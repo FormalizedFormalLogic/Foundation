@@ -6,9 +6,7 @@ import Foundation.FirstOrder.Arithmetic.IOpen.Basic
 $\mathrm{Pow2}(n)$ is a property that holds iff $n = 2^i$ for some $i$.
 -/
 
-namespace LO.ISigma0
-
-open FirstOrder Arithmetic PeanoMinus IOpen
+namespace LO.FirstOrder.Arithmetic
 
 variable {V : Type*} [ORingStructure V]
 
@@ -415,4 +413,4 @@ lemma lenbit_sub_pow2_iff_of_lenbit {a i j : V} (pi : Pow2 i) (pj : Pow2 j) (h :
 
 end ISigma0
 
-end LO.ISigma0
+end LO.FirstOrder.Arithmetic

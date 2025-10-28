@@ -376,7 +376,7 @@ open HierarchySymbol
 
 attribute [aesop (rule_sets := [Definability]) norm]
   sq
-  PeanoMinus.pow_three
+  Arithmetic.pow_three
   pow_four
 
 attribute [aesop 5 (rule_sets := [Definability]) safe]

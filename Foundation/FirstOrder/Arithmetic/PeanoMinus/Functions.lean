@@ -11,9 +11,7 @@ This file provides functions and relations defined in $\mathsf{PA^-}
 
 -/
 
-namespace LO.PeanoMinus
-
-open FirstOrder Arithmetic
+namespace LO.FirstOrder.Arithmetic
 
 variable {V : Type*} [ORingStructure V] [V ⊧ₘ* 𝗣𝗔⁻]
 
@@ -114,11 +112,6 @@ instance : OrderedSub V where
         _         ↔ a ≤ c + b           := by rw [sub_add_self_of_le h]
     · suffices a ≤ c + b by simpa [sub_spec_of_lt (show a < b from by simpa using h)]
       exact le_trans (le_of_lt <| show a < b from by simpa using h) (by simp)
-
-lemma zero_or_succ (a : V) : a = 0 ∨ ∃ a', a = a' + 1 := by
-  rcases zero_le a with (rfl | pos)
-  · simp
-  · right; exact ⟨a - 1, by rw [sub_add_self_of_le]; exact pos_iff_one_le.mp pos⟩
 
 lemma pred_lt_self_of_pos (h : 0 < a) : a - 1 < a := by
   rcases zero_or_succ a with (rfl | ⟨a, rfl⟩)
@@ -243,12 +236,12 @@ end Prime
 
 section min
 
-def _root_.LO.FirstOrder.Arithmetic.min : 𝚺₀.Semisentence 3 :=
+def min.dfn : 𝚺₀.Semisentence 3 :=
   .mkSigma “z x y. (x ≤ y → z = x) ∧ (x ≥ y → z = y)”
 
 set_option linter.flexible false in
-instance min_defined : 𝚺₀-Function₂[V] min via min := .mk fun v ↦ by
-  simp [FirstOrder.Arithmetic.min]; grind
+instance min_defined : 𝚺₀-Function₂[V] min via min.dfn := .mk fun v ↦ by
+  simp [min.dfn]; grind
 
 instance min_definable (ℌ) : ℌ-Function₂[V] min := min_defined.to_definable₀
 
@@ -260,11 +253,11 @@ end min
 
 section max
 
-def _root_.LO.FirstOrder.Arithmetic.max : 𝚺₀.Semisentence 3 :=
+def max.dfn : 𝚺₀.Semisentence 3 :=
   .mkSigma “z x y. (x ≥ y → z = x) ∧ (x ≤ y → z = y)”
 
 set_option linter.flexible false in
-instance max_defined : 𝚺₀-Function₂[V] max via max := .mk fun v ↦ by simp [Arithmetic.max]; grind
+instance max_defined : 𝚺₀-Function₂[V] max via max.dfn := .mk fun v ↦ by simp [max.dfn]; grind
 
 instance max_definable (Γ) : Γ-Function₂[V] max := max_defined.to_definable₀
 
@@ -272,4 +265,4 @@ instance max_polybounded : Bounded₂ (max : V → V → V) := ⟨‘#0 + #1’,
 
 end max
 
-end LO.PeanoMinus
+end LO.FirstOrder.Arithmetic

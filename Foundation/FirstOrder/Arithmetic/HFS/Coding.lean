@@ -1,8 +1,6 @@
 import Foundation.FirstOrder.Arithmetic.HFS.Vec
 
-namespace LO.ISigma1
-
-open FirstOrder Arithmetic PeanoMinus IOpen ISigma0
+namespace LO.FirstOrder.Arithmetic
 
 variable {V : Type*} [ORingStructure V] [V ⊧ₘ* 𝗜𝚺₁]
 
@@ -31,4 +29,4 @@ noncomputable def _root_.Finset.arithmetize (s : Finset V) : V := finsetArithmet
     (insert a s).arithmetize = insert a s.arithmetize := mem_ext <| by
   intro x; simp
 
-end LO.ISigma1
+end LO.FirstOrder.Arithmetic

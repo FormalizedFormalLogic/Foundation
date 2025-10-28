@@ -6,13 +6,13 @@ import Foundation.FirstOrder.Arithmetic.Internal.DerivabilityCondition.D1
 # Internal theory of equality
 -/
 
-namespace LO.ISigma1.Metamath
+namespace LO.FirstOrder.Arithmetic.Internal
 
-open Classical FirstOrder Arithmetic PeanoMinus IOpen ISigma0
+open Classical Entailment
 
 variable {V : Type*} [ORingStructure V] [V ⊧ₘ* 𝗜𝚺₁]
 
-namespace InternalArithmetic
+namespace Arithmetic
 
 local prefix:max "#'" => Semiterm.bvar (V := V) (L := ℒₒᵣ)
 
@@ -65,6 +65,8 @@ variable (T)
 
 section replace
 
+open LO.Entailment
+
 lemma subst_eq (t₁ t₂ u₁ u₂ : Term V ℒₒᵣ) : T.internalize V ⊢ (t₁ ≐ t₂) ➝ (u₁ ≐ u₂) ➝ (t₁ ≐ u₁) ➝ (t₂ ≐ u₂) := by
   have : T ⊢ “∀ x₁ x₂ y₁ y₂, x₁ = x₂ → y₁ = y₂ → x₁ = y₁ → x₂ = y₂” := provable_of_models.{0} _ _ fun _ _ _ ↦ by simp [models_iff]
   have := by simpa using internal_provable_of_outer_provable this (V := V)
@@ -106,8 +108,6 @@ lemma vec2_eq {v : V} (h : len v = 2) : ?[v.[0], v.[1]] = v :=
     have : i = 0 ∨ i = 1 := le_one_iff_eq_zero_or_one.mp (lt_two_iff_le_one.mp hi)
     rcases this with (rfl | rfl) <;> simp)
 
-set_option pp.rawOnError true
-
 lemma term_replace_aux (t : V) :
     IsSemiterm ℒₒᵣ 1 t →
     T.Provable (^∀ ^∀ imp ℒₒᵣ (^#1 ^= ^#0) (termSubst ℒₒᵣ (^#1 ∷ 0) t ^= termSubst ℒₒᵣ (^#0 ∷ 0) t)) := by
@@ -120,22 +120,22 @@ lemma term_replace_aux (t : V) :
       suffices
           T.internalize V ⊢ ∀' ∀' ((#'1 ≐ #'0) ➝ ((typedNumeral 0).subst ![#'1] ≐ (typedNumeral 0).subst ![#'0])) by
         have := (tprovable_iff_provable (T := T)).mp this
-        simpa [-subst_numeral, val_all, InternalArithmetic.coe_zero_eq] using this
+        simpa [-subst_numeral, val_all, Internal.Arithmetic.coe_zero_eq] using this
       suffices
         T.internalize V ⊢ ∀' ∀' ((#'1 ≐ #'0) ➝ (typedNumeral 0 ≐ typedNumeral 0)) by simpa
       suffices T.internalize V ⊢ (&'1 ≐ &'0) ➝ (typedNumeral 0 ≐ typedNumeral 0) by
         apply TProof.all₂!; simpa [Semiformula.free]
-      apply dhyp! (eq_refl _ _)
+      apply Entailment.dhyp! (eq_refl _ _)
     · rcases show v = 0 by simpa using hv
       suffices
           T.internalize V ⊢ ∀' ∀' ((#'1 ≐ #'0) ➝ ((typedNumeral 1).subst ![#'1] ≐ (typedNumeral 1).subst ![#'0])) by
         have := (tprovable_iff_provable (T := T)).mp this
-        simpa [-subst_numeral, val_all, InternalArithmetic.coe_one_eq] using this
+        simpa [-subst_numeral, val_all, Internal.Arithmetic.coe_one_eq] using this
       suffices
         T.internalize V ⊢ ∀' ∀' ((#'1 ≐ #'0) ➝ (typedNumeral 1 ≐ typedNumeral 1)) by simpa
       suffices T.internalize V ⊢ (&'1 ≐ &'0) ➝ (typedNumeral 1 ≐ typedNumeral 1) by
         apply TProof.all₂!; simpa [Semiformula.free]
-      apply dhyp! (eq_refl _ _)
+      apply Entailment.dhyp! (eq_refl _ _)
     · let t : Semiterm V ℒₒᵣ 1 := ⟨v.[0], by simpa using hv.nth (by simp)⟩
       let u : Semiterm V ℒₒᵣ 1 := ⟨v.[1], by simpa using hv.nth (by simp)⟩
       have veq : v = ?[t.val, u.val] := by simp [t, u, vec2_eq hv.lh]
@@ -206,7 +206,7 @@ lemma term_replace_aux (t : V) :
       simpa [-substs_equals, val_all] using this
     suffices T.internalize V ⊢ (&'1 ≐ &'0) ➝ (&'(x + 1 + 1) ≐ &'(x + 1 + 1)) by
       apply TProof.all₂!; simpa [Semiformula.free]
-    apply dhyp! (eq_refl T _)
+    apply Entailment.dhyp! (eq_refl T _)
 
 lemma term_replace (t : Semiterm V ℒₒᵣ 1) :
     T.internalize V ⊢ ∀' ∀' ((#'1 ≐ #'0) ➝ (t.subst ![#'1] ≐ t.subst ![#'0])) := by
@@ -486,4 +486,4 @@ lemma replace (φ : Semiformula V ℒₒᵣ 1) (u₁ u₂ : Term V ℒₒᵣ) :
 
 end replace
 
-end InternalArithmetic
+end Internal.Arithmetic

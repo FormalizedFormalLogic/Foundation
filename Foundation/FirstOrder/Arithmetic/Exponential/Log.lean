@@ -2,22 +2,19 @@ import Foundation.FirstOrder.Arithmetic.Exponential.Exp
 
 /-!
 # Logarithmic function
-
 -/
 
-namespace LO
-
-open FirstOrder Arithmetic PeanoMinus IOpen ISigma0
+namespace LO.FirstOrder.Arithmetic
 
 variable {V : Type*} [ORingStructure V]
 
-namespace ISigma0
+section ISigma0
 
 variable [V ⊧ₘ* 𝗜𝚺₀]
 
 lemma log_exists_unique_pos {y : V} (hy : 0 < y) : ∃! x, x < y ∧ ∃ y' ≤ y, Exponential x y' ∧ y < 2 * y' := by
   have : ∃ x < y, ∃ y' ≤ y, Exponential x y' ∧ y < 2 * y' := by
-    induction y using ISigma0.sigma0_polynomial_induction
+    induction y using sigma0_polynomial_induction
     · definability
     case zero => simp at hy
     case even y _ IH =>
@@ -249,7 +246,7 @@ lemma lt_exponential_length {a b : V} (h : Exponential ‖a‖ b) : a < b := by
   exact lt_exponential_log_self H
 
 lemma sq_len_le_three_mul (a : V) : ‖a‖ ^ 2 ≤ 3 * a := by
-  induction a using ISigma0.sigma0_polynomial_induction
+  induction a using sigma0_polynomial_induction
   · definability
   case zero => simp
   case even a pos IH =>
@@ -418,7 +415,7 @@ instance : Bounded₂ (fbit : V → V → V) := ⟨‘1’, λ _ ↦ by simp⟩
   simp [fbit, bexp_two_mul_succ, div_cancel_left]
 
 @[simp] lemma fbit_mul_two_add_one_mul (a i : V) : fbit (2 * a + 1) (i + 1) = fbit a i := by
-  simp [fbit, bexp_two_mul_add_one_succ, IOpen.div_mul]
+  simp [fbit, bexp_two_mul_add_one_succ, Arithmetic.div_mul]
 
 @[simp] lemma fbit_two_mul_zero_eq_zero (a : V) : fbit (2 * a) 0 = 0 := by
   rcases zero_le a with (rfl | pos)
@@ -430,7 +427,7 @@ instance : Bounded₂ (fbit : V → V → V) := ⟨‘1’, λ _ ↦ by simp⟩
 
 end ISigma0
 
-namespace ISigma1
+section ISigma1
 
 variable [V ⊧ₘ* 𝗜𝚺₁]
 
@@ -469,4 +466,4 @@ lemma exp_le_iff_le_log {i a : V} (pos : 0 < a) : Exp.exp i ≤ a ↔ i ≤ log 
 
 end ISigma1
 
-end LO
+end LO.FirstOrder.Arithmetic

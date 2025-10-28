@@ -1,8 +1,6 @@
 import Foundation.FirstOrder.Arithmetic.Omega1.Basic
 
-namespace LO.Omega1
-
-open FirstOrder Arithmetic PeanoMinus IOpen ISigma0
+namespace LO.FirstOrder.Arithmetic
 
 variable {V : Type*} [ORingStructure V] [V ⊧ₘ* 𝗜𝚺₀ + 𝝮₁]
 
@@ -138,7 +136,7 @@ lemma ext_add₂_bexp {I i j S₁ S₂ : V} (hij : i + j ≤ ‖I‖) (hS₁ : �
   calc  (S₁ + S₂ * bexp (I ⨳ L) (i * ‖L‖)){L}[i + j]
       = (S₁ + S₂ * bexp (I ⨳ L) (i * ‖L‖)) / bexp (I ⨳ L) ((i + j) * ‖L‖) % (L ⨳ 1)                    := by rw [ext_eq_smash_of_le hij]
     _ = (S₁ + S₂ * bexp (I ⨳ L) (i * ‖L‖)) / bexp (I ⨳ L) (i * ‖L‖) / bexp (I ⨳ L) (j * ‖L‖) % (L ⨳ 1) := by
-      simp only [add_mul, ← IOpen.div_mul]; congr 2; exact bexp_add (by simp [←add_mul, mul_len_lt_len_smash hij])
+      simp only [add_mul, ← Arithmetic.div_mul]; congr 2; exact bexp_add (by simp [←add_mul, mul_len_lt_len_smash hij])
     _ = S₂ / bexp (I ⨳ L) (j * ‖L‖) % (L ⨳ 1)                                                          := by
       congr 2; rw [div_add_mul_self, div_eq_zero_of_lt] <;> simp [hie.lt_iff_len_le.mpr hS₁, hie.range_pos]
     _ = S₂{L}[j]                                                                                       := ext_eq_smash_of_le (le_trans le_add_self hij)
@@ -669,4 +667,4 @@ instance nuon_defined : 𝚺₀-Function₁ (nuon : V → V) via nuonDef := .mk 
 
 instance nuon_definable : 𝚺₀-Function₁ (nuon : V → V) := nuon_defined.to_definable
 
-end LO.Omega1
+end LO.FirstOrder.Arithmetic

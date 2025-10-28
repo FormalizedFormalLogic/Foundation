@@ -6,9 +6,7 @@ import Foundation.FirstOrder.Arithmetic.HFS.Seq
 
 -/
 
-namespace LO.ISigma1
-
-open FirstOrder Arithmetic PeanoMinus IOpen ISigma0
+namespace LO.FirstOrder.Arithmetic
 
 variable {V : Type*} [ORingStructure V] [V ⊧ₘ* 𝗜𝚺₁]
 
@@ -208,4 +206,4 @@ end Construction
 
 end PR
 
-end LO.ISigma1
+end LO.FirstOrder.Arithmetic

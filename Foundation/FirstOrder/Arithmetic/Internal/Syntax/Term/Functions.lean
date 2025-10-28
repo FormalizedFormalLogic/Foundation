@@ -1,8 +1,6 @@
 import Foundation.FirstOrder.Arithmetic.Internal.Syntax.Term.Basic
 
-namespace LO.ISigma1.Metamath
-
-open FirstOrder Arithmetic PeanoMinus IOpen ISigma0
+namespace LO.FirstOrder.Arithmetic.Internal
 
 variable {V : Type*} [ORingStructure V] [V ⊧ₘ* 𝗜𝚺₁]
 
@@ -108,6 +106,8 @@ lemma termSubstVec_cons {k t ts : V} (ht : IsUTerm L t) (hts : IsUTermVec L k ts
 
 @[simp] lemma IsUTermVec.termSubst {t} (hw : IsUTermVec L n w) (ht : IsSemiterm L n t) : IsUTerm L (termSubst L w t) :=
   IsSemitermVec.termSubst hw.isSemitermVec ht |>.isUTerm
+
+#check IsSemitermVec
 
 @[simp] lemma IsSemitermVec.termSubstVec {k n m v} (hw : IsSemitermVec L n m w) (hv : IsSemitermVec L k n v) :
     IsSemitermVec L k m (termSubstVec L k w v) := IsSemitermVec.iff.mpr
@@ -269,7 +269,7 @@ lemma termShiftVec_cons {k t ts : V} (ht : IsUTerm L t) (hts : IsUTermVec L k ts
     ⟨by simp [hv.isUTerm], fun i hi ↦ by
       rw [nth_termShiftVec hv.isUTerm hi]; exact (hv.nth hi).termShift⟩
 
-@[simp] lemma IsUTerm.termBVtermShift {t : V} (ht : IsUTerm L t) : termBV L (Metamath.termShift L t) = termBV L t := by
+@[simp] lemma IsUTerm.termBVtermShift {t : V} (ht : IsUTerm L t) : termBV L (Internal.termShift L t) = termBV L t := by
   apply IsUTerm.induction 𝚺 ?_ ?_ ?_ ?_ t ht
   · definability
   · simp
@@ -284,7 +284,7 @@ lemma termShiftVec_cons {k t ts : V} (ht : IsUTerm L t) (hts : IsUTermVec L k ts
     simp [*]
 
 @[simp] lemma IsUTermVec.termBVVectermShiftVec {v : V} (hv : IsUTermVec L k v) :
-    termBVVec L k (Metamath.termShiftVec L k v) = termBVVec L k v := by
+    termBVVec L k (Internal.termShiftVec L k v) = termBVVec L k v := by
   apply nth_ext' k (by simp [*]) (by simp [*])
   intro i hi
   simp [*, IsUTerm.termBVtermShift (hv.nth hi)]
@@ -493,11 +493,11 @@ end
 lemma IsSemitermVec.qVec {k n w : V} (h : IsSemitermVec L k n w) : IsSemitermVec L (k + 1) (n + 1) (qVec L w) := by
   rcases h.lh
   refine IsSemitermVec.iff.mpr ⟨?_, ?_⟩
-  · simp [h.isUTerm, Metamath.qVec]
+  · simp [h.isUTerm, Internal.qVec]
   · intro i hi
     rcases zero_or_succ i with (rfl | ⟨i, rfl⟩)
-    · simp [Metamath.qVec]
-    · simpa [Metamath.qVec, nth_termBShiftVec h.isUTerm (by simpa using hi)] using
+    · simp [Internal.qVec]
+    · simpa [Internal.qVec, nth_termBShiftVec h.isUTerm (by simpa using hi)] using
         h.nth (by simpa using hi) |>.termBShift
 
 lemma substs_cons_bShift {u t w : V} (ht : IsSemiterm L n t) :
@@ -618,7 +618,7 @@ end fvfree
 
 end
 
-namespace InternalArithmetic
+namespace Arithmetic
 
 protected def zero : ℕ := qqFuncN 0 zeroIndex 0
 
@@ -628,9 +628,9 @@ noncomputable def qqAdd (x y : V) : V := ^func 2 (addIndex : V) ?[x, y]
 
 noncomputable def qqMul (x y : V) : V := ^func 2 (mulIndex : V) ?[x, y]
 
-notation "𝟎" => InternalArithmetic.zero
+notation "𝟎" => Arithmetic.zero
 
-notation "𝟏" => InternalArithmetic.one
+notation "𝟏" => Arithmetic.one
 
 infixl:80 " ^+ " => qqAdd
 
@@ -671,22 +671,22 @@ end
 lemma qqFunc_absolute (k f v : ℕ) : ((^func k f v : ℕ) : V) = ^func (k : V) (f : V) (v : V) := by simp [qqFunc, nat_cast_pair]
 
 @[simp] lemma zero_semiterm : IsSemiterm ℒₒᵣ n (𝟎 : V) := by
-  simp [InternalArithmetic.zero, qqFunc_absolute, qqFuncN_eq_qqFunc]
+  simp [Arithmetic.zero, qqFunc_absolute, qqFuncN_eq_qqFunc]
 
 @[simp] lemma one_semiterm : IsSemiterm ℒₒᵣ n (𝟏 : V) := by
-  simp [InternalArithmetic.one, qqFunc_absolute, qqFuncN_eq_qqFunc]
+  simp [Arithmetic.one, qqFunc_absolute, qqFuncN_eq_qqFunc]
 
 lemma coe_zero_eq : (𝟎 : V) = (^func 0 ⌜(Language.Zero.zero : (ℒₒᵣ).Func 0)⌝ 0) := by
-  simp [InternalArithmetic.zero, qqFuncN_eq_qqFunc, qqFunc, nat_cast_pair]; rfl
+  simp [Arithmetic.zero, qqFuncN_eq_qqFunc, qqFunc, nat_cast_pair]; rfl
 
 lemma coe_one_eq : (𝟏 : V) = (^func 0 ⌜(Language.One.one : (ℒₒᵣ).Func 0)⌝ 0) := by
-  simp [InternalArithmetic.one, qqFuncN_eq_qqFunc, qqFunc, nat_cast_pair]; rfl
+  simp [Arithmetic.one, qqFuncN_eq_qqFunc, qqFunc, nat_cast_pair]; rfl
 
 namespace Numeral
 
 def blueprint : PR.Blueprint 0 where
-  zero := .mkSigma “y. y = ↑InternalArithmetic.one”
-  succ := .mkSigma “y t n. !qqAddGraph y t ↑InternalArithmetic.one”
+  zero := .mkSigma “y. y = ↑Arithmetic.one”
+  succ := .mkSigma “y t n. !qqAddGraph y t ↑Arithmetic.one”
 
 noncomputable def construction : PR.Construction V blueprint where
   zero := fun _ ↦ 𝟏
@@ -714,7 +714,7 @@ end
 @[simp] lemma lt_numeralAux_self (n : V) : n < numeralAux n := by
     induction n using ISigma1.sigma1_succ_induction
     · definability
-    case zero => simp [InternalArithmetic.one, qqFuncN_eq_qqFunc]
+    case zero => simp [Arithmetic.one, qqFuncN_eq_qqFunc]
     case succ n ih =>
       refine lt_of_lt_of_le ((add_lt_add_iff_right 1).mpr ih) (by simp [succ_le_iff_lt])
 
@@ -734,7 +734,7 @@ noncomputable def numeral (x : V) : V := if x = 0 then 𝟎 else numeralAux (x -
 
 def numeralGraph : 𝚺₁.Semisentence 2 := .mkSigma
   “t x.
-    (x = 0 → t = ↑InternalArithmetic.zero) ∧
+    (x = 0 → t = ↑Arithmetic.zero) ∧
     (x ≠ 0 → ∃ x', !subDef x' x 1 ∧ !numeralAuxGraph t x')”
 
 @[simp] lemma numeral_zero : numeral (0 : V) = 𝟎 := by simp [numeral]
@@ -774,38 +774,38 @@ end
     termSubst ℒₒᵣ w (numeral x) = numeral x := by
   induction x using ISigma1.sigma1_succ_induction
   · definability
-  case zero => simp [InternalArithmetic.zero, qqFunc_absolute, qqFuncN_eq_qqFunc]
+  case zero => simp [Arithmetic.zero, qqFunc_absolute, qqFuncN_eq_qqFunc]
   case succ x ih =>
     rcases zero_or_succ x with (rfl | ⟨x, rfl⟩)
-    · simp [InternalArithmetic.one, qqFunc_absolute, qqFuncN_eq_qqFunc]
+    · simp [Arithmetic.one, qqFunc_absolute, qqFuncN_eq_qqFunc]
     · simp only [numeral_add_two, qqAdd]
-      rw [termSubst_func (L := ℒₒᵣ) (by simp) (by simp [InternalArithmetic.one, qqFunc_absolute, qqFuncN_eq_qqFunc])]
-      simp [ih, InternalArithmetic.one, qqFunc_absolute, qqFuncN_eq_qqFunc]
+      rw [termSubst_func (L := ℒₒᵣ) (by simp) (by simp [Arithmetic.one, qqFunc_absolute, qqFuncN_eq_qqFunc])]
+      simp [ih, Arithmetic.one, qqFunc_absolute, qqFuncN_eq_qqFunc]
 
 @[simp] lemma numeral_shift (x : V) :
     termShift ℒₒᵣ (numeral x) = numeral x := by
   induction x using ISigma1.sigma1_succ_induction
   · definability
-  case zero => simp [InternalArithmetic.zero, qqFunc_absolute, qqFuncN_eq_qqFunc]
+  case zero => simp [Arithmetic.zero, qqFunc_absolute, qqFuncN_eq_qqFunc]
   case succ x ih =>
     rcases zero_or_succ x with (rfl | ⟨x, rfl⟩)
-    · simp [InternalArithmetic.one, qqFunc_absolute, qqFuncN_eq_qqFunc]
+    · simp [Arithmetic.one, qqFunc_absolute, qqFuncN_eq_qqFunc]
     · simp only [numeral_add_two, qqAdd]
-      rw [termShift_func (L := ℒₒᵣ) (by simp) (by simp [InternalArithmetic.one, qqFunc_absolute, qqFuncN_eq_qqFunc])]
-      simp [ih, InternalArithmetic.one, qqFunc_absolute, qqFuncN_eq_qqFunc]
+      rw [termShift_func (L := ℒₒᵣ) (by simp) (by simp [Arithmetic.one, qqFunc_absolute, qqFuncN_eq_qqFunc])]
+      simp [ih, Arithmetic.one, qqFunc_absolute, qqFuncN_eq_qqFunc]
 
 @[simp] lemma numeral_bShift (x : V) :
     termBShift ℒₒᵣ (numeral x) = numeral x := by
   induction x using ISigma1.sigma1_succ_induction
   · definability
-  case zero => simp [InternalArithmetic.zero, qqFunc_absolute, qqFuncN_eq_qqFunc]
+  case zero => simp [Arithmetic.zero, qqFunc_absolute, qqFuncN_eq_qqFunc]
   case succ x ih =>
     rcases zero_or_succ x with (rfl | ⟨x, rfl⟩)
-    · simp [InternalArithmetic.one, qqFunc_absolute, qqFuncN_eq_qqFunc]
-    · simp [qqAdd, ih, InternalArithmetic.one, qqFunc_absolute, qqFuncN_eq_qqFunc]
+    · simp [Arithmetic.one, qqFunc_absolute, qqFuncN_eq_qqFunc]
+    · simp [qqAdd, ih, Arithmetic.one, qqFunc_absolute, qqFuncN_eq_qqFunc]
 
 end numeral
 
-end InternalArithmetic
+end Arithmetic
 
-end LO.ISigma1.Metamath
+end LO.FirstOrder.Arithmetic.Internal

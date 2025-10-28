@@ -8,13 +8,13 @@ import Foundation.Logic.HilbertStyle.Supplemental
 
 namespace LO
 
-open FirstOrder Arithmetic PeanoMinus IOpen ISigma0
+open FirstOrder Arithmetic
 
 variable {V : Type*} [ORingStructure V] [V ⊧ₘ* 𝗜𝚺₁]
 
 variable {L : Language} [L.Encodable] [L.LORDefinable]
 
-namespace ISigma1.Metamath
+namespace FirstOrder.Arithmetic.Internal
 
 section typed_theory
 
@@ -173,29 +173,29 @@ namespace TDerivation
 
 variable {Γ Δ : (Sequent V L)} {φ ψ p₀ p₁ p₂ p₃ p₄ : Formula V L}
 
-protected noncomputable def cast {Γ Δ : Metamath.Sequent V L} (e : Γ = Δ) :
+protected noncomputable def cast {Γ Δ : Internal.Sequent V L} (e : Γ = Δ) :
     T ⊢!ᵈᵉʳ Γ → T ⊢!ᵈᵉʳ Δ := fun d ↦ by rcases e; exact d
 
-@[simp] lemma cast_val {Γ Δ : Metamath.Sequent V L} (e : Γ = Δ) (d : T ⊢!ᵈᵉʳ Γ) :
+@[simp] lemma cast_val {Γ Δ : Internal.Sequent V L} (e : Γ = Δ) (d : T ⊢!ᵈᵉʳ Γ) :
     (TDerivation.cast e d).val = d.val := by rcases e; simp [TDerivation.cast]
 
 noncomputable def byAxm (φ) (h : φ ∈' T.theory) (hΓ : φ ∈ Γ) : T ⊢!ᵈᵉʳ Γ :=
-  ⟨Metamath.axm Γ.val φ.val, by simp, Theory.Derivation.axm (by simp) (by simpa) h⟩
+  ⟨Internal.axm Γ.val φ.val, by simp, Theory.Derivation.axm (by simp) (by simpa) h⟩
 
 @[simp] lemma byAxm_val (φ) (h : φ ∈' T.theory) (hΓ : φ ∈ Γ) :
-    (byAxm φ h hΓ).val = Metamath.axm Γ.val φ.val := rfl
+    (byAxm φ h hΓ).val = Internal.axm Γ.val φ.val := rfl
 
 noncomputable def em (φ) (h : φ ∈ Γ := by simp) (hn : ∼φ ∈ Γ := by simp) : T ⊢!ᵈᵉʳ Γ :=
   ⟨axL Γ.val φ.val, by simp, Theory.Derivation.axL (by simp) h hn⟩
 
 @[simp] lemma em_val (φ) (h : φ ∈ Γ) (hn : ∼φ ∈ Γ) :
-    (em φ h hn : T ⊢!ᵈᵉʳ Γ).val = Metamath.axL Γ.val φ.val := rfl
+    (em φ h hn : T ⊢!ᵈᵉʳ Γ).val = Internal.axL Γ.val φ.val := rfl
 
 noncomputable def verum (h : ⊤ ∈ Γ := by simp) : T ⊢!ᵈᵉʳ Γ :=
   ⟨verumIntro Γ.val, by simp, Theory.Derivation.verumIntro (by simp) h⟩
 
 @[simp] lemma verum_val (h : ⊤ ∈ Γ) :
-    (verum h : T ⊢!ᵈᵉʳ Γ).val = Metamath.verumIntro Γ.val := rfl
+    (verum h : T ⊢!ᵈᵉʳ Γ).val = Internal.verumIntro Γ.val := rfl
 
 noncomputable def and' (H : φ ⋏ ψ ∈ Γ) (dp : T ⊢!ᵈᵉʳ insert φ Γ) (dq : T ⊢!ᵈᵉʳ insert ψ Γ) : T ⊢!ᵈᵉʳ Γ :=
   ⟨andIntro Γ.val φ.val ψ.val dp.val dq.val, by simp,
@@ -540,7 +540,7 @@ lemma ex! {φ : Semiformula V L 1} (t) (dp : T ⊢ φ.subst ![t]) : T ⊢ ∃' �
 
 variable (A : InternalTheory V ℒₒᵣ)
 
-open InternalArithmetic
+open Internal.Arithmetic
 
 open Entailment Theory.Derivation
 
@@ -559,7 +559,7 @@ lemma substItrDisj_right {i z : V}
     rw [substItr_nth _ _ _ this]
     have : z - (z - (i + 1) + 1) = i := sub_succ_lt_selfs hi
     simp only [this, Nat.succ_eq_add_one, Semiformula.val_substs, SemitermVec.val_succ,
-      Matrix.head_cons, val_numeral, Matrix.tail_cons]
+      Matrix.head_cons, Matrix.tail_cons]
     apply Theory.Derivable.em (L := ℒₒᵣ) (p := subst ℒₒᵣ (numeral i ∷ SemitermVec.val w) φ.val)
     · simpa using φ.isSemiformula_succ.subst (w.isSemitermVec.adjoin (numeral_semiterm 0 i))
     · simp
@@ -590,11 +590,11 @@ open Classical in
 lemma substItrDisj_left_intro {ψ} {w : TermVec V ℒₒᵣ m} {φ : Semiformula V ℒₒᵣ (m + 1)} {z : V}
     (h : ∀ i < z, A ⊢ φ.subst (𝕹 i :> w) ➝ ψ) :
     A ⊢ φ.substItrDisj w z ➝ ψ := by
-  apply C!_of_CNN!
+  apply Entailment.C!_of_CNN!
   simp only [Semiformula.substItrDisj_neg]
   apply substItrConj_right_intro
   intro i hi
-  apply C!_of_CNN!
+  apply Entailment.C!_of_CNN!
   simpa using h i hi
 
 end TProof

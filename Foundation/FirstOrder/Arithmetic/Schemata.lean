@@ -4,24 +4,19 @@ import Foundation.FirstOrder.Arithmetic.TA.Basic
 
 /-!
 # Induction schemata of Arithmetic
-
 -/
 
-namespace LO
+namespace LO.FirstOrder.Arithmetic
 
-open FirstOrder
+section axioms
 
 variable {L : Language} [L.ORing] {ξ : Type*} [DecidableEq ξ]
-
-namespace FirstOrder
 
 def succInd {ξ} (φ : Semiformula L ξ 1) : Formula L ξ := “!φ 0 → (∀ x, !φ x → !φ (x + 1)) → ∀ x, !φ x”
 
 def orderInd {ξ} (φ : Semiformula L ξ 1) : Formula L ξ := “(∀ x, (∀ y < x, !φ y) → !φ x) → ∀ x, !φ x”
 
 def leastNumber {ξ} (φ : Semiformula L ξ 1) : Formula L ξ := “(∃ x, !φ x) → ∃ z, !φ z ∧ ∀ x < z, ¬!φ x”
-
-end FirstOrder
 
 variable (L)
 
@@ -95,11 +90,9 @@ instance : 𝗜𝗢𝗽𝗲𝗻 ⪯ 𝗜𝚺₀ := inferInstance
 
 instance : 𝗜𝚺₁ ⪯ 𝗣𝗔 := inferInstance
 
-end LO
+end axioms
 
-namespace LO
-
-open FirstOrder Arithmetic PeanoMinus
+section models
 
 variable {V : Type*} [ORingStructure V]
 
@@ -181,7 +174,7 @@ private lemma neg_succ_induction {P : V → Prop} (hP : Γ-[m].DefinablePred P)
       intro hx
       have : P (a - x) := IH (le_of_add_le_left hx)
       exact (not_imp_not.mp <| nsucc (a - (x + 1))) (by
-        rw [←PeanoMinus.sub_sub, sub_add_self_of_le]
+        rw [←Arithmetic.sub_sub, sub_add_self_of_le]
         · exact this
         · exact le_tsub_of_add_le_left hx)
     case inst => infer_instance
@@ -343,7 +336,6 @@ lemma ISigma0.least_number [V ⊧ₘ* 𝗜𝚺₀] {P : V → Prop} (hP : 𝚺�
     (ind : ∀ x, (∀ y < x, P y) → P x) : ∀ x, P x :=
   InductionOnHierarchy.order_induction_sigma Γ 1 hP ind
 
-
 instance [V ⊧ₘ* 𝗜𝗢𝗽𝗲𝗻] : V ⊧ₘ* 𝗣𝗔⁻ := models_of_subtheory <| inferInstanceAs (V ⊧ₘ* 𝗜𝗢𝗽𝗲𝗻)
 
 instance [V ⊧ₘ* 𝗜𝚺₀] : V ⊧ₘ* 𝗜𝗢𝗽𝗲𝗻 := models_of_subtheory <| inferInstanceAs (V ⊧ₘ* 𝗜𝚺₀)
@@ -352,6 +344,8 @@ instance [V ⊧ₘ* 𝗜𝚺₁] : V ⊧ₘ* 𝗜𝚺₀ := inferInstance
 
 def mod_ISigma_of_le {n₁ n₂} (h : n₁ ≤ n₂) [V ⊧ₘ* 𝗜𝚺 n₂] : V ⊧ₘ* 𝗜𝚺 n₁ :=
   ModelsTheory.of_ss inferInstance (ISigma_subset_mono h)
+
+end models
 
 lemma models_succInd (φ : Semiformula ℒₒᵣ ℕ 1) : ℕ ⊧ₘ (succInd φ).univCl := by
   suffices
@@ -365,7 +359,7 @@ lemma models_succInd (φ : Semiformula ℒₒᵣ ℕ 1) : ℕ ⊧ₘ (succInd φ
   · exact hsucc x ih
 
 instance models_ISigma (Γ k) : ℕ ⊧ₘ* 𝗜𝗡𝗗 Γ k := by
-  simp only [ModelsTheory.add_iff, instModelsTheoryNat, InductionScheme,
+  simp only [ModelsTheory.add_iff, PeanoMinus.instModelsTheoryNat, InductionScheme,
     Semantics.ModelsSet.setOf_iff, forall_exists_index, and_imp, true_and]
   rintro _ φ _ rfl; simp [models_succInd]
 
@@ -374,7 +368,7 @@ instance models_ISigmaZero : ℕ ⊧ₘ* 𝗜𝚺₀ := inferInstance
 instance models_ISigmaOne : ℕ ⊧ₘ* 𝗜𝚺₁ := inferInstance
 
 instance models_Peano : ℕ ⊧ₘ* 𝗣𝗔 := by
-  simp only [Peano, InductionScheme, ModelsTheory.add_iff, instModelsTheoryNat,
+  simp only [Peano, InductionScheme, ModelsTheory.add_iff, PeanoMinus.instModelsTheoryNat,
     Semantics.ModelsSet.setOf_iff, forall_exists_index, and_imp, true_and]
   rintro _ φ _ rfl; simp [models_succInd]
 
@@ -396,4 +390,4 @@ instance (T : ArithmeticTheory) [𝗜𝚺₁ ⪯ T] : 𝗣𝗔⁻ ⪯ T :=
 instance (T : ArithmeticTheory) [𝗣𝗔 ⪯ T] : 𝗣𝗔⁻ ⪯ T :=
   Entailment.WeakerThan.trans (inferInstanceAs (𝗣𝗔⁻ ⪯ 𝗣𝗔)) inferInstance
 
-end LO
+end LO.FirstOrder.Arithmetic

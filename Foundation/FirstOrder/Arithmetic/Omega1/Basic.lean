@@ -5,9 +5,7 @@ import Foundation.FirstOrder.Arithmetic.Exponential
 
 -/
 
-namespace LO.Omega1
-
-open FirstOrder Arithmetic PeanoMinus IOpen ISigma0
+namespace LO.FirstOrder.Arithmetic
 
 /-- ∀ x, ∃ y, 2^{|x|^2} = y-/
 def _root_.LO.Omega1.omega1 : Sentence ℒₒᵣ := “∀ x, ∃ y, ∃ l <⁺ x, !lengthDef l x ∧ !exponentialDef (l * l) y”
@@ -27,7 +25,7 @@ variable {V : Type*} [ORingStructure V]
 lemma models_Omega1_iff [V ⊧ₘ* 𝗜𝚺₀] : V ⊧ₘ Omega1.omega1 ↔ ∀ x : V, ∃ y, Exponential (‖x‖^2) y := by
   simp [models_iff, Omega1.omega1, sq]
 
-lemma omega1_of_ISigma1 [V ⊧ₘ* 𝗜𝚺₁] : V ⊧ₘ Omega1.omega1 := models_Omega1_iff.mpr (fun x ↦ ISigma1.Exponential.range_exists (‖x‖^2))
+lemma omega1_of_ISigma1 [V ⊧ₘ* 𝗜𝚺₁] : V ⊧ₘ Omega1.omega1 := models_Omega1_iff.mpr (fun x ↦ Exponential.range_exists (‖x‖^2))
 
 instance [V ⊧ₘ* 𝗜𝚺₁] : V ⊧ₘ* 𝗜𝚺₀ + 𝝮₁ :=
   ModelsTheory.add_iff.mpr
@@ -132,4 +130,4 @@ instance : 𝗜𝚺₀ + 𝝮₁ ⪯ 𝗜𝚺₁ := weakerThan_of_models.{0} _ _
 
 instance : ℕ ⊧ₘ* 𝗜𝚺₀ + 𝝮₁ := inferInstance
 
-end LO.Omega1
+end LO.FirstOrder.Arithmetic

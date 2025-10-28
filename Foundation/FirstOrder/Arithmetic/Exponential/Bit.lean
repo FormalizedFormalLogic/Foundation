@@ -2,14 +2,13 @@ import Foundation.FirstOrder.Arithmetic.Exponential.Log
 
 /-!
 # $\mathrm{Bit}$ predicate
-
 -/
 
-namespace LO.ISigma1
-
-open FirstOrder Arithmetic PeanoMinus IOpen ISigma0
+namespace LO.FirstOrder.Arithmetic
 
 variable {V : Type*} [ORingStructure V] [V ⊧ₘ* 𝗜𝚺₁]
+
+section model
 
 def Bit (i a : V) : Prop := LenBit (Exp.exp i) a
 
@@ -43,8 +42,6 @@ lemma lt_of_mem {i a : V} (h : i ∈ a) : i < a := lt_of_lt_of_le (lt_exp i) (ex
 
 lemma not_mem_of_lt_exp {i a : V} (h : a < Exp.exp i) : i ∉ a := fun H ↦ by have := lt_of_le_of_lt (exp_le_of_mem H) h; simp at this
 
-section
-
 @[definability] lemma HierarchySymbol.Definable.ball_mem (Γ m) {P : (Fin k → V) → V → Prop} {f : (Fin k → V) → V}
     (hf : 𝚺-[m + 1].DefinableFunction f) (h : Γ-[m + 1].Definable (fun w ↦ P (w ·.succ) (w 0))) :
     Γ-[m + 1].Definable (fun v ↦ ∀ x ∈ f v, P v x) := by
@@ -60,11 +57,9 @@ section
   exact this.of_iff <| by
     intro v; exact ⟨by rintro ⟨x, hx, hxv⟩; exact ⟨x, lt_of_mem hx, hx, hxv⟩, by rintro ⟨x, _, hx, hvx⟩; exact ⟨x, hx, hvx⟩⟩
 
-end
+end model
 
-end LO.ISigma1
-
-namespace LO.FirstOrder.Arithmetic
+section mem
 
 variable {ξ : Type*} {n}
 
@@ -100,7 +95,7 @@ def memRelOpr : Semiformula.Operator ℒₒᵣ 3 := ⟨memRel.val⟩
 
 def memRel₃Opr : Semiformula.Operator ℒₒᵣ 4 := ⟨memRel₃.val⟩
 
-section
+section notations
 
 open Lean PrettyPrinter Delaborator
 
@@ -131,7 +126,6 @@ macro_rules
     `(memRelOpr.operator ![⤫term(lit)[$binders* | $fbinders* | $u], ⤫term(lit)[$binders* | $fbinders* | $t₁], ⤫term(lit)[$binders* | $fbinders* | $t₂]])
   | `(⤫formula(lit)[ $binders* | $fbinders* | :⟪$t₁:first_order_term, $t₂:first_order_term, $t₃:first_order_term⟫:∈ $u:first_order_term]) =>
     `(memRel₃Opr.operator ![⤫term(lit)[$binders* | $fbinders* | $u], ⤫term(lit)[$binders* | $fbinders* | $t₁], ⤫term(lit)[$binders* | $fbinders* | $t₂], ⤫term(lit)[$binders* | $fbinders* | $t₃]])
-end
 
 @[simp] lemma Hierarchy.memRel {t₁ t₂ u : Semiterm ℒₒᵣ μ n} : Hierarchy Γ s “!!t₁ ∼[ !!u ] !!t₂” := by
   simp [Semiformula.Operator.operator, Matrix.fun_eq_vec_two, memRelOpr]
@@ -139,9 +133,11 @@ end
 @[simp] lemma Hierarchy.memRel₃ {t₁ t₂ t₃ u : Semiterm ℒₒᵣ μ n} : Hierarchy Γ s “:⟪!!t₁, !!t₂, !!t₃⟫:∈ !!u” := by
   simp [Semiformula.Operator.operator, Matrix.fun_eq_vec_two, memRel₃Opr]
 
-open FirstOrder Arithmetic PeanoMinus IOpen ISigma0 ISigma1
+end notations
 
-variable {V : Type*} [ORingStructure V] [V ⊧ₘ* 𝗜𝚺₁]
+end mem
+
+section model
 
 scoped instance : Structure.Mem ℒₒᵣ V := ⟨by intro a b; simp [Semiformula.Operator.val, operator_mem_def]⟩
 
@@ -177,13 +173,9 @@ instance memRel₃_defined : 𝚺₀-Relation₄ (fun r x y z : V ↦ ⟪x, y, z
   unfold Semiformula.Operator.val
   simp [memRel₃Opr]
 
-end LO.FirstOrder.Arithmetic
+end model
 
-namespace LO.ISigma1
-
-open FirstOrder Arithmetic PeanoMinus IOpen ISigma0
-
-variable {V : Type*} [ORingStructure V] [V ⊧ₘ* 𝗜𝚺₁]
+section model
 
 lemma mem_iff_mul_exp_add_exp_add {i a : V} : i ∈ a ↔ ∃ k, ∃ r < Exp.exp i, a = k * Exp.exp (i + 1) + Exp.exp i + r := by
   simpa [mem_iff_bit, exp_succ] using lenbit_iff_add_mul (exp_pow2 i) (a := a)
@@ -311,7 +303,7 @@ lemma log_mem_of_pos {a : V} (h : 0 < a) : log a ∈ a :=
 lemma le_log_of_mem {i a : V} (h : i ∈ a) : i ≤ log a := (exp_le_iff_le_log (pos_of_nonempty h)).mp (exp_le_of_mem h)
 
 lemma succ_mem_iff_mem_div_two {i a : V} : i + 1 ∈ a ↔ i ∈ a / 2 := by
-  simp [mem_iff_bit, Bit, LenBit.iff_rem, exp_succ, IOpen.div_mul]
+  simp [mem_iff_bit, Bit, LenBit.iff_rem, exp_succ, Arithmetic.div_mul]
 
 lemma lt_length_of_mem {i a : V} (h : i ∈ a) : i < ‖a‖ := by
   simpa [length_of_pos (pos_of_nonempty h), ←le_iff_lt_succ] using le_log_of_mem h
@@ -372,7 +364,7 @@ noncomputable def under (a : V) : V := Exp.exp a - 1
     have : j = i + k + 1 := calc
       j = i + (j - i)         := by rw [add_tsub_self_of_le (le_of_lt lt)]
       _ = i + (j - i - 1 + 1) := by rw [sub_add_self_of_le <| le_tsub_of_add_le_left <| lt_iff_succ_le.mp lt]
-      _ = i + k + 1           := by simp [add_assoc, ←PeanoMinus.sub_sub, k]
+      _ = i + k + 1           := by simp [add_assoc, ←Arithmetic.sub_sub, k]
     rw [this]; exact mem_exp_add_succ_sub_one i k
 
 @[simp] lemma not_mem_under_self (i : V) : i ∉ under i := by simp
@@ -413,10 +405,10 @@ lemma zero_mem_iff {a : V} : 0 ∉ a ↔ 2 ∣ a := by simp [mem_iff_bit, Bit, L
   simp [mem_iff_bit, Bit, LenBit, exp_succ, div_cancel_left]
 
 @[simp] lemma succ_mem_two_mul_succ_iff {i a : V} : i + 1 ∈ 2 * a + 1 ↔ i ∈ a := by
-  simp [mem_iff_bit, Bit, LenBit, exp_succ, IOpen.div_mul]
+  simp [mem_iff_bit, Bit, LenBit, exp_succ, Arithmetic.div_mul]
 
 lemma le_of_subset {a b : V} (h : a ⊆ b) : a ≤ b := by
-  induction b using ISigma1.pi1_polynomial_induction generalizing a
+  induction b using pi1_polynomial_induction generalizing a
   · definability
   case zero =>
     simp [eq_zero_of_subset_zero h]
@@ -574,4 +566,6 @@ theorem finite_comprehension₁! {P : V → Prop} (hP : Γ-[1]-Predicate P) (fin
       fun h ↦ (Hs i (mh i h)).mpr h⟩
   exact ExistsUnique.intro s H (fun s' H' ↦ mem_ext <| fun i ↦ by simp [H, H'])
 
-end LO.ISigma1
+end model
+
+end LO.FirstOrder.Arithmetic

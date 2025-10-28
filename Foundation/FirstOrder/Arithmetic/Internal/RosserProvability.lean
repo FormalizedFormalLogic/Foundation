@@ -4,9 +4,7 @@ import Foundation.FirstOrder.Arithmetic.Internal.WitnessComparison
 # Rosser's provability predicate
 -/
 
-namespace LO.ISigma1.Metamath
-
-open FirstOrder Arithmetic PeanoMinus IOpen ISigma0
+namespace LO.FirstOrder.Arithmetic.Internal
 
 variable {V : Type*} [ORingStructure V] [V ⊧ₘ* 𝗜𝚺₁]
 
@@ -93,11 +91,11 @@ def not_rosserProvable [Entailment.Consistent T] {φ : Sentence L} : T ⊢ ∼φ
 def not_rosserProvable_sentence [Entailment.Consistent T] {σ : Sentence L} : T ⊢ ∼σ → ¬T.RosserProvable (⌜σ⌝ : V) := fun h ↦ by
   simpa [Sentence.quote_def] using not_rosserProvable h
 
-end LO.ISigma1.Metamath
+end LO.FirstOrder.Arithmetic.Internal
 
 namespace LO.FirstOrder.Arithmetic
 
-open FirstOrder Arithmetic ISigma1 Metamath
+open Internal
 
 section
 

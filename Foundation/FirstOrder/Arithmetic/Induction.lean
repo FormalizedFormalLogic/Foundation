@@ -4,11 +4,13 @@ import Foundation.FirstOrder.Arithmetic.HFS
 # Various induction-related principles in $\mathsf{I}\Sigma_n$
 -/
 
-namespace LO.ISigma1
+namespace LO.FirstOrder.Arithmetic
 
-open FirstOrder Arithmetic PeanoMinus IOpen ISigma0
+variable {V : Type*} [ORingStructure V]
 
-variable {V : Type*} [ORingStructure V] [V ⊧ₘ* 𝗜𝚺₁]
+section ISigma1
+
+variable [V ⊧ₘ* 𝗜𝚺₁]
 
 @[elab_as_elim] lemma sigma1_pos_succ_induction
     {P : V → Prop} (hP : 𝚺₁-Predicate P)
@@ -110,7 +112,7 @@ theorem bounded_all_sigma1_order_induction {f : V → V → V} (hf : 𝚺₁-Fun
       let m₁ := SW.nth (show x - i < lh W by simp [←hxW, lt_succ_iff_le])
       have : f x' y' ≤ m₁ :=
         hWₛ (x - (i + 1)) (tsub_lt_iff_left hi |>.mpr (by simp)) m (lt_of_mem_rng hm) m₁ (by simp [m₁]) hm
-          (by rw [←PeanoMinus.sub_sub, sub_add_self_of_le (show 1 ≤ x - i from le_tsub_of_add_le_left hi)]; simp [m₁])
+          (by rw [←Arithmetic.sub_sub, sub_add_self_of_le (show 1 ≤ x - i from le_tsub_of_add_le_left hi)]; simp [m₁])
           x' (by simp [tsub_tsub_cancel_of_le hi, hx']) y' hy'
       exact ih m₁ (by simp [m₁]) (by simp [m₁]) x'' (lt_succ_iff_le.mp (lt_of_lt_of_le hx'' hx')) y'' (le_trans hy'' this)
   exact this x (by rfl) y (lt_of_mem_rng hW₀) (by simpa using hW₀) x (by rfl) y (by rfl)
@@ -193,13 +195,9 @@ lemma measured_bounded_sigma1_order_induction {m : V → V} {f : V → V} {P : V
   intro a
   exact this (m a) a (by rfl)
 
-end LO.ISigma1
+end ISigma1
 
-namespace LO.Induction
-
-open FirstOrder Arithmetic PeanoMinus IOpen ISigma0 ISigma1
-
-variable {V : Type*} [ORingStructure V]
+section Induction
 
 variable (m : ℕ) [Fact (1 ≤ m)] [V ⊧ₘ* 𝗜𝗡𝗗𝚺 m]
 
@@ -261,4 +259,6 @@ lemma sigma_or_pi_order_induction {P Q : V → Prop} (hP : 𝚺-[m]-Predicate P)
       simpa [hp, hq, hx] using this
   simpa [hp, hq] using this a (by rfl)
 
-end LO.Induction
+end Induction
+
+end LO.FirstOrder.Arithmetic

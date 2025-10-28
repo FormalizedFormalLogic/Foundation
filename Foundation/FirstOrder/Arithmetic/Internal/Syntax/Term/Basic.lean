@@ -1,9 +1,7 @@
 import Foundation.FirstOrder.Arithmetic.Internal.Syntax.Language
 import Foundation.FirstOrder.Arithmetic.HFS
 
-namespace LO.ISigma1.Metamath
-
-open FirstOrder Arithmetic PeanoMinus IOpen ISigma0
+namespace LO.FirstOrder.Arithmetic.Internal
 
 variable {V : Type*} [ORingStructure V] [V ⊧ₘ* 𝗜𝚺₁]
 
@@ -691,9 +689,13 @@ section isSemiterm
 
 variable (L)
 
-def IsSemiterm (n t : V) : Prop := IsUTerm L t ∧ termBV L t ≤ n
+class IsSemiterm (n t : V) : Prop where
+  isUTerm : IsUTerm L t
+  bv : termBV L t ≤ n
 
-def IsSemitermVec (k n v : V) : Prop := IsUTermVec L k v ∧ ∀ i < k, termBV L v.[i] ≤ n
+class IsSemitermVec (k n v : V) : Prop where
+  isUTermVec : IsUTermVec L k v
+  bv : ∀  {i}, i < k → termBV L v.[i] ≤ n
 
 noncomputable def isSemiterm : 𝚫₁.Semisentence 2 := .mkDelta
   (.mkSigma “n p. !(isUTerm L).sigma p ∧ ∃ b, !(termBVGraph L) b p ∧ b ≤ n”)
@@ -709,13 +711,13 @@ abbrev IsTermVec (k v : V) : Prop := IsSemitermVec L k 0 v
 
 variable {L}
 
-lemma IsSemiterm.isUTerm {n t : V} (h : IsSemiterm L n t) : IsUTerm L t := h.1
+lemma IsSemiterm.def {n} {t : V} : IsSemiterm L n t ↔ IsUTerm L t ∧ termBV L t ≤ n :=
+  ⟨by rintro ⟨h, bv⟩; exact ⟨h, bv⟩, by rintro ⟨h, bv⟩; exact ⟨h, bv⟩⟩
 
-lemma IsSemiterm.bv {n t : V} (h : IsSemiterm L n t) : termBV L t ≤ n := h.2
+lemma IsSemitermVec.def {n} {v : V} : IsSemitermVec L k n v ↔ IsUTermVec L k v ∧ ∀ i < k, termBV (V := V) L v.[i] ≤ n :=
+  ⟨by rintro ⟨h, bv⟩; exact ⟨h, fun _ ↦ bv⟩, by rintro ⟨h, bv⟩; exact ⟨h, bv _⟩⟩
 
 @[simp] lemma IsSemitermVec.isUTerm {k n v : V} (h : IsSemitermVec L k n v) : IsUTermVec L k v := h.1
-
-lemma IsSemitermVec.bv {k n v : V} (h : IsSemitermVec L k n v) {i} (hi : i < k) : termBV L v.[i] ≤ n := h.2 i hi
 
 lemma IsSemitermVec.lh {k n v : V} (h : IsSemitermVec L k n v) : len v = k := h.isUTerm.lh.symm
 
@@ -725,22 +727,22 @@ lemma IsSemitermVec.nth {k n v : V} (h : IsSemitermVec L k n v) {i} (hi : i < k)
 lemma IsUTerm.isSemiterm {t : V} (h : IsUTerm L t) : IsSemiterm L (termBV L t) t := ⟨h, by simp⟩
 
 lemma IsUTermVec.isSemitermVec {k v : V} (h : IsUTermVec L k v) : IsSemitermVec L k (listMax (termBVVec L k v)) v :=
-  ⟨h, fun i hi ↦ le_trans (by rw [nth_termBVVec h hi]) (nth_le_listMax (i := i) (by simp [h, hi]))⟩
+  ⟨h, fun {i} hi ↦ le_trans (by rw [nth_termBVVec h hi]) (nth_le_listMax (i := i) (by simp [h, hi]))⟩
 
 lemma IsSemitermVec.iff {k n v : V} : IsSemitermVec L k n v ↔ (len v = k ∧ ∀ i < k, IsSemiterm L n v.[i]) := by
   constructor
   · intro h; exact ⟨h.lh, fun i hi ↦ h.nth hi⟩
-  · intro ⟨hk, h⟩; exact ⟨⟨hk.symm, fun i hi ↦ h i hi |>.isUTerm⟩, fun i hi ↦ h i hi |>.bv⟩
+  · intro ⟨hk, h⟩; exact ⟨⟨hk.symm, fun i hi ↦ h i hi |>.isUTerm⟩, fun hi ↦ h _ hi |>.bv⟩
 
 @[simp] lemma IsSemiterm.bvar {n z : V} :
-    IsSemiterm L n ^#z ↔ z < n := by simp [IsSemiterm, succ_le_iff_lt]
+    IsSemiterm L n ^#z ↔ z < n := by simp [IsSemiterm.def, succ_le_iff_lt]
 
 @[simp] lemma IsSemiterm.fvar (n x : V) :
-    IsSemiterm L n ^&x := by simp [IsSemiterm]
+    IsSemiterm L n ^&x := by simp [IsSemiterm.def]
 
 @[simp] lemma IsSemiterm.func {n k f v : V} :
     IsSemiterm L n (^func k f v) ↔ L.IsFunc k f ∧ IsSemitermVec L k n v := by
-  simp only [IsSemiterm, IsUTerm.func_iff]
+  simp only [IsSemiterm.def, IsUTerm.func_iff]
   constructor
   · rintro ⟨⟨hf, hbv⟩, hv⟩
     exact ⟨hf, hbv, by
@@ -793,7 +795,7 @@ instance IsSemiterm.defined : 𝚫₁-Relation (IsSemiterm (V := V) L) via (isSe
   · intro v
     simp [isSemiterm, HierarchySymbol.Semiformula.val_sigma]
   · intro v
-    simp [isSemiterm, IsSemiterm, HierarchySymbol.Semiformula.val_sigma]
+    simp [isSemiterm, IsSemiterm.def, HierarchySymbol.Semiformula.val_sigma]
 
 instance IsSemiterm.definable : 𝚫₁-Relation (IsSemiterm (V := V) L) := IsSemiterm.defined.to_definable
 
@@ -804,7 +806,7 @@ instance IsSemitermVec.defined : 𝚫₁-Relation₃ (IsSemitermVec (V := V) L) 
   · intro v
     simp [isSemitermVec, HierarchySymbol.Semiformula.val_sigma]
   · intro v
-    simp [isSemitermVec, IsSemitermVec, HierarchySymbol.Semiformula.val_sigma]
+    simp [isSemitermVec, IsSemitermVec.def, HierarchySymbol.Semiformula.val_sigma]
 
 instance IsSemitermVec.definable : 𝚫₁-Relation₃ (IsSemitermVec (V := V) L) := IsSemitermVec.defined.to_definable
 
@@ -828,7 +830,7 @@ lemma IsSemiterm.case_iff {n t : V} :
     · simp
     · simp [hf, hv]
 
-alias ⟨IsSemiterm.case, IsSemiterm.mk⟩ := IsSemiterm.case_iff
+alias ⟨IsSemiterm.case, IsSemiterm.mk'⟩ := IsSemiterm.case_iff
 
 lemma IsSemiterm.induction (Γ) {P : V → Prop} (hP : Γ-[1]-Predicate P)
     (hbvar : ∀ z < n, P (^#z)) (hfvar : ∀ x, P (^&x))
@@ -860,4 +862,4 @@ lemma IsSemiterm.sigma1_induction {P : V → Prop} (hP : 𝚺₁-Predicate P)
 
 end isSemiterm
 
-end LO.ISigma1.Metamath
+end LO.FirstOrder.Arithmetic.Internal

@@ -174,7 +174,7 @@ private lemma codeAux_sigma_one {k} (c : Nat.ArithPart₁.Code k) : Hierarchy �
 @[simp] lemma code_sigma_one {k} (c : Nat.ArithPart₁.Code k) : Hierarchy 𝚺 1 (code c) :=
   Hierarchy.rew _ (codeAux_sigma_one c)
 
-@[simp] lemma natCast_nat (n : ℕ) : Nat.cast n = n := by rfl
+@[simp] lemma natCast_nat' (n : ℕ) : Nat.cast n = n := by rfl
 
 private lemma models_codeAux {c : Code k} {f : List.Vector ℕ k →. ℕ} (hc : c.eval f) (y : ℕ) (v : Fin k → ℕ) :
     Semiformula.Evalfm ℕ (y :> v) (codeAux c) ↔ f (List.Vector.ofFn v) = Part.some y := by
@@ -260,8 +260,4 @@ theorem re_complete {A : ℕ → Prop} (hp : REPred A) {x : ℕ} :
   (by simpa [models_iff, Semiformula.eval_substs, Matrix.constant_eq_singleton] using (codeOfREPred_spec hp (x := x)).symm)
   (sigma_one_completeness_iff <| by simp [codeOfREPred, codeOfPartrec'])
 
-end Arithmetic
-
-end FirstOrder
-
-end LO
+end LO.FirstOrder.Arithmetic

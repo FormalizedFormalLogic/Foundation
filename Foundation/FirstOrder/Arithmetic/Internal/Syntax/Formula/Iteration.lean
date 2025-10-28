@@ -16,9 +16,7 @@ def weight (k : ℕ) : Semiformula L ξ n := (List.replicate k ⊤).conj
 
 end LO.FirstOrder.Semiformula
 
-namespace LO.ISigma1.Metamath
-
-open FirstOrder Arithmetic PeanoMinus IOpen ISigma0
+namespace LO.FirstOrder.Arithmetic.Internal
 
 variable {V : Type*} [ORingStructure V] [V ⊧ₘ* 𝗜𝚺₁]
 
@@ -148,7 +146,7 @@ lemma qqDisj_semiformula {ps : V} :
 
 end qqDisj
 
-namespace InternalArithmetic
+namespace Arithmetic
 
 /-! ### Disjunction of sequential substution
 
@@ -196,9 +194,9 @@ instance disjSeqSubst.definable' : Γ-[m + 1]-Function₃[V] disjSeqSubst := .of
 
 end
 
-lemma _root_.LO.ISigma1.Metamath.IsSemiformula.disjSeqSubst {n m w p : V} (hw : IsSemitermVec ℒₒᵣ n m w) (hp : IsSemiformula ℒₒᵣ (n + 1) p) (k : V) :
+lemma _root_.LO.FirstOrder.Arithmetic.Internal.IsSemiformula.disjSeqSubst {n m w p : V} (hw : IsSemitermVec ℒₒᵣ n m w) (hp : IsSemiformula ℒₒᵣ (n + 1) p) (k : V) :
     IsSemiformula ℒₒᵣ m (disjSeqSubst w p k) := by
-  induction k using sigma1_succ_induction
+  induction k using ISigma1.sigma1_succ_induction
   · definability
   case zero => simp
   case succ k ih =>
@@ -277,7 +275,7 @@ end
     · simp
     · simp [ih (by simpa using hi)]
 
-lemma _root_.LO.ISigma1.Metamath.IsSemiformula.substItrConj
+lemma _root_.LO.FirstOrder.Arithmetic.Internal.IsSemiformula.substItrConj
     {m n w p : V} (hp : IsSemiformula ℒₒᵣ (n + 1) p) (hw : IsSemitermVec ℒₒᵣ n m w) (k : V) :
     IsSemiformula ℒₒᵣ m (^⋀ substItr w p k) := by
   simp only [qqConj_semiformula, len_substItr]
@@ -285,7 +283,7 @@ lemma _root_.LO.ISigma1.Metamath.IsSemiformula.substItrConj
   simp only [hi, substItr_nth]
   apply hp.subst (by simp [hw])
 
-lemma _root_.LO.ISigma1.Metamath.IsSemiformula.substItrDisj
+lemma _root_.LO.FirstOrder.Arithmetic.Internal.IsSemiformula.substItrDisj
     {m n w p : V} (hp : IsSemiformula ℒₒᵣ (n + 1) p) (hw : IsSemitermVec ℒₒᵣ n m w) (k : V) :
     IsSemiformula ℒₒᵣ m (^⋁ substItr w p k) := by
   simp only [qqDisj_semiformula, len_substItr]
@@ -381,7 +379,7 @@ lemma substs_disj_substItr {n m l w p k : V} (hp : IsSemiformula ℒₒᵣ (n + 
 
 end substItr
 
-end InternalArithmetic
+end Arithmetic
 
 section verums
 
@@ -413,4 +411,4 @@ end
 
 end verums
 
-end LO.ISigma1.Metamath
+end LO.FirstOrder.Arithmetic.Internal

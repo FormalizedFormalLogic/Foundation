@@ -6,9 +6,7 @@ import Foundation.FirstOrder.Arithmetic.HFS.Basic
 
 -/
 
-namespace LO.ISigma1
-
-open FirstOrder Arithmetic PeanoMinus IOpen ISigma0
+namespace LO.FirstOrder.Arithmetic
 
 variable {V : Type*} [ORingStructure V] [V ⊧ₘ* 𝗜𝚺₁]
 
@@ -400,4 +398,4 @@ lemma mem_vectoSeq {n : ℕ} (v : Fin n → V) (i : Fin n) : ⟪(i : V), v i⟫ 
 
 end seqToVec
 
-end LO.ISigma1
+end LO.FirstOrder.Arithmetic

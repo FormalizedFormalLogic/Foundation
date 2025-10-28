@@ -7,9 +7,7 @@ import Foundation.Vorspiel.ExistsUnique
 
 -/
 
-namespace LO.ISigma1
-
-open FirstOrder Arithmetic PeanoMinus IOpen ISigma0
+namespace LO.FirstOrder.Arithmetic
 
 variable {V : Type*} [ORingStructure V] [V ⊧ₘ* 𝗜𝚺₁]
 
@@ -614,4 +612,4 @@ instance sndIdx_definable' (Γ) : Γ-Function₁ (sndIdx : V → V) := sndIdx_de
 
 end sndIdx
 
-end LO.ISigma1
+end LO.FirstOrder.Arithmetic

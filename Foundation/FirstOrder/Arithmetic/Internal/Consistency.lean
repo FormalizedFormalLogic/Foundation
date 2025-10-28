@@ -6,9 +6,7 @@ import Foundation.FirstOrder.Arithmetic.Internal.DerivabilityCondition
 
 open Classical
 
-namespace LO.ISigma1.Metamath
-
-open FirstOrder Arithmetic PeanoMinus IOpen ISigma0
+namespace LO.FirstOrder.Arithmetic.Internal
 
 variable {V : Type*} [ORingStructure V] [V ⊧ₘ* 𝗜𝚺₁]
 
@@ -76,7 +74,7 @@ def consistent_eq : T.consistent = T.standardProvability.con := rfl
 
 end WitnessComparisons
 
-end LO.ISigma1.Metamath
+end LO.FirstOrder.Arithmetic.Internal
 
 namespace LO.FirstOrder.Arithmetic
 

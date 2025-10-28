@@ -2,9 +2,7 @@ import Foundation.FirstOrder.Arithmetic.HFS
 
 /-! # Internalized languages of first-order logic -/
 
-namespace LO.ISigma1.Metamath
-
-open FirstOrder Arithmetic PeanoMinus IOpen ISigma0
+namespace LO.FirstOrder.Arithmetic.Internal
 
 variable {L : Language} [L.Encodable]
 
@@ -123,7 +121,7 @@ lemma _root_.LO.FirstOrder.Language.ORing.of_mem_range_encode_func {k f : ℕ} :
     · exact ⟨Language.ORing.Func.add, rfl⟩
     · exact ⟨Language.ORing.Func.mul, rfl⟩
 
-/-- TODO: move to Basic/Syntax/Metamath.Language.lean-/
+/-- TODO: move to Basic/Syntax/Internal.Language.lean-/
 lemma _root_.LO.FirstOrder.Language.ORing.of_mem_range_encode_rel {k r : ℕ} :
     r ∈ Set.range (Encodable.encode : FirstOrder.Language.Rel ℒₒᵣ k → ℕ) ↔
     (k = 2 ∧ r = 0) ∨ (k = 2 ∧ r = 1) := by
@@ -144,7 +142,7 @@ instance : (ℒₒᵣ).LORDefinable where
   rel_iff {k c} := by
     simpa [models_iff] using Language.ORing.of_mem_range_encode_rel
 
-namespace InternalArithmetic
+namespace Arithmetic
 
 variable {V : Type*} [ORingStructure V] [V ⊧ₘ* 𝗜𝚺₁]
 
@@ -223,6 +221,6 @@ lemma isRel_iff_LOR {k R : V} :
   congr
   · calc (1 : V) = (1 : ℕ) := by simp
 
-end InternalArithmetic
+end Arithmetic
 
-end LO.ISigma1.Metamath
+end LO.FirstOrder.Arithmetic.Internal

@@ -6,9 +6,7 @@ import Foundation.FirstOrder.Arithmetic.Exponential.Pow2
 $\mathrm{PPow2}(n)$ is a property that holds iff $n = 2^{2^i}$ for some $i$.
 -/
 
-namespace LO.ISigma0
-
-open FirstOrder Arithmetic PeanoMinus IOpen
+namespace LO.FirstOrder.Arithmetic
 
 variable {V : Type*} [ORingStructure V] [V ⊧ₘ* 𝗜𝚺₀]
 
@@ -313,6 +311,4 @@ lemma two_mul_sq_uniq {y i j : V} (py : Pow2 y) (ppi : PPow2 i) (ppj : PPow2 j)
 
 end PPow2
 
-end ISigma0
-
-end LO
+end LO.FirstOrder.Arithmetic

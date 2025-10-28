@@ -1,9 +1,7 @@
 import Foundation.FirstOrder.Arithmetic.TA.Basic
 import Foundation.FirstOrder.Arithmetic.PeanoMinus.Basic
 
-namespace LO.FirstOrderTrueArith
-
-open FirstOrder Arithmetic PeanoMinus
+namespace LO.FirstOrder.Arithmetic
 
 abbrev withStar := Language.add ℒₒᵣ Language.unit
 
@@ -91,3 +89,7 @@ lemma star_unbounded (n : ℕ) : n < ⋆ := by
   simpa [models_iff, numeral_eq_natCast] using this
 
 end Nonstandard
+
+end
+
+end LO.FirstOrder.Arithmetic

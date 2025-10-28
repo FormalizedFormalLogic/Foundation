@@ -1,12 +1,8 @@
 import Foundation.FirstOrder.Arithmetic.Basic.Model
 
-namespace LO
-
-namespace FirstOrder
+namespace LO.FirstOrder.Arithmetic
 
 variable {L : Language} [L.LT]
-
-namespace Arithmetic
 
 inductive Hierarchy : Polarity → ℕ → {n : ℕ} → Semiformula L ξ n → Prop
   | verum (Γ s n)                                    : Hierarchy Γ s (⊤ : Semiformula L ξ n)

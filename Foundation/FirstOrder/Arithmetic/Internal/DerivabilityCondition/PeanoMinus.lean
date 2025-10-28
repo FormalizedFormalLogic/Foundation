@@ -4,7 +4,7 @@ import Foundation.FirstOrder.Arithmetic.Internal.DerivabilityCondition.Equationa
 # Internal theory $\mathsf{PA}^-$, $\mathsf{R_0}$ in $\mathsf{I}\Sigma_1$
 -/
 
-namespace LO.PeanoMinus
+namespace LO.FirstOrder.Arithmetic
 
 variable {V : Type*} [ORingStructure V] [V ⊧ₘ* 𝗣𝗔⁻]
 
@@ -13,11 +13,11 @@ lemma lt_add_self_add_one (a b : V) : a < b + a + 1 := lt_succ_iff_le.mpr <| le_
 lemma lt_succ_iff_eq_or_succ {a b : V} : a < b + 1 ↔ a = b ∨ a < b := by
   simp [lt_succ_iff_le, le_iff_eq_or_lt]
 
-end LO.PeanoMinus
+end LO.FirstOrder.Arithmetic
 
-namespace LO.ISigma1.Metamath.InternalArithmetic
+namespace LO.FirstOrder.Arithmetic.Internal.Arithmetic
 
-open Classical FirstOrder Arithmetic PeanoMinus IOpen ISigma0
+open Classical LO.Entailment
 
 variable {V : Type*} [ORingStructure V] [V ⊧ₘ* 𝗜𝚺₁]
 
@@ -47,7 +47,7 @@ lemma term_add_assoc (t₁ t₂ t₃ : Term V ℒₒᵣ) :
 
 lemma numeral_add (n m : V) :
     T.internalize V ⊢ (𝕹 n + 𝕹 m) ≐ 𝕹 (n + m) := by
-  induction m using ISigma1.sigma1_pos_succ_induction
+  induction m using sigma1_pos_succ_induction
   · simp only [tprovable_iff_provable, val_equals, val_add, val_numeral]
     definability
   case zero =>
@@ -79,7 +79,7 @@ lemma numeral_add (n m : V) :
 
 lemma numeral_mul (n m : V) :
     T.internalize V ⊢ 𝕹 n * 𝕹 m ≐ 𝕹 (n * m) := by
-  induction m using ISigma1.sigma1_pos_succ_induction
+  induction m using sigma1_pos_succ_induction
   · simp only [tprovable_iff_provable, val_equals, val_mul, val_numeral]
     definability
   case zero =>
@@ -130,7 +130,7 @@ lemma numeral_lt {n m : V} :
     have : T ⊢ “∀ x y, x < y + x + 1” :=
       provable_of_models.{0} _ _ fun M _ hM ↦ by
         have : M ⊧ₘ* 𝗣𝗔⁻ := models_of_subtheory hM
-        simp [models_iff, PeanoMinus.lt_add_self_add_one]
+        simp [models_iff, Arithmetic.lt_add_self_add_one]
     have := by simpa using internal_provable_of_outer_provable (V := V) this
     simpa using TProof.specialize₂! this (𝕹 d) (𝕹 n)
   have l₂ : T.internalize V ⊢ 𝕹 d + 𝕹 n + 𝕹 1 ≐ 𝕹 (d + n + 1) := by
@@ -177,7 +177,7 @@ lemma numeral_nlt {n m : V} :
 
 lemma lt_iff_substItrDisj (t : Term V ℒₒᵣ) (m : V) :
     T.internalize V ⊢ (t <' 𝕹 m) ⭤ substItrDisj ![t] (#'1 ≐ #'0) m := by
-  induction m using ISigma1.sigma1_pos_succ_induction
+  induction m using sigma1_pos_succ_induction
   · simp only [Nat.succ_eq_add_one, Nat.reduceAdd, Fin.isValue, tprovable_iff_provable,
       val_iff, val_lessThan, val_numeral, substItrDisj_val, SemitermVec.val_succ, Matrix.head_cons,
       Matrix.tail_cons, SemitermVec.val_nil, val_equals, Semiterm.bvar_val, Fin.coe_ofNat_eq_mod,
@@ -211,7 +211,7 @@ lemma lt_iff_substItrDisj (t : Term V ℒₒᵣ) (m : V) :
         have : T ⊢ “∀ m x, x < m + 1 ↔ x = m ∨ x < m” :=
           provable_of_models.{0} _ _ fun M _ hM ↦ by
             have : M ⊧ₘ* 𝗣𝗔⁻ := models_of_subtheory hM
-            simp [models_iff, PeanoMinus.lt_succ_iff_eq_or_succ]
+            simp [models_iff, Arithmetic.lt_succ_iff_eq_or_succ]
         simpa using internal_provable_of_outer_provable (V := V) this
       simpa using TProof.specialize₂! this t 𝕹(m + 1)
     cl_prover [ih, this]
@@ -251,4 +251,4 @@ lemma bex_replace (φ : Semiformula V ℒₒᵣ 1) (t u : Term V ℒₒᵣ) :
     T.internalize V ⊢ (t ≐ u) ➝ φ.bex t ➝ φ.bex u := by
   simpa [SemitermVec.q, Semiformula.substs_substs] using replace T ((φ.subst ![#'0]).bex #'0) t u
 
-end LO.ISigma1.Metamath.InternalArithmetic
+end LO.FirstOrder.Arithmetic.Internal.Arithmetic

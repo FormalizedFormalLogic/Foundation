@@ -146,25 +146,25 @@ Following holds for all formula (not coded one) $\varphi$ and finite set $\Gamma
 
 - *Sound*: $\N \models \mathrm{Provable}_T(\ulcorner \varphi \urcorner) \implies T \vdash \varphi$
   ```lean
-  lemma LO.ISigma1.Metamath.Language.Theory.Provable.sound :
+  lemma LO.FirstOrder.Arithmetic.Internal.Language.Theory.Provable.sound :
       (T.codeIn ℕ).Provable ⌜p⌝ → T ⊢ p
   ```
-  - [LO.ISigma1.Metamath.Language.Theory.Provable.sound](https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/Incompleteness/StandardProvability/D1.html#LO.ISigma1.Metamath.Language.Theory.Provable.sound)
+  - [LO.FirstOrder.Arithmetic.Internal.Language.Theory.Provable.sound](https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/Incompleteness/StandardProvability/D1.html#LO.FirstOrder.Arithmetic.Internal.Language.Theory.Provable.sound)
 - _D1_: $T \vdash \varphi \implies V \models \mathrm{Provable}_T(\ulcorner \varphi \urcorner)$
   ```lean
-  theorem LO.ISigma1.Metamath.provable_of_provable :
+  theorem LO.FirstOrder.Arithmetic.Internal.provable_of_provable :
       T ⊢ p → (T.codeIn V).Provable ⌜p⌝
   ```
-  - [LO.ISigma1.Metamath.provable_of_provable](https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/Incompleteness/StandardProvability/D1.html#LO.ISigma1.Metamath.provable_of_provable)
+  - [LO.FirstOrder.Arithmetic.Internal.provable_of_provable](https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/Incompleteness/StandardProvability/D1.html#LO.FirstOrder.Arithmetic.Internal.provable_of_provable)
 - *D2*: $\mathrm{Provable}_T(\ulcorner \varphi \to \psi \urcorner)\ \&\ \mathrm{Provable}_T(\ulcorner \varphi \urcorner)
     \implies \mathrm{Provable}_T(\ulcorner \psi \urcorner)$
 - *Formalized $\Sigma_1$-completeness*: Let $\sigma$ be a $\Sigma_1$-sentence. $V \models \sigma \implies
     V \models \mathrm{Provable}_{T + \mathsf{R_0}} (\ulcorner \sigma \urcorner)$
   ```lean
-  theorem LO.ISigma1.Metamath.sigma1_complete (hσ : Hierarchy 𝚺 1 σ) :
+  theorem LO.FirstOrder.Arithmetic.Internal.sigma1_complete (hσ : Hierarchy 𝚺 1 σ) :
       V ⊧ₘ σ → T.Provable ⌜σ⌝
   ```
-  - [LO.ISigma1.Metamath.sigma1_complete](https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/Incompleteness/StandardProvability/D3.html#LO.ISigma1.Metamath.sigma1_complete)
+  - [LO.FirstOrder.Arithmetic.Internal.sigma1_complete](https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/Incompleteness/StandardProvability/D3.html#LO.FirstOrder.Arithmetic.Internal.sigma1_complete)
 
 Now assume that $U$ is a theory of arithmetic stronger than $\mathsf{R_0}$ and
 $T$ be a theory  of arithmetic stronger than $\mathsf{I}\Sigma_1$.

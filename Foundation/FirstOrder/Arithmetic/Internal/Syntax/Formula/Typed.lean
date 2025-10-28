@@ -5,9 +5,7 @@ import Foundation.FirstOrder.Arithmetic.Internal.Syntax.Formula.Iteration
 # Typed Formalized Semiformula/Formula
 -/
 
-namespace LO.ISigma1.Metamath
-
-open FirstOrder Arithmetic PeanoMinus IOpen ISigma0
+namespace LO.FirstOrder.Arithmetic.Internal
 
 variable {V : Type*} [ORingStructure V] [V ⊧ₘ* 𝗜𝚺₁]
 
@@ -17,7 +15,7 @@ lemma sub_succ_lt_self {a b : V} (h : b < a) : a - (b + 1) < a := by
   simp [tsub_lt_iff_left (succ_le_iff_lt.mpr h)]
 
 lemma sub_succ_lt_selfs {a b : V} (h : b < a) : a - (a - (b + 1) + 1) = b := by
-  rw [←PeanoMinus.sub_sub]
+  rw [←Arithmetic.sub_sub]
   apply sub_remove_left
   apply sub_remove_left
   rw [←add_sub_of_le (succ_le_iff_lt.mpr h)]
@@ -143,13 +141,13 @@ instance : DeMorgan (Semiformula V L n) where
 
 lemma imp_def (φ ψ : Semiformula V L n) : φ ➝ ψ = ∼φ ⋎ ψ := by ext; simp [imp]
 
-noncomputable def shift (φ : Semiformula V L n) : Semiformula V L n := ⟨Metamath.shift L φ.val, φ.isSemiformula.shift⟩
+noncomputable def shift (φ : Semiformula V L n) : Semiformula V L n := ⟨Internal.shift L φ.val, φ.isSemiformula.shift⟩
 
 noncomputable def subst (w : SemitermVec V L n m) (φ : Semiformula V L n) : Semiformula V L m :=
-  ⟨Metamath.subst L w.val φ.val, φ.isSemiformula.subst w.isSemitermVec⟩
+  ⟨Internal.subst L w.val φ.val, φ.isSemiformula.subst w.isSemitermVec⟩
 
-@[simp] lemma val_shift (φ : Semiformula V L n) : φ.shift.val = Metamath.shift L φ.val := rfl
-@[simp] lemma val_substs (φ : Semiformula V L n) (w : SemitermVec V L n m) : (φ.subst w).val = Metamath.subst L w.val φ.val := rfl
+@[simp] lemma val_shift (φ : Semiformula V L n) : φ.shift.val = Internal.shift L φ.val := rfl
+@[simp] lemma val_substs (φ : Semiformula V L n) (w : SemitermVec V L n m) : (φ.subst w).val = Internal.subst L w.val φ.val := rfl
 
 @[simp] lemma shift_verum : (⊤ : Semiformula V L n).shift = ⊤ := by ext; simp [shift]
 @[simp] lemma shift_falsum : (⊥ : Semiformula V L n).shift = ⊥ := by ext; simp [shift]
@@ -168,7 +166,7 @@ noncomputable def subst (w : SemitermVec V L n m) (φ : Semiformula V L n) : Sem
     φ₁ ➝ φ₂ = ψ₁ ➝ ψ₂ ↔ φ₁ = ψ₁ ∧ φ₂ = ψ₂ := by simp [imp_def]
 
 @[simp] lemma shift_neg (φ : Semiformula V L n) : (∼φ).shift = ∼(φ.shift) := by
-  ext; simp [shift, val_neg]; simp [Metamath.shift_neg φ.isSemiformula]
+  ext; simp [shift, val_neg]; simp [Internal.shift_neg φ.isSemiformula]
 
 @[simp] lemma shift_imp (φ ψ : Semiformula V L n) : (φ ➝ ψ).shift = φ.shift ➝ ψ.shift := by
   simp [imp_def]
@@ -193,7 +191,7 @@ noncomputable def subst (w : SemitermVec V L n m) (φ : Semiformula V L n) : Sem
     (nrel R v).subst w = nrel R ((Semiterm.subst w)⨟ v) := by ext; simp
 
 @[simp] lemma substs_neg (w : SemitermVec V L n m) (φ : Semiformula V L n) : (∼φ).subst w = ∼(φ.subst w) := by
-  ext; simp [subst, val_neg, Metamath.substs_neg φ.isSemiformula w.isSemitermVec]
+  ext; simp [subst, val_neg, Internal.substs_neg φ.isSemiformula w.isSemitermVec]
 @[simp] lemma substs_imp (w : SemitermVec V L n m) (φ ψ : Semiformula V L n) : (φ ➝ ψ).subst w = φ.subst w ➝ ψ.subst w := by
   simp [imp_def]
 @[simp] lemma substs_imply (w : SemitermVec V L n m) (φ ψ : Semiformula V L n) : (φ ⭤ ψ).subst w = φ.subst w ⭤ ψ.subst w := by
@@ -209,7 +207,7 @@ noncomputable def subst (w : SemitermVec V L n m) (φ : Semiformula V L n) : Sem
 lemma subst_eq_self {n : ℕ} (w : SemitermVec V L n n) (φ : Semiformula V L n) (H : ∀ i, w i = Semiterm.bvar i) :
     φ.subst w = φ := by
   suffices ∀ i < ↑n, w.val.[i] = ^#i by
-    ext; simp only [Semiformula.val_substs]; rw [Metamath.subst_eq_self φ.isSemiformula w.isSemitermVec]; simpa
+    ext; simp only [Semiformula.val_substs]; rw [Internal.subst_eq_self φ.isSemiformula w.isSemitermVec]; simpa
   intro i hi
   rcases eq_fin_of_lt_nat hi with ⟨i, rfl⟩
   simpa using congr_arg Semiterm.val <| H i
@@ -223,39 +221,39 @@ lemma subst_eq_self {n : ℕ} (w : SemitermVec V L n n) (φ : Semiformula V L n)
     φ.subst w = φ := subst_eq_self _ _ (by simp)
 
 lemma shift_substs (w : SemitermVec V L n m) (φ : Semiformula V L n) :
-    (φ.subst w).shift = φ.shift.subst (Semiterm.shift⨟ w) := by ext; simp [Metamath.shift_substs φ.isSemiformula w.isSemitermVec]
+    (φ.subst w).shift = φ.shift.subst (Semiterm.shift⨟ w) := by ext; simp [Internal.shift_substs φ.isSemiformula w.isSemitermVec]
 
 lemma substs_substs {n m l : ℕ} (v : SemitermVec V L m l) (w : SemitermVec V L n m) (φ : Semiformula V L n) :
     (φ.subst w).subst v = φ.subst ((Semiterm.subst v)⨟ w) := by
-  ext; simp [Metamath.substs_substs φ.isSemiformula v.isSemitermVec w.isSemitermVec]
+  ext; simp [Internal.substs_substs φ.isSemiformula v.isSemitermVec w.isSemitermVec]
 
 noncomputable def free (φ : Semiformula V L 1) : Formula V L := φ.shift.subst ![Semiterm.fvar 0]
 
-@[simp] lemma free_val (φ : Semiformula V L 1) : φ.free.val = Metamath.free L φ.val := by
+@[simp] lemma free_val (φ : Semiformula V L 1) : φ.free.val = Internal.free L φ.val := by
   simp [free]; rfl
 
 noncomputable def free1 (φ : Semiformula V L 2) : Semiformula V L 1 := φ.shift.subst ![Semiterm.fvar 0, Semiterm.bvar 0]
 
-@[simp] lemma free1_val (φ : Semiformula V L 2) : φ.free1.val = Metamath.free1 L φ.val := by
+@[simp] lemma free1_val (φ : Semiformula V L 2) : φ.free1.val = Internal.free1 L φ.val := by
   simp [free1]; rfl
 
-open InternalArithmetic
+open Internal.Arithmetic
 
 noncomputable def substItrConj (w : SemitermVec V ℒₒᵣ m n) (φ : Semiformula V ℒₒᵣ (m + 1)) (z : V) : Semiformula V ℒₒᵣ n :=
-  ⟨^⋀ InternalArithmetic.substItr w.val φ.val z, by
+  ⟨^⋀ Internal.Arithmetic.substItr w.val φ.val z, by
     have : IsSemiformula ℒₒᵣ (↑m + 1 : V) φ.val := by simp
     exact this.substItrConj w.isSemitermVec z⟩
 
 noncomputable def substItrDisj (w : SemitermVec V ℒₒᵣ m n) (φ : Semiformula V ℒₒᵣ (m + 1)) (z : V) : Semiformula V ℒₒᵣ n :=
-  ⟨^⋁ InternalArithmetic.substItr w.val φ.val z, by
+  ⟨^⋁ Internal.Arithmetic.substItr w.val φ.val z, by
     have : IsSemiformula ℒₒᵣ (↑m + 1 : V) φ.val := by simp
     exact this.substItrDisj w.isSemitermVec z⟩
 
 @[simp] lemma substItrConj_val (w : SemitermVec V ℒₒᵣ m n) (φ : Semiformula V ℒₒᵣ (m + 1)) (z : V) :
-    (φ.substItrConj w z).val = ^⋀ InternalArithmetic.substItr w.val φ.val z := rfl
+    (φ.substItrConj w z).val = ^⋀ Internal.Arithmetic.substItr w.val φ.val z := rfl
 
 @[simp] lemma substItrDisj_val (w : SemitermVec V ℒₒᵣ m n) (φ : Semiformula V ℒₒᵣ (m + 1)) (z : V) :
-    (φ.substItrDisj w z).val = ^⋁ InternalArithmetic.substItr w.val φ.val z := rfl
+    (φ.substItrDisj w z).val = ^⋁ Internal.Arithmetic.substItr w.val φ.val z := rfl
 
 @[simp] lemma substItrConj_zero (w : SemitermVec V ℒₒᵣ m n) (φ : Semiformula V ℒₒᵣ (m + 1)) :
     φ.substItrConj w 0 = ⊤ := by ext; simp
@@ -355,7 +353,7 @@ end Semiformula
 end typed_isfvfree
 -/
 
-open InternalArithmetic
+open Internal.Arithmetic
 
 variable {k n m : ℕ}
 
@@ -381,7 +379,7 @@ noncomputable def Semiformula.ball (t : Semiterm V ℒₒᵣ n) (φ : Semiformul
 noncomputable def Semiformula.bex (t : Semiterm V ℒₒᵣ n) (φ : Semiformula V ℒₒᵣ (n + 1)) : Semiformula V ℒₒᵣ n :=
   ∃' ((Semiterm.bvar 0 <' t.bShift) ⋏ φ)
 
-namespace InternalArithmetic
+namespace Arithmetic
 
 variable {n m : ℕ}
 
@@ -502,9 +500,9 @@ lemma neg_bex (t : Semiterm V ℒₒᵣ n) (φ : Semiformula V ℒₒᵣ (n + 1)
     (φ.bex t).subst w = (φ.subst w.q).bex (t.subst w) := by
   simp [Semiformula.bex]
 
-end InternalArithmetic
+end Arithmetic
 
 lemma Semiformula.ball_eqss_imp (t : Semiterm V ℒₒᵣ n) (φ : Semiformula V ℒₒᵣ (n + 1)) :
     φ.ball t = ∀' ((Semiterm.bvar 0 <' t.bShift) ➝ φ) := by simp [Semiformula.ball, imp_def]
 
-end LO.ISigma1.Metamath
+end LO.FirstOrder.Arithmetic.Internal

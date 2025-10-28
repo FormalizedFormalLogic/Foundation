@@ -1,14 +1,12 @@
 import Foundation.FirstOrder.Arithmetic.Basic
 
-namespace LO
-
-open FirstOrder Arithmetic
+namespace LO.FirstOrder.Arithmetic
 
 abbrev FirstOrderTrueArith : Theory ℒₒᵣ := Structure.theory ℒₒᵣ ℕ
 
 notation "𝗧𝗔" => FirstOrderTrueArith
 
-namespace FirstOrderTrueArith
+namespace TA
 
 instance : ℕ ⊧ₘ* 𝗧𝗔 :=
   modelsTheory_iff.mpr fun {φ} ↦ by simp
@@ -22,4 +20,6 @@ instance (T : Theory ℒₒᵣ) [ℕ ⊧ₘ* T] : T ⪯ 𝗧𝗔 := ⟨by
   have : ℕ ⊧ₘ φ := consequence_iff'.mp (smallSound! h) ℕ
   exact provable_iff.mpr this⟩
 
-end LO.FirstOrderTrueArith
+end TA
+
+end LO.FirstOrder.Arithmetic

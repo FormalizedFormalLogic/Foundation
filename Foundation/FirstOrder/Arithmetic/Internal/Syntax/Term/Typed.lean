@@ -6,9 +6,7 @@ import Foundation.FirstOrder.Arithmetic.Internal.Syntax.Term.Functions
 
 -/
 
-namespace LO.ISigma1
-
-open FirstOrder Arithmetic PeanoMinus IOpen ISigma0
+namespace LO.FirstOrder.Arithmetic
 
 variable {V : Type*} [ORingStructure V] [V ⊧ₘ* 𝗜𝚺₁]
 
@@ -28,10 +26,9 @@ noncomputable def matrixToVec (v : Fin k → V) : V := Matrix.foldr (fun t w ↦
     · simp; rfl
     · simp [*]; rfl
 
-namespace Metamath
+namespace Internal
 
 variable {L : Language} [L.Encodable] [L.LORDefinable]
-
 
 section typed_term
 
@@ -224,11 +221,11 @@ lemma bShift_shift_comm (t : Semiterm V L n) :
   ext; simp [termBShift_termShift t.isSemiterm]
 
 lemma shift_substs (w : SemitermVec V L n m) (t : Semiterm V L n) :
-    (t.subst w).shift = t.shift.subst (Semiterm.shift⨟ w) := by ext; simp [Metamath.termShift_termSubsts t.isSemiterm w.isSemitermVec]
+    (t.subst w).shift = t.shift.subst (Semiterm.shift⨟ w) := by ext; simp [Internal.termShift_termSubsts t.isSemiterm w.isSemitermVec]
 
 lemma substs_substs {n m l : ℕ} (v : SemitermVec V L m l) (w : SemitermVec V L n m) (t : Semiterm V L n) :
     (t.subst w).subst v = t.subst ((Semiterm.subst v)⨟ w) := by
-  ext;simp [Metamath.termSubst_termSubst w.isSemitermVec t.isSemiterm]
+  ext;simp [Internal.termSubst_termSubst w.isSemitermVec t.isSemiterm]
 
 end Semiterm
 
@@ -254,7 +251,7 @@ end Semiterm
 
 end typed_isfvfree
 
-namespace InternalArithmetic
+namespace Arithmetic
 
 variable {k n m : ℕ}
 
@@ -388,4 +385,4 @@ lemma semiterm_induction (Γ) {n : V} {P : Semiterm V ℒₒᵣ n → isSemiterm
         (by simpa using ih 1 (by simp) (by simp [ht₂]))
 -/
 
-end LO.ISigma1.Metamath.InternalArithmetic
+end LO.FirstOrder.Arithmetic.Internal.Arithmetic

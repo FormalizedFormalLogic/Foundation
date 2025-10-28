@@ -5,9 +5,7 @@ import Foundation.Logic.HilbertStyle.Supplemental
 # Witness comparisons of provability
 -/
 
-namespace LO.ISigma1.Metamath
-
-open FirstOrder Arithmetic PeanoMinus IOpen ISigma0
+namespace LO.FirstOrder.Arithmetic.Internal
 
 variable {V : Type*} [ORingStructure V] [V ⊧ₘ* 𝗜𝚺₁]
 
@@ -83,4 +81,4 @@ end ProvabilityComparison
 
 end WitnessComparisons
 
-end LO.ISigma1.Metamath
+end LO.FirstOrder.Arithmetic.Internal

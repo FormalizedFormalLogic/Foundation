@@ -2,7 +2,7 @@ import Foundation.FirstOrder.Arithmetic.Internal.Syntax.Theory
 
 namespace LO
 
-open FirstOrder Arithmetic PeanoMinus IOpen ISigma0
+open FirstOrder Arithmetic
 
 variable {V : Type*} [ORingStructure V] [V ⊧ₘ* 𝗜𝚺₁]
 
@@ -10,7 +10,7 @@ variable {L : Language} [L.Encodable] [L.LORDefinable]
 
 variable {T U : Theory L} [T.Δ₁] [U.Δ₁]
 
-namespace ISigma1.Metamath
+namespace FirstOrder.Arithmetic.Internal
 
 variable (L)
 
@@ -87,7 +87,7 @@ lemma shift_mem_setShift {p s : V} (h : p ∈ s) : shift L p ∈ setShift L s :=
   mem_setShift_iff.mpr ⟨p, h, rfl⟩
 
 @[simp] lemma IsFormulaSet.setShift_iff {s : V} :
-    IsFormulaSet L (Metamath.setShift L s) ↔ IsFormulaSet L s :=
+    IsFormulaSet L (Internal.setShift L s) ↔ IsFormulaSet L s :=
   ⟨by intro h p hp; simpa using h (shift L p) (shift_mem_setShift hp), IsFormulaSet.setShift⟩
 
 @[simp] lemma mem_setShift_union {s t : V} : setShift L (s ∪ t) = setShift L s ∪ setShift L t := mem_ext <| by
@@ -445,11 +445,11 @@ instance : (construction T).StrongFinite V where
 
 end Derivation
 
-end ISigma1.Metamath
+end FirstOrder.Arithmetic.Internal
 
 namespace FirstOrder.Theory
 
-open PeanoMinus ISigma0 ISigma1 Metamath Derivation
+open PeanoMinus ISigma0 ISigma1 Internal Derivation
 
 variable (T)
 
@@ -531,7 +531,7 @@ namespace Derivation
 lemma case_iff {d : V} :
     T.Derivation d ↔
     IsFormulaSet L (fstIdx d) ∧
-    ( (∃ s p, d = Metamath.axL s p ∧ p ∈ s ∧ neg L p ∈ s) ∨
+    ( (∃ s p, d = Internal.axL s p ∧ p ∈ s ∧ neg L p ∈ s) ∨
       (∃ s, d = verumIntro s ∧ ^⊤ ∈ s) ∨
       (∃ s p q dp dq, d = andIntro s p q dp dq ∧ p ^⋏ q ∈ s ∧ T.DerivationOf dp (insert p s) ∧ T.DerivationOf dq (insert q s)) ∨
       (∃ s p q dpq, d = orIntro s p q dpq ∧ p ^⋎ q ∈ s ∧ T.DerivationOf dpq (insert p (insert q s))) ∨
@@ -731,7 +731,7 @@ lemma cut {s : V} (p) (hd₁ : T.Derivable (insert p s)) (hd₂ : T.Derivable (i
 
 lemma by_axm {s : V} (hs : IsFormulaSet L s) (p) (hp : p ∈ s) (hT : p ∈ T.Δ₁Class) :
     T.Derivable s := by
-  exact ⟨Metamath.axm s p, by simp, Derivation.axm hs hp hT⟩
+  exact ⟨Internal.axm s p, by simp, Derivation.axm hs hp hT⟩
 
 lemma of_ss (h : T.Δ₁Class (V := V) ⊆ U.Δ₁Class) {s : V} : T.Derivable s → U.Derivable s := by
   rintro ⟨d, hd⟩; exact ⟨d, hd.1, hd.2.of_ss h⟩
@@ -797,7 +797,7 @@ lemma disjDistr (ps s : V) (d : T.Derivable (vecToSet ps ∪ s)) : T.Derivable (
         refine ih (le_trans (by simp) hk) s'' (le_of_subset hs'') hs'' ?_
         intro i hi
         have : i ≤ len ps - (k + 1) := by
-          simpa [PeanoMinus.sub_sub] using le_sub_one_of_lt hi
+          simpa [Arithmetic.sub_sub] using le_sub_one_of_lt hi
         rcases lt_or_eq_of_le this with (hi | rfl)
         · simp [s'', hs' i hi]
         · simp [s'']

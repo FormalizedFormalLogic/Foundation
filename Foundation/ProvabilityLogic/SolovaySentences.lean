@@ -133,9 +133,7 @@ end SolovaySentences
 
 end LO.ProvabilityLogic
 
-namespace LO.ISigma1.Metamath
-
-open FirstOrder Arithmetic PeanoMinus IOpen ISigma0
+namespace LO.FirstOrder.Arithmetic.Internal
 
 namespace SolovaySentences
 
@@ -474,7 +472,7 @@ lemma Solovay.box_disjunction [𝗜𝚺₁ ⪯ T] {i : F} (ne : r ≠ i) :
           simpa [models_iff] using Θ.disjunction i
       exact Entailment.WeakerThan.pbl this
   have Tθ : T.internalize V ⊢ ⌜θ T i⌝ :=
-    InternalArithmetic.sigma_one_provable_of_models T (show Hierarchy 𝚺 1 (θ T i) by simp) (by simpa [models_iff] using hS.1)
+    Internal.Arithmetic.sigma_one_provable_of_models T (show Hierarchy 𝚺 1 (θ T i) by simp) (by simpa [models_iff] using hS.1)
   have hP : T.internalize V ⊢ ⌜T.solovay i⌝ ⋎ ⌜⩖ j ∈ {j : F | i ≺ j}, T.solovay j⌝ := (by simpa using TP) ⨀ Tθ
   have : T.internalize V ⊢ ∼⌜T.solovay i⌝ := by simpa using (tprovable_tquote_iff_provable_quote (T := T)).mpr (Solovay.refute ne hS)
   have : T.internalize V ⊢ ⌜⩖ j ∈ {j : F | i ≺ j}, T.solovay j⌝ := Entailment.of_a!_of_n! hP this
@@ -541,4 +539,4 @@ end frame
 
 end SolovaySentences
 
-end LO.ISigma1.Metamath
+end LO.FirstOrder.Arithmetic.Internal

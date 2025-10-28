@@ -8,9 +8,7 @@ import Mathlib.Data.ENat.Basic
 
 noncomputable section
 
-namespace LO
-
-open FirstOrder FirstOrder.Arithmetic
+namespace LO.FirstOrder.Arithmetic
 
 inductive RobinsonQ : ArithmeticTheory
   | equal          : ∀ φ ∈ 𝗘𝗤, RobinsonQ φ
@@ -47,6 +45,8 @@ open ORingStructure
 
 instance : 𝗘𝗤 ⪯ 𝗤 := Entailment.WeakerThan.ofSubset <| fun φ hp ↦ equal φ hp
 
+end RobinsonQ
+
 variable {M : Type*} [ORingStructure M] [M ⊧ₘ* 𝗤]
 
 @[simp] protected lemma succ_ne_zero : ∀ a : M, a + 1 ≠ 0 := by
@@ -71,7 +71,7 @@ protected lemma add_succ (a b : M) : a + (b + 1) = a + b + 1 := by
 protected lemma mul_succ : ∀ a b : M, a * (b + 1) = a * b + a := by
   simpa [models_iff] using ModelsTheory.models M RobinsonQ.mulSucc
 
-lemma zero_or_succ {a : M} : a = 0 ∨ ∃ b : M, a = b + 1 := by
+lemma zero_or_succ (a : M) : a = 0 ∨ ∃ b : M, a = b + 1 := by
   have := by simpa [models_iff] using ModelsTheory.models M RobinsonQ.zeroOrSucc
   exact this a
 
@@ -90,9 +90,9 @@ protected lemma lt_def {a b : M} : a < b ↔ ∃ c : M, a + (c + 1) = b := by
 @[simp]
 lemma one_ne_zero : (1 : M) ≠ 0 := by
   by_contra h;
-  apply RobinsonQ.succ_ne_zero (M := M) (a := 0);
+  apply Arithmetic.succ_ne_zero (M := M) (a := 0);
   rw [h];
-  apply RobinsonQ.add_zero;
+  apply Arithmetic.add_zero;
 
 @[simp]
 lemma one_add_zero : (1 : M) + 0 = 1 := by simp;
@@ -103,11 +103,11 @@ lemma zero_add_one : (0 : M) + 1 = 1 := by
   convert ha;
   by_contra;
   obtain ⟨b, rfl⟩ := exists_succ_of_ne_zero' (M := M) (a := a) (by tauto);
-  apply RobinsonQ.succ_ne_zero (M := M) (a := (0 + b));
+  apply Arithmetic.succ_ne_zero (M := M) (a := (0 + b));
   apply succ_inj;
   calc
-    0 + b + 1 + 1 = 0 + (b + 1) + 1 := by rw [RobinsonQ.add_succ (a := 0) (b := b)];
-    _             = 0 + (b + 1 + 1) := by rw [RobinsonQ.add_succ (a := 0) (b := (b + 1))];
+    0 + b + 1 + 1 = 0 + (b + 1) + 1 := by rw [Arithmetic.add_succ (a := 0) (b := b)];
+    _             = 0 + (b + 1 + 1) := by rw [Arithmetic.add_succ (a := 0) (b := (b + 1))];
     _             = 0 + 1           := by rw [ha];
 
 lemma succ_inj_zero {a : M} : a + 1 = 1 → a = 0 := by
@@ -119,61 +119,62 @@ lemma eq_zero_of_eq_add_zero {a b : M} (h : a + b = 0) : a = 0 ∧ b = 0 := by
   rcases h with ha | hb;
   . obtain ⟨c, rfl⟩ := exists_succ_of_ne_zero (M := M) ha;
     by_cases hb0 : b = 0;
-    . subst hb0; rwa [RobinsonQ.add_zero]
+    . subst hb0; rwa [Arithmetic.add_zero]
     . obtain ⟨d, rfl⟩ := exists_succ_of_ne_zero (M := M) hb0;
-      rw [RobinsonQ.add_succ (a := c + 1) (b := d)];
-      apply RobinsonQ.succ_ne_zero;
+      rw [Arithmetic.add_succ (a := c + 1) (b := d)];
+      apply Arithmetic.succ_ne_zero;
   . obtain ⟨c, rfl⟩ := exists_succ_of_ne_zero' (M := M) hb;
-    rw [RobinsonQ.add_succ];
+    rw [Arithmetic.add_succ];
     simp;
 
 
 @[simp]
 lemma one_mul_one : (1 : M) * 1 = 1 := calc
   (1 : M) * 1 = 1 * (0 + 1) := by simp
-  _           = 1 * 0 + 1   := by rw [RobinsonQ.mul_succ]
+  _           = 1 * 0 + 1   := by rw [Arithmetic.mul_succ]
   _           = 1           := by simp
 
 @[simp]
 lemma zero_mul_one : (0 : M) * 1 = 0 := calc
    (0 : M) * 1 = 0 * (0 + 1) := by simp
-    _          = 0 * 0 + 0   := by rw [RobinsonQ.mul_succ]
+    _          = 0 * 0 + 0   := by rw [Arithmetic.mul_succ]
     _          = 0           := by simp
 
 
 @[simp]
 lemma not_le_zero {a : M} : ¬a < 0 := by
-  apply RobinsonQ.lt_def.not.mpr;
+  apply Arithmetic.lt_def.not.mpr;
   push_neg;
   intro b;
   calc
-    a + (b + 1) = (a + b) + 1 := RobinsonQ.add_succ _ _
+    a + (b + 1) = (a + b) + 1 := Arithmetic.add_succ _ _
     _           ≠ 0           := by simp;
 
 lemma lt_of_not_zero {a b : M} (ha : b ≠ 0) : a < a + b := by
-  apply RobinsonQ.lt_def.mpr;
+  apply Arithmetic.lt_def.mpr;
   obtain ⟨b, rfl⟩ := exists_succ_of_ne_zero (M := M) ha;
   use b;
 
 @[simp]
 lemma iff_le_one_eq_zero {a : M} : a < 1 ↔ a = 0 := by
   constructor;
-  . rw [RobinsonQ.lt_def];
+  . rw [Arithmetic.lt_def];
     rintro ⟨b, hb⟩;
     apply eq_zero_of_eq_add_zero (b := b) ?_ |>.1;
     apply succ_inj_zero;
-    rwa [RobinsonQ.add_succ] at hb;
+    rwa [Arithmetic.add_succ] at hb;
   . rintro rfl;
-    apply RobinsonQ.lt_def.mpr;
+    apply Arithmetic.lt_def.mpr;
     use 0;
     simp;
 
+open ORingStructure
 
 @[simp] lemma numeral_zero_add (n : ℕ) : 0 + (numeral n : M) = numeral n := by
   match n with
   |     0 => simp
   |     1 => simp
-  | n + 2 => simp [ORingStructure.numeral, RobinsonQ.add_succ, numeral_zero_add (n + 1)]
+  | n + 2 => simp [ORingStructure.numeral, Arithmetic.add_succ, numeral_zero_add (n + 1)]
 
 lemma numeral_add_one (n : ℕ) : (numeral n : M) + 1 = numeral (n + 1) := by
   match n with
@@ -185,7 +186,7 @@ lemma numeral_add (n m : ℕ) : (numeral n : M) + numeral m = numeral (n + m) :=
   |     0 => simp
   |     1 => simp [numeral_add_one]
   | m + 2 => calc
-    (numeral n : M) + (numeral (m + 1) + 1) = (numeral n + numeral (m + 1)) + 1 := RobinsonQ.add_succ _ _
+    (numeral n : M) + (numeral (m + 1) + 1) = (numeral n + numeral (m + 1)) + 1 := Arithmetic.add_succ _ _
     _                                       = numeral (n + (m + 1)) + 1         := by rw [numeral_add n (m + 1)]
     _                                       = numeral (n + (m + 2))             := by simp [←add_assoc]; rfl
 
@@ -196,12 +197,12 @@ lemma numeral_zero_mul {n : ℕ} : 0 * (numeral n : M) = 0 := by
   |     1 => simp
   | n + 2 => calc
     (0 : M) * numeral (n + 2) = 0 * (numeral (n + 1) + 1) := rfl
-    _                         = 0 * numeral (n + 1) + 0   := by rw [RobinsonQ.mul_succ]
+    _                         = 0 * numeral (n + 1) + 0   := by rw [Arithmetic.mul_succ]
     _                         = 0                         := by simp [numeral_zero_mul]
 
 lemma numeral_mul_one {n : ℕ} : (numeral n : M) * 1 = numeral n := calc
   (numeral n : M) * 1 = numeral n * (0 + 1)       := by simp
-  _                   = numeral n * 0 + numeral n := by rw [RobinsonQ.mul_succ]
+  _                   = numeral n * 0 + numeral n := by rw [Arithmetic.mul_succ]
   _                   = numeral n                 := by simp
 
 lemma numeral_mul {n m : ℕ} : (numeral n : M) * numeral m = numeral (n * m) := by
@@ -209,7 +210,7 @@ lemma numeral_mul {n m : ℕ} : (numeral n : M) * numeral m = numeral (n * m) :=
   |     0 => simp
   |     1 => simp [numeral_mul_one]
   | m + 2 => calc
-    (numeral n : M) * (numeral (m + 1) + 1) = numeral n * numeral (m + 1) + numeral n := by rw [RobinsonQ.mul_succ]
+    (numeral n : M) * (numeral (m + 1) + 1) = numeral n * numeral (m + 1) + numeral n := by rw [Arithmetic.mul_succ]
     _                                       = numeral (n * (m + 1)) + numeral n       := by rw [numeral_mul]
     _                                       = numeral (n * (m + 2))                   := by simp [numeral_add, mul_add, mul_two, ←add_assoc]
 
@@ -249,8 +250,8 @@ lemma numeral_ne_of_ne {n m : ℕ} (h : n ≠ m) : (numeral n : M) ≠ numeral m
     apply numeral_succ_inj this;
 
 lemma numeral_lt_of_lt {n m : ℕ} (h : n < m) : (numeral n : M) < numeral m := by
-  apply RobinsonQ.lt_def.mpr;
-  obtain ⟨k, rfl, hk⟩ := RobinsonQ.lt_def.mp h;
+  apply Arithmetic.lt_def.mpr;
+  obtain ⟨k, rfl, hk⟩ := Arithmetic.lt_def.mp h;
   use (numeral k : M);
   calc
     (numeral n + (numeral k + 1) : M) = numeral n + (numeral k + numeral 1) := by simp;
@@ -272,7 +273,7 @@ lemma iff_lt_numeral_exists_numeral {n : ℕ} {x : M} : x < numeral n ↔ ∃ m 
   | n + 2 =>
     constructor;
     . intro h;
-      obtain ⟨a, ha⟩ := RobinsonQ.lt_def.mp h;
+      obtain ⟨a, ha⟩ := Arithmetic.lt_def.mp h;
       by_cases ha0 : a = 0;
       . subst ha0;
         use n + 1;
@@ -281,7 +282,7 @@ lemma iff_lt_numeral_exists_numeral {n : ℕ} {x : M} : x < numeral n ↔ ∃ m 
         . apply succ_inj;
           simpa using ha;
       . obtain ⟨m, hm, rfl⟩ := iff_lt_numeral_exists_numeral (x := x) (n := n + 1) |>.mp $ by
-          have ha : x + a = numeral (n + 1) := succ_inj $ by rwa [RobinsonQ.add_succ] at ha;
+          have ha : x + a = numeral (n + 1) := succ_inj $ by rwa [Arithmetic.add_succ] at ha;
           rw [←ha];
           apply lt_of_not_zero ha0;
         use m;
@@ -291,6 +292,8 @@ lemma iff_lt_numeral_exists_numeral {n : ℕ} {x : M} : x < numeral n ↔ ∃ m 
     . rintro ⟨m, hm, rfl⟩;
       apply numeral_lt_of_lt;
       exact hm;
+
+namespace R0
 
 instance : M ⊧ₘ* 𝗥₀ := modelsTheory_iff.mpr <| by
   intro φ h
@@ -305,12 +308,12 @@ instance : M ⊧ₘ* 𝗥₀ := modelsTheory_iff.mpr <| by
     suffices ∀ (x : M), x < numeral n ↔ ∃ i < n, x = numeral i by simpa [models_iff];
     apply iff_lt_numeral_exists_numeral;
 
+end R0
+
 instance : 𝗥₀ ⪯ 𝗤 := weakerThan_of_models.{0} _ _ fun _ _ _ ↦ inferInstance
 
 instance : 𝗥₀ ⪱ 𝗤 :=
   Entailment.StrictlyWeakerThan.of_unprovable_provable
     R0.unprovable_addZero (Entailment.by_axm _ RobinsonQ.addZero)
 
-end RobinsonQ
-
-end LO
+end LO.FirstOrder.Arithmetic

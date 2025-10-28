@@ -3,11 +3,11 @@ import Foundation.Logic.HilbertStyle.Supplemental
 
 open Classical
 
-namespace LO.ISigma1.Metamath.InternalArithmetic
-
-open FirstOrder Arithmetic PeanoMinus IOpen ISigma0
+namespace LO.FirstOrder.Arithmetic
 
 variable {V : Type*} [ORingStructure V] [V ⊧ₘ* 𝗜𝚺₁]
+
+namespace Internal.Arithmetic
 
 noncomputable def substNumeral (φ x : V) : V := subst ℒₒᵣ ?[numeral x] φ
 
@@ -103,11 +103,9 @@ instance ssnumParams.defined :
 
 end
 
-end LO.ISigma1.Metamath.InternalArithmetic
+end Internal.Arithmetic
 
-namespace LO.ISigma1
-
-open FirstOrder Arithmetic PeanoMinus IOpen ISigma0 Metamath InternalArithmetic
+open Internal Internal.Arithmetic
 
 variable {T : Theory ℒₒᵣ} [𝗜𝚺₁ ⪯ T]
 
@@ -221,4 +219,4 @@ theorem parameterized_diagonal₁ (θ : Semisentence ℒₒᵣ 2) :
 
 end ParameterizedDiagonalization
 
-end LO.ISigma1
+end LO.FirstOrder.Arithmetic

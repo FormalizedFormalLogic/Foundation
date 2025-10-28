@@ -62,20 +62,20 @@ lemma models_iff_of_Sigma0 {σ : Semisentence ℒₒᵣ n} (hσ : Hierarchy 𝚺
     V ⊧/(e ·) σ ↔ ℕ ⊧/e σ := by
   by_cases h : ℕ ⊧/e σ <;> simp [h]
   · have : V ⊧/(e ·) σ := by
-      simpa [numeral_eq_natCast] using R0.bold_sigma_one_completeness' (M := V) (by simp [Hierarchy.of_zero hσ]) h
+      simpa [numeral_eq_natCast] using bold_sigma_one_completeness' (M := V) (by simp [Hierarchy.of_zero hσ]) h
     simpa [HierarchySymbol.Semiformula.val_sigma] using this
   · have : ℕ ⊧/e (∼σ) := by simpa using h
-    have : V ⊧/(e ·) (∼σ) := by simpa [numeral_eq_natCast] using R0.bold_sigma_one_completeness' (M := V) (by simp [Hierarchy.of_zero hσ]) this
+    have : V ⊧/(e ·) (∼σ) := by simpa [numeral_eq_natCast] using bold_sigma_one_completeness' (M := V) (by simp [Hierarchy.of_zero hσ]) this
     simpa using this
 
 lemma models_iff_of_Delta1 {σ : 𝚫₁.Semisentence n} (hσ : σ.ProperOn ℕ) (hσV : σ.ProperOn V) {e : Fin n → ℕ} :
     V ⊧/(e ·) σ.val ↔ ℕ ⊧/e σ.val := by
   by_cases h : ℕ ⊧/e σ.val <;> simp [h]
   · have : ℕ ⊧/e σ.sigma.val := by simpa [HierarchySymbol.Semiformula.val_sigma] using h
-    have : V ⊧/(e ·) σ.sigma.val := by simpa [numeral_eq_natCast] using R0.bold_sigma_one_completeness' (M := V) (by simp) this
+    have : V ⊧/(e ·) σ.sigma.val := by simpa [numeral_eq_natCast] using bold_sigma_one_completeness' (M := V) (by simp) this
     simpa [HierarchySymbol.Semiformula.val_sigma] using this
   · have : ℕ ⊧/e (∼σ.pi.val) := by simpa [hσ.iff'] using h
-    have : V ⊧/(e ·) (∼σ.pi.val) := by simpa [numeral_eq_natCast] using R0.bold_sigma_one_completeness' (M := V) (by simp) this
+    have : V ⊧/(e ·) (∼σ.pi.val) := by simpa [numeral_eq_natCast] using bold_sigma_one_completeness' (M := V) (by simp) this
     simpa [hσV.iff'] using this
 
 variable {T : ArithmeticTheory} [𝗣𝗔⁻ ⪯ T] [T.SoundOnHierarchy 𝚺 1]

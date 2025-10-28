@@ -7,22 +7,19 @@
 
 import Foundation.FirstOrder.Arithmetic.Internal.DerivabilityCondition
 
-namespace LO.PeanoMinus
+namespace LO.FirstOrder.Arithmetic
 
 open ORingStructure
 
 variable {M : Type*} [ORingStructure M] [M ⊧ₘ* 𝗣𝗔⁻]
 
 lemma numeral_lt_of_numeral_succ_lt {n : ℕ} {m : M} : (numeral (n + 1) : M) < m → (numeral n < m) := by
-  apply PeanoMinus.lt_trans;
+  apply Arithmetic.lt_trans;
   simp;
 
-end LO.PeanoMinus
+end LO.FirstOrder.Arithmetic
 
-
-namespace LO.ISigma1.Metamath.InternalArithmetic
-
-open FirstOrder Arithmetic PeanoMinus IOpen ISigma0
+namespace LO.FirstOrder.Arithmetic.Internal.Arithmetic
 
 variable {V : Type*} [ORingStructure V] [V ⊧ₘ* 𝗜𝚺₁]
 
@@ -40,16 +37,15 @@ lemma substNumeral_app_quote_nat_Nat (σ : Semisentence ℒₒᵣ 1) (n : ℕ) :
     Rewriting.emb_subst_eq_subst_coe₁
   ];
 
-end LO.ISigma1.Metamath.InternalArithmetic
+end LO.FirstOrder.Arithmetic.Internal.Arithmetic
 
 namespace LO.FirstOrder
 
-open FirstOrder Arithmetic PeanoMinus IOpen ISigma0 ISigma1 Metamath InternalArithmetic
+open FirstOrder Arithmetic Internal Internal.Arithmetic
 
 namespace Theory
 
-variable {V} [ORingStructure V] [V ⊧ₘ* 𝗜𝚺₁]
-         {T U : ArithmeticTheory} [T.Δ₁]
+variable {V} [ORingStructure V] [V ⊧ₘ* 𝗜𝚺₁] {T U : ArithmeticTheory} [T.Δ₁]
 
 def YabloSystem (T : ArithmeticTheory) [T.Δ₁] (φ n : V) : Prop := ∀ m, n < m → ¬T.Provable (substNumeral φ m)
 
@@ -65,7 +61,6 @@ noncomputable def yablo (T : ArithmeticTheory) [T.Δ₁] : ArithmeticSemisentenc
 noncomputable abbrev yabloPred (T : ArithmeticTheory) [T.Δ₁] (n : ℕ) : ArithmeticSentence := T.yablo/[.numeral n]
 
 end Theory
-
 
 
 namespace Arithmetic
@@ -118,7 +113,7 @@ lemma provable_greater_yablo {n m : ℕ} (hnm : n < m) : U ⊢ T.yabloPred n ➝
     by simpa [models_iff, Matrix.constant_eq_singleton, Matrix.comp_vecCons', yablo_diagonal_modeled] using this;
   intro h k hmk;
   apply h;
-  apply PeanoMinus.lt_trans _ _ _ (by simpa) hmk;
+  apply Arithmetic.lt_trans _ _ _ (by simpa) hmk;
 
 end
 
@@ -159,6 +154,5 @@ theorem yablo_independent [T.SoundOnHierarchy 𝚺 1] : Entailment.Independent T
 end
 
 end Arithmetic
-
 
 end LO.FirstOrder

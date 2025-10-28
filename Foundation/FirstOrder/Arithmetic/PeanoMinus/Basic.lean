@@ -1,5 +1,6 @@
 import Foundation.FirstOrder.Arithmetic.Basic
 import Foundation.FirstOrder.Arithmetic.R0.Basic
+import Foundation.FirstOrder.Arithmetic.Q.Basic
 import Mathlib.Algebra.Order.Monoid.Canonical.Defs
 import Mathlib.Data.Nat.Cast.Order.Basic
 import Mathlib.Algebra.Order.Sub.Basic
@@ -9,9 +10,7 @@ import Mathlib.Algebra.Order.Sub.Basic
 
 -/
 
-namespace LO
-
-open FirstOrder
+namespace LO.FirstOrder.Arithmetic
 
 namespace PeanoMinus.Axiom
 
@@ -159,6 +158,8 @@ set_option linter.flexible false in
 
 instance : 𝗘𝗤 ⪯ 𝗣𝗔⁻ := Entailment.WeakerThan.ofSubset <| fun φ hp ↦ PeanoMinus.equal φ hp
 
+end PeanoMinus
+
 variable {M : Type*} [ORingStructure M]
 
 scoped instance : LE M := ⟨fun x y => x = y ∨ x < y⟩
@@ -167,7 +168,7 @@ lemma le_def {x y : M} : x ≤ y ↔ x = y ∨ x < y := iff_of_eq rfl
 
 variable [M ⊧ₘ* 𝗣𝗔⁻]
 
-protected lemma add_zero : ∀ x : M, x + 0 = x := by
+protected lemma add_zero' : ∀ x : M, x + 0 = x := by
   simpa [models_iff] using ModelsTheory.models M PeanoMinus.addZero
 
 protected lemma add_assoc : ∀ x y z : M,  (x + y) + z = x + (y + z) := by
@@ -191,7 +192,7 @@ lemma one_le_of_zero_lt : ∀ x : M, 0 < x → 1 ≤ x := by
 lemma add_lt_add : ∀ x y z : M, x < y → x + z < y + z := by
   simpa [models_iff] using ModelsTheory.models M PeanoMinus.addLtAdd
 
-protected lemma mul_zero : ∀ x : M, x * 0 = 0 := by
+protected lemma mul_zero' : ∀ x : M, x * 0 = 0 := by
   simpa [models_iff] using ModelsTheory.models M PeanoMinus.mulZero
 
 protected lemma mul_one : ∀ x : M, x * 1 = x := by
@@ -219,17 +220,17 @@ lemma lt_tri : ∀ x y : M, x < y ∨ x = y ∨ y < x := by
   simpa [models_iff] using ModelsTheory.models M PeanoMinus.ltTri
 
 scoped instance : AddCommMonoid M where
-  add_assoc := PeanoMinus.add_assoc
-  zero_add  := fun x ↦ PeanoMinus.add_comm x 0 ▸ PeanoMinus.add_zero x
-  add_zero  := PeanoMinus.add_zero
-  add_comm  := PeanoMinus.add_comm
+  add_assoc := Arithmetic.add_assoc
+  zero_add  := fun x ↦ Arithmetic.add_comm x 0 ▸ Arithmetic.add_zero' x
+  add_zero  := Arithmetic.add_zero'
+  add_comm  := Arithmetic.add_comm
   nsmul := nsmulRec
 
 scoped instance : CommMonoid M where
-  mul_assoc := PeanoMinus.mul_assoc
-  one_mul   := fun x ↦ PeanoMinus.mul_comm x 1 ▸ PeanoMinus.mul_one x
-  mul_one   := PeanoMinus.mul_one
-  mul_comm  := PeanoMinus.mul_comm
+  mul_assoc := Arithmetic.mul_assoc
+  one_mul   := fun x ↦ Arithmetic.mul_comm x 1 ▸ Arithmetic.mul_one x
+  mul_one   := Arithmetic.mul_one
+  mul_comm  := Arithmetic.mul_comm
 
 noncomputable scoped instance : LinearOrder M where
   le_refl := fun x ↦ Or.inl (by simp)
@@ -238,30 +239,30 @@ noncomputable scoped instance : LinearOrder M where
     · simp [le_def]
     · simp [le_def, *]
     · simp [le_def, *]
-    · exact Or.inr (PeanoMinus.lt_trans _ _ _ hx hy)
+    · exact Or.inr (Arithmetic.lt_trans _ _ _ hx hy)
   le_antisymm := by
     rintro x y (rfl | hx) <;> try simp
     rintro (rfl | hy) <;> try simp
-    exact False.elim <| PeanoMinus.lt_irrefl _ <| PeanoMinus.lt_trans _ _ _ hx hy
+    exact False.elim <| Arithmetic.lt_irrefl _ <| Arithmetic.lt_trans _ _ _ hx hy
   le_total := by
     intro x y
-    rcases PeanoMinus.lt_tri x y with (h | rfl | h) <;> simp [*, le_def]
+    rcases Arithmetic.lt_tri x y with (h | rfl | h) <;> simp [*, le_def]
   lt_iff_le_not_ge := fun x y ↦
     ⟨ fun h => ⟨Or.inr h, by
       simp only [le_def]; rintro (rfl | h');
       · exact lt_irrefl y h
-      · exact lt_irrefl _ (PeanoMinus.lt_trans _ _ _ h h') ⟩,
+      · exact lt_irrefl _ (Arithmetic.lt_trans _ _ _ h h') ⟩,
      by simp only [le_def, not_or, and_imp]
         rintro (rfl | h) <;> simp [*] ⟩
   toDecidableLE := fun _ _ => Classical.dec _
 
-protected lemma zero_mul : ∀ x : M, 0 * x = 0 := fun x => by simpa [mul_comm] using PeanoMinus.mul_zero x
+protected lemma zero_mul : ∀ x : M, 0 * x = 0 := fun x => by simpa [mul_comm] using Arithmetic.mul_zero' x
 
 scoped instance : CommSemiring M where
-  left_distrib := PeanoMinus.mul_add_distr
+  left_distrib := Arithmetic.mul_add_distr
   right_distrib := fun x y z ↦ by simp [mul_comm _ z, mul_add_distr]
-  zero_mul := PeanoMinus.zero_mul
-  mul_zero := PeanoMinus.mul_zero
+  zero_mul := Arithmetic.zero_mul
+  mul_zero := Arithmetic.mul_zero'
 
 scoped instance : IsStrictOrderedRing M where
   add_le_add_left := by
@@ -324,7 +325,7 @@ lemma eq_nat_of_le_nat {n : ℕ} {x : M} : x ≤ n → ∃ m : ℕ, x = m := fun
   have : x < ↑(n + 1) := by simpa [←le_iff_lt_succ] using h
   exact eq_nat_of_lt_nat this
 
-instance : M ⊧ₘ* 𝗥₀ := modelsTheory_iff.mpr <| by
+instance models_R0_of_models_PeanoMinus : M ⊧ₘ* 𝗥₀ := modelsTheory_iff.mpr <| by
   intro φ h
   rcases h
   case equal h =>
@@ -343,9 +344,48 @@ instance : M ⊧ₘ* 𝗥₀ := modelsTheory_iff.mpr <| by
     · intro hx; rcases eq_nat_of_lt_nat hx with ⟨x, rfl⟩; exact ⟨x, by simpa using hx, by simp⟩
     · rintro ⟨i, hi, rfl⟩; simp [hi]
 
-variable {a b c : M}
+instance : 𝗥₀ ⪯ 𝗣𝗔⁻ := weakerThan_of_models.{0} _ _ fun _ _ _ ↦ inferInstance
 
-instance : Nonempty M := ⟨0⟩
+instance models_RobinsonQ_of_models_PeanoMinus : M ⊧ₘ* 𝗤 := modelsTheory_iff.mpr <| by
+  intro φ h
+  rcases h
+  case equal h =>
+    have : M ⊧ₘ* (𝗘𝗤 : ArithmeticTheory) := inferInstance
+    exact modelsTheory_iff.mp this h
+  case addSucc h =>
+    suffices ∀ a b : M, a + (b + 1) = a + b + 1 by simpa [models_iff];
+    simp [add_assoc]
+  case mulSucc h =>
+    suffices ∀ a b : M, a * (b + 1) = a * b + a by simpa [models_iff];
+    intro a b;
+    calc
+      a * (b + 1) = (a * b) + (a * 1) := by rw [mul_add_distr]
+      _           = (a * b) + a       := by rw [mul_one]
+  case zeroOrSucc h =>
+    suffices ∀ a b : M, a = 0 ∨ ∃ x, a = x + 1 by simpa [models_iff];
+    intro a b;
+    by_cases h : 0 < a;
+    . right; apply eq_succ_of_pos h;
+    . left; simpa using h;
+  case ltDef h =>
+    suffices ∀ a b : M, a < b ↔ ∃ x, a + (x + 1) = b by simpa [models_iff];
+    intro a b;
+    apply Iff.trans lt_iff_exists_add;
+    constructor;
+    . rintro ⟨a, ha₁, ha₂⟩;
+      obtain ⟨b, rfl⟩ : ∃ b, a = b + 1 := eq_succ_of_pos ha₁;
+      use b;
+      tauto;
+    . rintro ⟨a, ha⟩;
+      use (a + 1);
+      constructor;
+      . simp;
+      . apply ha.symm;
+  all_goals simp [models_iff];
+
+instance : 𝗤 ⪯ 𝗣𝗔⁻ := weakerThan_of_models.{0} _ _ fun _ _ _ ↦ inferInstance
+
+variable {a b c : M}
 
 @[simp] lemma numeral_two_eq_two : (ORingStructure.numeral 2 : M) = 2 := by simp [numeral_eq_natCast]
 
@@ -549,14 +589,10 @@ variable {M}
 
 variable {T : ArithmeticTheory} [𝗣𝗔⁻ ⪯ T]
 
-instance : 𝗥₀ ⪯ 𝗣𝗔⁻ := weakerThan_of_models.{0} _ _ fun _ _ _ ↦ inferInstance
-
 instance : 𝗥₀ ⪱ 𝗣𝗔⁻ :=
   Entailment.StrictlyWeakerThan.of_unprovable_provable
     R0.unprovable_addZero (Entailment.by_axm _ PeanoMinus.addZero)
 
 instance (M : Type*) [ORingStructure M] [M ⊧ₘ* 𝗣𝗔⁻] : M ⊧ₘ* 𝗥₀ := models_of_subtheory (T := 𝗣𝗔⁻) inferInstance
 
-end PeanoMinus
-
-end LO
+end LO.FirstOrder.Arithmetic

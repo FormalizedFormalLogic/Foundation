@@ -1,9 +1,7 @@
 import Foundation.FirstOrder.Arithmetic.Internal.Syntax.Term.Basic
 import Foundation.FirstOrder.Arithmetic.Induction
 
-namespace LO.ISigma1.Metamath
-
-open FirstOrder Arithmetic PeanoMinus IOpen ISigma0
+namespace LO.FirstOrder.Arithmetic.Internal
 
 variable {V : Type*} [ORingStructure V] [V ⊧ₘ* 𝗜𝚺₁]
 
@@ -1111,8 +1109,8 @@ noncomputable def blueprint : UformulaRec1.Blueprint where
   nrel := .mkSigma “y param k R v. ∃ M, !(termBVVecGraph L) M k v ∧ !listMaxDef y M”
   verum := .mkSigma “y param. y = 0”
   falsum := .mkSigma “y param. y = 0”
-  and := .mkSigma “y param p₁ p₂ y₁ y₂. !Arithmetic.max y y₁ y₂”
-  or := .mkSigma “y param p₁ p₂ y₁ y₂. !Arithmetic.max y y₁ y₂”
+  and := .mkSigma “y param p₁ p₂ y₁ y₂. !max.dfn y y₁ y₂”
+  or := .mkSigma “y param p₁ p₂ y₁ y₂. !max.dfn y y₁ y₂”
   all := .mkSigma “y param p₁ y₁. !subDef y y₁ 1”
   ex := .mkSigma “y param p₁ y₁. !subDef y y₁ 1”
   allChanges := .mkSigma “param' param. param' = 0”
@@ -1229,7 +1227,7 @@ end
   constructor
   · intro h
     have hrv : L.IsRel k r ∧ IsUTermVec L k v := by simpa using h.isUFormula
-    exact ⟨hrv.1, hrv.2, fun i hi ↦ by
+    exact ⟨hrv.1, hrv.2, fun {i} hi ↦ by
       have : listMax (termBVVec L k v) ≤ n := by simpa [hrv] using h.bv_le
       exact le_trans (le_trans (by simp_all) (nth_le_listMax (i := i) (by simp_all))) this⟩
   · rintro ⟨hr, hv⟩
@@ -1245,7 +1243,7 @@ end
   constructor
   · intro h
     have hrv : L.IsRel k r ∧ IsUTermVec L k v := by simpa using h.isUFormula
-    exact ⟨hrv.1, hrv.2, fun i hi ↦ by
+    exact ⟨hrv.1, hrv.2, fun {i} hi ↦ by
       have : listMax (termBVVec L k v) ≤ n := by simpa [hrv] using h.bv_le
       exact le_trans (le_trans (by simp_all) (nth_le_listMax (i := i) (by simp_all))) this⟩
   · rintro ⟨hr, hv⟩
@@ -1491,4 +1489,4 @@ lemma semiformula_result_induction {P : V → V → V → V → Prop} (hP : 𝚺
 
 end UformulaRec1.Construction
 
-end LO.ISigma1.Metamath
+end LO.FirstOrder.Arithmetic.Internal

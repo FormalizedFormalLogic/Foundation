@@ -6,9 +6,7 @@ import Foundation.FirstOrder.Arithmetic.HFS.Fixpoint
 
 -/
 
-namespace LO.ISigma1
-
-open FirstOrder Arithmetic PeanoMinus IOpen ISigma0
+namespace LO.FirstOrder.Arithmetic
 
 variable {V : Type*} [ORingStructure V] [V ⊧ₘ* 𝗜𝚺₁]
 
@@ -654,7 +652,7 @@ namespace ListMax
 
 def blueprint : VecRec.Blueprint 0 where
   nil := .mkSigma “y. y = 0”
-  adjoin := .mkSigma “y x xs ih. !FirstOrder.Arithmetic.max y x ih”
+  adjoin := .mkSigma “y x xs ih. !max.dfn y x ih”
 
 noncomputable def adjointruction : VecRec.Construction V blueprint where
   nil _ := 0
@@ -806,7 +804,7 @@ lemma takeLast_succ_of_lt {i v : V} (h : i < len v) : takeLast v (i + 1) = v.[le
     rcases show i = len v ∨ i < len v from eq_or_lt_of_le (by simpa [lt_succ_iff_le] using h) with (rfl | hi)
     · simp [takeLast_adjoin]
     · have : len v - i = len v - (i + 1) + 1 := by
-        rw [←PeanoMinus.sub_sub, sub_add_self_of_le (pos_iff_one_le.mp (tsub_pos_of_lt hi))]
+        rw [←Arithmetic.sub_sub, sub_add_self_of_le (pos_iff_one_le.mp (tsub_pos_of_lt hi))]
       simpa [takeLast_adjoin, lt_succ_iff_le, not_le_of_gt hi, this, not_lt_of_gt hi] using ih hi
 
 end takeLast
@@ -1091,4 +1089,4 @@ lemma mem_vecToSet_iff {v x : V} : x ∈ vecToSet v ↔ ∃ i < len v, x = v.[i]
 
 end vecToSet
 
-end LO.ISigma1
+end LO.FirstOrder.Arithmetic

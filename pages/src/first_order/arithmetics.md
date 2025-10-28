@@ -109,9 +109,9 @@ Since `Exponential` and `Exponential.total` are defined in all the model of $\ma
 [`lh x`]: https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/ISigma1/HFS/Seq.html#LO.ISigma1.lh
 [`x ⁀' y`]: https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/ISigma1/HFS/Seq.html#LO.ISigma1.seqCons
 [`znth x`]: https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/ISigma1/HFS/Seq.html#LO.ISigma1.znth
-[`Semiterm L x y`]: https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/ISigma1/Metamath/Term/Basic.html#LO.ISigma1.Metamath.IsSemiterm
-[`L.termSubst w t`]: https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/ISigma1/Metamath/Term/Functions.html#LO.ISigma1.Metamath.Language.termSubst
-[`Semiformula L x y`]: https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/ISigma1/Metamath/Formula/Basic.html#LO.ISigma1.Metamath.IsSemiformula
-[`subst L w φ`]: https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/ISigma1/Metamath/Formula/Functions.html#LO.ISigma1.Metamath.subst
+[`Semiterm L x y`]: https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/ISigma1/Internal/Term/Basic.html#LO.FirstOrder.Arithmetic.Internal.IsSemiterm
+[`L.termSubst w t`]: https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/ISigma1/Internal/Term/Functions.html#LO.FirstOrder.Arithmetic.Internal.Language.termSubst
+[`Semiformula L x y`]: https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/ISigma1/Internal/Formula/Basic.html#LO.FirstOrder.Arithmetic.Internal.IsSemiformula
+[`subst L w φ`]: https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/ISigma1/Internal/Formula/Functions.html#LO.FirstOrder.Arithmetic.Internal.subst
 [`T.Provable φ`]: https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/Incompleteness/StandardProvability/FormalizedR0.html#LO.FirstOrder.Theory.Provable%E2%82%90
 

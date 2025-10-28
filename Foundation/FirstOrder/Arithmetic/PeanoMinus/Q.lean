@@ -10,9 +10,7 @@ lemma Nat.iff_lt_exists_add_succ : n < m ↔ ∃ k, m = n + (k + 1) := by
     apply Nat.lt_add_of_pos_right;
     omega;
 
-namespace LO.RobinsonQ
-
-open FirstOrder FirstOrder.Arithmetic
+namespace LO.FirstOrder.Arithmetic
 
 namespace Countermodel
 
@@ -151,64 +149,13 @@ instance : OmegaAddOne ⊧ₘ* 𝗤 := ⟨by
 
 end Countermodel
 
-lemma unprovable_neSucc : 𝗤 ⊬ “∀ x, x + 1 ≠ x” :=
+lemma RobinsonQ.unprovable_neSucc : 𝗤 ⊬ “∀ x, x + 1 ≠ x” :=
   unprovable_of_countermodel (M := Countermodel.OmegaAddOne) <| by
     simpa [models_iff] using Countermodel.OmegaAddOne.exists_add_one_eq_self
 
-end LO.RobinsonQ
-
-namespace LO
-
-open FirstOrder FirstOrder.Arithmetic
-
-namespace PeanoMinus
-
-variable {M : Type*} [ORingStructure M] [M ⊧ₘ* 𝗣𝗔⁻]
-
-instance : M ⊧ₘ* 𝗤 := modelsTheory_iff.mpr <| by
-  intro φ h
-  rcases h
-  case equal h =>
-    have : M ⊧ₘ* (𝗘𝗤 : ArithmeticTheory) := inferInstance
-    exact modelsTheory_iff.mp this h
-  case addSucc h =>
-    suffices ∀ a b : M, a + (b + 1) = a + b + 1 by simpa [models_iff];
-    simp [add_assoc]
-  case mulSucc h =>
-    suffices ∀ a b : M, a * (b + 1) = a * b + a by simpa [models_iff];
-    intro a b;
-    calc
-      a * (b + 1) = (a * b) + (a * 1) := by rw [mul_add_distr]
-      _           = (a * b) + a       := by rw [mul_one]
-  case zeroOrSucc h =>
-    suffices ∀ a b : M, a = 0 ∨ ∃ x, a = x + 1 by simpa [models_iff];
-    intro a b;
-    by_cases h : 0 < a;
-    . right; apply eq_succ_of_pos h;
-    . left; simpa using h;
-  case ltDef h =>
-    suffices ∀ a b : M, a < b ↔ ∃ x, a + (x + 1) = b by simpa [models_iff];
-    intro a b;
-    apply Iff.trans lt_iff_exists_add;
-    constructor;
-    . rintro ⟨a, ha₁, ha₂⟩;
-      obtain ⟨b, rfl⟩ : ∃ b, a = b + 1 := eq_succ_of_pos ha₁;
-      use b;
-      tauto;
-    . rintro ⟨a, ha⟩;
-      use (a + 1);
-      constructor;
-      . simp;
-      . apply ha.symm;
-  all_goals simp [models_iff];
-
-instance : 𝗤 ⪯ 𝗣𝗔⁻ := weakerThan_of_models.{0} _ _ fun _ _ _ ↦ inferInstance
-
-instance w : 𝗤 ⪱ 𝗣𝗔⁻ := Entailment.StrictlyWeakerThan.of_unprovable_provable RobinsonQ.unprovable_neSucc $ by
+instance : 𝗤 ⪱ 𝗣𝗔⁻ := Entailment.StrictlyWeakerThan.of_unprovable_provable RobinsonQ.unprovable_neSucc $ by
   apply provable_of_models.{0};
   intro _ _ _;
   simp [models_iff];
 
-end PeanoMinus
-
-end LO
+end LO.FirstOrder.Arithmetic

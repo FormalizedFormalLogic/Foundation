@@ -10,7 +10,7 @@ import Foundation.FirstOrder.Arithmetic.Internal.FixedPoint
 
 namespace LO.FirstOrder.Arithmetic
 
-open ISigma1 Metamath ProvabilityLogic
+open ISigma1 Internal ProvabilityLogic
 
 noncomputable instance : Diagonalization 𝗜𝚺₁ where
   fixedpoint := fixedpoint
@@ -56,7 +56,7 @@ local prefix:90 "□" => T.provabilityPred
 lemma provable_sigma_one_complete [𝗣𝗔⁻ ⪯ T] {σ : Sentence ℒₒᵣ} (hσ : Hierarchy 𝚺 1 σ) :
     𝗜𝚺₁ ⊢ σ ➝ □σ :=
   provable_of_models _ _ fun (V : Type) _ _ ↦ by
-    simpa [models_iff] using InternalArithmetic.sigma_one_complete (T := T) (V := V) hσ
+    simpa [models_iff] using Internal.Arithmetic.sigma_one_complete (T := T) (V := V) hσ
 
 /-- The derivability condition D3. -/
 theorem provable_D3 [𝗣𝗔⁻ ⪯ T] {σ : Sentence ℒₒᵣ} :

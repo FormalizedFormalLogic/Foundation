@@ -6,9 +6,7 @@ import Foundation.FirstOrder.Arithmetic.HFS.PRF
 
 -/
 
-namespace LO.ISigma1
-
-open FirstOrder Arithmetic PeanoMinus IOpen ISigma0
+namespace LO.FirstOrder.Arithmetic
 
 variable {V : Type*} [ORingStructure V] [V ⊧ₘ* 𝗜𝚺₁]
 
@@ -267,4 +265,4 @@ attribute [irreducible] Blueprint.fixpointDef
 
 end Fixpoint
 
-end LO.ISigma1
+end LO.FirstOrder.Arithmetic

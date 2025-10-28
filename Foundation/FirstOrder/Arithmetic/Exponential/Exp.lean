@@ -10,13 +10,11 @@ it's inductive property is provable in $\mathsf{I}\Sigma_0$.
 
 -/
 
-namespace LO
-
-open FirstOrder Arithmetic PeanoMinus IOpen
+namespace LO.FirstOrder.Arithmetic
 
 variable {V : Type*} [ORingStructure V]
 
-namespace ISigma0
+section ISigma0
 
 variable [V ⊧ₘ* 𝗜𝚺₀]
 
@@ -709,9 +707,7 @@ end Exponential
 
 end ISigma0
 
-namespace ISigma1
-
-open ISigma0
+section ISigma1
 
 variable [V ⊧ₘ* 𝗜𝚺₁]
 
@@ -785,4 +781,4 @@ end exponential
 
 end ISigma1
 
-end LO
+end LO.FirstOrder.Arithmetic

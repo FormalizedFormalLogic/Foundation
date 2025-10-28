@@ -6,13 +6,11 @@ import Mathlib.Logic.Nonempty
 
 -/
 
-namespace LO
-
-open FirstOrder Arithmetic PeanoMinus
+namespace LO.FirstOrder.Arithmetic
 
 variable {V : Type*} [ORingStructure V]
 
-namespace IOpen
+section IOpen
 
 variable [V ⊧ₘ* 𝗜𝗢𝗽𝗲𝗻]
 
@@ -75,7 +73,7 @@ lemma div_exists_unique_pos (a : V) {b} (pos : 0 < b) : ∃! u, b * u ≤ a ∧ 
     exact LT.lt.false this)
 
 lemma div_exists_unique (a b : V) : ∃! u, (0 < b → b * u ≤ a ∧ a < b * (u + 1)) ∧ (b = 0 → u = 0) := by
-  have : 0 ≤ b := by exact PeanoMinus.zero_le b
+  have : 0 ≤ b := by exact Arithmetic.zero_le b
   rcases this with (rfl | pos) <;> simp [*]
   · simpa [pos_iff_ne_zero.mp pos] using div_exists_unique_pos a pos
 
@@ -284,7 +282,7 @@ lemma mod_mul_add_of_lt (a b : V) {r} (hr : r < b) : (a * b + r) % b = r := by
   simp [mod_def, div_mul_add a b hr, mul_comm]
 
 @[simp] lemma mod_mul_add (a c : V) (pos : 0 < b) : (a * b + c) % b = c % b := by
-  simp [mod_def, div_mul_add_self, pos, mul_add, ←PeanoMinus.sub_sub, show b * a = a * b from mul_comm _ _]
+  simp [mod_def, div_mul_add_self, pos, mul_add, ←Arithmetic.sub_sub, show b * a = a * b from mul_comm _ _]
 
 @[simp] lemma mod_add_mul (a b : V) (pos : 0 < c) : (a + b * c) % c = a % c := by
   simp [add_comm a (b * c), pos]
@@ -764,10 +762,8 @@ end IOpen
 
 /-! ### Polynomial induction -/
 
-open PeanoMinus IOpen
-
 @[elab_as_elim]
-lemma InductionOnHierarchy.polynomial_induction [V ⊧ₘ* 𝗣𝗔⁻] (Γ m) [V ⊧ₘ* 𝗜𝗡𝗗 Γ m]
+lemma polynomial_induction [V ⊧ₘ* 𝗣𝗔⁻] (Γ m) [V ⊧ₘ* 𝗜𝗡𝗗 Γ m]
     {P : V → Prop} (hP : Γ-[m]-Predicate P)
     (zero : P 0) (even : ∀ x > 0, P x → P (2 * x)) (odd : ∀ x, P x → P (2 * x + 1)) : ∀ x, P x := by
   haveI : V ⊧ₘ* 𝗜𝗢𝗽𝗲𝗻 := models_of_subtheory <| inferInstanceAs (V ⊧ₘ* 𝗜𝗡𝗗 Γ m)
@@ -784,16 +780,16 @@ lemma InductionOnHierarchy.polynomial_induction [V ⊧ₘ* 𝗣𝗔⁻] (Γ m) [
       · simpa [←hx] using even (x / 2) (by by_contra A; simp at A; simp [show x = 0 from by simpa [A] using hx] at pos) (IH (x / 2) this)
       · simpa [←hx] using odd (x / 2) (IH (x / 2) this)
 
-@[elab_as_elim] lemma ISigma0.sigma0_polynomial_induction [V ⊧ₘ* 𝗜𝚺₀] {P : V → Prop} (hP : 𝚺₀-Predicate P)
+@[elab_as_elim] lemma sigma0_polynomial_induction [V ⊧ₘ* 𝗜𝚺₀] {P : V → Prop} (hP : 𝚺₀-Predicate P)
     (zero : P 0) (even : ∀ x > 0, P x → P (2 * x)) (odd : ∀ x, P x → P (2 * x + 1)) : ∀ x, P x :=
-  InductionOnHierarchy.polynomial_induction 𝚺 0 (P := P) hP zero even odd
+  polynomial_induction 𝚺 0 (P := P) hP zero even odd
 
-@[elab_as_elim] lemma ISigma1.sigma1_polynomial_induction [V ⊧ₘ* 𝗜𝚺₁] {P : V → Prop} (hP : 𝚺₁-Predicate P)
+@[elab_as_elim] lemma sigma1_polynomial_induction [V ⊧ₘ* 𝗜𝚺₁] {P : V → Prop} (hP : 𝚺₁-Predicate P)
     (zero : P 0) (even : ∀ x > 0, P x → P (2 * x)) (odd : ∀ x, P x → P (2 * x + 1)) : ∀ x, P x :=
-  InductionOnHierarchy.polynomial_induction 𝚺 1 (P := P) hP zero even odd
+  polynomial_induction 𝚺 1 (P := P) hP zero even odd
 
-@[elab_as_elim] lemma ISigma1.pi1_polynomial_induction [V ⊧ₘ* 𝗜𝚺₁] {P : V → Prop} (hP : 𝚷₁-Predicate P)
+@[elab_as_elim] lemma pi1_polynomial_induction [V ⊧ₘ* 𝗜𝚺₁] {P : V → Prop} (hP : 𝚷₁-Predicate P)
     (zero : P 0) (even : ∀ x > 0, P x → P (2 * x)) (odd : ∀ x, P x → P (2 * x + 1)) : ∀ x, P x :=
-  InductionOnHierarchy.polynomial_induction 𝚷 1 (P := P) hP zero even odd
+  polynomial_induction 𝚷 1 (P := P) hP zero even odd
 
-end LO
+end LO.FirstOrder.Arithmetic
