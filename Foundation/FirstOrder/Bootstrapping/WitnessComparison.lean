@@ -1,11 +1,11 @@
-import Foundation.FirstOrder.Arithmetic.Internal.DerivabilityCondition
+import Foundation.FirstOrder.Bootstrapping.DerivabilityCondition
 import Foundation.Logic.HilbertStyle.Supplemental
 
 /-!
 # Witness comparisons of provability
 -/
 
-namespace LO.FirstOrder.Arithmetic.Internal
+namespace LO.FirstOrder.Arithmetic.Bootstrapping
 
 variable {V : Type*} [ORingStructure V] [V ⊧ₘ* 𝗜𝚺₁]
 
@@ -81,4 +81,4 @@ end ProvabilityComparison
 
 end WitnessComparisons
 
-end LO.FirstOrder.Arithmetic.Internal
+end LO.FirstOrder.Arithmetic.Bootstrapping

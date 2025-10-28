@@ -115,7 +115,7 @@ lemma refl_mainlemma_aux (hA : ¬r₁ ⊧ (A.rflSubformula.conj ➝ A)) :
             apply Frame.root_genaretes'!;
             assumption
       have b : 𝗜𝚺₁ ⊢ ⩖ j, S j := provable_of_models _ _ fun (V : Type) _ _ ↦ by
-        simpa [models_iff, S, SolovaySentences.standard_σ_def] using FirstOrder.Arithmetic.Internal.SolovaySentences.disjunctive
+        simpa [models_iff, S, SolovaySentences.standard_σ_def] using FirstOrder.Arithmetic.Bootstrapping.SolovaySentences.disjunctive
       exact this ⨀ b
     . intro h;
       have := Satisfies.box_def.not.mp h;
@@ -187,7 +187,7 @@ lemma GL_S_TFAE :
       convert SolovaySentences.rfl_mainlemma_neg (T := T) hA A (by grind) $ Formula.Kripke.Satisfies.not_imp_def.mp hA |>.2;
     simp only [Models, LO.Semantics.Not.models_not, LO.Semantics.Imp.models_imply] at this;
     exact this <| by
-      simpa [models_iff, S, SolovaySentences.standard_σ_def] using FirstOrder.Arithmetic.Internal.SolovaySentences.solovay_root_sound
+      simpa [models_iff, S, SolovaySentences.standard_σ_def] using FirstOrder.Arithmetic.Bootstrapping.SolovaySentences.solovay_root_sound
   tfae_finish;
 
 theorem S.arithmetical_completeness_iff : Modal.S ⊢ A ↔ ∀ f : T.StandardRealization, ℕ ⊧ₘ f A := GL_S_TFAE.out 1 2

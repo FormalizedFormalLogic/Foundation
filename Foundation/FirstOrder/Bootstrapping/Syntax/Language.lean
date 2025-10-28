@@ -2,7 +2,7 @@ import Foundation.FirstOrder.Arithmetic.HFS
 
 /-! # Internalized languages of first-order logic -/
 
-namespace LO.FirstOrder.Arithmetic.Internal
+namespace LO.FirstOrder.Arithmetic.Bootstrapping
 
 variable {L : Language} [L.Encodable]
 
@@ -121,7 +121,7 @@ lemma _root_.LO.FirstOrder.Language.ORing.of_mem_range_encode_func {k f : ℕ} :
     · exact ⟨Language.ORing.Func.add, rfl⟩
     · exact ⟨Language.ORing.Func.mul, rfl⟩
 
-/-- TODO: move to Basic/Syntax/Internal.Language.lean-/
+/-- TODO: move to Basic/Syntax/Bootstrapping.Language.lean-/
 lemma _root_.LO.FirstOrder.Language.ORing.of_mem_range_encode_rel {k r : ℕ} :
     r ∈ Set.range (Encodable.encode : FirstOrder.Language.Rel ℒₒᵣ k → ℕ) ↔
     (k = 2 ∧ r = 0) ∨ (k = 2 ∧ r = 1) := by
@@ -223,4 +223,4 @@ lemma isRel_iff_LOR {k R : V} :
 
 end Arithmetic
 
-end LO.FirstOrder.Arithmetic.Internal
+end LO.FirstOrder.Arithmetic.Bootstrapping

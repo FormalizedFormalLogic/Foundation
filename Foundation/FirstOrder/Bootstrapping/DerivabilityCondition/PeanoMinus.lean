@@ -1,7 +1,7 @@
-import Foundation.FirstOrder.Arithmetic.Internal.DerivabilityCondition.EquationalTheory
+import Foundation.FirstOrder.Bootstrapping.DerivabilityCondition.EquationalTheory
 
 /-!
-# Internal theory $\mathsf{PA}^-$, $\mathsf{R_0}$ in $\mathsf{I}\Sigma_1$
+# Bootstrapping theory $\mathsf{PA}^-$, $\mathsf{R_0}$ in $\mathsf{I}\Sigma_1$
 -/
 
 namespace LO.FirstOrder.Arithmetic
@@ -15,7 +15,7 @@ lemma lt_succ_iff_eq_or_succ {a b : V} : a < b + 1 ↔ a = b ∨ a < b := by
 
 end LO.FirstOrder.Arithmetic
 
-namespace LO.FirstOrder.Arithmetic.Internal.Arithmetic
+namespace LO.FirstOrder.Arithmetic.Bootstrapping.Arithmetic
 
 open Classical LO.Entailment
 
@@ -251,4 +251,4 @@ lemma bex_replace (φ : Semiformula V ℒₒᵣ 1) (t u : Term V ℒₒᵣ) :
     T.internalize V ⊢ (t ≐ u) ➝ φ.bex t ➝ φ.bex u := by
   simpa [SemitermVec.q, Semiformula.substs_substs] using replace T ((φ.subst ![#'0]).bex #'0) t u
 
-end LO.FirstOrder.Arithmetic.Internal.Arithmetic
+end LO.FirstOrder.Arithmetic.Bootstrapping.Arithmetic

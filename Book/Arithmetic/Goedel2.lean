@@ -7,7 +7,7 @@ open Verso.Genre.Manual.InlineLean
 set_option verso.docstring.allowMissing true
 set_option linter.unusedSectionVars false
 
-open LO Entailment FirstOrder Arithmetic R0 PeanoMinus IOpen ISigma0 ISigma1 Internal InternalArithmetic
+open LO Entailment FirstOrder Arithmetic R0 PeanoMinus IOpen ISigma0 ISigma1 Bootstrapping InternalArithmetic
 
 #doc (Manual) "Gödel's Second Incompleteness Theorem" =>
 %%%
@@ -51,7 +51,7 @@ Define the function $`\mathrm{termBV}(t)` inductively on $`\mathrm{UTerm}` meani
 the largest bounded variable $`+1` that appears in the term.
 Define $`\mathrm{Semiterm}(n, t) := \mathrm{UTerm}(t) \land \mathrm{termBV}(t) \le n`.
 
-{docstring LO.FirstOrder.Arithmetic.Internal.IsSemiterm}
+{docstring LO.FirstOrder.Arithmetic.Bootstrapping.IsSemiterm}
 
 ## Formula
 
@@ -90,13 +90,13 @@ $`F_C` is $`\Delta_1` and monotone. Let $`\mathrm{UFormula}(p)` be a fixedpoint 
 \mathrm{Semiformula}(n, p) \iff \mathrm{UFormula}(p) \land \mathrm{bv}(p) \le n
 ```
 
-{docstring LO.FirstOrder.Arithmetic.Internal.IsSemiformula}
+{docstring LO.FirstOrder.Arithmetic.Bootstrapping.IsSemiformula}
 
 The function $`\mathrm{bv}(p)` is defined inductively on $`\mathrm{UFormula}` meaning the largest bounded variable $`+1` that appears in the formula.
 
 $`\mathrm{UFormula}(p)` and $`\mathrm{Semiormula}(n, p)` are again $`\Delta_1` since $`F_C` satisfies strong finiteness.
 
-{docstring LO.FirstOrder.Arithmetic.Internal.IsUFormula}
+{docstring LO.FirstOrder.Arithmetic.Bootstrapping.IsUFormula}
 
 # Formalized Provability
 

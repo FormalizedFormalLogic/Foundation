@@ -1,4 +1,4 @@
-import Foundation.FirstOrder.Arithmetic.Internal.Syntax.Formula.Functions
+import Foundation.FirstOrder.Bootstrapping.Syntax.Formula.Functions
 
 namespace LO.FirstOrder.Semiformula
 
@@ -16,7 +16,7 @@ def weight (k : ℕ) : Semiformula L ξ n := (List.replicate k ⊤).conj
 
 end LO.FirstOrder.Semiformula
 
-namespace LO.FirstOrder.Arithmetic.Internal
+namespace LO.FirstOrder.Arithmetic.Bootstrapping
 
 variable {V : Type*} [ORingStructure V] [V ⊧ₘ* 𝗜𝚺₁]
 
@@ -194,7 +194,7 @@ instance disjSeqSubst.definable' : Γ-[m + 1]-Function₃[V] disjSeqSubst := .of
 
 end
 
-lemma _root_.LO.FirstOrder.Arithmetic.Internal.IsSemiformula.disjSeqSubst {n m w p : V} (hw : IsSemitermVec ℒₒᵣ n m w) (hp : IsSemiformula ℒₒᵣ (n + 1) p) (k : V) :
+lemma _root_.LO.FirstOrder.Arithmetic.Bootstrapping.IsSemiformula.disjSeqSubst {n m w p : V} (hw : IsSemitermVec ℒₒᵣ n m w) (hp : IsSemiformula ℒₒᵣ (n + 1) p) (k : V) :
     IsSemiformula ℒₒᵣ m (disjSeqSubst w p k) := by
   induction k using ISigma1.sigma1_succ_induction
   · definability
@@ -275,7 +275,7 @@ end
     · simp
     · simp [ih (by simpa using hi)]
 
-lemma _root_.LO.FirstOrder.Arithmetic.Internal.IsSemiformula.substItrConj
+lemma _root_.LO.FirstOrder.Arithmetic.Bootstrapping.IsSemiformula.substItrConj
     {m n w p : V} (hp : IsSemiformula ℒₒᵣ (n + 1) p) (hw : IsSemitermVec ℒₒᵣ n m w) (k : V) :
     IsSemiformula ℒₒᵣ m (^⋀ substItr w p k) := by
   simp only [qqConj_semiformula, len_substItr]
@@ -283,7 +283,7 @@ lemma _root_.LO.FirstOrder.Arithmetic.Internal.IsSemiformula.substItrConj
   simp only [hi, substItr_nth]
   apply hp.subst (by simp [hw])
 
-lemma _root_.LO.FirstOrder.Arithmetic.Internal.IsSemiformula.substItrDisj
+lemma _root_.LO.FirstOrder.Arithmetic.Bootstrapping.IsSemiformula.substItrDisj
     {m n w p : V} (hp : IsSemiformula ℒₒᵣ (n + 1) p) (hw : IsSemitermVec ℒₒᵣ n m w) (k : V) :
     IsSemiformula ℒₒᵣ m (^⋁ substItr w p k) := by
   simp only [qqDisj_semiformula, len_substItr]
@@ -411,4 +411,4 @@ end
 
 end verums
 
-end LO.FirstOrder.Arithmetic.Internal
+end LO.FirstOrder.Arithmetic.Bootstrapping

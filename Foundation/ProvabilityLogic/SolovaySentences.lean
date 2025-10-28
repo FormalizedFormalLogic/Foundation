@@ -1,8 +1,8 @@
 import Foundation.ProvabilityLogic.Realization
 import Foundation.Modal.Kripke.Rank
-import Foundation.FirstOrder.Arithmetic.Internal.WitnessComparison
-import Foundation.FirstOrder.Arithmetic.Internal.FixedPoint
-import Foundation.FirstOrder.Arithmetic.Internal.Consistency
+import Foundation.FirstOrder.Bootstrapping.WitnessComparison
+import Foundation.FirstOrder.Bootstrapping.FixedPoint
+import Foundation.FirstOrder.Bootstrapping.Consistency
 import Foundation.ProvabilityLogic.GL.Soundness
 import Foundation.ProvabilityLogic.Height
 
@@ -133,7 +133,7 @@ end SolovaySentences
 
 end LO.ProvabilityLogic
 
-namespace LO.FirstOrder.Arithmetic.Internal
+namespace LO.FirstOrder.Arithmetic.Bootstrapping
 
 namespace SolovaySentences
 
@@ -472,7 +472,7 @@ lemma Solovay.box_disjunction [𝗜𝚺₁ ⪯ T] {i : F} (ne : r ≠ i) :
           simpa [models_iff] using Θ.disjunction i
       exact Entailment.WeakerThan.pbl this
   have Tθ : T.internalize V ⊢ ⌜θ T i⌝ :=
-    Internal.Arithmetic.sigma_one_provable_of_models T (show Hierarchy 𝚺 1 (θ T i) by simp) (by simpa [models_iff] using hS.1)
+    Bootstrapping.Arithmetic.sigma_one_provable_of_models T (show Hierarchy 𝚺 1 (θ T i) by simp) (by simpa [models_iff] using hS.1)
   have hP : T.internalize V ⊢ ⌜T.solovay i⌝ ⋎ ⌜⩖ j ∈ {j : F | i ≺ j}, T.solovay j⌝ := (by simpa using TP) ⨀ Tθ
   have : T.internalize V ⊢ ∼⌜T.solovay i⌝ := by simpa using (tprovable_tquote_iff_provable_quote (T := T)).mpr (Solovay.refute ne hS)
   have : T.internalize V ⊢ ⌜⩖ j ∈ {j : F | i ≺ j}, T.solovay j⌝ := Entailment.of_a!_of_n! hP this
@@ -539,4 +539,4 @@ end frame
 
 end SolovaySentences
 
-end LO.FirstOrder.Arithmetic.Internal
+end LO.FirstOrder.Arithmetic.Bootstrapping

@@ -1,7 +1,7 @@
-import Foundation.FirstOrder.Arithmetic.Internal.Syntax.Formula.Basic
-import Foundation.FirstOrder.Arithmetic.Internal.Syntax.Term.Functions
+import Foundation.FirstOrder.Bootstrapping.Syntax.Formula.Basic
+import Foundation.FirstOrder.Bootstrapping.Syntax.Term.Functions
 
-namespace LO.FirstOrder.Arithmetic.Internal
+namespace LO.FirstOrder.Arithmetic.Bootstrapping
 
 variable {V : Type*} [ORingStructure V] [V ⊧ₘ* 𝗜𝚺₁]
 
@@ -109,7 +109,7 @@ lemma IsUFormula.neg {p : V} : IsUFormula L p → IsUFormula L (neg L p) := by
   · intro p hp ihp; simp [hp, ihp]
   · intro p hp ihp; simp [hp, ihp]
 
-@[simp] lemma IsUFormula.bv_neg {p : V} : IsUFormula L p → bv L (Internal.neg L p) = bv L p := by
+@[simp] lemma IsUFormula.bv_neg {p : V} : IsUFormula L p → bv L (Bootstrapping.neg L p) = bv L p := by
   apply IsUFormula.ISigma1.sigma1_succ_induction
   · definability
   · intro k R v hR hv; simp [*]
@@ -121,7 +121,7 @@ lemma IsUFormula.neg {p : V} : IsUFormula L p → IsUFormula L (neg L p) := by
   · intro p hp ihp; simp [hp, hp.neg, ihp]
   · intro p hp ihp; simp [hp, hp.neg, ihp]
 
-@[simp] lemma IsUFormula.neg_neg {p : V} : IsUFormula L p → Internal.neg L (Internal.neg L p) = p := by
+@[simp] lemma IsUFormula.neg_neg {p : V} : IsUFormula L p → Bootstrapping.neg L (Bootstrapping.neg L p) = p := by
   apply IsUFormula.ISigma1.sigma1_succ_induction
   · definability
   · intro k r v hr hv; simp [hr, hv]
@@ -133,7 +133,7 @@ lemma IsUFormula.neg {p : V} : IsUFormula L p → IsUFormula L (neg L p) := by
   · intro p hp ihp; simp [hp, hp.neg, ihp]
   · intro p hp ihp; simp [hp, hp.neg, ihp]
 
-@[simp] lemma IsUFormula.neg_iff {p : V} : IsUFormula L (Internal.neg L p) ↔ IsUFormula L p := by
+@[simp] lemma IsUFormula.neg_iff {p : V} : IsUFormula L (Bootstrapping.neg L p) ↔ IsUFormula L p := by
   constructor
   · intro h; by_contra hp
     have Hp : IsUFormula L p := by by_contra hp; simp [neg_not_uformula hp] at h
@@ -176,11 +176,11 @@ section imp
 
 @[simp] lemma IsUFormula.imp {p q : V} :
     IsUFormula L (imp L p q) ↔ IsUFormula L p ∧ IsUFormula L q := by
-  simp [Internal.imp]
+  simp [Bootstrapping.imp]
 
 @[simp] lemma IsSemiformula.imp {n p q : V} :
     IsSemiformula L n (imp L p q) ↔ IsSemiformula L n p ∧ IsSemiformula L n q := by
-  simp [Internal.imp]
+  simp [Bootstrapping.imp]
 
 section
 
@@ -198,12 +198,12 @@ section iff
 
 @[simp] lemma IsUFormula.iff {p q : V} :
     IsUFormula L (iff L p q) ↔ IsUFormula L p ∧ IsUFormula L q := by
-  simp only [Internal.iff, and, imp, and_iff_left_iff_imp, and_imp]
+  simp only [Bootstrapping.iff, and, imp, and_iff_left_iff_imp, and_imp]
   intros; simp_all
 
 @[simp] lemma IsSemiformula.iff {n p q : V} :
     IsSemiformula L n (iff L p q) ↔ IsSemiformula L n p ∧ IsSemiformula L n q := by
-  simp only [Internal.iff, and, imp, and_iff_left_iff_imp, and_imp]
+  simp only [Bootstrapping.iff, and, imp, and_iff_left_iff_imp, and_imp]
   intros; simp_all
 
 @[simp] lemma lt_iff_left (p q : V) : p < iff L p q := lt_trans (lt_or_right _ _) (lt_K!_right _ _)
@@ -324,7 +324,7 @@ lemma IsUFormula.shift {p : V} : IsUFormula L p → IsUFormula L (shift L p) := 
   · intro p hp ihp; simp [hp, ihp]
   · intro p hp ihp; simp [hp, ihp]
 
-lemma IsUFormula.bv_shift {p : V} : IsUFormula L p → bv L (Internal.shift L p) = bv L p := by
+lemma IsUFormula.bv_shift {p : V} : IsUFormula L p → bv L (Bootstrapping.shift L p) = bv L p := by
   apply IsUFormula.ISigma1.sigma1_succ_induction
   · definability
   · intro k r v hr hv; simp [hr, hv]
@@ -348,14 +348,14 @@ lemma IsSemiformula.shift {p : V} : IsSemiformula L n p → IsSemiformula L n (s
   · intro n p hp ihp; simp [hp.isUFormula, ihp]
   · intro n p hp ihp; simp [hp.isUFormula, ihp]
 
-@[simp] lemma IsUFormula.shift_iff {p : V} : IsUFormula L (Internal.shift L p) ↔ IsUFormula L p := by
+@[simp] lemma IsUFormula.shift_iff {p : V} : IsUFormula L (Bootstrapping.shift L p) ↔ IsUFormula L p := by
   constructor
   · intro h; by_contra hp
     have Hp : IsUFormula L p := by by_contra hp; simp [shift_not_uformula hp] at h
     contradiction
   · exact IsUFormula.shift
 
-@[simp] lemma IsSemiformula.shift_iff {p : V} : IsSemiformula L n (Internal.shift L p) ↔ IsSemiformula L n p :=
+@[simp] lemma IsSemiformula.shift_iff {p : V} : IsSemiformula L n (Bootstrapping.shift L p) ↔ IsSemiformula L n p :=
   ⟨fun h ↦ by
     have : IsUFormula L p := by by_contra hp; simp [shift_not_uformula hp] at h
     exact ⟨this, by simpa [this.bv_shift] using h.bv_le⟩,
@@ -546,11 +546,11 @@ lemma semiformula_subst_induction {P : V → V → V → V → Prop} (hP : 𝚺�
   · simp [hR, hv.isUTerm, hw.termSubstVec hv]
   · simp
   · simp
-  · have ih₁ : IsSemiformula L m (Internal.subst L w p₁) := ih p₁ (by simp) w (by simp [fw]) n (by simp [fn]) m (by simp [fm]) h₁ hw
-    have ih₂ : IsSemiformula L m (Internal.subst L w p₂) := ih p₂ (by simp) w (by simp [fw]) n (by simp [fn]) m (by simp [fm]) h₂ hw
+  · have ih₁ : IsSemiformula L m (Bootstrapping.subst L w p₁) := ih p₁ (by simp) w (by simp [fw]) n (by simp [fn]) m (by simp [fm]) h₁ hw
+    have ih₂ : IsSemiformula L m (Bootstrapping.subst L w p₂) := ih p₂ (by simp) w (by simp [fw]) n (by simp [fn]) m (by simp [fm]) h₂ hw
     simp [h₁.isUFormula, h₂.isUFormula, ih₁, ih₂]
-  · have ih₁ : IsSemiformula L m (Internal.subst L w p₁) := ih p₁ (by simp) w (by simp [fw]) n (by simp [fn]) m (by simp [fm]) h₁ hw
-    have ih₂ : IsSemiformula L m (Internal.subst L w p₂) := ih p₂ (by simp) w (by simp [fw]) n (by simp [fn]) m (by simp [fm]) h₂ hw
+  · have ih₁ : IsSemiformula L m (Bootstrapping.subst L w p₁) := ih p₁ (by simp) w (by simp [fw]) n (by simp [fn]) m (by simp [fm]) h₁ hw
+    have ih₂ : IsSemiformula L m (Bootstrapping.subst L w p₂) := ih p₂ (by simp) w (by simp [fw]) n (by simp [fn]) m (by simp [fm]) h₂ hw
     simp [h₁.isUFormula, h₂.isUFormula, ih₁, ih₂]
   · simpa [h₁.isUFormula] using ih p₁ (by simp) (qVec L w) (by simp [fw]) (n + 1) (by simp [fn]) (m + 1) (by simp [fm]) h₁ hw.qVec
   · simpa [h₁.isUFormula] using ih p₁ (by simp) (qVec L w) (by simp [fw]) (n + 1) (by simp [fn]) (m + 1) (by simp [fm]) h₁ hw.qVec
@@ -1280,4 +1280,4 @@ lemma substs_eq {t u : V} (ht : IsUTerm ℒₒᵣ t) (hu : IsUTerm ℒₒᵣ u) 
 
 end Arithmetic
 
-end LO.FirstOrder.Arithmetic.Internal
+end LO.FirstOrder.Arithmetic.Bootstrapping

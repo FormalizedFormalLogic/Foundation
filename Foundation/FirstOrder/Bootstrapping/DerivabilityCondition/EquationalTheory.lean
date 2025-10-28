@@ -1,12 +1,12 @@
 import Foundation.Meta.ClProver
 import Foundation.FirstOrder.Arithmetic.Induction
-import Foundation.FirstOrder.Arithmetic.Internal.DerivabilityCondition.D1
+import Foundation.FirstOrder.Bootstrapping.DerivabilityCondition.D1
 
 /-!
-# Internal theory of equality
+# Bootstrapping theory of equality
 -/
 
-namespace LO.FirstOrder.Arithmetic.Internal
+namespace LO.FirstOrder.Arithmetic.Bootstrapping
 
 open Classical Entailment
 
@@ -120,7 +120,7 @@ lemma term_replace_aux (t : V) :
       suffices
           T.internalize V ⊢ ∀' ∀' ((#'1 ≐ #'0) ➝ ((typedNumeral 0).subst ![#'1] ≐ (typedNumeral 0).subst ![#'0])) by
         have := (tprovable_iff_provable (T := T)).mp this
-        simpa [-subst_numeral, val_all, Internal.Arithmetic.coe_zero_eq] using this
+        simpa [-subst_numeral, val_all, Bootstrapping.Arithmetic.coe_zero_eq] using this
       suffices
         T.internalize V ⊢ ∀' ∀' ((#'1 ≐ #'0) ➝ (typedNumeral 0 ≐ typedNumeral 0)) by simpa
       suffices T.internalize V ⊢ (&'1 ≐ &'0) ➝ (typedNumeral 0 ≐ typedNumeral 0) by
@@ -130,7 +130,7 @@ lemma term_replace_aux (t : V) :
       suffices
           T.internalize V ⊢ ∀' ∀' ((#'1 ≐ #'0) ➝ ((typedNumeral 1).subst ![#'1] ≐ (typedNumeral 1).subst ![#'0])) by
         have := (tprovable_iff_provable (T := T)).mp this
-        simpa [-subst_numeral, val_all, Internal.Arithmetic.coe_one_eq] using this
+        simpa [-subst_numeral, val_all, Bootstrapping.Arithmetic.coe_one_eq] using this
       suffices
         T.internalize V ⊢ ∀' ∀' ((#'1 ≐ #'0) ➝ (typedNumeral 1 ≐ typedNumeral 1)) by simpa
       suffices T.internalize V ⊢ (&'1 ≐ &'0) ➝ (typedNumeral 1 ≐ typedNumeral 1) by
@@ -486,4 +486,4 @@ lemma replace (φ : Semiformula V ℒₒᵣ 1) (u₁ u₂ : Term V ℒₒᵣ) :
 
 end replace
 
-end Internal.Arithmetic
+end Bootstrapping.Arithmetic

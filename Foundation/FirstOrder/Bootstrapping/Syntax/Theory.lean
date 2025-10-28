@@ -1,7 +1,7 @@
-import Foundation.FirstOrder.Arithmetic.Internal.Syntax.Formula.Coding
-import Foundation.FirstOrder.Arithmetic.Internal.Syntax.Formula.Iteration
+import Foundation.FirstOrder.Bootstrapping.Syntax.Formula.Coding
+import Foundation.FirstOrder.Bootstrapping.Syntax.Formula.Iteration
 
-namespace LO.FirstOrder.Arithmetic.Internal
+namespace LO.FirstOrder.Arithmetic.Bootstrapping
 
 variable {V : Type*} [ORingStructure V] [V ⊧ₘ* 𝗜𝚺₁]
 
@@ -46,10 +46,10 @@ instance Δ₁Class.definable : 𝚫₁-Predicate[V] (· ∈ T.Δ₁Class) := Δ
 
 @[simp] lemma Δ₁Class.mem_iff'_s {φ : SyntacticFormula L} : V ⊧/![⌜φ⌝] T.Δ₁ch.val ↔ ∃ σ ∈ T, φ = σ := Δ₁Class.mem_iff_s
 
-@[simp] lemma Δ₁Class.mem_iff'' {φ : Sentence L} : ((⌜φ⌝ : Internal.Formula V L).val : V) ∈ T.Δ₁Class ↔ φ ∈ T :=
+@[simp] lemma Δ₁Class.mem_iff'' {φ : Sentence L} : ((⌜φ⌝ : Bootstrapping.Formula V L).val : V) ∈ T.Δ₁Class ↔ φ ∈ T :=
   Δ₁Class.mem_iff
 
-end LO.FirstOrder.Arithmetic.Internal
+end LO.FirstOrder.Arithmetic.Bootstrapping
 
 namespace LO.FirstOrder.Theory
 
@@ -65,7 +65,7 @@ instance add (dT : T.Δ₁) (dU : U.Δ₁) : (T + U).Δ₁ where
   ch := T.Δ₁ch ⋎ U.Δ₁ch
   mem_iff {φ} := by
     simp only [Nat.succ_eq_add_one, Nat.reduceAdd, val_or, LogicalConnective.HomClass.map_or,
-      FirstOrder.Arithmetic.Internal.Δ₁Class.mem_iff'_s, LogicalConnective.Prop.or_eq, add_def, Set.mem_union]
+      FirstOrder.Arithmetic.Bootstrapping.Δ₁Class.mem_iff'_s, LogicalConnective.Prop.or_eq, add_def, Set.mem_union]
     grind
   isDelta1 := ProvablyProperOn.ofProperOn.{0} _ fun V _ _ ↦ ProperOn.or (by simp) (by simp)
 

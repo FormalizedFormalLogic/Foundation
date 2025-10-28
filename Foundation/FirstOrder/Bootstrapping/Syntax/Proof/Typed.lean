@@ -1,5 +1,5 @@
-import Foundation.FirstOrder.Arithmetic.Internal.Syntax.Formula.Typed
-import Foundation.FirstOrder.Arithmetic.Internal.Syntax.Proof.Basic
+import Foundation.FirstOrder.Bootstrapping.Syntax.Formula.Typed
+import Foundation.FirstOrder.Bootstrapping.Syntax.Proof.Basic
 import Foundation.Logic.HilbertStyle.Supplemental
 
 /-!
@@ -14,7 +14,7 @@ variable {V : Type*} [ORingStructure V] [V ⊧ₘ* 𝗜𝚺₁]
 
 variable {L : Language} [L.Encodable] [L.LORDefinable]
 
-namespace FirstOrder.Arithmetic.Internal
+namespace FirstOrder.Arithmetic.Bootstrapping
 
 section typed_theory
 
@@ -173,29 +173,29 @@ namespace TDerivation
 
 variable {Γ Δ : (Sequent V L)} {φ ψ p₀ p₁ p₂ p₃ p₄ : Formula V L}
 
-protected noncomputable def cast {Γ Δ : Internal.Sequent V L} (e : Γ = Δ) :
+protected noncomputable def cast {Γ Δ : Bootstrapping.Sequent V L} (e : Γ = Δ) :
     T ⊢!ᵈᵉʳ Γ → T ⊢!ᵈᵉʳ Δ := fun d ↦ by rcases e; exact d
 
-@[simp] lemma cast_val {Γ Δ : Internal.Sequent V L} (e : Γ = Δ) (d : T ⊢!ᵈᵉʳ Γ) :
+@[simp] lemma cast_val {Γ Δ : Bootstrapping.Sequent V L} (e : Γ = Δ) (d : T ⊢!ᵈᵉʳ Γ) :
     (TDerivation.cast e d).val = d.val := by rcases e; simp [TDerivation.cast]
 
 noncomputable def byAxm (φ) (h : φ ∈' T.theory) (hΓ : φ ∈ Γ) : T ⊢!ᵈᵉʳ Γ :=
-  ⟨Internal.axm Γ.val φ.val, by simp, Theory.Derivation.axm (by simp) (by simpa) h⟩
+  ⟨Bootstrapping.axm Γ.val φ.val, by simp, Theory.Derivation.axm (by simp) (by simpa) h⟩
 
 @[simp] lemma byAxm_val (φ) (h : φ ∈' T.theory) (hΓ : φ ∈ Γ) :
-    (byAxm φ h hΓ).val = Internal.axm Γ.val φ.val := rfl
+    (byAxm φ h hΓ).val = Bootstrapping.axm Γ.val φ.val := rfl
 
 noncomputable def em (φ) (h : φ ∈ Γ := by simp) (hn : ∼φ ∈ Γ := by simp) : T ⊢!ᵈᵉʳ Γ :=
   ⟨axL Γ.val φ.val, by simp, Theory.Derivation.axL (by simp) h hn⟩
 
 @[simp] lemma em_val (φ) (h : φ ∈ Γ) (hn : ∼φ ∈ Γ) :
-    (em φ h hn : T ⊢!ᵈᵉʳ Γ).val = Internal.axL Γ.val φ.val := rfl
+    (em φ h hn : T ⊢!ᵈᵉʳ Γ).val = Bootstrapping.axL Γ.val φ.val := rfl
 
 noncomputable def verum (h : ⊤ ∈ Γ := by simp) : T ⊢!ᵈᵉʳ Γ :=
   ⟨verumIntro Γ.val, by simp, Theory.Derivation.verumIntro (by simp) h⟩
 
 @[simp] lemma verum_val (h : ⊤ ∈ Γ) :
-    (verum h : T ⊢!ᵈᵉʳ Γ).val = Internal.verumIntro Γ.val := rfl
+    (verum h : T ⊢!ᵈᵉʳ Γ).val = Bootstrapping.verumIntro Γ.val := rfl
 
 noncomputable def and' (H : φ ⋏ ψ ∈ Γ) (dp : T ⊢!ᵈᵉʳ insert φ Γ) (dq : T ⊢!ᵈᵉʳ insert ψ Γ) : T ⊢!ᵈᵉʳ Γ :=
   ⟨andIntro Γ.val φ.val ψ.val dp.val dq.val, by simp,
@@ -540,7 +540,7 @@ lemma ex! {φ : Semiformula V L 1} (t) (dp : T ⊢ φ.subst ![t]) : T ⊢ ∃' �
 
 variable (A : InternalTheory V ℒₒᵣ)
 
-open Internal.Arithmetic
+open Bootstrapping.Arithmetic
 
 open Entailment Theory.Derivation
 

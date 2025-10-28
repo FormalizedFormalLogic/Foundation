@@ -1,8 +1,8 @@
-import Foundation.FirstOrder.Arithmetic.Internal.Syntax.Proof.Typed
+import Foundation.FirstOrder.Bootstrapping.Syntax.Proof.Typed
 
 namespace LO.FirstOrder
 
-open Arithmetic Internal
+open Arithmetic Bootstrapping
 
 variable {V : Type*} [ORingStructure V] [V ⊧ₘ* 𝗜𝚺₁]
 
@@ -96,30 +96,30 @@ lemma setShift_quote (Γ : Finset (SyntacticFormula L)) :
   rcases Derivation2.Sequent.mem_quote hx with ⟨p, _, rfl⟩;
   simp [Semiformula.quote_def]
 
-noncomputable instance : GödelQuote (Finset (SyntacticFormula L)) (Internal.Sequent V L) := ⟨fun Γ ↦ ⟨⌜Γ⌝, by simp⟩⟩
+noncomputable instance : GödelQuote (Finset (SyntacticFormula L)) (Bootstrapping.Sequent V L) := ⟨fun Γ ↦ ⟨⌜Γ⌝, by simp⟩⟩
 
-@[simp] lemma Sequent.typed_quote_val (Γ : Finset (SyntacticFormula L)) : (⌜Γ⌝ : Internal.Sequent V L).val = ⌜Γ⌝ := rfl
+@[simp] lemma Sequent.typed_quote_val (Γ : Finset (SyntacticFormula L)) : (⌜Γ⌝ : Bootstrapping.Sequent V L).val = ⌜Γ⌝ := rfl
 
 @[simp] lemma Sequent.quote_mem_quote {φ : SyntacticFormula L} {Γ : Finset (SyntacticFormula L)} :
-    ⌜φ⌝ ∈ (⌜Γ⌝ : Internal.Sequent V L) ↔ φ ∈ Γ := by simp [Internal.Sequent.mem_iff, ←Semiformula.quote_def]
+    ⌜φ⌝ ∈ (⌜Γ⌝ : Bootstrapping.Sequent V L) ↔ φ ∈ Γ := by simp [Bootstrapping.Sequent.mem_iff, ←Semiformula.quote_def]
 
-@[simp] lemma Sequent.typed_quote_insert (Γ : Finset (SyntacticFormula L)) (φ) : (⌜insert φ Γ⌝ : Internal.Sequent V L) = insert ⌜φ⌝ ⌜Γ⌝ := by
-  ext; simp [Internal.Sequent.mem_iff, Semiformula.quote_def]
+@[simp] lemma Sequent.typed_quote_insert (Γ : Finset (SyntacticFormula L)) (φ) : (⌜insert φ Γ⌝ : Bootstrapping.Sequent V L) = insert ⌜φ⌝ ⌜Γ⌝ := by
+  ext; simp [Bootstrapping.Sequent.mem_iff, Semiformula.quote_def]
 
-@[simp] lemma Sequent.typed_quote_empty : (⌜(∅ : Finset (SyntacticFormula L))⌝ : Internal.Sequent V L) = ∅ := rfl
+@[simp] lemma Sequent.typed_quote_empty : (⌜(∅ : Finset (SyntacticFormula L))⌝ : Bootstrapping.Sequent V L) = ∅ := rfl
 
 @[simp] lemma Sequent.typed_quote_singleton (φ : SyntacticFormula L) :
-    (⌜({φ} : Finset (SyntacticFormula L))⌝ : Internal.Sequent V L) = {⌜φ⌝} := by
+    (⌜({φ} : Finset (SyntacticFormula L))⌝ : Bootstrapping.Sequent V L) = {⌜φ⌝} := by
   rw [show ({φ} : Finset (SyntacticFormula L)) = insert φ ∅ by simp]
   rw [Sequent.typed_quote_insert];
   simp [Sequent.insert_empty_eq_singleton]
 
 @[simp] lemma setShift_typed_quote (Γ : Finset (SyntacticFormula L)) :
-    (⌜Finset.image Rewriting.shift Γ⌝ : Internal.Sequent V L) = (⌜Γ⌝ : Internal.Sequent V L).shift := by
+    (⌜Finset.image Rewriting.shift Γ⌝ : Bootstrapping.Sequent V L) = (⌜Γ⌝ : Bootstrapping.Sequent V L).shift := by
   apply Sequent.ext'
   simp [←setShift_quote]; rfl
 
-lemma Sequent.typed_quote_inj {Γ Δ : Finset (SyntacticFormula L)} : (⌜Γ⌝ : Internal.Sequent V L) = ⌜Δ⌝ → Γ = Δ := fun h ↦ by
+lemma Sequent.typed_quote_inj {Γ Δ : Finset (SyntacticFormula L)} : (⌜Γ⌝ : Bootstrapping.Sequent V L) = ⌜Δ⌝ → Γ = Δ := fun h ↦ by
   have : (⌜Γ⌝ : V) = ⌜Δ⌝ := by simpa using congr_arg Sequent.val h
   exact quote_inj this
 
@@ -130,7 +130,7 @@ lemma Sequent.coe_eq (Γ : Finset (SyntacticFormula L)) : (↑(⌜Γ⌝ : ℕ) :
     simp [insert_absolute, ih, Semiformula.coe_quote_eq_quote]
 
 @[simp] lemma Sequent.typed_quote_subset_typed_quote {Γ Δ : Finset (SyntacticFormula L)} :
-    (⌜Γ⌝ : Internal.Sequent V L) ⊆ ⌜Δ⌝ ↔ Γ ⊆ Δ := Sequent.quote_subset_quote
+    (⌜Γ⌝ : Bootstrapping.Sequent V L) ⊆ ⌜Δ⌝ ↔ Γ ⊆ Δ := Sequent.quote_subset_quote
 
 lemma isFormulaSet_sound {s : ℕ} : IsFormulaSet L s → ∃ S : Finset (SyntacticFormula L), ⌜S⌝ = s := by
   intro h
@@ -186,29 +186,29 @@ lemma coe_typedQuote_val_eq (d : (T : SyntacticFormulas L) ⟹₂ Γ) : ↑(d.ty
   |   closed Δ φ h hn => by
     simp [typedQuote, axL, nat_cast_pair, Sequent.coe_eq, Semiformula.coe_quote_eq_quote']
   |       axm φ hT _ => by
-    simp [typedQuote, Internal.axm, nat_cast_pair, Sequent.coe_eq, Semiformula.coe_quote_eq_quote']
+    simp [typedQuote, Bootstrapping.axm, nat_cast_pair, Sequent.coe_eq, Semiformula.coe_quote_eq_quote']
   |           verum h => by
-    simp [typedQuote, Internal.verumIntro, nat_cast_pair, Sequent.coe_eq]
+    simp [typedQuote, Bootstrapping.verumIntro, nat_cast_pair, Sequent.coe_eq]
   |       and h b₁ b₂ => by
-    simp [typedQuote, Internal.andIntro, nat_cast_pair, Sequent.coe_eq, Semiformula.coe_quote_eq_quote',
+    simp [typedQuote, Bootstrapping.andIntro, nat_cast_pair, Sequent.coe_eq, Semiformula.coe_quote_eq_quote',
       b₁.coe_typedQuote_val_eq, b₂.coe_typedQuote_val_eq]
   |            or h b => by
-    simp [typedQuote, Internal.orIntro, nat_cast_pair, Sequent.coe_eq, Semiformula.coe_quote_eq_quote',
+    simp [typedQuote, Bootstrapping.orIntro, nat_cast_pair, Sequent.coe_eq, Semiformula.coe_quote_eq_quote',
       b.coe_typedQuote_val_eq]
   |           all h b => by
-    simp [typedQuote, Internal.allIntro, nat_cast_pair, Sequent.coe_eq, Semiformula.coe_quote_eq_quote',
+    simp [typedQuote, Bootstrapping.allIntro, nat_cast_pair, Sequent.coe_eq, Semiformula.coe_quote_eq_quote',
       b.coe_typedQuote_val_eq]
   |          ex h t b => by
-    simp [typedQuote, Internal.exIntro, nat_cast_pair, Sequent.coe_eq,
+    simp [typedQuote, Bootstrapping.exIntro, nat_cast_pair, Sequent.coe_eq,
       Semiterm.coe_quote_eq_quote', Semiformula.coe_quote_eq_quote',
       b.coe_typedQuote_val_eq]
   |           wk b ss => by
-    simp [typedQuote, Internal.wkRule, nat_cast_pair, Sequent.coe_eq, b.coe_typedQuote_val_eq]
+    simp [typedQuote, Bootstrapping.wkRule, nat_cast_pair, Sequent.coe_eq, b.coe_typedQuote_val_eq]
   |           shift b => by
-    simp [typedQuote, Internal.shiftRule, nat_cast_pair, Sequent.coe_eq,
+    simp [typedQuote, Bootstrapping.shiftRule, nat_cast_pair, Sequent.coe_eq,
       b.coe_typedQuote_val_eq, ←setShift_typed_quote]
   |       cut b₁ b₂ => by
-    simp [typedQuote, Internal.cutRule, nat_cast_pair, Sequent.coe_eq, Semiformula.coe_quote_eq_quote',
+    simp [typedQuote, Bootstrapping.cutRule, nat_cast_pair, Sequent.coe_eq, Semiformula.coe_quote_eq_quote',
       b₁.coe_typedQuote_val_eq, b₂.coe_typedQuote_val_eq]
 
 lemma coe_quote_eq (d : (T : SyntacticFormulas L) ⟹₂ Γ) : (↑(⌜d⌝ : ℕ) : V) = ⌜d⌝ := coe_typedQuote_val_eq V d

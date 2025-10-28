@@ -1,7 +1,7 @@
-import Foundation.FirstOrder.Arithmetic.Internal.Syntax.Term.Basic
+import Foundation.FirstOrder.Bootstrapping.Syntax.Term.Basic
 import Foundation.FirstOrder.Arithmetic.Induction
 
-namespace LO.FirstOrder.Arithmetic.Internal
+namespace LO.FirstOrder.Arithmetic.Bootstrapping
 
 variable {V : Type*} [ORingStructure V] [V ⊧ₘ* 𝗜𝚺₁]
 
@@ -1489,4 +1489,4 @@ lemma semiformula_result_induction {P : V → V → V → V → Prop} (hP : 𝚺
 
 end UformulaRec1.Construction
 
-end LO.FirstOrder.Arithmetic.Internal
+end LO.FirstOrder.Arithmetic.Bootstrapping

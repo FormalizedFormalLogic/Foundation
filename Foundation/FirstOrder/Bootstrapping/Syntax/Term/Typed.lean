@@ -1,4 +1,4 @@
-import Foundation.FirstOrder.Arithmetic.Internal.Syntax.Term.Functions
+import Foundation.FirstOrder.Bootstrapping.Syntax.Term.Functions
 
 /-!
 
@@ -26,7 +26,7 @@ noncomputable def matrixToVec (v : Fin k → V) : V := Matrix.foldr (fun t w ↦
     · simp; rfl
     · simp [*]; rfl
 
-namespace Internal
+namespace Bootstrapping
 
 variable {L : Language} [L.Encodable] [L.LORDefinable]
 
@@ -221,11 +221,11 @@ lemma bShift_shift_comm (t : Semiterm V L n) :
   ext; simp [termBShift_termShift t.isSemiterm]
 
 lemma shift_substs (w : SemitermVec V L n m) (t : Semiterm V L n) :
-    (t.subst w).shift = t.shift.subst (Semiterm.shift⨟ w) := by ext; simp [Internal.termShift_termSubsts t.isSemiterm w.isSemitermVec]
+    (t.subst w).shift = t.shift.subst (Semiterm.shift⨟ w) := by ext; simp [Bootstrapping.termShift_termSubsts t.isSemiterm w.isSemitermVec]
 
 lemma substs_substs {n m l : ℕ} (v : SemitermVec V L m l) (w : SemitermVec V L n m) (t : Semiterm V L n) :
     (t.subst w).subst v = t.subst ((Semiterm.subst v)⨟ w) := by
-  ext;simp [Internal.termSubst_termSubst w.isSemitermVec t.isSemiterm]
+  ext;simp [Bootstrapping.termSubst_termSubst w.isSemitermVec t.isSemiterm]
 
 end Semiterm
 
@@ -385,4 +385,4 @@ lemma semiterm_induction (Γ) {n : V} {P : Semiterm V ℒₒᵣ n → isSemiterm
         (by simpa using ih 1 (by simp) (by simp [ht₂]))
 -/
 
-end LO.FirstOrder.Arithmetic.Internal.Arithmetic
+end LO.FirstOrder.Arithmetic.Bootstrapping.Arithmetic

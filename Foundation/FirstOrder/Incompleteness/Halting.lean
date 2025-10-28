@@ -20,7 +20,7 @@ lemma incomplete_of_REPred_not_ComputablePred_Nat' {P : ℕ → Prop} (hRE : REP
     constructor;
     . assumption;
     . suffices REPred fun a : ℕ ↦ T ⊬ φ/[a] by simpa [hP] using this;
-      have : 𝚺₁-Predicate fun b : ℕ ↦ T.Provable (Internal.neg ℒₒᵣ <| Internal.subst ℒₒᵣ ?[Internal.Arithmetic.numeral b] ⌜φ⌝) := by clear hP; definability;
+      have : 𝚺₁-Predicate fun b : ℕ ↦ T.Provable (Bootstrapping.neg ℒₒᵣ <| Bootstrapping.subst ℒₒᵣ ?[Bootstrapping.Arithmetic.numeral b] ⌜φ⌝) := by clear hP; definability;
       apply REPred.of_eq (re_iff_sigma1.mpr this);
       intro a;
       push_neg at h;
@@ -31,7 +31,7 @@ lemma incomplete_of_REPred_not_ComputablePred_Nat' {P : ℕ → Prop} (hRE : REP
         simpa [Sentence.quote_def, Semiformula.quote_def, Rewriting.emb_subst_eq_subst_coe₁] using hP;
       . rintro hφ
         simpa [Sentence.quote_def, Semiformula.quote_def, Rewriting.emb_subst_eq_subst_coe₁] using
-          Internal.internalize_provability (V := ℕ) hφ;
+          Bootstrapping.internalize_provability (V := ℕ) hφ;
   push_neg at hd;
   rcases hd with (⟨hd₁, hd₂⟩ | ⟨hd₁, hd₂⟩);
   . use d;

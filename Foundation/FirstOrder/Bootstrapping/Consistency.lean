@@ -1,4 +1,4 @@
-import Foundation.FirstOrder.Arithmetic.Internal.DerivabilityCondition
+import Foundation.FirstOrder.Bootstrapping.DerivabilityCondition
 
 /-!
 # Consistency predicate
@@ -6,7 +6,7 @@ import Foundation.FirstOrder.Arithmetic.Internal.DerivabilityCondition
 
 open Classical
 
-namespace LO.FirstOrder.Arithmetic.Internal
+namespace LO.FirstOrder.Arithmetic.Bootstrapping
 
 variable {V : Type*} [ORingStructure V] [V ⊧ₘ* 𝗜𝚺₁]
 
@@ -74,7 +74,7 @@ def consistent_eq : T.consistent = T.standardProvability.con := rfl
 
 end WitnessComparisons
 
-end LO.FirstOrder.Arithmetic.Internal
+end LO.FirstOrder.Arithmetic.Bootstrapping
 
 namespace LO.FirstOrder.Arithmetic
 

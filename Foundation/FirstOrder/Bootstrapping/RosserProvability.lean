@@ -1,10 +1,10 @@
-import Foundation.FirstOrder.Arithmetic.Internal.WitnessComparison
+import Foundation.FirstOrder.Bootstrapping.WitnessComparison
 
 /-!
 # Rosser's provability predicate
 -/
 
-namespace LO.FirstOrder.Arithmetic.Internal
+namespace LO.FirstOrder.Arithmetic.Bootstrapping
 
 variable {V : Type*} [ORingStructure V] [V ⊧ₘ* 𝗜𝚺₁]
 
@@ -91,11 +91,11 @@ def not_rosserProvable [Entailment.Consistent T] {φ : Sentence L} : T ⊢ ∼φ
 def not_rosserProvable_sentence [Entailment.Consistent T] {σ : Sentence L} : T ⊢ ∼σ → ¬T.RosserProvable (⌜σ⌝ : V) := fun h ↦ by
   simpa [Sentence.quote_def] using not_rosserProvable h
 
-end LO.FirstOrder.Arithmetic.Internal
+end LO.FirstOrder.Arithmetic.Bootstrapping
 
 namespace LO.FirstOrder.Arithmetic
 
-open Internal
+open Bootstrapping
 
 section
 

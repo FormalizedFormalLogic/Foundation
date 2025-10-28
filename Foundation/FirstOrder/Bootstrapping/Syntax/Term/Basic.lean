@@ -1,7 +1,7 @@
-import Foundation.FirstOrder.Arithmetic.Internal.Syntax.Language
+import Foundation.FirstOrder.Bootstrapping.Syntax.Language
 import Foundation.FirstOrder.Arithmetic.HFS
 
-namespace LO.FirstOrder.Arithmetic.Internal
+namespace LO.FirstOrder.Arithmetic.Bootstrapping
 
 variable {V : Type*} [ORingStructure V] [V ⊧ₘ* 𝗜𝚺₁]
 
@@ -862,4 +862,4 @@ lemma IsSemiterm.sigma1_induction {P : V → Prop} (hP : 𝚺₁-Predicate P)
 
 end isSemiterm
 
-end LO.FirstOrder.Arithmetic.Internal
+end LO.FirstOrder.Arithmetic.Bootstrapping

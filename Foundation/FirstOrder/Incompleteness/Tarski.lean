@@ -1,4 +1,4 @@
-import Foundation.FirstOrder.Arithmetic.Internal.FixedPoint
+import Foundation.FirstOrder.Bootstrapping.FixedPoint
 import Foundation.Meta.ClProver
 
 namespace LO.FirstOrder.Arithmetic

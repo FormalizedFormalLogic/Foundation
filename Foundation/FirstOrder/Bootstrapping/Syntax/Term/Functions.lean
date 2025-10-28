@@ -1,6 +1,6 @@
-import Foundation.FirstOrder.Arithmetic.Internal.Syntax.Term.Basic
+import Foundation.FirstOrder.Bootstrapping.Syntax.Term.Basic
 
-namespace LO.FirstOrder.Arithmetic.Internal
+namespace LO.FirstOrder.Arithmetic.Bootstrapping
 
 variable {V : Type*} [ORingStructure V] [V ⊧ₘ* 𝗜𝚺₁]
 
@@ -269,7 +269,7 @@ lemma termShiftVec_cons {k t ts : V} (ht : IsUTerm L t) (hts : IsUTermVec L k ts
     ⟨by simp [hv.isUTerm], fun i hi ↦ by
       rw [nth_termShiftVec hv.isUTerm hi]; exact (hv.nth hi).termShift⟩
 
-@[simp] lemma IsUTerm.termBVtermShift {t : V} (ht : IsUTerm L t) : termBV L (Internal.termShift L t) = termBV L t := by
+@[simp] lemma IsUTerm.termBVtermShift {t : V} (ht : IsUTerm L t) : termBV L (Bootstrapping.termShift L t) = termBV L t := by
   apply IsUTerm.induction 𝚺 ?_ ?_ ?_ ?_ t ht
   · definability
   · simp
@@ -284,7 +284,7 @@ lemma termShiftVec_cons {k t ts : V} (ht : IsUTerm L t) (hts : IsUTermVec L k ts
     simp [*]
 
 @[simp] lemma IsUTermVec.termBVVectermShiftVec {v : V} (hv : IsUTermVec L k v) :
-    termBVVec L k (Internal.termShiftVec L k v) = termBVVec L k v := by
+    termBVVec L k (Bootstrapping.termShiftVec L k v) = termBVVec L k v := by
   apply nth_ext' k (by simp [*]) (by simp [*])
   intro i hi
   simp [*, IsUTerm.termBVtermShift (hv.nth hi)]
@@ -493,11 +493,11 @@ end
 lemma IsSemitermVec.qVec {k n w : V} (h : IsSemitermVec L k n w) : IsSemitermVec L (k + 1) (n + 1) (qVec L w) := by
   rcases h.lh
   refine IsSemitermVec.iff.mpr ⟨?_, ?_⟩
-  · simp [h.isUTerm, Internal.qVec]
+  · simp [h.isUTerm, Bootstrapping.qVec]
   · intro i hi
     rcases zero_or_succ i with (rfl | ⟨i, rfl⟩)
-    · simp [Internal.qVec]
-    · simpa [Internal.qVec, nth_termBShiftVec h.isUTerm (by simpa using hi)] using
+    · simp [Bootstrapping.qVec]
+    · simpa [Bootstrapping.qVec, nth_termBShiftVec h.isUTerm (by simpa using hi)] using
         h.nth (by simpa using hi) |>.termBShift
 
 lemma substs_cons_bShift {u t w : V} (ht : IsSemiterm L n t) :
@@ -808,4 +808,4 @@ end numeral
 
 end Arithmetic
 
-end LO.FirstOrder.Arithmetic.Internal
+end LO.FirstOrder.Arithmetic.Bootstrapping

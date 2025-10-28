@@ -1,4 +1,4 @@
-import Foundation.FirstOrder.Arithmetic.Internal.Syntax.Theory
+import Foundation.FirstOrder.Bootstrapping.Syntax.Theory
 
 namespace LO
 
@@ -10,7 +10,7 @@ variable {L : Language} [L.Encodable] [L.LORDefinable]
 
 variable {T U : Theory L} [T.Δ₁] [U.Δ₁]
 
-namespace FirstOrder.Arithmetic.Internal
+namespace FirstOrder.Arithmetic.Bootstrapping
 
 variable (L)
 
@@ -87,7 +87,7 @@ lemma shift_mem_setShift {p s : V} (h : p ∈ s) : shift L p ∈ setShift L s :=
   mem_setShift_iff.mpr ⟨p, h, rfl⟩
 
 @[simp] lemma IsFormulaSet.setShift_iff {s : V} :
-    IsFormulaSet L (Internal.setShift L s) ↔ IsFormulaSet L s :=
+    IsFormulaSet L (Bootstrapping.setShift L s) ↔ IsFormulaSet L s :=
   ⟨by intro h p hp; simpa using h (shift L p) (shift_mem_setShift hp), IsFormulaSet.setShift⟩
 
 @[simp] lemma mem_setShift_union {s t : V} : setShift L (s ∪ t) = setShift L s ∪ setShift L t := mem_ext <| by
@@ -445,11 +445,11 @@ instance : (construction T).StrongFinite V where
 
 end Derivation
 
-end FirstOrder.Arithmetic.Internal
+end FirstOrder.Arithmetic.Bootstrapping
 
 namespace FirstOrder.Theory
 
-open PeanoMinus ISigma0 ISigma1 Internal Derivation
+open PeanoMinus ISigma0 ISigma1 Bootstrapping Derivation
 
 variable (T)
 
@@ -531,7 +531,7 @@ namespace Derivation
 lemma case_iff {d : V} :
     T.Derivation d ↔
     IsFormulaSet L (fstIdx d) ∧
-    ( (∃ s p, d = Internal.axL s p ∧ p ∈ s ∧ neg L p ∈ s) ∨
+    ( (∃ s p, d = Bootstrapping.axL s p ∧ p ∈ s ∧ neg L p ∈ s) ∨
       (∃ s, d = verumIntro s ∧ ^⊤ ∈ s) ∨
       (∃ s p q dp dq, d = andIntro s p q dp dq ∧ p ^⋏ q ∈ s ∧ T.DerivationOf dp (insert p s) ∧ T.DerivationOf dq (insert q s)) ∨
       (∃ s p q dpq, d = orIntro s p q dpq ∧ p ^⋎ q ∈ s ∧ T.DerivationOf dpq (insert p (insert q s))) ∨
@@ -731,7 +731,7 @@ lemma cut {s : V} (p) (hd₁ : T.Derivable (insert p s)) (hd₂ : T.Derivable (i
 
 lemma by_axm {s : V} (hs : IsFormulaSet L s) (p) (hp : p ∈ s) (hT : p ∈ T.Δ₁Class) :
     T.Derivable s := by
-  exact ⟨Internal.axm s p, by simp, Derivation.axm hs hp hT⟩
+  exact ⟨Bootstrapping.axm s p, by simp, Derivation.axm hs hp hT⟩
 
 lemma of_ss (h : T.Δ₁Class (V := V) ⊆ U.Δ₁Class) {s : V} : T.Derivable s → U.Derivable s := by
   rintro ⟨d, hd⟩; exact ⟨d, hd.1, hd.2.of_ss h⟩

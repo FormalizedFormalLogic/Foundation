@@ -1,6 +1,6 @@
-import Foundation.FirstOrder.Arithmetic.Internal.DerivabilityCondition
-import Foundation.FirstOrder.Arithmetic.Internal.Consistency
-import Foundation.FirstOrder.Arithmetic.Internal.RosserProvability
+import Foundation.FirstOrder.Bootstrapping.DerivabilityCondition
+import Foundation.FirstOrder.Bootstrapping.Consistency
+import Foundation.FirstOrder.Bootstrapping.RosserProvability
 
 /-!
 # Gödel's second incompleteness theorem for arithmetic theories stronger than $\mathsf{I}\Sigma_1$

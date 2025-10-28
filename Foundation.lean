@@ -54,12 +54,12 @@ import Foundation.FirstOrder.Arithmetic.HFS
 import Foundation.FirstOrder.Arithmetic.Induction
 import Foundation.FirstOrder.Arithmetic.Omega1.Basic
 import Foundation.FirstOrder.Arithmetic.Omega1.Nuon
-import Foundation.FirstOrder.Arithmetic.Internal.Syntax
-import Foundation.FirstOrder.Arithmetic.Internal.FixedPoint
-import Foundation.FirstOrder.Arithmetic.Internal.DerivabilityCondition
-import Foundation.FirstOrder.Arithmetic.Internal.Consistency
-import Foundation.FirstOrder.Arithmetic.Internal.WitnessComparison
-import Foundation.FirstOrder.Arithmetic.Internal.RosserProvability
+import Foundation.FirstOrder.Bootstrapping.Syntax
+import Foundation.FirstOrder.Bootstrapping.FixedPoint
+import Foundation.FirstOrder.Bootstrapping.DerivabilityCondition
+import Foundation.FirstOrder.Bootstrapping.Consistency
+import Foundation.FirstOrder.Bootstrapping.WitnessComparison
+import Foundation.FirstOrder.Bootstrapping.RosserProvability
 
 import Foundation.FirstOrder.Incompleteness.First
 import Foundation.FirstOrder.Incompleteness.Halting

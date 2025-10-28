@@ -1,11 +1,11 @@
-import Foundation.FirstOrder.Arithmetic.Internal.DerivabilityCondition.D1
-import Foundation.FirstOrder.Arithmetic.Internal.DerivabilityCondition.PeanoMinus
+import Foundation.FirstOrder.Bootstrapping.DerivabilityCondition.D1
+import Foundation.FirstOrder.Bootstrapping.DerivabilityCondition.PeanoMinus
 
 /-!
 # Hilbert-Bernays-Löb derivability condition $\mathbf{D3}$ and formalized $\Sigma_1$-completeness
 -/
 
-namespace LO.FirstOrder.Arithmetic.Internal.Arithmetic
+namespace LO.FirstOrder.Arithmetic.Bootstrapping.Arithmetic
 
 open Classical
 
@@ -151,10 +151,10 @@ theorem sigma_one_provable_of_models {σ : Sentence ℒₒᵣ} (hσ : Hierarchy 
 theorem sigma_one_complete {σ : Sentence ℒₒᵣ} (hσ : Hierarchy 𝚺 1 σ) :
     V ⊧ₘ σ → T.Provable (⌜σ⌝ : V) := fun h ↦ by
   simpa [tprovable_iff_provable]
-    using Internal.Arithmetic.sigma_one_provable_of_models T hσ h
+    using Bootstrapping.Arithmetic.sigma_one_provable_of_models T hσ h
 
 theorem provable_internalize {σ : Sentence ℒₒᵣ} :
     T.Provable (⌜σ⌝ : V) → T.Provable (⌜T.provabilityPred σ⌝ : V) := by
   simpa [models_iff] using sigma_one_complete (V := V) (σ := T.provabilityPred σ) T (by simp)
 
-end LO.FirstOrder.Arithmetic.Internal.Arithmetic
+end LO.FirstOrder.Arithmetic.Bootstrapping.Arithmetic

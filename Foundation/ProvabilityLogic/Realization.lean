@@ -1,5 +1,5 @@
 import Foundation.ProvabilityLogic.Provability
-import Foundation.FirstOrder.Arithmetic.Internal.DerivabilityCondition
+import Foundation.FirstOrder.Bootstrapping.DerivabilityCondition
 import Foundation.FirstOrder.Incompleteness.Examples
 import Foundation.Logic.HilbertStyle.Cl
 import Foundation.Modal.Hilbert.Normal.Basic

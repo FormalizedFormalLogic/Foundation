@@ -1,4 +1,4 @@
-import Foundation.FirstOrder.Arithmetic.Internal.Syntax
+import Foundation.FirstOrder.Bootstrapping.Syntax
 import Foundation.Logic.HilbertStyle.Supplemental
 
 open Classical
@@ -7,7 +7,7 @@ namespace LO.FirstOrder.Arithmetic
 
 variable {V : Type*} [ORingStructure V] [V ⊧ₘ* 𝗜𝚺₁]
 
-namespace Internal.Arithmetic
+namespace Bootstrapping.Arithmetic
 
 noncomputable def substNumeral (φ x : V) : V := subst ℒₒᵣ ?[numeral x] φ
 
@@ -103,9 +103,9 @@ instance ssnumParams.defined :
 
 end
 
-end Internal.Arithmetic
+end Bootstrapping.Arithmetic
 
-open Internal Internal.Arithmetic
+open Bootstrapping Bootstrapping.Arithmetic
 
 variable {T : Theory ℒₒᵣ} [𝗜𝚺₁ ⪯ T]
 

@@ -5,7 +5,7 @@
   - C. Cieśliński, R. Urbaniak, "Gödelizing the Yablo Sequence"
 -/
 
-import Foundation.FirstOrder.Arithmetic.Internal.DerivabilityCondition
+import Foundation.FirstOrder.Bootstrapping.DerivabilityCondition
 
 namespace LO.FirstOrder.Arithmetic
 
@@ -19,7 +19,7 @@ lemma numeral_lt_of_numeral_succ_lt {n : ℕ} {m : M} : (numeral (n + 1) : M) < 
 
 end LO.FirstOrder.Arithmetic
 
-namespace LO.FirstOrder.Arithmetic.Internal.Arithmetic
+namespace LO.FirstOrder.Arithmetic.Bootstrapping.Arithmetic
 
 variable {V : Type*} [ORingStructure V] [V ⊧ₘ* 𝗜𝚺₁]
 
@@ -37,11 +37,11 @@ lemma substNumeral_app_quote_nat_Nat (σ : Semisentence ℒₒᵣ 1) (n : ℕ) :
     Rewriting.emb_subst_eq_subst_coe₁
   ];
 
-end LO.FirstOrder.Arithmetic.Internal.Arithmetic
+end LO.FirstOrder.Arithmetic.Bootstrapping.Arithmetic
 
 namespace LO.FirstOrder
 
-open FirstOrder Arithmetic Internal Internal.Arithmetic
+open FirstOrder Arithmetic Bootstrapping Bootstrapping.Arithmetic
 
 namespace Theory
 

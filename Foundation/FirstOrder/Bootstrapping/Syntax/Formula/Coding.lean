@@ -1,8 +1,8 @@
-import Foundation.FirstOrder.Arithmetic.Internal.Syntax.Formula.Typed
-import Foundation.FirstOrder.Arithmetic.Internal.Syntax.Term.Coding
+import Foundation.FirstOrder.Bootstrapping.Syntax.Formula.Typed
+import Foundation.FirstOrder.Bootstrapping.Syntax.Term.Coding
 import Mathlib.Combinatorics.Colex
 
-open Encodable LO FirstOrder Arithmetic Internal
+open Encodable LO FirstOrder Arithmetic Bootstrapping
 
 namespace LO
 
@@ -47,9 +47,9 @@ namespace FirstOrder.Semiformula
 
 variable (V) {n : ℕ}
 
-noncomputable def typedQuote {n} : SyntacticSemiformula L n → Internal.Semiformula V L n
-  |  rel R v => Internal.Semiformula.rel R fun i ↦ ⌜v i⌝
-  | nrel R v => Internal.Semiformula.nrel R fun i ↦ ⌜v i⌝
+noncomputable def typedQuote {n} : SyntacticSemiformula L n → Bootstrapping.Semiformula V L n
+  |  rel R v => Bootstrapping.Semiformula.rel R fun i ↦ ⌜v i⌝
+  | nrel R v => Bootstrapping.Semiformula.nrel R fun i ↦ ⌜v i⌝
   |        ⊤ => ⊤
   |        ⊥ => ⊥
   |    φ ⋏ ψ => φ.typedQuote ⋏ ψ.typedQuote
@@ -70,25 +70,25 @@ lemma typedQuote_neg {n} (φ : SyntacticSemiformula L n) : (∼φ).typedQuote V 
   |     ∀' φ => simp [typedQuote, typedQuote_neg φ]
   |     ∃' φ => simp [typedQuote, typedQuote_neg φ]
 
-noncomputable instance : LCWQIsoGödelQuote (SyntacticSemiformula L) (Internal.Semiformula V L) where
+noncomputable instance : LCWQIsoGödelQuote (SyntacticSemiformula L) (Bootstrapping.Semiformula V L) where
   gq _ := ⟨typedQuote V⟩
   top := rfl
   bot := rfl
   and _ _ := rfl
   or _ _ := rfl
   neg _ := by simpa [typedQuote] using typedQuote_neg _
-  imply _ _ := by simpa [Internal.Semiformula.imp_def, imp_eq, typedQuote] using typedQuote_neg _
+  imply _ _ := by simpa [Bootstrapping.Semiformula.imp_def, imp_eq, typedQuote] using typedQuote_neg _
   all _ := rfl
   ex _ := rfl
 
 @[simp] lemma typed_quote_rel (R : L.Rel k) (v : Fin k → SyntacticSemiterm L n) :
-    (⌜rel R v⌝ : Internal.Semiformula V L n) = Internal.Semiformula.rel R fun i ↦ ⌜v i⌝ := rfl
+    (⌜rel R v⌝ : Bootstrapping.Semiformula V L n) = Bootstrapping.Semiformula.rel R fun i ↦ ⌜v i⌝ := rfl
 
 @[simp] lemma typed_quote_nrel (R : L.Rel k) (v : Fin k → SyntacticSemiterm L n) :
-    (⌜nrel R v⌝ : Internal.Semiformula V L n) = Internal.Semiformula.nrel R fun i ↦ ⌜v i⌝ := rfl
+    (⌜nrel R v⌝ : Bootstrapping.Semiformula V L n) = Bootstrapping.Semiformula.nrel R fun i ↦ ⌜v i⌝ := rfl
 
 @[simp] lemma typed_quote_shift (φ : SyntacticSemiformula L n) :
-    (⌜Rewriting.shift φ⌝ : Internal.Semiformula V L n) = Internal.Semiformula.shift ⌜φ⌝ := by
+    (⌜Rewriting.shift φ⌝ : Bootstrapping.Semiformula V L n) = Bootstrapping.Semiformula.shift ⌜φ⌝ := by
   induction φ using Semiformula.rec'
   case hrel => simp [rew_rel, *]; rfl
   case hnrel => simp [rew_nrel, *]; rfl
@@ -100,7 +100,7 @@ noncomputable instance : LCWQIsoGödelQuote (SyntacticSemiformula L) (Internal.S
   case hex φ ih => simp [*]
 
 @[simp] lemma typed_quote_substs {n m} (w : Fin n → SyntacticSemiterm L m) (φ : SyntacticSemiformula L n) :
-    (⌜φ ⇜ w⌝ : Internal.Semiformula V L m) = Internal.Semiformula.subst (fun i ↦ ⌜w i⌝) ⌜φ⌝ := by
+    (⌜φ ⇜ w⌝ : Bootstrapping.Semiformula V L m) = Bootstrapping.Semiformula.subst (fun i ↦ ⌜w i⌝) ⌜φ⌝ := by
   induction φ using Semiformula.rec' generalizing m
   case hrel => simp [rew_rel, *]; rfl
   case hnrel => simp [rew_nrel, *]; rfl
@@ -114,30 +114,30 @@ noncomputable instance : LCWQIsoGödelQuote (SyntacticSemiformula L) (Internal.S
     simp [*, Rew.q_subst, Matrix.comp_vecCons']; rfl
 
 @[simp] lemma free_quote (φ : SyntacticSemiformula L 1) :
-    (⌜Rewriting.free φ⌝ : Internal.Formula V L) = Internal.Semiformula.free ⌜φ⌝ := by
+    (⌜Rewriting.free φ⌝ : Bootstrapping.Formula V L) = Bootstrapping.Semiformula.free ⌜φ⌝ := by
   rw [← LawfulSyntacticRewriting.app_subst_fbar_zero_comp_shift_eq_free, typed_quote_substs, typed_quote_shift]
-  simp [Internal.Semiformula.free, Matrix.constant_eq_singleton]
+  simp [Bootstrapping.Semiformula.free, Matrix.constant_eq_singleton]
 
-open Internal.Arithmetic
+open Bootstrapping.Arithmetic
 
 @[simp] lemma typed_quote_eq (t u : SyntacticSemiterm ℒₒᵣ n) :
-    (⌜(“!!t = !!u” : SyntacticSemiformula ℒₒᵣ n)⌝ : Internal.Semiformula V ℒₒᵣ n) = (⌜t⌝ ≐ ⌜u⌝) := rfl
+    (⌜(“!!t = !!u” : SyntacticSemiformula ℒₒᵣ n)⌝ : Bootstrapping.Semiformula V ℒₒᵣ n) = (⌜t⌝ ≐ ⌜u⌝) := rfl
 
 @[simp] lemma typed_quote_ne (t u : SyntacticSemiterm ℒₒᵣ n) :
-    (⌜(“!!t ≠ !!u” : SyntacticSemiformula ℒₒᵣ n)⌝ : Internal.Semiformula V ℒₒᵣ n) = (⌜t⌝ ≉ ⌜u⌝) := rfl
+    (⌜(“!!t ≠ !!u” : SyntacticSemiformula ℒₒᵣ n)⌝ : Bootstrapping.Semiformula V ℒₒᵣ n) = (⌜t⌝ ≉ ⌜u⌝) := rfl
 
 @[simp] lemma typed_quote_lt (t u : SyntacticSemiterm ℒₒᵣ n) :
-    (⌜(“!!t < !!u” : SyntacticSemiformula ℒₒᵣ n)⌝ : Internal.Semiformula V ℒₒᵣ n) = (⌜t⌝ <' ⌜u⌝) := rfl
+    (⌜(“!!t < !!u” : SyntacticSemiformula ℒₒᵣ n)⌝ : Bootstrapping.Semiformula V ℒₒᵣ n) = (⌜t⌝ <' ⌜u⌝) := rfl
 
 @[simp] lemma typed_quote_nlt (t u : SyntacticSemiterm ℒₒᵣ n) :
-    (⌜(“!!t ≮ !!u” : SyntacticSemiformula ℒₒᵣ n)⌝ : Internal.Semiformula V ℒₒᵣ n) = (⌜t⌝ ≮' ⌜u⌝) := rfl
+    (⌜(“!!t ≮ !!u” : SyntacticSemiformula ℒₒᵣ n)⌝ : Bootstrapping.Semiformula V ℒₒᵣ n) = (⌜t⌝ ≮' ⌜u⌝) := rfl
 
-lemma ne_iff_val_ne (φ ψ : Internal.Semiformula V L n) : φ ≠ ψ ↔ φ.val ≠ ψ.val := Iff.ne Semiformula.ext_iff
+lemma ne_iff_val_ne (φ ψ : Bootstrapping.Semiformula V L n) : φ ≠ ψ ↔ φ.val ≠ ψ.val := Iff.ne Semiformula.ext_iff
 
-lemma typed_quote_inj {n} {φ₁ φ₂ : SyntacticSemiformula L n} : (⌜φ₁⌝ : Internal.Semiformula V L n) = ⌜φ₂⌝ → φ₁ = φ₂ :=
+lemma typed_quote_inj {n} {φ₁ φ₂ : SyntacticSemiformula L n} : (⌜φ₁⌝ : Bootstrapping.Semiformula V L n) = ⌜φ₂⌝ → φ₁ = φ₂ :=
   match φ₁, φ₂ with
   | rel R₁ v₁, rel R₂ v₂ => by
-    simp only [typed_quote_rel, Internal.Semiformula.rel, Semiformula.mk.injEq, qqRel_inj,
+    simp only [typed_quote_rel, Bootstrapping.Semiformula.rel, Semiformula.mk.injEq, qqRel_inj,
       Nat.cast_inj, rel.injEq, and_imp]
     rintro rfl
     simp only [quote_rel_inj, heq_eq_eq, true_and]
@@ -148,7 +148,7 @@ lemma typed_quote_inj {n} {φ₁ φ₂ : SyntacticSemiformula L n} : (⌜φ₁�
     ext i
     exact Semiterm.typed_quote_inj (congr_fun h i)
   | nrel R₁ v₁, nrel R₂ v₂ => by
-    simp only [typed_quote_nrel, Internal.Semiformula.nrel, Semiformula.mk.injEq, qqNRel_inj,
+    simp only [typed_quote_nrel, Bootstrapping.Semiformula.nrel, Semiformula.mk.injEq, qqNRel_inj,
       Nat.cast_inj, nrel.injEq, and_imp]
     rintro rfl
     simp only [quote_rel_inj, heq_eq_eq, true_and]
@@ -161,18 +161,18 @@ lemma typed_quote_inj {n} {φ₁ φ₂ : SyntacticSemiformula L n} : (⌜φ₁�
   |         ⊤,         ⊤ => by simp
   |         ⊥,         ⊥ => by simp
   |   φ₁ ⋏ ψ₁,   φ₂ ⋏ ψ₂ => by
-    simp only [LCWQIsoGödelQuote.and, Internal.Semiformula.and_inj, and_inj, and_imp]
+    simp only [LCWQIsoGödelQuote.and, Bootstrapping.Semiformula.and_inj, and_inj, and_imp]
     intro hφ hψ
     refine ⟨typed_quote_inj hφ, typed_quote_inj hψ⟩
   |   φ₁ ⋎ ψ₁,   φ₂ ⋎ ψ₂ => by
-    simp only [LCWQIsoGödelQuote.or, Internal.Semiformula.or_inj, or_inj, and_imp]
+    simp only [LCWQIsoGödelQuote.or, Bootstrapping.Semiformula.or_inj, or_inj, and_imp]
     intro hφ hψ
     refine ⟨typed_quote_inj hφ, typed_quote_inj hψ⟩
   |     ∀' φ₁,     ∀' φ₂ => by
-    simp only [LCWQIsoGödelQuote.all, Internal.Semiformula.all_inj, all_inj]
+    simp only [LCWQIsoGödelQuote.all, Bootstrapping.Semiformula.all_inj, all_inj]
     exact typed_quote_inj
   |     ∃' φ₁,     ∃' φ₂ => by
-    simp only [LCWQIsoGödelQuote.ex, Internal.Semiformula.ex_inj, ex_inj]
+    simp only [LCWQIsoGödelQuote.ex, Bootstrapping.Semiformula.ex_inj, ex_inj]
     exact typed_quote_inj
   | rel _ _, nrel _ _ | rel _ _, ⊤ | rel _ _, ⊥ | rel _ _, _ ⋏ _ | rel _ _, _ ⋎ _ | rel _ _, ∀' _ | rel _ _, ∃' _
   | nrel _ _, rel _ _ | nrel _ _, ⊤ | nrel _ _, ⊥ | nrel _ _, _ ⋏ _ | nrel _ _, _ ⋎ _ | nrel _ _, ∀' _ | nrel _ _, ∃' _
@@ -185,12 +185,12 @@ lemma typed_quote_inj {n} {φ₁ φ₂ : SyntacticSemiformula L n} : (⌜φ₁�
     simp [ne_iff_val_ne, qqRel, qqNRel, qqVerum, qqFalsum, qqAnd, qqOr, qqAll, qqEx]
 
 @[simp] lemma typed_quote_inj_iff {φ₁ φ₂ : SyntacticSemiformula L n} :
-    (⌜φ₁⌝ : Internal.Semiformula V L n) = ⌜φ₂⌝ ↔ φ₁ = φ₂ := ⟨typed_quote_inj, by rintro rfl; rfl⟩
+    (⌜φ₁⌝ : Bootstrapping.Semiformula V L n) = ⌜φ₂⌝ ↔ φ₁ = φ₂ := ⟨typed_quote_inj, by rintro rfl; rfl⟩
 
 noncomputable instance : GödelQuote (SyntacticSemiformula L n) V where
-  quote φ := (⌜φ⌝ : Internal.Semiformula V L n).val
+  quote φ := (⌜φ⌝ : Bootstrapping.Semiformula V L n).val
 
-lemma quote_def (φ : SyntacticSemiformula L n) : (⌜φ⌝ : V) = (⌜φ⌝ : Internal.Semiformula V L n).val := rfl
+lemma quote_def (φ : SyntacticSemiformula L n) : (⌜φ⌝ : V) = (⌜φ⌝ : Bootstrapping.Semiformula V L n).val := rfl
 
 @[simp] lemma quote_isSemiformula (φ : SyntacticSemiformula L n) : IsSemiformula L ↑n (⌜φ⌝ : V) := by simp [quote_def]
 
@@ -199,10 +199,10 @@ lemma quote_def (φ : SyntacticSemiformula L n) : (⌜φ⌝ : V) = (⌜φ⌝ : I
 @[simp] lemma quote_isSemiformul₁ (φ : SyntacticSemiformula L 1) : IsSemiformula L 1 (⌜φ⌝ : V) := by simp [quote_def]
 
 @[simp] lemma quote_rel (R : L.Rel k) (v : Fin k → SyntacticSemiterm L n) :
-    (⌜rel R v⌝ : V) = ^rel ↑k ⌜R⌝ (SemitermVec.val fun i ↦ (⌜v i⌝ : Internal.Semiterm V L n)) := rfl
+    (⌜rel R v⌝ : V) = ^rel ↑k ⌜R⌝ (SemitermVec.val fun i ↦ (⌜v i⌝ : Bootstrapping.Semiterm V L n)) := rfl
 
 @[simp] lemma quote_nrel (R : L.Rel k) (v : Fin k → SyntacticSemiterm L n) :
-    (⌜nrel R v⌝ : V) = ^nrel ↑k ⌜R⌝ (SemitermVec.val fun i ↦ (⌜v i⌝ : Internal.Semiterm V L n)) := rfl
+    (⌜nrel R v⌝ : V) = ^nrel ↑k ⌜R⌝ (SemitermVec.val fun i ↦ (⌜v i⌝ : Bootstrapping.Semiterm V L n)) := rfl
 
 @[simp] lemma quote_verum : (⌜(⊤ : SyntacticSemiformula L n)⌝ : V) = ^⊤ := rfl
 
@@ -217,10 +217,10 @@ lemma quote_def (φ : SyntacticSemiformula L n) : (⌜φ⌝ : V) = (⌜φ⌝ : I
 @[simp] lemma quote_ex (φ : SyntacticSemiformula L (n + 1)) : (⌜∃' φ⌝ : V) = ^∃ ⌜φ⌝ := rfl
 
 lemma quote_shift (φ : SyntacticSemiformula L n) :
-    (⌜Rewriting.shift φ⌝ : V) = Internal.shift L ⌜φ⌝ := by simp [quote_def]
+    (⌜Rewriting.shift φ⌝ : V) = Bootstrapping.shift L ⌜φ⌝ := by simp [quote_def]
 
 lemma quote_eq_encode (φ : SyntacticSemiformula L n) : (⌜φ⌝ : V) = ↑(encode φ) := by
-  suffices (⌜φ⌝ : Internal.Semiformula V L n).val = ↑(encode φ) from this
+  suffices (⌜φ⌝ : Bootstrapping.Semiformula V L n).val = ↑(encode φ) from this
   induction φ using rec'
   case hrel => simp [encode_rel, qqRel, coe_pair_eq_pair_coe, Semiterm.quote_eq_encode']; rfl
   case hnrel => simp [encode_nrel, qqNRel, coe_pair_eq_pair_coe, Semiterm.quote_eq_encode']; rfl
@@ -235,13 +235,13 @@ lemma coe_quote_eq_quote (φ : SyntacticSemiformula L n) : (↑(⌜φ⌝ : ℕ) 
   simp [quote_eq_encode]
 
 lemma coe_quote_eq_quote' (φ : SyntacticSemiformula L n) :
-    (↑(⌜φ⌝ : Internal.Semiformula ℕ L n).val : V) = (⌜φ⌝ : Internal.Semiformula V L n).val :=
+    (↑(⌜φ⌝ : Bootstrapping.Semiformula ℕ L n).val : V) = (⌜φ⌝ : Bootstrapping.Semiformula V L n).val :=
   coe_quote_eq_quote φ
 
 @[simp] lemma quote_inj_iff {φ₁ φ₂ : SyntacticSemiformula L n} :
     (⌜φ₁⌝ : V) = ⌜φ₂⌝ ↔ φ₁ = φ₂ := by simp [quote_eq_encode]
 
-noncomputable instance : LCWQIsoGödelQuote (Semisentence L) (Internal.Semiformula V L) where
+noncomputable instance : LCWQIsoGödelQuote (Semisentence L) (Bootstrapping.Semiformula V L) where
   gq n := ⟨fun σ ↦ (⌜(Rewriting.emb σ : SyntacticSemiformula L n)⌝)⟩
   top := by simp
   bot := by simp
@@ -256,7 +256,7 @@ noncomputable instance : LCWQIsoGödelQuote (Semisentence L) (Internal.Semiformu
   simp [gödelNumber'_def, Semiformula.quote_eq_encode]
 
 @[simp] lemma quote_quote_eq_numeral (φ : SyntacticSemiformula L n) :
-    (⌜(⌜φ⌝ : Semiterm ℒₒᵣ ℕ m)⌝ : Internal.Semiterm V ℒₒᵣ m) = Internal.Arithmetic.typedNumeral ⌜φ⌝ := by
+    (⌜(⌜φ⌝ : Semiterm ℒₒᵣ ℕ m)⌝ : Bootstrapping.Semiterm V ℒₒᵣ m) = Bootstrapping.Arithmetic.typedNumeral ⌜φ⌝ := by
   simp [←coe_quote, coe_quote_eq_quote]
 
 end Semiformula
@@ -264,26 +264,26 @@ end Semiformula
 namespace Sentence
 
 def typed_quote_def (σ : Semisentence L n) :
-    (⌜σ⌝ : Internal.Semiformula V L n) = ⌜(Rewriting.emb σ : SyntacticSemiformula L n)⌝ := rfl
+    (⌜σ⌝ : Bootstrapping.Semiformula V L n) = ⌜(Rewriting.emb σ : SyntacticSemiformula L n)⌝ := rfl
 
 @[simp] lemma typed_quote_eq (t u : ClosedSemiterm ℒₒᵣ n) :
-    (⌜(“!!t = !!u” : Semisentence ℒₒᵣ n)⌝ : Internal.Semiformula V ℒₒᵣ n) = (⌜t⌝ ≐ ⌜u⌝) := rfl
+    (⌜(“!!t = !!u” : Semisentence ℒₒᵣ n)⌝ : Bootstrapping.Semiformula V ℒₒᵣ n) = (⌜t⌝ ≐ ⌜u⌝) := rfl
 
 @[simp] lemma typed_quote_ne (t u : ClosedSemiterm ℒₒᵣ n) :
-    (⌜(“!!t ≠ !!u” : Semisentence ℒₒᵣ n)⌝ : Internal.Semiformula V ℒₒᵣ n) = (⌜t⌝ ≉ ⌜u⌝) := rfl
+    (⌜(“!!t ≠ !!u” : Semisentence ℒₒᵣ n)⌝ : Bootstrapping.Semiformula V ℒₒᵣ n) = (⌜t⌝ ≉ ⌜u⌝) := rfl
 
 @[simp] lemma typed_quote_lt (t u : ClosedSemiterm ℒₒᵣ n) :
-    (⌜(“!!t < !!u” : Semisentence ℒₒᵣ n)⌝ : Internal.Semiformula V ℒₒᵣ n) = (⌜t⌝ <' ⌜u⌝) := rfl
+    (⌜(“!!t < !!u” : Semisentence ℒₒᵣ n)⌝ : Bootstrapping.Semiformula V ℒₒᵣ n) = (⌜t⌝ <' ⌜u⌝) := rfl
 
 @[simp] lemma typed_quote_nlt (t u : ClosedSemiterm ℒₒᵣ n) :
-    (⌜(“!!t ≮ !!u” : Semisentence ℒₒᵣ n)⌝ : Internal.Semiformula V ℒₒᵣ n) = (⌜t⌝ ≮' ⌜u⌝) := rfl
+    (⌜(“!!t ≮ !!u” : Semisentence ℒₒᵣ n)⌝ : Bootstrapping.Semiformula V ℒₒᵣ n) = (⌜t⌝ ≮' ⌜u⌝) := rfl
 
 noncomputable instance : GödelQuote (Semisentence L n) V where
   quote σ := ⌜(Rewriting.emb σ : SyntacticSemiformula L n)⌝
 
 lemma quote_def (σ : Semisentence L n) : (⌜σ⌝ : V) = ⌜(Rewriting.emb σ : SyntacticSemiformula L n)⌝ := rfl
 
-def quote_eq (σ : Semisentence L n) : (⌜σ⌝ : V) = (⌜σ⌝ : Internal.Semiformula V L n).val := rfl
+def quote_eq (σ : Semisentence L n) : (⌜σ⌝ : V) = (⌜σ⌝ : Bootstrapping.Semiformula V L n).val := rfl
 
 @[simp] lemma quote_isSemiformula (φ : Semisentence L n) : IsSemiformula L ↑n (⌜φ⌝ : V) := by simp [quote_def]
 
@@ -304,7 +304,7 @@ lemma coe_quote_eq_quote (σ : Semisentence L n) : (↑(⌜σ⌝ : ℕ) : V) = �
   simp [gödelNumber'_def, quote_eq_encode]
 
 @[simp] lemma quote_quote_eq_numeral (σ : Semisentence L n) :
-    (⌜(⌜σ⌝ : Semiterm ℒₒᵣ ℕ m)⌝ : Internal.Semiterm V ℒₒᵣ m) = Internal.Arithmetic.typedNumeral ⌜σ⌝ := by
+    (⌜(⌜σ⌝ : Semiterm ℒₒᵣ ℕ m)⌝ : Bootstrapping.Semiterm V ℒₒᵣ m) = Bootstrapping.Arithmetic.typedNumeral ⌜σ⌝ := by
   simp [←coe_quote, coe_quote_eq_quote]
 
 @[simp] lemma quote_inj_iff {σ₁ σ₂ : Semisentence L n} :
@@ -314,7 +314,7 @@ end Sentence
 
 end FirstOrder
 
-namespace FirstOrder.Arithmetic.Internal
+namespace FirstOrder.Arithmetic.Bootstrapping
 
 open Encodable FirstOrder
 
@@ -336,7 +336,7 @@ lemma IsSemiformula.sound {n φ : ℕ} (h : IsSemiformula L n φ) : ∃ F : Firs
       calc
         (SemitermVec.val fun i ↦ ⌜v' i⌝).[i] = (SemitermVec.val fun i ↦ ⌜v' i⌝).[↑j] := rfl
         _                                    = ⌜v' j⌝ := by
-          simpa [Semiterm.quote_def] using SemitermVec.val_nth_eq (fun i ↦ (⌜v' i⌝ : Internal.Semiterm ℕ L n)) j
+          simpa [Semiterm.quote_def] using SemitermVec.val_nth_eq (fun i ↦ (⌜v' i⌝ : Bootstrapping.Semiterm ℕ L n)) j
         _                                    = v.[i] := hv' j
     · have : ∀ i : Fin k, ∃ t : FirstOrder.SyntacticSemiterm L n, ⌜t⌝ = v.[i] := fun i ↦ (hv.nth i.prop).sound
       choose v' hv' using this
@@ -350,7 +350,7 @@ lemma IsSemiformula.sound {n φ : ℕ} (h : IsSemiformula L n φ) : ∃ F : Firs
       calc
         (SemitermVec.val fun i ↦ ⌜v' i⌝).[i] = (SemitermVec.val fun i ↦ ⌜v' i⌝).[↑j] := rfl
         _                                    = ⌜v' j⌝ := by
-          simpa [Semiterm.quote_def] using SemitermVec.val_nth_eq (fun i ↦ (⌜v' i⌝ : Internal.Semiterm ℕ L n)) j
+          simpa [Semiterm.quote_def] using SemitermVec.val_nth_eq (fun i ↦ (⌜v' i⌝ : Bootstrapping.Semiterm ℕ L n)) j
         _                                    = v.[i] := hv' j
     · exact ⟨⊤, by simp⟩
     · exact ⟨⊥, by simp⟩
@@ -365,6 +365,6 @@ lemma IsSemiformula.sound {n φ : ℕ} (h : IsSemiformula L n φ) : ∃ F : Firs
     · rcases ih φ (by simp) hp with ⟨φ, rfl⟩
       exact ⟨∃' φ, by simp⟩
 
-end FirstOrder.Arithmetic.Internal
+end FirstOrder.Arithmetic.Bootstrapping
 
 end LO

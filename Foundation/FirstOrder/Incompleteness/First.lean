@@ -1,4 +1,4 @@
-import Foundation.FirstOrder.Arithmetic.Internal.DerivabilityCondition
+import Foundation.FirstOrder.Bootstrapping.DerivabilityCondition
 import Foundation.FirstOrder.Arithmetic.R0.Representation
 
 /-!
@@ -19,7 +19,7 @@ lemma re_iff_sigma1 {P : ℕ → Prop} : REPred P ↔ 𝚺₁-Predicate P := by
         (Primrec.to_comp <| Primrec.vector_cons.comp .id <| .const _)
     exact this.of_eq <| by intro x; simpa [List.Vector.cons_get, Matrix.empty_eq] using hφ ![x]
 
-open LO.Entailment Internal Internal.Arithmetic
+open LO.Entailment Bootstrapping Bootstrapping.Arithmetic
 
 /-- Gödel's first incompleteness theorem-/
 theorem incomplete (T : ArithmeticTheory) [T.Δ₁] [𝗥₀ ⪯ T] [T.SoundOnHierarchy 𝚺 1] :
