@@ -6,7 +6,7 @@ open Verso.Genre.Manual.InlineLean
 
 set_option linter.unusedSectionVars false
 
-open LO Entailment FirstOrder Arithmetic R0 PeanoMinus IOpen ISigma0 ISigma1 Metamath InternalArithmetic
+open LO Entailment FirstOrder Arithmetic Bootstrapping Bootstrapping.Arithmetic
 
 set_option verso.docstring.allowMissing true
 

@@ -7,8 +7,8 @@ import Foundation.ProvabilityLogic.Arithmetic
 
 namespace LO.ProvabilityLogic
 
-open Entailment Entailment.FiniteContext
-open FirstOrder Arithmetic
+open LO.Entailment Entailment.FiniteContext
+open FirstOrder
 open Modal
 open Modal.Kripke
 open ArithmeticTheory (ProvabilityLogic)

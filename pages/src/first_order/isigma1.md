@@ -19,26 +19,26 @@ lemma LO.Arithmetic.mem_iff_bit [M ⊧ₘ* 𝗜𝚺₁] {i a : M} : i ∈ a ↔ 
 The following comprehension holds.
 
 ```lean
-theorem LO.ISigma1.finset_comprehension₁ [M ⊧ₘ* 𝗜𝚺₁]
+theorem LO.FirstOrder.Arithmetic.finset_comprehension₁ [M ⊧ₘ* 𝗜𝚺₁]
     {P : M → Prop} (hP : (Γ, 1)-Predicate P) (a : M) :
     ∃ s < exp a, ∀ i < a, i ∈ s ↔ P i
 ```
 
-- [LO.ISigma1.finset_comprehension₁](https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/ISigma1/Bit.html#LO.ISigma1.finset_comprehension%E2%82%81)
+- [LO.FirstOrder.Arithmetic.finset_comprehension₁](https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/ISigma1/Bit.html#LO.FirstOrder.Arithmetic.finset_comprehension%E2%82%81)
 
-The basic concepts of set theory, such as [union](https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/ISigma1/HFS/Basic.html#LO.ISigma1.union), [inter](https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/ISigma1/HFS/Basic.html#LO.ISigma1.inter),
-[cartesian product](https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/ISigma1/HFS/Basic.html#LO.ISigma1.product),
-and [mapping](https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/ISigma1/HFS/Basic.html#LO.ISigma1.IsMapping), etc. are defined.
+The basic concepts of set theory, such as [union](https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/ISigma1/HFS/Basic.html#LO.FirstOrder.Arithmetic.union), [inter](https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/ISigma1/HFS/Basic.html#LO.FirstOrder.Arithmetic.inter),
+[cartesian product](https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/ISigma1/HFS/Basic.html#LO.FirstOrder.Arithmetic.product),
+and [mapping](https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/ISigma1/HFS/Basic.html#LO.FirstOrder.Arithmetic.IsMapping), etc. are defined.
 
 ### Seq
 
 $\mathrm{Seq}(s)$ iff $s$ is a mapping and its domain is $[0, l)$ for some $l$.
 
 ```lean
-def LO.ISigma1.Seq [M ⊧ₘ* 𝗜𝚺₁] (s : M) : Prop := IsMapping s ∧ ∃ l, domain s = under l
+def LO.FirstOrder.Arithmetic.Seq [M ⊧ₘ* 𝗜𝚺₁] (s : M) : Prop := IsMapping s ∧ ∃ l, domain s = under l
 ```
 
-- [LO.ISigma1.Seq](https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/ISigma1/HFS/Seq.html#LO.ISigma1.Seq)
+- [LO.FirstOrder.Arithmetic.Seq](https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/ISigma1/HFS/Seq.html#LO.FirstOrder.Arithmetic.Seq)
 
 ### Primitive Recursion
 
@@ -74,7 +74,7 @@ theorem Construction.result_succ (u : M) :
     c.result v (u + 1) = c.succ v u (c.result v u)
 ```
 
-- [Blueprint](https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/ISigma1/HFS/PRF.html#LO.ISigma1.PR.Blueprint), [Construction](https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/ISigma1/HFS/PRF.html#LO.ISigma1.PR.Construction), [Construction.result](https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/ISigma1/HFS/PRF.html#LO.ISigma1.PR.Construction.result), [Construction.result_zero](https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/ISigma1/HFS/PRF.html#LO.ISigma1.PR.Construction.result_zero), [Construction.result_succ](https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/ISigma1/HFS/PRF.html#LO.ISigma1.PR.Construction.result_succ)
+- [Blueprint](https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/ISigma1/HFS/PRF.html#LO.FirstOrder.Arithmetic.PR.Blueprint), [Construction](https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/ISigma1/HFS/PRF.html#LO.FirstOrder.Arithmetic.PR.Construction), [Construction.result](https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/ISigma1/HFS/PRF.html#LO.FirstOrder.Arithmetic.PR.Construction.result), [Construction.result_zero](https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/ISigma1/HFS/PRF.html#LO.FirstOrder.Arithmetic.PR.Construction.result_zero), [Construction.result_succ](https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/ISigma1/HFS/PRF.html#LO.FirstOrder.Arithmetic.PR.Construction.result_succ)
 
 ### Fixpoint
 
@@ -112,7 +112,7 @@ theorem Construction.case :
     c.Fixpoint v x ↔ c.Φ v {z | c.Fixpoint v z} x
 ```
 
-- [Blueprint](https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/ISigma1/HFS/Fixpoint.html#LO.ISigma1.Fixpoint.Blueprint), [Construction](https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/ISigma1/HFS/Fixpoint.html#LO.ISigma1.Fixpoint.Construction), [Construction.Finite](https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/ISigma1/HFS/Fixpoint.html#LO.ISigma1.Fixpoint.Construction.Finite), [Construction.Fixpoint](https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/ISigma1/HFS/Fixpoint.html#LO.ISigma1.Fixpoint.Construction.Fixpoint), [Construction.case](https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/ISigma1/HFS/Fixpoint.html#LO.ISigma1.Fixpoint.Construction.case)
+- [Blueprint](https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/ISigma1/HFS/Fixpoint.html#LO.FirstOrder.Arithmetic.Fixpoint.Blueprint), [Construction](https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/ISigma1/HFS/Fixpoint.html#LO.FirstOrder.Arithmetic.Fixpoint.Construction), [Construction.Finite](https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/ISigma1/HFS/Fixpoint.html#LO.FirstOrder.Arithmetic.Fixpoint.Construction.Finite), [Construction.Fixpoint](https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/ISigma1/HFS/Fixpoint.html#LO.FirstOrder.Arithmetic.Fixpoint.Construction.Fixpoint), [Construction.case](https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/ISigma1/HFS/Fixpoint.html#LO.FirstOrder.Arithmetic.Fixpoint.Construction.case)
 
 $\mathsf{Fix}_\Phi(\vec v, x)$ is $\Delta_1$ if $\Phi$ satisfies strong finiteness:
 
@@ -121,7 +121,7 @@ class Construction.StrongFinite (c : Construction M φ) where
   strong_finite {C : Set M} {v x} : c.Φ v C x → c.Φ v {y ∈ C | y < x} x
 ```
 
-- [StrongFinite](https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/ISigma1/HFS/Fixpoint.html#LO.ISigma1.Fixpoint.Construction.StrongFinite)
+- [StrongFinite](https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/ISigma1/HFS/Fixpoint.html#LO.FirstOrder.Arithmetic.Fixpoint.Construction.StrongFinite)
 
 Also structural induction holds.
 
@@ -132,4 +132,4 @@ theorem Construction.induction [c.StrongFinite]
     ∀ x, c.Fixpoint v x → P x
 ```
 
-- [LO.Arithmetic.Fixpoint.Construction.induction](https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/ISigma1/HFS/Fixpoint.html#LO.ISigma1.Fixpoint.Construction.induction)
+- [LO.Arithmetic.Fixpoint.Construction.induction](https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/ISigma1/HFS/Fixpoint.html#LO.FirstOrder.Arithmetic.Fixpoint.Construction.induction)

@@ -1,399 +1,264 @@
-import Foundation.FirstOrder.Arithmetic.Definability
-import Foundation.FirstOrder.PeanoMinus.Functions
-import Foundation.FirstOrder.TrueArithmetic.Basic
+import Foundation.FirstOrder.Arithmetic.HFS
 
 /-!
-# Induction schemata of Arithmetic
-
+# Various induction-related principles in $\mathsf{I}\Sigma_n$
 -/
 
-namespace LO
-
-open FirstOrder
-
-variable {L : Language} [L.ORing] {ξ : Type*} [DecidableEq ξ]
-
-namespace FirstOrder
-
-def succInd {ξ} (φ : Semiformula L ξ 1) : Formula L ξ := “!φ 0 → (∀ x, !φ x → !φ (x + 1)) → ∀ x, !φ x”
-
-def orderInd {ξ} (φ : Semiformula L ξ 1) : Formula L ξ := “(∀ x, (∀ y < x, !φ y) → !φ x) → ∀ x, !φ x”
-
-def leastNumber {ξ} (φ : Semiformula L ξ 1) : Formula L ξ := “(∃ x, !φ x) → ∃ z, !φ z ∧ ∀ x < z, ¬!φ x”
-
-end FirstOrder
-
-variable (L)
-
-def InductionScheme (Γ : Semiformula L ℕ 1 → Prop) : Theory L :=
-  { ψ | ∃ φ : Semiformula L ℕ 1, Γ φ ∧ ψ = .univCl (succInd φ) }
-
-abbrev IOpen : ArithmeticTheory := 𝗣𝗔⁻ + InductionScheme ℒₒᵣ Semiformula.Open
-
-notation "𝗜𝗢𝗽𝗲𝗻" => IOpen
-
-abbrev InductionOnHierarchy (Γ : Polarity) (k : ℕ) : ArithmeticTheory := 𝗣𝗔⁻ + InductionScheme ℒₒᵣ (Arithmetic.Hierarchy Γ k)
-
-prefix:max "𝗜𝗡𝗗 " => InductionOnHierarchy
-
-abbrev ISigma (k : ℕ) : ArithmeticTheory := 𝗜𝗡𝗗 𝚺 k
-
-prefix:max "𝗜𝚺" => ISigma
-
-notation "𝗜𝚺₀" => ISigma 0
-
-abbrev IPi (k : ℕ) : ArithmeticTheory := 𝗜𝗡𝗗 𝚷 k
-
-prefix:max "𝗜𝚷" => IPi
-
-notation "𝗜𝚷₀" => IPi 0
-
-notation "𝗜𝚺₁" => ISigma 1
-
-notation "𝗜𝚷₁" => IPi 1
-
-abbrev Peano : ArithmeticTheory := 𝗣𝗔⁻ + InductionScheme ℒₒᵣ Set.univ
-
-notation "𝗣𝗔" => Peano
-
-variable {L}
-
-variable {C C' : Semiformula ℒₒᵣ ℕ 1 → Prop}
-
-lemma InductionScheme_subset (h : ∀ {φ : Semiformula ℒₒᵣ ℕ 1},  C φ → C' φ) : InductionScheme ℒₒᵣ C ⊆ InductionScheme ℒₒᵣ C' := by
-  intro _; simp only [InductionScheme, Set.mem_setOf_eq, forall_exists_index, and_imp]; rintro φ hp rfl; exact ⟨φ, h hp, rfl⟩
-
-lemma ISigma_subset_mono {s₁ s₂} (h : s₁ ≤ s₂) : 𝗜𝚺 s₁ ⊆ 𝗜𝚺 s₂ :=
-  Set.union_subset_union_right _ (InductionScheme_subset (fun H ↦ H.mono h))
-
-lemma ISigma_weakerThan_of_le {s₁ s₂} (h : s₁ ≤ s₂) : 𝗜𝚺 s₁ ⪯ 𝗜𝚺 s₂ :=
-  Entailment.WeakerThan.ofSubset (ISigma_subset_mono h)
-
-instance : 𝗘𝗤 ⪯ 𝗜𝗡𝗗 Γ n := Entailment.WeakerThan.trans (inferInstanceAs (𝗘𝗤 ⪯ 𝗣𝗔⁻)) inferInstance
-
-instance : 𝗘𝗤 ⪯ 𝗜𝗢𝗽𝗲𝗻 := Entailment.WeakerThan.trans (inferInstanceAs (𝗘𝗤 ⪯ 𝗣𝗔⁻)) inferInstance
-
-instance : 𝗜𝗢𝗽𝗲𝗻 ⪯ 𝗜𝗡𝗗 Γ n :=
-  Entailment.WeakerThan.ofSubset <| Set.union_subset_union_right _  <| InductionScheme_subset Arithmetic.Hierarchy.of_open
-
-instance : 𝗜𝚺₀ ⪯ 𝗜𝚺₁ := ISigma_weakerThan_of_le (by decide)
-
-instance : 𝗜𝚺i ⪯ 𝗣𝗔 :=
-  Entailment.WeakerThan.ofSubset <| Set.union_subset_union_right _  <| InductionScheme_subset (by intros; trivial)
-
-lemma mem_InductionScheme_of_mem {φ : Semiformula ℒₒᵣ ℕ 1} (hp : C φ) :
-    .univCl (succInd φ) ∈ InductionScheme ℒₒᵣ C := by
-  simpa [InductionScheme] using ⟨φ, hp, rfl⟩
-
-lemma mem_IOpen_of_qfree {φ : Semiformula ℒₒᵣ ℕ 1} (hp : φ.Open) :
-    .univCl (succInd φ) ∈ InductionScheme ℒₒᵣ Semiformula.Open := by
-  exact ⟨φ, hp, rfl⟩
-
-instance : 𝗣𝗔⁻ ⪯ 𝗜𝗢𝗽𝗲𝗻 := inferInstance
-
-instance : 𝗜𝗢𝗽𝗲𝗻 ⪯ 𝗜𝚺₀ := inferInstance
-
-instance : 𝗜𝚺₁ ⪯ 𝗣𝗔 := inferInstance
-
-end LO
-
-namespace LO
-
-open FirstOrder Arithmetic PeanoMinus
+namespace LO.FirstOrder.Arithmetic
 
 variable {V : Type*} [ORingStructure V]
 
-namespace InductionScheme
+section ISigma1
 
-variable {C : Semiformula ℒₒᵣ ℕ 1 → Prop} [V ⊧ₘ* InductionScheme ℒₒᵣ C]
+variable [V ⊧ₘ* 𝗜𝚺₁]
 
-private lemma induction_eval {φ : Semiformula ℒₒᵣ ℕ 1} (hp : C φ) (v) :
-    Semiformula.Evalm V ![0] v φ →
-    (∀ x, Semiformula.Evalm V ![x] v φ → Semiformula.Evalm V ![x + 1] v φ) →
-    ∀ x, Semiformula.Evalm V ![x] v φ := by
-  have : V ⊧ₘ .univCl (succInd φ) :=
-    ModelsTheory.models (T := InductionScheme _ C) V (by simpa using mem_InductionScheme_of_mem hp)
-  revert v
-  simpa [models_iff, Semiformula.eval_univCl, succInd, Semiformula.eval_substs,
-    Semiformula.eval_rew_q Rew.toS, Function.comp, Matrix.constant_eq_singleton] using this
+@[elab_as_elim] lemma sigma1_pos_succ_induction
+    {P : V → Prop} (hP : 𝚺₁-Predicate P)
+    (zero : P 0) (one : P 1) (succ : ∀ x, P (x + 1) → P (x + 2)) : ∀ x, P x := by
+  have : ∀ x, P (x + 1) := by
+    intro x
+    induction x using ISigma1.sigma1_succ_induction
+    · definability
+    case zero => simpa
+    case succ x ih =>
+      simpa [add_assoc, one_add_one_eq_two] using succ x ih
+  intro x
+  rcases zero_or_succ x with (rfl | ⟨x, rfl⟩)
+  · exact zero
+  · exact this x
 
-@[elab_as_elim]
-lemma succ_induction {P : V → Prop}
-    (hP : ∃ e : ℕ → V, ∃ φ : Semiformula ℒₒᵣ ℕ 1, C φ ∧ ∀ x, P x ↔ Semiformula.Evalm V ![x] e φ) :
-    P 0 → (∀ x, P x → P (x + 1)) → ∀ x, P x := by
-  rcases hP with ⟨e, φ, Cp, hp⟩; simpa [←hp] using induction_eval (V := V) Cp e
+open HierarchySymbol
 
-end InductionScheme
-
-namespace InductionOnHierarchy
-
-section
-
-variable (Γ : Polarity) (m : ℕ) [V ⊧ₘ* 𝗜𝗡𝗗 Γ m]
-
-instance : V ⊧ₘ* InductionScheme ℒₒᵣ (Hierarchy Γ m) := models_of_subtheory <| inferInstanceAs (V ⊧ₘ* 𝗜𝗡𝗗 Γ m)
-
-lemma succ_induction {P : V → Prop} (hP : Γ-[m].DefinablePred P)
-    (zero : P 0) (succ : ∀ x, P x → P (x + 1)) : ∀ x, P x :=
-  haveI : V ⊧ₘ* 𝗣𝗔⁻ := models_of_subtheory <| inferInstanceAs (V ⊧ₘ* 𝗜𝗡𝗗 Γ m)
-  InductionScheme.succ_induction (P := P) (C := Hierarchy Γ m) (by
-    rcases hP with ⟨φ, hp⟩
-    haveI : Inhabited V := Classical.inhabited_of_nonempty'
-    exact ⟨φ.val.enumarateFVar, (Rew.rewriteMap φ.val.idxOfFVar) ▹ φ.val, by simp,
-      by intro x; simp [Semiformula.eval_rewriteMap, hp.df.iff]⟩)
-    zero succ
-
-lemma order_induction {P : V → Prop} (hP : Γ-[m].DefinablePred P)
-    (ind : ∀ x, (∀ y < x, P y) → P x) : ∀ x, P x := by
-  haveI : V ⊧ₘ* 𝗣𝗔⁻ := models_of_subtheory <| inferInstanceAs (V ⊧ₘ* 𝗜𝗡𝗗 Γ m)
-  suffices ∀ x, ∀ y < x, P y by
-    intro x; exact this (x + 1) x (by simp only [lt_add_iff_pos_right, lt_one_iff_eq_zero])
-  intro x; induction x using succ_induction
-  · exact Γ
-  · exact m
-  · suffices Γ-[m].DefinablePred fun x ↦ ∀ y < x, P y by exact this
-    exact HierarchySymbol.Definable.ball_blt (by simp) (hP.retraction ![0])
-  case zero => simp
-  case succ x IH =>
-    intro y hxy
-    rcases show y < x ∨ y = x from lt_or_eq_of_le (le_iff_lt_succ.mpr hxy) with (lt | rfl)
-    · exact IH y lt
-    · exact ind y IH
-  case inst => infer_instance
-
-private lemma neg_succ_induction {P : V → Prop} (hP : Γ-[m].DefinablePred P)
-    (nzero : ¬P 0) (nsucc : ∀ x, ¬P x → ¬P (x + 1)) : ∀ x, ¬P x := by
-  haveI : V ⊧ₘ* 𝗣𝗔⁻ := models_of_subtheory <| inferInstanceAs (V ⊧ₘ* 𝗜𝗡𝗗 Γ m)
-  by_contra A
-  have : ∃ x, P x := by simpa using A
-  rcases this with ⟨a, ha⟩
-  have : ∀ x ≤ a, P (a - x) := by
-    intro x; induction x using succ_induction
-    · exact Γ
-    · exact m
-    · suffices Γ-[m].DefinablePred fun x ↦ x ≤ a → P (a - x) by exact this
-      apply HierarchySymbol.Definable.imp
-      · apply HierarchySymbol.Definable.bcomp₂ (by definability) (by definability)
-      · apply HierarchySymbol.Definable.bcomp₁ (by definability)
+theorem bounded_all_sigma1_order_induction {f : V → V → V} (hf : 𝚺₁-Function₂ f) {P : V → V → Prop} (hP : 𝚺₁-Relation P)
+    (ind : ∀ x y, (∀ x' < x, ∀ y' ≤ f x y, P x' y') → P x y) : ∀ x y, P x y := by
+  have maxf : ∀ x y, ∃ m, ∀ x' ≤ x, ∀ y' ≤ y, f x' y' ≤ m := by
+    intro x y;
+    rcases sigma₁_replacement₂ hf (under (x + 1)) (under (y + 1)) |>.exists with ⟨m, hm⟩
+    exact ⟨m, fun x' hx' y' hy' ↦
+      le_of_lt <| lt_of_mem <| hm (f x' y') |>.mpr
+        ⟨x', by simpa [lt_succ_iff_le] using hx', y', by simpa [lt_succ_iff_le] using hy', rfl⟩⟩
+  intro x y
+  have : ∀ k ≤ x, ∃ W, Seq W ∧ k + 1 = lh W ∧
+      ⟪0, y⟫ ∈ W ∧
+      ∀ l < k, ∀ m < W, ∀ m' < W, ⟪l, m⟫ ∈ W → ⟪l + 1, m'⟫ ∈ W → ∀ x' ≤ x - l, ∀ y' ≤ m, f x' y' ≤ m' := by
+    intro k hk
+    induction k using ISigma1.sigma1_succ_induction
+    · apply Definable.imp (Definable.comp₂ (by definability) (by definability))
+      apply Definable.ex
+      apply Definable.and (Definable.comp₁ (by definability))
+      apply Definable.and
+        (Definable.comp₂
+          (DefinableFunction₂.comp (.var _) (.const _))
+          (DefinableFunction₁.comp (.var _)))
+      apply Definable.and
+        (Definable.comp₂ (.var 0) (by definability))
+      apply Definable.ball_lt (.var _)
+      apply Definable.ball_lt (.var _)
+      apply Definable.ball_lt (.var _)
+      apply Definable.imp
+        (Definable.comp₂ (.var _) (DefinableFunction₂.comp (.var _) (.var _)))
+      apply Definable.imp
+        (Definable.comp₂ (.var _) (DefinableFunction₂.comp (DefinableFunction₂.comp (.var _) (.const _)) (.var _)))
+      apply Definable.ball_le
+        (Definable.comp₂
+          (.var _)
+          (DefinableFunction₂.comp (.const _) (.var _)))
+      apply Definable.ball_le (.var _)
+      apply Definable.comp₂
+        (DefinableFunction₂.comp
+          (.var _) (.var _)) (.var _)
+    case zero => exact ⟨!⟦y⟧, by simp⟩
+    case succ k ih =>
+      rcases ih (le_trans le_self_add hk) with ⟨W, SW, hkW, hW₀, hWₛ⟩
+      let m₀ := SW.nth (show k < lh W by simp [←hkW])
+      have : ∃ m₁, ∀ x' ≤ x - k, ∀ y' ≤ m₀, f x' y' ≤ m₁ := maxf (x - k) m₀
+      rcases this with ⟨m₁, hm₁⟩
+      exact ⟨W ⁀' m₁, SW.seqCons m₁, by simp [SW, hkW], Seq.subset_seqCons _ _ hW₀, by
+        intro l hl m _ m' _ hm hm' x' hx' y' hy'
+        rcases show l ≤ k from lt_succ_iff_le.mp hl with (rfl | hl)
+        · have hmm₀ : m = m₀ :=
+            SW.isMapping.uniq (by simpa [mem_seqCons_iff, ←hkW] using hm) (by simp [m₀])
+          have hm'm₁ : m' = m₁ := by
+            simpa [SW, hkW, mem_seqCons_iff] using hm'
+          simpa [hm'm₁] using hm₁ x' hx' y' (by simp [←hmm₀, hy'])
+        · have Hm : ⟪l, m⟫ ∈ W := Seq.mem_seqCons_iff_of_lt (by simpa [←hkW]) |>.mp hm
+          have Hm' : ⟪l + 1, m'⟫ ∈ W := Seq.mem_seqCons_iff_of_lt (by simpa [←hkW]) |>.mp hm'
+          exact hWₛ l hl m (lt_of_mem_rng Hm) m' (lt_of_mem_rng Hm') Hm Hm' x' hx' y' hy'⟩
+  rcases this x (by rfl) with ⟨W, SW, hxW, hW₀, hWₛ⟩
+  have : ∀ i ≤ x, ∀ m < W, ⟪x - i, m⟫ ∈ W → ∀ x' ≤ i, ∀ y' ≤ m, P x' y' := by
+    intro i
+    induction i using ISigma1.sigma1_succ_induction
+    · apply Definable.imp
+        (Definable.comp₂ (.var _) (.const _))
+      apply Definable.ball_lt (.const _)
+      apply Definable.imp
+        (Definable.comp₂
+          (.const _)
+          (DefinableFunction₂.comp
+            (DefinableFunction₂.comp
+              (.const _) (.var _)) (.var _)))
+      apply Definable.ball_le (.var _)
+      apply Definable.ball_le (.var _)
+      apply Definable.comp₂ (.var _) (.var _)
     case zero =>
-      intro _; simpa using ha
-    case succ x IH =>
-      intro hx
-      have : P (a - x) := IH (le_of_add_le_left hx)
-      exact (not_imp_not.mp <| nsucc (a - (x + 1))) (by
-        rw [←PeanoMinus.sub_sub, sub_add_self_of_le]
-        · exact this
-        · exact le_tsub_of_add_le_left hx)
-    case inst => infer_instance
-  have : P 0 := by simpa using this a (by rfl)
-  contradiction
+      intro _ _ _ _ _ h y' _
+      rcases nonpos_iff_eq_zero.mp h
+      exact ind 0 y' (by simp)
+    case succ i ih' =>
+      intro hi m _ hm x' hx' y' hy'
+      have ih : ∀ m < W, ⟪x - i, m⟫ ∈ W → ∀ x' ≤ i, ∀ y' ≤ m, P x' y' := ih' (le_trans le_self_add hi)
+      refine ind x' y' ?_
+      intro x'' hx'' y'' hy''
+      let m₁ := SW.nth (show x - i < lh W by simp [←hxW, lt_succ_iff_le])
+      have : f x' y' ≤ m₁ :=
+        hWₛ (x - (i + 1)) (tsub_lt_iff_left hi |>.mpr (by simp)) m (lt_of_mem_rng hm) m₁ (by simp [m₁]) hm
+          (by rw [←Arithmetic.sub_sub, sub_add_self_of_le (show 1 ≤ x - i from le_tsub_of_add_le_left hi)]; simp [m₁])
+          x' (by simp [tsub_tsub_cancel_of_le hi, hx']) y' hy'
+      exact ih m₁ (by simp [m₁]) (by simp [m₁]) x'' (lt_succ_iff_le.mp (lt_of_lt_of_le hx'' hx')) y'' (le_trans hy'' this)
+  exact this x (by rfl) y (lt_of_mem_rng hW₀) (by simpa using hW₀) x (by rfl) y (by rfl)
 
-instance models_InductionScheme_alt : V ⊧ₘ* InductionScheme ℒₒᵣ (Arithmetic.Hierarchy Γ.alt m) := by
-  suffices
-      ∀ (φ : Semiformula ℒₒᵣ ℕ 1), Hierarchy Γ.alt m φ →
-      ∀ (f : ℕ → V),
-        Semiformula.Evalm V ![0] f φ →
-        (∀ x, Semiformula.Evalm V ![x] f φ → Semiformula.Evalm V ![x + 1] f φ) →
-        ∀ x, Semiformula.Evalm V ![x] f φ by
-    simp only [InductionScheme, Semantics.ModelsSet.setOf_iff, forall_exists_index, and_imp]
-    rintro _ φ hφ rfl
-    simpa [models_iff, Semiformula.eval_univCl, succInd, Semiformula.eval_rew_q,
-        Semiformula.eval_substs, Function.comp, Matrix.constant_eq_singleton]
-    using this φ hφ
-  intro φ hp v
-  simpa using
-    neg_succ_induction Γ m (P := fun x ↦ ¬Semiformula.Evalm V ![x] v φ)
-      (.mkPolarity (∼(Rew.rewriteMap v ▹ φ)) (by simpa using hp)
-      (by intro x; simp [←Matrix.fun_eq_vec_one, Semiformula.eval_rewriteMap]))
+lemma bounded_all_sigma1_order_induction' {f : V → V} (hf : 𝚺₁-Function₁ f) {P : V → V → Prop} (hP : 𝚺₁-Relation P)
+    (ind : ∀ x y, (∀ x' < x, ∀ y' ≤ f y, P x' y') → P x y) : ∀ x y, P x y :=
+  have : 𝚺₁-Function₂ (fun _ ↦ f) := DefinableFunction₁.comp (by simp)
+  bounded_all_sigma1_order_induction this hP ind
 
-instance models_alt : V ⊧ₘ* 𝗜𝗡𝗗 Γ.alt m := by
-  haveI : V ⊧ₘ* 𝗣𝗔⁻ := models_of_subtheory <| inferInstanceAs (V ⊧ₘ* 𝗜𝗡𝗗 Γ m)
-  simp only [InductionOnHierarchy, ModelsTheory.add_iff]; constructor <;> infer_instance
+lemma bounded_all_sigma1_order_induction₂ {fy fz : V → V → V → V}
+    (hfy : 𝚺₁-Function₃ fy) (hfz : 𝚺₁-Function₃ fz) {P : V → V → V → Prop} (hP : 𝚺₁-Relation₃ P)
+    (ind : ∀ x y z, (∀ x' < x, ∀ y' ≤ fy x y z, ∀ z' ≤ fz x y z, P x' y' z') → P x y z) :
+    ∀ x y z, P x y z := by
+  let Q : V → V → Prop := fun x w ↦ P x (π₁ w) (π₂ w)
+  have hQ : 𝚺₁-Relation Q := by
+    apply Definable.comp₃ (.var _)
+      (DefinableFunction₁.comp (.var _))
+      (DefinableFunction₁.comp (.var _))
+  let f : V → V → V := fun x w ↦ ⟪fy x (π₁ w) (π₂ w), fz x (π₁ w) (π₂ w)⟫
+  have hf : 𝚺₁-Function₂ f := by
+    simp only [f]
+    apply DefinableFunction₂.comp
+    · apply DefinableFunction₃.comp (.var _)
+      · apply DefinableFunction₁.comp (.var _)
+      · apply DefinableFunction₁.comp (.var _)
+    · apply DefinableFunction₃.comp (.var _)
+      · apply DefinableFunction₁.comp (.var _)
+      · apply DefinableFunction₁.comp (.var _)
+  intro x y z
+  simpa [Q] using bounded_all_sigma1_order_induction hf hQ (fun x w ih ↦
+    ind x (π₁ w) (π₂ w) (fun x' hx' y' hy' z' hz' ↦ by simpa [Q] using ih x' hx' ⟪y', z'⟫ (pair_le_pair hy' hz')))
+    x ⟪y, z⟫
 
-lemma least_number {P : V → Prop} (hP : Γ-[m].DefinablePred P)
-    {x} (h : P x) : ∃ y, P y ∧ ∀ z < y, ¬P z := by
-  haveI : V ⊧ₘ* 𝗣𝗔⁻ := models_of_subtheory <| inferInstanceAs (V ⊧ₘ* 𝗜𝗡𝗗 Γ m)
-  by_contra A
-  have A : ∀ z, P z → ∃ w < z, P w := by simpa using A
-  have : ∀ z, ∀ w < z, ¬P w := by
-    intro z
-    induction z using succ_induction
-    · exact Γ.alt
-    · exact m
-    · suffices Γ.alt-[m].DefinablePred fun z ↦ ∀ w < z, ¬P w by exact this
-      apply HierarchySymbol.Definable.ball_blt (by definability)
-      apply HierarchySymbol.Definable.not
-      apply HierarchySymbol.Definable.bcomp₁ (hP := by simpa using hP) (by definability)
-    case zero => simp
-    case succ x IH =>
-      intro w hx hw
-      rcases le_iff_lt_or_eq.mp (lt_succ_iff_le.mp hx) with (hx | rfl)
-      · exact IH w hx hw
-      · have : ∃ v < w, P v := A w hw
-        rcases this with ⟨v, hvw, hv⟩
-        exact IH v hvw hv
-    case inst => infer_instance
-  exact this (x + 1) x (by simp) h
+lemma bounded_all_sigma1_order_induction₃ {fy fz fw : V → V → V → V → V}
+    (hfy : 𝚺₁-Function₄ fy) (hfz : 𝚺₁-Function₄ fz) (hfw : 𝚺₁-Function₄ fw) {P : V → V → V → V → Prop} (hP : 𝚺₁-Relation₄ P)
+    (ind : ∀ x y z w, (∀ x' < x, ∀ y' ≤ fy x y z w, ∀ z' ≤ fz x y z w, ∀ w' ≤ fw x y z w, P x' y' z' w') → P x y z w) :
+    ∀ x y z w, P x y z w := by
+  let Q : V → V → Prop := fun x v ↦ P x (π₁ v) (π₁ (π₂ v)) (π₂ (π₂ v))
+  have hQ : 𝚺₁-Relation Q := by
+    apply Definable.comp₄
+      (.var _)
+      (DefinableFunction₁.comp <| .var _)
+      (DefinableFunction₁.comp <| DefinableFunction₁.comp <| .var _)
+      (DefinableFunction₁.comp <| DefinableFunction₁.comp <| .var _)
+  let f : V → V → V := fun x v ↦
+    ⟪fy x (π₁ v) (π₁ (π₂ v)) (π₂ (π₂ v)), fz x (π₁ v) (π₁ (π₂ v)) (π₂ (π₂ v)), fw x (π₁ v) (π₁ (π₂ v)) (π₂ (π₂ v))⟫
+  have hf : 𝚺₁-Function₂ f := by
+    simp only [f]
+    apply DefinableFunction₂.comp
+    · apply DefinableFunction₄.comp
+        (.var _)
+        (DefinableFunction₁.comp <| .var _)
+        (DefinableFunction₁.comp <| DefinableFunction₁.comp <| .var _)
+        (DefinableFunction₁.comp <| DefinableFunction₁.comp <| .var _)
+    · apply DefinableFunction₂.comp
+      · apply DefinableFunction₄.comp
+          (.var _)
+          (DefinableFunction₁.comp <| .var _)
+          (DefinableFunction₁.comp <| DefinableFunction₁.comp <| .var _)
+          (DefinableFunction₁.comp <| DefinableFunction₁.comp <| .var _)
+      · apply DefinableFunction₄.comp
+          (.var _)
+          (DefinableFunction₁.comp <| .var _)
+          (DefinableFunction₁.comp <| DefinableFunction₁.comp <| .var _)
+          (DefinableFunction₁.comp <| DefinableFunction₁.comp <| .var _)
+  intro x y z w
+  have := bounded_all_sigma1_order_induction hf hQ (fun x v ih ↦
+    ind x (π₁ v) (π₁ (π₂ v)) (π₂ (π₂ v)) (fun x' hx' y' hy' z' hz' w' hw' ↦ by
+      simpa [Q] using ih x' hx' ⟪y', z', w'⟫ (pair_le_pair hy' <| pair_le_pair hz' hw')))
+    x ⟪y, z, w⟫
+  simpa [Q] using this
 
-end
+lemma measured_bounded_sigma1_order_induction {m : V → V} {f : V → V} {P : V → Prop}
+    (hm : 𝚺₁-Function₁ m) (hf : 𝚺₁-Function₁ f) (hP : 𝚺₁-Predicate P)
+    (H : ∀ a, (∀ b ≤ f a, m b < m a → P b) → P a) : ∀ a, P a := by
+  let Q : V → V → Prop := fun k x ↦ m x ≤ k → P x
+  have hQ : 𝚺₁-Relation Q := by unfold Q; definability
+  have : ∀ x y, Q x y := bounded_all_sigma1_order_induction' hf hQ fun k a ih hm ↦
+    H a fun b hb hba ↦ ih (m b) (lt_of_le_of_lt' hm hba) b hb (by rfl)
+  intro a
+  exact this (m a) a (by rfl)
 
-section
+end ISigma1
 
-variable (Γ : SigmaPiDelta) (m : ℕ) [V ⊧ₘ* 𝗜𝗡𝗗 𝚺 m]
+section Induction
 
-lemma succ_induction_sigma {P : V → Prop} (hP : Γ-[m].DefinablePred P)
-    (zero : P 0) (succ : ∀ x, P x → P (x + 1)) : ∀ x, P x :=
-  match Γ with
-  | 𝚺 => succ_induction 𝚺 m hP zero succ
-  | 𝚷 =>
-    haveI : V ⊧ₘ* 𝗜𝗡𝗗 𝚷 m := models_alt 𝚺 m
-    succ_induction 𝚷 m hP zero succ
-  | 𝚫 => succ_induction 𝚺 m hP.of_delta zero succ
+variable (m : ℕ) [Fact (1 ≤ m)] [V ⊧ₘ* 𝗜𝗡𝗗𝚺 m]
 
-lemma order_induction_sigma {P : V → Prop} (hP : Γ-[m].DefinablePred P)
-    (ind : ∀ x, (∀ y < x, P y) → P x) : ∀ x, P x :=
-  match Γ with
-  | 𝚺 => order_induction 𝚺 m hP ind
-  | 𝚷 =>
-    haveI : V ⊧ₘ* 𝗜𝗡𝗗 𝚷 m := models_alt 𝚺 m
-    order_induction 𝚷 m hP ind
-  | 𝚫 => order_induction 𝚺 m hP.of_delta ind
+lemma sigma_or_pi_succ_induction {P Q : V → Prop} (hP : 𝚺-[m]-Predicate P) (hQ : 𝚷-[m]-Predicate Q)
+    (zero : P 0 ∨ Q 0) (succ : ∀ x, P x ∨ Q x → P (x + 1) ∨ Q (x + 1)) : ∀ x, P x ∨ Q x := by
+  haveI : V ⊧ₘ* 𝗜𝚺₁ := mod_ISigma_of_le (show 1 ≤ m from Fact.out)
+  intro a
+  have : ∃ p < Exp.exp (a + 1), ∀ x ≤ a, x ∈ p ↔ P x := by
+    simpa [lt_succ_iff_le] using finset_comprehension hP (a + 1)
+  rcases this with ⟨p, _, hp⟩
+  have : ∃ q < Exp.exp (a + 1), ∀ x ≤ a, x ∈ q ↔ Q x := by
+    simpa [lt_succ_iff_le] using finset_comprehension hQ (a + 1)
+  rcases this with ⟨q, _, hq⟩
+  have : ∀ x ≤ a, x ∈ p ∨ x ∈ q := by
+    intro x hx
+    induction x using ISigma1.sigma1_succ_induction
+    · clear hp hq zero succ
+      definability
+    case zero => simpa [hp, hq] using zero
+    case succ x ih =>
+      have hx' : x ≤ a := le_trans le_self_add hx
+      have : P x ∨ Q x := by simpa [hp x hx', hq x hx'] using ih hx'
+      simpa [hp (x + 1) hx, hq (x + 1) hx] using succ x this
+  have := this a (by rfl)
+  simpa [hp, hq] using this
 
-lemma least_number_sigma {P : V → Prop} (hP : Γ-[m].DefinablePred P)
-    {x} (h : P x) : ∃ y, P y ∧ ∀ z < y, ¬P z :=
-  match Γ with
-  | 𝚺 => least_number 𝚺 m hP h
-  | 𝚷 =>
-    haveI : V ⊧ₘ* 𝗜𝗡𝗗 𝚷 m := models_alt 𝚺 m
-    least_number 𝚷 m hP h
-  | 𝚫 => least_number 𝚺 m hP.of_delta h
+lemma sigma_or_pi_order_induction {P Q : V → Prop} (hP : 𝚺-[m]-Predicate P) (hQ : 𝚷-[m]-Predicate Q)
+    (ind : ∀ x, (∀ y < x, P y ∨ Q y) → P x ∨ Q x) : ∀ x, P x ∨ Q x := by
+  haveI : V ⊧ₘ* 𝗜𝚺₁ := mod_ISigma_of_le (show 1 ≤ m from Fact.out)
+  intro a
+  have : ∃ p < Exp.exp (a + 1), ∀ x ≤ a, x ∈ p ↔ P x := by
+    simpa [lt_succ_iff_le] using finset_comprehension hP (a + 1)
+  rcases this with ⟨p, _, hp⟩
+  have : ∃ q < Exp.exp (a + 1), ∀ x ≤ a, x ∈ q ↔ Q x := by
+    simpa [lt_succ_iff_le] using finset_comprehension hQ (a + 1)
+  rcases this with ⟨q, _, hq⟩
+  have : ∀ x ≤ a, x ∈ p ∨ x ∈ q := by
+    intro x hx
+    induction x using ISigma1.sigma1_order_induction
+    · clear hp hq ind
+      apply LO.FirstOrder.Arithmetic.HierarchySymbol.Definable.imp
+      · simp_all only [SigmaPiDelta.alt_sigma, Fin.isValue]
+        apply LO.FirstOrder.Arithmetic.HierarchySymbol.Definable.comp₂
+        · simp [Fin.isValue, HierarchySymbol.DefinableFunction.var]
+        · simp [HierarchySymbol.DefinableFunction.const]
+      · apply LO.FirstOrder.Arithmetic.HierarchySymbol.Definable.or
+        · apply LO.FirstOrder.Arithmetic.HierarchySymbol.Definable.comp₂
+          · simp
+          · simp
+        · apply LO.FirstOrder.Arithmetic.HierarchySymbol.Definable.comp₂
+          · simp
+          · simp
+    case ind z ih =>
+      have : P z ∨ Q z :=
+        ind z (fun y hy ↦ by
+          have hya : y ≤ a := le_trans (le_of_lt hy) hx
+          have : y ∈ p ∨ y ∈ q := ih y hy hya
+          simpa [hp, hq, hya] using this)
+      simpa [hp, hq, hx] using this
+  simpa [hp, hq] using this a (by rfl)
 
-end
+end Induction
 
-instance [V ⊧ₘ* 𝗜𝗡𝗗 𝚺 m] : V ⊧ₘ* 𝗜𝗡𝗗 Γ m := by
-  rcases Γ
-  · infer_instance
-  · exact models_alt 𝚺 m
-
-instance [V ⊧ₘ* 𝗜𝗡𝗗 𝚷 m] : V ⊧ₘ* 𝗜𝗡𝗗 Γ m := by
-  rcases Γ
-  · exact models_alt 𝚷 m
-  · infer_instance
-
-lemma mod_ISigma_of_le {n₁ n₂} (h : n₁ ≤ n₂) [V ⊧ₘ* 𝗜𝚺 n₂] : V ⊧ₘ* 𝗜𝚺 n₁ :=
-  ModelsTheory.of_ss inferInstance (ISigma_subset_mono h)
-
-instance [V ⊧ₘ* 𝗜𝚺₁] : V ⊧ₘ* 𝗜𝚺₀ := mod_ISigma_of_le (show 0 ≤ 1 from by simp)
-
-instance [V ⊧ₘ* 𝗜𝚺n] : V ⊧ₘ* 𝗜𝚷n := inferInstance
-
-instance [V ⊧ₘ* 𝗜𝚷n] : V ⊧ₘ* 𝗜𝚺n := inferInstance
-
-lemma models_ISigma_iff_models_IPi {n} : V ⊧ₘ* 𝗜𝚺 n ↔ V ⊧ₘ* 𝗜𝚷 n :=
-  ⟨fun _ ↦ inferInstance, fun _ ↦ inferInstance⟩
-
-instance [V ⊧ₘ* 𝗜𝚺 n] : V ⊧ₘ* 𝗜𝗡𝗗 Γ n :=
-  match Γ with
-  | 𝚺 => inferInstance
-  | 𝚷 => inferInstance
-
-end InductionOnHierarchy
-
-@[elab_as_elim] lemma ISigma0.succ_induction [V ⊧ₘ* 𝗜𝚺₀]
-    {P : V → Prop} (hP : 𝚺₀.DefinablePred P)
-    (zero : P 0) (succ : ∀ x, P x → P (x + 1)) : ∀ x, P x :=
-  InductionOnHierarchy.succ_induction 𝚺 0 hP zero succ
-
-@[elab_as_elim] lemma ISigma1.sigma1_succ_induction [V ⊧ₘ* 𝗜𝚺₁]
-    {P : V → Prop} (hP : 𝚺₁-Predicate P)
-    (zero : P 0) (succ : ∀ x, P x → P (x + 1)) : ∀ x, P x :=
-  InductionOnHierarchy.succ_induction 𝚺 1 hP zero succ
-
-@[elab_as_elim] lemma ISigma1.pi1_succ_induction [V ⊧ₘ* 𝗜𝚺₁]
-    {P : V → Prop} (hP : 𝚷₁-Predicate P)
-    (zero : P 0) (succ : ∀ x, P x → P (x + 1)) : ∀ x, P x :=
-  InductionOnHierarchy.succ_induction 𝚷 1 hP zero succ
-
-@[elab_as_elim] lemma ISigma0.order_induction [V ⊧ₘ* 𝗜𝚺₀]
-    {P : V → Prop} (hP : 𝚺₀-Predicate P)
-    (ind : ∀ x, (∀ y < x, P y) → P x) : ∀ x, P x :=
-  InductionOnHierarchy.order_induction 𝚺 0 hP ind
-
-@[elab_as_elim] lemma ISigma1.sigma1_order_induction [V ⊧ₘ* 𝗜𝚺₁]
-    {P : V → Prop} (hP : 𝚺₁-Predicate P)
-    (ind : ∀ x, (∀ y < x, P y) → P x) : ∀ x, P x :=
-  InductionOnHierarchy.order_induction 𝚺 1 hP ind
-
-@[elab_as_elim] lemma ISigma1.pi1_order_induction [V ⊧ₘ* 𝗜𝚺₁]
-    {P : V → Prop} (hP : 𝚷₁-Predicate P)
-    (ind : ∀ x, (∀ y < x, P y) → P x) : ∀ x, P x :=
-  InductionOnHierarchy.order_induction 𝚷 1 hP ind
-
-lemma ISigma0.least_number [V ⊧ₘ* 𝗜𝚺₀] {P : V → Prop} (hP : 𝚺₀-Predicate P)
-    {x} (h : P x) : ∃ y, P y ∧ ∀ z < y, ¬P z :=
-  InductionOnHierarchy.least_number 𝚺 0 hP h
-
-@[elab_as_elim] lemma ISigma1.succ_induction [V ⊧ₘ* 𝗜𝚺₁] (Γ)
-    {P : V → Prop} (hP : Γ-[1]-Predicate P)
-    (zero : P 0) (succ : ∀ x, P x → P (x + 1)) : ∀ x, P x :=
-  InductionOnHierarchy.succ_induction_sigma Γ 1 hP zero succ
-
-@[elab_as_elim] lemma ISigma1.order_induction [V ⊧ₘ* 𝗜𝚺₁] (Γ)
-    {P : V → Prop} (hP : Γ-[1]-Predicate P)
-    (ind : ∀ x, (∀ y < x, P y) → P x) : ∀ x, P x :=
-  InductionOnHierarchy.order_induction_sigma Γ 1 hP ind
-
-
-instance [V ⊧ₘ* 𝗜𝗢𝗽𝗲𝗻] : V ⊧ₘ* 𝗣𝗔⁻ := models_of_subtheory <| inferInstanceAs (V ⊧ₘ* 𝗜𝗢𝗽𝗲𝗻)
-
-instance [V ⊧ₘ* 𝗜𝚺₀] : V ⊧ₘ* 𝗜𝗢𝗽𝗲𝗻 := models_of_subtheory <| inferInstanceAs (V ⊧ₘ* 𝗜𝚺₀)
-
-instance [V ⊧ₘ* 𝗜𝚺₁] : V ⊧ₘ* 𝗜𝚺₀ := inferInstance
-
-def mod_ISigma_of_le {n₁ n₂} (h : n₁ ≤ n₂) [V ⊧ₘ* 𝗜𝚺 n₂] : V ⊧ₘ* 𝗜𝚺 n₁ :=
-  ModelsTheory.of_ss inferInstance (ISigma_subset_mono h)
-
-lemma models_succInd (φ : Semiformula ℒₒᵣ ℕ 1) : ℕ ⊧ₘ (succInd φ).univCl := by
-  suffices
-    ∀ f : ℕ → ℕ,
-      Semiformula.Evalm ℕ ![0] f φ →
-      (∀ x, Semiformula.Evalm ℕ ![x] f φ → Semiformula.Evalm ℕ ![x + 1] f φ) →
-        ∀ x, Semiformula.Evalm ℕ ![x] f φ by
-    simpa [Semiformula.eval_univCl, succInd, models_iff, Matrix.constant_eq_singleton, Semiformula.eval_substs]
-  intro e hzero hsucc x; induction' x with x ih
-  · exact hzero
-  · exact hsucc x ih
-
-instance models_ISigma (Γ k) : ℕ ⊧ₘ* 𝗜𝗡𝗗 Γ k := by
-  simp only [ModelsTheory.add_iff, instModelsTheoryNat, InductionScheme,
-    Semantics.ModelsSet.setOf_iff, forall_exists_index, and_imp, true_and]
-  rintro _ φ _ rfl; simp [models_succInd]
-
-instance models_ISigmaZero : ℕ ⊧ₘ* 𝗜𝚺₀ := inferInstance
-
-instance models_ISigmaOne : ℕ ⊧ₘ* 𝗜𝚺₁ := inferInstance
-
-instance models_Peano : ℕ ⊧ₘ* 𝗣𝗔 := by
-  simp only [Peano, InductionScheme, ModelsTheory.add_iff, instModelsTheoryNat,
-    Semantics.ModelsSet.setOf_iff, forall_exists_index, and_imp, true_and]
-  rintro _ φ _ rfl; simp [models_succInd]
-
-instance : Entailment.Consistent (𝗜𝗡𝗗 Γ k) := (𝗜𝗡𝗗 Γ k).consistent_of_sound (Eq ⊥) rfl
-
-instance : Entailment.Consistent 𝗣𝗔 := 𝗣𝗔.consistent_of_sound (Eq ⊥) rfl
-
-instance : 𝗣𝗔 ⪯ 𝗧𝗔 := inferInstance
-
-instance (T : ArithmeticTheory) [𝗣𝗔⁻ ⪯ T] : 𝗥₀ ⪯ T :=
-  Entailment.WeakerThan.trans (inferInstanceAs (𝗥₀ ⪯ 𝗣𝗔⁻)) inferInstance
-
-instance (T : ArithmeticTheory) [𝗜𝚺₀ ⪯ T] : 𝗣𝗔⁻ ⪯ T :=
-  Entailment.WeakerThan.trans (inferInstanceAs (𝗣𝗔⁻ ⪯ 𝗜𝚺₀)) inferInstance
-
-instance (T : ArithmeticTheory) [𝗜𝚺₁ ⪯ T] : 𝗣𝗔⁻ ⪯ T :=
-  Entailment.WeakerThan.trans (inferInstanceAs (𝗣𝗔⁻ ⪯ 𝗜𝚺₁)) inferInstance
-
-instance (T : ArithmeticTheory) [𝗣𝗔 ⪯ T] : 𝗣𝗔⁻ ⪯ T :=
-  Entailment.WeakerThan.trans (inferInstanceAs (𝗣𝗔⁻ ⪯ 𝗣𝗔)) inferInstance
-
-end LO
+end LO.FirstOrder.Arithmetic

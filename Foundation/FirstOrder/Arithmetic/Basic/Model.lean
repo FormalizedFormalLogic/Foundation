@@ -1,9 +1,6 @@
 import Foundation.FirstOrder.Arithmetic.Basic.Misc
 
-namespace LO
-
-namespace FirstOrder
-namespace Arithmetic
+namespace LO.FirstOrder.Arithmetic
 
 private lemma consequence_of_aux (T : ArithmeticTheory) [𝗘𝗤 ⪯ T] (φ : Sentence ℒₒᵣ)
     (H : ∀ (M : Type w)
@@ -104,6 +101,4 @@ lemma consistent_of_sound [SoundOn T F] (hF : F ⊥) : Entailment.Consistent T :
 
 end ArithmeticTheory
 
-end FirstOrder
-
-end LO
+end LO.FirstOrder

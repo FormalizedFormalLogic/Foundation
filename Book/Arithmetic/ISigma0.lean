@@ -17,10 +17,10 @@ tag := "first-order-isigma0"
 The graph of exponential $`\mathrm{Exp}(x, y)` is definable by $`\Sigma_0`-fomrula,
 and its inductive properties are proved in $`\mathsf{I}\Sigma_0`.
 
-{docstring LO.ISigma0.exponential_definable}
+{docstring LO.FirstOrder.Arithmetic.exponential_definable}
 
-{docstring LO.ISigma0.Exponential.exponential_zero_one}
+{docstring LO.FirstOrder.Arithmetic.Exponential.exponential_zero_one}
 
-{docstring LO.ISigma0.Exponential.exponential_succ_mul_two}
+{docstring LO.FirstOrder.Arithmetic.Exponential.exponential_succ_mul_two}
 
 Other basic functions, such as $`\log x, |x|` are defined by using exponential.
