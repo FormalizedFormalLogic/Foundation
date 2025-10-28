@@ -170,11 +170,11 @@ Now assume that $U$ is a theory of arithmetic stronger than $\mathsf{R_0}$ and
 $T$ be a theory  of arithmetic stronger than $\mathsf{I}\Sigma_1$.
 The following holds, thanks to the completeness theorem.
 - $U \vdash \sigma \iff T \vdash \mathrm{Provable}_U(\ulcorner \sigma \urcorner)$
-  - [LO.ISigma1.provable_complete](https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/Incompleteness/StandardProvability/DerivabilityCondition.html#LO.ISigma1.provable%E2%82%90_complete)
+  - [LO.FirstOrder.Arithmetic.provable_complete](https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/Incompleteness/StandardProvability/DerivabilityCondition.html#LO.FirstOrder.Arithmetic.provable%E2%82%90_complete)
 - $T \vdash \mathrm{Provable}_U(\ulcorner \sigma \to \pi \urcorner) \to \mathrm{Provable}_U(\ulcorner \sigma \urcorner) \to \mathrm{Provable}_U(\ulcorner \pi \urcorner)$
-  - [LO.ISigma1.provable_D2](https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/Incompleteness/StandardProvability/DerivabilityCondition.html#LO.ISigma1.provable%E2%82%90_D2)
+  - [LO.FirstOrder.Arithmetic.provable_D2](https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/Incompleteness/StandardProvability/DerivabilityCondition.html#LO.FirstOrder.Arithmetic.provable%E2%82%90_D2)
 - $T \vdash \mathrm{Provable}_U(\ulcorner \sigma \urcorner) \to \mathrm{Provable}_U(\ulcorner \mathrm{Provable}_U(\ulcorner \sigma \urcorner) \urcorner)$
-  - [LO.ISigma1.provable_D3](https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/Incompleteness/StandardProvability/DerivabilityCondition.html#LO.ISigma1.provable%E2%82%90_D3)
+  - [LO.FirstOrder.Arithmetic.provable_D3](https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/Incompleteness/StandardProvability/DerivabilityCondition.html#LO.FirstOrder.Arithmetic.provable%E2%82%90_D3)
 
 ## Second Incompleteness Theorem
 
@@ -226,10 +226,10 @@ $$
   ∎
 
 ```lean
-theorem LO.ISigma1.diagonal (θ : Semisentence ℒₒᵣ 1) :
+theorem LO.FirstOrder.Arithmetic.diagonal (θ : Semisentence ℒₒᵣ 1) :
     T ⊢ fixpoint θ ⭤ θ/[⌜fixpoint θ⌝]
 ```
-- [LO.ISigma1.diagonal](https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/Incompleteness/FixedPoint.html#LO.ISigma1.diagonal)
+- [LO.FirstOrder.Arithmetic.diagonal](https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/Incompleteness/FixedPoint.html#LO.FirstOrder.Arithmetic.diagonal)
 
 ### Main Theorem
 
@@ -268,13 +268,13 @@ theorem gödel_iff_consistency
 #### Theorem: $T$ cannot prove its own consistency, i.e., $T \nvdash \mathrm{Con}_T$ if $T$ is consistent. Moreover, $\mathrm{Con}_T$ is undecidable from $T$ if $\mathbb{N} \models T$.
 
 ```lean
-theorem LO.ISigma1.gödel_second_incompleteness
+theorem LO.FirstOrder.Arithmetic.gödel_second_incompleteness
     (T : ArithmeticTheory) [𝗜𝚺₁ ≼ T] [T.Δ₁] [System.Consistent T] :
     T ⊬ T.consistent
 
-theorem LO.ISigma1.inconsistent_undecidable
+theorem LO.FirstOrder.Arithmetic.inconsistent_undecidable
     (T : ArithmeticTheory) [𝗜𝚺₁ ≼ T] [T.Δ₁] [T.Sigma1Sound] :
     Independent (T : Axiom ℒₒᵣ) (T.consistent : Sentence ℒₒᵣ)
 ```
-- [LO.ISigma1.gödel_second_incompleteness](https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/Incompleteness/Second.html#LO.ISigma1.gödel_second_incompleteness)
-- [LO.ISigma1.inconsistent_undecidable](https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/Incompleteness/Second.html#LO.ISigma1.inconsistent_undecidable)
+- [LO.FirstOrder.Arithmetic.gödel_second_incompleteness](https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/Incompleteness/Second.html#LO.FirstOrder.Arithmetic.gödel_second_incompleteness)
+- [LO.FirstOrder.Arithmetic.inconsistent_undecidable](https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/Incompleteness/Second.html#LO.FirstOrder.Arithmetic.inconsistent_undecidable)

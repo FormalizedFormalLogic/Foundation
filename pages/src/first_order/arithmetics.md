@@ -90,25 +90,25 @@ Since `Exponential` and `Exponential.total` are defined in all the model of $\ma
 [`⟪x, y⟫`]: https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/IOpen/Basic.html#LO.IOpen.pair
 [`π₁ x`]: https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/IOpen/Basic.html#LO.IOpen.pi%E2%82%81
 [`π₂ x`]: https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/IOpen/Basic.html#LO.IOpen.pi%E2%82%82
-[`exp x`]: https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/ISigma0/Exponential/Exp.html#LO.ISigma0.Exponential
-[`log x`]: https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/ISigma0/Exponential/Log.html#LO.ISigma0.log
-[`‖x‖`]: https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/ISigma0/Exponential/Log.html#LO.ISigma0.binaryLength
+[`exp x`]: https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/ISigma0/Exponential/Exp.html#LO.FirstOrder.Arithmetic.Exponential
+[`log x`]: https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/ISigma0/Exponential/Log.html#LO.FirstOrder.Arithmetic.log
+[`‖x‖`]: https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/ISigma0/Exponential/Log.html#LO.FirstOrder.Arithmetic.binaryLength
 [`x ⨳ y`]: https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/Omega1/Basic.html#LO.Omega1.instSmash
 [`nuon x`]: https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/Omega1/Nuon.html#LO.Omega1.nuon
-[`x ∈ y`]: https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/ISigma1/Bit.html#LO.ISigma1.Bit
-[`∅`]: https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/ISigma1/Bit.html#LO.ISigma1.instEmptyCollection_foundation
-[`x ⊆ y`]: https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/ISigma1/Bit.html#LO.ISigma1.instHasSubset_foundation
-[`⋃ʰᶠ x`]: https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/ISigma1/HFS/Basic.html#LO.ISigma1.sUnion
-[`x ∪ y`]: https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/ISigma1/HFS/Basic.html#LO.ISigma1.union
-[`x ∩ y`]: https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/ISigma1/HFS/Basic.html#LO.ISigma1.instInter_foundation
-[`⋂ʰᶠ x`]: https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/ISigma1/HFS/Basic.html#LO.ISigma1.sInter
-[`x ×ʰᶠ y`]: https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/ISigma1/HFS/Basic.html#LO.ISigma1.product
-[`domain x`]: https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/ISigma1/HFS/Basic.html#LO.ISigma1.domain
-[`IsMapping x`]: https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/ISigma1/HFS/Basic.html#LO.ISigma1.IsMapping
-[`Seq x`]: https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/ISigma1/HFS/Seq.html#LO.ISigma1.Seq
-[`lh x`]: https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/ISigma1/HFS/Seq.html#LO.ISigma1.lh
-[`x ⁀' y`]: https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/ISigma1/HFS/Seq.html#LO.ISigma1.seqCons
-[`znth x`]: https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/ISigma1/HFS/Seq.html#LO.ISigma1.znth
+[`x ∈ y`]: https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/ISigma1/Bit.html#LO.FirstOrder.Arithmetic.Bit
+[`∅`]: https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/ISigma1/Bit.html#LO.FirstOrder.Arithmetic.instEmptyCollection_foundation
+[`x ⊆ y`]: https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/ISigma1/Bit.html#LO.FirstOrder.Arithmetic.instHasSubset_foundation
+[`⋃ʰᶠ x`]: https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/ISigma1/HFS/Basic.html#LO.FirstOrder.Arithmetic.sUnion
+[`x ∪ y`]: https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/ISigma1/HFS/Basic.html#LO.FirstOrder.Arithmetic.union
+[`x ∩ y`]: https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/ISigma1/HFS/Basic.html#LO.FirstOrder.Arithmetic.instInter_foundation
+[`⋂ʰᶠ x`]: https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/ISigma1/HFS/Basic.html#LO.FirstOrder.Arithmetic.sInter
+[`x ×ʰᶠ y`]: https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/ISigma1/HFS/Basic.html#LO.FirstOrder.Arithmetic.product
+[`domain x`]: https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/ISigma1/HFS/Basic.html#LO.FirstOrder.Arithmetic.domain
+[`IsMapping x`]: https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/ISigma1/HFS/Basic.html#LO.FirstOrder.Arithmetic.IsMapping
+[`Seq x`]: https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/ISigma1/HFS/Seq.html#LO.FirstOrder.Arithmetic.Seq
+[`lh x`]: https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/ISigma1/HFS/Seq.html#LO.FirstOrder.Arithmetic.lh
+[`x ⁀' y`]: https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/ISigma1/HFS/Seq.html#LO.FirstOrder.Arithmetic.seqCons
+[`znth x`]: https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/ISigma1/HFS/Seq.html#LO.FirstOrder.Arithmetic.znth
 [`Semiterm L x y`]: https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/ISigma1/Bootstrapping/Term/Basic.html#LO.FirstOrder.Arithmetic.Bootstrapping.IsSemiterm
 [`L.termSubst w t`]: https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/ISigma1/Bootstrapping/Term/Functions.html#LO.FirstOrder.Arithmetic.Bootstrapping.Language.termSubst
 [`Semiformula L x y`]: https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/ISigma1/Bootstrapping/Formula/Basic.html#LO.FirstOrder.Arithmetic.Bootstrapping.IsSemiformula

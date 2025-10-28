@@ -8,7 +8,7 @@ open Verso.Genre
 open Verso.Genre.Manual
 open Verso.Genre.Manual.InlineLean
 
-open LO FirstOrder Arithmetic PeanoMinus ISigma0
+open LO FirstOrder Arithmetic
 
 set_option verso.docstring.allowMissing true
 set_option linter.tacticAnalysis false
@@ -30,11 +30,11 @@ First, the graph of the exponential function must be defined. This is achieved b
 
 1 By working in model of $`\mathsf{I}Σ_1`, declare the semantic definition of the graph of the exponential function.
 
-{docstring LO.ISigma0.Exponential}
+{docstring LO.FirstOrder.Arithmetic.Exponential}
 
 2 Declare the syntactic definition of the semantic definition.
 
-{docstring LO.ISigma0.Exponential.defined}
+{docstring LO.FirstOrder.Arithmetic.Exponential.defined}
 
 Then prove the totality.
 
