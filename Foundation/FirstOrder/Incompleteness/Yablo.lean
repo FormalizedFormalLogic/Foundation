@@ -5,7 +5,7 @@
   - C. Cieśliński, R. Urbaniak, "Gödelizing the Yablo Sequence"
 -/
 
-import Foundation.FirstOrder.Internal.DerivabilityCondition
+import Foundation.FirstOrder.Arithmetic.Internal.DerivabilityCondition
 
 namespace LO.PeanoMinus
 

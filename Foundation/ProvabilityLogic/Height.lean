@@ -1,5 +1,5 @@
 import Foundation.FirstOrder.Incompleteness.Examples
-import Foundation.FirstOrder.Internal.DerivabilityCondition
+import Foundation.FirstOrder.Arithmetic.Internal.DerivabilityCondition
 import Foundation.ProvabilityLogic.Provability
 import Foundation.Vorspiel.ENat
 

@@ -1,4 +1,4 @@
-import Foundation.FirstOrder.PeanoMinus.Basic
+import Foundation.FirstOrder.Arithmetic.PeanoMinus.Basic
 
 /-!
 

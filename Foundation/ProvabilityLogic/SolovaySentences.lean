@@ -1,8 +1,8 @@
 import Foundation.ProvabilityLogic.Realization
 import Foundation.Modal.Kripke.Rank
-import Foundation.FirstOrder.Internal.WitnessComparison
-import Foundation.FirstOrder.Internal.FixedPoint
-import Foundation.FirstOrder.Internal.Consistency
+import Foundation.FirstOrder.Arithmetic.Internal.WitnessComparison
+import Foundation.FirstOrder.Arithmetic.Internal.FixedPoint
+import Foundation.FirstOrder.Arithmetic.Internal.Consistency
 import Foundation.ProvabilityLogic.GL.Soundness
 import Foundation.ProvabilityLogic.Height
 

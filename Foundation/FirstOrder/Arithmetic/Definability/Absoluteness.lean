@@ -1,5 +1,5 @@
 import Foundation.FirstOrder.Arithmetic.Definability.BoundedDefinable
-import Foundation.FirstOrder.Arithmetic.R0
+import Foundation.FirstOrder.Arithmetic.R0.Basic
 
 namespace LO.FirstOrder.Arithmetic
 

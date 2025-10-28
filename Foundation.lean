@@ -38,39 +38,37 @@ import Foundation.FirstOrder.Order.Le
 import Foundation.FirstOrder.Interpretation
 
 import Foundation.FirstOrder.Arithmetic.Basic
-import Foundation.FirstOrder.Arithmetic.Basic.BoundedQuantifier
 import Foundation.FirstOrder.Arithmetic.Definability
+import Foundation.FirstOrder.Arithmetic.Schemata
+
+import Foundation.FirstOrder.Arithmetic.R0.Basic
+import Foundation.FirstOrder.Arithmetic.R0.Representation
+
+import Foundation.FirstOrder.Arithmetic.Q.Basic
+
+import Foundation.FirstOrder.Arithmetic.PeanoMinus.Basic
+import Foundation.FirstOrder.Arithmetic.PeanoMinus.Functions
+import Foundation.FirstOrder.Arithmetic.PeanoMinus.Q
+
+import Foundation.FirstOrder.Arithmetic.TA.Basic
+import Foundation.FirstOrder.Arithmetic.TA.Nonstandard
+
+import Foundation.FirstOrder.Arithmetic.IOpen.Basic
+
+import Foundation.FirstOrder.Arithmetic.Exponential
+
+import Foundation.FirstOrder.Arithmetic.HFS
 import Foundation.FirstOrder.Arithmetic.Induction
 
-import Foundation.FirstOrder.Arithmetic.R0
-import Foundation.FirstOrder.R0.Representation
+import Foundation.FirstOrder.Arithmetic.Omega1.Basic
+import Foundation.FirstOrder.Arithmetic.Omega1.Nuon
 
-import Foundation.FirstOrder.Q.Basic
-
-import Foundation.FirstOrder.PeanoMinus.Basic
-import Foundation.FirstOrder.PeanoMinus.Functions
-import Foundation.FirstOrder.PeanoMinus.Q
-
-import Foundation.FirstOrder.TrueArithmetic.Basic
-import Foundation.FirstOrder.TrueArithmetic.Nonstandard
-
-import Foundation.FirstOrder.IOpen.Basic
-
-import Foundation.FirstOrder.ISigma0.Exponential
-
-import Foundation.FirstOrder.ISigma1.Bit
-import Foundation.FirstOrder.ISigma1.HFS
-import Foundation.FirstOrder.ISigma1.Ind
-
-import Foundation.FirstOrder.Omega1.Basic
-import Foundation.FirstOrder.Omega1.Nuon
-
-import Foundation.FirstOrder.Internal.Syntax
-import Foundation.FirstOrder.Internal.FixedPoint
-import Foundation.FirstOrder.Internal.DerivabilityCondition
-import Foundation.FirstOrder.Internal.Consistency
-import Foundation.FirstOrder.Internal.WitnessComparison
-import Foundation.FirstOrder.Internal.RosserProvability
+import Foundation.FirstOrder.Arithmetic.Internal.Syntax
+import Foundation.FirstOrder.Arithmetic.Internal.FixedPoint
+import Foundation.FirstOrder.Arithmetic.Internal.DerivabilityCondition
+import Foundation.FirstOrder.Arithmetic.Internal.Consistency
+import Foundation.FirstOrder.Arithmetic.Internal.WitnessComparison
+import Foundation.FirstOrder.Arithmetic.Internal.RosserProvability
 
 import Foundation.FirstOrder.Incompleteness.First
 import Foundation.FirstOrder.Incompleteness.Halting
@@ -83,7 +81,6 @@ import Foundation.FirstOrder.Incompleteness.Tarski
 import Foundation.FirstOrder.Incompleteness.Yablo
 
 import Foundation.FirstOrder.SetTheory.Basic
-import Foundation.FirstOrder.SetTheory.Axioms
 
 import Foundation.FirstOrder.Z.Basic
 import Foundation.FirstOrder.Z.Ordinal

@@ -1,4 +1,4 @@
-import Foundation.FirstOrder.Internal.FixedPoint
+import Foundation.FirstOrder.Arithmetic.Internal.FixedPoint
 import Foundation.Meta.ClProver
 
 namespace LO.ISigma1

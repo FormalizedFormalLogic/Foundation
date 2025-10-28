@@ -1,5 +1,5 @@
-import Foundation.FirstOrder.Internal.DerivabilityCondition
-import Foundation.FirstOrder.R0.Representation
+import Foundation.FirstOrder.Arithmetic.Internal.DerivabilityCondition
+import Foundation.FirstOrder.Arithmetic.R0.Representation
 
 /-!
 # Gödel's first incompleteness theorem for arithmetic theories stronger than $\mathsf{R_0}$

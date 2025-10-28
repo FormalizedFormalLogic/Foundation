@@ -1,5 +1,5 @@
 import Foundation.ProvabilityLogic.Realization
-import Foundation.FirstOrder.Internal.FixedPoint
+import Foundation.FirstOrder.Arithmetic.Internal.FixedPoint
 
 /-!
 # Provability logic of arithmetic theory
