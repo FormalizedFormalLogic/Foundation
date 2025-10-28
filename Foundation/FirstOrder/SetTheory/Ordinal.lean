@@ -1,14 +1,12 @@
-import Foundation.FirstOrder.Z.Basic
+import Foundation.FirstOrder.SetTheory.Z
 
 /-!
-# Ordinals and transitive sets in Zermelo set theory
+# Ordinals and transitive sets
 
 reference: Ralf Schindler, "Set Theory, Exploring Independence and Truth"
 -/
 
-namespace LO.Zermelo
-
-open FirstOrder SetTheory
+namespace LO.FirstOrder.SetTheory
 
 variable {V : Type*} [SetStructure V] [Nonempty V] [V ⊧ₘ* 𝗭]
 
@@ -471,4 +469,4 @@ noncomputable def left (x : V) : V := Classical.choose! <| left_existsUnique R x
 
 end SetLike
 
-end LO.Zermelo
+end LO.FirstOrder.SetTheory

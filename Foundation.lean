@@ -40,29 +40,20 @@ import Foundation.FirstOrder.Interpretation
 import Foundation.FirstOrder.Arithmetic.Basic
 import Foundation.FirstOrder.Arithmetic.Definability
 import Foundation.FirstOrder.Arithmetic.Schemata
-
 import Foundation.FirstOrder.Arithmetic.R0.Basic
 import Foundation.FirstOrder.Arithmetic.R0.Representation
-
 import Foundation.FirstOrder.Arithmetic.Q.Basic
-
 import Foundation.FirstOrder.Arithmetic.PeanoMinus.Basic
 import Foundation.FirstOrder.Arithmetic.PeanoMinus.Functions
 import Foundation.FirstOrder.Arithmetic.PeanoMinus.Q
-
 import Foundation.FirstOrder.Arithmetic.TA.Basic
 import Foundation.FirstOrder.Arithmetic.TA.Nonstandard
-
 import Foundation.FirstOrder.Arithmetic.IOpen.Basic
-
 import Foundation.FirstOrder.Arithmetic.Exponential
-
 import Foundation.FirstOrder.Arithmetic.HFS
 import Foundation.FirstOrder.Arithmetic.Induction
-
 import Foundation.FirstOrder.Arithmetic.Omega1.Basic
 import Foundation.FirstOrder.Arithmetic.Omega1.Nuon
-
 import Foundation.FirstOrder.Arithmetic.Internal.Syntax
 import Foundation.FirstOrder.Arithmetic.Internal.FixedPoint
 import Foundation.FirstOrder.Arithmetic.Internal.DerivabilityCondition
@@ -81,14 +72,9 @@ import Foundation.FirstOrder.Incompleteness.Tarski
 import Foundation.FirstOrder.Incompleteness.Yablo
 
 import Foundation.FirstOrder.SetTheory.Basic
-
-import Foundation.FirstOrder.Z.Basic
-import Foundation.FirstOrder.Z.Ordinal
-import Foundation.FirstOrder.Z.Function
-
-import Foundation.FirstOrder.ZF.Basic
-
-import Foundation.FirstOrder.ZFC.Basic
+import Foundation.FirstOrder.SetTheory.Z
+import Foundation.FirstOrder.SetTheory.Function
+import Foundation.FirstOrder.SetTheory.Ordinal
 
 import Foundation.FirstOrder.Hauptsatz
 

@@ -7,90 +7,9 @@ import Foundation.Vorspiel.ExistsUnique
 reference: Ralf Schindler, "Set Theory, Exploring Independence and Truth"
 -/
 
-namespace LO
+namespace LO.FirstOrder.SetTheory
 
-open FirstOrder SetTheory
-
-inductive Zermelo : Theory ℒₛₑₜ
-  | axiom_of_equality : ∀ φ ∈ 𝗘𝗤, Zermelo φ
-  | axiom_of_empty_set : Zermelo Axiom.empty
-  | axiom_of_extentionality : Zermelo Axiom.extentionality
-  | axiom_of_pairing : Zermelo Axiom.pairing
-  | axiom_of_union : Zermelo Axiom.union
-  | axiom_of_power_set : Zermelo Axiom.power
-  | axiom_of_infinity : Zermelo Axiom.infinity
-  | axiom_of_foundation : Zermelo Axiom.foundation
-  | axiom_of_separation (φ : SyntacticSemiformula ℒₛₑₜ 1) : Zermelo (Axiom.separationSchema φ)
-
-notation "𝗭" => Zermelo
-
-namespace Zermelo
-
-instance : 𝗘𝗤 ⪯ 𝗭 := Entailment.WeakerThan.ofSubset Zermelo.axiom_of_equality
-
-variable {V : Type*} [SetStructure V]
-
-scoped instance : HasSubset V := ⟨fun x y ↦ ∀ z ∈ x, z ∈ y⟩
-
-lemma subset_def {a b : V} : a ⊆ b ↔ ∀ x ∈ a, x ∈ b := by rfl
-
-instance Subset.defined_isSubsetOf : ℒₛₑₜ-relation[V] Subset via isSubsetOf :=
-  ⟨fun v ↦ by simp [isSubsetOf, subset_def]⟩
-
-instance Subset.definable : ℒₛₑₜ-relation[V] Subset := defined_isSubsetOf.to_definable
-
-@[simp, refl] lemma subset_refl (x : V) : x ⊆ x := by simp [subset_def]
-
-@[simp, trans] lemma subset_trans {x y z : V} : x ⊆ y → y ⊆ z → x ⊆ z := fun hxy hyz v hv ↦ hyz v (hxy v hv)
-
-instance : IsRefl V Subset := ⟨subset_refl⟩
-
-instance : IsTrans V Subset := ⟨fun _ _ _ ↦ subset_trans⟩
-
-def IsEmpty (a : V) : Prop := ∀ x, x ∉ a
-
-lemma IsEmpty.not_mem {a x : V} (h : IsEmpty a) : x ∉ a := h x
-
-instance IsEmpty.defined : ℒₛₑₜ-predicate[V] IsEmpty via isEmpty :=
-  ⟨fun v ↦ by simp [isEmpty, IsEmpty]⟩
-
-instance IsEmpty.definable : ℒₛₑₜ-predicate[V] IsEmpty := defined.to_definable
-
-class IsNonempty (a : V) : Prop where
-  nonempty : ∃ x, x ∈ a
-
-lemma isNonempty_def {x : V} : IsNonempty x ↔ ∃ y, y ∈ x := ⟨fun h ↦ h.nonempty, fun h ↦ ⟨h⟩⟩
-
-instance IsNonempty.defined_isNonempty : ℒₛₑₜ-predicate[V] IsNonempty via isNonempty :=
-  ⟨fun v ↦ by simp [isNonempty, isNonempty_def]⟩
-
-instance IsNonempty.definable : ℒₛₑₜ-predicate[V] IsNonempty := defined_isNonempty.to_definable
-
-@[simp] lemma not_isEmpty_iff_isNonempty {x : V} :
-    ¬IsEmpty x ↔ IsNonempty x := by simp [IsEmpty, isNonempty_def]
-
-@[simp] lemma not_isNonempty_iff_isEmpty {x : V} :
-    ¬IsNonempty x ↔ IsEmpty x := by simp [IsEmpty, isNonempty_def]
-
-scoped instance : CoeSort V (Type _) := ⟨fun x ↦ {z : V // z ∈ x}⟩
-
-def SSubset (x y : V) : Prop := x ⊆ y ∧ x ≠ y
-
-infix:50 " ⊊ " => SSubset
-
-lemma ssubset_def {x y : V} : x ⊊ y ↔ x ⊆ y ∧ x ≠ y := by rfl
-
-def SSubset.dfn : Semisentence ℒₛₑₜ 2 := “x y. x ⊆ y ∧ x ≠ y”
-
-instance SSubset.defined : ℒₛₑₜ-relation[V] SSubset via SSubset.dfn := ⟨fun v ↦ by simp [ssubset_def, SSubset.dfn]⟩
-
-instance SSubset.definable : ℒₛₑₜ-relation[V] SSubset := SSubset.defined.to_definable
-
-@[simp] lemma SSubset.irrefl (x : V) : ¬x ⊊ x := by simp [ssubset_def]
-
-lemma SSubset.subset {x y : V} : x ⊊ y → x ⊆ y := fun h ↦ h.1
-
-variable [Nonempty V] [V ⊧ₘ* 𝗭]
+variable {V : Type*} [SetStructure V] [Nonempty V] [V ⊧ₘ* 𝗭]
 
 /-! ## Axiom of extentionality -/
 
@@ -281,7 +200,7 @@ lemma union_assoc (x y z : V) : (x ∪ y) ∪ z = x ∪ (y ∪ z) := by ext; sim
 
 protected noncomputable def insert (x y : V) : V := {x} ∪ y
 
-noncomputable scoped instance : Insert V V := ⟨Zermelo.insert⟩
+noncomputable scoped instance : Insert V V := ⟨SetTheory.insert⟩
 
 lemma insert_def (x y : V) : insert x y = {x} ∪ y := rfl
 
@@ -420,7 +339,7 @@ instance sInter.definable : ℒₛₑₜ-function₁[V] sInter := sInter.defined
 
 @[simp] lemma mem_sInter_iff_of_nonempty {x : V} [hx : IsNonempty x] :
     z ∈ ⋂ˢ x ↔ ∀ y ∈ x, z ∈ y := by
-  simp [Zermelo.mem_sInter_iff, hx]
+  simp [SetTheory.mem_sInter_iff, hx]
 
 @[simp] lemma sInter_empty_eq : ⋂ˢ (∅ : V) = ∅ := by ext; simp [mem_sInter_iff]
 
@@ -791,7 +710,7 @@ lemma naturalNumber_induction (P : V → Prop) (hP : ℒₛₑₜ-predicate P)
     · simpa [p]
     · intro x hx
       have hx : x ∈ (ω : V) ∧ P x := by simpa [p] using hx
-      suffices Zermelo.succ x ∈ ω ∧ P (Zermelo.succ x) by simpa [p]
+      suffices SetTheory.succ x ∈ ω ∧ P (SetTheory.succ x) by simpa [p]
       refine ⟨ω_succ_closed hx.1, succ x hx.1 hx.2⟩
   have : ω ⊆ p := this.ω_subset
   intro x hx
@@ -828,4 +747,4 @@ lemma mem_asymm₃ {x y z : V} : x ∈ y → y ∈ z → z ∉ x := by
   have : x ∈ succ x := mem_succ_self x
   simp [←h] at this
 
-end LO.Zermelo
+end LO.FirstOrder.SetTheory

@@ -1,12 +1,10 @@
-import Foundation.FirstOrder.Z.Basic
+import Foundation.FirstOrder.SetTheory.Z
 
 /-!
-# Relations and functions in Zermelo set theory
+# Basic definitions and lemmata for relations and functions
 -/
 
-namespace LO.Zermelo
-
-open FirstOrder SetTheory
+namespace LO.FirstOrder.SetTheory
 
 variable {V : Type*} [SetStructure V] [Nonempty V] [V ⊧ₘ* 𝗭]
 
@@ -524,4 +522,4 @@ lemma two_pow_cardEQ_power (X : V) : 2 ^ X ≋ ℘ X := by
       have : (s₂ ⊆ X ∧ f ∈ (2 ^ X : V)) ∧ ∀ x, ⟨x, 1⟩ₖ ∈ f ↔ x ∈ s₂ := by simpa [F] using h₂
       ext z; grind
 
-end LO.Zermelo
+end LO.FirstOrder.SetTheory
