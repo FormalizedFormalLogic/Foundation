@@ -38,11 +38,11 @@ import Foundation.FirstOrder.Order.Le
 import Foundation.FirstOrder.Interpretation
 
 import Foundation.FirstOrder.Arithmetic.Basic
-import Foundation.FirstOrder.Arithmetic.BoundedQuantifier
+import Foundation.FirstOrder.Arithmetic.Basic.BoundedQuantifier
 import Foundation.FirstOrder.Arithmetic.Definability
 import Foundation.FirstOrder.Arithmetic.Induction
 
-import Foundation.FirstOrder.R0.Basic
+import Foundation.FirstOrder.Arithmetic.R0
 import Foundation.FirstOrder.R0.Representation
 
 import Foundation.FirstOrder.Q.Basic

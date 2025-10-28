@@ -1,5 +1,5 @@
 import Foundation.FirstOrder.Arithmetic.Basic
-import Foundation.FirstOrder.R0.Basic
+import Foundation.FirstOrder.Arithmetic.R0
 import Mathlib.Algebra.Order.Monoid.Canonical.Defs
 import Mathlib.Data.Nat.Cast.Order.Basic
 import Mathlib.Algebra.Order.Sub.Basic
@@ -527,6 +527,14 @@ lemma coe_add_one (x : ℕ) : ((x + 1 : ℕ) : M) = (x : M) + 1 := by simp
 lemma eq_fin_of_lt_nat {n : ℕ} {x : M} (hx : x < (n : M)) : ∃ i : Fin n, x = i := by
   rcases eq_nat_of_lt_nat hx with ⟨x, rfl⟩
   exact ⟨⟨x, by simpa using hx⟩, by simp⟩
+
+@[simp] lemma eval_ballLTSucc' {t : Semiterm ℒₒᵣ ξ n} {φ : Semiformula ℒₒᵣ ξ (n + 1)} :
+    Semiformula.Evalm M e ε (φ.ballLTSucc t) ↔ ∀ x ≤ Semiterm.valm M e ε t, Semiformula.Evalm M (x :> e) ε φ := by
+  simp [Semiformula.eval_ballLTSucc, lt_succ_iff_le]
+
+@[simp] lemma eval_bexLTSucc' {t : Semiterm ℒₒᵣ ξ n} {φ : Semiformula ℒₒᵣ ξ (n + 1)} :
+    Semiformula.Evalm M e ε (φ.bexLTSucc t) ↔ ∃ x ≤ Semiterm.valm M e ε t, Semiformula.Evalm M (x :> e) ε φ := by
+  simp [Semiformula.eval_bexLTSucc, lt_succ_iff_le]
 
 variable (M)
 
