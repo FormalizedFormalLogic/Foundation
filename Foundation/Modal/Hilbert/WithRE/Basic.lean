@@ -228,6 +228,59 @@ instance : EK.axioms.HasK where p := 0; q := 1;
 protected abbrev EK : Logic ℕ := Hilbert.WithRE EK.axioms
 instance : Entailment.EK Modal.EK where
 
+protected abbrev EKC.axioms : Axiom ℕ := {Axioms.K (.atom 0) (.atom 1), Axioms.C (.atom 0) (.atom 1)}
+namespace EKC.axioms
+instance : EKC.axioms.HasK where p := 0; q := 1;
+instance : EKC.axioms.HasC where p := 0; q := 1;
+end EKC.axioms
+protected abbrev EKC : Logic ℕ := Hilbert.WithRE EKC.axioms
+instance : Entailment.EK Modal.EKC where
+instance : Entailment.EC Modal.EKC where
+
+protected abbrev EKP.axioms : Axiom ℕ := {Axioms.K (.atom 0) (.atom 1), Axioms.P}
+namespace EKP.axioms
+instance : EKP.axioms.HasK where p := 0; q := 1;
+instance : EKP.axioms.HasP where mem_P := by simp;
+end EKP.axioms
+protected abbrev EKP : Logic ℕ := Hilbert.WithRE EKP.axioms
+instance : Entailment.EK Modal.EKP where
+instance : Entailment.HasAxiomP Modal.EKP := instHasAxiomP
+
+protected abbrev ECKP.axioms : Axiom ℕ := {Axioms.K (.atom 0) (.atom 1), Axioms.C (.atom 0) (.atom 1), Axioms.P}
+namespace ECKP.axioms
+instance : ECKP.axioms.HasK where p := 0; q := 1;
+instance : ECKP.axioms.HasC where p := 0; q := 1;
+instance : ECKP.axioms.HasP where mem_P := by simp;
+end ECKP.axioms
+protected abbrev ECKP : Logic ℕ := Hilbert.WithRE ECKP.axioms
+instance : Entailment.EK Modal.ECKP where
+instance : Entailment.EC Modal.ECKP where
+instance : Entailment.HasAxiomP Modal.ECKP := instHasAxiomP
+
+protected abbrev EKT.axioms : Axiom ℕ := {Axioms.K (.atom 0) (.atom 1), Axioms.T (.atom 0)}
+namespace EKT.axioms
+instance : EKT.axioms.HasK where p := 0; q := 1;
+instance : EKT.axioms.HasT where p := 0;
+end EKT.axioms
+protected abbrev EKT : Logic ℕ := Hilbert.WithRE EKT.axioms
+instance : Entailment.EK Modal.EKT where
+instance : Entailment.ET Modal.EKT where
+
+protected abbrev ECKT.axioms : Axiom ℕ := {
+  Axioms.K (.atom 0) (.atom 1),
+  Axioms.C (.atom 0) (.atom 1),
+  Axioms.T (.atom 0)
+}
+namespace ECKT.axioms
+instance : ECKT.axioms.HasK where p := 0; q := 1;
+instance : ECKT.axioms.HasC where p := 0; q := 1;
+instance : ECKT.axioms.HasT where p := 0;
+end ECKT.axioms
+protected abbrev ECKT : Logic ℕ := Hilbert.WithRE ECKT.axioms
+instance : Entailment.EK Modal.ECKT where
+instance : Entailment.EC Modal.ECKT where
+instance : Entailment.ET Modal.ECKT where
+
 protected abbrev E4.axioms : Axiom ℕ := {Axioms.Four (.atom 0)}
 instance : E4.axioms.HasFour where p := 0; mem_Four := by simp;
 protected abbrev E4 : Logic ℕ := Hilbert.WithRE E4.axioms
