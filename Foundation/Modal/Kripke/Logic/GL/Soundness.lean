@@ -27,6 +27,8 @@ protected abbrev FrameClass.finite_GL: FrameClass := { F | F.IsFiniteGL }
 
 instance : blackpoint.IsFiniteGL where
 
+instance : blackpoint.IsInfiniteGL where
+
 end Kripke
 
 instance : Sound Modal.GL Kripke.FrameClass.infinite_GL := instSound_of_validates_axioms $ by

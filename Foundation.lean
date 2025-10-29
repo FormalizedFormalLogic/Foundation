@@ -186,6 +186,11 @@ import Foundation.ProvabilityLogic.S.Completeness
 import Foundation.ProvabilityLogic.Classification.LetterlessTrace
 import Foundation.ProvabilityLogic.Classification.Trace
 
+-- Interpretability Logic
+import Foundation.InterpretabilityLogic.Veltman.Logic.CL
+import Foundation.InterpretabilityLogic.Veltman.Logic.IL
+
+-- Meta
 import Foundation.Meta.Qq
 import Foundation.Meta.Lit
 import Foundation.Meta.ClProver
