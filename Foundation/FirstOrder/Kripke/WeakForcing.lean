@@ -1,6 +1,11 @@
 import Foundation.FirstOrder.Kripke.Intuitionistic
 import Foundation.FirstOrder.NegationTranslation.GoedelGentzen
 
+/-! # Weak forcing
+
+Main reference: Jeremy Avigad, "Forcing in proof theory"
+-/
+
 namespace LO.FirstOrder.KripkeModel
 
 variable {L : Language} [L.Relational] {ℙ : KripkeModel L}
@@ -55,7 +60,7 @@ variable {bv : Fin n → ℙ.Name} {fv : ξ → ℙ.Name}
 lemma monotone {φ : Semiformula L ξ n} :
     p ⊩[bv|fv] φ → ∀ q ≤ p, q ⊩[bv|fv] φ := fun h ↦ Forces.monotone h
 
-lemma regular {n} {bv : Fin n → ℙ.Name} {fv : ξ → ℙ.Name} {φ : Semiformula L ξ n} :
+lemma genricity {n} {bv : Fin n → ℙ.Name} {fv : ξ → ℙ.Name} {φ : Semiformula L ξ n} :
     (∀ q ≤ p, ∃ r ≤ q, r ⊩[bv|fv] φ) → p ⊩[bv|fv] φ :=
   match φ with
   | .rel R v => by
@@ -78,7 +83,7 @@ lemma regular {n} {bv : Fin n → ℙ.Name} {fv : ξ → ℙ.Name} {φ : Semifor
   | φ ⋏ ψ => by
     suffices (∀ q ≤ p, ∃ r ≤ q, r ⊩[bv|fv] φ ∧ r ⊩[bv|fv] ψ) → p ⊩[bv|fv] φ ∧ p ⊩[bv|fv] ψ by simpa
     intro h
-    refine ⟨regular fun q hqp ↦ ?_, regular fun q hqp ↦ ?_⟩
+    refine ⟨genricity fun q hqp ↦ ?_, genricity fun q hqp ↦ ?_⟩
     · rcases h q hqp with ⟨r, hrq, h, _⟩
       exact ⟨r, hrq, h⟩
     · rcases h q hqp with ⟨r, hrq, _, h⟩
@@ -96,7 +101,7 @@ lemma regular {n} {bv : Fin n → ℙ.Name} {fv : ξ → ℙ.Name} {φ : Semifor
       (∀ q ≤ p, ∃ r ≤ q, ∀ q ≤ r, ∀ a ∈ ℙ.Domain q, q ⊩[a :> bv|fv] φ) →
       (∀ q ≤ p, ∀ x ∈ ℙ.Domain q, q ⊩[x :> bv|fv] φ) by simpa
     intro h q hqp x hx
-    apply regular
+    apply genricity
     intro r hrq
     rcases h r (le_trans hrq hqp) with ⟨s, hsr, Hs⟩
     exact ⟨s, hsr, Hs s (by rfl) x (ℙ.domain_antimonotone' hx _ (le_trans hsr hrq))⟩
@@ -109,12 +114,12 @@ lemma regular {n} {bv : Fin n → ℙ.Name} {fv : ξ → ℙ.Name} {φ : Semifor
     rcases H r (by rfl) with ⟨s, hsr, x, hx, H⟩
     exact ⟨s, le_trans hsr hrq, x, hx, H⟩
 
-lemma regular_iff {φ : Semiformula L ξ n} :
+lemma genricity_iff {φ : Semiformula L ξ n} :
     p ⊩[bv|fv] φ ↔ ∀ q ≤ p, ∃ r ≤ q, r ⊩[bv|fv] φ :=
-  ⟨fun H q hqp ↦ ⟨q, by rfl, H.monotone q hqp⟩, regular⟩
+  ⟨fun H q hqp ↦ ⟨q, by rfl, H.monotone q hqp⟩, genricity⟩
 
-lemma regular_iff_not {φ : Semiformula L ξ n} :
-    ¬p ⊩[bv|fv] φ ↔ ∃ q ≤ p, ∀ r ≤ q, ¬r ⊩[bv|fv] φ := by simpa using regular_iff.not
+lemma genricity_iff_not {φ : Semiformula L ξ n} :
+    ¬p ⊩[bv|fv] φ ↔ ∃ q ≤ p, ∀ r ≤ q, ¬r ⊩[bv|fv] φ := by simpa using genricity_iff.not
 
 @[simp] lemma not {n} {bv : Fin n → ℙ.Name} {fv : ξ → ℙ.Name} {φ : Semiformula L ξ n} :
     p ⊩[bv|fv] ∼φ ↔ ∀ q ≤ p, ¬q ⊩[bv|fv] φ :=
@@ -146,10 +151,10 @@ lemma regular_iff_not {φ : Semiformula L ξ n} :
         exact WeaklyForces.not.mp H r (by rfl) (Hqψ.monotone _ hrq)
     · intro h q hqp
       rcases h q hqp with (C | C)
-      · rcases regular_iff_not.mp C with ⟨r, hrq, Hr⟩
+      · rcases genricity_iff_not.mp C with ⟨r, hrq, Hr⟩
         refine ⟨r, hrq, ?_⟩
         left; apply WeaklyForces.not.mpr Hr
-      · rcases regular_iff_not.mp C with ⟨r, hrq, Hr⟩
+      · rcases genricity_iff_not.mp C with ⟨r, hrq, Hr⟩
         refine ⟨r, hrq, ?_⟩
         right; apply WeaklyForces.not.mpr Hr
   | φ ⋎ ψ => by
@@ -181,7 +186,7 @@ lemma regular_iff_not {φ : Semiformula L ξ n} :
       exact ⟨r, hrq, x, hx, WeaklyForces.not.mp Hr r (by rfl)⟩
     · intro h q hqp
       rcases h q hqp with ⟨r, hrq, x, hx, H⟩
-      rcases regular_iff_not.mp H with ⟨s, hsr, Hs⟩
+      rcases genricity_iff_not.mp H with ⟨s, hsr, Hs⟩
       exact ⟨s, le_trans hsr hrq, x, ℙ.domain_antimonotone hsr hx, WeaklyForces.not.mpr Hs⟩
   | ∃' φ => by
     suffices
@@ -199,8 +204,8 @@ lemma regular_iff_not {φ : Semiformula L ξ n} :
       have : ¬s ⊩[x :> bv|fv] φ := H s (by rfl) x (ℙ.domain_antimonotone (le_trans hsr hrq) hx)
       exact this (Hr.monotone _ hsr)
 
-lemma regular_iff_not' {φ : Semiformula L ξ n} :
-    ¬p ⊩[bv|fv] φ ↔ ∃ q ≤ p, q ⊩[bv|fv] ∼φ := by simpa using regular_iff.not
+lemma genricity_iff_not' {φ : Semiformula L ξ n} :
+    ¬p ⊩[bv|fv] φ ↔ ∃ q ≤ p, q ⊩[bv|fv] ∼φ := by simpa using genricity_iff.not
 
 @[simp] lemma imply {φ ψ : Semiformula L ξ n} :
     p ⊩[bv|fv] φ ➝ ψ ↔ ∀ q ≤ p, q ⊩[bv|fv] φ → q ⊩[bv|fv] ψ := by
@@ -210,14 +215,14 @@ lemma regular_iff_not' {φ : Semiformula L ξ n} :
   constructor
   · intro h q hqp Hqφ
     by_contra! Hqψ
-    rcases regular_iff_not.mp Hqψ with ⟨r, hrq, Hr⟩
+    rcases genricity_iff_not.mp Hqψ with ⟨r, hrq, Hr⟩
     rcases h r (le_trans hrq hqp) with ⟨s, hsr, (H | H)⟩
     · exact H s (by rfl) (Hqφ.monotone s (le_trans hsr hrq))
     · exact Hr s hsr H
   · intro h q hqp
     have : ¬q ⊩[bv|fv] φ ∨ q ⊩[bv|fv] ψ := not_or_of_imp (h q hqp)
     rcases this with (H | H)
-    · rcases regular_iff_not.mp H with ⟨r, hrq, H⟩
+    · rcases genricity_iff_not.mp H with ⟨r, hrq, H⟩
       exact ⟨r, hrq, Or.inl H⟩
     · exact ⟨q, by rfl, Or.inr H⟩
 
@@ -226,5 +231,22 @@ lemma regular_iff_not' {φ : Semiformula L ξ n} :
   simp [LogicalConnective.iff]; grind
 
 end WeaklyForces
+
+abbrev WeaklyForces₀ (p : ℙ) (φ : Sentence L) : Prop := p ⊩[![]|Empty.elim] ↑φ
+
+instance : WeakForcingRelation ℙ (Sentence L) := ⟨WeaklyForces₀⟩
+
+lemma WeaklyForces₀.def {p : ℙ} {φ : Sentence L} : p ⊩ᶜ φ ↔ p ⊩[![]|Empty.elim] φ := by rfl
+
+lemma weaklyForces_iff_forces {p : ℙ} {φ : Sentence L} :
+    p ⊩ᶜ φ ↔ p ⊩ φᴺ := by rfl
+
+instance : WeakForcingRelation.ClassicalKripke ℙ (· ≥ ·) where
+  verum w := by simp [WeaklyForces₀.def]
+  falsum w := by simp [WeaklyForces₀.def, WeakForcingRelation.NotForces]
+  and w := by simp [WeaklyForces₀.def]
+  or w := by simp [WeaklyForces₀.def]
+  imply w := by simp [WeaklyForces₀.def]
+  not w := by simp [WeaklyForces₀.def, WeakForcingRelation.NotForces]
 
 end KripkeModel
