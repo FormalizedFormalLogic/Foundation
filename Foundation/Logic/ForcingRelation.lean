@@ -7,6 +7,11 @@ class ForcingRelation (W : Type*) (F : outParam Type*) where
 
 infix:45 " ⊩ " => ForcingRelation.Forces
 
+class ForcingExists (W : Type*) (α : outParam Type*) where
+  Forces : W → α → Prop
+
+infix:45 " ⊩↓ " => ForcingExists.Forces
+
 namespace ForcingRelation
 
 variable {W : Type*} {F : Type*} [ForcingRelation W F] [LogicalConnective F]

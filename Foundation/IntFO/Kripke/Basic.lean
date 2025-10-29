@@ -161,14 +161,15 @@ variable {Λ : Hilbertᵢ L}
 
 open HilbertProofᵢ Semantics
 
-lemma sound!_forces (w : 𝓚) (fv : ℕ → 𝓚.Name) (hfv : ∀ i, fv i ∈ 𝓚.Domain w) {φ} : 𝗜𝗻𝘁¹ ⊢! φ → w ⊩[![]|fv] φ
+lemma sound!_forces (w : 𝓚) (fv : ℕ → 𝓚.Name) (hfv : ∀ i, w ⊩↓ fv i) {φ} : 𝗜𝗻𝘁¹ ⊢! φ → w ⊩[![]|fv] φ
   |     eaxm h => by
     have : ∃ ψ, Axioms.EFQ ψ = φ := by simpa [Hilbertᵢ.Intuitionistic] using h
     rcases this with ⟨ψ, rfl⟩
     rintro v hvw ⟨⟩
   | mdp bφψ bφ => by simpa using sound!_forces w fv hfv bφψ w (by simp) (sound!_forces w fv hfv bφ)
   |      gen b => fun v hwv x ↦ by
-    simpa using sound!_forces v (x :>ₙ fv) (by rintro (i | i) <;> simp [fun i ↦ 𝓚.domain_antimonotone hwv (hfv i)]) b
+    simpa using sound!_forces v (x :>ₙ fv)
+      (by rintro (i | i) <;> simp [fun i ↦ 𝓚.domain_antimonotone' hwv (hfv i)]) b
   | verum => by simp
   | imply₁ φ ψ => by
     intro w₁ hw₁w₀ hw₁φ w₂ hw₁w₂ hw₂φ
@@ -214,10 +215,10 @@ lemma sound!_forces (w : 𝓚) (fv : ℕ → 𝓚.Name) (hfv : ∀ i, fv i ∈ �
     simpa using H w₂ hw₂₁ x w₂ (by rfl) hφ
 
 lemma sound {T : Theoryᵢ L 𝗜𝗻𝘁¹} (b : T ⊢ φ) : 𝓚 ⊧* T → 𝓚 ⊧ φ := fun H w ↦ by
-  rcases 𝓚.domain_nonempty w with ⟨x, hx⟩
+  rcases 𝓚.domain_nonempty' w with ⟨x, hx⟩
   have : (Rewriting.emb '' T.theory) *⊢[𝗜𝗻𝘁¹] ↑φ := b
   rcases Entailment.Context.provable_iff.mp this with ⟨Γ, HΓ, b⟩
-  have : w ⊩[![]|fun _ ↦ x] ⋀Γ ➝ ↑φ := sound!_forces (L := L) w (fun _ ↦ x) (by simp [hx]) b.get
+  have : w ⊩[![]|fun _ ↦ x] ⋀Γ ➝ ↑φ := sound!_forces (L := L) w (fun _ ↦ x) (by simpa using hx) b.get
   have : w ⊩[![]|fun _ : ℕ ↦ x] ↑φ := by
     apply this w (by rfl)
     suffices ∀ φ ∈ Γ, w ⊩[![]|fun _ ↦ x] φ by simpa

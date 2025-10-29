@@ -25,11 +25,20 @@ instance (𝓚 : RelationalKripkeModel L) : CoeSort 𝓚.Condition (Type _) := �
 
 instance (𝓚 : RelationalKripkeModel L) : Preorder 𝓚.Condition := 𝓚.preorder
 
+instance (𝓚 : RelationalKripkeModel L) : ForcingExists 𝓚 𝓚.Name := ⟨fun p x ↦ x ∈ 𝓚.Domain p⟩
+
 variable {L}
 
 namespace RelationalKripkeModel
 
 variable (𝓚 : RelationalKripkeModel L)
+
+lemma domain_nonempty' (p : 𝓚) : ∃ x, p ⊩↓ x := 𝓚.domain_nonempty p
+
+lemma domain_antimonotone' {p q : 𝓚} (h : p ≥ q) : p ⊩↓ x → q ⊩↓ x := fun hx ↦
+  𝓚.domain_antimonotone h hx
+
+@[simp] lemma domain_forcesExists {p : 𝓚} (x : p) : p ⊩↓ x.val := x.prop
 
 abbrev Filter : Type _ := Order.PFilter 𝓚
 
@@ -40,7 +49,7 @@ namespace Filter
 /-- A domain of filter `F` -/
 @[ext] structure Domain (F : 𝓚.Filter) where
   val : 𝓚.Name
-  mem_filter : ∃ p ∈ F, val ∈ 𝓚.Domain p
+  mem_filter : ∃ p ∈ F, p ⊩↓ val
 
 attribute [coe] Domain.val
 
@@ -52,8 +61,8 @@ lemma finite_colimit [Fintype ι] (p : ι → 𝓚) (hp : ∀ i, p i ∈ F) : �
   DirectedOn.fintype_colimit transitive_ge (Order.PFilter.nonempty F) F.directed p hp
 
 lemma finite_colimit_domain [Fintype ι] (v : ι → F.Domain) :
-    ∃ q ∈ F, ∀ i, (v i).val ∈ 𝓚.Domain q := by
-  have : ∀ i, ∃ p ∈ F, (v i).val ∈ 𝓚.Domain p := fun i ↦ (v i).mem_filter
+    ∃ q ∈ F, ∀ i, q ⊩↓ (v i).val := by
+  have : ∀ i, ∃ p ∈ F, p ⊩↓ (v i).val := fun i ↦ (v i).mem_filter
   choose p hp using this
   have : ∃ q ∈ F, ∀ i, q ≤ p i := F.finite_colimit p fun i ↦ (hp i).1
   rcases this with ⟨q, hq, hqp⟩
@@ -61,10 +70,10 @@ lemma finite_colimit_domain [Fintype ι] (v : ι → F.Domain) :
 
 instance Str : Structure L F.Domain where
   func _ f _ := IsEmpty.elim' inferInstance f
-  rel _ R v := ∀ p ∈ F, (∀ i, (v i).val ∈ 𝓚.Domain p) → 𝓚.Rel p R fun i ↦ v i
+  rel _ R v := ∀ p ∈ F, (∀ i, p ⊩↓ (v i).val) → 𝓚.Rel p R fun i ↦ v i
 
 @[simp] lemma Str.rel_iff {k : ℕ} (R : L.Rel k) (v : Fin k → F.Domain) :
-    F.Str.rel R v ↔ ∀ p ∈ F, (∀ i, (v i).val ∈ 𝓚.Domain p) → 𝓚.Rel p R fun i ↦ v i := by rfl
+    F.Str.rel R v ↔ ∀ p ∈ F, (∀ i, p ⊩↓ (v i).val) → 𝓚.Rel p R fun i ↦ v i := by rfl
 
 end Filter
 
