@@ -1,4 +1,4 @@
-import Foundation.IntFO.Basic.Rew
+import Foundation.FirstOrder.Intuitionistic.Rew
 
 namespace LO.FirstOrder
 
@@ -263,6 +263,8 @@ instance : AdjunctiveSet (Sentenceᵢ L) (Theoryᵢ L 𝓗) where
   subset_iff := by simp
   not_mem_empty := by simp
   mem_cons_iff := by simp [mem_def]
+
+@[simp] lemma empty_eq_empty : ((∅ : Theoryᵢ L 𝓗) : Set (Sentenceᵢ L)) = ∅  := by rfl
 
 @[simp] lemma adjoin_theory_def : (adjoin φ T).theory = insert φ T.theory := rfl
 

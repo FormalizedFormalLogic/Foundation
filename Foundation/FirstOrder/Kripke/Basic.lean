@@ -7,7 +7,7 @@ import Mathlib.Order.PFilter
 namespace LO.FirstOrder
 
 /-- Kripke model for relational first-order language -/
-structure RelationalKripkeModel (L : Language) [L.Relational] where
+structure KripkeModel (L : Language) [L.Relational] where
   Condition : Type*
   [preorder : Preorder Condition]
   Name : Type*
@@ -15,27 +15,27 @@ structure RelationalKripkeModel (L : Language) [L.Relational] where
   domain_nonempty : ∀ w, ∃ x, x ∈ Domain w
   domain_antimonotone : w ≥ v → Domain w ⊆ Domain v
   Rel (w : Condition) {k : ℕ} (R : L.Rel k) : (Fin k → Name) → Prop
-  rel_monotone : w ≥ v → Rel w R t → Rel v R t
+  rel_monotone : Rel w R t → ∀ v ≤ w, Rel v R t
 
 variable (L : Language) [L.Relational]
 
-instance : CoeSort (RelationalKripkeModel L) (Type _) := ⟨fun 𝓚 ↦ 𝓚.Condition⟩
+instance : CoeSort (KripkeModel L) (Type _) := ⟨fun 𝓚 ↦ 𝓚.Condition⟩
 
-instance (𝓚 : RelationalKripkeModel L) : CoeSort 𝓚.Condition (Type _) := ⟨fun w ↦ 𝓚.Domain w⟩
+instance (𝓚 : KripkeModel L) : CoeSort 𝓚.Condition (Type _) := ⟨fun w ↦ 𝓚.Domain w⟩
 
-instance (𝓚 : RelationalKripkeModel L) : Preorder 𝓚.Condition := 𝓚.preorder
+instance (𝓚 : KripkeModel L) : Preorder 𝓚.Condition := 𝓚.preorder
 
-instance (𝓚 : RelationalKripkeModel L) : ForcingExists 𝓚 𝓚.Name := ⟨fun p x ↦ x ∈ 𝓚.Domain p⟩
+instance (𝓚 : KripkeModel L) : ForcingExists 𝓚 𝓚.Name := ⟨fun p x ↦ x ∈ 𝓚.Domain p⟩
 
 variable {L}
 
-namespace RelationalKripkeModel
+namespace KripkeModel
 
-variable (𝓚 : RelationalKripkeModel L)
+variable (𝓚 : KripkeModel L)
 
 lemma domain_nonempty' (p : 𝓚) : ∃ x, p ⊩↓ x := 𝓚.domain_nonempty p
 
-lemma domain_antimonotone' {p q : 𝓚} (h : p ≥ q) : p ⊩↓ x → q ⊩↓ x := fun hx ↦
+lemma domain_antimonotone' {p : 𝓚} : p ⊩↓ x → ∀ q ≤ p, q ⊩↓ x := fun hx _ h ↦
   𝓚.domain_antimonotone h hx
 
 @[simp] lemma domain_forcesExists {p : 𝓚} (x : p) : p ⊩↓ x.val := x.prop
@@ -77,9 +77,6 @@ instance Str : Structure L F.Domain where
 
 end Filter
 
-lemma triple_negation_elimination {P : 𝓚 → Prop} (mono : ∀ p q, p ≤ q → P q → Q p) :
-    ∀
-
-end RelationalKripkeModel
+end KripkeModel
 
 end LO.FirstOrder

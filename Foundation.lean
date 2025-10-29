@@ -80,10 +80,10 @@ import Foundation.FirstOrder.Hauptsatz
 
 -- IntFO
 
-import Foundation.IntFO.Basic
-import Foundation.IntFO.Kripke.Basic
-import Foundation.IntFO.Kripke.HeytingValuedModel
-import Foundation.IntFO.Translation
+import Foundation.FirstOrder.Intuitionistic.Basic
+import Foundation.FirstOrder.Intuitionistic.Kripke.Basic
+import Foundation.FirstOrder.Intuitionistic.Kripke.HeytingValuedModel
+import Foundation.FirstOrder.Intuitionistic.Translation
 
 -- TODO:
 -- import Foundation.Propositional.Dialectica.Basic

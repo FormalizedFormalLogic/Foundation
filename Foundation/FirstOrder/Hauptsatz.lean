@@ -1,4 +1,4 @@
-import Foundation.IntFO.Translation
+import Foundation.FirstOrder.Intuitionistic.Translation
 
 /-!
 # Algebraic proofs of cut elimination
