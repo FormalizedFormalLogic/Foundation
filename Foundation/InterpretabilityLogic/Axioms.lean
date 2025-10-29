@@ -7,12 +7,18 @@ variable (φ ψ χ : F)
 
 protected abbrev J1 := □(φ ➝ ψ) ➝ (φ ▷ ψ)
 
-protected abbrev J2 := (φ ▷ ψ) ➝ (ψ ➝ χ) ➝ (φ ▷ χ)
+protected abbrev J2 := (φ ▷ ψ) ➝ (ψ ▷ χ) ➝ (φ ▷ χ)
 
 protected abbrev J3 := (φ ▷ χ) ➝ (ψ ▷ χ) ➝ ((φ ⋎ ψ) ▷ χ)
 
 protected abbrev J4 := (φ ▷ ψ) ➝ (◇φ ➝ ◇ψ)
 
 protected abbrev J5 := ◇φ ▷ φ
+
+/-- Persistency Principle -/
+protected abbrev PP := (φ ▷ ψ) ➝ □(φ ▷ ψ)
+
+/-- Montagna's Principle -/
+protected abbrev MP := (φ ▷ ψ) ➝ ((φ ⋏ □χ) ▷ (ψ ⋏ □χ))
 
 end LO.InterpretabilityLogic.Axioms

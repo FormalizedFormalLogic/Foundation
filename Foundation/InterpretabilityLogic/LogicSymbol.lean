@@ -5,7 +5,7 @@ namespace LO
 class Rhd (F : Type*) where
   rhd : F → F → F
 
-infixl:70 "▷" => Rhd.rhd
+infixl:70 " ▷ " => Rhd.rhd
 
 attribute [match_pattern] Rhd.rhd
 
