@@ -1,5 +1,6 @@
 import Foundation.InterpretabilityLogic.Formula.Substitution
 import Foundation.InterpretabilityLogic.Axioms
+import Foundation.InterpretabilityLogic.Formula.OfModal
 import Foundation.Modal.Kripke.Logic.GL.Completeness
 
 namespace LO.InterpretabilityLogic
@@ -27,6 +28,8 @@ structure Model extends toVeltmanFrame : Veltman.Frame where
   Val : Valuation toVeltmanFrame
 instance : CoeSort Model Type := ⟨λ M => M.toKripkeFrame.World⟩
 instance : CoeFun (Model) (λ M => M.World → ℕ → Prop) := ⟨fun m => m.Val⟩
+
+def Model.toKripkeModel (M : Veltman.Model) : Modal.Kripke.Model := ⟨M.toKripkeFrame, M.Val⟩
 
 end Veltman
 
@@ -119,13 +122,50 @@ lemma iff_subst_self {x : F.World} (s : Substitution ℕ) :
   | hrhd φ ψ ihφ ihψ =>
     constructor;
     . intro h y Rxy hy;
-      obtain ⟨⟨z, Rxz⟩, hz₁, hz₂⟩ := h _ Rxy $ by
-        sorry;
+      obtain ⟨⟨z, Rxz⟩, Sxyz, hz₂⟩ := h _ Rxy $ ihφ.mpr hy;
       use ⟨z, Rxz⟩;
       constructor;
-      . sorry;
-      . sorry;
-    . sorry;
+      . assumption;
+      . apply ihψ.mp;
+        assumption;
+    . intro h y Rxy hy;
+      obtain ⟨⟨z, Rxz⟩, Sxyz, hz₂⟩ := h _ Rxy $ ihφ.mp hy;
+      use ⟨z, Rxz⟩;
+      constructor;
+      . assumption;
+      . apply ihψ.mpr;
+        assumption;
+
+/-- For **modal** formula `φ`, Veltman model `M` and `x` in `M`. `M, x ⊧ φ` if and only if `M.toKripkeModel x ⊧ φ` -/
+lemma kripkeLift {φ : Modal.Formula _} : x ⊧ ↑φ ↔ Modal.Formula.Kripke.Satisfies M.toKripkeModel x φ := by
+  induction φ generalizing x with
+  | hatom a =>
+    simp [Modal.Formula.toInterpretabilityLogicFormula, Semantics.Models, Formula.Veltman.Satisfies, Modal.Formula.Kripke.Satisfies];
+    tauto;
+  | hfalsum =>
+    simp [Modal.Formula.toInterpretabilityLogicFormula, Semantics.Models, Formula.Veltman.Satisfies, Modal.Formula.Kripke.Satisfies];
+  | himp φ ψ ihφ ihψ =>
+    constructor;
+    . intro h hφ;
+      apply ihψ.mp;
+      apply h;
+      apply ihφ.mpr;
+      exact hφ;
+    . intro h hφ;
+      apply ihψ.mpr;
+      apply h;
+      apply ihφ.mp;
+      exact hφ;
+  | hbox φ ih =>
+    constructor;
+    . intro h y Rxy;
+      apply ih.mp;
+      apply h;
+      exact Rxy;
+    . intro h y Rxy;
+      apply ih.mpr;
+      apply h;
+      exact Rxy;
 
 end Satisfies
 
@@ -158,6 +198,11 @@ lemma iff_not_exists_world {M : Veltman.Model} : (¬M ⊧ φ) ↔ (∃ x : M.Wor
 
 alias ⟨exists_world_of_not, not_of_exists_world⟩ := iff_not_exists_world
 
+/-- For **modal** formula `φ`, Veltman model `M`. `M ⊧ φ` if and only if `M.toKripkeModel ⊧ φ` -/
+lemma kripkeLift {φ : Modal.Formula _} : M ⊧ ↑φ ↔ M.toKripkeModel ⊧ φ := by
+  constructor;
+  . intro h x; apply Satisfies.kripkeLift.mp; apply h;
+  . intro h x; exact (Satisfies.kripkeLift.mpr $ h x);
 
 protected lemma mdp (hpq : M ⊧ φ ➝ ψ) (hp : M ⊧ φ) : M ⊧ ψ := by
   intro x;
@@ -187,27 +232,6 @@ protected lemma axiomK : M ⊧ (Modal.Axioms.K φ ψ)  := by
   replace hpq := Satisfies.imp_def.mp $ hpq x Rxy;
   replace hp := hp x Rxy;
   exact hpq hp;
-
-protected lemma axiomL : M ⊧ (Modal.Axioms.L φ) := by
-  rintro w;
-  apply Satisfies.imp_def.mpr;
-  contrapose;
-  intro h;
-  obtain ⟨x, Rwx, h⟩ := by simpa using Satisfies.box_def.not.mp h;
-  obtain ⟨m, ⟨⟨Rwm, hm⟩, hm₂⟩⟩ := M.toKripkeFrame.cwf.has_min ({ x | w ≺ x ∧ ¬(Satisfies M x φ) }) $ by
-    use x;
-    tauto;
-  replace hm₂ : ∀ x, w ≺ x → ¬Satisfies M x φ → ¬m ≺ x := by simpa using hm₂;
-  apply Satisfies.not_box_def.mpr;
-  use m;
-  constructor;
-  . assumption;
-  . apply Satisfies.not_imp_def.mpr;
-    constructor;
-    . intro n rmn;
-      apply not_imp_not.mp $ hm₂ n (IsTrans.trans _ _ _ Rwm rmn);
-      exact rmn;
-    . assumption;
 
 protected lemma axiomJ1 : M ⊧ Axioms.J1 φ ψ := by
   intro x h y Rxy hy;
@@ -317,9 +341,18 @@ protected lemma imply₂ : F ⊧ (Axioms.Imply₂ φ ψ χ) := fun _ ↦ ValidOn
 
 protected lemma elimContra : F ⊧ (Axioms.ElimContra φ ψ) := fun _ ↦ ValidOnModel.elimContra
 
+/-- For **modal** formula `φ`, Veltman frame `F`. `F ⊧ φ` if and only if `F.toKripkeFrame ⊧ φ` -/
+lemma kripkeLift {φ : Modal.Formula _} : F ⊧ ↑φ ↔ F.toKripkeFrame ⊧ φ := by
+  constructor;
+  . intro h V;
+    apply ValidOnModel.kripkeLift.mp $ h V;
+  . intro h K;
+    apply ValidOnModel.kripkeLift.mpr;
+    apply h;
+
 @[simp] protected lemma axiomK : F ⊧ (Modal.Axioms.K φ ψ) := fun _ ↦ ValidOnModel.axiomK
 
-@[simp] protected lemma axiomL : F ⊧ (Modal.Axioms.L φ) := fun _ ↦ ValidOnModel.axiomL
+@[simp] protected lemma axiomL : F ⊧ (Modal.Axioms.L φ) := ValidOnFrame.subst (s := λ _ => φ) $ kripkeLift.mpr $ Modal.Kripke.validate_AxiomL_of_trans_cwf
 
 @[simp] protected lemma axiomJ1 : F ⊧ Axioms.J1 φ ψ := fun _ ↦ ValidOnModel.axiomJ1
 
