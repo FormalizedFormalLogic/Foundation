@@ -236,17 +236,29 @@ abbrev WeaklyForces₀ (p : ℙ) (φ : Sentence L) : Prop := p ⊩[![]|Empty.eli
 
 instance : WeakForcingRelation ℙ (Sentence L) := ⟨WeaklyForces₀⟩
 
-lemma WeaklyForces₀.def {p : ℙ} {φ : Sentence L} : p ⊩ᶜ φ ↔ p ⊩[![]|Empty.elim] φ := by rfl
+lemma weaklyForces₀_def {p : ℙ} {φ : Sentence L} : p ⊩ᶜ φ ↔ p ⊩[![]|Empty.elim] φ := by rfl
 
-lemma weaklyForces_iff_forces {p : ℙ} {φ : Sentence L} :
+lemma weaklyForces₀_iff_forces {p : ℙ} {φ : Sentence L} :
     p ⊩ᶜ φ ↔ p ⊩ φᴺ := by rfl
 
+namespace WeaklyForces₀
+
+lemma monotone {p : ℙ} : p ⊩ᶜ φ → ∀ q ≤ p, q ⊩ᶜ φ := WeaklyForces.monotone
+
+lemma genericity {p : ℙ} :
+    (∀ q ≤ p, ∃ r ≤ q, r ⊩ᶜ φ) → p ⊩ᶜ φ := WeaklyForces.genricity
+
+lemma genericity_iff {p : ℙ} :
+    p ⊩ᶜ φ ↔ ∀ q ≤ p, ∃ r ≤ q, r ⊩ᶜ φ := WeaklyForces.genricity_iff
+
 instance : WeakForcingRelation.ClassicalKripke ℙ (· ≥ ·) where
-  verum w := by simp [WeaklyForces₀.def]
-  falsum w := by simp [WeaklyForces₀.def, WeakForcingRelation.NotForces]
-  and w := by simp [WeaklyForces₀.def]
-  or w := by simp [WeaklyForces₀.def]
-  imply w := by simp [WeaklyForces₀.def]
-  not w := by simp [WeaklyForces₀.def, WeakForcingRelation.NotForces]
+  verum w := by simp [weaklyForces₀_def]
+  falsum w := by simp [weaklyForces₀_def, WeakForcingRelation.NotForces]
+  and w := by simp [weaklyForces₀_def]
+  or w := by simp [weaklyForces₀_def]
+  imply w := by simp [weaklyForces₀_def]
+  not w := by simp [weaklyForces₀_def, WeakForcingRelation.NotForces]
+
+end WeaklyForces₀
 
 end KripkeModel
