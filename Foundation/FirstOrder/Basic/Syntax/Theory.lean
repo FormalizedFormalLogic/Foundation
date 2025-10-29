@@ -35,6 +35,8 @@ instance : Coe (Theory L) (SyntacticFormulas L) := ⟨toSyntacticFormulas⟩
 @[simp] lemma coe_mem_coe {σ : Sentence L} {T : Theory L} : (σ : SyntacticFormula L) ∈ (T : SyntacticFormulas L) ↔ σ ∈ T := by
   simp [toSyntacticFormulas]
 
+@[simp] lemma coe_empty_eq : ((∅ : Theory L) : SyntacticFormulas L) = ∅ := by simp [toSyntacticFormulas]
+
 @[simp] lemma coe_subset_coe : (T : SyntacticFormulas L) ⊆ (U : SyntacticFormulas L) ↔ T ⊆ U := by
   constructor
   · intro h σ hσ

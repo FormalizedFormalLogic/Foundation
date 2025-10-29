@@ -1,4 +1,4 @@
-import Foundation.IntFO.Translation
+import Foundation.FirstOrder.NegationTranslation.GoedelGentzen
 
 /-!
 # Algebraic proofs of cut elimination

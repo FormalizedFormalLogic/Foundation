@@ -78,12 +78,15 @@ import Foundation.FirstOrder.SetTheory.Ordinal
 
 import Foundation.FirstOrder.Hauptsatz
 
--- IntFO
+import Foundation.FirstOrder.Intuitionistic.Formula
+import Foundation.FirstOrder.Intuitionistic.Rew
+import Foundation.FirstOrder.Intuitionistic.Deduction
 
-import Foundation.IntFO.Basic
-import Foundation.IntFO.Kripke.Basic
-import Foundation.IntFO.Kripke.HeytingValuedModel
-import Foundation.IntFO.Translation
+import Foundation.FirstOrder.Kripke.Basic
+import Foundation.FirstOrder.Kripke.Intuitionistic
+import Foundation.FirstOrder.Kripke.WeakForcing
+
+import Foundation.FirstOrder.NegationTranslation.GoedelGentzen
 
 -- TODO:
 -- import Foundation.Propositional.Dialectica.Basic

@@ -1,4 +1,4 @@
-import Foundation.IntFO.Basic
+import Foundation.FirstOrder.Intuitionistic.Deduction
 
 namespace LO.FirstOrder
 
@@ -52,7 +52,11 @@ scoped[LO.FirstOrder] postfix:max "ᴺ" => Semiformula.doubleNegation
 lemma rew_doubleNegation (ω : Rew L ξ₁ n₁ ξ₂ n₂) (φ : Semiformula L ξ₁ n₁) : ω ▹ φᴺ = (ω ▹ φ)ᴺ := by
   induction φ using rec' generalizing n₂ <;> simp [rew_rel, rew_nrel, Semiformulaᵢ.rew_rel, *]
 
-lemma subst_doubleNegation (φ : Semiformula L ξ n₁) (v : Fin n₁ → Semiterm L ξ n₂) : φᴺ ⇜ v = (φ ⇜ v)ᴺ := rew_doubleNegation _ _
+lemma subst_doubleNegation (φ : Semiformula L ξ n₁) (v : Fin n₁ → Semiterm L ξ n₂) :
+    φᴺ ⇜ v = (φ ⇜ v)ᴺ := rew_doubleNegation _ _
+
+lemma emb_doubleNegation (φ : Semisentence L n₁) :
+    Rewriting.emb (φᴺ) = (Rewriting.emb φ : Semiformula L ξ n₁)ᴺ := rew_doubleNegation _ _
 
 end Semiformula
 
@@ -136,5 +140,19 @@ def gödelGentzen {Γ : Sequent L} : ⊢ᵀ Γ → (∼Γ)ᴺ ⊢[𝗠𝗶𝗻¹
   | @wk _ _ Γ Δ d h      => FiniteContext.weakening (by simpa using List.map_subset _ h) (gödelGentzen d)
 
 end Derivation
+
+open Classical Entailment
+
+lemma neg_doubleNegation (φ : SyntacticFormula L) : 𝗠𝗶𝗻¹ ⊢ ∼φᴺ ⭤ (∼φ)ᴺ := ⟨Derivation.negDoubleNegation φ⟩
+
+lemma GödelGentzen {φ} : (∅ : Theory L) ⊢ φ → (∅ : Theoryᵢ L 𝗠𝗶𝗻¹) ⊢ φᴺ := by
+  intro h
+  let ψ : SyntacticFormula L := ↑φ
+  have h : (∅ : SyntacticFormulas L) ⊢ ↑φ := Entailment.wk! (by simp) h
+  have h₁ : 𝗠𝗶𝗻¹ ⊢ ∼(∼ψ)ᴺ := by
+    simpa using Entailment.FiniteContext.provable_iff.mp ⟨Derivation.gödelGentzen h.get⟩
+  have h₂ : 𝗠𝗶𝗻¹ ⊢ ∼(∼ψ)ᴺ ⭤ ψᴺ := by simpa using neg_doubleNegation (∼ψ)
+  have : 𝗠𝗶𝗻¹ ⊢ Rewriting.emb φᴺ := by simpa [ψ, Semiformula.emb_doubleNegation] using Entailment.K!_left h₂ ⨀ h₁
+  exact Theoryᵢ.provable_def.mpr <| Entailment.Context.of! this
 
 end LO.FirstOrder
