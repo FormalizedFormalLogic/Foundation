@@ -1,10 +1,8 @@
 import Foundation.FirstOrder.Arithmetic.Definability.Hierarchy
-import Foundation.FirstOrder.Arithmetic.BoundedQuantifier
+import Foundation.FirstOrder.Arithmetic.PeanoMinus.Basic
 import Foundation.Vorspiel.Graph
 
-namespace LO.FirstOrder
-
-namespace Arithmetic.HierarchySymbol
+namespace LO.FirstOrder.Arithmetic.HierarchySymbol
 
 variable (ξ : Type*) (n : ℕ)
 
@@ -282,7 +280,7 @@ namespace DefinableFunction₂
   Defined.to_definable₀ (φ := .mkSigma “#0 = #1 * #1”) ⟨by intro _; simp [sq]⟩
 
 @[simp] instance pow3 [V ⊧ₘ* 𝗣𝗔⁻] : ℌ.DefinableFunction₁ fun x : V ↦ x^3 :=
-  Defined.to_definable₀ (φ := .mkSigma “#0 = #1 * #1 * #1”) ⟨by intro _; simp [PeanoMinus.pow_three]⟩
+  Defined.to_definable₀ (φ := .mkSigma “#0 = #1 * #1 * #1”) ⟨by intro _; simp [Arithmetic.pow_three]⟩
 
 @[simp] instance pow4 [V ⊧ₘ* 𝗣𝗔⁻] : ℌ.DefinableFunction₁ fun x : V ↦ x^4 :=
   Defined.to_definable₀ (φ := .mkSigma “#0 = #1 * #1 * #1 * #1”) ⟨by intro _; simp [pow_four]⟩
