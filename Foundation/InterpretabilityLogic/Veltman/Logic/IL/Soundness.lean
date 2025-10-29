@@ -9,6 +9,12 @@ namespace Veltman
 
 protected abbrev FrameClass.IL : FrameClass := { F | F.IsIL }
 
+
+protected class Frame.IsFiniteIL (F : Veltman.Frame) extends F.IsIL, F.IsFinite where
+
+protected abbrev FrameClass.FiniteIL : FrameClass := { F | F.IsFiniteIL }
+
+
 instance : Veltman.trivialFrame.IsIL where
   S_IL _ _ _ := by simp;
 
@@ -18,13 +24,13 @@ end Veltman
 namespace IL
 
 instance Veltman.sound : Sound InterpretabilityLogic.IL FrameClass.IL := instSound_of_validates_axioms $ by
-  rw [(show IL.axioms = CL.axioms ∪ {(InterpretabilityLogic.Axioms.J5 (.atom 0))} by simp)];
-  apply validates_CL_axioms_union;
   constructor;
-  suffices FrameClass.IL ⊧ Axioms.J5 (Formula.atom 0) by simpa;
-  intro F hF;
-  simp only [Set.mem_setOf_eq] at hF;
-  apply Formula.Veltman.ValidOnFrame.axiomJ5;
+  rintro φ (rfl | hφ) F hF;
+  . simp only [Set.mem_setOf_eq] at hF;
+    apply Formula.Veltman.ValidOnFrame.axiomJ5;
+  . simp only [Set.mem_setOf_eq] at hF;
+    apply validates_CL_axioms_union.models;
+    assumption;
 
 instance : Entailment.Consistent InterpretabilityLogic.IL := consistent_of_sound_frameclass FrameClass.IL $ by
   use Veltman.trivialFrame;

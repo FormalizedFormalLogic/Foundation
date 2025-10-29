@@ -77,18 +77,6 @@ lemma weakerThan_of_subset_frameClass
   apply Sound.sound (𝓜 := C₁) hφ;
   apply hC hF;
 
-lemma validates_CL_axioms_union (hV : C ⊧* Ax) : C ⊧* CL.axioms ∪ Ax := by
-  constructor;
-  rintro φ ((rfl | rfl | rfl | rfl | rfl | rfl) | hφ);
-  . intro _ _; apply ValidOnFrame.axiomK;
-  . intro _ _; apply ValidOnFrame.axiomL;
-  . intro _ _; apply ValidOnFrame.axiomJ1;
-  . intro _ _; apply ValidOnFrame.axiomJ2;
-  . intro _ _; apply ValidOnFrame.axiomJ3;
-  . intro _ _; apply ValidOnFrame.axiomJ4;
-  . apply hV.models;
-    assumption;
-
 end Veltman
 
 end LO.InterpretabilityLogic
