@@ -61,8 +61,8 @@ lemma finite_colimit [Fintype ι] (p : ι → 𝓚) (hp : ∀ i, p i ∈ F) : �
   DirectedOn.fintype_colimit transitive_ge (Order.PFilter.nonempty F) F.directed p hp
 
 lemma finite_colimit_domain [Fintype ι] (v : ι → F.Domain) :
-    ∃ q ∈ F, ∀ i, q ⊩↓ (v i).val := by
-  have : ∀ i, ∃ p ∈ F, p ⊩↓ (v i).val := fun i ↦ (v i).mem_filter
+    ∃ q ∈ F, ∀ i, q ⊩↓ ↑(v i) := by
+  have : ∀ i, ∃ p ∈ F, p ⊩↓ ↑(v i) := fun i ↦ (v i).mem_filter
   choose p hp using this
   have : ∃ q ∈ F, ∀ i, q ≤ p i := F.finite_colimit p fun i ↦ (hp i).1
   rcases this with ⟨q, hq, hqp⟩
@@ -70,12 +70,15 @@ lemma finite_colimit_domain [Fintype ι] (v : ι → F.Domain) :
 
 instance Str : Structure L F.Domain where
   func _ f _ := IsEmpty.elim' inferInstance f
-  rel _ R v := ∀ p ∈ F, (∀ i, p ⊩↓ (v i).val) → 𝓚.Rel p R fun i ↦ v i
+  rel _ R v := ∀ p ∈ F, (∀ i, p ⊩↓ ↑(v i)) → 𝓚.Rel p R fun i ↦ v i
 
 @[simp] lemma Str.rel_iff {k : ℕ} (R : L.Rel k) (v : Fin k → F.Domain) :
-    F.Str.rel R v ↔ ∀ p ∈ F, (∀ i, p ⊩↓ (v i).val) → 𝓚.Rel p R fun i ↦ v i := by rfl
+    F.Str.rel R v ↔ ∀ p ∈ F, (∀ i, p ⊩↓ ↑(v i)) → 𝓚.Rel p R fun i ↦ v i := by rfl
 
 end Filter
+
+lemma triple_negation_elimination {P : 𝓚 → Prop} (mono : ∀ p q, p ≤ q → P q → Q p) :
+    ∀
 
 end RelationalKripkeModel
 
