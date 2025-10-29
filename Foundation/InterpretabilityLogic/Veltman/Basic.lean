@@ -74,6 +74,8 @@ protected lemma not_box_def : ¬x ⊧ □φ ↔ (∃ y, x ≺ y ∧ ¬y ⊧ φ) 
 protected lemma dia_def : x ⊧ ◇φ ↔ ∃ y, x ≺ y ∧ y ⊧ φ := by simp [Satisfies];
 protected lemma not_dia_def : ¬x ⊧ ◇φ ↔ ∀ y, x ≺ y → ¬(y ⊧ φ) := by simp [Satisfies];
 
+protected lemma rhd_def : x ⊧ φ ▷ ψ ↔ ∀ y, (Rxy : (x ≺ y)) → (y ⊧ φ) → (∃ z : { v // x ≺ v }, M.S x ⟨y, Rxy⟩ z ∧ z.1 ⊧ ψ) := by simp [Satisfies];
+
 protected instance : Semantics.Tarski (M.World) where
   models_verum := λ _ => Satisfies.top_def;
   models_falsum := λ _ => Satisfies.bot_def;
@@ -315,19 +317,19 @@ protected lemma imply₂ : F ⊧ (Axioms.Imply₂ φ ψ χ) := fun _ ↦ ValidOn
 
 protected lemma elimContra : F ⊧ (Axioms.ElimContra φ ψ) := fun _ ↦ ValidOnModel.elimContra
 
-protected lemma axiomK : F ⊧ (Modal.Axioms.K φ ψ) := fun _ ↦ ValidOnModel.axiomK
+@[simp] protected lemma axiomK : F ⊧ (Modal.Axioms.K φ ψ) := fun _ ↦ ValidOnModel.axiomK
 
-protected lemma axiomL : F ⊧ (Modal.Axioms.L φ) := fun _ ↦ ValidOnModel.axiomL
+@[simp] protected lemma axiomL : F ⊧ (Modal.Axioms.L φ) := fun _ ↦ ValidOnModel.axiomL
 
-protected lemma axiomJ1 : F ⊧ Axioms.J1 φ ψ := fun _ ↦ ValidOnModel.axiomJ1
+@[simp] protected lemma axiomJ1 : F ⊧ Axioms.J1 φ ψ := fun _ ↦ ValidOnModel.axiomJ1
 
-protected lemma axiomJ2 : F ⊧ Axioms.J2 φ ψ χ := fun _ ↦ ValidOnModel.axiomJ2
+@[simp] protected lemma axiomJ2 : F ⊧ Axioms.J2 φ ψ χ := fun _ ↦ ValidOnModel.axiomJ2
 
-protected lemma axiomJ3 : F ⊧ Axioms.J3 φ ψ χ := fun _ ↦ ValidOnModel.axiomJ3
+@[simp] protected lemma axiomJ3 : F ⊧ Axioms.J3 φ ψ χ := fun _ ↦ ValidOnModel.axiomJ3
 
-protected lemma axiomJ4 : F ⊧ Axioms.J4 φ ψ := fun _ ↦ ValidOnModel.axiomJ4
+@[simp] protected lemma axiomJ4 : F ⊧ Axioms.J4 φ ψ := fun _ ↦ ValidOnModel.axiomJ4
 
-protected lemma axiomJ5 [F.IsIL] : F ⊧ Axioms.J5 φ := fun _ ↦ ValidOnModel.axiomJ5
+@[simp] protected lemma axiomJ5 [F.IsIL] : F ⊧ Axioms.J5 φ := fun _ ↦ ValidOnModel.axiomJ5
 
 end ValidOnFrame
 
