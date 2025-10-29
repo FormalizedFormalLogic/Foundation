@@ -1,67 +1,15 @@
 import Foundation.IntFO.Basic
+import Foundation.FirstOrder.Kripke.Basic
+import Foundation.Logic.Predicate.Relational
 import Foundation.Logic.ForcingRelation
 
 namespace LO.FirstOrder
-
-namespace Semiterm
-
-variable {L : Language} [L.Relational]
-
-lemma bvar_or_fvar_of_relational (t : Semiterm L ξ n) : (∃ x, t = #x) ∨ (∃ x, t = &x) :=
-  match t with
-  |        #x => by simp
-  |        &x => by simp
-  | .func f _ => Language.Relational.func_empty _ |>.elim' f
-
-lemma fvar_of_relational (t : Term L ξ) : ∃ x, t = &x := by
-  rcases bvar_or_fvar_of_relational t with (⟨x, rfl⟩ | ⟨x, rfl⟩)
-  · exact finZeroElim (α := fun _ ↦ _) x
-  · exact ⟨x, rfl⟩
-
-variable {M : Type*} (bv : Fin n → M) (fv : ξ → M)
-
-def relationalVal : Semiterm L ξ n → M
-  |        #x => bv x
-  |        &x => fv x
-  | .func f _ => Language.Relational.func_empty _ |>.elim' f
-
-variable {bv fv}
-
-@[simp] lemma relationalVal_bvar : (#x : Semiterm L ξ n).relationalVal bv fv = bv x := rfl
-
-@[simp] lemma relationalVal_fvar : (&x : Semiterm L ξ n).relationalVal bv fv = fv x := rfl
-
-lemma relationalVal_rew {bv : Fin n₂ → M} {fv : ξ₂ → M} (ω : Rew L ξ₁ n₁ ξ₂ n₂) (t : Semiterm L ξ₁ n₁) :
-    relationalVal bv fv (ω t) = relationalVal (relationalVal bv fv ∘ ω ∘ bvar) (relationalVal bv fv ∘ ω ∘ fvar) t := by
-  rcases bvar_or_fvar_of_relational t with (⟨x, rfl⟩ | ⟨x, rfl⟩) <;> simp
-
-@[simp] lemma relationalVal_bShift (x : M) (t : Semiterm L ξ n) :
-    relationalVal (x :> bv) fv (Rew.bShift t) = relationalVal bv fv t := by
-  simp [relationalVal_rew, Function.comp_def]
-
-end Semiterm
-
-structure RelationalKripkeModel (L : Language) [L.Relational] where
-  World : Type*
-  [preorder : Preorder World]
-  Carrier : Type*
-  Domain : World → Set Carrier
-  domain_nonempty : ∀ w, ∃ x, x ∈ Domain w
-  domain_antimonotone : w ≥ v → Domain w ⊆ Domain v
-  Rel (w : World) {k : ℕ} (R : L.Rel k) : (Fin k → Carrier) → Prop
-  rel_monotone : w ≥ v → Rel w R t → Rel v R t
-
-instance (L : Language) [L.Relational] : CoeSort (RelationalKripkeModel L) (Type _) := ⟨fun 𝓚 ↦ 𝓚.World⟩
-
-instance {L : Language} [L.Relational] (𝓚 : RelationalKripkeModel L) : CoeSort 𝓚.World (Type _) := ⟨fun w ↦ 𝓚.Domain w⟩
-
-instance {L : Language} [L.Relational] (𝓚 : RelationalKripkeModel L) : Preorder 𝓚.World := 𝓚.preorder
 
 namespace RelationalKripkeModel
 
 variable {L : Language} [L.Relational] {𝓚 : RelationalKripkeModel L}
 
-def Forces {n} (w : 𝓚) (bv : Fin n → Carrier 𝓚) (fv : ξ → Carrier 𝓚) : Semiformulaᵢ L ξ n → Prop
+def Forces {n} (w : 𝓚) (bv : Fin n → Name 𝓚) (fv : ξ → Name 𝓚) : Semiformulaᵢ L ξ n → Prop
   | .rel R t => 𝓚.Rel w R fun i ↦ (t i).relationalVal bv fv
   |        ⊤ => True
   |        ⊥ => False
@@ -73,11 +21,11 @@ def Forces {n} (w : 𝓚) (bv : Fin n → Carrier 𝓚) (fv : ξ → Carrier �
 
 local notation:45 w " ⊩[" bv "|" fv "] " φ:46 => Forces w bv fv φ
 
-abbrev Forcesb {n} (w : 𝓚) (bv : Fin n → Carrier 𝓚) : Semisentenceᵢ L n → Prop := 𝓚.Forces w bv Empty.elim
+abbrev Forcesb {n} (w : 𝓚) (bv : Fin n → Name 𝓚) : Semisentenceᵢ L n → Prop := 𝓚.Forces w bv Empty.elim
 
 scoped notation:45 w " ⊩/" bv φ:46 => Forcesb w bv φ
 
-variable (w : 𝓚) (bv : Fin n → Carrier 𝓚) (fv : ξ → Carrier 𝓚)
+variable (w : 𝓚) (bv : Fin n → Name 𝓚) (fv : ξ → Name 𝓚)
 
 @[simp] lemma forces_verum : w ⊩[bv|fv] ⊤ := by trivial
 
@@ -118,7 +66,7 @@ lemma forces_not {φ : Semiformulaᵢ L ξ n} :
   |         [φ] => by simp
   | φ :: ψ :: Γ => by simp [forces_disj (Γ := ψ :: Γ)]
 
-lemma forces_rew {bv : Fin n₂ → Carrier 𝓚} {fv : ξ₂ → Carrier 𝓚} {ω : Rew L ξ₁ n₁ ξ₂ n₂} {φ : Semiformulaᵢ L ξ₁ n₁} :
+lemma forces_rew {bv : Fin n₂ → Name 𝓚} {fv : ξ₂ → Name 𝓚} {ω : Rew L ξ₁ n₁ ξ₂ n₂} {φ : Semiformulaᵢ L ξ₁ n₁} :
     w ⊩[bv|fv] (ω ▹ φ) ↔
     w ⊩[fun x ↦ (ω #x).relationalVal bv fv|fun x ↦ (ω &x).relationalVal bv fv] φ := by
   induction φ using Semiformulaᵢ.rec' generalizing n₂ w
@@ -133,15 +81,15 @@ lemma forces_rew {bv : Fin n₂ → Carrier 𝓚} {fv : ξ₂ → Carrier 𝓚} 
   case hVerum => simp
   case hFalsum => simp
   case hAll φ ih =>
-    have (x : Carrier 𝓚) : (fun i ↦ (ω.q #i).relationalVal (x :> bv) fv) = (x :> fun i ↦ (ω #i).relationalVal bv fv) := by
+    have (x : Name 𝓚) : (fun i ↦ (ω.q #i).relationalVal (x :> bv) fv) = (x :> fun i ↦ (ω #i).relationalVal bv fv) := by
       funext i; cases i using Fin.cases <;> simp
     simp [ih, this]
   case hEx φ ih =>
-    have (x : Carrier 𝓚) : (fun i ↦ (ω.q #i).relationalVal (x :> bv) fv) = (x :> fun i ↦ (ω #i).relationalVal bv fv) := by
+    have (x : Name 𝓚) : (fun i ↦ (ω.q #i).relationalVal (x :> bv) fv) = (x :> fun i ↦ (ω #i).relationalVal bv fv) := by
       funext i; cases i using Fin.cases <;> simp
     simp [ih, this]
 
-@[simp] lemma forces_free {fv : ℕ → 𝓚.Carrier} {φ : SyntacticSemiformulaᵢ L (n + 1)} :
+@[simp] lemma forces_free {fv : ℕ → 𝓚.Name} {φ : SyntacticSemiformulaᵢ L (n + 1)} :
     v ⊩[bv|↑x :>ₙ fv] Rewriting.free φ ↔ v ⊩[bv <: x|fv] φ := by
   have : (fun i ↦ Semiterm.relationalVal (L := L) bv (x :>ₙ fv) (Rew.free #i)) = (bv <: x) := by
     ext i; cases i using Fin.lastCases <;> simp
@@ -164,7 +112,7 @@ lemma forces_subst (w : Fin k → Semiterm L ξ n) (φ : Semiformulaᵢ L ξ k) 
   simp [Rewriting.emb, forces_rew, Empty.eq_elim]
 
 lemma Forces.monotone
-    {n} {bv : Fin n → Carrier 𝓚} {fv : ξ → Carrier 𝓚}
+    {n} {bv : Fin n → Name 𝓚} {fv : ξ → Name 𝓚}
     (h : v ≤ w) {φ} : w ⊩[bv|fv] φ → v ⊩[bv|fv] φ :=
   match φ with
   | .rel R v => 𝓚.rel_monotone h
@@ -213,7 +161,7 @@ variable {Λ : Hilbertᵢ L}
 
 open HilbertProofᵢ Semantics
 
-lemma sound!_forces (w : 𝓚) (fv : ℕ → 𝓚.Carrier) (hfv : ∀ i, fv i ∈ 𝓚.Domain w) {φ} : 𝗜𝗻𝘁¹ ⊢! φ → w ⊩[![]|fv] φ
+lemma sound!_forces (w : 𝓚) (fv : ℕ → 𝓚.Name) (hfv : ∀ i, fv i ∈ 𝓚.Domain w) {φ} : 𝗜𝗻𝘁¹ ⊢! φ → w ⊩[![]|fv] φ
   |     eaxm h => by
     have : ∃ ψ, Axioms.EFQ ψ = φ := by simpa [Hilbertᵢ.Intuitionistic] using h
     rcases this with ⟨ψ, rfl⟩
