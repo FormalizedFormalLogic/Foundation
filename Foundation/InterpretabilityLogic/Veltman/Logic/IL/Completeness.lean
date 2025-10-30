@@ -87,10 +87,10 @@ lemma def_inconsistent [Entailment.Minimal 𝓢] : Inconsistent 𝓢 Γ ↔ ∃ 
 
 def Maximal (𝓢 : S) (Γ : Finset F) : Prop := ∀ Δ, Γ ⊂ Δ → Inconsistent 𝓢 Δ
 
-def ComplementBounded [Compl F] (Γ Φ : Finset F) : Prop := Γ ⊆ (Φ ∪ Φ.image (-·))
+def ComplementSubset [Compl F] (Γ Δ : Finset F) : Prop := Γ ⊆ (Δ ∪ Δ.image (-·))
 
 /-- For every `φ` in `Δ`, `φ` or `-φ` is in `Γ` -/
-def ComplementMaximal [Compl F] (Γ Φ : Finset F) : Prop := ∀ φ ∈ Φ, φ ∈ Γ ∨ -φ ∈ Γ
+def ComplementMaximal [Compl F] (Γ Δ : Finset F) : Prop := ∀ φ ∈ Δ, φ ∈ Γ ∨ -φ ∈ Γ
 
 
 section
@@ -273,17 +273,18 @@ end exists_consistent_complementary_closed
 
 
 open exists_consistent_complementary_closed in
-theorem exists_consistent_complement_maximal [Compl F] [ComplEquiv 𝓢] [Entailment.Cl 𝓢]
-  (Γ_consis : Consistent 𝓢 Γ) (Γ_bounded : ComplementBounded Γ Φ)
-  : ∃ Γ', (Γ ⊆ Γ') ∧ (Consistent 𝓢 Γ') ∧ (ComplementBounded Γ' Φ) ∧ (ComplementMaximal Γ' Φ) := by
-  use enum 𝓢 Γ Φ.toList;
+theorem exists_consistent_complement_maximal {Ξ : Finset F} [Compl F] [ComplEquiv 𝓢] [Entailment.Cl 𝓢]
+  (Γ_consis : Consistent 𝓢 Γ)
+  (subset_ΓΔ : ComplementSubset Γ Ξ)
+  : ∃ Γ', (Γ ⊆ Γ') ∧ (Consistent 𝓢 Γ') ∧ (ComplementSubset Γ' Ξ) ∧ (ComplementMaximal Γ' Ξ) := by
+  use enum 𝓢 Γ Ξ.toList;
   refine ⟨?_, ?_, ?_, ?_⟩;
   . simp;
   . grind;
   . intro φ hφ;
     simp only [Finset.mem_union, Finset.mem_image];
     rcases of_mem_enum hφ with (hφ | hφ | ⟨ψ, hψ, rfl⟩);
-    . dsimp [ComplementBounded] at Γ_bounded
+    . dsimp [ComplementSubset] at subset_ΓΔ
       grind;
     . left;
       simpa using hφ;
@@ -300,7 +301,7 @@ section
 
 variable [Compl F] {Φ : Finset F}
 
-abbrev ComplementMaximalConsistentFinset (𝓢 : S) (Φ : Finset F) := { Γ : Finset F // (Consistent 𝓢 Γ) ∧ (ComplementBounded Γ Φ) ∧ (ComplementMaximal Γ Φ) }
+abbrev ComplementMaximalConsistentFinset (𝓢 : S) (Φ : Finset F) := { Γ : Finset F // (Consistent 𝓢 Γ) ∧ (ComplementSubset Γ Φ) ∧ (ComplementMaximal Γ Φ) }
 
 variable {Γ Γ₁ Γ₂ Δ : ComplementMaximalConsistentFinset 𝓢 Φ} {φ ψ : F}
 
@@ -332,11 +333,10 @@ lemma equality_def : Γ₁ = Γ₂ ↔ Γ₁.1 = Γ₂.1 := by
 
 variable [Entailment.ComplEquiv 𝓢] [Entailment.Cl 𝓢]
 
-theorem lindenbaum {Γ : Finset F} (Γ_consis : Consistent 𝓢 Γ) (Γ_bounded : ComplementBounded Γ Φ)
+theorem lindenbaum {Γ : Finset F} (Γ_consis : Consistent 𝓢 Γ) (X_sub : ComplementSubset Γ Φ)
   : ∃ Γ' : ComplementMaximalConsistentFinset 𝓢 Φ, Γ ⊆ Γ'.1 := by
-  obtain ⟨Γ', ⟨_, _⟩⟩ := exists_consistent_complement_maximal Γ_consis Γ_bounded;
-  use ⟨Γ', ?_⟩;
-  assumption;
+  obtain ⟨Y, ⟨_, _, _⟩⟩ := exists_consistent_complement_maximal Γ_consis X_sub;
+  use ⟨Y, (by assumption), (by assumption)⟩;
 
 noncomputable instance [Entailment.Consistent 𝓢] : Inhabited (ComplementMaximalConsistentFinset 𝓢 Φ) := ⟨lindenbaum (Γ := ∅) (by simp) (by tauto) |>.choose⟩
 
@@ -696,19 +696,10 @@ lemma claim3 [Entailment.IL 𝓢] (h₁ : ∼(φ ▷ χ.1) ∈ Γ.1) : ∃ Δ, (
     ((Γ.1.1.preimage (λ ξ => ξ ▷ χ.1) (by simp)) |>.image (λ ξ => □-ξ))
   have Δ₀_consis : Δ₀.Consistent 𝓢 := by
     by_contra!;
-    obtain ⟨Θ, hΘ₁, hΘ₂⟩ := def_inconsistent.mp this;
+
     sorry;
-  have Δ₀_cs : ComplementBounded Δ₀ Φ.1 := by
-    intro ψ hψ;
-    simp [Δ₀] at hψ;
-    rcases hψ with rfl | rfl | hψ | ⟨ψ, hψ, rfl⟩ | ⟨ψ, hψ, rfl⟩ | ⟨ψ, hψ, rfl⟩ <;>
-    simp only [Finset.mem_union, Finset.mem_image];
-    . left; have : ∼(ψ ▷ χ) ∈ Φ.1 := Γ.2 h₁; grind;
-    . left; grind;
-    . left; have : □ψ ∈ Φ.1 := Γ.2 hψ; grind;
-    . left; have : □ψ ∈ Φ.1 := Γ.2 hψ; grind;
-    . sorry;
-    . sorry;
+  have Δ₀_cs : ComplementSubset Δ₀ Φ.1 := by
+    sorry;
   obtain ⟨Δ, hΔ⟩ : ∃ Δ : ComplementMaximalConsistentFinset 𝓢 Φ.1, Δ₀ ⊆ Δ.1 := ComplementMaximalConsistentFinset.lindenbaum Δ₀_consis Δ₀_cs;
   sorry;
   /-
@@ -818,15 +809,14 @@ variable {α : Type*} [DecidableEq α]
 variable [Entailment S (Formula ℕ)]
 variable {Φ : AdequateSet _} {𝓢 : S} {Γ : { Γ : ComplementMaximalConsistentFinset 𝓢 Φ.1 // Γ.1 ⊆ Φ.1 }}
 
-protected inductive ILMiniCanonicalModel.IsWorld (Γ : { Γ : ComplementMaximalConsistentFinset 𝓢 Φ.1 // Γ.1 ⊆ Φ.1 })
-  : { Γ : ComplementMaximalConsistentFinset 𝓢 Φ.1 // Γ.1 ⊆ Φ.1 } × List { φ // φ ∈ Φ.1 } → Prop
-  | i₁              : ILMiniCanonicalModel.IsWorld Γ ⟨Γ, []⟩
-  | i₂ {Δ Δ'} {τ}   : ILMiniCanonicalModel.IsWorld Γ ⟨Δ, τ⟩ → Δ < Δ' → ILMiniCanonicalModel.IsWorld Γ ⟨Δ', τ⟩
-  | i₃ {Δ Δ'} {τ χ} : ILMiniCanonicalModel.IsWorld Γ ⟨Δ, τ⟩ → Δ ≺[χ] Δ' → ILMiniCanonicalModel.IsWorld Γ ⟨Δ', (τ ++ [χ])⟩
+protected inductive ILMiniCanonicalModel.IsWorld (Γ : { Γ : ComplementMaximalConsistentFinset 𝓢 Φ.1 // Γ.1 ⊆ Φ.1 }) : { Γ : ComplementMaximalConsistentFinset 𝓢 Φ.1 // Γ.1 ⊆ Φ.1 } → List { φ // φ ∈ Φ.1 } → Prop
+  | i₁              : ILMiniCanonicalModel.IsWorld Γ Γ []
+  | i₂ {Δ Δ'} {τ}   : ILMiniCanonicalModel.IsWorld Γ Δ τ → Δ < Δ' → ILMiniCanonicalModel.IsWorld Γ Δ' τ
+  | i₃ {Δ Δ'} {τ χ} : ILMiniCanonicalModel.IsWorld Γ Δ τ → Δ ≺[χ] Δ' → ILMiniCanonicalModel.IsWorld Γ Δ' (τ ++ [χ])
 
 def ILMiniCanonicalModel (Γ : { Γ : ComplementMaximalConsistentFinset 𝓢 Φ.1 // Γ.1 ⊆ Φ.1 }) : Veltman.Model where
   toKripkeFrame := {
-    World := { P // ILMiniCanonicalModel.IsWorld Γ P }
+    World := { P : _ × _ // ILMiniCanonicalModel.IsWorld Γ P.1 P.2 }
     world_nonempty := ⟨⟨(Γ, []), ILMiniCanonicalModel.IsWorld.i₁⟩⟩
     Rel X Y := ∃ χ, X.1.1 ≺[χ] Y.1.1 ∧ (∃ τ, Y.1.2 = X.1.2 ++ [χ] ++ τ)
   }
@@ -837,6 +827,7 @@ def ILMiniCanonicalModel (Γ : { Γ : ComplementMaximalConsistentFinset 𝓢 Φ.
   Val X p := (.atom p) ∈ X.1.1.1
 
 instance : (ILMiniCanonicalModel Γ).IsFiniteGL where
+  world_finite := by sorry
   trans X Y Z := by
     rintro ⟨χ₁, RXY, ⟨τ₁, hτ₁⟩⟩ ⟨χ₂, RYZ, ⟨τ₂, hτ₂⟩⟩;
     use χ₁;
@@ -847,9 +838,6 @@ instance : (ILMiniCanonicalModel Γ).IsFiniteGL where
   irrefl := by
     rintro _ ⟨_, _, ⟨_, hτ⟩⟩;
     simp at hτ;
-  world_finite := by
-    simp [ILMiniCanonicalModel];
-    sorry
 
 instance : (ILMiniCanonicalModel Γ).IsIL where
   S_refl X := by
