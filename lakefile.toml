@@ -29,6 +29,11 @@ root = "Zoo.Arith"
 supportInterpreter = true
 
 [[lean_exe]]
+name = "generate_setTheory_zoo"
+root = "Zoo.SetTheory"
+supportInterpreter = true
+
+[[lean_exe]]
 name = "generate_modal_zoo"
 root = "Zoo.Modal"
 supportInterpreter = true

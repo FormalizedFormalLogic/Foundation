@@ -2,7 +2,10 @@
 
 #set page(width: auto, height: auto, margin: 24pt)
 
+#let omitLabels = ()
+
 #let arrows = json("./arith.json").map(((from, to, type)) => {
+  if omitLabels.contains(from) == false and omitLabels.contains(from) == false {
     if type == "ssub" {
       return strfmt("\"{}\" -> \"{}\"", from, to)
     } else if type == "sub" {
@@ -10,6 +13,7 @@
     } else if type == "sorry" {
       return strfmt("\"{}\" -> \"{}\" [color=red; style=dashed] ", from, to)
     }
+  }
 })
 
 #let TheoryPA = $Theory("PA")$

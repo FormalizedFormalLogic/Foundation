@@ -1,6 +1,6 @@
 import Foundation.FirstOrder.SetTheory.Basic.Axioms
 
-/-! # basic properties of model of set theory-/
+/-! # Basic properties of model of set theory-/
 
 namespace LO.FirstOrder.SetTheory
 
@@ -65,6 +65,10 @@ instance SSubset.definable : ℒₛₑₜ-relation[V] SSubset := SSubset.defined
 @[simp] lemma SSubset.irrefl (x : V) : ¬x ⊊ x := by simp [ssubset_def]
 
 lemma SSubset.subset {x y : V} : x ⊊ y → x ⊆ y := fun h ↦ h.1
+
+lemma val_isSucc_iff {v : Fin 2 → V} :
+    V ⊧/v isSucc ↔ ∀ z, z ∈ v 0 ↔ z = v 1 ∨ z ∈ v 1 := by
+  simp [isSucc]
 
 variable [Nonempty V]
 

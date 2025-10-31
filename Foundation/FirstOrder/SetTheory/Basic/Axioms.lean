@@ -46,7 +46,7 @@ def replacementSchema (φ : SyntacticSemiformula ℒₛₑₜ 2) : Sentence ℒ�
   .univCl “(∀ x, ∃! y, !φ x y) → ∀ X, ∃ Y, ∀ y, y ∈ Y ↔ ∃ x ∈ X, !φ x y”
 
 def choice : Sentence ℒₛₑₜ :=
-  “∀ x, (∀ y ∈ x, !isNonempty y) ∧ (∀ y ∈ x, ∀ z ∈ x, y ≠ z → ¬∃ w, w ∈ y ∧ w ∈ z) → ∃ c, ∀ y ∈ x, ∃ u ∈ c, u ∈ y”
+  “∀ 𝓧, (∀ X ∈ 𝓧, !isNonempty X) ∧ (∀ X ∈ 𝓧, ∀ Y ∈ 𝓧, (∃ z, z ∈ X ∧ z ∈ Y) → X = Y) → ∃ C, ∀ X ∈ 𝓧, ∃! x, x ∈ C ∧ x ∈ X”
 
 end Axiom
 
@@ -85,7 +85,7 @@ notation "𝗭𝗙" => ZermeloFraenkel
 
 instance : 𝗘𝗤 ⪯ 𝗭𝗙 := Entailment.WeakerThan.ofSubset ZermeloFraenkel.axiom_of_equality
 
-lemma Zermelo_subset_ZermeloFraenkel : 𝗭 ⊆ 𝗭𝗙 := by
+lemma z_subset_zf : 𝗭 ⊆ 𝗭𝗙 := by
   rintro φ ⟨h⟩
   · exact ZermeloFraenkel.axiom_of_equality φ (by assumption)
   · exact ZermeloFraenkel.axiom_of_empty_set
@@ -97,7 +97,7 @@ lemma Zermelo_subset_ZermeloFraenkel : 𝗭 ⊆ 𝗭𝗙 := by
   · exact ZermeloFraenkel.axiom_of_foundation
   · exact ZermeloFraenkel.axiom_of_separation _
 
-instance : 𝗭 ⪯ 𝗭𝗙 := Entailment.WeakerThan.ofSubset Zermelo_subset_ZermeloFraenkel
+instance : 𝗭 ⪯ 𝗭𝗙 := Entailment.WeakerThan.ofSubset z_subset_zf
 
 /-! ### Zermelo set theory with axiom of choice -/
 
@@ -122,5 +122,9 @@ notation "𝗭𝗙𝗖" => ZermeloFraenkelChoice
 instance : 𝗭𝗙 ⪯ 𝗭𝗙𝗖 := inferInstance
 
 instance : 𝗘𝗤 ⪯ 𝗭𝗙𝗖 := Entailment.WeakerThan.trans (inferInstanceAs (𝗘𝗤 ⪯ 𝗭𝗙)) inferInstance
+
+lemma zc_subset_zfc : 𝗭𝗖 ⊆ 𝗭𝗙𝗖 := Set.union_subset_union_left _ z_subset_zf
+
+instance : 𝗭𝗖 ⪯ 𝗭𝗙𝗖 := Entailment.WeakerThan.ofSubset zc_subset_zfc
 
 end LO.FirstOrder.SetTheory
