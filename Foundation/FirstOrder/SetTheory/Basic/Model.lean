@@ -1,6 +1,6 @@
 import Foundation.FirstOrder.SetTheory.Basic.Axioms
 
-/-! # basic properties of model of set theory-/
+/-! # Basic properties of model of set theory-/
 
 namespace LO.FirstOrder.SetTheory
 

@@ -45,32 +45,32 @@ instance models_zf : ZFSet.{u} ⊧ₘ* 𝗭𝗙 where
       have : ZFSet.{u} ⊧ₘ* (𝗘𝗤 : Theory ℒₛₑₜ) := inferInstance
       simpa [models_iff] using modelsTheory_iff.mp this h
     case axiom_of_empty_set =>
-      suffices ∃ x, ∀ y : ZFSet.{u}, y ∉ x by simpa [models_iff, Axiom.empty]
+      suffices ∃ x, ∀ y, y ∉ x by simpa [models_iff, Axiom.empty]
       exact ⟨∅, by simp⟩
     case axiom_of_extentionality =>
       simp [models_iff, Axiom.extentionality, ZFSet.ext_iff]
     case axiom_of_pairing =>
       suffices
-          ∀ x y : ZFSet.{u}, ∃ z, ∀ v : ZFSet.{u}, v ∈ z ↔ v = x ∨ v = y by
+          ∀ x y : ZFSet.{u}, ∃ z, ∀ v, v ∈ z ↔ v = x ∨ v = y by
         simpa [models_iff, Axiom.pairing]
       intro x y
       exact ⟨{x, y}, by simp⟩
     case axiom_of_union =>
       suffices
-          ∀ x : ZFSet.{u}, ∃ y, ∀ z : ZFSet.{u}, z ∈ y ↔ ∃ v ∈ x, z ∈ v by
+          ∀ x : ZFSet.{u}, ∃ y, ∀ z, z ∈ y ↔ ∃ v ∈ x, z ∈ v by
         simpa [models_iff, Axiom.union]
       intro x
       exact ⟨x.sUnion, by simp⟩
     case axiom_of_power_set =>
       suffices
-          ∀ x : ZFSet.{u}, ∃ y, ∀ z : ZFSet.{u}, z ∈ y ↔ z ⊆ x by
+          ∀ x : ZFSet.{u}, ∃ y, ∀ z, z ∈ y ↔ z ⊆ x by
         simpa [models_iff, Axiom.power]
       intro x
       exact ⟨x.powerset, by simp⟩
     case axiom_of_infinity =>
       suffices
           ∃ ω, (∅ ∈ ω) ∧
-            ∀ x ∈ ω, ∀ y : ZFSet.{u}, (∀ z, z ∈ y ↔ z = x ∨ z ∈ x) → y ∈ ω by
+            ∀ x ∈ ω, ∀ y, (∀ z, z ∈ y ↔ z = x ∨ z ∈ x) → y ∈ ω by
         simpa [models_iff, Axiom.infinity, val_isSucc_iff]
       refine ⟨ZFSet.omega, ?_, ?_⟩
       · simp
@@ -129,14 +129,18 @@ instance models_ac : ZFSet.{u} ⊧ₘ* 𝗔𝗖 where
 
 instance models_zfc : ZFSet.{u} ⊧ₘ* 𝗭𝗙𝗖 := inferInstance
 
-instance models_z : ZFSet.{u} ⊧ₘ* 𝗭 := ModelsTheory.of_ss (inferInstanceAs (ZFSet.{u} ⊧ₘ* 𝗭𝗙)) Zermelo_subset_ZermeloFraenkel
+instance models_z : ZFSet.{u} ⊧ₘ* 𝗭 := ModelsTheory.of_ss inferInstance z_subset_zf
+
+instance models_zc : ZFSet.{u} ⊧ₘ* 𝗭𝗖 := inferInstance
 
 end Standard
 
-instance : Entailment.Consistent 𝗭 := consistent_of_model 𝗭 ZFSet.{0}
+instance z_consistent : Entailment.Consistent 𝗭 := consistent_of_model 𝗭 ZFSet.{0}
 
-instance : Entailment.Consistent 𝗭𝗙 := consistent_of_model 𝗭𝗙 ZFSet.{0}
+instance zc_consistent : Entailment.Consistent 𝗭𝗖 := consistent_of_model 𝗭𝗖 ZFSet.{0}
 
-instance : Entailment.Consistent 𝗭𝗙𝗖 := consistent_of_model 𝗭𝗙𝗖 ZFSet.{0}
+instance zf_consistent : Entailment.Consistent 𝗭𝗙 := consistent_of_model 𝗭𝗙 ZFSet.{0}
+
+instance zfc_consistent : Entailment.Consistent 𝗭𝗙𝗖 := consistent_of_model 𝗭𝗙𝗖 ZFSet.{0}
 
 end LO.FirstOrder.SetTheory

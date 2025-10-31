@@ -85,7 +85,7 @@ notation "𝗭𝗙" => ZermeloFraenkel
 
 instance : 𝗘𝗤 ⪯ 𝗭𝗙 := Entailment.WeakerThan.ofSubset ZermeloFraenkel.axiom_of_equality
 
-lemma Zermelo_subset_ZermeloFraenkel : 𝗭 ⊆ 𝗭𝗙 := by
+lemma z_subset_zf : 𝗭 ⊆ 𝗭𝗙 := by
   rintro φ ⟨h⟩
   · exact ZermeloFraenkel.axiom_of_equality φ (by assumption)
   · exact ZermeloFraenkel.axiom_of_empty_set
@@ -97,7 +97,7 @@ lemma Zermelo_subset_ZermeloFraenkel : 𝗭 ⊆ 𝗭𝗙 := by
   · exact ZermeloFraenkel.axiom_of_foundation
   · exact ZermeloFraenkel.axiom_of_separation _
 
-instance : 𝗭 ⪯ 𝗭𝗙 := Entailment.WeakerThan.ofSubset Zermelo_subset_ZermeloFraenkel
+instance : 𝗭 ⪯ 𝗭𝗙 := Entailment.WeakerThan.ofSubset z_subset_zf
 
 /-! ### Zermelo set theory with axiom of choice -/
 
@@ -122,5 +122,9 @@ notation "𝗭𝗙𝗖" => ZermeloFraenkelChoice
 instance : 𝗭𝗙 ⪯ 𝗭𝗙𝗖 := inferInstance
 
 instance : 𝗘𝗤 ⪯ 𝗭𝗙𝗖 := Entailment.WeakerThan.trans (inferInstanceAs (𝗘𝗤 ⪯ 𝗭𝗙)) inferInstance
+
+lemma zc_subset_zfc : 𝗭𝗖 ⊆ 𝗭𝗙𝗖 := Set.union_subset_union_left _ z_subset_zf
+
+instance : 𝗭𝗖 ⪯ 𝗭𝗙𝗖 := Entailment.WeakerThan.ofSubset zc_subset_zfc
 
 end LO.FirstOrder.SetTheory
