@@ -66,6 +66,10 @@ instance SSubset.definable : ℒₛₑₜ-relation[V] SSubset := SSubset.defined
 
 lemma SSubset.subset {x y : V} : x ⊊ y → x ⊆ y := fun h ↦ h.1
 
+lemma val_isSucc_iff {v : Fin 2 → V} :
+    V ⊧/v isSucc ↔ ∀ z, z ∈ v 0 ↔ z = v 1 ∨ z ∈ v 1 := by
+  simp [isSucc]
+
 variable [Nonempty V]
 
 instance [V ⊧ₘ* 𝗭] [V ⊧ₘ* 𝗔𝗖] : V ⊧ₘ* 𝗭𝗖 := inferInstance
