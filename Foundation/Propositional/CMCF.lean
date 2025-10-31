@@ -1,31 +1,35 @@
+/-
+  Complement maximal consistent finset for propositional logic
+-/
 import Foundation.Logic.HilbertStyle.Supplemental
+
+section
+
+open LO
+
+variable {F} [LogicalConnective F]
+         {S} [Entailment S F]
+variable {𝓢 : S} {Γ Δ : Finset F} {φ ψ : F} {Φ : Finset F}
 
 
 namespace LO
 
-class Compl (F : Type*) [Tilde F] where
+class Compl (F : Type*) where
   compl : F → F
 
 prefix:120 "-" => Compl.compl
 
-
-
 namespace Entailment
 
-class ComplEquiv [LogicalConnective F] [Compl F] [Entailment S F] (𝓢 : S) where
+class ComplEquiv [LogicalConnective F] [Compl F] (𝓢 : S) where
   compl_equiv! {φ : F} : 𝓢 ⊢! ∼φ ⭤ -φ
 export ComplEquiv (compl_equiv!)
 
+@[simp] lemma compl_equiv {φ : F} [Compl F] [ComplEquiv 𝓢] : 𝓢 ⊢ ∼φ ⭤ -φ := ⟨compl_equiv!⟩
 
 section
 
-variable {F S : Type*} [LogicalConnective F] [Compl F] [Entailment S F]
-         {𝓢 : S} {φ : F} [ComplEquiv 𝓢]
-
-@[simp] lemma compl_equiv : 𝓢 ⊢ ∼φ ⭤ -φ := ⟨compl_equiv!⟩
-
-
-variable [Entailment.Minimal 𝓢]
+variable [Compl F] [Entailment.Minimal 𝓢] [Entailment.ComplEquiv 𝓢]
 
 def compl_of_neg! [Entailment.Minimal 𝓢] (h : 𝓢 ⊢! ∼φ) : 𝓢 ⊢! -φ := K_left compl_equiv! ⨀ h
 @[grind] lemma compl_of_neg : 𝓢 ⊢ ∼φ → 𝓢 ⊢ -φ := λ ⟨a⟩ => ⟨compl_of_neg! a⟩
@@ -47,18 +51,25 @@ end
 
 end Entailment
 
+end LO
 
 
-namespace CCCF
 
 open LO.Entailment LO.Entailment.Context
 
+namespace Finset.LO
 
-variable {F} [LogicalConnective F] [DecidableEq F]
-         {S} [Entailment S F]
-variable {𝓢 : S} {Γ Δ : Finset F} {φ ψ : F}
+variable [DecidableEq F]
 
 def Consistent (𝓢 : S) (Γ : Finset F) : Prop := Γ *⊬[𝓢] ⊥
+
+def Inconsistent (𝓢 : S) (Γ : Finset F) : Prop := ¬(Consistent 𝓢 Γ)
+
+def ComplementBounded [Compl F] (Γ Φ : Finset F) : Prop := Γ ⊆ (Φ ∪ Φ.image (-·))
+
+/-- For every `φ` in `Δ`, `φ` or `-φ` is in `Γ` -/
+def ComplementMaximal [Compl F] (Γ Φ : Finset F) : Prop := ∀ φ ∈ Φ, φ ∈ Γ ∨ -φ ∈ Γ
+
 
 lemma def_consistent [Entailment.Minimal 𝓢] : Consistent 𝓢 Γ ↔ ∀ Δ : Finset F, (Δ ⊆ Γ) → Δ *⊬[𝓢] ⊥ := by
   constructor;
@@ -72,21 +83,10 @@ lemma def_consistent [Entailment.Minimal 𝓢] : Consistent 𝓢 Γ ↔ ∀ Δ :
     push_neg;
     simpa using h;
 
-
-def Inconsistent (𝓢 : S) (Γ : Finset F) : Prop := ¬(Consistent 𝓢 Γ)
-
 lemma def_inconsistent [Entailment.Minimal 𝓢] : Inconsistent 𝓢 Γ ↔ ∃ Δ : Finset F, (Δ ⊆ Γ) ∧ (Δ *⊢[𝓢] ⊥) := by
   rw [Inconsistent, def_consistent];
   push_neg;
   simp;
-
-
-def Maximal (𝓢 : S) (Γ : Finset F) : Prop := ∀ Δ, Γ ⊂ Δ → Inconsistent 𝓢 Δ
-
-def ComplementBounded [Compl F] (Γ Φ : Finset F) : Prop := Γ ⊆ (Φ ∪ Φ.image (-·))
-
-/-- For every `φ` in `Δ`, `φ` or `-φ` is in `Γ` -/
-def ComplementClosed [Compl F] (Γ Φ : Finset F) : Prop := ∀ φ ∈ Φ, φ ∈ Γ ∨ -φ ∈ Γ
 
 
 section
@@ -162,12 +162,9 @@ lemma neg_provable_iff_insert_not_consistent : Inconsistent 𝓢 (insert φ Γ) 
     . tauto;
     . apply N!_iff_CO!.mp h;
 
-end
-
-
 section
 
-variable [Compl F] [Entailment.Cl 𝓢] [ComplEquiv 𝓢]
+variable [Compl F] [ComplEquiv 𝓢]
 
 @[grind]
 lemma not_mem_compl_of_mem (Γ_consis : Consistent 𝓢 Γ) (h : φ ∈ Γ) : (-φ) ∉ Γ := by
@@ -188,6 +185,8 @@ lemma not_mem_of_mem_compl (Γ_consis : Consistent 𝓢 Γ) (h : -φ ∈ Γ) : �
     convert O_of_compl h₁ h₂;
     simp;
   . grind;
+
+end
 
 end
 
@@ -267,10 +266,9 @@ end
 
 end exists_consistent_complement_closed
 
-
 open exists_consistent_complement_closed in
 theorem exists_consistent_complement_closed [Compl F] [ComplEquiv 𝓢] [Entailment.Cl 𝓢] (Γ_consis : Consistent 𝓢 Γ)
-  : ∃ Γ', (Γ ⊆ Γ') ∧ (Consistent 𝓢 Γ') ∧ (ComplementClosed Γ' Φ) := by
+  : ∃ Γ', (Γ ⊆ Γ') ∧ (Consistent 𝓢 Γ') ∧ (ComplementMaximal Γ' Φ) := by
   use enum 𝓢 Γ Φ.toList;
   refine ⟨?_, ?_, ?_⟩;
   . simp;
@@ -279,24 +277,30 @@ theorem exists_consistent_complement_closed [Compl F] [ComplEquiv 𝓢] [Entailm
     apply of_mem_seed;
     simpa;
 
-section
+end Finset.LO
 
-omit [DecidableEq F]
+
+
+
+namespace LO
+
+open Finset.LO
+
 variable [Compl F] {Φ : Finset F}
 
-abbrev ConsistentComplementClosedFinset (𝓢 : S) (Φ : Finset F) := { Γ : Finset F // (Consistent 𝓢 Γ) ∧ (ComplementClosed Γ Φ) }
+abbrev ComplementMaximalConsistentFinset (𝓢 : S) (Φ : Finset F) := { Γ : Finset F // (Consistent 𝓢 Γ) ∧ (ComplementMaximal Γ Φ) }
 
-variable {Γ Γ₁ Γ₂ Δ : ConsistentComplementClosedFinset 𝓢 Φ} {φ ψ : F}
+variable {Γ Γ₁ Γ₂ Δ : ComplementMaximalConsistentFinset 𝓢 Φ} {φ ψ : F}
 
-namespace ConsistentComplementClosedFinset
+namespace ComplementMaximalConsistentFinset
 
-instance : Membership (F) (ConsistentComplementClosedFinset 𝓢 Φ) := ⟨λ X φ => φ ∈ X.1⟩
+instance : Membership (F) (ComplementMaximalConsistentFinset 𝓢 Φ) := ⟨λ X φ => φ ∈ X.1⟩
 
-@[simp] lemma consistent (Γ : ConsistentComplementClosedFinset 𝓢 Φ) : Consistent 𝓢 Γ := Γ.2.1
+@[simp] lemma consistent (Γ : ComplementMaximalConsistentFinset 𝓢 Φ) : Consistent 𝓢 Γ := Γ.2.1
 @[simp] lemma unprovable_falsum : Γ.1 *⊬[𝓢] ⊥ := Γ.consistent
 @[simp, grind] lemma mem_falsum [DecidableEq F] [Entailment.Cl 𝓢] : ⊥ ∉ Γ := not_mem_falsum (consistent Γ)
 
-@[simp] lemma maximal (Γ : ConsistentComplementClosedFinset 𝓢 Φ) : ComplementClosed Γ Φ := Γ.2.2
+@[simp] lemma maximal (Γ : ComplementMaximalConsistentFinset 𝓢 Φ) : ComplementMaximal Γ Φ := Γ.2.2
 
 @[grind]
 lemma mem_compl_of_not_mem (hs : ψ ∈ Φ) : ψ ∉ Γ → -ψ ∈ Γ := by
@@ -317,12 +321,12 @@ lemma equality_def : Γ₁ = Γ₂ ↔ Γ₁.1 = Γ₂.1 := by
 variable [Entailment.ComplEquiv 𝓢] [Entailment.Cl 𝓢]
 
 theorem lindenbaum [DecidableEq F] {Γ : Finset F} (Γ_consis : Consistent 𝓢 Γ)
-  : ∃ Γ' : ConsistentComplementClosedFinset 𝓢 Φ, Γ ⊆ Γ'.1 := by
+  : ∃ Γ' : ComplementMaximalConsistentFinset 𝓢 Φ, Γ ⊆ Γ'.1 := by
   obtain ⟨Γ', ⟨_, _⟩⟩ := exists_consistent_complement_closed Γ_consis;
   use ⟨Γ', ?_⟩;
   assumption;
 
-noncomputable instance [DecidableEq F] [Entailment.Consistent 𝓢] : Inhabited (ConsistentComplementClosedFinset 𝓢 Φ) := ⟨lindenbaum (Γ := ∅) (by simp) |>.choose⟩
+noncomputable instance [DecidableEq F] [Entailment.Consistent 𝓢] : Inhabited (ComplementMaximalConsistentFinset 𝓢 Φ) := ⟨lindenbaum (Γ := ∅) (by simp) |>.choose⟩
 
 variable [DecidableEq F]
 
@@ -379,10 +383,8 @@ lemma iff_mem_imp (hφψΦ : (φ ➝ ψ) ∈ Φ) (hφΦ : φ ∈ Φ) (hψΦ : ψ
       apply membership_iff hψΦ |>.mp;
       assumption;
 
-end ConsistentComplementClosedFinset
-
-end
-
-end CCCF
+end ComplementMaximalConsistentFinset
 
 end LO
+
+end
