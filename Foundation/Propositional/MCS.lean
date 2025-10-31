@@ -1,5 +1,5 @@
 /-
-  Maximal consistent set
+  Maximal consistent set for propositional classical logic
 -/
 import Foundation.Logic.HilbertStyle.Supplemental
 import Foundation.Meta.ClProver
@@ -232,7 +232,7 @@ lemma iff_mem_provable : φ ∈ Γ ↔ Γ.1 *⊢[𝓢] φ := by
 @[simp, grind] lemma mem_verum : ⊤ ∈ Γ := by apply iff_mem_provable.mpr; cl_prover;
 
 @[grind]
-lemma iff_mem_neg_not_mem : (∼φ ∈ Γ) ↔ (φ ∉ Γ) := by
+lemma iff_mem_neg : (∼φ ∈ Γ) ↔ (φ ∉ Γ) := by
   simp only [iff_mem_provable];
   constructor;
   . intro hnφ hφ;
@@ -248,7 +248,7 @@ lemma iff_forall_mem_provable : (∀ Γ : MaximalConsistentSet 𝓢, φ ∈ Γ) 
     intro h;
     obtain ⟨Γ, hΓ⟩ := lindenbaum $ iff_consistent_neg_singleton_unprovable.mpr h;
     use Γ;
-    apply iff_mem_neg_not_mem.mp;
+    apply iff_mem_neg.mp;
     simpa using hΓ;
   . intro h Γ;
     apply iff_mem_provable.mpr;
@@ -256,9 +256,9 @@ lemma iff_forall_mem_provable : (∀ Γ : MaximalConsistentSet 𝓢, φ ∈ Γ) 
 
 @[grind] lemma mem_of_provable (h : 𝓢 ⊢ φ) : φ ∈ Γ := iff_forall_mem_provable.mpr h Γ
 
-@[grind] lemma iff_mem_negneg_mem : (∼∼φ ∈ Γ) ↔ (φ ∈ Γ) := by grind
+@[grind] lemma iff_mem_negneg : (∼∼φ ∈ Γ) ↔ (φ ∈ Γ) := by grind
 
-@[grind]
+@[grind ⇒]
 lemma iff_mem_imp : ((φ ➝ ψ) ∈ Γ) ↔ ((φ ∈ Γ) → (ψ ∈ Γ)) := by
   constructor;
   . intro hφψ hφ;
@@ -266,7 +266,7 @@ lemma iff_mem_imp : ((φ ➝ ψ) ∈ Γ) ↔ ((φ ∈ Γ) → (ψ ∈ Γ)) := by
     cl_prover [hφψ, hφ];
   . intro h;
     rcases imp_iff_not_or.mp h with (h | h);
-    . replace h := iff_mem_provable.mp $ iff_mem_neg_not_mem.mpr h;
+    . replace h := iff_mem_provable.mp $ iff_mem_neg.mpr h;
       apply iff_mem_provable.mpr;
       cl_prover [h];
     . replace h := iff_mem_provable.mp h;
@@ -277,7 +277,7 @@ lemma iff_mem_imp : ((φ ➝ ψ) ∈ Γ) ↔ ((φ ∈ Γ) → (ψ ∈ Γ)) := by
 @[grind]
 lemma mdp (hφψ : (φ ➝ ψ) ∈ Γ) (hφ : φ ∈ Γ) : ψ ∈ Γ := iff_mem_imp.mp hφψ hφ
 
-@[grind]
+@[grind ⇒]
 lemma iff_mem_and : ((φ ⋏ ψ) ∈ Γ) ↔ (φ ∈ Γ) ∧ (ψ ∈ Γ) := by
   constructor;
   . intro hφψ;
@@ -287,15 +287,15 @@ lemma iff_mem_and : ((φ ⋏ ψ) ∈ Γ) ↔ (φ ∈ Γ) ∧ (ψ ∈ Γ) := by
     rintro ⟨hφ, hψ⟩;
     cl_prover [hφ, hψ];
 
-@[grind]
+@[grind ⇒]
 lemma iff_mem_or : ((φ ⋎ ψ) ∈ Γ) ↔ (φ ∈ Γ) ∨ (ψ ∈ Γ) := by
   constructor;
   . intro hφψ;
     replace hφψ := iff_mem_provable.mp hφψ;
     by_contra!;
     rcases this with ⟨hφ, hψ⟩;
-    replace hφ := iff_mem_provable.mp $ iff_mem_neg_not_mem.mpr hφ;
-    replace hψ := iff_mem_provable.mp $ iff_mem_neg_not_mem.mpr hψ;
+    replace hφ := iff_mem_provable.mp $ iff_mem_neg.mpr hφ;
+    replace hψ := iff_mem_provable.mp $ iff_mem_neg.mpr hψ;
     apply Γ.consistent;
     cl_prover [hφψ, hφ, hψ];
   . simp_all only [iff_mem_provable];
@@ -311,6 +311,10 @@ lemma imp_of_provable_C (hφψ : Γ *⊢[𝓢] (φ ➝ ψ)) : (φ ∈ Γ) → (�
 
 lemma iff_of_provable_E (h : Γ *⊢[𝓢] (φ ⭤ ψ)) : φ ∈ Γ ↔ ψ ∈ Γ := by
   constructor <;> . apply imp_of_provable_C; cl_prover [h];
+
+@[grind ⇒] lemma neg_monotone (h : φ ∈ Γ → ψ ∈ Γ) : (∼ψ ∈ Γ) → (∼φ ∈ Γ) := by simp only [iff_mem_neg]; grind;
+
+@[grind ⇒] lemma neg_congruence (h : φ ∈ Γ ↔ ψ ∈ Γ) : (∼φ ∈ Γ) ↔ (∼ψ ∈ Γ) := by grind;
 
 end MaximalConsistentSet
 
