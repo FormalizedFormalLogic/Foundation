@@ -216,7 +216,7 @@ lemma models_iff {σ : Sentence L} : QuotEq L M ⊧ₘ σ ↔ M ⊧ₘ σ := by
 
 variable (L M)
 
-lemma elementaryEquiv : QuotEq L M ≡ₑ[L] M := fun _ => models_iff
+lemma elementaryEquiv : QuotEq L M ≡ₑ[L] M := ⟨models_iff⟩
 
 variable {L M}
 

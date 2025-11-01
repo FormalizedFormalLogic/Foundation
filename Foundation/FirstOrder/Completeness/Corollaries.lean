@@ -32,8 +32,7 @@ lemma EQ.provOf (φ : Sentence L)
          [M ⊧ₘ* T],
          M ⊧ₘ φ) :
     T ⊨ φ := consequence_iff_consequence.{u, w}.mp <| consequence_iff_eq.mpr fun M _ _ _ hT =>
-  letI : (Structure.Model L M) ⊧ₘ* T :=
-    ((Structure.ElementaryEquiv.modelsTheory (Structure.Model.elementaryEquiv L M)).mp hT)
-  (Structure.ElementaryEquiv.models (Structure.Model.elementaryEquiv L M)).mpr (H (Structure.Model L M))
+  letI : Structure.Model L M ⊧ₘ* T := Structure.ElementaryEquiv.modelsTheory.mp hT
+  Structure.ElementaryEquiv.models.mpr (H (Structure.Model L M))
 
 end LO.FirstOrder
