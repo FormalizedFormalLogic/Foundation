@@ -1,5 +1,13 @@
 import Foundation.FirstOrder.Completeness.Corollaries
 
+/-! # Preperations for set theory
+
+- *NOTE*:
+  To avoid the duplicate definitions of `Structure ℒₛₑₜ` for models,
+  we basically use `SetStructure`, and generated `standardStructure` instead of `Structure ℒₛₑₜ` itself.
+  If you wish to use a type with `Structure ℒₛₑₜ`, use `NormalizedModel`.
+-/
+
 namespace LO.FirstOrder
 
 namespace Language
@@ -130,6 +138,30 @@ lemma standardStructure_unique' (s : Structure ℒₛₑₜ M)
 
 lemma standardStructure_unique (s : Structure ℒₛₑₜ M) [hEq : Structure.Eq ℒₛₑₜ M] [hMem : Structure.Mem ℒₛₑₜ M] : s = standardStructure M :=
   standardStructure_unique' M s hEq hMem
+
+def NormalizedModel (M : Type*) [Structure ℒₛₑₜ M] [Nonempty M] [M ⊧ₘ* (𝗘𝗤 : Theory ℒₛₑₜ)] : Type _ :=
+  Structure.Model ℒₛₑₜ (Structure.Eq.QuotEq ℒₛₑₜ M)
+
+namespace NormalizedModel
+
+variable (M : Type*) [s : Structure ℒₛₑₜ M] [Nonempty M] [M ⊧ₘ* (𝗘𝗤 : Theory ℒₛₑₜ)]
+
+def equiv : Structure.Model ℒₛₑₜ (Structure.Eq.QuotEq ℒₛₑₜ M) ≃ NormalizedModel M := Equiv.refl _
+
+variable {M}
+
+instance : Nonempty (NormalizedModel M) :=
+  have : Nonempty (Structure.Model ℒₛₑₜ (Structure.Eq.QuotEq ℒₛₑₜ M)) := inferInstance
+  ⟨equiv M this.some⟩
+
+instance : SetStructure (NormalizedModel M) where
+  mem x y := (equiv M).symm x ∈ (equiv M).symm y
+
+lemma elenm :
+
+end NormalizedModel
+
+
 
 end semantics
 

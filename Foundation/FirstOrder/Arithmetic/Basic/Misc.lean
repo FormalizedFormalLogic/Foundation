@@ -1,5 +1,12 @@
 import Foundation.FirstOrder.Order.Le
 
+/-! # Preperations for arithmetic
+
+- *NOTE*:
+  To avoid the duplicate definitions of `Structure ℒₒᵣ` for models,
+  we basically use `ORingStructure`, and generated `standardStructure` instead of `Structure ℒₒᵣ` itself.
+-/
+
 namespace LO
 
 class ORingStructure (α : Type*) extends Zero α, One α, Add α, Mul α, LT α

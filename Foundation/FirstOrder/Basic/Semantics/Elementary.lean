@@ -227,6 +227,23 @@ lemma ofEquiv [Nonempty N] (Θ : M ≃ N) :
   letI : Structure L N := Structure.ofEquiv Θ
   simp [models_iff, Empty.eq_elim, Structure.evalf_ofEquiv_iff (Θ := Θ)]
 
+lemma of_equiv_aux (j : M₁ ≃ M₂)
+    {f₁ f₂ b₁ b₂}
+    (hf : ∀ x, j (f₁ x) = f₂ x) (hb : ∀ x, j (b₁ x) = b₂ x)
+    (rel : ∀ {k} (R : L.Rel k) {v₁ : Fin k → M₁} {v₂ : Fin k → M₂}, (∀ i, j (v₁ i) = v₂ i) → (s₁.rel R v₁ ↔ s₂.rel R v₂))
+    (func : ∀ {k} (f : L.Func k) {v₁ : Fin k → M₁} {v₂ : Fin k → M₂}, (∀ i, j (v₁ i) = v₂ i) → j (s₁.func f v₁) = s₂.func f v₂)
+    {φ : Semiformula L ξ n} :
+    Semiformula.Evalm M₁ f₁ b₁ φ ↔ Semiformula.Evalm M₂ f₂ b₂ φ :=
+  match φ with
+  | .rel R v => by {
+    simp [Semiformula.eval_rel]
+    apply rel R fun x ↦ (by {  })
+     }
+
+lemma of_equiv (i : M₁ ≃ M₂) (atomic : sorry) : M₁ ≡ₑ[L] M₂ := fun φ ↦ by {
+  induction φ using
+ }
+
 end ElementaryEquiv
 
 end Structure
