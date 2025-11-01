@@ -402,7 +402,8 @@ protected class Language.DecidableEq (L : Language) where
   func : (k : ℕ) → DecidableEq (L.Func k)
   rel : (k : ℕ) → DecidableEq (L.Rel k)
 
-instance (priority := 100) (L : Language) [(k : ℕ) → DecidableEq (L.Func k)] [(k : ℕ) → DecidableEq (L.Rel k)] : L.DecidableEq := ⟨fun _ ↦ inferInstance, fun _ ↦ inferInstance⟩
+instance (L : Language) [(k : ℕ) → DecidableEq (L.Func k)] [(k : ℕ) → DecidableEq (L.Rel k)] : L.DecidableEq :=
+  ⟨fun _ ↦ inferInstance, fun _ ↦ inferInstance⟩
 
 instance (L : Language) [L.DecidableEq] (k : ℕ) : DecidableEq (L.Func k) := Language.DecidableEq.func k
 

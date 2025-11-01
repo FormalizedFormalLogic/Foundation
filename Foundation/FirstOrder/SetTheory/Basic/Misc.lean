@@ -206,11 +206,6 @@ lemma countable_of_countable [c : Countable M] : Countable (QuotNormalize M) :=
 
 end QuotNormalize
 
-/- ### Normalize model without =-isomorphic. -/
-
-structure Normalize (M : Type*) [Structure ℒₛₑₜ M] [Nonempty M] [M ⊧ₘ* (𝗘𝗤 : Theory ℒₛₑₜ)] : Type _ where
-  val : M
-
 end semantics
 
 lemma consequence_of_models (T : SetTheory) [𝗘𝗤 ⪯ T] (φ : Sentence ℒₛₑₜ) (H : ∀ (M : Type*) [SetStructure M] [Nonempty M] [M ⊧ₘ* T], M ⊧ₘ φ) :
