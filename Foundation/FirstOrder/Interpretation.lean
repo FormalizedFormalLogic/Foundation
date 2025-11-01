@@ -539,8 +539,8 @@ lemma eval_compDirectTranslation_Model_equiv {φ : Semiformula L₃ ξ n}
       apply (eval_compDirectTranslation_Model_equiv hε ?_).mpr hx
       intro i; cases i using Fin.cases <;> simp [he]
 
-lemma compDirectTranslation_Model_equiv :
-    (compDirectTranslation τ π).Model M ≡ₑ[L₃] τ.Model (π.Model M) := fun φ ↦ by
+instance compDirectTranslation_Model_equiv :
+    (compDirectTranslation τ π).Model M ≡ₑ[L₃] τ.Model (π.Model M) := .mk <| fun {φ} ↦ by
   simp only [models_iff]
   constructor
   · intro h
@@ -555,7 +555,7 @@ protected def comp (τ : T₂ ⊳ T₃) (π : T₁ ⊳ T₂) : T₁ ⊳ T₃ whe
   interpret_theory φ hφ := complete <| EQ.provOf.{_,0} _ fun M _ _ _ hT ↦ by
     apply models_iff.mpr
     suffices τ.Model (π.Model M) ⊧ₘ φ by
-      apply Model.translate_iff.mpr <| (compDirectTranslation_Model_equiv τ.trln π φ).mpr this
+      apply Model.translate_iff.mpr <| (compDirectTranslation_Model_equiv τ.trln π).models.mpr this
     have : τ.Model (π.Model M) ⊧ₘ* T₃ := inferInstance
     exact modelsTheory_iff.mp this hφ
 

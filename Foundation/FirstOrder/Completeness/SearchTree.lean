@@ -7,7 +7,7 @@ namespace FirstOrder
 
 namespace Completeness
 
-open Semiformula Encodable Entailment
+open Classical Semiformula Encodable Entailment
 variable {L : Language.{u}}
 variable {T : Theory L} {Γ : Sequent L}
 
@@ -34,7 +34,7 @@ local notation:25 Δ₁" ≺[" c:25 "] " Δ₂:80 => Redux T c Δ₁ Δ₂
 lemma Redux.antimonotone {c : Code L} {Δ₂ Δ₁ : Sequent L} (h : Δ₂ ≺[c] Δ₁) : Δ₁ ⊆ Δ₂ := by
   cases h <;> simp [List.subset_cons_of_subset _ (List.subset_cons_self _ _)]
 
-variable [∀ k, DecidableEq (L.Func k)] [∀ k, DecidableEq (L.Rel k)] [∀ k, Encodable (L.Func k)] [∀ k, Encodable (L.Rel k)]
+variable [L.Encodable]
 
 inductive ReduxNat (T : Theory L) (s : ℕ) : Sequent L → Sequent L → Prop
   | redux {c : Code L} : decode s.unpair.1 = some c → ∀ {Δ₂ Δ₁}, Redux T c Δ₂ Δ₁ → ReduxNat T s Δ₂ Δ₁

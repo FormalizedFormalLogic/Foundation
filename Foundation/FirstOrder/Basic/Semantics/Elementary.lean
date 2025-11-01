@@ -195,7 +195,8 @@ namespace Structure
 
 variable (L M₁ M₂)
 
-def ElementaryEquiv : Prop := ∀ σ : Sentence L, M₁ ⊧ₘ σ ↔ M₂ ⊧ₘ σ
+class ElementaryEquiv : Prop where
+  models {φ : Sentence L} : M₁ ⊧ₘ φ ↔ M₂ ⊧ₘ φ
 
 notation:50 M₁ " ≡ₑ[" L "] " M₂ => ElementaryEquiv L M₁ M₂
 
@@ -203,29 +204,105 @@ variable {L M₁ M₂}
 
 namespace ElementaryEquiv
 
-@[refl]
-lemma refl (M) [Nonempty M] [Structure L M] : M ≡ₑ[L] M := fun σ => by rfl
+@[refl] instance refl (M) [Nonempty M] [Structure L M] : M ≡ₑ[L] M := ⟨by rfl⟩
 
-@[symm]
-lemma symm : (M₁ ≡ₑ[L] M₂) → (M₂ ≡ₑ[L] M₁) :=
-  fun h σ => (h σ).symm
+@[symm] lemma symm : (M₁ ≡ₑ[L] M₂) → (M₂ ≡ₑ[L] M₁) := fun h ↦ ⟨h.models.symm⟩
 
-@[trans]
-lemma trans :
-    (M₁ ≡ₑ[L] M₂) → (M₂ ≡ₑ[L] M₃) → (M₁ ≡ₑ[L] M₃) :=
-  fun h₁ h₂ σ => Iff.trans (h₁ σ) (h₂ σ)
+@[trans] lemma trans : (M₁ ≡ₑ[L] M₂) → (M₂ ≡ₑ[L] M₃) → (M₁ ≡ₑ[L] M₃) :=
+  fun h₁ h₂ ↦ ⟨Iff.trans h₁.models h₂.models⟩
 
-lemma models (h : M₁ ≡ₑ[L] M₂) :
-    ∀ {σ : Sentence L}, M₁ ⊧ₘ σ ↔ M₂ ⊧ₘ σ := @h
-
-lemma modelsTheory (h : M₁ ≡ₑ[L] M₂) {T : Theory L} :
+lemma modelsTheory [h : M₁ ≡ₑ[L] M₂] {T : Theory L} :
     M₁ ⊧ₘ* T ↔ M₂ ⊧ₘ* T := by simp [modelsTheory_iff, h.models]
+
+variable (M₁ M₂)
+
+lemma modelsTheory' [M₁ ≡ₑ[L] M₂] (T : Theory L) [M₂ ⊧ₘ* T] :
+    M₁ ⊧ₘ* T := modelsTheory.mpr (inferInstanceAs (M₂ ⊧ₘ* T))
+
+variable {M₁ M₂}
 
 lemma ofEquiv [Nonempty N] (Θ : M ≃ N) :
     letI : Structure L N := Structure.ofEquiv Θ
-    M ≡ₑ[L] N := fun φ => by
+    M ≡ₑ[L] N :=
   letI : Structure L N := Structure.ofEquiv Θ
-  simp [models_iff, Empty.eq_elim, Structure.evalf_ofEquiv_iff (Θ := Θ)]
+  ⟨by simp [models_iff, Empty.eq_elim, Structure.evalf_ofEquiv_iff (Θ := Θ)]⟩
+
+omit [Nonempty M₁] [Nonempty M₂] in
+lemma val_eq_of_equiv {f₁ f₂ b₁ b₂}
+    (I : M₁ ≃ M₂)
+    (hf : ∀ x, I (f₁ x) = f₂ x) (hb : ∀ x, I (b₁ x) = b₂ x)
+    (hfunc : ∀ {k} (f : L.Func k) {v₁ : Fin k → M₁} {v₂ : Fin k → M₂}, (∀ i, I (v₁ i) = v₂ i) → I (s₁.func f v₁) = s₂.func f v₂)
+    (t : Semiterm L ξ n) :
+    I (t.val s₁ b₁ f₁) = t.val s₂ b₂ f₂ :=
+  match t with
+  | #x => by simp [hb]
+  | &x => by simp [hf]
+  | .func f v => by
+    have ih : ∀ i, I (Semiterm.val s₁ b₁ f₁ (v i)) = Semiterm.val s₂ b₂ f₂ (v i) := fun i ↦
+      val_eq_of_equiv I hf hb hfunc (v i)
+    simp [Semiterm.val_func, hfunc, ih]
+
+omit [Nonempty M₁] [Nonempty M₂] in
+lemma eval_iff_of_equiv {f₁ f₂ b₁ b₂}
+    (I : M₁ ≃ M₂)
+    (hf : ∀ x, I (f₁ x) = f₂ x) (hb : ∀ x, I (b₁ x) = b₂ x)
+    (hrel : ∀ {k} (R : L.Rel k) {v₁ : Fin k → M₁} {v₂ : Fin k → M₂}, (∀ i, I (v₁ i) = v₂ i) → (s₁.rel R v₁ ↔ s₂.rel R v₂))
+    (hfunc : ∀ {k} (f : L.Func k) {v₁ : Fin k → M₁} {v₂ : Fin k → M₂}, (∀ i, I (v₁ i) = v₂ i) → I (s₁.func f v₁) = s₂.func f v₂)
+    (φ : Semiformula L ξ n) :
+    Semiformula.Eval s₁ b₁ f₁ φ ↔ Semiformula.Eval s₂ b₂ f₂ φ :=
+  match φ with
+  | .rel R v => by
+    simpa [Semiformula.eval_rel]
+      using hrel R fun i ↦ val_eq_of_equiv I hf hb hfunc (v i)
+  | .nrel R v => by
+    simpa [Semiformula.eval_nrel]
+      using not_congr <| hrel R fun i ↦ val_eq_of_equiv I hf hb hfunc (v i)
+  | ⊤ => by simp
+  | ⊥ => by simp
+  | φ ⋏ ψ => by
+    simp [eval_iff_of_equiv I hf hb hrel hfunc φ, eval_iff_of_equiv I hf hb hrel hfunc ψ]
+  | φ ⋎ ψ => by
+    simp [eval_iff_of_equiv I hf hb hrel hfunc φ, eval_iff_of_equiv I hf hb hrel hfunc ψ]
+  | ∀' φ => by
+    suffices
+      (∀ x₁ : M₁, φ.Eval s₁ (x₁ :> b₁) f₁) ↔ (∀ x₂ : M₂, φ.Eval s₂ (x₂ :> b₂) f₂) by simpa
+    constructor
+    · intro h x₂
+      have : φ.Eval s₁ (I.symm x₂ :> b₁) f₁ ↔ φ.Eval s₂ (x₂ :> b₂) f₂ :=
+        eval_iff_of_equiv I (b₁ := I.symm x₂ :> b₁) (b₂ := x₂ :> b₂) hf
+          (by intro i; cases i using Fin.cases <;> simp [hb])
+          hrel hfunc φ
+      exact this.mp (h (I.symm x₂))
+    · intro h x₁
+      have : φ.Eval s₁ (x₁ :> b₁) f₁ ↔ φ.Eval s₂ (I x₁ :> b₂) f₂ :=
+        eval_iff_of_equiv I (b₁ := x₁ :> b₁) (b₂ := I x₁ :> b₂) hf
+          (by intro i; cases i using Fin.cases <;> simp [hb])
+          hrel hfunc φ
+      exact this.mpr (h _)
+  | ∃' φ => by
+    suffices
+      (∃ x₁, φ.Eval s₁ (x₁ :> b₁) f₁) ↔ (∃ x₂, φ.Eval s₂ (x₂ :> b₂) f₂) by simpa
+    constructor
+    · rintro ⟨x₁, h⟩
+      have : φ.Eval s₁ (x₁ :> b₁) f₁ ↔ φ.Eval s₂ (I x₁ :> b₂) f₂ :=
+        eval_iff_of_equiv I (b₁ := x₁ :> b₁) (b₂ := I x₁ :> b₂) hf
+          (by intro i; cases i using Fin.cases <;> simp [hb])
+          hrel hfunc φ
+      exact ⟨I x₁, this.mp h⟩
+    · rintro ⟨x₂, h⟩
+      have : φ.Eval s₁ (I.symm x₂ :> b₁) f₁ ↔ φ.Eval s₂ (x₂ :> b₂) f₂ :=
+        eval_iff_of_equiv I (b₁ := I.symm x₂ :> b₁) (b₂ := x₂ :> b₂) hf
+          (by intro i; cases i using Fin.cases <;> simp [hb])
+          hrel hfunc φ
+      exact ⟨I.symm x₂, this.mpr h⟩
+
+lemma of_equiv
+    (I : M₁ ≃ M₂)
+    (hrel : ∀ {k} (R : L.Rel k) {v₁ : Fin k → M₁} {v₂ : Fin k → M₂}, (∀ i, I (v₁ i) = v₂ i) → (s₁.rel R v₁ ↔ s₂.rel R v₂))
+    (hfunc : ∀ {k} (f : L.Func k) {v₁ : Fin k → M₁} {v₂ : Fin k → M₂}, (∀ i, I (v₁ i) = v₂ i) → I (s₁.func f v₁) = s₂.func f v₂) :
+    M₁ ≡ₑ[L] M₂ := ⟨fun {φ} ↦
+  eval_iff_of_equiv
+    (b₁ := ![]) (b₂ := ![]) (f₁ := Empty.elim) (f₂ := Empty.elim) I (by simp) (by simp) hrel hfunc φ⟩
 
 end ElementaryEquiv
 
@@ -233,6 +310,4 @@ end Structure
 
 end
 
-end FirstOrder
-
-end LO
+end  LO.FirstOrder
