@@ -25,7 +25,7 @@
 #let Con(T) = $sans("Con")(#T)$
 #let Incon(T) = $neg(Con(#T))$
 
-#figure(caption: [Arithmetic Theory Zoo], numbering: none)[
+#figure(caption: [Set Theory Zoo], numbering: none)[
   #raw-render(
     raw(
       "
