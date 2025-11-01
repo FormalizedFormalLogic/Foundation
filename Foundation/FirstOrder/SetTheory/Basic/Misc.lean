@@ -22,6 +22,7 @@ inductive Rel : ℕ → Type
 
 end Set
 
+/-- Language of set theory -/
 @[reducible]
 def set : Language where
   Func := Set.Func
