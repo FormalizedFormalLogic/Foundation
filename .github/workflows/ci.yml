@@ -75,6 +75,10 @@ jobs:
         run: |
           lake exe generate_setTheory_zoo
           typst compile ./Zoo/setTheory.typ ./pages/_output/setTheory_zoo.png
+      - name: Generate InterpretabilityLogic Zoo
+        run: |
+          lake exe generate_interpretabilityLogic_zoo
+          typst compile ./Zoo/InterpretabilityLogic.typ ./pages/_output/InterpretabilityLogic_zoo.png
 
       # Build Doc
       - name: Build doc

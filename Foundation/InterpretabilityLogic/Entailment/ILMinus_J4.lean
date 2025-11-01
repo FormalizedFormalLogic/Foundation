@@ -13,8 +13,7 @@ section
 
 variable [Entailment.ILMinus_J4 𝓢]
 
--- TODO: Proposition 3.4 (⇒)
--- instance : HasAxiomJ4' 𝓢 := ⟨by sorry⟩
+instance : HasAxiomJ4' 𝓢 := ⟨by sorry⟩
 
 end
 
@@ -25,19 +24,20 @@ section
 
 variable [Entailment.ILMinus_J4' 𝓢]
 
--- TODO: Proposition 3.4 (⇐)
--- instance : HasAxiomJ4 𝓢 := ⟨by sorry⟩
+instance : HasAxiomJ4 𝓢 := ⟨by sorry⟩
 
 end
 
 -- TODO: Move to entailments
 variable [Entailment.Minimal 𝓢] in
-def C_trans₃ (h₁ : 𝓢 ⊢! φ ➝ ψ ➝ χ) (h₂ : 𝓢 ⊢! χ ➝ ξ) : 𝓢 ⊢! φ ➝ ψ ➝ ξ := by
+def CC_of_CC_of_C (h₁ : 𝓢 ⊢! φ ➝ ψ ➝ χ) (h₂ : 𝓢 ⊢! χ ➝ ξ) : 𝓢 ⊢! φ ➝ ψ ➝ ξ := by
   apply deduct';
   apply deduct;
   exact (of h₂) ⨀ (deductInv $ deductInv' h₁);
 variable [Entailment.Minimal 𝓢] in
-lemma C_trans₃! (h₁ : 𝓢 ⊢ φ ➝ ψ ➝ χ) (h₂ : 𝓢 ⊢ χ ➝ ξ) : 𝓢 ⊢ φ ➝ ψ ➝ ξ := ⟨C_trans₃ h₁.some h₂.some⟩
+lemma CC!_of_CC!_of_C! (h₁ : 𝓢 ⊢ φ ➝ ψ ➝ χ) (h₂ : 𝓢 ⊢ χ ➝ ξ) : 𝓢 ⊢ φ ➝ ψ ➝ ξ := ⟨CC_of_CC_of_C h₁.some h₂.some⟩
+
+
 
 
 protected class ILMinus_J4Plus (𝓢 : S) extends Entailment.ILMinus 𝓢, HasAxiomJ4Plus 𝓢
@@ -91,7 +91,7 @@ instance : HasAxiomJ4Plus 𝓢 := ⟨by
   intro φ ψ χ;
   have H₁ : 𝓢 ⊢! □(φ ➝ ψ) ➝ χ ▷ φ ➝ χ ▷ ((φ ➝ ψ) ⋏ φ) := J4Plus''!;
   have H₂ : 𝓢 ⊢! χ ▷ ((φ ➝ ψ) ⋏ φ) ➝ χ ▷ ψ := R1! $ C_trans (CKK _ _) $ innerMDP;
-  exact C_trans₃ H₁ H₂;
+  exact CC_of_CC_of_C H₁ H₂;
 ⟩
 
 end

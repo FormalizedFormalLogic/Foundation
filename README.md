@@ -79,6 +79,10 @@ Automatically generated diagrams "Zoo", illustrate the Lean4-verified interrelat
 
 ![Modal Logic Zoo](https://formalizedformallogic.github.io/Foundation/modal_zoo.png)
 
+### Interpretability Logic Zoo
+
+![Interpretability Logic Zoo](https://formalizedformallogic.github.io/Foundation/InterpretabillityLogic_zoo.png)
+
 ### Propositional Logic Zoo
 
 ![Propositional Logic Zoo](https://formalizedformallogic.github.io/Foundation/propositional_zoo.png)

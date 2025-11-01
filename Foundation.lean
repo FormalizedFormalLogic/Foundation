@@ -191,6 +191,7 @@ import Foundation.ProvabilityLogic.Classification.LetterlessTrace
 import Foundation.ProvabilityLogic.Classification.Trace
 
 -- Interpretability Logic
+import Foundation.InterpretabilityLogic.Hilbert.Minimal.Basic
 import Foundation.InterpretabilityLogic.Veltman.Logic.CL
 import Foundation.InterpretabilityLogic.Veltman.Logic.IL
 

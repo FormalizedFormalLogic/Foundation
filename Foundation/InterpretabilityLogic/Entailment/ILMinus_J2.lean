@@ -1,5 +1,6 @@
 import Foundation.InterpretabilityLogic.Entailment.ILMinus_J4
 import Foundation.InterpretabilityLogic.Entailment.ILMinus_J1
+import Foundation.Meta.ClProver
 
 namespace LO.InterpretabilityLogic.Entailment
 
@@ -29,10 +30,8 @@ section
 variable [Entailment.ILMinus_J2Plus 𝓢]
 
 instance : HasAxiomJ2Plus' 𝓢 := ⟨by
-  intro A B C;
-  dsimp only [Axioms.J2Plus'];
-
-  sorry;
+  intro φ ψ χ;
+  apply sorry
 ⟩
 
 instance : HasAxiomJ2 𝓢 := ⟨by
@@ -42,17 +41,32 @@ instance : HasAxiomJ2 𝓢 := ⟨by
   apply or₁;
 ⟩
 
+end
+
+
+protected class ILMinus_J2Plus' (𝓢 : S) extends Entailment.ILMinus 𝓢, HasAxiomJ2Plus' 𝓢
+
+section
+
+variable [Entailment.ILMinus_J2Plus' 𝓢]
+
+instance : HasAxiomJ2Plus 𝓢 := ⟨by
+  intro φ ψ χ;
+  apply sorry;
+⟩
+
 instance : HasAxiomJ4Plus 𝓢 := ⟨by
   intro φ ψ χ;
-  dsimp only [Axioms.J4Plus];
-  have : 𝓢 ⊢! □(φ ➝ ψ) ➝ □(∼(φ ⋏ ψ)) := by
-    apply box_regularity;
-    sorry;
-  have : 𝓢 ⊢! □(φ ➝ ψ) ➝ ((φ ⋏ ψ) ▷ ψ) := C_trans this CLNRhd!;
-  sorry;
+  apply C_trans $ C_trans ?_ CLNRhd!;
+  . exact C_swap $ J2Plus'!;
+  . apply box_regularity;
+    apply C_replace CCAN CANNNK;
+    apply CAA_of_C_right;
+    apply dni;
 ⟩
 
 end
+
 
 
 protected class ILMinus_J1_J2 (𝓢 : S) extends Entailment.ILMinus 𝓢, HasAxiomJ1 𝓢, HasAxiomJ2 𝓢
