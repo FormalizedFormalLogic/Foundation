@@ -26,32 +26,34 @@ namespace Structure
 
 variable (L) (M : Type*) [Structure L M] [Nonempty M]
 
-abbrev CountableLS : Type _ := Completeness.Model (theory L M) []
+abbrev Collapse : Type _ := Completeness.Model (theory L M) []
 
-lemma CountableLS.models : CountableLS L M ⊧ₘ* theory L M :=
+lemma Collapse.models : Collapse L M ⊧ₘ* theory L M :=
   Completeness.models_of_consistent <| consistent_of_satidfiable <| theory_satisfiable
 
 /-- Downward Löwenheim-Skolem theorem for countable language -/
-instance CountableLS.equiv : CountableLS L M ≡ₑ[L] M where
+instance Collapse.equiv : Collapse L M ≡ₑ[L] M where
   models := by
     intro φ
     by_cases hφ : φ ∈ theory L M
     · have : M ⊧ₘ φ := by simpa using hφ
-      have : CountableLS L M ⊧ₘ φ := modelsTheory_iff.mp (CountableLS.models L M) hφ
+      have : Collapse L M ⊧ₘ φ := modelsTheory_iff.mp (Collapse.models L M) hφ
       simp_all
     · have hφ : ∼φ ∈ theory L M := by simpa using hφ
       have : ¬M ⊧ₘ φ := by simpa
-      have : ¬CountableLS L M ⊧ₘ φ := by simpa using modelsTheory_iff.mp (CountableLS.models L M) hφ
+      have : ¬Collapse L M ⊧ₘ φ := by simpa using modelsTheory_iff.mp (Collapse.models L M) hφ
       simp_all
 
-instance countable : Countable (CountableLS L M) := Encodable.countable
+instance Collapse.equiv' : M ≡ₑ[L] Collapse L M := (equiv L M).symm
 
-instance infinite : Infinite (CountableLS L M) := Infinite.of_injective (fun x : ℕ ↦ &x) fun x y ↦ (by simp)
+instance countable : Countable (Collapse L M) := Encodable.countable
+
+instance infinite : Infinite (Collapse L M) := Infinite.of_injective (fun x : ℕ ↦ &x) fun x y ↦ (by simp)
 
 open Cardinal
 
 /-- Downward Löwenheim-Skolem theorem for countable language -/
-theorem CountableLS.card : #(CountableLS L M) = ℵ₀ := mk_eq_aleph0 _
+theorem Collapse.card : #(Collapse L M) = ℵ₀ := mk_eq_aleph0 _
 
 end Structure
 

@@ -214,6 +214,13 @@ namespace ElementaryEquiv
 lemma modelsTheory [h : M₁ ≡ₑ[L] M₂] {T : Theory L} :
     M₁ ⊧ₘ* T ↔ M₂ ⊧ₘ* T := by simp [modelsTheory_iff, h.models]
 
+variable (M₁ M₂)
+
+lemma modelsTheory' [M₁ ≡ₑ[L] M₂] (T : Theory L) [M₂ ⊧ₘ* T] :
+    M₁ ⊧ₘ* T := modelsTheory.mpr (inferInstanceAs (M₂ ⊧ₘ* T))
+
+variable {M₁ M₂}
+
 lemma ofEquiv [Nonempty N] (Θ : M ≃ N) :
     letI : Structure L N := Structure.ofEquiv Θ
     M ≡ₑ[L] N :=
