@@ -60,6 +60,11 @@ instance : (ℒₛₑₜ).Eq := ⟨Rel.eq⟩
 
 instance : (ℒₛₑₜ).Mem := ⟨Rel.mem⟩
 
+lemma rel_eq_eq_or_mem (R : (ℒₛₑₜ).Rel k) : k = 2 ∧ (R ≍ (Eq.eq : (ℒₛₑₜ).Rel 2) ∨ R ≍ (Mem.mem : (ℒₛₑₜ).Rel 2)) :=
+  match R with
+  | Rel.eq => ⟨rfl, Or.inl <| by rfl⟩
+  | Rel.mem => ⟨by rfl, Or.inr <| by rfl⟩
+
 end Set
 
 end Language
@@ -111,14 +116,13 @@ private lemma consequence_of_aux (T : SetTheory) [𝗘𝗤 ⪯ T] (φ : Sentence
            [M ⊧ₘ* T],
            M ⊧ₘ φ) :
     T ⊨ φ := consequence_iff_consequence.{_, w}.mp <| consequence_iff_eq.mpr fun M _ _ _ hT =>
-  letI : Structure.Model ℒₛₑₜ M ⊧ₘ* T :=
-    ((Structure.ElementaryEquiv.modelsTheory (Structure.Model.elementaryEquiv ℒₛₑₜ M)).mp hT)
-  (Structure.ElementaryEquiv.models (Structure.Model.elementaryEquiv ℒₛₑₜ M)).mpr (H (Structure.Model ℒₛₑₜ M))
+  letI : Structure.Model ℒₛₑₜ M ⊧ₘ* T := Structure.ElementaryEquiv.modelsTheory.mp hT
+  Structure.ElementaryEquiv.models.mpr (H (Structure.Model ℒₛₑₜ M))
 section semantics
 
 variable (M : Type*) [SetStructure M]
 
-instance standardStructure : Structure ℒₛₑₜ M where
+instance (priority := 100) standardStructure : Structure ℒₛₑₜ M where
   func := fun _ f ↦ Empty.elim f
   rel := fun _ r ↦
     match r with
@@ -140,29 +144,46 @@ lemma standardStructure_unique' (s : Structure ℒₛₑₜ M)
 lemma standardStructure_unique (s : Structure ℒₛₑₜ M) [hEq : Structure.Eq ℒₛₑₜ M] [hMem : Structure.Mem ℒₛₑₜ M] : s = standardStructure M :=
   standardStructure_unique' M s hEq hMem
 
-def NormalizedModel (M : Type*) [Structure ℒₛₑₜ M] [Nonempty M] [M ⊧ₘ* (𝗘𝗤 : Theory ℒₛₑₜ)] : Type _ :=
-  Structure.Model ℒₛₑₜ (Structure.Eq.QuotEq ℒₛₑₜ M)
+structure NormalizedModel (M : Type*) [Structure ℒₛₑₜ M] [Nonempty M] [M ⊧ₘ* (𝗘𝗤 : Theory ℒₛₑₜ)] : Type _ where
+  toQuot : Structure.Model ℒₛₑₜ (Structure.Eq.QuotEq ℒₛₑₜ M)
 
 namespace NormalizedModel
 
-variable (M : Type*) [s : Structure ℒₛₑₜ M] [Nonempty M] [M ⊧ₘ* (𝗘𝗤 : Theory ℒₛₑₜ)]
+variable {M : Type*} [s : Structure ℒₛₑₜ M] [Nonempty M] [M ⊧ₘ* (𝗘𝗤 : Theory ℒₛₑₜ)]
 
-def equiv : Structure.Model ℒₛₑₜ (Structure.Eq.QuotEq ℒₛₑₜ M) ≃ NormalizedModel M := Equiv.refl _
-
-variable {M}
+def equiv : NormalizedModel M ≃ Structure.Model ℒₛₑₜ (Structure.Eq.QuotEq ℒₛₑₜ M) where
+  toFun x := x.toQuot
+  invFun x := ⟨x⟩
 
 instance : Nonempty (NormalizedModel M) :=
   have : Nonempty (Structure.Model ℒₛₑₜ (Structure.Eq.QuotEq ℒₛₑₜ M)) := inferInstance
-  ⟨equiv M this.some⟩
+  ⟨equiv.symm this.some⟩
 
 instance : SetStructure (NormalizedModel M) where
-  mem x y := (equiv M).symm x ∈ (equiv M).symm y
+  mem y x := equiv x ∈ equiv y
 
-lemma elenm :
+lemma mem_def (x y : NormalizedModel M) : x ∈ y ↔ equiv x ∈ equiv y := by rfl
+
+open Structure
+
+instance elementary_equiv : NormalizedModel M ≡ₑ[ℒₛₑₜ] M :=
+  have h₁ : NormalizedModel M ≡ₑ[ℒₛₑₜ] Structure.Model ℒₛₑₜ (Structure.Eq.QuotEq ℒₛₑₜ M) := by
+    apply ElementaryEquiv.of_equiv equiv
+    · intro k R v₁ v₂ h
+      rcases Language.Set.rel_eq_eq_or_mem R with ⟨rfl, (rfl | rfl)⟩
+      · simp only [eq_lang, Fin.isValue]
+        rw [←(equiv (M := M)).apply_eq_iff_eq]
+        simp only [h]
+      · simp [mem_def, h]
+    · intro _ f
+      exact IsEmpty.elim' inferInstance f
+  have h₂ : Structure.Model ℒₛₑₜ (Structure.Eq.QuotEq ℒₛₑₜ M) ≡ₑ[ℒₛₑₜ] M :=
+    Structure.ElementaryEquiv.trans
+      (Structure.Model.elementaryEquiv ℒₛₑₜ (Structure.Eq.QuotEq ℒₛₑₜ M)).symm
+      (Structure.Eq.QuotEq.elementaryEquiv ℒₛₑₜ M)
+  h₁.trans h₂
 
 end NormalizedModel
-
-
 
 end semantics
 

@@ -10,9 +10,8 @@ private lemma consequence_of_aux (T : ArithmeticTheory) [𝗘𝗤 ⪯ T] (φ : S
            [M ⊧ₘ* T],
            M ⊧ₘ φ) :
     T ⊨ φ := consequence_iff_consequence.{_, w}.mp <| consequence_iff_eq.mpr fun M _ _ _ hT =>
-  letI : Structure.Model ℒₒᵣ M ⊧ₘ* T :=
-    ((Structure.ElementaryEquiv.modelsTheory (Structure.Model.elementaryEquiv ℒₒᵣ M)).mp hT)
-  (Structure.ElementaryEquiv.models (Structure.Model.elementaryEquiv ℒₒᵣ M)).mpr (H (Structure.Model ℒₒᵣ M))
+  letI : Structure.Model ℒₒᵣ M ⊧ₘ* T := Structure.ElementaryEquiv.modelsTheory.mp hT
+  Structure.ElementaryEquiv.models.mpr (H (Structure.Model ℒₒᵣ M))
 
 open Language
 
