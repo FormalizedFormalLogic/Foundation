@@ -49,7 +49,7 @@ variable [Entailment.ILMinus_J4Plus 𝓢]
 instance : HasAxiomJ4' 𝓢 := ⟨by
   intro φ ψ;
   have : 𝓢 ⊢! (∼∼ψ ▷ ⊥) ➝ □(ψ ➝ ⊥) := C_trans CRhdNOL! $ box_regularity $ K_left negEquiv;
-  have : 𝓢 ⊢! (ψ ▷ ⊥) ➝ □(ψ ➝ ⊥) := C_trans (R2! dni) this;
+  have : 𝓢 ⊢! (ψ ▷ ⊥) ➝ □(ψ ➝ ⊥) := C_trans (R2! dne) this;
   apply C_swap $ C_trans this $ J4Plus!;
 ⟩
 

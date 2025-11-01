@@ -1,4 +1,5 @@
 import Foundation.InterpretabilityLogic.Entailment.ILMinus_J4
+import Foundation.InterpretabilityLogic.Entailment.ILMinus_J1
 
 namespace LO.InterpretabilityLogic.Entailment
 
@@ -58,14 +59,18 @@ protected class ILMinus_J1_J2 (𝓢 : S) extends Entailment.ILMinus 𝓢, HasAxi
 
 section
 
-variable [Entailment.ILMinus_J2 𝓢]
+variable [Entailment.ILMinus_J1_J2 𝓢]
+
+instance : Entailment.ILMinus_J1 𝓢 where
 
 instance : HasAxiomJ2Plus 𝓢 := ⟨by
   intro φ ψ χ;
   apply deduct';
-  have : [φ ▷ (ψ ⋎ χ)] ⊢[𝓢]! (ψ ▷ χ) ➝ ((ψ ⋎ χ) ▷ χ) := of $ R2! or₁;
-  have : [φ ▷ (ψ ⋎ χ)] ⊢[𝓢]! ((ψ ⋎ χ) ▷ χ) ➝ (φ ▷ χ) := deductInv' $ J2!;
-  apply C_trans (of $ R2! or₁) $ deductInv' $ J2!;
+  apply C_trans ?_ $ deductInv' $ J2!;
+  apply of;
+  apply C_trans $ J3! ⨀ J1'!;
+  apply R2!;
+  exact inner_A_symm;
 ⟩
 
 end

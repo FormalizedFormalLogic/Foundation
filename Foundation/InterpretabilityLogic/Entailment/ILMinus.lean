@@ -12,20 +12,20 @@ protected class ILMinus (𝓢 : S) extends Modal.Entailment.GL 𝓢, HasAxiomJ3 
 
 variable [Entailment.ILMinus 𝓢]
 
-def CRhdRhd!_of_C!_C! (hφ : 𝓢 ⊢! φ₁ ➝ φ₂) (hψ : 𝓢 ⊢! ψ₁ ➝ ψ₂) : 𝓢 ⊢! (φ₁ ▷ ψ₁) ➝ (φ₂ ▷ ψ₂) := by
+def CRhdRhd!_of_C!_C! (hφ : 𝓢 ⊢! φ₂ ➝ φ₁) (hψ : 𝓢 ⊢! ψ₁ ➝ ψ₂) : 𝓢 ⊢! (φ₁ ▷ ψ₁) ➝ (φ₂ ▷ ψ₂) := by
   apply C_trans;
-  . apply R2! hφ;
-  . apply R1! hψ;
+  . apply R1!; apply hψ;
+  . apply R2!; apply hφ;
 
 omit [DecidableEq F] in
-@[grind] lemma CRhdRhd_of_C_C : 𝓢 ⊢ φ₁ ➝ φ₂ → 𝓢 ⊢ ψ₁ ➝ ψ₂ → 𝓢 ⊢ (φ₁ ▷ ψ₁) ➝ (φ₂ ▷ ψ₂) := λ ⟨h₁⟩ ⟨h₂⟩ => ⟨CRhdRhd!_of_C!_C! h₁ h₂⟩
+@[grind] lemma CRhdRhd_of_C_C : 𝓢 ⊢ φ₂ ➝ φ₁ → 𝓢 ⊢ ψ₁ ➝ ψ₂ → 𝓢 ⊢ (φ₁ ▷ ψ₁) ➝ (φ₂ ▷ ψ₂) := λ ⟨h₁⟩ ⟨h₂⟩ => ⟨CRhdRhd!_of_C!_C! h₁ h₂⟩
 
 
 
 def ERhdRhd!_of_E!_E! (hφ : 𝓢 ⊢! φ₁ ⭤ φ₂) (hψ : 𝓢 ⊢! ψ₁ ⭤ ψ₂) : 𝓢 ⊢! (φ₁ ▷ ψ₁) ⭤ (φ₂ ▷ ψ₂) := by
   apply K_intro;
-  . apply CRhdRhd!_of_C!_C! (K_left hφ) (K_left hψ);
-  . apply CRhdRhd!_of_C!_C! (K_right hφ) (K_right hψ);
+  . apply CRhdRhd!_of_C!_C! (K_right hφ) (K_left hψ);
+  . apply CRhdRhd!_of_C!_C! (K_left hφ) (K_right hψ);
 
 omit [DecidableEq F] in
 @[grind]
@@ -34,7 +34,7 @@ lemma ERhdRhd_of_E_E : 𝓢 ⊢ φ₁ ⭤ φ₂ → 𝓢 ⊢ ψ₁ ⭤ ψ₂ →
 def CLNRhd! : 𝓢 ⊢! □(∼φ) ➝ (φ ▷ ψ) := by
   apply C_trans CLRhdNO!;
   apply CRhdRhd!_of_C!_C!;
-  . apply dne;
+  . apply dni;
   . apply efq;
 @[simp, grind] lemma CLNRhd : 𝓢 ⊢ □(∼φ) ➝ (φ ▷ ψ) := ⟨CLNRhd!⟩
 

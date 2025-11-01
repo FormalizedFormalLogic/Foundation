@@ -26,19 +26,19 @@ end
 
 
 class HasRule2 (𝓢 : S) where
-  R2! {φ ψ χ : F} : 𝓢 ⊢! φ ➝ ψ → 𝓢 ⊢! φ ▷ χ ➝ ψ ▷ χ
+  R2! {φ ψ χ : F} : 𝓢 ⊢! φ ➝ ψ → 𝓢 ⊢! ψ ▷ χ ➝ φ ▷ χ
 export HasRule2 (R2!)
 
 section
 
 variable [HasRule2 𝓢]
 
-@[grind] lemma R2 (h : 𝓢 ⊢ φ ➝ ψ) : 𝓢 ⊢ φ ▷ χ ➝ ψ ▷ χ := ⟨R2! h.some⟩
+@[grind] lemma R2 (h : 𝓢 ⊢ φ ➝ ψ) : 𝓢 ⊢ ψ ▷ χ ➝ φ ▷ χ := ⟨R2! h.some⟩
 
 variable [Entailment.Cl 𝓢]
 
-def R2E! (h : 𝓢 ⊢! φ ⭤ ψ) : 𝓢 ⊢! φ ▷ χ ⭤ ψ ▷ χ := K_intro (R2! $ K_left h) (R2! $ K_right h)
-@[grind] lemma R2E (h : 𝓢 ⊢ φ ⭤ ψ) : 𝓢 ⊢ φ ▷ χ ⭤ ψ ▷ χ := ⟨R2E! h.some⟩
+def R2E! (h : 𝓢 ⊢! φ ⭤ ψ) : 𝓢 ⊢! ψ ▷ χ ⭤ φ ▷ χ := K_intro (R2! $ K_left h) (R2! $ K_right h)
+@[grind] lemma R2E (h : 𝓢 ⊢ φ ⭤ ψ) : 𝓢 ⊢ ψ ▷ χ ⭤ φ ▷ χ := ⟨R2E! h.some⟩
 
 end
 
