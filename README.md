@@ -9,14 +9,15 @@ Formalizing mathematical logic in Lean 4.
 
 Main results of this repository. More detailed explanations are provided in the [Book] and [Doc].
 
-- `FirstOrder`: [First-Order Logic][first_order] and [Arithmetic][arith]
+- `FirstOrder`: [First-Order Logic][first_order]
   - [Completeness Theorem][first_order:completeness]
   - [Cut-elimination of first-order sequent calculus _(Gentzen's Hauptsatz)_][first_order:haupstaz]
   - [Arithmetic][arith]
+  - [Set Theory][setTheory]
   - Gödel's [First][arith:goedel_it1] and [Second][arith:goedel_it2] Incompleteness Theorems
-  - [Arithmetic Theory Zoo](#arithmetic-theory-zoo)
-- `IntFO`: [Intuitionistic First-Order Logic][first_order]
   - [Gödel-Gentzen Translation][first_order:goedel_translation]
+  - [Arithmetic Theory Zoo](#arithmetic-theory-zoo)
+  - [Set Theory Zoo](#set-theory-zoo)
 - `Modal`: [Basic Modal Logic][modal:logic] (with modal operators $\Box, \Diamond$)
   - [Kripke completeness for well-known subsystems][modal:logic_kripke_completeness]
   - [Modal Logic Zoo](#modal-logic-zoo)
@@ -44,6 +45,7 @@ Main results of this repository. More detailed explanations are provided in the 
 [first_order:haupstaz]: ./Foundation/FirstOrder/Hauptsatz.lean
 [first_order:goedel_translation]: ./Foundation/IntFO/Translation.lean
 [arith]: https://formalizedformallogic.github.io/Foundation/book/first_order/arithmetics.html
+[setTheory]: https://formalizedformallogic.github.io/Foundation/book/first_order/setTheory.html
 [arithmetization]: ./Foundation/Arithmetization
 [arith:goedel_it1]: https://formalizedformallogic.github.io/Foundation/book/first_order/goedel1.html
 [arith:goedel_it2]: https://formalizedformallogic.github.io/Foundation/book/first_order/goedel2.html
