@@ -60,11 +60,14 @@ lemma emb_doubleNegation (φ : Semisentence L n₁) :
 
 end Semiformula
 
-scoped[LO.FirstOrder] postfix:max "ᴺ" => Theory.doubleNegation
-
 abbrev Sequent.doubleNegation (Γ : List (Semiformula L ξ n)) : List (Semiformulaᵢ L ξ n) := Γ.map (·ᴺ)
 
 scoped[LO.FirstOrder] postfix:max "ᴺ" => Sequent.doubleNegation
+
+def Theory.ToTheoryᵢ (T : Theory L) (Λ : Hilbertᵢ L) : Theoryᵢ L Λ where
+  theory := Semiformula.doubleNegation '' T
+
+scoped[LO.FirstOrder] postfix:max "ᴺ" => Theory.ToTheoryᵢ
 
 namespace Derivation
 
@@ -145,7 +148,19 @@ open Classical Entailment
 
 lemma neg_doubleNegation (φ : SyntacticFormula L) : 𝗠𝗶𝗻¹ ⊢ ∼φᴺ ⭤ (∼φ)ᴺ := ⟨Derivation.negDoubleNegation φ⟩
 
-lemma GödelGentzen {φ} : (∅ : Theory L) ⊢ φ → (∅ : Theoryᵢ L 𝗠𝗶𝗻¹) ⊢ φᴺ := by
+lemma GödelGentzen {T : Theory L} {φ} : T ⊢ φ → T.ToTheoryᵢ Λ ⊢ φᴺ := by
+  intro h
+  let ψ : SyntacticFormula L := ↑φ
+  have h : ↑T ⊢ ↑φ := Entailment.wk! (by simp) h
+  have h₁ : 𝗠𝗶𝗻¹ ⊢ ∼(∼ψ)ᴺ := by
+    simpa using Entailment.FiniteContext.provable_iff.mp ⟨Derivation.gödelGentzen h.get⟩
+  have h₂ : 𝗠𝗶𝗻¹ ⊢ ∼(∼ψ)ᴺ ⭤ ψᴺ := by simpa using neg_doubleNegation (∼ψ)
+  have : 𝗠𝗶𝗻¹ ⊢ Rewriting.emb φᴺ := by simpa [ψ, Semiformula.emb_doubleNegation] using Entailment.K!_left h₂ ⨀ h₁
+  have :=
+  exact Theoryᵢ.provable_def.mpr <| Entailment.Context.of! this
+
+/--/
+lemma GödelGentzen {φ} : (∅ : Theory L) ⊢ φ → (∅ : Theoryᵢ L Λ) ⊢ φᴺ := by
   intro h
   let ψ : SyntacticFormula L := ↑φ
   have h : (∅ : SyntacticFormulas L) ⊢ ↑φ := Entailment.wk! (by simp) h
@@ -153,6 +168,7 @@ lemma GödelGentzen {φ} : (∅ : Theory L) ⊢ φ → (∅ : Theoryᵢ L 𝗠�
     simpa using Entailment.FiniteContext.provable_iff.mp ⟨Derivation.gödelGentzen h.get⟩
   have h₂ : 𝗠𝗶𝗻¹ ⊢ ∼(∼ψ)ᴺ ⭤ ψᴺ := by simpa using neg_doubleNegation (∼ψ)
   have : 𝗠𝗶𝗻¹ ⊢ Rewriting.emb φᴺ := by simpa [ψ, Semiformula.emb_doubleNegation] using Entailment.K!_left h₂ ⨀ h₁
+  have :=
   exact Theoryᵢ.provable_def.mpr <| Entailment.Context.of! this
 
 end LO.FirstOrder

@@ -12,11 +12,13 @@ structure Hilbertᵢ (L : Language) where
   axiomSet : Set (SyntacticFormulaᵢ L)
   rewrite_closed {φ : SyntacticFormulaᵢ L} : φ ∈ axiomSet → ∀ f : ℕ → SyntacticTerm L, Rew.rewrite f ▹ φ ∈ axiomSet
 
+namespace Hilbertᵢ
+
 instance : SetLike (Hilbertᵢ L) (SyntacticFormulaᵢ L) where
   coe := Hilbertᵢ.axiomSet
   coe_injective' := by rintro ⟨T, _⟩ ⟨U, _⟩; simp
 
-namespace Hilbertᵢ
+@[simp] lemma mem_mk (s : Set (SyntacticFormulaᵢ L)) (h) : φ ∈ Hilbertᵢ.mk s h ↔ φ ∈ s := by rfl
 
 def Minimal : Hilbertᵢ L := ⟨∅, by simp⟩
 
@@ -33,11 +35,9 @@ def Classical : Hilbertᵢ L := ⟨{⊥ ➝ φ | φ} ∪ {φ ⋎ ∼φ | φ}, by
 
 notation "𝗖𝗹¹" => Classical
 
-lemma minimal_le (Λ : Hilbertᵢ L) : (Minimal : Hilbertᵢ L) ≤ Λ := by rintro _ ⟨⟩
+@[simp] lemma minimal_le (Λ : Hilbertᵢ L) : (Minimal : Hilbertᵢ L) ≤ Λ := by rintro _ ⟨⟩
 
-lemma intuitionistic_le_classical : (Intuitionistic : Hilbertᵢ L) ≤ Classical := by rintro _ ⟨φ, rfl⟩; exact .inl ⟨φ, rfl⟩
-
-@[simp] lemma mem_mk (s : Set (SyntacticFormulaᵢ L)) (h) : φ ∈ Hilbertᵢ.mk s h ↔ φ ∈ s := by rfl
+@[simp] lemma intuitionistic_le_classical : (Intuitionistic : Hilbertᵢ L) ≤ Classical := by rintro _ ⟨φ, rfl⟩; exact .inl ⟨φ, rfl⟩
 
 end Hilbertᵢ
 
@@ -232,6 +232,28 @@ def rewrite (f : ℕ → SyntacticTerm L) : Λ ⊢! φ → Λ ⊢! Rew.rewrite f
 
 @[simp] lemma depth_rewrite (f : ℕ → SyntacticTerm L) (b : Λ ⊢! φ) : ‖rewrite f b‖ = ‖b‖ := by
   induction b generalizing f <;> simp [rewrite, *]
+
+def ofLE {Λ₁ Λ₂ : Hilbertᵢ L} (h : Λ₁ ≤ Λ₂) : Λ₁ ⊢! φ → Λ₂ ⊢! φ
+  | mdp b d => (ofLE h b).mdp (ofLE h d)
+  | gen b => (ofLE h b).gen
+  | eaxm hφ => eaxm <| h hφ
+  | verum => verum
+  | imply₁ _ _ => imply₁ _ _
+  | imply₂ _ _ _ => imply₂ _ _ _
+  | and₁ _ _ => and₁ _ _
+  | and₂ _ _ => and₂ _ _
+  | and₃ _ _ => and₃ _ _
+  | or₁ _ _ => or₁ _ _
+  | or₂ _ _ => or₂ _ _
+  | or₃ _ _ _ => or₃ _ _ _
+  | all₁ _ _ => all₁ _ _
+  | all₂ _ _ => all₂ _ _
+  | ex₁ _ _ => ex₁ _ _
+  | ex₂ _ _ => ex₂ _ _
+
+lemma of_le {Λ₁ Λ₂ : Hilbertᵢ L} (h : Λ₁ ≤ Λ₂) : Λ₁ ⊢ φ → Λ₂ ⊢ φ := fun b ↦ ⟨ofLE h b.get⟩
+
+open Entailment
 
 end HilbertProofᵢ
 

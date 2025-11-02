@@ -7,73 +7,66 @@ import Mathlib.Order.PFilter
 namespace LO.FirstOrder
 
 /-- Kripke model for relational first-order language -/
-structure KripkeModel (L : Language) [L.Relational] where
-  Condition : Type*
-  [preorder : Preorder Condition]
-  Name : Type*
-  Domain : Condition → Set Name
+class KripkeModel (L : outParam Language) [L.Relational] (World : Type*) [Preorder World] (Carrier : outParam Type*) where
+  Domain : World → Set Carrier
   domain_nonempty : ∀ w, ∃ x, x ∈ Domain w
   domain_antimonotone : w ≥ v → Domain w ⊆ Domain v
-  Rel (w : Condition) {k : ℕ} (R : L.Rel k) : (Fin k → Name) → Prop
+  Rel (w : World) {k : ℕ} (R : L.Rel k) : (Fin k → Carrier) → Prop
   rel_monotone : Rel w R t → ∀ v ≤ w, Rel v R t
 
-variable (L : Language) [L.Relational]
+variable (L : Language) [L.Relational] (W : Type*) [Preorder W] (C : outParam Type*) [KripkeModel L W C]
 
-instance : CoeSort (KripkeModel L) (Type _) := ⟨fun 𝓚 ↦ 𝓚.Condition⟩
+instance : CoeSort W (Type _) := ⟨fun w ↦ KripkeModel.Domain w⟩
 
-instance (𝓚 : KripkeModel L) : CoeSort 𝓚.Condition (Type _) := ⟨fun w ↦ 𝓚.Domain w⟩
+instance : ForcingExists W C := ⟨fun p x ↦ x ∈ KripkeModel.Domain p⟩
 
-instance (𝓚 : KripkeModel L) : Preorder 𝓚.Condition := 𝓚.preorder
-
-instance (𝓚 : KripkeModel L) : ForcingExists 𝓚 𝓚.Name := ⟨fun p x ↦ x ∈ 𝓚.Domain p⟩
-
-variable {L}
+variable {L W C}
 
 namespace KripkeModel
 
-variable (𝓚 : KripkeModel L)
+lemma domain_nonempty' (p : W) : ∃ x, p ⊩↓ x := domain_nonempty p
 
-lemma domain_nonempty' (p : 𝓚) : ∃ x, p ⊩↓ x := 𝓚.domain_nonempty p
+lemma domain_monotone {p : W} : p ⊩↓ x → ∀ q ≤ p, q ⊩↓ x := fun hx _ h ↦
+  domain_antimonotone h hx
 
-lemma domain_antimonotone' {p : 𝓚} : p ⊩↓ x → ∀ q ≤ p, q ⊩↓ x := fun hx _ h ↦
-  𝓚.domain_antimonotone h hx
+@[simp] lemma domain_forcesExists {p : W} (x : p) : p ⊩↓ x.val := x.prop
 
-@[simp] lemma domain_forcesExists {p : 𝓚} (x : p) : p ⊩↓ x.val := x.prop
+variable (W)
 
-abbrev Filter : Type _ := Order.PFilter 𝓚
+abbrev Filter : Type _ := Order.PFilter W
 
-variable {𝓚}
+variable {W}
 
 namespace Filter
 
 /-- A domain of filter `F` -/
-@[ext] structure Domain (F : 𝓚.Filter) where
-  val : 𝓚.Name
+@[ext] structure Model (F : Filter W) where
+  val : C
   mem_filter : ∃ p ∈ F, p ⊩↓ val
 
-attribute [coe] Domain.val
+attribute [coe] Model.val
 
-variable (F : 𝓚.Filter)
+variable (F : Filter W)
 
-instance : CoeOut F.Domain 𝓚.Name := ⟨fun x ↦ x.val⟩
+instance : CoeOut F.Model C := ⟨fun x ↦ x.val⟩
 
-lemma finite_colimit [Fintype ι] (p : ι → 𝓚) (hp : ∀ i, p i ∈ F) : ∃ q ∈ F, ∀ i, q ≤ p i :=
+lemma finite_colimit [Fintype ι] (p : ι → W) (hp : ∀ i, p i ∈ F) : ∃ q ∈ F, ∀ i, q ≤ p i :=
   DirectedOn.fintype_colimit transitive_ge (Order.PFilter.nonempty F) F.directed p hp
 
-lemma finite_colimit_domain [Fintype ι] (v : ι → F.Domain) :
+lemma finite_colimit_domain [Fintype ι] (v : ι → F.Model) :
     ∃ q ∈ F, ∀ i, q ⊩↓ ↑(v i) := by
   have : ∀ i, ∃ p ∈ F, p ⊩↓ ↑(v i) := fun i ↦ (v i).mem_filter
   choose p hp using this
   have : ∃ q ∈ F, ∀ i, q ≤ p i := F.finite_colimit p fun i ↦ (hp i).1
   rcases this with ⟨q, hq, hqp⟩
-  refine ⟨q, hq, fun i ↦ 𝓚.domain_antimonotone (hqp i) (hp i).2⟩
+  refine ⟨q, hq, fun i ↦ domain_antimonotone (hqp i) (hp i).2⟩
 
-instance Str : Structure L F.Domain where
+instance Str : Structure L F.Model where
   func _ f _ := IsEmpty.elim' inferInstance f
-  rel _ R v := ∀ p ∈ F, (∀ i, p ⊩↓ ↑(v i)) → 𝓚.Rel p R fun i ↦ v i
+  rel _ R v := ∀ p ∈ F, (∀ i, p ⊩↓ ↑(v i)) → Rel p R fun i ↦ (v i).val
 
-@[simp] lemma Str.rel_iff {k : ℕ} (R : L.Rel k) (v : Fin k → F.Domain) :
-    F.Str.rel R v ↔ ∀ p ∈ F, (∀ i, p ⊩↓ ↑(v i)) → 𝓚.Rel p R fun i ↦ v i := by rfl
+@[simp] lemma Str.rel_iff {k : ℕ} (R : L.Rel k) (v : Fin k → F.Model) :
+    F.Str.rel R v ↔ ∀ p ∈ F, (∀ i, p ⊩↓ ↑(v i)) → Rel p R fun i ↦ (v i).val := by rfl
 
 end Filter
 
