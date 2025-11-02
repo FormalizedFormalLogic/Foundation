@@ -26,10 +26,7 @@ section
 
 variable [Entailment.ILMinus_J2Plus 𝓢]
 
-instance : HasAxiomJ2Plus' 𝓢 := ⟨by
-  intro φ ψ χ;
-  apply sorry
-⟩
+instance : HasAxiomJ2Plus' 𝓢 := ⟨fun {_ _ _} ↦ C_trans (R1! CAKN!) J2Plus!⟩
 
 instance : HasAxiomJ2 𝓢 := ⟨fun {_ _ _} ↦ C_trans (R1! or₁) J2Plus!⟩
 
@@ -43,8 +40,13 @@ section
 variable [Entailment.ILMinus_J2Plus' 𝓢]
 
 instance : HasAxiomJ2Plus 𝓢 := ⟨by
-  intro φ ψ χ;
-  apply sorry;
+  intro A B C;
+  dsimp only [Axioms.J2Plus];
+  apply deduct';
+  have H₁ : [A ▷ (B ⋎ C), A ▷ (B ⋎ C) ➝ B ▷ C] ⊢[𝓢]! ((B ⋎ C) ⋏ ∼C) ▷ C := deductInv $ deductInv' $ CCC_of_C_right $ R2! $ CK_of_CC $ left_A_intro imply₁ CCN;
+  have H₂ : [A ▷ (B ⋎ C), A ▷ (B ⋎ C) ➝ B ▷ C] ⊢[𝓢]! ((B ⋎ C) ⋏ ∼C) ▷ C ➝ A ▷ C := weakening (by simp) $ deductInv' J2Plus'!;
+  have : [A ▷ (B ⋎ C)] ⊢[𝓢]! (A ▷ (B ⋎ C) ➝ B ▷ C) ➝ A ▷ C := deduct $ weakening (by simp) $ H₂ ⨀ H₁;
+  apply C_trans imply₁ this;
 ⟩
 
 instance : HasAxiomJ4Plus 𝓢 := ⟨by

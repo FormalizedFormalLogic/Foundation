@@ -60,17 +60,22 @@ def CCNKN : 𝓢 ⊢! (φ ➝ ψ) ➝ ∼(φ ⋏ ∼ψ) := by
   apply CAA_of_C_right;
   apply dni;
 
-def CCRhdRhdLC! : 𝓢 ⊢! □(φ ➝ ψ) ➝ (ψ ▷ χ ➝ φ ▷ χ) := by
-  suffices 𝓢 ⊢! □(∼(φ ⋏ ∼ψ)) ➝ ψ ▷ χ ➝ φ ▷ χ by apply C_trans (box_regularity CCNKN) this;
-  apply C_trans CLNRhd!;
-  apply CC!_of_CC!_of_C! J3!;
-  apply R2!;
+-- TODO: Move to entailments
+def CAKN! : 𝓢 ⊢! φ ➝ φ ⋏ ∼ψ ⋎ ψ := by
   apply deduct';
   apply A_replace $ A_symm $ lem (φ := ψ);
   . apply deduct;
     apply K_intro <;> . apply FiniteContext.byAxm; simp;
   . apply C_id;
 
+def CCRhdRhdLC! : 𝓢 ⊢! □(φ ➝ ψ) ➝ (ψ ▷ χ ➝ φ ▷ χ) := by
+  suffices 𝓢 ⊢! □(∼(φ ⋏ ∼ψ)) ➝ ψ ▷ χ ➝ φ ▷ χ by apply C_trans (box_regularity CCNKN) this;
+  apply C_trans CLNRhd!;
+  apply CC!_of_CC!_of_C! J3!;
+  apply R2!;
+  apply CAKN!;
+
+-- TODO: Move to entailments
 def CCC!_of_C!_of_C! (h₁ : 𝓢 ⊢! ψ₁ ➝ φ₁) (h₂ : 𝓢 ⊢! φ₂ ➝ ψ₂) : 𝓢 ⊢! (φ₁ ➝ φ₂) ➝ (ψ₁ ➝ ψ₂) := by
   apply deduct';
   apply C_trans ?_ $ of h₂;
