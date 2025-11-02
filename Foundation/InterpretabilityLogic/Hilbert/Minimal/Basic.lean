@@ -324,6 +324,7 @@ macro "defineILMinus" name:ident "[" xs:ident,* "]" : command => do
 
     end $axiomsName
 
+    -- TODO: make protected
     abbrev $logicName := Hilbert.Minimal $axiomsName
 
     namespace $logicName
