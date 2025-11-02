@@ -193,7 +193,8 @@ import Foundation.ProvabilityLogic.Classification.Trace
 
 -- Interpretability Logic
 import Foundation.InterpretabilityLogic.Veltman.Logic.CL
-import Foundation.InterpretabilityLogic.Veltman.Logic.IL
+import Foundation.InterpretabilityLogic.Veltman.Logic.IL.Soundness
+import Foundation.InterpretabilityLogic.Veltman.Logic.IL.Completeness
 
 -- Meta
 import Foundation.Meta.Qq

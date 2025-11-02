@@ -53,7 +53,6 @@ instance : LukasiewiczAbbrev (Formula α) where
 instance : DiaAbbrev (Formula α) := ⟨rfl⟩
 
 
-
 @[simp, grind] lemma and_inj : φ₁ ⋏ φ₂ = ψ₁ ⋏ ψ₂ ↔ φ₁ = ψ₁ ∧ φ₂ = ψ₂ := by simp [Wedge.wedge]
 
 @[simp, grind] lemma or_inj : φ₁ ⋎ φ₂ = ψ₁ ⋎ ψ₂ ↔ φ₁ = ψ₁ ∧ φ₂ = ψ₂ := by simp [Vee.vee]
@@ -63,6 +62,22 @@ instance : DiaAbbrev (Formula α) := ⟨rfl⟩
 @[simp, grind] lemma rhd_inj : φ₁ ▷ φ₂ = ψ₁ ▷ ψ₂ ↔ φ₁ = ψ₁ ∧ φ₂ = ψ₂ := by simp [Rhd.rhd];
 
 @[simp, grind] lemma neg_inj : ∼φ = ∼ψ ↔ φ = ψ := by simp [NegAbbrev.neg];
+
+
+@[simp, grind] lemma eq_falsum : (falsum : Formula α) = ⊥ := rfl
+
+@[simp, grind] lemma eq_or : or φ ψ = φ ⋎ ψ := rfl
+
+@[simp, grind] lemma eq_and : and φ ψ = φ ⋏ ψ := rfl
+
+@[simp, grind] lemma eq_imp : imp φ ψ = φ ➝ ψ := rfl
+
+@[simp, grind] lemma eq_neg : neg φ = ∼φ := rfl
+
+@[simp, grind] lemma eq_box : box φ = □φ := rfl
+
+@[simp, grind] lemma eq_dia : dia φ = ◇φ := rfl
+
 
 
 section ToString
