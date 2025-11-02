@@ -68,14 +68,14 @@ instance : HasAxiomJ4Plus 𝓢 := ⟨by
 end
 
 
+instance [Entailment.ILMinus_J2Plus 𝓢] : Entailment.ILMinus_J2Plus' 𝓢 where
+instance [Entailment.ILMinus_J2Plus' 𝓢] : Entailment.ILMinus_J2Plus 𝓢 where
+instance [Entailment.ILMinus_J2Plus 𝓢] : Entailment.ILMinus_J4Plus 𝓢 where
 
-protected class ILMinus_J1_J2 (𝓢 : S) extends Entailment.ILMinus 𝓢, HasAxiomJ1 𝓢, HasAxiomJ2 𝓢
 
 section
 
-variable [Entailment.ILMinus_J1_J2 𝓢]
-
-instance : Entailment.ILMinus_J1 𝓢 where
+variable [Entailment.ILMinus_J1 𝓢] [Entailment.ILMinus_J2 𝓢]
 
 instance : HasAxiomJ2Plus 𝓢 := ⟨by
   intro φ ψ χ;
@@ -88,5 +88,10 @@ instance : HasAxiomJ2Plus 𝓢 := ⟨by
 ⟩
 
 end
+
+instance [Entailment.ILMinus_J2Plus 𝓢] : Entailment.ILMinus_J2Plus' 𝓢 where
+instance [Entailment.ILMinus_J2Plus' 𝓢] : Entailment.ILMinus_J2Plus 𝓢 where
+instance [Entailment.ILMinus_J2Plus 𝓢] : Entailment.ILMinus_J4Plus 𝓢 where
+instance [Entailment.ILMinus_J1 𝓢] [Entailment.ILMinus_J2 𝓢] : Entailment.ILMinus_J2Plus 𝓢 where
 
 end LO.InterpretabilityLogic.Entailment

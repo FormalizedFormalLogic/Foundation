@@ -63,6 +63,6 @@
       "LO.InterpretabilityLogic.ILMinus_J5": $ILMinus (AxiomJ5)$,
       "LO.InterpretabilityLogic.ILMinus": $ILMinus$,
     ),
-    width: 240pt,
+    width: 480pt,
   )
 ]
