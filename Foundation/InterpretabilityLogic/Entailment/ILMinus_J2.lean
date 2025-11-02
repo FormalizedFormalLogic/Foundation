@@ -15,10 +15,7 @@ section
 
 variable [Entailment.ILMinus_J2 𝓢]
 
-instance : HasAxiomJ4' 𝓢 := ⟨by
-  intro φ ψ;
-  apply J2!;
-⟩
+instance : HasAxiomJ4' 𝓢 := ⟨fun {_ _} ↦ J2!⟩
 
 end
 
@@ -34,12 +31,7 @@ instance : HasAxiomJ2Plus' 𝓢 := ⟨by
   apply sorry
 ⟩
 
-instance : HasAxiomJ2 𝓢 := ⟨by
-  intro φ ψ χ;
-  apply C_trans ?_ J2Plus!;
-  apply R1!;
-  apply or₁;
-⟩
+instance : HasAxiomJ2 𝓢 := ⟨fun {_ _ _} ↦ C_trans (R1! or₁) J2Plus!⟩
 
 end
 
