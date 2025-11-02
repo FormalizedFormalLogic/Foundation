@@ -13,7 +13,7 @@ section
 
 variable [Entailment.ILMinus_J4 𝓢]
 
-instance : HasAxiomJ4' 𝓢 := ⟨by sorry⟩
+instance : HasAxiomJ4' 𝓢 := ⟨λ {_ _} ↦ C_trans J4! CCMMCRhdORhdO!⟩
 
 end
 
@@ -24,19 +24,9 @@ section
 
 variable [Entailment.ILMinus_J4' 𝓢]
 
-instance : HasAxiomJ4 𝓢 := ⟨by sorry⟩
+instance : HasAxiomJ4 𝓢 := ⟨fun {_ _} ↦ C_trans J4'! CCRhdORhdOCMM!⟩
 
 end
-
--- TODO: Move to entailments
-variable [Entailment.Minimal 𝓢] in
-def CC_of_CC_of_C (h₁ : 𝓢 ⊢! φ ➝ ψ ➝ χ) (h₂ : 𝓢 ⊢! χ ➝ ξ) : 𝓢 ⊢! φ ➝ ψ ➝ ξ := by
-  apply deduct';
-  apply deduct;
-  exact (of h₂) ⨀ (deductInv $ deductInv' h₁);
-variable [Entailment.Minimal 𝓢] in
-lemma CC!_of_CC!_of_C! (h₁ : 𝓢 ⊢ φ ➝ ψ ➝ χ) (h₂ : 𝓢 ⊢ χ ➝ ξ) : 𝓢 ⊢ φ ➝ ψ ➝ ξ := ⟨CC_of_CC_of_C h₁.some h₂.some⟩
-
 
 
 
@@ -72,8 +62,10 @@ instance : HasAxiomJ4Plus'' 𝓢 := ⟨by
   dsimp only [Axioms.J4Plus''];
   -- apply C_trans $ J4Plus'! (𝓢 := 𝓢) (φ := A) (ψ := B) (χ := C);
 
+
   have H₁ : 𝓢 ⊢! C ▷ B ➝ C ▷ (A ➝ A ⋏ B) := R1! $ C_swap $ and₃;
   have H₂ : 𝓢 ⊢! □A ➝ (C ▷ (A ➝ B) ➝ C ▷ B) := J4Plus'!;
+  apply C_trans $ CC!_of_CC!_of_C! H₂ H₁;
 
   sorry;
 ⟩
@@ -91,7 +83,7 @@ instance : HasAxiomJ4Plus 𝓢 := ⟨by
   intro φ ψ χ;
   have H₁ : 𝓢 ⊢! □(φ ➝ ψ) ➝ χ ▷ φ ➝ χ ▷ ((φ ➝ ψ) ⋏ φ) := J4Plus''!;
   have H₂ : 𝓢 ⊢! χ ▷ ((φ ➝ ψ) ⋏ φ) ➝ χ ▷ ψ := R1! $ C_trans (CKK _ _) $ innerMDP;
-  exact CC_of_CC_of_C H₁ H₂;
+  exact CC!_of_CC!_of_C! H₁ H₂;
 ⟩
 
 end

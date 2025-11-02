@@ -1,5 +1,6 @@
 import Foundation.InterpretabilityLogic.Entailment.Basic
 import Foundation.Modal.Entailment.GL
+import Foundation.Meta.ClProver
 
 namespace LO.InterpretabilityLogic.Entailment
 
@@ -31,6 +32,15 @@ omit [DecidableEq F] in
 @[grind]
 lemma ERhdRhd_of_E_E : 𝓢 ⊢ φ₁ ⭤ φ₂ → 𝓢 ⊢ ψ₁ ⭤ ψ₂ → 𝓢 ⊢ (φ₁ ▷ ψ₁) ⭤ (φ₂ ▷ ψ₂) := λ ⟨h₁⟩ ⟨h₂⟩ => ⟨ERhdRhd!_of_E!_E! h₁ h₂⟩
 
+-- TODO: Move to entailments
+def CC!_of_CC!_of_C! (h₁ : 𝓢 ⊢! φ ➝ ψ ➝ χ) (h₂ : 𝓢 ⊢! χ ➝ ξ) : 𝓢 ⊢! φ ➝ ψ ➝ ξ := by
+  apply deduct';
+  apply deduct;
+  exact (of h₂) ⨀ (deductInv $ deductInv' h₁);
+omit [DecidableEq F] in
+lemma CC_of_CC_of_C (h₁ : 𝓢 ⊢ φ ➝ ψ ➝ χ) (h₂ : 𝓢 ⊢ χ ➝ ξ) : 𝓢 ⊢ φ ➝ ψ ➝ ξ := ⟨CC!_of_CC!_of_C! h₁.some h₂.some⟩
+
+
 def CLNRhd! : 𝓢 ⊢! □(∼φ) ➝ (φ ▷ ψ) := by
   apply C_trans CLRhdNO!;
   apply CRhdRhd!_of_C!_C!;
@@ -38,11 +48,57 @@ def CLNRhd! : 𝓢 ⊢! □(∼φ) ➝ (φ ▷ ψ) := by
   . apply efq;
 @[simp, grind] lemma CLNRhd : 𝓢 ⊢ □(∼φ) ➝ (φ ▷ ψ) := ⟨CLNRhd!⟩
 
+def CRhdLN! : 𝓢 ⊢! ψ ▷ ⊥ ➝ □(∼ψ) := by
+  apply C_trans ?_ CRhdNOL!;
+  apply R2!;
+  apply dne;
+omit [DecidableEq F] in @[simp, grind] lemma CRhdLN : 𝓢 ⊢ ψ ▷ ⊥ ➝ □(∼ψ) := ⟨CRhdLN!⟩
+
+-- TODO: Move to entailments
+def CCNKN : 𝓢 ⊢! (φ ➝ ψ) ➝ ∼(φ ⋏ ∼ψ) := by
+  apply C_replace CCAN CANNNK;
+  apply CAA_of_C_right;
+  apply dni;
+
 def CCRhdRhdLC! : 𝓢 ⊢! □(φ ➝ ψ) ➝ (ψ ▷ χ ➝ φ ▷ χ) := by
-  suffices 𝓢 ⊢! □(∼(φ ⋏ ∼ψ)) ➝ ψ ▷ χ ➝ φ ▷ χ by sorry;
-  have H₁ : 𝓢 ⊢! □(∼(φ ⋏ ∼ψ)) ➝ (φ ⋏ ∼ψ) ▷ χ := CLNRhd!;
-  have H₂ : 𝓢 ⊢! (φ ⋏ ∼ψ) ▷ χ ➝ ψ ▷ χ ➝ ((φ ⋏ ∼ψ) ⋎ ψ) ▷ χ := J3!
-  apply C_trans H₁;
-  sorry;
+  suffices 𝓢 ⊢! □(∼(φ ⋏ ∼ψ)) ➝ ψ ▷ χ ➝ φ ▷ χ by apply C_trans (box_regularity CCNKN) this;
+  apply C_trans CLNRhd!;
+  apply CC!_of_CC!_of_C! J3!;
+  apply R2!;
+  apply deduct';
+  apply A_replace $ A_symm $ lem (φ := ψ);
+  . apply deduct;
+    apply K_intro <;> . apply FiniteContext.byAxm; simp;
+  . apply C_id;
+
+def CCC!_of_C!_of_C! (h₁ : 𝓢 ⊢! ψ₁ ➝ φ₁) (h₂ : 𝓢 ⊢! φ₂ ➝ ψ₂) : 𝓢 ⊢! (φ₁ ➝ φ₂) ➝ (ψ₁ ➝ ψ₂) := by
+  apply deduct';
+  apply C_trans ?_ $ of h₂;
+  apply C_trans $ of h₁;
+  exact byAxm;
+
+def CCMMCRhdORhdO! : 𝓢 ⊢! (◇φ ➝ ◇ψ) ➝ ψ ▷ ⊥ ➝ φ ▷ ⊥ := by
+  suffices 𝓢 ⊢! (□(∼ψ) ➝ □(∼φ)) ➝ ψ ▷ ⊥ ➝ φ ▷ ⊥ by
+    apply C_trans ?_ this;
+    apply C_trans ?_ CCNNC;
+    apply CCC!_of_C!_of_C!;
+    . apply INLNM!;
+    . apply IMNLN!;
+  apply CCC!_of_C!_of_C!;
+  . apply CRhdLN!;
+  . apply CLNRhd!;
+@[simp] lemma CCMMCRhdORhdO : 𝓢 ⊢ (◇φ ➝ ◇ψ) ➝ (ψ ▷ ⊥ ➝ φ ▷ ⊥) := ⟨CCMMCRhdORhdO!⟩
+
+def CCRhdORhdOCMM! : 𝓢 ⊢! (ψ ▷ ⊥ ➝ φ ▷ ⊥) ➝ (◇φ ➝ ◇ψ) := by
+  suffices 𝓢 ⊢! (ψ ▷ ⊥ ➝ φ ▷ ⊥) ➝ (□(∼ψ) ➝ □(∼φ)) by
+    apply C_trans this;
+    apply C_trans CCCNN;
+    apply CCC!_of_C!_of_C!;
+    . apply IMNLN!;
+    . apply INLNM!;
+  apply CCC!_of_C!_of_C!;
+  . apply CLNRhd!;
+  . apply CRhdLN!;
+@[simp] lemma CCRhdORhdOCMM : 𝓢 ⊢ (ψ ▷ ⊥ ➝ φ ▷ ⊥) ➝ (◇φ ➝ ◇ψ) := ⟨CCRhdORhdOCMM!⟩
 
 end LO.InterpretabilityLogic.Entailment

@@ -59,18 +59,11 @@ instance : HasAxiomJ4Plus 𝓢 := ⟨by
   intro φ ψ χ;
   apply C_trans $ C_trans ?_ CLNRhd!;
   . exact C_swap $ J2Plus'!;
-  . apply box_regularity;
-    apply C_replace CCAN CANNNK;
-    apply CAA_of_C_right;
-    apply dni;
+  . apply box_regularity CCNKN;
 ⟩
 
 end
 
-
-instance [Entailment.ILMinus_J2Plus 𝓢] : Entailment.ILMinus_J2Plus' 𝓢 where
-instance [Entailment.ILMinus_J2Plus' 𝓢] : Entailment.ILMinus_J2Plus 𝓢 where
-instance [Entailment.ILMinus_J2Plus 𝓢] : Entailment.ILMinus_J4Plus 𝓢 where
 
 
 section
