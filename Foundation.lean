@@ -194,8 +194,8 @@ import Foundation.ProvabilityLogic.Classification.Trace
 -- Interpretability Logic
 import Foundation.InterpretabilityLogic.Hilbert.Minimal.Basic
 import Foundation.InterpretabilityLogic.Hilbert.Basic_Minimal
-import Foundation.InterpretabilityLogic.Veltman.Logic.CL
-import Foundation.InterpretabilityLogic.Veltman.Logic.IL
+-- import Foundation.InterpretabilityLogic.Veltman.Logic.CL
+import Foundation.InterpretabilityLogic.Veltman.Logic.ILMinus_J1
 
 -- Meta
 import Foundation.Meta.Qq
