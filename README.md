@@ -23,7 +23,7 @@ Main results of this repository. More detailed explanations are provided in the 
     - Gödel's [First][arith:goedel_it1] and [Second][arith:goedel_it2] Incompleteness Theorems
     - [Arithmetic Theory Zoo](#arithmetic-theory-zoo)
   - [Set Theory][setTheory]
-    - [Consistency of $\mathsf{ZFC}$][setTheory:zfc_consistent]
+    - [Consistency of ZFC][setTheory:zfc_consistent]
     - [Set Theory Zoo](#set-theory-zoo)
 - `Modal`: [Basic Modal Logic][modal:logic] (with modal operators $\Box, \Diamond$)
   - [Kripke Semantics][modal:kripke_semantics]
