@@ -1,5 +1,14 @@
 import Foundation.InterpretabilityLogic.Veltman.Hilbert
 
+
+namespace LO.Modal.Kripke
+
+lemma Frame.isGL_of_isFiniteGL {F : Kripke.Frame} (hF : F.IsFiniteGL) : F.IsGL := by constructor;
+
+end LO.Modal.Kripke
+
+
+
 namespace LO.InterpretabilityLogic
 
 open Veltman
