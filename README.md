@@ -110,9 +110,9 @@ Automatically generated diagrams "Zoo", illustrate the Lean4-verified interrelat
 
 ### Interpretability Logic Zoo
 
-![Interpretability Logic Zoo](https://formalizedformallogic.github.io/Foundation/zoo/InterpretabillityLogic.png)
+![Interpretability Logic Zoo](https://formalizedformallogic.github.io/Foundation/zoo/InterpretabilityLogic.png)
 
-[PDF version](https://formalizedformallogic.github.io/Foundation/zoo/InterpretabillityLogic.pdf)
+[PDF version](https://formalizedformallogic.github.io/Foundation/zoo/InterpretabilityLogic.pdf)
 
 ## Build
 
