@@ -4,14 +4,14 @@
 
 #let omitLabels = ()
 
-#let arrows = json("./arith.json").map(((from, to, type)) => {
+#let arrows = json("./Arith.json").map(((from, to, type)) => {
   if omitLabels.contains(from) == false and omitLabels.contains(from) == false {
     if type == "ssub" {
-      return strfmt("\"{}\" -> \"{}\"", from, to)
+      return strfmt("\"{}\" -> \"{}\"", to, from)
     } else if type == "sub" {
-      return strfmt("\"{}\" -> \"{}\" [style=dashed] ", from, to)
+      return strfmt("\"{}\" -> \"{}\" [style=dashed] ", to, from)
     } else if type == "sorry" {
-      return strfmt("\"{}\" -> \"{}\" [color=red; style=dashed] ", from, to)
+      return strfmt("\"{}\" -> \"{}\" [color=red; style=dashed] ", to, from)
     }
   }
 })
@@ -28,11 +28,11 @@
     raw(
       "
   digraph ModalTheorysZoo {
-    rankdir = BT;
+    rankdir = RL;
 
     node [
       shape=none
-      margin=0.1
+      margin=0.05
       width=0
       height=0
     ]
@@ -64,6 +64,6 @@
       "𝗥₀": $Theory("R"_0)$,
       "𝗧𝗔": $Theory("TA")$,
     ),
-    width: 240pt,
+    width: 640pt,
   )
 ]

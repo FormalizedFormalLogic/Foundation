@@ -65,29 +65,29 @@ Main results of this repository. More detailed explanations are provided in the 
 
 Automatically generated diagrams "Zoo", illustrate the Lean4-verified interrelationships among proof systems.
 
-- A solid arrow $\mathsf{A} \rightarrow \mathsf{B}$ indicates that $\mathsf{B}$ is strictly stronger than $\mathsf{A}$; that is, $\mathsf{B}$ is stronger than $\mathsf{A}$, while $\mathsf{A}$ is not stronger than $\mathsf{B}$, in terms of provability strength.
-- A dashed arrow $\mathsf{A} \dashrightarrow \mathsf{B}$ indicates that $\mathsf{B}$ is stronger than $\mathsf{A}$ in terms of provability strength.
+- A solid arrow $\mathsf{A} \leftarrow \mathsf{B}$ indicates that $\mathsf{B}$ is strictly stronger than $\mathsf{A}$; that is, $\mathsf{B}$ is stronger than $\mathsf{A}$, while $\mathsf{A}$ is not stronger than $\mathsf{B}$, in terms of provability strength.
+- A dashed arrow $\mathsf{A} \dashleftarrow \mathsf{B}$ indicates that $\mathsf{B}$ is stronger than $\mathsf{A}$ in terms of provability strength.
 - A double line $\mathsf{A} \xlongequal{} \mathsf{B}$ indicates that $\mathsf{A}$ and $\mathsf{B}$ are equivalent in terms of provability strength.
 
 ### Arithmetic Theory Zoo
 
-![Arithmetic Theory Zoo](https://formalizedformallogic.github.io/Foundation/arith_zoo.png)
+![Arithmetic Theory Zoo](https://formalizedformallogic.github.io/Foundation/zoo/Arith.png)
 
 ### Set Theory Zoo
 
-![Set Theory Zoo](https://formalizedformallogic.github.io/Foundation/setTheory_zoo.png)
-
-### Modal Logic Zoo
-
-![Modal Logic Zoo](https://formalizedformallogic.github.io/Foundation/modal_zoo.png)
-
-### Interpretability Logic Zoo
-
-![Interpretability Logic Zoo](https://formalizedformallogic.github.io/Foundation/InterpretabillityLogic_zoo.png)
+![Set Theory Zoo](https://formalizedformallogic.github.io/Foundation/zoo/SetTheory.png)
 
 ### Propositional Logic Zoo
 
-![Propositional Logic Zoo](https://formalizedformallogic.github.io/Foundation/propositional_zoo.png)
+![Propositional Logic Zoo](https://formalizedformallogic.github.io/Foundation/zoo/propositional.png)
+
+### Modal Logic Zoo
+
+![Modal Logic Zoo](https://formalizedformallogic.github.io/Foundation/zoo/Modal.png)
+
+### Interpretability Logic Zoo
+
+![Interpretability Logic Zoo](https://formalizedformallogic.github.io/Foundation/zoo/InterpretabillityLogic.png)
 
 ## Build
 
@@ -121,6 +121,7 @@ If you have any interest or questions, [create a new issue](https://github.com/F
   - Modal logic.
   - Propositional logic (including intermediate logic).
   - Provability logic.
+  - Interpretability Logic.
   - Miscellaneous repository maintenance (e.g. GitHub Actions)
 
 [iehality:github]: https://github.com/iehality
