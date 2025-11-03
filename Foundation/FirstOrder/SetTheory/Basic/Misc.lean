@@ -1,4 +1,13 @@
 import Foundation.FirstOrder.Completeness.Corollaries
+import Mathlib.SetTheory.Cardinal.Basic
+
+/-! # Preperations for set theory
+
+- *NOTE*:
+  To avoid the duplicate definitions of `Structure ℒₛₑₜ` for models,
+  we basically use `SetStructure`, and generated `standardStructure` instead of `Structure ℒₛₑₜ` itself.
+  If you wish to use a type with `Structure ℒₛₑₜ`, use `QuotNormalize`.
+-/
 
 namespace LO.FirstOrder
 
@@ -14,6 +23,7 @@ inductive Rel : ℕ → Type
 
 end Set
 
+/-- Language of set theory -/
 @[reducible]
 def set : Language where
   Func := Set.Func
@@ -50,6 +60,11 @@ instance : (ℒₛₑₜ).Encodable := ⟨fun _ ↦ inferInstance, fun _ ↦ inf
 instance : (ℒₛₑₜ).Eq := ⟨Rel.eq⟩
 
 instance : (ℒₛₑₜ).Mem := ⟨Rel.mem⟩
+
+lemma rel_eq_eq_or_mem (R : (ℒₛₑₜ).Rel k) : k = 2 ∧ (R ≍ (Eq.eq : (ℒₛₑₜ).Rel 2) ∨ R ≍ (Mem.mem : (ℒₛₑₜ).Rel 2)) :=
+  match R with
+  | Rel.eq => ⟨rfl, Or.inl <| by rfl⟩
+  | Rel.mem => ⟨by rfl, Or.inr <| by rfl⟩
 
 end Set
 
@@ -102,14 +117,13 @@ private lemma consequence_of_aux (T : SetTheory) [𝗘𝗤 ⪯ T] (φ : Sentence
            [M ⊧ₘ* T],
            M ⊧ₘ φ) :
     T ⊨ φ := consequence_iff_consequence.{_, w}.mp <| consequence_iff_eq.mpr fun M _ _ _ hT =>
-  letI : Structure.Model ℒₛₑₜ M ⊧ₘ* T :=
-    ((Structure.ElementaryEquiv.modelsTheory (Structure.Model.elementaryEquiv ℒₛₑₜ M)).mp hT)
-  (Structure.ElementaryEquiv.models (Structure.Model.elementaryEquiv ℒₛₑₜ M)).mpr (H (Structure.Model ℒₛₑₜ M))
+  letI : Structure.Model ℒₛₑₜ M ⊧ₘ* T := Structure.ElementaryEquiv.modelsTheory.mp hT
+  Structure.ElementaryEquiv.models.mpr (H (Structure.Model ℒₛₑₜ M))
 section semantics
 
 variable (M : Type*) [SetStructure M]
 
-instance standardStructure : Structure ℒₛₑₜ M where
+instance (priority := 100) standardStructure : Structure ℒₛₑₜ M where
   func := fun _ f ↦ Empty.elim f
   rel := fun _ r ↦
     match r with
@@ -130,6 +144,67 @@ lemma standardStructure_unique' (s : Structure ℒₛₑₜ M)
 
 lemma standardStructure_unique (s : Structure ℒₛₑₜ M) [hEq : Structure.Eq ℒₛₑₜ M] [hMem : Structure.Mem ℒₛₑₜ M] : s = standardStructure M :=
   standardStructure_unique' M s hEq hMem
+
+
+/- ### Normalization -/
+
+/-- Normalize model without =-isomorphic. -/
+structure QuotNormalize (M : Type*) [Structure ℒₛₑₜ M] [Nonempty M] [M ⊧ₘ* (𝗘𝗤 : Theory ℒₛₑₜ)] : Type _ where
+  toQuot : Structure.Model ℒₛₑₜ (Structure.Eq.QuotEq ℒₛₑₜ M)
+
+namespace QuotNormalize
+
+variable {M : Type*} [s : Structure ℒₛₑₜ M] [Nonempty M] [M ⊧ₘ* (𝗘𝗤 : Theory ℒₛₑₜ)]
+
+def equiv : QuotNormalize M ≃ Structure.Model ℒₛₑₜ (Structure.Eq.QuotEq ℒₛₑₜ M) where
+  toFun x := x.toQuot
+  invFun x := ⟨x⟩
+
+def equiv' : QuotNormalize M ≃ Structure.Eq.QuotEq ℒₛₑₜ M :=
+  equiv.trans (Structure.Model.equiv ℒₛₑₜ (Structure.Eq.QuotEq ℒₛₑₜ M)).symm
+
+instance : Nonempty (QuotNormalize M) :=
+  have : Nonempty (Structure.Model ℒₛₑₜ (Structure.Eq.QuotEq ℒₛₑₜ M)) := inferInstance
+  ⟨equiv.symm this.some⟩
+
+instance : SetStructure (QuotNormalize M) where
+  mem y x := equiv x ∈ equiv y
+
+lemma mem_def (x y : QuotNormalize M) : x ∈ y ↔ equiv x ∈ equiv y := by rfl
+
+open Structure
+
+instance elementary_equiv : QuotNormalize M ≡ₑ[ℒₛₑₜ] M :=
+  have h₁ : QuotNormalize M ≡ₑ[ℒₛₑₜ] Structure.Model ℒₛₑₜ (Structure.Eq.QuotEq ℒₛₑₜ M) := by
+    apply ElementaryEquiv.of_equiv equiv
+    · intro k R v₁ v₂ h
+      rcases Language.Set.rel_eq_eq_or_mem R with ⟨rfl, (rfl | rfl)⟩
+      · simp only [eq_lang, Fin.isValue]
+        rw [←(equiv (M := M)).apply_eq_iff_eq]
+        simp only [h]
+      · simp [mem_def, h]
+    · intro _ f
+      exact IsEmpty.elim' inferInstance f
+  have h₂ : Structure.Model ℒₛₑₜ (Structure.Eq.QuotEq ℒₛₑₜ M) ≡ₑ[ℒₛₑₜ] M :=
+    Structure.ElementaryEquiv.trans
+      (Structure.Model.elementaryEquiv ℒₛₑₜ (Structure.Eq.QuotEq ℒₛₑₜ M)).symm
+      (Structure.Eq.QuotEq.elementaryEquiv ℒₛₑₜ M)
+  h₁.trans h₂
+
+open Cardinal
+
+variable (M)
+
+lemma card_le : #(QuotNormalize M) ≤ #M := calc
+  #(QuotNormalize M) = #(Structure.Eq.QuotEq ℒₛₑₜ M) := by
+    simpa using Cardinal.mk_congr_lift equiv'
+  _  ≤ #M := Cardinal.mk_quotient_le
+
+lemma countable_of_countable [c : Countable M] : Countable (QuotNormalize M) :=
+  have : #M ≤ ℵ₀ := mk_le_aleph0_iff.mpr c
+  mk_le_aleph0_iff.mp <| le_trans (card_le M) this
+
+end QuotNormalize
 
 end semantics
 

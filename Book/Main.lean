@@ -1,6 +1,7 @@
 import Book.Init
 import Book.FirstOrder.Main
 import Book.Arithmetic.Main
+import Book.SetTheory.Main
 import Book.Modal.Main
 
 open Verso.Genre
@@ -15,5 +16,7 @@ some various results of mathematical logic in [Lean Theorem Prover](https://lean
 {include 0 Book.FirstOrder.Main}
 
 {include 0 Book.Arithmetic.Main}
+
+{include 0 Book.SetTheory.Main}
 
 {include 0 Book.Modal.Main}

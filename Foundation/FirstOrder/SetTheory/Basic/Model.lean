@@ -76,4 +76,6 @@ instance [V ⊧ₘ* 𝗭] [V ⊧ₘ* 𝗔𝗖] : V ⊧ₘ* 𝗭𝗖 := inferInst
 
 instance [V ⊧ₘ* 𝗭𝗙] [V ⊧ₘ* 𝗔𝗖] : V ⊧ₘ* 𝗭𝗙𝗖 := inferInstance
 
+instance : V ⊧ₘ* (𝗘𝗤 : Theory ℒₛₑₜ) := Structure.Eq.models_eqAxiom' ℒₛₑₜ V
+
 end LO.FirstOrder.SetTheory
