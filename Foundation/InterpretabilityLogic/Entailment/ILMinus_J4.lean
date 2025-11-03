@@ -59,15 +59,11 @@ variable [Entailment.ILMinus_J4Plus' 𝓢]
 
 instance : HasAxiomJ4Plus'' 𝓢 := ⟨by
   intro A B C;
-  dsimp only [Axioms.J4Plus''];
-  -- apply C_trans $ J4Plus'! (𝓢 := 𝓢) (φ := A) (ψ := B) (χ := C);
-
-
-  have H₁ : 𝓢 ⊢! C ▷ B ➝ C ▷ (A ➝ A ⋏ B) := R1! $ C_swap $ and₃;
-  have H₂ : 𝓢 ⊢! □A ➝ (C ▷ (A ➝ B) ➝ C ▷ B) := J4Plus'!;
-  apply C_trans $ CC!_of_CC!_of_C! H₂ H₁;
-
-  sorry;
+  apply C_trans (show 𝓢 ⊢! □A ➝ (C ▷ (A ➝ A ⋏ B) ➝ C ▷ (A ⋏ B)) by exact J4Plus'!);
+  apply deduct';
+  apply C_trans (show [C ▷ (A ➝ A ⋏ B) ➝ C ▷ (A ⋏ B)] ⊢[𝓢]! C ▷ B ➝ C ▷ (A ➝ A ⋏ B) by exact of $ R1! $ C_swap $ and₃);
+  apply FiniteContext.byAxm;
+  simp;
 ⟩
 
 end
@@ -88,5 +84,15 @@ instance : HasAxiomJ4Plus 𝓢 := ⟨by
 
 end
 
+
+instance [Entailment.ILMinus_J4 𝓢] : Entailment.ILMinus_J4' 𝓢 where
+instance [Entailment.ILMinus_J4' 𝓢] : Entailment.ILMinus_J4 𝓢 where
+
+instance [Entailment.ILMinus_J4Plus 𝓢] : Entailment.ILMinus_J4Plus' 𝓢 where
+instance [Entailment.ILMinus_J4Plus' 𝓢] : Entailment.ILMinus_J4Plus'' 𝓢 where
+instance [Entailment.ILMinus_J4Plus'' 𝓢] : Entailment.ILMinus_J4Plus 𝓢 where
+
+instance [Entailment.ILMinus_J4Plus 𝓢] : Entailment.ILMinus_J4' 𝓢 where
+instance [Entailment.ILMinus_J4Plus 𝓢] : Entailment.ILMinus_J4 𝓢 where
 
 end LO.InterpretabilityLogic.Entailment
