@@ -11,7 +11,7 @@ namespace Veltman
 variable {Ax Ax₁ Ax₂ : Axiom ℕ} {φ : Formula ℕ}
 variable {F : Frame} {C : FrameClass}
 
-lemma soundness_of_validates_axioms (hGL : ∀ F ∈ C, F.IsInfiniteGL) (hV : C ⊧* Ax) : Hilbert.Basic Ax ⊢ φ → C ⊧ φ := by
+lemma soundness_of_validates_axioms (hGL : ∀ F ∈ C, F.IsGL) (hV : C ⊧* Ax) : Hilbert.Basic Ax ⊢ φ → C ⊧ φ := by
   intro hφ F hF;
   induction hφ using Hilbert.Basic.rec! with
   | @axm φ s h =>
@@ -27,7 +27,7 @@ lemma soundness_of_validates_axioms (hGL : ∀ F ∈ C, F.IsInfiniteGL) (hV : C 
   | axiomK => exact ValidOnFrame.axiomK;
   | axiomL => have := hGL F hF; exact ValidOnFrame.axiomL;
 
-instance instSound_of_validates_axioms (hGL : ∀ F ∈ C, F.IsInfiniteGL) (hV : C ⊧* Ax) : Sound (Hilbert.Basic Ax) C := ⟨fun {_} =>
+instance instSound_of_validates_axioms (hGL : ∀ F ∈ C, F.IsGL) (hV : C ⊧* Ax) : Sound (Hilbert.Basic Ax) C := ⟨fun {_} =>
   soundness_of_validates_axioms hGL hV
 ⟩
 
@@ -46,7 +46,7 @@ lemma consistent_of_sound_frameclass
   . simp;
 
 
-lemma soundness_of_frame_validates_axioms [F.IsInfiniteGL] (hV : F ⊧* Ax) : (Hilbert.Basic Ax) ⊢ φ → F ⊧ φ := by
+lemma soundness_of_frame_validates_axioms [F.IsGL] (hV : F ⊧* Ax) : (Hilbert.Basic Ax) ⊢ φ → F ⊧ φ := by
   intro hφ;
   induction hφ using Hilbert.Basic.rec! with
   | axm s h =>
@@ -61,7 +61,7 @@ lemma soundness_of_frame_validates_axioms [F.IsInfiniteGL] (hV : F ⊧* Ax) : (H
   | axiomK => exact ValidOnFrame.axiomK;
   | axiomL => exact ValidOnFrame.axiomL;
 
-instance instSound_of_frame_validates_axioms [F.IsInfiniteGL] (hV : F ⊧* Ax) : Sound (Hilbert.Basic Ax) F := ⟨fun {_} =>
+instance instSound_of_frame_validates_axioms [F.IsGL] (hV : F ⊧* Ax) : Sound (Hilbert.Basic Ax) F := ⟨fun {_} =>
   soundness_of_frame_validates_axioms hV
 ⟩
 

@@ -14,7 +14,7 @@ structure Frame extends toKripkeFrame : Modal.Kripke.Frame where
 
 namespace Frame
 
-class IsCL (F : Frame) extends F.IsInfiniteGL where
+class IsCL (F : Frame) extends F.IsGL where
   S_refl  : ∀ w, IsRefl _ (F.S w)
   S_trans : ∀ w, IsTrans _ (F.S w)
 export IsCL (S_refl S_trans)
@@ -359,7 +359,7 @@ lemma kripkeLift {φ : Modal.Formula _} : F ⊧ ↑φ ↔ F.toKripkeFrame ⊧ φ
 
 @[simp high] protected lemma axiomK : F ⊧ (Modal.Axioms.K φ ψ) := fun _ ↦ ValidOnModel.axiomK
 
-@[simp high] protected lemma axiomL [F.IsInfiniteGL] : F ⊧ (Modal.Axioms.L φ) := ValidOnFrame.subst (s := λ _ => φ) $ kripkeLift.mpr $ Modal.Kripke.validate_AxiomL_of_trans_cwf
+@[simp high] protected lemma axiomL [F.IsGL] : F ⊧ (Modal.Axioms.L φ) := ValidOnFrame.subst (s := λ _ => φ) $ kripkeLift.mpr $ Modal.Kripke.validate_AxiomL_of_trans_cwf
 
 @[simp high] protected lemma axiomJ1 [F.IsCL] : F ⊧ Axioms.J1 φ ψ := fun _ ↦ ValidOnModel.axiomJ1
 

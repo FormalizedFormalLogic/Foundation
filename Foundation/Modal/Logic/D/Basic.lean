@@ -408,7 +408,7 @@ theorem GL_D_TFAE :
       intro h M r _ o;
       induction h using D.rec' with
       | mem_GL h =>
-        apply Sound.sound (𝓜 := Kripke.FrameClass.infinite_GL) h;
+        apply Sound.sound (𝓜 := Kripke.FrameClass.GL) h;
         apply Set.mem_setOf_eq.mpr;
         exact {
           trans := by intro x y z; exact Frame.trans (F := tailModel₀ M o |>.toFrame),
