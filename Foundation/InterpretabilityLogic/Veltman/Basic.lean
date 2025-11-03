@@ -20,7 +20,8 @@ namespace Veltman
 -/
 structure Frame extends toKripkeFrame : Modal.Kripke.Frame where
   [isGL : toKripkeFrame.IsGL]
-  S : (w : World) → (HRel { v // Rel w v })
+  S : (w : World) → HRel World
+  S_cond {w x y} : S w x y → w ≺ x
 
 namespace Frame
 
@@ -62,7 +63,7 @@ def Satisfies (M : Veltman.Model) (x : M.World) : Formula ℕ → Prop
   | ⊥  => False
   | φ ➝ ψ => (Satisfies M x φ) ➝ (Satisfies M x ψ)
   | □φ   => ∀ y, x ≺ y → (Satisfies M y φ)
-  | φ ▷ ψ => ∀ y : { v // x ≺ v}, Satisfies M y φ → (∃ z : { v // x ≺ v }, M.S x y z ∧ Satisfies M z ψ)
+  | φ ▷ ψ => ∀ y, x ≺ y → Satisfies M y φ → (∃ z, M.S x y z ∧ Satisfies M z ψ)
 
 
 namespace Satisfies
@@ -96,7 +97,7 @@ protected lemma not_box_def : ¬x ⊧ □φ ↔ (∃ y, x ≺ y ∧ ¬y ⊧ φ) 
 protected lemma dia_def : x ⊧ ◇φ ↔ ∃ y, x ≺ y ∧ y ⊧ φ := by simp [Satisfies];
 protected lemma not_dia_def : ¬x ⊧ ◇φ ↔ ∀ y, x ≺ y → ¬(y ⊧ φ) := by simp [Satisfies];
 
-protected lemma rhd_def : x ⊧ φ ▷ ψ ↔ ∀ y, (Rxy : (x ≺ y)) → (y ⊧ φ) → (∃ z : { v // x ≺ v }, M.S x ⟨y, Rxy⟩ z ∧ z.1 ⊧ ψ) := by simp [Satisfies];
+protected lemma rhd_def : x ⊧ φ ▷ ψ ↔ ∀ y, x ≺ y → Satisfies M y φ → (∃ z, M.S x y z ∧ Satisfies M z ψ) := by simp [Satisfies];
 
 protected instance : Semantics.Tarski (M.World) where
   models_verum := λ _ => Satisfies.top_def;
@@ -140,16 +141,16 @@ lemma iff_subst_self {x : F.World} (s : Substitution ℕ) :
       exact hφ;
   | hrhd φ ψ ihφ ihψ =>
     constructor;
-    . intro h y hy;
-      obtain ⟨⟨z, Rxz⟩, Sxyz, hz₂⟩ := h y $ ihφ.mpr hy;
-      use ⟨z, Rxz⟩;
+    . intro h y Rxy hy;
+      obtain ⟨z, Sxyz, hz⟩ := h y Rxy $ ihφ.mpr hy;
+      use z;
       constructor;
       . assumption;
       . apply ihψ.mp;
         assumption;
-    . intro h y hy;
-      obtain ⟨⟨z, Rxz⟩, Sxyz, hz₂⟩ := h y $ ihφ.mp hy;
-      use ⟨z, Rxz⟩;
+    . intro h y Rxy hy;
+      obtain ⟨z, Sxyz, hz₂⟩ := h y Rxy $ ihφ.mp hy;
+      use z;
       constructor;
       . assumption;
       . apply ihψ.mpr;
@@ -387,8 +388,8 @@ lemma validate_axiomL : F ⊧ (Modal.Axioms.L φ) :=
 
 @[grind ⇒]
 lemma validate_R1 (h : F ⊧ φ ➝ ψ) : F ⊧ χ ▷ φ ➝ χ ▷ ψ := by
-  rintro V x hxχφ y hyχ;
-  obtain ⟨z, Sxyz, hzφ⟩ := hxχφ y hyχ;
+  rintro V x h₁ y Rxy h₂;
+  obtain ⟨z, _, _⟩ := h₁ y Rxy h₂;
   use z;
   constructor;
   . assumption;
@@ -397,28 +398,30 @@ lemma validate_R1 (h : F ⊧ φ ➝ ψ) : F ⊧ χ ▷ φ ➝ χ ▷ ψ := by
 
 @[grind ⇒]
 lemma validate_R2 (h : F ⊧ φ ➝ ψ) : F ⊧ ψ ▷ χ ➝ φ ▷ χ := by
-  rintro V x hxψχ y hyφ;
-  obtain ⟨z, Sxyz, hzχ⟩ := hxψχ y $ h _ _ hyφ;
+  rintro V x h₁ y Rxy h₂;
+  obtain ⟨z, Sxyz, hzχ⟩ := h₁ y Rxy $ by
+    apply h;
+    assumption;
   use z;
 
 @[simp high, grind]
 lemma validate_axiomJ3 : F ⊧ Axioms.J3 φ ψ χ := by
-  intro V x h₁ h₂ y h₃;
+  intro V x h₁ h₂ y Rxy h₃;
   rcases Satisfies.or_def.mp h₃ with (h₃ | h₃);
-  . obtain ⟨⟨u, Rxu⟩, Sxyu, hu⟩ := h₁ y h₃; use ⟨u, Rxu⟩;
-  . obtain ⟨⟨u, Rxu⟩, Sxyu, hu⟩ := h₂ y h₃; use ⟨u, Rxu⟩;
+  . obtain ⟨u, Sxyu, hu⟩ := h₁ y Rxy h₃; use u;
+  . obtain ⟨u, Sxyu, hu⟩ := h₂ y Rxy h₃; use u;
 
 @[simp high, grind]
 lemma validate_axiomJ6 : F ⊧ Axioms.J6 φ := by
   intro V x;
   apply Satisfies.iff_def.mpr
   constructor;
-  . intro h ⟨y, Rxy⟩ hy;
+  . rintro h y Rxy hy;
     have := h y Rxy;
     contradiction;
   . intro h y Rxy;
     by_contra hy;
-    obtain ⟨z, _, _⟩ := h ⟨y, Rxy⟩ hy;
+    obtain ⟨z, _, _⟩ := h y Rxy hy;
     contradiction;
 
 /-

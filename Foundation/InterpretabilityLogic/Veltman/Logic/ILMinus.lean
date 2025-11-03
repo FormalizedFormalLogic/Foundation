@@ -20,7 +20,8 @@ protected abbrev FrameClass.ILMinus : FrameClass := Set.univ
 
 abbrev trivialFrame : Veltman.Frame where
   toKripkeFrame := Modal.Kripke.blackpoint
-  S _ _ _ := True
+  S _ _ _ := False
+  S_cond := by tauto
 
 end Veltman
 
