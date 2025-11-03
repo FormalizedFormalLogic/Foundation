@@ -192,6 +192,7 @@ import Foundation.ProvabilityLogic.Classification.Trace
 
 -- Interpretability Logic
 import Foundation.InterpretabilityLogic.Hilbert.Minimal.Basic
+import Foundation.InterpretabilityLogic.Hilbert.Basic_Minimal
 import Foundation.InterpretabilityLogic.Veltman.Logic.CL
 import Foundation.InterpretabilityLogic.Veltman.Logic.IL
 

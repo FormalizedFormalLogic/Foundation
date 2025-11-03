@@ -46,10 +46,8 @@ instance : Entailment.Lukasiewicz (Hilbert.Minimal Ax) where
     . exact h₁.1;
     . exact h₂.1;
 
-instance : Modal.Entailment.Necessitation (Hilbert.Minimal Ax) where
-  nec h := by constructor; apply Hilbert.Minimal.nec; exact h.1;
-
 instance : Modal.Entailment.GL (Hilbert.Minimal Ax) where
+  nec h := by constructor; apply Hilbert.Minimal.nec; exact h.1;
   K φ ψ := by constructor; apply Hilbert.Minimal.axiomK;
   L φ := by constructor; apply Hilbert.Minimal.axiomL;
 

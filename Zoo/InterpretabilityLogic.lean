@@ -34,6 +34,6 @@ end Zoo
 
 unsafe def main : IO Unit := do
   initSearchPath (← findSysroot)
-  let env ← importModules (loadExts := true) #[`Foundation.InterpretabilityLogic.Hilbert.Minimal.Basic] {}
+  let env ← importModules (loadExts := true) #[`Foundation.InterpretabilityLogic.Hilbert.Basic_Minimal] {}
   let ⟨s, _, _⟩ ← Zoo.findMatches.toIO { fileName := "<compiler>", fileMap := default } { env := env }
   IO.FS.writeFile "Zoo/InterpretabilityLogic.json" s.pretty
