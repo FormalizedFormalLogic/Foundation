@@ -10,15 +10,20 @@ open Entailment
 namespace Veltman
 
 structure Frame extends toKripkeFrame : Modal.Kripke.Frame where
-  [F_GL : toKripkeFrame.IsInfiniteGL]
   S : (w : World) → (HRel { v // Rel w v })
-  S_refl  : ∀ w, IsRefl _ (S w)
-  S_trans : ∀ w, IsTrans _ (S w)
 
-instance {F :  Frame} : F.IsInfiniteGL := F.F_GL
+namespace Frame
 
-class Frame.IsIL (F : Frame) where
+class IsCL (F : Frame) extends F.IsInfiniteGL where
+  S_refl  : ∀ w, IsRefl _ (F.S w)
+  S_trans : ∀ w, IsTrans _ (F.S w)
+export IsCL (S_refl S_trans)
+
+class IsIL (F : Frame) extends F.IsCL where
   S_IL : ∀ w : F.World, ∀ x y : { v // w ≺ v }, (x.1 ≺ y.1) → (F.S w x y)
+export IsIL (S_IL)
+
+end Frame
 
 abbrev FrameClass := Set (Frame)
 
@@ -43,7 +48,7 @@ def Satisfies (M : Veltman.Model) (x : M.World) : Formula ℕ → Prop
   | ⊥  => False
   | φ ➝ ψ => (Satisfies M x φ) ➝ (Satisfies M x ψ)
   | □φ   => ∀ y, x ≺ y → (Satisfies M y φ)
-  | φ ▷ ψ => ∀ y, (Rxy : (x ≺ y)) → Satisfies M y φ → (∃ z : { v // x ≺ v }, M.S x ⟨y, Rxy⟩ z ∧ Satisfies M z ψ)
+  | φ ▷ ψ => ∀ y : { v // x ≺ v}, Satisfies M y φ → (∃ z : { v // x ≺ v }, M.S x y z ∧ Satisfies M z ψ)
 
 
 namespace Satisfies
@@ -121,15 +126,15 @@ lemma iff_subst_self {x : F.World} (s : Substitution ℕ) :
       exact hφ;
   | hrhd φ ψ ihφ ihψ =>
     constructor;
-    . intro h y Rxy hy;
-      obtain ⟨⟨z, Rxz⟩, Sxyz, hz₂⟩ := h _ Rxy $ ihφ.mpr hy;
+    . intro h y hy;
+      obtain ⟨⟨z, Rxz⟩, Sxyz, hz₂⟩ := h y $ ihφ.mpr hy;
       use ⟨z, Rxz⟩;
       constructor;
       . assumption;
       . apply ihψ.mp;
         assumption;
-    . intro h y Rxy hy;
-      obtain ⟨⟨z, Rxz⟩, Sxyz, hz₂⟩ := h _ Rxy $ ihφ.mp hy;
+    . intro h y hy;
+      obtain ⟨⟨z, Rxz⟩, Sxyz, hz₂⟩ := h y $ ihφ.mp hy;
       use ⟨z, Rxz⟩;
       constructor;
       . assumption;
@@ -233,40 +238,42 @@ protected lemma axiomK : M ⊧ (Modal.Axioms.K φ ψ)  := by
   replace hp := hp x Rxy;
   exact hpq hp;
 
-protected lemma axiomJ1 : M ⊧ Axioms.J1 φ ψ := by
-  intro x h y Rxy hy;
-  use ⟨y, Rxy⟩;
+protected lemma axiomJ1 [M.IsCL] : M ⊧ Axioms.J1 φ ψ := by
+  intro x h y hy;
+  use y;
   constructor;
-  . apply M.toVeltmanFrame.S_refl x |>.refl;
-  . exact h y Rxy hy;
+  . apply M.S_refl x |>.refl;
+  . apply h;
+    . exact y.2;
+    . exact hy;
 
-protected lemma axiomJ2 : M ⊧ Axioms.J2 φ ψ χ := by
-  intro x h₁ h₂ y Rxy hy;
-  obtain ⟨⟨u, Rxu⟩, Sxyu, hu⟩ := h₁ _ Rxy hy;
-  obtain ⟨⟨v, Ruv⟩, Sxuv, hv⟩ := h₂ u Rxu hu;
+protected lemma axiomJ2 [M.IsCL] : M ⊧ Axioms.J2 φ ψ χ := by
+  intro x h₁ h₂ y hy;
+  obtain ⟨⟨u, Rxu⟩, Sxyu, hu⟩ := h₁ y hy;
+  obtain ⟨⟨v, Ruv⟩, Sxuv, hv⟩ := h₂ ⟨u, Rxu⟩ hu;
   use ⟨v, Ruv⟩;
   constructor;
-  . apply M.toVeltmanFrame.S_trans x |>.trans;
+  . apply M.S_trans x |>.trans;
     . exact Sxyu;
     . exact Sxuv;
   . assumption;
 
 protected lemma axiomJ3 : M ⊧ Axioms.J3 φ ψ χ := by
-  intro x h₁ h₂ y Rxy h₃;
+  intro x h₁ h₂ y h₃;
   rcases Veltman.Satisfies.or_def.mp h₃ with (h₃ | h₃);
-  . obtain ⟨⟨u, Rxu⟩, Sxyu, hu⟩ := h₁ _ Rxy h₃; use ⟨u, Rxu⟩;
-  . obtain ⟨⟨u, Rxu⟩, Sxyu, hu⟩ := h₂ _ Rxy h₃; use ⟨u, Rxu⟩;
+  . obtain ⟨⟨u, Rxu⟩, Sxyu, hu⟩ := h₁ y h₃; use ⟨u, Rxu⟩;
+  . obtain ⟨⟨u, Rxu⟩, Sxyu, hu⟩ := h₂ y h₃; use ⟨u, Rxu⟩;
 
 protected lemma axiomJ4 : M ⊧ Axioms.J4 φ ψ := by
   intro x h₁ h₂;
   obtain ⟨y, Rxy, hy⟩ := Satisfies.dia_def.mp h₂;
-  obtain ⟨⟨z, Rxz⟩, Sxyz, hz⟩ := h₁ _ Rxy hy;
+  obtain ⟨⟨z, Rxz⟩, Sxyz, hz⟩ := h₁ ⟨y, Rxy⟩ hy;
   apply Satisfies.dia_def.mpr;
   use z;
   tauto;
 
-protected lemma axiomJ5 [M.toVeltmanFrame.IsIL] : M ⊧ Axioms.J5 φ := by
-  intro x y Rxy h;
+protected lemma axiomJ5 [M.IsIL] : M ⊧ Axioms.J5 φ := by
+  rintro x ⟨y, Rxy⟩ h;
   obtain ⟨z, Ryz, hz⟩ := Satisfies.dia_def.mp h;
   use ⟨z, M.toKripkeFrame.trans Rxy Ryz⟩;
   constructor;
@@ -350,19 +357,19 @@ lemma kripkeLift {φ : Modal.Formula _} : F ⊧ ↑φ ↔ F.toKripkeFrame ⊧ φ
     apply ValidOnModel.kripkeLift.mpr;
     apply h;
 
-@[simp] protected lemma axiomK : F ⊧ (Modal.Axioms.K φ ψ) := fun _ ↦ ValidOnModel.axiomK
+@[simp high] protected lemma axiomK : F ⊧ (Modal.Axioms.K φ ψ) := fun _ ↦ ValidOnModel.axiomK
 
-@[simp] protected lemma axiomL : F ⊧ (Modal.Axioms.L φ) := ValidOnFrame.subst (s := λ _ => φ) $ kripkeLift.mpr $ Modal.Kripke.validate_AxiomL_of_trans_cwf
+@[simp high] protected lemma axiomL [F.IsInfiniteGL] : F ⊧ (Modal.Axioms.L φ) := ValidOnFrame.subst (s := λ _ => φ) $ kripkeLift.mpr $ Modal.Kripke.validate_AxiomL_of_trans_cwf
 
-@[simp] protected lemma axiomJ1 : F ⊧ Axioms.J1 φ ψ := fun _ ↦ ValidOnModel.axiomJ1
+@[simp high] protected lemma axiomJ1 [F.IsCL] : F ⊧ Axioms.J1 φ ψ := fun _ ↦ ValidOnModel.axiomJ1
 
-@[simp] protected lemma axiomJ2 : F ⊧ Axioms.J2 φ ψ χ := fun _ ↦ ValidOnModel.axiomJ2
+@[simp high] protected lemma axiomJ2 [F.IsCL] : F ⊧ Axioms.J2 φ ψ χ := fun _ ↦ ValidOnModel.axiomJ2
 
-@[simp] protected lemma axiomJ3 : F ⊧ Axioms.J3 φ ψ χ := fun _ ↦ ValidOnModel.axiomJ3
+@[simp high] protected lemma axiomJ3 : F ⊧ Axioms.J3 φ ψ χ := fun _ ↦ ValidOnModel.axiomJ3
 
-@[simp] protected lemma axiomJ4 : F ⊧ Axioms.J4 φ ψ := fun _ ↦ ValidOnModel.axiomJ4
+@[simp high] protected lemma axiomJ4 : F ⊧ Axioms.J4 φ ψ := fun _ ↦ ValidOnModel.axiomJ4
 
-@[simp] protected lemma axiomJ5 [F.IsIL] : F ⊧ Axioms.J5 φ := fun _ ↦ ValidOnModel.axiomJ5
+@[simp high] protected lemma axiomJ5 [F.IsIL] : F ⊧ Axioms.J5 φ := fun _ ↦ ValidOnModel.axiomJ5
 
 end ValidOnFrame
 

@@ -39,6 +39,11 @@ root = "Zoo.Modal"
 supportInterpreter = true
 
 [[lean_exe]]
+name = "generate_interpretabilityLogic_zoo"
+root = "Zoo.InterpretabilityLogic"
+supportInterpreter = true
+
+[[lean_exe]]
 name = "generate_propositional_zoo"
 root = "Zoo.Propositional"
 supportInterpreter = true
