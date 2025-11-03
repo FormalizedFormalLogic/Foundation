@@ -7,16 +7,16 @@
 #let arrows = json("./InterpretabilityLogic.json").map(((from, to, type)) => {
   if omitLabels.contains(from) == false and omitLabels.contains(from) == false {
     if type == "ssub" {
-      return strfmt("\"{}\" -> \"{}\"", from, to)
+      return strfmt("\"{}\" -> \"{}\"", to, from)
     } else if type == "sub" {
-      return strfmt("\"{}\" -> \"{}\" [style=dashed] ", from, to)
+      return strfmt("\"{}\" -> \"{}\" [style=dashed] ", to, from)
     } else if type == "eq" {
       return (
-        strfmt("\"{}\" -> \"{}\" [color=\"black:white:black\" arrowhead=\"none\"] ", from, to),
-        strfmt("{{rank = same; \"{}\"; \"{}\";}}", from, to),
+        strfmt("\"{}\" -> \"{}\" [color=\"black:white:black\" arrowhead=\"none\"] ", to, from),
+        strfmt("{{rank = same; \"{}\"; \"{}\";}}", to, from),
       ).join("\n")
     } else if type == "sorry" {
-      return strfmt("\"{}\" -> \"{}\" [color=red; style=dashed] ", from, to)
+      return strfmt("\"{}\" -> \"{}\" [color=red; style=dashed] ", to, from)
     }
   }
 })
@@ -35,7 +35,7 @@
     raw(
       "
   digraph ModalTheorysZoo {
-    rankdir = LR;
+    rankdir = RL;
 
     node [
       shape=none
@@ -70,6 +70,6 @@
       "LO.InterpretabilityLogic.ILMinus_J5": $ILMinus (AxiomJ5)$,
       "LO.InterpretabilityLogic.ILMinus": $ILMinus$,
     ),
-    width: 480pt,
+    width: 640pt,
   )
 ]

@@ -9,18 +9,18 @@
 #let smallestMC(L) = $tau(#L)$
 #let largestMC(L) = $sigma(#L)$
 
-#let arrows = json("./modal.json").map(((from, to, type)) => {
+#let arrows = json("./Modal.json").map(((from, to, type)) => {
   if type == "ssub" {
-    return strfmt("\"{}\" -> \"{}\"", from, to)
+    return strfmt("\"{}\" -> \"{}\"", to, from)
   } else if type == "sub" {
-    return strfmt("\"{}\" -> \"{}\" [style=dashed] ", from, to)
+    return strfmt("\"{}\" -> \"{}\" [style=dashed] ", to, from)
   } else if type == "eq" {
     return (
-      strfmt("\"{}\" -> \"{}\" [color=\"black:white:black\" arrowhead=\"none\"] ", from, to),
-      strfmt("{{rank = same; \"{}\"; \"{}\";}}", from, to),
+      strfmt("\"{}\" -> \"{}\" [color=\"black:white:black\" arrowhead=\"none\"] ", to, from),
+      strfmt("{{rank = same; \"{}\"; \"{}\";}}", to, from),
     ).join("\n")
   } else if type == "sorry" {
-    return strfmt("\"{}\" -> \"{}\" [color=red; style=dashed] ", from, to)
+    return strfmt("\"{}\" -> \"{}\" [color=red; style=dashed] ", to, from)
   }
 })
 
@@ -29,7 +29,7 @@
     raw(
       "
   digraph ModalLogicsZoo {
-    rankdir = BT;
+    rankdir = RL;
 
     node [
       shape=none
@@ -161,7 +161,7 @@
       "𝗣𝗔.ProvabilityLogic 𝗣𝗔": [$ProvLogic(Theory("PA"), Theory("PA"))$],
       "𝗣𝗔.ProvabilityLogic 𝗧𝗔": [$ProvLogic(Theory("PA"), Theory("TA"))$],
     ),
-    width: 1280pt,
+    width: 640pt,
   )
 ]
 

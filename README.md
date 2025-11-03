@@ -9,34 +9,42 @@ Formalizing mathematical logic in Lean 4.
 
 Main results of this repository. More detailed explanations are provided in the [Book] and [Doc].
 
-- `FirstOrder`: [First-Order Logic][first_order]
-  - [Completeness Theorem][first_order:completeness]
-  - [Cut-elimination of first-order sequent calculus _(Gentzen's Hauptsatz)_][first_order:haupstaz]
-  - [Arithmetic][arith]
-  - [Set Theory][setTheory]
-  - Gödel's [First][arith:goedel_it1] and [Second][arith:goedel_it2] Incompleteness Theorems
-  - [Gödel-Gentzen Translation][first_order:goedel_translation]
-  - [Arithmetic Theory Zoo](#arithmetic-theory-zoo)
-  - [Set Theory Zoo](#set-theory-zoo)
-- `Modal`: [Basic Modal Logic][modal:logic] (with modal operators $\Box, \Diamond$)
-  - [Kripke completeness for well-known subsystems][modal:logic_kripke_completeness]
-  - [Modal Logic Zoo](#modal-logic-zoo)
-  - [Gödel-McKinsey-Tarski Theorem][modal:gmt_theorem] and [Modal Companions](modal:companion)
 - `Propositional`: [Propositional Logic][prop]
-  - [Tait-style calculus][prop:classical_tait] and [completeness][prop:classical_tait_complete]
+  - [Tait-style Calculus][prop:classical_tait] and [Completeness][prop:classical_tait_complete]
   - [Completeness for Kripke semantics][prop:kripke]
   - [Disjunctive Property of intuitionistic logic][prop:int_disjunctive]
   - [Propositional Logic Zoo](#propositional-logic-zoo)
+- `FirstOrder`: [First-Order Logic][first_order]
+  - [Completeness Theorem][first_order:completeness]
+  - [Cut-Elimination of First-Order Sequent Calculus _(Gentzen's Hauptsatz)_][first_order:haupstaz]
+  - [Gödel-Gentzen Translation][first_order:goedel_translation]
+  - [Downward Löwenheim-Skolem Theorem][first_order:downward_loewenheim_skolem]
+  - [Arithmetic][arith]
+    - Gödel's [First][arith:goedel_it1] and [Second][arith:goedel_it2] Incompleteness Theorems
+    - [Arithmetic Theory Zoo](#arithmetic-theory-zoo)
+  - [Set Theory][setTheory]
+    - [Consistency of ZFC][setTheory:zfc_consistent]
+    - [Set Theory Zoo](#set-theory-zoo)
+- `Modal`: [Basic Modal Logic][modal:logic] (with modal operators $\Box, \Diamond$)
+  - [Kripke Semantics][modal:kripke_semantics]
+  - [Neighborhood Semantics][modal:neighborhood_semantics]
+  - [Gödel-McKinsey-Tarski Theorem][modal:gmt_theorem] and [Modal Companions](modal:companion)
+  - [Boxdot Conjecture][modal:boxdot_conjecture]
+  - [Modal Logic Zoo](#modal-logic-zoo)
 - `ProvabilityLogic`: [Provability Logic][provability_logic]
   - [Solovay's Arithmetical Completeness Theorem for GL][provability_logic:GL_arith_complete]
+- `InterpretabilityLogic`: [Interpretability Logic][interpretability_logic]
+  - [Veltman Semantics][interpretability_logic:veltman]
+  - [Verbugge Semantics][interpretability_logic:verbugge] (a.k.a generalized Veltman semantics)
+  - [Interpretability Logic Zoo](#interpretability-logic-zoo)
 - `Meta`: Proof automation.
 - `Logic`: Fundamental tools for various logics.
 - `Vospiel`: Supplemental definitions and theorems for mathlib.
 
 [prop]: ./Foundation/Propositional
 [prop:classical_tait]: ./Foundation/Propositional/Tait/Calculus.lean
-[prop:classical_tait_complete]: ./Foundation/Propositional/Classical/Tait.lean
-[prop:classical_complete]: ./Foundation/Propositional/Classical/Tait.lean
+[prop:classical_tait_complete]: ./Foundation/Propositional/ClassicalSemantics/Tait.lean
+[prop:classical_complete]: ./Foundation/Propositional/ClassicalSemantics/Tait.lean
 [prop:kripke]: ./Foundation/Propositional/Kripke
 [prop:int_disjunctive]: ./Foundation/Propositional/Kripke/Hilbert/Int.lean
 [prop:sublogics]: ./Foundation/Propositional/Logic/Sublogic.lean
@@ -44,17 +52,24 @@ Main results of this repository. More detailed explanations are provided in the 
 [first_order:completeness]: ./Foundation/FirstOrder/Completeness/Completeness.lean
 [first_order:haupstaz]: ./Foundation/FirstOrder/Hauptsatz.lean
 [first_order:goedel_translation]: ./Foundation/IntFO/Translation.lean
+[first_order:downward_loewenheim_skolem]: https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/LoewenheimSkolem.html#LO.FirstOrder.Structure.Collapse.card
 [arith]: https://formalizedformallogic.github.io/Foundation/book/Arithmetic/#arithmetics
 [setTheory]: https://formalizedformallogic.github.io/Foundation/book/Set-Theory/#setTheory
+[setTheory:zfc_consistent]: https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/SetTheory/StandardModel.html#LO.FirstOrder.SetTheory.zfc_consistent
 [arithmetization]: ./Foundation/Arithmetization
 [arith:goedel_it1]: https://formalizedformallogic.github.io/Foundation/book/Arithmetic/G___del___s-First-Incompleteness-Theorem/#goedel-1
 [arith:goedel_it2]: https://formalizedformallogic.github.io/Foundation/book/Arithmetic/G___del___s-Second-Incompleteness-Theorem/#goedel-2
 [modal:logic]: ./Foundation/Modal
-[modal:logic_kripke_completeness]: ./Foundation/Modal/Kripke/Hilbert
+[modal:kripke_semantics]: https://formalizedformallogic.github.io/Foundation/book/Modal-Logic/Kripke-Semantics
+[modal:neighborhood_semantics]: https://formalizedformallogic.github.io/Foundation/book/Modal-Logic/Neighborhood-Semantics
 [modal:gmt_theorem]: ./Foundation/Modal/ModalCompanion/Int.lean
 [modal:companion]: ./Foundation/Modal/ModalCompanion
+[modal:boxdot_conjecture]: ./Foundation/Modal/Boxdot
 [provability_logic]: ./Foundation/ProvabilityLogic
 [provability_logic:GL_arith_complete]: ./Foundation/ProvabilityLogic/GL/Completeness.lean
+[interpretability_logic]: ./Foundation/InterpretabilityLogic
+[interpretability_logic:veltman]: ./Foundation/InterpretabilityLogic/Veltman
+[interpretability_logic:verbugge]: ./Foundation/InterpretabilityLogic/Verbugge
 
 ## Documents
 
@@ -65,29 +80,39 @@ Main results of this repository. More detailed explanations are provided in the 
 
 Automatically generated diagrams "Zoo", illustrate the Lean4-verified interrelationships among proof systems.
 
-- A solid arrow $\mathsf{A} \rightarrow \mathsf{B}$ indicates that $\mathsf{B}$ is strictly stronger than $\mathsf{A}$; that is, $\mathsf{B}$ is stronger than $\mathsf{A}$, while $\mathsf{A}$ is not stronger than $\mathsf{B}$, in terms of provability strength.
-- A dashed arrow $\mathsf{A} \dashrightarrow \mathsf{B}$ indicates that $\mathsf{B}$ is stronger than $\mathsf{A}$ in terms of provability strength.
+- A solid arrow $\mathsf{A} \leftarrow \mathsf{B}$ indicates that $\mathsf{B}$ is strictly stronger than $\mathsf{A}$; that is, $\mathsf{B}$ is stronger than $\mathsf{A}$, while $\mathsf{A}$ is not stronger than $\mathsf{B}$, in terms of provability strength.
+- A dashed arrow $\mathsf{A} \dashleftarrow \mathsf{B}$ indicates that $\mathsf{B}$ is stronger than $\mathsf{A}$ in terms of provability strength.
 - A double line $\mathsf{A} \xlongequal{} \mathsf{B}$ indicates that $\mathsf{A}$ and $\mathsf{B}$ are equivalent in terms of provability strength.
 
 ### Arithmetic Theory Zoo
 
-![Arithmetic Theory Zoo](https://formalizedformallogic.github.io/Foundation/arith_zoo.png)
+![Arithmetic Theory Zoo](https://formalizedformallogic.github.io/Foundation/zoo/Arith.png)
+
+[PDF version](https://formalizedformallogic.github.io/Foundation/zoo/Arith.pdf)
 
 ### Set Theory Zoo
 
-![Set Theory Zoo](https://formalizedformallogic.github.io/Foundation/setTheory_zoo.png)
+![Set Theory Zoo](https://formalizedformallogic.github.io/Foundation/zoo/SetTheory.png)
 
-### Modal Logic Zoo
-
-![Modal Logic Zoo](https://formalizedformallogic.github.io/Foundation/modal_zoo.png)
-
-### Interpretability Logic Zoo
-
-![Interpretability Logic Zoo](https://formalizedformallogic.github.io/Foundation/InterpretabillityLogic_zoo.png)
+[PDF version](https://formalizedformallogic.github.io/Foundation/zoo/SetTheory.pdf)
 
 ### Propositional Logic Zoo
 
-![Propositional Logic Zoo](https://formalizedformallogic.github.io/Foundation/propositional_zoo.png)
+![Propositional Logic Zoo](https://formalizedformallogic.github.io/Foundation/zoo/Propositional.png)
+
+[PDF version](https://formalizedformallogic.github.io/Foundation/zoo/Propositional.pdf)
+
+### Modal Logic Zoo
+
+![Modal Logic Zoo](https://formalizedformallogic.github.io/Foundation/zoo/Modal.png)
+
+[PDF version](https://formalizedformallogic.github.io/Foundation/zoo/Modal.pdf)
+
+### Interpretability Logic Zoo
+
+![Interpretability Logic Zoo](https://formalizedformallogic.github.io/Foundation/zoo/InterpretabillityLogic.png)
+
+[PDF version](https://formalizedformallogic.github.io/Foundation/zoo/InterpretabillityLogic.pdf)
 
 ## Build
 
@@ -121,6 +146,7 @@ If you have any interest or questions, [create a new issue](https://github.com/F
   - Modal logic.
   - Propositional logic (including intermediate logic).
   - Provability logic.
+  - Interpretability Logic.
   - Miscellaneous repository maintenance (e.g. GitHub Actions)
 
 [iehality:github]: https://github.com/iehality
