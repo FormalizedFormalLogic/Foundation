@@ -17,14 +17,15 @@ end Veltman
 
 namespace IL
 
-instance Veltman.sound : Sound InterpretabilityLogic.IL FrameClass.IL := instSound_of_validates_axioms $ by
-  rw [(show IL.axioms = CL.axioms ∪ {(InterpretabilityLogic.Axioms.J5 (.atom 0))} by simp)];
-  apply validates_CL_axioms_union;
-  constructor;
-  suffices FrameClass.IL ⊧ Axioms.J5 (Formula.atom 0) by simpa;
-  intro F hF;
-  simp only [Set.mem_setOf_eq] at hF;
-  apply Formula.Veltman.ValidOnFrame.axiomJ5;
+instance Veltman.sound : Sound InterpretabilityLogic.IL FrameClass.IL := by
+  apply instSound_of_validates_axioms;
+  . intro F hF;
+    replace hF := Set.mem_setOf_eq.mp hF;
+    infer_instance;
+  . constructor;
+    intro φ hφ F hF;
+    replace hF := Set.mem_setOf_eq.mp hF;
+    rcases hφ with (rfl | rfl | rfl | rfl | rfl) <;> simp;
 
 instance : Entailment.Consistent InterpretabilityLogic.IL := consistent_of_sound_frameclass FrameClass.IL $ by
   use Veltman.trivialFrame;

@@ -357,19 +357,19 @@ lemma kripkeLift {φ : Modal.Formula _} : F ⊧ ↑φ ↔ F.toKripkeFrame ⊧ φ
     apply ValidOnModel.kripkeLift.mpr;
     apply h;
 
-@[simp] protected lemma axiomK : F ⊧ (Modal.Axioms.K φ ψ) := fun _ ↦ ValidOnModel.axiomK
+@[simp high] protected lemma axiomK : F ⊧ (Modal.Axioms.K φ ψ) := fun _ ↦ ValidOnModel.axiomK
 
-@[simp] protected lemma axiomL [F.IsInfiniteGL] : F ⊧ (Modal.Axioms.L φ) := ValidOnFrame.subst (s := λ _ => φ) $ kripkeLift.mpr $ Modal.Kripke.validate_AxiomL_of_trans_cwf
+@[simp high] protected lemma axiomL [F.IsInfiniteGL] : F ⊧ (Modal.Axioms.L φ) := ValidOnFrame.subst (s := λ _ => φ) $ kripkeLift.mpr $ Modal.Kripke.validate_AxiomL_of_trans_cwf
 
-@[simp] protected lemma axiomJ1 [F.IsCL] : F ⊧ Axioms.J1 φ ψ := fun _ ↦ ValidOnModel.axiomJ1
+@[simp high] protected lemma axiomJ1 [F.IsCL] : F ⊧ Axioms.J1 φ ψ := fun _ ↦ ValidOnModel.axiomJ1
 
-@[simp] protected lemma axiomJ2 [F.IsCL] : F ⊧ Axioms.J2 φ ψ χ := fun _ ↦ ValidOnModel.axiomJ2
+@[simp high] protected lemma axiomJ2 [F.IsCL] : F ⊧ Axioms.J2 φ ψ χ := fun _ ↦ ValidOnModel.axiomJ2
 
-@[simp] protected lemma axiomJ3 : F ⊧ Axioms.J3 φ ψ χ := fun _ ↦ ValidOnModel.axiomJ3
+@[simp high] protected lemma axiomJ3 : F ⊧ Axioms.J3 φ ψ χ := fun _ ↦ ValidOnModel.axiomJ3
 
-@[simp] protected lemma axiomJ4 : F ⊧ Axioms.J4 φ ψ := fun _ ↦ ValidOnModel.axiomJ4
+@[simp high] protected lemma axiomJ4 : F ⊧ Axioms.J4 φ ψ := fun _ ↦ ValidOnModel.axiomJ4
 
-@[simp] protected lemma axiomJ5 [F.IsIL] : F ⊧ Axioms.J5 φ := fun _ ↦ ValidOnModel.axiomJ5
+@[simp high] protected lemma axiomJ5 [F.IsIL] : F ⊧ Axioms.J5 φ := fun _ ↦ ValidOnModel.axiomJ5
 
 end ValidOnFrame
 
