@@ -18,16 +18,16 @@ lemma Frame.cwf [F.IsConverseWellFounded] : ConverseWellFounded F.Rel := IsConve
 instance [F.IsFinite] [F.IsTransitive] [F.IsIrreflexive] : F.IsConverseWellFounded := ⟨IsConverseWellFounded.cwf⟩
 
 
-lemma validate_AxiomL_of_trans_cwf [F.IsTransitive] [F.IsConverseWellFounded] : F ⊧ (Axioms.L (.atom 0)) := by
+lemma validate_AxiomL_of_trans_cwf [F.IsTransitive] [F.IsConverseWellFounded] : F ⊧ (Axioms.L φ) := by
   rintro V w;
   apply Satisfies.imp_def.mpr;
   contrapose;
   intro h;
   obtain ⟨x, Rwx, h⟩ := by simpa using Satisfies.box_def.not.mp h;
-  obtain ⟨m, ⟨⟨Rwm, hm⟩, hm₂⟩⟩ := F.cwf.has_min ({ x | w ≺ x ∧ ¬(Satisfies ⟨F, V⟩ x (.atom 0)) }) $ by
+  obtain ⟨m, ⟨⟨Rwm, hm⟩, hm₂⟩⟩ := F.cwf.has_min ({ x | w ≺ x ∧ ¬(Satisfies ⟨F, V⟩ x φ) }) $ by
     use x;
     tauto;
-  replace hm₂ : ∀ x, w ≺ x → ¬Satisfies ⟨F, V⟩ x (.atom 0) → ¬m ≺ x := by simpa using hm₂;
+  replace hm₂ : ∀ x, w ≺ x → ¬Satisfies ⟨F, V⟩ x φ → ¬m ≺ x := by simpa using hm₂;
   apply Satisfies.not_box_def.mpr;
   use m;
   constructor;
@@ -39,7 +39,7 @@ lemma validate_AxiomL_of_trans_cwf [F.IsTransitive] [F.IsConverseWellFounded] : 
       exact rmn;
     . assumption;
 
-lemma validate_AxiomL_of_finite_trans_irrefl [F.IsFinite] [F.IsTransitive] [F.IsIrreflexive] : F ⊧ (Axioms.L (.atom 0)) := validate_AxiomL_of_trans_cwf
+lemma validate_AxiomL_of_finite_trans_irrefl [F.IsFinite] [F.IsTransitive] [F.IsIrreflexive] : F ⊧ (Axioms.L φ) := validate_AxiomL_of_trans_cwf
 
 lemma isTransitive_of_validate_axiomL (h : F ⊧ (Axioms.L (.atom 0))) : F.IsTransitive where
   trans := by
