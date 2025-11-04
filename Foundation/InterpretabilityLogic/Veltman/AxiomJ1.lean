@@ -9,7 +9,7 @@ variable {F : Veltman.Frame} {φ ψ χ : Formula ℕ}
 namespace Frame
 
 class HasAxiomJ1 (F : Frame) : Prop where
-  S_J1 : ∀ {x y}, x ≺ y → F.S x y y
+  S_J1 : ∀ {w x}, w ≺ x → F.S w x x
 export HasAxiomJ1 (S_J1)
 
 end Frame

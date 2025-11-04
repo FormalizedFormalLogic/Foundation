@@ -35,6 +35,10 @@ lemma validate_axiomJ2_of_validate_axiomJ2Plus (h : F ⊧ Axioms.J2Plus (.atom 0
     rcases (by simpa [buildAxioms] using hφ) with (rfl | rfl | rfl | rfl) <;> grind;
   . simp;
 
+@[simp high]
+lemma validate_axiomJ2_of_HasAxiomJ2 [F.HasAxiomJ2] : F ⊧ Axioms.J2 φ ψ χ := by
+  apply @validate_axiomJ2_of_validate_axiomJ2Plus F _ _ _ $ validate_axiomJ2Plus_of_HasAxiomJ2;
+
 open Hilbert.Minimal in
 lemma validate_axiomJ4_of_validate_axiomJ2 (h : F ⊧ Axioms.J2 (.atom 0) (.atom 1) (.atom 2)) : F ⊧ Axioms.J4 φ ψ := by
   apply Hilbert.Minimal.Veltman.soundness_frame (Ax := ILMinus_J2.axioms);
