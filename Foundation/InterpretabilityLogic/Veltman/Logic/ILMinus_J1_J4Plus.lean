@@ -86,6 +86,6 @@ instance : InterpretabilityLogic.ILMinus_J4Plus ⪱ InterpretabilityLogic.ILMinu
       . constructor; simp;
       . by_contra hC;
         have := Veltman.Frame.HasAxiomJ1.of_validate_axiomJ1 hC |>.S_J1 (w := 0) (x := 1) (by omega);
-        simp at this;
+        contradiction;
 
 end LO.InterpretabilityLogic

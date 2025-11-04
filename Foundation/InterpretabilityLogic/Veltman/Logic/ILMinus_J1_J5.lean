@@ -59,10 +59,10 @@ instance : InterpretabilityLogic.ILMinus_J1 ⪱ InterpretabilityLogic.ILMinus_J1
       constructor;
       . constructor;
         intro x y Rxy;
-        simpa;
+        simpa [Frame.SRel'];
       . by_contra hC;
         have := Veltman.Frame.HasAxiomJ5.of_validate_axiomJ5 hC |>.S_J5 (show 0 < 1 by omega) (show 1 < 2 by omega);
-        simp at this;
+        contradiction;
 
 instance : InterpretabilityLogic.ILMinus_J5 ⪱ InterpretabilityLogic.ILMinus_J1_J5 := by
   constructor;
@@ -86,6 +86,6 @@ instance : InterpretabilityLogic.ILMinus_J5 ⪱ InterpretabilityLogic.ILMinus_J1
       . constructor; omega;
       . by_contra hC;
         have := Veltman.Frame.HasAxiomJ1.of_validate_axiomJ1 hC |>.S_J1 (w := 0) (x := 1) (by omega);
-        simp at this;
+        contradiction;
 
 end LO.InterpretabilityLogic

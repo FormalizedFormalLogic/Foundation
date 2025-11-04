@@ -58,7 +58,7 @@ instance : InterpretabilityLogic.ILMinus_J1 ⪱ InterpretabilityLogic.ILMinus_J1
       };
       constructor;
       . constructor;
-        simp;
+        simp [Frame.SRel'];
       . by_contra hC;
         have := Veltman.Frame.HasAxiomJ2.of_validate_axiomJ2 hC |>.S_J2 (w := 0) (x := 1) (y := 2) (z := 3) (by tauto) (by tauto);
         simp [Frame.SRel'] at this;
@@ -89,6 +89,6 @@ instance : InterpretabilityLogic.ILMinus_J2Plus ⪱ InterpretabilityLogic.ILMinu
         exact { S_J2 := by tauto, S_J4 := by tauto }
       . by_contra hC;
         have := Veltman.Frame.HasAxiomJ1.of_validate_axiomJ1 hC |>.S_J1 (show (0 : F.World) ≺ 1 by omega);
-        simp [F] at this;
+        contradiction;
 
 end LO.InterpretabilityLogic

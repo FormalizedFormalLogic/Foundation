@@ -59,6 +59,6 @@ instance : InterpretabilityLogic.ILMinus ⪱ InterpretabilityLogic.ILMinus_J1 :=
       . tauto;
       . by_contra hC;
         replace hC := Veltman.Frame.HasAxiomJ1.of_validate_axiomJ1 hC |>.S_J1 (show 0 < 1 by omega);
-        simp at hC;
+        contradiction;
 
 end LO.InterpretabilityLogic

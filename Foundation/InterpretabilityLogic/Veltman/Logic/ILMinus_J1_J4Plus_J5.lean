@@ -54,14 +54,14 @@ instance : InterpretabilityLogic.ILMinus_J1_J4Plus ⪱ InterpretabilityLogic.ILM
           trans := by omega;
           irrefl := by omega;
         }
-        S w x y := w < x ∧ x = y
+        S w x y := w ≺ x ∧ x = y
         S_cond := by omega;
       }
       constructor;
       . apply Set.mem_setOf_eq.mpr;
         exact {
-          S_J1 := by tauto
-          S_J4 := by simp;
+          S_J1 := by tauto;
+          S_J4 := by simp [Frame.SRel'];
         }
       . by_contra hC;
         replace hC := Veltman.Frame.HasAxiomJ5.of_validate_axiomJ5 hC |>.S_J5 (show 0 < 1 by omega) (show 1 < 2 by omega);
@@ -91,8 +91,8 @@ instance : InterpretabilityLogic.ILMinus_J1_J5 ⪱ InterpretabilityLogic.ILMinus
       constructor;
       . apply Set.mem_setOf_eq.mpr;
         exact {
-          S_J1 := by omega
-          S_J5 := by omega
+          S_J1 := by tauto
+          S_J5 := by tauto
         }
       . by_contra hC;
         have := Veltman.Frame.HasAxiomJ4.of_validate_axiomJ4Plus hC |>.S_J4 (w := 1) (x := 2) (y := 0) (by omega);
@@ -124,6 +124,6 @@ instance : InterpretabilityLogic.ILMinus_J4Plus_J5 ⪱ InterpretabilityLogic.ILM
         }
       . by_contra hC;
         have := Veltman.Frame.HasAxiomJ1.of_validate_axiomJ1 hC |>.S_J1 (w := 0) (x := 1) (by omega);
-        simp at this;
+        contradiction;
 
 end LO.InterpretabilityLogic
