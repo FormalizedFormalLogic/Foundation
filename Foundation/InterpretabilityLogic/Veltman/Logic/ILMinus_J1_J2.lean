@@ -1,4 +1,4 @@
-import Foundation.InterpretabilityLogic.Veltman.Logic.ILMinus_J1
+import Foundation.InterpretabilityLogic.Veltman.Logic.ILMinus_J1_J4Plus
 import Foundation.InterpretabilityLogic.Veltman.Logic.ILMinus_J2Plus
 
 namespace LO.InterpretabilityLogic
@@ -35,14 +35,16 @@ instance : Entailment.Consistent InterpretabilityLogic.ILMinus_J1_J2 := Veltman.
 end ILMinus_J1_J2
 
 
-instance : InterpretabilityLogic.ILMinus_J1 ⪱ InterpretabilityLogic.ILMinus_J1_J2 := by
+instance : InterpretabilityLogic.ILMinus_J1_J4Plus ⪱ InterpretabilityLogic.ILMinus_J1_J2 := by
   constructor;
-  . apply weakerThan_of_subset_axioms $ by grind;
+  . apply weakerThan_of_provable_axioms;
+    intro φ hφ;
+    rcases (by simpa [Hilbert.Minimal.buildAxioms] using hφ) with (rfl | rfl | rfl | rfl) <;> simp;
   . apply Entailment.not_weakerThan_iff.mpr;
     use (Axioms.J2 (.atom 0) (.atom 1) (.atom 2));
     constructor;
     . simp;
-    . apply Sound.not_provable_of_countermodel (𝓜 := Veltman.FrameClass.ILMinus_J1);
+    . apply Sound.not_provable_of_countermodel (𝓜 := Veltman.FrameClass.ILMinus_J1_J4Plus);
       apply Veltman.not_validOnFrameClass_of_exists_frame;
       use {
         toKripkeFrame := {
@@ -57,8 +59,11 @@ instance : InterpretabilityLogic.ILMinus_J1 ⪱ InterpretabilityLogic.ILMinus_J1
         S_cond := by tauto;
       };
       constructor;
-      . constructor;
-        simp [Frame.SRel'];
+      . apply Set.mem_setOf_eq.mpr;
+        exact {
+          S_J1 := by tauto;
+          S_J4 := by grind;
+        }
       . by_contra hC;
         have := Veltman.Frame.HasAxiomJ2.of_validate_axiomJ2 hC |>.S_J2 (w := 0) (x := 1) (y := 2) (z := 3) (by tauto) (by tauto);
         simp [Frame.SRel'] at this;
