@@ -28,6 +28,12 @@ namespace Frame
 
 instance {F : Veltman.Frame} : F.IsGL := F.isGL
 
+abbrev SRel' {F : Veltman.Frame} (w x y : F.World) := F.S w x y
+notation:45 x:max " ≺[" w "] " y:max => SRel' w x y
+
+abbrev SInvRel {F : Veltman.Frame} (w x y : F.World) := F.S w y x
+notation:45 x:max " ≻[" w "] " y:max => SInvRel w x y
+
 /-
 class IsCL (F : Frame) extends F.IsGL where
   S_refl  : ∀ w, IsRefl _ (F.S w)
