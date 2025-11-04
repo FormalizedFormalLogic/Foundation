@@ -48,11 +48,17 @@ def CLNRhd! : 𝓢 ⊢! □(∼φ) ➝ (φ ▷ ψ) := by
   . apply efq;
 @[simp, grind] lemma CLNRhd : 𝓢 ⊢ □(∼φ) ➝ (φ ▷ ψ) := ⟨CLNRhd!⟩
 
-def CRhdLN! : 𝓢 ⊢! ψ ▷ ⊥ ➝ □(∼ψ) := by
+def CRhdOLN! : 𝓢 ⊢! φ ▷ ⊥ ➝ □(∼φ) := by
   apply C_trans ?_ CRhdNOL!;
   apply R2!;
   apply dne;
-omit [DecidableEq F] in @[simp, grind] lemma CRhdLN : 𝓢 ⊢ ψ ▷ ⊥ ➝ □(∼ψ) := ⟨CRhdLN!⟩
+omit [DecidableEq F] in @[simp, grind] lemma CRhdOLN : 𝓢 ⊢ φ ▷ ⊥ ➝ □(∼φ) := ⟨CRhdOLN!⟩
+
+def CLNRhdO! : 𝓢 ⊢! □(∼φ) ➝ (φ ▷ ⊥) := by
+  apply C_trans CLRhdNO!;
+  apply R2!;
+  apply dni;
+@[simp, grind] lemma CLNRhdO : 𝓢 ⊢ □(∼φ) ➝ (φ ▷ ⊥) := ⟨CLNRhdO!⟩
 
 -- TODO: Move to entailments
 def CCNKN : 𝓢 ⊢! (φ ➝ ψ) ➝ ∼(φ ⋏ ∼ψ) := by
@@ -90,7 +96,7 @@ def CCMMCRhdORhdO! : 𝓢 ⊢! (◇φ ➝ ◇ψ) ➝ ψ ▷ ⊥ ➝ φ ▷ ⊥ :
     . apply INLNM!;
     . apply IMNLN!;
   apply CCC!_of_C!_of_C!;
-  . apply CRhdLN!;
+  . apply CRhdOLN!;
   . apply CLNRhd!;
 @[simp] lemma CCMMCRhdORhdO : 𝓢 ⊢ (◇φ ➝ ◇ψ) ➝ (ψ ▷ ⊥ ➝ φ ▷ ⊥) := ⟨CCMMCRhdORhdO!⟩
 
@@ -103,7 +109,7 @@ def CCRhdORhdOCMM! : 𝓢 ⊢! (ψ ▷ ⊥ ➝ φ ▷ ⊥) ➝ (◇φ ➝ ◇ψ)
     . apply INLNM!;
   apply CCC!_of_C!_of_C!;
   . apply CLNRhd!;
-  . apply CRhdLN!;
+  . apply CRhdOLN!;
 @[simp] lemma CCRhdORhdOCMM : 𝓢 ⊢ (ψ ▷ ⊥ ➝ φ ▷ ⊥) ➝ (◇φ ➝ ◇ψ) := ⟨CCRhdORhdOCMM!⟩
 
 end LO.InterpretabilityLogic.Entailment
