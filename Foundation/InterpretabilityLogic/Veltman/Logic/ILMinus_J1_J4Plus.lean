@@ -46,7 +46,7 @@ instance : InterpretabilityLogic.ILMinus_J1 ⪱ InterpretabilityLogic.ILMinus_J1
       apply Veltman.not_validOnFrameClass_of_exists_frame;
       use {
         toKripkeFrame := {
-          World := Fin 4
+          World := Fin 3
           Rel := λ x y => x < y
         }
         isGL := Modal.Kripke.Frame.isGL_of_isFiniteGL {
