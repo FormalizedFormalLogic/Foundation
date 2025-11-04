@@ -1,21 +1,15 @@
-import Foundation.InterpretabilityLogic.Veltman.Hilbert
+import Foundation.InterpretabilityLogic.Veltman.Logic.ILMinus_J1_J2
+import Foundation.InterpretabilityLogic.Hilbert.Basic_Minimal
+
 
 namespace LO.InterpretabilityLogic
 
 open Veltman
 
-
 namespace Veltman
 
-protected abbrev FrameClass.CL : FrameClass := { F | F.IsCL }
-
-abbrev trivialFrame : Veltman.Frame where
-  toKripkeFrame := Modal.Kripke.blackpoint
-  S _ _ _ := True
-
-instance : Veltman.trivialFrame.IsCL where
-  S_refl _ := ⟨by tauto⟩
-  S_trans _ := ⟨by tauto⟩
+protected alias Frame.IsCL := Frame.IsILMinus_J1_J2
+protected alias FrameClass.CL := FrameClass.ILMinus_J1_J2
 
 end Veltman
 
@@ -23,18 +17,13 @@ end Veltman
 namespace CL
 
 instance Veltman.sound : Sound InterpretabilityLogic.CL FrameClass.CL := by
-  apply instSound_of_validates_axioms;
-  . intro F hF;
-    replace hF := Set.mem_setOf_eq.mp hF;
-    infer_instance;
-  . constructor;
-    intro φ hφ F hF;
-    replace hF := Set.mem_setOf_eq.mp hF;
-    rcases hφ with (rfl | rfl | rfl | rfl) <;> simp;
+  constructor;
+  intro φ hφ;
+  apply ILMinus_J1_J2.Veltman.sound.sound;
+  apply Entailment.Equiv.iff.mp inferInstance _ |>.mp hφ;
 
-instance : Entailment.Consistent InterpretabilityLogic.CL := consistent_of_sound_frameclass FrameClass.CL $ by
-  use Veltman.trivialFrame;
-  apply Set.mem_setOf_eq.mpr;
+instance : Entailment.Consistent InterpretabilityLogic.CL := by
+  apply Entailment.Consistent.of_le  (𝓢 := InterpretabilityLogic.ILMinus_J1_J2) <;>
   infer_instance;
 
 end CL

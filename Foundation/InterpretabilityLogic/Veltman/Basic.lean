@@ -34,17 +34,6 @@ notation:45 x:max " ≺[" w "] " y:max => SRel' w x y
 abbrev SInvRel {F : Veltman.Frame} (w : outParam F.World) (x y : F.World) := F.S w y x
 notation:45 x:max " ≻[" w "] " y:max => SInvRel w x y
 
-/-
-class IsCL (F : Frame) extends F.IsGL where
-  S_refl  : ∀ w, IsRefl _ (F.S w)
-  S_trans : ∀ w, IsTrans _ (F.S w)
-export IsCL (S_refl S_trans)
-
-class IsIL (F : Frame) extends F.IsCL where
-  S_IL : ∀ w : F.World, ∀ x y, (x.1 ≺ y.1) → (F.S w x y)
-export IsIL (S_IL)
--/
-
 end Frame
 
 abbrev FrameClass := Set (Frame)
@@ -434,44 +423,6 @@ lemma validate_axiomJ6 : F ⊧ Axioms.J6 φ := by
     by_contra hy;
     obtain ⟨z, _, _⟩ := h y Rxy hy;
     contradiction;
-
-/-
-@[simp high] protected lemma axiomJ1 [F.IsCL] : F ⊧ Axioms.J1 φ ψ := by
-  intro V x h y hy;
-  use y;
-  constructor;
-  . apply F.S_refl x |>.refl;
-  . apply h;
-    . exact y.2;
-    . exact hy;
-
-@[simp high] protected lemma axiomJ2 [F.IsCL] : F ⊧ Axioms.J2 φ ψ χ := by
-  intro V x h₁ h₂ y hy;
-  obtain ⟨⟨u, Rxu⟩, Sxyu, hu⟩ := h₁ y hy;
-  obtain ⟨⟨v, Ruv⟩, Sxuv, hv⟩ := h₂ ⟨u, Rxu⟩ hu;
-  use ⟨v, Ruv⟩;
-  constructor;
-  . apply F.S_trans x |>.trans;
-    . exact Sxyu;
-    . exact Sxuv;
-  . assumption;
-
-@[simp high] protected lemma axiomJ4 : F ⊧ Axioms.J4 φ ψ := by
-  intro V x h₁ h₂;
-  obtain ⟨y, Rxy, hy⟩ := Satisfies.dia_def.mp h₂;
-  obtain ⟨⟨z, Rxz⟩, Sxyz, hz⟩ := h₁ ⟨y, Rxy⟩ hy;
-  apply Satisfies.dia_def.mpr;
-  use z;
-  tauto;
-
-@[simp high] protected lemma axiomJ5 [F.IsIL] : F ⊧ Axioms.J5 φ := by
-  rintro V x ⟨y, Rxy⟩ h;
-  obtain ⟨z, Ryz, hz⟩ := Satisfies.dia_def.mp h;
-  use ⟨z, F.trans Rxy Ryz⟩;
-  constructor;
-  . apply Veltman.Frame.IsIL.S_IL; simpa;
-  . assumption;
--/
 
 end
 
