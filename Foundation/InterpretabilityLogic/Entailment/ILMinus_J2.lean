@@ -76,9 +76,13 @@ instance : HasAxiomJ2Plus 𝓢 := ⟨by
 
 end
 
+instance [Entailment.ILMinus_J2 𝓢] : Entailment.ILMinus_J4' 𝓢 where
+instance [Entailment.ILMinus_J2 𝓢] : Entailment.ILMinus_J4 𝓢 where
+
 instance [Entailment.ILMinus_J2Plus 𝓢] : Entailment.ILMinus_J2Plus' 𝓢 where
 instance [Entailment.ILMinus_J2Plus' 𝓢] : Entailment.ILMinus_J2Plus 𝓢 where
 instance [Entailment.ILMinus_J2Plus 𝓢] : Entailment.ILMinus_J4Plus 𝓢 where
+
 instance [Entailment.ILMinus_J1 𝓢] [Entailment.ILMinus_J2 𝓢] : Entailment.ILMinus_J2Plus 𝓢 where
 
 end LO.InterpretabilityLogic.Entailment

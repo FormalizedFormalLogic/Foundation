@@ -352,7 +352,7 @@ defineILMinus ILMinus_J4Plus [J4Plus]
 defineILMinus ILMinus_J4Plus_J5 [J4Plus, J5]
 defineILMinus ILMinus_J5 [J5]
 
-instance : InterpretabilityLogic.ILMinus ⪯ InterpretabilityLogic.ILMinus_J1 := weakerThan_of_subset_axioms $ by grind;
+-- instance : InterpretabilityLogic.ILMinus ⪯ InterpretabilityLogic.ILMinus_J1 := weakerThan_of_subset_axioms $ by grind;
 instance : InterpretabilityLogic.ILMinus ⪯ InterpretabilityLogic.ILMinus_J4Plus := weakerThan_of_subset_axioms $ by grind;
 instance : InterpretabilityLogic.ILMinus ⪯ InterpretabilityLogic.ILMinus_J5 := weakerThan_of_subset_axioms $ by grind;
 instance : InterpretabilityLogic.ILMinus_J1 ⪯ InterpretabilityLogic.ILMinus_J1_J4Plus := weakerThan_of_subset_axioms $ by grind;
