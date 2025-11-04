@@ -1,4 +1,6 @@
 import Foundation.InterpretabilityLogic.Veltman.Basic
+import Foundation.InterpretabilityLogic.Veltman.Logic.ILMinus
+
 
 namespace LO.InterpretabilityLogic.Veltman
 
@@ -15,17 +17,6 @@ export HasAxiomJ4 (S_J4)
 end Frame
 
 @[simp high, grind]
-lemma validate_axiomJ4_of_HasAxiomJ4 [F.HasAxiomJ4] : F ⊧ Axioms.J4 φ ψ := by
-  intro V x h₁ h₂;
-  replace ⟨z, Rxz, h₂⟩ := Satisfies.dia_def.mp h₂;
-  obtain ⟨w, Sxzw, hw⟩ := h₁ z Rxz h₂;
-  apply Satisfies.dia_def.mpr;
-  use w;
-  constructor;
-  . apply F.S_J4 Sxzw;
-  . assumption;
-
-@[simp high, grind]
 lemma validate_axiomJ4Plus_of_HasAxiomJ4 [F.HasAxiomJ4] : F ⊧ Axioms.J4Plus φ ψ χ := by
   intro V x h₁ h₂ y Rxy h₃;
   obtain ⟨z, Sxyz, hz⟩ := h₂ y Rxy h₃;
@@ -34,7 +25,14 @@ lemma validate_axiomJ4Plus_of_HasAxiomJ4 [F.HasAxiomJ4] : F ⊧ Axioms.J4Plus φ
   . assumption;
   . apply h₁ z (F.S_J4 Sxyz) hz;
 
-@[simp high, grind]
+open Hilbert.Minimal in
+lemma validate_axiomJ4_of_validate_axiomJ4Plus (h : F ⊧ Axioms.J4Plus (.atom 0) (.atom 1) (.atom 2)) : F ⊧ Axioms.J4 φ ψ := by
+  apply Hilbert.Minimal.Veltman.soundness_frame (Ax := ILMinus_J4Plus.axioms);
+  . constructor;
+    intro φ hφ;
+    rcases (by simpa [buildAxioms] using hφ) with (rfl | rfl | rfl | rfl) <;> grind;
+  . simp;
+
 lemma Frame.HasAxiomJ4.of_validate_axiomJ4 (h : F ⊧ Axioms.J4 (.atom 0) (.atom 1)) : F.HasAxiomJ4 := by
   constructor;
   intro w x y Swxy;
@@ -53,20 +51,16 @@ lemma Frame.HasAxiomJ4.of_validate_axiomJ4 (h : F ⊧ Axioms.J4 (.atom 0) (.atom
     . apply F.S_cond Swxy;
     . tauto;
 
-open Formula (atom)
-lemma validate_axiomJ4_of_validate_axiomJ4Plus {F : Veltman.Frame} (h : F ⊧ Axioms.J4Plus (.atom 1) (.atom 2) (.atom 0)) : F ⊧ Axioms.J4 (.atom 0) (.atom 1) := by
+lemma Frame.HasAxiomJ4.of_validate_axiomJ4Plus (h : F ⊧ Axioms.J4Plus (.atom 0) (.atom 1) (.atom 2)) : F.HasAxiomJ4 := by
+  apply Frame.HasAxiomJ4.of_validate_axiomJ4;
+  apply validate_axiomJ4_of_validate_axiomJ4Plus h;
 
-  intro V x h₁ h₂;
-  dsimp [Axioms.J4Plus] at h;
+lemma validate_axiomJ4Plus_of_validate_axiomJ4 (h : F ⊧ Axioms.J4 (.atom 0) (.atom 1)) : F ⊧ Axioms.J4Plus φ ψ χ := by
+  apply @validate_axiomJ4Plus_of_HasAxiomJ4 F _ _ _ $ Frame.HasAxiomJ4.of_validate_axiomJ4 h;
 
-  have := h V x (by sorry);
-  replace ⟨z, Rxz, h₂⟩ := Satisfies.dia_def.mp h₂;
-  obtain ⟨w, Sxzw, hw⟩ := h₁ z Rxz h₂;
-  apply Satisfies.dia_def.mpr;
-  use w;
-  constructor;
-  . apply F.trans Rxz;
-    sorry;
-  . assumption;
+lemma validate_axiomJ4_iff_validate_axiomJ4Plus : (F ⊧ Axioms.J4 (.atom 0) (.atom 1)) ↔ (F ⊧ Axioms.J4Plus (.atom 0) (.atom 1) (.atom 2)) := ⟨
+  fun h ↦ validate_axiomJ4Plus_of_validate_axiomJ4 h,
+  fun h ↦ validate_axiomJ4_of_validate_axiomJ4Plus h
+⟩
 
 end LO.InterpretabilityLogic.Veltman

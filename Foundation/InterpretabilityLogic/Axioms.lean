@@ -26,8 +26,14 @@ protected abbrev J3 := (φ ▷ χ) ➝ (ψ ▷ χ) ➝ ((φ ⋎ ψ) ▷ χ)
 
 protected abbrev J4 := (φ ▷ ψ) ➝ (◇φ ➝ ◇ψ)
 
+/--
+  - Visser 1988, `K2`
+-/
 protected abbrev J4' := (φ ▷ ψ) ➝ ((ψ ▷ ⊥) ➝ (φ ▷ ⊥))
 
+/--
+  - Visser 1988, `K1`
+-/
 protected abbrev J4Plus := □(φ ➝ ψ) ➝ (χ ▷ φ ➝ χ ▷ ψ)
 
 protected abbrev J4Plus' := □φ ➝ (χ ▷ (φ ➝ ψ) ➝ χ ▷ ψ)

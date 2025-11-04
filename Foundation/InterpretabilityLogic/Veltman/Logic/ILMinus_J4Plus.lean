@@ -12,7 +12,7 @@ namespace Veltman
 protected abbrev FrameClass.ILMinus_J4Plus : FrameClass := { F | F.HasAxiomJ4 }
 
 instance : trivialFrame.HasAxiomJ4 where
-  S_J4 {w x y} Swxy := by have := x.2; contradiction;
+  S_J4 _ := by contradiction
 
 end Veltman
 
@@ -53,12 +53,13 @@ instance : InterpretabilityLogic.ILMinus ⪱ InterpretabilityLogic.ILMinus_J4Plu
           trans := by omega;
           irrefl := by omega;
         }
-        S _ _ _ := False
+        S w x y := w < x,
+        S_cond := by omega;
       }
       constructor;
       . tauto;
       . by_contra hC;
-        replace hC : ¬1 < 2 := Veltman.Frame.HasAxiomJ4.of_validate_axiomJ4 hC |>.S_J4Plus 0 ⟨1, by omega⟩ ⟨2, by omega⟩;
-        omega;
+        have := Veltman.Frame.HasAxiomJ4.of_validate_axiomJ4Plus hC |>.S_J4 (w := 1) (x := 2) (y := 0) (by simp);
+        contradiction;
 
 end LO.InterpretabilityLogic

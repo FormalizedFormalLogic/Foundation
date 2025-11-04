@@ -38,6 +38,15 @@ lemma consistent_of_sound_frameclass
   . assumption;
   . simp;
 
+lemma soundness_frame (hV : F ⊧* Ax) : Hilbert.Minimal Ax ⊢ φ → F ⊧ φ := by
+  intro hφ;
+  induction hφ using Hilbert.Minimal.rec! with
+  | axm s h =>
+    apply ValidOnFrame.subst;
+    apply hV.models;
+    assumption;
+  | _ => grind;
+
 end Hilbert.Minimal.Veltman
 
 

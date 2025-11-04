@@ -54,11 +54,12 @@ instance : InterpretabilityLogic.ILMinus ⪱ InterpretabilityLogic.ILMinus_J5 :=
           irrefl := by omega;
         }
         S _ _ _ := False
+        S_cond := by tauto
       }
       constructor;
       . tauto;
       . by_contra hC;
-        replace hC : ¬1 < 2 := Veltman.Frame.HasAxiomJ5.of_validate_axiomJ5 hC |>.S_J5 0 ⟨1, by omega⟩ ⟨2, by omega⟩;
-        omega;
+        replace hC := Veltman.Frame.HasAxiomJ5.of_validate_axiomJ5 hC |>.S_J5 (show 0 < 1 by omega) (show 1 < 2 by omega);
+        contradiction
 
 end LO.InterpretabilityLogic

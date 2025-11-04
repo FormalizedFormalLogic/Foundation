@@ -1,5 +1,6 @@
 import Foundation.InterpretabilityLogic.Formula.Substitution
 import Foundation.InterpretabilityLogic.Axioms
+import Foundation.InterpretabilityLogic.Logic.Basic
 import Foundation.InterpretabilityLogic.Formula.OfModal
 import Foundation.Modal.Kripke.Logic.GL.Completeness
 
@@ -312,6 +313,10 @@ end Formula.Veltman
 
 
 namespace Veltman
+
+lemma validate_of_logic_provable {F : Veltman.Frame} {L : Logic ℕ} (h : F ⊧* L) (hL : L ⊢ φ) : F ⊧ φ := by
+  apply h.models;
+  rwa [Logic.iff_provable] at hL;
 
 section
 
