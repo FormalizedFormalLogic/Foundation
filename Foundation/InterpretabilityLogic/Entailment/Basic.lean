@@ -277,8 +277,19 @@ end
 
 
 class HasAxiomP (𝓢 : S) where
-  PP! {φ ψ : F} : 𝓢 ⊢! Axioms.P φ ψ
-export HasAxiomP (PP!)
+  P! {φ ψ : F} : 𝓢 ⊢! Axioms.P φ ψ
+export HasAxiomP (P!)
+
+section
+
+variable [HasAxiomP 𝓢]
+@[simp] lemma P : 𝓢 ⊢ Axioms.P φ ψ := ⟨P!⟩
+
+open FiniteContext in instance [Entailment.Minimal 𝓢] (Γ : FiniteContext F 𝓢) : HasAxiomP Γ := ⟨λ {_} => of P!⟩
+open Context in instance [Entailment.Minimal 𝓢] (Γ : Context F 𝓢) : HasAxiomP Γ := ⟨λ {_} => of P!⟩
+
+end
+
 
 
 class HasAxiomM (𝓢 : S) where

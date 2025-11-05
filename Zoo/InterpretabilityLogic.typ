@@ -57,6 +57,7 @@
       "LO.InterpretabilityLogic.CL": $Logic("CL")$,
       "LO.InterpretabilityLogic.IL": $Logic("IL")$,
       "LO.InterpretabilityLogic.ILM": $Logic("ILM")$,
+      "LO.InterpretabilityLogic.ILP": $Logic("ILP")$,
       "LO.InterpretabilityLogic.ILMinus_J1_J2_J5": $ILMinus (AxiomJ1, AxiomJ2, AxiomJ5)$,
       "LO.InterpretabilityLogic.ILMinus_J1_J2": $ILMinus (AxiomJ1, AxiomJ2)$,
       "LO.InterpretabilityLogic.ILMinus_J1_J4Plus_J5": $ILMinus (AxiomJ1, AxiomJ4Plus, AxiomJ5)$,

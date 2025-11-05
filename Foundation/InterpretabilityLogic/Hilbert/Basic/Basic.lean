@@ -1,6 +1,7 @@
 import Foundation.InterpretabilityLogic.Logic.Basic
 import Foundation.InterpretabilityLogic.Entailment.IL
 import Foundation.InterpretabilityLogic.Entailment.ILM
+import Foundation.InterpretabilityLogic.Entailment.ILP
 import Foundation.InterpretabilityLogic.Hilbert.Axiom
 
 namespace LO.InterpretabilityLogic
@@ -163,6 +164,26 @@ instance [Ax.HasM] : InterpretabilityLogic.Entailment.HasAxiomM (Hilbert.Basic A
         else (.atom b))
       $ HasM.mem_M;
 
+instance [Ax.HasM] : InterpretabilityLogic.Entailment.HasAxiomM (Hilbert.Basic Ax) where
+  M! {φ ψ χ} := by
+    constructor;
+    simpa [HasM.ne_pq, HasM.ne_qr, HasM.ne_rp.symm] using Hilbert.Basic.axm
+      (φ := InterpretabilityLogic.Axioms.M (.atom (HasM.p Ax)) (.atom (HasM.q Ax)) (.atom (HasM.r Ax)))
+      (s := λ b =>
+        if (HasM.p Ax) = b then φ
+        else if (HasM.q Ax) = b then ψ
+        else if (HasM.r Ax) = b then χ
+        else (.atom b))
+      $ HasM.mem_M;
+
+instance [Ax.HasP] : InterpretabilityLogic.Entailment.HasAxiomP (Hilbert.Basic Ax) where
+  P! {φ ψ} := by
+    constructor;
+    simpa [HasP.ne_pq] using Hilbert.Basic.axm
+      (φ := InterpretabilityLogic.Axioms.P (.atom (HasP.p Ax)) (.atom (HasP.q Ax)))
+      (s := λ b => if (HasP.p Ax) = b then φ else if (HasP.q Ax) = b then ψ else (.atom b))
+      (HasP.mem_P);
+
 end
 
 end Hilbert.Basic
@@ -211,6 +232,19 @@ instance : ILM.axioms.HasM where p := 0; q := 1; r := 2;
 end ILM.axioms
 protected abbrev ILM := Hilbert.Basic ILM.axioms
 instance : Entailment.ILM InterpretabilityLogic.ILM where
+
+
+protected abbrev ILP.axioms : Axiom ℕ := insert (InterpretabilityLogic.Axioms.P (.atom 0) (.atom 1)) IL.axioms
+namespace ILP.axioms
+instance : ILP.axioms.HasJ1 where p := 0; q := 1;
+instance : ILP.axioms.HasJ2 where p := 0; q := 1; r := 2;
+instance : ILP.axioms.HasJ3 where p := 0; q := 1; r := 2;
+instance : ILP.axioms.HasJ4 where p := 0; q := 1;
+instance : ILP.axioms.HasJ5 where p := 0;
+instance : ILP.axioms.HasP where p := 0; q := 1;
+end ILP.axioms
+protected abbrev ILP := Hilbert.Basic ILP.axioms
+instance : Entailment.ILP InterpretabilityLogic.ILP where
 
 end
 
