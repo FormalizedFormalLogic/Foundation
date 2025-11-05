@@ -280,4 +280,49 @@ instance [IsPartialOrder _ R] : IsStrictOrder _ (R.IrreflGen) where
 
 end IrreflGen
 
+
+def CovBy (R : HRel α) : HRel α := fun x y ↦ R x y ∧ ∀ z, ¬R x z ∨ ¬R z y
+
+namespace CovBy
+
+@[grind] lemma rel (h : R.CovBy x y) : R x y := h.1
+
+lemma no_intermediate (h : R.CovBy x y) : ∀ z, ¬R x z ∨ ¬R z y := h.2
+
+lemma no_intermediate' (h : R.CovBy x y) : ∀ z, R x z → ¬R z y :=
+  fun z ↦ imp_iff_not_or.mpr (h.no_intermediate z)
+
+@[simp] lemma irrefl (x : α) : ¬R.CovBy x x := fun h ↦ by
+  have : R x x := h.rel
+  rcases h.no_intermediate x <;> contradiction
+
+instance : IsIrrefl α R.CovBy := ⟨irrefl⟩
+
+lemma not_covby_iff {x y : α} : ¬R.CovBy x y ↔ R x y → ∃ z, R x z ∧ R z y := by simp [CovBy]
+
+lemma antitrans (hxy : R x y) (hyz : R y z) : ¬R.CovBy x z :=
+  not_covby_iff.mpr fun _ ↦ ⟨y, hxy, hyz⟩
+
+lemma off (hab : R.CovBy a b) (hac : R a c) : R b c := by { 
+  
+ }
+
+end CovBy
+
+def Rightmost (R : HRel α) (a : α) : Prop := ∀ b, ¬R a b
+
+namespace Rightmost
+
+@[simp] lemma not_iff : ¬R.Rightmost a ↔ ∃ b, R a b := by simp [Rightmost]
+
+end Rightmost
+
+def Leftmost (R : HRel α) (a : α) : Prop := ∀ b, ¬R b a
+
+namespace Leftmost
+
+@[simp] lemma not_iff : ¬R.Leftmost a ↔ ∃ b, R b a := by simp [Leftmost]
+
+end Leftmost
+
 end HRel

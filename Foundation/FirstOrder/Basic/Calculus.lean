@@ -288,7 +288,7 @@ instance : Tait.Axiomatized (SyntacticFormula L) (SyntacticFormulas L) where
   axm {_ _ h} := axm h
   trans {_ _ _ F d} := trans (fun h ↦ F _ h) d
 
-variable [(k : ℕ) → DecidableEq (L.Func k)] [(k : ℕ) → DecidableEq (L.Rel k)]
+variable [L.DecidableEq]
 
 private def not_close' (φ) : 𝓢 ⟹ [∼(φ.univCl'), φ] :=
   have : 𝓢 ⟹ [∃* ∼(@Rew.fixitr L 0 (fvSup φ) ▹ φ), φ] := instances (v := fun x ↦ &x) (em (φ := φ) (by simp) (by simp))
@@ -297,6 +297,40 @@ private def not_close' (φ) : 𝓢 ⟹ [∼(φ.univCl'), φ] :=
 def invClose (b : 𝓢 ⊢! φ.univCl') : 𝓢 ⊢! φ := cut (wk b (by simp)) (not_close' φ)
 
 def invClose! (b : 𝓢 ⊢ φ.univCl') : 𝓢 ⊢ φ := ⟨invClose b.get⟩
+
+def compact {Γ : Sequent L} : 𝓢 ⟹ Γ → (s : { s : Finset (SyntacticFormula L) // ↑s ⊆ 𝓢}) × (s : SyntacticFormulas L) ⟹ Γ
+  | axL Γ R v   => ⟨⟨∅, by simp⟩, axL Γ R v⟩
+  | verum Γ   => ⟨⟨∅, by simp⟩, verum Γ⟩
+  | and d₁ d₂ =>
+    let ⟨s₁, d₁⟩ := compact d₁
+    let ⟨s₂, d₂⟩ := compact d₂
+    ⟨⟨(s₁ ∪ s₂ : Finset (SyntacticFormula L)), by simp [s₁.prop, s₂.prop]⟩,
+      and (Tait.ofAxiomSubset (by simp) d₁) (Tait.ofAxiomSubset (by simp) d₂)⟩
+  | or d      =>
+    let ⟨s, d⟩ := compact d
+    ⟨s, or d⟩
+  | wk d ss   =>
+    let ⟨s, d⟩ := compact d
+    ⟨s, wk d ss⟩
+  | cut d₁ d₂ =>
+    let ⟨s₁, d₁⟩ := compact d₁
+    let ⟨s₂, d₂⟩ := compact d₂
+    ⟨⟨(s₁ ∪ s₂ : Finset (SyntacticFormula L)), by simp [s₁.prop, s₂.prop]⟩,
+      cut (Tait.ofAxiomSubset (by simp) d₁) (Tait.ofAxiomSubset (by simp) d₂)⟩
+  | axm (φ := φ) h =>
+    ⟨⟨{φ}, by simp [h]⟩, axm (by simp)⟩
+  | all d          =>
+    let ⟨s, d⟩ := compact d
+    ⟨s, all d⟩
+  | ex t d =>
+    let ⟨s, d⟩ := compact d
+    ⟨s, ex t d⟩
+
+instance : Entailment.Compact (SyntacticFormulas L) where
+  Γ b := (compact b).1
+  ΓPrf b := (compact b).2
+  Γ_subset b := by simpa using (compact b).1.prop
+  Γ_finite b := by simp
 
 private def deductionAux {Γ : Sequent L} : 𝓢 ⟹ Γ → 𝓢 \ {φ} ⟹ ∼(φ.univCl') :: Γ
   | axL Γ R v       => Tait.wkTail <| axL Γ R v
@@ -368,7 +402,7 @@ lemma inconsistent'_lMap (Φ : L₁ →ᵥ L₂) : Entailment.Inconsistent 𝓢�
 
 end Hom
 
-omit [(k : ℕ) → DecidableEq (L.Func k)] [(k : ℕ) → DecidableEq (L.Rel k)]
+omit [L.DecidableEq]
 
 private lemma map_subst_eq_free (φ : SyntacticSemiformula L 1) (h : ¬φ.FVar? m) :
     (@Rew.rewriteMap L ℕ ℕ 0 (fun x ↦ if x = m then 0 else x + 1)) ▹ (φ/[&m] : SyntacticFormula L) = Rewriting.free φ := by
@@ -452,9 +486,11 @@ instance (T : Theory L) : Entailment.Cl T := Entailment.Cl.ofEquiv (T : Syntacti
 
 def toSyntacticProof {T : Theory L} {σ} : T ⊢! σ → (T : SyntacticFormulas L) ⊢! ↑σ := fun b ↦ b
 
-def  ofSyntacticProof {T : Theory L} {σ} : (T : SyntacticFormulas L) ⊢! ↑σ → T ⊢! σ := fun b ↦ b
+def ofSyntacticProof {T : Theory L} {σ} : (T : SyntacticFormulas L) ⊢! ↑σ → T ⊢! σ := fun b ↦ b
 
 lemma provable_def {T : Theory L} {σ} : T ⊢ σ ↔ (T : SyntacticFormulas L) ⊢ ↑σ := by rfl
+
+def Proof.cast {T : Theory L} {σ} : T ⊢ σ ↔ (T : SyntacticFormulas L) ⊢ ↑σ := by rfl
 
 namespace Theory
 
@@ -474,6 +510,59 @@ instance [L.DecidableEq] : Entailment.Deduction (Theory L) where
     have : adjoin σ T ⊢! σ ➝ τ := Axiomatized.weakening (by simp) b
     this ⨀ (Axiomatized.adjoin _ _)
 
+def compact! [L.DecidableEq] {T : Theory L} {φ : Sentence L} :
+    T ⊢! φ → (s : { s : Finset (Sentence L) // ↑s ⊆ T}) × (s : Theory L) ⊢! φ :=
+  fun b ↦
+    let ⟨s, b⟩ := Derivation.compact b
+    ⟨⟨s.val.image Semiformula.toEmpty', fun φ ↦ by
+      suffices ∀ φ' ∈ s.val, φ'.toEmpty' = φ → φ ∈ T by simpa
+      intro φ hφ e
+      have : ∃ σ ∈ T, ↑σ = φ := by
+        simpa [Theory.toSyntacticFormulas] using s.prop hφ
+      rcases this with ⟨σ, hσ, rfl⟩
+      have : σ = φ := by simpa [Semiformula.toEmpty'] using e
+      simp_all⟩, ofSyntacticProof <|
+        Axiomatized.weakening (by
+          simp only [Finset.coe_image]
+          intro φ hφ
+          have : ∃ σ ∈ T, ↑σ = φ := by
+            simpa [Theory.toSyntacticFormulas] using s.prop hφ
+          rcases this with ⟨σ, _, rfl⟩
+          simpa using ⟨σ, hφ, by simp⟩) b⟩
+
+instance [L.DecidableEq] : Entailment.Compact (Theory L) where
+  Γ b := (compact! b).1
+  ΓPrf b := (compact! b).2
+  Γ_subset b := by simpa using (compact! b).1.prop
+  Γ_finite b := by simp
+
+theorem compact [L.DecidableEq] {T : Theory L} {φ : Sentence L} (b : T ⊢ φ) :
+    ∃ (s : { s : Finset (Sentence L) // ↑s ⊆ T}), (s : Theory L) ⊢ φ :=
+  let ⟨s, b⟩ := compact! b.get
+  ⟨s, ⟨b⟩⟩
+
+instance : Entailment.StrongCut (Theory L) (Theory L) where
+  cut {T U φ} b d :=
+    Tait.Axiomatized.trans (𝓛 := (↑T : SyntacticFormulas L)) (𝓚 := (↑U : SyntacticFormulas L))
+      (fun ψ hψ ↦
+        let b := @b ψ.toEmpty' (by
+          have : ∃ ψ₀ ∈ U, ↑ψ₀ = ψ := by simpa [toSyntacticFormulas] using hψ
+          rcases this with ⟨ψ₀, hψ₀U, rfl⟩
+          simpa using hψ)
+        (toSyntacticProof b).cast <| by
+          have : ∃ ψ₀ ∈ U, ↑ψ₀ = ψ := by simpa [toSyntacticFormulas] using hψ
+          rcases this with⟨_, _, rfl⟩
+          simp)
+      (toSyntacticProof d)
+
+lemma compact' [L.DecidableEq] {T : Theory L} {φ : Sentence L}
+    (b : T ⊢ φ) : ∃ (s : { s : Finset (Sentence L) // ↑s ⊆ T}), (∅ : Theory L) ⊢ s.val.conj ➝ φ := by
+  let ⟨s, b⟩ := compact b
+  let bc : ({s.val.conj} : Theory L) ⊢ s.val.conj := Axiomatized.provable_axm _ (by simp)
+  have : {s.val.conj} ⊢ φ := StrongCut.cut! (fun {ψ} hψ ↦ Entailment.left_Fconj!_intro (by simpa) ⨀ bc) b
+  have : (insert s.val.conj ∅ : Theory L) ⊢ φ := by simpa using this
+  exact ⟨s, ⟨deduction this.get⟩⟩
+
 instance (T : Theory L) : Entailment.Cl T := Entailment.Cl.ofEquiv (T : SyntacticFormulas L) T (Rewriting.app Rew.emb) (fun _ ↦ .refl _)
 
 instance : DeductiveExplosion (Theory L) where
@@ -490,12 +579,11 @@ lemma inconsistent_lMap {T : Theory L₁} (Φ : L₁ →ᵥ L₂) :
   intro h
   have : SyntacticFormulas.lMap Φ ↑T ⊢ ⊥ := ⟨Derivation.lMap Φ (provable_def.mp <| inconsistent_iff_provable_bot.mp h).get⟩
   refine inconsistent_iff_provable_bot.mpr <| provable_def.mpr ?_
-  simp
+  suffices ↑(lMap Φ T) ⊢ ⊥ by simpa
   apply Axiomatized.weakening! ?_ this
-  simp [SyntacticFormulas.lMap, Theory.toSyntacticFormulas]
+  simp only [SyntacticFormulas.lMap, toSyntacticFormulas, Set.image_subset_iff]
   intro φ hφ
-  simp
-  exact ⟨(Semiformula.lMap Φ) φ, Set.mem_image_of_mem _ hφ, Eq.symm (lMap_emb φ)⟩
+  simpa using ⟨(Semiformula.lMap Φ) φ, Set.mem_image_of_mem _ hφ, Eq.symm (lMap_emb φ)⟩
 
 instance {T U : Theory L} : T ⪯ T + U := Entailment.Axiomatized.weakerThanOfSubset (by simp [add_def])
 
