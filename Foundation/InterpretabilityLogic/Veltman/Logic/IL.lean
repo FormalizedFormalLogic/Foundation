@@ -1,34 +1,29 @@
+import Foundation.InterpretabilityLogic.Veltman.Logic.ILMinus_J1_J2_J5
 import Foundation.InterpretabilityLogic.Veltman.Logic.CL
+
 
 namespace LO.InterpretabilityLogic
 
 open Veltman
 
-
 namespace Veltman
 
-protected abbrev FrameClass.IL : FrameClass := { F | F.IsIL }
-
-instance : Veltman.trivialFrame.IsIL where
-  S_IL _ _ _ := by simp;
+protected alias Frame.IsIL := Frame.IsILMinus_J1_J2_J5
+protected alias FrameClass.IL := FrameClass.ILMinus_J1_J2_J5
 
 end Veltman
 
 
 namespace IL
 
-instance Veltman.sound : Sound InterpretabilityLogic.IL FrameClass.IL := instSound_of_validates_axioms $ by
-  rw [(show IL.axioms = CL.axioms ∪ {(InterpretabilityLogic.Axioms.J5 (.atom 0))} by simp)];
-  apply validates_CL_axioms_union;
+instance Veltman.sound : Sound InterpretabilityLogic.IL FrameClass.IL := by
   constructor;
-  suffices FrameClass.IL ⊧ Axioms.J5 (Formula.atom 0) by simpa;
-  intro F hF;
-  simp only [Set.mem_setOf_eq] at hF;
-  apply Formula.Veltman.ValidOnFrame.axiomJ5;
+  intro φ hφ;
+  apply ILMinus_J1_J2_J5.Veltman.sound.sound;
+  apply Entailment.Equiv.iff.mp inferInstance _ |>.mp hφ;
 
-instance : Entailment.Consistent InterpretabilityLogic.IL := consistent_of_sound_frameclass FrameClass.IL $ by
-  use Veltman.trivialFrame;
-  apply Set.mem_setOf_eq.mpr;
+instance : Entailment.Consistent InterpretabilityLogic.IL := by
+  apply Entailment.Consistent.of_le  (𝓢 := InterpretabilityLogic.ILMinus_J1_J2_J5) <;>
   infer_instance;
 
 end IL

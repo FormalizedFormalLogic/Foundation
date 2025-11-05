@@ -18,17 +18,17 @@ class HasK where
   p : α
   q : α
   ne_pq : p ≠ q := by trivial;
-  mem_K : Modal.Axioms.K (.atom p) (.atom q) ∈ Ax := by tauto;
+  mem_K : Modal.Axioms.K (.atom p) (.atom q) ∈ Ax := by grind;
 
 class HasL where
   p : α
-  mem_L : Modal.Axioms.L (.atom p) ∈ Ax := by tauto;
+  mem_L : Modal.Axioms.L (.atom p) ∈ Ax := by grind;
 
 class HasJ1 where
   p : α
   q : α
   ne_pq : p ≠ q := by trivial;
-  mem_J1 : InterpretabilityLogic.Axioms.J1 (.atom p) (.atom q) ∈ Ax := by tauto;
+  mem_J1 : InterpretabilityLogic.Axioms.J1 (.atom p) (.atom q) ∈ Ax := by grind;
 
 class HasJ2 where
   p : α
@@ -37,7 +37,16 @@ class HasJ2 where
   ne_pq : p ≠ q := by trivial;
   ne_qr : q ≠ r := by trivial;
   ne_rp : r ≠ p := by trivial;
-  mem_J2 : InterpretabilityLogic.Axioms.J2 (.atom p) (.atom q) (.atom r) ∈ Ax := by tauto;
+  mem_J2 : InterpretabilityLogic.Axioms.J2 (.atom p) (.atom q) (.atom r) ∈ Ax := by grind;
+
+class HasJ2Plus where
+  p : α
+  q : α
+  r : α
+  ne_pq : p ≠ q := by trivial;
+  ne_qr : q ≠ r := by trivial;
+  ne_rp : r ≠ p := by trivial;
+  mem_J2Plus : InterpretabilityLogic.Axioms.J2Plus (.atom p) (.atom q) (.atom r) ∈ Ax := by grind;
 
 class HasJ3 where
   p : α
@@ -46,17 +55,45 @@ class HasJ3 where
   ne_pq : p ≠ q := by trivial;
   ne_qr : q ≠ r := by trivial;
   ne_rp : r ≠ p := by trivial;
-  mem_J3 : InterpretabilityLogic.Axioms.J3 (.atom p) (.atom q) (.atom r) ∈ Ax := by tauto;
+  mem_J3 : InterpretabilityLogic.Axioms.J3 (.atom p) (.atom q) (.atom r) ∈ Ax := by grind;
 
 class HasJ4 where
   p : α
   q : α
   ne_pq : p ≠ q := by trivial;
-  mem_J4 : InterpretabilityLogic.Axioms.J4 (.atom p) (.atom q) ∈ Ax := by tauto;
+  mem_J4 : InterpretabilityLogic.Axioms.J4 (.atom p) (.atom q) ∈ Ax := by grind;
+
+class HasJ4Plus where
+  p : α
+  q : α
+  r : α
+  ne_pq : p ≠ q := by trivial;
+  ne_qr : q ≠ r := by trivial;
+  ne_rp : r ≠ p := by trivial;
+  mem_J4Plus : InterpretabilityLogic.Axioms.J4Plus (.atom p) (.atom q) (.atom r) ∈ Ax := by grind;
 
 class HasJ5 where
   p : α
-  mem_J5 : InterpretabilityLogic.Axioms.J5 (.atom p) ∈ Ax := by tauto;
+  mem_J5 : InterpretabilityLogic.Axioms.J5 (.atom p) ∈ Ax := by grind;
+
+class HasJ6 where
+  p : α
+  mem_J6 : InterpretabilityLogic.Axioms.J6 (.atom p) ∈ Ax := by grind;
+
+class HasM where
+  p : α
+  q : α
+  r : α
+  ne_pq : p ≠ q := by trivial;
+  ne_qr : q ≠ r := by trivial;
+  ne_rp : r ≠ p := by trivial;
+  mem_M : InterpretabilityLogic.Axioms.M (.atom p) (.atom q) (.atom r) ∈ Ax := by grind;
+
+class HasP where
+  p : α
+  q : α
+  ne_pq : p ≠ q := by trivial;
+  mem_P : InterpretabilityLogic.Axioms.P (.atom p) (.atom q) ∈ Ax := by grind;
 
 end Axiom
 

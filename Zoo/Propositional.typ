@@ -2,13 +2,13 @@
 
 #set page(width: auto, height: auto, margin: 24pt)
 
-#let arrows = json("./propositional.json").map(((from, to, type)) => {
+#let arrows = json("./Propositional.json").map(((from, to, type)) => {
   if type == "ssub" {
-    return strfmt("\"{}\" -> \"{}\"", from, to)
+    return strfmt("\"{}\" -> \"{}\"", to, from)
   } else if type == "sub" {
-    return strfmt("\"{}\" -> \"{}\" [style=dashed] ", from, to)
+    return strfmt("\"{}\" -> \"{}\" [style=dashed] ", to, from)
   } else if type == "sorry" {
-    return strfmt("\"{}\" -> \"{}\" [color=red; style=dashed] ", from, to)
+    return strfmt("\"{}\" -> \"{}\" [color=red; style=dashed] ", to, from)
   }
 })
 
@@ -17,7 +17,7 @@
     raw(
       "
   digraph PropositionalLogicZoo {
-    rankdir = LR;
+    rankdir = RL;
     node [
       shape=none
       margin=0.1
@@ -41,6 +41,6 @@
       "LO.Propositional.KrieselPutnam": $Logic("KP")$,
       "LO.Propositional.LC": $Logic("LC")$,
     ),
-    width: 240pt,
+    width: 640pt,
   )
 ]

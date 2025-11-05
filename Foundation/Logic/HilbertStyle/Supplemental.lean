@@ -389,14 +389,14 @@ lemma CCC! [DecidableEq F] : 𝓢 ⊢ φ ➝ (φ ➝ ψ) ➝ ψ := ⟨CCC⟩
 def CCC_of_C_right (h : 𝓢 ⊢! φ ➝ ψ) : 𝓢 ⊢! (χ ➝ φ) ➝ (χ ➝ ψ) := imply₂ ⨀ (C_of_conseq h)
 lemma CCC!_of_C!_right (h : 𝓢 ⊢ φ ➝ ψ) : 𝓢 ⊢ (χ ➝ φ) ➝ (χ ➝ ψ) := ⟨CCC_of_C_right h.some⟩
 
--- TODO: Actually this can be computable but it's too slow.
-noncomputable def CNNCCNNNN [DecidableEq F] : 𝓢 ⊢! ∼∼(φ ➝ ψ) ➝ (∼∼φ ➝ ∼∼ψ) := by
+
+def CNNCCNNNN [DecidableEq F] : 𝓢 ⊢! ∼∼(φ ➝ ψ) ➝ (∼∼φ ➝ ∼∼ψ) := by
   apply C_swap;
   apply deduct';
   exact C_trans (CNNNN_of_C $ deductInv $ of $ C_swap $ CCCNNNN) tne;
 @[simp] lemma CNNCCNNNN! [DecidableEq F] : 𝓢 ⊢ ∼∼(φ ➝ ψ) ➝ (∼∼φ ➝ ∼∼ψ) := ⟨CNNCCNNNN⟩
 
-noncomputable def CNNNN_of_NNC [DecidableEq F] (b : 𝓢 ⊢! ∼∼(φ ➝ ψ)) : 𝓢 ⊢! ∼∼φ ➝ ∼∼ψ := CNNCCNNNN ⨀ b
+def CNNNN_of_NNC [DecidableEq F] (b : 𝓢 ⊢! ∼∼(φ ➝ ψ)) : 𝓢 ⊢! ∼∼φ ➝ ∼∼ψ := CNNCCNNNN ⨀ b
 lemma CNNNN!_of_NNC! [DecidableEq F] (b : 𝓢 ⊢ ∼∼(φ ➝ ψ)) : 𝓢 ⊢ ∼∼φ ➝ ∼∼ψ := ⟨CNNNN_of_NNC b.some⟩
 
 def O_intro_of_KN (h : 𝓢 ⊢! φ ⋏ ∼φ) : 𝓢 ⊢! ⊥ := (CO_of_N $ K_right h) ⨀ (K_left h)
@@ -450,18 +450,16 @@ def KNN_of_NA [DecidableEq F] (b : 𝓢 ⊢! ∼(φ ⋎ ψ)) : 𝓢 ⊢! ∼φ �
 lemma KNN!_of_NA! [DecidableEq F] (b : 𝓢 ⊢ ∼(φ ⋎ ψ)) : 𝓢 ⊢ ∼φ ⋏ ∼ψ := ⟨KNN_of_NA b.some⟩
 
 
--- TODO: Actually this can be computable but it's too slow.
-noncomputable def CNKANN [DecidableEq F] [HasAxiomDNE 𝓢] : 𝓢 ⊢! ∼(φ ⋏ ψ) ➝ (∼φ ⋎ ∼ψ) := by
+def CNKANN [DecidableEq F] [HasAxiomDNE 𝓢] : 𝓢 ⊢! ∼(φ ⋏ ψ) ➝ (∼φ ⋎ ∼ψ) := by
   apply CN_of_CN_left;
   apply deduct';
   exact K_replace (KNN_of_NA $ FiniteContext.id) dne dne;
 @[simp] lemma CNKANN! [DecidableEq F] [HasAxiomDNE 𝓢] : 𝓢 ⊢ ∼(φ ⋏ ψ) ➝ (∼φ ⋎ ∼ψ) := ⟨CNKANN⟩
 
-noncomputable def ANN_of_NK [DecidableEq F] [HasAxiomDNE 𝓢] (b : 𝓢 ⊢! ∼(φ ⋏ ψ)) : 𝓢 ⊢! ∼φ ⋎ ∼ψ := CNKANN ⨀ b
+def ANN_of_NK [DecidableEq F] [HasAxiomDNE 𝓢] (b : 𝓢 ⊢! ∼(φ ⋏ ψ)) : 𝓢 ⊢! ∼φ ⋎ ∼ψ := CNKANN ⨀ b
 lemma ANN!_of_NK! [DecidableEq F] [HasAxiomDNE 𝓢] (b : 𝓢 ⊢ ∼(φ ⋏ ψ)) : 𝓢 ⊢ ∼φ ⋎ ∼ψ := ⟨ANN_of_NK b.some⟩
 
--- TODO: Actually this can be computable but it's too slow.
-noncomputable def AN_of_C [DecidableEq F] [HasAxiomDNE 𝓢] (d : 𝓢 ⊢! φ ➝ ψ) : 𝓢 ⊢! ∼φ ⋎ ψ := by
+def AN_of_C [DecidableEq F] [HasAxiomDNE 𝓢] (d : 𝓢 ⊢! φ ➝ ψ) : 𝓢 ⊢! ∼φ ⋎ ψ := by
   apply of_NN;
   apply N_of_CO;
   apply deduct';
@@ -471,14 +469,13 @@ noncomputable def AN_of_C [DecidableEq F] [HasAxiomDNE 𝓢] (d : 𝓢 ⊢! φ �
   exact d₂ ⨀ d₃;
 lemma AN!_of_C! [DecidableEq F] [HasAxiomDNE 𝓢] (d : 𝓢 ⊢ φ ➝ ψ) : 𝓢 ⊢ ∼φ ⋎ ψ := ⟨AN_of_C d.some⟩
 
-noncomputable def CCAN [DecidableEq F] [HasAxiomDNE 𝓢]  : 𝓢 ⊢! (φ ➝ ψ) ➝ (∼φ ⋎ ψ) := by
+def CCAN [DecidableEq F] [HasAxiomDNE 𝓢]  : 𝓢 ⊢! (φ ➝ ψ) ➝ (∼φ ⋎ ψ) := by
   apply deduct';
   apply AN_of_C;
   exact FiniteContext.byAxm;
 lemma CCAN! [DecidableEq F] [HasAxiomDNE 𝓢] : 𝓢 ⊢ (φ ➝ ψ) ➝ ∼φ ⋎ ψ := ⟨CCAN⟩
 
--- TODO: Actually this can be computable but it's too slow.
-noncomputable def CCNNNNNNC [DecidableEq F] [HasAxiomEFQ 𝓢] : 𝓢 ⊢! (∼∼φ ➝ ∼∼ψ) ➝ ∼∼(φ ➝ ψ) := by
+def CCNNNNNNC [DecidableEq F] [HasAxiomEFQ 𝓢] : 𝓢 ⊢! (∼∼φ ➝ ∼∼ψ) ➝ ∼∼(φ ➝ ψ) := by
   apply deduct';
   apply N_of_CO;
   exact C_trans
@@ -494,8 +491,7 @@ noncomputable def CCNNNNNNC [DecidableEq F] [HasAxiomEFQ 𝓢] : 𝓢 ⊢! (∼�
 
 @[simp] lemma CCNNNNNNC! [DecidableEq F] [HasAxiomEFQ 𝓢] : 𝓢 ⊢ (∼∼φ ➝ ∼∼ψ) ➝ ∼∼(φ ➝ ψ) := ⟨CCNNNNNNC⟩
 
--- TODO: Actually this can be computable but it's too slow.
-noncomputable def NNC_of_CNNNN [DecidableEq F] [HasAxiomEFQ 𝓢] (b : 𝓢 ⊢! ∼∼φ ➝ ∼∼ψ) : 𝓢 ⊢! ∼∼(φ ➝ ψ) := CCNNNNNNC⨀ b
+def NNC_of_CNNNN [DecidableEq F] [HasAxiomEFQ 𝓢] (b : 𝓢 ⊢! ∼∼φ ➝ ∼∼ψ) : 𝓢 ⊢! ∼∼(φ ➝ ψ) := CCNNNNNNC⨀ b
 lemma NNC!_of_CNNNN! [DecidableEq F] [HasAxiomEFQ 𝓢] (b : 𝓢 ⊢ ∼∼φ ➝ ∼∼ψ) : 𝓢 ⊢ ∼∼(φ ➝ ψ) := ⟨NNC_of_CNNNN b.some⟩
 
 section
@@ -515,8 +511,8 @@ end
 
 section
 
--- TODO: Actually this can be computable but it's too slow.
-noncomputable instance [DecidableEq F] [HasAxiomDNE 𝓢] : HasAxiomLEM 𝓢 where
+
+instance [DecidableEq F] [HasAxiomDNE 𝓢] : HasAxiomLEM 𝓢 where
   lem _ := A_of_ANNNN $ AN_of_C dni
 
 
@@ -534,10 +530,10 @@ instance [DecidableEq F] [HasAxiomDNE 𝓢] : HasAxiomElimContra 𝓢 where
 
 end
 
-noncomputable def ECAN [DecidableEq F] [HasAxiomDNE 𝓢] : 𝓢 ⊢! (φ ➝ ψ) ⭤ (∼φ ⋎ ψ) := E_intro
+def ECAN [DecidableEq F] [HasAxiomDNE 𝓢] : 𝓢 ⊢! (φ ➝ ψ) ⭤ (∼φ ⋎ ψ) := E_intro
   CCAN (deduct' (A_cases CNC imply₁ byAxm₀))
 
-noncomputable def ECAN! [DecidableEq F] [HasAxiomDNE 𝓢] : 𝓢 ⊢ (φ ➝ ψ) ⭤ (∼φ ⋎ ψ) := ⟨ECAN⟩
+def ECAN! [DecidableEq F] [HasAxiomDNE 𝓢] : 𝓢 ⊢ (φ ➝ ψ) ⭤ (∼φ ⋎ ψ) := ⟨ECAN⟩
 
 def EConj₂Conj : (Γ : List F) → 𝓢 ⊢! ⋀Γ ⭤ Γ.conj
   | []          => E_Id ⊤

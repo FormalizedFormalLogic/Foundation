@@ -24,22 +24,27 @@ name = "verso"
 name = "Foundation"
 
 [[lean_exe]]
-name = "generate_arith_zoo"
+name = "Zoo_Arith"
 root = "Zoo.Arith"
 supportInterpreter = true
 
 [[lean_exe]]
-name = "generate_setTheory_zoo"
+name = "Zoo_SetTheory"
 root = "Zoo.SetTheory"
 supportInterpreter = true
 
 [[lean_exe]]
-name = "generate_modal_zoo"
+name = "Zoo_Modal"
 root = "Zoo.Modal"
 supportInterpreter = true
 
 [[lean_exe]]
-name = "generate_propositional_zoo"
+name = "Zoo_InterpretabilityLogic"
+root = "Zoo.InterpretabilityLogic"
+supportInterpreter = true
+
+[[lean_exe]]
+name = "Zoo_Propositional"
 root = "Zoo.Propositional"
 supportInterpreter = true
 

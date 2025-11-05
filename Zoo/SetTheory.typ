@@ -2,16 +2,16 @@
 
 #set page(width: auto, height: auto, margin: 24pt)
 
-#let omitLabels = ("𝗔𝗖")
+#let omitLabels = "𝗔𝗖"
 
-#let arrows = json("./setTheory.json").map(((from, to, type)) => {
+#let arrows = json("./SetTheory.json").map(((from, to, type)) => {
   if omitLabels.contains(from) == false and omitLabels.contains(from) == false {
     if type == "ssub" {
-      return strfmt("\"{}\" -> \"{}\"", from, to)
+      return strfmt("\"{}\" -> \"{}\"", to, from)
     } else if type == "sub" {
-      return strfmt("\"{}\" -> \"{}\" [style=dashed] ", from, to)
+      return strfmt("\"{}\" -> \"{}\" [style=dashed] ", to, from)
     } else if type == "sorry" {
-      return strfmt("\"{}\" -> \"{}\" [color=red; style=dashed] ", from, to)
+      return strfmt("\"{}\" -> \"{}\" [color=red; style=dashed] ", to, from)
     }
   }
 })
@@ -30,7 +30,7 @@
     raw(
       "
   digraph ModalTheorysZoo {
-    rankdir = BT;
+    rankdir = RL;
 
     node [
       shape=none
@@ -56,6 +56,6 @@
       "𝗭𝗙": $TheoryZF$,
       "𝗭𝗙𝗖": $TheoryZFC$,
     ),
-    width: 240pt,
+    width: 640pt,
   )
 ]

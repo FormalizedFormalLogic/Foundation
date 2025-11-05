@@ -1,5 +1,6 @@
 import Foundation.InterpretabilityLogic.Formula.Substitution
 import Foundation.InterpretabilityLogic.Axioms
+import Foundation.InterpretabilityLogic.Logic.Basic
 import Foundation.InterpretabilityLogic.Formula.OfModal
 import Foundation.Modal.Kripke.Logic.GL.Completeness
 
@@ -9,16 +10,31 @@ open Entailment
 
 namespace Veltman
 
+/--
+  **Note**:
+
+  To be precise, we call _Veltman frame_ when `S` has reflexive, transitive and satisfies `S_IL` conditions,
+  i.e. satisfies `IsIL`.
+  Frames that impose none of these conditions are called _Veltman prestructures_ or _ILMinus frames_.
+  However, since making such distinctions is cumbersome in formalizing,
+  we will refer to frames where only `S` is defined as Veltman frames in this project.
+-/
 structure Frame extends toKripkeFrame : Modal.Kripke.Frame where
-  [F_GL : toKripkeFrame.IsInfiniteGL]
-  S : (w : World) → (HRel { v // Rel w v })
-  S_refl  : ∀ w, IsRefl _ (S w)
-  S_trans : ∀ w, IsTrans _ (S w)
+  [isGL : toKripkeFrame.IsGL]
+  S : (w : World) → HRel World
+  S_cond {w x y} : S w x y → w ≺ x
 
-instance {F :  Frame} : F.IsInfiniteGL := F.F_GL
+namespace Frame
 
-class Frame.IsIL (F : Frame) where
-  S_IL : ∀ w : F.World, ∀ x y : { v // w ≺ v }, (x.1 ≺ y.1) → (F.S w x y)
+instance {F : Veltman.Frame} : F.IsGL := F.isGL
+
+abbrev SRel' {F : Veltman.Frame} (w : outParam F.World) (x y : F.World) := F.S w x y
+notation:45 x:max " ≺[" w "] " y:max => SRel' w x y
+
+abbrev SInvRel {F : Veltman.Frame} (w : outParam F.World) (x y : F.World) := F.S w y x
+notation:45 x:max " ≻[" w "] " y:max => SInvRel w x y
+
+end Frame
 
 abbrev FrameClass := Set (Frame)
 
@@ -43,7 +59,7 @@ def Satisfies (M : Veltman.Model) (x : M.World) : Formula ℕ → Prop
   | ⊥  => False
   | φ ➝ ψ => (Satisfies M x φ) ➝ (Satisfies M x ψ)
   | □φ   => ∀ y, x ≺ y → (Satisfies M y φ)
-  | φ ▷ ψ => ∀ y, (Rxy : (x ≺ y)) → Satisfies M y φ → (∃ z : { v // x ≺ v }, M.S x ⟨y, Rxy⟩ z ∧ Satisfies M z ψ)
+  | φ ▷ ψ => ∀ y, x ≺ y → Satisfies M y φ → (∃ z, y ≺[x] z ∧ Satisfies M z ψ)
 
 
 namespace Satisfies
@@ -77,7 +93,7 @@ protected lemma not_box_def : ¬x ⊧ □φ ↔ (∃ y, x ≺ y ∧ ¬y ⊧ φ) 
 protected lemma dia_def : x ⊧ ◇φ ↔ ∃ y, x ≺ y ∧ y ⊧ φ := by simp [Satisfies];
 protected lemma not_dia_def : ¬x ⊧ ◇φ ↔ ∀ y, x ≺ y → ¬(y ⊧ φ) := by simp [Satisfies];
 
-protected lemma rhd_def : x ⊧ φ ▷ ψ ↔ ∀ y, (Rxy : (x ≺ y)) → (y ⊧ φ) → (∃ z : { v // x ≺ v }, M.S x ⟨y, Rxy⟩ z ∧ z.1 ⊧ ψ) := by simp [Satisfies];
+protected lemma rhd_def : x ⊧ φ ▷ ψ ↔ ∀ y, x ≺ y → Satisfies M y φ → (∃ z, y ≺[x] z ∧ Satisfies M z ψ) := by simp [Satisfies];
 
 protected instance : Semantics.Tarski (M.World) where
   models_verum := λ _ => Satisfies.top_def;
@@ -122,15 +138,15 @@ lemma iff_subst_self {x : F.World} (s : Substitution ℕ) :
   | hrhd φ ψ ihφ ihψ =>
     constructor;
     . intro h y Rxy hy;
-      obtain ⟨⟨z, Rxz⟩, Sxyz, hz₂⟩ := h _ Rxy $ ihφ.mpr hy;
-      use ⟨z, Rxz⟩;
+      obtain ⟨z, Sxyz, hz⟩ := h y Rxy $ ihφ.mpr hy;
+      use z;
       constructor;
       . assumption;
       . apply ihψ.mp;
         assumption;
     . intro h y Rxy hy;
-      obtain ⟨⟨z, Rxz⟩, Sxyz, hz₂⟩ := h _ Rxy $ ihφ.mp hy;
-      use ⟨z, Rxz⟩;
+      obtain ⟨z, Sxyz, hz₂⟩ := h y Rxy $ ihφ.mp hy;
+      use z;
       constructor;
       . assumption;
       . apply ihψ.mpr;
@@ -223,56 +239,6 @@ protected lemma imply₂ : M ⊧ (Axioms.Imply₂ φ ψ χ) := by simp [ValidOnM
 
 protected lemma elimContra : M ⊧ (Axioms.ElimContra φ ψ) := by simp [ValidOnModel]; tauto;
 
-protected lemma axiomK : M ⊧ (Modal.Axioms.K φ ψ)  := by
-  intro V;
-  apply Satisfies.imp_def.mpr;
-  intro hpq;
-  apply Satisfies.imp_def.mpr;
-  intro hp x Rxy;
-  replace hpq := Satisfies.imp_def.mp $ hpq x Rxy;
-  replace hp := hp x Rxy;
-  exact hpq hp;
-
-protected lemma axiomJ1 : M ⊧ Axioms.J1 φ ψ := by
-  intro x h y Rxy hy;
-  use ⟨y, Rxy⟩;
-  constructor;
-  . apply M.toVeltmanFrame.S_refl x |>.refl;
-  . exact h y Rxy hy;
-
-protected lemma axiomJ2 : M ⊧ Axioms.J2 φ ψ χ := by
-  intro x h₁ h₂ y Rxy hy;
-  obtain ⟨⟨u, Rxu⟩, Sxyu, hu⟩ := h₁ _ Rxy hy;
-  obtain ⟨⟨v, Ruv⟩, Sxuv, hv⟩ := h₂ u Rxu hu;
-  use ⟨v, Ruv⟩;
-  constructor;
-  . apply M.toVeltmanFrame.S_trans x |>.trans;
-    . exact Sxyu;
-    . exact Sxuv;
-  . assumption;
-
-protected lemma axiomJ3 : M ⊧ Axioms.J3 φ ψ χ := by
-  intro x h₁ h₂ y Rxy h₃;
-  rcases Veltman.Satisfies.or_def.mp h₃ with (h₃ | h₃);
-  . obtain ⟨⟨u, Rxu⟩, Sxyu, hu⟩ := h₁ _ Rxy h₃; use ⟨u, Rxu⟩;
-  . obtain ⟨⟨u, Rxu⟩, Sxyu, hu⟩ := h₂ _ Rxy h₃; use ⟨u, Rxu⟩;
-
-protected lemma axiomJ4 : M ⊧ Axioms.J4 φ ψ := by
-  intro x h₁ h₂;
-  obtain ⟨y, Rxy, hy⟩ := Satisfies.dia_def.mp h₂;
-  obtain ⟨⟨z, Rxz⟩, Sxyz, hz⟩ := h₁ _ Rxy hy;
-  apply Satisfies.dia_def.mpr;
-  use z;
-  tauto;
-
-protected lemma axiomJ5 [M.toVeltmanFrame.IsIL] : M ⊧ Axioms.J5 φ := by
-  intro x y Rxy h;
-  obtain ⟨z, Ryz, hz⟩ := Satisfies.dia_def.mp h;
-  use ⟨z, M.toKripkeFrame.trans Rxy Ryz⟩;
-  constructor;
-  . apply Veltman.Frame.IsIL.S_IL; simpa;
-  . assumption;
-
 end ValidOnModel
 
 
@@ -319,27 +285,12 @@ lemma iff_not_exists_model_world :  (¬F ⊧ φ) ↔ (∃ M : Veltman.Model, ∃
 
 alias ⟨exists_model_world_of_not, not_of_exists_model_world⟩ := iff_not_exists_model_world
 
-
-protected lemma mdp (hpq : F ⊧ φ ➝ ψ) (hp : F ⊧ φ) : F ⊧ ψ := by
-  intro V x;
-  exact (hpq V x) (hp V x);
-
-protected lemma nec (h : F ⊧ φ) : F ⊧ □φ := by
-  intro V x y _;
-  exact h V y;
-
 protected lemma subst (h : F ⊧ φ) : F ⊧ φ⟦s⟧ := by
   by_contra hC;
   replace hC := iff_not_exists_valuation_world.mp hC;
   obtain ⟨V, ⟨x, hx⟩⟩ := hC;
   apply Satisfies.iff_subst_self s |>.not.mpr hx;
   exact h (λ w a => Satisfies ⟨F, V⟩ w (atom a⟦s⟧)) x;
-
-protected lemma imply₁ : F ⊧ (Axioms.Imply₁ φ ψ) := fun _ ↦ ValidOnModel.imply₁
-
-protected lemma imply₂ : F ⊧ (Axioms.Imply₂ φ ψ χ) := fun _ ↦ ValidOnModel.imply₂
-
-protected lemma elimContra : F ⊧ (Axioms.ElimContra φ ψ) := fun _ ↦ ValidOnModel.elimContra
 
 /-- For **modal** formula `φ`, Veltman frame `F`. `F ⊧ φ` if and only if `F.toKripkeFrame ⊧ φ` -/
 lemma kripkeLift {φ : Modal.Formula _} : F ⊧ ↑φ ↔ F.toKripkeFrame ⊧ φ := by
@@ -350,19 +301,6 @@ lemma kripkeLift {φ : Modal.Formula _} : F ⊧ ↑φ ↔ F.toKripkeFrame ⊧ φ
     apply ValidOnModel.kripkeLift.mpr;
     apply h;
 
-@[simp] protected lemma axiomK : F ⊧ (Modal.Axioms.K φ ψ) := fun _ ↦ ValidOnModel.axiomK
-
-@[simp] protected lemma axiomL : F ⊧ (Modal.Axioms.L φ) := ValidOnFrame.subst (s := λ _ => φ) $ kripkeLift.mpr $ Modal.Kripke.validate_AxiomL_of_trans_cwf
-
-@[simp] protected lemma axiomJ1 : F ⊧ Axioms.J1 φ ψ := fun _ ↦ ValidOnModel.axiomJ1
-
-@[simp] protected lemma axiomJ2 : F ⊧ Axioms.J2 φ ψ χ := fun _ ↦ ValidOnModel.axiomJ2
-
-@[simp] protected lemma axiomJ3 : F ⊧ Axioms.J3 φ ψ χ := fun _ ↦ ValidOnModel.axiomJ3
-
-@[simp] protected lemma axiomJ4 : F ⊧ Axioms.J4 φ ψ := fun _ ↦ ValidOnModel.axiomJ4
-
-@[simp] protected lemma axiomJ5 [F.IsIL] : F ⊧ Axioms.J5 φ := fun _ ↦ ValidOnModel.axiomJ5
 
 end ValidOnFrame
 
@@ -370,6 +308,10 @@ end Formula.Veltman
 
 
 namespace Veltman
+
+lemma validate_of_logic_provable {F : Veltman.Frame} {L : Logic ℕ} (h : F ⊧* L) (hL : L ⊢ φ) : F ⊧ φ := by
+  apply h.models;
+  rwa [Logic.iff_provable] at hL;
 
 section
 
@@ -398,6 +340,89 @@ lemma iff_not_validOnFrameClass_exists_valuation_world : (¬C ⊧ φ) ↔ (∃ F
   push_neg;
   tauto;
 alias ⟨exists_valuation_world_of_not_validOnFrameClass, not_validOnFrameClass_of_exists_valuation_world⟩ := iff_not_validOnFrameClass_exists_valuation_world
+
+end
+
+
+section
+
+open Formula.Veltman
+variable {F : Veltman.Frame} {φ ψ χ : Formula ℕ}
+
+@[simp high, grind]
+lemma validate_imply₁ : F ⊧ (Axioms.Imply₁ φ ψ) := by tauto;
+
+@[simp high, grind]
+lemma validate_imply₂ : F ⊧ (Axioms.Imply₂ φ ψ χ) := by tauto;
+
+@[simp high, grind]
+lemma validate_elimContra : F ⊧ (Axioms.ElimContra φ ψ) := by
+  intro V x;
+  simp [Semantics.Models, Satisfies];
+  tauto;
+
+@[grind]
+lemma validate_mdp (hpq : F ⊧ φ ➝ ψ) (hp : F ⊧ φ) : F ⊧ ψ := by
+  intro V x;
+  exact (hpq V x) (hp V x);
+
+@[grind]
+lemma validate_nec (h : F ⊧ φ) : F ⊧ □φ := by
+  intro V x y _;
+  exact h V y;
+
+@[simp high, grind]
+lemma validate_axiomK : F ⊧ (Modal.Axioms.K φ ψ) := by
+  intro V x;
+  apply Satisfies.imp_def.mpr;
+  intro hpq;
+  apply Satisfies.imp_def.mpr;
+  intro hp x Rxy;
+  replace hpq := Satisfies.imp_def.mp $ hpq x Rxy;
+  replace hp := hp x Rxy;
+  exact hpq hp;
+
+@[simp high, grind]
+lemma validate_axiomL : F ⊧ (Modal.Axioms.L φ) :=
+  ValidOnFrame.subst (s := λ _ => φ) $ ValidOnFrame.kripkeLift.mpr $ Modal.Kripke.validate_AxiomL_of_trans_cwf (φ := (.atom 0))
+
+@[grind ⇒]
+lemma validate_R1 (h : F ⊧ φ ➝ ψ) : F ⊧ χ ▷ φ ➝ χ ▷ ψ := by
+  rintro V x h₁ y Rxy h₂;
+  obtain ⟨z, _, _⟩ := h₁ y Rxy h₂;
+  use z;
+  constructor;
+  . assumption;
+  . apply h;
+    assumption;
+
+@[grind ⇒]
+lemma validate_R2 (h : F ⊧ φ ➝ ψ) : F ⊧ ψ ▷ χ ➝ φ ▷ χ := by
+  rintro V x h₁ y Rxy h₂;
+  obtain ⟨z, Sxyz, hzχ⟩ := h₁ y Rxy $ by
+    apply h;
+    assumption;
+  use z;
+
+@[simp high, grind]
+lemma validate_axiomJ3 : F ⊧ Axioms.J3 φ ψ χ := by
+  intro V x h₁ h₂ y Rxy h₃;
+  rcases Satisfies.or_def.mp h₃ with (h₃ | h₃);
+  . obtain ⟨u, Sxyu, hu⟩ := h₁ y Rxy h₃; use u;
+  . obtain ⟨u, Sxyu, hu⟩ := h₂ y Rxy h₃; use u;
+
+@[simp high, grind]
+lemma validate_axiomJ6 : F ⊧ Axioms.J6 φ := by
+  intro V x;
+  apply Satisfies.iff_def.mpr
+  constructor;
+  . rintro h y Rxy hy;
+    have := h y Rxy;
+    contradiction;
+  . intro h y Rxy;
+    by_contra hy;
+    obtain ⟨z, _, _⟩ := h y Rxy hy;
+    contradiction;
 
 end
 

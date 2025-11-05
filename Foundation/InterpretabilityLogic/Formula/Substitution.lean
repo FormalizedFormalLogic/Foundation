@@ -26,6 +26,7 @@ lemma subst_falsum : ⊥⟦s⟧ = ⊥ := rfl
 lemma subst_verum : ⊤⟦s⟧ = ⊤ := rfl
 lemma subst_neg : (∼φ)⟦s⟧ = ∼(φ⟦s⟧) := rfl
 lemma subst_imp : (φ ➝ ψ)⟦s⟧ = (φ⟦s⟧) ➝ (ψ⟦s⟧) := rfl
+lemma subst_iff : (φ ⭤ ψ)⟦s⟧ = (φ⟦s⟧) ⭤ (ψ⟦s⟧) := rfl
 lemma subst_and : (φ ⋏ ψ)⟦s⟧ = (φ⟦s⟧) ⋏ (ψ⟦s⟧) := rfl
 lemma subst_or : (φ ⋎ ψ)⟦s⟧ = (φ⟦s⟧) ⋎ (ψ⟦s⟧) := rfl
 lemma subst_box : (□φ)⟦s⟧ = □(φ⟦s⟧) := rfl
@@ -38,6 +39,7 @@ attribute [simp, grind]
   subst_verum
   subst_neg
   subst_imp
+  subst_iff
   subst_and
   subst_or
   subst_box
