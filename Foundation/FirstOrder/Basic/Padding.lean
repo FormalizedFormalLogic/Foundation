@@ -1,6 +1,6 @@
 import Foundation.FirstOrder.Basic.Semantics.Semantics
 import Foundation.FirstOrder.Basic.Calculus
-import Foundation.Logic.HilbertStyle.Supplemental
+import Foundation.Propositional.Entailment.Cl.Basic
 
 namespace LO.FirstOrder
 

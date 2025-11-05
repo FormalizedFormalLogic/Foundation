@@ -1,6 +1,6 @@
 import Foundation.FirstOrder.Bootstrapping.Syntax.Formula.Typed
 import Foundation.FirstOrder.Bootstrapping.Syntax.Proof.Basic
-import Foundation.Logic.HilbertStyle.Supplemental
+import Foundation.Propositional.Entailment.Cl.Basic
 
 /-!
 # Typed internal Tait-calculus

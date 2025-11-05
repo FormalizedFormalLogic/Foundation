@@ -1,5 +1,5 @@
 import Foundation.Logic.Entailment
-import Foundation.Logic.HilbertStyle.Supplemental
+import Foundation.Propositional.Entailment.Cl.Basic
 
 /-!
 # Sequent calculus and variants

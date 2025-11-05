@@ -1,4 +1,4 @@
-import Foundation.Logic.HilbertStyle.Supplemental
+import Foundation.Propositional.Entailment.Cl.Basic
 
 namespace LO.Entailment
 

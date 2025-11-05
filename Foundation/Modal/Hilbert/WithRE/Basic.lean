@@ -4,7 +4,7 @@ import Foundation.Modal.Entailment.EMCN
 import Foundation.Modal.Entailment.END
 import Foundation.Modal.Entailment.ET5
 import Foundation.Modal.Entailment.EMK
-import Foundation.Logic.HilbertStyle.Lukasiewicz
+import Foundation.Propositional.Entailment.Cl.Lukasiewicz
 import Foundation.Logic.Incomparable
 import Foundation.Modal.Logic.Basic
 import Foundation.Modal.Hilbert.Axiom

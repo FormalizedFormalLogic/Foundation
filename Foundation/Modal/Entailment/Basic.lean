@@ -1,5 +1,5 @@
 import Foundation.Logic.Disjunctive
-import Foundation.Logic.HilbertStyle.Supplemental
+import Foundation.Propositional.Entailment.Cl.Basic
 import Foundation.Propositional.Entailment.Cl
 import Foundation.Modal.Axioms
 

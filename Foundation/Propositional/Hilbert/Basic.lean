@@ -1,4 +1,4 @@
-import Foundation.Logic.HilbertStyle.Supplemental
+import Foundation.Propositional.Entailment.Cl.Basic
 import Foundation.Propositional.Hilbert.Axiom
 import Foundation.Propositional.Formula
 import Foundation.Propositional.Logic.Basic

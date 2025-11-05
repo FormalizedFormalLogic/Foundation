@@ -1,7 +1,7 @@
 import Foundation.Modal.Formula
 import Foundation.Modal.Entailment.K
 import Foundation.Propositional.Formula
-import Foundation.Logic.HilbertStyle.Supplemental
+import Foundation.Propositional.Entailment.Cl.Basic
 import Foundation.Vorspiel.List.Supplemental
 import Foundation.Vorspiel.Finset.Supplemental
 import Foundation.Vorspiel.Set.Supplemental
