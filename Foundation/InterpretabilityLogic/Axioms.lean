@@ -1,6 +1,9 @@
 /-
   Naming of axioms are refered from:
-  - T. Kurahashi, Y. Okawa, "Modal completeness of sublogics of the  interpretability logic IL"
+
+  - T. Kurahashi, Y. Okawa, 2021, "Modal completeness of sublogics of the  interpretability logic IL"
+  - A. Visser, 1988, "Preliminary Notes on Interpretability Logic"
+  - V. Švejdar, 1991, "Some independence results in interpretability logic"
 -/
 import Foundation.InterpretabilityLogic.LogicSymbol
 
@@ -50,5 +53,11 @@ protected abbrev P := (φ ▷ ψ) ➝ □(φ ▷ ψ)
 
 /-- Montagna's Principle -/
 protected abbrev M := (φ ▷ ψ) ➝ ((φ ⋏ □χ) ▷ (ψ ⋏ □χ))
+
+/--
+  - Visser 1988, `K12`
+  - Švejdar 1991, `KM1`
+-/
+protected abbrev KM1 := (φ ▷ ◇ψ) ➝ □(φ ➝ ◇ψ)
 
 end LO.InterpretabilityLogic.Axioms

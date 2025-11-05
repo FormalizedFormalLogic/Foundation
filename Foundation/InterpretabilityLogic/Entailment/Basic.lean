@@ -280,8 +280,31 @@ class HasAxiomP (𝓢 : S) where
   PP! {φ ψ : F} : 𝓢 ⊢! Axioms.P φ ψ
 export HasAxiomP (PP!)
 
+
 class HasAxiomM (𝓢 : S) where
-  MP! {φ ψ χ : F} : 𝓢 ⊢! Axioms.M φ ψ χ
-export HasAxiomM (MP!)
+  M! {φ ψ χ : F} : 𝓢 ⊢! Axioms.M φ ψ χ
+export HasAxiomM (M!)
+
+section
+
+variable [HasAxiomM 𝓢]
+@[simp] lemma M : 𝓢 ⊢ Axioms.M φ ψ χ := ⟨M!⟩
+
+open FiniteContext in instance [Entailment.Minimal 𝓢] (Γ : FiniteContext F 𝓢) : HasAxiomM Γ := ⟨λ {_} => of M!⟩
+open Context in instance [Entailment.Minimal 𝓢] (Γ : Context F 𝓢) : HasAxiomM Γ := ⟨λ {_} => of M!⟩
+
+end
+
+
+class HasAxiomKM1 (𝓢 : S) where
+  KM1! {φ ψ : F} : 𝓢 ⊢! Axioms.KM1 φ ψ
+export HasAxiomKM1 (KM1!)
+
+section
+variable [HasAxiomKM1 𝓢]
+@[simp] lemma KM1 : 𝓢 ⊢ Axioms.KM1 φ ψ := ⟨KM1!⟩
+open FiniteContext in instance [Entailment.Minimal 𝓢] (Γ : FiniteContext F 𝓢) : HasAxiomKM1 Γ := ⟨λ {_} => of KM1!⟩
+open Context in instance [Entailment.Minimal 𝓢] (Γ : Context F 𝓢) : HasAxiomKM1 Γ := ⟨λ {_} => of KM1!⟩
+end
 
 end LO.InterpretabilityLogic.Entailment

@@ -80,6 +80,15 @@ class HasJ6 where
   p : α
   mem_J6 : InterpretabilityLogic.Axioms.J6 (.atom p) ∈ Ax := by grind;
 
+class HasM where
+  p : α
+  q : α
+  r : α
+  ne_pq : p ≠ q := by trivial;
+  ne_qr : q ≠ r := by trivial;
+  ne_rp : r ≠ p := by trivial;
+  mem_M : InterpretabilityLogic.Axioms.M (.atom p) (.atom q) (.atom r) ∈ Ax := by grind;
+
 end Axiom
 
 end LO.InterpretabilityLogic

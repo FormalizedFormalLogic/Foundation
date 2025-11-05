@@ -4,6 +4,7 @@ import Foundation.InterpretabilityLogic.Entailment.ILMinus_J1
 import Foundation.InterpretabilityLogic.Entailment.ILMinus_J2
 import Foundation.InterpretabilityLogic.Entailment.ILMinus_J4
 import Foundation.InterpretabilityLogic.Entailment.ILMinus_J5
+import Foundation.InterpretabilityLogic.Entailment.ILMinus_M
 import Foundation.InterpretabilityLogic.Hilbert.Axiom
 import Batteries.Tactic.Instances
 
@@ -208,6 +209,18 @@ instance [Ax.HasJ6] : InterpretabilityLogic.Entailment.HasAxiomJ6 (Hilbert.Minim
       (s := λ b => if (HasJ6.p Ax) = b then φ else (.atom b))
       (HasJ6.mem_J6);
 
+instance [Ax.HasM] : InterpretabilityLogic.Entailment.HasAxiomM (Hilbert.Minimal Ax) where
+  M! {φ ψ χ} := by
+    constructor;
+    simpa [HasM.ne_pq, HasM.ne_qr, HasM.ne_rp.symm] using Hilbert.Minimal.axm
+      (φ := InterpretabilityLogic.Axioms.M (.atom (HasM.p Ax)) (.atom (HasM.q Ax)) (.atom (HasM.r Ax)))
+      (s := λ b =>
+        if (HasM.p Ax) = b then φ
+        else if (HasM.q Ax) = b then ψ
+        else if (HasM.r Ax) = b then χ
+        else (.atom b))
+      $ HasM.mem_M;
+
 end
 
 end Hilbert.Minimal
@@ -234,7 +247,7 @@ section
 
 namespace Hilbert.Minimal
 
-inductive AxiomName | J1 | J2 | J2Plus | J4 | J4Plus | J5 deriving DecidableEq
+inductive AxiomName | J1 | J2 | J2Plus | J4 | J4Plus | J5 | M deriving DecidableEq
 
 variable {l : List AxiomName}
 
@@ -246,7 +259,9 @@ def buildAxioms (l : List AxiomName) : Axiom ℕ :=
     (if l.contains .J2Plus then { InterpretabilityLogic.Axioms.J2Plus (.atom 0) (.atom 1) (.atom 2) } else ∅) ∪
     (if l.contains .J4 then { InterpretabilityLogic.Axioms.J4 (.atom 0) (.atom 1) } else ∅) ∪
     (if l.contains .J4Plus then { InterpretabilityLogic.Axioms.J4Plus (.atom 0) (.atom 1) (.atom 2) } else ∅) ∪
-    (if l.contains .J5 then { InterpretabilityLogic.Axioms.J5 (.atom 0) } else ∅)
+    (if l.contains .J5 then { InterpretabilityLogic.Axioms.J5 (.atom 0) } else ∅) ∪
+    (if l.contains .M then { InterpretabilityLogic.Axioms.M (.atom 0) (.atom 1) (.atom 2) } else ∅)
+
 
 example : buildAxioms [.J1, .J2] = {
   Axioms.J1 (.atom 0) (.atom 1),
@@ -287,6 +302,10 @@ instance buildAxioms.instHasJ5 (h : l.contains .J5 := by decide) : (buildAxioms 
   p := 0;
   mem_J5 := by simp only [buildAxioms, h]; grind;
 
+instance buildAxioms.instHasM (h : l.contains .M := by decide) : (buildAxioms l).HasM where
+  p := 0; q := 1; r := 2;
+  mem_M := by simp only [buildAxioms, h]; grind;
+
 open Lean in
 macro "defineILMinus" name:ident "[" xs:ident,* "]" : command => do
   let xs ← xs.getElems.mapM $ λ stx => pure (Lean.mkIdentFrom stx stx.getId)
@@ -300,6 +319,7 @@ macro "defineILMinus" name:ident "[" xs:ident,* "]" : command => do
   let instJ4     ← if xs.contains (mkIdent `J4)     then `(command| instance : Axiom.HasJ4 $axiomsName := buildAxioms.instHasJ4)         else `(section end)
   let instJ4Plus ← if xs.contains (mkIdent `J4Plus) then `(command| instance : Axiom.HasJ4Plus $axiomsName := buildAxioms.instHasJ4Plus) else `(section end)
   let instJ5     ← if xs.contains (mkIdent `J5)     then `(command| instance : Axiom.HasJ5 $axiomsName := buildAxioms.instHasJ5)         else `(section end)
+  let instM      ← if xs.contains (mkIdent `M)      then `(command| instance : Axiom.HasM $axiomsName := buildAxioms.instHasM)           else `(section end)
 
   let instILMinusJ1     ← if xs.contains (mkIdent `J1)     then `(command| instance : Entailment.ILMinus_J1 $logicName where)     else `(section end)
   let instILMinusJ2     ← if xs.contains (mkIdent `J2)     then `(command| instance : Entailment.ILMinus_J2 $logicName where)     else `(section end)
@@ -307,6 +327,7 @@ macro "defineILMinus" name:ident "[" xs:ident,* "]" : command => do
   let instILMinusJ4     ← if xs.contains (mkIdent `J4)     then `(command| instance : Entailment.ILMinus_J4 $logicName where)     else `(section end)
   let instILMinusJ4Plus ← if xs.contains (mkIdent `J4Plus) then `(command| instance : Entailment.ILMinus_J4Plus $logicName where) else `(section end)
   let instILMinusJ5     ← if xs.contains (mkIdent `J5)     then `(command| instance : Entailment.ILMinus_J5 $logicName where)     else `(section end)
+  let instILMinusM      ← if xs.contains (mkIdent `M)      then `(command| instance : Entailment.ILMinus_M $logicName where)      else `(section end)
 
   `(
     protected abbrev $axiomsName := buildAxioms [$[$xs],*]
@@ -319,6 +340,7 @@ macro "defineILMinus" name:ident "[" xs:ident,* "]" : command => do
     $instJ4
     $instJ4Plus
     $instJ5
+    $instM
 
     end $axiomsName
 
@@ -332,6 +354,7 @@ macro "defineILMinus" name:ident "[" xs:ident,* "]" : command => do
     $instILMinusJ4
     $instILMinusJ4Plus
     $instILMinusJ5
+    $instILMinusM
     end $logicName
   )
 
@@ -352,45 +375,6 @@ defineILMinus ILMinus_J4Plus [J4Plus]
 defineILMinus ILMinus_J4Plus_J5 [J4Plus, J5]
 defineILMinus ILMinus_J5 [J5]
 
--- instance : InterpretabilityLogic.ILMinus ⪯ InterpretabilityLogic.ILMinus_J1 := weakerThan_of_subset_axioms $ by grind;
-instance : InterpretabilityLogic.ILMinus ⪯ InterpretabilityLogic.ILMinus_J4Plus := weakerThan_of_subset_axioms $ by grind;
-instance : InterpretabilityLogic.ILMinus ⪯ InterpretabilityLogic.ILMinus_J5 := weakerThan_of_subset_axioms $ by grind;
-instance : InterpretabilityLogic.ILMinus_J1 ⪯ InterpretabilityLogic.ILMinus_J1_J4Plus := weakerThan_of_subset_axioms $ by grind;
-instance : InterpretabilityLogic.ILMinus_J1 ⪯ InterpretabilityLogic.ILMinus_J1_J5 := weakerThan_of_subset_axioms $ by grind;
-instance : InterpretabilityLogic.ILMinus_J1_J2 ⪯ InterpretabilityLogic.ILMinus_J1_J2_J5 := weakerThan_of_subset_axioms $ by grind;
-instance : InterpretabilityLogic.ILMinus_J1_J4Plus ⪯ InterpretabilityLogic.ILMinus_J1_J4Plus_J5 := weakerThan_of_subset_axioms $ by grind;
-instance : InterpretabilityLogic.ILMinus_J1_J5 ⪯ InterpretabilityLogic.ILMinus_J1_J4Plus_J5 := weakerThan_of_subset_axioms $ by grind;
-instance : InterpretabilityLogic.ILMinus_J2Plus ⪯ InterpretabilityLogic.ILMinus_J2Plus_J5 := weakerThan_of_subset_axioms $ by grind;
-instance : InterpretabilityLogic.ILMinus_J4Plus ⪯ InterpretabilityLogic.ILMinus_J1_J4Plus := weakerThan_of_subset_axioms $ by grind;
-instance : InterpretabilityLogic.ILMinus_J4Plus ⪯ InterpretabilityLogic.ILMinus_J4Plus_J5 := weakerThan_of_subset_axioms $ by grind;
-instance : InterpretabilityLogic.ILMinus_J4Plus_J5 ⪯ InterpretabilityLogic.ILMinus_J1_J4Plus_J5 := weakerThan_of_subset_axioms $ by grind;
-instance : InterpretabilityLogic.ILMinus_J5 ⪯ InterpretabilityLogic.ILMinus_J1_J5 := weakerThan_of_subset_axioms $ by grind;
-instance : InterpretabilityLogic.ILMinus_J5 ⪯ InterpretabilityLogic.ILMinus_J4Plus_J5 := weakerThan_of_subset_axioms $ by grind;
-
-instance : InterpretabilityLogic.ILMinus_J2Plus ⪯ InterpretabilityLogic.ILMinus_J1_J2 := weakerThan_of_provable_axioms $ by
-  intro φ hφ;
-  rcases (by simpa [Hilbert.Minimal.buildAxioms] using hφ) with (rfl | rfl | rfl | rfl) <;> simp;
-
-instance : InterpretabilityLogic.ILMinus_J4Plus ⪯ InterpretabilityLogic.ILMinus_J2Plus := weakerThan_of_provable_axioms $ by
-  intro φ hφ;
-  rcases (by simpa [Hilbert.Minimal.buildAxioms] using hφ) with (rfl | rfl | rfl) <;> simp;
-
-instance : InterpretabilityLogic.ILMinus_J1_J4Plus ⪯ InterpretabilityLogic.ILMinus_J1_J2 := weakerThan_of_provable_axioms $ by
-  intro φ hφ;
-  rcases (by simpa [Hilbert.Minimal.buildAxioms] using hφ) with (rfl | rfl | rfl | rfl) <;> simp;
-
-instance : InterpretabilityLogic.ILMinus_J1_J4Plus_J5 ⪯ InterpretabilityLogic.ILMinus_J1_J2_J5 := weakerThan_of_provable_axioms $ by
-  intro φ hφ;
-  rcases (by simpa [Hilbert.Minimal.buildAxioms] using hφ) with (rfl | rfl | rfl | rfl | rfl) <;> simp;
-
-instance : InterpretabilityLogic.ILMinus_J2Plus_J5 ⪯ InterpretabilityLogic.ILMinus_J1_J2_J5 := weakerThan_of_provable_axioms $ by
-  intro φ hφ;
-  rcases (by simpa [Hilbert.Minimal.buildAxioms] using hφ) with (rfl | rfl | rfl | rfl) <;> simp;
-
-instance : InterpretabilityLogic.ILMinus_J4Plus_J5 ⪯ InterpretabilityLogic.ILMinus_J2Plus_J5 := weakerThan_of_provable_axioms $ by
-  intro φ hφ;
-  rcases (by simpa [Hilbert.Minimal.buildAxioms] using hφ) with (rfl | rfl | rfl | rfl) <;> simp;
-
 -- Veltman incomplete
 defineILMinus ILMinus_J1_J4 [J1, J4]
 defineILMinus ILMinus_J1_J4_J5 [J1, J4, J5]
@@ -400,6 +384,9 @@ defineILMinus ILMinus_J2_J4Plus_J5 [J2, J4Plus, J5]
 defineILMinus ILMinus_J2_J5 [J2, J5]
 defineILMinus ILMinus_J4 [J4]
 defineILMinus ILMinus_J4_J5 [J4, J5]
+
+-- ?
+defineILMinus ILMinus_M [M]
 
 end
 

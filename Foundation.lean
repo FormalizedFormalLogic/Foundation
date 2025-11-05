@@ -195,6 +195,7 @@ import Foundation.ProvabilityLogic.Classification.Trace
 import Foundation.InterpretabilityLogic.Veltman.Logic.ILMinus_J1_J2_J5
 import Foundation.InterpretabilityLogic.Veltman.Logic.CL
 import Foundation.InterpretabilityLogic.Veltman.Logic.IL
+import Foundation.InterpretabilityLogic.Veltman.Logic.ILM
 
 -- Meta
 import Foundation.Meta.Qq
