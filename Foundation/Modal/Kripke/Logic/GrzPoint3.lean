@@ -131,7 +131,7 @@ instance : Modal.GrzPoint2 ⪱ Modal.GrzPoint3 := by
             push_neg;
             constructor;
             . tauto;
-            . simp [M, Semantics.Realize, Satisfies, Frame.Rel', F];
+            . simp [M, Semantics.Models, Satisfies, Frame.Rel', F];
         . apply Satisfies.box_def.not.mpr;
           push_neg;
           use 2;
@@ -141,7 +141,7 @@ instance : Modal.GrzPoint2 ⪱ Modal.GrzPoint3 := by
             push_neg;
             constructor;
             . tauto;
-            . simp [M, Semantics.Realize, Satisfies, Frame.Rel', F];
+            . simp [M, Semantics.Models, Satisfies, Frame.Rel', F];
 
 instance : Modal.S4Point3 ⪱ Modal.GrzPoint3 := by
   constructor;
@@ -162,7 +162,7 @@ instance : Modal.S4Point3 ⪱ Modal.GrzPoint3 := by
             rintro x y z Rxy Rxz;
             simp;
         };
-      . simp [Semantics.Realize, Satisfies];
+      . simp [Semantics.Models, Satisfies];
 
 end Logic
 

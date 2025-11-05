@@ -17,19 +17,21 @@ namespace Kripke
 
 variable {F : Frame}
 
-protected class Frame.IsInfiniteGL (F : Frame) extends F.IsTransitive, F.IsConverseWellFounded
+protected class Frame.IsGL (F : Frame) extends F.IsTransitive, F.IsConverseWellFounded
 
 protected class Frame.IsFiniteGL (F : Frame) extends F.IsFinite, F.IsStrictPreorder
 
-protected abbrev FrameClass.infinite_GL: FrameClass := { F | F.IsInfiniteGL }
+protected abbrev FrameClass.GL: FrameClass := { F | F.IsGL }
 
 protected abbrev FrameClass.finite_GL: FrameClass := { F | F.IsFiniteGL }
 
 instance : blackpoint.IsFiniteGL where
 
+instance : blackpoint.IsGL where
+
 end Kripke
 
-instance : Sound Modal.GL Kripke.FrameClass.infinite_GL := instSound_of_validates_axioms $ by
+instance : Sound Modal.GL Kripke.FrameClass.GL := instSound_of_validates_axioms $ by
   apply FrameClass.validates_with_AxiomK_of_validates;
   constructor;
   simp only [Set.mem_singleton_iff, forall_eq];

@@ -9,8 +9,6 @@ import Mathlib.Tactic.TFAE
 noncomputable abbrev LO.Modal.Formula.rflSubformula [DecidableEq α] (φ : Formula α) : FormulaFinset α :=
   (φ.subformulas.prebox.image (λ ψ => □ψ ➝ ψ))
 
-
-
 namespace LO.ProvabilityLogic
 
 open Entailment
@@ -46,7 +44,7 @@ lemma refl_mainlemma_aux (hA : ¬r₁ ⊧ (A.rflSubformula.conj ➝ A)) :
   let S := SolovaySentences.standard T M₀.toFrame
   ∀ B ∈ A.subformulas,
   (r₁ ⊧ B → 𝗜𝚺₁ ⊢ (S r₀) ➝ (S.realization B)) ∧
-  (¬r₁ ⊧ B → 𝗜𝚺₁ ⊢ (S r₀) ➝ ∼(S.realization B)) := by
+  (r₁ ⊭ B → 𝗜𝚺₁ ⊢ (S r₀) ➝ ∼(S.realization B)) := by
   intro M₀ r₀ _ S B B_sub;
 
   replace hA := Formula.Kripke.Satisfies.imp_def.not.mp hA;
@@ -116,8 +114,8 @@ lemma refl_mainlemma_aux (hA : ¬r₁ ⊧ (A.rflSubformula.conj ➝ A)) :
             apply h;
             apply Frame.root_genaretes'!;
             assumption
-      have b : 𝗜𝚺₁ ⊢ ⩖ j, S j := oRing_provable_of _ _ fun (V : Type) _ _ ↦ by
-        simpa [models_iff, S, SolovaySentences.standard_σ_def] using ISigma1.Metamath.SolovaySentences.disjunctive
+      have b : 𝗜𝚺₁ ⊢ ⩖ j, S j := provable_of_models _ _ fun (V : Type) _ _ ↦ by
+        simpa [models_iff, S, SolovaySentences.standard_σ_def] using FirstOrder.Arithmetic.Bootstrapping.SolovaySentences.disjunctive
       exact this ⨀ b
     . intro h;
       have := Satisfies.box_def.not.mp h;
@@ -146,7 +144,7 @@ lemma rfl_mainlemma_neg (hA : ¬r₁ ⊧ (A.rflSubformula.conj ➝ A)) :
   letI r₀ : M₀ := Model.extendRoot.root
   haveI : Fintype M₀.World := Fintype.ofFinite _
   letI S := SolovaySentences.standard T M₀.toFrame
-  ∀ B ∈ A.subformulas, ¬r₁ ⊧ B → 𝗜𝚺₁ ⊢ (S r₀) ➝ ∼(S.realization B) := λ B B_sub => (refl_mainlemma_aux hA B B_sub).2
+  ∀ B ∈ A.subformulas, r₁ ⊭ B → 𝗜𝚺₁ ⊢ (S r₀) ➝ ∼(S.realization B) := λ B B_sub => (refl_mainlemma_aux hA B B_sub).2
 
 end
 
@@ -164,7 +162,7 @@ lemma GL_S_TFAE :
     have h : Modal.S ⊢ Finset.conj A.rflSubformula ➝ A := WeakerThan.pbl h;
     apply h ⨀ ?_;
     apply FConj!_iff_forall_provable.mpr;
-    simp [-Logic.iff_provable];
+    simp
   tfae_have 2 → 3 := by
     intro h f;
     have : 𝗥₀ ⪯ T := WeakerThan.trans (inferInstanceAs (𝗥₀ ⪯ 𝗜𝚺₁)) inferInstance
@@ -187,9 +185,9 @@ lemma GL_S_TFAE :
     have := Formula.Kripke.Satisfies.not_imp_def.mp hA |>.2;
     have : ℕ ⊧ₘ S r₀ ➝ ∼S.realization A := models_of_provable inferInstance $ by
       convert SolovaySentences.rfl_mainlemma_neg (T := T) hA A (by grind) $ Formula.Kripke.Satisfies.not_imp_def.mp hA |>.2;
-    simp only [Models, LO.Semantics.Not.realize_not, LO.Semantics.Imp.realize_imp] at this;
+    simp only [Models, LO.Semantics.Not.models_not, LO.Semantics.Imp.models_imply] at this;
     exact this <| by
-      simpa [models_iff, S, SolovaySentences.standard_σ_def] using ISigma1.Metamath.SolovaySentences.solovay_root_sound
+      simpa [models_iff, S, SolovaySentences.standard_σ_def] using FirstOrder.Arithmetic.Bootstrapping.SolovaySentences.solovay_root_sound
   tfae_finish;
 
 theorem S.arithmetical_completeness_iff : Modal.S ⊢ A ↔ ∀ f : T.StandardRealization, ℕ ⊧ₘ f A := GL_S_TFAE.out 1 2
@@ -198,7 +196,7 @@ theorem provabilityLogic_PA_TA_eq_S :
     ProvabilityLogic T 𝗧𝗔 ≊ Modal.S := by
   apply Logic.iff_equal_provable_equiv.mp
   ext A;
-  simpa [ArithmeticTheory.ProvabilityLogic, FirstOrderTrueArith.provable_iff, ←Logic.iff_provable] using
+  simpa [ArithmeticTheory.ProvabilityLogic, TA.provable_iff, ←Logic.iff_provable] using
     S.arithmetical_completeness_iff.symm;
 
 instance : ProvabilityLogic 𝗣𝗔 𝗧𝗔 ≊ Modal.S := provabilityLogic_PA_TA_eq_S

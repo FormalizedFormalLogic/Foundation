@@ -55,7 +55,7 @@ instance : Modal.K4 ⪱ Modal.K4Point3 := by
       . suffices
           ∃ x : M.World, (0 : M.World) ≺ x ∧ x = 1 ∧ (∀ y, x ≺ y → y = 1) ∧ ¬x = 2 ∧
           ∃ x : M.World, (0 : M.World) ≺ x ∧ x = 2 ∧ (∀ z : M.World, x ≺ z → z = 2) ∧ x ≠ 1
-          by simpa [M, Semantics.Realize, Satisfies];
+          by simpa [M, Semantics.Models, Satisfies];
         refine ⟨1, ?_, rfl, ?_, ?_, 2, ?_, rfl, ?_, ?_⟩;
         . trivial;
         . omega;

@@ -4,7 +4,7 @@ namespace LO.Entailment
 
 section
 
-variable {F S : Type*} [Primcodable F] [Entailment F S]
+variable {F S : Type*} [Primcodable F] [Entailment S F]
 
 variable (𝓢 : S)
 

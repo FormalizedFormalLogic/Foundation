@@ -3,7 +3,7 @@ import Foundation.Propositional.ConsistentTableau
 
 namespace LO.Propositional
 
-variable {S} [Entailment (Formula ℕ) S]
+variable {S} [Entailment S (Formula ℕ)]
 variable {𝓢 : S} [Entailment.Consistent 𝓢] [Entailment.Int 𝓢]
 variable {t t₁ t₂ : SaturatedConsistentTableau 𝓢} {φ ψ : Formula ℕ}
 
@@ -118,7 +118,7 @@ private lemma truthlemma.himp
 lemma truthlemma : t ⊧ φ ↔ φ ∈ t.1.1 := by
   induction φ generalizing t with
   | hatom => tauto;
-  | hfalsum => simp only [Semantics.Bot.realize_bot, not_mem₁_falsum];
+  | hfalsum => simp only [Semantics.Bot.models_falsum, not_mem₁_falsum];
   | himp φ ψ ihp ihq => exact truthlemma.himp ihp ihq;
   | hand φ ψ ihp ihq => simp [SaturatedConsistentTableau.iff_mem₁_and, *];
   | hor φ ψ ihp ihq => simp [SaturatedConsistentTableau.iff_mem₁_or, *];

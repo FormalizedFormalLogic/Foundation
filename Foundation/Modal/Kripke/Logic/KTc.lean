@@ -65,7 +65,7 @@ instance : Modal.KB4 ⪱ Modal.KTc := by
           trans := by simp [M],
         }
       . suffices ∃ x, (x : M.World) ≠ 0 by
-          simp [M, Semantics.Realize, Satisfies];
+          simp [M, Semantics.Models, Satisfies];
           tauto;
         use 1;
         aesop;

@@ -121,7 +121,7 @@ open Formula.Neighborhood
 open MaximalConsistentSet
 open proofset
 
-variable {S} [Entailment (Formula ℕ) S]
+variable {S} [Entailment S (Formula ℕ)]
 variable {𝓢 : S} [Entailment.EM 𝓢] [Entailment.Consistent 𝓢]
 
 abbrev supplementedBasicCanonicity (𝓢 : S) [Entailment.EM 𝓢] [Entailment.Consistent 𝓢] : Canonicity 𝓢 where

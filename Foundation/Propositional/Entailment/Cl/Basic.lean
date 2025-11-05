@@ -14,7 +14,7 @@ end LO.Axioms
 
 namespace LO.Entailment
 
-variable {S F : Type*} [LogicalConnective F] [Entailment F S]
+variable {S F : Type*} [LogicalConnective F] [Entailment S F]
 variable {𝓢 : S} {φ ψ χ : F}
 
 class HasAxiomDNE (𝓢 : S)  where
@@ -39,7 +39,7 @@ protected class Cl (𝓢 : S) extends Entailment.Minimal 𝓢, Entailment.HasAxi
 
 section
 
-variable [LogicalConnective F] [Entailment F S] [Entailment.Minimal 𝓢]
+variable [LogicalConnective F] [Entailment S F] [Entailment.Minimal 𝓢]
 
 namespace FiniteContext
 
@@ -67,7 +67,7 @@ end
 section
 
 variable {F : Type*} [LogicalConnective F] [DecidableEq F]
-         {S : Type*} [Entailment F S]
+         {S : Type*} [Entailment S F]
          {𝓢 : S} [Entailment.Cl 𝓢]
          {φ φ₁ φ₂ ψ ψ₁ ψ₂ χ ξ : F}
          {Γ Δ : List F}

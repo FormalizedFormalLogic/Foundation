@@ -81,7 +81,7 @@ abbrev valm (M : Type w) [s : Structure L M] {n} (e : Fin n → M) (ε : ξ → 
 
 abbrev valbm (M : Type w) [s : Structure L M] {n} (e : Fin n → M) : ClosedSemiterm L n → M := valb s e
 
-abbrev realize (s : Structure L M) (t : Term L M) : M := t.val s ![] id
+abbrev models (s : Structure L M) (t : Term L M) : M := t.val s ![] id
 
 @[simp] lemma val_bvar (x) : val s e ε (#x : Semiterm L ξ n) = e x := rfl
 
@@ -257,7 +257,7 @@ abbrev Evalbm (M : Type w) [s : Structure L M] (e : Fin n → M) :
 
 notation:max M:90 " ⊧/" e:max => Evalbm M e
 
-abbrev Realize (s : Structure L M) : Formula L M →ˡᶜ Prop := Eval s ![] id
+abbrev Models (s : Structure L M) : Formula L M →ˡᶜ Prop := Eval s ![] id
 
 lemma eval_rel {k} {r : L.Rel k} {v} :
     Eval s e ε (rel r v) ↔ s.rel r (fun i => Semiterm.val s e ε (v i)) := of_eq rfl
@@ -536,32 +536,28 @@ end
 
 end Structure
 
-instance : Semantics (Sentence L) (Struc L) where
-  Realize := fun str ↦ Semiformula.Evalb str.struc ![]
+instance : Semantics (Struc L) (Sentence L) where
+  Models := fun str ↦ Semiformula.Evalb str.struc ![]
 
 instance : Semantics.Tarski (Struc L) where
-  realize_top := by simp [Semantics.Realize]
-  realize_bot := by simp [Semantics.Realize]
-  realize_and := by simp [Semantics.Realize]
-  realize_or := by simp [Semantics.Realize]
-  realize_imp := by simp [Semantics.Realize]
-  realize_not := by simp [Semantics.Realize]
+  models_verum := by simp [Semantics.Models]
+  models_falsum := by simp [Semantics.NotModels, Semantics.Models]
+  models_and := by simp [Semantics.Models]
+  models_or := by simp [Semantics.Models]
+  models_imply := by simp [Semantics.Models]
+  models_not := by simp [Semantics.NotModels, Semantics.Models]
 
 section
 
 variable (M : Type*) [Nonempty M] [s : Structure L M] {T U : Theory L}
 
-abbrev Models : Sentence L → Prop := Semantics.Realize s.toStruc
+abbrev Models : Sentence L → Prop := Semantics.Models s.toStruc
 
 infix:45 " ⊧ₘ " => Models
 
-abbrev ModelsTheory (T : Theory L) : Prop := Semantics.RealizeSet s.toStruc T
+abbrev ModelsTheory (T : Theory L) : Prop := Semantics.ModelsSet s.toStruc T
 
 infix:45 " ⊧ₘ* " => ModelsTheory
-
-abbrev Realize (M : Type*) [s : Structure L M] : Formula L M → Prop := Semiformula.Evalf s id
-
-infix:45 " ⊧ₘᵣ " => Realize
 
 abbrev Consequence (T : Theory L) (σ : Sentence L) : Prop := T ⊨[SmallStruc L] σ
 
@@ -575,11 +571,11 @@ def modelsTheory_iff_modelsTheory_s : M ⊧ₘ* T ↔ s.toStruc ⊧* T := by rfl
 
 lemma models_iff : M ⊧ₘ σ ↔ Semiformula.Evalbm (s := s) M ![] σ := by rfl
 
-lemma modelsTheory_iff : M ⊧ₘ* T ↔ (∀ {φ}, φ ∈ T → M ⊧ₘ φ) := Semantics.realizeSet_iff
+lemma modelsTheory_iff : M ⊧ₘ* T ↔ (∀ {φ}, φ ∈ T → M ⊧ₘ φ) := Semantics.modelsSet_iff
 
 variable (M T)
 
-lemma Theory.models [M ⊧ₘ* T] {σ} (hσ : σ ∈ T) : M ⊧ₘ σ := Semantics.realizeSet_iff.mp inferInstance hσ
+lemma Theory.models [M ⊧ₘ* T] {σ} (hσ : σ ∈ T) : M ⊧ₘ σ := Semantics.modelsSet_iff.mp inferInstance hσ
 
 variable {M T}
 
@@ -632,12 +628,12 @@ lemma consequence_iff_unsatisfiable {σ : Sentence L} :
   constructor
   · intro h
     apply unsatisfiable_iff.mpr
-    intro M _ s; simp only [Semantics.RealizeSet.insert_iff, models_iff, not_and']
+    intro M _ s; simp only [Semantics.ModelsSet.insert_iff, models_iff, not_and']
     intro hT; simpa using models_iff.mp (h hT)
   · intro h; apply consequence_iff.mpr
     intro M _ s hT
     have : (Semiformula.Evalb s ![]) σ := by
-      have := by simpa only [Semantics.RealizeSet.insert_iff, not_and', models_iff] using unsatisfiable_iff.mp h M inferInstance s
+      have := by simpa only [Semantics.ModelsSet.insert_iff, not_and', models_iff] using unsatisfiable_iff.mp h M inferInstance s
       simpa using this hT
     apply models_iff.mpr (by simpa using this)
 
@@ -657,7 +653,7 @@ lemma eval_lMap [Nonempty M] {φ : Semiformula L₁ ξ n} :
 
 lemma models_lMap [Nonempty M] {σ : Sentence L₁} :
     s₂.toStruc ⊧ lMap Φ σ ↔ (s₂.lMap Φ).toStruc ⊧ σ := by
-  simp [Semantics.Realize, eval_lMap]
+  simp [Semantics.Models, eval_lMap]
 
 end lMap
 
@@ -667,19 +663,19 @@ lemma lMap_models_lMap {L₁ L₂ : Language.{u}} {Φ : L₁ →ᵥ L₂}  {T : 
     T.lMap Φ ⊨[Struc.{v, u} L₂] Semiformula.lMap Φ σ := by
   intro s hM
   have : (s.struc.lMap Φ).toStruc ⊧ σ :=
-    h ⟨fun _ hq => Semiformula.models_lMap.mp <| hM.realize _ (Set.mem_image_of_mem _ hq)⟩
+    h ⟨fun _ hq => Semiformula.models_lMap.mp <| hM.models _ (Set.mem_image_of_mem _ hq)⟩
   exact Semiformula.models_lMap.mpr this
 
 namespace ModelsTheory
 
 variable (M) [Nonempty M] [Structure L M]
 
-lemma models {T : Theory L} [M ⊧ₘ* T] {φ} (h : φ ∈ T) : M ⊧ₘ φ := Semantics.RealizeSet.realize _ h
+lemma models {T : Theory L} [M ⊧ₘ* T] {φ} (h : φ ∈ T) : M ⊧ₘ φ := Semantics.ModelsSet.models _ h
 
 variable {M}
 
 lemma of_ss {T U : Theory L} (h : M ⊧ₘ* U) (ss : T ⊆ U) : M ⊧ₘ* T :=
-  Semantics.RealizeSet.of_subset h ss
+  Semantics.ModelsSet.of_subset h ss
 
 @[simp] lemma add_iff {T U : Theory L} :
     M ⊧ₘ* T + U ↔ M ⊧ₘ* T ∧ M ⊧ₘ* U := by simp [Theory.add_def]
@@ -705,13 +701,15 @@ namespace Structure
 
 variable (L)
 
-abbrev theory (M : Type u) [Nonempty M] [s : Structure L M] : Theory L := Semantics.theory s.toStruc
+abbrev theory (M : Type*) [Nonempty M] [s : Structure L M] : Theory L := Semantics.theory s.toStruc
 
-variable {L} {M : Type u} [Nonempty M] [Structure L M]
+variable {L} {M : Type v} [Nonempty M] [s : Structure L M]
 
 @[simp] lemma mem_theory_iff {σ} : σ ∈ theory L M ↔ M ⊧ₘ σ := by rfl
 
-lemma subset_of_models : T ⊆ theory L M ↔ M ⊧ₘ* T := ⟨fun h  ↦ ⟨fun _ hσ ↦ h hσ⟩, fun h _ hσ ↦ h.RealizeSet hσ⟩
+lemma subset_of_models : T ⊆ theory L M ↔ M ⊧ₘ* T := ⟨fun h  ↦ ⟨fun _ hσ ↦ h hσ⟩, fun h _ hσ ↦ h.models_set hσ⟩
+
+lemma theory_satisfiable : Semantics.Satisfiable (Struc.{v} L) (theory L M) := ⟨s.toStruc, by simp⟩
 
 end Structure
 

@@ -800,6 +800,11 @@ def toEmpty [DecidableEq ξ] {n : ℕ} : (t : Semiterm L ξ n) → t.freeVariabl
   induction t <;> try simp [toEmpty, Rew.func, *]
   case fvar => simp at ht
 
+@[simp] lemma toEmpty_emb [DecidableEq ξ] (t : ClosedSemiterm L n) :
+    (Rew.emb t : Semiterm L ξ n).toEmpty (by simp) = t := by
+  induction t <;> try simp [toEmpty, Rew.func, *]
+  case fvar => contradiction
+
 end Semiterm
 
 /-!
@@ -913,7 +918,7 @@ lemma fix_allClosure (φ : S n) :
 
 @[simp] lemma shifts_nil : ([] : List (S n))⁺ = [] := by rfl
 
-lemma shifts_union (Γ Δ : List (S n)) :
+@[simp] lemma shifts_union (Γ Δ : List (S n)) :
     (Γ ++ Δ)⁺ = Γ⁺ ++ Δ⁺ := by simp [shifts]
 
 lemma shifts_neg (Γ : List (S n)) :

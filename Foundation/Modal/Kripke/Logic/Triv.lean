@@ -94,7 +94,7 @@ instance : Modal.KTc ⪱ Modal.Triv := by
       use ⟨⟨Fin 2, λ x y => False⟩, λ w _ => False⟩, 0;
       constructor;
       . refine ⟨by tauto⟩;
-      . simp [Satisfies, Semantics.Realize];
+      . simp [Satisfies, Semantics.Models];
 
 instance : Modal.GrzPoint3 ⪱ Modal.Triv := by
   constructor;
@@ -113,7 +113,7 @@ instance : Modal.GrzPoint3 ⪱ Modal.Triv := by
       constructor;
       . exact {}
       . suffices (0 : M) = 0 ∧ ∃ x, (0 : M.World) ≺ x ∧ x ≠ 0 by
-          simpa [Semantics.Realize, Satisfies, ValidOnFrame, M];
+          simpa [Semantics.Models, Satisfies, ValidOnFrame, M];
         constructor;
         . tauto;
         . use 1;
@@ -152,7 +152,7 @@ instance : Modal.S4Point4McK ⪱ Modal.Triv := by
             constructor <;> omega;
         }
       . suffices (0 : M) = 0 ∧ ∃ x : M, (0 : M) ≺ x ∧ ¬x = 0 by
-          simpa [Semantics.Realize, Satisfies, ValidOnFrame, M];
+          simpa [Semantics.Models, Satisfies, ValidOnFrame, M];
         constructor;
         . tauto;
         . use 1;

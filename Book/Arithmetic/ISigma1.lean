@@ -24,11 +24,11 @@ Weak theory of sets in $`\mathbf V_\omega` (Hereditary Finite Sets) can be devel
 inside $`\mathsf{I}\Sigma_1` using Ackermann coding and BIT predicate.
 Hereafter, we will use the notation $`i \in a` in the sense of BIT predicate:
 
-{docstring LO.ISigma1.mem_iff_bit}
+{docstring LO.FirstOrder.Arithmetic.mem_iff_bit}
 
 The following comprehension holds.
 
-{docstring LO.ISigma1.finset_comprehension₁}
+{docstring LO.FirstOrder.Arithmetic.finset_comprehension₁}
 
 The basic concepts of set theory, such as union, inter, cartesian product, and mapping, etc. are defined.
 
@@ -36,7 +36,7 @@ The basic concepts of set theory, such as union, inter, cartesian product, and m
 
 $`\mathrm{Seq}(s)` iff $`s` is a mapping and its domain is $`[0, l)` for some $`l`.
 
-{docstring LO.ISigma1.Seq}
+{docstring LO.FirstOrder.Arithmetic.Seq}
 
 # Primitive Recursion
 
@@ -50,15 +50,15 @@ There is a $`\Sigma_1`-function $`\mathsf{PR}_{f,g}(\vec{v}, u)` such that:
 \end{align*}
 ```
 
-{docstring LO.ISigma1.PR.Blueprint}
+{docstring LO.FirstOrder.Arithmetic.PR.Blueprint}
 
-{docstring LO.ISigma1.PR.Construction}
+{docstring LO.FirstOrder.Arithmetic.PR.Construction}
 
-{docstring LO.ISigma1.PR.Construction.result}
+{docstring LO.FirstOrder.Arithmetic.PR.Construction.result}
 
-{docstring LO.ISigma1.PR.Construction.result_zero}
+{docstring LO.FirstOrder.Arithmetic.PR.Construction.result_zero}
 
-{docstring LO.ISigma1.PR.Construction.result_succ}
+{docstring LO.FirstOrder.Arithmetic.PR.Construction.result_succ}
 
 # Fixed-point
 
@@ -76,20 +76,20 @@ if $`\Phi` satisfies following conditions:
 2 _Monotone_: $`C \subseteq C'` and $`\Phi_C(\vec{v}, x)` implies $`\Phi_{C'}(\vec{v}, x)`.
 3 _Finite_: $`\Phi_C (\vec{v}, x)` implies the existence of a $`m` s.t. $`\Phi_{\{z \in C \mid z < m\}} (\vec{v}, x)`.
 
-{docstring LO.ISigma1.Fixpoint.Blueprint}
+{docstring LO.FirstOrder.Arithmetic.Fixpoint.Blueprint}
 
-{docstring LO.ISigma1.Fixpoint.Construction}
+{docstring LO.FirstOrder.Arithmetic.Fixpoint.Construction}
 
-{docstring LO.ISigma1.Fixpoint.Construction.Finite}
+{docstring LO.FirstOrder.Arithmetic.Fixpoint.Construction.Finite}
 
-{docstring LO.ISigma1.Fixpoint.Construction.Fixpoint}
+{docstring LO.FirstOrder.Arithmetic.Fixpoint.Construction.Fixpoint}
 
-{docstring LO.ISigma1.Fixpoint.Construction.case}
+{docstring LO.FirstOrder.Arithmetic.Fixpoint.Construction.case}
 
 $`\mathsf{Fix}_\Phi(\vec v, x)` is $`\Delta_1` if $`\Phi` satisfies strong finiteness:
 
-{docstring LO.ISigma1.Fixpoint.Construction.StrongFinite}
+{docstring LO.FirstOrder.Arithmetic.Fixpoint.Construction.StrongFinite}
 
 Also structural induction holds.
 
-{docstring LO.ISigma1.Fixpoint.Construction.induction}
+{docstring LO.FirstOrder.Arithmetic.Fixpoint.Construction.induction}

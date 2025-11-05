@@ -1,5 +1,7 @@
-_output/*
-!_output/index.html
+_output/book
+_output/zoo/*
+!_output/zoo/.gitkeep
+
 
 src/assets/import_graph.*
 # src/assets/*_zoo.png

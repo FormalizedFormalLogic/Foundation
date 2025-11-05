@@ -23,7 +23,7 @@ attribute [local simp]
   LukasiewiczAbbrev.or
   LukasiewiczAbbrev.and
 
-variable {S F : Type*} [LogicalConnective F] [LukasiewiczAbbrev F] [Entailment F S]
+variable {S F : Type*} [LogicalConnective F] [LukasiewiczAbbrev F] [Entailment S F]
 
 variable (𝓢 : S)
 

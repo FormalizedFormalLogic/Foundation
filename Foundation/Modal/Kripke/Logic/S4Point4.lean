@@ -61,7 +61,7 @@ instance : Modal.S4Point3 ⪱ Modal.S4Point4 := by
       constructor;
       . exact {};
       . suffices ∃ x : M.World, (0 : M.World) ≺ x ∧ ¬x ≺ 1 ∧ (0 : M.World) ≺ 1 by
-          simpa [Semantics.Realize, Satisfies, M];
+          simpa [Semantics.Models, Satisfies, M];
         use 2;
         omega;
 

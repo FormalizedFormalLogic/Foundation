@@ -1,12 +1,8 @@
 import Foundation.FirstOrder.Arithmetic.Basic.Model
 
-namespace LO
-
-namespace FirstOrder
+namespace LO.FirstOrder.Arithmetic
 
 variable {L : Language} [L.LT]
-
-namespace Arithmetic
 
 inductive Hierarchy : Polarity → ℕ → {n : ℕ} → Semiformula L ξ n → Prop
   | verum (Γ s n)                                    : Hierarchy Γ s (⊤ : Semiformula L ξ n)
@@ -333,14 +329,6 @@ lemma of_open {φ : Semiformula L ξ n} : φ.Open → Hierarchy Γ s φ := by
   case hor ihp ihq => intro hp hq; exact ⟨ihp hp, ihq hq⟩
 
 variable {L : Language} [L.ORing]
-
-set_option linter.flexible false in
-lemma oringEmb {φ : Semiformula ℒₒᵣ ξ n} : Hierarchy Γ s φ → Hierarchy Γ s (Semiformula.lMap (Language.oringEmb : ℒₒᵣ →ᵥ L) φ) := by
-  intro h; induction h <;> try simp [*, Semiformula.lMap_rel, Semiformula.lMap_nrel]
-  case sigma ih => exact ih.accum _
-  case pi ih => exact ih.accum _
-  case dummy_pi ih => exact ih.dummy_pi
-  case dummy_sigma ih => exact ih.dummy_sigma
 
 lemma iff_iff {φ ψ : Semiformula L ξ n} :
     Hierarchy b s (φ ⭤ ψ) ↔ (Hierarchy b s φ ∧ Hierarchy b.alt s φ ∧ Hierarchy b s ψ ∧ Hierarchy b.alt s ψ) := by

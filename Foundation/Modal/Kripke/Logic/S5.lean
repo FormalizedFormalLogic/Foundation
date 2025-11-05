@@ -110,7 +110,7 @@ instance : Modal.KTB ⪱ Modal.S5 := by
       constructor;
       . refine { refl := by omega, symm := by omega };
       . suffices (0 : M.World) ≺ 1 ∧ ∃ x : M.World, (0 : M.World) ≺ x ∧ ¬x ≺ 1 by
-          simpa [M, Semantics.Realize, Satisfies];
+          simpa [M, Semantics.Models, Satisfies];
         constructor;
         . omega;
         . use 2;
@@ -136,7 +136,7 @@ instance : Modal.KD45 ⪱ Modal.S5 := by
           trans := by omega,
           reucl := by simp [RightEuclidean]; omega
         }
-      . simp [Semantics.Realize, Satisfies, M];
+      . simp [Semantics.Models, Satisfies, M];
         tauto;
 
 instance : Modal.KB4 ⪱ Modal.S5 := by
@@ -154,7 +154,7 @@ instance : Modal.KB4 ⪱ Modal.S5 := by
       use ⟨⟨Fin 1, λ x y => False⟩, λ x _ => False⟩, 0;
       constructor;
       . refine { symm := by tauto, trans := by tauto };
-      . simp [Semantics.Realize, Satisfies];
+      . simp [Semantics.Models, Satisfies];
 
 instance : Modal.S4Point4 ⪱ Modal.S5 := by
   constructor;
@@ -181,7 +181,7 @@ instance : Modal.S4Point4 ⪱ Modal.S5 := by
             | 1, 1 => contradiction;
         };
       . suffices (0 : M.World) ≺ 0 ∧ ∃ x : M.World, (0 : M) ≺ x ∧ ¬x ≺ 0 by
-          simpa [M, Semantics.Realize, Satisfies];
+          simpa [M, Semantics.Models, Satisfies];
         constructor;
         . omega;
         . use 1;

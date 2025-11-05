@@ -70,7 +70,7 @@ instance : Modal.K ⪱ Modal.K4 := by
       constructor
       . trivial;
       . suffices (∀ (y : M.World), (0 : M.World) ≺ y → y = 1) ∧ ∃ x, (0 : M.World) ≺ x ∧ ∃ y, x ≺ y ∧ y ≠ 1 by
-          simpa [Semantics.Realize, Satisfies];
+          simpa [Semantics.Models, Satisfies];
         constructor;
         . intro x;
           match x with

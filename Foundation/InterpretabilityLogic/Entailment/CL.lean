@@ -1,0 +1,51 @@
+import Foundation.Modal.Entailment.GL
+import Foundation.InterpretabilityLogic.Entailment.ILMinus_J2
+
+namespace LO.InterpretabilityLogic.Entailment
+
+open LO.Entailment LO.Modal.Entailment
+open FiniteContext
+
+variable {S F : Type*} [DecidableEq F] [InterpretabilityLogicalConnective F] [Entailment S F] {𝓢 : S} {φ ψ χ : F}
+
+/-- Entailment for conservatibity logic -/
+protected class CL (𝓢 : S) extends Modal.Entailment.GL 𝓢, HasAxiomJ1 𝓢, HasAxiomJ2 𝓢, HasAxiomJ3 𝓢, HasAxiomJ4 𝓢
+
+variable [Entailment.CL 𝓢]
+
+-- TODO: move to Entailment
+def CCNO! : 𝓢 ⊢! φ ➝ ∼φ ➝ ⊥ := C_trans dni (K_left negEquiv)
+@[simp] lemma CCNO : 𝓢 ⊢ φ ➝ ∼φ ➝ ⊥ := ⟨CCNO!⟩
+
+-- TODO: move to Entailment
+def NMO! : 𝓢 ⊢! ∼◇⊥ := (contra $ K_left diaDuality) ⨀ (dni' $ nec NO)
+@[simp] lemma NMO : 𝓢 ⊢ ∼◇⊥ := ⟨NMO!⟩
+
+instance : HasAxiomJ6 𝓢 := ⟨by
+  intro φ;
+  apply Entailment.K_intro;
+  . apply C_trans ?_ J1!;
+    apply box_regularity;
+    exact CCNO!;
+  . apply C_trans J4!;
+    apply C_trans CCCNN;
+    apply deduct';
+    haveI H₁ : [∼◇⊥ ➝ ∼◇(∼φ)] ⊢[𝓢]! ∼◇⊥ ➝ ∼◇(∼φ) := FiniteContext.byAxm $ by simp;
+    haveI H₂ : [∼◇⊥ ➝ ∼◇(∼φ)] ⊢[𝓢]! ∼◇⊥ := of $ NMO!
+    haveI H₃ : [∼◇⊥ ➝ ∼◇(∼φ)] ⊢[𝓢]! ∼◇(∼φ) := H₁ ⨀ H₂;
+    haveI H₄ : [∼◇⊥ ➝ ∼◇(∼φ)] ⊢[𝓢]! ∼◇(∼φ) ➝ □φ := of INMNL!;
+    apply H₄ ⨀ H₃;
+⟩
+
+instance : HasAxiomJ4Plus 𝓢 := ⟨λ {_ _ _} ↦ C_trans J1! (C_swap J2!)⟩
+
+instance : HasRule1 𝓢 := ⟨λ {_ _ _} hφ ↦ J4Plus! ⨀ nec hφ⟩
+
+def CLCCRhdRhd! : 𝓢 ⊢! □(φ ➝ ψ) ➝ (ψ ▷ χ ➝ φ ▷ χ) := C_trans J1! J2!
+
+instance : HasRule2 𝓢 := ⟨λ {_ _ _} hφ ↦ CLCCRhdRhd! ⨀ nec hφ⟩
+
+instance : Entailment.ILMinus_J1 𝓢 where
+instance : Entailment.ILMinus_J2 𝓢 where
+
+end LO.InterpretabilityLogic.Entailment

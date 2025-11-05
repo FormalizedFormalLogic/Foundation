@@ -27,7 +27,7 @@ protected abbrev Frame.simple_whitehole : Frame := ⟨Unit, λ _ => ∅⟩
 
 @[simp]
 lemma Frame.simple_whitehole.not_valid_axiomN : ¬Frame.simple_whitehole ⊧ Axioms.N := by
-  simp [Semantics.Realize, ValidOnFrame, ValidOnModel, Satisfies];
+  simp [Semantics.Models, ValidOnFrame, ValidOnModel, Satisfies];
 
 
 section
@@ -113,7 +113,7 @@ instance : Modal.E ⪱ Modal.EM := by
       use M, 0;
       constructor;
       . tauto;
-      . simp! [M, Semantics.Realize, Satisfies];
+      . simp! [M, Semantics.Models, Satisfies];
         ext x;
         simp;
         omega;
@@ -143,7 +143,7 @@ instance : Modal.E ⪱ Modal.EC := by
       use M, 0;
       constructor;
       . tauto;
-      . simp [M, Semantics.Realize, Satisfies]
+      . simp [M, Semantics.Models, Satisfies]
 
 instance : Modal.E ⪱ Modal.EN := by
   constructor;
@@ -186,7 +186,7 @@ instance : Modal.E ⪱ Modal.EM := by
       use M, 0;
       constructor;
       . tauto;
-      . simp! [M, Semantics.Realize, Satisfies];
+      . simp! [M, Semantics.Models, Satisfies];
         ext x;
         simp;
         omega;
@@ -216,7 +216,7 @@ instance : Modal.E ⪱ Modal.EC := by
       use M, 0;
       constructor;
       . tauto;
-      . simp [M, Semantics.Realize, Satisfies]
+      . simp [M, Semantics.Models, Satisfies]
 
 instance : Modal.E ⪱ Modal.EN := by
   constructor;
@@ -259,7 +259,7 @@ instance : Modal.E ⪱ Modal.EK := by
       use M, 0;
       constructor;
       . tauto;
-      . simp! [M, Semantics.Realize, Satisfies];
+      . simp! [M, Semantics.Models, Satisfies];
         constructor;
         . intro;
           ext x;

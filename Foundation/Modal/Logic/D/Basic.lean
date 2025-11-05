@@ -326,7 +326,7 @@ lemma of_provable_rflSubformula_original_root [M.IsTransitive]
   ∀ ψ ∈ φ.subformulas, ∀ i : ℕ, r ⊧ ψ ↔ (tailModel₀.embed_nat i : tailModel₀ M o) ⊧ ψ := by
   intro ψ hψ i;
   induction ψ generalizing i with
-  | hatom p => simp [Semantics.Realize, tailModel₀, Satisfies];
+  | hatom p => simp [Semantics.Models, tailModel₀, Satisfies];
   | hfalsum => simp;
   | himp ψ ξ ihψ ihξ => simp [ihψ (by grind) i, ihξ (by grind) i];
   | hbox ψ ihψ =>
@@ -408,7 +408,7 @@ theorem GL_D_TFAE :
       intro h M r _ o;
       induction h using D.rec' with
       | mem_GL h =>
-        apply Sound.sound (𝓜 := Kripke.FrameClass.infinite_GL) h;
+        apply Sound.sound (𝓜 := Kripke.FrameClass.GL) h;
         apply Set.mem_setOf_eq.mpr;
         exact {
           trans := by intro x y z; exact Frame.trans (F := tailModel₀ M o |>.toFrame),
@@ -487,7 +487,7 @@ theorem GL_D_TFAE :
       have : ∀ ψ ∈ φ.subformulas, (tailModel₀.root : Mt) ⊧ ψ ↔ r ⊧ ψ := by
         intro ψ hψ;
         induction ψ with
-        | hatom p => simp [tailModel₀, tailModel₀.root, Satisfies, Semantics.Realize]; -- TODO: extract
+        | hatom p => simp [tailModel₀, tailModel₀.root, Satisfies, Semantics.Models]; -- TODO: extract
         | hfalsum => simp;
         | himp φ ψ ihφ ihψ => simp [ihφ (by grind), ihψ (by grind)];
         | hbox ψ ihψ =>

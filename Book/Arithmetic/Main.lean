@@ -8,7 +8,7 @@ open Verso.Genre
 open Verso.Genre.Manual
 open Verso.Genre.Manual.InlineLean
 
-open LO FirstOrder Arithmetic PeanoMinus ISigma0
+open LO FirstOrder Arithmetic
 
 set_option verso.docstring.allowMissing true
 set_option linter.tacticAnalysis false
@@ -21,7 +21,7 @@ In this formalization, we prefer developing arithmetic _model theoretic_, i.e.
 show $`T \models \sigma` instead of $`T \vdash \sigma` (They are equivalent thanks to the completeness theorem.).
 
 ```lean
-variable {V : Type*} [ORingStruc V] [V ⊧ₘ* 𝗜𝚺₁]
+variable {V : Type*} [ORingStructure V] [V ⊧ₘ* 𝗜𝚺₁]
 ```
 
 This procedure is done as follows.
@@ -30,11 +30,11 @@ First, the graph of the exponential function must be defined. This is achieved b
 
 1 By working in model of $`\mathsf{I}Σ_1`, declare the semantic definition of the graph of the exponential function.
 
-{docstring LO.ISigma0.Exponential}
+{docstring LO.FirstOrder.Arithmetic.Exponential}
 
 2 Declare the syntactic definition of the semantic definition.
 
-{docstring LO.ISigma0.Exponential.defined}
+{docstring LO.FirstOrder.Arithmetic.Exponential.defined}
 
 Then prove the totality.
 
@@ -55,9 +55,9 @@ Since `Exponential` and `Exponential.total` are defined in all the model of $`\m
 ```lean
 lemma exp_total :
     𝗜𝚺₁ ⊢ “∀ x, ∃ y, !↑exponentialDef x y” := by
-  apply oRing_provable_of.{0}
-  intro M _ _
-  suffices ∀ x, ∃ y, Exponential x y by
+  apply provable_of_models.{0}
+  intro V _ _
+  suffices ∀ x : V, ∃ y, Exponential x y by
     simpa [models_iff]
   exact range_exists
 ```

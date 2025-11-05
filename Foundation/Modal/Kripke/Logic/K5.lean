@@ -57,7 +57,7 @@ instance : Modal.K ⪱ Modal.K5 := by
       use M, 0;
       constructor;
       . trivial;
-      . suffices ∃ (x : M.World), ¬x = 0 by simpa [Semantics.Realize, Satisfies, M];
+      . suffices ∃ (x : M.World), ¬x = 0 by simpa [Semantics.Models, Satisfies, M];
         use 1;
         trivial;
 

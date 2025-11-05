@@ -279,5 +279,3 @@ instance [IsTrans _ R] [IsAntisymm _ R] : IsTrans _ (R.IrreflGen) := ⟨by
 instance [IsPartialOrder _ R] : IsStrictOrder _ (R.IrreflGen) where
 
 end IrreflGen
-
-end HRel

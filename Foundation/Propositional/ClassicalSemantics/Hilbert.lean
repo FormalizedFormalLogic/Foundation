@@ -15,9 +15,9 @@ theorem soundness (h : Propositional.Cl ⊢ φ) : φ.isTautology := by
   induction h with
   | axm _ h => rcases h with (rfl | rfl) <;> tauto;
   | mdp ihφψ ihφ => exact ihφψ ihφ;
-  | andElimL => simp [Semantics.Realize, val]; tauto;
-  | andElimR => simp [Semantics.Realize, val];
-  | orElim => simp [Semantics.Realize, val]; tauto;
+  | andElimL => simp [Semantics.Models, val]; tauto;
+  | andElimR => simp [Semantics.Models, val];
+  | orElim => simp [Semantics.Models, val]; tauto;
   | _ => tauto;
 
 lemma not_provable_of_exists_valuation : (∃ v : Valuation _, ¬(v ⊧ φ)) → Propositional.Cl ⊬ φ := by

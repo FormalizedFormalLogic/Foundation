@@ -6,7 +6,7 @@ namespace LO.Modal.Entailment
 
 open LO.Entailment LO.Entailment.FiniteContext
 
-variable {S F : Type*} [BasicModalLogicalConnective F] [Entailment F S]
+variable {S F : Type*} [BasicModalLogicalConnective F] [Entailment S F]
 variable {𝓢 : S} {n : ℕ} {φ ψ ξ χ: F}
 
 protected class ET5 (𝓢 : S) extends Entailment.E 𝓢, HasAxiomT 𝓢, HasAxiomFive 𝓢

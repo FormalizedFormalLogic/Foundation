@@ -1,5 +1,5 @@
-import Foundation.FirstOrder.Arithmetic.Definability.BoundedBoldface
-import Foundation.FirstOrder.R0.Basic
+import Foundation.FirstOrder.Arithmetic.Definability.BoundedDefinable
+import Foundation.FirstOrder.Arithmetic.R0.Basic
 
 namespace LO.FirstOrder.Arithmetic
 
@@ -9,7 +9,7 @@ lemma nat_modelsWithParam_iff_models_substs {v : Fin k → ℕ} {φ : Semisenten
     ℕ ⊧/v φ ↔ ℕ ⊧ₘ (φ ⇜ (fun i ↦ Semiterm.Operator.numeral ℒₒᵣ (v i))) := by
   simp [models_iff]
 
-variable (V : Type*) [ORingStruc V] [V ⊧ₘ* 𝗣𝗔⁻]
+variable (V : Type*) [ORingStructure V] [V ⊧ₘ* 𝗣𝗔⁻]
 
 lemma modelsWithParam_iff_models_substs {v : Fin k → ℕ} {φ : Semisentence ℒₒᵣ k} :
     V ⊧/(v ·) φ ↔ V ⊧ₘ (φ ⇜ (fun i ↦ Semiterm.Operator.numeral ℒₒᵣ (v i))) := by
@@ -49,7 +49,7 @@ lemma deltaOne_absolute {k} (φ : 𝚫₁.Semisentence k)
 lemma Defined.shigmaOne_absolute {k} {R : (Fin k → ℕ) → Prop} {R' : (Fin k → V) → Prop} {φ : 𝚫₁.Semisentence k}
     (hR : 𝚫₁.Defined R φ) (hR' : 𝚫₁.Defined R' φ) (v : Fin k → ℕ) :
     R v ↔ R' (fun i ↦ (v i : V)) := by
-  simpa [hR.df.iff, hR'.df.iff] using deltaOne_absolute V φ hR.proper hR'.proper v
+  simpa using deltaOne_absolute V φ hR.proper hR'.proper v
 
 lemma DefinedFunction.shigmaOne_absolute_func {k} {f : (Fin k → ℕ) → ℕ} {f' : (Fin k → V) → V} {φ : 𝚺₁.Semisentence (k + 1)}
     (hf : 𝚺₁.DefinedFunction f φ) (hf' : 𝚺₁.DefinedFunction f' φ) (v : Fin k → ℕ) :
@@ -62,20 +62,20 @@ lemma models_iff_of_Sigma0 {σ : Semisentence ℒₒᵣ n} (hσ : Hierarchy 𝚺
     V ⊧/(e ·) σ ↔ ℕ ⊧/e σ := by
   by_cases h : ℕ ⊧/e σ <;> simp [h]
   · have : V ⊧/(e ·) σ := by
-      simpa [numeral_eq_natCast] using R0.bold_sigma_one_completeness' (M := V) (by simp [Hierarchy.of_zero hσ]) h
+      simpa [numeral_eq_natCast] using bold_sigma_one_completeness' (M := V) (by simp [Hierarchy.of_zero hσ]) h
     simpa [HierarchySymbol.Semiformula.val_sigma] using this
   · have : ℕ ⊧/e (∼σ) := by simpa using h
-    have : V ⊧/(e ·) (∼σ) := by simpa [numeral_eq_natCast] using R0.bold_sigma_one_completeness' (M := V) (by simp [Hierarchy.of_zero hσ]) this
+    have : V ⊧/(e ·) (∼σ) := by simpa [numeral_eq_natCast] using bold_sigma_one_completeness' (M := V) (by simp [Hierarchy.of_zero hσ]) this
     simpa using this
 
 lemma models_iff_of_Delta1 {σ : 𝚫₁.Semisentence n} (hσ : σ.ProperOn ℕ) (hσV : σ.ProperOn V) {e : Fin n → ℕ} :
     V ⊧/(e ·) σ.val ↔ ℕ ⊧/e σ.val := by
   by_cases h : ℕ ⊧/e σ.val <;> simp [h]
   · have : ℕ ⊧/e σ.sigma.val := by simpa [HierarchySymbol.Semiformula.val_sigma] using h
-    have : V ⊧/(e ·) σ.sigma.val := by simpa [numeral_eq_natCast] using R0.bold_sigma_one_completeness' (M := V) (by simp) this
+    have : V ⊧/(e ·) σ.sigma.val := by simpa [numeral_eq_natCast] using bold_sigma_one_completeness' (M := V) (by simp) this
     simpa [HierarchySymbol.Semiformula.val_sigma] using this
   · have : ℕ ⊧/e (∼σ.pi.val) := by simpa [hσ.iff'] using h
-    have : V ⊧/(e ·) (∼σ.pi.val) := by simpa [numeral_eq_natCast] using R0.bold_sigma_one_completeness' (M := V) (by simp) this
+    have : V ⊧/(e ·) (∼σ.pi.val) := by simpa [numeral_eq_natCast] using bold_sigma_one_completeness' (M := V) (by simp) this
     simpa [hσV.iff'] using this
 
 variable {T : ArithmeticTheory} [𝗣𝗔⁻ ⪯ T] [T.SoundOnHierarchy 𝚺 1]

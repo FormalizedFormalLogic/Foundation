@@ -292,3 +292,17 @@ Similar to `Modal.EMC4`.
 {docstring FrameClass.END4}
 
 {docstring END4.Neighborhood.sound}
+
+
+## For {lean}`Modal.EK`
+
+{docstring FrameClass.EK}
+
+{docstring EK.Neighborhood.sound}
+
+
+## For {lean}`Modal.EMK`
+
+{docstring FrameClass.EMK}
+
+{docstring EMK.Neighborhood.sound}

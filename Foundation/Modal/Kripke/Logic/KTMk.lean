@@ -86,7 +86,7 @@ lemma validate_axiomFour_of_model_finitely {M : Kripke.Model} (hM : M ⊧* Modal
         replace hij : i < j := hij;
         apply Satisfies.not_def.mp $ Satisfies.and_def.mp (hl' ⟨i, hi⟩) |>.2;
         apply Satisfies.mdp ?_ $ eij ▸ Satisfies.and_def.mp (hl' ⟨j, hj⟩) |>.1;
-        apply hM.realize;
+        apply hM.models;
         obtain ⟨c, hc, rfl⟩ := lt_iff_exists_add.mp hij;
         match c with
         | 0 => contradiction;
@@ -104,7 +104,7 @@ lemma validate_axiomFour_of_model_finitely {M : Kripke.Model} (hM : M ⊧* Modal
           . simp [m, hl_len];
       . intro h;
         have : l[m] ⊧ □^[(m + 1)]φ ⋏ ∼□^[(m + 2)]φ ➝ ◇(□^[(m + 2)]φ ⋏ ◇(∼□^[(m + 2)]φ)) := by
-          apply hM.realize;
+          apply hM.models;
           apply Logic.iff_provable.mp;
           simp;
         replace : l[m] ⊧ ◇(□^[(m + 2)]φ ⋏ ◇(∼□^[(m + 2)]φ)) := this h;
@@ -195,7 +195,7 @@ instance : Modal.KT ⪱ Modal.KTMk := by
       constructor;
       . exact { refl := by omega; }
       . suffices ∀ (x : Fin 3), 0 = x ∨ 1 = x → (∀ y, x = y ∨ x + 1 = y → ∀ z, y = z ∨ y + 1 = z → z ≠ 2) → x ≠ 0 ∧ x + 1 ≠ 0 by
-          simpa [Frame.Rel', Satisfies, Semantics.Realize];
+          simpa [Frame.Rel', Satisfies, Semantics.Models];
         rintro x (rfl | rfl);
         . intro h;
           exfalso;

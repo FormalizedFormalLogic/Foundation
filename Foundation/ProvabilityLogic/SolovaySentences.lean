@@ -1,8 +1,8 @@
 import Foundation.ProvabilityLogic.Realization
 import Foundation.Modal.Kripke.Rank
-import Foundation.FirstOrder.Internal.WitnessComparison
-import Foundation.FirstOrder.Internal.FixedPoint
-import Foundation.FirstOrder.Internal.Consistency
+import Foundation.FirstOrder.Bootstrapping.WitnessComparison
+import Foundation.FirstOrder.Bootstrapping.FixedPoint
+import Foundation.FirstOrder.Bootstrapping.Consistency
 import Foundation.ProvabilityLogic.GL.Soundness
 import Foundation.ProvabilityLogic.Height
 
@@ -50,9 +50,9 @@ noncomputable def realization :
 
 private lemma mainlemma_aux {i : M} (hri : r ≺ i) :
     (i ⊧ A → T₀ ⊢ S i ➝ S.realization A) ∧
-    (¬i ⊧ A → T₀ ⊢ S i ➝ ∼S.realization A) := by
+    (i ⊭ A → T₀ ⊢ S i ➝ ∼S.realization A) := by
   induction A generalizing i with
-  | hfalsum => simp [Realization.interpret, Semantics.Realize, Satisfies];
+  | hfalsum => simp [Realization.interpret, Semantics.Models, Satisfies];
   | hatom a =>
     constructor;
     . intro h;
@@ -67,7 +67,7 @@ private lemma mainlemma_aux {i : M} (hri : r ≺ i) :
       apply h;
       simpa using hi;
   | himp A B ihA ihB =>
-    simp only [Realization.interpret, Semantics.Imp.realize_imp, Classical.not_imp, and_imp];
+    simp only [Realization.interpret, Semantics.Imp.models_imply, Semantics.NotModels, Classical.not_imp, and_imp];
     constructor;
     . intro h;
       rcases Satisfies.imp_def₂.mp h with (hA | hB);
@@ -98,7 +98,7 @@ theorem mainlemma (S : SolovaySentences 𝔅 M.toFrame r) {i : M} (hri : r ≺ i
     i ⊧ A → T₀ ⊢ S i ➝ S.realization A := (mainlemma_aux S hri).1
 
 theorem mainlemma_neg (S : SolovaySentences 𝔅 M.toFrame r) {i : M} (hri : r ≺ i) :
-    ¬i ⊧ A → T₀ ⊢ S i ➝ ∼S.realization A := (mainlemma_aux S hri).2
+    i ⊭ A → T₀ ⊢ S i ➝ ∼S.realization A := (mainlemma_aux S hri).2
 
 lemma root_of_iterated_inconsistency : T₀ ⊢ ∼𝔅^[M.height] ⊥ ➝ S r := by
   suffices T₀ ⊢ (⩖ j, S j) ➝ ∼S r ➝ 𝔅^[M.height] ⊥ by
@@ -119,7 +119,7 @@ lemma root_of_iterated_inconsistency : T₀ ⊢ ∼𝔅^[M.height] ⊥ ➝ S r :
 lemma theory_height [𝔅.Sound₀] (h : r ⊧ ◇(∼A)) (b : T ⊢ S.realization A) :
     𝔅.height < M.height := by
   apply 𝔅.height_lt_pos_of_boxBot (height_pos_of_dia h)
-  have : ∃ i, r ≺ i ∧ ¬i ⊧ A := Formula.Kripke.Satisfies.dia_def.mp h
+  have : ∃ i, r ≺ i ∧ i ⊭ A := Formula.Kripke.Satisfies.dia_def.mp h
   rcases this with ⟨i, hi, hiA⟩
   have b₀ : T₀ ⊢ 𝔅 (S.realization A) := 𝔅.D1 b
   have b₁ : T₀ ⊢ ∼(↑𝔅)^[M.height] ⊥ ➝ S r := S.root_of_iterated_inconsistency
@@ -133,9 +133,7 @@ end SolovaySentences
 
 end LO.ProvabilityLogic
 
-namespace LO.ISigma1.Metamath
-
-open FirstOrder Arithmetic PeanoMinus IOpen ISigma0
+namespace LO.FirstOrder.Arithmetic.Bootstrapping
 
 namespace SolovaySentences
 
@@ -149,7 +147,7 @@ variable {F : Kripke.Frame} {r : F} [F.IsFiniteTree r] [Fintype F]
 
 section model
 
-variable (T) {V : Type*} [ORingStruc V] [V ⊧ₘ* 𝗜𝚺₁]
+variable (T) {V : Type*} [ORingStructure V] [V ⊧ₘ* 𝗜𝚺₁]
 
 def NegativeSuccessor (φ ψ : V) : Prop := T.ProvabilityComparison (neg ℒₒᵣ φ) (neg ℒₒᵣ ψ)
 
@@ -162,12 +160,8 @@ section
 def negativeSuccessor : 𝚺₁.Semisentence 2 := .mkSigma
   “φ ψ. ∃ nφ, ∃ nψ, !(negGraph ℒₒᵣ) nφ φ ∧ !(negGraph ℒₒᵣ) nψ ψ ∧ !T.provabilityComparison nφ nψ”
 
-lemma negativeSuccessor_defined : 𝚺₁-Relation[V] NegativeSuccessor T via (negativeSuccessor T) := by
-  intro v
-  simp [negativeSuccessor, NegativeSuccessor, (neg.defined (L := ℒₒᵣ)).df.iff]
-
-@[simp] lemma eval_negativeSuccessorDef (v) :
-    Semiformula.Evalbm V v (negativeSuccessor T).val ↔ NegativeSuccessor T (v 0) (v 1) := (negativeSuccessor_defined T).df.iff v
+instance negativeSuccessor_defined : 𝚺₁-Relation[V] NegativeSuccessor T via (negativeSuccessor T) := .mk fun v ↦ by
+  simp [negativeSuccessor, NegativeSuccessor]
 
 instance negativeSuccessor_definable : 𝚺₁-Relation (NegativeSuccessor T : V → V → Prop) := (negativeSuccessor_defined T).to_definable
 
@@ -262,7 +256,7 @@ section model
 
 variable (T)
 
-variable {V : Type*} [ORingStruc V] [V ⊧ₘ* 𝗜𝚺₁]
+variable {V : Type*} [ORingStructure V] [V ⊧ₘ* 𝗜𝚺₁]
 
 open Modal ProvabilityLogic Kripke
 
@@ -474,11 +468,11 @@ lemma Solovay.box_disjunction [𝗜𝚺₁ ⪯ T] {i : F} (ne : r ≠ i) :
   have TP : T.internalize V ⊢ ⌜θ T i ➝ T.solovay i ⋎ ⩖ j ∈ {j : F | i ≺ j}, T.solovay j⌝ :=
     internal_provable_of_outer_provable <| by
       have : 𝗜𝚺₁ ⊢ θ T i ➝ T.solovay i ⋎ ⩖ j ∈ {j : F | i ≺ j}, T.solovay j :=
-        oRing_provable_of _ _ fun (V : Type) _ _ ↦ by
+        provable_of_models _ _ fun (V : Type) _ _ ↦ by
           simpa [models_iff] using Θ.disjunction i
       exact Entailment.WeakerThan.pbl this
   have Tθ : T.internalize V ⊢ ⌜θ T i⌝ :=
-    InternalArithmetic.sigma_one_provable_of_models T (show Hierarchy 𝚺 1 (θ T i) by simp) (by simpa [models_iff] using hS.1)
+    Bootstrapping.Arithmetic.sigma_one_provable_of_models T (show Hierarchy 𝚺 1 (θ T i) by simp) (by simpa [models_iff] using hS.1)
   have hP : T.internalize V ⊢ ⌜T.solovay i⌝ ⋎ ⌜⩖ j ∈ {j : F | i ≺ j}, T.solovay j⌝ := (by simpa using TP) ⨀ Tθ
   have : T.internalize V ⊢ ∼⌜T.solovay i⌝ := by simpa using (tprovable_tquote_iff_provable_quote (T := T)).mpr (Solovay.refute ne hS)
   have : T.internalize V ⊢ ⌜⩖ j ∈ {j : F | i ≺ j}, T.solovay j⌝ := Entailment.of_a!_of_n! hP this
@@ -526,16 +520,16 @@ variable (T F)
 def _root_.LO.ProvabilityLogic.SolovaySentences.standard [𝗜𝚺₁ ⪯ T] : SolovaySentences T.standardProvability F r where
   σ := T.solovay
   SC1 i j ne :=
-    oRing_provable_of _ _ fun (V : Type) _ _ ↦ by
+    provable_of_models _ _ fun (V : Type) _ _ ↦ by
       simpa [models_iff] using Solovay.exclusive ne
   SC2 i j h :=
-    oRing_provable_of _ _ fun (V : Type) _ _ ↦ by
+    provable_of_models _ _ fun (V : Type) _ _ ↦ by
       simpa [models_iff, standardProvability_def] using Solovay.consistent h
   SC3 i h :=
-    oRing_provable_of _ _ fun (V : Type) _ _ ↦ by
+    provable_of_models _ _ fun (V : Type) _ _ ↦ by
       simpa [models_iff, standardProvability_def] using Solovay.box_disjunction h
   SC4 :=
-    oRing_provable_of _ _ fun (V : Type) _ _ ↦ by
+    provable_of_models _ _ fun (V : Type) _ _ ↦ by
       simpa [models_iff] using disjunctive
 
 lemma _root_.LO.ProvabilityLogic.SolovaySentences.standard_σ_def [𝗜𝚺₁ ⪯ T] :
@@ -545,4 +539,4 @@ end frame
 
 end SolovaySentences
 
-end LO.ISigma1.Metamath
+end LO.FirstOrder.Arithmetic.Bootstrapping

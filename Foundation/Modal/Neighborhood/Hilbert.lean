@@ -22,7 +22,7 @@ lemma soundness_of_axioms_validOnFrame (hC : F ⊧* Ax) : Hilbert.WithRE Ax ⊢ 
   | re ihφ => exact ValidOnFrame.re ihφ;
   | axm s h =>
     apply ValidOnFrame.subst s;
-    apply hC.RealizeSet;
+    apply hC.models_set;
     assumption;
 
 instance instSound_of_axioms_validOnFrame (hV : F ⊧* Ax) : Sound (Hilbert.WithRE Ax) F := ⟨fun {_} => soundness_of_axioms_validOnFrame hV⟩
@@ -40,7 +40,7 @@ lemma soundness_of_validates_axioms (hC : C ⊧* Ax) : Hilbert.WithRE Ax ⊢ φ 
   | re ihφ => exact ValidOnFrame.re ihφ;
   | axm s h =>
     intro V x;
-    apply ValidOnFrame.subst s $ @hC.RealizeSet _ h F hF;
+    apply ValidOnFrame.subst s $ @hC.models_set _ h F hF;
 
 instance instSound_of_validates_axioms (hV : C ⊧* Ax) : Sound (Hilbert.WithRE Ax) C := ⟨fun {_} => soundness_of_validates_axioms hV⟩
 

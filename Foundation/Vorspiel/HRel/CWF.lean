@@ -33,6 +33,13 @@ lemma Finite.converseWellFounded_of_trans_irrefl'
     ⟨by simp [flip]; intro a b c ba cb; exact hTrans cb ba;⟩
     ⟨by simp [flip]; exact hIrrefl⟩
 
+namespace IsConverseWellFounded
+
+
+
+
+end IsConverseWellFounded
+
 variable (R)
 
 open Classical in
@@ -144,5 +151,7 @@ lemma fcwHeight_lt [IsTrans α R] {a : α} :
       exact ⟨c, IsTrans.trans _ _ _ hb hc, rfl⟩
 
 end fcwHeight
+
+
 
 end

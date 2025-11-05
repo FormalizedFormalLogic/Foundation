@@ -47,7 +47,7 @@ end Neighborhood
 namespace E4
 
 instance Neighborhood.sound : Sound Modal.E4 FrameClass.E4 := instSound_of_validates_axioms $ by
-  simp only [Semantics.RealizeSet.singleton_iff];
+  simp only [Semantics.ModelsSet.singleton_iff];
   intro F hF;
   replace hF := Set.mem_setOf_eq.mp hF;
   apply valid_axiomFour_of_isTransitive;

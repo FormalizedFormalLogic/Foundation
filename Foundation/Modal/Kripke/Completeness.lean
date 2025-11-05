@@ -8,7 +8,7 @@ open Formula
 open Kripke
 open MaximalConsistentTableau
 
-variable {S} [Entailment (Formula ℕ) S]
+variable {S} [Entailment S (Formula ℕ)]
 variable {𝓢 : S} [Entailment.Consistent 𝓢] [Entailment.K 𝓢]
 
 namespace Kripke
@@ -25,7 +25,7 @@ abbrev canonicalModel (𝓢 : S) [Entailment.Consistent 𝓢] [Entailment.K 𝓢
   Val t a := (atom a) ∈ t.1.1
 
 @[reducible]
-instance : Semantics (Formula ℕ) (canonicalModel 𝓢).World := Formula.Kripke.Satisfies.semantics (M := canonicalModel 𝓢)
+instance : Semantics (canonicalModel 𝓢) (Formula ℕ) := Formula.Kripke.Satisfies.semantics (M := canonicalModel 𝓢)
 
 end
 
@@ -38,9 +38,9 @@ variable {t : (canonicalModel 𝓢).World}
 lemma truthlemma : ((φ ∈ t.1.1) ↔ t ⊧ φ) ∧ ((φ ∈ t.1.2) ↔ ¬t ⊧ φ) := by
   induction φ generalizing t with
   | hatom =>
-    simp_all only [Semantics.Realize, Satisfies, true_and];
+    simp_all only [Semantics.Models, Satisfies, true_and];
     exact iff_not_mem₁_mem₂.symm;
-  | hfalsum => simp [Semantics.Realize, Satisfies];
+  | hfalsum => simp [Semantics.Models, Satisfies];
   | himp φ ψ ihφ ihψ =>
     constructor;
     . constructor;

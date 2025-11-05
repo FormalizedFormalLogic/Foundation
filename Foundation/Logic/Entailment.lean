@@ -9,7 +9,7 @@ This file defines a characterization of the system/proof/provability/calculus of
 Also defines soundness and completeness.
 
 ## Main Definitions
-* `LO.Entailment F S`: a general framework of deductive system `S` for formulae `F`.
+* `LO.Entailment S F`: a general framework of deductive system `S` for formulae `F`.
 * `LO.Entailment.Inconsistent 𝓢`: a proposition that states that all formulae in `F` is provable from `𝓢`.
 * `LO.Entailment.Consistent 𝓢`: a proposition that states that `𝓢` is not inconsistent.
 * `LO.Entailment.Sound 𝓢 𝓜`: provability from `𝓢` implies satisfiability on `𝓜`.
@@ -27,14 +27,14 @@ Also defines soundness and completeness.
 namespace LO
 
 /-- Entailment relation on proof system `S` and formula `F` -/
-class Entailment (F : outParam Type*) (S : Type*) where
+class Entailment (S : Type*) (F : outParam Type*) where
   Prf : S → F → Type*
 
 infix:45 " ⊢! " => Entailment.Prf
 
 namespace Entailment
 
-variable {F : Type*} {S T U : Type*} [Entailment F S] [Entailment F T] [Entailment F U]
+variable {F : Type*} {S T U : Type*} [Entailment S F] [Entailment T F] [Entailment U F]
 
 section
 
@@ -285,9 +285,11 @@ section
 
 variable [LogicalConnective F] (𝓢 : S)
 
+/-- `𝓢` is complete if, for every formula, either it or its negation is provable by `𝓢`. -/
 class Complete : Prop where
   con : ∀ φ, 𝓢 ⊢ φ ∨ 𝓢 ⊢ ∼φ
 
+/-- A formula `φ` is independent from `𝓢` if, neither it nor its negation is provable by `𝓢`. -/
 def Independent (φ : F) : Prop := 𝓢 ⊬ φ ∧ 𝓢 ⊬ ∼φ
 
 /-- A proof system is incomplete if and only if there exists a formula that is both unprovable and irrefutable. -/
@@ -414,7 +416,7 @@ end Entailment
 
 namespace Entailment
 
-variable {S : Type*} {F : Type*} [LogicalConnective F] [Entailment F S]
+variable {S : Type*} {F : Type*} [LogicalConnective F] [Entailment S F]
 
 section
 
@@ -465,7 +467,7 @@ end Entailment
 
 section
 
-variable {S : Type*} {F : Type*} [Entailment F S] {M : Type*} [Semantics F M]
+variable {S : Type*} {F : Type*} [Entailment S F] {M : Type*} [Semantics M F]
 
 class Sound (𝓢 : S) (𝓜 : M) : Prop where
   sound : ∀ {φ : F}, 𝓢 ⊢ φ → 𝓜 ⊧ φ
@@ -479,7 +481,7 @@ section
 
 variable {𝓢 𝓣 : S} {𝓜 𝓝 : M} [Sound 𝓢 𝓜] [Sound 𝓣 𝓝]
 
-lemma not_provable_of_countermodel {φ : F} (hp : ¬𝓜 ⊧ φ) : 𝓢 ⊬ φ :=
+lemma not_provable_of_countermodel {φ : F} (hp : 𝓜 ⊭ φ) : 𝓢 ⊬ φ :=
   fun b ↦ hp (Sound.sound b)
 
 lemma consistent_of_meaningful : Semantics.Meaningful 𝓜 → Entailment.Consistent 𝓢 :=
@@ -488,7 +490,7 @@ lemma consistent_of_meaningful : Semantics.Meaningful 𝓜 → Entailment.Consis
 lemma consistent_of_model [LogicalConnective F] [Semantics.Bot M] (𝓜 : M) [Sound 𝓢 𝓜] : Entailment.Consistent 𝓢 :=
   consistent_of_meaningful (𝓜 := 𝓜) inferInstance
 
-lemma realizeSet_of_prfSet {T : Set F} (b : 𝓢 ⊢* T) : 𝓜 ⊧* T :=
+lemma modelsSet_of_prfSet {T : Set F} (b : 𝓢 ⊢* T) : 𝓜 ⊧* T :=
   ⟨fun _ hf ↦ sound (b hf)⟩
 
 end
@@ -512,7 +514,7 @@ section
 
 variable {𝓢 : S} {𝓜 : M} [Complete 𝓢 𝓜]
 
-lemma exists_countermodel_of_not_provable {φ : F} (h : 𝓢 ⊬ φ) : ¬𝓜 ⊧ φ := by
+lemma exists_countermodel_of_not_provable {φ : F} (h : 𝓢 ⊬ φ) : 𝓜 ⊭ φ := by
   contrapose! h;
   simpa using Complete.complete (𝓢 := 𝓢) h;
 
@@ -552,7 +554,8 @@ end
 
 lemma weakerthan_of_models {𝓣 : S} {t : Set F} [Sound 𝓣 (Semantics.models M t)]
     (H : ∀ 𝓜 : M, 𝓜 ⊧* s → 𝓜 ⊧* t) : 𝓣 ⪯ 𝓢 :=
-  Entailment.weakerThan_iff.mpr <| fun h ↦ provable_of_consequence <| fun 𝓜 h𝓜 ↦ Sound.consequence_of_provable (M := M) (T := t) h (H 𝓜 h𝓜)
+  Entailment.weakerThan_iff.mpr <| fun h ↦ provable_of_consequence <|
+    fun 𝓜 h𝓜 ↦ Sound.consequence_of_provable (M := M) (T := t) h (H 𝓜 h𝓜)
 
 end
 

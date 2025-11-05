@@ -1,4 +1,4 @@
 import Foundation.FirstOrder.Arithmetic.Definability.Hierarchy
-import Foundation.FirstOrder.Arithmetic.Definability.Boldface
-import Foundation.FirstOrder.Arithmetic.Definability.BoundedBoldface
+import Foundation.FirstOrder.Arithmetic.Definability.Definable
+import Foundation.FirstOrder.Arithmetic.Definability.BoundedDefinable
 import Foundation.FirstOrder.Arithmetic.Definability.Absoluteness

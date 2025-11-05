@@ -18,7 +18,7 @@ variable {S F : Type*} {𝓢 : S} {φ ψ χ : F}
 
 section
 
-variable [LogicalConnective F] [Entailment F S]
+variable [LogicalConnective F] [Entailment S F]
 
 class HasAxiomEFQ (𝓢 : S) where
   efq {φ : F} : 𝓢 ⊢! Axioms.EFQ φ
@@ -38,7 +38,7 @@ end
 
 section
 
-variable [LogicalConnective F] [Entailment F S] [Entailment.Minimal 𝓢]
+variable [LogicalConnective F] [Entailment S F] [Entailment.Minimal 𝓢]
 
 namespace FiniteContext
 
@@ -68,7 +68,7 @@ end
 section
 
 variable {F : Type*} [LogicalConnective F] [DecidableEq F]
-         {S : Type*} [Entailment F S]
+         {S : Type*} [Entailment S F]
          {𝓢 : S} [Entailment.Int 𝓢]
          {φ φ₁ φ₂ ψ ψ₁ ψ₂ χ ξ : F}
          {Γ Δ : List F}

@@ -32,43 +32,34 @@ import Foundation.FirstOrder.Completeness.SubLanguage
 import Foundation.FirstOrder.Completeness.SearchTree
 import Foundation.FirstOrder.Completeness.Completeness
 
+import Foundation.FirstOrder.LoewenheimSkolem
+
 import Foundation.FirstOrder.Order.Le
 import Foundation.FirstOrder.Interpretation
 
 import Foundation.FirstOrder.Arithmetic.Basic
-import Foundation.FirstOrder.Arithmetic.BoundedQuantifier
 import Foundation.FirstOrder.Arithmetic.Definability
+import Foundation.FirstOrder.Arithmetic.Schemata
+import Foundation.FirstOrder.Arithmetic.R0.Basic
+import Foundation.FirstOrder.Arithmetic.R0.Representation
+import Foundation.FirstOrder.Arithmetic.Q.Basic
+import Foundation.FirstOrder.Arithmetic.PeanoMinus.Basic
+import Foundation.FirstOrder.Arithmetic.PeanoMinus.Functions
+import Foundation.FirstOrder.Arithmetic.PeanoMinus.Q
+import Foundation.FirstOrder.Arithmetic.TA.Basic
+import Foundation.FirstOrder.Arithmetic.TA.Nonstandard
+import Foundation.FirstOrder.Arithmetic.IOpen.Basic
+import Foundation.FirstOrder.Arithmetic.Exponential
+import Foundation.FirstOrder.Arithmetic.HFS
 import Foundation.FirstOrder.Arithmetic.Induction
-
-import Foundation.FirstOrder.R0.Basic
-import Foundation.FirstOrder.R0.Representation
-
-import Foundation.FirstOrder.Q.Basic
-
-import Foundation.FirstOrder.PeanoMinus.Basic
-import Foundation.FirstOrder.PeanoMinus.Functions
-import Foundation.FirstOrder.PeanoMinus.Q
-
-import Foundation.FirstOrder.TrueArithmetic.Basic
-import Foundation.FirstOrder.TrueArithmetic.Nonstandard
-
-import Foundation.FirstOrder.IOpen.Basic
-
-import Foundation.FirstOrder.ISigma0.Exponential
-
-import Foundation.FirstOrder.ISigma1.Bit
-import Foundation.FirstOrder.ISigma1.HFS
-import Foundation.FirstOrder.ISigma1.Ind
-
-import Foundation.FirstOrder.Omega1.Basic
-import Foundation.FirstOrder.Omega1.Nuon
-
-import Foundation.FirstOrder.Internal.Syntax
-import Foundation.FirstOrder.Internal.FixedPoint
-import Foundation.FirstOrder.Internal.DerivabilityCondition
-import Foundation.FirstOrder.Internal.Consistency
-import Foundation.FirstOrder.Internal.WitnessComparison
-import Foundation.FirstOrder.Internal.RosserProvability
+import Foundation.FirstOrder.Arithmetic.Omega1.Basic
+import Foundation.FirstOrder.Arithmetic.Omega1.Nuon
+import Foundation.FirstOrder.Bootstrapping.Syntax
+import Foundation.FirstOrder.Bootstrapping.FixedPoint
+import Foundation.FirstOrder.Bootstrapping.DerivabilityCondition
+import Foundation.FirstOrder.Bootstrapping.Consistency
+import Foundation.FirstOrder.Bootstrapping.WitnessComparison
+import Foundation.FirstOrder.Bootstrapping.RosserProvability
 
 import Foundation.FirstOrder.Incompleteness.First
 import Foundation.FirstOrder.Incompleteness.Halting
@@ -81,23 +72,23 @@ import Foundation.FirstOrder.Incompleteness.Tarski
 import Foundation.FirstOrder.Incompleteness.Yablo
 
 import Foundation.FirstOrder.SetTheory.Basic
-import Foundation.FirstOrder.SetTheory.Axioms
-
-import Foundation.FirstOrder.Z.Basic
-import Foundation.FirstOrder.Z.Ordinal
-import Foundation.FirstOrder.Z.Function
-
-import Foundation.FirstOrder.ZF.Basic
-
-import Foundation.FirstOrder.ZFC.Basic
+import Foundation.FirstOrder.SetTheory.StandardModel
+import Foundation.FirstOrder.SetTheory.LoewenheimSkolem
+import Foundation.FirstOrder.SetTheory.Z
+import Foundation.FirstOrder.SetTheory.Function
+import Foundation.FirstOrder.SetTheory.Ordinal
 
 import Foundation.FirstOrder.Hauptsatz
 
--- IntFO
+import Foundation.FirstOrder.Intuitionistic.Formula
+import Foundation.FirstOrder.Intuitionistic.Rew
+import Foundation.FirstOrder.Intuitionistic.Deduction
 
-import Foundation.IntFO.Basic
-import Foundation.IntFO.Kripke.Basic
-import Foundation.IntFO.Translation
+import Foundation.FirstOrder.Kripke.Basic
+import Foundation.FirstOrder.Kripke.Intuitionistic
+import Foundation.FirstOrder.Kripke.WeakForcing
+
+import Foundation.FirstOrder.NegationTranslation.GoedelGentzen
 
 -- TODO:
 -- import Foundation.Propositional.Dialectica.Basic
@@ -142,6 +133,8 @@ import Foundation.Modal.PLoN.Logic.N
 
 import Foundation.Modal.Neighborhood.Logic.E4
 import Foundation.Modal.Neighborhood.Logic.E5
+import Foundation.Modal.Neighborhood.Logic.EK
+import Foundation.Modal.Neighborhood.Logic.EMK
 import Foundation.Modal.Neighborhood.Logic.EMC4
 import Foundation.Modal.Neighborhood.Logic.EMCN
 import Foundation.Modal.Neighborhood.Logic.EMCN4
@@ -198,6 +191,14 @@ import Foundation.ProvabilityLogic.S.Completeness
 import Foundation.ProvabilityLogic.Classification.LetterlessTrace
 import Foundation.ProvabilityLogic.Classification.Trace
 
+-- Interpretability Logic
+import Foundation.InterpretabilityLogic.Veltman.Logic.ILMinus_J1_J2_J5
+import Foundation.InterpretabilityLogic.Veltman.Logic.CL
+import Foundation.InterpretabilityLogic.Veltman.Logic.IL
+import Foundation.InterpretabilityLogic.Veltman.Logic.ILM
+import Foundation.InterpretabilityLogic.Veltman.Logic.ILP
+
+-- Meta
 import Foundation.Meta.Qq
 import Foundation.Meta.Lit
 import Foundation.Meta.ClProver

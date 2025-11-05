@@ -6,7 +6,7 @@ namespace LO
 
 namespace Entailment
 
-variable {F S : Type*} [DecidableEq F] [LogicalConnective F] [Entailment F S] [AdjunctiveSet F S] [Deduction S]
+variable {F S : Type*} [DecidableEq F] [LogicalConnective F] [Entailment S F] [AdjunctiveSet F S] [Deduction S]
          {𝓢 : S} [Entailment.Cl 𝓢]
 
 lemma consistent_cons_of_unprovable_neg (h : 𝓢 ⊬ ∼φ) : Consistent (adjoin φ 𝓢) := by
@@ -27,7 +27,7 @@ namespace Entailment.LindenbaumAlgebra
 
 open Entailment LindenbaumAlgebra
 
-variable {F S : Type*} [DecidableEq F] [LogicalConnective F] [Entailment F S] [AdjunctiveSet F S] [Deduction S]
+variable {F S : Type*} [DecidableEq F] [LogicalConnective F] [Entailment S F] [AdjunctiveSet F S] [Deduction S]
          (𝓢 : S) [Entailment.Cl 𝓢]
 
 lemma dense_of_finite_extend_incomplete
@@ -65,7 +65,7 @@ end Entailment.LindenbaumAlgebra
 open Entailment LindenbaumAlgebra FirstOrder
 
 /-- Lindenbuam algebra of `𝗜𝚺₁`-extension theory satisfies G1 is dense. -/
-lemma ISigma1.dense (T : Theory ℒₒᵣ) [𝗜𝚺₁ ⪯ T] [T.Δ₁] {φ ψ : LindenbaumAlgebra T} :
+lemma FirstOrder.Arithmetic.dense (T : Theory ℒₒᵣ) [𝗜𝚺₁ ⪯ T] [T.Δ₁] {φ ψ : LindenbaumAlgebra T} :
     φ < ψ → ∃ ξ, φ < ξ ∧ ξ < ψ := fun h ↦ by
   refine LindenbaumAlgebra.dense_of_finite_extend_incomplete T ?_ h
   intro σ con
@@ -73,6 +73,6 @@ lemma ISigma1.dense (T : Theory ℒₒᵣ) [𝗜𝚺₁ ⪯ T] [T.Δ₁] {φ ψ 
   simpa using Arithmetic.incomplete' (insert σ T)
 
 instance (T : Theory ℒₒᵣ) [𝗜𝚺₁ ⪯ T] [T.Δ₁] : DenselyOrdered (LindenbaumAlgebra T) where
-  dense _ _ := ISigma1.dense T
+  dense _ _ := FirstOrder.Arithmetic.dense T
 
 end LO

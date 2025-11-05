@@ -6,7 +6,7 @@ namespace LO.Modal.Entailment
 
 open LO.Entailment
 
-variable {S F : Type*} [BasicModalLogicalConnective F] [DecidableEq F] [Entailment F S]
+variable {S F : Type*} [BasicModalLogicalConnective F] [DecidableEq F] [Entailment S F]
 variable {𝓢 : S}
 
 instance [Entailment.EMCN 𝓢] : Entailment.K 𝓢 where

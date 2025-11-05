@@ -13,7 +13,7 @@ end LO.Axioms
 
 namespace LO.Entailment
 
-variable {S F : Type*} [LogicalConnective F] [Entailment F S]
+variable {S F : Type*} [LogicalConnective F] [Entailment S F]
 variable {𝓢 : S} {φ ψ χ : F}
 
 class HasAxiomElimContra (𝓢 : S)  where

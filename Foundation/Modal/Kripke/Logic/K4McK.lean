@@ -44,6 +44,6 @@ instance : Modal.K4 ⪱ Modal.K4McK := by
       use ⟨⟨Fin 1, λ x y => False⟩, λ w _ => False⟩, 0;
       constructor;
       . simp only [Set.mem_setOf_eq]; refine { trans := by simp; }
-      . simp [Semantics.Realize, Satisfies];
+      . simp [Semantics.Models, Satisfies];
 
 end LO.Modal

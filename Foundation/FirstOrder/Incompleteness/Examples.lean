@@ -7,7 +7,7 @@ import Foundation.FirstOrder.Incompleteness.Second
 *TODO: Prove `𝗜𝚺₁` and `𝗣𝗔` are $\Delta_1$-definable.*
 -/
 
-namespace LO.FirstOrder
+namespace LO.FirstOrder.Arithmetic
 
 axiom ISigma1_delta1Definable : 𝗜𝚺₁.Δ₁
 
@@ -31,4 +31,4 @@ instance : 𝗣𝗔 + 𝗣𝗔.Con ⪱ 𝗣𝗔 + 𝗣𝗔.Con + (𝗣𝗔 + �
   have : 𝗜𝚺₁ ⪯ 𝗣𝗔 + 𝗣𝗔.Con := Entailment.WeakerThan.trans (inferInstanceAs (𝗜𝚺₁ ⪯ 𝗣𝗔)) inferInstance
   inferInstance
 
-end LO.FirstOrder
+end LO.FirstOrder.Arithmetic

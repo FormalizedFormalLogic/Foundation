@@ -385,7 +385,7 @@ instance : Modal.K ⪱ Modal.KHen := by
     . apply Sound.not_provable_of_countermodel (𝓜 := FrameClass.K)
       apply Kripke.not_validOnFrameClass_of_exists_model_world;
       use ⟨⟨Fin 1, λ x y => True⟩, λ w _ => False⟩, 0;
-      simp [Satisfies, Semantics.Realize];
+      simp [Satisfies, Semantics.Models];
       constructor <;> tauto;
 
 instance : Modal.KHen ⪱ Modal.GL := by

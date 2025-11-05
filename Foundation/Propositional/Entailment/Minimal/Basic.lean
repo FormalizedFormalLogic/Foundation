@@ -45,7 +45,7 @@ namespace LO.Entailment
 
 section
 
-variable {S F : Type*} [LogicalConnective F] [Entailment F S]
+variable {S F : Type*} [LogicalConnective F] [Entailment S F]
 variable {𝓢 : S} {φ ψ χ : F}
 
 class ModusPonens (𝓢 : S) where
@@ -177,7 +177,7 @@ end
 
 section
 
-variable {S F : Type*} [LogicalConnective F] [Entailment F S]
+variable {S F : Type*} [LogicalConnective F] [Entailment S F]
 variable {𝓢 : S} [ModusPonens 𝓢] {φ ψ χ : F}
 
 def CO_of_N [HasAxiomAndElim 𝓢] [NegationEquiv 𝓢] : 𝓢 ⊢! ∼φ → 𝓢 ⊢! φ ➝ ⊥ := λ h => (K_left negEquiv) ⨀ h
@@ -300,7 +300,7 @@ end
 
 section
 
-variable {S F : Type*} [LogicalConnective F] [Entailment F S]
+variable {S F : Type*} [LogicalConnective F] [Entailment S F]
 variable {𝓢 : S} [Entailment.Minimal 𝓢] {φ ψ χ : F}
 
 variable {Γ Δ : List F}
@@ -401,7 +401,7 @@ instance : AdjunctiveSet F (FiniteContext F 𝓢) where
   not_mem_empty := by simp
   mem_cons_iff := by simp [Adjoin.adjoin, mem_def]
 
-variable [Entailment F S] [LogicalConnective F]
+variable [Entailment S F] [LogicalConnective F]
 
 instance (𝓢 : S) : Entailment F (FiniteContext F 𝓢) := ⟨(𝓢 ⊢! ·.conj ➝ ·)⟩
 
@@ -583,7 +583,7 @@ instance : AdjunctiveSet F (Context F 𝓢) where
   not_mem_empty := by simp
   mem_cons_iff := by simp [Adjoin.adjoin, mem_def]
 
-variable [LogicalConnective F] [Entailment F S]
+variable [LogicalConnective F] [Entailment S F]
 
 structure Proof (Γ : Context F 𝓢) (φ : F) where
   ctx : List F
@@ -730,7 +730,7 @@ end
 section DT
 
 variable {F : Type*} [LogicalConnective F]
-         {S : Type*} [Entailment F S]
+         {S : Type*} [Entailment S F]
          {𝓢 : S} [Entailment.Minimal 𝓢]
          {φ φ₁ φ₂ ψ ψ₁ ψ₂ χ ξ : F}
          {Γ Δ : List F}
