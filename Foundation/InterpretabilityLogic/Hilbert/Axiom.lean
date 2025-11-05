@@ -89,6 +89,12 @@ class HasM where
   ne_rp : r ≠ p := by trivial;
   mem_M : InterpretabilityLogic.Axioms.M (.atom p) (.atom q) (.atom r) ∈ Ax := by grind;
 
+class HasP where
+  p : α
+  q : α
+  ne_pq : p ≠ q := by trivial;
+  mem_P : InterpretabilityLogic.Axioms.P (.atom p) (.atom q) ∈ Ax := by grind;
+
 end Axiom
 
 end LO.InterpretabilityLogic
