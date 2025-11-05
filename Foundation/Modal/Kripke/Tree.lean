@@ -18,27 +18,6 @@ variable {F : Kripke.Frame} {r : outParam F.World}
 
 end
 
-namespace Frame.IsFiniteTree
-
-variable (F : Kripke.Frame) (r : F) [IsFiniteTree F r]
-
-instance cwf : IsConverseWellFounded F (· ≺ ·) :=
-  ⟨Finite.converseWellFounded_of_trans_irrefl' inferInstance (fun _ _ _ ↦ F.trans) F.irrefl⟩
-
-instance wf : IsWellFounded F (· ≻ ·) := ⟨(cwf F r).cwf⟩
-
-lemma induction (P : F → Prop)
-  (hr : P r)
-  (h : ∀ x, P x → ∀ y P x) {x} : P x := by {
-  have := IsWellFounded.induction (α := F) (· ≻ ·)
- }
-
-lemma induction (P : F → Prop) (h : ∀ x, (∀ y, y ≺ x → P y) → P x) {x} : P x := by {
-  have := IsWellFounded.induction (α := F) (· ≻ ·)
- }
-
-end Frame.IsFiniteTree
-
 def Frame.mkTreeUnravelling (F : Frame) (r : F.World) : Kripke.Frame where
   World := { c : List F.World // [r] <+: c ∧ c.IsChain F.Rel }
   Rel X Y := ∃ z, Y.1 = X.1 ++ [z]
