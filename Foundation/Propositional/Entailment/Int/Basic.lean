@@ -67,7 +67,7 @@ end
 
 section
 
-variable {F : Type*} [LogicalConnective F]
+variable {F : Type*} [LogicalConnective F] [DecidableEq F]
          {S : Type*} [Entailment F S]
          {𝓢 : S} [Entailment.Int 𝓢]
          {φ φ₁ φ₂ ψ ψ₁ ψ₂ χ ξ : F}
@@ -77,41 +77,41 @@ open NegationEquiv
 open FiniteContext
 open List
 
-def efq_of_mem_either [DecidableEq F] (h₁ : φ ∈ Γ) (h₂ : ∼φ ∈ Γ) : Γ ⊢[𝓢]! ψ := of_O $ bot_of_mem_either h₁ h₂
-@[simp] lemma efq_of_mem_either! [DecidableEq F] (h₁ : φ ∈ Γ) (h₂ : ∼φ ∈ Γ) : Γ ⊢[𝓢] ψ := ⟨efq_of_mem_either h₁ h₂⟩
+def efq_of_mem_either (h₁ : φ ∈ Γ) (h₂ : ∼φ ∈ Γ) : Γ ⊢[𝓢]! ψ := of_O $ bot_of_mem_either h₁ h₂
+@[simp] lemma efq_of_mem_either! (h₁ : φ ∈ Γ) (h₂ : ∼φ ∈ Γ) : Γ ⊢[𝓢] ψ := ⟨efq_of_mem_either h₁ h₂⟩
 
-def CNC [DecidableEq F] : 𝓢 ⊢! ∼φ ➝ φ ➝ ψ := by
+def CNC : 𝓢 ⊢! ∼φ ➝ φ ➝ ψ := by
   apply deduct';
   apply deduct;
   apply efq_of_mem_either (φ := φ) (by simp) (by simp);
-@[simp] lemma CNC! [DecidableEq F] : 𝓢 ⊢ ∼φ ➝ φ ➝ ψ := ⟨CNC⟩
+@[simp] lemma CNC! : 𝓢 ⊢ ∼φ ➝ φ ➝ ψ := ⟨CNC⟩
 
-def CCN [DecidableEq F] : 𝓢 ⊢! φ ➝ ∼φ ➝ ψ := by
+def CCN : 𝓢 ⊢! φ ➝ ∼φ ➝ ψ := by
   apply deduct';
   apply deduct;
   apply efq_of_mem_either (φ := φ) (by simp) (by simp);
-@[simp] lemma CCN! [DecidableEq F] : 𝓢 ⊢ φ ➝ ∼φ ➝ ψ := ⟨CCN⟩
+@[simp] lemma CCN! : 𝓢 ⊢ φ ➝ ∼φ ➝ ψ := ⟨CCN⟩
 
-lemma C_of_N [DecidableEq F] (h : 𝓢 ⊢ ∼φ) : 𝓢 ⊢ φ ➝ ψ := by
+lemma C_of_N (h : 𝓢 ⊢ ∼φ) : 𝓢 ⊢ φ ➝ ψ := by
   apply provable_iff_provable.mpr;
   apply deduct_iff.mpr;
   have dnp : [φ] ⊢[𝓢] φ ➝ ⊥ := of'! $ N!_iff_CO!.mp h;
   exact of_O! (dnp ⨀ FiniteContext.id!);
 
-lemma CN!_of_! [DecidableEq F] (h : 𝓢 ⊢ φ) : 𝓢 ⊢ ∼φ ➝ ψ := CCN! ⨀ h
+lemma CN!_of_! (h : 𝓢 ⊢ φ) : 𝓢 ⊢ ∼φ ➝ ψ := CCN! ⨀ h
 
-def CANC [DecidableEq F] : 𝓢 ⊢! (∼φ ⋎ ψ) ➝ (φ ➝ ψ) := left_A_intro (by
+def CANC : 𝓢 ⊢! (∼φ ⋎ ψ) ➝ (φ ➝ ψ) := left_A_intro (by
     apply emptyPrf;
     apply deduct;
     apply deduct;
     exact efq_of_mem_either (φ := φ) (by simp) (by simp)
   ) imply₁
-@[simp] lemma CANC! [DecidableEq F] : 𝓢 ⊢ (∼φ ⋎ ψ) ➝ (φ ➝ ψ) := ⟨CANC⟩
+@[simp] lemma CANC! : 𝓢 ⊢ (∼φ ⋎ ψ) ➝ (φ ➝ ψ) := ⟨CANC⟩
 
-def C_of_AN [DecidableEq F] (b : 𝓢 ⊢! ∼φ ⋎ ψ) : 𝓢 ⊢! φ ➝ ψ := CANC ⨀ b
-lemma C!_of_AN! [DecidableEq F] (b : 𝓢 ⊢ ∼φ ⋎ ψ) : 𝓢 ⊢ φ ➝ ψ := ⟨C_of_AN b.some⟩
+def C_of_AN (b : 𝓢 ⊢! ∼φ ⋎ ψ) : 𝓢 ⊢! φ ➝ ψ := CANC ⨀ b
+lemma C!_of_AN! (b : 𝓢 ⊢ ∼φ ⋎ ψ) : 𝓢 ⊢ φ ➝ ψ := ⟨C_of_AN b.some⟩
 
-def CCNNNNNNC [DecidableEq F] : 𝓢 ⊢! (∼∼φ ➝ ∼∼ψ) ➝ ∼∼(φ ➝ ψ) := by
+def CCNNNNNNC : 𝓢 ⊢! (∼∼φ ➝ ∼∼ψ) ➝ ∼∼(φ ➝ ψ) := by
   apply deduct';
   apply N_of_CO;
   exact C_trans
@@ -125,10 +125,10 @@ def CCNNNNNNC [DecidableEq F] : 𝓢 ⊢! (∼∼φ ➝ ∼∼ψ) ➝ ∼∼(φ 
     )
     (CKNO (φ := ∼ψ));
 
-@[simp] lemma CCNNNNNNC! [DecidableEq F] : 𝓢 ⊢ (∼∼φ ➝ ∼∼ψ) ➝ ∼∼(φ ➝ ψ) := ⟨CCNNNNNNC⟩
+@[simp] lemma CCNNNNNNC! : 𝓢 ⊢ (∼∼φ ➝ ∼∼ψ) ➝ ∼∼(φ ➝ ψ) := ⟨CCNNNNNNC⟩
 
-def NNC_of_CNNNN [DecidableEq F] (b : 𝓢 ⊢! ∼∼φ ➝ ∼∼ψ) : 𝓢 ⊢! ∼∼(φ ➝ ψ) := CCNNNNNNC ⨀ b
-lemma NNC!_of_CNNNN! [DecidableEq F] (b : 𝓢 ⊢ ∼∼φ ➝ ∼∼ψ) : 𝓢 ⊢ ∼∼(φ ➝ ψ) := ⟨NNC_of_CNNNN b.some⟩
+def NNC_of_CNNNN (b : 𝓢 ⊢! ∼∼φ ➝ ∼∼ψ) : 𝓢 ⊢! ∼∼(φ ➝ ψ) := CCNNNNNNC ⨀ b
+lemma NNC!_of_CNNNN! (b : 𝓢 ⊢ ∼∼φ ➝ ∼∼ψ) : 𝓢 ⊢ ∼∼(φ ➝ ψ) := ⟨NNC_of_CNNNN b.some⟩
 
 section Conjunction
 
@@ -136,11 +136,11 @@ end Conjunction
 
 section disjunction
 
-def left_Disj_intro [DecidableEq F] (Γ : List F) (b : (ψ : F) → ψ ∈ Γ → 𝓢 ⊢! ψ ➝ φ) : 𝓢 ⊢! Γ.disj ➝ φ :=
+def left_Disj_intro (Γ : List F) (b : (ψ : F) → ψ ∈ Γ → 𝓢 ⊢! ψ ➝ φ) : 𝓢 ⊢! Γ.disj ➝ φ :=
   match Γ with
   |     [] => efq
   | ψ :: Γ => left_A_intro (b ψ (by simp)) <| left_Disj_intro Γ fun ψ h ↦ b ψ (by simp [h])
-def left_Disj!_intro [DecidableEq F] (Γ : List F) (b : (ψ : F) → ψ ∈ Γ → 𝓢 ⊢ ψ ➝ φ) : 𝓢 ⊢ Γ.disj ➝ φ :=
+def left_Disj!_intro (Γ : List F) (b : (ψ : F) → ψ ∈ Γ → 𝓢 ⊢ ψ ➝ φ) : 𝓢 ⊢ Γ.disj ➝ φ :=
   ⟨left_Disj_intro Γ fun ψ h ↦ (b ψ h).get⟩
 
 def left_Disj₂_intro (Γ : List F) (b : (ψ : F) → ψ ∈ Γ → 𝓢 ⊢! ψ ➝ φ) : 𝓢 ⊢! ⋁Γ ➝ φ :=
@@ -149,26 +149,30 @@ def left_Disj₂_intro (Γ : List F) (b : (ψ : F) → ψ ∈ Γ → 𝓢 ⊢! �
   |    [ψ] => b _ (by simp)
   | ψ :: χ :: Γ => left_A_intro (b ψ (by simp)) <| left_Disj₂_intro _ fun ψ h ↦ b ψ (by simp [h])
 
+omit [DecidableEq F] in
 lemma left_Disj₂!_intro (Γ : List F) (b : (ψ : F) → ψ ∈ Γ → 𝓢 ⊢ ψ ➝ φ) : 𝓢 ⊢ ⋁Γ ➝ φ :=
   ⟨left_Disj₂_intro Γ fun ψ h ↦ (b ψ h).get⟩
 
-def left_Disj'_intro [DecidableEq F] (l : List ι) (ψ : ι → F) (b : ∀ i ∈ l, 𝓢 ⊢! ψ i ➝ φ) : 𝓢 ⊢! l.disj' ψ ➝ φ :=
+def left_Disj'_intro (l : List ι) (ψ : ι → F) (b : ∀ i ∈ l, 𝓢 ⊢! ψ i ➝ φ) : 𝓢 ⊢! l.disj' ψ ➝ φ :=
   left_Disj₂_intro _ fun χ h ↦
     let ⟨i, hi, e⟩ := l.chooseX (ψ · = χ) (by simpa using h);
     haveI := b i hi;
     e ▸ this
-lemma left_Disj'!_intro [DecidableEq F] (l : List ι) (ψ : ι → F) (b : ∀ i ∈ l, 𝓢 ⊢ ψ i ➝ φ) : 𝓢 ⊢ l.disj' ψ ➝ φ :=
+lemma left_Disj'!_intro (l : List ι) (ψ : ι → F) (b : ∀ i ∈ l, 𝓢 ⊢ ψ i ➝ φ) : 𝓢 ⊢ l.disj' ψ ➝ φ :=
   ⟨left_Disj'_intro l ψ fun i hi ↦ (b i hi).get⟩
 
+omit [DecidableEq F] in
 lemma left_Fdisj!_intro (s : Finset F) (b : (ψ : F) → ψ ∈ s → 𝓢 ⊢ ψ ➝ φ) : 𝓢 ⊢ s.disj ➝ φ :=
   left_Disj₂!_intro _ fun ψ h ↦ b ψ (by simpa using h)
 
-lemma left_Fdisj'!_intro [DecidableEq F] (s : Finset ι) (ψ : ι → F) (b : ∀ i ∈ s, 𝓢 ⊢ ψ i ➝ φ) : 𝓢 ⊢ (⩖ i ∈ s, ψ i) ➝ φ :=
+lemma left_Fdisj'!_intro (s : Finset ι) (ψ : ι → F) (b : ∀ i ∈ s, 𝓢 ⊢ ψ i ➝ φ) : 𝓢 ⊢ (⩖ i ∈ s, ψ i) ➝ φ :=
   left_Disj'!_intro _ _ (by simpa)
 
+omit [DecidableEq F] in
 lemma left_Udisj!_intro [DecidableEq F] [Fintype ι] (ψ : ι → F) (b : (i : ι) → 𝓢 ⊢ ψ i ➝ φ) : 𝓢 ⊢ (⩖ i, ψ i) ➝ φ :=
   left_Fdisj'!_intro _ _ (by simpa)
 
+omit [DecidableEq F] in
 lemma EDisj₂AppendADisj₂Disj₂! : 𝓢 ⊢ ⋁(Γ ++ Δ) ⭤ ⋁Γ ⋎ ⋁Δ := by
   induction Γ using List.induction_with_singleton generalizing Δ <;> induction Δ using List.induction_with_singleton;
   case hnil.hnil =>
@@ -210,13 +214,13 @@ lemma EDisj₂AppendADisj₂Disj₂! : 𝓢 ⊢ ⋁(Γ ++ Δ) ⭤ ⋁Γ ⋎ ⋁�
       )
     ) EAAAA!;
 
-
+omit [DecidableEq F] in
 lemma Disj₂Append!_iff_ADisj₂Disj₂! : 𝓢 ⊢ ⋁(Γ ++ Δ) ↔ 𝓢 ⊢ ⋁Γ ⋎ ⋁Δ := by
   constructor;
   . intro h; exact (K!_left EDisj₂AppendADisj₂Disj₂!) ⨀ h;
   . intro h; exact (K!_right EDisj₂AppendADisj₂Disj₂!) ⨀ h;
 
-
+omit [DecidableEq F] in
 lemma CDisj₂!_iff_CADisj₂! : 𝓢 ⊢ φ ➝ ⋁(ψ :: Γ) ↔ 𝓢 ⊢ φ ➝ ψ ⋎ ⋁Γ := by
   induction Γ with
   | nil =>
@@ -227,7 +231,7 @@ lemma CDisj₂!_iff_CADisj₂! : 𝓢 ⊢ φ ➝ ⋁(ψ :: Γ) ↔ 𝓢 ⊢ φ �
   | cons ψ ih => simp;
 
 @[simp]
-lemma CDisj₂ADisj₂Remove! [DecidableEq F] : 𝓢 ⊢ ⋁Γ ➝ φ ⋎ ⋁(Γ.remove φ) := by
+lemma CDisj₂ADisj₂Remove! : 𝓢 ⊢ ⋁Γ ➝ φ ⋎ ⋁(Γ.remove φ) := by
   induction Γ using List.induction_with_singleton with
   | hnil => simp;
   | hsingle ψ =>
@@ -246,7 +250,7 @@ lemma CDisj₂ADisj₂Remove! [DecidableEq F] : 𝓢 ⊢ ⋁Γ ➝ φ ⋎ ⋁(Γ
       . simp_all;
         exact left_A!_intro (C!_trans or₁! or₂!) (C!_trans ih (CAA!_of_C!_right or₂!));
 
-lemma left_Disj₂!_intro' [DecidableEq F] (hd : ∀ ψ ∈ Γ, ψ = φ) : 𝓢 ⊢ ⋁Γ ➝ φ := by
+lemma left_Disj₂!_intro' (hd : ∀ ψ ∈ Γ, ψ = φ) : 𝓢 ⊢ ⋁Γ ➝ φ := by
   induction Γ using List.induction_with_singleton with
   | hcons ψ Δ hΔ ih =>
     simp_all;
@@ -256,22 +260,22 @@ lemma left_Disj₂!_intro' [DecidableEq F] (hd : ∀ ψ ∈ Γ, ψ = φ) : 𝓢 
     exact of_C!_of_C!_of_A! (by simp) (weakening! (by simp) $ provable_iff_provable.mp $ ih) id!
   | _ => simp_all;
 
-lemma of_Disj₂!_of_mem_eq [DecidableEq F] (hd : ∀ ψ ∈ Γ, ψ = φ) (h : 𝓢 ⊢ ⋁Γ) : 𝓢 ⊢ φ := (left_Disj₂!_intro' hd) ⨀ h
+lemma of_Disj₂!_of_mem_eq (hd : ∀ ψ ∈ Γ, ψ = φ) (h : 𝓢 ⊢ ⋁Γ) : 𝓢 ⊢ φ := (left_Disj₂!_intro' hd) ⨀ h
 
 
-@[simp] lemma CFDisjDisj₂ [DecidableEq F] {Γ : Finset F} : 𝓢 ⊢ ⋁Γ.toList ➝ Γ.disj := by
+@[simp] lemma CFDisjDisj₂ {Γ : Finset F} : 𝓢 ⊢ ⋁Γ.toList ➝ Γ.disj := by
   apply left_Disj₂!_intro;
   intro ψ hψ;
   apply right_Fdisj!_intro;
   simpa using hψ;
 
-@[simp] lemma CDisj₂Disj [DecidableEq F] {Γ : Finset F} : 𝓢 ⊢ Γ.disj ➝ ⋁Γ.toList := by
+@[simp] lemma CDisj₂Disj {Γ : Finset F} : 𝓢 ⊢ Γ.disj ➝ ⋁Γ.toList := by
   apply left_Fdisj!_intro;
   intro ψ hψ;
   apply right_Disj₂!_intro;
   simpa;
 
-lemma CDisj₂Disj₂_of_subset [DecidableEq F] {Γ Δ : List F} (h : ∀ φ ∈ Γ, φ ∈ Δ) : 𝓢 ⊢ ⋁Γ ➝ ⋁Δ := by
+lemma CDisj₂Disj₂_of_subset {Γ Δ : List F} (h : ∀ φ ∈ Γ, φ ∈ Δ) : 𝓢 ⊢ ⋁Γ ➝ ⋁Δ := by
   match Δ with
   | [] =>
     have : Γ = [] := List.iff_nil_forall.mpr h;
@@ -289,10 +293,10 @@ lemma CDisj₂Disj₂_of_subset [DecidableEq F] {Γ Δ : List F} (h : ∀ φ ∈
     apply h;
     exact hψ;
 
-lemma CFDisjFDisj_of_subset [DecidableEq F] {Γ Δ : Finset F} (h : Γ ⊆ Δ) : 𝓢 ⊢ Γ.disj ➝ Δ.disj := by
+lemma CFDisjFDisj_of_subset {Γ Δ : Finset F} (h : Γ ⊆ Δ) : 𝓢 ⊢ Γ.disj ➝ Δ.disj := by
   refine C!_trans (C!_trans ?_ (CDisj₂Disj₂_of_subset (Γ := Γ.toList) (Δ := Δ.toList) (by simpa))) ?_ <;> simp;
 
-lemma EDisj₂FDisj [DecidableEq F] {Γ : List F} : 𝓢 ⊢ ⋁Γ ⭤ Γ.toFinset.disj := by
+lemma EDisj₂FDisj {Γ : List F} : 𝓢 ⊢ ⋁Γ ⭤ Γ.toFinset.disj := by
   match Γ with
   | [] => simp;
   | φ :: Γ =>
@@ -314,23 +318,23 @@ lemma EDisj₂FDisj [DecidableEq F] {Γ : List F} : 𝓢 ⊢ ⋁Γ ⭤ Γ.toFins
         apply right_Disj₂!_intro;
         tauto;
 
-lemma EDisj₂FDisj!_doubleton [DecidableEq F] : 𝓢 ⊢ ⋁[φ, ψ] ⭤ Finset.disj {φ, ψ} := by
+lemma EDisj₂FDisj!_doubleton : 𝓢 ⊢ ⋁[φ, ψ] ⭤ Finset.disj {φ, ψ} := by
   convert EDisj₂FDisj (𝓢 := 𝓢) (Γ := [φ, ψ]);
   simp;
 
-lemma EConj₂_FConj!_doubleton [DecidableEq F] : 𝓢 ⊢ ⋁[φ, ψ] ↔ 𝓢 ⊢ Finset.disj {φ, ψ} := by
+lemma EConj₂_FConj!_doubleton : 𝓢 ⊢ ⋁[φ, ψ] ↔ 𝓢 ⊢ Finset.disj {φ, ψ} := by
   constructor;
   . intro h; exact (C_of_E_mp! $ EDisj₂FDisj!_doubleton) ⨀ h;
   . intro h; exact (C_of_E_mpr! $ EDisj₂FDisj!_doubleton) ⨀ h;
 
 @[simp]
-lemma CAFDisjinsertFDisj! [DecidableEq F] {Γ : Finset F} : 𝓢 ⊢ φ ⋎ Γ.disj ➝ (insert φ Γ).disj := by
+lemma CAFDisjinsertFDisj! {Γ : Finset F} : 𝓢 ⊢ φ ⋎ Γ.disj ➝ (insert φ Γ).disj := by
   apply left_A!_intro;
   . apply right_Fdisj!_intro; simp;
   . apply CFDisjFDisj_of_subset; simp;
 
 @[simp]
-lemma CinsertFDisjAFDisj! [DecidableEq F] {Γ : Finset F} : 𝓢 ⊢ (insert φ Γ).disj ➝ φ ⋎ Γ.disj := by
+lemma CinsertFDisjAFDisj! {Γ : Finset F} : 𝓢 ⊢ (insert φ Γ).disj ➝ φ ⋎ Γ.disj := by
   apply left_Fdisj!_intro;
   simp only [Finset.mem_insert, forall_eq_or_imp, or₁!, true_and];
   intro ψ hψ;
@@ -338,13 +342,13 @@ lemma CinsertFDisjAFDisj! [DecidableEq F] {Γ : Finset F} : 𝓢 ⊢ (insert φ 
   apply right_Fdisj!_intro;
   assumption;
 
-@[simp] lemma CAFdisjFdisjUnion [DecidableEq F] {Γ Δ : Finset F} : 𝓢 ⊢ Γ.disj ⋎ Δ.disj ➝ (Γ ∪ Δ).disj := by
+@[simp] lemma CAFdisjFdisjUnion {Γ Δ : Finset F} : 𝓢 ⊢ Γ.disj ⋎ Δ.disj ➝ (Γ ∪ Δ).disj := by
   apply left_A!_intro <;>
   . apply CFDisjFDisj_of_subset;
     simp;
 
 @[simp]
-lemma CFdisjUnionAFdisj [DecidableEq F] {Γ Δ : Finset F} : 𝓢 ⊢ (Γ ∪ Δ).disj ➝ Γ.disj ⋎ Δ.disj := by
+lemma CFdisjUnionAFdisj {Γ Δ : Finset F} : 𝓢 ⊢ (Γ ∪ Δ).disj ➝ Γ.disj ⋎ Δ.disj := by
   apply left_Fdisj!_intro;
   simp only [Finset.mem_union];
   rintro ψ (hψ | hψ);
@@ -355,7 +359,7 @@ lemma CFdisjUnionAFdisj [DecidableEq F] {Γ Δ : Finset F} : 𝓢 ⊢ (Γ ∪ Δ
     apply right_Fdisj!_intro;
     assumption;
 
-lemma left_Fdisj!_intro' [DecidableEq F] {Γ : Finset _} (hd : ∀ ψ ∈ Γ, ψ = φ) : 𝓢 ⊢ Γ.disj ➝ φ := by
+lemma left_Fdisj!_intro' {Γ : Finset _} (hd : ∀ ψ ∈ Γ, ψ = φ) : 𝓢 ⊢ Γ.disj ➝ φ := by
   apply C!_trans ?_ $ left_Disj₂!_intro' (Γ := Γ.toList) (by simpa);
   simp;
 
@@ -366,7 +370,7 @@ section
 
 variable {Γ Δ : Finset F}
 
-lemma CFConj_CDisj!_of_A [DecidableEq F] (hφψ : φ ⋎ ψ ∈ Γ) (hφ : φ ∈ Δ) (hψ : ψ ∈ Δ) : 𝓢 ⊢ Γ.conj ➝ Δ.disj := by
+lemma CFConj_CDisj!_of_A (hφψ : φ ⋎ ψ ∈ Γ) (hφ : φ ∈ Δ) (hψ : ψ ∈ Δ) : 𝓢 ⊢ Γ.conj ➝ Δ.disj := by
   apply C!_trans (ψ := Finset.disj {φ, ψ});
   . apply C!_trans (ψ := Finset.conj {φ ⋎ ψ}) ?_;
     . apply FConj_DT.mpr;
@@ -388,7 +392,7 @@ section
 
 /-- List version of `CNAKNN!` -/
 @[simp]
-lemma CNDisj₁Conj₂! [DecidableEq F] : 𝓢 ⊢ ∼⋁Γ ➝ ⋀(Γ.map (∼·)) := by
+lemma CNDisj₁Conj₂! : 𝓢 ⊢ ∼⋁Γ ➝ ⋀(Γ.map (∼·)) := by
   induction Γ using List.induction_with_singleton with
   | hnil => simp;
   | hsingle => simp;
@@ -399,7 +403,7 @@ lemma CNDisj₁Conj₂! [DecidableEq F] : 𝓢 ⊢ ∼⋁Γ ➝ ⋀(Γ.map (∼�
 
 /--- Finset version of `CNAKNN!` -/
 @[simp]
-lemma CNFdisjFconj! [DecidableEq F] {Γ : Finset F} : 𝓢 ⊢ ∼Γ.disj ➝ (Γ.image (∼·)).conj := by
+lemma CNFdisjFconj! {Γ : Finset F} : 𝓢 ⊢ ∼Γ.disj ➝ (Γ.image (∼·)).conj := by
   apply C!_replace ?_ ?_ $ CNDisj₁Conj₂! (Γ := Γ.toList);
   . apply contra!;
     exact CFDisjDisj₂;
@@ -410,7 +414,7 @@ lemma CNFdisjFconj! [DecidableEq F] {Γ : Finset F} : 𝓢 ⊢ ∼Γ.disj ➝ (�
 
 /--- Finset version of `CKNNNA!` -/
 @[simp]
-lemma CConj₂NNDisj₂! [DecidableEq F] : 𝓢 ⊢ ⋀Γ.map (∼·) ➝ ∼⋁Γ := by
+lemma CConj₂NNDisj₂! : 𝓢 ⊢ ⋀Γ.map (∼·) ➝ ∼⋁Γ := by
   induction Γ using List.induction_with_singleton with
   | hnil => simp;
   | hsingle => simp;
@@ -421,7 +425,7 @@ lemma CConj₂NNDisj₂! [DecidableEq F] : 𝓢 ⊢ ⋀Γ.map (∼·) ➝ ∼⋁
 
 /--- Finset version of `CKNNNA!` -/
 @[simp]
-lemma CFconjNNFconj! [DecidableEq F] {Γ : Finset F} : 𝓢 ⊢ (Γ.image (∼·)).conj ➝ ∼Γ.disj := by
+lemma CFconjNNFconj! {Γ : Finset F} : 𝓢 ⊢ (Γ.image (∼·)).conj ➝ ∼Γ.disj := by
   apply C!_replace ?_ ?_ $ CConj₂NNDisj₂! (Γ := Γ.toList);
   . apply CConj₂Conj₂!_of_provable;
     intro φ hφ;
@@ -438,6 +442,7 @@ end Context
 
 section consistency
 
+omit [DecidableEq F] in
 lemma inconsistent_of_provable_of_unprovable {φ : F}
     (hp : 𝓢 ⊢ φ) (hn : 𝓢 ⊢ ∼φ) : Inconsistent 𝓢 := by
   have : 𝓢 ⊢ φ ➝ ⊥ := N!_iff_CO!.mp hn
