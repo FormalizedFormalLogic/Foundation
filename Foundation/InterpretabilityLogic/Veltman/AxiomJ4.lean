@@ -33,6 +33,11 @@ lemma validate_axiomJ4_of_validate_axiomJ4Plus (h : F ⊧ Axioms.J4Plus (.atom 0
     rcases (by simpa [buildAxioms] using hφ) with (rfl | rfl | rfl | rfl) <;> grind;
   . simp;
 
+@[simp high, grind]
+lemma validate_axiomJ4_of_HasAxiomJ4 [F.HasAxiomJ4] : F ⊧ Axioms.J4 φ ψ := by
+  apply validate_axiomJ4_of_validate_axiomJ4Plus;
+  apply validate_axiomJ4Plus_of_HasAxiomJ4;
+
 lemma Frame.HasAxiomJ4.of_validate_axiomJ4 (h : F ⊧ Axioms.J4 (.atom 0) (.atom 1)) : F.HasAxiomJ4 := by
   constructor;
   intro w x y Swxy;
