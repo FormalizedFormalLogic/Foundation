@@ -15,7 +15,6 @@ variable {W : Type*} [Preorder W] {C : Type*} [KripkeModel L W C]
 
 def Forces {n} (w : W) (bv : Fin n → C) (fv : ξ → C) : Semiformulaᵢ L ξ n → Prop
   | .rel R t => Rel w R fun i ↦ (t i).relationalVal bv fv
-  |        ⊤ => True
   |        ⊥ => False
   |    φ ⋏ ψ => Forces w bv fv φ ∧ Forces w bv fv ψ
   |    φ ⋎ ψ => Forces w bv fv φ ∨ Forces w bv fv ψ
@@ -33,7 +32,7 @@ namespace Forces
 
 variable (w v : W) (bv : Fin n → C) (fv : ξ → C)
 
-@[simp] lemma verum : w ⊩[bv|fv] ⊤ := by trivial
+@[simp] lemma verum : w ⊩[bv|fv] ⊤ := fun v _ ↦ by rintro ⟨⟩
 
 @[simp] lemma falsum : ¬w ⊩[bv|fv] ⊥ := by rintro ⟨⟩
 
@@ -88,7 +87,6 @@ lemma rew {bv : Fin n₂ → C} {fv : ξ₂ → C} {ω : Rew L ξ₁ n₁ ξ₂ 
     simp [*]
   case hAnd φ ψ ihφ ihψ => simp [ihφ, ihψ]
   case hOr φ ψ ihφ ihψ => simp [ihφ, ihψ]
-  case hVerum => simp
   case hFalsum => simp
   case hAll φ ih =>
     have (x : C) : (fun i ↦ (ω.q #i).relationalVal (x :> bv) fv) = (x :> fun i ↦ (ω #i).relationalVal bv fv) := by
@@ -125,7 +123,6 @@ lemma monotone
     {n} {bv : Fin n → C} {fv : ξ → C} {φ} : w ⊩[bv|fv] φ → ∀ v ≤ w, v ⊩[bv|fv] φ :=
   match φ with
   | .rel R v => rel_monotone
-  |        ⊤ => fun _ _ _ ↦ trivial
   |        ⊥ => by rintro ⟨⟩
   |    φ ⋏ ψ => by
     rintro ⟨hl, hr⟩ v h
@@ -218,16 +215,17 @@ lemma forces₀_def {w : W} {φ : Sentenceᵢ L} : w ⊩ φ ↔ w ⊩[![]|Empty.
 
 namespace Forces₀
 
+lemma monotone {w : W} {φ} : w ⊩ φ → ∀ v ≤ w, v ⊩ φ :=
+  fun h hw ↦ Forces.monotone h hw
+
 instance : ForcingRelation.IntKripke W (· ≥ ·) where
-  verum w := trivial
+  verum w := by rintro _ _ ⟨⟩
   falsum w := by rintro ⟨⟩
   and w := by simp [forces₀_def]
   or w := by simp [forces₀_def]
   imply w := by simp [forces₀_def, Forces.imply]
-  not w := by simp [forces₀_def, ForcingRelation.NotForces, Forces.not]
-
-lemma monotone {w : W} {φ} : w ⊩ φ → ∀ v ≤ w, v ⊩ φ :=
-  fun h hw ↦ Forces.monotone h hw
+  not w := by simp [forces₀_def, Forces.not]
+  monotone := monotone
 
 open HilbertProofᵢ Semantics
 

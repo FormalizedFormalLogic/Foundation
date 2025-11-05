@@ -235,10 +235,6 @@ lemma generic_iff_not' {φ : Semiformula L ξ n} :
     p ⊩ᶜ[bv|fv] φ ⭤ ψ ↔ ∀ q ≤ p, q ⊩ᶜ[bv|fv] φ ↔ q ⊩ᶜ[bv|fv] ψ := by
   simp [LogicalConnective.iff]; grind
 
-
-lemma
-
-/--/
 end WeaklyForces
 
 abbrev WeaklyForces₀ (p : ℙ) (φ : Sentence L) : Prop := p ⊩ᶜ[![]|Empty.elim] ↑φ
@@ -262,11 +258,18 @@ lemma generic_iff {p : ℙ} :
 
 instance : WeakForcingRelation.ClassicalKripke ℙ (· ≥ ·) where
   verum w := by simp [weaklyForces₀_def]
-  falsum w := by simp [weaklyForces₀_def, WeakForcingRelation.NotForces]
+  falsum w := by simp [weaklyForces₀_def]
   and w := by simp [weaklyForces₀_def]
   or w := by simp [weaklyForces₀_def]
   imply w := by simp [weaklyForces₀_def]
-  not w := by simp [weaklyForces₀_def, WeakForcingRelation.NotForces]
+  not w := by simp [weaklyForces₀_def]
+  monotone := monotone
+  generic := generic
+
+lemma sound {T : Theory L} (b : T ⊢ φ) : ℙ ∀⊩ᶜ* T → ℙ ∀⊩ᶜ φ := fun H ↦
+  Forces₀.sound (W := ℙ) (gödel_gentzen b (Λ := 𝗜𝗻𝘁¹)) fun φ hφ ↦ (by
+    rcases show ∃ ψ ∈ T, ψᴺ = φ by simpa [Theory.ToTheoryᵢ] using hφ with ⟨ψ, hψ, rfl⟩
+    exact H ψ hψ)
 
 end WeaklyForces₀
 
@@ -301,25 +304,9 @@ instance : Semantics (ForcingNotion L) (Sentence L) := ⟨fun ℙ φ ↦ ℙ ∀
 
 lemma models_def : ℙ ⊧ φ ↔ ℙ ∀⊩ᶜ φ := by rfl
 
+lemma sound {T : Theory L} (b : T ⊢ φ) : ℙ ⊧* T → ℙ ⊧ φ := fun H ↦
+  WeaklyForces₀.sound (ℙ := ℙ) b fun _ hφ ↦ H.models_set hφ
 
-namespace KripkeModel
+instance (T : Theory L) : Sound T (Semantics.models (ForcingNotion L) T) := ⟨fun b _ H ↦ sound b H⟩
 
-namespace WeaklyForces
-
-variable {p : ℙ} {bv : Fin n → p} {fv : ξ → p}
-
-end WeaklyForces
-
-namespace Filter
-
-variable {p : ℙ}
-
-
-def toModel (p : ℙ) {F : Filter ℙ} (hp : p ∈ F) : p → F.Model := fun x ↦ ⟨x, p, hp, by simp⟩
-
-lemma ifffff : p ⊩ᶜ[bv|fv] φ ↔ ∀ F : Filter ℙ, p ∈ F → φ.Eval F.Str bv (fun x ↦ toModel (fv i)) := by {  }
-
-end Filter
-
-
-end KripkeModel
+end ForcingNotion
