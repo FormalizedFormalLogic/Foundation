@@ -13,7 +13,6 @@ The quantification is represented by de Bruijn index.
 namespace LO.FirstOrder
 
 inductive Semiformulaᵢ (L : Language) (ξ : Type*) : ℕ → Type _ where
-  | verum  {n} : Semiformulaᵢ L ξ n
   | falsum {n} : Semiformulaᵢ L ξ n
   | rel    {n} : {arity : ℕ} → L.Rel arity → (Fin arity → Semiterm L ξ n) → Semiformulaᵢ L ξ n
   | and    {n} : Semiformulaᵢ L ξ n → Semiformulaᵢ L ξ n → Semiformulaᵢ L ξ n
@@ -42,6 +41,8 @@ instance : Arrow (Semiformulaᵢ L ξ n) := ⟨imp⟩
 
 abbrev neg (φ : Semiformulaᵢ L ξ n) : Semiformulaᵢ L ξ n := φ ➝ ⊥
 
+abbrev verum : Semiformulaᵢ L ξ n := ⊥ ➝ ⊥
+
 instance : LogicalConnective (Semiformulaᵢ L ξ n) where
   wedge := and
   vee := or
@@ -49,6 +50,8 @@ instance : LogicalConnective (Semiformulaᵢ L ξ n) where
   tilde := neg
 
 lemma neg_def (φ : Semiformulaᵢ L ξ n) : ∼φ = φ ➝ ⊥ := rfl
+
+lemma verum_def : (⊤ : Semiformulaᵢ L ξ n) = ⊥ ➝ ⊥ := rfl
 
 instance : Quantifier (Semiformulaᵢ L ξ) where
   univ := all
@@ -59,7 +62,6 @@ section ToString
 variable [∀ k, ToString (L.Func k)] [∀ k, ToString (L.Rel k)] [ToString ξ]
 
 def toStr : ∀ {n}, Semiformulaᵢ L ξ n → String
-  | _, ⊤                         => "\\top"
   | _, ⊥                         => "\\bot"
   | _, rel (arity := 0) r _      => "{" ++ toString r ++ "}"
   | _, rel (arity := _ + 1) r v  => "{" ++ toString r ++ "} \\left(" ++ String.vecToStr (fun i => toString (v i)) ++ "\\right)"
@@ -103,7 +105,6 @@ end ToString
   induction k <;> simp [*, exItr_succ]
 
 def complexity : {n : ℕ} → Semiformulaᵢ L ξ n → ℕ
-| _, ⊤        => 0
 | _, ⊥        => 0
 | _, rel _ _  => 0
 | _, φ ⋏ ψ    => max φ.complexity ψ.complexity + 1
@@ -112,7 +113,7 @@ def complexity : {n : ℕ} → Semiformulaᵢ L ξ n → ℕ
 | _, ∀' φ     => φ.complexity + 1
 | _, ∃' φ     => φ.complexity + 1
 
-@[simp] lemma complexity_top : complexity (⊤ : Semiformulaᵢ L ξ n) = 0 := rfl
+@[simp] lemma complexity_top : complexity (⊤ : Semiformulaᵢ L ξ n) = 1 := rfl
 
 @[simp] lemma complexity_bot : complexity (⊥ : Semiformulaᵢ L ξ n) = 0 := rfl
 
@@ -138,7 +139,6 @@ def complexity : {n : ℕ} → Semiformulaᵢ L ξ n → ℕ
 @[elab_as_elim]
 def cases' {C : ∀ n, Semiformulaᵢ L ξ n → Sort w}
   (hRel    : ∀ {n k : ℕ} (r : L.Rel k) (v : Fin k → Semiterm L ξ n), C n (rel r v))
-  (hVerum  : ∀ {n : ℕ}, C n ⊤)
   (hFalsum : ∀ {n : ℕ}, C n ⊥)
   (hAnd    : ∀ {n : ℕ} (φ ψ : Semiformulaᵢ L ξ n), C n (φ ⋏ ψ))
   (hOr     : ∀ {n : ℕ} (φ ψ : Semiformulaᵢ L ξ n), C n (φ ⋎ ψ))
@@ -147,7 +147,6 @@ def cases' {C : ∀ n, Semiformulaᵢ L ξ n → Sort w}
   (hEx     : ∀ {n : ℕ} (φ : Semiformulaᵢ L ξ (n + 1)), C n (∃' φ)) :
     ∀ {n : ℕ} (φ : Semiformulaᵢ L ξ n), C n φ
   | _, rel r v => hRel r v
-  | _, ⊤       => hVerum
   | _, ⊥       => hFalsum
   | _, φ ⋏ ψ   => hAnd φ ψ
   | _, φ ⋎ ψ   => hOr φ ψ
@@ -158,7 +157,6 @@ def cases' {C : ∀ n, Semiformulaᵢ L ξ n → Sort w}
 @[elab_as_elim]
 def rec' {C : ∀ n, Semiformulaᵢ L ξ n → Sort w}
   (hRel    : ∀ {n k : ℕ} (r : L.Rel k) (v : Fin k → Semiterm L ξ n), C n (rel r v))
-  (hVerum  : ∀ {n : ℕ}, C n ⊤)
   (hFalsum : ∀ {n : ℕ}, C n ⊥)
   (hAnd    : ∀ {n : ℕ} (φ ψ : Semiformulaᵢ L ξ n), C n φ → C n ψ → C n (φ ⋏ ψ))
   (hOr     : ∀ {n : ℕ} (φ ψ : Semiformulaᵢ L ξ n), C n φ → C n ψ → C n (φ ⋎ ψ))
@@ -167,21 +165,18 @@ def rec' {C : ∀ n, Semiformulaᵢ L ξ n → Sort w}
   (hEx     : ∀ {n : ℕ} (φ : Semiformulaᵢ L ξ (n + 1)), C (n + 1) φ → C n (∃' φ)) :
     ∀ {n : ℕ} (φ : Semiformulaᵢ L ξ n), C n φ
   | _, rel r v => hRel r v
-  | _, ⊤       => hVerum
   | _, ⊥       => hFalsum
-  | _, φ ⋏ ψ   => hAnd φ ψ (rec' hRel hVerum hFalsum hAnd hOr hImp hAll hEx φ) (rec' hRel hVerum hFalsum hAnd hOr hImp hAll hEx ψ)
-  | _, φ ⋎ ψ   => hOr φ ψ (rec' hRel hVerum hFalsum hAnd hOr hImp hAll hEx φ) (rec' hRel hVerum hFalsum hAnd hOr hImp hAll hEx ψ)
-  | _, φ ➝ ψ   => hImp φ ψ (rec' hRel hVerum hFalsum hAnd hOr hImp hAll hEx φ) (rec' hRel hVerum hFalsum hAnd hOr hImp hAll hEx ψ)
-  | _, ∀' φ    => hAll φ (rec' hRel hVerum hFalsum hAnd hOr hImp hAll hEx φ)
-  | _, ∃' φ    => hEx φ (rec' hRel hVerum hFalsum hAnd hOr hImp hAll hEx φ)
+  | _, φ ⋏ ψ   => hAnd φ ψ (rec' hRel hFalsum hAnd hOr hImp hAll hEx φ) (rec' hRel hFalsum hAnd hOr hImp hAll hEx ψ)
+  | _, φ ⋎ ψ   => hOr φ ψ (rec' hRel hFalsum hAnd hOr hImp hAll hEx φ) (rec' hRel hFalsum hAnd hOr hImp hAll hEx ψ)
+  | _, φ ➝ ψ   => hImp φ ψ (rec' hRel hFalsum hAnd hOr hImp hAll hEx φ) (rec' hRel hFalsum hAnd hOr hImp hAll hEx ψ)
+  | _, ∀' φ    => hAll φ (rec' hRel hFalsum hAnd hOr hImp hAll hEx φ)
+  | _, ∃' φ    => hEx φ (rec' hRel hFalsum hAnd hOr hImp hAll hEx φ)
 
 section Decidable
 
 variable [L.DecidableEq] [DecidableEq ξ]
 
 def hasDecEq : {n : ℕ} → (φ ψ : Semiformulaᵢ L ξ n) → Decidable (φ = ψ)
-  | _, ⊤,        ψ => by cases ψ using cases' <;>
-      { simp only [reduceCtorEq]; try { exact isFalse not_false }; try { exact isTrue trivial } }
   | _, ⊥,        ψ => by cases ψ using cases' <;>
       { simp only [reduceCtorEq]; try { exact isFalse not_false }; try { exact isTrue trivial } }
   | _, rel r v,  ψ => by
@@ -255,7 +250,7 @@ namespace IsNegative
 @[simp] lemma all_iff {φ : Semiformulaᵢ L ξ (n + 1)} : (∀' φ).IsNegative ↔ φ.IsNegative :=
   ⟨by rintro ⟨⟩; simp_all, by rintro h; exact .all h⟩
 
-@[simp] lemma not_verum : ¬(⊤ : Semiformulaᵢ L ξ n).IsNegative := by rintro ⟨⟩
+@[simp] lemma verum : (⊤ : Semiformulaᵢ L ξ n).IsNegative := by simp [verum_def]
 
 @[simp] lemma not_or {φ ψ : Semiformulaᵢ L ξ n} : ¬(φ ⋎ ψ).IsNegative := by rintro ⟨⟩
 

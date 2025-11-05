@@ -169,7 +169,6 @@ def leMinRightOfLe (s : q ≼ p) : q ≼ p ⊓ q := leMinOfle s (.refl q)
 end StrongerThan
 
 abbrev Forces (p : ℙ) : SyntacticFormulaᵢ L → Type u
-  | ⊤        => PUnit.{u+1}
   | ⊥        => { b : ⊢ᵀ ∼p // Derivation.IsCutFree b }
   | .rel R v => { b : ⊢ᵀ .rel R v :: ∼p // Derivation.IsCutFree b }
   | φ ⋏ ψ    => Forces p φ × Forces p ψ
@@ -186,8 +185,6 @@ abbrev allForces (φ : SyntacticFormulaᵢ L) := (p : ℙ) → p ⊩ φ
 scoped prefix:45 "⊩ " => allForces
 
 namespace Forces
-
-def verumEquiv : p ⊩ ⊤ ≃ PUnit := .refl _
 
 def falsumEquiv : p ⊩ ⊥ ≃ { b : ⊢ᵀ ∼p // Derivation.IsCutFree b} := .refl _
 
@@ -206,7 +203,6 @@ def exEquiv {φ} : p ⊩ ∃' φ ≃ ((t : SyntacticTerm L) × Forces p (φ/[t])
 def cast {p : ℙ} (f : p ⊩ φ) (s : φ = ψ) : p ⊩ ψ := s ▸ f
 
 def monotone {q p : ℙ} (s : q ≼ p) : {φ : SyntacticFormulaᵢ L} → p ⊩ φ → q ⊩ φ
-  | ⊤,        _ => PUnit.unit
   | ⊥,        b =>
     let ⟨d, hd⟩ := b.falsumEquiv
     falsumEquiv.symm ⟨s.val.graft d, PositiveDerivationFrom.graft_isCutFree_of_isCutFree hd⟩
@@ -223,7 +219,6 @@ def monotone {q p : ℙ} (s : q ≼ p) : {φ : SyntacticFormulaᵢ L} → p ⊩ 
   termination_by φ => φ.complexity
 
 def explosion {p : ℙ} (b : p ⊩ ⊥) : (φ : SyntacticFormulaᵢ L) → p ⊩ φ
-  | ⊤        => PUnit.unit
   | ⊥        => b
   | .rel R v =>
     let ⟨d, hd⟩ := b.falsumEquiv
@@ -257,7 +252,7 @@ def ofMinimalProof {φ : SyntacticFormulaᵢ L} : 𝗠𝗶𝗻¹ ⊢! φ → ⊩
     let d : 𝗠𝗶𝗻¹ ⊢! φ/[t] :=
       HilbertProofᵢ.cast (HilbertProofᵢ.rewrite (t :>ₙ fun x ↦ &x) b) (by simp [rewrite_free_eq_subst])
     ofMinimalProof d p
-  | .verum => fun p ↦ PUnit.unit
+  | .verum => fun p ↦ implyEquiv.symm fun q sqp bφ ↦ bφ
   | .imply₁ φ ψ => fun p ↦ implyEquiv.symm fun q sqp bφ ↦ implyEquiv.symm fun r srq bψ ↦ bφ.monotone srq
   | .imply₂ φ ψ χ => fun p ↦
     implyEquiv.symm fun q sqp b₁ ↦
@@ -359,12 +354,12 @@ protected def refl : (φ : SyntacticFormula L) → [φ] ⊩ φᴺ
   termination_by φ => φ.complexity
 
 def conj : {Γ : Sequentᵢ L} → (b : (φ : SyntacticFormulaᵢ L) → φ ∈ Γ → p ⊩ φ) → p ⊩ ⋀Γ
-  | [],          _ => PUnit.unit
+  | [],          _ => implyEquiv.symm fun q sqp bφ ↦ bφ
   | [φ],         b => b φ (by simp)
   | φ :: ψ :: Γ, b => andEquiv.symm ⟨b φ (by simp), conj (fun χ hχ ↦ b χ (List.mem_cons_of_mem φ hχ))⟩
 
 def conj' : {Γ : Sequent L} → (b : (φ : SyntacticFormula L) → φ ∈ Γ → p ⊩ φᴺ) → p ⊩ ⋀Γᴺ
-  | [],          _ => PUnit.unit
+  | [],          _ => implyEquiv.symm fun q sqp bφ ↦ bφ
   | [φ],         b => b φ (by simp)
   | φ :: ψ :: Γ, b => andEquiv.symm ⟨b φ (by simp), conj' (fun χ hχ ↦ b χ (List.mem_cons_of_mem φ hχ))⟩
 

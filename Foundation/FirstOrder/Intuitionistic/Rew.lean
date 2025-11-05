@@ -5,7 +5,6 @@ namespace LO.FirstOrder
 namespace Semiformulaᵢ
 
 def rewAux ⦃n₁ n₂ : ℕ⦄ : Rew L ξ₁ n₁ ξ₂ n₂ → Semiformulaᵢ L ξ₁ n₁ → Semiformulaᵢ L ξ₂ n₂
-  | _, ⊤        => ⊤
   | _, ⊥        => ⊥
   | ω, rel r v  => rel r (ω ∘ v)
   | ω, φ ⋏ ψ    => rewAux ω φ ⋏ rewAux ω ψ
@@ -38,7 +37,6 @@ lemma rew_rel' (ω : Rew L ξ₁ n₁ ξ₂ n₂) {k} {r : L.Rel k} {v : Fin k �
 
 private lemma map_inj {n₁ n₂} {b : Fin n₁ → Fin n₂} {f : ξ₁ → ξ₂}
     (hb : Function.Injective b) (hf : Function.Injective f) : Function.Injective fun φ : Semiformulaᵢ L ξ₁ n₁ ↦ @Rew.map L ξ₁ ξ₂ n₁ n₂ b f ▹ φ
-  | ⊤,        φ => by cases φ using cases' <;> simp [rew_rel]
   | ⊥,        φ => by cases φ using cases' <;> simp [rew_rel]
   | rel r v,  φ => by
     cases φ using cases' <;> simp [rew_rel]

@@ -1,4 +1,5 @@
 import Foundation.Vorspiel.Chain
+import Foundation.Vorspiel.HRel.CWF
 import Foundation.Modal.Kripke.Rooted
 import Foundation.Modal.Kripke.Antisymmetric
 import Foundation.Modal.Kripke.Asymmetric
@@ -16,7 +17,6 @@ variable {F : Kripke.Frame} {r : outParam F.World}
 @[mk_iff] class Frame.IsFiniteTree (F : Kripke.Frame) (r : outParam F.World) extends F.IsFinite, F.IsTree r where
 
 end
-
 
 def Frame.mkTreeUnravelling (F : Frame) (r : F.World) : Kripke.Frame where
   World := { c : List F.World // [r] <+: c ∧ c.IsChain F.Rel }

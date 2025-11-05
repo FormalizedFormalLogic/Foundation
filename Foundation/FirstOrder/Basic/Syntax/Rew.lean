@@ -451,6 +451,9 @@ def toEmpty [DecidableEq ξ] {n : ℕ} : (φ : Semiformula L ξ n) → φ.freeVa
 @[simp] lemma emb_toEmpty [DecidableEq ξ] (φ : Semiformula L ξ n) (hp : φ.freeVariables = ∅) : Rewriting.emb (φ.toEmpty hp) = φ := by
   induction φ using rec' <;> simp [toEmpty, rew_rel, rew_nrel, *]
 
+@[simp] lemma toEmpty_emb [DecidableEq ξ] (φ : Semisentence L n) : (Rewriting.emb φ : Semiformula L ξ n).toEmpty (by simp) = φ := by
+  induction φ using rec' <;> simp [toEmpty, rew_rel, rew_nrel, *]
+
 @[simp] lemma toEmpty_verum [DecidableEq ξ] : (⊤ : Semiformula L ξ n).toEmpty (by simp) = ⊤ := rfl
 
 @[simp] lemma toEmpty_falsum [DecidableEq ξ]: (⊥ : Semiformula L ξ n).toEmpty (by simp) = ⊥ := rfl
@@ -475,6 +478,13 @@ def univCl (φ : SyntacticFormula L) : Sentence L := φ.univCl'.toEmpty (by simp
   refine (Semiformula.coe_inj _ _).mp ?_
   rw [emb_toEmpty]
   simp
+
+def toEmpty' [DecidableEq ξ] {n : ℕ} (φ : Semiformula L ξ n) : Semisentence L n :=
+  if h : φ.freeVariables = ∅ then φ.toEmpty h else ⊥
+
+@[simp] lemma toEmpty'_coe [DecidableEq ξ] {n : ℕ} {φ : Semisentence L n} :
+    (Rewriting.emb φ : Semiformula L ξ n).toEmpty' = φ := by
+  simp [toEmpty']
 
 end univCl
 
