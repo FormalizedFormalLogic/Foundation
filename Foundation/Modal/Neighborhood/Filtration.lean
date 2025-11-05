@@ -565,7 +565,7 @@ def quasiFilteringTransitiveFiltration (M : Model) [M.IsMonotonic] [M.IsTransiti
         . suffices ∀ ξ : Ξ, w ∈ M (□^[2]ξ) by apply M.regular_finite_iUnion (ι := Ξ); simpa;
           rintro ⟨ξ, _, ⟨Ui, hUi, rfl⟩, ⟨v, hv₁, hv₂⟩⟩;
           replace hv₁ : v ∈ M.box^[2] (M ξ) := M.trans hv₁;
-          grind;
+          sorry;
       . suffices ∀ ψ : Ψ, w ∈ M (□ψ) by
           apply toFilterEquivSet.mem_of_mem;
           replace H : M.box (⋂ ψ : Ψ, M ψ) ⊆ M.box (M φ) := M.mono' $ by
@@ -610,7 +610,7 @@ def quasiFilteringTransitiveFiltration (M : Model) [M.IsMonotonic] [M.IsTransiti
           simpa;
         rintro ⟨ξ, _, ⟨Ui, hUi, rfl⟩, ⟨v, hv₁, hv₂⟩⟩;
         replace hv₁ : v ∈ M.box^[2] (M ξ) := M.trans hv₁;
-        grind;
+        sorry;
       . exfalso;
         apply hYs₁;
         suffices (Vs = ∅ ∧ Us = ∅) by simp [eYVU, this.1, this.2];

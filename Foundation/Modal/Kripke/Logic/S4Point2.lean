@@ -135,7 +135,7 @@ instance : Modal.K4Point2 ⪱ Modal.S4Point2 := by
       use M, 0;
       constructor;
       . simp only [Set.mem_setOf_eq];
-        refine { p_convergent := by simp [M, PiecewiseConvergent ]; omega; };
+        refine { p_convergent := by simp [M, PiecewiseConvergent ]; };
       . suffices ∃ x, (0 : M.World) ≺ x ∧ (∀ y, ¬x ≺ y) ∧ ∃ x, (0 : M.World) ≺ x by
           simpa [M, Semantics.Models, Satisfies];
         use 1;
