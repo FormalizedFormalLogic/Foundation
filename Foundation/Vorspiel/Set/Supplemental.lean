@@ -7,7 +7,7 @@ namespace Set
 
 variable {α : Type*} {s t : Set α} {a b : α}
 
-@[simp, grind]
+@[simp, grind =]
 lemma compl_inj_iff : sᶜ = tᶜ ↔ s = t := _root_.compl_inj_iff
 
 lemma doubleton_subset : ({a, b} : Set α) ⊆ s ↔ a ∈ s ∧ b ∈ s := by
