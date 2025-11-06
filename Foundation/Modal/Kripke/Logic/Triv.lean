@@ -112,14 +112,8 @@ instance : Modal.GrzPoint3 ⪱ Modal.Triv := by
       use M, 0;
       constructor;
       . exact {}
-      . suffices (0 : M) = 0 ∧ ∃ x, (0 : M.World) ≺ x ∧ x ≠ 0 by
-          simpa [Semantics.Models, Satisfies, ValidOnFrame, M];
-        constructor;
-        . tauto;
-        . use 1;
-          constructor;
-          . omega;
-          . trivial;
+      . simp [Semantics.Models, Satisfies, M];
+        grind;
 
 instance : Modal.S4Point4McK ⪱ Modal.Triv := by
   constructor;
@@ -151,13 +145,7 @@ instance : Modal.S4Point4McK ⪱ Modal.Triv := by
             simp [M];
             constructor <;> omega;
         }
-      . suffices (0 : M) = 0 ∧ ∃ x : M, (0 : M) ≺ x ∧ ¬x = 0 by
-          simpa [Semantics.Models, Satisfies, ValidOnFrame, M];
-        constructor;
-        . tauto;
-        . use 1;
-          constructor;
-          . omega;
-          . trivial;
+      . simp [Semantics.Models, Satisfies, M];
+        grind;
 
 end LO.Modal
