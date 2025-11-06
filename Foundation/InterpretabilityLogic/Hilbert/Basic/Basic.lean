@@ -25,11 +25,11 @@ namespace Hilbert.Basic
 
 variable {Ax Ax₁ Ax₂ : Axiom α}
 
-@[grind] lemma axm! {φ} (s : Substitution _) (h : φ ∈ Ax) : Hilbert.Basic Ax ⊢ φ⟦s⟧ := by
+@[grind ⇒] lemma axm! {φ} (s : Substitution _) (h : φ ∈ Ax) : Hilbert.Basic Ax ⊢ φ⟦s⟧ := by
   apply Logic.iff_provable.mpr;
   apply Basic.axm s h;
 
-@[grind] lemma axm'! {φ} (h : φ ∈ Ax) : Hilbert.Basic Ax ⊢ φ := by simpa using axm! (idSubstitution _) h;
+@[grind ⇒] lemma axm'! {φ} (h : φ ∈ Ax) : Hilbert.Basic Ax ⊢ φ := by simpa using axm! (idSubstitution _) h;
 
 instance : Entailment.Lukasiewicz (Hilbert.Basic Ax) where
   imply₁ _ _ := by constructor; apply Hilbert.Basic.imply₁;

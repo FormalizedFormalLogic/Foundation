@@ -279,10 +279,11 @@ scoped instance : IsStrictOrderedRing M where
   zero_le_one := Or.inr zero_lt_one
   exists_pair_ne := ⟨0, 1, ne_of_lt zero_lt_one⟩
   mul_lt_mul_of_pos_left := by
-    rintro x y z h hz; { simpa [mul_comm z] using mul_lt_mul x y z h hz }
+    intro z hz x y h
+    simpa [mul_comm z] using mul_lt_mul x y z h hz
   mul_lt_mul_of_pos_right := by
-    rintro x y z h hz; { simpa using mul_lt_mul x y z h hz }
-
+    intro z hz x y h
+    exact mul_lt_mul x y z h hz
 scoped instance : CanonicallyOrderedAdd M where
   exists_add_of_le := by
     rintro x y (rfl | h)

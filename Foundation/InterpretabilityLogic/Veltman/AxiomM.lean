@@ -15,7 +15,7 @@ export HasAxiomM (S_M)
 
 end Frame
 
-@[simp high, grind]
+@[simp high, grind .]
 lemma validate_axiomM_of_HasAxiomM [F.HasAxiomM] : F ⊧ Axioms.M φ ψ χ := by
   intro V x h₁ y Rxy h₂;
   replace ⟨h₂₁, h₂₂⟩ := Satisfies.and_def.mp h₂;
@@ -38,7 +38,7 @@ lemma validate_axiomKM1_of_validate_axiomM (h : F ⊧ Axioms.M (.atom 0) (.atom 
     rcases (by simpa [buildAxioms] using hφ) with (rfl | rfl | rfl) <;> grind;
   . simp;
 
-@[simp high, grind]
+@[simp high, grind .]
 lemma validate_axiomKM1_of_HasAxiomM [F.HasAxiomM] : F ⊧ Axioms.KM1 φ ψ := by
   apply validate_axiomKM1_of_validate_axiomM;
   apply validate_axiomM_of_HasAxiomM;

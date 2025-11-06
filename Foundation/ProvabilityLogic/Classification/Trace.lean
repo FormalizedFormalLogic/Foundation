@@ -24,7 +24,7 @@ lemma iff_mem_trace {n : ℕ} : n ∈ φ.trace ↔ ∃ M : Kripke.Model, ∃ r :
 lemma satisfies_of_not_mem_trace : n ∉ φ.trace ↔ (∀ M : Kripke.Model, ∀ r : M, [M.IsTree r] → [Fintype M] → M.height = n → r ⊧ φ) := by
   simp [Formula.trace];
 
-@[grind]
+@[grind =]
 lemma eq_trace_trace_of_letterless {φ : Formula ℕ} (φ_letterless : φ.Letterless) : φ.trace = φ.letterlessTrace := by
   ext n;
   apply Iff.trans ?_ (Kripke.letterlessSpectrum_TFAE φ_letterless (n := n) |>.out 1 0 |>.not);
@@ -44,8 +44,8 @@ lemma eq_trace_trace_of_letterless {φ : Formula ℕ} (φ_letterless : φ.Letter
 
 open Formula.Kripke
 
-@[simp, grind] lemma trace_bot : (⊥ : Formula ℕ).trace = Set.univ := by simp [Formula.eq_trace_trace_of_letterless];
-@[simp, grind] lemma trace_top : (⊤ : Formula ℕ).trace = ∅ := by simp [Formula.eq_trace_trace_of_letterless];
+@[simp, grind =] lemma trace_bot : (⊥ : Formula ℕ).trace = Set.univ := by simp [Formula.eq_trace_trace_of_letterless];
+@[simp, grind =] lemma trace_top : (⊤ : Formula ℕ).trace = ∅ := by simp [Formula.eq_trace_trace_of_letterless];
 
 lemma trace_and : (φ ⋏ ψ).trace = φ.trace ∪ ψ.trace := by
   ext n;
@@ -89,7 +89,7 @@ abbrev trace (X : FormulaSet ℕ) : Set ℕ := ⋃ φ ∈ X, φ.trace
 
 @[simp] lemma trace_empty : (∅ : FormulaSet ℕ).trace = ∅ := by simp [FormulaSet.trace];
 
-lemma eq_FormulaSet_trace_finset_conj {X : Finset (Formula ℕ)} : X.conj.trace = FormulaSet.trace X.toSet := by simp [FormulaSet.trace, Formula.trace_fconj];
+lemma eq_FormulaSet_trace_finset_conj {X : Finset (Formula ℕ)} : X.conj.trace = FormulaSet.trace X := by simp [FormulaSet.trace, Formula.trace_fconj];
 
 lemma subset_trace_of_subset {X Y : FormulaSet ℕ} (h : X ⊆ Y) : X.trace ⊆ Y.trace := by
   simp only [trace, Set.iUnion_subset_iff];
@@ -147,9 +147,9 @@ lemma GLβMinus.eq_trace {β : Set ℕ} (hβ : β.Cofinite := by grind) : (Modal
   apply Eq.trans $ GL.eq_trace_ext $ by grind;
   simp [FormulaSet.trace, Formula.eq_trace_trace_of_letterless];
 
-@[simp, grind] lemma S.provable_TBB {n : ℕ} : Modal.S ⊢ TBB n := by simp [TBB]
+@[simp, grind .] lemma S.provable_TBB {n : ℕ} : Modal.S ⊢ TBB n := by simp [TBB]
 
-@[simp, grind]
+@[simp]
 lemma subset_GLα_S : Modal.GLα α ⊆ Modal.S := by
   intro φ;
   suffices Modal.GLα α ⊢ φ → Modal.S ⊢ φ by grind;
@@ -160,7 +160,7 @@ lemma subset_GLα_S : Modal.GLα α ⊆ Modal.S := by
   | mdp ihφψ ihφ => exact ihφψ ⨀ ihφ;
   | subst ihφ => exact Logic.subst _ ihφ;
 
-instance : Modal.GLα α ⪯ Modal.S := by grind
+instance : Modal.GLα α ⪯ Modal.S := Logic.weakerThan_of_subset subset_GLα_S
 
 @[simp]
 lemma S.eq_trace : Modal.S.trace = Set.univ := by
@@ -168,7 +168,7 @@ lemma S.eq_trace : Modal.S.trace = Set.univ := by
   intro n;
   use (TBB n);
   constructor;
-  . grind;
+  . apply Logic.iff_provable.mp; grind;
   . simp [Formula.eq_trace_trace_of_letterless];
 
 variable {L : Logic ℕ} {φ : Formula ℕ}
@@ -334,7 +334,7 @@ end Kripke
 
 axiom GL.formalized_validates_axiomT_set_in_irrefl_trans_chain : Modal.GL ⊢ ∼□^[(φ.rflSubformula.card + 1)]⊥ ➝ ◇φ.rflSubformula.conj
 
-@[grind]
+@[grind .]
 lemma Formula.trace.finite_or_cofinite : φ.trace.Finite ∨ φ.trace.Cofinite := by
   suffices φ.trace.Infinite → φ.trace.Cofinite by tauto;
   intro tr_infinite;
@@ -366,13 +366,7 @@ lemma Formula.trace.finite_or_cofinite : φ.trace.Finite ∨ φ.trace.Cofinite :
   . intro i;
     simp;
 
-@[grind]
-lemma Formula.trace.finite_of_coinfinite (h_ci : φ.trace.Coinfinite) : φ.trace.Finite := by
-  rcases Formula.trace.finite_or_cofinite (φ := φ) with h | h_cf;
-  . assumption;
-  . exfalso;
-    apply h_ci;
-    exact h_cf;
+@[grind →] lemma Formula.trace.finite_of_coinfinite (h_ci : φ.trace.Coinfinite) : φ.trace.Finite := by grind;
 
 lemma subset_GLα_of_trace_coinfinite (hL : L.trace.Coinfinite) : L ⊆ Modal.GLα L.trace := by
   intro φ hφ;
@@ -533,7 +527,7 @@ theorem eq_provablityLogic_GLα_of_coinfinite_trace (h : (T.ProvabilityLogic U).
       use A;
     | mdp ihAB ihA => exact ihAB ⨀ ihA;
 
-@[grind]
+@[grind ⇐]
 lemma cofinite_of_not_subset_S (h : ¬(T.ProvabilityLogic U) ⊆ Modal.S) : (T.ProvabilityLogic U).trace.Cofinite := by
   contrapose! h;
   rw [eq_provablityLogic_GLα_of_coinfinite_trace h];

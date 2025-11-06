@@ -33,7 +33,7 @@ lemma subst_box : (□φ)⟦s⟧ = □(φ⟦s⟧) := rfl
 lemma subst_dia : (◇φ)⟦s⟧ = ◇(φ⟦s⟧) := rfl
 lemma subst_rhd : (φ ▷ ψ)⟦s⟧ = (φ⟦s⟧) ▷ (ψ⟦s⟧) := rfl
 
-attribute [simp, grind]
+attribute [simp, grind =]
   subst_atom
   subst_falsum
   subst_verum
@@ -56,7 +56,7 @@ abbrev idSubstitution (α) : Substitution α := Formula.atom
 def Substitution.comp (s₁ s₂ : Substitution α) : Substitution α := λ a => (s₁ a)⟦s₂⟧
 infixr:80 " ∘ " => Substitution.comp
 
-@[simp, grind]
+@[simp, grind =]
 lemma Formula.comp_subst {s₁ s₂ : Substitution α} {φ : Formula α} : φ⟦s₁ ∘ s₂⟧ = φ⟦s₁⟧⟦s₂⟧ := by
   induction φ <;> simp_all [Substitution.comp];
 

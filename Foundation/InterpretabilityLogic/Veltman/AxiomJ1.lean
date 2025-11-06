@@ -14,7 +14,7 @@ export HasAxiomJ1 (S_J1)
 
 end Frame
 
-@[simp high, grind]
+@[simp high, grind .]
 lemma validate_axiomJ1_of_J1 [F.HasAxiomJ1] : F ⊧ Axioms.J1 φ ψ := by
   intro V x h₁ y Rxy h₂;
   use y;

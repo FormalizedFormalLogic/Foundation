@@ -16,7 +16,7 @@ export HasAxiomJ4 (S_J4)
 
 end Frame
 
-@[simp high, grind]
+@[simp high, grind .]
 lemma validate_axiomJ4Plus_of_HasAxiomJ4 [F.HasAxiomJ4] : F ⊧ Axioms.J4Plus φ ψ χ := by
   intro V x h₁ h₂ y Rxy h₃;
   obtain ⟨z, Sxyz, hz⟩ := h₂ y Rxy h₃;
@@ -33,7 +33,7 @@ lemma validate_axiomJ4_of_validate_axiomJ4Plus (h : F ⊧ Axioms.J4Plus (.atom 0
     rcases (by simpa [buildAxioms] using hφ) with (rfl | rfl | rfl | rfl) <;> grind;
   . simp;
 
-@[simp high, grind]
+@[simp high, grind .]
 lemma validate_axiomJ4_of_HasAxiomJ4 [F.HasAxiomJ4] : F ⊧ Axioms.J4 φ ψ := by
   apply validate_axiomJ4_of_validate_axiomJ4Plus;
   apply validate_axiomJ4Plus_of_HasAxiomJ4;

@@ -136,6 +136,7 @@ protected lemma re : ¬∀ M : Model, ∀ φ ψ, M ⊧ φ ⭤ ψ → M ⊧ □φ
   . simp [ValidOnModel];
     tauto;
   . suffices (∃ x : M.World, ∀ y : M.World, x ≺[atom 0] y → y = 0) ∧ ∃ x : M.World, x ≠ 0 by
+      simp [ValidOnModel, Satisfies];
       simpa [M, ValidOnModel, Semantics.Models, Satisfies] using this;
     constructor;
     . use 0;

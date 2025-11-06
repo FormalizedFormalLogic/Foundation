@@ -50,21 +50,14 @@ instance : Modal.N ⪱ Modal.EN := by
       cl_prover;
     . apply Sound.not_provable_of_countermodel (𝓜 := PLoN.AllFrameClass);
       apply Formula.PLoN.ValidOnFrameClass.not_of_exists_model;
-      let M : PLoN.Model := {
+      use {
         World := Fin 2,
         Rel ξ x y := if ξ = ∼∼(.atom 0) then True else False,
         Valuation x a := x = 0
       };
-      use M;
       constructor;
       . tauto;
-      . suffices (∃ x : M.World, ∀ y : M.World, (PLoN.Frame.Rel' (.atom 0) x y) → y = 0) ∧ ∃ x : M.World, x ≠ 0 by
-          simpa [M, Semantics.Models, Formula.PLoN.ValidOnModel, Formula.PLoN.Satisfies] using this;
-        constructor;
-        . use 0;
-          simp [M, PLoN.Frame.Rel'];
-        . use 1;
-          simp [M];
+      . simp [Semantics.Models, ValidOnModel, Satisfies, Frame.Rel'];
 
 
 instance : Modal.N ⪱ Modal.K := by

@@ -167,12 +167,8 @@ lemma exists_max_sharp (h₁ : ∀ n, n♭ ∈ ‖φ‖) (h₂ : ‖φ‖ᶜ.Fin
     use x;
   use (s.max' se);
   constructor;
-  . obtain ⟨f, hx₁⟩ := by simpa using @hs _ |>.mp $ Finset.max'_mem _ se;
-    match f with
-    | 0 => exact hx₁;
-    | 1 =>
-      have := hx₁ $ h₁ _;
-      contradiction;
+  . have : ¬Satisfies cresswellModel (s.max' se, 0) φ ∨ ¬Satisfies cresswellModel (s.max' se, 1) φ := by simpa using @hs _ |>.mp $ Finset.max'_mem _ se;
+    rcases this with (h | h) <;> tauto;
   . intro m hm;
     by_contra hC;
     have : m < m := Finset.max'_lt_iff (H := se) |>.mp hm m (by
@@ -386,7 +382,6 @@ instance : Modal.K ⪱ Modal.KHen := by
       apply Kripke.not_validOnFrameClass_of_exists_model_world;
       use ⟨⟨Fin 1, λ x y => True⟩, λ w _ => False⟩, 0;
       simp [Satisfies, Semantics.Models];
-      constructor <;> tauto;
 
 instance : Modal.KHen ⪱ Modal.GL := by
   constructor;

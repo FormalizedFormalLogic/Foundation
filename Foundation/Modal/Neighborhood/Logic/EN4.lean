@@ -4,7 +4,7 @@ import Foundation.Modal.Neighborhood.Logic.EN
 
 namespace LO.Modal
 
-instance {φ : Formula ℕ} : FormulaSet.IsSubformulaClosed (Finset.toSet (φ.subformulas ∪ (□⊤ : Formula ℕ).subformulas)) := by
+instance {φ : Formula ℕ} : FormulaSet.IsSubformulaClosed (SetLike.coe (φ.subformulas ∪ (□⊤ : Formula ℕ).subformulas)) := by
   constructor;
   simp_all only [Finset.coe_union];
   rintro ψ (hψ | hψ);
@@ -14,6 +14,7 @@ instance {φ : Formula ℕ} : FormulaSet.IsSubformulaClosed (Finset.toSet (φ.su
     simpa;
   . intro ξ hξ;
     right;
+    simp only [SetLike.mem_coe] at hψ;
     apply Formula.subformulas.subset_of_mem hψ;
     simpa;
 

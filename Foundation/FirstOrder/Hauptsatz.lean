@@ -168,7 +168,7 @@ def leMinRightOfLe (s : q ≼ p) : q ≼ p ⊓ q := leMinOfle s (.refl q)
 
 end StrongerThan
 
-abbrev Forces (p : ℙ) : SyntacticFormulaᵢ L → Type u
+def Forces (p : ℙ) : SyntacticFormulaᵢ L → Type u
   | ⊥        => { b : ⊢ᵀ ∼p // Derivation.IsCutFree b }
   | .rel R v => { b : ⊢ᵀ .rel R v :: ∼p // Derivation.IsCutFree b }
   | φ ⋏ ψ    => Forces p φ × Forces p ψ
@@ -186,19 +186,40 @@ scoped prefix:45 "⊩ " => allForces
 
 namespace Forces
 
-def falsumEquiv : p ⊩ ⊥ ≃ { b : ⊢ᵀ ∼p // Derivation.IsCutFree b} := .refl _
+def falsumEquiv : p ⊩ ⊥ ≃ { b : ⊢ᵀ ∼p // Derivation.IsCutFree b} := by unfold Forces; exact .refl _
 
-def relEquiv {k} {R : L.Rel k} {v} : p ⊩ .rel R v ≃ { b : ⊢ᵀ .rel R v :: ∼p // Derivation.IsCutFree b } := .refl _
+def relEquiv {k} {R : L.Rel k} {v} : p ⊩ .rel R v ≃ { b : ⊢ᵀ .rel R v :: ∼p // Derivation.IsCutFree b } := by
+  unfold Forces; exact .refl _
 
-def andEquiv {φ ψ : SyntacticFormulaᵢ L} : p ⊩ φ ⋏ ψ ≃ (p ⊩ φ) × (p ⊩ ψ) := .refl _
+def andEquiv {φ ψ : SyntacticFormulaᵢ L} : p ⊩ φ ⋏ ψ ≃ (p ⊩ φ) × (p ⊩ ψ) := by
+  conv =>
+    lhs
+    unfold Forces
+    exact .refl _
 
-def orEquiv {φ ψ : SyntacticFormulaᵢ L} : p ⊩ φ ⋎ ψ ≃ (p ⊩ φ) ⊕ (p ⊩ ψ) := .refl _
+def orEquiv {φ ψ : SyntacticFormulaᵢ L} : p ⊩ φ ⋎ ψ ≃ (p ⊩ φ) ⊕ (p ⊩ ψ) := by
+  conv =>
+    lhs
+    unfold Forces
+    exact .refl _
 
-def implyEquiv {φ ψ : SyntacticFormulaᵢ L} : p ⊩ φ ➝ ψ ≃ ((q : ℙ) → q ≼ p → q ⊩ φ → q ⊩ ψ) := .refl _
+def implyEquiv {φ ψ : SyntacticFormulaᵢ L} : p ⊩ φ ➝ ψ ≃ ((q : ℙ) → q ≼ p → q ⊩ φ → q ⊩ ψ) := by
+  conv =>
+    lhs
+    unfold Forces
+    exact .refl _
 
-def allEquiv {φ} : p ⊩ ∀' φ ≃ ((t : SyntacticTerm L) → Forces p (φ/[t])) := .refl _
+def allEquiv {φ} : p ⊩ ∀' φ ≃ ((t : SyntacticTerm L) → Forces p (φ/[t])) := by
+  conv =>
+    lhs
+    unfold Forces
+    exact .refl _
 
-def exEquiv {φ} : p ⊩ ∃' φ ≃ ((t : SyntacticTerm L) × Forces p (φ/[t])) := .refl _
+def exEquiv {φ} : p ⊩ ∃' φ ≃ ((t : SyntacticTerm L) × Forces p (φ/[t])) := by
+  conv =>
+    lhs
+    unfold Forces
+    exact .refl _
 
 def cast {p : ℙ} (f : p ⊩ φ) (s : φ = ψ) : p ⊩ ψ := s ▸ f
 

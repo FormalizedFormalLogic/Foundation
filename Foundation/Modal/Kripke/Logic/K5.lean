@@ -57,9 +57,8 @@ instance : Modal.K ⪱ Modal.K5 := by
       use M, 0;
       constructor;
       . trivial;
-      . suffices ∃ (x : M.World), ¬x = 0 by simpa [Semantics.Models, Satisfies, M];
-        use 1;
-        trivial;
+      . suffices (0 : M) ≺ 1 by simpa [Semantics.Models, Satisfies, M];
+        tauto;
 
 end Hilbert
 

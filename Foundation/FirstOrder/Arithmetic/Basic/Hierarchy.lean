@@ -281,11 +281,13 @@ set_option linter.flexible false in
       rcases eq with ⟨φ₁, rfl, φ₂, rfl, rfl⟩
       simpa using ⟨ihp rfl, ihq rfl⟩
     case ball pos _ ih =>
-      simp [Rew.eq_lt_iff] at eq
+      simp only [Rew.eq_lt_iff, Rew.q_eq_zero_iff, Matrix.vecCons_empty_eq_singleton,
+        exists_and_left, exists_eq_left] at eq
       rcases eq with ⟨hp, ⟨u, rfl, s, hs, rfl⟩, φ, rfl, rfl⟩
       simpa [show u.Positive from by simpa using pos] using ih rfl
     case bex pos _ ih =>
-      simp [Rew.eq_lt_iff] at eq
+      simp only [Rew.eq_lt_iff, Rew.q_eq_zero_iff, Matrix.vecCons_empty_eq_singleton,
+        exists_and_left, exists_eq_left] at eq
       rcases eq with ⟨hp, ⟨u, rfl, s, hs, rfl⟩, φ, rfl, rfl⟩
       simpa [show u.Positive from by simpa using pos] using ih rfl
     case all ih =>
