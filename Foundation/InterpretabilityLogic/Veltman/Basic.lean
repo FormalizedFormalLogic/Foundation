@@ -349,29 +349,29 @@ section
 open Formula.Veltman
 variable {F : Veltman.Frame} {φ ψ χ : Formula ℕ}
 
-@[simp high, grind]
+@[simp high, grind .]
 lemma validate_imply₁ : F ⊧ (Axioms.Imply₁ φ ψ) := by tauto;
 
-@[simp high, grind]
+@[simp high, grind .]
 lemma validate_imply₂ : F ⊧ (Axioms.Imply₂ φ ψ χ) := by tauto;
 
-@[simp high, grind]
+@[simp high, grind .]
 lemma validate_elimContra : F ⊧ (Axioms.ElimContra φ ψ) := by
   intro V x;
   simp [Semantics.Models, Satisfies];
   tauto;
 
-@[grind]
+@[grind ⇒]
 lemma validate_mdp (hpq : F ⊧ φ ➝ ψ) (hp : F ⊧ φ) : F ⊧ ψ := by
   intro V x;
   exact (hpq V x) (hp V x);
 
-@[grind]
+@[grind ⇒]
 lemma validate_nec (h : F ⊧ φ) : F ⊧ □φ := by
   intro V x y _;
   exact h V y;
 
-@[simp high, grind]
+@[simp high, grind .]
 lemma validate_axiomK : F ⊧ (Modal.Axioms.K φ ψ) := by
   intro V x;
   apply Satisfies.imp_def.mpr;
@@ -382,7 +382,7 @@ lemma validate_axiomK : F ⊧ (Modal.Axioms.K φ ψ) := by
   replace hp := hp x Rxy;
   exact hpq hp;
 
-@[simp high, grind]
+@[simp high, grind .]
 lemma validate_axiomL : F ⊧ (Modal.Axioms.L φ) :=
   ValidOnFrame.subst (s := λ _ => φ) $ ValidOnFrame.kripkeLift.mpr $ Modal.Kripke.validate_AxiomL_of_trans_cwf (φ := (.atom 0))
 
@@ -404,14 +404,14 @@ lemma validate_R2 (h : F ⊧ φ ➝ ψ) : F ⊧ ψ ▷ χ ➝ φ ▷ χ := by
     assumption;
   use z;
 
-@[simp high, grind]
+@[simp high, grind .]
 lemma validate_axiomJ3 : F ⊧ Axioms.J3 φ ψ χ := by
   intro V x h₁ h₂ y Rxy h₃;
   rcases Satisfies.or_def.mp h₃ with (h₃ | h₃);
   . obtain ⟨u, Sxyu, hu⟩ := h₁ y Rxy h₃; use u;
   . obtain ⟨u, Sxyu, hu⟩ := h₂ y Rxy h₃; use u;
 
-@[simp high, grind]
+@[simp high, grind .]
 lemma validate_axiomJ6 : F ⊧ Axioms.J6 φ := by
   intro V x;
   apply Satisfies.iff_def.mpr

@@ -26,7 +26,7 @@ def _root_.LO.FirstOrder.Arithmetic.seqDef : 𝚺₀.Semisentence 1 := .mkSigma
   “s. !isMappingDef s ∧ ∃ l <⁺ 2 * s, ∃ d <⁺ 2 * s, !domainDef d s ∧ !underDef d l”
 
 instance seq_defined : 𝚺₀-Predicate (Seq : V → Prop) via seqDef := .mk <| by
-  intro v; simp [seqDef, seq_iff]
+  intro v; simp [seqDef, seq_iff, -existsAndEq]
 
 instance seq_definable : 𝚺₀-Predicate (Seq : V → Prop) := seq_defined.to_definable
 

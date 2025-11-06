@@ -155,7 +155,7 @@ instance : Modal.K4Point3 ⪱ Modal.S4Point3 := by
       constructor;
       . refine {
           trans := by omega,
-          p_connected := by simp [M, PiecewiseConnected]; omega
+          p_connected := by simp [M, PiecewiseConnected];
         };
       . suffices ∃ x, (0 : M.World) ≺ x ∧ (∀ y, ¬x ≺ y) ∧ ∃ x, (0 : M.World) ≺ x ∧ ∀ y, ¬x ≺ y by
           simpa [M, Semantics.Models, Satisfies];

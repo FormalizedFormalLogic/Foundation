@@ -14,7 +14,7 @@ export HasAxiomJ5 (S_J5)
 
 end Frame
 
-@[simp high, grind]
+@[simp high, grind .]
 lemma validate_axiomJ5_of_J5 [F.HasAxiomJ5] : F ⊧ Axioms.J5 φ := by
   rintro V x y Rxy h;
   obtain ⟨z, Ryz, hz⟩ := Satisfies.dia_def.mp h;
