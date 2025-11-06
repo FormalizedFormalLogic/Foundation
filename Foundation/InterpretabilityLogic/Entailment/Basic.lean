@@ -15,12 +15,12 @@ export HasRule1 (R1!)
 section
 
 variable [HasRule1 𝓢]
-@[grind ⇒] lemma R1 (h : 𝓢 ⊢ φ ➝ ψ) : 𝓢 ⊢ χ ▷ φ ➝ χ ▷ ψ := ⟨R1! h.some⟩
+@[grind ⇐] lemma R1 (h : 𝓢 ⊢ φ ➝ ψ) : 𝓢 ⊢ χ ▷ φ ➝ χ ▷ ψ := ⟨R1! h.some⟩
 
 variable [Entailment.Cl 𝓢]
 
 def R1E! (h : 𝓢 ⊢! φ ⭤ ψ) : 𝓢 ⊢! χ ▷ φ ⭤ χ ▷ ψ := K_intro (R1! $ K_left h) (R1! $ K_right h)
-@[grind ⇒] lemma R1E (h : 𝓢 ⊢ φ ⭤ ψ) : 𝓢 ⊢ χ ▷ φ ⭤ χ ▷ ψ := ⟨R1E! h.some⟩
+@[grind ⇐] lemma R1E (h : 𝓢 ⊢ φ ⭤ ψ) : 𝓢 ⊢ χ ▷ φ ⭤ χ ▷ ψ := ⟨R1E! h.some⟩
 
 end
 
@@ -33,12 +33,12 @@ section
 
 variable [HasRule2 𝓢]
 
-@[grind ⇒] lemma R2 (h : 𝓢 ⊢ φ ➝ ψ) : 𝓢 ⊢ ψ ▷ χ ➝ φ ▷ χ := ⟨R2! h.some⟩
+@[grind ⇐] lemma R2 (h : 𝓢 ⊢ φ ➝ ψ) : 𝓢 ⊢ ψ ▷ χ ➝ φ ▷ χ := ⟨R2! h.some⟩
 
 variable [Entailment.Cl 𝓢]
 
 def R2E! (h : 𝓢 ⊢! φ ⭤ ψ) : 𝓢 ⊢! ψ ▷ χ ⭤ φ ▷ χ := K_intro (R2! $ K_left h) (R2! $ K_right h)
-@[grind ⇒] lemma R2E (h : 𝓢 ⊢ φ ⭤ ψ) : 𝓢 ⊢ ψ ▷ χ ⭤ φ ▷ χ := ⟨R2E! h.some⟩
+@[grind ⇐] lemma R2E (h : 𝓢 ⊢ φ ⭤ ψ) : 𝓢 ⊢ ψ ▷ χ ⭤ φ ▷ χ := ⟨R2E! h.some⟩
 
 end
 
@@ -58,7 +58,7 @@ variable [ModusPonens 𝓢]
 
 def rhdOfLC! (h : 𝓢 ⊢! □(φ ➝ ψ)) : 𝓢 ⊢! (φ ▷ ψ) := J1! ⨀ h
 
-@[grind ⇒]
+@[grind ⇐]
 lemma rhd_of_lc (h : 𝓢 ⊢ □(φ ➝ ψ)) : 𝓢 ⊢ (φ ▷ ψ) := ⟨rhdOfLC! h.some⟩
 
 open FiniteContext in instance [Entailment.Minimal 𝓢] (Γ : FiniteContext F 𝓢) : HasAxiomJ1 Γ := ⟨λ {_} => of J1!⟩
@@ -100,7 +100,7 @@ variable [ModusPonens 𝓢]
 
 def rhdTrans! (h₁ : 𝓢 ⊢! φ ▷ ψ) (h₂ : 𝓢 ⊢! ψ ▷ χ) : 𝓢 ⊢! (φ ▷ χ) := J2! ⨀ h₁ ⨀ h₂
 
-@[grind ⇒]
+@[grind ⇐]
 lemma rhd_trans (h₁ : 𝓢 ⊢ φ ▷ ψ) (h₂ : 𝓢 ⊢ ψ ▷ χ) : 𝓢 ⊢ (φ ▷ χ) := ⟨rhdTrans! h₁.some h₂.some⟩
 
 end
@@ -152,7 +152,7 @@ variable [ModusPonens 𝓢]
 
 def rhdDilemma! (h₁ : 𝓢 ⊢! φ ▷ χ) (h₂ : 𝓢 ⊢! ψ ▷ χ) : 𝓢 ⊢! (φ ⋎ ψ) ▷ χ := J3! ⨀ h₁ ⨀ h₂
 
-@[grind ⇒]
+@[grind ⇐]
 lemma rhd_dilemma (h₁ : 𝓢 ⊢ φ ▷ χ) (h₂ : 𝓢 ⊢ ψ ▷ χ) : 𝓢 ⊢ (φ ⋎ ψ) ▷ χ := ⟨rhdDilemma! h₁.some h₂.some⟩
 
 end
@@ -176,7 +176,7 @@ open Context in instance [Entailment.Minimal 𝓢] (Γ : Context F 𝓢) : HasAx
 variable [ModusPonens 𝓢]
 
 def CMM_of_Rhd! (h : 𝓢 ⊢! φ ▷ ψ) : 𝓢 ⊢! (◇φ ➝ ◇ψ) := J4! ⨀ h
-@[grind ⇒] lemma CMM_of_rhd (h : 𝓢 ⊢ φ ▷ ψ) : 𝓢 ⊢ (◇φ ➝ ◇ψ) := ⟨CMM_of_Rhd! h.some⟩
+@[grind ⇐] lemma CMM_of_rhd (h : 𝓢 ⊢ φ ▷ ψ) : 𝓢 ⊢ (◇φ ➝ ◇ψ) := ⟨CMM_of_Rhd! h.some⟩
 
 end
 

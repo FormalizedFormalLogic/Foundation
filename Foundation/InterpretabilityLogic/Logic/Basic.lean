@@ -34,7 +34,7 @@ section
 variable {L : Logic α} {φ ψ : Formula α}
 
 
-@[grind]
+@[grind =]
 lemma iff_provable : L ⊢ φ ↔ φ ∈ L := by
   constructor;
   . intro h;
@@ -44,7 +44,7 @@ lemma iff_provable : L ⊢ φ ↔ φ ∈ L := by
     constructor;
     exact h;
 
-@[grind]
+@[grind =]
 lemma iff_unprovable : L ⊬ φ ↔ φ ∉ L := by
   apply not_congr;
   simp [iff_provable];
@@ -71,19 +71,19 @@ lemma exists_unprovable : ∃ φ, L ⊬ φ := Consistent.exists_unprovable (𝓢
 
 variable [DecidableEq α] [Entailment.Cl L]
 
-@[simp, grind]
+@[simp, grind .]
 lemma no_bot : L ⊬ ⊥ := by
   obtain ⟨φ, hφ⟩ := exists_unprovable (L := L);
   contrapose! hφ;
   apply of_O! hφ;
 
-@[simp, grind]
+@[simp, grind .]
 lemma not_mem_bot : ⊥ ∉ L := by
   apply iff_unprovable.mp;
   exact no_bot;
 
 -- TODO: more general place
-@[grind]
+@[grind → ]
 lemma not_neg_of! (hφ : L ⊢ φ) : L ⊬ ∼φ := by
   by_contra! hC;
   apply L.no_bot;
@@ -115,7 +115,7 @@ lemma strictWeakerThan_of_ssubset (h : L₁ ⊂ L₂) : L₁ ⪱ L₂ := by
   . use ψ;
     grind;
 
-@[simp, grind]
+@[simp, grind .]
 lemma subset_of_weakerThan [L₁ ⪯ L₂] : L₁ ⊆ L₂ := by
   intro φ;
   suffices L₁ ⊢ φ → L₂ ⊢ φ by grind;
@@ -124,7 +124,7 @@ lemma subset_of_weakerThan [L₁ ⪯ L₂] : L₁ ⊆ L₂ := by
 instance [L₁ ≊ L₂] : L₁ ⪯ L₂ := Equiv.le inferInstance
 instance [L₁ ≊ L₂] : L₂ ⪯ L₁ := Equiv.le $ .symm inferInstance
 
-@[simp, grind]
+@[simp, grind .]
 lemma eq_of_equiv [L₁ ≊ L₂] : L₁ = L₂ := Set.Subset.antisymm subset_of_weakerThan subset_of_weakerThan
 
 end
