@@ -2,6 +2,7 @@ import Foundation.InterpretabilityLogic.Logic.Basic
 import Foundation.InterpretabilityLogic.Entailment.IL
 import Foundation.InterpretabilityLogic.Entailment.ILM
 import Foundation.InterpretabilityLogic.Entailment.ILP
+import Foundation.InterpretabilityLogic.Entailment.ILW
 import Foundation.InterpretabilityLogic.Hilbert.Axiom
 
 namespace LO.InterpretabilityLogic
@@ -184,6 +185,14 @@ instance [Ax.HasP] : InterpretabilityLogic.Entailment.HasAxiomP (Hilbert.Basic A
       (s := λ b => if (HasP.p Ax) = b then φ else if (HasP.q Ax) = b then ψ else (.atom b))
       (HasP.mem_P);
 
+instance [Ax.HasW] : InterpretabilityLogic.Entailment.HasAxiomW (Hilbert.Basic Ax) where
+  W! {φ ψ} := by
+    constructor;
+    simpa [HasW.ne_pq] using Hilbert.Basic.axm
+      (φ := InterpretabilityLogic.Axioms.W (.atom (HasW.p Ax)) (.atom (HasW.q Ax)))
+      (s := λ b => if (HasW.p Ax) = b then φ else if (HasW.q Ax) = b then ψ else (.atom b))
+      (HasW.mem_W);
+
 end
 
 end Hilbert.Basic
@@ -245,6 +254,20 @@ instance : ILP.axioms.HasP where p := 0; q := 1;
 end ILP.axioms
 protected abbrev ILP := Hilbert.Basic ILP.axioms
 instance : Entailment.ILP InterpretabilityLogic.ILP where
+
+
+protected abbrev ILW.axioms : Axiom ℕ := insert (InterpretabilityLogic.Axioms.W (.atom 0) (.atom 1)) IL.axioms
+namespace ILW.axioms
+instance : ILW.axioms.HasJ1 where p := 0; q := 1;
+instance : ILW.axioms.HasJ2 where p := 0; q := 1; r := 2;
+instance : ILW.axioms.HasJ3 where p := 0; q := 1; r := 2;
+instance : ILW.axioms.HasJ4 where p := 0; q := 1;
+instance : ILW.axioms.HasJ5 where p := 0;
+instance : ILW.axioms.HasW where p := 0; q := 1;
+end ILW.axioms
+
+protected abbrev ILW := Hilbert.Basic ILW.axioms
+instance : Entailment.ILW InterpretabilityLogic.ILW where
 
 end
 

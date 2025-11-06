@@ -95,6 +95,12 @@ class HasP where
   ne_pq : p ≠ q := by trivial;
   mem_P : InterpretabilityLogic.Axioms.P (.atom p) (.atom q) ∈ Ax := by grind;
 
+class HasW where
+  p : α
+  q : α
+  ne_pq : p ≠ q := by trivial;
+  mem_W : InterpretabilityLogic.Axioms.W (.atom p) (.atom q) ∈ Ax := by grind;
+
 end Axiom
 
 end LO.InterpretabilityLogic

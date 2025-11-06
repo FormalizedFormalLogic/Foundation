@@ -318,4 +318,28 @@ open FiniteContext in instance [Entailment.Minimal 𝓢] (Γ : FiniteContext F �
 open Context in instance [Entailment.Minimal 𝓢] (Γ : Context F 𝓢) : HasAxiomKM1 Γ := ⟨λ {_} => of KM1!⟩
 end
 
+
+class HasAxiomW (𝓢 : S) where
+  W! {φ ψ : F} : 𝓢 ⊢! Axioms.W φ ψ
+export HasAxiomW (W!)
+
+section
+variable [HasAxiomW 𝓢]
+@[simp] protected lemma W : 𝓢 ⊢ Axioms.W φ ψ := ⟨W!⟩
+open FiniteContext in instance [Entailment.Minimal 𝓢] (Γ : FiniteContext F 𝓢) : HasAxiomW Γ := ⟨λ {_} => of W!⟩
+open Context in instance [Entailment.Minimal 𝓢] (Γ : Context F 𝓢) : HasAxiomW Γ := ⟨λ {_} => of W!⟩
+end
+
+
+class HasAxiomF (𝓢 : S) where
+  F! {φ : F} : 𝓢 ⊢! Axioms.F φ
+export HasAxiomF (F!)
+section
+variable [HasAxiomF 𝓢]
+@[simp] protected lemma F : 𝓢 ⊢ Axioms.F φ := ⟨F!⟩
+open FiniteContext in instance [Entailment.Minimal 𝓢] (Γ : FiniteContext F 𝓢) : HasAxiomF Γ := ⟨λ {_} => of F!⟩
+open Context in instance [Entailment.Minimal 𝓢] (Γ : Context F 𝓢) : HasAxiomF Γ := ⟨λ {_} => of F!⟩
+end
+
+
 end LO.InterpretabilityLogic.Entailment
