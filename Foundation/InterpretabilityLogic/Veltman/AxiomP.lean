@@ -14,7 +14,7 @@ export HasAxiomP (S_P)
 
 end Frame
 
-@[simp high, grind]
+@[simp high, grind .]
 lemma validate_axiomP_of_HasAxiomP [F.HasAxiomP] : F ⊧ Axioms.P φ ψ := by
   intro V x h₁ y Rxy z Ryz h₂;
   obtain ⟨w, Sxyw, hw⟩ := h₁ z (F.trans Rxy Ryz) h₂;

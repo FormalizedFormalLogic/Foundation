@@ -77,36 +77,35 @@ variable {M : Model} {n : ℕ} {φ ψ : Formula ℕ}
 
 instance : CoeFun Model (λ M => Formula ℕ → Set M.World) := ⟨λ M => truthset M⟩
 
-@[simp, grind] lemma eq_atom : M (.atom n) = M.Val n := rfl
-@[simp, grind] lemma eq_bot  : M ⊥ = ∅ := rfl
-@[simp, grind] lemma eq_top  : M ⊤ = Set.univ := by simp [truthset]
-@[simp, grind] lemma eq_imp  : M (φ ➝ ψ) = (M φ)ᶜ ∪ (M ψ) := rfl
-@[simp, grind] lemma eq_or   : M (φ ⋎ ψ) = (M φ) ∪ (M ψ) := by simp [truthset];
-@[simp, grind] lemma eq_and  : M (φ ⋏ ψ) = (M φ) ∩ (M ψ) := by simp [truthset];
-@[simp, grind] lemma eq_neg  : M (∼φ) = (M φ)ᶜ := by simp [truthset]
-@[simp, grind] lemma eq_iff  : M (φ ⭤ ψ) = (M φ ∩ M ψ) ∪ ((M φ)ᶜ ∩ (M ψ)ᶜ) := calc
+@[simp, grind =] lemma eq_atom : M (.atom n) = M.Val n := rfl
+@[simp, grind =] lemma eq_bot  : M ⊥ = ∅ := rfl
+@[simp, grind =] lemma eq_top  : M ⊤ = Set.univ := by simp [truthset]
+@[simp, grind =] lemma eq_imp  : M (φ ➝ ψ) = (M φ)ᶜ ∪ (M ψ) := rfl
+@[simp, grind =] lemma eq_or   : M (φ ⋎ ψ) = (M φ) ∪ (M ψ) := by simp [truthset];
+@[simp, grind =] lemma eq_and  : M (φ ⋏ ψ) = (M φ) ∩ (M ψ) := by simp [truthset];
+@[simp, grind =] lemma eq_neg  : M (∼φ) = (M φ)ᶜ := by simp [truthset]
+@[simp, grind =] lemma eq_iff  : M (φ ⭤ ψ) = (M φ ∩ M ψ) ∪ ((M φ)ᶜ ∩ (M ψ)ᶜ) := calc
   M (φ ⭤ ψ) = M (φ ➝ ψ) ∩ (M (ψ ➝ φ))             := by simp [LogicalConnective.iff];
   _         = ((M φ)ᶜ ∪ (M ψ)) ∩ ((M ψ)ᶜ ∪ (M φ)) := by simp;
   _         = (M φ ∩ M ψ) ∪ ((M φ)ᶜ ∩ (M ψ)ᶜ)     := by tauto_set;
 
-@[simp, grind]
+@[simp, grind =]
 lemma eq_multibox {n : ℕ} : M (□^[n] φ) = M.box^[n] (M φ) := by
   induction n with
   | zero => simp
   | succ n ih => rw [Function.iterate_succ']; simp [ih, truthset]
 
-@[simp, grind] lemma eq_box : M (□φ) = M.box (M φ) := eq_multibox (n := 1)
+@[simp, grind =] lemma eq_box : M (□φ) = M.box (M φ) := eq_multibox (n := 1)
 
-@[simp, grind]
+@[simp, grind =]
 lemma eq_multidia {n : ℕ} : M (◇^[n] φ) = M.dia^[n] (M φ) := by
   induction n with
   | zero => simp
   | succ n ih => rw [Function.iterate_succ']; simp [ih, truthset]
 
-@[simp, grind] lemma eq_dia : M (◇φ) = M.dia (M φ) := eq_multidia (n := 1)
+@[simp, grind =] lemma eq_dia : M (◇φ) = M.dia (M φ) := eq_multidia (n := 1)
 
 
-@[grind]
 lemma eq_subst :
   letI U : Valuation M.toFrame := λ a => M ((atom a)⟦s⟧)
   M (φ⟦s⟧) = (⟨M.toFrame, U⟩ : Model) φ := by
@@ -130,20 +129,20 @@ protected instance semantics {M : Model} : Semantics M (Formula ℕ) := ⟨λ x 
 
 variable {M : Model} {x : M.World} {φ ψ ξ : Formula ℕ}
 
-@[grind] lemma def_top : x ⊧ ⊤ := by simp [Semantics.Models, Satisfies];
-@[grind] lemma def_bot : ¬x ⊧ ⊥ := by simp [Semantics.Models, Satisfies];
-@[grind] lemma def_neg : x ⊧ ∼φ ↔ ¬x ⊧ φ := by simp [Semantics.Models, Satisfies];
-@[grind] lemma def_imp : x ⊧ φ ➝ ψ ↔ (x ⊧ φ → x ⊧ ψ) := by simp [Semantics.Models, Satisfies]; tauto;
-@[grind] lemma def_and : x ⊧ φ ⋏ ψ ↔ (x ⊧ φ ∧ x ⊧ ψ) := by simp [Semantics.Models, Satisfies];
-@[grind] lemma def_or  : x ⊧ φ ⋎ ψ ↔ (x ⊧ φ ∨ x ⊧ ψ) := by simp [Semantics.Models, Satisfies];
+@[grind .] lemma def_top : x ⊧ ⊤ := by simp [Semantics.Models, Satisfies];
+@[grind .] lemma def_bot : ¬x ⊧ ⊥ := by simp [Semantics.Models, Satisfies];
+@[grind =] lemma def_neg : x ⊧ ∼φ ↔ ¬x ⊧ φ := by simp [Semantics.Models, Satisfies];
+@[grind =] lemma def_imp : x ⊧ φ ➝ ψ ↔ (x ⊧ φ → x ⊧ ψ) := by simp [Semantics.Models, Satisfies]; tauto;
+@[grind =] lemma def_and : x ⊧ φ ⋏ ψ ↔ (x ⊧ φ ∧ x ⊧ ψ) := by simp [Semantics.Models, Satisfies];
+@[grind =] lemma def_or  : x ⊧ φ ⋎ ψ ↔ (x ⊧ φ ∨ x ⊧ ψ) := by simp [Semantics.Models, Satisfies];
 
-@[grind] lemma def_box : x ⊧ □φ ↔ M φ ∈ (M.𝒩 x) := by simp [Semantics.Models, Satisfies];
-@[grind] lemma def_dia : x ⊧ ◇φ ↔ (M φ)ᶜ ∈ (M.𝒩 x)ᶜ := by simp [Semantics.Models, Satisfies];
+@[grind =] lemma def_box : x ⊧ □φ ↔ M φ ∈ (M.𝒩 x) := by simp [Semantics.Models, Satisfies];
+@[grind =] lemma def_dia : x ⊧ ◇φ ↔ (M φ)ᶜ ∈ (M.𝒩 x)ᶜ := by simp [Semantics.Models, Satisfies];
 
-@[grind] lemma def_multibox' : x ⊧ □^[n]φ ↔ x ∈ M.box^[n] (M φ) := by simp [Semantics.Models, Satisfies]
-@[grind] lemma def_mutlidia' : x ⊧ ◇^[n]φ ↔ x ∈ M.dia^[n] (M φ) := by simp [Semantics.Models, Satisfies]
-@[grind] lemma def_box' : x ⊧ □φ ↔ x ∈ M.box (M φ) := def_multibox' (n := 1)
-@[grind] lemma def_dia' : x ⊧ ◇φ ↔ x ∈ M.dia (M φ) := def_mutlidia' (n := 1)
+@[grind =] lemma def_multibox' : x ⊧ □^[n]φ ↔ x ∈ M.box^[n] (M φ) := by simp [Semantics.Models, Satisfies]
+@[grind =] lemma def_mutlidia' : x ⊧ ◇^[n]φ ↔ x ∈ M.dia^[n] (M φ) := by simp [Semantics.Models, Satisfies]
+@[grind =] lemma def_box' : x ⊧ □φ ↔ x ∈ M.box (M φ) := def_multibox' (n := 1)
+@[grind =] lemma def_dia' : x ⊧ ◇φ ↔ x ∈ M.dia (M φ) := def_mutlidia' (n := 1)
 
 protected instance : Semantics.Tarski (M.World) where
   models_verum := by grind

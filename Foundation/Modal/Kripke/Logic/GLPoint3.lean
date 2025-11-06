@@ -271,11 +271,7 @@ instance : Modal.K4Point3 ⪱ Modal.GLPoint3 := by
       . apply Set.mem_setOf_eq.mpr;
         constructor;
       . simp [Semantics.Models, Satisfies];
-        constructor;
-        . intro y Rxy;
-          use y;
-        . use 1;
-          omega;
+        tauto;
 
 end Modal.GLPoint3.Kripke
 

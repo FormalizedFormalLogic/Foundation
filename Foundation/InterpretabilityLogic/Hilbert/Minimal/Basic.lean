@@ -31,11 +31,13 @@ namespace Hilbert.Minimal
 
 variable {Ax Ax₁ Ax₂ : Axiom α}
 
-@[grind] lemma axm! {φ} (s : Substitution _) (h : φ ∈ Ax) : Hilbert.Minimal Ax ⊢ φ⟦s⟧ := by
+@[grind ⇒]
+lemma axm! {φ} (s : Substitution _) (h : φ ∈ Ax) : Hilbert.Minimal Ax ⊢ φ⟦s⟧ := by
   apply Logic.iff_provable.mpr;
   apply Minimal.axm s h;
 
-@[grind] lemma axm'! {φ} (h : φ ∈ Ax) : Hilbert.Minimal Ax ⊢ φ := by simpa using axm! (idSubstitution _) h;
+@[grind ⇒]
+lemma axm'! {φ} (h : φ ∈ Ax) : Hilbert.Minimal Ax ⊢ φ := by simpa using axm! (idSubstitution _) h;
 
 instance : Entailment.Lukasiewicz (Hilbert.Minimal Ax) where
   imply₁ _ _ := by constructor; apply Hilbert.Minimal.imply₁;
@@ -272,39 +274,39 @@ example : buildAxioms [.J1, .J2] = {
 
 instance buildAxioms.instHasJ3 : (buildAxioms l).HasJ3 where
   p := 0; q := 1; r := 2;
-  mem_J3 := by simp only [buildAxioms]; grind;
+  mem_J3 := by simp only [buildAxioms]; simp;
 
 instance buildAxioms.instHasJ6 : (buildAxioms l).HasJ6 where
   p := 0;
-  mem_J6 := by simp only [buildAxioms]; grind;
+  mem_J6 := by simp only [buildAxioms]; simp;
 
 instance buildAxioms.instHasJ1 (h : l.contains .J1 := by decide) : (buildAxioms l).HasJ1 where
   p := 0; q := 1;
-  mem_J1 := by simp only [buildAxioms, h]; grind;
+  mem_J1 := by simp only [buildAxioms, h]; simp;
 
 instance buildAxioms.instHasJ2 (h : l.contains .J2 := by decide) : (buildAxioms l).HasJ2 where
   p := 0; q := 1; r := 2;
-  mem_J2 := by simp only [buildAxioms, h]; grind;
+  mem_J2 := by simp only [buildAxioms, h]; simp;
 
 instance buildAxioms.instHasJ2Plus (h : l.contains .J2Plus := by decide) : (buildAxioms l).HasJ2Plus where
   p := 0; q := 1; r := 2;
-  mem_J2Plus := by simp only [buildAxioms, h]; grind;
+  mem_J2Plus := by simp only [buildAxioms, h]; simp;
 
 instance buildAxioms.instHasJ4 (h : l.contains .J4 := by decide) : (buildAxioms l).HasJ4 where
   p := 0; q := 1;
-  mem_J4 := by simp only [buildAxioms, h]; grind;
+  mem_J4 := by simp only [buildAxioms, h]; simp;
 
 instance buildAxioms.instHasJ4Plus (h : l.contains .J4Plus := by decide) : (buildAxioms l).HasJ4Plus where
   p := 0; q := 1; r := 2;
-  mem_J4Plus := by simp only [buildAxioms, h]; grind;
+  mem_J4Plus := by simp only [buildAxioms, h]; simp;
 
 instance buildAxioms.instHasJ5 (h : l.contains .J5 := by decide) : (buildAxioms l).HasJ5 where
   p := 0;
-  mem_J5 := by simp only [buildAxioms, h]; grind;
+  mem_J5 := by simp only [buildAxioms, h]; simp;
 
 instance buildAxioms.instHasM (h : l.contains .M := by decide) : (buildAxioms l).HasM where
   p := 0; q := 1; r := 2;
-  mem_M := by simp only [buildAxioms, h]; grind;
+  mem_M := by simp only [buildAxioms, h]; simp;
 
 open Lean in
 macro "defineILMinus" name:ident "[" xs:ident,* "]" : command => do

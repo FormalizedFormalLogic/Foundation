@@ -67,9 +67,7 @@ instance : Modal.ECN ⪱ Modal.EMCN := by
             rcases hwY with (rfl | rfl) <;>
             simp;
         }
-      . simp! [M, Semantics.Models, Satisfies, Set.eq_univ_iff_forall];
-        constructor;
-        . omega;
-        . tauto_set;
+      . simp [M, Semantics.Models, Satisfies];
+        grind;
 
 end LO.Modal
