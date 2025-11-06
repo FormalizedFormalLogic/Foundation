@@ -19,7 +19,7 @@ def CRhdRhd!_of_C!_C! (hφ : 𝓢 ⊢! φ₂ ➝ φ₁) (hψ : 𝓢 ⊢! ψ₁ �
   . apply R2!; apply hφ;
 
 omit [DecidableEq F] in
-@[grind] lemma CRhdRhd_of_C_C : 𝓢 ⊢ φ₂ ➝ φ₁ → 𝓢 ⊢ ψ₁ ➝ ψ₂ → 𝓢 ⊢ (φ₁ ▷ ψ₁) ➝ (φ₂ ▷ ψ₂) := λ ⟨h₁⟩ ⟨h₂⟩ => ⟨CRhdRhd!_of_C!_C! h₁ h₂⟩
+@[grind →] lemma CRhdRhd_of_C_C : 𝓢 ⊢ φ₂ ➝ φ₁ → 𝓢 ⊢ ψ₁ ➝ ψ₂ → 𝓢 ⊢ (φ₁ ▷ ψ₁) ➝ (φ₂ ▷ ψ₂) := λ ⟨h₁⟩ ⟨h₂⟩ => ⟨CRhdRhd!_of_C!_C! h₁ h₂⟩
 
 
 
@@ -29,7 +29,7 @@ def ERhdRhd!_of_E!_E! (hφ : 𝓢 ⊢! φ₁ ⭤ φ₂) (hψ : 𝓢 ⊢! ψ₁ �
   . apply CRhdRhd!_of_C!_C! (K_left hφ) (K_right hψ);
 
 omit [DecidableEq F] in
-@[grind]
+@[grind →]
 lemma ERhdRhd_of_E_E : 𝓢 ⊢ φ₁ ⭤ φ₂ → 𝓢 ⊢ ψ₁ ⭤ ψ₂ → 𝓢 ⊢ (φ₁ ▷ ψ₁) ⭤ (φ₂ ▷ ψ₂) := λ ⟨h₁⟩ ⟨h₂⟩ => ⟨ERhdRhd!_of_E!_E! h₁ h₂⟩
 
 -- TODO: Move to entailments
@@ -46,19 +46,19 @@ def CLNRhd! : 𝓢 ⊢! □(∼φ) ➝ (φ ▷ ψ) := by
   apply CRhdRhd!_of_C!_C!;
   . apply dni;
   . apply efq;
-@[simp, grind] lemma CLNRhd : 𝓢 ⊢ □(∼φ) ➝ (φ ▷ ψ) := ⟨CLNRhd!⟩
+@[simp, grind .] lemma CLNRhd : 𝓢 ⊢ □(∼φ) ➝ (φ ▷ ψ) := ⟨CLNRhd!⟩
 
 def CRhdOLN! : 𝓢 ⊢! φ ▷ ⊥ ➝ □(∼φ) := by
   apply C_trans ?_ CRhdNOL!;
   apply R2!;
   apply dne;
-omit [DecidableEq F] in @[simp, grind] lemma CRhdOLN : 𝓢 ⊢ φ ▷ ⊥ ➝ □(∼φ) := ⟨CRhdOLN!⟩
+omit [DecidableEq F] in @[simp, grind .] lemma CRhdOLN : 𝓢 ⊢ φ ▷ ⊥ ➝ □(∼φ) := ⟨CRhdOLN!⟩
 
 def CLNRhdO! : 𝓢 ⊢! □(∼φ) ➝ (φ ▷ ⊥) := by
   apply C_trans CLRhdNO!;
   apply R2!;
   apply dni;
-@[simp, grind] lemma CLNRhdO : 𝓢 ⊢ □(∼φ) ➝ (φ ▷ ⊥) := ⟨CLNRhdO!⟩
+@[simp, grind .] lemma CLNRhdO : 𝓢 ⊢ □(∼φ) ➝ (φ ▷ ⊥) := ⟨CLNRhdO!⟩
 
 -- TODO: Move to entailments
 def CCNKN : 𝓢 ⊢! (φ ➝ ψ) ➝ ∼(φ ⋏ ∼ψ) := by

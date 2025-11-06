@@ -5,7 +5,7 @@ import Foundation.Propositional.Kripke.Logic.Cl
 
 namespace LO.Propositional
 
-@[simp, grind]
+@[simp, grind .]
 lemma Formula.gödelTranslate.Letterless {φ : Formula ℕ} (hφ : φ.Letterless) : φᵍ.Letterless := by
   induction φ with
   | himp | hand | hor => simp_all only [Formula.gödelTranslate]; grind;

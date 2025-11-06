@@ -31,11 +31,13 @@ namespace Hilbert.Minimal
 
 variable {Ax Ax₁ Ax₂ : Axiom α}
 
-@[grind] lemma axm! {φ} (s : Substitution _) (h : φ ∈ Ax) : Hilbert.Minimal Ax ⊢ φ⟦s⟧ := by
+@[grind ⇒]
+lemma axm! {φ} (s : Substitution _) (h : φ ∈ Ax) : Hilbert.Minimal Ax ⊢ φ⟦s⟧ := by
   apply Logic.iff_provable.mpr;
   apply Minimal.axm s h;
 
-@[grind] lemma axm'! {φ} (h : φ ∈ Ax) : Hilbert.Minimal Ax ⊢ φ := by simpa using axm! (idSubstitution _) h;
+@[grind ⇒]
+lemma axm'! {φ} (h : φ ∈ Ax) : Hilbert.Minimal Ax ⊢ φ := by simpa using axm! (idSubstitution _) h;
 
 instance : Entailment.Lukasiewicz (Hilbert.Minimal Ax) where
   imply₁ _ _ := by constructor; apply Hilbert.Minimal.imply₁;
