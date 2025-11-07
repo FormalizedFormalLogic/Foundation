@@ -22,6 +22,19 @@ There were 4 major topics this month.
 
 # Filteration of Neighborhood Semantics on Modal logic
 
+-- TODO: more format
+
+In neighborhood semantics for modal logic, filtration methods have been studied mainly for extensions involving the axioms M, C, and N,
+as well as for non-iterative axioms (i.e., those of modal depth at most 1) to which Lewis’s theorem applies.
+Beyond these cases, however, very few results are known.
+
+Recently, Kopnev showed that logics containing axiom 4 also enjoy the finite frame property (FFP) via filtration.
+Since axiom 4 is not non-iterative, Lewis’s theorem cannot be applied, and a nontrivial construction of the filtration is required.
+Kopnev’s work, however, exists only as an arXiv preprint and does not appear to have undergone formal peer review or publication.
+During our verification, we identified one missing case distinction in the preprint, but the main argument remains correct once this gap is addressed.
+
+In this work, we formalized Kopnev’s result and, in particular, established the finite frame property via filtration for the logics E4 and ET4.
+
 # Interpretability Logic and Veltman Semantics
 
 # Commits
