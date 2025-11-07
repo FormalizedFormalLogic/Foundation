@@ -1,6 +1,6 @@
 import Book.Init
 
-import Book.Monthly.«2025.10».Main
+import Book.Monthly.«2025_10».Main
 
 open Verso.Genre
 open Verso.Genre.Manual
@@ -11,6 +11,6 @@ tag := "monthly-reports"
 number := false
 %%%
 
-Monthly reports of FFL.
+These are monthly reports of our formalized results in FFL.
 
-{include 0 Book.Monthly.«2025.10».Main}
+{include 0 Book.Monthly.«2025_10».Main}
