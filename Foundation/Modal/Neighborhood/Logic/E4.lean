@@ -60,6 +60,7 @@ instance Neighborhood.complete : Complete Modal.E4 FrameClass.E4 := (basicCanoni
   apply Set.mem_setOf_eq.mpr;
   infer_instance;
 
+/-- FFP of `Modal.E4` -/
 instance Neighborhood.finite_complete : Complete Modal.E4 FrameClass.finite_E4 := ⟨by
   intro φ hφ;
   apply Complete.complete (𝓜 := FrameClass.E4);
