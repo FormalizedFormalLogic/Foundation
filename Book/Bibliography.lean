@@ -40,3 +40,14 @@ def Kop23 : ArXiv where
   ]
   year := 2023
   id := "2305.08605"
+
+def Lew74 : Article where
+  title := inlines!"Intensional Logics without Iterative Axioms"
+  authors := #[
+    inlines!"D. Lewis",
+  ]
+  journal := inlines!"Journal of Philosophical Logic"
+  year := 1974
+  month := some inlines!"October"
+  volume := inlines!"3"
+  number := inlines!"4"

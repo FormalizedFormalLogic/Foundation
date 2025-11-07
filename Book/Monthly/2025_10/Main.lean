@@ -3,8 +3,13 @@ import Book.Init
 open LO.Modal
 
 open Verso.Genre
+open Verso.Genre.Manual
+open Verso.Genre.Manual.InlineLean
 
-set_option linter.tacticAnalysis false
+open LO
+open Modal Neighborhood
+
+set_option verso.docstring.allowMissing true
 
 open LO
 
@@ -14,13 +19,56 @@ tag  := "monthly-report-2025-10"
 %%%
 
 This page is the monthly report summarizing commits [between 2025/10/01 and 2025/11/01](https://github.com/FormalizedFormalLogic/Foundation/commits/master/?since=2025-10-01&until=2025-11-01).
-There were 4 major topics this month.
+There are 4 major topics in this month.
 
 # Set Theory and Consistency of `ZFC`
 
 # Downward Löwenheim-Skolem Theorem
 
 # Filteration of Neighborhood Semantics on Modal logic
+
+_Author_: [@SnO2WMaN](https://github.com/SnO2WMaN)
+
+Filtration in neighborhood semantics for modal logic has been studied
+mainly for extensions of logic `E` by the axioms `M`, `C`, and `N`,
+as well as for non-iterative axioms (i.e., those of modal depth at most 1)
+by Lewis's Theorem ({citet Lew74}[]).
+However, beyond these cases, very few results are known.
+
+Recently, {citet Kop23}[] showed that logics containing
+axiom `4` also enjoy the finite frame property (FFP) via filtration.
+Since axiom `4` is not non-iterative,
+Lewis’s theorem cannot be applied, and a nontrivial construction of the filtration is required.
+However, Kopnev’s work exists only as an arXiv preprint and
+does not have been reviewed and officially published.
+During our verification, we found one missing case in the proof,
+but the main argument remains correct once this gap is addressed.
+
+In this project, we formalized Kopnev’s result.
+In particular, formalized the FFP of logics `E4`, `ET4`, `EMC4` and `EMT4` via filtration.
+
+{docstring E4.Neighborhood.finite_complete}
+
+{docstring ET4.Neighborhood.finite_complete}
+
+{docstring EMC4.Neighborhood.finite_complete}
+
+{docstring EMT4.Neighborhood.finite_complete}
+
+And as easy corollaries about and `N`, also formalized in FFP of `EN4`, `EMCN4`, `EMNT4`.
+
+{docstring EN4.Neighborhood.finite_complete}
+
+{docstring EMNT4.Neighborhood.finite_complete}
+
+{docstring EMCN4.Neighborhood.finite_complete}
+
+Remarks that `EMCN4` is equivalent to `K4`.
+
+_Author note_: We noticed that forgot to formalize the FFP of `EMCNT4`, that is equivalent to `S4`, it might be proved easily.
+
+More information might be found in {ref "modal-logic-neighborhood-semantics"}[chapter of neightborhood semantics on modal logic].
+_(work in progress)_
 
 # Interpretability Logic and Veltman Semantics
 
