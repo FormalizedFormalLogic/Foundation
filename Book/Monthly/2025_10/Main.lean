@@ -20,7 +20,16 @@ There are 4 major topics in this month.
 
 # Set Theory and Consistency of `ZFC`
 
-# Downward Löwenheim-Skolem Theorem
+*Author*: [Palalansoukî](https://github.com/iehality)
+
+We formalized that [ZFSet](https://leanprover-community.github.io/mathlib4_docs//Mathlib/SetTheory/ZFC/Basic.html#ZFSet)
+is a (standard) model of $`\mathsf{ZFC}`.
+
+{docstring FirstOrder.SetTheory.Standard.models_zc}
+
+As an obvious consequence, it can be proven that $`\mathsf{ZFC}` is consistent.
+
+{docstring FirstOrder.SetTheory.zfc_consistent}
 
 # Filteration of Neighborhood Semantics on Modal logic
 
