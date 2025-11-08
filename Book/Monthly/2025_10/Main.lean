@@ -73,7 +73,7 @@ _(work in progress)_
 
 *Author note*: This report described below is under active development,
 and some parts may no longer match the implementation at the time of reading.
-For precise details, please refer to the latest code or the section {ref "interpretability-logic"}[Interpretability] _(in progress)_.
+For precise details, please refer to the latest code or the section {ref "interpretability-logic"}[Interpretability Logic] _(in progress)_.
 
 As a further extension of provability logic, observed *interpretations* between theories are treated as modal operators.
 This study is called *interpretability logic*.
