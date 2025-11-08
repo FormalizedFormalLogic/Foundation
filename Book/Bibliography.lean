@@ -51,3 +51,79 @@ def Lew74 : Article where
   month := some inlines!"October"
   volume := inlines!"3"
   number := inlines!"4"
+
+def KO21 : Article where
+  title := inlines!"Modal completeness of sublogics of the interpretability logic IL"
+  authors := #[
+    inlines!"Taishi. Kurahashi",
+    inlines!"Yuya. Okawa",
+  ]
+  journal := inlines!"Mathematical Logic Quarterly"
+  year := 2021
+  month := some inlines!"May"
+  volume := inlines!"67"
+  number := inlines!"2"
+
+-- TODO: `Book`
+def Vis88 : ArXiv where
+  title := inlines!"Preliminary Notes on Interpretability Logic"
+  authors := #[
+    inlines!"Albert. Visser",
+  ]
+  year := 1988
+  id := "...insert arXiv id here..."
+
+def Rov20 : Thesis where
+  title := inlines!"Interpretability Logics and Generalized Veltman Semantics in Agda"
+  author := inlines!"Jan Mas. Rovira"
+  year := 2020
+  degree := inlines!"Master"
+  university := inlines!"The University of Amsterdam"
+
+-- TODO: `incollection`
+def DV90 : ArXiv where
+  title := inlines!"Provability Logics for Relative Interpretability"
+  authors := #[
+    inlines!"Dick. de Jongh",
+    inlines!"Frank. Veltman",
+  ]
+  year := 1990
+  id := "...insert arXiv id here..."
+
+def Joo04 : Thesis where
+  title := inlines!"Interpretability Formalized"
+  author := inlines!"Joost Johannes. Joosten"
+  year := 2004
+  degree := inlines!"Ph.D"
+  university := inlines!"Utrecht University"
+
+-- TODO: `Book`
+def Vis97 : ArXiv where
+  title := inlines!"An Overview of Interpretability Logic"
+  authors := #[
+    inlines!"Albert. Visser",
+  ]
+  year := 1997
+  id := "...insert arXiv id here..."
+
+-- TODO: `incollection`
+def JD98 : ArXiv where
+  title := inlines!"The Logic of Provability"
+  authors := #[
+    inlines!"Giorgi. Japaridze",
+    inlines!"Dick. de Jongh",
+  ]
+  year := 1998
+  id := "...insert arXiv id here..."
+
+-- TODO: `incollection`
+def JRMV24 : ArXiv where
+  title := inlines!"An Overview of Verbrugge Semantics, a.k.a. Generalised Veltman Semantics"
+  authors := #[
+    inlines!"Joost J. Joosten",
+    inlines!"Jan Mas. Rovira",
+    inlines!"Luka. Mikec",
+    inlines!"Mladen. Vuković",
+  ]
+  year := 2024
+  id := "...insert arXiv id here..."
