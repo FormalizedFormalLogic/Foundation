@@ -5,7 +5,7 @@ namespace LO.InterpretabilityLogic
 
 open LO.Modal.Entailment LO.InterpretabilityLogic.Entailment
 
-instance : InterpretabilityLogic.CL ≊ InterpretabilityLogic.ILMinus_J1_J2 := by
+instance equiv_CL_ILMinus_J1_J2 : InterpretabilityLogic.CL ≊ InterpretabilityLogic.ILMinus_J1_J2 := by
   apply Logic.equiv_of_provable;
   intro φ;
   constructor;
@@ -24,7 +24,7 @@ instance : InterpretabilityLogic.CL ≊ InterpretabilityLogic.ILMinus_J1_J2 := b
     | R2 h => apply R2; assumption;
     | _ => simp;
 
-instance : InterpretabilityLogic.IL ≊ InterpretabilityLogic.ILMinus_J1_J2_J5 := by
+instance equiv_IL_ILMinus_J1_J2_J5 : InterpretabilityLogic.IL ≊ InterpretabilityLogic.ILMinus_J1_J2_J5 := by
   apply Logic.equiv_of_provable;
   intro φ;
   constructor;
