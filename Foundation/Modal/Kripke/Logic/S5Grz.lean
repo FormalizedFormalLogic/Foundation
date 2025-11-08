@@ -40,19 +40,16 @@ instance : Modal.Grz ⪱ Modal.S5Grz := by
       . refine {
           refl := by omega,
           trans := by omega;
-          antisymm := by simp [M]; omega;
+          antisymm := by grind;
         };
-      . suffices (0 : M.World) ≺ 0 ∧ ∃ x, (0 : M.World) ≺ x ∧ ¬x ≺ 0 by
-          simpa [Semantics.Models, Satisfies, ValidOnFrame, M];
-        constructor;
-        . omega;
-        . use 1;
-          constructor <;> omega;
+      . simp [Satisfies];
+        simp [M]
+        grind;
 
 instance : Modal.S4 ⪱ Modal.Triv := calc
   Modal.S4 ⪱ Modal.S5    := by infer_instance
-  _          ⪱ Modal.S5Grz := by infer_instance
-  _          ≊ Modal.Triv  := by infer_instance
+  _        ⪱ Modal.S5Grz := by infer_instance
+  _        ≊ Modal.Triv  := by infer_instance
 
 instance : Sound Modal.S5Grz FrameClass.finite_Triv := by
   suffices Modal.S5Grz ≊ Modal.Triv by

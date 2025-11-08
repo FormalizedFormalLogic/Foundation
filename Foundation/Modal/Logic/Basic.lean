@@ -37,7 +37,7 @@ variable {L : Logic α} {φ ψ : Formula α}
 
 export Substitution (subst)
 
-@[grind]
+@[grind =]
 lemma iff_provable : L ⊢ φ ↔ φ ∈ L := by
   constructor;
   . intro h;
@@ -47,7 +47,7 @@ lemma iff_provable : L ⊢ φ ↔ φ ∈ L := by
     constructor;
     exact h;
 
-@[grind]
+@[grind =]
 lemma iff_unprovable : L ⊬ φ ↔ φ ∉ L := by
   apply not_congr;
   simp [iff_provable];
@@ -73,20 +73,20 @@ lemma exists_unprovable : ∃ φ, L ⊬ φ := Consistent.exists_unprovable (𝓢
 
 variable [DecidableEq α] [L.IsQuasiNormal]
 
-@[simp, grind]
+@[simp, grind .]
 lemma no_bot : L ⊬ ⊥ := by
   obtain ⟨φ, hφ⟩ := exists_unprovable (L := L);
   contrapose! hφ;
   apply of_O!;
   assumption;
 
-@[simp, grind]
+@[simp, grind .]
 lemma not_mem_bot : ⊥ ∉ L := by
   apply iff_unprovable.mp;
   exact no_bot;
 
 -- TODO: more general place
-@[grind]
+@[grind →]
 lemma not_neg_of! (hφ : L ⊢ φ) : L ⊬ ∼φ := by
   by_contra! hC;
   apply L.no_bot;
@@ -95,25 +95,20 @@ lemma not_neg_of! (hφ : L ⊢ φ) : L ⊬ ∼φ := by
 end
 
 
-@[grind]
 lemma weakerThan_of_provable (h : ∀ φ, L₁ ⊢ φ → L₂ ⊢ φ) : L₁ ⪯ L₂ := by
   constructor;
   simpa [Entailment.theory, forall_exists_index];
 
-@[grind]
 lemma weakerThan_of_subset (h : L₁ ⊆ L₂) : L₁ ⪯ L₂ := by
-  suffices ∀ (φ : Formula α), L₁ ⊢ φ → L₂ ⊢ φ by grind;
-  intro φ;
+  apply weakerThan_of_provable;
   grind;
 
-@[grind]
 lemma equiv_of_provable (h : ∀ φ, L₁ ⊢ φ ↔ L₂ ⊢ φ) : L₁ ≊ L₂ := by
   apply Entailment.Equiv.antisymm;
   constructor <;>
   . apply weakerThan_of_provable;
     grind;
 
-@[grind]
 lemma strictWeakerThan_of_ssubset (h : L₁ ⊂ L₂) : L₁ ⪱ L₂ := by
   apply Entailment.strictlyWeakerThan_iff.mpr;
   obtain ⟨h₁, ⟨ψ, hψ⟩⟩ := Set.ssubset_iff_exists.mp h;
@@ -122,7 +117,7 @@ lemma strictWeakerThan_of_ssubset (h : L₁ ⊂ L₂) : L₁ ⪱ L₂ := by
   . use ψ;
     grind;
 
-@[simp, grind]
+@[simp, grind .]
 lemma subset_of_weakerThan [L₁ ⪯ L₂] : L₁ ⊆ L₂ := by
   intro φ;
   suffices L₁ ⊢ φ → L₂ ⊢ φ by grind;
@@ -131,8 +126,7 @@ lemma subset_of_weakerThan [L₁ ⪯ L₂] : L₁ ⊆ L₂ := by
 instance [L₁ ≊ L₂] : L₁ ⪯ L₂ := Equiv.le inferInstance
 instance [L₁ ≊ L₂] : L₂ ⪯ L₁ := Equiv.le $ .symm inferInstance
 
-@[grind]
-lemma eq_of_equiv [L₁ ≊ L₂] : L₁ = L₂ := Set.Subset.antisymm subset_of_weakerThan subset_of_weakerThan
+@[simp, grind .] lemma eq_of_equiv [L₁ ≊ L₂] : L₁ = L₂ := Set.Subset.antisymm subset_of_weakerThan subset_of_weakerThan
 
 end
 

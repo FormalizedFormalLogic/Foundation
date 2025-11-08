@@ -248,12 +248,11 @@ abbrev finestFiltrationTransitiveClosureFrame (M : Model) (T : FormulaSet ℕ) [
         clear Rxy Ryx;
         induction n using PNat.recOn generalizing x with
         | one =>
-          simp [FilterEqvSetoid, filterEquiv] at hn;
-          obtain ⟨u, Rxu, v, Ryv, Ruv⟩ := hn;
+          obtain ⟨_, ⟨u, v, exu, rfl, Ruv⟩, evy⟩ := hn;
           intro hx;
-          have : u ⊧ φ := Rxu φ hφ |>.mp hx;
+          have : u ⊧ φ := FilterEqvQuotient.iff_of_eq (h := exu) φ (by grind) |>.mp $ hx;
           have : v ⊧ φ := formula_hereditary Ruv this;
-          exact Ryv φ hφ |>.mpr this;
+          exact FilterEqvQuotient.iff_of_eq evy.symm φ (by grind) |>.mpr this;
         | succ n ih =>
           obtain ⟨⟨u⟩, ⟨x', u', exx', euu', Rx'u'⟩, RUY⟩ := hn;
           intro hx;
@@ -265,12 +264,11 @@ abbrev finestFiltrationTransitiveClosureFrame (M : Model) (T : FormulaSet ℕ) [
         clear Rxy Ryx;
         induction n using PNat.recOn generalizing y with
         | one =>
-          simp [FilterEqvSetoid, filterEquiv] at hn;
-          obtain ⟨u, Rxu, v, Ryv, Ruv⟩ := hn;
+          obtain ⟨_, ⟨u, v, eyu, rfl, Ruv⟩, evx⟩ := hn;
           intro hy;
-          have : u ⊧ φ := Rxu φ hφ |>.mp hy;
+          have : u ⊧ φ := FilterEqvQuotient.iff_of_eq (h := eyu) φ (by grind) |>.mp $ hy;
           have : v ⊧ φ := formula_hereditary Ruv this;
-          exact Ryv φ hφ |>.mpr this;
+          exact FilterEqvQuotient.iff_of_eq evx.symm φ (by grind) |>.mpr this;
         | succ n ih =>
           obtain ⟨⟨u⟩, ⟨y', u', eyy', euu', Ry'u'⟩, RUY⟩ := hn;
           intro hy;
@@ -292,10 +290,10 @@ abbrev finestFiltrationTransitiveClosureModel (M : Model) (T : FormulaSet ℕ) [
       clear RXY;
       induction n using PNat.recOn generalizing x with
       | one =>
-        obtain ⟨u, v, exu, eyv, Ruv⟩ : ∃ u v : M.World, (⟦x⟧ : FilterEqvQuotient M T) = ⟦u⟧ ∧ (⟦y⟧ : FilterEqvQuotient M T) = ⟦v⟧ ∧ u ≺ v := by simpa using hn;
-        have := FilterEqvQuotient.iff_of_eq (h := exu) (.atom a) ha |>.mp $ hX ha;
-        have := formula_hereditary Ruv this;
-        exact FilterEqvQuotient.iff_of_eq eyv (.atom a) ha |>.mpr this;
+        obtain ⟨u, v, ⟨exu, Ruv⟩, evy⟩ : ∃ u v, (⟦x⟧ = ⟦u⟧ ∧ u ≺ v) ∧ ⟦v⟧ = ⟦y⟧ := by simpa using hn;
+        have : u ⊧ atom a := FilterEqvQuotient.iff_of_eq (h := exu) (.atom a) ha |>.mp $ hX ha;
+        have : v ⊧ atom a := formula_hereditary Ruv this;
+        exact FilterEqvQuotient.iff_of_eq evy.symm (.atom a) ha |>.mpr this;
       | succ n ih =>
         obtain ⟨_, ⟨x', u', exx', rfl, Rx'u'⟩, RUY⟩ := hn;
         refine ih u' ?_ RUY;
@@ -319,11 +317,11 @@ instance finestFiltrationTransitiveClosureModel.filterOf : FilterOf (finestFiltr
     clear RXY;
     induction n using PNat.recOn generalizing x with
     | one =>
-      obtain ⟨u, v, exu, eyv, Ruv⟩ : ∃ u v : M.World, (⟦x⟧ : FilterEqvQuotient M T) = ⟦u⟧ ∧ (⟦y⟧ : FilterEqvQuotient M T) = ⟦v⟧ ∧ u ≺ v := by simpa using hn;
+      obtain ⟨_, ⟨u, v, exu, rfl, Ruv⟩, evy⟩ := hn;
       intro φ hφ hx;
       have : u ⊧ φ := FilterEqvQuotient.iff_of_eq exu _ hφ |>.mp hx;
       have : v ⊧ φ := formula_hereditary Ruv this;
-      exact FilterEqvQuotient.iff_of_eq eyv _ hφ |>.mpr this;
+      exact FilterEqvQuotient.iff_of_eq evy.symm _ hφ |>.mpr this;
     | succ n ih =>
       obtain ⟨U, ⟨v, w, exv, euw, Rvw⟩, RUY⟩ := hn;
       obtain ⟨u, rfl⟩ := Quotient.exists_rep U;

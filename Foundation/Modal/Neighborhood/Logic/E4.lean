@@ -40,7 +40,6 @@ lemma counterframe_2_3_5.not_valid_axiomFour : ¬counterframe_2_3_5 ⊧ Axioms.F
   . simp [Frame.box] at h;
     tauto_set;
   . simp [Frame.box, Set.eq_univ_iff_forall] at h;
-    tauto_set;
 
 end Neighborhood
 

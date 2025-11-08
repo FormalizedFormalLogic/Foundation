@@ -24,21 +24,21 @@ namespace Formula.letterlessSpectrum
 
 variable (hφ : φ.Letterless := by grind) (hψ : ψ.Letterless := by grind)
 
-@[simp, grind] lemma def_bot : (⊥ : Formula _).letterlessSpectrum = ∅ := by simp [letterlessSpectrum]
-@[simp, grind] lemma def_top : (⊤ : Formula _).letterlessSpectrum = Set.univ := by simp [letterlessSpectrum]
-@[grind] lemma def_imp : (φ ➝ ψ).letterlessSpectrum = φ.letterlessSpectrumᶜ ∪ ψ.letterlessSpectrum := by simp [letterlessSpectrum]
-@[grind] lemma def_neg : (∼φ).letterlessSpectrum = φ.letterlessSpectrumᶜ := by simp [letterlessSpectrum]
-@[grind] lemma def_or  : (φ ⋎ ψ).letterlessSpectrum = φ.letterlessSpectrum ∪ ψ.letterlessSpectrum := by simp [letterlessSpectrum];
-@[grind] lemma def_and : (φ ⋏ ψ).letterlessSpectrum = φ.letterlessSpectrum ∩ ψ.letterlessSpectrum := by simp [letterlessSpectrum];
-@[grind] lemma def_box : (□φ).letterlessSpectrum = { n | ∀ i < n, i ∈ φ.letterlessSpectrum } := by simp [letterlessSpectrum];
-@[grind] lemma def_multibox : (□^[(n + 1)]φ).letterlessSpectrum = { k | ∀ i < k, i ∈ (□^[n]φ).letterlessSpectrum } := by
+@[simp, grind =] lemma def_bot : (⊥ : Formula _).letterlessSpectrum = ∅ := by simp [letterlessSpectrum]
+@[simp, grind =] lemma def_top : (⊤ : Formula _).letterlessSpectrum = Set.univ := by simp [letterlessSpectrum]
+@[grind =] lemma def_imp : (φ ➝ ψ).letterlessSpectrum = φ.letterlessSpectrumᶜ ∪ ψ.letterlessSpectrum := by simp [letterlessSpectrum]
+@[grind =] lemma def_neg : (∼φ).letterlessSpectrum = φ.letterlessSpectrumᶜ := by simp [letterlessSpectrum]
+@[grind =] lemma def_or  : (φ ⋎ ψ).letterlessSpectrum = φ.letterlessSpectrum ∪ ψ.letterlessSpectrum := by simp [letterlessSpectrum];
+@[grind =] lemma def_and : (φ ⋏ ψ).letterlessSpectrum = φ.letterlessSpectrum ∩ ψ.letterlessSpectrum := by simp [letterlessSpectrum];
+@[grind =] lemma def_box : (□φ).letterlessSpectrum = { n | ∀ i < n, i ∈ φ.letterlessSpectrum } := by simp [letterlessSpectrum];
+@[grind =] lemma def_multibox : (□^[(n + 1)]φ).letterlessSpectrum = { k | ∀ i < k, i ∈ (□^[n]φ).letterlessSpectrum } := by
   apply Eq.trans ?_ $ def_box (φ := □^[n]φ);
   induction n generalizing φ with
   | zero => simp [letterlessSpectrum]
   | succ n ih =>
     suffices (□^[n](□□φ)).letterlessSpectrum = (□□^[n](□φ)).letterlessSpectrum by simpa
     simpa using ih (φ := □φ) (by grind);
-@[grind] lemma def_boxdot : (⊡φ).letterlessSpectrum = { n | ∀ i ≤ n, i ∈ φ.letterlessSpectrum } := by
+@[grind =] lemma def_boxdot : (⊡φ).letterlessSpectrum = { n | ∀ i ≤ n, i ∈ φ.letterlessSpectrum } := by
   ext i;
   suffices (i ∈ φ.letterlessSpectrum ∧ ∀ j < i, j ∈ φ.letterlessSpectrum) ↔ ∀ j ≤ i, j ∈ φ.letterlessSpectrum by simpa [letterlessSpectrum];
   constructor;
@@ -96,19 +96,19 @@ namespace Formula.letterlessTrace
 
 variable {φ ψ : Formula ℕ} (hφ : φ.Letterless := by grind) (hψ : ψ.Letterless := by grind)
 
-@[simp, grind] lemma def_top : (⊤ : Formula _).letterlessTrace = ∅ := by unfold letterlessTrace; rw [letterlessSpectrum.def_top]; tauto_set;
-@[simp, grind] lemma def_bot : (⊥ : Formula _).letterlessTrace = Set.univ := by unfold letterlessTrace; rw [letterlessSpectrum.def_bot]; tauto_set;
-@[grind] lemma def_neg : (∼φ).letterlessTrace = φ.letterlessTraceᶜ := by unfold letterlessTrace; rw [letterlessSpectrum.def_neg];
-@[grind] lemma def_and : (φ ⋏ ψ).letterlessTrace = φ.letterlessTrace ∪ ψ.letterlessTrace := by unfold letterlessTrace; rw [letterlessSpectrum.def_and]; tauto_set;
-@[grind] lemma def_or  : (φ ⋎ ψ).letterlessTrace = φ.letterlessTrace ∩ ψ.letterlessTrace := by unfold letterlessTrace; rw [letterlessSpectrum.def_or]; tauto_set;
+@[simp, grind =] lemma def_top : (⊤ : Formula _).letterlessTrace = ∅ := by unfold letterlessTrace; rw [letterlessSpectrum.def_top]; tauto_set;
+@[simp, grind =] lemma def_bot : (⊥ : Formula _).letterlessTrace = Set.univ := by unfold letterlessTrace; rw [letterlessSpectrum.def_bot]; tauto_set;
+@[grind =] lemma def_neg : (∼φ).letterlessTrace = φ.letterlessTraceᶜ := by unfold letterlessTrace; rw [letterlessSpectrum.def_neg];
+@[grind =] lemma def_and : (φ ⋏ ψ).letterlessTrace = φ.letterlessTrace ∪ ψ.letterlessTrace := by unfold letterlessTrace; rw [letterlessSpectrum.def_and]; tauto_set;
+@[grind =] lemma def_or  : (φ ⋎ ψ).letterlessTrace = φ.letterlessTrace ∩ ψ.letterlessTrace := by unfold letterlessTrace; rw [letterlessSpectrum.def_or]; tauto_set;
 
 end Formula.letterlessTrace
 
 
 namespace Formula
 
-@[grind] lemma neg_letterlessTrace_letterlessSpectrum {φ : Formula ℕ} (hφ : φ.Letterless := by grind) : (∼φ).letterlessTrace = φ.letterlessSpectrum := by rw [letterlessTrace.def_neg]; simp [letterlessTrace];
-@[grind] lemma neg_letterlessSpectrum_letterlessTrace {φ : Formula ℕ} (hφ : φ.Letterless := by grind) : (∼φ).letterlessSpectrum = φ.letterlessTrace := by rw [letterlessSpectrum.def_neg]; simp [letterlessTrace];
+@[grind =] lemma neg_letterlessTrace_letterlessSpectrum {φ : Formula ℕ} (hφ : φ.Letterless := by grind) : (∼φ).letterlessTrace = φ.letterlessSpectrum := by rw [letterlessTrace.def_neg]; simp [letterlessTrace];
+@[grind =] lemma neg_letterlessSpectrum_letterlessTrace {φ : Formula ℕ} (hφ : φ.Letterless := by grind) : (∼φ).letterlessSpectrum = φ.letterlessTrace := by rw [letterlessSpectrum.def_neg]; simp [letterlessTrace];
 
 
 lemma letterlessSpectrum_finite_or_cofinite {φ : Formula ℕ} (hφ : φ.Letterless) : φ.letterlessSpectrum.Finite ∨ φ.letterlessSpectrum.Cofinite := by
@@ -187,28 +187,37 @@ namespace Formula
 
 namespace Regular
 
-@[simp, grind] lemma def_bot : ¬((⊥ : Formula _).Regular T) := by simp [Formula.Regular, Realization.interpret];
-@[simp, grind] lemma def_top : (⊤ : Formula _).Regular T := by simp [Formula.Regular, Realization.interpret];
-@[grind] lemma def_neg : (∼φ).Regular T ↔ ¬(φ.Regular T) := by simp [Formula.Regular, Realization.interpret];
-@[grind] lemma def_neg' : (∼φ).Regular T ↔ (φ.Singular T) := Iff.trans def_neg $ by rfl
-@[grind] lemma def_and : (φ ⋏ ψ).Regular T ↔ (φ.Regular T) ∧ (ψ.Regular T) := by simp [Formula.Regular, Realization.interpret];
-@[grind] lemma def_or : (φ ⋎ ψ).Regular T ↔ (φ.Regular T) ∨ (ψ.Regular T) := by simp [Formula.Regular, Realization.interpret]; tauto;
-@[grind] lemma def_imp : (φ ➝ ψ).Regular T ↔ ((φ.Regular T) → (ψ.Regular T)) := by simp [Formula.Regular, Realization.interpret];
-@[grind] lemma def_iff : (φ ⭤ ψ).Regular T ↔ ((φ.Regular T) ↔ (ψ.Regular T)) := by simp [Formula.Regular, Realization.interpret]; tauto;
+@[simp] lemma def_bot : ¬((⊥ : Formula _).Regular T) := by simp [Formula.Regular, Realization.interpret];
+@[simp] lemma def_top : (⊤ : Formula _).Regular T := by simp [Formula.Regular, Realization.interpret];
+lemma def_neg : (∼φ).Regular T ↔ ¬(φ.Regular T) := by simp [Formula.Regular, Realization.interpret];
+lemma def_neg' : (∼φ).Regular T ↔ (φ.Singular T) := Iff.trans def_neg $ by rfl
+lemma def_and : (φ ⋏ ψ).Regular T ↔ (φ.Regular T) ∧ (ψ.Regular T) := by simp [Formula.Regular, Realization.interpret];
+lemma def_or : (φ ⋎ ψ).Regular T ↔ (φ.Regular T) ∨ (ψ.Regular T) := by simp [Formula.Regular, Realization.interpret]; tauto;
+lemma def_imp : (φ ➝ ψ).Regular T ↔ ((φ.Regular T) → (ψ.Regular T)) := by simp [Formula.Regular, Realization.interpret];
+lemma def_iff : (φ ⭤ ψ).Regular T ↔ ((φ.Regular T) ↔ (ψ.Regular T)) := by simp [Formula.Regular, Realization.interpret]; tauto;
 
-@[simp, grind]
+attribute [simp, grind .]
+  def_bot
+  def_top
+  def_neg def_neg'
+  def_and
+  def_or
+  def_imp
+  def_iff
+
+@[simp, grind =]
 lemma def_lconj {l : List (Formula _)} : (l.conj₂).Regular T ↔ ∀ φ ∈ l, (φ.Regular T) := by
   induction l using List.induction_with_singleton' with
   | hcons _ _ _ ih => simp_all [Regular];
   | _ => simp;
 
-@[simp, grind]
+@[simp, grind =]
 lemma def_lconj' {l : List _} {Φ : β → Formula _} : (l.conj' Φ).Regular T ↔ ∀ i ∈ l, ((Φ i).Regular T) := by
   induction l using List.induction_with_singleton' with
   | hcons _ _ _ ih => simp_all [Regular];
   | _ => simp;
 
-@[simp, grind]
+@[simp, grind =]
 lemma def_fconj {s : Finset (Formula _)} : (s.conj).Regular T ↔ ∀ φ ∈ s, (φ.Regular T) := by
   simp [Finset.conj];
 
@@ -221,13 +230,21 @@ end Regular
 
 namespace Singular
 
-@[simp, grind] lemma def_bot : (⊥ : Formula _).Singular T := by grind
-@[simp, grind] lemma def_top : ¬(⊤ : Formula _).Singular T := by grind
-@[grind] lemma def_neg : (∼φ).Singular T ↔ ¬(φ.Singular T) := by grind;
-@[grind] lemma def_neg' : (∼φ).Singular T ↔ (φ.Regular T) := by grind;
-@[grind] lemma def_and : (φ ⋏ ψ).Singular T ↔ (φ.Singular T) ∨ (ψ.Singular T) := by grind
-@[grind] lemma def_or : (φ ⋎ ψ).Singular T ↔ (φ.Singular T) ∧ (ψ.Singular T) := by grind
-@[grind] lemma def_imp : (φ ➝ ψ).Singular T ↔ (¬(φ.Singular T) ∧ (ψ.Singular T)) := by grind
+@[simp] lemma def_bot : (⊥ : Formula _).Singular T := by grind
+@[simp] lemma def_top : ¬(⊤ : Formula _).Singular T := by grind
+lemma def_neg : (∼φ).Singular T ↔ ¬(φ.Singular T) := by grind;
+lemma def_neg' : (∼φ).Singular T ↔ (φ.Regular T) := by grind;
+lemma def_and : (φ ⋏ ψ).Singular T ↔ (φ.Singular T) ∨ (ψ.Singular T) := by grind
+lemma def_or : (φ ⋎ ψ).Singular T ↔ (φ.Singular T) ∧ (ψ.Singular T) := by grind
+lemma def_imp : (φ ➝ ψ).Singular T ↔ (¬(φ.Singular T) ∧ (ψ.Singular T)) := by grind
+
+attribute [grind .]
+  def_bot
+  def_top
+  def_neg def_neg'
+  def_and
+  def_or
+  def_imp
 
 end Singular
 
@@ -265,7 +282,7 @@ section
 
 variable {α α₁ α₂ β β₁ β₂ : Set ℕ} (hβ : β.Cofinite := by grind) (hβ₁ : β₁.Cofinite := by grind) (hβ₂ : β₂.Cofinite := by grind)
 
-@[simp, grind] lemma TBB_letterless : (TBB n).Letterless := by grind
+@[simp, grind .] lemma TBB_letterless : (TBB n).Letterless := by grind
 
 @[simp]
 lemma TBB_injective : Function.Injective TBB := by
@@ -278,39 +295,39 @@ lemma TBB_injective : Function.Injective TBB := by
   obtain ⟨k, rfl⟩ := Nat.exists_eq_add_of_lt hij;
   simp [show ((i + k) + 1) = i + (k + 1) by omega, ←(Box.add (n := i) (m := (k + 1)))];
 
-@[simp, grind]
+@[simp, grind .]
 lemma TBB_letterlessSpectrum : (TBB n).letterlessSpectrum = {n}ᶜ := by
   ext i;
   rw [Formula.letterlessSpectrum.def_imp, Formula.boxbot_letterlessSpectrum, Formula.boxbot_letterlessSpectrum];
   simp;
   omega;
 
-@[simp, grind]
+@[simp, grind .]
 lemma TBB_letterlessTrace : (TBB n).letterlessTrace = {n} := by simp [Formula.letterlessTrace, TBB_letterlessSpectrum, compl_compl];
 variable {α α₁ α₂ β β₁ β₂ : Set ℕ} (hβ : β.Cofinite := by grind) (hβ₁ : β₁.Cofinite := by grind) (hβ₂ : β₂.Cofinite := by grind)
 
-@[simp, grind]
+@[simp, grind .]
 lemma TBB_conj'_letterless : (⩕ n ∈ s, TBB n).Letterless := by
   apply Formula.Letterless.of_fconj';
   grind;
 
-@[simp, grind]
+@[simp, grind .]
 lemma TBBSet_letterless : FormulaSet.Letterless ((λ i => TBB i) '' α) := by simp [FormulaSet.Letterless]
 
 @[simp]
 lemma TBBSet_letterlessTrace : FormulaSet.letterlessTrace (α.image (λ i => TBB i)) = α := by
   simp [FormulaSet.def_letterlessTrace_union];
 
-@[simp, grind]
+@[simp, grind .]
 lemma TBBMinus_letterless' : Formula.Letterless (∼⩕ n ∈ hβ.toFinset, TBB n) := by
   apply Formula.Letterless.of_neg;
   apply Formula.Letterless.of_fconj';
   grind;
 
-@[simp, grind]
+@[simp, grind .]
 lemma TBBMinus_letterless : FormulaSet.Letterless {∼⩕ n ∈ hβ.toFinset, TBB n} := by simp [FormulaSet.Letterless];
 
-@[simp]
+@[simp, grind .]
 lemma TBBMinus_letterlessSpectrum' : (∼⩕ n ∈ hβ.toFinset, TBB n).letterlessSpectrum = βᶜ := by
   rw [Formula.letterlessSpectrum.def_neg (Formula.Letterless.of_fconj' (by grind)), Formula.letterlessSpectrum.def_fconj' (by grind)];
   ext i;
@@ -319,7 +336,7 @@ lemma TBBMinus_letterlessSpectrum' : (∼⩕ n ∈ hβ.toFinset, TBB n).letterle
   . contrapose!; tauto;
   . contrapose!; rintro ⟨i, _, rfl⟩; tauto;
 
-@[simp]
+@[simp, grind .]
 lemma TBBMinus_letterlessSpectrum : FormulaSet.letterlessSpectrum {(∼⩕ n ∈ hβ.toFinset, TBB n)} = βᶜ := by simp [FormulaSet.letterlessSpectrum]
 
 
@@ -327,7 +344,7 @@ section
 
 variable [ℕ ⊧ₘ* T]
 
-@[simp, grind]
+@[simp high, grind .]
 lemma TBB_regular : (TBB n).Regular T := by
   apply Formula.Regular.def_imp.mpr;
   intro h;
@@ -339,12 +356,16 @@ lemma TBB_regular : (TBB n).Regular T := by
   apply this;
   exact h;
 
-@[simp, grind]
+@[simp, grind .]
 lemma TBB_conj'_regular : (⩕ n ∈ s, TBB n).Regular T := by
   apply Formula.Regular.def_fconj'.mpr;
   grind;
 
-@[simp] lemma TBBSet_regular : FormulaSet.Regular T ((fun i ↦ TBB i) '' α) := by simp [FormulaSet.Regular];
+@[simp high]
+lemma TBBSet_regular : FormulaSet.Regular T ((fun i ↦ TBB i) '' α) := by
+  rintro _ ⟨_, _, rfl⟩;
+  grind;
+
 
 @[simp]
 lemma TBBMinus_singular : FormulaSet.Singular T {∼⩕ n ∈ hβ.toFinset, TBB n} := by
@@ -852,7 +873,7 @@ lemma GL.eq_closed_regular_sumQuasiNormal_GLα (X_regular : X.Regular T)
     . simp;
 
 
-@[grind]
+@[grind! <=]
 lemma FormulaSet.comp_letterlessTrace_finite_of_singular (X_singular : X.Singular T) : (X.letterlessTrace).Cofinite := by
   have := FormulaSet.letterlessSpectrum_finite_of_singular X_letterless X_singular;
   have := FormulaSet.comp_letterlessTrace_letterlessSpectrum X_letterless;

@@ -27,9 +27,8 @@ protected lemma eq_univ : Set.univ (α := Fin 2) = {0, 1} := by ext x; match x w
 @[simp]
 protected lemma ne_singleton_univ {x : Fin 2} : ({x} : Set (Fin 2)) ≠ Set.univ := by
   apply Set.Subset.antisymm_iff.not.mpr;
-  suffices ∃ y, y ≠ x by simpa;
-  use x + 1;
-  omega;
+  suffices 0 = x → ¬1 = x by simpa;
+  grind;
 
 protected lemma eq_powerset : Set.powerset (Set.univ : Set (Fin 2)) = {{0, 1}, {0}, {1}, ∅} := by
   ext x;

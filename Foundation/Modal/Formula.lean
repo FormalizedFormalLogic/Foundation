@@ -402,7 +402,7 @@ namespace Formula.subformulas
 
 variable [DecidableEq α] {φ ψ χ ξ : Formula α}
 
-@[simp, grind] lemma mem_self {φ : Formula α} : φ ∈ φ.subformulas := by induction φ <;> simp [subformulas]
+@[simp, grind .] lemma mem_self {φ : Formula α} : φ ∈ φ.subformulas := by induction φ <;> simp [subformulas]
 
 @[grind ⇒]
 protected lemma mem_imp (h : (ψ ➝ χ) ∈ φ.subformulas) : ψ ∈ φ.subformulas ∧ χ ∈ φ.subformulas := by

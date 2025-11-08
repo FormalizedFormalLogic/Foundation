@@ -92,7 +92,7 @@ instance : Modal.KDB ⪱ Modal.KTB := by
             match x with
             | 0 => use 1; omega;
             | 1 => use 0; omega;
-          symm := by simp; omega
+          symm := by simp;
         };
       . simp [Semantics.Models, Satisfies];
         omega;

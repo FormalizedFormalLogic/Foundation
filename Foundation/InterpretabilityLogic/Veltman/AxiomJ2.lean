@@ -14,7 +14,7 @@ export HasAxiomJ2 (S_J2)
 
 end Frame
 
-@[simp high, grind]
+@[simp high, grind .]
 lemma validate_axiomJ2Plus_of_HasAxiomJ2 [F.HasAxiomJ2] : F ⊧ Axioms.J2Plus φ ψ χ := by
   intro V x h₁ h₂ y Rxy h₃;
   replace ⟨z, Sxyz, h₃⟩ := h₁ y Rxy h₃;
