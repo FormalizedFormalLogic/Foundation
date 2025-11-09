@@ -37,8 +37,7 @@ end ILMinus_J5
 
 instance : InterpretabilityLogic.ILMinus ⪱ InterpretabilityLogic.ILMinus_J5 := by
   constructor;
-  . apply weakerThan_of_subset_axioms;
-    simp [buildAxioms];
+  . simp;
   . apply Entailment.not_weakerThan_iff.mpr;
     use (Axioms.J5 (.atom 0));
     constructor;

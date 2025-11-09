@@ -249,11 +249,12 @@ section
 
 namespace Hilbert.Minimal
 
+open Formula (atom)
+
 inductive AxiomName | J1 | J2 | J2Plus | J4 | J4Plus | J5 | M deriving DecidableEq
 
 variable {l : List AxiomName}
 
-@[grind]
 def buildAxioms (l : List AxiomName) : Axiom ℕ :=
   ILMinus.axioms ∪
     (if l.contains .J1 then { InterpretabilityLogic.Axioms.J1 (.atom 0) (.atom 1) } else ∅) ∪
@@ -271,6 +272,13 @@ example : buildAxioms [.J1, .J2] = {
   Axioms.J3 (.atom 0) (.atom 1) (.atom 2),
   Axioms.J6 (.atom 0)
 } := by ext A; simp [Hilbert.Minimal.buildAxioms]; grind;
+
+
+@[grind ⇒]
+lemma buildAxioms.sub_of_sub {l₁ l₂ : List AxiomName} (h : l₁ ⊆ l₂) : buildAxioms l₁ ⊆ buildAxioms l₂ := by
+  intro A hA;
+  simp_all only [buildAxioms, List.contains_eq_mem, decide_eq_true_eq, Set.mem_union, Set.mem_insert_iff, Set.mem_singleton_iff, Set.mem_ite_empty_right];
+  grind;
 
 instance buildAxioms.instHasJ3 : (buildAxioms l).HasJ3 where
   p := 0; q := 1; r := 2;
@@ -377,6 +385,17 @@ macro "defineILMinus" name:ident "[" xs:ident,* "]" : command => do
     $instILMinusM
     end $logicName
   )
+
+@[simp high]
+lemma weakerThan_ILMinus_buildAxioms_of_subset : InterpretabilityLogic.ILMinus ⪯ Hilbert.Minimal (buildAxioms l) := by
+  apply weakerThan_of_subset_axioms;
+  simp [buildAxioms, Set.union_assoc];
+
+@[grind ⇒]
+lemma weakerThan_buildAxioms_of_subset (h : l₁ ⊆ l₂) : Hilbert.Minimal (buildAxioms l₁) ⪯ Hilbert.Minimal (buildAxioms l₂) := by
+  apply weakerThan_of_subset_axioms;
+  apply buildAxioms.sub_of_sub;
+  apply h;
 
 end Hilbert.Minimal
 
