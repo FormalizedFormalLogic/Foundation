@@ -184,7 +184,7 @@ def DN_of_isNegative [L.DecidableEq] {φ : SyntacticFormulaᵢ L} (h : φ.IsNega
   Entailment.K_intro (dneOfNegative h) Entailment.dni
 
 def efqOfNegative : {φ : SyntacticFormulaᵢ L} → φ.IsNegative → Λ ⊢! ⊥ ➝ φ
-  | ⊥,     _ => Entailment.C_id ⊥
+  | ⊥,     _ => Entailment.C_id
   | φ ⋏ ψ, h =>
     have ihφ : Λ ⊢! ⊥ ➝ φ := efqOfNegative (by simp [by simpa using h])
     have ihψ : Λ ⊢! ⊥ ➝ ψ := efqOfNegative (by simp [by simpa using h])
@@ -209,8 +209,8 @@ def rewrite (f : ℕ → SyntacticTerm L) : Λ ⊢! φ → Λ ⊢! Rew.rewrite f
     gen d
   | eaxm h         => eaxm (Λ.rewrite_closed h f)
   | verum          => verum
-  | implyK {_ _}     => implyK {_ _}
-  | implyS {_ _ _}   => implyS {_ _ _}
+  | implyK _ _     => implyK _ _
+  | implyS _ _ _   => implyS _ _ _
   | and₁ _ _       => and₁ _ _
   | and₂ _ _       => and₂ _ _
   | and₃ _ _       => and₃ _ _
@@ -238,8 +238,8 @@ def ofLE {Λ₁ Λ₂ : Hilbertᵢ L} (h : Λ₁ ≤ Λ₂) : Λ₁ ⊢! φ → 
   | gen b => (ofLE h b).gen
   | eaxm hφ => eaxm <| h hφ
   | verum => verum
-  | implyK {_ _} => implyK {_ _}
-  | implyS {_ _ _} => implyS {_ _ _}
+  | implyK _ _ => implyK _ _
+  | implyS _ _ _ => implyS _ _ _
   | and₁ _ _ => and₁ _ _
   | and₂ _ _ => and₂ _ _
   | and₃ _ _ => and₃ _ _

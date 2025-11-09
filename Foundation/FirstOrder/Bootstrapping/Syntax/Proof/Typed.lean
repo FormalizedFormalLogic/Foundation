@@ -312,7 +312,7 @@ lemma of_subset (h : T ⊆ U) {φ : Formula V L} : T ⊢ φ → U ⊢ φ := by
 noncomputable instance : Entailment.ModusPonens T := ⟨modusPonens⟩
 
 noncomputable instance : Entailment.NegationEquiv T where
-  negEquiv φ := by
+  negEquiv {φ} := by
     suffices T ⊢! (φ ⋎ ∼φ ⋎ ⊥) ⋏ (φ ⋏ ⊤ ⋎ ∼φ) by
       simpa [Axioms.NegEquiv, LO.LogicalConnective.iff, Semiformula.imp_def]
     apply TDerivation.and
@@ -327,13 +327,13 @@ noncomputable instance : Entailment.NegationEquiv T where
 
 noncomputable instance : Entailment.Minimal T where
   verum := TDerivation.toTProof <| TDerivation.verum
-  implyK (φ ψ) := by
+  implyK {φ ψ} := by
     simp only [Axioms.ImplyK, Semiformula.imp_def]
     apply TDerivation.or
     apply TDerivation.rotate₁
     apply TDerivation.or
     exact TDerivation.em φ
-  implyS (φ ψ r) := by
+  implyS {φ ψ r} := by
     simp only [Axioms.ImplyS, Semiformula.imp_def, DeMorgan.or, DeMorgan.neg]
     apply TDerivation.or
     apply TDerivation.rotate₁
@@ -349,17 +349,17 @@ noncomputable instance : Entailment.Minimal T where
       · apply TDerivation.and
         · exact TDerivation.em ψ
         · exact TDerivation.em r
-  and₁ (φ ψ) := by
+  and₁ {φ ψ} := by
     simp only [Axioms.AndElim₁, Semiformula.imp_def, DeMorgan.and]
     apply TDerivation.or
     apply TDerivation.or
     exact TDerivation.em φ
-  and₂ (φ ψ) := by
+  and₂ {φ ψ} := by
     simp only [Axioms.AndElim₂, Semiformula.imp_def, DeMorgan.and]
     apply TDerivation.or
     apply TDerivation.or
     exact TDerivation.em ψ
-  and₃ (φ ψ) := by
+  and₃ {φ ψ} := by
     simp only [Axioms.AndInst, Semiformula.imp_def]
     apply TDerivation.or
     apply TDerivation.rotate₁
@@ -368,20 +368,20 @@ noncomputable instance : Entailment.Minimal T where
     apply TDerivation.and
     · exact TDerivation.em φ
     · exact TDerivation.em ψ
-  or₁ (φ ψ) := by
+  or₁ {φ ψ} := by
     simp only [Axioms.OrInst₁, Semiformula.imp_def]
     apply TDerivation.or
     apply TDerivation.rotate₁
     apply TDerivation.or
     exact TDerivation.em φ
-  or₂ (φ ψ) := by
+  or₂ {φ ψ} := by
     suffices T ⊢! ∼ψ ⋎ φ ⋎ ψ by
       simpa [Axioms.OrInst₂, Semiformula.imp_def]
     apply TDerivation.or
     apply TDerivation.rotate₁
     apply TDerivation.or
     exact TDerivation.em ψ
-  or₃ (φ ψ r) := by
+  or₃ {φ ψ r} := by
     suffices T ⊢! φ ⋏ ∼r ⋎ ψ ⋏ ∼r ⋎ ∼φ ⋏ ∼ψ ⋎ r by
       simpa [Axioms.OrElim, Semiformula.imp_def]
     apply TDerivation.or
@@ -400,7 +400,7 @@ noncomputable instance : Entailment.Minimal T where
       · exact TDerivation.em r
 
 noncomputable instance : Entailment.Cl T where
-  dne φ := by simpa [Axioms.DNE, Semiformula.imp_def] using TDerivation.or (TDerivation.em φ)
+  dne {φ} := by simpa [Axioms.DNE, Semiformula.imp_def] using TDerivation.or (TDerivation.em φ)
 
 noncomputable def exIntro (φ : Semiformula V L 1) (t : Term V L) (b : T ⊢! φ.subst ![t]) : T ⊢! (∃' φ) := TDerivation.ex t b
 

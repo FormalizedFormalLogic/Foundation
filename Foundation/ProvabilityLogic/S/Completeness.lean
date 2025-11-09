@@ -71,10 +71,9 @@ lemma refl_mainlemma_aux (hA : ¬r₁ ⊧ (A.rflSubformula.conj ➝ A)) :
       have := Satisfies.imp_def.not.mp h;
       push_neg at this;
       obtain ⟨hA, hB⟩ := this;
-      apply deduct'!;
-      apply NC!_of_N!_of_!;
-      . exact deductInv'! $ ihB.1 hA;
-      . exact deductInv'! $ ihC.2 hB;
+      have h₁ := ihB.1 hA;
+      have h₂ := ihC.2 hB;
+      cl_prover [h₁, h₂];
   | hatom =>
     constructor;
     . intro h;
