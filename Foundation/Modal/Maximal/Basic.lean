@@ -92,7 +92,9 @@ lemma iff_provable_Cl : Modal.Triv ⊢ φ ↔ Propositional.Cl ⊢ φᵀ.toPropF
       dsimp [trivTranslate] at ih₁ ih₂;
       exact ih₁ ⨀ ih₂;
     | nec ih => exact ih;
-    | _ => simp [trivTranslate, Formula.toPropFormula];
+    | _ =>
+      dsimp [trivTranslate, Formula.toPropFormula];
+      cl_prover;
   . intro h;
     have d₁ : Modal.Triv ⊢ φᵀ ➝ φ := K!_right iff_trivTranslated;
     have d₂ : Modal.Triv ⊢ φᵀ := by simpa only [trivTranslate.toIP] using Hilbert.Normal.provable_of_classical_provable h;
@@ -125,7 +127,9 @@ protected lemma iff_provable_Cl : Modal.Ver ⊢ φ ↔ Propositional.Cl ⊢ φ�
     | mdp ih₁ ih₂ =>
       dsimp [verTranslate] at ih₁ ih₂;
       exact ih₁ ⨀ ih₂;
-    | _ => simp [verTranslate, Formula.toPropFormula];
+    | _ =>
+      dsimp [verTranslate, Formula.toPropFormula];
+      cl_prover;
   . intro h;
     have d₁ : Modal.Ver ⊢ φⱽ ➝ φ := K!_right iff_verTranslated;
     have d₂ : Modal.Ver ⊢ φⱽ := by simpa using Hilbert.Normal.provable_of_classical_provable h;

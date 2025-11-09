@@ -22,13 +22,13 @@ end Formula
 
 
 inductive GlobalConsequence (L : Logic α) : Set (Formula α) → Formula α → Type*
-  | protected thm {X φ}      : L ⊢ φ → GlobalConsequence L X φ
-  | protected ctx {X φ}      : φ ∈ X → GlobalConsequence L X φ
-  | protected mdp {X Y φ ψ}  : GlobalConsequence L X (φ ➝ ψ) → GlobalConsequence L Y φ → GlobalConsequence L (X ∪ Y) ψ
-  | protected nec {X φ}      : GlobalConsequence L X φ → GlobalConsequence L X (□φ)
-  | protected implyK X φ ψ   : GlobalConsequence L X $ Axioms.ImplyK φ ψ
-  | protected implyS X φ ψ χ : GlobalConsequence L X $ Axioms.ImplyS φ ψ χ
-  | protected ec X φ ψ       : GlobalConsequence L X $ Axioms.ElimContra φ ψ
+  | protected thm {X φ}        : L ⊢ φ → GlobalConsequence L X φ
+  | protected ctx {X φ}        : φ ∈ X → GlobalConsequence L X φ
+  | protected mdp {X Y φ ψ}    : GlobalConsequence L X (φ ➝ ψ) → GlobalConsequence L Y φ → GlobalConsequence L (X ∪ Y) ψ
+  | protected nec {X φ}        : GlobalConsequence L X φ → GlobalConsequence L X (□φ)
+  | protected implyK X {φ ψ}   : GlobalConsequence L X $ Axioms.ImplyK φ ψ
+  | protected implyS X {φ ψ χ} : GlobalConsequence L X $ Axioms.ImplyS φ ψ χ
+  | protected ec X {φ ψ}       : GlobalConsequence L X $ Axioms.ElimContra φ ψ
 
 instance : Entailment (Logic α × Set (Formula α)) (Formula α) := ⟨λ (L, Γ) => GlobalConsequence L Γ⟩
 
@@ -69,9 +69,9 @@ protected lemma rec!
     {hφ : (L, X) ⊢ φ},
     motive X φ hφ → motive X (□φ) ⟨GlobalConsequence.nec hφ.some⟩
   )
-  (implyK! : ∀ {X φ ψ}, motive X (Axioms.ImplyK φ ψ) ⟨GlobalConsequence.implyK X φ ψ⟩)
-  (implyS! : ∀ {X φ ψ ξ}, motive X (Axioms.ImplyS φ ψ ξ) ⟨GlobalConsequence.implyS X φ ψ ξ⟩)
-  (ec! : ∀ {X φ ψ}, motive X (Axioms.ElimContra φ ψ) ⟨GlobalConsequence.ec X φ ψ⟩)
+  (implyK! : ∀ {X φ ψ}, motive X (Axioms.ImplyK φ ψ) ⟨GlobalConsequence.implyK X⟩)
+  (implyS! : ∀ {X φ ψ ξ}, motive X (Axioms.ImplyS φ ψ ξ) ⟨GlobalConsequence.implyS X⟩)
+  (ec! : ∀ {X φ ψ}, motive X (Axioms.ElimContra φ ψ) ⟨GlobalConsequence.ec X⟩)
   : ∀ {X : Set (Formula α)} {φ}, (d : (L, X) ⊢ φ) → motive X φ d := by
   rintro X φ ⟨d⟩;
   induction d with

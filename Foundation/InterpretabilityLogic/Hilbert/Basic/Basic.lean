@@ -32,9 +32,9 @@ variable {Ax Ax₁ Ax₂ : Axiom α}
 @[grind ⇒] lemma axm'! {φ} (h : φ ∈ Ax) : Hilbert.Basic Ax ⊢ φ := by simpa using axm! (idSubstitution _) h;
 
 instance : Entailment.Lukasiewicz (Hilbert.Basic Ax) where
-  implyK _ _ := by constructor; apply Hilbert.Basic.implyK;
-  implyS _ _ _ := by constructor; apply Hilbert.Basic.implyS;
-  elimContra _ _ := by constructor; apply Hilbert.Basic.ec;
+  implyK {_ _} := by constructor; apply Hilbert.Basic.implyK;
+  implyS {_ _ _} := by constructor; apply Hilbert.Basic.implyS;
+  elimContra {_ _} := by constructor; apply Hilbert.Basic.ec;
   mdp h₁ h₂ := by
     constructor;
     apply Hilbert.Basic.mdp;
@@ -225,7 +225,7 @@ protected abbrev ILM.axioms : Axiom ℕ := insert (InterpretabilityLogic.Axioms.
 namespace ILM.axioms
 instance : ILM.axioms.HasJ1 where p := 0; q := 1;
 instance : ILM.axioms.HasJ2 where p := 0; q := 1; r := 2;
-instance : ILM.axioms.HasJ3 where p := 0; q := 1; r := 2;
+instance : ILM.axioms.HasJ3 where p := 0; q := 1; r := 2; mem_J3 := by simp;
 instance : ILM.axioms.HasJ4 where p := 0; q := 1;
 instance : ILM.axioms.HasJ5 where p := 0;
 instance : ILM.axioms.HasM where p := 0; q := 1; r := 2;
@@ -238,7 +238,7 @@ protected abbrev ILP.axioms : Axiom ℕ := insert (InterpretabilityLogic.Axioms.
 namespace ILP.axioms
 instance : ILP.axioms.HasJ1 where p := 0; q := 1;
 instance : ILP.axioms.HasJ2 where p := 0; q := 1; r := 2;
-instance : ILP.axioms.HasJ3 where p := 0; q := 1; r := 2;
+instance : ILP.axioms.HasJ3 where p := 0; q := 1; r := 2; mem_J3 := by simp;
 instance : ILP.axioms.HasJ4 where p := 0; q := 1;
 instance : ILP.axioms.HasJ5 where p := 0;
 instance : ILP.axioms.HasP where p := 0; q := 1;

@@ -69,29 +69,29 @@ variable (Λ : Hilbertᵢ L)
 
 instance : Entailment.ModusPonens Λ := ⟨mdp⟩
 
-instance : Entailment.HasAxiomAndInst Λ := ⟨and₃⟩
+instance : Entailment.HasAxiomAndInst Λ := ⟨and₃ _ _⟩
 
-instance : Entailment.HasAxiomImplyK Λ := ⟨implyK⟩
+instance : Entailment.HasAxiomImplyK Λ := ⟨implyK _ _⟩
 
-instance : Entailment.HasAxiomImplyS Λ := ⟨implyS⟩
+instance : Entailment.HasAxiomImplyS Λ := ⟨implyS _ _ _⟩
 
 instance : Entailment.Minimal Λ where
   mdp := mdp
   verum := verum
-  implyK := implyK
-  implyS := implyS
-  and₁ := and₁
-  and₂ := and₂
-  and₃ := and₃
-  or₁ := or₁
-  or₂ := or₂
-  or₃ := or₃
-  negEquiv _ := Entailment.E_Id _
+  implyK := implyK _ _
+  implyS := implyS _ _ _
+  and₁ := and₁ _ _
+  and₂ := and₂ _ _
+  and₃ := and₃ _ _
+  or₁ := or₁ _ _
+  or₂ := or₂ _ _
+  or₃ := or₃ _ _ _
+  negEquiv := Entailment.E_Id
 
 variable {Λ}
 
 instance : Entailment.Int (𝗜𝗻𝘁¹ : Hilbertᵢ L) where
-  efq _ := eaxm <| by simp [Hilbertᵢ.Intuitionistic]
+  efq := eaxm <| by simp [Hilbertᵢ.Intuitionistic]
 
 protected def cast {φ ψ} (b : Λ ⊢! φ) (e : φ = ψ) : Λ ⊢! ψ := e ▸ b
 
@@ -209,8 +209,8 @@ def rewrite (f : ℕ → SyntacticTerm L) : Λ ⊢! φ → Λ ⊢! Rew.rewrite f
     gen d
   | eaxm h         => eaxm (Λ.rewrite_closed h f)
   | verum          => verum
-  | implyK _ _     => implyK _ _
-  | implyS _ _ _   => implyS _ _ _
+  | implyK {_ _}     => implyK {_ _}
+  | implyS {_ _ _}   => implyS {_ _ _}
   | and₁ _ _       => and₁ _ _
   | and₂ _ _       => and₂ _ _
   | and₃ _ _       => and₃ _ _
@@ -238,8 +238,8 @@ def ofLE {Λ₁ Λ₂ : Hilbertᵢ L} (h : Λ₁ ≤ Λ₂) : Λ₁ ⊢! φ → 
   | gen b => (ofLE h b).gen
   | eaxm hφ => eaxm <| h hφ
   | verum => verum
-  | implyK _ _ => implyK _ _
-  | implyS _ _ _ => implyS _ _ _
+  | implyK {_ _} => implyK {_ _}
+  | implyS {_ _ _} => implyS {_ _ _}
   | and₁ _ _ => and₁ _ _
   | and₂ _ _ => and₂ _ _
   | and₃ _ _ => and₃ _ _
@@ -337,10 +337,10 @@ instance : Entailment.Minimal T :=
     fun φ ↦ (Equiv.refl ((Rewriting.emb '' T.theory) *⊢[𝓗]! ↑φ))
 
 instance minimal [Entailment.Int 𝓗] : Entailment.Int T where
-  efq _ := ofHilbert <| efq
+  efq := ofHilbert <| efq
 
 instance cl [Entailment.Cl 𝓗] : Entailment.Cl T where
-  dne _ := ofHilbert <| dne
+  dne := ofHilbert <| dne
 
 end Theoryᵢ
 

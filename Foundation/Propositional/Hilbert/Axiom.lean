@@ -1,6 +1,8 @@
-import Foundation.Propositional.Axioms
+
 import Foundation.Propositional.Formula
-import Foundation.Logic.Axioms
+import Foundation.Propositional.Entailment.Cl.Basic
+import Foundation.Propositional.Entailment.KrieselPutnam
+import Foundation.Propositional.Entailment.Scott
 
 namespace LO.Propositional
 

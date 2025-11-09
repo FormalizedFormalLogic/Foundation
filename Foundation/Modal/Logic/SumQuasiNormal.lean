@@ -80,9 +80,9 @@ lemma symm : sumQuasiNormal L₁ L₂ = sumQuasiNormal L₂ L₁ := by
 variable [DecidableEq α]
 
 instance [Entailment.Cl L₁] : Entailment.Lukasiewicz (sumQuasiNormal L₁ L₂) where
-  implyK _ _ := by constructor; apply sumQuasiNormal.mem₁; simp;
-  implyS _ _ _ := by constructor; apply sumQuasiNormal.mem₁; simp;
-  elimContra _ _ := by constructor; apply sumQuasiNormal.mem₁; simp;
+  implyK {_ _} := by constructor; apply sumQuasiNormal.mem₁; simp;
+  implyS {_ _ _} := by constructor; apply sumQuasiNormal.mem₁; simp;
+  elimContra {_ _} := by constructor; apply sumQuasiNormal.mem₁; simp;
 
 instance [L₁.IsQuasiNormal] : (sumQuasiNormal L₁ L₂).IsQuasiNormal where
   K _ _ := by constructor; apply sumQuasiNormal.mem₁; simp;

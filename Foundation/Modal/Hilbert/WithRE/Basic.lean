@@ -32,9 +32,9 @@ variable {Ax Ax₁ Ax₂ : Axiom α}
 @[grind] lemma axm'! {φ} (h : φ ∈ Ax) : WithRE Ax ⊢ φ := by simpa using axm! .id h;
 
 instance : Entailment.Lukasiewicz (Hilbert.WithRE Ax) where
-  implyK _ _ := by constructor; apply Hilbert.WithRE.implyK;
-  implyS _ _ _ := by constructor; apply Hilbert.WithRE.implyS;
-  elimContra _ _ := by constructor; apply Hilbert.WithRE.ec;
+  implyK {_ _} := by constructor; apply Hilbert.WithRE.implyK;
+  implyS {_ _ _} := by constructor; apply Hilbert.WithRE.implyS;
+  elimContra {_ _} := by constructor; apply Hilbert.WithRE.ec;
   mdp h₁ h₂ := by
     constructor;
     apply Hilbert.WithRE.mdp;

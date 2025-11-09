@@ -26,9 +26,9 @@ variable {Ax Ax₁ Ax₂ : Axiom α}
 @[grind] lemma axm'! {φ} (h : φ ∈ Ax) : WithHenkin Ax ⊢ φ := by simpa using axm! .id h;
 
 instance : Entailment.Lukasiewicz (Hilbert.WithHenkin Ax) where
-  implyK _ _ := by constructor; apply Hilbert.WithHenkin.implyK;
-  implyS _ _ _ := by constructor; apply Hilbert.WithHenkin.implyS;
-  elimContra _ _ := by constructor; apply Hilbert.WithHenkin.ec;
+  implyK {_ _} := by constructor; apply Hilbert.WithHenkin.implyK;
+  implyS {_ _ _} := by constructor; apply Hilbert.WithHenkin.implyS;
+  elimContra {_ _} := by constructor; apply Hilbert.WithHenkin.ec;
   mdp h₁ h₂ := by
     constructor;
     apply Hilbert.WithHenkin.mdp;

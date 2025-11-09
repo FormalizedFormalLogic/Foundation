@@ -65,6 +65,10 @@ def theory : Set F := {φ | 𝓢 ⊢ φ}
 
 end
 
+def cast {𝓢 : S} {φ ψ : F} (e : φ = ψ) (b : 𝓢 ⊢! φ) : 𝓢 ⊢! ψ := e ▸ b
+
+@[grind ⇒] lemma cast! {𝓢 : S} {φ ψ : F} (e : φ = ψ) (b : 𝓢 ⊢ φ) : 𝓢 ⊢ ψ := ⟨cast e b.some⟩
+
 lemma unprovable_iff_isEmpty {𝓢 : S} {φ : F} :
     𝓢 ⊬ φ ↔ IsEmpty (𝓢 ⊢! φ) := by simp [Provable, Unprovable]
 

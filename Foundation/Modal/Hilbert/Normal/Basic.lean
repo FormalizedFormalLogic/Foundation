@@ -30,9 +30,9 @@ variable {Ax Ax₁ Ax₂ : Axiom α}
 @[grind] lemma axm'! {φ} (h : φ ∈ Ax) : Normal Ax ⊢ φ := by simpa using axm! .id h;
 
 instance : Entailment.Lukasiewicz (Hilbert.Normal Ax) where
-  implyK _ _ := by constructor; apply Hilbert.Normal.implyK;
-  implyS _ _ _ := by constructor; apply Hilbert.Normal.implyS;
-  elimContra _ _ := by constructor; apply Hilbert.Normal.ec;
+  implyK {_ _} := by constructor; apply Hilbert.Normal.implyK;
+  implyS {_ _ _} := by constructor; apply Hilbert.Normal.implyS;
+  elimContra {_ _} := by constructor; apply Hilbert.Normal.ec;
   mdp h₁ h₂ := by
     constructor;
     apply Hilbert.Normal.mdp;

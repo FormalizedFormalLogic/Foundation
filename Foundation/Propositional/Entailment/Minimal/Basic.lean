@@ -360,6 +360,28 @@ def CConj₂Conj₂ [DecidableEq F] {Γ Δ : List F} (h : Δ ⊆ Γ) : 𝓢 ⊢!
   right_Conj₂_intro _ _ (fun _ hq ↦ left_Conj₂_intro (h hq))
 lemma CConj₂_Conj₂! [DecidableEq F] {Γ Δ : List F} (h : Δ ⊆ Γ) : 𝓢 ⊢ ⋀Γ ➝ ⋀Δ := ⟨CConj₂Conj₂ h⟩
 
+
+section
+
+variable {G T : Type*} [Entailment T G] [LogicalConnective G] {𝓣 : T}
+
+def Minimal.ofEquiv (𝓢 : S) [Entailment.Minimal 𝓢] (𝓣 : T) (f : G →ˡᶜ F) (e : (φ : G) → 𝓢 ⊢! f φ ≃ 𝓣 ⊢! φ) : Entailment.Minimal 𝓣 where
+  mdp {φ ψ dpq dp} := (e ψ) (
+    let d : 𝓢 ⊢! f φ ➝ f ψ := by simpa using (e (φ ➝ ψ)).symm dpq
+    d ⨀ ((e φ).symm dp))
+  negEquiv := e _ (by simpa using negEquiv)
+  verum := e _ (by simpa using verum)
+  implyK := e _ (by simpa using implyK)
+  implyS := e _ (by simpa using implyS)
+  and₁ := e _ (by simpa using and₁)
+  and₂ := e _ (by simpa using and₂)
+  and₃ := e _ (by simpa using and₃)
+  or₁ := e _ (by simpa using or₁)
+  or₂ := e _ (by simpa using or₂)
+  or₃ := e _ (by simpa using or₃)
+
+end
+
 end
 
 
@@ -725,7 +747,7 @@ end Context
 end
 
 
-section DT
+section
 
 variable {F : Type*} [LogicalConnective F]
          {S : Type*} [Entailment S F]
@@ -1110,6 +1132,7 @@ lemma KNN!_of_NA! [DecidableEq F] (b : 𝓢 ⊢ ∼(φ ⋎ ψ)) : 𝓢 ⊢ ∼φ
 
 
 
+
 section Conjunction
 
 def EConj₂Conj : (Γ : List F) → 𝓢 ⊢! ⋀Γ ⭤ Γ.conj
@@ -1431,7 +1454,6 @@ lemma FConj'_iff_forall_provable [DecidableEq F] {s : Finset α} {ι : α → F}
 end
 
 
-
 namespace Context
 
 lemma provable_iff_finset [DecidableEq F] {Γ : Set F} {φ : F} : Γ *⊢[𝓢] φ ↔ ∃ Δ : Finset F, (Δ.toSet ⊆ Γ) ∧ Δ *⊢[𝓢] φ := by
@@ -1459,7 +1481,7 @@ lemma bot_of_mem_neg [DecidableEq F] {Γ : Set F}  (h₁ : φ ∈ Γ) (h₂ : �
 
 end Context
 
-end DT
+end
 
 
 end LO.Entailment

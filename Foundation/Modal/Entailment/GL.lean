@@ -53,7 +53,7 @@ private noncomputable def lem_boxdot_Grz_of_L : 𝓢 ⊢! (⊡(⊡(φ ➝ ⊡φ)
     apply deduct';
     apply K_intro;
     . exact (of CNC) ⨀ and₂;
-    . exact (of (C_id _)) ⨀ and₁;
+    . exact (of C_id) ⨀ and₁;
   have : 𝓢 ⊢! ∼⊡(φ ➝ ⊡φ) ➝ (∼□(φ ➝ ⊡φ) ⋎ φ) := C_trans (contra this) $ C_trans CNKANN (CAA_of_C_right dne);
   have : 𝓢 ⊢! (∼⊡(φ ➝ ⊡φ) ⋎ φ) ➝ (∼□(φ ➝ ⊡φ) ⋎ φ) := left_A_intro this or₂;
   have : 𝓢 ⊢! ∼⊡(φ ➝ ⊡φ) ⋎ φ ➝ □(φ ➝ ⊡φ) ➝ φ := C_trans this CANC;

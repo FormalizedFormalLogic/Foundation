@@ -190,4 +190,26 @@ instance : HasAxiomPeirce 𝓢 where
 
 end
 
+section
+
+variable {G T : Type*} [Entailment T G] [LogicalConnective G] {𝓣 : T}
+
+def Cl.ofEquiv (𝓢 : S) [Entailment.Cl 𝓢] (𝓣 : T) (f : G →ˡᶜ F) (e : (φ : G) → 𝓢 ⊢! f φ ≃ 𝓣 ⊢! φ) : Entailment.Cl 𝓣 where
+  mdp {φ ψ dpq dp} := (e ψ) (
+    let d : 𝓢 ⊢! f φ ➝ f ψ := by simpa using (e (φ ➝ ψ)).symm dpq
+    d ⨀ ((e φ).symm dp))
+  negEquiv := e _ (by simpa using negEquiv)
+  verum := e _ (by simpa using verum)
+  implyK := e _ (by simpa using implyK)
+  implyS := e _ (by simpa using implyS)
+  and₁ := e _ (by simpa using and₁)
+  and₂ := e _ (by simpa using and₂)
+  and₃ := e _ (by simpa using and₃)
+  or₁ := e _ (by simpa using or₁)
+  or₂ := e _ (by simpa using or₂)
+  or₃ := e _ (by simpa using or₃)
+  dne := e _ (by simpa using dne)
+
+end
+
 end LO.Entailment
