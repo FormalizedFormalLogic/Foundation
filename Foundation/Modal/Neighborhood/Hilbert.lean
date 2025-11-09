@@ -17,7 +17,7 @@ section Frame
 lemma soundness_of_axioms_validOnFrame (hC : F ⊧* Ax) : Hilbert.WithRE Ax ⊢ φ → F ⊧ φ := by
   intro hφ;
   induction hφ using Hilbert.WithRE.rec! with
-  | imply₁ | imply₂ | ec => simp;
+  | implyK | implyS | ec => simp;
   | mdp ihφψ ihφ => exact ValidOnFrame.mdp ihφψ ihφ;
   | re ihφ => exact ValidOnFrame.re ihφ;
   | axm s h =>
@@ -35,7 +35,7 @@ section FrameClass
 lemma soundness_of_validates_axioms (hC : C ⊧* Ax) : Hilbert.WithRE Ax ⊢ φ → C ⊧ φ := by
   intro hφ F hF;
   induction hφ using Hilbert.WithRE.rec! with
-  | imply₁ | imply₂ | ec => simp;
+  | implyK | implyS | ec => simp;
   | mdp ihφψ ihφ => exact ValidOnFrame.mdp ihφψ ihφ;
   | re ihφ => exact ValidOnFrame.re ihφ;
   | axm s h =>

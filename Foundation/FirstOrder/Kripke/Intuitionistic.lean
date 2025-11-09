@@ -159,10 +159,10 @@ lemma sound! (w : W) (fv : ℕ → C) (hfv : ∀ i, w ⊩↓ fv i) {φ} : 𝗜�
     simpa using sound! v (x :>ₙ fv)
       (by rintro (i | i) <;> simp [fun i ↦ domain_monotone (hfv i) _ hwv]) b
   | .verum => by simp
-  | imply₁ φ ψ => by
+  | implyK φ ψ => by
     intro w₁ hw₁w₀ hw₁φ w₂ hw₁w₂ hw₂φ
     exact hw₁φ.monotone _ hw₁w₂
-  | imply₂ φ ψ χ => by
+  | implyS φ ψ χ => by
     intro w₁ hw₁w₀ hw₁ w₂ hw₂w₁ hw₂ w₃ hw₃w₂ hw₃
     have : w₃ ⊩[![]|fv] ψ := hw₂ w₃ hw₃w₂ hw₃
     exact hw₁ w₃ (le_trans hw₃w₂ hw₂w₁) hw₃ w₃ (by rfl) this

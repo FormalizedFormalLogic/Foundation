@@ -29,12 +29,12 @@ instance : Entailment.Lukasiewicz (ProvabilityLogic T U) where
     replace hA : U ⊢ f A ➝ f B := hA f;
     replace hB : U ⊢ f A := hB f;
     cl_prover [hA, hB];
-  imply₁ A B := by
+  implyK A B := by
     constructor;
     apply Modal.Logic.iff_provable.mp;
     apply ProvabilityLogic.provable_iff.mpr;
     simp;
-  imply₂ A B C := by
+  implyS A B C := by
     constructor;
     apply Modal.Logic.iff_provable.mp;
     apply ProvabilityLogic.provable_iff.mpr;

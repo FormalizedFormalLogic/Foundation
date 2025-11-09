@@ -1,77 +1,27 @@
 import Foundation.Propositional.Entailment.Minimal.Basic
-
-
-namespace LO.Axioms
-
-variable {F : Type*} [LogicalConnective F]
-variable (φ ψ χ : F)
-
-protected abbrev EFQ := ⊥ ➝ φ
-
-end LO.Axioms
-
+import Foundation.Propositional.Entailment.AxiomEFQ
 
 namespace LO.Entailment
 
-variable {S F : Type*} {𝓢 : S} {φ ψ χ : F}
-
-
-section
-
-variable [LogicalConnective F] [Entailment S F]
-
-class HasAxiomEFQ (𝓢 : S) where
-  efq {φ : F} : 𝓢 ⊢! Axioms.EFQ φ
-
-export HasAxiomEFQ (efq)
-@[simp] lemma efq! [Entailment.HasAxiomEFQ 𝓢] : 𝓢 ⊢ ⊥ ➝ φ := ⟨efq⟩
-
-def of_O [ModusPonens 𝓢] [Entailment.HasAxiomEFQ 𝓢] (b : 𝓢 ⊢! ⊥) : 𝓢 ⊢! φ := efq ⨀ b
-@[grind] lemma of_O! [ModusPonens 𝓢]  [Entailment.HasAxiomEFQ 𝓢] (h : 𝓢 ⊢ ⊥) : 𝓢 ⊢ φ := ⟨of_O h.some⟩
-
-instance [(𝓢 : S) → ModusPonens 𝓢] [(𝓢 : S) → HasAxiomEFQ 𝓢] : DeductiveExplosion S := ⟨fun b _ ↦ efq ⨀ b⟩
+variable {F : Type*} [LogicalConnective F] [DecidableEq F]
+         {S : Type*} [Entailment S F]
+         {𝓢 : S}
+         {φ φ₁ φ₂ ψ ψ₁ ψ₂ χ ξ : F}
+         {Γ Δ : List F}
 
 protected class Int (𝓢 : S) extends Entailment.Minimal 𝓢, Entailment.HasAxiomEFQ 𝓢
 
-end
 
-
-section
-
-variable [LogicalConnective F] [Entailment S F] [Entailment.Minimal 𝓢]
+variable [Entailment.Int 𝓢]
 
 namespace FiniteContext
-
-variable {Γ Δ E : List F}
-
-instance [Entailment.HasAxiomEFQ 𝓢] (Γ : FiniteContext F 𝓢) : HasAxiomEFQ Γ := ⟨of efq⟩
-
-instance  [Entailment.HasAxiomEFQ 𝓢] : DeductiveExplosion (FiniteContext F 𝓢) := inferInstance
-instance [Entailment.Int 𝓢] (Γ : FiniteContext F 𝓢) : Entailment.Int Γ where
-
+instance (Γ : FiniteContext F 𝓢) : Entailment.Int Γ where
 end FiniteContext
 
-
 namespace Context
-
-instance [Entailment.HasAxiomEFQ 𝓢] (Γ : Context F 𝓢) : HasAxiomEFQ Γ := ⟨of efq⟩
-
-instance [Entailment.HasAxiomEFQ 𝓢] : DeductiveExplosion (FiniteContext F 𝓢) := inferInstance
-
-instance [DecidableEq F] [Entailment.Int 𝓢] (Γ : Context F 𝓢) : Entailment.Int Γ where
-
+instance (Γ : Context F 𝓢) : Entailment.Int Γ where
 end Context
 
-end
-
-
-section
-
-variable {F : Type*} [LogicalConnective F] [DecidableEq F]
-         {S : Type*} [Entailment S F]
-         {𝓢 : S} [Entailment.Int 𝓢]
-         {φ φ₁ φ₂ ψ ψ₁ ψ₂ χ ξ : F}
-         {Γ Δ : List F}
 
 open NegationEquiv
 open FiniteContext
@@ -105,7 +55,7 @@ def CANC : 𝓢 ⊢! (∼φ ⋎ ψ) ➝ (φ ➝ ψ) := left_A_intro (by
     apply deduct;
     apply deduct;
     exact efq_of_mem_either (φ := φ) (by simp) (by simp)
-  ) imply₁
+  ) implyK
 @[simp] lemma CANC! : 𝓢 ⊢ (∼φ ⋎ ψ) ➝ (φ ➝ ψ) := ⟨CANC⟩
 
 def C_of_AN (b : 𝓢 ⊢! ∼φ ⋎ ψ) : 𝓢 ⊢! φ ➝ ψ := CANC ⨀ b
@@ -436,10 +386,6 @@ lemma CFconjNNFconj! {Γ : Finset F} : 𝓢 ⊢ (Γ.image (∼·)).conj ➝ ∼�
 
 end
 
-namespace Context
-
-end Context
-
 section consistency
 
 omit [DecidableEq F] in
@@ -449,8 +395,5 @@ lemma inconsistent_of_provable_of_unprovable {φ : F}
   intro ψ; exact efq! ⨀ (this ⨀ hp)
 
 end consistency
-
-end
-
 
 end LO.Entailment

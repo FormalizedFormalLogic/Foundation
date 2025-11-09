@@ -222,11 +222,11 @@ protected lemma orElim : M ⊧ (φ ➝ χ) ➝ (ψ ➝ χ) ➝ (φ ⋎ ψ ➝ χ
   | inl hp => exact hpr (M.trans hw₂₃ hw₃₄) hp;
   | inr hq => exact hqr hw₃₄ hq;
 
-protected lemma imply₁ : M ⊧ φ ➝ ψ ➝ φ := by
+protected lemma implyK : M ⊧ φ ➝ ψ ➝ φ := by
   intro x y _ hp z Ryz _;
   exact formula_hereditary Ryz hp;
 
-protected lemma imply₂ : M ⊧ (φ ➝ ψ ➝ χ) ➝ (φ ➝ ψ) ➝ φ ➝ χ := by
+protected lemma implyS : M ⊧ (φ ➝ ψ ➝ χ) ➝ (φ ➝ ψ) ➝ φ ➝ χ := by
   intro x y _ hpqr z Ryz hpq w Rzw hp;
   have Ryw : y ≺ w := M.trans Ryz Rzw;
   have Rww : w ≺ w := M.refl;
@@ -303,9 +303,9 @@ protected lemma orInst₂ : F ⊧ ψ ➝ φ ⋎ ψ := fun _ => ValidOnModel.orIn
 
 protected lemma orElim : F ⊧ (φ ➝ χ) ➝ (ψ ➝ χ) ➝ (φ ⋎ ψ ➝ χ) := fun _ => ValidOnModel.orElim
 
-protected lemma imply₁ : F ⊧ φ ➝ ψ ➝ φ := fun _ => ValidOnModel.imply₁
+protected lemma implyK : F ⊧ φ ➝ ψ ➝ φ := fun _ => ValidOnModel.implyK
 
-protected lemma imply₂ : F ⊧ (φ ➝ ψ ➝ χ) ➝ (φ ➝ ψ) ➝ φ ➝ χ := fun _ => ValidOnModel.imply₂
+protected lemma implyS : F ⊧ (φ ➝ ψ ➝ χ) ➝ (φ ➝ ψ) ➝ φ ➝ χ := fun _ => ValidOnModel.implyS
 
 protected lemma mdp (hpq : F ⊧ φ ➝ ψ) (hp : F ⊧ φ) : F ⊧ ψ := fun V x => ValidOnModel.mdp (hpq V) (hp V) x
 

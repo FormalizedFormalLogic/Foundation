@@ -82,7 +82,7 @@ lemma exists_iff {φ} : ∃ ψ : NNFormula _, Modal.K ⊢ φ ⭤ ψ.toFormula :=
     . apply left_A!_intro;
       . apply C!_trans (C!_trans (K!_right $ iff_neg) (contra! $ K!_left hφ'));
         exact CNC!;
-      . exact C!_trans (K!_right $ hψ') imply₁!;
+      . exact C!_trans (K!_right $ hψ') implyK!;
   | hbox φ ihφ =>
     obtain ⟨ψ, ih⟩ := ihφ;
     use □ψ;

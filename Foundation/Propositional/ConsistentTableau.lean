@@ -603,7 +603,7 @@ private lemma of_mem₂_imp [DecidableEq α] [Encodable α] [Entailment.Cl 𝓢]
     . contradiction;
     . have := iff_not_mem₁_mem₂.mpr h;
       contradiction;
-  . have : ψ ➝ (φ ➝ ψ) ∈ t.1.1 := iff_provable_mem₁.mp imply₁! t;
+  . have : ψ ➝ (φ ➝ ψ) ∈ t.1.1 := iff_provable_mem₁.mp implyK! t;
     have : φ ➝ ψ ∉ t.1.2 := iff_not_mem₂_mem₁.mpr $ mdp_mem₁ this (iff_not_mem₂_mem₁.mp hψ);
     contradiction;
 

@@ -11,8 +11,8 @@ inductive Hilbert.WithLoeb {α} (Ax : Axiom α) : Logic α
 | mdp {φ ψ}     : WithLoeb Ax (φ ➝ ψ) → WithLoeb Ax φ → WithLoeb Ax ψ
 | nec {φ}       : WithLoeb Ax φ → WithLoeb Ax (□φ)
 | loeb {φ}      : WithLoeb Ax (□φ ➝ φ) → WithLoeb Ax φ
-| imply₁ φ ψ    : WithLoeb Ax $ Axioms.Imply₁ φ ψ
-| imply₂ φ ψ χ  : WithLoeb Ax $ Axioms.Imply₂ φ ψ χ
+| implyK φ ψ    : WithLoeb Ax $ Axioms.ImplyK φ ψ
+| implyS φ ψ χ  : WithLoeb Ax $ Axioms.ImplyS φ ψ χ
 | ec φ ψ        : WithLoeb Ax $ Axioms.ElimContra φ ψ
 
 namespace Hilbert.WithLoeb
@@ -26,8 +26,8 @@ variable {Ax Ax₁ Ax₂ : Axiom α}
 @[grind] lemma axm'! {φ} (h : φ ∈ Ax) : WithLoeb Ax ⊢ φ := by simpa using axm! .id h;
 
 instance : Entailment.Lukasiewicz (Hilbert.WithLoeb Ax) where
-  imply₁ _ _ := by constructor; apply Hilbert.WithLoeb.imply₁;
-  imply₂ _ _ _ := by constructor; apply Hilbert.WithLoeb.imply₂;
+  implyK _ _ := by constructor; apply Hilbert.WithLoeb.implyK;
+  implyS _ _ _ := by constructor; apply Hilbert.WithLoeb.implyS;
   elimContra _ _ := by constructor; apply Hilbert.WithLoeb.ec;
   mdp h₁ h₂ := by
     constructor;
@@ -49,8 +49,8 @@ instance : Logic.Substitution (Hilbert.WithLoeb Ax) where
     | mdp hφψ hφ ihφψ ihφ => apply mdp ihφψ ihφ;
     | nec hφ ihφ => apply nec ihφ;
     | loeb hφψ ihφψ => apply loeb ihφψ;
-    | imply₁ φ ψ => apply imply₁;
-    | imply₂ φ ψ χ => apply imply₂;
+    | implyK φ ψ => apply implyK;
+    | implyS φ ψ χ => apply implyS;
     | ec φ ψ => apply ec;
 
 protected lemma rec!
@@ -59,8 +59,8 @@ protected lemma rec!
   (mdp      : ∀ {φ ψ : Formula α}, {hφψ : (WithLoeb Ax) ⊢ φ ➝ ψ} → {hφ : (WithLoeb Ax) ⊢ φ} → motive (φ ➝ ψ) hφψ → motive φ hφ → motive ψ (hφψ ⨀ hφ))
   (nec      : ∀ {φ}, {hφψ : (WithLoeb Ax) ⊢ φ} → motive (φ) hφψ → motive (□φ) (nec! hφψ))
   (loeb     : ∀ {φ}, {hφψ : (WithLoeb Ax) ⊢ □φ ➝ φ} → motive (□φ ➝ φ) hφψ → motive (φ) (loeb! hφψ))
-  (imply₁   : ∀ {φ ψ}, motive (Axioms.Imply₁ φ ψ) $ by simp)
-  (imply₂   : ∀ {φ ψ χ}, motive (Axioms.Imply₂ φ ψ χ) $ by simp)
+  (implyK   : ∀ {φ ψ}, motive (Axioms.ImplyK φ ψ) $ by simp)
+  (implyS   : ∀ {φ ψ χ}, motive (Axioms.ImplyS φ ψ χ) $ by simp)
   (ec       : ∀ {φ ψ}, motive (Axioms.ElimContra φ ψ) $ by simp)
   : ∀ {φ}, (d : WithLoeb Ax ⊢ φ) → motive φ d := by
   rintro φ d;
@@ -73,8 +73,8 @@ protected lemma rec!
     . exact ihφ (Logic.iff_provable.mpr hφ);
   | nec hφ ihφ => apply nec; exact ihφ (Logic.iff_provable.mpr hφ);
   | loeb hφψ ihφψ => apply loeb; exact ihφψ (Logic.iff_provable.mpr hφψ);
-  | imply₁ φ ψ => apply imply₁;
-  | imply₂ φ ψ χ => apply imply₂;
+  | implyK φ ψ => apply implyK;
+  | implyS φ ψ χ => apply implyS;
   | ec φ ψ => apply ec;
 
 lemma weakerThan_of_provable_axioms (hs : WithLoeb Ax₂ ⊢* Ax₁) : (WithLoeb Ax₁) ⪯ (WithLoeb Ax₂) := by

@@ -114,9 +114,9 @@ instance : Semantics.Bot (PLoN.Model) where
 
 variable {M : PLoN.Model}
 
-protected lemma imply₁ : M ⊧ (Axioms.Imply₁ φ ψ) := by simp [ValidOnModel]; tauto;
+protected lemma implyK : M ⊧ (Axioms.ImplyK φ ψ) := by simp [ValidOnModel]; tauto;
 
-protected lemma imply₂ : M ⊧ (Axioms.Imply₂ φ ψ χ) := by simp [ValidOnModel]; tauto;
+protected lemma implyS : M ⊧ (Axioms.ImplyS φ ψ χ) := by simp [ValidOnModel]; tauto;
 
 protected lemma elimContra : M ⊧ (Axioms.ElimContra φ ψ) := by simp [ValidOnModel]; tauto;
 
@@ -174,9 +174,9 @@ protected lemma mdp (hpq : F ⊧ φ ➝ ψ) (hp : F ⊧ φ) : F ⊧ ψ := by
   intro V x;
   exact (hpq V x) (hp V x);
 
-protected lemma imply₁ : F ⊧ (Axioms.Imply₁ φ ψ) := by simp [ValidOnFrame]; tauto;
+protected lemma implyK : F ⊧ (Axioms.ImplyK φ ψ) := by simp [ValidOnFrame]; tauto;
 
-protected lemma imply₂ : F ⊧ (Axioms.Imply₂ φ ψ χ) := by simp [ValidOnFrame]; tauto;
+protected lemma implyS : F ⊧ (Axioms.ImplyS φ ψ χ) := by simp [ValidOnFrame]; tauto;
 
 protected lemma elimContra : F ⊧ (Axioms.ElimContra φ ψ) := by intro V; exact ValidOnModel.elimContra;
 
@@ -203,9 +203,9 @@ protected lemma mdp (hpq : C ⊧ φ ➝ ψ) (hp : C ⊧ φ) : C ⊧ ψ := by
   intro _ hF;
   exact PLoN.ValidOnFrame.mdp (hpq hF) (hp hF)
 
-protected lemma imply₁ : C ⊧ (Axioms.Imply₁ φ ψ) := by intro _ _; exact PLoN.ValidOnFrame.imply₁;
+protected lemma implyK : C ⊧ (Axioms.ImplyK φ ψ) := by intro _ _; exact PLoN.ValidOnFrame.implyK;
 
-protected lemma imply₂ : C ⊧ (Axioms.Imply₂ φ ψ χ) := by intro _ _; exact PLoN.ValidOnFrame.imply₂;
+protected lemma implyS : C ⊧ (Axioms.ImplyS φ ψ χ) := by intro _ _; exact PLoN.ValidOnFrame.implyS;
 
 protected lemma elimContra : C ⊧ (Axioms.ElimContra φ ψ) := by intro _ _; exact PLoN.ValidOnFrame.elimContra;
 

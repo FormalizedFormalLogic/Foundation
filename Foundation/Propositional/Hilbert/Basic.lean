@@ -49,8 +49,8 @@ instance : Entailment.ModusPonens (Hilbert Ax) where
     . exact h₁.1;
     . exact h₂.1;
 
-instance : Entailment.HasAxiomImply₁ (Hilbert Ax) := ⟨λ _ _ => by constructor; apply Hilbert.implyS⟩
-instance : Entailment.HasAxiomImply₂ (Hilbert Ax) := ⟨λ _ _ _ => by constructor; apply Hilbert.implyK⟩
+instance : Entailment.HasAxiomImplyK (Hilbert Ax) := ⟨λ _ _ => by constructor; apply Hilbert.implyS⟩
+instance : Entailment.HasAxiomImplyS (Hilbert Ax) := ⟨λ _ _ _ => by constructor; apply Hilbert.implyK⟩
 instance : Entailment.HasAxiomAndInst (Hilbert Ax) := ⟨λ _ _ => by constructor; apply Hilbert.andIntro⟩
 instance : Entailment.Minimal (Hilbert Ax) where
   verum := by constructor; apply Hilbert.verum;
@@ -66,8 +66,8 @@ protected lemma rec!
   (axm      : ∀ {φ : Formula α} (s), (h : φ ∈ Ax) → motive (φ⟦s⟧) (by grind))
   (mdp      : ∀ {φ ψ : Formula α}, {hpq : (Hilbert Ax) ⊢ φ ➝ ψ} → {hp : (Hilbert Ax) ⊢ φ} → (motive (φ ➝ ψ) hpq) → (motive φ hp) → (motive ψ (hpq ⨀ hp)))
   (verum    : motive ⊤ $ by simp)
-  (implyS   : ∀ {φ ψ},   motive (Axioms.Imply₁ φ ψ) $ by simp)
-  (implyK   : ∀ {φ ψ χ}, motive (Axioms.Imply₂ φ ψ χ) $ by simp)
+  (implyS   : ∀ {φ ψ},   motive (Axioms.ImplyK φ ψ) $ by simp)
+  (implyK   : ∀ {φ ψ χ}, motive (Axioms.ImplyS φ ψ χ) $ by simp)
   (andElimL : ∀ {φ ψ},   motive (φ ⋏ ψ ➝ φ) $ by simp)
   (andElimR : ∀ {φ ψ},   motive (φ ⋏ ψ ➝ ψ) $ by simp)
   (andIntro : ∀ {φ ψ},   motive (φ ➝ ψ ➝ φ ⋏ ψ) $ by simp)
@@ -130,12 +130,12 @@ instance [Ax.HasLEM] : Entailment.HasAxiomLEM (Hilbert Ax) where
       (φ := Axioms.LEM (.atom (HasLEM.p Ax)))
       $ HasLEM.mem_lem;
 
-instance [Ax.HasWLEM] : Entailment.HasAxiomWeakLEM (Hilbert Ax) where
+instance [Ax.HasWLEM] : Entailment.HasAxiomWLEM (Hilbert Ax) where
   wlem φ := by
     constructor;
     simpa using Hilbert.axm
       (s := λ b => if (HasWLEM.p Ax) = b then φ else (.atom b))
-      (φ := Axioms.WeakLEM (.atom (HasWLEM.p Ax)))
+      (φ := Axioms.WLEM (.atom (HasWLEM.p Ax)))
       $ HasWLEM.mem_lem;
 
 instance [Ax.HasDummett] : Entailment.HasAxiomDummett (Hilbert Ax) where
@@ -194,7 +194,7 @@ protected abbrev Cl := Hilbert Cl.axioms
 instance : Entailment.Cl Propositional.Cl where
 
 
-protected abbrev KC.axioms : Axiom ℕ := {Axioms.EFQ (.atom 0), Axioms.WeakLEM (.atom 0)}
+protected abbrev KC.axioms : Axiom ℕ := {Axioms.EFQ (.atom 0), Axioms.WLEM (.atom 0)}
 namespace KC.axioms
 instance : KC.axioms.HasEFQ where p := 0;
 instance : KC.axioms.HasWLEM where p := 0;

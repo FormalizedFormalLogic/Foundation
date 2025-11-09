@@ -11,8 +11,8 @@ inductive Hilbert.WithHenkin {α} (Ax : Axiom α) : Logic α
 | mdp {φ ψ}     : WithHenkin Ax (φ ➝ ψ) → WithHenkin Ax φ → WithHenkin Ax ψ
 | nec {φ}       : WithHenkin Ax φ → WithHenkin Ax (□φ)
 | henkin {φ}    : WithHenkin Ax (□φ ⭤ φ) → WithHenkin Ax φ
-| imply₁ φ ψ    : WithHenkin Ax $ Axioms.Imply₁ φ ψ
-| imply₂ φ ψ χ  : WithHenkin Ax $ Axioms.Imply₂ φ ψ χ
+| implyK φ ψ    : WithHenkin Ax $ Axioms.ImplyK φ ψ
+| implyS φ ψ χ  : WithHenkin Ax $ Axioms.ImplyS φ ψ χ
 | ec φ ψ        : WithHenkin Ax $ Axioms.ElimContra φ ψ
 
 namespace Hilbert.WithHenkin
@@ -26,8 +26,8 @@ variable {Ax Ax₁ Ax₂ : Axiom α}
 @[grind] lemma axm'! {φ} (h : φ ∈ Ax) : WithHenkin Ax ⊢ φ := by simpa using axm! .id h;
 
 instance : Entailment.Lukasiewicz (Hilbert.WithHenkin Ax) where
-  imply₁ _ _ := by constructor; apply Hilbert.WithHenkin.imply₁;
-  imply₂ _ _ _ := by constructor; apply Hilbert.WithHenkin.imply₂;
+  implyK _ _ := by constructor; apply Hilbert.WithHenkin.implyK;
+  implyS _ _ _ := by constructor; apply Hilbert.WithHenkin.implyS;
   elimContra _ _ := by constructor; apply Hilbert.WithHenkin.ec;
   mdp h₁ h₂ := by
     constructor;
@@ -49,8 +49,8 @@ instance : Logic.Substitution (Hilbert.WithHenkin Ax) where
     | mdp hφψ hφ ihφψ ihφ => apply mdp ihφψ ihφ;
     | nec hφ ihφ => apply nec ihφ;
     | henkin hφψ ihφψ => apply henkin ihφψ;
-    | imply₁ φ ψ => apply imply₁;
-    | imply₂ φ ψ χ => apply imply₂;
+    | implyK φ ψ => apply implyK;
+    | implyS φ ψ χ => apply implyS;
     | ec φ ψ => apply ec;
 
 protected lemma rec!
@@ -59,8 +59,8 @@ protected lemma rec!
   (mdp      : ∀ {φ ψ : Formula α}, {hφψ : (WithHenkin Ax) ⊢ φ ➝ ψ} → {hφ : (WithHenkin Ax) ⊢ φ} → motive (φ ➝ ψ) hφψ → motive φ hφ → motive ψ (hφψ ⨀ hφ))
   (nec      : ∀ {φ}, {hφψ : (WithHenkin Ax) ⊢ φ} → motive (φ) hφψ → motive (□φ) (nec! hφψ))
   (henkin   : ∀ {φ}, {hφψ : (WithHenkin Ax) ⊢ □φ ⭤ φ} → motive (□φ ⭤ φ) hφψ → motive (φ) (henkin! hφψ))
-  (imply₁   : ∀ {φ ψ}, motive (Axioms.Imply₁ φ ψ) $ by simp)
-  (imply₂   : ∀ {φ ψ χ}, motive (Axioms.Imply₂ φ ψ χ) $ by simp)
+  (implyK   : ∀ {φ ψ}, motive (Axioms.ImplyK φ ψ) $ by simp)
+  (implyS   : ∀ {φ ψ χ}, motive (Axioms.ImplyS φ ψ χ) $ by simp)
   (ec       : ∀ {φ ψ}, motive (Axioms.ElimContra φ ψ) $ by simp)
   : ∀ {φ}, (d : WithHenkin Ax ⊢ φ) → motive φ d := by
   rintro φ d;
@@ -73,8 +73,8 @@ protected lemma rec!
     . exact ihφ (Logic.iff_provable.mpr hφ);
   | nec hφ ihφ => apply nec; exact ihφ (Logic.iff_provable.mpr hφ);
   | henkin hφψ ihφψ => apply henkin; exact ihφψ (Logic.iff_provable.mpr hφψ);
-  | imply₁ φ ψ => apply imply₁;
-  | imply₂ φ ψ χ => apply imply₂;
+  | implyK φ ψ => apply implyK;
+  | implyS φ ψ χ => apply implyS;
   | ec φ ψ => apply ec;
 
 lemma weakerThan_of_provable_axioms (hs : WithHenkin Ax₂ ⊢* Ax₁) : (WithHenkin Ax₁) ⪯ (WithHenkin Ax₂) := by

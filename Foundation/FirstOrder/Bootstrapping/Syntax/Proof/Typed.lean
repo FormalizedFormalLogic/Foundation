@@ -327,14 +327,14 @@ noncomputable instance : Entailment.NegationEquiv T where
 
 noncomputable instance : Entailment.Minimal T where
   verum := TDerivation.toTProof <| TDerivation.verum
-  imply₁ (φ ψ) := by
-    simp only [Axioms.Imply₁, Semiformula.imp_def]
+  implyK (φ ψ) := by
+    simp only [Axioms.ImplyK, Semiformula.imp_def]
     apply TDerivation.or
     apply TDerivation.rotate₁
     apply TDerivation.or
     exact TDerivation.em φ
-  imply₂ (φ ψ r) := by
-    simp only [Axioms.Imply₂, Semiformula.imp_def, DeMorgan.or, DeMorgan.neg]
+  implyS (φ ψ r) := by
+    simp only [Axioms.ImplyS, Semiformula.imp_def, DeMorgan.or, DeMorgan.neg]
     apply TDerivation.or
     apply TDerivation.rotate₁
     apply TDerivation.or

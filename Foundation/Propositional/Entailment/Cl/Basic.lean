@@ -1,76 +1,30 @@
+import Foundation.Propositional.Entailment.AxiomDNE
+import Foundation.Propositional.Entailment.AxiomElimContra
+import Foundation.Propositional.Entailment.AxiomLEM
 import Foundation.Propositional.Entailment.Int.Basic
-
-namespace LO.Axioms
-
-variable {F : Type*} [LogicalConnective F]
-variable (φ ψ χ : F)
-
-protected abbrev DNE := ∼∼φ ➝ φ
-
-protected abbrev ElimContra := (∼ψ ➝ ∼φ) ➝ (φ ➝ ψ)
-
-end LO.Axioms
-
+import Foundation.Propositional.Entailment.LC
+import Foundation.Propositional.Entailment.AxiomPeirce
 
 namespace LO.Entailment
 
-variable {S F : Type*} [LogicalConnective F] [Entailment S F]
-variable {𝓢 : S} {φ ψ χ : F}
-
-class HasAxiomDNE (𝓢 : S)  where
-  dne {φ : F} : 𝓢 ⊢! Axioms.DNE φ
-export HasAxiomDNE (dne)
-
-@[simp] lemma dne! [HasAxiomDNE 𝓢] : 𝓢 ⊢ ∼∼φ ➝ φ  := ⟨dne⟩
-
-def of_NN [ModusPonens 𝓢] [HasAxiomDNE 𝓢] (b : 𝓢 ⊢! ∼∼φ) : 𝓢 ⊢! φ := dne ⨀ b
-lemma of_NN! [ModusPonens 𝓢] [HasAxiomDNE 𝓢] (h : 𝓢 ⊢ ∼∼φ) : 𝓢 ⊢ φ := ⟨of_NN h.some⟩
-
-
-class HasAxiomElimContra (𝓢 : S)  where
-  elimContra {φ ψ : F} : 𝓢 ⊢! Axioms.ElimContra φ ψ
-export HasAxiomElimContra (elimContra)
-
-@[simp] lemma elim_contra! [HasAxiomElimContra 𝓢] : 𝓢 ⊢ (∼ψ ➝ ∼φ) ➝ (φ ➝ ψ)  := ⟨elimContra⟩
-
+variable {F : Type*} [LogicalConnective F] [DecidableEq F]
+         {S : Type*} [Entailment S F]
+         {𝓢 : S}
+         {φ φ₁ φ₂ ψ ψ₁ ψ₂ χ ξ : F}
+         {Γ Δ : List F}
 
 protected class Cl (𝓢 : S) extends Entailment.Minimal 𝓢, Entailment.HasAxiomDNE 𝓢
 
-
-section
-
-variable [LogicalConnective F] [Entailment S F] [Entailment.Minimal 𝓢]
+variable [Entailment.Cl 𝓢]
 
 namespace FiniteContext
-
-variable {Γ Δ E : List F}
-
-instance [Entailment.HasAxiomDNE 𝓢] (Γ : FiniteContext F 𝓢) : HasAxiomDNE Γ := ⟨of dne⟩
-
-instance [Entailment.Cl 𝓢] (Γ : FiniteContext F 𝓢) : Entailment.Cl Γ where
-
+instance (Γ : FiniteContext F 𝓢) : Entailment.Cl Γ where
 end FiniteContext
 
-
 namespace Context
-
-instance [Entailment.HasAxiomDNE 𝓢] (Γ : Context F 𝓢) : HasAxiomDNE Γ := ⟨of dne⟩
-
-instance [DecidableEq F] [Entailment.Cl 𝓢] (Γ : Context F 𝓢) : Entailment.Cl Γ where
-
+instance (Γ : Context F 𝓢) : Entailment.Cl Γ where
 end Context
 
-end
-
-
-
-section
-
-variable {F : Type*} [LogicalConnective F] [DecidableEq F]
-         {S : Type*} [Entailment S F]
-         {𝓢 : S} [Entailment.Cl 𝓢]
-         {φ φ₁ φ₂ ψ ψ₁ ψ₂ χ ξ : F}
-         {Γ Δ : List F}
 
 open NegationEquiv
 open FiniteContext
@@ -91,12 +45,6 @@ def CCNCN' : 𝓢 ⊢! (∼φ ➝ ψ) ➝ (∼ψ ➝ φ) := deduct' $ CN_of_CN_l
 
 def C_of_CNN (b : 𝓢 ⊢! ∼φ ➝ ∼ψ) : 𝓢 ⊢! ψ ➝ φ := C_trans dni (CN_of_CN_left b)
 lemma C!_of_CNN! (b : 𝓢 ⊢ ∼φ ➝ ∼ψ) : 𝓢 ⊢ ψ ➝ φ := ⟨C_of_CNN b.some⟩
-
-instance : HasAxiomElimContra 𝓢 where
-  elimContra {φ ψ} := by
-    apply deduct';
-    have : [∼ψ ➝ ∼φ] ⊢[𝓢]! ∼ψ ➝ ∼φ := FiniteContext.byAxm;
-    exact C_of_CNN this;
 
 
 def CCNNC : 𝓢 ⊢! (∼φ ➝ ∼ψ) ➝ (ψ ➝ φ) :=  deduct' $ C_of_CNN FiniteContext.id
@@ -140,13 +88,22 @@ def CCAN : 𝓢 ⊢! (φ ➝ ψ) ➝ (∼φ ⋎ ψ) := by
   exact FiniteContext.byAxm;
 lemma CCAN! : 𝓢 ⊢ (φ ➝ ψ) ➝ ∼φ ⋎ ψ := ⟨CCAN⟩
 
+
 instance : HasAxiomEFQ 𝓢 where
   efq {φ} := by
     apply C_of_CNN;
-    exact C_trans (K_left negEquiv) $ C_trans (C_swap imply₁) (K_right negEquiv);
+    exact C_trans (K_left negEquiv) $ C_trans (C_swap implyK) (K_right negEquiv);
 
-instance : Entailment.Cl 𝓢 where
-instance Cl.toInt (𝓢 : S) [Entailment.Cl 𝓢] : Entailment.Int 𝓢 where
+instance : Entailment.Int 𝓢 where
+
+
+instance : HasAxiomElimContra 𝓢 where
+  elimContra {φ ψ} := by
+    apply deduct';
+    have : [∼ψ ➝ ∼φ] ⊢[𝓢]! ∼ψ ➝ ∼φ := FiniteContext.byAxm;
+    exact C_of_CNN this;
+
+instance : HasAxiomLEM 𝓢 := ⟨A_of_ANNNN $ AN_of_C dni⟩
 
 
 lemma not_imply_prem''! (hpq : 𝓢 ⊢ φ ➝ ψ) (hpnr : 𝓢 ⊢ φ ➝ ∼ξ) : 𝓢 ⊢ φ ➝ ∼(ψ ➝ ξ) :=
@@ -156,7 +113,7 @@ def ofAOfN (b : 𝓢 ⊢! φ ⋎ ψ) (d : 𝓢 ⊢! ∼φ) : 𝓢 ⊢! ψ := A_c
 
 def of_a!_of_n! (b : 𝓢 ⊢ φ ⋎ ψ) (d : 𝓢 ⊢ ∼φ) : 𝓢 ⊢ ψ := ⟨ofAOfN b.get d.get⟩
 
-def ECAN : 𝓢 ⊢! (φ ➝ ψ) ⭤ (∼φ ⋎ ψ) := E_intro CCAN (deduct' (A_cases CNC imply₁ byAxm₀))
+def ECAN : 𝓢 ⊢! (φ ➝ ψ) ⭤ (∼φ ⋎ ψ) := E_intro CCAN (deduct' (A_cases CNC implyK byAxm₀))
 def ECAN! : 𝓢 ⊢ (φ ➝ ψ) ⭤ (∼φ ⋎ ψ) := ⟨ECAN⟩
 
 
@@ -210,7 +167,27 @@ lemma provable_iff_inconsistent_adjoin {φ : F} :
 
 end consistency
 
-end
 
+section
+
+instance : HasAxiomDummett 𝓢 where
+  dummett {φ ψ} := by
+    have d₁ : 𝓢 ⊢! φ ➝ ((φ ➝ ψ) ⋎ (ψ ➝ φ)) := C_trans implyK or₂;
+    have d₂ : 𝓢 ⊢! ∼φ ➝ ((φ ➝ ψ) ⋎ (ψ ➝ φ)) := C_trans CNC or₁;
+    exact of_C_of_C_of_A d₁ d₂ lem;
+instance : Entailment.LC 𝓢 where
+
+instance : HasAxiomPeirce 𝓢 where
+  peirce {φ ψ} := by
+    apply of_C_of_C_of_A implyK ?_ lem;
+    apply deduct';
+    apply deduct;
+    refine (FiniteContext.byAxm (φ := (φ ➝ ψ) ➝ φ)) ⨀ ?_;
+    apply deduct;
+    apply efq_of_mem_either (φ := φ);
+    . simp;
+    . simp;
+
+end
 
 end LO.Entailment

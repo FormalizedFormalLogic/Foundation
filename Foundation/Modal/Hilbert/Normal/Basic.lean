@@ -15,8 +15,8 @@ inductive Hilbert.Normal {α} (Ax : Axiom α) : Logic α
 | axm {φ} (s : Substitution _) : φ ∈ Ax → Normal Ax (φ⟦s⟧)
 | mdp {φ ψ}     : Normal Ax (φ ➝ ψ) → Normal Ax φ → Normal Ax ψ
 | nec {φ}       : Normal Ax φ → Normal Ax (□φ)
-| imply₁ φ ψ    : Normal Ax $ Axioms.Imply₁ φ ψ
-| imply₂ φ ψ χ  : Normal Ax $ Axioms.Imply₂ φ ψ χ
+| implyK φ ψ    : Normal Ax $ Axioms.ImplyK φ ψ
+| implyS φ ψ χ  : Normal Ax $ Axioms.ImplyS φ ψ χ
 | ec φ ψ        : Normal Ax $ Axioms.ElimContra φ ψ
 
 namespace Hilbert.Normal
@@ -30,8 +30,8 @@ variable {Ax Ax₁ Ax₂ : Axiom α}
 @[grind] lemma axm'! {φ} (h : φ ∈ Ax) : Normal Ax ⊢ φ := by simpa using axm! .id h;
 
 instance : Entailment.Lukasiewicz (Hilbert.Normal Ax) where
-  imply₁ _ _ := by constructor; apply Hilbert.Normal.imply₁;
-  imply₂ _ _ _ := by constructor; apply Hilbert.Normal.imply₂;
+  implyK _ _ := by constructor; apply Hilbert.Normal.implyK;
+  implyS _ _ _ := by constructor; apply Hilbert.Normal.implyS;
   elimContra _ _ := by constructor; apply Hilbert.Normal.ec;
   mdp h₁ h₂ := by
     constructor;
@@ -49,8 +49,8 @@ instance : Logic.Substitution (Hilbert.Normal Ax) where
     | @axm _ s' ih => simpa using axm (s := s' ∘ s) ih;
     | mdp hφψ hφ ihφψ ihφ => apply mdp ihφψ ihφ;
     | nec hφ ihφ => apply nec ihφ;
-    | imply₁ φ ψ => apply imply₁;
-    | imply₂ φ ψ χ => apply imply₂;
+    | implyK φ ψ => apply implyK;
+    | implyS φ ψ χ => apply implyS;
     | ec φ ψ => apply ec;
 
 protected lemma rec!
@@ -58,8 +58,8 @@ protected lemma rec!
   (axm      : ∀ {φ : Formula α} (s), (h : φ ∈ Ax) → motive (φ⟦s⟧) (by grind))
   (mdp      : ∀ {φ ψ : Formula α}, {hφψ : (Normal Ax) ⊢ φ ➝ ψ} → {hφ : (Normal Ax) ⊢ φ} → motive (φ ➝ ψ) hφψ → motive φ hφ → motive ψ (hφψ ⨀ hφ))
   (nec      : ∀ {φ}, {hφψ : (Normal Ax) ⊢ φ} → motive (φ) hφψ → motive (□φ) (nec! hφψ))
-  (imply₁   : ∀ {φ ψ}, motive (Axioms.Imply₁ φ ψ) $ by simp)
-  (imply₂   : ∀ {φ ψ χ}, motive (Axioms.Imply₂ φ ψ χ) $ by simp)
+  (implyK   : ∀ {φ ψ}, motive (Axioms.ImplyK φ ψ) $ by simp)
+  (implyS   : ∀ {φ ψ χ}, motive (Axioms.ImplyS φ ψ χ) $ by simp)
   (ec       : ∀ {φ ψ}, motive (Axioms.ElimContra φ ψ) $ by simp)
   : ∀ {φ}, (d : Normal Ax ⊢ φ) → motive φ d := by
   rintro φ d;
@@ -71,8 +71,8 @@ protected lemma rec!
     . exact ihφψ (Logic.iff_provable.mpr hφψ);
     . exact ihφ (Logic.iff_provable.mpr hφ);
   | nec hφ ihφ => apply nec; exact ihφ (Logic.iff_provable.mpr hφ);
-  | imply₁ φ ψ => apply imply₁;
-  | imply₂ φ ψ χ => apply imply₂;
+  | implyK φ ψ => apply implyK;
+  | implyS φ ψ χ => apply implyS;
   | ec φ ψ => apply ec;
 
 lemma weakerThan_of_provable_axioms (hs : Normal Ax₂ ⊢* Ax₁) : (Normal Ax₁) ⪯ (Normal Ax₂) := by
@@ -311,7 +311,7 @@ instance {L : Logic ℕ} [L.IsNormal] : Modal.K ⪯ L := by
   | axm s h => rcases h with rfl; simp;
   | nec hφ => apply nec! hφ;
   | mdp hφψ hφ => exact mdp! hφψ hφ
-  | imply₁ | imply₂ | ec => simp;
+  | implyK | implyS | ec => simp;
 
 protected abbrev KT.axioms : Axiom ℕ := {Axioms.K (.atom 0) (.atom 1), Axioms.T (.atom 0)}
 namespace KT.axioms

@@ -422,9 +422,9 @@ lemma multinec (n) (h : M ⊧ φ) : M ⊧ □^[n]φ := by
   | zero => tauto;
   | succ n ih => simpa using ValidOnModel.nec ih;
 
-protected lemma imply₁ : M ⊧ (Axioms.Imply₁ φ ψ) := by simp [ValidOnModel]; tauto;
+protected lemma implyK : M ⊧ (Axioms.ImplyK φ ψ) := by simp [ValidOnModel]; tauto;
 
-protected lemma imply₂ : M ⊧ (Axioms.Imply₂ φ ψ χ) := by simp [ValidOnModel]; tauto;
+protected lemma implyS : M ⊧ (Axioms.ImplyS φ ψ χ) := by simp [ValidOnModel]; tauto;
 
 protected lemma elimContra : M ⊧ (Axioms.ElimContra φ ψ) := by simp [ValidOnModel]; tauto;
 
@@ -500,9 +500,9 @@ protected lemma subst (h : F ⊧ φ) : F ⊧ φ⟦s⟧ := by
   apply Satisfies.iff_subst_self s |>.not.mpr hx;
   exact h (λ w a => Satisfies ⟨F, V⟩ w (atom a⟦s⟧)) x;
 
-protected lemma imply₁ : F ⊧ (Axioms.Imply₁ φ ψ) := by intro V; exact ValidOnModel.imply₁ (M := ⟨F, V⟩);
+protected lemma implyK : F ⊧ (Axioms.ImplyK φ ψ) := by intro V; exact ValidOnModel.implyK (M := ⟨F, V⟩);
 
-protected lemma imply₂ : F ⊧ (Axioms.Imply₂ φ ψ χ) := by intro V; exact ValidOnModel.imply₂ (M := ⟨F, V⟩);
+protected lemma implyS : F ⊧ (Axioms.ImplyS φ ψ χ) := by intro V; exact ValidOnModel.implyS (M := ⟨F, V⟩);
 
 protected lemma elimContra : F ⊧ (Axioms.ElimContra φ ψ) := by intro V; exact ValidOnModel.elimContra (M := ⟨F, V⟩);
 

@@ -17,8 +17,8 @@ inductive Hilbert.WithRE {α} (Ax : Axiom α) : Logic α
 | axm {φ} (s : Substitution _) : φ ∈ Ax → WithRE Ax (φ⟦s⟧)
 | mdp {φ ψ}     : WithRE Ax (φ ➝ ψ) → WithRE Ax φ → WithRE Ax ψ
 | re {φ ψ}      : WithRE Ax (φ ⭤ ψ) → WithRE Ax (□φ ⭤ □ψ)
-| imply₁ φ ψ    : WithRE Ax $ Axioms.Imply₁ φ ψ
-| imply₂ φ ψ χ  : WithRE Ax $ Axioms.Imply₂ φ ψ χ
+| implyK φ ψ    : WithRE Ax $ Axioms.ImplyK φ ψ
+| implyS φ ψ χ  : WithRE Ax $ Axioms.ImplyS φ ψ χ
 | ec φ ψ        : WithRE Ax $ Axioms.ElimContra φ ψ
 
 namespace Hilbert.WithRE
@@ -32,8 +32,8 @@ variable {Ax Ax₁ Ax₂ : Axiom α}
 @[grind] lemma axm'! {φ} (h : φ ∈ Ax) : WithRE Ax ⊢ φ := by simpa using axm! .id h;
 
 instance : Entailment.Lukasiewicz (Hilbert.WithRE Ax) where
-  imply₁ _ _ := by constructor; apply Hilbert.WithRE.imply₁;
-  imply₂ _ _ _ := by constructor; apply Hilbert.WithRE.imply₂;
+  implyK _ _ := by constructor; apply Hilbert.WithRE.implyK;
+  implyS _ _ _ := by constructor; apply Hilbert.WithRE.implyS;
   elimContra _ _ := by constructor; apply Hilbert.WithRE.ec;
   mdp h₁ h₂ := by
     constructor;
@@ -51,8 +51,8 @@ instance : Logic.Substitution (Hilbert.WithRE Ax) where
     | @axm _ s' ih => simpa using axm (s := s' ∘ s) ih;
     | mdp hφψ hφ ihφψ ihφ => apply mdp ihφψ ihφ;
     | re hφψ ihφψ => apply re; assumption;
-    | imply₁ φ ψ => apply imply₁;
-    | imply₂ φ ψ χ => apply imply₂;
+    | implyK φ ψ => apply implyK;
+    | implyS φ ψ χ => apply implyS;
     | ec φ ψ => apply ec;
 
 protected lemma rec!
@@ -60,8 +60,8 @@ protected lemma rec!
   (axm      : ∀ {φ : Formula α} (s), (h : φ ∈ Ax) → motive (φ⟦s⟧) (by grind))
   (mdp      : ∀ {φ ψ : Formula α}, {hφψ : (WithRE Ax) ⊢ φ ➝ ψ} → {hφ : (WithRE Ax) ⊢ φ} → motive (φ ➝ ψ) hφψ → motive φ hφ → motive ψ (hφψ ⨀ hφ))
   (re       : ∀ {φ ψ}, {hφψ : (WithRE Ax) ⊢ φ ⭤ ψ} → motive (φ ⭤ ψ) hφψ → motive (□φ ⭤ □ψ) (re! hφψ))
-  (imply₁   : ∀ {φ ψ}, motive (Axioms.Imply₁ φ ψ) $ by simp)
-  (imply₂   : ∀ {φ ψ χ}, motive (Axioms.Imply₂ φ ψ χ) $ by simp)
+  (implyK   : ∀ {φ ψ}, motive (Axioms.ImplyK φ ψ) $ by simp)
+  (implyS   : ∀ {φ ψ χ}, motive (Axioms.ImplyS φ ψ χ) $ by simp)
   (ec       : ∀ {φ ψ}, motive (Axioms.ElimContra φ ψ) $ by simp)
   : ∀ {φ}, (d : WithRE Ax ⊢ φ) → motive φ d := by
   rintro φ d;
@@ -75,8 +75,8 @@ protected lemma rec!
   | re hφψ ihφψ =>
     apply re;
     . exact ihφψ (Logic.iff_provable.mpr hφψ);
-  | imply₁ φ ψ => apply imply₁;
-  | imply₂ φ ψ χ => apply imply₂;
+  | implyK φ ψ => apply implyK;
+  | implyS φ ψ χ => apply implyS;
   | ec φ ψ => apply ec;
 
 lemma weakerThan_of_provable_axioms (hs : WithRE Ax₂ ⊢* Ax₁) : (WithRE Ax₁) ⪯ (WithRE Ax₂) := by

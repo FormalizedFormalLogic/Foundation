@@ -21,8 +21,8 @@ protected inductive Hilbert.Minimal {α} (Ax : Axiom α) : Logic α
 | protected nec {φ}       : Hilbert.Minimal Ax φ → Hilbert.Minimal Ax (□φ)
 | protected R1 {φ ψ χ}    : Hilbert.Minimal Ax (φ ➝ ψ) → Hilbert.Minimal Ax (χ ▷ φ ➝ χ ▷ ψ)
 | protected R2 {φ ψ χ}    : Hilbert.Minimal Ax (φ ➝ ψ) → Hilbert.Minimal Ax (ψ ▷ χ ➝ φ ▷ χ)
-| protected imply₁ φ ψ    : Hilbert.Minimal Ax $ Axioms.Imply₁ φ ψ
-| protected imply₂ φ ψ χ  : Hilbert.Minimal Ax $ Axioms.Imply₂ φ ψ χ
+| protected implyK φ ψ    : Hilbert.Minimal Ax $ Axioms.ImplyK φ ψ
+| protected implyS φ ψ χ  : Hilbert.Minimal Ax $ Axioms.ImplyS φ ψ χ
 | protected ec φ ψ        : Hilbert.Minimal Ax $ Axioms.ElimContra φ ψ
 | protected axiomK φ ψ    : Hilbert.Minimal Ax $ Modal.Axioms.K φ ψ
 | protected axiomL φ      : Hilbert.Minimal Ax $ Modal.Axioms.L φ
@@ -40,8 +40,8 @@ lemma axm! {φ} (s : Substitution _) (h : φ ∈ Ax) : Hilbert.Minimal Ax ⊢ φ
 lemma axm'! {φ} (h : φ ∈ Ax) : Hilbert.Minimal Ax ⊢ φ := by simpa using axm! (idSubstitution _) h;
 
 instance : Entailment.Lukasiewicz (Hilbert.Minimal Ax) where
-  imply₁ _ _ := by constructor; apply Hilbert.Minimal.imply₁;
-  imply₂ _ _ _ := by constructor; apply Hilbert.Minimal.imply₂;
+  implyK _ _ := by constructor; apply Hilbert.Minimal.implyK;
+  implyS _ _ _ := by constructor; apply Hilbert.Minimal.implyS;
   elimContra _ _ := by constructor; apply Hilbert.Minimal.ec;
   mdp h₁ h₂ := by
     constructor;
@@ -75,8 +75,8 @@ instance : Logic.Substitution (Hilbert.Minimal Ax) where
     | nec hφ ihφ          => apply Minimal.nec ihφ;
     | R1 hφψ ihφψ         => apply Minimal.R1 ihφψ;
     | R2 hφψ ihφψ         => apply Minimal.R2 ihφψ;
-    | imply₁ φ ψ          => apply Minimal.imply₁;
-    | imply₂ φ ψ χ        => apply Minimal.imply₂;
+    | implyK φ ψ          => apply Minimal.implyK;
+    | implyS φ ψ χ        => apply Minimal.implyS;
     | ec φ ψ              => apply Minimal.ec;
     | axiomK φ ψ          => apply Minimal.axiomK;
     | axiomL φ            => apply Minimal.axiomL;
@@ -88,8 +88,8 @@ protected lemma rec!
   (nec      : ∀ {φ}, {hφψ : (Hilbert.Minimal Ax) ⊢ φ} → motive (φ) hφψ → motive (□φ) (nec! hφψ))
   (R1       : ∀ {φ ψ χ}, {hφψ : (Hilbert.Minimal Ax) ⊢ φ ➝ ψ} → motive (φ ➝ ψ) hφψ → motive (χ ▷ φ ➝ χ ▷ ψ) (by grind))
   (R2       : ∀ {φ ψ χ}, {hφψ : (Hilbert.Minimal Ax) ⊢ φ ➝ ψ} → motive (φ ➝ ψ) hφψ → motive (ψ ▷ χ ➝ φ ▷ χ) (by grind))
-  (imply₁   : ∀ {φ ψ}, motive (Axioms.Imply₁ φ ψ) $ by simp)
-  (imply₂   : ∀ {φ ψ χ}, motive (Axioms.Imply₂ φ ψ χ) $ by simp)
+  (implyK   : ∀ {φ ψ}, motive (Axioms.ImplyK φ ψ) $ by simp)
+  (implyS   : ∀ {φ ψ χ}, motive (Axioms.ImplyS φ ψ χ) $ by simp)
   (ec       : ∀ {φ ψ}, motive (Axioms.ElimContra φ ψ) $ by simp)
   (axiomK   : ∀ {φ ψ}, motive (Modal.Axioms.K φ ψ) $ by simp)
   (axiomL   : ∀ {φ}, motive (Modal.Axioms.L φ) $ by simp)

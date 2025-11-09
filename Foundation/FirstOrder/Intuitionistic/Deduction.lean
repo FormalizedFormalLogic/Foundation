@@ -46,8 +46,8 @@ inductive HilbertProofᵢ (Λ : Hilbertᵢ L) : SyntacticFormulaᵢ L → Type _
   | mdp {φ ψ}    : HilbertProofᵢ Λ (φ ➝ ψ) → HilbertProofᵢ Λ φ → HilbertProofᵢ Λ ψ
   | gen {φ}      : HilbertProofᵢ Λ (Rewriting.free φ) → HilbertProofᵢ Λ (∀' φ)
   | verum        : HilbertProofᵢ Λ ⊤
-  | imply₁ φ ψ   : HilbertProofᵢ Λ <| φ ➝ ψ ➝ φ
-  | imply₂ φ ψ χ : HilbertProofᵢ Λ <| (φ ➝ ψ ➝ χ) ➝ (φ ➝ ψ) ➝ φ ➝ χ
+  | implyK φ ψ   : HilbertProofᵢ Λ <| φ ➝ ψ ➝ φ
+  | implyS φ ψ χ : HilbertProofᵢ Λ <| (φ ➝ ψ ➝ χ) ➝ (φ ➝ ψ) ➝ φ ➝ χ
   | and₁ φ ψ     : HilbertProofᵢ Λ <| φ ⋏ ψ ➝ φ
   | and₂ φ ψ     : HilbertProofᵢ Λ <| φ ⋏ ψ ➝ ψ
   | and₃ φ ψ     : HilbertProofᵢ Λ <| φ ➝ ψ ➝ φ ⋏ ψ
@@ -71,15 +71,15 @@ instance : Entailment.ModusPonens Λ := ⟨mdp⟩
 
 instance : Entailment.HasAxiomAndInst Λ := ⟨and₃⟩
 
-instance : Entailment.HasAxiomImply₁ Λ := ⟨imply₁⟩
+instance : Entailment.HasAxiomImplyK Λ := ⟨implyK⟩
 
-instance : Entailment.HasAxiomImply₂ Λ := ⟨imply₂⟩
+instance : Entailment.HasAxiomImplyS Λ := ⟨implyS⟩
 
 instance : Entailment.Minimal Λ where
   mdp := mdp
   verum := verum
-  imply₁ := imply₁
-  imply₂ := imply₂
+  implyK := implyK
+  implyS := implyS
   and₁ := and₁
   and₂ := and₂
   and₃ := and₃
@@ -106,8 +106,8 @@ scoped notation "‖" d "‖" => depth d
 @[simp] lemma depth_mdp (b : Λ ⊢! φ ➝ ψ) (d : Λ ⊢! φ) : ‖mdp b d‖ = max ‖b‖ ‖d‖ + 1 := rfl
 @[simp] lemma depth_gen (b : Λ ⊢! Rewriting.free φ) : ‖gen b‖ = ‖b‖ + 1 := rfl
 @[simp] lemma depth_verum : ‖(verum : Λ ⊢! ⊤)‖ = 0 := rfl
-@[simp] lemma depth_imply₁ (φ ψ) : ‖imply₁ (Λ := Λ) φ ψ‖ = 0 := rfl
-@[simp] lemma depth_imply₂ (φ ψ χ) : ‖imply₂ (Λ := Λ) φ ψ χ‖ = 0 := rfl
+@[simp] lemma depth_implyK (φ ψ) : ‖implyK (Λ := Λ) φ ψ‖ = 0 := rfl
+@[simp] lemma depth_implyS (φ ψ χ) : ‖implyS (Λ := Λ) φ ψ χ‖ = 0 := rfl
 @[simp] lemma depth_and₁ (φ ψ) : ‖and₁ (Λ := Λ) φ ψ‖ = 0 := rfl
 @[simp] lemma depth_and₂ (φ ψ) : ‖and₂ (Λ := Λ) φ ψ‖ = 0 := rfl
 @[simp] lemma depth_and₃ (φ ψ) : ‖and₃ (Λ := Λ) φ ψ‖ = 0 := rfl
@@ -191,7 +191,7 @@ def efqOfNegative : {φ : SyntacticFormulaᵢ L} → φ.IsNegative → Λ ⊢! �
     Entailment.CK_of_C_of_C ihφ ihψ
   | φ ➝ ψ, h =>
     have ihψ : Λ ⊢! ⊥ ➝ ψ := efqOfNegative (by simp [by simpa using h])
-    Entailment.C_trans ihψ Entailment.imply₁
+    Entailment.C_trans ihψ Entailment.implyK
   | ∀' φ,  h =>
     have ihφ : Λ ⊢! ⊥ ➝ free φ := efqOfNegative (by simp [by simpa using h])
     implyAll <| Entailment.cast (by simp) ihφ
@@ -209,8 +209,8 @@ def rewrite (f : ℕ → SyntacticTerm L) : Λ ⊢! φ → Λ ⊢! Rew.rewrite f
     gen d
   | eaxm h         => eaxm (Λ.rewrite_closed h f)
   | verum          => verum
-  | imply₁ _ _     => imply₁ _ _
-  | imply₂ _ _ _   => imply₂ _ _ _
+  | implyK _ _     => implyK _ _
+  | implyS _ _ _   => implyS _ _ _
   | and₁ _ _       => and₁ _ _
   | and₂ _ _       => and₂ _ _
   | and₃ _ _       => and₃ _ _
@@ -238,8 +238,8 @@ def ofLE {Λ₁ Λ₂ : Hilbertᵢ L} (h : Λ₁ ≤ Λ₂) : Λ₁ ⊢! φ → 
   | gen b => (ofLE h b).gen
   | eaxm hφ => eaxm <| h hφ
   | verum => verum
-  | imply₁ _ _ => imply₁ _ _
-  | imply₂ _ _ _ => imply₂ _ _ _
+  | implyK _ _ => implyK _ _
+  | implyS _ _ _ => implyS _ _ _
   | and₁ _ _ => and₁ _ _
   | and₂ _ _ => and₂ _ _
   | and₃ _ _ => and₃ _ _

@@ -15,10 +15,8 @@ protected abbrev NegEquiv := ∼φ ⭤ (φ ➝ ⊥)
 protected abbrev Verum : F := ⊤
 
 protected abbrev ImplyK := φ ➝ ψ ➝ φ
-@[deprecated] protected alias Imply₁ := Axioms.ImplyK
 
 protected abbrev ImplyS := (φ ➝ ψ ➝ χ) ➝ (φ ➝ ψ) ➝ φ ➝ χ
-@[deprecated] protected alias Imply₂ := Axioms.ImplyS
 
 protected abbrev AndElim₁ := φ ⋏ ψ ➝ φ
 
@@ -82,24 +80,24 @@ def verum [HasAxiomVerum 𝓢] : 𝓢 ⊢! ⊤ := HasAxiomVerum.verum
 @[simp] lemma verum! [HasAxiomVerum 𝓢] : 𝓢 ⊢ ⊤ := ⟨verum⟩
 
 
-class HasAxiomImply₁ (𝓢 : S)  where
-  imply₁ {φ ψ : F} : 𝓢 ⊢! Axioms.Imply₁ φ ψ
-export HasAxiomImply₁ (imply₁)
+class HasAxiomImplyK (𝓢 : S)  where
+  implyK {φ ψ : F} : 𝓢 ⊢! Axioms.ImplyK φ ψ
+export HasAxiomImplyK (implyK)
 
-@[simp] lemma imply₁! [HasAxiomImply₁ 𝓢] : 𝓢 ⊢ φ ➝ ψ ➝ φ := ⟨imply₁⟩
+@[simp] lemma implyK! [HasAxiomImplyK 𝓢] : 𝓢 ⊢ φ ➝ ψ ➝ φ := ⟨implyK⟩
 
-def C_of_conseq [ModusPonens 𝓢] [HasAxiomImply₁ 𝓢] (h : 𝓢 ⊢! φ) : 𝓢 ⊢! ψ ➝ φ := imply₁ ⨀ h
+def C_of_conseq [ModusPonens 𝓢] [HasAxiomImplyK 𝓢] (h : 𝓢 ⊢! φ) : 𝓢 ⊢! ψ ➝ φ := implyK ⨀ h
 alias dhyp := C_of_conseq
 
-lemma C!_of_conseq! [ModusPonens 𝓢] [HasAxiomImply₁ 𝓢] (d : 𝓢 ⊢ φ) : 𝓢 ⊢ ψ ➝ φ := ⟨C_of_conseq d.some⟩
+lemma C!_of_conseq! [ModusPonens 𝓢] [HasAxiomImplyK 𝓢] (d : 𝓢 ⊢ φ) : 𝓢 ⊢ ψ ➝ φ := ⟨C_of_conseq d.some⟩
 alias dhyp! := C!_of_conseq!
 
 
-class HasAxiomImply₂ (𝓢 : S)  where
-  imply₂ {φ ψ χ : F} : 𝓢 ⊢! Axioms.Imply₂ φ ψ χ
-export HasAxiomImply₂ (imply₂)
+class HasAxiomImplyS (𝓢 : S)  where
+  implyS {φ ψ χ : F} : 𝓢 ⊢! Axioms.ImplyS φ ψ χ
+export HasAxiomImplyS (implyS)
 
-@[simp] lemma imply₂! [HasAxiomImply₂ 𝓢] : 𝓢 ⊢ (φ ➝ ψ ➝ χ) ➝ (φ ➝ ψ) ➝ φ ➝ χ := ⟨imply₂⟩
+@[simp] lemma implyS! [HasAxiomImplyS 𝓢] : 𝓢 ⊢ (φ ➝ ψ ➝ χ) ➝ (φ ➝ ψ) ➝ φ ➝ χ := ⟨implyS⟩
 
 
 class HasAxiomAndElim (𝓢 : S)  where
@@ -168,7 +166,7 @@ protected class Minimal (𝓢 : S) extends
               ModusPonens 𝓢,
               NegationEquiv 𝓢,
               HasAxiomVerum 𝓢,
-              HasAxiomImply₁ 𝓢, HasAxiomImply₂ 𝓢,
+              HasAxiomImplyK 𝓢, HasAxiomImplyS 𝓢,
               HasAxiomAndElim 𝓢, HasAxiomAndInst 𝓢,
               HasAxiomOrInst 𝓢, HasAxiomOrElim 𝓢
 
@@ -196,101 +194,101 @@ def E_intro [HasAxiomAndInst 𝓢] (b₁ : 𝓢 ⊢! φ ➝ ψ) (b₂ : 𝓢 ⊢
 
 @[grind] lemma iff_of_E! [HasAxiomAndInst 𝓢] [HasAxiomAndElim 𝓢] (h : 𝓢 ⊢ φ ⭤ ψ) : 𝓢 ⊢ φ ↔ 𝓢 ⊢ ψ := ⟨fun hp ↦ K!_left h ⨀ hp, fun hq ↦ K!_right h ⨀ hq⟩
 
-def C_id [HasAxiomImply₁ 𝓢] [HasAxiomImply₂ 𝓢] {φ : F} : 𝓢 ⊢! φ ➝ φ := imply₂ (φ := φ) (ψ := (φ ➝ φ)) (χ := φ) ⨀ imply₁ ⨀ imply₁
-@[simp] def C!_id [HasAxiomImply₁ 𝓢] [HasAxiomImply₂ 𝓢] : 𝓢 ⊢ φ ➝ φ := ⟨C_id⟩
+def C_id [HasAxiomImplyK 𝓢] [HasAxiomImplyS 𝓢] {φ : F} : 𝓢 ⊢! φ ➝ φ := implyS (φ := φ) (ψ := (φ ➝ φ)) (χ := φ) ⨀ implyK ⨀ implyK
+@[simp] def C!_id [HasAxiomImplyK 𝓢] [HasAxiomImplyS 𝓢] : 𝓢 ⊢ φ ➝ φ := ⟨C_id⟩
 
-def E_Id [HasAxiomAndInst 𝓢] [HasAxiomImply₁ 𝓢] [HasAxiomImply₂ 𝓢] {φ : F} : 𝓢 ⊢! φ ⭤ φ := K_intro C_id C_id
-@[simp] def E!_id [HasAxiomAndInst 𝓢] [HasAxiomImply₁ 𝓢] [HasAxiomImply₂ 𝓢] : 𝓢 ⊢ φ ⭤ φ := ⟨E_Id⟩
+def E_Id [HasAxiomAndInst 𝓢] [HasAxiomImplyK 𝓢] [HasAxiomImplyS 𝓢] {φ : F} : 𝓢 ⊢! φ ⭤ φ := K_intro C_id C_id
+@[simp] def E!_id [HasAxiomAndInst 𝓢] [HasAxiomImplyK 𝓢] [HasAxiomImplyS 𝓢] : 𝓢 ⊢ φ ⭤ φ := ⟨E_Id⟩
 
-instance [NegAbbrev F] [HasAxiomImply₁ 𝓢] [HasAxiomImply₂ 𝓢] [HasAxiomAndInst 𝓢] : Entailment.NegationEquiv 𝓢 where
+instance [NegAbbrev F] [HasAxiomImplyK 𝓢] [HasAxiomImplyS 𝓢] [HasAxiomAndInst 𝓢] : Entailment.NegationEquiv 𝓢 where
   negEquiv {φ} := by
     suffices 𝓢 ⊢! (φ ➝ ⊥) ⭤ (φ ➝ ⊥) by simpa [Axioms.NegEquiv, NegAbbrev.neg];
     apply E_Id;
 
 
-def NO [HasAxiomImply₁ 𝓢] [HasAxiomImply₂ 𝓢] [NegationEquiv 𝓢] [HasAxiomAndElim 𝓢] : 𝓢 ⊢! ∼⊥ := N_of_CO C_id
-@[simp] lemma NO! [HasAxiomImply₁ 𝓢] [HasAxiomImply₂ 𝓢] [NegationEquiv 𝓢] [HasAxiomAndElim 𝓢] : 𝓢 ⊢ ∼⊥ := ⟨NO⟩
+def NO [HasAxiomImplyK 𝓢] [HasAxiomImplyS 𝓢] [NegationEquiv 𝓢] [HasAxiomAndElim 𝓢] : 𝓢 ⊢! ∼⊥ := N_of_CO C_id
+@[simp] lemma NO! [HasAxiomImplyK 𝓢] [HasAxiomImplyS 𝓢] [NegationEquiv 𝓢] [HasAxiomAndElim 𝓢] : 𝓢 ⊢ ∼⊥ := ⟨NO⟩
 
 
-def mdp₁ [HasAxiomImply₂ 𝓢] (bqr : 𝓢 ⊢! φ ➝ ψ ➝ χ) (bq : 𝓢 ⊢! φ ➝ ψ) : 𝓢 ⊢! φ ➝ χ := imply₂ ⨀ bqr ⨀ bq
-@[grind] lemma mdp₁! [HasAxiomImply₂ 𝓢] (hqr : 𝓢 ⊢ φ ➝ ψ ➝ χ) (hq : 𝓢 ⊢ φ ➝ ψ) : 𝓢 ⊢ φ ➝ χ := ⟨mdp₁ hqr.some hq.some⟩
+def mdp₁ [HasAxiomImplyS 𝓢] (bqr : 𝓢 ⊢! φ ➝ ψ ➝ χ) (bq : 𝓢 ⊢! φ ➝ ψ) : 𝓢 ⊢! φ ➝ χ := implyS ⨀ bqr ⨀ bq
+@[grind] lemma mdp₁! [HasAxiomImplyS 𝓢] (hqr : 𝓢 ⊢ φ ➝ ψ ➝ χ) (hq : 𝓢 ⊢ φ ➝ ψ) : 𝓢 ⊢ φ ➝ χ := ⟨mdp₁ hqr.some hq.some⟩
 
 infixl:90 "⨀₁" => mdp₁
 infixl:90 "⨀₁" => mdp₁!
 
-def mdp₂ [HasAxiomImply₁ 𝓢] [HasAxiomImply₂ 𝓢] (bqr : 𝓢 ⊢! φ ➝ ψ ➝ χ ➝ s) (bq : 𝓢 ⊢! φ ➝ ψ ➝ χ) : 𝓢 ⊢! φ ➝ ψ ➝ s := C_of_conseq (imply₂) ⨀₁ bqr ⨀₁ bq
-@[grind] lemma mdp₂! [HasAxiomImply₁ 𝓢] [HasAxiomImply₂ 𝓢] (hqr : 𝓢 ⊢ φ ➝ ψ ➝ χ ➝ s) (hq : 𝓢 ⊢ φ ➝ ψ ➝ χ) : 𝓢 ⊢ φ ➝ ψ ➝ s := ⟨mdp₂ hqr.some hq.some⟩
+def mdp₂ [HasAxiomImplyK 𝓢] [HasAxiomImplyS 𝓢] (bqr : 𝓢 ⊢! φ ➝ ψ ➝ χ ➝ s) (bq : 𝓢 ⊢! φ ➝ ψ ➝ χ) : 𝓢 ⊢! φ ➝ ψ ➝ s := C_of_conseq (implyS) ⨀₁ bqr ⨀₁ bq
+@[grind] lemma mdp₂! [HasAxiomImplyK 𝓢] [HasAxiomImplyS 𝓢] (hqr : 𝓢 ⊢ φ ➝ ψ ➝ χ ➝ s) (hq : 𝓢 ⊢ φ ➝ ψ ➝ χ) : 𝓢 ⊢ φ ➝ ψ ➝ s := ⟨mdp₂ hqr.some hq.some⟩
 
 infixl:90 "⨀₂" => mdp₂
 infixl:90 "⨀₂" => mdp₂!
 
-def mdp₃ [HasAxiomImply₁ 𝓢] [HasAxiomImply₂ 𝓢] (bqr : 𝓢 ⊢! φ ➝ ψ ➝ χ ➝ s ➝ t) (bq : 𝓢 ⊢! φ ➝ ψ ➝ χ ➝ s) : 𝓢 ⊢! φ ➝ ψ ➝ χ ➝ t := (C_of_conseq <| C_of_conseq <| imply₂) ⨀₂ bqr ⨀₂ bq
-@[grind] lemma mdp₃! [HasAxiomImply₁ 𝓢] [HasAxiomImply₂ 𝓢] (hqr : 𝓢 ⊢ φ ➝ ψ ➝ χ ➝ s ➝ t) (hq : 𝓢 ⊢ φ ➝ ψ ➝ χ ➝ s) : 𝓢 ⊢ φ ➝ ψ ➝ χ ➝ t := ⟨mdp₃ hqr.some hq.some⟩
+def mdp₃ [HasAxiomImplyK 𝓢] [HasAxiomImplyS 𝓢] (bqr : 𝓢 ⊢! φ ➝ ψ ➝ χ ➝ s ➝ t) (bq : 𝓢 ⊢! φ ➝ ψ ➝ χ ➝ s) : 𝓢 ⊢! φ ➝ ψ ➝ χ ➝ t := (C_of_conseq <| C_of_conseq <| implyS) ⨀₂ bqr ⨀₂ bq
+@[grind] lemma mdp₃! [HasAxiomImplyK 𝓢] [HasAxiomImplyS 𝓢] (hqr : 𝓢 ⊢ φ ➝ ψ ➝ χ ➝ s ➝ t) (hq : 𝓢 ⊢ φ ➝ ψ ➝ χ ➝ s) : 𝓢 ⊢ φ ➝ ψ ➝ χ ➝ t := ⟨mdp₃ hqr.some hq.some⟩
 
 infixl:90 "⨀₃" => mdp₃
 infixl:90 "⨀₃" => mdp₃!
 
-def mdp₄ [HasAxiomImply₁ 𝓢] [HasAxiomImply₂ 𝓢] (bqr : 𝓢 ⊢! φ ➝ ψ ➝ χ ➝ s ➝ t ➝ u) (bq : 𝓢 ⊢! φ ➝ ψ ➝ χ ➝ s ➝ t) : 𝓢 ⊢! φ ➝ ψ ➝ χ ➝ s ➝ u := (C_of_conseq <| C_of_conseq <| C_of_conseq <| imply₂) ⨀₃ bqr ⨀₃ bq
-@[grind] lemma mdp₄! [HasAxiomImply₁ 𝓢] [HasAxiomImply₂ 𝓢] (hqr : 𝓢 ⊢ φ ➝ ψ ➝ χ ➝ s ➝ t ➝ u) (hq : 𝓢 ⊢ φ ➝ ψ ➝ χ ➝ s ➝ t) : 𝓢 ⊢ φ ➝ ψ ➝ χ ➝ s ➝ u := ⟨mdp₄ hqr.some hq.some⟩
+def mdp₄ [HasAxiomImplyK 𝓢] [HasAxiomImplyS 𝓢] (bqr : 𝓢 ⊢! φ ➝ ψ ➝ χ ➝ s ➝ t ➝ u) (bq : 𝓢 ⊢! φ ➝ ψ ➝ χ ➝ s ➝ t) : 𝓢 ⊢! φ ➝ ψ ➝ χ ➝ s ➝ u := (C_of_conseq <| C_of_conseq <| C_of_conseq <| implyS) ⨀₃ bqr ⨀₃ bq
+@[grind] lemma mdp₄! [HasAxiomImplyK 𝓢] [HasAxiomImplyS 𝓢] (hqr : 𝓢 ⊢ φ ➝ ψ ➝ χ ➝ s ➝ t ➝ u) (hq : 𝓢 ⊢ φ ➝ ψ ➝ χ ➝ s ➝ t) : 𝓢 ⊢ φ ➝ ψ ➝ χ ➝ s ➝ u := ⟨mdp₄ hqr.some hq.some⟩
 infixl:90 "⨀₄" => mdp₄
 infixl:90 "⨀₄" => mdp₄!
 
 
-def C_trans [HasAxiomImply₁ 𝓢] [HasAxiomImply₂ 𝓢] (bpq : 𝓢 ⊢! φ ➝ ψ) (bqr : 𝓢 ⊢! ψ ➝ χ) : 𝓢 ⊢! φ ➝ χ := imply₂ ⨀ C_of_conseq bqr ⨀ bpq
-@[grind] lemma C!_trans [HasAxiomImply₁ 𝓢] [HasAxiomImply₂ 𝓢] (hpq : 𝓢 ⊢ φ ➝ ψ) (hqr : 𝓢 ⊢ ψ ➝ χ) : 𝓢 ⊢ φ ➝ χ := ⟨C_trans hpq.some hqr.some⟩
+def C_trans [HasAxiomImplyK 𝓢] [HasAxiomImplyS 𝓢] (bpq : 𝓢 ⊢! φ ➝ ψ) (bqr : 𝓢 ⊢! ψ ➝ χ) : 𝓢 ⊢! φ ➝ χ := implyS ⨀ C_of_conseq bqr ⨀ bpq
+@[grind] lemma C!_trans [HasAxiomImplyK 𝓢] [HasAxiomImplyS 𝓢] (hpq : 𝓢 ⊢ φ ➝ ψ) (hqr : 𝓢 ⊢ ψ ➝ χ) : 𝓢 ⊢ φ ➝ χ := ⟨C_trans hpq.some hqr.some⟩
 
-def C_replace [HasAxiomImply₁ 𝓢] [HasAxiomImply₂ 𝓢] (h₁ : 𝓢 ⊢! ψ₁ ➝ φ₁) (h₂ : 𝓢 ⊢! φ₂ ➝ ψ₂) : 𝓢 ⊢! φ₁ ➝ φ₂ → 𝓢 ⊢! ψ₁ ➝ ψ₂ := λ h => C_trans h₁ $ C_trans h h₂
-@[grind] lemma C!_replace [HasAxiomImply₁ 𝓢] [HasAxiomImply₂ 𝓢] (h₁ : 𝓢 ⊢ ψ₁ ➝ φ₁) (h₂ : 𝓢 ⊢ φ₂ ➝ ψ₂) : 𝓢 ⊢ φ₁ ➝ φ₂ → 𝓢 ⊢ ψ₁ ➝ ψ₂ := λ h => ⟨C_replace h₁.some h₂.some h.some⟩
+def C_replace [HasAxiomImplyK 𝓢] [HasAxiomImplyS 𝓢] (h₁ : 𝓢 ⊢! ψ₁ ➝ φ₁) (h₂ : 𝓢 ⊢! φ₂ ➝ ψ₂) : 𝓢 ⊢! φ₁ ➝ φ₂ → 𝓢 ⊢! ψ₁ ➝ ψ₂ := λ h => C_trans h₁ $ C_trans h h₂
+@[grind] lemma C!_replace [HasAxiomImplyK 𝓢] [HasAxiomImplyS 𝓢] (h₁ : 𝓢 ⊢ ψ₁ ➝ φ₁) (h₂ : 𝓢 ⊢ φ₂ ➝ ψ₂) : 𝓢 ⊢ φ₁ ➝ φ₂ → 𝓢 ⊢ ψ₁ ➝ ψ₂ := λ h => ⟨C_replace h₁.some h₂.some h.some⟩
 
-def E_trans [HasAxiomAndInst 𝓢] [HasAxiomAndElim 𝓢] [HasAxiomImply₁ 𝓢] [HasAxiomImply₂ 𝓢] (h₁ : 𝓢 ⊢! φ ⭤ ψ) (h₂ : 𝓢 ⊢! ψ ⭤ χ) : 𝓢 ⊢! φ ⭤ χ := by
+def E_trans [HasAxiomAndInst 𝓢] [HasAxiomAndElim 𝓢] [HasAxiomImplyK 𝓢] [HasAxiomImplyS 𝓢] (h₁ : 𝓢 ⊢! φ ⭤ ψ) (h₂ : 𝓢 ⊢! ψ ⭤ χ) : 𝓢 ⊢! φ ⭤ χ := by
   apply E_intro;
   . exact C_trans (K_left h₁) (K_left h₂);
   . exact C_trans (K_right h₂) (K_right h₁);
-@[grind] lemma E!_trans [HasAxiomAndInst 𝓢] [HasAxiomAndElim 𝓢] [HasAxiomImply₁ 𝓢] [HasAxiomImply₂ 𝓢] (h₁ : 𝓢 ⊢ φ ⭤ ψ) (h₂ : 𝓢 ⊢ ψ ⭤ χ) : 𝓢 ⊢ φ ⭤ χ := ⟨E_trans h₁.some h₂.some⟩
+@[grind] lemma E!_trans [HasAxiomAndInst 𝓢] [HasAxiomAndElim 𝓢] [HasAxiomImplyK 𝓢] [HasAxiomImplyS 𝓢] (h₁ : 𝓢 ⊢ φ ⭤ ψ) (h₂ : 𝓢 ⊢ ψ ⭤ χ) : 𝓢 ⊢ φ ⭤ χ := ⟨E_trans h₁.some h₂.some⟩
 
-def CCCC [HasAxiomAndElim 𝓢] [HasAxiomImply₁ 𝓢] [HasAxiomImply₂ 𝓢] : 𝓢 ⊢! φ ➝ ψ ➝ χ ➝ φ := C_trans imply₁ imply₁
-@[grind] lemma CCCC! [HasAxiomAndElim 𝓢] [HasAxiomImply₁ 𝓢] [HasAxiomImply₂ 𝓢] : 𝓢 ⊢ φ ➝ ψ ➝ χ ➝ φ := ⟨CCCC⟩
+def CCCC [HasAxiomAndElim 𝓢] [HasAxiomImplyK 𝓢] [HasAxiomImplyS 𝓢] : 𝓢 ⊢! φ ➝ ψ ➝ χ ➝ φ := C_trans implyK implyK
+@[grind] lemma CCCC! [HasAxiomAndElim 𝓢] [HasAxiomImplyK 𝓢] [HasAxiomImplyS 𝓢] : 𝓢 ⊢ φ ➝ ψ ➝ χ ➝ φ := ⟨CCCC⟩
 
-def CK_of_C_of_C [HasAxiomAndInst 𝓢] [HasAxiomAndElim 𝓢] [HasAxiomImply₁ 𝓢] [HasAxiomImply₂ 𝓢] (bq : 𝓢 ⊢! φ ➝ ψ) (br : 𝓢 ⊢! φ ➝ χ)
+def CK_of_C_of_C [HasAxiomAndInst 𝓢] [HasAxiomAndElim 𝓢] [HasAxiomImplyK 𝓢] [HasAxiomImplyS 𝓢] (bq : 𝓢 ⊢! φ ➝ ψ) (br : 𝓢 ⊢! φ ➝ χ)
   : 𝓢 ⊢! φ ➝ ψ ⋏ χ := C_of_conseq and₃ ⨀₁ bq ⨀₁ br
-@[grind] lemma CK!_of_C!_of_C! [HasAxiomAndInst 𝓢] [HasAxiomAndElim 𝓢] [HasAxiomImply₁ 𝓢] [HasAxiomImply₂ 𝓢] (hq : 𝓢 ⊢ φ ➝ ψ) (hr : 𝓢 ⊢ φ ➝ χ)
+@[grind] lemma CK!_of_C!_of_C! [HasAxiomAndInst 𝓢] [HasAxiomAndElim 𝓢] [HasAxiomImplyK 𝓢] [HasAxiomImplyS 𝓢] (hq : 𝓢 ⊢ φ ➝ ψ) (hr : 𝓢 ⊢ φ ➝ χ)
   : 𝓢 ⊢ φ ➝ ψ ⋏ χ := ⟨CK_of_C_of_C hq.some hr.some⟩
 
 
-def CKK [HasAxiomAndInst 𝓢] [HasAxiomAndElim 𝓢] [HasAxiomImply₁ 𝓢] [HasAxiomImply₂ 𝓢] : 𝓢 ⊢! φ ⋏ ψ ➝ ψ ⋏ φ := CK_of_C_of_C and₂ and₁
-@[simp] lemma CKK! [HasAxiomAndInst 𝓢] [HasAxiomAndElim 𝓢] [HasAxiomImply₁ 𝓢] [HasAxiomImply₂ 𝓢] : 𝓢 ⊢ φ ⋏ ψ ➝ ψ ⋏ φ := ⟨CKK⟩
+def CKK [HasAxiomAndInst 𝓢] [HasAxiomAndElim 𝓢] [HasAxiomImplyK 𝓢] [HasAxiomImplyS 𝓢] : 𝓢 ⊢! φ ⋏ ψ ➝ ψ ⋏ φ := CK_of_C_of_C and₂ and₁
+@[simp] lemma CKK! [HasAxiomAndInst 𝓢] [HasAxiomAndElim 𝓢] [HasAxiomImplyK 𝓢] [HasAxiomImplyS 𝓢] : 𝓢 ⊢ φ ⋏ ψ ➝ ψ ⋏ φ := ⟨CKK⟩
 
-def K_symm [HasAxiomAndInst 𝓢] [HasAxiomAndElim 𝓢] [HasAxiomImply₁ 𝓢] [HasAxiomImply₂ 𝓢] (h : 𝓢 ⊢! φ ⋏ ψ) : 𝓢 ⊢! ψ ⋏ φ := CKK ⨀ h
-@[grind] lemma K!_symm [HasAxiomAndInst 𝓢] [HasAxiomAndElim 𝓢] [HasAxiomImply₁ 𝓢] [HasAxiomImply₂ 𝓢] (h : 𝓢 ⊢ φ ⋏ ψ) : 𝓢 ⊢ ψ ⋏ φ := ⟨K_symm h.some⟩
-
-
-def CEE [HasAxiomAndInst 𝓢] [HasAxiomAndElim 𝓢] [HasAxiomImply₁ 𝓢] [HasAxiomImply₂ 𝓢] : 𝓢 ⊢! (φ ⭤ ψ) ➝ (ψ ⭤ φ) := CKK
-@[simp] lemma CEE! [HasAxiomAndInst 𝓢] [HasAxiomAndElim 𝓢] [HasAxiomImply₁ 𝓢] [HasAxiomImply₂ 𝓢] : 𝓢 ⊢ (φ ⭤ ψ) ➝ (ψ ⭤ φ) := ⟨CEE⟩
-
-def E_symm [HasAxiomAndInst 𝓢] [HasAxiomAndElim 𝓢] [HasAxiomImply₁ 𝓢] [HasAxiomImply₂ 𝓢] (h : 𝓢 ⊢! φ ⭤ ψ) : 𝓢 ⊢! ψ ⭤ φ := CEE ⨀ h
-@[grind] lemma E!_symm [HasAxiomAndInst 𝓢] [HasAxiomAndElim 𝓢] [HasAxiomImply₁ 𝓢] [HasAxiomImply₂ 𝓢] (h : 𝓢 ⊢ φ ⭤ ψ) : 𝓢 ⊢ ψ ⭤ φ := ⟨E_symm h.some⟩
+def K_symm [HasAxiomAndInst 𝓢] [HasAxiomAndElim 𝓢] [HasAxiomImplyK 𝓢] [HasAxiomImplyS 𝓢] (h : 𝓢 ⊢! φ ⋏ ψ) : 𝓢 ⊢! ψ ⋏ φ := CKK ⨀ h
+@[grind] lemma K!_symm [HasAxiomAndInst 𝓢] [HasAxiomAndElim 𝓢] [HasAxiomImplyK 𝓢] [HasAxiomImplyS 𝓢] (h : 𝓢 ⊢ φ ⋏ ψ) : 𝓢 ⊢ ψ ⋏ φ := ⟨K_symm h.some⟩
 
 
-def ECKCC [HasAxiomAndInst 𝓢] [HasAxiomAndElim 𝓢] [HasAxiomImply₁ 𝓢] [HasAxiomImply₂ 𝓢] : 𝓢 ⊢! (φ ⋏ ψ ➝ χ) ⭤ (φ ➝ ψ ➝ χ) := by
+def CEE [HasAxiomAndInst 𝓢] [HasAxiomAndElim 𝓢] [HasAxiomImplyK 𝓢] [HasAxiomImplyS 𝓢] : 𝓢 ⊢! (φ ⭤ ψ) ➝ (ψ ⭤ φ) := CKK
+@[simp] lemma CEE! [HasAxiomAndInst 𝓢] [HasAxiomAndElim 𝓢] [HasAxiomImplyK 𝓢] [HasAxiomImplyS 𝓢] : 𝓢 ⊢ (φ ⭤ ψ) ➝ (ψ ⭤ φ) := ⟨CEE⟩
+
+def E_symm [HasAxiomAndInst 𝓢] [HasAxiomAndElim 𝓢] [HasAxiomImplyK 𝓢] [HasAxiomImplyS 𝓢] (h : 𝓢 ⊢! φ ⭤ ψ) : 𝓢 ⊢! ψ ⭤ φ := CEE ⨀ h
+@[grind] lemma E!_symm [HasAxiomAndInst 𝓢] [HasAxiomAndElim 𝓢] [HasAxiomImplyK 𝓢] [HasAxiomImplyS 𝓢] (h : 𝓢 ⊢ φ ⭤ ψ) : 𝓢 ⊢ ψ ⭤ φ := ⟨E_symm h.some⟩
+
+
+def ECKCC [HasAxiomAndInst 𝓢] [HasAxiomAndElim 𝓢] [HasAxiomImplyK 𝓢] [HasAxiomImplyS 𝓢] : 𝓢 ⊢! (φ ⋏ ψ ➝ χ) ⭤ (φ ➝ ψ ➝ χ) := by
   let b₁ : 𝓢 ⊢! (φ ⋏ ψ ➝ χ) ➝ φ ➝ ψ ➝ χ := CCCC ⨀₃ C_of_conseq (ψ := φ ⋏ ψ ➝ χ) and₃
-  let b₂ : 𝓢 ⊢! (φ ➝ ψ ➝ χ) ➝ φ ⋏ ψ ➝ χ := imply₁ ⨀₂ (C_of_conseq (ψ := φ ➝ ψ ➝ χ) and₁) ⨀₂ (C_of_conseq (ψ := φ ➝ ψ ➝ χ) and₂);
+  let b₂ : 𝓢 ⊢! (φ ➝ ψ ➝ χ) ➝ φ ⋏ ψ ➝ χ := implyK ⨀₂ (C_of_conseq (ψ := φ ➝ ψ ➝ χ) and₁) ⨀₂ (C_of_conseq (ψ := φ ➝ ψ ➝ χ) and₂);
   exact E_intro b₁ b₂
-@[simp, grind] lemma ECKCC! [HasAxiomAndInst 𝓢] [HasAxiomAndElim 𝓢] [HasAxiomImply₁ 𝓢] [HasAxiomImply₂ 𝓢] : 𝓢 ⊢ (φ ⋏ ψ ➝ χ) ⭤ (φ ➝ ψ ➝ χ) := ⟨ECKCC⟩
+@[simp, grind] lemma ECKCC! [HasAxiomAndInst 𝓢] [HasAxiomAndElim 𝓢] [HasAxiomImplyK 𝓢] [HasAxiomImplyS 𝓢] : 𝓢 ⊢ (φ ⋏ ψ ➝ χ) ⭤ (φ ➝ ψ ➝ χ) := ⟨ECKCC⟩
 
-def CC_of_CK [HasAxiomAndInst 𝓢] [HasAxiomAndElim 𝓢] [HasAxiomImply₁ 𝓢] [HasAxiomImply₂ 𝓢] (d : 𝓢 ⊢! φ ⋏ ψ ➝ χ) : 𝓢 ⊢! φ ➝ ψ ➝ χ := (K_left $ ECKCC) ⨀ d
-def CK_of_CC [HasAxiomAndInst 𝓢] [HasAxiomAndElim 𝓢] [HasAxiomImply₁ 𝓢] [HasAxiomImply₂ 𝓢] (d : 𝓢 ⊢! φ ➝ ψ ➝ χ) : 𝓢 ⊢! φ ⋏ ψ ➝ χ := (K_right $ ECKCC) ⨀ d
+def CC_of_CK [HasAxiomAndInst 𝓢] [HasAxiomAndElim 𝓢] [HasAxiomImplyK 𝓢] [HasAxiomImplyS 𝓢] (d : 𝓢 ⊢! φ ⋏ ψ ➝ χ) : 𝓢 ⊢! φ ➝ ψ ➝ χ := (K_left $ ECKCC) ⨀ d
+def CK_of_CC [HasAxiomAndInst 𝓢] [HasAxiomAndElim 𝓢] [HasAxiomImplyK 𝓢] [HasAxiomImplyS 𝓢] (d : 𝓢 ⊢! φ ➝ ψ ➝ χ) : 𝓢 ⊢! φ ⋏ ψ ➝ χ := (K_right $ ECKCC) ⨀ d
 
-@[grind] lemma CK!_iff_CC! [HasAxiomAndInst 𝓢] [HasAxiomAndElim 𝓢] [HasAxiomImply₁ 𝓢] [HasAxiomImply₂ 𝓢]: (𝓢 ⊢ φ ⋏ ψ ➝ χ) ↔ (𝓢 ⊢ φ ➝ ψ ➝ χ) := iff_of_E! ECKCC!
+@[grind] lemma CK!_iff_CC! [HasAxiomAndInst 𝓢] [HasAxiomAndElim 𝓢] [HasAxiomImplyK 𝓢] [HasAxiomImplyS 𝓢]: (𝓢 ⊢ φ ⋏ ψ ➝ χ) ↔ (𝓢 ⊢ φ ➝ ψ ➝ χ) := iff_of_E! ECKCC!
 
-def CV [HasAxiomVerum 𝓢] [HasAxiomImply₁ 𝓢] : 𝓢 ⊢! φ ➝ ⊤ := C_of_conseq verum
-@[simp] lemma CV! [HasAxiomImply₁ 𝓢] [HasAxiomVerum 𝓢] : 𝓢 ⊢ φ ➝ ⊤ := ⟨CV⟩
+def CV [HasAxiomVerum 𝓢] [HasAxiomImplyK 𝓢] : 𝓢 ⊢! φ ➝ ⊤ := C_of_conseq verum
+@[simp] lemma CV! [HasAxiomImplyK 𝓢] [HasAxiomVerum 𝓢] : 𝓢 ⊢ φ ➝ ⊤ := ⟨CV⟩
 
 
-@[grind] lemma unprovable_C!_trans [HasAxiomImply₁ 𝓢] [HasAxiomImply₂ 𝓢] (hpq : 𝓢 ⊢ φ ➝ ψ) : 𝓢 ⊬ φ ➝ χ → 𝓢 ⊬ ψ ➝ χ := by
+@[grind] lemma unprovable_C!_trans [HasAxiomImplyK 𝓢] [HasAxiomImplyS 𝓢] (hpq : 𝓢 ⊢ φ ➝ ψ) : 𝓢 ⊬ φ ➝ χ → 𝓢 ⊬ ψ ➝ χ := by
   contrapose!;
   exact C!_trans hpq;
 
-@[grind] lemma uniff_of_E! [HasAxiomAndInst 𝓢] [HasAxiomAndElim 𝓢] [HasAxiomImply₁ 𝓢] [HasAxiomImply₂ 𝓢] (H : 𝓢 ⊢ φ ⭤ ψ) : 𝓢 ⊬ φ ↔ 𝓢 ⊬ ψ := by
+@[grind] lemma uniff_of_E! [HasAxiomAndInst 𝓢] [HasAxiomAndElim 𝓢] [HasAxiomImplyK 𝓢] [HasAxiomImplyS 𝓢] (H : 𝓢 ⊢ φ ⭤ ψ) : 𝓢 ⊬ φ ↔ 𝓢 ⊬ ψ := by
   constructor;
   . intro hp hq; have := K!_right H ⨀ hq; contradiction;
   . intro hq hp; have := K!_left H ⨀ hp; contradiction;
@@ -489,9 +487,9 @@ instance (Γ : FiniteContext F 𝓢) : Entailment.ModusPonens Γ := ⟨mdp₁⟩
 
 instance (Γ : FiniteContext F 𝓢) : Entailment.HasAxiomVerum Γ := ⟨of verum⟩
 
-instance (Γ : FiniteContext F 𝓢) : Entailment.HasAxiomImply₁ Γ := ⟨of imply₁⟩
+instance (Γ : FiniteContext F 𝓢) : Entailment.HasAxiomImplyK Γ := ⟨of implyK⟩
 
-instance (Γ : FiniteContext F 𝓢) : Entailment.HasAxiomImply₂ Γ := ⟨of imply₂⟩
+instance (Γ : FiniteContext F 𝓢) : Entailment.HasAxiomImplyS Γ := ⟨of implyS⟩
 
 instance (Γ : FiniteContext F 𝓢) : Entailment.HasAxiomAndElim Γ := ⟨of and₁, of and₂⟩
 
@@ -708,8 +706,8 @@ lemma iff_provable_context_provable_finiteContext_toList [DecidableEq F] {Δ : F
 instance minimal [DecidableEq F] (Γ : Context F 𝓢) : Entailment.Minimal Γ where
   mdp := mdp
   verum := of verum
-  imply₁ := of imply₁
-  imply₂ := of imply₂
+  implyK := of implyK
+  implyS := of implyS
   and₁ := of and₁
   and₂ := of and₂
   and₃ := of and₃
@@ -1059,7 +1057,7 @@ lemma C!_of_CC! [DecidableEq F] (h : 𝓢 ⊢ φ ➝ φ ➝ ψ) : 𝓢 ⊢ φ �
 def CCC [DecidableEq F] : 𝓢 ⊢! φ ➝ (φ ➝ ψ) ➝ ψ := C_swap $ C_id
 lemma CCC! [DecidableEq F] : 𝓢 ⊢ φ ➝ (φ ➝ ψ) ➝ ψ := ⟨CCC⟩
 
-def CCC_of_C_right (h : 𝓢 ⊢! φ ➝ ψ) : 𝓢 ⊢! (χ ➝ φ) ➝ (χ ➝ ψ) := imply₂ ⨀ (C_of_conseq h)
+def CCC_of_C_right (h : 𝓢 ⊢! φ ➝ ψ) : 𝓢 ⊢! (χ ➝ φ) ➝ (χ ➝ ψ) := implyS ⨀ (C_of_conseq h)
 lemma CCC!_of_C!_right (h : 𝓢 ⊢ φ ➝ ψ) : 𝓢 ⊢ (χ ➝ φ) ➝ (χ ➝ ψ) := ⟨CCC_of_C_right h.some⟩
 
 def CNNCCNNNN [DecidableEq F] : 𝓢 ⊢! ∼∼(φ ➝ ψ) ➝ (∼∼φ ➝ ∼∼ψ) := by

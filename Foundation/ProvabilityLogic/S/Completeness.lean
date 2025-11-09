@@ -66,7 +66,7 @@ lemma refl_mainlemma_aux (hA : ¬r₁ ⊧ (A.rflSubformula.conj ➝ A)) :
     . intro h;
       rcases Satisfies.imp_def₂.mp h with (hA | hB);
       . exact C!_trans (ihB.2 hA) CNC!;
-      . exact C!_trans (ihC.1 hB) imply₁!;
+      . exact C!_trans (ihC.1 hB) implyK!;
     . intro h;
       have := Satisfies.imp_def.not.mp h;
       push_neg at this;

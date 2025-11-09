@@ -48,16 +48,16 @@ instance [DecidableEq α] [H.HasDNE] : Entailment.HasAxiomDNE H where
       HasDNE.mem_dne;
 
 
-class HasWeakLEM (H : Hilbert α) where
+class HasWLEM (H : Hilbert α) where
   p : α
   mem_wlem : (∼(.atom p) ⋎ ∼∼(.atom p)) ∈ H.axioms := by tauto;
 
-instance [DecidableEq α] [H.HasWeakLEM] : Entailment.HasAxiomWeakLEM H where
+instance [DecidableEq α] [H.HasWLEM] : Entailment.HasAxiomWLEM H where
   wlem φ := by
     simpa using Deduction.axm
-      (φ := Axioms.WeakLEM (.atom (HasWeakLEM.p H)))
-      (s := λ b => if (HasWeakLEM.p H) = b then φ else (.atom b))
-      HasWeakLEM.mem_wlem;
+      (φ := Axioms.WLEM (.atom (HasWLEM.p H)))
+      (s := λ b => if (HasWLEM.p H) = b then φ else (.atom b))
+      HasWLEM.mem_wlem;
 
 
 class HasDummett (H : Hilbert α) where
@@ -119,11 +119,11 @@ instance : Entailment.Cl (Propositional.Cl) where
 lemma Propositional.Int_weakerThan_Cl : (Propositional.Int) ⪯ (Propositional.Cl) := by apply weakerThan_of_subset_axioms; tauto;
 
 
-protected abbrev Propositional.KC : Hilbert ℕ := ⟨{Axioms.EFQ (.atom 0), Axioms.WeakLEM (.atom 0)}⟩
+protected abbrev Propositional.KC : Hilbert ℕ := ⟨{Axioms.EFQ (.atom 0), Axioms.WLEM (.atom 0)}⟩
 protected abbrev KC := Propositional.KC.logic
 notation "Propositional.KC" => Propositional.KC
 instance : Propositional.KC.HasEFQ where p := 0;
-instance : Propositional.KC.HasWeakLEM where p := 0;
+instance : Propositional.KC.HasWLEM where p := 0;
 instance : Entailment.KC (Propositional.KC) where
 
 

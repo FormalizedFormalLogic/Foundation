@@ -201,10 +201,10 @@ instance [Cut F K] : Entailment.Cl 𝓚 where
       and (or <| rotate₁ <| or <| close φ) (or <| and (close φ) verum'))
     (by simp [Axioms.NegEquiv, DeMorgan.imply, LogicalConnective.iff])
   verum := verum _ _
-  imply₁ φ ψ :=
+  implyK φ ψ :=
     have : 𝓚 ⊢! ∼φ ⋎ ∼ψ ⋎ φ := or <| rotate₁ <| or <| close φ
     ofEq this (by simp [DeMorgan.imply])
-  imply₂ φ ψ χ :=
+  implyS φ ψ χ :=
     have : 𝓚 ⊢! φ ⋏ ψ ⋏ ∼χ ⋎ φ ⋏ ∼ψ ⋎ ∼φ ⋎ χ :=
       or <| rotate₁ <| or <| rotate₁ <| or <| rotate₃ <| and
         (close φ)

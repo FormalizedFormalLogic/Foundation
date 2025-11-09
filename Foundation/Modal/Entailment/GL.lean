@@ -27,7 +27,7 @@ namespace GL
 
 variable {φ ψ : F}
 
-instance : HasAxiomZ 𝓢 := ⟨fun _ ↦ C_trans axiomL imply₁⟩
+instance : HasAxiomZ 𝓢 := ⟨fun _ ↦ C_trans axiomL implyK⟩
 
 protected def axiomFour : 𝓢 ⊢! Axioms.Four φ := by
   dsimp [Axioms.Four];
@@ -43,7 +43,7 @@ instance : Entailment.K4 𝓢 where
 protected def axiomHen : 𝓢 ⊢! Axioms.Hen φ := C_trans (implyBoxDistribute' and₁) axiomL
 instance : HasAxiomHen 𝓢 := ⟨fun _ ↦ GL.axiomHen⟩
 
-protected def axiomZ : 𝓢 ⊢! Axioms.Z φ := C_trans axiomL imply₁
+protected def axiomZ : 𝓢 ⊢! Axioms.Z φ := C_trans axiomL implyK
 instance : HasAxiomZ 𝓢 := ⟨fun _ ↦ GL.axiomZ⟩
 
 end GL

@@ -1,5 +1,5 @@
 import Foundation.Logic.Entailment
-
+import Foundation.Propositional.Entailment.Minimal.Basic
 
 namespace LO.Axioms
 
@@ -17,9 +17,32 @@ variable {S F : Type*} [LogicalConnective F] [Entailment S F]
 variable {𝓢 : S} {φ ψ χ : F}
 
 class HasAxiomDNE (𝓢 : S)  where
-  DNE {φ : F} : 𝓢 ⊢! Axioms.DNE φ
-export HasAxiomDNE (DNE)
+  dne {φ : F} : 𝓢 ⊢! Axioms.DNE φ
+export HasAxiomDNE (dne)
 
-@[simp] lemma dne! [HasAxiomDNE 𝓢] : 𝓢 ⊢ ∼∼φ ➝ φ  := ⟨DNE⟩
+@[simp] lemma dne! [HasAxiomDNE 𝓢] : 𝓢 ⊢ ∼∼φ ➝ φ  := ⟨dne⟩
+
+def of_NN [ModusPonens 𝓢] [HasAxiomDNE 𝓢] (b : 𝓢 ⊢! ∼∼φ) : 𝓢 ⊢! φ := dne ⨀ b
+@[grind ⇒] lemma of_NN! [ModusPonens 𝓢] [HasAxiomDNE 𝓢] (h : 𝓢 ⊢ ∼∼φ) : 𝓢 ⊢ φ := ⟨of_NN h.some⟩
+
+section
+
+variable [LogicalConnective F] [Entailment S F] [Entailment.Minimal 𝓢]
+
+namespace FiniteContext
+
+instance [Entailment.HasAxiomDNE 𝓢] (Γ : FiniteContext F 𝓢) : HasAxiomDNE Γ := ⟨of dne⟩
+
+end FiniteContext
+
+
+namespace Context
+
+instance [Entailment.HasAxiomDNE 𝓢] (Γ : Context F 𝓢) : HasAxiomDNE Γ := ⟨of dne⟩
+
+end Context
+
+end
+
 
 end LO.Entailment

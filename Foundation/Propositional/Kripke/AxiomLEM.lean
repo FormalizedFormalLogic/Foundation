@@ -1,5 +1,4 @@
 import Foundation.Propositional.Kripke.Completeness
-import Foundation.Propositional.Entailment.Cl
 import Foundation.Vorspiel.HRel.Euclidean
 
 namespace LO.Propositional

@@ -9,9 +9,9 @@ variable (φ ψ χ : F)
 
 protected abbrev Verum : F := ⊤
 
-protected abbrev Imply₁ := φ ➝ ψ ➝ φ
+protected abbrev ImplyK := φ ➝ ψ ➝ φ
 
-protected abbrev Imply₂ := (φ ➝ ψ ➝ χ) ➝ (φ ➝ ψ) ➝ φ ➝ χ
+protected abbrev ImplyS := (φ ➝ ψ ➝ χ) ➝ (φ ➝ ψ) ➝ φ ➝ χ
 
 protected abbrev ElimContra := (∼ψ ➝ ∼φ) ➝ (φ ➝ ψ)
 
