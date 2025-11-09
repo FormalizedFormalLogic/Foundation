@@ -200,6 +200,7 @@ end Hilbert.Basic
 
 section
 
+open Axiom
 open Hilbert.Basic
 
 protected abbrev CL.axioms : Axiom ℕ := {
@@ -220,10 +221,10 @@ instance : Entailment.CL InterpretabilityLogic.CL where
 
 protected abbrev IL.axioms : Axiom ℕ := insert (InterpretabilityLogic.Axioms.J5 (.atom 0)) CL.axioms
 namespace IL.axioms
-instance : IL.axioms.HasJ1 where p := 0; q := 1;
-instance : IL.axioms.HasJ2 where p := 0; q := 1; r := 2;
-instance : IL.axioms.HasJ3 where p := 0; q := 1; r := 2;
-instance : IL.axioms.HasJ4 where p := 0; q := 1;
+instance : IL.axioms.HasJ1 := HasJ1.of_mem (Ax₁ := CL.axioms) (by tauto)
+instance : IL.axioms.HasJ2 := HasJ2.of_mem (Ax₁ := CL.axioms) (by tauto)
+instance : IL.axioms.HasJ3 := HasJ3.of_mem (Ax₁ := CL.axioms) (by tauto)
+instance : IL.axioms.HasJ4 := HasJ4.of_mem (Ax₁ := CL.axioms) (by tauto)
 instance : IL.axioms.HasJ5 where p := 0;
 end IL.axioms
 protected abbrev IL := Hilbert.Basic IL.axioms
@@ -232,11 +233,11 @@ instance : Entailment.IL InterpretabilityLogic.IL where
 
 protected abbrev ILM.axioms : Axiom ℕ := insert (InterpretabilityLogic.Axioms.M (.atom 0) (.atom 1) (.atom 2)) IL.axioms
 namespace ILM.axioms
-instance : ILM.axioms.HasJ1 where p := 0; q := 1;
-instance : ILM.axioms.HasJ2 where p := 0; q := 1; r := 2;
-instance : ILM.axioms.HasJ3 where p := 0; q := 1; r := 2; mem_J3 := by simp;
-instance : ILM.axioms.HasJ4 where p := 0; q := 1;
-instance : ILM.axioms.HasJ5 where p := 0;
+instance : ILM.axioms.HasJ1 := HasJ1.of_mem (Ax₁ := IL.axioms) (by tauto)
+instance : ILM.axioms.HasJ2 := HasJ2.of_mem (Ax₁ := IL.axioms) (by tauto)
+instance : ILM.axioms.HasJ3 := HasJ3.of_mem (Ax₁ := IL.axioms) (by tauto)
+instance : ILM.axioms.HasJ4 := HasJ4.of_mem (Ax₁ := IL.axioms) (by tauto)
+instance : ILM.axioms.HasJ5 := HasJ5.of_mem (Ax₁ := IL.axioms) (by tauto)
 instance : ILM.axioms.HasM where p := 0; q := 1; r := 2;
 end ILM.axioms
 protected abbrev ILM := Hilbert.Basic ILM.axioms
@@ -245,11 +246,11 @@ instance : Entailment.ILM InterpretabilityLogic.ILM where
 
 protected abbrev ILP.axioms : Axiom ℕ := insert (InterpretabilityLogic.Axioms.P (.atom 0) (.atom 1)) IL.axioms
 namespace ILP.axioms
-instance : ILP.axioms.HasJ1 where p := 0; q := 1;
-instance : ILP.axioms.HasJ2 where p := 0; q := 1; r := 2;
-instance : ILP.axioms.HasJ3 where p := 0; q := 1; r := 2; mem_J3 := by simp;
-instance : ILP.axioms.HasJ4 where p := 0; q := 1;
-instance : ILP.axioms.HasJ5 where p := 0;
+instance : ILP.axioms.HasJ1 := HasJ1.of_mem (Ax₁ := IL.axioms) (by tauto)
+instance : ILP.axioms.HasJ2 := HasJ2.of_mem (Ax₁ := IL.axioms) (by tauto)
+instance : ILP.axioms.HasJ3 := HasJ3.of_mem (Ax₁ := IL.axioms) (by tauto)
+instance : ILP.axioms.HasJ4 := HasJ4.of_mem (Ax₁ := IL.axioms) (by tauto)
+instance : ILP.axioms.HasJ5 := HasJ5.of_mem (Ax₁ := IL.axioms) (by tauto)
 instance : ILP.axioms.HasP where p := 0; q := 1;
 end ILP.axioms
 protected abbrev ILP := Hilbert.Basic ILP.axioms
@@ -258,11 +259,11 @@ instance : Entailment.ILP InterpretabilityLogic.ILP where
 
 protected abbrev ILW.axioms : Axiom ℕ := insert (InterpretabilityLogic.Axioms.W (.atom 0) (.atom 1)) IL.axioms
 namespace ILW.axioms
-instance : ILW.axioms.HasJ1 where p := 0; q := 1;
-instance : ILW.axioms.HasJ2 where p := 0; q := 1; r := 2;
-instance : ILW.axioms.HasJ3 where p := 0; q := 1; r := 2;
-instance : ILW.axioms.HasJ4 where p := 0; q := 1;
-instance : ILW.axioms.HasJ5 where p := 0;
+instance : ILW.axioms.HasJ1 := HasJ1.of_mem (Ax₁ := IL.axioms) (by tauto)
+instance : ILW.axioms.HasJ2 := HasJ2.of_mem (Ax₁ := IL.axioms) (by tauto)
+instance : ILW.axioms.HasJ3 := HasJ3.of_mem (Ax₁ := IL.axioms) (by tauto)
+instance : ILW.axioms.HasJ4 := HasJ4.of_mem (Ax₁ := IL.axioms) (by tauto)
+instance : ILW.axioms.HasJ5 := HasJ5.of_mem (Ax₁ := IL.axioms) (by tauto)
 instance : ILW.axioms.HasW where p := 0; q := 1;
 end ILW.axioms
 

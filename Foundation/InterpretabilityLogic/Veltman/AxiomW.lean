@@ -19,7 +19,7 @@ export HasAxiomW (S_W)
 
 end Frame
 
-@[simp high, grind]
+@[simp high, grind .]
 lemma validate_axiomW_of_HasAxiomW [F.IsILMinus_J2Plus_J5] [F.HasAxiomW] : F ⊧ Axioms.W φ ψ := by
   intro V x h₁ y Rxy h₂;
   obtain ⟨z, ⟨Sxyz, hz⟩, hb⟩ := F.S_W x |>.has_max ({ z | y ≺[x] z ∧ Satisfies ⟨F, V⟩ z ψ }) $ by
