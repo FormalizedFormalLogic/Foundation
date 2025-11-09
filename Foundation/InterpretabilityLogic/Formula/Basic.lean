@@ -54,16 +54,19 @@ instance : DiaAbbrev (Formula α) := ⟨rfl⟩
 
 
 
-@[simp, grind] lemma and_inj : φ₁ ⋏ φ₂ = ψ₁ ⋏ ψ₂ ↔ φ₁ = ψ₁ ∧ φ₂ = ψ₂ := by simp [Wedge.wedge]
+@[simp, grind =] lemma and_inj : φ₁ ⋏ φ₂ = ψ₁ ⋏ ψ₂ ↔ φ₁ = ψ₁ ∧ φ₂ = ψ₂ := by simp [Wedge.wedge]
 
-@[simp, grind] lemma or_inj : φ₁ ⋎ φ₂ = ψ₁ ⋎ ψ₂ ↔ φ₁ = ψ₁ ∧ φ₂ = ψ₂ := by simp [Vee.vee]
+@[simp, grind =] lemma or_inj : φ₁ ⋎ φ₂ = ψ₁ ⋎ ψ₂ ↔ φ₁ = ψ₁ ∧ φ₂ = ψ₂ := by simp [Vee.vee]
 
-@[simp, grind] lemma imp_inj : φ₁ ➝ φ₂ = ψ₁ ➝ ψ₂ ↔ φ₁ = ψ₁ ∧ φ₂ = ψ₂ := by simp [Arrow.arrow]
+@[simp, grind =] lemma imp_inj : φ₁ ➝ φ₂ = ψ₁ ➝ ψ₂ ↔ φ₁ = ψ₁ ∧ φ₂ = ψ₂ := by simp [Arrow.arrow]
 
-@[simp, grind] lemma rhd_inj : φ₁ ▷ φ₂ = ψ₁ ▷ ψ₂ ↔ φ₁ = ψ₁ ∧ φ₂ = ψ₂ := by simp [Rhd.rhd];
+@[simp, grind =] lemma rhd_inj : φ₁ ▷ φ₂ = ψ₁ ▷ ψ₂ ↔ φ₁ = ψ₁ ∧ φ₂ = ψ₂ := by simp [Rhd.rhd];
 
-@[simp, grind] lemma neg_inj : ∼φ = ∼ψ ↔ φ = ψ := by simp [NegAbbrev.neg];
+@[simp, grind =] lemma neg_inj : ∼φ = ∼ψ ↔ φ = ψ := by simp [NegAbbrev.neg];
 
+@[simp, grind =] lemma iff_inj : (φ₁ ⭤ φ₂) = (ψ₁ ⭤ ψ₂) ↔ φ₁ = ψ₁ ∧ φ₂ = ψ₂ := by
+  simp [LogicalConnective.iff];
+  grind;
 
 section ToString
 

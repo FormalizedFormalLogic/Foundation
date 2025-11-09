@@ -383,7 +383,7 @@ lemma iff_mem_imp : ((φ ➝ ψ) ∈ Ω) ↔ (φ ∈ Ω) → (ψ ∈ Ω) := by
       exact C_of_N $ membership_iff.mp $ iff_mem_neg.mpr h;
     | inr h =>
       apply membership_iff.mpr;
-      exact imply₁! ⨀ (membership_iff.mp h)
+      exact implyK! ⨀ (membership_iff.mp h)
 
 lemma mdp (hφψ : φ ➝ ψ ∈ Ω) (hψ : φ ∈ Ω) : ψ ∈ Ω := iff_mem_imp.mp hφψ hψ
 

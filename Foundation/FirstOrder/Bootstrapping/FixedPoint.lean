@@ -1,5 +1,5 @@
 import Foundation.FirstOrder.Bootstrapping.Syntax
-import Foundation.Logic.HilbertStyle.Supplemental
+import Foundation.Propositional.Entailment.Cl.Basic
 
 open Classical
 

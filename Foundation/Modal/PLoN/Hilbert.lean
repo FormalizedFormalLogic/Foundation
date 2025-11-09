@@ -23,8 +23,8 @@ lemma soundness_of_defined_by_AxiomInstances [defined : C.DefinedBy Ax.instances
     tauto;
   | mdp ihpq ihp => exact ValidOnFrame.mdp ihpq ihp;
   | nec ih => exact ValidOnFrame.nec ih;
-  | imply₁ => exact ValidOnFrame.imply₁;
-  | imply₂ => exact ValidOnFrame.imply₂;
+  | implyK => exact ValidOnFrame.implyK;
+  | implyS => exact ValidOnFrame.implyS;
   | ec => exact ValidOnFrame.elimContra;
 
 instance [C.DefinedBy Ax.instances] : Sound (Hilbert.Normal Ax) C := ⟨fun {_} => soundness_of_defined_by_AxiomInstances⟩

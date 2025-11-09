@@ -37,7 +37,7 @@ theorem GLPlusBoxBot.arithmetical_soundness
     have : Modal.GLPlusBoxBot n ⊢ A := by simpa [h] using hA
     have : Modal.GL ⊢ □^[n]⊥ ➝ A := iff_provable_GLPlusBoxBot_provable_GL.mp this
     have : U ⊢ f (□^[n]⊥ ➝ A) := GL.arithmetical_soundness this;
-    have : U ⊢ 𝔅^[n] ⊥ ➝ f A := by grind;
+    have : U ⊢ 𝔅^[n] ⊥ ➝ f A := by simpa using (Realization.interpret.def_boxItr (f := f) n (A := ⊥)) ▸ this;
     exact this ⨀ (Provability.height_le_iff_boxBot.mp (by simp [h]))
 
 end LO.ProvabilityLogic

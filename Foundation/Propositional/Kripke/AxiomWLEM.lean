@@ -21,7 +21,7 @@ section definability
 
 variable {F : Kripke.Frame}
 
-lemma validate_axiomWeakLEM_of_isPiecewiseStronglyConvergent [F.IsPiecewiseStronglyConvergent] : F ⊧ (Axioms.WeakLEM (.atom 0)) := by
+lemma validate_axiomWLEM_of_isPiecewiseStronglyConvergent [F.IsPiecewiseStronglyConvergent] : F ⊧ (Axioms.WLEM (.atom 0)) := by
   have := F.ps_convergent;
   revert this;
   contrapose!;
@@ -46,13 +46,13 @@ lemma validate_axiomWeakLEM_of_isPiecewiseStronglyConvergent [F.IsPiecewiseStron
     exact (Satisfies.neg_def.mp hz) Rzu $ Satisfies.formula_hereditary Ryu hy;
 
 
-lemma isPiecewiseStronglyConvergent_of_validate_axiomWeakLEM (h : F ⊧ (Axioms.WeakLEM (.atom 0))) : F.IsPiecewiseStronglyConvergent := ⟨by
+lemma isPiecewiseStronglyConvergent_of_validate_axiomWLEM (h : F ⊧ (Axioms.WLEM (.atom 0))) : F.IsPiecewiseStronglyConvergent := ⟨by
   rintro x y z Rxy Ryz;
   let V : Kripke.Valuation F := ⟨λ {v a} => y ≺ v, by
     intro w v Rwv a Ryw;
     apply F.trans Ryw Rwv;
   ⟩;
-  replace h : F ⊧ (Axioms.WeakLEM (.atom 0)) := by simpa using h;
+  replace h : F ⊧ (Axioms.WLEM (.atom 0)) := by simpa using h;
   have : ¬Satisfies ⟨F, V⟩ x (∼(.atom 0)) := by
     suffices ∃ y, x ≺ y ∧ V y 0 by simpa [Satisfies];
     use y;
@@ -81,7 +81,7 @@ open canonicalModel
 open SaturatedConsistentTableau
 open Classical
 
-instance [Entailment.HasAxiomWeakLEM 𝓢] : (canonicalFrame 𝓢).IsPiecewiseStronglyConvergent := ⟨by
+instance [Entailment.HasAxiomWLEM 𝓢] : (canonicalFrame 𝓢).IsPiecewiseStronglyConvergent := ⟨by
   rintro x y z Rxy Rxz;
   suffices Tableau.Consistent 𝓢 (y.1.1 ∪ z.1.1, ∅) by
     obtain ⟨w, hw⟩ := lindenbaum (𝓢 := 𝓢) this;

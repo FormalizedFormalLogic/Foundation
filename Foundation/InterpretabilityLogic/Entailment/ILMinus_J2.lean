@@ -43,10 +43,10 @@ instance : HasAxiomJ2Plus 𝓢 := ⟨by
   intro A B C;
   dsimp only [Axioms.J2Plus];
   apply deduct';
-  have H₁ : [A ▷ (B ⋎ C), A ▷ (B ⋎ C) ➝ B ▷ C] ⊢[𝓢]! ((B ⋎ C) ⋏ ∼C) ▷ C := deductInv $ deductInv' $ CCC_of_C_right $ R2! $ CK_of_CC $ left_A_intro imply₁ CCN;
+  have H₁ : [A ▷ (B ⋎ C), A ▷ (B ⋎ C) ➝ B ▷ C] ⊢[𝓢]! ((B ⋎ C) ⋏ ∼C) ▷ C := deductInv $ deductInv' $ CCC_of_C_right $ R2! $ CK_of_CC $ left_A_intro implyK CCN;
   have H₂ : [A ▷ (B ⋎ C), A ▷ (B ⋎ C) ➝ B ▷ C] ⊢[𝓢]! ((B ⋎ C) ⋏ ∼C) ▷ C ➝ A ▷ C := weakening (by simp) $ deductInv' J2Plus'!;
   have : [A ▷ (B ⋎ C)] ⊢[𝓢]! (A ▷ (B ⋎ C) ➝ B ▷ C) ➝ A ▷ C := deduct $ weakening (by simp) $ H₂ ⨀ H₁;
-  apply C_trans imply₁ this;
+  apply C_trans implyK this;
 ⟩
 
 instance : HasAxiomJ4Plus 𝓢 := ⟨by

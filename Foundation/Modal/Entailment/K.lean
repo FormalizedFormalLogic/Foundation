@@ -104,7 +104,7 @@ lemma imply_box_distribute'! (h : 𝓢 ⊢ φ ➝ ψ) : 𝓢 ⊢ □φ ➝ □ψ
 def collect_multibox_and : 𝓢 ⊢! □^[n]φ ⋏ □^[n]ψ ➝ □^[n](φ ⋏ ψ) := by
   have d₁ : 𝓢 ⊢! □^[n]φ ➝ □^[n](ψ ➝ φ ⋏ ψ) := implyMultiboxDistribute' and₃;
   have d₂ : 𝓢 ⊢! □^[n](ψ ➝ φ ⋏ ψ) ➝ (□^[n]ψ ➝ □^[n](φ ⋏ ψ)) := multibox_axiomK;
-  exact (K_right (ECKCC _ _ _)) ⨀ (C_trans d₁ d₂);
+  exact (K_right (ECKCC)) ⨀ (C_trans d₁ d₂);
 @[simp] lemma collect_multibox_and! : 𝓢 ⊢ □^[n]φ ⋏ □^[n]ψ ➝ □^[n](φ ⋏ ψ) := ⟨collect_multibox_and⟩
 
 def collect_box_and : 𝓢 ⊢! □φ ⋏ □ψ ➝ □(φ ⋏ ψ) := collect_multibox_and (n := 1)
@@ -236,7 +236,7 @@ omit [DecidableEq F] in lemma boxdot_nec! (d : 𝓢 ⊢ φ) : 𝓢 ⊢ ⊡φ := 
 def boxdotBox : 𝓢 ⊢! ⊡φ ➝ □φ := by exact and₂;
 omit [DecidableEq F] in lemma boxdot_box! : 𝓢 ⊢ ⊡φ ➝ □φ := ⟨boxdotBox⟩
 
-def BoxBoxdot_BoxDotbox : 𝓢 ⊢! □⊡φ ➝ ⊡□φ := C_trans distribute_box_and (C_id _)
+def BoxBoxdot_BoxDotbox : 𝓢 ⊢! □⊡φ ➝ ⊡□φ := C_trans distribute_box_and (C_id)
 lemma boxboxdot_boxdotbox : 𝓢 ⊢ □⊡φ ➝ ⊡□φ := ⟨BoxBoxdot_BoxDotbox⟩
 
 
@@ -505,7 +505,7 @@ noncomputable def lemma_Grz₁ : 𝓢 ⊢! □φ ➝ □(□((φ ⋏ (□φ ➝ 
   let ψ := φ ⋏ (□φ ➝ □□φ);
   have    : 𝓢 ⊢! ((□φ ➝ □□φ) ➝ □φ) ➝ □φ := peirce
   have    : 𝓢 ⊢! (φ ➝ ((□φ ➝ □□φ) ➝ □φ)) ➝ (φ ➝ □φ) := CCC_of_C_right this;
-  have d₁ : 𝓢 ⊢! (ψ ➝ □φ) ➝ φ ➝ □φ := C_trans (K_left $ ECKCC φ (□φ ➝ □□φ) (□φ)) this;
+  have d₁ : 𝓢 ⊢! (ψ ➝ □φ) ➝ φ ➝ □φ := C_trans (K_left $ ECKCC) this;
   have    : 𝓢 ⊢! ψ ➝ φ := and₁;
   have    : 𝓢 ⊢! □ψ ➝ □φ := implyBoxDistribute' this;
   have d₂ : 𝓢 ⊢! (ψ ➝ □ψ) ➝ (ψ ➝ □φ) := CCC_of_C_right this;

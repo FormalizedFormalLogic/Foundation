@@ -16,7 +16,7 @@ variable {T U} {A B C : Modal.Formula ℕ}
 
 namespace ArithmeticTheory.ProvabilityLogic
 
-@[grind]
+@[grind =]
 lemma provable_iff : ProvabilityLogic T U ⊢ A ↔ ∀ f : T.StandardRealization, U ⊢ f A := by
   simp [Modal.Logic.iff_provable, ArithmeticTheory.ProvabilityLogic]
 
@@ -29,17 +29,17 @@ instance : Entailment.Lukasiewicz (ProvabilityLogic T U) where
     replace hA : U ⊢ f A ➝ f B := hA f;
     replace hB : U ⊢ f A := hB f;
     cl_prover [hA, hB];
-  imply₁ A B := by
+  implyK {_ _} := by
     constructor;
     apply Modal.Logic.iff_provable.mp;
     apply ProvabilityLogic.provable_iff.mpr;
     simp;
-  imply₂ A B C := by
+  implyS {_ _ _} := by
     constructor;
     apply Modal.Logic.iff_provable.mp;
     apply ProvabilityLogic.provable_iff.mpr;
     simp;
-  elimContra A B := by
+  elimContra {_ _} := by
     constructor;
     apply Modal.Logic.iff_provable.mp;
     apply ProvabilityLogic.provable_iff.mpr;

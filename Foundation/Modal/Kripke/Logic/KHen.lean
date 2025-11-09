@@ -353,8 +353,8 @@ lemma Kripke.valid_cresswellModel_of_provable : Modal.KHen ⊢ φ → cresswellM
     . exact cresswellModel.valid_axiomHen;
   | mdp ihφψ ihφ => exact Kripke.ValidOnModel.mdp ihφψ ihφ;
   | nec ihφ => exact Kripke.ValidOnModel.nec ihφ;
-  | imply₁ => exact Kripke.ValidOnModel.imply₁;
-  | imply₂ => exact Kripke.ValidOnModel.imply₂;
+  | implyK => exact Kripke.ValidOnModel.implyK;
+  | implyS => exact Kripke.ValidOnModel.implyS;
   | ec => exact Kripke.ValidOnModel.elimContra;
 
 lemma unprovable_atomic_axiomFour : Modal.KHen ⊬ Axioms.Four (atom a) := by

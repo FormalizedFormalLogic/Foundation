@@ -19,8 +19,8 @@ lemma soundness_of_validates_axioms (hV : C.Validates Ax) : (Hilbert Ax) ⊢ φ 
   intro hφ F hF;
   induction hφ with
   | verum => apply ValidOnFrame.top;
-  | implyS => apply ValidOnFrame.imply₁;
-  | implyK => apply ValidOnFrame.imply₂;
+  | implyS => apply ValidOnFrame.implyK;
+  | implyK => apply ValidOnFrame.implyS;
   | andElimL => apply ValidOnFrame.andElim₁;
   | andElimR => apply ValidOnFrame.andElim₂;
   | andIntro => apply ValidOnFrame.andInst₃;
