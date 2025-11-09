@@ -1,11 +1,12 @@
 /-
   Naming of axioms are refered from:
 
-  - T. Kurahashi, Y. Okawa, 2021, "Modal completeness of sublogics of the  interpretability logic IL"
-  - A. Visser, 1988, "Preliminary Notes on Interpretability Logic"
-  - V. Švejdar, 1991, "Some independence results in interpretability logic"
-  - L. Mitec, 2022, "On Logics and Semantics of Interpretability"
-  - E. Goris, J. J. Joosten, 2011, "A New Principle in the Interpretability Logic of  all Reasonable Arithmetical Theories"
+  - 1988, A. Visser, "Preliminary Notes on Interpretability Logic"
+  - 1991, V. Švejdar, "Some independence results in interpretability logic"
+  - 1997, A. Visser, "An Overview of Interpretability Logic"
+  - 2011, E. Goris, J. J. Joosten, "A New Principle in the Interpretability Logic of  all Reasonable Arithmetical Theories"
+  - 2021, T. Kurahashi, Y. Okawa, "Modal completeness of sublogics of the  interpretability logic IL"
+  - 2022, L. Mitec, "On Logics and Semantics of Interpretability"
 -/
 import Foundation.InterpretabilityLogic.LogicSymbol
 
@@ -59,7 +60,7 @@ protected abbrev P := (φ ▷ ψ) ➝ □(φ ▷ ψ)
 /--
   - Goris & Joosten 2011, `P₀`
 -/
-protected abbrev P0 := (φ ➝ ◇ψ) ➝ □(φ ▷ ψ)
+protected abbrev P₀ := (φ ➝ ◇ψ) ➝ □(φ ▷ ψ)
 
 /--
   Montagna's Principle
@@ -74,9 +75,9 @@ protected abbrev M := (φ ▷ ψ) ➝ ((φ ⋏ □χ) ▷ (ψ ⋏ □χ))
 protected abbrev KM1 := (φ ▷ ◇ψ) ➝ □(φ ➝ ◇ψ)
 
 /--
-  - Mitec 2022, `M₀`
+  - Visser 1997, `M₀`
 -/
-protected abbrev M0 := (φ ▷ ψ) ➝ (◇φ ⋏ □χ ➝ ψ ⋏ □χ)
+protected abbrev M₀ := (φ ▷ ψ) ➝ (◇φ ⋏ □χ) ▷ (ψ ⋏ □χ)
 
 /--
   - Visser 1988, `J6`: De Jongh-Visser Principle
@@ -84,17 +85,37 @@ protected abbrev M0 := (φ ▷ ψ) ➝ (◇φ ⋏ □χ ➝ ψ ⋏ □χ)
 -/
 protected abbrev W := (φ ▷ ψ) ➝ (φ ▷ (ψ ⋏ □(∼φ)))
 
+/--
+  - Visser 1997, `W*`
+-/
 protected abbrev WStar := (φ ▷ ψ) ➝ ((ψ ⋏ □χ) ▷ (ψ ⋏ □χ ⋏ □(∼φ)))
 
 /--
   - Švejdar 1991, `KW1`
+  - Visser 1997, `KW1`
 -/
 protected abbrev KW1 := (φ ▷ ◇⊤) ➝ (⊤ ▷ ∼φ)
 
 /--
   - Švejdar 1991, `KW1⁰`
 -/
-protected abbrev KW1_0 := (φ ▷ ◇⊤) ➝ (⊤ ▷ (∼φ ⋏ □(∼φ)))
+protected abbrev KW1₀ := (φ ▷ ◇⊤) ➝ (⊤ ▷ (∼φ ⋏ □(∼φ)))
+
+/--
+  - Visser 1997, `KW2`
+-/
+protected abbrev KW2 := φ ▷ ◇ψ ➝ ψ ▷ (ψ ⋏ ∼φ)
+
+/--
+  - Visser 1997, `KW3`
+-/
+protected abbrev KW3 := φ ▷ (ψ ⋎ ◇φ) ➝ φ ▷ ψ
+
+/--
+  - Visser 1997, `KW4`
+-/
+protected abbrev KW4 := φ ▷ ψ ➝ ψ ▷ (ψ ⋏ □(∼φ))
+
 
 /--
   Feferman's Principle

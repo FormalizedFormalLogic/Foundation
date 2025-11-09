@@ -307,6 +307,20 @@ open Context in instance [Entailment.Minimal 𝓢] (Γ : Context F 𝓢) : HasAx
 end
 
 
+class HasAxiomM₀ (𝓢 : S) where
+  M₀! {φ ψ χ : F} : 𝓢 ⊢! Axioms.M₀ φ ψ χ
+export HasAxiomM₀ (M₀!)
+
+section
+variable [HasAxiomM₀ 𝓢]
+@[simp] lemma M₀ : 𝓢 ⊢ Axioms.M₀ φ ψ χ := ⟨M₀!⟩
+
+open FiniteContext in instance [Entailment.Minimal 𝓢] (Γ : FiniteContext F 𝓢) : HasAxiomM₀ Γ := ⟨λ {_} => of M₀!⟩
+open Context in instance [Entailment.Minimal 𝓢] (Γ : Context F 𝓢) : HasAxiomM₀ Γ := ⟨λ {_} => of M₀!⟩
+end
+
+
+
 class HasAxiomKM1 (𝓢 : S) where
   KM1! {φ ψ : F} : 𝓢 ⊢! Axioms.KM1 φ ψ
 export HasAxiomKM1 (KM1!)
@@ -328,6 +342,17 @@ variable [HasAxiomW 𝓢]
 @[simp] protected lemma W : 𝓢 ⊢ Axioms.W φ ψ := ⟨W!⟩
 open FiniteContext in instance [Entailment.Minimal 𝓢] (Γ : FiniteContext F 𝓢) : HasAxiomW Γ := ⟨λ {_} => of W!⟩
 open Context in instance [Entailment.Minimal 𝓢] (Γ : Context F 𝓢) : HasAxiomW Γ := ⟨λ {_} => of W!⟩
+end
+
+
+class HasAxiomWStar (𝓢 : S) where
+  WStar! {φ ψ χ : F} : 𝓢 ⊢! Axioms.WStar φ ψ χ
+export HasAxiomWStar (WStar!)
+section
+variable [HasAxiomWStar 𝓢]
+@[simp] protected lemma WStar : 𝓢 ⊢ Axioms.WStar φ ψ χ := ⟨WStar!⟩
+open FiniteContext in instance [Entailment.Minimal 𝓢] (Γ : FiniteContext F 𝓢) : HasAxiomWStar Γ := ⟨λ {_} => of WStar!⟩
+open Context in instance [Entailment.Minimal 𝓢] (Γ : Context F 𝓢) : HasAxiomWStar Γ := ⟨λ {_} => of WStar!⟩
 end
 
 
