@@ -22,8 +22,8 @@ lemma soundness_of_validates_axioms (hV : C ⊧* Ax) : Hilbert.Normal Ax ⊢ φ 
     . assumption;
   | mdp ihpq ihp => exact ValidOnFrame.mdp ihpq ihp;
   | nec ih => exact ValidOnFrame.nec ih;
-  | imply₁ => exact ValidOnFrame.imply₁;
-  | imply₂ => exact ValidOnFrame.imply₂;
+  | implyK => exact ValidOnFrame.implyK;
+  | implyS => exact ValidOnFrame.implyS;
   | ec => exact ValidOnFrame.elimContra;
 
 instance instSound_of_validates_axioms (hV : C ⊧* Ax) : Sound (Hilbert.Normal Ax) C := ⟨fun {_} =>
@@ -53,8 +53,8 @@ lemma soundness_of_frame_validates_axioms (hV : F ⊧* Ax) : (Hilbert.Normal Ax)
     assumption;
   | mdp ihpq ihp => exact ValidOnFrame.mdp ihpq ihp;
   | nec ih => exact ValidOnFrame.nec ih;
-  | imply₁ => exact ValidOnFrame.imply₁;
-  | imply₂ => exact ValidOnFrame.imply₂;
+  | implyK => exact ValidOnFrame.implyK;
+  | implyS => exact ValidOnFrame.implyS;
   | ec => exact ValidOnFrame.elimContra;
 
 instance instSound_of_frame_validates_axioms (hV : F ⊧* Ax) : Sound (Hilbert.Normal Ax) F := ⟨fun {_} =>

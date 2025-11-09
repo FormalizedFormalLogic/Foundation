@@ -609,6 +609,7 @@ lemma provable_TBBMinus_of_mem_trace (h : ¬(T.ProvabilityLogic U) ⊆ Modal.S) 
 
   apply ProvabilityLogic.provable_iff.mpr;
   intro g;
+  apply Realization.iff_provable_letterless_interpret ?_ |>.mp H;
   grind;
 
 /-- Artemov & Beklemishev. Lemma 49 -/

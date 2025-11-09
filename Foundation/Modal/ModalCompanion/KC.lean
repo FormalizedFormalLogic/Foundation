@@ -67,7 +67,7 @@ instance : Entailment.HasAxiomPoint2 Propositional.KC.smallestMC where
     apply Modal.Logic.subst (L := Propositional.KC.smallestMC) (φ := Modal.Axioms.Point2 (.atom 0)) (s := λ a => φ);
     have : Propositional.KC.smallestMC ⊢ □(∼□(.atom 0)) ⋎ □(∼□(∼□(.atom 0))) := by
       apply Logic.sumNormal.mem₂!;
-      use Axioms.WeakLEM (.atom 0);
+      use Axioms.WLEM (.atom 0);
       constructor;
       . apply Propositional.Logic.iff_provable.mp;
         simp;

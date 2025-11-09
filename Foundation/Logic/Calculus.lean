@@ -1,5 +1,5 @@
 import Foundation.Logic.Entailment
-import Foundation.Logic.HilbertStyle.Supplemental
+import Foundation.Propositional.Entailment.Cl.Basic
 
 /-!
 # Sequent calculus and variants
@@ -196,42 +196,42 @@ instance [Cut F K] : Entailment.Cl 𝓚 where
       let d : 𝓚 ⟹ [φ ⋏ ∼ψ, ψ] := and (wk dp <| by simp) (close ψ)
       ofEq d (by simp)
     cut dpq dnq
-  negEquiv φ := ofEq
+  negEquiv {φ} := ofEq
     (show 𝓚 ⊢! (φ ⋎ ∼φ ⋎ ⊥) ⋏ (φ ⋏ ⊤ ⋎ ∼φ) from
       and (or <| rotate₁ <| or <| close φ) (or <| and (close φ) verum'))
     (by simp [Axioms.NegEquiv, DeMorgan.imply, LogicalConnective.iff])
   verum := verum _ _
-  imply₁ φ ψ :=
+  implyK {φ ψ} :=
     have : 𝓚 ⊢! ∼φ ⋎ ∼ψ ⋎ φ := or <| rotate₁ <| or <| close φ
     ofEq this (by simp [DeMorgan.imply])
-  imply₂ φ ψ χ :=
+  implyS {φ ψ χ} :=
     have : 𝓚 ⊢! φ ⋏ ψ ⋏ ∼χ ⋎ φ ⋏ ∼ψ ⋎ ∼φ ⋎ χ :=
       or <| rotate₁ <| or <| rotate₁ <| or <| rotate₃ <| and
         (close φ)
         (and (rotate₃ <| and (close φ) (close ψ)) (close χ))
     ofEq this (by simp [DeMorgan.imply])
-  and₁ φ ψ :=
+  and₁ {φ ψ} :=
     have : 𝓚 ⊢! (∼φ ⋎ ∼ψ) ⋎ φ := or <| or <| close φ
     ofEq this (by simp [DeMorgan.imply])
-  and₂ φ ψ :=
+  and₂ {φ ψ} :=
     have : 𝓚 ⊢! (∼φ ⋎ ∼ψ) ⋎ ψ := or <| or <| close ψ
     ofEq this (by simp [DeMorgan.imply])
-  and₃ φ ψ :=
+  and₃ {φ ψ} :=
     have : 𝓚 ⊢! ∼φ ⋎ ∼ψ ⋎ φ ⋏ ψ := or <| rotate₁ <| or <| rotate₁ <| and (close φ) (close ψ)
     ofEq this (by simp [DeMorgan.imply])
-  or₁ φ ψ :=
+  or₁ {φ ψ} :=
     have : 𝓚 ⊢! ∼φ ⋎ φ ⋎ ψ := or <| rotate₁ <| or <| close φ
     ofEq this (by simp [DeMorgan.imply])
-  or₂ φ ψ :=
+  or₂ {φ ψ} :=
     have : 𝓚 ⊢! ∼ψ ⋎ φ ⋎ ψ := or <| rotate₁ <| or <| close ψ
     ofEq this (by simp [DeMorgan.imply])
-  or₃ φ ψ χ :=
+  or₃ {φ ψ χ} :=
     have : 𝓚 ⊢! φ ⋏ ∼χ ⋎ ψ ⋏ ∼ χ ⋎ ∼φ ⋏ ∼ψ ⋎ χ :=
       or <| rotate₁ <| or <| rotate₁ <| or <| and
         (rotate₃ <| and (close φ) (close χ))
         (rotate₂ <| and (close ψ) (close χ))
     ofEq this (by simp [DeMorgan.imply])
-  dne φ :=
+  dne {φ} :=
     have : 𝓚 ⊢! ∼φ ⋎ φ := or <| close φ
     ofEq this (by simp [DeMorgan.imply])
 

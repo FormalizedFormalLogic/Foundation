@@ -24,8 +24,8 @@ theorem Hilbert.Normal.of_provable_boxdotTranslated_axiomInstances [Entailment.K
   | @axm φ s hs => apply h; use φ; tauto;
   | mdp ihpq ihp => exact ihpq ⨀ ihp;
   | nec ihp => exact boxdot_nec! $ ihp;
-  | imply₂ => exact imply₂!;
-  | imply₁ => exact imply₁!;
+  | implyS => exact implyS!;
+  | implyK => exact implyK!;
   | ec => exact elim_contra!;
 
 

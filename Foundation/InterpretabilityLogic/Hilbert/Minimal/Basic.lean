@@ -21,8 +21,8 @@ protected inductive Hilbert.Minimal {α} (Ax : Axiom α) : Logic α
 | protected nec {φ}       : Hilbert.Minimal Ax φ → Hilbert.Minimal Ax (□φ)
 | protected R1 {φ ψ χ}    : Hilbert.Minimal Ax (φ ➝ ψ) → Hilbert.Minimal Ax (χ ▷ φ ➝ χ ▷ ψ)
 | protected R2 {φ ψ χ}    : Hilbert.Minimal Ax (φ ➝ ψ) → Hilbert.Minimal Ax (ψ ▷ χ ➝ φ ▷ χ)
-| protected imply₁ φ ψ    : Hilbert.Minimal Ax $ Axioms.Imply₁ φ ψ
-| protected imply₂ φ ψ χ  : Hilbert.Minimal Ax $ Axioms.Imply₂ φ ψ χ
+| protected implyK φ ψ    : Hilbert.Minimal Ax $ Axioms.ImplyK φ ψ
+| protected implyS φ ψ χ  : Hilbert.Minimal Ax $ Axioms.ImplyS φ ψ χ
 | protected ec φ ψ        : Hilbert.Minimal Ax $ Axioms.ElimContra φ ψ
 | protected axiomK φ ψ    : Hilbert.Minimal Ax $ Modal.Axioms.K φ ψ
 | protected axiomL φ      : Hilbert.Minimal Ax $ Modal.Axioms.L φ
@@ -40,9 +40,9 @@ lemma axm! {φ} (s : Substitution _) (h : φ ∈ Ax) : Hilbert.Minimal Ax ⊢ φ
 lemma axm'! {φ} (h : φ ∈ Ax) : Hilbert.Minimal Ax ⊢ φ := by simpa using axm! (idSubstitution _) h;
 
 instance : Entailment.Lukasiewicz (Hilbert.Minimal Ax) where
-  imply₁ _ _ := by constructor; apply Hilbert.Minimal.imply₁;
-  imply₂ _ _ _ := by constructor; apply Hilbert.Minimal.imply₂;
-  elimContra _ _ := by constructor; apply Hilbert.Minimal.ec;
+  implyK {_ _} := by constructor; apply Hilbert.Minimal.implyK;
+  implyS {_ _ _} := by constructor; apply Hilbert.Minimal.implyS;
+  elimContra {_ _} := by constructor; apply Hilbert.Minimal.ec;
   mdp h₁ h₂ := by
     constructor;
     apply Hilbert.Minimal.mdp;
@@ -75,8 +75,8 @@ instance : Logic.Substitution (Hilbert.Minimal Ax) where
     | nec hφ ihφ          => apply Minimal.nec ihφ;
     | R1 hφψ ihφψ         => apply Minimal.R1 ihφψ;
     | R2 hφψ ihφψ         => apply Minimal.R2 ihφψ;
-    | imply₁ φ ψ          => apply Minimal.imply₁;
-    | imply₂ φ ψ χ        => apply Minimal.imply₂;
+    | implyK φ ψ          => apply Minimal.implyK;
+    | implyS φ ψ χ        => apply Minimal.implyS;
     | ec φ ψ              => apply Minimal.ec;
     | axiomK φ ψ          => apply Minimal.axiomK;
     | axiomL φ            => apply Minimal.axiomL;
@@ -88,8 +88,8 @@ protected lemma rec!
   (nec      : ∀ {φ}, {hφψ : (Hilbert.Minimal Ax) ⊢ φ} → motive (φ) hφψ → motive (□φ) (nec! hφψ))
   (R1       : ∀ {φ ψ χ}, {hφψ : (Hilbert.Minimal Ax) ⊢ φ ➝ ψ} → motive (φ ➝ ψ) hφψ → motive (χ ▷ φ ➝ χ ▷ ψ) (by grind))
   (R2       : ∀ {φ ψ χ}, {hφψ : (Hilbert.Minimal Ax) ⊢ φ ➝ ψ} → motive (φ ➝ ψ) hφψ → motive (ψ ▷ χ ➝ φ ▷ χ) (by grind))
-  (imply₁   : ∀ {φ ψ}, motive (Axioms.Imply₁ φ ψ) $ by simp)
-  (imply₂   : ∀ {φ ψ χ}, motive (Axioms.Imply₂ φ ψ χ) $ by simp)
+  (implyK   : ∀ {φ ψ}, motive (Axioms.ImplyK φ ψ) $ by simp)
+  (implyS   : ∀ {φ ψ χ}, motive (Axioms.ImplyS φ ψ χ) $ by simp)
   (ec       : ∀ {φ ψ}, motive (Axioms.ElimContra φ ψ) $ by simp)
   (axiomK   : ∀ {φ ψ}, motive (Modal.Axioms.K φ ψ) $ by simp)
   (axiomL   : ∀ {φ}, motive (Modal.Axioms.L φ) $ by simp)
@@ -249,11 +249,12 @@ section
 
 namespace Hilbert.Minimal
 
+open Formula (atom)
+
 inductive AxiomName | J1 | J2 | J2Plus | J4 | J4Plus | J5 | M deriving DecidableEq
 
 variable {l : List AxiomName}
 
-@[grind]
 def buildAxioms (l : List AxiomName) : Axiom ℕ :=
   ILMinus.axioms ∪
     (if l.contains .J1 then { InterpretabilityLogic.Axioms.J1 (.atom 0) (.atom 1) } else ∅) ∪
@@ -272,41 +273,66 @@ example : buildAxioms [.J1, .J2] = {
   Axioms.J6 (.atom 0)
 } := by ext A; simp [Hilbert.Minimal.buildAxioms]; grind;
 
+
+@[grind ⇒]
+lemma buildAxioms.sub_of_sub {l₁ l₂ : List AxiomName} (h : l₁ ⊆ l₂) : buildAxioms l₁ ⊆ buildAxioms l₂ := by
+  intro A hA;
+  simp_all only [buildAxioms, List.contains_eq_mem, decide_eq_true_eq, Set.mem_union, Set.mem_insert_iff, Set.mem_singleton_iff, Set.mem_ite_empty_right];
+  grind;
+
 instance buildAxioms.instHasJ3 : (buildAxioms l).HasJ3 where
   p := 0; q := 1; r := 2;
-  mem_J3 := by simp only [buildAxioms]; simp;
+  mem_J3 := by
+    left; left; left; left; left; left; left;
+    simp;
 
 instance buildAxioms.instHasJ6 : (buildAxioms l).HasJ6 where
   p := 0;
-  mem_J6 := by simp only [buildAxioms]; simp;
+  mem_J6 := by
+    left; left; left; left; left; left; left;
+    simp;
 
 instance buildAxioms.instHasJ1 (h : l.contains .J1 := by decide) : (buildAxioms l).HasJ1 where
   p := 0; q := 1;
-  mem_J1 := by simp only [buildAxioms, h]; simp;
+  mem_J1 := by
+    left; left; left; left; left; left; right;
+    simpa using h;
 
 instance buildAxioms.instHasJ2 (h : l.contains .J2 := by decide) : (buildAxioms l).HasJ2 where
   p := 0; q := 1; r := 2;
-  mem_J2 := by simp only [buildAxioms, h]; simp;
+  mem_J2 := by
+    left; left; left; left; left; right;
+    simpa using h;
 
 instance buildAxioms.instHasJ2Plus (h : l.contains .J2Plus := by decide) : (buildAxioms l).HasJ2Plus where
   p := 0; q := 1; r := 2;
-  mem_J2Plus := by simp only [buildAxioms, h]; simp;
+  mem_J2Plus := by
+    left; left; left; left; right;
+    simpa using h;
 
 instance buildAxioms.instHasJ4 (h : l.contains .J4 := by decide) : (buildAxioms l).HasJ4 where
   p := 0; q := 1;
-  mem_J4 := by simp only [buildAxioms, h]; simp;
+  mem_J4 := by
+    left; left; left; right;
+    simpa using h;
 
 instance buildAxioms.instHasJ4Plus (h : l.contains .J4Plus := by decide) : (buildAxioms l).HasJ4Plus where
   p := 0; q := 1; r := 2;
-  mem_J4Plus := by simp only [buildAxioms, h]; simp;
+  mem_J4Plus := by
+    left; left; right;
+    simpa using h;
 
 instance buildAxioms.instHasJ5 (h : l.contains .J5 := by decide) : (buildAxioms l).HasJ5 where
   p := 0;
-  mem_J5 := by simp only [buildAxioms, h]; simp;
+  mem_J5 := by
+    left; right;
+    simpa using h;
 
 instance buildAxioms.instHasM (h : l.contains .M := by decide) : (buildAxioms l).HasM where
   p := 0; q := 1; r := 2;
-  mem_M := by simp only [buildAxioms, h]; simp;
+  mem_M := by
+    right;
+    simpa using h;
 
 open Lean in
 macro "defineILMinus" name:ident "[" xs:ident,* "]" : command => do
@@ -359,6 +385,17 @@ macro "defineILMinus" name:ident "[" xs:ident,* "]" : command => do
     $instILMinusM
     end $logicName
   )
+
+@[simp high]
+lemma weakerThan_ILMinus_buildAxioms_of_subset : InterpretabilityLogic.ILMinus ⪯ Hilbert.Minimal (buildAxioms l) := by
+  apply weakerThan_of_subset_axioms;
+  simp [buildAxioms, Set.union_assoc];
+
+@[grind ⇒]
+lemma weakerThan_buildAxioms_of_subset (h : l₁ ⊆ l₂) : Hilbert.Minimal (buildAxioms l₁) ⪯ Hilbert.Minimal (buildAxioms l₂) := by
+  apply weakerThan_of_subset_axioms;
+  apply buildAxioms.sub_of_sub;
+  apply h;
 
 end Hilbert.Minimal
 

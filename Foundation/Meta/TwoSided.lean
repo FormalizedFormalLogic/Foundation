@@ -1,4 +1,4 @@
-import Foundation.Logic.HilbertStyle.Supplemental
+import Foundation.Propositional.Entailment.Cl.Basic
 
 namespace LO.Entailment
 
@@ -153,7 +153,7 @@ lemma imply_right_cl [Entailment.Cl 𝓢] (h : Γ ++ [φ] ⟹ Δ ++ [ψ]) : Γ �
     intro χ hχ
     rcases show χ = ψ ∨ χ ∈ Δ by simpa using hχ with (rfl | hχ)
     · apply right_Disj!_intro' _ (φ := φ ➝ χ) (by simp)
-      exact imply₁!
+      exact implyK!
     · apply right_Disj!_intro
       simp [hχ]
   exact left_A!_intro hφ hnφ ⨀ lem!

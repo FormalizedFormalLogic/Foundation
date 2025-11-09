@@ -8,6 +8,23 @@ open Modal.Hilbert
 open FirstOrder
 open Entailment FiniteContext
 
+
+namespace Entailment
+
+
+variable {F : Type*} [LogicalConnective F] [DecidableEq F]
+         {S : Type*} [Entailment S F]
+         {𝓢 : S} [Entailment.Cl 𝓢]
+         {φ ψ χ ξ : F}
+
+lemma CCCCOOK! : 𝓢 ⊢ ((φ ➝ (ψ ➝ ⊥)) ➝ ⊥) ➝ (φ ⋏ ψ) := by cl_prover
+
+lemma CKCCCOO! : 𝓢 ⊢ (φ ⋏ ψ) ➝ ((φ ➝ ψ ➝ ⊥) ➝ ⊥) := by cl_prover;
+
+end Entailment
+
+
+
 namespace ProvabilityLogic
 
 variable {L : Language} [L.ReferenceableBy L] [L.DecidableEq]
@@ -30,15 +47,16 @@ lemma iff_interpret_boxdot_strongInterpret_inside [𝔅.HBL2] :
   | hfalsum => simp [strongInterpret, Formula.boxdotTranslate];
   | himp A B ihA ihB => exact ECC!_of_E!_of_E! ihA ihB;
   | hbox A ih =>
+    apply E!_trans Realization.interpret.iff_provable_boxdot_inside;
     apply K!_intro;
-    . apply C!_trans CCCCOOK! ?_;
-      apply CKK!_of_C!_of_C!;
-      . exact K!_left ih;
-      . exact 𝔅.prov_distribute_imply'' $ K!_left ih;
-    . apply C!_trans ?_ CKCCCOO!;
-      apply CKK!_of_C!_of_C!;
-      . exact K!_right ih;
-      . exact 𝔅.prov_distribute_imply'' $ K!_right ih;
+    . apply CKK!_of_C!_of_C!;
+      . cl_prover [ih];
+      . apply 𝔅.prov_distribute_imply'';
+        cl_prover [ih];
+    . apply CKK!_of_C!_of_C!;
+      . cl_prover [ih];
+      . apply 𝔅.prov_distribute_imply'';
+        cl_prover [ih];
 
 lemma iff_interpret_boxdot_strongInterpret [𝔅.HBL2] :
     T ⊢ f (Aᵇ) ↔ T ⊢ f.strongInterpret A := by

@@ -233,9 +233,9 @@ lemma multinec (n) (h : M ⊧ φ) : M ⊧ □^[n]φ := by
   | zero => tauto;
   | succ n ih => simpa using ValidOnModel.nec ih;
 
-protected lemma imply₁ : M ⊧ (Axioms.Imply₁ φ ψ) := by simp [ValidOnModel]; tauto;
+protected lemma implyK : M ⊧ (Axioms.ImplyK φ ψ) := by simp [ValidOnModel]; tauto;
 
-protected lemma imply₂ : M ⊧ (Axioms.Imply₂ φ ψ χ) := by simp [ValidOnModel]; tauto;
+protected lemma implyS : M ⊧ (Axioms.ImplyS φ ψ χ) := by simp [ValidOnModel]; tauto;
 
 protected lemma elimContra : M ⊧ (Axioms.ElimContra φ ψ) := by simp [ValidOnModel]; tauto;
 
@@ -350,10 +350,10 @@ open Formula.Veltman
 variable {F : Veltman.Frame} {φ ψ χ : Formula ℕ}
 
 @[simp high, grind .]
-lemma validate_imply₁ : F ⊧ (Axioms.Imply₁ φ ψ) := by tauto;
+lemma validate_implyK : F ⊧ (Axioms.ImplyK φ ψ) := by tauto;
 
 @[simp high, grind .]
-lemma validate_imply₂ : F ⊧ (Axioms.Imply₂ φ ψ χ) := by tauto;
+lemma validate_implyS : F ⊧ (Axioms.ImplyS φ ψ χ) := by tauto;
 
 @[simp high, grind .]
 lemma validate_elimContra : F ⊧ (Axioms.ElimContra φ ψ) := by

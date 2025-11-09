@@ -78,7 +78,7 @@ variable [Entailment.ILMinus_J4Plus'' 𝓢]
 instance : HasAxiomJ4Plus 𝓢 := ⟨by
   intro φ ψ χ;
   have H₁ : 𝓢 ⊢! □(φ ➝ ψ) ➝ χ ▷ φ ➝ χ ▷ ((φ ➝ ψ) ⋏ φ) := J4Plus''!;
-  have H₂ : 𝓢 ⊢! χ ▷ ((φ ➝ ψ) ⋏ φ) ➝ χ ▷ ψ := R1! $ C_trans (CKK _ _) $ innerMDP;
+  have H₂ : 𝓢 ⊢! χ ▷ ((φ ➝ ψ) ⋏ φ) ➝ χ ▷ ψ := R1! $ C_trans CKK $ innerMDP;
   exact CC!_of_CC!_of_C! H₁ H₂;
 ⟩
 

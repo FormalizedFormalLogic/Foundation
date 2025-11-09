@@ -1,6 +1,8 @@
-import Foundation.Propositional.Axioms
+
 import Foundation.Propositional.Formula
-import Foundation.Logic.Axioms
+import Foundation.Propositional.Entailment.Cl.Basic
+import Foundation.Propositional.Entailment.KrieselPutnam
+import Foundation.Propositional.Entailment.Scott
 
 namespace LO.Propositional
 
@@ -22,7 +24,7 @@ class HasLEM (Ax : Axiom α) where
 
 class HasWLEM (Ax : Axiom α) where
   p : α
-  mem_lem : Axioms.WeakLEM (.atom p) ∈ Ax := by tauto;
+  mem_lem : Axioms.WLEM (.atom p) ∈ Ax := by tauto;
 
 class HasDummett (Ax : Axiom α) where
   p : α

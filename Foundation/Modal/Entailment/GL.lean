@@ -27,7 +27,7 @@ namespace GL
 
 variable {φ ψ : F}
 
-instance : HasAxiomZ 𝓢 := ⟨fun _ ↦ C_trans axiomL imply₁⟩
+instance : HasAxiomZ 𝓢 := ⟨fun _ ↦ C_trans axiomL implyK⟩
 
 protected def axiomFour : 𝓢 ⊢! Axioms.Four φ := by
   dsimp [Axioms.Four];
@@ -43,7 +43,7 @@ instance : Entailment.K4 𝓢 where
 protected def axiomHen : 𝓢 ⊢! Axioms.Hen φ := C_trans (implyBoxDistribute' and₁) axiomL
 instance : HasAxiomHen 𝓢 := ⟨fun _ ↦ GL.axiomHen⟩
 
-protected def axiomZ : 𝓢 ⊢! Axioms.Z φ := C_trans axiomL imply₁
+protected def axiomZ : 𝓢 ⊢! Axioms.Z φ := C_trans axiomL implyK
 instance : HasAxiomZ 𝓢 := ⟨fun _ ↦ GL.axiomZ⟩
 
 end GL
@@ -53,7 +53,7 @@ private noncomputable def lem_boxdot_Grz_of_L : 𝓢 ⊢! (⊡(⊡(φ ➝ ⊡φ)
     apply deduct';
     apply K_intro;
     . exact (of CNC) ⨀ and₂;
-    . exact (of (C_id _)) ⨀ and₁;
+    . exact (of C_id) ⨀ and₁;
   have : 𝓢 ⊢! ∼⊡(φ ➝ ⊡φ) ➝ (∼□(φ ➝ ⊡φ) ⋎ φ) := C_trans (contra this) $ C_trans CNKANN (CAA_of_C_right dne);
   have : 𝓢 ⊢! (∼⊡(φ ➝ ⊡φ) ⋎ φ) ➝ (∼□(φ ➝ ⊡φ) ⋎ φ) := left_A_intro this or₂;
   have : 𝓢 ⊢! ∼⊡(φ ➝ ⊡φ) ⋎ φ ➝ □(φ ➝ ⊡φ) ➝ φ := C_trans this CANC;

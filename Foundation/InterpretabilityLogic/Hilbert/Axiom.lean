@@ -6,6 +6,7 @@ namespace LO.InterpretabilityLogic
 
 variable {α : Type _}
 
+
 abbrev Axiom (α) := Set (Formula α)
 
 abbrev Axiom.instances (Ax : Axiom α) : FormulaSet α := { φ | ∃ ψ ∈ Ax, ∃ s, φ = ψ⟦s⟧ }
@@ -96,5 +97,46 @@ class HasP where
   mem_P : InterpretabilityLogic.Axioms.P (.atom p) (.atom q) ∈ Ax := by grind;
 
 end Axiom
+
+section
+
+-- TODO: too trivial, it should be proved by one `simp`.
+
+open Formula (atom)
+
+@[simp]
+lemma ne_J1_J6 : Axioms.J1 (atom 0) (atom 1) ≠ Axioms.J6 (atom 0) := by
+  apply Formula.imp_inj.not.mpr;
+  simp;
+
+@[simp]
+lemma ne_J2_J6 : Axioms.J2 (atom 0) (atom 1) (atom 2) ≠ Axioms.J6 (atom 0) := by
+  apply Formula.imp_inj.not.mpr;
+  simp;
+
+@[simp]
+lemma ne_J2Plus_J6 : Axioms.J2Plus (atom 0) (atom 1) (atom 2) ≠ Axioms.J6 (atom 0) := by
+  apply Formula.imp_inj.not.mpr;
+  simp;
+
+@[simp]
+lemma ne_J4_J6 : Axioms.J4 (atom 0) (atom 1) ≠ Axioms.J6 (atom 0) := by
+  apply Formula.imp_inj.not.mpr;
+  simp;
+
+@[simp]
+lemma ne_J4Plus_J6 : Axioms.J4Plus (atom 0) (atom 1) (atom 2) ≠ Axioms.J6 (atom 0) := by
+  apply Formula.imp_inj.not.mpr;
+  simp;
+
+@[simp]
+lemma ne_J5_J6 : Axioms.J5 (atom 0) ≠ Axioms.J6 (atom 0) := by tauto;
+
+@[simp]
+lemma ne_M_J6 : Axioms.M (atom 0) (atom 1) (atom 2) ≠ Axioms.J6 (atom 0) := by
+  apply Formula.imp_inj.not.mpr;
+  simp;
+
+end
 
 end LO.InterpretabilityLogic

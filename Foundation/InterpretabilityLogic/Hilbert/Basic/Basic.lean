@@ -15,8 +15,8 @@ inductive Hilbert.Basic {α} (Ax : Axiom α) : Logic α
 | protected axm {φ} (s : Substitution _) : φ ∈ Ax → Hilbert.Basic Ax (φ⟦s⟧)
 | protected mdp {φ ψ}     : Hilbert.Basic Ax (φ ➝ ψ) → Hilbert.Basic Ax φ → Hilbert.Basic Ax ψ
 | protected nec {φ}       : Hilbert.Basic Ax φ → Hilbert.Basic Ax (□φ)
-| protected imply₁ φ ψ    : Hilbert.Basic Ax $ Axioms.Imply₁ φ ψ
-| protected imply₂ φ ψ χ  : Hilbert.Basic Ax $ Axioms.Imply₂ φ ψ χ
+| protected implyK φ ψ    : Hilbert.Basic Ax $ Axioms.ImplyK φ ψ
+| protected implyS φ ψ χ  : Hilbert.Basic Ax $ Axioms.ImplyS φ ψ χ
 | protected ec φ ψ        : Hilbert.Basic Ax $ Axioms.ElimContra φ ψ
 | protected axiomK φ ψ    : Hilbert.Basic Ax $ Modal.Axioms.K φ ψ
 | protected axiomL φ      : Hilbert.Basic Ax $ Modal.Axioms.L φ
@@ -32,9 +32,9 @@ variable {Ax Ax₁ Ax₂ : Axiom α}
 @[grind ⇒] lemma axm'! {φ} (h : φ ∈ Ax) : Hilbert.Basic Ax ⊢ φ := by simpa using axm! (idSubstitution _) h;
 
 instance : Entailment.Lukasiewicz (Hilbert.Basic Ax) where
-  imply₁ _ _ := by constructor; apply Hilbert.Basic.imply₁;
-  imply₂ _ _ _ := by constructor; apply Hilbert.Basic.imply₂;
-  elimContra _ _ := by constructor; apply Hilbert.Basic.ec;
+  implyK {_ _} := by constructor; apply Hilbert.Basic.implyK;
+  implyS {_ _ _} := by constructor; apply Hilbert.Basic.implyS;
+  elimContra {_ _} := by constructor; apply Hilbert.Basic.ec;
   mdp h₁ h₂ := by
     constructor;
     apply Hilbert.Basic.mdp;
@@ -53,8 +53,8 @@ instance : Logic.Substitution (Hilbert.Basic Ax) where
     | @axm _ s' ih        => simpa using Basic.axm (s := s' ∘ s) ih;
     | mdp hφψ hφ ihφψ ihφ => apply Basic.mdp ihφψ ihφ;
     | nec hφ ihφ          => apply Basic.nec ihφ;
-    | imply₁ φ ψ          => apply Basic.imply₁;
-    | imply₂ φ ψ χ        => apply Basic.imply₂;
+    | implyK φ ψ          => apply Basic.implyK;
+    | implyS φ ψ χ        => apply Basic.implyS;
     | ec φ ψ              => apply Basic.ec;
     | axiomK φ ψ          => apply Basic.axiomK;
     | axiomL φ            => apply Basic.axiomL;
@@ -64,8 +64,8 @@ protected lemma rec!
   (axm      : ∀ {φ : Formula α} (s), (h : φ ∈ Ax) → motive (φ⟦s⟧) (by grind))
   (mdp      : ∀ {φ ψ : Formula α}, {hφψ : (Hilbert.Basic Ax) ⊢ φ ➝ ψ} → {hφ : (Hilbert.Basic Ax) ⊢ φ} → motive (φ ➝ ψ) hφψ → motive φ hφ → motive ψ (hφψ ⨀ hφ))
   (nec      : ∀ {φ}, {hφψ : (Hilbert.Basic Ax) ⊢ φ} → motive (φ) hφψ → motive (□φ) (nec! hφψ))
-  (imply₁   : ∀ {φ ψ}, motive (Axioms.Imply₁ φ ψ) $ by simp)
-  (imply₂   : ∀ {φ ψ χ}, motive (Axioms.Imply₂ φ ψ χ) $ by simp)
+  (implyK   : ∀ {φ ψ}, motive (Axioms.ImplyK φ ψ) $ by simp)
+  (implyS   : ∀ {φ ψ χ}, motive (Axioms.ImplyS φ ψ χ) $ by simp)
   (ec       : ∀ {φ ψ}, motive (Axioms.ElimContra φ ψ) $ by simp)
   (axiomK   : ∀ {φ ψ}, motive (Modal.Axioms.K φ ψ) $ by simp)
   (axiomL   : ∀ {φ}, motive (Modal.Axioms.L φ) $ by simp)
@@ -225,7 +225,7 @@ protected abbrev ILM.axioms : Axiom ℕ := insert (InterpretabilityLogic.Axioms.
 namespace ILM.axioms
 instance : ILM.axioms.HasJ1 where p := 0; q := 1;
 instance : ILM.axioms.HasJ2 where p := 0; q := 1; r := 2;
-instance : ILM.axioms.HasJ3 where p := 0; q := 1; r := 2;
+instance : ILM.axioms.HasJ3 where p := 0; q := 1; r := 2; mem_J3 := by simp;
 instance : ILM.axioms.HasJ4 where p := 0; q := 1;
 instance : ILM.axioms.HasJ5 where p := 0;
 instance : ILM.axioms.HasM where p := 0; q := 1; r := 2;
@@ -238,7 +238,7 @@ protected abbrev ILP.axioms : Axiom ℕ := insert (InterpretabilityLogic.Axioms.
 namespace ILP.axioms
 instance : ILP.axioms.HasJ1 where p := 0; q := 1;
 instance : ILP.axioms.HasJ2 where p := 0; q := 1; r := 2;
-instance : ILP.axioms.HasJ3 where p := 0; q := 1; r := 2;
+instance : ILP.axioms.HasJ3 where p := 0; q := 1; r := 2; mem_J3 := by simp;
 instance : ILP.axioms.HasJ4 where p := 0; q := 1;
 instance : ILP.axioms.HasJ5 where p := 0;
 instance : ILP.axioms.HasP where p := 0; q := 1;

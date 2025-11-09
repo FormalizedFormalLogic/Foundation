@@ -1,17 +1,6 @@
 import Foundation.Modal.Entailment.DiaDuality
 
 
-namespace LO.Entailment
-
-open FiniteContext
-
-variable {S F : Type*} [BasicModalLogicalConnective F] [Entailment S F] {𝓢 : S} [Entailment.Minimal 𝓢]
-
-def C_replace [HasAxiomImply₁ 𝓢] [HasAxiomImply₂ 𝓢] (h₁ : 𝓢 ⊢! ψ₁ ➝ φ₁) (h₂ : 𝓢 ⊢! φ₂ ➝ ψ₂) : 𝓢 ⊢! φ₁ ➝ φ₂ → 𝓢 ⊢! ψ₁ ➝ ψ₂ := λ h => C_trans h₁ $ C_trans h h₂
-
-end LO.Entailment
-
-
 namespace LO.Modal.Entailment
 
 open LO.Entailment LO.Entailment.FiniteContext

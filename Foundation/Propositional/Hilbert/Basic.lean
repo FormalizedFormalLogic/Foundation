@@ -1,4 +1,5 @@
-import Foundation.Logic.HilbertStyle.Supplemental
+import Foundation.Propositional.Entailment.Cl.Basic
+import Foundation.Propositional.Entailment.Int.DNE_of_LEM
 import Foundation.Propositional.Hilbert.Axiom
 import Foundation.Propositional.Formula
 import Foundation.Propositional.Logic.Basic
@@ -49,16 +50,16 @@ instance : Entailment.ModusPonens (Hilbert Ax) where
     . exact h₁.1;
     . exact h₂.1;
 
-instance : Entailment.HasAxiomImply₁ (Hilbert Ax) := ⟨λ _ _ => by constructor; apply Hilbert.implyS⟩
-instance : Entailment.HasAxiomImply₂ (Hilbert Ax) := ⟨λ _ _ _ => by constructor; apply Hilbert.implyK⟩
-instance : Entailment.HasAxiomAndInst (Hilbert Ax) := ⟨λ _ _ => by constructor; apply Hilbert.andIntro⟩
+instance : Entailment.HasAxiomImplyK (Hilbert Ax) := ⟨λ {_ _} => by constructor; apply Hilbert.implyS⟩
+instance : Entailment.HasAxiomImplyS (Hilbert Ax) := ⟨λ {_ _ _} => by constructor; apply Hilbert.implyK⟩
+instance : Entailment.HasAxiomAndInst (Hilbert Ax) := ⟨λ {_ _} => by constructor; apply Hilbert.andIntro⟩
 instance : Entailment.Minimal (Hilbert Ax) where
   verum := by constructor; apply Hilbert.verum;
-  and₁ _ _ := by constructor; apply Hilbert.andElimL;
-  and₂ _ _ := by constructor; apply Hilbert.andElimR;
-  or₁  _ _ := by constructor; apply Hilbert.orIntroL;
-  or₂  _ _ := by constructor; apply Hilbert.orIntroR;
-  or₃  _ _ _ := by constructor; apply Hilbert.orElim;
+  and₁ {_ _} := by constructor; apply Hilbert.andElimL;
+  and₂ {_ _} := by constructor; apply Hilbert.andElimR;
+  or₁  {_ _} := by constructor; apply Hilbert.orIntroL;
+  or₂  {_ _} := by constructor; apply Hilbert.orIntroR;
+  or₃  {_ _ _} := by constructor; apply Hilbert.orElim;
 
 @[induction_eliminator]
 protected lemma rec!
@@ -66,8 +67,8 @@ protected lemma rec!
   (axm      : ∀ {φ : Formula α} (s), (h : φ ∈ Ax) → motive (φ⟦s⟧) (by grind))
   (mdp      : ∀ {φ ψ : Formula α}, {hpq : (Hilbert Ax) ⊢ φ ➝ ψ} → {hp : (Hilbert Ax) ⊢ φ} → (motive (φ ➝ ψ) hpq) → (motive φ hp) → (motive ψ (hpq ⨀ hp)))
   (verum    : motive ⊤ $ by simp)
-  (implyS   : ∀ {φ ψ},   motive (Axioms.Imply₁ φ ψ) $ by simp)
-  (implyK   : ∀ {φ ψ χ}, motive (Axioms.Imply₂ φ ψ χ) $ by simp)
+  (implyS   : ∀ {φ ψ},   motive (Axioms.ImplyK φ ψ) $ by simp)
+  (implyK   : ∀ {φ ψ χ}, motive (Axioms.ImplyS φ ψ χ) $ by simp)
   (andElimL : ∀ {φ ψ},   motive (φ ⋏ ψ ➝ φ) $ by simp)
   (andElimR : ∀ {φ ψ},   motive (φ ⋏ ψ ➝ ψ) $ by simp)
   (andIntro : ∀ {φ ψ},   motive (φ ➝ ψ ➝ φ ⋏ ψ) $ by simp)
@@ -114,7 +115,7 @@ variable [DecidableEq α]
 open Axiom
 
 instance [Ax.HasEFQ] : Entailment.HasAxiomEFQ (Hilbert Ax) where
-  efq φ := by
+  efq {φ} := by
     constructor;
     simpa using Hilbert.axm
       (s := λ b => if (HasEFQ.p Ax) = b then φ else (.atom b))
@@ -123,23 +124,23 @@ instance [Ax.HasEFQ] : Entailment.HasAxiomEFQ (Hilbert Ax) where
 instance  [Ax.HasEFQ] : Entailment.Int (Hilbert Ax) where
 
 instance [Ax.HasLEM] : Entailment.HasAxiomLEM (Hilbert Ax) where
-  lem φ := by
+  lem {φ} := by
     constructor;
     simpa using Hilbert.axm
       (s := λ b => if (HasLEM.p Ax) = b then φ else (.atom b))
       (φ := Axioms.LEM (.atom (HasLEM.p Ax)))
       $ HasLEM.mem_lem;
 
-instance [Ax.HasWLEM] : Entailment.HasAxiomWeakLEM (Hilbert Ax) where
-  wlem φ := by
+instance [Ax.HasWLEM] : Entailment.HasAxiomWLEM (Hilbert Ax) where
+  wlem {φ} := by
     constructor;
     simpa using Hilbert.axm
       (s := λ b => if (HasWLEM.p Ax) = b then φ else (.atom b))
-      (φ := Axioms.WeakLEM (.atom (HasWLEM.p Ax)))
+      (φ := Axioms.WLEM (.atom (HasWLEM.p Ax)))
       $ HasWLEM.mem_lem;
 
 instance [Ax.HasDummett] : Entailment.HasAxiomDummett (Hilbert Ax) where
-  dummett φ ψ := by
+  dummett {φ ψ} := by
     constructor;
     simpa [HasDummett.ne_pq] using Hilbert.axm
       (φ := Axioms.Dummett (.atom (HasDummett.p Ax)) (.atom (HasDummett.q Ax)))
@@ -150,7 +151,7 @@ instance [Ax.HasDummett] : Entailment.HasAxiomDummett (Hilbert Ax) where
       $ (HasDummett.mem_m);
 
 instance [Ax.HasPeirce] : Entailment.HasAxiomPeirce (Hilbert Ax) where
-  peirce φ ψ := by
+  peirce {φ ψ} := by
     constructor;
     simpa [HasPeirce.ne_pq] using Hilbert.axm
       (φ := Axioms.Peirce (.atom (HasPeirce.p Ax)) (.atom (HasPeirce.q Ax)))
@@ -161,7 +162,7 @@ instance [Ax.HasPeirce] : Entailment.HasAxiomPeirce (Hilbert Ax) where
       $ (HasPeirce.mem_peirce);
 
 instance [Ax.HasKrieselPutnam] : Entailment.HasAxiomKrieselPutnam (Hilbert Ax) where
-  krieselputnam φ ψ χ := by
+  krieselputnam {φ ψ χ} := by
     constructor;
     simpa [HasKrieselPutnam.ne_pq, HasKrieselPutnam.ne_qr, HasKrieselPutnam.ne_rp.symm] using Hilbert.axm
       (φ := Axioms.KrieselPutnam (.atom (HasKrieselPutnam.p Ax)) (.atom (HasKrieselPutnam.q Ax)) (.atom (HasKrieselPutnam.r Ax)))
@@ -194,7 +195,7 @@ protected abbrev Cl := Hilbert Cl.axioms
 instance : Entailment.Cl Propositional.Cl where
 
 
-protected abbrev KC.axioms : Axiom ℕ := {Axioms.EFQ (.atom 0), Axioms.WeakLEM (.atom 0)}
+protected abbrev KC.axioms : Axiom ℕ := {Axioms.EFQ (.atom 0), Axioms.WLEM (.atom 0)}
 namespace KC.axioms
 instance : KC.axioms.HasEFQ where p := 0;
 instance : KC.axioms.HasWLEM where p := 0;
