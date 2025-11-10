@@ -4,13 +4,18 @@ import Foundation.Logic.Predicate.Relational
 import Foundation.Logic.ForcingRelation
 import Mathlib.Order.PFilter
 
-namespace LO.FirstOrder
+namespace LO
+
+abbrev IsSetMonotone {α : Type*} (R : α → α → Prop) (f : α → Set β) :=
+  ∀ {a b}, R a b → f a ⊆ f b
+
+namespace FirstOrder
 
 /-- Kripke model for relational first-order language -/
 class KripkeModel (L : outParam Language) [L.Relational] (World : Type*) [Preorder World] (Carrier : outParam Type*) where
   Domain : World → Set Carrier
-  domain_nonempty : ∀ w, ∃ x, x ∈ Domain w
-  domain_antimonotone : w ≥ v → Domain w ⊆ Domain v
+  domain_nonempty : ∀ w, Set.Nonempty (Domain w)
+  domain_antimonotone : IsSetMonotone (· ≥ ·) Domain
   Rel (w : World) {k : ℕ} (R : L.Rel k) : (Fin k → Carrier) → Prop
   rel_monotone : Rel w R t → ∀ v ≤ w, Rel v R t
 
