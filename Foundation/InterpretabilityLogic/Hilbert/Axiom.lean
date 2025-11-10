@@ -193,6 +193,99 @@ def HasW.of_mem {Ax₁ Ax₂ : Axiom α} (h : Ax₁ ⊆ Ax₂) [Ax₁.HasW] : Ax
   mem_W := h mem_W
 
 
+class HasWStar where
+  p : α
+  q : α
+  r : α
+  ne_pq : p ≠ q := by simp;
+  ne_qr : q ≠ r := by simp;
+  ne_rp : r ≠ p := by simp;
+  mem_WStar : InterpretabilityLogic.Axioms.WStar (.atom p) (.atom q) (.atom r) ∈ Ax := by grind;
+attribute [simp] HasWStar.ne_pq HasWStar.ne_qr HasWStar.ne_rp
+export HasWStar (mem_WStar)
+
+def HasWStar.of_mem {Ax₁ Ax₂ : Axiom α} (h : Ax₁ ⊆ Ax₂) [Ax₁.HasWStar] : Ax₂.HasWStar where
+  p := HasWStar.p Ax₁;
+  q := HasWStar.q Ax₁;
+  r := HasWStar.r Ax₁;
+  mem_WStar := h mem_WStar
+
+
+class HasM₀ where
+  p : α
+  q : α
+  r : α
+  ne_pq : p ≠ q := by simp;
+  ne_qr : q ≠ r := by simp;
+  ne_rp : r ≠ p := by simp;
+  mem_M₀ : InterpretabilityLogic.Axioms.M₀ (.atom p) (.atom q) (.atom r) ∈ Ax := by grind;
+attribute [simp] HasM₀.ne_pq HasM₀.ne_qr HasM₀.ne_rp
+export HasM₀ (mem_M₀)
+
+def HasM₀.of_mem {Ax₁ Ax₂ : Axiom α} (h : Ax₁ ⊆ Ax₂) [Ax₁.HasM₀] : Ax₂.HasM₀ where
+  p := HasM₀.p Ax₁;
+  q := HasM₀.q Ax₁;
+  r := HasM₀.r Ax₁;
+  mem_M₀ := h mem_M₀
+
+
+
+class HasCLAxioms where
+  p : α
+  q : α
+  r : α
+  ne_pq : p ≠ q := by simp;
+  ne_qr : q ≠ r := by simp;
+  ne_rp : r ≠ p := by simp;
+  mem_J1 : InterpretabilityLogic.Axioms.J1 (.atom p) (.atom q) ∈ Ax := by grind;
+  mem_J2 : InterpretabilityLogic.Axioms.J2 (.atom p) (.atom q) (.atom r) ∈ Ax := by grind;
+  mem_J3 : InterpretabilityLogic.Axioms.J3 (.atom p) (.atom q) (.atom r) ∈ Ax := by grind;
+  mem_J4 : InterpretabilityLogic.Axioms.J4 (.atom p) (.atom q) ∈ Ax := by grind;
+attribute [simp] HasCLAxioms.ne_pq HasCLAxioms.ne_qr HasCLAxioms.ne_rp
+instance [Ax.HasCLAxioms] : Ax.HasJ1 where p := HasCLAxioms.p Ax; q := HasCLAxioms.q Ax; mem_J1 := HasCLAxioms.mem_J1;
+instance [Ax.HasCLAxioms] : Ax.HasJ2 where p := HasCLAxioms.p Ax; q := HasCLAxioms.q Ax; r := HasCLAxioms.r Ax; mem_J2 := HasCLAxioms.mem_J2;
+instance [Ax.HasCLAxioms] : Ax.HasJ3 where p := HasCLAxioms.p Ax; q := HasCLAxioms.q Ax; r := HasCLAxioms.r Ax; mem_J3 := HasCLAxioms.mem_J3;
+instance [Ax.HasCLAxioms] : Ax.HasJ4 where p := HasCLAxioms.p Ax; q := HasCLAxioms.q Ax; mem_J4 := HasCLAxioms.mem_J4;
+
+def HasCLAxioms.of_subset {Ax₁ Ax₂ : Axiom α} (h : Ax₁ ⊆ Ax₂) [Ax₁.HasCLAxioms] : Ax₂.HasCLAxioms where
+  p := HasCLAxioms.p Ax₁;
+  q := HasCLAxioms.q Ax₁;
+  r := HasCLAxioms.r Ax₁;
+  mem_J1 := h $ mem_J1;
+  mem_J2 := h $ mem_J2;
+  mem_J3 := h $ mem_J3;
+  mem_J4 := h $ mem_J4;
+
+
+class HasILAxioms where
+  p : α
+  q : α
+  r : α
+  ne_pq : p ≠ q := by simp;
+  ne_qr : q ≠ r := by simp;
+  ne_rp : r ≠ p := by simp;
+  mem_J1 : InterpretabilityLogic.Axioms.J1 (.atom p) (.atom q) ∈ Ax := by grind;
+  mem_J2 : InterpretabilityLogic.Axioms.J2 (.atom p) (.atom q) (.atom r) ∈ Ax := by grind;
+  mem_J3 : InterpretabilityLogic.Axioms.J3 (.atom p) (.atom q) (.atom r) ∈ Ax := by grind;
+  mem_J4 : InterpretabilityLogic.Axioms.J4 (.atom p) (.atom q) ∈ Ax := by grind;
+  mem_J5 : InterpretabilityLogic.Axioms.J5 (.atom p) ∈ Ax := by grind;
+attribute [simp] HasILAxioms.ne_pq HasILAxioms.ne_qr HasILAxioms.ne_rp
+instance [Ax.HasILAxioms] : Ax.HasJ1 where mem_J1 := HasILAxioms.mem_J1; p := HasILAxioms.p Ax; q := HasILAxioms.q Ax;
+instance [Ax.HasILAxioms] : Ax.HasJ2 where mem_J2 := HasILAxioms.mem_J2; p := HasILAxioms.p Ax; q := HasILAxioms.q Ax; r := HasILAxioms.r Ax;
+instance [Ax.HasILAxioms] : Ax.HasJ3 where mem_J3 := HasILAxioms.mem_J3; p := HasILAxioms.p Ax; q := HasILAxioms.q Ax; r := HasILAxioms.r Ax;
+instance [Ax.HasILAxioms] : Ax.HasJ4 where mem_J4 := HasILAxioms.mem_J4; p := HasILAxioms.p Ax; q := HasILAxioms.q Ax;
+instance [Ax.HasILAxioms] : Ax.HasJ5 where mem_J5 := HasILAxioms.mem_J5; p := HasILAxioms.p Ax;
+
+def HasILAxioms.of_subset {Ax₁ Ax₂ : Axiom α} (h : Ax₁ ⊆ Ax₂) [Ax₁.HasILAxioms] : Ax₂.HasILAxioms where
+  p := HasILAxioms.p Ax₁;
+  q := HasILAxioms.q Ax₁;
+  r := HasILAxioms.r Ax₁;
+  mem_J1 := h $ mem_J1;
+  mem_J2 := h $ mem_J2;
+  mem_J3 := h $ mem_J3;
+  mem_J4 := h $ mem_J4;
+  mem_J5 := h $ mem_J5;
+
 end Axiom
 
 section

@@ -3,6 +3,10 @@ import Foundation.InterpretabilityLogic.Entailment.IL
 import Foundation.InterpretabilityLogic.Entailment.ILM
 import Foundation.InterpretabilityLogic.Entailment.ILP
 import Foundation.InterpretabilityLogic.Entailment.ILW
+import Foundation.InterpretabilityLogic.Entailment.ILWStar.Basic
+import Foundation.InterpretabilityLogic.Entailment.ILWStar.M₀
+import Foundation.InterpretabilityLogic.Entailment.ILM₀.Basic
+import Foundation.InterpretabilityLogic.Entailment.ILWM₀
 import Foundation.InterpretabilityLogic.Hilbert.Axiom
 
 namespace LO.InterpretabilityLogic
@@ -91,6 +95,12 @@ lemma weakerThan_of_provable_axioms (hs : Hilbert.Basic Ax₂ ⊢* Ax₁) : (Hil
   | mdp ih₁ ih₂ => exact ih₁ ⨀ ih₂;
   | _ => simp;
 
+lemma equiv_of_provable_axioms (h₁ : Hilbert.Basic Ax₂ ⊢* Ax₁) (h₂ : Hilbert.Basic Ax₁ ⊢* Ax₂) : (Hilbert.Basic Ax₁) ≊ (Hilbert.Basic Ax₂) := by
+  apply Equiv.antisymm;
+  constructor <;>
+  . apply weakerThan_of_provable_axioms;
+    assumption;
+
 lemma weakerThan_of_subset_axioms (h : Ax₁ ⊆ Ax₂) : (Hilbert.Basic Ax₁) ⪯ (Hilbert.Basic Ax₂) := by
   apply weakerThan_of_provable_axioms;
   intro φ hφ;
@@ -177,6 +187,18 @@ instance [Ax.HasM] : InterpretabilityLogic.Entailment.HasAxiomM (Hilbert.Basic A
         else (.atom b))
       $ HasM.mem_M;
 
+instance [Ax.HasM₀] : InterpretabilityLogic.Entailment.HasAxiomM₀ (Hilbert.Basic Ax) where
+  M₀! {φ ψ χ} := by
+    constructor;
+    simpa [HasM₀.ne_pq, HasM₀.ne_qr, HasM₀.ne_rp.symm] using Hilbert.Basic.axm
+      (φ := InterpretabilityLogic.Axioms.M₀ (.atom (HasM₀.p Ax)) (.atom (HasM₀.q Ax)) (.atom (HasM₀.r Ax)))
+      (s := λ b =>
+        if (HasM₀.p Ax) = b then φ
+        else if (HasM₀.q Ax) = b then ψ
+        else if (HasM₀.r Ax) = b then χ
+        else (.atom b))
+      $ HasM₀.mem_M₀;
+
 instance [Ax.HasP] : InterpretabilityLogic.Entailment.HasAxiomP (Hilbert.Basic Ax) where
   P! {φ ψ} := by
     constructor;
@@ -192,6 +214,18 @@ instance [Ax.HasW] : InterpretabilityLogic.Entailment.HasAxiomW (Hilbert.Basic A
       (φ := InterpretabilityLogic.Axioms.W (.atom (HasW.p Ax)) (.atom (HasW.q Ax)))
       (s := λ b => if (HasW.p Ax) = b then φ else if (HasW.q Ax) = b then ψ else (.atom b))
       (HasW.mem_W);
+
+instance [Ax.HasWStar] : InterpretabilityLogic.Entailment.HasAxiomWStar (Hilbert.Basic Ax) where
+  WStar! {φ ψ χ} := by
+    constructor;
+    simpa [HasWStar.ne_pq, HasWStar.ne_qr, HasWStar.ne_rp.symm] using Hilbert.Basic.axm
+      (φ := InterpretabilityLogic.Axioms.WStar (.atom (HasWStar.p Ax)) (.atom (HasWStar.q Ax)) (.atom (HasWStar.r Ax)))
+      (s := λ b =>
+        if (HasWStar.p Ax) = b then φ
+        else if (HasWStar.q Ax) = b then ψ
+        else if (HasWStar.r Ax) = b then χ
+        else (.atom b))
+      $ HasWStar.mem_WStar;
 
 end
 
@@ -210,10 +244,7 @@ protected abbrev CL.axioms : Axiom ℕ := {
   InterpretabilityLogic.Axioms.J4 (.atom 0) (.atom 1)
 }
 namespace CL.axioms
-instance : CL.axioms.HasJ1 where p := 0; q := 1;
-instance : CL.axioms.HasJ2 where p := 0; q := 1; r := 2;
-instance : CL.axioms.HasJ3 where p := 0; q := 1; r := 2;
-instance : CL.axioms.HasJ4 where p := 0; q := 1;
+instance : CL.axioms.HasCLAxioms where p := 0; q := 1; r := 2;
 end CL.axioms
 protected abbrev CL := Hilbert.Basic CL.axioms
 instance : Entailment.CL InterpretabilityLogic.CL where
@@ -221,11 +252,7 @@ instance : Entailment.CL InterpretabilityLogic.CL where
 
 protected abbrev IL.axioms : Axiom ℕ := insert (InterpretabilityLogic.Axioms.J5 (.atom 0)) CL.axioms
 namespace IL.axioms
-instance : IL.axioms.HasJ1 := HasJ1.of_mem (Ax₁ := CL.axioms) (by tauto)
-instance : IL.axioms.HasJ2 := HasJ2.of_mem (Ax₁ := CL.axioms) (by tauto)
-instance : IL.axioms.HasJ3 := HasJ3.of_mem (Ax₁ := CL.axioms) (by tauto)
-instance : IL.axioms.HasJ4 := HasJ4.of_mem (Ax₁ := CL.axioms) (by tauto)
-instance : IL.axioms.HasJ5 where p := 0;
+instance : IL.axioms.HasILAxioms where p := 0; q := 1; r := 2;
 end IL.axioms
 protected abbrev IL := Hilbert.Basic IL.axioms
 instance : Entailment.IL InterpretabilityLogic.IL where
@@ -233,24 +260,25 @@ instance : Entailment.IL InterpretabilityLogic.IL where
 
 protected abbrev ILM.axioms : Axiom ℕ := insert (InterpretabilityLogic.Axioms.M (.atom 0) (.atom 1) (.atom 2)) IL.axioms
 namespace ILM.axioms
-instance : ILM.axioms.HasJ1 := HasJ1.of_mem (Ax₁ := IL.axioms) (by tauto)
-instance : ILM.axioms.HasJ2 := HasJ2.of_mem (Ax₁ := IL.axioms) (by tauto)
-instance : ILM.axioms.HasJ3 := HasJ3.of_mem (Ax₁ := IL.axioms) (by tauto)
-instance : ILM.axioms.HasJ4 := HasJ4.of_mem (Ax₁ := IL.axioms) (by tauto)
-instance : ILM.axioms.HasJ5 := HasJ5.of_mem (Ax₁ := IL.axioms) (by tauto)
+instance : ILM.axioms.HasILAxioms := HasILAxioms.of_subset (Ax₁ := IL.axioms) (by tauto)
 instance : ILM.axioms.HasM where p := 0; q := 1; r := 2;
 end ILM.axioms
 protected abbrev ILM := Hilbert.Basic ILM.axioms
 instance : Entailment.ILM InterpretabilityLogic.ILM where
 
 
+protected abbrev ILM₀.axioms : Axiom ℕ := insert (InterpretabilityLogic.Axioms.M₀ (.atom 0) (.atom 1) (.atom 2)) IL.axioms
+namespace ILM₀.axioms
+instance : ILM₀.axioms.HasILAxioms := HasILAxioms.of_subset (Ax₁ := IL.axioms) (by tauto)
+instance : ILM₀.axioms.HasM₀ where p := 0; q := 1; r := 2;
+end ILM₀.axioms
+protected abbrev ILM₀ := Hilbert.Basic ILM₀.axioms
+instance : Entailment.ILM₀ InterpretabilityLogic.ILM₀ where
+
+
 protected abbrev ILP.axioms : Axiom ℕ := insert (InterpretabilityLogic.Axioms.P (.atom 0) (.atom 1)) IL.axioms
 namespace ILP.axioms
-instance : ILP.axioms.HasJ1 := HasJ1.of_mem (Ax₁ := IL.axioms) (by tauto)
-instance : ILP.axioms.HasJ2 := HasJ2.of_mem (Ax₁ := IL.axioms) (by tauto)
-instance : ILP.axioms.HasJ3 := HasJ3.of_mem (Ax₁ := IL.axioms) (by tauto)
-instance : ILP.axioms.HasJ4 := HasJ4.of_mem (Ax₁ := IL.axioms) (by tauto)
-instance : ILP.axioms.HasJ5 := HasJ5.of_mem (Ax₁ := IL.axioms) (by tauto)
+instance : ILP.axioms.HasILAxioms := HasILAxioms.of_subset (Ax₁ := IL.axioms) (by tauto)
 instance : ILP.axioms.HasP where p := 0; q := 1;
 end ILP.axioms
 protected abbrev ILP := Hilbert.Basic ILP.axioms
@@ -259,16 +287,50 @@ instance : Entailment.ILP InterpretabilityLogic.ILP where
 
 protected abbrev ILW.axioms : Axiom ℕ := insert (InterpretabilityLogic.Axioms.W (.atom 0) (.atom 1)) IL.axioms
 namespace ILW.axioms
-instance : ILW.axioms.HasJ1 := HasJ1.of_mem (Ax₁ := IL.axioms) (by tauto)
-instance : ILW.axioms.HasJ2 := HasJ2.of_mem (Ax₁ := IL.axioms) (by tauto)
-instance : ILW.axioms.HasJ3 := HasJ3.of_mem (Ax₁ := IL.axioms) (by tauto)
-instance : ILW.axioms.HasJ4 := HasJ4.of_mem (Ax₁ := IL.axioms) (by tauto)
-instance : ILW.axioms.HasJ5 := HasJ5.of_mem (Ax₁ := IL.axioms) (by tauto)
+instance : ILW.axioms.HasILAxioms := HasILAxioms.of_subset (Ax₁ := IL.axioms) (by tauto)
 instance : ILW.axioms.HasW where p := 0; q := 1;
 end ILW.axioms
 
 protected abbrev ILW := Hilbert.Basic ILW.axioms
 instance : Entailment.ILW InterpretabilityLogic.ILW where
+
+
+protected abbrev ILWStar.axioms : Axiom ℕ := insert (InterpretabilityLogic.Axioms.WStar (.atom 0) (.atom 1) (.atom 2)) IL.axioms
+namespace ILWStar.axioms
+instance : ILWStar.axioms.HasILAxioms := HasILAxioms.of_subset (Ax₁ := IL.axioms) (by tauto)
+instance : ILWStar.axioms.HasWStar where p := 0; q := 1; r := 2
+end ILWStar.axioms
+protected abbrev ILWStar := Hilbert.Basic ILWStar.axioms
+instance : Entailment.ILWStar InterpretabilityLogic.ILWStar where
+
+
+protected abbrev ILWM₀.axioms : Axiom ℕ := insert (InterpretabilityLogic.Axioms.M₀ (.atom 0) (.atom 1) (.atom 2)) ILW.axioms
+namespace ILWM₀.axioms
+instance : ILWM₀.axioms.HasILAxioms := HasILAxioms.of_subset (Ax₁ := ILW.axioms) (by tauto)
+instance : ILWM₀.axioms.HasM₀ where p := 0; q := 1; r := 2
+end ILWM₀.axioms
+protected abbrev ILWM₀ := Hilbert.Basic ILWM₀.axioms
+instance : Entailment.ILWM₀ InterpretabilityLogic.ILWM₀ where
+
+instance : InterpretabilityLogic.ILWStar ≊ InterpretabilityLogic.ILWM₀ := by
+  apply equiv_of_provable_axioms;
+  . rintro φ (rfl | rfl | rfl | rfl | rfl | rfl) <;> simp only [
+      Entailment.WStar,
+      Entailment.J1,
+      Entailment.J2,
+      Entailment.J3,
+      Entailment.J4,
+      Entailment.J5,
+    ];
+  . rintro φ (rfl | rfl | rfl | rfl | rfl | rfl | rfl) <;> simp only [
+      Entailment.W,
+      Entailment.M₀,
+      Entailment.J1,
+      Entailment.J2,
+      Entailment.J3,
+      Entailment.J4,
+      Entailment.J5,
+    ];
 
 end
 
