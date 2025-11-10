@@ -1,12 +1,13 @@
 /-
   Naming of axioms are refered from:
 
-  - 1988, A. Visser, "Preliminary Notes on Interpretability Logic"
-  - 1991, V. Švejdar, "Some independence results in interpretability logic"
-  - 1997, A. Visser, "An Overview of Interpretability Logic"
-  - 2011, E. Goris, J. J. Joosten, "A New Principle in the Interpretability Logic of  all Reasonable Arithmetical Theories"
-  - 2021, T. Kurahashi, Y. Okawa, "Modal completeness of sublogics of the  interpretability logic IL"
-  - 2022, L. Mitec, "On Logics and Semantics of Interpretability"
+  - Goris & Joosten, 2008, "Modal Matters in Interpretability Logics"
+  - Goris & Joosten, 2011, "A New Principle in the Interpretability Logic of  all Reasonable Arithmetical Theories"
+  - Kurahashi & Okawa, 2021, "Modal completeness of sublogics of the  interpretability logic IL"
+  - Mitec, 2022, "On Logics and Semantics of Interpretability"
+  - Švejdar, 1991, "Some independence results in interpretability logic"
+  - Visser, 1988, "Preliminary Notes on Interpretability Logic"
+  - Visser, 1997, "An Overview of Interpretability Logic"
 -/
 import Foundation.InterpretabilityLogic.LogicSymbol
 
@@ -58,7 +59,7 @@ protected abbrev J6 := □φ ⭤ (∼φ ▷ ⊥)
 protected abbrev P := (φ ▷ ψ) ➝ □(φ ▷ ψ)
 
 /--
-  - Goris & Joosten 2011, `P₀`
+  - Goris & Joosten 2008, `P₀`
 -/
 protected abbrev P₀ := (φ ➝ ◇ψ) ➝ □(φ ▷ ψ)
 
@@ -78,6 +79,11 @@ protected abbrev KM1 := (φ ▷ ◇ψ) ➝ □(φ ➝ ◇ψ)
   - Visser 1997, `M₀`
 -/
 protected abbrev M₀ := (φ ▷ ψ) ➝ (◇φ ⋏ □χ) ▷ (ψ ⋏ □χ)
+
+/--
+  - Goris & Joosten 2008, `M₀*`
+-/
+protected abbrev M₀Star := (φ ▷ ψ) ➝ (◇φ ⋏ □χ) ▷ (ψ ⋏ □χ ⋏ □(∼φ))
 
 /--
   - Visser 1988, `J6`: De Jongh-Visser Principle
@@ -123,6 +129,16 @@ protected abbrev KW4 := φ ▷ ψ ➝ ψ ▷ (ψ ⋏ □(∼φ))
   - Švejdar 1991, `F`
 -/
 protected abbrev F := (φ ▷ ◇φ) ➝ □(∼φ)
+
+/--
+  - Goris & Joosten 2008, `R`
+-/
+protected abbrev R := φ ▷ ψ ➝ ∼(φ ▷ ∼χ) ▷ (ψ ⋏ □χ)
+
+/--
+  - Goris & Joosten 2011, `R*`
+-/
+protected abbrev RStar := φ ▷ ψ ➝ ∼(φ ▷ ∼χ) ▷ (ψ ⋏ □χ ⋏ □(∼φ))
 
 /--
   - Visser 1988, `K13`: Relative Interpretability Implies Provable Relative Consistency
