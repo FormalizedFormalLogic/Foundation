@@ -211,6 +211,44 @@ def HasWStar.of_mem {Ax₁ Ax₂ : Axiom α} (h : Ax₁ ⊆ Ax₂) [Ax₁.HasWSt
   mem_WStar := h mem_WStar
 
 
+class HasKW1Zero where
+  p : α
+  q : α
+  ne_pq : p ≠ q := by simp;
+  mem_KW1Zero : InterpretabilityLogic.Axioms.KW1Zero (.atom p) (.atom q) ∈ Ax := by grind;
+attribute [simp] HasKW1Zero.ne_pq
+export HasKW1Zero (mem_KW1Zero)
+
+def HasKW1Zero.of_mem {Ax₁ Ax₂ : Axiom α} (h : Ax₁ ⊆ Ax₂) [Ax₁.HasKW1Zero] : Ax₂.HasKW1Zero where
+  p := HasKW1Zero.p Ax₁;
+  q := HasKW1Zero.q Ax₁;
+  mem_KW1Zero := h mem_KW1Zero
+
+
+class HasKW2 where
+  p : α
+  q : α
+  ne_pq : p ≠ q := by simp;
+  mem_KW2 : InterpretabilityLogic.Axioms.KW2 (.atom p) (.atom q) ∈ Ax := by grind;
+attribute [simp] HasKW2.ne_pq
+export HasKW2 (mem_KW2)
+
+def HasKW2.of_mem {Ax₁ Ax₂ : Axiom α} (h : Ax₁ ⊆ Ax₂) [Ax₁.HasKW2] : Ax₂.HasKW2 where
+  p := HasKW2.p Ax₁;
+  q := HasKW2.q Ax₁;
+  mem_KW2 := h mem_KW2
+
+
+class HasF where
+  p : α
+  mem_F : InterpretabilityLogic.Axioms.F (.atom p) ∈ Ax := by grind;
+attribute [simp] HasF.mem_F
+
+def HasF.of_mem {Ax₁ Ax₂ : Axiom α} (h : Ax₁ ⊆ Ax₂) [Ax₁.HasF] : Ax₂.HasF where
+  p := HasF.p Ax₁;
+  mem_F := h mem_F
+
+
 class HasM₀ where
   p : α
   q : α

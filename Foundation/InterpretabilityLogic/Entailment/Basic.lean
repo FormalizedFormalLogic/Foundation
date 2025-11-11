@@ -356,6 +356,16 @@ open Context in instance [Entailment.Minimal 𝓢] (Γ : Context F 𝓢) : HasAx
 end
 
 
+class HasAxiomKW1Zero (𝓢 : S) where
+  KW1Zero! {φ ψ : F} : 𝓢 ⊢! Axioms.KW1Zero φ ψ
+export HasAxiomKW1Zero (KW1Zero!)
+section
+variable [HasAxiomKW1Zero 𝓢]
+@[simp] protected lemma KW1Zero : 𝓢 ⊢ Axioms.KW1Zero φ ψ := ⟨KW1Zero!⟩
+open FiniteContext in instance [Entailment.Minimal 𝓢] (Γ : FiniteContext F 𝓢) : HasAxiomKW1Zero Γ := ⟨λ {_} => of KW1Zero!⟩
+open Context in instance [Entailment.Minimal 𝓢] (Γ : Context F 𝓢) : HasAxiomKW1Zero Γ := ⟨λ {_} => of KW1Zero!⟩
+end
+
 
 class HasAxiomKW2 (𝓢 : S) where
   KW2! {φ ψ : F} : 𝓢 ⊢! Axioms.KW2 φ ψ

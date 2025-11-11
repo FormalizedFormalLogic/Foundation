@@ -38,4 +38,20 @@ instance : Entailment.HasAxiomF 𝓢 where
       apply wlem;
     exact negMDP H₄ H₃;
 
+instance : Entailment.HasAxiomKW1Zero 𝓢 where
+  KW1Zero! {φ ψ} := by
+    apply C_trans KW2!;
+    apply R1!;
+    apply deduct';
+    apply K_intro;
+    . apply K_left;
+      apply FiniteContext.nthAxm 0;
+    . apply A_cases ?_ ?_ $ ANN_of_NK $ K_right $ FiniteContext.nthAxm 0;
+      . suffices [ψ, ∼(ψ ⋏ φ)] ⊢[𝓢]! ∼ψ ➝ ∼φ by tauto;
+        apply deduct;
+        apply efq_of_mem_either (φ := ψ);
+        . simp;
+        . simp;
+      . apply C_id;
+
 end LO.InterpretabilityLogic.Entailment

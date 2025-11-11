@@ -7,6 +7,8 @@ import Foundation.InterpretabilityLogic.Entailment.ILWStar.Basic
 import Foundation.InterpretabilityLogic.Entailment.ILWStar.M₀
 import Foundation.InterpretabilityLogic.Entailment.ILM₀.Basic
 import Foundation.InterpretabilityLogic.Entailment.ILWM₀
+import Foundation.InterpretabilityLogic.Entailment.IL_KW2
+import Foundation.InterpretabilityLogic.Entailment.IL_KW1Zero
 import Foundation.InterpretabilityLogic.Hilbert.Axiom
 
 namespace LO.InterpretabilityLogic
@@ -227,6 +229,30 @@ instance [Ax.HasWStar] : InterpretabilityLogic.Entailment.HasAxiomWStar (Hilbert
         else (.atom b))
       $ HasWStar.mem_WStar;
 
+instance [Ax.HasKW1Zero] : InterpretabilityLogic.Entailment.HasAxiomKW1Zero (Hilbert.Basic Ax) where
+  KW1Zero! {φ ψ} := by
+    constructor;
+    simpa [HasKW1Zero.ne_pq] using Hilbert.Basic.axm
+      (φ := InterpretabilityLogic.Axioms.KW1Zero (.atom (HasKW1Zero.p Ax)) (.atom (HasKW1Zero.q Ax)))
+      (s := λ b => if (HasKW1Zero.p Ax) = b then φ else if (HasKW1Zero.q Ax) = b then ψ else (.atom b))
+      (HasKW1Zero.mem_KW1Zero);
+
+instance [Ax.HasKW2] : InterpretabilityLogic.Entailment.HasAxiomKW2 (Hilbert.Basic Ax) where
+  KW2! {φ ψ} := by
+    constructor;
+    simpa [HasKW2.ne_pq] using Hilbert.Basic.axm
+      (φ := InterpretabilityLogic.Axioms.KW2 (.atom (HasKW2.p Ax)) (.atom (HasKW2.q Ax)))
+      (s := λ b => if (HasKW2.p Ax) = b then φ else if (HasKW2.q Ax) = b then ψ else (.atom b))
+      (HasKW2.mem_KW2);
+
+instance [Ax.HasF] : InterpretabilityLogic.Entailment.HasAxiomF (Hilbert.Basic Ax) where
+  F! {φ} := by
+    constructor;
+    simpa using Hilbert.Basic.axm
+      (φ := InterpretabilityLogic.Axioms.F (.atom (HasF.p Ax)))
+      (s := λ b => if (HasF.p Ax) = b then φ else (.atom b))
+      (HasF.mem_F);
+
 end
 
 end Hilbert.Basic
@@ -308,29 +334,114 @@ protected abbrev ILWM₀.axioms : Axiom ℕ := insert (InterpretabilityLogic.Axi
 namespace ILWM₀.axioms
 instance : ILWM₀.axioms.HasILAxioms := HasILAxioms.of_subset (Ax₁ := ILW.axioms) (by tauto)
 instance : ILWM₀.axioms.HasM₀ where p := 0; q := 1; r := 2
+instance : ILWM₀.axioms.HasW where p := 0; q := 1;
 end ILWM₀.axioms
 protected abbrev ILWM₀ := Hilbert.Basic ILWM₀.axioms
 instance : Entailment.ILWM₀ InterpretabilityLogic.ILWM₀ where
 
+
 instance : InterpretabilityLogic.ILWStar ≊ InterpretabilityLogic.ILWM₀ := by
   apply equiv_of_provable_axioms;
   . rintro φ (rfl | rfl | rfl | rfl | rfl | rfl) <;> simp only [
-      Entailment.WStar,
       Entailment.J1,
       Entailment.J2,
       Entailment.J3,
       Entailment.J4,
       Entailment.J5,
+      Entailment.WStar,
     ];
   . rintro φ (rfl | rfl | rfl | rfl | rfl | rfl | rfl) <;> simp only [
-      Entailment.W,
-      Entailment.M₀,
       Entailment.J1,
       Entailment.J2,
       Entailment.J3,
       Entailment.J4,
       Entailment.J5,
+      Entailment.W,
+      Entailment.M₀,
     ];
+
+instance : InterpretabilityLogic.ILW ⪯ InterpretabilityLogic.ILWStar := by
+  apply weakerThan_of_provable_axioms;
+  rintro φ (rfl | rfl | rfl | rfl | rfl | rfl) <;> simp only [
+      Entailment.J1,
+      Entailment.J2,
+      Entailment.J3,
+      Entailment.J4,
+      Entailment.J5,
+      Entailment.W,
+    ];
+
+protected abbrev ILF.axioms : Axiom ℕ := insert (InterpretabilityLogic.Axioms.F (.atom 0)) IL.axioms
+namespace ILF.axioms
+instance : ILF.axioms.HasILAxioms := HasILAxioms.of_subset (Ax₁ := IL.axioms) (by tauto)
+instance : ILF.axioms.HasF where p := 0;
+end ILF.axioms
+protected abbrev ILF := Hilbert.Basic ILF.axioms
+
+
+protected abbrev IL_KW1Zero.axioms : Axiom ℕ := insert (InterpretabilityLogic.Axioms.KW1Zero (.atom 0) (.atom 1)) IL.axioms
+namespace IL_KW1Zero.axioms
+instance : IL_KW1Zero.axioms.HasILAxioms := HasILAxioms.of_subset (Ax₁ := IL.axioms) (by tauto)
+instance : IL_KW1Zero.axioms.HasKW1Zero where p := 0; q := 1;
+end IL_KW1Zero.axioms
+protected abbrev IL_KW1Zero := Hilbert.Basic IL_KW1Zero.axioms
+instance : Entailment.IL_KW1Zero InterpretabilityLogic.IL_KW1Zero where
+
+
+protected abbrev IL_KW2.axioms : Axiom ℕ := insert (InterpretabilityLogic.Axioms.KW2 (.atom 0) (.atom 1)) IL.axioms
+namespace IL_KW2.axioms
+instance : IL_KW2.axioms.HasILAxioms := HasILAxioms.of_subset (Ax₁ := IL.axioms) (by tauto)
+instance : IL_KW2.axioms.HasKW2 where p := 0; q := 1;
+end IL_KW2.axioms
+protected abbrev IL_KW2 := Hilbert.Basic IL_KW2.axioms
+instance : Entailment.IL_KW2 InterpretabilityLogic.IL_KW2 where
+
+
+instance : InterpretabilityLogic.IL_KW1Zero ≊ InterpretabilityLogic.IL_KW2 := by
+  apply equiv_of_provable_axioms;
+  . rintro φ (rfl | rfl | rfl | rfl | rfl | rfl) <;> simp only [
+      Entailment.J1,
+      Entailment.J2,
+      Entailment.J3,
+      Entailment.J4,
+      Entailment.J5,
+      Entailment.KW1Zero,
+    ];
+  . rintro φ (rfl | rfl | rfl | rfl | rfl | rfl | rfl) <;> simp only [
+      Entailment.J1,
+      Entailment.J2,
+      Entailment.J3,
+      Entailment.J4,
+      Entailment.J5,
+      Entailment.KW2,
+    ];
+
+
+instance : InterpretabilityLogic.IL_KW2 ⪯ InterpretabilityLogic.ILW := by
+  apply weakerThan_of_provable_axioms;
+  rintro φ (rfl | rfl | rfl | rfl | rfl | rfl | rfl) <;> simp only [
+      Entailment.J1,
+      Entailment.J2,
+      Entailment.J3,
+      Entailment.J4,
+      Entailment.J5,
+      Entailment.KW2,
+    ];
+
+instance : InterpretabilityLogic.ILF ⪯ InterpretabilityLogic.IL_KW2 := by
+  apply weakerThan_of_provable_axioms;
+  rintro φ (rfl | rfl | rfl | rfl | rfl | rfl) <;> simp only [
+      Entailment.J1,
+      Entailment.J2,
+      Entailment.J3,
+      Entailment.J4,
+      Entailment.J5,
+      Entailment.F,
+    ];
+
+instance : InterpretabilityLogic.IL ⪯ InterpretabilityLogic.ILF := by
+  apply weakerThan_of_subset_axioms;
+  simp;
 
 end
 
