@@ -356,6 +356,7 @@ open Context in instance [Entailment.Minimal 𝓢] (Γ : Context F 𝓢) : HasAx
 end
 
 
+
 class HasAxiomKW2 (𝓢 : S) where
   KW2! {φ ψ : F} : 𝓢 ⊢! Axioms.KW2 φ ψ
 export HasAxiomKW2 (KW2!)

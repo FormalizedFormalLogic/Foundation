@@ -103,14 +103,19 @@ protected abbrev WStar := (φ ▷ ψ) ➝ ((ψ ⋏ □χ) ▷ (ψ ⋏ □χ ⋏ 
 protected abbrev KW1 := (φ ▷ ◇⊤) ➝ (⊤ ▷ ∼φ)
 
 /--
+  - Švejdar 1991, `KW1'`
+-/
+protected abbrev KW1' := ((ψ ⋏ φ) ▷ (ψ ⋏ ◇ψ)) ➝ (ψ ▷ (ψ ⋏ ∼φ))
+
+/--
   - Švejdar 1991, `KW1⁰`
 -/
-protected abbrev KW1₀ := (φ ▷ ◇⊤) ➝ (⊤ ▷ (∼φ ⋏ □(∼φ)))
+protected abbrev KW1Zero := ((ψ ⋏ φ) ▷ ◇ψ) ➝ (ψ ▷ (ψ ⋏ ∼φ))
 
 /--
   - Visser 1997, `KW2`
 -/
-protected abbrev KW2 := φ ▷ ◇ψ ➝ ψ ▷ (ψ ⋏ ∼φ)
+protected abbrev KW2 := (φ ▷ ◇ψ) ➝ (ψ ▷ (ψ ⋏ ∼φ))
 
 /--
   - Visser 1997, `KW3`
