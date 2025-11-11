@@ -20,9 +20,9 @@ def CLNNM! : 𝓢 ⊢! □(∼φ) ➝ ∼◇φ := CN_of_CN_right $ IMNLN!
 def NM!_of_LN! (h : 𝓢 ⊢! □(∼φ)) : 𝓢 ⊢! ∼◇φ := CLNNM! ⨀ h
 
 instance : Entailment.HasAxiomF 𝓢 where
-  F! {φ} := by
-    apply C_trans KW2!;
-    apply C_trans J4!;
+  axiomF! {φ} := by
+    apply C_trans axiomKW2!;
+    apply C_trans axiomJ4!;
     apply C_trans ?_ CNMLN!;
     apply CN_of_CN_right;
     apply deduct';
@@ -39,8 +39,8 @@ instance : Entailment.HasAxiomF 𝓢 where
     exact negMDP H₄ H₃;
 
 instance : Entailment.HasAxiomKW1Zero 𝓢 where
-  KW1Zero! {φ ψ} := by
-    apply C_trans KW2!;
+  axiomKW1Zero! {φ ψ} := by
+    apply C_trans axiomKW2!;
     apply R1!;
     apply deduct';
     apply K_intro;

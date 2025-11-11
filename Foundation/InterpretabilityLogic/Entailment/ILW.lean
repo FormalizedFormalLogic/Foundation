@@ -27,7 +27,7 @@ variable [Entailment.ILW 𝓢]
 
 def RhdR1! (h : 𝓢 ⊢! ψ ▷ χ) : 𝓢 ⊢! (φ ▷ ψ) ➝ (φ ▷ χ) := by
   apply deduct';
-  exact (of J2!) ⨀ FiniteContext.byAxm ⨀ (of h);
+  exact (of axiomJ2!) ⨀ FiniteContext.byAxm ⨀ (of h);
 
 -- TODO: move to entailment
 def CKDiaBoxDiaK! : 𝓢 ⊢! ◇φ ⋏ □ψ ➝ ◇(φ ⋏ ψ) := by
@@ -53,15 +53,15 @@ def CKDiaBoxDiaK! : 𝓢 ⊢! ◇φ ⋏ □ψ ➝ ◇(φ ⋏ ψ) := by
       apply IMNLN!;
     exact (FiniteContext.nthAxm 1) ⨀ (FiniteContext.nthAxm 0)
 
-def CRhdRhdA_of_Rhd₁ (h : 𝓢 ⊢! φ ▷ χ) : 𝓢 ⊢! ψ ▷ χ ➝ (φ ⋎ ψ) ▷ χ := J3! ⨀ h
-def CRhdRhdA_of_Rhd₂ (h : 𝓢 ⊢! ψ ▷ χ) : 𝓢 ⊢! φ ▷ χ ➝ (φ ⋎ ψ) ▷ χ := C_swap J3! ⨀ h
+def CRhdRhdA_of_Rhd₁ (h : 𝓢 ⊢! φ ▷ χ) : 𝓢 ⊢! ψ ▷ χ ➝ (φ ⋎ ψ) ▷ χ := axiomJ3! ⨀ h
+def CRhdRhdA_of_Rhd₂ (h : 𝓢 ⊢! ψ ▷ χ) : 𝓢 ⊢! φ ▷ χ ➝ (φ ⋎ ψ) ▷ χ := C_swap axiomJ3! ⨀ h
 
 instance : HasAxiomKW2 𝓢 where
-  KW2! {φ ψ} := by
-    apply C_trans $ W!;
+  axiomKW2! {φ ψ} := by
+    apply C_trans $ axiomW!;
     apply C_trans $ R1! $ CKDiaBoxDiaK!;
-    apply C_trans $ RhdR1! $ J5!;
-    apply C_trans $ CRhdRhdA_of_Rhd₁ $ J1'!;
+    apply C_trans $ RhdR1! $ axiomJ5!;
+    apply C_trans $ CRhdRhdA_of_Rhd₁ $ axiomJ1'!;
     apply R2!;
     apply deduct';
     apply AK_of_KA;

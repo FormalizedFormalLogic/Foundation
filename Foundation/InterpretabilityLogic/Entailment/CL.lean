@@ -24,10 +24,10 @@ def NMO! : 𝓢 ⊢! ∼◇⊥ := (contra $ K_left diaDuality) ⨀ (dni' $ nec N
 instance : HasAxiomJ6 𝓢 := ⟨by
   intro φ;
   apply Entailment.K_intro;
-  . apply C_trans ?_ J1!;
+  . apply C_trans ?_ axiomJ1!;
     apply box_regularity;
     exact CCNO!;
-  . apply C_trans J4!;
+  . apply C_trans axiomJ4!;
     apply C_trans CCCNN;
     apply deduct';
     haveI H₁ : [∼◇⊥ ➝ ∼◇(∼φ)] ⊢[𝓢]! ∼◇⊥ ➝ ∼◇(∼φ) := FiniteContext.byAxm $ by simp;
@@ -37,11 +37,11 @@ instance : HasAxiomJ6 𝓢 := ⟨by
     apply H₄ ⨀ H₃;
 ⟩
 
-instance : HasAxiomJ4Plus 𝓢 := ⟨λ {_ _ _} ↦ C_trans J1! (C_swap J2!)⟩
+instance : HasAxiomJ4Plus 𝓢 := ⟨λ {_ _ _} ↦ C_trans axiomJ1! (C_swap axiomJ2!)⟩
 
-instance : HasRule1 𝓢 := ⟨λ {_ _ _} hφ ↦ J4Plus! ⨀ nec hφ⟩
+instance : HasRule1 𝓢 := ⟨λ {_ _ _} hφ ↦ axiomJ4Plus! ⨀ nec hφ⟩
 
-def CLCCRhdRhd! : 𝓢 ⊢! □(φ ➝ ψ) ➝ (ψ ▷ χ ➝ φ ▷ χ) := C_trans J1! J2!
+def CLCCRhdRhd! : 𝓢 ⊢! □(φ ➝ ψ) ➝ (ψ ▷ χ ➝ φ ▷ χ) := C_trans axiomJ1! axiomJ2!
 
 instance : HasRule2 𝓢 := ⟨λ {_ _ _} hφ ↦ CLCCRhdRhd! ⨀ nec hφ⟩
 

@@ -13,7 +13,7 @@ variable [Entailment.ILWStar 𝓢]
 
 def rhdTrans_dhyp! (h₁ : 𝓢 ⊢! φ ▷ ψ ➝ φ ▷ χ) (h₂ : 𝓢 ⊢! φ ▷ ψ ➝ χ ▷ ξ) : 𝓢 ⊢! φ ▷ ψ ➝ φ ▷ ξ := by
   apply deduct';
-  exact (of $ J2!) ⨀ (deductInv' h₁) ⨀ (deductInv' h₂);
+  exact (of $ axiomJ2!) ⨀ (deductInv' h₁) ⨀ (deductInv' h₂);
 
 instance : Entailment.HasAxiomW 𝓢 := by
   constructor;
@@ -26,7 +26,7 @@ instance : Entailment.HasAxiomW 𝓢 := by
     . apply FiniteContext.byAxm; simp;
     . apply axiomN;
   . show 𝓢 ⊢! φ ▷ ψ ➝ (ψ ⋏ □⊤) ▷ (ψ ⋏ □(∼φ));
-    apply C_trans WStar!;
+    apply C_trans axiomWStar!;
     apply R1!;
     apply deduct';
     suffices [ψ, □⊤, □(∼φ)] ⊢[𝓢]! ψ ⋏ □(∼φ) by tauto;

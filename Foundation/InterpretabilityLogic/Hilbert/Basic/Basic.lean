@@ -118,7 +118,7 @@ section
 variable [DecidableEq α]
 
 instance [Ax.HasJ1] : InterpretabilityLogic.Entailment.HasAxiomJ1 (Hilbert.Basic Ax) where
-  J1! {φ ψ} := by
+  axiomJ1! {φ ψ} := by
     constructor;
     simpa [HasJ1.ne_pq] using Hilbert.Basic.axm
       (φ := InterpretabilityLogic.Axioms.J1 (.atom (HasJ1.p Ax)) (.atom (HasJ1.q Ax)))
@@ -126,7 +126,7 @@ instance [Ax.HasJ1] : InterpretabilityLogic.Entailment.HasAxiomJ1 (Hilbert.Basic
       (HasJ1.mem_J1);
 
 instance [Ax.HasJ2] : InterpretabilityLogic.Entailment.HasAxiomJ2 (Hilbert.Basic Ax) where
-  J2! {φ ψ χ} := by
+  axiomJ2! {φ ψ χ} := by
     constructor;
     simpa [HasJ2.ne_pq, HasJ2.ne_qr, HasJ2.ne_rp.symm] using Hilbert.Basic.axm
       (φ := InterpretabilityLogic.Axioms.J2 (.atom (HasJ2.p Ax)) (.atom (HasJ2.q Ax)) (.atom (HasJ2.r Ax)))
@@ -138,7 +138,7 @@ instance [Ax.HasJ2] : InterpretabilityLogic.Entailment.HasAxiomJ2 (Hilbert.Basic
       $ HasJ2.mem_J2;
 
 instance [Ax.HasJ3] : InterpretabilityLogic.Entailment.HasAxiomJ3 (Hilbert.Basic Ax) where
-  J3! {φ ψ χ} := by
+  axiomJ3! {φ ψ χ} := by
     constructor;
     simpa [HasJ3.ne_pq, HasJ3.ne_qr, HasJ3.ne_rp.symm] using Hilbert.Basic.axm
       (φ := InterpretabilityLogic.Axioms.J3 (.atom (HasJ3.p Ax)) (.atom (HasJ3.q Ax)) (.atom (HasJ3.r Ax)))
@@ -150,7 +150,7 @@ instance [Ax.HasJ3] : InterpretabilityLogic.Entailment.HasAxiomJ3 (Hilbert.Basic
       $ HasJ3.mem_J3;
 
 instance [Ax.HasJ4] : InterpretabilityLogic.Entailment.HasAxiomJ4 (Hilbert.Basic Ax) where
-  J4! {φ ψ} := by
+  axiomJ4! {φ ψ} := by
     constructor;
     simpa [HasJ4.ne_pq] using Hilbert.Basic.axm
       (φ := InterpretabilityLogic.Axioms.J4 (.atom (HasJ4.p Ax)) (.atom (HasJ4.q Ax)))
@@ -158,7 +158,7 @@ instance [Ax.HasJ4] : InterpretabilityLogic.Entailment.HasAxiomJ4 (Hilbert.Basic
       (HasJ4.mem_J4);
 
 instance [Ax.HasJ5] : InterpretabilityLogic.Entailment.HasAxiomJ5 (Hilbert.Basic Ax) where
-  J5! {φ} := by
+  axiomJ5! {φ} := by
     constructor;
     simpa using Hilbert.Basic.axm
       (φ := InterpretabilityLogic.Axioms.J5 (.atom (HasJ5.p Ax)))
@@ -166,7 +166,7 @@ instance [Ax.HasJ5] : InterpretabilityLogic.Entailment.HasAxiomJ5 (Hilbert.Basic
       (HasJ5.mem_J5);
 
 instance [Ax.HasM] : InterpretabilityLogic.Entailment.HasAxiomM (Hilbert.Basic Ax) where
-  M! {φ ψ χ} := by
+  axiomM! {φ ψ χ} := by
     constructor;
     simpa [HasM.ne_pq, HasM.ne_qr, HasM.ne_rp.symm] using Hilbert.Basic.axm
       (φ := InterpretabilityLogic.Axioms.M (.atom (HasM.p Ax)) (.atom (HasM.q Ax)) (.atom (HasM.r Ax)))
@@ -178,7 +178,7 @@ instance [Ax.HasM] : InterpretabilityLogic.Entailment.HasAxiomM (Hilbert.Basic A
       $ HasM.mem_M;
 
 instance [Ax.HasM] : InterpretabilityLogic.Entailment.HasAxiomM (Hilbert.Basic Ax) where
-  M! {φ ψ χ} := by
+  axiomM! {φ ψ χ} := by
     constructor;
     simpa [HasM.ne_pq, HasM.ne_qr, HasM.ne_rp.symm] using Hilbert.Basic.axm
       (φ := InterpretabilityLogic.Axioms.M (.atom (HasM.p Ax)) (.atom (HasM.q Ax)) (.atom (HasM.r Ax)))
@@ -190,7 +190,7 @@ instance [Ax.HasM] : InterpretabilityLogic.Entailment.HasAxiomM (Hilbert.Basic A
       $ HasM.mem_M;
 
 instance [Ax.HasM₀] : InterpretabilityLogic.Entailment.HasAxiomM₀ (Hilbert.Basic Ax) where
-  M₀! {φ ψ χ} := by
+  axiomM₀! {φ ψ χ} := by
     constructor;
     simpa [HasM₀.ne_pq, HasM₀.ne_qr, HasM₀.ne_rp.symm] using Hilbert.Basic.axm
       (φ := InterpretabilityLogic.Axioms.M₀ (.atom (HasM₀.p Ax)) (.atom (HasM₀.q Ax)) (.atom (HasM₀.r Ax)))
@@ -202,7 +202,7 @@ instance [Ax.HasM₀] : InterpretabilityLogic.Entailment.HasAxiomM₀ (Hilbert.B
       $ HasM₀.mem_M₀;
 
 instance [Ax.HasP] : InterpretabilityLogic.Entailment.HasAxiomP (Hilbert.Basic Ax) where
-  P! {φ ψ} := by
+  axiomP! {φ ψ} := by
     constructor;
     simpa [HasP.ne_pq] using Hilbert.Basic.axm
       (φ := InterpretabilityLogic.Axioms.P (.atom (HasP.p Ax)) (.atom (HasP.q Ax)))
@@ -210,7 +210,7 @@ instance [Ax.HasP] : InterpretabilityLogic.Entailment.HasAxiomP (Hilbert.Basic A
       (HasP.mem_P);
 
 instance [Ax.HasW] : InterpretabilityLogic.Entailment.HasAxiomW (Hilbert.Basic Ax) where
-  W! {φ ψ} := by
+  axiomW! {φ ψ} := by
     constructor;
     simpa [HasW.ne_pq] using Hilbert.Basic.axm
       (φ := InterpretabilityLogic.Axioms.W (.atom (HasW.p Ax)) (.atom (HasW.q Ax)))
@@ -218,7 +218,7 @@ instance [Ax.HasW] : InterpretabilityLogic.Entailment.HasAxiomW (Hilbert.Basic A
       (HasW.mem_W);
 
 instance [Ax.HasWStar] : InterpretabilityLogic.Entailment.HasAxiomWStar (Hilbert.Basic Ax) where
-  WStar! {φ ψ χ} := by
+  axiomWStar! {φ ψ χ} := by
     constructor;
     simpa [HasWStar.ne_pq, HasWStar.ne_qr, HasWStar.ne_rp.symm] using Hilbert.Basic.axm
       (φ := InterpretabilityLogic.Axioms.WStar (.atom (HasWStar.p Ax)) (.atom (HasWStar.q Ax)) (.atom (HasWStar.r Ax)))
@@ -230,7 +230,7 @@ instance [Ax.HasWStar] : InterpretabilityLogic.Entailment.HasAxiomWStar (Hilbert
       $ HasWStar.mem_WStar;
 
 instance [Ax.HasKW1Zero] : InterpretabilityLogic.Entailment.HasAxiomKW1Zero (Hilbert.Basic Ax) where
-  KW1Zero! {φ ψ} := by
+  axiomKW1Zero! {φ ψ} := by
     constructor;
     simpa [HasKW1Zero.ne_pq] using Hilbert.Basic.axm
       (φ := InterpretabilityLogic.Axioms.KW1Zero (.atom (HasKW1Zero.p Ax)) (.atom (HasKW1Zero.q Ax)))
@@ -238,7 +238,7 @@ instance [Ax.HasKW1Zero] : InterpretabilityLogic.Entailment.HasAxiomKW1Zero (Hil
       (HasKW1Zero.mem_KW1Zero);
 
 instance [Ax.HasKW2] : InterpretabilityLogic.Entailment.HasAxiomKW2 (Hilbert.Basic Ax) where
-  KW2! {φ ψ} := by
+  axiomKW2! {φ ψ} := by
     constructor;
     simpa [HasKW2.ne_pq] using Hilbert.Basic.axm
       (φ := InterpretabilityLogic.Axioms.KW2 (.atom (HasKW2.p Ax)) (.atom (HasKW2.q Ax)))
@@ -246,7 +246,7 @@ instance [Ax.HasKW2] : InterpretabilityLogic.Entailment.HasAxiomKW2 (Hilbert.Bas
       (HasKW2.mem_KW2);
 
 instance [Ax.HasF] : InterpretabilityLogic.Entailment.HasAxiomF (Hilbert.Basic Ax) where
-  F! {φ} := by
+  axiomF! {φ} := by
     constructor;
     simpa using Hilbert.Basic.axm
       (φ := InterpretabilityLogic.Axioms.F (.atom (HasF.p Ax)))
@@ -343,32 +343,32 @@ instance : Entailment.ILWM₀ InterpretabilityLogic.ILWM₀ where
 instance : InterpretabilityLogic.ILWStar ≊ InterpretabilityLogic.ILWM₀ := by
   apply equiv_of_provable_axioms;
   . rintro φ (rfl | rfl | rfl | rfl | rfl | rfl) <;> simp only [
-      Entailment.J1,
-      Entailment.J2,
-      Entailment.J3,
-      Entailment.J4,
-      Entailment.J5,
-      Entailment.WStar,
+      axiomJ1,
+      axiomJ2,
+      axiomJ3,
+      axiomJ4,
+      axiomJ5,
+      axiomWStar,
     ];
   . rintro φ (rfl | rfl | rfl | rfl | rfl | rfl | rfl) <;> simp only [
-      Entailment.J1,
-      Entailment.J2,
-      Entailment.J3,
-      Entailment.J4,
-      Entailment.J5,
-      Entailment.W,
-      Entailment.M₀,
+      axiomJ1,
+      axiomJ2,
+      axiomJ3,
+      axiomJ4,
+      axiomJ5,
+      axiomW,
+      axiomM₀,
     ];
 
 instance : InterpretabilityLogic.ILW ⪯ InterpretabilityLogic.ILWStar := by
   apply weakerThan_of_provable_axioms;
   rintro φ (rfl | rfl | rfl | rfl | rfl | rfl) <;> simp only [
-      Entailment.J1,
-      Entailment.J2,
-      Entailment.J3,
-      Entailment.J4,
-      Entailment.J5,
-      Entailment.W,
+      axiomJ1,
+      axiomJ2,
+      axiomJ3,
+      axiomJ4,
+      axiomJ5,
+      axiomW,
     ];
 
 protected abbrev ILF.axioms : Axiom ℕ := insert (InterpretabilityLogic.Axioms.F (.atom 0)) IL.axioms
@@ -400,43 +400,43 @@ instance : Entailment.IL_KW2 InterpretabilityLogic.IL_KW2 where
 instance : InterpretabilityLogic.IL_KW1Zero ≊ InterpretabilityLogic.IL_KW2 := by
   apply equiv_of_provable_axioms;
   . rintro φ (rfl | rfl | rfl | rfl | rfl | rfl) <;> simp only [
-      Entailment.J1,
-      Entailment.J2,
-      Entailment.J3,
-      Entailment.J4,
-      Entailment.J5,
-      Entailment.KW1Zero,
+      axiomJ1,
+      axiomJ2,
+      axiomJ3,
+      axiomJ4,
+      axiomJ5,
+      axiomKW1Zero,
     ];
   . rintro φ (rfl | rfl | rfl | rfl | rfl | rfl | rfl) <;> simp only [
-      Entailment.J1,
-      Entailment.J2,
-      Entailment.J3,
-      Entailment.J4,
-      Entailment.J5,
-      Entailment.KW2,
+      axiomJ1,
+      axiomJ2,
+      axiomJ3,
+      axiomJ4,
+      axiomJ5,
+      axiomKW2,
     ];
 
 
 instance : InterpretabilityLogic.IL_KW2 ⪯ InterpretabilityLogic.ILW := by
   apply weakerThan_of_provable_axioms;
   rintro φ (rfl | rfl | rfl | rfl | rfl | rfl | rfl) <;> simp only [
-      Entailment.J1,
-      Entailment.J2,
-      Entailment.J3,
-      Entailment.J4,
-      Entailment.J5,
-      Entailment.KW2,
+      axiomJ1,
+      axiomJ2,
+      axiomJ3,
+      axiomJ4,
+      axiomJ5,
+      axiomKW2,
     ];
 
 instance : InterpretabilityLogic.ILF ⪯ InterpretabilityLogic.IL_KW2 := by
   apply weakerThan_of_provable_axioms;
   rintro φ (rfl | rfl | rfl | rfl | rfl | rfl) <;> simp only [
-      Entailment.J1,
-      Entailment.J2,
-      Entailment.J3,
-      Entailment.J4,
-      Entailment.J5,
-      Entailment.F,
+      axiomJ1,
+      axiomJ2,
+      axiomJ3,
+      axiomJ4,
+      axiomJ5,
+      axiomF,
     ];
 
 instance : InterpretabilityLogic.IL ⪯ InterpretabilityLogic.ILF := by

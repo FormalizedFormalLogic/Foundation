@@ -13,6 +13,6 @@ protected class IL_KW1Zero (𝓢 : S) extends InterpretabilityLogic.Entailment.I
 variable [Entailment.IL_KW1Zero 𝓢]
 
 instance : Entailment.HasAxiomKW2 𝓢 where
-  KW2! {_ _} := C_trans (R2! and₂) KW1Zero!
+  axiomKW2! {_ _} := C_trans (R2! and₂) axiomKW1Zero!
 
 end LO.InterpretabilityLogic.Entailment

@@ -18,9 +18,9 @@ instance : HasAxiomM₀ 𝓢 := by
   apply C_trans $ show 𝓢 ⊢! (φ ▷ ψ) ➝ (φ ▷ (ψ ⋎ ◇φ)) by
     apply R1!;
     apply or₁;
-  apply C_trans $ WStar! (χ := χ);
+  apply C_trans $ axiomWStar! (χ := χ);
 
-  have : 𝓢 ⊢! ((ψ ⋎ ◇φ) ⋏ □χ) ▷ (ψ ⋏ □χ) ➝ (◇φ ⋏ □χ) ▷ (ψ ⋏ □χ) := J2! ⨀ (rhdOfLC! $ nec $ CKK_of_C or₂);
+  have : 𝓢 ⊢! ((ψ ⋎ ◇φ) ⋏ □χ) ▷ (ψ ⋏ □χ) ➝ (◇φ ⋏ □χ) ▷ (ψ ⋏ □χ) := axiomJ2! ⨀ (rhdOfLC! $ nec $ CKK_of_C or₂);
   apply C_trans ?_ this;
   apply R1!;
   apply deduct';

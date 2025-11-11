@@ -64,7 +64,7 @@ instance : HasAxiomWStar 𝓢 := by
       . apply FiniteContext.byAxm;
         simp;
   have H₂ : 𝓢 ⊢! (φ ▷ ψ) ➝ (ψ ⋏ □χ ⋏ ◇φ) ▷ (ψ ⋏ □χ ⋏ □(∼φ)) := by
-    apply C_trans $ C_trans W! $ M₀! (χ := χ);
+    apply C_trans $ C_trans axiomW! $ axiomM₀! (χ := χ);
     apply CRhdRhd!_of_C!_C!;
     . apply deduct';
       suffices [ψ, □χ, ◇φ] ⊢[𝓢]! ◇φ ⋏ □χ by tauto;
@@ -73,7 +73,7 @@ instance : HasAxiomWStar 𝓢 := by
       apply deduct';
       suffices [ψ, □(∼φ), □χ] ⊢[𝓢]! ψ ⋏ □χ ⋏ □(∼φ) by tauto;
       apply K_intro₃ <;> . apply FiniteContext.byAxm; simp;
-  apply C_trans H₂ $ J2Plus! ⨀ H₁;
+  apply C_trans H₂ $ axiomJ2Plus! ⨀ H₁;
 
 instance : Entailment.ILWStar 𝓢 where
 
