@@ -133,7 +133,7 @@ section
 variable [DecidableEq α]
 
 instance [Ax.HasJ1] : InterpretabilityLogic.Entailment.HasAxiomJ1 (Hilbert.Minimal Ax) where
-  J1! {φ ψ} := by
+  axiomJ1! {φ ψ} := by
     constructor;
     simpa [HasJ1.ne_pq] using Hilbert.Minimal.axm
       (φ := InterpretabilityLogic.Axioms.J1 (.atom (HasJ1.p Ax)) (.atom (HasJ1.q Ax)))
@@ -141,7 +141,7 @@ instance [Ax.HasJ1] : InterpretabilityLogic.Entailment.HasAxiomJ1 (Hilbert.Minim
       (HasJ1.mem_J1);
 
 instance [Ax.HasJ2] : InterpretabilityLogic.Entailment.HasAxiomJ2 (Hilbert.Minimal Ax) where
-  J2! {φ ψ χ} := by
+  axiomJ2! {φ ψ χ} := by
     constructor;
     simpa [HasJ2.ne_pq, HasJ2.ne_qr, HasJ2.ne_rp.symm] using Hilbert.Minimal.axm
       (φ := InterpretabilityLogic.Axioms.J2 (.atom (HasJ2.p Ax)) (.atom (HasJ2.q Ax)) (.atom (HasJ2.r Ax)))
@@ -153,7 +153,7 @@ instance [Ax.HasJ2] : InterpretabilityLogic.Entailment.HasAxiomJ2 (Hilbert.Minim
       $ HasJ2.mem_J2;
 
 instance [Ax.HasJ2Plus] : InterpretabilityLogic.Entailment.HasAxiomJ2Plus (Hilbert.Minimal Ax) where
-  J2Plus! {φ ψ χ} := by
+  axiomJ2Plus! {φ ψ χ} := by
     constructor;
     simpa [HasJ2Plus.ne_pq, HasJ2Plus.ne_qr, HasJ2Plus.ne_rp.symm] using Hilbert.Minimal.axm
       (φ := InterpretabilityLogic.Axioms.J2Plus (.atom (HasJ2Plus.p Ax)) (.atom (HasJ2Plus.q Ax)) (.atom (HasJ2Plus.r Ax)))
@@ -165,7 +165,7 @@ instance [Ax.HasJ2Plus] : InterpretabilityLogic.Entailment.HasAxiomJ2Plus (Hilbe
       $ HasJ2Plus.mem_J2Plus;
 
 instance [Ax.HasJ3] : InterpretabilityLogic.Entailment.HasAxiomJ3 (Hilbert.Minimal Ax) where
-  J3! {φ ψ χ} := by
+  axiomJ3! {φ ψ χ} := by
     constructor;
     simpa [HasJ3.ne_pq, HasJ3.ne_qr, HasJ3.ne_rp.symm] using Hilbert.Minimal.axm
       (φ := InterpretabilityLogic.Axioms.J3 (.atom (HasJ3.p Ax)) (.atom (HasJ3.q Ax)) (.atom (HasJ3.r Ax)))
@@ -177,7 +177,7 @@ instance [Ax.HasJ3] : InterpretabilityLogic.Entailment.HasAxiomJ3 (Hilbert.Minim
       $ HasJ3.mem_J3;
 
 instance [Ax.HasJ4] : InterpretabilityLogic.Entailment.HasAxiomJ4 (Hilbert.Minimal Ax) where
-  J4! {φ ψ} := by
+  axiomJ4! {φ ψ} := by
     constructor;
     simpa [HasJ4.ne_pq] using Hilbert.Minimal.axm
       (φ := InterpretabilityLogic.Axioms.J4 (.atom (HasJ4.p Ax)) (.atom (HasJ4.q Ax)))
@@ -185,7 +185,7 @@ instance [Ax.HasJ4] : InterpretabilityLogic.Entailment.HasAxiomJ4 (Hilbert.Minim
       (HasJ4.mem_J4);
 
 instance [Ax.HasJ4Plus] : InterpretabilityLogic.Entailment.HasAxiomJ4Plus (Hilbert.Minimal Ax) where
-  J4Plus! {φ ψ χ} := by
+  axiomJ4Plus! {φ ψ χ} := by
     constructor;
     simpa [HasJ4Plus.ne_pq, HasJ4Plus.ne_qr, HasJ4Plus.ne_rp.symm] using Hilbert.Minimal.axm
       (φ := InterpretabilityLogic.Axioms.J4Plus (.atom (HasJ4Plus.p Ax)) (.atom (HasJ4Plus.q Ax)) (.atom (HasJ4Plus.r Ax)))
@@ -197,7 +197,7 @@ instance [Ax.HasJ4Plus] : InterpretabilityLogic.Entailment.HasAxiomJ4Plus (Hilbe
       $ HasJ4Plus.mem_J4Plus;
 
 instance [Ax.HasJ5] : InterpretabilityLogic.Entailment.HasAxiomJ5 (Hilbert.Minimal Ax) where
-  J5! {φ} := by
+  axiomJ5! {φ} := by
     constructor;
     simpa using Hilbert.Minimal.axm
       (φ := InterpretabilityLogic.Axioms.J5 (.atom (HasJ5.p Ax)))
@@ -205,14 +205,14 @@ instance [Ax.HasJ5] : InterpretabilityLogic.Entailment.HasAxiomJ5 (Hilbert.Minim
       (HasJ5.mem_J5);
 
 instance [Ax.HasJ6] : InterpretabilityLogic.Entailment.HasAxiomJ6 (Hilbert.Minimal Ax) where
-  J6! {φ} := by
+  axiomJ6! {φ} := by
     constructor;
     simpa using Hilbert.Minimal.axm (φ := InterpretabilityLogic.Axioms.J6 (.atom (HasJ6.p Ax)))
       (s := λ b => if (HasJ6.p Ax) = b then φ else (.atom b))
       (HasJ6.mem_J6);
 
 instance [Ax.HasM] : InterpretabilityLogic.Entailment.HasAxiomM (Hilbert.Minimal Ax) where
-  M! {φ ψ χ} := by
+  axiomM! {φ ψ χ} := by
     constructor;
     simpa [HasM.ne_pq, HasM.ne_qr, HasM.ne_rp.symm] using Hilbert.Minimal.axm
       (φ := InterpretabilityLogic.Axioms.M (.atom (HasM.p Ax)) (.atom (HasM.q Ax)) (.atom (HasM.r Ax)))

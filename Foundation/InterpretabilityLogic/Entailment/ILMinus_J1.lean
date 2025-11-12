@@ -13,7 +13,7 @@ variable [Entailment.ILMinus_J1 𝓢]
 
 instance : HasAxiomJ1' 𝓢 := ⟨by
   intro φ;
-  exact J1! ⨀ (nec $ C_id (φ := φ));
+  exact axiomJ1! ⨀ (nec $ C_id (φ := φ));
 ⟩
 
 
@@ -25,7 +25,7 @@ instance : HasAxiomJ1 𝓢 := ⟨by
   intro φ ψ;
   have := CCRhdRhdLC! (𝓢 := 𝓢) (φ := φ) (ψ := ψ) (χ := ψ);
   apply C_trans this;
-  apply CCC (𝓢 := 𝓢) ⨀ J1'!;
+  apply CCC (𝓢 := 𝓢) ⨀ axiomJ1'!;
 ⟩
 
 end LO.InterpretabilityLogic.Entailment

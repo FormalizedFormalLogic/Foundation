@@ -77,7 +77,7 @@ def CAKN! : 𝓢 ⊢! φ ➝ φ ⋏ ∼ψ ⋎ ψ := by
 def CCRhdRhdLC! : 𝓢 ⊢! □(φ ➝ ψ) ➝ (ψ ▷ χ ➝ φ ▷ χ) := by
   suffices 𝓢 ⊢! □(∼(φ ⋏ ∼ψ)) ➝ ψ ▷ χ ➝ φ ▷ χ by apply C_trans (box_regularity CCNKN) this;
   apply C_trans CLNRhd!;
-  apply CC!_of_CC!_of_C! J3!;
+  apply CC!_of_CC!_of_C! axiomJ3!;
   apply R2!;
   apply CAKN!;
 
