@@ -49,26 +49,6 @@ lemma validate_axiomW_of_HasAxiomW [F.IsIL] [F.HasAxiomW] : F ⊧ Axioms.W φ ψ
       . use u;
 
 
--- TODO: remove
-instance : Entailment.IL_KW2 InterpretabilityLogic.ILW where
-instance : Entailment.HasAxiomF InterpretabilityLogic.ILW := Entailment.instHasAxiomF
-
-
-open Hilbert.Basic in
-lemma validate_axiomF_of_validate_axiomW [F.IsIL] (h : F ⊧ Axioms.W (.atom 0) (.atom 1)) : F ⊧ Axioms.F φ := by
-  apply Hilbert.Basic.Veltman.soundness_frame (Ax := ILW.axioms);
-  . constructor;
-    rintro φ hφ;
-    rcases (by simpa using hφ) with (rfl | rfl | rfl | rfl | rfl | rfl);
-    . assumption;
-    . simp [validate_axiomJ5_of_J5]
-    . simp [validate_axiomJ1_of_J1]
-    . simp [validate_axiomJ2_of_HasAxiomJ2]
-    . simp [validate_axiomJ3]
-    . simp [validate_axiomJ4_of_HasAxiomJ4]
-  . suffices InterpretabilityLogic.ILW ⊢ Axioms.F φ by tauto;
-    simp;
-
 open Formula (atom) in
 lemma Frame.HasAxiomW.of_validate_axiomF [F.IsIL] (h : F ⊧ Axioms.F (.atom 0)) : F.HasAxiomW := by
   constructor;
@@ -100,9 +80,9 @@ lemma Frame.HasAxiomW.of_validate_axiomF [F.IsIL] (h : F ⊧ Axioms.F (.atom 0))
       use 1;
       tauto;
 
-lemma Frame.HasAxiomW.of_validate_axiomW [F.IsIL] (h : F ⊧ Axioms.W (.atom 0) (.atom 1)) : F.HasAxiomW := by
-  apply Frame.HasAxiomW.of_validate_axiomF;
-  apply validate_axiomF_of_validate_axiomW h;
+-- TODO: remove
+instance : Entailment.IL_KW2 InterpretabilityLogic.ILW where
+instance : Entailment.HasAxiomF InterpretabilityLogic.ILW := Entailment.instHasAxiomF
 
 lemma TFAE_HasAxiomW [F.IsIL] : [
     F.HasAxiomW,
@@ -110,8 +90,28 @@ lemma TFAE_HasAxiomW [F.IsIL] : [
     F ⊧ Axioms.F (.atom 0)
   ].TFAE := by
     tfae_have 1 → 2 := by apply validate_axiomW_of_HasAxiomW;
-    tfae_have 2 → 3 := validate_axiomF_of_validate_axiomW;
+    tfae_have 2 → 3 := by
+      intro h;
+      apply Hilbert.Basic.Veltman.soundness_frame (Ax := ILW.axioms);
+      . constructor;
+        rintro φ hφ;
+        rcases (by simpa using hφ) with (rfl | rfl | rfl | rfl | rfl | rfl);
+        . assumption;
+        . simp [validate_axiomJ5_of_J5]
+        . simp [validate_axiomJ1_of_J1]
+        . simp [validate_axiomJ2_of_HasAxiomJ2]
+        . simp [validate_axiomJ3]
+        . simp [validate_axiomJ4_of_HasAxiomJ4]
+      . suffices InterpretabilityLogic.ILW ⊢ Axioms.F (.atom 0) by tauto;
+        simp;
     tfae_have 3 → 1 := Frame.HasAxiomW.of_validate_axiomF;
     tfae_finish;
+
+@[simp high, grind .]
+lemma validate_axiomF_of_HasAxiomW [F.IsIL] [F.HasAxiomW] : F ⊧ Axioms.F φ := by
+  have : F ⊧ Axioms.F (.atom 0) := TFAE_HasAxiomW.out 0 2 |>.mp (by infer_instance);
+  apply ValidOnFrame.subst (s := λ n => φ) this;
+
+lemma Frame.HasAxiomW.of_validate_axiomW [F.IsIL] (h : F ⊧ Axioms.W (.atom 0) (.atom 1)) : F.HasAxiomW := TFAE_HasAxiomW.out 1 0 |>.mp h
 
 end LO.InterpretabilityLogic.Veltman
