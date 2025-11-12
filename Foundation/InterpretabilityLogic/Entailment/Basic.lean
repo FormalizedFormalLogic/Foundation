@@ -290,6 +290,16 @@ open Context in instance [Entailment.Minimal 𝓢] (Γ : Context F 𝓢) : HasAx
 end
 
 
+class HasAxiomP₀ (𝓢 : S) where
+  axiomP₀! {φ ψ : F} : 𝓢 ⊢! Axioms.P₀ φ ψ
+export HasAxiomP₀ (axiomP₀!)
+section
+variable [HasAxiomP₀ 𝓢]
+@[simp] lemma axiomP₀ : 𝓢 ⊢ Axioms.P₀ φ ψ := ⟨axiomP₀!⟩
+open FiniteContext in instance [Entailment.Minimal 𝓢] (Γ : FiniteContext F 𝓢) : HasAxiomP₀ Γ := ⟨λ {_} => of axiomP₀!⟩
+open Context in instance [Entailment.Minimal 𝓢] (Γ : Context F 𝓢) : HasAxiomP₀ Γ := ⟨λ {_} => of axiomP₀!⟩
+end
+
 
 class HasAxiomM (𝓢 : S) where
   axiomM! {φ ψ χ : F} : 𝓢 ⊢! Axioms.M φ ψ χ
@@ -387,5 +397,26 @@ open FiniteContext in instance [Entailment.Minimal 𝓢] (Γ : FiniteContext F �
 open Context in instance [Entailment.Minimal 𝓢] (Γ : Context F 𝓢) : HasAxiomF Γ := ⟨λ {_} => of axiomF!⟩
 end
 
+
+class HasAxiomR (𝓢 : S) where
+  axiomR! {φ ψ χ : F} : 𝓢 ⊢! Axioms.R φ ψ χ
+export HasAxiomR (axiomR!)
+section
+variable [HasAxiomR 𝓢]
+@[simp] lemma axiomR : 𝓢 ⊢ Axioms.R φ ψ χ := ⟨axiomR!⟩
+open FiniteContext in instance [Entailment.Minimal 𝓢] (Γ : FiniteContext F 𝓢) : HasAxiomR Γ := ⟨λ {_} => of axiomR!⟩
+open Context in instance [Entailment.Minimal 𝓢] (Γ : Context F 𝓢) : HasAxiomR Γ := ⟨λ {_} => of axiomR!⟩
+end
+
+
+class HasAxiomRStar (𝓢 : S) where
+  axiomRStar! {φ ψ χ : F} : 𝓢 ⊢! Axioms.RStar φ ψ χ
+export HasAxiomRStar (axiomRStar!)
+section
+variable [HasAxiomRStar 𝓢]
+@[simp] lemma axiomRStar : 𝓢 ⊢ Axioms.RStar φ ψ χ := ⟨axiomRStar!⟩
+open FiniteContext in instance [Entailment.Minimal 𝓢] (Γ : FiniteContext F 𝓢) : HasAxiomRStar Γ := ⟨λ {_} => of axiomRStar!⟩
+open Context in instance [Entailment.Minimal 𝓢] (Γ : Context F 𝓢) : HasAxiomRStar Γ := ⟨λ {_} => of axiomRStar!⟩
+end
 
 end LO.InterpretabilityLogic.Entailment
