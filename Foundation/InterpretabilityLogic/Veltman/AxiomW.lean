@@ -1,6 +1,7 @@
 import Foundation.InterpretabilityLogic.Veltman.Basic
 import Foundation.InterpretabilityLogic.Veltman.AxiomJ2
 import Foundation.InterpretabilityLogic.Veltman.Logic.IL
+import Mathlib.Tactic.TFAE
 
 namespace LO.InterpretabilityLogic.Veltman
 
@@ -20,7 +21,7 @@ export HasAxiomW (S_W)
 end Frame
 
 @[simp high, grind .]
-lemma validate_axiomW_of_HasAxiomW [F.IsILMinus_J2Plus_J5] [F.HasAxiomW] : F ⊧ Axioms.W φ ψ := by
+lemma validate_axiomW_of_HasAxiomW [F.IsIL] [F.HasAxiomW] : F ⊧ Axioms.W φ ψ := by
   intro V x h₁ y Rxy h₂;
   obtain ⟨z, ⟨Sxyz, hz⟩, hb⟩ := F.S_W x |>.has_max ({ z | y ≺[x] z ∧ Satisfies ⟨F, V⟩ z ψ }) $ by
     obtain ⟨z, _, _⟩ := h₁ y Rxy h₂;
@@ -47,45 +48,70 @@ lemma validate_axiomW_of_HasAxiomW [F.IsILMinus_J2Plus_J5] [F.HasAxiomW] : F ⊧
         . assumption;
       . use u;
 
+
+-- TODO: remove
+instance : Entailment.IL_KW2 InterpretabilityLogic.ILW where
+instance : Entailment.HasAxiomF InterpretabilityLogic.ILW := Entailment.instHasAxiomF
+
+
+open Hilbert.Basic in
+lemma validate_axiomF_of_validate_axiomW [F.IsIL] (h : F ⊧ Axioms.W (.atom 0) (.atom 1)) : F ⊧ Axioms.F φ := by
+  apply Hilbert.Basic.Veltman.soundness_frame (Ax := ILW.axioms);
+  . constructor;
+    rintro φ hφ;
+    rcases (by simpa using hφ) with (rfl | rfl | rfl | rfl | rfl | rfl);
+    . assumption;
+    . simp [validate_axiomJ5_of_J5]
+    . simp [validate_axiomJ1_of_J1]
+    . simp [validate_axiomJ2_of_HasAxiomJ2]
+    . simp [validate_axiomJ3]
+    . simp [validate_axiomJ4_of_HasAxiomJ4]
+  . suffices InterpretabilityLogic.ILW ⊢ Axioms.F φ by tauto;
+    simp;
+
 open Formula (atom) in
-lemma Frame.HasAxiomW.of_validate_axiomF [F.IsILMinus_J1_J2_J5] (h : F ⊧ Axioms.F (.atom 0)) : F.HasAxiomW := by
+lemma Frame.HasAxiomW.of_validate_axiomF [F.IsIL] (h : F ⊧ Axioms.F (.atom 0)) : F.HasAxiomW := by
   constructor;
-  intro x;
-  apply ConverseWellFounded.iff_has_max.mpr;
-  rintro S ⟨u₁, hu₁⟩;
-  wlog exu : x = u₁;
-  . have := @this F _ h x S;
-    sorry;
-  subst exu;
-
-  have := @h (λ w a => match a with | 0 => ∃ u ∈ S, u ≺≺[x] w | _ => False) x;
-  contrapose! this;
-  apply Satisfies.imp_def.not.mpr;
-  push_neg;
+  contrapose! h;
+  obtain ⟨w, hw⟩ := h;
+  obtain ⟨f, hf⟩ := not_isEmpty_iff.mp $ wellFounded_iff_isEmpty_descending_chain.not.mp hw;
+  replace hf : ∀ n, ∃ v, (f n) ≺ v ∧ v ≺[w] (f (n + 1)) := by simpa [RS, Relation.Comp, flip] using hf;
+  apply ValidOnFrame.iff_not_exists_valuation_world.mpr;
+  use (λ u a => match a with | 0 => ∃ i > 0, u = (hf i).choose | _ => False), w;
+  apply Satisfies.not_imp_def.mpr;
   constructor;
-  . intro y Rxy ⟨u, hu, RSxuy⟩;
-    use y;
+  . apply Satisfies.rhd_def.mpr;
+    rintro v Rwy ⟨m, hm, rfl⟩;
+    use (f (m + 1));
     constructor;
-    . apply F.S_J1;
-      assumption;
+    . exact hf m |>.choose_spec.2;
     . apply Satisfies.dia_def.mpr;
-      use u;
+      use (hf (m + 1)).choose;
       constructor;
-      . sorry;
-      . sorry;
-  . apply Satisfies.box_def.not.mpr;
-    push_neg;
-    obtain ⟨y, hy, ⟨v, Rxv, Sxvy⟩⟩ := this x hu₁;
-    use y;
+      . exact hf (m + 1) |>.choose_spec.1;
+      . use m + 1;
+        tauto;
+  . apply Satisfies.not_box_def.mpr;
+    use (hf 1).choose;
     constructor;
-    . apply F.S_J4 Sxvy
-    . suffices ∃ u ∈ S, u ≺≺[x] y by simpa [Semantics.Models, Satisfies];
-      use x;
-      refine ⟨?_, ?_⟩;
-      . assumption;
-      . use v;
+    . apply F.trans (F.S_J4 (hf 0).choose_spec.2) (hf 1).choose_spec.1;
+    . apply Satisfies.not_def.not.mpr;
+      push_neg;
+      use 1;
+      tauto;
 
+lemma Frame.HasAxiomW.of_validate_axiomW [F.IsIL] (h : F ⊧ Axioms.W (.atom 0) (.atom 1)) : F.HasAxiomW := by
+  apply Frame.HasAxiomW.of_validate_axiomF;
+  apply validate_axiomF_of_validate_axiomW h;
 
-lemma Frame.HasAxiomW.of_validate_axiomW [F.IsILMinus_J1_J2_J5] (h : F ⊧ Axioms.W (.atom 0) (.atom 1)) : F.HasAxiomW := by sorry;
+lemma TFAE_HasAxiomW [F.IsIL] : [
+    F.HasAxiomW,
+    F ⊧ Axioms.W (.atom 0) (.atom 1),
+    F ⊧ Axioms.F (.atom 0)
+  ].TFAE := by
+    tfae_have 1 → 2 := by apply validate_axiomW_of_HasAxiomW;
+    tfae_have 2 → 3 := validate_axiomF_of_validate_axiomW;
+    tfae_have 3 → 1 := Frame.HasAxiomW.of_validate_axiomF;
+    tfae_finish;
 
 end LO.InterpretabilityLogic.Veltman
