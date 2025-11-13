@@ -482,6 +482,17 @@ end ILR.axioms
 protected abbrev ILR := Hilbert.Basic ILR.axioms
 instance : Entailment.ILR InterpretabilityLogic.ILR where
 
+instance : InterpretabilityLogic.ILP₀ ⪯ InterpretabilityLogic.ILR := by
+  apply weakerThan_of_provable_axioms;
+  rintro φ (rfl | rfl | rfl | rfl | rfl | rfl) <;> simp only [
+      axiomJ1,
+      axiomJ2,
+      axiomJ3,
+      axiomJ4,
+      axiomJ5,
+      axiomP₀,
+    ];
+
 end
 
 end LO.InterpretabilityLogic
