@@ -1,0 +1,56 @@
+import Foundation.InterpretabilityLogic.Entailment.IL
+
+
+namespace LO.InterpretabilityLogic.Entailment
+
+open LO.Entailment LO.Modal.Entailment
+open FiniteContext
+
+variable {S F : Type*} [DecidableEq F] [InterpretabilityLogicalConnective F] [Entailment S F] {𝓢 : S} {φ ψ χ : F}
+
+protected class ILR (𝓢 : S) extends InterpretabilityLogic.Entailment.IL 𝓢, HasAxiomR 𝓢
+
+variable [Entailment.ILR 𝓢]
+
+def CCNNK! : 𝓢 ⊢! (φ ➝ ∼ψ) ➝ ∼(φ ⋏ ψ):= C_replace CCAN CANNNK C_id
+
+def CCC!_of_C! (h : 𝓢 ⊢! φ₂ ➝ ψ₂) : 𝓢 ⊢! (φ ➝ φ₂) ➝ (φ ➝ ψ₂) := CCC!_of_C!_of_C! C_id h
+
+def CMNNL! : 𝓢 ⊢! ◇(∼φ) ➝ (∼□φ) := by
+  apply C_trans IMNLN!;
+  apply contra;
+  apply box_regularity;
+  apply dni;
+
+instance ILR_proves_axiomM₀ : Entailment.HasAxiomM₀ 𝓢 where
+  axiomM₀! := by
+    intro φ ψ χ;
+    apply rhdTrans_dhyp! ?_ axiomR!;
+    apply dhyp;
+    apply rhdOfLC!;
+    apply nec;
+    apply CN_of_CN_right;
+    apply C_trans axiomJ4!;
+    apply C_trans ?_ CCNNK!;
+    apply CCC!_of_C!;
+    apply CMNNL!;
+
+/--
+  E. Goris & J. J. Joosten 2011, Lemma 4.4
+-/
+instance ILR_proves_axiomP₀ : Entailment.HasAxiomP₀ 𝓢 where
+  axiomP₀! := by
+    intro φ ψ;
+    apply C_trans $ axiomR! (χ := ∼ψ);
+    apply C_trans ?_ CRhdNOL!;
+    apply CRhdRhd!_of_C!_C!;
+    . apply contra;
+      apply R1!;
+      apply dne;
+    . apply deduct';
+      suffices [◇ψ, □(∼ψ)] ⊢[𝓢]! ⊥ by tauto;
+      have H₁ : [◇ψ, □(∼ψ)] ⊢[𝓢]! ∼(□(∼ψ)) := (of IMNLN!) ⨀ (FiniteContext.nthAxm 0);
+      have H₂ : [◇ψ, □(∼ψ)] ⊢[𝓢]! □(∼ψ) := FiniteContext.nthAxm 1;
+      apply negMDP H₁ H₂;
+
+end LO.InterpretabilityLogic.Entailment

@@ -178,6 +178,20 @@ def HasP.of_mem {Ax₁ Ax₂ : Axiom α} (h : Ax₁ ⊆ Ax₂) [Ax₁.HasP] : Ax
   mem_P := h mem_P
 
 
+class HasP₀ where
+  p : α
+  q : α
+  ne_pq : p ≠ q := by simp;
+  mem_P₀ : InterpretabilityLogic.Axioms.P₀ (.atom p) (.atom q) ∈ Ax := by grind;
+attribute [simp] HasP₀.ne_pq
+export HasP₀ (mem_P₀)
+
+def HasP₀.of_mem {Ax₁ Ax₂ : Axiom α} (h : Ax₁ ⊆ Ax₂) [Ax₁.HasP₀] : Ax₂.HasP₀ where
+  p := HasP₀.p Ax₁;
+  q := HasP₀.q Ax₁;
+  mem_P₀ := h mem_P₀
+
+
 class HasW where
   p : α
   q : α
@@ -266,6 +280,23 @@ def HasM₀.of_mem {Ax₁ Ax₂ : Axiom α} (h : Ax₁ ⊆ Ax₂) [Ax₁.HasM₀
   r := HasM₀.r Ax₁;
   mem_M₀ := h mem_M₀
 
+
+class HasR where
+  p : α
+  q : α
+  r : α
+  ne_pq : p ≠ q := by simp;
+  ne_qr : q ≠ r := by simp;
+  ne_rp : r ≠ p := by simp;
+  mem_R : InterpretabilityLogic.Axioms.R (.atom p) (.atom q) (.atom r) ∈ Ax := by grind;
+attribute [simp] HasR.ne_pq HasR.ne_qr HasR.ne_rp
+export HasR (mem_R)
+
+def HasR.of_mem {Ax₁ Ax₂ : Axiom α} (h : Ax₁ ⊆ Ax₂) [Ax₁.HasR] : Ax₂.HasR where
+  p := HasR.p Ax₁;
+  q := HasR.q Ax₁;
+  r := HasR.r Ax₁;
+  mem_R := h mem_R
 
 
 class HasCLAxioms where

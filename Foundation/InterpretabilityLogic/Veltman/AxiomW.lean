@@ -35,7 +35,7 @@ lemma validate_axiomW_of_HasAxiomW [F.IsIL] [F.HasAxiomW] : F ⊧ Axioms.W φ ψ
     . simpa;
     . apply Satisfies.box_def.mpr;
       intro u Rzu;
-      apply Satisfies.not_def.mpr;
+      apply Satisfies.neg_def.mpr;
       by_contra hC;
       have Rxu : x ≺ u := F.trans (F.S_J4 Sxyz) Rzu;
       obtain ⟨v, Sxuv, hv⟩ := h₁ u Rxu hC;
@@ -75,8 +75,7 @@ lemma Frame.HasAxiomW.of_validate_axiomF [F.IsIL] (h : F ⊧ Axioms.F (.atom 0))
     use (hf 1).choose;
     constructor;
     . apply F.trans (F.S_J4 (hf 0).choose_spec.2) (hf 1).choose_spec.1;
-    . apply Satisfies.not_def.not.mpr;
-      push_neg;
+    . apply Satisfies.not_neg_def.mpr;
       use 1;
       tauto;
 

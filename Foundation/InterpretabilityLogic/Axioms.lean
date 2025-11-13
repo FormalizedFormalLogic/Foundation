@@ -61,7 +61,7 @@ protected abbrev P := (φ ▷ ψ) ➝ □(φ ▷ ψ)
 /--
   - Goris & Joosten 2008, `P₀`
 -/
-protected abbrev P₀ := (φ ➝ ◇ψ) ➝ □(φ ▷ ψ)
+protected abbrev P₀ := (φ ▷ ◇ψ) ➝ □(φ ▷ ψ)
 
 /--
   Montagna's Principle

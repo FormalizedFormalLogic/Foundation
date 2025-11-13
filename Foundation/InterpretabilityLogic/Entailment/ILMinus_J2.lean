@@ -17,6 +17,10 @@ variable [Entailment.ILMinus_J2 𝓢]
 
 instance : HasAxiomJ4' 𝓢 := ⟨fun {_ _} ↦ axiomJ2!⟩
 
+def rhdTrans_dhyp! (h₁ : 𝓢 ⊢! ψ ➝ φ ▷ χ) (h₂ : 𝓢 ⊢! ψ ➝ χ ▷ ξ) : 𝓢 ⊢! ψ ➝ φ ▷ ξ := by
+  apply deduct';
+  exact (of $ axiomJ2!) ⨀ (deductInv' h₁) ⨀ (deductInv' h₂);
+
 end
 
 

@@ -11,10 +11,6 @@ protected class ILWStar (𝓢 : S) extends InterpretabilityLogic.Entailment.IL �
 
 variable [Entailment.ILWStar 𝓢]
 
-def rhdTrans_dhyp! (h₁ : 𝓢 ⊢! φ ▷ ψ ➝ φ ▷ χ) (h₂ : 𝓢 ⊢! φ ▷ ψ ➝ χ ▷ ξ) : 𝓢 ⊢! φ ▷ ψ ➝ φ ▷ ξ := by
-  apply deduct';
-  exact (of $ axiomJ2!) ⨀ (deductInv' h₁) ⨀ (deductInv' h₂);
-
 instance : Entailment.HasAxiomW 𝓢 := by
   constructor;
   intro φ ψ;
