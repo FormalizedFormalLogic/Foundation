@@ -13,11 +13,11 @@ variable {S F : Type*} [DecidableEq F] [InterpretabilityLogicalConnective F] [En
 
 protected class ILWM₀ (𝓢 : S) extends Entailment.ILM₀ 𝓢, Entailment.ILW 𝓢
 
-variable [Entailment.ILWM₀ 𝓢]
-
 -- TODO: shorter proof by conjunection of list
 variable [LogicalConnective F] [Entailment.Cl 𝓢] in
-omit     [InterpretabilityLogicalConnective F] [Entailment.ILWM₀ 𝓢] in
+omit     [InterpretabilityLogicalConnective F] in
+section
+
 def K_intro₃ (h₁ : 𝓢 ⊢! φ₁) (h₂ : 𝓢 ⊢! φ₂) (h₃ : 𝓢 ⊢! φ₃) : 𝓢 ⊢! φ₁ ⋏ φ₂ ⋏ φ₃ := by
   apply K_intro;
   . assumption;
@@ -41,6 +41,11 @@ def K_assoc : 𝓢 ⊢! (φ ⋏ ψ) ⋏ χ ⭤ φ ⋏ (ψ ⋏ χ) := by
 
 def K_assoc_mp : 𝓢 ⊢! (φ ⋏ ψ) ⋏ χ ➝ φ ⋏ (ψ ⋏ χ) := K_left K_assoc
 def K_assoc_mpr : 𝓢 ⊢! φ ⋏ (ψ ⋏ χ) ➝ (φ ⋏ ψ) ⋏ χ := K_right K_assoc
+
+end
+
+
+variable [Entailment.ILWM₀ 𝓢]
 
 instance : HasAxiomWStar 𝓢 := by
   constructor;
