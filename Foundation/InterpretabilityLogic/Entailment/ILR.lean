@@ -36,11 +36,11 @@ instance : Entailment.HasAxiomM₀ 𝓢 where
     apply CCC!_of_C!;
     apply CMNNL!;
 
-instance : Entailment.HasAxiomP₀ 𝓢 where
-  axiomP₀! := by
-    intro φ ψ;
-    have := axiomR! (𝓢 := 𝓢) (φ := φ) (ψ := ψ) (χ := ∼ψ);
-    dsimp [Axioms.R, Axioms.P₀] at this ⊢;
-    sorry;
+/--
+  E. Goris & J. J. Joosten 2011, Lemma 4.4
+
+  > The principle `P₀` follows directly from `R` by taking `χ = ∼ψ`.
+-/
+instance : Entailment.HasAxiomP₀ 𝓢 := by sorry;
 
 end LO.InterpretabilityLogic.Entailment
