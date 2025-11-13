@@ -127,3 +127,12 @@ def JRMV24 : ArXiv where
   ]
   year := 2024
   id := "...insert arXiv id here..."
+
+-- TODO: `incollection`
+def Werner97 : ArXiv where
+  title := inlines!"Sets in types, types in sets"
+  authors := #[
+    inlines!"Benjamin. Werner",
+  ]
+  year := 1997
+  id := "none"

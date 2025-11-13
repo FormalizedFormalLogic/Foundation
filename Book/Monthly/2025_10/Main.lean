@@ -31,6 +31,11 @@ As an obvious consequence, it can be proven that $`\mathsf{ZFC}` is consistent.
 
 {docstring FirstOrder.SetTheory.zfc_consistent}
 
+This result should not be seen as supporting the "consistency of mathematics" in the sense of Hilbert's Program.
+Rather, it is a natural consequence of Lean 4 possessing multiple type universes,
+and it is well-known that Lean is much stronger than $`\mathsf{ZFC + Con(ZFC)}`.
+For detail, see [M. Carneiro, "The Type Theory of Lean"](https://github.com/digama0/lean-type-theory/releases/tag/v1.0) and {citet Werner97}[].
+
 # Filteration of Neighborhood Semantics on Modal logic
 
 *Author*: [@SnO2WMaN](https://github.com/SnO2WMaN)
