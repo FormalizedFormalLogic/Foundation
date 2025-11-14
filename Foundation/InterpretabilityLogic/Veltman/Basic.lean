@@ -83,7 +83,8 @@ protected lemma or_def : x ⊧ φ ⋎ ψ ↔ x ⊧ φ ∨ x ⊧ ψ := by simp [S
 
 protected lemma and_def : x ⊧ φ ⋏ ψ ↔ x ⊧ φ ∧ x ⊧ ψ := by simp [Satisfies];
 
-protected lemma not_def : x ⊧ ∼φ ↔ ¬(x ⊧ φ) := by simp [Satisfies];
+protected lemma neg_def : x ⊧ ∼φ ↔ ¬(x ⊧ φ) := by simp [Satisfies];
+protected lemma not_neg_def : ¬(x ⊧ ∼φ) ↔ x ⊧ φ := by simp [Satisfies];
 
 protected lemma top_def : x ⊧ ⊤ := by simp [Satisfies];
 
@@ -94,12 +95,13 @@ protected lemma dia_def : x ⊧ ◇φ ↔ ∃ y, x ≺ y ∧ y ⊧ φ := by simp
 protected lemma not_dia_def : ¬x ⊧ ◇φ ↔ ∀ y, x ≺ y → ¬(y ⊧ φ) := by simp [Satisfies];
 
 protected lemma rhd_def : x ⊧ φ ▷ ψ ↔ ∀ y, x ≺ y → Satisfies M y φ → (∃ z, y ≺[x] z ∧ Satisfies M z ψ) := by simp [Satisfies];
+protected lemma not_rhd_def : ¬x ⊧ φ ▷ ψ ↔ ∃ y, x ≺ y ∧ Satisfies M y φ ∧ ∀ z, y ≺[x] z → ¬(Satisfies M z ψ) := by simp [Satisfies];
 
 protected instance : Semantics.Tarski (M.World) where
   models_verum := λ _ => Satisfies.top_def;
   models_falsum := λ _ => Satisfies.bot_def;
   models_imply := Satisfies.imp_def;
-  models_not := Satisfies.not_def;
+  models_not := Satisfies.neg_def;
   models_or := Satisfies.or_def;
   models_and := Satisfies.and_def;
 
@@ -233,9 +235,9 @@ lemma multinec (n) (h : M ⊧ φ) : M ⊧ □^[n]φ := by
   | zero => tauto;
   | succ n ih => simpa using ValidOnModel.nec ih;
 
-protected lemma imply₁ : M ⊧ (Axioms.Imply₁ φ ψ) := by simp [ValidOnModel]; tauto;
+protected lemma implyK : M ⊧ (Axioms.ImplyK φ ψ) := by simp [ValidOnModel]; tauto;
 
-protected lemma imply₂ : M ⊧ (Axioms.Imply₂ φ ψ χ) := by simp [ValidOnModel]; tauto;
+protected lemma implyS : M ⊧ (Axioms.ImplyS φ ψ χ) := by simp [ValidOnModel]; tauto;
 
 protected lemma elimContra : M ⊧ (Axioms.ElimContra φ ψ) := by simp [ValidOnModel]; tauto;
 
@@ -350,10 +352,10 @@ open Formula.Veltman
 variable {F : Veltman.Frame} {φ ψ χ : Formula ℕ}
 
 @[simp high, grind .]
-lemma validate_imply₁ : F ⊧ (Axioms.Imply₁ φ ψ) := by tauto;
+lemma validate_implyK : F ⊧ (Axioms.ImplyK φ ψ) := by tauto;
 
 @[simp high, grind .]
-lemma validate_imply₂ : F ⊧ (Axioms.Imply₂ φ ψ χ) := by tauto;
+lemma validate_implyS : F ⊧ (Axioms.ImplyS φ ψ χ) := by tauto;
 
 @[simp high, grind .]
 lemma validate_elimContra : F ⊧ (Axioms.ElimContra φ ψ) := by

@@ -195,10 +195,10 @@ lemma gödelTranslated_axiomTc : 𝓜𝓢 ⊢ φᵍ ➝ □φᵍ := by
   | _ => simp only [gödelTranslate, axiomFour!];
 
 lemma gödelTranslated_implyS : 𝓜𝓢 ⊢ (φ ➝ ψ ➝ φ)ᵍ := by
-  exact nec! $ C!_trans gödelTranslated_axiomTc $ axiomK'! $ nec! $ imply₁!;
+  exact nec! $ C!_trans gödelTranslated_axiomTc $ axiomK'! $ nec! $ implyK!;
 
 lemma gödelTranslated_implyK : 𝓜𝓢 ⊢ ((φ ➝ ψ ➝ χ) ➝ (φ ➝ ψ) ➝ φ ➝ χ)ᵍ := by
-  apply nec! $ C!_trans (C!_trans (axiomK'! $ nec! ?b) axiomFour!) $ axiomK'! $ nec! $ C!_trans (axiomK'! $ nec! imply₂!) axiomK!;
+  apply nec! $ C!_trans (C!_trans (axiomK'! $ nec! ?b) axiomFour!) $ axiomK'! $ nec! $ C!_trans (axiomK'! $ nec! implyS!) axiomK!;
   apply provable_iff_provable.mpr;
   apply deduct_iff.mpr;
   apply deduct_iff.mpr;

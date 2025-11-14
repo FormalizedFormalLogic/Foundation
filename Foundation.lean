@@ -197,6 +197,9 @@ import Foundation.InterpretabilityLogic.Veltman.Logic.CL
 import Foundation.InterpretabilityLogic.Veltman.Logic.IL
 import Foundation.InterpretabilityLogic.Veltman.Logic.ILM
 import Foundation.InterpretabilityLogic.Veltman.Logic.ILP
+import Foundation.InterpretabilityLogic.Veltman.Logic.ILW
+import Foundation.InterpretabilityLogic.Veltman.Logic.ILF
+import Foundation.InterpretabilityLogic.Veltman.Logic.ILP₀
 
 -- Meta
 import Foundation.Meta.Qq

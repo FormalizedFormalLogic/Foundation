@@ -8,7 +8,7 @@ open Veltman
 
 namespace Veltman
 
-protected alias Frame.IsIL := Frame.IsILMinus_J1_J2_J5
+protected class Frame.IsIL (F : Frame) extends F.IsILMinus_J1_J2_J5
 protected alias FrameClass.IL := FrameClass.ILMinus_J1_J2_J5
 
 end Veltman

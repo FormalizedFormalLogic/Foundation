@@ -17,7 +17,7 @@ instance [Entailment.EMK 𝓢] : HasAxiomC 𝓢 := ⟨by
   have H₂ : [□φ ⋏ □ψ] ⊢[𝓢]! □φ := K_left $ FiniteContext.byAxm (φ := □φ ⋏ □ψ) (by simp);
   have H₃ : [□φ ⋏ □ψ] ⊢[𝓢]! □ψ := K_right $ FiniteContext.byAxm (φ := □φ ⋏ □ψ) (by simp);
   apply H₁ ⨀ ?_ ⨀ H₃;
-  have H₄ : [□φ ⋏ □ψ] ⊢[𝓢]! □(ψ ➝ φ) := (of $ rm $ imply₁) ⨀ H₂;
+  have H₄ : [□φ ⋏ □ψ] ⊢[𝓢]! □(ψ ➝ φ) := (of $ rm $ implyK) ⨀ H₂;
   have H₅ : [□φ ⋏ □ψ] ⊢[𝓢]! □(ψ ➝ φ) ➝ □(ψ ➝ (φ ⋏ ψ)) := of $ by
     apply K_left;
     apply re;

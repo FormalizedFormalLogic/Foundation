@@ -152,8 +152,8 @@ protected instance : Semantics.Tarski (M.World) where
   models_or  := by grind
   models_and := by grind
 
-@[simp] protected lemma imply₁ : x ⊧ Axioms.Imply₁ φ ψ := by grind
-@[simp] protected lemma imply₂ : x ⊧ Axioms.Imply₂ φ ψ ξ := by grind
+@[simp] protected lemma implyK : x ⊧ Axioms.ImplyK φ ψ := by grind
+@[simp] protected lemma implyS : x ⊧ Axioms.ImplyS φ ψ ξ := by grind
 @[simp] protected lemma elimContra : x ⊧ Axioms.ElimContra φ ψ := by grind
 protected lemma mdp (hφψ : x ⊧ φ ➝ ψ) (hψ : x ⊧ φ) : x ⊧ ψ := by grind
 
@@ -205,9 +205,9 @@ lemma valid_iff : M ⊧ φ ⭤ ψ ↔ (M φ = M ψ) := by
   . intro h x;
     simp [Satisfies, h];
 
-@[simp] protected lemma imply₁ : M ⊧ Axioms.Imply₁ φ ψ := λ _ ↦ Satisfies.imply₁
+@[simp] protected lemma implyK : M ⊧ Axioms.ImplyK φ ψ := λ _ ↦ Satisfies.implyK
 
-@[simp] protected lemma imply₂ : M ⊧ Axioms.Imply₂ φ ψ ξ := λ _ ↦ Satisfies.imply₂
+@[simp] protected lemma implyS : M ⊧ Axioms.ImplyS φ ψ ξ := λ _ ↦ Satisfies.implyS
 
 @[simp] protected lemma elimContra : M ⊧ Axioms.ElimContra φ ψ := λ _ ↦ Satisfies.elimContra
 
@@ -253,9 +253,9 @@ protected lemma re (hφ : F ⊧ φ ⭤ ψ) : F ⊧ □φ ⭤ □ψ := by
   apply ValidOnModel.re;
   exact hφ V;
 
-@[simp] protected lemma imply₁ : F ⊧ Axioms.Imply₁ φ ψ := λ _ ↦ ValidOnModel.imply₁
+@[simp] protected lemma implyK : F ⊧ Axioms.ImplyK φ ψ := λ _ ↦ ValidOnModel.implyK
 
-@[simp] protected lemma imply₂ : F ⊧ Axioms.Imply₂ φ ψ ξ := λ _ ↦ ValidOnModel.imply₂
+@[simp] protected lemma implyS : F ⊧ Axioms.ImplyS φ ψ ξ := λ _ ↦ ValidOnModel.implyS
 
 @[simp] protected lemma elimContra : F ⊧ Axioms.ElimContra φ ψ := λ _ ↦ ValidOnModel.elimContra
 

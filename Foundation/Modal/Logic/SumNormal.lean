@@ -1,4 +1,4 @@
-import Foundation.Logic.HilbertStyle.Supplemental
+import Foundation.Propositional.Entailment.Cl.Basic
 import Foundation.Modal.Logic.Basic
 import Foundation.Meta.ClProver
 import Foundation.Modal.Letterless
@@ -100,9 +100,9 @@ lemma symm : sumNormal L₁ L₂ = sumNormal L₂ L₁ := by
 variable [DecidableEq α]
 
 instance [Entailment.Cl L₁] : Entailment.Lukasiewicz (sumNormal L₁ L₂) where
-  imply₁ _ _ := by constructor; apply sumNormal.mem₁; simp;
-  imply₂ _ _ _ := by constructor; apply sumNormal.mem₁; simp;
-  elimContra _ _ := by constructor; apply sumNormal.mem₁; simp;
+  implyK {_ _} := by constructor; apply sumNormal.mem₁; simp;
+  implyS {_ _ _} := by constructor; apply sumNormal.mem₁; simp;
+  elimContra {_ _} := by constructor; apply sumNormal.mem₁; simp;
   mdp hφψ hφ := by
     constructor;
     apply sumNormal.mdp;

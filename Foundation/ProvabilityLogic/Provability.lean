@@ -1,5 +1,5 @@
 import Foundation.FirstOrder.Arithmetic.Basic
-import Foundation.Logic.HilbertStyle.Supplemental
+import Foundation.Propositional.Entailment.Cl.Basic
 import Foundation.Meta.ClProver
 
 /-!

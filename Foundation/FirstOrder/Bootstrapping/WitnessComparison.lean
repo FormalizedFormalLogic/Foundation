@@ -1,5 +1,5 @@
 import Foundation.FirstOrder.Bootstrapping.DerivabilityCondition
-import Foundation.Logic.HilbertStyle.Supplemental
+import Foundation.Propositional.Entailment.Cl.Basic
 
 /-!
 # Witness comparisons of provability

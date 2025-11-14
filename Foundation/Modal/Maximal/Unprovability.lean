@@ -70,9 +70,9 @@ lemma provable_verTranslated_Cl : Modal.GL ⊢ φ → Propositional.Cl ⊢ φⱽ
     | mdp ih₁ ih₂ =>
       dsimp [verTranslate] at ih₁ ih₂;
       exact ih₁ ⨀ ih₂;
-    | _ => simp [verTranslate, Formula.toPropFormula];
+    | _ => dsimp [verTranslate, Formula.toPropFormula]; cl_prover;
 
-@[simp, grind]
+@[simp, grind .]
 lemma unprovable_AxiomT : (Modal.GL) ⊬ Axioms.T (.atom a) := by
   apply not_imp_not.mpr provable_verTranslated_Cl;
   apply Cl.not_provable_of_exists_valuation;

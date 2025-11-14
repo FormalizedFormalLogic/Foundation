@@ -37,7 +37,7 @@ end ILMinus_J1_J4Plus
 
 instance : InterpretabilityLogic.ILMinus_J1 ⪱ InterpretabilityLogic.ILMinus_J1_J4Plus := by
   constructor;
-  . apply weakerThan_of_subset_axioms $ by grind;
+  . apply weakerThan_buildAxioms_of_subset; decide;
   . apply Entailment.not_weakerThan_iff.mpr;
     use (Axioms.J4Plus (.atom 0) (.atom 1) (.atom 2));
     constructor;
@@ -66,7 +66,7 @@ instance : InterpretabilityLogic.ILMinus_J1 ⪱ InterpretabilityLogic.ILMinus_J1
 
 instance : InterpretabilityLogic.ILMinus_J4Plus ⪱ InterpretabilityLogic.ILMinus_J1_J4Plus := by
   constructor;
-  . apply weakerThan_of_subset_axioms $ by grind;
+  . apply weakerThan_buildAxioms_of_subset; decide;
   . apply Entailment.not_weakerThan_iff.mpr;
     use (Axioms.J1 (.atom 0)) (.atom 1);
     constructor;

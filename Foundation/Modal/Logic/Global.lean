@@ -22,13 +22,13 @@ end Formula
 
 
 inductive GlobalConsequence (L : Logic α) : Set (Formula α) → Formula α → Type*
-  | protected thm {X φ}      : L ⊢ φ → GlobalConsequence L X φ
-  | protected ctx {X φ}      : φ ∈ X → GlobalConsequence L X φ
-  | protected mdp {X Y φ ψ}  : GlobalConsequence L X (φ ➝ ψ) → GlobalConsequence L Y φ → GlobalConsequence L (X ∪ Y) ψ
-  | protected nec {X φ}      : GlobalConsequence L X φ → GlobalConsequence L X (□φ)
-  | protected imply₁ X φ ψ   : GlobalConsequence L X $ Axioms.Imply₁ φ ψ
-  | protected imply₂ X φ ψ χ : GlobalConsequence L X $ Axioms.Imply₂ φ ψ χ
-  | protected ec X φ ψ       : GlobalConsequence L X $ Axioms.ElimContra φ ψ
+  | protected thm {X φ}        : L ⊢ φ → GlobalConsequence L X φ
+  | protected ctx {X φ}        : φ ∈ X → GlobalConsequence L X φ
+  | protected mdp {X Y φ ψ}    : GlobalConsequence L X (φ ➝ ψ) → GlobalConsequence L Y φ → GlobalConsequence L (X ∪ Y) ψ
+  | protected nec {X φ}        : GlobalConsequence L X φ → GlobalConsequence L X (□φ)
+  | protected implyK X {φ ψ}   : GlobalConsequence L X $ Axioms.ImplyK φ ψ
+  | protected implyS X {φ ψ χ} : GlobalConsequence L X $ Axioms.ImplyS φ ψ χ
+  | protected ec X {φ ψ}       : GlobalConsequence L X $ Axioms.ElimContra φ ψ
 
 instance : Entailment (Logic α × Set (Formula α)) (Formula α) := ⟨λ (L, Γ) => GlobalConsequence L Γ⟩
 
@@ -40,8 +40,8 @@ variable {L : Logic α} {X Y : Set (Formula α)} {φ ψ : Formula α}
 
 instance : Entailment.Lukasiewicz (F := Formula α) (S := Logic α × Set (Formula α)) (L, X) where
   mdp ihφψ ihφ := by simpa using GlobalConsequence.mdp ihφψ ihφ;
-  imply₁ := GlobalConsequence.imply₁ X
-  imply₂ := GlobalConsequence.imply₂ X
+  implyK := GlobalConsequence.implyK X
+  implyS := GlobalConsequence.implyS X
   elimContra := GlobalConsequence.ec X
 
 instance : Entailment.Necessitation (F := Formula α) (S := Logic α × Set (Formula α)) (L, X) where
@@ -69,9 +69,9 @@ protected lemma rec!
     {hφ : (L, X) ⊢ φ},
     motive X φ hφ → motive X (□φ) ⟨GlobalConsequence.nec hφ.some⟩
   )
-  (imply₁! : ∀ {X φ ψ}, motive X (Axioms.Imply₁ φ ψ) ⟨GlobalConsequence.imply₁ X φ ψ⟩)
-  (imply₂! : ∀ {X φ ψ ξ}, motive X (Axioms.Imply₂ φ ψ ξ) ⟨GlobalConsequence.imply₂ X φ ψ ξ⟩)
-  (ec! : ∀ {X φ ψ}, motive X (Axioms.ElimContra φ ψ) ⟨GlobalConsequence.ec X φ ψ⟩)
+  (implyK! : ∀ {X φ ψ}, motive X (Axioms.ImplyK φ ψ) ⟨GlobalConsequence.implyK X⟩)
+  (implyS! : ∀ {X φ ψ ξ}, motive X (Axioms.ImplyS φ ψ ξ) ⟨GlobalConsequence.implyS X⟩)
+  (ec! : ∀ {X φ ψ}, motive X (Axioms.ElimContra φ ψ) ⟨GlobalConsequence.ec X⟩)
   : ∀ {X : Set (Formula α)} {φ}, (d : (L, X) ⊢ φ) → motive X φ d := by
   rintro X φ ⟨d⟩;
   induction d with
@@ -79,8 +79,8 @@ protected lemma rec!
   | thm h => apply thm! h;
   | mdp _ _ ihφψ ihφ => apply mdp! ihφψ ihφ;
   | nec _ ihφ => apply nec! ihφ;
-  | imply₁ => apply imply₁!;
-  | imply₂ => apply imply₂!;
+  | implyK => apply implyK!;
+  | implyS => apply implyS!;
   | ec => apply ec!;
 
 section
@@ -132,7 +132,7 @@ lemma iff_finite_boxlt_provable : ((L, X) ⊢ φ) ↔ (∃ Γ : Finset (Formula 
         constructor;
         . omega;
         . simp;
-    | imply₁! | imply₂! | ec! =>
+    | implyK! | implyS! | ec! =>
       use ∅, 0;
       constructor;
       . simp;

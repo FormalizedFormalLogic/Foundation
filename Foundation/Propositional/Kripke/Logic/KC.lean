@@ -1,4 +1,4 @@
-import Foundation.Propositional.Kripke.AxiomWeakLEM
+import Foundation.Propositional.Kripke.AxiomWLEM
 import Foundation.Propositional.Kripke.Rooted
 import Foundation.Propositional.Kripke.Logic.Int
 import Foundation.Propositional.Kripke.Logic.KrieselPutnam
@@ -41,14 +41,14 @@ instance : Sound Propositional.KC FrameClass.KC :=
     apply FrameClass.Validates.withAxiomEFQ;
     rintro F hF _ rfl;
     replace hF := Set.mem_setOf_eq.mp hF;
-    apply validate_axiomWeakLEM_of_isPiecewiseStronglyConvergent
+    apply validate_axiomWLEM_of_isPiecewiseStronglyConvergent
 
 instance : Sound Propositional.KC FrameClass.finite_KC :=
   instSound_of_validates_axioms $ by
     apply FrameClass.Validates.withAxiomEFQ;
     rintro F hF _ rfl;
     replace hF := Set.mem_setOf_eq.mp hF;
-    apply validate_axiomWeakLEM_of_isPiecewiseStronglyConvergent
+    apply validate_axiomWLEM_of_isPiecewiseStronglyConvergent
 
 instance : Entailment.Consistent Propositional.KC := consistent_of_sound_frameclass FrameClass.KC $ by
   use whitepoint;
@@ -140,7 +140,7 @@ instance : Propositional.KrieselPutnam ⪱ Propositional.KC := by
     simp_all only [Set.mem_setOf_eq];
     infer_instance
   . apply Entailment.not_weakerThan_iff.mpr;
-    use Axioms.WeakLEM (.atom 0);
+    use Axioms.WLEM (.atom 0);
     constructor;
     . simp;
     . apply Sound.not_provable_of_countermodel (𝓜 := FrameClass.KrieselPutnam)
@@ -178,7 +178,7 @@ instance : Propositional.KrieselPutnam ⪱ Propositional.KC := by
               | 1 => use 1; tauto;
               | 2 => use 2; tauto;
         }
-      . apply not_imp_not.mpr $ Kripke.isPiecewiseStronglyConvergent_of_validate_axiomWeakLEM;
+      . apply not_imp_not.mpr $ Kripke.isPiecewiseStronglyConvergent_of_validate_axiomWLEM;
         by_contra hC;
         have := @F.ps_convergent _ 0 1 2;
         omega;

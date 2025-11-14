@@ -72,7 +72,7 @@ private lemma mainlemma_aux {i : M} (hri : r ≺ i) :
     . intro h;
       rcases Satisfies.imp_def₂.mp h with (hA | hB);
       . exact C!_trans ((ihA hri).2 hA) CNC!;
-      . exact C!_trans ((ihB hri).1 hB) imply₁!;
+      . exact C!_trans ((ihB hri).1 hB) implyK!;
     . intro hA hB;
       exact not_imply_prem''! ((ihA hri).1 hA) ((ihB hri).2 hB);
   | hbox A ihA =>

@@ -1,6 +1,6 @@
 import Foundation.FirstOrder.Basic.Semantics.Semantics
 import Foundation.FirstOrder.Basic.Calculus
-import Foundation.Logic.HilbertStyle.Supplemental
+import Foundation.Propositional.Entailment.Cl.Basic
 
 namespace LO.FirstOrder
 
@@ -52,8 +52,8 @@ def Entailment.paddingIff [L.DecidableEq] [DecidableEq ξ] [Entailment S (Formul
     · apply dhyp
       apply Conj_intro
       intro φ hφ
-      have : k ≠ 0 ∧ φ = ⊤ := by simpa using hφ
-      exact Entailment.cast this.2.symm HasAxiomVerum.verum
+      have : k ≠ 0 ∧ φ = ⊤ := by simpa using hφ;
+      exact this.2 ▸ HasAxiomVerum.verum
 
 @[simp] def Entailment.padding_iff [L.DecidableEq] [DecidableEq ξ] [Entailment S (Formula L ξ)] {𝓢 : S} [Entailment.Minimal 𝓢] (φ k) :
     𝓢 ⊢ φ.padding k ⭤ φ := ⟨paddingIff φ k⟩

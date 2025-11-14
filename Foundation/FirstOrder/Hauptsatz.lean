@@ -274,8 +274,8 @@ def ofMinimalProof {φ : SyntacticFormulaᵢ L} : 𝗠𝗶𝗻¹ ⊢! φ → ⊩
       HilbertProofᵢ.cast (HilbertProofᵢ.rewrite (t :>ₙ fun x ↦ &x) b) (by simp [rewrite_free_eq_subst])
     ofMinimalProof d p
   | .verum => fun p ↦ implyEquiv.symm fun q sqp bφ ↦ bφ
-  | .imply₁ φ ψ => fun p ↦ implyEquiv.symm fun q sqp bφ ↦ implyEquiv.symm fun r srq bψ ↦ bφ.monotone srq
-  | .imply₂ φ ψ χ => fun p ↦
+  | .implyK φ ψ => fun p ↦ implyEquiv.symm fun q sqp bφ ↦ implyEquiv.symm fun r srq bψ ↦ bφ.monotone srq
+  | .implyS φ ψ χ => fun p ↦
     implyEquiv.symm fun q sqp b₁ ↦
       implyEquiv.symm fun r srq b₂ ↦
         implyEquiv.symm fun s ssr b₃ ↦

@@ -37,7 +37,8 @@ end ILM
 
 instance : InterpretabilityLogic.IL ⪱ InterpretabilityLogic.ILM := by
   constructor;
-  . apply weakerThan_of_subset_axioms $ by grind;
+  . apply weakerThan_of_subset_axioms;
+    simp;
   . apply Entailment.not_weakerThan_iff.mpr;
     use (Axioms.M (.atom 0) (.atom 1) (.atom 2));
     constructor;
