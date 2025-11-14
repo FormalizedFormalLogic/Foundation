@@ -33,6 +33,9 @@ def ENTO : 𝓢 ⊢! ∼⊤ ⭤ ⊥ := by
 def CNTO : 𝓢 ⊢! ∼⊤ ➝ ⊥ := K_left ENTO
 def CONT : 𝓢 ⊢! ⊥ ➝ ∼⊤ := K_right ENTO
 
+/--
+  E. Goris & J. Joosten 2011, Lemma 4.5
+-/
 instance : HasAxiomW 𝓢 where
   axiomW! {φ ψ} := by
     dsimp [Axioms.W];

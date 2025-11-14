@@ -13,6 +13,9 @@ protected class ILRW (𝓢 : S) extends InterpretabilityLogic.Entailment.ILR �
 
 variable [Entailment.ILRW 𝓢]
 
+/--
+  E. Goris & J. Joosten 2011, Lemma 4.5
+-/
 instance : HasAxiomRStar 𝓢 where
   axiomRStar! {φ ψ χ} := by
     apply C_trans axiomW!;
