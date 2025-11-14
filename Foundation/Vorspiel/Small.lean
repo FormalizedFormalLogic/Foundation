@@ -3,7 +3,7 @@ import Mathlib.Logic.Small.Basic
 
 section Small
 
-variable {α β : Type*}
+variable {α : Type uα} {β : Type uβ}
 
 def small_preimage_of_injective (f : α → β) (h : Function.Injective f) (s : Set β) [Small.{u} s] :
     Small.{u} (f ⁻¹' s) := small_of_injective (β := s) (f := fun x ↦ ⟨f x, x.prop⟩) fun x y ↦ by

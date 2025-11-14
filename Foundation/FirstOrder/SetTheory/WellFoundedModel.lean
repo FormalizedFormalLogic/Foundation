@@ -31,6 +31,13 @@ theorem ind {P : V → Prop}
     (x : V) : P x :=
   WellFounded.induction wf x h
 
+noncomputable def rankMin (s : Set V) (h : s.Nonempty) : V := WellFounded.min wf s h
+
+@[simp] lemma rankMin_mem (s : Set V) (h : s.Nonempty) : rankMin s h ∈ s := WellFounded.min_mem wf s h
+
+lemma not_mem_rankMin (s : Set V) (h : s.Nonempty) {x} (hx : x ∈ s) :
+    x ∉ rankMin s h := WellFounded.not_lt_min wf s h hx
+
 end WellFoundedModel
 
 end LO.FirstOrder.SetTheory
