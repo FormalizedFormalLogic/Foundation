@@ -16,7 +16,7 @@ tag  := "monthly-report-2025-10"
 %%%
 
 This page is the monthly report summarizing commits [between 2025/10/01 and 2025/11/01](https://github.com/FormalizedFormalLogic/Foundation/commits/master/?since=2025-10-01&until=2025-11-01).
-There are 4 major topics in this month.
+There are 3 major topics in this month.
 
 # Set Theory and Consistency of `ZFC`
 
@@ -34,7 +34,7 @@ As an obvious consequence, it can be proven that $`\mathsf{ZFC}` is consistent.
 This result should not be seen as supporting the "consistency of mathematics" in the sense of Hilbert's Program.
 Rather, it is a natural consequence of Lean 4 possessing multiple type universes,
 and it is well-known that Lean is much stronger than $`\mathsf{ZFC + Con(ZFC)}`.
-For detail, see [M. Carneiro, "The Type Theory of Lean"](https://github.com/digama0/lean-type-theory/releases/tag/v1.0) and {citet Werner97}[].
+For detail, see {citet Carneiro19}[] and {citet Werner97}[].
 
 # Filteration of Neighborhood Semantics on Modal logic
 
@@ -251,3 +251,12 @@ We list several goals for future development:
 - `dfe9cc43`: add(FirstOrder/SetTheory): functions in `𝗭` ([#578](https://github.com/FormalizedFormalLogic/Foundation/pull/578))
 - `f1acb057`: add(FirstOrder): ordinals in Zermelo set theoey ([#575](https://github.com/FormalizedFormalLogic/Foundation/pull/575))
 - `201dd59f`: refactor(Modal/Neighborhood): Refactor ([#576](https://github.com/FormalizedFormalLogic/Foundation/pull/576))
+
+# Call for Support
+
+We have created an [Open Collective account](https://opencollective.com/formalizedformallogic).
+(GitHub Sponsors is now pending.)
+
+Currently, this project receives little to no financial support.
+If you find our work valuable, we would greatly appreciate contributions to help sustain our OSS development efforts.
+All supports received will be shared between the two current maintainers.

@@ -2,6 +2,7 @@ import VersoManual
 
 open Verso.Genre.Manual
 
+-- TODO: Book
 def CZ97 : ArXiv where
   title := inlines!"Modal Logic"
   authors := #[
@@ -9,14 +10,16 @@ def CZ97 : ArXiv where
     inlines!"M. Zakharyaschev"
   ]
   year := 1997
-  id := "...insert arXiv id here..."
+  id := "none"
 
+-- TODO: Book
 def Boo94 : ArXiv where
   title := inlines!"The Logic of Provability"
   authors := #[inlines!"G. Boolos"]
   year := 1994
-  id := "...insert arXiv id here..."
+  id := "none"
 
+-- TODO: Book
 def CH07 : ArXiv where
   title := inlines!"A New Introduction to Modal Logic"
   authors := #[
@@ -24,13 +27,13 @@ def CH07 : ArXiv where
     inlines!"M. J. Cresswell",
   ]
   year := 2007
-  id := "...insert arXiv id here..."
+  id := "none"
 
 def Seg71 : Thesis where
   title := inlines!"An Essay in Classical Modal Logic"
   author := inlines!"K. Segerberg"
   year := 1971
-  degree := inlines!"Ph.D"
+  degree := inlines!"Ph.D Thesis"
   university := inlines!"Stanford University"
 
 def Kop23 : ArXiv where
@@ -71,14 +74,15 @@ def Vis88 : ArXiv where
     inlines!"Albert. Visser",
   ]
   year := 1988
-  id := "...insert arXiv id here..."
+  id := "none"
 
 def Rov20 : Thesis where
   title := inlines!"Interpretability Logics and Generalized Veltman Semantics in Agda"
   author := inlines!"Jan Mas. Rovira"
   year := 2020
-  degree := inlines!"Master"
+  degree := inlines!"Master thesis"
   university := inlines!"The University of Amsterdam"
+  url := some "https://diposit.ub.edu/dspace/handle/2445/173054"
 
 -- TODO: `incollection`
 def DV90 : ArXiv where
@@ -88,13 +92,13 @@ def DV90 : ArXiv where
     inlines!"Frank. Veltman",
   ]
   year := 1990
-  id := "...insert arXiv id here..."
+  id := "none"
 
 def Joo04 : Thesis where
   title := inlines!"Interpretability Formalized"
   author := inlines!"Joost Johannes. Joosten"
   year := 2004
-  degree := inlines!"Ph.D"
+  degree := inlines!"Ph.D Thesis"
   university := inlines!"Utrecht University"
 
 -- TODO: `Book`
@@ -104,7 +108,7 @@ def Vis97 : ArXiv where
     inlines!"Albert. Visser",
   ]
   year := 1997
-  id := "...insert arXiv id here..."
+  id := "none"
 
 -- TODO: `incollection`
 def JD98 : ArXiv where
@@ -114,10 +118,10 @@ def JD98 : ArXiv where
     inlines!"Dick. de Jongh",
   ]
   year := 1998
-  id := "...insert arXiv id here..."
+  id := "none"
 
 -- TODO: `incollection`
-def JRMV24 : ArXiv where
+def JRMV24 : InProceedings where
   title := inlines!"An Overview of Verbrugge Semantics, a.k.a. Generalised Veltman Semantics"
   authors := #[
     inlines!"Joost J. Joosten",
@@ -126,7 +130,7 @@ def JRMV24 : ArXiv where
     inlines!"Mladen. Vuković",
   ]
   year := 2024
-  id := "...insert arXiv id here..."
+  booktitle := inlines!"Dick de Jongh on Intuitionistic and Provability Logics"
 
 -- TODO: `incollection`
 def Werner97 : ArXiv where
@@ -136,3 +140,11 @@ def Werner97 : ArXiv where
   ]
   year := 1997
   id := "none"
+
+def Carneiro19 : Thesis where
+  title := inlines!"The Type Theory of Lean"
+  author := inlines!"Mario Carneiro"
+  year := 2019
+  university := inlines!"Carnegie Mellon University"
+  url := some "https://github.com/digama0/lean-type-theory/releases/download/v1.0/main.pdf"
+  degree := inlines!"Master thesis"
