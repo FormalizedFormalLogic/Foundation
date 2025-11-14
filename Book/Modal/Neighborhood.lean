@@ -13,6 +13,7 @@ open Modal Neighborhood
 
 #doc (Manual) "Neighborhood Semantics" =>
 %%%
+tag  := "modal-logic-neighborhood-semantics"
 %%%
 
 # Minimal Modal Logic
