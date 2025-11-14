@@ -35,4 +35,23 @@ instance : Entailment.Consistent InterpretabilityLogic.ILRW := Veltman.consisten
 
 end ILRW
 
+instance : InterpretabilityLogic.ILR ⪱ InterpretabilityLogic.ILRW := by
+  constructor;
+  . apply weakerThan_of_subset_axioms $ by grind;
+  . apply Entailment.not_weakerThan_iff.mpr;
+    use (Axioms.W (.atom 0) (.atom 1));
+    constructor;
+    . simp;
+    . sorry;
+
+instance : InterpretabilityLogic.ILW ⪱ InterpretabilityLogic.ILRW := by
+  constructor;
+  . apply weakerThan_of_subset_axioms $ by grind;
+  . apply Entailment.not_weakerThan_iff.mpr;
+    use (Axioms.R (.atom 0) (.atom 1) (.atom 2));
+    constructor;
+    . simp;
+    . sorry;
+      -- apply Sound.not_provable_of_countermodel (𝓜 := Veltman.FrameClass.ILR);
+
 end LO.InterpretabilityLogic
