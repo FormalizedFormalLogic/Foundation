@@ -64,6 +64,8 @@
       "LO.InterpretabilityLogic.ILP": $Logic("ILP")$,
       "LO.InterpretabilityLogic.ILP₀": $Logic("ILP"_0)$,
       "LO.InterpretabilityLogic.ILR": $Logic("ILR")$,
+      "LO.InterpretabilityLogic.ILRStar": $Logic("IL"R^*)$,
+      "LO.InterpretabilityLogic.ILRW": $Logic("ILRW")$,
       "LO.InterpretabilityLogic.ILW": $Logic("ILW")$,
       "LO.InterpretabilityLogic.ILWM₀": $Logic("ILW"M_0)$,
       "LO.InterpretabilityLogic.ILWStar": $Logic("IL"W^*)$,

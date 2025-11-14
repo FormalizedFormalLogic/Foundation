@@ -1,0 +1,70 @@
+import Foundation.InterpretabilityLogic.Entailment.ILR
+import Foundation.InterpretabilityLogic.Entailment.ILW
+import Foundation.InterpretabilityLogic.Entailment.ILWM₀
+
+namespace LO.InterpretabilityLogic.Entailment
+
+open LO.Entailment LO.Modal.Entailment
+open FiniteContext
+
+variable {S F : Type*} [DecidableEq F] [InterpretabilityLogicalConnective F] [Entailment S F] {𝓢 : S} {φ ψ χ : F}
+
+protected class ILRStar (𝓢 : S) extends InterpretabilityLogic.Entailment.IL 𝓢, Entailment.HasAxiomRStar 𝓢
+
+variable [Entailment.ILRStar 𝓢]
+
+instance : HasAxiomR 𝓢 where
+  axiomR! {φ ψ χ} := by
+    apply C_trans $ axiomRStar! (χ := χ);
+    apply R1!;
+    apply C_trans K_assoc_mpr;
+    apply and₁;
+
+instance : Entailment.ILR 𝓢 where
+
+
+def ENTO : 𝓢 ⊢! ∼⊤ ⭤ ⊥ := by
+  apply E_intro;
+  . apply CN_of_CN_left;
+    apply C_of_conseq;
+    apply verum;
+  . exact efq;
+
+def CNTO : 𝓢 ⊢! ∼⊤ ➝ ⊥ := K_left ENTO
+def CONT : 𝓢 ⊢! ⊥ ➝ ∼⊤ := K_right ENTO
+
+/--
+  E. Goris & J. Joosten 2011, Lemma 4.5
+-/
+instance : HasAxiomW 𝓢 where
+  axiomW! {φ ψ} := by
+    dsimp [Axioms.W];
+    have H₁ : 𝓢 ⊢! (φ ▷ ψ) ➝ ◇φ ▷ (ψ ⋏ □(∼φ)) := by
+      apply C_trans $ axiomRStar! (χ := ⊤);
+      apply CRhdRhd!_of_C!_C!;
+      . apply C_trans IMNLN!;
+        apply contra;
+        apply C_trans ?_ CRhdNOL!;
+        apply CRhdRhd!_of_C!_C! dne CNTO;
+      . suffices [ψ, □⊤, □(∼φ)] ⊢[𝓢]! ψ ⋏ □(∼φ) by tauto;
+        apply K_intro <;> . apply FiniteContext.byAxm; simp;
+    have H₂ : 𝓢 ⊢! (φ ▷ ψ) ➝ ((ψ ⋏ □(∼φ)) ⋎ ◇φ) ▷ (ψ ⋏ □(∼φ)) := by
+      apply (of axiomJ3!) ⨀ axiomJ1'! ⨀ (deductInv' H₁);
+    have H₃ : 𝓢 ⊢! (φ ▷ ψ) ➝ φ ▷ ((ψ ⋏ □(∼φ)) ⋎ ◇φ) := by
+      apply R1!;
+      apply deduct';
+      apply A_cases ?_ ?_ $ lem (φ := □(∼φ));
+      . apply deduct;
+        apply A_intro_left;
+        apply K_intro <;> . apply FiniteContext.byAxm; simp;
+      . apply deduct;
+        apply A_intro_right;
+        refine (of INLNM!) ⨀ ?_;
+        apply FiniteContext.byAxm;
+        simp
+    apply (of axiomJ2!) ⨀ (deductInv' H₃) ⨀ (deductInv' H₂);
+
+instance : Entailment.ILW 𝓢 where
+
+
+end LO.InterpretabilityLogic.Entailment

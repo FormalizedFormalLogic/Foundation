@@ -1,4 +1,4 @@
-import Foundation.InterpretabilityLogic.Veltman.Logic.IL
+import Foundation.InterpretabilityLogic.Veltman.Logic.ILRW
 import Foundation.InterpretabilityLogic.Veltman.AxiomM
 
 namespace LO.InterpretabilityLogic
@@ -81,5 +81,7 @@ instance : InterpretabilityLogic.IL ⪱ InterpretabilityLogic.ILM := by
       . by_contra hC;
         have := Veltman.Frame.HasAxiomM.of_validate_axiomM hC |>.S_M (w := 0) (x := 1) (y := 2) (z := 3) (by tauto) (by tauto);
         contradiction;
+
+instance : InterpretabilityLogic.ILRW ⪱ InterpretabilityLogic.ILM := by sorry
 
 end LO.InterpretabilityLogic

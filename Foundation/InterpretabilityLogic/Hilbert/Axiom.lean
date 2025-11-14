@@ -299,6 +299,24 @@ def HasR.of_mem {Ax₁ Ax₂ : Axiom α} (h : Ax₁ ⊆ Ax₂) [Ax₁.HasR] : Ax
   mem_R := h mem_R
 
 
+class HasRStar where
+  p : α
+  q : α
+  r : α
+  ne_pq : p ≠ q := by simp;
+  ne_qr : q ≠ r := by simp;
+  ne_rp : r ≠ p := by simp;
+  mem_RStar : InterpretabilityLogic.Axioms.RStar (.atom p) (.atom q) (.atom r) ∈ Ax := by grind;
+attribute [simp] HasRStar.ne_pq HasRStar.ne_qr HasRStar.ne_rp
+export HasRStar (mem_RStar)
+
+def HasRStar.of_mem {Ax₁ Ax₂ : Axiom α} (h : Ax₁ ⊆ Ax₂) [Ax₁.HasRStar] : Ax₂.HasRStar where
+  p := HasRStar.p Ax₁;
+  q := HasRStar.q Ax₁;
+  r := HasRStar.r Ax₁;
+  mem_RStar := h mem_RStar
+
+
 class HasCLAxioms where
   p : α
   q : α
