@@ -192,15 +192,17 @@ import Foundation.ProvabilityLogic.Classification.LetterlessTrace
 import Foundation.ProvabilityLogic.Classification.Trace
 
 -- Interpretability Logic
-import Foundation.InterpretabilityLogic.Veltman.Logic.ILMinus_J1_J2_J5
 import Foundation.InterpretabilityLogic.Veltman.Logic.CL
 import Foundation.InterpretabilityLogic.Veltman.Logic.IL
-import Foundation.InterpretabilityLogic.Veltman.Logic.ILM
-import Foundation.InterpretabilityLogic.Veltman.Logic.ILP
-import Foundation.InterpretabilityLogic.Veltman.Logic.ILW
 import Foundation.InterpretabilityLogic.Veltman.Logic.ILF
-import Foundation.InterpretabilityLogic.Veltman.Logic.ILRW
+import Foundation.InterpretabilityLogic.Veltman.Logic.ILM
+import Foundation.InterpretabilityLogic.Veltman.Logic.ILM₀
+import Foundation.InterpretabilityLogic.Veltman.Logic.ILMinus_J1_J2_J5
+import Foundation.InterpretabilityLogic.Veltman.Logic.ILP
 import Foundation.InterpretabilityLogic.Veltman.Logic.ILP₀
+import Foundation.InterpretabilityLogic.Veltman.Logic.ILRW
+import Foundation.InterpretabilityLogic.Veltman.Logic.ILW
+import Foundation.InterpretabilityLogic.Veltman.Logic.ILWM₀
 
 -- Meta
 import Foundation.Meta.Qq
