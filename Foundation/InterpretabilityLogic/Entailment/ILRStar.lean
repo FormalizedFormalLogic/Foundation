@@ -23,6 +23,9 @@ instance : HasAxiomR 𝓢 where
 instance : Entailment.ILR 𝓢 where
 
 
+variable [LogicalConnective F] [Entailment.Cl 𝓢] in
+omit     [InterpretabilityLogicalConnective F] in
+section
 def ENTO : 𝓢 ⊢! ∼⊤ ⭤ ⊥ := by
   apply E_intro;
   . apply CN_of_CN_left;
@@ -32,6 +35,7 @@ def ENTO : 𝓢 ⊢! ∼⊤ ⭤ ⊥ := by
 
 def CNTO : 𝓢 ⊢! ∼⊤ ➝ ⊥ := K_left ENTO
 def CONT : 𝓢 ⊢! ⊥ ➝ ∼⊤ := K_right ENTO
+end
 
 /--
   E. Goris & J. Joosten 2011, Lemma 4.5
