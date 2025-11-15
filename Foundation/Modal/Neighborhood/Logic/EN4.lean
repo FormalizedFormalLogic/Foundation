@@ -55,6 +55,7 @@ instance Neighborhood.complete : Complete Modal.EN4 FrameClass.EN4 := (basicCano
   apply Set.mem_setOf_eq.mpr;
   exact {}
 
+/-- FFP of `Modal.EN4` -/
 instance Neighborhood.finite_complete : Complete Modal.EN4 FrameClass.finite_EN4 := ⟨by
   intro φ hφ;
   apply Complete.complete (𝓜 := FrameClass.EN4);
