@@ -1,5 +1,12 @@
 name = "Foundation"
-defaultTargets = ["Foundation"]
+defaultTargets = [
+  "Foundation",
+  "Zoo_Arith",
+  "Zoo_SetTheory",
+  "Zoo_Modal",
+  "Zoo_InterpretabilityLogic",
+  "Zoo_Propositional",
+]
 
 [leanOptions]
 pp.unicode.fun = true
