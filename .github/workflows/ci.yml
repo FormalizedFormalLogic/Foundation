@@ -20,7 +20,7 @@ jobs:
     steps:
       # We don't use https://github.com/leanprover/lean-action.
       # Because caching strategy is not suitable for our project.
-
+      - uses: BRAINSia/free-disk-space@v2.1.2
       - uses: actions/checkout@v4
       - name: Setup elan
         run: |
