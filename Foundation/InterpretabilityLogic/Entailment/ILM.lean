@@ -25,7 +25,7 @@ instance : Entailment.HasAxiomW 𝓢 where
 instance : Entailment.HasAxiomR 𝓢 where
   axiomR! {φ ψ χ} := by
     apply deduct';
-    apply rhdTrans! (of $ rhdOfLC! $ nec $ oh);
+    apply rhdTrans! (of $ rhdOfLC! $ nec $ IL.lemma₂);
     apply rhdTrans! (of $ axiomJ5!);
     apply axiomM!;
 
