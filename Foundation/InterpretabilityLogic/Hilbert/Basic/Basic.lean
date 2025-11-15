@@ -1,17 +1,5 @@
 import Foundation.InterpretabilityLogic.Logic.Basic
-import Foundation.InterpretabilityLogic.Entailment.IL
-import Foundation.InterpretabilityLogic.Entailment.ILM
-import Foundation.InterpretabilityLogic.Entailment.ILP
-import Foundation.InterpretabilityLogic.Entailment.ILW
-import Foundation.InterpretabilityLogic.Entailment.ILWStar.Basic
-import Foundation.InterpretabilityLogic.Entailment.ILWStar.M₀
-import Foundation.InterpretabilityLogic.Entailment.ILM₀.Basic
-import Foundation.InterpretabilityLogic.Entailment.ILWM₀
-import Foundation.InterpretabilityLogic.Entailment.IL_KW2
-import Foundation.InterpretabilityLogic.Entailment.IL_KW1Zero
-import Foundation.InterpretabilityLogic.Entailment.ILR
-import Foundation.InterpretabilityLogic.Entailment.ILRStar
-import Foundation.InterpretabilityLogic.Entailment.ILRW
+import Foundation.InterpretabilityLogic.Entailment
 import Foundation.InterpretabilityLogic.Hilbert.Axiom
 
 namespace LO.InterpretabilityLogic

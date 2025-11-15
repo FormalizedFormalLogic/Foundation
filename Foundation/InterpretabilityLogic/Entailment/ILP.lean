@@ -14,7 +14,7 @@ protected class ILP (𝓢 : S) extends InterpretabilityLogic.Entailment.IL 𝓢,
 
 variable [Entailment.ILP 𝓢]
 
-instance : Entailment.HasAxiomR 𝓢 where
+instance «IL(P)_⊢_R» : Entailment.HasAxiomR 𝓢 where
   axiomR! {φ ψ χ} := by
     apply deduct';
     apply rhdTrans! $ show [φ ▷ ψ] ⊢[𝓢]! ∼(φ ▷ ∼χ) ▷ (∼(φ ▷ ∼χ) ⋏ (φ ▷ ψ)) by
@@ -31,44 +31,12 @@ instance : Entailment.HasAxiomR 𝓢 where
       apply IL.lemma₁;
     apply axiomJ5!;
 
-def replace_Rhd_K_right : 𝓢 ⊢! □(ψ₁ ➝ ψ₂) ➝ (φ ⋏ ψ₁) ▷ (φ ⋏ ψ₂) := by
-  suffices 𝓢 ⊢! □(φ ⋏ ψ₁ ➝ φ ⋏ ψ₂) ➝ (φ ⋏ ψ₁) ▷ (φ ⋏ ψ₂) by
-    apply C_trans ?_ this;
-    apply box_regularity;
-    apply deduct';
-    apply CKK_of_C';
-    apply FiniteContext.byAxm;
-    simp;
-  apply deduct';
-  apply rhdOfLC!;
-  apply FiniteContext.byAxm;
-  simp;
-
-def CAKK_of_A (h : 𝓢 ⊢! ψ₁ ⋎ ψ₂) : 𝓢 ⊢! φ ➝ φ ⋏ ψ₁ ⋎ φ ⋏ ψ₂ := by
-  apply deduct';
-  apply A_cases ?_ ?_ (of h);
-  . apply deduct;
-    apply A_intro_left;
-    apply K_intro <;> . apply FiniteContext.byAxm; simp;
-  . apply deduct;
-    apply A_intro_right;
-    apply K_intro <;> . apply FiniteContext.byAxm; simp;
-
-def M_rhd_MALN : 𝓢 ⊢! ◇ψ ▷ ◇(ψ ⋏ □(∼ψ)) := by
-  apply rhdOfLC!;
-  apply nec;
-  apply C_replace IMNLN! INLNM!;
-  apply contra;
-  apply C_trans ?_ axiomL;
-  apply box_regularity;
-  apply C_trans CNKCN!;
-  apply CCNCN;
 
 def RIIPRC : 𝓢 ⊢! φ ▷ ψ ➝ □(◇φ ➝ ◇ψ) := by
   apply deduct';
   refine of (box_regularity $ axiomJ4!) ⨀ axiomP!;
 
-instance ILP_proves_W : Entailment.HasAxiomW 𝓢 where
+instance «IL(P)_⊢_W» : Entailment.HasAxiomW 𝓢 where
   axiomW! {φ ψ} := by
     apply deduct';
     suffices [φ ▷ ψ] ⊢[𝓢]! (ψ ⋏ ◇φ) ▷ (ψ ⋏ □(∼φ)) by

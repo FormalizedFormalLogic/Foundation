@@ -12,12 +12,35 @@ protected class IL (𝓢 : S) extends InterpretabilityLogic.Entailment.CL 𝓢, 
 
 variable [Entailment.IL 𝓢]
 
--- TODO: move
-def CNKCN! : 𝓢 ⊢! ∼(φ ⋏ ψ) ➝ (φ ➝ ∼ψ) := by
-  apply C_trans CNKANN;
-  apply CA_of_C_of_C;
-  . apply CNC;
-  . apply implyK;
+def RhdR1! (h : 𝓢 ⊢! ψ ▷ χ) : 𝓢 ⊢! (φ ▷ ψ) ➝ (φ ▷ χ) := by
+  apply deduct';
+  exact (of axiomJ2!) ⨀ FiniteContext.byAxm ⨀ (of h);
+
+def CRhdRhdA_of_Rhd₁ (h : 𝓢 ⊢! φ ▷ χ) : 𝓢 ⊢! ψ ▷ χ ➝ (φ ⋎ ψ) ▷ χ := axiomJ3! ⨀ h
+def CRhdRhdA_of_Rhd₂ (h : 𝓢 ⊢! ψ ▷ χ) : 𝓢 ⊢! φ ▷ χ ➝ (φ ⋎ ψ) ▷ χ := C_swap axiomJ3! ⨀ h
+
+def replace_Rhd_K_right : 𝓢 ⊢! □(ψ₁ ➝ ψ₂) ➝ (φ ⋏ ψ₁) ▷ (φ ⋏ ψ₂) := by
+  suffices 𝓢 ⊢! □(φ ⋏ ψ₁ ➝ φ ⋏ ψ₂) ➝ (φ ⋏ ψ₁) ▷ (φ ⋏ ψ₂) by
+    apply C_trans ?_ this;
+    apply box_regularity;
+    apply deduct';
+    apply CKK_of_C';
+    apply FiniteContext.byAxm;
+    simp;
+  apply deduct';
+  apply rhdOfLC!;
+  apply FiniteContext.byAxm;
+  simp;
+
+def M_rhd_MALN : 𝓢 ⊢! ◇ψ ▷ ◇(ψ ⋏ □(∼ψ)) := by
+  apply rhdOfLC!;
+  apply nec;
+  apply C_replace IMNLN! INLNM!;
+  apply contra;
+  apply C_trans ?_ axiomL;
+  apply box_regularity;
+  apply C_trans CNKCN!;
+  apply CCNCN;
 
 /-- Lemma to prove `ILP ⊢ R` -/
 protected def IL.lemma₁ : 𝓢 ⊢! (∼(φ ▷ ∼χ) ⋏ (φ ▷ ψ)) ➝ ◇(ψ ⋏ □χ) := by
