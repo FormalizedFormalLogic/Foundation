@@ -1,7 +1,6 @@
 name = "Foundation"
 defaultTargets = [
   "Foundation",
-  "book",
   "Zoo_Arith",
   "Zoo_SetTheory",
   "Zoo_Modal",
