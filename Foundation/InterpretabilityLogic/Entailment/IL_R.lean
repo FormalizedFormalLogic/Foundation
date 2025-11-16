@@ -8,11 +8,11 @@ open FiniteContext
 
 variable {S F : Type*} [DecidableEq F] [InterpretabilityLogicalConnective F] [Entailment S F] {𝓢 : S} {φ ψ χ : F}
 
-protected class ILR (𝓢 : S) extends InterpretabilityLogic.Entailment.IL 𝓢, HasAxiomR 𝓢
+protected class IL_R (𝓢 : S) extends InterpretabilityLogic.Entailment.IL 𝓢, HasAxiomR 𝓢
 
-variable [Entailment.ILR 𝓢]
+variable [Entailment.IL_R 𝓢]
 
-instance ILR_proves_axiomM₀ : Entailment.HasAxiomM₀ 𝓢 where
+instance IL_R_proves_axiomM₀ : Entailment.HasAxiomM₀ 𝓢 where
   axiomM₀! := by
     intro φ ψ χ;
     apply rhdTrans_dhyp! ?_ axiomR!;
@@ -28,7 +28,7 @@ instance ILR_proves_axiomM₀ : Entailment.HasAxiomM₀ 𝓢 where
 /--
   E. Goris & J. J. Joosten 2011, Lemma 4.4
 -/
-instance ILR_proves_axiomP₀ : Entailment.HasAxiomP₀ 𝓢 where
+instance IL_R_proves_axiomP₀ : Entailment.HasAxiomP₀ 𝓢 where
   axiomP₀! := by
     intro φ ψ;
     apply C_trans $ axiomR! (χ := ∼ψ);

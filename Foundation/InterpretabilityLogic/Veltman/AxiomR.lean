@@ -53,7 +53,7 @@ lemma Frame.HasAxiomR.of_validate_axiomP₀ [F.IsIL] (h : F ⊧ Axioms.P₀ (.at
 
 open Hilbert.Basic in
 lemma validate_axiomP₀_of_validate_axiomR [F.IsIL] (h : F ⊧ Axioms.R (.atom 0) (.atom 1) (.atom 2)) : F ⊧ Axioms.P₀ φ ψ := by
-  apply Hilbert.Basic.Veltman.soundness_frame (Ax := ILR.axioms);
+  apply Hilbert.Basic.Veltman.soundness_frame (Ax := IL_R.axioms);
   . constructor;
     rintro φ hφ;
     rcases (by simpa using hφ) with (rfl | rfl | rfl | rfl | rfl | rfl);
@@ -63,7 +63,7 @@ lemma validate_axiomP₀_of_validate_axiomR [F.IsIL] (h : F ⊧ Axioms.R (.atom 
     . simp [validate_axiomJ2_of_HasAxiomJ2]
     . simp [validate_axiomJ3]
     . simp [validate_axiomJ4_of_HasAxiomJ4]
-  . suffices InterpretabilityLogic.ILR ⊢ Axioms.P₀ φ ψ by tauto;
+  . suffices InterpretabilityLogic.IL_R ⊢ Axioms.P₀ φ ψ by tauto;
     simp;
 
 lemma TFAE_HasAxiomR [F.IsIL] : [

@@ -1,6 +1,6 @@
-import Foundation.InterpretabilityLogic.Entailment.ILR
-import Foundation.InterpretabilityLogic.Entailment.ILW
-import Foundation.InterpretabilityLogic.Entailment.ILWM₀
+import Foundation.InterpretabilityLogic.Entailment.IL_R
+import Foundation.InterpretabilityLogic.Entailment.IL_W
+import Foundation.InterpretabilityLogic.Entailment.IL_M₀_W
 
 namespace LO.InterpretabilityLogic.Entailment
 
@@ -9,15 +9,15 @@ open FiniteContext
 
 variable {S F : Type*} [DecidableEq F] [InterpretabilityLogicalConnective F] [Entailment S F] {𝓢 : S} {φ ψ χ : F}
 
-protected class ILRW (𝓢 : S) extends InterpretabilityLogic.Entailment.ILR 𝓢, InterpretabilityLogic.Entailment.ILW 𝓢
+protected class IL_R_W (𝓢 : S) extends InterpretabilityLogic.Entailment.IL_R 𝓢, InterpretabilityLogic.Entailment.IL_W 𝓢
 
-variable [Entailment.ILRW 𝓢]
+variable [Entailment.IL_R_W 𝓢]
 
 /--
   E. Goris & J. Joosten 2011, Lemma 4.5
 -/
-instance : HasAxiomRStar 𝓢 where
-  axiomRStar! {φ ψ χ} := by
+instance : HasAxiomRstar 𝓢 where
+  axiomRstar! {φ ψ χ} := by
     apply C_trans axiomW!;
     apply C_trans $ axiomR! (χ := χ);
     apply R1!;

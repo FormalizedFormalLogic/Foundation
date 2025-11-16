@@ -1,4 +1,4 @@
-import Foundation.InterpretabilityLogic.Entailment.ILW
+import Foundation.InterpretabilityLogic.Entailment.IL_W
 import Foundation.InterpretabilityLogic.Entailment.IL_KW2
 
 namespace LO.InterpretabilityLogic.Entailment

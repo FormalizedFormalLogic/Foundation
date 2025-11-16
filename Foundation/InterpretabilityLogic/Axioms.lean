@@ -94,7 +94,7 @@ protected abbrev W := (φ ▷ ψ) ➝ (φ ▷ (ψ ⋏ □(∼φ)))
 /--
   - Visser 1997, `W*`
 -/
-protected abbrev WStar := (φ ▷ ψ) ➝ ((ψ ⋏ □χ) ▷ (ψ ⋏ □χ ⋏ □(∼φ)))
+protected abbrev Wstar := (φ ▷ ψ) ➝ ((ψ ⋏ □χ) ▷ (ψ ⋏ □χ ⋏ □(∼φ)))
 
 /--
   - Švejdar 1991, `KW1`
@@ -143,7 +143,7 @@ protected abbrev R := φ ▷ ψ ➝ ∼(φ ▷ ∼χ) ▷ (ψ ⋏ □χ)
 /--
   - Goris & Joosten 2011, `R*`
 -/
-protected abbrev RStar := φ ▷ ψ ➝ ∼(φ ▷ ∼χ) ▷ (ψ ⋏ □χ ⋏ □(∼φ))
+protected abbrev Rstar := φ ▷ ψ ➝ ∼(φ ▷ ∼χ) ▷ (ψ ⋏ □χ ⋏ □(∼φ))
 
 /--
   - Visser 1988, `K13`: Relative Interpretability Implies Provable Relative Consistency
