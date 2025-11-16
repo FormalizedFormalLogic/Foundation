@@ -1,4 +1,5 @@
 import Foundation.FirstOrder.Basic
+import Mathlib.SetTheory.Cardinal.Basic
 
 namespace LO.FirstOrder
 
@@ -9,11 +10,15 @@ def Language.skolemFunction₁ (L : Language) : Language where
 
 abbrev Semisentence.skolem₁ {L : Language} (φ : Semisentence L (k + 1)) : L.skolemFunction₁.Func k := φ
 
+instance (L : Language) [L.Encodable] : L.skolemFunction₁.Encodable where
+  func k := inferInstanceAs (Encodable (Semisentence L (k + 1)))
+  rel _ := inferInstanceAs (Encodable PEmpty)
+
 namespace Structure
 
-variable (L : Language)
+variable (L : Language.{u})
 
-variable (M : Type*) [Nonempty M] [𝓼 : Structure L M]
+variable (M : Type v) [Nonempty M] [𝓼 : Structure L M]
 
 noncomputable instance skolem : Structure L.skolemFunction₁ M where
   func _ φ v := Classical.epsilon fun z ↦ Semiformula.Evalb 𝓼 (z :> v) φ
@@ -28,7 +33,11 @@ variable (L)
 
 def SkolemHull (s : Set M) : Set M := Set.range fun t : Term L.skolemFunction₁ s ↦ t.valm M ![] (↑)
 
-variable {L}
+variable (M)
+
+abbrev SkolemHull₀ := SkolemHull L (M := M) ∅
+
+variable {L M}
 
 namespace SkolemHull
 
@@ -124,8 +133,31 @@ variable {𝓼 s}
     · intro h
       exact closed (s := s) (by simp) h
 
-instance elementary : (SkolemHull L s) ≡ₑ[L] M where
+/-- Downward Löwenheim-Skolem theorem for countable language (1) -/
+instance elementaryEquiv : (SkolemHull L s) ≡ₑ[L] M where
   models {φ} := by simp [models_iff, Matrix.empty_eq]
+
+end SkolemHull
+
+namespace SkolemHull
+
+open Cardinal
+
+variable [L.Encodable] {s : Set M}
+
+lemma set_countable (hs : s.Countable) : (SkolemHull L s).Countable := by
+  have : Countable s := hs
+  have : Countable (Term L.skolemFunction₁ s) := Semiterm.countable
+  exact Set.countable_range _
+
+instance countable (hs : s.Countable) : Countable (SkolemHull L s) := set_countable hs
+
+instance countable₀ : Countable (SkolemHull₀ L M) := set_countable (by simp)
+
+/-- Downward Löwenheim-Skolem theorem for countable language (2) -/
+lemma card_le_aleph0 (hs : s.Countable) : #(SkolemHull L s) ≤ ℵ₀ :=
+  have : Countable (SkolemHull L s) := countable hs
+  Set.Countable.le_aleph0 this
 
 end SkolemHull
 
