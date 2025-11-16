@@ -31,22 +31,43 @@ def C_flat_flat₂ : 𝓢 ⊢! ♭φ ➝ ♭♭φ := or₁
 def Rhd_flat_flat₂ : 𝓢 ⊢! ♭φ ▷ ♭♭φ := rhdOfLC! $ nec C_flat_flat₂
 
 def C_flat_flatsharp : 𝓢 ⊢! ♭φ ➝ ♭♯φ := by
-  simp;
-  have : 𝓢 ⊢! ◇♭φ ➝ ◇φ := CMM_of_Rhd! AM_Rhd;
-  sorry;
-
+  show 𝓢 ⊢! φ ⋎ ◇φ ➝ φ ⋏ □(∼φ) ⋎ ◇(φ ⋏ □(∼φ));
+  apply left_A_intro;
+  . apply deduct';
+    apply A_cases ?_ ?_ $ lem (φ := □(∼φ));
+    . apply deduct;
+      apply A_intro_left;
+      apply K_intro <;>
+      . apply FiniteContext.byAxm
+        simp;
+    . apply C_trans (of INLNM!);
+      apply C_trans (of diaAxiomL);
+      apply deduct;
+      apply A_intro_right;
+      apply FiniteContext.byAxm;
+      simp;
+  . apply deduct';
+    apply A_intro_right;
+    refine (of diaAxiomL) ⨀ ?_;
+    apply FiniteContext.byAxm;
+    simp;
 def Rhd_flat_flatsharp : 𝓢 ⊢! ♭φ ▷ ♭♯φ := rhdOfLC! $ nec C_flat_flatsharp
 
+
 def C_sharpflat_sharp : 𝓢 ⊢! ♯♭φ ➝ ♯φ := by
-  simp;
-  have : [φ ⋎ ◇φ, □(∼(φ ⋎ ◇φ))] ⊢[𝓢]! □(∼(φ ⋎ ◇φ)) := FiniteContext.nthAxm 1;
-  suffices [φ ⋎ ◇φ, □(∼(φ ⋎ ◇φ))] ⊢[𝓢]! φ ⋏ □(∼φ) by tauto;
+  show [φ ⋎ ◇φ, □(∼(φ ⋎ ◇φ))] ⊢[𝓢]! φ ⋏ □(∼φ);
+
+  have : [φ ⋎ ◇φ, □(∼(φ ⋎ ◇φ))] ⊢[𝓢]! ∼◇φ := by
+    apply K_left (ψ := ∼◇◇φ);
+    refine CNAKNN ⨀ ?_;
+    refine (of $ contra collect_dia_or) ⨀ ?_;
+    exact (of CLNNM!) ⨀ (FiniteContext.nthAxm 1);
+
   apply K_intro;
   . apply A_cases ?_ ?_ $ FiniteContext.nthAxm 0;
     . apply C_id;
-    . apply deduct;
-      sorry;
-  . sorry;
+    . exact CNC ⨀ this;
+  . refine (of CNMLN!) ⨀ this;
 def Rhd_sharpflat_sharp : 𝓢 ⊢! ♯♭φ ▷ ♯φ := rhdOfLC! $ nec C_sharpflat_sharp
 
 

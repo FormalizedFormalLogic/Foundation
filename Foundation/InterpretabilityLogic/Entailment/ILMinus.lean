@@ -96,6 +96,8 @@ def CCC!_of_C!_of_C! (h₁ : 𝓢 ⊢! ψ₁ ➝ φ₁) (h₂ : 𝓢 ⊢! φ₂ 
 
 def CCC!_of_C! (h : 𝓢 ⊢! φ₂ ➝ ψ₂) : 𝓢 ⊢! (φ ➝ φ₂) ➝ (φ ➝ ψ₂) := CCC!_of_C!_of_C! C_id h
 
+def CCC!_of_C'! (h : 𝓢 ⊢! ψ₁ ➝ φ₁) : 𝓢 ⊢! (φ₁ ➝ ψ) ➝ (ψ₁ ➝ ψ) := CCC!_of_C!_of_C! h C_id
+
 def replace_CK_left (h₁ : 𝓢 ⊢! φ₂ ➝ φ₁) (h₂ : 𝓢 ⊢! φ₁ ⋏ ψ ➝ χ) : 𝓢 ⊢! φ₂ ⋏ ψ ➝ χ := by
   apply C_trans ?_ h₂;
   apply CKK_of_C h₁;
@@ -164,6 +166,17 @@ def NM!_of_LN! (h : 𝓢 ⊢! □(∼φ)) : 𝓢 ⊢! ∼◇φ := CLNNM! ⨀ h
 
 def NMO! : 𝓢 ⊢! ∼◇⊥ := (contra $ K_left diaDuality) ⨀ (dni' $ nec NO)
 @[simp] lemma NMO : 𝓢 ⊢ ∼◇⊥ := ⟨NMO!⟩
+
+def diaAxiomL : 𝓢 ⊢! ◇φ ➝ ◇(φ ⋏ □(∼φ)) := by
+  apply C_replace IMNLN! INLNM!;
+  apply contra;
+  apply C_trans ?_ axiomL;
+  apply box_regularity;
+  apply C_trans CNKCN!;
+  apply deduct';
+  apply CN_of_CN_right;
+  apply FiniteContext.byAxm;
+  simp;
 
 end
 
