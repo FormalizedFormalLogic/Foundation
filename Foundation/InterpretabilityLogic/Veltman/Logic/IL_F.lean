@@ -8,8 +8,8 @@ open Veltman
 
 namespace Veltman
 
-protected class Frame.IsILF (F : Veltman.Frame) extends F.IsIL, F.HasAxiomW
-protected abbrev FrameClass.ILF : FrameClass := { F | F.IsILF }
+protected class Frame.IsIL_F (F : Veltman.Frame) extends F.IsIL, F.HasAxiomW
+protected abbrev FrameClass.IL_F : FrameClass := { F | F.IsIL_F }
 
 instance : trivialFrame.HasAxiomW where
   S_W w := by
@@ -17,7 +17,7 @@ instance : trivialFrame.HasAxiomW where
     . infer_instance;
     . tauto;
     . intro x; simp [Frame.RS, Relation.Comp];
-instance : trivialFrame.IsILF where
+instance : trivialFrame.IsIL_F where
 
 instance {F : Veltman.Frame} [F.IsIL] : F.IsILMinus_J1_J2_J5 where
 instance {F : Veltman.Frame} [F.IsILMinus_J1_J2_J5] : F.IsILMinus_J2Plus_J5 where
@@ -27,23 +27,23 @@ end Veltman
 
 open Hilbert.Basic
 
-namespace ILF
+namespace IL_F
 
-instance Veltman.sound : Sound InterpretabilityLogic.ILF FrameClass.ILF := by
+instance Veltman.sound : Sound InterpretabilityLogic.IL_F FrameClass.IL_F := by
   apply Veltman.instFrameClassSound;
   constructor;
   intro φ hφ F hF;
   replace hF := Set.mem_setOf_eq.mp hF;
   rcases hφ with (rfl | rfl | rfl | rfl | rfl | rfl) <;> simp;
 
-instance : Entailment.Consistent InterpretabilityLogic.ILF := Veltman.consistent_of_sound_frameclass FrameClass.ILF $ by
+instance : Entailment.Consistent InterpretabilityLogic.IL_F := Veltman.consistent_of_sound_frameclass FrameClass.IL_F $ by
   use Veltman.trivialFrame;
   apply Set.mem_setOf_eq.mpr;
   infer_instance;
 
-end ILF
+end IL_F
 
-instance : InterpretabilityLogic.IL ⪱ InterpretabilityLogic.ILF := by
+instance : InterpretabilityLogic.IL ⪱ InterpretabilityLogic.IL_F := by
   constructor;
   . apply weakerThan_of_subset_axioms $ by grind;
   . apply Entailment.not_weakerThan_iff.mpr;

@@ -1,5 +1,5 @@
-import Foundation.InterpretabilityLogic.Veltman.Logic.ILW
-import Foundation.InterpretabilityLogic.Veltman.Logic.ILM₀
+import Foundation.InterpretabilityLogic.Veltman.Logic.IL_W
+import Foundation.InterpretabilityLogic.Veltman.Logic.IL_M₀
 
 namespace LO.InterpretabilityLogic
 
@@ -8,33 +8,33 @@ open Veltman
 
 namespace Veltman
 
-protected class Frame.IsILWM₀ (F : Veltman.Frame) extends F.IsILM₀, F.IsILW
-protected abbrev FrameClass.ILWM₀ : FrameClass := { F | F.IsILWM₀ }
+protected class Frame.IsIL_M₀_W (F : Veltman.Frame) extends F.IsIL_M₀, F.IsIL_W
+protected abbrev FrameClass.IL_M₀_W : FrameClass := { F | F.IsIL_M₀_W }
 
-instance : trivialFrame.IsILWM₀ where
+instance : trivialFrame.IsIL_M₀_W where
 
 end Veltman
 
 
 open Hilbert.Basic
 
-namespace ILWM₀
+namespace IL_M₀_W
 
-instance Veltman.sound : Sound InterpretabilityLogic.ILWM₀ FrameClass.ILWM₀ := by
+instance Veltman.sound : Sound InterpretabilityLogic.IL_M₀_W FrameClass.IL_M₀_W := by
   apply Veltman.instFrameClassSound;
   constructor;
   intro φ hφ F hF;
   replace hF := Set.mem_setOf_eq.mp hF;
   rcases hφ with (rfl | rfl | rfl | rfl | rfl | rfl | rfl) <;> simp;
 
-instance : Entailment.Consistent InterpretabilityLogic.ILWM₀ := Veltman.consistent_of_sound_frameclass FrameClass.ILWM₀ $ by
+instance : Entailment.Consistent InterpretabilityLogic.IL_M₀_W := Veltman.consistent_of_sound_frameclass FrameClass.IL_M₀_W $ by
   use Veltman.trivialFrame;
   apply Set.mem_setOf_eq.mpr;
   infer_instance;
 
-end ILWM₀
+end IL_M₀_W
 
-instance : InterpretabilityLogic.ILM₀ ⪱ InterpretabilityLogic.ILWM₀ := by
+instance : InterpretabilityLogic.IL_M₀ ⪱ InterpretabilityLogic.IL_M₀_W := by
   constructor;
   . apply weakerThan_of_subset_axioms;
     simp;
@@ -42,7 +42,7 @@ instance : InterpretabilityLogic.ILM₀ ⪱ InterpretabilityLogic.ILWM₀ := by
     use (Axioms.W (.atom 0) (.atom 1));
     constructor;
     . simp;
-    . apply Sound.not_provable_of_countermodel (𝓜 := Veltman.FrameClass.ILM₀);
+    . apply Sound.not_provable_of_countermodel (𝓜 := Veltman.FrameClass.IL_M₀);
       apply Veltman.not_validOnFrameClass_of_exists_frame;
       let F : Veltman.Frame := {
         toKripkeFrame := ⟨Fin 3, (· < ·)⟩
@@ -53,7 +53,7 @@ instance : InterpretabilityLogic.ILM₀ ⪱ InterpretabilityLogic.ILWM₀ := by
         S w x y := (w = 0 ∧ x ≠ 0 ∧ y ≠ 0) ∨ (w = 1 ∧ x = 2 ∧ y = 2)
         S_cond := by grind;
       }
-      have : F.IsILM₀ := {
+      have : F.IsIL_M₀ := {
         S_J1 := by dsimp [Frame.SRel', F]; omega;
         S_J2 := by dsimp [Frame.SRel', F]; omega;
         S_J4 := by dsimp [Frame.SRel', F]; omega;

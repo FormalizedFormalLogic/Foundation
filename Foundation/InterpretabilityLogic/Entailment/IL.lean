@@ -42,7 +42,7 @@ def M_rhd_MALN : 𝓢 ⊢! ◇ψ ▷ ◇(ψ ⋏ □(∼ψ)) := by
   apply C_trans CNKCN!;
   apply CCNCN;
 
-/-- Lemma to prove `ILP ⊢ R` -/
+/-- Lemma to prove `IL_P ⊢ R` -/
 protected def IL.lemma₁ : 𝓢 ⊢! (∼(φ ▷ ∼χ) ⋏ (φ ▷ ψ)) ➝ ◇(ψ ⋏ □χ) := by
   apply CK_of_CC;
   apply C_swap;
