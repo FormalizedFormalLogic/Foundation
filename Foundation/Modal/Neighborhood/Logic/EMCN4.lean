@@ -34,6 +34,7 @@ instance Neighborhood.complete : Complete Modal.EMCN4 FrameClass.EMCN4 := (suppl
   apply Set.mem_setOf_eq.mpr;
   constructor;
 
+/-- FFP of `Modal.EMCN4` -/
 instance Neighborhood.finite_complete : Complete Modal.EMCN4 FrameClass.finite_EMCN4 := ⟨by
   intro φ hφ;
   apply Complete.complete (𝓜 := FrameClass.EMCN4);
