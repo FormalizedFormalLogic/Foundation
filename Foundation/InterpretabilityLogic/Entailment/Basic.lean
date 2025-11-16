@@ -103,6 +103,9 @@ def rhdTrans! (h₁ : 𝓢 ⊢! φ ▷ ψ) (h₂ : 𝓢 ⊢! ψ ▷ χ) : 𝓢 �
 @[grind ⇐]
 lemma rhd_trans (h₁ : 𝓢 ⊢ φ ▷ ψ) (h₂ : 𝓢 ⊢ ψ ▷ χ) : 𝓢 ⊢ (φ ▷ χ) := ⟨rhdTrans! h₁.some h₂.some⟩
 
+open FiniteContext in instance [Entailment.Minimal 𝓢] (Γ : FiniteContext F 𝓢) : HasAxiomJ2 Γ := ⟨λ {_} => of axiomJ2!⟩
+open Context in instance [Entailment.Minimal 𝓢] (Γ : Context F 𝓢) : HasAxiomJ2 Γ := ⟨λ {_} => of axiomJ2!⟩
+
 end
 
 class HasAxiomJ2Plus (𝓢 : S) where
@@ -245,7 +248,15 @@ class HasAxiomJ5 (𝓢 : S) where
   axiomJ5! {φ : F} : 𝓢 ⊢! Axioms.J5 φ
 export HasAxiomJ5 (axiomJ5!)
 
-@[simp] lemma axiomJ5 [HasAxiomJ5 𝓢] : 𝓢 ⊢ Axioms.J5 φ := ⟨axiomJ5!⟩
+section
+
+variable [HasAxiomJ5 𝓢]
+@[simp] lemma axiomJ5 : 𝓢 ⊢ Axioms.J5 φ := ⟨axiomJ5!⟩
+
+open FiniteContext in instance [Entailment.Minimal 𝓢] (Γ : FiniteContext F 𝓢) : HasAxiomJ5 Γ := ⟨λ {_} => of axiomJ5!⟩
+open Context in instance [Entailment.Minimal 𝓢] (Γ : Context F 𝓢) : HasAxiomJ5 Γ := ⟨λ {_} => of axiomJ5!⟩
+
+end
 
 
 class HasAxiomJ6 (𝓢 : S) where

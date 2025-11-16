@@ -11,15 +11,7 @@ protected class IL_KW2 (𝓢 : S) extends InterpretabilityLogic.Entailment.IL �
 
 variable [Entailment.IL_KW2 𝓢]
 
-def CNMLN! : 𝓢 ⊢! ∼◇φ ➝ □(∼φ) := CN_of_CN_left $ INLNM!
-
-def LN!_of_CMN! (h : 𝓢 ⊢! ∼◇φ) : 𝓢 ⊢! □(∼φ) := CNMLN! ⨀ h
-
-def CLNNM! : 𝓢 ⊢! □(∼φ) ➝ ∼◇φ := CN_of_CN_right $ IMNLN!
-
-def NM!_of_LN! (h : 𝓢 ⊢! □(∼φ)) : 𝓢 ⊢! ∼◇φ := CLNNM! ⨀ h
-
-instance : Entailment.HasAxiomF 𝓢 where
+instance «IL(KW2)_⊢_F» : Entailment.HasAxiomF 𝓢 where
   axiomF! {φ} := by
     apply C_trans axiomKW2!;
     apply C_trans axiomJ4!;
@@ -38,7 +30,7 @@ instance : Entailment.HasAxiomF 𝓢 where
       apply wlem;
     exact negMDP H₄ H₃;
 
-instance : Entailment.HasAxiomKW1Zero 𝓢 where
+instance «IL(KW2)_⊢_KW1Zero» : Entailment.HasAxiomKW1Zero 𝓢 where
   axiomKW1Zero! {φ ψ} := by
     apply C_trans axiomKW2!;
     apply R1!;

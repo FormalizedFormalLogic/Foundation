@@ -147,8 +147,11 @@ protected abbrev RStar := φ ▷ ψ ➝ ∼(φ ▷ ∼χ) ▷ (ψ ⋏ □χ ⋏ 
 
 /--
   - Visser 1988, `K13`: Relative Interpretability Implies Provable Relative Consistency
+  - Joosten & Visser 2004, `P_R`
 
-  Note: `P ⊢ RIIPRC` in Visser 1988 Section 16.4
+  Note:
+  - `P ⊢ P_R` in Visser 1988 Section 16.4
+  - `P_R ⊢ W` in Joosten & Visser 2004 Fact 4.1
 -/
 protected abbrev RIIPRC := φ ▷ ψ ➝ □(◇φ ➝ ◇ψ)
 

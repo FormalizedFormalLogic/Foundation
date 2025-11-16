@@ -15,33 +15,6 @@ protected class ILWM₀ (𝓢 : S) extends Entailment.ILM₀ 𝓢, Entailment.IL
 
 variable [Entailment.ILWM₀ 𝓢]
 
--- TODO: shorter proof by conjunection of list
-variable [LogicalConnective F] [Entailment.Cl 𝓢] in
-omit     [InterpretabilityLogicalConnective F] [Entailment.ILWM₀ 𝓢] in
-def K_intro₃ (h₁ : 𝓢 ⊢! φ₁) (h₂ : 𝓢 ⊢! φ₂) (h₃ : 𝓢 ⊢! φ₃) : 𝓢 ⊢! φ₁ ⋏ φ₂ ⋏ φ₃ := by
-  apply K_intro;
-  . assumption;
-  . apply K_intro;
-    . assumption;
-    . assumption;
-
-def K_assoc : 𝓢 ⊢! (φ ⋏ ψ) ⋏ χ ⭤ φ ⋏ (ψ ⋏ χ) := by
-  apply K_intro;
-  . apply deduct';
-    suffices [φ ⋏ ψ, χ] ⊢[𝓢]! φ ⋏ (ψ ⋏ χ) by tauto;
-    apply K_intro₃;
-    . apply K_left $ FiniteContext.nthAxm 0;
-    . apply K_right $ FiniteContext.nthAxm 0;
-    . apply FiniteContext.byAxm; simp;
-  . apply deduct';
-    suffices [φ, ψ, χ] ⊢[𝓢]! (φ ⋏ ψ) ⋏ χ by tauto;
-    apply K_intro
-    . apply K_intro <;> . apply FiniteContext.byAxm; simp;
-    . apply FiniteContext.byAxm; simp;
-
-def K_assoc_mp : 𝓢 ⊢! (φ ⋏ ψ) ⋏ χ ➝ φ ⋏ (ψ ⋏ χ) := K_left K_assoc
-def K_assoc_mpr : 𝓢 ⊢! φ ⋏ (ψ ⋏ χ) ➝ (φ ⋏ ψ) ⋏ χ := K_right K_assoc
-
 instance : HasAxiomWStar 𝓢 := by
   constructor;
   intro φ ψ χ;
@@ -75,6 +48,5 @@ instance : HasAxiomWStar 𝓢 := by
       apply K_intro₃ <;> . apply FiniteContext.byAxm; simp;
   apply C_trans H₂ $ axiomJ2Plus! ⨀ H₁;
 
-instance : Entailment.ILWStar 𝓢 where
 
 end LO.InterpretabilityLogic.Entailment

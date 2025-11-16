@@ -12,16 +12,6 @@ protected class ILR (𝓢 : S) extends InterpretabilityLogic.Entailment.IL 𝓢,
 
 variable [Entailment.ILR 𝓢]
 
-def CCNNK! : 𝓢 ⊢! (φ ➝ ∼ψ) ➝ ∼(φ ⋏ ψ):= C_replace CCAN CANNNK C_id
-
-def CCC!_of_C! (h : 𝓢 ⊢! φ₂ ➝ ψ₂) : 𝓢 ⊢! (φ ➝ φ₂) ➝ (φ ➝ ψ₂) := CCC!_of_C!_of_C! C_id h
-
-def CMNNL! : 𝓢 ⊢! ◇(∼φ) ➝ (∼□φ) := by
-  apply C_trans IMNLN!;
-  apply contra;
-  apply box_regularity;
-  apply dni;
-
 instance ILR_proves_axiomM₀ : Entailment.HasAxiomM₀ 𝓢 where
   axiomM₀! := by
     intro φ ψ χ;

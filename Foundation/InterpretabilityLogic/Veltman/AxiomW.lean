@@ -79,10 +79,6 @@ lemma Frame.HasAxiomW.of_validate_axiomF [F.IsIL] (h : F ⊧ Axioms.F (.atom 0))
       use 1;
       tauto;
 
--- TODO: remove
-instance : Entailment.IL_KW2 InterpretabilityLogic.ILW where
-instance : Entailment.HasAxiomF InterpretabilityLogic.ILW := Entailment.instHasAxiomF
-
 lemma TFAE_HasAxiomW [F.IsIL] : [
     F.HasAxiomW,
     F ⊧ Axioms.W (.atom 0) (.atom 1),
