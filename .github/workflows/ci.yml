@@ -21,7 +21,7 @@ jobs:
       # We don't use https://github.com/leanprover/lean-action.
       # Because caching strategy is not suitable for our project.
       - uses: BRAINSia/free-disk-space@v2.1.2
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Setup elan
         run: |
           curl https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -sSf | sh -s -- -y --default-toolchain none
