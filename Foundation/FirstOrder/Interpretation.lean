@@ -3,7 +3,7 @@ import Foundation.FirstOrder.Completeness.Corollaries
 import Foundation.Vorspiel.ExistsUnique
 
 /-!
-# On direct directinterpretation
+# (Direct) Interpretation
 -/
 
 namespace LO.FirstOrder
