@@ -84,11 +84,11 @@ lemma models_of_subtheory {T U : Theory L} [U ⪯ T] {M : Type*} [Structure L M]
     have : T ⊢ φ := (inferInstanceAs (U ⪯ T)).pbl (Entailment.by_axm _ hp)
     exact sound! this hM ⟩
 
-lemma consistent_of_satidfiable (h : Semantics.Satisfiable (Struc.{v, u} L) T) : Entailment.Consistent T :=
+lemma consistent_of_satisfiable (h : Semantics.Satisfiable (Struc.{v, u} L) T) : Entailment.Consistent T :=
   Sound.consistent_of_satisfiable h
 
 lemma consistent_of_model (T : Theory L) (M : Type*) [s : Structure L M] [Nonempty M] [hM : M ⊧ₘ* T] :
-    Entailment.Consistent T := consistent_of_satidfiable ⟨s.toStruc, hM⟩
+    Entailment.Consistent T := consistent_of_satisfiable ⟨s.toStruc, hM⟩
 
 lemma unprovable_of_countermodel {M : Type*} [s : Structure L M] [Nonempty M] [hM : M ⊧ₘ* T]
     {σ} (c : ¬M ⊧ₘ σ) : T ⊬ σ := by

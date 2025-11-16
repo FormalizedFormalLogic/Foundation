@@ -29,7 +29,7 @@ variable (L) (M : Type*) [Structure L M] [Nonempty M]
 abbrev Collapse : Type _ := Completeness.Model (theory L M) []
 
 lemma Collapse.models : Collapse L M ⊧ₘ* theory L M :=
-  Completeness.models_of_consistent <| consistent_of_satidfiable <| theory_satisfiable
+  Completeness.models_of_consistent <| consistent_of_satisfiable <| theory_satisfiable
 
 /-- Downward Löwenheim-Skolem theorem for countable language -/
 instance Collapse.equiv : Collapse L M ≡ₑ[L] M where
