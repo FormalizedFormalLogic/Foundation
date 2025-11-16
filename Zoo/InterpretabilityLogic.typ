@@ -47,7 +47,7 @@
     raw(
       "
   digraph ModalTheorysZoo {
-    rankdir = TB;
+    rankdir = RL;
 
     node [
       shape=none
