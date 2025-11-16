@@ -1,8 +1,8 @@
 /-
   Visser 1991 (de Jongh), `IL(W, M₀) ⊢ W*`
 -/
-import Foundation.InterpretabilityLogic.Entailment.ILWStar.Basic
-import Foundation.InterpretabilityLogic.Entailment.ILM₀.Basic
+import Foundation.InterpretabilityLogic.Entailment.IL_Wstar
+import Foundation.InterpretabilityLogic.Entailment.IL_M₀
 
 namespace LO.InterpretabilityLogic.Entailment
 
@@ -11,11 +11,11 @@ open FiniteContext
 
 variable {S F : Type*} [DecidableEq F] [InterpretabilityLogicalConnective F] [Entailment S F] {𝓢 : S}
 
-protected class ILWM₀ (𝓢 : S) extends Entailment.ILM₀ 𝓢, Entailment.ILW 𝓢
+protected class IL_M₀_W (𝓢 : S) extends Entailment.IL_M₀ 𝓢, Entailment.IL_W 𝓢
 
-variable [Entailment.ILWM₀ 𝓢]
+variable [Entailment.IL_M₀_W 𝓢]
 
-instance : HasAxiomWStar 𝓢 := by
+instance : HasAxiomWstar 𝓢 := by
   constructor;
   intro φ ψ χ;
   have H₁ : 𝓢 ⊢! (ψ ⋏ □χ) ▷ ((ψ ⋏ □χ ⋏ ◇φ) ⋎ (ψ ⋏ □χ ⋏ □(∼φ))) := by

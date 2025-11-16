@@ -1,6 +1,6 @@
-import Foundation.InterpretabilityLogic.Entailment.ILR
-import Foundation.InterpretabilityLogic.Entailment.ILW
-import Foundation.InterpretabilityLogic.Entailment.ILWM₀
+import Foundation.InterpretabilityLogic.Entailment.IL_R
+import Foundation.InterpretabilityLogic.Entailment.IL_W
+import Foundation.InterpretabilityLogic.Entailment.IL_M₀_W
 
 namespace LO.InterpretabilityLogic.Entailment
 
@@ -9,18 +9,18 @@ open FiniteContext
 
 variable {S F : Type*} [DecidableEq F] [InterpretabilityLogicalConnective F] [Entailment S F] {𝓢 : S} {φ ψ χ : F}
 
-protected class ILRStar (𝓢 : S) extends InterpretabilityLogic.Entailment.IL 𝓢, Entailment.HasAxiomRStar 𝓢
+protected class IL_Rstar (𝓢 : S) extends InterpretabilityLogic.Entailment.IL 𝓢, Entailment.HasAxiomRstar 𝓢
 
-variable [Entailment.ILRStar 𝓢]
+variable [Entailment.IL_Rstar 𝓢]
 
 instance : HasAxiomR 𝓢 where
   axiomR! {φ ψ χ} := by
-    apply C_trans $ axiomRStar! (χ := χ);
+    apply C_trans $ axiomRstar! (χ := χ);
     apply R1!;
     apply C_trans K_assoc_mpr;
     apply and₁;
 
-instance : Entailment.ILR 𝓢 where
+instance : Entailment.IL_R 𝓢 where
 
 /--
   E. Goris & J. Joosten 2011, Lemma 4.5
@@ -29,7 +29,7 @@ instance : HasAxiomW 𝓢 where
   axiomW! {φ ψ} := by
     dsimp [Axioms.W];
     have H₁ : 𝓢 ⊢! (φ ▷ ψ) ➝ ◇φ ▷ (ψ ⋏ □(∼φ)) := by
-      apply C_trans $ axiomRStar! (χ := ⊤);
+      apply C_trans $ axiomRstar! (χ := ⊤);
       apply CRhdRhd!_of_C!_C!;
       . apply C_trans IMNLN!;
         apply contra;
@@ -53,7 +53,7 @@ instance : HasAxiomW 𝓢 where
         simp
     apply (of axiomJ2!) ⨀ (deductInv' H₃) ⨀ (deductInv' H₂);
 
-instance : Entailment.ILW 𝓢 where
+instance : Entailment.IL_W 𝓢 where
 
 
 end LO.InterpretabilityLogic.Entailment

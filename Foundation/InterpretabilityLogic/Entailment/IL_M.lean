@@ -1,5 +1,5 @@
-import Foundation.InterpretabilityLogic.Entailment.ILRStar
-import Foundation.InterpretabilityLogic.Entailment.ILRW
+import Foundation.InterpretabilityLogic.Entailment.IL_Rstar
+import Foundation.InterpretabilityLogic.Entailment.IL_R_W
 import Foundation.InterpretabilityLogic.Entailment.ILMinus_M
 
 namespace LO.InterpretabilityLogic.Entailment
@@ -10,9 +10,9 @@ open FiniteContext
 variable {S F : Type*} [DecidableEq F] [InterpretabilityLogicalConnective F] [Entailment S F] {𝓢 : S} {φ ψ χ : F}
 
 /-- Entailment for interpretability logic with Montagna's principle -/
-protected class ILM (𝓢 : S) extends InterpretabilityLogic.Entailment.IL 𝓢, HasAxiomM 𝓢
+protected class IL_M (𝓢 : S) extends InterpretabilityLogic.Entailment.IL 𝓢, HasAxiomM 𝓢
 
-variable [Entailment.ILM 𝓢]
+variable [Entailment.IL_M 𝓢]
 
 instance «IL(M)_⊢_R» : Entailment.HasAxiomR 𝓢 where
   axiomR! {φ ψ χ} := by

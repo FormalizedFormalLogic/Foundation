@@ -365,14 +365,14 @@ open Context in instance [Entailment.Minimal 𝓢] (Γ : Context F 𝓢) : HasAx
 end
 
 
-class HasAxiomWStar (𝓢 : S) where
-  axiomWStar! {φ ψ χ : F} : 𝓢 ⊢! Axioms.WStar φ ψ χ
-export HasAxiomWStar (axiomWStar!)
+class HasAxiomWstar (𝓢 : S) where
+  axiomWstar! {φ ψ χ : F} : 𝓢 ⊢! Axioms.Wstar φ ψ χ
+export HasAxiomWstar (axiomWstar!)
 section
-variable [HasAxiomWStar 𝓢]
-@[simp] lemma axiomWStar : 𝓢 ⊢ Axioms.WStar φ ψ χ := ⟨axiomWStar!⟩
-open FiniteContext in instance [Entailment.Minimal 𝓢] (Γ : FiniteContext F 𝓢) : HasAxiomWStar Γ := ⟨λ {_} => of axiomWStar!⟩
-open Context in instance [Entailment.Minimal 𝓢] (Γ : Context F 𝓢) : HasAxiomWStar Γ := ⟨λ {_} => of axiomWStar!⟩
+variable [HasAxiomWstar 𝓢]
+@[simp] lemma axiomWstar : 𝓢 ⊢ Axioms.Wstar φ ψ χ := ⟨axiomWstar!⟩
+open FiniteContext in instance [Entailment.Minimal 𝓢] (Γ : FiniteContext F 𝓢) : HasAxiomWstar Γ := ⟨λ {_} => of axiomWstar!⟩
+open Context in instance [Entailment.Minimal 𝓢] (Γ : Context F 𝓢) : HasAxiomWstar Γ := ⟨λ {_} => of axiomWstar!⟩
 end
 
 
@@ -420,14 +420,14 @@ open Context in instance [Entailment.Minimal 𝓢] (Γ : Context F 𝓢) : HasAx
 end
 
 
-class HasAxiomRStar (𝓢 : S) where
-  axiomRStar! {φ ψ χ : F} : 𝓢 ⊢! Axioms.RStar φ ψ χ
-export HasAxiomRStar (axiomRStar!)
+class HasAxiomRstar (𝓢 : S) where
+  axiomRstar! {φ ψ χ : F} : 𝓢 ⊢! Axioms.Rstar φ ψ χ
+export HasAxiomRstar (axiomRstar!)
 section
-variable [HasAxiomRStar 𝓢]
-@[simp] lemma axiomRStar : 𝓢 ⊢ Axioms.RStar φ ψ χ := ⟨axiomRStar!⟩
-open FiniteContext in instance [Entailment.Minimal 𝓢] (Γ : FiniteContext F 𝓢) : HasAxiomRStar Γ := ⟨λ {_} => of axiomRStar!⟩
-open Context in instance [Entailment.Minimal 𝓢] (Γ : Context F 𝓢) : HasAxiomRStar Γ := ⟨λ {_} => of axiomRStar!⟩
+variable [HasAxiomRstar 𝓢]
+@[simp] lemma axiomRstar : 𝓢 ⊢ Axioms.Rstar φ ψ χ := ⟨axiomRstar!⟩
+open FiniteContext in instance [Entailment.Minimal 𝓢] (Γ : FiniteContext F 𝓢) : HasAxiomRstar Γ := ⟨λ {_} => of axiomRstar!⟩
+open Context in instance [Entailment.Minimal 𝓢] (Γ : Context F 𝓢) : HasAxiomRstar Γ := ⟨λ {_} => of axiomRstar!⟩
 end
 
 end LO.InterpretabilityLogic.Entailment
