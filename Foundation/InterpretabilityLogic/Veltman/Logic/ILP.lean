@@ -36,15 +36,19 @@ instance : Entailment.Consistent InterpretabilityLogic.ILP := Veltman.consistent
 
 end ILP
 
-instance : InterpretabilityLogic.IL ⪱ InterpretabilityLogic.ILP := by
+open Entailment in
+instance : InterpretabilityLogic.ILRW ⪱ InterpretabilityLogic.ILP := by
   constructor;
-  . apply weakerThan_of_subset_axioms;
-    simp;
+  . apply weakerThan_of_provable_axioms;
+    intro φ hφ;
+    rcases (by simpa using hφ) with (rfl | rfl | rfl | rfl | rfl | rfl | rfl) <;> simp only [
+      axiomJ1, axiomJ2, axiomJ3, axiomJ4, axiomJ5, axiomR, axiomW,
+    ];
   . apply Entailment.not_weakerThan_iff.mpr;
     use (Axioms.P (.atom 0) (.atom 1));
     constructor;
     . simp;
-    . apply Sound.not_provable_of_countermodel (𝓜 := Veltman.FrameClass.IL);
+    . apply Sound.not_provable_of_countermodel (𝓜 := Veltman.FrameClass.ILRW);
       apply Veltman.not_validOnFrameClass_of_exists_frame;
       use {
         toKripkeFrame := {
@@ -61,26 +65,23 @@ instance : InterpretabilityLogic.IL ⪱ InterpretabilityLogic.ILP := by
       constructor;
       . apply Set.mem_setOf_eq.mpr;
         exact {
-          S_J1 := by tauto;
+          S_J1 := by grind;
           S_J2 := by grind;
-          S_J4 := by
-            rintro w x y (⟨rfl, h₁, h₂⟩ | ⟨rfl, rfl, rfl⟩);
-            . left;
-              constructor;
-              . rfl;
-              . simpa using Fin.le_trans h₁ h₂;
-            . tauto;
-          S_J5 := by
-            rintro w x y (⟨rfl, h⟩ | ⟨rfl, rfl⟩) (⟨_, _⟩ | ⟨_, _⟩);
-            . simp_all;
-            . left; refine ⟨rfl, ?_, ?_⟩ <;> simp_all;
-            . contradiction;
-            . contradiction;
+          S_J4 := by grind;
+          S_J5 := by grind;
+          S_W {w} := by
+            apply Finite.converseWellFounded_of_trans_irrefl';
+            . infer_instance
+            . rintro x y z ⟨a, Rxa, Sway⟩ ⟨b, Ryb, Rwbz⟩;
+              use a;
+              grind;
+            . dsimp [Irreflexive, Frame.RS, Relation.Comp];
+              push_neg;
+              grind;
+          S_R := by grind;
         }
       . by_contra hC;
         have := Veltman.Frame.HasAxiomP.of_validate_axiomP hC |>.S_P (w := 0) (x := 1) (y := 2) (z := 3) (by tauto) (by tauto);
         contradiction;
-
-instance : InterpretabilityLogic.ILRW ⪱ InterpretabilityLogic.ILP := by sorry
 
 end LO.InterpretabilityLogic
