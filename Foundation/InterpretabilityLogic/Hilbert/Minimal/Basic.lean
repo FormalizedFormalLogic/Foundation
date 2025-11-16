@@ -1,10 +1,5 @@
 import Foundation.InterpretabilityLogic.Logic.Basic
-import Foundation.InterpretabilityLogic.Entailment.IL
-import Foundation.InterpretabilityLogic.Entailment.ILMinus_J1
-import Foundation.InterpretabilityLogic.Entailment.ILMinus_J2
-import Foundation.InterpretabilityLogic.Entailment.ILMinus_J4
-import Foundation.InterpretabilityLogic.Entailment.ILMinus_J5
-import Foundation.InterpretabilityLogic.Entailment.ILMinus_M
+import Foundation.InterpretabilityLogic.Entailment
 import Foundation.InterpretabilityLogic.Hilbert.Axiom
 import Batteries.Tactic.Instances
 

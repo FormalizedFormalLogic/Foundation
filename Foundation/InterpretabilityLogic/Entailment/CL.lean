@@ -13,14 +13,6 @@ protected class CL (𝓢 : S) extends Modal.Entailment.GL 𝓢, HasAxiomJ1 𝓢,
 
 variable [Entailment.CL 𝓢]
 
--- TODO: move to Entailment
-def CCNO! : 𝓢 ⊢! φ ➝ ∼φ ➝ ⊥ := C_trans dni (K_left negEquiv)
-@[simp] lemma CCNO : 𝓢 ⊢ φ ➝ ∼φ ➝ ⊥ := ⟨CCNO!⟩
-
--- TODO: move to Entailment
-def NMO! : 𝓢 ⊢! ∼◇⊥ := (contra $ K_left diaDuality) ⨀ (dni' $ nec NO)
-@[simp] lemma NMO : 𝓢 ⊢ ∼◇⊥ := ⟨NMO!⟩
-
 instance : HasAxiomJ6 𝓢 := ⟨by
   intro φ;
   apply Entailment.K_intro;

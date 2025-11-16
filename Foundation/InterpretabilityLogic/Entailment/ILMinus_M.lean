@@ -12,19 +12,6 @@ protected class ILMinus_M (𝓢 : S) extends InterpretabilityLogic.Entailment.IL
 
 variable [Entailment.ILMinus_M 𝓢]
 
--- TODO: move to Entailment
-def replace_CK_left (h₁ : 𝓢 ⊢! φ₂ ➝ φ₁) (h₂ : 𝓢 ⊢! φ₁ ⋏ ψ ➝ χ) : 𝓢 ⊢! φ₂ ⋏ ψ ➝ χ := by
-  apply C_trans ?_ h₂;
-  apply CKK_of_C h₁;
-
--- TODO: move to Entailment
-def replace_CK_right (h₁ : 𝓢 ⊢! ψ₁ ➝ ψ₂) (h₂ : 𝓢 ⊢! φ ⋏ ψ₂ ➝ χ) : 𝓢 ⊢! φ ⋏ ψ₁ ➝ χ := by
-  apply C_trans ?_ h₂;
-  apply CKK_of_C' h₁;
-
--- TODO: move to Entailment
-def left_K_symm (d : 𝓢 ⊢! φ ⋏ ψ ➝ χ) : 𝓢 ⊢! ψ ⋏ φ ➝ χ := C_trans CKK d
-
 instance : HasAxiomKM1 𝓢 := ⟨by
   intro φ ψ;
   apply C_trans $ axiomM! (χ := ∼ψ);
