@@ -54,6 +54,12 @@ instance nonempty : Nonempty (Hull s) := Structure.SkolemHull.nonempty _ _
 instance elementaryEquiv : (Hull s) ≡ₑ[ℒₛₑₜ] V  where
   models {φ} := by simp [models_iff, Matrix.empty_eq]
 
+instance set_countable (hs : s.Countable) : (Hull s).Countable := Structure.SkolemHull.set_countable hs
+
+instance countable (hs : s.Countable) : Countable (Hull s) := Structure.SkolemHull.set_countable hs
+
+instance countable₀ : Countable (Collapse V) := Structure.SkolemHull.countable₀
+
 end Hull
 
 end LO.FirstOrder.SetTheory

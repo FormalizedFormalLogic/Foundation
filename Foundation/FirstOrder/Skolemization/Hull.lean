@@ -165,7 +165,7 @@ open Cardinal
 
 variable [L.Encodable] {s : Set M}
 
-lemma set_countable (hs : s.Countable) : (SkolemHull L s).Countable := by
+instance set_countable (hs : s.Countable) : (SkolemHull L s).Countable := by
   have : Countable s := hs
   have : Countable (Term L.skolemFunction₁ s) := Semiterm.countable
   exact Set.countable_range _
