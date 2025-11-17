@@ -1,5 +1,5 @@
 import Foundation.InterpretabilityLogic.Entailment.IL
-import Foundation.InterpretabilityLogic.Entailment.ILRStar
+import Foundation.InterpretabilityLogic.Entailment.IL_Rstar
 import Foundation.InterpretabilityLogic.Entailment.ILMinus_J4
 
 namespace LO.InterpretabilityLogic.Entailment
@@ -10,9 +10,9 @@ open FiniteContext
 variable {S F : Type*} [DecidableEq F] [InterpretabilityLogicalConnective F] [Entailment S F] {𝓢 : S} {φ ψ χ : F}
 
 /-- Entailment for interpretability logic with persistence principle -/
-protected class ILP (𝓢 : S) extends InterpretabilityLogic.Entailment.IL 𝓢, HasAxiomP 𝓢
+protected class IL_P (𝓢 : S) extends InterpretabilityLogic.Entailment.IL 𝓢, HasAxiomP 𝓢
 
-variable [Entailment.ILP 𝓢]
+variable [Entailment.IL_P 𝓢]
 
 instance «IL(P)_⊢_R» : Entailment.HasAxiomR 𝓢 where
   axiomR! {φ ψ χ} := by

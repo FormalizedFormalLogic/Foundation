@@ -7,9 +7,9 @@ open FiniteContext
 
 variable {S F : Type*} [DecidableEq F] [InterpretabilityLogicalConnective F] [Entailment S F] {𝓢 : S} {φ ψ χ : F}
 
-protected class ILW (𝓢 : S) extends InterpretabilityLogic.Entailment.IL 𝓢, HasAxiomW 𝓢
+protected class IL_W (𝓢 : S) extends InterpretabilityLogic.Entailment.IL 𝓢, HasAxiomW 𝓢
 
-variable [Entailment.ILW 𝓢]
+variable [Entailment.IL_W 𝓢]
 
 instance : HasAxiomKW2 𝓢 where
   axiomKW2! {φ ψ} := by

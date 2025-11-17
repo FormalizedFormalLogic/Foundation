@@ -8,10 +8,10 @@ open Veltman
 
 namespace Veltman
 
-protected class Frame.IsILM₀ (F : Veltman.Frame) extends F.IsIL, F.HasAxiomM₀
-protected abbrev FrameClass.ILM₀ : FrameClass := { F | F.IsILM₀ }
+protected class Frame.IsIL_M₀ (F : Veltman.Frame) extends F.IsIL, F.HasAxiomM₀
+protected abbrev FrameClass.IL_M₀ : FrameClass := { F | F.IsIL_M₀ }
 
-instance : trivialFrame.IsILM₀ where
+instance : trivialFrame.IsIL_M₀ where
   S_M₀ := by tauto
 
 end Veltman
@@ -19,23 +19,23 @@ end Veltman
 
 open Hilbert.Basic
 
-namespace ILM₀
+namespace IL_M₀
 
-instance Veltman.sound : Sound InterpretabilityLogic.ILM₀ FrameClass.ILM₀ := by
+instance Veltman.sound : Sound InterpretabilityLogic.IL_M₀ FrameClass.IL_M₀ := by
   apply Veltman.instFrameClassSound;
   constructor;
   intro φ hφ F hF;
   replace hF := Set.mem_setOf_eq.mp hF;
   rcases hφ with (rfl | rfl | rfl | rfl | rfl | rfl) <;> simp;
 
-instance : Entailment.Consistent InterpretabilityLogic.ILM₀ := Veltman.consistent_of_sound_frameclass FrameClass.ILM₀ $ by
+instance : Entailment.Consistent InterpretabilityLogic.IL_M₀ := Veltman.consistent_of_sound_frameclass FrameClass.IL_M₀ $ by
   use Veltman.trivialFrame;
   apply Set.mem_setOf_eq.mpr;
   infer_instance;
 
-end ILM₀
+end IL_M₀
 
-instance : InterpretabilityLogic.IL ⪱ InterpretabilityLogic.ILM₀ := by
+instance : InterpretabilityLogic.IL ⪱ InterpretabilityLogic.IL_M₀ := by
   constructor;
   . apply weakerThan_of_subset_axioms;
     simp;

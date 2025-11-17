@@ -87,7 +87,7 @@ lemma TFAE_HasAxiomW [F.IsIL] : [
     tfae_have 1 → 2 := by apply validate_axiomW_of_HasAxiomW;
     tfae_have 2 → 3 := by
       intro h;
-      apply Hilbert.Basic.Veltman.soundness_frame (Ax := ILW.axioms);
+      apply Hilbert.Basic.Veltman.soundness_frame (Ax := IL_W.axioms);
       . constructor;
         rintro φ hφ;
         rcases (by simpa using hφ) with (rfl | rfl | rfl | rfl | rfl | rfl);
@@ -97,7 +97,7 @@ lemma TFAE_HasAxiomW [F.IsIL] : [
         . simp [validate_axiomJ2_of_HasAxiomJ2]
         . simp [validate_axiomJ3]
         . simp [validate_axiomJ4_of_HasAxiomJ4]
-      . suffices InterpretabilityLogic.ILW ⊢ Axioms.F (.atom 0) by tauto;
+      . suffices InterpretabilityLogic.IL_W ⊢ Axioms.F (.atom 0) by tauto;
         simp;
     tfae_have 3 → 1 := Frame.HasAxiomW.of_validate_axiomF;
     tfae_finish;
