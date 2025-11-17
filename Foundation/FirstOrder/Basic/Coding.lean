@@ -7,7 +7,6 @@ variable {L : Language} [(k : ℕ) → Encodable (L.Func k)]
 variable {ξ : Type*} [Encodable ξ]
 
 open Encodable
-
 namespace Semiterm
 
 def toNat {n : ℕ} : Semiterm L ξ n → ℕ
@@ -45,11 +44,11 @@ lemma ofNat_toNat {n : ℕ} : ∀ t : Semiterm L ξ n, ofNat n (toNat t) = some 
   |       &x => by simp [toNat, ofNat]
   | func f v => by
       suffices (Matrix.getM fun i ↦ ofNat n (v i).toNat) = some v by
-        simp only [toNat, ofNat, Nat.unpair_pair, Option.pure_def, Option.bind_eq_bind]
+        simp only [toNat, ofNat, Nat.unpair_pair]
         rw [Nat.unpair_pair, Nat.unpair_pair, Nat.unpair_pair, Nat.natToVec_vecToNat]
         simpa
       have : (fun i ↦ ofNat n (toNat (v i))) = (fun i ↦ pure (v i)) := funext <| fun i ↦ ofNat_toNat (v i)
-      simp [this, Matrix.getM_pure]
+      simp [this]
 
 instance encodable : Encodable (Semiterm L ξ n) where
   encode := toNat
@@ -140,13 +139,13 @@ def ofNat : (n : ℕ) → ℕ → Option (Semiformula L ξ n)
 
 lemma ofNat_toNat {n : ℕ} : ∀ φ : Semiformula L ξ n, ofNat n (toNat φ) = some φ
   |  rel R v => by
-    simp only [toNat, ofNat, Nat.unpair_pair, Option.pure_def, Option.bind_eq_bind]
+    simp only [toNat, ofNat, Nat.unpair_pair]
     rw [Nat.unpair_pair, Nat.unpair_pair]
-    simp [Matrix.getM_pure]
+    simp
   | nrel R v => by
-    simp only [toNat, ofNat, Nat.unpair_pair, Option.pure_def, Option.bind_eq_bind]
+    simp only [toNat, ofNat, Nat.unpair_pair]
     rw [Nat.unpair_pair, Nat.unpair_pair]
-    simp [Matrix.getM_pure]
+    simp
   |        ⊤ => by simp [toNat, ofNat]
   |        ⊥ => by simp [toNat, ofNat]
   |    φ ⋎ ψ => by simp [toNat, ofNat, ofNat_toNat φ, ofNat_toNat ψ]
@@ -199,5 +198,19 @@ lemma encode_ex (φ : Semiformula L ξ (n + 1)) : encode (∃' φ) = (Nat.pair 7
     encode σ = encode φ ↔ φ = Rewriting.emb σ := by rw [←encode_inj_sentence, eq_comm]
 
 end Semiformula
+
+end LO.FirstOrder
+
+namespace LO.FirstOrder
+
+variable {L : Language} [L.Encodable]
+
+instance Semiterm.countable [Countable ξ] : Countable (Semiterm L ξ n) := by
+  have : Encodable ξ := Encodable.ofCountable ξ
+  exact Encodable.countable
+
+instance Semiformula.countable [Countable ξ] : Countable (Semiformula L ξ n) := by
+  have : Encodable ξ := Encodable.ofCountable ξ
+  exact Encodable.countable
 
 end LO.FirstOrder

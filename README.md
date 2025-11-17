@@ -51,7 +51,7 @@ Main results of this repository. More detailed explanations are provided in the 
 [first_order:completeness]: ./Foundation/FirstOrder/Completeness/Completeness.lean
 [first_order:haupstaz]: ./Foundation/FirstOrder/Hauptsatz.lean
 [first_order:goedel_translation]: ./Foundation/IntFO/Translation.lean
-[first_order:downward_loewenheim_skolem]: https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/LoewenheimSkolem.html#LO.FirstOrder.Structure.Collapse.card
+[first_order:downward_loewenheim_skolem]: https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/Skolemization/Hull.html#LO.FirstOrder.Structure.SkolemHull.card_le_aleph0
 [arith]: https://formalizedformallogic.github.io/Foundation/book/Arithmetic/#arithmetics
 [setTheory]: https://formalizedformallogic.github.io/Foundation/book/Set-Theory/#setTheory
 [setTheory:zfc_consistent]: https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/SetTheory/StandardModel.html#LO.FirstOrder.SetTheory.zfc_consistent
