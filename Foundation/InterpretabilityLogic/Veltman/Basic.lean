@@ -94,8 +94,8 @@ protected lemma not_box_def : ¬x ⊧ □φ ↔ (∃ y, x ≺ y ∧ ¬y ⊧ φ) 
 protected lemma dia_def : x ⊧ ◇φ ↔ ∃ y, x ≺ y ∧ y ⊧ φ := by simp [Satisfies];
 protected lemma not_dia_def : ¬x ⊧ ◇φ ↔ ∀ y, x ≺ y → ¬(y ⊧ φ) := by simp [Satisfies];
 
-protected lemma rhd_def : x ⊧ φ ▷ ψ ↔ ∀ y, x ≺ y → Satisfies M y φ → (∃ z, y ≺[x] z ∧ Satisfies M z ψ) := by simp [Satisfies];
-protected lemma not_rhd_def : ¬x ⊧ φ ▷ ψ ↔ ∃ y, x ≺ y ∧ Satisfies M y φ ∧ ∀ z, y ≺[x] z → ¬(Satisfies M z ψ) := by simp [Satisfies];
+protected lemma rhd_def : x ⊧ φ ▷ ψ ↔ ∀ y, x ≺ y → y ⊧ φ → (∃ z, y ≺[x] z ∧ z ⊧ ψ) := by simp [Satisfies];
+protected lemma not_rhd_def : ¬x ⊧ φ ▷ ψ ↔ ∃ y, x ≺ y ∧ y ⊧ φ ∧ ∀ z, y ≺[x] z → ¬(z ⊧ ψ) := by simp [Satisfies];
 
 protected instance : Semantics.Tarski (M.World) where
   models_verum := λ _ => Satisfies.top_def;
