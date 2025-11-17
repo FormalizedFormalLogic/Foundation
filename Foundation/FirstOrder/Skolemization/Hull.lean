@@ -1,6 +1,8 @@
 import Foundation.FirstOrder.Basic
 import Mathlib.SetTheory.Cardinal.Basic
 
+/-! # Skolem hull -/
+
 namespace LO.FirstOrder
 
 /-- Skolem function of rank 1 -/
@@ -66,7 +68,7 @@ lemma closed {v : Fin k → M} (hv : ∀ i, v i ∈ SkolemHull L s)
     simpa [t, Semiterm.val_func, hu]
   exact Classical.epsilon_spec H
 
-variable [Operator.Eq L] [Structure.Eq L M]
+variable [L.Eq] [Structure.Eq L M]
 
 lemma closed_func {v : Fin k → M} (hv : ∀ i, v i ∈ SkolemHull L s)
     {f : L.Func k} : Structure.func f v ∈ SkolemHull L s := by
@@ -79,7 +81,7 @@ lemma closed_func {v : Fin k → M} (hv : ∀ i, v i ∈ SkolemHull L s)
 
 variable (𝓼 s)
 
-instance str : Structure L (SkolemHull L s) where
+instance (priority := 50) str : Structure L (SkolemHull L s) where
   func k f v := ⟨func f fun i ↦ (v i : M), closed_func (by simp)⟩
   rel k R v := Structure.rel R fun i ↦ (v i : M)
 
@@ -134,8 +136,26 @@ variable {𝓼 s}
       exact closed (s := s) (by simp) h
 
 /-- Downward Löwenheim-Skolem theorem for countable language (1) -/
-instance elementaryEquiv : (SkolemHull L s) ≡ₑ[L] M where
+instance (priority := 50) elementaryEquiv : (SkolemHull L s) ≡ₑ[L] M where
   models {φ} := by simp [models_iff, Matrix.empty_eq]
+
+instance (priority := 50) eq : Structure.Eq L (SkolemHull L s) := ⟨fun x y ↦ by
+  simp [Operator.val, Matrix.comp_vecCons', Matrix.constant_eq_singleton]
+  simpa [-Eq.eq, Subtype.ext_iff] using Structure.Eq.eq (L := L) x.val y.val⟩
+
+section mem
+
+variable [Operator.Mem L] [Membership M M] [Structure.Mem L M]
+
+instance (priority := 50) membership :
+  Membership (SkolemHull L s) (SkolemHull L s) := ⟨fun y x ↦ x.val ∈ y.val⟩
+
+instance (priority := 50) mem [Operator.Mem L] [Membership M M] [Structure.Mem L M] :
+    Structure.Mem L (SkolemHull L s) := ⟨fun x y ↦ by
+  simp [Operator.val, Matrix.comp_vecCons', Matrix.constant_eq_singleton]
+  simpa [-Mem.mem, Subtype.ext_iff] using Structure.Mem.mem (L := L) x.val y.val⟩
+
+end mem
 
 end SkolemHull
 

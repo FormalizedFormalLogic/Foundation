@@ -1,6 +1,6 @@
 import Foundation.FirstOrder.SetTheory.Basic
 import Foundation.FirstOrder.SetTheory.StandardModel
-import Foundation.FirstOrder.LoewenheimSkolem
+import Foundation.FirstOrder.Skolemization.Hull
 
 /-!
 # Downward Löwenheim-Skolem theorem for models of set theory
@@ -8,39 +8,52 @@ import Foundation.FirstOrder.LoewenheimSkolem
 
 namespace LO.FirstOrder.SetTheory
 
-variable (M : Type*) [SetStructure M] [Nonempty M]
+variable {V : Type*} [SetStructure V] [Nonempty V] (s : Set V)
 
-instance : Structure.Collapse ℒₛₑₜ M ⊧ₘ* (𝗘𝗤 : Theory ℒₛₑₜ) :=
-   Structure.ElementaryEquiv.modelsTheory.mp (inferInstanceAs (M ⊧ₘ* (𝗘𝗤 : Theory ℒₛₑₜ)))
+def Hull : Set V := Structure.SkolemHull ℒₛₑₜ s
 
-/-- A function returns "collapsed", but elemetary equivalent model -/
-abbrev Collapse (M : Type*) [SetStructure M] [Nonempty M] : Type _ := QuotNormalize (Structure.Collapse ℒₛₑₜ M)
+variable (V)
 
-namespace Collapse
+abbrev Collapse : Set V := Hull ∅
 
-instance elementary_equiv : Collapse M ≡ₑ[ℒₛₑₜ] M :=
-  have h₁ : Collapse M ≡ₑ[ℒₛₑₜ] Structure.Collapse ℒₛₑₜ M := QuotNormalize.elementary_equiv
-  have h₂ : Structure.Collapse ℒₛₑₜ M ≡ₑ[ℒₛₑₜ] M := Structure.Collapse.equiv ℒₛₑₜ M
-  h₁.trans h₂
+variable {V}
 
-open Cardinal
+namespace Hull
 
-@[simp] lemma le_aleph0  : #(Collapse M) ≤ ℵ₀ := by
-    simpa using QuotNormalize.card_le (Structure.Collapse ℒₛₑₜ M)
+instance : SetStructure (Hull s) := ⟨fun y x ↦ x.val ∈ y.val⟩
 
-instance countable : Countable (Collapse M) :=
-  QuotNormalize.countable_of_countable (Structure.Collapse ℒₛₑₜ M)
+lemma mem_iff {x y : Hull s} : x ∈ y ↔ x.val ∈ y.val := by rfl
 
-end Collapse
+@[simp] lemma mk_mem_mk_iff {x y : V} {hx hy} : (⟨x, hx⟩ : Hull s) ∈ (⟨y, hy⟩ : Hull s) ↔ x ∈ y := by rfl
 
-/-- Collapsed ZFSet; a countable model of ZFC. -/
-abbrev CollapsedZFSet.{u} : Type := Collapse ZFSet.{u}
+lemma str_eq : Structure.SkolemHull.str (standardStructure V) s = standardStructure (Hull s) := by
+  have : (Structure.SkolemHull.str (standardStructure V) s).Eq ℒₛₑₜ (Hull s) := Structure.SkolemHull.eq
+  have : (Structure.SkolemHull.str (standardStructure V) s).Mem ℒₛₑₜ (Hull s) := Structure.SkolemHull.mem
+  exact standardStructure_unique (Hull s) (Structure.SkolemHull.str (standardStructure V) s)
 
-instance CollapsedZFSet.elementary_equiv : CollapsedZFSet.{u} ≡ₑ[ℒₛₑₜ] ZFSet.{u} := inferInstance
+@[simp] lemma subset : s ⊆ Hull s := Structure.SkolemHull.subset
 
-instance CollapsedZFSet.countable : Countable CollapsedZFSet.{u} := inferInstance
+lemma closed {v : Fin k → V} (hv : ∀ i, v i ∈ Hull s)
+    {φ : Semisentence ℒₛₑₜ (k + 1)} (H : ∃ z, V ⊧/(z :> v) φ) :
+    ∃ z ∈ Hull s, V ⊧/(z :> v) φ :=
+  Structure.SkolemHull.closed hv H
 
-instance CollapsedZFSet.modelsZFC : CollapsedZFSet.{u} ⊧ₘ* 𝗭𝗙𝗖 :=
-  Structure.ElementaryEquiv.modelsTheory' CollapsedZFSet.{u} ZFSet.{u} _
+@[simp] lemma hull_models_iff {φ : Semisentence ℒₛₑₜ n} :
+    (Hull s) ⊧/b φ ↔ V ⊧/(b ·) φ := by
+  have :
+      Semiformula.Evalb (Structure.SkolemHull.str (standardStructure V) s) b φ ↔
+      V ⊧/(b ·) φ :=
+    Structure.SkolemHull.str_eval (𝓼 := standardStructure V) (φ := φ) (b := b)
+  rw [str_eq] at this
+  exact this
+
+instance set_nonempty : (Hull s).Nonempty := Structure.SkolemHull.set_nonempty _ _
+
+instance nonempty : Nonempty (Hull s) := Structure.SkolemHull.nonempty _ _
+
+instance elementaryEquiv : (Hull s) ≡ₑ[ℒₛₑₜ] V  where
+  models {φ} := by simp [models_iff, Matrix.empty_eq]
+
+end Hull
 
 end LO.FirstOrder.SetTheory
