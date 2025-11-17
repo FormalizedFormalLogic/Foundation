@@ -32,7 +32,7 @@ import Foundation.FirstOrder.Completeness.SubLanguage
 import Foundation.FirstOrder.Completeness.SearchTree
 import Foundation.FirstOrder.Completeness.Completeness
 
-import Foundation.FirstOrder.LoewenheimSkolem
+import Foundation.FirstOrder.Skolemization.Hull
 
 import Foundation.FirstOrder.Order.Le
 import Foundation.FirstOrder.Interpretation
