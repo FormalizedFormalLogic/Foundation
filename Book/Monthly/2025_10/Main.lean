@@ -24,7 +24,8 @@ There are 3 major topics in this month.
 
 -We formalized that [ZFSet](https://leanprover-community.github.io/mathlib4_docs//Mathlib/SetTheory/ZFC/Basic.html#ZFSet)
 is a (standard) model of $`\mathsf{ZFC}`.-
-Update(2025/11): We use {lean}`FirstOrder.SetTheory.Universe` instead of `ZFSet`.
+
+_Update (2025/11)_: We use {lean}`FirstOrder.SetTheory.Universe` instead of `ZFSet`.
 
 {docstring FirstOrder.SetTheory.Universe.models_zfc}
 
