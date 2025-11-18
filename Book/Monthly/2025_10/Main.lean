@@ -22,10 +22,11 @@ There are 3 major topics in this month.
 
 *Author*: [Palalansoukî](https://github.com/iehality)
 
-We formalized that [ZFSet](https://leanprover-community.github.io/mathlib4_docs//Mathlib/SetTheory/ZFC/Basic.html#ZFSet)
-is a (standard) model of $`\mathsf{ZFC}`.
+-We formalized that [ZFSet](https://leanprover-community.github.io/mathlib4_docs//Mathlib/SetTheory/ZFC/Basic.html#ZFSet)
+is a (standard) model of $`\mathsf{ZFC}`.-
+Update(2025/11): We use {lean}`FirstOrder.SetTheory.Universe` instead of `ZFSet`.
 
-{docstring FirstOrder.SetTheory.Standard.models_zc}
+{docstring FirstOrder.SetTheory.Universe.models_zfc}
 
 As an obvious consequence, it can be proven that $`\mathsf{ZFC}` is consistent.
 
