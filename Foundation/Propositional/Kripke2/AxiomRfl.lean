@@ -5,6 +5,17 @@ import Foundation.Vorspiel.HRel.Coreflexive
 
 namespace LO.Propositional
 
+namespace Axioms
+
+variable {F : Type*} [LogicalConnective F]
+variable (φ ψ χ : F)
+
+/-- Axioms of reflexivity -/
+protected abbrev Rfl := (φ ⋏ (φ ➝ ψ)) ➝ ψ
+
+end Axioms
+
+
 open Kripke2
 open Formula.Kripke2
 
@@ -22,14 +33,14 @@ end Frame
 
 
 @[simp high, grind .]
-lemma valid_axiomRfl_of_isReflexive [F.IsReflexive] : F ⊧ (φ ⋏ (φ ➝ ψ)) ➝ ψ := by
+lemma valid_axiomRfl_of_isReflexive [F.IsReflexive] : F ⊧ Axioms.Rfl φ ψ := by
   intro V x y Rxy h;
   have ⟨h₁, h₂⟩ := Satisfies.def_and.mp h;
   apply h₂;
   . simp;
   . assumption;
 
-lemma isReflexive_of_valid_axiomRfl (h : F ⊧ ((.atom 0) ⋏ ((.atom 0) ➝ (.atom 1))) ➝ (.atom 1)) : F.IsReflexive := by
+lemma isReflexive_of_valid_axiomRfl (h : F ⊧ Axioms.Rfl #0 #1) : F.IsReflexive := by
   constructor;
   intro x;
   have := @h (λ w a => match a with | 0 => w = x | 1 => x ≺ w | _ => False) F.root x F.rooted $ by

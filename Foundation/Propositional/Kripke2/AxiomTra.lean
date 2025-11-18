@@ -4,7 +4,23 @@ import Foundation.Vorspiel.HRel.Euclidean
 import Foundation.Vorspiel.HRel.Coreflexive
 import Mathlib.Tactic.TFAE
 
+
+
 namespace LO.Propositional
+
+namespace Axioms
+
+variable {F : Type*} [LogicalConnective F]
+variable (φ ψ χ : F)
+
+/-- Axioms of transitivity 1 -/
+protected abbrev Tra1 := (φ ➝ ψ) ➝ (χ ➝ φ ➝ ψ)
+
+/-- Axioms of transitivity 2 -/
+protected abbrev Tra2 := (φ ➝ ψ) ➝ (ψ ➝ χ) ➝ (φ ➝ χ)
+
+end Axioms
+
 
 open Formula (atom)
 open Kripke2
@@ -23,20 +39,20 @@ end Frame
 
 
 @[simp high, grind .]
-lemma valid_axiomTra₁_of_IsTransitive [F.IsTransitive] : F ⊧ (φ ➝ ψ) ➝ (χ ➝ φ ➝ ψ) := by
+lemma valid_axiomTra₁_of_IsTransitive [F.IsTransitive] : F ⊧ Axioms.Tra1 φ ψ χ := by
   intro V x y Rxy h₁ z Ryz h₂ v Rzv h₃;
   apply h₁;
   . apply F.trans Ryz Rzv;
   . assumption;
 
-lemma IsTransitive_of_valid_axiomTra₁ (h : F ⊧ ((.atom 0) ➝ (.atom 1)) ➝ ((.atom 2) ➝ (.atom 0) ➝ (.atom 1))) : F.IsTransitive := by
+lemma IsTransitive_of_valid_axiomTra₁ (h : F ⊧ Axioms.Tra1 #0 #1 #2) : F.IsTransitive := by
   constructor;
   intro x y z Rxy Ryz;
   apply @h (λ w a => match a with | 0 => y ≺ w | 1 => x ≺ w | 2 => x ≺ w | _ => False) F.root x F.rooted ?_ y Rxy ?_ z Ryz ?_;
   all_goals tauto;
 
 @[simp high, grind .]
-lemma valid_axiomTra₂_of_IsTransitive [F.IsTransitive] : F ⊧ (φ ➝ ψ) ➝ (ψ ➝ χ) ➝ (φ ➝ χ) := by
+lemma valid_axiomTra₂_of_IsTransitive [F.IsTransitive] : F ⊧ Axioms.Tra2 φ ψ χ := by
   intro V x y Rxy h₁ z Ryz h₂ v Rzv h₃;
   apply h₂;
   . assumption;
@@ -44,7 +60,7 @@ lemma valid_axiomTra₂_of_IsTransitive [F.IsTransitive] : F ⊧ (φ ➝ ψ) ➝
     . apply F.trans Ryz Rzv;
     . assumption;
 
-lemma IsTransitive_of_valid_axiomTra₂ (h : F ⊧ ((.atom 0) ➝ (.atom 1)) ➝ ((.atom 1) ➝ (.atom 2)) ➝ ((.atom 0) ➝ (.atom 2))) : F.IsTransitive := by
+lemma IsTransitive_of_valid_axiomTra₂ (h : F ⊧ Axioms.Tra2 #0 #1 #2) : F.IsTransitive := by
   constructor;
   intro x y z Rxy Ryz;
   apply @h (λ w a => match a with | 0 => w = z | 1 => x ≺ w | 2 => x ≺ w | _ => False) F.root x F.rooted ?_ y Rxy ?_ z Ryz ?_;
@@ -52,8 +68,8 @@ lemma IsTransitive_of_valid_axiomTra₂ (h : F ⊧ ((.atom 0) ➝ (.atom 1)) ➝
 
 lemma TFAE_IsTransitive : [
   F.IsTransitive,
-  F ⊧ ((.atom 0) ➝ (.atom 1)) ➝ ((.atom 2) ➝ (.atom 0) ➝ (.atom 1)),
-  F ⊧ ((.atom 0) ➝ (.atom 1)) ➝ ((.atom 1) ➝ (.atom 2)) ➝ ((.atom 0) ➝ (.atom 2)),
+  F ⊧ Axioms.Tra1 #0 #1 #2,
+  F ⊧ Axioms.Tra2 #0 #1 #2,
 ].TFAE := by
   tfae_have 1 → 2 := by apply valid_axiomTra₁_of_IsTransitive;
   tfae_have 1 → 3 := by apply valid_axiomTra₂_of_IsTransitive;

@@ -17,6 +17,8 @@ abbrev FormulaFinset (α) := Finset (Formula α)
 
 namespace Formula
 
+prefix:max "#" => Formula.atom
+
 abbrev neg {α : Type u} (φ : Formula α) : Formula α := imp φ falsum
 
 abbrev verum {α : Type u} : Formula α := imp falsum falsum

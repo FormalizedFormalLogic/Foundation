@@ -5,6 +5,15 @@ import Foundation.Vorspiel.HRel.Coreflexive
 
 namespace LO.Propositional
 
+namespace Axioms
+
+variable {F : Type*} [LogicalConnective F]
+
+/-- Axioms of seriality -/
+protected abbrev Ser : F := ∼∼⊤
+
+end Axioms
+
 open Kripke2
 open Formula.Kripke2
 
@@ -22,7 +31,7 @@ end Frame
 
 
 @[simp high, grind .]
-lemma valid_axiomD_of_isSerial [F.IsSerial] : F ⊧ ∼∼⊤ := by
+lemma valid_axiomSer_of_isSerial [F.IsSerial] : F ⊧ Axioms.Ser := by
   intro V x y Rxy h;
   contrapose! h;
   apply Satisfies.not_def_neg.mpr;
@@ -32,7 +41,7 @@ lemma valid_axiomD_of_isSerial [F.IsSerial] : F ⊧ ∼∼⊤ := by
   . assumption;
   . exact Satisfies.def_top
 
-lemma isSerial_of_valid_axiomD (h : F ⊧ ∼∼⊤) : F.IsSerial := by
+lemma isSerial_of_valid_axiomSer (h : F ⊧ Axioms.Ser) : F.IsSerial := by
   constructor;
   intro x;
   simpa [Satisfies] using @h (λ v a => True) F.root x F.rooted;
