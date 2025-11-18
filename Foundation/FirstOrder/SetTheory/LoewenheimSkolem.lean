@@ -1,5 +1,4 @@
 import Foundation.FirstOrder.SetTheory.Basic
-import Foundation.FirstOrder.SetTheory.StandardModel
 import Foundation.FirstOrder.Skolemization.Hull
 
 /-!
@@ -19,10 +18,6 @@ abbrev Collapse : Set V := Hull ∅
 variable {V}
 
 namespace Hull
-
-instance : SetStructure (Hull s) := ⟨fun y x ↦ x.val ∈ y.val⟩
-
-lemma mem_iff {x y : Hull s} : x ∈ y ↔ x.val ∈ y.val := by rfl
 
 @[simp] lemma mk_mem_mk_iff {x y : V} {hx hy} : (⟨x, hx⟩ : Hull s) ∈ (⟨y, hy⟩ : Hull s) ↔ x ∈ y := by rfl
 
