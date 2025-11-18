@@ -7,26 +7,23 @@ namespace Kripke2
 
 structure Frame where
   World : Type
-  [World_nonempty : Nonempty World]
   Rel : HRel World
-
+  root : World
+  rooted {w : World} : Rel root w
 
 namespace Frame
 
+variable {F : Frame}
+
 instance : CoeSort Frame (Type) := ⟨World⟩
 instance : CoeFun Frame (λ F => HRel F.World) := ⟨Frame.Rel⟩
-instance {F : Frame} : Nonempty F.World := F.World_nonempty
+instance : Nonempty F.World := ⟨F.root⟩
 
 abbrev Rel' {F : Frame} (x y : F.World) := F.Rel x y
 infix:45 " ≺ " => Rel'
 
 abbrev Rel_on (F : Frame) (x y : F.World) := F.Rel x y
 notation:45 x:max " ≺ " y:max " on " F:max => Rel_on F x y
-
-class Rooted (F : Frame) where
-  root : F.World
-  rooted {w : F.World} : root ≺ w
-export Rooted (root rooted)
 
 end Frame
 
@@ -268,14 +265,14 @@ lemma valid_conjunction_rule (h₁ : F ⊧ φ) (h₂ : F ⊧ ψ) : F ⊧ φ ⋏ 
   . apply h₂;
 
 @[grind ⇒]
-lemma valid_modusponens [F.Rooted] (h₁ : F ⊧ φ ➝ ψ) (h₂ : F ⊧ φ) : F ⊧ ψ := by
+lemma valid_modusponens (h₁ : F ⊧ φ ➝ ψ) (h₂ : F ⊧ φ) : F ⊧ ψ := by
   rintro V x;
   apply h₁;
   . apply F.rooted;
   . apply h₂;
 
 lemma invalid_implyS :
-  let F : Frame := ⟨Fin 3, (λ x y => x = 0 ∨ (x = 1 ∧ y = 2))⟩
+  let F : Frame := ⟨Fin 3, (λ x y => x = 0 ∨ (x = 1 ∧ y = 2)), 0, by omega⟩
   F ⊭ (atom 0) ➝ (atom 1) ➝ (atom 0) := by
   intro F;
   apply ValidOnFrame.iff_not_exists_valuation_world.mpr;
@@ -287,7 +284,7 @@ lemma invalid_implyS :
     grind;
 
 lemma invalid_axiomD :
-  let F : Frame := ⟨Fin 2, (· < ·)⟩
+  let F : Frame := ⟨Fin 2, (λ x y => x < y ∨ x = 0), 0, by simp⟩
   F ⊭ ∼∼⊤ := by
   intro F;
   apply ValidOnFrame.iff_not_exists_valuation_world.mpr;
@@ -297,7 +294,7 @@ lemma invalid_axiomD :
   grind;
 
 lemma invalid_axiomR :
-  let F : Frame := ⟨Fin 2, (· < ·)⟩
+  let F : Frame := ⟨Fin 2, (λ x y => x < y ∨ x = 0), 0, by simp⟩
   F ⊭ ((atom 0) ⋏ (atom 0 ➝ atom 1)) ➝ (atom 1) := by
   intro F;
   apply ValidOnFrame.iff_not_exists_valuation_world.mpr;
@@ -306,25 +303,25 @@ lemma invalid_axiomR :
   omega;
 
 lemma invalid_axiomT :
-  let F : Frame := ⟨Fin 3, (λ x y => x = 0 ∨ (x = 1 ∧ y = 2))⟩
+  let F : Frame := ⟨Fin 2, (λ x y => x < y ∨ x = 0), 0, by simp⟩
   F ⊭ (atom 0 ➝ atom 1) ➝ (atom 2 ➝ (atom 0 ➝ atom 1)) := by
   intro F;
   sorry;
 
 lemma invalid_axiomS :
-  let F : Frame := ⟨Fin 3, (λ x y => x = 0 ∨ (x = 1 ∧ y = 2))⟩
+  let F : Frame := ⟨Fin 3, (λ x y => x = 0 ∨ (x = 1 ∧ y = 2)), 0, by simp⟩
   F ⊭ atom 0 ➝ (atom 1 ⋎ ∼(atom 0 ➝ atom 1)) := by
   intro F;
   sorry;
 
 lemma invalid_axiomC :
-  let F : Frame := ⟨Fin 3, (λ x y => x = 0 ∨ (x = 1 ∧ y = 2))⟩
+  let F : Frame := ⟨Fin 2, (λ x y => x < y ∨ x = 0), 0, by simp⟩
   F ⊭ ((atom 2 ⋏ (atom 0 ➝ atom 1)) ➝ atom 3) ⋎ ((atom 0 ⋏ (atom 2 ➝ atom 3)) ➝ atom 1) := by
   intro F;
   sorry;
 
 lemma invalid_axiomZ :
-  let F : Frame := ⟨Fin 3, (λ x y => x = 0 ∨ (x = 1 ∧ y = 2))⟩
+  let F : Frame := ⟨Fin 2, (λ x y => x < y ∨ x = 0), 0, by simp⟩
   F ⊭ (atom 0 ➝ atom 1 ➝ atom 0) ➝ (atom 0 ⋎ ∼(atom 0)) := by
   intro F;
   sorry;
