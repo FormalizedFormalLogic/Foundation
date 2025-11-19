@@ -69,7 +69,11 @@ variable {M : Kripke2.Model} {x y : M.World} {a : ℕ} {φ ψ χ : Formula ℕ}
 @[simp high, grind .] protected lemma def_top : x ⊧ ⊤ := by simp [Satisfies];
 @[simp high, grind .] protected lemma def_bot : x ⊭ ⊥ := by simp [Semantics.NotModels, Satisfies];
 @[grind =] protected lemma def_and : x ⊧ φ ⋏ ψ ↔ x ⊧ φ ∧ x ⊧ ψ := by simp [Satisfies];
+
 @[grind =] protected lemma def_or  : x ⊧ φ ⋎ ψ ↔ x ⊧ φ ∨ x ⊧ ψ := by simp [Satisfies];
+@[grind =] protected lemma not_def_or : x ⊭ φ ⋎ ψ ↔ x ⊭ φ ∧ x ⊭ ψ := by
+  dsimp [Semantics.NotModels];
+  grind;
 
 @[grind =] protected lemma def_imp  : x ⊧ φ ➝ ψ ↔ ∀ {y : M.World}, (x ≺ y) → (y ⊧ φ → y ⊧ ψ) := by simp [Satisfies];
 @[grind =] protected lemma not_def_imp : x ⊭ φ ➝ ψ ↔ ∃ y : M.World, (x ≺ y) ∧ (y ⊧ φ) ∧ (y ⊭ ψ) := by
@@ -281,43 +285,6 @@ lemma invalid_implyS :
   . tauto;
   . use 2;
     grind;
-
-lemma invalid_axiomD :
-  let F : Frame := ⟨Fin 2, (λ x y => x < y ∨ x = 0), 0, by simp⟩
-  F ⊭ ∼∼⊤ := by
-  intro F;
-  apply ValidOnFrame.iff_not_exists_valuation_world.mpr;
-  use (λ x a => False), 0;
-  suffices ∃ x, 0 ≺ x on F ∧ ∀ y, ¬x ≺ y by simpa [Satisfies];
-  use 1;
-  grind;
-
-lemma invalid_axiomR :
-  let F : Frame := ⟨Fin 2, (λ x y => x < y ∨ x = 0), 0, by simp⟩
-  F ⊭ ((atom 0) ⋏ (atom 0 ➝ atom 1)) ➝ (atom 1) := by
-  intro F;
-  apply ValidOnFrame.iff_not_exists_valuation_world.mpr;
-  use (λ x a => x = 1 ∧ a = 0), 0;
-  suffices 0 ≺ 1 on F ∧ ¬(1 ≺ 1 on F) by simpa [Semantics.Models, Satisfies, Semantics.NotModels];
-  omega;
-
-lemma invalid_axiomT :
-  let F : Frame := ⟨Fin 2, (λ x y => x < y ∨ x = 0), 0, by simp⟩
-  F ⊭ (atom 0 ➝ atom 1) ➝ (atom 2 ➝ (atom 0 ➝ atom 1)) := by
-  intro F;
-  sorry;
-
-lemma invalid_axiomS :
-  let F : Frame := ⟨Fin 3, (λ x y => x = 0 ∨ (x = 1 ∧ y = 2)), 0, by simp⟩
-  F ⊭ atom 0 ➝ (atom 1 ⋎ ∼(atom 0 ➝ atom 1)) := by
-  intro F;
-  sorry;
-
-lemma invalid_axiomC :
-  let F : Frame := ⟨Fin 2, (λ x y => x < y ∨ x = 0), 0, by simp⟩
-  F ⊭ ((atom 2 ⋏ (atom 0 ➝ atom 1)) ➝ atom 3) ⋎ ((atom 0 ⋏ (atom 2 ➝ atom 3)) ➝ atom 1) := by
-  intro F;
-  sorry;
 
 lemma invalid_axiomZ :
   let F : Frame := ⟨Fin 2, (λ x y => x < y ∨ x = 0), 0, by simp⟩
