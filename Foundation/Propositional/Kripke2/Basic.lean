@@ -132,7 +132,6 @@ variable {M : Kripke2.Model} {φ ψ χ : Formula ℕ}
 instance : Semantics.Top (Kripke2.Model) := ⟨by grind⟩
 instance : Semantics.Bot (Kripke2.Model) := ⟨by grind⟩
 
-
 lemma iff_not_models_exists_world : (M ⊭ φ) ↔ (∃ x : M.World, ¬x ⊧ φ) := by grind;
 alias ⟨exists_world_of_not, not_of_exists_world⟩ := iff_not_models_exists_world
 
