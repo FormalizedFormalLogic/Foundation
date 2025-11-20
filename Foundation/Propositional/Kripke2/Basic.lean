@@ -27,6 +27,8 @@ notation:45 x:max " ≺ " y:max " on " F:max => Rel_on F x y
 
 end Frame
 
+abbrev FrameClass := Set Frame
+
 
 
 abbrev Valuation (F : Frame) := F.World → ℕ → Prop
@@ -41,6 +43,8 @@ instance : CoeSort (Model) (Type) := ⟨λ M => M.World⟩
 instance : CoeFun (Model) (λ M => M.World → ℕ → Prop) := ⟨fun m => m.Val⟩
 
 end Model
+
+abbrev ModelClass := Set Model
 
 end Kripke2
 

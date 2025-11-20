@@ -21,6 +21,8 @@ import Foundation.Propositional.Logic.Letterless_Int_Cl
 import Foundation.Propositional.Logic.PostComplete
 import Foundation.Propositional.Decidable
 
+import Foundation.Propositional.Kripke2.Logic.F
+
 -- FirstOrder
 
 import Foundation.FirstOrder.Basic
