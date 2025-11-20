@@ -9,10 +9,9 @@ open Kripke2
 
 namespace Kripke2
 
-protected class Frame.IsF_Sym (F : Kripke2.Frame) extends F.IsSymmetric where
-protected abbrev FrameClass.F_Sym : Kripke2.FrameClass := { F | F.IsF_Sym }
+protected abbrev FrameClass.F_Sym : Kripke2.FrameClass := { F | F.IsSymmetric }
 
-instance : trivialFrame.IsF_Sym where
+instance : trivialFrame.IsSymmetric where
   symm := by simp
 
 end Kripke2

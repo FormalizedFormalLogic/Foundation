@@ -211,4 +211,13 @@ protected abbrev F_Sym := Hilbert.Corsi F_Sym.axioms
 instance : Entailment.F Propositional.F_Sym where
 
 
+protected abbrev F_Rfl_Sym.axioms : Axiom ℕ := { Axioms.Rfl #0 #1, Axioms.Sym #0 #1 }
+namespace F_Rfl_Sym
+instance : F_Rfl_Sym.axioms.HasAxiomRfl where p := 0; q := 1
+instance : F_Rfl_Sym.axioms.HasAxiomSym where p := 0; q := 1
+end F_Rfl_Sym
+protected abbrev F_Rfl_Sym := Hilbert.Corsi F_Rfl_Sym.axioms
+instance : Entailment.F Propositional.F_Rfl_Sym where
+
+
 end LO.Propositional

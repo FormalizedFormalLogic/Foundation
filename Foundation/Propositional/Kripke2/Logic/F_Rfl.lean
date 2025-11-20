@@ -9,10 +9,9 @@ open Kripke2
 
 namespace Kripke2
 
-protected class Frame.IsF_Rfl (F : Kripke2.Frame) extends F.IsReflexive where
-protected abbrev FrameClass.F_Rfl : Kripke2.FrameClass := { F | F.IsF_Rfl }
+protected abbrev FrameClass.F_Rfl : Kripke2.FrameClass := { F | F.IsReflexive }
 
-instance : trivialFrame.IsF_Rfl where
+instance : trivialFrame.IsReflexive where
   refl := by simp
 
 end Kripke2
