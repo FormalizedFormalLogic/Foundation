@@ -1,8 +1,8 @@
 /-
   Corsi's `F` system by de Jongh and Shirmohammadzadeh Maleki
 -/
-import Foundation.Propositional.Entailment.Cl.Basic
 import Foundation.Propositional.Entailment.Int.DNE_of_LEM
+import Foundation.Propositional.Entailment.Corsi
 import Foundation.Propositional.Hilbert.Axiom
 import Foundation.Propositional.Formula
 import Foundation.Propositional.Logic.Basic
@@ -10,222 +10,126 @@ import Foundation.Logic.Disjunctive
 
 namespace LO.Propositional
 
-variable {α : Type*}
+open Entailment
 
+variable {α : Type*} {Ax Ax₁ Ax₂ : Axiom α} {φ ψ χ : Formula _}
 
-inductive Hilbert.Corsi (Ax : Axiom α) : Logic α
-| protected axm {φ} (s : Substitution _) : φ ∈ Ax → Hilbert.Corsi Ax (φ⟦s⟧)
-| protected andElim₁ φ ψ                 : Hilbert.Corsi Ax $ φ ⋏ ψ ➝ φ
-| protected andElim₂ φ ψ                 : Hilbert.Corsi Ax $ φ ⋏ ψ ➝ ψ
-| protected orIntro₁ φ ψ                 : Hilbert.Corsi Ax $ φ ➝ φ ⋎ ψ
-| protected orIntro₂ φ ψ                 : Hilbert.Corsi Ax $ ψ ➝ φ ⋎ ψ
-| protected distributeAndOr φ ψ χ        : Hilbert.Corsi Ax $ φ ⋏ (ψ ⋎ χ) ➝ (φ ⋏ ψ) ⋎ (φ ⋏ χ)
-| protected axiomC φ ψ χ                 : Hilbert.Corsi Ax $ (φ ➝ ψ) ⋏ (ψ ➝ χ) ➝ (φ ➝ (ψ ⋏ χ))
-| protected axiomD φ ψ χ                 : Hilbert.Corsi Ax $ (φ ➝ χ) ⋏ (ψ ➝ χ) ➝ (φ ⋎ ψ ➝ χ)
-| protected axiomI φ ψ χ                 : Hilbert.Corsi Ax $ (φ ➝ ψ) ⋏ (ψ ➝ χ) ➝ (φ ➝ χ)
-| protected impId φ                      : Hilbert.Corsi Ax $ φ ➝ φ
-| protected mdp {φ ψ}                    : Hilbert.Corsi Ax (φ ➝ ψ) → Hilbert.Corsi Ax φ → Hilbert.Corsi Ax ψ
-| protected af {φ ψ}                     : Hilbert.Corsi Ax φ → Hilbert.Corsi Ax (ψ ➝ φ)
-| protected conj {φ ψ}                   : Hilbert.Corsi Ax φ → Hilbert.Corsi Ax ψ → Hilbert.Corsi Ax (φ ⋏ ψ)
+protected inductive Hilbert.Corsi (Ax : Axiom α) : Logic α
+| protected axm {φ} (s)             : φ ∈ Ax → Hilbert.Corsi Ax (φ⟦s⟧)
+| protected andElimL {φ ψ}          : Hilbert.Corsi Ax $ Axioms.AndElim₁ φ ψ
+| protected andElimR {φ ψ}          : Hilbert.Corsi Ax $ Axioms.AndElim₂ φ ψ
+| protected orIntroL {φ ψ}          : Hilbert.Corsi Ax $ Axioms.OrInst₁ φ ψ
+| protected orIntroR {φ ψ}          : Hilbert.Corsi Ax $ Axioms.OrInst₂ φ ψ
+| protected distributeAndOr {φ ψ χ} : Hilbert.Corsi Ax $ Axioms.DistributeAndOr φ ψ χ
+| protected axiomC {φ ψ χ}          : Hilbert.Corsi Ax $ Axioms.C φ ψ χ
+| protected axiomD {φ ψ χ}          : Hilbert.Corsi Ax $ Axioms.D φ ψ χ
+| protected axiomI {φ ψ χ}          : Hilbert.Corsi Ax $ Axioms.I φ ψ χ
+| protected impId {φ}               : Hilbert.Corsi Ax $ Axioms.ImpId φ
+| protected mdp {φ ψ}               : Hilbert.Corsi Ax (φ ➝ ψ) → Hilbert.Corsi Ax φ → Hilbert.Corsi Ax ψ
+| protected af {φ ψ}                : Hilbert.Corsi Ax φ → Hilbert.Corsi Ax (ψ ➝ φ)
+| protected andIR {φ ψ}             : Hilbert.Corsi Ax φ → Hilbert.Corsi Ax ψ → Hilbert.Corsi Ax (φ ⋏ ψ)
 
-namespace Hilbert
+namespace Hilbert.Corsi
 
-variable {Ax Ax₁ Ax₂ : Axiom α}
-
-@[grind] lemma axm' (h : φ ∈ Ax) : φ ∈ Hilbert Ax := by
+@[grind ⇒]
+protected lemma axm' (h : φ ∈ Ax) : φ ∈ Hilbert.Corsi Ax := by
   rw [(show φ = φ⟦.id⟧ by simp)]
-  apply axm _ h;
+  apply Corsi.axm _ h;
 
-@[grind] lemma axm! (s : Substitution α) (h : φ ∈ Ax) : Hilbert Ax ⊢ (φ⟦s⟧)  := by
+@[grind ⇒]
+protected lemma axm! (s : Substitution α) (h : φ ∈ Ax) : Hilbert.Corsi Ax ⊢ φ⟦s⟧ := by
   apply Logic.iff_provable.mpr;
-  apply axm s h;
+  apply Corsi.axm s h;
 
-@[grind] lemma axm'! (h : φ ∈ Ax) : Hilbert Ax ⊢ φ := by
+@[grind ⇒]
+protected lemma axm'! (h : φ ∈ Ax) : Hilbert.Corsi Ax ⊢ φ := by
   rw [(show φ = φ⟦.id⟧ by simp)]
-  apply axm! _ h;
+  apply Corsi.axm! _ h;
 
-@[grind]
-lemma axm_instances! (h : φ ∈ Ax.instances) : Hilbert Ax ⊢ φ := by
+@[grind ⇒]
+protected lemma axm_instances! (h : φ ∈ Ax.instances) : Hilbert.Corsi Ax ⊢ φ := by
   rcases h with ⟨ψ, _, s, rfl⟩;
   grind;
 
-instance : Entailment.ModusPonens (Hilbert Ax) where
-  mdp h₁ h₂ := by
-    constructor;
-    apply Hilbert.mdp;
-    . exact h₁.1;
-    . exact h₂.1;
-
-instance : Entailment.HasAxiomImplyK (Hilbert Ax) := ⟨λ {_ _} => by constructor; apply Hilbert.implyS⟩
-instance : Entailment.HasAxiomImplyS (Hilbert Ax) := ⟨λ {_ _ _} => by constructor; apply Hilbert.implyK⟩
-instance : Entailment.HasAxiomAndInst (Hilbert Ax) := ⟨λ {_ _} => by constructor; apply Hilbert.andIntro⟩
-instance : Entailment.Minimal (Hilbert Ax) where
-  verum := by constructor; apply Hilbert.verum;
-  and₁ {_ _} := by constructor; apply Hilbert.andElimL;
-  and₂ {_ _} := by constructor; apply Hilbert.andElimR;
-  or₁  {_ _} := by constructor; apply Hilbert.orIntroL;
-  or₂  {_ _} := by constructor; apply Hilbert.orIntroR;
-  or₃  {_ _ _} := by constructor; apply Hilbert.orElim;
+instance : Entailment.F (Hilbert.Corsi Ax) where
+  and₁ := ⟨Corsi.andElimL⟩
+  and₂ := ⟨Corsi.andElimR⟩
+  or₁  := ⟨Corsi.orIntroL⟩
+  or₂  := ⟨Corsi.orIntroR⟩
+  distributeAndOr! := ⟨Corsi.distributeAndOr⟩
+  axiomC! := ⟨Corsi.axiomC⟩
+  axiomD! := ⟨Corsi.axiomD⟩
+  axiomI! := ⟨Corsi.axiomI⟩
+  impId! := ⟨Corsi.impId⟩
+  mdp hφψ hφ := ⟨Corsi.mdp hφψ.1 hφ.1⟩
+  af! hφ := ⟨Corsi.af hφ.1⟩
+  andIR! h₁ h₂ := ⟨Corsi.andIR h₁.1 h₂.1⟩
 
 @[induction_eliminator]
 protected lemma rec!
-  {motive   : (φ : Formula α) → (Hilbert Ax ⊢ φ) → Sort}
-  (axm      : ∀ {φ : Formula α} (s), (h : φ ∈ Ax) → motive (φ⟦s⟧) (by grind))
-  (mdp      : ∀ {φ ψ : Formula α}, {hpq : (Hilbert Ax) ⊢ φ ➝ ψ} → {hp : (Hilbert Ax) ⊢ φ} → (motive (φ ➝ ψ) hpq) → (motive φ hp) → (motive ψ (hpq ⨀ hp)))
-  (verum    : motive ⊤ $ by simp)
-  (implyS   : ∀ {φ ψ},   motive (Axioms.ImplyK φ ψ) $ by simp)
-  (implyK   : ∀ {φ ψ χ}, motive (Axioms.ImplyS φ ψ χ) $ by simp)
-  (andElimL : ∀ {φ ψ},   motive (φ ⋏ ψ ➝ φ) $ by simp)
-  (andElimR : ∀ {φ ψ},   motive (φ ⋏ ψ ➝ ψ) $ by simp)
-  (andIntro : ∀ {φ ψ},   motive (φ ➝ ψ ➝ φ ⋏ ψ) $ by simp)
-  (orIntroL : ∀ {φ ψ},   motive (φ ➝ φ ⋎ ψ) $ by simp)
-  (orIntroR : ∀ {φ ψ},   motive (ψ ➝ φ ⋎ ψ) $ by simp)
-  (orElim   : ∀ {φ ψ χ}, motive ((φ ➝ χ) ➝ (ψ ➝ χ) ➝ φ ⋎ ψ ➝ χ) $ by simp)
-  : ∀ {φ}, (d : Hilbert Ax ⊢ φ) → motive φ d := by
+  {motive   : (φ : Formula α) → (Hilbert.Corsi Ax ⊢ φ) → Sort}
+  (axm      : ∀ {φ : Formula α} (s), (h : φ ∈ Ax) → motive (φ⟦s⟧) (Corsi.axm! _ h))
+  (mdp      : ∀ {φ ψ : Formula α}, {hφψ : (Hilbert.Corsi Ax) ⊢ φ ➝ ψ} → {hφ : (Hilbert.Corsi Ax) ⊢ φ} → (motive (φ ➝ ψ) hφψ) → (motive φ hφ) → (motive ψ (hφψ ⨀ hφ)))
+  (af       : ∀ {φ ψ : Formula α}, {hφ : (Hilbert.Corsi Ax) ⊢ φ} → (motive φ hφ) → (motive (ψ ➝ φ) (af hφ)))
+  (andIR    : ∀ {φ ψ : Formula α}, {hφ : (Hilbert.Corsi Ax) ⊢ φ} → {hψ : (Hilbert.Corsi Ax) ⊢ ψ} → (motive φ hφ) → (motive ψ hψ) → (motive (φ ⋏ ψ) (andIR hφ hψ)))
+  (impId    : ∀ {φ : Formula α}, (motive (Axioms.ImpId φ) (by simp)))
+  (andElimL : ∀ {φ ψ : Formula α}, (motive (Axioms.AndElim₁ φ ψ) (by simp)))
+  (andElimR : ∀ {φ ψ : Formula α}, (motive (Axioms.AndElim₂ φ ψ) (by simp)))
+  (orIntroL  : ∀ {φ ψ : Formula α}, (motive (Axioms.OrInst₁ φ ψ) (by simp)))
+  (orIntroR  : ∀ {φ ψ : Formula α}, (motive (Axioms.OrInst₂ φ ψ) (by simp)))
+  (distributeAndOr : ∀ {φ ψ χ : Formula α}, (motive (Axioms.DistributeAndOr φ ψ χ) (by simp)))
+  (axiomC   : ∀ {φ ψ χ : Formula α}, (motive (Axioms.C φ ψ χ) (by simp)))
+  (axiomD   : ∀ {φ ψ χ : Formula α}, (motive (Axioms.D φ ψ χ) (by simp)))
+  (axiomI   : ∀ {φ ψ χ : Formula α}, (motive (Axioms.I φ ψ χ) (by simp)))
+  : ∀ {φ}, (d : Hilbert.Corsi Ax ⊢ φ) → motive φ d := by
   rintro φ d;
   replace d := Logic.iff_provable.mp d;
   induction d with
   | axm s h => apply axm s h;
-  | mdp hφψ hφ ihφψ ihφ =>
-    apply mdp;
-    . exact ihφψ (Logic.iff_provable.mpr hφψ);
-    . exact ihφ (Logic.iff_provable.mpr hφ);
+  | mdp hφψ hφ ihφψ ihφ => apply mdp (ihφψ (Logic.iff_provable.mpr hφψ)) (ihφ (Logic.iff_provable.mpr hφ));
+  | af hφ ihφ => apply af $ ihφ (Logic.iff_provable.mpr hφ);
+  | andIR hφ hψ ihφ ihψ => apply andIR (ihφ (Logic.iff_provable.mpr hφ)) (ihψ (Logic.iff_provable.mpr hψ));
   | _ => grind;
 
-instance : Logic.Substitution (Hilbert Ax) where
+instance : Logic.Substitution (Hilbert.Corsi Ax) where
   subst s h := by
-    induction h using Hilbert.rec! with
-    | axm s' h => simpa [Formula.subst_comp] using axm! (s' ∘ s) h;
+    induction h using Hilbert.Corsi.rec! with
+    | axm s' h => simpa [Formula.subst_comp] using Corsi.axm! (s' ∘ s) h;
     | mdp ih₁ ih₂ => exact ih₁ ⨀ ih₂;
+    | af ih => exact af ih;
+    | andIR ih₁ ih₂ => exact andIR ih₁ ih₂;
     | _ => simp;
 
-lemma weakerThan_of_provable_axioms (hs : Hilbert Ax₂ ⊢* Ax₁) : (Hilbert Ax₁) ⪯ (Hilbert Ax₂) := by
+lemma weakerThan_of_provable_axioms (hs : (Hilbert.Corsi Ax₂) ⊢* Ax₁) : (Hilbert.Corsi Ax₁) ⪯ (Hilbert.Corsi Ax₂) := by
   apply Entailment.weakerThan_iff.mpr;
   intro φ h;
-  induction h using Hilbert.rec! with
+  induction h using Hilbert.Corsi.rec! with
   | axm h => apply Logic.subst; apply hs; assumption;
   | mdp ih₁ ih₂ => exact ih₁ ⨀ ih₂;
+  | af ih => exact af ih;
+  | andIR ih₁ ih₂ => exact andIR ih₁ ih₂;
   | _ => simp;
 
-lemma weakerThan_of_subset_axioms (h : Ax₁ ⊆ Ax₂) : (Hilbert Ax₁) ⪯ (Hilbert Ax₂) := by
+lemma weakerThan_of_subset_axioms (h : Ax₁ ⊆ Ax₂) : (Hilbert.Corsi Ax₁) ⪯ (Hilbert.Corsi Ax₂) := by
   apply weakerThan_of_provable_axioms;
   intro φ hφ;
-  apply Hilbert.axm'!;
-  apply h;
-  assumption;
-
+  apply Hilbert.Corsi.axm'!;
+  grind;
 
 section
 
 variable [DecidableEq α]
 open Axiom
 
-instance [Ax.HasEFQ] : Entailment.HasAxiomEFQ (Hilbert Ax) where
-  efq {φ} := by
-    constructor;
-    simpa using Hilbert.axm
-      (s := λ b => if (HasEFQ.p Ax) = b then φ else (.atom b))
-      (φ := Axioms.EFQ (.atom (HasEFQ.p Ax)))
-      $ HasEFQ.mem_efq;
-instance  [Ax.HasEFQ] : Entailment.Int (Hilbert Ax) where
-
-instance [Ax.HasLEM] : Entailment.HasAxiomLEM (Hilbert Ax) where
-  lem {φ} := by
-    constructor;
-    simpa using Hilbert.axm
-      (s := λ b => if (HasLEM.p Ax) = b then φ else (.atom b))
-      (φ := Axioms.LEM (.atom (HasLEM.p Ax)))
-      $ HasLEM.mem_lem;
-
-instance [Ax.HasWLEM] : Entailment.HasAxiomWLEM (Hilbert Ax) where
-  wlem {φ} := by
-    constructor;
-    simpa using Hilbert.axm
-      (s := λ b => if (HasWLEM.p Ax) = b then φ else (.atom b))
-      (φ := Axioms.WLEM (.atom (HasWLEM.p Ax)))
-      $ HasWLEM.mem_lem;
-
-instance [Ax.HasDummett] : Entailment.HasAxiomDummett (Hilbert Ax) where
-  dummett {φ ψ} := by
-    constructor;
-    simpa [HasDummett.ne_pq] using Hilbert.axm
-      (φ := Axioms.Dummett (.atom (HasDummett.p Ax)) (.atom (HasDummett.q Ax)))
-      (s := λ b =>
-        if (HasDummett.p Ax) = b then φ
-        else if (HasDummett.q Ax) = b then ψ
-        else (.atom b))
-      $ (HasDummett.mem_m);
-
-instance [Ax.HasPeirce] : Entailment.HasAxiomPeirce (Hilbert Ax) where
-  peirce {φ ψ} := by
-    constructor;
-    simpa [HasPeirce.ne_pq] using Hilbert.axm
-      (φ := Axioms.Peirce (.atom (HasPeirce.p Ax)) (.atom (HasPeirce.q Ax)))
-      (s := λ b =>
-        if (HasPeirce.p Ax) = b then φ
-        else if (HasPeirce.q Ax) = b then ψ
-        else (.atom b))
-      $ (HasPeirce.mem_peirce);
-
-instance [Ax.HasKrieselPutnam] : Entailment.HasAxiomKrieselPutnam (Hilbert Ax) where
-  krieselputnam {φ ψ χ} := by
-    constructor;
-    simpa [HasKrieselPutnam.ne_pq, HasKrieselPutnam.ne_qr, HasKrieselPutnam.ne_rp.symm] using Hilbert.axm
-      (φ := Axioms.KrieselPutnam (.atom (HasKrieselPutnam.p Ax)) (.atom (HasKrieselPutnam.q Ax)) (.atom (HasKrieselPutnam.r Ax)))
-      (s := λ b =>
-        if (HasKrieselPutnam.p Ax) = b then φ
-        else if (HasKrieselPutnam.q Ax) = b then ψ
-        else if (HasKrieselPutnam.r Ax) = b then χ
-        else (.atom b))
-      $ (HasKrieselPutnam.mem_kriesel_putnam);
-
 end
 
-end Hilbert
+end Hilbert.Corsi
 
 
-protected abbrev Int.axioms : Axiom ℕ := {Axioms.EFQ (.atom 0)}
-namespace Int.axioms
-instance : Int.axioms.HasEFQ where p := 0;
-end Int.axioms
-protected abbrev Int := Hilbert Int.axioms
-instance : Entailment.Int Propositional.Int where
 
-
-protected abbrev Cl.axioms : Axiom ℕ := {Axioms.EFQ (.atom 0), Axioms.LEM (.atom 0)}
-namespace Cl.axioms
-instance : Cl.axioms.HasEFQ where p := 0;
-instance : Cl.axioms.HasLEM where p := 0;
-end Cl.axioms
-protected abbrev Cl := Hilbert Cl.axioms
-instance : Entailment.Cl Propositional.Cl where
-
-
-protected abbrev KC.axioms : Axiom ℕ := {Axioms.EFQ (.atom 0), Axioms.WLEM (.atom 0)}
-namespace KC.axioms
-instance : KC.axioms.HasEFQ where p := 0;
-instance : KC.axioms.HasWLEM where p := 0;
-end KC.axioms
-protected abbrev KC := Hilbert KC.axioms
-instance : Entailment.KC Propositional.KC where
-
-
-protected abbrev LC.axioms : Axiom ℕ := {Axioms.EFQ (.atom 0), Axioms.Dummett (.atom 0) (.atom 1)}
-namespace LC.axioms
-instance : LC.axioms.HasEFQ where p := 0;
-instance : LC.axioms.HasDummett where p := 0; q := 1;
-end LC.axioms
-protected abbrev LC := Hilbert LC.axioms
-instance : Entailment.LC Propositional.LC where
-
-
-protected abbrev KrieselPutnam.axioms : Axiom ℕ := {Axioms.EFQ (.atom 0), Axioms.KrieselPutnam (.atom 0) (.atom 1) (.atom 2)}
-namespace KrieselPutnam.axioms
-instance : KrieselPutnam.axioms.HasEFQ where p := 0;
-instance : KrieselPutnam.axioms.HasKrieselPutnam where p := 0; q := 1; r := 2;
-end KrieselPutnam.axioms
-protected abbrev KrieselPutnam := Hilbert KrieselPutnam.axioms
-instance : Entailment.KrieselPutnam Propositional.KrieselPutnam where
+protected abbrev F.axioms : Axiom ℕ := ∅
+protected abbrev F := Hilbert.Corsi F.axioms
+instance : Entailment.F Propositional.F where
 
 
 end LO.Propositional

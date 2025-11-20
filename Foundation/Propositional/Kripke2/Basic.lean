@@ -286,12 +286,6 @@ lemma invalid_implyS :
   . use 2;
     grind;
 
-lemma invalid_axiomZ :
-  let F : Frame := ⟨Fin 2, (λ x y => x < y ∨ x = 0), 0, by simp⟩
-  F ⊭ (atom 0 ➝ atom 1 ➝ atom 0) ➝ (atom 0 ⋎ ∼(atom 0)) := by
-  intro F;
-  sorry;
-
 end
 
 end Kripke2
