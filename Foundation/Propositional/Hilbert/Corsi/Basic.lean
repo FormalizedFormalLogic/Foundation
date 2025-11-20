@@ -152,6 +152,9 @@ instance [Ax.HasAxiomRfl] : Entailment.HasAxiomRfl (Hilbert.Corsi Ax) where
       $ (HasAxiomRfl.mem_rfl);
   ⟩
 
+instance [Ax.HasAxiomSer] : Entailment.HasAxiomSer (Hilbert.Corsi Ax) where
+  axiomSer! := ⟨by simpa using Hilbert.Corsi.axm' $ HasAxiomSer.mem_ser⟩
+
 instance [Ax.HasAxiomSym] : Entailment.HasAxiomSym (Hilbert.Corsi Ax) where
   axiomSym! {φ ψ} := ⟨by
     simpa using Hilbert.Corsi.axm

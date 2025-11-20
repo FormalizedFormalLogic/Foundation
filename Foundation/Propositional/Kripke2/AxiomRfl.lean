@@ -1,7 +1,5 @@
 import Foundation.Propositional.Kripke2.Basic
-import Foundation.Vorspiel.HRel.Convergent
-import Foundation.Vorspiel.HRel.Euclidean
-import Foundation.Vorspiel.HRel.Coreflexive
+import Foundation.Propositional.Kripke2.AxiomSer
 
 namespace LO.Propositional
 
@@ -18,6 +16,8 @@ namespace Frame
 
 protected abbrev IsReflexive (F : Kripke2.Frame) := _root_.IsRefl _ F.Rel
 @[simp, grind .] lemma refl [F.IsReflexive] : ∀ x : F, x ≺ x := IsRefl.refl
+
+instance [F.IsReflexive] : F.IsSerial := inferInstance
 
 end Frame
 
