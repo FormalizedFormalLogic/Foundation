@@ -38,12 +38,14 @@
     ),
     labels: (
       "LO.Propositional.Cl": $Logic("Cl")$,
+      "LO.Propositional.F_Rfl": $LogicF(Axiom("Rfl"))$,
+      "LO.Propositional.F_Ser": $LogicF(Axiom("Ser"))$,
+      "LO.Propositional.F_Sym": $LogicF(Axiom("Sym"))$,
+      "LO.Propositional.F": $LogicF$,
       "LO.Propositional.Int": $Logic("Int")$,
       "LO.Propositional.KC": $Logic("KC")$,
       "LO.Propositional.KrieselPutnam": $Logic("KP")$,
       "LO.Propositional.LC": $Logic("LC")$,
-      "LO.Propositional.F": $LogicF$,
-      "LO.Propositional.F_Rfl": $LogicF(Axiom("Rfl"))$,
     ),
     width: 640pt,
   )

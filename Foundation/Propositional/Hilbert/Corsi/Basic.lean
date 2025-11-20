@@ -152,6 +152,29 @@ instance [Ax.HasAxiomRfl] : Entailment.HasAxiomRfl (Hilbert.Corsi Ax) where
       $ (HasAxiomRfl.mem_rfl);
   ⟩
 
+instance [Ax.HasAxiomSym] : Entailment.HasAxiomSym (Hilbert.Corsi Ax) where
+  axiomSym! {φ ψ} := ⟨by
+    simpa using Hilbert.Corsi.axm
+      (φ := Axioms.Sym (.atom (HasAxiomSym.p Ax)) (.atom (HasAxiomSym.q Ax)))
+      (s := λ b =>
+        if (HasAxiomSym.p Ax) = b then φ
+        else if (HasAxiomSym.q Ax) = b then ψ
+        else (.atom b))
+      $ (HasAxiomSym.mem_sym);
+  ⟩
+
+instance [Ax.HasAxiomTra1] : Entailment.HasAxiomTra1 (Hilbert.Corsi Ax) where
+  axiomTra1! {φ ψ χ} := ⟨by
+    simpa using Hilbert.Corsi.axm
+      (φ := Axioms.Tra1 (#(HasAxiomTra1.p Ax)) (#(HasAxiomTra1.q Ax)) (#(HasAxiomTra1.r Ax)))
+      (s := λ b =>
+        if (HasAxiomTra1.p Ax) = b then φ
+        else if (HasAxiomTra1.q Ax) = b then ψ
+        else if (HasAxiomTra1.r Ax) = b then χ
+        else (.atom b)
+      )
+      $ (HasAxiomTra1.mem_tra1);
+  ⟩
 
 end
 
@@ -164,12 +187,28 @@ protected abbrev F := Hilbert.Corsi F.axioms
 instance : Entailment.F Propositional.F where
 
 
+protected abbrev F_Ser.axioms : Axiom ℕ := { Axioms.Ser }
+namespace F_Ser
+instance : F_Ser.axioms.HasAxiomSer where
+end F_Ser
+protected abbrev F_Ser := Hilbert.Corsi F_Ser.axioms
+instance : Entailment.F Propositional.F_Ser where
+
+
 protected abbrev F_Rfl.axioms : Axiom ℕ := { Axioms.Rfl #0 #1 }
 namespace F_Rfl
 instance : F_Rfl.axioms.HasAxiomRfl where p := 0; q := 1
 end F_Rfl
 protected abbrev F_Rfl := Hilbert.Corsi F_Rfl.axioms
 instance : Entailment.F Propositional.F_Rfl where
+
+
+protected abbrev F_Sym.axioms : Axiom ℕ := { Axioms.Sym #0 #1 }
+namespace F_Sym
+instance : F_Sym.axioms.HasAxiomSym where p := 0; q := 1
+end F_Sym
+protected abbrev F_Sym := Hilbert.Corsi F_Sym.axioms
+instance : Entailment.F Propositional.F_Sym where
 
 
 end LO.Propositional
