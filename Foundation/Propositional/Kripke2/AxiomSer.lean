@@ -5,15 +5,6 @@ import Foundation.Vorspiel.HRel.Coreflexive
 
 namespace LO.Propositional
 
-namespace Axioms
-
-variable {F : Type*} [LogicalConnective F]
-
-/-- Axioms of seriality -/
-protected abbrev Ser : F := ∼∼⊤
-
-end Axioms
-
 open Kripke2
 open Formula.Kripke2
 

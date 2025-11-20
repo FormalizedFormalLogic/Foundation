@@ -4,6 +4,7 @@ import Foundation.Propositional.ConsistentTableau
 
 namespace LO.Propositional
 
+open LO.Entailment
 open Semantics
 open ClassicalSemantics
 open Formula.ClassicalSemantics

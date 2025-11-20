@@ -72,15 +72,15 @@ protected lemma rec!
   (mdp      : ∀ {φ ψ : Formula α}, {hφψ : (Hilbert.Corsi Ax) ⊢ φ ➝ ψ} → {hφ : (Hilbert.Corsi Ax) ⊢ φ} → (motive (φ ➝ ψ) hφψ) → (motive φ hφ) → (motive ψ (hφψ ⨀ hφ)))
   (af       : ∀ {φ ψ : Formula α}, {hφ : (Hilbert.Corsi Ax) ⊢ φ} → (motive φ hφ) → (motive (ψ ➝ φ) (af hφ)))
   (andIR    : ∀ {φ ψ : Formula α}, {hφ : (Hilbert.Corsi Ax) ⊢ φ} → {hψ : (Hilbert.Corsi Ax) ⊢ ψ} → (motive φ hφ) → (motive ψ hψ) → (motive (φ ⋏ ψ) (andIR hφ hψ)))
-  (impId    : ∀ {φ : Formula α}, (motive (Axioms.ImpId φ) (by simp)))
-  (andElimL : ∀ {φ ψ : Formula α}, (motive (Axioms.AndElim₁ φ ψ) (by simp)))
-  (andElimR : ∀ {φ ψ : Formula α}, (motive (Axioms.AndElim₂ φ ψ) (by simp)))
-  (orIntroL  : ∀ {φ ψ : Formula α}, (motive (Axioms.OrInst₁ φ ψ) (by simp)))
-  (orIntroR  : ∀ {φ ψ : Formula α}, (motive (Axioms.OrInst₂ φ ψ) (by simp)))
-  (distributeAndOr : ∀ {φ ψ χ : Formula α}, (motive (Axioms.DistributeAndOr φ ψ χ) (by simp)))
-  (axiomC   : ∀ {φ ψ χ : Formula α}, (motive (Axioms.C φ ψ χ) (by simp)))
-  (axiomD   : ∀ {φ ψ χ : Formula α}, (motive (Axioms.D φ ψ χ) (by simp)))
-  (axiomI   : ∀ {φ ψ χ : Formula α}, (motive (Axioms.I φ ψ χ) (by simp)))
+  (impId    : ∀ {φ : Formula α}, (motive (Axioms.ImpId φ) impId))
+  (andElimL : ∀ {φ ψ : Formula α}, (motive (Axioms.AndElim₁ φ ψ) Entailment.and₁!))
+  (andElimR : ∀ {φ ψ : Formula α}, (motive (Axioms.AndElim₂ φ ψ) Entailment.and₂!))
+  (orIntroL  : ∀ {φ ψ : Formula α}, (motive (Axioms.OrInst₁ φ ψ) Entailment.or₁!))
+  (orIntroR  : ∀ {φ ψ : Formula α}, (motive (Axioms.OrInst₂ φ ψ) Entailment.or₂!))
+  (distributeAndOr : ∀ {φ ψ χ : Formula α}, (motive (Axioms.DistributeAndOr φ ψ χ) distributeAndOr))
+  (axiomC   : ∀ {φ ψ χ : Formula α}, (motive (Axioms.C φ ψ χ) axiomC))
+  (axiomD   : ∀ {φ ψ χ : Formula α}, (motive (Axioms.D φ ψ χ) axiomD))
+  (axiomI   : ∀ {φ ψ χ : Formula α}, (motive (Axioms.I φ ψ χ) axiomI))
   : ∀ {φ}, (d : Hilbert.Corsi Ax ⊢ φ) → motive φ d := by
   rintro φ d;
   replace d := Logic.iff_provable.mp d;
@@ -98,7 +98,17 @@ instance : Logic.Substitution (Hilbert.Corsi Ax) where
     | mdp ih₁ ih₂ => exact ih₁ ⨀ ih₂;
     | af ih => exact af ih;
     | andIR ih₁ ih₂ => exact andIR ih₁ ih₂;
-    | _ => simp;
+    | _ =>
+      first
+      | apply impId;
+      | apply Entailment.and₁!;
+      | apply Entailment.and₂!;
+      | apply Entailment.or₁!;
+      | apply Entailment.or₂!;
+      | apply distributeAndOr;
+      | apply axiomC;
+      | apply axiomD;
+      | apply axiomI;
 
 lemma weakerThan_of_provable_axioms (hs : (Hilbert.Corsi Ax₂) ⊢* Ax₁) : (Hilbert.Corsi Ax₁) ⪯ (Hilbert.Corsi Ax₂) := by
   apply Entailment.weakerThan_iff.mpr;
@@ -108,7 +118,17 @@ lemma weakerThan_of_provable_axioms (hs : (Hilbert.Corsi Ax₂) ⊢* Ax₁) : (H
   | mdp ih₁ ih₂ => exact ih₁ ⨀ ih₂;
   | af ih => exact af ih;
   | andIR ih₁ ih₂ => exact andIR ih₁ ih₂;
-  | _ => simp;
+  | _ =>
+      first
+      | apply impId;
+      | apply Entailment.and₁!;
+      | apply Entailment.and₂!;
+      | apply Entailment.or₁!;
+      | apply Entailment.or₂!;
+      | apply distributeAndOr;
+      | apply axiomC;
+      | apply axiomD;
+      | apply axiomI;
 
 lemma weakerThan_of_subset_axioms (h : Ax₁ ⊆ Ax₂) : (Hilbert.Corsi Ax₁) ⪯ (Hilbert.Corsi Ax₂) := by
   apply weakerThan_of_provable_axioms;
@@ -121,6 +141,18 @@ section
 variable [DecidableEq α]
 open Axiom
 
+instance [Ax.HasAxiomRfl] : Entailment.HasAxiomRfl (Hilbert.Corsi Ax) where
+  axiomRfl! {φ ψ} := ⟨by
+    simpa using Hilbert.Corsi.axm
+      (φ := Axioms.Rfl (.atom (HasAxiomRfl.p Ax)) (.atom (HasAxiomRfl.q Ax)))
+      (s := λ b =>
+        if (HasAxiomRfl.p Ax) = b then φ
+        else if (HasAxiomRfl.q Ax) = b then ψ
+        else (.atom b))
+      $ (HasAxiomRfl.mem_rfl);
+  ⟩
+
+
 end
 
 end Hilbert.Corsi
@@ -130,6 +162,14 @@ end Hilbert.Corsi
 protected abbrev F.axioms : Axiom ℕ := ∅
 protected abbrev F := Hilbert.Corsi F.axioms
 instance : Entailment.F Propositional.F where
+
+
+protected abbrev F_Rfl.axioms : Axiom ℕ := { Axioms.Rfl #0 #1 }
+namespace F_Rfl
+instance : F_Rfl.axioms.HasAxiomRfl where p := 0; q := 1
+end F_Rfl
+protected abbrev F_Rfl := Hilbert.Corsi F_Rfl.axioms
+instance : Entailment.F Propositional.F_Rfl where
 
 
 end LO.Propositional

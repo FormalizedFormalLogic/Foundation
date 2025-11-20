@@ -3,6 +3,7 @@ import Foundation.Propositional.Formula
 import Foundation.Propositional.Entailment.Cl.Basic
 import Foundation.Propositional.Entailment.KrieselPutnam
 import Foundation.Propositional.Entailment.Scott
+import Foundation.Propositional.Entailment.Corsi
 
 namespace LO.Propositional
 
@@ -50,6 +51,37 @@ class HasKrieselPutnam (Ax : Axiom α) where
 class HasScott (Ax : Axiom α) where
   p : α
   mem_scott : Axioms.Scott (.atom p) ∈ Ax := by tauto;
+
+
+class HasAxiomRfl (Ax : Axiom α) where
+  p : α
+  q : α
+  ne_pq : p ≠ q := by trivial;
+  mem_rfl : Axioms.Rfl #p #q ∈ Ax := by tauto;
+attribute [simp] HasAxiomRfl.ne_pq
+
+
+class HasAxiomTra1 (Ax : Axiom α) where
+  p : α
+  q : α
+  r : α
+  ne_pq : p ≠ q := by trivial;
+  ne_qr : q ≠ r := by trivial;
+  ne_rp : r ≠ p := by trivial;
+  mem_tra1 : Axioms.Tra1 #p #q #r ∈ Ax := by grind;
+attribute [simp] HasAxiomTra1.ne_pq HasAxiomTra1.ne_qr HasAxiomTra1.ne_rp
+
+
+class HasAxiomTra2 (Ax : Axiom α) where
+  p : α
+  q : α
+  r : α
+  ne_pq : p ≠ q := by trivial;
+  ne_qr : q ≠ r := by trivial;
+  ne_rp : r ≠ p := by trivial;
+  mem_tra2 : Axioms.Tra2 #p #q #r ∈ Ax := by grind;
+attribute [simp] HasAxiomTra2.ne_pq HasAxiomTra2.ne_qr HasAxiomTra2.ne_rp
+
 
 end Axiom
 

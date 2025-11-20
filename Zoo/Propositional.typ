@@ -12,6 +12,8 @@
   }
 })
 
+#let LogicF = $Logic("F")$
+
 #figure(caption: [Propositional Logic Zoo], numbering: none)[
   #raw-render(
     raw(
@@ -40,6 +42,8 @@
       "LO.Propositional.KC": $Logic("KC")$,
       "LO.Propositional.KrieselPutnam": $Logic("KP")$,
       "LO.Propositional.LC": $Logic("LC")$,
+      "LO.Propositional.F": $LogicF$,
+      "LO.Propositional.F_Rfl": $LogicF(Axiom("Rfl"))$,
     ),
     width: 640pt,
   )

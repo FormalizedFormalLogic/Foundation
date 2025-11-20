@@ -5,22 +5,7 @@ import Foundation.Vorspiel.HRel.Coreflexive
 import Mathlib.Tactic.TFAE
 
 
-
 namespace LO.Propositional
-
-namespace Axioms
-
-variable {F : Type*} [LogicalConnective F]
-variable (φ ψ χ : F)
-
-/-- Axioms of transitivity 1 -/
-protected abbrev Tra1 := (φ ➝ ψ) ➝ (χ ➝ φ ➝ ψ)
-
-/-- Axioms of transitivity 2 -/
-protected abbrev Tra2 := (φ ➝ ψ) ➝ (ψ ➝ χ) ➝ (φ ➝ χ)
-
-end Axioms
-
 
 open Formula (atom)
 open Kripke2

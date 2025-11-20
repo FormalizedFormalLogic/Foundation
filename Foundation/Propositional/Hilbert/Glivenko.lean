@@ -4,7 +4,7 @@ import Foundation.Meta.ClProver
 
 namespace LO.Propositional
 
-open Entailment
+open LO.Entailment
 open Formula (atom)
 
 variable [DecidableEq α]

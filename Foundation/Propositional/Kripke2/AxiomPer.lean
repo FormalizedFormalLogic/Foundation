@@ -5,17 +5,6 @@ import Foundation.Vorspiel.HRel.Coreflexive
 
 namespace LO.Propositional
 
-namespace Axioms
-
-variable {F : Type*} [LogicalConnective F]
-variable (φ ψ χ : F)
-
-/-- Axioms of persistency -/
-protected abbrev Per := φ ➝ ⊤ ➝ φ
-
-end Axioms
-
-
 open Kripke2
 open Formula.Kripke2
 
