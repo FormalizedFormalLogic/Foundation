@@ -1,5 +1,5 @@
 import Foundation.Propositional.Kripke2.Hilbert
-
+import Foundation.Propositional.Kripke2.FTheory
 
 namespace LO.Propositional
 
@@ -32,6 +32,13 @@ instance : Entailment.Consistent Propositional.F := consistent_of_sound_framecla
   use Kripke2.trivialFrame;
   apply Set.mem_setOf_eq.mpr;
   simp;
+
+instance Kripke2.complete : Complete Propositional.F FrameClass.F := by
+  constructor;
+  intro φ hφ;
+  apply Kripke2.provable_of_validOnCannonicalModel;
+  apply hφ;
+  tauto;
 
 end F
 

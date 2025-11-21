@@ -222,34 +222,32 @@ variable {F : Frame} {φ ψ χ : Formula ℕ}
 
 open Formula (atom)
 
-lemma valid_andElim₁ : F ⊧ φ ⋏ ψ ➝ φ := by rintro V x y Rxy ⟨_, _⟩; assumption;
-lemma valid_andElim₂ : F ⊧ φ ⋏ ψ ➝ ψ := by rintro V x y Rxy ⟨_, _⟩; assumption;
-lemma valid_axiomC : F ⊧ (φ ➝ ψ) ⋏ (ψ ➝ χ) ➝ (φ ➝ (ψ ⋏ χ)) := by
+lemma valid_andElim₁ : F ⊧ Axioms.AndElim₁ φ ψ := by rintro V x y Rxy ⟨_, _⟩; assumption;
+lemma valid_andElim₂ : F ⊧ Axioms.AndElim₂ φ ψ := by rintro V x y Rxy ⟨_, _⟩; assumption;
+lemma valid_axiomC : F ⊧ Axioms.C φ ψ χ := by
   rintro V x y Rxy ⟨h₁, h₂⟩ z Ryz h₃;
   constructor;
   . apply h₁ <;> assumption;
   . apply h₂;
     . assumption;
-    . apply h₁;
-      . assumption;
-      . assumption;
+    . assumption;
 
-lemma valid_orIntro₁ : F ⊧ φ ➝ φ ⋎ ψ := by rintro V x y Rxy hφ; left; assumption;
-lemma valid_orIntro₂ : F ⊧ ψ ➝ φ ⋎ ψ := by rintro V x y Rxy hψ; right; assumption;
-lemma valid_axiomD : F ⊧ (φ ➝ χ) ⋏ (ψ ➝ χ) ➝ (φ ⋎ ψ ➝ χ) := by
+lemma valid_orIntro₁ : F ⊧ Axioms.OrInst₁ φ ψ := by rintro V x y Rxy hφ; left; assumption;
+lemma valid_orIntro₂ : F ⊧ Axioms.OrInst₂ φ ψ := by rintro V x y Rxy hψ; right; assumption;
+lemma valid_axiomD : F ⊧ Axioms.D φ ψ χ := by
   rintro V x y Rxy ⟨h₁, h₂⟩ z Ryz (hφ | hψ);
   . apply h₁ <;> assumption;
   . apply h₂ <;> assumption;
 
-lemma valid_distributeAndOr : F ⊧ φ ⋏ (ψ ⋎ χ) ➝ (φ ⋏ ψ) ⋎ (φ ⋏ χ) := by
+lemma valid_distributeAndOr : F ⊧ Axioms.DistributeAndOr φ ψ χ := by
   rintro V x y Rxy ⟨hφ, (hψ | hχ)⟩
   . left; constructor <;> assumption;
   . right; constructor <;> assumption;
 
-lemma valid_axiomI : F ⊧ (φ ➝ ψ) ⋏ (ψ ➝ χ) ➝ (φ ➝ χ) := by
+lemma valid_axiomI : F ⊧ Axioms.I φ ψ χ := by
   rintro V x y Rxy ⟨h₁, h₂⟩ z Ryz h₃;
   exact h₂ Ryz $ h₁ Ryz h₃;
-lemma valid_impId : F ⊧ φ ➝ φ := by rintro V x y Rxy hφ; assumption;
+lemma valid_impId : F ⊧ Axioms.ImpId φ := by rintro V x y Rxy hφ; assumption;
 
 attribute [simp high, grind .]
   valid_andElim₁ valid_andElim₂
