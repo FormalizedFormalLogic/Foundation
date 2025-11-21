@@ -2,12 +2,10 @@ import Foundation.Propositional.Entailment.Corsi.Basic
 
 namespace LO.Propositional
 
+namespace Entailment
+
 variable {S F : Type*} [LogicalConnective F] [Entailment S F]
 variable {𝓢 : S} {φ ψ χ : F}
-
-
-
-namespace Entailment
 
 protected class F (𝓢 : S) extends
   -- Axioms
@@ -22,6 +20,29 @@ protected class F (𝓢 : S) extends
   Entailment.ModusPonens 𝓢,
   Entailment.AFortiori 𝓢,
   Entailment.AndIntroRule 𝓢
+
+-- TODO: unify old
+namespace Corsi
+
+variable [Entailment.F 𝓢]
+
+def CA!_of_C!_of_C! (h₁ : 𝓢 ⊢! φ ➝ χ) (h₂ : 𝓢 ⊢! ψ ➝ χ) : 𝓢 ⊢! φ ⋎ ψ ➝ χ := by
+  refine axiomD! ⨀ ?_
+  apply andIR! <;> assumption;
+@[grind ⇐] lemma CA_of_C_of_C (h₁ : 𝓢 ⊢ φ ➝ χ) (h₂ : 𝓢 ⊢ ψ ➝ χ) : 𝓢 ⊢ φ ⋎ ψ ➝ χ := ⟨CA!_of_C!_of_C! h₁.some h₂.some⟩
+
+def CK!_of_C!_of_C! (h₁ : 𝓢 ⊢! φ ➝ ψ) (h₂ : 𝓢 ⊢! φ ➝ χ) : 𝓢 ⊢! φ ➝ ψ ⋏ χ := by
+  refine axiomC! ⨀ ?_
+  apply andIR! <;> assumption;
+@[grind ⇐] lemma CK_of_C_of_C (h₁ : 𝓢 ⊢ φ ➝ ψ) (h₂ : 𝓢 ⊢ φ ➝ χ) : 𝓢 ⊢ φ ➝ ψ ⋏ χ := ⟨CK!_of_C!_of_C! h₁.some h₂.some⟩
+
+def C_trans! (h₁ : 𝓢 ⊢! φ ➝ ψ) (h₂ : 𝓢 ⊢! ψ ➝ χ) : 𝓢 ⊢! φ ➝ χ := by
+  refine (axiomI! (ψ := ψ)) ⨀ ?_;
+  apply andIR! <;> assumption;
+@[grind ⇐] lemma C_trans (h₁ : 𝓢 ⊢ φ ➝ ψ) (h₂ : 𝓢 ⊢ ψ ➝ χ) : 𝓢 ⊢ φ ➝ χ := ⟨C_trans! h₁.some h₂.some⟩
+
+end Corsi
+
 
 end Entailment
 

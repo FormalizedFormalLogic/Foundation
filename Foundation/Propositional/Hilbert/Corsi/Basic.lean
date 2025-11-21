@@ -10,7 +10,7 @@ import Foundation.Logic.Disjunctive
 
 namespace LO.Propositional
 
-open Entailment
+open Entailment.Corsi
 
 variable {α : Type*} {Ax Ax₁ Ax₂ : Axiom α} {φ ψ χ : Formula _}
 
@@ -73,10 +73,10 @@ protected lemma rec!
   (af       : ∀ {φ ψ : Formula α}, {hφ : (Hilbert.Corsi Ax) ⊢ φ} → (motive φ hφ) → (motive (ψ ➝ φ) (af hφ)))
   (andIR    : ∀ {φ ψ : Formula α}, {hφ : (Hilbert.Corsi Ax) ⊢ φ} → {hψ : (Hilbert.Corsi Ax) ⊢ ψ} → (motive φ hφ) → (motive ψ hψ) → (motive (φ ⋏ ψ) (andIR hφ hψ)))
   (impId    : ∀ {φ : Formula α}, (motive (Axioms.ImpId φ) impId))
-  (andElimL : ∀ {φ ψ : Formula α}, (motive (Axioms.AndElim₁ φ ψ) Entailment.and₁!))
-  (andElimR : ∀ {φ ψ : Formula α}, (motive (Axioms.AndElim₂ φ ψ) Entailment.and₂!))
-  (orIntroL  : ∀ {φ ψ : Formula α}, (motive (Axioms.OrInst₁ φ ψ) Entailment.or₁!))
-  (orIntroR  : ∀ {φ ψ : Formula α}, (motive (Axioms.OrInst₂ φ ψ) Entailment.or₂!))
+  (andElimL : ∀ {φ ψ : Formula α}, (motive (Axioms.AndElim₁ φ ψ) andElimL))
+  (andElimR : ∀ {φ ψ : Formula α}, (motive (Axioms.AndElim₂ φ ψ) andElimR))
+  (orIntroL  : ∀ {φ ψ : Formula α}, (motive (Axioms.OrInst₁ φ ψ) orIntroL))
+  (orIntroR  : ∀ {φ ψ : Formula α}, (motive (Axioms.OrInst₂ φ ψ) orIntroR))
   (distributeAndOr : ∀ {φ ψ χ : Formula α}, (motive (Axioms.DistributeAndOr φ ψ χ) distributeAndOr))
   (axiomC   : ∀ {φ ψ χ : Formula α}, (motive (Axioms.C φ ψ χ) axiomC))
   (axiomD   : ∀ {φ ψ χ : Formula α}, (motive (Axioms.D φ ψ χ) axiomD))
@@ -101,10 +101,10 @@ instance : Logic.Substitution (Hilbert.Corsi Ax) where
     | _ =>
       first
       | apply impId;
-      | apply Entailment.and₁!;
-      | apply Entailment.and₂!;
-      | apply Entailment.or₁!;
-      | apply Entailment.or₂!;
+      | apply andElimL;
+      | apply andElimR;
+      | apply orIntroL;
+      | apply orIntroR;
       | apply distributeAndOr;
       | apply axiomC;
       | apply axiomD;
@@ -121,10 +121,10 @@ lemma weakerThan_of_provable_axioms (hs : (Hilbert.Corsi Ax₂) ⊢* Ax₁) : (H
   | _ =>
       first
       | apply impId;
-      | apply Entailment.and₁!;
-      | apply Entailment.and₂!;
-      | apply Entailment.or₁!;
-      | apply Entailment.or₂!;
+      | apply andElimL;
+      | apply andElimR;
+      | apply orIntroL;
+      | apply orIntroR;
       | apply distributeAndOr;
       | apply axiomC;
       | apply axiomD;
