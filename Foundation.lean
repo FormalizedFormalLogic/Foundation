@@ -73,7 +73,7 @@ import Foundation.FirstOrder.Incompleteness.Tarski
 import Foundation.FirstOrder.Incompleteness.Yablo
 
 import Foundation.FirstOrder.SetTheory.Basic
-import Foundation.FirstOrder.SetTheory.StandardModel
+import Foundation.FirstOrder.SetTheory.Universe
 import Foundation.FirstOrder.SetTheory.LoewenheimSkolem
 import Foundation.FirstOrder.SetTheory.Z
 import Foundation.FirstOrder.SetTheory.Function
