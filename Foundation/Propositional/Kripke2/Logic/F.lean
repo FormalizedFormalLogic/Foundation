@@ -1,5 +1,6 @@
 import Foundation.Propositional.Kripke2.Hilbert
 import Foundation.Propositional.Kripke2.FTheory
+import Foundation.Propositional.Hilbert.Corsi.Disjunctive
 
 namespace LO.Propositional
 
