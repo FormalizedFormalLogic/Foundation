@@ -73,7 +73,11 @@ variable {M : Kripke2.Model} {x y : M.World} {a : ℕ} {φ ψ χ : Formula ℕ}
 @[grind =] protected lemma def_atom : x ⊧ atom a ↔ M x a := by simp [Satisfies];
 @[simp high, grind .] protected lemma def_top : x ⊧ ⊤ := by simp [Satisfies];
 @[simp high, grind .] protected lemma def_bot : x ⊭ ⊥ := by simp [Semantics.NotModels, Satisfies];
+
 @[grind =] protected lemma def_and : x ⊧ φ ⋏ ψ ↔ x ⊧ φ ∧ x ⊧ ψ := by simp [Satisfies];
+@[grind =] protected lemma not_def_and : x ⊭ φ ⋏ ψ ↔ x ⊭ φ ∨ x ⊭ ψ := by
+  dsimp [Semantics.NotModels];
+  grind;
 
 @[grind =] protected lemma def_or  : x ⊧ φ ⋎ ψ ↔ x ⊧ φ ∨ x ⊧ ψ := by simp [Satisfies];
 @[grind =] protected lemma not_def_or : x ⊭ φ ⋎ ψ ↔ x ⊭ φ ∧ x ⊭ ψ := by

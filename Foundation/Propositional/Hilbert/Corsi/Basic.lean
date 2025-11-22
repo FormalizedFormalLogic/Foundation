@@ -61,6 +61,7 @@ instance : Entailment.F (Hilbert.Corsi Ax) where
   axiomD! := ⟨Corsi.axiomD⟩
   axiomI! := ⟨Corsi.axiomI⟩
   impId! := ⟨Corsi.impId⟩
+  verum := ⟨Corsi.impId⟩
   mdp hφψ hφ := ⟨Corsi.mdp hφψ.1 hφ.1⟩
   af! hφ := ⟨Corsi.af hφ.1⟩
   andIR! h₁ h₂ := ⟨Corsi.andIR h₁.1 h₂.1⟩
@@ -221,6 +222,15 @@ instance : F_Rfl_Sym.axioms.HasAxiomSym where p := 0; q := 1
 end F_Rfl_Sym
 protected abbrev F_Rfl_Sym := Hilbert.Corsi F_Rfl_Sym.axioms
 instance : Entailment.F Propositional.F_Rfl_Sym where
+
+
+protected abbrev F_Tra1.axioms : Axiom ℕ := { Axioms.Tra1 #0 #1 #2 }
+namespace F_Tra1
+instance : F_Tra1.axioms.HasAxiomTra1 where p := 0; q := 1; r := 2; mem_tra1 := by simp
+end F_Tra1
+protected abbrev F_Tra1 := Hilbert.Corsi F_Tra1.axioms
+instance : Entailment.F Propositional.F_Tra1 where
+
 
 
 end LO.Propositional

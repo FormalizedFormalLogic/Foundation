@@ -1,4 +1,4 @@
-import Foundation.Propositional.Kripke2.Logic.F
+import Foundation.Propositional.Kripke2.Logic.F_Ser
 import Foundation.Propositional.Kripke2.AxiomSym
 
 namespace LO.Propositional

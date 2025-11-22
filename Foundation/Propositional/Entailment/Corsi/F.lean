@@ -16,6 +16,7 @@ protected class F (𝓢 : S) extends
   Entailment.HasAxiomC 𝓢,
   Entailment.HasAxiomD 𝓢,
   Entailment.HasAxiomI 𝓢,
+  Entailment.HasAxiomVerum 𝓢,
   -- Rule
   Entailment.ModusPonens 𝓢,
   Entailment.AFortiori 𝓢,

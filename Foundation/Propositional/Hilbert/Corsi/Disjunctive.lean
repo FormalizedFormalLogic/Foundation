@@ -99,4 +99,17 @@ instance F_Rfl.KleeneSlashable : Propositional.F_Rfl.KleeneSlashable := Hilbert.
 instance F_Rfl.Disjunctive : Entailment.Disjunctive Propositional.F := inferInstance
 
 
+instance F_Tra1.KleeneSlashable : Propositional.F_Tra1.KleeneSlashable := Hilbert.Corsi.instKleeneSlashable $ by
+  rintro φ s (rfl);
+  constructor;
+  . exact axiomTra1;
+  . rintro ⟨h₁, h₂⟩;
+    constructor;
+    . apply af h₁;
+    . intro h₃;
+      constructor;
+      . assumption;
+      . grind;
+instance F_Tra1.Disjunctive : Entailment.Disjunctive Propositional.F_Tra1 := inferInstance
+
 end LO.Propositional
