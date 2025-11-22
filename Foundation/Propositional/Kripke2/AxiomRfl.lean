@@ -1,5 +1,6 @@
 import Foundation.Propositional.Kripke2.Basic
 import Foundation.Propositional.Kripke2.AxiomSer
+import Foundation.Propositional.Kripke2.FTheory
 
 namespace LO.Propositional
 
@@ -40,6 +41,12 @@ lemma isReflexive_of_valid_axiomRfl (h : F ⊧ Axioms.Rfl #0 #1) : F.IsReflexive
     . rintro y Rxy;
       tauto;
   exact this;
+
+instance [Entailment.F L] [Entailment.HasAxiomRfl L] [Entailment.Disjunctive L] : Frame.IsReflexive (canonicalModel L).toFrame where
+  refl := by
+    rintro T φ ψ hφψ hφ;
+    apply T.imp_closed (show L ⊢ Axioms.Rfl φ ψ from by simp);
+    apply T.andIR <;> assumption;
 
 end Kripke2
 

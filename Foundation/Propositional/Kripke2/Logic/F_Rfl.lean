@@ -34,13 +34,22 @@ instance : Entailment.Consistent Propositional.F_Rfl := consistent_of_sound_fram
   apply Set.mem_setOf_eq.mpr;
   infer_instance;
 
+instance Kripke2.complete : Complete Propositional.F_Rfl FrameClass.F_Rfl := by
+  constructor;
+  intro φ hφ;
+  apply Kripke2.provable_of_validOncanonicalModel;
+  apply hφ;
+  apply Set.mem_setOf_eq.mpr;
+  infer_instance;
+
 end F_Rfl
 
 instance : Propositional.F_Ser ⪱ Propositional.F_Rfl := by
   constructor;
-  . apply weakerThan_of_provable_axioms;
-    rintro φ (rfl);
-    sorry;
+  . apply weakerThan_of_subset_frameClass FrameClass.F_Ser FrameClass.F_Rfl;
+    simp_all only [Set.setOf_subset_setOf];
+    intro F hF;
+    infer_instance;
   . apply Entailment.not_weakerThan_iff.mpr;
     use (Axioms.Rfl #0 #1);
     constructor;
