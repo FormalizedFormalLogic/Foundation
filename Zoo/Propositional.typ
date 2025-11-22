@@ -16,6 +16,7 @@
 #let AxiomRfl = $Axiom("Rfl")$
 #let AxiomSym = $Axiom("Sym")$
 #let AxiomSer = $Axiom("Ser")$
+#let AxiomTra1 = $Axiom("Tra1")$
 
 #figure(caption: [Propositional Logic Zoo], numbering: none)[
   #raw-render(
@@ -45,6 +46,7 @@
       "LO.Propositional.F_Ser": $LogicF(AxiomSer)$,
       "LO.Propositional.F_Sym": $LogicF(AxiomSym)$,
       "LO.Propositional.F_Rfl_Sym": $LogicF(AxiomRfl, AxiomSym)$,
+      "LO.Propositional.F_Tra1": $LogicF(AxiomTra1)$,
       "LO.Propositional.F": $LogicF$,
       "LO.Propositional.Int": $Logic("Int")$,
       "LO.Propositional.KC": $Logic("KC")$,
