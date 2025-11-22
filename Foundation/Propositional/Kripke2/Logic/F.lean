@@ -36,11 +36,23 @@ instance : Entailment.Consistent Propositional.F := consistent_of_sound_framecla
 instance Kripke2.complete : Complete Propositional.F FrameClass.F := by
   constructor;
   intro φ hφ;
-  apply Kripke2.provable_of_validOnCannonicalModel;
+  apply Kripke2.provable_of_validOncanonicalModel;
   apply hφ;
   tauto;
 
+open Formula.Kripke2 in
+lemma unprovable_noncontradiction : (Propositional.F ⊬ ∼((.atom 0) ⋏ ∼(.atom 0))) := by
+  apply Sound.not_provable_of_countermodel (𝓜 := Kripke2.FrameClass.F);
+  apply Kripke2.not_validOnFrameClass_of_exists_frame;
+  use ⟨Fin 2, (λ x y => x = 0), 0, by omega⟩;
+  constructor;
+  . tauto;
+  . apply ValidOnFrame.not_of_exists_valuation_world;
+    use (λ _ _ => True), 0;
+    simp [Satisfies, Frame.Rel'];
+
 end F
+
 
 
 end LO.Propositional
