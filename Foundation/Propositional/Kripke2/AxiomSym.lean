@@ -1,7 +1,9 @@
 import Foundation.Propositional.Kripke2.Basic
+import Foundation.Propositional.Kripke2.AxiomSer
 import Foundation.Vorspiel.HRel.Convergent
 import Foundation.Vorspiel.HRel.Euclidean
 import Foundation.Vorspiel.HRel.Coreflexive
+import Foundation.Propositional.Kripke2.FTheory
 
 namespace LO.Propositional
 
@@ -16,6 +18,12 @@ namespace Frame
 
 protected abbrev IsSymmetric (F : Kripke2.Frame) := _root_.IsSymm _ F.Rel
 @[simp, grind →] lemma symm [F.IsSymmetric] : ∀ {x y : F}, x ≺ y → y ≺ x := by apply IsSymm.symm
+
+instance [F.IsSymmetric] : Frame.IsSerial F where
+  serial x := by
+    use F.root;
+    apply F.symm;
+    apply F.rooted;
 
 end Frame
 
