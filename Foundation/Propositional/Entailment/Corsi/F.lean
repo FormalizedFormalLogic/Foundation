@@ -37,10 +37,10 @@ instance : GreedyRule 𝓢 where
     refine axiomC! ⨀ ?_
     apply andIR! <;> assumption;
 
-def C_trans! (h₁ : 𝓢 ⊢! φ ➝ ψ) (h₂ : 𝓢 ⊢! ψ ➝ χ) : 𝓢 ⊢! φ ➝ χ := by
-  refine (axiomI! (ψ := ψ)) ⨀ ?_;
-  apply andIR! <;> assumption;
-@[grind ⇐] lemma C_trans (h₁ : 𝓢 ⊢ φ ➝ ψ) (h₂ : 𝓢 ⊢ ψ ➝ χ) : 𝓢 ⊢ φ ➝ χ := ⟨C_trans! h₁.some h₂.some⟩
+instance : TransRule 𝓢 where
+  transRule! {φ ψ χ} h₁ h₂ := by
+    refine (axiomI! (ψ := ψ)) ⨀ ?_;
+    apply andIR! <;> assumption;
 
 def CK_right_cancel! (h₁ : 𝓢 ⊢! φ ⋏ ψ ➝ χ) (h₂ : 𝓢 ⊢! ψ) : 𝓢 ⊢! φ ➝ χ := by
   apply C_trans! ?_ h₁;

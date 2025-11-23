@@ -72,6 +72,10 @@ instance Hilbert.VCorsi.instKleeneSlashable (hs : ∀ {φ s}, φ ∈ Ax → ∕[
         . apply greedy <;> assumption;
         . rintro h;
           constructor <;> grind;
+      | transRule ih₁ ih₂ =>
+        constructor;
+        . apply transRule <;> assumption;
+        . grind;
       | axm => apply hs; assumption;
 
 

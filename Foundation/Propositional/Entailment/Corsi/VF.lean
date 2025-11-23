@@ -20,7 +20,8 @@ protected class VF (𝓢 : S) extends
   Entailment.AFortiori 𝓢,
   Entailment.AndIntroRule 𝓢,
   Entailment.DilemmaRule 𝓢,
-  Entailment.GreedyRule 𝓢
+  Entailment.GreedyRule 𝓢,
+  Entailment.TransRule 𝓢
 
 -- TODO: unify old
 namespace Corsi

@@ -12,6 +12,7 @@
   }
 })
 
+#let LogicVF = $Logic("VF")$
 #let LogicF = $Logic("F")$
 #let AxiomRfl = $Axiom("Rfl")$
 #let AxiomSym = $Axiom("Sym")$
@@ -48,6 +49,7 @@
       "LO.Propositional.F_Rfl_Sym": $LogicF(AxiomRfl, AxiomSym)$,
       "LO.Propositional.F_Tra1": $LogicF(AxiomTra1)$,
       "LO.Propositional.F": $LogicF$,
+      "LO.Propositional.VF": $LogicVF$,
       "LO.Propositional.Int": $Logic("Int")$,
       "LO.Propositional.KC": $Logic("KC")$,
       "LO.Propositional.KrieselPutnam": $Logic("KP")$,

@@ -64,6 +64,9 @@ class DilemmaRule (𝓢 : S) where
 class GreedyRule (𝓢 : S) where
   greedy! {φ ψ χ : F} : 𝓢 ⊢! φ ➝ ψ → 𝓢 ⊢! φ ➝ χ → 𝓢 ⊢! φ ➝ ψ ⋏ χ
 
+class TransRule (𝓢 : S) where
+  transRule! {φ ψ χ : F} : 𝓢 ⊢! φ ➝ ψ → 𝓢 ⊢! ψ ➝ χ → 𝓢 ⊢! φ ➝ χ
+
 class HasDistributeAndOr (𝓢 : S) where
   distributeAndOr! {φ ψ χ : F} : 𝓢 ⊢! Axioms.DistributeAndOr φ ψ χ
 
@@ -141,6 +144,13 @@ export GreedyRule (greedy!)
 
 alias CK!_of_C!_of_C! := greedy!
 alias CK_of_C_of_C := greedy
+
+
+export TransRule (transRule!)
+@[grind ⇐] lemma transRule [TransRule 𝓢] : 𝓢 ⊢ φ ➝ ψ → 𝓢 ⊢ ψ ➝ χ → 𝓢 ⊢ φ ➝ χ := λ ⟨a⟩ ⟨b⟩ => ⟨transRule! a b⟩
+
+alias C_trans! := transRule!
+alias C_trans := transRule
 
 
 export HasDistributeAndOr (distributeAndOr!)
