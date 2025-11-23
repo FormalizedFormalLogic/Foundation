@@ -56,6 +56,10 @@ instance Hilbert.VCorsi.instKleeneSlashable (hs : ∀ {φ s}, φ ∈ Ax → ∕[
         constructor;
         . exact impId;
         . tauto;
+      | efq =>
+        constructor;
+        . exact efq;
+        . tauto;
       | mdp ihφψ ihφ => apply ihφψ.2 ihφ;
       | af ihφ =>
         constructor;

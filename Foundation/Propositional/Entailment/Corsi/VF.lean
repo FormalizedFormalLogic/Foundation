@@ -15,6 +15,7 @@ protected class VF (𝓢 : S) extends
   Entailment.HasImpId 𝓢,
   Entailment.HasAxiomC 𝓢,
   Entailment.HasAxiomVerum 𝓢,
+  Entailment.HasAxiomEFQ 𝓢,
   -- Rule
   Entailment.ModusPonens 𝓢,
   Entailment.AFortiori 𝓢,

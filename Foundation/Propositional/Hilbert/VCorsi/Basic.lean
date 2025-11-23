@@ -16,6 +16,7 @@ protected inductive Hilbert.VCorsi (Ax : Axiom α) : Logic α
 | protected distributeAndOr {φ ψ χ} : Hilbert.VCorsi Ax $ Axioms.DistributeAndOr φ ψ χ
 | protected axiomC {φ ψ χ}          : Hilbert.VCorsi Ax $ Axioms.C φ ψ χ
 | protected impId {φ}               : Hilbert.VCorsi Ax $ Axioms.ImpId φ
+| protected efq {φ}                 : Hilbert.VCorsi Ax $ Axioms.EFQ φ
 | protected mdp {φ ψ}               : Hilbert.VCorsi Ax (φ ➝ ψ) → Hilbert.VCorsi Ax φ → Hilbert.VCorsi Ax ψ
 | protected af {φ ψ}                : Hilbert.VCorsi Ax φ → Hilbert.VCorsi Ax (ψ ➝ φ)
 | protected andIR {φ ψ}             : Hilbert.VCorsi Ax φ → Hilbert.VCorsi Ax ψ → Hilbert.VCorsi Ax (φ ⋏ ψ)
@@ -54,6 +55,7 @@ instance : Entailment.VF (Hilbert.VCorsi Ax) where
   axiomC! := ⟨VCorsi.axiomC⟩
   impId! := ⟨VCorsi.impId⟩
   verum := ⟨VCorsi.impId⟩
+  efq := ⟨VCorsi.efq⟩
   mdp hφψ hφ := ⟨VCorsi.mdp hφψ.1 hφ.1⟩
   af! hφ := ⟨VCorsi.af hφ.1⟩
   andIR! h₁ h₂ := ⟨VCorsi.andIR h₁.1 h₂.1⟩
@@ -78,6 +80,7 @@ protected lemma rec!
   (orIntroR  : ∀ {φ ψ : Formula α}, (motive (Axioms.OrInst₂ φ ψ) orIntroR))
   (distributeAndOr : ∀ {φ ψ χ : Formula α}, (motive (Axioms.DistributeAndOr φ ψ χ) distributeAndOr))
   (axiomC   : ∀ {φ ψ χ : Formula α}, (motive (Axioms.C φ ψ χ) axiomC))
+  (efq      : ∀ {φ : Formula α}, (motive (Axioms.EFQ φ) efq))
   : ∀ {φ}, (d : Hilbert.VCorsi Ax ⊢ φ) → motive φ d := by
   rintro φ d;
   replace d := Logic.iff_provable.mp d;
@@ -110,6 +113,7 @@ instance : Logic.Substitution (Hilbert.VCorsi Ax) where
       | apply orIntroR;
       | apply distributeAndOr;
       | apply axiomC;
+      | apply efq;
 
 lemma weakerThan_of_provable_axioms (hs : (Hilbert.VCorsi Ax₂) ⊢* Ax₁) : (Hilbert.VCorsi Ax₁) ⪯ (Hilbert.VCorsi Ax₂) := by
   apply Entailment.weakerThan_iff.mpr;
@@ -131,6 +135,7 @@ lemma weakerThan_of_provable_axioms (hs : (Hilbert.VCorsi Ax₂) ⊢* Ax₁) : (
       | apply orIntroR;
       | apply distributeAndOr;
       | apply axiomC;
+      | apply efq;
 
 lemma weakerThan_of_subset_axioms (h : Ax₁ ⊆ Ax₂) : (Hilbert.VCorsi Ax₁) ⪯ (Hilbert.VCorsi Ax₂) := by
   apply weakerThan_of_provable_axioms;

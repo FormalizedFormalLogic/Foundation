@@ -25,6 +25,7 @@ protected inductive Hilbert.Corsi (Ax : Axiom α) : Logic α
 | protected axiomD {φ ψ χ}          : Hilbert.Corsi Ax $ Axioms.D φ ψ χ
 | protected axiomI {φ ψ χ}          : Hilbert.Corsi Ax $ Axioms.I φ ψ χ
 | protected impId {φ}               : Hilbert.Corsi Ax $ Axioms.ImpId φ
+| protected efq {φ}                 : Hilbert.Corsi Ax $ Axioms.EFQ φ
 | protected mdp {φ ψ}               : Hilbert.Corsi Ax (φ ➝ ψ) → Hilbert.Corsi Ax φ → Hilbert.Corsi Ax ψ
 | protected af {φ ψ}                : Hilbert.Corsi Ax φ → Hilbert.Corsi Ax (ψ ➝ φ)
 | protected andIR {φ ψ}             : Hilbert.Corsi Ax φ → Hilbert.Corsi Ax ψ → Hilbert.Corsi Ax (φ ⋏ ψ)
@@ -62,6 +63,7 @@ instance : Entailment.F (Hilbert.Corsi Ax) where
   axiomI! := ⟨Corsi.axiomI⟩
   impId! := ⟨Corsi.impId⟩
   verum := ⟨Corsi.impId⟩
+  efq := ⟨Corsi.efq⟩
   mdp hφψ hφ := ⟨Corsi.mdp hφψ.1 hφ.1⟩
   af! hφ := ⟨Corsi.af hφ.1⟩
   andIR! h₁ h₂ := ⟨Corsi.andIR h₁.1 h₂.1⟩
@@ -82,6 +84,7 @@ protected lemma rec!
   (axiomC   : ∀ {φ ψ χ : Formula α}, (motive (Axioms.C φ ψ χ) axiomC))
   (axiomD   : ∀ {φ ψ χ : Formula α}, (motive (Axioms.D φ ψ χ) axiomD))
   (axiomI   : ∀ {φ ψ χ : Formula α}, (motive (Axioms.I φ ψ χ) axiomI))
+  (efq      : ∀ {φ : Formula α}, (motive (Axioms.EFQ φ) efq))
   : ∀ {φ}, (d : Hilbert.Corsi Ax ⊢ φ) → motive φ d := by
   rintro φ d;
   replace d := Logic.iff_provable.mp d;
@@ -110,6 +113,7 @@ instance : Logic.Substitution (Hilbert.Corsi Ax) where
       | apply axiomC;
       | apply axiomD;
       | apply axiomI;
+      | apply efq;
 
 lemma weakerThan_of_provable_axioms (hs : (Hilbert.Corsi Ax₂) ⊢* Ax₁) : (Hilbert.Corsi Ax₁) ⪯ (Hilbert.Corsi Ax₂) := by
   apply Entailment.weakerThan_iff.mpr;
@@ -130,6 +134,7 @@ lemma weakerThan_of_provable_axioms (hs : (Hilbert.Corsi Ax₂) ⊢* Ax₁) : (H
       | apply axiomC;
       | apply axiomD;
       | apply axiomI;
+      | apply efq;
 
 lemma weakerThan_of_subset_axioms (h : Ax₁ ⊆ Ax₂) : (Hilbert.Corsi Ax₁) ⪯ (Hilbert.Corsi Ax₂) := by
   apply weakerThan_of_provable_axioms;

@@ -1,4 +1,5 @@
 import Foundation.Propositional.Entailment.Minimal.Basic
+import Foundation.Propositional.Entailment.Int.Basic
 
 namespace LO.Propositional
 
@@ -118,12 +119,18 @@ alias orIntroR := Entailment.or₂!
 alias andElimL := Entailment.and₁!
 alias andElimR := Entailment.and₂!
 
+alias efq! := Entailment.efq
+alias efq := Entailment.efq!
+
 attribute [simp, grind .]
   orIntroL orIntroR
   andElimL andElimR
+  efq
 
 alias A_intro_left := Entailment.A!_intro_left
 alias A_intro_right := Entailment.A!_intro_right
+
+alias of_O := Entailment.of_O!
 
 export AFortiori (af!)
 @[grind <=] lemma af [AFortiori 𝓢] : 𝓢 ⊢ φ → 𝓢 ⊢ ψ ➝ φ := λ ⟨h⟩ => ⟨af! h⟩

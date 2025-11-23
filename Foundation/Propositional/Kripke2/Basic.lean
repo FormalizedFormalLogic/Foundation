@@ -253,6 +253,10 @@ lemma valid_axiomI : F ⊧ Axioms.I φ ψ χ := by
   exact h₂ Ryz $ h₁ Ryz h₃;
 lemma valid_impId : F ⊧ Axioms.ImpId φ := by rintro V x y Rxy hφ; assumption;
 
+lemma valid_efq : F ⊧ Axioms.EFQ φ := by
+  rintro V x y Rxy;
+  simp [Satisfies];
+
 attribute [simp high, grind .]
   valid_andElim₁ valid_andElim₂
   valid_axiomC
@@ -261,6 +265,7 @@ attribute [simp high, grind .]
   valid_distributeAndOr
   valid_axiomI
   valid_impId
+  valid_efq
 
 @[grind ⇒]
 lemma valid_afortiori (h : F ⊧ φ) : F ⊧ ψ ➝ φ := by

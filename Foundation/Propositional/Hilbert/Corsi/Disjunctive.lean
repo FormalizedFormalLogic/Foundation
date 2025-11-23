@@ -44,6 +44,10 @@ instance Hilbert.Corsi.instKleeneSlashable (hs : ∀ {φ s}, φ ∈ Ax → ∕[(
         constructor;
         . exact distributeAndOr;
         . rintro ⟨hφ, (hψ | hψ)⟩ <;> tauto;
+      | efq =>
+        constructor;
+        . exact efq;
+        . tauto;
       | axiomC =>
         constructor;
         . exact axiomC;

@@ -20,6 +20,7 @@ def weakerThan_VCorsi_Corsi_of_provable_axiomInstances (h : (Hilbert.Corsi Ax₂
     | apply orIntroR;
     | apply distributeAndOr;
     | apply axiomC;
+    | apply efq;
     | grind;
 
 end LO.Propositional
