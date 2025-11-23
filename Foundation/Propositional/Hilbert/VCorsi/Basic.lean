@@ -148,6 +148,32 @@ section
 variable [DecidableEq α]
 open Axiom
 
+instance [Ax.HasAxiomD] : Entailment.HasAxiomD (Hilbert.VCorsi Ax) where
+  axiomD! {φ ψ χ} := ⟨by
+    simpa using Hilbert.VCorsi.axm
+      (φ := Axioms.D (#(HasAxiomD.p Ax)) (#(HasAxiomD.q Ax)) (#(HasAxiomD.r Ax)))
+      (s := λ b =>
+        if (HasAxiomD.p Ax) = b then φ
+        else if (HasAxiomD.q Ax) = b then ψ
+        else if (HasAxiomD.r Ax) = b then χ
+        else (.atom b)
+      )
+      $ (HasAxiomD.mem_d)
+  ⟩;
+
+instance [Ax.HasAxiomI] : Entailment.HasAxiomI (Hilbert.VCorsi Ax) where
+  axiomI! {φ ψ χ} := ⟨by
+    simpa using Hilbert.VCorsi.axm
+      (φ := Axioms.I (#(HasAxiomI.p Ax)) (#(HasAxiomI.q Ax)) (#(HasAxiomI.r Ax)))
+      (s := λ b =>
+        if (HasAxiomI.p Ax) = b then φ
+        else if (HasAxiomI.q Ax) = b then ψ
+        else if (HasAxiomI.r Ax) = b then χ
+        else (.atom b)
+      )
+      $ (HasAxiomI.mem_i)
+  ⟩;
+
 end
 
 end Hilbert.VCorsi
@@ -157,6 +183,31 @@ end Hilbert.VCorsi
 protected abbrev VF.axioms : Axiom ℕ := ∅
 protected abbrev VF := Hilbert.VCorsi VF.axioms
 instance : Entailment.VF Propositional.VF where
+
+
+protected abbrev VF_D.axioms : Axiom ℕ := {Axioms.D #0 #1 #2}
+namespace VF_D.axioms
+instance : VF_D.axioms.HasAxiomD where p := 0; q := 1; r := 2; mem_d := by simp;
+end VF_D.axioms
+protected abbrev VF_D := Hilbert.VCorsi VF_D.axioms
+instance : Entailment.VF Propositional.VF_D where
+
+
+protected abbrev VF_I.axioms : Axiom ℕ := {Axioms.I #0 #1 #2}
+namespace VF_I.axioms
+instance : VF_I.axioms.HasAxiomI where p := 0; q := 1; r := 2; mem_i := by simp;
+end VF_I.axioms
+protected abbrev VF_I := Hilbert.VCorsi VF_I.axioms
+instance : Entailment.VF Propositional.VF_I where
+
+
+protected abbrev VF_D_I.axioms : Axiom ℕ := {Axioms.D #0 #1 #2, Axioms.I #0 #1 #2}
+namespace VF_D_I.axioms
+instance : VF_D_I.axioms.HasAxiomD where p := 0; q := 1; r := 2; mem_d := by simp;
+instance : VF_D_I.axioms.HasAxiomI where p := 0; q := 1; r := 2; mem_i := by simp;
+end VF_D_I.axioms
+protected abbrev VF_D_I := Hilbert.VCorsi VF_D_I.axioms
+instance : Entailment.VF Propositional.VF_D_I where
 
 
 end LO.Propositional

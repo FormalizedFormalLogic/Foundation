@@ -104,15 +104,4 @@ lemma unprovable_axiomI : Propositional.VF ⊬ Axioms.I #0 #1 #2 := by
 
 end VF
 
-instance : Propositional.VF ⪱ Propositional.F := by
-  constructor;
-  . apply weakerThan_VCorsi_Corsi_of_provable_axiomInstances;
-    intro φ;
-    simp;
-  . apply Entailment.not_weakerThan_iff.mpr;
-    use (Axioms.D #0 #1 #2);
-    constructor;
-    . simp;
-    . exact VF.unprovable_axiomD
-
 end LO.Propositional

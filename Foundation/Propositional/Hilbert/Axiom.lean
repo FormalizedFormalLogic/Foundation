@@ -53,6 +53,27 @@ class HasScott (Ax : Axiom α) where
   mem_scott : Axioms.Scott (.atom p) ∈ Ax := by tauto;
 
 
+class HasAxiomD (Ax : Axiom α) where
+  p : α
+  q : α
+  r : α
+  ne_pq : p ≠ q := by trivial;
+  ne_pr : p ≠ r := by trivial;
+  ne_qr : q ≠ r := by trivial;
+  mem_d : Axioms.D #p #q #r ∈ Ax := by grind;
+attribute [simp] HasAxiomD.ne_pq HasAxiomD.ne_qr HasAxiomD.ne_pr HasAxiomD.mem_d
+
+class HasAxiomI (Ax : Axiom α) where
+  p : α
+  q : α
+  r : α
+  ne_pq : p ≠ q := by trivial;
+  ne_pr : p ≠ r := by trivial;
+  ne_qr : q ≠ r := by trivial;
+  mem_i : Axioms.I #p #q #r ∈ Ax := by grind;
+attribute [simp] HasAxiomI.ne_pq HasAxiomI.ne_qr HasAxiomI.ne_pr HasAxiomI.mem_i
+
+
 class HasAxiomRfl (Ax : Axiom α) where
   p : α
   q : α
