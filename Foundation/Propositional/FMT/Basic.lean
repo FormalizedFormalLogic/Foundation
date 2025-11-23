@@ -308,6 +308,41 @@ lemma valid_CTrans (h₁ : F ⊧ φ ➝ ψ) (h₂ : F ⊧ ψ ➝ χ) : F ⊧ φ 
     . apply F.rooted;
     . assumption;
 
+example :
+  let F : Frame := {
+    World := Fin 3,
+    Rel := λ φ x y =>
+      match φ, x, y with
+      | _, 0, _ => True
+      | #1, 1, 2 => True
+      | _, _, _ => False
+    ,
+    root := 0,
+    rooted := by simp
+  };
+  F ⊧ #0 ⭤ #1 → F ⊧ #2 ⭤ #3 → F ⊭ (#0 ➝ #2) ⭤ (#1 ➝ #3) := by
+  rintro F h₁ h₂;
+  apply ValidOnFrame.not_of_exists_valuation_world;
+  use λ w a =>
+    match w, a with
+    | 2, 3 => False
+    | _, _ => True;
+  use 0;
+  apply Satisfies.not_def_and.mpr;
+  apply or_not_of_imp;
+  intro h₃;
+  apply Satisfies.not_def_imp.mpr;
+  use 1;
+  refine ⟨?_, ?_, ?_⟩;
+  . tauto;
+  . intro z R1z;
+    match z with
+    | 0 => tauto;
+    | 1 => tauto;
+    | 2 => tauto;
+  . apply Satisfies.not_def_imp.mpr;
+    use 2;
+    tauto;
 
 end
 
