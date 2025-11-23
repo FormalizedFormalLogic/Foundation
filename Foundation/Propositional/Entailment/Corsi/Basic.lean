@@ -58,6 +58,12 @@ class AFortiori (𝓢 : S) where
 class AndIntroRule (𝓢 : S) where
   andIR! {φ ψ : F} : 𝓢 ⊢! φ → 𝓢 ⊢! ψ → 𝓢 ⊢! φ ⋏ ψ
 
+class DilemmaRule (𝓢 : S) where
+  dilemma! {φ ψ χ : F} : 𝓢 ⊢! φ ➝ χ → 𝓢 ⊢! ψ ➝ χ → 𝓢 ⊢! φ ⋎ ψ ➝ χ
+
+class GreedyRule (𝓢 : S) where
+  greedy! {φ ψ χ : F} : 𝓢 ⊢! φ ➝ ψ → 𝓢 ⊢! φ ➝ χ → 𝓢 ⊢! φ ➝ ψ ⋏ χ
+
 class HasDistributeAndOr (𝓢 : S) where
   distributeAndOr! {φ ψ χ : F} : 𝓢 ⊢! Axioms.DistributeAndOr φ ψ χ
 
@@ -121,6 +127,20 @@ export AFortiori (af!)
 
 export AndIntroRule (andIR!)
 @[grind <=] lemma andIR [AndIntroRule 𝓢] : 𝓢 ⊢ φ → 𝓢 ⊢ ψ → 𝓢 ⊢ φ ⋏ ψ := λ ⟨h₁⟩ ⟨h₂⟩ => ⟨andIR! h₁ h₂⟩
+
+
+export DilemmaRule (dilemma!)
+@[grind <=] lemma dilemma [DilemmaRule 𝓢] : 𝓢 ⊢ φ ➝ χ → 𝓢 ⊢ ψ ➝ χ → 𝓢 ⊢ φ ⋎ ψ ➝ χ := λ ⟨a⟩ ⟨b⟩ => ⟨dilemma! a b⟩
+
+alias CA!_of_C!_of_C! := dilemma!
+alias CA_of_C_of_C := dilemma
+
+
+export GreedyRule (greedy!)
+@[grind <=] lemma greedy [GreedyRule 𝓢] : 𝓢 ⊢ φ ➝ ψ → 𝓢 ⊢ φ ➝ χ → 𝓢 ⊢ φ ➝ ψ ⋏ χ := λ ⟨a⟩ ⟨b⟩ => ⟨greedy! a b⟩
+
+alias CK!_of_C!_of_C! := greedy!
+alias CK_of_C_of_C := greedy
 
 
 export HasDistributeAndOr (distributeAndOr!)
