@@ -1,5 +1,5 @@
 import Foundation.Propositional.Hilbert.Corsi.Basic
-import Foundation.Propositional.Logic.KleeneSlash
+import Foundation.Propositional.Logic.Slash
 
 
 namespace LO.Propositional
@@ -9,7 +9,7 @@ variable {Ax : Axiom α} {φ ψ : Formula α}
 
 open Entailment.Corsi
 
-instance Hilbert.Corsi.instKleeneSlashable (hs : ∀ {φ s}, φ ∈ Ax → ∕[(Hilbert.Corsi Ax)] (φ⟦s⟧)) : (Hilbert.Corsi Ax).KleeneSlashable where
+instance Hilbert.Corsi.instAczelSlashable (hs : ∀ {φ s}, φ ∈ Ax → ∕ₐ[(Hilbert.Corsi Ax)] (φ⟦s⟧)) : (Hilbert.Corsi Ax).AczelSlashable where
   iff_ks_provable {φ} := by
     constructor;
     . intro h;
@@ -79,37 +79,21 @@ instance Hilbert.Corsi.instKleeneSlashable (hs : ∀ {φ s}, φ ∈ Ax → ∕[(
       | andIR ihφ ihψ => tauto;
       | axm => apply hs; assumption;
 
-instance F.KleeneSlashable : Propositional.F.KleeneSlashable := Hilbert.Corsi.instKleeneSlashable $ by tauto;
+instance F.AczelSlashable : Propositional.F.AczelSlashable := Hilbert.Corsi.instAczelSlashable $ by tauto;
 instance F.Disjunctive : Entailment.Disjunctive Propositional.F := inferInstance
 
-
-instance F_Ser.KleeneSlashable : Propositional.F_Ser.KleeneSlashable := Hilbert.Corsi.instKleeneSlashable $ by
-  rintro φ s (rfl);
-  constructor;
-  . exact axiomSer;
-  . simp [KleeneSlash];
+instance F_Ser.AczelSlashable : Propositional.F_Ser.AczelSlashable := Hilbert.Corsi.instAczelSlashable $ by
+  rintro φ s (rfl); grind;
 instance F_Ser.Disjunctive : Entailment.Disjunctive Propositional.F := inferInstance
 
 
-instance F_Rfl.KleeneSlashable : Propositional.F_Rfl.KleeneSlashable := Hilbert.Corsi.instKleeneSlashable $ by
-  rintro φ s (rfl);
-  constructor;
-  . exact axiomRfl;
-  . rintro ⟨h₁, ⟨h₂, h₃⟩⟩; apply h₃ h₁;
+instance F_Rfl.AczelSlashable : Propositional.F_Rfl.AczelSlashable := Hilbert.Corsi.instAczelSlashable $ by
+  rintro φ s (rfl); grind;
 instance F_Rfl.Disjunctive : Entailment.Disjunctive Propositional.F := inferInstance
 
 
-instance F_Tra1.KleeneSlashable : Propositional.F_Tra1.KleeneSlashable := Hilbert.Corsi.instKleeneSlashable $ by
-  rintro φ s (rfl);
-  constructor;
-  . exact axiomTra1;
-  . rintro ⟨h₁, h₂⟩;
-    constructor;
-    . apply af h₁;
-    . intro h₃;
-      constructor;
-      . assumption;
-      . grind;
+instance F_Tra1.AczelSlashable : Propositional.F_Tra1.AczelSlashable := Hilbert.Corsi.instAczelSlashable $ by
+  rintro φ s (rfl); grind;
 instance F_Tra1.Disjunctive : Entailment.Disjunctive Propositional.F_Tra1 := inferInstance
 
 end LO.Propositional
