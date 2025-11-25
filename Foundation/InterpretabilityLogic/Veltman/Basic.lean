@@ -83,7 +83,8 @@ protected lemma or_def : x ⊧ φ ⋎ ψ ↔ x ⊧ φ ∨ x ⊧ ψ := by simp [S
 
 protected lemma and_def : x ⊧ φ ⋏ ψ ↔ x ⊧ φ ∧ x ⊧ ψ := by simp [Satisfies];
 
-protected lemma not_def : x ⊧ ∼φ ↔ ¬(x ⊧ φ) := by simp [Satisfies];
+protected lemma neg_def : x ⊧ ∼φ ↔ ¬(x ⊧ φ) := by simp [Satisfies];
+protected lemma not_neg_def : ¬(x ⊧ ∼φ) ↔ x ⊧ φ := by simp [Satisfies];
 
 protected lemma top_def : x ⊧ ⊤ := by simp [Satisfies];
 
@@ -94,12 +95,13 @@ protected lemma dia_def : x ⊧ ◇φ ↔ ∃ y, x ≺ y ∧ y ⊧ φ := by simp
 protected lemma not_dia_def : ¬x ⊧ ◇φ ↔ ∀ y, x ≺ y → ¬(y ⊧ φ) := by simp [Satisfies];
 
 protected lemma rhd_def : x ⊧ φ ▷ ψ ↔ ∀ y, x ≺ y → Satisfies M y φ → (∃ z, y ≺[x] z ∧ Satisfies M z ψ) := by simp [Satisfies];
+protected lemma not_rhd_def : ¬x ⊧ φ ▷ ψ ↔ ∃ y, x ≺ y ∧ Satisfies M y φ ∧ ∀ z, y ≺[x] z → ¬(Satisfies M z ψ) := by simp [Satisfies];
 
 protected instance : Semantics.Tarski (M.World) where
   models_verum := λ _ => Satisfies.top_def;
   models_falsum := λ _ => Satisfies.bot_def;
   models_imply := Satisfies.imp_def;
-  models_not := Satisfies.not_def;
+  models_not := Satisfies.neg_def;
   models_or := Satisfies.or_def;
   models_and := Satisfies.and_def;
 

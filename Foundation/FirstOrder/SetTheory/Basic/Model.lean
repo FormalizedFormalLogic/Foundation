@@ -70,6 +70,8 @@ lemma val_isSucc_iff {v : Fin 2 → V} :
     V ⊧/v isSucc ↔ ∀ z, z ∈ v 0 ↔ z = v 1 ∨ z ∈ v 1 := by
   simp [isSucc]
 
+section
+
 variable [Nonempty V]
 
 instance [V ⊧ₘ* 𝗭] [V ⊧ₘ* 𝗔𝗖] : V ⊧ₘ* 𝗭𝗖 := inferInstance
@@ -77,5 +79,21 @@ instance [V ⊧ₘ* 𝗭] [V ⊧ₘ* 𝗔𝗖] : V ⊧ₘ* 𝗭𝗖 := inferInst
 instance [V ⊧ₘ* 𝗭𝗙] [V ⊧ₘ* 𝗔𝗖] : V ⊧ₘ* 𝗭𝗙𝗖 := inferInstance
 
 instance : V ⊧ₘ* (𝗘𝗤 : Theory ℒₛₑₜ) := Structure.Eq.models_eqAxiom' ℒₛₑₜ V
+
+end
+
+section
+
+variable {U : Set V}
+
+instance submodel (U : Set V) : SetStructure U := ⟨fun y x ↦ x.val ∈ y.val⟩
+
+lemma submodel_mem_iff {x y : U} :
+    x ∈ y ↔ x.val ∈ y.val := by rfl
+
+@[simp] lemma mk_mem_mk_iff_mem {x y : V} {hx hy} :
+    (⟨x, hx⟩ : U) ∈ (⟨y, hy⟩ : U) ↔ x ∈ y := by rfl
+
+end
 
 end LO.FirstOrder.SetTheory

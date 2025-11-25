@@ -17,6 +17,8 @@ abbrev FormulaFinset (α) := Finset (Formula α)
 
 namespace Formula
 
+prefix:max "#" => Formula.atom
+
 abbrev neg {α : Type u} (φ : Formula α) : Formula α := imp φ falsum
 
 abbrev verum {α : Type u} : Formula α := imp falsum falsum
@@ -421,21 +423,24 @@ notation:80 φ "⟦" s "⟧" => Formula.subst s φ
 
 namespace subst
 
-@[simp] protected lemma subst_atom {a} : (.atom a)⟦s⟧ = s a := rfl
+protected lemma subst_atom {a} : (.atom a)⟦s⟧ = s a := rfl
+protected lemma subst_bot : ⊥⟦s⟧ = ⊥ := rfl
+protected lemma subst_top : ⊤⟦s⟧ = ⊤ := rfl
+protected lemma subst_imp : (φ ➝ ψ)⟦s⟧ = φ⟦s⟧ ➝ ψ⟦s⟧ := rfl
+protected lemma subst_neg : (∼φ)⟦s⟧ = ∼(φ⟦s⟧) := rfl
+protected lemma subst_and : (φ ⋏ ψ)⟦s⟧ = φ⟦s⟧ ⋏ ψ⟦s⟧ := rfl
+protected lemma subst_or : (φ ⋎ ψ)⟦s⟧ = φ⟦s⟧ ⋎ ψ⟦s⟧ := rfl
+protected lemma subst_iff : (φ ⭤ ψ)⟦s⟧ = (φ⟦s⟧ ⭤ ψ⟦s⟧) := rfl
 
-@[simp] protected lemma subst_bot : ⊥⟦s⟧ = ⊥ := rfl
-
-@[simp] protected lemma subst_top : ⊤⟦s⟧ = ⊤ := rfl
-
-@[simp] protected lemma subst_imp : (φ ➝ ψ)⟦s⟧ = φ⟦s⟧ ➝ ψ⟦s⟧ := rfl
-
-@[simp] protected lemma subst_neg : (∼φ)⟦s⟧ = ∼(φ⟦s⟧) := rfl
-
-@[simp] protected lemma subst_and : (φ ⋏ ψ)⟦s⟧ = φ⟦s⟧ ⋏ ψ⟦s⟧ := rfl
-
-@[simp] protected lemma subst_or : (φ ⋎ ψ)⟦s⟧ = φ⟦s⟧ ⋎ ψ⟦s⟧ := rfl
-
-@[simp] protected lemma subst_iff : (φ ⭤ ψ)⟦s⟧ = (φ⟦s⟧ ⭤ ψ⟦s⟧) := rfl
+attribute [simp, grind =]
+  subst.subst_atom
+  subst.subst_bot
+  subst.subst_top
+  subst.subst_imp
+  subst.subst_neg
+  subst.subst_and
+  subst.subst_or
+  subst.subst_iff
 
 end subst
 

@@ -73,15 +73,15 @@ lemma satisfiable_of_consistent (h : Entailment.Consistent T) : Semantics.Satisf
   exact satisfiable_iff.mpr ⟨ULift.{w} M, inferInstance, inferInstance, ((uLift_elementaryEquiv L M).modelsTheory).mpr h⟩
 
 lemma satisfiable_iff_consistent' : Semantics.Satisfiable (Struc.{max u w} L) T ↔ Entailment.Consistent T :=
-  ⟨consistent_of_satidfiable, satisfiable_of_consistent.{u, w}⟩
+  ⟨consistent_of_satisfiable, satisfiable_of_consistent.{u, w}⟩
 
 lemma satisfiable_iff_consistent : Satisfiable T ↔ Entailment.Consistent T := satisfiable_iff_consistent'.{u, u}
 
-lemma satidfiable_iff_satisfiable : Semantics.Satisfiable (Struc.{max u w} L) T ↔ Satisfiable T := by
+lemma satisfiable_iff_satisfiable : Semantics.Satisfiable (Struc.{max u w} L) T ↔ Satisfiable T := by
   simp [satisfiable_iff_consistent'.{u, w}, satisfiable_iff_consistent]
 
 lemma consequence_iff_consequence : T ⊨[Struc.{max u w} L] φ ↔ T ⊨ φ := by
-  simp [consequence_iff_unsatisfiable, satidfiable_iff_satisfiable.{u, w}]
+  simp [consequence_iff_unsatisfiable, satisfiable_iff_satisfiable.{u, w}]
 
 theorem complete' {φ : Sentence L} :
     T ⊨[Struc.{max u w} L] φ → T ⊢ φ := fun h ↦ complete <| consequence_iff_consequence.{u, w}.mp h

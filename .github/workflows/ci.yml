@@ -4,10 +4,6 @@ on:
   push:
   merge_group:
 
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
-
 permissions:
   contents: read
   pages: write
@@ -20,8 +16,7 @@ jobs:
     steps:
       # We don't use https://github.com/leanprover/lean-action.
       # Because caching strategy is not suitable for our project.
-
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Setup elan
         run: |
           curl https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -sSf | sh -s -- -y --default-toolchain none
@@ -41,7 +36,7 @@ jobs:
         id: cache-restore
         uses: actions/cache/restore@v4
         with:
-          path: .lake
+          path: .lake/build
           key: lake-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('lean-toolchain') }}-${{ hashFiles('lake-manifest.json') }}-${{ github.sha }}
           restore-keys: |
             lake-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('lean-toolchain') }}-${{ hashFiles('lake-manifest.json') }}
@@ -110,11 +105,11 @@ jobs:
         id: cache-save
         uses: actions/cache/save@v4
         with:
-          path: .lake
+          path: .lake/build
           key: ${{ steps.cache-restore.outputs.cache-primary-key }}
 
       # Upload pages artifact
-      - uses: actions/upload-pages-artifact@v3
+      - uses: actions/upload-pages-artifact@v4
         with:
           path: pages/_output
 

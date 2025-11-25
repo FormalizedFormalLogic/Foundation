@@ -13,7 +13,7 @@ open Entailment Entailment.FiniteContext
 open Formula.Kripke
 open ComplementClosedConsistentFinset
 
-namespace Modal.GL.Kripke
+namespace GL.Kripke
 
 variable {φ ψ : Formula ℕ}
 
@@ -172,7 +172,7 @@ lemma truthlemma {X : (miniCanonicalModel φ).World} (q_sub : ψ ∈ φ.subformu
       refine RXY.1 ψ ?_ h |>.1;
       simpa;
 
-instance : Complete Modal.GL Kripke.FrameClass.finite_GL := ⟨by
+instance FFP : Complete Modal.GL Kripke.FrameClass.finite_GL := ⟨by
   intro φ;
   contrapose;
   intro h;
@@ -202,16 +202,6 @@ instance : Complete Modal.GL Kripke.FrameClass.finite_GL := ⟨by
       all_goals grind;
 ⟩
 
-end Modal.GL.Kripke
-
-namespace Logic
-
-open Formula
-open Entailment
-open Kripke
-
-
-end Logic
-
+end GL.Kripke
 
 end LO.Modal

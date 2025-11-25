@@ -3,6 +3,7 @@ import Foundation
 import VersoBlog
 import VersoManual
 import Book.Bibliography
+
 import Book.Meta.Lean
 
 set_option linter.tacticAnalysis false

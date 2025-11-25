@@ -20,6 +20,7 @@ import Foundation.Propositional.Kripke.Logic.Cl
 import Foundation.Propositional.Logic.Letterless_Int_Cl
 import Foundation.Propositional.Logic.PostComplete
 import Foundation.Propositional.Decidable
+import Foundation.Propositional.Kripke2.Logic
 
 -- FirstOrder
 
@@ -32,7 +33,7 @@ import Foundation.FirstOrder.Completeness.SubLanguage
 import Foundation.FirstOrder.Completeness.SearchTree
 import Foundation.FirstOrder.Completeness.Completeness
 
-import Foundation.FirstOrder.LoewenheimSkolem
+import Foundation.FirstOrder.Skolemization.Hull
 
 import Foundation.FirstOrder.Order.Le
 import Foundation.FirstOrder.Interpretation
@@ -72,7 +73,7 @@ import Foundation.FirstOrder.Incompleteness.Tarski
 import Foundation.FirstOrder.Incompleteness.Yablo
 
 import Foundation.FirstOrder.SetTheory.Basic
-import Foundation.FirstOrder.SetTheory.StandardModel
+import Foundation.FirstOrder.SetTheory.Universe
 import Foundation.FirstOrder.SetTheory.LoewenheimSkolem
 import Foundation.FirstOrder.SetTheory.Z
 import Foundation.FirstOrder.SetTheory.Function
@@ -192,11 +193,17 @@ import Foundation.ProvabilityLogic.Classification.LetterlessTrace
 import Foundation.ProvabilityLogic.Classification.Trace
 
 -- Interpretability Logic
-import Foundation.InterpretabilityLogic.Veltman.Logic.ILMinus_J1_J2_J5
 import Foundation.InterpretabilityLogic.Veltman.Logic.CL
 import Foundation.InterpretabilityLogic.Veltman.Logic.IL
-import Foundation.InterpretabilityLogic.Veltman.Logic.ILM
-import Foundation.InterpretabilityLogic.Veltman.Logic.ILP
+import Foundation.InterpretabilityLogic.Veltman.Logic.IL_F
+import Foundation.InterpretabilityLogic.Veltman.Logic.IL_M
+import Foundation.InterpretabilityLogic.Veltman.Logic.IL_M₀
+import Foundation.InterpretabilityLogic.Veltman.Logic.ILMinus_J1_J2_J5
+import Foundation.InterpretabilityLogic.Veltman.Logic.IL_P
+import Foundation.InterpretabilityLogic.Veltman.Logic.IL_P₀
+import Foundation.InterpretabilityLogic.Veltman.Logic.IL_R_W
+import Foundation.InterpretabilityLogic.Veltman.Logic.IL_W
+import Foundation.InterpretabilityLogic.Veltman.Logic.IL_M₀_W
 
 -- Meta
 import Foundation.Meta.Qq
