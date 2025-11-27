@@ -67,21 +67,21 @@ structure PrimeFTheory (L : Logic ℕ) extends FTheory L where
 namespace FTheory.lindenbaum
 
 open Classical
-open Encodable
 
-variable {φ ψ χ ξ : Formula ℕ} {T : FTheory L} {hT : χ ➝ ξ ∉ T.theory}
+variable {φ ψ χ ξ γ δ : Formula ℕ} {i j : ℕ} {T : FTheory L} {hT : χ ➝ ξ ∉ T.theory}
 
 def construction (T : FTheory L) (hT : χ ➝ ξ ∉ T.theory) : ℕ → Set (Formula ℕ)
   | 0 => { δ | χ ➝ δ ∈ T.theory }
   | i + 1 =>
-    match (decode i) with
+    match (ofNat i) with
     | some δ =>
       letI T' := construction T hT i
-      if ∀ Γ : Finset (Formula _), ↑Γ ⊆ T' → Γ.conj ⋏ δ ➝ ξ ∉ T.theory then insert δ T'
+      if ∀ Γ : Finset (Formula _), ↑Γ ⊆ T' → Finset.conj (insert δ Γ) ➝ ξ ∉ T.theory then insert δ T'
       else T'
     | none => construction T hT i
 
 def construction_omega (T : FTheory L) (hT : χ ➝ ξ ∉ T.theory) : Set (Formula ℕ) := ⋃ i, construction T hT i
+
 
 lemma subset_construction_succ : construction T hT i ⊆ construction T hT (i + 1) := by
   dsimp [construction];
@@ -97,114 +97,108 @@ lemma subset_construction_add : construction T hT i ⊆ construction T hT (i + j
     . apply ih;
     . apply subset_construction_succ;
 
-lemma monotone_construction (hij : i ≤ j) : construction T hT i ⊆ construction T hT j := by
+lemma subset_construction_mono (hij : i ≤ j) : construction T hT i ⊆ construction T hT j := by
   obtain ⟨k, rfl⟩ := le_iff_exists_add.mp hij;
   apply subset_construction_add;
 
-lemma mem_omega_of_mem (h : χ ➝ δ ∈ T.theory) : δ ∈ construction_omega T hT := by
+
+lemma mem_omega_of_mem_zero (h : χ ➝ δ ∈ T.theory) : δ ∈ construction_omega T hT := by
   simp only [construction_omega, Set.mem_iUnion];
   use 0;
   simpa [construction];
 
-lemma of_mem_construction_omega {φ : Formula ℕ} (hφ : φ ∈ construction_omega T hT) :
-  (χ ➝ φ ∈ T.theory) ∨ (∀ Γ : Finset _, ↑Γ ⊆ construction T hT (encode φ) → Γ.conj ⋏ φ ➝ ξ ∉ T.theory) := by
-  obtain ⟨i, hi⟩ := by simpa [construction_omega] using hφ;
-  induction i with
-  | zero => left; simpa [construction] using hi;
-  | succ i ih =>
-    dsimp [construction] at hi;
-    sorry;
-    /-
-    split at hi;
-    . split_ifs at hi with h;
-      . replace hi := Set.mem_insert_iff.mp hi;
-        rcases hi with (rfl | hi);
-        . right;
-          assumption;
-        . grind;
-      . grind;
-    . grind;
-    .dsimp [construction] at hi;
-    split at hi;
-    . split_ifs at hi with h;
-      . replace hi := Set.mem_insert_iff.mp hi;
-        rcases hi with (rfl | hi);
-        . sorry;
-        . grind;
-      . grind;
-    . grind;
-    split at hi;
-    -/
-
-lemma not_of_mem_construction_omega {φ : Formula ℕ}
-  {Γ : Finset (Formula ℕ)} (hΓ : ↑Γ ⊆ construction T hT (encode φ))
-  (hφ : Γ.conj ⋏ φ ➝ ξ ∈ T.theory) :
-  φ ∉ (construction_omega T hT) := by
-  simp [construction_omega, Set.mem_iUnion];
-  intro i;
-  induction i with
-  | zero =>
-    simp [construction];
-    sorry;
-  | succ i ih =>
-    simp [construction];
-    split;
-    . split_ifs with h;
-      . rename_i δ hδ;
-        by_contra hC;
-        have : δ = φ := by grind;
-        subst this;
-        apply h Γ ((show encode δ = i by sorry) ▸ hΓ) hφ;
-      . assumption
-    . assumption;
-
-lemma of_not_mem_construction_omega {φ : Formula ℕ} (hφ : φ ∉ construction_omega T hT) :
-  (χ ➝ φ ∉ T.theory) ∧ (∃ Γ : Finset (Formula _), ↑Γ ⊆ (construction T hT (encode φ)) ∧ Γ.conj ⋏ φ ➝ ξ ∈ T.theory) := by
-  simp only [construction_omega, Set.mem_iUnion, not_exists] at hφ;
-  constructor;
-  . simpa using hφ 0;
-  . have this := hφ (encode φ + 1);
-    simp only [construction, encodek] at this;
-    split_ifs at this with h;
-    . simp at this;
-    . simpa using h;
-
-
 variable [Entailment.F L]
 
-lemma construction_omega_mem_ant : χ ∈ construction_omega T hT := by
-  apply mem_omega_of_mem;
-  apply T.mem_of_provable;
-  apply impId;
-
-lemma construction_omega_not_mem_csq : ξ ∉ construction_omega T hT := by
-  simp only [construction_omega, Set.mem_iUnion, not_exists];
-  intro i;
+lemma mem_construction_of_mem_construction_omega (hφ : φ ∈ construction_omega T hT) : φ ∈ (construction T hT (toNat φ + 1)) := by
+  simp [construction_omega] at hφ;
+  obtain ⟨i, hi⟩ := hφ;
   induction i with
-  | zero => simpa [construction];
+  | zero => apply subset_construction_mono (by omega) hi;
   | succ i ih =>
-    contrapose! ih;
-    dsimp [construction] at ih;
-    split at ih;
-    . split_ifs at ih with h;
-      . rename_i δ hδ;
-        have := h ∅ (by tauto);
-        contrapose! this;
-        have : ξ = δ := by grind;
-        subst this;
-        apply T.mem_of_provable;
-        simp;
-      . assumption;
-    . assumption;
+    dsimp [construction] at hi;
+    split at hi;
+    . split_ifs at hi with h;
+      . rcases hi with rfl | hi;
+        . simp [construction];
+          sorry;
+        . grind;
+      . grind;
+    . grind;
+
+lemma construction_consistency (i : ℕ) : ∀ Γ, ↑Γ ⊆ construction T hT i → Finset.conj Γ ➝ ξ ∉ T.theory := by
+  intro Γ hΓ;
+  induction i with
+  | zero =>
+    by_contra hC;
+    apply hT;
+    apply T.mem_trans ?_ hC;
+    apply T.mem_of_provable;
+    sorry;
+  | succ i ih =>
+    dsimp [construction] at hΓ;
+    split at hΓ;
+    . split_ifs at hΓ with h;
+      . rename_i γ hγ;
+        by_contra hC;
+        apply h (Γ.erase γ);
+        . simpa;
+        . apply T.mem_trans ?_ hC;
+          apply T.mem_of_provable;
+          suffices Γ ⊆ insert γ (Γ.erase γ) by sorry;
+          apply Finset.insert_erase_subset;
+      . apply ih;
+        assumption;
+    . apply ih;
+      assumption;
+
+lemma not_mem_construction_omega (h : γ ➝ ξ ∈ T.theory) : γ ∉ construction_omega T hT := by
+  suffices ∀ i, γ ∉ construction T hT i by simpa [construction_omega];
+  by_contra! hC;
+  obtain ⟨i, hi⟩ := hC;
+  induction i with
+  | zero => apply hT $ T.mem_trans hi h;
+  | succ i ih =>
+    dsimp [construction] at hi;
+    split at hi;
+    . split_ifs at hi with h;
+      . apply h ∅ (by tauto);
+        suffices γ ➝ ξ ∈ T.theory by
+          simp only [insert_empty_eq, Finset.conj_singleton];
+          grind;
+        assumption;
+      . contradiction;
+    . contradiction;
+
+lemma construction_omega_noBot : ⊥ ∉ (construction_omega T hT) := by
+  apply not_mem_construction_omega;
+  apply T.mem_of_provable;
+  simp only [Entailment.efq!];
 
 lemma construction_omega_andClosed :
   letI U := construction_omega T hT
   φ ∈ U → ψ ∈ U → φ ⋏ ψ ∈ U := by
   rintro hφ hψ;
-  by_contra hφψ;
-  replace ⟨hφψ, ⟨Γ, hΓ₁, hΓ₂⟩⟩ := of_not_mem_construction_omega hφψ;
-
-  sorry;
+  suffices ∃ i, φ ⋏ ψ ∈ construction T hT i by simpa [construction_omega];
+  use (toNat (φ ⋏ ψ)) + 1;
+  simp only [construction, Formula.ofNat_toNat];
+  split_ifs with h;
+  . tauto;
+  . exfalso;
+    push_neg at h;
+    obtain ⟨Γ, hΓ, h⟩ := h;
+    replace h : (Γ ∪ {φ, ψ}).conj ➝ ξ ∈ T.theory := by
+      apply T.mem_trans ?_ h;
+      sorry;
+    apply construction_consistency (hT := hT) (toNat (φ ⋏ ψ)) (Γ := Γ ∪ {φ, ψ}) ?_ h;
+    intro γ;
+    suffices γ = φ ∨ γ = ψ ∨ γ ∈ Γ → γ ∈ construction T hT (toNat (φ ⋏ ψ)) by simpa;
+    rintro (rfl | rfl | hγ);
+    case inr.inr => apply hΓ; assumption;
+    all_goals
+    . apply subset_construction_mono (i := (toNat γ) + 1);
+      . apply Nat.succ_le_of_lt; simp;
+      . apply mem_construction_of_mem_construction_omega;
+        assumption;
 
 lemma construction_omega_impClosed :
   letI U := construction_omega T hT
@@ -264,33 +258,20 @@ lemma construction_omega_prime :
     sorry;
   sorry;
 
-lemma construction_omega_noBot :
-  letI U := construction_omega T hT
-  ⊥ ∉ U := by
-  simp [construction_omega, Set.mem_iUnion, not_exists];
-  intro i;
-  induction i with
-  | zero =>
-    simp [construction];
-    sorry;
-  | succ i ih =>
-    contrapose! ih;
-    dsimp [construction] at ih;
-    split at ih;
-    . split_ifs at ih with h;
-      . rename_i δ hδ;
-        have := h ∅ (by tauto);
-        contrapose! this;
-        have : ⊥ = δ := by grind;
-        subst this;
-        sorry;
-      . assumption;
-    . assumption;
-
 lemma construction_rel :
   letI U := construction_omega T hT
   (∀ φ ψ, φ ➝ ψ ∈ T.theory → φ ∈ U → ψ ∈ U) := by
   sorry;
+
+lemma construction_omega_mem_ant : χ ∈ construction_omega T hT := by
+  apply mem_omega_of_mem_zero;
+  apply T.mem_of_provable;
+  apply impId;
+
+lemma construction_omega_not_mem_csq : ξ ∉ construction_omega T hT := by
+  apply not_mem_construction_omega;
+  apply T.mem_of_provable;
+  simp;
 
 end FTheory.lindenbaum
 
