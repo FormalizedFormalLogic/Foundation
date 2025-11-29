@@ -44,6 +44,10 @@ instance Hilbert.Corsi.instAczelSlashable (hs : ∀ {φ s}, φ ∈ Ax → ∕ₐ
         constructor;
         . exact distributeAndOr;
         . rintro ⟨hφ, (hψ | hψ)⟩ <;> tauto;
+      | efq =>
+        constructor;
+        . exact efq;
+        . tauto;
       | axiomC =>
         constructor;
         . exact axiomC;
@@ -95,5 +99,33 @@ instance F_Rfl.Disjunctive : Entailment.Disjunctive Propositional.F := inferInst
 instance F_Tra1.AczelSlashable : Propositional.F_Tra1.AczelSlashable := Hilbert.Corsi.instAczelSlashable $ by
   rintro φ s (rfl); grind;
 instance F_Tra1.Disjunctive : Entailment.Disjunctive Propositional.F_Tra1 := inferInstance
+
+example : ∀ {s : Substitution ℕ}, ∕[(Hilbert.Corsi {Axioms.Per #0})] ((Axioms.Per #0)⟦s⟧) := by
+  intro s;
+  constructor;
+  . sorry;
+  . intro h;
+    constructor;
+    . apply af;
+      generalize #0⟦s⟧ = φ at h ⊢;
+      induction φ with
+      | hatom a => exact h;
+      | hfalsum => contradiction;
+      | hor φ ψ ihφ ihψ => grind;
+      | hand φ ψ ihφ ihpsi => grind;
+      | himp φ ψ ihφ ihψ => exact h.1;
+    . grind;
+
+example : ∀ {s : Substitution ℕ}, ∕[(Hilbert.Corsi {Axioms.Sym #0 #1})] ((Axioms.Sym #0 #1)⟦s⟧) := by
+  intro s;
+  constructor;
+  . sorry;
+  . intro h₁;
+    apply or_iff_not_imp_left.mpr;
+    intro h₂;
+    apply KleeneSlash.def_neg.mpr;
+    constructor;
+    . sorry;
+    . sorry;
 
 end LO.Propositional

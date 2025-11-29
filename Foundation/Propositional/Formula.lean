@@ -3,6 +3,8 @@ import Foundation.Logic.LogicSymbol
 
 namespace LO.Propositional
 
+variable {α : Type*}
+
 inductive Formula (α : Type u) : Type u
   | atom   : α → Formula α
   | falsum : Formula α
@@ -16,6 +18,8 @@ abbrev FormulaSet (α) := Set (Formula α)
 abbrev FormulaFinset (α) := Finset (Formula α)
 
 namespace Formula
+
+variable {φ ψ χ : Formula α}
 
 prefix:max "#" => Formula.atom
 
@@ -67,6 +71,7 @@ lemma top_def : (⊤ : Formula α) = ⊥ ➝ ⊥ := rfl
 
 lemma iff_def (φ ψ : Formula α) : φ ⭤ ψ = (φ ➝ ψ) ⋏ (ψ ➝ φ) := by rfl
 
+
 def complexity : Formula α → ℕ
 | atom _  => 0
 | ⊥       => 0
@@ -74,18 +79,27 @@ def complexity : Formula α → ℕ
 | φ ⋏ ψ   => max φ.complexity ψ.complexity + 1
 | φ ⋎ ψ   => max φ.complexity ψ.complexity + 1
 
-@[simp] lemma complexity_bot : complexity (⊥ : Formula α) = 0 := rfl
+namespace complexity
 
-@[simp] lemma complexity_atom (a : α) : complexity (atom a) = 0 := rfl
+lemma def_atom {a : α} : complexity (atom a) = 0 := rfl
+lemma def_bot : complexity (⊥ : Formula α) = 0 := rfl
+lemma def_top : complexity (⊤ : Formula α) = 1 := by simp [complexity]
+lemma def_imp : complexity (φ ➝ ψ) = max φ.complexity ψ.complexity + 1 := rfl
+lemma def_and  : complexity (φ ⋏ ψ) = max φ.complexity ψ.complexity + 1 := rfl
+lemma def_or : complexity (φ ⋎ ψ) = max φ.complexity ψ.complexity + 1 := rfl
+lemma def_neg : complexity (∼φ) = φ.complexity + 1 := by simp [complexity]
 
-@[simp] lemma complexity_imp (φ ψ : Formula α) : complexity (φ ➝ ψ) = max φ.complexity ψ.complexity + 1 := rfl
-@[simp] lemma complexity_imp' (φ ψ : Formula α) : complexity (imp φ ψ) = max φ.complexity ψ.complexity + 1 := rfl
+attribute [simp, grind .]
+  def_atom
+  def_bot
+  def_top
+  def_imp
+  def_and
+  def_or
+  def_neg
 
-@[simp] lemma complexity_and (φ ψ : Formula α) : complexity (φ ⋏ ψ) = max φ.complexity ψ.complexity + 1 := rfl
-@[simp] lemma complexity_and' (φ ψ : Formula α) : complexity (and φ ψ) = max φ.complexity ψ.complexity + 1 := rfl
+end complexity
 
-@[simp] lemma complexity_or (φ ψ : Formula α) : complexity (φ ⋎ ψ) = max φ.complexity ψ.complexity + 1 := rfl
-@[simp] lemma complexity_or' (φ ψ : Formula α) : complexity (or φ ψ) = max φ.complexity ψ.complexity + 1 := rfl
 
 @[elab_as_elim]
 def cases' {C : Formula α → Sort w}
@@ -158,6 +172,7 @@ instance : DecidableEq (Formula α) := hasDecEq
 
 end Decidable
 
+
 section Encodable
 
 variable [Encodable α]
@@ -166,9 +181,44 @@ open Encodable
 def toNat : Formula α → ℕ
   | ⊥       => (Nat.pair 0 0) + 1
   | atom a  => (Nat.pair 1 <| encode a) + 1
-  | φ ➝ ψ   => (Nat.pair 2 <| φ.toNat.pair ψ.toNat) + 1
-  | φ ⋏ ψ   => (Nat.pair 3 <| φ.toNat.pair ψ.toNat) + 1
-  | φ ⋎ ψ   => (Nat.pair 4 <| φ.toNat.pair ψ.toNat) + 1
+  | φ ➝ ψ   => (Nat.pair 2 <| Nat.pair φ.toNat ψ.toNat) + 1
+  | φ ⋏ ψ   => (Nat.pair 3 <| Nat.pair φ.toNat ψ.toNat) + 1
+  | φ ⋎ ψ   => (Nat.pair 4 <| Nat.pair φ.toNat ψ.toNat) + 1
+
+lemma toNat_imp₁ : toNat φ < toNat (φ ➝ ψ) := by calc
+  _ ≤ Nat.pair φ.toNat ψ.toNat              := by apply Nat.left_le_pair
+  _ ≤ Nat.pair 2 (Nat.pair φ.toNat ψ.toNat) := by apply Nat.right_le_pair
+  _ < _                                     := by simp [toNat]
+
+lemma toNat_imp₂ : toNat ψ < toNat (φ ➝ ψ) := by calc
+  _ ≤ Nat.pair φ.toNat ψ.toNat              := by apply Nat.right_le_pair
+  _ ≤ Nat.pair 2 (Nat.pair φ.toNat ψ.toNat) := by apply Nat.right_le_pair
+  _ < _                                     := by simp [toNat]
+
+lemma toNat_and₁ : toNat φ < toNat (φ ⋏ ψ) := by calc
+  _ ≤ Nat.pair φ.toNat ψ.toNat              := by apply Nat.left_le_pair
+  _ ≤ Nat.pair 3 (Nat.pair φ.toNat ψ.toNat) := by apply Nat.right_le_pair
+  _ < _                                     := by simp [toNat]
+
+lemma toNat_and₂ : toNat ψ < toNat (φ ⋏ ψ) := by calc
+  _ ≤ Nat.pair φ.toNat ψ.toNat              := by apply Nat.right_le_pair
+  _ ≤ Nat.pair 3 (Nat.pair φ.toNat ψ.toNat) := by apply Nat.right_le_pair
+  _ < _                                     := by simp [toNat]
+
+lemma toNat_or₁ : toNat φ < toNat (φ ⋎ ψ) := by calc
+  _ ≤ Nat.pair φ.toNat ψ.toNat              := by apply Nat.left_le_pair
+  _ ≤ Nat.pair 4 (Nat.pair φ.toNat ψ.toNat) := by apply Nat.right_le_pair
+  _ < _                                     := by simp [toNat]
+
+lemma toNat_or₂ : toNat ψ < toNat (φ ⋎ ψ) := by calc
+  _ ≤ Nat.pair φ.toNat ψ.toNat              := by apply Nat.right_le_pair
+  _ ≤ Nat.pair 4 (Nat.pair φ.toNat ψ.toNat) := by apply Nat.right_le_pair
+  _ < _                                     := by simp [toNat]
+
+attribute [simp, grind .]
+  toNat_imp₁ toNat_imp₂
+  toNat_and₁ toNat_and₂
+  toNat_or₁ toNat_or₂
 
 def ofNat : ℕ → Option (Formula α)
   | 0 => none
@@ -208,12 +258,16 @@ lemma ofNat_toNat : ∀ (φ : Formula α), ofNat (toNat φ) = some φ
   | φ ⋏ ψ   => by simp [toNat, ofNat, ofNat_toNat φ, ofNat_toNat ψ]
   | φ ⋎ ψ   => by simp [toNat, ofNat, ofNat_toNat φ, ofNat_toNat ψ]
 
-instance : Encodable (Formula α) where
+
+instance instEncodable : Encodable (Formula α) where
   encode := toNat
   decode := ofNat
   encodek := ofNat_toNat
 
+lemma toNat_injective : Function.Injective (toNat : Formula α → ℕ) := instEncodable.encode_injective
+
 end Encodable
+
 
 
 def Letterless : Formula α → Prop

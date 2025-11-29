@@ -1,4 +1,5 @@
 import Foundation.Propositional.Entailment.Minimal.Basic
+import Foundation.Propositional.Entailment.Int.Basic
 
 namespace LO.Propositional
 
@@ -58,6 +59,15 @@ class AFortiori (𝓢 : S) where
 class AndIntroRule (𝓢 : S) where
   andIR! {φ ψ : F} : 𝓢 ⊢! φ → 𝓢 ⊢! ψ → 𝓢 ⊢! φ ⋏ ψ
 
+class DilemmaRule (𝓢 : S) where
+  dilemma! {φ ψ χ : F} : 𝓢 ⊢! φ ➝ χ → 𝓢 ⊢! ψ ➝ χ → 𝓢 ⊢! φ ⋎ ψ ➝ χ
+
+class GreedyRule (𝓢 : S) where
+  greedy! {φ ψ χ : F} : 𝓢 ⊢! φ ➝ ψ → 𝓢 ⊢! φ ➝ χ → 𝓢 ⊢! φ ➝ ψ ⋏ χ
+
+class TransRule (𝓢 : S) where
+  transRule! {φ ψ χ : F} : 𝓢 ⊢! φ ➝ ψ → 𝓢 ⊢! ψ ➝ χ → 𝓢 ⊢! φ ➝ χ
+
 class HasDistributeAndOr (𝓢 : S) where
   distributeAndOr! {φ ψ χ : F} : 𝓢 ⊢! Axioms.DistributeAndOr φ ψ χ
 
@@ -109,18 +119,45 @@ alias orIntroR := Entailment.or₂!
 alias andElimL := Entailment.and₁!
 alias andElimR := Entailment.and₂!
 
+alias efq! := Entailment.efq
+alias efq := Entailment.efq!
+
 attribute [simp, grind .]
   orIntroL orIntroR
   andElimL andElimR
+  efq
 
 alias A_intro_left := Entailment.A!_intro_left
 alias A_intro_right := Entailment.A!_intro_right
+
+alias of_O := Entailment.of_O!
 
 export AFortiori (af!)
 @[grind <=] lemma af [AFortiori 𝓢] : 𝓢 ⊢ φ → 𝓢 ⊢ ψ ➝ φ := λ ⟨h⟩ => ⟨af! h⟩
 
 export AndIntroRule (andIR!)
 @[grind <=] lemma andIR [AndIntroRule 𝓢] : 𝓢 ⊢ φ → 𝓢 ⊢ ψ → 𝓢 ⊢ φ ⋏ ψ := λ ⟨h₁⟩ ⟨h₂⟩ => ⟨andIR! h₁ h₂⟩
+
+
+export DilemmaRule (dilemma!)
+@[grind <=] lemma dilemma [DilemmaRule 𝓢] : 𝓢 ⊢ φ ➝ χ → 𝓢 ⊢ ψ ➝ χ → 𝓢 ⊢ φ ⋎ ψ ➝ χ := λ ⟨a⟩ ⟨b⟩ => ⟨dilemma! a b⟩
+
+alias CA!_of_C!_of_C! := dilemma!
+alias CA_of_C_of_C := dilemma
+
+
+export GreedyRule (greedy!)
+@[grind <=] lemma greedy [GreedyRule 𝓢] : 𝓢 ⊢ φ ➝ ψ → 𝓢 ⊢ φ ➝ χ → 𝓢 ⊢ φ ➝ ψ ⋏ χ := λ ⟨a⟩ ⟨b⟩ => ⟨greedy! a b⟩
+
+alias CK!_of_C!_of_C! := greedy!
+alias CK_of_C_of_C := greedy
+
+
+export TransRule (transRule!)
+@[grind ⇐] lemma transRule [TransRule 𝓢] : 𝓢 ⊢ φ ➝ ψ → 𝓢 ⊢ ψ ➝ χ → 𝓢 ⊢ φ ➝ χ := λ ⟨a⟩ ⟨b⟩ => ⟨transRule! a b⟩
+
+alias C_trans! := transRule!
+alias C_trans := transRule
 
 
 export HasDistributeAndOr (distributeAndOr!)

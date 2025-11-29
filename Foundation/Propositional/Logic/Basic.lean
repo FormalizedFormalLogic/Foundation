@@ -46,6 +46,14 @@ lemma iff_equal_provable_equiv : L₁ = L₂ ↔ L₁ ≊ L₂ := by
     have := Equiv.iff.mp h φ;
     grind;
 
+lemma weakerThan_of_provable (h : ∀ φ, L₁ ⊢ φ → L₂ ⊢ φ) : L₁ ⪯ L₂ := by
+  constructor;
+  simpa [Entailment.theory, forall_exists_index];
+
+lemma weakerThan_of_subset (h : L₁ ⊆ L₂) : L₁ ⪯ L₂ := by
+  apply weakerThan_of_provable;
+  grind;
+
 section
 
 variable [L.IsSuperintuitionistic] [Consistent L]

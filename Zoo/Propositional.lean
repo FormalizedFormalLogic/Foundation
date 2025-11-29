@@ -12,6 +12,8 @@ def isMatch (ci : ConstantInfo) : MetaM (Option Edge) := withNewMCtxDepth do
     return some ⟨s!"{←PrettyPrinter.ppExpr a}", s!"{←PrettyPrinter.ppExpr b}", .ssub⟩
   | ⟨1, ~q(Prop), ~q(LO.Entailment.WeakerThan (S := Logic ℕ) (T := Logic ℕ) $a $b)⟩ =>
     return some ⟨s!"{←PrettyPrinter.ppExpr a}", s!"{←PrettyPrinter.ppExpr b}", .sub⟩
+  | ⟨1, ~q(Prop), ~q(LO.Entailment.Equiv (S := Logic ℕ) (T := Logic ℕ) $a $b)⟩ =>
+    return some ⟨toString (←Lean.PrettyPrinter.ppExpr a), toString (←Lean.PrettyPrinter.ppExpr b), .eq⟩
   | _ => return none
 
 def findMatches : MetaM Json := do
