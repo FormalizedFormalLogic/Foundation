@@ -44,7 +44,7 @@ protected abbrev Ser : F := ∼∼⊤
 
 
 /-- Axioms of persistency for Kripke frame -/
-protected abbrev Per := φ ➝ ⊤ ➝ φ
+protected abbrev Hrd := φ ➝ ⊤ ➝ φ
 
 end Axioms
 
@@ -93,8 +93,8 @@ class HasAxiomSer (𝓢 : S) where
 class HasAxiomSym (𝓢 : S) where
   axiomSym! {φ ψ : F} : 𝓢 ⊢! Axioms.Sym φ ψ
 
-class HasAxiomPer (𝓢 : S) where
-  axiomPer! {φ : F} : 𝓢 ⊢! Axioms.Per φ
+class HasAxiomHrd (𝓢 : S) where
+  axiomHrd! {φ : F} : 𝓢 ⊢! Axioms.Hrd φ
 
 
 namespace Corsi
@@ -171,8 +171,8 @@ export HasAxiomSym (axiomSym!)
 lemma axiomSym [HasAxiomSym 𝓢] : 𝓢 ⊢ Axioms.Sym φ ψ := ⟨axiomSym!⟩
 
 
-export HasAxiomPer (axiomPer!)
-lemma axiomPer [HasAxiomPer 𝓢] : 𝓢 ⊢ Axioms.Per φ := ⟨axiomPer!⟩
+export HasAxiomHrd (axiomHrd!)
+lemma axiomHrd [HasAxiomHrd 𝓢] : 𝓢 ⊢ Axioms.Hrd φ := ⟨axiomHrd!⟩
 
 attribute [simp, grind .]
   axiomRfl
@@ -180,7 +180,7 @@ attribute [simp, grind .]
   axiomTra1 axiomTra2
   axiomSer
   axiomSym
-  axiomPer
+  axiomHrd
 
 end Corsi
 

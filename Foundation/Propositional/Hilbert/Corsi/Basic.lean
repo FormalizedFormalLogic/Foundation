@@ -180,6 +180,16 @@ instance [Ax.HasAxiomTra1] : Entailment.HasAxiomTra1 (Hilbert.Corsi Ax) where
       $ (HasAxiomTra1.mem_tra1);
   ⟩
 
+instance [Ax.HasAxiomHrd] : Entailment.HasAxiomHrd (Hilbert.Corsi Ax) where
+  axiomHrd! {φ} := ⟨by
+    simpa using Hilbert.Corsi.axm
+      (φ := Axioms.Hrd (.atom (HasAxiomHrd.p Ax)))
+      (s := λ b =>
+        if (HasAxiomHrd.p Ax) = b then φ
+        else (.atom b))
+      $ (HasAxiomHrd.mem_hrd);
+  ⟩
+
 end
 
 end Hilbert.Corsi
@@ -231,6 +241,30 @@ end F_Tra1
 protected abbrev F_Tra1 := Hilbert.Corsi F_Tra1.axioms
 instance : Entailment.F Propositional.F_Tra1 where
 
+protected abbrev F_Tra1_Hrd.axioms : Axiom ℕ := {
+  Axioms.Tra1 #0 #1 #2,
+  Axioms.Hrd #0
+}
+namespace F_Tra1_Hrd
+instance : F_Tra1_Hrd.axioms.HasAxiomTra1 where p := 0; q := 1; r := 2; mem_tra1 := by simp
+instance : F_Tra1_Hrd.axioms.HasAxiomHrd where p := 0
+end F_Tra1_Hrd
+protected abbrev F_Tra1_Hrd := Hilbert.Corsi F_Tra1_Hrd.axioms
+instance : Entailment.F Propositional.F_Tra1_Hrd where
+
+
+protected abbrev F_Rfl_Tra1_Hrd.axioms : Axiom ℕ := {
+  Axioms.Rfl #0 #1,
+  Axioms.Tra1 #0 #1 #2,
+  Axioms.Hrd #0
+}
+namespace F_Rfl_Tra1_Hrd
+instance : F_Rfl_Tra1_Hrd.axioms.HasAxiomRfl where p := 0; q := 1
+instance : F_Rfl_Tra1_Hrd.axioms.HasAxiomTra1 where p := 0; q := 1; r := 2; mem_tra1 := by simp
+instance : F_Rfl_Tra1_Hrd.axioms.HasAxiomHrd where p := 0
+end F_Rfl_Tra1_Hrd
+protected abbrev F_Rfl_Tra1_Hrd := Hilbert.Corsi F_Rfl_Tra1_Hrd.axioms
+instance : Entailment.F Propositional.F_Rfl_Tra1_Hrd where
 
 
 end LO.Propositional
