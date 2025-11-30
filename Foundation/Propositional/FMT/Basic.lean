@@ -250,7 +250,7 @@ lemma valid_orIntro₁ : F ⊧ Axioms.OrInst₁ φ ψ := by rintro V x y Rxy hφ
 lemma valid_orIntro₂ : F ⊧ Axioms.OrInst₂ φ ψ := by rintro V x y Rxy hψ; right; assumption;
 
 lemma valid_distributeAndOr : F ⊧ Axioms.DistributeAndOr φ ψ χ := by
-  rintro V x y Rxy ⟨hφ, (hψ | hχ)⟩
+  rintro V x y Rxy ⟨(_ | _), _⟩
   . left; constructor <;> assumption;
   . right; constructor <;> assumption;
 lemma valid_impId : F ⊧ Axioms.ImpId φ := by rintro V x y Rxy hφ; assumption;
@@ -307,6 +307,21 @@ lemma valid_CTrans (h₁ : F ⊧ φ ➝ ψ) (h₂ : F ⊧ ψ ➝ χ) : F ⊧ φ 
   . apply h₁ _ F.root;
     . apply F.rooted;
     . assumption;
+
+lemma valid_wkRestallRule (h : F ⊧ φ ➝ ψ) : F ⊧ (χ ➝ φ) ➝ (χ ➝ ψ) := by
+  intro V x y Rxy hψχ z Ryz hφ;
+  apply h;
+  . apply F.rooted;
+  . apply hψχ <;> assumption;
+
+lemma valid_what : F ⊧ (((φ ➝ χ) ⋏ (ψ ➝ χ)) ➝ ξ) ➝ (((φ ⋎ ψ) ➝ χ) ➝ ξ) := by
+  intro V x y Rxy h₁ z Ryz h₂;
+  apply h₁;
+  . sorry;
+  . constructor;
+    . intro w Rzw;
+      sorry;
+    . sorry;
 
 example :
   let F : Frame := {

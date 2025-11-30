@@ -173,6 +173,11 @@ instance : DecidableEq (Formula α) := hasDecEq
 end Decidable
 
 
+instance instInfinite [Infinite α] : Infinite (Formula α) := by
+  apply Infinite.of_injective (f := .atom);
+  simp [Function.Injective];
+
+
 section Encodable
 
 variable [Encodable α]
@@ -263,6 +268,8 @@ instance instEncodable : Encodable (Formula α) where
   encode := toNat
   decode := ofNat
   encodek := ofNat_toNat
+
+instance instDenumerable [Infinite α] : Denumerable (Formula α) := Denumerable.ofEncodableOfInfinite (Formula α)
 
 lemma toNat_injective : Function.Injective (toNat : Formula α → ℕ) := instEncodable.encode_injective
 

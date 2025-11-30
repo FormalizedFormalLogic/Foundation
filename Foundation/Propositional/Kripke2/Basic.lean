@@ -244,7 +244,7 @@ lemma valid_axiomD : F ⊧ Axioms.D φ ψ χ := by
   . apply h₂ <;> assumption;
 
 lemma valid_distributeAndOr : F ⊧ Axioms.DistributeAndOr φ ψ χ := by
-  rintro V x y Rxy ⟨hφ, (hψ | hχ)⟩
+  rintro V x y Rxy ⟨(_ | _), _⟩;
   . left; constructor <;> assumption;
   . right; constructor <;> assumption;
 

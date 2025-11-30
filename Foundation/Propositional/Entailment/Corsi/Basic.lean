@@ -11,7 +11,7 @@ namespace Axioms
 
 variable (φ ψ χ ξ)
 
-protected abbrev DistributeAndOr := (φ ⋏ (ψ ⋎ χ)) ➝ ((φ ⋏ ψ) ⋎ (φ ⋏ χ))
+protected abbrev DistributeAndOr := ((ψ ⋎ χ) ⋏ φ) ➝ ((ψ ⋏ φ) ⋎ (χ ⋏ φ))
 
 protected abbrev C := (φ ➝ ψ) ⋏ (φ ➝ χ) ➝ (φ ➝ (ψ ⋏ χ))
 

@@ -26,7 +26,8 @@ lemma insert_LConj {Γ : List (Formula α)} : 𝓢 ⊢ φ ⋏ Γ.conj₂ ➝ (φ
     . apply Entailment.and₁!;
     . apply Entailment.and₂!;
 
-@[simp, grind .] lemma conjconj {Γ : Finset (Formula α)} : 𝓢 ⊢ (Γ.conj) ➝ Γ.toList.conj₂ := by simp [Finset.conj];
+@[simp, grind .]
+lemma conjconj {Γ : Finset (Formula α)} : 𝓢 ⊢ (Γ.conj) ➝ Γ.toList.conj₂ := by simp [Finset.conj];
 
 lemma C_replace_both (h : 𝓢 ⊢ φ ➝ ψ) (h₁ : 𝓢 ⊢ φ' ➝ φ) (h₂ : 𝓢 ⊢ ψ ➝ ψ') : 𝓢 ⊢ φ' ➝ ψ' := by
   apply C_trans h₁;
@@ -55,7 +56,7 @@ lemma FConj_of_mem {Γ : Finset (Formula α)} (h : φ ∈ Γ) : 𝓢 ⊢ Γ.conj
   apply of_mem;
   simpa using h;
 
-lemma LConj₂Conj₂_of_provable {Γ Δ : List (Formula α)} (h : ∀ δ ∈ Δ, 𝓢 ⊢ Γ.conj₂ ➝ δ) : 𝓢 ⊢ Γ.conj₂ ➝ Δ.conj₂ := by
+lemma LConj₂Conj₂_of_provable {Δ : List (Formula α)} (h : ∀ δ ∈ Δ, 𝓢 ⊢ γ ➝ δ) : 𝓢 ⊢ γ ➝ Δ.conj₂ := by
   induction Δ using List.induction_with_singleton with
   | hnil => apply af; simp;
   | hsingle φ =>
@@ -93,20 +94,19 @@ lemma insert_FConj {Γ : Finset (Formula α)} : 𝓢 ⊢ φ ⋏ Γ.conj ➝ (ins
     rw [show (φ :: Γ.toList).toFinset = insert φ Γ by simp];
     exact impId;
 
-lemma CFConjFConj_of_provable {Γ Δ : Finset (Formula α)} (h : ∀ δ ∈ Δ, 𝓢 ⊢ Γ.conj ➝ δ) : 𝓢 ⊢ Γ.conj ➝ Δ.conj := by
+lemma CFConjFConj_of_provable {Δ : Finset (Formula α)} (h : ∀ δ ∈ Δ, 𝓢 ⊢ γ ➝ δ) : 𝓢 ⊢ γ ➝ Δ.conj := by
   apply LConj₂Conj₂_of_provable;
   intro δ hδ;
-  apply C_trans ?_ $ h δ ?_;
-  . exact impId;
-  . simpa using hδ;
+  apply C_trans impId $ h δ ?_;
+  simpa using hδ;
 
 lemma Lgreedy {Γ : List (Formula α)} (h : ∀ γ ∈ Γ, 𝓢 ⊢ φ ➝ γ) : 𝓢 ⊢ φ ➝ Γ.conj₂ := by
   induction Γ using List.induction_with_singleton with
   | hnil => apply af; simp;
   | hsingle ψ => apply h; simp;
   | hcons ψ Δ he ih =>
-    simp [List.conj₂_cons_nonempty he];
-    simp at h;
+    simp only [List.conj₂_cons_nonempty he];
+    simp only [List.mem_cons, forall_eq_or_imp] at h;
     apply greedy;
     . apply h.1;
     . apply ih h.2;
@@ -116,6 +116,61 @@ lemma Fgreedy {Γ : Finset (Formula α)} (h : ∀ γ ∈ Γ, 𝓢 ⊢ φ ➝ γ)
   intro γ hγ;
   apply h γ;
   simpa using hγ;
+
+lemma CA_replace_both (h₁ : 𝓢 ⊢ φ ➝ φ') (h₂ : 𝓢 ⊢ ψ ➝ ψ') : 𝓢 ⊢ φ ⋎ ψ ➝ φ' ⋎ ψ' := by
+  apply dilemma;
+  . apply C_trans h₁; simp;
+  . apply C_trans h₂; simp;
+
+lemma CA_replace_left (h : 𝓢 ⊢ φ' ➝ φ) : 𝓢 ⊢ φ' ⋎ ψ ➝ φ ⋎ ψ := by
+  apply CA_replace_both;
+  . assumption;
+  . simp;
+
+lemma CA_replace_right (h : 𝓢 ⊢ ψ ➝ ψ') : 𝓢 ⊢ φ ⋎ ψ ➝ φ ⋎ ψ' := by
+  apply CA_replace_both;
+  . simp;
+  . assumption;
+
+lemma w₂ {Γ : List (Formula α)} : 𝓢 ⊢ ((φ ⋎ ψ) :: Γ).conj₂ ➝ (φ :: Γ).conj₂ ⋎ (ψ :: Γ).conj₂ := by
+  induction Γ using List.induction_with_singleton with
+  | hnil => exact impId;
+  | hsingle χ => simp;
+  | hcons χ Δ he ih => simp [List.conj₂_cons_nonempty he];
+
+lemma w {Γ : Finset (Formula α)} : 𝓢 ⊢ (insert (φ ⋎ ψ) Γ).conj ➝ (insert φ Γ).conj ⋎ (insert ψ Γ).conj := by
+  apply C_replace_both w₂;
+  . show 𝓢 ⊢ (insert (φ ⋎ ψ) Γ).conj ➝ ((φ ⋎ ψ) :: Γ.toList).conj₂
+    apply LConj₂Conj₂_of_provable;
+    intro δ hδ;
+    simp at hδ;
+    rcases hδ with rfl | hδ;
+    . apply FConj_of_mem;
+      simp;
+    . apply FConj_of_mem;
+      grind;
+  . apply CA_replace_both <;>
+    . apply C_trans ?_ insert_FConj
+      apply greedy;
+      . apply of_mem;
+        simp;
+      . apply LConj₂Conj₂_of_subset;
+        grind;
+
+lemma dd {Γ Δ : Finset (Formula α)} : 𝓢 ⊢ (insert (φ ⋎ ψ) (Γ ∪ Δ)).conj ➝ (insert φ Γ).conj ⋎ (insert ψ Δ).conj := by
+  apply C_trans $ w (𝓢 := 𝓢) (Γ := Γ ∪ Δ) (φ := φ) (ψ := ψ);
+  apply dilemma;
+  . apply C_trans $ Entailment.or₁! (ψ := (insert ψ Δ).conj)
+    apply CA_replace_left;
+    apply CFConjFConj_of_subset
+    grind;
+  . apply C_trans $ Entailment.or₂! (φ := (insert φ Γ).conj)
+    apply CA_replace_right;
+    apply CFConjFConj_of_subset
+    grind;
+
+lemma bomb (h : 𝓢 ⊢ φ ➝ ψ) : 𝓢 ⊢ (χ ➝ φ) ➝ (χ ➝ ψ) := by
+  sorry;
 
 end Entailment.Corsi
 
@@ -174,9 +229,9 @@ lemma mem_LGreedy {Γ : List _} [Entailment.F L] (h : ∀ γ ∈ Γ, φ ➝ γ �
   | hnil => apply T.mem_of_provable; apply af; simp;
   | hsingle ψ => apply h; simp;
   | hcons ψ Δ he ih =>
-    simp [List.conj₂_cons_nonempty he];
-    simp at h;
-    apply mem_greedy
+    simp only [List.conj₂_cons_nonempty he];
+    simp only [List.mem_cons, forall_eq_or_imp] at h;
+    apply mem_greedy;
     . apply h.1;
     . apply ih h.2;
 
@@ -185,6 +240,10 @@ lemma mem_FGreedy {Γ : Finset _} [Entailment.F L] (h : ∀ γ ∈ Γ, φ ➝ γ
   intro γ hγ;
   apply h;
   simpa using hγ;
+
+lemma mem_dilemma [Entailment.HasAxiomD L] (h₁ : φ ➝ χ ∈ T.theory) (h₂ : ψ ➝ χ ∈ T.theory) : φ ⋎ ψ ➝ χ ∈ T.theory := by
+  apply T.imp_closed axiomD;
+  apply T.andIR h₁ h₂;
 
 end FTheory
 
@@ -231,6 +290,8 @@ lemma subset_construction_mono (hij : i ≤ j) : construction T hT i ⊆ constru
   obtain ⟨k, rfl⟩ := le_iff_exists_add.mp hij;
   apply subset_construction_add;
 
+lemma mem_construction_omega_of_exists_mem_construction (h : ∃ i, φ ∈ construction T hT i) : φ ∈ construction_omega T hT := by
+  simpa [construction_omega];
 
 lemma mem_construction_of_mem_construction_omega (hφ : φ ∈ construction_omega T hT) : φ ∈ (construction T hT (toNat φ + 1)) := by
   simp only [construction_omega, Set.mem_iUnion] at hφ;
@@ -251,15 +312,29 @@ lemma mem_construction_of_mem_construction_omega (hφ : φ ∈ construction_omeg
 
 
 variable [Entailment.F L]
+variable [Denumerable (Formula ℕ)]
 
+lemma ttt (h : Encodable.decode i = some φ) : construction T hT i = construction T hT φ.toNat := by
+  sorry;
 
 lemma iff_mem_omega_construction : φ ∈ construction_omega T hT ↔
   (χ ➝ φ ∈ T.theory) ∨
-  (∀ Γ : Finset (Formula _), ↑Γ ⊆ (construction T hT (toNat φ)) → Finset.conj (insert φ Γ) ➝ ξ ∉ T.theory) := by
+  (∀ Γ : Finset (Formula _), ↑Γ ⊆ (construction T hT φ.toNat) → Finset.conj (insert φ Γ) ➝ ξ ∉ T.theory) := by
   simp only [construction_omega, Set.mem_iUnion];
   constructor;
   . rintro ⟨i, hi⟩;
-    sorry;
+    fun_induction construction T hT i;
+    case case1 => left; simpa using hi;
+    case case2 o h ih =>
+      simp at hi;
+      rcases hi with rfl | hi;
+      . right;
+        intro Γ hΓ;
+        apply h;
+        sorry;
+      . apply ih hi;
+    case case3 ih => apply ih hi;
+    case case4 ih => apply ih hi;
   . contrapose!;
     intro h;
     constructor;
@@ -274,54 +349,38 @@ lemma iff_not_mem_omega_construction : φ ∉ construction_omega T hT ↔
   apply Iff.trans iff_mem_omega_construction.not;
   grind;
 
-lemma not_mem_zero_of_not_mem_construction_omega (h : φ ∉ construction_omega T hT) : χ ➝ φ ∉ T.theory := by
-  contrapose! h;
-  apply iff_mem_omega_construction.mpr;
-  tauto;
-
 lemma construction_consistency (i : ℕ) : ∀ Γ, ↑Γ ⊆ construction T hT i → Finset.conj Γ ➝ ξ ∉ T.theory := by
   intro Γ hΓ;
-  induction i with
-  | zero =>
+  fun_induction construction T hT i;
+  case case1 =>
     by_contra hC;
     apply hT;
     apply T.mem_trans ?_ hC;
     apply T.mem_FGreedy
     apply hΓ;
-  | succ i ih =>
-    dsimp [construction] at hΓ;
-    split at hΓ;
-    . split_ifs at hΓ with h;
-      . rename_i γ hγ;
-        by_contra hC;
-        apply h (Γ.erase γ);
-        . simpa;
-        . apply T.mem_trans ?_ hC;
-          apply T.mem_of_provable;
-          apply CFConjFConj_of_subset;
-          apply Finset.insert_erase_subset;
-      . apply ih;
-        assumption;
-    . apply ih;
-      assumption;
+  case case2 γ _ h ih =>
+    by_contra hC;
+    apply h (Γ.erase γ);
+    . simpa;
+    . apply T.mem_trans ?_ hC;
+      apply T.mem_of_provable;
+      apply CFConjFConj_of_subset;
+      apply Finset.insert_erase_subset;
+  all_goals grind;
 
-lemma not_mem_construction_omega (h : γ ➝ ξ ∈ T.theory) : γ ∉ construction_omega T hT := by
-  suffices ∀ i, γ ∉ construction T hT i by simpa [construction_omega];
-  by_contra! hC;
-  obtain ⟨i, hi⟩ := hC;
-  induction i with
-  | zero => apply hT $ T.mem_trans hi h;
-  | succ i ih =>
-    dsimp [construction] at hi;
-    split at hi;
-    . split_ifs at hi with h;
-      . apply h ∅ (by tauto);
-        suffices γ ➝ ξ ∈ T.theory by
-          simp only [insert_empty_eq, Finset.conj_singleton];
-          grind;
-        assumption;
-      . contradiction;
-    . contradiction;
+lemma construction_omega_mem_ant : χ ∈ construction_omega T hT := by
+  apply iff_mem_omega_construction.mpr;
+  left;
+  apply T.mem_of_provable;
+  apply impId;
+
+lemma construction_omega_not_mem_csq : ξ ∉ construction_omega T hT := by
+  apply iff_mem_omega_construction.not.mpr;
+  push_neg;
+  constructor;
+  . assumption;
+  . use ∅;
+    simp;
 
 lemma construction_omega_noBot : ⊥ ∉ (construction_omega T hT) := by
   apply iff_not_mem_omega_construction.mpr;
@@ -333,14 +392,11 @@ lemma construction_omega_noBot : ⊥ ∉ (construction_omega T hT) := by
   . use ∅;
     simp;
 
-lemma mem_construction_omega_of_exists (h : ∃ i, φ ∈ construction T hT i) : φ ∈ construction_omega T hT := by
-  simpa [construction_omega];
-
 lemma construction_omega_andClosed :
   letI U := construction_omega T hT
   φ ∈ U → ψ ∈ U → φ ⋏ ψ ∈ U := by
   rintro hφ hψ;
-  apply mem_construction_omega_of_exists;
+  apply mem_construction_omega_of_exists_mem_construction;
   use (toNat (φ ⋏ ψ)) + 1;
   simp only [construction, Formula.ofNat_toNat];
   split_ifs with h;
@@ -353,7 +409,7 @@ lemma construction_omega_andClosed :
       apply T.mem_of_provable;
       apply CFConjFConj_of_provable;
       intro γ hγ;
-      simp at hγ;
+      simp only [Finset.mem_insert] at hγ;
       rcases hγ with rfl | hγ;
       . apply greedy <;> . apply FConj_of_mem; grind;
       . apply FConj_of_mem;
@@ -365,30 +421,59 @@ lemma construction_omega_andClosed :
     case inr.inr => apply hΓ; assumption;
     all_goals
     . apply subset_construction_mono (i := (toNat γ) + 1);
-      . apply Nat.succ_le_of_lt; simp;
+      . apply Nat.succ_le_of_lt;
+        simp;
       . apply mem_construction_of_mem_construction_omega;
         assumption;
+
+lemma construction_rel :
+  letI U := construction_omega T hT;
+  φ ➝ ψ ∈ T.theory → φ ∈ U → ψ ∈ U := by
+  intro hφψ hφ;
+  by_contra hψ;
+  wlog iφψ : ψ.toNat ≤ φ.toNat;
+  . sorry;
+  obtain ⟨hψ, Γ, hΓ₁, hΓ₂⟩ := iff_not_mem_omega_construction.mp hψ;
+  rcases iff_mem_omega_construction.mp hφ with hφ | hφ;
+  . apply hψ;
+    apply T.mem_trans hφ hφψ;
+  . apply hφ Γ ?_ ?_;
+    . intro γ hγ;
+      apply subset_construction_mono ?_ $ hΓ₁ hγ;
+      assumption;
+    . apply T.mem_trans ?_ hΓ₂;
+      apply T.imp_closed;
+      . show L ⊢ ((insert φ Γ).conj ➝ Γ.conj) ⋏ ((insert φ Γ).conj ➝ ψ) ➝ (insert φ Γ).conj ➝ (insert ψ Γ).conj;
+        apply C_trans axiomC;
+        apply bomb;
+        apply CFConjFConj_of_provable;
+        intro δ hδ;
+        simp only [Finset.mem_insert] at hδ;
+        rcases hδ with rfl | hδ;
+        . exact Entailment.and₂!;
+        . apply C_trans Entailment.and₁!
+          apply FConj_of_mem
+          assumption;
+      . apply T.andIR;
+        . apply T.mem_of_provable;
+          apply CFConjFConj_of_subset
+          simp;
+        . apply T.mem_trans ?_ hφψ;
+          apply T.mem_of_provable;
+          apply FConj_of_mem;
+          simp;
 
 lemma construction_omega_impClosed :
   letI U := construction_omega T hT
   L ⊢ φ ➝ ψ → φ ∈ U → ψ ∈ U := by
-  rintro hφψ hφ;
-  by_contra hψ;
-  obtain ⟨hψ, Γ, hΓ₁, hΓ₂⟩ := iff_not_mem_omega_construction.mp hψ;
-  have H : (insert φ Γ).conj ➝ ξ ∈ T.theory := T.mem_trans ?_ hΓ₂;
-  . rcases iff_mem_omega_construction.mp hφ with (hφ | hφ);
-    . apply hψ;
-      apply T.mem_trans hφ;
-      apply T.mem_of_provable;
-      exact hφψ;
-    . apply hφ Γ ?_ H;
-      sorry;
-  . apply T.mem_of_provable;
-    sorry;
+  intro hφψ hφ;
+  apply construction_rel ?_ hφ;
+  apply T.mem_of_provable;
+  assumption;
 
 lemma construction_omega_L_subset : L ⊆ construction_omega T hT := by
   intro φ hφ;
-  apply mem_construction_omega_of_exists;
+  apply mem_construction_omega_of_exists_mem_construction;
   use (toNat φ) + 1;
   simp only [construction, Formula.ofNat_toNat];
   split_ifs with h;
@@ -408,11 +493,6 @@ lemma construction_omega_prime :
   letI U := construction_omega T hT
   φ ⋎ ψ ∈ U → φ ∈ U ∨ ψ ∈ U := by
   rintro hφψ;
-  wlog lt_φψ : toNat φ ≤ toNat ψ;
-  . symm;
-    apply this;
-    . sorry;
-    . omega;
   by_contra! hC;
   obtain ⟨hφ, hψ⟩ := hC;
   replace ⟨_, Γ, hΓ₁, hΓ₂⟩ := iff_not_mem_omega_construction.mp hφ;
@@ -433,27 +513,9 @@ lemma construction_omega_prime :
       . suffices ψ.toNat < (φ ⋎ ψ).toNat by omega;
         simp;
       . exact hΔ₁ hχ;
-  . have := T.andIR hΓ₂ hΔ₂;
-    sorry;
-
-lemma construction_rel :
-  letI U := construction_omega T hT;
-  (φ ➝ ψ ∈ T.theory → φ ∈ U → ψ ∈ U) := by
-  sorry;
-
-lemma construction_omega_mem_ant : χ ∈ construction_omega T hT := by
-  apply iff_mem_omega_construction.mpr;
-  left;
-  apply T.mem_of_provable;
-  apply impId;
-
-lemma construction_omega_not_mem_csq : ξ ∉ construction_omega T hT := by
-  apply iff_mem_omega_construction.not.mpr;
-  push_neg;
-  constructor;
-  . assumption;
-  . use ∅;
-    simp;
+  . apply T.mem_trans ?_ $ T.mem_dilemma hΓ₂ hΔ₂;
+    apply T.mem_of_provable;
+    apply dd;
 
 end FTheory.lindenbaum
 
@@ -516,7 +578,7 @@ lemma truthlemma {T : canonicalModel L} : Satisfies _ T φ ↔ φ ∈ T.theory :
   | hfalsum => simp [Kripke2.Satisfies];
   | hor φ ψ ihφ ihψ =>
     suffices φ ∈ T.theory ∨ ψ ∈ T.theory ↔ φ ⋎ ψ ∈ T.theory by
-      simpa [Kripke2.Satisfies, ihφ, ihψ];
+      simpa only [Satisfies, ihφ, ihψ];
     constructor;
     . rintro (hφ | hψ);
       . apply T.imp_closed orIntroL hφ;
@@ -524,7 +586,7 @@ lemma truthlemma {T : canonicalModel L} : Satisfies _ T φ ↔ φ ∈ T.theory :
     . apply T.prime;
   | hand φ ψ ihφ ihψ =>
     suffices (φ ∈ T.theory ∧ ψ ∈ T.theory) ↔ φ ⋏ ψ ∈ T.theory by
-      simpa [Kripke2.Satisfies, ihφ, ihψ];
+      simpa only [Satisfies, ihφ, ihψ];
     constructor;
     . rintro ⟨hφ, hψ⟩;
       apply T.andIR hφ hψ;
@@ -534,7 +596,7 @@ lemma truthlemma {T : canonicalModel L} : Satisfies _ T φ ↔ φ ∈ T.theory :
       . apply T.imp_closed andElimR h;
   | himp φ ψ ihφ ihψ =>
     suffices (∀ {U : canonicalModel L}, T ≺ U → φ ∈ U.theory → ψ ∈ U.theory) ↔ φ ➝ ψ ∈ T.theory by
-      simpa [Kripke2.Satisfies, ihφ, ihψ];
+      simpa only [Satisfies, ihφ, ihψ];
     constructor;
     . contrapose!;
       exact FTheory.lindenbaum T;
