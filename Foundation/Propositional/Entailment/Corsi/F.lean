@@ -1,4 +1,4 @@
-import Foundation.Propositional.Entailment.Corsi.Basic
+import Foundation.Propositional.Entailment.Corsi.WF
 
 namespace LO.Propositional
 
@@ -17,6 +17,7 @@ protected class F (𝓢 : S) extends
   Entailment.HasAxiomD 𝓢,
   Entailment.HasAxiomI 𝓢,
   Entailment.HasAxiomVerum 𝓢,
+  Entailment.HasAxiomEFQ 𝓢,
   -- Rule
   Entailment.ModusPonens 𝓢,
   Entailment.AFortiori 𝓢,
@@ -27,35 +28,36 @@ namespace Corsi
 
 variable [Entailment.F 𝓢]
 
-def CA!_of_C!_of_C! (h₁ : 𝓢 ⊢! φ ➝ χ) (h₂ : 𝓢 ⊢! ψ ➝ χ) : 𝓢 ⊢! φ ⋎ ψ ➝ χ := by
-  refine axiomD! ⨀ ?_
-  apply andIR! <;> assumption;
-@[grind ⇐] lemma CA_of_C_of_C (h₁ : 𝓢 ⊢ φ ➝ χ) (h₂ : 𝓢 ⊢ ψ ➝ χ) : 𝓢 ⊢ φ ⋎ ψ ➝ χ := ⟨CA!_of_C!_of_C! h₁.some h₂.some⟩
+instance : RuleD 𝓢 where
+  ruleD! {φ ψ χ} h₁ h₂ := by
+    refine axiomD! ⨀ ?_
+    apply andIR! <;> assumption;
 
-def CK!_of_C!_of_C! (h₁ : 𝓢 ⊢! φ ➝ ψ) (h₂ : 𝓢 ⊢! φ ➝ χ) : 𝓢 ⊢! φ ➝ ψ ⋏ χ := by
-  refine axiomC! ⨀ ?_
-  apply andIR! <;> assumption;
-@[grind ⇐] lemma CK_of_C_of_C (h₁ : 𝓢 ⊢ φ ➝ ψ) (h₂ : 𝓢 ⊢ φ ➝ χ) : 𝓢 ⊢ φ ➝ ψ ⋏ χ := ⟨CK!_of_C!_of_C! h₁.some h₂.some⟩
+instance : RuleC 𝓢 where
+  ruleC! {φ ψ χ} h₁ h₂ := by
+    refine axiomC! ⨀ ?_
+    apply andIR! <;> assumption;
 
-def C_trans! (h₁ : 𝓢 ⊢! φ ➝ ψ) (h₂ : 𝓢 ⊢! ψ ➝ χ) : 𝓢 ⊢! φ ➝ χ := by
-  refine (axiomI! (ψ := ψ)) ⨀ ?_;
-  apply andIR! <;> assumption;
-@[grind ⇐] lemma C_trans (h₁ : 𝓢 ⊢ φ ➝ ψ) (h₂ : 𝓢 ⊢ ψ ➝ χ) : 𝓢 ⊢ φ ➝ χ := ⟨C_trans! h₁.some h₂.some⟩
+instance : RuleI 𝓢 where
+  ruleI! {φ ψ χ} h₁ h₂ := by
+    refine (axiomI! (ψ := ψ)) ⨀ ?_;
+    apply andIR! <;> assumption;
 
-def CK_right_cancel! (h₁ : 𝓢 ⊢! φ ⋏ ψ ➝ χ) (h₂ : 𝓢 ⊢! ψ) : 𝓢 ⊢! φ ➝ χ := by
-  apply C_trans! ?_ h₁;
-  apply CK!_of_C!_of_C!;
-  . apply impId!;
-  . apply af! h₂;
-lemma CK_right_cancel (h₁ : 𝓢 ⊢ φ ⋏ ψ ➝ χ) (h₂ : 𝓢 ⊢ ψ) : 𝓢 ⊢ φ ➝ χ := ⟨CK_right_cancel! h₁.some h₂.some⟩
+instance : RuleRestall 𝓢 where
+  restall! {φ ψ χ ξ} h₁ h₂ := by
+    apply ruleI! (ψ := (φ ➝ χ) ⋏ (χ ➝ ξ)) ?_ axiomI!;
+    apply ruleC!;
+    . apply ruleI! (ψ := (φ ➝ ψ) ⋏ (ψ ➝ χ)) ?_ axiomI!;
+      apply ruleC!;
+      . apply af! h₁;
+      . apply impId!;
+    . apply af! h₂;
 
-def CK_right_replace! (h₁ : 𝓢 ⊢! φ ⋏ ψ ➝ χ) (h₂ : 𝓢 ⊢! ψ' ➝ ψ) : 𝓢 ⊢! φ ⋏ ψ' ➝ χ := by
-  apply C_trans! ?_ h₁;
-  apply CK!_of_C!_of_C!
-  . apply andElimL!;
-  . apply C_trans! ?_ h₂;
-    apply andElimR!;
-lemma CK_right_replace (h₁ : 𝓢 ⊢ φ ⋏ ψ ➝ χ) (h₂ : 𝓢 ⊢ ψ' ➝ ψ) : 𝓢 ⊢ φ ⋏ ψ' ➝ χ := ⟨CK_right_replace! h₁.some h₂.some⟩
+instance : RuleE 𝓢 where
+  ruleE! h₁ h₂ := by
+    apply andIR!;
+    . apply restall! (K_Elim_right! h₁) (K_Elim_left! h₂);
+    . apply restall! (K_Elim_left! h₁) (K_Elim_right! h₂);
 
 end Corsi
 
