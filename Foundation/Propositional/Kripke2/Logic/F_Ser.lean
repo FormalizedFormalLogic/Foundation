@@ -34,6 +34,7 @@ instance : Entailment.Consistent Propositional.F_Ser := consistent_of_sound_fram
   apply Set.mem_setOf_eq.mpr;
   infer_instance;
 
+/-
 instance Kripke2.complete : Complete Propositional.F_Ser FrameClass.F_Ser := by
   constructor;
   intro φ hφ;
@@ -41,6 +42,7 @@ instance Kripke2.complete : Complete Propositional.F_Ser FrameClass.F_Ser := by
   apply hφ;
   apply Set.mem_setOf_eq.mpr;
   infer_instance;
+-/
 
 end F_Ser
 

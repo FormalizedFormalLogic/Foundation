@@ -102,6 +102,11 @@ class HasAxiomSer (Ax : Axiom α) where
   mem_ser : Axioms.Ser ∈ Ax := by tauto;
 
 
+class HasAxiomHrd (Ax : Axiom α) where
+  p : α
+  mem_hrd : Axioms.Hrd #p ∈ Ax := by tauto;
+
+
 end Axiom
 
 end LO.Propositional

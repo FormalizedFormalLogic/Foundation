@@ -15,19 +15,19 @@ variable {M : Kripke2.Model} {φ ψ χ : Formula ℕ}
 
 namespace Model
 
-protected class IsPersistent (M : Kripke2.Model) where
-  persistent : ∀ {a x y}, M x a → x ≺ y → M y a
-export IsPersistent (persistent)
+protected class IsHereditary (M : Kripke2.Model) where
+  hereditary : ∀ {a x y}, M x a → x ≺ y → M y a
+export IsHereditary (hereditary)
 
 end Model
 
 
 @[simp high, grind .]
-lemma valid_axiomRfl_of_isReflexive {a} [M.IsPersistent] : M ⊧ Axioms.Per #a := by
+lemma valid_axiomHrd_of_isHereditary {a} [M.IsHereditary] : M ⊧ Axioms.Hrd #a := by
   intro x y Rxy h z Ryz _;
-  apply M.persistent h Ryz;
+  apply M.hereditary h Ryz;
 
-lemma isPersistent_of_valid_axiomPer (h : ∀ a, M ⊧ Axioms.Per #a) : M.IsPersistent := by
+lemma isHereditary_of_valid_axiomHrd (h : ∀ a, M ⊧ Axioms.Hrd #a) : M.IsHereditary := by
   constructor;
   intro a x y h₁ Rxy;
   apply h a M.root M.rooted h₁ Rxy;
