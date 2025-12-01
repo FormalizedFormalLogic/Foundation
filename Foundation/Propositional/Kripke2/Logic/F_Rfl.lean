@@ -26,7 +26,7 @@ instance Kripke2.sound : Sound Propositional.F_Rfl FrameClass.F_Rfl := by
   constructor;
   rintro φ hφ F hF;
   replace hF := Set.mem_setOf_eq.mp hF;
-  rcases hφ with (rfl);
+  rcases hφ with ⟨_, _, rfl⟩;
   simp;
 
 instance : Entailment.Consistent Propositional.F_Rfl := consistent_of_sound_frameclass FrameClass.F_Rfl $ by

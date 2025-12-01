@@ -148,7 +148,6 @@ instance : Semantics.Bot (Kripke2.Model) := ⟨by grind⟩
 lemma iff_not_models_exists_world : (M ⊭ φ) ↔ (∃ x : M.World, ¬x ⊧ φ) := by grind;
 alias ⟨exists_world_of_not, not_of_exists_world⟩ := iff_not_models_exists_world
 
-
 end ValidOnModel
 
 
@@ -197,7 +196,7 @@ open Formula.Kripke2
 
 section
 
-variable {C : Set Frame} {φ ψ χ : Formula ℕ}
+variable {C : FrameClass} {φ ψ χ : Formula ℕ}
 
 lemma iff_not_validOnFrameClass_exists_frame : C ⊭ φ ↔ ∃ F ∈ C, ¬F ⊧ φ := by
   apply not_iff_not.mp;
@@ -222,36 +221,55 @@ end
 
 section
 
-variable {F : Frame} {φ ψ χ : Formula ℕ}
+variable {C : ModelClass} {φ ψ χ : Formula ℕ}
+
+lemma iff_not_validOnModelClass_exists_model : C ⊭ φ ↔ ∃ M ∈ C, ¬M ⊧ φ := by
+  apply not_iff_not.mp;
+  push_neg;
+  tauto;
+alias ⟨exists_model_of_not_validOnModelClass, not_validOnModelClass_of_exists_model⟩ := iff_not_validOnModelClass_exists_model
+
+lemma iff_not_validOnModelClass_exists_model_world : C ⊭ φ ↔ ∃ M : Kripke2.Model, ∃ x : M, M ∈ C ∧ x ⊭ φ := by
+  apply not_iff_not.mp;
+  push_neg;
+  tauto;
+alias ⟨exists_model_world_of_not_validOnModelClass, not_validOnModelClass_of_exists_model_world⟩ := iff_not_validOnModelClass_exists_model_world
+
+end
+
+
+section
+
+variable {M : Model} {φ ψ χ : Formula ℕ}
 
 open Formula (atom)
 
-lemma valid_andElim₁ : F ⊧ Axioms.AndElim₁ φ ψ := by rintro V x y Rxy ⟨_, _⟩; assumption;
-lemma valid_andElim₂ : F ⊧ Axioms.AndElim₂ φ ψ := by rintro V x y Rxy ⟨_, _⟩; assumption;
-lemma valid_axiomC : F ⊧ Axioms.C φ ψ χ := by
-  rintro V x y Rxy ⟨h₁, h₂⟩ z Ryz h₃;
+lemma valid_andElim₁ : M ⊧ Axioms.AndElim₁ φ ψ := by rintro x y Rxy ⟨_, _⟩; assumption;
+lemma valid_andElim₂ : M ⊧ Axioms.AndElim₂ φ ψ := by rintro x y Rxy ⟨_, _⟩; assumption;
+lemma valid_axiomC : M ⊧ Axioms.C φ ψ χ := by
+  rintro x y Rxy ⟨h₁, h₂⟩ z Ryz h₃;
   constructor;
   . apply h₁ <;> assumption;
   . apply h₂;
     . assumption;
     . assumption;
 
-lemma valid_orIntro₁ : F ⊧ Axioms.OrInst₁ φ ψ := by rintro V x y Rxy hφ; left; assumption;
-lemma valid_orIntro₂ : F ⊧ Axioms.OrInst₂ φ ψ := by rintro V x y Rxy hψ; right; assumption;
-lemma valid_axiomD : F ⊧ Axioms.D φ ψ χ := by
-  rintro V x y Rxy ⟨h₁, h₂⟩ z Ryz (hφ | hψ);
+lemma valid_orIntro₁ : M ⊧ Axioms.OrInst₁ φ ψ := by rintro x y Rxy hφ; left; assumption;
+lemma valid_orIntro₂ : M ⊧ Axioms.OrInst₂ φ ψ := by rintro x y Rxy hψ; right; assumption;
+lemma valid_axiomD : M ⊧ Axioms.D φ ψ χ := by
+  rintro x y Rxy ⟨h₁, h₂⟩ z Ryz (hφ | hψ);
   . apply h₁ <;> assumption;
   . apply h₂ <;> assumption;
 
-lemma valid_distributeAndOr : F ⊧ Axioms.DistributeAndOr φ ψ χ := by
-  rintro V x y Rxy ⟨hφ, (hψ | hχ)⟩
+lemma valid_distributeAndOr : M ⊧ Axioms.DistributeAndOr φ ψ χ := by
+  rintro x y Rxy ⟨hφ, (hψ | hχ)⟩
   . left; constructor <;> assumption;
   . right; constructor <;> assumption;
 
-lemma valid_axiomI : F ⊧ Axioms.I φ ψ χ := by
-  rintro V x y Rxy ⟨h₁, h₂⟩ z Ryz h₃;
+lemma valid_axiomI : M ⊧ Axioms.I φ ψ χ := by
+  rintro x y Rxy ⟨h₁, h₂⟩ z Ryz h₃;
   exact h₂ Ryz $ h₁ Ryz h₃;
-lemma valid_impId : F ⊧ Axioms.ImpId φ := by rintro V x y Rxy hφ; assumption;
+lemma valid_impId : M ⊧ Axioms.ImpId φ := by rintro x y Rxy hφ; assumption;
 
 attribute [simp high, grind .]
   valid_andElim₁ valid_andElim₂
@@ -263,22 +281,22 @@ attribute [simp high, grind .]
   valid_impId
 
 @[grind ⇒]
-lemma valid_afortiori (h : F ⊧ φ) : F ⊧ ψ ➝ φ := by
-  rintro V x y Rxy _;
+lemma valid_afortiori (h : M ⊧ φ) : M ⊧ ψ ➝ φ := by
+  rintro x y Rxy _;
   apply h;
 
 @[grind ⇒]
-lemma valid_conjunction_rule (h₁ : F ⊧ φ) (h₂ : F ⊧ ψ) : F ⊧ φ ⋏ ψ := by
-  rintro V x;
+lemma valid_conjunction_rule (h₁ : M ⊧ φ) (h₂ : M ⊧ ψ) : M ⊧ φ ⋏ ψ := by
+  rintro x;
   constructor;
   . apply h₁;
   . apply h₂;
 
 @[grind ⇒]
-lemma valid_modusponens (h₁ : F ⊧ φ ➝ ψ) (h₂ : F ⊧ φ) : F ⊧ ψ := by
-  rintro V x;
+lemma valid_modusponens (h₁ : M ⊧ φ ➝ ψ) (h₂ : M ⊧ φ) : M ⊧ ψ := by
+  rintro x;
   apply h₁;
-  . apply F.rooted;
+  . apply M.rooted;
   . apply h₂;
 
 lemma invalid_implyS :
