@@ -70,6 +70,7 @@ instance : CoeFun (Model) (λ M => Formula ℕ → 𝒫 M.𝓧) := ⟨truthset�
 @[simp, grind =] lemma truthset_imp : M (φ ➝ ψ) = ⟨{ w | (M φ, M ψ) ∈ M.NB w }, M.𝓧_closed_imp⟩ := rfl
 @[simp, grind .] lemma truthset_top : (M ⊤).1 = Set.univ := by simp [truthset, M.NB_spec];
 @[simp, grind =] lemma truthset_neg : M (∼φ) = ⟨{ w | (M φ, ∅) ∈ M.NB w }, M.𝓧_closed_imp⟩ := by grind;
+@[simp, grind =] lemma truthset_iff : M (φ ⭤ ψ) = ⟨{ w | (M φ, M ψ) ∈ M.NB w ∧ (M ψ, M φ) ∈ M.NB w }, @M.𝓧_closed_inter (M (φ ➝ ψ)) (M (ψ ➝ φ))⟩ := by grind;
 
 end Model
 

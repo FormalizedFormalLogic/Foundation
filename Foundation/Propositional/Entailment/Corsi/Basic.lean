@@ -268,10 +268,13 @@ def CK_right_replace!  [RuleI 𝓢] [RuleC 𝓢] [Entailment.HasAxiomAndElim �
 lemma CK_right_replace [RuleI 𝓢] [RuleC 𝓢] [Entailment.HasAxiomAndElim 𝓢] (h₁ : 𝓢 ⊢ φ ⋏ ψ ➝ χ) (h₂ : 𝓢 ⊢ ψ' ➝ ψ) : 𝓢 ⊢ φ ⋏ ψ' ➝ χ := ⟨CK_right_replace! h₁.some h₂.some⟩
 
 def K_comm! [RuleC 𝓢] [Entailment.HasAxiomAndElim 𝓢] : 𝓢 ⊢! (φ ⋏ ψ) ➝ (ψ ⋏ φ) := CK!_of_C!_of_C! andElimR! andElimL!
-lemma K_comm [RuleC 𝓢] [Entailment.HasAxiomAndElim 𝓢] : 𝓢 ⊢ (φ ⋏ ψ) ➝ (ψ ⋏ φ) := ⟨K_comm!⟩
+@[simp, grind .] lemma K_comm [RuleC 𝓢] [Entailment.HasAxiomAndElim 𝓢] : 𝓢 ⊢ (φ ⋏ ψ) ➝ (ψ ⋏ φ) := ⟨K_comm!⟩
 
 def A_comm! [RuleD 𝓢] [Entailment.HasAxiomOrInst 𝓢] : 𝓢 ⊢! (φ ⋎ ψ) ➝ (ψ ⋎ φ) := CA!_of_C!_of_C! orIntroR! orIntroL!
-lemma A_comm [RuleD 𝓢] [Entailment.HasAxiomOrInst 𝓢] : 𝓢 ⊢ (φ ⋎ ψ) ➝ (ψ ⋎ φ) := ⟨A_comm!⟩
+@[simp, grind .] lemma A_comm [RuleD 𝓢] [Entailment.HasAxiomOrInst 𝓢] : 𝓢 ⊢ (φ ⋎ ψ) ➝ (ψ ⋎ φ) := ⟨A_comm!⟩
+
+def equivId! [HasImpId 𝓢] [AndIntroRule 𝓢] : 𝓢 ⊢! φ ⭤ φ := andIR! impId! impId!
+@[simp, grind .] lemma equivId [HasImpId 𝓢] [AndIntroRule 𝓢] : 𝓢 ⊢ φ ⭤ φ := ⟨equivId!⟩
 
 end
 
