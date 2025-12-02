@@ -59,19 +59,6 @@ instance : RuleE 𝓢 where
     . apply restall! (K_Elim_right! h₁) (K_Elim_left! h₂);
     . apply restall! (K_Elim_left! h₁) (K_Elim_right! h₂);
 
-def K_comm! : 𝓢 ⊢! (φ ⋏ ψ) ➝ (ψ ⋏ φ) := CK!_of_C!_of_C! andElimR! andElimL!
-def A_comm! : 𝓢 ⊢! (φ ⋎ ψ) ➝ (ψ ⋎ φ) := CA!_of_C!_of_C! orIntroR! orIntroL!
-
-instance : Entailment.HasCollectOrAnd 𝓢 where
-  collectOrAnd! {φ ψ χ} := by
-    apply C_trans! distributeAndOr!;
-    apply CA!_of_C!_of_C!;
-    . apply C_trans! andElimR! orIntroL!;
-    . apply C_trans! $ C_trans! K_comm! distributeAndOr!;
-      apply CA!_of_C!_of_C!;
-      . apply C_trans! andElimR! orIntroL!;
-      . apply C_trans! K_comm! orIntroR!
-
 end Corsi
 
 
