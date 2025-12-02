@@ -1,0 +1,78 @@
+import Foundation.Propositional.Hilbert.VF.Basic
+import Foundation.Propositional.Logic.Slash
+
+
+namespace LO.Propositional
+
+variable {Ax : Axiom ℕ} {φ ψ χ : Formula ℕ} {s : Substitution ℕ}
+
+open Entailment.Corsi
+
+instance Hilbert.VF.instAczelSlashable (hs : ∀ {φ}, φ ∈ Ax → ∕ₐ[(Hilbert.VF Ax)] φ) : (Hilbert.VF Ax).AczelSlashable where
+  iff_ks_provable {φ} := by
+    constructor;
+    . intro h;
+      induction φ with
+      | hatom a => exact h;
+      | hfalsum => contradiction;
+      | hor φ ψ ihφ ihψ =>
+        rcases h with h | h;
+        . apply A_intro_left $ ihφ h;
+        . apply A_intro_right $ ihψ h;
+      | hand φ ψ ihφ ihψ => exact andIR (ihφ h.1) (ihψ h.2);
+      | himp φ ψ ihφ ihψ => exact h.1;
+    . intro h;
+      induction h using VF.rec! with
+      | orIntroL =>
+        constructor;
+        . exact orIntroL;
+        . tauto;
+      | orIntroR =>
+        constructor;
+        . exact orIntroR;
+        . tauto;
+      | andElimL =>
+        constructor;
+        . exact andElimL;
+        . rintro ⟨_, _⟩; assumption;
+      | andElimR =>
+        constructor;
+        . exact andElimR;
+        . rintro ⟨_, _⟩; assumption;
+      | impId =>
+        constructor;
+        . exact impId;
+        . tauto;
+      | collectOrAnd =>
+        constructor;
+        . exact collectOrAnd;
+        . rintro ⟨(_ | _), (_ | _)⟩ <;> grind;
+      | mdp ihφψ ihφ => apply ihφψ.2 ihφ;
+      | af ihφ =>
+        constructor;
+        . apply af;
+          assumption;
+        . tauto;
+      | efq =>
+        constructor;
+        . exact efq;
+        . tauto;
+      | ruleD ih₁ ih₂ =>
+        constructor;
+        . apply ruleD <;> assumption;
+        . rintro (h | h) <;> grind;
+      | ruleC ih₁ ih₂ =>
+        constructor;
+        . apply ruleC <;> assumption;
+        . rintro h;
+          constructor <;> grind;
+      | ruleI ih₁ ih₂ =>
+        constructor;
+        . apply ruleI <;> assumption;
+        . grind;
+      | axm => apply hs; assumption;
+
+instance VF.AczelSlashable : Propositional.VF.AczelSlashable := Hilbert.VF.instAczelSlashable $ by tauto;
+instance VF.Disjunctive : Entailment.Disjunctive Propositional.VF := inferInstance
+
+end LO.Propositional

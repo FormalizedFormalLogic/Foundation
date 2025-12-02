@@ -1,7 +1,5 @@
 import Foundation.Propositional.Entailment.Corsi.Basic
 
-import Foundation.Propositional.Entailment.Corsi.VF
-
 namespace LO.Propositional
 
 namespace Entailment
@@ -9,11 +7,11 @@ namespace Entailment
 variable {S F : Type*} [LogicalConnective F] [Entailment S F]
 variable {𝓢 : S} {φ ψ χ : F}
 
-protected class WF (𝓢 : S) extends
+protected class VF (𝓢 : S) extends
   -- Axioms
   Entailment.HasAxiomAndElim 𝓢,
   Entailment.HasAxiomOrInst 𝓢,
-  Entailment.HasDistributeAndOr 𝓢,
+  Entailment.HasCollectOrAnd 𝓢,
   Entailment.HasImpId 𝓢,
   Entailment.HasAxiomVerum 𝓢,
   Entailment.HasAxiomEFQ 𝓢,
@@ -23,23 +21,18 @@ protected class WF (𝓢 : S) extends
   Entailment.AndIntroRule 𝓢,
   Entailment.RuleC 𝓢,
   Entailment.RuleD 𝓢,
-  Entailment.RuleI 𝓢,
-  Entailment.RuleE 𝓢
+  Entailment.RuleI 𝓢
 
 -- TODO: unify old
 namespace Corsi
 
-variable [Entailment.WF 𝓢]
+variable [Entailment.VF 𝓢]
 
-instance : Entailment.HasCollectOrAnd 𝓢 where
-  collectOrAnd! {φ ψ χ} := by
-    apply C_trans! distributeAndOr!;
-    apply CA!_of_C!_of_C!;
-    . apply C_trans! andElimR! orIntroL!;
-    . apply C_trans! $ C_trans! K_comm! distributeAndOr!;
-      apply CA!_of_C!_of_C!;
-      . apply C_trans! andElimR! orIntroL!;
-      . apply C_trans! K_comm! orIntroR!
+/-
+instance : Entailment.AndIntroRule 𝓢 where
+  andIR! hφ hψ := by sorry;
+
+-/
 
 end Corsi
 

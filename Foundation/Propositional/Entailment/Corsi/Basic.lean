@@ -191,6 +191,9 @@ export RuleRestall (restall!)
 export HasDistributeAndOr (distributeAndOr!)
 lemma distributeAndOr [HasDistributeAndOr 𝓢] : 𝓢 ⊢ Axioms.DistributeAndOr φ ψ χ := ⟨distributeAndOr!⟩
 
+export HasCollectOrAnd (collectOrAnd!)
+lemma collectOrAnd [HasCollectOrAnd 𝓢] : 𝓢 ⊢ Axioms.CollectOrAnd φ ψ χ := ⟨collectOrAnd!⟩
+
 export HasAxiomC (axiomC!)
 lemma axiomC [HasAxiomC 𝓢] : 𝓢 ⊢ Axioms.C φ ψ χ := ⟨axiomC!⟩
 
@@ -246,6 +249,31 @@ attribute [simp, grind .]
   axiomSer
   axiomSym
   axiomHrd
+
+section
+
+def CK_right_cancel! [RuleI 𝓢] [RuleC 𝓢] [AFortiori 𝓢] [HasImpId 𝓢] (h₁ : 𝓢 ⊢! φ ⋏ ψ ➝ χ) (h₂ : 𝓢 ⊢! ψ) : 𝓢 ⊢! φ ➝ χ := by
+  apply C_trans! ?_ h₁;
+  apply CK!_of_C!_of_C!;
+  . apply impId!;
+  . apply af! h₂;
+lemma CK_right_cancel [RuleI 𝓢] [RuleC 𝓢] [AFortiori 𝓢] [HasImpId 𝓢] (h₁ : 𝓢 ⊢ φ ⋏ ψ ➝ χ) (h₂ : 𝓢 ⊢ ψ) : 𝓢 ⊢ φ ➝ χ := ⟨CK_right_cancel! h₁.some h₂.some⟩
+
+def CK_right_replace!  [RuleI 𝓢] [RuleC 𝓢] [Entailment.HasAxiomAndElim 𝓢] (h₁ : 𝓢 ⊢! φ ⋏ ψ ➝ χ) (h₂ : 𝓢 ⊢! ψ' ➝ ψ) : 𝓢 ⊢! φ ⋏ ψ' ➝ χ := by
+  apply C_trans! ?_ h₁;
+  apply CK!_of_C!_of_C!
+  . apply andElimL!;
+  . apply C_trans! ?_ h₂;
+    apply andElimR!;
+lemma CK_right_replace [RuleI 𝓢] [RuleC 𝓢] [Entailment.HasAxiomAndElim 𝓢] (h₁ : 𝓢 ⊢ φ ⋏ ψ ➝ χ) (h₂ : 𝓢 ⊢ ψ' ➝ ψ) : 𝓢 ⊢ φ ⋏ ψ' ➝ χ := ⟨CK_right_replace! h₁.some h₂.some⟩
+
+def K_comm! [RuleC 𝓢] [Entailment.HasAxiomAndElim 𝓢] : 𝓢 ⊢! (φ ⋏ ψ) ➝ (ψ ⋏ φ) := CK!_of_C!_of_C! andElimR! andElimL!
+lemma K_comm [RuleC 𝓢] [Entailment.HasAxiomAndElim 𝓢] : 𝓢 ⊢ (φ ⋏ ψ) ➝ (ψ ⋏ φ) := ⟨K_comm!⟩
+
+def A_comm! [RuleD 𝓢] [Entailment.HasAxiomOrInst 𝓢] : 𝓢 ⊢! (φ ⋎ ψ) ➝ (ψ ⋎ φ) := CA!_of_C!_of_C! orIntroR! orIntroL!
+lemma A_comm [RuleD 𝓢] [Entailment.HasAxiomOrInst 𝓢] : 𝓢 ⊢ (φ ⋎ ψ) ➝ (ψ ⋎ φ) := ⟨A_comm!⟩
+
+end
 
 end Corsi
 
