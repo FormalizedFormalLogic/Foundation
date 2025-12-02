@@ -13,6 +13,8 @@ variable (φ ψ χ ξ)
 
 protected abbrev DistributeAndOr := (φ ⋏ (ψ ⋎ χ)) ➝ ((φ ⋏ ψ) ⋎ (φ ⋏ χ))
 
+protected abbrev CollectOrAnd := ((φ ⋎ ψ) ⋏ (φ ⋎ χ)) ➝ (φ ⋎ (ψ ⋏ χ))
+
 protected abbrev C := (φ ➝ ψ) ⋏ (φ ➝ χ) ➝ (φ ➝ (ψ ⋏ χ))
 
 protected abbrev D := (φ ➝ χ) ⋏ (ψ ➝ χ) ➝ (φ ⋎ ψ ➝ χ)
@@ -62,6 +64,8 @@ class AndIntroRule (𝓢 : S) where
 class HasDistributeAndOr (𝓢 : S) where
   distributeAndOr! {φ ψ χ : F} : 𝓢 ⊢! Axioms.DistributeAndOr φ ψ χ
 
+class HasCollectOrAnd (𝓢 : S) where
+  collectOrAnd! {φ ψ χ : F} : 𝓢 ⊢! Axioms.CollectOrAnd φ ψ χ
 
 class HasAxiomC (𝓢 : S) where
   axiomC! {φ ψ χ : F} : 𝓢 ⊢! Axioms.C φ ψ χ
