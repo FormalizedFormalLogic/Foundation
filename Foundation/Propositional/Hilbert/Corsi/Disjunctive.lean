@@ -75,6 +75,10 @@ instance Hilbert.Corsi.instAczelSlashable (hs : ∀ {φ}, φ ∈ Ax → ∕ₐ[(
         . apply af;
           assumption;
         . tauto;
+      | efq =>
+        constructor;
+        . exact efq;
+        . tauto;
       | andIR ihφ ihψ => tauto;
       | axm => apply hs; assumption;
 

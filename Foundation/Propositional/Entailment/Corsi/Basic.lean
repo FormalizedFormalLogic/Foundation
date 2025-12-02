@@ -1,4 +1,5 @@
 import Foundation.Propositional.Entailment.Minimal.Basic
+import Foundation.Propositional.Entailment.Int.Basic
 
 namespace LO.Propositional
 
@@ -69,11 +70,30 @@ class HasCollectOrAnd (𝓢 : S) where
 class HasAxiomC (𝓢 : S) where
   axiomC! {φ ψ χ : F} : 𝓢 ⊢! Axioms.C φ ψ χ
 
+class RuleC (𝓢 : S) where
+  ruleC! {φ ψ χ : F} : 𝓢 ⊢! φ ➝ ψ → 𝓢 ⊢! φ ➝ χ → 𝓢 ⊢! φ ➝ (ψ ⋏ χ)
+
+
 class HasAxiomD (𝓢 : S) where
   axiomD! {φ ψ χ : F} : 𝓢 ⊢! Axioms.D φ ψ χ
 
+class RuleD (𝓢 : S) where
+  ruleD! {φ ψ χ : F} : 𝓢 ⊢! φ ➝ χ → 𝓢 ⊢! ψ ➝ χ → 𝓢 ⊢! φ ⋎ ψ ➝ χ
+
+
 class HasAxiomI (𝓢 : S) where
   axiomI! {φ ψ χ : F} : 𝓢 ⊢! Axioms.I φ ψ χ
+
+class RuleI (𝓢 : S) where
+  ruleI! {φ ψ χ : F} : 𝓢 ⊢! φ ➝ ψ → 𝓢 ⊢! ψ ➝ χ → 𝓢 ⊢! φ ➝ χ
+
+
+class RuleE (𝓢 : S) where
+  ruleE! {φ ψ χ ξ : F} : 𝓢 ⊢! φ ⭤ ψ → 𝓢 ⊢! χ ⭤ ξ → 𝓢 ⊢! (φ ➝ χ) ⭤ (ψ ➝ ξ)
+
+
+class RuleRestall (𝓢 : S) where
+  restall! {φ ψ χ ξ : F} : 𝓢 ⊢! φ ➝ ψ → 𝓢 ⊢! χ ➝ ξ → 𝓢 ⊢! (ψ ➝ χ) ➝ (φ ➝ ξ)
 
 
 class HasImpId (𝓢 : S) where
@@ -114,6 +134,9 @@ alias orIntroR := Entailment.or₂!
 alias andElimL := Entailment.and₁!
 alias andElimR := Entailment.and₂!
 
+alias efq! := Entailment.efq
+alias efq := Entailment.efq!
+
 attribute [simp, grind .]
   orIntroL orIntroR
   andElimL andElimR
@@ -121,11 +144,48 @@ attribute [simp, grind .]
 alias A_intro_left := Entailment.A!_intro_left
 alias A_intro_right := Entailment.A!_intro_right
 
+
+alias K_Elim_left! := Entailment.K_left
+alias K_Elim_right! := Entailment.K_right
+
+alias K_Elim_left := Entailment.K!_left
+alias K_Elim_right := Entailment.K!_right
+
+
+
+alias of_O := Entailment.of_O!
+
 export AFortiori (af!)
 @[grind <=] lemma af [AFortiori 𝓢] : 𝓢 ⊢ φ → 𝓢 ⊢ ψ ➝ φ := λ ⟨h⟩ => ⟨af! h⟩
 
 export AndIntroRule (andIR!)
 @[grind <=] lemma andIR [AndIntroRule 𝓢] : 𝓢 ⊢ φ → 𝓢 ⊢ ψ → 𝓢 ⊢ φ ⋏ ψ := λ ⟨h₁⟩ ⟨h₂⟩ => ⟨andIR! h₁ h₂⟩
+
+
+export RuleC (ruleC!)
+@[grind <=] lemma ruleC [RuleC 𝓢] : 𝓢 ⊢ φ ➝ ψ → 𝓢 ⊢ φ ➝ χ → 𝓢 ⊢ φ ➝ (ψ ⋏ χ) := λ ⟨a⟩ ⟨b⟩ => ⟨ruleC! a b⟩
+alias CK!_of_C!_of_C! := ruleC!
+alias CK_of_C_of_C := ruleC
+
+
+export RuleD (ruleD!)
+@[grind <=] lemma ruleD [RuleD 𝓢] : 𝓢 ⊢ φ ➝ χ → 𝓢 ⊢ ψ ➝ χ → 𝓢 ⊢ φ ⋎ ψ ➝ χ := λ ⟨a⟩ ⟨b⟩ => ⟨ruleD! a b⟩
+alias CA!_of_C!_of_C! := ruleD!
+alias CA_of_C_of_C := ruleD
+
+
+export RuleI (ruleI!)
+@[grind <=] lemma ruleI [RuleI 𝓢] : 𝓢 ⊢ φ ➝ ψ → 𝓢 ⊢ ψ ➝ χ → 𝓢 ⊢ φ ➝ χ := λ ⟨a⟩ ⟨b⟩ => ⟨ruleI! a b⟩
+alias C_trans! := ruleI!
+alias C_trans := ruleI
+
+
+export RuleE (ruleE!)
+@[grind <=] lemma ruleE [RuleE 𝓢] : 𝓢 ⊢ φ ⭤ ψ → 𝓢 ⊢ χ ⭤ ξ → 𝓢 ⊢ (φ ➝ χ) ⭤ (ψ ➝ ξ) := λ ⟨a⟩ ⟨b⟩ => ⟨ruleE! a b⟩
+
+
+export RuleRestall (restall!)
+@[grind <=] lemma restall [RuleRestall 𝓢] : 𝓢 ⊢ φ ➝ ψ → 𝓢 ⊢ χ ➝ ξ → 𝓢 ⊢ (ψ ➝ χ) ➝ (φ ➝ ξ) := λ ⟨a⟩ ⟨b⟩ => ⟨restall! a b⟩
 
 
 export HasDistributeAndOr (distributeAndOr!)
