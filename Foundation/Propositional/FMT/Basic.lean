@@ -171,6 +171,12 @@ lemma invalid_RuleE :
   sorry;
 -/
 
+lemma iff_not_exists_world : M ⊭ φ ↔ ∃ x : M.World, x ⊮ φ := by
+  apply not_iff_not.mp;
+  push_neg;
+  tauto;
+alias ⟨exists_world_of_not, not_of_exists_world⟩ := iff_not_exists_world
+
 end ValidOnModel
 
 

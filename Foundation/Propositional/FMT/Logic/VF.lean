@@ -1,5 +1,7 @@
 import Foundation.Propositional.FMT.Hilbert
+import Foundation.Propositional.FMT.Completeness
 import Foundation.Propositional.Hilbert.WF_VF
+import Foundation.Propositional.Hilbert.VF.Disjunctive
 
 
 namespace LO.Propositional
@@ -36,6 +38,13 @@ instance : Entailment.Consistent Propositional.VF := consistent_of_sound_framecl
   use FMT.trivialFrame;
   apply Set.mem_setOf_eq.mpr;
   simp;
+
+instance FMT.complete : Complete Propositional.VF FrameClass.VF := by
+  constructor;
+  intro φ h;
+  apply FMT.provable_of_validOnHintikkaModel;
+  apply h;
+  tauto;
 
 lemma unprovable_top_dntop : Propositional.VF ⊬ ⊤ ⭤ ∼∼⊤ := by
   apply Sound.not_provable_of_countermodel (𝓜 := FMT.FrameClass.VF);

@@ -232,8 +232,9 @@ def insert₂ (H : HintikkaPair φ) (ψ : { ψ // ψ ∈ φ.subformulas }) : Hin
 
 variable [Entailment.VF L]
 
+@[grind ⇒]
 lemma either_consistent_insert
-  (H_consis : H.Consistent L) {ψ}
+  (H_consis : H.Consistent L) (ψ)
   : Consistent L (H.insert₁ ψ) ∨ Consistent L (H.insert₂ ψ) := by
   contrapose! H_consis;
   apply iff_not_consistent.mpr;
@@ -282,11 +283,88 @@ lemma either_consistent_insert
 
 namespace lindenbaum
 
+open Classical
+
+variable {L : Logic ℕ} {φ : Formula ℕ} {H : HintikkaPair φ}
+
+noncomputable def next (L : Logic ℕ) (ψ : SubformulaOf φ) (H : HintikkaPair φ) : HintikkaPair φ :=
+  if Consistent L (H.insert₁ ψ) then H.insert₁ ψ else H.insert₂ ψ
+
+variable [Entailment.VF L]
+
+lemma next_consistent (H_consis : H.Consistent L) : (next L ψ H).Consistent L := by
+  by_cases h : Consistent L (H.insert₁ ψ) <;>
+  . dsimp [next, h];
+    grind;
+
+lemma next_monotone₁ : H.1 ⊆ (next L ψ H).1 := by
+  simp [next, insert₁, insert₂];
+  split <;> grind;
+
+lemma next_monotone₂ : H.2 ⊆ (next L ψ H).2 := by
+  simp [next, insert₁, insert₂];
+  split <;> grind;
+
+lemma next_either_mem (ψ) : ψ ∈ (next L ψ H).1 ∨ ψ ∈ (next L ψ H).2 := by
+  simp [next, insert₁, insert₂];
+  split <;> grind;
+
+noncomputable def enum (L : Logic ℕ) (H : HintikkaPair φ) : List (SubformulaOf φ) → HintikkaPair φ
+  | [] => H
+  | ψ :: Δ => next L ψ (enum L H Δ)
+
+lemma enum_consistent (H_consis : H.Consistent L) (Γ : List (SubformulaOf φ)) : (enum L H Γ).Consistent L := by
+  induction Γ with
+  | nil => assumption;
+  | cons ψ Γ ih => apply next_consistent; exact ih;
+
+lemma enum_monotone₁ {Γ : List (SubformulaOf φ)} : H.1 ⊆ (enum L H Γ).1 := by
+  induction Γ with
+  | nil => simp [enum];
+  | cons ψ Γ ih =>
+    trans (enum L H Γ).1;
+    . exact ih;
+    . apply next_monotone₁
+
+lemma enum_monotone₂ {Γ : List (SubformulaOf φ)} : H.2 ⊆ (enum L H Γ).2 := by
+  induction Γ with
+  | nil => simp [enum];
+  | cons ψ Γ ih =>
+    trans (enum L H Γ).2;
+    . exact ih;
+    . apply next_monotone₂
+
+lemma enum_of_mem (hψ : ψ ∈ Γ) : ψ ∈ (enum L H Γ).1 ∨ ψ ∈ (enum L H Γ).2 := by
+  induction Γ with
+  | nil => simp at hψ;
+  | cons χ Δ ih =>
+    simp only [List.mem_cons] at hψ;
+    rcases hψ with rfl | hψ;
+    . rcases next_either_mem (L := L) (H := enum L H Δ) ψ with h | h;
+      . left; simpa [enum];
+      . right; simpa [enum];
+    . rcases ih hψ with h | h;
+      . left; apply next_monotone₁ h;
+      . right; apply next_monotone₂ h;
+
+noncomputable def sat (L : Logic ℕ) (H : HintikkaPair φ) : HintikkaPair φ := enum L H Finset.univ.toList
+
+lemma sat_saturated : (sat L H).Saturated := by
+  ext ψ;
+  simp only [Finset.univ_eq_attach, Finset.mem_union, Finset.mem_attach, iff_true];
+  apply enum_of_mem;
+  simp;
+
 end lindenbaum
 
 open lindenbaum in
 lemma lindenbaum (H : HintikkaPair φ) (H_consis : H.Consistent L) : ∃ H' : HintikkaPair φ, H.1 ⊆ H'.1 ∧ H.2 ⊆ H'.2 ∧ H'.Consistent L ∧ H'.Saturated := by
-  sorry;
+  use lindenbaum.sat L H;
+  refine ⟨?_, ?_, ?_, ?_⟩;
+  . apply enum_monotone₁;
+  . apply enum_monotone₂;
+  . apply enum_consistent H_consis;
+  . apply sat_saturated;
 
 end HintikkaPair
 
@@ -498,6 +576,22 @@ lemma HintikkaModel.truthlemma {H : HintikkaModel L φ} (hsub : ψ ∈ φ.subfor
       . apply ihξ (by grind) |>.not.mp;
         apply ConsistentSaturatedHintikkaPair.iff_mem₂_not_mem₁.mp;
         grind;
+
+
+open Formula.FMT in
+theorem provable_of_validOnHintikkaModel : (HintikkaModel L φ) ⊧ φ → L ⊢ φ := by
+  contrapose!;
+  intro h;
+  apply ValidOnModel.not_of_exists_world;
+  obtain ⟨H, _, hH₂⟩ := ConsistentSaturatedHintikkaPair.lindenbaum (φ := φ) (L := L)  ⟨∅, {⟨φ, by grind⟩}⟩ $ by
+    suffices ¬L ⊢ ⊤ ➝ φ by simpa [HintikkaPair.Consistent];
+    contrapose! h;
+    exact h ⨀ Entailment.verum!;
+  use H;
+  apply HintikkaModel.truthlemma (by grind) |>.not.mp;
+  apply ConsistentSaturatedHintikkaPair.iff_mem₂_not_mem₁.mp;
+  apply hH₂;
+  simp;
 
 end FMT
 
