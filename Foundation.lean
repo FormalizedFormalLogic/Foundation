@@ -22,6 +22,7 @@ import Foundation.Propositional.Logic.PostComplete
 import Foundation.Propositional.Decidable
 import Foundation.Propositional.Kripke2.Logic
 import Foundation.Propositional.Neighborhood.NB.Logic
+import Foundation.Propositional.FMT.Logic
 
 -- FirstOrder
 

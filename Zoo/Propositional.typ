@@ -12,13 +12,15 @@
   }
 })
 
-#let LogicF = $Logic("F")$
-#let AxiomRfl = $Axiom("Rfl")$
-#let AxiomSym = $Axiom("Sym")$
-#let AxiomSer = $Axiom("Ser")$
-#let AxiomTra1 = $Axiom("Tra1")$
 #let AxiomHrd = $Axiom("Hrd")$
+#let AxiomRfl = $Axiom("Rfl")$
+#let AxiomSer = $Axiom("Ser")$
+#let AxiomSym = $Axiom("Sym")$
+#let AxiomTra1 = $Axiom("Tra1")$
+
+#let LogicF = $Logic("F")$
 #let LogicWF = $Logic("WF")$
+#let LogicVF = $Logic("VF")$
 
 #figure(caption: [Propositional Logic Zoo], numbering: none)[
   #raw-render(
@@ -53,11 +55,12 @@
       "LO.Propositional.F_Tra1_Hrd": $LogicF(AxiomTra1, AxiomHrd)$,
       "LO.Propositional.F_Tra1": $LogicF(AxiomTra1)$,
       "LO.Propositional.F": $LogicF$,
-      "LO.Propositional.WF": $LogicWF$,
       "LO.Propositional.Int": $Logic("Int")$,
       "LO.Propositional.KC": $Logic("KC")$,
       "LO.Propositional.KrieselPutnam": $Logic("KP")$,
       "LO.Propositional.LC": $Logic("LC")$,
+      "LO.Propositional.VF": $LogicVF$,
+      "LO.Propositional.WF": $LogicWF$,
     ),
     width: 640pt,
   )

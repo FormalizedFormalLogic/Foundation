@@ -1,5 +1,7 @@
 import Foundation.Propositional.Entailment.Corsi.Basic
 
+import Foundation.Propositional.Entailment.Corsi.VF
+
 namespace LO.Propositional
 
 namespace Entailment
@@ -26,37 +28,6 @@ protected class WF (𝓢 : S) extends
 
 -- TODO: unify old
 namespace Corsi
-
-variable [Entailment.WF 𝓢]
-
-def CK_right_cancel! (h₁ : 𝓢 ⊢! φ ⋏ ψ ➝ χ) (h₂ : 𝓢 ⊢! ψ) : 𝓢 ⊢! φ ➝ χ := by
-  apply C_trans! ?_ h₁;
-  apply CK!_of_C!_of_C!;
-  . apply impId!;
-  . apply af! h₂;
-lemma CK_right_cancel (h₁ : 𝓢 ⊢ φ ⋏ ψ ➝ χ) (h₂ : 𝓢 ⊢ ψ) : 𝓢 ⊢ φ ➝ χ := ⟨CK_right_cancel! h₁.some h₂.some⟩
-
-def CK_right_replace! (h₁ : 𝓢 ⊢! φ ⋏ ψ ➝ χ) (h₂ : 𝓢 ⊢! ψ' ➝ ψ) : 𝓢 ⊢! φ ⋏ ψ' ➝ χ := by
-  apply C_trans! ?_ h₁;
-  apply CK!_of_C!_of_C!
-  . apply andElimL!;
-  . apply C_trans! ?_ h₂;
-    apply andElimR!;
-lemma CK_right_replace (h₁ : 𝓢 ⊢ φ ⋏ ψ ➝ χ) (h₂ : 𝓢 ⊢ ψ' ➝ ψ) : 𝓢 ⊢ φ ⋏ ψ' ➝ χ := ⟨CK_right_replace! h₁.some h₂.some⟩
-
-
-def K_comm! : 𝓢 ⊢! (φ ⋏ ψ) ➝ (ψ ⋏ φ) := CK!_of_C!_of_C! andElimR! andElimL!
-def A_comm! : 𝓢 ⊢! (φ ⋎ ψ) ➝ (ψ ⋎ φ) := CA!_of_C!_of_C! orIntroR! orIntroL!
-
-instance : Entailment.HasCollectOrAnd 𝓢 where
-  collectOrAnd! {φ ψ χ} := by
-    apply C_trans! distributeAndOr!;
-    apply CA!_of_C!_of_C!;
-    . apply C_trans! andElimR! orIntroL!;
-    . apply C_trans! $ C_trans! K_comm! distributeAndOr!;
-      apply CA!_of_C!_of_C!;
-      . apply C_trans! andElimR! orIntroL!;
-      . apply C_trans! K_comm! orIntroR!
 
 end Corsi
 
