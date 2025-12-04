@@ -15,7 +15,7 @@ protected inductive Hilbert.VF (Ax : Axiom α) : Logic α
 | protected andElimR {φ ψ}          : Hilbert.VF Ax $ Axioms.AndElim₂ φ ψ
 | protected orIntroL {φ ψ}          : Hilbert.VF Ax $ Axioms.OrInst₁ φ ψ
 | protected orIntroR {φ ψ}          : Hilbert.VF Ax $ Axioms.OrInst₂ φ ψ
-| protected collectOrAnd {φ ψ χ}    : Hilbert.VF Ax $ Axioms.CollectOrAnd φ ψ χ
+| protected distributeAndOr {φ ψ χ} : Hilbert.VF Ax $ Axioms.DistributeAndOr φ ψ χ
 | protected impId {φ}               : Hilbert.VF Ax $ Axioms.ImpId φ
 | protected efq {φ}                 : Hilbert.VF Ax $ Axioms.EFQ φ
 | protected mdp {φ ψ}               : Hilbert.VF Ax (φ ➝ ψ) → Hilbert.VF Ax φ → Hilbert.VF Ax ψ
@@ -40,7 +40,7 @@ instance : Entailment.VF (Hilbert.VF Ax) where
   and₂ := ⟨VF.andElimR⟩
   or₁  := ⟨VF.orIntroL⟩
   or₂  := ⟨VF.orIntroR⟩
-  collectOrAnd! := ⟨VF.collectOrAnd⟩
+  distributeAndOr! := ⟨VF.distributeAndOr⟩
   impId! := ⟨VF.impId⟩
   verum := ⟨VF.impId⟩
   mdp hφψ hφ := ⟨VF.mdp hφψ.1 hφ.1⟩
@@ -66,7 +66,7 @@ protected lemma rec!
   (orIntroL  : ∀ {φ ψ}, (motive (Axioms.OrInst₁ φ ψ) orIntroL))
   (orIntroR  : ∀ {φ ψ}, (motive (Axioms.OrInst₂ φ ψ) orIntroR))
   (efq       : ∀ {φ}, (motive (Axioms.EFQ φ) efq))
-  (collectOrAnd : ∀ {φ ψ χ : Formula α}, (motive (Axioms.CollectOrAnd φ ψ χ) collectOrAnd))
+  (distributeAndOr : ∀ {φ ψ χ : Formula α}, (motive (Axioms.DistributeAndOr φ ψ χ) distributeAndOr))
   : ∀ {φ}, (d : Hilbert.VF Ax ⊢ φ) → motive φ d := by
   rintro φ d;
   replace d := Logic.iff_provable.mp d;
@@ -98,7 +98,7 @@ lemma weakerThan_of_provable_axioms (hs : (Hilbert.VF Ax₂) ⊢* Ax₁) : (Hilb
       | apply andElimR;
       | apply orIntroL;
       | apply orIntroR;
-      | apply collectOrAnd;
+      | apply distributeAndOr;
       | apply efq;
 
 lemma weakerThan_of_subset_axioms (h : Ax₁ ⊆ Ax₂) : (Hilbert.VF Ax₁) ⪯ (Hilbert.VF Ax₂) := by

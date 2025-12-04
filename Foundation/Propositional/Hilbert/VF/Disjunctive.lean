@@ -43,10 +43,10 @@ instance Hilbert.VF.instAczelSlashable (hs : ∀ {φ}, φ ∈ Ax → ∕ₐ[(Hil
         constructor;
         . exact impId;
         . tauto;
-      | collectOrAnd =>
+      | distributeAndOr =>
         constructor;
-        . exact collectOrAnd;
-        . rintro ⟨(_ | _), (_ | _)⟩ <;> grind;
+        . exact distributeAndOr;
+        . rintro ⟨hφ, (hψ | hψ)⟩ <;> tauto;
       | mdp ihφψ ihφ => apply ihφψ.2 ihφ;
       | af ihφ =>
         constructor;

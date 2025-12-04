@@ -29,18 +29,6 @@ protected class WF (𝓢 : S) extends
 -- TODO: unify old
 namespace Corsi
 
-variable [Entailment.WF 𝓢]
-
-instance : Entailment.HasCollectOrAnd 𝓢 where
-  collectOrAnd! {φ ψ χ} := by
-    apply C_trans! distributeAndOr!;
-    apply CA!_of_C!_of_C!;
-    . apply C_trans! andElimR! orIntroL!;
-    . apply C_trans! $ C_trans! K_comm! distributeAndOr!;
-      apply CA!_of_C!_of_C!;
-      . apply C_trans! andElimR! orIntroL!;
-      . apply C_trans! K_comm! orIntroR!
-
 end Corsi
 
 
