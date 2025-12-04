@@ -93,7 +93,7 @@ lemma CFConjFConj_of_provable {Δ : Finset (Formula α)} (h : ∀ δ ∈ Δ, �
   apply C_trans impId $ h δ ?_;
   simpa using hδ;
 
-lemma LruleC {Γ : List (Formula α)} (h : ∀ γ ∈ Γ, 𝓢 ⊢ φ ➝ γ) : 𝓢 ⊢ φ ➝ Γ.conj₂ := by
+lemma ruleC_lconj₂ {Γ : List (Formula α)} (h : ∀ γ ∈ Γ, 𝓢 ⊢ φ ➝ γ) : 𝓢 ⊢ φ ➝ Γ.conj₂ := by
   induction Γ using List.induction_with_singleton with
   | hnil => apply af; simp;
   | hsingle ψ => apply h; simp;
@@ -104,11 +104,15 @@ lemma LruleC {Γ : List (Formula α)} (h : ∀ γ ∈ Γ, 𝓢 ⊢ φ ➝ γ) : 
     . apply h.1;
     . apply ih h.2;
 
-lemma FruleC {Γ : Finset (Formula α)} (h : ∀ γ ∈ Γ, 𝓢 ⊢ φ ➝ γ) : 𝓢 ⊢ φ ➝ Γ.conj := by
-  apply LruleC;
+lemma ruleC_fconj {Γ : Finset (Formula α)} (h : ∀ γ ∈ Γ, 𝓢 ⊢ φ ➝ γ) : 𝓢 ⊢ φ ➝ Γ.conj := by
+  apply ruleC_lconj₂;
   intro γ hγ;
   apply h γ;
   simpa using hγ;
+
+lemma ruleC_fconj' {Γ : Finset ι} (Φ : ι → Formula α) (h : ∀ i ∈ Γ, 𝓢 ⊢ φ ➝ Φ i) : 𝓢 ⊢ φ ➝ (⩕ i ∈ Γ, Φ i) := by
+  apply ruleC_lconj₂;
+  simpa;
 
 lemma CA_replace_both (h₁ : 𝓢 ⊢ φ ➝ φ') (h₂ : 𝓢 ⊢ ψ ➝ ψ') : 𝓢 ⊢ φ ⋎ ψ ➝ φ' ⋎ ψ' := by
   apply ruleD;
@@ -142,6 +146,21 @@ lemma mem_fdisj' {Γ : Finset ι} (Φ : ι → Formula α) (hΦ : ∃ i ∈ Γ, 
 
 lemma mem_fconj' {Γ : Finset ι} (Φ : ι → Formula α) (hΦ : ∃ i ∈ Γ, Φ i = ψ) : 𝓢 ⊢ (⩕ i ∈ Γ, Φ i) ➝ ψ := by
   apply mem_lconj₂;
+  simpa;
+
+lemma ruleD_ldisj₂ {Γ : List (Formula α)} (h : ∀ γ ∈ Γ, 𝓢 ⊢ γ ➝ φ) : 𝓢 ⊢ Γ.disj₂ ➝ φ := by
+  induction Γ using List.induction_with_singleton with
+  | hnil => apply efq;
+  | hsingle ψ => apply h; simp;
+  | hcons ψ Δ he ih =>
+    simp only [List.disj₂_cons_nonempty he];
+    simp only [List.mem_cons, forall_eq_or_imp] at h;
+    apply ruleD;
+    . apply h.1;
+    . apply ih h.2;
+
+lemma ruleD_fdisj' {Γ : Finset ι} (Φ : ι → Formula α) (h : ∀ i ∈ Γ, 𝓢 ⊢ Φ i ➝ φ) : 𝓢 ⊢ (⩖ i ∈ Γ, Φ i) ➝ φ := by
+  apply ruleD_ldisj₂;
   simpa;
 
 variable [Entailment.Disjunctive 𝓢] [Entailment.Consistent 𝓢]
@@ -191,9 +210,9 @@ namespace HintikkaPair
 
 variable {H : HintikkaPair φ}
 
-def Consistent (L : Logic ℕ) (H : HintikkaPair φ) : Prop := L ⊬ Finset.conj' H.1 (·.1) ➝ Finset.disj' H.2 (·.1)
-lemma iff_consistent : H.Consistent L ↔ ¬(L ⊢ Finset.conj' H.1 (·.1) ➝ Finset.disj' H.2 (·.1)) := by simp [Consistent];
-lemma iff_not_consistent : ¬(H.Consistent L) ↔ L ⊢ Finset.conj' H.1 (·.1) ➝ Finset.disj' H.2 (·.1) := by simp [Consistent];
+def Consistent (L : Logic ℕ) (H : HintikkaPair φ) : Prop := L ⊬ Finset.conj' H.1 (·.1) ➝ (⩖ x ∈ H.2, ↑x)
+lemma iff_consistent : H.Consistent L ↔ ¬(L ⊢ Finset.conj' H.1 (·.1) ➝ (⩖ x ∈ H.2, ↑x)) := by simp [Consistent];
+lemma iff_not_consistent : ¬(H.Consistent L) ↔ L ⊢ Finset.conj' H.1 (·.1) ➝ (⩖ x ∈ H.2, ↑x) := by simp [Consistent];
 
 @[grind]
 def Saturated (H : HintikkaPair φ) := H.1 ∪ H.2 = Finset.univ
@@ -221,21 +240,45 @@ lemma either_consistent_insert
 
   obtain ⟨h₁, h₂⟩ := H_consis;
 
-  replace h₁ : L ⊢ Finset.conj' (H.insert₁ ψ).1 (·.1) ➝ Finset.disj' H.2 (·.1) := iff_not_consistent.mp h₁;
-  replace h₂ : L ⊢ Finset.conj' H.1 (·.1) ➝ Finset.disj' (H.insert₂ ψ).2 (·.1) := iff_not_consistent.mp h₂;
+  let Γ₀ : Formula ℕ := ⩕ γ ∈ H.1, ↑γ;
+  let Γ₁ : Formula ℕ := ⩕ γ ∈ (H.insert₁ ψ).1, ↑γ;
 
-  apply ruleI ?_ (ruleD h₁ impId);
+  let Δ₀ : Formula ℕ := ⩖ δ ∈ H.2, ↑δ;
+  let Δ₁ : Formula ℕ := ⩖ δ ∈ (H.insert₂ ψ).2, ↑δ;
 
-  have h₃ : L ⊢ Finset.conj' H.1 (·.1) ➝ (Finset.disj' (H.insert₂ ψ).2 (·.1)) ⋏ (Finset.conj' H.2 (·.1) ⋎ Finset.conj' H.1 (·.1)) :=
-    ruleC h₂ orIntroR;
-  apply ruleI h₃;
-  have h₄ : L ⊢ Finset.conj' H.1 (·.1) ➝ (Finset.conj' H.1 (·.1) ⋏ ψ) ⋎ (Finset.disj' H.2 (·.1)) := by
-    apply ruleI h₃;
-    have := collectOrAnd (𝓢 := L) (φ := Finset.disj' H.2 (·.1)) (ψ := Finset.conj' H.1 (·.1)) (χ := ψ);
-    dsimp [Axioms.CollectOrAnd] at this;
-    sorry;
-  sorry;
+  replace h₁ : L ⊢ Γ₁ ➝ Δ₀ := iff_not_consistent.mp h₁;
+  replace h₂ : L ⊢ Γ₀ ➝ Δ₁ := iff_not_consistent.mp h₂;
+  show L ⊢ Γ₀ ➝ Δ₀;
 
+  apply ruleI ?_ $ ruleD impId h₁;
+  show L ⊢ Γ₀ ➝ Δ₀ ⋎ Γ₁;
+
+  apply ruleI $ ruleC h₂ orIntroR;
+  show L ⊢ Δ₁ ⋏ (Δ₀ ⋎ Γ₀) ➝ Δ₀ ⋎ Γ₁;
+
+  apply C_replace_both;
+  . show L ⊢ (Δ₀ ⋎ ↑ψ) ⋏ (Δ₀ ⋎ Γ₀) ➝ Δ₀ ⋎ ↑ψ ⋏ Γ₀;
+    exact collectOrAnd;
+  . apply ruleC ?_ andElimR;
+    apply ruleI andElimL;
+    apply ruleD_fdisj';
+    simp only [insert₂, Finset.mem_insert, forall_eq_or_imp];
+    constructor;
+    . exact orIntroR;
+    . intro δ hδ;
+      apply ruleI ?_ orIntroL;
+      apply mem_fdisj';
+      grind;
+  . apply ruleD orIntroL;
+    apply ruleI ?_ orIntroR;
+    apply ruleC_fconj';
+    simp only [insert₁, Finset.mem_insert, forall_eq_or_imp];
+    constructor;
+    . exact andElimL;
+    . intro γ hγ;
+      apply ruleI andElimR;
+      apply mem_fconj';
+      grind;
 
 namespace lindenbaum
 
