@@ -29,7 +29,7 @@ interpretting its negation translation as usual Kripke semantics of intuitionist
 
 {docstring FirstOrder.KripkeModel.weaklyForces₀_iff_forces}
 
-This semantics satisfises monotonisity, genericity and soundness.
+This semantics satisfises monotonicity, genericity and soundness.
 
 {docstring FirstOrder.KripkeModel.WeaklyForces₀.monotone}
 
