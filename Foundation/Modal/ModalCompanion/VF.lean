@@ -149,6 +149,11 @@ lemma provable_VF_of_provable_gödelWeakTranslated : Modal.N ⊢ φᵍʷ → Pro
   . use x;
     apply lemma1.not.mpr H;
 
+lemma iff_provable_VF_provable_gödelWeakTranslated : Modal.N ⊢ φᵍʷ ↔ Propositional.VF ⊢ φ := by
+  constructor;
+  . apply provable_VF_of_provable_gödelWeakTranslated;
+  . apply provable_gödelWeakTranslated_of_provable_VF;
+
 end Modal
 
 
