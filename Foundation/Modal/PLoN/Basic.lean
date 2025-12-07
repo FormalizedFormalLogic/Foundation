@@ -226,6 +226,13 @@ lemma iff_not_exists_model : (¬C ⊧ φ) ↔ (∃ M : PLoN.Model, M.toFrame ∈
 alias ⟨exists_model_of_not, not_of_exists_model⟩ := iff_not_exists_model
 
 
+lemma iff_not_exists_model_world : (¬C ⊧ φ) ↔ (∃ M : PLoN.Model, M.toFrame ∈ C ∧ ∃ w : M.World, ¬(w ⊧ φ)) := by
+  apply not_iff_not.mp;
+  push_neg;
+  tauto;
+alias ⟨exists_model_world_of_not, not_of_exists_model_world⟩ := iff_not_exists_model_world
+
+
 end ValidOnFrameClass
 
 end Formula.PLoN
