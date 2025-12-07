@@ -15,7 +15,7 @@ tag  := "monthly-report-2025-11"
 %%%
 
 This page is the monthly report summarizing commits [between 2025/11/02 and 2025/11/30](https://github.com/FormalizedFormalLogic/Foundation/commits/master/?since=2025-11-02&until=2025-11-30).
-There are 2 major topics in this month.
+There are 3 major topics in this month.
 
 # Kripke Semantics of Classical First-Order Logic
 
