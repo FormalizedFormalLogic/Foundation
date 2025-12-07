@@ -55,6 +55,25 @@ And if the subset is countable, then the cardinality of the Skolem hull is at mo
 
 {docstring FirstOrder.Structure.SkolemHull.card_le_aleph0}
 
+# Interpretability Logic and Veltman Semantics II
+
+*Author*: [SnO2WMaN](https://github.com/SnO2WMaN)
+
+This is a continuation of last month's report on Interpretability Logic and Veltman Semantics.
+We formalized the frame conditions for the several axioms `M`, `M₀`, `P`, `P₀`, `W`, `Wstar` ($`\mathsf{KW^*}`), `KW2`, `KW1Zero` (Švejdar's $`\mathsf{KW1^0}`), `R`, `Rstar` ($`\mathsf{R^*}`), and separate the sublogics and extensions of `IL`.
+
+Here is the current diagram of sublogics and extensions of `IL` we formalized.
+
+![Figure of Sublogics and Extensions of `IL`](/assets/Monthly/2025_11/IL.png)
+
+Note that solid arrows means proper extensions and dashed arrows mean not.
+In Veltman semantics, many of dashed arrows cannot be separated.
+For example, axiom `R` and axiom `P₀` are characterized by the same frame condition in Veltman semantics.
+
+{docstring InterpretabilityLogic.Veltman.TFAE_HasAxiomR}
+
+It can be separated by Verbrugge semantics.
+
 # Commits
 
 - `939c95d0`: refactor(Propositional): Rename slash operation ([#652](https://github.com/FormalizedFormalLogic/Foundation/pull/652))
