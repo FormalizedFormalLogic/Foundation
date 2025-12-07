@@ -18,6 +18,9 @@ This page is the monthly report summarizing commits [between 2025/11/02 and 2025
 There are 2 major topics in this month.
 
 # Kripke Semantics of Classical First-Order Logic
+
+*Author*: [Palalansoukî](https://github.com/iehality)
+
 We formalized the Kripke semantics of classical first-order logic, a.k.a. weak forcing and proved its soundness theorem.
 This semantics is used when we working on forcing arguments.
 
@@ -35,6 +38,9 @@ This semantics satisfises monotonisity, genericity and soundness.
 {docstring FirstOrder.KripkeModel.WeaklyForces₀.sound}
 
 # Downward Löwenheim-Skolem Theorem
+
+*Author*: [Palalansoukî](https://github.com/iehality)
+
 We formalized the downward Löwenheim-Skolem theorem for countable languages.
 This theorem states that all structure of countable language, with its subset $`s`,
 has a minimal elementary substructure contains $`s`, namely a Skolem hull of $`s`.
