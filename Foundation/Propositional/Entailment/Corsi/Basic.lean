@@ -1,4 +1,5 @@
 import Foundation.Propositional.Entailment.Minimal.Basic
+import Foundation.Propositional.Entailment.Int.Basic
 
 namespace LO.Propositional
 
@@ -11,6 +12,8 @@ namespace Axioms
 variable (φ ψ χ ξ)
 
 protected abbrev DistributeAndOr := (φ ⋏ (ψ ⋎ χ)) ➝ ((φ ⋏ ψ) ⋎ (φ ⋏ χ))
+
+protected abbrev CollectOrAnd := ((φ ⋎ ψ) ⋏ (φ ⋎ χ)) ➝ (φ ⋎ (ψ ⋏ χ))
 
 protected abbrev C := (φ ➝ ψ) ⋏ (φ ➝ χ) ➝ (φ ➝ (ψ ⋏ χ))
 
@@ -61,14 +64,36 @@ class AndIntroRule (𝓢 : S) where
 class HasDistributeAndOr (𝓢 : S) where
   distributeAndOr! {φ ψ χ : F} : 𝓢 ⊢! Axioms.DistributeAndOr φ ψ χ
 
+class HasCollectOrAnd (𝓢 : S) where
+  collectOrAnd! {φ ψ χ : F} : 𝓢 ⊢! Axioms.CollectOrAnd φ ψ χ
+
 class HasAxiomC (𝓢 : S) where
   axiomC! {φ ψ χ : F} : 𝓢 ⊢! Axioms.C φ ψ χ
+
+class RuleC (𝓢 : S) where
+  ruleC! {φ ψ χ : F} : 𝓢 ⊢! φ ➝ ψ → 𝓢 ⊢! φ ➝ χ → 𝓢 ⊢! φ ➝ (ψ ⋏ χ)
+
 
 class HasAxiomD (𝓢 : S) where
   axiomD! {φ ψ χ : F} : 𝓢 ⊢! Axioms.D φ ψ χ
 
+class RuleD (𝓢 : S) where
+  ruleD! {φ ψ χ : F} : 𝓢 ⊢! φ ➝ χ → 𝓢 ⊢! ψ ➝ χ → 𝓢 ⊢! φ ⋎ ψ ➝ χ
+
+
 class HasAxiomI (𝓢 : S) where
   axiomI! {φ ψ χ : F} : 𝓢 ⊢! Axioms.I φ ψ χ
+
+class RuleI (𝓢 : S) where
+  ruleI! {φ ψ χ : F} : 𝓢 ⊢! φ ➝ ψ → 𝓢 ⊢! ψ ➝ χ → 𝓢 ⊢! φ ➝ χ
+
+
+class RuleE (𝓢 : S) where
+  ruleE! {φ ψ χ ξ : F} : 𝓢 ⊢! φ ⭤ ψ → 𝓢 ⊢! χ ⭤ ξ → 𝓢 ⊢! (φ ➝ χ) ⭤ (ψ ➝ ξ)
+
+
+class RuleRestall (𝓢 : S) where
+  restall! {φ ψ χ ξ : F} : 𝓢 ⊢! φ ➝ ψ → 𝓢 ⊢! χ ➝ ξ → 𝓢 ⊢! (ψ ➝ χ) ➝ (φ ➝ ξ)
 
 
 class HasImpId (𝓢 : S) where
@@ -109,12 +134,26 @@ alias orIntroR := Entailment.or₂!
 alias andElimL := Entailment.and₁!
 alias andElimR := Entailment.and₂!
 
+alias efq! := Entailment.efq
+alias efq := Entailment.efq!
+
 attribute [simp, grind .]
   orIntroL orIntroR
   andElimL andElimR
 
 alias A_intro_left := Entailment.A!_intro_left
 alias A_intro_right := Entailment.A!_intro_right
+
+
+alias K_Elim_left! := Entailment.K_left
+alias K_Elim_right! := Entailment.K_right
+
+alias K_Elim_left := Entailment.K!_left
+alias K_Elim_right := Entailment.K!_right
+
+
+
+alias of_O := Entailment.of_O!
 
 export AFortiori (af!)
 @[grind <=] lemma af [AFortiori 𝓢] : 𝓢 ⊢ φ → 𝓢 ⊢ ψ ➝ φ := λ ⟨h⟩ => ⟨af! h⟩
@@ -123,8 +162,37 @@ export AndIntroRule (andIR!)
 @[grind <=] lemma andIR [AndIntroRule 𝓢] : 𝓢 ⊢ φ → 𝓢 ⊢ ψ → 𝓢 ⊢ φ ⋏ ψ := λ ⟨h₁⟩ ⟨h₂⟩ => ⟨andIR! h₁ h₂⟩
 
 
+export RuleC (ruleC!)
+@[grind <=] lemma ruleC [RuleC 𝓢] : 𝓢 ⊢ φ ➝ ψ → 𝓢 ⊢ φ ➝ χ → 𝓢 ⊢ φ ➝ (ψ ⋏ χ) := λ ⟨a⟩ ⟨b⟩ => ⟨ruleC! a b⟩
+alias CK!_of_C!_of_C! := ruleC!
+alias CK_of_C_of_C := ruleC
+
+
+export RuleD (ruleD!)
+@[grind <=] lemma ruleD [RuleD 𝓢] : 𝓢 ⊢ φ ➝ χ → 𝓢 ⊢ ψ ➝ χ → 𝓢 ⊢ φ ⋎ ψ ➝ χ := λ ⟨a⟩ ⟨b⟩ => ⟨ruleD! a b⟩
+alias CA!_of_C!_of_C! := ruleD!
+alias CA_of_C_of_C := ruleD
+
+
+export RuleI (ruleI!)
+@[grind <=] lemma ruleI [RuleI 𝓢] : 𝓢 ⊢ φ ➝ ψ → 𝓢 ⊢ ψ ➝ χ → 𝓢 ⊢ φ ➝ χ := λ ⟨a⟩ ⟨b⟩ => ⟨ruleI! a b⟩
+alias C_trans! := ruleI!
+alias C_trans := ruleI
+
+
+export RuleE (ruleE!)
+@[grind <=] lemma ruleE [RuleE 𝓢] : 𝓢 ⊢ φ ⭤ ψ → 𝓢 ⊢ χ ⭤ ξ → 𝓢 ⊢ (φ ➝ χ) ⭤ (ψ ➝ ξ) := λ ⟨a⟩ ⟨b⟩ => ⟨ruleE! a b⟩
+
+
+export RuleRestall (restall!)
+@[grind <=] lemma restall [RuleRestall 𝓢] : 𝓢 ⊢ φ ➝ ψ → 𝓢 ⊢ χ ➝ ξ → 𝓢 ⊢ (ψ ➝ χ) ➝ (φ ➝ ξ) := λ ⟨a⟩ ⟨b⟩ => ⟨restall! a b⟩
+
+
 export HasDistributeAndOr (distributeAndOr!)
 lemma distributeAndOr [HasDistributeAndOr 𝓢] : 𝓢 ⊢ Axioms.DistributeAndOr φ ψ χ := ⟨distributeAndOr!⟩
+
+export HasCollectOrAnd (collectOrAnd!)
+lemma collectOrAnd [HasCollectOrAnd 𝓢] : 𝓢 ⊢ Axioms.CollectOrAnd φ ψ χ := ⟨collectOrAnd!⟩
 
 export HasAxiomC (axiomC!)
 lemma axiomC [HasAxiomC 𝓢] : 𝓢 ⊢ Axioms.C φ ψ χ := ⟨axiomC!⟩
@@ -181,6 +249,34 @@ attribute [simp, grind .]
   axiomSer
   axiomSym
   axiomHrd
+
+section
+
+def CK_right_cancel! [RuleI 𝓢] [RuleC 𝓢] [AFortiori 𝓢] [HasImpId 𝓢] (h₁ : 𝓢 ⊢! φ ⋏ ψ ➝ χ) (h₂ : 𝓢 ⊢! ψ) : 𝓢 ⊢! φ ➝ χ := by
+  apply C_trans! ?_ h₁;
+  apply CK!_of_C!_of_C!;
+  . apply impId!;
+  . apply af! h₂;
+lemma CK_right_cancel [RuleI 𝓢] [RuleC 𝓢] [AFortiori 𝓢] [HasImpId 𝓢] (h₁ : 𝓢 ⊢ φ ⋏ ψ ➝ χ) (h₂ : 𝓢 ⊢ ψ) : 𝓢 ⊢ φ ➝ χ := ⟨CK_right_cancel! h₁.some h₂.some⟩
+
+def CK_right_replace!  [RuleI 𝓢] [RuleC 𝓢] [Entailment.HasAxiomAndElim 𝓢] (h₁ : 𝓢 ⊢! φ ⋏ ψ ➝ χ) (h₂ : 𝓢 ⊢! ψ' ➝ ψ) : 𝓢 ⊢! φ ⋏ ψ' ➝ χ := by
+  apply C_trans! ?_ h₁;
+  apply CK!_of_C!_of_C!
+  . apply andElimL!;
+  . apply C_trans! ?_ h₂;
+    apply andElimR!;
+lemma CK_right_replace [RuleI 𝓢] [RuleC 𝓢] [Entailment.HasAxiomAndElim 𝓢] (h₁ : 𝓢 ⊢ φ ⋏ ψ ➝ χ) (h₂ : 𝓢 ⊢ ψ' ➝ ψ) : 𝓢 ⊢ φ ⋏ ψ' ➝ χ := ⟨CK_right_replace! h₁.some h₂.some⟩
+
+def K_comm! [RuleC 𝓢] [Entailment.HasAxiomAndElim 𝓢] : 𝓢 ⊢! (φ ⋏ ψ) ➝ (ψ ⋏ φ) := CK!_of_C!_of_C! andElimR! andElimL!
+@[simp, grind .] lemma K_comm [RuleC 𝓢] [Entailment.HasAxiomAndElim 𝓢] : 𝓢 ⊢ (φ ⋏ ψ) ➝ (ψ ⋏ φ) := ⟨K_comm!⟩
+
+def A_comm! [RuleD 𝓢] [Entailment.HasAxiomOrInst 𝓢] : 𝓢 ⊢! (φ ⋎ ψ) ➝ (ψ ⋎ φ) := CA!_of_C!_of_C! orIntroR! orIntroL!
+@[simp, grind .] lemma A_comm [RuleD 𝓢] [Entailment.HasAxiomOrInst 𝓢] : 𝓢 ⊢ (φ ⋎ ψ) ➝ (ψ ⋎ φ) := ⟨A_comm!⟩
+
+def equivId! [HasImpId 𝓢] [AndIntroRule 𝓢] : 𝓢 ⊢! φ ⭤ φ := andIR! impId! impId!
+@[simp, grind .] lemma equivId [HasImpId 𝓢] [AndIntroRule 𝓢] : 𝓢 ⊢ φ ⭤ φ := ⟨equivId!⟩
+
+end
 
 end Corsi
 

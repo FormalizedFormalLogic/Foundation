@@ -21,6 +21,8 @@ import Foundation.Propositional.Logic.Letterless_Int_Cl
 import Foundation.Propositional.Logic.PostComplete
 import Foundation.Propositional.Decidable
 import Foundation.Propositional.Kripke2.Logic
+import Foundation.Propositional.Neighborhood.NB.Logic
+import Foundation.Propositional.FMT.Logic
 
 -- FirstOrder
 
@@ -154,6 +156,7 @@ import Foundation.Modal.ModalCompanion.Int
 import Foundation.Modal.ModalCompanion.KC
 import Foundation.Modal.ModalCompanion.LC
 import Foundation.Modal.ModalCompanion.Cl
+import Foundation.Modal.ModalCompanion.VF
 
 import Foundation.Modal.Boxdot.K4_S4
 import Foundation.Modal.Boxdot.GL_Grz

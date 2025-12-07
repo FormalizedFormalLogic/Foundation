@@ -23,13 +23,13 @@ namespace N
 
 instance : AllFrameClass.DefinedBy Modal.N.axioms.instances := ⟨by simp⟩
 
-instance : Sound Modal.N PLoN.AllFrameClass := inferInstance
+instance PLoN.sound : Sound Modal.N PLoN.AllFrameClass := inferInstance
 
 instance : Entailment.Consistent Modal.N := PLoN.Hilbert.consistent_of_FrameClass PLoN.AllFrameClass
 
 instance : Canonical Modal.N PLoN.AllFrameClass := ⟨by tauto⟩
 
-instance : Complete Modal.N PLoN.AllFrameClass := inferInstance
+instance PLoN.complete : Complete Modal.N PLoN.AllFrameClass := inferInstance
 
 end N
 
