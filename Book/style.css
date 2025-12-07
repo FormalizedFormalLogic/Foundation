@@ -113,3 +113,7 @@ html {
 .with-toc #toc {
   overflow-y: scroll;
 }
+
+img {
+  width: 100%;
+}
