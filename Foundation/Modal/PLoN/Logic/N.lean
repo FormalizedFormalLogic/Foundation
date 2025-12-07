@@ -29,7 +29,7 @@ instance : Entailment.Consistent Modal.N := PLoN.Hilbert.consistent_of_FrameClas
 
 instance : Canonical Modal.N PLoN.AllFrameClass := ⟨by tauto⟩
 
-instance : Complete Modal.N PLoN.AllFrameClass := inferInstance
+instance PLoN.complete : Complete Modal.N PLoN.AllFrameClass := inferInstance
 
 end N
 
