@@ -26,7 +26,7 @@ namespace Modal
 open Entailment
 open Propositional.Formula (gödelWeakTranslate)
 
-abbrev modelmodel.translate (M : PLoN.Model) : FMT.Model where
+abbrev PLoN.FMT_bridge.translate (M : PLoN.Model) : FMT.Model where
   World := Unit ⊕ M.World
   Rel φ x y :=
     match x, y, φ with
@@ -40,8 +40,8 @@ abbrev modelmodel.translate (M : PLoN.Model) : FMT.Model where
     | .inl () => True
     | .inr x => M.Valuation x a
 
-lemma modelmodel {M : PLoN.Model} {w : M.World} {φ : Propositional.Formula ℕ} :
-  Propositional.Formula.FMT.Forces (M := modelmodel.translate M) (Sum.inr w) φ ↔ Formula.PLoN.Satisfies M w (φᵍʷ)  := by
+lemma PLoN.FMT_bridge {M : PLoN.Model} {w : M.World} {φ : Propositional.Formula ℕ} :
+  Propositional.Formula.FMT.Forces (M := FMT_bridge.translate M) (Sum.inr w) φ ↔ Formula.PLoN.Satisfies M w (φᵍʷ)  := by
   induction φ using Propositional.Formula.rec' generalizing w with
   | himp φ ψ ihφ ihψ =>
     dsimp [Formula.PLoN.Satisfies];
@@ -65,10 +65,10 @@ lemma provable_gödelWeakTranslated_of_provable_VF : Propositional.VF ⊢ φ →
 
   clear h;
 
-  use modelmodel.translate M, .inr w;
+  use PLoN.FMT_bridge.translate M, .inr w;
   constructor;
   . tauto;
-  . apply modelmodel.not.mpr hφ;
+  . apply PLoN.FMT_bridge.not.mpr hφ;
 
 end Modal
 
