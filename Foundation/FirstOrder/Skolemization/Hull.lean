@@ -33,6 +33,7 @@ variable {L M}
 
 variable (L)
 
+/-- The Skolem hull of subset of structure. -/
 def SkolemHull (s : Set M) : Set M := Set.range fun t : Term L.skolemFunction₁ s ↦ t.valm M ![] (↑)
 
 variable (M)

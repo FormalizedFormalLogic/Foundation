@@ -8,7 +8,6 @@ open LO
 
 set_option verso.docstring.allowMissing true
 
-open LO
 
 #doc (Manual) "Monthly Report 2025/11" =>
 %%%
@@ -17,6 +16,44 @@ tag  := "monthly-report-2025-11"
 
 This page is the monthly report summarizing commits [between 2025/11/02 and 2025/11/30](https://github.com/FormalizedFormalLogic/Foundation/commits/master/?since=2025-11-02&until=2025-11-30).
 There are 2 major topics in this month.
+
+# Kripke Semantics of Classical First-Order Logic
+
+*Author*: [Palalansoukî](https://github.com/iehality)
+
+We formalized the Kripke semantics of classical first-order logic, a.k.a. weak forcing and proved its soundness theorem.
+This semantics is used when we working on forcing arguments.
+
+Kripke semantics of classical first-order logic is defined by
+interpretting its negation translation as usual Kripke semantics of intuitionistic first-order logic.
+
+{docstring FirstOrder.KripkeModel.weaklyForces₀_iff_forces}
+
+This semantics satisfises monotonicity, genericity and soundness.
+
+{docstring FirstOrder.KripkeModel.WeaklyForces₀.monotone}
+
+{docstring FirstOrder.KripkeModel.WeaklyForces₀.generic_iff}
+
+{docstring FirstOrder.KripkeModel.WeaklyForces₀.sound}
+
+# Downward Löwenheim-Skolem Theorem
+
+*Author*: [Palalansoukî](https://github.com/iehality)
+
+We formalized the downward Löwenheim-Skolem theorem for countable languages.
+This theorem states that all structure of countable language, with its subset $`s`,
+has a minimal elementary substructure contains $`s`, namely a Skolem hull of $`s`.
+
+{docstring FirstOrder.Structure.SkolemHull}
+
+{docstring FirstOrder.Structure.SkolemHull.subset}
+
+{docstring FirstOrder.Structure.SkolemHull.elementaryEquiv}
+
+And if the subset is countable, then the cardinality of the Skolem hull is at most countable.
+
+{docstring FirstOrder.Structure.SkolemHull.card_le_aleph0}
 
 # Commits
 
