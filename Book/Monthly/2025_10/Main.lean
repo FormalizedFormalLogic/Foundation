@@ -83,7 +83,7 @@ Remarks that `EMCN4` is equivalent to `K4`.
 More information might be found in {ref "modal-logic-neighborhood-semantics"}[chapter of neightborhood semantics on modal logic].
 _(work in progress)_
 
-# Interpretability Logic and Veltman Semantics
+# Interpretability Logic and Veltman Semantics I
 
 *Author*: [@SnO2WMaN](https://github.com/SnO2WMaN)
 
@@ -110,7 +110,7 @@ Basic axioms and rules of interpretability logic are as follows:
 
 - $`\mathsf{J1}`: $`\Box(\varphi \rightarrow \psi) \rightarrow (\varphi \rhd \psi)`
 - $`\mathsf{J2}`: $`(\varphi \rhd \psi) \wedge (\psi \rhd \chi) \rightarrow (\varphi \rhd \chi)`
-- $`\mathsf{J2^+}`: $`\varphi \rhd (\psi \lor \chi) \to \psi \rhd \chi \varphi \rhd \chi`
+- $`\mathsf{J2^+}`: $`\varphi \rhd (\psi \lor \chi) \to \psi \rhd \chi \to \varphi \rhd \chi`
 - $`\mathsf{J3}`: $`\varphi \rhd \chi \to \psi \rhd \chi \to (\varphi \lor \psi) \rhd \chi`
 - $`\mathsf{J4}`: $`\varphi \rhd \psi \to \Diamond \varphi \to \Diamond \psi`
 - $`\mathsf{J4^+}`: $`\Box(\varphi \to \psi) \to (\chi \rhd \varphi \to \chi \rhd \psi)`
