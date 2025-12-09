@@ -112,4 +112,9 @@ end Hilbert.VF
 protected abbrev VF : Logic ℕ := Hilbert.VF ∅
 instance : Entailment.VF Propositional.VF where
 
+protected abbrev VF_Ser : Logic ℕ := Hilbert.VF { Axioms.Ser }
+instance : Entailment.VF Propositional.VF_Ser where
+instance : Entailment.HasAxiomSer Propositional.VF_Ser where
+  axiomSer! := ⟨by apply Hilbert.VF.axm'; simp⟩
+
 end LO.Propositional
