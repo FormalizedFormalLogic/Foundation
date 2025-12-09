@@ -88,7 +88,10 @@ instance [HasAxiomVerum L] : (∅ : Logic α) ⪱ L := by
   apply strictlyWeakerThan_iff.mpr;
   constructor;
   . simp [Logic.iff_provable];
-  . use ⊤; constructor <;> simp [Logic.iff_unprovable];
+  . use ⊤;
+    constructor;
+    . simp [Logic.iff_unprovable];
+    . exact Entailment.verum!;
 
 instance : L ⪯ (Set.univ : Logic α) := ⟨by simp [Entailment.theory, Logic.iff_provable]⟩
 

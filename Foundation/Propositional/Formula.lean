@@ -3,6 +3,8 @@ import Foundation.Logic.LogicSymbol
 
 namespace LO.Propositional
 
+variable {α : Type*}
+
 inductive Formula (α : Type u) : Type u
   | atom   : α → Formula α
   | falsum : Formula α
@@ -17,11 +19,13 @@ abbrev FormulaFinset (α) := Finset (Formula α)
 
 namespace Formula
 
+variable {φ ψ φ₁ ψ₁ φ₂ ψ₂ : Formula α}
+
 prefix:max "#" => Formula.atom
 
-abbrev neg {α : Type u} (φ : Formula α) : Formula α := imp φ falsum
+abbrev neg (φ : Formula α) : Formula α := imp φ falsum
 
-abbrev verum {α : Type u} : Formula α := imp falsum falsum
+abbrev verum : Formula α := imp falsum falsum
 
 instance : LogicalConnective (Formula α) where
   tilde := neg
@@ -51,17 +55,13 @@ instance : ToString (Formula α) := ⟨toStr⟩
 
 end ToString
 
-@[simp] lemma and_inj (φ₁ ψ₁ φ₂ ψ₂ : Formula α) : φ₁ ⋏ φ₂ = ψ₁ ⋏ ψ₂ ↔ φ₁ = ψ₁ ∧ φ₂ = ψ₂ := by simp [Wedge.wedge]
+lemma and_inj : φ₁ ⋏ φ₂ = ψ₁ ⋏ ψ₂ ↔ φ₁ = ψ₁ ∧ φ₂ = ψ₂ := by simp [Wedge.wedge]
+lemma or_inj : φ₁ ⋎ φ₂ = ψ₁ ⋎ ψ₂ ↔ φ₁ = ψ₁ ∧ φ₂ = ψ₂ := by simp [Vee.vee]
+lemma imp_inj : φ₁ ➝ φ₂ = ψ₁ ➝ ψ₂ ↔ φ₁ = ψ₁ ∧ φ₂ = ψ₂ := by simp [Arrow.arrow]
+lemma neg_inj : ∼φ = ∼ψ ↔ φ = ψ := by simp [Tilde.tilde]
+attribute [simp, grind =] and_inj or_inj imp_inj neg_inj
 
-@[simp] lemma or_inj (φ₁ ψ₁ φ₂ ψ₂ : Formula α) : φ₁ ⋎ φ₂ = ψ₁ ⋎ ψ₂ ↔ φ₁ = ψ₁ ∧ φ₂ = ψ₂ := by simp [Vee.vee]
-
-@[simp] lemma imp_inj (φ₁ ψ₁ φ₂ ψ₂ : Formula α) : φ₁ ➝ φ₂ = ψ₁ ➝ ψ₂ ↔ φ₁ = ψ₁ ∧ φ₂ = ψ₂ := by simp [Arrow.arrow]
-
-@[simp] lemma neg_inj (φ ψ : Formula α) : ∼φ = ∼ψ ↔ φ = ψ := by simp [Tilde.tilde]
-
-
-lemma neg_def (φ : Formula α) : ∼φ = φ ➝ ⊥ := rfl
-
+lemma neg_def : ∼φ = φ ➝ ⊥ := rfl
 lemma top_def : (⊤ : Formula α) = ⊥ ➝ ⊥ := rfl
 
 
