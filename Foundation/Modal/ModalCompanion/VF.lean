@@ -58,7 +58,7 @@ namespace Modal
 open Entailment
 open Propositional.Formula (gödelWeakTranslate)
 
-abbrev PLoN.FMT_bridge.translate (M : PLoN.Model) : FMT.Model where
+protected abbrev provable_gödelWeakTranslated_of_provable_VF.lemma.translate (M : PLoN.Model) : FMT.Model where
   World := Unit ⊕ M.World
   Rel φ x y :=
     match x, y, φ with
@@ -72,38 +72,33 @@ abbrev PLoN.FMT_bridge.translate (M : PLoN.Model) : FMT.Model where
     | .inl () => True
     | .inr x => M.Valuation x a
 
-lemma PLoN.FMT_bridge {M : PLoN.Model} {w : M.World} {φ : Propositional.Formula ℕ} :
-  Propositional.Formula.FMT.Forces (M := FMT_bridge.translate M) (Sum.inr w) φ ↔ Formula.PLoN.Satisfies M w (φᵍʷ)  := by
+lemma provable_gödelWeakTranslated_of_provable_VF.lemma {M : PLoN.Model} {w : M.World} {φ : Propositional.Formula ℕ} :
+  Propositional.Formula.FMT.Forces (M := lemma.translate M) (Sum.inr w) φ ↔ Modal.Formula.PLoN.Forces w (φᵍʷ)  := by
   induction φ using Propositional.Formula.rec' generalizing w with
   | himp φ ψ ihφ ihψ =>
-    dsimp [Formula.PLoN.Satisfies];
+    dsimp [Formula.PLoN.Forces];
     constructor;
     . grind;
     . intro h x Rwx hxφ;
       match x with
       | .inl () => grind;
       | .inr x => grind;
-  | _ => dsimp [Formula.PLoN.Satisfies]; grind;
+  | _ => dsimp [Formula.PLoN.Forces]; grind;
 
+open provable_gödelWeakTranslated_of_provable_VF in
 lemma provable_gödelWeakTranslated_of_provable_VF : Propositional.VF ⊢ φ → Modal.N ⊢ φᵍʷ := by
   contrapose!;
   intro h;
   apply Propositional.VF.FMT.sound.not_provable_of_countermodel;
   apply Propositional.FMT.not_validOnFrameClass_of_exists_model_world;
-
-  obtain ⟨M, _, hφ⟩ := Modal.Formula.PLoN.ValidOnFrameClass.iff_not_exists_model.mp $ Modal.N.PLoN.complete.exists_countermodel_of_not_provable h;
-  simp only [Formula.PLoN.ValidOnModel.iff_models, Formula.PLoN.ValidOnModel, Formula.PLoN.Satisfies.iff_models, not_forall] at hφ;
-  obtain ⟨w, hφ⟩ := hφ;
-
-  clear h;
-
-  use PLoN.FMT_bridge.translate M, .inr w;
+  obtain ⟨M, w, _, hφ⟩ := Modal.PLoN.exists_model_world_of_not_validOnFrameClass $ Modal.N.PLoN.complete.exists_countermodel_of_not_provable h;
+  use lemma.translate M, .inr w;
   constructor;
   . tauto;
-  . apply PLoN.FMT_bridge.not.mpr hφ;
+  . apply lemma.not.mpr hφ;
 
 
-abbrev provable_VF_of_provable_gödelWeakTranslated.lemma1.translate (M : FMT.Model) : PLoN.Model where
+protected abbrev provable_VF_of_provable_gödelWeakTranslated.lemma.translate (M : FMT.Model) : PLoN.Model where
   World := M.World
   Rel φ x y :=
     match φ with
@@ -111,12 +106,11 @@ abbrev provable_VF_of_provable_gödelWeakTranslated.lemma1.translate (M : FMT.Mo
     | _     => True
   Valuation x a := M.Val x a
 
-
-lemma provable_VF_of_provable_gödelWeakTranslated.lemma1 {M : FMT.Model} {w : M.World} {φ : Propositional.Formula ℕ} :
-  Formula.PLoN.Satisfies (M := lemma1.translate M) w (φᵍʷ) ↔ Propositional.Formula.FMT.Forces (M := M) w φ := by
+lemma provable_VF_of_provable_gödelWeakTranslated.lemma {M : FMT.Model} {w : M.World} {φ : Propositional.Formula ℕ} :
+  Formula.PLoN.Forces (M := lemma.translate M) w (φᵍʷ) ↔ Propositional.Formula.FMT.Forces (M := M) w φ := by
   induction φ using Propositional.Formula.rec' generalizing w with
   | himp φ ψ ihφ ihψ =>
-    dsimp [Formula.PLoN.Satisfies];
+    dsimp [Formula.PLoN.Forces];
     constructor;
     . intro H x Rwx h;
       apply ihψ.mp;
@@ -133,28 +127,26 @@ lemma provable_VF_of_provable_gödelWeakTranslated.lemma1 {M : FMT.Model} {w : M
         grind;
       . apply ihφ.mp;
         assumption;
-  | _ => dsimp [Formula.PLoN.Satisfies]; grind;
+  | _ => dsimp [Formula.PLoN.Forces]; grind;
 
 open provable_VF_of_provable_gödelWeakTranslated in
 lemma provable_VF_of_provable_gödelWeakTranslated : Modal.N ⊢ φᵍʷ → Propositional.VF ⊢ φ := by
   contrapose!;
   intro h;
-  apply Modal.N.PLoN.sound.not_provable_of_countermodel;
-  apply Modal.Formula.PLoN.ValidOnFrameClass.not_of_exists_model_world;
   obtain ⟨M, x, _, H⟩ := Propositional.FMT.exists_model_world_of_not_validOnFrameClass $ Propositional.VF.FMT.complete.exists_countermodel_of_not_provable h;
-  clear h;
-  use lemma1.translate M;
+  apply Modal.N.PLoN.sound.not_provable_of_countermodel;
+  apply Modal.PLoN.not_validOnFrameClass_of_exists_model_world;
+  use lemma.translate M, x;
   constructor;
   . tauto;
-  . use x;
-    apply lemma1.not.mpr H;
+  . apply lemma.not.mpr H;
 
-lemma iff_provable_VF_provable_gödelWeakTranslated : Modal.N ⊢ φᵍʷ ↔ Propositional.VF ⊢ φ := by
+
+theorem iff_provable_VF_provable_gödelWeakTranslated : Propositional.VF ⊢ φ ↔ Modal.N ⊢ φᵍʷ := by
   constructor;
-  . apply provable_VF_of_provable_gödelWeakTranslated;
   . apply provable_gödelWeakTranslated_of_provable_VF;
+  . apply provable_VF_of_provable_gödelWeakTranslated;
 
 end Modal
-
 
 end LO
