@@ -132,7 +132,7 @@ import Foundation.Modal.Kripke.Undefinability
 import Foundation.Modal.Kripke.Balloon
 import Foundation.Modal.Kripke.LinearFrame
 
-import Foundation.Modal.PLoN.Logic.N
+import Foundation.Modal.PLoN.Logic
 
 import Foundation.Modal.Neighborhood.Logic.E4
 import Foundation.Modal.Neighborhood.Logic.E5

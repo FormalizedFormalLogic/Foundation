@@ -1,10 +1,9 @@
 import Foundation.Modal.Formula
 
-universe u v
-
 namespace LO.Modal
 
 open Formula (atom)
+variable {φ ψ χ : Formula ℕ}
 
 namespace PLoN
 
@@ -13,29 +12,30 @@ structure Frame where
   Rel : Formula ℕ → World → World → Prop
   [World_nonempty : Nonempty World]
 
-noncomputable abbrev Frame.default {F : PLoN.Frame} : F.World := F.World_nonempty.some
-scoped notation "﹫" => Frame.default
+namespace Frame
+
+variable {F : PLoN.Frame}
+
+noncomputable abbrev default {F : PLoN.Frame} : F.World := F.World_nonempty.some
+
+instance : CoeSort PLoN.Frame (Type) := ⟨World⟩
+instance : CoeFun PLoN.Frame (λ F => Formula ℕ → F.World → F.World → Prop) := ⟨Frame.Rel⟩
+instance : Nonempty F.World := F.World_nonempty
+
+abbrev Rel' {F : PLoN.Frame} (φ : Formula ℕ) (x y : F.World) := F.Rel φ x y
+notation:45 x:90 " ≺[" φ "] " y:90 => Rel' φ x y
+
+end Frame
 
 
-instance : CoeFun (PLoN.Frame) (λ F => Formula ℕ → F.World → F.World → Prop) := ⟨Frame.Rel⟩
 
-abbrev Frame.Rel' {F : PLoN.Frame} (φ : Formula ℕ) (x y : F.World) := F.Rel φ x y
-notation:45 x:90 " ≺[" φ "] " y:90 => Frame.Rel' φ x y
-
-
-structure FiniteFrame extends Frame where
-  [World_finite : Finite World]
-
-instance : Coe (FiniteFrame) (Frame) := ⟨λ F ↦ F.toFrame⟩
-
-
-abbrev terminalFrame : FiniteFrame where
+abbrev terminalFrame : PLoN.Frame where
   World := Unit
   Rel := λ _ _ _ => True
 
 
-abbrev FrameClass := Set (PLoN.Frame)
 
+abbrev FrameClass := Set (PLoN.Frame)
 
 abbrev Valuation (F : PLoN.Frame) := F.World → ℕ → Prop
 
@@ -50,79 +50,70 @@ open PLoN
 
 namespace Formula.PLoN
 
-def Satisfies (M : PLoN.Model) (w : M.World) : Formula ℕ → Prop
+@[simp, grind .]
+def Forces {M : PLoN.Model} (w : M.World) : Formula ℕ → Prop
   | atom a  => M.Valuation w a
   | falsum  => False
-  | φ ➝ ψ => (Satisfies M w φ) → (Satisfies M w ψ)
-  | □φ   => ∀ {w'}, w ≺[φ] w' → (Satisfies M w' φ)
+  | φ ➝ ψ => (Forces w φ) → (Forces w ψ)
+  | □φ   => ∀ {w'}, w ≺[φ] w' → (Forces w' φ)
+infix:45 " ⊩ " => Forces
 
-namespace Satisfies
-
-protected instance semantics (M : PLoN.Model) : Semantics M.World (Formula ℕ) := ⟨fun w ↦ Formula.PLoN.Satisfies M w⟩
-
-variable {M : PLoN.Model} {x : M.World} {φ ψ : Formula ℕ}
-
-@[simp] protected lemma iff_models : x ⊧ φ ↔ PLoN.Satisfies M x φ := by rfl
-
-lemma box_def : x ⊧ □φ ↔ ∀ y, x ≺[φ] y → y ⊧ φ := by simp [PLoN.Satisfies];
-
-protected lemma not_def : x ⊧ ∼φ ↔ ¬(x ⊧ φ) := by
-  induction φ generalizing x with
-  | _ => simp_all [Satisfies];
-
-protected lemma imp_def : x ⊧ φ ➝ ψ ↔ (x ⊧ φ) → (x ⊧ ψ) := by tauto;
-
-protected lemma or_def : x ⊧ φ ⋎ ψ ↔ x ⊧ φ ∨ x ⊧ ψ := by simp [Satisfies]; tauto;
-
-protected lemma and_def : x ⊧ φ ⋏ ψ ↔ x ⊧ φ ∧ x ⊧ ψ := by simp [Satisfies];
-
-protected lemma bot_def : ¬(x ⊧ ⊥) := by simp [Satisfies];
-
-protected lemma top_def : x ⊧ ⊤ := by simp [Satisfies];
-
-instance : Semantics.Tarski M.World where
-  models_verum := λ _ => Satisfies.top_def
-  models_falsum := λ _ => Satisfies.bot_def
-  models_imply := Satisfies.imp_def
-  models_not := Satisfies.not_def
-  models_and := Satisfies.and_def
-  models_or  := Satisfies.or_def
-
-protected lemma def_iff : x ⊧ φ ⭤ ψ ↔ ((x ⊧ φ) ↔ (x ⊧ ψ)) := by
-  simp [LogicalConnective.iff]
-  tauto;
-
-end Satisfies
+@[simp, grind .] abbrev NotForces {M : outParam (PLoN.Model)} (x : M.World) (φ : Formula ℕ) : Prop := ¬(x ⊩ φ)
+infix:45 " ⊮ " => NotForces
 
 
-def ValidOnModel (M : PLoN.Model) (φ : Formula ℕ) : Prop := ∀ w : M.World, w ⊧ φ
+namespace Forces
+
+variable {M : PLoN.Model} {x : M.World}
+
+@[grind .] protected lemma bot_def : x ⊮ ⊥ := by simp [Forces];
+@[grind .] protected lemma top_def : x ⊩ ⊤ := by simp [Forces];
+
+@[grind =] protected lemma imp_def : x ⊩ φ ➝ ψ ↔ (x ⊩ φ) → (x ⊩ ψ) := by tauto;
+@[grind =] protected lemma not_def_imp : x ⊮ φ ➝ ψ ↔ (x ⊩ φ ∧ x ⊮ ψ) := by grind
+
+@[grind =] protected lemma or_def : x ⊩ φ ⋎ ψ ↔ x ⊩ φ ∨ x ⊩ ψ := by dsimp [Forces]; grind;
+@[grind =] protected lemma not_def_or : x ⊮ φ ⋎ ψ ↔ x ⊮ φ ∧ x ⊮ ψ := by dsimp [Forces]; grind;
+
+@[grind =] protected lemma and_def : x ⊩ φ ⋏ ψ ↔ x ⊩ φ ∧ x ⊩ ψ := by dsimp [Forces]; grind;
+@[grind =] protected lemma not_def_and : x ⊮ φ ⋏ ψ ↔ x ⊮ φ ∨ x ⊮ ψ := by grind;
+
+@[grind =] protected lemma def_neg : x ⊩ ∼φ ↔ x ⊮ φ := by dsimp [Forces]; grind;
+@[grind =] protected lemma not_def_neg : x ⊮ ∼φ ↔ x ⊩ φ := by dsimp [Forces]; grind;
+
+
+@[grind =] protected lemma def_iff : x ⊩ φ ⭤ ψ ↔ ((x ⊩ φ) ↔ (x ⊩ ψ)) := by dsimp [LogicalConnective.iff]; grind;
+@[grind =] protected lemma not_def_iff : x ⊮ φ ⭤ ψ ↔ ((x ⊩ φ) ∧ x ⊮ ψ) ∨ (x ⊮ φ ∧ (x ⊩ ψ)) := by grind;
+
+@[grind =] lemma box_def : x ⊩ □φ ↔ ∀ y, x ≺[φ] y → y ⊩ φ := by simp [PLoN.Forces];
+@[grind =] lemma not_box_def : x ⊮ □φ ↔ ∃ y, x ≺[φ] y ∧ y ⊮ φ := by grind;
+
+end Forces
+
+
+instance : Semantics (PLoN.Model) (Formula ℕ) := ⟨fun M φ => ∀ x : M.World, x ⊩ φ⟩
 
 namespace ValidOnModel
 
-variable {M : PLoN.Model} {φ ψ χ : Formula ℕ}
-
-instance : Semantics PLoN.Model (Formula ℕ) := ⟨fun M ↦ Formula.PLoN.ValidOnModel M⟩
-
-@[simp]
-protected lemma iff_models {M : PLoN.Model} {φ : Formula ℕ}
-: M ⊧ φ ↔ Formula.PLoN.ValidOnModel M φ := by rfl
-
-instance : Semantics.Bot (PLoN.Model) where
-  models_falsum _ := by
-    simp [Semantics.NotModels, Formula.PLoN.ValidOnModel];
-    use ﹫;
-
 variable {M : PLoN.Model}
 
-protected lemma implyK : M ⊧ (Axioms.ImplyK φ ψ) := by simp [ValidOnModel]; tauto;
+@[simp, grind =] lemma iff_models : M ⊧ φ ↔ ∀ x : M.World, x ⊩ φ := iff_of_eq rfl
+@[simp, grind =] lemma iff_not_models : M ⊭ φ ↔ ∃ x : M.World, x ⊮ φ := by simp [Semantics.NotModels, Semantics.Models];
 
-protected lemma implyS : M ⊧ (Axioms.ImplyS φ ψ χ) := by simp [ValidOnModel]; tauto;
+@[simp, grind .] protected lemma def_verum : M ⊧ ⊤ := by grind;
+instance : Semantics.Top (PLoN.Model) := ⟨by grind⟩
 
-protected lemma elimContra : M ⊧ (Axioms.ElimContra φ ψ) := by simp [ValidOnModel]; tauto;
+@[simp, grind .] protected lemma def_bot : M ⊭ ⊥ := by
+  apply iff_not_models.mpr;
+  use M.default;
+  simp;
+instance : Semantics.Bot (PLoN.Model) := ⟨by grind⟩
 
-protected lemma nec (h : M ⊧ φ) : M ⊧ □φ := by
-  intro x y Rxy;
-  apply h;
+@[grind .] protected lemma implyK : M ⊧ (Axioms.ImplyK φ ψ) := by grind;
+@[grind .] protected lemma implyS : M ⊧ (Axioms.ImplyS φ ψ χ) := by grind;
+@[grind .] protected lemma elimContra : M ⊧ (Axioms.ElimContra φ ψ) := by grind;
+@[grind <=] protected lemma nec (h : M ⊧ φ) : M ⊧ □φ := by grind;
+@[grind <=] protected lemma mdp (h₁ : M ⊧ φ ➝ ψ) (h₂ : M ⊧ φ) : M ⊧ ψ := fun x ↦ h₁ x (h₂ x)
 
 protected lemma re : ¬∀ M : Model, ∀ φ ψ, M ⊧ φ ⭤ ψ → M ⊧ □φ ⭤ □ψ := by
   push_neg;
@@ -133,11 +124,10 @@ protected lemma re : ¬∀ M : Model, ∀ φ ψ, M ⊧ φ ⭤ ψ → M ⊧ □φ
   };
   use M, (.atom 0), (.atom 1);
   constructor;
-  . simp [ValidOnModel];
-    tauto;
+  . grind;
   . suffices (∃ x : M.World, ∀ y : M.World, x ≺[atom 0] y → y = 0) ∧ ∃ x : M.World, x ≠ 0 by
-      simp [ValidOnModel, Satisfies];
-      simpa [M, ValidOnModel, Semantics.Models, Satisfies] using this;
+      simp [M];
+      grind;
     constructor;
     . use 0;
       intro x;
@@ -151,131 +141,53 @@ protected lemma re : ¬∀ M : Model, ∀ φ ψ, M ⊧ φ ⭤ ψ → M ⊧ □φ
 end ValidOnModel
 
 
-def ValidOnFrame (F : PLoN.Frame) (φ : Formula ℕ) := ∀ V, (Model.mk F V) ⊧ φ
+instance : Semantics (PLoN.Frame) (Formula ℕ) := ⟨fun F φ => ∀ V, (⟨F, V⟩ : PLoN.Model) ⊧ φ⟩
 
 namespace ValidOnFrame
 
-instance : Semantics PLoN.Frame (Formula ℕ) := ⟨fun F ↦ Formula.PLoN.ValidOnFrame F⟩
+variable {F : PLoN.Frame}
 
-@[simp]
-protected lemma iff_models {F : PLoN.Frame} {φ : Formula ℕ}
-: F ⊧ φ ↔ Formula.PLoN.ValidOnFrame F φ := by rfl
+@[simp, grind .] lemma iff_models : F ⊧ φ ↔ ∀ V, (⟨F, V⟩ : PLoN.Model) ⊧ φ := by rfl
+@[simp, grind .] lemma iff_not_models : F ⊭ φ ↔ ∃ V, (⟨F, V⟩ : PLoN.Model) ⊭ φ := by simp [Semantics.NotModels, Semantics.Models];
 
-variable {F : Frame}
+@[simp, grind .] protected lemma def_verum : F ⊧ ⊤ := by simp;
+instance : Semantics.Top (PLoN.Frame) := ⟨by grind⟩
 
-instance : Semantics.Bot (PLoN.Frame) where
-  models_falsum _ := by simp [Semantics.NotModels, Formula.PLoN.ValidOnFrame];
-
-protected lemma nec (h : F ⊧ φ) : F ⊧ □φ := by
-  intro V x y _;
-  exact h V y;
-
-protected lemma mdp (hpq : F ⊧ φ ➝ ψ) (hp : F ⊧ φ) : F ⊧ ψ := by
-  intro V x;
-  exact (hpq V x) (hp V x);
-
-protected lemma implyK : F ⊧ (Axioms.ImplyK φ ψ) := by simp [ValidOnFrame]; tauto;
-
-protected lemma implyS : F ⊧ (Axioms.ImplyS φ ψ χ) := by simp [ValidOnFrame]; tauto;
-
-protected lemma elimContra : F ⊧ (Axioms.ElimContra φ ψ) := by intro V; exact ValidOnModel.elimContra;
+@[simp, grind .] protected lemma def_bot : F ⊭ ⊥ := by simp;
+instance : Semantics.Bot (PLoN.Frame) := ⟨by grind⟩
 
 end ValidOnFrame
-
-
-def ValidOnFrameClass (C : PLoN.FrameClass) (φ : Formula ℕ) := ∀ {F}, F ∈ C → F ⊧ φ
-
-namespace ValidOnFrameClass
-
-instance : Semantics PLoN.FrameClass (Formula ℕ) := ⟨fun C ↦ Formula.PLoN.ValidOnFrameClass C⟩
-
-variable {C : FrameClass}
-
-@[simp]
-protected lemma iff_models {C : PLoN.FrameClass} {φ : Formula ℕ} : C ⊧ φ ↔ Formula.PLoN.ValidOnFrameClass C φ := by rfl
-
-protected lemma nec (h : C ⊧ φ) : C ⊧ □φ := by
-  intro _ hF;
-  apply PLoN.ValidOnFrame.nec;
-  exact h hF;
-
-protected lemma mdp (hpq : C ⊧ φ ➝ ψ) (hp : C ⊧ φ) : C ⊧ ψ := by
-  intro _ hF;
-  exact PLoN.ValidOnFrame.mdp (hpq hF) (hp hF)
-
-protected lemma implyK : C ⊧ (Axioms.ImplyK φ ψ) := by intro _ _; exact PLoN.ValidOnFrame.implyK;
-
-protected lemma implyS : C ⊧ (Axioms.ImplyS φ ψ χ) := by intro _ _; exact PLoN.ValidOnFrame.implyS;
-
-protected lemma elimContra : C ⊧ (Axioms.ElimContra φ ψ) := by intro _ _; exact PLoN.ValidOnFrame.elimContra;
-
-
-lemma iff_not_exists_frame : (¬C ⊧ φ) ↔ (∃ F ∈ C, ¬F ⊧ φ) := by
-  apply not_iff_not.mp;
-  push_neg;
-  tauto;
-
-alias ⟨exists_frame_of_not, not_of_exists_frame⟩ := iff_not_exists_frame
-
-
-lemma iff_not_exists_model : (¬C ⊧ φ) ↔ (∃ M : PLoN.Model, M.toFrame ∈ C ∧ ¬M ⊧ φ) := by
-  apply not_iff_not.mp;
-  push_neg;
-  tauto;
-
-alias ⟨exists_model_of_not, not_of_exists_model⟩ := iff_not_exists_model
-
-
-lemma iff_not_exists_model_world : (¬C ⊧ φ) ↔ (∃ M : PLoN.Model, M.toFrame ∈ C ∧ ∃ w : M.World, ¬(w ⊧ φ)) := by
-  apply not_iff_not.mp;
-  push_neg;
-  tauto;
-alias ⟨exists_model_world_of_not, not_of_exists_model_world⟩ := iff_not_exists_model_world
-
-
-end ValidOnFrameClass
 
 end Formula.PLoN
 
 
-namespace PLoN.FrameClass
-
-class DefinedBy (C : PLoN.FrameClass) (Γ : Set (Formula ℕ)) where
-  defines : ∀ F, F ∈ C ↔ (∀ φ ∈ Γ, F ⊧ φ)
-
-class IsNonempty (C : PLoN.FrameClass) : Prop where
-  nonempty : Nonempty C
-
-end PLoN.FrameClass
-
-/-
 namespace PLoN
 
-abbrev AllFrameClass (α) : FrameClass α := Set.univ
+section
 
-lemma AllFrameClass.nonempty : (AllFrameClass.{_, 0} α).Nonempty := by
-  use terminalFrame α
-  trivial;
+variable {C : PLoN.FrameClass}
 
-open Formula
+lemma iff_not_validOnFrameClass_exists_frame : (C ⊭ φ) ↔ (∃ F ∈ C, F ⊭ φ) := by
+  apply not_iff_not.mp;
+  push_neg;
+  tauto;
+alias ⟨exists_frame_of_not_validOnFrameClass, not_validOnFrameClass_of_exists_frame⟩ := iff_not_validOnFrameClass_exists_frame
 
-lemma N_defines : (Hilbert.N).DefinesPLoNFrameClass (AllFrameClass α) := by
-  intro F;
-  simp [Hilbert.theorems, Entailment.theory, PLoN.ValidOnFrame, PLoN.ValidOnModel];
-  intro φ hp;
-  induction hp using Hilbert.Deduction.inducition_with_necOnly! with
-  | hMaxm h => simp at h;
-  | hMdp ihpq ihp =>
-    intro V w;
-    exact (ihpq V w) (ihp V w)
-  | hNec ihp =>
-    intro V w w' _;
-    exact ihp V w';
-  | _ =>
-    simp_all [PLoN.Satisfies];
-    try tauto;
+
+lemma iff_not_validOnFrameClass_exists_model : (C ⊭ φ) ↔ (∃ M : PLoN.Model, M.toFrame ∈ C ∧ M ⊭ φ) := by
+  apply not_iff_not.mp;
+  push_neg;
+  tauto;
+alias ⟨exists_model_of_not_validOnFrameClass, not_validOnFrameClass_of_exists_model⟩ := iff_not_validOnFrameClass_exists_model
+
+lemma iff_not_validOnFrameClass_exists_model_world : (C ⊭ φ) ↔ (∃ M : PLoN.Model, ∃ w : M.World, M.toFrame ∈ C ∧ w ⊮ φ) := by
+  apply not_iff_not.mp;
+  push_neg;
+  tauto;
+alias ⟨exists_model_world_of_not_validOnFrameClass, not_validOnFrameClass_of_exists_model_world⟩ := iff_not_validOnFrameClass_exists_model_world
+
+end
 
 end PLoN
--/
 
 end LO.Modal

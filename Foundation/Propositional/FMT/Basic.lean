@@ -57,8 +57,8 @@ namespace Formula.FMT
 
 open FMT
 
-open Classical in
-@[simp, grind .] def Forces {M : outParam (FMT.Model)} (x : M.World) : Formula ℕ → Prop
+@[simp, grind .]
+def Forces {M : outParam (FMT.Model)} (x : M.World) : Formula ℕ → Prop
   | atom a => M x a
   | ⊥      => False
   | φ ⋏ ψ  => Forces x φ ∧ Forces x ψ
