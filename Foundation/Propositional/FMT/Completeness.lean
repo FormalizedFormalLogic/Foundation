@@ -242,6 +242,17 @@ lemma no_bot (h : ⊥ ∈ φ.subformulas) : ⟨⊥, h⟩ ∉ H.1.1 := by
     grind;
   . exact efq;
 
+@[simp, grind =>]
+lemma mem_top (h : ⊤ ∈ φ.subformulas) : ⟨⊤, h⟩ ∈ H.1.1 := by
+  apply iff_mem₁_not_mem₂.mpr;
+  by_contra hC;
+  apply H.consistent;
+  apply ruleI (ψ := ⊤);
+  . apply af;
+    exact Entailment.verum!;
+  . apply mem_fdisj';
+    grind;
+
 lemma iff_mem_and (hSub : ψ ⋏ χ ∈ φ.subformulas) : ⟨ψ ⋏ χ, hSub⟩ ∈ H.1.1 ↔ ⟨ψ, subformulas.mem_and hSub |>.1⟩ ∈ H.1.1 ∧ ⟨χ, subformulas.mem_and hSub |>.2⟩ ∈ H.1.1 := by
   constructor;
   . rintro h;

@@ -60,6 +60,7 @@
       "LO.Propositional.KrieselPutnam": $Logic("KP")$,
       "LO.Propositional.LC": $Logic("LC")$,
       "LO.Propositional.VF": $LogicVF$,
+      "LO.Propositional.VF_Ser": $LogicVF(AxiomSer)$,
       "LO.Propositional.WF": $LogicWF$,
     ),
     width: 640pt,
