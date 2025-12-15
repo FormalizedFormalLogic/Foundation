@@ -8,12 +8,36 @@ namespace LO
 open LO.Entailment LO.Entailment.FiniteContext LO.Modal.Entailment
 open Propositional
 
+
 namespace Modal.Formula
 
 @[grind .] lemma neq_and_or {φ ψ χ ξ : Formula α} : φ ⋏ ψ ≠ χ ⋎ ξ := by rw [←Formula.or_eq, ←Formula.and_eq]; simp;
 @[grind .] lemma neq_or_and {φ ψ χ ξ : Formula α} : φ ⋎ ψ ≠ χ ⋏ ξ := by rw [←Formula.and_eq, ←Formula.or_eq]; simp;
 
 end Modal.Formula
+
+
+namespace Modal
+
+namespace PLoN
+
+protected class Frame.NP (F : Frame) where
+  P_serial : ∀ x : F, ∃ y, x ≺[⊥] y
+
+protected abbrev FrameClass.NP : PLoN.FrameClass := { F | Frame.NP F }
+
+end PLoN
+
+
+namespace NP.PLoN
+
+axiom sound : Sound Modal.NP PLoN.FrameClass.NP
+axiom complete : Complete Modal.NP PLoN.FrameClass.NP
+
+end NP.PLoN
+
+
+end Modal
 
 
 namespace Propositional.Formula
@@ -28,7 +52,7 @@ def gödelWeakTranslate : Propositional.Formula α → Modal.Formula α
   | φ ⋏ ψ => (φ.gödelWeakTranslate) ⋏ (ψ.gödelWeakTranslate)
   | φ ⋎ ψ => (φ.gödelWeakTranslate) ⋎ (ψ.gödelWeakTranslate)
   | φ ➝ ψ => □((φ.gödelWeakTranslate) ➝ (ψ.gödelWeakTranslate))
-postfix:90 "ᵍʷ" => Propositional.Formula.gödelWeakTranslate
+postfix:90 "ᶜ" => Propositional.Formula.gödelWeakTranslate
 
 @[grind .]
 lemma gödelWeakTranslate.injective : Function.Injective (gödelWeakTranslate (α := α)) := by
@@ -38,7 +62,7 @@ lemma gödelWeakTranslate.injective : Function.Injective (gödelWeakTranslate (�
   | ⊥, ⊥ => rfl
   | φ₁ ⋏ φ₂, ψ₁ ⋏ ψ₂ | φ₁ ⋎ φ₂, ψ₁ ⋎ ψ₂ | φ₁ ➝ φ₂, ψ₁ ➝ ψ₂ =>
     suffices φ₁ = ψ₁ ∧ φ₂ = ψ₂ by simpa;
-    have ⟨h₁, h₂⟩ : φ₁ᵍʷ = ψ₁ᵍʷ ∧ φ₂ᵍʷ = ψ₂ᵍʷ := by simpa [gödelWeakTranslate] using h;
+    have ⟨h₁, h₂⟩ : φ₁ᶜ = ψ₁ᶜ ∧ φ₂ᶜ = ψ₂ᶜ := by simpa [gödelWeakTranslate] using h;
     constructor;
     . apply gödelWeakTranslate.injective h₁;
     . apply gödelWeakTranslate.injective h₂;
@@ -62,7 +86,7 @@ protected abbrev provable_gödelWeakTranslated_of_provable_VF.lemma.translate (M
   World := Unit ⊕ M.World
   Rel φ x y :=
     match x, y, φ with
-    | .inr x, .inr y, φ ➝ ψ => M.Rel (φᵍʷ ➝ ψᵍʷ) x y
+    | .inr x, .inr y, φ ➝ ψ => M.Rel (φᶜ ➝ ψᶜ) x y
     | .inr _, .inl (), _ => False
     | _, _, _ => True
   root := .inl ()
@@ -73,7 +97,7 @@ protected abbrev provable_gödelWeakTranslated_of_provable_VF.lemma.translate (M
     | .inr x => M.Valuation x a
 
 lemma provable_gödelWeakTranslated_of_provable_VF.lemma {M : PLoN.Model} {w : M.World} {φ : Propositional.Formula ℕ} :
-  Propositional.Formula.FMT.Forces (M := lemma.translate M) (Sum.inr w) φ ↔ Modal.Formula.PLoN.Forces w (φᵍʷ)  := by
+  Propositional.Formula.FMT.Forces (M := lemma.translate M) (Sum.inr w) φ ↔ Modal.Formula.PLoN.Forces w (φᶜ)  := by
   induction φ using Propositional.Formula.rec' generalizing w with
   | himp φ ψ ihφ ihψ =>
     dsimp [Formula.PLoN.Forces];
@@ -86,7 +110,7 @@ lemma provable_gödelWeakTranslated_of_provable_VF.lemma {M : PLoN.Model} {w : M
   | _ => dsimp [Formula.PLoN.Forces]; grind;
 
 open provable_gödelWeakTranslated_of_provable_VF in
-lemma provable_gödelWeakTranslated_of_provable_VF : Propositional.VF ⊢ φ → Modal.N ⊢ φᵍʷ := by
+lemma provable_gödelWeakTranslated_of_provable_VF : Propositional.VF ⊢ φ → Modal.N ⊢ φᶜ := by
   contrapose!;
   intro h;
   apply Propositional.VF.FMT.sound.not_provable_of_countermodel;
@@ -102,12 +126,12 @@ protected abbrev provable_VF_of_provable_gödelWeakTranslated.lemma.translate (M
   World := M.World
   Rel φ x y :=
     match φ with
-    | ψ ➝ χ => ∃ ψ' χ', ψ'ᵍʷ = ψ ∧ χ'ᵍʷ = χ ∧ M.Rel' (ψ' ➝ χ') x y
+    | ψ ➝ χ => ∃ ψ' χ', ψ'ᶜ = ψ ∧ χ'ᶜ = χ ∧ M.Rel' (ψ' ➝ χ') x y
     | _     => True
   Valuation x a := M.Val x a
 
 lemma provable_VF_of_provable_gödelWeakTranslated.lemma {M : FMT.Model} {w : M.World} {φ : Propositional.Formula ℕ} :
-  Formula.PLoN.Forces (M := lemma.translate M) w (φᵍʷ) ↔ Propositional.Formula.FMT.Forces (M := M) w φ := by
+  Formula.PLoN.Forces (M := lemma.translate M) w (φᶜ) ↔ Propositional.Formula.FMT.Forces (M := M) w φ := by
   induction φ using Propositional.Formula.rec' generalizing w with
   | himp φ ψ ihφ ihψ =>
     dsimp [Formula.PLoN.Forces];
@@ -130,22 +154,26 @@ lemma provable_VF_of_provable_gödelWeakTranslated.lemma {M : FMT.Model} {w : M.
   | _ => dsimp [Formula.PLoN.Forces]; grind;
 
 open provable_VF_of_provable_gödelWeakTranslated in
-lemma provable_VF_of_provable_gödelWeakTranslated : Modal.N ⊢ φᵍʷ → Propositional.VF ⊢ φ := by
+lemma provable_VF_Ser_of_provable_gödelWeakTranslated : Modal.NP ⊢ φᶜ → Propositional.VF ⊢ φ := by
   contrapose!;
   intro h;
   obtain ⟨M, x, _, H⟩ := Propositional.FMT.exists_model_world_of_not_validOnFrameClass $ Propositional.VF.FMT.complete.exists_countermodel_of_not_provable h;
-  apply Modal.N.PLoN.sound.not_provable_of_countermodel;
+  apply Modal.NP.PLoN.sound.not_provable_of_countermodel;
   apply Modal.PLoN.not_validOnFrameClass_of_exists_model_world;
   use lemma.translate M, x;
   constructor;
   . tauto;
   . apply lemma.not.mpr H;
 
-
-theorem iff_provable_VF_provable_gödelWeakTranslated : Propositional.VF ⊢ φ ↔ Modal.N ⊢ φᵍʷ := by
-  constructor;
-  . apply provable_gödelWeakTranslated_of_provable_VF;
-  . apply provable_VF_of_provable_gödelWeakTranslated;
+lemma VF_modal_companion_TFAE : [
+  Propositional.VF ⊢ φ,
+  Modal.N ⊢ φᶜ,
+  Modal.NP ⊢ φᶜ
+].TFAE := by
+  tfae_have 1 → 2 := provable_gödelWeakTranslated_of_provable_VF
+  tfae_have 2 → 3 := Hilbert.Normal.weakerThan_of_subset_axioms (by tauto) |>.wk
+  tfae_have 3 → 1 := provable_VF_Ser_of_provable_gödelWeakTranslated
+  tfae_finish
 
 end Modal
 
