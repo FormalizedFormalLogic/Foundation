@@ -34,7 +34,7 @@ jobs:
       # Restore project cache
       - name: Restore cache
         id: cache-restore
-        uses: actions/cache/restore@v4
+        uses: actions/cache/restore@v5
         with:
           path: .lake/build
           key: lake-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('lean-toolchain') }}-${{ hashFiles('lake-manifest.json') }}-${{ github.sha }}
@@ -103,7 +103,7 @@ jobs:
       # Save project cache
       - name: Save project cache
         id: cache-save
-        uses: actions/cache/save@v4
+        uses: actions/cache/save@v5
         with:
           path: .lake/build
           key: ${{ steps.cache-restore.outputs.cache-primary-key }}
