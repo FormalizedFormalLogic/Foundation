@@ -23,11 +23,16 @@ namespace Hilbert.Normal
 
 variable {Ax Ax₁ Ax₂ : Axiom α}
 
-@[grind] lemma axm! {φ} (s : Substitution _) (h : φ ∈ Ax) : Normal Ax ⊢ φ⟦s⟧ := by
+@[grind →]
+lemma axm' {φ} (h : φ ∈ Ax) : Normal Ax ⊢ φ := by
+  apply Logic.iff_provable.mpr;
+  simpa using axm (s := .id) h;
+
+@[grind =>] lemma axm! {φ} (s : Substitution _) (h : φ ∈ Ax) : Normal Ax ⊢ φ⟦s⟧ := by
   apply Logic.iff_provable.mpr;
   apply axm s h;
 
-@[grind] lemma axm'! {φ} (h : φ ∈ Ax) : Normal Ax ⊢ φ := by simpa using axm! .id h;
+@[grind →] lemma axm'! {φ} (h : φ ∈ Ax) : Normal Ax ⊢ φ := by simpa using axm! .id h;
 
 instance : Entailment.Lukasiewicz (Hilbert.Normal Ax) where
   implyK {_ _} := by constructor; apply Hilbert.Normal.implyK;
@@ -853,10 +858,6 @@ protected abbrev S4H := Hilbert.Normal S4H.axioms
 instance : Entailment.S4H (Modal.S4H) where
 
 
-protected abbrev N.axioms : Axiom ℕ := ∅
-protected abbrev N := Hilbert.Normal N.axioms
-
-
 protected abbrev Ver.axioms : Axiom ℕ := {Axioms.K (.atom 0) (.atom 1), Axioms.Ver (.atom 0)}
 namespace Ver.axioms
 instance : Ver.axioms.HasK where p := 0; q := 1;
@@ -893,6 +894,16 @@ instance : Modal.S5Grz ≊ Modal.Triv := by
   . apply weakerThan_of_provable_axioms; rintro φ (rfl | rfl | rfl | rfl) <;> simp;
   . apply weakerThan_of_provable_axioms; rintro φ (rfl | rfl | rfl) <;> simp;
 
+
+protected abbrev N.axioms : Axiom ℕ := ∅
+protected abbrev N := Hilbert.Normal N.axioms
+
+protected abbrev NP.axioms : Axiom ℕ := {Axioms.P}
+namespace NP.axioms
+instance : NP.axioms.HasP where
+end NP.axioms
+protected abbrev NP := Hilbert.Normal NP.axioms
+instance : Entailment.HasAxiomP (Modal.NP) := inferInstance
 
 end
 

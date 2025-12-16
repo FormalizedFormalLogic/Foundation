@@ -139,7 +139,7 @@ lemma GL.eq_trace_emptyset : Modal.GL.trace = ∅ := by
 
 @[simp]
 lemma GLα.eq_trace {α : Set ℕ} : (Modal.GLα α).trace = α := by
-  apply Eq.trans $ GL.eq_trace_ext $ by grind;
+  apply Eq.trans $ GL.eq_trace_ext $ by simp; tauto;
   simp [FormulaSet.trace, Formula.eq_trace_trace_of_letterless];
 
 @[simp]
