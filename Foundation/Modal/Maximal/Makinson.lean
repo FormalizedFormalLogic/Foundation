@@ -141,8 +141,8 @@ private lemma subset_Triv_of_KD_subset.lemma₁
   | _ => simp_all [trivTranslate, toPropFormula];
 
 lemma subset_Triv_of_KD_subset.lemma₂ {φ : Modal.Formula α} {s : Propositional.ZeroSubstitution _} :
-  (∼((φᵀ.toPropFormula)⟦s.1⟧)).isTautology ↔
-  ((∼φ⟦(s : Modal.ZeroSubstitution _).1⟧)ᵀ.toPropFormula).isTautology
+  (∼((φᵀ.toPropFormula)⟦s.1⟧)).Tautology ↔
+  ((∼φ⟦(s : Modal.ZeroSubstitution _).1⟧)ᵀ.toPropFormula).Tautology
   := by
   constructor;
   . intro h v hφ;
@@ -155,7 +155,7 @@ theorem subset_Triv_of_KD_subset [Modal.KD ⪯ L] : L ⪯ Modal.Triv := by
   by_contra! hC;
   obtain ⟨φ, hφ₁, hφ₂⟩ := not_weakerThan_iff.mp hC;
   replace hφ₂ := (not_imp_not.mpr Propositional.Cl.completeness) $ Modal.Triv.iff_provable_Cl.not.mp $ hφ₂;
-  obtain ⟨s, h⟩ := ClassicalSemantics.exists_neg_zeroSubst_of_not_isTautology hφ₂;
+  obtain ⟨s, h⟩ := ClassicalSemantics.exists_neg_zeroSubst_of_not_tautology hφ₂;
   let ψ := φ⟦(s : Modal.ZeroSubstitution _).1⟧;
   have : Semantics.Valid (ClassicalSemantics.Valuation ℕ) (∼(ψᵀ.toPropFormula)) := subset_Triv_of_KD_subset.lemma₂.mp h;
   have : Modal.KD ⊢ ∼ψ := provable_not_KD_of_classical_unsatisfiable Formula.Letterless_zeroSubst

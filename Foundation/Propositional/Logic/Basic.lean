@@ -17,13 +17,13 @@ variable {L L₀ L₁ L₂ L₃ : Logic α} {φ ψ : Formula α}
 protected class Substitution (L : Logic α) where
   subst {φ : Formula _} (s) : L ⊢ φ → L ⊢ φ⟦s⟧
 
-protected class IsSuperintuitionistic (L : Logic α) extends Entailment.Int L, L.Substitution where
+protected class Superintuitionistic (L : Logic α) extends Entailment.Int L, L.Substitution where
 
 section
 
 export Substitution (subst)
 
- @[grind]
+ @[grind =]
 lemma iff_provable : L ⊢ φ ↔ φ ∈ L := by
   constructor;
   . intro h;
@@ -33,10 +33,8 @@ lemma iff_provable : L ⊢ φ ↔ φ ∈ L := by
     constructor;
     exact h;
 
- @[grind]
-lemma iff_unprovable : L ⊬ φ ↔ φ ∉ L := by
-  apply not_congr;
-  simp [iff_provable];
+ @[grind =]
+ lemma iff_unprovable : L ⊬ φ ↔ φ ∉ L := by grind
 
 lemma iff_equal_provable_equiv : L₁ = L₂ ↔ L₁ ≊ L₂ := by
   constructor;
@@ -56,9 +54,9 @@ lemma weakerThan_of_subset (h : L₁ ⊆ L₂) : L₁ ⪯ L₂ := by
 
 section
 
-variable [L.IsSuperintuitionistic] [Consistent L]
+variable [L.Superintuitionistic] [Consistent L]
 
-@[simp]
+@[simp, grind .]
 lemma no_bot : L ⊬ ⊥ := by
   obtain ⟨φ, hφ⟩ := Consistent.exists_unprovable (𝓢 := L) inferInstance;
   by_contra! hC;
@@ -67,6 +65,7 @@ lemma no_bot : L ⊬ ⊥ := by
   exact hC;
 
 -- TODO: more general place
+@[grind →]
 lemma not_neg_of! (hφ : L ⊢ φ) : L ⊬ ∼φ := by
   by_contra! hC;
   apply L.no_bot;
