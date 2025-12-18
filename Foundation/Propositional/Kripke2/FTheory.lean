@@ -1,4 +1,4 @@
-import Foundation.Propositional.Hilbert.Corsi.Deduction
+import Foundation.Propositional.Hilbert.F.Deduction
 import Foundation.Propositional.Kripke2.Basic
 
 namespace LO.Propositional
@@ -49,8 +49,8 @@ lemma mem_orIntroR [Entailment.HasAxiomOrInst L] (hψ : ψ ∈ T.theory) : φ �
   . exact orIntroR;
   . assumption;
 
-open Hilbert.Corsi in
-lemma iff_mem_CorsiDeducible {T : FTheory (Hilbert.Corsi Ax)} : φ ∈ T.theory ↔ Deduction Ax T.theory φ := by
+open Hilbert.F in
+lemma iff_mem_CorsiDeducible {T : FTheory (Hilbert.F Ax)} : φ ∈ T.theory ↔ Deduction Ax T.theory φ := by
   constructor;
   . intro hφ;
     apply Deduction.ctx hφ;

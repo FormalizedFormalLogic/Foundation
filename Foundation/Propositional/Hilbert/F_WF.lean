@@ -1,5 +1,5 @@
-import Foundation.Propositional.Hilbert.Corsi.Basic
-import Foundation.Propositional.Hilbert.WF.Basic
+import Foundation.Propositional.Hilbert.F
+import Foundation.Propositional.Hilbert.WF
 
 namespace LO.Propositional
 
@@ -7,7 +7,7 @@ open Entailment.Corsi
 
 variable [DecidableEq α] {Ax₁ Ax₂ : Axiom α}
 
-def weakerThan_WF_Corsi_of_provable_axioms (h : (Hilbert.Corsi Ax₂) ⊢* Ax₁) : (Hilbert.WF Ax₁) ⪯ (Hilbert.Corsi Ax₂) := by
+def weakerThan_WF_Corsi_of_provable_axioms (h : (Hilbert.F Ax₂) ⊢* Ax₁) : (Hilbert.WF Ax₁) ⪯ (Hilbert.F Ax₂) := by
   apply Logic.weakerThan_of_provable;
   intro φ hφ;
   induction hφ using Hilbert.WF.rec! with

@@ -1,5 +1,5 @@
-import Foundation.Propositional.Hilbert.WF.Basic
-import Foundation.Propositional.Hilbert.VF.Basic
+import Foundation.Propositional.Hilbert.WF
+import Foundation.Propositional.Hilbert.VF
 
 namespace LO.Propositional
 
