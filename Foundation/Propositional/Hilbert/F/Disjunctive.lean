@@ -1,4 +1,4 @@
-import Foundation.Propositional.Hilbert.Corsi.Basic
+import Foundation.Propositional.Hilbert.F.Basic
 import Foundation.Propositional.Logic.Slash
 
 
@@ -8,7 +8,7 @@ variable {Ax : Axiom ℕ} {φ ψ χ : Formula ℕ} {s : Substitution ℕ}
 
 open Entailment.Corsi
 
-instance Hilbert.Corsi.instAczelSlashable (hs : ∀ {φ}, φ ∈ Ax → ∕ₐ[(Hilbert.Corsi Ax)] φ) : (Hilbert.Corsi Ax).AczelSlashable where
+instance Hilbert.F.instAczelSlashable (hs : ∀ {φ}, φ ∈ Ax → ∕ₐ[(Hilbert.F Ax)] φ) : (Hilbert.F Ax).AczelSlashable where
   iff_ks_provable {φ} := by
     constructor;
     . intro h;
@@ -22,7 +22,7 @@ instance Hilbert.Corsi.instAczelSlashable (hs : ∀ {φ}, φ ∈ Ax → ∕ₐ[(
       | hand φ ψ ihφ ihψ => exact andIR (ihφ h.1) (ihψ h.2);
       | himp φ ψ ihφ ihψ => exact h.1;
     . intro h;
-      induction h using Corsi.rec! with
+      induction h using F.rec! with
       | orIntroL =>
         constructor;
         . exact orIntroL;
@@ -82,12 +82,12 @@ instance Hilbert.Corsi.instAczelSlashable (hs : ∀ {φ}, φ ∈ Ax → ∕ₐ[(
       | andIR ihφ ihψ => tauto;
       | axm => apply hs; assumption;
 
-@[grind .] lemma slashable_axiomSer [Entailment.HasAxiomSer (Hilbert.Corsi Ax)] : ∕ₐ[(Hilbert.Corsi Ax)] ((Axioms.Ser)) := by grind
-@[grind .] lemma slashable_axiomTra1 [Entailment.HasAxiomTra1 (Hilbert.Corsi Ax)] : ∕ₐ[(Hilbert.Corsi Ax)] ((Axioms.Tra1 φ ψ χ)) := by grind
-@[grind .] lemma slashable_axiomRfl [Entailment.HasAxiomRfl (Hilbert.Corsi Ax)] : ∕ₐ[(Hilbert.Corsi Ax)] ((Axioms.Rfl φ ψ)) := by grind
+@[grind .] lemma slashable_axiomSer [Entailment.HasAxiomSer (Hilbert.F Ax)] : ∕ₐ[(Hilbert.F Ax)] ((Axioms.Ser)) := by grind
+@[grind .] lemma slashable_axiomTra1 [Entailment.HasAxiomTra1 (Hilbert.F Ax)] : ∕ₐ[(Hilbert.F Ax)] ((Axioms.Tra1 φ ψ χ)) := by grind
+@[grind .] lemma slashable_axiomRfl [Entailment.HasAxiomRfl (Hilbert.F Ax)] : ∕ₐ[(Hilbert.F Ax)] ((Axioms.Rfl φ ψ)) := by grind
 
 @[grind .]
-lemma slashable_propvar_axiomHrd (h : ∀ a, Hilbert.Corsi Ax ⊢ #a ➝ ⊤ ➝ #a) : ∕ₐ[(Hilbert.Corsi Ax)] (Axioms.Hrd #a) := by
+lemma slashable_propvar_axiomHrd (h : ∀ a, Hilbert.F Ax ⊢ #a ➝ ⊤ ➝ #a) : ∕ₐ[(Hilbert.F Ax)] (Axioms.Hrd #a) := by
   constructor;
   . apply h;
   . intro h;
@@ -95,34 +95,34 @@ lemma slashable_propvar_axiomHrd (h : ∀ a, Hilbert.Corsi Ax ⊢ #a ➝ ⊤ ➝
     . apply af h;
     . grind;
 
-instance F.AczelSlashable : Propositional.F.AczelSlashable := Hilbert.Corsi.instAczelSlashable $ by tauto;
+instance F.AczelSlashable : Propositional.F.AczelSlashable := Hilbert.F.instAczelSlashable $ by tauto;
 instance F.Disjunctive : Entailment.Disjunctive Propositional.F := inferInstance
 
-instance F_Ser.AczelSlashable : Propositional.F_Ser.AczelSlashable := Hilbert.Corsi.instAczelSlashable $ by grind;
+instance F_Ser.AczelSlashable : Propositional.F_Ser.AczelSlashable := Hilbert.F.instAczelSlashable $ by grind;
 instance F_Ser.Disjunctive : Entailment.Disjunctive Propositional.F_Ser := inferInstance
 
-instance F_Rfl.AczelSlashable : Propositional.F_Rfl.AczelSlashable := Hilbert.Corsi.instAczelSlashable $ by grind
+instance F_Rfl.AczelSlashable : Propositional.F_Rfl.AczelSlashable := Hilbert.F.instAczelSlashable $ by grind
 instance F_Rfl.Disjunctive : Entailment.Disjunctive Propositional.F_Rfl := inferInstance
 
-instance F_Tra1.AczelSlashable : Propositional.F_Tra1.AczelSlashable := Hilbert.Corsi.instAczelSlashable $ by grind
+instance F_Tra1.AczelSlashable : Propositional.F_Tra1.AczelSlashable := Hilbert.F.instAczelSlashable $ by grind
 instance F_Tra1.Disjunctive : Entailment.Disjunctive Propositional.F_Tra1 := inferInstance
 
-instance F_Tra1_Hrd.AczelSlashable : Propositional.F_Tra1_Hrd.AczelSlashable := Hilbert.Corsi.instAczelSlashable $ by
+instance F_Tra1_Hrd.AczelSlashable : Propositional.F_Tra1_Hrd.AczelSlashable := Hilbert.F.instAczelSlashable $ by
   rintro φ (⟨_, _, _, rfl⟩ | ⟨_, rfl⟩);
   . apply slashable_axiomTra1
   . apply slashable_propvar_axiomHrd;
     intro a;
-    apply Hilbert.Corsi.axm'!
+    apply Hilbert.F.axm'!
     simp;
 instance F_Tra1_Hrd.Disjunctive : Entailment.Disjunctive Propositional.F_Tra1_Hrd := inferInstance
 
-instance F_Rfl_Tra1_Hrd.AczelSlashable : Propositional.F_Rfl_Tra1_Hrd.AczelSlashable := Hilbert.Corsi.instAczelSlashable $ by
+instance F_Rfl_Tra1_Hrd.AczelSlashable : Propositional.F_Rfl_Tra1_Hrd.AczelSlashable := Hilbert.F.instAczelSlashable $ by
   rintro φ ((⟨_, _, _, rfl⟩ | ⟨_, _, _, rfl⟩) | ⟨_, rfl⟩);
   . apply slashable_axiomRfl
   . apply slashable_axiomTra1
   . apply slashable_propvar_axiomHrd;
     intro a;
-    apply Hilbert.Corsi.axm'!
+    apply Hilbert.F.axm'!
     simp;
 instance F_Rfl_Tra1_Hrd.Disjunctive : Entailment.Disjunctive Propositional.F_Rfl_Tra1_Hrd := inferInstance
 

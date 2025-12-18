@@ -1,4 +1,4 @@
-import Foundation.Propositional.Hilbert.Basic
+import Foundation.Propositional.Hilbert.Standard.Basic
 import Foundation.Propositional.ClassicalSemantics.Hilbert
 import Foundation.Modal.Hilbert.Normal.Basic
 
@@ -65,7 +65,7 @@ variable {φ : Modal.Formula ℕ}
 
 lemma Hilbert.Normal.provable_of_classical_provable {Ax : Axiom ℕ} {φ : Propositional.Formula ℕ} : Propositional.Cl ⊢ φ → (Hilbert.Normal Ax ⊢ φ.toModalFormula) := by
   intro h;
-  induction h using Propositional.Hilbert.rec! with
+  induction h using Propositional.Hilbert.Standard.rec! with
   | axm _ h => rcases h with (rfl | rfl) <;> simp;
   | mdp ihφψ ihφ => exact ihφψ ⨀ ihφ;
   | _ => dsimp [Propositional.Formula.toModalFormula]; simp;
@@ -82,6 +82,7 @@ lemma iff_trivTranslated : Modal.Triv ⊢ φ ⭤ φᵀ := by
   | himp _ _ ih₁ ih₂ => exact ECC!_of_E!_of_E! ih₁ ih₂;
   | _ => apply E!_id
 
+@[grind =]
 lemma iff_provable_Cl : Modal.Triv ⊢ φ ↔ Propositional.Cl ⊢ φᵀ.toPropFormula := by
   constructor;
   . intro h;
@@ -100,9 +101,8 @@ lemma iff_provable_Cl : Modal.Triv ⊢ φ ↔ Propositional.Cl ⊢ φᵀ.toPropF
     have d₂ : Modal.Triv ⊢ φᵀ := by simpa only [trivTranslate.toIP] using Hilbert.Normal.provable_of_classical_provable h;
     exact d₁ ⨀ d₂;
 
-lemma iff_isTautology : Modal.Triv ⊢ φ ↔ φᵀ.toPropFormula.isTautology := by
-  apply Iff.trans Triv.iff_provable_Cl;
-  apply Propositional.Cl.iff_isTautology_provable.symm;
+@[grind =]
+lemma iff_tautology : Modal.Triv ⊢ φ ↔ φᵀ.toPropFormula.Tautology := by grind;
 
 end Triv
 
@@ -118,7 +118,8 @@ lemma iff_verTranslated : Modal.Ver ⊢ φ ⭤ φⱽ := by
   | himp _ _ ih₁ ih₂ => exact ECC!_of_E!_of_E! ih₁ ih₂;
   | _ => apply E!_id
 
-protected lemma iff_provable_Cl : Modal.Ver ⊢ φ ↔ Propositional.Cl ⊢ φⱽ.toPropFormula := by
+@[grind =]
+lemma iff_provable_Cl : Modal.Ver ⊢ φ ↔ Propositional.Cl ⊢ φⱽ.toPropFormula := by
   constructor;
   . intro h;
     induction h using Hilbert.Normal.rec! with
@@ -135,9 +136,8 @@ protected lemma iff_provable_Cl : Modal.Ver ⊢ φ ↔ Propositional.Cl ⊢ φ�
     have d₂ : Modal.Ver ⊢ φⱽ := by simpa using Hilbert.Normal.provable_of_classical_provable h;
     exact d₁ ⨀ d₂;
 
-lemma iff_isTautology : Modal.Ver ⊢ φ ↔ φⱽ.toPropFormula.isTautology := by
-  apply Iff.trans Ver.iff_provable_Cl;
-  apply Propositional.Cl.iff_isTautology_provable.symm;
+@[grind =]
+lemma iff_tautology : Modal.Ver ⊢ φ ↔ φⱽ.toPropFormula.Tautology := by grind;
 
 end Ver
 

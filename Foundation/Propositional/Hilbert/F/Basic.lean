@@ -14,55 +14,55 @@ open Entailment.Corsi
 
 variable {α : Type*} {Ax Ax₁ Ax₂ : Axiom α} {φ ψ χ : Formula _}
 
-protected inductive Hilbert.Corsi (Ax : Axiom α) : Logic α
-| protected axm {φ}                 : φ ∈ Ax → Hilbert.Corsi Ax φ
-| protected andElimL {φ ψ}          : Hilbert.Corsi Ax $ Axioms.AndElim₁ φ ψ
-| protected andElimR {φ ψ}          : Hilbert.Corsi Ax $ Axioms.AndElim₂ φ ψ
-| protected orIntroL {φ ψ}          : Hilbert.Corsi Ax $ Axioms.OrInst₁ φ ψ
-| protected orIntroR {φ ψ}          : Hilbert.Corsi Ax $ Axioms.OrInst₂ φ ψ
-| protected distributeAndOr {φ ψ χ} : Hilbert.Corsi Ax $ Axioms.DistributeAndOr φ ψ χ
-| protected axiomC {φ ψ χ}          : Hilbert.Corsi Ax $ Axioms.C φ ψ χ
-| protected axiomD {φ ψ χ}          : Hilbert.Corsi Ax $ Axioms.D φ ψ χ
-| protected axiomI {φ ψ χ}          : Hilbert.Corsi Ax $ Axioms.I φ ψ χ
-| protected impId {φ}               : Hilbert.Corsi Ax $ Axioms.ImpId φ
-| protected efq {φ}                 : Hilbert.Corsi Ax $ Axioms.EFQ φ
-| protected mdp {φ ψ}               : Hilbert.Corsi Ax (φ ➝ ψ) → Hilbert.Corsi Ax φ → Hilbert.Corsi Ax ψ
-| protected af {φ ψ}                : Hilbert.Corsi Ax φ → Hilbert.Corsi Ax (ψ ➝ φ)
-| protected andIR {φ ψ}             : Hilbert.Corsi Ax φ → Hilbert.Corsi Ax ψ → Hilbert.Corsi Ax (φ ⋏ ψ)
+protected inductive Hilbert.F (Ax : Axiom α) : Logic α
+| protected axm {φ}                 : φ ∈ Ax → Hilbert.F Ax φ
+| protected andElimL {φ ψ}          : Hilbert.F Ax $ Axioms.AndElim₁ φ ψ
+| protected andElimR {φ ψ}          : Hilbert.F Ax $ Axioms.AndElim₂ φ ψ
+| protected orIntroL {φ ψ}          : Hilbert.F Ax $ Axioms.OrInst₁ φ ψ
+| protected orIntroR {φ ψ}          : Hilbert.F Ax $ Axioms.OrInst₂ φ ψ
+| protected distributeAndOr {φ ψ χ} : Hilbert.F Ax $ Axioms.DistributeAndOr φ ψ χ
+| protected axiomC {φ ψ χ}          : Hilbert.F Ax $ Axioms.C φ ψ χ
+| protected axiomD {φ ψ χ}          : Hilbert.F Ax $ Axioms.D φ ψ χ
+| protected axiomI {φ ψ χ}          : Hilbert.F Ax $ Axioms.I φ ψ χ
+| protected impId {φ}               : Hilbert.F Ax $ Axioms.ImpId φ
+| protected efq {φ}                 : Hilbert.F Ax $ Axioms.EFQ φ
+| protected mdp {φ ψ}               : Hilbert.F Ax (φ ➝ ψ) → Hilbert.F Ax φ → Hilbert.F Ax ψ
+| protected af {φ ψ}                : Hilbert.F Ax φ → Hilbert.F Ax (ψ ➝ φ)
+| protected andIR {φ ψ}             : Hilbert.F Ax φ → Hilbert.F Ax ψ → Hilbert.F Ax (φ ⋏ ψ)
 
-namespace Hilbert.Corsi
-
-@[grind ⇒]
-protected lemma axm' (h : φ ∈ Ax) : φ ∈ Hilbert.Corsi Ax := by apply Corsi.axm h;
+namespace Hilbert.F
 
 @[grind ⇒]
-protected lemma axm'! (h : φ ∈ Ax) : Hilbert.Corsi Ax ⊢ φ := by
+protected lemma axm' (h : φ ∈ Ax) : φ ∈ Hilbert.F Ax := by apply F.axm h;
+
+@[grind ⇒]
+protected lemma axm'! (h : φ ∈ Ax) : Hilbert.F Ax ⊢ φ := by
   apply Logic.iff_provable.mpr;
-  apply Corsi.axm h;
+  apply F.axm h;
 
-instance : Entailment.F (Hilbert.Corsi Ax) where
-  and₁ := ⟨Corsi.andElimL⟩
-  and₂ := ⟨Corsi.andElimR⟩
-  or₁  := ⟨Corsi.orIntroL⟩
-  or₂  := ⟨Corsi.orIntroR⟩
-  distributeAndOr! := ⟨Corsi.distributeAndOr⟩
-  axiomC! := ⟨Corsi.axiomC⟩
-  axiomD! := ⟨Corsi.axiomD⟩
-  axiomI! := ⟨Corsi.axiomI⟩
-  impId! := ⟨Corsi.impId⟩
-  verum := ⟨Corsi.impId⟩
-  efq := ⟨Corsi.efq⟩
-  mdp hφψ hφ := ⟨Corsi.mdp hφψ.1 hφ.1⟩
-  af! hφ := ⟨Corsi.af hφ.1⟩
-  andIR! h₁ h₂ := ⟨Corsi.andIR h₁.1 h₂.1⟩
+instance : Entailment.F (Hilbert.F Ax) where
+  and₁ := ⟨F.andElimL⟩
+  and₂ := ⟨F.andElimR⟩
+  or₁  := ⟨F.orIntroL⟩
+  or₂  := ⟨F.orIntroR⟩
+  distributeAndOr! := ⟨F.distributeAndOr⟩
+  axiomC! := ⟨F.axiomC⟩
+  axiomD! := ⟨F.axiomD⟩
+  axiomI! := ⟨F.axiomI⟩
+  impId! := ⟨F.impId⟩
+  verum := ⟨F.impId⟩
+  efq := ⟨F.efq⟩
+  mdp hφψ hφ := ⟨F.mdp hφψ.1 hφ.1⟩
+  af! hφ := ⟨F.af hφ.1⟩
+  andIR! h₁ h₂ := ⟨F.andIR h₁.1 h₂.1⟩
 
 @[induction_eliminator]
 protected lemma rec!
-  {motive   : (φ : Formula α) → (Hilbert.Corsi Ax ⊢ φ) → Sort}
-  (axm      : ∀ {φ : Formula α}, (h : φ ∈ Ax) → motive (φ) (Corsi.axm'! h))
-  (mdp      : ∀ {φ ψ : Formula α}, {hφψ : (Hilbert.Corsi Ax) ⊢ φ ➝ ψ} → {hφ : (Hilbert.Corsi Ax) ⊢ φ} → (motive (φ ➝ ψ) hφψ) → (motive φ hφ) → (motive ψ (hφψ ⨀ hφ)))
-  (af       : ∀ {φ ψ : Formula α}, {hφ : (Hilbert.Corsi Ax) ⊢ φ} → (motive φ hφ) → (motive (ψ ➝ φ) (af hφ)))
-  (andIR    : ∀ {φ ψ : Formula α}, {hφ : (Hilbert.Corsi Ax) ⊢ φ} → {hψ : (Hilbert.Corsi Ax) ⊢ ψ} → (motive φ hφ) → (motive ψ hψ) → (motive (φ ⋏ ψ) (andIR hφ hψ)))
+  {motive   : (φ : Formula α) → (Hilbert.F Ax ⊢ φ) → Sort}
+  (axm      : ∀ {φ : Formula α}, (h : φ ∈ Ax) → motive (φ) (F.axm'! h))
+  (mdp      : ∀ {φ ψ : Formula α}, {hφψ : (Hilbert.F Ax) ⊢ φ ➝ ψ} → {hφ : (Hilbert.F Ax) ⊢ φ} → (motive (φ ➝ ψ) hφψ) → (motive φ hφ) → (motive ψ (hφψ ⨀ hφ)))
+  (af       : ∀ {φ ψ : Formula α}, {hφ : (Hilbert.F Ax) ⊢ φ} → (motive φ hφ) → (motive (ψ ➝ φ) (af hφ)))
+  (andIR    : ∀ {φ ψ : Formula α}, {hφ : (Hilbert.F Ax) ⊢ φ} → {hψ : (Hilbert.F Ax) ⊢ ψ} → (motive φ hφ) → (motive ψ hψ) → (motive (φ ⋏ ψ) (andIR hφ hψ)))
   (impId    : ∀ {φ : Formula α}, (motive (Axioms.ImpId φ) impId))
   (andElimL : ∀ {φ ψ : Formula α}, (motive (Axioms.AndElim₁ φ ψ) andElimL))
   (andElimR : ∀ {φ ψ : Formula α}, (motive (Axioms.AndElim₂ φ ψ) andElimR))
@@ -73,7 +73,7 @@ protected lemma rec!
   (axiomD   : ∀ {φ ψ χ : Formula α}, (motive (Axioms.D φ ψ χ) axiomD))
   (axiomI   : ∀ {φ ψ χ : Formula α}, (motive (Axioms.I φ ψ χ) axiomI))
   (efq      : ∀ {φ : Formula α}, (motive (Axioms.EFQ φ) efq))
-  : ∀ {φ}, (d : Hilbert.Corsi Ax ⊢ φ) → motive φ d := by
+  : ∀ {φ}, (d : Hilbert.F Ax ⊢ φ) → motive φ d := by
   rintro φ d;
   replace d := Logic.iff_provable.mp d;
   induction d with
@@ -84,10 +84,10 @@ protected lemma rec!
   | _ => grind;
 
 /-
-instance : Logic.Substitution (Hilbert.Corsi Ax) where
+instance : Logic.Substitution (Hilbert.F Ax) where
   subst s h := by
-    induction h using Hilbert.Corsi.rec! with
-    | axm s' h => simpa [Formula.subst_comp] using Corsi.axm! (s' ∘ s) h;
+    induction h using Hilbert.F.rec! with
+    | axm s' h => simpa [Formula.subst_comp] using F.axm! (s' ∘ s) h;
     | mdp ih₁ ih₂ => exact ih₁ ⨀ ih₂;
     | af ih => exact af ih;
     | andIR ih₁ ih₂ => exact andIR ih₁ ih₂;
@@ -104,10 +104,10 @@ instance : Logic.Substitution (Hilbert.Corsi Ax) where
       | apply axiomI;
 -/
 
-lemma weakerThan_of_provable_axioms (hs : (Hilbert.Corsi Ax₂) ⊢* Ax₁) : (Hilbert.Corsi Ax₁) ⪯ (Hilbert.Corsi Ax₂) := by
+lemma weakerThan_of_provable_axioms (hs : (Hilbert.F Ax₂) ⊢* Ax₁) : (Hilbert.F Ax₁) ⪯ (Hilbert.F Ax₂) := by
   apply Entailment.weakerThan_iff.mpr;
   intro φ h;
-  induction h using Hilbert.Corsi.rec! with
+  induction h using Hilbert.F.rec! with
   | axm h => apply hs; assumption;
   | mdp ih₁ ih₂ => exact ih₁ ⨀ ih₂;
   | af ih => exact af ih;
@@ -125,10 +125,10 @@ lemma weakerThan_of_provable_axioms (hs : (Hilbert.Corsi Ax₂) ⊢* Ax₁) : (H
       | apply axiomI;
       | apply efq;
 
-lemma weakerThan_of_subset_axioms (h : Ax₁ ⊆ Ax₂) : (Hilbert.Corsi Ax₁) ⪯ (Hilbert.Corsi Ax₂) := by
+lemma weakerThan_of_subset_axioms (h : Ax₁ ⊆ Ax₂) : (Hilbert.F Ax₁) ⪯ (Hilbert.F Ax₂) := by
   apply weakerThan_of_provable_axioms;
   intro φ hφ;
-  apply Hilbert.Corsi.axm'!;
+  apply Hilbert.F.axm'!;
   grind;
 
 section
@@ -137,9 +137,9 @@ variable [DecidableEq α]
 open Axiom
 
 /-
-instance [Ax.HasAxiomRfl] : Entailment.HasAxiomRfl (Hilbert.Corsi Ax) where
+instance [Ax.HasAxiomRfl] : Entailment.HasAxiomRfl (Hilbert.F Ax) where
   axiomRfl! {φ ψ} := ⟨by
-    simpa using Hilbert.Corsi.axm
+    simpa using Hilbert.F.axm
       (φ := Axioms.Rfl (.atom (HasAxiomRfl.p Ax)) (.atom (HasAxiomRfl.q Ax)))
       (s := λ b =>
         if (HasAxiomRfl.p Ax) = b then φ
@@ -148,12 +148,12 @@ instance [Ax.HasAxiomRfl] : Entailment.HasAxiomRfl (Hilbert.Corsi Ax) where
       $ (HasAxiomRfl.mem_rfl);
   ⟩
 
-instance [Ax.HasAxiomSer] : Entailment.HasAxiomSer (Hilbert.Corsi Ax) where
-  axiomSer! := ⟨by simpa using Hilbert.Corsi.axm' $ HasAxiomSer.mem_ser⟩
+instance [Ax.HasAxiomSer] : Entailment.HasAxiomSer (Hilbert.F Ax) where
+  axiomSer! := ⟨by simpa using Hilbert.F.axm' $ HasAxiomSer.mem_ser⟩
 
-instance [Ax.HasAxiomSym] : Entailment.HasAxiomSym (Hilbert.Corsi Ax) where
+instance [Ax.HasAxiomSym] : Entailment.HasAxiomSym (Hilbert.F Ax) where
   axiomSym! {φ ψ} := ⟨by
-    simpa using Hilbert.Corsi.axm
+    simpa using Hilbert.F.axm
       (φ := Axioms.Sym (.atom (HasAxiomSym.p Ax)) (.atom (HasAxiomSym.q Ax)))
       (s := λ b =>
         if (HasAxiomSym.p Ax) = b then φ
@@ -162,9 +162,9 @@ instance [Ax.HasAxiomSym] : Entailment.HasAxiomSym (Hilbert.Corsi Ax) where
       $ (HasAxiomSym.mem_sym);
   ⟩
 
-instance [Ax.HasAxiomTra1] : Entailment.HasAxiomTra1 (Hilbert.Corsi Ax) where
+instance [Ax.HasAxiomTra1] : Entailment.HasAxiomTra1 (Hilbert.F Ax) where
   axiomTra1! {φ ψ χ} := ⟨by
-    simpa using Hilbert.Corsi.axm
+    simpa using Hilbert.F.axm
       (φ := Axioms.Tra1 (#(HasAxiomTra1.p Ax)) (#(HasAxiomTra1.q Ax)) (#(HasAxiomTra1.r Ax)))
       (s := λ b =>
         if (HasAxiomTra1.p Ax) = b then φ
@@ -175,9 +175,9 @@ instance [Ax.HasAxiomTra1] : Entailment.HasAxiomTra1 (Hilbert.Corsi Ax) where
       $ (HasAxiomTra1.mem_tra1);
   ⟩
 
-instance [Ax.HasAxiomHrd] : Entailment.HasAxiomHrd (Hilbert.Corsi Ax) where
+instance [Ax.HasAxiomHrd] : Entailment.HasAxiomHrd (Hilbert.F Ax) where
   axiomHrd! {φ} := ⟨by
-    simpa using Hilbert.Corsi.axm
+    simpa using Hilbert.F.axm
       (φ := Axioms.Hrd (.atom (HasAxiomHrd.p Ax)))
       (s := λ b =>
         if (HasAxiomHrd.p Ax) = b then φ
@@ -188,78 +188,78 @@ instance [Ax.HasAxiomHrd] : Entailment.HasAxiomHrd (Hilbert.Corsi Ax) where
 
 end
 
-end Hilbert.Corsi
+end Hilbert.F
 
 
 
-protected abbrev F : Logic ℕ := Hilbert.Corsi ∅
+protected abbrev F : Logic ℕ := Hilbert.F ∅
 instance : Entailment.F Propositional.F where
 
 
-protected abbrev F_Ser : Logic ℕ := Hilbert.Corsi { Axioms.Ser }
+protected abbrev F_Ser : Logic ℕ := Hilbert.F { Axioms.Ser }
 instance : Entailment.F Propositional.F_Ser where
 instance : Entailment.HasAxiomSer Propositional.F_Ser where
-  axiomSer! := ⟨by apply Hilbert.Corsi.axm'; simp⟩
+  axiomSer! := ⟨by apply Hilbert.F.axm'; simp⟩
 
 
-protected abbrev F_Rfl : Logic ℕ := Hilbert.Corsi { Axioms.Rfl φ ψ | (φ) (ψ) }
+protected abbrev F_Rfl : Logic ℕ := Hilbert.F { Axioms.Rfl φ ψ | (φ) (ψ) }
 instance : Entailment.F Propositional.F_Rfl where
 instance : Entailment.HasAxiomRfl Propositional.F_Rfl where
-  axiomRfl! {φ ψ} := ⟨by apply Hilbert.Corsi.axm'; simp⟩
+  axiomRfl! {φ ψ} := ⟨by apply Hilbert.F.axm'; simp⟩
 
 
-protected abbrev F_Sym : Logic ℕ := Hilbert.Corsi { Axioms.Sym φ ψ | (φ) (ψ) }
+protected abbrev F_Sym : Logic ℕ := Hilbert.F { Axioms.Sym φ ψ | (φ) (ψ) }
 instance : Entailment.F Propositional.F_Sym where
 instance : Entailment.HasAxiomSym Propositional.F_Sym where
-  axiomSym! {φ ψ} := ⟨by apply Hilbert.Corsi.axm'; simp⟩
+  axiomSym! {φ ψ} := ⟨by apply Hilbert.F.axm'; simp⟩
 
 
-protected abbrev F_Rfl_Sym : Logic ℕ := Hilbert.Corsi (
+protected abbrev F_Rfl_Sym : Logic ℕ := Hilbert.F (
   { Axioms.Rfl φ ψ | (φ) (ψ) } ∪
   { Axioms.Sym φ ψ | (φ) (ψ) }
 )
 instance : Entailment.F Propositional.F_Rfl_Sym where
 instance : Entailment.HasAxiomRfl Propositional.F_Rfl_Sym where
-  axiomRfl! {_ _} := ⟨by apply Hilbert.Corsi.axm'; simp⟩
+  axiomRfl! {_ _} := ⟨by apply Hilbert.F.axm'; simp⟩
 instance : Entailment.HasAxiomSym Propositional.F_Rfl_Sym where
-  axiomSym! {_ _} := ⟨by apply Hilbert.Corsi.axm'; simp⟩
+  axiomSym! {_ _} := ⟨by apply Hilbert.F.axm'; simp⟩
 
 
-protected abbrev F_Tra1 : Logic ℕ := Hilbert.Corsi { Axioms.Tra1 φ ψ χ | (φ) (ψ) (χ) }
+protected abbrev F_Tra1 : Logic ℕ := Hilbert.F { Axioms.Tra1 φ ψ χ | (φ) (ψ) (χ) }
 instance : Entailment.F Propositional.F_Tra1 where
 instance : Entailment.HasAxiomTra1 Propositional.F_Tra1 where
-  axiomTra1! {_ _ _} := ⟨by apply Hilbert.Corsi.axm'; simp⟩
+  axiomTra1! {_ _ _} := ⟨by apply Hilbert.F.axm'; simp⟩
 
 
-protected abbrev F_Rfl_Tra1 : Logic ℕ := Hilbert.Corsi (
+protected abbrev F_Rfl_Tra1 : Logic ℕ := Hilbert.F (
   { Axioms.Rfl φ ψ | (φ) (ψ) } ∪
   { Axioms.Tra1 φ ψ χ | (φ) (ψ) (χ) }
 )
 instance : Entailment.F Propositional.F_Rfl_Tra1 where
 instance : Entailment.HasAxiomRfl Propositional.F_Rfl_Tra1 where
-  axiomRfl! {_ _} := ⟨by apply Hilbert.Corsi.axm'; simp⟩
+  axiomRfl! {_ _} := ⟨by apply Hilbert.F.axm'; simp⟩
 instance : Entailment.HasAxiomTra1 Propositional.F_Rfl_Tra1 where
-  axiomTra1! {_ _ _} := ⟨by apply Hilbert.Corsi.axm'; simp⟩
+  axiomTra1! {_ _ _} := ⟨by apply Hilbert.F.axm'; simp⟩
 
 
-protected abbrev F_Tra1_Hrd : Logic ℕ := Hilbert.Corsi (
+protected abbrev F_Tra1_Hrd : Logic ℕ := Hilbert.F (
   { Axioms.Tra1 φ ψ χ | (φ) (ψ) (χ) } ∪
   { Axioms.Hrd #a | (a : ℕ) }
 )
 instance : Entailment.F Propositional.F_Tra1_Hrd where
 instance : Entailment.HasAxiomTra1 Propositional.F_Tra1_Hrd where
-  axiomTra1! {φ ψ χ} := ⟨by apply Hilbert.Corsi.axm'; simp⟩
+  axiomTra1! {φ ψ χ} := ⟨by apply Hilbert.F.axm'; simp⟩
 
 
-protected abbrev F_Rfl_Tra1_Hrd := Hilbert.Corsi (
+protected abbrev F_Rfl_Tra1_Hrd := Hilbert.F (
   { Axioms.Rfl φ ψ | (φ) (ψ) } ∪
   { Axioms.Tra1 φ ψ χ | (φ) (ψ) (χ) } ∪
   { Axioms.Hrd #a | (a : ℕ) }
 )
 instance : Entailment.F Propositional.F_Rfl_Tra1_Hrd where
 instance : Entailment.HasAxiomRfl Propositional.F_Rfl_Tra1_Hrd where
-  axiomRfl! {_ _} := ⟨by apply Hilbert.Corsi.axm'; simp⟩
+  axiomRfl! {_ _} := ⟨by apply Hilbert.F.axm'; simp⟩
 instance : Entailment.HasAxiomTra1 Propositional.F_Rfl_Tra1_Hrd where
-  axiomTra1! {_ _ _} := ⟨by apply Hilbert.Corsi.axm'; simp⟩
+  axiomTra1! {_ _ _} := ⟨by apply Hilbert.F.axm'; simp⟩
 
 end LO.Propositional

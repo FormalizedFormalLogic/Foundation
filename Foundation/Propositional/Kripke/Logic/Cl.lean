@@ -117,7 +117,7 @@ end Cl
 
 instance : Propositional.LC ⪱ Propositional.Cl := by
   constructor;
-  . apply Hilbert.weakerThan_of_provable_axioms;
+  . apply Hilbert.Standard.weakerThan_of_provable_axioms;
     rintro φ (rfl | rfl) <;> simp;
   . apply Entailment.not_weakerThan_iff.mpr;
     use Axioms.LEM (.atom 0);
