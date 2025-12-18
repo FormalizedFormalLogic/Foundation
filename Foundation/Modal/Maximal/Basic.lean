@@ -1,4 +1,4 @@
-import Foundation.Propositional.Hilbert.Basic
+import Foundation.Propositional.Hilbert.Standard.Basic
 import Foundation.Propositional.ClassicalSemantics.Hilbert
 import Foundation.Modal.Hilbert.Normal.Basic
 
@@ -65,7 +65,7 @@ variable {φ : Modal.Formula ℕ}
 
 lemma Hilbert.Normal.provable_of_classical_provable {Ax : Axiom ℕ} {φ : Propositional.Formula ℕ} : Propositional.Cl ⊢ φ → (Hilbert.Normal Ax ⊢ φ.toModalFormula) := by
   intro h;
-  induction h using Propositional.Hilbert.rec! with
+  induction h using Propositional.Hilbert.Standard.rec! with
   | axm _ h => rcases h with (rfl | rfl) <;> simp;
   | mdp ihφψ ihφ => exact ihφψ ⨀ ihφ;
   | _ => dsimp [Propositional.Formula.toModalFormula]; simp;

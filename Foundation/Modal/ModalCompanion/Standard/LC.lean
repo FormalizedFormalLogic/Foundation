@@ -1,4 +1,4 @@
-import Foundation.Modal.ModalCompanion.Int
+import Foundation.Modal.ModalCompanion.Standard.Int
 import Foundation.Modal.Kripke.Logic.S4Point3
 import Foundation.Modal.Boxdot.GLPoint3_GrzPoint3
 import Foundation.Propositional.Kripke.Logic.LC

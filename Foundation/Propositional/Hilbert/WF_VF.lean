@@ -20,7 +20,7 @@ def weakerThan_WF_VF_of_provable_axioms (h : (Hilbert.WF Ax₂) ⊢* Ax₁) : (H
     | apply andElimR;
     | apply orIntroL;
     | apply orIntroR;
-    | apply collectOrAnd;
+    | apply distributeAndOr;
     | apply efq;
     | grind;
 

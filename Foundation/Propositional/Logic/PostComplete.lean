@@ -1,5 +1,3 @@
-import Foundation.Propositional.Hilbert.Basic
-import Foundation.Propositional.Kripke.Logic.Cl
 import Foundation.Propositional.ClassicalSemantics.Hilbert
 import Foundation.Propositional.ClassicalSemantics.ZeroSubst
 
@@ -19,7 +17,7 @@ theorem Cl.post_complete : ¬∃ L : Logic _, Entailment.Consistent L ∧ Nonemp
   obtain ⟨hL, φ, hφ₁, hφ₂⟩ := Entailment.strictlyWeakerThan_iff.mp L_Cl;
   have ⟨v, hv⟩ := exists_valuation_of_not_provable hφ₁;
   have h₁ : L ⊢ ∼(φ⟦(vfSubst v).1⟧) := hL $ by
-    apply iff_tautology_provable.mp;
+    apply iff_provable_tautology.mpr;
     apply neg_tautology_of_letterless_of_tautology;
     . grind;
     . apply vfSubst_tautology.not.mp hv;

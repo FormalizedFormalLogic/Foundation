@@ -1,4 +1,4 @@
-import Foundation.Propositional.Hilbert.Basic
+import Foundation.Propositional.Hilbert.Standard
 import Foundation.Propositional.ClassicalSemantics.Basic
 import Foundation.Propositional.ConsistentTableau
 
@@ -103,9 +103,9 @@ theorem completeness : (φ.Tautology) → (Propositional.Cl ⊢ φ) := by
   tauto;
 
 @[grind =]
-theorem iff_tautology_provable : φ.Tautology ↔ Propositional.Cl ⊢ φ := ⟨
-  completeness,
+theorem iff_provable_tautology : Propositional.Cl ⊢ φ ↔ φ.Tautology := ⟨
   soundness,
+  completeness,
 ⟩
 
 lemma exists_valuation_of_not_provable : ¬(Propositional.Cl ⊢ φ) → ∃ v : Valuation _, ¬(v ⊧ φ) := by
@@ -114,7 +114,10 @@ lemma exists_valuation_of_not_provable : ¬(Propositional.Cl ⊢ φ) → ∃ v :
 
 end Completeness
 
-theorem tautologies : Propositional.Cl = { φ | φ.Tautology } := by grind;
+theorem tautologies : Propositional.Cl = { φ | φ.Tautology } := by
+  ext;
+  rw [←Logic.iff_provable];
+  apply iff_provable_tautology;
 
 end Cl
 

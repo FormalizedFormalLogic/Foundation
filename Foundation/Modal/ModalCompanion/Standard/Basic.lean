@@ -217,9 +217,9 @@ lemma provable_gödelTranslated_of_provable
   {IAx : Propositional.Axiom ℕ}
   {𝓜𝓢 : MS} [Entailment.S4 𝓜𝓢]
   (hAx : ∀ φ ∈ IAx.instances, 𝓜𝓢 ⊢ φᵍ)
-  : (Propositional.Hilbert IAx) ⊢ φ → 𝓜𝓢 ⊢ φᵍ := by
+  : (Propositional.Hilbert.Standard IAx) ⊢ φ → 𝓜𝓢 ⊢ φᵍ := by
   intro h;
-  induction h using Propositional.Hilbert.rec! with
+  induction h using Propositional.Hilbert.Standard.rec! with
   | @axm φ _ ih =>
     apply hAx;
     use φ;

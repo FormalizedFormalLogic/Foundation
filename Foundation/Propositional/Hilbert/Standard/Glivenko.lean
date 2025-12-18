@@ -1,4 +1,4 @@
-import Foundation.Propositional.Hilbert.Basic
+import Foundation.Propositional.Hilbert.Standard.Basic
 import Foundation.Meta.IntProver
 import Foundation.Meta.ClProver
 
@@ -9,7 +9,7 @@ open Formula (atom)
 
 variable [DecidableEq α]
 
-instance : Propositional.Int ⪯ Propositional.Cl := Hilbert.weakerThan_of_subset_axioms $ by simp
+instance : Propositional.Int ⪯ Propositional.Cl := Hilbert.Standard.weakerThan_of_subset_axioms $ by simp
 
 theorem iff_provable_dn_Int_Cl : Propositional.Int ⊢ ∼∼φ ↔ Propositional.Cl ⊢ φ := by
   constructor;

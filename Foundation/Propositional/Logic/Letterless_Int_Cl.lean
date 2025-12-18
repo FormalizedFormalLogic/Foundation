@@ -1,6 +1,6 @@
 import Foundation.Modal.Kripke.Logic.S5Grz
 import Foundation.Modal.Maximal.Makinson
-import Foundation.Modal.ModalCompanion.Int
+import Foundation.Modal.ModalCompanion.Standard.Int
 import Foundation.Propositional.Kripke.Logic.Cl
 
 namespace LO.Propositional
