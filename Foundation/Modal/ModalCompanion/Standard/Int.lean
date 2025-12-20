@@ -117,7 +117,7 @@ lemma iff_provable_Cl_provable_dia_gS4 : Propositional.Cl ⊢ φ ↔ Modal.S4 �
 /--
   Chagrov & Zakharyaschev 1997, Theorem 3.89
 -/
-theorem embedding_Int_GL : Propositional.Int ⊢ φ ↔ Modal.GL ⊢ φᵍᵇ:= Iff.trans ModalCompanion.companion iff_boxdot_GL_Grz.symm
+theorem embedding_Int_GL : Propositional.Int ⊢ φ ↔ Modal.GL ⊢ φᵍᵇ:= Iff.trans ModalCompanion.companion iff_provable_boxdot_GL_provable_Grz.symm
 
 
 end LO.Modal
