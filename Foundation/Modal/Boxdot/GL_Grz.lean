@@ -47,7 +47,4 @@ theorem iff_provable_boxdot_GL_provable_Grz : Modal.GL ⊢ φᵇ ↔ Modal.Grz �
   provable_boxdot_GL_of_provable_Grz
 ⟩
 
-theorem iff_boxdot_GL_Grz : Modal.GL ⊢ φᵇ ↔ Modal.Grz ⊢ φ := by
-  grind [iff_provable_boxdot_GL_provable_Grz];
-
 end LO.Modal
