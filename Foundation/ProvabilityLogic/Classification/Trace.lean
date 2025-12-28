@@ -248,7 +248,7 @@ instance isTree [M.IsTree r] (hra : r ≠ a) : (M.boneLengthening a k).IsTree r 
   root_generates := by
     rintro (x | i) <;>
     . intro;
-      apply HRel.TransGen.unwrap_iff.mpr;
+      apply Rel.TransGen.unwrap_iff.mpr;
       dsimp [Model.boneLengthening];
       apply Frame.root_genaretes'!;
       tauto;
@@ -270,7 +270,7 @@ axiom eq_height [M.IsTree r] [Fintype M] (hra : r ≠ a) :
     | succ k ih =>
       suffices (r : M.boneLengthening a (k + 1)) ≺^[(M.rank + k) + 1] t by
         rwa [(show M.rank + (k + 1) = (M.rank + k) + 1 by omega)];
-      dsimp [Frame.RelItr', HRel.Iterate]
+      dsimp [Frame.RelItr', Rel.Iterate]
       sorry;
   . intro t Rrt x;
     sorry;

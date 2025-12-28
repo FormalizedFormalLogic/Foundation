@@ -1,5 +1,5 @@
 import Foundation.Propositional.Logic.Basic
-import Foundation.Vorspiel.HRel.Basic
+import Foundation.Vorspiel.Rel.Basic
 
 namespace LO.Propositional
 
@@ -9,12 +9,12 @@ namespace Kripke
 
 structure Frame where
   World : Type
-  Rel : HRel World
+  Rel : Rel World World
   [world_nonempty : Nonempty World]
   [rel_partial_order : IsPartialOrder _ Rel]
 
 instance : CoeSort Frame (Type) := ⟨Frame.World⟩
-instance : CoeFun Frame (λ F => HRel F.World) := ⟨Frame.Rel⟩
+instance : CoeFun Frame (λ F => _root_.Rel F.World F.World) := ⟨Frame.Rel⟩
 instance {F : Frame} : Nonempty F.World := F.world_nonempty
 instance {F : Frame} : IsPartialOrder F.World F.Rel := F.rel_partial_order
 

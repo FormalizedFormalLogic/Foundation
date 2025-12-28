@@ -1,4 +1,4 @@
-import Foundation.Vorspiel.HRel.Basic
+import Foundation.Vorspiel.Rel.Basic
 import Foundation.Modal.Axioms
 import Foundation.Modal.Formula
 import Foundation.Modal.Logic.Basic
@@ -12,12 +12,12 @@ namespace Kripke
 
 structure Frame where
   World : Type
-  Rel : HRel World
+  Rel : Rel World World
   [world_nonempty : Nonempty World]
 attribute [simp] Frame.world_nonempty
 
 instance : CoeSort Frame (Type) := ⟨Frame.World⟩
-instance : CoeFun Frame (λ F => HRel F.World) := ⟨Frame.Rel⟩
+instance : CoeFun Frame (λ F => _root_.Rel F.World F.World) := ⟨Frame.Rel⟩
 instance {F : Frame} : Nonempty F.World := F.world_nonempty
 
 namespace Frame

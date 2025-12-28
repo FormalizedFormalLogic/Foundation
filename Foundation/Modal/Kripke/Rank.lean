@@ -57,7 +57,7 @@ lemma height_eq_iff_relItr {i : F} :
   F.rank i = n
     ↔ F.rank i < n + 1 ∧ n ≤ F.rank i := by simpa [Nat.lt_succ_iff] using Nat.eq_iff_le_and_ge
   _ ↔ (∀ j, ¬i ≺^[n + 1] j) ∧ (∃ j, i ≺^[n] j) := by simp [height_lt_iff_relItr, le_height_iff_relItr]
-  _ ↔ (∀ k j, i ≺^[n] j → ¬j ≺ k) ∧ (∃ j, i ≺^[n] j) := by simp only [HRel.Iterate.forward, not_exists, not_and]
+  _ ↔ (∀ k j, i ≺^[n] j → ¬j ≺ k) ∧ (∃ j, i ≺^[n] j) := by simp only [Rel.Iterate.forward, not_exists, not_and]
   _ ↔ (∃ j, i ≺^[n] j) ∧ (∀ j, i ≺^[n] j → ∀ k, ¬j ≺ k) := by grind
 
 lemma exists_rank_terminal (i : F) : ∃ j, i ≺^[F.rank i] j := le_height_iff_relItr.mp (by simp)
@@ -75,7 +75,7 @@ lemma eq_height_root : Frame.rank x = F.height ↔ x = r := by
 lemma terminal_rel_height (h : x ≺^[rank x] y) : ∀ z, ¬y ≺ z := by
   intro z Ryz;
   suffices rank x + 1 ≤ rank x by omega;
-  exact le_height_iff_relItr.mpr ⟨z, HRel.Iterate.forward.mpr ⟨y, h, Ryz⟩⟩;
+  exact le_height_iff_relItr.mpr ⟨z, Rel.Iterate.forward.mpr ⟨y, h, Ryz⟩⟩;
 
 namespace extendRoot
 
@@ -104,12 +104,12 @@ namespace extendRoot
       rw [e] at hj
       simpa using hj
     rcases this with ⟨z, hz, hzj⟩
-    have : ∃ x, j = embed x := eq_inr_of_root_rel <| HRel.Iterate.unwrap_of_trans_of_pos height_pos hj
+    have : ∃ x, j = embed x := eq_inr_of_root_rel <| Rel.Iterate.unwrap_of_trans_of_pos height_pos hj
     rcases this with ⟨j, rfl⟩
     rcases not_root_of_from_root'₁ hz with (rfl | ⟨z, rfl, Rrz⟩)
     · exact ⟨j, embed_rel_iterate_embed_iff_rel.mp hzj⟩
     use j
-    exact HRel.Iterate.constant_trans_of_pos lpos Rrz (embed_rel_iterate_embed_iff_rel.mp hzj)
+    exact Rel.Iterate.constant_trans_of_pos lpos Rrz (embed_rel_iterate_embed_iff_rel.mp hzj)
   · suffices rank r + 1 ≤ rank extendRoot.root from this
     apply le_height_iff_relItr.mpr
     rcases exists_rank_terminal r with ⟨j, hj⟩
@@ -128,8 +128,8 @@ lemma eq_original_height : Frame.rank (x : F.extendRoot 1) = Frame.rank x := by
       exfalso;
       have : extendRoot.root ≺ (x : F.extendRoot 1) := Frame.root_genaretes'! (F := F.extendRoot 1) x (by simp);
       have : (x : F.extendRoot 1) ≺ x :=
-        HRel.Iterate.unwrap_of_trans_of_pos (by omega) $
-        HRel.Iterate.comp (m := 1) |>.mp ⟨_, Rxy, by simpa⟩;
+        Rel.Iterate.unwrap_of_trans_of_pos (by omega) $
+        Rel.Iterate.comp (m := 1) |>.mp ⟨_, Rxy, by simpa⟩;
       exact Frame.irrefl _ this;
     . apply Frame.asymm;
       exact Frame.root_genaretes'! (F := F.extendRoot 1) y (by simp);

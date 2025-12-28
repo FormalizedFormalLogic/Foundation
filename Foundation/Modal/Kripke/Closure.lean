@@ -1,6 +1,6 @@
 import Foundation.Modal.Kripke.Basic
 import Foundation.Modal.Kripke.AxiomGeach
-import Foundation.Vorspiel.HRel.Basic
+import Foundation.Vorspiel.Rel.Basic
 import Foundation.Modal.Kripke.Irreflexive
 
 namespace LO.Modal.Kripke

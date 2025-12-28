@@ -1,11 +1,11 @@
-import Foundation.Vorspiel.HRel.Coreflexive
+import Foundation.Vorspiel.Rel.Coreflexive
 
-variable {α} {R : HRel α}
+variable {α} {R : Rel α α}
 
 /-- Everything is related on `R` -/
-def Universal (R : HRel α) := ∀ ⦃x y⦄, R x y
+def Universal (R : Rel α α) := ∀ ⦃x y⦄, R x y
 
-class IsUniversal (R : HRel α) where
+class IsUniversal (R : Rel α α) where
   universal : Universal R
 
 instance [IsUniversal R] : IsRefl α R := ⟨by intro x; apply IsUniversal.universal⟩

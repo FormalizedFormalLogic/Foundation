@@ -1,6 +1,6 @@
 import Foundation.Propositional.Kripke.Completeness
 import Foundation.Propositional.Entailment.LC
-import Foundation.Vorspiel.HRel.Connected
+import Foundation.Vorspiel.Rel.Connected
 
 namespace LO.Propositional
 
