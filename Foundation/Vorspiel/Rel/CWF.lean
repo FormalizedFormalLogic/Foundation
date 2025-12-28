@@ -1,19 +1,19 @@
 import Mathlib.Data.Fintype.Card
 import Mathlib.Order.WellFounded
-import Foundation.Vorspiel.HRel.Connected
+import Foundation.Vorspiel.Rel.Connected
 import Mathlib.Data.Finset.Lattice.Fold
 
 section
 
-abbrev ConverseWellFounded {α} (rel : HRel α) := WellFounded $ flip rel
+abbrev ConverseWellFounded {α} (rel : Rel α α) := WellFounded $ flip rel
 
-class IsConverseWellFounded (α) (rel : HRel α) : Prop where cwf : ConverseWellFounded rel
+class IsConverseWellFounded (α) (rel : Rel α α) : Prop where cwf : ConverseWellFounded rel
 
 end
 
 section
 
-variable {α} {R : HRel α}
+variable {α} {R : Rel α α}
 
 lemma ConverseWellFounded.iff_has_max : ConverseWellFounded R ↔ (∀ (s : Set α), Set.Nonempty s → ∃ m ∈ s, ∀ x ∈ s, ¬(R m x)) := by
   simp [ConverseWellFounded, WellFounded.wellFounded_iff_has_min, flip]

@@ -1,5 +1,5 @@
 import Foundation.Vorspiel.Chain
-import Foundation.Vorspiel.HRel.CWF
+import Foundation.Vorspiel.Rel.CWF
 import Foundation.Modal.Kripke.Rooted
 import Foundation.Modal.Kripke.Antisymmetric
 import Foundation.Modal.Kripke.Asymmetric

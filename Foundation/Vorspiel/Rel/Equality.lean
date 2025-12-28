@@ -1,9 +1,9 @@
-import Foundation.Vorspiel.HRel.Coreflexive
-import Foundation.Vorspiel.HRel.Connected
+import Foundation.Vorspiel.Rel.Coreflexive
+import Foundation.Vorspiel.Rel.Connected
 
-variable {α} {R : HRel α}
+variable {α} {R : Rel α α}
 
-class IsEquality (R : HRel α) extends IsRefl α R, IsCoreflexive R
+class IsEquality (R : Rel α α) extends IsRefl α R, IsCoreflexive R
 
 @[simp]
 lemma equality [IsEquality R] : ∀ ⦃x y⦄, R x y ↔ x = y := by

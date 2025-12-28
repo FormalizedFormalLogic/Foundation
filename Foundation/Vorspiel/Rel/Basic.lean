@@ -1,16 +1,14 @@
 import Mathlib.Data.PNat.Basic
 import Mathlib.Data.Rel
 
-def HRel (α : Type*) := α → α → Prop
 
+namespace Rel
 
-namespace HRel
-
-variable {α} {R : HRel α} {x y z : α}
+variable {α} {R : Rel α α} {x y z : α}
 
 local infix:50 " ≺ " => R
 
-def Iterate (R : HRel α) : ℕ → HRel α
+def Iterate (R : Rel α α) : ℕ → Rel α α
   | 0 => (· = ·)
   | n + 1 => fun x y ↦ ∃ z, R x z ∧ R.Iterate n z y
 
@@ -29,7 +27,7 @@ lemma pos_succ_iff (pos : n > 0) {x y : α} : R.Iterate n x y ↔ ∃ z, R x z �
 lemma succ_left (Rxz : R x z) (Rzy : R.Iterate n z y) : R.Iterate (n + 1) x y := iff_succ.mp ⟨z, Rxz, Rzy⟩
 
 @[simp]
-lemma eq : HRel.Iterate (α := α) (· = ·) n = (· = ·) := by
+lemma eq : Rel.Iterate (α := α) (· = ·) n = (· = ·) := by
   induction n with
   | zero => rfl;
   | succ n ih => simp [Iterate]; aesop
@@ -52,7 +50,7 @@ lemma forward : (R.Iterate (n + 1) x y) ↔ ∃ z, R.Iterate n x z ∧ R z y := 
       . apply ih.mpr;
         use z;
 
-lemma true_any (h : x = y) : HRel.Iterate (λ _ _ => True) n x y := by
+lemma true_any (h : x = y) : Rel.Iterate (λ _ _ => True) n x y := by
   induction n with
   | zero => simpa;
   | succ n ih => use x;
@@ -116,7 +114,7 @@ end Iterate
 open Iterate
 
 
-def ReflGen (R : HRel α) : HRel α := Relation.ReflGen R
+abbrev ReflGen (R : Rel α α) : Rel α α  := Relation.ReflGen R
 
 namespace ReflGen
 
@@ -150,7 +148,7 @@ instance [IsTrans _ R] [IsIrrefl _ R] : IsPartialOrder α (ReflGen R) where
 end ReflGen
 
 
-def TransGen (R : HRel α) : HRel α := Relation.TransGen R
+abbrev TransGen (R : Rel α α) : Rel α α := Relation.TransGen R
 
 local infix:50 " ≺^+ " => TransGen R
 
@@ -174,7 +172,7 @@ lemma exists_iterate : TransGen R x y ↔ ∃ n : ℕ+, R.Iterate n x y := by
     | tail Rxy Ryz ih =>
       obtain ⟨⟨n, hn⟩, Rxy⟩ := ih;
       use ⟨n + 1, by omega⟩;
-      apply HRel.Iterate.forward.mpr;
+      apply Rel.Iterate.forward.mpr;
       refine ⟨_, Rxy, Ryz⟩;
   . rintro ⟨n, Rxy⟩;
     induction n using PNat.recOn generalizing x with
@@ -217,7 +215,8 @@ instance [IsTrans _ R] [IsAntisymm _ R] : IsAntisymm α R.TransGen := ⟨by
 
 end TransGen
 
-def ReflTransGen (R : HRel α) : HRel α := Relation.ReflTransGen R
+
+abbrev ReflTransGen (R : Rel α α) : Rel α α := Relation.ReflTransGen R
 
 namespace ReflTransGen
 
@@ -232,7 +231,7 @@ lemma exists_iterate : R.ReflTransGen x y ↔ ∃ n : ℕ, R.Iterate n x y := by
     | tail Rxy Ryz ih =>
       obtain ⟨n, Rxy⟩ := ih;
       use n + 1;
-      apply HRel.Iterate.forward.mpr;
+      apply Rel.Iterate.forward.mpr;
       exact ⟨_, Rxy, Ryz⟩;
   . rintro ⟨n, h⟩;
     induction n generalizing x y with
@@ -261,7 +260,7 @@ instance [IsSymm _ R] : IsSymm _ (R.ReflTransGen) := ⟨by
 end ReflTransGen
 
 
-def IrreflGen (r : HRel α) : HRel α := λ x y => r x y ∧ x ≠ y
+def IrreflGen (r : Rel α α) : Rel α α := λ x y => r x y ∧ x ≠ y
 
 namespace IrreflGen
 

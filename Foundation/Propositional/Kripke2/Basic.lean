@@ -1,6 +1,6 @@
 import Foundation.Propositional.Logic.Basic
 import Foundation.Propositional.Entailment.Corsi.Basic
-import Foundation.Vorspiel.HRel.Basic
+import Foundation.Vorspiel.Rel.Basic
 
 namespace LO.Propositional
 
@@ -8,7 +8,7 @@ namespace Kripke2
 
 structure Frame where
   World : Type
-  Rel : HRel World
+  Rel : Rel World World
   root : World
   rooted {w : World} : Rel root w
 
@@ -17,7 +17,7 @@ namespace Frame
 variable {F : Frame}
 
 instance : CoeSort Frame (Type) := ⟨World⟩
-instance : CoeFun Frame (λ F => HRel F.World) := ⟨Frame.Rel⟩
+instance : CoeFun Frame (λ F => _root_.Rel F.World F.World) := ⟨Frame.Rel⟩
 instance : Nonempty F.World := ⟨F.root⟩
 
 abbrev Rel' {F : Frame} (x y : F.World) := F.Rel x y

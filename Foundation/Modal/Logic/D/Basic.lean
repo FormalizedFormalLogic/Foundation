@@ -508,7 +508,7 @@ theorem GL_D_TFAE :
               apply h;
               rcases w.2 with (_ | Rrw);
               . convert Rrx;
-              . apply M.trans Rrx $ HRel.TransGen.unwrap Rrw;
+              . apply M.trans Rrx $ Rel.TransGen.unwrap Rrw;
             match w with
             | .inl _ => contradiction;
             | .inr $ .inr w => exact tailModel₀.modal_equivalent_original.mp $ H₁ w;

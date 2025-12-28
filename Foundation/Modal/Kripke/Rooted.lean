@@ -55,7 +55,7 @@ lemma root_generates [F.IsRooted] : ∀ x ≠ F.root, F.root ≺^+ x := by
 
 lemma root_generates' [F.IsRooted] [F.IsTransitive] : ∀ x ≠ F.root, F.root ≺ x := by
   intro x hx;
-  exact HRel.TransGen.unwrap $ F.root_generates _ hx;
+  exact Rel.TransGen.unwrap $ F.root_generates _ hx;
 
 /-- `Frame.root` is first. -/
 @[simp] lemma root_first [F.IsRooted] [F.IsTransitive] [F.IsReflexive] : ∀ x, F.root ≺ x := by
@@ -71,7 +71,7 @@ lemma root_generates! [F.IsRootedBy r] : ∀ x ≠ r, r ≺^+ x := IsRootedBy.ro
 /-- Explicit version of `root_generates'` for rooted by `r`. -/
 lemma root_genaretes'! [F.IsTransitive] [F.IsRootedBy r] : ∀ x ≠ r, r ≺ x := by
   intro x hx;
-  apply HRel.TransGen.unwrap;
+  apply Rel.TransGen.unwrap;
   exact IsRootedBy.root_generates x hx;
 
 @[simp] lemma root_first! [F.IsRootedBy r] [F.IsTransitive] [F.IsReflexive] : ∀ x, r ≺ x := by
@@ -302,7 +302,7 @@ instance isPiecewiseConvergent [F.IsPiecewiseConvergent] : (F↾r).IsPiecewiseCo
   rintro ⟨x, (rfl | Rrx)⟩ ⟨y, (rfl | Rry)⟩ ⟨z, (rfl | Rrz)⟩ Rxy Rxz nexy;
   case inl.inr.inr | inr.inr.inr =>
     have ⟨u, Ryu, Rzu⟩ := F.p_convergent Rxy Rxz $ by simp_all;
-    use ⟨u, by right; apply HRel.TransGen.tail Rry Ryu⟩;
+    use ⟨u, by right; apply Rel.TransGen.tail Rry Ryu⟩;
   all_goals
   . have ⟨u, _⟩ := F.p_convergent Rxy Rxz $ by simp_all;
     use ⟨u, by tauto⟩;
@@ -314,7 +314,7 @@ instance isPiecewiseStronglyConvergent [F.IsPiecewiseStronglyConvergent] : (F↾
   case inr.inr.inr | inl.inr.inr =>
     obtain ⟨u, Ryu, Rzu⟩ := F.ps_convergent Rxy Rxz;
     use ⟨u, ?_⟩;
-    . right; exact HRel.TransGen.tail Rry Ryu;
+    . right; exact Rel.TransGen.tail Rry Ryu;
   all_goals
   . obtain ⟨u, Ryu, Rzu⟩ := F.ps_convergent Rxy Rxz;
     use ⟨u, by tauto⟩;

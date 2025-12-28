@@ -4,7 +4,7 @@ import Foundation.Modal.Kripke.Logic.KD45
 import Foundation.Modal.Kripke.Logic.KB4
 import Foundation.Modal.Kripke.Logic.S4
 import Foundation.Modal.Kripke.Logic.S4Point4
-import Foundation.Vorspiel.HRel.Universal
+import Foundation.Vorspiel.Rel.Universal
 
 namespace LO.Modal
 
