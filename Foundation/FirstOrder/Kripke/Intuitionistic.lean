@@ -147,6 +147,17 @@ lemma monotone
   · intro h v hvw
     refine ⟨v, by rfl, fun x hxv ↦ h x (le_trans hxv hvw)⟩
 
+@[simp] lemma all_of_constantDomain [ConstantDomain W] {φ : Semiformulaᵢ L ξ (n + 1)} :
+    w ⊩[bv|fv] ∀' φ ↔ ∀ x : C, w ⊩[x :> bv|fv] φ := by
+  constructor
+  · intro h x
+    exact all.mp h w (by rfl) ⟨x, by simp⟩
+  · rintro h v hvw ⟨x, _⟩
+    simpa using monotone (h x) v hvw
+
+@[simp] lemma ex_of_constantDomain [ConstantDomain W] {φ : Semiformulaᵢ L ξ (n + 1)} :
+    w ⊩[bv|fv] ∃' φ ↔ ∃ x : C, w ⊩[x :> bv|fv] φ := by simp
+
 open HilbertProofᵢ Semantics
 
 lemma sound! (w : W) (fv : ℕ → C) (hfv : ∀ i, w ⊩↓ fv i) {φ} : 𝗜𝗻𝘁¹ ⊢! φ → w ⊩[![]|fv] φ
