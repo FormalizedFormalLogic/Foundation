@@ -105,13 +105,13 @@ theorem Grz.arithmetical_completeness_iff
     (∀ f : T.StandardRealization, T ⊢ f.strongInterpret A) ↔ Modal.Grz ⊢ A := by
   constructor;
   . intro h;
-    suffices Modal.GL ⊢ Aᵇ by apply iff_boxdot_GL_Grz.mp this;
+    suffices Modal.GL ⊢ Aᵇ by apply iff_provable_boxdot_GL_provable_Grz.mp this;
     apply GL.arithmetical_completeness_iff height |>.mp;
     intro f;
     apply Realization.iff_interpret_boxdot_strongInterpret (L := ℒₒᵣ).mpr;
     apply h;
   . intro h f;
-    replace h := iff_boxdot_GL_Grz.mpr h;
+    replace h := iff_provable_boxdot_GL_provable_Grz.mpr h;
     have : (∀ f : T.StandardRealization, T ⊢ f (Aᵇ)) := GL.arithmetical_completeness_iff height |>.mpr h;
     exact Realization.iff_interpret_boxdot_strongInterpret (L := ℒₒᵣ) |>.mp $ this f;
 

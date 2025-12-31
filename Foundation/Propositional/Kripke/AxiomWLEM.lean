@@ -1,6 +1,6 @@
 import Foundation.Propositional.Entailment.KC
 import Foundation.Propositional.Kripke.Completeness
-import Foundation.Vorspiel.HRel.Convergent
+import Foundation.Vorspiel.Rel.Convergent
 
 namespace LO.Propositional
 

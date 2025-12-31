@@ -1,5 +1,5 @@
 import Foundation.Modal.Kripke.Completeness
-import Foundation.Vorspiel.HRel.Isolated
+import Foundation.Vorspiel.Rel.Isolated
 
 namespace LO.Modal
 

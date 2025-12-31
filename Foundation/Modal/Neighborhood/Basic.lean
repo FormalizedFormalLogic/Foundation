@@ -1,4 +1,4 @@
-import Foundation.Vorspiel.HRel.Basic
+import Foundation.Vorspiel.Rel.Basic
 import Foundation.Modal.Axioms
 import Foundation.Modal.Formula
 import Foundation.Modal.Letterless

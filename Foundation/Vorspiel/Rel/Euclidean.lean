@@ -1,10 +1,10 @@
-import Foundation.Vorspiel.HRel.Serial
+import Foundation.Vorspiel.Rel.Serial
 
-variable {α} {R : HRel α}
+variable {α} {R : Rel α α}
 
-def RightEuclidean (R : HRel α) := ∀ ⦃x y z⦄, R x y → R x z → R y z
+def RightEuclidean (R : Rel α α) := ∀ ⦃x y z⦄, R x y → R x z → R y z
 
-class IsRightEuclidean (R : HRel α) where
+class IsRightEuclidean (R : Rel α α) where
   reucl : RightEuclidean R
 
 lemma IsRightEuclidean.reucl' [IsRightEuclidean R] {x y z : α} (Rxy : R x y) (Rxz : R x z) : R z y := reucl Rxz Rxy
@@ -43,7 +43,7 @@ instance [IsSymm _ R] [IsTrans _ R] [IsSerial R] : IsRefl α R := ⟨by
 ⟩
 
 
-def LeftEuclidean (R : HRel α) := ∀ ⦃x y z⦄, R y x → R z x → R y z
+def LeftEuclidean (R : Rel α α) := ∀ ⦃x y z⦄, R y x → R z x → R y z
 
-class IsLeftEuclidean (R : HRel α) where
+class IsLeftEuclidean (R : Rel α α) where
   leucl : LeftEuclidean R

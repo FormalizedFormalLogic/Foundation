@@ -1,12 +1,12 @@
-import Foundation.Vorspiel.HRel.CWF
+import Foundation.Vorspiel.Rel.CWF
 import Mathlib.Data.Fintype.Pigeonhole
 
 section
 
-abbrev WeaklyConverseWellFounded {α} (rel : HRel α) := ConverseWellFounded (rel.IrreflGen)
+abbrev WeaklyConverseWellFounded {α} (rel : Rel α α) := ConverseWellFounded (rel.IrreflGen)
 
 @[mk_iff]
-class IsWeaklyConverseWellFounded (α) (rel : HRel α) where wcwf : WeaklyConverseWellFounded rel
+class IsWeaklyConverseWellFounded (α) (rel : Rel α α) where wcwf : WeaklyConverseWellFounded rel
 
 end
 
@@ -48,8 +48,8 @@ lemma antisymm_of_weaklyConverseWellFounded : WeaklyConverseWellFounded rel → 
   . simp;
   . intro z hz;
     by_cases z = x;
-    . use y; simp_all [HRel.IrreflGen];
-    . use x; simp_all [HRel.IrreflGen];
+    . use y; simp_all [Rel.IrreflGen];
+    . use x; simp_all [Rel.IrreflGen];
 
 instance [IsWeaklyConverseWellFounded _ rel] : IsAntisymm _ rel := ⟨by
   apply antisymm_of_weaklyConverseWellFounded;
@@ -66,7 +66,7 @@ lemma weaklyConverseWellFounded_of_finite_trans_antisymm (hFin : Finite α) (R_t
     replace hWCWF := ConverseWellFounded.iff_has_max.not.mp hWCWF;
     push_neg at hWCWF;
     obtain ⟨f, hf⟩ := dependent_choice hWCWF; clear hWCWF;
-    dsimp [HRel.IrreflGen] at hf;
+    dsimp [Rel.IrreflGen] at hf;
 
     obtain ⟨i, j, hij, e⟩ := Finite.exists_ne_map_eq_of_infinite_lt f;
     use (f i), (f (i + 1));

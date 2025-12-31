@@ -1,8 +1,8 @@
 import Foundation.Propositional.Kripke2.Basic
-import Foundation.Vorspiel.HRel.Convergent
-import Foundation.Vorspiel.HRel.Euclidean
-import Foundation.Vorspiel.HRel.Coreflexive
-import Foundation.Vorspiel.HRel.Isolated
+import Foundation.Vorspiel.Rel.Convergent
+import Foundation.Vorspiel.Rel.Euclidean
+import Foundation.Vorspiel.Rel.Coreflexive
+import Foundation.Vorspiel.Rel.Isolated
 
 namespace LO.Propositional
 

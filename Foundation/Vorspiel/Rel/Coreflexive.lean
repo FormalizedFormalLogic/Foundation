@@ -1,10 +1,10 @@
-import Foundation.Vorspiel.HRel.Euclidean
+import Foundation.Vorspiel.Rel.Euclidean
 
-variable {α} {R : HRel α}
+variable {α} {R : Rel α α}
 
-def Coreflexive (R : HRel α) := ∀ ⦃x y⦄, R x y → x = y
+def Coreflexive (R : Rel α α) := ∀ ⦃x y⦄, R x y → x = y
 
-class IsCoreflexive (R : HRel α) where
+class IsCoreflexive (R : Rel α α) where
   corefl : Coreflexive R
 
 instance [IsSymm _ R] [IsAntisymm _ R] : IsCoreflexive R := ⟨by

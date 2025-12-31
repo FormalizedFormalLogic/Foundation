@@ -59,11 +59,11 @@ lemma counterframe.iff_rel_from_zero {m : ℕ} {x : counterframe n} : (0 : count
   | succ m ih =>
     constructor;
     . intro R0x;
-      obtain ⟨u, R0u, Rux⟩ := HRel.Iterate.forward.mp R0x;
+      obtain ⟨u, R0u, Rux⟩ := Rel.Iterate.forward.mp R0x;
       rw [Rux, ih.mp R0u];
       simp;
     . rintro h;
-      apply HRel.Iterate.forward.mpr;
+      apply Rel.Iterate.forward.mpr;
       by_cases hm : m ≤ n + 1;
       . use ⟨m, by omega⟩;
         constructor;
@@ -77,18 +77,18 @@ lemma counterframe.iff_rel_from_zero {m : ℕ} {x : counterframe n} : (0 : count
 lemma counterframe.iff_rel_from {i j : counterframe n} {m : ℕ} : i ≺^[m] j ↔ j = min (i + m) (n + 1) := by
   induction m generalizing i j with
   | zero =>
-    simp only [HRel.Iterate.iff_zero, add_zero]
+    simp only [Rel.Iterate.iff_zero, add_zero]
     constructor;
     . rintro rfl; have := i.2; omega;
     . rintro h; have := j.2; omega;
   | succ m ih =>
     constructor;
     . intro Rij;
-      obtain ⟨k, Rik, Rkj⟩ := HRel.Iterate.forward.mp Rij;
+      obtain ⟨k, Rik, Rkj⟩ := Rel.Iterate.forward.mp Rij;
       have := @ih i k |>.mp Rik;
       omega;
     . rintro h;
-      apply HRel.Iterate.forward.mpr;
+      apply Rel.Iterate.forward.mpr;
       by_cases hm : (i + m) ≤ n + 1;
       . use ⟨i + m, by omega⟩;
         constructor;

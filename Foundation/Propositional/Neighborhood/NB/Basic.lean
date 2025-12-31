@@ -1,6 +1,6 @@
 import Foundation.Propositional.Logic.Basic
 import Foundation.Propositional.Entailment.Corsi.Basic
-import Foundation.Vorspiel.HRel.Basic
+import Foundation.Vorspiel.Rel.Basic
 
 namespace LO.Propositional
 

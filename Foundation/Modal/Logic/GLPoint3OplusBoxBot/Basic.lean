@@ -79,15 +79,15 @@ instance : (Modal.GLPoint3OplusBoxBot 2) ⪯ (Modal.GLPoint3OplusBoxBot 1) := GL
 /--
   `<` on `Fin (k + 1)`, `m ≥ n` can be reached by `n` times `<`-step.
 -/
-lemma _root_.HRel.Iterate.fin_lt_stepping_stones {k n : ℕ} {m : Fin (k + 1)}
+lemma _root_.Rel.Iterate.fin_lt_stepping_stones {k n : ℕ} {m : Fin (k + 1)}
   (_ : n = 0 → m = 0)
   (_ : n ≤ m)
-  : HRel.Iterate (α := Fin (k + 1)) (· < ·) n 0 m := by
+  : Rel.Iterate (α := Fin (k + 1)) (· < ·) n 0 m := by
   induction n generalizing m with
   | zero =>
     simp_all;
   | succ n ih =>
-    rw [HRel.Iterate.forward];
+    rw [Rel.Iterate.forward];
     use ⟨n, by omega⟩;
     constructor;
     . apply ih;
@@ -114,7 +114,7 @@ lemma GLPoint3OplusBoxBot.strictlyWeakerThan_GLPoint3 {n : ℕ} : (Modal.GLPoint
         push_neg;
         use ⟨n, by omega⟩;
         constructor;
-        . apply HRel.Iterate.fin_lt_stepping_stones <;> simp;
+        . apply Rel.Iterate.fin_lt_stepping_stones <;> simp;
         . tauto;
     . simp;
 

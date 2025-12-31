@@ -1,5 +1,5 @@
 import Foundation.Modal.Kripke.Logic.K
-import Foundation.Vorspiel.HRel.WCWF
+import Foundation.Vorspiel.Rel.WCWF
 import Foundation.Modal.Kripke.Antisymmetric
 
 namespace LO.Modal
@@ -10,7 +10,7 @@ open Entailment
 open Kripke
 open Formula (atom)
 open Formula.Kripke
-open HRel (IrreflGen)
+open Rel (IrreflGen)
 
 variable {F : Kripke.Frame}
 
