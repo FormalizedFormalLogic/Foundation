@@ -82,19 +82,19 @@ lemma truthlemma_lemma2
     replace := Context.deduct! this;
     replace : ↑Γ₁.box *⊢[Modal.GL] □(□ψ ➝ ψ) := by simpa using Context.nec! this;
     replace := axiomL! ⨀ this;
-    replace : (X.1.prebox.box ∪ X.1.prebox.multibox 2) *⊢[Modal.GL] □ψ := Context.weakening! ?_ this;
-    . replace : X.1.prebox.box *⊢[Modal.GL] (X.1.prebox.multibox 2).conj ➝ □ψ := FConj_DT'.mpr $ by simpa using this;
+    replace : (X.1.prebox.box ∪ X.1.prebox.boxItr 2) *⊢[Modal.GL] □ψ := Context.weakening! ?_ this;
+    . replace : X.1.prebox.box *⊢[Modal.GL] (X.1.prebox.boxItr 2).conj ➝ □ψ := FConj_DT'.mpr $ by simpa using this;
       replace : X.1.prebox.box *⊢[Modal.GL] (X.1.prebox.box).conj ➝ □ψ := C!_trans ?_ this;
       . replace := FConj_DT'.mp this;
         have : X *⊢[Modal.GL] □ψ := Context.weakening! (by simp) this;
         exact membership_iff hψ₁ |>.mpr this;
       . apply CFconjFconj!_of_provable;
         intro ξ hξ;
-        obtain ⟨ξ, h, rfl⟩ := Finset.exists_multibox_of_mem_multibox hξ;
+        obtain ⟨ξ, h, rfl⟩ := Finset.LO.exists_of_mem_boxItr hξ;
         apply axiomFour'!;
         apply Context.by_axm!
         simpa using h;
-    . simp only [Finset.coe_image, Function.iterate_one, Finset.coe_preimage, Box.multibox_succ, Set.image_subset_iff, Set.preimage_union];
+    . simp only [Finset.coe_image, Function.iterate_one, Finset.coe_preimage, Box.boxItr_succ, Set.image_subset_iff, Set.preimage_union];
       intro ξ hξ;
       simpa using hΓ₁ hξ;
   . intro ξ;

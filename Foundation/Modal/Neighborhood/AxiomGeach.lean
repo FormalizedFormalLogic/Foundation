@@ -234,7 +234,7 @@ instance [Entailment.HasAxiomFour 𝓢] : (basicCanonicity 𝓢).toModel.IsTrans
   apply Canonicity.isTransitive;
   intro X hX A hA;
   obtain ⟨φ, rfl, hφ⟩ := basicCanonicity.iff_mem_box_exists_fml.mp hA;
-  simp only [Canonicity.multibox_proofset];
+  simp only [Canonicity.boxItr_proofset];
   apply proofset.imp_subset.mp (by simp) hφ;
 
 instance [Entailment.HasAxiomD 𝓢] : (basicCanonicity 𝓢).toModel.IsSerial := by

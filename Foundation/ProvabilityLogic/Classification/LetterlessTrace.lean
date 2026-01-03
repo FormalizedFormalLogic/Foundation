@@ -31,7 +31,7 @@ variable (hφ : φ.Letterless := by grind) (hψ : ψ.Letterless := by grind)
 @[grind =] lemma def_or  : (φ ⋎ ψ).letterlessSpectrum = φ.letterlessSpectrum ∪ ψ.letterlessSpectrum := by simp [letterlessSpectrum];
 @[grind =] lemma def_and : (φ ⋏ ψ).letterlessSpectrum = φ.letterlessSpectrum ∩ ψ.letterlessSpectrum := by simp [letterlessSpectrum];
 @[grind =] lemma def_box : (□φ).letterlessSpectrum = { n | ∀ i < n, i ∈ φ.letterlessSpectrum } := by simp [letterlessSpectrum];
-@[grind =] lemma def_multibox : (□^[(n + 1)]φ).letterlessSpectrum = { k | ∀ i < k, i ∈ (□^[n]φ).letterlessSpectrum } := by
+@[grind =] lemma def_boxItr : (□^[(n + 1)]φ).letterlessSpectrum = { k | ∀ i < k, i ∈ (□^[n]φ).letterlessSpectrum } := by
   apply Eq.trans ?_ $ def_box (φ := □^[n]φ);
   induction n generalizing φ with
   | zero => simp [letterlessSpectrum]
@@ -160,7 +160,7 @@ lemma boxbot_letterlessSpectrum : (□^[n]⊥ : Formula ℕ).letterlessSpectrum 
   | zero => simp
   | succ n ih =>
     calc
-      _ = { i | ∀ k < i, k ∈ (□^[n]⊥ : Formula ℕ).letterlessSpectrum } := Formula.letterlessSpectrum.def_multibox
+      _ = { i | ∀ k < i, k ∈ (□^[n]⊥ : Formula ℕ).letterlessSpectrum } := Formula.letterlessSpectrum.def_boxItr
       _ = { i | ∀ k < i, k < n }                             := by simp [ih];
       _ = { i | i < n + 1 }                                  := by
         ext i;
@@ -350,7 +350,7 @@ lemma TBB_regular : (TBB n).Regular T := by
   intro h;
   exfalso;
   have : ¬ℕ ⊧ₘ T.LetterlessStandardRealization (□^[(n + 1)]⊥) := by
-    simp only [Box.multibox_succ, Realization.interpret.def_box, Realization.interpret.def_boxItr, Realization.interpret.def_bot];
+    simp only [Box.boxItr_succ, Realization.interpret.def_box, Realization.interpret.def_boxItr, Realization.interpret.def_bot];
     apply Provability.SoundOnModel.sound.not.mpr;
     apply Provability.iIncon_unprovable_of_sigma1_sound;
   apply this;

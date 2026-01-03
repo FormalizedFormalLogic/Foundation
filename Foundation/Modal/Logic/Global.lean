@@ -90,7 +90,7 @@ variable {L : Logic ℕ} [L.IsNormal] {X Y : Set (Formula ℕ)} {φ ψ : Formula
 /--
   Jeřábek, Fact 2.7
 -/
-lemma iff_finite_boxlt_provable : ((L, X) ⊢ φ) ↔ (∃ Γ : Finset (Formula _), ∃ n, ↑Γ ⊆ X ∧ L ⊢ (□^≤[n] Γ.conj) ➝ φ) := by
+lemma iff_finite_boxLe_provable : ((L, X) ⊢ φ) ↔ (∃ Γ : Finset (Formula _), ∃ n, ↑Γ ⊆ X ∧ L ⊢ (□^≤[n] Γ.conj) ➝ φ) := by
   constructor;
   . intro h;
     induction h using GlobalConsequence.rec! with
@@ -112,8 +112,8 @@ lemma iff_finite_boxlt_provable : ((L, X) ⊢ φ) ↔ (∃ Γ : Finset (Formula 
       constructor;
       . simp only [Finset.coe_union, Set.union_subset_iff];
         tauto_set;
-      . replace hφψ : L ⊢ (□^≤[n + m](Δ₁ ∪ Δ₂).conj) ➝ φ ➝ ψ := C!_trans (C!_trans (boxlt_lt! (by omega)) (boxlt_regularity! (CFConj_FConj!_of_subset (by simp)))) hφψ;
-        replace hφ  : L ⊢ (□^≤[n + m](Δ₁ ∪ Δ₂).conj) ➝ φ := C!_trans (C!_trans (boxlt_lt! (by omega)) (boxlt_regularity! (CFConj_FConj!_of_subset (by simp)))) hφ;
+      . replace hφψ : L ⊢ (□^≤[n + m](Δ₁ ∪ Δ₂).conj) ➝ φ ➝ ψ := C!_trans (C!_trans (boxLe_lt! (by omega)) (boxLe_regularity! (CFConj_FConj!_of_subset (by simp)))) hφψ;
+        replace hφ  : L ⊢ (□^≤[n + m](Δ₁ ∪ Δ₂).conj) ➝ φ := C!_trans (C!_trans (boxLe_lt! (by omega)) (boxLe_regularity! (CFConj_FConj!_of_subset (by simp)))) hφ;
         cl_prover [hφψ, hφ];
     | @nec! _ φ h ih =>
       obtain ⟨Δ, n, ⟨h₁, h₂⟩⟩ := ih;

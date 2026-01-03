@@ -128,7 +128,7 @@ end Kripke
 lemma MDP_Aux {X : Set _} (h : (X.box) *⊢[Modal.GL] □φ₁ ⋎ □φ₂) : (X.box) *⊢[Modal.GL] □φ₁ ∨ (X.box) *⊢[Modal.GL] □φ₂ := by
   obtain ⟨Δ, sΓ, hΓ⟩ := Context.provable_iff_boxed.mp h;
 
-  have : Modal.GL ⊢ ⋀Δ.box ➝ (□φ₁ ⋎ □φ₂) := FiniteContext.provable_iff.mp hΓ;
+  have : Modal.GL ⊢ ⋀(□'Δ) ➝ (□φ₁ ⋎ □φ₂) := FiniteContext.provable_iff.mp hΓ;
   have : Modal.GL ⊢ □⋀Δ ➝ (□φ₁ ⋎ □φ₂) := C!_trans (by simp) this;
   generalize e : ⋀Δ = c at this;
 
@@ -184,7 +184,7 @@ lemma MDP_Aux {X : Set _} (h : (X.box) *⊢[Modal.GL] □φ₁ ⋎ □φ₂) : (
     have := imply_box_box_of_imply_boxdot_plain! h;
     have := C!_trans collect_box_conj! this;
     have := FiniteContext.provable_iff.mpr this;
-    have := Context.provable_iff.mpr $ by use Δ.box;
+    have := Context.provable_iff.mpr $ by use (□'Δ);
     tauto;
   };
 

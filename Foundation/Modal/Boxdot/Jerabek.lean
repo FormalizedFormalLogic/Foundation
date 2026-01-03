@@ -191,13 +191,13 @@ private lemma jerabek_SBDP.lemma₃ : L ⊢ (□^[n]Γ.conj)ᵇ ➝ □^≤[n](�
   apply Satisfies.fconj_def.mpr;
   simp only [Finset.mem_image, Finset.mem_range, forall_exists_index, and_imp, forall_apply_eq_imp_iff₂];
   intro k hk;
-  apply Satisfies.multibox_def.mpr;
+  apply Satisfies.boxItr_def.mpr;
   intro y Rxy;
   apply Satisfies.fconj_def.mpr;
   simp only [Finset.mem_image, forall_exists_index, and_imp, forall_apply_eq_imp_iff₂];
   intro ξ hξ;
   replace h : Satisfies _ x (□^[k]Γ.conjᵇ) := Satisfies.fconj_def.mp (Satisfies.iff_boxdotTranslateMultibox_boxdotTranslateBoxlt.mp h) _ ?_;
-  . apply Satisfies.fconj_def.mp (Satisfies.boxdotTranslate_fconj₂.mp $ Satisfies.multibox_def.mp h Rxy) _;
+  . apply Satisfies.fconj_def.mp (Satisfies.boxdotTranslate_fconj₂.mp $ Satisfies.boxItr_def.mp h Rxy) _;
     simp only [Finset.mem_image];
     use ξ;
   . simp only [Finset.mem_image, Finset.mem_range];
@@ -272,8 +272,8 @@ theorem jerabek_SBDP
       apply GlobalConsequence.thm!;
       grind;
     exact h₁ ⨀ h₂;
-  obtain ⟨Γ, n, hΓ, hφ⟩ := GlobalConsequence.iff_finite_boxlt_provable.mp this;
-  replace hφ : L ⊢ (□^≤[n]XB.conj) ➝ φᵇ := C!_trans (boxlt_fconj_regularity_of_subset hΓ) hφ;
+  obtain ⟨Γ, n, hΓ, hφ⟩ := GlobalConsequence.iff_finite_boxLe_provable.mp this;
+  replace hφ : L ⊢ (□^≤[n]XB.conj) ➝ φᵇ := C!_trans (boxLe_fconj_regularity_of_subset hΓ) hφ;
   let χ := (□^[n](X.conj) ➝ φ);
   have hχ : L ⊢ χᵇ := by apply C!_trans jerabek_SBDP.lemma₃ hφ;
   use χ;

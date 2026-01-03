@@ -180,15 +180,15 @@ open Formula.Kripke
 
 lemma validate_axiomGeach_of_isGeachConvergent (g) [F.IsGeachConvergent g] : F ⊧ (Axioms.Geach g (.atom 0)) := by
   rintro V x h;
-  apply Satisfies.multibox_def.mpr;
-  obtain ⟨y, Rxy, hbp⟩ := Satisfies.multidia_def.mp h;
+  apply Satisfies.boxItr_def.mpr;
+  obtain ⟨y, Rxy, hbp⟩ := Satisfies.diaItr_def.mp h;
   intro z Rxz;
-  apply Satisfies.multidia_def.mpr;
+  apply Satisfies.diaItr_def.mpr;
   obtain ⟨u, Ryu, Rzu⟩ := Frame.IsGeachConvergent.gconv Rxy Rxz;
   use u;
   constructor;
   . assumption;
-  . exact (Satisfies.multibox_def.mp hbp) Ryu;
+  . exact (Satisfies.boxItr_def.mp hbp) Ryu;
 
 lemma validate_AxiomT_of_reflexive [refl : F.IsReflexive] : F ⊧ (Axioms.T (.atom 0)) := validate_axiomGeach_of_isGeachConvergent ⟨0, 0, 1, 0⟩
 lemma validate_AxiomD_of_serial [ser : F.IsSerial] : F ⊧ (Axioms.D (.atom 0)) := validate_axiomGeach_of_isGeachConvergent ⟨0, 0, 1, 1⟩
@@ -203,14 +203,14 @@ lemma isGeachConvergent_of_validate_axiomGeach {g} (h : F ⊧ (Axioms.Geach g (.
   rintro x y z Rxy Rxz;
   let V : Kripke.Valuation F := λ v _ => y ≺^[g.m] v;
   have : Satisfies ⟨F, V⟩ x (□^[g.j](◇^[g.n](.atom 0)))  := h V x $ by
-    apply Satisfies.multidia_def.mpr;
+    apply Satisfies.diaItr_def.mpr;
     use y;
     constructor;
     . assumption;
-    . apply Satisfies.multibox_def.mpr;
+    . apply Satisfies.boxItr_def.mpr;
       aesop;
-  replace : Satisfies ⟨F, V⟩ z (◇^[g.n]Formula.atom 0) := Satisfies.multibox_def.mp this Rxz;
-  obtain ⟨u, Rzu, Ryu⟩ := Satisfies.multidia_def.mp this;
+  replace : Satisfies ⟨F, V⟩ z (◇^[g.n]Formula.atom 0) := Satisfies.boxItr_def.mp this Rxz;
+  obtain ⟨u, Rzu, Ryu⟩ := Satisfies.diaItr_def.mp this;
   exact ⟨u, Ryu, Rzu⟩;
 ⟩
 
@@ -264,24 +264,24 @@ open canonicalModel
 
 instance [Entailment.HasAxiomGeach g 𝓢] : (canonicalFrame 𝓢).IsGeachConvergent g := ⟨by
   rintro x y z Rxy Rxz;
-  have ⟨u, hu⟩ := lindenbaum (𝓢 := 𝓢) (t₀ := ⟨y.1.1.premultibox g.m, z.1.2.premultidia g.n⟩) $ by
+  have ⟨u, hu⟩ := lindenbaum (𝓢 := 𝓢) (t₀ := ⟨y.1.1.preboxItr g.m, z.1.2.prediaItr g.n⟩) $ by
     rintro Γ Δ hΓ hΔ;
     by_contra! hC;
-    have hγ : □^[g.m](Γ.conj) ∈ y.1.1 := y.mdp_mem₁_provable collect_multibox_fconj! $ iff_mem₁_fconj.mpr (by simpa using hΓ);
-    have hδ : ◇^[g.n](Δ.disj) ∈ z.1.2 := mdp_mem₂_provable distribute_multidia_fdisj! $ iff_mem₂_fdisj.mpr (by simpa using hΔ);
+    have hγ : □^[g.m](Γ.conj) ∈ y.1.1 := y.mdp_mem₁_provable collect_boxItr_fconj! $ iff_mem₁_fconj.mpr (by simpa using hΓ);
+    have hδ : ◇^[g.n](Δ.disj) ∈ z.1.2 := mdp_mem₂_provable distribute_diaItr_fdisj! $ iff_mem₂_fdisj.mpr (by simpa using hΔ);
     generalize Γ.conj = γ at hγ hC;
     generalize Δ.disj = δ at hδ hC;
-    have : 𝓢 ⊢ □^[g.m]γ ➝ □^[g.m]δ := imply_multibox_distribute'! hC;
+    have : 𝓢 ⊢ □^[g.m]γ ➝ □^[g.m]δ := imply_boxItr_distribute'! hC;
     have : □^[g.m]δ ∈ y.1.1 := mdp_mem₁_provable this hγ;
-    have : ◇^[g.i](□^[g.m]δ) ∈ x.1.1 := def_multirel_multidia_mem₁.mp Rxy this;
+    have : ◇^[g.i](□^[g.m]δ) ∈ x.1.1 := def_multirel_diaItr_mem₁.mp Rxy this;
     have : □^[g.j](◇^[g.n]δ) ∈ x.1.1 := mdp_mem₁_provable axiomGeach! this;
-    have : ◇^[g.n]δ ∈ z.1.1 := def_multirel_multibox_mem₁.mp Rxz this;
+    have : ◇^[g.n]δ ∈ z.1.1 := def_multirel_boxItr_mem₁.mp Rxz this;
     have : ◇^[g.n]δ ∉ z.1.2 := iff_not_mem₂_mem₁.mpr this;
     contradiction;
   use u;
   constructor;
-  . apply def_multirel_multibox_mem₁.mpr; apply hu.1;
-  . apply def_multirel_multidia_mem₂.mpr; apply hu.2;
+  . apply def_multirel_boxItr_mem₁.mpr; apply hu.1;
+  . apply def_multirel_diaItr_mem₂.mpr; apply hu.2;
 ⟩
 
 instance [Entailment.HasAxiomT 𝓢] : (canonicalFrame 𝓢).IsReflexive := by simp
