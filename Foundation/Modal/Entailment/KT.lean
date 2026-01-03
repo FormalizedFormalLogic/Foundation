@@ -35,7 +35,7 @@ omit [DecidableEq F] in
   induction n with
   | zero => simp;
   | succ n ih =>
-    simp only [show (i + (n + 1)) = (i + n) + 1 by omega, Box.multibox_succ];
+    simp only [show (i + (n + 1)) = (i + n) + 1 by omega, Box.boxItr_succ];
     apply C!_trans ?_ ih;
     apply axiomT!;
 

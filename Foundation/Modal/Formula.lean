@@ -21,7 +21,7 @@ abbrev FormulaFinset (α) := Finset (Formula α)
 
 namespace Formula
 
-variable {α} {φ ψ χ : Formula α}
+variable {α} {φ φ₁ φ₂ ψ ψ₁ ψ₂ χ : Formula α}
 
 abbrev neg (φ : Formula α) : Formula α := imp φ falsum
 
@@ -50,7 +50,7 @@ instance : LukasiewiczAbbrev (Formula α) where
   neg := rfl
   or := rfl
   and := rfl
-instance : DiaAbbrev (Formula α) := ⟨rfl⟩
+instance : DiaByBox (Formula α) := ⟨rfl⟩
 
 section ToString
 
@@ -99,41 +99,25 @@ end ToString
   · exact congr_arg _
 -/
 
-lemma or_eq (φ ψ : Formula α) : or φ ψ = φ ⋎ ψ := rfl
-
-lemma and_eq (φ ψ : Formula α) : and φ ψ = φ ⋏ ψ := rfl
-
-lemma imp_eq (φ ψ : Formula α) : imp φ ψ = φ ➝ ψ := rfl
-
-lemma neg_eq (φ : Formula α) : neg φ = ∼φ := rfl
-
-lemma box_eq (φ : Formula α) : box φ = □φ := rfl
-
-lemma dia_eq (φ : Formula α) : dia φ = ◇φ := rfl
-
-lemma iff_eq (φ ψ : Formula α) : φ ⭤ ψ = (φ ➝ ψ) ⋏ (ψ ➝ φ) := rfl
-
 lemma falsum_eq : (falsum : Formula α) = ⊥ := rfl
+lemma or_eq : or φ ψ = φ ⋎ ψ := rfl
+lemma and_eq : and φ ψ = φ ⋏ ψ := rfl
+lemma imp_eq : imp φ ψ = φ ➝ ψ := rfl
+lemma neg_eq : neg φ = ∼φ := rfl
+lemma box_eq : box φ = □φ := rfl
+lemma dia_eq : dia φ = ◇φ := rfl
+lemma iff_eq : φ ⭤ ψ = (φ ➝ ψ) ⋏ (ψ ➝ φ) := rfl
 
-@[simp] lemma and_inj (φ₁ ψ₁ φ₂ ψ₂ : Formula α) : φ₁ ⋏ φ₂ = ψ₁ ⋏ ψ₂ ↔ φ₁ = ψ₁ ∧ φ₂ = ψ₂ := by simp [Wedge.wedge]
+lemma inj_and : φ₁ ⋏ φ₂ = ψ₁ ⋏ ψ₂ ↔ φ₁ = ψ₁ ∧ φ₂ = ψ₂ := by simp [Wedge.wedge]
+lemma inj_or  : φ₁ ⋎ φ₂ = ψ₁ ⋎ ψ₂ ↔ φ₁ = ψ₁ ∧ φ₂ = ψ₂ := by simp [Vee.vee]
+lemma inj_imp : φ₁ ➝ φ₂ = ψ₁ ➝ ψ₂ ↔ φ₁ = ψ₁ ∧ φ₂ = ψ₂ := by simp [Arrow.arrow]
+lemma inj_neg : ∼φ = ∼ψ ↔ φ = ψ := by simp [Tilde.tilde]
+lemma inj_box : □φ = □ψ ↔ φ = ψ := by simp [Box.box]
+lemma inj_dia : ◇φ = ◇ψ ↔ φ = ψ := by simp [Dia.dia]
+attribute [simp] inj_and inj_or inj_imp inj_neg inj_box inj_dia
 
-@[simp] lemma or_inj (φ₁ ψ₁ φ₂ ψ₂ : Formula α) : φ₁ ⋎ φ₂ = ψ₁ ⋎ ψ₂ ↔ φ₁ = ψ₁ ∧ φ₂ = ψ₂ := by simp [Vee.vee]
-
-@[simp] lemma imp_inj (φ₁ ψ₁ φ₂ ψ₂ : Formula α) : φ₁ ➝ φ₂ = ψ₁ ➝ ψ₂ ↔ φ₁ = ψ₁ ∧ φ₂ = ψ₂ := by simp [Arrow.arrow]
-
-@[simp] lemma neg_inj (φ ψ : Formula α) : ∼φ = ∼ψ ↔ φ = ψ := by simp [NegAbbrev.neg];
-
-/-
-instance : ModalDeMorgan (Formula α) where
-  verum := rfl
-  falsum := rfl
-  and := by simp
-  or := by simp
-  imply := by simp [imp_eq]
-  neg := by simp
-  dia := by simp
-  box := by simp
--/
+instance : InjectiveBox (Formula α) := ⟨by simp [Function.Injective]⟩
+instance : InjectiveDia (Formula α) := ⟨by simp [Function.Injective]⟩
 
 /-- Formula complexity -/
 def complexity : Formula α → ℕ
@@ -143,14 +127,19 @@ def complexity : Formula α → ℕ
 | □φ   => φ.complexity + 1
 
 /-- Max numbers of `□` -/
+@[grind]
 def degree : Formula α → Nat
   | atom _ => 0
   | ⊥ => 0
   | φ ➝ ψ => max φ.degree ψ.degree
   | □φ => φ.degree + 1
 
-@[simp] lemma degree_neg (φ : Formula α) : degree (∼φ) = degree φ := by induction φ <;> simp_all [degree, neg]
-@[simp] lemma degree_imp (φ ψ : Formula α) : degree (φ ➝ ψ) = max (degree φ) (degree ψ) := by simp [degree]
+@[grind =] lemma degree_falsum : degree (⊥ : Formula α) = 0 := by rfl
+@[grind =] lemma degree_imp : degree (φ ➝ ψ) = max (degree φ) (degree ψ) := by rfl
+@[simp, grind =] lemma degree_neg : degree (∼φ) = degree φ := by
+  dsimp [←neg_eq, neg];
+  grind;
+
 
 @[elab_as_elim]
 def cases' {C : Formula α → Sort w}
@@ -188,23 +177,35 @@ def hasDecEq : (φ ψ : Formula α) → Decidable (φ = ψ)
     cases ψ using cases' <;>
     { simp; try { exact isFalse not_false }; try { exact isTrue trivial } }
   | atom a, ψ => by
-    cases ψ <;> try { simp; exact isFalse not_false }
-    simp; exact decEq _ _;
+    cases ψ using cases';
+    case hatom b =>
+      exact match decEq a b with
+      | isTrue h  => isTrue (h ▸ rfl)
+      | isFalse h => isFalse (by simp [h])
+    all_goals
+    . apply isFalse;
+      simp;
   | φ ➝ ψ, χ => by
-    cases χ using cases' <;> try { simp; exact isFalse not_false }
+    cases χ using cases';
     case himp φ' ψ' =>
       exact match hasDecEq φ φ' with
       | isTrue hp =>
         match hasDecEq ψ ψ' with
         | isTrue hq  => isTrue (hp ▸ hq ▸ rfl)
-        | isFalse hq => isFalse (by simp [hp, hq])
+        | isFalse hq => isFalse $ by simp_all
       | isFalse hp => isFalse (by simp [hp])
+    all_goals
+    . apply isFalse;
+      simp;
   | □φ, ψ => by
-    cases ψ <;> try { simp; exact isFalse not_false }
+    cases ψ
     case box φ' =>
       exact match hasDecEq φ φ' with
       | isTrue hp  => isTrue (hp ▸ rfl)
-      | isFalse hp => isFalse (by simp [hp, box_eq])
+      | isFalse hp => isFalse $ by simp [hp, box_eq];
+    all_goals
+    . apply isFalse;
+      simp;
 instance : DecidableEq (Formula α) := hasDecEq
 
 end Decidable
@@ -373,7 +374,7 @@ end Propositional
 
 namespace Modal
 
-def Formula.toPropFormula (φ : Formula α) (_ : φ.degree = 0 := by simp_all [Formula.degree, Formula.degree_neg, Formula.degree_imp]) : Propositional.Formula α :=
+def Formula.toPropFormula (φ : Formula α) (_ : φ.degree = 0 := by grind) : Propositional.Formula α :=
   match φ with
   | atom a => Propositional.Formula.atom a
   | ⊥ => ⊥
@@ -408,19 +409,16 @@ variable [DecidableEq α] {φ ψ χ ξ : Formula α}
 protected lemma mem_imp (h : (ψ ➝ χ) ∈ φ.subformulas) : ψ ∈ φ.subformulas ∧ χ ∈ φ.subformulas := by
   induction φ with
   | himp ψ χ ihψ ihχ =>
-    simp only [subformulas, Finset.mem_insert, imp_inj, Finset.mem_union] at h;
-    rcases h with ⟨rfl, rfl⟩ | h | h;
-    . simp_all [subformulas];
-    . simp_all [subformulas];
-    . simp_all [subformulas];
+    simp only [subformulas, Finset.mem_insert, Finset.mem_union] at h;
+    rcases h with ⟨rfl, rfl⟩ | h | h <;> simp_all [subformulas];
   | _ => simp_all [subformulas];
 
 @[grind ⇒]
 protected lemma mem_box (h : □ψ ∈ φ.subformulas) : ψ ∈ φ.subformulas := by
   induction φ with
   | hbox ψ ihψ =>
-    simp only [subformulas, Finset.mem_insert, Box.box_injective'] at h;
-    rcases h with rfl | h <;> simp_all [subformulas];
+    simp only [subformulas, Finset.mem_insert, inj_box] at h ⊢;
+    rcases h with rfl | h <;> simp_all;
   | himp ψ χ ihψ ihχ =>
     simp_all only [subformulas, Finset.mem_insert, reduceCtorEq, Finset.mem_union, false_or];
     grind;
@@ -556,14 +554,14 @@ variable {s : Substitution α} {φ ψ ξ : Formula α}
 
 @[simp] lemma subst_box : (□φ)⟦s⟧ = □(φ⟦s⟧) := rfl
 
-@[simp] lemma subst_multibox : (□^[n]φ)⟦s⟧ = □^[n](φ⟦s⟧) := by
+@[simp] lemma subst_boxItr : (□^[n]φ)⟦s⟧ = □^[n](φ⟦s⟧) := by
   induction n with
   | zero => rfl
   | succ n ih => simp [ih]
 
 @[simp] lemma subst_dia : (◇φ)⟦s⟧ = ◇(φ⟦s⟧) := rfl
 
-@[simp] lemma subst_multidia : (◇^[n]φ)⟦s⟧ = ◇^[n](φ⟦s⟧) := by
+@[simp] lemma subst_diaItr : (◇^[n]φ)⟦s⟧ = ◇^[n](φ⟦s⟧) := by
   induction n with
   | zero => rfl
   | succ n ih => simp [ih]

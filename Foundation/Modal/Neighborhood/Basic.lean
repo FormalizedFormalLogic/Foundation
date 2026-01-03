@@ -90,20 +90,20 @@ instance : CoeFun Model (λ M => Formula ℕ → Set M.World) := ⟨λ M => trut
   _         = (M φ ∩ M ψ) ∪ ((M φ)ᶜ ∩ (M ψ)ᶜ)     := by tauto_set;
 
 @[simp, grind =]
-lemma eq_multibox {n : ℕ} : M (□^[n] φ) = M.box^[n] (M φ) := by
+lemma eq_boxItr {n : ℕ} : M (□^[n] φ) = M.box^[n] (M φ) := by
   induction n with
   | zero => simp
   | succ n ih => rw [Function.iterate_succ']; simp [ih, truthset]
 
-@[simp, grind =] lemma eq_box : M (□φ) = M.box (M φ) := eq_multibox (n := 1)
+@[simp, grind =] lemma eq_box : M (□φ) = M.box (M φ) := eq_boxItr (n := 1)
 
 @[simp, grind =]
-lemma eq_multidia {n : ℕ} : M (◇^[n] φ) = M.dia^[n] (M φ) := by
+lemma eq_diaItr {n : ℕ} : M (◇^[n] φ) = M.dia^[n] (M φ) := by
   induction n with
   | zero => simp
   | succ n ih => rw [Function.iterate_succ']; simp [ih, truthset]
 
-@[simp, grind =] lemma eq_dia : M (◇φ) = M.dia (M φ) := eq_multidia (n := 1)
+@[simp, grind =] lemma eq_dia : M (◇φ) = M.dia (M φ) := eq_diaItr (n := 1)
 
 
 lemma eq_subst :
@@ -139,9 +139,9 @@ variable {M : Model} {x : M.World} {φ ψ ξ : Formula ℕ}
 @[grind =] lemma def_box : x ⊧ □φ ↔ M φ ∈ (M.𝒩 x) := by simp [Semantics.Models, Satisfies];
 @[grind =] lemma def_dia : x ⊧ ◇φ ↔ (M φ)ᶜ ∈ (M.𝒩 x)ᶜ := by simp [Semantics.Models, Satisfies];
 
-@[grind =] lemma def_multibox' : x ⊧ □^[n]φ ↔ x ∈ M.box^[n] (M φ) := by simp [Semantics.Models, Satisfies]
+@[grind =] lemma def_boxItr' : x ⊧ □^[n]φ ↔ x ∈ M.box^[n] (M φ) := by simp [Semantics.Models, Satisfies]
 @[grind =] lemma def_mutlidia' : x ⊧ ◇^[n]φ ↔ x ∈ M.dia^[n] (M φ) := by simp [Semantics.Models, Satisfies]
-@[grind =] lemma def_box' : x ⊧ □φ ↔ x ∈ M.box (M φ) := def_multibox' (n := 1)
+@[grind =] lemma def_box' : x ⊧ □φ ↔ x ∈ M.box (M φ) := def_boxItr' (n := 1)
 @[grind =] lemma def_dia' : x ⊧ ◇φ ↔ x ∈ M.dia (M φ) := def_mutlidia' (n := 1)
 
 protected instance : Semantics.Tarski (M.World) where

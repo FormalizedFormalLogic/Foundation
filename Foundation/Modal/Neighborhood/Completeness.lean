@@ -161,7 +161,7 @@ lemma box_proofset : 𝓒.toModel.box (proofset 𝓢 φ) = (proofset 𝓢 (□φ
   simp [toModel];
 
 @[simp]
-lemma multibox_proofset : 𝓒.toModel.box^[n] (proofset 𝓢 φ) = (proofset 𝓢 (□^[n]φ)) := by
+lemma boxItr_proofset : 𝓒.toModel.box^[n] (proofset 𝓢 φ) = (proofset 𝓢 (□^[n]φ)) := by
   induction n generalizing φ with
   | zero => simp;
   | succ n ih => simp only [Function.iterate_succ, Function.comp_apply, box_proofset, ih];
@@ -172,7 +172,7 @@ lemma dia_proofset : 𝓒.toModel.dia (proofset 𝓢 φ) = (proofset 𝓢 (◇φ
   simpa using 𝓒.box_proofset (φ := ∼φ);
 
 @[simp]
-lemma multidia_proofset : 𝓒.toModel.dia^[n] (proofset 𝓢 φ) = (proofset 𝓢 (◇^[n]φ)) := by
+lemma diaItr_proofset : 𝓒.toModel.dia^[n] (proofset 𝓢 φ) = (proofset 𝓢 (◇^[n]φ)) := by
   induction n generalizing φ with
   | zero => simp;
   | succ n ih => simp only [Function.iterate_succ, Function.comp_apply, dia_proofset, ih];

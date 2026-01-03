@@ -298,7 +298,7 @@ lemma mainlemma_aux
         . right; exact Raj;
         . simp [Frame.Rel', Model.boneLengthening] at Raj;
       . intro h;
-        have : (a : M.boneLengthening a k) ⊧ ψ := Satisfies.fconj_def.mp (equivalence (by tauto) _ |>.mp hrfl) (□ψ ➝ ψ) (by simpa) h;
+        have : (a : M.boneLengthening a k) ⊧ ψ := Satisfies.fconj_def.mp (equivalence (by tauto) _ |>.mp hrfl) (□ψ ➝ ψ) (by simpa [Finset.LO.preboxItr]) h;
         rintro (y | j) Ri;
         . rcases Ri with rfl | Ray;
           . assumption;
