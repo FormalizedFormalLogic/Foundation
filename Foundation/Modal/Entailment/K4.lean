@@ -42,7 +42,7 @@ def iff_Boxdot_BoxdotBoxdot : 𝓢 ⊢! ⊡φ ⭤ ⊡⊡φ := by
 def boxdotAxiomFour : 𝓢 ⊢! ⊡φ ➝ ⊡⊡φ := K_left iff_Boxdot_BoxdotBoxdot
 @[simp] lemma boxdot_axiomFour! : 𝓢 ⊢ ⊡φ ➝ ⊡⊡φ := ⟨boxdotAxiomFour⟩
 
-lemma Context.boxItr_2_in_context_to_box_finset {Γ : Finset F} (h : (□'Γ)Itr 2 *⊢[𝓢] φ) : (□'Γ) *⊢[𝓢] φ := by
+lemma Context.boxItr_2_in_context_to_box_finset {Γ : Finset F} (h : ↑(□'^[2]Γ) *⊢[𝓢] φ) : ↑(□'Γ) *⊢[𝓢] φ := by
   apply FConj_DT.mp;
   refine C!_trans ?_ $ FConj_DT.mpr h;
   apply CFconjFconj!_of_provable;
@@ -50,28 +50,32 @@ lemma Context.boxItr_2_in_context_to_box_finset {Γ : Finset F} (h : (□'Γ)Itr
   obtain ⟨ξ, h, rfl⟩ := Finset.LO.exists_of_mem_boxItr hξ;
   apply axiomFour'!;
   apply Context.by_axm!
-  simpa using h;
+  grind;
 
-lemma Context.boxItr_2_in_context_to_box {Γ : Set F} (h : (□'Γ)Itr 2 *⊢[𝓢] φ) : (□'Γ) *⊢[𝓢] φ := by
+lemma Context.boxItr_2_in_context_to_box {Γ : Set F} (h : (□'^[2]Γ) *⊢[𝓢] φ) : (□'Γ) *⊢[𝓢] φ := by
   apply Context.provable_iff_finset.mpr;
   obtain ⟨Δ, hΔ₁, hΔ₂⟩ := Context.provable_iff_finset.mp h;
-  use Δ.preboxItr 2 |>.box;
+  use □'(□'⁻¹^[2]Δ);
   constructor;
   . intro ψ hψ;
-    simp at hψ;
-    obtain ⟨ψ, hψ, rfl⟩ := hψ;
-    have := hΔ₁ hψ;
-    simpa;
+    obtain ⟨ξ, hξ, rfl⟩ := Finset.LO.exists_of_mem_box hψ;
+    have : □^[2]ξ ∈ Δ := Finset.LO.mem_boxItr_of_mem_preboxItr hξ;
+    have : □^[2]ξ ∈ □'^[2]Γ := hΔ₁ this;
+    sorry;
   . apply Context.boxItr_2_in_context_to_box_finset;
     apply Context.weakening! ?_ hΔ₂;
     intro ψ hψ;
-    have := hΔ₁ hψ;
-    simp at this;
-    obtain ⟨ψ, hψ, rfl⟩ := this;
-    simpa;
+    apply Finset.LO.mem_boxItr_preboxItr_of_mem_of_mem_boxItr;
+    . simpa;
+    . obtain ⟨ψ, hψ, rfl⟩ := hΔ₁ hψ;
+      simp at hψ;
+      simp;
+      sorry;
 
-lemma Context.boxbox_in_context_to_box {Γ : Set F} (h : (□'Γ).box *⊢[𝓢] φ) : (□'Γ) *⊢[𝓢] φ := by
-  rw [(show (□'Γ).box = (□'Γ)Itr 2 by ext; simp)] at h;
-  apply Context.boxItr_2_in_context_to_box h;
+lemma Context.boxbox_in_context_to_box {Γ : Set F} (h : (□'□'Γ) *⊢[𝓢] φ) : (□'Γ) *⊢[𝓢] φ := by
+  apply Context.boxItr_2_in_context_to_box;
+  suffices (□'□'Γ) = (□'^[2]Γ) by rwa [this] at h;
+  ext;
+  simp [Set.LO.boxItr];
 
 end LO.Modal.Entailment

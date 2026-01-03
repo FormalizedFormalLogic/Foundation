@@ -383,27 +383,27 @@ open Formula (atom)
 
 @[simp]
 lemma ne_J1_J6 : Axioms.J1 (atom 0) (atom 1) ≠ Axioms.J6 (atom 0) := by
-  apply Formula.imp_inj.not.mpr;
+  apply Formula.inj_imp.not.mpr;
   simp;
 
 @[simp]
 lemma ne_J2_J6 : Axioms.J2 (atom 0) (atom 1) (atom 2) ≠ Axioms.J6 (atom 0) := by
-  apply Formula.imp_inj.not.mpr;
+  apply Formula.inj_imp.not.mpr;
   simp;
 
 @[simp]
 lemma ne_J2Plus_J6 : Axioms.J2Plus (atom 0) (atom 1) (atom 2) ≠ Axioms.J6 (atom 0) := by
-  apply Formula.imp_inj.not.mpr;
+  apply Formula.inj_imp.not.mpr;
   simp;
 
 @[simp]
 lemma ne_J4_J6 : Axioms.J4 (atom 0) (atom 1) ≠ Axioms.J6 (atom 0) := by
-  apply Formula.imp_inj.not.mpr;
+  apply Formula.inj_imp.not.mpr;
   simp;
 
 @[simp]
 lemma ne_J4Plus_J6 : Axioms.J4Plus (atom 0) (atom 1) (atom 2) ≠ Axioms.J6 (atom 0) := by
-  apply Formula.imp_inj.not.mpr;
+  apply Formula.inj_imp.not.mpr;
   simp;
 
 @[simp]
@@ -411,7 +411,7 @@ lemma ne_J5_J6 : Axioms.J5 (atom 0) ≠ Axioms.J6 (atom 0) := by tauto;
 
 @[simp]
 lemma ne_M_J6 : Axioms.M (atom 0) (atom 1) (atom 2) ≠ Axioms.J6 (atom 0) := by
-  apply Formula.imp_inj.not.mpr;
+  apply Formula.inj_imp.not.mpr;
   simp;
 
 end

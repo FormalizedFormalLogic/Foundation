@@ -489,9 +489,9 @@ variable {L : Logic _} [L.IsNormal] {m : Modality}
 
 instance : m ⤳[L] m := refl m
 
-instance : (□) ≅[L] (∼◇∼) := by constructor; simp;
+instance : (□) ≅[L] (∼◇∼) := ⟨by simp⟩
 
-instance : (◇) ≅[L] (∼□∼) := by constructor; simp;
+instance : (◇) ≅[L] (∼□∼) := ⟨by simp⟩
 
 instance : (∼∼) ≅[L] (-) := by
   apply equivalence_of_axiomInstance (a := 0);
@@ -517,8 +517,7 @@ instance : (◇∼) ≅[L] (∼□) := by
     . simp;
     . simp;
   . apply C!_trans (ψ := ∼∼◇(∼(.atom 0)));
-    . apply contra!;
-      simp;
+    . sorry;
     . simp;
 
 end

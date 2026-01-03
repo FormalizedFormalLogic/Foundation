@@ -455,12 +455,14 @@ section
 
 variable [Entailment.K 𝓢]
 
-lemma iff_mem_boxItr : (□^[n]φ ∈ Ω) ↔ (∀ {Ω' : MaximalConsistentSet 𝓢}, (Ω.1.preboxItr n ⊆ Ω'.1) → (φ ∈ Ω')) := by
+lemma iff_mem_boxItr : (□^[n]φ ∈ Ω) ↔ (∀ {Ω' : MaximalConsistentSet 𝓢}, ((□'⁻¹^[n]Ω.1) ⊆ Ω'.1) → (φ ∈ Ω')) := by
   constructor;
-  . intro hp Ω' hΩ'; apply hΩ'; simpa;
+  . intro hp Ω' hΩ';
+    apply hΩ';
+    simpa;
   . contrapose!;
     intro hp;
-    obtain ⟨Ω', hΩ'⟩ := lindenbaum (𝓢 := 𝓢) (T := insert (∼φ) (Ω.1.preboxItr n)) (by
+    obtain ⟨Ω', hΩ'⟩ := lindenbaum (𝓢 := 𝓢) (T := insert (∼φ) ((□'⁻¹^[n]Ω.1))) (by
       apply unprovable_iff_insert_neg_consistent.mpr;
       by_contra hC;
       obtain ⟨Γ, hΓ₁, hΓ₂⟩ := Context.provable_iff.mp hC;
@@ -468,7 +470,7 @@ lemma iff_mem_boxItr : (□^[n]φ ∈ Ω) ↔ (∀ {Ω' : MaximalConsistentSet �
       have : 𝓢 ⊬ □^[n]⋀Γ ➝ □^[n]φ := by
         have := Context.provable_iff.not.mp $ membership_iff.not.mp hp;
         push_neg at this;
-        have : 𝓢 ⊬ ⋀((□'Γ)Itr n) ➝ □^[n]φ := FiniteContext.provable_iff.not.mp $ this ((□'Γ)Itr n) (by
+        have : 𝓢 ⊬ ⋀((□'^[n]Γ)) ➝ □^[n]φ := FiniteContext.provable_iff.not.mp $ this (□'^[n]Γ) (by
           intro ψ hq;
           obtain ⟨χ, hr₁, rfl⟩ := List.LO.exists_of_mem_boxItr hq;
           simpa using hΓ₁ χ hr₁;
@@ -486,7 +488,7 @@ lemma iff_mem_boxItr : (□^[n]φ ∈ Ω) ↔ (∀ {Ω' : MaximalConsistentSet �
       apply hΩ';
       simp only [Set.mem_insert_iff, true_or]
 
-lemma iff_mem_box : (□φ ∈ Ω) ↔ (∀ {Ω' : MaximalConsistentSet 𝓢}, (Ω.1.prebox ⊆ Ω'.1) → (φ ∈ Ω')) := iff_mem_boxItr (n := 1)
+lemma iff_mem_box : (□φ ∈ Ω) ↔ (∀ {Ω' : MaximalConsistentSet 𝓢}, ((□'⁻¹Ω.1) ⊆ Ω'.1) → (φ ∈ Ω')) := iff_mem_boxItr (n := 1)
 
 
 lemma boxItr_dn_iff : (□^[n](∼∼φ) ∈ Ω) ↔ (□^[n]φ ∈ Ω) := by
@@ -539,7 +541,7 @@ lemma mem_diaItr_dual : ◇^[n]φ ∈ Ω ↔ ∼(□^[n](∼φ)) ∈ Ω := by
     . exact FiniteContext.provable_iff.mpr $ C!_trans (FiniteContext.provable_iff.mp hΓ₂) (K!_right diaItr_duality!);
 lemma mem_dia_dual : ◇φ ∈ Ω ↔ (∼(□(∼φ)) ∈ Ω) := mem_diaItr_dual (n := 1)
 
-lemma iff_mem_diaItr : (◇^[n]φ ∈ Ω) ↔ (∃ Ω' : MaximalConsistentSet 𝓢, (Ω.1.preboxItr n ⊆ Ω'.1) ∧ (φ ∈ Ω'.1)) := by
+lemma iff_mem_diaItr : (◇^[n]φ ∈ Ω) ↔ (∃ Ω' : MaximalConsistentSet 𝓢, ((□'⁻¹^[n]Ω.1) ⊆ Ω'.1) ∧ (φ ∈ Ω'.1)) := by
   constructor;
   . intro h;
     have := mem_diaItr_dual.mp h;
@@ -560,7 +562,7 @@ lemma iff_mem_diaItr : (◇^[n]φ ∈ Ω) ↔ (∃ Ω' : MaximalConsistentSet �
     constructor;
     . exact h₁;
     . exact iff_mem_neg.mp $ iff_mem_negneg.mpr h₂;
-lemma iff_mem_dia : (◇φ ∈ Ω) ↔ (∃ Ω' : MaximalConsistentSet 𝓢, (Ω.1.prebox ⊆ Ω'.1) ∧ (φ ∈ Ω'.1)) := iff_mem_diaItr (n := 1)
+lemma iff_mem_dia : (◇φ ∈ Ω) ↔ (∃ Ω' : MaximalConsistentSet 𝓢, ((□'⁻¹Ω.1) ⊆ Ω'.1) ∧ (φ ∈ Ω'.1)) := iff_mem_diaItr (n := 1)
 
 lemma boxItr_diaItr : (∀ {φ : Formula α}, (□^[n]φ ∈ Ω₁.1 → φ ∈ Ω₂.1)) ↔ (∀ {φ : Formula α}, (φ ∈ Ω₂.1 → ◇^[n]φ ∈ Ω₁.1)) := by
   constructor;

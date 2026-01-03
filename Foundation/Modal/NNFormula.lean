@@ -73,6 +73,7 @@ lemma neg_eq : neg φ = ∼φ := rfl
 
 @[simp] lemma neg_natom (a : α) : ∼natom a = atom a := by rfl
 
+@[grind =]
 lemma negneg : ∼∼φ = φ := by
   induction φ with
   | and φ ψ ihφ ihψ =>
@@ -90,6 +91,12 @@ lemma negneg : ∼∼φ = φ := by
   | _ => tauto;
 
 instance : ModalDeMorgan (NNFormula α) where
+  verum   := by tauto;
+  falsum  := by tauto;
+  imply   := by tauto;
+  and     := by tauto;
+  or      := by tauto;
+  neg     := by grind;
   neg_dia := by tauto;
   neg_box := by tauto;
 

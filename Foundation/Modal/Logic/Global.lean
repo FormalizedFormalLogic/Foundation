@@ -124,7 +124,7 @@ lemma iff_finite_boxLe_provable : ((L, X) ⊢ φ) ↔ (∃ Γ : Finset (Formula 
         apply C!_trans ?_ collect_box_fconj!;
         apply CFconjFconj!_of_provable;
         intro ψ hψ;
-        simp only [Finset.mem_image, Finset.mem_range, Function.iterate_one, exists_exists_and_eq_and] at hψ;
+        simp only [Finset.LO.boxItr, Box.boxItr_succ, Box.boxItr_zero, Finset.mem_image, Finset.mem_range, exists_exists_and_eq_and] at hψ;
         obtain ⟨i, hi, rfl⟩ := hψ;
         apply Context.by_axm!;
         simp only [Finset.coe_image, Finset.coe_range, Set.mem_image, Set.mem_Iio];

@@ -52,14 +52,15 @@ instance : LukasiewiczAbbrev (Formula α) where
 
 instance : DiaByBox (Formula α) := ⟨rfl⟩
 
-lemma falsum_eq : (falsum : Formula α) = ⊥ := rfl
-lemma or_eq : or φ ψ = φ ⋎ ψ := rfl
-lemma and_eq : and φ ψ = φ ⋏ ψ := rfl
-lemma imp_eq : imp φ ψ = φ ➝ ψ := rfl
-lemma neg_eq : neg φ = ∼φ := rfl
-lemma box_eq : box φ = □φ := rfl
-lemma dia_eq : dia φ = ◇φ := rfl
-lemma iff_eq : φ ⭤ ψ = (φ ➝ ψ) ⋏ (ψ ➝ φ) := rfl
+lemma eq_falsum : (falsum : Formula α) = ⊥ := rfl
+lemma eq_or  : or φ ψ = φ ⋎ ψ := rfl
+lemma eq_and : and φ ψ = φ ⋏ ψ := rfl
+lemma eq_imp : imp φ ψ = φ ➝ ψ := rfl
+lemma eq_rhd : rhd φ ψ = φ ▷ ψ := rfl
+lemma eq_neg : neg φ = ∼φ := rfl
+lemma eq_box : box φ = □φ := rfl
+lemma eq_dia : dia φ = ◇φ := rfl
+lemma eq_iff : φ ⭤ ψ = (φ ➝ ψ) ⋏ (ψ ➝ φ) := rfl
 
 
 lemma inj_and : φ₁ ⋏ φ₂ = ψ₁ ⋏ ψ₂ ↔ φ₁ = ψ₁ ∧ φ₂ = ψ₂ := by simp [Wedge.wedge]
@@ -69,7 +70,7 @@ lemma inj_rhd : φ₁ ▷ φ₂ = ψ₁ ▷ ψ₂ ↔ φ₁ = ψ₁ ∧ φ₂ = 
 lemma inj_neg : ∼φ = ∼ψ ↔ φ = ψ := by simp [Tilde.tilde];
 lemma inj_box : □φ = □ψ ↔ φ = ψ := by simp [Box.box]
 lemma inj_dia : ◇φ = ◇ψ ↔ φ = ψ := by simp [Dia.dia]
-attribute [simp, grind =] inj_and inj_or inj_imp inj_neg inj_box inj_dia
+attribute [simp, grind =] inj_and inj_or inj_imp inj_neg inj_box inj_dia inj_rhd
 
 @[simp, grind =]
 lemma inj_iff : (φ₁ ⭤ φ₂) = (ψ₁ ⭤ ψ₂) ↔ φ₁ = ψ₁ ∧ φ₂ = ψ₂ := by simp [LogicalConnective.iff]; grind;
@@ -150,7 +151,7 @@ def hasDecEq : (φ ψ : Formula α) → Decidable (φ = ψ)
     case box φ' =>
       exact match hasDecEq φ φ' with
       | isTrue hp  => isTrue (hp ▸ rfl)
-      | isFalse hp => isFalse $ by simp [hp, box_eq];
+      | isFalse hp => isFalse $ by simp [hp, eq_box];
     all_goals
     . apply isFalse;
       simp;
@@ -161,7 +162,7 @@ def hasDecEq : (φ ψ : Formula α) → Decidable (φ = ψ)
       | isTrue hp =>
         match hasDecEq ψ ψ' with
         | isTrue hq  => isTrue (hp ▸ hq ▸ rfl)
-        | isFalse hq => isFalse (by simp_all)
+        | isFalse hq => isFalse (by simp_all )
       | isFalse hp => isFalse (by simp_all)
     any_goals simpa using isFalse not_false
 

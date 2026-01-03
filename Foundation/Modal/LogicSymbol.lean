@@ -89,16 +89,16 @@ class BasicModalLogicalConnective (F : Type*) extends LogicalConnective F, Box F
 
 class DiaByBox (F) [Box F] [Dia F] [Tilde F] where
   dia_by_box {φ : F} : ◇φ = ∼□(∼φ)
-attribute [simp, grind .] DiaByBox.dia_by_box
+attribute [grind .] DiaByBox.dia_by_box
 
 class BoxByDia (F) [Box F] [Dia F] [Tilde F] where
   box_by_dia {φ : F} : □φ = ∼◇(∼φ)
-attribute [simp, grind .] BoxByDia.box_by_dia
+attribute [grind .] BoxByDia.box_by_dia
 
 class ModalDeMorgan (F) [BasicModalLogicalConnective F] extends DeMorgan F where
   neg_dia {φ : F} : ∼◇φ = □(∼φ)
   neg_box {φ : F} : ∼□φ = ◇(∼φ)
-attribute [simp, grind .] ModalDeMorgan.neg_dia ModalDeMorgan.neg_box
+attribute [grind .] ModalDeMorgan.neg_dia ModalDeMorgan.neg_box
 
 end LO
 
@@ -182,9 +182,9 @@ end Set.LO
 
 namespace Finset.LO
 
-open Classical
-
 variable {s t : Finset F} {n : ℕ}
+
+section
 
 @[grind] def boxItr [DecidableEq F] (n : ℕ) : Finset F → Finset F := Finset.image (□^[n]·)
 notation:90 "□'^[" n "]" s => Finset.LO.boxItr n s
@@ -192,14 +192,12 @@ notation:90 "□'^[" n "]" s => Finset.LO.boxItr n s
 abbrev box [DecidableEq F] : Finset F → Finset F := boxItr 1
 prefix:90 "□'" => Finset.LO.box
 
-@[grind] noncomputable def preboxItr (n : ℕ) : Finset F → Finset F := λ s => { φ ∈ s | (□^[n]φ) ∈ s }
-notation:90 "□'⁻¹^[" n "]" s => Finset.LO.preboxItr n s
+variable [DecidableEq F]
 
-noncomputable abbrev prebox : Finset F → Finset F := preboxItr 1
-prefix:90 "□'⁻¹" => Finset.LO.prebox
+@[simp, grind =] lemma eq_boxItr_one_box : (□'^[1]s) = (□'s) := by rfl
 
-@[simp, grind =] lemma eq_boxItr_one_box [DecidableEq F] : (□'^[1]s) = (□'s) := by rfl
-@[simp, grind =] lemma eq_preboxItr_one_prebox : (□'⁻¹^[1]s) = (□'⁻¹s) := by rfl
+@[grind <=] lemma mem_boxItr_of_mem (h : φ ∈ s) : (□^[n]φ) ∈ (□'^[n]s) := by dsimp [Finset.LO.boxItr]; grind;
+@[grind <=] lemma mem_box_of_mem (h : φ ∈ s) : □φ ∈ (□'s) := mem_boxItr_of_mem (n := 1) h
 
 @[grind! =>]
 lemma exists_of_mem_boxItr (h : φ ∈ □'^[n]s) : ∃ ψ ∈ s, (□^[n]ψ) = φ := by
@@ -208,6 +206,37 @@ lemma exists_of_mem_boxItr (h : φ ∈ □'^[n]s) : ∃ ψ ∈ s, (□^[n]ψ) = 
 @[grind! =>]
 lemma exists_of_mem_box (h : φ ∈ □'s) : ∃ ψ ∈ s, □ψ = φ := exists_of_mem_boxItr (n := 1) h
 
+lemma www (h : □^[n]φ ∈ □'^[n]s) : □^[m]φ ∈ □'^[m]s := by
+  simp only [boxItr, mem_image] at h ⊢;
+  obtain ⟨φ, hφ, _⟩ := h;
+  use φ, hφ;
+  sorry;
+
+end
+
+
+section
+
+@[grind]
+def preboxItr (n : ℕ) (s : Finset F) [DecidablePred (λ φ ↦ □^[n]φ ∈ s)] : Finset F := s.filter (λ φ => (□^[n]φ) ∈ s)
+notation:90 "□'⁻¹^[" n "]" s => Finset.LO.preboxItr n s
+
+abbrev prebox (s : Finset F) [DecidablePred (λ φ ↦ □^[1]φ ∈ s)] : Finset F := preboxItr 1 s
+prefix:90 "□'⁻¹" => Finset.LO.prebox
+
+@[simp, grind =] lemma eq_preboxItr_one_prebox [DecidablePred (λ φ ↦ □^[1]φ ∈ s)] : (□'⁻¹^[1]s) = (□'⁻¹s) := by rfl
+
+@[grind →] lemma mem_boxItr_of_mem_preboxItr [DecidablePred (λ φ ↦ □^[n]φ ∈ s)] (h : φ ∈ (□'⁻¹^[n]s)) : (□^[n]φ) ∈ s := by grind;
+@[grind →] lemma mem_box_of_mem_prebox [DecidablePred (λ φ ↦ □^[1]φ ∈ s)] (h : φ ∈ (□'⁻¹s)) : □φ ∈ s := mem_boxItr_of_mem_preboxItr (n := 1) h
+
+@[grind <=] lemma mem_boxItr_preboxItr_of_mem_of_mem_boxItr [DecidableEq F] [DecidablePred (λ φ ↦ □^[n]φ ∈ s)] (h : φ ∈ s) (h₁ : φ ∈ □'^[n]s) : φ ∈ (□'^[n]□'⁻¹^[n]s) := by grind;
+@[grind <=] lemma mem_box_prebox_of_mem_of_mem_box [DecidableEq F] [DecidablePred (λ φ ↦ □^[1]φ ∈ s)] (h : φ ∈ s) (h₁ : φ ∈ □'s) : φ ∈ (□'□'⁻¹s) := mem_boxItr_preboxItr_of_mem_of_mem_boxItr h h₁
+
+end
+
+
+
+section
 
 @[grind] def diaItr [DecidableEq F] (n : ℕ) : Finset F → Finset F := Finset.image (◇^[n]·)
 notation:90 "◇'^[" n "]" s => Finset.LO.diaItr n s
@@ -215,21 +244,32 @@ notation:90 "◇'^[" n "]" s => Finset.LO.diaItr n s
 abbrev dia [DecidableEq F] : Finset F → Finset F := diaItr 1
 prefix:90 "◇'" => Finset.LO.dia
 
-@[grind] noncomputable def prediaItr (n : ℕ) : Finset F → Finset F := λ s => { φ ∈ s | (◇^[n]φ) ∈ s }
-notation:90 "◇'⁻¹^[" n "]" s => Finset.LO.prediaItr n s
+variable [DecidableEq F]
 
-noncomputable abbrev predia : Finset F → Finset F := prediaItr 1
-prefix:90 "◇'⁻¹" => Finset.LO.predia
-
-@[simp, grind =] lemma eq_diaItr_one_dia [DecidableEq F] : (◇'^[1]s) = (◇'s) := by rfl
-@[simp, grind =] lemma eq_prediaItr_one_predia : (◇'⁻¹^[1] s) = (◇'⁻¹s) := by rfl
+@[simp, grind =] lemma eq_diaItr_one_dia : (◇'^[1]s) = (◇'s) := by rfl
 
 @[grind! =>]
-lemma exists_of_mem_diaItr (h : φ ∈ diaItr n s) : ∃ ψ ∈ s, (◇^[n]ψ) = φ := by
+lemma exists_of_mem_diaItr (h : φ ∈ ◇'^[n]s) : ∃ ψ ∈ s, (◇^[n]ψ) = φ := by
   dsimp [diaItr] at h;
   grind;
 @[grind! =>]
-lemma exists_of_mem_dia (h : φ ∈ dia s) : ∃ ψ ∈ s, (◇ψ) = φ := exists_of_mem_diaItr (n := 1) h
+lemma exists_of_mem_dia (h : φ ∈ ◇'s) : ∃ ψ ∈ s, ◇ψ = φ := exists_of_mem_diaItr (n := 1) h
+
+end
+
+
+section
+
+@[grind]
+def prediaItr (n : ℕ) (s : Finset F) [DecidablePred (λ φ ↦ ◇^[n]φ ∈ s)] : Finset F := { φ ∈ s | (◇^[n]φ) ∈ s }
+notation:90 "◇'⁻¹^[" n "]" s => Finset.LO.prediaItr n s
+
+abbrev predia (s : Finset F) [DecidablePred (λ φ ↦ ◇^[1]φ ∈ s)] : Finset F := prediaItr 1 s
+prefix:90 "◇'⁻¹" => Finset.LO.predia
+
+@[simp, grind =] lemma eq_prediaItr_one_predia [DecidablePred (λ φ ↦ ◇^[1]φ ∈ s)] : (◇'⁻¹^[1]s) = (◇'⁻¹s) := by rfl
+
+end
 
 end Finset.LO
 
