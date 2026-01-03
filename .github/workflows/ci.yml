@@ -47,7 +47,7 @@ jobs:
       - name: Build project
         run: |
           lake build --keep-toolchain \
-            Foundation
+            Foundation \
             Zoo_Arith \
             Zoo_SetTheory \
             Zoo_Propositional \
