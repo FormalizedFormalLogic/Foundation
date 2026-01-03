@@ -116,6 +116,9 @@ lemma inj_box : □φ = □ψ ↔ φ = ψ := by simp [Box.box]
 lemma inj_dia : ◇φ = ◇ψ ↔ φ = ψ := by simp [Dia.dia]
 attribute [simp, grind =] inj_and inj_or inj_imp inj_neg inj_box inj_dia
 
+instance : InjectiveBox (Formula α) := ⟨by simp [Function.Injective]⟩
+instance : InjectiveDia (Formula α) := ⟨by simp [Function.Injective]⟩
+
 /-- Formula complexity -/
 def complexity : Formula α → ℕ
 | atom _  => 0

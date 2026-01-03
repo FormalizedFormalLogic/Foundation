@@ -264,11 +264,19 @@ open canonicalModel
 
 instance [Entailment.HasAxiomGeach g 𝓢] : (canonicalFrame 𝓢).IsGeachConvergent g := ⟨by
   rintro x y z Rxy Rxz;
-  have ⟨u, hu⟩ := lindenbaum (𝓢 := 𝓢) (t₀ := ⟨y.1.1.preboxItr g.m, z.1.2.prediaItr g.n⟩) $ by
+  have ⟨u, hu⟩ := lindenbaum (𝓢 := 𝓢) (t₀ := ⟨□'⁻¹^[g.m]y.1.1, ◇'⁻¹^[g.n]z.1.2⟩) $ by
     rintro Γ Δ hΓ hΔ;
     by_contra! hC;
-    have hγ : □^[g.m](Γ.conj) ∈ y.1.1 := y.mdp_mem₁_provable collect_boxItr_fconj! $ iff_mem₁_fconj.mpr (by simpa using hΓ);
-    have hδ : ◇^[g.n](Δ.disj) ∈ z.1.2 := mdp_mem₂_provable distribute_diaItr_fdisj! $ iff_mem₂_fdisj.mpr (by simpa using hΔ);
+    have hγ : □^[g.m](Γ.conj) ∈ y.1.1 := y.mdp_mem₁_provable collect_boxItr_fconj! $ iff_mem₁_fconj.mpr $ by
+      intro χ hχ;
+      obtain ⟨ξ, hξ, rfl⟩ := Finset.LO.exists_of_mem_boxItr hχ;
+      apply hΓ;
+      assumption;
+    have hδ : ◇^[g.n](Δ.disj) ∈ z.1.2 := mdp_mem₂_provable distribute_diaItr_fdisj! $ iff_mem₂_fdisj.mpr $ by
+      intro χ hχ;
+      obtain ⟨ξ, hξ, rfl⟩ := Finset.LO.exists_of_mem_diaItr hχ;
+      apply hΔ;
+      assumption;
     generalize Γ.conj = γ at hγ hC;
     generalize Δ.disj = δ at hδ hC;
     have : 𝓢 ⊢ □^[g.m]γ ➝ □^[g.m]δ := imply_boxItr_distribute'! hC;
@@ -280,8 +288,10 @@ instance [Entailment.HasAxiomGeach g 𝓢] : (canonicalFrame 𝓢).IsGeachConver
     contradiction;
   use u;
   constructor;
-  . apply def_multirel_boxItr_mem₁.mpr; apply hu.1;
-  . apply def_multirel_diaItr_mem₂.mpr; apply hu.2;
+  . apply def_multirel_boxItr_mem₁.mpr;
+    apply hu.1;
+  . apply def_multirel_diaItr_mem₂.mpr;
+    apply hu.2;
 ⟩
 
 instance [Entailment.HasAxiomT 𝓢] : (canonicalFrame 𝓢).IsReflexive := by simp

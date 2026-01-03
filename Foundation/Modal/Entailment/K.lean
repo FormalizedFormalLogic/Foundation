@@ -600,7 +600,7 @@ namespace Context
 
 variable {X : Set F}
 
-lemma provable_iff_boxed : (□'X) *⊢[𝓢] φ ↔ ∃ Δ : List F, (∀ ψ ∈ □'Δ, ψ ∈ □'X) ∧ (□'Δ) ⊢[𝓢] φ := by
+lemma provable_iff_boxed [InjectiveBox F] : (□'X) *⊢[𝓢] φ ↔ ∃ Δ : List F, (∀ ψ ∈ □'Δ, ψ ∈ □'X) ∧ (□'Δ) ⊢[𝓢] φ := by
   constructor;
   . intro h;
     obtain ⟨Γ,sΓ, hΓ⟩ := Context.provable_iff.mp h;
@@ -613,13 +613,8 @@ lemma provable_iff_boxed : (□'X) *⊢[𝓢] φ ↔ ∃ Δ : List F, (∀ ψ �
       apply C!_trans ?_ (FiniteContext.provable_iff.mp hΓ);
       apply CConj₂Conj₂!_of_subset;
       intro ψ hψ;
-      simp [List.LO.boxItr, List.LO.preboxItr];
       obtain ⟨ξ, hξ, rfl⟩ := sΓ ψ hψ;
-      use ξ;
-      refine ⟨⟨?_, ?_⟩, rfl⟩
-      . simp at hψ;
-        sorry;
-      . assumption;
+      grind;
   . rintro ⟨Δ, hΔ, h⟩;
     apply Context.provable_iff.mpr;
     use (□'Δ);

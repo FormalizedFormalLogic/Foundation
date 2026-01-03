@@ -185,16 +185,18 @@ lemma def_multirel_boxItr_satisfies : x ≺^[n] y ↔ (∀ {φ}, x ⊧ □^[n]φ
           intro y Rxy;
           apply boxItr_def.mpr;
           intro z Ryz;
-          obtain ⟨ψ, hψ₁, hψ₂⟩ := Satisfies.fdisj_def.mp $ this y Rxy;
-          obtain ⟨ξ, _, rfl⟩ := by simpa using hΔ hψ₁;
           apply Satisfies.fdisj_def.mpr;
+          obtain ⟨ψ, hψ₁, hψ₂⟩ := Satisfies.fdisj_def.mp $ this y Rxy;
+          obtain ⟨ξ, hξ, rfl⟩ := hΔ hψ₁;
           use ξ;
           constructor;
-          . simpa;
+          . simpa [Finset.LO.preboxItr];
           . exact Satisfies.boxItr_def.mp hψ₂ Ryz;
         have : y ⊧ (□'⁻¹^[n]Δ).disj := h this;
         obtain ⟨ψ, hψ₁, hψ₂⟩ := fdisj_def.mp this;
-        have : ¬y ⊧ ψ := by simpa using @hΔ (□^[n]ψ) (by simpa using hψ₁);
+        have : y ⊭ ψ := Set.LO.mem_of_mem_boxItr $ @hΔ (□^[n]ψ) $ by
+          show □^[n]ψ ∈ ↑Δ;
+          grind;
         contradiction;
       use t;
       constructor;
@@ -250,12 +252,25 @@ lemma def_multirel_diaItr_satisfies : x ≺^[n] y ↔ (∀ {φ}, y ⊧ φ → x 
     intro _ _;
     apply negneg_def.mpr;
 
-lemma def_multirel_diaItr_mem₁ : x ≺^[n] y ↔ (y.1.1 ⊆ (□'⁻¹^[n]x.1.1)) := ⟨
-  fun h _ hφ => truthlemma₁.mpr $ def_multirel_diaItr_satisfies.mp h (truthlemma₁.mp hφ),
+lemma def_multirel_diaItr_mem₁ : x ≺^[n] y ↔ (y.1.1 ⊆ (◇'⁻¹^[n]x.1.1)) := by
+  constructor;
+  . intro h φ hφ;
+    apply truthlemma₁.mpr;
+    apply def_multirel_diaItr_satisfies.mp h;
+    exact truthlemma₁.mp hφ;
+  . intro h;
+    apply def_multirel_diaItr_satisfies.mpr;
+    intro _ hφ;
+    exact truthlemma₁.mp $ h $ truthlemma₁.mpr hφ;
+/-
+  by
+    sorry,
+  -- fun h _ hφ => truthlemma₁.mpr $ def_multirel_diaItr_satisfies.mp h (truthlemma₁.mp hφ),
   fun h => def_multirel_diaItr_satisfies.mpr fun hφ => truthlemma₁.mp $ h (truthlemma₁.mpr hφ)
 ⟩
+-/
 
-lemma def_rel_dia_mem₁ : x ≺ y ↔ (y.1.1 ⊆ (□'⁻¹ x.1.1)) := by
+lemma def_rel_dia_mem₁ : x ≺ y ↔ (y.1.1 ⊆ (◇'⁻¹ x.1.1)) := by
   simpa using def_multirel_diaItr_mem₁ (n := 1);
 
 lemma def_multirel_diaItr_mem₂ : x ≺^[n] y ↔ ((◇'⁻¹^[n]x.1.2) ⊆ y.1.2) := by
