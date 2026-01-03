@@ -245,14 +245,14 @@ section List
 variable {Γ : List F}
 
 @[simp]
-lemma distribute_boxItr_conj! : 𝓢 ⊢ □^[n]⋀Γ ➝ ⋀(□'^[n]Γ) := by
+lemma distribute_boxItr_conj! : 𝓢 ⊢ □^[n]⋀Γ ➝ ⋀(□^[n]'Γ) := by
   induction Γ using List.induction_with_singleton with
   | hnil => simp;
   | hsingle => simp;
   | hcons φ Γ h ih =>
     simp only [List.conj₂_cons_nonempty h];
     have h₁ : 𝓢 ⊢ □^[n](φ ⋏ ⋀Γ) ➝ □^[n]φ := imply_boxItr_distribute'! $ and₁!;
-    have h₂ : 𝓢 ⊢ □^[n](φ ⋏ ⋀Γ) ➝ ⋀(□'^[n]Γ) := C!_trans (imply_boxItr_distribute'! $ and₂!) ih;
+    have h₂ : 𝓢 ⊢ □^[n](φ ⋏ ⋀Γ) ➝ ⋀(□^[n]'Γ) := C!_trans (imply_boxItr_distribute'! $ and₂!) ih;
     have := right_K!_intro h₁ h₂;
     exact C!_trans this $ by
       apply right_Conj₂!_intro;
@@ -281,35 +281,35 @@ lemma boxItrConj'_iff! : 𝓢 ⊢ □^[n]⋀Γ ↔ ∀ φ ∈ Γ, 𝓢 ⊢ □^[
   | _ => simp_all;
 lemma boxConj'_iff! : 𝓢 ⊢ □⋀Γ ↔ ∀ φ ∈ Γ, 𝓢 ⊢ □φ := boxItrConj'_iff! (n := 1)
 
-lemma boxItrconj_of_conjboxItr! (d : 𝓢 ⊢ ⋀(□'^[n]Γ)) : 𝓢 ⊢ □^[n]⋀Γ := by
+lemma boxItrconj_of_conjboxItr! (d : 𝓢 ⊢ ⋀(□^[n]'Γ)) : 𝓢 ⊢ □^[n]⋀Γ := by
   apply boxItrConj'_iff!.mpr;
   intro φ hp;
   exact Conj₂!_iff_forall_provable.mp d (□^[n]φ) $ by grind;
 
 @[simp]
-lemma boxItr_cons_conjAux₁! :  𝓢 ⊢ ⋀(□'^[n](φ :: Γ)) ➝ ⋀(□'^[n]Γ) := by
+lemma boxItr_cons_conjAux₁! :  𝓢 ⊢ ⋀(□^[n]'(φ :: Γ)) ➝ ⋀(□^[n]'Γ) := by
   apply CConj₂Conj₂!_of_subset;
   grind;
 
 @[simp]
-lemma boxItr_cons_conjAux₂! :  𝓢 ⊢ ⋀(□'^[n](φ :: Γ)) ➝ □^[n]φ := by
-  suffices 𝓢 ⊢ ⋀(□'^[n](φ :: Γ)) ➝ ⋀(□'^[n][φ]) by simpa;
+lemma boxItr_cons_conjAux₂! :  𝓢 ⊢ ⋀(□^[n]'(φ :: Γ)) ➝ □^[n]φ := by
+  suffices 𝓢 ⊢ ⋀(□^[n]'(φ :: Γ)) ➝ ⋀(□^[n]'[φ]) by simpa;
   apply CConj₂Conj₂!_of_subset;
   grind;
 
 @[simp]
-lemma boxItr_cons_conj! :  𝓢 ⊢ ⋀(□'^[n](φ :: Γ)) ➝ ⋀(□'^[n]Γ) ⋏ □^[n]φ :=
+lemma boxItr_cons_conj! :  𝓢 ⊢ ⋀(□^[n]'(φ :: Γ)) ➝ ⋀(□^[n]'Γ) ⋏ □^[n]φ :=
   right_K!_intro boxItr_cons_conjAux₁! boxItr_cons_conjAux₂!
 
 @[simp]
-lemma collect_boxItr_conj! : 𝓢 ⊢ ⋀(□'^[n]Γ) ➝ □^[n]⋀Γ := by
+lemma collect_boxItr_conj! : 𝓢 ⊢ ⋀(□^[n]'Γ) ➝ □^[n]⋀Γ := by
   induction Γ using List.induction_with_singleton with
   | hnil => simpa using C!_of_conseq! boxItrverum!;
   | hsingle => simp;
   | hcons φ Γ h ih =>
     simp_all only [List.LO.eq_boxItr_conn, List.conj₂_cons_nonempty h];
     apply C!_trans ?_ collect_boxItr_and!;
-    rw [List.conj₂_cons_nonempty (show (□'^[n]Γ) ≠ [] by grind)]
+    rw [List.conj₂_cons_nonempty (show (□^[n]'Γ) ≠ [] by grind)]
     apply right_K!_intro;
     . exact and₁!;
     . apply C!_trans and₂! ih;
@@ -328,7 +328,7 @@ section Finset
 variable {Γ : Finset F}
 
 @[simp]
-lemma collect_boxItr_fconj! : 𝓢 ⊢ (□'^[n]Γ).conj ➝ □^[n](Γ.conj) := by
+lemma collect_boxItr_fconj! : 𝓢 ⊢ (□^[n]'Γ).conj ➝ □^[n](Γ.conj) := by
   refine C!_replace ?_ ?_ (collect_boxItr_conj! (n := n) (Γ := Γ.toList));
   . apply right_Conj₂!_intro
     intro φ hφ;
@@ -451,7 +451,7 @@ section List
 variable {Γ : List F}
 
 @[simp]
-lemma distribute_diaItr_disj! : 𝓢 ⊢ ◇^[n]⋁Γ ➝ ⋁(◇'^[n]Γ) := by
+lemma distribute_diaItr_disj! : 𝓢 ⊢ ◇^[n]⋁Γ ➝ ⋁(◇^[n]'Γ) := by
   induction Γ using List.induction_with_singleton with
   | hnil => apply C_of_N; simp only [List.disj₂_nil, not_dia_bot];
   | hsingle => simp;
@@ -465,7 +465,7 @@ lemma distribute_diaItr_disj! : 𝓢 ⊢ ◇^[n]⋁Γ ➝ ⋁(◇'^[n]Γ) := by
 lemma distribute_dia_disj! : 𝓢 ⊢ ◇⋁Γ ➝ ⋁◇'Γ := by simpa using distribute_diaItr_disj! (n := 1)
 
 -- TODO: `iffConjMultidiaMultidiaconj` is computable but it's too slow, so leave it.
-@[simp] lemma iff_conjdiaItr_diaItrconj! : 𝓢 ⊢ ◇^[n](⋀Γ) ➝ ⋀(◇'^[n]Γ) := by
+@[simp] lemma iff_conjdiaItr_diaItrconj! : 𝓢 ⊢ ◇^[n](⋀Γ) ➝ ⋀(◇^[n]'Γ) := by
   induction Γ using List.induction_with_singleton with
   | hcons φ Γ h ih =>
     simp_all only [ne_eq, not_false_eq_true, List.conj₂_cons_nonempty];
@@ -488,7 +488,7 @@ section Finset
 variable {Γ : Finset F}
 
 @[simp]
-lemma distribute_diaItr_fdisj! : 𝓢 ⊢ ◇^[n]Γ.disj ➝ (◇'^[n]Γ).disj := by
+lemma distribute_diaItr_fdisj! : 𝓢 ⊢ ◇^[n]Γ.disj ➝ (◇^[n]'Γ).disj := by
   refine C!_replace ?_ ?_ (distribute_diaItr_disj! (n := n) (Γ := Γ.toList));
   . apply CMultidiaMultidia_of_C;
     simp;
@@ -604,7 +604,7 @@ lemma provable_iff_boxed [InjectiveBox F] : (□'X) *⊢[𝓢] φ ↔ ∃ Δ : L
   constructor;
   . intro h;
     obtain ⟨Γ,sΓ, hΓ⟩ := Context.provable_iff.mp h;
-    use □'⁻¹Γ;
+    use □⁻¹'Γ;
     constructor;
     . rintro ψ hψ;
       apply sΓ ψ;

@@ -780,17 +780,17 @@ section
 variable [Entailment.K 𝓢]
 
 omit [Entailment.Cl 𝓢] [Entailment.K 𝓢] [DecidableEq α] [Encodable α] in
-private lemma of_mem₁_boxItr : (□^[n]φ ∈ t.1.1) → (∀ {t' : MaximalConsistentTableau 𝓢}, ((□'⁻¹^[n]t.1.1) ⊆ t'.1.1) → (φ ∈ t'.1.1)) := by
+private lemma of_mem₁_boxItr : (□^[n]φ ∈ t.1.1) → (∀ {t' : MaximalConsistentTableau 𝓢}, ((□⁻¹^[n]'t.1.1) ⊆ t'.1.1) → (φ ∈ t'.1.1)) := by
   intro h t' ht';
   apply ht';
   grind;
 
-private lemma of_mem₂_boxItr : (□^[n]φ ∈ t.1.2) → (∃ t' : MaximalConsistentTableau 𝓢, ((□'⁻¹^[n]t.1.1) ⊆ t'.1.1) ∧ (φ ∈ t'.1.2)) := by
+private lemma of_mem₂_boxItr : (□^[n]φ ∈ t.1.2) → (∃ t' : MaximalConsistentTableau 𝓢, ((□⁻¹^[n]'t.1.1) ⊆ t'.1.1) ∧ (φ ∈ t'.1.2)) := by
   intro h;
-  obtain ⟨t', ht'⟩ := lindenbaum (𝓢 := 𝓢) (t₀ := ⟨(□'⁻¹^[n]t.1.1), {φ}⟩) $ by
+  obtain ⟨t', ht'⟩ := lindenbaum (𝓢 := 𝓢) (t₀ := ⟨(□⁻¹^[n]'t.1.1), {φ}⟩) $ by
     intro Γ Δ hΓ hΔ;
     by_contra! hC;
-    apply t.consistent (Γ := (□'^[n]Γ)) (Δ := {□^[n]φ}) ?_ ?_;
+    apply t.consistent (Γ := (□^[n]'Γ)) (Δ := {□^[n]φ}) ?_ ?_;
     . simp only [Finset.disj_singleton];
       exact C!_trans collect_boxItr_fconj! $ imply_boxItr_distribute'! $ C!_trans hC (left_Fdisj!_intro' hΔ);
     . rintro ψ hψ;
@@ -804,7 +804,7 @@ private lemma of_mem₂_boxItr : (□^[n]φ ∈ t.1.2) → (∃ t' : MaximalCons
   . apply ht'.2;
     tauto;
 
-lemma iff_mem₁_boxItr : (□^[n]φ ∈ t.1.1) ↔ (∀ {t' : MaximalConsistentTableau 𝓢}, ((□'⁻¹^[n]t.1.1) ⊆ t'.1.1) → (φ ∈ t'.1.1)) := by
+lemma iff_mem₁_boxItr : (□^[n]φ ∈ t.1.1) ↔ (∀ {t' : MaximalConsistentTableau 𝓢}, ((□⁻¹^[n]'t.1.1) ⊆ t'.1.1) → (φ ∈ t'.1.1)) := by
   constructor;
   . apply of_mem₁_boxItr;
   . contrapose;
@@ -816,9 +816,9 @@ lemma iff_mem₁_boxItr : (□^[n]φ ∈ t.1.1) ↔ (∀ {t' : MaximalConsistent
     . exact ht'₁;
     . exact iff_not_mem₁_mem₂.mpr ht'₂;
 
-lemma iff_mem₁_box : (□φ ∈ t.1.1) ↔ (∀ {t' : MaximalConsistentTableau 𝓢}, ((□'⁻¹t.1.1) ⊆ t'.1.1) → (φ ∈ t'.1.1)) := iff_mem₁_boxItr (n := 1)
+lemma iff_mem₁_box : (□φ ∈ t.1.1) ↔ (∀ {t' : MaximalConsistentTableau 𝓢}, ((□⁻¹'t.1.1) ⊆ t'.1.1) → (φ ∈ t'.1.1)) := iff_mem₁_boxItr (n := 1)
 
-lemma iff_mem₂_boxItr : (□^[n]φ ∈ t.1.2) ↔ (∃ t' : MaximalConsistentTableau 𝓢, ((□'⁻¹^[n]t.1.1) ⊆ t'.1.1) ∧ (φ ∈ t'.1.2)) := by
+lemma iff_mem₂_boxItr : (□^[n]φ ∈ t.1.2) ↔ (∃ t' : MaximalConsistentTableau 𝓢, ((□⁻¹^[n]'t.1.1) ⊆ t'.1.1) ∧ (φ ∈ t'.1.2)) := by
   constructor;
   . apply of_mem₂_boxItr;
   . contrapose;
@@ -826,20 +826,20 @@ lemma iff_mem₂_boxItr : (□^[n]φ ∈ t.1.2) ↔ (∃ t' : MaximalConsistentT
     intro hφ t' ht';
     exact iff_not_mem₂_mem₁.mpr $ of_mem₁_boxItr (iff_not_mem₂_mem₁.mp hφ) ht';
 
-lemma iff_mem₂_box : (□φ ∈ t.1.2) ↔ (∃ t' : MaximalConsistentTableau 𝓢, ((□'⁻¹t.1.1) ⊆ t'.1.1) ∧ (φ ∈ t'.1.2)) := iff_mem₂_boxItr (n := 1)
+lemma iff_mem₂_box : (□φ ∈ t.1.2) ↔ (∃ t' : MaximalConsistentTableau 𝓢, ((□⁻¹'t.1.1) ⊆ t'.1.1) ∧ (φ ∈ t'.1.2)) := iff_mem₂_boxItr (n := 1)
 
-lemma iff_mem₁_diaItr : (◇^[n]φ ∈ t.1.1) ↔ (∃ t' : MaximalConsistentTableau 𝓢, ((□'⁻¹^[n]t.1.1) ⊆ t'.1.1) ∧ (φ ∈ t'.1.1)) := by
-  suffices ◇^[n]φ ∈ t.1.1 ↔ ∃ t' : MaximalConsistentTableau 𝓢, (□'⁻¹^[n]t.1.1) ⊆ t'.1.1 ∧ ∼φ ∈ t'.1.2 by simpa [iff_mem₂_neg];
+lemma iff_mem₁_diaItr : (◇^[n]φ ∈ t.1.1) ↔ (∃ t' : MaximalConsistentTableau 𝓢, ((□⁻¹^[n]'t.1.1) ⊆ t'.1.1) ∧ (φ ∈ t'.1.1)) := by
+  suffices ◇^[n]φ ∈ t.1.1 ↔ ∃ t' : MaximalConsistentTableau 𝓢, (□⁻¹^[n]'t.1.1) ⊆ t'.1.1 ∧ ∼φ ∈ t'.1.2 by simpa [iff_mem₂_neg];
   apply Iff.trans ?_ iff_mem₂_boxItr;
   rw [←iff_mem₁_neg];
   constructor;
   . apply mdp_mem₁_provable; simp;
   . apply mdp_mem₁_provable; simp;
 
-lemma iff_mem₁_dia : (◇φ ∈ t.1.1) ↔ (∃ t' : MaximalConsistentTableau 𝓢, ((□'⁻¹t.1.1) ⊆ t'.1.1) ∧ (φ ∈ t'.1.1)) := iff_mem₁_diaItr (n := 1)
+lemma iff_mem₁_dia : (◇φ ∈ t.1.1) ↔ (∃ t' : MaximalConsistentTableau 𝓢, ((□⁻¹'t.1.1) ⊆ t'.1.1) ∧ (φ ∈ t'.1.1)) := iff_mem₁_diaItr (n := 1)
 
-lemma iff_mem₂_diaItr : (◇^[n]φ ∈ t.1.2) ↔ (∀ t' : MaximalConsistentTableau 𝓢, ((□'⁻¹^[n]t.1.1) ⊆ t'.1.1) → (φ ∈ t'.1.2)) := by
-  suffices ◇^[n]φ ∈ t.1.2 ↔ (∀ t' : MaximalConsistentTableau 𝓢, ((□'⁻¹^[n]t.1.1) ⊆ t'.1.1) → (∼φ ∈ t'.1.1)) by simpa [iff_mem₁_neg]
+lemma iff_mem₂_diaItr : (◇^[n]φ ∈ t.1.2) ↔ (∀ t' : MaximalConsistentTableau 𝓢, ((□⁻¹^[n]'t.1.1) ⊆ t'.1.1) → (φ ∈ t'.1.2)) := by
+  suffices ◇^[n]φ ∈ t.1.2 ↔ (∀ t' : MaximalConsistentTableau 𝓢, ((□⁻¹^[n]'t.1.1) ⊆ t'.1.1) → (∼φ ∈ t'.1.1)) by simpa [iff_mem₁_neg]
   apply Iff.trans ?_ iff_mem₁_boxItr;
   rw [←iff_mem₁_neg];
   constructor;
@@ -850,7 +850,7 @@ lemma iff_mem₂_diaItr : (◇^[n]φ ∈ t.1.2) ↔ (∀ t' : MaximalConsistentT
     apply CN!_of_CN!_right;
     simp;
 
-lemma iff_mem₂_dia : (◇φ ∈ t.1.2) ↔ (∀ t' : MaximalConsistentTableau 𝓢, ((□'⁻¹t.1.1) ⊆ t'.1.1) → (φ ∈ t'.1.2)) := iff_mem₂_diaItr (n := 1)
+lemma iff_mem₂_dia : (◇φ ∈ t.1.2) ↔ (∀ t' : MaximalConsistentTableau 𝓢, ((□⁻¹'t.1.1) ⊆ t'.1.1) → (φ ∈ t'.1.2)) := iff_mem₂_diaItr (n := 1)
 
 end
 

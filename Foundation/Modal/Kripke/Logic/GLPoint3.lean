@@ -93,7 +93,7 @@ private def complete.filteredModel
   (φ : Formula ℕ)
   (_ : □φ ∈ v.1.1) (_ : φ ∈ v.1.2)
   : Kripke.Model where
-  World := { x // x = v ∨ (v ≺ x ∧ ∃ ψ ∈ (□'⁻¹φ.subformulas), □ψ ∈ v.1.2 ∧ □ψ ∈ x.1.1 ∧ ψ ∈ x.1.2) }
+  World := { x // x = v ∨ (v ≺ x ∧ ∃ ψ ∈ (□⁻¹'φ.subformulas), □ψ ∈ v.1.2 ∧ □ψ ∈ x.1.1 ∧ ψ ∈ x.1.2) }
   world_nonempty := ⟨v, by simp⟩
   Rel := λ x y => x.1 ≺ y.1
   Val := λ x => (canonicalModel Modal.GLPoint3).Val x
@@ -120,8 +120,8 @@ private instance complete.filteredModel.isFiniteGLPoint3 : Frame.IsFiniteGLPoint
       simpa [filteredModel] using hxy;
   world_finite := by
     dsimp [complete.filteredModel];
-    have : Finite { ψ // ψ ∈ (□'⁻¹φ.subformulas) ∧ ∼□ψ ∈ v.1.1 } := Finite.of_scoped_subtype (P := λ ψ => ψ ∈ (□'⁻¹φ.subformulas)) $ by tauto;
-    apply Finite.of_surjective (α := Unit ⊕ { ψ // ψ ∈ (□'⁻¹φ.subformulas : Finset (Formula ℕ)) ∧ ∼□ψ ∈ v.1.1 })
+    have : Finite { ψ // ψ ∈ (□⁻¹'φ.subformulas) ∧ ∼□ψ ∈ v.1.1 } := Finite.of_scoped_subtype (P := λ ψ => ψ ∈ (□⁻¹'φ.subformulas)) $ by tauto;
+    apply Finite.of_surjective (α := Unit ⊕ { ψ // ψ ∈ (□⁻¹'φ.subformulas : Finset (Formula ℕ)) ∧ ∼□ψ ∈ v.1.1 })
       (f := λ x => match x with
         | .inl _ => ⟨v, by simp⟩
         | .inr ψ =>

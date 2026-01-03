@@ -149,7 +149,7 @@ lemma D.fdisj_axiomDz {s : Finset (Formula ℕ)} : Modal.D ⊢ □((□'s).disj)
 lemma D.axiomFour : Modal.D ⊢ □□φ ➝ □φ := by
   simpa [Finset.LO.preboxItr, Finset.LO.boxItr] using fdisj_axiomDz (s := {φ});
 
-noncomputable abbrev Formula.dzSubformula (φ : Formula ℕ) := (□'⁻¹φ.subformulas).powerset.image (λ s => □((□'s).disj) ➝ (□'s).disj)
+noncomputable abbrev Formula.dzSubformula (φ : Formula ℕ) := (□⁻¹'φ.subformulas).powerset.image (λ s => □((□'s).disj) ➝ (□'s).disj)
 
 
 namespace Kripke
@@ -321,7 +321,7 @@ lemma modal_equivalent_extendRoot_nat {n : ℕ+} {i : Fin n} : ModalEquivalent (
 open Formula.Kripke in
 lemma of_provable_rflSubformula_original_root [M.IsTransitive]
   {φ : Formula _}
-  (hS : r ⊧ ((□'⁻¹φ.subformulas).image (λ ψ => □ψ ➝ ψ)).conj) :
+  (hS : r ⊧ ((□⁻¹'φ.subformulas).image (λ ψ => □ψ ➝ ψ)).conj) :
   ∀ ψ ∈ φ.subformulas, ∀ i : ℕ, r ⊧ ψ ↔ (tailModel₀.embed_nat i : tailModel₀ M o) ⊧ ψ := by
   intro ψ hψ i;
   induction ψ generalizing i with
@@ -463,10 +463,10 @@ theorem GL_D_TFAE :
     tfae_have 2 → 3 := by
       contrapose!;
       rintro ⟨M, r, _, h⟩;
-      have h₁ : ∀ X ⊆ (□'⁻¹φ.subformulas), Satisfies M r (□(□'X).disj ➝ (□'X).disj) := by simpa using Satisfies.not_imp_def.mp h |>.1;
+      have h₁ : ∀ X ⊆ (□⁻¹'φ.subformulas), Satisfies M r (□(□'X).disj ➝ (□'X).disj) := by simpa using Satisfies.not_imp_def.mp h |>.1;
       have h₂ := Satisfies.not_imp_def.mp h |>.2;
 
-      let X := (□'⁻¹φ.subformulas).filter (λ ψ => ¬(r ⊧ □ψ));
+      let X := (□⁻¹'φ.subformulas).filter (λ ψ => ¬(r ⊧ □ψ));
       obtain ⟨x, Rrx, hx⟩ : ∃ x, r ≺ x ∧ ∀ ψ ∈ X, ¬x ⊧ □ψ := by
         have : r ⊧ ∼((□'X).disj) := by
           apply Satisfies.not_def.mpr;
@@ -535,7 +535,7 @@ theorem GL_D_TFAE :
       apply (show Modal.D ⊢ φ.dzSubformula.conj ➝ φ by exact sumQuasiNormal.mem₁! h) ⨀ ?_;
       apply FConj!_iff_forall_provable.mpr;
       intro ψ hψ;
-      obtain ⟨s, _, rfl⟩ : ∃ s ⊆ (□'⁻¹φ.subformulas), □(□'s).disj ➝ (□'s).disj = ψ := by simpa using hψ;
+      obtain ⟨s, _, rfl⟩ : ∃ s ⊆ (□⁻¹'φ.subformulas), □(□'s).disj ➝ (□'s).disj = ψ := by simpa using hψ;
       exact D.fdisj_axiomDz;
     tfae_finish;
 

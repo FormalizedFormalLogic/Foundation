@@ -181,7 +181,7 @@ namespace Canonical
 open Classical in
 instance [Modal.K4McK ⪯ (Hilbert.Normal Ax)] : (canonicalFrame (Hilbert.Normal Ax)).SatisfiesMcKinseyCondition := ⟨by
   rintro x;
-  have ⟨y, hy⟩ := lindenbaum (𝓢 := (Hilbert.Normal Ax)) (t₀ := ⟨□'⁻¹x.1.1 ∪ Set.univ.image (λ φ => ◇φ ➝ □φ), ∅⟩) $ by
+  have ⟨y, hy⟩ := lindenbaum (𝓢 := (Hilbert.Normal Ax)) (t₀ := ⟨□⁻¹'x.1.1 ∪ Set.univ.image (λ φ => ◇φ ➝ □φ), ∅⟩) $ by
     intro Γ Δ hΓ hΔ;
     suffices (Hilbert.Normal Ax) ⊬ Γ.conj ➝ ⊥ by
       simp only [Set.subset_empty_iff, Finset.coe_eq_empty] at hΔ;
@@ -193,7 +193,7 @@ instance [Modal.K4McK ⪯ (Hilbert.Normal Ax)] : (canonicalFrame (Hilbert.Normal
     let Γ' := insert (◇⊤ ➝ □⊤) Γ;
     replace hC : Γ'.toSet *⊢[(Hilbert.Normal Ax)] ⊥ := Context.weakening! (by simp [Γ']) hC;
 
-    let Γ'₁ := { φ ∈ Γ' | φ ∈ □'⁻¹x.1.1 };
+    let Γ'₁ := { φ ∈ Γ' | φ ∈ □⁻¹'x.1.1 };
     let Γ'₂ := { φ ∈ Γ' | ∃ ψ, ◇ψ ➝ □ψ = φ };
     apply MaximalConsistentTableau.neither (t := x) (φ := ◇Γ'₂.conj);
     constructor;
@@ -230,7 +230,7 @@ instance [Modal.K4McK ⪯ (Hilbert.Normal Ax)] : (canonicalFrame (Hilbert.Normal
       assumption;
   have Rxy : (canonicalFrame (Hilbert.Normal Ax)).Rel x y := by
     dsimp [canonicalFrame];
-    trans (□'⁻¹x.1.1 ∪ Set.univ.image (λ φ => ◇φ ➝ □φ));
+    trans (□⁻¹'x.1.1 ∪ Set.univ.image (λ φ => ◇φ ➝ □φ));
     . apply Set.subset_union_left;
     . simpa using hy;
   by_cases hy : ∃ z, (canonicalFrame (Hilbert.Normal Ax)).Rel y z;

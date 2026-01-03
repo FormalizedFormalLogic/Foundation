@@ -220,12 +220,12 @@ theorem jerabek_SBDP
   apply Set.not_subset.mpr;
 
   let q := Formula.freshAtom φ;
-  let X₀ := (□'⁻¹φ.subformulas).image (λ ψ => □((.atom q) ➝ ψ) ➝ ψ);
-  let X₁ := (□'⁻¹φ.subformulas).image (λ ψ => □(∼(.atom q) ➝ ψ) ➝ ψ);
+  let X₀ := (□⁻¹'φ.subformulas).image (λ ψ => □((.atom q) ➝ ψ) ➝ ψ);
+  let X₁ := (□⁻¹'φ.subformulas).image (λ ψ => □(∼(.atom q) ➝ ψ) ➝ ψ);
   let X := X₀ ∪ X₁;
   let XB := X.image (·ᵇ);
 
-  have Claim1 : ∀ ψ ∈ (□'⁻¹φ.subformulas), (L, XB.toSet) ⊢ □ψᵇ ➝ ψᵇ := by
+  have Claim1 : ∀ ψ ∈ (□⁻¹'φ.subformulas), (L, XB.toSet) ⊢ □ψᵇ ➝ ψᵇ := by
     intro ψ hψ;
     have H₁ : ∀ b, (L, XB.toSet) ⊢ (flag (.atom q) b) ⋏ □ψᵇ ➝ ⊡((flag (.atom q) !b) ➝ ψᵇ) := by
       intro b;

@@ -79,7 +79,7 @@ open canonicalModel
 instance [Entailment.HasAxiomWeakPoint2 𝓢] : (canonicalFrame 𝓢).IsPiecewiseConvergent where
   p_convergent := by
     rintro x y z Rxy Rxz eyz;
-    have ⟨u, hu⟩ := lindenbaum (𝓢 := 𝓢) (t₀ := ⟨□'⁻¹y.1.1, ◇'⁻¹z.1.2⟩) $ by
+    have ⟨u, hu⟩ := lindenbaum (𝓢 := 𝓢) (t₀ := ⟨□⁻¹'y.1.1, ◇'⁻¹z.1.2⟩) $ by
       rintro Γ Δ hΓ hΔ;
       by_contra hC;
       have hγ : □(Γ.conj) ∈ y.1.1 := y.mdp_mem₁_provable collect_box_fconj! $ iff_mem₁_fconj.mpr $ by

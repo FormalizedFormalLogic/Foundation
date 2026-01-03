@@ -264,7 +264,7 @@ open canonicalModel
 
 instance [Entailment.HasAxiomGeach g 𝓢] : (canonicalFrame 𝓢).IsGeachConvergent g := ⟨by
   rintro x y z Rxy Rxz;
-  have ⟨u, hu⟩ := lindenbaum (𝓢 := 𝓢) (t₀ := ⟨□'⁻¹^[g.m]y.1.1, ◇'⁻¹^[g.n]z.1.2⟩) $ by
+  have ⟨u, hu⟩ := lindenbaum (𝓢 := 𝓢) (t₀ := ⟨□⁻¹^[g.m]'y.1.1, ◇⁻¹^[g.n]'z.1.2⟩) $ by
     rintro Γ Δ hΓ hΔ;
     by_contra! hC;
     have hγ : □^[g.m](Γ.conj) ∈ y.1.1 := y.mdp_mem₁_provable collect_boxItr_fconj! $ iff_mem₁_fconj.mpr $ by

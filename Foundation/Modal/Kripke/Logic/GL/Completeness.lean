@@ -20,8 +20,8 @@ variable {φ ψ : Formula ℕ}
 abbrev miniCanonicalFrame (φ : Formula ℕ) : Kripke.Frame where
   World := ComplementClosedConsistentFinset Modal.GL φ.subformulas
   Rel X Y :=
-    (∀ ψ ∈ □'⁻¹φ.subformulas, □ψ ∈ X → (ψ ∈ Y ∧ □ψ ∈ Y)) ∧
-    (∃ χ ∈ □'⁻¹φ.subformulas, □χ ∉ X ∧ □χ ∈ Y)
+    (∀ ψ ∈ □⁻¹'φ.subformulas, □ψ ∈ X → (ψ ∈ Y ∧ □ψ ∈ Y)) ∧
+    (∃ χ ∈ □⁻¹'φ.subformulas, □χ ∉ X ∧ □χ ∈ Y)
 
 namespace miniCanonicalFrame
 
@@ -51,7 +51,7 @@ abbrev miniCanonicalModel (φ : Formula ℕ) : Kripke.Model where
 
 lemma truthlemma_lemma1
   {X : ComplementClosedConsistentFinset Modal.GL φ.subformulas} (hq : □ψ ∈ φ.subformulas)
-  : ((□'⁻¹X.1 ∪ □'□'⁻¹X.1) ∪ {□ψ, -ψ}) ⊆ φ.subformulas⁻ := by
+  : ((□⁻¹'X.1 ∪ □'□⁻¹'X.1) ∪ {□ψ, -ψ}) ⊆ φ.subformulas⁻ := by
   intro χ hr;
   replace hr : χ = □ψ ∨ χ = -ψ ∨ □χ ∈ X ∨ ∃ a, □a ∈ X ∧ □a = χ := by
     simpa [Finset.LO.preboxItr, Finset.LO.boxItr] using hr;
@@ -73,7 +73,7 @@ lemma truthlemma_lemma2
   {X : ComplementClosedConsistentFinset Modal.GL φ.subformulas}
   (hψ₁ : □ψ ∈ φ.subformulas)
   (hψ₂ : □ψ ∉ X)
-  : FormulaFinset.Consistent Modal.GL ((□'⁻¹X.1 ∪ □'□'⁻¹X.1) ∪ {□ψ, -ψ}) := by
+  : FormulaFinset.Consistent Modal.GL ((□⁻¹'X.1 ∪ □'□⁻¹'X.1) ∪ {□ψ, -ψ}) := by
   apply FormulaFinset.intro_union_consistent;
   rintro Γ₁ Γ₂ hΓ₁ hΓ₂;
   by_contra hC;
@@ -83,10 +83,10 @@ lemma truthlemma_lemma2
     replace : ↑Γ₁ *⊢[Modal.GL] □ψ ➝ ψ:= Context.deduct! this;
     replace : ↑(□'Γ₁) *⊢[Modal.GL] □(□ψ ➝ ψ) := by simpa using Context.nec! this;
     replace : ↑(□'Γ₁) *⊢[Modal.GL] □ψ := axiomL! ⨀ this;
-    replace : ↑(□'□'⁻¹X.1 ∪ □'^[2]□'⁻¹X.1) *⊢[Modal.GL] □ψ := Context.weakening! ?_ this;
-    . replace : ↑(□'□'⁻¹X.1) *⊢[Modal.GL] ((□'^[2]□'⁻¹X.1).conj) ➝ □ψ := FConj_DT'.mpr this;
-      replace : ↑(□'□'⁻¹X.1) *⊢[Modal.GL] (□'□'⁻¹X.1).conj ➝ □ψ := C!_trans ?_ this;
-      . replace : ↑(□'□'⁻¹X.1 ∪ □'□'⁻¹↑X) *⊢[Modal.GL] □ψ := FConj_DT'.mp this;
+    replace : ↑(□'□⁻¹'X.1 ∪ □^[2]'□⁻¹'X.1) *⊢[Modal.GL] □ψ := Context.weakening! ?_ this;
+    . replace : ↑(□'□⁻¹'X.1) *⊢[Modal.GL] ((□^[2]'□⁻¹'X.1).conj) ➝ □ψ := FConj_DT'.mpr this;
+      replace : ↑(□'□⁻¹'X.1) *⊢[Modal.GL] (□'□⁻¹'X.1).conj ➝ □ψ := C!_trans ?_ this;
+      . replace : ↑(□'□⁻¹'X.1 ∪ □'□⁻¹'↑X) *⊢[Modal.GL] □ψ := FConj_DT'.mp this;
         have : X *⊢[Modal.GL] □ψ := Context.weakening! (by grind) this;
         exact membership_iff hψ₁ |>.mpr this;
       . apply CFconjFconj!_of_provable;

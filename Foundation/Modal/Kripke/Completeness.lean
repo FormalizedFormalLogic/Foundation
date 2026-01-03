@@ -18,7 +18,7 @@ section
 
 abbrev canonicalFrame (𝓢 : S) [Entailment.Consistent 𝓢] [Entailment.K 𝓢] : Kripke.Frame where
   World := MaximalConsistentTableau 𝓢
-  Rel t₁ t₂ := □'⁻¹t₁.1.1 ⊆ t₂.1.1
+  Rel t₁ t₂ := □⁻¹'t₁.1.1 ⊆ t₂.1.1
 
 abbrev canonicalModel (𝓢 : S) [Entailment.Consistent 𝓢] [Entailment.K 𝓢] : Model where
   toFrame := canonicalFrame 𝓢
@@ -145,7 +145,7 @@ open Formula.Kripke.Satisfies
 
 variable {x y : (canonicalModel 𝓢).World}
 
-lemma def_rel_box_mem₁ : x ≺ y ↔ □'⁻¹x.1.1 ⊆ y.1.1 := by simp [Frame.Rel'];
+lemma def_rel_box_mem₁ : x ≺ y ↔ □⁻¹'x.1.1 ⊆ y.1.1 := by simp [Frame.Rel'];
 
 lemma def_rel_box_satisfies : x ≺ y ↔ ∀ {φ}, x ⊧ □φ → y ⊧ φ := by
   constructor;
@@ -169,7 +169,7 @@ lemma def_multirel_boxItr_satisfies : x ≺^[n] y ↔ (∀ {φ}, x ⊧ □^[n]φ
       . intro φ hφ; exact truthlemma₂.mpr $ h $ Satisfies.not_def.mpr $ truthlemma₂.mp hφ;
     | succ n ih =>
       intro h;
-      obtain ⟨t, ht⟩ := lindenbaum (𝓢 := 𝓢) (t₀ := ⟨{ φ | x ⊧ □φ }, □'^[n]{ φ | ¬y ⊧ φ }⟩) $ by
+      obtain ⟨t, ht⟩ := lindenbaum (𝓢 := 𝓢) (t₀ := ⟨{ φ | x ⊧ □φ }, □^[n]'{ φ | ¬y ⊧ φ }⟩) $ by
         intro Γ Δ hΓ hΔ;
         by_contra! hC;
         have : 𝓢 ⊢ □Γ.conj ➝ □Δ.disj := imply_box_distribute'! hC;
@@ -180,8 +180,8 @@ lemma def_multirel_boxItr_satisfies : x ≺^[n] y ↔ (∀ {φ}, x ⊧ □^[n]φ
           intro φ hφ;
           apply hΓ hφ y Rxy;
         have : x ⊧ □Δ.disj := truthlemma₁.mp this;
-        have : x ⊧ □^[(n + 1)](□'⁻¹^[n]Δ).disj := by
-          suffices x ⊧ □□^[n](□'⁻¹^[n]Δ).disj by simpa;
+        have : x ⊧ □^[(n + 1)](□⁻¹^[n]'Δ).disj := by
+          suffices x ⊧ □□^[n](□⁻¹^[n]'Δ).disj by simpa;
           intro y Rxy;
           apply boxItr_def.mpr;
           intro z Ryz;
@@ -192,7 +192,7 @@ lemma def_multirel_boxItr_satisfies : x ≺^[n] y ↔ (∀ {φ}, x ⊧ □^[n]φ
           constructor;
           . simpa [Finset.LO.preboxItr];
           . exact Satisfies.boxItr_def.mp hψ₂ Ryz;
-        have : y ⊧ (□'⁻¹^[n]Δ).disj := h this;
+        have : y ⊧ (□⁻¹^[n]'Δ).disj := h this;
         obtain ⟨ψ, hψ₁, hψ₂⟩ := fdisj_def.mp this;
         have : y ⊭ ψ := Set.LO.mem_of_mem_boxItr $ @hΔ (□^[n]ψ) $ by
           show □^[n]ψ ∈ ↑Δ;
@@ -208,12 +208,12 @@ lemma def_multirel_boxItr_satisfies : x ≺^[n] y ↔ (∀ {φ}, x ⊧ □^[n]φ
         have := Set.compl_subset_compl.mpr ht.2 $ iff_not_mem₂_mem₁.mpr $ truthlemma₁.mpr hφ;
         grind;
 
-lemma def_multirel_boxItr_mem₁ : x ≺^[n] y ↔ ((□'⁻¹^[n]x.1.1) ⊆ y.1.1) := ⟨
+lemma def_multirel_boxItr_mem₁ : x ≺^[n] y ↔ ((□⁻¹^[n]'x.1.1) ⊆ y.1.1) := ⟨
   fun h _ hφ => truthlemma₁.mpr $ def_multirel_boxItr_satisfies.mp h $ truthlemma₁.mp hφ,
   fun h => def_multirel_boxItr_satisfies.mpr fun hφ => truthlemma₁.mp (h $ truthlemma₁.mpr hφ)
 ⟩
 
-lemma def_multirel_boxItr_mem₂ : x ≺^[n] y ↔ (y.1.2 ⊆ (□'⁻¹^[n]x.1.2)) := by
+lemma def_multirel_boxItr_mem₂ : x ≺^[n] y ↔ (y.1.2 ⊆ (□⁻¹^[n]'x.1.2)) := by
   apply Iff.trans def_multirel_boxItr_mem₁;
   constructor;
   . intro h φ;
@@ -231,7 +231,7 @@ lemma def_multirel_boxItr_mem₂ : x ≺^[n] y ↔ (y.1.2 ⊆ (□'⁻¹^[n]x.1.
     apply iff_not_mem₁_mem₂.mp;
     assumption;
 
-lemma def_rel_box_mem₂ : x ≺ y ↔ (y.1.2 ⊆ (□'⁻¹ x.1.2)) := by
+lemma def_rel_box_mem₂ : x ≺ y ↔ (y.1.2 ⊆ (□⁻¹' x.1.2)) := by
   simpa using def_multirel_boxItr_mem₂ (n := 1);
 
 lemma def_multirel_diaItr_satisfies : x ≺^[n] y ↔ (∀ {φ}, y ⊧ φ → x ⊧ ◇^[n]φ) := by
@@ -252,7 +252,7 @@ lemma def_multirel_diaItr_satisfies : x ≺^[n] y ↔ (∀ {φ}, y ⊧ φ → x 
     intro _ _;
     apply negneg_def.mpr;
 
-lemma def_multirel_diaItr_mem₁ : x ≺^[n] y ↔ (y.1.1 ⊆ (◇'⁻¹^[n]x.1.1)) := by
+lemma def_multirel_diaItr_mem₁ : x ≺^[n] y ↔ (y.1.1 ⊆ (◇⁻¹^[n]'x.1.1)) := by
   constructor;
   . intro h φ hφ;
     apply truthlemma₁.mpr;
@@ -273,7 +273,7 @@ lemma def_multirel_diaItr_mem₁ : x ≺^[n] y ↔ (y.1.1 ⊆ (◇'⁻¹^[n]x.1.
 lemma def_rel_dia_mem₁ : x ≺ y ↔ (y.1.1 ⊆ (◇'⁻¹ x.1.1)) := by
   simpa using def_multirel_diaItr_mem₁ (n := 1);
 
-lemma def_multirel_diaItr_mem₂ : x ≺^[n] y ↔ ((◇'⁻¹^[n]x.1.2) ⊆ y.1.2) := by
+lemma def_multirel_diaItr_mem₂ : x ≺^[n] y ↔ ((◇⁻¹^[n]'x.1.2) ⊆ y.1.2) := by
   constructor;
   . intro Rxy φ;
     contrapose;

@@ -8,7 +8,7 @@ namespace Formula
 variable {α : Type u} [DecidableEq α]
 variable {φ ψ χ : Formula ℕ}
 
-@[grind] noncomputable abbrev subformulasGrz (φ : Formula α) := φ.subformulas ∪ ((□'⁻¹φ.subformulas).image (λ ψ => □(ψ ➝ □ψ)))
+@[grind] noncomputable abbrev subformulasGrz (φ : Formula α) := φ.subformulas ∪ ((□⁻¹'φ.subformulas).image (λ ψ => □(ψ ➝ □ψ)))
 
 namespace subformulasGrz
 
@@ -16,7 +16,7 @@ namespace subformulasGrz
 
 @[grind ⇒] protected lemma mem_of_mem_subformula (h : ψ ∈ φ.subformulas) : ψ ∈ φ.subformulasGrz := by simp_all [subformulasGrz];
 
-@[grind ⇒] lemma mem_boximpbox (h : ψ ∈ (□'⁻¹φ.subformulas)) : □(ψ ➝ □ψ) ∈ φ.subformulasGrz := by simp_all [subformulasGrz];
+@[grind ⇒] lemma mem_boximpbox (h : ψ ∈ (□⁻¹'φ.subformulas)) : □(ψ ➝ □ψ) ∈ φ.subformulasGrz := by simp_all [subformulasGrz];
 
 @[grind ⇒]
 protected lemma mem_imp (h : (ψ ➝ χ) ∈ φ.subformulasGrz) : ψ ∈ φ.subformulasGrz ∧ χ ∈ φ.subformulasGrz := by
@@ -50,8 +50,8 @@ variable {φ ψ : Formula ℕ}
 abbrev miniCanonicalFrame (𝓢 : S) [Entailment.Grz 𝓢] [Entailment.Consistent 𝓢] (φ : Formula ℕ) : Kripke.Frame where
   World := ComplementClosedConsistentFinset 𝓢 (φ.subformulasGrz)
   Rel X Y :=
-    (∀ ψ ∈ □'⁻¹(φ.subformulasGrz), □ψ ∈ X → □ψ ∈ Y) ∧
-    ((∀ ψ ∈ □'⁻¹(φ.subformulasGrz), □ψ ∈ Y → □ψ ∈ X) → X = Y)
+    (∀ ψ ∈ □⁻¹'(φ.subformulasGrz), □ψ ∈ X → □ψ ∈ Y) ∧
+    ((∀ ψ ∈ □⁻¹'(φ.subformulasGrz), □ψ ∈ Y → □ψ ∈ X) → X = Y)
 
 instance : (miniCanonicalFrame 𝓢 φ).IsReflexive where
   refl := by tauto_set;
@@ -87,7 +87,7 @@ abbrev miniCanonicalModel (𝓢 : S) [Entailment.Grz 𝓢] [Entailment.Consisten
 omit [Consistent 𝓢] [Entailment.Grz 𝓢] in
 lemma truthlemma_lemma1
   {X : ComplementClosedConsistentFinset 𝓢 (φ.subformulasGrz)} (hq : □ψ ∈ φ.subformulas)
-  : ((□'□'⁻¹X.1) ∪ {□(ψ ➝ □ψ), -ψ}) ⊆ (φ.subformulasGrz)⁻ := by
+  : ((□'□⁻¹'X.1) ∪ {□(ψ ➝ □ψ), -ψ}) ⊆ (φ.subformulasGrz)⁻ := by
   simp only [FormulaFinset.complementary];
   intro χ hr;
   apply Finset.mem_union.mpr;
@@ -111,7 +111,7 @@ lemma truthlemma_lemma2
   {X : ComplementClosedConsistentFinset 𝓢 (φ.subformulasGrz)}
   (hψ₁ : □ψ ∈ φ.subformulas)
   (hψ₂ : □ψ ∉ X)
-  : FormulaFinset.Consistent 𝓢 ((□'□'⁻¹X.1) ∪ {□(ψ ➝ □ψ), -ψ}) := by
+  : FormulaFinset.Consistent 𝓢 ((□'□⁻¹'X.1) ∪ {□(ψ ➝ □ψ), -ψ}) := by
     apply FormulaFinset.intro_union_consistent;
     rintro Γ₁ Γ₂ hΓ₁ hΓ₂;
     by_contra! hC;
@@ -124,8 +124,8 @@ lemma truthlemma_lemma2
     replace : (□'↑Γ₁) *⊢[𝓢] ψ := axiomGrz! ⨀ this;
     replace : (□'□'↑Γ₁) *⊢[𝓢] □ψ := Context.nec! this;
     replace : (□'↑Γ₁) *⊢[𝓢] □ψ := Context.boxbox_in_context_to_box this;
-    replace : (□'□'□'⁻¹X.1) *⊢[𝓢] □ψ := Context.weakening! ?h₂ this;
-    replace : (□'□'⁻¹X) *⊢[𝓢] □ψ := Context.boxbox_in_context_to_box this;
+    replace : (□'□'□⁻¹'X.1) *⊢[𝓢] □ψ := Context.weakening! ?h₂ this;
+    replace : (□'□⁻¹'X) *⊢[𝓢] □ψ := Context.boxbox_in_context_to_box this;
     replace : X *⊢[𝓢] □ψ := Context.weakening! ?h₃ this;
     exact membership_iff (by grind) |>.mpr this;
     case h₁ =>
@@ -139,7 +139,7 @@ lemma truthlemma_lemma2
     case h₂ =>
       intro ξ hξ;
       obtain ⟨ξ, hξ, rfl⟩ := hξ;
-      have : ξ ∈ □'□'⁻¹X.1 := hΓ₁ hξ;
+      have : ξ ∈ □'□⁻¹'X.1 := hΓ₁ hξ;
       obtain ⟨χ, hχ, rfl⟩ := Finset.LO.exists_of_mem_box this;
       use □χ;
       grind;

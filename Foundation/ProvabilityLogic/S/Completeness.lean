@@ -7,7 +7,7 @@ import Foundation.FirstOrder.Incompleteness.Tarski
 import Mathlib.Tactic.TFAE
 
 noncomputable abbrev LO.Modal.Formula.rflSubformula [DecidableEq α] (φ : Formula α) : FormulaFinset α :=
-  ((□'⁻¹φ.subformulas).image (λ ψ => □ψ ➝ ψ))
+  ((□⁻¹'φ.subformulas).image (λ ψ => □ψ ➝ ψ))
 
 namespace LO.ProvabilityLogic
 
