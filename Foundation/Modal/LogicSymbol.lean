@@ -470,7 +470,7 @@ namespace Finset.LO
 
 variable [DecidableEq F] {s : Finset F}
 
-@[grind →]
+@[grind! <=]
 lemma mem_boxItr_of_toList_boxItr (h : φ ∈ □'^[n]s.toList) : φ ∈ (□'^[n]s) := by
   obtain ⟨ψ, hψ₁, hψ₂⟩ := List.LO.exists_of_mem_boxItr h;
   simp only [boxItr, mem_image];
@@ -478,12 +478,19 @@ lemma mem_boxItr_of_toList_boxItr (h : φ ∈ □'^[n]s.toList) : φ ∈ (□'^[
   constructor;
   . simpa using hψ₁;
   . assumption;
-
-@[grind →]
+@[grind! <=]
 lemma mem_box_of_toList_box (h : φ ∈ □'s.toList) : φ ∈ □'s := mem_boxItr_of_toList_boxItr h
 
+@[grind! <=]
+lemma mem_boxItr_toList_of_mem (h : φ ∈ (□'^[n]s)) : φ ∈ □'^[n]s.toList := by
+  obtain ⟨ψ, hψ₁, rfl⟩ := Finset.LO.exists_of_mem_boxItr h;
+  simp only [List.LO.boxItr, List.mem_map, mem_toList]
+  use ψ;
+@[grind <=]
+lemma mem_box_toList_of_mem (h : φ ∈ □'s) : φ ∈ □'s.toList := mem_boxItr_toList_of_mem (n := 1) h
 
-@[grind →]
+
+@[grind <=]
 lemma mem_diaItr_of_toList_diaItr (h : φ ∈ ◇'^[n]s.toList) : φ ∈ (◇'^[n]s) := by
   obtain ⟨ψ, hψ₁, hψ₂⟩ := List.LO.exists_of_mem_diaItr h;
   simp only [diaItr, mem_image];
@@ -492,7 +499,7 @@ lemma mem_diaItr_of_toList_diaItr (h : φ ∈ ◇'^[n]s.toList) : φ ∈ (◇'^[
   . simpa using hψ₁;
   . assumption;
 
-@[grind →]
+@[grind <=]
 lemma mem_dia_of_toList_dia (h : φ ∈ ◇'s.toList) : φ ∈ ◇'s := mem_diaItr_of_toList_diaItr h
 
 end Finset.LO

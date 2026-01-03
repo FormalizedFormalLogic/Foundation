@@ -7,7 +7,7 @@ import Foundation.FirstOrder.Incompleteness.Tarski
 import Mathlib.Tactic.TFAE
 
 noncomputable abbrev LO.Modal.Formula.rflSubformula [DecidableEq α] (φ : Formula α) : FormulaFinset α :=
-  (φ.subformulas.prebox.image (λ ψ => □ψ ➝ ψ))
+  ((□'⁻¹φ.subformulas).image (λ ψ => □ψ ➝ ψ))
 
 namespace LO.ProvabilityLogic
 
@@ -98,7 +98,7 @@ lemma refl_mainlemma_aux (hA : ¬r₁ ⊧ (A.rflSubformula.conj ➝ A)) :
         apply left_Fdisj'!_intro;
         have hrfl : r₁ ⊧ □B ➝ B := by
           apply hA₁;
-          simpa [Formula.rflSubformula];
+          simpa [Formula.rflSubformula, Finset.LO.preboxItr];
         rintro (i | i) _;
         . rw [(show (Sum.inl i) = r₀ by simp [r₀];)]
           suffices 𝗜𝚺₁ ⊢ S r₀ ➝ S.realization B by convert this;

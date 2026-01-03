@@ -220,12 +220,12 @@ theorem jerabek_SBDP
   apply Set.not_subset.mpr;
 
   let q := Formula.freshAtom φ;
-  let X₀ := φ.subformulas.prebox.image (λ ψ => □((.atom q) ➝ ψ) ➝ ψ);
-  let X₁ := φ.subformulas.prebox.image (λ ψ => □(∼(.atom q) ➝ ψ) ➝ ψ);
+  let X₀ := (□'⁻¹φ.subformulas).image (λ ψ => □((.atom q) ➝ ψ) ➝ ψ);
+  let X₁ := (□'⁻¹φ.subformulas).image (λ ψ => □(∼(.atom q) ➝ ψ) ➝ ψ);
   let X := X₀ ∪ X₁;
   let XB := X.image (·ᵇ);
 
-  have Claim1 : ∀ ψ ∈ φ.subformulas.prebox, (L, XB.toSet) ⊢ □ψᵇ ➝ ψᵇ := by
+  have Claim1 : ∀ ψ ∈ (□'⁻¹φ.subformulas), (L, XB.toSet) ⊢ □ψᵇ ➝ ψᵇ := by
     intro ψ hψ;
     have H₁ : ∀ b, (L, XB.toSet) ⊢ (flag (.atom q) b) ⋏ □ψᵇ ➝ ⊡((flag (.atom q) !b) ➝ ψᵇ) := by
       intro b;
@@ -262,7 +262,7 @@ theorem jerabek_SBDP
       have H₁ : (L, XB.toSet) ⊢ □ψ ⭤ □ψᵇ := box_congruence! ihψ;
       have H₂ : (L, XB.toSet) ⊢ □ψᵇ ⭤ ⊡ψᵇ := by
         apply Entailment.E!_intro;
-        . have : (L, XB.toSet) ⊢ □ψᵇ ➝ ψᵇ := Claim1 ψ (by simpa);
+        . have : (L, XB.toSet) ⊢ □ψᵇ ➝ ψᵇ := Claim1 ψ (by simpa [Finset.LO.preboxItr]);
           cl_prover [this];
         . cl_prover;
       cl_prover [H₁, H₂];

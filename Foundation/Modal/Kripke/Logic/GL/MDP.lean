@@ -125,7 +125,7 @@ end mdpCounterexmpleModel
 end Kripke
 
 
-lemma MDP_Aux {X : Set _} (h : (X.box) *⊢[Modal.GL] □φ₁ ⋎ □φ₂) : (X.box) *⊢[Modal.GL] □φ₁ ∨ (X.box) *⊢[Modal.GL] □φ₂ := by
+lemma MDP_Aux {X : Set _} (h : (□'X) *⊢[Modal.GL] □φ₁ ⋎ □φ₂) : (□'X) *⊢[Modal.GL] □φ₁ ∨ (□'X) *⊢[Modal.GL] □φ₂ := by
   obtain ⟨Δ, sΓ, hΓ⟩ := Context.provable_iff_boxed.mp h;
 
   have : Modal.GL ⊢ ⋀(□'Δ) ➝ (□φ₁ ⋎ □φ₂) := FiniteContext.provable_iff.mp hΓ;
@@ -189,7 +189,7 @@ lemma MDP_Aux {X : Set _} (h : (X.box) *⊢[Modal.GL] □φ₁ ⋎ □φ₂) : (
   };
 
 theorem modal_disjunctive (h : Modal.GL ⊢ □φ₁ ⋎ □φ₂) : Modal.GL ⊢ φ₁ ∨ Modal.GL ⊢ φ₂ := by
-  have : ∅ *⊢[Modal.GL] □φ₁ ∨ ∅ *⊢[Modal.GL] □φ₂ := by simpa using MDP_Aux (X := ∅) (φ₁ := φ₁) (φ₂ := φ₂) $ Context.of! h;
+  have : ∅ *⊢[Modal.GL] □φ₁ ∨ ∅ *⊢[Modal.GL] □φ₂ := by simpa [Set.LO.boxItr, Set.LO.preboxItr] using MDP_Aux (X := ∅) (φ₁ := φ₁) (φ₂ := φ₂) $ Context.of! h;
   rcases this with (h | h) <;> {
     have := unnec! $ Context.emptyPrf! h;
     tauto;

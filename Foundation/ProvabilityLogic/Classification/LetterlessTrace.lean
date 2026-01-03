@@ -293,7 +293,7 @@ lemma TBB_injective : Function.Injective TBB := by
     . tauto;
     . have := @this j i; grind;
   obtain ⟨k, rfl⟩ := Nat.exists_eq_add_of_lt hij;
-  simp [show ((i + k) + 1) = i + (k + 1) by omega, ←(Box.add (n := i) (m := (k + 1)))];
+  simp [show ((i + k) + 1) = i + (k + 1) by omega, ←Box.boxItr_add (n := i) (m := (k + 1)), InjectiveBox.inj_multibox.eq_iff];
 
 @[simp, grind .]
 lemma TBB_letterlessSpectrum : (TBB n).letterlessSpectrum = {n}ᶜ := by

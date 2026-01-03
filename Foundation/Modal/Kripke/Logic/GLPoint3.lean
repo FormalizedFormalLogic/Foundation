@@ -31,7 +31,7 @@ instance : blackpoint.IsFiniteGLPoint3 where
 end Kripke
 
 
-namespace Modal.GLPoint3.Kripke
+namespace GLPoint3.Kripke
 
 instance : Sound Modal.GLPoint3 FrameClass.finite_GLPoint3 := instSound_of_validates_axioms $ by
   apply FrameClass.validates_with_AxiomK_of_validates;
@@ -93,7 +93,7 @@ private def complete.filteredModel
   (φ : Formula ℕ)
   (_ : □φ ∈ v.1.1) (_ : φ ∈ v.1.2)
   : Kripke.Model where
-  World := { x // x = v ∨ (v ≺ x ∧ ∃ ψ ∈ φ.subformulas.prebox, □ψ ∈ v.1.2 ∧ □ψ ∈ x.1.1 ∧ ψ ∈ x.1.2) }
+  World := { x // x = v ∨ (v ≺ x ∧ ∃ ψ ∈ (□'⁻¹φ.subformulas), □ψ ∈ v.1.2 ∧ □ψ ∈ x.1.1 ∧ ψ ∈ x.1.2) }
   world_nonempty := ⟨v, by simp⟩
   Rel := λ x y => x.1 ≺ y.1
   Val := λ x => (canonicalModel Modal.GLPoint3).Val x
@@ -120,8 +120,8 @@ private instance complete.filteredModel.isFiniteGLPoint3 : Frame.IsFiniteGLPoint
       simpa [filteredModel] using hxy;
   world_finite := by
     dsimp [complete.filteredModel];
-    have : Finite { ψ // ψ ∈ φ.subformulas.prebox ∧ ∼□ψ ∈ v.1.1 } := Finite.of_scoped_subtype (P := λ ψ => ψ ∈ φ.subformulas.prebox) $ by tauto;
-    apply Finite.of_surjective (α := Unit ⊕ { ψ // ψ ∈ φ.subformulas.prebox ∧ ∼□ψ ∈ v.1.1 })
+    have : Finite { ψ // ψ ∈ (□'⁻¹φ.subformulas) ∧ ∼□ψ ∈ v.1.1 } := Finite.of_scoped_subtype (P := λ ψ => ψ ∈ (□'⁻¹φ.subformulas)) $ by tauto;
+    apply Finite.of_surjective (α := Unit ⊕ { ψ // ψ ∈ (□'⁻¹φ.subformulas : Finset (Formula ℕ)) ∧ ∼□ψ ∈ v.1.1 })
       (f := λ x => match x with
         | .inl _ => ⟨v, by simp⟩
         | .inr ψ =>
@@ -177,7 +177,7 @@ private lemma complete.filteredModel.truthlemma : ∀ x : (complete.filteredMode
         . exact Rvy;
         . use ψ;
           refine ⟨?_, ?_, ?_, ?_⟩;
-          . simpa;
+          . simpa [Finset.LO.preboxItr]
           . apply iff_not_mem₁_mem₂.mp; simpa;
           . simpa;
           . simpa;
@@ -273,8 +273,6 @@ instance : Modal.K4Point3 ⪱ Modal.GLPoint3 := by
       . simp [Semantics.Models, Satisfies];
         tauto;
 
-end Modal.GLPoint3.Kripke
-
-
+end GLPoint3.Kripke
 
 end LO.Modal

@@ -10,6 +10,7 @@ variable {α} {φ ψ : Modal.Formula α}
 
 namespace Formula
 
+@[grind]
 def trivTranslate : Formula α → Formula α
   | .atom a => atom a
   | □φ => φ.trivTranslate
@@ -19,9 +20,9 @@ postfix:75 "ᵀ" => trivTranslate
 
 namespace trivTranslate
 
-@[simp, grind! .] lemma degree_zero : φᵀ.degree = 0 := by induction φ <;> simp [trivTranslate, degree, *];
+@[simp, grind =] lemma degree_zero : φᵀ.degree = 0 := by induction φ <;> simp [trivTranslate, degree, *];
 
-@[simp]
+@[simp, grind =]
 lemma toIP : φᵀ.toPropFormula = φᵀ := by
   induction φ using rec' with
   | hbox => simp [trivTranslate, *];
@@ -30,7 +31,7 @@ lemma toIP : φᵀ.toPropFormula = φᵀ := by
 
 end trivTranslate
 
-
+@[grind]
 def verTranslate : Formula α → Formula α
   | atom a => atom a
   | □_ => ⊤
@@ -40,7 +41,7 @@ postfix:75 "ⱽ" => verTranslate
 
 namespace verTranslate
 
-@[simp, grind .]
+@[simp, grind =]
 lemma degree_zero : φⱽ.degree = 0 := by
   induction φ using rec' with
   | himp => simp [degree, verTranslate, *];
