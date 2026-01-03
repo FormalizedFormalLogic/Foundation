@@ -114,7 +114,7 @@ lemma inj_imp : φ₁ ➝ φ₂ = ψ₁ ➝ ψ₂ ↔ φ₁ = ψ₁ ∧ φ₂ = 
 lemma inj_neg : ∼φ = ∼ψ ↔ φ = ψ := by simp [Tilde.tilde]
 lemma inj_box : □φ = □ψ ↔ φ = ψ := by simp [Box.box]
 lemma inj_dia : ◇φ = ◇ψ ↔ φ = ψ := by simp [Dia.dia]
-attribute [simp, grind =] inj_and inj_or inj_imp inj_neg inj_box inj_dia
+attribute [simp] inj_and inj_or inj_imp inj_neg inj_box inj_dia
 
 instance : InjectiveBox (Formula α) := ⟨by simp [Function.Injective]⟩
 instance : InjectiveDia (Formula α) := ⟨by simp [Function.Injective]⟩

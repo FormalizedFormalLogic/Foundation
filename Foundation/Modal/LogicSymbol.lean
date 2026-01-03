@@ -166,12 +166,17 @@ lemma iff_mem_preboxItr : φ ∈ (□'⁻¹^[n]s) ↔ (□^[n]φ) ∈ s := by
   grind;
 
 @[grind →]
-lemma mem_of_mem_boxItr [InjectiveBox F] (h : □^[n]φ ∈ □'^[n]s) : φ ∈ s:= by
+lemma mem_of_mem_boxItr [InjectiveBox F] (h : □^[n]φ ∈ □'^[n]s) : φ ∈ s := by
   obtain ⟨ψ, hψ, h_eq⟩ := h;
   exact InjectiveBox.inj_multibox h_eq ▸ hψ;
 
 @[grind →]
 lemma mem_of_mem_box [InjectiveBox F] (h : □φ ∈ □'s) : φ ∈ s := mem_of_mem_boxItr (n := 1) h
+
+@[grind! =>]
+lemma mem_boxItr_of_mem_boxItr [InjectiveBox F] (h : □^[n]φ ∈ □'^[n]s) : □^[m]φ ∈ □'^[m]s := by
+  apply mem_boxItr_of_mem;
+  apply mem_of_mem_boxItr h;
 
 @[grind! =>]
 lemma exists_of_mem_boxItr (h : φ ∈ □'^[n]s) : ∃ ψ ∈ s, (□^[n]ψ) = φ := by
@@ -237,6 +242,11 @@ lemma exists_of_mem_boxItr (h : φ ∈ □'^[n]s) : ∃ ψ ∈ s, (□^[n]ψ) = 
   grind;
 @[grind! =>]
 lemma exists_of_mem_box (h : φ ∈ □'s) : ∃ ψ ∈ s, □ψ = φ := exists_of_mem_boxItr (n := 1) h
+
+@[simp, grind =] lemma eq_boxItr_toSet_toSet_boxItr : (↑(□'^[n]s) : Set F) = (□'^[n](↑s : Set F)) := by
+  ext φ;
+  simp [Finset.LO.boxItr, Set.LO.boxItr];
+@[simp, grind =] lemma eq_box_toSet_toSet_box : (↑(□'s) : Set F) = □'(↑s : Set F) := by grind
 
 end
 

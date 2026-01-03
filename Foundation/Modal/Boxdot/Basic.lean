@@ -113,7 +113,7 @@ lemma iff_boxdotTranslateMultibox_boxdotTranslateBoxlt : x ⊧ (□^[n]φ)ᵇ �
   | zero => simp;
   | succ n ih =>
     suffices (∀ k < n + 1, x ⊧ (□^[k]φᵇ)) ∧ x ⊧ (□(□^[n]φ)ᵇ) ↔ (∀ k < n + 2, x ⊧ (□^[k]φᵇ)) by
-      simpa [Box.boxdot, boxdotTranslate, ih];
+      simpa [Box.boxdot, boxdotTranslate, ih, Box.boxLe];
     constructor;
     . rintro ⟨h₁, h₂⟩ k hk;
       apply Satisfies.boxItr_def.mpr;

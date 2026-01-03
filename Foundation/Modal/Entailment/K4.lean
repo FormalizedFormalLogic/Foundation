@@ -6,7 +6,7 @@ namespace LO.Modal.Entailment
 open LO.Entailment Entailment.FiniteContext
 
 variable {S F : Type*} [BasicModalLogicalConnective F] [DecidableEq F] [Entailment S F]
-variable {𝓢 : S} [Entailment.K4 𝓢]
+variable {𝓢 : S} [Entailment.K4 𝓢] {φ : F}
 
 lemma diaFour'! (h : 𝓢 ⊢ ◇◇φ) : 𝓢 ⊢ ◇φ := axiomFourDual ⨀ h
 
@@ -52,7 +52,7 @@ lemma Context.boxItr_2_in_context_to_box_finset {Γ : Finset F} (h : ↑(□'^[2
   apply Context.by_axm!
   grind;
 
-lemma Context.boxItr_2_in_context_to_box {Γ : Set F} (h : (□'^[2]Γ) *⊢[𝓢] φ) : (□'Γ) *⊢[𝓢] φ := by
+lemma Context.boxItr_2_in_context_to_box [InjectiveBox F] {Γ : Set F} (h : (□'^[2]Γ) *⊢[𝓢] φ) : (□'Γ) *⊢[𝓢] φ := by
   apply Context.provable_iff_finset.mpr;
   obtain ⟨Δ, hΔ₁, hΔ₂⟩ := Context.provable_iff_finset.mp h;
   use □'(□'⁻¹^[2]Δ);
@@ -61,18 +61,15 @@ lemma Context.boxItr_2_in_context_to_box {Γ : Set F} (h : (□'^[2]Γ) *⊢[�
     obtain ⟨ξ, hξ, rfl⟩ := Finset.LO.exists_of_mem_box hψ;
     have : □^[2]ξ ∈ Δ := Finset.LO.mem_boxItr_of_mem_preboxItr hξ;
     have : □^[2]ξ ∈ □'^[2]Γ := hΔ₁ this;
-    sorry;
+    apply Set.LO.mem_boxItr_of_mem_boxItr this;
   . apply Context.boxItr_2_in_context_to_box_finset;
     apply Context.weakening! ?_ hΔ₂;
     intro ψ hψ;
+    obtain ⟨ψ, hψ, rfl⟩ := hΔ₁ hψ;
     apply Finset.LO.mem_boxItr_preboxItr_of_mem_of_mem_boxItr;
-    . simpa;
-    . obtain ⟨ψ, hψ, rfl⟩ := hΔ₁ hψ;
-      simp at hψ;
-      simp;
-      sorry;
+    simpa;
 
-lemma Context.boxbox_in_context_to_box {Γ : Set F} (h : (□'□'Γ) *⊢[𝓢] φ) : (□'Γ) *⊢[𝓢] φ := by
+lemma Context.boxbox_in_context_to_box [InjectiveBox F] {Γ : Set F} (h : (□'□'Γ) *⊢[𝓢] φ) : (□'Γ) *⊢[𝓢] φ := by
   apply Context.boxItr_2_in_context_to_box;
   suffices (□'□'Γ) = (□'^[2]Γ) by rwa [this] at h;
   ext;

@@ -59,7 +59,7 @@ instance [Entailment.HasAxiomT 𝓢] [Entailment.HasAxiomMk 𝓢] : (canonicalFr
   sorry;
   /-
   rintro x;
-  obtain ⟨y, hy⟩ := lindenbaum (𝓢 := 𝓢) (t₀ := ⟨x.1.1.prebox, x.1.2.box ∪ x.1.2.dia⟩) $ by
+  obtain ⟨y, hy⟩ := lindenbaum (𝓢 := 𝓢) (t₀ := ⟨□'⁻¹x.1.1, x.1.2.box ∪ x.1.2.dia⟩) $ by
     rintro Γ Δ hΓ hΔ;
     by_contra! hC;
     let Δ₁ := { φ ∈ Δ | φ ∈ x.1.2.box };
