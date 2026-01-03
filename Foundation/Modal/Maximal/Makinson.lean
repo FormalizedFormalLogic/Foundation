@@ -125,19 +125,11 @@ private lemma subset_Triv_of_KD_subset.lemma₁
   := by
   induction φ with
   | hatom a =>
-    suffices v ⊧ (s.1 a) ↔ v ⊧ (s.1 a).toModalFormulaᵀ.toPropFormula by
-      simpa [trivTranslate, toPropFormula];
-    generalize eψ : s.1 a = ψ;
-    have hψ : ψ.Letterless := by
-      rw [←eψ];
-      exact s.2;
-    clear eψ;
-    induction ψ using Propositional.Formula.rec' with
-    | hatom => simp at hψ;
-    | hfalsum => tauto;
-    | hand => unfold Propositional.Formula.Letterless at hψ; simp_all [trivTranslate, toPropFormula];
-    | himp => unfold Propositional.Formula.Letterless at hψ; simp_all [trivTranslate, toPropFormula];
-    | hor => unfold Propositional.Formula.Letterless at hψ; simp_all [trivTranslate, toPropFormula]; tauto;
+    let ψ : Propositional.Formula α := s.1 a;
+    suffices v ⊧ ψ ↔ v ⊧ ψ.toModalFormulaᵀ.toPropFormula (by simp) by simpa [trivTranslate, toPropFormula];
+    induction ψ with
+    | hor => simp [trivTranslate, toPropFormula]; tauto;
+    | _ => simp_all [trivTranslate, toPropFormula];
   | _ => simp_all [trivTranslate, toPropFormula];
 
 lemma subset_Triv_of_KD_subset.lemma₂ {φ : Modal.Formula α} {s : Propositional.ZeroSubstitution _} :

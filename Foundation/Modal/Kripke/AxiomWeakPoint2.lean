@@ -79,11 +79,19 @@ open canonicalModel
 instance [Entailment.HasAxiomWeakPoint2 𝓢] : (canonicalFrame 𝓢).IsPiecewiseConvergent where
   p_convergent := by
     rintro x y z Rxy Rxz eyz;
-    have ⟨u, hu⟩ := lindenbaum (𝓢 := 𝓢) (t₀ := ⟨y.1.1.prebox, z.1.2.predia⟩) $ by
+    have ⟨u, hu⟩ := lindenbaum (𝓢 := 𝓢) (t₀ := ⟨□⁻¹'y.1.1, ◇'⁻¹z.1.2⟩) $ by
       rintro Γ Δ hΓ hΔ;
       by_contra hC;
-      have hγ : □(Γ.conj) ∈ y.1.1 := y.mdp_mem₁_provable collect_box_fconj! $ iff_mem₁_fconj.mpr (by simpa using hΓ);
-      have hδ : ◇(Δ.disj) ∈ z.1.2 := mdp_mem₂_provable distribute_dia_fdisj! $ iff_mem₂_fdisj.mpr (by simpa using hΔ);
+      have hγ : □(Γ.conj) ∈ y.1.1 := y.mdp_mem₁_provable collect_box_fconj! $ iff_mem₁_fconj.mpr $ by
+        intro χ hχ;
+        obtain ⟨ξ, hξ, rfl⟩ := Finset.LO.exists_of_mem_box hχ;
+        apply hΓ;
+        assumption;
+      have hδ : ◇(Δ.disj) ∈ z.1.2 := mdp_mem₂_provable distribute_dia_fdisj! $ iff_mem₂_fdisj.mpr $ by
+        intro χ hχ;
+        obtain ⟨ξ, hξ, rfl⟩ := Finset.LO.exists_of_mem_dia hχ;
+        apply hΔ;
+        assumption;
       generalize Γ.conj = γ₁ at hγ hC;
       generalize Δ.disj = δ₁ at hδ hC;
       obtain ⟨δ₂, hδ₂₁, hδ₂₂⟩ := exists₁₂_of_ne eyz;

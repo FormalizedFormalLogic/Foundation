@@ -485,13 +485,12 @@ def quasiFilteringTransitiveFiltration (M : Model) [M.IsMonotonic] [M.IsTransiti
 
       let Ψ := {ψ // □ψ ∈ T ∧ (∃ Vi ∈ Ys, Vi = 【M ψ】) ∧ W ∈ 【M (□ψ)】};
       have : Fintype Ψ := by
-        apply Fintype.subtype (s := { ψ ∈ hT.toFinset.prebox | (∃ Vi ∈ Ys, Vi = 【M ψ】) ∧ W ∈ 【M (□ψ)】 });
-        simp;
+        apply Fintype.subtype (s := { ψ ∈ □⁻¹'hT.toFinset | (∃ Vi ∈ Ys, Vi = 【M ψ】) ∧ W ∈ 【M (□ψ)】 });
+        simp [Finset.LO.preboxItr];
       let Ξ := {ξ // □ξ ∈ T ∧ (∃ Ui ∈ Ys, Ui = 【M (□ξ)】) ∧ W ∈ 【M (□ξ)】};
       have : Fintype Ξ := by
-        apply Fintype.subtype (s := { ξ ∈ hT.toFinset.prebox | (∃ Ui ∈ Ys, Ui = 【M (□ξ)】) ∧ W ∈ 【M (□ξ)】 });
-        simp;
-
+        apply Fintype.subtype (s := { ξ ∈ □⁻¹'hT.toFinset | (∃ Ui ∈ Ys, Ui = 【M (□ξ)】) ∧ W ∈ 【M (□ξ)】 });
+        simp [Finset.LO.preboxItr];
       have H : (⋂ ψ : Ψ, 【M ψ】) ∩ (⋂ ξ : Ξ, 【M (□ξ)】) ⊆ (【M φ】 : Set (FilterEqvQuotient M T)) := by calc
         _ = (⋂ ψ : Ψ, 【M ψ】) ∩ (⋂ Ui ∈ Us, Ui) := by
           suffices (⋂ ψ : Ξ, 【M (□ψ)】) = (⋂ Ui ∈ Us, Ui) by congr;

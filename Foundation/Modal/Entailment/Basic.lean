@@ -40,15 +40,15 @@ section Unnecessitation
 
 variable [Unnecessitation 𝓢]
 
-alias unnec := Unnecessitation.unnec
+  alias unnec := Unnecessitation.unnec
 lemma unnec! : 𝓢 ⊢ □φ → 𝓢 ⊢ φ := by rintro ⟨hp⟩; exact ⟨unnec hp⟩
 
-def multiunnec : 𝓢 ⊢! □^[n]φ → 𝓢 ⊢! φ := by
+def multiunnec : 𝓢 ⊢! (□^[n]φ) → 𝓢 ⊢! φ := by
   intro h;
   induction n generalizing φ with
   | zero => simpa;
   | succ n ih => exact unnec $ @ih (□φ) h;
-lemma multiunnec! : 𝓢 ⊢ □^[n]φ → 𝓢 ⊢ φ := by rintro ⟨hp⟩; exact ⟨multiunnec hp⟩
+lemma multiunnec! : 𝓢 ⊢ (□^[n]φ) → 𝓢 ⊢ φ := by rintro ⟨hp⟩; exact ⟨multiunnec hp⟩
 
 end Unnecessitation
 
@@ -690,20 +690,20 @@ end Axioms
 
 section
 
-variable [BasicModalLogicalConnective F] [DecidableEq F]
+variable [DecidableEq F]
 variable {φ ψ χ : F} {Γ Δ : List F}
 variable {𝓢 : S}
 
 instance [Entailment.Minimal 𝓢] [ModalDeMorgan F] [HasAxiomDNE 𝓢] : HasDiaDuality 𝓢 := ⟨by
   intro φ;
-  simp only [Axioms.DiaDuality, ModalDeMorgan.box, DeMorgan.neg];
-  apply E_Id;
+  rw [Axioms.DiaDuality, ModalDeMorgan.neg_box, DeMorgan.neg];
+  exact E_Id;
 ⟩
 
-instance [Entailment.Minimal 𝓢] [DiaAbbrev F] : HasDiaDuality 𝓢 := ⟨by
+instance [Entailment.Minimal 𝓢] [DiaByBox F] : HasDiaDuality 𝓢 := ⟨by
   intro φ;
-  simp only [Axioms.DiaDuality, DiaAbbrev.dia_abbrev];
-  apply E_Id;
+  rw [Axioms.DiaDuality, ←DiaByBox.dia_by_box];
+  exact E_Id;
 ⟩
 
 instance [ModusPonens 𝓢] [HasAxiomT 𝓢] : Unnecessitation 𝓢 := ⟨by

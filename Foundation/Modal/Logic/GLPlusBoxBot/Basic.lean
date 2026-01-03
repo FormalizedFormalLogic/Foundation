@@ -58,7 +58,7 @@ lemma Logic.GLPlusBoxBot.weakerThan_succ {n : ℕ} : (Modal.GLPlusBoxBot (n + 1)
   intro h;
   apply C!_trans ?_ h;
   suffices Modal.GL ⊢ □^[n]⊥ ➝ □^[n](□⊥) by simpa [Function.iterate_succ_apply]
-  apply imply_multibox_distribute'!;
+  apply imply_boxItr_distribute'!;
   cl_prover;
 
 lemma Logic.GLPlusBoxBot.weakerThan_add {n k : ℕ} : (Modal.GLPlusBoxBot (n + k)) ⪯ (Modal.GLPlusBoxBot n) := by

@@ -175,7 +175,7 @@ variable {M : Model} {r : M.World} [M.IsFiniteTree r] [Fintype M]
 
 lemma height_lt_iff_satisfies_boxbot {i : M} :
     M.rank i < n ↔ i ⊧ □^[n] ⊥ := by
-  simp only [Frame.height_lt_iff_relItr, Formula.Kripke.Satisfies.multibox_def]
+  simp only [Frame.height_lt_iff_relItr, Formula.Kripke.Satisfies.boxItr_def]
   simp
 
 lemma height_pos_of_dia {i : M} (hA : i ⊧ ◇ A) : 0 < M.rank i := by

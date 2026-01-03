@@ -121,10 +121,10 @@ instance : Modal.K ⪱ Modal.K4n n := by
       . simp;
       . apply Satisfies.not_imp_def.mpr;
         constructor;
-        . apply Satisfies.multibox_def.mpr;
+        . apply Satisfies.boxItr_def.mpr;
           intro y R0y;
           simp [Semantics.Models, Satisfies, M, counterframe.iff_rel_from.mp R0y];
-        . apply Satisfies.multibox_def.not.mpr;
+        . apply Satisfies.boxItr_def.not.mpr;
           push_neg;
           use ⟨(n + 1), by omega⟩;
           constructor;
@@ -152,13 +152,13 @@ lemma succ_strictlyWeakerThan : Modal.K4n (n + 1) ⪱ Modal.K4n n := by
         infer_instance;
       . apply Satisfies.not_imp_def.mpr;
         constructor;
-        . apply Satisfies.multibox_def.mpr;
+        . apply Satisfies.boxItr_def.mpr;
           intro y R0y;
           replace R0y := counterframe.iff_rel_from_zero.mp R0y;
           simp only [Semantics.Models, Satisfies, counterframe.last, ne_eq, M];
           rintro rfl;
           simp at R0y;
-        . apply Satisfies.multibox_def.not.mpr;
+        . apply Satisfies.boxItr_def.not.mpr;
           push_neg;
           use counterframe.last;
           constructor;

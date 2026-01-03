@@ -14,7 +14,7 @@ def multire {n} (h : 𝓢 ⊢! φ ⭤ ψ) : 𝓢 ⊢! □^[n]φ ⭤ □^[n]ψ :=
   induction n with
   | zero => simp only [Function.iterate_zero, id_eq]; exact h;
   | succ n ih =>
-    simp only [Box.multibox_succ];
+    simp only [Box.boxItr_succ];
     apply re ih;
 omit [DecidableEq F] in lemma multire! {n} (h : 𝓢 ⊢ φ ⭤ ψ) : 𝓢 ⊢ □^[n]φ ⭤ □^[n]ψ := ⟨multire h.some⟩
 
@@ -51,64 +51,64 @@ def multiDiaDuality : 𝓢 ⊢! ◇^[n]φ ⭤ ∼(□^[n](∼φ)) := by
     simp only [Function.iterate_zero, id_eq];
     apply dn;
   | succ n ih =>
-    simp only [Dia.multidia_succ, Box.multibox_succ];
+    simp only [Dia.diaItr_succ, Box.boxItr_succ];
     apply E_trans $ diaDuality (φ := ◇^[n]φ);
     apply ENN_of_E;
     apply re;
     apply E_intro;
     . exact CN_of_CN_left $ K_right ih;
     . exact CN_of_CN_right $ K_left ih;
-lemma multidia_duality! : 𝓢 ⊢ ◇^[n]φ ⭤ ∼(□^[n](∼φ)) := ⟨multiDiaDuality⟩
+lemma diaItr_duality! : 𝓢 ⊢ ◇^[n]φ ⭤ ∼(□^[n](∼φ)) := ⟨multiDiaDuality⟩
 
-def multidiaDuality_mp : 𝓢 ⊢! ◇^[n]φ ➝ ∼(□^[n](∼φ)) := K_left multiDiaDuality
-def diaDuality_mp : 𝓢 ⊢! ◇φ ➝ ∼(□(∼φ)) := multidiaDuality_mp (n := 1)
+def diaItrDuality_mp : 𝓢 ⊢! ◇^[n]φ ➝ ∼(□^[n](∼φ)) := K_left multiDiaDuality
+def diaDuality_mp : 𝓢 ⊢! ◇φ ➝ ∼(□(∼φ)) := diaItrDuality_mp (n := 1)
 
-def multidiaDuality_mpr : 𝓢 ⊢! ∼(□^[n](∼φ)) ➝ ◇^[n]φ := K_right multiDiaDuality
-def diaDuality_mpr : 𝓢 ⊢! ∼(□(∼φ)) ➝ ◇φ := multidiaDuality_mpr (n := 1)
+def diaItrDuality_mpr : 𝓢 ⊢! ∼(□^[n](∼φ)) ➝ ◇^[n]φ := K_right multiDiaDuality
+def diaDuality_mpr : 𝓢 ⊢! ∼(□(∼φ)) ➝ ◇φ := diaItrDuality_mpr (n := 1)
 
 def diaDuality'.mp (h : 𝓢 ⊢! ◇φ) : 𝓢 ⊢! ∼(□(∼φ)) := (K_left diaDuality) ⨀ h
 def diaDuality'.mpr (h : 𝓢 ⊢! ∼(□(∼φ))) : 𝓢 ⊢! ◇φ := (K_right diaDuality) ⨀ h
 
-@[simp] lemma multidia_duality!_mp : 𝓢 ⊢ ◇^[n]φ ➝ ∼(□^[n](∼φ)) := C_of_E_mp! multidia_duality!
-@[simp] lemma dia_duality!_mp : 𝓢 ⊢ ◇φ ➝ ∼(□(∼φ)) := multidia_duality!_mp (n := 1)
+@[simp] lemma diaItr_duality!_mp : 𝓢 ⊢ ◇^[n]φ ➝ ∼(□^[n](∼φ)) := C_of_E_mp! diaItr_duality!
+@[simp] lemma dia_duality!_mp : 𝓢 ⊢ ◇φ ➝ ∼(□(∼φ)) := diaItr_duality!_mp (n := 1)
 
-@[simp] lemma multidia_duality!_mpr : 𝓢 ⊢ ∼(□^[n](∼φ)) ➝ ◇^[n]φ := C_of_E_mpr! multidia_duality!
-@[simp] lemma dia_duality!_mpr : 𝓢 ⊢ ∼(□(∼φ)) ➝ ◇φ := multidia_duality!_mpr (n := 1)
+@[simp] lemma diaItr_duality!_mpr : 𝓢 ⊢ ∼(□^[n](∼φ)) ➝ ◇^[n]φ := C_of_E_mpr! diaItr_duality!
+@[simp] lemma dia_duality!_mpr : 𝓢 ⊢ ∼(□(∼φ)) ➝ ◇φ := diaItr_duality!_mpr (n := 1)
 
 omit [DecidableEq F] in lemma dia_duality'! : 𝓢 ⊢ ◇φ ↔ 𝓢 ⊢ ∼(□(∼φ)) := ⟨λ h => ⟨diaDuality'.mp h.some⟩, λ h => ⟨diaDuality'.mpr h.some⟩⟩
 
-lemma multidia_duality'! : 𝓢 ⊢ ◇^[n]φ ↔ 𝓢 ⊢ ∼(□^[n](∼φ)) := by
+lemma diaItr_duality'! : 𝓢 ⊢ ◇^[n]φ ↔ 𝓢 ⊢ ∼(□^[n](∼φ)) := by
   constructor;
-  . intro h; exact (K!_left multidia_duality!) ⨀ h;
-  . intro h; exact (K!_right multidia_duality!) ⨀ h;
+  . intro h; exact (K!_left diaItr_duality!) ⨀ h;
+  . intro h; exact (K!_right diaItr_duality!) ⨀ h;
 
 
-def multiboxDuality : 𝓢 ⊢! □^[n]φ ⭤ ∼(◇^[n](∼φ)) := by
+def boxItrDuality : 𝓢 ⊢! □^[n]φ ⭤ ∼(◇^[n](∼φ)) := by
   induction n with
   | zero =>
     simp only [Function.iterate_zero, id_eq];
     apply dn;
   | succ n ih =>
-    simp only [Box.multibox_succ, Dia.multidia_succ];
+    simp only [Box.boxItr_succ, Dia.diaItr_succ];
     apply E_trans (re ih);
     apply EN_of_EN_left;
     exact E_symm $ diaDuality;
-@[simp] lemma multibox_duality! : 𝓢 ⊢ □^[n]φ ⭤ ∼(◇^[n](∼φ)) := ⟨multiboxDuality⟩
+@[simp] lemma boxItr_duality! : 𝓢 ⊢ □^[n]φ ⭤ ∼(◇^[n](∼φ)) := ⟨boxItrDuality⟩
 
-def multiboxDuality_mp: 𝓢 ⊢! □^[n]φ ➝ ∼(◇^[n](∼φ)) := K_left multiboxDuality
-def boxDuality_mp : 𝓢 ⊢! □φ ➝ ∼(◇(∼φ)) := multiboxDuality_mp (n := 1)
+def boxItrDuality_mp: 𝓢 ⊢! □^[n]φ ➝ ∼(◇^[n](∼φ)) := K_left boxItrDuality
+def boxDuality_mp : 𝓢 ⊢! □φ ➝ ∼(◇(∼φ)) := boxItrDuality_mp (n := 1)
 
-def multiboxDuality_mpr: 𝓢 ⊢! ∼(◇^[n](∼φ)) ➝ □^[n]φ := K_right multiboxDuality
-def boxDuality_mpr : 𝓢 ⊢! ∼(◇(∼φ)) ➝ □φ := multiboxDuality_mpr (n := 1)
+def boxItrDuality_mpr: 𝓢 ⊢! ∼(◇^[n](∼φ)) ➝ □^[n]φ := K_right boxItrDuality
+def boxDuality_mpr : 𝓢 ⊢! ∼(◇(∼φ)) ➝ □φ := boxItrDuality_mpr (n := 1)
 
 
-@[simp] lemma multibox_duality_mp! : 𝓢 ⊢ □^[n]φ ➝ ∼(◇^[n](∼φ)) := K!_left multibox_duality!
-lemma multibox_duality_mp'! (h : 𝓢 ⊢ □^[n]φ) : 𝓢 ⊢ ∼(◇^[n](∼φ)) := multibox_duality_mp! ⨀ h
+@[simp] lemma boxItr_duality_mp! : 𝓢 ⊢ □^[n]φ ➝ ∼(◇^[n](∼φ)) := K!_left boxItr_duality!
+lemma boxItr_duality_mp'! (h : 𝓢 ⊢ □^[n]φ) : 𝓢 ⊢ ∼(◇^[n](∼φ)) := boxItr_duality_mp! ⨀ h
 
-@[simp] lemma multibox_duality_mpr! : 𝓢 ⊢ ∼(◇^[n](∼φ)) ➝ □^[n]φ := K!_right multibox_duality!
-lemma multibox_duality_mpr'! (h : 𝓢 ⊢ ∼(◇^[n](∼φ))) : 𝓢 ⊢ □^[n]φ := multibox_duality_mpr! ⨀ h
+@[simp] lemma boxItr_duality_mpr! : 𝓢 ⊢ ∼(◇^[n](∼φ)) ➝ □^[n]φ := K!_right boxItr_duality!
+lemma boxItr_duality_mpr'! (h : 𝓢 ⊢ ∼(◇^[n](∼φ))) : 𝓢 ⊢ □^[n]φ := boxItr_duality_mpr! ⨀ h
 
-def boxDuality : 𝓢 ⊢! □φ ⭤ ∼(◇(∼φ)) := multiboxDuality (n := 1)
+def boxDuality : 𝓢 ⊢! □φ ⭤ ∼(◇(∼φ)) := boxItrDuality (n := 1)
 @[simp] lemma box_duality! : 𝓢 ⊢ □φ ⭤ ∼(◇(∼φ)) := ⟨boxDuality⟩
 
 @[simp] lemma boxDuality_mp! : 𝓢 ⊢ □φ ➝ ∼(◇(∼φ)) := ⟨boxDuality_mp⟩
