@@ -7,12 +7,11 @@ namespace LO
 
 class ForcingRelation (W : Type*) (F : outParam Type*) where
   Forces : W → F → Prop
-
 infix:45 " ⊩ " => ForcingRelation.Forces
+
 
 class ForcingExists (W : Type*) (α : outParam Type*) where
   Forces : W → α → Prop
-
 infix:45 " ⊩↓ " => ForcingExists.Forces
 
 namespace ForcingRelation
@@ -20,48 +19,62 @@ namespace ForcingRelation
 variable {W : Type*} {F : Type*} [ForcingRelation W F] [LogicalConnective F]
 
 abbrev NotForces (w : W) (φ : F) : Prop := ¬w ⊩ φ
-
 infix:45 " ⊮ " => NotForces
 
 variable (W)
 
 class BasicSemantics where
-  verum (w : W) : w ⊩ ⊤
-  falsum (w : W) : ¬w ⊩ ⊥
-  and (w : W) : w ⊩ φ ⋏ ψ ↔ w ⊩ φ ∧ w ⊩ ψ
-  or (w : W) : w ⊩ φ ⋎ ψ ↔ w ⊩ φ ∨ w ⊩ ψ
+  verum {w : W} : w ⊩ ⊤
+  falsum {w : W} : ¬w ⊩ ⊥
+  and {φ ψ} {w : W} : w ⊩ φ ⋏ ψ ↔ w ⊩ φ ∧ w ⊩ ψ
+  or {φ ψ} {w : W} : w ⊩ φ ⋎ ψ ↔ w ⊩ φ ∨ w ⊩ ψ
 
 class IntKripke (R : outParam (W → W → Prop)) extends BasicSemantics W where
-  not (w : W) : w ⊩ ∼φ ↔ (∀ v, R w v → ¬v ⊩ φ)
-  imply (w : W) : w ⊩ φ ➝ ψ ↔ (∀ v, R w v → v ⊩ φ → v ⊩ ψ)
-  monotone {w : W} : w ⊩ φ → ∀ v, R w v → v ⊩ φ
+  not {φ} {w : W} : w ⊩ ∼φ ↔ (∀ v, R w v → ¬v ⊩ φ)
+  imply {φ ψ} {w : W} : w ⊩ φ ➝ ψ ↔ (∀ v, R w v → v ⊩ φ → v ⊩ ψ)
+  monotone {φ} {w : W} : w ⊩ φ → ∀ v, R w v → v ⊩ φ
 
 variable {W}
 
-attribute [simp, grind]
-  BasicSemantics.verum BasicSemantics.falsum BasicSemantics.and
-  BasicSemantics.or IntKripke.imply IntKripke.not
+attribute [simp, grind .]
+  BasicSemantics.verum
+  BasicSemantics.falsum
+
+attribute [simp, grind .]
+  BasicSemantics.and
+  BasicSemantics.or
+
+attribute [simp, grind .]
+  IntKripke.imply
+  IntKripke.not
+
+attribute [grind <=]
+  IntKripke.monotone
 
 variable (W)
 
-abbrev AllForces (φ : F) : Prop := ∀ w : W, w ⊩ φ
-
+@[grind] def AllForces (φ : F) : Prop := ∀ w : W, w ⊩ φ
 infix:45 " ∀⊩ " => AllForces
 
-abbrev AllForcesSet (s : S) [AdjunctiveSet F S] : Prop := ∀ φ ∈ s, W ∀⊩ φ
-
+@[grind] def AllForcesSet (s : S) [AdjunctiveSet F S] : Prop := ∀ φ ∈ s, W ∀⊩ φ
 infix:45 " ∀⊩* " => AllForcesSet
 
 variable {W}
 
 namespace AllForces
 
-@[simp] lemma verum [BasicSemantics W] : W ∀⊩ ⊤ := fun _ ↦ by simp
+@[simp, grind .] lemma verum [BasicSemantics W] : W ∀⊩ ⊤ := fun _ ↦ by simp
+@[simp, grind .] lemma falsum [BasicSemantics W] [Nonempty W] : ¬W ∀⊩ ⊥ := fun h ↦ by simpa using h (Nonempty.some inferInstance)
 
-@[simp] lemma falsum [BasicSemantics W] [Inhabited W] : ¬W ∀⊩ ⊥ := fun h ↦ by simpa using h default
-
-@[simp] lemma and [BasicSemantics W] : W ∀⊩ φ ⋏ ψ ↔ W ∀⊩ φ ∧ W ∀⊩ ψ := by
-  simp [AllForces]; grind
+@[simp, grind =]
+lemma and {φ ψ} [BasicSemantics W] : W ∀⊩ φ ⋏ ψ ↔ W ∀⊩ φ ∧ W ∀⊩ ψ := by
+  constructor;
+  . intro h;
+    constructor <;>
+    . intro w;
+      have := h w;
+      grind;
+  . grind;
 
 end AllForces
 
