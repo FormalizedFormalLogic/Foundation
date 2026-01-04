@@ -59,7 +59,7 @@ lemma chain_length : extendRoot.chain (F := F) (r := r) (n := n).length = n := b
 
 @[simp]
 lemma chain_IsChain : List.IsChain (· ≺ ·) (extendRoot.chain (F := F) (r := r) (n := n)) := by
-  apply List.chain'_map_of_chain' (R := λ a b => a < b);
+  apply List.isChain_map_of_isChain (R := λ a b => a < b);
   . tauto;
   . simp;
 
@@ -246,7 +246,7 @@ variable {M : Kripke.Model} [Finite M.World] [IsTrans _ M.Rel] [IsIrrefl _ M.Rel
 variable {A : Formula _}
 variable {l : List M.World} {n : ℕ+}
 
-lemma atmost_one_validates_axiomT_in_irrefl_trans_chain' (l_chain : List.IsChain (· ≺ ·) l) :
+lemma atmost_one_validates_axiomT_in_irrefl_trans_isChain (l_chain : List.IsChain (· ≺ ·) l) :
     (∀ x ∈ l, x ⊧ □A ➝ A) ∨ (∃! x ∈ l, ¬x ⊧ □A ➝ A) := by
   apply or_iff_not_imp_left.mpr;
   push_neg;
@@ -268,7 +268,7 @@ lemma atmost_one_validates_axiomT_in_irrefl_trans_chain
     haveI : Fintype M.World := Fintype.ofFinite _;
     Finset.card { x | x ∈ l ∧ ¬x ⊧ (□A ➝ A) } ≤ 1 := by
   apply Nat.le_one_iff_eq_zero_or_eq_one.mpr;
-  rcases atmost_one_validates_axiomT_in_irrefl_trans_chain' (l_chain := l_chain) (A := A) with h | h;
+  rcases atmost_one_validates_axiomT_in_irrefl_trans_isChain (l_chain := l_chain) (A := A) with h | h;
   . left;
     apply Finset.card_filter_eq_zero_iff.mpr;
     simp_all;

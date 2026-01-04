@@ -404,11 +404,8 @@ lemma iff_provable_include₁ : T *⊢[𝓢] φ ↔ ∀ t : SaturatedConsistentT
     by_contra! hC;
     obtain ⟨t, ht⟩ := lindenbaum (𝓢 := 𝓢) (t₀ := ⟨T, {φ}⟩) $ by
       intro Γ Δ hΓ hΔ;
-      revert hC;
-      contrapose;
-      simp only [not_not];
-      intro h;
-      replace h : T *⊢[𝓢] Δ.disj := Context.weakening! (by simpa using hΓ) $ FConj_DT.mp h;
+      contrapose! hC;
+      replace h : T *⊢[𝓢] Δ.disj := Context.weakening! (by simpa using hΓ) $ FConj_DT.mp hC;
       rcases Set.subset_singleton_iff_eq.mp hΔ with (hΔ | hΔ);
       . simp only [Finset.coe_eq_empty] at hΔ;
         subst hΔ;

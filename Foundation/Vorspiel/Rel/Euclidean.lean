@@ -9,37 +9,37 @@ class IsRightEuclidean (R : Rel α α) where
 
 lemma IsRightEuclidean.reucl' [IsRightEuclidean R] {x y z : α} (Rxy : R x y) (Rxz : R x z) : R z y := reucl Rxz Rxy
 
-instance [IsSymm _ R] [IsTrans _ R] : IsRightEuclidean R := ⟨by
+instance [Std.Symm R] [IsTrans _ R] : IsRightEuclidean R := ⟨by
   intro x y z Rxy Rxz;
-  apply IsSymm.symm;
+  apply Std.Symm.symm;
   apply IsTrans.trans;
-  . exact IsSymm.symm _ _ Rxz;
+  . exact Std.Symm.symm _ _ Rxz;
   . assumption;
 ⟩
 
 
-instance [IsRefl _ R] [IsRightEuclidean R] : IsSymm α R := ⟨by
+instance [IsRefl _ R] [IsRightEuclidean R] : Std.Symm R := ⟨by
   intro x y Rxy;
   apply IsRightEuclidean.reucl Rxy;
   . apply IsRefl.refl
 ⟩
 
-instance [IsSymm _ R] [IsRightEuclidean R] : IsTrans α R := ⟨by
+instance [Std.Symm R] [IsRightEuclidean R] : IsTrans α R := ⟨by
   intro x y z Rxy Ryz;
-  apply IsSymm.symm;
+  apply Std.Symm.symm;
   apply IsRightEuclidean.reucl;
   . exact Ryz;
-  . exact IsSymm.symm _ _ Rxy;
+  . exact Std.Symm.symm _ _ Rxy;
 ⟩
 
 instance [IsRefl _ R] [IsRightEuclidean R] : IsTrans α R := inferInstance
 
-instance [IsSymm _ R] [IsTrans _ R] [IsSerial R] : IsRefl α R := ⟨by
+instance [Std.Symm R] [IsTrans _ R] [IsSerial R] : IsRefl α R := ⟨by
   rintro x;
   obtain ⟨y, Rxy⟩ := IsSerial.serial (R := R) x;
   apply IsTrans.trans;
   . exact Rxy;
-  . apply IsSymm.symm; exact Rxy;
+  . apply Std.Symm.symm; exact Rxy;
 ⟩
 
 
