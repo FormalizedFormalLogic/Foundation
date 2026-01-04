@@ -21,35 +21,34 @@ def finIdxOf (l : List α) (hx : x ∈ l) : Fin l.length := ⟨l.idxOf x, idxOf_
 
 lemma neq_findIdxOf_of_neq {hx : x ∈ l} {hy : y ∈ l} (exy : x ≠ y) : l.finIdxOf hx ≠ l.finIdxOf hy := by
   simp only [finIdxOf, ne_eq, Fin.mk.injEq];
-  apply List.idxOf_inj hx hy |>.not.mpr;
-  exact exy;
+  apply List.idxOf_inj _ |>.not.mpr <;> grind;
 
 end
 
 
 section
 
-lemma range.le_chain'_succ : List.IsChain (· < ·) (List.range (n + 1)) := by
-  apply List.chain'_range_succ (· < ·) n |>.mpr;
+lemma range.le_isChain_succ : List.IsChain (· < ·) (List.range (n + 1)) := by
+  apply List.isChain_range_succ (· < ·) n |>.mpr;
   omega;
 
 @[simp]
-lemma range.le_chain' : List.IsChain (· < ·) (List.range n) := by
+lemma range.le_isChain : List.IsChain (· < ·) (List.range n) := by
   match n with
-  | 0 => simp [List.chain'_nil];
-  | n + 1 => apply le_chain'_succ;
+  | 0 => simp;
+  | n + 1 => apply le_isChain_succ;
 
-lemma finRange.le_chain'_succ : List.IsChain (· < ·) (List.finRange (n + 1)) := by
+lemma finRange.le_isChain_succ : List.IsChain (· < ·) (List.finRange (n + 1)) := by
   rw [finRange_succ];
   induction n with
   | zero => simp [finRange]
   | succ n ih =>
     rw [List.finRange_succ, List.map]
-    apply List.chain'_append_cons_cons (α := Fin (n + 2)) (l₁ := []) |>.mpr;
+    apply List.isChain_append_cons_cons (α := Fin (n + 2)) (l₁ := []) |>.mpr;
     refine ⟨?_, ?_, ?_⟩;
     . tauto;
     . tauto;
-    . have := @List.chain'_map_of_chain'
+    . have := @List.isChain_map_of_isChain
         (α := Fin (n + 1)) (β := Fin (n + 2)) (R := (· < ·)) (S := (· < ·))
         (f := Fin.succ)
         (by simp)
@@ -58,10 +57,10 @@ lemma finRange.le_chain'_succ : List.IsChain (· < ·) (List.finRange (n + 1)) :
       exact ih;
 
 @[simp]
-lemma finRange.le_chain' : List.IsChain (· < ·) (List.finRange n) := by
+lemma finRange.le_isChain : List.IsChain (· < ·) (List.finRange n) := by
   match n with
   | 0 => simp [List.finRange_zero]
-  | n + 1 => apply finRange.le_chain'_succ;
+  | n + 1 => apply finRange.le_isChain_succ;
 
 end
 
@@ -71,7 +70,7 @@ namespace IsChain
 variable {R} [IsTrans α R] {l : List α} {i j : Fin l.length}
 
 lemma of_lt (h : List.IsChain R l) (hij : i < j) : R (l.get i) (l.get j) :=
-  List.pairwise_iff_get.mp (List.chain'_iff_pairwise.mp h) _ _ hij
+  List.pairwise_iff_get.mp (List.isChain_iff_pairwise.mp h) _ _ hij
 
 lemma connected_of_trans' (h : List.IsChain R l) (eij : i ≠ j) : R (l.get i) (l.get j) ∨ R (l.get j) (l.get i) := by
   rcases Nat.lt_trichotomy i j with (_ | _ | _);
@@ -113,21 +112,21 @@ lemma concat_head?_eq_head (lh : l ≠ []) : (l.concat a).head? = some (l.head l
   | [] => contradiction;
   | _::_ => simp;
 
-lemma chain'_concat :  List.IsChain R (l.concat a) ↔ List.IsChain R l ∧ ∀ x ∈ l.getLast?, R x a := by
+lemma isChain_concat :  List.IsChain R (l.concat a) ↔ List.IsChain R l ∧ ∀ x ∈ l.getLast?, R x a := by
   rw [List.concat_eq_append]
   constructor;
   . intro h;
-    simpa using List.chain'_append.mp h;
+    simpa using List.isChain_append.mp h;
   . rintro ⟨h₁, h₂⟩;
-    apply List.chain'_append.mpr;
+    apply List.isChain_append.mpr;
     refine ⟨h₁, ?_, ?_⟩;
     . simp;
     . intro x hx;
       have : R x a := h₂ x hx;
       simpa;
 
-lemma chain'_concat_of_not_nil (hl : l ≠ []) : List.IsChain R (l.concat a) ↔ List.IsChain R l ∧ R (l.getLast hl) a := by
-  apply Iff.trans List.chain'_concat;
+lemma isChain_concat_of_not_nil (hl : l ≠ []) : List.IsChain R (l.concat a) ↔ List.IsChain R l ∧ R (l.getLast hl) a := by
+  apply Iff.trans List.isChain_concat;
   suffices (∀ x ∈ l.getLast?, R x a) ↔ R (l.getLast hl) a by tauto;
   constructor;
   . intro h;
@@ -141,7 +140,7 @@ section
 
 variable [DecidableEq α]
 
-lemma rel_head_of_chain'_trans [IsTrans _ R] (h : List.IsChain R l) (lh : l ≠ []) : ∀ x ∈ l, x ≠ l.head lh → R (l.head lh) x := by
+lemma rel_head_of_isChain_trans [IsTrans _ R] (h : List.IsChain R l) (lh : l ≠ []) : ∀ x ∈ l, x ≠ l.head lh → R (l.head lh) x := by
   intro x hx₁ hx₂;
   let i : Fin l.length := ⟨0, List.length_pos_of_ne_nil lh⟩;
   let j : Fin l.length := List.finIdxOf _ hx₁;
@@ -157,14 +156,14 @@ lemma rel_head_of_chain'_trans [IsTrans _ R] (h : List.IsChain R l) (lh : l ≠ 
       have := List.get_finIdxOf (hx := hx₁) |>.symm;
       rwa [←hC] at this;
 
-lemma rel_head_of_chain'_preorder [IsPreorder _ R] (h : List.IsChain R l) (lh : l ≠ []) : ∀ x ∈ l, R (l.head lh) x := by
+lemma rel_head_of_isChain_preorder [IsPreorder _ R] (h : List.IsChain R l) (lh : l ≠ []) : ∀ x ∈ l, R (l.head lh) x := by
   intro x hx;
   by_cases e : x = l.head lh;
   . subst e;
     apply refl;
-  . apply rel_head_of_chain'_trans h lh <;> assumption;
+  . apply rel_head_of_isChain_trans h lh <;> assumption;
 
-lemma rel_getLast_of_chain'_trans [IsTrans _ R] (h : List.IsChain R l) (lh : l ≠ []) : ∀ x ∈ l, x ≠ l.getLast lh → R x (l.getLast lh) := by
+lemma rel_getLast_of_isChain_trans [IsTrans _ R] (h : List.IsChain R l) (lh : l ≠ []) : ∀ x ∈ l, x ≠ l.getLast lh → R x (l.getLast lh) := by
   intro x hx₁ hx₂;
   have : NeZero l.length := ⟨List.length_eq_zero_iff.not.mpr lh⟩;
   let i : Fin l.length := List.finIdxOf l hx₁;
@@ -181,12 +180,12 @@ lemma rel_getLast_of_chain'_trans [IsTrans _ R] (h : List.IsChain R l) (lh : l �
       have := List.get_finIdxOf (hx := hx₁) |>.symm;
       rwa [hC] at this;
 
-lemma rel_getLast_of_chain'_preorder [IsPreorder _ R] (h : List.IsChain R l) (lh : l ≠ []) : ∀ x ∈ l, R x (l.getLast lh) := by
+lemma rel_getLast_of_isChain_preorder [IsPreorder _ R] (h : List.IsChain R l) (lh : l ≠ []) : ∀ x ∈ l, R x (l.getLast lh) := by
   intro x hx;
   by_cases e : x = l.getLast lh;
   . subst e;
     apply refl;
-  . apply rel_getLast_of_chain'_trans h lh <;> assumption;
+  . apply rel_getLast_of_isChain_trans h lh <;> assumption;
 
 end
 

@@ -58,9 +58,9 @@ instance [F.IsTransitive] : F.IsGeachConvergent ⟨0, 2, 1, 0⟩ where
     exact IsTrans.trans _ _ _ Rxy Ryz
 
 
-protected abbrev IsSymmetric (F : Frame) := _root_.IsSymm _ F.Rel
+protected abbrev IsSymmetric (F : Frame) := _root_.Std.Symm F.Rel
 
-lemma symm [F.IsSymmetric] : ∀ {x y : F.World}, x ≺ y → y ≺ x := by apply IsSymm.symm
+lemma symm [F.IsSymmetric] : ∀ {x y : F.World}, x ≺ y → y ≺ x := by apply Std.Symm.symm
 
 @[simp]
 instance [F.IsGeachConvergent ⟨0, 1, 0, 1⟩] : F.IsSymmetric where
@@ -72,7 +72,7 @@ instance [F.IsSymmetric] : F.IsGeachConvergent ⟨0, 1, 0, 1⟩ where
   gconv x y z Rxy Rxz := by
     simp_all only [Rel.Iterate.iff_zero, Rel.Iterate.iff_succ, exists_eq_right, exists_eq_left'];
     subst Rxy;
-    exact _root_.IsSymm.symm _ _ Rxz;
+    exact _root_.Std.Symm.symm _ _ Rxz;
 
 
 protected abbrev IsEuclidean (F : Frame) := _root_.IsRightEuclidean F.Rel

@@ -128,10 +128,10 @@ instance [IsTrans _ R] : IsTrans α (R.ReflGen) := ⟨by
   . exact Relation.ReflGen.single $ IsTrans.trans a b c Rab Rbc;
 ⟩
 
-instance [IsSymm _ R] : IsSymm α (ReflGen R) := ⟨by
+instance [Std.Symm R] : Std.Symm (ReflGen R) := ⟨by
   rintro a b (rfl | Rab);
   . exact Relation.ReflGen.refl;
-  . exact Relation.ReflGen.single $ IsSymm.symm _ _ Rab;
+  . apply Relation.ReflGen.single $ Std.Symm.symm _ _ Rab;
 ⟩
 
 instance [IsIrrefl _ R] [IsTrans _ R] : IsAntisymm α (ReflGen R) := ⟨by
@@ -198,14 +198,14 @@ lemma unwrap [IsTrans _ R] (Rxy : R.TransGen x y) : R x y := by
 
 instance [IsRefl _ R] : IsRefl α R.TransGen := ⟨fun x ↦ Relation.TransGen.single (IsRefl.refl x)⟩
 
-instance [IsSymm _ R] : IsSymm α R.TransGen := ⟨by
+instance [Std.Symm R] : Std.Symm R.TransGen := ⟨by
   rintro x y Rxy;
   induction Rxy with
   | single Rxy =>
     apply single;
-    apply IsSymm.symm _ _ Rxy;
+    apply Std.Symm.symm _ _ Rxy;
   | tail _ hyz ih =>
-    exact trans (Relation.TransGen.single $ (IsSymm.symm _ _) hyz) ih
+    exact trans (Relation.TransGen.single $ (Std.Symm.symm _ _) hyz) ih
 ⟩
 
 instance [IsTrans _ R] [IsAntisymm _ R] : IsAntisymm α R.TransGen := ⟨by
@@ -250,11 +250,11 @@ lemma unwrap [IsRefl _ R] [IsTrans _ R] (Rxy : (R.ReflTransGen) x y) : R x y := 
   obtain ⟨n, Rxy⟩ := ReflTransGen.exists_iterate.mp Rxy;
   exact unwrap_of_refl_trans Rxy;
 
-instance [IsSymm _ R] : IsSymm _ (R.ReflTransGen) := ⟨by
+instance [Std.Symm R] : Std.Symm (R.ReflTransGen) := ⟨by
   rintro x y Rxy;
   induction Rxy with
   | refl => apply Relation.ReflTransGen.refl;
-  | @tail y z Rxy Ryz Ryx => exact Relation.ReflTransGen.head (IsSymm.symm _ _ Ryz) Ryx;
+  | @tail y z Rxy Ryz Ryx => exact Relation.ReflTransGen.head (Std.Symm.symm _ _ Ryz) Ryx;
 ⟩
 
 end ReflTransGen

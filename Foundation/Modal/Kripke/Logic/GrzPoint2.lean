@@ -182,7 +182,6 @@ instance : Complete Modal.GrzPoint2 FrameClass.finite_GrzPoint2 := ⟨by
       ps_convergent := by
         rintro x y z Rxy Ryz;
         use (Sum.inr ());
-        simp [M'];
     }
   . have H₁ : ∀ a ∈ φ.atoms, ∀ t ∈ RM.toFrame.terminals, ∀ t' ∈ RM.toFrame.terminals, RM t a → RM t' a := by
       intro a ha t t_terminal t' t'_terminal hy;

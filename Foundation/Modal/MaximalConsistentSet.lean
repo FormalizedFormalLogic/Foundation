@@ -475,10 +475,8 @@ lemma iff_mem_boxItr : (□^[n]φ ∈ Ω) ↔ (∀ {Ω' : MaximalConsistentSet �
           obtain ⟨χ, hr₁, rfl⟩ := List.LO.exists_of_mem_boxItr hq;
           simpa using hΓ₁ χ hr₁;
         );
-        revert this;
-        contrapose;
-        simp only [not_not];
-        exact C!_trans collect_boxItr_conj!;
+        contrapose! this;
+        exact C!_trans collect_boxItr_conj! this;
       contradiction;
     );
     existsi Ω';

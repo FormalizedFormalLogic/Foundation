@@ -60,8 +60,7 @@ lemma finite (T_finite : T.Finite) : Finite (FilterEqvQuotient M T) := by
 instance : Nonempty (FilterEqvQuotient M T) := ⟨⟦M.toFrame.world_nonempty.some⟧⟩
 
 lemma iff_of_eq (h : (⟦x⟧ : FilterEqvQuotient M T) = ⟦y⟧) : ∀ φ ∈ T, x ⊧ φ ↔ y ⊧ φ := by
-  simp [FilterEqvSetoid, filterEquiv] at h;
-  tauto;
+  simp_all [FilterEqvSetoid, filterEquiv, Quotient.eq];
 
 end FilterEqvQuotient
 

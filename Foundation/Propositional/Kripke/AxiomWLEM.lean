@@ -142,7 +142,7 @@ instance [Entailment.HasAxiomWLEM 𝓢] : (canonicalFrame 𝓢).IsPiecewiseStron
     tauto;
 
   have nmem_nΘz_z : ∼Θz.conj ∉ z.1.1 := not_mem₁_neg_of_mem₁ mem_Θz_z;
-  have nmem_nΘz_x : ∼Θz.conj ∉ x.1.1 := Set.not_mem_subset Rxz nmem_nΘz_z;
+  have nmem_nΘz_x : ∼Θz.conj ∉ x.1.1 := Set.notMem_subset Rxz nmem_nΘz_z;
   have mem_nnΘz_x : ∼∼Θz.conj ∈ x.1.1 := or_iff_not_imp_left.mp (iff_mem₁_or.mp $ mem₁_of_provable $ wlem!) nmem_nΘz_x;
 
   exact mdp₁_mem mem_nnΘz_x $ mdp_mem₁_provable this mem_Θx_x;

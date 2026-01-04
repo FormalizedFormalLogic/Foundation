@@ -158,8 +158,7 @@ lemma iff_consistent_empty_singleton₂ : Tableau.Consistent 𝓢 (∅, {φ}) �
   convert iff_consistent_insert₂ (𝓢 := 𝓢) (T := ∅) (U := ∅) (φ := φ);
   . simp;
   . constructor;
-    . contrapose;
-      push_neg;
+    . contrapose!;
       rintro ⟨Γ, Δ, hΓ, hΔ, h⟩;
       simp_all only [Set.subset_empty_iff, Finset.coe_eq_empty, Finset.conj_empty, Finset.disj_empty, not_not];
       simpa using A!_cases C!_id efq! ((by simpa using h) ⨀ verum!);
@@ -392,13 +391,11 @@ lemma equality_of₁ (e₁ : t₁.1.1 = t₂.1.1) : t₁ = t₂ := by
 lemma equality_of₂ (e₂ : t₁.1.2 = t₂.1.2) : t₁ = t₂ := equality_of₁ $ maximal_duality.mpr e₂
 
 lemma ne₁_of_ne : t₁ ≠ t₂ → t₁.1.1 ≠ t₂.1.1 := by
-  contrapose;
-  push_neg;
+  contrapose!;
   exact equality_of₁;
 
 lemma ne₂_of_ne : t₁ ≠ t₂ → t₁.1.2 ≠ t₂.1.2 := by
-  contrapose;
-  push_neg;
+  contrapose!;
   exact equality_of₂;
 
 lemma intro_equality (h₁ : ∀ {φ}, φ ∈ t₁.1.1 → φ ∈ t₂.1.1) (h₂ : ∀ {φ}, φ ∈ t₁.1.2 → φ ∈ t₂.1.2) : t₁ = t₂ := by
@@ -435,8 +432,7 @@ lemma iff_provable_include₁ : T *⊢[𝓢] φ ↔ ∀ t : MaximalConsistentTab
     obtain ⟨t, ht⟩ := lindenbaum (𝓢 := 𝓢) (t₀ := ⟨T, {φ}⟩) $ by
       intro Γ Δ hΓ hΔ;
       revert hC;
-      contrapose;
-      simp only [not_not];
+      contrapose!;
       intro h;
       replace h : T *⊢[𝓢] Δ.disj := Context.weakening! (by simpa using hΓ) $ FConj_DT.mp h;
       rcases Set.subset_singleton_iff_eq.mp hΔ with (hΔ | hΔ);
@@ -861,8 +857,7 @@ section
 
 lemma _root_.Set.exists_of_ne {s t : Set α} (h : s ≠ t) : ∃ x, ((x ∈ s ∧ x ∉ t) ∨ (x ∉ s ∧ x ∈ t)) := by
   revert h;
-  contrapose;
-  push_neg;
+  contrapose!;
   intro h;
   ext x;
   rcases h x with ⟨h₁, h₂⟩;

@@ -95,7 +95,7 @@ lemma validate_axiomFour_of_model_finitely {M : Kripke.Model} (hM : M ⊧* Modal
             apply Logic.iff_provable.mp;
             rwa [show (i + (n + 1) + 1) = (i + 2 + n) by omega];
           apply reduce_box_in_CAnt!;
-      . apply List.chain'_concat_of_not_nil (List.length_pos_iff_ne_nil.mp (by simp [hl_len])) |>.mpr;
+      . apply List.isChain_concat_of_not_nil (List.length_pos_iff_ne_nil.mp (by simp [hl_len])) |>.mpr;
         constructor;
         . assumption;
         . convert Rmy;

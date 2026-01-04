@@ -98,12 +98,12 @@ instance : Complete Propositional.Cl FrameClass.finite_Cl := by
     . apply TransGen.single;
       use ⟨y, by tauto⟩, ⟨x, by tauto⟩;
       refine ⟨by tauto, by tauto, ?_⟩;
-      . have : y ≺ x := IsSymm.symm _ _ Rry;
+      . have : y ≺ x := Std.Symm.symm _ _ Rry;
         tauto;
     . apply TransGen.single;
       use ⟨y, by tauto⟩, ⟨x, by tauto⟩;
       refine ⟨by tauto, by tauto, ?_⟩;
-      . have : x ≺ y := IsSymm.symm _ _ Rrx;
+      . have : x ≺ y := Std.Symm.symm _ _ Rrx;
         tauto;
     . apply Relation.TransGen.single;
       use ⟨y, by tauto⟩, ⟨x, by tauto⟩;

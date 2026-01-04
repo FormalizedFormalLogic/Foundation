@@ -396,7 +396,7 @@ instance [m₁ ⤳[L] m₂] [m₂ ⤳[L] m₁] : m₁ ≅[L] m₂ := by
   apply iff_equivalence_bi_translate.mpr;
   constructor <;> infer_instance;
 
-instance : IsSymm _ (· ≅[L] ·) := ⟨by
+instance : Std.Symm (· ≅[L] ·) := ⟨by
   intro _ _ eq;
   apply iff_equivalence_bi_translate.mpr;
   constructor <;> infer_instance;

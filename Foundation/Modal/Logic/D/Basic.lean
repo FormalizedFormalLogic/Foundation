@@ -421,8 +421,8 @@ theorem GL_D_TFAE :
         . exact tailModel₀.rel_root_embed_original;
         . tauto;
       | @axiomDz φ ψ =>
-        contrapose!;
         intro h;
+        contrapose! h;
         replace h := Satisfies.or_def.not.mp h;
         push_neg at h;
         obtain ⟨x, Rrx, hx⟩ := Satisfies.not_box_def.mp h.1;

@@ -5,7 +5,7 @@ import Mathlib.Data.Finite.Card
 
 def IsEquiv.equivalence [IsEquiv α r] : Equivalence r where
   refl := IsRefl.refl
-  symm {_ _} := by apply IsSymm.symm
+  symm {_ _} := by apply Std.Symm.symm
   trans {_ _ _} := by apply IsTrans.trans
 
 
@@ -21,7 +21,7 @@ variable {F : Kripke.Frame} {x y z : F.World}
 
 instance : IsRefl _ (clusterEquiv F) := by tauto;
 
-instance : IsSymm _ (clusterEquiv F) := ⟨by
+instance : Std.Symm (clusterEquiv F) := ⟨by
   rintro x y (rfl | ⟨Rxy, Ryx⟩);
   . apply refl;
   . right; exact ⟨Ryx, Rxy⟩;

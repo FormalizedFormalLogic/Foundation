@@ -103,9 +103,7 @@ lemma truthlemma_lemma2
       rcases (Finset.mem_union.mp $ hΓ₁ hξ) with hξ | hξ;
       . grind;
       . right;
-        simp [Finset.LO.preboxItr, Finset.LO.boxItr] at hξ;
-        simp;
-        grind;
+        simpa [Finset.LO.preboxItr, Finset.LO.boxItr] using hξ;
   . intro ξ;
     simp only [Set.mem_union, Finset.mem_coe, Set.mem_insert_iff];
     rintro (hξ₁ | hξ₂);

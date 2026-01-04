@@ -287,20 +287,16 @@ lemma GLPoint2.provable_axiomWeakPoint3 : Modal.GLPoint2 ⊢ (Axioms.WeakPoint3 
         exact Logic.subst (λ _ => (atom 0 ⋏ □atom 0)) this;
       apply normal_provable_of_K_provable;
       apply Complete.complete (𝓜 := Kripke.FrameClass.K);
-      intro F _ V x h₁;
+      intro F _ V x;
+      simp only [Semantics.Models, Satisfies, LogicalConnective.Prop.arrow_eq, imp_false,
+        not_forall, Classical.not_imp, not_not, not_exists, not_and, forall_exists_index, and_imp];
       contrapose!;
-      intro h₂;
-      apply Satisfies.not_dia_def.mpr;
-      intro y Rxy;
-      apply (Satisfies.box_def.mp $ h₁ ?_) y Rxy;
-      intro z Rxz;
-      replace h₂ := Satisfies.dia_def.not.mp h₂;
-      push_neg at h₂;
-      have := Satisfies.and_def.not.mp $ h₂ z Rxz;
-      set_option push_neg.use_distrib true in push_neg at this;
-      rcases this
-      . tauto;
-      . tauto;
+      rintro ⟨y, Rxy, hy, h₁⟩;
+      constructor;
+      . intro z Rxz h₂ hz;
+        obtain ⟨w, Rzw, hz⟩ := h₁ z Rxz hz;
+        grind;
+      . use y;
     simp;
   haveI : Modal.GLPoint2 ⊢ ◇((.atom 0) ⋏ □(.atom 0)) ➝ ◇((.atom 0) ⋏ □(.atom 0) ⋏ □^[2](.atom 0) ⋏ □(∼((.atom 0) ⋏ □(.atom 0)))) := C!_trans this $ by
     have : Modal.GLPoint2 ⊢ □(.atom 0) ➝ □^[2](.atom 0) := by simp;
