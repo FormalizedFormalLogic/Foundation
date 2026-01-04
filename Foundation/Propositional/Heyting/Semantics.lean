@@ -1,4 +1,4 @@
-import Foundation.Propositional.Hilbert.Basic
+import Foundation.Propositional.Hilbert.Standard.Basic
 import Foundation.Vorspiel.Order
 import Foundation.Logic.LindenbaumAlgebra
 
@@ -101,7 +101,7 @@ lemma mod_models_iff {φ : Formula α} :
     mod.{_,w} Ax ⊧ φ ↔ ∀ ℍ : HeytingSemantics.{_,w} α, ℍ ⊧* Ax.instances → ℍ ⊧ φ := by
   simp [mod, Semantics.models, Semantics.set_models_iff]
 
-lemma sound {φ : Formula α} (d : (Hilbert Ax) ⊢ φ) : mod (Hilbert Ax) ⊧ φ := by
+lemma sound {φ : Formula α} (d : (Hilbert.Standard Ax) ⊢ φ) : mod (Hilbert.Standard Ax) ⊧ φ := by
   apply mod_models_iff.mpr;
   intro ℍ hℍ;
   induction d with
@@ -114,16 +114,16 @@ lemma sound {φ : Formula α} (d : (Hilbert Ax) ⊢ φ) : mod (Hilbert Ax) ⊧ �
     simpa [val_def'.mp ihp] using this
   | _ => simp [himp_himp_inf_himp_inf_le, himp_inf_himp_inf_sup_le]
 
-instance : Sound (Hilbert Ax) (mod (Hilbert Ax)) := ⟨sound⟩
+instance : Sound (Hilbert.Standard Ax) (mod (Hilbert.Standard Ax)) := ⟨sound⟩
 
 section
 
 open Entailment.LindenbaumAlgebra
 
-variable [DecidableEq α] {Ax : Axiom α} [Ax.HasEFQ] [Entailment.Consistent (Hilbert Ax)]
+variable [DecidableEq α] {Ax : Axiom α} [Ax.HasEFQ] [Entailment.Consistent (Hilbert.Standard Ax)]
 
-def lindenbaum (Ax : Axiom α) [Ax.HasEFQ] [Entailment.Consistent (Hilbert Ax)] : HeytingSemantics α where
-  Algebra := Entailment.LindenbaumAlgebra (Hilbert Ax)
+def lindenbaum (Ax : Axiom α) [Ax.HasEFQ] [Entailment.Consistent (Hilbert.Standard Ax)] : HeytingSemantics α where
+  Algebra := Entailment.LindenbaumAlgebra (Hilbert.Standard Ax)
   valAtom a := ⟦.atom a⟧
 
 lemma lindenbaum_val_eq : (lindenbaum Ax ⊧ₕ φ) = ⟦φ⟧ := by
@@ -133,22 +133,22 @@ lemma lindenbaum_val_eq : (lindenbaum Ax ⊧ₕ φ) = ⟦φ⟧ := by
   | himp _ _ ihp ihq => simp only [hVal_imply, ihp, ihq]; rw [himp_def];
   | _ => rfl
 
-lemma lindenbaum_complete_iff {φ : Formula α} : lindenbaum Ax ⊧ φ ↔ (Hilbert Ax) ⊢ φ := by
+lemma lindenbaum_complete_iff {φ : Formula α} : lindenbaum Ax ⊧ φ ↔ (Hilbert.Standard Ax) ⊢ φ := by
   simp [val_def', lindenbaum_val_eq, provable_iff_eq_top]
 
-instance : Sound (Hilbert Ax) (lindenbaum Ax) := ⟨lindenbaum_complete_iff.mpr⟩
+instance : Sound (Hilbert.Standard Ax) (lindenbaum Ax) := ⟨lindenbaum_complete_iff.mpr⟩
 
-instance : Complete (Hilbert Ax) (lindenbaum Ax) := ⟨lindenbaum_complete_iff.mp⟩
+instance : Complete (Hilbert.Standard Ax) (lindenbaum Ax) := ⟨lindenbaum_complete_iff.mp⟩
 
 end
 
-lemma complete [DecidableEq α] [Ax.HasEFQ] {φ : Formula α} (h : mod.{_,u} Ax ⊧ φ) : (Hilbert Ax) ⊢ φ := by
-  wlog Con : Entailment.Consistent (Hilbert Ax)
+lemma complete [DecidableEq α] [Ax.HasEFQ] {φ : Formula α} (h : mod.{_,u} Ax ⊧ φ) : (Hilbert.Standard Ax) ⊢ φ := by
+  wlog Con : Entailment.Consistent (Hilbert.Standard Ax)
   . exact Entailment.not_consistent_iff_inconsistent.mp Con φ
   exact lindenbaum_complete_iff.mp <|
     mod_models_iff.mp h (lindenbaum Ax) ⟨fun ψ hψ ↦ lindenbaum_complete_iff.mpr <| by grind⟩
 
-instance [DecidableEq α] [Ax.HasEFQ] : Complete (Hilbert Ax) (mod.{_,u} Ax) := ⟨complete⟩
+instance [DecidableEq α] [Ax.HasEFQ] : Complete (Hilbert.Standard Ax) (mod.{_,u} Ax) := ⟨complete⟩
 
 end HeytingSemantics
 

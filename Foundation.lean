@@ -14,7 +14,6 @@ import Foundation.Logic.Entailment
 -- Propositional
 import Foundation.Propositional.ClassicalSemantics.Tait
 import Foundation.Propositional.ClassicalSemantics.Hilbert
-import Foundation.Propositional.Hilbert.Glivenko
 import Foundation.Propositional.Heyting.Semantics
 import Foundation.Propositional.Kripke.Logic.Cl
 import Foundation.Propositional.Logic.Letterless_Int_Cl
@@ -132,7 +131,7 @@ import Foundation.Modal.Kripke.Undefinability
 import Foundation.Modal.Kripke.Balloon
 import Foundation.Modal.Kripke.LinearFrame
 
-import Foundation.Modal.PLoN.Logic.N
+import Foundation.Modal.PLoN.Logic
 
 import Foundation.Modal.Neighborhood.Logic.E4
 import Foundation.Modal.Neighborhood.Logic.E5
@@ -152,11 +151,7 @@ import Foundation.Modal.Neighborhood.Logic.ET5
 import Foundation.Modal.Neighborhood.Logic.ETB
 import Foundation.Modal.Neighborhood.Logic.Incomparability.ED_EP
 
-import Foundation.Modal.ModalCompanion.Int
-import Foundation.Modal.ModalCompanion.KC
-import Foundation.Modal.ModalCompanion.LC
-import Foundation.Modal.ModalCompanion.Cl
-import Foundation.Modal.ModalCompanion.VF
+import Foundation.Modal.ModalCompanion
 
 import Foundation.Modal.Boxdot.K4_S4
 import Foundation.Modal.Boxdot.GL_Grz

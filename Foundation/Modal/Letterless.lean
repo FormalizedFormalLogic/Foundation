@@ -32,7 +32,7 @@ lemma def_imp : (φ ➝ ψ).Letterless → φ.Letterless ∧ ψ.Letterless := by
 @[grind] lemma of_or (hφ : φ.Letterless) (hψ : ψ.Letterless) : (φ ⋎ ψ).Letterless := by simp_all [Letterless]
 @[grind] lemma of_and (hφ : φ.Letterless) (hψ : ψ.Letterless) : (φ ⋏ ψ).Letterless := by simp_all [Letterless]
 @[grind] lemma of_box (hφ : φ.Letterless) : (□φ).Letterless := by simp_all [Letterless]
-@[grind] lemma of_multibox (hφ : φ.Letterless) : (□^[n]φ).Letterless := by
+@[grind] lemma of_boxItr (hφ : φ.Letterless) : (□^[n]φ).Letterless := by
   induction n with
   | zero => simpa [Letterless]
   | succ n ih => simp [Letterless, ih]

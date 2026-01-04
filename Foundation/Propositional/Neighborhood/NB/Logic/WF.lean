@@ -1,5 +1,5 @@
 import Foundation.Propositional.Neighborhood.NB.Hilbert
-import Foundation.Propositional.Hilbert.Corsi_WF
+import Foundation.Propositional.Hilbert.F_WF
 
 
 namespace LO.Propositional

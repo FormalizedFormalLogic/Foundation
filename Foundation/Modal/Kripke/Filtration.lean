@@ -234,10 +234,10 @@ instance filterOf [trans : M.IsTransitive] : FilterOf (finestFiltrationTransitiv
   def_rel_back := by
     rintro x y RXY φ hφ hx;
     simp only [cast_eq] at RXY;
-    replace ⟨n, RXY⟩ := HRel.TransGen.exists_iterate.mp RXY;
+    replace ⟨n, RXY⟩ := Rel.TransGen.exists_iterate.mp RXY;
     induction n using PNat.recOn generalizing x with
     | one =>
-      simp only [PNat.val_ofNat, HRel.Iterate.iff_succ, HRel.Iterate.iff_zero, exists_eq_right] at RXY;
+      simp only [PNat.val_ofNat, Rel.Iterate.iff_succ, Rel.Iterate.iff_zero, exists_eq_right] at RXY;
       obtain ⟨u, v, exu, eyv, Ruv⟩ := RXY;
       have : u ⊧ □φ := FilterEqvQuotient.iff_of_eq exu hφ |>.mp hx;
       have : v ⊧ φ := this _ Ruv;
@@ -274,7 +274,7 @@ instance rooted_isPiecewiseStronglyConvergent [preorder : M.IsPreorder] [ps_conv
       constructor;
       . apply Relation.TransGen.single;
         suffices y ≺ z by tauto;
-        exact HRel.TransGen.unwrap Rrz;
+        exact Rel.TransGen.unwrap Rrz;
       . apply Relation.TransGen.single;
         suffices z ≺ z by tauto;
         apply IsRefl.refl ;
@@ -285,9 +285,9 @@ instance rooted_isPiecewiseStronglyConvergent [preorder : M.IsPreorder] [ps_conv
         apply IsRefl.refl;
       . apply Relation.TransGen.single;
         suffices z ≺ y by tauto;
-        exact HRel.TransGen.unwrap Rry;
-    . replace Rry := HRel.TransGen.unwrap Rry;
-      replace Rrz := HRel.TransGen.unwrap Rrz;
+        exact Rel.TransGen.unwrap Rry;
+    . replace Rry := Rel.TransGen.unwrap Rry;
+      replace Rrz := Rel.TransGen.unwrap Rrz;
       obtain ⟨u, Ruy, Ruz⟩ := M.ps_convergent Rry Rrz;
       use ⟦⟨u, by
         right;

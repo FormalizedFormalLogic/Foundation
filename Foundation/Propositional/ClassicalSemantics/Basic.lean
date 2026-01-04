@@ -76,6 +76,7 @@ lemma iff_subst_self (s) :
       . left; apply ihφ.mpr hφ;
       . right; apply ihψ.mpr hψ;
 
+@[grind =>]
 lemma equiv_of_letterless (hl : φ.Letterless) : ∀ v w : Valuation _, v ⊧ φ ↔ w ⊧ φ := by
   intro v w;
   induction φ with
@@ -110,52 +111,59 @@ open ClassicalSemantics
 
 variable {v : ClassicalSemantics.Valuation α} {φ ψ : Formula α}
 
-abbrev Formula.isTautology (φ : Formula α) := Valid (ClassicalSemantics.Valuation α) φ
+abbrev Formula.Tautology (φ : Formula α) := Valid (ClassicalSemantics.Valuation α) φ
 
-lemma isTautology_subst_of_isTautology (h : φ.isTautology) : ∀ s, (φ⟦s⟧).isTautology := by
+@[grind <=]
+lemma subst_tautology (h : φ.Tautology) : ∀ s, (φ⟦s⟧).Tautology := by
   intro s v;
   apply Formula.ClassicalSemantics.iff_subst_self s |>.mp;
   apply h;
 
-lemma iff_isTautology_and : (φ.isTautology) ∧ (ψ.isTautology) ↔ (φ ⋏ ψ).isTautology := by
+@[grind =]
+lemma iff_and_tautology : (φ ⋏ ψ).Tautology ↔ (φ.Tautology) ∧ (ψ.Tautology) := by
   constructor;
-  . rintro ⟨hφ, hψ⟩ v;
-    have := hφ v;
-    have := hψ v;
-    tauto;
   . intro h;
     constructor;
     . intro v; exact h v |>.1;
     . intro v; exact h v |>.2;
+  . rintro ⟨hφ, hψ⟩ v;
+    have := hφ v;
+    have := hψ v;
+    tauto;
 
-lemma of_isTautology_or : φ.isTautology ∨ ψ.isTautology → (φ ⋎ ψ).isTautology := by
+@[grind <=]
+lemma or_tautology_of : φ.Tautology ∨ ψ.Tautology → (φ ⋎ ψ).Tautology := by
   rintro (hφ | hψ) v;
   . left; exact hφ v;
   . right; exact hψ v;
 
-lemma of_isTautology_imp₂ : (ψ.isTautology) → (φ ➝ ψ).isTautology := by
+@[grind <=]
+lemma imp_tautology_of : (ψ.Tautology) → (φ ➝ ψ).Tautology := by
   intro hψ v h;
   apply hψ;
+alias tautology_afortiori := imp_tautology_of
 
-@[simp]
-lemma isTautology_bot : ¬((⊥ : Formula α).isTautology) := by
+@[simp, grind .]
+lemma not_bot_tautology : ¬((⊥ : Formula α).Tautology) := by
   intro h;
   have := @h (λ _ => True);
   simp at this;
 
-@[simp]
-lemma isTautology_top : (⊤ : Formula α).isTautology := by intro v; simp;
+@[simp, grind .]
+lemma top_tautology : (⊤ : Formula α).Tautology := by intro v; simp;
 
-lemma isTautology_of_not_neg_isTautology_of_letterless (hl : φ.Letterless) : ¬((∼φ).isTautology) → φ.isTautology := by
+@[grind =>]
+lemma tautology_of_letterless_of_not_neg_tautology (hl : φ.Letterless) : ¬((∼φ).Tautology) → φ.Tautology := by
   intro h v;
-  obtain ⟨w, hw⟩ : ∃ x : Valuation _, x ⊧ φ := by simpa [Formula.isTautology, Valid] using h;
+  obtain ⟨w, hw⟩ : ∃ x : Valuation _, x ⊧ φ := by simpa [Formula.Tautology, Valid] using h;
   have H := Formula.ClassicalSemantics.equiv_of_letterless hl;
   apply H w v |>.mp;
   assumption;
 
-lemma neg_isTautology_of_not_isTautology_of_letterless (hl : φ.Letterless) : ¬φ.isTautology → (∼φ).isTautology := by
+@[grind =>]
+lemma neg_tautology_of_letterless_of_tautology (hl : φ.Letterless) : ¬φ.Tautology → (∼φ).Tautology := by
   contrapose!;
-  apply isTautology_of_not_neg_isTautology_of_letterless hl;
+  apply tautology_of_letterless_of_not_neg_tautology hl;
 
 end
 

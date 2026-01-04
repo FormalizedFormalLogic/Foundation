@@ -36,6 +36,7 @@ section
 variable {L : Logic α} {φ ψ : Formula α}
 
 export Substitution (subst)
+attribute [grind <=] subst
 
 @[grind =]
 lemma iff_provable : L ⊢ φ ↔ φ ∈ L := by

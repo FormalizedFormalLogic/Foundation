@@ -50,23 +50,31 @@ instance : LukasiewiczAbbrev (Formula α) where
   or := rfl
   and := rfl
 
-instance : DiaAbbrev (Formula α) := ⟨rfl⟩
+instance : DiaByBox (Formula α) := ⟨rfl⟩
+
+lemma eq_falsum : (falsum : Formula α) = ⊥ := rfl
+lemma eq_or  : or φ ψ = φ ⋎ ψ := rfl
+lemma eq_and : and φ ψ = φ ⋏ ψ := rfl
+lemma eq_imp : imp φ ψ = φ ➝ ψ := rfl
+lemma eq_rhd : rhd φ ψ = φ ▷ ψ := rfl
+lemma eq_neg : neg φ = ∼φ := rfl
+lemma eq_box : box φ = □φ := rfl
+lemma eq_dia : dia φ = ◇φ := rfl
+lemma eq_iff : φ ⭤ ψ = (φ ➝ ψ) ⋏ (ψ ➝ φ) := rfl
 
 
+lemma inj_and : φ₁ ⋏ φ₂ = ψ₁ ⋏ ψ₂ ↔ φ₁ = ψ₁ ∧ φ₂ = ψ₂ := by simp [Wedge.wedge]
+lemma inj_or  : φ₁ ⋎ φ₂ = ψ₁ ⋎ ψ₂ ↔ φ₁ = ψ₁ ∧ φ₂ = ψ₂ := by simp [Vee.vee]
+lemma inj_imp : φ₁ ➝ φ₂ = ψ₁ ➝ ψ₂ ↔ φ₁ = ψ₁ ∧ φ₂ = ψ₂ := by simp [Arrow.arrow]
+lemma inj_rhd : φ₁ ▷ φ₂ = ψ₁ ▷ ψ₂ ↔ φ₁ = ψ₁ ∧ φ₂ = ψ₂ := by simp [Rhd.rhd];
+lemma inj_neg : ∼φ = ∼ψ ↔ φ = ψ := by simp [Tilde.tilde];
+lemma inj_box : □φ = □ψ ↔ φ = ψ := by simp [Box.box]
+lemma inj_dia : ◇φ = ◇ψ ↔ φ = ψ := by simp [Dia.dia]
+attribute [simp, grind =] inj_and inj_or inj_imp inj_neg inj_box inj_dia inj_rhd
 
-@[simp, grind =] lemma and_inj : φ₁ ⋏ φ₂ = ψ₁ ⋏ ψ₂ ↔ φ₁ = ψ₁ ∧ φ₂ = ψ₂ := by simp [Wedge.wedge]
+@[simp, grind =]
+lemma inj_iff : (φ₁ ⭤ φ₂) = (ψ₁ ⭤ ψ₂) ↔ φ₁ = ψ₁ ∧ φ₂ = ψ₂ := by simp [LogicalConnective.iff]; grind;
 
-@[simp, grind =] lemma or_inj : φ₁ ⋎ φ₂ = ψ₁ ⋎ ψ₂ ↔ φ₁ = ψ₁ ∧ φ₂ = ψ₂ := by simp [Vee.vee]
-
-@[simp, grind =] lemma imp_inj : φ₁ ➝ φ₂ = ψ₁ ➝ ψ₂ ↔ φ₁ = ψ₁ ∧ φ₂ = ψ₂ := by simp [Arrow.arrow]
-
-@[simp, grind =] lemma rhd_inj : φ₁ ▷ φ₂ = ψ₁ ▷ ψ₂ ↔ φ₁ = ψ₁ ∧ φ₂ = ψ₂ := by simp [Rhd.rhd];
-
-@[simp, grind =] lemma neg_inj : ∼φ = ∼ψ ↔ φ = ψ := by simp [NegAbbrev.neg];
-
-@[simp, grind =] lemma iff_inj : (φ₁ ⭤ φ₂) = (ψ₁ ⭤ ψ₂) ↔ φ₁ = ψ₁ ∧ φ₂ = ψ₂ := by
-  simp [LogicalConnective.iff];
-  grind;
 
 section ToString
 
@@ -139,12 +147,14 @@ def hasDecEq : (φ ψ : Formula α) → Decidable (φ = ψ)
       | isFalse hp => isFalse (by simp_all)
     any_goals simpa using isFalse not_false
   | □φ, ψ => by
-    cases ψ using cases'
-    case hbox φ' =>
+    cases ψ
+    case box φ' =>
       exact match hasDecEq φ φ' with
       | isTrue hp  => isTrue (hp ▸ rfl)
-      | isFalse hp => isFalse (by simp_all)
-    any_goals simpa using isFalse not_false
+      | isFalse hp => isFalse $ by simp [hp, eq_box];
+    all_goals
+    . apply isFalse;
+      simp;
   | φ ▷ ψ, χ => by
     cases χ using cases'
     case hrhd φ' ψ' =>
@@ -152,7 +162,7 @@ def hasDecEq : (φ ψ : Formula α) → Decidable (φ = ψ)
       | isTrue hp =>
         match hasDecEq ψ ψ' with
         | isTrue hq  => isTrue (hp ▸ hq ▸ rfl)
-        | isFalse hq => isFalse (by simp_all)
+        | isFalse hq => isFalse (by simp_all )
       | isFalse hp => isFalse (by simp_all)
     any_goals simpa using isFalse not_false
 

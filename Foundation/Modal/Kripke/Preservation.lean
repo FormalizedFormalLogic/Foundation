@@ -127,7 +127,7 @@ lemma forth_iterate {x y : F₁} :
     intro h
     have : ∃ z, x ≺ z ∧ z ≺^[n] y := by simpa using h
     rcases this with ⟨z, rxz, hz⟩
-    exact HRel.Iterate.succ_left (f.forth rxz) (forth_iterate hz)
+    exact Rel.Iterate.succ_left (f.forth rxz) (forth_iterate hz)
 
 lemma back_iterate {w v} :
     f w ≺^[n] v → ∃ u, f u = v ∧ w ≺^[n] u := by
@@ -139,7 +139,7 @@ lemma back_iterate {w v} :
     rcases this with ⟨z, rfwz, hz⟩
     rcases f.back rfwz with ⟨z, rfl, rwz⟩
     rcases back_iterate hz with ⟨v, rfl, hzv⟩
-    exact ⟨v, rfl, HRel.Iterate.succ_left rwz hzv⟩
+    exact ⟨v, rfl, Rel.Iterate.succ_left rwz hzv⟩
 
 lemma toFun_rel_toFun_iff_of_inj (inj : Function.Injective f) {x y : F₁} :
     f x ≺ f y ↔ x ≺ y :=

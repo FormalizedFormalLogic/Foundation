@@ -33,7 +33,7 @@ lemma GLPoint3OplusBoxBot.boxbot {n : ℕ} : Modal.GLPoint3OplusBoxBot n ⊢ (�
 open LO.Entailment LO.Modal.Entailment in
 @[simp]
 lemma GLPoint3OplusBoxBot.axiomNVer {n : ℕ} : Modal.GLPoint3OplusBoxBot n ⊢ (□^[n]φ) :=
-  Modal.Entailment.multibox_axiomK'! (multinec! (by cl_prover)) ⨀ GLPoint3OplusBoxBot.boxbot
+  Modal.Entailment.boxItr_axiomK'! (multinec! (by cl_prover)) ⨀ GLPoint3OplusBoxBot.boxbot
 
 @[simp] lemma eq_GLPoint3OplusBoxBot_omega_GLPoint3 : (Modal.GLPoint3OplusBoxBot ⊤) = Modal.GLPoint3 := by simp [Modal.GLPoint3OplusBoxBot];
 
@@ -54,7 +54,7 @@ lemma GLPoint3OplusBoxBot.weakerThan_succ {n : ℕ} : (Modal.GLPoint3OplusBoxBot
     suffices Modal.GLPoint3OplusBoxBot n ⊢ (□^[n]⊥) ➝ (□^[(n + 1)](⊥)) by
       rw [(show φ = □^[(n + 1)]⊥ by replace h := Logic.iff_provable.mp h; simp_all;)];
       exact this ⨀ (by simp);
-    apply multibox_axiomK'!;
+    apply boxItr_axiomK'!;
     apply multinec!;
     cl_prover;
   | mdp ihφψ ihφ => cl_prover [ihφψ, ihφ];
@@ -79,15 +79,15 @@ instance : (Modal.GLPoint3OplusBoxBot 2) ⪯ (Modal.GLPoint3OplusBoxBot 1) := GL
 /--
   `<` on `Fin (k + 1)`, `m ≥ n` can be reached by `n` times `<`-step.
 -/
-lemma _root_.HRel.Iterate.fin_lt_stepping_stones {k n : ℕ} {m : Fin (k + 1)}
+lemma _root_.Rel.Iterate.fin_lt_stepping_stones {k n : ℕ} {m : Fin (k + 1)}
   (_ : n = 0 → m = 0)
   (_ : n ≤ m)
-  : HRel.Iterate (α := Fin (k + 1)) (· < ·) n 0 m := by
+  : Rel.Iterate (α := Fin (k + 1)) (· < ·) n 0 m := by
   induction n generalizing m with
   | zero =>
     simp_all;
   | succ n ih =>
-    rw [HRel.Iterate.forward];
+    rw [Rel.Iterate.forward];
     use ⟨n, by omega⟩;
     constructor;
     . apply ih;
@@ -110,11 +110,11 @@ lemma GLPoint3OplusBoxBot.strictlyWeakerThan_GLPoint3 {n : ℕ} : (Modal.GLPoint
       constructor;
       . apply Set.mem_setOf_eq.mpr;
         exact {}
-      . apply Satisfies.multibox_def.not.mpr;
+      . apply Satisfies.boxItr_def.not.mpr;
         push_neg;
         use ⟨n, by omega⟩;
         constructor;
-        . apply HRel.Iterate.fin_lt_stepping_stones <;> simp;
+        . apply Rel.Iterate.fin_lt_stepping_stones <;> simp;
         . tauto;
     . simp;
 
@@ -190,7 +190,7 @@ lemma GLPoint3OplusBoxBot.provable_weakPoint2_in_2 : Modal.GLPoint3OplusBoxBot 2
         constructor;
         . assumption;
         . intro z Ryz;
-          apply Satisfies.multibox_def.mp h.2;
+          apply Satisfies.boxItr_def.mp h.2;
           use y;
           tauto;
       . apply Satisfies.not_def.mp;
@@ -325,7 +325,7 @@ lemma GLPoint2.provable_axiomWeakPoint3 : Modal.GLPoint2 ⊢ (Axioms.WeakPoint3 
       constructor;
       . assumption;
       . intro z Ryz;
-        apply Satisfies.multibox_def.mp hx₃;
+        apply Satisfies.boxItr_def.mp hx₃;
         use y;
         tauto;
     . assumption;

@@ -1,7 +1,7 @@
 import Foundation.Modal.Kripke.Completeness
-import Foundation.Vorspiel.HRel.Euclidean
-import Foundation.Vorspiel.HRel.Coreflexive
-import Foundation.Vorspiel.HRel.Convergent
+import Foundation.Vorspiel.Rel.Euclidean
+import Foundation.Vorspiel.Rel.Coreflexive
+import Foundation.Vorspiel.Rel.Convergent
 
 namespace LO.Modal
 
@@ -34,7 +34,7 @@ instance [F.IsGeachConvergent ⟨0, 0, 1, 1⟩] : F.IsSerial where
   serial := by simpa using IsGeachConvergent.gconv (F := F) (g := ⟨0, 0, 1, 1⟩);
 instance [F.IsSerial] : F.IsGeachConvergent ⟨0, 0, 1, 1⟩ where
   gconv x y z Rxy Rxz := by
-    simp_all only [HRel.Iterate.iff_zero, HRel.Iterate.iff_succ, exists_eq_right, and_self];
+    simp_all only [Rel.Iterate.iff_zero, Rel.Iterate.iff_succ, exists_eq_right, and_self];
     subst Rxz;
     apply _root_.IsSerial.serial
 
@@ -52,7 +52,7 @@ instance [F.IsGeachConvergent ⟨0, 2, 1, 0⟩] : F.IsTransitive where
     apply this x x z rfl y;
 instance [F.IsTransitive] : F.IsGeachConvergent ⟨0, 2, 1, 0⟩ where
   gconv x y z Rxy Rxz := by
-    simp_all only [HRel.Iterate.iff_zero, HRel.Iterate.iff_succ, exists_eq_right, exists_eq_right'];
+    simp_all only [Rel.Iterate.iff_zero, Rel.Iterate.iff_succ, exists_eq_right, exists_eq_right'];
     subst Rxy;
     obtain ⟨y, Rxy, Ryz⟩ := Rxz;
     exact IsTrans.trans _ _ _ Rxy Ryz
@@ -70,7 +70,7 @@ instance [F.IsGeachConvergent ⟨0, 1, 0, 1⟩] : F.IsSymmetric where
     apply @this x x y rfl;
 instance [F.IsSymmetric] : F.IsGeachConvergent ⟨0, 1, 0, 1⟩ where
   gconv x y z Rxy Rxz := by
-    simp_all only [HRel.Iterate.iff_zero, HRel.Iterate.iff_succ, exists_eq_right, exists_eq_left'];
+    simp_all only [Rel.Iterate.iff_zero, Rel.Iterate.iff_succ, exists_eq_right, exists_eq_left'];
     subst Rxy;
     exact _root_.IsSymm.symm _ _ Rxz;
 
@@ -87,7 +87,7 @@ instance [F.IsGeachConvergent ⟨1, 1, 0, 1⟩] : F.IsEuclidean where
     apply this x z y Rxz Rxy;
 instance [F.IsEuclidean] : F.IsGeachConvergent ⟨1, 1, 0, 1⟩ where
   gconv x y z Rxy Rxz := by
-    simp_all only [HRel.Iterate.iff_succ, HRel.Iterate.iff_zero, exists_eq_right, exists_eq_left'];
+    simp_all only [Rel.Iterate.iff_succ, Rel.Iterate.iff_zero, exists_eq_right, exists_eq_left'];
     exact IsRightEuclidean.reucl Rxz Rxy
 
 
@@ -101,7 +101,7 @@ instance [F.IsGeachConvergent ⟨1, 1, 1, 1⟩] : F.IsPiecewiseStronglyConvergen
   ps_convergent := by simpa using IsGeachConvergent.gconv (g := ⟨1, 1, 1, 1⟩) (F := F);
 instance [F.IsPiecewiseStronglyConvergent] : F.IsGeachConvergent ⟨1, 1, 1, 1⟩ where
   gconv x y z Rxy Rxz := by
-    simp_all only [HRel.Iterate.iff_succ, HRel.Iterate.iff_zero, exists_eq_right];
+    simp_all only [Rel.Iterate.iff_succ, Rel.Iterate.iff_zero, exists_eq_right];
     obtain ⟨u, Ryu, Rzu⟩ := IsPiecewiseStronglyConvergent.ps_convergent Rxy Rxz;
     use u;
 
@@ -118,7 +118,7 @@ instance [F.IsGeachConvergent ⟨0, 1, 0, 0⟩] : F.IsCoreflexive where
     apply this x x y rfl Rxy |>.symm;
 instance [F.IsCoreflexive] : F.IsGeachConvergent ⟨0, 1, 0, 0⟩ where
   gconv x y z Rxy Rxz := by
-    simp_all only [HRel.Iterate.iff_zero, HRel.Iterate.iff_succ, exists_eq_right, exists_eq_left'];
+    simp_all only [Rel.Iterate.iff_zero, Rel.Iterate.iff_succ, exists_eq_right, exists_eq_left'];
     subst Rxy;
     exact F.corefl Rxz |>.symm;
 
@@ -135,7 +135,7 @@ instance [F.IsGeachConvergent ⟨1, 1, 0, 0⟩] : F.IsFunctional where
     exact this x y z Rxy Rxz |>.symm;
 instance [F.IsFunctional] : F.IsGeachConvergent ⟨1, 1, 0, 0⟩ where
   gconv x y z Rxy Rxz := by
-    simp_all only [HRel.Iterate.iff_succ, HRel.Iterate.iff_zero, exists_eq_right, exists_eq_left'];
+    simp_all only [Rel.Iterate.iff_succ, Rel.Iterate.iff_zero, exists_eq_right, exists_eq_left'];
     apply IsFunctional.functional Rxy Rxz |>.symm;
 
 
@@ -151,7 +151,7 @@ instance [F.IsGeachConvergent ⟨0, 1, 2, 0⟩] : F.IsDense where
     apply this x x y rfl Rxy;
 instance [F.IsDense] : F.IsGeachConvergent ⟨0, 1, 2, 0⟩ where
   gconv x y z Rxy Rxz := by
-    simp_all only [HRel.Iterate.iff_zero, HRel.Iterate.iff_succ, exists_eq_right, exists_eq_right'];
+    simp_all only [Rel.Iterate.iff_zero, Rel.Iterate.iff_succ, exists_eq_right, exists_eq_right'];
     subst Rxy;
     obtain ⟨u, Ryu, Rzu⟩ := IsDense.dense Rxz;
     use u;
@@ -168,7 +168,7 @@ end Frame
 instance : whitepoint.IsGeachConvergent g := ⟨by
   rintro x y z Rxy Rxz;
   use ();
-  constructor <;> . apply HRel.Iterate.true_any; tauto;
+  constructor <;> . apply Rel.Iterate.true_any; tauto;
 ⟩
 instance : whitepoint.IsPreorder where
 
@@ -180,15 +180,15 @@ open Formula.Kripke
 
 lemma validate_axiomGeach_of_isGeachConvergent (g) [F.IsGeachConvergent g] : F ⊧ (Axioms.Geach g (.atom 0)) := by
   rintro V x h;
-  apply Satisfies.multibox_def.mpr;
-  obtain ⟨y, Rxy, hbp⟩ := Satisfies.multidia_def.mp h;
+  apply Satisfies.boxItr_def.mpr;
+  obtain ⟨y, Rxy, hbp⟩ := Satisfies.diaItr_def.mp h;
   intro z Rxz;
-  apply Satisfies.multidia_def.mpr;
+  apply Satisfies.diaItr_def.mpr;
   obtain ⟨u, Ryu, Rzu⟩ := Frame.IsGeachConvergent.gconv Rxy Rxz;
   use u;
   constructor;
   . assumption;
-  . exact (Satisfies.multibox_def.mp hbp) Ryu;
+  . exact (Satisfies.boxItr_def.mp hbp) Ryu;
 
 lemma validate_AxiomT_of_reflexive [refl : F.IsReflexive] : F ⊧ (Axioms.T (.atom 0)) := validate_axiomGeach_of_isGeachConvergent ⟨0, 0, 1, 0⟩
 lemma validate_AxiomD_of_serial [ser : F.IsSerial] : F ⊧ (Axioms.D (.atom 0)) := validate_axiomGeach_of_isGeachConvergent ⟨0, 0, 1, 1⟩
@@ -203,14 +203,14 @@ lemma isGeachConvergent_of_validate_axiomGeach {g} (h : F ⊧ (Axioms.Geach g (.
   rintro x y z Rxy Rxz;
   let V : Kripke.Valuation F := λ v _ => y ≺^[g.m] v;
   have : Satisfies ⟨F, V⟩ x (□^[g.j](◇^[g.n](.atom 0)))  := h V x $ by
-    apply Satisfies.multidia_def.mpr;
+    apply Satisfies.diaItr_def.mpr;
     use y;
     constructor;
     . assumption;
-    . apply Satisfies.multibox_def.mpr;
+    . apply Satisfies.boxItr_def.mpr;
       aesop;
-  replace : Satisfies ⟨F, V⟩ z (◇^[g.n]Formula.atom 0) := Satisfies.multibox_def.mp this Rxz;
-  obtain ⟨u, Rzu, Ryu⟩ := Satisfies.multidia_def.mp this;
+  replace : Satisfies ⟨F, V⟩ z (◇^[g.n]Formula.atom 0) := Satisfies.boxItr_def.mp this Rxz;
+  obtain ⟨u, Rzu, Ryu⟩ := Satisfies.diaItr_def.mp this;
   exact ⟨u, Ryu, Rzu⟩;
 ⟩
 
@@ -264,24 +264,34 @@ open canonicalModel
 
 instance [Entailment.HasAxiomGeach g 𝓢] : (canonicalFrame 𝓢).IsGeachConvergent g := ⟨by
   rintro x y z Rxy Rxz;
-  have ⟨u, hu⟩ := lindenbaum (𝓢 := 𝓢) (t₀ := ⟨y.1.1.premultibox g.m, z.1.2.premultidia g.n⟩) $ by
+  have ⟨u, hu⟩ := lindenbaum (𝓢 := 𝓢) (t₀ := ⟨□⁻¹^[g.m]'y.1.1, ◇⁻¹^[g.n]'z.1.2⟩) $ by
     rintro Γ Δ hΓ hΔ;
     by_contra! hC;
-    have hγ : □^[g.m](Γ.conj) ∈ y.1.1 := y.mdp_mem₁_provable collect_multibox_fconj! $ iff_mem₁_fconj.mpr (by simpa using hΓ);
-    have hδ : ◇^[g.n](Δ.disj) ∈ z.1.2 := mdp_mem₂_provable distribute_multidia_fdisj! $ iff_mem₂_fdisj.mpr (by simpa using hΔ);
+    have hγ : □^[g.m](Γ.conj) ∈ y.1.1 := y.mdp_mem₁_provable collect_boxItr_fconj! $ iff_mem₁_fconj.mpr $ by
+      intro χ hχ;
+      obtain ⟨ξ, hξ, rfl⟩ := Finset.LO.exists_of_mem_boxItr hχ;
+      apply hΓ;
+      assumption;
+    have hδ : ◇^[g.n](Δ.disj) ∈ z.1.2 := mdp_mem₂_provable distribute_diaItr_fdisj! $ iff_mem₂_fdisj.mpr $ by
+      intro χ hχ;
+      obtain ⟨ξ, hξ, rfl⟩ := Finset.LO.exists_of_mem_diaItr hχ;
+      apply hΔ;
+      assumption;
     generalize Γ.conj = γ at hγ hC;
     generalize Δ.disj = δ at hδ hC;
-    have : 𝓢 ⊢ □^[g.m]γ ➝ □^[g.m]δ := imply_multibox_distribute'! hC;
+    have : 𝓢 ⊢ □^[g.m]γ ➝ □^[g.m]δ := imply_boxItr_distribute'! hC;
     have : □^[g.m]δ ∈ y.1.1 := mdp_mem₁_provable this hγ;
-    have : ◇^[g.i](□^[g.m]δ) ∈ x.1.1 := def_multirel_multidia_mem₁.mp Rxy this;
+    have : ◇^[g.i](□^[g.m]δ) ∈ x.1.1 := def_multirel_diaItr_mem₁.mp Rxy this;
     have : □^[g.j](◇^[g.n]δ) ∈ x.1.1 := mdp_mem₁_provable axiomGeach! this;
-    have : ◇^[g.n]δ ∈ z.1.1 := def_multirel_multibox_mem₁.mp Rxz this;
+    have : ◇^[g.n]δ ∈ z.1.1 := def_multirel_boxItr_mem₁.mp Rxz this;
     have : ◇^[g.n]δ ∉ z.1.2 := iff_not_mem₂_mem₁.mpr this;
     contradiction;
   use u;
   constructor;
-  . apply def_multirel_multibox_mem₁.mpr; apply hu.1;
-  . apply def_multirel_multidia_mem₂.mpr; apply hu.2;
+  . apply def_multirel_boxItr_mem₁.mpr;
+    apply hu.1;
+  . apply def_multirel_diaItr_mem₂.mpr;
+    apply hu.2;
 ⟩
 
 instance [Entailment.HasAxiomT 𝓢] : (canonicalFrame 𝓢).IsReflexive := by simp

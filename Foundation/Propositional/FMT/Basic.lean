@@ -1,6 +1,6 @@
 import Foundation.Propositional.Logic.Basic
 import Foundation.Propositional.Entailment.Corsi.Basic
-import Foundation.Vorspiel.HRel.Basic
+import Foundation.Vorspiel.Rel.Basic
 
 namespace LO.Propositional
 
@@ -10,7 +10,7 @@ namespace FMT
 
 structure Frame where
   World : Type
-  Rel : Formula ℕ → HRel World
+  Rel : Formula ℕ → Rel World World
   root : World
   rooted {φ : Formula ℕ} {w : World} : Rel φ root w
 
@@ -21,7 +21,7 @@ variable {F : Frame}
 attribute [simp, grind .] rooted
 
 instance : CoeSort Frame (Type) := ⟨World⟩
-instance : CoeFun Frame (λ F => Formula ℕ → HRel F.World) := ⟨Frame.Rel⟩
+instance : CoeFun Frame (λ F => Formula ℕ → _root_.Rel F.World F.World) := ⟨Frame.Rel⟩
 instance : Nonempty F.World := ⟨F.root⟩
 
 abbrev Rel' {F : Frame} (φ : Formula ℕ) (x y : F.World) := F.Rel φ x y
@@ -57,8 +57,8 @@ namespace Formula.FMT
 
 open FMT
 
-open Classical in
-@[simp, grind .] def Forces {M : outParam (FMT.Model)} (x : M.World) : Formula ℕ → Prop
+@[simp, grind .]
+def Forces {M : outParam (FMT.Model)} (x : M.World) : Formula ℕ → Prop
   | atom a => M x a
   | ⊥      => False
   | φ ⋏ ψ  => Forces x φ ∧ Forces x ψ

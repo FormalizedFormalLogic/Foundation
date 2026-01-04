@@ -3,7 +3,7 @@ import Foundation.Propositional.Kripke2.AxiomSym
 
 namespace LO.Propositional
 
-open Hilbert.Corsi
+open Hilbert.F
 open Kripke2
 
 
@@ -19,7 +19,7 @@ end Kripke2
 
 namespace F_Sym
 
-open Hilbert.Corsi.Kripke2
+open Hilbert.F.Kripke2
 
 instance Kripke2.sound : Sound Propositional.F_Sym FrameClass.F_Sym := by
   apply instFrameClassSound;

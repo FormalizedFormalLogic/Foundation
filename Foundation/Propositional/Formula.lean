@@ -3,6 +3,8 @@ import Foundation.Logic.LogicSymbol
 
 namespace LO.Propositional
 
+variable {α : Type*}
+
 inductive Formula (α : Type u) : Type u
   | atom   : α → Formula α
   | falsum : Formula α
@@ -15,13 +17,16 @@ abbrev FormulaSet (α) := Set (Formula α)
 
 abbrev FormulaFinset (α) := Finset (Formula α)
 
+variable {φ ψ φ₁ ψ₁ φ₂ ψ₂ : Formula α}
+
+
 namespace Formula
 
 prefix:max "#" => Formula.atom
 
-abbrev neg {α : Type u} (φ : Formula α) : Formula α := imp φ falsum
+abbrev neg (φ : Formula α) : Formula α := imp φ falsum
 
-abbrev verum {α : Type u} : Formula α := imp falsum falsum
+abbrev verum : Formula α := imp falsum falsum
 
 instance : LogicalConnective (Formula α) where
   tilde := neg
@@ -51,17 +56,13 @@ instance : ToString (Formula α) := ⟨toStr⟩
 
 end ToString
 
-@[simp] lemma and_inj (φ₁ ψ₁ φ₂ ψ₂ : Formula α) : φ₁ ⋏ φ₂ = ψ₁ ⋏ ψ₂ ↔ φ₁ = ψ₁ ∧ φ₂ = ψ₂ := by simp [Wedge.wedge]
+lemma and_inj : φ₁ ⋏ φ₂ = ψ₁ ⋏ ψ₂ ↔ φ₁ = ψ₁ ∧ φ₂ = ψ₂ := by simp [Wedge.wedge]
+lemma or_inj : φ₁ ⋎ φ₂ = ψ₁ ⋎ ψ₂ ↔ φ₁ = ψ₁ ∧ φ₂ = ψ₂ := by simp [Vee.vee]
+lemma imp_inj : φ₁ ➝ φ₂ = ψ₁ ➝ ψ₂ ↔ φ₁ = ψ₁ ∧ φ₂ = ψ₂ := by simp [Arrow.arrow]
+lemma neg_inj : ∼φ = ∼ψ ↔ φ = ψ := by simp [Tilde.tilde]
+attribute [simp, grind =] and_inj or_inj imp_inj neg_inj
 
-@[simp] lemma or_inj (φ₁ ψ₁ φ₂ ψ₂ : Formula α) : φ₁ ⋎ φ₂ = ψ₁ ⋎ ψ₂ ↔ φ₁ = ψ₁ ∧ φ₂ = ψ₂ := by simp [Vee.vee]
-
-@[simp] lemma imp_inj (φ₁ ψ₁ φ₂ ψ₂ : Formula α) : φ₁ ➝ φ₂ = ψ₁ ➝ ψ₂ ↔ φ₁ = ψ₁ ∧ φ₂ = ψ₂ := by simp [Arrow.arrow]
-
-@[simp] lemma neg_inj (φ ψ : Formula α) : ∼φ = ∼ψ ↔ φ = ψ := by simp [Tilde.tilde]
-
-
-lemma neg_def (φ : Formula α) : ∼φ = φ ➝ ⊥ := rfl
-
+lemma neg_def : ∼φ = φ ➝ ⊥ := rfl
 lemma top_def : (⊤ : Formula α) = ⊥ ➝ ⊥ := rfl
 
 
@@ -421,47 +422,48 @@ def subst (s : Substitution α) : Formula α → Formula α
 
 notation:80 φ "⟦" s "⟧" => Formula.subst s φ
 
-namespace subst
-
-protected lemma subst_atom {a} : (.atom a)⟦s⟧ = s a := rfl
-protected lemma subst_bot : ⊥⟦s⟧ = ⊥ := rfl
-protected lemma subst_top : ⊤⟦s⟧ = ⊤ := rfl
-protected lemma subst_imp : (φ ➝ ψ)⟦s⟧ = φ⟦s⟧ ➝ ψ⟦s⟧ := rfl
-protected lemma subst_neg : (∼φ)⟦s⟧ = ∼(φ⟦s⟧) := rfl
-protected lemma subst_and : (φ ⋏ ψ)⟦s⟧ = φ⟦s⟧ ⋏ ψ⟦s⟧ := rfl
-protected lemma subst_or : (φ ⋎ ψ)⟦s⟧ = φ⟦s⟧ ⋎ ψ⟦s⟧ := rfl
-protected lemma subst_iff : (φ ⭤ ψ)⟦s⟧ = (φ⟦s⟧ ⭤ ψ⟦s⟧) := rfl
+lemma subst_atom {a} : (#a)⟦s⟧ = s a := rfl
+lemma subst_bot : ⊥⟦s⟧ = ⊥ := rfl
+lemma subst_top : ⊤⟦s⟧ = ⊤ := rfl
+lemma subst_imp : (φ ➝ ψ)⟦s⟧ = φ⟦s⟧ ➝ ψ⟦s⟧ := rfl
+lemma subst_neg : (∼φ)⟦s⟧ = ∼(φ⟦s⟧) := rfl
+lemma subst_and : (φ ⋏ ψ)⟦s⟧ = φ⟦s⟧ ⋏ ψ⟦s⟧ := rfl
+lemma subst_or : (φ ⋎ ψ)⟦s⟧ = φ⟦s⟧ ⋎ ψ⟦s⟧ := rfl
+lemma subst_iff : (φ ⭤ ψ)⟦s⟧ = (φ⟦s⟧ ⭤ ψ⟦s⟧) := rfl
 
 attribute [simp, grind =]
-  subst.subst_atom
-  subst.subst_bot
-  subst.subst_top
-  subst.subst_imp
-  subst.subst_neg
-  subst.subst_and
-  subst.subst_or
-  subst.subst_iff
+  subst_atom
+  subst_bot
+  subst_top
+  subst_imp
+  subst_neg
+  subst_and
+  subst_or
+  subst_iff
 
-end subst
+@[simp, grind =]
+lemma subst_id {φ : Formula α} : φ⟦.id⟧ = φ := by induction φ <;> grind;
 
 end Formula
 
-@[simp]
-lemma Formula.subst_id {φ : Formula α} : φ⟦.id⟧ = φ := by induction φ <;> simp_all;
 
+@[grind]
 def Substitution.comp (s₁ s₂ : Substitution α) : Substitution α := λ a => (s₁ a)⟦s₂⟧
 infixr:80 " ∘ " => Substitution.comp
 
-@[simp]
+@[simp, grind =]
 lemma Formula.subst_comp {s₁ s₂ : Substitution α} {φ : Formula α} : φ⟦s₁ ∘ s₂⟧ = φ⟦s₁⟧⟦s₂⟧ := by
-  induction φ <;> simp_all [Substitution.comp];
+  induction φ <;> grind;
 
-def ZeroSubstitution (α) := { s : Substitution α // ∀ {a : α}, ((.atom a)⟦s⟧).Letterless }
 
-lemma Formula.Letterless_zeroSubst {φ : Formula α} {s : ZeroSubstitution α} : (φ⟦s.1⟧).Letterless := by
-  induction φ <;> simp [Formula.Letterless, *];
+def ZeroSubstitution (α) := { s : Substitution α // ∀ {a : α}, (#a⟦s⟧).Letterless }
+instance : Coe (ZeroSubstitution α) (Substitution α) := ⟨Subtype.val⟩
+
+@[grind .]
+lemma Formula.letterless_zeroSubst {s : ZeroSubstitution α} : (φ⟦s⟧).Letterless := by
+  induction φ;
   case hatom => exact s.2;
-
+  all_goals. simp_all [Formula.Letterless];
 
 class SubstitutionClosed (S : Set (Formula α)) where
   closed : ∀ φ ∈ S, (∀ s : Substitution α, φ⟦s⟧ ∈ S)

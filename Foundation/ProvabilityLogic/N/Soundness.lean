@@ -1,4 +1,5 @@
 import Foundation.ProvabilityLogic.Realization
+import Foundation.Modal.PLoN.Logic.N
 
 namespace LO.ProvabilityLogic
 

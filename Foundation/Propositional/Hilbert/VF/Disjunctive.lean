@@ -8,7 +8,9 @@ variable {Ax : Axiom ℕ} {φ ψ χ : Formula ℕ} {s : Substitution ℕ}
 
 open Entailment.Corsi
 
-instance Hilbert.VF.instAczelSlashable (hs : ∀ {φ}, φ ∈ Ax → ∕ₐ[(Hilbert.VF Ax)] φ) : (Hilbert.VF Ax).AczelSlashable where
+namespace Hilbert.VF
+
+instance instAczelSlashable (hs : ∀ {φ}, φ ∈ Ax → ∕ₐ[(Hilbert.VF Ax)] φ) : (Hilbert.VF Ax).AczelSlashable where
   iff_ks_provable {φ} := by
     constructor;
     . intro h;
@@ -72,7 +74,15 @@ instance Hilbert.VF.instAczelSlashable (hs : ∀ {φ}, φ ∈ Ax → ∕ₐ[(Hil
         . grind;
       | axm => apply hs; assumption;
 
+@[grind .] lemma slashable_axiomSer [Entailment.HasAxiomSer (Hilbert.VF Ax)] : ∕ₐ[(Hilbert.VF Ax)] ((Axioms.Ser)) := by grind
+
+end Hilbert.VF
+
+
 instance VF.AczelSlashable : Propositional.VF.AczelSlashable := Hilbert.VF.instAczelSlashable $ by tauto;
 instance VF.Disjunctive : Entailment.Disjunctive Propositional.VF := inferInstance
+
+instance VF_Ser.AczelSlashable : Propositional.VF_Ser.AczelSlashable := Hilbert.VF.instAczelSlashable $ by grind;
+instance VF_Ser.Disjunctive : Entailment.Disjunctive Propositional.VF_Ser := inferInstance
 
 end LO.Propositional

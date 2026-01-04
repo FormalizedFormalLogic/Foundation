@@ -3,7 +3,7 @@ import Foundation.Propositional.Kripke2.Logic.F_Tra1_Hrd
 
 namespace LO.Propositional
 
-open Hilbert.Corsi
+open Hilbert.F
 open Kripke2
 
 
@@ -19,7 +19,7 @@ end Kripke2
 
 namespace F_Rfl_Tra1_Hrd
 
-open Hilbert.Corsi.Kripke2
+open Hilbert.F.Kripke2
 
 instance Kripke2.sound : Sound Propositional.F_Rfl_Tra1_Hrd ModelClass.F_Rfl_Tra1_Hrd := by
   apply instModelClassSound;
@@ -45,7 +45,7 @@ instance : Propositional.F_Tra1_Hrd ⪱ Propositional.F_Rfl_Tra1_Hrd := by
   . apply Entailment.not_weakerThan_iff.mpr;
     use (Axioms.Rfl #0 #1);
     constructor;
-    . apply Hilbert.Corsi.axm'!;
+    . apply Hilbert.F.axm'!;
       simp;
     . apply Sound.not_provable_of_countermodel (𝓜 := Kripke2.ModelClass.F_Tra1_Hrd);
       apply Kripke2.not_validOnModelClass_of_exists_model_world;
@@ -66,7 +66,7 @@ instance : Propositional.F_Rfl_Tra1 ⪱ Propositional.F_Rfl_Tra1_Hrd := by
   . apply Entailment.not_weakerThan_iff.mpr;
     use (Axioms.Hrd #0);
     constructor;
-    . apply Hilbert.Corsi.axm'!;
+    . apply Hilbert.F.axm'!;
       simp;
     . apply Sound.not_provable_of_countermodel (𝓜 := Kripke2.FrameClass.F_Rfl_Tra1);
       apply Kripke2.not_validOnFrameClass_of_exists_model_world;

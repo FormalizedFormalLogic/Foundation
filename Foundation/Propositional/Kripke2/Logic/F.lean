@@ -1,6 +1,6 @@
 import Foundation.Propositional.Kripke2.Hilbert
 import Foundation.Propositional.Kripke2.FTheory
-import Foundation.Propositional.Hilbert.Corsi.Disjunctive
+import Foundation.Propositional.Hilbert.F.Disjunctive
 
 namespace LO.Propositional
 
@@ -22,7 +22,7 @@ end Kripke2
 
 namespace F
 
-open Hilbert.Corsi.Kripke2
+open Hilbert.F.Kripke2
 
 instance Kripke2.sound : Sound Propositional.F FrameClass.F := by
   apply instFrameClassSound;

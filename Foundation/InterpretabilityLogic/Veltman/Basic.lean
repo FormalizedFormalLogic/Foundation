@@ -21,7 +21,7 @@ namespace Veltman
 -/
 structure Frame extends toKripkeFrame : Modal.Kripke.Frame where
   [isGL : toKripkeFrame.IsGL]
-  S : (w : World) → HRel World
+  S : (w : World) → _root_.Rel World World
   S_cond {w x y} : S w x y → w ≺ x
 
 namespace Frame

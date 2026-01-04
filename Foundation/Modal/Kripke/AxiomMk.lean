@@ -32,7 +32,7 @@ lemma validate_axiomMk_of_satisfiesMakinsonCondition [F.SatisfiesMakinsonConditi
   . apply Satisfies.and_def.mpr;
     constructor;
     . suffices Satisfies ⟨F, V⟩ y (□^[2](.atom 0)) by simpa using this;
-      apply Satisfies.multibox_def.mpr
+      apply Satisfies.boxItr_def.mpr
       intro z Ryz;
       apply hx₁;
       apply hz;
@@ -59,7 +59,7 @@ instance [Entailment.HasAxiomT 𝓢] [Entailment.HasAxiomMk 𝓢] : (canonicalFr
   sorry;
   /-
   rintro x;
-  obtain ⟨y, hy⟩ := lindenbaum (𝓢 := 𝓢) (t₀ := ⟨x.1.1.prebox, x.1.2.box ∪ x.1.2.dia⟩) $ by
+  obtain ⟨y, hy⟩ := lindenbaum (𝓢 := 𝓢) (t₀ := ⟨□⁻¹'x.1.1, x.1.2.box ∪ x.1.2.dia⟩) $ by
     rintro Γ Δ hΓ hΔ;
     by_contra! hC;
     let Δ₁ := { φ ∈ Δ | φ ∈ x.1.2.box };
@@ -90,7 +90,7 @@ instance [Entailment.HasAxiomT 𝓢] [Entailment.HasAxiomMk 𝓢] : (canonicalFr
   . rintro z Ryz;
     apply def_rel_dia_mem₂.mpr;
     intro φ hφ;
-    apply def_multirel_multidia_mem₂.mp Ryz;
+    apply def_multirel_diaItr_mem₂.mp Ryz;
     exact @hy.2 (◇◇φ) (by simpa);
   -/
 ⟩
