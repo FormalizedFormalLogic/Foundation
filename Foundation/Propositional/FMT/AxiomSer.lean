@@ -8,41 +8,44 @@ variable {F : FMT.Frame} {M : FMT.Model} {Γ : FormulaSet ℕ} {φ ψ χ : Formu
 
 namespace Frame
 
-class IsDNFSerial (F : Frame) : Prop where
-  dnf_serial : ∀ x : F, ∃ y, x ≺[∼∼⊥] y
-export IsDNFSerial (dnf_serial)
+class IsNTSerial (F : Frame) : Prop where
+  nt_serial : ∀ x : F, ∃ y, x ≺[∼⊤] y
+export IsNTSerial (nt_serial)
 
 end Frame
 
-lemma valid_axiomSer_of_isDNFSerial [F.IsDNFSerial] : F ⊧ ∼∼⊤ := by
+lemma valid_axiomSer_of_isDNFSerial [F.IsNTSerial] : F ⊧ ∼∼⊤ := by
   intro V x y Rxy h₁;
-  obtain ⟨z, Ryz⟩ := F.dnf_serial y;
+  obtain ⟨z, Ryz⟩ := F.nt_serial y;
   have : Formula.FMT.Forces (M := ⟨F, V⟩) z ⊥ := h₁ Ryz (by tauto);
   contradiction;
 
-lemma isDNFSerial_of_valid_axiomSer (h : F ⊧ ∼∼⊤) : F.IsDNFSerial where
-  dnf_serial := by
+lemma isDNFSerial_of_valid_axiomSer (h : F ⊧ ∼⊤) : F.IsNTSerial where
+  nt_serial := by
     intro x;
     simpa using @h (λ v a => True) F.root x F.rooted;
+
+lemma valid_axiomO_f (h : F ⊧ ∼⊤) : F ⊧ ∼∼⊤ := by
+  haveI := isDNFSerial_of_valid_axiomSer h;
+  apply valid_axiomSer_of_isDNFSerial;
 
 open ConsistentSaturatedHintikkaPair in
 open Formula.FMT in
 instance isDNFSerial_HintikkaModel {L}
   [Entailment.VF L] [Entailment.Disjunctive L] [Entailment.Consistent L]
   [Entailment.HasAxiomSer L]
-  : (HintikkaModel L φ).toFrame.IsDNFSerial where
-  dnf_serial := by
+  : (HintikkaModel L φ).toFrame.IsNTSerial where
+  nt_serial := by
     intro x;
-    obtain ⟨y, _, _⟩ := @ConsistentSaturatedHintikkaPair.lindenbaum (L := L) (φ := φ) _ ⟨x.1.1, x.1.2⟩ $ x.2.1;
-    use y;
+    use x;
     intro hs;
     left;
     apply iff_mem₂_not_mem₁.mpr;
     by_contra hC;
-    apply no_bot (H := y);
+    apply no_bot (H := x);
     apply imp_closed hs ?_ Entailment.Corsi.axiomSer;
     . grind;
-    . exact Formula.subformulas.mem_imp hs |>.2;
+    . grind;
 
 end FMT
 

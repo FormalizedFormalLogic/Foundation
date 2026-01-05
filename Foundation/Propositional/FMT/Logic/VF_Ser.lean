@@ -8,10 +8,10 @@ open FMT
 
 namespace FMT
 
-protected abbrev FrameClass.VF_Ser : FMT.FrameClass := { F | F.IsDNFSerial }
+protected abbrev FrameClass.VF_Ser : FMT.FrameClass := { F | F.IsNTSerial }
 
-instance : trivialFrame.IsDNFSerial where
-  dnf_serial := by tauto;
+instance : trivialFrame.IsNTSerial where
+  nt_serial := by tauto;
 
 end FMT
 
