@@ -36,7 +36,7 @@ def canonicalVal (T : SaturatedConsistentTableau Propositional.Cl) : Valuation �
 lemma truthlemma {T : SaturatedConsistentTableau Propositional.Cl} : (canonicalVal T) ⊧ φ ↔ φ ∈ T.1.1 := by
   induction φ with
   | hatom => simp [canonicalVal];
-  | hfalsum => simp [canonicalVal];
+  | hfalsum => simp
   | himp φ ψ ihφ ihψ =>
     constructor;
     . intro hφψ;

@@ -177,15 +177,11 @@ end numeral
 
 @[simp] lemma Add.positive_iff [L.Add] (t u : Semiterm L ξ (n + 1)) :
     (add.operator ![t, u]).Positive ↔ t.Positive ∧ u.Positive := by
-  simpa [positive_operator_iff, Add.term_eq, bv_func]
-  using ⟨by intro h; exact ⟨h 0, h 1⟩,
-    by intro h i; cases i using Fin.cases <;> simp [Fin.eq_zero, *]⟩
+  simp [positive_operator_iff, Add.term_eq, bv_func]
 
 @[simp] lemma Mul.positive_iff [L.Mul] (t u : Semiterm L ξ (n + 1)) :
     (mul.operator ![t, u]).Positive ↔ t.Positive ∧ u.Positive := by
-  simpa [positive_operator_iff, Mul.term_eq, bv_func]
-  using ⟨by intro h; exact ⟨h 0, h 1⟩,
-    by intro h i; cases i using Fin.cases <;> simp [Fin.eq_zero, *]⟩
+  simp [positive_operator_iff, Mul.term_eq, bv_func]
 
 @[simp] lemma Exp.positive_iff [L.Exp] (t : Semiterm L ξ (n + 1)) :
     (exp.operator ![t]).Positive ↔ t.Positive := by

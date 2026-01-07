@@ -13,10 +13,10 @@ namespace Nuon
   · exact le_mul_of_pos_left pos
 
 lemma mul_len_lt_len_smash {i I L : V} (hi : i ≤ ‖I‖) : i * ‖L‖ < ‖I ⨳ L‖ := by
-  simpa [length_smash, lt_succ_iff_le] using mul_le_mul_right' hi ‖L‖
+  simpa [length_smash, lt_succ_iff_le] using _root_.mul_le_mul_left hi ‖L‖
 
 lemma mul_len_lt_len_smash' {i K z : V} (hi : i ≤ ‖z‖) : i * ‖‖K‖‖ < ‖z ⨳ ‖K‖‖ := by
-  simpa [length_smash, lt_succ_iff_le] using mul_le_mul_right' hi ‖‖K‖‖
+  simpa [length_smash, lt_succ_iff_le] using _root_.mul_le_mul_left hi ‖‖K‖‖
 
 noncomputable def ext (L S i : V) : V := S / bexp S (i * ‖L‖) % (L ⨳ 1)
 

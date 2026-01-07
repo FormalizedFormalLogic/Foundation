@@ -541,11 +541,11 @@ instance : Semantics (Struc L) (Sentence L) where
 
 instance : Semantics.Tarski (Struc L) where
   models_verum := by simp [Semantics.Models]
-  models_falsum := by simp [Semantics.NotModels, Semantics.Models]
+  models_falsum := by simp [Semantics.Models]
   models_and := by simp [Semantics.Models]
   models_or := by simp [Semantics.Models]
   models_imply := by simp [Semantics.Models]
-  models_not := by simp [Semantics.NotModels, Semantics.Models]
+  models_not := by simp [Semantics.Models]
 
 section
 

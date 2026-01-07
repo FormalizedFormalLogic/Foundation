@@ -663,7 +663,7 @@ lemma fixitr_fvar (n m) (x : ℕ) :
     by_cases hx : x < m
     · simp [hx, Nat.lt_add_right 1 hx]
     by_cases hx2 : x < m + 1
-    · have : x = m := Nat.le_antisymm (by { simpa [Nat.lt_succ] using hx2 }) (by simpa using hx)
+    · have : x = m := Nat.le_antisymm (by { simpa [Nat.lt_succ_iff] using hx2 }) (by simpa using hx)
       aesop
     · simp [hx, hx2]
       have : x - m = x - (m + 1) + 1 := by omega

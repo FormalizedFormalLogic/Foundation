@@ -47,19 +47,19 @@ def Derivation.toDerivation2 (𝓢) {Γ : Sequent L} : 𝓢 ⟹ Γ → 𝓢 ⟹�
   | Derivation.verum Δ              => Derivation2.verum (by simp)
   | @Derivation.and _ _ Δ φ ψ dp dq =>
     Derivation2.and (φ := φ) (ψ := ψ) (by simp)
-      (Derivation2.wk (Derivation.toDerivation2 𝓢 dp) (by simpa using Finset.insert_subset_insert _ (by simp)))
-      (Derivation2.wk (Derivation.toDerivation2 𝓢 dq) (by simpa using Finset.insert_subset_insert _ (by simp)))
+      (Derivation2.wk (Derivation.toDerivation2 𝓢 dp) (by simp))
+      (Derivation2.wk (Derivation.toDerivation2 𝓢 dq) (by simp))
   | @Derivation.or _ _ Δ φ ψ dpq    =>
     Derivation2.or (φ := φ) (ψ := ψ) (by simp)
       (Derivation2.wk (Derivation.toDerivation2 𝓢 dpq)
-      (by simpa using Finset.insert_subset_insert _ <| Finset.insert_subset_insert _ (by simp)))
+      (by simp))
   | @Derivation.all _ _ Δ φ dp      =>
     Derivation2.all (φ := φ) (by simp)
       (Derivation2.wk (Derivation.toDerivation2 𝓢 dp)
         (by simpa using Finset.insert_subset_insert _ (by simp [shifts_toFinset_eq_image_shift])))
   | @Derivation.ex _ _ Δ φ t dp     =>
     Derivation2.ex (φ := φ) (by simp) t
-      (Derivation2.wk (Derivation.toDerivation2 𝓢 dp) (by simpa using Finset.insert_subset_insert _ (by simp)))
+      (Derivation2.wk (Derivation.toDerivation2 𝓢 dp) (by simp))
   | Derivation.wk d h               =>
     Derivation2.wk (Derivation.toDerivation2 𝓢 d) (List.toFinset_mono h)
   | @Derivation.cut _ _ Δ φ d₁ d₂   =>
