@@ -71,6 +71,8 @@ abbrev subst (φ : Semiformula L ξ n) (v : Fin n → Semiterm L ξ m) : Semifor
 
 abbrev shift (φ : SyntacticSemiformula L n) : SyntacticSemiformula L n := Rewriting.shift φ
 
+abbrev free (φ : SyntacticSemiformula L (n + 1)) : SyntacticSemiformula L n := Rewriting.free φ
+
 lemma rew_rel (ω : Rew L ξ₁ n₁ ξ₂ n₂) {k} (r : L.Rel k) (v : Fin k → Semiterm L ξ₁ n₁) : ω ▹ rel r v = rel r fun i ↦ ω (v i) := rfl
 
 lemma rew_nrel (ω : Rew L ξ₁ n₁ ξ₂ n₂) {k} (r : L.Rel k) (v : Fin k → Semiterm L ξ₁ n₁) : ω ▹ nrel r v = nrel r fun i ↦ ω (v i) := rfl
