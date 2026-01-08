@@ -50,10 +50,3 @@ supportInterpreter = true
 
 [[lean_lib]]
 name = "Zoo"
-
-[[lean_lib]]
-name = "Book"
-
-[[lean_exe]]
-name = "book"
-root = "Book.Book"

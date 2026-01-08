@@ -95,19 +95,6 @@ jobs:
       - name: Copy doc to pages
         run: cp -r .lake/build/doc ./pages/_output/doc
 
-      # Build Book
-      - name: Download JuliaMono
-        run: |
-          wget https://github.com/cormullion/juliamono/releases/download/v0.061/JuliaMono-webfonts.tar.gz
-          mkdir juliamono
-          tar -xvf JuliaMono-webfonts.tar.gz -C juliamono --strip-components 1
-          rm JuliaMono-webfonts.tar.gz
-        working-directory: ./Book/assets
-      - name: Build book
-        run: lake exe book
-      - name: Copy book to pages
-        run: cp -r  _out/html-multi ./pages/_output/book
-
       # Save project cache
       - name: Save project cache
         id: cache-save
