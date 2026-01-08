@@ -41,56 +41,22 @@ jobs:
           restore-keys: |
             lake-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('lean-toolchain') }}-${{ hashFiles('lake-manifest.json') }}
 
-      # Build project
       - name: Get Mathlib cache
         run: lake exe cache get
+
+      # Build project
       - name: Build project
         run: lake build --keep-toolchain Foundation
-      - name: Build executables
-        run: |
-          lake build --keep-toolchain \
-            Zoo_Arith \
-            Zoo_SetTheory \
-            Zoo_Propositional \
-            Zoo_Modal \
-            Zoo_InterpretabilityLogic
 
-      # Build import-graph
+      # Generate import-graph
       - name: Generate import graph
         run: |
           lake exe graph ./pages/_output/import_graph.png
           lake exe graph ./pages/_output/import_graph.pdf
           lake exe graph ./pages/_output/import_graph.html
 
-      # Build zoo
-      - name: Generate Propositional Zoo
-        run: |
-          lake exe Zoo_Propositional
-          typst compile ./Zoo/Propositional.typ ./pages/_output/zoo/Propositional.png
-          typst compile ./Zoo/Propositional.typ ./pages/_output/zoo/Propositional.pdf
-      - name: Generate Arith Zoo
-        run: |
-          lake exe Zoo_Arith
-          typst compile ./Zoo/Arith.typ ./pages/_output/zoo/Arith.png
-          typst compile ./Zoo/Arith.typ ./pages/_output/zoo/Arith.pdf
-      - name: Generate SetTheory Zoo
-        run: |
-          lake exe Zoo_SetTheory
-          typst compile ./Zoo/SetTheory.typ ./pages/_output/zoo/SetTheory.png
-          typst compile ./Zoo/SetTheory.typ ./pages/_output/zoo/SetTheory.pdf
-      - name: Generate Modal Zoo
-        run: |
-          lake exe Zoo_Modal
-          typst compile ./Zoo/Modal.typ ./pages/_output/zoo/Modal.png
-          typst compile ./Zoo/Modal.typ ./pages/_output/zoo/Modal.pdf
-      - name: Generate InterpretabilityLogic Zoo
-        run: |
-          lake exe Zoo_InterpretabilityLogic
-          typst compile ./Zoo/InterpretabilityLogic.typ ./pages/_output/zoo/InterpretabilityLogic.png
-          typst compile ./Zoo/InterpretabilityLogic.typ ./pages/_output/zoo/InterpretabilityLogic.pdf
-
-      # Build Doc
-      - name: Build doc
+      # Generate Doc
+      - name: Generate doc
         run: lake build Foundation:docs
       - name: Copy doc to pages
         run: cp -r .lake/build/doc ./pages/_output/doc
