@@ -28,7 +28,7 @@ theorem sound : T ⟹ Γ → T ⊨[Valuation α] Γ.disj := by
   case wk Γ Ξ _ ss ih =>
     have : ∃ φ ∈ Γ, v ⊧ φ := by simpa [List.map_disj] using ih
     rcases this with ⟨φ, hp, hvp⟩
-    simp; exact ⟨φ, ss hp, hvp⟩
+    simpa using ⟨φ, ss hp, hvp⟩
   case cut Γ φ _ _ ihp ihn =>
     by_cases hv : v ⊧ Γ.disj
     · simp [hv]

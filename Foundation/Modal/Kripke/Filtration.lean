@@ -213,7 +213,7 @@ instance isSymmetric [M.IsSymmetric] : (finestFiltrationModel M T).IsSymmetric w
   symm := by
     rintro _ _ ⟨x, y, rfl, rfl, Rxy⟩;
     use y, x;
-    refine ⟨by trivial, by trivial, IsSymm.symm _ _ Rxy⟩;
+    refine ⟨by trivial, by trivial, Std.Symm.symm _ _ Rxy⟩;
 
 end finestFiltrationModel
 

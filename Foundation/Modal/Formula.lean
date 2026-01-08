@@ -313,13 +313,13 @@ def ofNat : ℕ → Option (Formula α)
     | 0 => (decode c).map Formula.atom
     | 1 => some ⊥
     | 2 =>
-      have : c < e + 1 := Nat.lt_succ.mpr $ Nat.unpair_right_le _
+      have : c < e + 1 := Nat.lt_succ_iff.mpr $ Nat.unpair_right_le _
       do
         let φ <- ofNat c
         return □φ
     | 3 =>
-      have : c.unpair.1 < e + 1 := Nat.lt_succ.mpr $ le_trans (Nat.unpair_left_le _) $ Nat.unpair_right_le _
-      have : c.unpair.2 < e + 1 := Nat.lt_succ.mpr $ le_trans (Nat.unpair_right_le _) $ Nat.unpair_right_le _
+      have : c.unpair.1 < e + 1 := Nat.lt_succ_iff.mpr $ le_trans (Nat.unpair_left_le _) $ Nat.unpair_right_le _
+      have : c.unpair.2 < e + 1 := Nat.lt_succ_iff.mpr $ le_trans (Nat.unpair_right_le _) $ Nat.unpair_right_le _
       do
         let φ <- ofNat c.unpair.1
         let ψ <- ofNat c.unpair.2

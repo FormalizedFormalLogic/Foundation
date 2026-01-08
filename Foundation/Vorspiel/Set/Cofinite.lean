@@ -11,12 +11,12 @@ abbrev Cofinite (s : Set α) := sᶜ.Finite
 
 abbrev Coinfinite (s : Set α) := sᶜ.Infinite
 
-@[grind =]
-lemma iff_cofinite_not_coinfinite : s.Cofinite ↔ ¬s.Coinfinite := by simp;
+@[push] lemma iff_cofinite_not_coinfinite : s.Cofinite ↔ ¬s.Coinfinite := by simp;
+@[push] lemma iff_coinfinite_not_cofinite : s.Coinfinite ↔ ¬s.Cofinite := by simp;
 
-@[simp, grind =] lemma iff_cofinite_comp_finite : s.Cofinite ↔ sᶜ.Finite := by simp [Cofinite];
+lemma iff_cofinite_comp_finite : s.Cofinite ↔ sᶜ.Finite := by grind;
 
-@[simp, grind =] lemma iff_coinfinite_comp_infinite : s.Coinfinite ↔ sᶜ.Infinite := by simp [Coinfinite];
+lemma iff_coinfinite_comp_infinite : s.Coinfinite ↔ sᶜ.Infinite := by grind;
 
 @[grind →]
 lemma Cofinite.subset (h : s ⊆ t) : s.Cofinite → t.Cofinite := by
@@ -32,13 +32,13 @@ lemma Coinfinite.subset (h : t ⊆ s) : s.Coinfinite → t.Coinfinite := by
 
 @[simp, grind .] lemma univ_cofinite : (Set.univ (α := α)).Cofinite := by simp [Set.Cofinite];
 
-@[grind ⇒]
+@[grind <=]
 lemma cofinite_union_left (hs : s.Cofinite) : (s ∪ t).Cofinite := by
   simp only [Cofinite, compl_union];
   apply Set.Finite.inter_of_left;
   assumption;
 
-@[grind =>]
+@[grind <=]
 lemma cofinite_union_right (ht : t.Cofinite) : (s ∪ t).Cofinite := by
   exact (show (t ∪ s) = (s ∪ t) by tauto_set) ▸ cofinite_union_left ht;
 

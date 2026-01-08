@@ -71,15 +71,19 @@ variable {F S : Type*} [BasicModalLogicalConnective F] [Entailment S F]
 instance [DecidableEq F] : Box (LindenbaumAlgebra 𝓢) where
   box := Quotient.lift (fun φ ↦ ⟦□φ⟧) $ by
     intro φ ψ h;
-    simpa using box_congruence! h;
+    simp only [ProvablyEquivalent.setoid, ProvablyEquivalent, Quotient.eq];
+    apply box_congruence!;
+    assumption;
 
 instance [DecidableEq F] : Dia (LindenbaumAlgebra 𝓢) where
   dia := Quotient.lift (fun φ ↦ ⟦◇φ⟧) $ by
     intro φ ψ h;
-    simpa using dia_iff! h;
+    simp only [ProvablyEquivalent.setoid, ProvablyEquivalent, Quotient.eq];
+    apply dia_iff!;
+    assumption;
 
-@[simp, grind =] lemma box_def [DecidableEq F] (φ : F) : □(⟦φ⟧ : LindenbaumAlgebra 𝓢) = ⟦□φ⟧ := rfl
-@[simp, grind =] lemma dia_def [DecidableEq F] (φ : F) : ◇(⟦φ⟧ : LindenbaumAlgebra 𝓢) = ⟦◇φ⟧ := rfl
+@[simp] lemma box_def [DecidableEq F] (φ : F) : □(⟦φ⟧ : LindenbaumAlgebra 𝓢) = ⟦□φ⟧ := rfl
+@[simp] lemma dia_def [DecidableEq F] (φ : F) : ◇(⟦φ⟧ : LindenbaumAlgebra 𝓢) = ⟦◇φ⟧ := rfl
 
 instance [DecidableEq F] : ModalAlgebra (LindenbaumAlgebra 𝓢) where
   box_top := by

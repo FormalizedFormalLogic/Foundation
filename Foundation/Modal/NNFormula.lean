@@ -220,26 +220,26 @@ def ofNat : Nat → Option (NNFormula α)
     | 2 => (decode c).map NNFormula.atom
     | 3 => (decode c).map NNFormula.natom
     | 4 =>
-      have : c.unpair.1 < e + 1 := Nat.lt_succ.mpr $ le_trans (Nat.unpair_left_le _) $ Nat.unpair_right_le _
-      have : c.unpair.2 < e + 1 := Nat.lt_succ.mpr $ le_trans (Nat.unpair_right_le _) $ Nat.unpair_right_le _
+      have : c.unpair.1 < e + 1 := Nat.lt_succ_iff.mpr $ le_trans (Nat.unpair_left_le _) $ Nat.unpair_right_le _
+      have : c.unpair.2 < e + 1 := Nat.lt_succ_iff.mpr $ le_trans (Nat.unpair_right_le _) $ Nat.unpair_right_le _
       do
         let φ ← ofNat c.unpair.1
         let ψ ← ofNat c.unpair.2
         return φ ⋎ ψ
     | 5 =>
-      have : c.unpair.1 < e + 1 := Nat.lt_succ.mpr $ le_trans (Nat.unpair_left_le _) $ Nat.unpair_right_le _
-      have : c.unpair.2 < e + 1 := Nat.lt_succ.mpr $ le_trans (Nat.unpair_right_le _) $ Nat.unpair_right_le _
+      have : c.unpair.1 < e + 1 := Nat.lt_succ_iff.mpr $ le_trans (Nat.unpair_left_le _) $ Nat.unpair_right_le _
+      have : c.unpair.2 < e + 1 := Nat.lt_succ_iff.mpr $ le_trans (Nat.unpair_right_le _) $ Nat.unpair_right_le _
       do
         let φ ← ofNat c.unpair.1
         let ψ ← ofNat c.unpair.2
         return φ ⋏ ψ
     | 6 =>
-      have : c < e + 1 := Nat.lt_succ.mpr $ Nat.unpair_right_le _
+      have : c < e + 1 := Nat.lt_succ_iff.mpr $ Nat.unpair_right_le _
       do
         let φ ← ofNat c;
         return □φ
     | 7 =>
-      have : c < e + 1 := Nat.lt_succ.mpr $ Nat.unpair_right_le _
+      have : c < e + 1 := Nat.lt_succ_iff.mpr $ Nat.unpair_right_le _
       do
         let φ ← ofNat c;
         return ◇φ

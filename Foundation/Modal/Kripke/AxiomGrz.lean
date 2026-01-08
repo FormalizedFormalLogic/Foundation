@@ -173,13 +173,8 @@ lemma WCWF_of_validate_AxiomGrz (h : F ⊧ Axioms.Grz (.atom 0)) : F.IsWeaklyCon
             . have : j + 1 < k := by omega;
               exact H this;
         intro x hx;
-        contrapose;
-        have : Satisfies ⟨F, V⟩ (f j) (□(∼(.atom 0) ➝ ∼□((.atom 0) ➝ □(.atom 0)))) := by
-          simp_all [Satisfies, V];
-          rintro x hx rfl;
-          use f (j + 1);
-          refine ⟨(hf j).1, Ne.symm $ (hf j).2, this.2⟩;
-        exact this _ hx;
+        simp only [Satisfies, LogicalConnective.Prop.arrow_eq, imp_false, Classical.not_imp, not_forall] at ⊢ this;
+        grind;
       . simp [Satisfies, V];
 
 /-

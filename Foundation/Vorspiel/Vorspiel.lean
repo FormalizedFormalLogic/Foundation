@@ -1036,7 +1036,7 @@ lemma projection {f : ℕ →. ℕ} (hf : Nat.Partrec f) (unif : ∀ {m n₁ n�
     · rintro ⟨x, H⟩
       obtain ⟨s, Hs⟩ := Code.evaln_complete.mp H
       exact ⟨max s x + 1, (@hF m (max s x + 1) a).mpr
-        ⟨x, by simp [Nat.lt_succ],
+        ⟨x, by simp [Nat.lt_succ_iff],
           Code.evaln_mono (le_trans (Nat.le_max_left s x) (le_add_right (max s x) 1)) Hs⟩⟩⟩
 
 end Nat.Partrec

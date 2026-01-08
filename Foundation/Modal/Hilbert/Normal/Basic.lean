@@ -23,16 +23,16 @@ namespace Hilbert.Normal
 
 variable {Ax Ax₁ Ax₂ : Axiom α}
 
-@[grind →]
+@[grind <=]
 lemma axm' {φ} (h : φ ∈ Ax) : Normal Ax ⊢ φ := by
   apply Logic.iff_provable.mpr;
   simpa using axm (s := .id) h;
 
-@[grind =>] lemma axm! {φ} (s : Substitution _) (h : φ ∈ Ax) : Normal Ax ⊢ φ⟦s⟧ := by
+@[grind <=] lemma axm! {φ} (s : Substitution _) (h : φ ∈ Ax) : Normal Ax ⊢ φ⟦s⟧ := by
   apply Logic.iff_provable.mpr;
   apply axm s h;
 
-@[grind →] lemma axm'! {φ} (h : φ ∈ Ax) : Normal Ax ⊢ φ := by simpa using axm! .id h;
+@[grind <=] lemma axm'! {φ} (h : φ ∈ Ax) : Normal Ax ⊢ φ := by simpa using axm! .id h;
 
 instance : Entailment.Lukasiewicz (Hilbert.Normal Ax) where
   implyK {_ _} := by constructor; apply Hilbert.Normal.implyK;
