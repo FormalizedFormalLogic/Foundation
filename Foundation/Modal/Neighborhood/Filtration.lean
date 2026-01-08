@@ -43,7 +43,7 @@ namespace FilterEqvQuotient
 
 @[grind =>]
 lemma iff_eq : (⟦x⟧ : FilterEqvQuotient M T) = ⟦y⟧ ↔ (∀ φ ∈ T, x ⊧ φ ↔ y ⊧ φ) := by
-  simp [FilterEqvSetoid, filterEquiv];
+  simp [FilterEqvSetoid, Quotient.eq, filterEquiv];
 
 lemma finite (T_finite : T.Finite) : Finite (FilterEqvQuotient M T) := by
   have : Finite (𝒫 T) := Set.Finite.powerset T_finite
@@ -135,7 +135,8 @@ lemma compl_truthset (hφ : φ ∈ T) : (【(M φ)ᶜ】 : Set (FilterEqvQuotien
 
 lemma subset_original_truthset_of_subset (hψ : ψ ∈ T) (h : (【M φ】 : Set (FilterEqvQuotient M T)) ⊆ 【M ψ】) : M φ ⊆ M ψ := by
   intro x hx;
-  replace h : ∀ y ∈ M φ, ∃ z ∈ M ψ, (filterEquiv M T) z y := by simpa [toFilterEquivSet] using h;
+  replace h : ∀ y ∈ M φ, ∃ z ∈ M ψ, (filterEquiv M T) z y := by
+    simpa [toFilterEquivSet, FilterEqvSetoid, Quotient.eq] using h;
   obtain ⟨y, hy₁, hy₂⟩ := h x hx;
   apply hy₂ ψ hψ |>.mp hy₁;
 

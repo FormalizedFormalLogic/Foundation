@@ -52,10 +52,10 @@ lemma models_iff_val {v : Valuation α} {f : NNFormula α} : v ⊧ f ↔ NNFormu
 
 instance : Semantics.Tarski (Valuation α) where
   models_verum := by simp [models_iff_val]
-  models_falsum := by simp [Semantics.NotModels, models_iff_val]
+  models_falsum := by simp [models_iff_val]
   models_and := by simp [models_iff_val]
   models_or := by simp [models_iff_val]
-  models_not := by simp [Semantics.NotModels, models_iff_val]
+  models_not := by simp [models_iff_val]
   models_imply := by simp [models_iff_val]
 
 @[simp] protected lemma models_atom : v ⊧ .atom a ↔ v a := iff_of_eq rfl

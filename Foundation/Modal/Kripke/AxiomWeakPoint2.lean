@@ -56,12 +56,7 @@ lemma isPiecewiseConvergent_of_validate_axiomWeakPoint2 (h : F ⊧ (Axioms.WeakP
     use (λ w a => match a with | 0 => y ≺ w | 1 => w = y | _ => False), x;
     suffices x ≺ y ∧ ∃ z, x ≺ z ∧ (∀ u, z ≺ u → ¬y ≺ u) ∧ ¬z = y by
       simpa [Satisfies, Semantics.Models];
-    refine ⟨Rxy, z, Rxz, ?_, by tauto⟩;
-    . intro u;
-      contrapose;
-      push_neg;
-      intro Ryu;
-      exact hu u Ryu;
+    refine ⟨Rxy, z, Rxz, by grind, by tauto⟩;
 
 end definability
 

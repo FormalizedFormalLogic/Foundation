@@ -43,7 +43,7 @@ instance Frame.pointGenerate.isUniversal (F : Frame) (r : F.World) (_ : F.IsS5) 
     . simp;
     . exact hy.unwrap;
     . suffices x ≺ y by simpa;
-      exact IsSymm.symm _ _ hx.unwrap;
+      exact Std.Symm.symm _ _ hx.unwrap;
     . suffices x ≺ y by simpa;
       apply F.eucl hx.unwrap hy.unwrap ;
 

@@ -366,7 +366,10 @@ lemma Formula.trace.finite_or_cofinite : φ.trace.Finite ∨ φ.trace.Cofinite :
   . intro i;
     simp;
 
-@[grind →] lemma Formula.trace.finite_of_coinfinite (h_ci : φ.trace.Coinfinite) : φ.trace.Finite := by grind;
+@[grind →]
+lemma Formula.trace.finite_of_coinfinite (h_ci : φ.trace.Coinfinite) : φ.trace.Finite := by
+  apply or_iff_not_imp_right.mp $ Formula.trace.finite_or_cofinite;
+  simpa;
 
 lemma subset_GLα_of_trace_coinfinite (hL : L.trace.Coinfinite) : L ⊆ Modal.GLα L.trace := by
   intro φ hφ;
@@ -610,7 +613,7 @@ lemma provable_TBBMinus_of_mem_trace (h : ¬(T.ProvabilityLogic U) ⊆ Modal.S) 
   apply ProvabilityLogic.provable_iff.mpr;
   intro g;
   apply Realization.iff_provable_letterless_interpret ?_ |>.mp H;
-  grind;
+  apply TBBMinus_letterless';
 
 /-- Artemov & Beklemishev. Lemma 49 -/
 theorem eq_provabilityLogic_GLβMinus_of_not_subset_S (h : ¬(T.ProvabilityLogic U) ⊆ Modal.S) : T.ProvabilityLogic U = Modal.GLβMinus (T.ProvabilityLogic U).trace := by

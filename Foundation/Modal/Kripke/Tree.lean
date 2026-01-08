@@ -34,6 +34,7 @@ lemma not_nil : X.1 ≠ [] := by
   have := X.2.1;
   simp_all;
 
+@[grind →]
 lemma rel_length (h : X ≺ Y) : X.1.length < Y.1.length := by
   obtain ⟨z, hz⟩ := h;
   simp_all;
@@ -77,23 +78,14 @@ lemma transrel_def : X ≺^+ Y ↔ ∃ l ≠ [], Y.1 = X.1 ++ l ∧ (List.IsChai
       . apply ih;
         refine ⟨by simp_all, by simpa, by simpa⟩;
 
-protected instance isIrreflexive : (F.mkTreeUnravelling r).IsIrreflexive := ⟨by
-  intro x; simp [Frame.mkTreeUnravelling];
-⟩
-
-protected instance isAsymmetric : (F.mkTreeUnravelling r).IsAsymmetric := ⟨by
-  rintro x y hxy;
-  by_contra hyx;
-  replace hxy := rel_length hxy;
-  replace hyx := rel_length hyx;
-  exact hxy.not_lt hyx;
-⟩
+protected instance isIrreflexive : (F.mkTreeUnravelling r).IsIrreflexive := ⟨by grind⟩
+protected instance isAsymmetric : (F.mkTreeUnravelling r).IsAsymmetric := ⟨by grind⟩
 
 protected def pMorphism (F : Frame) (r : F) : F.mkTreeUnravelling r →ₚ F where
   toFun c := c.1.getLast (by simp)
   forth {cx cy} h := by
     obtain ⟨z, hz⟩ := h;
-    have ⟨_, _, h⟩ := @List.chain'_append _ F.Rel cx.1 [z] |>.mp (by rw [←hz]; exact cy.2.2);
+    have ⟨_, _, h⟩ := @List.isChain_append _ F.Rel cx.1 [z] |>.mp (by rw [←hz]; exact cy.2.2);
     refine h (cx.1.getLast (by aesop)) ?hx (cy.1.getLast (by aesop)) ?hy;
     . exact List.getLast?_eq_getLast_of_ne_nil (by simp);
     . simp;
@@ -144,20 +136,14 @@ lemma not_nil : X.1 ≠ [] := by
   have := X.2.1;
   simp_all;
 
+@[grind →]
 lemma rel_length (Rxy : X ≺ Y) : X.1.length < Y.1.length := by
   induction Rxy with
   | single Rxy => exact treeUnravelling.rel_length Rxy;
   | tail _ h ih => have := treeUnravelling.rel_length h; omega;
 
 instance : (F.mkTransTreeUnravelling r).IsTransitive := inferInstance
-
-instance : (F.mkTransTreeUnravelling r).IsAsymmetric := ⟨by
-  rintro x y hxy;
-  by_contra hyx;
-  replace hxy := rel_length hxy;
-  replace hyx := rel_length hyx;
-  exact hxy.not_lt hyx;
-⟩
+instance : (F.mkTransTreeUnravelling r).IsAsymmetric := ⟨by grind⟩
 
 lemma rel_def : X ≺ Y ↔ (∃ l ≠ [], Y.1 = X.1 ++ l ∧ (List.IsChain F.Rel (X.1 ++ l))) := treeUnravelling.transrel_def
 
