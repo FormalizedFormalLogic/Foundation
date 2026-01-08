@@ -71,13 +71,15 @@ namespace FormulaSet
 
 variable {α : Type*} {Γ : FormulaSet α} {φ : Formula α}
 
+@[grind]
 def Letterless (Γ : FormulaSet α) : Prop := ∀ φ ∈ Γ, φ.Letterless
 
-@[simp, grind]
+@[simp, grind =]
 lemma letterless_singleton {φ : Formula α} : ({φ} : FormulaSet α).Letterless ↔ φ.Letterless := by
   simp [Letterless];
 
-@[grind] lemma letterless_of_mem (hΓ : Γ.Letterless) (hφ : φ ∈ Γ) : φ.Letterless := hΓ φ hφ
+@[grind <=]
+lemma letterless_of_mem (hΓ : Γ.Letterless) (hφ : φ ∈ Γ) : φ.Letterless := hΓ φ hφ
 
 end FormulaSet
 
