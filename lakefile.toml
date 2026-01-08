@@ -16,10 +16,6 @@ name = "mathlib"
 scope = "leanprover"
 name = "doc-gen4"
 
-[[require]]
-scope = "leanprover"
-name = "verso"
-
 [[lean_lib]]
 name = "Foundation"
 
