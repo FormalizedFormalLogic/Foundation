@@ -1,1 +1,0 @@
-# Completeness Theorem
