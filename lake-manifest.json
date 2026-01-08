@@ -18,7 +18,7 @@
    "rev": "f317236f66fce00be8a8e0f01cdd31619909f887",
    "name": "mathlib",
    "manifestFile": "lake-manifest.json",
-   "inputRev": "master",
+   "inputRev": "f317236f66fce00be8a8e0f01cdd31619909f887",
    "inherited": false,
    "configFile": "lakefile.lean"},
   {"url": "https://github.com/leanprover/lean4-cli",

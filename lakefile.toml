@@ -11,6 +11,7 @@ weak.linter.style.multiGoal = true
 [[require]]
 scope = "leanprover-community"
 name = "mathlib"
+rev = "f317236f66fce00be8a8e0f01cdd31619909f887"
 
 [[require]]
 scope = "leanprover"
