@@ -41,18 +41,18 @@ variable {V : Type} [ORingStructure V] [V ⊧ₘ* 𝗜𝚺₁]
 variable {T U : ArithmeticTheory} [T.Δ₁] -- [𝗜𝚺₁ ⪯ T] [𝗜𝚺₁ ⪯ U]
 variable {𝔢 : ℕ}
 
-lemma rg [𝗜𝚺₁ ⪯ U] : U ⊢ T.restrictedGödel 𝔢 ⭤ (∼T.restrictedProvable 𝔢)/[⌜T.restrictedGödel 𝔢⌝] := diagonal _
+lemma def_restrictedGödel [𝗜𝚺₁ ⪯ U] : U ⊢ T.restrictedGödel 𝔢 ⭤ (∼T.restrictedProvable 𝔢)/[⌜T.restrictedGödel 𝔢⌝] := diagonal _
 
-lemma rg_modeled : V ⊧ₘ T.restrictedGödel 𝔢 ↔ ∀ x : V, x ≤ (ORingStructure.numeral 𝔢) → ¬T.Proof x (⌜T.restrictedGödel 𝔢⌝) := by
-  apply Iff.trans $ Semantics.models_iff.mp $ models_of_provable (T := 𝗜𝚺₁) inferInstance $ rg;
+lemma models_restrictedGödel : V ⊧ₘ T.restrictedGödel 𝔢 ↔ ∀ x : V, x ≤ (ORingStructure.numeral 𝔢) → ¬T.Proof x (⌜T.restrictedGödel 𝔢⌝) := by
+  apply Iff.trans $ Semantics.models_iff.mp $ models_of_provable (T := 𝗜𝚺₁) inferInstance $ def_restrictedGödel;
   simp [models_iff, Theory.RestrictedProvable]
 
-lemma rg_neg_modeled : ¬V ⊧ₘ T.restrictedGödel 𝔢 ↔ ∃ x : V, x ≤ (ORingStructure.numeral 𝔢) ∧ T.Proof x (⌜T.restrictedGödel 𝔢⌝) := by
-  simpa using rg_modeled.not;
+lemma models_neg_restrictedGödel : ¬V ⊧ₘ T.restrictedGödel 𝔢 ↔ ∃ x : V, x ≤ (ORingStructure.numeral 𝔢) ∧ T.Proof x (⌜T.restrictedGödel 𝔢⌝) := by
+  simpa using models_restrictedGödel.not;
 
 theorem true_restrictedGödel (𝔢) [T.SoundOnHierarchy 𝚺 1] : ℕ ⊧ₘ (T.restrictedGödel 𝔢) := by
   by_contra hC;
-  obtain ⟨e, _, he⟩ := rg_neg_modeled (𝔢 := 𝔢) |>.mp hC;
+  obtain ⟨e, _, he⟩ := models_neg_restrictedGödel (𝔢 := 𝔢) |>.mp hC;
   apply hC;
   apply ArithmeticTheory.soundOnHierarchy T _ _ ?_ T.restrictedGödel_sigma_one;
   apply Arithmetic.Bootstrapping.provable_of_standard_proof (V := ℕ) (T := T) (n := e);
