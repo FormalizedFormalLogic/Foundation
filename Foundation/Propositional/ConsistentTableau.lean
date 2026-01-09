@@ -1,3 +1,4 @@
+module
 import Foundation.Propositional.Formula
 import Foundation.Propositional.Entailment.Cl.Basic
 import Foundation.Vorspiel.List.Supplemental

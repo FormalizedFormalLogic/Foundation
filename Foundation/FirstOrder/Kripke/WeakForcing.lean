@@ -1,3 +1,4 @@
+module
 import Foundation.FirstOrder.Kripke.Intuitionistic
 import Foundation.FirstOrder.NegationTranslation.GoedelGentzen
 

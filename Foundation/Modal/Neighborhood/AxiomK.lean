@@ -1,3 +1,4 @@
+module
 import Foundation.Modal.Neighborhood.Basic
 
 namespace LO.Modal.Neighborhood

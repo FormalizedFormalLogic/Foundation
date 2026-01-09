@@ -1,3 +1,4 @@
+module
 import Foundation.Modal.Kripke.Logic.GL.Completeness
 import Foundation.Modal.Kripke.Tree
 import Mathlib.Tactic.TFAE

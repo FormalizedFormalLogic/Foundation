@@ -1,3 +1,4 @@
+module
 import Foundation.Modal.Entailment.K
 import Foundation.Modal.Entailment.KP
 import Foundation.Modal.Entailment.KD

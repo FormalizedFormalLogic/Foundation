@@ -1,3 +1,4 @@
+module
 import Foundation.Propositional.Entailment.Minimal.Basic
 import Foundation.Propositional.Entailment.AxiomEFQ
 

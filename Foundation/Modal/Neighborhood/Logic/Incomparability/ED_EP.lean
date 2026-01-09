@@ -1,3 +1,4 @@
+module
 import Foundation.Modal.Neighborhood.Logic.EP
 import Foundation.Modal.Neighborhood.Logic.ED
 

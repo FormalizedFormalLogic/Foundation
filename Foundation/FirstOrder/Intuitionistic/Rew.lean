@@ -1,3 +1,4 @@
+module
 import Foundation.FirstOrder.Intuitionistic.Formula
 
 namespace LO.FirstOrder

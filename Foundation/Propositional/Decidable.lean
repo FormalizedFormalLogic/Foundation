@@ -1,3 +1,4 @@
+module
 import Foundation.Propositional.ClassicalSemantics.Basic
 import Foundation.Propositional.Tait.Calculus
 import Foundation.Propositional.ClassicalSemantics.Tait

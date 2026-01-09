@@ -1,3 +1,4 @@
+module
 import Foundation.FirstOrder.Bootstrapping.Syntax.Term.Typed
 import Foundation.FirstOrder.Bootstrapping.Syntax.Formula.Iteration
 

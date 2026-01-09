@@ -1,3 +1,4 @@
+module
 import Foundation.Modal.NNFormula
 import Foundation.Modal.Kripke.Basic
 

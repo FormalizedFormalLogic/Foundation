@@ -1,3 +1,4 @@
+module
 import Foundation.Propositional.Entailment.Int.Basic
 import Foundation.Propositional.Entailment.AxiomEFQ
 import Foundation.Propositional.Entailment.AxiomLEM

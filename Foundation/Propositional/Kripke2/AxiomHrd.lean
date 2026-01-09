@@ -1,3 +1,4 @@
+module
 import Foundation.Propositional.Kripke2.Basic
 import Foundation.Vorspiel.Rel.Convergent
 import Foundation.Vorspiel.Rel.Euclidean

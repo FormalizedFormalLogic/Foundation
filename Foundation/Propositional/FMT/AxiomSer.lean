@@ -1,3 +1,4 @@
+module
 import Foundation.Propositional.FMT.Logic.VF
 
 namespace LO.Propositional

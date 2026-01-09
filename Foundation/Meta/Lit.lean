@@ -1,3 +1,4 @@
+module
 import Foundation.Meta.Qq
 import Foundation.Logic.LogicSymbol
 

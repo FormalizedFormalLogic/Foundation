@@ -1,3 +1,4 @@
+module
 import Foundation.Logic.Disjunctive
 import Foundation.Propositional.Entailment.Cl.Basic
 import Foundation.Modal.Axioms

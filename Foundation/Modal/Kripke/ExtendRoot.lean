@@ -1,3 +1,4 @@
+module
 import Foundation.Modal.Boxdot.Basic
 import Foundation.Modal.Kripke.Tree
 import Foundation.Vorspiel.List.Chain

@@ -1,3 +1,4 @@
+module
 import Foundation.Modal.ComplementClosedConsistentFinset
 import Foundation.Modal.Kripke.Logic.Grz.Soundness
 

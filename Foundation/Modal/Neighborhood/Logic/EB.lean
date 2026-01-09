@@ -1,3 +1,4 @@
+module
 import Foundation.Modal.Neighborhood.AxiomGeach
 import Foundation.Modal.Neighborhood.AxiomM
 import Foundation.Modal.Neighborhood.AxiomC

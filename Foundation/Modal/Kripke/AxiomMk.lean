@@ -1,3 +1,4 @@
+module
 import Foundation.Modal.Kripke.Completeness
 
 namespace LO.Modal

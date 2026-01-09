@@ -1,3 +1,4 @@
+module
 import Lean.Elab.Tactic.Basic
 import Mathlib.Tactic.NormNum
 import Mathlib.Util.AtomM

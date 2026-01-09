@@ -1,3 +1,4 @@
+module
 import Foundation.Modal.Kripke.Rooted
 import Foundation.Modal.Kripke.Logic.KTB
 import Foundation.Modal.Kripke.Logic.KD45

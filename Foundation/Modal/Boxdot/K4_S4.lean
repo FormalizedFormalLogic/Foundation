@@ -1,3 +1,4 @@
+module
 import Foundation.Modal.Boxdot.Basic
 import Foundation.Modal.Entailment.S4
 import Foundation.Modal.Kripke.Logic.K4

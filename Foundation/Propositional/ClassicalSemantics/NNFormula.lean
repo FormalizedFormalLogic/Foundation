@@ -1,3 +1,4 @@
+module
 import Foundation.Propositional.ClassicalSemantics.Basic
 import Foundation.Propositional.NNFormula
 

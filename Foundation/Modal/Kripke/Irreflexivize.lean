@@ -1,3 +1,4 @@
+module
 import Foundation.Modal.Kripke.Irreflexive
 import Foundation.Modal.Kripke.AxiomWeakPoint2
 import Foundation.Modal.Kripke.AxiomPoint3

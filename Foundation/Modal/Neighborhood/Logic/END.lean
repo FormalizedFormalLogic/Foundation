@@ -1,3 +1,4 @@
+module
 import Foundation.Modal.Neighborhood.Hilbert
 import Foundation.Modal.Neighborhood.Logic.Incomparability.ED_EP
 

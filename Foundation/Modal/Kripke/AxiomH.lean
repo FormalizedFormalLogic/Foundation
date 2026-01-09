@@ -1,3 +1,4 @@
+module
 import Foundation.Modal.Kripke.Rooted
 
 namespace LO.Modal

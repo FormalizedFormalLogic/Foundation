@@ -1,3 +1,4 @@
+module
 import Foundation.Propositional.Entailment.KC
 import Foundation.Propositional.Kripke.Completeness
 import Foundation.Vorspiel.Rel.Convergent

@@ -1,3 +1,4 @@
+module
 import Foundation.Modal.Neighborhood.Completeness
 import Foundation.Modal.Entailment.AxiomGeach
 

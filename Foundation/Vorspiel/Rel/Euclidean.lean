@@ -1,3 +1,4 @@
+module
 import Foundation.Vorspiel.Rel.Serial
 
 variable {α} {R : Rel α α}

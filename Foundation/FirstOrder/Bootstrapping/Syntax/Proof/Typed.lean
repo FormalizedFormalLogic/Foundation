@@ -1,3 +1,4 @@
+module
 import Foundation.FirstOrder.Bootstrapping.Syntax.Formula.Typed
 import Foundation.FirstOrder.Bootstrapping.Syntax.Proof.Basic
 import Foundation.Propositional.Entailment.Cl.Basic

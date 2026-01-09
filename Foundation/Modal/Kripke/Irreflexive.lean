@@ -1,3 +1,4 @@
+module
 import Foundation.Modal.Kripke.Antisymmetric
 
 namespace LO.Modal.Kripke

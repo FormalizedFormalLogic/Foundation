@@ -1,3 +1,4 @@
+module
 import Foundation.Propositional.Kripke.Completeness
 import Foundation.Propositional.Kripke.Hilbert
 import Foundation.Propositional.Kripke.Filtration

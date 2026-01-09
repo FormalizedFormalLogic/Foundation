@@ -1,3 +1,4 @@
+module
 import Foundation.Propositional.Hilbert.WF
 import Foundation.Propositional.Hilbert.VF
 

@@ -1,3 +1,4 @@
+module
 import Foundation.Modal.LogicSymbol
 import Foundation.Modal.Formula
 import Foundation.Modal.Hilbert.Normal.Basic

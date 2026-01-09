@@ -1,3 +1,4 @@
+module
 import Foundation.Modal.Kripke.AxiomGeach
 import Foundation.Modal.Kripke.Hilbert
 import Foundation.Modal.Kripke.Logic.K4

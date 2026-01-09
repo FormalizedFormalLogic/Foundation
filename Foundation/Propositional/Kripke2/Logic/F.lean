@@ -1,3 +1,4 @@
+module
 import Foundation.Propositional.Kripke2.Hilbert
 import Foundation.Propositional.Kripke2.FTheory
 import Foundation.Propositional.Hilbert.F.Disjunctive

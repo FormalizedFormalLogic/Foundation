@@ -1,3 +1,4 @@
+module
 import Foundation.Modal.Tableau
 import Foundation.Modal.Kripke.Basic
 

@@ -1,3 +1,4 @@
+module
 import Foundation.Modal.Kripke.AxiomVer
 import Foundation.Modal.Kripke.Logic.GLPoint3
 import Foundation.Modal.Kripke.Logic.KTc

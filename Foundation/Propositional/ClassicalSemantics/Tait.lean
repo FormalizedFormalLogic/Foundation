@@ -1,3 +1,4 @@
+module
 import Foundation.Propositional.ClassicalSemantics.NNFormula
 import Foundation.Propositional.Tait.Calculus
 

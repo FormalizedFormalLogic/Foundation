@@ -1,3 +1,4 @@
+module
 import Foundation.Modal.PLoN.Hilbert
 import Foundation.Modal.PLoN.Completeness
 import Foundation.Modal.Hilbert.WithRE.Basic

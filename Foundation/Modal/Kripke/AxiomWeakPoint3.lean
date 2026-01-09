@@ -1,3 +1,4 @@
+module
 import Foundation.Modal.Kripke.Completeness
 import Foundation.Vorspiel.Rel.Connected
 

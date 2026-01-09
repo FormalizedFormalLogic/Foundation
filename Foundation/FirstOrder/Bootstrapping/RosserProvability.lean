@@ -1,3 +1,4 @@
+module
 import Foundation.FirstOrder.Bootstrapping.WitnessComparison
 
 /-!

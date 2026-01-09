@@ -1,3 +1,4 @@
+module
 import Foundation.Vorspiel.Rel.CWF
 import Foundation.Modal.Kripke.AxiomGeach
 import Foundation.Modal.Kripke.Irreflexive

@@ -1,3 +1,4 @@
+module
 import Foundation.InterpretabilityLogic.Veltman.Basic
 
 namespace LO.InterpretabilityLogic.Veltman

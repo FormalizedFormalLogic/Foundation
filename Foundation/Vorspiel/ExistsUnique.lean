@@ -1,3 +1,4 @@
+module
 import Foundation.Vorspiel.Vorspiel
 
 namespace Classical

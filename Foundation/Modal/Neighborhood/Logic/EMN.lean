@@ -1,3 +1,4 @@
+module
 import Foundation.Modal.Neighborhood.Hilbert
 import Foundation.Modal.Neighborhood.Logic.EN
 import Foundation.Modal.Neighborhood.Logic.EM

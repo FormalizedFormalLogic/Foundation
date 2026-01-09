@@ -1,3 +1,4 @@
+module
 import Foundation.Modal.Kripke.Logic.KT
 import Foundation.Modal.Kripke.Logic.KDB
 import Foundation.Modal.Kripke.Filtration

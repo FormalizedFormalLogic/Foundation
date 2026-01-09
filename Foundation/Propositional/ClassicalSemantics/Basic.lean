@@ -1,3 +1,4 @@
+module
 import Foundation.Propositional.Formula
 import Foundation.Logic.Semantics
 

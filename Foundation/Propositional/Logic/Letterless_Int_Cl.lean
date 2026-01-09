@@ -1,3 +1,4 @@
+module
 import Foundation.Modal.Kripke.Logic.S5Grz
 import Foundation.Modal.Maximal.Makinson
 import Foundation.Modal.ModalCompanion.Standard.Int

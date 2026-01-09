@@ -1,3 +1,4 @@
+module
 import Foundation.Modal.Kripke.Logic.S5
 
 namespace LO.Modal

@@ -1,3 +1,4 @@
+module
 import Foundation.FirstOrder.Basic.BinderNotation
 import Foundation.FirstOrder.Basic.Semantics.Elementary
 import Foundation.FirstOrder.Basic.Soundness

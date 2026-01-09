@@ -1,3 +1,4 @@
+module
 import Foundation.Modal.Entailment.K4Loeb
 import Foundation.Modal.Hilbert.Axiom
 import Foundation.Modal.Logic.Basic

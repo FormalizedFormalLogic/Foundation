@@ -1,3 +1,4 @@
+module
 import Foundation.Vorspiel.Rel.Euclidean
 
 variable {α} {R : Rel α α}

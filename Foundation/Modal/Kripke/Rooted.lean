@@ -1,3 +1,4 @@
+module
 import Foundation.Modal.Kripke.Preservation
 import Foundation.Modal.Kripke.Irreflexive
 import Foundation.Modal.Kripke.Asymmetric

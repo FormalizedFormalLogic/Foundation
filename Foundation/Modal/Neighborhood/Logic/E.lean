@@ -1,3 +1,4 @@
+module
 import Foundation.Modal.Neighborhood.Hilbert
 import Foundation.Modal.Neighborhood.Completeness
 import Foundation.Modal.Neighborhood.Filtration

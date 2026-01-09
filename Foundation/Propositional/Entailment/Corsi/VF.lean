@@ -1,3 +1,4 @@
+module
 import Foundation.Propositional.Entailment.Corsi.Basic
 import Foundation.Logic.Disjunctive
 

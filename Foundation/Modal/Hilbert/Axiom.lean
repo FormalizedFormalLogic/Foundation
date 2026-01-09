@@ -1,3 +1,4 @@
+module
 import Foundation.Modal.Axioms
 import Foundation.Modal.Formula
 

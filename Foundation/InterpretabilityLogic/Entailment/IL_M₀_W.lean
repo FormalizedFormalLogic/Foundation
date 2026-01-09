@@ -1,3 +1,4 @@
+module
 /-
   Visser 1991 (de Jongh), `IL(W, M₀) ⊢ W*`
 -/

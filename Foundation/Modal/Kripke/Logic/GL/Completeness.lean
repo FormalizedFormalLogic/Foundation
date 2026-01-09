@@ -1,3 +1,4 @@
+module
 import Foundation.Modal.Entailment.GL
 import Foundation.Modal.ComplementClosedConsistentFinset
 import Foundation.Modal.Kripke.Logic.GL.Soundness

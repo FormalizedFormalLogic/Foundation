@@ -1,3 +1,4 @@
+module
 import Foundation.Propositional.Hilbert.F.Basic
 
 namespace LO.Propositional.Hilbert.F

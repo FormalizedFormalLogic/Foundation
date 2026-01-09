@@ -1,3 +1,4 @@
+module
 import Foundation.Modal.Logic.SumNormal
 import Foundation.Modal.Logic.Basic
 import Foundation.Modal.Logic.GL.Independency

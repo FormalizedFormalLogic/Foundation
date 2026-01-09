@@ -1,3 +1,4 @@
+module
 import Foundation.ProvabilityLogic.GL.Completeness
 import Foundation.ProvabilityLogic.S.Soundness
 

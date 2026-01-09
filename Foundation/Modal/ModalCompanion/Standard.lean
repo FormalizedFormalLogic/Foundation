@@ -1,3 +1,4 @@
+module
 import Foundation.Modal.ModalCompanion.Standard.Basic
 import Foundation.Modal.ModalCompanion.Standard.Int
 import Foundation.Modal.ModalCompanion.Standard.KC

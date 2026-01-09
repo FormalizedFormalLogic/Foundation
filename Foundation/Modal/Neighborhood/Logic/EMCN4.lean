@@ -1,3 +1,4 @@
+module
 import Foundation.Modal.Neighborhood.Logic.EMCN
 import Foundation.Modal.Neighborhood.Logic.ENT4
 

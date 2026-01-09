@@ -1,3 +1,4 @@
+module
 import Foundation.Modal.Maximal.Basic
 import Foundation.Propositional.ClassicalSemantics.Hilbert
 import Foundation.Modal.Entailment.GL

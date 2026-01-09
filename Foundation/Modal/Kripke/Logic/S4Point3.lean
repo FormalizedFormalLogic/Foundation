@@ -1,3 +1,4 @@
+module
 import Foundation.Modal.Kripke.Logic.S4
 import Foundation.Modal.Kripke.AxiomPoint3
 import Foundation.Modal.Kripke.Filtration

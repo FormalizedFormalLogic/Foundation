@@ -1,3 +1,4 @@
+module
 import Foundation.FirstOrder.Bootstrapping.Syntax.Term.Basic
 import Foundation.FirstOrder.Arithmetic.Induction
 

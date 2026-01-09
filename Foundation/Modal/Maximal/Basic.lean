@@ -1,3 +1,4 @@
+module
 import Foundation.Propositional.Hilbert.Standard.Basic
 import Foundation.Propositional.ClassicalSemantics.Hilbert
 import Foundation.Modal.Hilbert.Normal.Basic

@@ -1,3 +1,4 @@
+module
 import Foundation.Modal.Kripke.Logic.K
 import Foundation.Vorspiel.Rel.WCWF
 import Foundation.Modal.Kripke.Antisymmetric

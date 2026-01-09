@@ -1,3 +1,4 @@
+module
 import Mathlib.Data.PNat.Basic
 import Mathlib.Data.Rel
 

@@ -1,3 +1,4 @@
+module
 import Foundation.Logic.Disjunctive
 import Foundation.Propositional.Entailment.Corsi
 import Foundation.Propositional.Hilbert.Axiom

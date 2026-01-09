@@ -1,3 +1,4 @@
+module
 /-
   Formalizing Yablo's Paradox.
 

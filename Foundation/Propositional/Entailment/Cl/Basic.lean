@@ -1,3 +1,4 @@
+module
 import Foundation.Propositional.Entailment.AxiomDNE
 import Foundation.Propositional.Entailment.AxiomElimContra
 import Foundation.Propositional.Entailment.AxiomLEM

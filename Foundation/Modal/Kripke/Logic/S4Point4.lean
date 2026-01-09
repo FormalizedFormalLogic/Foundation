@@ -1,3 +1,4 @@
+module
 import Foundation.Modal.Kripke.Logic.S4Point3
 import Foundation.Modal.Kripke.AxiomPoint4
 

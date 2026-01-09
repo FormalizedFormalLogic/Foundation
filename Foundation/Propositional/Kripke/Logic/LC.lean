@@ -1,3 +1,4 @@
+module
 import Foundation.Propositional.Kripke.AxiomDummett
 import Foundation.Propositional.Kripke.Logic.KC
 

@@ -1,3 +1,4 @@
+module
 import Foundation.Propositional.Kripke2.Logic.F_Rfl_Tra1
 import Foundation.Propositional.Kripke2.Logic.F_Tra1_Hrd
 

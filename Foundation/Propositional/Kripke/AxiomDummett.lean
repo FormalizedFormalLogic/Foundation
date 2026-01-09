@@ -1,3 +1,4 @@
+module
 import Foundation.Propositional.Kripke.Completeness
 import Foundation.Propositional.Entailment.LC
 import Foundation.Vorspiel.Rel.Connected

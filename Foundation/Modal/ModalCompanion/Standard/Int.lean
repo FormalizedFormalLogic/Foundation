@@ -1,3 +1,4 @@
+module
 import Foundation.Modal.Boxdot.GL_Grz
 import Foundation.Modal.Logic.SumNormal
 import Foundation.Modal.ModalCompanion.Standard.Basic

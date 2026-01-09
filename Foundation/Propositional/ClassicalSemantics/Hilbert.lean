@@ -1,3 +1,4 @@
+module
 import Foundation.Propositional.Hilbert.Standard
 import Foundation.Propositional.ClassicalSemantics.Basic
 import Foundation.Propositional.ConsistentTableau

@@ -1,3 +1,4 @@
+module
 import Foundation.FirstOrder.Bootstrapping.Syntax.Proof.Typed
 
 namespace LO.FirstOrder

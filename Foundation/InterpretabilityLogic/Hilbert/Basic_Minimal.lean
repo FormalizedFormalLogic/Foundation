@@ -1,3 +1,4 @@
+module
 import Foundation.InterpretabilityLogic.Hilbert.Basic.Basic
 import Foundation.InterpretabilityLogic.Hilbert.Minimal.Basic
 

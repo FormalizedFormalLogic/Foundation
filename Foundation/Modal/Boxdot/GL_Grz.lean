@@ -1,3 +1,4 @@
+module
 import Foundation.Modal.Boxdot.Basic
 import Foundation.Modal.Kripke.Logic.GL.Completeness
 import Foundation.Modal.Kripke.Logic.Grz.Completeness

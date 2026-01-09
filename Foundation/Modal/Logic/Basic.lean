@@ -1,3 +1,4 @@
+module
 import Foundation.Modal.Formula
 import Foundation.Modal.Entailment.Basic
 import Foundation.Meta.ClProver

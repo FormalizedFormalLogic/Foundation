@@ -1,3 +1,4 @@
+module
 import Foundation.InterpretabilityLogic.Formula.Substitution
 import Foundation.Modal.Formula
 

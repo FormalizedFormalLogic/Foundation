@@ -1,3 +1,4 @@
+module
 import Foundation.FirstOrder.Basic.Semantics.Semantics
 
 namespace LO.FirstOrder

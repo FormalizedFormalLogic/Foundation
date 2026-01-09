@@ -1,3 +1,4 @@
+module
 import Foundation.Propositional.Kripke.Basic
 import Foundation.Propositional.ConsistentTableau
 

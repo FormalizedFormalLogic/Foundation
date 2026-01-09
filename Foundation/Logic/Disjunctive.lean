@@ -1,3 +1,4 @@
+module
 import Foundation.Propositional.Entailment.Cl.Basic
 
 namespace LO.Entailment

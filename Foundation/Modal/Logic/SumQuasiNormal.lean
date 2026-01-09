@@ -1,3 +1,4 @@
+module
 import Foundation.Modal.Logic.SumNormal
 
 namespace LO.Modal

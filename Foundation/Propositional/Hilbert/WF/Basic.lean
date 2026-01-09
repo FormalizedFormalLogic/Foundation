@@ -1,3 +1,4 @@
+module
 /-
   `WF` system by de Jongh and Shirmohammadzadeh Maleki
 -/

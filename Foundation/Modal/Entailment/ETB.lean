@@ -1,3 +1,4 @@
+module
 import Foundation.Modal.Entailment.ET
 import Foundation.Modal.Entailment.EN
 

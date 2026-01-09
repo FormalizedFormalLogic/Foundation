@@ -1,3 +1,4 @@
+module
 import Foundation.Modal.Formula
 
 namespace LO.Modal

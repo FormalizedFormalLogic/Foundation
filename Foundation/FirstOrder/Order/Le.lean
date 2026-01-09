@@ -1,3 +1,4 @@
+module
 import Foundation.FirstOrder.Completeness.Corollaries
 
 namespace LO

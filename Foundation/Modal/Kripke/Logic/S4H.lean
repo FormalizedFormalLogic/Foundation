@@ -1,3 +1,4 @@
+module
 import Foundation.Modal.Kripke.Logic.Grz.Completeness
 import Foundation.Modal.Kripke.Logic.S4
 import Foundation.Modal.Kripke.AxiomH

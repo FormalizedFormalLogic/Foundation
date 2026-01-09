@@ -1,3 +1,4 @@
+module
 import Mathlib.Data.Finset.Insert
 import Mathlib.Data.Set.Insert
 import Mathlib.Data.Set.Countable

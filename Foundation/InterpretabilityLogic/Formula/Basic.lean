@@ -1,3 +1,4 @@
+module
 import Foundation.InterpretabilityLogic.LogicSymbol
 import Foundation.Modal.Formula
 

@@ -1,3 +1,4 @@
+module
 import Foundation.Propositional.Kripke2.Logic.F_Ser
 import Foundation.Propositional.Kripke2.AxiomSym
 

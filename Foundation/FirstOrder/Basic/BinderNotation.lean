@@ -1,3 +1,4 @@
+module
 import Foundation.FirstOrder.Basic.Operator
 
 open Lean Elab PrettyPrinter Delaborator SubExpr

@@ -1,3 +1,4 @@
+module
 import Foundation.Logic.Entailment
 import Foundation.Propositional.Entailment.Cl.Basic
 

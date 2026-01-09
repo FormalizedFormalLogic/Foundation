@@ -1,3 +1,4 @@
+module
 import Mathlib.Data.Fintype.Card
 import Mathlib.Order.WellFounded
 import Foundation.Vorspiel.Rel.Connected

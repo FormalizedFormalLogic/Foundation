@@ -1,3 +1,4 @@
+module
 import Foundation.Modal.ModalCompanion.Standard.Int
 import Foundation.Modal.Kripke.Logic.GrzPoint2
 import Foundation.Propositional.Kripke.Logic.KC

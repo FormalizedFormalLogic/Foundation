@@ -1,3 +1,4 @@
+module
 import Mathlib.Data.Set.Finite.Powerset
 import Foundation.Modal.MaximalConsistentSet
 import Foundation.Modal.Complement

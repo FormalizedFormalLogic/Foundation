@@ -1,3 +1,4 @@
+module
 import Foundation.Modal.Kripke.Cluster
 import Foundation.Modal.Kripke.Terminated
 import Foundation.Modal.Kripke.LinearFrame

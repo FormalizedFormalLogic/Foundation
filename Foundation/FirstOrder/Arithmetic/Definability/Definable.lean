@@ -1,3 +1,4 @@
+module
 import Foundation.FirstOrder.Arithmetic.Definability.Hierarchy
 import Foundation.FirstOrder.Arithmetic.PeanoMinus.Basic
 import Foundation.Vorspiel.Graph

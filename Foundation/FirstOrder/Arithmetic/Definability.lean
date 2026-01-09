@@ -1,3 +1,4 @@
+module
 import Foundation.FirstOrder.Arithmetic.Definability.Hierarchy
 import Foundation.FirstOrder.Arithmetic.Definability.Definable
 import Foundation.FirstOrder.Arithmetic.Definability.BoundedDefinable

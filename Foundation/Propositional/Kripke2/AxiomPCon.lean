@@ -1,3 +1,4 @@
+module
 /-
   D. de Jongh, M. Fetemeh Shirmohammadzadeh, "Below Gödel-Dummett"
 -/

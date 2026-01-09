@@ -1,3 +1,4 @@
+module
 import Foundation.Modal.Boxdot.GL_Grz
 import Foundation.Modal.Kripke.Logic.GrzPoint3
 import Foundation.Modal.Kripke.Logic.GLPoint3

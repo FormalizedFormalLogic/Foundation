@@ -1,3 +1,4 @@
+module
 import Foundation.Logic.Predicate.Rew
 import Foundation.FirstOrder.Basic.Syntax.Formula
 

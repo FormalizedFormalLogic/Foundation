@@ -1,3 +1,4 @@
+module
 /-
   Corsi's `F` system by de Jongh and Shirmohammadzadeh Maleki
 -/

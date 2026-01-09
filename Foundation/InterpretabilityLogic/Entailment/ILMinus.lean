@@ -1,3 +1,4 @@
+module
 import Foundation.InterpretabilityLogic.Entailment.Basic
 import Foundation.Modal.Entailment.GL
 

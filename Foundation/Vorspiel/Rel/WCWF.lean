@@ -1,3 +1,4 @@
+module
 import Foundation.Vorspiel.Rel.CWF
 import Mathlib.Data.Fintype.Pigeonhole
 

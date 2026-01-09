@@ -1,3 +1,4 @@
+module
 import Foundation.FirstOrder.Bootstrapping.FixedPoint
 import Foundation.Meta.ClProver
 

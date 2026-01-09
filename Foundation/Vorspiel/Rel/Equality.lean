@@ -1,3 +1,4 @@
+module
 import Foundation.Vorspiel.Rel.Coreflexive
 import Foundation.Vorspiel.Rel.Connected
 

@@ -1,3 +1,4 @@
+module
 import Foundation.Modal.Kripke.AxiomL
 import Mathlib.Order.Interval.Finset.Nat
 import Foundation.Modal.Kripke.Logic.K

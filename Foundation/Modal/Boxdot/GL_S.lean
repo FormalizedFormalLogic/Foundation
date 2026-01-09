@@ -1,3 +1,4 @@
+module
 import Foundation.ProvabilityLogic.S.Completeness
 
 namespace LO

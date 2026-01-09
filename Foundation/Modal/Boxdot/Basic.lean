@@ -1,3 +1,4 @@
+module
 import Foundation.Modal.Hilbert.Normal.Basic
 import Foundation.Modal.Kripke.Closure
 import Foundation.Modal.Kripke.Irreflexivize

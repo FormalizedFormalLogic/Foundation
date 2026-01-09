@@ -1,3 +1,4 @@
+module
 import Foundation.Modal.PLoN.Logic.N
 import Foundation.Modal.Logic.SumNormal
 import Foundation.Propositional.FMT.Logic

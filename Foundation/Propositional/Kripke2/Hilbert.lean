@@ -1,3 +1,4 @@
+module
 import Foundation.Propositional.Hilbert.F.Basic
 import Foundation.Propositional.Kripke2.Basic
 

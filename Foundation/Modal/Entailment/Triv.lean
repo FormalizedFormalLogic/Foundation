@@ -1,3 +1,4 @@
+module
 import Foundation.Modal.Entailment.KT
 import Foundation.Modal.Entailment.KTc
 

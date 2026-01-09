@@ -1,3 +1,4 @@
+module
 import Foundation.Vorspiel.Chain
 import Foundation.Vorspiel.Rel.CWF
 import Foundation.Modal.Kripke.Rooted

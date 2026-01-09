@@ -1,3 +1,4 @@
+module
 import Foundation.FirstOrder.Arithmetic.Basic.Model
 
 namespace LO.FirstOrder.Arithmetic

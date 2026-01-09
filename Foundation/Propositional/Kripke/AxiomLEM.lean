@@ -1,3 +1,4 @@
+module
 import Foundation.Propositional.Kripke.Completeness
 import Foundation.Vorspiel.Rel.Euclidean
 

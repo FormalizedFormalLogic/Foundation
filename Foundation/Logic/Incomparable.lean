@@ -1,3 +1,4 @@
+module
 -- This file need to be moved to `Entailment`
 import Foundation.Logic.Entailment
 

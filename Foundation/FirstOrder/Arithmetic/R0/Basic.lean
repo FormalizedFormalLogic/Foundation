@@ -1,3 +1,4 @@
+module
 import Foundation.FirstOrder.Arithmetic.Basic
 import Foundation.Vorspiel.ExistsUnique
 import Mathlib.Algebra.Order.Monoid.Canonical.Defs

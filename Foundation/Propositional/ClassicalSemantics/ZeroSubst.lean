@@ -1,3 +1,4 @@
+module
 import Foundation.Propositional.ClassicalSemantics.Basic
 
 namespace LO.Propositional.ClassicalSemantics

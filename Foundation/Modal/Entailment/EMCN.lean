@@ -1,3 +1,4 @@
+module
 import Foundation.Modal.Entailment.EMC
 import Foundation.Modal.Entailment.EN
 import Foundation.Modal.Entailment.K

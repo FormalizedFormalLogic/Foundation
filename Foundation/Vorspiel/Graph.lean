@@ -1,3 +1,4 @@
+module
 import Mathlib.Logic.Function.Defs
 
 namespace Function

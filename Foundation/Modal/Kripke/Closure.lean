@@ -1,3 +1,4 @@
+module
 import Foundation.Modal.Kripke.Basic
 import Foundation.Modal.Kripke.AxiomGeach
 import Foundation.Vorspiel.Rel.Basic

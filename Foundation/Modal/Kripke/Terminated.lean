@@ -1,3 +1,4 @@
+module
 import Foundation.Modal.Kripke.Closure
 
 namespace LO.Modal.Kripke

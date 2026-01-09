@@ -1,3 +1,4 @@
+module
 import Foundation.Vorspiel.Rel.Euclidean
 import Foundation.Vorspiel.Rel.Convergent
 

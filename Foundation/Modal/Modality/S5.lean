@@ -1,3 +1,4 @@
+module
 import Foundation.Modal.Modality.Basic
 import Foundation.Modal.Entailment.S5
 import Foundation.Modal.Kripke.Logic.S5

@@ -1,3 +1,4 @@
+module
 import Foundation.Modal.ModalCompanion.Standard.Int
 import Foundation.Modal.Kripke.Logic.S4Point3
 import Foundation.Modal.Boxdot.GLPoint3_GrzPoint3

@@ -1,3 +1,4 @@
+module
 import Foundation.Modal.Kripke.Logic.GL.Completeness
 import Foundation.Modal.Kripke.Logic.K4Point3
 import Foundation.Modal.Logic.Global

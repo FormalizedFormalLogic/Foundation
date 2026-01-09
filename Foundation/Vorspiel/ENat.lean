@@ -1,3 +1,4 @@
+module
 import Mathlib.Data.ENat.Basic
 
 namespace ENat

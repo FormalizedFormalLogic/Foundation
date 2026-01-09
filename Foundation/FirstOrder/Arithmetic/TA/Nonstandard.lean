@@ -1,3 +1,4 @@
+module
 import Foundation.FirstOrder.Arithmetic.TA.Basic
 import Foundation.FirstOrder.Arithmetic.PeanoMinus.Basic
 

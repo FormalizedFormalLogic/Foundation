@@ -1,3 +1,4 @@
+module
 import Foundation.Modal.Hilbert.Normal.Basic
 import Foundation.Modal.Hilbert.WithLoeb.Basic
 import Foundation.Modal.Hilbert.WithHenkin.Basic

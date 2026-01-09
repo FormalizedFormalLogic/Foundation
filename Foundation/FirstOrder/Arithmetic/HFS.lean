@@ -1,3 +1,4 @@
+module
 import Foundation.FirstOrder.Arithmetic.HFS.Basic
 import Foundation.FirstOrder.Arithmetic.HFS.Seq
 import Foundation.FirstOrder.Arithmetic.HFS.PRF

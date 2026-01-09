@@ -1,3 +1,4 @@
+module
 import Foundation.Propositional.NNFormula
 import Foundation.Logic.Calculus
 

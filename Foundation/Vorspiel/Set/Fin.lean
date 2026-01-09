@@ -1,3 +1,4 @@
+module
 import Mathlib.Data.Set.Insert
 
 namespace Set

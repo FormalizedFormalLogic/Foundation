@@ -1,3 +1,4 @@
+module
 import Foundation.Propositional.Kripke.AxiomWLEM
 import Foundation.Propositional.Kripke.Rooted
 import Foundation.Propositional.Kripke.Logic.Int

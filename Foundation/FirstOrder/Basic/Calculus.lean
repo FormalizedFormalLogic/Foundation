@@ -1,3 +1,4 @@
+module
 import Foundation.Logic.Calculus
 import Foundation.FirstOrder.Basic.Syntax.Theory
 

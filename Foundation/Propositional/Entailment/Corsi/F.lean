@@ -1,3 +1,4 @@
+module
 import Foundation.Propositional.Entailment.Corsi.WF
 
 namespace LO.Propositional

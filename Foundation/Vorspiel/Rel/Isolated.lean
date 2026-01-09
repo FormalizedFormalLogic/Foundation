@@ -1,3 +1,4 @@
+module
 import Foundation.Vorspiel.Rel.Coreflexive
 
 variable {α} {R : Rel α α}

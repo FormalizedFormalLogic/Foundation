@@ -1,3 +1,4 @@
+module
 import Foundation.Modal.Entailment.E
 import Foundation.Modal.Entailment.DiaDuality
 

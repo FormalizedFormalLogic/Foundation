@@ -1,3 +1,4 @@
+module
 import Foundation.InterpretabilityLogic.Veltman.AxiomJ4
 
 namespace LO.InterpretabilityLogic.Veltman

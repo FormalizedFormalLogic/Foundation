@@ -1,3 +1,4 @@
+module
 import Foundation.ProvabilityLogic.SolovaySentences
 import Foundation.ProvabilityLogic.Arithmetic
 

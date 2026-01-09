@@ -1,3 +1,4 @@
+module
 import Foundation.Propositional.Entailment.Cl.Basic
 import Foundation.Propositional.Entailment.Int.DNE_of_LEM
 import Foundation.Propositional.Hilbert.Axiom

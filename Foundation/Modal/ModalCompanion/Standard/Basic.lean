@@ -1,3 +1,4 @@
+module
 import Foundation.Modal.Kripke.Logic.S4
 import Foundation.Modal.Logic.SumNormal
 import Foundation.Propositional.Kripke.Hilbert

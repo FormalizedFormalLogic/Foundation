@@ -1,3 +1,4 @@
+module
 import Mathlib.Data.Finset.Insert
 
 namespace Finset

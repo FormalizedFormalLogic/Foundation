@@ -1,3 +1,4 @@
+module
 import Foundation.Modal.Kripke.AxiomGrz
 import Foundation.Modal.Kripke.Logic.S4McK
 import Mathlib.Order.Preorder.Finite

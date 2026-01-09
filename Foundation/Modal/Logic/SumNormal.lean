@@ -1,3 +1,4 @@
+module
 import Foundation.Propositional.Entailment.Cl.Basic
 import Foundation.Modal.Logic.Basic
 import Foundation.Meta.ClProver

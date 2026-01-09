@@ -1,3 +1,4 @@
+module
 import Foundation.Modal.Neighborhood.Logic.E
 import Foundation.Modal.Neighborhood.Supplementation
 import Foundation.Modal.Neighborhood.AxiomC

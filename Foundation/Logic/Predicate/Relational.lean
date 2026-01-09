@@ -1,3 +1,4 @@
+module
 import Foundation.Logic.Predicate.Rew
 
 namespace LO.FirstOrder

@@ -1,3 +1,4 @@
+module
 import Foundation.Logic.LogicSymbol
 import Foundation.Logic.Semantics
 import Foundation.Vorspiel.AdjunctiveSet

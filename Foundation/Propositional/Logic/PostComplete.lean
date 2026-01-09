@@ -1,3 +1,4 @@
+module
 import Foundation.Propositional.ClassicalSemantics.Hilbert
 import Foundation.Propositional.ClassicalSemantics.ZeroSubst
 

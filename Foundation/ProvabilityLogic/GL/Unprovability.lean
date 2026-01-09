@@ -1,3 +1,4 @@
+module
 import Foundation.Modal.Logic.GL.Independency
 import Foundation.ProvabilityLogic.GL.Completeness
 

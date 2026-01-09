@@ -1,3 +1,4 @@
+module
 import Foundation.Modal.Entailment.ETB
 import Foundation.Modal.Entailment.EN
 import Foundation.Modal.Entailment.AxiomGeach

@@ -1,3 +1,4 @@
+module
 import Foundation.FirstOrder.Bootstrapping.Syntax.Formula.Functions
 
 namespace LO.FirstOrder.Semiformula

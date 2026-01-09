@@ -1,3 +1,4 @@
+module
 import Foundation.Modal.Entailment.E
 
 namespace LO.Modal.Entailment

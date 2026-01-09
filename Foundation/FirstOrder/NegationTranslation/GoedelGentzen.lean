@@ -1,3 +1,4 @@
+module
 import Foundation.FirstOrder.Intuitionistic.Deduction
 import Foundation.Meta.IntProver
 

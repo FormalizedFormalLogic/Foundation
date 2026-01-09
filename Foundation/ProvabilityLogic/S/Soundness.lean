@@ -1,3 +1,4 @@
+module
 import Foundation.Modal.Logic.S.Basic
 import Foundation.ProvabilityLogic.GL.Soundness
 

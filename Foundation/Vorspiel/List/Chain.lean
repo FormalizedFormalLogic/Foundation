@@ -1,6 +1,7 @@
-import Mathlib.Data.List.Nodup
-import Mathlib.Data.List.Range
-import Foundation.Vorspiel.Fin.Supplemental
+module
+public import Mathlib.Data.List.Nodup
+public import Mathlib.Data.List.Range
+public import Foundation.Vorspiel.Fin.Supplemental
 
 lemma Nat.zero_lt_of_not_zero {n : ℕ} (hn : n ≠ 0) : 0 < n := by omega;
 

@@ -1,3 +1,4 @@
+module
 import Foundation.FirstOrder.Basic.Syntax.Rew
 import Foundation.FirstOrder.Basic.Syntax.Theory
 

@@ -1,3 +1,4 @@
+module
 import Foundation.Modal.Kripke.AxiomFourN
 import Foundation.Modal.Kripke.Hilbert
 import Foundation.Modal.Kripke.Logic.KTc

@@ -1,3 +1,4 @@
+module
 import Foundation.Modal.LogicSymbol
 
 namespace LO

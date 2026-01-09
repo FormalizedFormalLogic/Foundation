@@ -1,3 +1,4 @@
+module
 import Foundation.Modal.MaximalConsistentSet
 import Foundation.Modal.Neighborhood.Basic
 import Foundation.Modal.Entailment.EM

@@ -1,3 +1,4 @@
+module
 import Foundation.Propositional.Entailment.Cl.Lukasiewicz
 import Foundation.Vorspiel.AdjunctiveSet
 import Foundation.Modal.LogicSymbol

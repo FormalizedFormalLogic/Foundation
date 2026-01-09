@@ -1,3 +1,4 @@
+module
 import Foundation.Modal.Entailment.S5
 import Foundation.Modal.Entailment.KTc
 import Foundation.Modal.Entailment.Triv

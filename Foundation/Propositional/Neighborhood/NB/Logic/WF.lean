@@ -1,3 +1,4 @@
+module
 import Foundation.Propositional.Neighborhood.NB.Hilbert
 import Foundation.Propositional.Hilbert.F_WF
 

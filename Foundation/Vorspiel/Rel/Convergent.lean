@@ -1,3 +1,4 @@
+module
 import Foundation.Vorspiel.Rel.Basic
 
 variable {α} {R : Rel α α}

@@ -1,3 +1,4 @@
+module
 import Foundation.FirstOrder.Arithmetic.HFS
 
 /-! # Internalized languages of first-order logic -/

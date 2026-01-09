@@ -1,3 +1,4 @@
+module
 import Foundation.FirstOrder.Intuitionistic.Rew
 
 namespace LO.FirstOrder

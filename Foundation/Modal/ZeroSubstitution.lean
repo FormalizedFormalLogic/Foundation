@@ -1,3 +1,4 @@
+module
 import Foundation.Modal.Letterless
 
 namespace LO.Modal

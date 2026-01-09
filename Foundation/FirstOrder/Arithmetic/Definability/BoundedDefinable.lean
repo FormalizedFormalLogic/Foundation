@@ -1,3 +1,4 @@
+module
 import Foundation.FirstOrder.Arithmetic.Definability.Definable
 
 namespace LO.FirstOrder.Arithmetic

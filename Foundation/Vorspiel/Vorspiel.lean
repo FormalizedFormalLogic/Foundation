@@ -1,22 +1,25 @@
-import Mathlib.Data.Vector.Basic
-import Mathlib.Data.Fin.Basic
-import Mathlib.Data.Fin.VecNotation
-import Mathlib.Data.Fintype.Basic
-import Mathlib.Data.Finset.Basic
-import Mathlib.Data.Finset.Preimage
-import Mathlib.Data.Finset.Sort
-import Mathlib.Order.Filter.Ultrafilter.Defs
-import Mathlib.Logic.Encodable.Basic
-import Mathlib.Computability.Primrec
-import Mathlib.Computability.Partrec
-import Mathlib.Data.Finset.Sort
-import Mathlib.Data.List.GetD
-import Mathlib.Data.Set.Finite.Range
-import Mathlib.Tactic.TautoSet
-import Mathlib.Data.Fintype.Sigma
-import Mathlib.Data.Fintype.Vector
-import Mathlib.Computability.Halting
-import Mathlib.Tactic.Cases
+module
+public import Mathlib.Data.Vector.Basic
+public import Mathlib.Data.Fin.Basic
+public import Mathlib.Data.Fin.VecNotation
+public import Mathlib.Data.Fintype.Basic
+public import Mathlib.Data.Finset.Basic
+public import Mathlib.Data.Finset.Preimage
+public import Mathlib.Data.Finset.Sort
+public import Mathlib.Order.Filter.Ultrafilter.Defs
+public import Mathlib.Logic.Encodable.Basic
+public import Mathlib.Computability.Primrec
+public import Mathlib.Computability.Partrec
+public import Mathlib.Data.Finset.Sort
+public import Mathlib.Data.List.GetD
+public import Mathlib.Data.Set.Finite.Range
+public import Mathlib.Tactic.TautoSet
+public import Mathlib.Data.Fintype.Sigma
+public import Mathlib.Data.Fintype.Vector
+public import Mathlib.Computability.Halting
+public import Mathlib.Tactic.Cases
+
+@[expose] public section
 
 namespace Nat
 variable {α : ℕ → Sort u}

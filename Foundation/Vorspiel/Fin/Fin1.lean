@@ -1,3 +1,4 @@
+module
 import Mathlib.Order.Fin.Basic
 
 namespace Fin.Fin1

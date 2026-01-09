@@ -1,3 +1,4 @@
+module
 import Foundation.FirstOrder.Bootstrapping.Syntax.Formula.Basic
 import Foundation.FirstOrder.Bootstrapping.Syntax.Term.Functions
 

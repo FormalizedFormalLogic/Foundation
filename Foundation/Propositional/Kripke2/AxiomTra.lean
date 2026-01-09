@@ -1,3 +1,4 @@
+module
 import Foundation.Propositional.Kripke2.Basic
 import Foundation.Propositional.Kripke2.FTheory
 import Mathlib.Tactic.TFAE
