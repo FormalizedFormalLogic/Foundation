@@ -63,14 +63,13 @@ import Foundation.FirstOrder.Bootstrapping.Consistency
 import Foundation.FirstOrder.Bootstrapping.WitnessComparison
 import Foundation.FirstOrder.Bootstrapping.RosserProvability
 
+import Foundation.FirstOrder.Incompleteness.Dense
+import Foundation.FirstOrder.Incompleteness.Examples
 import Foundation.FirstOrder.Incompleteness.First
 import Foundation.FirstOrder.Incompleteness.Halting
-
-import Foundation.FirstOrder.Incompleteness.Dense
-import Foundation.FirstOrder.Incompleteness.Second
-import Foundation.FirstOrder.Incompleteness.Examples
+import Foundation.FirstOrder.Incompleteness.Löb
 import Foundation.FirstOrder.Incompleteness.RestrictedProvability
-
+import Foundation.FirstOrder.Incompleteness.Second
 import Foundation.FirstOrder.Incompleteness.Tarski
 import Foundation.FirstOrder.Incompleteness.Yablo
 
