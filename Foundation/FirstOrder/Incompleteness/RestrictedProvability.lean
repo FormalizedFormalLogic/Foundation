@@ -68,8 +68,10 @@ lemma models_restrictedGödel : V ⊧ₘ T.restrictedGödel e ↔ ∀ x : V, x <
 lemma models_neg_restrictedGödel : ¬V ⊧ₘ T.restrictedGödel e ↔ ∃ x : V, x < Exp.exp (ORingStructure.numeral e) ∧ T.Proof x (⌜T.restrictedGödel e⌝) := by
   simpa using models_restrictedGödel.not;
 
+variable [𝗜𝚺₁ ⪯ T] [T.SoundOnHierarchy 𝚺 1]
+
 /- Gödel sentence by restricted provability is true. -/
-theorem true_restrictedGödel [𝗜𝚺₁ ⪯ T] [T.SoundOnHierarchy 𝚺 1] : ℕ ⊧ₘ T.restrictedGödel e := by
+theorem true_restrictedGödel : ℕ ⊧ₘ T.restrictedGödel e := by
   by_contra hC;
   obtain ⟨e, _, he⟩ := models_neg_restrictedGödel (e := e) |>.mp hC;
   apply hC;
@@ -80,15 +82,33 @@ theorem true_restrictedGödel [𝗜𝚺₁ ⪯ T] [T.SoundOnHierarchy 𝚺 1] : 
   simpa using he;
 
 /- Gödel sentence by restricted provability is provable. -/
-theorem provable_restrictedGödel [𝗥₀ ⪯ T] [𝗜𝚺₁ ⪯ T] [T.SoundOnHierarchy 𝚺 1] : T ⊢ T.restrictedGödel e := by
+theorem provable_restrictedGödel : T ⊢ T.restrictedGödel e := by
   apply iff_provable_restrictedGödel_provable_restrictedGödel'.mpr;
   apply Arithmetic.sigma_one_completeness_iff T.restrictedGödel'_sigmaOne |>.mp;
   apply iff_true_restrictedGödel_true_restrictedGödel'.mp $ true_restrictedGödel;
 
+-- TODO: move to `Exp.lean`?
+@[simp, grind =]
+lemma exp_nat {n : ℕ} : Exp.exp n = 2 ^ n := by
+  induction n with
+  | zero => simp;
+  | succ => grind [exp_succ];
+
+
+/-- Lower bound of a Gödel number of proof of restricted Gödel sentence is `2^e`. -/
+lemma lower_bound_gödelNumber_proof_restrictedGödel : ∀ b : T ⊢! T.restrictedGödel e, 2^e ≤ ⌜b⌝ := by
+  intro b;
+  have : Exp.exp (ORingStructure.numeral e) ≤ ⌜b⌝ := Nat.le_of_not_lt
+    $ (imp_not_comm.mp $ models_restrictedGödel.mp true_restrictedGödel ⌜b⌝)
+    $ proof_of_quote_proof b;
+  simpa;
+
 /--
-  "This sentence cannot be proved by proof whose Gödel number is less than `2^100`" is true and provable.
+  "This sentence cannot be proved by proof whose Gödel number is less than `2^(10^9)`" is true and provable.
 -/
-example [T.SoundOnHierarchy 𝚺 1] [𝗥₀ ⪯ T] [𝗜𝚺₁ ⪯ T] : ℕ ⊧ₘ T.restrictedGödel 100 ∧ T ⊢ T.restrictedGödel 100 := by
+example :
+  letI 𝔲 : ℕ := 10^9;
+  ℕ ⊧ₘ T.restrictedGödel 𝔲 ∧ T ⊢ T.restrictedGödel 𝔲 := by
   constructor;
   . apply true_restrictedGödel;
   . apply provable_restrictedGödel;
