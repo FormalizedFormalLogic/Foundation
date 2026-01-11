@@ -31,9 +31,9 @@ instance RestrictedProvable.defined {e} : 𝚷₁-Predicate[V] T.RestrictedProva
 /-- Gödel sentence by restricted provability -/
 noncomputable abbrev restrictedGödel (e : ℕ) (T : Theory L) [T.Δ₁] : ArithmeticSentence := fixedpoint (∼(T.restrictedProvable e))
 
-noncomputable abbrev restrictedGödel' (e : ℕ) (T : Theory L) [T.Δ₁] : ArithmeticSentence := ∼(T.restrictedProvable e)/[⌜restrictedGödel e T⌝]
+private noncomputable abbrev restrictedGödel' (e : ℕ) (T : Theory L) [T.Δ₁] : ArithmeticSentence := ∼(T.restrictedProvable e)/[⌜restrictedGödel e T⌝]
 
-lemma restrictedGödel'_sigmaOne {e : ℕ} : Hierarchy 𝚺 1 (T.restrictedGödel' e) := by definability;
+private lemma restrictedGödel'_sigmaOne {e : ℕ} : Hierarchy 𝚺 1 (T.restrictedGödel' e) := by definability;
 
 end Theory
 
@@ -46,17 +46,17 @@ variable {e : ℕ}
 
 lemma def_restrictedGödel [𝗜𝚺₁ ⪯ U] : U ⊢ T.restrictedGödel e ⭤ (∼T.restrictedProvable e)/[⌜T.restrictedGödel e⌝] := diagonal _
 
-lemma def_restrictedGödel' [𝗜𝚺₁ ⪯ U] : U ⊢ T.restrictedGödel' e ⭤ (∼T.restrictedProvable e)/[⌜T.restrictedGödel e⌝] := by simp;
+private lemma def_restrictedGödel' [𝗜𝚺₁ ⪯ U] : U ⊢ T.restrictedGödel' e ⭤ (∼T.restrictedProvable e)/[⌜T.restrictedGödel e⌝] := by simp;
 
-lemma provable_E_restrictedGödel_restrictedGödel' [𝗜𝚺₁ ⪯ U] : U ⊢ T.restrictedGödel e ⭤ T.restrictedGödel' e := by
+private lemma provable_E_restrictedGödel_restrictedGödel' [𝗜𝚺₁ ⪯ U] : U ⊢ T.restrictedGödel e ⭤ T.restrictedGödel' e := by
   apply Entailment.E!_trans;
   . exact def_restrictedGödel;
   . exact Entailment.E!_symm $ def_restrictedGödel';
 
-lemma iff_provable_restrictedGödel_provable_restrictedGödel' [𝗜𝚺₁ ⪯ U] : U ⊢ (T.restrictedGödel e) ↔ U ⊢ (T.restrictedGödel' e) := by
+private lemma iff_provable_restrictedGödel_provable_restrictedGödel' [𝗜𝚺₁ ⪯ U] : U ⊢ (T.restrictedGödel e) ↔ U ⊢ (T.restrictedGödel' e) := by
   apply Entailment.iff_of_E! provable_E_restrictedGödel_restrictedGödel';
 
-lemma iff_true_restrictedGödel_true_restrictedGödel' : ℕ ⊧ₘ (T.restrictedGödel e) ↔ ℕ ⊧ₘ (T.restrictedGödel' e) := by
+private lemma iff_true_restrictedGödel_true_restrictedGödel' : ℕ ⊧ₘ (T.restrictedGödel e) ↔ ℕ ⊧ₘ (T.restrictedGödel' e) := by
   apply Semantics.models_iff.mp;
   apply models_of_provable (T := 𝗜𝚺₁) inferInstance;
   apply provable_E_restrictedGödel_restrictedGödel';
@@ -65,7 +65,7 @@ lemma models_restrictedGödel : V ⊧ₘ T.restrictedGödel e ↔ ∀ x : V, x <
   apply Iff.trans $ Semantics.models_iff.mp $ models_of_provable (T := 𝗜𝚺₁) inferInstance $ def_restrictedGödel;
   simp [models_iff, Theory.RestrictedProvable]
 
-lemma models_neg_restrictedGödel : ¬V ⊧ₘ T.restrictedGödel e ↔ ∃ x : V, x < Exp.exp (ORingStructure.numeral e) ∧ T.Proof x (⌜T.restrictedGödel e⌝) := by
+private lemma models_neg_restrictedGödel : ¬V ⊧ₘ T.restrictedGödel e ↔ ∃ x : V, x < Exp.exp (ORingStructure.numeral e) ∧ T.Proof x (⌜T.restrictedGödel e⌝) := by
   simpa using models_restrictedGödel.not;
 
 variable [𝗜𝚺₁ ⪯ T] [T.SoundOnHierarchy 𝚺 1]
@@ -96,7 +96,7 @@ lemma exp_nat {n : ℕ} : Exp.exp n = 2 ^ n := by
 
 
 /-- Lower bound of a Gödel number of proof of restricted Gödel sentence is `2^e`. -/
-lemma lower_bound_gödelNumber_proof_restrictedGödel : ∀ b : T ⊢! T.restrictedGödel e, 2^e ≤ ⌜b⌝ := by
+theorem lower_bound_gödelNumber_proof_restrictedGödel : ∀ b : T ⊢! T.restrictedGödel e, 2^e ≤ ⌜b⌝ := by
   intro b;
   have : Exp.exp (ORingStructure.numeral e) ≤ ⌜b⌝ := Nat.le_of_not_lt
     $ (imp_not_comm.mp $ models_restrictedGödel.mp true_restrictedGödel ⌜b⌝)
@@ -104,14 +104,14 @@ lemma lower_bound_gödelNumber_proof_restrictedGödel : ∀ b : T ⊢! T.restric
   simpa;
 
 /--
-  "This sentence cannot be proved by proof whose Gödel number is less than `2^(10^9)`" is true and provable.
+  "This sentence cannot be proved by proof whose Gödel number is less than `2^(10^9)`" is provable and length of its proof is larger than `2^(10^9)`.
 -/
 example :
   letI 𝔲 : ℕ := 10^9;
-  ℕ ⊧ₘ T.restrictedGödel 𝔲 ∧ T ⊢ T.restrictedGödel 𝔲 := by
+   T ⊢ T.restrictedGödel 𝔲 ∧ ∀ b : T ⊢! T.restrictedGödel 𝔲, (2^𝔲) ≤ ⌜b⌝  := by
   constructor;
-  . apply true_restrictedGödel;
   . apply provable_restrictedGödel;
+  . apply lower_bound_gödelNumber_proof_restrictedGödel;
 
 end Arithmetic
 
