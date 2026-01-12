@@ -1,6 +1,6 @@
 import Foundation.FirstOrder.Incompleteness.Examples
 import Foundation.FirstOrder.Bootstrapping.DerivabilityCondition
-import Foundation.ProvabilityLogic.Provability
+import Foundation.FirstOrder.Bootstrapping.ProvabilityAbstraction
 import Foundation.Vorspiel.ENat
 
 namespace LO.ProvabilityLogic.Provability

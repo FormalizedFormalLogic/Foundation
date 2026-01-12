@@ -1,4 +1,4 @@
-import Foundation.ProvabilityLogic.Provability
+import Foundation.FirstOrder.Bootstrapping.ProvabilityAbstraction
 import Foundation.FirstOrder.Bootstrapping.DerivabilityCondition
 import Foundation.FirstOrder.Incompleteness.Examples
 import Foundation.Modal.Hilbert.Normal.Basic

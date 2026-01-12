@@ -1,7 +1,7 @@
 import Foundation.FirstOrder.Bootstrapping.DerivabilityCondition.D1
 import Foundation.FirstOrder.Bootstrapping.DerivabilityCondition.D2
 import Foundation.FirstOrder.Bootstrapping.DerivabilityCondition.D3
-import Foundation.ProvabilityLogic.Provability
+import Foundation.FirstOrder.Bootstrapping.ProvabilityAbstraction
 import Foundation.FirstOrder.Bootstrapping.FixedPoint
 
 /-!
