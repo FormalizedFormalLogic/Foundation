@@ -13,8 +13,7 @@ namespace LO.ProvabilityLogic
 
 open Entailment
 open Modal
-open FirstOrder
-open Provability
+open FirstOrder FirstOrder.ProvabilityAbstraction
 open ArithmeticTheory (ProvabilityLogic)
 
 variable {T₀ T : ArithmeticTheory} [T₀ ⪯ T] [Diagonalization T₀]
@@ -92,7 +91,7 @@ lemma refl_mainlemma_aux (hA : ¬r₁ ⊧ (A.rflSubformula.conj ➝ A)) :
     constructor;
     . intro h;
       apply C!_of_conseq!;
-      apply T.standardProvability.D1;
+      apply D1;
       apply Entailment.WeakerThan.pbl (𝓢 := 𝗜𝚺₁);
       have : 𝗜𝚺₁ ⊢ ((⩖ j, S j)) ➝ S.realization B := by
         apply left_Fdisj'!_intro;
@@ -125,7 +124,7 @@ lemma refl_mainlemma_aux (hA : ¬r₁ ⊧ (A.rflSubformula.conj ➝ A)) :
         <| Model.extendRoot.inr_satisfies_iff (n := 1) |>.not.mpr hA;
       have : 𝗜𝚺₁ ⊢ ∼T.standardProvability (∼S (Sum.inr i)) ➝ ∼T.standardProvability (S.realization B) :=
         contra!
-        $ T.standardProvability.prov_distribute_imply'
+        $ prov_distribute_imply'
         $ CN!_of_CN!_right $ this;
       refine C!_trans ?_ this;
       apply S.SC2;
@@ -191,8 +190,7 @@ lemma GL_S_TFAE :
 
 theorem S.arithmetical_completeness_iff : Modal.S ⊢ A ↔ ∀ f : T.StandardRealization, ℕ ⊧ₘ f A := GL_S_TFAE.out 1 2
 
-theorem provabilityLogic_PA_TA_eq_S :
-    ProvabilityLogic T 𝗧𝗔 ≊ Modal.S := by
+theorem provabilityLogic_PA_TA_eq_S : ProvabilityLogic T 𝗧𝗔 ≊ Modal.S := by
   apply Logic.iff_equal_provable_equiv.mp
   ext A;
   simpa [ArithmeticTheory.ProvabilityLogic, TA.provable_iff, ←Logic.iff_provable] using

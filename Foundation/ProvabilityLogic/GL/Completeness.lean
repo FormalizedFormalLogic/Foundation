@@ -66,8 +66,8 @@ theorem GL.arithmetical_completeness_iff (height : T.height = ⊤) {A} :
   ⟨GL.arithmetical_completeness height, GL.arithmetical_soundness⟩
 
 theorem GL.arithmetical_completeness_sound_iff [T.SoundOnHierarchy 𝚺 1] {A} :
-    (∀ f : T.StandardRealization, T ⊢ f A) ↔ Modal.GL ⊢ A :=
-  GL.arithmetical_completeness_iff (Provability.hight_eq_top_of_sigma1_sound T)
+  (∀ f : T.StandardRealization, T ⊢ f A) ↔ Modal.GL ⊢ A :=
+  GL.arithmetical_completeness_iff (Arithmetic.height_eq_top_of_sigma1_sound T)
 
 /-- Provability logic of $\Sigma_1$-sound theory contains $\mathsf{I}\Sigma_1$ is $\mathsf{GL}$-/
 theorem provabilityLogic_eq_GL_of_sigma1_sound [T.SoundOnHierarchy 𝚺 1] :

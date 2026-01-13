@@ -1,4 +1,4 @@
-import Foundation.FirstOrder.Incompleteness.Second
+import Foundation.FirstOrder.Incompleteness.GödelRosser
 import Foundation.Meta.ClProver
 import Foundation.Logic.LindenbaumAlgebra
 
