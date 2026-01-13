@@ -78,7 +78,7 @@ end LO.FirstOrder.Arithmetic.Bootstrapping
 
 namespace LO.FirstOrder.Arithmetic
 
-open Entailment ProvabilityLogic
+open Entailment
 
 variable (T : ArithmeticTheory) [𝗜𝚺₁ ⪯ T] [T.Δ₁]
 
