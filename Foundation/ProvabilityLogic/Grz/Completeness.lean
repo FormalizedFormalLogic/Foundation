@@ -33,7 +33,7 @@ variable {L : Language} [L.ReferenceableBy L] [L.DecidableEq]
 
 namespace Realization
 
-variable {𝔅 : Provability T₀ T} [𝔅.HBL1] {f : Realization 𝔅} {A B : Modal.Formula _}
+variable {𝔅 : Provability T₀ T} {f : Realization 𝔅} {A B : Modal.Formula _}
 
 def strongInterpret (f : Realization 𝔅) : Formula ℕ → Sentence L
   | .atom a => f a
