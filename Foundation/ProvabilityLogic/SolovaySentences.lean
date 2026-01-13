@@ -1,10 +1,10 @@
-import Foundation.ProvabilityLogic.Realization
-import Foundation.Modal.Kripke.Rank
-import Foundation.FirstOrder.Bootstrapping.WitnessComparison
-import Foundation.FirstOrder.Bootstrapping.FixedPoint
 import Foundation.FirstOrder.Bootstrapping.Consistency
+import Foundation.FirstOrder.Bootstrapping.FixedPoint
+import Foundation.FirstOrder.Bootstrapping.ProvabilityAbstraction.Height
+import Foundation.FirstOrder.Bootstrapping.WitnessComparison
+import Foundation.Modal.Kripke.Rank
 import Foundation.ProvabilityLogic.GL.Soundness
-import Foundation.ProvabilityLogic.Height
+import Foundation.ProvabilityLogic.Realization
 
 /-!
 # Basic propaties of Solovay sentences and its construction
@@ -18,6 +18,7 @@ namespace LO.ProvabilityLogic
 
 open Entailment Entailment.FiniteContext
 open FirstOrder
+open FirstOrder.ProvabilityAbstraction
 open Modal
 open Modal.Kripke
 open Modal.Formula.Kripke
@@ -80,7 +81,7 @@ private lemma mainlemma_aux {i : M} (hri : r ≺ i) :
     constructor;
     . intro h;
       apply C!_trans $ S.SC3 i $ (by rintro rfl; exact IsIrrefl.irrefl _ hri);
-      apply 𝔅.prov_distribute_imply';
+      apply prov_distribute_imply';
       apply left_Fdisj'!_intro;
       rintro j Rij;
       replace Rij : i ≺ j := by simpa using Rij
@@ -91,7 +92,7 @@ private lemma mainlemma_aux {i : M} (hri : r ≺ i) :
       obtain ⟨j, Rij, hA⟩ := this;
       have := CN!_of_CN!_right $ (ihA (IsTrans.trans _ _ _ hri Rij)).2 hA
       have : T₀ ⊢ ∼𝔅 (∼S.σ j) ➝ ∼𝔅 (S.realization A) :=
-        contra! $ 𝔅.prov_distribute_imply' $ CN!_of_CN!_right $ (ihA (IsTrans.trans _ _ _ hri Rij)).2 hA;
+        contra! $ prov_distribute_imply' $ CN!_of_CN!_right $ (ihA (IsTrans.trans _ _ _ hri Rij)).2 hA;
       exact C!_trans (S.SC2 i j Rij) this;
 
 theorem mainlemma (S : SolovaySentences 𝔅 M.toFrame r) {i : M} (hri : r ≺ i) :
@@ -116,17 +117,15 @@ lemma root_of_iterated_inconsistency : T₀ ⊢ ∼𝔅^[M.height] ⊥ ➝ S r :
           <| Frame.rank_lt_whole_height hri
     cl_prover [this]
 
-lemma theory_height [𝔅.Sound₀] (h : r ⊧ ◇(∼A)) (b : T ⊢ S.realization A) :
-    𝔅.height < M.height := by
+lemma theory_height [𝔅.Sound₀] (h : r ⊧ ◇(∼A)) (b : T ⊢ S.realization A) : 𝔅.height < M.height := by
   apply 𝔅.height_lt_pos_of_boxBot (height_pos_of_dia h)
   have : ∃ i, r ≺ i ∧ i ⊭ A := Formula.Kripke.Satisfies.dia_def.mp h
   rcases this with ⟨i, hi, hiA⟩
-  have b₀ : T₀ ⊢ 𝔅 (S.realization A) := 𝔅.D1 b
+  have b₀ : T₀ ⊢ 𝔅 (S.realization A) := D1 b
   have b₁ : T₀ ⊢ ∼(↑𝔅)^[M.height] ⊥ ➝ S r := S.root_of_iterated_inconsistency
   have b₂ : T₀ ⊢ S r ➝ 𝔅.dia (S i) := S.SC2 r i hi
   have b₃ : T₀ ⊢ 𝔅.dia (S i) ➝ ∼𝔅 (S.realization A) := by
-    simpa [Provability.dia] using
-      𝔅.dia_distribute_imply <| WeakerThan.pbl <| S.mainlemma_neg hi hiA
+    simpa [Provability.dia] using dia_distribute_imply <| WeakerThan.pbl <| S.mainlemma_neg hi hiA
   cl_prover [b₀, b₁, b₂, b₃]
 
 end SolovaySentences

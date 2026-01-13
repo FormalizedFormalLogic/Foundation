@@ -1,13 +1,11 @@
-import Foundation.FirstOrder.Bootstrapping.ProvabilityAbstraction
 import Foundation.FirstOrder.Bootstrapping.DerivabilityCondition
-import Foundation.FirstOrder.Incompleteness.Examples
 import Foundation.Modal.Hilbert.Normal.Basic
 import Foundation.Modal.Letterless
 
 namespace LO
 
 open Entailment FiniteContext
-open FirstOrder ProvabilityLogic
+open FirstOrder ProvabilityAbstraction
 open Modal Modal.Hilbert
 
 variable {L : Language} [L.ReferenceableBy L] {T₀ T U : Theory L}
