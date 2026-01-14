@@ -2,6 +2,33 @@ import Foundation.FirstOrder.Bootstrapping.RosserProvability
 
 namespace LO.FirstOrder
 
+namespace Derivation
+
+variable {𝓢 : SyntacticFormulas L} {φ : SyntacticSemiformula L 1}
+
+def specialize'! (t : SyntacticTerm L) (b : 𝓢 ⊢! ∀' φ) : 𝓢 ⊢! φ/[t] := by simpa using specialize (Γ := []) t b;
+
+def specialize' (t : SyntacticTerm L) (b : 𝓢 ⊢ ∀' φ) : 𝓢 ⊢ φ/[t] := ⟨specialize'! t b.get⟩
+
+end Derivation
+
+
+namespace Theory
+
+variable {T : Theory L} {φ : Semisentence L 1}
+
+def specialize! (t) (b : T ⊢! ∀' φ) : T ⊢! (φ/[t]) := by
+  apply ofSyntacticProof;
+  sorry;
+
+def specialize (t) (b : T ⊢ ∀' φ) : T ⊢ (φ/[t]) := by
+  have := Derivation.specialize' t $ provable_def.mp b;
+  apply provable_def.mpr;
+  sorry;
+
+end Theory
+
+
 namespace ProvabilityAbstraction
 
 open LO.Entailment FirstOrder Diagonalization Provability
@@ -121,16 +148,14 @@ lemma jeroslow_not_safe [𝔅.FormalizedCompleteOn 𝐉] : T ⊢ 𝐉 ➝ (𝔅 
 -/
 lemma unprovable_flon [consis : Consistent T] [𝔅.FormalizedCompleteOn 𝐉] : T ⊬ flon 𝔅 𝔚 := by
   contrapose! consis;
-  have h₁ : T ⊢ 𝐉 ➝ 𝔅 𝐉 := Provability.formalized_complete_on;
-  have h₂ : T ⊢ 𝐉 ⭤ 𝔚 𝐉 := jeroslow_def';
-  dsimp [flon] at consis;
-  have : T ⊢ (safe 𝔅 𝔚)/[⌜𝐉⌝] := by
-    sorry;
-  have h₃ : T ⊢ ∼(𝔅 𝐉 ⋏ 𝔚 𝐉) := by simpa [safe] using this;
-  have h₄ : T ⊢ ∼(𝔅 𝐉 ⋏ 𝔚 𝐉) ➝ ∼𝐉 := contra! $ by cl_prover [h₁, h₂];
-  have h₅ : T ⊢ ∼𝐉 := h₄ ⨀ h₃;
+  replace consis : T ⊢ ∀' safe 𝔅 𝔚 := by simpa [flon] using consis;
+  have h₁ : T ⊢ ∼(𝔅 𝐉 ⋏ 𝔚 𝐉) := by simpa [safe] using FirstOrder.Theory.specialize _ $ consis;
+  have h₂ : T ⊢ 𝐉 ➝ 𝔅 𝐉 := Provability.formalized_complete_on;
+  have h₃ : T ⊢ 𝐉 ⭤ 𝔚 𝐉 := jeroslow_def';
+  have h₄ : T ⊢ ∼(𝔅 𝐉 ⋏ 𝔚 𝐉) ➝ ∼𝐉 := contra! $ by cl_prover [h₂, h₃];
+  have h₅ : T ⊢ ∼𝐉 := h₄ ⨀ h₁;
   have h₆ : T ⊢ 𝔚 𝐉 := R1' h₅;
-  have h₇ : T ⊢ 𝔚 𝐉 ➝ 𝐉 := by cl_prover [h₂];
+  have h₇ : T ⊢ 𝔚 𝐉 ➝ 𝐉 := by cl_prover [h₃];
   have h₈ : T ⊢ 𝐉 := h₇ ⨀ h₆;
   exact not_consistent_iff_inconsistent.mpr <| inconsistent_iff_provable_bot.mpr $ (N!_iff_CO!.mp h₅) ⨀ h₈;
 
