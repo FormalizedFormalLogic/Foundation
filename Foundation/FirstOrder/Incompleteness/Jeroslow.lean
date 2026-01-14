@@ -44,10 +44,10 @@ variable {V : Type} [ORingStructure V] [V ⊧ₘ* 𝗜𝚺₁]
 variable {T U : ArithmeticTheory} [T.Δ₁]  -- [𝗜𝚺₁ ⪯ T] [𝗜𝚺₁ ⪯ U]
 
 lemma unprovable_jeroslow [ℕ ⊧ₘ* T] [𝗜𝚺₁ ⪯ T] [T.SoundOnHierarchy 𝚺 1] : T ⊬ jeroslow (T.standardRefutability) := by
-  apply @ProvabilityAbstraction.unprovable_jeroslow (ℜ := T.standardRefutability) _ _ _ _ _ _ _ (by sorry);
+  apply @ProvabilityAbstraction.unprovable_jeroslow (𝔚 := T.standardRefutability) _ _ _ _ _ _ _ (by sorry);
 
 lemma unprovable_formalized_law_of_noncontradiction [ℕ ⊧ₘ* T] [𝗜𝚺₁ ⪯ T] [T.SoundOnHierarchy 𝚺 1] : T ⊬ flon (T.standardProvability) (T.standardRefutability) := by
-  apply @ProvabilityAbstraction.unprovable_flon (𝔅 := T.standardProvability) (ℜ := T.standardRefutability) _ _ _ _ _ _ _ (by sorry) (by sorry);
+  apply @ProvabilityAbstraction.unprovable_flon (𝔅 := T.standardProvability) (𝔚 := T.standardRefutability) _ _ _ _ _ _ _ (by sorry) (by sorry);
 
 end Arithmetic
 
