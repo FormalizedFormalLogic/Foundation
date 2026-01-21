@@ -1,6 +1,6 @@
 import Foundation.ProvabilityLogic.Realization
 import Foundation.Modal.Logic.GLPlusBoxBot.Basic
-import Foundation.ProvabilityLogic.Height
+import Foundation.FirstOrder.Bootstrapping.ProvabilityAbstraction.Height
 
 namespace LO.ProvabilityLogic
 
@@ -8,7 +8,7 @@ open Entailment
 open Modal
 open Modal.Hilbert
 open FirstOrder
-open Provability
+open FirstOrder.ProvabilityAbstraction
 
 variable {L : FirstOrder.Language} [L.ReferenceableBy L]
          [L.DecidableEq]
@@ -28,8 +28,8 @@ lemma GL.arithmetical_soundness (h : Modal.GL ⊢ A) {f : Realization 𝔅} : U 
 open Classical
 
 theorem GLPlusBoxBot.arithmetical_soundness
-    (hA : Modal.GLPlusBoxBot 𝔅.height ⊢ A)
-    (f : Realization 𝔅) : U ⊢ f A := by
+  (hA : Modal.GLPlusBoxBot 𝔅.height ⊢ A)
+  (f : Realization 𝔅) : U ⊢ f A := by
   cases h : 𝔅.height
   case _ =>
     exact GL.arithmetical_soundness (by simpa [h] using hA)
@@ -38,6 +38,6 @@ theorem GLPlusBoxBot.arithmetical_soundness
     have : Modal.GL ⊢ □^[n]⊥ ➝ A := iff_provable_GLPlusBoxBot_provable_GL.mp this
     have : U ⊢ f (□^[n]⊥ ➝ A) := GL.arithmetical_soundness this;
     have : U ⊢ 𝔅^[n] ⊥ ➝ f A := by simpa using (Realization.interpret.def_boxItr (f := f) n (A := ⊥)) ▸ this;
-    exact this ⨀ (Provability.height_le_iff_boxBot.mp (by simp [h]))
+    exact this ⨀ (𝔅.height_le_iff_boxBot.mp (by simp [h]))
 
 end LO.ProvabilityLogic

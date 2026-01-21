@@ -1,7 +1,7 @@
 import Foundation.FirstOrder.Bootstrapping.DerivabilityCondition.D1
 import Foundation.FirstOrder.Bootstrapping.DerivabilityCondition.D2
 import Foundation.FirstOrder.Bootstrapping.DerivabilityCondition.D3
-import Foundation.ProvabilityLogic.Provability
+import Foundation.FirstOrder.Bootstrapping.ProvabilityAbstraction.Basic
 import Foundation.FirstOrder.Bootstrapping.FixedPoint
 
 /-!
@@ -10,7 +10,7 @@ import Foundation.FirstOrder.Bootstrapping.FixedPoint
 
 namespace LO.FirstOrder.Arithmetic
 
-open ISigma1 Bootstrapping ProvabilityLogic
+open ISigma1 Bootstrapping ProvabilityAbstraction
 
 noncomputable instance : Diagonalization 𝗜𝚺₁ where
   fixedpoint := fixedpoint
@@ -32,13 +32,12 @@ theorem provable_D2 {σ π} : 𝗜𝚺₁ ⊢ □(σ ➝ π) ➝ □σ ➝ □π
 
 variable (T)
 
-noncomputable abbrev _root_.LO.FirstOrder.Theory.standardProvability : Provability 𝗜𝚺₁ T where
-  prov := T.provable
-  D1 := provable_D1
+noncomputable abbrev _root_.LO.FirstOrder.Theory.standardProvability : Provability 𝗜𝚺₁ T := ⟨T.provable⟩
 
 variable {T}
 
-instance : T.standardProvability.HBL2 := ⟨fun _ _ ↦ provable_D2⟩
+instance : T.standardProvability.HBL1 := ⟨provable_D1⟩
+instance : T.standardProvability.HBL2 := ⟨provable_D2⟩
 
 lemma standardProvability_def (σ : Sentence L) : T.standardProvability σ = T.provabilityPred σ := rfl
 
@@ -79,18 +78,16 @@ lemma provable_sound [U.SoundOnHierarchy 𝚺 1] {σ} : U ⊢ □σ → T ⊢ σ
 lemma provable_complete [U.SoundOnHierarchy 𝚺 1] [𝗜𝚺₁ ⪯ U] {σ} : T ⊢ σ ↔ U ⊢ □σ :=
   ⟨fun h ↦ weakening inferInstance (provable_D1 h), provable_sound⟩
 
-instance [𝗣𝗔⁻ ⪯ T] : T.standardProvability.HBL3 := ⟨fun _ ↦ provable_D3⟩
+instance [𝗣𝗔⁻ ⪯ T] : T.standardProvability.HBL3 := ⟨provable_D3⟩
 
 instance [𝗣𝗔⁻ ⪯ T] : T.standardProvability.HBL where
 
-instance [ArithmeticTheory.SoundOnHierarchy T 𝚺 1] : T.standardProvability.GödelSound := ⟨fun h ↦ by simpa using provable_sound h⟩
-
 instance : T.standardProvability.Sound₀ := ⟨provable_sound⟩
+
+instance [ArithmeticTheory.SoundOnHierarchy T 𝚺 1] : GödelSound T.standardProvability := ⟨fun h ↦ by simpa using provable_sound h⟩
 
 instance [ArithmeticTheory.SoundOnHierarchy T 𝚺 1] : T.standardProvability.Sound := ⟨fun h ↦ provable_sound h⟩
 
 end arithmetic
-
-open ProvabilityLogic
 
 end LO.FirstOrder.Arithmetic
