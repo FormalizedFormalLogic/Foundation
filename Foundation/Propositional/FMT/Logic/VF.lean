@@ -53,7 +53,6 @@ lemma unprovable_top_dntop : Propositional.VF ⊬ ⊤ ⭤ ∼∼⊤ := by
     World := Fin 3,
     Rel φ x y :=
       match φ with
-      | ⊤ ⭤ ∼∼⊤ => x ≤ y
       | ∼∼⊤     => x ≤ y
       | ∼⊤      => x ≠ 2
       | _       => True
@@ -65,7 +64,7 @@ lemma unprovable_top_dntop : Propositional.VF ⊬ ⊤ ⭤ ∼∼⊤ := by
   use M, 0
   constructor;
   . tauto;
-  . suffices ∃ x y : M, x ≺[∼⊤ ➝ ⊥] y ∧ ∀ (x : M), ¬y ≺[⊤ ➝ ⊥] x by simpa [M] using this;
+  . suffices ∃ x y : M, x ≺[∼∼⊤] y ∧ ∀ (x : M), ¬y ≺[∼⊤] x by simpa [M] using this;
     use 1, 2;
     grind;
 
@@ -100,6 +99,7 @@ instance : Propositional.VF ⪱ Propositional.WF := by
       constructor;
       . tauto;
       . simp;
-        tauto;
+        grind;
+
 
 end LO.Propositional
