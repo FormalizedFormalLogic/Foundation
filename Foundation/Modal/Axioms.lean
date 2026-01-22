@@ -114,4 +114,9 @@ protected structure Geach.Taple where
 -/
 protected abbrev Geach (g : Geach.Taple) (φ : F) := (◇^[g.i](□^[g.m]φ)) ➝ (□^[g.j](◇^[g.n]φ))
 
+/--
+  Section 13 in Boolos 1994
+-/
+protected abbrev I := □(□φ ➝ □ψ) ⋎ □(□ψ ➝ ⊡φ)
+
 end LO.Modal.Axioms
