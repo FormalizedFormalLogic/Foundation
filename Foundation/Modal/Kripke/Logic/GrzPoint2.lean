@@ -1,5 +1,3 @@
-import Foundation.Vorspiel.List.Chain
-import Foundation.Vorspiel.Fin.Supplemental
 import Foundation.Modal.Kripke.Logic.Grz.Completeness
 import Foundation.Modal.Kripke.Logic.S4Point2McK
 import Mathlib.Data.Finite.Sum

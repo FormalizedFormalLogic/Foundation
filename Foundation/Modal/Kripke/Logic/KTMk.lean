@@ -2,7 +2,7 @@ import Foundation.Modal.Kripke.Logic.S4
 import Foundation.Modal.Kripke.AxiomGeach
 import Foundation.Modal.Kripke.AxiomMk
 import Foundation.Modal.Logic.Basic
-import Foundation.Vorspiel.List.Chain
+
 import Foundation.Modal.Kripke.Hilbert
 
 namespace LO.Modal

@@ -1,4 +1,8 @@
-import Foundation.Vorspiel.Vorspiel
+module
+public import Vorspiel.List
+public import Mathlib.Tactic.TypeStar
+
+@[expose] public section
 
 /-!
 # Logic Symbols
@@ -60,8 +64,14 @@ attribute [simp] DeMorgan.verum DeMorgan.falsum DeMorgan.and DeMorgan.or DeMorga
 
 /-- Introducing `∼φ` as an abbreviation of `φ ➝ ⊥`. -/
 class NegAbbrev (F : Type*) [Tilde F] [Arrow F] [Bot F] where
-  neg {φ : F} : ∼φ = φ ➝ ⊥
+  protected neg {φ : F} : ∼φ = φ ➝ ⊥
 -- attribute [simp] NegAbbrev.neg
+
+/-- Introducing `∼φ`, `φ ⋎ ψ`, `φ ⋏ ψ`, `⊤` as abbreviation. -/
+class ŁukasiewiczAbbrev (F : Type*) [LogicalConnective F] extends NegAbbrev F where
+  protected top : ⊤ = ∼(⊥ : F)
+  protected or {φ ψ : F} : φ ⋎ ψ = ∼φ ➝ ψ
+  protected and {φ ψ : F} : φ ⋏ ψ = ∼(φ ➝ ∼ψ)
 
 namespace LogicalConnective
 
@@ -524,12 +534,12 @@ macro_rules (kind := biguconj)
   |      `(⩕ $i:ident ∈ $s:term, $v) => `(Finset.conj' $s fun $i ↦ $v)
 
 @[app_unexpander uconj]
-def uconjUnexpsnder : Unexpander
+meta def uconjUnexpsnder : Unexpander
   | `($_ fun $i ↦ $v) => `(⩕ $i, $v)
   |                 _ => throw ()
 
 @[app_unexpander Finset.conj']
-def conj'Unexpsnder : Unexpander
+meta def conj'Unexpsnder : Unexpander
   | `($_ $s fun $i ↦ $v) => `(⩕ $i ∈ $s, $v)
   |                    _ => throw ()
 
@@ -546,12 +556,12 @@ macro_rules (kind := bigudisj)
   |      `(⩖ $i:ident ∈ $s:term, $v) => `(Finset.disj' $s fun $i ↦ $v)
 
 @[app_unexpander udisj]
-def udisjUnexpsnder : Unexpander
+meta def udisjUnexpsnder : Unexpander
   | `($_ fun $i ↦ $v) => `(⩖ $i, $v)
   |                 _ => throw ()
 
 @[app_unexpander Finset.disj']
-def disj'Unexpsnder : Unexpander
+meta def disj'Unexpsnder : Unexpander
   | `($_ $s fun $i ↦ $v) => `(⩖ $i ∈ $s, $v)
   |                    _ => throw ()
 
@@ -641,3 +651,5 @@ lemma map_udisj [LogicalConnective β] [FunLike F α β] [LogicalConnective.HomC
     Φ (udisj f) ↔ ∃ i, Φ (f i) := by simp [udisj]
 
 end Finset
+
+end

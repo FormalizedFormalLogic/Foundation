@@ -1,6 +1,11 @@
-import Mathlib.Data.List.Nodup
-import Mathlib.Data.List.Range
-import Foundation.Vorspiel.Fin.Supplemental
+module
+
+public import Mathlib.Data.List.Nodup
+public import Mathlib.Data.List.Range
+public import Vorspiel.Fin.Basic
+
+
+public section
 
 lemma Nat.zero_lt_of_not_zero {n : ℕ} (hn : n ≠ 0) : 0 < n := by omega;
 
@@ -17,9 +22,14 @@ variable [DecidableEq α]
 
 def finIdxOf (l : List α) (hx : x ∈ l) : Fin l.length := ⟨l.idxOf x, idxOf_lt_length_of_mem hx⟩
 
-@[simp] lemma get_finIdxOf {hx : x ∈ l} : l.get (l.finIdxOf hx) = x := by simp [finIdxOf]
+@[simp, grind! →]
+lemma get_finIdxOf (hx : x ∈ l) : l.get (l.finIdxOf hx) = x := by simp [finIdxOf]
 
-lemma neq_findIdxOf_of_neq {hx : x ∈ l} {hy : y ∈ l} (exy : x ≠ y) : l.finIdxOf hx ≠ l.finIdxOf hy := by
+@[simp, grind! →]
+lemma getElem_finIdxOf (hx : x ∈ l) : l[l.finIdxOf hx] = x := by grind;
+
+@[grind →]
+lemma neq_findIdxOf_of_neq (hx : x ∈ l) (hy : y ∈ l) (exy : x ≠ y) : l.finIdxOf hx ≠ l.finIdxOf hy := by
   simp only [finIdxOf, ne_eq, Fin.mk.injEq];
   apply List.idxOf_inj _ |>.not.mpr <;> grind;
 
@@ -69,19 +79,20 @@ namespace IsChain
 
 variable {R} [IsTrans α R] {l : List α} {i j : Fin l.length}
 
+@[grind <=]
 lemma of_lt (h : List.IsChain R l) (hij : i < j) : R (l.get i) (l.get j) :=
   List.pairwise_iff_get.mp (List.isChain_iff_pairwise.mp h) _ _ hij
 
+@[grind =>]
 lemma connected_of_trans' (h : List.IsChain R l) (eij : i ≠ j) : R (l.get i) (l.get j) ∨ R (l.get j) (l.get i) := by
   rcases Nat.lt_trichotomy i j with (_ | _ | _);
   . left; exact of_lt h $ by omega;
   . omega;
   . right; exact of_lt h $ by omega;
 
+@[grind =>]
 lemma connected_of_trans [DecidableEq α] (h : List.IsChain R l) (hx : x ∈ l) (hy : y ∈ l) (exy : x ≠ y) : R x y ∨ R y x := by
-  have : x = l.get (l.finIdxOf hx) := List.get_finIdxOf.symm;
-  have : y = l.get (l.finIdxOf hy) := List.get_finIdxOf.symm;
-  convert IsChain.connected_of_trans' (i := l.finIdxOf hx) (j := l.finIdxOf hy) h $ List.neq_findIdxOf_of_neq exy;
+  grind;
 
 lemma noDup_of_irrefl_trans (h : List.IsChain R l) [IsIrrefl _ R] : l.Nodup := by
   apply List.nodup_iff_getElem?_ne_getElem?.mpr;
@@ -138,23 +149,23 @@ lemma isChain_concat_of_not_nil (hl : l ≠ []) : List.IsChain R (l.concat a) �
 
 section
 
-variable [DecidableEq α]
+variable [DecidableEq α] {R : α → α → Prop}
 
 lemma rel_head_of_isChain_trans [IsTrans _ R] (h : List.IsChain R l) (lh : l ≠ []) : ∀ x ∈ l, x ≠ l.head lh → R (l.head lh) x := by
   intro x hx₁ hx₂;
-  let i : Fin l.length := ⟨0, List.length_pos_of_ne_nil lh⟩;
-  let j : Fin l.length := List.finIdxOf _ hx₁;
-  convert List.IsChain.of_lt h (i := i) (j := j) ?_;
-  . apply List.head_eq_getElem_zero;
-  . apply List.get_finIdxOf.symm;
-  . apply lt_of_le_of_ne;
-    . apply Nat.zero_le;
-    . by_contra hC;
-      apply hx₂;
-      dsimp [i, j] at hC;
-      convert List.head_eq_getElem_zero lh |>.symm;
-      have := List.get_finIdxOf (hx := hx₁) |>.symm;
-      rwa [←hC] at this;
+  rw [List.head_eq_getElem_zero, ←getElem_finIdxOf hx₁];
+  apply List.IsChain.of_lt h;
+  apply lt_of_le_of_ne;
+  . apply Nat.zero_le;
+  . grind;
+
+lemma rel_getLast_of_isChain_trans [IsTrans _ R] (h : List.IsChain R l) (lh : l ≠ []) : ∀ x ∈ l, x ≠ l.getLast lh → R x (l.getLast lh) := by
+  intro x hx₁ hx₂;
+  rw [←getElem_finIdxOf hx₁, List.getLast_eq_getElem];
+  apply List.IsChain.of_lt h;
+  apply lt_of_le_of_ne;
+  . grind;
+  . grind;
 
 lemma rel_head_of_isChain_preorder [IsPreorder _ R] (h : List.IsChain R l) (lh : l ≠ []) : ∀ x ∈ l, R (l.head lh) x := by
   intro x hx;
@@ -162,23 +173,6 @@ lemma rel_head_of_isChain_preorder [IsPreorder _ R] (h : List.IsChain R l) (lh :
   . subst e;
     apply refl;
   . apply rel_head_of_isChain_trans h lh <;> assumption;
-
-lemma rel_getLast_of_isChain_trans [IsTrans _ R] (h : List.IsChain R l) (lh : l ≠ []) : ∀ x ∈ l, x ≠ l.getLast lh → R x (l.getLast lh) := by
-  intro x hx₁ hx₂;
-  have : NeZero l.length := ⟨List.length_eq_zero_iff.not.mpr lh⟩;
-  let i : Fin l.length := List.finIdxOf l hx₁;
-  let j : Fin l.length := Fin.last';
-  convert List.IsChain.of_lt h (i := i) (j := j) ?_;
-  . apply List.get_finIdxOf.symm;
-  . apply List.getLast_eq_getElem;
-  . apply lt_of_le_of_ne;
-    . exact Fin.lt_last';
-    . by_contra hC;
-      apply hx₂;
-      dsimp [i, j] at hC;
-      convert List.getLast_eq_getElem lh |>.symm;
-      have := List.get_finIdxOf (hx := hx₁) |>.symm;
-      rwa [hC] at this;
 
 lemma rel_getLast_of_isChain_preorder [IsPreorder _ R] (h : List.IsChain R l) (lh : l ≠ []) : ∀ x ∈ l, R x (l.getLast lh) := by
   intro x hx;
