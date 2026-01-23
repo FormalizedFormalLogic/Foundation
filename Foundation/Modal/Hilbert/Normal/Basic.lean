@@ -1,11 +1,12 @@
-import Foundation.Modal.Entailment.K4Henkin
-import Foundation.Modal.Hilbert.Axiom
-import Foundation.Modal.Logic.Basic
 import Foundation.Modal.Entailment.GL
 import Foundation.Modal.Entailment.Grz
-import Foundation.Modal.Entailment.S5Grz
 import Foundation.Modal.Entailment.K4Hen
+import Foundation.Modal.Entailment.K4Henkin
+import Foundation.Modal.Entailment.S5Grz
+import Foundation.Modal.Hilbert.Axiom
 import Foundation.Modal.Logic.Basic
+import Foundation.Modal.Logic.Basic
+import Foundation.Propositional.Entailment.Cl.Łukasiewicz
 
 namespace LO.Modal
 
@@ -34,7 +35,7 @@ lemma axm' {φ} (h : φ ∈ Ax) : Normal Ax ⊢ φ := by
 
 @[grind <=] lemma axm'! {φ} (h : φ ∈ Ax) : Normal Ax ⊢ φ := by simpa using axm! .id h;
 
-instance : Entailment.Lukasiewicz (Hilbert.Normal Ax) where
+instance : Entailment.Łukasiewicz (Hilbert.Normal Ax) where
   implyK {_ _} := by constructor; apply Hilbert.Normal.implyK;
   implyS {_ _ _} := by constructor; apply Hilbert.Normal.implyS;
   elimContra {_ _} := by constructor; apply Hilbert.Normal.ec;
@@ -512,7 +513,7 @@ instance : S4.axioms.HasFour where p := 0
 end S4.axioms
 protected abbrev S4 := Hilbert.Normal S4.axioms
 instance : Entailment.S4 (Modal.S4) where
-instance : Modal.K4 ⪯ Modal.S4 := weakerThan_of_subset_axioms $ by simp;
+instance : Modal.K4 ⪯ Modal.S4 := weakerThan_of_subset_axioms $ by grind;
 
 
 protected abbrev S4McK.axioms : Axiom ℕ := {Axioms.K (.atom 0) (.atom 1), Axioms.T (.atom 0), Axioms.Four (.atom 0), Axioms.McK (.atom 0)}
@@ -636,7 +637,7 @@ end GLPoint2.axioms
 protected abbrev GLPoint2 := Hilbert.Normal GLPoint2.axioms
 instance : Entailment.GLPoint2 (Modal.GLPoint2) where
 instance : Entailment.GLPoint2 (Modal.GLPoint2) where
-instance : Modal.GL ⪯ Modal.GLPoint2 := weakerThan_of_subset_axioms $ by simp
+instance : Modal.GL ⪯ Modal.GLPoint2 := weakerThan_of_subset_axioms $ by grind
 
 
 protected abbrev GLPoint3.axioms : Axiom ℕ := {Axioms.K (.atom 0) (.atom 1), Axioms.L (.atom 0), Axioms.WeakPoint3 (.atom 0) (.atom 1)}
@@ -658,7 +659,7 @@ end K4Z.axioms
 protected abbrev K4Z := Hilbert.Normal K4Z.axioms
 instance : Entailment.K4Z (Modal.K4Z) where
 
-instance : Modal.K4 ⪯ Modal.K4Z := weakerThan_of_subset_axioms $ by simp
+instance : Modal.K4 ⪯ Modal.K4Z := weakerThan_of_subset_axioms $ by grind;
 instance : Modal.K4 ⪯ Modal.K4Z := inferInstance
 
 instance : Modal.K4Z ⪯ Modal.GL := weakerThan_of_provable_axioms $ by rintro φ (rfl | rfl | rfl) <;> simp;
@@ -675,10 +676,10 @@ end K4Point2Z.axioms
 protected abbrev K4Point2Z := Hilbert.Normal K4Point2Z.axioms
 instance : Entailment.K4Point2Z (Modal.K4Point2Z) where
 
-instance : Modal.K4Point2 ⪯ Modal.K4Point2Z := weakerThan_of_subset_axioms (by simp)
+instance : Modal.K4Point2 ⪯ Modal.K4Point2Z := weakerThan_of_subset_axioms $ by grind;
 instance : Modal.K4Point2 ⪯ Modal.K4Point2Z := inferInstance
 
-instance : Modal.K4Z ⪯ Modal.K4Point2Z := weakerThan_of_subset_axioms (by simp)
+instance : Modal.K4Z ⪯ Modal.K4Point2Z := weakerThan_of_subset_axioms $ by grind;
 instance : Modal.K4Point2 ⪯ Modal.K4Point2Z := inferInstance
 
 instance : Modal.K4Point2Z ⪯ Modal.GLPoint2 := weakerThan_of_provable_axioms $ by rintro φ (rfl | rfl | rfl | rfl) <;> simp;
@@ -781,10 +782,10 @@ end DumPoint2.axioms
 protected abbrev DumPoint2 := Hilbert.Normal DumPoint2.axioms
 instance : Entailment.DumPoint2 (Modal.DumPoint2) where
 
-instance : Modal.Dum ⪯ Modal.DumPoint2 := weakerThan_of_subset_axioms (by simp)
+instance : Modal.Dum ⪯ Modal.DumPoint2 := weakerThan_of_subset_axioms $ by grind
 instance : Modal.Dum ⪯ Modal.DumPoint2 := inferInstance
 
-instance : Modal.S4Point2 ⪯ Modal.DumPoint2 := weakerThan_of_subset_axioms (by simp)
+instance : Modal.S4Point2 ⪯ Modal.DumPoint2 := weakerThan_of_subset_axioms $ by grind
 instance : Modal.S4Point2 ⪯ Modal.DumPoint2 := inferInstance
 
 instance : Modal.DumPoint2 ⪯ Modal.GrzPoint2 := weakerThan_of_provable_axioms $ by rintro φ (rfl | rfl | rfl | rfl | rfl) <;> simp;
@@ -802,7 +803,7 @@ end DumPoint3.axioms
 protected abbrev DumPoint3 := Hilbert.Normal DumPoint3.axioms
 instance : Entailment.DumPoint3 (Modal.DumPoint3) where
 
-instance : Modal.Dum ⪯ Modal.DumPoint3 := weakerThan_of_subset_axioms (by simp)
+instance : Modal.Dum ⪯ Modal.DumPoint3 := weakerThan_of_subset_axioms $ by grind
 instance : Modal.Dum ⪯ Modal.DumPoint3 := inferInstance
 
 instance : Modal.S4Point3 ⪯ Modal.DumPoint3 := weakerThan_of_provable_axioms $ by rintro φ (rfl | rfl | rfl | rfl | rfl) <;> simp;

@@ -1,5 +1,5 @@
-import Foundation.Propositional.Formula
-import Foundation.Propositional.NNFormula
+import Foundation.Propositional.Formula.Basic
+import Foundation.Propositional.Formula.NNFormula
 
 namespace LO.Propositional
 

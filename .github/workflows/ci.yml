@@ -44,7 +44,11 @@ jobs:
       # Build project
       - name: Get Mathlib cache
         run: lake exe cache get
-      - name: Build project
+      - name: Build Vorspiel
+        run: lake build --keep-toolchain Vorspiel
+      - name: Build Foundation2
+        run: lake build --keep-toolchain Foundation2
+      - name: Build Foundation
         run: lake build --keep-toolchain Foundation
       - name: Build executables
         run: |

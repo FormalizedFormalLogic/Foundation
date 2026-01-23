@@ -43,4 +43,8 @@ lemma least_number (P : ℕ → Prop) (hP : ∃ x, P x) : ∃ x, P x ∧ ∀ z <
 
 def toFin (n : ℕ) : ℕ → Option (Fin n) := fun x => if hx : x < n then some ⟨x, hx⟩ else none
 
+
+@[grind =>]
+lemma zero_lt_of_not_zero {n : ℕ} (hn : n ≠ 0) : 0 < n := by omega;
+
 end Nat

@@ -44,7 +44,7 @@ end EMC
 instance : Modal.EMC ⪱ Modal.EMCN := by
   constructor;
   . apply Hilbert.WithRE.weakerThan_of_subset_axioms;
-    simp;
+    grind;
   . apply Entailment.not_weakerThan_iff.mpr;
     use Axioms.N;
     constructor;
@@ -59,7 +59,7 @@ instance : Modal.EMC ⪱ Modal.EMCN := by
 instance : Modal.EMC ⪱ Modal.EMC4 := by
   constructor;
   . apply Hilbert.WithRE.weakerThan_of_subset_axioms;
-    simp;
+    grind;
   . apply Entailment.not_weakerThan_iff.mpr;
     use (Axioms.Four (.atom 0));
     constructor;

@@ -1,4 +1,4 @@
-import Foundation.Modal.Formula
+import Foundation.Modal.Formula.Basic
 
 namespace LO.Modal
 

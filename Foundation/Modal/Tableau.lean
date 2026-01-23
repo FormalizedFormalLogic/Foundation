@@ -1,6 +1,6 @@
-import Foundation.Modal.Formula
+import Foundation.Modal.Formula.Basic
 import Foundation.Modal.Entailment.K
-import Foundation.Propositional.Formula
+import Foundation.Propositional.Formula.Basic
 import Foundation.Propositional.Entailment.Cl.Basic
 import Foundation.Vorspiel.Finset.Supplemental
 import Foundation.Vorspiel.Set.Supplemental

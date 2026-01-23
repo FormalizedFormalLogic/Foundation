@@ -1,4 +1,4 @@
-import Foundation.Propositional.NNFormula
+import Foundation.Propositional.Formula.NNFormula
 import Foundation.Logic.Calculus
 
 namespace LO.Propositional

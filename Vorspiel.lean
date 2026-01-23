@@ -1,3 +1,5 @@
+-- Migrated new module system in Vorspiel.
+
 module
 
 public import Vorspiel.Fin.Basic

@@ -1,4 +1,4 @@
-import Foundation.Modal.NNFormula
+import Foundation.Modal.Formula.NNFormula
 import Foundation.Modal.Entailment.K
 import Foundation.Modal.Hilbert.Normal.Basic
 

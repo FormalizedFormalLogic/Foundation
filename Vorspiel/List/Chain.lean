@@ -7,14 +7,11 @@ public import Vorspiel.Fin.Basic
 
 public section
 
-lemma Nat.zero_lt_of_not_zero {n : ℕ} (hn : n ≠ 0) : 0 < n := by omega;
-
 
 namespace List
 
 variable {α}
 variable {l : List α} {x y : α}
-
 
 section
 

@@ -38,7 +38,7 @@ open LO.Entailment LO.Entailment.FiniteContext LO.Modal.Entailment
 
 variable {L : Logic α} {X Y : Set (Formula α)} {φ ψ : Formula α}
 
-instance : Entailment.Lukasiewicz (F := Formula α) (S := Logic α × Set (Formula α)) (L, X) where
+instance : Entailment.Łukasiewicz (F := Formula α) (S := Logic α × Set (Formula α)) (L, X) where
   mdp ihφψ ihφ := by simpa using GlobalConsequence.mdp ihφψ ihφ;
   implyK := GlobalConsequence.implyK X
   implyS := GlobalConsequence.implyS X

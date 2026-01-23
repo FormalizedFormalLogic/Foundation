@@ -1,5 +1,6 @@
 module
-public import Vorspiel.List
+
+public import Vorspiel
 public import Mathlib.Tactic.TypeStar
 
 @[expose] public section
@@ -65,13 +66,14 @@ attribute [simp] DeMorgan.verum DeMorgan.falsum DeMorgan.and DeMorgan.or DeMorga
 /-- Introducing `∼φ` as an abbreviation of `φ ➝ ⊥`. -/
 class NegAbbrev (F : Type*) [Tilde F] [Arrow F] [Bot F] where
   protected neg {φ : F} : ∼φ = φ ➝ ⊥
--- attribute [simp] NegAbbrev.neg
+attribute [grind =] NegAbbrev.neg
 
 /-- Introducing `∼φ`, `φ ⋎ ψ`, `φ ⋏ ψ`, `⊤` as abbreviation. -/
 class ŁukasiewiczAbbrev (F : Type*) [LogicalConnective F] extends NegAbbrev F where
   protected top : ⊤ = ∼(⊥ : F)
   protected or {φ ψ : F} : φ ⋎ ψ = ∼φ ➝ ψ
   protected and {φ ψ : F} : φ ⋏ ψ = ∼(φ ➝ ∼ψ)
+attribute [grind =] ŁukasiewiczAbbrev.and ŁukasiewiczAbbrev.or ŁukasiewiczAbbrev.top
 
 namespace LogicalConnective
 

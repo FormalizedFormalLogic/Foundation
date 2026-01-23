@@ -1,5 +1,5 @@
 import Foundation.FirstOrder.Basic
-import Foundation.Modal.NNFormula
+import Foundation.Modal.Formula.NNFormula
 import Foundation.Modal.Kripke.NNFormula
 
 namespace LO.FirstOrder

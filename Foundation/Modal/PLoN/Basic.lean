@@ -1,4 +1,6 @@
-import Foundation.Modal.Formula
+import Foundation.Modal.Formula.Basic
+import Foundation.Logic.Semantics
+import Foundation.Propositional.Entailment.Cl.Basic
 
 namespace LO.Modal
 

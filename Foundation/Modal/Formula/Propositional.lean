@@ -1,4 +1,4 @@
-import Foundation.Modal.Formula.Basic
+import Foundation.Modal.Formula.Basic.Basic
 import Foundation.Propositional.ClassicalSemantics.ZeroSubst
 
 

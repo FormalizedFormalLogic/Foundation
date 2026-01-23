@@ -1,7 +1,7 @@
 import Foundation.Propositional.Entailment.Cl.Basic
 import Foundation.Propositional.Entailment.Int.DNE_of_LEM
 import Foundation.Propositional.Hilbert.Axiom
-import Foundation.Propositional.Formula
+import Foundation.Propositional.Formula.Basic
 import Foundation.Propositional.Logic.Basic
 import Foundation.Logic.Disjunctive
 

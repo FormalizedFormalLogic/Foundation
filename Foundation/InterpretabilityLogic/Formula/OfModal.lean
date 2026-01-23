@@ -1,5 +1,5 @@
 import Foundation.InterpretabilityLogic.Formula.Substitution
-import Foundation.Modal.Formula
+import Foundation.Modal.Formula.Basic
 
 namespace LO.Modal
 

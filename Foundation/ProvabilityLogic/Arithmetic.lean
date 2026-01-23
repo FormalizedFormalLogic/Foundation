@@ -20,7 +20,7 @@ namespace ArithmeticTheory.ProvabilityLogic
 lemma provable_iff : ProvabilityLogic T U ⊢ A ↔ ∀ f : T.StandardRealization, U ⊢ f A := by
   simp [Modal.Logic.iff_provable, ArithmeticTheory.ProvabilityLogic]
 
-instance : Entailment.Lukasiewicz (ProvabilityLogic T U) where
+instance : Entailment.Łukasiewicz (ProvabilityLogic T U) where
   mdp := by
     rintro A B ⟨hA⟩ ⟨hB⟩;
     constructor;

@@ -1,11 +1,11 @@
-import Foundation.Modal.Formula
-
+import Foundation.Modal.Formula.Basic
+import Foundation.Propositional.Entailment.Cl.Basic
 
 namespace LO.Modal
 
-
 namespace Formula
 
+@[grind]
 def complement : Formula α → Formula α
   | ∼φ => φ
   | φ  => ∼φ
@@ -15,27 +15,24 @@ namespace complement
 
 variable {φ ψ : Formula α}
 
-@[simp] lemma neg_def : -(∼φ) = φ := by
-  induction φ <;> simp_all [complement]
+@[simp, grind =] lemma neg_def : -(∼φ) = φ := by induction φ <;> simp_all [complement]
+@[simp, grind =] lemma bot_def : -(⊥ : Formula α) = ∼⊥ := by simp only [complement];
+@[simp, grind =] lemma box_def : -(□φ) = ∼(□φ) := by simp only [complement];
 
-@[simp] lemma bot_def : -(⊥ : Formula α) = ∼(⊥) := by simp only [complement];
-
-@[simp] lemma box_def : -(□φ) = ∼(□φ) := by simp only [complement];
-
+@[grind =>]
 lemma imp_def₁ (hq : ψ ≠ ⊥) : -(φ ➝ ψ) = ∼(φ ➝ ψ) := by
-  simp only [complement];
-  split;
-  . rename_i h; simp [imp_eq, falsum_eq, hq] at h;
-  . rfl;
+  dsimp [complement];
+  grind;
 
+@[grind =>]
 lemma imp_def₂ (hq : ψ = ⊥) : -(φ ➝ ψ) = φ := by
-  subst_vars;
+  subst hq;
   apply neg_def;
 
 lemma resort_box (h : -φ = □ψ) : φ = ∼□ψ := by
-  simp [complement] at h;
+  dsimp [complement] at h;
   split at h;
-  . subst_vars; rfl;
+  . subst h; rfl;
   . contradiction;
 
 lemma or [DecidableEq α] (φ : Formula α) : -φ = ∼φ ∨ ∃ ψ, ∼ψ = φ := by

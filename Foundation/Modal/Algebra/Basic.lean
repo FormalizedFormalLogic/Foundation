@@ -1,5 +1,5 @@
 import Foundation.Modal.LogicSymbol
-import Foundation.Modal.Formula
+import Foundation.Modal.Formula.Basic
 import Foundation.Modal.Hilbert.Normal.Basic
 import Foundation.Vorspiel.Order
 import Foundation.Logic.LindenbaumAlgebra

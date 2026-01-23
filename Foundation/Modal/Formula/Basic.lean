@@ -1,12 +1,15 @@
 module
 
 public import Foundation.Modal.LogicSymbol
+public import Foundation.Propositional.Formula.Basic
 public import Mathlib.Data.Set.Finite.Lattice
 public import Mathlib.Logic.Encodable.Basic
 
 @[expose] public section
 
-namespace LO.Modal
+namespace LO
+
+namespace Modal
 
 @[grind]
 inductive Formula (α : Type*) where
@@ -72,7 +75,7 @@ instance : Coe α (Formula α) := ⟨atom⟩
 
 end ToString
 
-@[simp] lemma eq_verum_neg_falsum : ⊤ = ∼(⊥ : Formula α) := rfl
+@[grind =] lemma eq_verum_neg_falsum : ⊤ = ∼(⊥ : Formula α) := rfl
 
 lemma falsum_eq : (⊥ : Formula α) = falsum := rfl
 lemma verum_eq : (⊤ : Formula α) = verum := rfl
@@ -91,10 +94,10 @@ lemma inj_imp : φ₁ ➝ φ₂ = ψ₁ ➝ ψ₂ ↔ φ₁ = ψ₁ ∧ φ₂ = 
 lemma inj_neg : ∼φ = ∼ψ ↔ φ = ψ := by simp [Tilde.tilde]
 lemma inj_box : □φ = □ψ ↔ φ = ψ := by simp [Box.box]
 lemma inj_dia : ◇φ = ◇ψ ↔ φ = ψ := by simp [Dia.dia]
-attribute [simp, grind =] inj_and inj_or inj_imp inj_neg inj_box inj_dia
+attribute [grind =] inj_and inj_or inj_imp inj_neg inj_box inj_dia
 
-instance : InjectiveBox (Formula α) := ⟨by simp [Function.Injective]⟩
-instance : InjectiveDia (Formula α) := ⟨by simp [Function.Injective]⟩
+instance : InjectiveBox (Formula α) := ⟨by grind [Function.Injective]⟩
+instance : InjectiveDia (Formula α) := ⟨by grind [Function.Injective]⟩
 
 /-- Formula complexity -/
 @[grind]
@@ -165,8 +168,8 @@ def hasDecEq : (φ ψ : Formula α) → Decidable (φ = ψ)
       | isTrue hp =>
         match hasDecEq ψ ψ' with
         | isTrue hq  => isTrue (hp ▸ hq ▸ rfl)
-        | isFalse hq => isFalse $ by simp_all
-      | isFalse hp => isFalse (by simp [hp])
+        | isFalse hq => isFalse $ by grind
+      | isFalse hp => isFalse $ by grind
     all_goals
     . apply isFalse;
       simp;
@@ -175,7 +178,7 @@ def hasDecEq : (φ ψ : Formula α) → Decidable (φ = ψ)
     case box φ' =>
       exact match hasDecEq φ φ' with
       | isTrue hp  => isTrue (hp ▸ rfl)
-      | isFalse hp => isFalse $ by simp [hp, box_eq];
+      | isFalse hp => isFalse $ by grind
     all_goals
     . apply isFalse;
       simp;
@@ -222,27 +225,28 @@ def rec_neg [DecidableEq α] {C : Formula α → Sort w}
 
 section negated
 
+@[grind]
 def negated : Formula α → Bool
   | ∼_ => True
   | _  => False
 
 @[simp] lemma negated_def : (∼φ).negated := by simp [negated]
 
-@[simp]
+@[simp, grind =]
 lemma negated_imp : (φ ➝ ψ).negated ↔ (ψ = ⊥) := by
-  simp [negated];
+  dsimp [negated];
   split;
   . simp_all [Formula.imp_eq]; rfl;
   . simp_all [Formula.imp_eq]; simpa;
 
 lemma negated_iff [DecidableEq α] : φ.negated ↔ ∃ ψ, φ = ∼ψ := by
   induction φ using Formula.cases_neg with
-  | himp => simp [negated_imp, NegAbbrev.neg];
+  | himp => grind;
   | _ => simp [negated]
 
 lemma not_negated_iff [DecidableEq α] : ¬φ.negated ↔ ∀ ψ, φ ≠ ∼ψ := by
   induction φ using Formula.cases_neg with
-  | himp => simp [negated_imp, NegAbbrev.neg];
+  | himp => grind;
   | _ => simp [negated]
 
 @[elab_as_elim]
@@ -567,9 +571,138 @@ lemma ne_freshAtom_of_mem_subformulas (h : atom a ∈ φ.subformulas) : φ.fresh
 
 end
 
-
 end Formula
 
 end Atoms
 
-end LO.Modal
+
+
+
+section Letterless
+
+variable {α} {a : α} {n : ℕ} {φ ψ : Formula α}
+
+namespace Formula
+
+@[grind]
+def Letterless : Formula α → Prop
+  | atom _ => False
+  | ⊥ => True
+  | □φ => φ.Letterless
+  | φ ➝ ψ => (φ.Letterless) ∧ (ψ.Letterless)
+
+@[grind .] lemma not_letterless_atom {a : α} : ¬(Formula.Letterless (.atom a)) := by grind;
+@[grind .] lemma letterless_falsum : (⊥ : Formula α).Letterless := by simp [Letterless];
+@[grind .] lemma letterless_verum : (⊤ : Formula α).Letterless := by simp [Letterless];
+@[grind =] lemma letterless_imp : (φ ➝ ψ).Letterless ↔ φ.Letterless ∧ ψ.Letterless := by simp [Letterless];
+@[grind =] lemma letterless_neg : (∼φ).Letterless ↔ φ.Letterless := by grind;
+@[grind =] lemma letterless_and : (φ ⋏ ψ).Letterless ↔ φ.Letterless ∧ ψ.Letterless := by grind;
+@[grind =] lemma letterless_or : (φ ⋎ ψ).Letterless ↔ φ.Letterless ∧ ψ.Letterless := by grind;
+@[grind =] lemma letterless_box : (□φ).Letterless ↔ φ.Letterless := by simp [Letterless];
+@[grind =] lemma letterless_boxItr : (□^[n]φ).Letterless ↔ φ.Letterless := by induction n <;> grind;
+@[grind =] lemma letterless_dia : (◇φ).Letterless ↔ φ.Letterless := by grind;
+@[grind =] lemma letterless_diaItr : (◇^[n]φ).Letterless ↔ φ.Letterless := by induction n <;> grind;
+
+@[grind <=]
+lemma letterless_lconj₂ {l : List (Formula α)} (h : ∀ φ ∈ l, φ.Letterless) : (l.conj₂).Letterless := by
+  induction l using List.induction_with_singleton <;> simp_all [Letterless];
+
+@[grind <=]
+lemma letterless_lconj' {l : List β} {Φ : β → Formula α} (h : ∀ i ∈ l, (Φ i).Letterless) : (l.conj' Φ).Letterless := by
+  induction l using List.induction_with_singleton with
+  | hcons _ _ _ ih => apply letterless_lconj₂; grind;
+  | _  => dsimp [List.conj']; grind;
+
+@[grind <=]
+lemma letterless_fconj {s : Finset (Formula α)} (h : ∀ φ ∈ s, φ.Letterless) : (s.conj).Letterless := by
+  apply letterless_lconj₂;
+  simpa;
+
+lemma letterless_fconj' {s : Finset β} {Φ : β → Formula α} (h : ∀ i, (Φ i).Letterless) : (⩕ i ∈ s, Φ i).Letterless := by
+  apply letterless_lconj';
+  grind;
+
+@[grind =]
+lemma subst_letterless (hφ : φ.Letterless) {s : Substitution α} : φ⟦s⟧ = φ := by induction φ <;> grind;
+
+end Formula
+
+
+namespace FormulaSet
+
+variable {Γ : FormulaSet α} {φ : Formula α}
+
+@[grind]
+def Letterless (Γ : FormulaSet α) : Prop := ∀ φ ∈ Γ, φ.Letterless
+
+@[simp, grind =]
+lemma letterless_singleton {φ : Formula α} : ({φ} : FormulaSet α).Letterless ↔ φ.Letterless := by grind;
+
+@[grind <=]
+lemma letterless_of_mem (hΓ : Γ.Letterless) (hφ : φ ∈ Γ) : φ.Letterless := hΓ φ hφ
+
+end FormulaSet
+
+end Letterless
+
+end Modal
+
+
+section toModalFormula
+
+namespace Propositional
+
+@[grind]
+def Formula.toModalFormula : Propositional.Formula α → Modal.Formula α
+  | .atom a => Modal.Formula.atom a
+  | ⊥ => ⊥
+  | φ ➝ ψ => (toModalFormula φ) ➝ (toModalFormula ψ)
+  | φ ⋏ ψ => (toModalFormula φ) ⋏ (toModalFormula ψ)
+  | φ ⋎ ψ => (toModalFormula φ) ⋎ (toModalFormula ψ)
+
+instance : Coe (Propositional.Formula α) (Modal.Formula α) := ⟨Formula.toModalFormula⟩
+variable {α} {a : α} {φ ψ : Propositional.Formula α}
+
+local postfix:80 "ᴹ" => Formula.toModalFormula
+@[simp, grind =] lemma toModalFormula_atom : (.atom a)ᴹ = .atom a := by rfl
+@[simp, grind =] lemma toModalFormula_top : (⊤ : Propositional.Formula α)ᴹ = ⊤ := by rfl
+@[simp, grind =] lemma toModalFormula_bot : (⊥ : Propositional.Formula α)ᴹ = ⊥ := by rfl
+@[simp, grind =] lemma toModalFormula_not : (∼φ)ᴹ = ∼(φᴹ) := by rfl
+@[simp, grind =] lemma toModalFormula_imp : (φ ➝ ψ)ᴹ = (φᴹ) ➝ (ψᴹ) := by rfl
+@[simp, grind =] lemma toModalFormula_and : (φ ⋏ ψ)ᴹ = (φᴹ) ⋏ (ψᴹ) := by rfl
+@[simp, grind =] lemma toModalFormula_or : (φ ⋎ ψ)ᴹ = (φᴹ) ⋎ (ψᴹ) := by rfl
+@[grind →] lemma toModalFormula_letterless (h : φ.Letterless) : φᴹ.Letterless := by induction φ <;> grind;
+
+end Propositional
+
+end toModalFormula
+
+
+section toPropFormula
+
+def Modal.Formula.toPropFormula (φ : Modal.Formula α) (_ : φ.degree = 0 := by grind) : Propositional.Formula α :=
+  match φ with
+  | atom a => Propositional.Formula.atom a
+  | ⊥ => ⊥
+  | φ ➝ ψ => φ.toPropFormula ➝ ψ.toPropFormula
+
+end toPropFormula
+
+
+
+section ZeroSubst
+
+namespace Modal
+
+def ZeroSubstitution (α) := {s : Substitution α // ∀ {a : α}, ((.atom a)⟦s⟧).Letterless }
+
+@[grind .]
+lemma Formula.letterless_zeroSubst {φ : Formula α} {s : ZeroSubstitution α} : (φ⟦s.1⟧).Letterless := by induction φ <;> grind;
+
+end Modal
+
+instance : Coe (Propositional.ZeroSubstitution α) (Modal.ZeroSubstitution α) := ⟨λ ⟨s, p⟩ => ⟨λ φ => (s φ), λ {_} => Propositional.toModalFormula_letterless p⟩⟩
+
+end ZeroSubst
+
+end LO
