@@ -1,6 +1,7 @@
 import Foundation.Modal.Entailment.K4Loeb
 import Foundation.Modal.Hilbert.Axiom
 import Foundation.Modal.Logic.Basic
+import Foundation.Propositional.Entailment.Cl.Łukasiewicz
 
 namespace LO.Modal
 

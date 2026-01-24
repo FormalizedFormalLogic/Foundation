@@ -1,7 +1,7 @@
 import Foundation.InterpretabilityLogic.Logic.Basic
 import Foundation.InterpretabilityLogic.Entailment
 import Foundation.InterpretabilityLogic.Hilbert.Axiom
-import Batteries.Tactic.Instances
+import Foundation.Propositional.Entailment.Cl.Łukasiewicz
 
 namespace LO.InterpretabilityLogic
 

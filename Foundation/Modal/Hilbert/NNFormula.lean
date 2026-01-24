@@ -14,7 +14,10 @@ open
 
 lemma iff_neg {φ : NNFormula _} : Modal.K ⊢ ∼(φ.toFormula) ⭤ (∼φ).toFormula := by
   induction φ using NNFormula.rec' with
+  | hAtom a => simp;
   | hNatom a => apply K!_intro <;> simp;
+  | hVerum => simp;
+  | hFalsum => simp [Formula.eq_verum_neg_falsum];
   | hAnd φ ψ ihφ ihψ =>
     apply K!_intro;
     . apply deduct'!;
@@ -63,7 +66,6 @@ lemma iff_neg {φ : NNFormula _} : Modal.K ⊢ ∼(φ.toFormula) ⭤ (∼φ).toF
       apply axiomK'!;
       apply nec!;
       exact K!_right ih;
-  | _ => simp;
 
 lemma exists_iff {φ} : ∃ ψ : NNFormula _, Modal.K ⊢ φ ⭤ ψ.toFormula := by
   induction φ with

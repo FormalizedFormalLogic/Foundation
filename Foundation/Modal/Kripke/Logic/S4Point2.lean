@@ -91,7 +91,7 @@ end FFP
 
 instance : Modal.S4 ⪱ Modal.S4Point2 := by
   constructor;
-  . apply Hilbert.Normal.weakerThan_of_subset_axioms $ by simp;
+  . grind;
   . apply Entailment.not_weakerThan_iff.mpr;
     use Axioms.Point2 (.atom 0)
     constructor;

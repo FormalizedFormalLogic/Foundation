@@ -44,7 +44,7 @@ end KD4
 
 instance : Modal.KD ⪱ Modal.KD4 := by
   constructor;
-  . apply Hilbert.Normal.weakerThan_of_subset_axioms $ by simp;
+  . grind;
   . apply Entailment.not_weakerThan_iff.mpr;
     use Axioms.Four (.atom 0);
     constructor;
@@ -59,7 +59,7 @@ instance : Modal.KD ⪱ Modal.KD4 := by
 
 instance : Modal.K4 ⪱ Modal.KD4 := by
   constructor;
-  . apply Hilbert.Normal.weakerThan_of_subset_axioms $ by simp;
+  . grind;
   . apply Entailment.not_weakerThan_iff.mpr;
     use (Axioms.D (.atom 0));
     constructor;

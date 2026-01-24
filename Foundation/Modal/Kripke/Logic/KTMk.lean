@@ -184,7 +184,7 @@ end KTMk
 
 instance : Modal.KT ⪱ Modal.KTMk := by
   constructor;
-  . apply Hilbert.Normal.weakerThan_of_subset_axioms; simp;
+  . grind;
   . apply Entailment.not_weakerThan_iff.mpr;
     use (Axioms.Mk (.atom 0) (.atom 1));
     constructor;

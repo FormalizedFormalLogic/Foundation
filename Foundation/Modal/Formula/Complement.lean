@@ -22,7 +22,7 @@ variable {φ ψ : Formula α}
 @[grind =>]
 lemma imp_def₁ (hq : ψ ≠ ⊥) : -(φ ➝ ψ) = ∼(φ ➝ ψ) := by
   dsimp [complement];
-  grind;
+  grind [Formula.inj_imp];
 
 @[grind =>]
 lemma imp_def₂ (hq : ψ = ⊥) : -(φ ➝ ψ) = φ := by

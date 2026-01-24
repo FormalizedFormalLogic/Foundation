@@ -60,7 +60,7 @@ instance : Modal.N ⪱ Modal.EN := by
 
 instance : Modal.N ⪱ Modal.K := by
   constructor;
-  . apply Hilbert.Normal.weakerThan_of_subset_axioms $ by simp;
+  . grind;
   . apply Entailment.not_weakerThan_iff.mpr;
     use Axioms.K (.atom 0) (.atom 1);
     constructor;

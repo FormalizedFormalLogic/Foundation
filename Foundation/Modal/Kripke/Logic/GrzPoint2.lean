@@ -68,7 +68,7 @@ section
 
 open LO.Entailment LO.Entailment.FiniteContext LO.Modal.Entailment
 
-instance : Modal.Grz ⪯ Modal.GrzPoint2 := Hilbert.Normal.weakerThan_of_subset_axioms $ by simp;
+instance : Modal.Grz ⪯ Modal.GrzPoint2 := Hilbert.Normal.weakerThan_of_subset_axioms $ by grind;
 
 lemma GrzPoint2_of_Grz (h : (φ.atoms.image (λ a => Axioms.Point2 (.atom a))).toSet *⊢[Modal.Grz] φ) : Modal.GrzPoint2 ⊢ φ := by
   obtain ⟨Γ, hΓ₁, hΓ₂⟩ := Context.provable_iff.mp h;
@@ -195,7 +195,7 @@ instance : Complete Modal.GrzPoint2 FrameClass.finite_GrzPoint2 := ⟨by
       have : ¬r' ⊧ ◇(□atom a) := by
         revert this;
         apply not_imp_not.mpr
-        exact Satisfies.conj_def.mp hΓ (Axioms.Point2 (atom a)) (by simpa [←eΓ]);
+        exact Satisfies.conj_def.mp hΓ (Axioms.Point2 (atom a)) $ by grind;
       have := Satisfies.dia_def.not.mp this;
       push_neg at this;
       have : ¬t ⊧ □atom a := this t (RM_rooted t);

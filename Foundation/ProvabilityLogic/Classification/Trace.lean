@@ -44,8 +44,8 @@ lemma eq_trace_trace_of_letterless {φ : Formula ℕ} (φ_letterless : φ.Letter
 
 open Formula.Kripke
 
-@[simp, grind =] lemma trace_bot : (⊥ : Formula ℕ).trace = Set.univ := by simp [Formula.eq_trace_trace_of_letterless];
-@[simp, grind =] lemma trace_top : (⊤ : Formula ℕ).trace = ∅ := by simp [Formula.eq_trace_trace_of_letterless];
+@[simp, grind =] lemma trace_bot : (⊥ : Formula ℕ).trace = Set.univ := by grind;
+@[simp, grind =] lemma trace_top : (⊤ : Formula ℕ).trace = ∅ := by grind;
 
 lemma trace_and : (φ ⋏ ψ).trace = φ.trace ∪ ψ.trace := by
   ext n;
@@ -139,7 +139,7 @@ lemma GL.eq_trace_emptyset : Modal.GL.trace = ∅ := by
 
 @[simp]
 lemma GLα.eq_trace {α : Set ℕ} : (Modal.GLα α).trace = α := by
-  apply Eq.trans $ GL.eq_trace_ext $ by simp; tauto;
+  apply Eq.trans $ GL.eq_trace_ext $ by grind;
   simp [FormulaSet.trace, Formula.eq_trace_trace_of_letterless];
 
 @[simp]
@@ -298,13 +298,15 @@ lemma mainlemma_aux
         . right; exact Raj;
         . simp [Frame.Rel', Model.boneLengthening] at Raj;
       . intro h;
-        have : (a : M.boneLengthening a k) ⊧ ψ := Satisfies.fconj_def.mp (equivalence (by tauto) _ |>.mp hrfl) (□ψ ➝ ψ) (by simpa [Finset.LO.preboxItr]) h;
-        rintro (y | j) Ri;
-        . rcases Ri with rfl | Ray;
-          . assumption;
-          . apply h;
-            exact Ray;
-        . apply ihφ₁ j |>.mpr this;
+        have : (a : M.boneLengthening a k) ⊧ ψ := Satisfies.fconj_def.mp (equivalence (by tauto) _ |>.mp hrfl) (□ψ ➝ ψ) ?_ h;
+        . rintro (y | j) Ri;
+          . rcases Ri with rfl | Ray;
+            . assumption;
+            . apply h;
+              exact Ray;
+          . apply ihφ₁ j |>.mpr this;
+        . simp only [Finset.mem_image, Finset.LO.preboxItr, Function.iterate_one, Finset.mem_preimage]
+          use ψ;
     . intro y;
       constructor;
       . rintro h (z | j) Ryz;
@@ -392,7 +394,9 @@ lemma subset_GLα_of_trace_coinfinite (hL : L.trace.Coinfinite) : L ⊆ Modal.GL
         intro n h;
         apply iff_satisfies_TBB_ne_rank.mp;
         apply Satisfies.fconj_def.mp hr _;
-        suffices ∃ m ∈ φ.trace, □^[m]⊥ = □^[n]⊥ by simpa [Tφ];
+        suffices ∃ m ∈ φ.trace, (□^[m]⊥ : Formula ℕ) = □^[n]⊥ by
+          simp only [Finset.mem_image, Set.Finite.mem_toFinset, Tφ];
+          use n;
         use n;
       by_contra hC;
       apply hr _ hC rfl;
@@ -517,7 +521,10 @@ theorem eq_provablityLogic_GLα_of_coinfinite_trace (h : (T.ProvabilityLogic U).
   . intro A;
     suffices Modal.GLα (T.ProvabilityLogic U).trace ⊢ A → T.ProvabilityLogic U ⊢ A by grind;
     intro hA;
-    induction hA using Modal.Logic.sumQuasiNormal.rec!_omitSubst_strong (L₁ := Modal.GL) (L₂ := (T.ProvabilityLogic U).trace.image TBB) inferInstance (Logic.substitution_of_letterless (by grind)) with
+    induction hA using
+      Modal.Logic.sumQuasiNormal.rec!_omitSubst_strong (L₁ := Modal.GL) (L₂ := (T.ProvabilityLogic U).trace.image TBB)
+      inferInstance $ Logic.substitution_of_letterless $ Modal.TBBSet_letterless
+      with
     | mem₁ hA =>
       apply ProvabilityLogic.provable_iff.mpr;
       intro f;

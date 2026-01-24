@@ -199,11 +199,11 @@ instance [Modal.K4McK ⪯ (Hilbert.Normal Ax)] : (canonicalFrame (Hilbert.Normal
     constructor;
     . apply iff_provable_mem₁.mp;
       apply WeakerThan.pbl (𝓢 := Modal.K4McK);
-      convert Logic.K4McK.DiaFconjCDiabox (Γ := Γ'.preimage (λ φ => ◇φ ➝ □φ) (by simp [Set.InjOn])) ?_
+      convert Logic.K4McK.DiaFconjCDiabox (Γ := Γ'.preimage (λ φ => ◇φ ➝ □φ) (by grind [Set.InjOn, Formula.inj_dia, Formula.inj_imp])) ?_
       . simp [Γ'₂, Finset.image_preimage];
-      . suffices ∃ φ, ¬φ = ⊤ → ◇φ ➝ □φ ∈ Γ by simpa [Finset.eq_empty_iff_forall_notMem, Γ'];
+      . simp only [ne_eq, Finset.eq_empty_iff_forall_notMem, Finset.mem_preimage, Finset.mem_insert, not_or, not_forall, not_and, Decidable.not_not, Γ'];
         use ⊤;
-        simp;
+        grind;
     . replace hC : (Γ'₁ ∪ Γ'₂).toSet *⊢[(Hilbert.Normal Ax)] ⊥ := by
         convert hC;
         ext φ;

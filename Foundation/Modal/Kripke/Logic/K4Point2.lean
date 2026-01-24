@@ -36,7 +36,7 @@ instance : Complete (Modal.K4Point2) Kripke.FrameClass.K4Point2 := inferInstance
 
 instance : Modal.K4 ⪱ Modal.K4Point2 := by
   constructor;
-  . apply Hilbert.Normal.weakerThan_of_subset_axioms $ by simp;
+  . grind;
   . apply Entailment.not_weakerThan_iff.mpr;
     use (Axioms.WeakPoint2 (.atom 0) (.atom 1));
     constructor;

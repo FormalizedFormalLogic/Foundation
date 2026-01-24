@@ -44,7 +44,7 @@ instance : Complete Modal.S4McK FrameClass.S4McK := inferInstance
 
 instance : Modal.S4 ⪱ Modal.S4McK := by
   constructor;
-  . apply Hilbert.Normal.weakerThan_of_subset_axioms; simp;
+  . grind;
   . apply Entailment.not_weakerThan_iff.mpr;
     use (Axioms.McK (.atom 0));
     constructor;

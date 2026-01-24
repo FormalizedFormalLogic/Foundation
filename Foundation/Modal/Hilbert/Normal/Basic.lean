@@ -90,6 +90,7 @@ lemma weakerThan_of_provable_axioms (hs : Normal Ax₂ ⊢* Ax₁) : (Normal Ax�
   | mdp ih₁ ih₂ => exact ih₁ ⨀ ih₂;
   | _ => simp;
 
+@[grind <=]
 lemma weakerThan_of_subset_axioms (h : Ax₁ ⊆ Ax₂) : (Normal Ax₁) ⪯ (Normal Ax₂) := by
   apply weakerThan_of_provable_axioms;
   intro φ hφ;

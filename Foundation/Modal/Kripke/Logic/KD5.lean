@@ -34,7 +34,7 @@ instance : Complete (Modal.KD5) Kripke.FrameClass.KD5 := inferInstance
 
 instance : Modal.KD ⪱ Modal.KD5 := by
   constructor;
-  . apply Hilbert.Normal.weakerThan_of_subset_axioms $ by simp;
+  . grind;
   . apply Entailment.not_weakerThan_iff.mpr;
     use (Axioms.Five (.atom 0));
     constructor;
@@ -54,7 +54,7 @@ instance : Modal.KD ⪱ Modal.KD5 := by
 
 instance : Modal.K5 ⪱ Modal.KD5 := by
   constructor;
-  . apply Hilbert.Normal.weakerThan_of_subset_axioms $ by simp;
+  . grind;
   . apply Entailment.not_weakerThan_iff.mpr;
     use (Axioms.D (.atom 0));
     constructor;

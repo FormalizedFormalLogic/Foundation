@@ -94,10 +94,10 @@ lemma inj_imp : φ₁ ➝ φ₂ = ψ₁ ➝ ψ₂ ↔ φ₁ = ψ₁ ∧ φ₂ = 
 lemma inj_neg : ∼φ = ∼ψ ↔ φ = ψ := by simp [Tilde.tilde]
 lemma inj_box : □φ = □ψ ↔ φ = ψ := by simp [Box.box]
 lemma inj_dia : ◇φ = ◇ψ ↔ φ = ψ := by simp [Dia.dia]
-attribute [grind =] inj_and inj_or inj_imp inj_neg inj_box inj_dia
+-- attribute [grind! =>] inj_and inj_or inj_imp inj_neg inj_box inj_dia
 
-instance : InjectiveBox (Formula α) := ⟨by grind [Function.Injective]⟩
-instance : InjectiveDia (Formula α) := ⟨by grind [Function.Injective]⟩
+instance : InjectiveBox (Formula α) := ⟨λ _ _ => inj_box.mp⟩
+instance : InjectiveDia (Formula α) := ⟨λ _ _ => inj_dia.mp⟩
 
 /-- Formula complexity -/
 @[grind]
@@ -168,8 +168,8 @@ def hasDecEq : (φ ψ : Formula α) → Decidable (φ = ψ)
       | isTrue hp =>
         match hasDecEq ψ ψ' with
         | isTrue hq  => isTrue (hp ▸ hq ▸ rfl)
-        | isFalse hq => isFalse $ by grind
-      | isFalse hp => isFalse $ by grind
+        | isFalse hq => isFalse $ by grind [Formula.inj_imp]
+      | isFalse hp => isFalse $ by grind [Formula.inj_imp]
     all_goals
     . apply isFalse;
       simp;
@@ -178,7 +178,7 @@ def hasDecEq : (φ ψ : Formula α) → Decidable (φ = ψ)
     case box φ' =>
       exact match hasDecEq φ φ' with
       | isTrue hp  => isTrue (hp ▸ rfl)
-      | isFalse hp => isFalse $ by grind
+      | isFalse hp => isFalse $ by grind [Formula.inj_box]
     all_goals
     . apply isFalse;
       simp;
@@ -598,6 +598,7 @@ def Letterless : Formula α → Prop
 @[grind =] lemma letterless_neg : (∼φ).Letterless ↔ φ.Letterless := by grind;
 @[grind =] lemma letterless_and : (φ ⋏ ψ).Letterless ↔ φ.Letterless ∧ ψ.Letterless := by grind;
 @[grind =] lemma letterless_or : (φ ⋎ ψ).Letterless ↔ φ.Letterless ∧ ψ.Letterless := by grind;
+@[grind =] lemma letterless_iff : (φ ⭤ ψ).Letterless ↔ φ.Letterless ∧ ψ.Letterless := by grind [iff_eq];
 @[grind =] lemma letterless_box : (□φ).Letterless ↔ φ.Letterless := by simp [Letterless];
 @[grind =] lemma letterless_boxItr : (□^[n]φ).Letterless ↔ φ.Letterless := by induction n <;> grind;
 @[grind =] lemma letterless_dia : (◇φ).Letterless ↔ φ.Letterless := by grind;

@@ -58,7 +58,7 @@ instance : Complete Modal.K4 FrameClass.finite_K4 := ⟨by
 
 instance : Modal.K ⪱ Modal.K4 := by
   constructor;
-  . apply Hilbert.Normal.weakerThan_of_subset_axioms $ by simp;
+  . grind;
   . apply Entailment.not_weakerThan_iff.mpr;
     use (Axioms.Four (.atom 0));
     constructor;

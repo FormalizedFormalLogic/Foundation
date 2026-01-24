@@ -103,7 +103,9 @@ lemma truthlemma_lemma2
       rcases (Finset.mem_union.mp $ hΓ₁ hξ) with hξ | hξ;
       . grind;
       . right;
-        simpa [Finset.LO.preboxItr, Finset.LO.boxItr] using hξ;
+        obtain ⟨ζ, hζ, rfl⟩ := Finset.LO.exists_of_mem_boxItr hξ;
+        use ζ;
+        grind;
   . intro ξ;
     simp only [Set.mem_union, Finset.mem_coe, Set.mem_insert_iff];
     rintro (hξ₁ | hξ₂);
@@ -161,7 +163,8 @@ lemma truthlemma {X : (miniCanonicalModel φ).World} (q_sub : ψ ∈ φ.subformu
           . apply hY₁.1.1;
             simpa [Finset.LO.preboxItr];
           · apply hY₁.1.2;
-            simpa [Finset.LO.preboxItr, Finset.LO.boxItr];
+            apply Finset.LO.mem_box_prebox_of_mem_of_mem_box;
+            assumption;
         . use ψ;
           refine ⟨?_, ?_, ?_⟩;
           . simpa [Finset.LO.preboxItr, Finset.LO.boxItr];
