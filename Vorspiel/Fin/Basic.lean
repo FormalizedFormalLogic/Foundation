@@ -2,7 +2,12 @@ module
 
 public import Mathlib.Algebra.GroupWithZero.Nat
 public import Mathlib.Data.Fintype.Pigeonhole
+public import Mathlib.Tactic.Cases
+public import Mathlib.Tactic.TautoSet
+public import Vorspiel.Matrix
 
+
+@[expose]
 public section
 
 
@@ -43,7 +48,6 @@ lemma lt_last' : i ≤ Fin.last' := by
   apply Fin.is_lt;
 
 end last'
-
 
 end Fin
 

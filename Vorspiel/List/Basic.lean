@@ -284,6 +284,11 @@ lemma exists_of_range (h : a ∈ List.map f (List.range n)) : ∃ i < n, a = f i
   . simpa using hi;
   . simp;
 
+lemma single_suffix_uniq {l : List α} (ha : [a] <:+ l) (hb : [b] <:+ l) : a = b := by
+  rcases ha with ⟨la, rfl⟩
+  rcases hb with ⟨lb, e⟩
+  exact Eq.symm (List.concat_inj.mp <| by { simpa using e }).2
+
 end List
 
 end
