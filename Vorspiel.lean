@@ -3,6 +3,7 @@
 module
 
 -- public import Vorspiel.ENat
+public import Vorspiel.AdjunctiveSet
 public import Vorspiel.Computability
 public import Vorspiel.ExistsUnique
 public import Vorspiel.Fin.Basic

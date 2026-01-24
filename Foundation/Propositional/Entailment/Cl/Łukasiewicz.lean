@@ -1,4 +1,7 @@
-import Foundation.Propositional.Entailment.Cl.Basic
+module
+public import Foundation.Propositional.Entailment.Cl.Basic
+
+@[expose] public section
 
 namespace LO
 
@@ -177,3 +180,5 @@ end Łukasiewicz
 end Entailment
 
 end LO
+
+end

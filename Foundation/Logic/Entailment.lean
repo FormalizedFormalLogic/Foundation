@@ -1,6 +1,6 @@
-import Foundation.Logic.LogicSymbol
-import Foundation.Logic.Semantics
-import Foundation.Vorspiel.AdjunctiveSet
+module
+public import Foundation.Logic.LogicSymbol
+public import Foundation.Logic.Semantics
 
 /-!
 # Basic definitions and properties of proof system related notions
@@ -23,6 +23,9 @@ Also defines soundness and completeness.
 * `𝓢 ⊢* T`: a proposition that states each formulae in `T` is provable from `𝓢`.
 
 -/
+
+
+@[expose] public section
 
 namespace LO
 
@@ -568,3 +571,5 @@ end Complete
 end
 
 end LO
+
+end

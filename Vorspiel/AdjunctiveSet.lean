@@ -1,5 +1,8 @@
+module
 
-import Foundation.Vorspiel.Vorspiel
+public import Mathlib.Data.Set.Finite.Basic
+
+@[expose] public section
 
 class Adjoin (β : outParam Type*) (α : Type*) where
   adjoin : β → α → α
@@ -110,3 +113,5 @@ lemma cons_eq (a : α) (s : Set α) : adjoin a s = insert a s := rfl
 @[simp] lemma adjunctiveSet_finite_iff (s : Set α) : AdjunctiveSet.Finite s ↔ s.Finite := by simp [AdjunctiveSet.Finite]
 
 end Set
+
+end

@@ -1,5 +1,8 @@
-import Foundation.Propositional.Entailment.Minimal.Basic
-import Foundation.Propositional.Entailment.AxiomEFQ
+module
+public import Foundation.Propositional.Entailment.Minimal.Basic
+public import Foundation.Propositional.Entailment.AxiomEFQ
+
+@[expose] public section
 
 namespace LO.Entailment
 
