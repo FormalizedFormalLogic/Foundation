@@ -125,8 +125,8 @@ variable (T)
 
 noncomputable abbrev _root_.LO.FirstOrder.Theory.rosserProvability : Provability 𝗜𝚺₁ T where
   prov := T.rosserProvable
+  prov_def := rosserProvable_D1
 
-instance : T.rosserProvability.HBL1 := ⟨rosserProvable_D1⟩
 instance : T.rosserProvability.Rosser := ⟨rosserProvable_rosser⟩
 
 lemma rosserProvability_def (σ : Sentence L) : T.rosserProvability σ = T.rosserPred σ := rfl
