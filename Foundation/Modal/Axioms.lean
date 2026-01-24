@@ -1,4 +1,9 @@
-import Foundation.Modal.LogicSymbol
+module
+
+public import Foundation.Modal.LogicSymbol
+
+@[expose]
+public section
 
 namespace LO.Modal.Axioms
 
@@ -120,3 +125,5 @@ protected abbrev Geach (g : Geach.Taple) (φ : F) := (◇^[g.i](□^[g.m]φ)) �
 protected abbrev I := □(□φ ➝ □ψ) ⋎ □(□ψ ➝ ⊡φ)
 
 end LO.Modal.Axioms
+
+end
