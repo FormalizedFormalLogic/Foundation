@@ -84,7 +84,7 @@ end FFP
 
 instance : Modal.KTc ⪱ Modal.Triv := by
   constructor;
-  . apply Hilbert.Normal.weakerThan_of_subset_axioms; simp;
+  . grind;
   . apply Entailment.not_weakerThan_iff.mpr;
     use (Axioms.T (.atom 0));
     constructor;

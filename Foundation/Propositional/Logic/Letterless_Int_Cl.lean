@@ -7,10 +7,7 @@ namespace LO.Propositional
 
 @[simp, grind .]
 lemma Formula.gödelTranslate.Letterless {φ : Formula ℕ} (hφ : φ.Letterless) : φᵍ.Letterless := by
-  induction φ with
-  | himp | hand | hor => simp_all only [Formula.gödelTranslate]; grind;
-  | _ => simp_all [Formula.gödelTranslate];
-
+  induction φ <;> . simp_all only [Formula.gödelTranslate]; grind;
 
 namespace Logic
 

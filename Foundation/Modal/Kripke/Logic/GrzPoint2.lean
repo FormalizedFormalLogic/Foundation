@@ -193,9 +193,12 @@ instance : Complete Modal.GrzPoint2 FrameClass.finite_GrzPoint2 := ⟨by
         . apply RM_rooted;
         . assumption;
       have : ¬r' ⊧ ◇(□atom a) := by
-        revert this;
-        apply not_imp_not.mpr
-        exact Satisfies.conj_def.mp hΓ (Axioms.Point2 (atom a)) $ by grind;
+        contrapose! this;
+        apply Satisfies.conj_def.mp hΓ $ Axioms.Point2 (atom a);
+        . subst eΓ;
+          simp only [Finset.mem_toList, Finset.mem_image];
+          use a;
+        . assumption;
       have := Satisfies.dia_def.not.mp this;
       push_neg at this;
       have : ¬t ⊧ □atom a := this t (RM_rooted t);
