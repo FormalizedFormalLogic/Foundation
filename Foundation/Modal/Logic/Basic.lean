@@ -1,4 +1,4 @@
-import Foundation.Modal.Formula
+import Foundation.Modal.Formula.Basic
 import Foundation.Modal.Entailment.Basic
 import Foundation.Meta.ClProver
 
@@ -61,10 +61,10 @@ lemma iff_equal_provable_equiv : L₁ = L₂ ↔ L₁ ≊ L₂ := by
     have := Equiv.iff.mp h φ;
     grind;
 
-@[simp]
+@[simp, grind .]
 lemma mem_verum [HasAxiomVerum L] : ⊤ ∈ L := by
   apply iff_provable.mp;
-  simp;
+  exact verum!;
 
 section
 
@@ -166,8 +166,9 @@ instance [HasAxiomVerum L] : (∅ : Logic α) ⪱ L := by
   apply Logic.strictWeakerThan_of_ssubset;
   apply Set.ssubset_iff_exists.mpr;
   constructor;
-  . simp;
-  . use ⊤; simp;
+  . grind;
+  . use ⊤;
+    grind;
 
 instance : L ⪯ (Set.univ : Logic α) := Logic.weakerThan_of_subset (by tauto_set)
 
@@ -176,11 +177,9 @@ instance [Consistent L] : L ⪱ (Set.univ : Logic α) := by
   apply Set.ssubset_iff_exists.mpr;
   constructor;
   . simp;
-  . obtain ⟨φ, hφ⟩ := Logic.exists_unprovable (L := L);
+  . obtain ⟨φ, hφ⟩ := L.exists_unprovable;
     use φ;
-    constructor;
-    . simp;
-    . grind;
+    grind;
 
 end
 

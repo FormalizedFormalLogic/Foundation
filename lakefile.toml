@@ -1,5 +1,5 @@
 name = "Foundation"
-defaultTargets = ["Foundation"]
+defaultTargets = ["Foundation", "Foundation2"]
 
 [leanOptions]
 pp.unicode.fun = true
@@ -19,6 +19,12 @@ name = "doc-gen4"
 
 [[lean_lib]]
 name = "Foundation"
+
+[[lean_lib]]
+name = "Foundation2"
+
+[[lean_lib]]
+name = "Vorspiel"
 
 [[lean_exe]]
 name = "Zoo_Arith"

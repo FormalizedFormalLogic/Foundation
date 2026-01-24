@@ -1,6 +1,7 @@
 import Foundation.Modal.Entailment.K4Loeb
 import Foundation.Modal.Hilbert.Axiom
 import Foundation.Modal.Logic.Basic
+import Foundation.Propositional.Entailment.Cl.Łukasiewicz
 
 namespace LO.Modal
 
@@ -25,7 +26,7 @@ variable {Ax Ax₁ Ax₂ : Axiom α}
 
 @[grind] lemma axm'! {φ} (h : φ ∈ Ax) : WithLoeb Ax ⊢ φ := by simpa using axm! .id h;
 
-instance : Entailment.Lukasiewicz (Hilbert.WithLoeb Ax) where
+instance : Entailment.Łukasiewicz (Hilbert.WithLoeb Ax) where
   implyK {_ _} := by constructor; apply Hilbert.WithLoeb.implyK;
   implyS {_ _ _} := by constructor; apply Hilbert.WithLoeb.implyS;
   elimContra {_ _} := by constructor; apply Hilbert.WithLoeb.ec;

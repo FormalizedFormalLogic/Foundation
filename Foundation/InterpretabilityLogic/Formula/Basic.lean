@@ -1,5 +1,5 @@
 import Foundation.InterpretabilityLogic.LogicSymbol
-import Foundation.Modal.Formula
+import Foundation.Modal.Formula.Basic
 
 namespace LO.InterpretabilityLogic
 
@@ -44,7 +44,7 @@ instance : InterpretabilityLogicalConnective (Formula α) where
   dia := dia
   rhd := rhd
 
-instance : LukasiewiczAbbrev (Formula α) where
+instance : ŁukasiewiczAbbrev (Formula α) where
   top := rfl
   neg := rfl
   or := rfl

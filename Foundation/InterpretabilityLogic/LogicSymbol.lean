@@ -1,4 +1,9 @@
-import Foundation.Modal.LogicSymbol
+module
+
+public import Foundation.Modal.LogicSymbol
+
+@[expose]
+public section
 
 namespace LO
 
@@ -12,3 +17,5 @@ attribute [match_pattern] Rhd.rhd
 class InterpretabilityLogicalConnective (F : Type*) extends BasicModalLogicalConnective F, Rhd F
 
 end LO
+
+end

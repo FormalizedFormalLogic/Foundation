@@ -1,7 +1,7 @@
 import Foundation.InterpretabilityLogic.Logic.Basic
 import Foundation.InterpretabilityLogic.Entailment
 import Foundation.InterpretabilityLogic.Hilbert.Axiom
-import Batteries.Tactic.Instances
+import Foundation.Propositional.Entailment.Cl.Łukasiewicz
 
 namespace LO.InterpretabilityLogic
 
@@ -34,7 +34,7 @@ lemma axm! {φ} (s : Substitution _) (h : φ ∈ Ax) : Hilbert.Minimal Ax ⊢ φ
 @[grind ⇒]
 lemma axm'! {φ} (h : φ ∈ Ax) : Hilbert.Minimal Ax ⊢ φ := by simpa using axm! (idSubstitution _) h;
 
-instance : Entailment.Lukasiewicz (Hilbert.Minimal Ax) where
+instance : Entailment.Łukasiewicz (Hilbert.Minimal Ax) where
   implyK {_ _} := by constructor; apply Hilbert.Minimal.implyK;
   implyS {_ _ _} := by constructor; apply Hilbert.Minimal.implyS;
   elimContra {_ _} := by constructor; apply Hilbert.Minimal.ec;

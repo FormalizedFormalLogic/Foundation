@@ -108,7 +108,7 @@ instance : Frame.IsWeakTransitive (counterframe n) (n + 1) := by
 
 instance : Modal.K ⪱ Modal.K4n n := by
   constructor;
-  . apply Hilbert.Normal.weakerThan_of_subset_axioms $ by simp;
+  . grind;
   . apply Entailment.not_weakerThan_iff.mpr;
     use (Axioms.FourN n (.atom 0));
     constructor;

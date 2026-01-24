@@ -80,7 +80,7 @@ lemma symm : sumQuasiNormal L₁ L₂ = sumQuasiNormal L₂ L₁ := by
 
 variable [DecidableEq α]
 
-instance [Entailment.Cl L₁] : Entailment.Lukasiewicz (sumQuasiNormal L₁ L₂) where
+instance [Entailment.Cl L₁] : Entailment.Łukasiewicz (sumQuasiNormal L₁ L₂) where
   implyK {_ _} := by constructor; apply sumQuasiNormal.mem₁; simp;
   implyS {_ _ _} := by constructor; apply sumQuasiNormal.mem₁; simp;
   elimContra {_ _} := by constructor; apply sumQuasiNormal.mem₁; simp;
@@ -177,8 +177,7 @@ omit [DecidableEq α] in
 lemma iff_provable_finite_provable_letterless [DecidableEq α] {L₁ L₂ : Logic α} {φ : Formula _} [L₁.IsQuasiNormal] (L₂_letterless : FormulaSet.Letterless L₂)
   : sumQuasiNormal L₁ L₂ ⊢ φ ↔ ∃ X : Finset _, (↑X ⊆ L₂) ∧ L₁ ⊢ X.conj ➝ φ := by
   apply iff_provable_finite_provable;
-  rintro ξ hξ s;
-  simpa [Formula.subst.subst_letterless (L₂_letterless _ hξ)];
+  grind;
 
 end
 
@@ -293,9 +292,7 @@ lemma sumQuasiNormal.rec!_omitSubst
 
 
 def substitution_of_letterless (L_letterless : FormulaSet.Letterless L) : L.Substitution where
-  subst s hφ := by
-    rw [Logic.iff_provable] at ⊢ hφ;
-    simpa [Formula.subst.subst_letterless (s := s) $ L_letterless _ hφ];
+  subst s hφ := by grind;
 
 lemma sumQuasiNormal.rec!_omitSubst₁ (hL₁ : L₁.Substitution)
   {motive : (φ : Formula α) → ((sumQuasiNormal L₁ L₂) ⊢ φ) → Sort}

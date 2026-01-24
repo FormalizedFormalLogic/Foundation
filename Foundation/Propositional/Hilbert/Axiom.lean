@@ -1,5 +1,5 @@
 
-import Foundation.Propositional.Formula
+import Foundation.Propositional.Formula.Basic
 import Foundation.Propositional.Entailment.Cl.Basic
 import Foundation.Propositional.Entailment.KrieselPutnam
 import Foundation.Propositional.Entailment.Scott

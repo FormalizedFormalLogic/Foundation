@@ -1,5 +1,9 @@
-import Foundation.Logic.LogicSymbol
-import Mathlib.Data.PNat.Basic
+module
+public import Foundation.Logic.LogicSymbol
+public import Mathlib.Data.PNat.Basic
+
+@[expose] public section
+
 
 namespace LO
 
@@ -503,5 +507,7 @@ lemma mem_diaItr_of_toList_diaItr (h : φ ∈ ◇^[n]'s.toList) : φ ∈ (◇^[n
 lemma mem_dia_of_toList_dia (h : φ ∈ ◇'s.toList) : φ ∈ ◇'s := mem_diaItr_of_toList_diaItr h
 
 end Finset.LO
+
+end
 
 end

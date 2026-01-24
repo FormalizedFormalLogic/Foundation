@@ -1,5 +1,4 @@
 import Foundation.Logic.Entailment
-import Foundation.Vorspiel.List.Supplemental
 import Foundation.Vorspiel.Finset.Supplemental
 
 

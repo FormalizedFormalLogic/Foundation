@@ -1,6 +1,6 @@
 import Mathlib.Data.Set.Finite.Powerset
 import Foundation.Modal.MaximalConsistentSet
-import Foundation.Modal.Complement
+import Foundation.Modal.Formula.Complement
 
 namespace LO.Modal
 

@@ -4,43 +4,29 @@ namespace LO
 
 section
 
-class LukasiewiczAbbrev (F : Type*) [LogicalConnective F] where
-  top : ⊤ = ∼(⊥ : F)
-  neg {φ : F} : ∼φ = φ ➝ ⊥
-  or {φ ψ : F} : φ ⋎ ψ = ∼φ ➝ ψ
-  and {φ ψ : F} : φ ⋏ ψ = ∼(φ ➝ ∼ψ)
-
-instance [LogicalConnective F] [LukasiewiczAbbrev F] : NegAbbrev F := ⟨LukasiewiczAbbrev.neg⟩
-
 end
 
 
 namespace Entailment
 
-attribute [local simp]
-  LukasiewiczAbbrev.top
-  LukasiewiczAbbrev.neg
-  LukasiewiczAbbrev.or
-  LukasiewiczAbbrev.and
-
-variable {S F : Type*} [LogicalConnective F] [LukasiewiczAbbrev F] [Entailment S F]
+variable {S F : Type*} [LogicalConnective F] [ŁukasiewiczAbbrev F] [Entailment S F]
 
 variable (𝓢 : S)
 
-protected class Lukasiewicz [LukasiewiczAbbrev F]
+protected class Łukasiewicz [ŁukasiewiczAbbrev F]
   extends ModusPonens 𝓢,
           HasAxiomImplyK 𝓢,
           HasAxiomImplyS 𝓢,
           HasAxiomElimContra 𝓢
 
-namespace Lukasiewicz
+namespace Łukasiewicz
 
 variable {𝓢 : S} {φ φ₁ φ₂ ψ ψ₁ ψ₂ χ s t : F}
 
-variable [Entailment.Lukasiewicz 𝓢]
+variable [Entailment.Łukasiewicz 𝓢]
 
-def verum : 𝓢 ⊢! ⊤ := by simp only [LukasiewiczAbbrev.top, LukasiewiczAbbrev.neg]; exact C_id;
-instance : HasAxiomVerum 𝓢 := ⟨Lukasiewicz.verum⟩
+def verum : 𝓢 ⊢! ⊤ := by simp only [ŁukasiewiczAbbrev.top, NegAbbrev.neg]; exact C_id;
+instance : HasAxiomVerum 𝓢 := ⟨Łukasiewicz.verum⟩
 
 def dne : 𝓢 ⊢! ∼∼φ ➝ φ := by
   have d₁ : 𝓢 ⊢! ∼∼φ ➝ (∼∼(∼∼φ) ➝ ∼∼φ) ➝ ∼φ ➝ ∼(∼∼φ) := C_of_conseq $ elimContra;
@@ -50,7 +36,7 @@ def dne : 𝓢 ⊢! ∼∼φ ➝ φ := by
   have d₅ : 𝓢 ⊢! ∼∼φ ➝ ∼∼φ ➝ φ := d₃ ⨀₁ d₄;
   have d₆ : 𝓢 ⊢! ∼∼φ ➝ ∼∼φ := C_id;
   exact d₅ ⨀₁ d₆;
-instance : HasAxiomDNE 𝓢 := ⟨Lukasiewicz.dne⟩
+instance : HasAxiomDNE 𝓢 := ⟨Łukasiewicz.dne⟩
 
 def dni : 𝓢 ⊢! φ ➝ ∼∼φ := by
   have d₁ : 𝓢 ⊢! (∼(∼∼φ) ➝ ∼φ) ➝ φ ➝ ∼∼φ := elimContra;
@@ -76,8 +62,10 @@ def explodeHyp₂ (h₁ : 𝓢 ⊢! φ ➝ ψ ➝ χ) (h₂ : 𝓢 ⊢! φ ➝ �
 
 def efq : 𝓢 ⊢! ⊥ ➝ φ := by
   have := explodeHyp (𝓢 := 𝓢) (φ := ⊥) (ψ := ⊤) (χ := φ);
-  exact this (by simp; exact implyK) (by simp; exact implyK);
-instance : HasAxiomEFQ 𝓢 := ⟨Lukasiewicz.efq⟩
+  exact this
+    (by simp only [ŁukasiewiczAbbrev.top, NegAbbrev.neg]; exact implyK)
+    (by simp only [ŁukasiewiczAbbrev.top, NegAbbrev.neg]; exact implyK);
+instance : HasAxiomEFQ 𝓢 := ⟨Łukasiewicz.efq⟩
 
 def CCCCC (h : 𝓢 ⊢! φ ➝ ψ ➝ χ) : 𝓢 ⊢! ψ ➝ φ ➝ χ := by
   refine mdp₂ (χ := ψ) ?_ ?_;
@@ -105,27 +93,27 @@ def C_trans₁ : 𝓢 ⊢! (φ ➝ ψ) ➝ (ψ ➝ χ) ➝ (φ ➝ χ) := CCCCC 
 def dhypBoth (h : 𝓢 ⊢! ψ ➝ χ) : 𝓢 ⊢! (φ ➝ ψ) ➝ (φ ➝ χ) := implyS ⨀ (C_of_conseq $ h)
 
 def explode₂₁ : 𝓢 ⊢! ∼φ ➝ φ ➝ ψ := by
-  simp;
+  simp only [NegAbbrev.neg];
   exact dhypBoth efq;
 
 def explode₁₂ : 𝓢 ⊢! φ ➝ ∼φ ➝ ψ := CCCCC explode₂₁
 
-def contraIntro : 𝓢 ⊢! (φ ➝ ψ) ➝ (∼ψ ➝ ∼φ):= by simpa using C_trans₁;
+def contraIntro : 𝓢 ⊢! (φ ➝ ψ) ➝ (∼ψ ➝ ∼φ):= by simpa [NegAbbrev.neg] using C_trans₁;
 
 def contraIntro' : 𝓢 ⊢! (φ ➝ ψ) → 𝓢 ⊢! (∼ψ ➝ ∼φ) := λ h => contraIntro ⨀ h
 
 def andElim₁ : 𝓢 ⊢! φ ⋏ ψ ➝ φ := by
-  simp only [LukasiewiczAbbrev.and];
+  simp only [ŁukasiewiczAbbrev.and];
   have : 𝓢 ⊢! ∼φ ➝ φ ➝ ∼ψ := explodeHyp₂ explode₂₁ implyK;
   have : 𝓢 ⊢! ∼(φ ➝ ∼ψ) ➝ ∼∼φ := contraIntro' explode₂₁
   exact C_trans this dne;
 
 def andElim₂ : 𝓢 ⊢! φ ⋏ ψ ➝ ψ := by
-  simp only [LukasiewiczAbbrev.and];
+  simp only [ŁukasiewiczAbbrev.and];
   have : 𝓢 ⊢! ∼ψ ➝ φ ➝ ∼ψ := implyK (φ := ∼ψ) (ψ := φ);
   have : 𝓢 ⊢! ∼(φ ➝ ∼ψ) ➝ ∼∼ψ := contraIntro' this;
   exact C_trans this dne;
-instance : HasAxiomAndElim 𝓢 := ⟨Lukasiewicz.andElim₁, Lukasiewicz.andElim₂⟩
+instance : HasAxiomAndElim 𝓢 := ⟨Łukasiewicz.andElim₁, Łukasiewicz.andElim₂⟩
 
 def andImplyLeft : 𝓢 ⊢! (φ₁ ➝ ψ) ➝ φ₁ ⋏ φ₂ ➝ ψ := (CCCCC $ C_of_conseq (C_id)) ⨀₂ (C_of_conseq andElim₁)
 def andImplyLeft' (h : 𝓢 ⊢! (φ₁ ➝ ψ)) : 𝓢 ⊢! φ₁ ⋏ φ₂ ➝ ψ := andImplyLeft ⨀ h
@@ -134,7 +122,7 @@ def andImplyRight : 𝓢 ⊢! (φ₂ ➝ ψ) ➝ φ₁ ⋏ φ₂ ➝ ψ := (CCCC
 def andImplyRight' (h : 𝓢 ⊢! (φ₂ ➝ ψ)) : 𝓢 ⊢! φ₁ ⋏ φ₂ ➝ ψ := andImplyRight ⨀ h
 
 def andInst'' (hp : 𝓢 ⊢! φ) (hq : 𝓢 ⊢! ψ) : 𝓢 ⊢! φ ⋏ ψ := by
-  simp only [LukasiewiczAbbrev.and];
+  simp only [ŁukasiewiczAbbrev.and];
   have : 𝓢 ⊢! (φ ➝ ∼ψ) ➝ φ ➝ ∼ψ := C_id
   have : 𝓢 ⊢! (φ ➝ ∼ψ) ➝ ∼ψ := this ⨀₁ C_of_conseq hp;
   have : 𝓢 ⊢! ψ ➝ ∼(φ ➝ ∼ψ) := C_trans dni $ contraIntro' this;
@@ -145,25 +133,25 @@ def andInst : 𝓢 ⊢! φ ➝ ψ ➝ φ ⋏ ψ := by
   have d₂ : 𝓢 ⊢! φ ➝ ψ ➝ (φ ➝ ∼ψ) ➝ φ := CCCC (φ := φ) (ψ := ψ) (χ := (φ ➝ ∼ψ));
   have d₃ : 𝓢 ⊢! φ ➝ ψ ➝ (φ ➝ ∼ψ) ➝ ψ := C_of_conseq <| implyK;
   have d₄ : 𝓢 ⊢! φ ➝ ψ ➝ (φ ➝ ∼ψ) ➝ ∼ψ := d₁ ⨀₃ d₂;
-  have d₄ : 𝓢 ⊢! φ ➝ ψ ➝ (φ ➝ ∼ψ) ➝ ψ ➝ ⊥ := by simpa using d₄;
-  simpa using d₄ ⨀₃ d₃;
+  have d₄ : 𝓢 ⊢! φ ➝ ψ ➝ (φ ➝ ∼ψ) ➝ ψ ➝ ⊥ := by simpa [NegAbbrev.neg] using d₄;
+  simpa [ŁukasiewiczAbbrev.and, NegAbbrev.neg] using d₄ ⨀₃ d₃;
 
-instance : HasAxiomAndInst 𝓢 := ⟨Lukasiewicz.andInst⟩
+instance : HasAxiomAndInst 𝓢 := ⟨Łukasiewicz.andInst⟩
 
 
 def orInst₁ : 𝓢 ⊢! φ ➝ φ ⋎ ψ := by
-  simp only [LukasiewiczAbbrev.or];
+  simp only [ŁukasiewiczAbbrev.or];
   exact explode₁₂;
 
 def orInst₂ : 𝓢 ⊢! ψ ➝ φ ⋎ ψ := by
-  simp [LukasiewiczAbbrev.or];
+  simp [ŁukasiewiczAbbrev.or];
   exact implyK;
 
-instance : HasAxiomOrInst 𝓢 := ⟨Lukasiewicz.orInst₁, Lukasiewicz.orInst₂⟩
+instance : HasAxiomOrInst 𝓢 := ⟨Łukasiewicz.orInst₁, Łukasiewicz.orInst₂⟩
 
 -- or_imply
 def orElim : 𝓢 ⊢! (φ ➝ χ) ➝ (ψ ➝ χ) ➝ (φ ⋎ ψ ➝ χ) := by
-  simp only [LukasiewiczAbbrev.or];
+  simp only [ŁukasiewiczAbbrev.or];
   have d₁ : 𝓢 ⊢! (φ ➝ χ) ➝ (ψ ➝ χ) ➝ (∼φ ➝ ψ) ➝ (φ ➝ χ) ➝ ∼χ ➝ ∼φ
     := (C_of_conseq (ψ := φ ➝ χ) <| C_of_conseq (ψ := ψ ➝ χ) <| C_of_conseq (ψ := ∼φ ➝ ψ) <| contraIntro (φ := φ) (ψ := χ));
   have d₂ : 𝓢 ⊢! (φ ➝ χ) ➝ (ψ ➝ χ) ➝ (∼φ ➝ ψ) ➝ ∼χ ➝ ∼φ
@@ -173,18 +161,18 @@ def orElim : 𝓢 ⊢! (φ ➝ χ) ➝ (ψ ➝ χ) ➝ (φ ⋎ ψ ➝ χ) := by
   have d₄ : 𝓢 ⊢! (φ ➝ χ) ➝ (ψ ➝ χ) ➝ (∼φ ➝ ψ) ➝ ∼χ ➝ χ
     := (C_of_conseq (ψ := φ ➝ χ) <| CCCC (φ := ψ ➝ χ) (ψ := ∼φ ➝ ψ) (χ := ∼χ)) ⨀₄ d₃;
   have d₅ : 𝓢 ⊢! (φ ➝ χ) ➝ (ψ ➝ χ) ➝ (∼φ ➝ ψ) ➝ ∼χ ➝ χ ➝ ⊥
-    := by simpa using C_of_conseq (ψ := φ ➝ χ) <| C_of_conseq (ψ := ψ ➝ χ) <| C_of_conseq (ψ := ∼φ ➝ ψ) <| C_id (φ := ∼χ);
+    := by simpa [ŁukasiewiczAbbrev.and, NegAbbrev.neg] using C_of_conseq (ψ := φ ➝ χ) <| C_of_conseq (ψ := ψ ➝ χ) <| C_of_conseq (ψ := ∼φ ➝ ψ) <| C_id (φ := ∼χ);
   have d₆ : 𝓢 ⊢! (φ ➝ χ) ➝ (ψ ➝ χ) ➝ (∼φ ➝ ψ) ➝ ∼∼χ
-    := by simpa using d₅ ⨀₄ d₄;
+    := by simpa [ŁukasiewiczAbbrev.and, NegAbbrev.neg] using d₅ ⨀₄ d₄;
   have d₇ : 𝓢 ⊢! (φ ➝ χ) ➝ (ψ ➝ χ) ➝ (∼φ ➝ ψ) ➝ ∼∼χ ➝ χ
     := C_of_conseq (ψ := φ ➝ χ) <| C_of_conseq (ψ := ψ ➝ χ) <| C_of_conseq (ψ := ∼φ ➝ ψ) <| dne (φ := χ);
   exact d₇ ⨀₃ d₆;
 
-instance : HasAxiomOrElim 𝓢 := ⟨Lukasiewicz.orElim⟩
+instance : HasAxiomOrElim 𝓢 := ⟨Łukasiewicz.orElim⟩
 
 instance : Entailment.Cl 𝓢 where
 
-end Lukasiewicz
+end Łukasiewicz
 
 end Entailment
 

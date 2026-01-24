@@ -1,6 +1,6 @@
 import Foundation.Modal.Boxdot.Basic
 import Foundation.Modal.Kripke.Tree
-import Foundation.Vorspiel.List.Chain
+
 import Foundation.Vorspiel.Finset.Card
 import Foundation.Vorspiel.Fin.Fin1
 import Mathlib.Algebra.Order.BigOperators.Group.Finset

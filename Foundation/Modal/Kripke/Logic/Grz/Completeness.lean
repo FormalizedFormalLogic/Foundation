@@ -14,9 +14,8 @@ namespace subformulasGrz
 
 @[simp, grind .] lemma mem_self : φ ∈ φ.subformulasGrz := by simp [subformulasGrz, subformulas.mem_self]
 
-@[grind ⇒] protected lemma mem_of_mem_subformula (h : ψ ∈ φ.subformulas) : ψ ∈ φ.subformulasGrz := by simp_all [subformulasGrz];
-
-@[grind ⇒] lemma mem_boximpbox (h : ψ ∈ (□⁻¹'φ.subformulas)) : □(ψ ➝ □ψ) ∈ φ.subformulasGrz := by simp_all [subformulasGrz];
+@[grind ⇒] protected lemma mem_of_mem_subformula (h : ψ ∈ φ.subformulas) : ψ ∈ φ.subformulasGrz := by grind;
+@[grind ⇒] lemma mem_boximpbox (h : ψ ∈ (□⁻¹'φ.subformulas)) : □(ψ ➝ □ψ) ∈ φ.subformulasGrz := by grind;
 
 @[grind ⇒]
 protected lemma mem_imp (h : (ψ ➝ χ) ∈ φ.subformulasGrz) : ψ ∈ φ.subformulasGrz ∧ χ ∈ φ.subformulasGrz := by
@@ -195,12 +194,14 @@ lemma truthlemma {X : (miniCanonicalModel 𝓢 φ).World} (q_sub : ψ ∈ φ.sub
         . constructor;
           . intro χ _ hr₂;
             apply hY.1;
-            simpa [Finset.LO.preboxItr, Finset.LO.boxItr]
+            apply Finset.LO.mem_box_prebox_of_mem_of_mem_box;
+            simpa;
           . apply imp_iff_not_or (b := X = Y) |>.mpr;
             left; push_neg;
             use (ψ ➝ □ψ);
             refine ⟨?_, ?_, ?_⟩;
-            . simp_all [Finset.LO.preboxItr, Finset.LO.boxItr];
+            . simp [Formula.subformulasGrz, Finset.LO.preboxItr];
+              grind;
             . apply hY.2;
               simp;
             . by_contra hC;

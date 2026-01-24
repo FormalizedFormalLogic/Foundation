@@ -97,7 +97,8 @@ lemma refl_mainlemma_aux (hA : ¬r₁ ⊧ (A.rflSubformula.conj ➝ A)) :
         apply left_Fdisj'!_intro;
         have hrfl : r₁ ⊧ □B ➝ B := by
           apply hA₁;
-          simpa [Formula.rflSubformula, Finset.LO.preboxItr];
+          simp [Formula.rflSubformula, Finset.LO.preboxItr];
+          grind;
         rintro (i | i) _;
         . rw [(show (Sum.inl i) = r₀ by simp [r₀];)]
           suffices 𝗜𝚺₁ ⊢ S r₀ ➝ S.realization B by convert this;

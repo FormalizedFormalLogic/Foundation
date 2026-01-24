@@ -333,7 +333,9 @@ lemma of_provable_rflSubformula_original_root [M.IsTransitive]
     calc
       _ ↔ (∀ x, r ≺ x → x ⊧ ψ) ∧ r ⊧ ψ := by
         suffices (∀ y, r ≺ y → y ⊧ ψ) → r ⊧ ψ by simpa [Satisfies];
-        apply Satisfies.fconj_def.mp hS (□ψ ➝ ψ) (by simpa [Finset.LO.preboxItr]);
+        apply Satisfies.fconj_def.mp hS (□ψ ➝ ψ) $ by
+          simp only [Finset.LO.preboxItr, Function.iterate_one, Finset.mem_image, Finset.mem_preimage];
+          use ψ;
       _ ↔ (∀ x : M, x ⊧ ψ) ∧ r ⊧ ψ := by
         suffices (∀ x, r ≺ x → x ⊧ ψ) ∧ r ⊧ ψ → (∀ x : M, x ⊧ ψ) by tauto;
         rintro ⟨h₁, h₂⟩ y;

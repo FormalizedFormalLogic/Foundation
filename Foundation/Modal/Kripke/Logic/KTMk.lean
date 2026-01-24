@@ -2,7 +2,7 @@ import Foundation.Modal.Kripke.Logic.S4
 import Foundation.Modal.Kripke.AxiomGeach
 import Foundation.Modal.Kripke.AxiomMk
 import Foundation.Modal.Logic.Basic
-import Foundation.Vorspiel.List.Chain
+
 import Foundation.Modal.Kripke.Hilbert
 
 namespace LO.Modal
@@ -184,7 +184,7 @@ end KTMk
 
 instance : Modal.KT ⪱ Modal.KTMk := by
   constructor;
-  . apply Hilbert.Normal.weakerThan_of_subset_axioms; simp;
+  . grind;
   . apply Entailment.not_weakerThan_iff.mpr;
     use (Axioms.Mk (.atom 0) (.atom 1));
     constructor;

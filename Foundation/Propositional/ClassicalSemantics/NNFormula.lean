@@ -1,5 +1,5 @@
 import Foundation.Propositional.ClassicalSemantics.Basic
-import Foundation.Propositional.NNFormula
+import Foundation.Propositional.Formula.NNFormula
 
 namespace LO.Propositional
 

@@ -1,6 +1,5 @@
 import Foundation.FirstOrder.Bootstrapping.DerivabilityCondition
 import Foundation.Modal.Hilbert.Normal.Basic
-import Foundation.Modal.Letterless
 
 namespace LO
 
@@ -34,14 +33,14 @@ instance : CoeFun (Realization 𝔅) (fun _ ↦ Formula ℕ → FirstOrder.Sente
 @[grind ⇒]
 lemma letterless_interpret (A_letterless : A.Letterless) : f₁ A = f₂ A := by
   induction A with
-  | hatom a => simp at A_letterless;
+  | hatom a => grind;
   | hfalsum => simp_all [Realization.interpret];
   | himp A B ihA ihB =>
-    replace ihA := ihA $ Modal.Formula.Letterless.def_imp₁ A_letterless;
-    replace ihB := ihB $ Modal.Formula.Letterless.def_imp₂ A_letterless;
+    replace ihA := ihA $ by grind;
+    replace ihB := ihB $ by grind;
     simp_all [Realization.interpret];
   | hbox A ihA =>
-    replace ihA := ihA $ Modal.Formula.Letterless.def_box A_letterless;
+    replace ihA := ihA $ by grind;
     simp_all [Realization.interpret];
 
 @[grind ⇒]

@@ -1,4 +1,4 @@
-import Foundation.Modal.NNFormula
+import Foundation.Modal.Formula.NNFormula
 import Foundation.Modal.Kripke.Basic
 
 namespace LO.Modal

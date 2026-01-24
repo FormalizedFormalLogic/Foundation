@@ -1,9 +1,8 @@
 import Foundation.Modal.Hilbert.NNFormula
 import Foundation.Modal.Maximal.Basic
 import Foundation.Modal.Logic.SumNormal
-import Foundation.Modal.ZeroSubstitution
 import Foundation.Modal.Kripke.Logic.Ver
-import Foundation.Propositional.ClassicalSemantics.Hilbert
+import Foundation.Propositional.ClassicalSemantics.ZeroSubst
 
 namespace LO.Modal
 
@@ -79,7 +78,7 @@ lemma KD_provability_of_classical_satisfiability (hl : φ.Letterless) :
   (¬(v ⊧ (φᵀ.toPropFormula)) → Modal.KD ⊢ ∼φ)
   := by
   induction φ with
-  | hatom => simp at hl;
+  | hatom => grind;
   | hfalsum => simp [trivTranslate, toPropFormula];
   | himp φ ψ ihφ ihψ =>
     constructor;
@@ -150,7 +149,7 @@ theorem subset_Triv_of_KD_subset [Modal.KD ⪯ L] : L ⪯ Modal.Triv := by
   obtain ⟨s, h⟩ := ClassicalSemantics.exists_neg_zeroSubst_of_not_tautology hφ₂;
   let ψ := φ⟦(s : Modal.ZeroSubstitution _).1⟧;
   have : Semantics.Valid (ClassicalSemantics.Valuation ℕ) (∼(ψᵀ.toPropFormula)) := subset_Triv_of_KD_subset.lemma₂.mp h;
-  have : Modal.KD ⊢ ∼ψ := provable_not_KD_of_classical_unsatisfiable Formula.Letterless_zeroSubst
+  have : Modal.KD ⊢ ∼ψ := provable_not_KD_of_classical_unsatisfiable Formula.letterless_zeroSubst
     $ Semantics.Not.models_not.mp
     $ this (λ _ => True);
   have : L ⊢ ∼ψ := WeakerThan.pbl this;

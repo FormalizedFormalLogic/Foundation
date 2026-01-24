@@ -239,7 +239,11 @@ theorem jerabek_SBDP
       simp only [Finset.coe_image, Set.mem_image, Finset.mem_coe, XB];
       use (□((flag (atom q) b) ➝ ψ) ➝ ψ);
       constructor;
-      . match b with | true | false => simpa [X, X₀, X₁, flag] using hψ;
+      . match b with
+        | true
+        | false =>
+          simp [X, X₀, X₁, flag, Finset.LO.preboxItr];
+          grind;
       . rfl;
     have H₃ : ∀ b, (L, XB.toSet) ⊢ (flag (.atom q) b) ➝ (□ψᵇ ➝ ψᵇ) := by
       intro b;

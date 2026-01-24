@@ -1,4 +1,4 @@
-import Foundation.Propositional.Formula
+import Foundation.Propositional.Formula.Basic
 import Foundation.Modal.Entailment.Basic
 
 namespace LO.Propositional

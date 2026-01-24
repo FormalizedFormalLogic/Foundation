@@ -1,5 +1,10 @@
+module
 
-import Foundation.Logic.LogicSymbol
+public import Foundation.Logic.LogicSymbol
+public import Mathlib.Logic.Encodable.Basic
+
+@[expose]
+public section
 
 namespace LO.Propositional
 
@@ -64,10 +69,10 @@ attribute [simp, grind =] and_inj or_inj imp_inj neg_inj
 
 lemma neg_def : ∼φ = φ ➝ ⊥ := rfl
 lemma top_def : (⊤ : Formula α) = ⊥ ➝ ⊥ := rfl
-
-
 lemma iff_def (φ ψ : Formula α) : φ ⭤ ψ = (φ ➝ ψ) ⋏ (ψ ➝ φ) := by rfl
 
+
+@[grind]
 def complexity : Formula α → ℕ
 | atom _  => 0
 | ⊥       => 0
@@ -75,18 +80,12 @@ def complexity : Formula α → ℕ
 | φ ⋏ ψ   => max φ.complexity ψ.complexity + 1
 | φ ⋎ ψ   => max φ.complexity ψ.complexity + 1
 
-@[simp] lemma complexity_bot : complexity (⊥ : Formula α) = 0 := rfl
+@[simp, grind =] lemma complexity_bot : (⊥ : Formula α).complexity = 0 := rfl
+@[simp, grind =] lemma complexity_atom : (atom a).complexity = 0 := rfl
+@[simp, grind =] lemma complexity_imp : complexity (φ ➝ ψ) = max φ.complexity ψ.complexity + 1 := rfl
+@[simp, grind =] lemma complexity_and : complexity (φ ⋏ ψ) = max φ.complexity ψ.complexity + 1 := rfl
+@[simp, grind =] lemma complexity_or : complexity (φ ⋎ ψ) = max φ.complexity ψ.complexity + 1 := rfl
 
-@[simp] lemma complexity_atom (a : α) : complexity (atom a) = 0 := rfl
-
-@[simp] lemma complexity_imp (φ ψ : Formula α) : complexity (φ ➝ ψ) = max φ.complexity ψ.complexity + 1 := rfl
-@[simp] lemma complexity_imp' (φ ψ : Formula α) : complexity (imp φ ψ) = max φ.complexity ψ.complexity + 1 := rfl
-
-@[simp] lemma complexity_and (φ ψ : Formula α) : complexity (φ ⋏ ψ) = max φ.complexity ψ.complexity + 1 := rfl
-@[simp] lemma complexity_and' (φ ψ : Formula α) : complexity (and φ ψ) = max φ.complexity ψ.complexity + 1 := rfl
-
-@[simp] lemma complexity_or (φ ψ : Formula α) : complexity (φ ⋎ ψ) = max φ.complexity ψ.complexity + 1 := rfl
-@[simp] lemma complexity_or' (φ ψ : Formula α) : complexity (or φ ψ) = max φ.complexity ψ.complexity + 1 := rfl
 
 @[elab_as_elim]
 def cases' {C : Formula α → Sort w}
@@ -217,6 +216,9 @@ instance : Encodable (Formula α) where
 end Encodable
 
 
+section Letterless
+
+@[grind]
 def Letterless : Formula α → Prop
   | .atom _ => False
   | ⊥ => True
@@ -224,28 +226,15 @@ def Letterless : Formula α → Prop
   | φ ⋏ ψ => (φ.Letterless) ∧ (ψ.Letterless)
   | φ ⋎ ψ => (φ.Letterless) ∧ (ψ.Letterless)
 
-namespace Letterless
+attribute [grind =] NegAbbrev.neg
 
-variable {φ ψ : Formula α}
-
-@[simp] lemma not_atom : ¬(Letterless (atom p)) := by simp [Letterless]
-
-@[simp] lemma def_bot : (⊥ : Formula α).Letterless := by simp [Letterless]
-
-@[simp] lemma def_top : (⊤ : Formula α).Letterless := by simp [Letterless]
-
-
-lemma def_imp : (φ ➝ ψ).Letterless → φ.Letterless ∧ ψ.Letterless := by simp [Letterless]
-@[grind] lemma def_imp₁ : (φ ➝ ψ).Letterless → φ.Letterless := λ h => def_imp h |>.1
-@[grind] lemma def_imp₂ : (φ ➝ ψ).Letterless → ψ.Letterless := λ h => def_imp h |>.2
-
-lemma def_and : (φ ⋏ ψ).Letterless → φ.Letterless ∧ ψ.Letterless := by simp [Letterless]
-@[grind] lemma def_and₁ : (φ ⋏ ψ).Letterless → φ.Letterless := λ h => def_and h |>.1
-@[grind] lemma def_and₂ : (φ ⋏ ψ).Letterless → ψ.Letterless := λ h => def_and h |>.2
-
-lemma def_or : (φ ⋎ ψ).Letterless → φ.Letterless ∧ ψ.Letterless := by simp [Letterless]
-@[grind] lemma def_or₁ : (φ ⋎ ψ).Letterless → φ.Letterless := λ h => def_or h |>.1
-@[grind] lemma def_or₂ : (φ ⋎ ψ).Letterless → ψ.Letterless := λ h => def_or h |>.2
+@[grind .] lemma not_letterless_atom {a : α} : ¬(Formula.Letterless (.atom a)) := by grind;
+@[grind .] lemma letterless_falsum : (⊥ : Formula α).Letterless := by simp [Letterless];
+@[grind .] lemma letterless_verum : (⊤ : Formula α).Letterless := by simp [Letterless];
+@[grind =] lemma letterless_imp {φ ψ : Formula α} : (φ ➝ ψ).Letterless ↔ φ.Letterless ∧ ψ.Letterless := by simp [Letterless];
+@[grind =] lemma letterless_and : (φ ⋏ ψ).Letterless ↔ φ.Letterless ∧ ψ.Letterless := by simp [Letterless];
+@[grind =] lemma letterless_or : (φ ⋎ ψ).Letterless ↔ φ.Letterless ∧ ψ.Letterless := by simp [Letterless];
+@[grind =] lemma letterless_neg : (∼φ).Letterless ↔ φ.Letterless ∧ (⊥ : Formula α).Letterless := by grind;
 
 end Letterless
 
@@ -470,6 +459,6 @@ class SubstitutionClosed (S : Set (Formula α)) where
 
 end Substitution
 
-
-
 end LO.Propositional
+
+end

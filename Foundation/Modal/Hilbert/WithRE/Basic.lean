@@ -1,10 +1,10 @@
-import Foundation.Modal.Formula
+import Foundation.Modal.Formula.Basic
 import Foundation.Modal.Entailment.K
 import Foundation.Modal.Entailment.EMCN
 import Foundation.Modal.Entailment.END
 import Foundation.Modal.Entailment.ET5
 import Foundation.Modal.Entailment.EMK
-import Foundation.Propositional.Entailment.Cl.Lukasiewicz
+import Foundation.Propositional.Entailment.Cl.Łukasiewicz
 import Foundation.Logic.Incomparable
 import Foundation.Modal.Logic.Basic
 import Foundation.Modal.Hilbert.Axiom
@@ -31,7 +31,7 @@ variable {Ax Ax₁ Ax₂ : Axiom α}
 
 @[grind] lemma axm'! {φ} (h : φ ∈ Ax) : WithRE Ax ⊢ φ := by simpa using axm! .id h;
 
-instance : Entailment.Lukasiewicz (Hilbert.WithRE Ax) where
+instance : Entailment.Łukasiewicz (Hilbert.WithRE Ax) where
   implyK {_ _} := by constructor; apply Hilbert.WithRE.implyK;
   implyS {_ _ _} := by constructor; apply Hilbert.WithRE.implyS;
   elimContra {_ _} := by constructor; apply Hilbert.WithRE.ec;

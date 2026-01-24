@@ -11,7 +11,7 @@ open Modal.Kripke
 
 instance : Modal.S5 ⪱ Modal.S5Grz := by
   constructor;
-  . exact Hilbert.Normal.weakerThan_of_subset_axioms (by simp)
+  . grind;
   . apply Entailment.not_weakerThan_iff.mpr;
     use Axioms.Grz (.atom 0);
     constructor;

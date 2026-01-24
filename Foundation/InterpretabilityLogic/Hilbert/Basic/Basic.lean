@@ -1,6 +1,7 @@
 import Foundation.InterpretabilityLogic.Logic.Basic
 import Foundation.InterpretabilityLogic.Entailment
 import Foundation.InterpretabilityLogic.Hilbert.Axiom
+import Foundation.Propositional.Entailment.Cl.Łukasiewicz
 
 namespace LO.InterpretabilityLogic
 
@@ -29,7 +30,7 @@ variable {Ax Ax₁ Ax₂ : Axiom α}
 
 @[grind ⇒] lemma axm'! {φ} (h : φ ∈ Ax) : Hilbert.Basic Ax ⊢ φ := by simpa using axm! (idSubstitution _) h;
 
-instance : Entailment.Lukasiewicz (Hilbert.Basic Ax) where
+instance : Entailment.Łukasiewicz (Hilbert.Basic Ax) where
   implyK {_ _} := by constructor; apply Hilbert.Basic.implyK;
   implyS {_ _ _} := by constructor; apply Hilbert.Basic.implyS;
   elimContra {_ _} := by constructor; apply Hilbert.Basic.ec;
