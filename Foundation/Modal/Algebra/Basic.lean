@@ -39,17 +39,29 @@ lemma box_axiomK : □(a ⇨ b) ⇨ (□a ⇨ □b) = ⊤ := by
   rw [himp_eq_top_iff];
   exact box_imp_le_box_imp_box;
 
+lemma dia_or : ◇(a ⊔ b) = ◇a ⊔ ◇b := by
+  simp [dual_dia, compl_sup, box_meet];
+
+@[grind <-]
+lemma dia_monotone (h : a ≤ b) : ◇a ≤ ◇b := calc
+  ◇a ≤ ◇(a ⊔ (b \ a)) := by simp [dia_or]
+  _  = ◇b             := by simp [sup_sdiff_cancel_right h]
+
+@[grind <-]
+lemma box_monotone (h : a ≤ b) : □a ≤ □b := by
+  simpa [dual_box] using dia_monotone (show bᶜ ≤ aᶜ by simpa);
+
 end ModalAlgebra
 
 
 namespace ModalAlgebra
 
-class Transitive (α : Type*) extends ModalAlgebra α where
+protected class Transitive (α : Type*) extends ModalAlgebra α where
   box_trans {a : α} : □a ≤ □□a
 export Transitive (box_trans)
 attribute [simp, grind .] box_trans
 
-class Reflexive (α : Type*) extends ModalAlgebra α where
+protected class Reflexive (α : Type*) extends ModalAlgebra α where
   box_refl {a : α} : □a ≤ a
 export Reflexive (box_refl)
 attribute [simp, grind .] box_refl

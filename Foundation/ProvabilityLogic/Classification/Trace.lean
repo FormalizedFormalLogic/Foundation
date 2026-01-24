@@ -455,7 +455,8 @@ end Modal
 namespace ProvabilityLogic
 
 open LO.Entailment Entailment.FiniteContext
-open FirstOrder Arithmetic
+open FirstOrder FirstOrder.ProvabilityAbstraction
+open Arithmetic
 open ArithmeticTheory (ProvabilityLogic)
 open Modal
 open Modal.Kripke
@@ -497,7 +498,7 @@ lemma provable_TBB_of_mem_trace {n : ℕ} (h : n ∈ (T.ProvabilityLogic U).trac
         rw [(show Sum.inl a = r₀ by simp [r₀])];
         cl_prover [this]
       have : 𝗜𝚺₁ ⊢ S r₀ ➝ ∼(T.standardProvability) (S.realization (□^[M.height]⊥)) := C!_trans (S.SC2 r₀ r Rr₀) $ contra! $
-        T.standardProvability.prov_distribute_imply' $
+        prov_distribute_imply' $
         CN!_of_CN!_right $
         S.mainlemma_neg Rr₀ $
         height_lt_iff_satisfies_boxbot.not.mp $ by simp [Frame.extendRoot.eq_original_height_root]

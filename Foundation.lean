@@ -63,14 +63,16 @@ import Foundation.FirstOrder.Bootstrapping.Consistency
 import Foundation.FirstOrder.Bootstrapping.WitnessComparison
 import Foundation.FirstOrder.Bootstrapping.RosserProvability
 
-import Foundation.FirstOrder.Incompleteness.First
-import Foundation.FirstOrder.Incompleteness.Halting
 import Foundation.FirstOrder.Incompleteness.Dense
-import Foundation.FirstOrder.Incompleteness.Second
 import Foundation.FirstOrder.Incompleteness.Examples
+import Foundation.FirstOrder.Incompleteness.First
+import Foundation.FirstOrder.Incompleteness.GödelRosser
+import Foundation.FirstOrder.Incompleteness.Halting
+import Foundation.FirstOrder.Incompleteness.Löb
+import Foundation.FirstOrder.Incompleteness.RestrictedProvability
+import Foundation.FirstOrder.Incompleteness.Second
 import Foundation.FirstOrder.Incompleteness.Tarski
 import Foundation.FirstOrder.Incompleteness.Yablo
-import Foundation.FirstOrder.Incompleteness.Löb
 
 import Foundation.FirstOrder.SetTheory.Basic
 import Foundation.FirstOrder.SetTheory.Universe
@@ -98,37 +100,9 @@ import Foundation.FirstOrder.NegationTranslation.GoedelGentzen
 import Foundation.Modal.Hilbert.WithRE_Normal
 import Foundation.Modal.Hilbert.GL_K4Loeb_K4Henkin_K4Hen
 
-import Foundation.Modal.Kripke.Logic.GL.Unnecessitation
-import Foundation.Modal.Kripke.Logic.GL.MDP
-import Foundation.Modal.Kripke.Logic.S4Point4
-
-import Foundation.Modal.Kripke.Logic.Grz.Completeness
-
-import Foundation.Modal.Kripke.Logic.GLPoint3
-import Foundation.Modal.Kripke.Logic.GrzPoint2
-import Foundation.Modal.Kripke.Logic.GrzPoint3
-import Foundation.Modal.Kripke.Logic.K4McK
-import Foundation.Modal.Kripke.Logic.K4Point2
-import Foundation.Modal.Kripke.Logic.K4Point3
-import Foundation.Modal.Kripke.Logic.K4n
-import Foundation.Modal.Kripke.Logic.KHen
-import Foundation.Modal.Kripke.Logic.KT4B
-import Foundation.Modal.Kripke.Logic.KTc
-import Foundation.Modal.Kripke.Logic.KTMk
-import Foundation.Modal.Kripke.Logic.S4H
-import Foundation.Modal.Kripke.Logic.S4Point3
-import Foundation.Modal.Kripke.Logic.S4Point4
-import Foundation.Modal.Kripke.Logic.S4Point4McK
-import Foundation.Modal.Kripke.Logic.S5
-import Foundation.Modal.Kripke.Logic.S5Grz
-
 import Foundation.Modal.Boxdot.Jerabek
 
-import Foundation.Modal.Kripke.NNFormula
-import Foundation.Modal.Kripke.ComplexityLimited
-import Foundation.Modal.Kripke.Undefinability
-import Foundation.Modal.Kripke.Balloon
-import Foundation.Modal.Kripke.LinearFrame
+import Foundation.Modal.Kripke
 
 import Foundation.Modal.PLoN.Logic
 
