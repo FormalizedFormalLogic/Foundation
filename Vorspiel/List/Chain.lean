@@ -103,7 +103,7 @@ lemma noDup_of_irrefl_trans (h : List.IsChain R l) [IsIrrefl _ R] : l.Nodup := b
   ] using hC;
   have : R (l.get i') (l.get j') := of_lt h (by simpa);
   rw [hC] at this;
-  exact IsIrrefl.irrefl _ this;
+  exact Std.Irrefl.irrefl _ this;
 
 end IsChain
 

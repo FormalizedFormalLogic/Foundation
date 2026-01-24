@@ -15,7 +15,7 @@ lemma IsChain.nodup_of_trans_irreflex [IsTrans _ R] [IsIrrefl _ R] (h_chain : l.
   replace ⟨d, hC⟩ := List.exists_duplicate_iff_not_nodup.mpr hC;
   have := List.duplicate_iff_sublist.mp hC;
   have := @List.IsChain.sublist α R [d, d] l ⟨by apply IsTrans.trans⟩ h_chain this;
-  apply IsIrrefl.irrefl d (r := R);
+  apply Std.Irrefl.irrefl d (r := R);
   simpa;
 
 instance finiteNodupList [DecidableEq α] [Finite α] : Finite { l : List α // l.Nodup } := @fintypeNodupList α (Fintype.ofFinite α) |>.finite

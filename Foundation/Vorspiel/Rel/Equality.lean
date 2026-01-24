@@ -10,7 +10,7 @@ lemma equality [IsEquality R] : ∀ ⦃x y⦄, R x y ↔ x = y := by
   intro x y;
   constructor;
   . apply IsCoreflexive.corefl;
-  . rintro rfl; apply IsRefl.refl;
+  . rintro rfl; apply Std.Refl.refl;
 
 instance [IsEquality R] : Std.Symm R := ⟨by simp_all⟩
 

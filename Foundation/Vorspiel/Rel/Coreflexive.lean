@@ -7,9 +7,9 @@ def Coreflexive (R : Rel α α) := ∀ ⦃x y⦄, R x y → x = y
 class IsCoreflexive (R : Rel α α) where
   corefl : Coreflexive R
 
-instance [Std.Symm R] [IsAntisymm _ R] : IsCoreflexive R := ⟨by
+instance [Std.Symm R] [Std.Antisymm  R] : IsCoreflexive R := ⟨by
   intro x y Rxy;
-  apply IsAntisymm.antisymm (r := R);
+  apply Std.Antisymm.antisymm (r := R);
   . assumption;
   . exact Std.Symm.symm _ _ Rxy;
 ⟩

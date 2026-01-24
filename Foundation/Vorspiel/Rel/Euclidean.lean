@@ -18,10 +18,10 @@ instance [Std.Symm R] [IsTrans _ R] : IsRightEuclidean R := ⟨by
 ⟩
 
 
-instance [IsRefl _ R] [IsRightEuclidean R] : Std.Symm R := ⟨by
+instance [Std.Refl R] [IsRightEuclidean R] : Std.Symm R := ⟨by
   intro x y Rxy;
   apply IsRightEuclidean.reucl Rxy;
-  . apply IsRefl.refl
+  . apply Std.Refl.refl
 ⟩
 
 instance [Std.Symm R] [IsRightEuclidean R] : IsTrans α R := ⟨by
@@ -32,7 +32,7 @@ instance [Std.Symm R] [IsRightEuclidean R] : IsTrans α R := ⟨by
   . exact Std.Symm.symm _ _ Rxy;
 ⟩
 
-instance [IsRefl _ R] [IsRightEuclidean R] : IsTrans α R := inferInstance
+instance [Std.Refl R] [IsRightEuclidean R] : IsTrans α R := inferInstance
 
 instance [Std.Symm R] [IsTrans _ R] [IsSerial R] : IsRefl α R := ⟨by
   rintro x;

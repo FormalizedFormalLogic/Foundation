@@ -269,7 +269,7 @@ instance [F.IsFinite] : (F↾r).IsFinite := inferInstance
 instance [DecidableEq F.World] : DecidableEq (F↾r).World := Subtype.instDecidableEq
 
 instance isReflexive [F.IsReflexive] : (F↾r).IsReflexive where
-  refl := by rintro ⟨x, (rfl | hx)⟩ <;> exact IsRefl.refl x;
+  refl := by rintro ⟨x, (rfl | hx)⟩ <;> exact Std.Refl.refl x;
 
 instance isTransitive [F.IsTransitive] : (F↾r).IsTransitive where
   trans := by

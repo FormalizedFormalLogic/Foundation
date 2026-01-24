@@ -18,7 +18,7 @@ lemma S4.CCLL_CCL : Modal.S4 ⊢ □(□φ ➝ □ψ) ➝ □(□φ ➝ ψ) := b
   apply Complete.complete (𝓜 := FrameClass.S4);
   rintro F ⟨_, _⟩ V x h₁ y Rxy h₂;
   apply @h₁ y Rxy h₂;
-  apply IsRefl.refl;
+  apply Std.Refl.refl;
 
 instance : Entailment.HasAxiomPoint3 (smallestMC Propositional.LC) where
   Point3 φ ψ := by

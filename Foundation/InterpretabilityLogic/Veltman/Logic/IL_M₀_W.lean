@@ -67,7 +67,7 @@ instance : InterpretabilityLogic.IL_M₀ ⪱ InterpretabilityLogic.IL_M₀_W := 
       . by_contra hC;
         have : ∀ (x : F.World), (1 : F.World) ≺ x → ¬x ≺[(0 : F.World)] 1 := by
           simpa [Frame.RS, Relation.Comp, flip]
-          using Frame.HasAxiomW.of_validate_axiomW hC |>.S_W 0 |>.isIrrefl.irrefl 1;
+          using Frame.HasAxiomW.of_validate_axiomW hC |>.S_W 0 |>.Std.Irrefl.irrefl 1;
         apply @this 2;
         . omega;
         . simp [Frame.SRel', F];
