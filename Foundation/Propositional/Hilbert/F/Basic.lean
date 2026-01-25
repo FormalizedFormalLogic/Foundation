@@ -1,12 +1,13 @@
-/-
-  Corsi's `F` system by de Jongh and Shirmohammadzadeh Maleki
--/
-import Foundation.Propositional.Entailment.Int.DNE_of_LEM
-import Foundation.Propositional.Entailment.Corsi
-import Foundation.Propositional.Hilbert.Axiom
-import Foundation.Propositional.Formula.Basic
-import Foundation.Propositional.Logic.Basic
-import Foundation.Logic.Disjunctive
+module
+
+public import Foundation.Propositional.Entailment.Int.DNE_of_LEM
+public import Foundation.Propositional.Entailment.Corsi
+public import Foundation.Propositional.Hilbert.Axiom
+public import Foundation.Propositional.Formula.Basic
+public import Foundation.Propositional.Logic.Basic
+public import Foundation.Logic.Disjunctive
+
+@[expose] public section
 
 namespace LO.Propositional
 
@@ -263,3 +264,4 @@ instance : Entailment.HasAxiomTra1 Propositional.F_Rfl_Tra1_Hrd where
   axiomTra1! {_ _ _} := ⟨by apply Hilbert.F.axm'; simp⟩
 
 end LO.Propositional
+end

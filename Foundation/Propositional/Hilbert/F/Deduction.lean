@@ -1,4 +1,8 @@
-import Foundation.Propositional.Hilbert.F.Basic
+module
+
+public import Foundation.Propositional.Hilbert.F.Basic
+
+@[expose] public section
 
 namespace LO.Propositional.Hilbert.F
 
@@ -106,3 +110,4 @@ lemma DT_set {Γ : Set (Formula α)} : (Deduction Ax Γ φ) ↔ ∃ Δ : Finset 
     apply deduction_subset hΔΓ hφ;
 
 end LO.Propositional.Hilbert.F
+end

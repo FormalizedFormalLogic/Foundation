@@ -1,9 +1,12 @@
+module
 
-import Foundation.Propositional.Formula.Basic
-import Foundation.Propositional.Entailment.Cl.Basic
-import Foundation.Propositional.Entailment.KrieselPutnam
-import Foundation.Propositional.Entailment.Scott
-import Foundation.Propositional.Entailment.Corsi
+public import Foundation.Propositional.Formula.Basic
+public import Foundation.Propositional.Entailment.Cl.Basic
+public import Foundation.Propositional.Entailment.KrieselPutnam
+public import Foundation.Propositional.Entailment.Scott
+public import Foundation.Propositional.Entailment.Corsi
+
+@[expose] public section
 
 namespace LO.Propositional
 
@@ -110,3 +113,4 @@ class HasAxiomHrd (Ax : Axiom α) where
 end Axiom
 
 end LO.Propositional
+end

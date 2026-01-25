@@ -1,6 +1,10 @@
-import Foundation.Propositional.Hilbert.F.Basic
-import Foundation.Propositional.Logic.Slash
+module
 
+public import Foundation.Propositional.Hilbert.F.Basic
+public import Foundation.Propositional.Logic.Slash
+
+
+@[expose] public section
 
 namespace LO.Propositional
 
@@ -127,3 +131,4 @@ instance F_Rfl_Tra1_Hrd.AczelSlashable : Propositional.F_Rfl_Tra1_Hrd.AczelSlash
 instance F_Rfl_Tra1_Hrd.Disjunctive : Entailment.Disjunctive Propositional.F_Rfl_Tra1_Hrd := inferInstance
 
 end LO.Propositional
+end

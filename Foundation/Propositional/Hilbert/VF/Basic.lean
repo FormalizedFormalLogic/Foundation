@@ -1,7 +1,11 @@
-import Foundation.Logic.Disjunctive
-import Foundation.Propositional.Entailment.Corsi
-import Foundation.Propositional.Hilbert.Axiom
-import Foundation.Propositional.Logic.Basic
+module
+
+public import Foundation.Logic.Disjunctive
+public import Foundation.Propositional.Entailment.Corsi
+public import Foundation.Propositional.Hilbert.Axiom
+public import Foundation.Propositional.Logic.Basic
+
+@[expose] public section
 
 namespace LO.Propositional
 
@@ -118,3 +122,4 @@ instance : Entailment.HasAxiomSer Propositional.VF_Ser where
   axiomSer! := ⟨by apply Hilbert.VF.axm'; simp⟩
 
 end LO.Propositional
+end

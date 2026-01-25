@@ -1,5 +1,9 @@
-import Foundation.Propositional.FMT.Hilbert
-import Foundation.Propositional.Hilbert.WF_VF
+module
+
+public import Foundation.Propositional.FMT.Hilbert
+public import Foundation.Propositional.Hilbert.WF_VF
+
+@[expose] public section
 
 namespace LO.Propositional
 
@@ -418,3 +422,4 @@ end FMT
 
 
 end LO.Propositional
+end

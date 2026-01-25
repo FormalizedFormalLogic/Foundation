@@ -400,3 +400,5 @@ lemma inconsistent_of_provable_of_unprovable {φ : F}
 end consistency
 
 end LO.Entailment
+
+end

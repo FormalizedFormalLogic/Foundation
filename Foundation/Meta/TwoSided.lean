@@ -1,4 +1,8 @@
-import Foundation.Propositional.Entailment.Cl.Basic
+module
+
+public import Foundation.Propositional.Entailment.Cl.Basic
+
+@[expose] public section
 
 namespace LO.Entailment
 
@@ -351,3 +355,5 @@ lemma imply_left :
 end Tableaux.Valid
 
 end LO.Entailment
+
+end

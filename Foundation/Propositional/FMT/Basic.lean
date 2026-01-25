@@ -1,6 +1,9 @@
-import Foundation.Propositional.Logic.Basic
-import Foundation.Propositional.Entailment.Corsi.Basic
-import Foundation.Vorspiel.Rel.Basic
+module
+
+public import Foundation.Propositional.Logic.Basic
+public import Foundation.Propositional.Entailment.Corsi.Basic
+
+@[expose] public section
 
 namespace LO.Propositional
 
@@ -252,3 +255,4 @@ end
 end FMT
 
 end LO.Propositional
+end

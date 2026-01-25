@@ -1,5 +1,9 @@
-import Foundation.Propositional.Hilbert.WF
-import Foundation.Propositional.Hilbert.VF
+module
+
+public import Foundation.Propositional.Hilbert.WF
+public import Foundation.Propositional.Hilbert.VF
+
+@[expose] public section
 
 namespace LO.Propositional
 
@@ -25,3 +29,4 @@ def weakerThan_WF_VF_of_provable_axioms (h : (Hilbert.WF Ax₂) ⊢* Ax₁) : (H
     | grind;
 
 end LO.Propositional
+end

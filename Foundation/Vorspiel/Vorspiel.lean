@@ -1,3 +1,5 @@
+module
+
 import Mathlib.Computability.Halting
 import Mathlib.Computability.Partrec
 import Mathlib.Data.Fin.Basic
@@ -16,6 +18,8 @@ import Mathlib.Order.Filter.Ultrafilter.Defs
 import Mathlib.Tactic.Cases
 import Mathlib.Tactic.TautoSet
 import Vorspiel
+
+@[expose] public section
 
 lemma eq_finZeroElim {α : Sort u} (x : Fin 0 → α) : x = finZeroElim := funext (by rintro ⟨_, _⟩; contradiction)
 
@@ -314,3 +318,5 @@ namespace Nonempty
 instance [Zero α] : Nonempty α := ⟨0⟩
 
 end Nonempty
+
+end

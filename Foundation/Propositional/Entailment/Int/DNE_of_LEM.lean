@@ -29,5 +29,3 @@ instance [HasAxiomLEM 𝓢] : Entailment.Cl 𝓢 where
 end LO.Entailment
 
 end
-
-end
