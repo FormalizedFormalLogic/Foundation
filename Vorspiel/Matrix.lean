@@ -5,8 +5,7 @@ public import Mathlib.Data.Nat.Pairing
 public import Vorspiel.Nat
 public import Vorspiel.Fin.Basic
 
-@[expose]
-public section
+@[expose] public section
 
 namespace Matrix
 

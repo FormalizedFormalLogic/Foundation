@@ -1,5 +1,8 @@
 module
+
 public import Foundation.FirstOrder.Basic.BinderNotation
+public import Vorspiel.Nat.Matrix
+
 @[expose] public section
 
 namespace LO.FirstOrder
