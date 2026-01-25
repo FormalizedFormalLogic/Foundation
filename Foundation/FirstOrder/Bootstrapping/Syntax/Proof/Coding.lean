@@ -179,9 +179,9 @@ noncomputable instance (Γ : Finset (SyntacticFormula L)) : GödelQuote (T ⟹�
 
 noncomputable instance (Γ : Finset (SyntacticFormula L)) : GödelQuote (T ⟹₂ Γ) V := ⟨fun d ↦ (⌜d⌝ : T.internalize V ⊢!ᵈᵉʳ ⌜Γ⌝).val⟩
 
-lemma quote_def (d : (T : SyntacticFormulas L) ⟹₂ Γ) : (⌜d⌝ : V) = (⌜d⌝ : T.internalize V ⊢!ᵈᵉʳ ⌜Γ⌝).val := rfl
+lemma quote_def (d : (T : Schema L) ⟹₂ Γ) : (⌜d⌝ : V) = (⌜d⌝ : T.internalize V ⊢!ᵈᵉʳ ⌜Γ⌝).val := rfl
 
-lemma coe_typedQuote_val_eq (d : (T : SyntacticFormulas L) ⟹₂ Γ) : ↑(d.typedQuote ℕ).val = (d.typedQuote V).val :=
+lemma coe_typedQuote_val_eq (d : (T : Schema L) ⟹₂ Γ) : ↑(d.typedQuote ℕ).val = (d.typedQuote V).val :=
   match d with
   |   closed Δ φ h hn => by
     simp [typedQuote, axL, nat_cast_pair, Sequent.coe_eq, Semiformula.coe_quote_eq_quote']
@@ -211,27 +211,27 @@ lemma coe_typedQuote_val_eq (d : (T : SyntacticFormulas L) ⟹₂ Γ) : ↑(d.ty
     simp [typedQuote, Bootstrapping.cutRule, nat_cast_pair, Sequent.coe_eq, Semiformula.coe_quote_eq_quote',
       b₁.coe_typedQuote_val_eq, b₂.coe_typedQuote_val_eq]
 
-lemma coe_quote_eq (d : (T : SyntacticFormulas L) ⟹₂ Γ) : (↑(⌜d⌝ : ℕ) : V) = ⌜d⌝ := coe_typedQuote_val_eq V d
+lemma coe_quote_eq (d : (T : Schema L) ⟹₂ Γ) : (↑(⌜d⌝ : ℕ) : V) = ⌜d⌝ := coe_typedQuote_val_eq V d
 
 end Derivation2
 
-noncomputable instance (Γ : Sequent L) : GödelQuote ((T : SyntacticFormulas L) ⟹ Γ) V := ⟨fun b ↦ ⌜Derivation.toDerivation2 (T : SyntacticFormulas L) b⌝⟩
+noncomputable instance (Γ : Sequent L) : GödelQuote ((T : Schema L) ⟹ Γ) V := ⟨fun b ↦ ⌜Derivation.toDerivation2 (T : Schema L) b⌝⟩
 
 noncomputable instance (φ : Sentence L) : GödelQuote (T ⊢! φ) V := ⟨fun b ↦
-  let b : (T : SyntacticFormulas L) ⟹ [↑φ] := b
+  let b : (T : Schema L) ⟹ [↑φ] := b
   ⌜b⌝⟩
 
-lemma quote_derivation_def {Γ : Sequent L} (b : (T : SyntacticFormulas L) ⟹ Γ) : (⌜b⌝ : V) = ⌜Derivation.toDerivation2 (T : SyntacticFormulas L) b⌝ := rfl
+lemma quote_derivation_def {Γ : Sequent L} (b : (T : Schema L) ⟹ Γ) : (⌜b⌝ : V) = ⌜Derivation.toDerivation2 (T : Schema L) b⌝ := rfl
 
-lemma quote_proof_def {φ : Sentence L} (b : T ⊢! φ) : (⌜b⌝ : V) = ⌜Derivation.toDerivation2 (T : SyntacticFormulas L) b⌝ := rfl
+lemma quote_proof_def {φ : Sentence L} (b : T ⊢! φ) : (⌜b⌝ : V) = ⌜Derivation.toDerivation2 (T : Schema L) b⌝ := rfl
 
-@[simp] lemma derivation_of_quote_derivation {Γ : Sequent L} (b : (T : SyntacticFormulas L) ⟹ Γ) : T.DerivationOf (⌜b⌝ : V) ⌜Γ.toFinset⌝ := by
-  let x := Derivation2.typedQuote V (Derivation.toDerivation2 (T : SyntacticFormulas L) b)
+@[simp] lemma derivation_of_quote_derivation {Γ : Sequent L} (b : (T : Schema L) ⟹ Γ) : T.DerivationOf (⌜b⌝ : V) ⌜Γ.toFinset⌝ := by
+  let x := Derivation2.typedQuote V (Derivation.toDerivation2 (T : Schema L) b)
   suffices T.DerivationOf x.val ⌜List.toFinset Γ⌝ from this
   simpa using x.derivationOf
 
 @[simp] lemma proof_of_quote_proof {φ : Sentence L} (b : T ⊢! φ) : T.Proof (⌜b⌝ : V) ⌜φ⌝ := by
-  let x := Derivation2.typedQuote V (Derivation.toDerivation2 (T : SyntacticFormulas L) b)
+  let x := Derivation2.typedQuote V (Derivation.toDerivation2 (T : Schema L) b)
   suffices T.Proof x.val ⌜φ⌝ from this
   simpa using x.derivationOf
 
@@ -242,7 +242,7 @@ namespace Theory
 
 open Derivation2
 
-lemma Derivation.sound {d : ℕ} (h : T.Derivation d) : ∃ Γ, ⌜Γ⌝ = fstIdx d ∧ (T : SyntacticFormulas L) ⟹₂! Γ := by
+lemma Derivation.sound {d : ℕ} (h : T.Derivation d) : ∃ Γ, ⌜Γ⌝ = fstIdx d ∧ (T : Schema L) ⟹₂! Γ := by
   induction d using Nat.strongRec
   case ind d ih =>
   rcases h.case with ⟨hs, H⟩

@@ -14,7 +14,7 @@ variable {L : Language} [L.DecidableEq]
 
 section derivation2
 
-inductive Derivation2 (𝓢 : SyntacticFormulas L) : Finset (SyntacticFormula L) → Type _
+inductive Derivation2 (𝓢 : Schema L) : Finset (SyntacticFormula L) → Type _
 | closed (Δ) (φ : SyntacticFormula L)      : φ ∈ Δ → ∼φ ∈ Δ → Derivation2 𝓢 Δ
 | axm  {Δ} (φ : SyntacticFormula L)       : φ ∈ 𝓢 → φ ∈ Δ → Derivation2 𝓢 Δ
 | verum {Δ}                                : ⊤ ∈ Δ → Derivation2 𝓢 Δ
@@ -28,15 +28,15 @@ inductive Derivation2 (𝓢 : SyntacticFormulas L) : Finset (SyntacticFormula L)
 
 scoped infix:45 " ⟹₂" => Derivation2
 
-abbrev Derivable2 (𝓢 : SyntacticFormulas L) (Γ : Finset (SyntacticFormula L)) := Nonempty (𝓢 ⟹₂ Γ)
+abbrev Derivable2 (𝓢 : Schema L) (Γ : Finset (SyntacticFormula L)) := Nonempty (𝓢 ⟹₂ Γ)
 
 scoped infix:45 " ⟹₂! " => Derivable2
 
-abbrev Derivable2SingleConseq (𝓢 : SyntacticFormulas L) (φ : SyntacticFormula L) : Prop := 𝓢 ⟹₂! {φ}
+abbrev Derivable2SingleConseq (𝓢 : Schema L) (φ : SyntacticFormula L) : Prop := 𝓢 ⟹₂! {φ}
 
 scoped infix: 45 " ⊢!₂! " => Derivable2SingleConseq
 
-variable {𝓢 : SyntacticFormulas L}
+variable {𝓢 : Schema L}
 
 lemma shifts_toFinset_eq_image_shift (Δ : Sequent L) :
     (Rewriting.shifts Δ).toFinset = Δ.toFinset.image Rewriting.shift := by ext φ; simp [Rewriting.shifts]

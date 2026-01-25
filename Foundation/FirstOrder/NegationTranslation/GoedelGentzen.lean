@@ -189,7 +189,7 @@ open Classical LO.Entailment
 theorem gödel_gentzen {T : Theory L} {φ} : T ⊢ φ → T.ToTheoryᵢ Λ ⊢ φᴺ := by
   intro h
   let ⟨⟨s, hs⟩, b⟩ := Theory.compact' h
-  have h : (∅ : SyntacticFormulas L) ⊢ ↑s.conj ➝ ↑φ := by simpa using provable_def.mp b
+  have h : (∅ : Schema L) ⊢ ↑s.conj ➝ ↑φ := by simpa using provable_def.mp b
   let ψ : SyntacticFormula L := ↑s.conj ➝ ↑φ
   have h₁ : Λ ⊢ ∼(∼ψ)ᴺ := by
     simpa using Entailment.FiniteContext.provable_iff.mp ⟨Derivation.gödelGentzen h.get⟩
