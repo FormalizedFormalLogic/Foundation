@@ -1,5 +1,4 @@
 import Foundation.FirstOrder.Arithmetic.Basic
-import Foundation.Vorspiel.ExistsUnique
 import Mathlib.Algebra.Order.Monoid.Canonical.Defs
 import Mathlib.Data.Nat.Cast.Order.Basic
 

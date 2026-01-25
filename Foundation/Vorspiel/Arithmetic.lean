@@ -1,4 +1,3 @@
-import Foundation.Vorspiel.Vorspiel
 import Mathlib.Data.Nat.ModEq
 import Mathlib.Data.List.FinRange
 import Mathlib.Logic.Godel.GodelBetaFunction

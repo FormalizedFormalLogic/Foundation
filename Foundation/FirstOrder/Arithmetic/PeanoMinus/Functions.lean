@@ -2,7 +2,6 @@ import Foundation.FirstOrder.Arithmetic.PeanoMinus.Basic
 import Foundation.FirstOrder.Arithmetic.Definability
 import Mathlib.Algebra.GroupWithZero.Divisibility
 import Mathlib.Algebra.Prime.Lemmas
-import Foundation.Vorspiel.ExistsUnique
 
 /-!
 # Functions and relations defined in $\mathsf{PA^-}$

@@ -1,4 +1,8 @@
-import Foundation.FirstOrder.Basic.Syntax.Rew
+module
+
+public import Foundation.FirstOrder.Basic.Syntax.Rew
+
+@[expose] public section
 
 /-!
 # Theory of first-order logic
@@ -70,3 +74,4 @@ end SyntacticFormulas
 abbrev ArithmeticAxiom := Theory ℒₒᵣ
 
 end LO.FirstOrder
+end

@@ -1,4 +1,3 @@
-import Foundation.Vorspiel.Vorspiel
 import Mathlib.Order.PFilter
 import Mathlib.Data.Set.Countable
 

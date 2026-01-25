@@ -1,6 +1,5 @@
 import Foundation.Modal.Logic.S.Basic
 import Foundation.ProvabilityLogic.GL.Completeness
-import Foundation.Vorspiel.Set.Cofinite
 
 namespace LO
 

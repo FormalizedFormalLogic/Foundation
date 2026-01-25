@@ -1,5 +1,4 @@
 import Foundation.FirstOrder.Completeness.Coding
-import Foundation.Vorspiel.Order
 
 namespace LO
 

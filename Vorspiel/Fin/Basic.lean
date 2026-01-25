@@ -4,11 +4,12 @@ public import Mathlib.Algebra.GroupWithZero.Nat
 public import Mathlib.Data.Fintype.Pigeonhole
 public import Mathlib.Tactic.Cases
 public import Mathlib.Tactic.TautoSet
-public import Vorspiel.Matrix
 
 
 @[expose]
 public section
+
+lemma eq_finZeroElim {α : Sort u} (x : Fin 0 → α) : x = finZeroElim := funext (by rintro ⟨_, _⟩; contradiction)
 
 
 @[simp, grind .]
@@ -65,6 +66,29 @@ lemma pos_of_coe_ne_zero {i : Fin (n + 1)} (h : (i : ℕ) ≠ 0) : 0 < i := Nat.
 @[simp] lemma five_pos : (0 : Fin (n + 6)) < 5 := pos_of_coe_ne_zero (Nat.succ_ne_zero 4)
 
 end
+
+
+lemma forall_fin_iff_zero_and_forall_succ {P : Fin (k + 1) → Prop} : (∀ i, P i) ↔ P 0 ∧ ∀ i : Fin k, P i.succ :=
+  ⟨fun h ↦ ⟨h 0, fun i ↦ h i.succ⟩, by
+    rintro ⟨hz, hs⟩ i
+    cases' i using Fin.cases with i
+    · exact hz
+    · exact hs i⟩
+
+lemma exists_fin_iff_zero_or_exists_succ {P : Fin (k + 1) → Prop} : (∃ i, P i) ↔ P 0 ∨ ∃ i : Fin k, P i.succ :=
+  ⟨by rintro ⟨i, hi⟩
+      cases i using Fin.cases
+      · left; exact hi
+      · right; exact ⟨_, hi⟩,
+   by rintro (hz | ⟨i, h⟩)
+      · exact ⟨0, hz⟩
+      · exact ⟨_, h⟩⟩
+
+
+
+@[inline] def addCast (m) : Fin n → Fin (m + n) := castLE <| Nat.le_add_left n m
+
+@[simp] lemma addCast_val (i : Fin n) : (i.addCast m : ℕ) = i := rfl
 
 
 namespace Fin1

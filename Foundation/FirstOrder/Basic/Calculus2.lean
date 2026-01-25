@@ -1,6 +1,12 @@
-import Foundation.FirstOrder.Basic.Calculus
+module
+public import Foundation.FirstOrder.Basic.Calculus
+@[expose] public section
 
 /-!
+
+end LO
+
+end
 
 # Derivation2
 

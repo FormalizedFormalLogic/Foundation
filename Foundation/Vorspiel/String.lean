@@ -1,5 +1,3 @@
-import Foundation.Vorspiel.Vorspiel
-
 namespace String
 
 instance (ι : Type*) [h : IsEmpty ι] : ToString ι  := ⟨h.elim⟩

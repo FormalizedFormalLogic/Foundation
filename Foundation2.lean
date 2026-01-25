@@ -3,6 +3,10 @@
 module
 
 -- public import Foundation.Propositional.Kripke2.AxiomPCon
+public import Foundation.Logic.Predicate.Language
+public import Foundation.Logic.Predicate.Quantifier
+public import Foundation.Logic.Predicate.Rew
+public import Foundation.Logic.Predicate.Term
 public import Foundation.InterpretabilityLogic.Axioms
 public import Foundation.InterpretabilityLogic.Entailment
 public import Foundation.InterpretabilityLogic.Entailment.Basic
@@ -69,6 +73,21 @@ public import Foundation.InterpretabilityLogic.Veltman.Logic.ILMinus_J2Plus_J5
 public import Foundation.InterpretabilityLogic.Veltman.Logic.ILMinus_J4Plus
 public import Foundation.InterpretabilityLogic.Veltman.Logic.ILMinus_J4Plus_J5
 public import Foundation.InterpretabilityLogic.Veltman.Logic.ILMinus_J5
+public import Foundation.FirstOrder.Basic.Semantics.Elementary
+public import Foundation.FirstOrder.Basic.Semantics.Semantics
+public import Foundation.FirstOrder.Basic.Syntax.Formula
+public import Foundation.FirstOrder.Basic.Syntax.Rew
+public import Foundation.FirstOrder.Basic.Syntax.Theory
+public import Foundation.FirstOrder.Basic.Operator
+public import Foundation.FirstOrder.Basic.BinderNotation
+public import Foundation.FirstOrder.Basic.Model
+public import Foundation.FirstOrder.Basic.Calculus
+public import Foundation.FirstOrder.Basic.Calculus2
+public import Foundation.FirstOrder.Basic.Coding
+public import Foundation.FirstOrder.Basic.Eq
+public import Foundation.FirstOrder.Basic.Soundness
+public import Foundation.FirstOrder.Basic.Padding
+public import Foundation.FirstOrder.Basic.Definability
 public import Foundation.Modal.Algebra
 public import Foundation.Modal.Algebra.Basic
 public import Foundation.Modal.Algebra.Magari
@@ -262,6 +281,7 @@ public import Foundation.Modal.PLoN.Hilbert
 public import Foundation.Modal.PLoN.Logic
 public import Foundation.Modal.PLoN.Logic.N
 public import Foundation.Modal.Tableau
+public import Foundation.Modal.VanBentham.StandardTranslation
 public import Foundation.Propositional.ClassicalSemantics.Basic
 public import Foundation.Propositional.ClassicalSemantics.Hilbert
 public import Foundation.Propositional.ClassicalSemantics.NNFormula

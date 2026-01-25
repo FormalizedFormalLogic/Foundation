@@ -1,10 +1,15 @@
-import Foundation.FirstOrder.Basic.Operator
+module
+
+public import Foundation.FirstOrder.Basic.Operator
+public import Vorspiel.Fin.Matrix
+
+@[expose] public section
 
 open Lean Elab PrettyPrinter Delaborator SubExpr
 
 namespace Lean.TSyntax
 
-def freshIdent [Monad m] [MonadQuotation m] : m (TSyntax `ident) := do
+meta def freshIdent [Monad m] [MonadQuotation m] : m (TSyntax `ident) := do
   let name ← Term.mkFreshBinderName
   return ⟨mkIdent name⟩
 
@@ -242,25 +247,25 @@ macro_rules
 section delab
 
 @[app_unexpander Semiterm.Operator.numeral]
-def unexpsnderNatLit : Unexpander
+meta def unexpsnderNatLit : Unexpander
   | `($_ $_ $z:num) => `($z:num)
   | _ => throw ()
 
 @[app_unexpander Semiterm.Operator.const]
-def unexpsnderOperatorConst : Unexpander
+meta def unexpsnderOperatorConst : Unexpander
   | `($_ $z:num) => `(‘ $z:num ’)
   | _ => throw ()
 
 @[app_unexpander Semiterm.Operator.Add.add]
-def unexpsnderAdd : Unexpander
+meta def unexpsnderAdd : Unexpander
   | `($_) => `(op(+))
 
 @[app_unexpander Semiterm.Operator.Mul.mul]
-def unexpsnderMul : Unexpander
+meta def unexpsnderMul : Unexpander
   | `($_) => `(op(*))
 
 @[app_unexpander Semiterm.Operator.operator]
-def unexpandFuncArith : Unexpander
+meta def unexpandFuncArith : Unexpander
   | `($_ op(+) ![‘$t:first_order_term’,   ‘$u:first_order_term’   ]) => `(‘($t     + $u     )’)
   | `($_ op(+) ![‘$t:first_order_term’,   #$x                     ]) => `(‘($t     + #$x    )’)
   | `($_ op(+) ![‘$t:first_order_term’,   &$x                     ]) => `(‘($t     + &$x    )’)
@@ -315,7 +320,7 @@ def unexpandFuncArith : Unexpander
   | _                             => throw ()
 
 @[app_unexpander Semiterm.numeral]
-def unexpandNumeral : Unexpander
+meta def unexpandNumeral : Unexpander
   | `($_ $n:num) => `(‘$n:num’)
   | _            => throw ()
 
@@ -493,72 +498,72 @@ macro_rules
 section delab
 
 @[app_unexpander Language.Eq.eq]
-def unexpsnderEq : Unexpander
+meta def unexpsnderEq : Unexpander
   | `($_) => `(op(=))
 
 @[app_unexpander Language.LT.lt]
-def unexpsnderLe : Unexpander
+meta def unexpsnderLe : Unexpander
   | `($_) => `(op(<))
 
 @[app_unexpander Wedge.wedge]
-def unexpandAnd : Unexpander
+meta def unexpandAnd : Unexpander
   | `($_ “ $φ:first_order_formula ” “ $ψ:first_order_formula ”) => `(“ ($φ ∧ $ψ) ”)
   | `($_ “ $φ:first_order_formula ” $u:term                   ) => `(“ ($φ ∧ !$u) ”)
   | `($_ $t:term                    “ $ψ:first_order_formula ”) => `(“ (!$t ∧ $ψ) ”)
   | _                                                           => throw ()
 
 @[app_unexpander Vee.vee]
-def unexpandOr : Unexpander
+meta def unexpandOr : Unexpander
   | `($_ “ $φ:first_order_formula ” “ $ψ:first_order_formula ”) => `(“ ($φ ∨ $ψ) ”)
   | `($_ “ $φ:first_order_formula ” $u:term                   ) => `(“ ($φ ∨ !$u) ”)
   | `($_ $t:term                    “ $ψ:first_order_formula ”) => `(“ (!$t ∨ $ψ) ”)
   | _                                                           => throw ()
 
 @[app_unexpander Tilde.tilde]
-def unexpandNeg : Unexpander
+meta def unexpandNeg : Unexpander
   | `($_ “ $φ:first_order_formula ”) => `(“ ¬$φ ”)
   | _                                => throw ()
 
 @[app_unexpander UnivQuantifier.univ]
-def unexpandUniv : Unexpander
+meta def unexpandUniv : Unexpander
   | `($_ “ $φ:first_order_formula ”) => `(“ ∀' $φ:first_order_formula ”)
   | _                                => throw ()
 
 @[app_unexpander ExQuantifier.ex]
-def unexpandEx : Unexpander
+meta def unexpandEx : Unexpander
   | `($_ “ $φ:first_order_formula”) => `(“ ∃' $φ:first_order_formula ”)
   | _                                   => throw ()
 
 @[app_unexpander ball]
-def unexpandBall : Unexpander
+meta def unexpandBall : Unexpander
   | `($_ “ $φ:first_order_formula ” “ $ψ:first_order_formula ”) => `(“ (∀[$φ] $ψ) ”)
   | `($_ “ $φ:first_order_formula ” $u:term                   ) => `(“ (∀[$φ] !$u) ”)
   | `($_ $t:term                    “ $ψ:first_order_formula ”) => `(“ (∀[!$t] $ψ) ”)
   | _                                                           => throw ()
 
 @[app_unexpander bex]
-def unexpandBex : Unexpander
+meta def unexpandBex : Unexpander
   | `($_ “ $φ:first_order_formula ” “ $ψ:first_order_formula ”) => `(“ (∃[$φ] $ψ) ”)
   | `($_ “ $φ:first_order_formula ” $u:term                   ) => `(“ (∃[$φ] !$u) ”)
   | `($_ $t:term                    “ $ψ:first_order_formula ”) => `(“ (∃[!$t] $ψ) ”)
   | _                                                           => throw ()
 
 @[app_unexpander Arrow.arrow]
-def unexpandArrow : Unexpander
+meta def unexpandArrow : Unexpander
   | `($_ “ $φ:first_order_formula ” “ $ψ:first_order_formula”) => `(“ ($φ → $ψ) ”)
   | `($_ “ $φ:first_order_formula ” $u:term                  ) => `(“ ($φ → !$u) ”)
   | `($_ $t:term                    “ $ψ:first_order_formula”) => `(“ (!$t → $ψ) ”)
   | _                                                          => throw ()
 
 @[app_unexpander LogicalConnective.iff]
-def unexpandIff : Unexpander
+meta def unexpandIff : Unexpander
   | `($_ “ $φ:first_order_formula” “ $ψ:first_order_formula”) => `(“ ($φ ↔ $ψ) ”)
   | `($_ “ $φ:first_order_formula” $u:term                  ) => `(“ ($φ ↔ !$u) ”)
   | `($_ $t:term                   “ $ψ:first_order_formula”) => `(“ (!$t ↔ $ψ) ”)
   | _                                                         => throw ()
 
 @[app_unexpander Semiformula.Operator.operator]
-def unexpandOpArith : Unexpander
+meta def unexpandOpArith : Unexpander
   | `($_ op(=) ![‘ $t:first_order_term ’,  ‘ $u:first_order_term ’]) => `(“ $t:first_order_term = $u      ”)
   | `($_ op(=) ![‘ $t:first_order_term ’,  #$y:term               ]) => `(“ $t:first_order_term = #$y     ”)
   | `($_ op(=) ![‘ $t:first_order_term ’,  &$y:term               ]) => `(“ $t:first_order_term = &$y     ”)
@@ -822,3 +827,5 @@ lemma egegege : M ⊧/![x, y, z] (f“x y z. ∀ w ∈ x, w ∈ z” : Semisente
 end BinderNotation
 
 end LO.FirstOrder
+
+end

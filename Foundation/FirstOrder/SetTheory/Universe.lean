@@ -1,4 +1,3 @@
-import Foundation.Vorspiel.Small
 import Foundation.FirstOrder.SetTheory.Basic
 import Mathlib.Data.QPF.Univariate.Basic
 import Mathlib.SetTheory.Cardinal.Aleph

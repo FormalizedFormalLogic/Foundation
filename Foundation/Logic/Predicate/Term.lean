@@ -1,4 +1,9 @@
-import Foundation.Logic.Predicate.Language
+module
+
+public import Vorspiel
+public import Foundation.Logic.Predicate.Language
+
+@[expose] public section
 
 /-!
 # Terms of first-order logic
@@ -224,3 +229,4 @@ end Semiterm
 end FirstOrder
 
 end LO
+end

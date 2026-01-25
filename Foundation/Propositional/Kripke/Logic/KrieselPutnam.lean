@@ -90,7 +90,6 @@ instance : Propositional.Int ⪱ Propositional.KrieselPutnam := by
               constructor;
               . tauto;
               . simp [Semantics.Models, Satisfies, M];
-                grind;
             | 2 => tauto;
             | 3 => tauto;
             | 4 => tauto;
@@ -103,14 +102,12 @@ instance : Propositional.Int ⪱ Propositional.KrieselPutnam := by
               constructor;
               . tauto;
               . simp [Semantics.Models, Satisfies, M, Frame.Rel'];
-                grind;
             . apply Satisfies.imp_def.not.mpr;
               push_neg;
               use 3;
               constructor;
               . tauto;
               . simp [Semantics.Models, Satisfies, M, Frame.Rel'];
-                grind;
 
 end LO.Propositional
 end

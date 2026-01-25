@@ -1,5 +1,4 @@
 import Foundation.FirstOrder.SetTheory.Basic
-import Foundation.Vorspiel.ExistsUnique
 
 /-!
 # Zermelo set theory

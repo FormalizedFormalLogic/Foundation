@@ -1,7 +1,3 @@
-import Foundation.Vorspiel.Vorspiel
-import Foundation.Vorspiel.Order
---import Foundation.Vorspiel.Meta
-
 import Foundation.Logic.LogicSymbol
 import Foundation.Logic.Semantics
 import Foundation.Logic.Entailment

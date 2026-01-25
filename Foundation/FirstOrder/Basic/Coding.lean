@@ -1,4 +1,6 @@
-import Foundation.FirstOrder.Basic.BinderNotation
+module
+public import Foundation.FirstOrder.Basic.BinderNotation
+@[expose] public section
 
 namespace LO.FirstOrder
 
@@ -200,6 +202,8 @@ lemma encode_ex (φ : Semiformula L ξ (n + 1)) : encode (∃' φ) = (Nat.pair 7
 end Semiformula
 
 end LO.FirstOrder
+
+end
 
 namespace LO.FirstOrder
 

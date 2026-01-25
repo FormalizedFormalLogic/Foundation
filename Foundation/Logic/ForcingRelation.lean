@@ -1,5 +1,4 @@
 import Foundation.Logic.LogicSymbol
-import Foundation.Vorspiel.AdjunctiveSet
 
 /-! # Forcing relation -/
 

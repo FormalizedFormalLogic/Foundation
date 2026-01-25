@@ -1,3 +1,9 @@
+module
+
+public import Vorspiel
+
+@[expose] public section
+
 class Exp (α : Type*) where
   exp : α → α
 
@@ -26,3 +32,5 @@ class StarQuote (α β : Sort*) where
 prefix:max "✶" => StarQuote.quote
 
 end LO
+
+end

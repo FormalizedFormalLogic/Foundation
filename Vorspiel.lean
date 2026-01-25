@@ -10,6 +10,8 @@ public import Vorspiel.Fin.Basic
 public import Vorspiel.Fin.Basic
 public import Vorspiel.Finset.Basic
 public import Vorspiel.Finset.Card
+public import Vorspiel.Function
+public import Vorspiel.Graph
 public import Vorspiel.List.Basic
 public import Vorspiel.List.Chain
 public import Vorspiel.List.ChainI
@@ -28,6 +30,7 @@ public import Vorspiel.Rel.Serial
 public import Vorspiel.Rel.Universal
 public import Vorspiel.Rel.WCWF
 public import Vorspiel.Set.Basic
-public import Vorspiel.Set.Fin
 public import Vorspiel.Set.Cofinite
+public import Vorspiel.Set.Fin
 public import Vorspiel.Small
+public import Vorspiel.String

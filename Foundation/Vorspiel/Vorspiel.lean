@@ -21,8 +21,6 @@ import Vorspiel
 
 @[expose] public section
 
-lemma eq_finZeroElim {α : Sort u} (x : Fin 0 → α) : x = finZeroElim := funext (by rintro ⟨_, _⟩; contradiction)
-
 namespace DMatrix
 
 def vecEmpty : Fin 0 → α :=
@@ -244,16 +242,6 @@ lemma eq_elim {α : Sort*} (f : o → α) : f = h.elim := funext h.elim
 
 end IsEmpty
 
-namespace Function
-
-variable  {α : Type u} {β : Type v}
-
-def funEqOn (φ : α → Prop) (f g : α → β) : Prop := ∀ a, φ a → f a = g a
-
-lemma funEqOn.of_subset {φ ψ : α → Prop} {f g : α → β} (e : funEqOn φ f g) (h : ∀ a, ψ a → φ a) : funEqOn ψ f g :=
-  by intro a ha; exact e a (h a ha)
-
-end Function
 
 namespace Quotient
 open Matrix

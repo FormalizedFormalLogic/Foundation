@@ -1,6 +1,5 @@
 import Foundation.FirstOrder.Basic
 import Foundation.FirstOrder.Completeness.Corollaries
-import Foundation.Vorspiel.ExistsUnique
 
 /-!
 # (Direct) Interpretation

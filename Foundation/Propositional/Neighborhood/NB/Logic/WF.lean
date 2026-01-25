@@ -82,7 +82,6 @@ lemma unprovable_AxiomC : Propositional.WF ⊬ Axioms.C #0 #1 #2 := by
     . simp; tauto;
     . rintro (_ | _ | _) <;>
       . simp_all;
-        grind;
 
 lemma unprovable_axiomD : Propositional.WF ⊬ Axioms.D #0 #1 #2 := by
   apply Sound.not_provable_of_countermodel (𝓜 := NBNeighborhood.FrameClass.WF);

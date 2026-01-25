@@ -1,6 +1,8 @@
-import Foundation.FirstOrder.Basic.BinderNotation
-import Foundation.FirstOrder.Basic.Semantics.Elementary
-import Foundation.FirstOrder.Basic.Soundness
+module
+public import Foundation.FirstOrder.Basic.BinderNotation
+public import Foundation.FirstOrder.Basic.Semantics.Elementary
+public import Foundation.FirstOrder.Basic.Soundness
+@[expose] public section
 
 namespace Matrix
 
@@ -352,3 +354,5 @@ end BinderNotation
 end FirstOrder
 
 end LO
+
+end

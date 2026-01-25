@@ -1,5 +1,8 @@
-import Foundation.Logic.Predicate.Term
-import Foundation.Logic.Predicate.Quantifier
+module
+
+public import Foundation.Logic.Predicate.Quantifier
+public import Foundation.Logic.Predicate.Term
+public import Vorspiel
 
 /-!
 # Rewriting
@@ -14,6 +17,8 @@ term/formula morphisms such as Rewritings, substitutions, and embs are handled b
 Rewritings `LO.FirstOrder.Rew` is naturally converted to formula Rewritings by `LO.FirstOrder.Rew.hom`.
 
 -/
+
+@[expose] public section
 
 namespace LO
 
@@ -875,7 +880,7 @@ macro_rules (kind := substNotation)
   | `($φ:term /[$terms:term,*]) => `($φ ⇜ ![$terms,*])
 
 @[app_unexpander Rewriting.subst]
-def _root_.unexpsnderSubstitute : Unexpander
+meta def _root_.unexpsnderSubstitute : Unexpander
   | `($_ $φ:term ![$ts:term,*]) => `($φ /[ $ts,* ])
   | _                           => throw ()
 
@@ -1063,3 +1068,4 @@ variable {S : ℕ → Type*} [LCWQ S] [SyntacticRewriting L S S] [LawfulSyntacti
 end Rewriting
 
 end LO.FirstOrder
+end

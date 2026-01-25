@@ -1,5 +1,4 @@
 import Foundation.FirstOrder.Arithmetic.Exponential
-import Foundation.Vorspiel.ExistsUnique
 
 /-!
 
