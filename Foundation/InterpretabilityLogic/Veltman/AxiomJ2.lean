@@ -1,4 +1,8 @@
-import Foundation.InterpretabilityLogic.Veltman.AxiomJ4
+module
+
+public import Foundation.InterpretabilityLogic.Veltman.AxiomJ4
+
+@[expose] public section
 
 namespace LO.InterpretabilityLogic.Veltman
 
@@ -86,3 +90,4 @@ lemma validate_axiomJ2_iff_validate_axiomJ2Plus : (F ⊧ Axioms.J2 (.atom 0) (.a
 ⟩
 
 end LO.InterpretabilityLogic.Veltman
+end

@@ -1,6 +1,10 @@
-import Foundation.InterpretabilityLogic.Veltman.Logic.ILMinus
-import Foundation.InterpretabilityLogic.Veltman.AxiomJ5
+module
 
+public import Foundation.InterpretabilityLogic.Veltman.Logic.ILMinus
+public import Foundation.InterpretabilityLogic.Veltman.AxiomJ5
+
+
+@[expose] public section
 
 namespace LO.InterpretabilityLogic
 
@@ -63,3 +67,4 @@ instance : InterpretabilityLogic.ILMinus ⪱ InterpretabilityLogic.ILMinus_J5 :=
         contradiction
 
 end LO.InterpretabilityLogic
+end

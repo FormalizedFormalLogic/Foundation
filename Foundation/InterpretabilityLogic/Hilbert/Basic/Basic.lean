@@ -1,7 +1,11 @@
-import Foundation.InterpretabilityLogic.Logic.Basic
-import Foundation.InterpretabilityLogic.Entailment
-import Foundation.InterpretabilityLogic.Hilbert.Axiom
-import Foundation.Propositional.Entailment.Cl.Łukasiewicz
+module
+
+public import Foundation.InterpretabilityLogic.Logic.Basic
+public import Foundation.InterpretabilityLogic.Entailment
+public import Foundation.InterpretabilityLogic.Hilbert.Axiom
+public import Foundation.Propositional.Entailment.Cl.Łukasiewicz
+
+@[expose] public section
 
 namespace LO.InterpretabilityLogic
 
@@ -541,3 +545,4 @@ instance : InterpretabilityLogic.IL_R_W ≊ InterpretabilityLogic.IL_Rstar := by
 end
 
 end LO.InterpretabilityLogic
+end

@@ -1,5 +1,9 @@
-import Foundation.InterpretabilityLogic.Formula.Substitution
-import Foundation.Modal.Formula.Basic
+module
+
+public import Foundation.InterpretabilityLogic.Formula.Substitution
+public import Foundation.Modal.Formula.Basic
+
+@[expose] public section
 
 namespace LO.Modal
 
@@ -16,3 +20,4 @@ def Substitution.toInterpretabilityLogicSubstitution (s : Modal.Substitution α)
 instance : Coe (Modal.Substitution α) (InterpretabilityLogic.Substitution α) := ⟨Substitution.toInterpretabilityLogicSubstitution⟩
 
 end LO.Modal
+end

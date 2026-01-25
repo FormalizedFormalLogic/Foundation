@@ -2,6 +2,8 @@ module
 
 public import Foundation.Modal.LogicSymbol
 
+@[expose] public section
+
 @[expose]
 public section
 

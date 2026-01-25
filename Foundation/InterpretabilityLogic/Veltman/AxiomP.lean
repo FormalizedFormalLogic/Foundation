@@ -1,4 +1,8 @@
-import Foundation.InterpretabilityLogic.Veltman.Basic
+module
+
+public import Foundation.InterpretabilityLogic.Veltman.Basic
+
+@[expose] public section
 
 namespace LO.InterpretabilityLogic.Veltman
 
@@ -37,3 +41,4 @@ lemma Frame.HasAxiomP.of_validate_axiomP (h : F ⊧ Axioms.P (.atom 0) (.atom 1)
   . tauto;
 
 end LO.InterpretabilityLogic.Veltman
+end

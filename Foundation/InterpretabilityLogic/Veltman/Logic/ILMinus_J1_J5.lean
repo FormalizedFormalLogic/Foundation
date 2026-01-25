@@ -1,5 +1,9 @@
-import Foundation.InterpretabilityLogic.Veltman.Logic.ILMinus_J1
-import Foundation.InterpretabilityLogic.Veltman.Logic.ILMinus_J5
+module
+
+public import Foundation.InterpretabilityLogic.Veltman.Logic.ILMinus_J1
+public import Foundation.InterpretabilityLogic.Veltman.Logic.ILMinus_J5
+
+@[expose] public section
 
 namespace LO.InterpretabilityLogic
 
@@ -59,7 +63,7 @@ instance : InterpretabilityLogic.ILMinus_J1 ⪱ InterpretabilityLogic.ILMinus_J1
       constructor;
       . constructor;
         intro x y Rxy;
-        simpa [Frame.SRel'];
+        grind;
       . by_contra hC;
         have := Veltman.Frame.HasAxiomJ5.of_validate_axiomJ5 hC |>.S_J5 (show 0 < 1 by omega) (show 1 < 2 by omega);
         contradiction;
@@ -89,3 +93,4 @@ instance : InterpretabilityLogic.ILMinus_J5 ⪱ InterpretabilityLogic.ILMinus_J1
         contradiction;
 
 end LO.InterpretabilityLogic
+end

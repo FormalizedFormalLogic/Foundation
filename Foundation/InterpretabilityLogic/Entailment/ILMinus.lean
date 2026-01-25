@@ -1,6 +1,10 @@
-import Foundation.InterpretabilityLogic.Entailment.Basic
-import Foundation.Modal.Entailment.GL
+module
 
+public import Foundation.InterpretabilityLogic.Entailment.Basic
+public import Foundation.Modal.Entailment.GL
+
+
+@[expose] public section
 
 namespace LO.InterpretabilityLogic.Entailment
 
@@ -269,3 +273,4 @@ def CCRhdORhdOCMM! : 𝓢 ⊢! (ψ ▷ ⊥ ➝ φ ▷ ⊥) ➝ (◇φ ➝ ◇ψ)
 @[simp] lemma CCRhdORhdOCMM : 𝓢 ⊢ (ψ ▷ ⊥ ➝ φ ▷ ⊥) ➝ (◇φ ➝ ◇ψ) := ⟨CCRhdORhdOCMM!⟩
 
 end LO.InterpretabilityLogic.Entailment
+end

@@ -1,5 +1,9 @@
-import Foundation.InterpretabilityLogic.Entailment.IL
+module
 
+public import Foundation.InterpretabilityLogic.Entailment.IL
+
+
+@[expose] public section
 
 namespace LO.InterpretabilityLogic.Entailment
 
@@ -44,3 +48,4 @@ instance IL_R_proves_axiomP₀ : Entailment.HasAxiomP₀ 𝓢 where
       apply negMDP H₁ H₂;
 
 end LO.InterpretabilityLogic.Entailment
+end
