@@ -1,4 +1,8 @@
-import Foundation.Modal.Entailment.S4
+module
+
+public import Foundation.Modal.Entailment.S4
+
+@[expose] public section
 
 namespace LO.Modal.Entailment
 
@@ -8,3 +12,4 @@ variable {S F : Type*} [BasicModalLogicalConnective F] [DecidableEq F] [Entailme
 variable {𝓢 : S} [Entailment.S4Point2 𝓢]
 
 end LO.Modal.Entailment
+end

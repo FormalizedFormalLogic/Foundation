@@ -1,7 +1,11 @@
-import Foundation.Modal.Hilbert.Normal.Basic
-import Foundation.Modal.Logic.SumNormal
-import Foundation.Meta.ClProver
+module
 
+public import Foundation.Modal.Hilbert.Normal.Basic
+public import Foundation.Modal.Logic.SumNormal
+public import Foundation.Meta.ClProver
+
+
+@[expose] public section
 
 namespace LO.Modal
 
@@ -801,3 +805,4 @@ end
 end
 
 end LO.Modal
+end

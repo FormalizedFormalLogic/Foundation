@@ -1,6 +1,10 @@
-import Foundation.Modal.Formula.Basic
-import Foundation.Modal.Entailment.Basic
-import Foundation.Meta.ClProver
+module
+
+public import Foundation.Modal.Formula.Basic
+public import Foundation.Modal.Entailment.Basic
+public import Foundation.Meta.ClProver
+
+@[expose] public section
 
 namespace LO.Modal
 
@@ -186,3 +190,4 @@ end
 
 
 end LO.Modal
+end

@@ -1,6 +1,9 @@
-import Foundation.Propositional.Logic.Basic
-import Foundation.Propositional.Entailment.Corsi.Basic
-import Foundation.Vorspiel.Rel.Basic
+module
+
+public import Foundation.Propositional.Logic.Basic
+public import Foundation.Propositional.Entailment.Corsi.Basic
+
+@[expose] public section
 
 namespace LO.Propositional
 
@@ -30,10 +33,7 @@ end Frame
 
 abbrev FrameClass := Set Frame
 
-
-
 abbrev Valuation (F : Frame) := F.World → ℕ → Prop
-
 
 structure Model extends Frame where
   Val : Valuation toFrame
@@ -48,8 +48,6 @@ end Model
 abbrev ModelClass := Set Model
 
 end Kripke2
-
-
 
 namespace Formula.Kripke2
 
@@ -128,7 +126,6 @@ lemma iff_subst_self {F : Kripke2.Frame} {V : Kripke2.Valuation F} {x : F.World}
 
 end Satisfies
 
-
 def ValidOnModel (M : Kripke2.Model) (φ : Formula ℕ) : Prop := ∀ x : M.World, Satisfies M x φ
 
 namespace ValidOnModel
@@ -150,7 +147,6 @@ alias ⟨exists_world_of_not, not_of_exists_world⟩ := iff_not_models_exists_wo
 
 end ValidOnModel
 
-
 def ValidOnFrame (F : Kripke2.Frame) (φ : Formula ℕ) : Prop := ∀ V : Kripke2.Valuation F, (⟨F, V⟩ : Kripke2.Model) ⊧ φ
 
 namespace ValidOnFrame
@@ -167,10 +163,8 @@ variable {F : Kripke2.Frame} {φ ψ χ : Formula ℕ}
 instance : Semantics.Top (Kripke2.Frame) := ⟨by grind⟩
 instance : Semantics.Bot (Kripke2.Frame) := ⟨by grind⟩
 
-
 lemma iff_not_exists_valuation : (F ⊭ φ) ↔ (∃ V : Kripke2.Valuation F, ¬(⟨F, V⟩ : Kripke2.Model) ⊧ φ) := by grind;
 alias ⟨exists_valuation_of_not, not_of_exists_valuation⟩ := iff_not_exists_valuation
-
 
 lemma iff_not_exists_valuation_world : (F ⊭ φ) ↔ (∃ V : Kripke2.Valuation F, ∃ x : (⟨F, V⟩ : Kripke2.Model).World, ¬Satisfies _ x φ) := by
   simp [ValidOnFrame, ValidOnModel, Semantics.Models, Semantics.NotModels];
@@ -187,12 +181,9 @@ end ValidOnFrame
 
 end Formula.Kripke2
 
-
 namespace Kripke2
 
-
 open Formula.Kripke2
-
 
 section
 
@@ -218,7 +209,6 @@ alias ⟨exists_model_world_of_not_validOnFrameClass, not_validOnFrameClass_of_e
 
 end
 
-
 section
 
 variable {C : ModelClass} {φ ψ χ : Formula ℕ}
@@ -236,7 +226,6 @@ lemma iff_not_validOnModelClass_exists_model_world : C ⊭ φ ↔ ∃ M : Kripke
 alias ⟨exists_model_world_of_not_validOnModelClass, not_validOnModelClass_of_exists_model_world⟩ := iff_not_validOnModelClass_exists_model_world
 
 end
-
 
 section
 
@@ -310,7 +299,9 @@ lemma invalid_implyS :
   intro F;
   apply ValidOnFrame.iff_not_exists_valuation_world.mpr;
   use (λ x a => match a with | 0 => x = 1 | 1 => x = 0 ∨ x = 2 | _ => False), 0;
-  suffices 0 ≺ 1 on F ∧ ∃ x, 1 ≺ x on F ∧ (x = 0 ∨ x = 2) ∧ x ≠ 1 by simpa [F, Satisfies];
+  suffices 0 ≺ 1 on F ∧ ∃ x, 1 ≺ x on F ∧ (x = 0 ∨ x = 2) ∧ x ≠ 1 by
+    simp [Satisfies, F];
+    grind;
   constructor;
   . tauto;
   . use 2;
@@ -320,5 +311,5 @@ end
 
 end Kripke2
 
-
 end LO.Propositional
+end

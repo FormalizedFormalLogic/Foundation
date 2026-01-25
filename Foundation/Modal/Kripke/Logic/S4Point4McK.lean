@@ -1,5 +1,9 @@
-import Foundation.Modal.Kripke.Logic.S4Point3McK
-import Foundation.Modal.Kripke.Logic.S4Point4
+module
+
+public import Foundation.Modal.Kripke.Logic.S4Point3McK
+public import Foundation.Modal.Kripke.Logic.S4Point4
+
+@[expose] public section
 
 namespace LO.Modal
 
@@ -22,7 +26,7 @@ protected abbrev FrameClass.S4Point4McK : FrameClass := { F | F.IsS4Point4McK }
 end Kripke
 
 
-namespace Modal.S4Point4McK.Kripke
+namespace S4Point4McK.Kripke
 
 instance : Sound Modal.S4Point4McK FrameClass.S4Point4McK := instSound_of_validates_axioms $ by
   apply FrameClass.validates_with_AxiomK_of_validates;
@@ -68,7 +72,8 @@ instance : Modal.S4Point3McK ⪱ Modal.S4Point4McK := by
             constructor <;> omega;
         }
       . suffices ∃ x, (0 : M) ≺ x ∧ ¬x ≺ 1 ∧ (0 : M) ≺ 1 by
-          simpa [M, Semantics.Models, Satisfies];
+          simp [M, Semantics.Models, Satisfies];
+          grind;
         use 2;
         omega;
 
@@ -89,12 +94,15 @@ instance : Modal.S4Point4 ⪱ Modal.S4Point4McK := by
           trans := by tauto,
           sobocinski := by tauto
         }
-      . suffices ∃ x : M, x ≠ 0 by simpa [M, Semantics.Models, Satisfies];
+      . suffices ∃ x : M, x ≠ 0 by
+          simp [M, Semantics.Models, Satisfies];
+          grind;
         use 1;
         trivial;
 
-end Modal.S4Point4McK.Kripke
+end S4Point4McK.Kripke
 
 
 
 end LO.Modal
+end

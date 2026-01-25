@@ -1,3 +1,7 @@
+module
+
+@[expose] public section
+
 /-
   Filtration of neighborhood semantics.
 
@@ -664,3 +668,4 @@ end quasiFilteringTransitiveFiltration
 end Neighborhood
 
 end LO.Modal
+end

@@ -1,4 +1,8 @@
-import Foundation.Modal.Formula.Basic
+module
+
+public import Foundation.Modal.Formula.Basic
+
+@[expose] public section
 
 namespace LO.Modal
 
@@ -363,3 +367,4 @@ end Formula
 
 
 end LO.Modal
+end

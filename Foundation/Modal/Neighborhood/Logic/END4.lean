@@ -1,8 +1,11 @@
-import Foundation.Modal.Neighborhood.Hilbert
-import Foundation.Modal.Neighborhood.Logic.END
-import Foundation.Modal.Neighborhood.Logic.E4
-import Foundation.Modal.Neighborhood.Logic.EN4
-import Foundation.Vorspiel.Set.Fin
+module
+
+public import Foundation.Modal.Neighborhood.Hilbert
+public import Foundation.Modal.Neighborhood.Logic.END
+public import Foundation.Modal.Neighborhood.Logic.E4
+public import Foundation.Modal.Neighborhood.Logic.EN4
+
+@[expose] public section
 
 namespace LO.Modal
 
@@ -23,7 +26,6 @@ instance : counterframe_2_3_5.IsEND where
 
 end Neighborhood
 
-
 namespace END4
 
 instance Neighborhood.sound : Sound Modal.END4 FrameClass.END4 := instSound_of_validates_axioms $ by
@@ -36,8 +38,6 @@ instance consistent : Entailment.Consistent Modal.END4 := consistent_of_sound_fr
   exact {}
 
 end END4
-
-
 
 instance : Modal.END ⪱ Modal.END4 := by
   constructor;
@@ -55,3 +55,4 @@ instance : Modal.END ⪱ Modal.END4 := by
       . simp;
 
 end LO.Modal
+end

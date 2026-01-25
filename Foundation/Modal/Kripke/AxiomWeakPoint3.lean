@@ -1,10 +1,12 @@
-import Foundation.Modal.Kripke.Completeness
-import Foundation.Vorspiel.Rel.Connected
+module
+
+public import Foundation.Modal.Kripke.Completeness
+
+@[expose] public section
 
 namespace LO.Modal
 
 namespace Kripke
-
 
 variable {F : Kripke.Frame}
 
@@ -27,7 +29,6 @@ end Frame
 
 instance : whitepoint.IsPiecewiseConnected where
   p_connected := by tauto
-
 
 section definability
 
@@ -68,7 +69,6 @@ lemma isPiecewiseConnected_of_validate_axiomWeakPoint3 (h : F ⊧ (Axioms.WeakPo
     all_goals tauto;
 
 end definability
-
 
 section canonicality
 
@@ -142,7 +142,7 @@ instance [Entailment.HasAxiomWeakPoint3 𝓢] : (canonicalFrame 𝓢).IsPiecewis
 
 end canonicality
 
-
 end Kripke
 
 end LO.Modal
+end

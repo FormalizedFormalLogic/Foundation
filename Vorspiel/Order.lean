@@ -1,4 +1,13 @@
-import Foundation.Vorspiel.Vorspiel
+module
+
+public import Mathlib.Tactic.Cases
+public import Mathlib.Tactic.TautoSet
+public import Mathlib.Algebra.GroupWithZero.Nat
+public import Mathlib.Algebra.Order.Group.Nat
+public import Mathlib.Order.Heyting.Basic
+
+@[expose]
+public section
 
 section
 
@@ -55,3 +64,5 @@ lemma himp_inf_himp_inf_sup_le (a b c : α) : (a ⇨ c) ⊓ (b ⇨ c) ⊓ (a ⊔
   simpa only [GeneralizedHeytingAlgebra.le_himp_iff, inf_comm (a ⊔ b)] using this
 
 end HeytingAlgebra
+
+end

@@ -1,7 +1,11 @@
-import Foundation.Modal.Entailment.KT
-import Foundation.Modal.Kripke.Filtration
-import Foundation.Modal.Kripke.Logic.KD4
-import Foundation.Modal.Kripke.Logic.KT
+module
+
+public import Foundation.Modal.Entailment.KT
+public import Foundation.Modal.Kripke.Filtration
+public import Foundation.Modal.Kripke.Logic.KD4
+public import Foundation.Modal.Kripke.Logic.KT
+
+@[expose] public section
 
 namespace LO.Modal
 
@@ -102,6 +106,7 @@ instance : Modal.KD4 ⪱ Modal.S4 := by
           trans := by simp
         };
       . simp [Semantics.Models, Satisfies];
+        grind;
 
 instance : Modal.KD ⪱ Modal.S4 := calc
   Modal.KD ⪱ Modal.KD4 := by infer_instance
@@ -115,3 +120,4 @@ instance : Sound Modal.S4 FrameClass.S4 := inferInstance
 instance : Complete Modal.S4 FrameClass.S4 := inferInstance
 
 end LO.Modal
+end

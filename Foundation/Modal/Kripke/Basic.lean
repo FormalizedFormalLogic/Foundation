@@ -1,12 +1,14 @@
-import Foundation.Vorspiel.Rel.Basic
-import Foundation.Modal.Axioms
-import Foundation.Modal.Formula.Basic
-import Foundation.Modal.Logic.Basic
+module
+
+public import Foundation.Modal.Axioms
+public import Foundation.Modal.Formula.Basic
+public import Foundation.Modal.Logic.Basic
+
+@[expose] public section
 
 namespace LO.Modal
 
 open Entailment
-
 
 namespace Kripke
 
@@ -43,8 +45,6 @@ instance [Finite F.World] : F.IsFinite := ⟨⟩
 
 end Frame
 
-
-
 section
 
 def whitepoint : Frame := ⟨Unit, λ _ _ => True⟩
@@ -65,9 +65,7 @@ instance : IsStrictOrder _ blackpoint.Rel where
 
 end
 
-
 abbrev FrameClass := Set (Frame)
-
 
 abbrev Valuation (F : Frame) := F.World → ℕ → Prop
 
@@ -77,7 +75,6 @@ instance : CoeSort Model Type := ⟨λ M => M.toFrame.World⟩
 instance : CoeFun (Model) (λ M => M.World → ℕ → Prop) := ⟨fun m => m.Val⟩
 
 end Kripke
-
 
 namespace Formula.Kripke
 
@@ -214,7 +211,6 @@ lemma fconj'_def {ι : α → Formula ℕ} : x ⊧ (⩕ i ∈ X, ι i) ↔ ∀ i
 
 lemma not_fconj'_def {ι : α → Formula ℕ}  : ¬(x ⊧ (⩕ i ∈ X, ι i)) ↔ ∃ i ∈ X, ¬(x ⊧ ι i) := by simp;
 
-
 lemma fconj_def {Γ : Finset _} : x ⊧ Γ.conj ↔ ∀ φ ∈ Γ, x ⊧ φ := by
   simp only [Semantics.models_finset_conj];
 
@@ -225,11 +221,9 @@ lemma fdisj'_def {ι : α → Formula ℕ} : x ⊧ (⩖ i ∈ X, ι i) ↔ ∃ i
 
 lemma not_fdisj'_def {ι : α → Formula ℕ} : ¬(x ⊧ (⩖ i ∈ X, ι i)) ↔ ∀ i ∈ X, ¬(x ⊧ ι i) := by simp;
 
-
 lemma trans (hpq : x ⊧ φ ➝ ψ) (hqr : x ⊧ ψ ➝ χ) : x ⊧ φ ➝ χ := by simp_all;
 
 lemma mdp (hpq : x ⊧ φ ➝ ψ) (hp : x ⊧ φ) : x ⊧ ψ := by simp_all;
-
 
 lemma intro_neg_semiequiv (h : x ⊧ φ → x ⊧ ψ) : x ⊧ ∼ψ → x ⊧ ∼φ := by
   contrapose;
@@ -270,7 +264,6 @@ lemma intro_dia_semiequiv (h : ∀ y, x ≺ y → y ⊧ φ → y ⊧ ψ) : x ⊧
   apply intro_diaItr_semiequiv (n := 1);
   simpa;
 
-
 lemma intro_negEquiv (h : x ⊧ φ ↔ x ⊧ ψ) : x ⊧ ∼φ ↔ x ⊧ ∼ψ := by
   constructor;
   . apply intro_neg_semiequiv $ h.mpr;
@@ -293,7 +286,6 @@ lemma intro_diaItr_equiv (h : ∀ y, x ≺^[n] y → (y ⊧ φ ↔ y ⊧ ψ)) : 
 lemma intro_dia_equiv (h : ∀ y, x ≺ y → (y ⊧ φ ↔ y ⊧ ψ)) : x ⊧ ◇φ ↔ x ⊧ ◇ψ := by
   apply intro_diaItr_equiv (n := 1);
   simpa;
-
 
 lemma dia_dual : x ⊧ ◇φ ↔ x ⊧ ∼□(∼φ) := by simp [Semantics.NotModels, Satisfies];
 
@@ -379,7 +371,6 @@ lemma iff_subst_self {x : F.World} (s : Substitution ℕ) :
 
 end Satisfies
 
-
 def ValidOnModel (M : Kripke.Model) (φ : Formula ℕ) := ∀ x : M.World, x ⊧ φ
 
 namespace ValidOnModel
@@ -400,14 +391,12 @@ instance : Semantics.Bot (Kripke.Model) where
 instance : Semantics.Top (Kripke.Model) where
   models_verum := λ _ => ValidOnModel.top_def;
 
-
 lemma iff_not_exists_world {M : Kripke.Model} : (¬M ⊧ φ) ↔ (∃ x : M.World, ¬x ⊧ φ) := by
   apply not_iff_not.mp;
   push_neg;
   tauto;
 
 alias ⟨exists_world_of_not, not_of_exists_world⟩ := iff_not_exists_world
-
 
 protected lemma mdp (hpq : M ⊧ φ ➝ ψ) (hp : M ⊧ φ) : M ⊧ ψ := by
   intro x;
@@ -439,7 +428,6 @@ protected lemma axiomK : M ⊧ (Axioms.K φ ψ)  := by
   exact hpq hp;
 
 end ValidOnModel
-
 
 def ValidOnFrame (F : Kripke.Frame) (φ : Formula ℕ) := ∀ V, (⟨F, V⟩ : Kripke.Model) ⊧ φ
 
@@ -484,7 +472,6 @@ lemma iff_not_exists_model_world :  (¬F ⊧ φ) ↔ (∃ M : Kripke.Model, ∃ 
 
 alias ⟨exists_model_world_of_not, not_of_exists_model_world⟩ := iff_not_exists_model_world
 
-
 protected lemma mdp (hpq : F ⊧ φ ➝ ψ) (hp : F ⊧ φ) : F ⊧ ψ := by
   intro V x;
   exact (hpq V x) (hp V x);
@@ -512,7 +499,6 @@ end ValidOnFrame
 
 end Formula.Kripke
 
-
 namespace Kripke
 
 section
@@ -522,7 +508,6 @@ abbrev Frame.logic (F : Frame) : Logic ℕ := { φ | F ⊧ φ }
 abbrev FrameClass.logic (C : FrameClass) : Logic ℕ := { φ | C ⊧ φ }
 
 end
-
 
 section
 
@@ -554,7 +539,6 @@ alias ⟨exists_valuation_world_of_not_validOnFrameClass, not_validOnFrameClass_
 
 end
 
-
 section
 
 open Formula (atom)
@@ -578,3 +562,4 @@ end
 end Kripke
 
 end LO.Modal
+end

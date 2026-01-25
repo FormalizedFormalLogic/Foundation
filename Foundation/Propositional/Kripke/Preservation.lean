@@ -1,4 +1,8 @@
-import Foundation.Propositional.Kripke.Basic
+module
+
+public import Foundation.Propositional.Kripke.Basic
+
+@[expose] public section
 
 namespace LO.Propositional
 
@@ -177,3 +181,4 @@ end PseudoEpimorphism
 end Kripke
 
 end LO.Propositional
+end

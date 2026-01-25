@@ -1,5 +1,9 @@
-import Foundation.Propositional.Kripke2.Logic.F_Tra1
-import Foundation.Propositional.Kripke2.AxiomHrd
+module
+
+public import Foundation.Propositional.Kripke2.Logic.F_Tra1
+public import Foundation.Propositional.Kripke2.AxiomHrd
+
+@[expose] public section
 
 namespace LO.Propositional
 
@@ -56,6 +60,7 @@ instance : Propositional.F_Tra1 ⪱ Propositional.F_Tra1_Hrd := by
       . apply Set.mem_setOf_eq.mpr;
         exact { trans := by omega; }
       . simp [Semantics.NotModels, Semantics.Models, Formula.Kripke2.Satisfies];
-        omega;
+        grind;
 
 end LO.Propositional
+end

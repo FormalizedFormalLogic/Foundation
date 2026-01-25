@@ -1,6 +1,10 @@
-import Foundation.Propositional.Neighborhood.NB.Hilbert
-import Foundation.Propositional.Hilbert.F_WF
+module
 
+public import Foundation.Propositional.Neighborhood.NB.Hilbert
+public import Foundation.Propositional.Hilbert.F_WF
+
+
+@[expose] public section
 
 namespace LO.Propositional
 
@@ -76,7 +80,9 @@ lemma unprovable_AxiomC : Propositional.WF ⊬ Axioms.C #0 #1 #2 := by
     use 1;
     constructor;
     . simp; tauto;
-    . rintro (_ | _ | _) <;> simp_all;
+    . rintro (_ | _ | _) <;>
+      . simp_all;
+        grind;
 
 lemma unprovable_axiomD : Propositional.WF ⊬ Axioms.D #0 #1 #2 := by
   apply Sound.not_provable_of_countermodel (𝓜 := NBNeighborhood.FrameClass.WF);
@@ -116,7 +122,8 @@ lemma unprovable_axiomD : Propositional.WF ⊬ Axioms.D #0 #1 #2 := by
     . suffices ({0, 1} : Set (Fin 2)) ≠ {0} by
         apply not_or.mpr;
         constructor;
-        . simp;
+        . dsimp;
+          grind;
         . simpa;
       grind;
 
@@ -174,3 +181,4 @@ instance : Propositional.WF ⪱ Propositional.F := by
 
 
 end LO.Propositional
+end

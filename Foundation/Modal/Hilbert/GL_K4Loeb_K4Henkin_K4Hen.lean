@@ -1,7 +1,11 @@
-import Foundation.Modal.Hilbert.Normal.Basic
-import Foundation.Modal.Hilbert.WithLoeb.Basic
-import Foundation.Modal.Hilbert.WithHenkin.Basic
-import Mathlib.Tactic.TFAE
+module
+
+public import Foundation.Modal.Hilbert.Normal.Basic
+public import Foundation.Modal.Hilbert.WithLoeb.Basic
+public import Foundation.Modal.Hilbert.WithHenkin.Basic
+public import Mathlib.Tactic.TFAE
+
+@[expose] public section
 
 namespace LO.Modal
 
@@ -66,3 +70,4 @@ instance : Modal.GL ≊ Modal.K4Hen := by
   apply provable_GL_TFAE.out 0 3;
 
 end LO.Modal
+end

@@ -1,5 +1,9 @@
-import Foundation.Modal.Entailment.KT
-import Foundation.Modal.Entailment.K5
+module
+
+public import Foundation.Modal.Entailment.KT
+public import Foundation.Modal.Entailment.K5
+
+@[expose] public section
 
 namespace LO.Modal.Entailment
 
@@ -38,3 +42,4 @@ def lem₁_diaT_of_S5Grz : 𝓢 ⊢! (∼□(∼φ) ➝ ∼□(∼□φ)) ➝ (�
 def lem₂_diaT_of_S5Grz : 𝓢 ⊢! (◇φ ➝ ◇□φ) ➝ (◇φ ➝ φ) := CCC_of_C_right rm_diabox
 
 end LO.Modal.Entailment
+end

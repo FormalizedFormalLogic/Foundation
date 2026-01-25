@@ -1,3 +1,7 @@
+module
+
+@[expose] public section
+
 /-
   Jeřábek's proof of boxdot conjecture.
 
@@ -392,3 +396,4 @@ theorem S5.BDP : Modal.S5.BoxdotProperty := jerabek_BDP Modal.S5 Kripke.FrameCla
 end
 
 end LO.Modal
+end

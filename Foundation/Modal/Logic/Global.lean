@@ -1,6 +1,10 @@
-import Foundation.Modal.Hilbert.Normal.Basic
-import Foundation.Meta.ClProver
+module
 
+public import Foundation.Modal.Hilbert.Normal.Basic
+public import Foundation.Meta.ClProver
+
+
+@[expose] public section
 
 namespace LO.Modal
 
@@ -157,3 +161,4 @@ end
 end GlobalConsequence
 
 end LO.Modal
+end

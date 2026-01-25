@@ -1,9 +1,12 @@
-import Foundation.Modal.Neighborhood.AxiomGeach
-import Foundation.Modal.Neighborhood.AxiomM
-import Foundation.Modal.Neighborhood.AxiomC
-import Foundation.Modal.Neighborhood.Logic.E
-import Foundation.Modal.Neighborhood.Filtration
-import Foundation.Vorspiel.Set.Fin
+module
+
+public import Foundation.Modal.Neighborhood.AxiomGeach
+public import Foundation.Modal.Neighborhood.AxiomM
+public import Foundation.Modal.Neighborhood.AxiomC
+public import Foundation.Modal.Neighborhood.Logic.E
+public import Foundation.Modal.Neighborhood.Filtration
+
+@[expose] public section
 
 namespace LO.Modal
 
@@ -93,3 +96,4 @@ instance : Modal.E ⪱ Modal.E4 := by
       simp;
 
 end LO.Modal
+end

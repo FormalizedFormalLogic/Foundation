@@ -1,5 +1,9 @@
-import Foundation.Propositional.ClassicalSemantics.Hilbert
-import Foundation.Propositional.ClassicalSemantics.ZeroSubst
+module
+
+public import Foundation.Propositional.ClassicalSemantics.Hilbert
+public import Foundation.Propositional.ClassicalSemantics.ZeroSubst
+
+@[expose] public section
 
 namespace LO.Propositional
 
@@ -25,3 +29,4 @@ theorem Cl.post_complete : ¬∃ L : Logic _, Entailment.Consistent L ∧ Nonemp
   exact h₁ ⨀ h₂;
 
 end LO.Propositional
+end

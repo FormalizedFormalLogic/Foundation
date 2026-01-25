@@ -1,5 +1,9 @@
-import Foundation.Modal.Hilbert.Normal.Basic
-import Foundation.Modal.PLoN.Basic
+module
+
+public import Foundation.Modal.Hilbert.Normal.Basic
+public import Foundation.Modal.PLoN.Basic
+
+@[expose] public section
 
 namespace LO.Modal
 
@@ -40,3 +44,4 @@ lemma consistent_of_nonempty_frameClass (C : PLoN.FrameClass) (hC : Set.Nonempty
 end Hilbert.PLoN
 
 end LO.Modal
+end

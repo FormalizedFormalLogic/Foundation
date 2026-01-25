@@ -1,5 +1,7 @@
-import Foundation.Logic.Entailment
-import Foundation.Propositional.Entailment.Cl.Basic
+module
+
+public import Foundation.Logic.Entailment
+public import Foundation.Propositional.Entailment.Cl.Basic
 
 /-!
 # Sequent calculus and variants
@@ -11,6 +13,9 @@ This file defines a characterization of Tait style calculus and Gentzen style ca
 * `LO.Gentzen`
 
 -/
+
+@[expose]
+public section
 
 namespace LO
 
@@ -279,3 +284,5 @@ lemma derivable_iff_provable_disj [Cut F K] : 𝓚 ⟹! Γ ↔ 𝓚 ⊢ Γ.disj 
 end Tait
 
 end LO
+
+end

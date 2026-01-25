@@ -1,6 +1,10 @@
-import Foundation.Propositional.Kripke.AxiomLEM
-import Foundation.Propositional.Kripke.AxiomDummett
-import Foundation.Propositional.Kripke.Logic.LC
+module
+
+public import Foundation.Propositional.Kripke.AxiomLEM
+public import Foundation.Propositional.Kripke.AxiomDummett
+public import Foundation.Propositional.Kripke.Logic.LC
+
+@[expose] public section
 
 namespace LO.Propositional
 
@@ -108,7 +112,7 @@ instance : Complete Propositional.Cl FrameClass.finite_Cl := by
     . apply Relation.TransGen.single;
       use ⟨y, by tauto⟩, ⟨x, by tauto⟩;
       refine ⟨by tauto, by tauto, ?_⟩;
-      . simpa using F.eucl' Rrx Rry;
+      . exact F.eucl Rry Rrx;
 
 end FFP
 
@@ -148,3 +152,4 @@ instance : Propositional.Int ⪱ Propositional.Cl := calc
   _   ⪱ Propositional.Cl := inferInstance
 
 end LO.Propositional
+end

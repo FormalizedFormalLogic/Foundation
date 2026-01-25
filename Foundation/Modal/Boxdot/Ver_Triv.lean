@@ -1,6 +1,10 @@
-import Foundation.Modal.Boxdot.Basic
-import Foundation.Modal.Kripke.Logic.Triv
-import Foundation.Modal.Kripke.Logic.Ver
+module
+
+public import Foundation.Modal.Boxdot.Basic
+public import Foundation.Modal.Kripke.Logic.Triv
+public import Foundation.Modal.Kripke.Logic.Ver
+
+@[expose] public section
 
 namespace LO.Modal
 
@@ -56,3 +60,4 @@ end Logic
 
 
 end LO.Modal
+end

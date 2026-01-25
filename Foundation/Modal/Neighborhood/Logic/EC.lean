@@ -1,7 +1,11 @@
-import Foundation.Modal.Neighborhood.Hilbert
-import Foundation.Modal.Neighborhood.AxiomC
-import Foundation.Modal.Neighborhood.Logic.E
-import Foundation.Modal.Neighborhood.Supplementation
+module
+
+public import Foundation.Modal.Neighborhood.Hilbert
+public import Foundation.Modal.Neighborhood.AxiomC
+public import Foundation.Modal.Neighborhood.Logic.E
+public import Foundation.Modal.Neighborhood.Supplementation
+
+@[expose] public section
 
 namespace LO.Modal
 
@@ -122,3 +126,4 @@ instance : Modal.EC ⪱ Modal.EMC := by
         omega;
 
 end LO.Modal
+end

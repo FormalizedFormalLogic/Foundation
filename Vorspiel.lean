@@ -15,6 +15,7 @@ public import Vorspiel.List.Chain
 public import Vorspiel.List.ChainI
 public import Vorspiel.Matrix
 public import Vorspiel.Nat
+public import Vorspiel.Order
 public import Vorspiel.Rel.Basic
 public import Vorspiel.Rel.Connected
 public import Vorspiel.Rel.Convergent

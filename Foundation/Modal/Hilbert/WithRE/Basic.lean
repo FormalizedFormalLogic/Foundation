@@ -1,13 +1,17 @@
-import Foundation.Modal.Formula.Basic
-import Foundation.Modal.Entailment.K
-import Foundation.Modal.Entailment.EMCN
-import Foundation.Modal.Entailment.END
-import Foundation.Modal.Entailment.ET5
-import Foundation.Modal.Entailment.EMK
-import Foundation.Propositional.Entailment.Cl.Łukasiewicz
-import Foundation.Logic.Incomparable
-import Foundation.Modal.Logic.Basic
-import Foundation.Modal.Hilbert.Axiom
+module
+
+public import Foundation.Modal.Formula.Basic
+public import Foundation.Modal.Entailment.K
+public import Foundation.Modal.Entailment.EMCN
+public import Foundation.Modal.Entailment.END
+public import Foundation.Modal.Entailment.ET5
+public import Foundation.Modal.Entailment.EMK
+public import Foundation.Propositional.Entailment.Cl.Łukasiewicz
+public import Foundation.Logic.Incomparable
+public import Foundation.Modal.Logic.Basic
+public import Foundation.Modal.Hilbert.Axiom
+
+@[expose] public section
 
 namespace LO.Modal
 
@@ -505,3 +509,4 @@ end
 
 
 end LO.Modal
+end

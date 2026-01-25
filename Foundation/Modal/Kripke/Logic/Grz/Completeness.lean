@@ -1,5 +1,9 @@
-import Foundation.Modal.ComplementClosedConsistentFinset
-import Foundation.Modal.Kripke.Logic.Grz.Soundness
+module
+
+public import Foundation.Modal.ComplementClosedConsistentFinset
+public import Foundation.Modal.Kripke.Logic.Grz.Soundness
+
+@[expose] public section
 
 namespace LO.Modal
 
@@ -281,19 +285,18 @@ instance : Modal.S4McK ⪱ Modal.Grz := by
           trans := by omega,
           mckinsey := by simp;
         }
-      . suffices ∀ (x : Fin 3), (∀ (y : Fin 3), x = 0 ∨ x = 1 → y = 1 ∨ y = 2 → ∀ (z : Fin 3), y = 0 ∨ y = 1 → z = 1 ∨ z = 2) → x ≠ 1 → x = 2 by
-          simpa [Semantics.Models, Satisfies];
-        intro x hx hxn1;
-        by_contra hxn2;
-        rcases @hx 1 (by omega) (by tauto) x (by omega);
-        . contradiction;
-        . contradiction;
+      . suffices (∀ x : Fin 3, (∀ (y : Fin 3), x = 0 ∨ x = 1 → y = 1 ∨ y = 2 → ∀ z : Fin 3, y = 0 ∨ y = 1 → z = 1 ∨ z = 2) → (x = 1 ∨ x = 2)) ∧ 0 ≠ 1 by
+          simp [Semantics.Models, Satisfies, show (2 : Fin 3) = 2 from by omega];
+          tauto;
+        by_contra! hC;
+        simpa using hC $ by tauto;
 
 instance : Modal.S4 ⪱ Modal.Grz := calc
   Modal.S4 ⪱ Modal.S4McK := by infer_instance
-  _          ⪱ Modal.Grz   := by infer_instance
+  _        ⪱ Modal.Grz   := by infer_instance
 
 end Grz.Kripke
 
 
 end LO.Modal
+end

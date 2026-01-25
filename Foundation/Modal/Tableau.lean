@@ -1,9 +1,11 @@
-import Foundation.Modal.Formula.Basic
-import Foundation.Modal.Entailment.K
-import Foundation.Propositional.Formula.Basic
-import Foundation.Propositional.Entailment.Cl.Basic
-import Foundation.Vorspiel.Finset.Supplemental
-import Foundation.Vorspiel.Set.Supplemental
+module
+
+public import Foundation.Modal.Formula.Basic
+public import Foundation.Modal.Entailment.K
+public import Foundation.Propositional.Formula.Basic
+public import Foundation.Propositional.Entailment.Cl.Basic
+
+@[expose] public section
 
 namespace LO.Modal
 
@@ -12,7 +14,6 @@ open LO.Entailment LO.Modal.Entailment
 variable {α : Type*}
 variable {S} [Entailment S (Formula α)]
 variable {𝓢 : S}
-
 
 def Tableau (α : Type u) := Set (Formula α) × Set (Formula α)
 
@@ -36,7 +37,6 @@ protected def Maximal (t : Tableau α) := ∀ {φ}, φ ∈ t.1 ∨ φ ∈ t.2
 
 instance : HasSubset (Tableau α) := ⟨λ t₁ t₂ => t₁.1 ⊆ t₂.1 ∧ t₁.2 ⊆ t₂.2⟩
 @[simp] lemma subset_def {t₁ t₂ : Tableau α} : t₁ ⊆ t₂ ↔ t₁.1 ⊆ t₂.1 ∧ t₁.2 ⊆ t₂.2 := by rfl
-
 
 section
 
@@ -199,7 +199,6 @@ lemma consistent_empty [H_consis : Entailment.Consistent 𝓢] : Tableau.Consist
 
 end
 
-
 section lindenbaum
 
 open Classical
@@ -343,7 +342,6 @@ end lindenbaum
 
 end Tableau
 
-
 open Tableau
 
 def MaximalConsistentTableau (𝓢 : S) := {t : Tableau α // t.Maximal ∧ t.Consistent 𝓢}
@@ -456,7 +454,6 @@ lemma iff_provable_mem₁ : 𝓢 ⊢ φ ↔ ∀ t : MaximalConsistentTableau �
 
 end
 
-
 section Saturated
 
 variable [DecidableEq α] [Encodable α] {n : ℕ}
@@ -485,13 +482,11 @@ lemma mdp_mem₂_provable (hφψ : 𝓢 ⊢ φ ➝ ψ) : ψ ∈ t.1.2 → φ ∈
 
 @[simp] lemma not_mem₂_verum : ⊤ ∉ t.1.2 := iff_not_mem₂_mem₁.mpr mem₁_verum
 
-
 omit [Encodable α] [DecidableEq α] in
 @[simp] lemma not_mem₁_falsum : ⊥ ∉ t.1.1 := disjoint.no_bot
 
 omit [Encodable α] [DecidableEq α] in
 @[simp] lemma mem₂_falsum : ⊥ ∈ t.1.2 := iff_not_mem₁_mem₂.mp not_mem₁_falsum
-
 
 private lemma of_mem₁_and : φ ⋏ ψ ∈ t.1.1 → (φ ∈ t.1.1 ∧ ψ ∈ t.1.1) := by
   intro h;
@@ -734,7 +729,6 @@ lemma iff_mem₂_imp : φ ➝ ψ ∈ t.1.2 ↔ (φ ∈ t.1.1 ∧ ψ ∈ t.1.2) :
     . have := iff_not_mem₁_mem₂.mpr hφ; contradiction;
     . exact iff_not_mem₂_mem₁.mpr hψ;
 
-
 omit [Encodable α] in
 private lemma of_mem₁_neg : ∼φ ∈ t.1.1 → (φ ∈ t.1.2) := by
   intro h;
@@ -851,7 +845,6 @@ end
 
 end Saturated
 
-
 section
 
 lemma _root_.Set.exists_of_ne {s t : Set α} (h : s ≠ t) : ∃ x, ((x ∈ s ∧ x ∉ t) ∨ (x ∉ s ∧ x ∈ t)) := by
@@ -896,7 +889,7 @@ lemma exists₂₁_of_ne {y z : MaximalConsistentTableau 𝓢} (eyz : y ≠ z) :
 
 end
 
-
 end MaximalConsistentTableau
 
 end LO.Modal
+end

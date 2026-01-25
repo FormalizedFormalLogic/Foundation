@@ -1,5 +1,9 @@
-import Foundation.Propositional.Kripke2.Logic.F_Rfl_Tra1
-import Foundation.Propositional.Kripke2.Logic.F_Tra1_Hrd
+module
+
+public import Foundation.Propositional.Kripke2.Logic.F_Rfl_Tra1
+public import Foundation.Propositional.Kripke2.Logic.F_Tra1_Hrd
+
+@[expose] public section
 
 namespace LO.Propositional
 
@@ -40,8 +44,7 @@ end F_Rfl_Tra1_Hrd
 
 instance : Propositional.F_Tra1_Hrd ⪱ Propositional.F_Rfl_Tra1_Hrd := by
   constructor;
-  . apply weakerThan_of_subset_axioms;
-    simp;
+  . grind;
   . apply Entailment.not_weakerThan_iff.mpr;
     use (Axioms.Rfl #0 #1);
     constructor;
@@ -78,6 +81,7 @@ instance : Propositional.F_Rfl_Tra1 ⪱ Propositional.F_Rfl_Tra1_Hrd := by
           refl := by omega;
         }
       . simp [Semantics.NotModels, Semantics.Models, Formula.Kripke2.Satisfies];
-        omega;
+        grind;
 
 end LO.Propositional
+end

@@ -1,5 +1,9 @@
-import Foundation.Modal.Hilbert.WithRE.Basic
-import Foundation.Modal.Neighborhood.Basic
+module
+
+public import Foundation.Modal.Hilbert.WithRE.Basic
+public import Foundation.Modal.Neighborhood.Basic
+
+@[expose] public section
 
 namespace LO.Modal
 
@@ -61,3 +65,4 @@ end FrameClass
 end Hilbert.Neighborhood
 
 end LO.Modal
+end

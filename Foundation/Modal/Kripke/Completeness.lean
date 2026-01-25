@@ -1,5 +1,9 @@
-import Foundation.Modal.Tableau
-import Foundation.Modal.Kripke.Basic
+module
+
+public import Foundation.Modal.Tableau
+public import Foundation.Modal.Kripke.Basic
+
+@[expose] public section
 
 namespace LO.Modal
 
@@ -297,3 +301,4 @@ end canonicalModel
 end Kripke
 
 end LO.Modal
+end

@@ -1,6 +1,10 @@
-import Foundation.Modal.Formula.Basic.Basic
-import Foundation.Propositional.ClassicalSemantics.ZeroSubst
+module
 
+public import Foundation.Modal.Formula.Basic.Basic
+public import Foundation.Propositional.ClassicalSemantics.ZeroSubst
+
+
+@[expose] public section
 
 namespace LO
 
@@ -47,3 +51,4 @@ instance : Coe (PropositionalFormula α) (Propositional.Formula α) := ⟨fun �
 end Modal
 
 end LO
+end

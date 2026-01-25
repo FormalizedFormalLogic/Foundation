@@ -1,4 +1,8 @@
-import Foundation.Modal.Kripke.Preservation
+module
+
+public import Foundation.Modal.Kripke.Preservation
+
+@[expose] public section
 
 namespace LO.Modal
 
@@ -38,3 +42,4 @@ theorem undefinable_irreflexive : ¬∃ φ, ∀ F, F ∈ FrameClass.irrefl ↔ (
 end Kripke
 
 end LO.Modal
+end

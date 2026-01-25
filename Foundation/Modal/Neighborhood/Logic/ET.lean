@@ -1,10 +1,14 @@
-import Foundation.Modal.Neighborhood.AxiomGeach
-import Foundation.Modal.Neighborhood.AxiomM
-import Foundation.Modal.Neighborhood.AxiomC
-import Foundation.Modal.Neighborhood.Logic.E
-import Foundation.Modal.Neighborhood.Logic.ED
-import Foundation.Modal.Neighborhood.Filtration
-import Foundation.Modal.Entailment.ET
+module
+
+public import Foundation.Modal.Neighborhood.AxiomGeach
+public import Foundation.Modal.Neighborhood.AxiomM
+public import Foundation.Modal.Neighborhood.AxiomC
+public import Foundation.Modal.Neighborhood.Logic.E
+public import Foundation.Modal.Neighborhood.Logic.ED
+public import Foundation.Modal.Neighborhood.Filtration
+public import Foundation.Modal.Entailment.ET
+
+@[expose] public section
 
 namespace LO.Modal
 
@@ -76,3 +80,4 @@ instance : Modal.ED ⪱ Modal.ET := by
         simpa [Frame.box] using @hC.refl ∅;
 
 end LO.Modal
+end

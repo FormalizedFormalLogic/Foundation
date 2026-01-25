@@ -1,11 +1,12 @@
-import Foundation.Modal.Boxdot.Basic
-import Foundation.Modal.Kripke.Tree
+module
 
-import Foundation.Vorspiel.Finset.Card
-import Foundation.Vorspiel.Fin.Fin1
-import Mathlib.Algebra.Order.BigOperators.Group.Finset
-import Mathlib.Data.Finite.Sum
+public import Foundation.Modal.Boxdot.Basic
+public import Foundation.Modal.Kripke.Tree
 
+public import Mathlib.Algebra.Order.BigOperators.Group.Finset
+public import Mathlib.Data.Finite.Sum
+
+@[expose] public section
 
 namespace LO.Modal
 
@@ -51,7 +52,6 @@ instance instIsRooted : (F.extendRoot n).IsRootedBy extendRoot.root where
       apply Relation.TransGen.single;
       tauto;
 
-
 protected abbrev chain : List (F.extendRoot n) := List.finRange n |>.map (extend ·)
 
 @[simp]
@@ -62,7 +62,6 @@ lemma chain_IsChain : List.IsChain (· ≺ ·) (extendRoot.chain (F := F) (r := 
   apply List.isChain_map_of_isChain (R := λ a b => a < b);
   . tauto;
   . simp;
-
 
 instance isAsymmetric [F.IsAsymmetric] : (F.extendRoot n).IsAsymmetric := ⟨by
   intro x y hxy;
@@ -237,7 +236,6 @@ lemma inl_satisfies_boxdot_iff [IsTrans _ M.Rel] : r ⊧ φᵇ ↔ (extend i : M
 
 end Model.extendRoot
 
-
 section
 
 open Classical
@@ -339,7 +337,6 @@ lemma validates_axiomT_set_in_irrefl_trans_chain
 
 end
 
-
 namespace Model.extendRoot
 
 open Classical
@@ -371,5 +368,5 @@ end Model.extendRoot
 
 end Kripke
 
-
 end LO.Modal
+end

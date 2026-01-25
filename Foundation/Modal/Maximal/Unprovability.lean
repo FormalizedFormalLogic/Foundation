@@ -1,6 +1,10 @@
-import Foundation.Modal.Maximal.Basic
-import Foundation.Propositional.ClassicalSemantics.Hilbert
-import Foundation.Modal.Entailment.GL
+module
+
+public import Foundation.Modal.Maximal.Basic
+public import Foundation.Propositional.ClassicalSemantics.Hilbert
+public import Foundation.Modal.Entailment.GL
+
+@[expose] public section
 
 namespace LO.Modal
 
@@ -96,3 +100,4 @@ theorem not_S4_weakerThan_GL : ¬(Modal.S4) ⪯ (Modal.GL) := by
 
 
 end LO.Modal
+end

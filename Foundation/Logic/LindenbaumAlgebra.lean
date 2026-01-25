@@ -1,4 +1,9 @@
-import Foundation.Propositional.Entailment.Cl.Basic
+module
+
+public import Foundation.Propositional.Entailment.Cl.Basic
+
+
+public section
 
 namespace LO
 
@@ -207,3 +212,5 @@ end classical
 end Entailment
 
 end LO
+
+end

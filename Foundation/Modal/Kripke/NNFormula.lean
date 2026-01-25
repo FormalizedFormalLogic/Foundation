@@ -1,5 +1,9 @@
-import Foundation.Modal.Formula.NNFormula
-import Foundation.Modal.Kripke.Basic
+module
+
+public import Foundation.Modal.Formula.NNFormula
+public import Foundation.Modal.Kripke.Basic
+
+@[expose] public section
 
 namespace LO.Modal
 
@@ -256,3 +260,4 @@ end Formula.Kripke
 
 
 end LO.Modal
+end

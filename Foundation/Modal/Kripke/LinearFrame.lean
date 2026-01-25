@@ -1,8 +1,12 @@
-import Foundation.Modal.Kripke.Preservation
-import Foundation.Modal.Kripke.Rooted
-import Foundation.Modal.Kripke.AxiomWeakPoint3
-import Mathlib.Order.Interval.Finset.Defs
-import Mathlib.Order.Interval.Finset.Nat
+module
+
+public import Foundation.Modal.Kripke.Preservation
+public import Foundation.Modal.Kripke.Rooted
+public import Foundation.Modal.Kripke.AxiomWeakPoint3
+public import Mathlib.Order.Interval.Finset.Defs
+public import Mathlib.Order.Interval.Finset.Nat
+
+@[expose] public section
 
 namespace LO.Modal.Kripke
 
@@ -236,3 +240,4 @@ lemma natLE_validates_AxiomDum : natLE ⊧ (Axioms.Dum (.atom 0)) := by
 end
 
 end LO.Modal.Kripke
+end

@@ -1,10 +1,12 @@
-import Foundation.Modal.Neighborhood.AxiomGeach
-import Foundation.Modal.Neighborhood.Hilbert
-import Foundation.Modal.Neighborhood.Logic.E4
-import Foundation.Modal.Neighborhood.Logic.EC
-import Foundation.Modal.Neighborhood.Logic.EM
-import Foundation.Vorspiel.Set.Fin
+module
 
+public import Foundation.Modal.Neighborhood.AxiomGeach
+public import Foundation.Modal.Neighborhood.Hilbert
+public import Foundation.Modal.Neighborhood.Logic.E4
+public import Foundation.Modal.Neighborhood.Logic.EC
+public import Foundation.Modal.Neighborhood.Logic.EM
+
+@[expose] public section
 
 namespace LO.Modal
 
@@ -22,7 +24,6 @@ instance : Frame.simple_whitehole.IsEMC where
   regular := by simp_all [Frame.simple_whitehole, Frame.box];
 
 end Neighborhood
-
 
 namespace EMC
 
@@ -72,3 +73,4 @@ instance : Modal.EMC ⪱ Modal.EMC4 := by
       . simp;
 
 end LO.Modal
+end

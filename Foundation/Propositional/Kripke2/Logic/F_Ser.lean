@@ -1,5 +1,9 @@
-import Foundation.Propositional.Kripke2.Logic.F
-import Foundation.Propositional.Kripke2.AxiomSer
+module
+
+public import Foundation.Propositional.Kripke2.Logic.F
+public import Foundation.Propositional.Kripke2.AxiomSer
+
+@[expose] public section
 
 namespace LO.Propositional
 
@@ -63,3 +67,4 @@ instance : Propositional.F ⪱ Propositional.F_Ser := by
         simpa using isSerial_of_valid_axiomSer hC |>.serial 1;
 
 end LO.Propositional
+end

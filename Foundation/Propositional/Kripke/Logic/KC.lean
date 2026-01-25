@@ -1,8 +1,12 @@
-import Foundation.Propositional.Kripke.AxiomWLEM
-import Foundation.Propositional.Kripke.Rooted
-import Foundation.Propositional.Kripke.Logic.Int
-import Foundation.Propositional.Kripke.Logic.KrieselPutnam
+module
 
+public import Foundation.Propositional.Kripke.AxiomWLEM
+public import Foundation.Propositional.Kripke.Rooted
+public import Foundation.Propositional.Kripke.Logic.Int
+public import Foundation.Propositional.Kripke.Logic.KrieselPutnam
+
+
+@[expose] public section
 
 namespace LO.Propositional
 
@@ -188,3 +192,4 @@ instance : Propositional.Int ⪱ Propositional.KC := calc
   _   ⪱ Propositional.KC := inferInstance
 
 end LO.Propositional
+end

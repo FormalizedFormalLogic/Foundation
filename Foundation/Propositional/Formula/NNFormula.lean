@@ -1,5 +1,8 @@
-import Foundation.Logic.LogicSymbol
-import Foundation.Vorspiel.AdjunctiveSet
+module
+
+public import Foundation.Logic.LogicSymbol
+
+@[expose] public section
 
 namespace LO.Propositional
 
@@ -189,10 +192,9 @@ lemma ne_of_ne_complexity {φ ψ : NNFormula α} (h : φ.complexity ≠ ψ.compl
 
 end NNFormula
 
-
 abbrev Theory (α : Type*) := Set (NNFormula α)
 
 instance : AdjunctiveSet (NNFormula α) (Theory α) := inferInstance
 
-
 end LO.Propositional
+end

@@ -1,11 +1,13 @@
-import Foundation.Modal.Neighborhood.AxiomGeach
-import Foundation.Modal.Neighborhood.AxiomK
-import Foundation.Modal.Neighborhood.Hilbert
-import Foundation.Modal.Neighborhood.Logic.E4
-import Foundation.Modal.Neighborhood.Logic.EC
-import Foundation.Modal.Neighborhood.Logic.EM
-import Foundation.Vorspiel.Set.Fin
+module
 
+public import Foundation.Modal.Neighborhood.AxiomGeach
+public import Foundation.Modal.Neighborhood.AxiomK
+public import Foundation.Modal.Neighborhood.Hilbert
+public import Foundation.Modal.Neighborhood.Logic.E4
+public import Foundation.Modal.Neighborhood.Logic.EC
+public import Foundation.Modal.Neighborhood.Logic.EM
+
+@[expose] public section
 
 namespace LO.Modal
 
@@ -13,7 +15,6 @@ open Formula (atom)
 open Neighborhood
 open Hilbert.Neighborhood
 open Formula.Neighborhood
-
 
 namespace Neighborhood
 
@@ -72,7 +73,6 @@ lemma EK_counterframe_for_M_and_C.not_validate_axiomM : ¬EK_counterframe_for_M_
 
 end Neighborhood
 
-
 namespace EK
 
 instance Neighborhood.sound : Sound Modal.EK FrameClass.EK := instSound_of_validates_axioms $ by
@@ -98,3 +98,4 @@ instance : Modal.EK ⪱ Modal.EMC := by
     . apply not_imp_not.mpr $ soundness_of_axioms_validOnFrame (F := EK_counterframe_for_M_and_C) ?_ <;> simp;
 
 end LO.Modal
+end

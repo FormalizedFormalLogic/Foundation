@@ -1,9 +1,13 @@
-import Foundation.Modal.Kripke.Logic.Grz.Completeness
-import Foundation.Modal.Kripke.Logic.S4Point2McK
-import Mathlib.Data.Finite.Sum
-import Mathlib.Data.Set.Finite.Basic
-import Mathlib.Data.Fintype.Pigeonhole
+module
 
+public import Foundation.Modal.Kripke.Logic.Grz.Completeness
+public import Foundation.Modal.Kripke.Logic.S4Point2McK
+public import Mathlib.Data.Finite.Sum
+public import Mathlib.Data.Set.Finite.Basic
+public import Mathlib.Data.Fintype.Pigeonhole
+public import Lean.Meta.Tactic.Simp.BuiltinSimprocs.Fin
+
+@[expose] public section
 
 namespace LO.Modal
 
@@ -298,7 +302,8 @@ instance : Modal.Grz ⪱ Modal.GrzPoint2 := by
           constructor;
           . omega;
           . intro y Rxy;
-            simp_all [M, Satisfies, Frame.Rel'];
+            simp [Satisfies, M];
+            grind;
         . apply Satisfies.box_def.not.mpr;
           push_neg;
           use 2;
@@ -307,6 +312,7 @@ instance : Modal.Grz ⪱ Modal.GrzPoint2 := by
           . apply Satisfies.dia_def.not.mpr;
             push_neg;
             simp [M, Semantics.Models, Satisfies, Frame.Rel'];
+            grind;
 
 instance : Modal.S4Point2McK ⪱ Modal.GrzPoint2 := by
   constructor;
@@ -332,16 +338,15 @@ instance : Modal.S4Point2McK ⪱ Modal.GrzPoint2 := by
             use 2;
             omega;
         };
-      . suffices ∀ (x : Fin 3), (∀ (y : Fin 3), x = 0 ∨ x = 1 → y = 1 ∨ y = 2 → ∀ (z : Fin 3), y = 0 ∨ y = 1 → z = 1 ∨ z = 2) → x ≠ 1 → x = 2 by
-          simpa [Semantics.Models, Satisfies];
-        intro x hx hxn1;
-        by_contra hxn2;
-        rcases @hx 1 (by omega) (by tauto) x (by omega);
-        . contradiction;
-        . contradiction;
+      . suffices (∀ x : Fin 3, (∀ (y : Fin 3), x = 0 ∨ x = 1 → y = 1 ∨ y = 2 → ∀ z : Fin 3, y = 0 ∨ y = 1 → z = 1 ∨ z = 2) → (x = 1 ∨ x = 2)) ∧ 0 ≠ 1 by
+          simp [Semantics.Models, Satisfies, show (2 : Fin 3) = 2 from by omega];
+          tauto;
+        by_contra! hC;
+        simpa using hC $ by tauto;
 
 instance : Modal.S4Point2 ⪱ Modal.GrzPoint2 := calc
   Modal.S4Point2 ⪱ Modal.S4Point2McK := by infer_instance
-  _                ⪱ Modal.GrzPoint2 := by infer_instance
+  _              ⪱ Modal.GrzPoint2 := by infer_instance
 
 end LO.Modal
+end

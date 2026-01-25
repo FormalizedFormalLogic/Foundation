@@ -1,5 +1,9 @@
-import Foundation.Modal.Entailment.ET
-import Foundation.Modal.Entailment.EN
+module
+
+public import Foundation.Modal.Entailment.ET
+public import Foundation.Modal.Entailment.EN
+
+@[expose] public section
 
 namespace LO.Entailment
 
@@ -49,3 +53,4 @@ end ETB
 
 
 end LO.Modal.Entailment
+end

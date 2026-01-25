@@ -1,8 +1,12 @@
-import Foundation.Modal.Kripke.Preservation
-import Foundation.Modal.Kripke.Irreflexive
-import Foundation.Modal.Kripke.Asymmetric
-import Foundation.Modal.Kripke.AxiomWeakPoint2
-import Foundation.Modal.Kripke.AxiomPoint3
+module
+
+public import Foundation.Modal.Kripke.Preservation
+public import Foundation.Modal.Kripke.Irreflexive
+public import Foundation.Modal.Kripke.Asymmetric
+public import Foundation.Modal.Kripke.AxiomWeakPoint2
+public import Foundation.Modal.Kripke.AxiomPoint3
+
+@[expose] public section
 
 namespace LO.Modal
 
@@ -258,7 +262,7 @@ protected abbrev root : (F↾r).World := ⟨r, by tauto⟩
 instance : (F↾r).IsRootedBy pointGenerate.root where
   root_generates := by
     rintro ⟨w, (rfl | Rrw)⟩ hw;
-    . simp at hw;
+    . grind;
     . apply trans_rel_of_origin_trans_rel;
       exact Rrw;
 
@@ -428,3 +432,4 @@ end Model.pointGenerate
 end Kripke
 
 end LO.Modal
+end

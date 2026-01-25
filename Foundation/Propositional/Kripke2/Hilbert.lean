@@ -1,5 +1,9 @@
-import Foundation.Propositional.Hilbert.F.Basic
-import Foundation.Propositional.Kripke2.Basic
+module
+
+public import Foundation.Propositional.Hilbert.F.Basic
+public import Foundation.Propositional.Kripke2.Basic
+
+@[expose] public section
 
 namespace LO.Propositional
 
@@ -72,3 +76,4 @@ end Hilbert.F.Kripke2
 
 
 end LO.Propositional
+end

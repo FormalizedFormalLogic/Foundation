@@ -126,6 +126,7 @@ lemma weakerThan_of_provable_axioms (hs : (Hilbert.F Ax₂) ⊢* Ax₁) : (Hilbe
       | apply axiomI;
       | apply efq;
 
+@[grind <=]
 lemma weakerThan_of_subset_axioms (h : Ax₁ ⊆ Ax₂) : (Hilbert.F Ax₁) ⪯ (Hilbert.F Ax₂) := by
   apply weakerThan_of_provable_axioms;
   intro φ hφ;

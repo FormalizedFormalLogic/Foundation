@@ -1,5 +1,9 @@
-import Foundation.Modal.Entailment.K
-import Foundation.Modal.Entailment.AxiomGeach
+module
+
+public import Foundation.Modal.Entailment.K
+public import Foundation.Modal.Entailment.AxiomGeach
+
+@[expose] public section
 
 namespace LO.Modal.Entailment
 
@@ -76,3 +80,4 @@ lemma Context.boxbox_in_context_to_box [InjectiveBox F] {Γ : Set F} (h : (□'�
   simp [Set.LO.boxItr];
 
 end LO.Modal.Entailment
+end

@@ -1,5 +1,9 @@
-import Foundation.Modal.Neighborhood.Logic.EM
-import Foundation.Modal.Neighborhood.AxiomGeach
+module
+
+public import Foundation.Modal.Neighborhood.Logic.EM
+public import Foundation.Modal.Neighborhood.AxiomGeach
+
+@[expose] public section
 
 namespace LO.Modal
 
@@ -54,3 +58,4 @@ instance : Modal.EMT ⪱ Modal.EMT4 := by
       . simp;
 
 end LO.Modal
+end

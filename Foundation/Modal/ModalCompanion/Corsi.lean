@@ -1,1 +1,5 @@
-import Foundation.Modal.ModalCompanion.Corsi.VF
+module
+
+public import Foundation.Modal.ModalCompanion.Corsi.VF
+@[expose] public section
+end

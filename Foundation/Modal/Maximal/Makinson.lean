@@ -1,8 +1,12 @@
-import Foundation.Modal.Hilbert.NNFormula
-import Foundation.Modal.Maximal.Basic
-import Foundation.Modal.Logic.SumNormal
-import Foundation.Modal.Kripke.Logic.Ver
-import Foundation.Propositional.ClassicalSemantics.ZeroSubst
+module
+
+public import Foundation.Modal.Hilbert.NNFormula
+public import Foundation.Modal.Maximal.Basic
+public import Foundation.Modal.Logic.SumNormal
+public import Foundation.Modal.Kripke.Logic.Ver
+public import Foundation.Propositional.ClassicalSemantics.ZeroSubst
+
+@[expose] public section
 
 namespace LO.Modal
 
@@ -186,3 +190,4 @@ lemma TrivFamily.notVerFamily [L.TrivFamily] : ¬L.VerFamily := by
 end Logic
 
 end LO.Modal
+end

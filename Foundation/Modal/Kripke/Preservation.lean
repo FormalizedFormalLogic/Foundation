@@ -1,4 +1,8 @@
-import Foundation.Modal.Kripke.Closure
+module
+
+public import Foundation.Modal.Kripke.Closure
+
+@[expose] public section
 
 namespace LO.Modal
 
@@ -314,3 +318,4 @@ end Frame
 end Kripke
 
 end LO.Modal
+end

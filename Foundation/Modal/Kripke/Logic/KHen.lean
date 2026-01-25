@@ -1,7 +1,11 @@
-import Foundation.Modal.Kripke.AxiomL
-import Mathlib.Order.Interval.Finset.Nat
-import Foundation.Modal.Kripke.Logic.K
-import Foundation.Modal.Entailment.GL
+module
+
+public import Foundation.Modal.Kripke.AxiomL
+public import Mathlib.Order.Interval.Finset.Nat
+public import Foundation.Modal.Kripke.Logic.K
+public import Foundation.Modal.Entailment.GL
+
+@[expose] public section
 
 namespace LO.Modal
 
@@ -394,3 +398,4 @@ instance : Modal.KHen ⪱ Modal.GL := by
     . apply KHen.unprovable_atomic_axiomFour;
 
 end LO.Modal
+end

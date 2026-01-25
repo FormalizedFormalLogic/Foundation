@@ -1,4 +1,8 @@
-import Foundation.Propositional.Kripke.Preservation
+module
+
+public import Foundation.Propositional.Kripke.Preservation
+
+@[expose] public section
 
 namespace LO.Propositional
 
@@ -98,3 +102,4 @@ end Model.pointGenerate
 end Kripke
 
 end LO.Propositional
+end

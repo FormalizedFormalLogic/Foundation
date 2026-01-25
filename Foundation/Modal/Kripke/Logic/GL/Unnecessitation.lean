@@ -1,5 +1,9 @@
-import Foundation.Modal.Kripke.Logic.GL.Tree
-import Foundation.Modal.Kripke.ExtendRoot
+module
+
+public import Foundation.Modal.Kripke.Logic.GL.Tree
+public import Foundation.Modal.Kripke.ExtendRoot
+
+@[expose] public section
 
 namespace LO.Modal
 
@@ -51,3 +55,4 @@ theorem unnecessitation! : Modal.GL ⊢ □φ → Modal.GL ⊢ φ := by
 noncomputable instance : Entailment.Unnecessitation Modal.GL := ⟨λ h => unnecessitation! ⟨h⟩ |>.some⟩
 
 end LO.Modal
+end

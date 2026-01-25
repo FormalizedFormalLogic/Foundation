@@ -1,5 +1,9 @@
-import Foundation.Modal.Neighborhood.Basic
-import Foundation.Modal.Neighborhood.Completeness
+module
+
+public import Foundation.Modal.Neighborhood.Basic
+public import Foundation.Modal.Neighborhood.Completeness
+
+@[expose] public section
 
 namespace LO.Modal.Neighborhood
 
@@ -76,3 +80,4 @@ instance [Entailment.HasAxiomC 𝓢] : (basicCanonicity 𝓢).toModel.IsRegular 
 end
 
 end LO.Modal.Neighborhood
+end

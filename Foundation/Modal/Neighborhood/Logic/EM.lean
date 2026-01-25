@@ -1,7 +1,10 @@
-import Foundation.Modal.Neighborhood.Logic.E
-import Foundation.Modal.Neighborhood.Supplementation
-import Foundation.Modal.Neighborhood.AxiomC
-import Foundation.Vorspiel.Set.Fin
+module
+
+public import Foundation.Modal.Neighborhood.Logic.E
+public import Foundation.Modal.Neighborhood.Supplementation
+public import Foundation.Modal.Neighborhood.AxiomC
+
+@[expose] public section
 
 namespace LO.Modal
 
@@ -55,7 +58,6 @@ lemma counterframe_axiomC₁.not_validate_axiomC : ¬counterframe_axiomC₁ ⊧ 
 
 end Neighborhood
 
-
 namespace EM
 
 instance Neighborhood.sound : Sound Modal.EM FrameClass.EM := instSound_of_validates_axioms $ by
@@ -73,7 +75,6 @@ instance Neighborhood.complete : Complete Modal.EM FrameClass.EM := (supplemente
   infer_instance;
 
 end EM
-
 
 instance : Modal.EM ⪱ Modal.EMN := by
   constructor;
@@ -123,5 +124,5 @@ instance : Modal.EM ⪱ Modal.EMT := by
         by_contra! hC;
         simpa [Frame.box] using @hC.refl ∅;
 
-
 end LO.Modal
+end

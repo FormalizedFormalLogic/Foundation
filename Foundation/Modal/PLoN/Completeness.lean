@@ -1,5 +1,9 @@
-import Foundation.Modal.MaximalConsistentSet
-import Foundation.Modal.PLoN.Basic
+module
+
+public import Foundation.Modal.MaximalConsistentSet
+public import Foundation.Modal.PLoN.Basic
+
+@[expose] public section
 
 namespace LO.Modal
 
@@ -73,3 +77,4 @@ instance instComplete_of_mem_canonicalFrame {C : PLoN.FrameClass} (h : (canonica
 end PLoN
 
 end LO.Modal
+end

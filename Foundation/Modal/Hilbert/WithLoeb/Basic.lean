@@ -1,7 +1,11 @@
-import Foundation.Modal.Entailment.K4Loeb
-import Foundation.Modal.Hilbert.Axiom
-import Foundation.Modal.Logic.Basic
-import Foundation.Propositional.Entailment.Cl.Łukasiewicz
+module
+
+public import Foundation.Modal.Entailment.K4Loeb
+public import Foundation.Modal.Hilbert.Axiom
+public import Foundation.Modal.Logic.Basic
+public import Foundation.Propositional.Entailment.Cl.Łukasiewicz
+
+@[expose] public section
 
 namespace LO.Modal
 
@@ -141,3 +145,4 @@ instance : Entailment.K4Loeb Modal.K4Loeb where
 end
 
 end LO.Modal
+end

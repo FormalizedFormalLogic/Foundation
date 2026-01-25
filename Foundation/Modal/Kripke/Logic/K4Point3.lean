@@ -1,7 +1,11 @@
-import Foundation.Modal.Kripke.AxiomWeakPoint3
-import Foundation.Modal.Kripke.AxiomGeach
-import Foundation.Modal.Kripke.Hilbert
-import Foundation.Modal.Kripke.Logic.K4
+module
+
+public import Foundation.Modal.Kripke.AxiomWeakPoint3
+public import Foundation.Modal.Kripke.AxiomGeach
+public import Foundation.Modal.Kripke.Hilbert
+public import Foundation.Modal.Kripke.Logic.K4
+
+@[expose] public section
 
 namespace LO.Modal
 
@@ -65,3 +69,4 @@ instance : Modal.K4 ⪱ Modal.K4Point3 := by
         . trivial;
 
 end LO.Modal
+end

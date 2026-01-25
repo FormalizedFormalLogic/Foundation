@@ -1,6 +1,10 @@
-import Foundation.Modal.Kripke.Hilbert
-import Foundation.Modal.Kripke.Completeness
-import Foundation.Modal.Kripke.Filtration
+module
+
+public import Foundation.Modal.Kripke.Hilbert
+public import Foundation.Modal.Kripke.Completeness
+public import Foundation.Modal.Kripke.Filtration
+
+@[expose] public section
 
 namespace LO.Modal
 
@@ -53,3 +57,4 @@ instance Kripke.finite_complete : Complete Modal.K (FrameClass.finite_K) := ⟨b
 end K
 
 end LO.Modal
+end

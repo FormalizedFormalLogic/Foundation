@@ -1,10 +1,13 @@
-import Foundation.Modal.Neighborhood.AxiomGeach
-import Foundation.Modal.Neighborhood.AxiomN
-import Foundation.Modal.Neighborhood.Logic.END4
-import Foundation.Modal.Neighborhood.Logic.ENT4
-import Foundation.Modal.Neighborhood.Logic.ET
-import Foundation.Modal.Neighborhood.Logic.E5
-import Foundation.Vorspiel.Set.Fin
+module
+
+public import Foundation.Modal.Neighborhood.AxiomGeach
+public import Foundation.Modal.Neighborhood.AxiomN
+public import Foundation.Modal.Neighborhood.Logic.END4
+public import Foundation.Modal.Neighborhood.Logic.ENT4
+public import Foundation.Modal.Neighborhood.Logic.ET
+public import Foundation.Modal.Neighborhood.Logic.E5
+
+@[expose] public section
 
 @[simp]
 lemma Set.ne_univ_empty [Nonempty α] : Set.univ (α := α) ≠ ∅ := by simp only [ne_eq,
@@ -15,7 +18,6 @@ namespace LO.Modal
 open Neighborhood
 open Hilbert.Neighborhood
 open Formula.Neighborhood
-
 
 namespace Neighborhood
 
@@ -28,7 +30,6 @@ instance : Frame.simple_blackhole.IsET5 where
   eucl := by
     intro X x hx;
     simp_all [Frame.simple_blackhole, Frame.box];
-
 
 section
 
@@ -47,7 +48,6 @@ instance : (basicCanonicity 𝓢).toModel.IsEuclidean := by
     apply X_np φ;
     apply hφ₂;
   exact this ▸ (basicCanonicity 𝓢 |>.def_𝒩 A ⊤ |>.mp $ MaximalConsistentSet.mem_of_prove (by simp));
-
 
 instance : (basicCanonicity 𝓢).toModel.IsET5 where
 
@@ -68,7 +68,6 @@ instance : counterframe_axiomFive.IsENT4 where
 
 end Neighborhood
 
-
 namespace ET5
 
 instance Neighborhood.sound : Sound Modal.ET5 FrameClass.ET5 := instSound_of_validates_axioms $ by
@@ -85,7 +84,6 @@ instance Neighborhood.complete : Complete Modal.ET5 FrameClass.ET5 := (basicCano
   infer_instance;
 
 end ET5
-
 
 instance : Modal.ENT4 ⪱ Modal.ET5 := by
   constructor;
@@ -126,3 +124,4 @@ instance : Modal.E5 ⪱ Modal.ET5 := by
         contradiction;
 
 end LO.Modal
+end

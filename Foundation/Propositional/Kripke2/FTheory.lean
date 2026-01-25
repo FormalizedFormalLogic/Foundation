@@ -1,5 +1,9 @@
-import Foundation.Propositional.Hilbert.F.Deduction
-import Foundation.Propositional.Kripke2.Basic
+module
+
+public import Foundation.Propositional.Hilbert.F.Deduction
+public import Foundation.Propositional.Kripke2.Basic
+
+@[expose] public section
 
 namespace LO.Propositional
 
@@ -389,3 +393,4 @@ theorem provable_of_validOncanonicalModel : (canonicalModel L) ⊧ φ → L ⊢ 
 end Kripke2
 
 end LO.Propositional
+end

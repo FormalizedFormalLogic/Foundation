@@ -1,11 +1,12 @@
-import Foundation.Modal.Kripke.Completeness
-import Foundation.Vorspiel.Rel.Convergent
+module
 
+public import Foundation.Modal.Kripke.Completeness
+
+@[expose] public section
 
 namespace LO.Modal
 
 namespace Kripke
-
 
 variable {F : Kripke.Frame}
 
@@ -18,10 +19,8 @@ lemma p_convergent [F.IsPiecewiseConvergent] {x y z : F.World} : x ≺ y → x �
 
 end Frame
 
-
 instance : whitepoint.IsPiecewiseConvergent where
   p_convergent := by tauto
-
 
 section definability
 
@@ -59,7 +58,6 @@ lemma isPiecewiseConvergent_of_validate_axiomWeakPoint2 (h : F ⊧ (Axioms.WeakP
     refine ⟨Rxy, z, Rxz, by grind, by tauto⟩;
 
 end definability
-
 
 section canonicality
 
@@ -117,3 +115,4 @@ end canonicality
 end Kripke
 
 end LO.Modal
+end

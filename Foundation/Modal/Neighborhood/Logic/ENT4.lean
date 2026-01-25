@@ -1,5 +1,9 @@
-import Foundation.Modal.Neighborhood.Logic.EN4
-import Foundation.Modal.Neighborhood.Logic.ET4
+module
+
+public import Foundation.Modal.Neighborhood.Logic.EN4
+public import Foundation.Modal.Neighborhood.Logic.ET4
+
+@[expose] public section
 
 namespace LO.Modal
 
@@ -116,3 +120,4 @@ instance : Modal.ET4 ⪱ Modal.ENT4 := by
       . simp;
 
 end LO.Modal
+end

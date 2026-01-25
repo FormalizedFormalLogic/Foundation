@@ -20,9 +20,9 @@ instance [Symm R] [IsTrans _ R] : IsRightEuclidean R := ⟨by
   . assumption;
 ⟩
 
-instance [Refl R] [IsRightEuclidean R] : Symm R := ⟨by
+instance [IsRefl _ R] [IsRightEuclidean R] : Symm R := ⟨by
   intro x y Rxy;
-  exact IsRightEuclidean.reucl Rxy $ Refl.refl x
+  exact IsRightEuclidean.reucl Rxy $ IsRefl.refl x
 ⟩
 
 instance [Symm R] [IsRightEuclidean R] : IsTrans α R := ⟨by
@@ -33,7 +33,7 @@ instance [Symm R] [IsRightEuclidean R] : IsTrans α R := ⟨by
   . exact Symm.symm _ _ Rxy;
 ⟩
 
-instance [Refl R] [IsRightEuclidean R] : IsTrans α R := inferInstance
+instance [IsRefl _ R] [IsRightEuclidean R] : IsTrans α R := inferInstance
 
 
 def LeftEuclidean (R : Rel α α) := ∀ ⦃x y z⦄, R y x → R z x → R y z
