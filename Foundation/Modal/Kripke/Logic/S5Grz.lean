@@ -26,7 +26,6 @@ instance : Modal.S5 ⪱ Modal.S5Grz := by
       constructor;
       . exact { universal := by tauto }
       . simp [Semantics.Models, Satisfies];
-        tauto;
 
 instance : Modal.Grz ⪱ Modal.S5Grz := by
   constructor;

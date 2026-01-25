@@ -104,7 +104,6 @@ instance : Modal.S4Point3 ⪱ Modal.S4Point3McK := by
         }
       . suffices ∃ x : M, x ≠ 0 by
           simp [M, Semantics.Models, Satisfies];
-          grind;
         use 1;
         trivial;
 

@@ -50,7 +50,6 @@ lemma EK_counterframe_for_M_and_C.not_validate_axiomC : ¬EK_counterframe_for_M_
     | _ => ∅
   ), 0;
   simp [Satisfies];
-  grind;
 
 @[simp]
 lemma EK_counterframe_for_M_and_C.not_validate_axiomM : ¬EK_counterframe_for_M_and_C ⊧ Axioms.M ((atom 0) ⋎ (atom 1)) (atom 1) := by

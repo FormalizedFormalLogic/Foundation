@@ -131,9 +131,9 @@ lemma cresswellModel.not_valid_axiomFour : ¬(Satisfies cresswellModel 2♯ (Axi
     match x with
     | n♯ =>
       intro h2n;
-      suffices n ≠ 0 by simp [Satisfies]; grind;
+      suffices n ≠ 0 by simp [Satisfies]; grind
       omega;
-    | n♭ => simp [Satisfies]; grind;
+    | n♭ => simp [Satisfies];
   . apply Satisfies.box_def.not.mpr
     push_neg;
     use 1♯;
@@ -154,7 +154,7 @@ namespace cresswellModel.truthset
 
 lemma infinite_of_all_flat (h : ∀ n, n♭ ∈ ‖φ‖) : (‖φ‖.Infinite) := by
   apply Set.infinite_coe_iff.mp;
-  exact Infinite.of_injective (λ n => ⟨n♭, h n⟩) $ by simp [Function.Injective]; grind;
+  exact Infinite.of_injective (λ n => ⟨n♭, h n⟩) $ by simp [Function.Injective];
 
 -- TODO: need golf
 lemma exists_max_sharp (h₁ : ∀ n, n♭ ∈ ‖φ‖) (h₂ : ‖φ‖ᶜ.Finite) (h₃ : ‖φ‖ᶜ.Nonempty) :

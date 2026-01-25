@@ -19,7 +19,7 @@ variable {F : Frame}
 
 protected abbrev Frame.IsTriv (F : Frame) := _root_.IsEquality F.Rel
 instance [F.IsTriv] : F.IsS4Point4McK where
-  mckinsey := by simp
+  mckinsey := by simp [equality]
 
 protected class Frame.IsFiniteTriv (F : Frame) extends F.IsFinite, F.IsTriv
 instance [F.IsFiniteTriv] : F.IsFiniteGrzPoint3' where

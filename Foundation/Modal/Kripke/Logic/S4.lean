@@ -106,7 +106,6 @@ instance : Modal.KD4 ⪱ Modal.S4 := by
           trans := by simp
         };
       . simp [Semantics.Models, Satisfies];
-        grind;
 
 instance : Modal.KD ⪱ Modal.S4 := calc
   Modal.KD ⪱ Modal.KD4 := by infer_instance

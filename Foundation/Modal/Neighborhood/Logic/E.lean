@@ -146,7 +146,6 @@ instance : Modal.E ⪱ Modal.EC := by
       constructor;
       . tauto;
       . simp [M, Semantics.Models, Satisfies];
-        grind;
 
 instance : Modal.E ⪱ Modal.EN := by
   constructor;
@@ -218,7 +217,6 @@ instance : Modal.E ⪱ Modal.EC := by
       constructor;
       . tauto;
       . simp [M, Semantics.Models, Satisfies];
-        grind;
 
 instance : Modal.E ⪱ Modal.EN := by
   constructor;

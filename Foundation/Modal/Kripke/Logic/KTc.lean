@@ -69,7 +69,6 @@ instance : Modal.KB4 ⪱ Modal.KTc := by
           trans := by simp [M],
         }
       . simp [M, Semantics.Models, Satisfies];
-        grind;
 
 end KTc.Kripke
 

@@ -62,9 +62,7 @@ instance : Modal.S4 ⪱ Modal.S4McK := by
           refl := by tauto;
           trans := by tauto;
         }
-      . suffices ∃ x, x ≠ (0 : M.World) by
-          simp [M, Transitive, Reflexive, Semantics.Models, Satisfies];
-          grind;
+      . suffices ∃ x, x ≠ (0 : M.World) by simp [M, Transitive, Reflexive, Semantics.Models, Satisfies];
         use 1;
         trivial;
 
@@ -88,7 +86,6 @@ instance : Modal.K4McK ⪱ Modal.S4McK := by
             use 1;
         }
       . simp [Semantics.Models, Satisfies, M];
-        grind
 
 end S4McK.Kripke
 

@@ -169,7 +169,6 @@ lemma succ_strictlyWeakerThan : Modal.K4n (n + 1) ⪱ Modal.K4n n := by
           . apply counterframe.iff_rel_from_zero.mpr;
             simp;
           . simp [Semantics.Models, Satisfies, M];
-            grind;
 
 lemma add_strictlyWeakerThan {m : ℕ+} : Modal.K4n (n + m) ⪱ Modal.K4n n := by
   induction m with

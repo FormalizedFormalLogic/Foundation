@@ -62,7 +62,6 @@ instance : Modal.K45 ⪱ Modal.KB4 := by
       . simp only [Fin.isValue, Set.mem_setOf_eq];
         refine { trans := by omega, reucl := by tauto };
       . simp [Semantics.Models, Satisfies];
-        grind;
 
 instance : Modal.KB ⪱ Modal.KB4 := by
   constructor;

@@ -61,7 +61,6 @@ instance : Modal.KD ⪱ Modal.KT := by
       constructor;
       . exact { serial := by tauto };
       . simp [Semantics.Models, Satisfies];
-        grind;
 
 end LO.Modal
 end

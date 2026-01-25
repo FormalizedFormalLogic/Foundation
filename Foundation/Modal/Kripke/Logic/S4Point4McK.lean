@@ -94,9 +94,7 @@ instance : Modal.S4Point4 ⪱ Modal.S4Point4McK := by
           trans := by tauto,
           sobocinski := by tauto
         }
-      . suffices ∃ x : M, x ≠ 0 by
-          simp [M, Semantics.Models, Satisfies];
-          grind;
+      . suffices ∃ x : M, x ≠ 0 by simp [M, Semantics.Models, Satisfies];
         use 1;
         trivial;
 
