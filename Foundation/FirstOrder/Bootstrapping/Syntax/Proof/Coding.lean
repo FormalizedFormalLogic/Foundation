@@ -157,7 +157,7 @@ variable (V)
 noncomputable def typedQuote {Γ : Finset (SyntacticFormula L)} : T ⟹₂ Γ → T.internalize V ⊢!ᵈᵉʳ ⌜Γ⌝
   |   closed Δ φ h hn => TDerivation.em ⌜φ⌝ (by simpa) (by simpa using Sequent.quote_mem_quote.mpr hn)
   |       axm φ hT _ => TDerivation.byAxm ⌜φ⌝ (by
-    have : ∃ σ ∈ T, ↑σ = φ := by simpa [Theory.toSyntacticFormulas] using hT
+    have : ∃ σ ∈ T, ↑σ = φ := by simpa [Theory.toSchema] using hT
     rcases this with ⟨σ, hT', rfl⟩
     simp only [tmem, internalize_theory]
     apply (Δ₁Class.mem_iff'' (T := T) (φ := σ)).mpr hT') (by simpa)
