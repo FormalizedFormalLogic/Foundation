@@ -60,6 +60,7 @@ instance : Modal.N ⪱ Modal.EN := by
       constructor;
       . tauto;
       . simp [Frame.Rel'];
+        grind;
 
 
 instance : Modal.N ⪱ Modal.K := by
@@ -86,6 +87,7 @@ instance : Modal.N ⪱ Modal.K := by
       constructor;
       . tauto;
       . simp [Frame.Rel'];
+        grind;
 
 end LO.Modal
 end

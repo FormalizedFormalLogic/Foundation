@@ -39,10 +39,11 @@ lemma counterframe_2_3_5.not_valid_axiomFour : ¬counterframe_2_3_5 ⊧ Axioms.F
   apply not_imp_not.mpr isTransitive_of_valid_axiomFour;
   by_contra! hC;
   have := hC.trans {0}
-  rcases @this 1 (by simp) with (h | h);
+  rcases @this 1 (by grind;) with (h | h);
   . simp [Frame.box] at h;
     tauto_set;
   . simp [Frame.box, Set.eq_univ_iff_forall] at h;
+    grind;
 
 end Neighborhood
 

@@ -55,7 +55,6 @@ lemma unprovable_AxiomD : Modal.EP ⊬ Axioms.D (.atom a) := by
     by_contra! hC;
     have := @hC |>.serial {1} 1;
     simp [Frame.box, Frame.dia] at this;
-    tauto_set;
 
 end EP
 

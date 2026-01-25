@@ -37,8 +37,8 @@ instance : EK_counterframe_for_M_and_C.HasPropertyK where
     suffices Xᶜ ∪ Y = {0, 1} ∨ Xᶜ ∪ Y = {0, 2} → X = {0, 1} ∨ X = {0, 2} → Y = {0, 1} ∨ Y = {0, 2} by simpa;
     rintro (h₁ | h₁) (h₂ | h₂) <;>
     . have := h₁.subset;
-      have := @this 3 (by simp [h₂]);
-      simp at this;
+      have := @this 3 $ by grind;
+      grind;
 
 @[simp]
 lemma EK_counterframe_for_M_and_C.not_validate_axiomC : ¬EK_counterframe_for_M_and_C ⊧ Axioms.C (atom 0) (atom 1) := by
@@ -50,6 +50,7 @@ lemma EK_counterframe_for_M_and_C.not_validate_axiomC : ¬EK_counterframe_for_M_
     | _ => ∅
   ), 0;
   simp [Satisfies];
+  grind;
 
 @[simp]
 lemma EK_counterframe_for_M_and_C.not_validate_axiomM : ¬EK_counterframe_for_M_and_C ⊧ Axioms.M ((atom 0) ⋎ (atom 1)) (atom 1) := by
@@ -62,7 +63,7 @@ lemma EK_counterframe_for_M_and_C.not_validate_axiomM : ¬EK_counterframe_for_M_
   ), 0;
   suffices (({0, 2} : Set (Fin 4)) ⊆ {2, 0, 1}) ∧ ({2, 0, 1} : Set (Fin 4)) ≠ {0, 2} by
     simp [Satisfies];
-    tauto_set;
+    grind;
   constructor;
   . intro x;
     simp only [Set.mem_insert_iff, Set.mem_singleton_iff];

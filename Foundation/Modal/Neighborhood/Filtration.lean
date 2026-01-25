@@ -1,5 +1,10 @@
 module
 
+public import Mathlib.Data.Set.Finite.Powerset
+public import Foundation.Modal.Neighborhood.AxiomGeach
+public import Foundation.Modal.Neighborhood.Supplementation
+public import Foundation.Modal.Neighborhood.IntersectionClosure
+
 @[expose] public section
 
 /-
@@ -8,11 +13,6 @@ module
   References:
   - K. Kopnev, "The Finite Model Property of Some Non-normal Modal Logics with the Transitivity Axiom", https://arxiv.org/abs/2305.08605
 -/
-
-import Mathlib.Data.Set.Finite.Powerset
-import Foundation.Modal.Neighborhood.AxiomGeach
-import Foundation.Modal.Neighborhood.Supplementation
-import Foundation.Modal.Neighborhood.IntersectionClosure
 
 namespace LO.Modal
 

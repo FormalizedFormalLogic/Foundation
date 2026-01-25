@@ -117,10 +117,8 @@ instance : Modal.E ⪱ Modal.EM := by
       use M, 0;
       constructor;
       . tauto;
-      . simp! [M, Semantics.Models, Satisfies];
-        ext x;
-        simp;
-        omega;
+      . simp [M, Semantics.Models, Satisfies];
+        grind;
 
 instance : Modal.E ⪱ Modal.EC := by
   constructor;
@@ -147,7 +145,8 @@ instance : Modal.E ⪱ Modal.EC := by
       use M, 0;
       constructor;
       . tauto;
-      . simp [M, Semantics.Models, Satisfies]
+      . simp [M, Semantics.Models, Satisfies];
+        grind;
 
 instance : Modal.E ⪱ Modal.EN := by
   constructor;
@@ -191,9 +190,7 @@ instance : Modal.E ⪱ Modal.EM := by
       constructor;
       . tauto;
       . simp! [M, Semantics.Models, Satisfies];
-        ext x;
-        simp;
-        omega;
+        grind;
 
 instance : Modal.E ⪱ Modal.EC := by
   constructor;
@@ -220,7 +217,8 @@ instance : Modal.E ⪱ Modal.EC := by
       use M, 0;
       constructor;
       . tauto;
-      . simp [M, Semantics.Models, Satisfies]
+      . simp [M, Semantics.Models, Satisfies];
+        grind;
 
 instance : Modal.E ⪱ Modal.EN := by
   constructor;
@@ -266,9 +264,7 @@ instance : Modal.E ⪱ Modal.EK := by
       . simp! [M, Semantics.Models, Satisfies];
         constructor;
         . intro;
-          ext x;
-          simp;
-          omega;
+          grind;
         . tauto_set;
 
 instance : Modal.E ⪱ Modal.ED := by

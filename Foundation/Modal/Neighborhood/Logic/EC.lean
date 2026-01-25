@@ -121,9 +121,7 @@ instance : Modal.EC ⪱ Modal.EMC := by
               simp [M]
         }
       . simp! [M, Semantics.Models, Satisfies];
-        ext x;
-        simp!;
-        omega;
+        grind;
 
 end LO.Modal
 end

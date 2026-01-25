@@ -38,7 +38,7 @@ instance : Frame.IsRootedBy natLT natLT.min where
     intro x hx;
     apply Relation.TransGen.single;
     simp_all [natLT, natLT.min];
-    omega;
+    grind;
 
 end natLT
 

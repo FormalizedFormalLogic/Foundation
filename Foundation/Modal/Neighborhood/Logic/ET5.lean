@@ -58,13 +58,13 @@ lemma counterframe_2_3_5.not_valid_axiomT : ¬counterframe_2_3_5 ⊧ Axioms.T (F
   apply not_imp_not.mpr isReflexive_of_valid_axiomT;
   by_contra! hC;
   have := hC.refl {0};
-  have := @this 1
-  simp at this;
+  have := @this 1;
+  grind;
 
 instance : counterframe_axiomFive.IsENT4 where
   contains_unit := by simp [Frame.box];
   refl := by rintro X x (rfl | rfl | rfl) <;> tauto_set;
-  trans := by rintro X x (rfl | rfl) <;> simp [Frame.box];
+  trans := by rintro X x (rfl | rfl) <;> . dsimp [Frame.box]; grind;
 
 end Neighborhood
 
@@ -119,9 +119,9 @@ instance : Modal.E5 ⪱ Modal.ET5 := by
           simp_all [Frame.box, Frame.dia];
       . apply not_imp_not.mpr isReflexive_of_valid_axiomT;
         by_contra! hC;
-        have : ∀ (y : Fin 2), y = 1 := by simpa using hC.refl {1};
-        have := this 0;
-        contradiction;
+        have := hC.refl {1};
+        have := @this 0;
+        grind;
 
 end LO.Modal
 end

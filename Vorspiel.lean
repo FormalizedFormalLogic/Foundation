@@ -28,5 +28,6 @@ public import Vorspiel.Rel.Serial
 public import Vorspiel.Rel.Universal
 public import Vorspiel.Rel.WCWF
 public import Vorspiel.Set.Basic
+public import Vorspiel.Set.Fin
 public import Vorspiel.Set.Cofinite
 public import Vorspiel.Small

@@ -7,7 +7,6 @@ public import Foundation.Modal.Entailment.END
 public import Foundation.Modal.Entailment.ET5
 public import Foundation.Modal.Entailment.EMK
 public import Foundation.Propositional.Entailment.Cl.Łukasiewicz
-public import Foundation.Logic.Incomparable
 public import Foundation.Modal.Logic.Basic
 public import Foundation.Modal.Hilbert.Axiom
 

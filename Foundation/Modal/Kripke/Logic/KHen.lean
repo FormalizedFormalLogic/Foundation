@@ -95,11 +95,7 @@ postfix:max "♭" => flat
 variable {n m : ℕ} {x y : cresswellFrame.World}
 
 lemma trichonomy : x ≺ y ∨ x = y ∨ y ≺ x := by
-  match x, y with
-  | x♯, y♯ => simp [cresswellFrame, Frame.Rel']; omega;
-  | x♭, y♯ => simp [cresswellFrame, Frame.Rel'];
-  | x♯, y♭ => simp [cresswellFrame, Frame.Rel'];
-  | x♭, y♭ => simp [cresswellFrame, Frame.Rel']; omega;
+  match x, y with | x♯, y♯ | x♭, y♯ | x♯, y♭ | x♭, y♭ => grind;;
 
 @[simp] lemma sharp_to_flat : n♯ ≺ m♭ := by simp [Frame.Rel']
 
@@ -135,9 +131,9 @@ lemma cresswellModel.not_valid_axiomFour : ¬(Satisfies cresswellModel 2♯ (Axi
     match x with
     | n♯ =>
       intro h2n;
-      suffices n ≠ 0 by simpa [Satisfies];
+      suffices n ≠ 0 by simp [Satisfies]; grind;
       omega;
-    | n♭ => simp [Satisfies];
+    | n♭ => simp [Satisfies]; grind;
   . apply Satisfies.box_def.not.mpr
     push_neg;
     use 1♯;
@@ -158,7 +154,7 @@ namespace cresswellModel.truthset
 
 lemma infinite_of_all_flat (h : ∀ n, n♭ ∈ ‖φ‖) : (‖φ‖.Infinite) := by
   apply Set.infinite_coe_iff.mp;
-  exact Infinite.of_injective (λ n => ⟨n♭, h n⟩) $ by simp [Function.Injective]
+  exact Infinite.of_injective (λ n => ⟨n♭, h n⟩) $ by simp [Function.Injective]; grind;
 
 -- TODO: need golf
 lemma exists_max_sharp (h₁ : ∀ n, n♭ ∈ ‖φ‖) (h₂ : ‖φ‖ᶜ.Finite) (h₃ : ‖φ‖ᶜ.Nonempty) :
@@ -245,7 +241,7 @@ lemma either_finite_cofinite : (‖φ‖.Finite) ∨ (‖φ‖ᶜ.Finite) := by
         | m♯, k♯ =>
           by_contra hC; simp at hC;
           replace Rxy := sharp_to_sharp.mp Rxy;
-          have : k♯ ∈ ‖φ‖ := @hn_max k (by omega);
+          have : k♯ ∈ ‖φ‖ := @hn_max k (by grind);
           contradiction;
         | m♭, k♯ => simp at Rxy;
         | _♯, k♭ => have := h k; contradiction;
@@ -262,7 +258,7 @@ lemma either_finite_cofinite : (‖φ‖.Finite) ∨ (‖φ‖ᶜ.Finite) := by
           contradiction;
         | m♭ =>
           by_contra hC;
-          have := hx n♭ $ (cresswellFrame.flat_to_flat.mpr $ by simpa using hC);
+          have := hx n♭ $ cresswellFrame.flat_to_flat.mpr $ by grind;;
           contradiction;
 
 end cresswellModel.truthset

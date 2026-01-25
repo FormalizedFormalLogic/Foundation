@@ -2,8 +2,7 @@ module
 
 public import Foundation.Propositional.Entailment.Cl.Basic
 
-
-public section
+@[expose] public section
 
 namespace LO
 

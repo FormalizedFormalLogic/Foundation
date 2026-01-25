@@ -42,6 +42,7 @@ lemma counterframe_EN4_ENT4.not_valid_axiomT : ¬counterframe_EN4_ENT4 ⊧ Axiom
   have := hC.refl {0};
   have := @this 1;
   simp [Frame.box] at this;
+  grind;
 
 instance : Frame.simple_whitehole.IsET4 where
   refl := by simp [Frame.box];

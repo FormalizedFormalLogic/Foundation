@@ -2,15 +2,11 @@
 
 module
 
+-- public import Foundation.Propositional.Kripke2.AxiomPCon
 public import Foundation.Modal.Algebra
 public import Foundation.Modal.Algebra.Basic
 public import Foundation.Modal.Algebra.Magari
 public import Foundation.Modal.Axioms
-public import Foundation.Modal.Boxdot.Basic
-public import Foundation.Modal.Boxdot.GL_Grz
-public import Foundation.Modal.Boxdot.GL_S
-public import Foundation.Modal.Boxdot.GLPoint3_GrzPoint3
-public import Foundation.Modal.Boxdot.Grz_S
 public import Foundation.Modal.Boxdot.Jerabek
 public import Foundation.Modal.Boxdot.K4_S4
 public import Foundation.Modal.Boxdot.Ver_Triv
@@ -43,8 +39,6 @@ public import Foundation.Modal.Entailment.KT
 public import Foundation.Modal.Entailment.KTc
 public import Foundation.Modal.Entailment.N
 public import Foundation.Modal.Entailment.S4
-public import Foundation.Modal.Entailment.S4Dot2
-public import Foundation.Modal.Entailment.S4Dot3
 public import Foundation.Modal.Entailment.S5
 public import Foundation.Modal.Entailment.S5Grz
 public import Foundation.Modal.Entailment.Triv
@@ -52,7 +46,6 @@ public import Foundation.Modal.Entailment.Ver
 public import Foundation.Modal.Formula.Basic
 public import Foundation.Modal.Formula.Complement
 public import Foundation.Modal.Formula.NNFormula
-public import Foundation.Modal.Formula.Propositional
 public import Foundation.Modal.Hilbert.Axiom
 public import Foundation.Modal.Hilbert.GL_K4Loeb_K4Henkin_K4Hen
 public import Foundation.Modal.Hilbert.NNFormula
@@ -61,7 +54,6 @@ public import Foundation.Modal.Hilbert.WithHenkin.Basic
 public import Foundation.Modal.Hilbert.WithLoeb.Basic
 public import Foundation.Modal.Hilbert.WithRE_Normal
 public import Foundation.Modal.Hilbert.WithRE.Basic
-public import Foundation.Modal.Kripke
 public import Foundation.Modal.Kripke.Antisymmetric
 public import Foundation.Modal.Kripke.Asymmetric
 public import Foundation.Modal.Kripke.AxiomFourN
@@ -113,7 +105,6 @@ public import Foundation.Modal.Kripke.Logic.KB5
 public import Foundation.Modal.Kripke.Logic.KD
 public import Foundation.Modal.Kripke.Logic.KD4
 public import Foundation.Modal.Kripke.Logic.KD45
-public import Foundation.Modal.Kripke.Logic.KD4Point3Z
 public import Foundation.Modal.Kripke.Logic.KD5
 public import Foundation.Modal.Kripke.Logic.KDB
 public import Foundation.Modal.Kripke.Logic.KHen
@@ -142,13 +133,6 @@ public import Foundation.Modal.Kripke.Rooted
 public import Foundation.Modal.Kripke.Terminated
 public import Foundation.Modal.Kripke.Tree
 public import Foundation.Modal.Kripke.Undefinability
-public import Foundation.Modal.Logic.Basic
-public import Foundation.Modal.Logic.GL.Independency
-public import Foundation.Modal.Logic.Global
-public import Foundation.Modal.Logic.GLPlusBoxBot.Basic
-public import Foundation.Modal.Logic.GLPoint3OplusBoxBot.Basic
-public import Foundation.Modal.Logic.SumNormal
-public import Foundation.Modal.Logic.SumQuasiNormal
 public import Foundation.Modal.LogicSymbol
 public import Foundation.Modal.Maximal.Basic
 public import Foundation.Modal.Maximal.Makinson
@@ -280,7 +264,6 @@ public import Foundation.Propositional.Kripke.Preservation
 public import Foundation.Propositional.Kripke.Rooted
 public import Foundation.Propositional.Kripke2.AxiomCorfl
 public import Foundation.Propositional.Kripke2.AxiomHrd
-public import Foundation.Propositional.Kripke2.AxiomPCon
 public import Foundation.Propositional.Kripke2.AxiomPSCon
 public import Foundation.Propositional.Kripke2.AxiomRfl
 public import Foundation.Propositional.Kripke2.AxiomSer

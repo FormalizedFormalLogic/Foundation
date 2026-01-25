@@ -23,13 +23,9 @@ theorem undefinable_irreflexive : ¬∃ φ, ∀ F, F ∈ FrameClass.irrefl ↔ (
     back := by
       intro x y h;
       use 1 - x;
-      constructor;
-      . simpa;
-      . omega;
+      grind;
   };
-  have f_surjective : Function.Surjective f := by
-    simp [Function.Surjective];
-    aesop;
+  have f_surjective : Function.Surjective f := by simp [Function.Surjective];
 
   have : F₁.IsIrreflexive := { irrefl := by omega; }
   have : F₂.IsIrreflexive := by
