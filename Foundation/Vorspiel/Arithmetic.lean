@@ -3,7 +3,7 @@ module
 public import Mathlib.Data.Nat.ModEq
 public import Mathlib.Data.List.FinRange
 public import Mathlib.Logic.Godel.GodelBetaFunction
-public import Vorspiel
+public import Foundation.Vorspiel
 
 @[expose] public section
 

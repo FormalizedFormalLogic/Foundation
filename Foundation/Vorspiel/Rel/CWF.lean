@@ -3,7 +3,7 @@ module
 public import Mathlib.Data.Fintype.Card
 public import Mathlib.Order.WellFounded
 public import Mathlib.Data.Finset.Lattice.Fold
-public import Vorspiel.Rel.Connected
+public import Foundation.Vorspiel.Rel.Connected
 
 
 @[expose]

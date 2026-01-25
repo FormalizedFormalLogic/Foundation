@@ -3,7 +3,7 @@ public import Mathlib.Data.Fin.VecNotation
 public import Mathlib.Data.Fintype.Sigma
 public import Mathlib.Data.Fintype.Vector
 public import Mathlib.Data.List.GetD
-public import Vorspiel.Matrix
+public import Foundation.Vorspiel.Matrix
 
 @[expose]
 public section

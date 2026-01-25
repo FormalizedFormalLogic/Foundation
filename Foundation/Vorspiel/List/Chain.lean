@@ -4,7 +4,7 @@ public import Mathlib.Data.List.Nodup
 public import Mathlib.Data.List.Range
 public import Mathlib.Data.Fintype.Card
 public import Mathlib.Data.Fintype.List
-public import Vorspiel.Fin.Basic
+public import Foundation.Vorspiel.Fin.Basic
 
 @[expose]
 public section

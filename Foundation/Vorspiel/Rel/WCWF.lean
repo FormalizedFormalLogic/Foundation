@@ -1,6 +1,6 @@
 module
 
-public import Vorspiel.Rel.CWF
+public import Foundation.Vorspiel.Rel.CWF
 public import Mathlib.Data.Fintype.Pigeonhole
 
 @[expose]

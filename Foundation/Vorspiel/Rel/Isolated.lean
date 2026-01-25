@@ -1,7 +1,7 @@
 module
 
-public import Vorspiel.Rel.Coreflexive
-public import Vorspiel.Rel.Basic
+public import Foundation.Vorspiel.Rel.Coreflexive
+public import Foundation.Vorspiel.Rel.Basic
 
 @[expose]
 public section

@@ -1,7 +1,7 @@
 module
 
-public import Vorspiel.Rel.Euclidean
-public import Vorspiel.Rel.Convergent
+public import Foundation.Vorspiel.Rel.Euclidean
+public import Foundation.Vorspiel.Rel.Convergent
 
 @[expose]
 public section

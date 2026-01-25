@@ -1,6 +1,6 @@
 module
 
-public import Vorspiel
+public import Foundation.Vorspiel
 public import Foundation.Logic.Predicate.Language
 
 @[expose] public section

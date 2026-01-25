@@ -2,8 +2,8 @@ module
 public import Mathlib.Data.Fin.VecNotation
 public import Mathlib.Tactic.Cases
 public import Mathlib.Data.Nat.Pairing
-public import Vorspiel.Nat.Basic
-public import Vorspiel.Fin.Basic
+public import Foundation.Vorspiel.Nat.Basic
+public import Foundation.Vorspiel.Fin.Basic
 
 @[expose] public section
 

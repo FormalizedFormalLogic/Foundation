@@ -21,9 +21,6 @@ name = "doc-gen4"
 name = "Foundation"
 
 [[lean_lib]]
-name = "Foundation2"
-
-[[lean_lib]]
 name = "Vorspiel"
 
 [[lean_exe]]

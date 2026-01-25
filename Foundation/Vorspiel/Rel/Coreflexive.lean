@@ -1,6 +1,6 @@
 module
 
-public import Vorspiel.Rel.Basic
+public import Foundation.Vorspiel.Rel.Basic
 
 @[expose]
 public section

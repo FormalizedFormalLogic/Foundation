@@ -1,7 +1,7 @@
 module
 
 public import Foundation.FirstOrder.Basic.Operator
-public import Vorspiel.Fin.Matrix
+public import Foundation.Vorspiel.Fin.Matrix
 
 @[expose] public section
 

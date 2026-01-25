@@ -3,7 +3,7 @@ module
 public import Foundation.FirstOrder.Bootstrapping.DerivabilityCondition
 public import Foundation.FirstOrder.Bootstrapping.ProvabilityAbstraction.Basic
 public import Foundation.FirstOrder.Incompleteness.Examples
-public import Vorspiel.ENat
+public import Foundation.Vorspiel.ENat
 
 @[expose] public section
 namespace LO.FirstOrder

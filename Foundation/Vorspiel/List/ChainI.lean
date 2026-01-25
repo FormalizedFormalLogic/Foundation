@@ -3,7 +3,7 @@ module
 public import Mathlib.Data.Fintype.Card
 public import Mathlib.Data.Fintype.List
 public import Mathlib.Data.Fintype.EquivFin
-public import Vorspiel.List.Basic
+public import Foundation.Vorspiel.List.Basic
 
 @[expose]
 public section

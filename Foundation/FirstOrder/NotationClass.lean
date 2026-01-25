@@ -1,6 +1,6 @@
 module
 
-public import Vorspiel
+public import Foundation.Vorspiel
 
 @[expose] public section
 
