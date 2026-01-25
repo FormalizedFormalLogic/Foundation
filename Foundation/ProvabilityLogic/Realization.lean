@@ -1,6 +1,9 @@
-import Foundation.FirstOrder.Bootstrapping.DerivabilityCondition
-import Foundation.Modal.Hilbert.Normal.Basic
+module
 
+public import Foundation.FirstOrder.Bootstrapping.DerivabilityCondition
+public import Foundation.Modal.Hilbert.Normal.Basic
+
+@[expose] public section
 namespace LO
 
 open Entailment FiniteContext
