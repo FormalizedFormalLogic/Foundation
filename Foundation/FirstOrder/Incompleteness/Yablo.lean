@@ -1,11 +1,13 @@
+module
+
+public import Foundation.FirstOrder.Bootstrapping.DerivabilityCondition
+
+@[expose] public section
 /-
   Formalizing Yablo's Paradox.
-
   *References*
   - C. Cieśliński, R. Urbaniak, "Gödelizing the Yablo Sequence"
 -/
-
-import Foundation.FirstOrder.Bootstrapping.DerivabilityCondition
 
 namespace LO.FirstOrder.Arithmetic
 

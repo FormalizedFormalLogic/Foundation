@@ -1,6 +1,8 @@
-import Foundation.FirstOrder.Arithmetic.HFS.Basic
-import Foundation.FirstOrder.Arithmetic.HFS.Seq
-import Foundation.FirstOrder.Arithmetic.HFS.PRF
-import Foundation.FirstOrder.Arithmetic.HFS.Fixpoint
-import Foundation.FirstOrder.Arithmetic.HFS.Vec
-import Foundation.FirstOrder.Arithmetic.HFS.Coding
+module
+
+public import Foundation.FirstOrder.Arithmetic.HFS.Basic
+public import Foundation.FirstOrder.Arithmetic.HFS.Seq
+public import Foundation.FirstOrder.Arithmetic.HFS.PRF
+public import Foundation.FirstOrder.Arithmetic.HFS.Fixpoint
+public import Foundation.FirstOrder.Arithmetic.HFS.Vec
+public import Foundation.FirstOrder.Arithmetic.HFS.Coding

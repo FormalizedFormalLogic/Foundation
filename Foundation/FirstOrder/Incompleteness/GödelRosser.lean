@@ -1,5 +1,8 @@
-import Foundation.FirstOrder.Bootstrapping.RosserProvability
+module
 
+public import Foundation.FirstOrder.Bootstrapping.RosserProvability
+
+@[expose] public section
 /-!
 # Gödel-Rosser Incompleteness Theorem.
 -/

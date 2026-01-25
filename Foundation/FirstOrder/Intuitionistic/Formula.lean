@@ -1,5 +1,8 @@
-import Foundation.FirstOrder.Basic
+module
 
+public import Foundation.FirstOrder.Basic
+
+@[expose] public section
 /-!
 # Formulas of intuitionistic first-order logic
 

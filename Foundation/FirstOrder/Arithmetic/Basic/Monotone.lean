@@ -1,5 +1,8 @@
-import Foundation.FirstOrder.Arithmetic.Basic.Misc
+module
 
+public import Foundation.FirstOrder.Arithmetic.Basic.Misc
+
+@[expose] public section
 namespace LO.FirstOrder
 
 namespace Structure

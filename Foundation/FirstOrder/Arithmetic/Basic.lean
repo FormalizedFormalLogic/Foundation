@@ -1,4 +1,6 @@
-import Foundation.FirstOrder.Arithmetic.Basic.Misc
-import Foundation.FirstOrder.Arithmetic.Basic.Monotone
-import Foundation.FirstOrder.Arithmetic.Basic.Hierarchy
-import Foundation.FirstOrder.Arithmetic.Basic.Model
+module
+
+public import Foundation.FirstOrder.Arithmetic.Basic.Misc
+public import Foundation.FirstOrder.Arithmetic.Basic.Monotone
+public import Foundation.FirstOrder.Arithmetic.Basic.Hierarchy
+public import Foundation.FirstOrder.Arithmetic.Basic.Model

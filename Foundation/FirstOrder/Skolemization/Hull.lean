@@ -1,6 +1,9 @@
-import Foundation.FirstOrder.Basic
-import Mathlib.SetTheory.Cardinal.Basic
+module
 
+public import Foundation.FirstOrder.Basic
+public import Mathlib.SetTheory.Cardinal.Basic
+
+@[expose] public section
 /-! # Skolem hull -/
 
 namespace LO.FirstOrder

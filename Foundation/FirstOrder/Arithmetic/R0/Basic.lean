@@ -1,7 +1,10 @@
-import Foundation.FirstOrder.Arithmetic.Basic
-import Mathlib.Algebra.Order.Monoid.Canonical.Defs
-import Mathlib.Data.Nat.Cast.Order.Basic
+module
 
+public import Foundation.FirstOrder.Arithmetic.Basic
+public import Mathlib.Algebra.Order.Monoid.Canonical.Defs
+public import Mathlib.Data.Nat.Cast.Order.Basic
+
+@[expose] public section
 /-!
 # Cobham's theory $\mathsf{R_0}$
 

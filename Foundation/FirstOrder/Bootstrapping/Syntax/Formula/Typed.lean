@@ -1,6 +1,9 @@
-import Foundation.FirstOrder.Bootstrapping.Syntax.Term.Typed
-import Foundation.FirstOrder.Bootstrapping.Syntax.Formula.Iteration
+module
 
+public import Foundation.FirstOrder.Bootstrapping.Syntax.Term.Typed
+public import Foundation.FirstOrder.Bootstrapping.Syntax.Formula.Iteration
+
+@[expose] public section
 /-!
 # Typed Formalized Semiformula/Formula
 -/

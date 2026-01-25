@@ -1,6 +1,9 @@
-import Foundation.FirstOrder.Basic
-import Foundation.FirstOrder.Completeness.Corollaries
+module
 
+public import Foundation.FirstOrder.Basic
+public import Foundation.FirstOrder.Completeness.Corollaries
+
+@[expose] public section
 /-!
 # (Direct) Interpretation
 -/

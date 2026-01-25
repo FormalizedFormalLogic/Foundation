@@ -1,6 +1,9 @@
-import Foundation.FirstOrder.SetTheory.Basic
-import Foundation.FirstOrder.SetTheory.Universe
+module
 
+public import Foundation.FirstOrder.SetTheory.Basic
+public import Foundation.FirstOrder.SetTheory.Universe
+
+@[expose] public section
 namespace LO.FirstOrder.SetTheory
 
 abbrev TransitiveModel.{u} := Set Universe.{u}

@@ -1,5 +1,8 @@
-import Foundation.FirstOrder.Arithmetic.HFS.Vec
+module
 
+public import Foundation.FirstOrder.Arithmetic.HFS.Vec
+
+@[expose] public section
 namespace LO.FirstOrder.Arithmetic
 
 variable {V : Type*} [ORingStructure V] [V ⊧ₘ* 𝗜𝚺₁]

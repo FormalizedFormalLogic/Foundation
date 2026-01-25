@@ -1,8 +1,12 @@
-import Foundation.FirstOrder.Basic
-import Foundation.Logic.Predicate.Relational
-import Foundation.Logic.ForcingRelation
-import Mathlib.Order.PFilter
+module
 
+public import Foundation.FirstOrder.Basic
+public import Foundation.Logic.Predicate.Relational
+public import Foundation.Logic.ForcingRelation
+public import Mathlib.Order.PFilter
+public import Foundation.Vorspiel.Preorder
+
+@[expose] public section
 namespace LO.FirstOrder
 
 /-- Kripke model for relational first-order language -/

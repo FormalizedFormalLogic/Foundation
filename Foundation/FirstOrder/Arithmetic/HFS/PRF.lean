@@ -1,5 +1,8 @@
-import Foundation.FirstOrder.Arithmetic.HFS.Seq
+module
 
+public import Foundation.FirstOrder.Arithmetic.HFS.Seq
+
+@[expose] public section
 /-!
 
 # Primitive Recursive Functions in $\mathsf{I} \Sigma_1$

@@ -1,5 +1,8 @@
-import Foundation.FirstOrder.Bootstrapping.Syntax.Theory
+module
 
+public import Foundation.FirstOrder.Bootstrapping.Syntax.Theory
+
+@[expose] public section
 namespace LO
 
 open FirstOrder Arithmetic
@@ -400,7 +403,7 @@ noncomputable def blueprint : Fixpoint.Blueprint 0 := ⟨.mkDelta
         !axmGraph d s p ∧ p ∈ s ∧ !T.Δ₁ch.pi p) )”
     )⟩
 
-private lemma Phi_definable : 𝚫₁.Defined (fun v : Fin 2 → V ↦ Phi T {x | x ∈ v 1} (v 0)) (blueprint T).core := .mk <| by
+lemma Phi_definable : 𝚫₁.Defined (fun v : Fin 2 → V ↦ Phi T {x | x ∈ v 1} (v 0)) (blueprint T).core := .mk <| by
   constructor
   · intro v; simp [blueprint]
   · intro v; simp [phi_iff, blueprint]

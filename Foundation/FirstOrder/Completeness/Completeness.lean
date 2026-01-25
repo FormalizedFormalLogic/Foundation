@@ -1,7 +1,10 @@
-import Foundation.FirstOrder.Completeness.SearchTree
-import Foundation.FirstOrder.Completeness.SubLanguage
-import Foundation.FirstOrder.Ultraproduct
+module
 
+public import Foundation.FirstOrder.Completeness.SearchTree
+public import Foundation.FirstOrder.Completeness.SubLanguage
+public import Foundation.FirstOrder.Ultraproduct
+
+@[expose] public section
 namespace LO
 
 namespace FirstOrder

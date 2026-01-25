@@ -1,6 +1,10 @@
-import Foundation.Logic.LogicSymbol
+module
+
+public import Foundation.Logic.LogicSymbol
 
 /-! # Forcing relation -/
+
+@[expose] public section
 
 namespace LO
 
@@ -137,3 +141,5 @@ end AllForces
 end WeakForcingRelation
 
 end LO
+
+end

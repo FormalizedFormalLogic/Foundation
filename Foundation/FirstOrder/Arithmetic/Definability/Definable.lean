@@ -1,6 +1,9 @@
-import Foundation.FirstOrder.Arithmetic.Definability.Hierarchy
-import Foundation.FirstOrder.Arithmetic.PeanoMinus.Basic
+module
 
+public import Foundation.FirstOrder.Arithmetic.Definability.Hierarchy
+public import Foundation.FirstOrder.Arithmetic.PeanoMinus.Basic
+
+@[expose] public section
 namespace LO.FirstOrder.Arithmetic.HierarchySymbol
 
 variable (ξ : Type*) (n : ℕ)

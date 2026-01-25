@@ -1,4 +1,8 @@
-import Foundation.Logic.Predicate.Rew
+module
+
+public import Foundation.Logic.Predicate.Rew
+
+@[expose] public section
 
 namespace LO.FirstOrder
 
@@ -41,3 +45,5 @@ lemma relationalVal_rew {bv : Fin n₂ → M} {fv : ξ₂ → M} (ω : Rew L ξ�
 end Semiterm
 
 end LO.FirstOrder
+
+end

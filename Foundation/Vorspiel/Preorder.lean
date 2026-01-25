@@ -1,5 +1,10 @@
-import Mathlib.Order.PFilter
-import Mathlib.Data.Set.Countable
+module
+
+public import Mathlib.Order.PFilter
+public import Mathlib.Data.Set.Countable
+public import Vorspiel
+
+@[expose] public section
 
 namespace Nat
 
@@ -121,3 +126,5 @@ theorem countable_generic [Inhabited α] (𝓓 : Set (DenseSet α)) (ctb : Set.C
   · simp [s, hi]
 
 end Order.PFilter
+
+end

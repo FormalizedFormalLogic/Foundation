@@ -1,5 +1,8 @@
-import Foundation.FirstOrder.Arithmetic.IOpen.Basic
+module
 
+public import Foundation.FirstOrder.Arithmetic.IOpen.Basic
+
+@[expose] public section
 /-!
 # On $\mathrm{Pow2}(x)$ and $\mathrm{BitLen}(x, y)$
 

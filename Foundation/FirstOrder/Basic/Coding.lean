@@ -204,11 +204,7 @@ lemma encode_ex (φ : Semiformula L ξ (n + 1)) : encode (∃' φ) = (Nat.pair 7
 
 end Semiformula
 
-end LO.FirstOrder
-
-end
-
-namespace LO.FirstOrder
+section
 
 variable {L : Language} [L.Encodable]
 
@@ -220,4 +216,8 @@ instance Semiformula.countable [Countable ξ] : Countable (Semiformula L ξ n) :
   have : Encodable ξ := Encodable.ofCountable ξ
   exact Encodable.countable
 
+end
+
 end LO.FirstOrder
+
+end

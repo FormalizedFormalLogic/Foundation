@@ -1,5 +1,8 @@
-import Foundation.FirstOrder.Completeness.Completeness
+module
 
+public import Foundation.FirstOrder.Completeness.Completeness
+
+@[expose] public section
 namespace LO.FirstOrder
 
 namespace ModelsTheory

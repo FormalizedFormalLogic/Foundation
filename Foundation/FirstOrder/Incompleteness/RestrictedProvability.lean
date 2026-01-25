@@ -1,5 +1,8 @@
-import Foundation.FirstOrder.Bootstrapping.RosserProvability
+module
 
+public import Foundation.FirstOrder.Bootstrapping.RosserProvability
+
+@[expose] public section
 /-!
 # Provability with restricted proof size
 

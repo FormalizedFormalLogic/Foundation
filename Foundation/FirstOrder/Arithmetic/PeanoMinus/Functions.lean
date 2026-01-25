@@ -1,8 +1,11 @@
-import Foundation.FirstOrder.Arithmetic.PeanoMinus.Basic
-import Foundation.FirstOrder.Arithmetic.Definability
-import Mathlib.Algebra.GroupWithZero.Divisibility
-import Mathlib.Algebra.Prime.Lemmas
+module
 
+public import Foundation.FirstOrder.Arithmetic.PeanoMinus.Basic
+public import Foundation.FirstOrder.Arithmetic.Definability
+public import Mathlib.Algebra.GroupWithZero.Divisibility
+public import Mathlib.Algebra.Prime.Lemmas
+
+@[expose] public section
 /-!
 # Functions and relations defined in $\mathsf{PA^-}$
 

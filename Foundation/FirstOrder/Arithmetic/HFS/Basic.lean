@@ -1,5 +1,8 @@
-import Foundation.FirstOrder.Arithmetic.Exponential
+module
 
+public import Foundation.FirstOrder.Arithmetic.Exponential
+
+@[expose] public section
 /-!
 
 # Hereditary Finite Set Theory in $\mathsf{I}\Sigma_1$
