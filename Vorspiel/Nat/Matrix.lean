@@ -39,16 +39,6 @@ lemma lt_of_eq_natToVec {e : ℕ} {v : Fin n → ℕ} (h : e.natToVec n = some v
       · simp only [cons_val_succ]
         exact lt_trans (ih hnv i) (lt_succ.mpr <| unpair_right_le e)
 
-lemma one_le_of_bodd {n : ℕ} (h : n.bodd = true) : 1 ≤ n :=
-  by induction n <;> simp at h ⊢
-
-lemma pair_le_pair_of_le {a₁ a₂ b₁ b₂ : ℕ} (ha : a₁ ≤ a₂) (hb : b₁ ≤ b₂) : a₁.pair b₁ ≤ a₂.pair b₂ := by
-  rcases lt_or_eq_of_le ha with (ha | rfl) <;> rcases lt_or_eq_of_le hb with (hb | rfl)
-  · exact le_of_lt (lt_trans (Nat.pair_lt_pair_left b₁ ha) (Nat.pair_lt_pair_right a₂ hb))
-  · exact le_of_lt (Nat.pair_lt_pair_left b₁ ha)
-  · exact le_of_lt (Nat.pair_lt_pair_right a₁ hb)
-  · rfl
-
 end Nat
 
 end

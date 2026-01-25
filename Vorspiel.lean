@@ -10,13 +10,15 @@ public import Vorspiel.Fin.Basic
 public import Vorspiel.Fin.Basic
 public import Vorspiel.Finset.Basic
 public import Vorspiel.Finset.Card
+public import Vorspiel.Fintype
 public import Vorspiel.Function
 public import Vorspiel.Graph
 public import Vorspiel.List.Basic
 public import Vorspiel.List.Chain
 public import Vorspiel.List.ChainI
 public import Vorspiel.Matrix
-public import Vorspiel.Nat
+public import Vorspiel.Nat.Basic
+public import Vorspiel.Nat.Matrix
 public import Vorspiel.Order
 public import Vorspiel.Rel.Basic
 public import Vorspiel.Rel.Connected

@@ -2,7 +2,7 @@ module
 public import Mathlib.Data.Fin.VecNotation
 public import Mathlib.Tactic.Cases
 public import Mathlib.Data.Nat.Pairing
-public import Vorspiel.Nat
+public import Vorspiel.Nat.Basic
 public import Vorspiel.Fin.Basic
 
 @[expose] public section
