@@ -1,7 +1,11 @@
-import Foundation.Propositional.ClassicalSemantics.Basic
-import Foundation.Propositional.Tait.Calculus
-import Foundation.Propositional.ClassicalSemantics.Tait
-import Mathlib.Algebra.Order.BigOperators.Group.List
+module
+
+public import Foundation.Propositional.ClassicalSemantics.Basic
+public import Foundation.Propositional.Tait.Calculus
+public import Foundation.Propositional.ClassicalSemantics.Tait
+public import Mathlib.Algebra.Order.BigOperators.Group.List
+
+@[expose] public section
 
 namespace LO.Propositional
 
@@ -423,3 +427,4 @@ instance [DecidableEq α] : DecidablePred fun Γ : Sequent α ↦ Γ.IsTautology
 instance [DecidableEq α] : DecidablePred fun φ : NNFormula α ↦ φ.IsTautology := fun _ ↦ inferInstance
 
 end LO.Propositional
+end

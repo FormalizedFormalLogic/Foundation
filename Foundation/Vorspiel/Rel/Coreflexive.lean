@@ -1,17 +1,21 @@
-import Foundation.Vorspiel.Rel.Euclidean
+module
+
+public import Foundation.Vorspiel.Rel.Basic
+
+@[expose]
+public section
+
+open Std
 
 variable {α} {R : Rel α α}
 
 def Coreflexive (R : Rel α α) := ∀ ⦃x y⦄, R x y → x = y
+class IsCoreflexive (R : Rel α α) where corefl : Coreflexive R
 
-class IsCoreflexive (R : Rel α α) where
-  corefl : Coreflexive R
-
-instance [Std.Symm R] [IsAntisymm _ R] : IsCoreflexive R := ⟨by
+instance [Symm R] [IsAntisymm _ R] : IsCoreflexive R := ⟨by
   intro x y Rxy;
-  apply IsAntisymm.antisymm (r := R);
-  . assumption;
-  . exact Std.Symm.symm _ _ Rxy;
+  apply IsAntisymm.antisymm _ _ Rxy;
+  exact Symm.symm _ _ Rxy;
 ⟩
 
 instance [IsCoreflexive R] : IsTrans _ R := ⟨by
@@ -19,7 +23,11 @@ instance [IsCoreflexive R] : IsTrans _ R := ⟨by
   rwa [IsCoreflexive.corefl Rxy, IsCoreflexive.corefl Ryz] at *;
 ⟩
 
-instance [IsCoreflexive R] : Std.Symm R := ⟨by
+instance [IsCoreflexive R] : Symm R := ⟨by
   intro x y Rxy;
   rwa [IsCoreflexive.corefl Rxy] at *;
 ⟩
+
+instance : IsCoreflexive (α := α) (· = ·) := ⟨by tauto⟩
+
+end

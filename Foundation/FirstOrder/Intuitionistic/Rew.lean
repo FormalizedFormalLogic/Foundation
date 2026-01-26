@@ -1,5 +1,8 @@
-import Foundation.FirstOrder.Intuitionistic.Formula
+module
 
+public import Foundation.FirstOrder.Intuitionistic.Formula
+
+@[expose] public section
 namespace LO.FirstOrder
 
 namespace Semiformulaᵢ

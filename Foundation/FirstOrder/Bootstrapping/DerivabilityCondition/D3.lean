@@ -1,6 +1,9 @@
-import Foundation.FirstOrder.Bootstrapping.DerivabilityCondition.D1
-import Foundation.FirstOrder.Bootstrapping.DerivabilityCondition.PeanoMinus
+module
 
+public import Foundation.FirstOrder.Bootstrapping.DerivabilityCondition.D1
+public import Foundation.FirstOrder.Bootstrapping.DerivabilityCondition.PeanoMinus
+
+@[expose] public section
 /-!
 # Hilbert-Bernays-Löb derivability condition $\mathbf{D3}$ and formalized $\Sigma_1$-completeness
 -/

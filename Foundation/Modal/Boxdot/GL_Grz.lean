@@ -1,6 +1,10 @@
-import Foundation.Modal.Boxdot.Basic
-import Foundation.Modal.Kripke.Logic.GL.Completeness
-import Foundation.Modal.Kripke.Logic.Grz.Completeness
+module
+
+public import Foundation.Modal.Boxdot.Basic
+public import Foundation.Modal.Kripke.Logic.GL.Completeness
+public import Foundation.Modal.Kripke.Logic.Grz.Completeness
+
+@[expose] public section
 
 namespace LO.Modal
 
@@ -48,3 +52,4 @@ theorem iff_provable_boxdot_GL_provable_Grz : Modal.GL ⊢ φᵇ ↔ Modal.Grz �
 ⟩
 
 end LO.Modal
+end

@@ -1,4 +1,8 @@
-import Foundation.InterpretabilityLogic.Entailment.ILMinus
+module
+
+public import Foundation.InterpretabilityLogic.Entailment.ILMinus
+
+@[expose] public section
 
 namespace LO.InterpretabilityLogic.Entailment
 
@@ -32,3 +36,4 @@ instance : HasAxiomKM1 𝓢 := ⟨by
 ⟩
 
 end LO.InterpretabilityLogic.Entailment
+end

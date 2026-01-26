@@ -1,10 +1,14 @@
-import Foundation.Modal.Logic.SumNormal
-import Foundation.Modal.Maximal.Unprovability
-import Mathlib.Data.ENat.Basic
-import Foundation.Modal.Kripke.Logic.GL.Completeness
-import Foundation.Modal.Kripke.Logic.Ver
-import Foundation.Modal.Logic.Global
+module
 
+public import Foundation.Modal.Logic.SumNormal
+public import Foundation.Modal.Maximal.Unprovability
+public import Mathlib.Data.ENat.Basic
+public import Foundation.Modal.Kripke.Logic.GL.Completeness
+public import Foundation.Modal.Kripke.Logic.Ver
+public import Foundation.Modal.Logic.Global
+
+
+@[expose] public section
 
 namespace LO.Modal
 
@@ -387,3 +391,4 @@ instance : (Modal.GLPoint3OplusBoxBot 2) ≊ Modal.GLPoint2 := by rw [eq_GLPoint
 end
 
 end LO.Modal
+end

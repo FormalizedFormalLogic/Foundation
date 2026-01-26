@@ -1,4 +1,8 @@
-import Foundation.Modal.Kripke.Rooted
+module
+
+public import Foundation.Modal.Kripke.Rooted
+
+@[expose] public section
 
 namespace LO.Modal
 
@@ -121,3 +125,4 @@ end canonicality
 end Kripke
 
 end LO.Modal
+end

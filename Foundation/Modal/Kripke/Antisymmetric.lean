@@ -1,5 +1,9 @@
-import Foundation.Modal.Kripke.AxiomGeach
+module
 
+public import Foundation.Modal.Kripke.AxiomGeach
+
+
+@[expose] public section
 
 namespace LO.Modal
 
@@ -17,3 +21,4 @@ protected class Frame.IsPartialOrder (F : Frame) extends F.IsReflexive, F.IsTran
 end Kripke
 
 end LO.Modal
+end

@@ -1,5 +1,10 @@
-import Foundation.Vorspiel.Rel.CWF
-import Mathlib.Data.Fintype.Pigeonhole
+module
+
+public import Foundation.Vorspiel.Rel.CWF
+public import Mathlib.Data.Fintype.Pigeonhole
+
+@[expose]
+public section
 
 section
 
@@ -60,12 +65,10 @@ instance [IsWeaklyConverseWellFounded _ rel] : IsAntisymm _ rel := ⟨by
 
 lemma weaklyConverseWellFounded_of_finite_trans_antisymm (hFin : Finite α) (R_trans : Transitive rel)
   : AntiSymmetric rel → WeaklyConverseWellFounded rel := by
-    dsimp [AntiSymmetric]
+    simp only [AntiSymmetric, ConverseWellFounded.iff_has_max];
     contrapose!;
-    intro hWCWF;
-    replace hWCWF := ConverseWellFounded.iff_has_max.not.mp hWCWF;
-    push_neg at hWCWF;
-    obtain ⟨f, hf⟩ := dependent_choice hWCWF; clear hWCWF;
+    rintro h;
+    obtain ⟨f, hf⟩ := dependent_choice h;
     dsimp [Rel.IrreflGen] at hf;
 
     obtain ⟨i, j, hij, e⟩ := Finite.exists_ne_map_eq_of_infinite_lt f;
@@ -88,5 +91,7 @@ instance [Finite α] [IsTrans _ rel] [IsAntisymm _ rel] : IsWeaklyConverseWellFo
   . exact IsTrans.trans;
   . exact IsAntisymm.antisymm;
 ⟩
+
+end
 
 end

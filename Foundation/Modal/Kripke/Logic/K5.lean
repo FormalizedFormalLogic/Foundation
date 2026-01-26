@@ -1,6 +1,10 @@
-import Foundation.Modal.Kripke.AxiomGeach
-import Foundation.Modal.Kripke.Hilbert
-import Foundation.Modal.Kripke.Logic.K
+module
+
+public import Foundation.Modal.Kripke.AxiomGeach
+public import Foundation.Modal.Kripke.Hilbert
+public import Foundation.Modal.Kripke.Logic.K
+
+@[expose] public section
 
 namespace LO.Modal
 
@@ -65,3 +69,4 @@ end Hilbert
 
 
 end LO.Modal
+end

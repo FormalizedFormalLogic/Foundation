@@ -1,5 +1,8 @@
-import Foundation.FirstOrder.Bootstrapping.WitnessComparison
+module
 
+public import Foundation.FirstOrder.Bootstrapping.WitnessComparison
+
+@[expose] public section
 /-!
 # Rosser's provability predicate
 -/

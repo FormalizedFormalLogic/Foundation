@@ -1,4 +1,8 @@
-import Foundation.Modal.Entailment.EM
+module
+
+public import Foundation.Modal.Entailment.EM
+
+@[expose] public section
 
 namespace LO.Modal.Entailment
 
@@ -14,3 +18,4 @@ instance [Entailment.Minimal 𝓢] [Entailment.Necessitation 𝓢] : Entailment.
   N := nec verum
 
 end LO.Modal.Entailment
+end

@@ -1,5 +1,8 @@
-import Foundation.Logic.Calculus
-import Foundation.FirstOrder.Basic.Syntax.Theory
+module
+public import Foundation.Logic.Calculus
+public import Foundation.FirstOrder.Basic.Syntax.Theory
+
+@[expose] public section
 
 namespace LO
 
@@ -290,7 +293,7 @@ instance : Tait.Axiomatized (SyntacticFormula L) (SyntacticFormulas L) where
 
 variable [L.DecidableEq]
 
-private def not_close' (φ) : 𝓢 ⟹ [∼(φ.univCl'), φ] :=
+def not_close' (φ) : 𝓢 ⟹ [∼(φ.univCl'), φ] :=
   have : 𝓢 ⟹ [∃* ∼(@Rew.fixitr L 0 (fvSup φ) ▹ φ), φ] := instances (v := fun x ↦ &x) (em (φ := φ) (by simp) (by simp))
   Derivation.cast this (by simp [univCl'])
 
@@ -332,7 +335,7 @@ instance : Entailment.Compact (SyntacticFormulas L) where
   Γ_subset b := by simpa using (compact b).1.prop
   Γ_finite b := by simp
 
-private def deductionAux {Γ : Sequent L} : 𝓢 ⟹ Γ → 𝓢 \ {φ} ⟹ ∼(φ.univCl') :: Γ
+def deductionAux {Γ : Sequent L} : 𝓢 ⟹ Γ → 𝓢 \ {φ} ⟹ ∼(φ.univCl') :: Γ
   | axL Γ R v       => Tait.wkTail <| axL Γ R v
   | verum Γ         => Tait.wkTail <| verum Γ
   | and d₁ d₂       => Tait.rotate₁ <| and (Tait.rotate₁ (deductionAux d₁)) (Tait.rotate₁ (deductionAux d₂))
@@ -640,3 +643,5 @@ end SyntacticFormulas
 end FirstOrder
 
 end LO
+
+end

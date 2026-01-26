@@ -1,6 +1,9 @@
-import Foundation.ProvabilityLogic.Realization
-import Foundation.FirstOrder.Bootstrapping.FixedPoint
+module
 
+public import Foundation.ProvabilityLogic.Realization
+public import Foundation.FirstOrder.Bootstrapping.FixedPoint
+
+@[expose] public section
 /-!
 # Provability logic of arithmetic theory
 -/

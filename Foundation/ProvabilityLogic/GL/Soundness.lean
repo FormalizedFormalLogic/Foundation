@@ -1,7 +1,10 @@
-import Foundation.ProvabilityLogic.Realization
-import Foundation.Modal.Logic.GLPlusBoxBot.Basic
-import Foundation.FirstOrder.Bootstrapping.ProvabilityAbstraction.Height
+module
 
+public import Foundation.ProvabilityLogic.Realization
+public import Foundation.Modal.Logic.GLPlusBoxBot.Basic
+public import Foundation.FirstOrder.Bootstrapping.ProvabilityAbstraction.Height
+
+@[expose] public section
 namespace LO.ProvabilityLogic
 
 open Entailment

@@ -1,4 +1,8 @@
-import Foundation.Propositional.FMT.Logic.VF
+module
+
+public import Foundation.Propositional.FMT.Logic.VF
+
+@[expose] public section
 
 namespace LO.Propositional
 
@@ -51,3 +55,4 @@ end FMT
 
 
 end LO.Propositional
+end

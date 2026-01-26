@@ -1,7 +1,11 @@
-import Foundation.Modal.Kripke.Logic.S5Grz
-import Foundation.Modal.Maximal.Makinson
-import Foundation.Modal.ModalCompanion.Standard.Int
-import Foundation.Propositional.Kripke.Logic.Cl
+module
+
+public import Foundation.Modal.Kripke.Logic.S5Grz
+public import Foundation.Modal.Maximal.Makinson
+public import Foundation.Modal.ModalCompanion.Standard.Int
+public import Foundation.Propositional.Kripke.Logic.Cl
+
+@[expose] public section
 
 namespace LO.Propositional
 
@@ -29,3 +33,4 @@ theorem iff_letterless_Int_Cl {φ : Formula ℕ} (hφ : φ.Letterless) : Proposi
 end Logic
 
 end LO.Propositional
+end

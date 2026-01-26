@@ -1,4 +1,8 @@
-import Foundation.Modal.Neighborhood.Basic
+module
+
+public import Foundation.Modal.Neighborhood.Basic
+
+@[expose] public section
 
 namespace LO.Modal.Neighborhood
 
@@ -30,3 +34,4 @@ lemma notContainsEmpty_of_valid_axiomP (h : F ⊧ Axioms.P) : F.NotContainsEmpty
   simpa [Satisfies] using this;
 
 end LO.Modal.Neighborhood
+end

@@ -1,5 +1,9 @@
-import Foundation.Propositional.Kripke.Completeness
-import Foundation.Propositional.Entailment.KrieselPutnam
+module
+
+public import Foundation.Propositional.Kripke.Completeness
+public import Foundation.Propositional.Entailment.KrieselPutnam
+
+@[expose] public section
 
 namespace LO.Propositional
 
@@ -245,3 +249,4 @@ end canonicality
 end Kripke
 
 end LO.Propositional
+end

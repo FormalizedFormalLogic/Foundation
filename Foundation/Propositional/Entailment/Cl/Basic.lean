@@ -1,9 +1,12 @@
-import Foundation.Propositional.Entailment.AxiomDNE
-import Foundation.Propositional.Entailment.AxiomElimContra
-import Foundation.Propositional.Entailment.AxiomLEM
-import Foundation.Propositional.Entailment.Int.Basic
-import Foundation.Propositional.Entailment.LC
-import Foundation.Propositional.Entailment.AxiomPeirce
+module
+public import Foundation.Propositional.Entailment.AxiomDNE
+public import Foundation.Propositional.Entailment.AxiomElimContra
+public import Foundation.Propositional.Entailment.AxiomLEM
+public import Foundation.Propositional.Entailment.Int.Basic
+public import Foundation.Propositional.Entailment.LC
+public import Foundation.Propositional.Entailment.AxiomPeirce
+
+@[expose] public section
 
 namespace LO.Entailment
 
@@ -213,3 +216,5 @@ def Cl.ofEquiv (𝓢 : S) [Entailment.Cl 𝓢] (𝓣 : T) (f : G →ˡᶜ F) (e 
 end
 
 end LO.Entailment
+
+end

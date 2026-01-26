@@ -1,5 +1,9 @@
-import Foundation.Modal.Neighborhood.Logic.EP
-import Foundation.Modal.Neighborhood.Logic.ED
+module
+
+public import Foundation.Modal.Neighborhood.Logic.EP
+public import Foundation.Modal.Neighborhood.Logic.ED
+
+@[expose] public section
 
 namespace LO.Modal
 
@@ -34,3 +38,4 @@ instance : Incomparable Modal.ED Modal.EP := by
         simpa using @this 1;
 
 end LO.Modal
+end

@@ -1,5 +1,8 @@
-import Foundation.FirstOrder.Bootstrapping.DerivabilityCondition.EquationalTheory
+module
 
+public import Foundation.FirstOrder.Bootstrapping.DerivabilityCondition.EquationalTheory
+
+@[expose] public section
 /-!
 # Bootstrapping theory $\mathsf{PA}^-$, $\mathsf{R_0}$ in $\mathsf{I}\Sigma_1$
 -/

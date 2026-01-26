@@ -1,5 +1,8 @@
-import Foundation.FirstOrder.SetTheory.Basic.Axioms
+module
 
+public import Foundation.FirstOrder.SetTheory.Basic.Axioms
+
+@[expose] public section
 /-! # Basic properties of model of set theory-/
 
 namespace LO.FirstOrder.SetTheory

@@ -1,6 +1,9 @@
-import Foundation.Propositional.Entailment.Corsi.Basic
+module
 
-import Foundation.Propositional.Entailment.Corsi.VF
+public import Foundation.Propositional.Entailment.Corsi.Basic
+public import Foundation.Propositional.Entailment.Corsi.VF
+
+@[expose] public section
 
 namespace LO.Propositional
 
@@ -37,3 +40,5 @@ end Entailment
 
 
 end LO.Propositional
+
+end

@@ -1,6 +1,10 @@
-import Foundation.Modal.Hilbert.Normal.Basic
-import Foundation.Modal.Kripke.Closure
-import Foundation.Modal.Kripke.Irreflexivize
+module
+
+public import Foundation.Modal.Hilbert.Normal.Basic
+public import Foundation.Modal.Kripke.Closure
+public import Foundation.Modal.Kripke.Irreflexivize
+
+@[expose] public section
 
 namespace LO.Modal
 
@@ -219,3 +223,4 @@ lemma iff_reflexivize_irreflexivize' [F.IsReflexive] : (F ⊧ φ) ↔ ((F^≠^=)
 end Kripke
 
 end LO.Modal
+end

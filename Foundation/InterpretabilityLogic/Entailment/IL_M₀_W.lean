@@ -1,8 +1,12 @@
+module
+
 /-
   Visser 1991 (de Jongh), `IL(W, M₀) ⊢ W*`
 -/
-import Foundation.InterpretabilityLogic.Entailment.IL_Wstar
-import Foundation.InterpretabilityLogic.Entailment.IL_M₀
+public import Foundation.InterpretabilityLogic.Entailment.IL_Wstar
+public import Foundation.InterpretabilityLogic.Entailment.IL_M₀
+
+@[expose] public section
 
 namespace LO.InterpretabilityLogic.Entailment
 
@@ -50,3 +54,4 @@ instance : HasAxiomWstar 𝓢 := by
 
 
 end LO.InterpretabilityLogic.Entailment
+end

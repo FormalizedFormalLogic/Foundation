@@ -1,11 +1,11 @@
-import Foundation.Propositional.Kripke2.Basic
-import Foundation.Vorspiel.Rel.Convergent
-import Foundation.Vorspiel.Rel.Euclidean
-import Foundation.Vorspiel.Rel.Coreflexive
-import Foundation.Vorspiel.Rel.Isolated
+module
+
+public import Foundation.Propositional.Kripke2.Basic
+public import Foundation.Propositional.Entailment.Corsi.Basic
+
+@[expose] public section
 
 namespace LO.Propositional
-
 
 open Kripke2
 open Formula.Kripke2
@@ -14,7 +14,6 @@ namespace Kripke2
 
 variable {F : Kripke2.Frame} {φ ψ}
 
-
 namespace Frame
 
 protected abbrev IsCoreflexive (F : Kripke2.Frame) := _root_.IsCoreflexive F.Rel
@@ -22,14 +21,13 @@ protected abbrev IsCoreflexive (F : Kripke2.Frame) := _root_.IsCoreflexive F.Rel
 
 end Frame
 
-
 @[simp high, grind .]
-lemma valid_axiomCorfl_of_IsCoreflexive [F.IsCoreflexive] : F ⊧ Axioms.Corfl φ ψ := by
+lemma valid_axiomCorfl_of_IsCoreflexive [F.IsCoreflexive] : F ⊧ Axioms.Corefl φ ψ := by
   intro V x;
   dsimp [Satisfies];
   grind;
 
-lemma isCoreflexive_of_valid_axiomCorfl (h : F ⊧ Axioms.Corfl #0 #1) : F.IsCoreflexive := by
+lemma isCoreflexive_of_valid_axiomCorfl (h : F ⊧ Axioms.Corefl #0 #1) : F.IsCoreflexive := by
   constructor;
   intro x y Rxy;
   rcases @h (λ w a => match a with | 0 => w = x | 1 => w = y | _ => False) F.root with ⟨h₁, (h₂ | h₂)⟩;
@@ -40,3 +38,4 @@ lemma isCoreflexive_of_valid_axiomCorfl (h : F ⊧ Axioms.Corfl #0 #1) : F.IsCor
 end Kripke2
 
 end LO.Propositional
+end

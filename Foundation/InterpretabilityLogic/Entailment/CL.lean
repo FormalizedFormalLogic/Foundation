@@ -1,5 +1,9 @@
-import Foundation.Modal.Entailment.GL
-import Foundation.InterpretabilityLogic.Entailment.ILMinus_J2
+module
+
+public import Foundation.Modal.Entailment.GL
+public import Foundation.InterpretabilityLogic.Entailment.ILMinus_J2
+
+@[expose] public section
 
 namespace LO.InterpretabilityLogic.Entailment
 
@@ -41,3 +45,4 @@ instance : Entailment.ILMinus_J1 𝓢 where
 instance : Entailment.ILMinus_J2 𝓢 where
 
 end LO.InterpretabilityLogic.Entailment
+end

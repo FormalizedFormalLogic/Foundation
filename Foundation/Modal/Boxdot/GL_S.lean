@@ -1,4 +1,8 @@
-import Foundation.ProvabilityLogic.S.Completeness
+module
+
+public import Foundation.ProvabilityLogic.S.Completeness
+
+@[expose] public section
 
 namespace LO
 
@@ -37,3 +41,4 @@ lemma iff_provable_boxdot_GL_provable_boxdot_S : Modal.GL ⊢ φᵇ ↔ Modal.S 
 end Modal.Logic
 
 end LO
+end

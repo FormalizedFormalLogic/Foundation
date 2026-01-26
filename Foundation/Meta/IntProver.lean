@@ -1,6 +1,8 @@
-import Foundation.Meta.TwoSided
-import Foundation.Meta.Qq
-import Foundation.Meta.Lit
+module
+
+public meta import Foundation.Meta.Qq
+public meta import Foundation.Meta.Lit
+public meta import Foundation.Meta.TwoSided
 
 /-!
 # Proof automation based on the proof search on (modified) $\mathbf{LJpm}^*$
@@ -8,6 +10,7 @@ import Foundation.Meta.Lit
 main reference: Grigori Mints, A Short Introduction to Intuitionistic Logic
 -/
 
+public meta section
 
 namespace LO.Meta
 
@@ -570,3 +573,5 @@ elab "int_prover" n:(num)? seq:(termSeq)? : tactic => withMainContext do
 end IntProver
 
 end LO.Meta
+
+end

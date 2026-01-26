@@ -1,5 +1,9 @@
-import Foundation.Propositional.Hilbert.WF.Basic
-import Foundation.Propositional.Neighborhood.NB.Basic
+module
+
+public import Foundation.Propositional.Hilbert.WF.Basic
+public import Foundation.Propositional.Neighborhood.NB.Basic
+
+@[expose] public section
 
 namespace LO.Propositional
 
@@ -72,3 +76,4 @@ end Hilbert.WF.NBNeighborhood
 
 
 end LO.Propositional
+end

@@ -1,4 +1,8 @@
-import Foundation.Vorspiel.Vorspiel
+module
+
+public import Foundation.Vorspiel
+
+@[expose] public section
 
 class Exp (α : Type*) where
   exp : α → α
@@ -28,3 +32,5 @@ class StarQuote (α β : Sort*) where
 prefix:max "✶" => StarQuote.quote
 
 end LO
+
+end

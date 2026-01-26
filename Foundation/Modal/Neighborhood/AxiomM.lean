@@ -1,4 +1,8 @@
-import Foundation.Modal.Neighborhood.Basic
+module
+
+public import Foundation.Modal.Neighborhood.Basic
+
+@[expose] public section
 
 namespace LO.Modal.Neighborhood
 
@@ -35,3 +39,4 @@ lemma valid_axiomM_of_isMonotonic [F.IsMonotonic] : F ⊧ Axioms.M (.atom 0) (.a
   apply Frame.mono;
 
 end LO.Modal.Neighborhood
+end

@@ -1,7 +1,11 @@
-import Foundation.Modal.Kripke.Logic.K4
-import Foundation.Modal.Kripke.AxiomMcK
-import Foundation.Modal.Kripke.Logic.S4
-import Foundation.Modal.Kripke.Logic.K4McK
+module
+
+public import Foundation.Modal.Kripke.Logic.K4
+public import Foundation.Modal.Kripke.AxiomMcK
+public import Foundation.Modal.Kripke.Logic.S4
+public import Foundation.Modal.Kripke.Logic.K4McK
+
+@[expose] public section
 
 namespace LO.Modal
 
@@ -22,7 +26,7 @@ end Kripke
 
 
 
-namespace Modal.S4McK.Kripke
+namespace S4McK.Kripke
 
 instance : Sound Modal.S4McK FrameClass.S4McK := instSound_of_validates_axioms $ by
   apply FrameClass.validates_with_AxiomK_of_validates;
@@ -58,7 +62,7 @@ instance : Modal.S4 ⪱ Modal.S4McK := by
           refl := by tauto;
           trans := by tauto;
         }
-      . suffices ∃ x, x ≠ (0 : M.World) by simpa [M, Transitive, Reflexive, Semantics.Models, Satisfies];
+      . suffices ∃ x, x ≠ (0 : M.World) by simp [M, Transitive, Reflexive, Semantics.Models, Satisfies];
         use 1;
         trivial;
 
@@ -83,8 +87,7 @@ instance : Modal.K4McK ⪱ Modal.S4McK := by
         }
       . simp [Semantics.Models, Satisfies, M];
 
-end Modal.S4McK.Kripke
-
-
+end S4McK.Kripke
 
 end LO.Modal
+end

@@ -1,6 +1,10 @@
-import Foundation.InterpretabilityLogic.Veltman.Basic
-import Foundation.InterpretabilityLogic.Veltman.Logic.ILMinus
+module
 
+public import Foundation.InterpretabilityLogic.Veltman.Basic
+public import Foundation.InterpretabilityLogic.Veltman.Logic.ILMinus
+
+
+@[expose] public section
 
 namespace LO.InterpretabilityLogic.Veltman
 
@@ -69,3 +73,4 @@ lemma validate_axiomJ4_iff_validate_axiomJ4Plus : (F ⊧ Axioms.J4 (.atom 0) (.a
 ⟩
 
 end LO.InterpretabilityLogic.Veltman
+end

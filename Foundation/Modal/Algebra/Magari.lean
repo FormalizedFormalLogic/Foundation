@@ -1,4 +1,8 @@
-import Foundation.Modal.Algebra.Basic
+module
+
+public import Foundation.Modal.Algebra.Basic
+
+@[expose] public section
 
 namespace LO
 
@@ -35,3 +39,4 @@ instance : ModalAlgebra.Transitive α := ⟨box_trans⟩
 end MagariAlgebra
 
 end LO
+end

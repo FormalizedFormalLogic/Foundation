@@ -1,18 +1,16 @@
-import Foundation.FirstOrder.Bootstrapping.Syntax.Language
+module
 
-import Foundation.FirstOrder.Bootstrapping.Syntax.Term.Basic
-import Foundation.FirstOrder.Bootstrapping.Syntax.Term.Functions
-import Foundation.FirstOrder.Bootstrapping.Syntax.Term.Typed
-import Foundation.FirstOrder.Bootstrapping.Syntax.Term.Coding
-
-import Foundation.FirstOrder.Bootstrapping.Syntax.Formula.Basic
-import Foundation.FirstOrder.Bootstrapping.Syntax.Formula.Functions
-import Foundation.FirstOrder.Bootstrapping.Syntax.Formula.Iteration
-import Foundation.FirstOrder.Bootstrapping.Syntax.Formula.Typed
-import Foundation.FirstOrder.Bootstrapping.Syntax.Formula.Coding
-
-import Foundation.FirstOrder.Bootstrapping.Syntax.Theory
-
-import Foundation.FirstOrder.Bootstrapping.Syntax.Proof.Basic
-import Foundation.FirstOrder.Bootstrapping.Syntax.Proof.Typed
-import Foundation.FirstOrder.Bootstrapping.Syntax.Proof.Coding
+public import Foundation.FirstOrder.Bootstrapping.Syntax.Language
+public import Foundation.FirstOrder.Bootstrapping.Syntax.Term.Basic
+public import Foundation.FirstOrder.Bootstrapping.Syntax.Term.Functions
+public import Foundation.FirstOrder.Bootstrapping.Syntax.Term.Typed
+public import Foundation.FirstOrder.Bootstrapping.Syntax.Term.Coding
+public import Foundation.FirstOrder.Bootstrapping.Syntax.Formula.Basic
+public import Foundation.FirstOrder.Bootstrapping.Syntax.Formula.Functions
+public import Foundation.FirstOrder.Bootstrapping.Syntax.Formula.Iteration
+public import Foundation.FirstOrder.Bootstrapping.Syntax.Formula.Typed
+public import Foundation.FirstOrder.Bootstrapping.Syntax.Formula.Coding
+public import Foundation.FirstOrder.Bootstrapping.Syntax.Theory
+public import Foundation.FirstOrder.Bootstrapping.Syntax.Proof.Basic
+public import Foundation.FirstOrder.Bootstrapping.Syntax.Proof.Typed
+public import Foundation.FirstOrder.Bootstrapping.Syntax.Proof.Coding

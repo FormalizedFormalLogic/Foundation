@@ -1,5 +1,8 @@
-import Foundation.FirstOrder.Bootstrapping.DerivabilityCondition
+module
 
+public import Foundation.FirstOrder.Bootstrapping.DerivabilityCondition
+
+@[expose] public section
 /-!
 # Löb's Theorem
 -/

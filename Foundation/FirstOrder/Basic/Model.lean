@@ -1,5 +1,7 @@
-import Foundation.FirstOrder.Basic.Operator
-import Foundation.FirstOrder.Basic.Semantics.Elementary
+module
+public import Foundation.FirstOrder.Basic.Operator
+public import Foundation.FirstOrder.Basic.Semantics.Elementary
+@[expose] public section
 
 namespace LO
 
@@ -196,3 +198,5 @@ end ULift
 end FirstOrder
 
 end LO
+
+end

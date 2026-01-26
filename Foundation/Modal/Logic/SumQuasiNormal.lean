@@ -1,4 +1,8 @@
-import Foundation.Modal.Logic.SumNormal
+module
+
+public import Foundation.Modal.Logic.SumNormal
+
+@[expose] public section
 
 namespace LO.Modal
 
@@ -340,3 +344,4 @@ end Logic
 
 
 end LO.Modal
+end

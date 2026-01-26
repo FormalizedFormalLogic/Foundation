@@ -1,6 +1,9 @@
-import Foundation.Propositional.Logic.Basic
-import Foundation.Propositional.Entailment.Corsi.Basic
-import Foundation.Vorspiel.Rel.Basic
+module
+
+public import Foundation.Propositional.Logic.Basic
+public import Foundation.Propositional.Entailment.Corsi.Basic
+
+@[expose] public section
 
 namespace LO.Propositional
 
@@ -38,10 +41,7 @@ end Frame
 
 abbrev FrameClass := Set Frame
 
-
-
 abbrev Valuation (F : Frame) := ℕ → 𝒫 F.𝓧
-
 
 structure Model extends Frame where
   Val : Valuation toFrame
@@ -76,10 +76,7 @@ end Model
 
 abbrev ModelClass := Set Model
 
-
 end NBNeighborhood
-
-
 
 namespace Formula.NBNeighborhood
 
@@ -118,7 +115,6 @@ variable {M : NBNeighborhood.Model} {x y : M.World} {a : ℕ} {φ ψ χ : Formul
 @[grind =] protected lemma not_def_iff : x ⊮ φ ⭤ ψ ↔ ((M φ, M ψ) ∉ M.NB x ∨ (M ψ, M φ) ∉ M.NB x) := by grind
 
 end Forces
-
 
 instance : Semantics (NBNeighborhood.Model) (Formula ℕ) := ⟨fun M φ => ∀ x : M.World, x ⊩ φ⟩
 
@@ -184,9 +180,7 @@ lemma valid_RuleE (h₁ : M ⊧ φ ⭤ ψ) (h₂ : M ⊧ χ ⭤ ξ) : M ⊧ (φ 
   replace h₂ := eq_truthset_of_valid h₂;
   grind;
 
-
 end ValidOnModel
-
 
 instance : Semantics (NBNeighborhood.Frame) (Formula ℕ) := ⟨fun F φ => ∀ V, (⟨F, V⟩ : NBNeighborhood.Model) ⊧ φ⟩
 
@@ -210,12 +204,9 @@ end ValidOnFrame
 
 end Formula.NBNeighborhood
 
-
 namespace NBNeighborhood
 
-
 open Formula.NBNeighborhood
-
 
 section
 
@@ -241,7 +232,6 @@ alias ⟨exists_model_world_of_not_validOnFrameClass, not_validOnFrameClass_of_e
 
 end
 
-
 section
 
 variable {MC : ModelClass} {φ ψ χ : Formula ℕ}
@@ -263,3 +253,4 @@ end
 end NBNeighborhood
 
 end LO.Propositional
+end

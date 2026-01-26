@@ -1,6 +1,9 @@
-import Foundation.FirstOrder.Intuitionistic.Deduction
-import Foundation.Meta.IntProver
+module
 
+public import Foundation.FirstOrder.Intuitionistic.Deduction
+public import Foundation.Meta.IntProver
+
+@[expose] public section
 namespace LO.FirstOrder
 
 namespace Sequent

@@ -1,5 +1,9 @@
-import Foundation.Modal.Neighborhood.Hilbert
-import Foundation.Modal.Neighborhood.Logic.Incomparability.ED_EP
+module
+
+public import Foundation.Modal.Neighborhood.Hilbert
+public import Foundation.Modal.Neighborhood.Logic.Incomparability.ED_EP
+
+@[expose] public section
 
 namespace LO.Modal
 
@@ -29,3 +33,4 @@ instance consistent : Entailment.Consistent Modal.END := consistent_of_sound_fra
 end END
 
 end LO.Modal
+end

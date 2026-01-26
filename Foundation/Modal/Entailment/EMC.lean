@@ -1,4 +1,8 @@
-import Foundation.Modal.Entailment.EM
+module
+
+public import Foundation.Modal.Entailment.EM
+
+@[expose] public section
 
 namespace LO.Modal.Entailment
 
@@ -16,3 +20,4 @@ instance [Entailment.EMC 𝓢] : Entailment.HasAxiomK 𝓢 where
     exact CC_of_CK h₄
 
 end LO.Modal.Entailment
+end

@@ -1,5 +1,9 @@
-import Foundation.Propositional.Formula.Basic
-import Foundation.Logic.Semantics
+module
+
+public import Foundation.Propositional.Formula.Basic
+public import Foundation.Logic.Semantics
+
+@[expose] public section
 
 namespace LO.Propositional
 
@@ -169,3 +173,4 @@ end
 
 
 end LO.Propositional
+end

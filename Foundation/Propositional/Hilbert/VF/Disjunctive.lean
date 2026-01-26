@@ -1,6 +1,10 @@
-import Foundation.Propositional.Hilbert.VF.Basic
-import Foundation.Propositional.Logic.Slash
+module
 
+public import Foundation.Propositional.Hilbert.VF.Basic
+public import Foundation.Propositional.Logic.Slash
+
+
+@[expose] public section
 
 namespace LO.Propositional
 
@@ -86,3 +90,4 @@ instance VF_Ser.AczelSlashable : Propositional.VF_Ser.AczelSlashable := Hilbert.
 instance VF_Ser.Disjunctive : Entailment.Disjunctive Propositional.VF_Ser := inferInstance
 
 end LO.Propositional
+end

@@ -1,7 +1,10 @@
-import Foundation.FirstOrder.Arithmetic.R0.Basic
-import Foundation.Vorspiel.Arithmetic
-import Mathlib.Computability.Primrec
+module
 
+public import Foundation.FirstOrder.Arithmetic.R0.Basic
+public import Mathlib.Computability.Primrec
+public import Foundation.Vorspiel.Arithmetic
+
+@[expose] public section
 open Encodable Denumerable
 
 namespace LO.FirstOrder.Arithmetic

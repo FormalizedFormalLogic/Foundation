@@ -1,4 +1,12 @@
-import Foundation.Vorspiel.Rel.Coreflexive
+module
+
+public import Foundation.Vorspiel.Rel.Coreflexive
+public import Foundation.Vorspiel.Rel.Basic
+
+@[expose]
+public section
+
+open Std
 
 variable {α} {R : Rel α α}
 
@@ -15,3 +23,5 @@ instance [IsIsolated R] : IsCoreflexive R := ⟨by simp_all [Coreflexive]⟩
 instance [IsIsolated R] : IsIrrefl α R := ⟨by simp_all⟩
 
 instance [IsIsolated R] : IsTrans α R := ⟨by simp_all⟩
+
+end

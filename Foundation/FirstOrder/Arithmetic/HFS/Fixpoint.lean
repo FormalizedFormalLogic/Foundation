@@ -1,5 +1,8 @@
-import Foundation.FirstOrder.Arithmetic.HFS.PRF
+module
 
+public import Foundation.FirstOrder.Arithmetic.HFS.PRF
+
+@[expose] public section
 /-!
 
 # Fixpoint Construction

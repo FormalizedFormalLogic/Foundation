@@ -1,5 +1,9 @@
-import Foundation.Modal.Kripke.Logic.GL.Tree
-import Foundation.Modal.Kripke.ExtendRoot
+module
+
+public import Foundation.Modal.Kripke.Logic.GL.Tree
+public import Foundation.Modal.Kripke.ExtendRoot
+
+@[expose] public section
 
 namespace LO.Modal
 
@@ -193,3 +197,4 @@ end Kripke
 end
 
 end LO.Modal
+end

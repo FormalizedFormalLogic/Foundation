@@ -1,7 +1,15 @@
-import Mathlib.Data.Finset.Insert
-import Mathlib.Data.Set.Insert
-import Mathlib.Data.Set.Countable
-import Mathlib.Tactic.TautoSet
+module
+
+public import Mathlib.Data.Finset.Insert
+public import Mathlib.Data.Set.Insert
+public import Mathlib.Data.Set.Countable
+public import Mathlib.Tactic.TautoSet
+public import Mathlib.Data.Set.Finite.Range
+public import Mathlib.Order.Filter.Ultrafilter.Defs
+public import Foundation.Vorspiel.Rel.CWF
+
+@[expose]
+public section
 
 namespace Set
 
@@ -71,4 +79,21 @@ lemma infinitely_finset_approximate (count : s.Countable) (inf : s.Infinite) (ha
       suffices ∃ a_1 < eq.symm ⟨b, _⟩ + 1, ↑(eq _) = b by simpa;
       exact ⟨eq.symm ⟨b, hb, hba⟩, by simp⟩
 
+lemma subset_mem_chain_of_finite (c : Set (Set α)) (hc : Set.Nonempty c) (hchain : IsChain (· ⊆ ·) c)
+    {s} (hfin : Set.Finite s) : s ⊆ ⋃₀ c → ∃ t ∈ c, s ⊆ t :=
+  Set.Finite.induction_on s hfin
+    (by rcases hc with ⟨t, ht⟩; intro; exact ⟨t, ht, by simp⟩)
+    (by intro a s _ _ ih h
+        have : ∃ t ∈ c, s ⊆ t := ih (subset_trans (Set.subset_insert a s) h)
+        rcases this with ⟨t, htc, ht⟩
+        have : ∃ u ∈ c, a ∈ u := by
+          have : (∃ t ∈ c, a ∈ t) ∧ s ⊆ ⋃₀ c := by simpa [Set.insert_subset_iff] using h
+          exact this.1
+        rcases this with ⟨u, huc, hu⟩
+        have : ∃ z ∈ c, t ⊆ z ∧ u ⊆ z := IsChain.directedOn hchain t htc u huc
+        rcases this with ⟨z, hzc, htz, huz⟩
+        exact ⟨z, hzc, Set.insert_subset (huz hu) (Set.Subset.trans ht htz)⟩)
+
 end Set
+
+end

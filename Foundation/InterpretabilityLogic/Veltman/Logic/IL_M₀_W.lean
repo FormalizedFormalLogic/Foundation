@@ -1,5 +1,9 @@
-import Foundation.InterpretabilityLogic.Veltman.Logic.IL_W
-import Foundation.InterpretabilityLogic.Veltman.Logic.IL_M₀
+module
+
+public import Foundation.InterpretabilityLogic.Veltman.Logic.IL_W
+public import Foundation.InterpretabilityLogic.Veltman.Logic.IL_M₀
+
+@[expose] public section
 
 namespace LO.InterpretabilityLogic
 
@@ -68,8 +72,7 @@ instance : InterpretabilityLogic.IL_M₀ ⪱ InterpretabilityLogic.IL_M₀_W := 
         have : ∀ (x : F.World), (1 : F.World) ≺ x → ¬x ≺[(0 : F.World)] 1 := by
           simpa [Frame.RS, Relation.Comp, flip]
           using Frame.HasAxiomW.of_validate_axiomW hC |>.S_W 0 |>.isIrrefl.irrefl 1;
-        apply @this 2;
-        . omega;
-        . simp [Frame.SRel', F];
+        apply @this 2 <;> grind;
 
 end LO.InterpretabilityLogic
+end

@@ -1,5 +1,9 @@
-import Foundation.Propositional.Hilbert.Standard.Basic
-import Foundation.Propositional.Kripke.Basic
+module
+
+public import Foundation.Propositional.Hilbert.Standard.Basic
+public import Foundation.Propositional.Kripke.Basic
+
+@[expose] public section
 
 namespace LO.Propositional
 
@@ -86,3 +90,4 @@ end FrameClass
 end Modal.Kripke
 
 end LO.Propositional
+end

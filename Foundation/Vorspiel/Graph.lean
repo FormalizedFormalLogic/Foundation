@@ -1,8 +1,13 @@
-import Mathlib.Logic.Function.Defs
+module
+
+public import Mathlib.Logic.Function.Defs
+
+@[expose]
+public section
 
 namespace Function
 
-variable {σ α β : Sort*}
+variable {k} {σ α β γ δ ε : Sort*}
 
 def Graphᵥ (f : (Fin k → α) → α) : (Fin (k + 1) → α) → Prop := fun v ↦ v 0 = f (v ·.succ)
 
@@ -35,3 +40,5 @@ lemma Graph₃.iff_left (f : α → β → γ → σ) {y x₁ x₂ x₃} : f x�
 lemma Graph₃.iff_right (f : α → β → γ → σ) {y x₁ x₂ x₃} : y = f x₁ x₂ x₃ ↔ Graph₃ f y x₁ x₂ x₃ := by simp [Graph₃]
 
 end Function
+
+end

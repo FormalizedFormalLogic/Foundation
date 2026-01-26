@@ -1,10 +1,12 @@
-import Foundation.Modal.LogicSymbol
-import Foundation.Modal.Formula.Basic
-import Foundation.Modal.Hilbert.Normal.Basic
-import Foundation.Vorspiel.Order
-import Foundation.Logic.LindenbaumAlgebra
-import Foundation.Modal.Kripke.Logic.K
+module
 
+public import Foundation.Modal.LogicSymbol
+public import Foundation.Modal.Formula.Basic
+public import Foundation.Modal.Hilbert.Normal.Basic
+public import Foundation.Logic.LindenbaumAlgebra
+public import Foundation.Modal.Kripke.Logic.K
+
+@[expose] public section
 
 namespace LO
 
@@ -53,7 +55,6 @@ lemma box_monotone (h : a ≤ b) : □a ≤ □b := by
 
 end ModalAlgebra
 
-
 namespace ModalAlgebra
 
 protected class Transitive (α : Type*) extends ModalAlgebra α where
@@ -68,9 +69,7 @@ attribute [simp, grind .] box_refl
 
 end ModalAlgebra
 
-
 class InteriorAlgebra (α : Type*) extends ModalAlgebra.Transitive α, ModalAlgebra.Reflexive α where
-
 
 namespace Entailment.LindenbaumAlgebra
 
@@ -125,8 +124,6 @@ instance [DecidableEq F] : ModalAlgebra (LindenbaumAlgebra 𝓢) where
 
 end Entailment.LindenbaumAlgebra
 
-
-
 namespace Modal
 
 variable {α : Type u}
@@ -154,7 +151,6 @@ variable [ModalAlgebra H] {V : α → H} {φ ψ : Formula α}
 @[simp, grind =] lemma eq_value_dia : (V ⊩ ◇φ) = ◇(V ⊩ φ) := by simp [ModalAlgebra.dual_dia, value];
 
 end Formula
-
 
 structure AlgebraicSemantics (α : Type*) where
   Carrier : Type*
@@ -259,3 +255,4 @@ end AlgebraicSemantics
 end Modal
 
 end LO
+end

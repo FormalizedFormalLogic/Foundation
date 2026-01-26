@@ -1,5 +1,8 @@
-import Foundation.FirstOrder.Bootstrapping.Syntax.Formula.Functions
+module
 
+public import Foundation.FirstOrder.Bootstrapping.Syntax.Formula.Functions
+
+@[expose] public section
 namespace LO.FirstOrder.Semiformula
 
 variable {L : Language} {ξ : Type*} {n : ℕ}

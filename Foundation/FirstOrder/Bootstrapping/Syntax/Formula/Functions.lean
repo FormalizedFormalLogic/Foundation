@@ -1,6 +1,9 @@
-import Foundation.FirstOrder.Bootstrapping.Syntax.Formula.Basic
-import Foundation.FirstOrder.Bootstrapping.Syntax.Term.Functions
+module
 
+public import Foundation.FirstOrder.Bootstrapping.Syntax.Formula.Basic
+public import Foundation.FirstOrder.Bootstrapping.Syntax.Term.Functions
+
+@[expose] public section
 namespace LO.FirstOrder.Arithmetic.Bootstrapping
 
 variable {V : Type*} [ORingStructure V] [V ⊧ₘ* 𝗜𝚺₁]

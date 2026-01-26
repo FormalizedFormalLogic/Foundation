@@ -2,9 +2,11 @@ module
 
 public import Mathlib.Data.List.Nodup
 public import Mathlib.Data.List.Range
-public import Vorspiel.Fin.Basic
+public import Mathlib.Data.Fintype.Card
+public import Mathlib.Data.Fintype.List
+public import Foundation.Vorspiel.Fin.Basic
 
-
+@[expose]
 public section
 
 
@@ -74,7 +76,8 @@ end
 
 namespace IsChain
 
-variable {R} [IsTrans α R] {l : List α} {i j : Fin l.length}
+variable {l : List α} {i j : Fin l.length}
+         {R} [IsTrans α R]
 
 @[grind <=]
 lemma of_lt (h : List.IsChain R l) (hij : i < j) : R (l.get i) (l.get j) :=
@@ -105,7 +108,23 @@ lemma noDup_of_irrefl_trans (h : List.IsChain R l) [IsIrrefl _ R] : l.Nodup := b
   rw [hC] at this;
   exact IsIrrefl.irrefl _ this;
 
+lemma nodup_of_trans_irreflex [IsIrrefl _ R] (h_chain : l.IsChain R) : l.Nodup := by
+  by_contra hC;
+  replace ⟨d, hC⟩ := List.exists_duplicate_iff_not_nodup.mpr hC;
+  have := List.duplicate_iff_sublist.mp hC;
+  have := @List.IsChain.sublist α R [d, d] l ⟨by apply IsTrans.trans⟩ h_chain this;
+  apply IsIrrefl.irrefl d (r := R);
+  simpa;
+
 end IsChain
+
+
+instance finiteNodupList [DecidableEq α] [Finite α] : Finite { l : List α // l.Nodup } := @fintypeNodupList α (Fintype.ofFinite α) |>.finite
+
+lemma chains_finite [DecidableEq α] [Finite α] [IsTrans _ R] [IsIrrefl _ R] : Finite { l : List α // l.IsChain R } := by
+  apply @Finite.of_injective { l : List α // l.IsChain R } { l : List α // l.Nodup } _ ?f;
+  case f => intro ⟨l, hl⟩; refine ⟨l, List.IsChain.nodup_of_trans_irreflex hl⟩;
+  simp [Function.Injective];
 
 
 lemma mem_head?_eq_head : a ∈ l.head? → ∃ h, a = l.head h := by

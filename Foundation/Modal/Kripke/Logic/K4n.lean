@@ -1,6 +1,10 @@
-import Foundation.Modal.Kripke.AxiomFourN
-import Foundation.Modal.Kripke.Hilbert
-import Foundation.Modal.Kripke.Logic.KTc
+module
+
+public import Foundation.Modal.Kripke.AxiomFourN
+public import Foundation.Modal.Kripke.Hilbert
+public import Foundation.Modal.Kripke.Logic.KTc
+
+@[expose] public section
 
 namespace LO.Modal
 
@@ -210,3 +214,4 @@ end K4n
 
 
 end LO.Modal
+end

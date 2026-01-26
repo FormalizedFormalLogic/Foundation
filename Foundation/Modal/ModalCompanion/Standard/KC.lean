@@ -1,6 +1,10 @@
-import Foundation.Modal.ModalCompanion.Standard.Int
-import Foundation.Modal.Kripke.Logic.GrzPoint2
-import Foundation.Propositional.Kripke.Logic.KC
+module
+
+public import Foundation.Modal.ModalCompanion.Standard.Int
+public import Foundation.Modal.Kripke.Logic.GrzPoint2
+public import Foundation.Propositional.Kripke.Logic.KC
+
+@[expose] public section
 
 namespace LO.Propositional
 
@@ -177,3 +181,4 @@ instance : ModalCompanion Propositional.KC Modal.GrzPoint2 := by
 end GrzPoint2
 
 end LO.Modal
+end

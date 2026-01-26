@@ -1,6 +1,9 @@
-import Foundation.FirstOrder.Arithmetic.Q.Basic
-import Foundation.FirstOrder.Arithmetic.PeanoMinus.Basic
+module
 
+public import Foundation.FirstOrder.Arithmetic.Q.Basic
+public import Foundation.FirstOrder.Arithmetic.PeanoMinus.Basic
+
+@[expose] public section
 lemma Nat.iff_lt_exists_add_succ : n < m ↔ ∃ k, m = n + (k + 1) := by
   constructor;
   . intro h;

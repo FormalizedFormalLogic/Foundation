@@ -1,21 +1,25 @@
-import Foundation.InterpretabilityLogic.Entailment.IL
-import Foundation.InterpretabilityLogic.Entailment.IL_KW1Zero
-import Foundation.InterpretabilityLogic.Entailment.IL_KW2
-import Foundation.InterpretabilityLogic.Entailment.IL_M
-import Foundation.InterpretabilityLogic.Entailment.IL_M₀_W
-import Foundation.InterpretabilityLogic.Entailment.IL_M₀
-import Foundation.InterpretabilityLogic.Entailment.IL_P
-import Foundation.InterpretabilityLogic.Entailment.IL_R
-import Foundation.InterpretabilityLogic.Entailment.IL_R_W
-import Foundation.InterpretabilityLogic.Entailment.IL_Rstar
-import Foundation.InterpretabilityLogic.Entailment.IL_W
-import Foundation.InterpretabilityLogic.Entailment.IL_Wstar
-import Foundation.InterpretabilityLogic.Entailment.ILMinus
-import Foundation.InterpretabilityLogic.Entailment.ILMinus_J1
-import Foundation.InterpretabilityLogic.Entailment.ILMinus_J2
-import Foundation.InterpretabilityLogic.Entailment.ILMinus_J4
-import Foundation.InterpretabilityLogic.Entailment.ILMinus_J5
-import Foundation.InterpretabilityLogic.Entailment.ILMinus_M
+module
+
+public import Foundation.InterpretabilityLogic.Entailment.IL
+public import Foundation.InterpretabilityLogic.Entailment.IL_KW1Zero
+public import Foundation.InterpretabilityLogic.Entailment.IL_KW2
+public import Foundation.InterpretabilityLogic.Entailment.IL_M
+public import Foundation.InterpretabilityLogic.Entailment.IL_M₀_W
+public import Foundation.InterpretabilityLogic.Entailment.IL_M₀
+public import Foundation.InterpretabilityLogic.Entailment.IL_P
+public import Foundation.InterpretabilityLogic.Entailment.IL_R
+public import Foundation.InterpretabilityLogic.Entailment.IL_R_W
+public import Foundation.InterpretabilityLogic.Entailment.IL_Rstar
+public import Foundation.InterpretabilityLogic.Entailment.IL_W
+public import Foundation.InterpretabilityLogic.Entailment.IL_Wstar
+public import Foundation.InterpretabilityLogic.Entailment.ILMinus
+public import Foundation.InterpretabilityLogic.Entailment.ILMinus_J1
+public import Foundation.InterpretabilityLogic.Entailment.ILMinus_J2
+public import Foundation.InterpretabilityLogic.Entailment.ILMinus_J4
+public import Foundation.InterpretabilityLogic.Entailment.ILMinus_J5
+public import Foundation.InterpretabilityLogic.Entailment.ILMinus_M
+
+@[expose] public section
 
 namespace LO.InterpretabilityLogic.Entailment
 
@@ -41,3 +45,4 @@ instance [Entailment.IL_Wstar 𝓢] : Entailment.IL_W 𝓢 where
 instance [Entailment.IL_Wstar 𝓢] : Entailment.IL_M₀ 𝓢 where
 
 end LO.InterpretabilityLogic.Entailment
+end

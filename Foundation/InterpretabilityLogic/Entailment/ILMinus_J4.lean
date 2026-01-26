@@ -1,4 +1,8 @@
-import Foundation.InterpretabilityLogic.Entailment.ILMinus
+module
+
+public import Foundation.InterpretabilityLogic.Entailment.ILMinus
+
+@[expose] public section
 
 namespace LO.InterpretabilityLogic.Entailment
 
@@ -96,3 +100,4 @@ instance [Entailment.ILMinus_J4Plus 𝓢] : Entailment.ILMinus_J4' 𝓢 where
 instance [Entailment.ILMinus_J4Plus 𝓢] : Entailment.ILMinus_J4 𝓢 where
 
 end LO.InterpretabilityLogic.Entailment
+end

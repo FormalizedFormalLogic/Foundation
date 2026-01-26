@@ -1,5 +1,8 @@
-import Foundation.FirstOrder.Arithmetic.HFS
+module
 
+public import Foundation.FirstOrder.Arithmetic.HFS
+
+@[expose] public section
 /-! # Internalized languages of first-order logic -/
 
 namespace LO.FirstOrder.Arithmetic.Bootstrapping
