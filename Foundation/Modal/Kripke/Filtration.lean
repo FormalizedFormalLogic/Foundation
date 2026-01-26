@@ -132,7 +132,7 @@ lemma isReflexive (filterOf : FilterOf FM M T) [M.IsReflexive] : FM.IsReflexive 
   refl := by
     intro X;
     obtain ⟨x, hx⟩ := Quotient.exists_rep (cast (filterOf.def_world) X);
-    convert filterOf.def_rel_forth $ IsRefl.refl x <;> simp_all;
+    convert filterOf.def_rel_forth $ Std.Refl.refl x <;> simp_all;
 
 lemma isSerial (filterOf : FilterOf FM M T) [M.IsSerial] : FM.IsSerial where
   serial := by
@@ -281,12 +281,12 @@ instance rooted_isPiecewiseStronglyConvergent [preorder : M.IsPreorder] [ps_conv
         exact Rel.TransGen.unwrap Rrz;
       . apply Relation.TransGen.single;
         suffices z ≺ z by tauto;
-        apply IsRefl.refl ;
+        apply Std.Refl.refl ;
     . use ⟦⟨y, by tauto⟩⟧;
       constructor;
       . apply Relation.TransGen.single;
         suffices y ≺ y by tauto;
-        apply IsRefl.refl;
+        apply Std.Refl.refl;
       . apply Relation.TransGen.single;
         suffices z ≺ y by tauto;
         exact Rel.TransGen.unwrap Rry;
@@ -308,7 +308,7 @@ instance rooted_isPiecewiseStronglyConnected [preorder : M.IsPreorder] [ps_conne
     . simp only [or_self];
       apply Relation.TransGen.single;
       suffices z ≺ z by tauto;
-      apply IsRefl.refl;
+      apply Std.Refl.refl;
     . left;
       apply Relation.TransGen.single;
       suffices y ≺ z by tauto;

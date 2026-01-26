@@ -58,7 +58,7 @@ def blackpoint : Frame := ⟨Unit, λ _ _ => False⟩
 instance : Finite blackpoint.World := by
   dsimp [blackpoint];
   infer_instance;
-instance : IsIrrefl _ blackpoint.Rel := by tauto
+instance : Std.Irrefl blackpoint.Rel := by tauto
 instance : IsTrans _ blackpoint.Rel := ⟨by tauto⟩
 instance : IsStrictOrder _ blackpoint.Rel where
 -- instance : IsConnected _ blackpoint.Rel := ⟨by tauto⟩

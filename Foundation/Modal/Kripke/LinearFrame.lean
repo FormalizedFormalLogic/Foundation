@@ -53,7 +53,7 @@ instance : IsTrans _ natLE := by
   dsimp only [natLE];
   infer_instance;
 
-instance : IsRefl _ natLE := by
+instance : Std.Refl natLE := by
   dsimp only [natLE];
   infer_instance;
 
@@ -99,11 +99,11 @@ instance : IsTrans _ (finLE n) := by
   dsimp only [finLE];
   infer_instance;
 
-instance : IsRefl _ (finLE n) := by
+instance : Std.Refl (finLE n) := by
   dsimp only [finLE];
   infer_instance;
 
-instance : IsAntisymm _ (finLE n) := by
+instance : Std.Antisymm (finLE n) := by
   dsimp only [finLE];
   infer_instance;
 

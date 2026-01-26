@@ -28,8 +28,8 @@ protected abbrev IsStronglyConvergent (F : Frame) := _root_.IsStronglyConvergent
 lemma strongly_convergent [F.IsStronglyConvergent] : ∀ x y : F.World, ∃ u, x ≺ u ∧ y ≺ u := by apply IsStronglyConvergent.s_convergent
 
 
-protected abbrev IsStronglyConnected (F : Frame) := _root_.IsTotal _ F.Rel
-lemma s_connected [F.IsStronglyConnected] : ∀ {x y : F.World}, x ≺ y ∨ y ≺ x := by apply IsTotal.total
+protected abbrev IsStronglyConnected (F : Frame) := _root_.Std.Total F.Rel
+lemma s_connected [F.IsStronglyConnected] : ∀ {x y : F.World}, x ≺ y ∨ y ≺ x := by apply Std.Total.total
 
 protected abbrev IsConnected (F : Frame) := _root_.IsTrichotomous _ F.Rel
 lemma connected [F.IsConnected] : ∀ x y : F.World, x ≺ y ∨ x = y ∨ y ≺ x := by apply IsTrichotomous.trichotomous
@@ -273,7 +273,7 @@ instance [F.IsFinite] : (F↾r).IsFinite := inferInstance
 instance [DecidableEq F.World] : DecidableEq (F↾r).World := Subtype.instDecidableEq
 
 instance isReflexive [F.IsReflexive] : (F↾r).IsReflexive where
-  refl := by rintro ⟨x, (rfl | hx)⟩ <;> exact IsRefl.refl x;
+  refl := by rintro ⟨x, (rfl | hx)⟩ <;> exact Std.Refl.refl x;
 
 instance isTransitive [F.IsTransitive] : (F↾r).IsTransitive where
   trans := by
@@ -299,7 +299,7 @@ instance isIrreflexive [F.IsIrreflexive] : (F↾r).IsIrreflexive := ⟨by rintro
 
 instance isAsymmetric [F.IsAsymmetric] : (F↾r).IsAsymmetric := ⟨by
   rintro ⟨x, (rfl | hx)⟩ ⟨y, (rfl | hy)⟩ Rxy <;>
-  { dsimp at Rxy; apply IsAsymm.asymm _ _ Rxy; }
+  { dsimp at Rxy; apply Std.Asymm.asymm _ _ Rxy; }
 ⟩
 
 instance isPiecewiseConvergent [F.IsPiecewiseConvergent] : (F↾r).IsPiecewiseConvergent := ⟨by
