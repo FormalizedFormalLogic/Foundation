@@ -1,6 +1,10 @@
-import Mathlib.Data.PNat.Basic
-import Mathlib.Data.Rel
+module
 
+public import Mathlib.Data.PNat.Basic
+public import Mathlib.Data.Rel
+
+@[expose]
+public section
 
 namespace Rel
 
@@ -278,3 +282,7 @@ instance [IsTrans _ R] [IsAntisymm _ R] : IsTrans _ (R.IrreflGen) := ⟨by
 instance [IsPartialOrder _ R] : IsStrictOrder _ (R.IrreflGen) where
 
 end IrreflGen
+
+end Rel
+
+end

@@ -1,4 +1,8 @@
-import Foundation.InterpretabilityLogic.Entailment.IL
+module
+
+public import Foundation.InterpretabilityLogic.Entailment.IL
+
+@[expose] public section
 
 namespace LO.InterpretabilityLogic.Entailment
 
@@ -25,3 +29,4 @@ instance : HasAxiomKW2 𝓢 where
     . apply A_symm lem;
 
 end LO.InterpretabilityLogic.Entailment
+end

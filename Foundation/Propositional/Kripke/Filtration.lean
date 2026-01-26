@@ -1,5 +1,9 @@
-import Mathlib.Data.Set.Finite.Powerset
-import Foundation.Propositional.Kripke.Preservation
+module
+
+public import Mathlib.Data.Set.Finite.Powerset
+public import Foundation.Propositional.Kripke.Preservation
+
+@[expose] public section
 
 universe u v
 
@@ -336,3 +340,4 @@ end
 end Kripke
 
 end LO.Propositional
+end

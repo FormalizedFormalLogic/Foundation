@@ -1,9 +1,11 @@
-import Foundation.ProvabilityLogic.Classification.LetterlessTrace
-import Foundation.Modal.Boxdot.GL_S
-import Foundation.Modal.Logic.SumQuasiNormal
-import Foundation.Modal.Logic.D.Basic
+module
 
+public import Foundation.ProvabilityLogic.Classification.LetterlessTrace
+public import Foundation.Modal.Boxdot.GL_S
+public import Foundation.Modal.Logic.SumQuasiNormal
+public import Foundation.Modal.Logic.D.Basic
 
+@[expose] public section
 namespace LO
 
 namespace Modal

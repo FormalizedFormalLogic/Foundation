@@ -1,5 +1,9 @@
-import Foundation.Propositional.Kripke.Basic
-import Foundation.Propositional.ConsistentTableau
+module
+
+public import Foundation.Propositional.Kripke.Basic
+public import Foundation.Propositional.ConsistentTableau
+
+@[expose] public section
 
 namespace LO.Propositional
 
@@ -167,3 +171,4 @@ instance instCompleteOfCanonical [Canonical 𝓢 C] : Complete 𝓢 C := ⟨by
 end Kripke
 
 end LO.Propositional
+end

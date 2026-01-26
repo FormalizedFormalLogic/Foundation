@@ -13,8 +13,7 @@ module
 -/
 public import Foundation.InterpretabilityLogic.LogicSymbol
 
-@[expose]
-public section
+@[expose] public section
 
 namespace LO.InterpretabilityLogic.Axioms
 

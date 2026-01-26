@@ -1,5 +1,9 @@
-import Foundation.Modal.Logic.SumQuasiNormal
-import Foundation.Modal.Maximal.Unprovability
+module
+
+public import Foundation.Modal.Logic.SumQuasiNormal
+public import Foundation.Modal.Maximal.Unprovability
+
+@[expose] public section
 
 namespace LO.Modal
 
@@ -88,3 +92,4 @@ protected def S.rec'
 end
 
 end LO.Modal
+end

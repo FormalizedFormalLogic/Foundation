@@ -1,12 +1,16 @@
-import Foundation.Modal.Entailment.GL
-import Foundation.Modal.Entailment.Grz
-import Foundation.Modal.Entailment.K4Hen
-import Foundation.Modal.Entailment.K4Henkin
-import Foundation.Modal.Entailment.S5Grz
-import Foundation.Modal.Hilbert.Axiom
-import Foundation.Modal.Logic.Basic
-import Foundation.Modal.Logic.Basic
-import Foundation.Propositional.Entailment.Cl.Łukasiewicz
+module
+
+public import Foundation.Modal.Entailment.GL
+public import Foundation.Modal.Entailment.Grz
+public import Foundation.Modal.Entailment.K4Hen
+public import Foundation.Modal.Entailment.K4Henkin
+public import Foundation.Modal.Entailment.S5Grz
+public import Foundation.Modal.Hilbert.Axiom
+public import Foundation.Modal.Logic.Basic
+public import Foundation.Modal.Logic.Basic
+public import Foundation.Propositional.Entailment.Cl.Łukasiewicz
+
+@[expose] public section
 
 namespace LO.Modal
 
@@ -910,3 +914,4 @@ instance : Entailment.HasAxiomP (Modal.NP) := inferInstance
 end
 
 end LO.Modal
+end

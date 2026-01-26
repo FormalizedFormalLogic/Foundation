@@ -1,5 +1,9 @@
-import Foundation.Modal.Neighborhood.Completeness
-import Foundation.Modal.Entailment.AxiomGeach
+module
+
+public import Foundation.Modal.Neighborhood.Completeness
+public import Foundation.Modal.Entailment.AxiomGeach
+
+@[expose] public section
 
 namespace LO.Modal.Neighborhood
 
@@ -335,3 +339,4 @@ end maximalRelativeMaximalCanonicity
 end
 
 end LO.Modal.Neighborhood
+end

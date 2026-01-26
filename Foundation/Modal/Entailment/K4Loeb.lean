@@ -1,4 +1,8 @@
-import Foundation.Modal.Entailment.Basic
+module
+
+public import Foundation.Modal.Entailment.Basic
+
+@[expose] public section
 
 namespace LO.Modal
 
@@ -30,3 +34,7 @@ instance : HasAxiomL 𝓢 := ⟨fun _ ↦ K4Loeb.axiomL⟩
 end K4Loeb
 
 end Entailment
+
+end LO.Modal
+
+end

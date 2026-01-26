@@ -1,4 +1,8 @@
-import Foundation.Modal.Kripke.Antisymmetric
+module
+
+public import Foundation.Modal.Kripke.Antisymmetric
+
+@[expose] public section
 
 namespace LO.Modal.Kripke
 
@@ -16,3 +20,4 @@ class IsStrictPreorder (F : Frame) extends F.IsIrreflexive, F.IsTransitive
 end Frame
 
 end LO.Modal.Kripke
+end

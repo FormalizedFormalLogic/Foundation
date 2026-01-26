@@ -1,5 +1,10 @@
-import Foundation.Vorspiel.Rel.Euclidean
-import Foundation.Vorspiel.Rel.Convergent
+module
+
+public import Foundation.Vorspiel.Rel.Euclidean
+public import Foundation.Vorspiel.Rel.Convergent
+
+@[expose]
+public section
 
 variable {α} {R : Rel α α}
 
@@ -16,8 +21,8 @@ instance [IsTrichotomous _ R] : IsPiecewiseConnected R :=
 
 instance [IsRightEuclidean R] : IsPiecewiseConnected R := ⟨by
   intro x y z Rxy Rxz;
-  have : R y z := IsRightEuclidean.reucl Rxy Rxz;
-  tauto;
+  left;
+  exact IsRightEuclidean.reucl Rxy Rxz;
 ⟩
 
 def PiecewiseStronglyConnected (R : Rel α α) := ∀ ⦃x y z⦄, R x y → R x z → (R y z ∨ R z y)
@@ -52,3 +57,5 @@ instance [IsRefl _ R] [IsPiecewiseStronglyConnected R] : IsPiecewiseStronglyConv
     . apply IsRefl.refl;
     . assumption;
 ⟩
+
+end

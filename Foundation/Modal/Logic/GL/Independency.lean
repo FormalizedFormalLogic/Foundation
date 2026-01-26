@@ -1,6 +1,10 @@
-import Foundation.Modal.Maximal.Unprovability
-import Foundation.Modal.Kripke.Logic.GL.MDP
+module
 
+public import Foundation.Modal.Maximal.Unprovability
+public import Foundation.Modal.Kripke.Logic.GL.MDP
+
+
+@[expose] public section
 
 namespace LO.Modal
 
@@ -76,3 +80,4 @@ theorem undecidable_higherIndependency_of_consistency : Independent Modal.GL (hi
 end GL
 
 end LO.Modal
+end

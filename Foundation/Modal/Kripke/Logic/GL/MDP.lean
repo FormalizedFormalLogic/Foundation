@@ -1,4 +1,8 @@
-import Foundation.Modal.Kripke.Logic.GL.Unnecessitation
+module
+
+public import Foundation.Modal.Kripke.Logic.GL.Unnecessitation
+
+@[expose] public section
 
 namespace LO.Modal
 
@@ -199,3 +203,4 @@ instance : ModalDisjunctive Modal.GL := ⟨modal_disjunctive⟩
 end GL
 
 end LO.Modal
+end

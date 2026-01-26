@@ -1,4 +1,11 @@
-import Foundation.Vorspiel.Rel.Coreflexive
+module
+
+public import Foundation.Vorspiel.Rel.Coreflexive
+public import Foundation.Vorspiel.Rel.Euclidean
+
+
+@[expose]
+public section
 
 variable {α} {R : Rel α α}
 
@@ -10,3 +17,5 @@ class IsUniversal (R : Rel α α) where
 
 instance [IsUniversal R] : IsRefl α R := ⟨by intro x; apply IsUniversal.universal⟩
 instance [IsUniversal R] : IsRightEuclidean R := ⟨by intro x y z _ _; apply IsUniversal.universal⟩
+
+end

@@ -1,5 +1,8 @@
-import Foundation.Propositional.Kripke.Completeness
-import Foundation.Vorspiel.Rel.Euclidean
+module
+
+public import Foundation.Propositional.Kripke.Completeness
+
+@[expose] public section
 
 namespace LO.Propositional
 
@@ -13,7 +16,6 @@ lemma Frame.symm {F : Frame} [F.IsSymmetric] : ∀ ⦃x y : F⦄, x ≺ y → y 
 
 protected abbrev Frame.IsEuclidean (F : Frame) := _root_.IsRightEuclidean F.Rel
 lemma Frame.eucl {F : Frame} [F.IsEuclidean] : ∀ ⦃x y z : F⦄, x ≺ y → x ≺ z → y ≺ z := by apply IsRightEuclidean.reucl
-lemma Frame.eucl' {F : Frame} [F.IsEuclidean] : ∀ ⦃x y z : F⦄, x ≺ y → x ≺ z → z ≺ y := by apply IsRightEuclidean.reucl'
 
 section definability
 
@@ -58,7 +60,6 @@ lemma isEuclidean_of_validate_axiomLEM (h : F ⊧ (Axioms.LEM (.atom 0))) : F.Is
 
 end definability
 
-
 section canonicality
 
 variable {S} [Entailment S (Formula ℕ)]
@@ -92,7 +93,7 @@ instance [Entailment.HasAxiomLEM 𝓢] : (canonicalFrame 𝓢).IsEuclidean := �
 
 end canonicality
 
-
 end Kripke
 
 end LO.Propositional
+end

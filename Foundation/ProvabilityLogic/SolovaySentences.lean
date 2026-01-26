@@ -1,11 +1,14 @@
-import Foundation.FirstOrder.Bootstrapping.Consistency
-import Foundation.FirstOrder.Bootstrapping.FixedPoint
-import Foundation.FirstOrder.Bootstrapping.ProvabilityAbstraction.Height
-import Foundation.FirstOrder.Bootstrapping.WitnessComparison
-import Foundation.Modal.Kripke.Rank
-import Foundation.ProvabilityLogic.GL.Soundness
-import Foundation.ProvabilityLogic.Realization
+module
 
+public import Foundation.FirstOrder.Bootstrapping.Consistency
+public import Foundation.FirstOrder.Bootstrapping.FixedPoint
+public import Foundation.FirstOrder.Bootstrapping.ProvabilityAbstraction.Height
+public import Foundation.FirstOrder.Bootstrapping.WitnessComparison
+public import Foundation.Modal.Kripke.Rank
+public import Foundation.ProvabilityLogic.GL.Soundness
+public import Foundation.ProvabilityLogic.Realization
+
+@[expose] public section
 /-!
 # Basic propaties of Solovay sentences and its construction
 -/

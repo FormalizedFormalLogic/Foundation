@@ -1,6 +1,8 @@
-import Foundation.Propositional.Entailment.Corsi.Basic
-import Foundation.Logic.Disjunctive
+module
+public import Foundation.Propositional.Entailment.Corsi.Basic
+public import Foundation.Logic.Disjunctive
 
+@[expose] public section
 
 namespace LO.Propositional
 
@@ -239,3 +241,5 @@ end Entailment
 
 
 end LO.Propositional
+
+end

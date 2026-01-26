@@ -1,5 +1,9 @@
-import Foundation.Modal.Kripke.AxiomGeach
-import Foundation.Modal.Kripke.Closure
+module
+
+public import Foundation.Modal.Kripke.AxiomGeach
+public import Foundation.Modal.Kripke.Closure
+
+@[expose] public section
 
 attribute [instance] IsAsymm.isIrrefl
 
@@ -18,3 +22,4 @@ instance [F.IsAsymmetric] : F.IsIrreflexive := ⟨by simp⟩
 end Kripke
 
 end LO.Modal
+end

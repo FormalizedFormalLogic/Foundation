@@ -1,5 +1,9 @@
-import Foundation.Modal.Formula.Basic
-import Foundation.Propositional.Entailment.Cl.Basic
+module
+
+public import Foundation.Modal.Formula.Basic
+public import Foundation.Propositional.Entailment.Cl.Basic
+
+@[expose] public section
 
 namespace LO.Modal
 
@@ -125,3 +129,4 @@ lemma of_imply_complement_bot [DecidableEq α] (h : 𝓢 ⊢ (-φ) ➝ ⊥) : �
 end
 
 end LO.Modal
+end

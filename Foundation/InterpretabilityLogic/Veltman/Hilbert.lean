@@ -1,6 +1,10 @@
-import Foundation.InterpretabilityLogic.Hilbert.Basic.Basic
-import Foundation.InterpretabilityLogic.Hilbert.Minimal.Basic
-import Foundation.InterpretabilityLogic.Veltman.Basic
+module
+
+public import Foundation.InterpretabilityLogic.Hilbert.Basic.Basic
+public import Foundation.InterpretabilityLogic.Hilbert.Minimal.Basic
+public import Foundation.InterpretabilityLogic.Veltman.Basic
+
+@[expose] public section
 
 namespace LO.InterpretabilityLogic
 
@@ -112,3 +116,4 @@ end Hilbert.Basic.Veltman
 
 
 end LO.InterpretabilityLogic
+end

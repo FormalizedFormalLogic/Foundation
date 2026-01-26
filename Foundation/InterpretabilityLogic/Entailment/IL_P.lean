@@ -1,6 +1,10 @@
-import Foundation.InterpretabilityLogic.Entailment.IL
-import Foundation.InterpretabilityLogic.Entailment.IL_Rstar
-import Foundation.InterpretabilityLogic.Entailment.ILMinus_J4
+module
+
+public import Foundation.InterpretabilityLogic.Entailment.IL
+public import Foundation.InterpretabilityLogic.Entailment.IL_Rstar
+public import Foundation.InterpretabilityLogic.Entailment.ILMinus_J4
+
+@[expose] public section
 
 namespace LO.InterpretabilityLogic.Entailment
 
@@ -77,3 +81,4 @@ instance «IL(P)_⊢_W» : Entailment.HasAxiomW 𝓢 where
     simp;
 
 end LO.InterpretabilityLogic.Entailment
+end

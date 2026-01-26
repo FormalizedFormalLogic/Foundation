@@ -1,5 +1,8 @@
-import Foundation.Modal.Boxdot.Grz_S
+module
 
+public import Foundation.Modal.Boxdot.Grz_S
+
+@[expose] public section
 namespace LO
 
 open FirstOrder

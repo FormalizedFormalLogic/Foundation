@@ -1,7 +1,11 @@
-import Foundation.Propositional.Kripke2.Basic
-import Foundation.Propositional.Kripke2.FTheory
-import Mathlib.Tactic.TFAE
+module
 
+public import Foundation.Propositional.Kripke2.Basic
+public import Foundation.Propositional.Kripke2.FTheory
+public import Mathlib.Tactic.TFAE
+
+
+@[expose] public section
 
 namespace LO.Propositional
 
@@ -71,3 +75,4 @@ instance [Entailment.F L] [Entailment.HasAxiomTra1 L] [Entailment.Disjunctive L]
 end Kripke2
 
 end LO.Propositional
+end

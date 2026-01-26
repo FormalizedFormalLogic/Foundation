@@ -1,5 +1,9 @@
-import Foundation.Meta.Qq
-import Foundation.Logic.LogicSymbol
+module
+
+public import Foundation.Meta.Qq
+public import Foundation.Logic.LogicSymbol
+
+public section
 
 namespace LO.Meta
 
@@ -121,3 +125,5 @@ def dSubsetList (Γ Δ : List Lit) : MetaM Bool := do
 end Lit
 
 end LO.Meta
+
+end

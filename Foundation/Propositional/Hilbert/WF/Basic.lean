@@ -1,10 +1,14 @@
+module
+
 /-
   `WF` system by de Jongh and Shirmohammadzadeh Maleki
 -/
-import Foundation.Logic.Disjunctive
-import Foundation.Propositional.Entailment.Corsi
-import Foundation.Propositional.Hilbert.Axiom
-import Foundation.Propositional.Logic.Basic
+public import Foundation.Logic.Disjunctive
+public import Foundation.Propositional.Entailment.Corsi
+public import Foundation.Propositional.Hilbert.Axiom
+public import Foundation.Propositional.Logic.Basic
+
+@[expose] public section
 
 namespace LO.Propositional
 
@@ -123,3 +127,4 @@ protected abbrev WF : Logic ℕ := Hilbert.WF ∅
 instance : Entailment.WF Propositional.WF where
 
 end LO.Propositional
+end

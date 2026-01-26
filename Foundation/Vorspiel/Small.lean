@@ -1,5 +1,9 @@
-import Foundation.Vorspiel.Vorspiel
-import Mathlib.Logic.Small.Basic
+module
+
+public import Mathlib.Logic.Small.Basic
+
+@[expose]
+public section
 
 section Small
 
@@ -10,3 +14,5 @@ def small_preimage_of_injective (f : α → β) (h : Function.Injective f) (s : 
   simp [Function.Injective.eq_iff h, SetCoe.ext_iff]
 
 end Small
+
+end

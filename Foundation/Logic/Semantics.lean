@@ -1,4 +1,5 @@
-import Foundation.Logic.LogicSymbol
+module
+public import Foundation.Logic.LogicSymbol
 
 /-!
 # Basic definitions and properties of semantics-related notions
@@ -15,6 +16,8 @@ Also provides 𝓜 characterization of compactness.
 * `𝓜 ⊧* T`: a proposition that states that `𝓜` satisfies each formulae in a set `T`.
 
 -/
+
+@[expose] public section
 
 namespace LO
 
@@ -341,3 +344,5 @@ lemma compact_cumulative {T : ℕ → Set F} (hT : Cumulative T) :
 end Compact
 
 end LO
+
+end

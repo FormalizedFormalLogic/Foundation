@@ -1,4 +1,8 @@
-import Foundation.Modal.Entailment.E
+module
+
+public import Foundation.Modal.Entailment.E
+
+@[expose] public section
 
 namespace LO.Modal.Entailment
 
@@ -640,3 +644,4 @@ lemma box_congruence! (h : Γ *⊢[𝓢] φ ⭤ ψ) : (□'Γ) *⊢[𝓢] □φ 
 end Context
 
 end LO.Modal.Entailment
+end

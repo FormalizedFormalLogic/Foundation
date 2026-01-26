@@ -1,9 +1,13 @@
-import Foundation.Modal.Kripke.AxiomGeach
-import Foundation.Modal.Kripke.Hilbert
-import Foundation.Modal.Kripke.Filtration
-import Foundation.Modal.Kripke.Logic.S4
-import Foundation.Modal.Kripke.Logic.K4Point2
-import Foundation.Modal.Kripke.Rooted
+module
+
+public import Foundation.Modal.Kripke.AxiomGeach
+public import Foundation.Modal.Kripke.Hilbert
+public import Foundation.Modal.Kripke.Filtration
+public import Foundation.Modal.Kripke.Logic.S4
+public import Foundation.Modal.Kripke.Logic.K4Point2
+public import Foundation.Modal.Kripke.Rooted
+
+@[expose] public section
 
 namespace LO.Modal
 
@@ -149,3 +153,4 @@ instance : Modal.KT ⪱ Modal.S4Point2 := calc
   _        ⪱ Modal.S4Point2 := by infer_instance
 
 end LO.Modal
+end

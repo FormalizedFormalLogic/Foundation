@@ -1,5 +1,9 @@
-import Foundation.Modal.Entailment.K
-import Foundation.Modal.Entailment.EN
+module
+
+public import Foundation.Modal.Entailment.K
+public import Foundation.Modal.Entailment.EN
+
+@[expose] public section
 
 namespace LO.Modal.Entailment
 
@@ -17,3 +21,4 @@ instance [Entailment.END 𝓢] : HasAxiomP 𝓢 := ⟨by
 ⟩
 
 end LO.Modal.Entailment
+end

@@ -1,6 +1,10 @@
-import Foundation.Modal.Hilbert.WithRE.Basic
-import Foundation.Modal.Hilbert.Normal.Basic
+module
 
+public import Foundation.Modal.Hilbert.WithRE.Basic
+public import Foundation.Modal.Hilbert.Normal.Basic
+
+
+@[expose] public section
 
 namespace LO.Modal
 
@@ -44,3 +48,4 @@ instance : Modal.EMCNT4 ≊ Modal.S4 := by
   . rintro _ ⟨φ, (rfl | rfl | rfl), ⟨_, rfl⟩⟩ <;> simp;
 
 end LO.Modal
+end

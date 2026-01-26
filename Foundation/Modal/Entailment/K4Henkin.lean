@@ -1,4 +1,8 @@
-import Foundation.Modal.Entailment.Basic
+module
+
+public import Foundation.Modal.Entailment.Basic
+
+@[expose] public section
 
 namespace LO.Modal
 
@@ -20,5 +24,8 @@ instance : LoebRule 𝓢 where
 
 end K4Henkin
 
-
 end Entailment
+
+end LO.Modal
+
+end

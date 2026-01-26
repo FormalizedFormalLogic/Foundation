@@ -1,5 +1,9 @@
-import Foundation.ProvabilityLogic.GL.Completeness
-import Foundation.ProvabilityLogic.S.Soundness
+module
+
+public import Foundation.ProvabilityLogic.GL.Completeness
+public import Foundation.ProvabilityLogic.S.Soundness
+
+@[expose] public section
 
 namespace LO
 
@@ -26,3 +30,4 @@ instance : Entailment.Consistent Modal.S := Entailment.Consistent.of_unprovable 
 end Modal.Logic
 
 end LO
+end

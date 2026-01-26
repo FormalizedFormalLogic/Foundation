@@ -1,7 +1,11 @@
-import Foundation.Modal.Kripke.Preservation
-import Foundation.Modal.Kripke.Rooted
-import Mathlib.Data.Finite.Card
+module
 
+public import Foundation.Modal.Kripke.Preservation
+public import Foundation.Modal.Kripke.Rooted
+public import Mathlib.Data.Finite.Card
+
+
+@[expose] public section
 
 def IsEquiv.equivalence [IsEquiv α r] : Equivalence r where
   refl := IsRefl.refl
@@ -370,3 +374,4 @@ end Frame.strictSkelteon
 end Kripke
 
 end LO.Modal
+end

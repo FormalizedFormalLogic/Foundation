@@ -1,6 +1,9 @@
-import Foundation.FirstOrder.Arithmetic.TA.Basic
-import Foundation.FirstOrder.Arithmetic.PeanoMinus.Basic
+module
 
+public import Foundation.FirstOrder.Arithmetic.TA.Basic
+public import Foundation.FirstOrder.Arithmetic.PeanoMinus.Basic
+
+@[expose] public section
 namespace LO.FirstOrder.Arithmetic
 
 abbrev withStar := Language.add ℒₒᵣ Language.unit

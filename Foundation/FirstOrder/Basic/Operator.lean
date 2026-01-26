@@ -1,5 +1,9 @@
-import Foundation.FirstOrder.Basic.Semantics.Semantics
-import Foundation.Vorspiel.NotationClass
+module
+
+public import Foundation.FirstOrder.Basic.Semantics.Semantics
+public import Foundation.FirstOrder.NotationClass
+
+@[expose] public section
 
 namespace LO
 
@@ -383,7 +387,8 @@ lemma LE.def_of_Eq_of_LT [Operator.Eq L] [Operator.LT L] :
 
 @[simp] lemma LE.le_inj [L.Eq] [L.LT] {t₁ t₂ u₁ u₂ : Semiterm L ξ₂ n₂} :
     LE.le.operator ![t₁, u₁] = LE.le.operator ![t₂, u₂] ↔ t₁ = t₂ ∧ u₁ = u₂ := by
-  simp [operator, LE.sentence_eq, Eq.sentence_eq, LT.sentence_eq, Matrix.fun_eq_vec_two]
+  simp [operator, LE.sentence_eq, Eq.sentence_eq, LT.sentence_eq, Matrix.fun_eq_vec_two];
+
 
 lemma lt_def [L.LT] (t u : Semiterm L ξ n) :
     LT.lt.operator ![t, u] = Semiformula.rel Language.LT.lt ![t, u] := by simp [operator, LT.sentence_eq, rew_rel]
@@ -717,3 +722,5 @@ end Semiterm
 end FirstOrder
 
 end LO
+
+end

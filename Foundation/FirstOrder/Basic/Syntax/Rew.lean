@@ -1,5 +1,9 @@
-import Foundation.Logic.Predicate.Rew
-import Foundation.FirstOrder.Basic.Syntax.Formula
+module
+
+public import Foundation.Logic.Predicate.Rew
+public import Foundation.FirstOrder.Basic.Syntax.Formula
+
+@[expose] public section
 
 /-!
 # Rewriting Entailment
@@ -538,3 +542,4 @@ end lMap
 end Semiformula
 
 end LO.FirstOrder
+end

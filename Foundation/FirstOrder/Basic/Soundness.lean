@@ -1,5 +1,7 @@
-import Foundation.FirstOrder.Basic.Semantics.Semantics
-import Foundation.FirstOrder.Basic.Calculus
+module
+public import Foundation.FirstOrder.Basic.Semantics.Semantics
+public import Foundation.FirstOrder.Basic.Calculus
+@[expose] public section
 
 namespace LO
 
@@ -103,3 +105,5 @@ end sound
 end FirstOrder
 
 end LO
+
+end

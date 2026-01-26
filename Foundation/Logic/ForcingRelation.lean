@@ -1,7 +1,10 @@
-import Foundation.Logic.LogicSymbol
-import Foundation.Vorspiel.AdjunctiveSet
+module
+
+public import Foundation.Logic.LogicSymbol
 
 /-! # Forcing relation -/
+
+@[expose] public section
 
 namespace LO
 
@@ -138,3 +141,5 @@ end AllForces
 end WeakForcingRelation
 
 end LO
+
+end

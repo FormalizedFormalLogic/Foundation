@@ -1,6 +1,10 @@
-import Foundation.Modal.Formula.NNFormula
-import Foundation.Modal.Entailment.K
-import Foundation.Modal.Hilbert.Normal.Basic
+module
+
+public import Foundation.Modal.Formula.NNFormula
+public import Foundation.Modal.Entailment.K
+public import Foundation.Modal.Hilbert.Normal.Basic
+
+@[expose] public section
 
 namespace LO.Modal.Hilbert
 
@@ -241,3 +245,4 @@ lemma exists_DNF (φ : NNFormula _)
 end NNFormula
 
 end LO.Modal.Hilbert
+end

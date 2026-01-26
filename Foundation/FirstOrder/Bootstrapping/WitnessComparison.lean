@@ -1,6 +1,9 @@
-import Foundation.FirstOrder.Bootstrapping.DerivabilityCondition
-import Foundation.Propositional.Entailment.Cl.Basic
+module
 
+public import Foundation.FirstOrder.Bootstrapping.DerivabilityCondition
+public import Foundation.Propositional.Entailment.Cl.Basic
+
+@[expose] public section
 /-!
 # Witness comparisons of provability
 -/

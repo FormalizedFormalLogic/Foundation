@@ -1,6 +1,10 @@
-import Foundation.InterpretabilityLogic.Veltman.Logic.ILMinus_J1_J2
-import Foundation.InterpretabilityLogic.Hilbert.Basic_Minimal
+module
 
+public import Foundation.InterpretabilityLogic.Veltman.Logic.ILMinus_J1_J2
+public import Foundation.InterpretabilityLogic.Hilbert.Basic_Minimal
+
+
+@[expose] public section
 
 namespace LO.InterpretabilityLogic
 
@@ -29,3 +33,4 @@ instance : Entailment.Consistent InterpretabilityLogic.CL := by
 end CL
 
 end LO.InterpretabilityLogic
+end

@@ -1,5 +1,8 @@
-import Foundation.FirstOrder.Arithmetic.Omega1.Basic
+module
 
+public import Foundation.FirstOrder.Arithmetic.Omega1.Basic
+
+@[expose] public section
 namespace LO.FirstOrder.Arithmetic
 
 variable {V : Type*} [ORingStructure V] [V ⊧ₘ* 𝗜𝚺₀ + 𝝮₁]

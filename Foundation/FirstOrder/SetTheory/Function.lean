@@ -1,5 +1,8 @@
-import Foundation.FirstOrder.SetTheory.Z
+module
 
+public import Foundation.FirstOrder.SetTheory.Z
+
+@[expose] public section
 /-!
 # Basic definitions and lemmata for relations and functions
 -/

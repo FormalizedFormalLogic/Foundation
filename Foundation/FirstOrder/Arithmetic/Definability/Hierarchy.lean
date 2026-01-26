@@ -1,5 +1,8 @@
-import Foundation.FirstOrder.Arithmetic.PeanoMinus.Basic
+module
 
+public import Foundation.FirstOrder.Arithmetic.PeanoMinus.Basic
+
+@[expose] public section
 /-!
 
 # Arithmetical Formula Sorted by Arithmetical Hierarchy

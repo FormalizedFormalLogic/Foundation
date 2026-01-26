@@ -1,7 +1,11 @@
-import Foundation.Modal.Kripke.AxiomGeach
-import Foundation.Modal.Kripke.Hilbert
-import Foundation.Modal.Kripke.Logic.K4
-import Foundation.Modal.Kripke.Logic.KD
+module
+
+public import Foundation.Modal.Kripke.AxiomGeach
+public import Foundation.Modal.Kripke.Hilbert
+public import Foundation.Modal.Kripke.Logic.K4
+public import Foundation.Modal.Kripke.Logic.KD
+
+@[expose] public section
 
 namespace LO.Modal
 
@@ -72,3 +76,4 @@ instance : Modal.K4 ⪱ Modal.KD4 := by
       . simp [Semantics.Models, Satisfies];
 
 end LO.Modal
+end

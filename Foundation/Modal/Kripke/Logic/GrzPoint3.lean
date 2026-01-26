@@ -1,5 +1,9 @@
-import Foundation.Modal.Kripke.Logic.GrzPoint2
-import Foundation.Modal.Kripke.Logic.S4Point3
+module
+
+public import Foundation.Modal.Kripke.Logic.GrzPoint2
+public import Foundation.Modal.Kripke.Logic.S4Point3
+
+@[expose] public section
 
 namespace LO.Modal
 
@@ -169,3 +173,4 @@ end Logic
 
 
 end LO.Modal
+end

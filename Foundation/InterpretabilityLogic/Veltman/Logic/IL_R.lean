@@ -1,4 +1,8 @@
-import Foundation.InterpretabilityLogic.Veltman.Logic.IL_P₀
+module
+
+public import Foundation.InterpretabilityLogic.Veltman.Logic.IL_P₀
+
+@[expose] public section
 
 namespace LO.InterpretabilityLogic
 
@@ -34,3 +38,4 @@ instance : Entailment.Consistent InterpretabilityLogic.IL_R := Veltman.consisten
 end IL_R
 
 end LO.InterpretabilityLogic
+end

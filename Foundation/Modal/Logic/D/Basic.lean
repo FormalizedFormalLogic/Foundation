@@ -1,12 +1,16 @@
-import Foundation.Modal.Logic.SumNormal
-import Foundation.Modal.Logic.Basic
-import Foundation.Modal.Logic.GL.Independency
-import Foundation.Modal.Kripke.Logic.GL.Soundness
-import Foundation.Modal.Logic.S.Basic
-import Foundation.Modal.Entailment.GL
-import Mathlib.Tactic.TFAE
-import Mathlib.Order.WellFoundedSet
-import Foundation.Modal.Maximal.Unprovability
+module
+
+public import Foundation.Modal.Logic.SumNormal
+public import Foundation.Modal.Logic.Basic
+public import Foundation.Modal.Logic.GL.Independency
+public import Foundation.Modal.Kripke.Logic.GL.Soundness
+public import Foundation.Modal.Logic.S.Basic
+public import Foundation.Modal.Entailment.GL
+public import Mathlib.Tactic.TFAE
+public import Mathlib.Order.WellFoundedSet
+public import Foundation.Modal.Maximal.Unprovability
+
+@[expose] public section
 
 namespace LO.Modal
 
@@ -585,3 +589,4 @@ end
 end
 
 end LO.Modal
+end

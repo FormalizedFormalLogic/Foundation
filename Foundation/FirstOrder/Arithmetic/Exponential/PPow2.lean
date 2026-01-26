@@ -1,5 +1,8 @@
-import Foundation.FirstOrder.Arithmetic.Exponential.Pow2
+module
 
+public import Foundation.FirstOrder.Arithmetic.Exponential.Pow2
+
+@[expose] public section
 /-!
 # On $\mathrm{PPow2}(x)$
 

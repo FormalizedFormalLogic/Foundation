@@ -1,5 +1,9 @@
-import Foundation.Modal.Entailment.KT
-import Foundation.Modal.Entailment.KTc
+module
+
+public import Foundation.Modal.Entailment.KT
+public import Foundation.Modal.Entailment.KTc
+
+@[expose] public section
 
 namespace LO.Modal.Entailment
 
@@ -18,3 +22,4 @@ noncomputable instance : HasAxiomGrz 𝓢 := ⟨by
 ⟩
 
 end LO.Modal.Entailment
+end

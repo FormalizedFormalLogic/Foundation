@@ -1,4 +1,8 @@
-import Foundation.Propositional.Hilbert.Standard.Basic
+module
+
+public import Foundation.Propositional.Hilbert.Standard.Basic
+
+@[expose] public section
 
 /-!
   # A Toy Model of Dialectica Interpretation for Intuitionistic Propositional Logic
@@ -92,3 +96,4 @@ lemma NotValid.em (a : α) : ⊮ atom a ⋎ ∼atom a := by
     rw [interpret_or_right]; simp
 
 end LO.Propositional.Dialectica
+end

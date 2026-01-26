@@ -1,5 +1,9 @@
-import Foundation.Modal.Axioms
-import Foundation.Modal.Formula.Basic
+module
+
+public import Foundation.Modal.Axioms
+public import Foundation.Modal.Formula.Basic
+
+@[expose] public section
 
 namespace LO.Modal
 
@@ -142,3 +146,4 @@ class HasGeach (g) (Ax : Axiom α) where
 end Axiom
 
 end LO.Modal
+end

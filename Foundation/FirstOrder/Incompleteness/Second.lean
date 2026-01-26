@@ -1,7 +1,10 @@
-import Foundation.FirstOrder.Bootstrapping.DerivabilityCondition
-import Foundation.FirstOrder.Bootstrapping.Consistency
-import Foundation.FirstOrder.Bootstrapping.RosserProvability
+module
 
+public import Foundation.FirstOrder.Bootstrapping.DerivabilityCondition
+public import Foundation.FirstOrder.Bootstrapping.Consistency
+public import Foundation.FirstOrder.Bootstrapping.RosserProvability
+
+@[expose] public section
 /-!
 # Gödel's second incompleteness theorem for arithmetic theories stronger than $\mathsf{I}\Sigma_1$
 -/

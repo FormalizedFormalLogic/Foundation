@@ -1,4 +1,8 @@
-import Foundation.InterpretabilityLogic.Entailment.ILMinus
+module
+
+public import Foundation.InterpretabilityLogic.Entailment.ILMinus
+
+@[expose] public section
 
 namespace LO.InterpretabilityLogic.Entailment
 
@@ -10,3 +14,4 @@ variable {S F : Type*} [DecidableEq F] [InterpretabilityLogicalConnective F] [En
 protected class ILMinus_J5 (𝓢 : S) extends Entailment.ILMinus 𝓢, HasAxiomJ5 𝓢
 
 end LO.InterpretabilityLogic.Entailment
+end

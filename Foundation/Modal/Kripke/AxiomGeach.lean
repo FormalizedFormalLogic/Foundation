@@ -1,7 +1,8 @@
-import Foundation.Modal.Kripke.Completeness
-import Foundation.Vorspiel.Rel.Euclidean
-import Foundation.Vorspiel.Rel.Coreflexive
-import Foundation.Vorspiel.Rel.Convergent
+module
+
+public import Foundation.Modal.Kripke.Completeness
+
+@[expose] public section
 
 namespace LO.Modal
 
@@ -13,7 +14,6 @@ namespace Frame
 
 class IsGeachConvergent (F : Frame) (g : Axioms.Geach.Taple) where
   gconv : ∀ ⦃x y z : F⦄, x ≺^[g.i] y → x ≺^[g.j] z → ∃ u, y ≺^[g.m] u ∧ z ≺^[g.n] u
-
 
 protected abbrev IsReflexive (F : Frame) := _root_.IsRefl _ F
 
@@ -38,7 +38,6 @@ instance [F.IsSerial] : F.IsGeachConvergent ⟨0, 0, 1, 1⟩ where
     subst Rxz;
     apply _root_.IsSerial.serial
 
-
 protected abbrev IsTransitive (F : Frame) := _root_.IsTrans _ F.Rel
 
 lemma trans [F.IsTransitive] : ∀ {x y z : F.World}, x ≺ y → y ≺ z → x ≺ z := by apply IsTrans.trans
@@ -57,7 +56,6 @@ instance [F.IsTransitive] : F.IsGeachConvergent ⟨0, 2, 1, 0⟩ where
     obtain ⟨y, Rxy, Ryz⟩ := Rxz;
     exact IsTrans.trans _ _ _ Rxy Ryz
 
-
 protected abbrev IsSymmetric (F : Frame) := _root_.Std.Symm F.Rel
 
 lemma symm [F.IsSymmetric] : ∀ {x y : F.World}, x ≺ y → y ≺ x := by apply Std.Symm.symm
@@ -74,7 +72,6 @@ instance [F.IsSymmetric] : F.IsGeachConvergent ⟨0, 1, 0, 1⟩ where
     subst Rxy;
     exact _root_.Std.Symm.symm _ _ Rxz;
 
-
 protected abbrev IsEuclidean (F : Frame) := _root_.IsRightEuclidean F.Rel
 
 lemma eucl [F.IsEuclidean] : ∀ {x y z : F.World}, x ≺ y → x ≺ z → y ≺ z := by apply IsRightEuclidean.reucl
@@ -90,7 +87,6 @@ instance [F.IsEuclidean] : F.IsGeachConvergent ⟨1, 1, 0, 1⟩ where
     simp_all only [Rel.Iterate.iff_succ, Rel.Iterate.iff_zero, exists_eq_right, exists_eq_left'];
     exact IsRightEuclidean.reucl Rxz Rxy
 
-
 protected abbrev IsPiecewiseStronglyConvergent (F : Frame) := _root_.IsPiecewiseStronglyConvergent F.Rel
 
 lemma ps_convergent [F.IsPiecewiseStronglyConvergent] : ∀ {x y z : F.World}, x ≺ y → x ≺ z → ∃ u, y ≺ u ∧ z ≺ u := by
@@ -104,7 +100,6 @@ instance [F.IsPiecewiseStronglyConvergent] : F.IsGeachConvergent ⟨1, 1, 1, 1�
     simp_all only [Rel.Iterate.iff_succ, Rel.Iterate.iff_zero, exists_eq_right];
     obtain ⟨u, Ryu, Rzu⟩ := IsPiecewiseStronglyConvergent.ps_convergent Rxy Rxz;
     use u;
-
 
 protected abbrev IsCoreflexive (F : Frame) := _root_.IsCoreflexive F.Rel
 
@@ -122,7 +117,6 @@ instance [F.IsCoreflexive] : F.IsGeachConvergent ⟨0, 1, 0, 0⟩ where
     subst Rxy;
     exact F.corefl Rxz |>.symm;
 
-
 protected class IsFunctional (F : Frame) where
   functional : ∀ ⦃x y z : F.World⦄, x ≺ y → x ≺ z → y = z
 
@@ -137,7 +131,6 @@ instance [F.IsFunctional] : F.IsGeachConvergent ⟨1, 1, 0, 0⟩ where
   gconv x y z Rxy Rxz := by
     simp_all only [Rel.Iterate.iff_succ, Rel.Iterate.iff_zero, exists_eq_right, exists_eq_left'];
     apply IsFunctional.functional Rxy Rxz |>.symm;
-
 
 protected class IsDense (F : Frame) where
   dense : ∀ ⦃x y : F.World⦄, x ≺ y → ∃ u, x ≺ u ∧ u ≺ y
@@ -156,7 +149,6 @@ instance [F.IsDense] : F.IsGeachConvergent ⟨0, 1, 2, 0⟩ where
     obtain ⟨u, Ryu, Rzu⟩ := IsDense.dense Rxz;
     use u;
 
-
 protected class IsPreorder (F : Frame) extends F.IsReflexive, F.IsTransitive
 
 protected class IsEquivalence (F : Frame) extends F.IsReflexive, F.IsTransitive, F.IsSymmetric
@@ -164,14 +156,12 @@ instance [F.IsEquivalence] : F.IsPreorder where
 
 end Frame
 
-
 instance : whitepoint.IsGeachConvergent g := ⟨by
   rintro x y z Rxy Rxz;
   use ();
   constructor <;> . apply Rel.Iterate.true_any; tauto;
 ⟩
 instance : whitepoint.IsPreorder where
-
 
 section definability
 
@@ -197,7 +187,6 @@ lemma validate_AxiomFour_of_transitive [trans : F.IsTransitive] : F ⊧ (Axioms.
 lemma validate_AxiomFive_of_euclidean [eucl : F.IsEuclidean] : F ⊧ (Axioms.Five (.atom 0)) := validate_axiomGeach_of_isGeachConvergent ⟨1, 1, 0, 1⟩
 lemma validate_AxiomPoint2_of_confluent [conf : F.IsPiecewiseStronglyConvergent] : F ⊧ (Axioms.Point2 (.atom 0)) := validate_axiomGeach_of_isGeachConvergent ⟨1, 1, 1, 1⟩
 lemma validate_AxiomTc_of_coreflexive [corefl : F.IsCoreflexive] : F ⊧ (Axioms.Tc (.atom 0)) := validate_axiomGeach_of_isGeachConvergent ⟨0, 1, 0, 0⟩
-
 
 lemma isGeachConvergent_of_validate_axiomGeach {g} (h : F ⊧ (Axioms.Geach g (.atom 0))) : F.IsGeachConvergent g := ⟨by
   rintro x y z Rxy Rxz;
@@ -250,7 +239,6 @@ lemma confluent_of_validate_AxiomPoint2 (h : F ⊧ (Axioms.Point2 (.atom 0))) : 
   simpa;
 
 end definability
-
 
 section canonicality
 
@@ -307,3 +295,4 @@ end canonicality
 end Kripke
 
 end LO.Modal
+end

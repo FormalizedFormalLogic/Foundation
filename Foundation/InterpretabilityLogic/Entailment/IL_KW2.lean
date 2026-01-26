@@ -1,4 +1,8 @@
-import Foundation.InterpretabilityLogic.Entailment.IL_W
+module
+
+public import Foundation.InterpretabilityLogic.Entailment.IL_W
+
+@[expose] public section
 
 namespace LO.InterpretabilityLogic.Entailment
 
@@ -47,3 +51,4 @@ instance «IL(KW2)_⊢_KW1Zero» : Entailment.HasAxiomKW1Zero 𝓢 where
       . apply C_id;
 
 end LO.InterpretabilityLogic.Entailment
+end

@@ -1,5 +1,9 @@
-import Foundation.InterpretabilityLogic.Axioms
-import Foundation.Modal.Entailment.Basic
+module
+
+public import Foundation.InterpretabilityLogic.Axioms
+public import Foundation.Modal.Entailment.Basic
+
+@[expose] public section
 
 namespace LO.InterpretabilityLogic.Entailment
 
@@ -431,3 +435,4 @@ open Context in instance [Entailment.Minimal 𝓢] (Γ : Context F 𝓢) : HasAx
 end
 
 end LO.InterpretabilityLogic.Entailment
+end

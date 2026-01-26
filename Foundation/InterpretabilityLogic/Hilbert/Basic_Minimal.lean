@@ -1,5 +1,9 @@
-import Foundation.InterpretabilityLogic.Hilbert.Basic.Basic
-import Foundation.InterpretabilityLogic.Hilbert.Minimal.Basic
+module
+
+public import Foundation.InterpretabilityLogic.Hilbert.Basic.Basic
+public import Foundation.InterpretabilityLogic.Hilbert.Minimal.Basic
+
+@[expose] public section
 
 namespace LO.InterpretabilityLogic
 
@@ -44,3 +48,4 @@ instance equiv_IL_ILMinus_J1_J2_J5 : InterpretabilityLogic.IL ≊ Interpretabili
     | _ => simp;
 
 end LO.InterpretabilityLogic
+end

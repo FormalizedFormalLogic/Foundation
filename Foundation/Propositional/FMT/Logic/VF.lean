@@ -1,8 +1,12 @@
-import Foundation.Propositional.FMT.Hilbert
-import Foundation.Propositional.FMT.Completeness
-import Foundation.Propositional.Hilbert.WF_VF
-import Foundation.Propositional.Hilbert.VF.Disjunctive
+module
 
+public import Foundation.Propositional.FMT.Hilbert
+public import Foundation.Propositional.FMT.Completeness
+public import Foundation.Propositional.Hilbert.WF_VF
+public import Foundation.Propositional.Hilbert.VF.Disjunctive
+
+
+@[expose] public section
 
 namespace LO.Propositional
 
@@ -103,3 +107,4 @@ instance : Propositional.VF ⪱ Propositional.WF := by
 
 
 end LO.Propositional
+end

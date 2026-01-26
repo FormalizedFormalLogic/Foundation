@@ -1,6 +1,10 @@
-import Foundation.Modal.PLoN.Hilbert
-import Foundation.Modal.PLoN.Completeness
-import Foundation.Modal.Hilbert.WithRE.Basic
+module
+
+public import Foundation.Modal.PLoN.Hilbert
+public import Foundation.Modal.PLoN.Completeness
+public import Foundation.Modal.Hilbert.WithRE.Basic
+
+@[expose] public section
 
 namespace LO.Modal
 
@@ -84,3 +88,4 @@ instance : Modal.N ⪱ Modal.K := by
       . simp [Frame.Rel'];
 
 end LO.Modal
+end

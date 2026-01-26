@@ -1,6 +1,10 @@
-import Foundation.Modal.Neighborhood.Logic.EM
-import Foundation.Modal.Neighborhood.Logic.EK
+module
 
+public import Foundation.Modal.Neighborhood.Logic.EM
+public import Foundation.Modal.Neighborhood.Logic.EK
+
+
+@[expose] public section
 
 namespace LO.Modal
 
@@ -63,3 +67,4 @@ instance : Modal.EM ⪱ Modal.EMK := calc
   _ ≊ Modal.EMK  := by symm; infer_instance;
 
 end LO.Modal
+end

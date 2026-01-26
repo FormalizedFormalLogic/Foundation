@@ -1,6 +1,9 @@
-import Foundation.FirstOrder.SetTheory.Basic
-import Foundation.FirstOrder.Skolemization.Hull
+module
 
+public import Foundation.FirstOrder.SetTheory.Basic
+public import Foundation.FirstOrder.Skolemization.Hull
+
+@[expose] public section
 /-!
 # Downward Löwenheim-Skolem theorem for models of set theory
 -/

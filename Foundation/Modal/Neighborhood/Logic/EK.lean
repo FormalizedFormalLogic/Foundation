@@ -1,11 +1,13 @@
-import Foundation.Modal.Neighborhood.AxiomGeach
-import Foundation.Modal.Neighborhood.AxiomK
-import Foundation.Modal.Neighborhood.Hilbert
-import Foundation.Modal.Neighborhood.Logic.E4
-import Foundation.Modal.Neighborhood.Logic.EC
-import Foundation.Modal.Neighborhood.Logic.EM
-import Foundation.Vorspiel.Set.Fin
+module
 
+public import Foundation.Modal.Neighborhood.AxiomGeach
+public import Foundation.Modal.Neighborhood.AxiomK
+public import Foundation.Modal.Neighborhood.Hilbert
+public import Foundation.Modal.Neighborhood.Logic.E4
+public import Foundation.Modal.Neighborhood.Logic.EC
+public import Foundation.Modal.Neighborhood.Logic.EM
+
+@[expose] public section
 
 namespace LO.Modal
 
@@ -13,7 +15,6 @@ open Formula (atom)
 open Neighborhood
 open Hilbert.Neighborhood
 open Formula.Neighborhood
-
 
 namespace Neighborhood
 
@@ -36,8 +37,8 @@ instance : EK_counterframe_for_M_and_C.HasPropertyK where
     suffices Xᶜ ∪ Y = {0, 1} ∨ Xᶜ ∪ Y = {0, 2} → X = {0, 1} ∨ X = {0, 2} → Y = {0, 1} ∨ Y = {0, 2} by simpa;
     rintro (h₁ | h₁) (h₂ | h₂) <;>
     . have := h₁.subset;
-      have := @this 3 (by simp [h₂]);
-      simp at this;
+      have := @this 3 $ by grind;
+      grind;
 
 @[simp]
 lemma EK_counterframe_for_M_and_C.not_validate_axiomC : ¬EK_counterframe_for_M_and_C ⊧ Axioms.C (atom 0) (atom 1) := by
@@ -61,7 +62,7 @@ lemma EK_counterframe_for_M_and_C.not_validate_axiomM : ¬EK_counterframe_for_M_
   ), 0;
   suffices (({0, 2} : Set (Fin 4)) ⊆ {2, 0, 1}) ∧ ({2, 0, 1} : Set (Fin 4)) ≠ {0, 2} by
     simp [Satisfies];
-    tauto_set;
+    grind;
   constructor;
   . intro x;
     simp only [Set.mem_insert_iff, Set.mem_singleton_iff];
@@ -71,7 +72,6 @@ lemma EK_counterframe_for_M_and_C.not_validate_axiomM : ¬EK_counterframe_for_M_
     simpa using @this 1 (by simp)
 
 end Neighborhood
-
 
 namespace EK
 
@@ -98,3 +98,4 @@ instance : Modal.EK ⪱ Modal.EMC := by
     . apply not_imp_not.mpr $ soundness_of_axioms_validOnFrame (F := EK_counterframe_for_M_and_C) ?_ <;> simp;
 
 end LO.Modal
+end

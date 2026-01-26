@@ -1,6 +1,8 @@
 module
 
+public import Mathlib.Data.Nat.Bits
 public import Mathlib.Data.Nat.Lattice
+public import Mathlib.Data.Nat.Pairing
 public import Mathlib.Tactic.Cases
 
 @[expose]
@@ -46,5 +48,16 @@ def toFin (n : ℕ) : ℕ → Option (Fin n) := fun x => if hx : x < n then some
 
 @[grind =>]
 lemma zero_lt_of_not_zero {n : ℕ} (hn : n ≠ 0) : 0 < n := by omega;
+
+
+lemma one_le_of_bodd {n : ℕ} (h : n.bodd = true) : 1 ≤ n :=
+  by induction n <;> simp at h ⊢
+
+lemma pair_le_pair_of_le {a₁ a₂ b₁ b₂ : ℕ} (ha : a₁ ≤ a₂) (hb : b₁ ≤ b₂) : a₁.pair b₁ ≤ a₂.pair b₂ := by
+  rcases lt_or_eq_of_le ha with (ha | rfl) <;> rcases lt_or_eq_of_le hb with (hb | rfl)
+  · exact le_of_lt (lt_trans (Nat.pair_lt_pair_left b₁ ha) (Nat.pair_lt_pair_right a₂ hb))
+  · exact le_of_lt (Nat.pair_lt_pair_left b₁ ha)
+  · exact le_of_lt (Nat.pair_lt_pair_right a₁ hb)
+  · rfl
 
 end Nat

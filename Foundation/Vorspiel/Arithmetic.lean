@@ -1,7 +1,11 @@
-import Foundation.Vorspiel.Vorspiel
-import Mathlib.Data.Nat.ModEq
-import Mathlib.Data.List.FinRange
-import Mathlib.Logic.Godel.GodelBetaFunction
+module
+
+public import Mathlib.Data.Nat.ModEq
+public import Mathlib.Data.List.FinRange
+public import Mathlib.Logic.Godel.GodelBetaFunction
+public import Foundation.Vorspiel
+
+@[expose] public section
 
 open Mathlib List.Vector Part
 
@@ -564,3 +568,5 @@ lemma exists_code : ∀ {n : ℕ} {f : List.Vector ℕ n →. ℕ}, ArithPart₁
     exact ⟨cf.rfind, Code.eval.rfind cf f hcf⟩
 
 end Nat.ArithPart₁
+
+end

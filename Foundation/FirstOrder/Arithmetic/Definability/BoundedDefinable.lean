@@ -1,5 +1,8 @@
-import Foundation.FirstOrder.Arithmetic.Definability.Definable
+module
 
+public import Foundation.FirstOrder.Arithmetic.Definability.Definable
+
+@[expose] public section
 namespace LO.FirstOrder.Arithmetic
 
 open PeanoMinus

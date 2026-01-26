@@ -1,6 +1,10 @@
-import Foundation.Modal.Kripke.Cluster
-import Foundation.Modal.Kripke.Terminated
-import Foundation.Modal.Kripke.LinearFrame
+module
+
+public import Foundation.Modal.Kripke.Cluster
+public import Foundation.Modal.Kripke.Terminated
+public import Foundation.Modal.Kripke.LinearFrame
+
+@[expose] public section
 
 namespace LO.Modal.Kripke
 
@@ -98,3 +102,4 @@ lemma balooon_validates_axiomZ
         tauto;
 
 end LO.Modal.Kripke
+end

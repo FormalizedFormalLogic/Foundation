@@ -1,8 +1,10 @@
-import Foundation.Vorspiel.Small
-import Foundation.FirstOrder.SetTheory.Basic
-import Mathlib.Data.QPF.Univariate.Basic
-import Mathlib.SetTheory.Cardinal.Aleph
+module
 
+public import Foundation.FirstOrder.SetTheory.Basic
+public import Mathlib.Data.QPF.Univariate.Basic
+public import Mathlib.SetTheory.Cardinal.Aleph
+
+@[expose] public section
 /-!
 # Standard model of set theory
 

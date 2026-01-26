@@ -1,5 +1,8 @@
-import Foundation.Logic.Calculus
-import Foundation.FirstOrder.Basic.Syntax.Theory
+module
+public import Foundation.Logic.Calculus
+public import Foundation.FirstOrder.Basic.Syntax.Theory
+
+@[expose] public section
 
 namespace LO
 
@@ -291,7 +294,7 @@ instance : Tait.Axiomatized (SyntacticFormula L) (Schema L) where
 
 variable [L.DecidableEq]
 
-private def not_close' (φ) : 𝓢 ⟹ [∼(φ.univCl'), φ] :=
+def not_close' (φ) : 𝓢 ⟹ [∼(φ.univCl'), φ] :=
   have : 𝓢 ⟹ [∃* ∼(@Rew.fixitr L 0 (fvSup φ) ▹ φ), φ] := instances (v := fun x ↦ &x) (em (φ := φ) (by simp) (by simp))
   Derivation.cast this (by simp [univCl'])
 
@@ -641,3 +644,5 @@ end Schema
 end FirstOrder
 
 end LO
+
+end

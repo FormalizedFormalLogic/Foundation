@@ -1,4 +1,8 @@
-import Foundation.Modal.Entailment.K4
+module
+
+public import Foundation.Modal.Entailment.K4
+
+@[expose] public section
 
 namespace LO.Modal.Entailment
 
@@ -48,7 +52,7 @@ instance : HasAxiomZ 𝓢 := ⟨fun _ ↦ GL.axiomZ⟩
 
 end GL
 
-private noncomputable def lem_boxdot_Grz_of_L : 𝓢 ⊢! (⊡(⊡(φ ➝ ⊡φ) ➝ φ)) ➝ (□(φ ➝ ⊡φ) ➝ φ) := by
+noncomputable def lem_boxdot_Grz_of_L : 𝓢 ⊢! (⊡(⊡(φ ➝ ⊡φ) ➝ φ)) ➝ (□(φ ➝ ⊡φ) ➝ φ) := by
   have : 𝓢 ⊢! (□(φ ➝ ⊡φ) ⋏ ∼φ) ➝ ⊡(φ ➝ ⊡φ) := by
     apply deduct';
     apply K_intro;
@@ -101,3 +105,4 @@ lemma imply_box_box_of_imply_boxdot_plain! (h : 𝓢 ⊢ ⊡φ ➝ ψ) : 𝓢 �
   exact imply_box_box_of_imply_boxdot_axiomT! $ imply_boxdot_axiomT_of_imply_boxdot_boxdot! $ imply_boxdot_boxdot_of_imply_boxdot_plain! h
 
 end LO.Modal.Entailment
+end

@@ -1,6 +1,9 @@
-import Foundation.FirstOrder.Bootstrapping.FixedPoint
-import Foundation.Meta.ClProver
+module
 
+public import Foundation.FirstOrder.Bootstrapping.FixedPoint
+public import Foundation.Meta.ClProver
+
+@[expose] public section
 namespace LO.FirstOrder.Arithmetic
 
 variable {T : Theory ℒₒᵣ} [𝗜𝚺₁ ⪯ T] [Entailment.Consistent T]

@@ -1,9 +1,13 @@
-import Foundation.Modal.Kripke.Logic.S4
-import Foundation.Modal.Kripke.AxiomGeach
-import Foundation.Modal.Kripke.AxiomMk
-import Foundation.Modal.Logic.Basic
+module
 
-import Foundation.Modal.Kripke.Hilbert
+public import Foundation.Modal.Kripke.Logic.S4
+public import Foundation.Modal.Kripke.AxiomGeach
+public import Foundation.Modal.Kripke.AxiomMk
+public import Foundation.Modal.Logic.Basic
+
+public import Foundation.Modal.Kripke.Hilbert
+
+@[expose] public section
 
 namespace LO.Modal
 
@@ -195,7 +199,8 @@ instance : Modal.KT ⪱ Modal.KTMk := by
       constructor;
       . exact { refl := by omega; }
       . suffices ∀ (x : Fin 3), 0 = x ∨ 1 = x → (∀ y, x = y ∨ x + 1 = y → ∀ z, y = z ∨ y + 1 = z → z ≠ 2) → x ≠ 0 ∧ x + 1 ≠ 0 by
-          simpa [Frame.Rel', Satisfies, Semantics.Models];
+          simp [Frame.Rel', Satisfies, Semantics.Models];
+          grind;
         rintro x (rfl | rfl);
         . intro h;
           exfalso;
@@ -236,3 +241,4 @@ instance : Modal.KTMk ⪱ Modal.S4 := by
     . assumption;
 
 end LO.Modal
+end

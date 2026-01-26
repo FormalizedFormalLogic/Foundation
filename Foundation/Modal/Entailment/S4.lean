@@ -1,5 +1,9 @@
-import Foundation.Modal.Entailment.KT
-import Foundation.Modal.Entailment.K4
+module
+
+public import Foundation.Modal.Entailment.KT
+public import Foundation.Modal.Entailment.K4
+
+@[expose] public section
 
 namespace LO.Modal.Entailment
 
@@ -21,3 +25,4 @@ def iff_dia_diadot : 𝓢 ⊢! ◇φ ⭤ ⟐φ := by
 @[simp] lemma iff_dia_diadot! : 𝓢 ⊢ ◇φ ⭤ ⟐φ := ⟨iff_dia_diadot⟩
 
 end LO.Modal.Entailment
+end

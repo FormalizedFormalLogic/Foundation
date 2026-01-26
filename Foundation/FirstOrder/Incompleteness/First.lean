@@ -1,6 +1,9 @@
-import Foundation.FirstOrder.Bootstrapping.DerivabilityCondition
-import Foundation.FirstOrder.Arithmetic.R0.Representation
+module
 
+public import Foundation.FirstOrder.Bootstrapping.DerivabilityCondition
+public import Foundation.FirstOrder.Arithmetic.R0.Representation
+
+@[expose] public section
 /-!
 # Gödel's first incompleteness theorem for arithmetic theories stronger than $\mathsf{R_0}$
 -/

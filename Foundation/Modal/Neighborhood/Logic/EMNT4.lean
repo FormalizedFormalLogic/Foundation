@@ -1,7 +1,11 @@
-import Foundation.Modal.Neighborhood.Logic.EMT
-import Foundation.Modal.Neighborhood.Logic.EMN
-import Foundation.Modal.Neighborhood.Logic.E4
-import Foundation.Modal.Neighborhood.Logic.ENT4
+module
+
+public import Foundation.Modal.Neighborhood.Logic.EMT
+public import Foundation.Modal.Neighborhood.Logic.EMN
+public import Foundation.Modal.Neighborhood.Logic.E4
+public import Foundation.Modal.Neighborhood.Logic.ENT4
+
+@[expose] public section
 
 namespace LO.Modal
 
@@ -61,3 +65,4 @@ instance Neighborhood.finite_complete : Complete Modal.EMNT4 FrameClass.finite_E
 end EMNT4
 
 end LO.Modal
+end
