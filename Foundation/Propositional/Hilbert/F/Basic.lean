@@ -1,12 +1,13 @@
-/-
-  Corsi's `F` system by de Jongh and Shirmohammadzadeh Maleki
--/
-import Foundation.Propositional.Entailment.Int.DNE_of_LEM
-import Foundation.Propositional.Entailment.Corsi
-import Foundation.Propositional.Hilbert.Axiom
-import Foundation.Propositional.Formula.Basic
-import Foundation.Propositional.Logic.Basic
-import Foundation.Logic.Disjunctive
+module
+
+public import Foundation.Propositional.Entailment.Int.DNE_of_LEM
+public import Foundation.Propositional.Entailment.Corsi
+public import Foundation.Propositional.Hilbert.Axiom
+public import Foundation.Propositional.Formula.Basic
+public import Foundation.Propositional.Logic.Basic
+public import Foundation.Logic.Disjunctive
+
+@[expose] public section
 
 namespace LO.Propositional
 
@@ -125,6 +126,7 @@ lemma weakerThan_of_provable_axioms (hs : (Hilbert.F Ax₂) ⊢* Ax₁) : (Hilbe
       | apply axiomI;
       | apply efq;
 
+@[grind <=]
 lemma weakerThan_of_subset_axioms (h : Ax₁ ⊆ Ax₂) : (Hilbert.F Ax₁) ⪯ (Hilbert.F Ax₂) := by
   apply weakerThan_of_provable_axioms;
   intro φ hφ;
@@ -263,3 +265,4 @@ instance : Entailment.HasAxiomTra1 Propositional.F_Rfl_Tra1_Hrd where
   axiomTra1! {_ _ _} := ⟨by apply Hilbert.F.axm'; simp⟩
 
 end LO.Propositional
+end

@@ -1,11 +1,13 @@
-import Std.Data.HashSet
-import Lean.Data.Json
+module
+
+public import Std.Data.HashSet
+public import Lean.Data.Json
 
 open Lean
 
 namespace Zoo
 
-inductive EdgeType
+public inductive EdgeType
 | ssub
 | sub
 | eq
@@ -29,13 +31,13 @@ instance : ToString EdgeType := ⟨λ t =>
   | .sub => "sub"
 ⟩
 
-structure Edge where
+public structure Edge where
   a: String
   b: String
   type: EdgeType
 deriving BEq, Hashable, Repr
 
-abbrev Edges := Std.HashSet Edge
+public abbrev Edges := Std.HashSet Edge
 
 def Edges.cleanDup (es : Edges) : Edges := es.filter (
   λ ⟨a, b, t⟩ =>
@@ -67,7 +69,7 @@ def Edges.isDerivable (es : Edges) (e : Edge) :=
   | .sub  => tc.contains ⟨e.a, e.b, .eq⟩ || tc.contains ⟨e.a, e.b, .ssub⟩ || tc.contains ⟨e.a, e.b, .sub⟩
 def Edges.reductTrans (es : Edges) := es.toArray.filter (λ x => !es.isDerivable x)
 
-def Edges.toOutput (es : Edges) := es.cleanDup.reductTrans
+public def Edges.toOutput (es : Edges) := es.cleanDup.reductTrans
   |> .map (λ ⟨a, b, t⟩ => Json.mkObj [
       ("from", s!"{a}"),
       ("to", s!"{b}"),

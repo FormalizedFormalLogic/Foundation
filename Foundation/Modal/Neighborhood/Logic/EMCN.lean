@@ -1,8 +1,12 @@
-import Foundation.Modal.Neighborhood.Hilbert
-import Foundation.Modal.Neighborhood.Logic.ECN
-import Foundation.Modal.Neighborhood.Logic.EMC
-import Foundation.Modal.Neighborhood.Logic.EMN
+module
 
+public import Foundation.Modal.Neighborhood.Hilbert
+public import Foundation.Modal.Neighborhood.Logic.ECN
+public import Foundation.Modal.Neighborhood.Logic.EMC
+public import Foundation.Modal.Neighborhood.Logic.EMN
+
+
+@[expose] public section
 
 namespace LO.Modal
 
@@ -37,3 +41,4 @@ end EMCN
 
 
 end LO.Modal
+end

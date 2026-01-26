@@ -1,6 +1,10 @@
-import Foundation.Propositional.Kripke2.Basic
-import Foundation.Propositional.Kripke2.AxiomSer
-import Foundation.Propositional.Kripke2.FTheory
+module
+
+public import Foundation.Propositional.Kripke2.Basic
+public import Foundation.Propositional.Kripke2.AxiomSer
+public import Foundation.Propositional.Kripke2.FTheory
+
+@[expose] public section
 
 namespace LO.Propositional
 
@@ -51,3 +55,4 @@ instance [Entailment.F L] [Entailment.HasAxiomRfl L] [Entailment.Disjunctive L] 
 end Kripke2
 
 end LO.Propositional
+end

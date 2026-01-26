@@ -1,6 +1,10 @@
-import Foundation.Propositional.Entailment.Cl.Łukasiewicz
-import Foundation.Modal.Logic.Basic
-import Foundation.Meta.ClProver
+module
+
+public import Foundation.Propositional.Entailment.Cl.Łukasiewicz
+public import Foundation.Modal.Logic.Basic
+public import Foundation.Meta.ClProver
+
+@[expose] public section
 
 namespace LO.Modal
 
@@ -136,3 +140,4 @@ end sumNormal
 end Logic
 
 end LO.Modal
+end

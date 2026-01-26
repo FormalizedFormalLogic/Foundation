@@ -1,6 +1,10 @@
-import Foundation.Modal.Entailment.S5
-import Foundation.Modal.Entailment.KTc
-import Foundation.Modal.Entailment.Triv
+module
+
+public import Foundation.Modal.Entailment.S5
+public import Foundation.Modal.Entailment.KTc
+public import Foundation.Modal.Entailment.Triv
+
+@[expose] public section
 
 namespace LO.Modal.Entailment
 
@@ -26,3 +30,4 @@ noncomputable instance : HasAxiomDiaT 𝓢 := ⟨fun _ ↦ S5Grz.diaT⟩
 noncomputable instance : Entailment.KTc' 𝓢 where
 
 end LO.Modal.Entailment
+end

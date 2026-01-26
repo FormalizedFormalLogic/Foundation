@@ -1,6 +1,10 @@
-import Foundation.Modal.Kripke.Logic.S4
-import Foundation.Modal.Logic.SumNormal
-import Foundation.Propositional.Kripke.Hilbert
+module
+
+public import Foundation.Modal.Kripke.Logic.S4
+public import Foundation.Modal.Logic.SumNormal
+public import Foundation.Propositional.Kripke.Hilbert
+
+@[expose] public section
 
 namespace LO
 
@@ -250,3 +254,4 @@ theorem disjunctive_of_modalDisjunctive [ModalDisjunctive mH] [ModalCompanion iH
 -/
 
 end LO
+end

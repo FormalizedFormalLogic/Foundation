@@ -1,6 +1,9 @@
-import Foundation.FirstOrder.Kripke.Intuitionistic
-import Foundation.FirstOrder.NegationTranslation.GoedelGentzen
+module
 
+public import Foundation.FirstOrder.Kripke.Intuitionistic
+public import Foundation.FirstOrder.NegationTranslation.GoedelGentzen
+
+@[expose] public section
 /-! # Weak forcing
 
 Main reference: Jeremy Avigad, "Forcing in proof theory"

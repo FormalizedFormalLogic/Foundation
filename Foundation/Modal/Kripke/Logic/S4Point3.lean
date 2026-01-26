@@ -1,9 +1,13 @@
-import Foundation.Modal.Kripke.Logic.S4
-import Foundation.Modal.Kripke.AxiomPoint3
-import Foundation.Modal.Kripke.Filtration
-import Foundation.Modal.Kripke.Rooted
-import Foundation.Modal.Kripke.Logic.S4Point2
-import Foundation.Modal.Kripke.Logic.K4Point3
+module
+
+public import Foundation.Modal.Kripke.Logic.S4
+public import Foundation.Modal.Kripke.AxiomPoint3
+public import Foundation.Modal.Kripke.Filtration
+public import Foundation.Modal.Kripke.Rooted
+public import Foundation.Modal.Kripke.Logic.S4Point2
+public import Foundation.Modal.Kripke.Logic.K4Point3
+
+@[expose] public section
 
 namespace LO.Modal
 
@@ -124,12 +128,12 @@ instance : Modal.S4Point2 ⪱ Modal.S4Point3 := by
           push_neg;
           use 1;
           simp [Satisfies, Semantics.Models, M];
-          constructor <;> omega;
+          constructor <;> grind;
         . apply Kripke.Satisfies.box_def.not.mpr;
           push_neg;
           use 2;
           simp [Satisfies, Semantics.Models, M];
-          constructor <;> omega;
+          constructor <;> grind;
 
 instance : Modal.S4 ⪱ Modal.S4Point3 := calc
   Modal.S4 ⪱ Modal.S4Point2 := by infer_instance
@@ -169,3 +173,4 @@ instance : Modal.KT ⪱ Modal.S4Point3 := calc
 
 
 end LO.Modal
+end

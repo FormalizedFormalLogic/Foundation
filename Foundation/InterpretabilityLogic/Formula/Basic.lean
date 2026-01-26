@@ -1,5 +1,9 @@
-import Foundation.InterpretabilityLogic.LogicSymbol
-import Foundation.Modal.Formula.Basic
+module
+
+public import Foundation.InterpretabilityLogic.LogicSymbol
+public import Foundation.Modal.Formula.Basic
+
+@[expose] public section
 
 namespace LO.InterpretabilityLogic
 
@@ -177,3 +181,4 @@ end Formula
 
 
 end LO.InterpretabilityLogic
+end

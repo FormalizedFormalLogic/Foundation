@@ -1,7 +1,11 @@
-import Foundation.Modal.Entailment.K4Henkin
-import Foundation.Modal.Hilbert.Axiom
-import Foundation.Modal.Logic.Basic
-import Foundation.Propositional.Entailment.Cl.Łukasiewicz
+module
+
+public import Foundation.Modal.Entailment.K4Henkin
+public import Foundation.Modal.Hilbert.Axiom
+public import Foundation.Modal.Logic.Basic
+public import Foundation.Propositional.Entailment.Cl.Łukasiewicz
+
+@[expose] public section
 
 namespace LO.Modal
 
@@ -143,3 +147,4 @@ instance : Entailment.K4Henkin Modal.K4Henkin where
 end
 
 end LO.Modal
+end

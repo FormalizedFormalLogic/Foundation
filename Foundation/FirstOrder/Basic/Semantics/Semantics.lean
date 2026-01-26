@@ -1,5 +1,11 @@
-import Foundation.FirstOrder.Basic.Syntax.Rew
-import Foundation.FirstOrder.Basic.Syntax.Theory
+module
+
+public import Foundation.FirstOrder.Basic.Syntax.Rew
+public import Foundation.FirstOrder.Basic.Syntax.Theory
+public import Foundation.Vorspiel.IsEmpty
+public import Foundation.Vorspiel.Empty
+
+@[expose] public section
 
 /-!
 # Semantics of first-order logic
@@ -716,3 +722,4 @@ end Structure
 end FirstOrder
 
 end LO
+end

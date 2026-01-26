@@ -1,9 +1,12 @@
-import Foundation.Modal.Neighborhood.AxiomGeach
-import Foundation.Modal.Neighborhood.AxiomM
-import Foundation.Modal.Neighborhood.AxiomC
-import Foundation.Modal.Neighborhood.Logic.E
-import Foundation.Modal.Neighborhood.Filtration
-import Foundation.Vorspiel.Set.Fin
+module
+
+public import Foundation.Modal.Neighborhood.AxiomGeach
+public import Foundation.Modal.Neighborhood.AxiomM
+public import Foundation.Modal.Neighborhood.AxiomC
+public import Foundation.Modal.Neighborhood.Logic.E
+public import Foundation.Modal.Neighborhood.Filtration
+
+@[expose] public section
 
 namespace LO.Modal
 
@@ -36,7 +39,7 @@ lemma counterframe_2_3_5.not_valid_axiomFour : ¬counterframe_2_3_5 ⊧ Axioms.F
   apply not_imp_not.mpr isTransitive_of_valid_axiomFour;
   by_contra! hC;
   have := hC.trans {0}
-  rcases @this 1 (by simp) with (h | h);
+  rcases @this 1 (by grind;) with (h | h);
   . simp [Frame.box] at h;
     tauto_set;
   . simp [Frame.box, Set.eq_univ_iff_forall] at h;
@@ -93,3 +96,4 @@ instance : Modal.E ⪱ Modal.E4 := by
       simp;
 
 end LO.Modal
+end

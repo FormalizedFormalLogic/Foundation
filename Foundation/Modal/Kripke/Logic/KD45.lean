@@ -1,8 +1,12 @@
-import Foundation.Modal.Kripke.AxiomGeach
-import Foundation.Modal.Kripke.Hilbert
-import Foundation.Modal.Kripke.Logic.KD4
-import Foundation.Modal.Kripke.Logic.KD5
-import Foundation.Modal.Kripke.Logic.K45
+module
+
+public import Foundation.Modal.Kripke.AxiomGeach
+public import Foundation.Modal.Kripke.Hilbert
+public import Foundation.Modal.Kripke.Logic.KD4
+public import Foundation.Modal.Kripke.Logic.KD5
+public import Foundation.Modal.Kripke.Logic.K45
+
+@[expose] public section
 
 namespace LO.Modal
 
@@ -122,3 +126,4 @@ end Modal.KD45.Kripke
 
 
 end LO.Modal
+end

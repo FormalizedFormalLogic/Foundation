@@ -604,24 +604,23 @@ def Letterless : Formula α → Prop
 @[grind =] lemma letterless_dia : (◇φ).Letterless ↔ φ.Letterless := by grind;
 @[grind =] lemma letterless_diaItr : (◇^[n]φ).Letterless ↔ φ.Letterless := by induction n <;> grind;
 
-@[grind <=]
-lemma letterless_lconj₂ {l : List (Formula α)} (h : ∀ φ ∈ l, φ.Letterless) : (l.conj₂).Letterless := by
+@[grind =]
+lemma letterless_lconj₂ {l : List (Formula α)} : (l.conj₂).Letterless ↔ ∀ φ ∈ l, φ.Letterless := by
   induction l using List.induction_with_singleton <;> simp_all [Letterless];
 
-@[grind <=]
-lemma letterless_lconj' {l : List β} {Φ : β → Formula α} (h : ∀ i ∈ l, (Φ i).Letterless) : (l.conj' Φ).Letterless := by
-  induction l using List.induction_with_singleton with
-  | hcons _ _ _ ih => apply letterless_lconj₂; grind;
-  | _  => dsimp [List.conj']; grind;
+@[grind =]
+lemma letterless_fconj {s : Finset (Formula α)} : (s.conj).Letterless ↔ ∀ φ ∈ s, φ.Letterless := by
+  apply Iff.trans letterless_lconj₂;
+  simp;
 
-@[grind <=]
-lemma letterless_fconj {s : Finset (Formula α)} (h : ∀ φ ∈ s, φ.Letterless) : (s.conj).Letterless := by
-  apply letterless_lconj₂;
-  simpa;
-
-lemma letterless_fconj' {s : Finset β} {Φ : β → Formula α} (h : ∀ i, (Φ i).Letterless) : (⩕ i ∈ s, Φ i).Letterless := by
-  apply letterless_lconj';
+@[grind =]
+lemma letterless_lconj' {α β : Type*} {l : List β} {Φ : β → Formula α} : (l.conj' Φ).Letterless ↔ ∀ i ∈ l, (Φ i).Letterless := by
+  apply Iff.trans letterless_lconj₂;
   grind;
+
+lemma letterless_fconj' {α β : Type*} {s : Finset β} {Φ : β → Formula α} : (⩕ i ∈ s, Φ i).Letterless ↔ ∀ i ∈ s, (Φ i).Letterless := by
+  apply Iff.trans letterless_lconj';
+  simp;
 
 @[grind =]
 lemma subst_letterless (hφ : φ.Letterless) {s : Substitution α} : φ⟦s⟧ = φ := by induction φ <;> grind;

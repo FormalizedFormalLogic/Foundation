@@ -1,13 +1,13 @@
+module
+
 /-
   D. de Jongh, M. Fetemeh Shirmohammadzadeh, "Below Gödel-Dummett"
 -/
 
-import Foundation.Propositional.Kripke2.Basic
-import Foundation.Propositional.Entailment.LC
-import Foundation.Vorspiel.Rel.Convergent
-import Foundation.Vorspiel.Rel.Euclidean
-import Foundation.Vorspiel.Rel.Coreflexive
-import Foundation.Vorspiel.Rel.Connected
+public import Foundation.Propositional.Kripke2.Basic
+public import Foundation.Propositional.Entailment.LC
+
+@[expose] public section
 
 namespace LO.Propositional
 
@@ -29,7 +29,6 @@ protected abbrev PCon₅ := (φ ⋏ ψ ⋎ χ) ➝ (φ ➝ χ) ⋎ (φ ➝ ψ)
 protected abbrev PCon₆ := ((φ ➝ ψ) ➝ ψ) ⋏ ((ψ ➝ φ) ➝ φ) ➝ (φ ⋎ ψ)
 
 end Axioms
-
 
 open Kripke2
 open Formula.Kripke2
@@ -62,3 +61,4 @@ lemma valid_axiomSym_of_isSymmetric [F.IsPiecewiseConnected] : F ⊧ Axioms.PCon
 end Kripke2
 
 end LO.Propositional
+end

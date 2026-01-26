@@ -1,6 +1,9 @@
-import Foundation.ProvabilityLogic.SolovaySentences
-import Foundation.ProvabilityLogic.Arithmetic
+module
 
+public import Foundation.ProvabilityLogic.SolovaySentences
+public import Foundation.ProvabilityLogic.Arithmetic
+
+@[expose] public section
 /-!
 # Solovay's arithmetical completeness of $\mathsf{GL}$ and $\mathsf{GL} + \square^n \bot$
 -/

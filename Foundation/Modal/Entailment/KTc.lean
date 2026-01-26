@@ -1,4 +1,8 @@
-import Foundation.Modal.Entailment.K
+module
+
+public import Foundation.Modal.Entailment.K
+
+@[expose] public section
 
 namespace LO.Modal.Entailment
 
@@ -37,3 +41,4 @@ end KTc'
 
 
 end LO.Modal.Entailment
+end

@@ -1,5 +1,9 @@
-import Foundation.Modal.Neighborhood.Logic.E4
-import Foundation.Modal.Neighborhood.Logic.ET
+module
+
+public import Foundation.Modal.Neighborhood.Logic.E4
+public import Foundation.Modal.Neighborhood.Logic.ET
+
+@[expose] public section
 
 namespace LO.Modal
 
@@ -96,3 +100,4 @@ instance : Modal.ET ⪱ Modal.ET4 := by
         tauto_set;
 
 end LO.Modal
+end

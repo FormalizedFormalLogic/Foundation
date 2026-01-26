@@ -1,7 +1,11 @@
-import Foundation.Modal.Kripke.AxiomGeach
-import Foundation.Modal.Kripke.Hilbert
-import Foundation.Modal.Kripke.Logic.K45
-import Foundation.Modal.Kripke.Logic.KB
+module
+
+public import Foundation.Modal.Kripke.AxiomGeach
+public import Foundation.Modal.Kripke.Hilbert
+public import Foundation.Modal.Kripke.Logic.K45
+public import Foundation.Modal.Kripke.Logic.KB
+
+@[expose] public section
 
 namespace LO.Modal
 
@@ -76,3 +80,4 @@ instance : Modal.KB ⪱ Modal.KB4 := by
         tauto;
 
 end LO.Modal
+end

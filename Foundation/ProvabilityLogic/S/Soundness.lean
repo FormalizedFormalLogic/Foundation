@@ -1,6 +1,9 @@
-import Foundation.Modal.Logic.S.Basic
-import Foundation.ProvabilityLogic.GL.Soundness
+module
 
+public import Foundation.Modal.Logic.S.Basic
+public import Foundation.ProvabilityLogic.GL.Soundness
+
+@[expose] public section
 namespace LO.ProvabilityLogic
 
 open Entailment

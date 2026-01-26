@@ -1,7 +1,10 @@
-import Foundation.FirstOrder.Arithmetic.Basic
-import Foundation.FirstOrder.Arithmetic.R0.Basic
-import Mathlib.Data.ENat.Basic
+module
 
+public import Foundation.FirstOrder.Arithmetic.Basic
+public import Foundation.FirstOrder.Arithmetic.R0.Basic
+public import Mathlib.Data.ENat.Basic
+
+@[expose] public section
 /-!
 # Robinson's theory $\mathsf{Q}$
 -/

@@ -1,14 +1,18 @@
+module
+
 /-
   Jeřábek's proof of boxdot conjecture.
 
   References:
   - E. Jeřábek - "Cluster Expansion and the Boxdot Conjecture": https://arxiv.org/abs/1308.0994
 -/
-import Foundation.Modal.Boxdot.Basic
-import Foundation.Modal.Kripke.Logic.KTB
-import Foundation.Modal.Kripke.Logic.S5
-import Foundation.Modal.Kripke.Logic.S4McK
-import Foundation.Modal.Logic.Global
+public import Foundation.Modal.Boxdot.Basic
+public import Foundation.Modal.Kripke.Logic.KTB
+public import Foundation.Modal.Kripke.Logic.S5
+public import Foundation.Modal.Kripke.Logic.S4McK
+public import Foundation.Modal.Logic.Global
+
+@[expose] public section
 
 namespace LO.Modal
 
@@ -392,3 +396,4 @@ theorem S5.BDP : Modal.S5.BoxdotProperty := jerabek_BDP Modal.S5 Kripke.FrameCla
 end
 
 end LO.Modal
+end

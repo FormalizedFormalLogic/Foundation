@@ -1,5 +1,9 @@
-import Foundation.Modal.Kripke.Completeness
-import Foundation.Modal.Kripke.AxiomWeakPoint3
+module
+
+public import Foundation.Modal.Kripke.Completeness
+public import Foundation.Modal.Kripke.AxiomWeakPoint3
+
+@[expose] public section
 
 namespace LO.Modal
 
@@ -106,3 +110,4 @@ open Formula.Kripke
 end Kripke
 
 end LO.Modal
+end

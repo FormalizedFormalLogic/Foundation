@@ -1,5 +1,9 @@
-import Foundation.Modal.Entailment.E
-import Foundation.Modal.Entailment.DiaDuality
+module
+
+public import Foundation.Modal.Entailment.E
+public import Foundation.Modal.Entailment.DiaDuality
+
+@[expose] public section
 
 namespace LO.Modal.Entailment
 
@@ -24,3 +28,4 @@ instance : Entailment.ED 𝓢 where
 end ET
 
 end LO.Modal.Entailment
+end

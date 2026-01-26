@@ -1,5 +1,9 @@
-import Foundation.Propositional.Kripke2.Logic.F_Rfl
-import Foundation.Propositional.Kripke2.Logic.F_Sym
+module
+
+public import Foundation.Propositional.Kripke2.Logic.F_Rfl
+public import Foundation.Propositional.Kripke2.Logic.F_Sym
+
+@[expose] public section
 
 namespace LO.Propositional
 
@@ -50,7 +54,8 @@ instance : Propositional.F_Rfl ⪱ Propositional.F_Rfl_Sym := by
       . apply Set.mem_setOf_eq.mpr;
         exact { refl := by omega; }
       . by_contra hC;
-        simpa using isSymmetric_of_valid_axiomSym hC |>.symm 0 1;
+        have := isSymmetric_of_valid_axiomSym hC |>.symm 0 1;
+        grind;
 
 instance : Propositional.F_Sym ⪱ Propositional.F_Rfl_Sym := by
   constructor;
@@ -67,6 +72,8 @@ instance : Propositional.F_Sym ⪱ Propositional.F_Rfl_Sym := by
       . apply Set.mem_setOf_eq.mpr;
         exact { symm := by omega; }
       . by_contra hC;
-        simpa using isReflexive_of_valid_axiomRfl hC |>.refl 1;
+        have := isReflexive_of_valid_axiomRfl hC |>.refl 1;
+        grind;
 
 end LO.Propositional
+end

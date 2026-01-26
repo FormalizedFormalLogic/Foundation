@@ -1,6 +1,10 @@
-import Foundation.Logic.Disjunctive
-import Foundation.Propositional.Entailment.Cl.Basic
-import Foundation.Modal.Axioms
+module
+
+public import Foundation.Logic.Disjunctive
+public import Foundation.Propositional.Entailment.Cl.Basic
+public import Foundation.Modal.Axioms
+
+@[expose] public section
 
 namespace LO.Modal.Entailment
 
@@ -869,7 +873,7 @@ instance [Disjunctive 𝓢] [Unnecessitation 𝓢] : ModalDisjunctive 𝓢 where
     . left; exact unnec! h;
     . right; exact unnec! h;
 
-private lemma unnec_of_mdp_aux [ModalDisjunctive 𝓢] (h : 𝓢 ⊢ □φ) : 𝓢 ⊢ φ := by
+lemma unnec_of_mdp_aux [ModalDisjunctive 𝓢] (h : 𝓢 ⊢ □φ) : 𝓢 ⊢ φ := by
     have : 𝓢 ⊢ □φ ⋎ □φ := A!_intro_left h;
     rcases modal_disjunctive this with (h | h) <;> tauto;
 
@@ -879,3 +883,4 @@ noncomputable instance unnecessitation_of_modalDisjunctive [ModalDisjunctive �
 end
 
 end LO.Modal.Entailment
+end

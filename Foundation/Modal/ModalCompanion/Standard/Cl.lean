@@ -1,7 +1,11 @@
-import Foundation.Modal.ModalCompanion.Standard.Int
-import Foundation.Modal.Kripke.Logic.S5Grz
-import Foundation.Modal.Boxdot.Ver_Triv
-import Foundation.Propositional.Kripke.Logic.Cl
+module
+
+public import Foundation.Modal.ModalCompanion.Standard.Int
+public import Foundation.Modal.Kripke.Logic.S5Grz
+public import Foundation.Modal.Boxdot.Ver_Triv
+public import Foundation.Propositional.Kripke.Logic.Cl
+
+@[expose] public section
 
 namespace LO.Modal
 
@@ -139,3 +143,4 @@ end boxdot
 
 
 end LO.Modal
+end

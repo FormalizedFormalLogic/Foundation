@@ -1,4 +1,8 @@
-import Foundation.InterpretabilityLogic.Entailment.CL
+module
+
+public import Foundation.InterpretabilityLogic.Entailment.CL
+
+@[expose] public section
 
 namespace LO.InterpretabilityLogic.Entailment
 
@@ -79,3 +83,4 @@ protected def IL.lemma₂ : 𝓢 ⊢! ∼(φ ▷ ∼χ) ➝ ◇(φ ⋏ □χ) :=
     apply axiomJ1'!
 
 end LO.InterpretabilityLogic.Entailment
+end

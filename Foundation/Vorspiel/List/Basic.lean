@@ -3,7 +3,7 @@ public import Mathlib.Data.Fin.VecNotation
 public import Mathlib.Data.Fintype.Sigma
 public import Mathlib.Data.Fintype.Vector
 public import Mathlib.Data.List.GetD
-public import Vorspiel.Matrix
+public import Foundation.Vorspiel.Matrix
 
 @[expose]
 public section
@@ -283,6 +283,11 @@ lemma exists_of_range (h : a ∈ List.map f (List.range n)) : ∃ i < n, a = f i
   constructor;
   . simpa using hi;
   . simp;
+
+lemma single_suffix_uniq {l : List α} (ha : [a] <:+ l) (hb : [b] <:+ l) : a = b := by
+  rcases ha with ⟨la, rfl⟩
+  rcases hb with ⟨lb, e⟩
+  exact Eq.symm (List.concat_inj.mp <| by { simpa using e }).2
 
 end List
 

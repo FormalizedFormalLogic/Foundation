@@ -1,6 +1,9 @@
-import Foundation.Propositional.Entailment.KC
-import Foundation.Propositional.Kripke.Completeness
-import Foundation.Vorspiel.Rel.Convergent
+module
+
+public import Foundation.Propositional.Entailment.KC
+public import Foundation.Propositional.Kripke.Completeness
+
+@[expose] public section
 
 namespace LO.Propositional
 
@@ -9,13 +12,11 @@ open Formula.Kripke
 
 namespace Kripke
 
-
 protected abbrev Frame.IsPiecewiseStronglyConvergent (F : Frame) := _root_.IsPiecewiseStronglyConvergent F.Rel
 lemma Frame.ps_convergent {F : Frame} [F.IsPiecewiseStronglyConvergent] : ∀ ⦃x y z : F⦄, x ≺ y → x ≺ z → ∃ u, y ≺ u ∧ z ≺ u := by
   apply IsPiecewiseStronglyConvergent.ps_convergent
 
 instance : whitepoint.IsPiecewiseStronglyConvergent := ⟨by tauto⟩
-
 
 section definability
 
@@ -45,7 +46,6 @@ lemma validate_axiomWLEM_of_isPiecewiseStronglyConvergent [F.IsPiecewiseStrongly
     by_contra Rzu;
     exact (Satisfies.neg_def.mp hz) Rzu $ Satisfies.formula_hereditary Ryu hy;
 
-
 lemma isPiecewiseStronglyConvergent_of_validate_axiomWLEM (h : F ⊧ (Axioms.WLEM (.atom 0))) : F.IsPiecewiseStronglyConvergent := ⟨by
   rintro x y z Rxy Ryz;
   let V : Kripke.Valuation F := ⟨λ {v a} => y ≺ v, by
@@ -67,7 +67,6 @@ lemma isPiecewiseStronglyConvergent_of_validate_axiomWLEM (h : F ⊧ (Axioms.WLE
 ⟩
 
 end definability
-
 
 section canonicality
 
@@ -153,3 +152,4 @@ end canonicality
 end Kripke
 
 end LO.Propositional
+end

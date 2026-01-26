@@ -1,7 +1,10 @@
-import Foundation.FirstOrder.Arithmetic.Basic
-import Foundation.Propositional.Entailment.Cl.Basic
-import Foundation.Meta.ClProver
+module
 
+public import Foundation.FirstOrder.Arithmetic.Basic
+public import Foundation.Propositional.Entailment.Cl.Basic
+public import Foundation.Meta.ClProver
+
+@[expose] public section
 /-!
 # Abstract incompleteness theorems and related results
 -/

@@ -1,31 +1,14 @@
-import Mathlib.Data.Fintype.Card
-import Mathlib.Data.Fintype.List
-import Mathlib.Data.Fintype.EquivFin
-import Foundation.Vorspiel.Vorspiel
+module
+
+public import Mathlib.Data.Fintype.Card
+public import Mathlib.Data.Fintype.List
+public import Mathlib.Data.Fintype.EquivFin
+public import Foundation.Vorspiel.List.Basic
+
+@[expose]
+public section
 
 namespace List
-
-section
-
-variable {l l₁ l₂ : List α}
-variable {R : α → α → Prop}
-
-lemma IsChain.nodup_of_trans_irreflex [IsTrans _ R] [IsIrrefl _ R] (h_chain : l.IsChain R) : l.Nodup := by
-  by_contra hC;
-  replace ⟨d, hC⟩ := List.exists_duplicate_iff_not_nodup.mpr hC;
-  have := List.duplicate_iff_sublist.mp hC;
-  have := @List.IsChain.sublist α R [d, d] l ⟨by apply IsTrans.trans⟩ h_chain this;
-  apply IsIrrefl.irrefl d (r := R);
-  simpa;
-
-instance finiteNodupList [DecidableEq α] [Finite α] : Finite { l : List α // l.Nodup } := @fintypeNodupList α (Fintype.ofFinite α) |>.finite
-
-lemma chains_finite [DecidableEq α] [Finite α] [IsTrans _ R] [IsIrrefl _ R] : Finite { l : List α // l.IsChain R } := by
-  apply @Finite.of_injective { l : List α // l.IsChain R } { l : List α // l.Nodup } _ ?f;
-  case f => intro ⟨l, hl⟩; refine ⟨l, List.IsChain.nodup_of_trans_irreflex hl⟩;
-  simp [Function.Injective];
-
-end
 
 /--
 ```
@@ -171,9 +154,6 @@ lemma prefix_suffix : ChainI R a b l → [a] <+: l ∧ [b] <:+ l := by
 
 end ChainI
 
-lemma single_suffix_uniq {l : List α} (ha : [a] <:+ l) (hb : [b] <:+ l) : a = b := by
-  rcases ha with ⟨la, rfl⟩
-  rcases hb with ⟨lb, e⟩
-  exact Eq.symm (List.concat_inj.mp <| by { simpa using e }).2
-
 end List
+
+end

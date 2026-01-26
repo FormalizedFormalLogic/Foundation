@@ -1,5 +1,7 @@
-import Foundation.Logic.Entailment
+module
+public import Foundation.Logic.Entailment
 
+@[expose] public section
 
 namespace LO.Axioms
 
@@ -23,3 +25,5 @@ export HasAxiomElimContra (elimContra)
 @[simp] lemma elim_contra! [HasAxiomElimContra 𝓢] : 𝓢 ⊢ (∼ψ ➝ ∼φ) ➝ (φ ➝ ψ)  := ⟨elimContra⟩
 
 end LO.Entailment
+
+end

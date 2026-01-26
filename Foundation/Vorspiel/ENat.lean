@@ -1,4 +1,10 @@
-import Mathlib.Data.ENat.Basic
+module
+
+public import Mathlib.Data.ENat.Basic
+
+
+@[expose]
+public section
 
 namespace ENat
 
@@ -24,3 +30,5 @@ lemma find_le (n : ℕ) (h : P n) : find P ≤ ↑n := by
   exact ⟨n, by rfl, h⟩
 
 end ENat
+
+end

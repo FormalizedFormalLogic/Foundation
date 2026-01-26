@@ -1,4 +1,8 @@
-import Foundation.Modal.Entailment.K
+module
+
+public import Foundation.Modal.Entailment.K
+
+@[expose] public section
 
 namespace LO.Modal.Entailment
 
@@ -24,3 +28,4 @@ instance : HasAxiomDum 𝓢 := ⟨fun _ ↦ C_trans axiomGrz implyK⟩
 end Grz
 
 end LO.Modal.Entailment
+end

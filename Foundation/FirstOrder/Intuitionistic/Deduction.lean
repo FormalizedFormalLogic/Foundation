@@ -1,5 +1,8 @@
-import Foundation.FirstOrder.Intuitionistic.Rew
+module
 
+public import Foundation.FirstOrder.Intuitionistic.Rew
+
+@[expose] public section
 namespace LO.FirstOrder
 
 abbrev Sequentᵢ (L : Language) := List (SyntacticFormulaᵢ L)

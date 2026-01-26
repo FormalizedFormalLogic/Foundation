@@ -1,5 +1,8 @@
-import Foundation.FirstOrder.SetTheory.Z
+module
 
+public import Foundation.FirstOrder.SetTheory.Z
+
+@[expose] public section
 /-!
 # Ordinals and transitive sets
 

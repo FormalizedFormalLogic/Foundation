@@ -1,4 +1,8 @@
-import Foundation.FirstOrder.Bootstrapping.Syntax.Proof.Typed
+module
+
+public import Foundation.FirstOrder.Bootstrapping.Syntax.Proof.Typed
+
+@[expose] public section
 
 namespace LO.FirstOrder
 
@@ -162,14 +166,14 @@ noncomputable def typedQuote {Γ : Finset (SyntacticFormula L)} : T ⟹₂ Γ �
     simp only [tmem, internalize_theory]
     apply (Δ₁Class.mem_iff'' (T := T) (φ := σ)).mpr hT') (by simpa)
   |           verum h => TDerivation.verum (by simpa using Sequent.quote_mem_quote.mpr h)
-  |       and h bp bq =>
-    TDerivation.and' (by simpa using Sequent.quote_mem_quote.mpr h) (bp.typedQuote.cast (by simp)) (bq.typedQuote.cast (by simp))
-  |            or h b =>
-    TDerivation.or' (by simpa using Sequent.quote_mem_quote.mpr h) <| b.typedQuote.cast (by simp)
-  |           all h d =>
-    TDerivation.all' (by simpa using Sequent.quote_mem_quote.mpr h) <| d.typedQuote.cast (by simp)
-  |          ex h t d =>
-    TDerivation.ex' (by simpa using Sequent.quote_mem_quote.mpr h) ⌜t⌝ <| d.typedQuote.cast (by simp [Matrix.constant_eq_singleton])
+  |       and (φ := φ) (ψ := ψ) h bp bq =>
+    TDerivation.and' (show ⌜φ⌝ ⋏ ⌜ψ⌝ ∈ ⌜Γ⌝ by simpa using Sequent.quote_mem_quote.mpr h) (bp.typedQuote.cast (by simp)) (bq.typedQuote.cast (by simp))
+  |            or (φ := φ) (ψ := ψ) h b =>
+    TDerivation.or' (show ⌜φ⌝ ⋎ ⌜ψ⌝ ∈ ⌜Γ⌝ by simpa using Sequent.quote_mem_quote.mpr h) <| b.typedQuote.cast (by simp)
+  |           all (φ := φ) h d =>
+    TDerivation.all' (show ∀' ⌜φ⌝ ∈ ⌜Γ⌝ by simpa using Sequent.quote_mem_quote.mpr h) <| d.typedQuote.cast (by simp)
+  |          ex (φ := φ) h t d =>
+    TDerivation.ex' (show ∃' ⌜φ⌝ ∈ ⌜Γ⌝ by simpa using Sequent.quote_mem_quote.mpr h) ⌜t⌝ <| d.typedQuote.cast (by simp [Matrix.constant_eq_singleton])
   |           wk d ss => TDerivation.wk d.typedQuote (by simpa)
   |           shift d => (TDerivation.shift d.typedQuote).cast (by simp)
   | cut (φ := φ) d dn =>

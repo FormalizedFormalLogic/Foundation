@@ -1,9 +1,13 @@
-import Foundation.Propositional.Entailment.Cl.Basic
-import Foundation.Propositional.Entailment.Int.DNE_of_LEM
-import Foundation.Propositional.Hilbert.Axiom
-import Foundation.Propositional.Formula.Basic
-import Foundation.Propositional.Logic.Basic
-import Foundation.Logic.Disjunctive
+module
+
+public import Foundation.Propositional.Entailment.Cl.Basic
+public import Foundation.Propositional.Entailment.Int.DNE_of_LEM
+public import Foundation.Propositional.Hilbert.Axiom
+public import Foundation.Propositional.Formula.Basic
+public import Foundation.Propositional.Logic.Basic
+public import Foundation.Logic.Disjunctive
+
+@[expose] public section
 
 namespace LO.Propositional
 
@@ -245,3 +249,4 @@ instance : Entailment.KrieselPutnam Propositional.KrieselPutnam where
 
 
 end LO.Propositional
+end

@@ -1,5 +1,9 @@
-import Foundation.Modal.LogicSymbol
-import Foundation.Modal.Kripke.AxiomL
+module
+
+public import Foundation.Modal.LogicSymbol
+public import Foundation.Modal.Kripke.AxiomL
+
+@[expose] public section
 
 namespace LO.Modal
 
@@ -37,3 +41,4 @@ end Frame
 end Kripke
 
 end LO.Modal
+end

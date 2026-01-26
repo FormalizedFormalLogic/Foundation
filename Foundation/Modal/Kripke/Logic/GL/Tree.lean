@@ -1,6 +1,10 @@
-import Foundation.Modal.Kripke.Logic.GL.Completeness
-import Foundation.Modal.Kripke.Tree
-import Mathlib.Tactic.TFAE
+module
+
+public import Foundation.Modal.Kripke.Logic.GL.Completeness
+public import Foundation.Modal.Kripke.Tree
+public import Mathlib.Tactic.TFAE
+
+@[expose] public section
 
 namespace LO.Modal
 
@@ -64,3 +68,4 @@ lemma iff_unprovable_exists_unsatisfies_FiniteTransitiveTree : Modal.GL ⊬ φ �
 end GL.Kripke
 
 end LO.Modal
+end

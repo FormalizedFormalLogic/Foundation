@@ -1,5 +1,9 @@
-import Foundation.Modal.Entailment.DiaDuality
+module
 
+public import Foundation.Modal.Entailment.DiaDuality
+
+
+@[expose] public section
 
 namespace LO.Modal.Entailment
 
@@ -122,3 +126,4 @@ def boxDuality_mpr' (h : 𝓢 ⊢! ∼(◇(∼φ))) : 𝓢 ⊢! □φ := boxDual
 lemma boxDuality_mpr'! (h : 𝓢 ⊢ ∼(◇(∼φ))) : 𝓢 ⊢ □φ := ⟨boxDuality_mpr' h.some⟩
 
 end LO.Modal.Entailment
+end

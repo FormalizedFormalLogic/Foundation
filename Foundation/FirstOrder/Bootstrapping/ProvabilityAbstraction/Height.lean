@@ -1,8 +1,11 @@
-import Foundation.FirstOrder.Bootstrapping.DerivabilityCondition
-import Foundation.FirstOrder.Bootstrapping.ProvabilityAbstraction.Basic
-import Foundation.Vorspiel.ENat
-import Foundation.FirstOrder.Incompleteness.Examples
+module
 
+public import Foundation.FirstOrder.Bootstrapping.DerivabilityCondition
+public import Foundation.FirstOrder.Bootstrapping.ProvabilityAbstraction.Basic
+public import Foundation.FirstOrder.Incompleteness.Examples
+public import Foundation.Vorspiel.ENat
+
+@[expose] public section
 namespace LO.FirstOrder
 
 variable {L : Language} [L.ReferenceableBy L] {T₀ T : Theory L}

@@ -2,10 +2,10 @@ module
 public import Mathlib.Data.Fin.VecNotation
 public import Mathlib.Tactic.Cases
 public import Mathlib.Data.Nat.Pairing
-public import Vorspiel.Nat
+public import Foundation.Vorspiel.Nat.Basic
+public import Foundation.Vorspiel.Fin.Basic
 
-@[expose]
-public section
+@[expose] public section
 
 namespace Matrix
 
@@ -314,6 +314,19 @@ def vecToNat (v : Fin n → ℕ) : ℕ := foldr (fun x ih ↦ Nat.pair x ih + 1)
   simp [vecToNat]
 
 end vecToNat
+
+
+section
+
+variable {m : ℕ}
+
+@[simp] lemma appeendr_addCast (u : Fin m → α) (v : Fin n → α) (i : Fin m) :
+    appendr u v (i.addCast n) = u i := by simp [appendr, vecAppend_eq_ite]
+
+@[simp] lemma appeendr_addNat (u : Fin m → α) (v : Fin n → α) (i : Fin n) :
+    appendr u v (i.addNat m) = v i := by simp [appendr, vecAppend_eq_ite]
+
+end
 
 end Matrix
 

@@ -1,5 +1,9 @@
-import Foundation.Propositional.Kripke2.Logic.F_Ser
-import Foundation.Propositional.Kripke2.AxiomSym
+module
+
+public import Foundation.Propositional.Kripke2.Logic.F_Ser
+public import Foundation.Propositional.Kripke2.AxiomSym
+
+@[expose] public section
 
 namespace LO.Propositional
 
@@ -54,3 +58,4 @@ instance : Propositional.F ⪱ Propositional.F_Sym := by
         simp at this;
 
 end LO.Propositional
+end

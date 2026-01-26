@@ -1,8 +1,9 @@
-import Foundation.FirstOrder.Basic.Semantics.Elementary
-import Foundation.FirstOrder.Basic.Operator
-import Foundation.FirstOrder.Basic.BinderNotation
-import Foundation.FirstOrder.Basic.AesopInit
-import Foundation.Vorspiel.Graph
+module
+public import Foundation.FirstOrder.Basic.Semantics.Elementary
+public import Foundation.FirstOrder.Basic.Operator
+public import Foundation.FirstOrder.Basic.BinderNotation
+public import Foundation.FirstOrder.Basic.AesopInit
+@[expose] public section
 
 /-!
 # Relations and functions defined by a first-order formula (with parameter)
@@ -497,3 +498,5 @@ end aesop
 end Language
 
 end LO.FirstOrder
+
+end

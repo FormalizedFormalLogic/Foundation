@@ -1,4 +1,8 @@
-import Foundation.Modal.Kripke.Logic.S5
+module
+
+public import Foundation.Modal.Kripke.Logic.S5
+
+@[expose] public section
 
 namespace LO.Modal
 
@@ -71,3 +75,4 @@ instance : Modal.S5 ≊ Modal.KT4B := by
 instance : Modal.S5 ≊ Modal.KT4B := inferInstance
 
 end LO.Modal
+end

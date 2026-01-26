@@ -1,6 +1,10 @@
-import Foundation.Propositional.Kripke2.Hilbert
-import Foundation.Propositional.Kripke2.FTheory
-import Foundation.Propositional.Hilbert.F.Disjunctive
+module
+
+public import Foundation.Propositional.Kripke2.Hilbert
+public import Foundation.Propositional.Kripke2.FTheory
+public import Foundation.Propositional.Hilbert.F.Disjunctive
+
+@[expose] public section
 
 namespace LO.Propositional
 
@@ -57,3 +61,4 @@ end F
 
 
 end LO.Propositional
+end

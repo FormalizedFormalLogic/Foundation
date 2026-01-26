@@ -1,5 +1,8 @@
-import Foundation.FirstOrder.Incompleteness.First
+module
 
+public import Foundation.FirstOrder.Incompleteness.First
+
+@[expose] public section
 namespace LO.FirstOrder.Arithmetic
 
 variable (T : ArithmeticTheory) [T.Δ₁] [𝗜𝚺₁ ⪯ T] [T.SoundOnHierarchy 𝚺 1]

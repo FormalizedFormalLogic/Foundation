@@ -1,6 +1,9 @@
-import Foundation.Modal.Kripke.Logic.K
-import Foundation.Vorspiel.Rel.WCWF
-import Foundation.Modal.Kripke.Antisymmetric
+module
+
+public import Foundation.Modal.Kripke.Logic.K
+public import Foundation.Modal.Kripke.Antisymmetric
+
+@[expose] public section
 
 namespace LO.Modal
 
@@ -14,15 +17,11 @@ open Rel (IrreflGen)
 
 variable {F : Kripke.Frame}
 
-
 protected abbrev Frame.IsWeaklyConverseWellFounded (F : Frame) := _root_.IsWeaklyConverseWellFounded _ F.Rel
 
 lemma Frame.wcwf [F.IsWeaklyConverseWellFounded] : _root_.WeaklyConverseWellFounded F.Rel := IsWeaklyConverseWellFounded.wcwf
 
-
 instance [F.IsFinite] [F.IsTransitive] [F.IsAntisymmetric] : F.IsWeaklyConverseWellFounded := ⟨IsWeaklyConverseWellFounded.wcwf⟩
-
-
 
 lemma validate_AxiomGrz_of_refl_trans_wcwf [F.IsReflexive] [F.IsTransitive] [F.IsWeaklyConverseWellFounded] : F ⊧ (Axioms.Grz (.atom 0)) := by
   intro V;
@@ -78,7 +77,6 @@ lemma validate_AxiomGrz_of_refl_trans_wcwf [F.IsReflexive] [F.IsTransitive] [F.I
         contradiction;
 
 lemma validate_AxiomGrz_of_finite_strict_preorder [F.IsFinite] [F.IsPartialOrder] : F ⊧ (Axioms.Grz (.atom 0)) := validate_AxiomGrz_of_refl_trans_wcwf
-
 
 lemma validate_AxiomT_AxiomFour_of_validate_Grz (h : F ⊧ Axioms.Grz (.atom 0)) : F ⊧ □(.atom 0) ➝ ((.atom 0) ⋏ □□(.atom 0)) := by
   let ψ : Formula _ := (.atom 0) ⋏ (□(.atom 0) ➝ □□(.atom 0));
@@ -218,3 +216,4 @@ protected instance FrameClass.finite_strict_preorder.definability
 end Kripke
 
 end LO.Modal
+end

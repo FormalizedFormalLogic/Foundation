@@ -1,8 +1,10 @@
-import Foundation.Vorspiel.Chain
-import Foundation.Vorspiel.Rel.CWF
-import Foundation.Modal.Kripke.Rooted
-import Foundation.Modal.Kripke.Antisymmetric
-import Foundation.Modal.Kripke.Asymmetric
+module
+
+public import Foundation.Modal.Kripke.Rooted
+public import Foundation.Modal.Kripke.Antisymmetric
+public import Foundation.Modal.Kripke.Asymmetric
+
+@[expose] public section
 
 namespace LO.Modal
 
@@ -121,9 +123,7 @@ instance : (F.mkTreeUnravelling r).IsRootedBy treeUnravelling.root where
 
 end Frame.treeUnravelling
 
-
 abbrev Frame.mkTransTreeUnravelling (F : Frame) (r : outParam F.World) := (F.mkTreeUnravelling r)^+
-
 
 namespace Frame.mkTransTreeUnravelling
 
@@ -185,7 +185,6 @@ def Model.mkTreeUnravelling (M : Kripke.Model) (r : M.World) : Kripke.Model := �
 def Model.mkTreeUnravelling.pMorphism (M : Kripke.Model) (r : M.World) : (M.mkTreeUnravelling r) →ₚ M :=
   PseudoEpimorphism.ofAtomic (Frame.treeUnravelling.pMorphism M.toFrame r) $ by rfl;
 
-
 def Model.mkTransTreeUnravelling (M : Kripke.Model) (r : M.World) : Kripke.Model := ⟨M.toFrame.mkTransTreeUnravelling r, λ c a => M.Val (c.1.getLast (by simp)) a⟩
 
 namespace Model.mkTransTreeUnravelling
@@ -201,7 +200,7 @@ protected lemma modal_equivalence_at_root (M : Kripke.Model) (r : M.World) [M.Is
 
 end Model.mkTransTreeUnravelling
 
-
 end Kripke
 
 end LO.Modal
+end

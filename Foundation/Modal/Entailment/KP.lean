@@ -1,4 +1,8 @@
-import Foundation.Modal.Entailment.K
+module
+
+public import Foundation.Modal.Entailment.K
+
+@[expose] public section
 
 namespace LO.Modal.Entailment
 
@@ -21,3 +25,4 @@ instance : HasAxiomD 𝓢 := ⟨fun _ ↦ KP.axiomD⟩
 end KP
 
 end LO.Modal.Entailment
+end

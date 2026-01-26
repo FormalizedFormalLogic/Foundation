@@ -1,7 +1,11 @@
-import Foundation.Modal.PLoN.Logic.N
-import Foundation.Modal.Logic.SumNormal
-import Foundation.Propositional.FMT.Logic
-import Foundation.Propositional.Kripke.Logic.Cl
+module
+
+public import Foundation.Modal.PLoN.Logic.N
+public import Foundation.Modal.Logic.SumNormal
+public import Foundation.Propositional.FMT.Logic
+public import Foundation.Propositional.Kripke.Logic.Cl
+
+@[expose] public section
 
 namespace LO
 
@@ -182,3 +186,4 @@ lemma VF_modal_companion_TFAE : [
 end Modal
 
 end LO
+end

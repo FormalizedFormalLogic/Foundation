@@ -1,6 +1,7 @@
-import Foundation.Logic.Entailment
-import Foundation.Vorspiel.Finset.Supplemental
+module
+public import Foundation.Logic.Entailment
 
+@[expose] public section
 
 namespace LO.Axioms
 
@@ -1484,3 +1485,5 @@ end
 
 
 end LO.Entailment
+
+end

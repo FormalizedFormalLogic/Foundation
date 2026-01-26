@@ -1,7 +1,11 @@
-import Foundation.Modal.Kripke.AxiomGeach
-import Foundation.Modal.Kripke.Hilbert
-import Foundation.Modal.Kripke.Filtration
-import Foundation.Modal.Kripke.Logic.K
+module
+
+public import Foundation.Modal.Kripke.AxiomGeach
+public import Foundation.Modal.Kripke.Hilbert
+public import Foundation.Modal.Kripke.Filtration
+public import Foundation.Modal.Kripke.Logic.K
+
+@[expose] public section
 
 namespace LO.Modal
 
@@ -80,3 +84,4 @@ instance : Modal.K ⪱ Modal.K4 := by
 
 
 end LO.Modal
+end

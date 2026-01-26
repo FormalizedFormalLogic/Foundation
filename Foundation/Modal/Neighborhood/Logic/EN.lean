@@ -1,7 +1,11 @@
-import Foundation.Modal.Neighborhood.Hilbert
-import Foundation.Modal.Neighborhood.AxiomN
-import Foundation.Modal.Neighborhood.Logic.E
-import Foundation.Modal.PLoN.Logic.N
+module
+
+public import Foundation.Modal.Neighborhood.Hilbert
+public import Foundation.Modal.Neighborhood.AxiomN
+public import Foundation.Modal.Neighborhood.Logic.E
+public import Foundation.Modal.PLoN.Logic.N
+
+@[expose] public section
 
 namespace LO.Modal
 
@@ -100,6 +104,8 @@ instance : Modal.EN ⪱ Modal.EMN := by
             match x with | 0 | 1 => simp_all [M]
         }
       . simp! [M, Semantics.Models, Satisfies];
+        grind;
 
 
 end LO.Modal
+end

@@ -1,8 +1,12 @@
-import Foundation.Modal.Neighborhood.AxiomGeach
-import Foundation.Modal.Neighborhood.AxiomM
-import Foundation.Modal.Neighborhood.AxiomC
-import Foundation.Modal.Neighborhood.Logic.E
-import Foundation.Modal.Neighborhood.Filtration
+module
+
+public import Foundation.Modal.Neighborhood.AxiomGeach
+public import Foundation.Modal.Neighborhood.AxiomM
+public import Foundation.Modal.Neighborhood.AxiomC
+public import Foundation.Modal.Neighborhood.Logic.E
+public import Foundation.Modal.Neighborhood.Filtration
+
+@[expose] public section
 
 namespace LO.Modal
 
@@ -43,3 +47,4 @@ instance consistent : Entailment.Consistent Modal.EB := consistent_of_sound_fram
 end EB
 
 end LO.Modal
+end

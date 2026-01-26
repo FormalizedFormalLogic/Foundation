@@ -1,4 +1,8 @@
-import Foundation.Modal.Kripke.Basic
+module
+
+public import Foundation.Modal.Kripke.Basic
+
+@[expose] public section
 
 namespace LO.Modal.Kripke
 
@@ -88,3 +92,4 @@ end
 
 
 end LO.Modal.Kripke
+end

@@ -1,5 +1,9 @@
-import Foundation.Propositional.Kripke2.Logic.F_Ser
-import Foundation.Propositional.Kripke2.AxiomTra
+module
+
+public import Foundation.Propositional.Kripke2.Logic.F_Ser
+public import Foundation.Propositional.Kripke2.AxiomTra
+
+@[expose] public section
 
 namespace LO.Propositional
 
@@ -64,3 +68,4 @@ instance : Propositional.F ⪱ Propositional.F_Tra1 := by
 
 
 end LO.Propositional
+end

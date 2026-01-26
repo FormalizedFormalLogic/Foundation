@@ -1,6 +1,9 @@
-import Foundation.Modal.Logic.S.Basic
-import Foundation.ProvabilityLogic.GL.Completeness
-import Foundation.Vorspiel.Set.Cofinite
+module
+
+public import Foundation.Modal.Logic.S.Basic
+public import Foundation.ProvabilityLogic.GL.Completeness
+
+@[expose] public section
 
 namespace LO
 
@@ -17,29 +20,30 @@ namespace Modal
 def Formula.letterlessSpectrum (φ : Formula ℕ) (φ_closed : φ.Letterless := by grind) : Set ℕ :=
   match φ with
   | ⊥ => ∅
-  | φ ➝ ψ => φ.letterlessSpectrumᶜ ∪ ψ.letterlessSpectrum
+  | φ ➝ ψ => (φ.letterlessSpectrum)ᶜ ∪ ψ.letterlessSpectrum
   | □φ => { n | ∀ i < n, i ∈ φ.letterlessSpectrum }
 
 
 namespace Formula.letterlessSpectrum
 
-variable (hφ : φ.Letterless := by grind) (hψ : ψ.Letterless := by grind)
+-- variable {hφ : φ.Letterless}{hψ : ψ.Letterless}
 
 @[simp, grind =] lemma def_bot : (⊥ : Formula _).letterlessSpectrum = ∅ := by simp [letterlessSpectrum]
 @[simp, grind =] lemma def_top : (⊤ : Formula _).letterlessSpectrum = Set.univ := by simp [letterlessSpectrum]
-@[grind =] lemma def_imp : (φ ➝ ψ).letterlessSpectrum = φ.letterlessSpectrumᶜ ∪ ψ.letterlessSpectrum := by simp [letterlessSpectrum]
-@[grind =] lemma def_neg : (∼φ).letterlessSpectrum = φ.letterlessSpectrumᶜ := by simp [letterlessSpectrum]
-@[grind =] lemma def_or  : (φ ⋎ ψ).letterlessSpectrum = φ.letterlessSpectrum ∪ ψ.letterlessSpectrum := by simp [letterlessSpectrum];
-@[grind =] lemma def_and : (φ ⋏ ψ).letterlessSpectrum = φ.letterlessSpectrum ∩ ψ.letterlessSpectrum := by simp [letterlessSpectrum];
-@[grind =] lemma def_box : (□φ).letterlessSpectrum = { n | ∀ i < n, i ∈ φ.letterlessSpectrum } := by simp [letterlessSpectrum];
-@[grind =] lemma def_boxItr : (□^[(n + 1)]φ).letterlessSpectrum = { k | ∀ i < k, i ∈ (□^[n]φ).letterlessSpectrum } := by
+@[grind =] lemma def_imp {hφψ : Letterless (φ ➝ ψ)} : (φ ➝ ψ).letterlessSpectrum hφψ = φ.letterlessSpectrumᶜ ∪ ψ.letterlessSpectrum := by simp [letterlessSpectrum]
+@[grind =] lemma def_neg {hφ : Letterless (∼φ)} : (∼φ).letterlessSpectrum hφ = φ.letterlessSpectrumᶜ := by simp [letterlessSpectrum]
+@[grind =] lemma def_or {hφψ : Letterless (φ ⋎ ψ)}  : (φ ⋎ ψ).letterlessSpectrum hφψ = φ.letterlessSpectrum ∪ ψ.letterlessSpectrum := by simp [letterlessSpectrum];
+@[grind =] lemma def_and {hφψ : Letterless (φ ⋏ ψ)} : (φ ⋏ ψ).letterlessSpectrum hφψ = φ.letterlessSpectrum ∩ ψ.letterlessSpectrum := by simp [letterlessSpectrum];
+@[grind =] lemma def_box {hφ : Letterless (□φ)} : (□φ).letterlessSpectrum hφ = { n | ∀ i < n, i ∈ φ.letterlessSpectrum } := by simp [letterlessSpectrum];
+@[grind =] lemma def_boxItr {n} {hφ : Letterless (□^[(n + 1)]φ)} : (□^[(n + 1)]φ).letterlessSpectrum hφ = { k | ∀ i < k, i ∈ (□^[n]φ).letterlessSpectrum } := by
   apply Eq.trans ?_ $ def_box (φ := □^[n]φ);
-  induction n generalizing φ with
-  | zero => simp [letterlessSpectrum]
-  | succ n ih =>
-    suffices (□^[n](□□φ)).letterlessSpectrum = (□□^[n](□φ)).letterlessSpectrum by simpa
-    simpa using ih (φ := □φ) (by grind);
-@[grind =] lemma def_boxdot : (⊡φ).letterlessSpectrum = { n | ∀ i ≤ n, i ∈ φ.letterlessSpectrum } := by
+  . grind;
+  . induction n generalizing φ with
+    | zero => grind;
+    | succ n ih =>
+      suffices (□^[n](□□φ)).letterlessSpectrum = (□□^[n](□φ)).letterlessSpectrum by grind;
+      simpa using @ih (φ := □φ) (by grind);
+@[grind =] lemma def_boxdot {hφ : Letterless (⊡φ)} : (⊡φ).letterlessSpectrum hφ = { n | ∀ i ≤ n, i ∈ φ.letterlessSpectrum } := by
   ext i;
   suffices (i ∈ φ.letterlessSpectrum ∧ ∀ j < i, j ∈ φ.letterlessSpectrum) ↔ ∀ j ≤ i, j ∈ φ.letterlessSpectrum by simpa [letterlessSpectrum];
   constructor;
@@ -55,7 +59,7 @@ variable (hφ : φ.Letterless := by grind) (hψ : ψ.Letterless := by grind)
       apply h;
       omega;
 
-lemma def_lconj₂ {l : List (Formula ℕ)} (h : ∀ φ ∈ l, φ.Letterless) : (l.conj₂).letterlessSpectrum = ⋂ φ ∈ l, φ.letterlessSpectrum := by
+lemma def_lconj₂ {l : List (Formula ℕ)} (h : (l.conj₂).Letterless) : (l.conj₂).letterlessSpectrum = ⋂ φ ∈ l, φ.letterlessSpectrum := by
   induction l using List.induction_with_singleton with
   | hcons a l he ih =>
     suffices (a ⋏ ⋀l).letterlessSpectrum = ⋂ φ, ⋂ (_ : φ ∈ a :: l), φ.letterlessSpectrum by
@@ -65,7 +69,7 @@ lemma def_lconj₂ {l : List (Formula ℕ)} (h : ∀ φ ∈ l, φ.Letterless) : 
     simp [ih (by grind)];
   | _ => simp;
 
-lemma def_lconj' {l : List β} {Φ : β → Formula ℕ} (h : ∀ i ∈ l, (Φ i).Letterless) : (l.conj' Φ).letterlessSpectrum = ⋂ i ∈ l, (Φ i).letterlessSpectrum := by
+lemma def_lconj' {l : List β} {Φ : β → Formula ℕ} (h : (l.conj' Φ).Letterless) : (l.conj' Φ).letterlessSpectrum = ⋂ i ∈ l, (Φ i).letterlessSpectrum := by
   induction l using List.induction_with_singleton with
   | hcons a l he ih =>
     suffices (Φ a ⋏ (List.conj' Φ l)).letterlessSpectrum = ⋂ i, ⋂ (_ : i ∈ a :: l), (Φ i).letterlessSpectrum by
@@ -75,17 +79,17 @@ lemma def_lconj' {l : List β} {Φ : β → Formula ℕ} (h : ∀ i ∈ l, (Φ i
     simp [ih (by grind)];
   | _ => simp;
 
-lemma def_fconj {s : Finset (Formula _)} (h : ∀ φ ∈ s, φ.Letterless) : (s.conj.letterlessSpectrum) = ⋂ φ ∈ s, φ.letterlessSpectrum := by
+lemma def_fconj {s : Finset (Formula _)} (h : (s.conj).Letterless) : (s.conj.letterlessSpectrum) = ⋂ φ ∈ s, φ.letterlessSpectrum := by
   unfold Finset.conj;
   rw [def_lconj₂];
   . simp;
-  . simp_all;
+  . simpa;
 
-lemma def_fconj' {s} {Φ : α → Formula ℕ} (hΦ : ∀ i, (Φ i).Letterless) : ((⩕ i ∈ s, Φ i).letterlessSpectrum (letterless_fconj' hΦ)) = ⋂ i ∈ s, (Φ i).letterlessSpectrum (hΦ i) := by
+lemma def_fconj' {s} {Φ : α → Formula ℕ} (hΦ : ((⩕ i ∈ s, Φ i)).Letterless) : (⩕ i ∈ s, Φ i).letterlessSpectrum = ⋂ i ∈ s, (Φ i).letterlessSpectrum (by apply letterless_fconj'.mp hΦ _; assumption;) := by
   unfold Finset.conj';
   rw [def_lconj'];
   . simp;
-  . grind;
+  . simpa;
 
 end Formula.letterlessSpectrum
 
@@ -95,21 +99,21 @@ end Formula.letterlessSpectrum
 
 namespace Formula.letterlessTrace
 
-variable {φ ψ : Formula ℕ} (hφ : φ.Letterless := by grind) (hψ : ψ.Letterless := by grind)
+variable {φ ψ : Formula ℕ} {hφ : φ.Letterless} {hψ : ψ.Letterless}
 
-@[simp, grind =] lemma def_top : (⊤ : Formula _).letterlessTrace = ∅ := by unfold letterlessTrace; rw [letterlessSpectrum.def_top]; tauto_set;
-@[simp, grind =] lemma def_bot : (⊥ : Formula _).letterlessTrace = Set.univ := by unfold letterlessTrace; rw [letterlessSpectrum.def_bot]; tauto_set;
-@[grind =] lemma def_neg : (∼φ).letterlessTrace = φ.letterlessTraceᶜ := by unfold letterlessTrace; rw [letterlessSpectrum.def_neg];
-@[grind =] lemma def_and : (φ ⋏ ψ).letterlessTrace = φ.letterlessTrace ∪ ψ.letterlessTrace := by unfold letterlessTrace; rw [letterlessSpectrum.def_and]; tauto_set;
-@[grind =] lemma def_or  : (φ ⋎ ψ).letterlessTrace = φ.letterlessTrace ∩ ψ.letterlessTrace := by unfold letterlessTrace; rw [letterlessSpectrum.def_or]; tauto_set;
+@[simp, grind =] lemma def_top : (⊤ : Formula _).letterlessTrace = ∅ := by grind;
+@[simp, grind =] lemma def_bot : (⊥ : Formula _).letterlessTrace = Set.univ := by grind;
+@[grind =] lemma def_neg : (∼φ).letterlessTrace = φ.letterlessTraceᶜ := by grind;
+@[grind =] lemma def_and : (φ ⋏ ψ).letterlessTrace = φ.letterlessTrace ∪ ψ.letterlessTrace := by grind;
+@[grind =] lemma def_or  : (φ ⋎ ψ).letterlessTrace = φ.letterlessTrace ∩ ψ.letterlessTrace := by grind;
 
 end Formula.letterlessTrace
 
 
 namespace Formula
 
-@[grind =] lemma neg_letterlessTrace_letterlessSpectrum {φ : Formula ℕ} (hφ : φ.Letterless := by grind) : (∼φ).letterlessTrace = φ.letterlessSpectrum := by rw [letterlessTrace.def_neg]; simp [letterlessTrace];
-@[grind =] lemma neg_letterlessSpectrum_letterlessTrace {φ : Formula ℕ} (hφ : φ.Letterless := by grind) : (∼φ).letterlessSpectrum = φ.letterlessTrace := by rw [letterlessSpectrum.def_neg]; simp [letterlessTrace];
+@[grind =] lemma neg_letterlessTrace_letterlessSpectrum {φ : Formula ℕ} {hφ : φ.Letterless} : (∼φ).letterlessTrace = φ.letterlessSpectrum := by grind;
+@[grind =] lemma neg_letterlessSpectrum_letterlessTrace {φ : Formula ℕ} {hφ : φ.Letterless} : (∼φ).letterlessSpectrum = φ.letterlessTrace := by grind;
 
 
 lemma letterlessSpectrum_finite_or_cofinite {φ : Formula ℕ} (hφ : φ.Letterless) : φ.letterlessSpectrum.Finite ∨ φ.letterlessSpectrum.Cofinite := by
@@ -118,16 +122,16 @@ lemma letterlessSpectrum_finite_or_cofinite {φ : Formula ℕ} (hφ : φ.Letterl
   | hatom => grind;
   | himp φ ψ ihφ ihψ =>
     rw [letterlessSpectrum.def_imp];
-    rcases ihφ (by grind) with (ihφ | ihφ) <;>
-    rcases ihψ (by grind) with (ihψ | ihψ);
-    case himp.inr.inl =>
-      left;
-      grind [Set.Finite.union];
-    . right;
-      apply Set.cofinite_union_left;
-      simpa [Set.Cofinite]
-    . grind;
-    . grind;
+    . rcases ihφ (by grind) with (ihφ | ihφ) <;>
+      rcases ihψ (by grind) with (ihψ | ihψ);
+      case himp.inr.inl =>
+        left;
+        grind [Set.Finite.union];
+      . right;
+        apply Set.cofinite_union_left;
+        simpa [Set.Cofinite]
+      . grind;
+      . grind;
   | hbox φ ihφ =>
     by_cases h : φ.letterlessSpectrum = Set.univ;
     . right;
@@ -277,15 +281,15 @@ namespace FormulaSet
 lemma exists_singular_of_singular (hX_singular : X.Singular T) : ∃ φ ∈ X, φ.Singular T := by
   simpa [FormulaSet.Singular, FormulaSet.Regular] using hX_singular;
 
-variable (Xll : X.Letterless := by grind) (Yll : Y.Letterless := by grind)
+-- variable (Xll : X.Letterless := by grind) (Yll : Y.Letterless := by grind)
 
-lemma def_letterlessTrace_union : X.letterlessTrace = ⋃ φ ∈ X, φ.letterlessTrace := by simp [FormulaSet.letterlessTrace, FormulaSet.letterlessSpectrum, Formula.letterlessTrace]
+lemma def_letterlessTrace_union (hX) : X.letterlessTrace hX = ⋃ φ ∈ X, φ.letterlessTrace := by simp [FormulaSet.letterlessTrace, FormulaSet.letterlessSpectrum, Formula.letterlessTrace]
 
-lemma comp_letterlessTrace_letterlessSpectrum : X.letterlessTraceᶜ = X.letterlessSpectrum := by simp [FormulaSet.letterlessTrace]
+lemma comp_letterlessTrace_letterlessSpectrum (hX) : (X.letterlessTrace hX)ᶜ = X.letterlessSpectrum := by simp [FormulaSet.letterlessTrace]
 
-lemma iff_subset_letterlessSpectrum_subset_letterlessTrace : X.letterlessSpectrum ⊆ Y.letterlessSpectrum ↔ Y.letterlessTrace ⊆ X.letterlessTrace := by simp [FormulaSet.letterlessTrace]
+lemma iff_subset_letterlessSpectrum_subset_letterlessTrace (hX hY) : X.letterlessSpectrum hX ⊆ Y.letterlessSpectrum hY ↔ Y.letterlessTrace ⊆ X.letterlessTrace := by simp [FormulaSet.letterlessTrace]
 
-lemma iff_eq_letterlessSpectrum_eq_letterlessTrace : X.letterlessSpectrum = Y.letterlessSpectrum ↔ X.letterlessTrace = Y.letterlessTrace := by simp [FormulaSet.letterlessTrace];
+lemma iff_eq_letterlessSpectrum_eq_letterlessTrace (hX hY)  : X.letterlessSpectrum hX = Y.letterlessSpectrum hY ↔ X.letterlessTrace = Y.letterlessTrace := by simp [FormulaSet.letterlessTrace];
 
 end FormulaSet
 
@@ -295,7 +299,7 @@ abbrev TBB (n : ℕ) : Formula ℕ := □^[(n + 1)]⊥ ➝ □^[n]⊥
 
 section
 
-variable {α α₁ α₂ β β₁ β₂ : Set ℕ} (hβ : β.Cofinite := by grind) (hβ₁ : β₁.Cofinite := by grind) (hβ₂ : β₂.Cofinite := by grind)
+variable {α α₁ α₂ β β₁ β₂ : Set ℕ} {hβ : β.Cofinite} {hβ₁ : β₁.Cofinite} {hβ₂ : β₂.Cofinite}
 
 @[simp, grind .] lemma TBB_letterless : (TBB n).Letterless := by grind
 
@@ -316,11 +320,10 @@ lemma TBB_letterlessSpectrum : (TBB n).letterlessSpectrum = {n}ᶜ := by
 
 @[simp, grind .]
 lemma TBB_letterlessTrace : (TBB n).letterlessTrace = {n} := by simp [Formula.letterlessTrace, TBB_letterlessSpectrum, compl_compl];
-variable {α α₁ α₂ β β₁ β₂ : Set ℕ} (hβ : β.Cofinite := by grind) (hβ₁ : β₁.Cofinite := by grind) (hβ₂ : β₂.Cofinite := by grind)
 
 @[simp, grind .]
 lemma TBB_conj'_letterless : (⩕ n ∈ s, TBB n).Letterless := by
-  apply Formula.letterless_fconj';
+  apply Formula.letterless_fconj'.mpr;
   grind;
 
 @[simp, grind .]
@@ -333,7 +336,7 @@ lemma TBBSet_letterlessTrace : FormulaSet.letterlessTrace (α.image (λ i => TBB
 @[simp, grind .]
 lemma TBBMinus_letterless' : Formula.Letterless (∼⩕ n ∈ hβ.toFinset, TBB n) := by
   apply Formula.letterless_neg.mpr;
-  apply Formula.letterless_fconj';
+  apply Formula.letterless_fconj'.mpr;
   grind;
 
 @[simp, grind .]
@@ -341,12 +344,13 @@ lemma TBBMinus_letterless : FormulaSet.Letterless {∼⩕ n ∈ hβ.toFinset, TB
 
 @[simp, grind .]
 lemma TBBMinus_letterlessSpectrum' : (∼⩕ n ∈ hβ.toFinset, TBB n).letterlessSpectrum TBBMinus_letterless' = βᶜ := by
-  rw [Formula.letterlessSpectrum.def_neg (Formula.letterless_fconj' (by grind)), Formula.letterlessSpectrum.def_fconj' (by grind)];
-  ext i;
-  suffices (∀j ∉ β, i ≠ j) ↔ i ∈ β by simp [TBB_letterlessSpectrum];
-  constructor;
-  . contrapose!; tauto;
-  . contrapose!; rintro ⟨i, _, rfl⟩; tauto;
+  simp only [Formula.letterlessSpectrum.def_neg, compl_inj_iff];
+  rw [Formula.letterlessSpectrum.def_fconj' ?_];
+  . ext j;
+    suffices (∀ i ∉ β, j ≠ i) ↔ j ∈ β by simpa [TBB_letterlessSpectrum];
+    grind;
+  . apply Formula.letterless_fconj'.mpr
+    grind;
 
 @[simp, grind .]
 lemma TBBMinus_letterlessSpectrum : FormulaSet.letterlessSpectrum {(∼⩕ n ∈ hβ.toFinset, TBB n)} (by simp) = βᶜ := by simp [FormulaSet.letterlessSpectrum]
@@ -489,10 +493,9 @@ section
 open Formula
 open LO.Entailment Modal.Entailment
 
-variable {φ ψ : Formula ℕ} (φ_letterless : φ.Letterless) (ψ_letterless : ψ.Letterless)
+variable {φ ψ : Formula ℕ} (hφ : φ.Letterless) (hψ : ψ.Letterless)
 
-lemma iff_GL_provable_letterlessSpectrum_Univ
-  : Modal.GL ⊢ φ ↔ φ.letterlessSpectrum = Set.univ := by
+lemma iff_GL_provable_letterlessSpectrum_Univ : Modal.GL ⊢ φ ↔ φ.letterlessSpectrum = Set.univ := by
   rw [Set.eq_univ_iff_forall];
   constructor;
   . intro h n;
@@ -507,8 +510,8 @@ lemma iff_GL_provable_letterlessSpectrum_Univ
     have := Kripke.letterlessSpectrum_TFAE (φ := φ) (n := Kripke.Frame.rank w) (by grind) |>.out 0 1 |>.mp;
     apply this (by grind) _ r w rfl;
 
-lemma iff_GL_provable_C_subset_letterlessSpectrum : Modal.GL ⊢ (φ ➝ ψ) ↔ φ.letterlessSpectrum ⊆ ψ.letterlessSpectrum := by
-  apply Iff.trans $ iff_GL_provable_letterlessSpectrum_Univ (by grind);
+lemma iff_GL_provable_C_subset_letterlessSpectrum : Modal.GL ⊢ (φ ➝ ψ) ↔ φ.letterlessSpectrum hφ ⊆ ψ.letterlessSpectrum hψ := by
+  apply Iff.trans $ iff_GL_provable_letterlessSpectrum_Univ (show (φ ➝ ψ).Letterless by grind);
   rw [Formula.letterlessSpectrum.def_imp];
   suffices (∀ i, i ∉ φ.letterlessSpectrum ∨ i ∈ ψ.letterlessSpectrum) ↔ φ.letterlessSpectrum ⊆ ψ.letterlessSpectrum by
     simpa [Set.eq_univ_iff_forall];
@@ -517,47 +520,51 @@ lemma iff_GL_provable_C_subset_letterlessSpectrum : Modal.GL ⊢ (φ ➝ ψ) ↔
     have := @h i;
     tauto;
 
-lemma iff_GL_provable_E_eq_letterlessSpectrum : Modal.GL ⊢ φ ⭤ ψ ↔ φ.letterlessSpectrum = ψ.letterlessSpectrum := by
+lemma iff_GL_provable_E_eq_letterlessSpectrum : Modal.GL ⊢ (φ ⭤ ψ) ↔ φ.letterlessSpectrum = ψ.letterlessSpectrum := by
   rw [
     Set.Subset.antisymm_iff,
-    ←iff_GL_provable_C_subset_letterlessSpectrum φ_letterless ψ_letterless,
-    ←iff_GL_provable_C_subset_letterlessSpectrum ψ_letterless φ_letterless,
+    ←iff_GL_provable_C_subset_letterlessSpectrum,
+    ←iff_GL_provable_C_subset_letterlessSpectrum,
   ];
   constructor;
   . intro h; constructor <;> cl_prover [h];
   . rintro ⟨h₁, h₂⟩; cl_prover [h₁, h₂];
 
 lemma GL_letterlessTrace_TBB_normalization (h : φ.letterlessTrace.Finite) : Modal.GL ⊢ φ ⭤ (⩕ n ∈ h.toFinset, (TBB n)) := by
-  apply iff_GL_provable_E_eq_letterlessSpectrum φ_letterless (by grind) |>.mpr;
-  calc
-    _ = ⋂ i ∈ φ.letterlessTrace, (TBB i).letterlessSpectrum := by
-      have : φ.letterlessTrace = ⋃ i ∈ φ.letterlessTrace, (TBB i).letterlessTrace := by ext i; simp [TBB_letterlessTrace];
-      simpa [Formula.letterlessTrace] using compl_inj_iff.mpr this;
-    _ = _ := by
-      ext i;
-      rw [Formula.letterlessSpectrum.def_fconj' (by simp)];
-      simp;
+  apply iff_GL_provable_E_eq_letterlessSpectrum _ _ |>.mpr;
+  . calc
+      _ = ⋂ i ∈ φ.letterlessTrace, (TBB i).letterlessSpectrum := by
+        have : φ.letterlessTrace = ⋃ i ∈ φ.letterlessTrace, (TBB i).letterlessTrace := by ext i; simp [TBB_letterlessTrace];
+        simpa [Formula.letterlessTrace] using compl_inj_iff.mpr this;
+      _ = _ := by
+        ext i;
+        rw [Formula.letterlessSpectrum.def_fconj' (by simp)];
+        simp;
+  . show φ.Letterless;
+    assumption;
+  . show (⩕ n ∈ h.toFinset, TBB n).Letterless;
+    grind;
 
 lemma GL_letterlessSpectrum_TBB_normalization (h : φ.letterlessSpectrum.Finite) : Modal.GL ⊢ φ ⭤ ∼(⩕ n ∈ h.toFinset, (TBB n)) := by
-  have h' : (∼φ).letterlessTrace.Finite := by rwa [Formula.neg_letterlessTrace_letterlessSpectrum];
-  replace : Modal.GL ⊢ φ ⭤ ∼⩕ n ∈ h'.toFinset, TBB n := by
-    have := GL_letterlessTrace_TBB_normalization (φ := ∼φ) (by grind) h';
-    cl_prover [this];
-  have e : h'.toFinset = h.toFinset := by simp [Formula.neg_letterlessTrace_letterlessSpectrum (show φ.Letterless by simpa)]
-  exact e ▸ this;
+  have h' : (∼φ).letterlessTrace.Finite := by grind;
+  have := GL_letterlessTrace_TBB_normalization (show (∼φ).Letterless by grind) h';
+  rw [show h.toFinset = h'.toFinset by grind];
+  cl_prover [this];
 
-lemma GL_proves_letterless_axiomWeakPoint3 (φ_letterless : φ.Letterless) (ψ_letterless : ψ.Letterless) : Modal.GL ⊢ (Axioms.WeakPoint3 φ ψ) := by
+lemma GL_proves_letterless_axiomWeakPoint3 (hφ : φ.Letterless) (hψ : ψ.Letterless) : Modal.GL ⊢ (Axioms.WeakPoint3 φ ψ) := by
   apply iff_GL_provable_letterlessSpectrum_Univ (by grind) |>.mpr;
   apply Set.eq_univ_iff_forall.mpr;
   intro n;
-  rw [letterlessSpectrum.def_or, letterlessSpectrum.def_box, letterlessSpectrum.def_box, letterlessSpectrum.def_imp, letterlessSpectrum.def_imp, letterlessSpectrum.def_boxdot, letterlessSpectrum.def_boxdot];
-  suffices ∀ i < n, (∀ k ≤ i, k ∈ φ.letterlessSpectrum) → i ∉ ψ.letterlessSpectrum → ∀ j < n, (∀ k ≤ j, k ∈ ψ.letterlessSpectrum) → j ∈ φ.letterlessSpectrum by
-    simpa [or_iff_not_imp_left];
-  intro i _ hi hiψ j _ hj;
-  apply hi;
-  contrapose! hiψ;
-  apply hj;
-  omega;
+  rw [
+    letterlessSpectrum.def_or,
+    letterlessSpectrum.def_box,
+    letterlessSpectrum.def_box,
+    letterlessSpectrum.def_imp,
+    letterlessSpectrum.def_imp,
+    letterlessSpectrum.def_boxdot,
+    letterlessSpectrum.def_boxdot
+  ];
+  grind;
 
 /- TODO:
 /-- Theorem 2 in [Valentini & Solitro 1983] -/
@@ -586,28 +593,28 @@ end
 
 variable
   [ℕ ⊧ₘ* T]
-  (φ_letterless : φ.Letterless) (ψ_letterless : ψ.Letterless)
+  (hφ : φ.Letterless) (hψ : ψ.Letterless)
   (X_letterless : X.Letterless) (Y_letterless : Y.Letterless)
 
-lemma letterless_arithmetical_completeness [𝗜𝚺₁ ⪯ T] (φ_letterless : φ.Letterless)
+lemma letterless_arithmetical_completeness [𝗜𝚺₁ ⪯ T] (hφ : φ.Letterless)
   : Modal.GL ⊢ φ ↔ T ⊢ T.LetterlessStandardRealization φ := by
   apply Iff.trans (GL.arithmetical_completeness_sound_iff (T := T) |>.symm);
   constructor;
   . intro h;
     apply h;
   . intro h f;
-    have e : T.LetterlessStandardRealization φ = f φ := Realization.letterless_interpret φ_letterless
+    have e : T.LetterlessStandardRealization φ = f φ := Realization.letterless_interpret hφ
     exact e ▸ h;
 
-lemma iff_regular_of_provable_E [𝗜𝚺₁ ⪯ T] (φ_letterless : φ.Letterless) (ψ_letterless : ψ.Letterless) (h : Modal.GL ⊢ φ ⭤ ψ)
+lemma iff_regular_of_provable_E [𝗜𝚺₁ ⪯ T] (hφ : φ.Letterless) (hψ : ψ.Letterless) (h : Modal.GL ⊢ φ ⭤ ψ)
   : φ.Regular T ↔ ψ.Regular T := by
   have : T ⊢ T.LetterlessStandardRealization (φ ⭤ ψ) := letterless_arithmetical_completeness (by grind) |>.mp h;
   have : ℕ ⊧ₘ T.LetterlessStandardRealization (φ ⭤ ψ) := ArithmeticTheory.SoundOn.sound (F := λ _ => True) this (by simp);
   simp [Realization.interpret, Formula.Regular] at this ⊢;
   tauto;
 
-lemma iff_singular_of_provable_E [𝗜𝚺₁ ⪯ T] (φ_letterless : φ.Letterless) (ψ_letterless : ψ.Letterless) (h : Modal.GL ⊢ φ ⭤ ψ)
-  : φ.Singular T ↔ ψ.Singular T := Iff.not $ iff_regular_of_provable_E φ_letterless ψ_letterless h
+lemma iff_singular_of_provable_E [𝗜𝚺₁ ⪯ T] (hφ : φ.Letterless) (hψ : ψ.Letterless) (h : Modal.GL ⊢ φ ⭤ ψ)
+  : φ.Singular T ↔ ψ.Singular T := Iff.not $ iff_regular_of_provable_E hφ hψ h
 
 
 variable [𝗜𝚺₁ ⪯ T]
@@ -669,18 +676,18 @@ lemma GL.iff_provable_closed_sumQuasiNormal_subset_letterlessSpectrum (hSR : X.S
   : Modal.GL.sumQuasiNormal X ⊢ φ ↔ X.letterlessSpectrum ⊆ φ.letterlessSpectrum := by
   calc
     _ ↔ ∃ Y, (∀ ψ ∈ Y, ψ ∈ X) ∧ Modal.GL ⊢ Finset.conj Y ➝ φ := Logic.sumQuasiNormal.iff_provable_finite_provable_letterless X_letterless
-    _ ↔ ∃ Y : Finset (Formula ℕ), ∃ _ : ∀ ψ ∈ Y, ψ ∈ X, (Finset.conj Y).letterlessSpectrum (Formula.letterless_fconj (by grind)) ⊆ φ.letterlessSpectrum := by
+    _ ↔ ∃ Y : Finset (Formula ℕ), ∃ _ : ∀ ψ ∈ Y, ψ ∈ X, (Finset.conj Y).letterlessSpectrum ⊆ φ.letterlessSpectrum := by
       constructor;
       . rintro ⟨Y, _, hY₂⟩;
         use Y;
         constructor;
-        . apply iff_GL_provable_C_subset_letterlessSpectrum (Formula.letterless_fconj (by grind)) (by grind) |>.mp hY₂;
+        . apply iff_GL_provable_C_subset_letterlessSpectrum (by grind) (by grind) |>.mp hY₂;
         . assumption;
       . rintro ⟨Y, hY₁, hY₂⟩;
         use Y;
         constructor;
         . assumption;
-        . apply iff_GL_provable_C_subset_letterlessSpectrum (Formula.letterless_fconj (by grind)) (by grind) |>.mpr hY₂;
+        . apply iff_GL_provable_C_subset_letterlessSpectrum (by grind) (by grind) |>.mpr hY₂;
     _ ↔ ∃ Y : Finset (Formula ℕ), ∃ _ : ∀ ψ ∈ Y, ψ ∈ X, ⋂ ψ ∈ Y, ψ.letterlessSpectrum ⊆ φ.letterlessSpectrum := by
       constructor;
       . rintro ⟨Y, hY₁, hY₂⟩;
@@ -714,12 +721,12 @@ lemma GL.iff_provable_closed_sumQuasiNormal_subset_letterlessSpectrum (hSR : X.S
           obtain ⟨ψ, hψX, ψ_singular⟩ : ∃ ψ ∈ X, ψ.Singular T := FormulaSet.exists_singular_of_singular X_singular;
 
           obtain ⟨f, f0, f_monotone, fX, f_inv⟩ := Set.infinitely_finset_approximate (Countable.to_set inferInstance) X_infinite hψX;
-          have f_conj_letterless : ∀ i, (f i).conj.Letterless := λ i => Formula.letterless_fconj $ λ ξ hξ => X_letterless _ $ fX _ hξ;
+          have f_conj_letterless : ∀ i, (f i).conj.Letterless := λ i => Formula.letterless_fconj.mpr $ λ ξ hξ => X_letterless _ $ fX _ hξ;
 
           let sf := λ i => ⋂ ξ, ⋂ (h : ξ ∈ f i), ξ.letterlessSpectrum (X_letterless ξ $ fX _ $ by assumption);
           have sf_eq : ∀ i, sf i = Formula.letterlessSpectrum ((f i).conj) (f_conj_letterless _) := by
             intro i;
-            rw [Formula.letterlessSpectrum.def_fconj (λ ξ hξ => X_letterless _ $ fX _ hξ)];
+            rw [Formula.letterlessSpectrum.def_fconj (f_conj_letterless i)];
           have sf_monotone : ∀ i, sf (i + 1) ⊆ sf i := by
             intro i;
             rw [sf_eq (i + 1), sf_eq i];
@@ -850,8 +857,9 @@ lemma GL.iff_subset_closed_sumQuasiNormal_subset_letterlessSpectrum (hSR : X.Sin
     _ ↔ X.letterlessSpectrum ⊆ (⋂ ψ ∈ Y, ψ.letterlessSpectrum) := by simp;
 
 lemma GL.iff_subset_closed_sumQuasiNormal_subset_letterlessTrace (hSR : X.Singular T ∨ Y.Regular T)
-  : Modal.GL.sumQuasiNormal Y ⊆ Modal.GL.sumQuasiNormal X ↔ Y.letterlessTrace ⊆ X.letterlessTrace :=
-  Iff.trans (iff_subset_closed_sumQuasiNormal_subset_letterlessSpectrum X_letterless Y_letterless hSR) FormulaSet.iff_subset_letterlessSpectrum_subset_letterlessTrace
+  : Modal.GL.sumQuasiNormal Y ⊆ Modal.GL.sumQuasiNormal X ↔ Y.letterlessTrace ⊆ X.letterlessTrace := by
+  apply Iff.trans (iff_subset_closed_sumQuasiNormal_subset_letterlessSpectrum X_letterless Y_letterless hSR);
+  apply FormulaSet.iff_subset_letterlessSpectrum_subset_letterlessTrace;
 
 lemma GL.iff_eq_closed_sumQuasiNormal_eq_letterlessSpectrum (hXY : (X.Regular T ∧ Y.Regular T) ∨ (X.Singular T ∧ Y.Singular T))
   : Modal.GL.sumQuasiNormal X = Modal.GL.sumQuasiNormal Y ↔ X.letterlessSpectrum = Y.letterlessSpectrum := by
@@ -870,8 +878,9 @@ protected abbrev GLβMinus (β : Set ℕ) (hβ : β.Cofinite := by grind) : Logi
 
 
 lemma GL.iff_eq_closed_sumQuasiNormal_eq_letterlessTrace (hXY : (X.Regular T ∧ Y.Regular T) ∨ (X.Singular T ∧ Y.Singular T))
-  : Modal.GL.sumQuasiNormal X = Modal.GL.sumQuasiNormal Y ↔ X.letterlessTrace = Y.letterlessTrace :=
-  Iff.trans (iff_eq_closed_sumQuasiNormal_eq_letterlessSpectrum X_letterless Y_letterless hXY) FormulaSet.iff_eq_letterlessSpectrum_eq_letterlessTrace
+  : Modal.GL.sumQuasiNormal X = Modal.GL.sumQuasiNormal Y ↔ X.letterlessTrace = Y.letterlessTrace := by
+  apply Iff.trans (iff_eq_closed_sumQuasiNormal_eq_letterlessSpectrum X_letterless Y_letterless hXY);
+  apply FormulaSet.iff_eq_letterlessSpectrum_eq_letterlessTrace;
 
 lemma GL.eq_closed_regular_sumQuasiNormal_GLα (X_regular : X.Regular T)
   : Modal.GL.sumQuasiNormal X = Modal.GLα (X.letterlessTrace) := by
@@ -888,7 +897,7 @@ lemma GL.eq_closed_regular_sumQuasiNormal_GLα (X_regular : X.Regular T)
 @[grind! <=]
 lemma FormulaSet.comp_letterlessTrace_finite_of_singular (X_singular : X.Singular T) : (X.letterlessTrace).Cofinite := by
   have := FormulaSet.letterlessSpectrum_finite_of_singular X_letterless X_singular;
-  have := FormulaSet.comp_letterlessTrace_letterlessSpectrum X_letterless;
+  have := FormulaSet.comp_letterlessTrace_letterlessSpectrum (hX := X_letterless);
   grind;
 
 lemma GL.eq_closed_singular_sumQuasiNormal_GLβMinus (X_singular : X.Singular T) : Modal.GL.sumQuasiNormal X = Modal.GLβMinus (X.letterlessTrace) := by

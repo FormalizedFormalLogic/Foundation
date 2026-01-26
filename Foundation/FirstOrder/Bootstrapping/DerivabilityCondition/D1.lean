@@ -1,5 +1,8 @@
-import Foundation.FirstOrder.Bootstrapping.Syntax
+module
 
+public import Foundation.FirstOrder.Bootstrapping.Syntax
+
+@[expose] public section
 /-!
 # Hilbert-Bernays-Löb derivability condition $\mathbf{D1}$ and soundness of internal provability.
 -/

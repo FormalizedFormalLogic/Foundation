@@ -1,7 +1,14 @@
-import Mathlib.Data.Fintype.Card
-import Mathlib.Order.WellFounded
-import Foundation.Vorspiel.Rel.Connected
-import Mathlib.Data.Finset.Lattice.Fold
+module
+
+public import Mathlib.Data.Fintype.Card
+public import Mathlib.Order.WellFounded
+public import Mathlib.Data.Finset.Lattice.Fold
+public import Foundation.Vorspiel.Rel.Connected
+
+
+@[expose]
+public section
+
 
 section
 
@@ -10,6 +17,8 @@ abbrev ConverseWellFounded {α} (rel : Rel α α) := WellFounded $ flip rel
 class IsConverseWellFounded (α) (rel : Rel α α) : Prop where cwf : ConverseWellFounded rel
 
 end
+
+
 
 section
 
@@ -152,6 +161,6 @@ lemma fcwHeight_lt [IsTrans α R] {a : α} :
 
 end fcwHeight
 
-
+end
 
 end

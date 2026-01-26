@@ -1,5 +1,8 @@
-import Foundation.Logic.Calculus
-import Foundation.FirstOrder.Basic.Syntax.Theory
+module
+public import Foundation.Logic.Calculus
+public import Foundation.FirstOrder.Basic.Syntax.Theory
+
+@[expose] public section
 
 namespace LO
 
@@ -291,7 +294,7 @@ instance : Tait.Axiomatized (SyntacticFormula L) (Schema L) where
 
 variable [L.DecidableEq]
 
-private def not_close' (φ) : 𝓢 ⟹ [∼(φ.univCl'), φ] :=
+def not_close' (φ) : 𝓢 ⟹ [∼(φ.univCl'), φ] :=
   have : 𝓢 ⟹ [∃* ∼(@Rew.fixitr L 0 (fvSup φ) ▹ φ), φ] := instances (v := fun x ↦ &x) (em (φ := φ) (by simp) (by simp))
   Derivation.cast this (by simp [univCl'])
 
@@ -333,7 +336,7 @@ instance : Entailment.Compact (Schema L) where
   Γ_subset b := by simpa using (compact b).1.prop
   Γ_finite b := by simp
 
-private def deductionAux {Γ : Sequent L} : 𝓢 ⟹ Γ → 𝓢 \ {φ} ⟹ ∼(φ.univCl') :: Γ
+def deductionAux {Γ : Sequent L} : 𝓢 ⟹ Γ → 𝓢 \ {φ} ⟹ ∼(φ.univCl') :: Γ
   | axL r v         => Tait.wkTail <| axL r v
   | verum           => Tait.wkTail <| verum
   | and d₁ d₂       => Tait.rotate₁ <| and (Tait.rotate₁ (deductionAux d₁)) (Tait.rotate₁ (deductionAux d₂))
@@ -408,7 +411,7 @@ omit [L.DecidableEq]
 private lemma map_subst_eq_free (φ : SyntacticSemiformula L 1) (h : ¬φ.FVar? m) :
     (@Rew.rewriteMap L ℕ ℕ 0 (fun x ↦ if x = m then 0 else x + 1)) ▹ (φ/[&m] : SyntacticFormula L) = Rewriting.free φ := by
   simp only [← TransitiveRewriting.comp_app]
-  exact Semiformula.rew_eq_of_funEqOn (by simp [Rew.comp_app, Fin.eq_zero])
+  exact Semiformula.rew_eq_of_funEqOn (by simp [Rew.comp_app])
     (fun x hx => by simp [Rew.comp_app, ne_of_mem_of_not_mem hx h])
 
 private lemma map_rewriteMap_eq_shifts (Δ : Sequent L) (h : ∀ φ ∈ Δ, ¬φ.FVar? m) :
@@ -641,3 +644,5 @@ end Schema
 end FirstOrder
 
 end LO
+
+end

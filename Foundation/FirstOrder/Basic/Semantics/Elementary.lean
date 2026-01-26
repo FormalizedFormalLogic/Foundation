@@ -1,4 +1,8 @@
-import Foundation.FirstOrder.Basic.Semantics.Semantics
+module
+
+public import Foundation.FirstOrder.Basic.Semantics.Semantics
+
+@[expose] public section
 
 namespace LO.FirstOrder
 
@@ -311,3 +315,4 @@ end Structure
 end
 
 end  LO.FirstOrder
+end

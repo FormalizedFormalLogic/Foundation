@@ -1,7 +1,10 @@
-import Foundation.Meta.ClProver
-import Foundation.FirstOrder.Arithmetic.Induction
-import Foundation.FirstOrder.Bootstrapping.DerivabilityCondition.D1
+module
 
+public import Foundation.Meta.ClProver
+public import Foundation.FirstOrder.Arithmetic.Induction
+public import Foundation.FirstOrder.Bootstrapping.DerivabilityCondition.D1
+
+@[expose] public section
 /-!
 # Bootstrapping theory of equality
 -/

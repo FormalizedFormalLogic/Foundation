@@ -1,7 +1,11 @@
-import Foundation.Modal.Kripke.AxiomGeach
-import Foundation.Modal.Kripke.Hilbert
-import Foundation.Modal.Kripke.Logic.KB
-import Foundation.Modal.Kripke.Logic.KD
+module
+
+public import Foundation.Modal.Kripke.AxiomGeach
+public import Foundation.Modal.Kripke.Hilbert
+public import Foundation.Modal.Kripke.Logic.KB
+public import Foundation.Modal.Kripke.Logic.KD
+
+@[expose] public section
 
 namespace LO.Modal
 
@@ -47,7 +51,9 @@ instance : Modal.KD ⪱ Modal.KDB := by
       use M, 0;
       constructor;
       . refine { serial := by intro x; use 1; omega;}
-      . suffices ∃ x, (0 : M.World) ≺ x ∧ ¬x ≺ 0 by simpa [M, Semantics.Models, Satisfies];
+      . suffices ∃ x, (0 : M.World) ≺ x ∧ ¬x ≺ 0 by
+          simp [M, Semantics.Models, Satisfies];
+          grind;
         use 1;
         constructor <;> omega;
 
@@ -66,3 +72,4 @@ instance : Modal.KB ⪱ Modal.KDB := by
       . simp [Semantics.Models, Satisfies];
 
 end LO.Modal
+end

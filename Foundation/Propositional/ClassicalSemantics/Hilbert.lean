@@ -1,6 +1,10 @@
-import Foundation.Propositional.Hilbert.Standard
-import Foundation.Propositional.ClassicalSemantics.Basic
-import Foundation.Propositional.ConsistentTableau
+module
+
+public import Foundation.Propositional.Hilbert.Standard
+public import Foundation.Propositional.ClassicalSemantics.Basic
+public import Foundation.Propositional.ConsistentTableau
+
+@[expose] public section
 
 namespace LO.Propositional
 
@@ -123,3 +127,4 @@ end Cl
 
 
 end LO.Propositional
+end

@@ -1,6 +1,10 @@
-import Foundation.FirstOrder.Basic
-import Foundation.Modal.Formula.NNFormula
-import Foundation.Modal.Kripke.NNFormula
+module
+
+public import Foundation.FirstOrder.Basic
+public import Foundation.Modal.Formula.NNFormula
+public import Foundation.Modal.Kripke.NNFormula
+
+@[expose] public section
 
 namespace LO.FirstOrder
 
@@ -128,3 +132,4 @@ end Kripke.FirstOrder
 
 
 end LO.Modal
+end

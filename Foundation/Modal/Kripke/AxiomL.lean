@@ -1,6 +1,9 @@
-import Foundation.Vorspiel.Rel.CWF
-import Foundation.Modal.Kripke.AxiomGeach
-import Foundation.Modal.Kripke.Irreflexive
+module
+
+public import Foundation.Modal.Kripke.AxiomGeach
+public import Foundation.Modal.Kripke.Irreflexive
+
+@[expose] public section
 
 namespace LO.Modal
 
@@ -10,13 +13,11 @@ open Formula.Kripke
 
 variable {F : Kripke.Frame}
 
-
 protected abbrev Frame.IsConverseWellFounded (F : Frame) := _root_.IsConverseWellFounded _ F.Rel
 
 lemma Frame.cwf [F.IsConverseWellFounded] : ConverseWellFounded F.Rel := IsConverseWellFounded.cwf
 
 instance [F.IsFinite] [F.IsTransitive] [F.IsIrreflexive] : F.IsConverseWellFounded := ⟨IsConverseWellFounded.cwf⟩
-
 
 lemma validate_AxiomL_of_trans_cwf [F.IsTransitive] [F.IsConverseWellFounded] : F ⊧ (Axioms.L φ) := by
   rintro V w;
@@ -129,3 +130,4 @@ protected instance FrameClass.finite_trans_irrefl.definability : FrameClass.fini
 end Kripke
 
 end LO.Modal
+end
