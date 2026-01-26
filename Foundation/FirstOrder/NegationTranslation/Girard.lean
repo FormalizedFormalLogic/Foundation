@@ -1,4 +1,6 @@
-import Foundation.FirstOrder.Intuitionistic.Deduction
+module
+
+public import Foundation.FirstOrder.Intuitionistic.Deduction
 
 /-!
 # Girard's negation translation
@@ -10,6 +12,7 @@ namespace LO.FirstOrder.Semiformula
 
 variable {L : Language} {ξ : Type*}
 
+/-- A polarity of a formula -/
 def polarity {n} : Semiformula L ξ n → Bool
   |  rel _ _ => true
   | nrel _ _ => false
@@ -62,6 +65,7 @@ def IsPositive (φ : Semiformula L ξ n) : Prop := φ.polarity = true
 
 lemma IsPositive.eq_true {n} {φ : Semiformula L ξ n} (h : φ.IsPositive) : φ.polarity = true := h
 
+/-- Girard's negation translation -/
 def girard {n} : (φ : Semiformula L ξ n) → Semiformulaᵢ L ξ n
   |  rel r v => Semiformulaᵢ.rel r v
   | nrel r v => ∼Semiformulaᵢ.rel r v
