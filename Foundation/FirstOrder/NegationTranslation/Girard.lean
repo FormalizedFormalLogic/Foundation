@@ -20,9 +20,7 @@ def polarity {n} : Semiformula L ξ n → Bool
   |     ∀' _ => false
   |     ∃' _ => true
 
-abbrev IsPositive (φ : Semiformula L ξ n) : Prop := φ.polarity = true
-
-abbrev IsNegative (φ : Semiformula L ξ n) : Prop := φ.polarity = false
+def IsPositive (φ : Semiformula L ξ n) : Prop := φ.polarity = true
 
 @[simp] lemma polarity_rel {k} (r : L.Rel k) (v : Fin k → Semiterm L ξ n) : (rel r v).polarity = true := rfl
 
@@ -46,26 +44,78 @@ abbrev IsNegative (φ : Semiformula L ξ n) : Prop := φ.polarity = false
 @[simp] lemma polarity_imply {n} (φ ψ : Semiformula L ξ n) : (φ ➝ ψ).polarity = (!φ.polarity && ψ.polarity) := by
   simp [imp_eq]
 
-@[simp] lemma neg_isPositive {n} (φ : Semiformula L ξ n) : (∼φ).IsPositive ↔ φ.IsNegative := by
-  simp []
+@[simp] lemma neg_isPositive_iff {n} (φ : Semiformula L ξ n) : (∼φ).IsPositive ↔ ¬φ.IsPositive := by simp [IsPositive]
 
-def girardAux {n} : (φ : Semiformula L ξ n) → (H : φ.IsPositive) → Semiformulaᵢ L ξ n
-  | rel r v, _ => .rel r v
-  |       ⊤, _ => ⊤
-  |   φ ⋏ ψ, H =>
-    match hφ : φ.polarity, hψ : ψ.polarity with
-    |  true,  true => girardAux φ hφ ⋏ girardAux ψ hψ
-    |  true, false => girardAux φ hφ ⋏ ∼(girardAux (∼ψ) (by simpa using hψ))
-    | false,  true => ∼(girardAux (∼φ) (by simpa using hφ)) ⋏ girardAux ψ hψ
-    | false, false => by simp [IsPositive] at H; tauto
-  |   φ ⋎ ψ, H =>
-    have : φ.polarity = true ∧ ψ.polarity = true := by simpa [IsPositive] using H
-    girardAux φ this.1 ⋎ girardAux ψ this.2
-  |    ∃' φ, _ =>
-    match hφ : φ.polarity with
-    | true  => ∃' girardAux φ hφ
-    | false => ∼(∀' girardAux (∼φ) (by simpa using hφ))
-  |    ∀' φ, H => by simp [IsPositive] at H
-termination_by φ _ => φ.complexity
+@[simp] lemma and_isPositive_iff {n} (φ ψ : Semiformula L ξ n) :
+    (φ ⋏ ψ).IsPositive ↔ φ.IsPositive ∨ ψ.IsPositive := by
+  simp [IsPositive]
+
+@[simp] lemma or_isPositive_iff {n} (φ ψ : Semiformula L ξ n) :
+    (φ ⋎ ψ).IsPositive ↔ φ.IsPositive ∧ ψ.IsPositive := by
+  simp [IsPositive]
+
+@[simp] lemma ex_isPositive_iff {n} (φ : Semiformula L ξ (n + 1)) :
+    (∃' φ).IsPositive := by simp [IsPositive]
+
+@[simp] lemma all_isPositive_iff {n} (φ : Semiformula L ξ (n + 1)) :
+    ¬(∀' φ).IsPositive := by simp [IsPositive]
+
+lemma IsPositive.eq_true {n} {φ : Semiformula L ξ n} (h : φ.IsPositive) : φ.polarity = true := h
+
+def girard {n} : (φ : Semiformula L ξ n) → Semiformulaᵢ L ξ n
+  |  rel r v => Semiformulaᵢ.rel r v
+  | nrel r v => ∼Semiformulaᵢ.rel r v
+  |        ⊤ => ⊤
+  |        ⊥ => ∼⊤
+  |    φ ⋏ ψ =>
+    match (φ ⋏ ψ).polarity with
+    |  true => φ.girard ⋏ ψ.girard
+    | false => ∼((∼φ).girard ⋎ (∼ψ).girard)
+  |    φ ⋎ ψ =>
+    match (φ ⋎ ψ).polarity with
+    |  true => φ.girard ⋎ ψ.girard
+    | false => ∼((∼φ).girard ⋏ (∼ψ).girard)
+  |     ∃' φ => ∃' φ.girard
+  |     ∀' φ => ∼(∃' (∼φ).girard)
+termination_by φ => φ.complexity
+
+@[simp] lemma girard_rel (k) (r : L.Rel k) (v : Fin k → Semiterm L ξ n) :
+    (rel r v).girard = Semiformulaᵢ.rel r v := by simp [girard]
+
+@[simp] lemma girard_nrel (k) (r : L.Rel k) (v : Fin k → Semiterm L ξ n) :
+    (nrel r v).girard = ∼Semiformulaᵢ.rel r v := by simp [girard]
+
+@[simp] lemma girard_verum : (⊤ : Semiformula L ξ n).girard = ⊤ := by grind only [= girard.eq_def]
+
+@[simp] lemma girard_falsum : (⊥ : Semiformula L ξ n).girard = ∼⊤ := by grind only [= girard.eq_def]
+
+lemma girard_and_pos (φ ψ : Semiformula L ξ n) (h : (φ ⋏ ψ).IsPositive) :
+    (φ ⋏ ψ).girard = φ.girard ⋏ ψ.girard := by grind only [IsPositive, = girard.eq_def]
+
+lemma girard_and_neg (φ ψ : Semiformula L ξ n) (h : ¬(φ ⋏ ψ).IsPositive) :
+    (φ ⋏ ψ).girard = ∼((∼φ).girard ⋎ (∼ψ).girard) := by grind only [IsPositive, = girard.eq_def]
+
+lemma girard_or_pos (φ ψ : Semiformula L ξ n) (h : (φ ⋎ ψ).IsPositive) :
+    (φ ⋎ ψ).girard = φ.girard ⋎ ψ.girard := by grind only [IsPositive, = girard.eq_def]
+
+lemma girard_or_neg (φ ψ : Semiformula L ξ n) (h : ¬(φ ⋎ ψ).IsPositive) :
+    (φ ⋎ ψ).girard = ∼((∼φ).girard ⋏ (∼ψ).girard) := by grind only [IsPositive, = girard.eq_def]
+
+lemma girard_ex (φ : Semiformula L ξ (n + 1)) : (∃' φ).girard = ∃' φ.girard := by grind only [IsPositive, = girard.eq_def]
+
+lemma girard_all (φ : Semiformula L ξ (n + 1)) : (∀' φ).girard = ∼(∃' (∼φ).girard) := by grind only [= girard.eq_def]
+
+lemma girard_neg_of_pos (φ : Semiformula L ξ n) (h : φ.IsPositive) : (∼φ).girard = ∼(φ.girard) := by
+  match φ with
+  | rel r v => simp
+  | ⊤ => simp
+  | φ ⋏ ψ =>
+    rw [DeMorgan.and, girard_and_pos, girard_or_neg]
+    <;> { simp_all; try tauto }
+  | φ ⋎ ψ =>
+    rw [DeMorgan.or, girard_or_pos, girard_and_neg]
+    <;> { simp_all; try tauto }
+  | ∃' φ =>
+    simp [neg_ex, girard_ex, girard_all]
 
 end LO.FirstOrder.Semiformula
