@@ -1,5 +1,5 @@
 name = "Foundation"
-defaultTargets = ["Foundation", "Foundation2"]
+defaultTargets = ["Foundation"]
 
 [leanOptions]
 pp.unicode.fun = true
