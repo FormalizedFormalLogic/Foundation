@@ -105,6 +105,7 @@ public import Foundation.FirstOrder.Kripke.Basic
 public import Foundation.FirstOrder.Kripke.Intuitionistic
 public import Foundation.FirstOrder.Kripke.WeakForcing
 public import Foundation.FirstOrder.NegationTranslation.GoedelGentzen
+public import Foundation.FirstOrder.NegationTranslation.Girard
 public import Foundation.FirstOrder.NotationClass
 public import Foundation.FirstOrder.Order.Le
 public import Foundation.FirstOrder.SetTheory.Basic
