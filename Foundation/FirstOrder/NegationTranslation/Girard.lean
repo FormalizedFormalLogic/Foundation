@@ -1,9 +1,9 @@
 import Foundation.FirstOrder.Intuitionistic.Deduction
 
 /-!
-# Girard's Negation Translation
+# Girard's negation translation
 
-cf. Girard. "A new constructive logic: classic logic"
+reference: Girard. "A new constructive logic: classic logic"
 -/
 
 namespace LO.FirstOrder.Semiformula
@@ -105,17 +105,15 @@ lemma girard_ex (φ : Semiformula L ξ (n + 1)) : (∃' φ).girard = ∃' φ.gir
 
 lemma girard_all (φ : Semiformula L ξ (n + 1)) : (∀' φ).girard = ∼(∃' (∼φ).girard) := by grind only [= girard.eq_def]
 
-lemma girard_neg_of_pos (φ : Semiformula L ξ n) (h : φ.IsPositive) : (∼φ).girard = ∼(φ.girard) := by
+lemma girard_neg_of_pos (φ : Semiformula L ξ n) (h : φ.IsPositive) : (∼φ).girard = ∼φ.girard := by
   match φ with
   | rel r v => simp
-  | ⊤ => simp
-  | φ ⋏ ψ =>
-    rw [DeMorgan.and, girard_and_pos, girard_or_neg]
-    <;> { simp_all; try tauto }
-  | φ ⋎ ψ =>
-    rw [DeMorgan.or, girard_or_pos, girard_and_neg]
-    <;> { simp_all; try tauto }
-  | ∃' φ =>
+  |       ⊤ => simp
+  |   φ ⋏ ψ =>
+    rw [DeMorgan.and, girard_and_pos, girard_or_neg] <;> { simp_all; try tauto }
+  |   φ ⋎ ψ =>
+    rw [DeMorgan.or, girard_or_pos, girard_and_neg] <;> { simp_all; try tauto }
+  |    ∃' φ =>
     simp [neg_ex, girard_ex, girard_all]
 
 end LO.FirstOrder.Semiformula
