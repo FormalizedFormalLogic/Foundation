@@ -92,7 +92,6 @@ variable {L : Language} [L.DecidableEq] {T : Theory L} {Λ : Hilbertᵢ L}
 
 open Rewriting LO.Entailment Entailment.FiniteContext HilbertProofᵢ
 
-noncomputable
 def negDoubleNegation : (φ : SyntacticFormula L) → Λ ⊢! ∼φᴺ ⭤ (∼φ)ᴺ
   | .rel r v  => Entailment.tneIff (φ := Semiformulaᵢ.rel r v)
   | .nrel r v => Entailment.E_Id (φ := ∼∼(Semiformulaᵢ.rel r v))
@@ -151,38 +150,37 @@ lemma imply_doubleNegation (φ ψ : SyntacticFormula L) : Λ ⊢ (φᴺ ➝ ψ�
 
 open Entailment
 
-noncomputable
 def gödelGentzen {Γ : Sequent L} : ⊢ᵀ Γ → (∼Γ)ᴺ ⊢[Λ]! ⊥
-  | axL Γ r v            => nthAxm 1 ⨀ nthAxm 0
-  | verum Γ              => nthAxm 0
-  | @and _ _ Γ φ ψ dφ dψ =>
+  | axL r v => nthAxm 1 ⨀ nthAxm 0
+  | verum => nthAxm 0
+  | and (Γ := Γ) (φ := φ) (ψ := ψ) dφ dψ =>
     have ihφ : ((∼φ)ᴺ :: (∼Γ)ᴺ) ⊢[Λ]! ⊥ := gödelGentzen dφ
     have ihψ : ((∼ψ)ᴺ :: (∼Γ)ᴺ) ⊢[Λ]! ⊥ := gödelGentzen dψ
     have : (∼Γ)ᴺ ⊢[Λ]! ∼(∼φ)ᴺ ⋏ ∼(∼ψ)ᴺ := Entailment.K_intro (deduct ihφ) (deduct ihψ)
     deductInv (Entailment.dni' this)
-  | @or _ _ Γ φ ψ d      =>
+  | or (Γ := Γ) (φ := φ) (ψ := ψ) d =>
     have : (∼Γ)ᴺ ⊢[Λ]! (∼ψ)ᴺ ➝ (∼φ)ᴺ ➝ ⊥ := deduct <| deduct  <| gödelGentzen d
     have : ((∼φ)ᴺ ⋏ (∼ψ)ᴺ :: (∼Γ)ᴺ) ⊢[Λ]! ⊥ :=
       Entailment.FiniteContext.weakening (by simp) this ⨀ (Entailment.K_right (nthAxm 0)) ⨀ (Entailment.K_left (nthAxm 0))
     this
-  | @all _ _ Γ φ d       =>
+  | all (Γ := Γ) (φ := φ) d =>
     have eΓ : (∼Γ⁺)ᴺ = ((∼Γ)ᴺ)⁺ := by
       simp [Sequent.doubleNegation, Rewriting.shifts, Sequent.neg_def, Semiformula.rew_doubleNegation]
     have : ((∼Γ)ᴺ)⁺ ⊢[Λ]! free (∼(∼φ)ᴺ) :=
       FiniteContext.cast (deduct (gödelGentzen d)) eΓ (by simp [Semiformula.rew_doubleNegation]; rfl)
     deductInv <| dni' <| geNOverFiniteContext this
-  | @ex _ _ Γ φ t d      =>
+  | ex (Γ := Γ) (φ := φ) t d =>
     have ih : (∼Γ)ᴺ ⊢[Λ]! ∼((∼φ)ᴺ/[t]) :=
       Entailment.cast (by simp [Semiformula.rew_doubleNegation]; rfl) <| deduct (gödelGentzen d)
     have : ((∀' (∼φ)ᴺ) :: (∼Γ)ᴺ) ⊢[Λ]! (∼φ)ᴺ/[t] := specializeOverContext (nthAxm 0) t
     (FiniteContext.weakening (by simp) ih) ⨀ this
-  | @cut _ _ Γ φ dp dn   =>
+  | cut (Γ := Γ) (φ := φ) dp dn =>
     have ihp : ((∼φ)ᴺ :: (∼Γ)ᴺ) ⊢[Λ]! ⊥ := gödelGentzen dp
     have ihn : (φᴺ :: (∼Γ)ᴺ) ⊢[Λ]! ⊥ := cast (by simp) (gödelGentzen dn)
     have b₁ : (∼Γ)ᴺ ⊢[Λ]! ∼∼φᴺ := Entailment.C_trans (of <| Entailment.K_left (negDoubleNegation φ)) (deduct ihp)
     have b₂ : (∼Γ)ᴺ ⊢[Λ]! ∼φᴺ := deduct ihn
     b₁ ⨀ b₂
-  | @wk _ _ Γ Δ d h      => FiniteContext.weakening (by simpa using List.map_subset _ h) (gödelGentzen d)
+  | wk (Γ := Γ) (Δ := Δ) d h => FiniteContext.weakening (by simpa using List.map_subset _ h) (gödelGentzen d)
 
 end Derivation
 
@@ -192,7 +190,7 @@ open Classical LO.Entailment
 theorem gödel_gentzen {T : Theory L} {φ} : T ⊢ φ → T.ToTheoryᵢ Λ ⊢ φᴺ := by
   intro h
   let ⟨⟨s, hs⟩, b⟩ := Theory.compact' h
-  have h : (∅ : SyntacticFormulas L) ⊢ ↑s.conj ➝ ↑φ := by simpa using provable_def.mp b
+  have h : (∅ : Schema L) ⊢ ↑s.conj ➝ ↑φ := by simpa using provable_def.mp b
   let ψ : SyntacticFormula L := ↑s.conj ➝ ↑φ
   have h₁ : Λ ⊢ ∼(∼ψ)ᴺ := by
     simpa using Entailment.FiniteContext.provable_iff.mp ⟨Derivation.gödelGentzen h.get⟩
