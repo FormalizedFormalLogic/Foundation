@@ -1,4 +1,6 @@
-import Foundation.Vorspiel.Vorspiel
+module
+
+public import Foundation.Vorspiel
 
 /-!
 # Coherence space for denotational semantics of logics
@@ -8,48 +10,65 @@ reference:
 - nLab, coherence space, https://ncatlab.org/nlab/show/coherence+space
 -/
 
-namespace DirectedOn
-
-variable {α : Type*} {r : α → α → Prop}
-
-lemma of_terminal_elem (hu : u ∈ s) (h : ∀ x ∈ s, r x u) : DirectedOn r s := by
-  intro x hx y hy
-  exact ⟨u, hu, h x hx, h y hy⟩
-
-end DirectedOn
+@[expose] public section
 
 namespace LO
 
-/-- A coherence space is a set equipped with a coherence relation `◡`, which is reflexive and symmetric. -/
+/-- A coherence space is a set equipped with a coherence relation `⁐`, which is reflexive and symmetric. -/
 class CoherenceSpace (α : Type*) where
   /-- A coherence relation -/
-  Rel : α → α → Prop
-  reflexive : Reflexive Rel
-  symmetric : Symmetric Rel
+  Coherence : α → α → Prop
+  reflexive : Reflexive Coherence
+  symmetric : Symmetric Coherence
 
 namespace CoherenceSpace
 
-infix:40 " ◡ " => Rel
+infix:40 " ⁐ " => Coherence
 
 variable {α : Type*} [CoherenceSpace α]
 
-instance : IsRefl α Rel := ⟨reflexive⟩
+instance : Std.Refl (α := α) Coherence := ⟨reflexive⟩
 
-instance : IsSymm α Rel := ⟨symmetric⟩
+instance : Std.Symm (α := α) Coherence := ⟨symmetric⟩
 
-@[simp, refl] protected lemma Rel.refl (x : α) : x ◡ x := reflexive x
+@[simp, refl] protected lemma Coherence.refl (x : α) : x ⁐ x := reflexive x
 
-@[grind .] lemma Rel.symm {x y : α} : x ◡ y → y ◡ x := fun h ↦ symmetric h
+lemma Coherence.symm {x y : α} : x ⁐ y → y ⁐ x := fun h ↦ symmetric h
 
-lemma Rel.symm_iff {x y : α} : x ◡ y ↔ y ◡ x := ⟨symm, symm⟩
+@[grind =] lemma Coherence.symm_iff {x y : α} : x ⁐ y ↔ y ⁐ x := ⟨symm, symm⟩
+
+def Incoherence (x y : α) : Prop := ¬x ⁐ y ∨ x = y
+
+infix:40 (priority := high) " ≍ " => Incoherence
+
+@[simp, refl] lemma Incoherence.refl (x : α) : x ≍ x := by simp [Incoherence]
+
+lemma Incoherence.symm {x y : α} : x ≍ y → y ≍ x := by
+  intro h; cases h
+  · left; grind
+  · right; simp_all
+
+@[grind =] lemma Incoherence.symm_iff {x y : α} : x ≍ y ↔ y ≍ x := ⟨symm, symm⟩
+
+instance : Std.Refl (α := α) Incoherence := ⟨Incoherence.refl⟩
+
+instance : Std.Symm (α := α) Incoherence := ⟨fun _ _ ↦ Incoherence.symm⟩
+
+abbrev StrictIncoherence (x y : α) : Prop := ¬x ⁐ y
+
+infix:40 " ⌣ " => StrictIncoherence
+
+abbrev StrictCoherence (x y : α) : Prop := ¬x ≍ y
+
+infix:40 " ⌢ " => StrictCoherence
 
 end CoherenceSpace
 
 /-! ### Cliques and cocliques -/
 
-def IsClique [CoherenceSpace α] (s : Set α) : Prop := ∀ x ∈ s, ∀ y ∈ s, x ◡ y
+def IsClique [CoherenceSpace α] (s : Set α) : Prop := ∀ x ∈ s, ∀ y ∈ s, x ⁐ y
 
-def IsCoclique [CoherenceSpace α] (s : Set α) : Prop := ∀ x ∈ s, ∀ y ∈ s, x ◡ y → x = y
+def IsCoclique [CoherenceSpace α] (s : Set α) : Prop := ∀ x ∈ s, ∀ y ∈ s, x ≍ y
 
 def Clique (α : Type*) [CoherenceSpace α] : Set (Set α) := {s | IsClique s}
 
@@ -65,7 +84,7 @@ variable {α : Type*} [CoherenceSpace α]
 lemma of_subset {s u : Set α} (hs : IsClique s) (h : u ⊆ s) : IsClique u :=
   fun x hx y hy ↦ hs x (h hx) y (h hy)
 
-@[simp] lemma insert_iff {x : α} {s : Set α} : IsClique (insert x s) ↔ (∀ y ∈ s, x ◡ y) ∧ IsClique s := by
+@[simp] lemma insert_iff {x : α} {s : Set α} : IsClique (insert x s) ↔ (∀ y ∈ s, x ⁐ y) ∧ IsClique s := by
   constructor
   · intro h
     refine ⟨fun y hy ↦ h x (by simp) y (by simp [hy]), h.of_subset <| by simp⟩
@@ -79,7 +98,7 @@ lemma of_subset {s u : Set α} (hs : IsClique s) (h : u ⊆ s) : IsClique u :=
     · exact symm (h y hy_)
     · exact hs y hy_ z hz_
 
-@[simp] lemma doubleton_iff {x y : α} : IsClique {x, y} ↔ x ◡ y := by simp
+@[simp] lemma doubleton_iff {x y : α} : IsClique {x, y} ↔ x ⁐ y := by simp
 
 lemma sUnion_of_union {M : Set (Set α)} (h : ∀ a ∈ M, ∀ b ∈ M, IsClique (a ∪ b)) : IsClique (⋃₀ M) := by
   intro x ⟨a, ha, hx⟩ y ⟨b, hb, hy⟩
@@ -117,79 +136,35 @@ lemma le_def (a b : Clique α) : a ≤ b ↔ (a : Set α) ⊆ b := by rfl
 
 end Clique
 
-@[ext]
-structure StableFunction (α β : Type*) [CoherenceSpace α] [CoherenceSpace β] where
-  toFun : Clique α → Clique β
-  monotone' {a b : Clique α} : a ≤ b → toFun a ≤ toFun b
-  colimit' (s : Set (Clique α)) (ds : DirectedOn (· ≤ ·) s) :
-    toFun (Clique.colimit s ds) = Clique.colimit (toFun '' s) (ds.mono_comp @monotone')
-  pullback' {a b : Clique α} : IsClique (a ∪ b : Set α) → toFun (a ⊓ b) = toFun a ⊓ toFun b
-
-infix:30 " ⊸ " => StableFunction
-
-attribute [coe] StableFunction.toFun
-
-namespace StableFunction
-
-variable {α β γ δ : Type*} [CoherenceSpace α] [CoherenceSpace β] [CoherenceSpace γ] [CoherenceSpace δ]
-
-instance : FunLike (α ⊸ β) (Clique α) (Clique β) where
-  coe := toFun
-  coe_injective' _ _ := StableFunction.ext
-
-lemma monotone {f : α ⊸ β} {a b : Clique α} : a ≤ b → f a ≤ f b := f.monotone'
-
-lemma colimit {f : α ⊸ β} (s : Set (Clique α)) (ds : DirectedOn (· ≤ ·) s) :
-    f (Clique.colimit s ds) = Clique.colimit (f '' s) (ds.mono_comp @f.monotone) := f.colimit' s ds
-
-lemma pullback {f : α ⊸ β} {a b : Clique α} (h : IsClique (a ∪ b : Set α)) : f (a ⊓ b) = f a ⊓ f b := f.pullback' h
-
-lemma union_clique {f : α ⊸ β} {a b : Clique α} (h : IsClique (a ∪ b : Set α)) : IsClique (f a ∪ f b : Set β) := by
-  let u : Clique α := ⟨a ∪ b, h⟩
-  have directed : DirectedOn (· ≤ ·) {a, b, u} :=
-    DirectedOn.of_terminal_elem (u := u) (by simp) (by simp [u, Clique.le_def])
-  have := f.colimit {a, b, u} directed
-  have : (f (Clique.colimit {a, b, u} directed) : Set β) = ↑(f a) ∪ ↑(f b) ∪ ↑(f u) := by
-    simpa [-Set.sUnion_image, Set.image_insert_eq, ←Set.union_assoc] using congr_arg Subtype.val this
-  have : IsClique (↑(f a) ∪ ↑(f b) ∪ ↑(f u) : Set β) := by simp [←this]
-  refine this.of_subset (by simp)
-
-lemma ext_func {f g : α ⊸ β} : (f : Clique α → Clique β) = g → f = g := DFunLike.coe_fn_eq.mp
-
-protected def id (α : Type*) [CoherenceSpace α] : α ⊸ α where
-  toFun := id
-  monotone' h := h
-  colimit' s ds := by simp
-  pullback' h := by simp
-
-@[simp] lemma coe_id : (StableFunction.id α : Clique α → Clique α) = id := rfl
-
-protected def comp (g : β ⊸ γ) (f : α ⊸ β) : α ⊸ γ where
-  toFun := g ∘ f
-  monotone' h := g.monotone (f.monotone h)
-  colimit' s ds := by simp [colimit, Set.image_image]
-  pullback' h := by simp [f.pullback h, g.pullback (union_clique h)]
-
-@[simp] lemma coe_comp_def (g : β ⊸ γ) (f : α ⊸ β) : (g.comp f : Clique α → Clique γ) = g ∘ f := rfl
-
-@[simp] lemma id_comp (f : α ⊸ β) : (StableFunction.id β).comp f = f := ext_func (by simp)
-
-@[simp] lemma comp_id (f : α ⊸ β) : f.comp (StableFunction.id α) = f := ext_func (by simp)
-
-lemma comp_assoc (h : γ ⊸ δ) (g : β ⊸ γ) (f : α ⊸ β) :
-    h.comp (g.comp f) = (h.comp g).comp f := ext_func <| by simp; rfl
-
-end StableFunction
+/-! ### Basic coherence spaces -/
 
 instance : Bot (CoherenceSpace α) := ⟨{
-  Rel := Eq
+  Coherence := Eq
   reflexive := refl
   symmetric _ _ := symm }⟩
 
 instance : Top (CoherenceSpace α) := ⟨{
-  Rel _ _ := True
+  Coherence _ _ := True
   reflexive _ := by trivial
   symmetric _ _ _ := by trivial }⟩
+
+inductive CoherenceSpace.Top
+
+inductive CoherenceSpace.Zero
+
+instance : CoherenceSpace CoherenceSpace.Top := ⊥
+
+instance : CoherenceSpace CoherenceSpace.Zero := ⊥
+
+inductive CoherenceSpace.One where
+  | star : CoherenceSpace.One
+
+inductive CoherenceSpace.Bot where
+  | absurd : CoherenceSpace.Bot
+
+instance : CoherenceSpace CoherenceSpace.One := ⊤
+
+instance : CoherenceSpace CoherenceSpace.Bot := ⊤
 
 /-- A empty set is a coherence space -/
 instance : CoherenceSpace PEmpty := ⊥
@@ -200,23 +175,74 @@ instance : CoherenceSpace Unit := ⊥
 /-- A doubleton set is a coherence space -/
 instance : CoherenceSpace Bool := ⊥
 
-/-- An additive conjunction, or a direct product of two types -/
+/-! #### Additive conjunction -/
+
+/-- An additive conjunction of two types -/
 inductive With (α β : Type*) : Type _
   | inl : α → With α β
   | inr : β → With α β
 
 infixr:30 (priority := low) " & " => With
 
+namespace With
+
+variable {α β : Type*} [CoherenceSpace α] [CoherenceSpace β]
+
+inductive Coherence : α & β → α & β → Prop
+  | inl {a₀ a₁ : α} : a₀ ⁐ a₁ → Coherence (inl a₀) (inl a₁)
+  | inr {b₀ b₁ : β} : b₀ ⁐ b₁ → Coherence (inr b₀) (inr b₁)
+  | inl_inr (a : α) (b : β) : Coherence (inl a) (inr b)
+  | inr_inl (a : α) (b : β) : Coherence (inr b) (inl a)
+
 /-- An additive conjunction of coherence spaces is also a coherence space -/
-instance [CoherenceSpace α] [CoherenceSpace β] : CoherenceSpace (α & β) where
-  Rel p q :=
-    match p, q with
-    | .inl a₁, .inl a₂ => a₁ ◡ a₂
-    | .inl a₁, .inr b₂ => True
-    | .inr b₁, .inl a₂ => True
-    | .inr b₁, .inr b₂ => b₁ ◡ b₂
-  reflexive p := by rcases p <;> simp
+instance : CoherenceSpace (α & β) where
+  Coherence p q := Coherence p q
+  reflexive p := by
+    rcases p
+    · exact Coherence.inl (by rfl)
+    · exact Coherence.inr (by rfl)
   symmetric p q := by
-    rcases p <;> rcases q <;> grind
+    rintro (h | h | _ | _)
+    · exact Coherence.inl (symm h)
+    · exact Coherence.inr (symm h)
+    · exact Coherence.inr_inl _ _
+    · exact Coherence.inl_inr _ _
+
+lemma coherence_def (p q : α & β) : p ⁐ q ↔ Coherence p q := by rfl
+
+end With
+
+/-! #### Additive disjunction -/
+
+/-- An additive disjunction of two types -/
+inductive Plus (α β : Type*) : Type _
+  | inl : α → Plus α β
+  | inr : β → Plus α β
+
+infixr:30 " ⨁ " => Plus
+
+namespace Plus
+
+variable {α β : Type*} [CoherenceSpace α] [CoherenceSpace β]
+
+inductive Coherence : α ⨁ β → α ⨁ β → Prop
+  | inl {a₀ a₁ : α} : a₀ ⁐ a₁ → Coherence (inl a₀) (inl a₁)
+  | inr {b₀ b₁ : β} : b₀ ⁐ b₁ → Coherence (inr b₀) (inr b₁)
+
+/-- An additive conjunction of coherence spaces is also a coherence space -/
+instance : CoherenceSpace (α ⨁ β) where
+  Coherence p q := Coherence p q
+  reflexive p := by
+    rcases p
+    · exact Coherence.inl (by rfl)
+    · exact Coherence.inr (by rfl)
+  symmetric p q := by
+    rintro (h | h)
+    · exact Coherence.inl (symm h)
+    · exact Coherence.inr (symm h)
+
+lemma coherence_def (p q : α ⨁ β) : p ⁐ q ↔ Coherence p q := by rfl
+
+end Plus
 
 end LO
