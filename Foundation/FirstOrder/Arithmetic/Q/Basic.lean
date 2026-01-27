@@ -14,15 +14,15 @@ noncomputable section
 namespace LO.FirstOrder.Arithmetic
 
 inductive RobinsonQ : ArithmeticTheory
-  | equal          : ∀ φ ∈ 𝗘𝗤, RobinsonQ φ
-  | succNeZero     : RobinsonQ “∀ a, a + 1 ≠ 0”
-  | succInj        : RobinsonQ “∀ a b, a + 1 = b + 1 → a = b”
-  | zeroOrSucc     : RobinsonQ “∀ a, a = 0 ∨ ∃ b, a = b + 1”
-  | addZero        : RobinsonQ “∀ a, a + 0 = a”
-  | addSucc        : RobinsonQ “∀ a b, a + (b + 1) = (a + b) + 1”
-  | mulZero        : RobinsonQ “∀ a, a * 0 = 0”
-  | mulSucc        : RobinsonQ “∀ a b, a * (b + 1) = a * b + a”
-  | ltDef          : RobinsonQ “∀ a b, a < b ↔ ∃ c, a + (c + 1) = b”
+  | equal : ∀ φ ∈ 𝗘𝗤, RobinsonQ φ
+  | succNeZero : RobinsonQ “∀ a, a + 1 ≠ 0”
+  | succInj : RobinsonQ “∀ a b, a + 1 = b + 1 → a = b”
+  | zeroOrSucc : RobinsonQ “∀ a, a = 0 ∨ ∃ b, a = b + 1”
+  | addZero : RobinsonQ “∀ a, a + 0 = a”
+  | addSucc : RobinsonQ “∀ a b, a + (b + 1) = (a + b) + 1”
+  | mulZero : RobinsonQ “∀ a, a * 0 = 0”
+  | mulSucc : RobinsonQ “∀ a b, a * (b + 1) = a * b + a”
+  | ltDef : RobinsonQ “∀ a b, a < b ↔ ∃ c, a + (c + 1) = b”
 
 notation "𝗤" => RobinsonQ
 
@@ -32,8 +32,10 @@ open ORingStructure
 
 @[simp] instance : ℕ ⊧ₘ* 𝗤 := ⟨by
   intro σ h
-  rcases h <;> simp [models_iff, add_assoc, mul_add]
+  cases h
   case ltDef =>
+    suffices ∀ a b : ℕ, a < b ↔ ∃ c : ℕ, a + (c + 1) = b by
+      simpa [models_iff]
     intro a b
     constructor;
     . intro h;
@@ -41,10 +43,14 @@ open ORingStructure
       omega;
     . rintro ⟨c, hc⟩;
       simp [←hc];
-  case zeroOrSucc => omega;
+  case zeroOrSucc =>
+    simp [models_iff]
+    omega;
   case equal h =>
+    suffices ℕ ⊧/![] σ by simpa [models_iff]
     have : ℕ ⊧ₘ* (𝗘𝗤 : ArithmeticTheory) := inferInstance
-    exact modelsTheory_iff.mp this h⟩
+    exact modelsTheory_iff.mp this h
+  repeat case _ => simp [models_iff, add_assoc, mul_add]⟩
 
 instance : 𝗘𝗤 ⪯ 𝗤 := Entailment.WeakerThan.ofSubset <| fun φ hp ↦ equal φ hp
 
