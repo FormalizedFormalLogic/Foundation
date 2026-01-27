@@ -1,5 +1,8 @@
-import Foundation.FirstOrder.SetTheory.Z
+module
 
+public import Foundation.FirstOrder.SetTheory.Z
+
+@[expose] public section
 /-!
 # Ordinals and transitive sets
 
@@ -180,10 +183,10 @@ lemma mem_of_ssubset [hα : IsOrdinal α] [hβ : IsOrdinal β] : α ⊊ β → �
   rcases this
   assumption
 
-@[grind] lemma ssubset_iff [hα : IsOrdinal α] [hβ : IsOrdinal β] : α ⊊ β ↔ α ∈ β :=
+@[grind =] lemma ssubset_iff [hα : IsOrdinal α] [hβ : IsOrdinal β] : α ⊊ β ↔ α ∈ β :=
   ⟨mem_of_ssubset, fun hαβ ↦ ⟨hβ.transitive _ hαβ, ne_of_mem hαβ⟩⟩
 
-@[grind] lemma subset_iff [hα : IsOrdinal α] [hβ : IsOrdinal β] : α ⊆ β ↔ α = β ∨ α ∈ β := by
+@[grind =] lemma subset_iff [hα : IsOrdinal α] [hβ : IsOrdinal β] : α ⊆ β ↔ α = β ∨ α ∈ β := by
   constructor
   · intro ss
     by_cases eq : α = β
@@ -194,7 +197,7 @@ lemma mem_of_ssubset [hα : IsOrdinal α] [hβ : IsOrdinal β] : α ⊊ β → �
     · exact hβ.transitive α h
 
 open Classical in
-@[grind] lemma mem_iff_subset_and_not_subset [hα : IsOrdinal α] [hβ : IsOrdinal β] :
+@[grind =_] lemma mem_iff_subset_and_not_subset [hα : IsOrdinal α] [hβ : IsOrdinal β] :
     α ∈ β ↔ α ⊆ β ∧ ¬β ⊆ α := calc
   α ∈ β ↔ α ⊊ β          := ssubset_iff.symm
   _     ↔ α ⊆ β ∧ α ≠ β  := by rfl

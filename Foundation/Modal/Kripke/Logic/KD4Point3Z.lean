@@ -1,8 +1,12 @@
-import Foundation.Modal.Kripke.AxiomL
-import Foundation.Modal.Kripke.Logic.Soundness
-import Foundation.Modal.Kripke.LinearFrame
-import Foundation.Modal.Kripke.AxiomWeakPoint3
-import Foundation.Modal.Kripke.AxiomGeach
+module
+
+public import Foundation.Modal.Kripke.AxiomL
+public import Foundation.Modal.Kripke.Logic.Soundness
+public import Foundation.Modal.Kripke.LinearFrame
+public import Foundation.Modal.Kripke.AxiomWeakPoint3
+public import Foundation.Modal.Kripke.AxiomGeach
+
+@[expose] public section
 
 namespace LO.Modal
 
@@ -25,3 +29,4 @@ instance : Sound Modal.KD4Point3Z natLT := instSound_of_frame_validates_axioms $
 instance : Entailment.Consistent Logic.KD4Point3Z := consistent_of_sound_frames natLT
 
 end LO.Modal
+end

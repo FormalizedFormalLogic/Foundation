@@ -1,8 +1,12 @@
-import Foundation.Modal.Neighborhood.Basic
-import Foundation.Modal.Neighborhood.AxiomM
-import Foundation.Modal.Neighborhood.AxiomC
-import Foundation.Modal.Neighborhood.AxiomN
-import Foundation.Modal.Neighborhood.AxiomGeach
+module
+
+public import Foundation.Modal.Neighborhood.Basic
+public import Foundation.Modal.Neighborhood.AxiomM
+public import Foundation.Modal.Neighborhood.AxiomC
+public import Foundation.Modal.Neighborhood.AxiomN
+public import Foundation.Modal.Neighborhood.AxiomGeach
+
+@[expose] public section
 
 namespace LO.Modal.Neighborhood
 
@@ -175,3 +179,4 @@ end
 
 
 end LO.Modal.Neighborhood
+end

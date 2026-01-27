@@ -1,5 +1,9 @@
-import Foundation.Modal.Entailment.EM
-import Foundation.Meta.ClProver
+module
+
+public import Foundation.Modal.Entailment.EM
+public import Foundation.Meta.ClProver
+
+@[expose] public section
 
 namespace LO.Modal.Entailment
 
@@ -39,3 +43,4 @@ instance [Entailment.EMK 𝓢] : HasAxiomC 𝓢 := ⟨by
 ⟩
 
 end LO.Modal.Entailment
+end

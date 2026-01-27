@@ -1,7 +1,10 @@
-import Foundation.FirstOrder.Arithmetic.Definability
-import Foundation.FirstOrder.Arithmetic.PeanoMinus.Functions
-import Foundation.FirstOrder.Arithmetic.TA.Basic
+module
 
+public import Foundation.FirstOrder.Arithmetic.Definability
+public import Foundation.FirstOrder.Arithmetic.PeanoMinus.Functions
+public import Foundation.FirstOrder.Arithmetic.TA.Basic
+
+@[expose] public section
 /-!
 # Induction schemata of Arithmetic
 -/

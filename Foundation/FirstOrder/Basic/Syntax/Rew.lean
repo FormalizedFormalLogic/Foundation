@@ -1,5 +1,9 @@
-import Foundation.Logic.Predicate.Rew
-import Foundation.FirstOrder.Basic.Syntax.Formula
+module
+
+public import Foundation.Logic.Predicate.Rew
+public import Foundation.FirstOrder.Basic.Syntax.Formula
+
+@[expose] public section
 
 /-!
 # Rewriting Entailment
@@ -68,6 +72,8 @@ instance : Rewriting L ξ (Semiformula L ξ) ζ (Semiformula L ζ) where
 abbrev subst (φ : Semiformula L ξ n) (v : Fin n → Semiterm L ξ m) : Semiformula L ξ m := Rewriting.subst φ v
 
 @[coe] abbrev emb [IsEmpty o] (φ : Semiformula L o n) : Semiformula L ξ n := Rewriting.emb φ
+
+abbrev free (φ : SyntacticSemiformula L (n + 1)) : SyntacticSemiformula L n := Rewriting.free φ
 
 abbrev shift (φ : SyntacticSemiformula L n) : SyntacticSemiformula L n := Rewriting.shift φ
 
@@ -536,3 +542,4 @@ end lMap
 end Semiformula
 
 end LO.FirstOrder
+end

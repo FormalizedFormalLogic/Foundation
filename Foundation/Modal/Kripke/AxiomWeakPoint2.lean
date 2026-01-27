@@ -1,11 +1,12 @@
-import Foundation.Modal.Kripke.Completeness
-import Foundation.Vorspiel.HRel.Convergent
+module
 
+public import Foundation.Modal.Kripke.Completeness
+
+@[expose] public section
 
 namespace LO.Modal
 
 namespace Kripke
-
 
 variable {F : Kripke.Frame}
 
@@ -18,10 +19,8 @@ lemma p_convergent [F.IsPiecewiseConvergent] {x y z : F.World} : x ≺ y → x �
 
 end Frame
 
-
 instance : whitepoint.IsPiecewiseConvergent where
   p_convergent := by tauto
-
 
 section definability
 
@@ -56,15 +55,9 @@ lemma isPiecewiseConvergent_of_validate_axiomWeakPoint2 (h : F ⊧ (Axioms.WeakP
     use (λ w a => match a with | 0 => y ≺ w | 1 => w = y | _ => False), x;
     suffices x ≺ y ∧ ∃ z, x ≺ z ∧ (∀ u, z ≺ u → ¬y ≺ u) ∧ ¬z = y by
       simpa [Satisfies, Semantics.Models];
-    refine ⟨Rxy, z, Rxz, ?_, by tauto⟩;
-    . intro u;
-      contrapose;
-      push_neg;
-      intro Ryu;
-      exact hu u Ryu;
+    refine ⟨Rxy, z, Rxz, by grind, by tauto⟩;
 
 end definability
-
 
 section canonicality
 
@@ -79,11 +72,19 @@ open canonicalModel
 instance [Entailment.HasAxiomWeakPoint2 𝓢] : (canonicalFrame 𝓢).IsPiecewiseConvergent where
   p_convergent := by
     rintro x y z Rxy Rxz eyz;
-    have ⟨u, hu⟩ := lindenbaum (𝓢 := 𝓢) (t₀ := ⟨y.1.1.prebox, z.1.2.predia⟩) $ by
+    have ⟨u, hu⟩ := lindenbaum (𝓢 := 𝓢) (t₀ := ⟨□⁻¹'y.1.1, ◇'⁻¹z.1.2⟩) $ by
       rintro Γ Δ hΓ hΔ;
       by_contra hC;
-      have hγ : □(Γ.conj) ∈ y.1.1 := y.mdp_mem₁_provable collect_box_fconj! $ iff_mem₁_fconj.mpr (by simpa using hΓ);
-      have hδ : ◇(Δ.disj) ∈ z.1.2 := mdp_mem₂_provable distribute_dia_fdisj! $ iff_mem₂_fdisj.mpr (by simpa using hΔ);
+      have hγ : □(Γ.conj) ∈ y.1.1 := y.mdp_mem₁_provable collect_box_fconj! $ iff_mem₁_fconj.mpr $ by
+        intro χ hχ;
+        obtain ⟨ξ, hξ, rfl⟩ := Finset.LO.exists_of_mem_box hχ;
+        apply hΓ;
+        assumption;
+      have hδ : ◇(Δ.disj) ∈ z.1.2 := mdp_mem₂_provable distribute_dia_fdisj! $ iff_mem₂_fdisj.mpr $ by
+        intro χ hχ;
+        obtain ⟨ξ, hξ, rfl⟩ := Finset.LO.exists_of_mem_dia hχ;
+        apply hΔ;
+        assumption;
       generalize Γ.conj = γ₁ at hγ hC;
       generalize Δ.disj = δ₁ at hδ hC;
       obtain ⟨δ₂, hδ₂₁, hδ₂₂⟩ := exists₁₂_of_ne eyz;
@@ -114,3 +115,4 @@ end canonicality
 end Kripke
 
 end LO.Modal
+end

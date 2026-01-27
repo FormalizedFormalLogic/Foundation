@@ -1,6 +1,10 @@
-import Foundation.Modal.Kripke.Logic.Grz.Completeness
-import Foundation.Modal.Kripke.Logic.Triv
-import Foundation.Modal.Kripke.Logic.S5
+module
+
+public import Foundation.Modal.Kripke.Logic.Grz.Completeness
+public import Foundation.Modal.Kripke.Logic.Triv
+public import Foundation.Modal.Kripke.Logic.S5
+
+@[expose] public section
 
 namespace LO.Modal.Logic
 
@@ -11,7 +15,7 @@ open Modal.Kripke
 
 instance : Modal.S5 ⪱ Modal.S5Grz := by
   constructor;
-  . exact Hilbert.Normal.weakerThan_of_subset_axioms (by simp)
+  . grind;
   . apply Entailment.not_weakerThan_iff.mpr;
     use Axioms.Grz (.atom 0);
     constructor;
@@ -22,7 +26,6 @@ instance : Modal.S5 ⪱ Modal.S5Grz := by
       constructor;
       . exact { universal := by tauto }
       . simp [Semantics.Models, Satisfies];
-        tauto;
 
 instance : Modal.Grz ⪱ Modal.S5Grz := by
   constructor;
@@ -59,3 +62,4 @@ instance : Sound Modal.S5Grz FrameClass.finite_Triv := by
   infer_instance;
 
 end LO.Modal.Logic
+end

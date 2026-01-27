@@ -1,5 +1,7 @@
-import Foundation.Propositional.Entailment.Int.Basic
+module
+public import Foundation.Propositional.Entailment.Int.Basic
 
+@[expose] public section
 
 namespace LO.Axioms
 
@@ -56,3 +58,5 @@ protected class KrieselPutnam (𝓢 : S) extends Entailment.Int 𝓢, HasAxiomKr
 
 
 end LO.Entailment
+
+end

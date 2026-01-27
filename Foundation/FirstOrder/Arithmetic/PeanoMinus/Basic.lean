@@ -1,10 +1,13 @@
-import Foundation.FirstOrder.Arithmetic.Basic
-import Foundation.FirstOrder.Arithmetic.R0.Basic
-import Foundation.FirstOrder.Arithmetic.Q.Basic
-import Mathlib.Algebra.Order.Monoid.Canonical.Defs
-import Mathlib.Data.Nat.Cast.Order.Basic
-import Mathlib.Algebra.Order.Sub.Basic
+module
 
+public import Foundation.FirstOrder.Arithmetic.Basic
+public import Foundation.FirstOrder.Arithmetic.R0.Basic
+public import Foundation.FirstOrder.Arithmetic.Q.Basic
+public import Mathlib.Algebra.Order.Monoid.Canonical.Defs
+public import Mathlib.Data.Nat.Cast.Order.Basic
+public import Mathlib.Algebra.Order.Sub.Basic
+
+@[expose] public section
 /-!
 # Theory $\mathsf{PA^-}$
 
@@ -267,8 +270,8 @@ scoped instance : CommSemiring M where
 scoped instance : IsStrictOrderedRing M where
   add_le_add_left := by
     rintro x y (rfl | h) z
-    · simp [add_comm z]
-    · simp only [add_comm z]; exact Or.inr (add_lt_add x y z h)
+    · simp
+    · exact Or.inr (add_lt_add x y z h)
   le_of_add_le_add_left := by
     rintro x y z h
     have : y ≤ z ∨ z < y := le_or_gt y z
@@ -293,7 +296,7 @@ scoped instance : CanonicallyOrderedAdd M where
   le_add_self := by intro x y; simp
 
 scoped instance : IsOrderedAddMonoid M where
-  add_le_add_left _ _ h z := (add_le_add_iff_left z).mpr h
+  add_le_add_left _ _ h z := (add_le_add_iff_right z).mpr h
 
 lemma numeral_eq_natCast : (n : ℕ) → (ORingStructure.numeral n : M) = n
   |     0 => rfl
@@ -315,7 +318,7 @@ lemma le_iff_lt_succ {x y : M} : x ≤ y ↔ x < y + 1 :=
     simp [this]⟩
 
 lemma eq_nat_of_lt_nat : ∀ {n : ℕ} {x : M}, x < n → ∃ m : ℕ, x = m
-  |     0, x, hx => by simp [not_neg] at hx
+  |     0, x, hx => by simp_all
   | n + 1, x, hx => by
     have : x ≤ n := by simpa [le_iff_lt_succ] using hx
     rcases this with (rfl | hx)

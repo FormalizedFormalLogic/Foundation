@@ -1,8 +1,12 @@
-import Foundation.Modal.Logic.SumQuasiNormal
-import Foundation.Modal.Maximal.Unprovability
-import Mathlib.Data.ENat.Basic
-import Foundation.Modal.Kripke.Logic.GL.Completeness
+module
 
+public import Foundation.Modal.Logic.SumQuasiNormal
+public import Foundation.Modal.Maximal.Unprovability
+public import Mathlib.Data.ENat.Basic
+public import Foundation.Modal.Kripke.Logic.GL.Completeness
+
+
+@[expose] public section
 
 namespace LO.Modal
 
@@ -58,7 +62,7 @@ lemma Logic.GLPlusBoxBot.weakerThan_succ {n : ℕ} : (Modal.GLPlusBoxBot (n + 1)
   intro h;
   apply C!_trans ?_ h;
   suffices Modal.GL ⊢ □^[n]⊥ ➝ □^[n](□⊥) by simpa [Function.iterate_succ_apply]
-  apply imply_multibox_distribute'!;
+  apply imply_boxItr_distribute'!;
   cl_prover;
 
 lemma Logic.GLPlusBoxBot.weakerThan_add {n k : ℕ} : (Modal.GLPlusBoxBot (n + k)) ⪯ (Modal.GLPlusBoxBot n) := by
@@ -76,3 +80,4 @@ lemma Logic.GLPlusBoxBot.weakerThan_lt {n m : ℕ} (hmn : m > n) : (Modal.GLPlus
 end
 
 end LO.Modal
+end

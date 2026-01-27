@@ -1,5 +1,9 @@
-import Foundation.Modal.NNFormula
-import Foundation.Modal.Kripke.Basic
+module
+
+public import Foundation.Modal.Formula.NNFormula
+public import Foundation.Modal.Kripke.Basic
+
+@[expose] public section
 
 namespace LO.Modal
 
@@ -64,7 +68,7 @@ protected lemma neg_def : x ⊧ ∼φ ↔ ¬x ⊧ φ := by
       . left; exact ihφ.mpr h₁;
       . right; exact ihψ.mpr h₂;
   | hBox φ ihφ =>
-    simp only [ModalDeMorgan.box, Satisfies.box_def];
+    simp only [ModalDeMorgan.neg_box, Satisfies.box_def];
     push_neg;
     constructor;
     . intro h;
@@ -81,7 +85,7 @@ protected lemma neg_def : x ⊧ ∼φ ↔ ¬x ⊧ φ := by
       . apply ihφ.mpr;
         exact h;
   | hDia φ ihφ =>
-    simp only [ModalDeMorgan.dia, Satisfies.dia_def, not_exists, not_and];
+    simp only [ModalDeMorgan.neg_dia, Satisfies.dia_def, not_exists, not_and];
     constructor;
     . intro h y Rxy;
       apply ihφ.mp;
@@ -256,3 +260,4 @@ end Formula.Kripke
 
 
 end LO.Modal
+end

@@ -1,7 +1,10 @@
-import Foundation.Modal.Neighborhood.Logic.E
-import Foundation.Modal.Neighborhood.Supplementation
-import Foundation.Modal.Neighborhood.AxiomC
-import Foundation.Vorspiel.Set.Fin
+module
+
+public import Foundation.Modal.Neighborhood.Logic.E
+public import Foundation.Modal.Neighborhood.Supplementation
+public import Foundation.Modal.Neighborhood.AxiomC
+
+@[expose] public section
 
 namespace LO.Modal
 
@@ -49,12 +52,12 @@ instance : counterframe_axiomC₁.IsEM where
 @[simp]
 lemma counterframe_axiomC₁.not_validate_axiomC : ¬counterframe_axiomC₁ ⊧ Axioms.C (.atom 0) (.atom 1) := by
   apply not_imp_not.mpr $ @isRegular_of_valid_axiomC (F := counterframe_axiomC₁);
-  by_contra hC;
-  have : ({0} : Set counterframe_axiomC₁) ∩ {1} = {0, 1} := by simpa using @hC.regular {0} {1} 0;
-  tauto_set;
+  by_contra! hC;
+  have := @hC.regular {0} {1} 0;
+  simp at this;
+  grind;
 
 end Neighborhood
-
 
 namespace EM
 
@@ -73,7 +76,6 @@ instance Neighborhood.complete : Complete Modal.EM FrameClass.EM := (supplemente
   infer_instance;
 
 end EM
-
 
 instance : Modal.EM ⪱ Modal.EMN := by
   constructor;
@@ -123,5 +125,5 @@ instance : Modal.EM ⪱ Modal.EMT := by
         by_contra! hC;
         simpa [Frame.box] using @hC.refl ∅;
 
-
 end LO.Modal
+end

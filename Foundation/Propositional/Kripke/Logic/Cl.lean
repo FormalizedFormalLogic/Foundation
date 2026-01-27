@@ -1,6 +1,10 @@
-import Foundation.Propositional.Kripke.AxiomLEM
-import Foundation.Propositional.Kripke.AxiomDummett
-import Foundation.Propositional.Kripke.Logic.LC
+module
+
+public import Foundation.Propositional.Kripke.AxiomLEM
+public import Foundation.Propositional.Kripke.AxiomDummett
+public import Foundation.Propositional.Kripke.Logic.LC
+
+@[expose] public section
 
 namespace LO.Propositional
 
@@ -98,17 +102,17 @@ instance : Complete Propositional.Cl FrameClass.finite_Cl := by
     . apply TransGen.single;
       use ⟨y, by tauto⟩, ⟨x, by tauto⟩;
       refine ⟨by tauto, by tauto, ?_⟩;
-      . have : y ≺ x := IsSymm.symm _ _ Rry;
+      . have : y ≺ x := Std.Symm.symm _ _ Rry;
         tauto;
     . apply TransGen.single;
       use ⟨y, by tauto⟩, ⟨x, by tauto⟩;
       refine ⟨by tauto, by tauto, ?_⟩;
-      . have : x ≺ y := IsSymm.symm _ _ Rrx;
+      . have : x ≺ y := Std.Symm.symm _ _ Rrx;
         tauto;
     . apply Relation.TransGen.single;
       use ⟨y, by tauto⟩, ⟨x, by tauto⟩;
       refine ⟨by tauto, by tauto, ?_⟩;
-      . simpa using F.eucl' Rrx Rry;
+      . exact F.eucl Rry Rrx;
 
 end FFP
 
@@ -117,7 +121,7 @@ end Cl
 
 instance : Propositional.LC ⪱ Propositional.Cl := by
   constructor;
-  . apply Hilbert.weakerThan_of_provable_axioms;
+  . apply Hilbert.Standard.weakerThan_of_provable_axioms;
     rintro φ (rfl | rfl) <;> simp;
   . apply Entailment.not_weakerThan_iff.mpr;
     use Axioms.LEM (.atom 0);
@@ -148,3 +152,4 @@ instance : Propositional.Int ⪱ Propositional.Cl := calc
   _   ⪱ Propositional.Cl := inferInstance
 
 end LO.Propositional
+end

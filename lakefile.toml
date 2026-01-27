@@ -1,12 +1,5 @@
 name = "Foundation"
-defaultTargets = [
-  "Foundation",
-  "Zoo_Arith",
-  "Zoo_SetTheory",
-  "Zoo_Modal",
-  "Zoo_InterpretabilityLogic",
-  "Zoo_Propositional",
-]
+defaultTargets = ["Foundation"]
 
 [leanOptions]
 pp.unicode.fun = true
@@ -23,12 +16,11 @@ name = "mathlib"
 scope = "leanprover"
 name = "doc-gen4"
 
-[[require]]
-scope = "leanprover"
-name = "verso"
-
 [[lean_lib]]
 name = "Foundation"
+
+[[lean_lib]]
+name = "Vorspiel"
 
 [[lean_exe]]
 name = "Zoo_Arith"
@@ -57,10 +49,3 @@ supportInterpreter = true
 
 [[lean_lib]]
 name = "Zoo"
-
-[[lean_lib]]
-name = "Book"
-
-[[lean_exe]]
-name = "book"
-root = "Book.Book"

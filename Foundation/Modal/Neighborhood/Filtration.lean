@@ -1,14 +1,18 @@
+module
+
+public import Mathlib.Data.Set.Finite.Powerset
+public import Foundation.Modal.Neighborhood.AxiomGeach
+public import Foundation.Modal.Neighborhood.Supplementation
+public import Foundation.Modal.Neighborhood.IntersectionClosure
+
+@[expose] public section
+
 /-
   Filtration of neighborhood semantics.
 
   References:
   - K. Kopnev, "The Finite Model Property of Some Non-normal Modal Logics with the Transitivity Axiom", https://arxiv.org/abs/2305.08605
 -/
-
-import Mathlib.Data.Set.Finite.Powerset
-import Foundation.Modal.Neighborhood.AxiomGeach
-import Foundation.Modal.Neighborhood.Supplementation
-import Foundation.Modal.Neighborhood.IntersectionClosure
 
 namespace LO.Modal
 
@@ -43,7 +47,7 @@ namespace FilterEqvQuotient
 
 @[grind =>]
 lemma iff_eq : (⟦x⟧ : FilterEqvQuotient M T) = ⟦y⟧ ↔ (∀ φ ∈ T, x ⊧ φ ↔ y ⊧ φ) := by
-  simp [FilterEqvSetoid, filterEquiv];
+  simp [FilterEqvSetoid, Quotient.eq, filterEquiv];
 
 lemma finite (T_finite : T.Finite) : Finite (FilterEqvQuotient M T) := by
   have : Finite (𝒫 T) := Set.Finite.powerset T_finite
@@ -135,7 +139,8 @@ lemma compl_truthset (hφ : φ ∈ T) : (【(M φ)ᶜ】 : Set (FilterEqvQuotien
 
 lemma subset_original_truthset_of_subset (hψ : ψ ∈ T) (h : (【M φ】 : Set (FilterEqvQuotient M T)) ⊆ 【M ψ】) : M φ ⊆ M ψ := by
   intro x hx;
-  replace h : ∀ y ∈ M φ, ∃ z ∈ M ψ, (filterEquiv M T) z y := by simpa [toFilterEquivSet] using h;
+  replace h : ∀ y ∈ M φ, ∃ z ∈ M ψ, (filterEquiv M T) z y := by
+    simpa [toFilterEquivSet, FilterEqvSetoid, Quotient.eq] using h;
   obtain ⟨y, hy₁, hy₂⟩ := h x hx;
   apply hy₂ ψ hψ |>.mp hy₁;
 
@@ -485,13 +490,12 @@ def quasiFilteringTransitiveFiltration (M : Model) [M.IsMonotonic] [M.IsTransiti
 
       let Ψ := {ψ // □ψ ∈ T ∧ (∃ Vi ∈ Ys, Vi = 【M ψ】) ∧ W ∈ 【M (□ψ)】};
       have : Fintype Ψ := by
-        apply Fintype.subtype (s := { ψ ∈ hT.toFinset.prebox | (∃ Vi ∈ Ys, Vi = 【M ψ】) ∧ W ∈ 【M (□ψ)】 });
-        simp;
+        apply Fintype.subtype (s := { ψ ∈ □⁻¹'hT.toFinset | (∃ Vi ∈ Ys, Vi = 【M ψ】) ∧ W ∈ 【M (□ψ)】 });
+        simp [Finset.LO.preboxItr];
       let Ξ := {ξ // □ξ ∈ T ∧ (∃ Ui ∈ Ys, Ui = 【M (□ξ)】) ∧ W ∈ 【M (□ξ)】};
       have : Fintype Ξ := by
-        apply Fintype.subtype (s := { ξ ∈ hT.toFinset.prebox | (∃ Ui ∈ Ys, Ui = 【M (□ξ)】) ∧ W ∈ 【M (□ξ)】 });
-        simp;
-
+        apply Fintype.subtype (s := { ξ ∈ □⁻¹'hT.toFinset | (∃ Ui ∈ Ys, Ui = 【M (□ξ)】) ∧ W ∈ 【M (□ξ)】 });
+        simp [Finset.LO.preboxItr];
       have H : (⋂ ψ : Ψ, 【M ψ】) ∩ (⋂ ξ : Ξ, 【M (□ξ)】) ⊆ (【M φ】 : Set (FilterEqvQuotient M T)) := by calc
         _ = (⋂ ψ : Ψ, 【M ψ】) ∩ (⋂ Ui ∈ Us, Ui) := by
           suffices (⋂ ψ : Ξ, 【M (□ψ)】) = (⋂ Ui ∈ Us, Ui) by congr;
@@ -664,3 +668,4 @@ end quasiFilteringTransitiveFiltration
 end Neighborhood
 
 end LO.Modal
+end

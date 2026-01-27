@@ -1,5 +1,9 @@
-import Foundation.Propositional.NNFormula
-import Foundation.Logic.Calculus
+module
+
+public import Foundation.Propositional.Formula.NNFormula
+public import Foundation.Logic.Calculus
+
+@[expose] public section
 
 namespace LO.Propositional
 
@@ -157,3 +161,4 @@ abbrev NNFormula.Tautology (φ : NNFormula α) := Sequent.Tautology [φ]
 abbrev NNFormula.IsTautology (φ : NNFormula α) := Sequent.IsTautology [φ]
 
 end LO.Propositional
+end

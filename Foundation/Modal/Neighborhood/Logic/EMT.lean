@@ -1,5 +1,9 @@
-import Foundation.Modal.Neighborhood.Logic.EM
-import Foundation.Modal.Neighborhood.AxiomGeach
+module
+
+public import Foundation.Modal.Neighborhood.Logic.EM
+public import Foundation.Modal.Neighborhood.AxiomGeach
+
+@[expose] public section
 
 namespace LO.Modal
 
@@ -41,7 +45,7 @@ end EMT
 instance : Modal.EMT ⪱ Modal.EMT4 := by
   constructor;
   . apply Hilbert.WithRE.weakerThan_of_subset_axioms;
-    simp;
+    grind;
   . apply Entailment.not_weakerThan_iff.mpr;
     use (Axioms.Four (.atom 0));
     constructor;
@@ -54,3 +58,4 @@ instance : Modal.EMT ⪱ Modal.EMT4 := by
       . simp;
 
 end LO.Modal
+end

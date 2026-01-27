@@ -1,5 +1,8 @@
-import Foundation.FirstOrder.SetTheory.Z
+module
 
+public import Foundation.FirstOrder.SetTheory.Z
+
+@[expose] public section
 /-!
 # Basic definitions and lemmata for relations and functions
 -/
@@ -46,7 +49,7 @@ lemma domain_subset_of_subset_prod {R X Y : V} (h : R ⊆ X ×ˢ Y) : domain R �
   have : x ∈ X ∧ y ∈ Y := by simpa using h _ hy
   exact this.1
 
-@[simp, grind =] lemma domain_insert {x y R : V} : domain (insert (⟨x, y⟩ₖ) R) = insert x (domain R) := by
+@[simp, grind .] lemma domain_insert {x y R : V} : domain (insert (⟨x, y⟩ₖ) R) = insert x (domain R) := by
   ext z; simp only [mem_domain_iff, mem_insert, kpair_iff]; grind
 
 end domain
@@ -250,7 +253,7 @@ lemma function_ext {X Y f g : V} (hf : f ∈ Y ^ X) (hg : g ∈ Y ^ X)
     simpa [mem_prod_iff] using subset_prod_of_mem_function hf _ hp with ⟨x, hx, y, hy, rfl⟩
   exact h x hx y hy hp
 
-@[grind] lemma two_val_function_mem_iff_not {X f x : V} (hf : f ∈ (2 ^ X : V)) (hx : x ∈ X) : ⟨x, 0⟩ₖ ∈ f ↔ ⟨x, 1⟩ₖ ∉ f := by
+@[grind <=] lemma two_val_function_mem_iff_not {X f x : V} (hf : f ∈ (2 ^ X : V)) (hx : x ∈ X) : ⟨x, 0⟩ₖ ∈ f ↔ ⟨x, 1⟩ₖ ∉ f := by
   have : IsFunction f := IsFunction.of_mem hf
   constructor
   · intro h0 h1
@@ -505,7 +508,7 @@ lemma two_pow_cardEQ_power (X : V) : 2 ^ X ≋ ℘ X := by
               and_self, kpair_iff, and_false, imp_false, and_true, true_and, f]; grind
             · intro i hi
               simp [f, hx] at hi
-              grind
+              grind only
         apply ExistsUnique.intro f ?_ ?_
         · simp [F, hs, kp1_mem_f, f_func]
         · intro g hg

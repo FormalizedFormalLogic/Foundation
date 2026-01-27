@@ -1,11 +1,13 @@
-import Foundation.Vorspiel.List.Chain
-import Foundation.Vorspiel.Fin.Supplemental
-import Foundation.Modal.Kripke.Logic.Grz.Completeness
-import Foundation.Modal.Kripke.Logic.S4Point2McK
-import Mathlib.Data.Finite.Sum
-import Mathlib.Data.Set.Finite.Basic
-import Mathlib.Data.Fintype.Pigeonhole
+module
 
+public import Foundation.Modal.Kripke.Logic.Grz.Completeness
+public import Foundation.Modal.Kripke.Logic.S4Point2McK
+public import Mathlib.Data.Finite.Sum
+public import Mathlib.Data.Set.Finite.Basic
+public import Mathlib.Data.Fintype.Pigeonhole
+public import Lean.Meta.Tactic.Simp.BuiltinSimprocs.Fin
+
+@[expose] public section
 
 namespace LO.Modal
 
@@ -70,7 +72,7 @@ section
 
 open LO.Entailment LO.Entailment.FiniteContext LO.Modal.Entailment
 
-instance : Modal.Grz ⪯ Modal.GrzPoint2 := Hilbert.Normal.weakerThan_of_subset_axioms $ by simp;
+instance : Modal.Grz ⪯ Modal.GrzPoint2 := Hilbert.Normal.weakerThan_of_subset_axioms $ by grind;
 
 lemma GrzPoint2_of_Grz (h : (φ.atoms.image (λ a => Axioms.Point2 (.atom a))).toSet *⊢[Modal.Grz] φ) : Modal.GrzPoint2 ⊢ φ := by
   obtain ⟨Γ, hΓ₁, hΓ₂⟩ := Context.provable_iff.mp h;
@@ -182,7 +184,6 @@ instance : Complete Modal.GrzPoint2 FrameClass.finite_GrzPoint2 := ⟨by
       ps_convergent := by
         rintro x y z Rxy Ryz;
         use (Sum.inr ());
-        simp [M'];
     }
   . have H₁ : ∀ a ∈ φ.atoms, ∀ t ∈ RM.toFrame.terminals, ∀ t' ∈ RM.toFrame.terminals, RM t a → RM t' a := by
       intro a ha t t_terminal t' t'_terminal hy;
@@ -196,9 +197,12 @@ instance : Complete Modal.GrzPoint2 FrameClass.finite_GrzPoint2 := ⟨by
         . apply RM_rooted;
         . assumption;
       have : ¬r' ⊧ ◇(□atom a) := by
-        revert this;
-        apply not_imp_not.mpr
-        exact Satisfies.conj_def.mp hΓ (Axioms.Point2 (atom a)) (by simpa [←eΓ]);
+        contrapose! this;
+        apply Satisfies.conj_def.mp hΓ $ Axioms.Point2 (atom a);
+        . subst eΓ;
+          simp only [Finset.mem_toList, Finset.mem_image];
+          use a;
+        . assumption;
       have := Satisfies.dia_def.not.mp this;
       push_neg at this;
       have : ¬t ⊧ □atom a := this t (RM_rooted t);
@@ -298,7 +302,8 @@ instance : Modal.Grz ⪱ Modal.GrzPoint2 := by
           constructor;
           . omega;
           . intro y Rxy;
-            simp_all [M, Satisfies, Frame.Rel'];
+            simp [Satisfies, M];
+            grind;
         . apply Satisfies.box_def.not.mpr;
           push_neg;
           use 2;
@@ -332,16 +337,16 @@ instance : Modal.S4Point2McK ⪱ Modal.GrzPoint2 := by
             use 2;
             omega;
         };
-      . suffices ∀ (x : Fin 3), (∀ (y : Fin 3), x = 0 ∨ x = 1 → y = 1 ∨ y = 2 → ∀ (z : Fin 3), y = 0 ∨ y = 1 → z = 1 ∨ z = 2) → x ≠ 1 → x = 2 by
+      . suffices (∀ x : Fin 3, (∀ (y : Fin 3), x = 0 ∨ x = 1 → y = 1 ∨ y = 2 → ∀ z : Fin 3, y = 0 ∨ y = 1 → z = 1 ∨ z = 2) → x ≠ 1 → x = 2) by
           simpa [Semantics.Models, Satisfies];
-        intro x hx hxn1;
-        by_contra hxn2;
-        rcases @hx 1 (by omega) (by tauto) x (by omega);
-        . contradiction;
-        . contradiction;
+        by_contra! hC;
+        obtain ⟨x, hx, _, _⟩ := hC;
+        have := hx 1 (by grind) (by grind) 0 (by grind);
+        grind;
 
 instance : Modal.S4Point2 ⪱ Modal.GrzPoint2 := calc
   Modal.S4Point2 ⪱ Modal.S4Point2McK := by infer_instance
-  _                ⪱ Modal.GrzPoint2 := by infer_instance
+  _              ⪱ Modal.GrzPoint2 := by infer_instance
 
 end LO.Modal
+end

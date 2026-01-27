@@ -1,4 +1,9 @@
-import Foundation.FirstOrder.Basic.BinderNotation
+module
+
+public import Foundation.FirstOrder.Basic.BinderNotation
+public import Foundation.Vorspiel.Nat.Matrix
+
+@[expose] public section
 
 namespace LO.FirstOrder
 
@@ -29,7 +34,7 @@ def ofNat (n : ℕ) : ℕ → Option (Semiterm L ξ n)
         (decode ef).bind fun f : L.Func arity ↦
         (Matrix.getM fun i ↦
           have : v' i < e + 1 :=
-            Nat.lt_succ.mpr
+            Nat.lt_succ_iff.mpr
               <| le_trans (le_of_lt <| Nat.lt_of_eq_natToVec hv i)
               <| le_trans (Nat.unpair_right_le _)
               <| le_trans (Nat.unpair_right_le _)
@@ -112,26 +117,26 @@ def ofNat : (n : ℕ) → ℕ → Option (Semiformula L ξ n)
     | 2 => some ⊤
     | 3 => some ⊥
     | 4 =>
-      have : c.unpair.1 < e + 1 := Nat.lt_succ.mpr <| le_trans (Nat.unpair_left_le _) <| Nat.unpair_right_le _
-      have : c.unpair.2 < e + 1 := Nat.lt_succ.mpr <| le_trans (Nat.unpair_right_le _) <| Nat.unpair_right_le _
+      have : c.unpair.1 < e + 1 := Nat.lt_succ_iff.mpr <| le_trans (Nat.unpair_left_le _) <| Nat.unpair_right_le _
+      have : c.unpair.2 < e + 1 := Nat.lt_succ_iff.mpr <| le_trans (Nat.unpair_right_le _) <| Nat.unpair_right_le _
       do
         let φ ← ofNat n c.unpair.1
         let ψ ← ofNat n c.unpair.2
         return φ ⋏ ψ
     | 5 =>
-      have : c.unpair.1 < e + 1 := Nat.lt_succ.mpr <| le_trans (Nat.unpair_left_le _) <| Nat.unpair_right_le _
-      have : c.unpair.2 < e + 1 := Nat.lt_succ.mpr <| le_trans (Nat.unpair_right_le _) <| Nat.unpair_right_le _
+      have : c.unpair.1 < e + 1 := Nat.lt_succ_iff.mpr <| le_trans (Nat.unpair_left_le _) <| Nat.unpair_right_le _
+      have : c.unpair.2 < e + 1 := Nat.lt_succ_iff.mpr <| le_trans (Nat.unpair_right_le _) <| Nat.unpair_right_le _
       do
         let φ ← ofNat n c.unpair.1
         let ψ ← ofNat n c.unpair.2
         return φ ⋎ ψ
     | 6 =>
-      have : c < e + 1 := Nat.lt_succ.mpr <| Nat.unpair_right_le _
+      have : c < e + 1 := Nat.lt_succ_iff.mpr <| Nat.unpair_right_le _
       do
         let φ ← ofNat (n + 1) c
         return ∀' φ
     | 7 =>
-      have : c < e + 1 := Nat.lt_succ.mpr <| Nat.unpair_right_le _
+      have : c < e + 1 := Nat.lt_succ_iff.mpr <| Nat.unpair_right_le _
       do
         let φ ← ofNat (n + 1) c
         return ∃' φ
@@ -199,9 +204,7 @@ lemma encode_ex (φ : Semiformula L ξ (n + 1)) : encode (∃' φ) = (Nat.pair 7
 
 end Semiformula
 
-end LO.FirstOrder
-
-namespace LO.FirstOrder
+section
 
 variable {L : Language} [L.Encodable]
 
@@ -213,4 +216,8 @@ instance Semiformula.countable [Countable ξ] : Countable (Semiformula L ξ n) :
   have : Encodable ξ := Encodable.ofCountable ξ
   exact Encodable.countable
 
+end
+
 end LO.FirstOrder
+
+end

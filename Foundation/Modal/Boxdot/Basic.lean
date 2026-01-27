@@ -1,6 +1,10 @@
-import Foundation.Modal.Hilbert.Normal.Basic
-import Foundation.Modal.Kripke.Closure
-import Foundation.Modal.Kripke.Irreflexivize
+module
+
+public import Foundation.Modal.Hilbert.Normal.Basic
+public import Foundation.Modal.Kripke.Closure
+public import Foundation.Modal.Kripke.Irreflexivize
+
+@[expose] public section
 
 namespace LO.Modal
 
@@ -113,32 +117,32 @@ lemma iff_boxdotTranslateMultibox_boxdotTranslateBoxlt : x ⊧ (□^[n]φ)ᵇ �
   | zero => simp;
   | succ n ih =>
     suffices (∀ k < n + 1, x ⊧ (□^[k]φᵇ)) ∧ x ⊧ (□(□^[n]φ)ᵇ) ↔ (∀ k < n + 2, x ⊧ (□^[k]φᵇ)) by
-      simpa [Box.boxdot, boxdotTranslate, ih];
+      simpa [Box.boxdot, boxdotTranslate, ih, Box.boxLe];
     constructor;
     . rintro ⟨h₁, h₂⟩ k hk;
-      apply Satisfies.multibox_def.mpr;
+      apply Satisfies.boxItr_def.mpr;
       intro y Rxy;
       by_cases ek : k = n + 1;
       . subst ek;
         obtain ⟨u, Ryu, Ruy⟩ := Rxy;
-        apply Satisfies.multibox_def.mp (Satisfies.fconj_def.mp (ih.mp $ h₂ u Ryu) _ ?_) Ruy;
+        apply Satisfies.boxItr_def.mp (Satisfies.fconj_def.mp (ih.mp $ h₂ u Ryu) _ ?_) Ruy;
         . simp;
           tauto;
-      . exact Satisfies.multibox_def.mp (h₁ k (by omega)) Rxy;
+      . exact Satisfies.boxItr_def.mp (h₁ k (by omega)) Rxy;
     . intro h;
       constructor;
       . intro k hk;
-        apply Satisfies.multibox_def.mpr;
+        apply Satisfies.boxItr_def.mpr;
         intro y Rxy;
-        apply Satisfies.multibox_def.mp (@h k (by omega)) Rxy;
+        apply Satisfies.boxItr_def.mp (@h k (by omega)) Rxy;
       . intro y Rxy;
         apply ih.mpr;
         apply Satisfies.fconj_def.mpr;
         simp only [Finset.mem_image, Finset.mem_range, Satisfies.iff_models, forall_exists_index, and_imp, forall_apply_eq_imp_iff₂];
         intro k hk;
-        apply Satisfies.multibox_def.mpr;
+        apply Satisfies.boxItr_def.mpr;
         intro u Ryu;
-        apply Satisfies.multibox_def.mp $ @h (k + 1) (by omega);
+        apply Satisfies.boxItr_def.mp $ @h (k + 1) (by omega);
         use y;
 
 end Formula.Kripke.Satisfies
@@ -200,7 +204,7 @@ lemma iff_reflexivize_irreflexivize [F.IsReflexive] {x : F.World} {V} : (Satisfi
       apply ihp (x := y) |>.mp;
       exact h y $ by
         induction Rxy with
-        | refl => apply IsRefl.refl;
+        | refl => apply Std.Refl.refl;
         | single h => exact h.1;
     . intro h y Rxy;
       by_cases e : x = y;
@@ -219,3 +223,4 @@ lemma iff_reflexivize_irreflexivize' [F.IsReflexive] : (F ⊧ φ) ↔ ((F^≠^=)
 end Kripke
 
 end LO.Modal
+end

@@ -1,5 +1,9 @@
-import Foundation.Modal.Kripke.AxiomGeach
-import Foundation.Modal.Kripke.Hilbert
+module
+
+public import Foundation.Modal.Kripke.AxiomGeach
+public import Foundation.Modal.Kripke.Hilbert
+
+@[expose] public section
 
 namespace LO.Modal
 
@@ -31,3 +35,4 @@ instance : Canonical (Modal.KB5) Kripke.FrameClass.KB5 := ⟨by constructor⟩
 instance : Complete (Modal.KB5) Kripke.FrameClass.KB5 := inferInstance
 
 end LO.Modal
+end

@@ -1,7 +1,11 @@
-import Foundation.Modal.Entailment.K
-import Foundation.Modal.Entailment.KP
-import Foundation.Modal.Entailment.KD
-import Foundation.Modal.Entailment.ET
+module
+
+public import Foundation.Modal.Entailment.K
+public import Foundation.Modal.Entailment.KP
+public import Foundation.Modal.Entailment.KD
+public import Foundation.Modal.Entailment.ET
+
+@[expose] public section
 
 namespace LO.Modal.Entailment
 
@@ -35,10 +39,11 @@ omit [DecidableEq F] in
   induction n with
   | zero => simp;
   | succ n ih =>
-    simp only [show (i + (n + 1)) = (i + n) + 1 by omega, Box.multibox_succ];
+    simp only [show (i + (n + 1)) = (i + n) + 1 by omega, Box.boxItr_succ];
     apply C!_trans ?_ ih;
     apply axiomT!;
 
 end
 
 end LO.Modal.Entailment
+end

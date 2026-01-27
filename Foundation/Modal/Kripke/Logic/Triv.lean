@@ -1,7 +1,10 @@
-import Foundation.Modal.Kripke.Logic.KTc
-import Foundation.Modal.Kripke.Logic.GrzPoint3
-import Foundation.Modal.Kripke.Logic.S4Point4McK
-import Foundation.Vorspiel.HRel.Equality
+module
+
+public import Foundation.Modal.Kripke.Logic.KTc
+public import Foundation.Modal.Kripke.Logic.GrzPoint3
+public import Foundation.Modal.Kripke.Logic.S4Point4McK
+
+@[expose] public section
 
 namespace LO.Modal
 
@@ -16,7 +19,7 @@ variable {F : Frame}
 
 protected abbrev Frame.IsTriv (F : Frame) := _root_.IsEquality F.Rel
 instance [F.IsTriv] : F.IsS4Point4McK where
-  mckinsey := by simp
+  mckinsey := by simp [equality]
 
 protected class Frame.IsFiniteTriv (F : Frame) extends F.IsFinite, F.IsTriv
 instance [F.IsFiniteTriv] : F.IsFiniteGrzPoint3' where
@@ -26,9 +29,7 @@ instance [F.IsFiniteTriv] : F.IsFiniteGrzPoint3' where
 protected abbrev FrameClass.Triv : FrameClass := { F | F.IsTriv }
 protected abbrev FrameClass.finite_Triv : FrameClass := { F | F.IsFiniteTriv }
 
-
 end Kripke
-
 
 instance : Sound Modal.Triv Kripke.FrameClass.Triv := instSound_of_validates_axioms $ by
   apply FrameClass.validates_with_AxiomK_of_validates;
@@ -81,10 +82,9 @@ instance : Complete Modal.Triv Kripke.FrameClass.finite_Triv := ⟨by
 
 end FFP
 
-
 instance : Modal.KTc ⪱ Modal.Triv := by
   constructor;
-  . apply Hilbert.Normal.weakerThan_of_subset_axioms; simp;
+  . grind;
   . apply Entailment.not_weakerThan_iff.mpr;
     use (Axioms.T (.atom 0));
     constructor;
@@ -149,3 +149,4 @@ instance : Modal.S4Point4McK ⪱ Modal.Triv := by
         grind;
 
 end LO.Modal
+end

@@ -1,6 +1,9 @@
-import Foundation.FirstOrder.Kripke.Intuitionistic
-import Foundation.FirstOrder.NegationTranslation.GoedelGentzen
+module
 
+public import Foundation.FirstOrder.Kripke.Intuitionistic
+public import Foundation.FirstOrder.NegationTranslation.GoedelGentzen
+
+@[expose] public section
 /-! # Weak forcing
 
 Main reference: Jeremy Avigad, "Forcing in proof theory"
@@ -46,7 +49,15 @@ variable {p q r : ℙ} {bv : Fin n → Name} {fv : ξ → Name}
   grind
 
 @[simp] lemma all {φ : Semiformula L ξ (n + 1)} :
-    p ⊩ᶜ[bv|fv] ∀' φ ↔ ∀ q ≤ p, ∀ x : q, WeaklyForces q (↑x :> bv) fv φ := by simp [WeaklyForces]
+    p ⊩ᶜ[bv|fv] ∀' φ ↔ ∀ q ≤ p, ∀ x : q, q ⊩ᶜ[↑x :> bv|fv] φ := by simp [WeaklyForces]
+
+@[simp] lemma all_of_constantDomain [ConstantDomain ℙ] {φ : Semiformula L ξ (n + 1)} :
+    p ⊩ᶜ[bv|fv] ∀' φ ↔ ∀ x : Name, p ⊩ᶜ[x :> bv|fv] φ := by simp [WeaklyForces, -Forces.all]
+
+lemma rew {bv : Fin n₂ → Name} {fv : ξ₂ → Name} {ω : Rew L ξ₁ n₁ ξ₂ n₂} {φ : Semiformula L ξ₁ n₁} :
+    p ⊩ᶜ[bv|fv] (ω ▹ φ) ↔
+    p ⊩ᶜ[fun x ↦ (ω #x).relationalVal bv fv|fun x ↦ (ω &x).relationalVal bv fv] φ := by
+  simp [WeaklyForces, ←Semiformula.rew_doubleNegation, Forces.rew]
 
 @[simp] lemma ex {φ : Semiformula L ξ (n + 1)} :
     p ⊩ᶜ[bv|fv] ∃' φ ↔ ∀ q ≤ p, ∃ r ≤ q, ∃ x : r, r ⊩ᶜ[↑x :> bv|fv] φ := by
@@ -61,6 +72,9 @@ variable {p q r : ℙ} {bv : Fin n → Name} {fv : ξ → Name}
   · intro h q hqp
     rcases h q hqp with ⟨r, hrq, x, hx, H⟩
     exact ⟨r, hrq, x, hx, r, by rfl, H⟩
+
+@[simp] lemma ex_of_constantDomain [ConstantDomain ℙ] {φ : Semiformula L ξ (n + 1)} :
+    p ⊩ᶜ[bv|fv] ∃' φ ↔ ∀ q ≤ p, ∃ r ≤ q, ∃ x : Name, r ⊩ᶜ[x :> bv|fv] φ := by simp
 
 lemma monotone {φ : Semiformula L ξ n} :
     p ⊩ᶜ[bv|fv] φ → ∀ q ≤ p, q ⊩ᶜ[bv|fv] φ := fun h ↦ Forces.monotone h

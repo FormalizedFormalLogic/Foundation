@@ -1,5 +1,8 @@
-import Foundation.FirstOrder.Arithmetic.Basic.Misc
+module
 
+public import Foundation.FirstOrder.Arithmetic.Basic.Misc
+
+@[expose] public section
 namespace LO.FirstOrder.Arithmetic
 
 private lemma consequence_of_aux (T : ArithmeticTheory) [𝗘𝗤 ⪯ T] (φ : Sentence ℒₒᵣ)

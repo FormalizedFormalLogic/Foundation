@@ -1,5 +1,9 @@
-import Foundation.Modal.Kripke.Logic.K4Point3
-import Foundation.Modal.Kripke.Logic.K5
+module
+
+public import Foundation.Modal.Kripke.Logic.K4Point3
+public import Foundation.Modal.Kripke.Logic.K5
+
+@[expose] public section
 
 namespace LO.Modal
 
@@ -85,3 +89,4 @@ instance : Modal.K4Point3 ⪱ Modal.K45 := by
           omega;
 
 end LO.Modal
+end

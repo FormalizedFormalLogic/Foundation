@@ -1,11 +1,14 @@
-import Foundation.FirstOrder.SetTheory.Basic
-import Foundation.Vorspiel.ExistsUnique
+module
+
+public import Foundation.FirstOrder.SetTheory.Basic
 
 /-!
 # Zermelo set theory
 
 reference: Ralf Schindler, "Set Theory, Exploring Independence and Truth"
 -/
+
+@[expose] public section
 
 namespace LO.FirstOrder.SetTheory
 
@@ -21,10 +24,12 @@ alias ⟨_, mem_ext⟩ := mem_ext_iff
 
 attribute [ext] mem_ext
 
-@[grind] lemma subset_antisymm {x y : V} (hxy : x ⊆ y) (hyx : y ⊆ x) : x = y := by
+@[grind ->] lemma subset_antisymm {x y : V} (hxy : x ⊆ y) (hyx : y ⊆ x) : x = y := by
   ext z; constructor
   · exact hxy z
   · exact hyx z
+
+@[grind .] lemma subset_antisymm_iff {x y : V} : x ⊆ y ∧ y ⊆ x ↔ x = y := by aesop
 
 lemma SSubset.iff {x y : V} : x ⊊ y ↔ x ⊆ y ∧ ∃ z ∈ y, z ∉ x := by
   constructor
@@ -233,7 +238,7 @@ lemma pair_eq_doubleton (x y : V) : {x, y} = doubleton x y := by ext; simp
     {x} ∪ y = insert x y := by
   ext; simp
 
-@[simp, grind] lemma insert_eq_self_of_mem {x y : V} (hx : x ∈ y) : insert x y = y := by
+@[simp, grind =] lemma insert_eq_self_of_mem {x y : V} (hx : x ∈ y) : insert x y = y := by
   ext; simp only [mem_insert, or_iff_right_iff_imp]; grind
 
 /-! ## Axiom of power set -/
@@ -305,13 +310,13 @@ open Lean Elab Term Meta
 syntax (name := internalSetBuilder) "{" binderIdent " ∈ " term " ; " term "}" : term
 
 @[term_elab internalSetBuilder]
-def elabInternalSetBuilder : TermElab
+meta def elabInternalSetBuilder : TermElab
   | `({ $x:ident ∈ $s ; $p }), expectedType? => do
     elabTerm (← `(sep $s (fun $x:ident ↦ $p) (by definability))) expectedType?
   | _, _ => throwUnsupportedSyntax
 
 @[app_unexpander sep]
-def sep.unexpander : Lean.PrettyPrinter.Unexpander
+meta def sep.unexpander : Lean.PrettyPrinter.Unexpander
   | `($_ $s $P $_) =>
     match P with
     | `(fun $x:ident ↦ $p) => `({ $x:ident ∈ $s ; $p })
@@ -389,21 +394,21 @@ lemma inter_assoc (x y z : V) : (x ∩ y) ∩ z = x ∩ (y ∩ z) := by ext; sim
 @[simp] lemma sInter_insert (x y : V) [hy : IsNonempty y] : ⋂ˢ insert x y = x ∩ ⋂ˢ y := by
   ext; simp [*, mem_sInter_iff_of_nonempty]
 
-@[simp, grind] lemma intsert_inter_of_mem (x y z : V) (hx : x ∈ z) :
+@[simp, grind =] lemma intsert_inter_of_mem (x y z : V) (hx : x ∈ z) :
     insert x y ∩ z = insert x (y ∩ z) := by
   ext; simp only [inter_comm, mem_inter_iff, mem_insert]; grind
 
-@[simp, grind] lemma intsert_inter_of_not_mem (x y z : V) (hx : x ∉ z) :
+@[simp, grind =] lemma intsert_inter_of_not_mem (x y z : V) (hx : x ∉ z) :
     insert x y ∩ z = y ∩ z := by
   ext; simp only [inter_comm, mem_inter_iff, mem_insert]; grind
 
-@[simp, grind] lemma singleton_inter_of_mem {x y : V} (hx : x ∈ y) :
+@[simp, grind =] lemma singleton_inter_of_mem {x y : V} (hx : x ∈ y) :
     {x} ∩ y = {x} := by
   ext
   simp only [inter_comm, mem_inter_iff, mem_singleton_iff,
     and_iff_right_iff_imp]; grind
 
-@[simp, grind] lemma singleton_inter_of_not_mem {x y : V} (hx : x ∉ y) :
+@[simp, grind =] lemma singleton_inter_of_not_mem {x y : V} (hx : x ∉ y) :
     {x} ∩ y = ∅ := by
   ext; simp only [inter_comm, mem_inter_iff, mem_singleton_iff, not_mem_empty, iff_false, not_and]
   grind
@@ -428,21 +433,21 @@ instance sdiff.definable : ℒₛₑₜ-function₂[V] SDiff.sdiff := sdiff.defi
 
 @[simp] lemma empty_sdiff (x : V) : ∅ \ x = ∅ := by ext; simp
 
-@[simp, grind] lemma singleton_sdiff_of_mem {x z : V} (hx : x ∈ z) :
+@[simp, grind =] lemma singleton_sdiff_of_mem {x z : V} (hx : x ∈ z) :
     {x} \ z = ∅ := by
   ext
   simp only [mem_sdiff_iff, mem_singleton_iff, not_mem_empty,
     iff_false, not_and, Decidable.not_not]; grind
 
-@[simp, grind] lemma singleton_sdiff_of_not_mem {x z : V} (hx : x ∉ z) :
+@[simp, grind =] lemma singleton_sdiff_of_not_mem {x z : V} (hx : x ∉ z) :
     {x} \ z = {x} := by
   ext; simp only [mem_sdiff_iff, mem_singleton_iff, and_iff_left_iff_imp]; grind
 
-@[simp, grind] lemma insert_sdiff_of_mem {x y z : V} (hx : x ∈ z) :
+@[simp, grind =] lemma insert_sdiff_of_mem {x y z : V} (hx : x ∈ z) :
     insert x y \ z = y \ z := by
   ext; simp only [mem_sdiff_iff, mem_insert, and_congr_left_iff, or_iff_right_iff_imp]; grind
 
-@[simp, grind] lemma insert_sdiff_of_not_mem {x y z : V} (hx : x ∉ z) :
+@[simp, grind =] lemma insert_sdiff_of_not_mem {x y z : V} (hx : x ∉ z) :
     insert x y \ z = insert x (y \ z) := by
   ext; simp only [mem_sdiff_iff, mem_insert]; grind
 
@@ -463,7 +468,7 @@ macro_rules
   | `(⟨$term:term⟩ₖ) => `($term)
 
 @[app_unexpander kpair]
-def pairUnexpander : Lean.PrettyPrinter.Unexpander
+meta def pairUnexpander : Lean.PrettyPrinter.Unexpander
   | `($_ $term $term2) => `(⟨$term, $term2⟩ₖ)
   | _ => throw ()
 
@@ -506,10 +511,10 @@ instance kpair.π₂.defined : ℒₛₑₜ-function₁[V] kpair.π₂ via kpair
 
 instance kpair.π₂.definable : ℒₛₑₜ-function₁[V] kpair.π₂ := kpair.π₂.defined.to_definable
 
-@[grind, simp] lemma kpair.π₁_kpair (x y : V) :
+@[grind =, simp] lemma kpair.π₁_kpair (x y : V) :
     π₁ ⟨x, y⟩ₖ = x := by simp [π₁, kpair]
 
-@[grind, simp] lemma kpair.π₂_kpair (x y : V) :
+@[grind =, simp] lemma kpair.π₂_kpair (x y : V) :
     π₂ ⟨x, y⟩ₖ = y := calc
   π₂ ⟨x, y⟩ₖ = ⋃ˢ {z ∈ {x, y} ; z = x → ({x, y} : V) = {x}} := by simp [π₂, kpair]
   _              = ⋃ˢ {y} := by

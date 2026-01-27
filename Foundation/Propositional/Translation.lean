@@ -1,5 +1,9 @@
-import Foundation.Propositional.Formula
-import Foundation.Propositional.NNFormula
+module
+
+public import Foundation.Propositional.Formula.Basic
+public import Foundation.Propositional.Formula.NNFormula
+
+@[expose] public section
 
 namespace LO.Propositional
 
@@ -58,3 +62,4 @@ instance : Coe (NNFormula α) (Formula α) := ⟨NNFormula.toFormula⟩
 end NNFormula.toFormula
 
 end LO.Propositional
+end

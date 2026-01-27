@@ -1,7 +1,11 @@
-import Foundation.InterpretabilityLogic.Veltman.Basic
-import Foundation.InterpretabilityLogic.Veltman.AxiomJ2
-import Foundation.InterpretabilityLogic.Veltman.Logic.IL
-import Mathlib.Tactic.TFAE
+module
+
+public import Foundation.InterpretabilityLogic.Veltman.Basic
+public import Foundation.InterpretabilityLogic.Veltman.AxiomJ2
+public import Foundation.InterpretabilityLogic.Veltman.Logic.IL
+public import Mathlib.Tactic.TFAE
+
+@[expose] public section
 
 namespace LO.InterpretabilityLogic.Veltman
 
@@ -110,3 +114,4 @@ lemma validate_axiomF_of_HasAxiomW [F.IsIL] [F.HasAxiomW] : F ⊧ Axioms.F φ :=
 lemma Frame.HasAxiomW.of_validate_axiomW [F.IsIL] (h : F ⊧ Axioms.W (.atom 0) (.atom 1)) : F.HasAxiomW := TFAE_HasAxiomW.out 1 0 |>.mp h
 
 end LO.InterpretabilityLogic.Veltman
+end

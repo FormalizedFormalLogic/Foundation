@@ -1,6 +1,10 @@
-import Foundation.Modal.Kripke.Logic.KT
-import Foundation.Modal.Kripke.Logic.KDB
-import Foundation.Modal.Kripke.Filtration
+module
+
+public import Foundation.Modal.Kripke.Logic.KT
+public import Foundation.Modal.Kripke.Logic.KDB
+public import Foundation.Modal.Kripke.Filtration
+
+@[expose] public section
 
 namespace LO.Modal
 
@@ -56,7 +60,7 @@ instance : Complete Modal.KTB FrameClass.finite_KTB := ⟨by
 
 instance : Modal.KT ⪱ Modal.KTB := by
   constructor;
-  . apply Hilbert.Normal.weakerThan_of_subset_axioms $ by simp;
+  . grind;
   . apply Entailment.not_weakerThan_iff.mpr;
     use (Axioms.B (.atom 0));
     constructor;
@@ -68,7 +72,8 @@ instance : Modal.KT ⪱ Modal.KTB := by
       constructor;
       . tauto;
       . suffices ∃ x, (0 : M.World) ≺ x ∧ ¬x ≺ 0 by
-          simpa [M, Semantics.Models, Satisfies];
+          simp [M, Semantics.Models, Satisfies];
+          grind;
         use 1;
         omega;
 
@@ -95,7 +100,7 @@ instance : Modal.KDB ⪱ Modal.KTB := by
           symm := by simp;
         };
       . simp [Semantics.Models, Satisfies];
-        omega;
-
+        grind;
 
 end LO.Modal
+end

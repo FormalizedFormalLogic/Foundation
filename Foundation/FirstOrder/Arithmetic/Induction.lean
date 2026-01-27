@@ -1,5 +1,8 @@
-import Foundation.FirstOrder.Arithmetic.HFS
+module
 
+public import Foundation.FirstOrder.Arithmetic.HFS
+
+@[expose] public section
 /-!
 # Various induction-related principles in $\mathsf{I}\Sigma_n$
 -/

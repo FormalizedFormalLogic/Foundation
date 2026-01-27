@@ -1,5 +1,9 @@
-import Foundation.Modal.Tableau
-import Foundation.Modal.Kripke.Basic
+module
+
+public import Foundation.Modal.Tableau
+public import Foundation.Modal.Kripke.Basic
+
+@[expose] public section
 
 namespace LO.Modal
 
@@ -18,7 +22,7 @@ section
 
 abbrev canonicalFrame (𝓢 : S) [Entailment.Consistent 𝓢] [Entailment.K 𝓢] : Kripke.Frame where
   World := MaximalConsistentTableau 𝓢
-  Rel t₁ t₂ := t₁.1.1.prebox ⊆ t₂.1.1
+  Rel t₁ t₂ := □⁻¹'t₁.1.1 ⊆ t₂.1.1
 
 abbrev canonicalModel (𝓢 : S) [Entailment.Consistent 𝓢] [Entailment.K 𝓢] : Model where
   toFrame := canonicalFrame 𝓢
@@ -129,7 +133,8 @@ class Canonical (𝓢 : S) [Entailment.Consistent 𝓢] [Entailment.K 𝓢] (C :
   canonical : (Kripke.canonicalFrame 𝓢) ∈ C
 
 instance [Canonical 𝓢 C] : Complete 𝓢 C := ⟨by
-  contrapose;
+  intro φ;
+  contrapose!;
   intro h;
   apply not_validOnFrameClass_of_exists_model;
   use (canonicalModel 𝓢);
@@ -145,7 +150,7 @@ open Formula.Kripke.Satisfies
 
 variable {x y : (canonicalModel 𝓢).World}
 
-lemma def_rel_box_mem₁ : x ≺ y ↔ x.1.1.prebox ⊆ y.1.1 := by simp [Frame.Rel'];
+lemma def_rel_box_mem₁ : x ≺ y ↔ □⁻¹'x.1.1 ⊆ y.1.1 := by simp [Frame.Rel'];
 
 lemma def_rel_box_satisfies : x ≺ y ↔ ∀ {φ}, x ⊧ □φ → y ⊧ φ := by
   constructor;
@@ -156,10 +161,10 @@ lemma def_rel_box_satisfies : x ≺ y ↔ ∀ {φ}, x ⊧ □φ → y ⊧ φ := 
     intro φ hφ;
     exact truthlemma₁.mpr $ h $ truthlemma₁.mp hφ
 
-lemma def_multirel_multibox_satisfies : x ≺^[n] y ↔ (∀ {φ}, x ⊧ □^[n]φ → y ⊧ φ) := by
+lemma def_multirel_boxItr_satisfies : x ≺^[n] y ↔ (∀ {φ}, x ⊧ □^[n]φ → y ⊧ φ) := by
   constructor;
   . intro h φ hφ;
-    exact Satisfies.multibox_def.mp hφ h;
+    exact Satisfies.boxItr_def.mp hφ h;
   . induction n generalizing x y with
     | zero =>
       suffices (∀ {φ : Formula ℕ}, x ⊧ φ → y ⊧ φ) → x = y by simpa;
@@ -169,7 +174,7 @@ lemma def_multirel_multibox_satisfies : x ≺^[n] y ↔ (∀ {φ}, x ⊧ □^[n]
       . intro φ hφ; exact truthlemma₂.mpr $ h $ Satisfies.not_def.mpr $ truthlemma₂.mp hφ;
     | succ n ih =>
       intro h;
-      obtain ⟨t, ht⟩ := lindenbaum (𝓢 := 𝓢) (t₀ := ⟨{ φ | x ⊧ □φ }, Set.multibox n { φ | ¬y ⊧ φ }⟩) $ by
+      obtain ⟨t, ht⟩ := lindenbaum (𝓢 := 𝓢) (t₀ := ⟨{ φ | x ⊧ □φ }, □^[n]'{ φ | ¬y ⊧ φ }⟩) $ by
         intro Γ Δ hΓ hΔ;
         by_contra! hC;
         have : 𝓢 ⊢ □Γ.conj ➝ □Δ.disj := imply_box_distribute'! hC;
@@ -180,21 +185,23 @@ lemma def_multirel_multibox_satisfies : x ≺^[n] y ↔ (∀ {φ}, x ⊧ □^[n]
           intro φ hφ;
           apply hΓ hφ y Rxy;
         have : x ⊧ □Δ.disj := truthlemma₁.mp this;
-        have : x ⊧ □^[(n + 1)](Δ.premultibox n |>.disj) := by
-          suffices x ⊧ □□^[n](Finset.premultibox n Δ).disj by simpa;
+        have : x ⊧ □^[(n + 1)](□⁻¹^[n]'Δ).disj := by
+          suffices x ⊧ □□^[n](□⁻¹^[n]'Δ).disj by simpa;
           intro y Rxy;
-          apply multibox_def.mpr;
+          apply boxItr_def.mpr;
           intro z Ryz;
-          obtain ⟨ψ, hψ₁, hψ₂⟩ := Satisfies.fdisj_def.mp $ this y Rxy;
-          obtain ⟨ξ, _, rfl⟩ := by simpa using hΔ hψ₁;
           apply Satisfies.fdisj_def.mpr;
+          obtain ⟨ψ, hψ₁, hψ₂⟩ := Satisfies.fdisj_def.mp $ this y Rxy;
+          obtain ⟨ξ, hξ, rfl⟩ := hΔ hψ₁;
           use ξ;
           constructor;
-          . simpa;
-          . exact Satisfies.multibox_def.mp hψ₂ Ryz;
-        have : y ⊧ (Δ.premultibox n |>.disj) := h this;
+          . simpa [Finset.LO.preboxItr];
+          . exact Satisfies.boxItr_def.mp hψ₂ Ryz;
+        have : y ⊧ (□⁻¹^[n]'Δ).disj := h this;
         obtain ⟨ψ, hψ₁, hψ₂⟩ := fdisj_def.mp this;
-        have : ¬y ⊧ ψ := by simpa using @hΔ (□^[n]ψ) (by simpa using hψ₁);
+        have : y ⊭ ψ := Set.LO.mem_of_mem_boxItr $ @hΔ (□^[n]ψ) $ by
+          show □^[n]ψ ∈ ↑Δ;
+          grind;
         contradiction;
       use t;
       constructor;
@@ -203,15 +210,16 @@ lemma def_multirel_multibox_satisfies : x ≺^[n] y ↔ (∀ {φ}, x ⊧ □^[n]
         exact truthlemma₁.mp hφ;
       . apply ih;
         intro φ hφ;
-        simpa using (Set.compl_subset_compl.mpr ht.2) $ iff_not_mem₂_mem₁.mpr $ truthlemma₁.mpr hφ
+        have := Set.compl_subset_compl.mpr ht.2 $ iff_not_mem₂_mem₁.mpr $ truthlemma₁.mpr hφ;
+        grind;
 
-lemma def_multirel_multibox_mem₁ : x ≺^[n] y ↔ (x.1.1.premultibox n ⊆ y.1.1) := ⟨
-  fun h _ hφ => truthlemma₁.mpr $ def_multirel_multibox_satisfies.mp h $ truthlemma₁.mp hφ,
-  fun h => def_multirel_multibox_satisfies.mpr fun hφ => truthlemma₁.mp (h $ truthlemma₁.mpr hφ)
+lemma def_multirel_boxItr_mem₁ : x ≺^[n] y ↔ ((□⁻¹^[n]'x.1.1) ⊆ y.1.1) := ⟨
+  fun h _ hφ => truthlemma₁.mpr $ def_multirel_boxItr_satisfies.mp h $ truthlemma₁.mp hφ,
+  fun h => def_multirel_boxItr_satisfies.mpr fun hφ => truthlemma₁.mp (h $ truthlemma₁.mpr hφ)
 ⟩
 
-lemma def_multirel_multibox_mem₂ : x ≺^[n] y ↔ (y.1.2 ⊆ x.1.2.premultibox n) := by
-  apply Iff.trans def_multirel_multibox_mem₁;
+lemma def_multirel_boxItr_mem₂ : x ≺^[n] y ↔ (y.1.2 ⊆ (□⁻¹^[n]'x.1.2)) := by
+  apply Iff.trans def_multirel_boxItr_mem₁;
   constructor;
   . intro h φ;
     contrapose!;
@@ -228,55 +236,69 @@ lemma def_multirel_multibox_mem₂ : x ≺^[n] y ↔ (y.1.2 ⊆ x.1.2.premultibo
     apply iff_not_mem₁_mem₂.mp;
     assumption;
 
-lemma def_rel_box_mem₂ : x ≺ y ↔ (y.1.2 ⊆ x.1.2.prebox) := by
-  simpa using def_multirel_multibox_mem₂ (n := 1);
+lemma def_rel_box_mem₂ : x ≺ y ↔ (y.1.2 ⊆ (□⁻¹' x.1.2)) := by
+  simpa using def_multirel_boxItr_mem₂ (n := 1);
 
-lemma def_multirel_multidia_satisfies : x ≺^[n] y ↔ (∀ {φ}, y ⊧ φ → x ⊧ ◇^[n]φ) := by
+lemma def_multirel_diaItr_satisfies : x ≺^[n] y ↔ (∀ {φ}, y ⊧ φ → x ⊧ ◇^[n]φ) := by
   constructor;
   . intro h φ hφ;
-    apply Formula.Kripke.Satisfies.multidia_def.mpr;
+    apply Formula.Kripke.Satisfies.diaItr_def.mpr;
     use y;
   . intro h;
-    apply def_multirel_multibox_satisfies.mpr;
+    apply def_multirel_boxItr_satisfies.mpr;
     intro φ;
     contrapose;
     intro hφ;
     apply Satisfies.not_def.mp;
-    have : x ⊧ ∼□^[n](∼∼φ) := multidia_dual.mp $ h (φ := ∼φ) (Satisfies.not_def.mp hφ);
+    have : x ⊧ ∼□^[n](∼∼φ) := diaItr_dual.mp $ h (φ := ∼φ) (Satisfies.not_def.mp hφ);
     revert this;
     apply intro_neg_semiequiv;
-    apply intro_multibox_semiequiv;
+    apply intro_boxItr_semiequiv;
     intro _ _;
     apply negneg_def.mpr;
 
-lemma def_multirel_multidia_mem₁ : x ≺^[n] y ↔ (y.1.1 ⊆ x.1.1.premultidia n) := ⟨
-  fun h _ hφ => truthlemma₁.mpr $ def_multirel_multidia_satisfies.mp h (truthlemma₁.mp hφ),
-  fun h => def_multirel_multidia_satisfies.mpr fun hφ => truthlemma₁.mp $ h (truthlemma₁.mpr hφ)
+lemma def_multirel_diaItr_mem₁ : x ≺^[n] y ↔ (y.1.1 ⊆ (◇⁻¹^[n]'x.1.1)) := by
+  constructor;
+  . intro h φ hφ;
+    apply truthlemma₁.mpr;
+    apply def_multirel_diaItr_satisfies.mp h;
+    exact truthlemma₁.mp hφ;
+  . intro h;
+    apply def_multirel_diaItr_satisfies.mpr;
+    intro _ hφ;
+    exact truthlemma₁.mp $ h $ truthlemma₁.mpr hφ;
+/-
+  by
+    sorry,
+  -- fun h _ hφ => truthlemma₁.mpr $ def_multirel_diaItr_satisfies.mp h (truthlemma₁.mp hφ),
+  fun h => def_multirel_diaItr_satisfies.mpr fun hφ => truthlemma₁.mp $ h (truthlemma₁.mpr hφ)
 ⟩
+-/
 
-lemma def_rel_dia_mem₁ : x ≺ y ↔ (y.1.1 ⊆ x.1.1.predia) := by
-  simpa using def_multirel_multidia_mem₁ (n := 1);
+lemma def_rel_dia_mem₁ : x ≺ y ↔ (y.1.1 ⊆ (◇'⁻¹ x.1.1)) := by
+  simpa using def_multirel_diaItr_mem₁ (n := 1);
 
-lemma def_multirel_multidia_mem₂ : x ≺^[n] y ↔ (x.1.2.premultidia n ⊆ y.1.2) := by
+lemma def_multirel_diaItr_mem₂ : x ≺^[n] y ↔ ((◇⁻¹^[n]'x.1.2) ⊆ y.1.2) := by
   constructor;
   . intro Rxy φ;
     contrapose;
     intro hφ;
     apply iff_not_mem₂_mem₁.mpr;
-    apply def_multirel_multidia_mem₁.mp Rxy;
+    apply def_multirel_diaItr_mem₁.mp Rxy;
     exact iff_not_mem₂_mem₁.mp hφ;
   . intro H;
-    apply def_multirel_multidia_mem₁.mpr;
+    apply def_multirel_diaItr_mem₁.mpr;
     intro φ;
     contrapose;
     intro hφ;
     exact iff_not_mem₁_mem₂.mpr $ @H φ (iff_not_mem₁_mem₂.mp hφ);
 
-lemma def_rel_dia_mem₂ : x ≺ y ↔ (x.1.2.predia ⊆ y.1.2) := by
-  simpa using def_multirel_multidia_mem₂ (n := 1);
+lemma def_rel_dia_mem₂ : x ≺ y ↔ ((◇'⁻¹x.1.2) ⊆ y.1.2) := by
+  simpa using def_multirel_diaItr_mem₂ (n := 1);
 
 end canonicalModel
 
 end Kripke
 
 end LO.Modal
+end

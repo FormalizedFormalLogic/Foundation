@@ -1,5 +1,9 @@
-import Foundation.InterpretabilityLogic.Veltman.Logic.ILMinus_J1_J4Plus
-import Foundation.InterpretabilityLogic.Veltman.Logic.ILMinus_J2Plus
+module
+
+public import Foundation.InterpretabilityLogic.Veltman.Logic.ILMinus_J1_J4Plus
+public import Foundation.InterpretabilityLogic.Veltman.Logic.ILMinus_J2Plus
+
+@[expose] public section
 
 namespace LO.InterpretabilityLogic
 
@@ -66,7 +70,7 @@ instance : InterpretabilityLogic.ILMinus_J1_J4Plus ⪱ InterpretabilityLogic.ILM
         }
       . by_contra hC;
         have := Veltman.Frame.HasAxiomJ2.of_validate_axiomJ2 hC |>.S_J2 (w := 0) (x := 1) (y := 2) (z := 3) (by tauto) (by tauto);
-        simp [Frame.SRel'] at this;
+        grind;
 
 instance : InterpretabilityLogic.ILMinus_J2Plus ⪱ InterpretabilityLogic.ILMinus_J1_J2 := by
   constructor;
@@ -97,3 +101,4 @@ instance : InterpretabilityLogic.ILMinus_J2Plus ⪱ InterpretabilityLogic.ILMinu
         contradiction;
 
 end LO.InterpretabilityLogic
+end

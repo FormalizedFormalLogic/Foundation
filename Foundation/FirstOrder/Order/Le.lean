@@ -1,5 +1,8 @@
-import Foundation.FirstOrder.Completeness.Corollaries
+module
 
+public import Foundation.FirstOrder.Completeness.Corollaries
+
+@[expose] public section
 namespace LO
 
 namespace FirstOrder

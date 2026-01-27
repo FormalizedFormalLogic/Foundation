@@ -1,16 +1,17 @@
-import Foundation.Modal.Kripke.Logic.S5Grz
-import Foundation.Modal.Maximal.Makinson
-import Foundation.Modal.ModalCompanion.Int
-import Foundation.Propositional.Kripke.Logic.Cl
+module
+
+public import Foundation.Modal.Kripke.Logic.S5Grz
+public import Foundation.Modal.Maximal.Makinson
+public import Foundation.Modal.ModalCompanion.Standard.Int
+public import Foundation.Propositional.Kripke.Logic.Cl
+
+@[expose] public section
 
 namespace LO.Propositional
 
 @[simp, grind .]
 lemma Formula.gödelTranslate.Letterless {φ : Formula ℕ} (hφ : φ.Letterless) : φᵍ.Letterless := by
-  induction φ with
-  | himp | hand | hor => simp_all only [Formula.gödelTranslate]; grind;
-  | _ => simp_all [Formula.gödelTranslate];
-
+  induction φ <;> . simp_all only [Formula.gödelTranslate]; grind;
 
 namespace Logic
 
@@ -24,7 +25,7 @@ theorem iff_letterless_Int_Cl {φ : Formula ℕ} (hφ : φ.Letterless) : Proposi
     have : Modal.S4 ⊢ ◇φᵍ := Modal.iff_provable_Cl_provable_dia_gS4.mp h;
     have : Modal.Triv ⊢ ◇φᵍ := WeakerThan.pbl this;
     have : Modal.Triv ⊢ φᵍ := diaT'! this;
-    have : (φᵍᵀ.toPropFormula _).isTautology := Modal.Triv.iff_isTautology.mp this;
+    have : (φᵍᵀ.toPropFormula _).Tautology := Modal.Triv.iff_tautology.mp this;
     have : Modal.KD ⊢ φᵍ := Modal.Logic.provable_KD_of_classical_tautology (by grind) this;
     have : Modal.S4 ⊢ φᵍ := WeakerThan.pbl this;
     exact Modal.ModalCompanion.companion.mpr this;
@@ -32,3 +33,4 @@ theorem iff_letterless_Int_Cl {φ : Formula ℕ} (hφ : φ.Letterless) : Proposi
 end Logic
 
 end LO.Propositional
+end

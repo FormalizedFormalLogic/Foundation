@@ -1,5 +1,8 @@
-import Foundation.FirstOrder.SetTheory.Basic.Axioms
+module
 
+public import Foundation.FirstOrder.SetTheory.Basic.Axioms
+
+@[expose] public section
 /-! # Basic properties of model of set theory-/
 
 namespace LO.FirstOrder.SetTheory
@@ -19,7 +22,7 @@ instance Subset.definable : ℒₛₑₜ-relation[V] Subset := defined_isSubsetO
 
 @[simp, trans] lemma subset_trans {x y z : V} : x ⊆ y → y ⊆ z → x ⊆ z := fun hxy hyz v hv ↦ hyz v (hxy v hv)
 
-instance : IsRefl V Subset := ⟨subset_refl⟩
+instance : Std.Refl (α := V) Subset := ⟨subset_refl⟩
 
 instance : IsTrans V Subset := ⟨fun _ _ _ ↦ subset_trans⟩
 

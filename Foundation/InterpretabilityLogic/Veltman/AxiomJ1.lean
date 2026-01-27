@@ -1,4 +1,8 @@
-import Foundation.InterpretabilityLogic.Veltman.Basic
+module
+
+public import Foundation.InterpretabilityLogic.Veltman.Basic
+
+@[expose] public section
 
 namespace LO.InterpretabilityLogic.Veltman
 
@@ -32,3 +36,4 @@ lemma Frame.HasAxiomJ1.of_validate_axiomJ1 (h : F ⊧ Axioms.J1 (.atom 0) (.atom
   apply hz ▸ Sxyz;
 
 end LO.InterpretabilityLogic.Veltman
+end

@@ -1,8 +1,12 @@
-import Foundation.Modal.Kripke.Logic.Grz.Completeness
-import Foundation.Modal.Kripke.Logic.S4
-import Foundation.Modal.Kripke.AxiomH
-import Foundation.Modal.Kripke.Filtration
-import Foundation.Modal.Kripke.Rooted
+module
+
+public import Foundation.Modal.Kripke.Logic.Grz.Completeness
+public import Foundation.Modal.Kripke.Logic.S4
+public import Foundation.Modal.Kripke.AxiomH
+public import Foundation.Modal.Kripke.Filtration
+public import Foundation.Modal.Kripke.Rooted
+
+@[expose] public section
 
 namespace LO.Modal
 
@@ -68,13 +72,14 @@ instance : Modal.Grz ⪱ Modal.S4H := by
       . simp only [Set.mem_setOf_eq];
         exact {}
       . suffices ∃ x : M, (0 : M) ≺ x ∧ ∃ y, x ≺ y ∧ y ≠ 1 ∧ x = 1 by
-          simpa [Semantics.Models, Satisfies, M];
+          simp [Semantics.Models, Satisfies, M];
+          grind;
         use 1;
         constructor;
         . tauto;
         . use 2;
-          simp [M];
-          omega;
+          grind;
 
 
 end LO.Modal
+end

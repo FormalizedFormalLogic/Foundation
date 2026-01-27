@@ -1,9 +1,12 @@
-import Foundation.Modal.Hilbert.NNFormula
-import Foundation.Modal.Maximal.Basic
-import Foundation.Modal.Logic.SumNormal
-import Foundation.Modal.ZeroSubstitution
-import Foundation.Modal.Kripke.Logic.Ver
-import Foundation.Propositional.ClassicalSemantics.Hilbert
+module
+
+public import Foundation.Modal.Hilbert.NNFormula
+public import Foundation.Modal.Maximal.Basic
+public import Foundation.Modal.Logic.SumNormal
+public import Foundation.Modal.Kripke.Logic.Ver
+public import Foundation.Propositional.ClassicalSemantics.ZeroSubst
+
+@[expose] public section
 
 namespace LO.Modal
 
@@ -79,7 +82,7 @@ lemma KD_provability_of_classical_satisfiability (hl : φ.Letterless) :
   (¬(v ⊧ (φᵀ.toPropFormula)) → Modal.KD ⊢ ∼φ)
   := by
   induction φ with
-  | hatom => simp at hl;
+  | hatom => grind;
   | hfalsum => simp [trivTranslate, toPropFormula];
   | himp φ ψ ihφ ihψ =>
     constructor;
@@ -125,24 +128,16 @@ private lemma subset_Triv_of_KD_subset.lemma₁
   := by
   induction φ with
   | hatom a =>
-    suffices v ⊧ (s.1 a) ↔ v ⊧ (s.1 a).toModalFormulaᵀ.toPropFormula by
-      simpa [trivTranslate, toPropFormula];
-    generalize eψ : s.1 a = ψ;
-    have hψ : ψ.Letterless := by
-      rw [←eψ];
-      exact s.2;
-    clear eψ;
-    induction ψ using Propositional.Formula.rec' with
-    | hatom => simp at hψ;
-    | hfalsum => tauto;
-    | hand => unfold Propositional.Formula.Letterless at hψ; simp_all [trivTranslate, toPropFormula];
-    | himp => unfold Propositional.Formula.Letterless at hψ; simp_all [trivTranslate, toPropFormula];
-    | hor => unfold Propositional.Formula.Letterless at hψ; simp_all [trivTranslate, toPropFormula]; tauto;
+    let ψ : Propositional.Formula α := s.1 a;
+    suffices v ⊧ ψ ↔ v ⊧ ψ.toModalFormulaᵀ.toPropFormula (by simp) by simpa [trivTranslate, toPropFormula];
+    induction ψ with
+    | hor => simp [trivTranslate, toPropFormula]; tauto;
+    | _ => simp_all [trivTranslate, toPropFormula];
   | _ => simp_all [trivTranslate, toPropFormula];
 
 lemma subset_Triv_of_KD_subset.lemma₂ {φ : Modal.Formula α} {s : Propositional.ZeroSubstitution _} :
-  (∼((φᵀ.toPropFormula)⟦s.1⟧)).isTautology ↔
-  ((∼φ⟦(s : Modal.ZeroSubstitution _).1⟧)ᵀ.toPropFormula).isTautology
+  (∼((φᵀ.toPropFormula)⟦s.1⟧)).Tautology ↔
+  ((∼φ⟦(s : Modal.ZeroSubstitution _).1⟧)ᵀ.toPropFormula).Tautology
   := by
   constructor;
   . intro h v hφ;
@@ -155,10 +150,10 @@ theorem subset_Triv_of_KD_subset [Modal.KD ⪯ L] : L ⪯ Modal.Triv := by
   by_contra! hC;
   obtain ⟨φ, hφ₁, hφ₂⟩ := not_weakerThan_iff.mp hC;
   replace hφ₂ := (not_imp_not.mpr Propositional.Cl.completeness) $ Modal.Triv.iff_provable_Cl.not.mp $ hφ₂;
-  obtain ⟨s, h⟩ := ClassicalSemantics.exists_neg_zeroSubst_of_not_isTautology hφ₂;
+  obtain ⟨s, h⟩ := ClassicalSemantics.exists_neg_zeroSubst_of_not_tautology hφ₂;
   let ψ := φ⟦(s : Modal.ZeroSubstitution _).1⟧;
   have : Semantics.Valid (ClassicalSemantics.Valuation ℕ) (∼(ψᵀ.toPropFormula)) := subset_Triv_of_KD_subset.lemma₂.mp h;
-  have : Modal.KD ⊢ ∼ψ := provable_not_KD_of_classical_unsatisfiable Formula.Letterless_zeroSubst
+  have : Modal.KD ⊢ ∼ψ := provable_not_KD_of_classical_unsatisfiable Formula.letterless_zeroSubst
     $ Semantics.Not.models_not.mp
     $ this (λ _ => True);
   have : L ⊢ ∼ψ := WeakerThan.pbl this;
@@ -195,3 +190,4 @@ lemma TrivFamily.notVerFamily [L.TrivFamily] : ¬L.VerFamily := by
 end Logic
 
 end LO.Modal
+end

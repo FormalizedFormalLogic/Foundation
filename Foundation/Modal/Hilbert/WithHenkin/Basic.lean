@@ -1,6 +1,11 @@
-import Foundation.Modal.Entailment.K4Henkin
-import Foundation.Modal.Hilbert.Axiom
-import Foundation.Modal.Logic.Basic
+module
+
+public import Foundation.Modal.Entailment.K4Henkin
+public import Foundation.Modal.Hilbert.Axiom
+public import Foundation.Modal.Logic.Basic
+public import Foundation.Propositional.Entailment.Cl.Łukasiewicz
+
+@[expose] public section
 
 namespace LO.Modal
 
@@ -25,7 +30,7 @@ variable {Ax Ax₁ Ax₂ : Axiom α}
 
 @[grind] lemma axm'! {φ} (h : φ ∈ Ax) : WithHenkin Ax ⊢ φ := by simpa using axm! .id h;
 
-instance : Entailment.Lukasiewicz (Hilbert.WithHenkin Ax) where
+instance : Entailment.Łukasiewicz (Hilbert.WithHenkin Ax) where
   implyK {_ _} := by constructor; apply Hilbert.WithHenkin.implyK;
   implyS {_ _ _} := by constructor; apply Hilbert.WithHenkin.implyS;
   elimContra {_ _} := by constructor; apply Hilbert.WithHenkin.ec;
@@ -142,3 +147,4 @@ instance : Entailment.K4Henkin Modal.K4Henkin where
 end
 
 end LO.Modal
+end

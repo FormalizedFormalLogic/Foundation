@@ -1,14 +1,18 @@
+module
+
 /-
   Jeřábek's proof of boxdot conjecture.
 
   References:
   - E. Jeřábek - "Cluster Expansion and the Boxdot Conjecture": https://arxiv.org/abs/1308.0994
 -/
-import Foundation.Modal.Boxdot.Basic
-import Foundation.Modal.Kripke.Logic.KTB
-import Foundation.Modal.Kripke.Logic.S5
-import Foundation.Modal.Kripke.Logic.S4McK
-import Foundation.Modal.Logic.Global
+public import Foundation.Modal.Boxdot.Basic
+public import Foundation.Modal.Kripke.Logic.KTB
+public import Foundation.Modal.Kripke.Logic.S5
+public import Foundation.Modal.Kripke.Logic.S4McK
+public import Foundation.Modal.Logic.Global
+
+@[expose] public section
 
 namespace LO.Modal
 
@@ -191,13 +195,13 @@ private lemma jerabek_SBDP.lemma₃ : L ⊢ (□^[n]Γ.conj)ᵇ ➝ □^≤[n](�
   apply Satisfies.fconj_def.mpr;
   simp only [Finset.mem_image, Finset.mem_range, forall_exists_index, and_imp, forall_apply_eq_imp_iff₂];
   intro k hk;
-  apply Satisfies.multibox_def.mpr;
+  apply Satisfies.boxItr_def.mpr;
   intro y Rxy;
   apply Satisfies.fconj_def.mpr;
   simp only [Finset.mem_image, forall_exists_index, and_imp, forall_apply_eq_imp_iff₂];
   intro ξ hξ;
   replace h : Satisfies _ x (□^[k]Γ.conjᵇ) := Satisfies.fconj_def.mp (Satisfies.iff_boxdotTranslateMultibox_boxdotTranslateBoxlt.mp h) _ ?_;
-  . apply Satisfies.fconj_def.mp (Satisfies.boxdotTranslate_fconj₂.mp $ Satisfies.multibox_def.mp h Rxy) _;
+  . apply Satisfies.fconj_def.mp (Satisfies.boxdotTranslate_fconj₂.mp $ Satisfies.boxItr_def.mp h Rxy) _;
     simp only [Finset.mem_image];
     use ξ;
   . simp only [Finset.mem_image, Finset.mem_range];
@@ -220,12 +224,12 @@ theorem jerabek_SBDP
   apply Set.not_subset.mpr;
 
   let q := Formula.freshAtom φ;
-  let X₀ := φ.subformulas.prebox.image (λ ψ => □((.atom q) ➝ ψ) ➝ ψ);
-  let X₁ := φ.subformulas.prebox.image (λ ψ => □(∼(.atom q) ➝ ψ) ➝ ψ);
+  let X₀ := (□⁻¹'φ.subformulas).image (λ ψ => □((.atom q) ➝ ψ) ➝ ψ);
+  let X₁ := (□⁻¹'φ.subformulas).image (λ ψ => □(∼(.atom q) ➝ ψ) ➝ ψ);
   let X := X₀ ∪ X₁;
   let XB := X.image (·ᵇ);
 
-  have Claim1 : ∀ ψ ∈ φ.subformulas.prebox, (L, XB.toSet) ⊢ □ψᵇ ➝ ψᵇ := by
+  have Claim1 : ∀ ψ ∈ (□⁻¹'φ.subformulas), (L, XB.toSet) ⊢ □ψᵇ ➝ ψᵇ := by
     intro ψ hψ;
     have H₁ : ∀ b, (L, XB.toSet) ⊢ (flag (.atom q) b) ⋏ □ψᵇ ➝ ⊡((flag (.atom q) !b) ➝ ψᵇ) := by
       intro b;
@@ -239,7 +243,11 @@ theorem jerabek_SBDP
       simp only [Finset.coe_image, Set.mem_image, Finset.mem_coe, XB];
       use (□((flag (atom q) b) ➝ ψ) ➝ ψ);
       constructor;
-      . match b with | true | false => simpa [X, X₀, X₁, flag] using hψ;
+      . match b with
+        | true
+        | false =>
+          simp [X, X₀, X₁, flag, Finset.LO.preboxItr];
+          grind;
       . rfl;
     have H₃ : ∀ b, (L, XB.toSet) ⊢ (flag (.atom q) b) ➝ (□ψᵇ ➝ ψᵇ) := by
       intro b;
@@ -262,7 +270,7 @@ theorem jerabek_SBDP
       have H₁ : (L, XB.toSet) ⊢ □ψ ⭤ □ψᵇ := box_congruence! ihψ;
       have H₂ : (L, XB.toSet) ⊢ □ψᵇ ⭤ ⊡ψᵇ := by
         apply Entailment.E!_intro;
-        . have : (L, XB.toSet) ⊢ □ψᵇ ➝ ψᵇ := Claim1 ψ (by simpa);
+        . have : (L, XB.toSet) ⊢ □ψᵇ ➝ ψᵇ := Claim1 ψ (by simpa [Finset.LO.preboxItr]);
           cl_prover [this];
         . cl_prover;
       cl_prover [H₁, H₂];
@@ -272,8 +280,8 @@ theorem jerabek_SBDP
       apply GlobalConsequence.thm!;
       grind;
     exact h₁ ⨀ h₂;
-  obtain ⟨Γ, n, hΓ, hφ⟩ := GlobalConsequence.iff_finite_boxlt_provable.mp this;
-  replace hφ : L ⊢ (□^≤[n]XB.conj) ➝ φᵇ := C!_trans (boxlt_fconj_regularity_of_subset hΓ) hφ;
+  obtain ⟨Γ, n, hΓ, hφ⟩ := GlobalConsequence.iff_finite_boxLe_provable.mp this;
+  replace hφ : L ⊢ (□^≤[n]XB.conj) ➝ φᵇ := C!_trans (boxLe_fconj_regularity_of_subset hΓ) hφ;
   let χ := (□^[n](X.conj) ➝ φ);
   have hχ : L ⊢ χᵇ := by apply C!_trans jerabek_SBDP.lemma₃ hφ;
   use χ;
@@ -388,3 +396,4 @@ theorem S5.BDP : Modal.S5.BoxdotProperty := jerabek_BDP Modal.S5 Kripke.FrameCla
 end
 
 end LO.Modal
+end

@@ -1,6 +1,10 @@
-import Foundation.Logic.Predicate.Term
-import Foundation.Logic.Predicate.Quantifier
-import Mathlib.Data.Nat.Cast.Order.Basic
+module
+
+public import Foundation.Logic.Predicate.Term
+public import Foundation.Logic.Predicate.Quantifier
+public import Mathlib.Data.Nat.Cast.Order.Basic
+
+@[expose] public section
 
 /-!
 # Formulas of first-order logic
@@ -672,3 +676,4 @@ end enumarateFVar
 end Semiformula
 
 end LO.FirstOrder
+end

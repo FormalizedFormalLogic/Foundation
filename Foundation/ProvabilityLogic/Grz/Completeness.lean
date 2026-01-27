@@ -1,11 +1,14 @@
-import Foundation.Modal.Boxdot.Grz_S
+module
 
+public import Foundation.Modal.Boxdot.Grz_S
+
+@[expose] public section
 namespace LO
 
 open FirstOrder
 open Modal
 open Modal.Hilbert
-open FirstOrder
+open FirstOrder FirstOrder.ProvabilityAbstraction
 open Entailment FiniteContext
 
 
@@ -27,12 +30,13 @@ end Entailment
 
 namespace ProvabilityLogic
 
+
 variable {L : Language} [L.ReferenceableBy L] [L.DecidableEq]
          {T₀ T : Theory L} [T₀ ⪯ T] {A : Modal.Formula ℕ}
 
 namespace Realization
 
-variable {𝔅 : Provability T₀ T} {f : Realization 𝔅} {A B : Modal.Formula _}
+variable {𝔅 : Provability T₀ T} [𝔅.HBL1] {f : Realization 𝔅} {A B : Modal.Formula _}
 
 def strongInterpret (f : Realization 𝔅) : Formula ℕ → Sentence L
   | .atom a => f a
@@ -40,8 +44,7 @@ def strongInterpret (f : Realization 𝔅) : Formula ℕ → Sentence L
   | φ ➝ ψ => (f.strongInterpret φ) ➝ (f.strongInterpret ψ)
   | □φ => (f.strongInterpret φ) ⋏ 𝔅 (f.strongInterpret φ)
 
-lemma iff_interpret_boxdot_strongInterpret_inside [𝔅.HBL2] :
-    T ⊢ f (Aᵇ) ⭤ f.strongInterpret A := by
+lemma iff_interpret_boxdot_strongInterpret_inside [𝔅.HBL2] : T ⊢ f (Aᵇ) ⭤ f.strongInterpret A := by
   induction A with
   | hatom φ => simp [Realization.interpret, strongInterpret, Formula.boxdotTranslate];
   | hfalsum => simp [strongInterpret, Formula.boxdotTranslate];
@@ -51,11 +54,11 @@ lemma iff_interpret_boxdot_strongInterpret_inside [𝔅.HBL2] :
     apply K!_intro;
     . apply CKK!_of_C!_of_C!;
       . cl_prover [ih];
-      . apply 𝔅.prov_distribute_imply'';
+      . apply prov_distribute_imply'';
         cl_prover [ih];
     . apply CKK!_of_C!_of_C!;
       . cl_prover [ih];
-      . apply 𝔅.prov_distribute_imply'';
+      . apply prov_distribute_imply'';
         cl_prover [ih];
 
 lemma iff_interpret_boxdot_strongInterpret [𝔅.HBL2] :
@@ -65,8 +68,8 @@ lemma iff_interpret_boxdot_strongInterpret [𝔅.HBL2] :
   . intro h; exact (K!_right iff_interpret_boxdot_strongInterpret_inside) ⨀ h;
 
 lemma iff_models_interpret_boxdot_strongInterpret
-    {M} [Nonempty M] [Structure L M] [M ⊧ₘ* T] [𝔅.HBL2] [𝔅.SoundOnModel M] :
-    M ⊧ₘ f (Aᵇ) ↔ M ⊧ₘ f.strongInterpret A := by
+  {M} [Nonempty M] [Structure L M] [M ⊧ₘ* T] [𝔅.HBL2] [𝔅.SoundOnModel M] :
+   M ⊧ₘ f (Aᵇ) ↔ M ⊧ₘ f.strongInterpret A := by
   induction A with
   | hatom φ => simp [Realization.interpret, strongInterpret, Formula.boxdotTranslate];
   | hfalsum => simp [strongInterpret, Formula.boxdotTranslate];
@@ -90,28 +93,28 @@ lemma iff_models_interpret_boxdot_strongInterpret
     . rintro ⟨h₁, h₂⟩;
       constructor;
       . exact ih.mp h₁;
-      . apply Provability.SoundOnModel.sound.mpr;
-        exact iff_interpret_boxdot_strongInterpret.mp $ Provability.SoundOnModel.sound.mp h₂;
+      . apply sound_on_model.mpr;
+        exact iff_interpret_boxdot_strongInterpret.mp $ sound_on_model.mp h₂;
     . rintro ⟨h₁, h₂⟩;
       constructor;
       . apply ih.mpr h₁;
-      . apply Provability.SoundOnModel.sound.mpr;
-        exact iff_interpret_boxdot_strongInterpret.mpr $ Provability.SoundOnModel.sound.mp h₂;
+      . apply sound_on_model.mpr;
+        exact iff_interpret_boxdot_strongInterpret.mpr $ sound_on_model.mp h₂;
 
 end Realization
 
 theorem Grz.arithmetical_completeness_iff
-    {T : ArithmeticTheory} [T.Δ₁] [𝗜𝚺₁ ⪯ T] (height : T.standardProvability.height = ⊤) :
+    {T : ArithmeticTheory} [T.Δ₁] [𝗜𝚺₁ ⪯ T] (height : T.height = ⊤) :
     (∀ f : T.StandardRealization, T ⊢ f.strongInterpret A) ↔ Modal.Grz ⊢ A := by
   constructor;
   . intro h;
-    suffices Modal.GL ⊢ Aᵇ by apply iff_boxdot_GL_Grz.mp this;
+    suffices Modal.GL ⊢ Aᵇ by apply iff_provable_boxdot_GL_provable_Grz.mp this;
     apply GL.arithmetical_completeness_iff height |>.mp;
     intro f;
     apply Realization.iff_interpret_boxdot_strongInterpret (L := ℒₒᵣ).mpr;
     apply h;
   . intro h f;
-    replace h := iff_boxdot_GL_Grz.mpr h;
+    replace h := iff_provable_boxdot_GL_provable_Grz.mpr h;
     have : (∀ f : T.StandardRealization, T ⊢ f (Aᵇ)) := GL.arithmetical_completeness_iff height |>.mpr h;
     exact Realization.iff_interpret_boxdot_strongInterpret (L := ℒₒᵣ) |>.mp $ this f;
 

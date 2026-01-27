@@ -1,11 +1,15 @@
-import Foundation.Modal.Kripke.Preservation
-import Foundation.Modal.Kripke.Rooted
-import Mathlib.Data.Finite.Card
+module
 
+public import Foundation.Modal.Kripke.Preservation
+public import Foundation.Modal.Kripke.Rooted
+public import Mathlib.Data.Finite.Card
+
+
+@[expose] public section
 
 def IsEquiv.equivalence [IsEquiv α r] : Equivalence r where
-  refl := IsRefl.refl
-  symm {_ _} := by apply IsSymm.symm
+  refl := Std.Refl.refl
+  symm {_ _} := by apply Std.Symm.symm
   trans {_ _ _} := by apply IsTrans.trans
 
 
@@ -19,9 +23,9 @@ section
 
 variable {F : Kripke.Frame} {x y z : F.World}
 
-instance : IsRefl _ (clusterEquiv F) := by tauto;
+instance : Std.Refl (clusterEquiv F) := by tauto;
 
-instance : IsSymm _ (clusterEquiv F) := ⟨by
+instance : Std.Symm (clusterEquiv F) := ⟨by
   rintro x y (rfl | ⟨Rxy, Ryx⟩);
   . apply refl;
   . right; exact ⟨Ryx, Rxy⟩;
@@ -57,7 +61,7 @@ instance [Finite F] : Finite (Cluster F) := Finite.of_surjective (λ x => ⟦x�
 lemma iff_eq_cluster : (⟦x⟧ : Cluster F) = ⟦y⟧ ↔ (x = y ∨ (x ≺ y ∧ y ≺ x)) := by
   simp only [Quotient.eq, clusterEquiv];
 
-protected abbrev rel : HRel (Cluster F) := Quotient.lift₂ (λ x y => x ≺ y) $ by
+protected abbrev rel : Rel (Cluster F) (Cluster F) := Quotient.lift₂ (λ x y => x ≺ y) $ by
     rintro x₁ y₁ x₂ y₂ (rfl | ⟨Rx₁x₂, Rx₂x₁⟩) (rfl | ⟨Ry₁y₂, Ry₂y₁⟩);
     . rfl;
     . apply eq_iff_iff.mpr;
@@ -103,10 +107,10 @@ instance [F.IsReflexive] : IsRefl (Cluster F) (· ≼ ·)  := ⟨by
   rintro X;
   obtain ⟨x, rfl⟩ := Quotient.exists_rep X;
   simp only [Cluster.rel, Quotient.lift_mk];
-  apply IsRefl.refl;
+  apply Std.Refl.refl;
 ⟩
 
-instance [IsTotal _ F] : IsTotal (Cluster F) (· ≼ ·) := ⟨by
+instance [Std.Total F] : IsTotal (Cluster F) (· ≼ ·) := ⟨by
   rintro X Y;
   obtain ⟨x, rfl⟩ := Quotient.exists_rep X;
   obtain ⟨y, rfl⟩ := Quotient.exists_rep Y;
@@ -114,7 +118,7 @@ instance [IsTotal _ F] : IsTotal (Cluster F) (· ≼ ·) := ⟨by
 ⟩
 
 
-protected abbrev strict_rel : HRel (Cluster F) := λ X Y => X ≼ Y ∧ X ≠ Y
+protected abbrev strict_rel : Rel (Cluster F) (Cluster F) := λ X Y => X ≼ Y ∧ X ≠ Y
 local infix:50 " ≺ " => Cluster.strict_rel
 
 instance : IsTrans (Cluster F) (· ≺ ·) := ⟨by
@@ -329,11 +333,11 @@ instance [F.IsReflexive] : F.skeleton.IsReflexive :=  by
 instance [F.IsReflexive] : F.skeleton.IsPartialOrder where
 
 
-instance [IsTotal _ F] : IsTotal _ F.skeleton := by
+instance [Std.Total F] : Std.Total F.skeleton := by
   dsimp only [Frame.skeleton];
   infer_instance;
 
-instance [IsTotal _ F] : IsLinearOrder _ F.skeleton where
+instance [Std.Total F] : IsLinearOrder _ F.skeleton where
 
 end
 
@@ -370,3 +374,4 @@ end Frame.strictSkelteon
 end Kripke
 
 end LO.Modal
+end

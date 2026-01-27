@@ -1,6 +1,10 @@
-import Mathlib.Data.Set.Finite.Powerset
-import Foundation.Modal.MaximalConsistentSet
-import Foundation.Modal.Complement
+module
+
+public import Mathlib.Data.Set.Finite.Powerset
+public import Foundation.Modal.MaximalConsistentSet
+public import Foundation.Modal.Formula.Complement
+
+@[expose] public section
 
 namespace LO.Modal
 
@@ -48,6 +52,7 @@ lemma unprovable_iff_singleton_neg_consistent : FormulaFinset.Consistent 𝓢 ({
   apply Iff.trans iff_theory_consistent_formulae_consistent.symm;
   simpa using FormulaSet.unprovable_iff_singleton_neg_consistent;
 
+@[grind =]
 lemma unprovable_iff_singleton_compl_consistent : FormulaFinset.Consistent 𝓢 ({-φ}) ↔ 𝓢 ⊬ φ := by
   rcases (Formula.complement.or φ) with (hp | ⟨ψ, rfl⟩);
   . rw [hp];
@@ -56,16 +61,8 @@ lemma unprovable_iff_singleton_compl_consistent : FormulaFinset.Consistent 𝓢 
     apply Iff.trans iff_theory_consistent_formulae_consistent.symm;
     simpa using FormulaSet.unprovable_iff_singleton_consistent;
 
-lemma provable_iff_singleton_compl_inconsistent : (FormulaFinset.Inconsistent 𝓢 ({-φ})) ↔ 𝓢 ⊢ φ := by
-  constructor;
-  . contrapose;
-    unfold Inconsistent;
-    push_neg;
-    apply unprovable_iff_singleton_compl_consistent.mpr;
-  . contrapose;
-    unfold Inconsistent;
-    push_neg;
-    apply unprovable_iff_singleton_compl_consistent.mp;
+@[grind =]
+lemma provable_iff_singleton_compl_inconsistent : (FormulaFinset.Inconsistent 𝓢 ({-φ})) ↔ 𝓢 ⊢ φ := by grind;
 
 lemma intro_union_consistent (h : ∀ {Γ₁ Γ₂ : FormulaFinset _}, (Γ₁ ⊆ P₁) → (Γ₂ ⊆ P₂) → (Γ₁ ∪ Γ₂) *⊬[𝓢] ⊥)
   : FormulaFinset.Consistent 𝓢 (P₁ ∪ P₂) := by
@@ -353,3 +350,4 @@ end
 
 
 end LO.Modal
+end

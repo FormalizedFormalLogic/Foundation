@@ -1,11 +1,12 @@
-import Foundation.Modal.Boxdot.Basic
-import Foundation.Modal.Kripke.Tree
-import Foundation.Vorspiel.List.Chain
-import Foundation.Vorspiel.Finset.Card
-import Foundation.Vorspiel.Fin.Fin1
-import Mathlib.Algebra.Order.BigOperators.Group.Finset
-import Mathlib.Data.Finite.Sum
+module
 
+public import Foundation.Modal.Boxdot.Basic
+public import Foundation.Modal.Kripke.Tree
+
+public import Mathlib.Algebra.Order.BigOperators.Group.Finset
+public import Mathlib.Data.Finite.Sum
+
+@[expose] public section
 
 namespace LO.Modal
 
@@ -51,7 +52,6 @@ instance instIsRooted : (F.extendRoot n).IsRootedBy extendRoot.root where
       apply Relation.TransGen.single;
       tauto;
 
-
 protected abbrev chain : List (F.extendRoot n) := List.finRange n |>.map (extend ·)
 
 @[simp]
@@ -59,17 +59,16 @@ lemma chain_length : extendRoot.chain (F := F) (r := r) (n := n).length = n := b
 
 @[simp]
 lemma chain_IsChain : List.IsChain (· ≺ ·) (extendRoot.chain (F := F) (r := r) (n := n)) := by
-  apply List.chain'_map_of_chain' (R := λ a b => a < b);
+  apply List.isChain_map_of_isChain (R := λ a b => a < b);
   . tauto;
   . simp;
-
 
 instance isAsymmetric [F.IsAsymmetric] : (F.extendRoot n).IsAsymmetric := ⟨by
   intro x y hxy;
   match x, y with
   | .inr x, .inr y =>
     suffices ¬y ≺ x by tauto;
-    exact IsAsymm.asymm _ _ hxy;
+    exact Std.Asymm.asymm _ _ hxy;
   | .inl i, .inl j => simp_all [Frame.extendRoot]; omega;
   | .inl _, .inr _ => simp_all [Frame.extendRoot];
   | .inr _, .inl _ => simp_all [Frame.extendRoot];
@@ -237,16 +236,15 @@ lemma inl_satisfies_boxdot_iff [IsTrans _ M.Rel] : r ⊧ φᵇ ↔ (extend i : M
 
 end Model.extendRoot
 
-
 section
 
 open Classical
 
-variable {M : Kripke.Model} [Finite M.World] [IsTrans _ M.Rel] [IsIrrefl _ M.Rel]
+variable {M : Kripke.Model} [Finite M.World] [IsTrans _ M.Rel] [Std.Irrefl M.Rel]
 variable {A : Formula _}
 variable {l : List M.World} {n : ℕ+}
 
-lemma atmost_one_validates_axiomT_in_irrefl_trans_chain' (l_chain : List.IsChain (· ≺ ·) l) :
+lemma atmost_one_validates_axiomT_in_irrefl_trans_isChain (l_chain : List.IsChain (· ≺ ·) l) :
     (∀ x ∈ l, x ⊧ □A ➝ A) ∨ (∃! x ∈ l, ¬x ⊧ □A ➝ A) := by
   apply or_iff_not_imp_left.mpr;
   push_neg;
@@ -268,7 +266,7 @@ lemma atmost_one_validates_axiomT_in_irrefl_trans_chain
     haveI : Fintype M.World := Fintype.ofFinite _;
     Finset.card { x | x ∈ l ∧ ¬x ⊧ (□A ➝ A) } ≤ 1 := by
   apply Nat.le_one_iff_eq_zero_or_eq_one.mpr;
-  rcases atmost_one_validates_axiomT_in_irrefl_trans_chain' (l_chain := l_chain) (A := A) with h | h;
+  rcases atmost_one_validates_axiomT_in_irrefl_trans_isChain (l_chain := l_chain) (A := A) with h | h;
   . left;
     apply Finset.card_filter_eq_zero_iff.mpr;
     simp_all;
@@ -339,12 +337,11 @@ lemma validates_axiomT_set_in_irrefl_trans_chain
 
 end
 
-
 namespace Model.extendRoot
 
 open Classical
 
-variable {M : Model} {r : M.World} [M.IsFinite] [IsTrans _ M.Rel] [IsIrrefl _ M.Rel] [M.IsRootedBy r] {x y : M.World}
+variable {M : Model} {r : M.World} [M.IsFinite] [IsTrans _ M.Rel] [Std.Irrefl M.Rel] [M.IsRootedBy r] {x y : M.World}
 
 lemma inr_satisfies_axiomT_set
     {Γ : Finset (Modal.Formula ℕ)} :
@@ -371,5 +368,5 @@ end Model.extendRoot
 
 end Kripke
 
-
 end LO.Modal
+end

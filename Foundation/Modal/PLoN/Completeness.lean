@@ -1,5 +1,9 @@
-import Foundation.Modal.MaximalConsistentSet
-import Foundation.Modal.PLoN.Basic
+module
+
+public import Foundation.Modal.MaximalConsistentSet
+public import Foundation.Modal.PLoN.Basic
+
+@[expose] public section
 
 namespace LO.Modal
 
@@ -20,17 +24,12 @@ abbrev canonicalModel (𝓢 : S) [Entailment.Consistent 𝓢] [Entailment.Cl �
   toFrame := canonicalFrame 𝓢
   Valuation Ω a := (atom a) ∈ Ω
 
-@[reducible] instance : Semantics (canonicalModel 𝓢).World (Formula ℕ) := Formula.PLoN.Satisfies.semantics (M := canonicalModel 𝓢)
-
 variable {φ : Formula ℕ}
 
-lemma truthlemma : ∀ {X : (canonicalModel 𝓢).World}, X ⊧ φ ↔ (φ ∈ X) := by
+lemma truthlemma : ∀ {X : (canonicalModel 𝓢).World}, X ⊩ φ ↔ (φ ∈ X) := by
   induction φ with
-  | hfalsum =>
-    simp only [Semantics.Models, PLoN.Satisfies, false_iff];
-    exact not_mem_falsum;
-  | hatom =>
-    simp_all [Semantics.Models, PLoN.Satisfies];
+  | hfalsum => simp [PLoN.Forces];
+  | hatom => simp [PLoN.Forces];
   | himp φ ψ ihp ihq =>
     intro Ω;
     constructor;
@@ -46,17 +45,13 @@ lemma truthlemma : ∀ {X : (canonicalModel 𝓢).World}, X ⊧ φ ↔ (φ ∈ X
     intro X;
     constructor;
     . intro h;
-      by_contra hC;
-      obtain ⟨Y, hY⟩ := lindenbaum (𝓢 := 𝓢) (T := {∼φ}) (not_singleton_consistent X.consistent (iff_mem_neg.mpr hC));
-      suffices ¬X ⊧ □φ by contradiction;
-      suffices ∃ Y, (X ≺[φ] Y) ∧ (¬Y ⊧ φ) by
-        apply PLoN.Satisfies.box_def.not.mpr;
-        push_neg;
-        exact this;
+      contrapose! h;
+      obtain ⟨Y, hY⟩ := lindenbaum (𝓢 := 𝓢) (T := {∼φ}) (not_singleton_consistent X.consistent (iff_mem_neg.mpr h));
+      apply PLoN.Forces.not_box_def.mpr;
       use Y;
       constructor;
       . constructor;
-        . exact iff_mem_neg.mpr hC;
+        . exact iff_mem_neg.mpr h;
         . tauto_set;
       . apply (@ih Y).not.mpr;
         apply iff_mem_neg.mp;
@@ -65,28 +60,21 @@ lemma truthlemma : ∀ {X : (canonicalModel 𝓢).World}, X ⊧ φ ↔ (φ ∈ X
       have : □φ ∉ X := iff_mem_neg.mp RXY.1;
       contradiction;
 
-class Canonical (𝓢 : S) [Entailment.Consistent 𝓢] [Entailment.Cl 𝓢] (C : FrameClass) : Prop where
-  canonical : (canonicalFrame 𝓢) ∈ C
-
-instance [Canonical 𝓢 C] : Complete 𝓢 C := ⟨by
-  intro φ;
-  contrapose;
-  intro h;
-  apply PLoN.ValidOnFrameClass.not_of_exists_model;
-  use (canonicalModel 𝓢);
+instance instComplete_of_mem_canonicalFrame {C : PLoN.FrameClass} (h : (canonicalFrame 𝓢) ∈ C) : Complete 𝓢 C := by
   constructor;
-  . exact Canonical.canonical;
-  . suffices ∃ X, ¬(PLoN.Satisfies (canonicalModel 𝓢) X φ) by
-      simpa only [Semantics.Models, PLoN.ValidOnModel, not_forall];
-    obtain ⟨Y, hY⟩ := lindenbaum (𝓢 := 𝓢) (T := {∼φ}) $ by
-      apply unprovable_iff_singleton_neg_consistent.mpr;
-      exact h;
-    use Y;
-    apply truthlemma.not.mpr;
+  intro φ;
+  contrapose!;
+  intro h;
+  obtain ⟨Y, hY⟩ := lindenbaum (𝓢 := 𝓢) (T := {∼φ}) $ unprovable_iff_singleton_neg_consistent.mpr h;
+  apply PLoN.not_validOnFrameClass_of_exists_model_world;
+  use (canonicalModel 𝓢), Y;
+  constructor;
+  . assumption;
+  . apply truthlemma.not.mpr;
     apply iff_mem_neg.mp;
     tauto_set;
-⟩
 
 end PLoN
 
 end LO.Modal
+end

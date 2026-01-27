@@ -1,4 +1,9 @@
-import Foundation.Logic.Entailment
+module
+
+public import Foundation.Logic.Entailment
+public import Foundation.Vorspiel.Computability
+
+@[expose] public section
 
 namespace LO.Entailment
 
@@ -24,3 +29,5 @@ lemma decidable_of_incomplete : Inconsistent 𝓢 → Decidable 𝓢 :=
 end
 
 end LO.Entailment
+
+end

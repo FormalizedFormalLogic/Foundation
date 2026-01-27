@@ -1,6 +1,9 @@
-import Foundation.FirstOrder.Bootstrapping.Syntax.Term.Typed
-import Mathlib.Combinatorics.Colex
+module
 
+public import Foundation.FirstOrder.Bootstrapping.Syntax.Term.Typed
+public import Mathlib.Combinatorics.Colex
+
+@[expose] public section
 open Encodable LO FirstOrder Arithmetic PeanoMinus Bootstrapping
 
 namespace LO.FirstOrder.Semiterm

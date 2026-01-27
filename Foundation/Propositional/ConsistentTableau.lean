@@ -1,8 +1,9 @@
-import Foundation.Propositional.Formula
-import Foundation.Propositional.Entailment.Cl.Basic
-import Foundation.Vorspiel.List.Supplemental
-import Foundation.Vorspiel.Finset.Supplemental
-import Foundation.Vorspiel.Set.Supplemental
+module
+
+public import Foundation.Propositional.Formula.Basic
+public import Foundation.Propositional.Entailment.Cl.Basic
+
+@[expose] public section
 
 namespace LO.Propositional
 
@@ -12,7 +13,6 @@ open Formula
 variable {α : Type*}
 variable {S} [Entailment S (Formula α)]
 variable {𝓢 : S}
-
 
 def Tableau (α : Type u) := Set (Formula α) × Set (Formula α)
 
@@ -124,7 +124,6 @@ end Consistent
 
 end
 
-
 abbrev Saturated (t : Tableau α) := ∀ φ : Formula α, φ ∈ t.1 ∨ φ ∈ t.2
 
 section Saturated
@@ -143,7 +142,6 @@ lemma mem₁_of_not_mem₂ (hMat : Saturated t) : φ ∉ t.2 → φ ∈ t.1 := b
   cases (hMat φ) with
   | inl _ => assumption;
   | inr h' => exact absurd h' h;
-
 
 lemma not_mem₁_iff_mem₂ (hCon : t.Consistent 𝓢) (hMat : Saturated t) : φ ∉ t.1 ↔ φ ∈ t.2 := by
   constructor;
@@ -212,7 +210,6 @@ def lindenbaum_maximal [Encodable α] (t : Tableau α) : Tableau α := (⋃ i, t
 local notation:max t"∞" => lindenbaum_maximal 𝓢 t
 
 @[simp] lemma lindenbaum_next_indexed_zero [Encodable α] {t : Tableau α} : (t.lindenbaum_next_indexed 𝓢 0) = t := by simp [lindenbaum_next_indexed]
-
 
 variable {𝓢}
 
@@ -338,9 +335,7 @@ end lindenbaum
 
 end Tableau
 
-
 open Tableau
-
 
 def SaturatedConsistentTableau (𝓢 : S) := {t : Tableau α // Saturated t ∧ t.Consistent 𝓢}
 
@@ -381,7 +376,6 @@ lemma equality_of₁ (e₁ : t₁.1.1 = t₂.1.1) : t₁ = t₂ := by
 
 lemma equality_of₂ (e₂ : t₁.1.2 = t₂.1.2) : t₁ = t₂ := equality_of₁ $ saturated_duality.mpr e₂
 
-
 section
 
 variable [DecidableEq α] [Encodable α]
@@ -404,11 +398,8 @@ lemma iff_provable_include₁ : T *⊢[𝓢] φ ↔ ∀ t : SaturatedConsistentT
     by_contra! hC;
     obtain ⟨t, ht⟩ := lindenbaum (𝓢 := 𝓢) (t₀ := ⟨T, {φ}⟩) $ by
       intro Γ Δ hΓ hΔ;
-      revert hC;
-      contrapose;
-      simp only [not_not];
-      intro h;
-      replace h : T *⊢[𝓢] Δ.disj := Context.weakening! (by simpa using hΓ) $ FConj_DT.mp h;
+      contrapose! hC;
+      replace h : T *⊢[𝓢] Δ.disj := Context.weakening! (by simpa using hΓ) $ FConj_DT.mp hC;
       rcases Set.subset_singleton_iff_eq.mp hΔ with (hΔ | hΔ);
       . simp only [Finset.coe_eq_empty] at hΔ;
         subst hΔ;
@@ -432,10 +423,6 @@ lemma iff_provable_mem₁ : 𝓢 ⊢ φ ↔ ∀ t : SaturatedConsistentTableau �
     exact Context.emptyPrf! $ iff_provable_include₁.mpr $ by tauto;
 
 end
-
-
-
-
 
 section Saturated
 
@@ -618,7 +605,6 @@ lemma iff_mem₁_imp [DecidableEq α] [Encodable α] [Entailment.Cl 𝓢] : φ �
     . exact iff_not_mem₂_mem₁.mpr hφ;
     . exact iff_not_mem₁_mem₂.mpr hψ;
 
-
 lemma iff_mem₂_imp [DecidableEq α] [Encodable α] [Entailment.Cl 𝓢] : φ ➝ ψ ∈ t.1.2 ↔ (φ ∈ t.1.1 ∧ ψ ∈ t.1.2) := by
   constructor;
   . apply of_mem₂_imp;
@@ -655,3 +641,4 @@ end Saturated
 end SaturatedConsistentTableau
 
 end LO.Propositional
+end

@@ -1,4 +1,8 @@
-import Foundation.Modal.Entailment.Basic
+module
+
+public import Foundation.Modal.Entailment.Basic
+
+@[expose] public section
 
 namespace LO.Modal.Entailment
 
@@ -78,3 +82,4 @@ instance : HasAxiomP 𝓢 := ⟨N_of_CO axiomT⟩
 end
 
 end LO.Modal.Entailment
+end

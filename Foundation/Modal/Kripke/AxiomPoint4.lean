@@ -1,6 +1,10 @@
-import Foundation.Modal.Kripke.Completeness
-import Foundation.Modal.Kripke.AxiomGeach
-import Foundation.Modal.Kripke.AxiomPoint3
+module
+
+public import Foundation.Modal.Kripke.Completeness
+public import Foundation.Modal.Kripke.AxiomGeach
+public import Foundation.Modal.Kripke.AxiomPoint3
+
+@[expose] public section
 
 namespace LO.Modal
 
@@ -120,3 +124,4 @@ end canonicality
 end Kripke
 
 end LO.Modal
+end

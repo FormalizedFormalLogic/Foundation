@@ -1,13 +1,16 @@
-import Foundation.Modal.Formula
-import Foundation.Modal.Entailment.K
-import Foundation.Modal.Entailment.EMCN
-import Foundation.Modal.Entailment.END
-import Foundation.Modal.Entailment.ET5
-import Foundation.Modal.Entailment.EMK
-import Foundation.Propositional.Entailment.Cl.Lukasiewicz
-import Foundation.Logic.Incomparable
-import Foundation.Modal.Logic.Basic
-import Foundation.Modal.Hilbert.Axiom
+module
+
+public import Foundation.Modal.Formula.Basic
+public import Foundation.Modal.Entailment.K
+public import Foundation.Modal.Entailment.EMCN
+public import Foundation.Modal.Entailment.END
+public import Foundation.Modal.Entailment.ET5
+public import Foundation.Modal.Entailment.EMK
+public import Foundation.Propositional.Entailment.Cl.Łukasiewicz
+public import Foundation.Modal.Logic.Basic
+public import Foundation.Modal.Hilbert.Axiom
+
+@[expose] public section
 
 namespace LO.Modal
 
@@ -31,7 +34,7 @@ variable {Ax Ax₁ Ax₂ : Axiom α}
 
 @[grind] lemma axm'! {φ} (h : φ ∈ Ax) : WithRE Ax ⊢ φ := by simpa using axm! .id h;
 
-instance : Entailment.Lukasiewicz (Hilbert.WithRE Ax) where
+instance : Entailment.Łukasiewicz (Hilbert.WithRE Ax) where
   implyK {_ _} := by constructor; apply Hilbert.WithRE.implyK;
   implyS {_ _ _} := by constructor; apply Hilbert.WithRE.implyS;
   elimContra {_ _} := by constructor; apply Hilbert.WithRE.ec;
@@ -505,3 +508,4 @@ end
 
 
 end LO.Modal
+end

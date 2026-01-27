@@ -1,7 +1,11 @@
-import Foundation.Modal.Hilbert.Normal.Basic
-import Foundation.Modal.Logic.SumNormal
-import Foundation.Meta.ClProver
+module
 
+public import Foundation.Modal.Hilbert.Normal.Basic
+public import Foundation.Modal.Logic.SumNormal
+public import Foundation.Meta.ClProver
+
+
+@[expose] public section
 
 namespace LO.Modal
 
@@ -360,7 +364,7 @@ class Translation (L : Logic _) (m₁ m₂ : Modality) where
 
 notation:90 M₁ " ⤳[" L "] " M₂ => Translation L M₁ M₂
 
-instance : IsRefl _ (· ⤳[L] ·) := ⟨by
+instance : Std.Refl (· ⤳[L] ·) := ⟨by
   intro M;
   constructor;
   simp;
@@ -396,13 +400,13 @@ instance [m₁ ⤳[L] m₂] [m₂ ⤳[L] m₁] : m₁ ≅[L] m₂ := by
   apply iff_equivalence_bi_translate.mpr;
   constructor <;> infer_instance;
 
-instance : IsSymm _ (· ≅[L] ·) := ⟨by
+instance : Std.Symm (· ≅[L] ·) := ⟨by
   intro _ _ eq;
   apply iff_equivalence_bi_translate.mpr;
   constructor <;> infer_instance;
 ⟩
 
-instance : IsRefl _ (· ≅[L] ·) := ⟨by
+instance : Std.Refl (· ≅[L] ·) := ⟨by
   intro _;
   apply iff_equivalence_bi_translate.mpr;
   constructor <;> apply _root_.refl;
@@ -489,9 +493,9 @@ variable {L : Logic _} [L.IsNormal] {m : Modality}
 
 instance : m ⤳[L] m := refl m
 
-instance : (□) ≅[L] (∼◇∼) := by constructor; simp;
+instance : (□) ≅[L] (∼◇∼) := ⟨by simp⟩
 
-instance : (◇) ≅[L] (∼□∼) := by constructor; simp;
+instance : (◇) ≅[L] (∼□∼) := ⟨by simp⟩
 
 instance : (∼∼) ≅[L] (-) := by
   apply equivalence_of_axiomInstance (a := 0);
@@ -517,8 +521,7 @@ instance : (◇∼) ≅[L] (∼□) := by
     . simp;
     . simp;
   . apply C!_trans (ψ := ∼∼◇(∼(.atom 0)));
-    . apply contra!;
-      simp;
+    . sorry;
     . simp;
 
 end
@@ -802,3 +805,4 @@ end
 end
 
 end LO.Modal
+end

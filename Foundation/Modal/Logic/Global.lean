@@ -1,6 +1,10 @@
-import Foundation.Modal.Hilbert.Normal.Basic
-import Foundation.Meta.ClProver
+module
 
+public import Foundation.Modal.Hilbert.Normal.Basic
+public import Foundation.Meta.ClProver
+
+
+@[expose] public section
 
 namespace LO.Modal
 
@@ -38,7 +42,7 @@ open LO.Entailment LO.Entailment.FiniteContext LO.Modal.Entailment
 
 variable {L : Logic α} {X Y : Set (Formula α)} {φ ψ : Formula α}
 
-instance : Entailment.Lukasiewicz (F := Formula α) (S := Logic α × Set (Formula α)) (L, X) where
+instance : Entailment.Łukasiewicz (F := Formula α) (S := Logic α × Set (Formula α)) (L, X) where
   mdp ihφψ ihφ := by simpa using GlobalConsequence.mdp ihφψ ihφ;
   implyK := GlobalConsequence.implyK X
   implyS := GlobalConsequence.implyS X
@@ -90,7 +94,7 @@ variable {L : Logic ℕ} [L.IsNormal] {X Y : Set (Formula ℕ)} {φ ψ : Formula
 /--
   Jeřábek, Fact 2.7
 -/
-lemma iff_finite_boxlt_provable : ((L, X) ⊢ φ) ↔ (∃ Γ : Finset (Formula _), ∃ n, ↑Γ ⊆ X ∧ L ⊢ (□^≤[n] Γ.conj) ➝ φ) := by
+lemma iff_finite_boxLe_provable : ((L, X) ⊢ φ) ↔ (∃ Γ : Finset (Formula _), ∃ n, ↑Γ ⊆ X ∧ L ⊢ (□^≤[n] Γ.conj) ➝ φ) := by
   constructor;
   . intro h;
     induction h using GlobalConsequence.rec! with
@@ -112,8 +116,8 @@ lemma iff_finite_boxlt_provable : ((L, X) ⊢ φ) ↔ (∃ Γ : Finset (Formula 
       constructor;
       . simp only [Finset.coe_union, Set.union_subset_iff];
         tauto_set;
-      . replace hφψ : L ⊢ (□^≤[n + m](Δ₁ ∪ Δ₂).conj) ➝ φ ➝ ψ := C!_trans (C!_trans (boxlt_lt! (by omega)) (boxlt_regularity! (CFConj_FConj!_of_subset (by simp)))) hφψ;
-        replace hφ  : L ⊢ (□^≤[n + m](Δ₁ ∪ Δ₂).conj) ➝ φ := C!_trans (C!_trans (boxlt_lt! (by omega)) (boxlt_regularity! (CFConj_FConj!_of_subset (by simp)))) hφ;
+      . replace hφψ : L ⊢ (□^≤[n + m](Δ₁ ∪ Δ₂).conj) ➝ φ ➝ ψ := C!_trans (C!_trans (boxLe_lt! (by omega)) (boxLe_regularity! (CFConj_FConj!_of_subset (by simp)))) hφψ;
+        replace hφ  : L ⊢ (□^≤[n + m](Δ₁ ∪ Δ₂).conj) ➝ φ := C!_trans (C!_trans (boxLe_lt! (by omega)) (boxLe_regularity! (CFConj_FConj!_of_subset (by simp)))) hφ;
         cl_prover [hφψ, hφ];
     | @nec! _ φ h ih =>
       obtain ⟨Δ, n, ⟨h₁, h₂⟩⟩ := ih;
@@ -124,7 +128,7 @@ lemma iff_finite_boxlt_provable : ((L, X) ⊢ φ) ↔ (∃ Γ : Finset (Formula 
         apply C!_trans ?_ collect_box_fconj!;
         apply CFconjFconj!_of_provable;
         intro ψ hψ;
-        simp only [Finset.mem_image, Finset.mem_range, Function.iterate_one, exists_exists_and_eq_and] at hψ;
+        simp only [Finset.LO.boxItr, Box.boxItr_succ, Box.boxItr_zero, Finset.mem_image, Finset.mem_range, exists_exists_and_eq_and] at hψ;
         obtain ⟨i, hi, rfl⟩ := hψ;
         apply Context.by_axm!;
         simp only [Finset.coe_image, Finset.coe_range, Set.mem_image, Set.mem_Iio];
@@ -157,3 +161,4 @@ end
 end GlobalConsequence
 
 end LO.Modal
+end

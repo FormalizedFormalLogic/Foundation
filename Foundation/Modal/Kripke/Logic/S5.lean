@@ -1,10 +1,13 @@
-import Foundation.Modal.Kripke.Rooted
-import Foundation.Modal.Kripke.Logic.KTB
-import Foundation.Modal.Kripke.Logic.KD45
-import Foundation.Modal.Kripke.Logic.KB4
-import Foundation.Modal.Kripke.Logic.S4
-import Foundation.Modal.Kripke.Logic.S4Point4
-import Foundation.Vorspiel.HRel.Universal
+module
+
+public import Foundation.Modal.Kripke.Rooted
+public import Foundation.Modal.Kripke.Logic.KTB
+public import Foundation.Modal.Kripke.Logic.KD45
+public import Foundation.Modal.Kripke.Logic.KB4
+public import Foundation.Modal.Kripke.Logic.S4
+public import Foundation.Modal.Kripke.Logic.S4Point4
+
+@[expose] public section
 
 namespace LO.Modal
 
@@ -12,8 +15,6 @@ open Entailment
 open Formula
 open Kripke
 open Modal.Kripke
-
-
 
 namespace Kripke
 
@@ -43,7 +44,7 @@ instance Frame.pointGenerate.isUniversal (F : Frame) (r : F.World) (_ : F.IsS5) 
     . simp;
     . exact hy.unwrap;
     . suffices x ≺ y by simpa;
-      exact IsSymm.symm _ _ hx.unwrap;
+      exact Std.Symm.symm _ _ hx.unwrap;
     . suffices x ≺ y by simpa;
       apply F.eucl hx.unwrap hy.unwrap ;
 
@@ -59,8 +60,6 @@ lemma iff_validOnUniversalFrameClass_validOnReflexiveEuclideanFrameClass : Frame
     constructor;
 
 end Kripke
-
-
 
 instance : Sound Modal.S5 FrameClass.S5 := instSound_of_validates_axioms $ by
   apply FrameClass.validates_with_AxiomK_of_validates;
@@ -89,9 +88,6 @@ instance : Complete Modal.S5 FrameClass.universal := ⟨by
   apply iff_validOnUniversalFrameClass_validOnReflexiveEuclideanFrameClass.mp;
   exact hF;
 ⟩
-
-
-
 
 instance : Modal.KTB ⪱ Modal.S5 := by
   constructor;
@@ -137,7 +133,7 @@ instance : Modal.KD45 ⪱ Modal.S5 := by
           reucl := by simp [RightEuclidean]; omega
         }
       . simp [Semantics.Models, Satisfies, M];
-        tauto;
+        grind;
 
 instance : Modal.KB4 ⪱ Modal.S5 := by
   constructor;
@@ -181,7 +177,8 @@ instance : Modal.S4Point4 ⪱ Modal.S5 := by
             | 1, 1 => contradiction;
         };
       . suffices (0 : M.World) ≺ 0 ∧ ∃ x : M.World, (0 : M) ≺ x ∧ ¬x ≺ 0 by
-          simpa [M, Semantics.Models, Satisfies];
+          simp [M, Semantics.Models, Satisfies];
+          grind;
         constructor;
         . omega;
         . use 1;
@@ -205,3 +202,4 @@ instance : Modal.KT ⪱ Modal.S5 := calc
   _        ⪱ Modal.S5 := by infer_instance
 
 end LO.Modal
+end

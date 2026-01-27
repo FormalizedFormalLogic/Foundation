@@ -1,23 +1,25 @@
-import Foundation.Vorspiel.HRel.Basic
-import Foundation.Modal.Axioms
-import Foundation.Modal.Formula
-import Foundation.Modal.Logic.Basic
+module
+
+public import Foundation.Modal.Axioms
+public import Foundation.Modal.Formula.Basic
+public import Foundation.Modal.Logic.Basic
+
+@[expose] public section
 
 namespace LO.Modal
 
 open Entailment
 
-
 namespace Kripke
 
 structure Frame where
   World : Type
-  Rel : HRel World
+  Rel : Rel World World
   [world_nonempty : Nonempty World]
 attribute [simp] Frame.world_nonempty
 
 instance : CoeSort Frame (Type) := ⟨Frame.World⟩
-instance : CoeFun Frame (λ F => HRel F.World) := ⟨Frame.Rel⟩
+instance : CoeFun Frame (λ F => _root_.Rel F.World F.World) := ⟨Frame.Rel⟩
 instance {F : Frame} : Nonempty F.World := F.world_nonempty
 
 namespace Frame
@@ -43,8 +45,6 @@ instance [Finite F.World] : F.IsFinite := ⟨⟩
 
 end Frame
 
-
-
 section
 
 def whitepoint : Frame := ⟨Unit, λ _ _ => True⟩
@@ -58,16 +58,14 @@ def blackpoint : Frame := ⟨Unit, λ _ _ => False⟩
 instance : Finite blackpoint.World := by
   dsimp [blackpoint];
   infer_instance;
-instance : IsIrrefl _ blackpoint.Rel := by tauto
+instance : Std.Irrefl blackpoint.Rel := by tauto
 instance : IsTrans _ blackpoint.Rel := ⟨by tauto⟩
 instance : IsStrictOrder _ blackpoint.Rel where
 -- instance : IsConnected _ blackpoint.Rel := ⟨by tauto⟩
 
 end
 
-
 abbrev FrameClass := Set (Frame)
-
 
 abbrev Valuation (F : Frame) := F.World → ℕ → Prop
 
@@ -77,7 +75,6 @@ instance : CoeSort Model Type := ⟨λ M => M.toFrame.World⟩
 instance : CoeFun (Model) (λ M => M.World → ℕ → Prop) := ⟨fun m => m.Val⟩
 
 end Kripke
-
 
 namespace Formula.Kripke
 
@@ -132,7 +129,7 @@ lemma iff_def : x ⊧ φ ⭤ ψ ↔ (x ⊧ φ ↔ x ⊧ ψ) := by simp;
 
 protected lemma not_and_def : ¬(x ⊧ φ ⋏ ψ) ↔ ¬(x ⊧ φ) ∨ ¬(x ⊧ ψ) := by simp [-not_and, not_and_or];
 
-lemma multibox_dn : x ⊧ □^[n](∼∼φ) ↔ x ⊧ □^[n]φ := by
+lemma boxItr_dn : x ⊧ □^[n](∼∼φ) ↔ x ⊧ □^[n]φ := by
   induction n generalizing x with
   | zero => simp [Semantics.NotModels];
   | succ n ih =>
@@ -143,9 +140,9 @@ lemma multibox_dn : x ⊧ □^[n](∼∼φ) ↔ x ⊧ □^[n]φ := by
     . intro h y Rxy;
       exact ih.mpr $ (h y Rxy);
 
-lemma box_dn : x ⊧ □(∼∼φ) ↔ x ⊧ □φ := multibox_dn (n := 1)
+lemma box_dn : x ⊧ □(∼∼φ) ↔ x ⊧ □φ := boxItr_dn (n := 1)
 
-lemma multidia_dn : x ⊧ ◇^[n](∼∼φ) ↔ x ⊧ ◇^[n]φ := by
+lemma diaItr_dn : x ⊧ ◇^[n](∼∼φ) ↔ x ⊧ ◇^[n]φ := by
   induction n generalizing x with
   | zero => simp [Semantics.NotModels];
   | succ n ih =>
@@ -166,9 +163,9 @@ lemma multidia_dn : x ⊧ ◇^[n](∼∼φ) ↔ x ⊧ ◇^[n]φ := by
       . exact Rxy;
       . exact ih.mpr h;
 
-lemma dia_dn : x ⊧ ◇(∼∼φ) ↔ x ⊧ ◇φ := multidia_dn (n := 1)
+lemma dia_dn : x ⊧ ◇(∼∼φ) ↔ x ⊧ ◇φ := diaItr_dn (n := 1)
 
-lemma multibox_def : x ⊧ □^[n]φ ↔ ∀ {y}, x ≺^[n] y → y ⊧ φ := by
+lemma boxItr_def : x ⊧ □^[n]φ ↔ ∀ {y}, x ≺^[n] y → y ⊧ φ := by
   induction n generalizing x with
   | zero => simp;
   | succ n ih =>
@@ -182,7 +179,7 @@ lemma multibox_def : x ⊧ □^[n]φ ↔ ∀ {y}, x ≺^[n] y → y ⊧ φ := by
       intro z Ryz;
       exact h Rxy Ryz;
 
-lemma multidia_def : x ⊧ ◇^[n]φ ↔ ∃ y, x ≺^[n] y ∧ y ⊧ φ := by
+lemma diaItr_def : x ⊧ ◇^[n]φ ↔ ∃ y, x ≺^[n] y ∧ y ⊧ φ := by
   induction n generalizing x with
   | zero => simp;
   | succ n ih =>
@@ -214,7 +211,6 @@ lemma fconj'_def {ι : α → Formula ℕ} : x ⊧ (⩕ i ∈ X, ι i) ↔ ∀ i
 
 lemma not_fconj'_def {ι : α → Formula ℕ}  : ¬(x ⊧ (⩕ i ∈ X, ι i)) ↔ ∃ i ∈ X, ¬(x ⊧ ι i) := by simp;
 
-
 lemma fconj_def {Γ : Finset _} : x ⊧ Γ.conj ↔ ∀ φ ∈ Γ, x ⊧ φ := by
   simp only [Semantics.models_finset_conj];
 
@@ -225,38 +221,36 @@ lemma fdisj'_def {ι : α → Formula ℕ} : x ⊧ (⩖ i ∈ X, ι i) ↔ ∃ i
 
 lemma not_fdisj'_def {ι : α → Formula ℕ} : ¬(x ⊧ (⩖ i ∈ X, ι i)) ↔ ∀ i ∈ X, ¬(x ⊧ ι i) := by simp;
 
-
 lemma trans (hpq : x ⊧ φ ➝ ψ) (hqr : x ⊧ ψ ➝ χ) : x ⊧ φ ➝ χ := by simp_all;
 
 lemma mdp (hpq : x ⊧ φ ➝ ψ) (hp : x ⊧ φ) : x ⊧ ψ := by simp_all;
-
 
 lemma intro_neg_semiequiv (h : x ⊧ φ → x ⊧ ψ) : x ⊧ ∼ψ → x ⊧ ∼φ := by
   contrapose;
   simp_all;
 
-lemma intro_multibox_semiequiv (h : ∀ y, x ≺^[n] y → y ⊧ φ → y ⊧ ψ) : x ⊧ □^[n]φ → x ⊧ □^[n]ψ := by
+lemma intro_boxItr_semiequiv (h : ∀ y, x ≺^[n] y → y ⊧ φ → y ⊧ ψ) : x ⊧ □^[n]φ → x ⊧ □^[n]ψ := by
   induction n generalizing x with
   | zero => simp_all;
   | succ n ih =>
     intro hφ;
-    apply Satisfies.multibox_def.mpr;
+    apply Satisfies.boxItr_def.mpr;
     rintro y ⟨z, Rxz, Rzy⟩;
     replace hφ : x ⊧ □□^[n]φ := by simpa using hφ;
-    refine Satisfies.multibox_def.mp (@ih z ?_ (Satisfies.box_def.mp hφ z Rxz)) Rzy;
+    refine Satisfies.boxItr_def.mp (@ih z ?_ (Satisfies.box_def.mp hφ z Rxz)) Rzy;
     . intro w Rzw;
       apply h w;
       use z;
 
 lemma intro_box_semiequiv (h : ∀ y, x ≺ y → y ⊧ φ → y ⊧ ψ) : x ⊧ □φ → x ⊧ □ψ := by
-  apply intro_multibox_semiequiv (n := 1);
+  apply intro_boxItr_semiequiv (n := 1);
   simpa;
 
-lemma intro_multidia_semiequiv (h : ∀ y, x ≺^[n] y → y ⊧ φ → y ⊧ ψ) : x ⊧ ◇^[n]φ → x ⊧ ◇^[n]ψ := by
+lemma intro_diaItr_semiequiv (h : ∀ y, x ≺^[n] y → y ⊧ φ → y ⊧ ψ) : x ⊧ ◇^[n]φ → x ⊧ ◇^[n]ψ := by
   induction n generalizing x with
   | zero => simp_all;
   | succ n ih =>
-    simp only [Dia.multidia_succ];
+    simp only [Dia.diaItr_succ];
     apply intro_neg_semiequiv;
     apply intro_box_semiequiv;
     intro y Rxy;
@@ -267,37 +261,35 @@ lemma intro_multidia_semiequiv (h : ∀ y, x ≺^[n] y → y ⊧ φ → y ⊧ ψ
     use y;
 
 lemma intro_dia_semiequiv (h : ∀ y, x ≺ y → y ⊧ φ → y ⊧ ψ) : x ⊧ ◇φ → x ⊧ ◇ψ := by
-  apply intro_multidia_semiequiv (n := 1);
+  apply intro_diaItr_semiequiv (n := 1);
   simpa;
-
 
 lemma intro_negEquiv (h : x ⊧ φ ↔ x ⊧ ψ) : x ⊧ ∼φ ↔ x ⊧ ∼ψ := by
   constructor;
   . apply intro_neg_semiequiv $ h.mpr;
   . apply intro_neg_semiequiv $ h.mp;
 
-lemma intro_multibox_equiv (h : ∀ y, x ≺^[n] y → (y ⊧ φ ↔ y ⊧ ψ)) : x ⊧ □^[n]φ ↔ x ⊧ □^[n]ψ := by
+lemma intro_boxItr_equiv (h : ∀ y, x ≺^[n] y → (y ⊧ φ ↔ y ⊧ ψ)) : x ⊧ □^[n]φ ↔ x ⊧ □^[n]ψ := by
   constructor;
-  . apply intro_multibox_semiequiv; intro y Rxy; apply h y Rxy |>.mp;
-  . apply intro_multibox_semiequiv; intro y Rxy; apply h y Rxy |>.mpr;
+  . apply intro_boxItr_semiequiv; intro y Rxy; apply h y Rxy |>.mp;
+  . apply intro_boxItr_semiequiv; intro y Rxy; apply h y Rxy |>.mpr;
 
 lemma intro_box_equiv (h : ∀ y, x ≺ y → (y ⊧ φ ↔ y ⊧ ψ)) : x ⊧ □φ ↔ x ⊧ □ψ := by
-  apply intro_multibox_equiv (n := 1);
+  apply intro_boxItr_equiv (n := 1);
   simpa;
 
-lemma intro_multidia_equiv (h : ∀ y, x ≺^[n] y → (y ⊧ φ ↔ y ⊧ ψ)) : x ⊧ ◇^[n]φ ↔ x ⊧ ◇^[n]ψ := by
+lemma intro_diaItr_equiv (h : ∀ y, x ≺^[n] y → (y ⊧ φ ↔ y ⊧ ψ)) : x ⊧ ◇^[n]φ ↔ x ⊧ ◇^[n]ψ := by
   constructor;
-  . apply intro_multidia_semiequiv; intro y Rxy; apply h y Rxy |>.mp;
-  . apply intro_multidia_semiequiv; intro y Rxy; apply h y Rxy |>.mpr;
+  . apply intro_diaItr_semiequiv; intro y Rxy; apply h y Rxy |>.mp;
+  . apply intro_diaItr_semiequiv; intro y Rxy; apply h y Rxy |>.mpr;
 
 lemma intro_dia_equiv (h : ∀ y, x ≺ y → (y ⊧ φ ↔ y ⊧ ψ)) : x ⊧ ◇φ ↔ x ⊧ ◇ψ := by
-  apply intro_multidia_equiv (n := 1);
+  apply intro_diaItr_equiv (n := 1);
   simpa;
-
 
 lemma dia_dual : x ⊧ ◇φ ↔ x ⊧ ∼□(∼φ) := by simp [Semantics.NotModels, Satisfies];
 
-lemma multidia_dual : x ⊧ ◇^[n]φ ↔ x ⊧ ∼□^[n](∼φ) := by
+lemma diaItr_dual : x ⊧ ◇^[n]φ ↔ x ⊧ ∼□^[n](∼φ) := by
   induction n generalizing x with
   | zero => simp [Semantics.NotModels];
   | succ n ih =>
@@ -329,23 +321,23 @@ lemma multidia_dual : x ⊧ ◇^[n]φ ↔ x ⊧ ∼□^[n](∼φ) := by
 
 lemma box_dual : x ⊧ □φ ↔ x ⊧ ∼◇(∼φ) := by simp [Semantics.NotModels, Satisfies];
 
-lemma multibox_dual : x ⊧ □^[n]φ ↔ x ⊧ ∼◇^[n](∼φ) := by
+lemma boxItr_dual : x ⊧ □^[n]φ ↔ x ⊧ ∼◇^[n](∼φ) := by
   constructor;
   . contrapose;
     intro h;
     exact
-      multibox_dn.not.mp
+      boxItr_dn.not.mp
       $ Satisfies.not_def.mp
-      $ multidia_dual.mp
+      $ diaItr_dual.mp
       $ negneg_def.mp
       $ Satisfies.not_def.mpr h
   . contrapose;
     intro h;
     apply Satisfies.not_def.mp;
     apply negneg_def.mpr;
-    apply multidia_dual.mpr;
+    apply diaItr_dual.mpr;
     apply Satisfies.not_def.mpr;
-    apply multibox_dn.not.mpr;
+    apply boxItr_dn.not.mpr;
     exact h;
 
 lemma not_imp : ¬(x ⊧ φ ➝ ψ) ↔ x ⊧ φ ⋏ ∼ψ := by simp [Semantics.NotModels];
@@ -379,7 +371,6 @@ lemma iff_subst_self {x : F.World} (s : Substitution ℕ) :
 
 end Satisfies
 
-
 def ValidOnModel (M : Kripke.Model) (φ : Formula ℕ) := ∀ x : M.World, x ⊧ φ
 
 namespace ValidOnModel
@@ -400,14 +391,12 @@ instance : Semantics.Bot (Kripke.Model) where
 instance : Semantics.Top (Kripke.Model) where
   models_verum := λ _ => ValidOnModel.top_def;
 
-
 lemma iff_not_exists_world {M : Kripke.Model} : (¬M ⊧ φ) ↔ (∃ x : M.World, ¬x ⊧ φ) := by
   apply not_iff_not.mp;
   push_neg;
   tauto;
 
 alias ⟨exists_world_of_not, not_of_exists_world⟩ := iff_not_exists_world
-
 
 protected lemma mdp (hpq : M ⊧ φ ➝ ψ) (hp : M ⊧ φ) : M ⊧ ψ := by
   intro x;
@@ -439,7 +428,6 @@ protected lemma axiomK : M ⊧ (Axioms.K φ ψ)  := by
   exact hpq hp;
 
 end ValidOnModel
-
 
 def ValidOnFrame (F : Kripke.Frame) (φ : Formula ℕ) := ∀ V, (⟨F, V⟩ : Kripke.Model) ⊧ φ
 
@@ -484,7 +472,6 @@ lemma iff_not_exists_model_world :  (¬F ⊧ φ) ↔ (∃ M : Kripke.Model, ∃ 
 
 alias ⟨exists_model_world_of_not, not_of_exists_model_world⟩ := iff_not_exists_model_world
 
-
 protected lemma mdp (hpq : F ⊧ φ ➝ ψ) (hp : F ⊧ φ) : F ⊧ ψ := by
   intro V x;
   exact (hpq V x) (hp V x);
@@ -512,7 +499,6 @@ end ValidOnFrame
 
 end Formula.Kripke
 
-
 namespace Kripke
 
 section
@@ -522,7 +508,6 @@ abbrev Frame.logic (F : Frame) : Logic ℕ := { φ | F ⊧ φ }
 abbrev FrameClass.logic (C : FrameClass) : Logic ℕ := { φ | C ⊧ φ }
 
 end
-
 
 section
 
@@ -554,7 +539,6 @@ alias ⟨exists_valuation_world_of_not_validOnFrameClass, not_validOnFrameClass_
 
 end
 
-
 section
 
 open Formula (atom)
@@ -578,3 +562,4 @@ end
 end Kripke
 
 end LO.Modal
+end

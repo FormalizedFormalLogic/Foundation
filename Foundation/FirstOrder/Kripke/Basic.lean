@@ -1,18 +1,32 @@
-import Foundation.Vorspiel.Preorder
-import Foundation.FirstOrder.Basic
-import Foundation.Logic.Predicate.Relational
-import Foundation.Logic.ForcingRelation
-import Mathlib.Order.PFilter
+module
 
+public import Foundation.FirstOrder.Basic
+public import Foundation.Logic.Predicate.Relational
+public import Foundation.Logic.ForcingRelation
+public import Mathlib.Order.PFilter
+public import Foundation.Vorspiel.Preorder
+
+@[expose] public section
 namespace LO.FirstOrder
 
 /-- Kripke model for relational first-order language -/
-class KripkeModel (L : outParam Language) [L.Relational] (World : Type*) [Preorder World] (Carrier : outParam Type*) where
+class KripkeModel
+    (L : outParam Language) [L.Relational]
+    (World : Type*) [Preorder World]
+    (Carrier : outParam Type*) where
   Domain : World → Set Carrier
   domain_nonempty : ∀ w, ∃ x, x ∈ Domain w
   domain_antimonotone : w ≥ v → Domain w ⊆ Domain v
   Rel (w : World) {k : ℕ} (R : L.Rel k) : (Fin k → Carrier) → Prop
   rel_monotone : Rel w R t → ∀ v ≤ w, Rel v R t
+
+class KripkeModel.ConstantDomain
+    {L : Language} [L.Relational]
+    (World : Type*) [Preorder World]
+    {Carrier : Type*} [KripkeModel L World Carrier] where
+  const_domain : ∀ w : World, Domain w = Set.univ
+
+attribute [simp] KripkeModel.ConstantDomain.const_domain
 
 variable (L : Language) [L.Relational] (W : Type*) [Preorder W] (C : outParam Type*) [KripkeModel L W C]
 
@@ -30,6 +44,40 @@ lemma domain_monotone {p : W} : p ⊩↓ x → ∀ q ≤ p, q ⊩↓ x := fun hx
   domain_antimonotone h hx
 
 @[simp] lemma domain_forcesExists {p : W} (x : p) : p ⊩↓ x.val := x.prop
+
+@[simp] lemma forcingExists_of_constantDomain [ConstantDomain W] (w : W) (x : C) : w ⊩↓ x := by
+  suffices x ∈ Domain w from this; simp
+
+section point_model
+
+instance domain (w : W) : Structure L w where
+  func _ f _ := IsEmpty.elim' inferInstance f
+  rel _ R v := Rel w R fun i ↦ ↑(v i)
+
+set_option linter.unusedVariables false in
+def Point [KripkeModel L W C] (w : W) := C
+
+instance domain' (w : W) : Structure L (Point w) where
+  func _ f _ := IsEmpty.elim' inferInstance f
+  rel _ R v := Rel w R v
+
+variable {w : W}
+
+@[simp] lemma domain_models_rel {R : L.Rel k} {v : Fin k → w} :
+    (domain w).rel R v ↔ Rel w R fun i ↦ ↑(v i) := by rfl
+
+@[simp] lemma domain'_models_rel {R : L.Rel k} {v : Fin k → Point w} :
+    (domain' w).rel R v ↔ Rel w R fun i ↦ ↑(v i) := by rfl
+
+@[simp] lemma domain_val (t : Semiterm L ξ n) : t.val (domain w) bv fv = t.relationalVal bv fv := by
+  rcases Semiterm.bvar_or_fvar_of_relational t with (⟨x, rfl⟩ | ⟨x, rfl⟩) <;> simp
+
+@[simp] lemma domain'_val (t : Semiterm L ξ n) : t.val (domain' w) bv fv = t.relationalVal bv fv := by
+  rcases Semiterm.bvar_or_fvar_of_relational t with (⟨x, rfl⟩ | ⟨x, rfl⟩) <;> simp
+
+end point_model
+
+section filter
 
 variable (W)
 
@@ -69,6 +117,8 @@ instance Str : Structure L F.Model where
     F.Str.rel R v ↔ ∀ p ∈ F, (∀ i, p ⊩↓ ↑(v i)) → Rel p R fun i ↦ (v i).val := by rfl
 
 end Filter
+
+end filter
 
 end KripkeModel
 

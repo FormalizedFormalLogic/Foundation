@@ -1,5 +1,8 @@
-import Foundation.FirstOrder.SetTheory.Basic.Misc
+module
 
+public import Foundation.FirstOrder.SetTheory.Basic.Misc
+
+@[expose] public section
 /-!
 # Basic axioms of set theory
 

@@ -1,5 +1,8 @@
-import Foundation.FirstOrder.Bootstrapping.Syntax.Term.Functions
+module
 
+public import Foundation.FirstOrder.Bootstrapping.Syntax.Term.Functions
+
+@[expose] public section
 /-!
 
 # Typed Formalized IsSemiterm/Term

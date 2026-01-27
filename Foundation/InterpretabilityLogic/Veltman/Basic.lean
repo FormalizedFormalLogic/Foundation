@@ -1,8 +1,12 @@
-import Foundation.InterpretabilityLogic.Formula.Substitution
-import Foundation.InterpretabilityLogic.Axioms
-import Foundation.InterpretabilityLogic.Logic.Basic
-import Foundation.InterpretabilityLogic.Formula.OfModal
-import Foundation.Modal.Kripke.Logic.GL.Completeness
+module
+
+public import Foundation.InterpretabilityLogic.Formula.Substitution
+public import Foundation.InterpretabilityLogic.Axioms
+public import Foundation.InterpretabilityLogic.Logic.Basic
+public import Foundation.InterpretabilityLogic.Formula.OfModal
+public import Foundation.Modal.Kripke.Logic.GL.Completeness
+
+@[expose] public section
 
 namespace LO.InterpretabilityLogic
 
@@ -21,7 +25,7 @@ namespace Veltman
 -/
 structure Frame extends toKripkeFrame : Modal.Kripke.Frame where
   [isGL : toKripkeFrame.IsGL]
-  S : (w : World) → HRel World
+  S : (w : World) → _root_.Rel World World
   S_cond {w x y} : S w x y → w ≺ x
 
 namespace Frame
@@ -431,3 +435,4 @@ end
 end Veltman
 
 end LO.InterpretabilityLogic
+end

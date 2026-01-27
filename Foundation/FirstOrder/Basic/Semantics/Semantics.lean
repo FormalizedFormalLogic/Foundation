@@ -1,5 +1,11 @@
-import Foundation.FirstOrder.Basic.Syntax.Rew
-import Foundation.FirstOrder.Basic.Syntax.Theory
+module
+
+public import Foundation.FirstOrder.Basic.Syntax.Rew
+public import Foundation.FirstOrder.Basic.Syntax.Theory
+public import Foundation.Vorspiel.IsEmpty
+public import Foundation.Vorspiel.Empty
+
+@[expose] public section
 
 /-!
 # Semantics of first-order logic
@@ -541,11 +547,11 @@ instance : Semantics (Struc L) (Sentence L) where
 
 instance : Semantics.Tarski (Struc L) where
   models_verum := by simp [Semantics.Models]
-  models_falsum := by simp [Semantics.NotModels, Semantics.Models]
+  models_falsum := by simp [Semantics.Models]
   models_and := by simp [Semantics.Models]
   models_or := by simp [Semantics.Models]
   models_imply := by simp [Semantics.Models]
-  models_not := by simp [Semantics.NotModels, Semantics.Models]
+  models_not := by simp [Semantics.Models]
 
 section
 
@@ -716,3 +722,4 @@ end Structure
 end FirstOrder
 
 end LO
+end

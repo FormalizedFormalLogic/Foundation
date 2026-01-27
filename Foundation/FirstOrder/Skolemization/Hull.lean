@@ -1,6 +1,9 @@
-import Foundation.FirstOrder.Basic
-import Mathlib.SetTheory.Cardinal.Basic
+module
 
+public import Foundation.FirstOrder.Basic
+public import Mathlib.SetTheory.Cardinal.Basic
+
+@[expose] public section
 /-! # Skolem hull -/
 
 namespace LO.FirstOrder
@@ -33,6 +36,7 @@ variable {L M}
 
 variable (L)
 
+/-- The Skolem hull of subset of structure. -/
 def SkolemHull (s : Set M) : Set M := Set.range fun t : Term L.skolemFunction₁ s ↦ t.valm M ![] (↑)
 
 variable (M)

@@ -1,8 +1,10 @@
-import Foundation.Vorspiel.HRel.Basic
-import Foundation.Modal.Axioms
-import Foundation.Modal.Formula
-import Foundation.Modal.Letterless
-import Foundation.Modal.Logic.Basic
+module
+
+public import Foundation.Modal.Axioms
+public import Foundation.Modal.Formula.Basic
+public import Foundation.Modal.Logic.Basic
+
+@[expose] public section
 
 namespace LO.Modal
 
@@ -51,7 +53,6 @@ end Frame
 
 abbrev FrameClass := Set Frame
 
-
 abbrev Valuation (F : Frame) := ℕ → Set F.World
 
 structure Model extends Frame where
@@ -90,21 +91,20 @@ instance : CoeFun Model (λ M => Formula ℕ → Set M.World) := ⟨λ M => trut
   _         = (M φ ∩ M ψ) ∪ ((M φ)ᶜ ∩ (M ψ)ᶜ)     := by tauto_set;
 
 @[simp, grind =]
-lemma eq_multibox {n : ℕ} : M (□^[n] φ) = M.box^[n] (M φ) := by
+lemma eq_boxItr {n : ℕ} : M (□^[n] φ) = M.box^[n] (M φ) := by
   induction n with
   | zero => simp
   | succ n ih => rw [Function.iterate_succ']; simp [ih, truthset]
 
-@[simp, grind =] lemma eq_box : M (□φ) = M.box (M φ) := eq_multibox (n := 1)
+@[simp, grind =] lemma eq_box : M (□φ) = M.box (M φ) := eq_boxItr (n := 1)
 
 @[simp, grind =]
-lemma eq_multidia {n : ℕ} : M (◇^[n] φ) = M.dia^[n] (M φ) := by
+lemma eq_diaItr {n : ℕ} : M (◇^[n] φ) = M.dia^[n] (M φ) := by
   induction n with
   | zero => simp
   | succ n ih => rw [Function.iterate_succ']; simp [ih, truthset]
 
-@[simp, grind =] lemma eq_dia : M (◇φ) = M.dia (M φ) := eq_multidia (n := 1)
-
+@[simp, grind =] lemma eq_dia : M (◇φ) = M.dia (M φ) := eq_diaItr (n := 1)
 
 lemma eq_subst :
   letI U : Valuation M.toFrame := λ a => M ((atom a)⟦s⟧)
@@ -113,9 +113,7 @@ lemma eq_subst :
 
 end Model.truthset
 
-
 end Neighborhood
-
 
 namespace Formula.Neighborhood
 
@@ -139,9 +137,9 @@ variable {M : Model} {x : M.World} {φ ψ ξ : Formula ℕ}
 @[grind =] lemma def_box : x ⊧ □φ ↔ M φ ∈ (M.𝒩 x) := by simp [Semantics.Models, Satisfies];
 @[grind =] lemma def_dia : x ⊧ ◇φ ↔ (M φ)ᶜ ∈ (M.𝒩 x)ᶜ := by simp [Semantics.Models, Satisfies];
 
-@[grind =] lemma def_multibox' : x ⊧ □^[n]φ ↔ x ∈ M.box^[n] (M φ) := by simp [Semantics.Models, Satisfies]
+@[grind =] lemma def_boxItr' : x ⊧ □^[n]φ ↔ x ∈ M.box^[n] (M φ) := by simp [Semantics.Models, Satisfies]
 @[grind =] lemma def_mutlidia' : x ⊧ ◇^[n]φ ↔ x ∈ M.dia^[n] (M φ) := by simp [Semantics.Models, Satisfies]
-@[grind =] lemma def_box' : x ⊧ □φ ↔ x ∈ M.box (M φ) := def_multibox' (n := 1)
+@[grind =] lemma def_box' : x ⊧ □φ ↔ x ∈ M.box (M φ) := def_boxItr' (n := 1)
 @[grind =] lemma def_dia' : x ⊧ ◇φ ↔ x ∈ M.dia (M φ) := def_mutlidia' (n := 1)
 
 protected instance : Semantics.Tarski (M.World) where
@@ -166,7 +164,6 @@ lemma iff_subst_self {M : Model} {x : M.World} (s) :
   simp [Satisfies, Model.truthset.eq_subst];
 
 end Satisfies
-
 
 def ValidOnModel (M : Model) (φ : Formula ℕ) : Prop := ∀ x, Satisfies M x φ
 
@@ -224,8 +221,6 @@ protected lemma re (hφ : M ⊧ φ ⭤ ψ) : M ⊧ □φ ⭤ □ψ := by
 
 end ValidOnModel
 
-
-
 def ValidOnFrame (F : Neighborhood.Frame) (φ : Formula ℕ) : Prop := ∀ V, (⟨F, V⟩ : Model) ⊧ φ
 
 namespace ValidOnFrame
@@ -258,7 +253,6 @@ protected lemma re (hφ : F ⊧ φ ⭤ ψ) : F ⊧ □φ ⭤ □ψ := by
 @[simp] protected lemma implyS : F ⊧ Axioms.ImplyS φ ψ ξ := λ _ ↦ ValidOnModel.implyS
 
 @[simp] protected lemma elimContra : F ⊧ Axioms.ElimContra φ ψ := λ _ ↦ ValidOnModel.elimContra
-
 
 lemma iff_not_exists_valuation_world : (¬F ⊧ φ) ↔ (∃ V : Valuation F, ∃ x : (⟨F, V⟩ : Model).World, ¬Satisfies _ x φ) := by
   simp [ValidOnFrame, Satisfies, ValidOnModel, Semantics.Models];
@@ -293,7 +287,6 @@ end
 
 end Formula.Neighborhood
 
-
 namespace Neighborhood
 
 abbrev Frame.logic (F : Frame) : Logic ℕ := { φ | F ⊧ φ }
@@ -301,6 +294,5 @@ abbrev FrameClass.logic (C : FrameClass) : Logic ℕ := { φ | C ⊧ φ }
 
 end Neighborhood
 
-
-
 end LO.Modal
+end

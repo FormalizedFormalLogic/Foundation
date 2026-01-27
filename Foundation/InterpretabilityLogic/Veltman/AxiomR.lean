@@ -1,7 +1,11 @@
-import Foundation.InterpretabilityLogic.Veltman.Basic
-import Foundation.InterpretabilityLogic.Veltman.AxiomJ2
-import Foundation.InterpretabilityLogic.Veltman.Logic.IL
-import Mathlib.Tactic.TFAE
+module
+
+public import Foundation.InterpretabilityLogic.Veltman.Basic
+public import Foundation.InterpretabilityLogic.Veltman.AxiomJ2
+public import Foundation.InterpretabilityLogic.Veltman.Logic.IL
+public import Mathlib.Tactic.TFAE
+
+@[expose] public section
 
 namespace LO.InterpretabilityLogic.Veltman
 
@@ -84,3 +88,4 @@ lemma validate_axiomP₀_of_HasAxiomR [F.IsIL] [F.HasAxiomR] : F ⊧ Axioms.P₀
   apply ValidOnFrame.subst (s := λ n => match n with | 0 => φ | 1 => ψ | _ => ⊥) this;
 
 end LO.InterpretabilityLogic.Veltman
+end

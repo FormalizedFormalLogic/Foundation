@@ -1,5 +1,9 @@
-import Foundation.Modal.Kripke.AxiomL
-import Foundation.Modal.Kripke.Hilbert
+module
+
+public import Foundation.Modal.Kripke.AxiomL
+public import Foundation.Modal.Kripke.Hilbert
+
+@[expose] public section
 
 namespace LO.Modal
 
@@ -53,3 +57,4 @@ instance : Entailment.Consistent Modal.GL :=
 instance : Entailment.Consistent Modal.GL := inferInstance
 
 end LO.Modal
+end

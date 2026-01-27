@@ -1,3 +1,5 @@
+module
+
 /-
   Naming of axioms are refered from:
 
@@ -9,7 +11,9 @@
   - Visser, 1988, "Preliminary Notes on Interpretability Logic"
   - Visser, 1997, "An Overview of Interpretability Logic"
 -/
-import Foundation.InterpretabilityLogic.LogicSymbol
+public import Foundation.InterpretabilityLogic.LogicSymbol
+
+@[expose] public section
 
 namespace LO.InterpretabilityLogic.Axioms
 
@@ -156,3 +160,5 @@ protected abbrev Rstar := φ ▷ ψ ➝ ∼(φ ▷ ∼χ) ▷ (ψ ⋏ □χ ⋏ 
 protected abbrev RIIPRC := φ ▷ ψ ➝ □(◇φ ➝ ◇ψ)
 
 end LO.InterpretabilityLogic.Axioms
+
+end

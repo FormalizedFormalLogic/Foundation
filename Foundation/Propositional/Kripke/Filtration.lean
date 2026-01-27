@@ -1,5 +1,9 @@
-import Mathlib.Data.Set.Finite.Powerset
-import Foundation.Propositional.Kripke.Preservation
+module
+
+public import Mathlib.Data.Set.Finite.Powerset
+public import Foundation.Propositional.Kripke.Preservation
+
+@[expose] public section
 
 universe u v
 
@@ -60,8 +64,7 @@ lemma finite (T_finite : T.Finite) : Finite (FilterEqvQuotient M T) := by
 instance : Nonempty (FilterEqvQuotient M T) := ⟨⟦M.toFrame.world_nonempty.some⟧⟩
 
 lemma iff_of_eq (h : (⟦x⟧ : FilterEqvQuotient M T) = ⟦y⟧) : ∀ φ ∈ T, x ⊧ φ ↔ y ⊧ φ := by
-  simp [FilterEqvSetoid, filterEquiv] at h;
-  tauto;
+  simp_all [FilterEqvSetoid, filterEquiv, Quotient.eq];
 
 end FilterEqvQuotient
 
@@ -244,7 +247,7 @@ abbrev finestFiltrationTransitiveClosureFrame (M : Model) (T : FormulaSet ℕ) [
       simp only [Quotient.eq, FilterEqvSetoid, filterEquiv];
       intro φ hφ;
       constructor;
-      . obtain ⟨n, hn⟩ := HRel.TransGen.exists_iterate.mp Rxy;
+      . obtain ⟨n, hn⟩ := Rel.TransGen.exists_iterate.mp Rxy;
         clear Rxy Ryx;
         induction n using PNat.recOn generalizing x with
         | one =>
@@ -260,7 +263,7 @@ abbrev finestFiltrationTransitiveClosureFrame (M : Model) (T : FormulaSet ℕ) [
           have : u' ⊧ φ := formula_hereditary Rx'u' this;
           have : u ⊧ φ := FilterEqvQuotient.iff_of_eq euu' φ hφ |>.mpr this;
           exact ih u RUY this;
-      . obtain ⟨n, hn⟩ := HRel.TransGen.exists_iterate.mp Ryx;
+      . obtain ⟨n, hn⟩ := Rel.TransGen.exists_iterate.mp Ryx;
         clear Rxy Ryx;
         induction n using PNat.recOn generalizing y with
         | one =>
@@ -286,7 +289,7 @@ abbrev finestFiltrationTransitiveClosureModel (M : Model) (T : FormulaSet ℕ) [
       intro X Y RXY a hX ha;
       obtain ⟨x, rfl⟩ := Quotient.exists_rep X;
       obtain ⟨y, rfl⟩ := Quotient.exists_rep Y;
-      obtain ⟨n, hn⟩ := HRel.TransGen.exists_iterate.mp RXY;
+      obtain ⟨n, hn⟩ := Rel.TransGen.exists_iterate.mp RXY;
       clear RXY;
       induction n using PNat.recOn generalizing x with
       | one =>
@@ -313,7 +316,7 @@ instance finestFiltrationTransitiveClosureModel.filterOf : FilterOf (finestFiltr
     tauto;
   def_rel_back := by
     rintro x y RXY;
-    obtain ⟨n, hn⟩ := HRel.TransGen.exists_iterate.mp RXY;
+    obtain ⟨n, hn⟩ := Rel.TransGen.exists_iterate.mp RXY;
     clear RXY;
     induction n using PNat.recOn generalizing x with
     | one =>
@@ -337,3 +340,4 @@ end
 end Kripke
 
 end LO.Propositional
+end

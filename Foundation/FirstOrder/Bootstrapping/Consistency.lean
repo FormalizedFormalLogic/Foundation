@@ -1,5 +1,8 @@
-import Foundation.FirstOrder.Bootstrapping.DerivabilityCondition
+module
 
+public import Foundation.FirstOrder.Bootstrapping.DerivabilityCondition
+
+@[expose] public section
 /-!
 # Consistency predicate
 -/
@@ -78,7 +81,7 @@ end LO.FirstOrder.Arithmetic.Bootstrapping
 
 namespace LO.FirstOrder.Arithmetic
 
-open Entailment ProvabilityLogic
+open Entailment
 
 variable (T : ArithmeticTheory) [𝗜𝚺₁ ⪯ T] [T.Δ₁]
 

@@ -1,6 +1,10 @@
-import Foundation.Modal.Boxdot.GL_Grz
-import Foundation.Modal.Kripke.Logic.GrzPoint3
-import Foundation.Modal.Kripke.Logic.GLPoint3
+module
+
+public import Foundation.Modal.Boxdot.GL_Grz
+public import Foundation.Modal.Kripke.Logic.GrzPoint3
+public import Foundation.Modal.Kripke.Logic.GLPoint3
+
+@[expose] public section
 
 namespace LO.Modal
 
@@ -98,3 +102,4 @@ theorem iff_boxdot_GLPoint3_GrzPoint3 : Modal.GLPoint3 ⊢ φᵇ ↔ Modal.GrzPo
   grind [iff_boxdotTranslatedGLPoint3_GrzPoint3];
 
 end LO.Modal
+end

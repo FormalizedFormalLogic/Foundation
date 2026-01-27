@@ -1,6 +1,10 @@
-import Foundation.Modal.Kripke.AxiomFourN
-import Foundation.Modal.Kripke.Hilbert
-import Foundation.Modal.Kripke.Logic.KTc
+module
+
+public import Foundation.Modal.Kripke.AxiomFourN
+public import Foundation.Modal.Kripke.Hilbert
+public import Foundation.Modal.Kripke.Logic.KTc
+
+@[expose] public section
 
 namespace LO.Modal
 
@@ -59,11 +63,11 @@ lemma counterframe.iff_rel_from_zero {m : ℕ} {x : counterframe n} : (0 : count
   | succ m ih =>
     constructor;
     . intro R0x;
-      obtain ⟨u, R0u, Rux⟩ := HRel.Iterate.forward.mp R0x;
+      obtain ⟨u, R0u, Rux⟩ := Rel.Iterate.forward.mp R0x;
       rw [Rux, ih.mp R0u];
       simp;
     . rintro h;
-      apply HRel.Iterate.forward.mpr;
+      apply Rel.Iterate.forward.mpr;
       by_cases hm : m ≤ n + 1;
       . use ⟨m, by omega⟩;
         constructor;
@@ -77,18 +81,18 @@ lemma counterframe.iff_rel_from_zero {m : ℕ} {x : counterframe n} : (0 : count
 lemma counterframe.iff_rel_from {i j : counterframe n} {m : ℕ} : i ≺^[m] j ↔ j = min (i + m) (n + 1) := by
   induction m generalizing i j with
   | zero =>
-    simp only [HRel.Iterate.iff_zero, add_zero]
+    simp only [Rel.Iterate.iff_zero, add_zero]
     constructor;
     . rintro rfl; have := i.2; omega;
     . rintro h; have := j.2; omega;
   | succ m ih =>
     constructor;
     . intro Rij;
-      obtain ⟨k, Rik, Rkj⟩ := HRel.Iterate.forward.mp Rij;
+      obtain ⟨k, Rik, Rkj⟩ := Rel.Iterate.forward.mp Rij;
       have := @ih i k |>.mp Rik;
       omega;
     . rintro h;
-      apply HRel.Iterate.forward.mpr;
+      apply Rel.Iterate.forward.mpr;
       by_cases hm : (i + m) ≤ n + 1;
       . use ⟨i + m, by omega⟩;
         constructor;
@@ -108,7 +112,7 @@ instance : Frame.IsWeakTransitive (counterframe n) (n + 1) := by
 
 instance : Modal.K ⪱ Modal.K4n n := by
   constructor;
-  . apply Hilbert.Normal.weakerThan_of_subset_axioms $ by simp;
+  . grind;
   . apply Entailment.not_weakerThan_iff.mpr;
     use (Axioms.FourN n (.atom 0));
     constructor;
@@ -121,10 +125,10 @@ instance : Modal.K ⪱ Modal.K4n n := by
       . simp;
       . apply Satisfies.not_imp_def.mpr;
         constructor;
-        . apply Satisfies.multibox_def.mpr;
+        . apply Satisfies.boxItr_def.mpr;
           intro y R0y;
           simp [Semantics.Models, Satisfies, M, counterframe.iff_rel_from.mp R0y];
-        . apply Satisfies.multibox_def.not.mpr;
+        . apply Satisfies.boxItr_def.not.mpr;
           push_neg;
           use ⟨(n + 1), by omega⟩;
           constructor;
@@ -152,13 +156,13 @@ lemma succ_strictlyWeakerThan : Modal.K4n (n + 1) ⪱ Modal.K4n n := by
         infer_instance;
       . apply Satisfies.not_imp_def.mpr;
         constructor;
-        . apply Satisfies.multibox_def.mpr;
+        . apply Satisfies.boxItr_def.mpr;
           intro y R0y;
           replace R0y := counterframe.iff_rel_from_zero.mp R0y;
           simp only [Semantics.Models, Satisfies, counterframe.last, ne_eq, M];
           rintro rfl;
           simp at R0y;
-        . apply Satisfies.multibox_def.not.mpr;
+        . apply Satisfies.boxItr_def.not.mpr;
           push_neg;
           use counterframe.last;
           constructor;
@@ -210,3 +214,4 @@ end K4n
 
 
 end LO.Modal
+end

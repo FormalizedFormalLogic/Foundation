@@ -1,5 +1,9 @@
-import Foundation.Propositional.Kripke.AxiomKrieselPutnam
-import Foundation.Propositional.Kripke.Logic.Int
+module
+
+public import Foundation.Propositional.Kripke.AxiomKrieselPutnam
+public import Foundation.Propositional.Kripke.Logic.Int
+
+@[expose] public section
 
 namespace LO.Propositional
 
@@ -36,7 +40,7 @@ end KrieselPutnam
 
 instance : Propositional.Int ⪱ Propositional.KrieselPutnam := by
   constructor;
-  . apply Hilbert.weakerThan_of_subset_axioms $ by simp;
+  . apply Hilbert.Standard.weakerThan_of_subset_axioms $ by simp;
   . apply Entailment.not_weakerThan_iff.mpr;
     use Axioms.KrieselPutnam (.atom 0) (.atom 1) (.atom 2);
     constructor;
@@ -106,3 +110,4 @@ instance : Propositional.Int ⪱ Propositional.KrieselPutnam := by
               . simp [Semantics.Models, Satisfies, M, Frame.Rel'];
 
 end LO.Propositional
+end

@@ -1,6 +1,9 @@
-import Foundation.Propositional.Entailment.KC
-import Foundation.Propositional.Kripke.Completeness
-import Foundation.Vorspiel.HRel.Convergent
+module
+
+public import Foundation.Propositional.Entailment.KC
+public import Foundation.Propositional.Kripke.Completeness
+
+@[expose] public section
 
 namespace LO.Propositional
 
@@ -9,13 +12,11 @@ open Formula.Kripke
 
 namespace Kripke
 
-
 protected abbrev Frame.IsPiecewiseStronglyConvergent (F : Frame) := _root_.IsPiecewiseStronglyConvergent F.Rel
 lemma Frame.ps_convergent {F : Frame} [F.IsPiecewiseStronglyConvergent] : ∀ ⦃x y z : F⦄, x ≺ y → x ≺ z → ∃ u, y ≺ u ∧ z ≺ u := by
   apply IsPiecewiseStronglyConvergent.ps_convergent
 
 instance : whitepoint.IsPiecewiseStronglyConvergent := ⟨by tauto⟩
-
 
 section definability
 
@@ -45,7 +46,6 @@ lemma validate_axiomWLEM_of_isPiecewiseStronglyConvergent [F.IsPiecewiseStrongly
     by_contra Rzu;
     exact (Satisfies.neg_def.mp hz) Rzu $ Satisfies.formula_hereditary Ryu hy;
 
-
 lemma isPiecewiseStronglyConvergent_of_validate_axiomWLEM (h : F ⊧ (Axioms.WLEM (.atom 0))) : F.IsPiecewiseStronglyConvergent := ⟨by
   rintro x y z Rxy Ryz;
   let V : Kripke.Valuation F := ⟨λ {v a} => y ≺ v, by
@@ -67,7 +67,6 @@ lemma isPiecewiseStronglyConvergent_of_validate_axiomWLEM (h : F ⊧ (Axioms.WLE
 ⟩
 
 end definability
-
 
 section canonicality
 
@@ -142,7 +141,7 @@ instance [Entailment.HasAxiomWLEM 𝓢] : (canonicalFrame 𝓢).IsPiecewiseStron
     tauto;
 
   have nmem_nΘz_z : ∼Θz.conj ∉ z.1.1 := not_mem₁_neg_of_mem₁ mem_Θz_z;
-  have nmem_nΘz_x : ∼Θz.conj ∉ x.1.1 := Set.not_mem_subset Rxz nmem_nΘz_z;
+  have nmem_nΘz_x : ∼Θz.conj ∉ x.1.1 := Set.notMem_subset Rxz nmem_nΘz_z;
   have mem_nnΘz_x : ∼∼Θz.conj ∈ x.1.1 := or_iff_not_imp_left.mp (iff_mem₁_or.mp $ mem₁_of_provable $ wlem!) nmem_nΘz_x;
 
   exact mdp₁_mem mem_nnΘz_x $ mdp_mem₁_provable this mem_Θx_x;
@@ -153,3 +152,4 @@ end canonicality
 end Kripke
 
 end LO.Propositional
+end

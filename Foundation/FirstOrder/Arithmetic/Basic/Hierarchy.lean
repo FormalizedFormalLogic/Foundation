@@ -1,5 +1,8 @@
-import Foundation.FirstOrder.Arithmetic.Basic.Model
+module
 
+public import Foundation.FirstOrder.Arithmetic.Basic.Model
+
+@[expose] public section
 namespace LO.FirstOrder.Arithmetic
 
 variable {L : Language} [L.LT]

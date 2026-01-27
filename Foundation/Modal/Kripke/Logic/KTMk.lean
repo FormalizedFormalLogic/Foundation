@@ -1,9 +1,13 @@
-import Foundation.Modal.Kripke.Logic.S4
-import Foundation.Modal.Kripke.AxiomGeach
-import Foundation.Modal.Kripke.AxiomMk
-import Foundation.Modal.Logic.Basic
-import Foundation.Vorspiel.List.Chain
-import Foundation.Modal.Kripke.Hilbert
+module
+
+public import Foundation.Modal.Kripke.Logic.S4
+public import Foundation.Modal.Kripke.AxiomGeach
+public import Foundation.Modal.Kripke.AxiomMk
+public import Foundation.Modal.Logic.Basic
+
+public import Foundation.Modal.Kripke.Hilbert
+
+@[expose] public section
 
 namespace LO.Modal
 
@@ -95,7 +99,7 @@ lemma validate_axiomFour_of_model_finitely {M : Kripke.Model} (hM : M ⊧* Modal
             apply Logic.iff_provable.mp;
             rwa [show (i + (n + 1) + 1) = (i + 2 + n) by omega];
           apply reduce_box_in_CAnt!;
-      . apply List.chain'_concat_of_not_nil (List.length_pos_iff_ne_nil.mp (by simp [hl_len])) |>.mpr;
+      . apply List.isChain_concat_of_not_nil (List.length_pos_iff_ne_nil.mp (by simp [hl_len])) |>.mpr;
         constructor;
         . assumption;
         . convert Rmy;
@@ -184,7 +188,7 @@ end KTMk
 
 instance : Modal.KT ⪱ Modal.KTMk := by
   constructor;
-  . apply Hilbert.Normal.weakerThan_of_subset_axioms; simp;
+  . grind;
   . apply Entailment.not_weakerThan_iff.mpr;
     use (Axioms.Mk (.atom 0) (.atom 1));
     constructor;
@@ -195,7 +199,8 @@ instance : Modal.KT ⪱ Modal.KTMk := by
       constructor;
       . exact { refl := by omega; }
       . suffices ∀ (x : Fin 3), 0 = x ∨ 1 = x → (∀ y, x = y ∨ x + 1 = y → ∀ z, y = z ∨ y + 1 = z → z ≠ 2) → x ≠ 0 ∧ x + 1 ≠ 0 by
-          simpa [Frame.Rel', Satisfies, Semantics.Models];
+          simp [Frame.Rel', Satisfies, Semantics.Models];
+          grind;
         rintro x (rfl | rfl);
         . intro h;
           exfalso;
@@ -236,3 +241,4 @@ instance : Modal.KTMk ⪱ Modal.S4 := by
     . assumption;
 
 end LO.Modal
+end

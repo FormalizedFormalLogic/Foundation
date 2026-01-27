@@ -1,6 +1,9 @@
-import Foundation.Propositional.Kripke.Completeness
-import Foundation.Propositional.Entailment.LC
-import Foundation.Vorspiel.HRel.Connected
+module
+
+public import Foundation.Propositional.Kripke.Completeness
+public import Foundation.Propositional.Entailment.LC
+
+@[expose] public section
 
 namespace LO.Propositional
 
@@ -12,7 +15,6 @@ namespace Kripke
 protected abbrev Frame.IsPiecewiseStronglyConnected (F : Frame) := _root_.IsPiecewiseStronglyConnected F.Rel
 lemma Frame.ps_connected {F : Frame} [F.IsPiecewiseStronglyConnected] : ∀ ⦃x y z : F⦄, x ≺ y → x ≺ z → y ≺ z ∨ z ≺ y := by
   apply IsPiecewiseStronglyConnected.ps_connected
-
 
 section definability
 
@@ -67,7 +69,6 @@ lemma isPiecewiseStronglyConnected_of_validate_axiomDummett (h : F ⊧ (Axioms.D
 
 end definability
 
-
 section canonicality
 
 variable {S} [Entailment S (Formula ℕ)]
@@ -103,3 +104,4 @@ end canonicality
 end Kripke
 
 end LO.Propositional
+end

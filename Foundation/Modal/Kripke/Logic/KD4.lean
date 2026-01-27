@@ -1,7 +1,11 @@
-import Foundation.Modal.Kripke.AxiomGeach
-import Foundation.Modal.Kripke.Hilbert
-import Foundation.Modal.Kripke.Logic.K4
-import Foundation.Modal.Kripke.Logic.KD
+module
+
+public import Foundation.Modal.Kripke.AxiomGeach
+public import Foundation.Modal.Kripke.Hilbert
+public import Foundation.Modal.Kripke.Logic.K4
+public import Foundation.Modal.Kripke.Logic.KD
+
+@[expose] public section
 
 namespace LO.Modal
 
@@ -44,7 +48,7 @@ end KD4
 
 instance : Modal.KD ⪱ Modal.KD4 := by
   constructor;
-  . apply Hilbert.Normal.weakerThan_of_subset_axioms $ by simp;
+  . grind;
   . apply Entailment.not_weakerThan_iff.mpr;
     use Axioms.Four (.atom 0);
     constructor;
@@ -59,7 +63,7 @@ instance : Modal.KD ⪱ Modal.KD4 := by
 
 instance : Modal.K4 ⪱ Modal.KD4 := by
   constructor;
-  . apply Hilbert.Normal.weakerThan_of_subset_axioms $ by simp;
+  . grind;
   . apply Entailment.not_weakerThan_iff.mpr;
     use (Axioms.D (.atom 0));
     constructor;
@@ -72,3 +76,4 @@ instance : Modal.K4 ⪱ Modal.KD4 := by
       . simp [Semantics.Models, Satisfies];
 
 end LO.Modal
+end

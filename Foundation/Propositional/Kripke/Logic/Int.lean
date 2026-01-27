@@ -1,7 +1,11 @@
-import Foundation.Propositional.Kripke.Completeness
-import Foundation.Propositional.Kripke.Hilbert
-import Foundation.Propositional.Kripke.Filtration
-import Foundation.Logic.Disjunctive
+module
+
+public import Foundation.Propositional.Kripke.Completeness
+public import Foundation.Propositional.Kripke.Hilbert
+public import Foundation.Propositional.Kripke.Filtration
+public import Foundation.Logic.Disjunctive
+
+@[expose] public section
 
 namespace LO.Propositional
 
@@ -157,3 +161,4 @@ end DP
 end Int
 
 end LO.Propositional
+end

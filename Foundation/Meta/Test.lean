@@ -1,6 +1,8 @@
-import Foundation.Modal.Entailment.Basic
-import Foundation.Meta.ClProver
-import Foundation.Meta.IntProver
+module
+
+public import Foundation.Modal.Entailment.Basic
+public import Foundation.Meta.ClProver
+public import Foundation.Meta.IntProver
 
 namespace LO
 

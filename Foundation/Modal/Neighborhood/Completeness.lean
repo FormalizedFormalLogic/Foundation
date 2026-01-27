@@ -1,6 +1,10 @@
-import Foundation.Modal.MaximalConsistentSet
-import Foundation.Modal.Neighborhood.Basic
-import Foundation.Modal.Entailment.EM
+module
+
+public import Foundation.Modal.MaximalConsistentSet
+public import Foundation.Modal.Neighborhood.Basic
+public import Foundation.Modal.Entailment.EM
+
+@[expose] public section
 
 namespace LO.Modal
 
@@ -161,7 +165,7 @@ lemma box_proofset : 𝓒.toModel.box (proofset 𝓢 φ) = (proofset 𝓢 (□φ
   simp [toModel];
 
 @[simp]
-lemma multibox_proofset : 𝓒.toModel.box^[n] (proofset 𝓢 φ) = (proofset 𝓢 (□^[n]φ)) := by
+lemma boxItr_proofset : 𝓒.toModel.box^[n] (proofset 𝓢 φ) = (proofset 𝓢 (□^[n]φ)) := by
   induction n generalizing φ with
   | zero => simp;
   | succ n ih => simp only [Function.iterate_succ, Function.comp_apply, box_proofset, ih];
@@ -172,7 +176,7 @@ lemma dia_proofset : 𝓒.toModel.dia (proofset 𝓢 φ) = (proofset 𝓢 (◇φ
   simpa using 𝓒.box_proofset (φ := ∼φ);
 
 @[simp]
-lemma multidia_proofset : 𝓒.toModel.dia^[n] (proofset 𝓢 φ) = (proofset 𝓢 (◇^[n]φ)) := by
+lemma diaItr_proofset : 𝓒.toModel.dia^[n] (proofset 𝓢 φ) = (proofset 𝓢 (◇^[n]φ)) := by
   induction n generalizing φ with
   | zero => simp;
   | succ n ih => simp only [Function.iterate_succ, Function.comp_apply, dia_proofset, ih];
@@ -313,3 +317,4 @@ abbrev maximalRelativeMaximalCanonicity (𝓢 : S) [Entailment.E 𝓢] : Canonic
 end Neighborhood
 
 end LO.Modal
+end

@@ -1,8 +1,11 @@
-import Foundation.FirstOrder.Intuitionistic.Deduction
-import Foundation.FirstOrder.Kripke.Basic
-import Foundation.Logic.Predicate.Relational
-import Foundation.Logic.ForcingRelation
+module
 
+public import Foundation.FirstOrder.Intuitionistic.Deduction
+public import Foundation.FirstOrder.Kripke.Basic
+public import Foundation.Logic.Predicate.Relational
+public import Foundation.Logic.ForcingRelation
+
+@[expose] public section
 /-! # Kripke semantics for intuitionistic first-order logic -/
 
 namespace LO.FirstOrder
@@ -146,6 +149,17 @@ lemma monotone
     exact Hx x (by rfl) (Hv.monotone x hxv)
   · intro h v hvw
     refine ⟨v, by rfl, fun x hxv ↦ h x (le_trans hxv hvw)⟩
+
+@[simp] lemma all_of_constantDomain [ConstantDomain W] {φ : Semiformulaᵢ L ξ (n + 1)} :
+    w ⊩[bv|fv] ∀' φ ↔ ∀ x : C, w ⊩[x :> bv|fv] φ := by
+  constructor
+  · intro h x
+    exact all.mp h w (by rfl) ⟨x, by simp⟩
+  · rintro h v hvw ⟨x, _⟩
+    simpa using monotone (h x) v hvw
+
+@[simp] lemma ex_of_constantDomain [ConstantDomain W] {φ : Semiformulaᵢ L ξ (n + 1)} :
+    w ⊩[bv|fv] ∃' φ ↔ ∃ x : C, w ⊩[x :> bv|fv] φ := by simp
 
 open HilbertProofᵢ Semantics
 

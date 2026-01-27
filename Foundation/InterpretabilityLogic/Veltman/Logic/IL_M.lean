@@ -1,5 +1,9 @@
-import Foundation.InterpretabilityLogic.Veltman.Logic.IL_R_W
-import Foundation.InterpretabilityLogic.Veltman.AxiomM
+module
+
+public import Foundation.InterpretabilityLogic.Veltman.Logic.IL_R_W
+public import Foundation.InterpretabilityLogic.Veltman.AxiomM
+
+@[expose] public section
 
 namespace LO.InterpretabilityLogic
 
@@ -86,3 +90,4 @@ instance : InterpretabilityLogic.IL_R_W ⪱ InterpretabilityLogic.IL_M := by
         contradiction;
 
 end LO.InterpretabilityLogic
+end

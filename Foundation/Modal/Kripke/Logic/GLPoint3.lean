@@ -1,8 +1,12 @@
-import Foundation.Modal.Kripke.Logic.GL.Completeness
-import Foundation.Modal.Kripke.Logic.K4Point3
-import Foundation.Modal.Logic.Global
-import Mathlib.Data.Finite.Sum
+module
 
+public import Foundation.Modal.Kripke.Logic.GL.Completeness
+public import Foundation.Modal.Kripke.Logic.K4Point3
+public import Foundation.Modal.Logic.Global
+public import Mathlib.Data.Finite.Sum
+
+
+@[expose] public section
 
 lemma Finite.of_scoped_subtype {P Q : α → Prop} (h : ∀ x : α, Q x → P x) [Finite { x // P x }] : Finite { x // Q x } := by
   apply Finite.of_injective (β := { x // P x }) (λ x => ⟨x.1, h _ x.2⟩);
@@ -31,7 +35,7 @@ instance : blackpoint.IsFiniteGLPoint3 where
 end Kripke
 
 
-namespace Modal.GLPoint3.Kripke
+namespace GLPoint3.Kripke
 
 instance : Sound Modal.GLPoint3 FrameClass.finite_GLPoint3 := instSound_of_validates_axioms $ by
   apply FrameClass.validates_with_AxiomK_of_validates;
@@ -93,8 +97,8 @@ private def complete.filteredModel
   (φ : Formula ℕ)
   (_ : □φ ∈ v.1.1) (_ : φ ∈ v.1.2)
   : Kripke.Model where
-  World := { x // x = v ∨ (v ≺ x ∧ ∃ ψ ∈ φ.subformulas.prebox, □ψ ∈ v.1.2 ∧ □ψ ∈ x.1.1 ∧ ψ ∈ x.1.2) }
-  world_nonempty := ⟨v, by simp⟩
+  World := { x // x = v ∨ (v ≺ x ∧ ∃ ψ ∈ (□⁻¹'φ.subformulas), □ψ ∈ v.1.2 ∧ □ψ ∈ x.1.1 ∧ ψ ∈ x.1.2) }
+  world_nonempty := ⟨v, by grind⟩
   Rel := λ x y => x.1 ≺ y.1
   Val := λ x => (canonicalModel Modal.GLPoint3).Val x
 
@@ -120,10 +124,10 @@ private instance complete.filteredModel.isFiniteGLPoint3 : Frame.IsFiniteGLPoint
       simpa [filteredModel] using hxy;
   world_finite := by
     dsimp [complete.filteredModel];
-    have : Finite { ψ // ψ ∈ φ.subformulas.prebox ∧ ∼□ψ ∈ v.1.1 } := Finite.of_scoped_subtype (P := λ ψ => ψ ∈ φ.subformulas.prebox) $ by tauto;
-    apply Finite.of_surjective (α := Unit ⊕ { ψ // ψ ∈ φ.subformulas.prebox ∧ ∼□ψ ∈ v.1.1 })
+    have : Finite { ψ // ψ ∈ (□⁻¹'φ.subformulas) ∧ ∼□ψ ∈ v.1.1 } := Finite.of_scoped_subtype (P := λ ψ => ψ ∈ (□⁻¹'φ.subformulas)) $ by tauto;
+    apply Finite.of_surjective (α := Unit ⊕ { ψ // ψ ∈ (□⁻¹'φ.subformulas : Finset (Formula ℕ)) ∧ ∼□ψ ∈ v.1.1 })
       (f := λ x => match x with
-        | .inl _ => ⟨v, by simp⟩
+        | .inl _ => ⟨v, by grind⟩
         | .inr ψ =>
           letI u := lemma₂ (v := v) ψ.2.2;
           ⟨u.choose, by
@@ -160,7 +164,7 @@ private lemma complete.filteredModel.truthlemma : ∀ x : (complete.filteredMode
       intro h;
       apply Satisfies.not_box_def.mpr;
       have : □ψ ∉ v.1.1 := by
-        rcases (filteredModel v φ _ _).connected ⟨v, by simp⟩ x with (Rvx | rfl | Rxv);
+        rcases (filteredModel v φ _ _).connected ⟨v, by grind⟩ x with (Rvx | rfl | Rxv);
         . contrapose! h;
           apply Rvx;
           apply mdp_mem₁_provable ?_ $ h;
@@ -177,7 +181,7 @@ private lemma complete.filteredModel.truthlemma : ∀ x : (complete.filteredMode
         . exact Rvy;
         . use ψ;
           refine ⟨?_, ?_, ?_, ?_⟩;
-          . simpa;
+          . simpa [Finset.LO.preboxItr]
           . apply iff_not_mem₁_mem₂.mp; simpa;
           . simpa;
           . simpa;
@@ -223,7 +227,7 @@ instance complete : Complete Modal.GLPoint3 FrameClass.finite_GLPoint3 := ⟨by
       exact (lemma₂ $ (iff_mem₁_neg'.mpr h)) |>.choose_spec.1.2.2;
 
   apply Kripke.not_validOnFrameClass_of_exists_model_world;
-  use (complete.filteredModel v φ hv₁ hv₂), ⟨v, by simp⟩;
+  use (complete.filteredModel v φ hv₁ hv₂), ⟨v, by grind⟩;
   constructor;
   . apply Set.mem_setOf_eq.mpr; infer_instance;
   . apply filteredModel.truthlemma _ _ (by grind) |>.not.mpr;
@@ -252,7 +256,8 @@ instance : Modal.GL ⪱ Modal.GLPoint3 := by
           irrefl := by omega
         };
       . suffices (0 : M.World) ≺ 1 ∧ (∀ x, (1 : M.World) ≺ x → x = 1) ∧ (0 : M.World) ≺ 2 ∧ ∀ x, (2 : M.World) ≺ x → x = 2 by
-          simpa [Semantics.Models, Satisfies, ValidOnFrame, M];
+          simp [Semantics.Models, Satisfies, ValidOnFrame, M];
+          grind;
         refine ⟨?_, ?_, ?_, ?_⟩;
         all_goals omega;
 
@@ -273,8 +278,7 @@ instance : Modal.K4Point3 ⪱ Modal.GLPoint3 := by
       . simp [Semantics.Models, Satisfies];
         tauto;
 
-end Modal.GLPoint3.Kripke
-
-
+end GLPoint3.Kripke
 
 end LO.Modal
+end

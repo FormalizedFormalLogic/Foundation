@@ -1,10 +1,13 @@
-import Foundation.Modal.Neighborhood.AxiomGeach
-import Foundation.Modal.Neighborhood.AxiomN
-import Foundation.Modal.Neighborhood.Logic.END4
-import Foundation.Modal.Neighborhood.Logic.ENT4
-import Foundation.Modal.Neighborhood.Logic.ET
-import Foundation.Modal.Neighborhood.Logic.E5
-import Foundation.Vorspiel.Set.Fin
+module
+
+public import Foundation.Modal.Neighborhood.AxiomGeach
+public import Foundation.Modal.Neighborhood.AxiomN
+public import Foundation.Modal.Neighborhood.Logic.END4
+public import Foundation.Modal.Neighborhood.Logic.ENT4
+public import Foundation.Modal.Neighborhood.Logic.ET
+public import Foundation.Modal.Neighborhood.Logic.E5
+
+@[expose] public section
 
 @[simp]
 lemma Set.ne_univ_empty [Nonempty α] : Set.univ (α := α) ≠ ∅ := by simp only [ne_eq,
@@ -15,7 +18,6 @@ namespace LO.Modal
 open Neighborhood
 open Hilbert.Neighborhood
 open Formula.Neighborhood
-
 
 namespace Neighborhood
 
@@ -28,7 +30,6 @@ instance : Frame.simple_blackhole.IsET5 where
   eucl := by
     intro X x hx;
     simp_all [Frame.simple_blackhole, Frame.box];
-
 
 section
 
@@ -48,7 +49,6 @@ instance : (basicCanonicity 𝓢).toModel.IsEuclidean := by
     apply hφ₂;
   exact this ▸ (basicCanonicity 𝓢 |>.def_𝒩 A ⊤ |>.mp $ MaximalConsistentSet.mem_of_prove (by simp));
 
-
 instance : (basicCanonicity 𝓢).toModel.IsET5 where
 
 end
@@ -58,16 +58,15 @@ lemma counterframe_2_3_5.not_valid_axiomT : ¬counterframe_2_3_5 ⊧ Axioms.T (F
   apply not_imp_not.mpr isReflexive_of_valid_axiomT;
   by_contra! hC;
   have := hC.refl {0};
-  have := @this 1
-  simp at this;
+  have := @this 1;
+  grind;
 
 instance : counterframe_axiomFive.IsENT4 where
   contains_unit := by simp [Frame.box];
   refl := by rintro X x (rfl | rfl | rfl) <;> tauto_set;
-  trans := by rintro X x (rfl | rfl) <;> simp [Frame.box];
+  trans := by rintro X x (rfl | rfl) <;> . dsimp [Frame.box]; grind;
 
 end Neighborhood
-
 
 namespace ET5
 
@@ -85,7 +84,6 @@ instance Neighborhood.complete : Complete Modal.ET5 FrameClass.ET5 := (basicCano
   infer_instance;
 
 end ET5
-
 
 instance : Modal.ENT4 ⪱ Modal.ET5 := by
   constructor;
@@ -121,8 +119,9 @@ instance : Modal.E5 ⪱ Modal.ET5 := by
           simp_all [Frame.box, Frame.dia];
       . apply not_imp_not.mpr isReflexive_of_valid_axiomT;
         by_contra! hC;
-        have : ∀ (y : Fin 2), y = 1 := by simpa using hC.refl {1};
-        have := this 0;
-        contradiction;
+        have := hC.refl {1};
+        have := @this 0;
+        grind;
 
 end LO.Modal
+end

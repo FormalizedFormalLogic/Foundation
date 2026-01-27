@@ -1,5 +1,9 @@
-import Foundation.FirstOrder.Basic.Semantics.Semantics
-import Foundation.Vorspiel.NotationClass
+module
+
+public import Foundation.FirstOrder.Basic.Semantics.Semantics
+public import Foundation.FirstOrder.NotationClass
+
+@[expose] public section
 
 namespace LO
 
@@ -177,15 +181,11 @@ end numeral
 
 @[simp] lemma Add.positive_iff [L.Add] (t u : Semiterm L ξ (n + 1)) :
     (add.operator ![t, u]).Positive ↔ t.Positive ∧ u.Positive := by
-  simpa [positive_operator_iff, Add.term_eq, bv_func]
-  using ⟨by intro h; exact ⟨h 0, h 1⟩,
-    by intro h i; cases i using Fin.cases <;> simp [Fin.eq_zero, *]⟩
+  simp [positive_operator_iff, Add.term_eq, bv_func]
 
 @[simp] lemma Mul.positive_iff [L.Mul] (t u : Semiterm L ξ (n + 1)) :
     (mul.operator ![t, u]).Positive ↔ t.Positive ∧ u.Positive := by
-  simpa [positive_operator_iff, Mul.term_eq, bv_func]
-  using ⟨by intro h; exact ⟨h 0, h 1⟩,
-    by intro h i; cases i using Fin.cases <;> simp [Fin.eq_zero, *]⟩
+  simp [positive_operator_iff, Mul.term_eq, bv_func]
 
 @[simp] lemma Exp.positive_iff [L.Exp] (t : Semiterm L ξ (n + 1)) :
     (exp.operator ![t]).Positive ↔ t.Positive := by
@@ -242,12 +242,12 @@ variable {L : Language}
 @[simp] lemma complexity_add [L.Add] (t u : Semiterm L ξ n) :
     (Operator.Add.add.operator ![t, u]).complexity = max t.complexity u.complexity + 1 := by
   simp [Operator.operator, Operator.Add.term_eq, complexity_func, Rew.func]
-  simp [show (Finset.univ : Finset (Fin 2)) = {0, 1} from by ext i; cases i using Fin.cases <;> simp [Fin.eq_zero]]
+  simp [show (Finset.univ : Finset (Fin 2)) = {0, 1} from by ext i; cases i using Fin.cases <;> simp]
 
 @[simp] lemma complexity_mul [L.Mul] (t u : Semiterm L ξ n) :
     (Operator.Mul.mul.operator ![t, u]).complexity = max t.complexity u.complexity + 1 := by
   simp [Operator.operator, Operator.Mul.term_eq, complexity_func, Rew.func]
-  simp [show (Finset.univ : Finset (Fin 2)) = {0, 1} from by ext i; cases i using Fin.cases <;> simp [Fin.eq_zero]]
+  simp [show (Finset.univ : Finset (Fin 2)) = {0, 1} from by ext i; cases i using Fin.cases <;> simp]
 
 end complexity
 
@@ -387,7 +387,8 @@ lemma LE.def_of_Eq_of_LT [Operator.Eq L] [Operator.LT L] :
 
 @[simp] lemma LE.le_inj [L.Eq] [L.LT] {t₁ t₂ u₁ u₂ : Semiterm L ξ₂ n₂} :
     LE.le.operator ![t₁, u₁] = LE.le.operator ![t₂, u₂] ↔ t₁ = t₂ ∧ u₁ = u₂ := by
-  simp [operator, LE.sentence_eq, Eq.sentence_eq, LT.sentence_eq, Matrix.fun_eq_vec_two]
+  simp [operator, LE.sentence_eq, Eq.sentence_eq, LT.sentence_eq, Matrix.fun_eq_vec_two];
+
 
 lemma lt_def [L.LT] (t u : Semiterm L ξ n) :
     LT.lt.operator ![t, u] = Semiformula.rel Language.LT.lt ![t, u] := by simp [operator, LT.sentence_eq, rew_rel]
@@ -721,3 +722,5 @@ end Semiterm
 end FirstOrder
 
 end LO
+
+end

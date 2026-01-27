@@ -1,5 +1,8 @@
-import Foundation.Logic.LogicSymbol
+module
 
+public import Foundation.Logic.LogicSymbol
+
+@[expose] public section
 
 namespace LO
 
@@ -203,3 +206,4 @@ notation:64 "∃[" φ "] " ψ => bex φ ψ
 end quantifier
 
 end LO
+end

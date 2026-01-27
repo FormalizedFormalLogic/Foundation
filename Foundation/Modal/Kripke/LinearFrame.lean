@@ -1,8 +1,12 @@
-import Foundation.Modal.Kripke.Preservation
-import Foundation.Modal.Kripke.Rooted
-import Foundation.Modal.Kripke.AxiomWeakPoint3
-import Mathlib.Order.Interval.Finset.Defs
-import Mathlib.Order.Interval.Finset.Nat
+module
+
+public import Foundation.Modal.Kripke.Preservation
+public import Foundation.Modal.Kripke.Rooted
+public import Foundation.Modal.Kripke.AxiomWeakPoint3
+public import Mathlib.Order.Interval.Finset.Defs
+public import Mathlib.Order.Interval.Finset.Nat
+
+@[expose] public section
 
 namespace LO.Modal.Kripke
 
@@ -34,7 +38,7 @@ instance : Frame.IsRootedBy natLT natLT.min where
     intro x hx;
     apply Relation.TransGen.single;
     simp_all [natLT, natLT.min];
-    omega;
+    grind;
 
 end natLT
 
@@ -49,7 +53,7 @@ instance : IsTrans _ natLE := by
   dsimp only [natLE];
   infer_instance;
 
-instance : IsRefl _ natLE := by
+instance : Std.Refl natLE := by
   dsimp only [natLE];
   infer_instance;
 
@@ -95,11 +99,11 @@ instance : IsTrans _ (finLE n) := by
   dsimp only [finLE];
   infer_instance;
 
-instance : IsRefl _ (finLE n) := by
+instance : Std.Refl (finLE n) := by
   dsimp only [finLE];
   infer_instance;
 
-instance : IsAntisymm _ (finLE n) := by
+instance : Std.Antisymm (finLE n) := by
   dsimp only [finLE];
   infer_instance;
 
@@ -236,3 +240,4 @@ lemma natLE_validates_AxiomDum : natLE ⊧ (Axioms.Dum (.atom 0)) := by
 end
 
 end LO.Modal.Kripke
+end

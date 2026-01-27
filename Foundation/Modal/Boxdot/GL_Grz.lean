@@ -1,6 +1,10 @@
-import Foundation.Modal.Boxdot.Basic
-import Foundation.Modal.Kripke.Logic.GL.Completeness
-import Foundation.Modal.Kripke.Logic.Grz.Completeness
+module
+
+public import Foundation.Modal.Boxdot.Basic
+public import Foundation.Modal.Kripke.Logic.GL.Completeness
+public import Foundation.Modal.Kripke.Logic.Grz.Completeness
+
+@[expose] public section
 
 namespace LO.Modal
 
@@ -47,7 +51,5 @@ theorem iff_provable_boxdot_GL_provable_Grz : Modal.GL ⊢ φᵇ ↔ Modal.Grz �
   provable_boxdot_GL_of_provable_Grz
 ⟩
 
-theorem iff_boxdot_GL_Grz : Modal.GL ⊢ φᵇ ↔ Modal.Grz ⊢ φ := by
-  grind [iff_provable_boxdot_GL_provable_Grz];
-
 end LO.Modal
+end

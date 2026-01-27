@@ -1,13 +1,13 @@
-import Foundation.ProvabilityLogic.Provability
-import Foundation.FirstOrder.Bootstrapping.DerivabilityCondition
-import Foundation.FirstOrder.Incompleteness.Examples
-import Foundation.Modal.Hilbert.Normal.Basic
-import Foundation.Modal.Letterless
+module
 
+public import Foundation.FirstOrder.Bootstrapping.DerivabilityCondition
+public import Foundation.Modal.Hilbert.Normal.Basic
+
+@[expose] public section
 namespace LO
 
 open Entailment FiniteContext
-open FirstOrder ProvabilityLogic
+open FirstOrder ProvabilityAbstraction
 open Modal Modal.Hilbert
 
 variable {L : Language} [L.ReferenceableBy L] {T₀ T U : Theory L}
@@ -36,14 +36,14 @@ instance : CoeFun (Realization 𝔅) (fun _ ↦ Formula ℕ → FirstOrder.Sente
 @[grind ⇒]
 lemma letterless_interpret (A_letterless : A.Letterless) : f₁ A = f₂ A := by
   induction A with
-  | hatom a => simp at A_letterless;
+  | hatom a => grind;
   | hfalsum => simp_all [Realization.interpret];
   | himp A B ihA ihB =>
-    replace ihA := ihA $ Modal.Formula.Letterless.def_imp₁ A_letterless;
-    replace ihB := ihB $ Modal.Formula.Letterless.def_imp₂ A_letterless;
+    replace ihA := ihA $ by grind;
+    replace ihB := ihB $ by grind;
     simp_all [Realization.interpret];
   | hbox A ihA =>
-    replace ihA := ihA $ Modal.Formula.Letterless.def_box A_letterless;
+    replace ihA := ihA $ by grind;
     simp_all [Realization.interpret];
 
 @[grind ⇒]

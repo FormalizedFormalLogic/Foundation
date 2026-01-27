@@ -1,5 +1,8 @@
-import Foundation.Propositional.Logic.Basic
-import Foundation.Vorspiel.HRel.Basic
+module
+
+public import Foundation.Propositional.Logic.Basic
+
+@[expose] public section
 
 namespace LO.Propositional
 
@@ -9,12 +12,12 @@ namespace Kripke
 
 structure Frame where
   World : Type
-  Rel : HRel World
+  Rel : Rel World World
   [world_nonempty : Nonempty World]
   [rel_partial_order : IsPartialOrder _ Rel]
 
 instance : CoeSort Frame (Type) := ⟨Frame.World⟩
-instance : CoeFun Frame (λ F => HRel F.World) := ⟨Frame.Rel⟩
+instance : CoeFun Frame (λ F => _root_.Rel F.World F.World) := ⟨Frame.Rel⟩
 instance {F : Frame} : Nonempty F.World := F.world_nonempty
 instance {F : Frame} : IsPartialOrder F.World F.Rel := F.rel_partial_order
 
@@ -47,9 +50,7 @@ instance : whitepoint.IsFinite := inferInstance
 
 end
 
-
 abbrev FrameClass := Set (Frame)
-
 
 structure Valuation (F : Frame) where
   Val : F.World → ℕ → Prop
@@ -63,9 +64,7 @@ instance : CoeFun (Model) (λ M => M.World → ℕ → Prop) := ⟨fun m => m.Va
 
 end Kripke
 
-
 open Kripke
-
 
 open Formula
 
@@ -125,8 +124,7 @@ lemma formula_hereditary
   | _ => simp_all;
 
 lemma formula_hereditary_not (hw : w ≺ w') : ¬w' ⊧ φ → ¬w ⊧ φ := by
-  contrapose;
-  push_neg;
+  contrapose!;
   exact formula_hereditary hw;
 
 lemma negEquiv : w ⊧ ∼φ ↔ w ⊧ φ ➝ ⊥ := by simp_all [Satisfies];
@@ -172,7 +170,6 @@ lemma iff_subst_self {F : Frame} {V : Valuation F} {x : F.World} (s) :
 
 end Satisfies
 
-
 open Satisfies
 
 def ValidOnModel (M : Kripke.Model) (φ : Formula ℕ) := ∀ w : M.World, w ⊧ φ
@@ -185,16 +182,13 @@ variable {M : Model} {φ ψ χ : Formula ℕ}
 
 @[simp] protected lemma iff_models : M ⊧ φ ↔ Formula.Kripke.ValidOnModel M φ := iff_of_eq rfl
 
-
 protected lemma verum : M ⊧ ⊤ := by simp [ValidOnModel];
 
 instance : Semantics.Top (Model) := ⟨λ _ => ValidOnModel.verum⟩
 
-
 protected lemma bot : ¬M ⊧ ⊥ := by simp [ValidOnModel];
 
 instance : Semantics.Bot (Model) := ⟨λ _ => ValidOnModel.bot⟩
-
 
 lemma iff_not_exists_world {M : Kripke.Model} : (¬M ⊧ φ) ↔ (∃ x : M.World, ¬x ⊧ φ) := by
   apply not_iff_not.mp;
@@ -240,9 +234,7 @@ protected lemma efq : M ⊧ Axioms.EFQ φ := by simp [ValidOnModel, Satisfies];
 
 end ValidOnModel
 
-
 def ValidOnFrame (F : Frame) (φ : Formula ℕ) := ∀ V, (⟨F, V⟩ : Kripke.Model) ⊧ φ
-
 
 namespace ValidOnFrame
 
@@ -260,18 +252,15 @@ protected lemma bot : ¬F ⊧ ⊥ := by
   exact ⟨(λ _ _ => True), by tauto⟩;
 instance : Semantics.Bot (Frame) := ⟨λ _ => ValidOnFrame.bot⟩
 
-
 lemma iff_not_exists_valuation : (¬F ⊧ φ) ↔ (∃ V : Kripke.Valuation F, ¬(⟨F, V⟩ : Kripke.Model) ⊧ φ) := by
   simp [ValidOnFrame];
 
 alias ⟨exists_valuation_of_not, not_of_exists_valuation⟩ := iff_not_exists_valuation
 
-
 lemma iff_not_exists_valuation_world : (¬F ⊧ φ) ↔ (∃ V : Kripke.Valuation F, ∃ x : (⟨F, V⟩ : Kripke.Model).World, ¬Satisfies _ x φ) := by
   simp [ValidOnFrame, ValidOnModel, Semantics.Models];
 
 alias ⟨exists_valuation_world_of_not, not_of_exists_valuation_world⟩ := iff_not_exists_valuation_world
-
 
 lemma iff_not_exists_model_world :  (¬F ⊧ φ) ↔ (∃ M : Kripke.Model, ∃ x : M.World, M.toFrame = F ∧ ¬(x ⊧ φ)) := by
   constructor;
@@ -283,7 +272,6 @@ lemma iff_not_exists_model_world :  (¬F ⊧ φ) ↔ (∃ M : Kripke.Model, ∃ 
     exact iff_not_exists_valuation_world.mpr ⟨M.Val, x, h⟩;
 
 alias ⟨exists_model_world_of_not, not_of_exists_model_world⟩ := iff_not_exists_model_world
-
 
 protected lemma subst (h : F ⊧ φ) : F ⊧ φ⟦s⟧ := by
   by_contra hC;
@@ -315,8 +303,6 @@ end ValidOnFrame
 
 end Formula.Kripke
 
-
-
 namespace Kripke
 
 section
@@ -343,8 +329,6 @@ alias ⟨exists_model_world_of_not_validOnFrameClass, not_validOnFrameClass_of_e
 
 end
 
-
-
 section
 
 open Formula (atom)
@@ -365,7 +349,6 @@ lemma Validates.inter_of (h₁ : C₁.Validates Γ₁) (h₂ : C₂.Validates Γ
 
 lemma ValidatesFormula.inter_of (h₁ : C₁.ValidatesFormula φ₁) (h₂ : C₂.ValidatesFormula φ₂) : (C₁ ∩ C₂).Validates {φ₁, φ₂}
   := Validates.inter_of h₁ h₂
-
 
 protected abbrev all : FrameClass := Set.univ
 
@@ -395,7 +378,6 @@ end FrameClass
 
 end
 
-
 section
 
 abbrev FrameClass.logic (C : FrameClass) : Logic ℕ := { φ | C ⊧ φ }
@@ -405,3 +387,4 @@ end
 end Kripke
 
 end LO.Propositional
+end

@@ -1,6 +1,8 @@
-import Foundation.ProvabilityLogic.GL.Completeness
+module
 
+public import Foundation.ProvabilityLogic.GL.Completeness
 
+@[expose] public section
 namespace LO.ProvabilityLogic.GL
 
 open LO.Entailment Entailment.FiniteContext

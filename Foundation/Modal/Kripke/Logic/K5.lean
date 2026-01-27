@@ -1,6 +1,10 @@
-import Foundation.Modal.Kripke.AxiomGeach
-import Foundation.Modal.Kripke.Hilbert
-import Foundation.Modal.Kripke.Logic.K
+module
+
+public import Foundation.Modal.Kripke.AxiomGeach
+public import Foundation.Modal.Kripke.Hilbert
+public import Foundation.Modal.Kripke.Logic.K
+
+@[expose] public section
 
 namespace LO.Modal
 
@@ -46,7 +50,7 @@ end K5.Kripke
 
 instance : Modal.K ⪱ Modal.K5 := by
   constructor;
-  . apply Hilbert.Normal.weakerThan_of_subset_axioms $ by simp;
+  . grind;
   . apply Entailment.not_weakerThan_iff.mpr;
     use (Axioms.Five (.atom 0));
     constructor;
@@ -65,3 +69,4 @@ end Hilbert
 
 
 end LO.Modal
+end

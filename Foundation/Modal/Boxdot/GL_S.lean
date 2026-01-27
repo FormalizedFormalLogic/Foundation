@@ -1,4 +1,8 @@
-import Foundation.ProvabilityLogic.S.Completeness
+module
+
+public import Foundation.ProvabilityLogic.S.Completeness
+
+@[expose] public section
 
 namespace LO
 
@@ -19,8 +23,8 @@ lemma iff_provable_boxdot_GL_provable_boxdot_S : Modal.GL ⊢ φᵇ ↔ Modal.S 
     replace h := iff_provable_rflSubformula_GL_provable_S.mpr h;
     replace h := GL.Kripke.iff_provable_satisfies_FiniteTransitiveTree.mp h;
     intro M r _;
-    obtain ⟨i, hi⟩ := Kripke.Model.extendRoot.inr_satisfies_axiomT_set (M := M) (Γ := φᵇ.subformulas.prebox);
-    let M₁ := M.extendRoot ⟨φᵇ.subformulas.prebox.card + 1, by omega⟩;
+    obtain ⟨i, hi⟩ := Kripke.Model.extendRoot.inr_satisfies_axiomT_set (M := M) (Γ := □⁻¹'φᵇ.subformulas);
+    let M₁ := M.extendRoot ⟨(□⁻¹'φᵇ.subformulas).card + 1, by omega⟩;
     let i₁ : M₁.World := Sum.inl i;
     refine Model.extendRoot.inl_satisfies_boxdot_iff.mpr
       $ Model.pointGenerate.modal_equivalent_at_root (r := i₁) |>.mp
@@ -37,3 +41,4 @@ lemma iff_provable_boxdot_GL_provable_boxdot_S : Modal.GL ⊢ φᵇ ↔ Modal.S 
 end Modal.Logic
 
 end LO
+end

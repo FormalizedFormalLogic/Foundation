@@ -1,5 +1,9 @@
-import Foundation.Propositional.Kripke.AxiomDummett
-import Foundation.Propositional.Kripke.Logic.KC
+module
+
+public import Foundation.Propositional.Kripke.AxiomDummett
+public import Foundation.Propositional.Kripke.Logic.KC
+
+@[expose] public section
 
 namespace LO.Propositional
 
@@ -136,3 +140,4 @@ instance : Propositional.KC ⪱ Propositional.LC := inferInstance
 
 
 end LO.Propositional
+end

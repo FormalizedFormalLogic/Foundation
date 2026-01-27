@@ -1,9 +1,11 @@
-import Foundation.ProvabilityLogic.Classification.LetterlessTrace
-import Foundation.Modal.Boxdot.GL_S
-import Foundation.Modal.Logic.SumQuasiNormal
-import Foundation.Modal.Logic.D.Basic
+module
 
+public import Foundation.ProvabilityLogic.Classification.LetterlessTrace
+public import Foundation.Modal.Boxdot.GL_S
+public import Foundation.Modal.Logic.SumQuasiNormal
+public import Foundation.Modal.Logic.D.Basic
 
+@[expose] public section
 namespace LO
 
 namespace Modal
@@ -44,8 +46,8 @@ lemma eq_trace_trace_of_letterless {φ : Formula ℕ} (φ_letterless : φ.Letter
 
 open Formula.Kripke
 
-@[simp, grind =] lemma trace_bot : (⊥ : Formula ℕ).trace = Set.univ := by simp [Formula.eq_trace_trace_of_letterless];
-@[simp, grind =] lemma trace_top : (⊤ : Formula ℕ).trace = ∅ := by simp [Formula.eq_trace_trace_of_letterless];
+@[simp, grind =] lemma trace_bot : (⊥ : Formula ℕ).trace = Set.univ := by grind;
+@[simp, grind =] lemma trace_top : (⊤ : Formula ℕ).trace = ∅ := by grind;
 
 lemma trace_and : (φ ⋏ ψ).trace = φ.trace ∪ ψ.trace := by
   ext n;
@@ -248,7 +250,7 @@ instance isTree [M.IsTree r] (hra : r ≠ a) : (M.boneLengthening a k).IsTree r 
   root_generates := by
     rintro (x | i) <;>
     . intro;
-      apply HRel.TransGen.unwrap_iff.mpr;
+      apply Rel.TransGen.unwrap_iff.mpr;
       dsimp [Model.boneLengthening];
       apply Frame.root_genaretes'!;
       tauto;
@@ -270,7 +272,7 @@ axiom eq_height [M.IsTree r] [Fintype M] (hra : r ≠ a) :
     | succ k ih =>
       suffices (r : M.boneLengthening a (k + 1)) ≺^[(M.rank + k) + 1] t by
         rwa [(show M.rank + (k + 1) = (M.rank + k) + 1 by omega)];
-      dsimp [Frame.RelItr', HRel.Iterate]
+      dsimp [Frame.RelItr', Rel.Iterate]
       sorry;
   . intro t Rrt x;
     sorry;
@@ -298,13 +300,15 @@ lemma mainlemma_aux
         . right; exact Raj;
         . simp [Frame.Rel', Model.boneLengthening] at Raj;
       . intro h;
-        have : (a : M.boneLengthening a k) ⊧ ψ := Satisfies.fconj_def.mp (equivalence (by tauto) _ |>.mp hrfl) (□ψ ➝ ψ) (by simpa) h;
-        rintro (y | j) Ri;
-        . rcases Ri with rfl | Ray;
-          . assumption;
-          . apply h;
-            exact Ray;
-        . apply ihφ₁ j |>.mpr this;
+        have : (a : M.boneLengthening a k) ⊧ ψ := Satisfies.fconj_def.mp (equivalence (by tauto) _ |>.mp hrfl) (□ψ ➝ ψ) ?_ h;
+        . rintro (y | j) Ri;
+          . rcases Ri with rfl | Ray;
+            . assumption;
+            . apply h;
+              exact Ray;
+          . apply ihφ₁ j |>.mpr this;
+        . simp only [Finset.mem_image, Finset.LO.preboxItr, Function.iterate_one, Finset.mem_preimage]
+          use ψ;
     . intro y;
       constructor;
       . rintro h (z | j) Ryz;
@@ -366,7 +370,10 @@ lemma Formula.trace.finite_or_cofinite : φ.trace.Finite ∨ φ.trace.Cofinite :
   . intro i;
     simp;
 
-@[grind →] lemma Formula.trace.finite_of_coinfinite (h_ci : φ.trace.Coinfinite) : φ.trace.Finite := by grind;
+@[grind →]
+lemma Formula.trace.finite_of_coinfinite (h_ci : φ.trace.Coinfinite) : φ.trace.Finite := by
+  apply or_iff_not_imp_right.mp $ Formula.trace.finite_or_cofinite;
+  simpa;
 
 lemma subset_GLα_of_trace_coinfinite (hL : L.trace.Coinfinite) : L ⊆ Modal.GLα L.trace := by
   intro φ hφ;
@@ -389,7 +396,9 @@ lemma subset_GLα_of_trace_coinfinite (hL : L.trace.Coinfinite) : L ⊆ Modal.GL
         intro n h;
         apply iff_satisfies_TBB_ne_rank.mp;
         apply Satisfies.fconj_def.mp hr _;
-        suffices ∃ m ∈ φ.trace, □^[m]⊥ = □^[n]⊥ by simpa [Tφ];
+        suffices ∃ m ∈ φ.trace, (□^[m]⊥ : Formula ℕ) = □^[n]⊥ by
+          simp only [Finset.mem_image, Set.Finite.mem_toFinset, Tφ];
+          use n;
         use n;
       by_contra hC;
       apply hr _ hC rfl;
@@ -448,7 +457,8 @@ end Modal
 namespace ProvabilityLogic
 
 open LO.Entailment Entailment.FiniteContext
-open FirstOrder Arithmetic
+open FirstOrder FirstOrder.ProvabilityAbstraction
+open Arithmetic
 open ArithmeticTheory (ProvabilityLogic)
 open Modal
 open Modal.Kripke
@@ -490,7 +500,7 @@ lemma provable_TBB_of_mem_trace {n : ℕ} (h : n ∈ (T.ProvabilityLogic U).trac
         rw [(show Sum.inl a = r₀ by simp [r₀])];
         cl_prover [this]
       have : 𝗜𝚺₁ ⊢ S r₀ ➝ ∼(T.standardProvability) (S.realization (□^[M.height]⊥)) := C!_trans (S.SC2 r₀ r Rr₀) $ contra! $
-        T.standardProvability.prov_distribute_imply' $
+        prov_distribute_imply' $
         CN!_of_CN!_right $
         S.mainlemma_neg Rr₀ $
         height_lt_iff_satisfies_boxbot.not.mp $ by simp [Frame.extendRoot.eq_original_height_root]
@@ -514,7 +524,10 @@ theorem eq_provablityLogic_GLα_of_coinfinite_trace (h : (T.ProvabilityLogic U).
   . intro A;
     suffices Modal.GLα (T.ProvabilityLogic U).trace ⊢ A → T.ProvabilityLogic U ⊢ A by grind;
     intro hA;
-    induction hA using Modal.Logic.sumQuasiNormal.rec!_omitSubst_strong (L₁ := Modal.GL) (L₂ := (T.ProvabilityLogic U).trace.image TBB) inferInstance (Logic.substitution_of_letterless (by grind)) with
+    induction hA using
+      Modal.Logic.sumQuasiNormal.rec!_omitSubst_strong (L₁ := Modal.GL) (L₂ := (T.ProvabilityLogic U).trace.image TBB)
+      inferInstance $ Logic.substitution_of_letterless $ Modal.TBBSet_letterless
+      with
     | mem₁ hA =>
       apply ProvabilityLogic.provable_iff.mpr;
       intro f;
@@ -610,7 +623,7 @@ lemma provable_TBBMinus_of_mem_trace (h : ¬(T.ProvabilityLogic U) ⊆ Modal.S) 
   apply ProvabilityLogic.provable_iff.mpr;
   intro g;
   apply Realization.iff_provable_letterless_interpret ?_ |>.mp H;
-  grind;
+  apply TBBMinus_letterless';
 
 /-- Artemov & Beklemishev. Lemma 49 -/
 theorem eq_provabilityLogic_GLβMinus_of_not_subset_S (h : ¬(T.ProvabilityLogic U) ⊆ Modal.S) : T.ProvabilityLogic U = Modal.GLβMinus (T.ProvabilityLogic U).trace := by

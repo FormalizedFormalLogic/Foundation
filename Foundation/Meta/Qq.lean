@@ -1,7 +1,12 @@
-import Lean.Elab.Tactic.Basic
-import Mathlib.Tactic.NormNum
-import Mathlib.Util.AtomM
-import Foundation.Vorspiel.Vorspiel
+module
+
+public import Lean.Elab.Tactic.Basic
+public import Mathlib.Tactic.NormNum
+public import Mathlib.Util.AtomM
+public import Qq.Typ
+
+@[expose]
+public meta section
 
 namespace Qq
 
@@ -39,3 +44,5 @@ partial def ofQList {α : Q(Type u)} (l : Q(List $α)) : MetaM <| List Q($α) :=
   | ~q($a :: $l) => return a :: (← ofQList l)
 
 end Qq
+
+end

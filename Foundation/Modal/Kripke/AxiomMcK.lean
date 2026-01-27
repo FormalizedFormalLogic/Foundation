@@ -1,19 +1,19 @@
-import Foundation.Modal.Kripke.Basic
-import Foundation.Modal.Kripke.AxiomGeach
-import Foundation.Modal.Hilbert.Normal.Basic
-import Foundation.Modal.Entailment.K4
-import Foundation.Modal.Kripke.Logic.K
-import Foundation.Modal.Kripke.Logic.K4
-import Foundation.Modal.Kripke.Completeness
-import Mathlib.Order.Preorder.Finite
+module
 
+public import Foundation.Modal.Kripke.Basic
+public import Foundation.Modal.Kripke.AxiomGeach
+public import Foundation.Modal.Hilbert.Normal.Basic
+public import Foundation.Modal.Entailment.K4
+public import Foundation.Modal.Kripke.Logic.K
+public import Foundation.Modal.Kripke.Logic.K4
+public import Foundation.Modal.Kripke.Completeness
+public import Mathlib.Order.Preorder.Finite
+
+@[expose] public section
 
 namespace LO.Modal
 
 instance : Modal.K ⪯ Modal.K4McK := Hilbert.Normal.weakerThan_of_subset_axioms (by simp)
-
-@[simp]
-lemma eq_box_toSet_toSet_box {F : Type*} [Box F] [DecidableEq F] {s : Finset F} : s.toSet.box = s.box.toSet := by ext φ; simp;
 
 
 namespace Logic.K
@@ -185,7 +185,7 @@ namespace Canonical
 open Classical in
 instance [Modal.K4McK ⪯ (Hilbert.Normal Ax)] : (canonicalFrame (Hilbert.Normal Ax)).SatisfiesMcKinseyCondition := ⟨by
   rintro x;
-  have ⟨y, hy⟩ := lindenbaum (𝓢 := (Hilbert.Normal Ax)) (t₀ := ⟨x.1.1.prebox ∪ Set.univ.image (λ φ => ◇φ ➝ □φ), ∅⟩) $ by
+  have ⟨y, hy⟩ := lindenbaum (𝓢 := (Hilbert.Normal Ax)) (t₀ := ⟨□⁻¹'x.1.1 ∪ Set.univ.image (λ φ => ◇φ ➝ □φ), ∅⟩) $ by
     intro Γ Δ hΓ hΔ;
     suffices (Hilbert.Normal Ax) ⊬ Γ.conj ➝ ⊥ by
       simp only [Set.subset_empty_iff, Finset.coe_eq_empty] at hΔ;
@@ -197,17 +197,17 @@ instance [Modal.K4McK ⪯ (Hilbert.Normal Ax)] : (canonicalFrame (Hilbert.Normal
     let Γ' := insert (◇⊤ ➝ □⊤) Γ;
     replace hC : Γ'.toSet *⊢[(Hilbert.Normal Ax)] ⊥ := Context.weakening! (by simp [Γ']) hC;
 
-    let Γ'₁ := { φ ∈ Γ' | φ ∈ x.1.1.prebox };
+    let Γ'₁ := { φ ∈ Γ' | φ ∈ □⁻¹'x.1.1 };
     let Γ'₂ := { φ ∈ Γ' | ∃ ψ, ◇ψ ➝ □ψ = φ };
     apply MaximalConsistentTableau.neither (t := x) (φ := ◇Γ'₂.conj);
     constructor;
     . apply iff_provable_mem₁.mp;
       apply WeakerThan.pbl (𝓢 := Modal.K4McK);
-      convert Logic.K4McK.DiaFconjCDiabox (Γ := Γ'.preimage (λ φ => ◇φ ➝ □φ) (by simp [Set.InjOn])) ?_
+      convert Logic.K4McK.DiaFconjCDiabox (Γ := Γ'.preimage (λ φ => ◇φ ➝ □φ) (by grind [Set.InjOn, Formula.inj_dia, Formula.inj_imp])) ?_
       . simp [Γ'₂, Finset.image_preimage];
-      . suffices ∃ φ, ¬φ = ⊤ → ◇φ ➝ □φ ∈ Γ by simpa [Finset.eq_empty_iff_forall_notMem, Γ'];
+      . simp only [ne_eq, Finset.eq_empty_iff_forall_notMem, Finset.mem_preimage, Finset.mem_insert, not_or, not_forall, not_and, Decidable.not_not, Γ'];
         use ⊤;
-        simp;
+        grind;
     . replace hC : (Γ'₁ ∪ Γ'₂).toSet *⊢[(Hilbert.Normal Ax)] ⊥ := by
         convert hC;
         ext φ;
@@ -219,22 +219,22 @@ instance [Modal.K4McK ⪯ (Hilbert.Normal Ax)] : (canonicalFrame (Hilbert.Normal
           . have := hΓ h;
             simp at this ⊢;
             tauto;
-      replace hC : Γ'₁.toSet.box *⊢[(Hilbert.Normal Ax)] □(∼Γ'₂.conj) := Context.nec! $ N!_iff_CO!.mpr $ FConj_DT'.mpr hC;
-      replace hC : Γ'₁.box.toSet *⊢[(Hilbert.Normal Ax)] □(∼Γ'₂.conj) := by convert hC; simp;
-      replace hC : Γ'₁.box.toSet *⊢[(Hilbert.Normal Ax)] ∼◇(Γ'₂.conj) := by
+      replace hC : ↑(□'Γ'₁) *⊢[(Hilbert.Normal Ax)] □(∼Γ'₂.conj) := by
+        rw [Finset.LO.eq_box_toSet_toSet_box];
+        apply Context.nec! $ N!_iff_CO!.mpr $ FConj_DT'.mpr hC;
+      replace hC : ↑(□'Γ'₁) *⊢[(Hilbert.Normal Ax)] ∼◇(Γ'₂.conj) := by
         apply FConj_DT.mp;
         apply C!_trans $ FConj_DT.mpr hC;
         simp;
       apply iff_mem₁_neg.mp;
       apply iff_provable_include₁.mp hC x;
       intro _;
-      simp only [Set.mem_preimage, Function.iterate_one, Finset.coe_image, Finset.coe_filter,
-        Set.mem_image, Set.mem_setOf_eq, forall_exists_index, and_imp, Γ'₁];
+      simp only [Finset.LO.boxItr, Function.iterate_one, Finset.coe_image, Finset.coe_filter, Set.mem_image, Set.mem_setOf_eq, forall_exists_index, and_imp, Γ'₁];
       rintro χ hχ _ rfl;
       assumption;
   have Rxy : (canonicalFrame (Hilbert.Normal Ax)).Rel x y := by
     dsimp [canonicalFrame];
-    trans (x.1.1.prebox ∪ Set.univ.image (λ φ => ◇φ ➝ □φ));
+    trans (□⁻¹'x.1.1 ∪ Set.univ.image (λ φ => ◇φ ➝ □φ));
     . apply Set.subset_union_left;
     . simpa using hy;
   by_cases hy : ∃ z, (canonicalFrame (Hilbert.Normal Ax)).Rel y z;
@@ -261,3 +261,4 @@ end canonicality
 end Kripke
 
 end LO.Modal
+end

@@ -1,8 +1,12 @@
-import Foundation.Modal.Neighborhood.AxiomGeach
-import Foundation.Modal.Neighborhood.AxiomM
-import Foundation.Modal.Neighborhood.AxiomC
-import Foundation.Modal.Neighborhood.Logic.E
-import Foundation.Modal.Neighborhood.Filtration
+module
+
+public import Foundation.Modal.Neighborhood.AxiomGeach
+public import Foundation.Modal.Neighborhood.AxiomM
+public import Foundation.Modal.Neighborhood.AxiomC
+public import Foundation.Modal.Neighborhood.Logic.E
+public import Foundation.Modal.Neighborhood.Filtration
+
+@[expose] public section
 
 namespace LO.Modal
 
@@ -41,7 +45,7 @@ lemma counterframe_axiomFive.not_valid_axiomFive : ¬counterframe_axiomFive ⊧ 
     tauto_set;
   simp only [Frame.box, Frame.dia, Set.mem_insert_iff, Set.mem_singleton_iff, Set.compl_univ_iff, Set.mem_setOf_eq] at this;
   rcases this with (h | h);
-  . have := Set.ext_iff.mp h 1 |>.2 (by simp);
+  . have := Set.ext_iff.mp h 1 |>.2 (by grind);
     simp at this;
     tauto_set;
   . tauto_set;
@@ -83,3 +87,4 @@ instance : Modal.E ⪱ Modal.E5 := by
       . simp;
 
 end LO.Modal
+end

@@ -16,7 +16,7 @@ jobs:
     steps:
       # We don't use https://github.com/leanprover/lean-action.
       # Because caching strategy is not suitable for our project.
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - name: Setup elan
         run: |
           curl https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -sSf | sh -s -- -y --default-toolchain none
@@ -34,7 +34,7 @@ jobs:
       # Restore project cache
       - name: Restore cache
         id: cache-restore
-        uses: actions/cache/restore@v4
+        uses: actions/cache/restore@v5
         with:
           path: .lake/build
           key: lake-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('lean-toolchain') }}-${{ hashFiles('lake-manifest.json') }}-${{ github.sha }}
@@ -44,8 +44,16 @@ jobs:
       # Build project
       - name: Get Mathlib cache
         run: lake exe cache get
-      - name: Build project
-        run: lake build --keep-toolchain
+      - name: Build Foundation
+        run: lake build --keep-toolchain Foundation
+      - name: Build executables
+        run: |
+          lake build --keep-toolchain \
+            Zoo_Arith \
+            Zoo_SetTheory \
+            Zoo_Propositional \
+            Zoo_Modal \
+            Zoo_InterpretabilityLogic
 
       # Build import-graph
       - name: Generate import graph
@@ -87,23 +95,10 @@ jobs:
       - name: Copy doc to pages
         run: cp -r .lake/build/doc ./pages/_output/doc
 
-      # Build Book
-      - name: Download JuliaMono
-        run: |
-          wget https://github.com/cormullion/juliamono/releases/download/v0.061/JuliaMono-webfonts.tar.gz
-          mkdir juliamono
-          tar -xvf JuliaMono-webfonts.tar.gz -C juliamono --strip-components 1
-          rm JuliaMono-webfonts.tar.gz
-        working-directory: ./Book/assets
-      - name: Build book
-        run: lake exe book
-      - name: Copy book to pages
-        run: cp -r  _out/html-multi ./pages/_output/book
-
       # Save project cache
       - name: Save project cache
         id: cache-save
-        uses: actions/cache/save@v4
+        uses: actions/cache/save@v5
         with:
           path: .lake/build
           key: ${{ steps.cache-restore.outputs.cache-primary-key }}

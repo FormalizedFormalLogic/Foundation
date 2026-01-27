@@ -1,4 +1,8 @@
-import Foundation.Propositional.Entailment.Cl.Basic
+module
+
+public import Foundation.Propositional.Entailment.Cl.Basic
+
+@[expose] public section
 
 namespace LO.Entailment
 
@@ -29,3 +33,5 @@ lemma iff_complete_disjunctive [DecidableEq F] {𝓢 : S} [Entailment.Cl 𝓢] :
     exact @hDisj φ (∼φ) lem!;
 
 end LO.Entailment
+
+end

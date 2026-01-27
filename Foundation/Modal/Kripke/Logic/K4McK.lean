@@ -1,5 +1,9 @@
-import Foundation.Modal.Kripke.Logic.K4
-import Foundation.Modal.Kripke.AxiomMcK
+module
+
+public import Foundation.Modal.Kripke.Logic.K4
+public import Foundation.Modal.Kripke.AxiomMcK
+
+@[expose] public section
 
 namespace LO.Modal
 
@@ -34,7 +38,7 @@ instance : Complete Modal.K4McK FrameClass.K4McK := inferInstance
 
 instance : Modal.K4 ⪱ Modal.K4McK := by
   constructor;
-  . apply Hilbert.Normal.weakerThan_of_subset_axioms; simp;
+  . grind;
   . apply Entailment.not_weakerThan_iff.mpr;
     use (Axioms.McK (.atom 0));
     constructor;
@@ -47,3 +51,4 @@ instance : Modal.K4 ⪱ Modal.K4McK := by
       . simp [Semantics.Models, Satisfies];
 
 end LO.Modal
+end

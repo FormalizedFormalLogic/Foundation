@@ -1,7 +1,10 @@
-import Foundation.Propositional.Entailment.Cl.Basic
-import Foundation.Modal.Logic.Basic
-import Foundation.Meta.ClProver
-import Foundation.Modal.Letterless
+module
+
+public import Foundation.Propositional.Entailment.Cl.Łukasiewicz
+public import Foundation.Modal.Logic.Basic
+public import Foundation.Meta.ClProver
+
+@[expose] public section
 
 namespace LO.Modal
 
@@ -99,7 +102,7 @@ lemma symm : sumNormal L₁ L₂ = sumNormal L₂ L₁ := by
 
 variable [DecidableEq α]
 
-instance [Entailment.Cl L₁] : Entailment.Lukasiewicz (sumNormal L₁ L₂) where
+instance [Entailment.Cl L₁] : Entailment.Łukasiewicz (sumNormal L₁ L₂) where
   implyK {_ _} := by constructor; apply sumNormal.mem₁; simp;
   implyS {_ _ _} := by constructor; apply sumNormal.mem₁; simp;
   elimContra {_ _} := by constructor; apply sumNormal.mem₁; simp;
@@ -137,3 +140,4 @@ end sumNormal
 end Logic
 
 end LO.Modal
+end

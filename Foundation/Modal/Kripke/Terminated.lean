@@ -1,4 +1,8 @@
-import Foundation.Modal.Kripke.Closure
+module
+
+public import Foundation.Modal.Kripke.Closure
+
+@[expose] public section
 
 namespace LO.Modal.Kripke
 
@@ -11,8 +15,9 @@ variable {F : Frame} {t : F.World} [F.IsTerminated t]
 
 lemma direct_terminated_of_trans [F.IsTransitive] : ∀ x ≠ t, x ≺ t := by
   intro x hx;
-  exact HRel.TransGen.unwrap $ IsTerminated.terminal_terminated x hx;
+  exact Rel.TransGen.unwrap $ IsTerminated.terminal_terminated x hx;
 
 end Frame.IsTerminated
 
 end LO.Modal.Kripke
+end

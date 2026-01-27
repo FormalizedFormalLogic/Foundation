@@ -1,7 +1,11 @@
-import Foundation.Modal.Entailment.KT
-import Foundation.Modal.Kripke.Filtration
-import Foundation.Modal.Kripke.Logic.KD4
-import Foundation.Modal.Kripke.Logic.KT
+module
+
+public import Foundation.Modal.Entailment.KT
+public import Foundation.Modal.Kripke.Filtration
+public import Foundation.Modal.Kripke.Logic.KD4
+public import Foundation.Modal.Kripke.Logic.KT
+
+@[expose] public section
 
 namespace LO.Modal
 
@@ -57,7 +61,7 @@ instance : Complete Modal.S4 FrameClass.finite_S4 := ⟨by
 
 instance : Modal.KT ⪱ Modal.S4 := by
   constructor;
-  . apply Hilbert.Normal.weakerThan_of_subset_axioms $ by simp;
+  . grind;
   . apply Entailment.not_weakerThan_iff.mpr;
     use Axioms.Four (.atom 0);
     constructor;
@@ -115,3 +119,4 @@ instance : Sound Modal.S4 FrameClass.S4 := inferInstance
 instance : Complete Modal.S4 FrameClass.S4 := inferInstance
 
 end LO.Modal
+end

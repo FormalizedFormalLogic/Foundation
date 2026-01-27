@@ -1,6 +1,10 @@
-import Foundation.Modal.Kripke.AxiomGeach
-import Foundation.Modal.Kripke.Hilbert
-import Foundation.Modal.Kripke.Logic.K
+module
+
+public import Foundation.Modal.Kripke.AxiomGeach
+public import Foundation.Modal.Kripke.Hilbert
+public import Foundation.Modal.Kripke.Logic.K
+
+@[expose] public section
 
 namespace LO.Modal
 
@@ -37,7 +41,7 @@ instance : Canonical Modal.KB FrameClass.KB := ⟨by
 
 instance : Modal.K ⪱ Modal.KB := by
   constructor;
-  . apply Hilbert.Normal.weakerThan_of_subset_axioms $ by simp;
+  . grind;
   . apply Entailment.not_weakerThan_iff.mpr;
     use (Axioms.B (.atom 0));
     constructor;
@@ -48,8 +52,11 @@ instance : Modal.K ⪱ Modal.KB := by
       use M, 0;
       constructor;
       . trivial;
-      . suffices ∃ (x : M.World), (0 : M.World) ≺ x ∧ ¬x ≺ 0 by simpa [Semantics.Models, Satisfies, M];
+      . suffices ∃ (x : M.World), (0 : M.World) ≺ x ∧ ¬x ≺ 0 by
+          simp [Semantics.Models, Satisfies, M];
+          grind;
         use 1;
         trivial;
 
 end LO.Modal
+end

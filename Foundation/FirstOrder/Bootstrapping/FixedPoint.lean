@@ -1,6 +1,9 @@
-import Foundation.FirstOrder.Bootstrapping.Syntax
-import Foundation.Propositional.Entailment.Cl.Basic
+module
 
+public import Foundation.FirstOrder.Bootstrapping.Syntax
+public import Foundation.Propositional.Entailment.Cl.Basic
+
+@[expose] public section
 open Classical
 
 namespace LO.FirstOrder.Arithmetic

@@ -1,5 +1,9 @@
-import Foundation.Modal.Axioms
-import Foundation.Modal.Formula
+module
+
+public import Foundation.Modal.Axioms
+public import Foundation.Modal.Formula.Basic
+
+@[expose] public section
 
 namespace LO.Modal
 
@@ -8,6 +12,14 @@ variable {α : Type _}
 abbrev Axiom (α) := Set (Formula α)
 
 abbrev Axiom.instances (Ax : Axiom α) : FormulaSet α := { φ | ∃ ψ ∈ Ax, ∃ s, φ = ψ⟦s⟧ }
+
+@[grind =>]
+lemma Axiom.of_mem {Ax : Axiom α} {φ : Formula α} (hφ : φ ∈ Ax) : φ⟦s⟧ ∈ Ax.instances := by
+  dsimp [Axiom.instances];
+  use φ;
+  constructor;
+  . assumption;
+  . grind;
 
 namespace Axiom
 
@@ -134,3 +146,4 @@ class HasGeach (g) (Ax : Axiom α) where
 end Axiom
 
 end LO.Modal
+end

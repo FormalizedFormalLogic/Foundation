@@ -1,5 +1,9 @@
-import Foundation.Modal.Neighborhood.Completeness
-import Foundation.Modal.Entailment.AxiomGeach
+module
+
+public import Foundation.Modal.Neighborhood.Completeness
+public import Foundation.Modal.Entailment.AxiomGeach
+
+@[expose] public section
 
 namespace LO.Modal.Neighborhood
 
@@ -228,21 +232,21 @@ instance [Entailment.HasAxiomT 𝓢] : (basicCanonicity 𝓢).toModel.IsReflexiv
   apply Canonicity.isReflexive;
   intro X hX A hA;
   obtain ⟨φ, rfl, hφ⟩ := basicCanonicity.iff_mem_box_exists_fml.mp hA;
-  apply proofset.imp_subset.mp (by simp) hφ;
+  apply proofset.imp_subset.mp axiomT! hφ;
 
 instance [Entailment.HasAxiomFour 𝓢] : (basicCanonicity 𝓢).toModel.IsTransitive := by
   apply Canonicity.isTransitive;
   intro X hX A hA;
   obtain ⟨φ, rfl, hφ⟩ := basicCanonicity.iff_mem_box_exists_fml.mp hA;
-  simp only [Canonicity.multibox_proofset];
-  apply proofset.imp_subset.mp (by simp) hφ;
+  simp only [Canonicity.boxItr_proofset];
+  apply proofset.imp_subset.mp axiomFour! hφ;
 
 instance [Entailment.HasAxiomD 𝓢] : (basicCanonicity 𝓢).toModel.IsSerial := by
   apply Canonicity.isSerial;
   intro X hX A hA;
   obtain ⟨φ, rfl, hφ⟩ := basicCanonicity.iff_mem_box_exists_fml.mp hA;
   simp only [Canonicity.dia_proofset];
-  apply proofset.imp_subset.mp (by simp) hφ;
+  apply proofset.imp_subset.mp axiomD! hφ;
 
 
 namespace relativeBasicCanonicity
@@ -335,3 +339,4 @@ end maximalRelativeMaximalCanonicity
 end
 
 end LO.Modal.Neighborhood
+end

@@ -1,6 +1,10 @@
-import Foundation.Modal.Kripke.AxiomVer
-import Foundation.Modal.Kripke.Logic.GLPoint3
-import Foundation.Modal.Kripke.Logic.KTc
+module
+
+public import Foundation.Modal.Kripke.AxiomVer
+public import Foundation.Modal.Kripke.Logic.GLPoint3
+public import Foundation.Modal.Kripke.Logic.KTc
+
+@[expose] public section
 
 namespace LO.Modal
 
@@ -120,3 +124,4 @@ instance : Modal.GLPoint3 ⪱ Modal.Ver := by
         tauto;
 
 end LO.Modal
+end
