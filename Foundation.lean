@@ -1,6 +1,8 @@
 module
 
 -- public import Foundation.Modal.Kripke.Logic.KD4Point3Z
+public import Foundation.Semantics.CoherenceSpace.Basic
+public import Foundation.Semantics.CoherenceSpace.StableFunction
 public import Foundation.FirstOrder.Arithmetic.Basic
 public import Foundation.FirstOrder.Arithmetic.Basic.Hierarchy
 public import Foundation.FirstOrder.Arithmetic.Basic.Misc
