@@ -1,9 +1,6 @@
 module
 
-public import Foundation.Modal.Kripke.AxiomGeach
-public import Foundation.Modal.Kripke.Hilbert
 public import Foundation.Modal.Kripke.Logic.KD
-public import Foundation.Modal.Entailment.KT
 
 @[expose] public section
 

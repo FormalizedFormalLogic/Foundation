@@ -3,7 +3,6 @@ module
 public import Foundation.Modal.Hilbert.Normal.Basic
 public import Foundation.Modal.Hilbert.WithLoeb.Basic
 public import Foundation.Modal.Hilbert.WithHenkin.Basic
-public import Mathlib.Tactic.TFAE
 
 @[expose] public section
 

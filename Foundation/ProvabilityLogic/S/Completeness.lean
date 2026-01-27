@@ -1,12 +1,8 @@
 module
 
-public import Foundation.Modal.Logic.SumNormal
-public import Foundation.Modal.Logic.S.Basic
 public import Foundation.ProvabilityLogic.GL.Completeness
 public import Foundation.ProvabilityLogic.S.Soundness
-public import Foundation.Modal.Boxdot.Basic
 public import Foundation.FirstOrder.Incompleteness.Tarski
-public import Mathlib.Tactic.TFAE
 
 @[expose] public section
 noncomputable abbrev LO.Modal.Formula.rflSubformula [DecidableEq α] (φ : Formula α) : FormulaFinset α :=

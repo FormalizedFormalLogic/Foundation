@@ -1,14 +1,7 @@
 module
 
 public import Foundation.Vorspiel.List.Basic
-public import Mathlib.Algebra.Order.GroupWithZero.Canonical
-public import Mathlib.Algebra.Order.Ring.Unbundled.Basic
 public import Mathlib.Computability.Halting
-public import Mathlib.Computability.Partrec
-public import Mathlib.Data.List.FinRange
-public import Mathlib.Data.Nat.ModEq
-public import Mathlib.Data.Part
-public import Mathlib.Data.PFun
 public import Mathlib.Logic.Godel.GodelBetaFunction
 
 @[expose] public section

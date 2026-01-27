@@ -1,11 +1,8 @@
 module
 
 public import Foundation.Propositional.Entailment.Int.DNE_of_LEM
-public import Foundation.Propositional.Entailment.Corsi
 public import Foundation.Propositional.Hilbert.Axiom
-public import Foundation.Propositional.Formula.Basic
 public import Foundation.Propositional.Logic.Basic
-public import Foundation.Logic.Disjunctive
 
 @[expose] public section
 

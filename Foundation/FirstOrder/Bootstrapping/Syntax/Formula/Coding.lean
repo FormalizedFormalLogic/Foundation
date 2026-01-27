@@ -2,7 +2,6 @@ module
 
 public import Foundation.FirstOrder.Bootstrapping.Syntax.Formula.Typed
 public import Foundation.FirstOrder.Bootstrapping.Syntax.Term.Coding
-public import Mathlib.Combinatorics.Colex
 
 @[expose] public section
 open Encodable LO FirstOrder Arithmetic Bootstrapping

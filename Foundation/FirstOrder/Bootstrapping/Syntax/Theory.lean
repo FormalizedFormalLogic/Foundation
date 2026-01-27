@@ -1,7 +1,6 @@
 module
 
 public import Foundation.FirstOrder.Bootstrapping.Syntax.Formula.Coding
-public import Foundation.FirstOrder.Bootstrapping.Syntax.Formula.Iteration
 
 @[expose] public section
 namespace LO.FirstOrder.Arithmetic.Bootstrapping

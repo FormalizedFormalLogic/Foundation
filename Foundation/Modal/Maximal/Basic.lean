@@ -1,6 +1,5 @@
 module
 
-public import Foundation.Propositional.Hilbert.Standard.Basic
 public import Foundation.Propositional.ClassicalSemantics.Hilbert
 public import Foundation.Modal.Hilbert.Normal.Basic
 

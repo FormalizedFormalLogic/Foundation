@@ -1,5 +1,4 @@
 module
-public import Foundation.Logic.LogicSymbol
 public import Foundation.Logic.Semantics
 
 /-!

@@ -1,7 +1,6 @@
 module
 public import Foundation.FirstOrder.Basic.Semantics.Semantics
 public import Foundation.FirstOrder.Basic.Calculus
-public import Foundation.Propositional.Entailment.Cl.Basic
 @[expose] public section
 
 namespace LO.FirstOrder

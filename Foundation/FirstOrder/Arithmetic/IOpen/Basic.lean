@@ -1,7 +1,6 @@
 module
 
 public import Foundation.FirstOrder.Arithmetic.Schemata
-public import Mathlib.Logic.Nonempty
 
 @[expose] public section
 /-!

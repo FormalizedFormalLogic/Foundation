@@ -1,7 +1,6 @@
 module
 
 public import Foundation.Modal.Kripke.Hilbert
-public import Foundation.Modal.Kripke.Completeness
 public import Foundation.Modal.Kripke.Filtration
 
 @[expose] public section

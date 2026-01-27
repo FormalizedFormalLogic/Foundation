@@ -1,9 +1,6 @@
 module
 
-public import Lean.Elab.Tactic.Basic
 public import Mathlib.Tactic.NormNum
-public import Mathlib.Util.AtomM
-public import Qq.Typ
 
 @[expose]
 public meta section

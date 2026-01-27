@@ -2,7 +2,6 @@ module
 
 public import Foundation.Modal.Kripke.Logic.KT
 public import Foundation.Modal.Kripke.Logic.KDB
-public import Foundation.Modal.Kripke.Filtration
 
 @[expose] public section
 

@@ -1,7 +1,6 @@
 module
 
 public import Foundation.Modal.Boxdot.GL_Grz
-public import Foundation.Modal.Logic.SumNormal
 public import Foundation.Modal.ModalCompanion.Standard.Basic
 public import Foundation.Propositional.Hilbert.Standard
 public import Foundation.Propositional.Kripke.Logic.Int

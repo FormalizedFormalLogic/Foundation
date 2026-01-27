@@ -7,7 +7,6 @@ module
   - E. Jeřábek - "Cluster Expansion and the Boxdot Conjecture": https://arxiv.org/abs/1308.0994
 -/
 public import Foundation.Modal.Boxdot.Basic
-public import Foundation.Modal.Kripke.Logic.KTB
 public import Foundation.Modal.Kripke.Logic.S5
 public import Foundation.Modal.Kripke.Logic.S4McK
 public import Foundation.Modal.Logic.Global

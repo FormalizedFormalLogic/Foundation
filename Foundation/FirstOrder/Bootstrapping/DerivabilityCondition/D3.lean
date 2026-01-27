@@ -1,6 +1,5 @@
 module
 
-public import Foundation.FirstOrder.Bootstrapping.DerivabilityCondition.D1
 public import Foundation.FirstOrder.Bootstrapping.DerivabilityCondition.PeanoMinus
 
 @[expose] public section

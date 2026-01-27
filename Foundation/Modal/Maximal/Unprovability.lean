@@ -1,8 +1,6 @@
 module
 
 public import Foundation.Modal.Maximal.Basic
-public import Foundation.Propositional.ClassicalSemantics.Hilbert
-public import Foundation.Modal.Entailment.GL
 
 @[expose] public section
 

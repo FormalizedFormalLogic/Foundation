@@ -1,12 +1,8 @@
 module
 
 public import Foundation.Modal.Neighborhood.Hilbert
-public import Foundation.Modal.Neighborhood.Completeness
 public import Foundation.Modal.Neighborhood.Filtration
-public import Foundation.Modal.Neighborhood.AxiomC
-public import Foundation.Modal.Neighborhood.AxiomGeach
 public import Foundation.Modal.Neighborhood.AxiomP
-public import Foundation.Modal.Neighborhood.AxiomN
 
 
 @[expose] public section

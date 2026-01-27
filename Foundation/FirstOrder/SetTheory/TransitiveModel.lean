@@ -1,6 +1,5 @@
 module
 
-public import Foundation.FirstOrder.SetTheory.Basic
 public import Foundation.FirstOrder.SetTheory.Universe
 
 @[expose] public section

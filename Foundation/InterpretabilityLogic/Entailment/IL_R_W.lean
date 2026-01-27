@@ -1,7 +1,6 @@
 module
 
 public import Foundation.InterpretabilityLogic.Entailment.IL_R
-public import Foundation.InterpretabilityLogic.Entailment.IL_W
 public import Foundation.InterpretabilityLogic.Entailment.IL_M₀_W
 
 @[expose] public section

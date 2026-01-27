@@ -1,8 +1,5 @@
 module
 
-public import Foundation.Modal.Kripke.AxiomGeach
-public import Foundation.Modal.Kripke.Hilbert
-public import Foundation.Modal.Kripke.Filtration
 public import Foundation.Modal.Kripke.Logic.K
 
 @[expose] public section

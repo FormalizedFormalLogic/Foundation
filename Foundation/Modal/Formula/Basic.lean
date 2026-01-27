@@ -2,8 +2,6 @@ module
 
 public import Foundation.Modal.LogicSymbol
 public import Foundation.Propositional.Formula.Basic
-public import Mathlib.Data.Set.Finite.Lattice
-public import Mathlib.Logic.Encodable.Basic
 
 @[expose] public section
 

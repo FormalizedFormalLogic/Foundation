@@ -1,8 +1,6 @@
 module
 
 public import Foundation.Modal.Kripke.Rooted
-public import Foundation.Modal.Kripke.Antisymmetric
-public import Foundation.Modal.Kripke.Asymmetric
 
 @[expose] public section
 

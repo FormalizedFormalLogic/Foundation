@@ -1,7 +1,6 @@
 module
 
 public import Foundation.Modal.ModalCompanion.Standard.Int
-public import Foundation.Modal.Kripke.Logic.S4Point3
 public import Foundation.Modal.Boxdot.GLPoint3_GrzPoint3
 public import Foundation.Propositional.Kripke.Logic.LC
 

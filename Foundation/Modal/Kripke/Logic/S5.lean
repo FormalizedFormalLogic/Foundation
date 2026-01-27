@@ -1,10 +1,8 @@
 module
 
-public import Foundation.Modal.Kripke.Rooted
 public import Foundation.Modal.Kripke.Logic.KTB
 public import Foundation.Modal.Kripke.Logic.KD45
 public import Foundation.Modal.Kripke.Logic.KB4
-public import Foundation.Modal.Kripke.Logic.S4
 public import Foundation.Modal.Kripke.Logic.S4Point4
 
 @[expose] public section

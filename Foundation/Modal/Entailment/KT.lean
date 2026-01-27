@@ -1,6 +1,5 @@
 module
 
-public import Foundation.Modal.Entailment.K
 public import Foundation.Modal.Entailment.KP
 public import Foundation.Modal.Entailment.KD
 public import Foundation.Modal.Entailment.ET

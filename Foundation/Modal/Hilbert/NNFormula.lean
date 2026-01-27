@@ -1,7 +1,6 @@
 module
 
 public import Foundation.Modal.Formula.NNFormula
-public import Foundation.Modal.Entailment.K
 public import Foundation.Modal.Hilbert.Normal.Basic
 
 @[expose] public section

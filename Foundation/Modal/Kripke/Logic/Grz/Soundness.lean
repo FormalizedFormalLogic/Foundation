@@ -2,7 +2,6 @@ module
 
 public import Foundation.Modal.Kripke.AxiomGrz
 public import Foundation.Modal.Kripke.Logic.S4McK
-public import Mathlib.Order.Preorder.Finite
 
 @[expose] public section
 

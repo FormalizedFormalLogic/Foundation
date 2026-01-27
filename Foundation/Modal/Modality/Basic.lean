@@ -2,7 +2,6 @@ module
 
 public import Foundation.Modal.Hilbert.Normal.Basic
 public import Foundation.Modal.Logic.SumNormal
-public import Foundation.Meta.ClProver
 
 
 @[expose] public section

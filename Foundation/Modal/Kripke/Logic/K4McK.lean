@@ -1,6 +1,5 @@
 module
 
-public import Foundation.Modal.Kripke.Logic.K4
 public import Foundation.Modal.Kripke.AxiomMcK
 
 @[expose] public section

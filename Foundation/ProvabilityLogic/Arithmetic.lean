@@ -1,7 +1,6 @@
 module
 
 public import Foundation.ProvabilityLogic.Realization
-public import Foundation.FirstOrder.Bootstrapping.FixedPoint
 
 @[expose] public section
 /-!

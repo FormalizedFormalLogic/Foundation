@@ -1,6 +1,5 @@
 module
 
-public import Foundation.Modal.Kripke.Completeness
 public import Foundation.Modal.Kripke.AxiomGeach
 public import Foundation.Modal.Kripke.AxiomPoint3
 

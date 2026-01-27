@@ -1,7 +1,6 @@
 module
 
 public import Foundation.Modal.Entailment.S5
-public import Foundation.Modal.Entailment.KTc
 public import Foundation.Modal.Entailment.Triv
 
 @[expose] public section

@@ -1,12 +1,7 @@
 module
 
-public import Foundation.FirstOrder.Bootstrapping.Consistency
-public import Foundation.FirstOrder.Bootstrapping.FixedPoint
-public import Foundation.FirstOrder.Bootstrapping.ProvabilityAbstraction.Height
-public import Foundation.FirstOrder.Bootstrapping.WitnessComparison
 public import Foundation.Modal.Kripke.Rank
 public import Foundation.ProvabilityLogic.GL.Soundness
-public import Foundation.ProvabilityLogic.Realization
 
 @[expose] public section
 /-!

@@ -3,7 +3,6 @@ module
 public import Foundation.FirstOrder.Basic
 public import Foundation.Logic.Predicate.Relational
 public import Foundation.Logic.ForcingRelation
-public import Mathlib.Order.PFilter
 public import Foundation.Vorspiel.Preorder
 
 @[expose] public section

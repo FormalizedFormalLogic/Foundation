@@ -1,8 +1,6 @@
 module
 
-public import Foundation.FirstOrder.Bootstrapping.Syntax.Formula.Typed
 public import Foundation.FirstOrder.Bootstrapping.Syntax.Proof.Basic
-public import Foundation.Propositional.Entailment.Cl.Basic
 
 @[expose] public section
 /-!

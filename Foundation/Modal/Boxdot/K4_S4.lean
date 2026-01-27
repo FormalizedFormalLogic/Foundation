@@ -2,7 +2,6 @@ module
 
 public import Foundation.Modal.Boxdot.Basic
 public import Foundation.Modal.Entailment.S4
-public import Foundation.Modal.Kripke.Logic.K4
 public import Foundation.Modal.Kripke.Logic.S4
 
 @[expose] public section

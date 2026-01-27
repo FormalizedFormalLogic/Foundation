@@ -1,6 +1,5 @@
 module
 
-public import Foundation.InterpretabilityLogic.Veltman.Logic.ILMinus
 public import Foundation.InterpretabilityLogic.Veltman.AxiomJ4
 
 

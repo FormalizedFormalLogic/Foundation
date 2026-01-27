@@ -1,7 +1,6 @@
 module
 
 public import Foundation.Modal.Hilbert.Normal.Basic
-public import Foundation.Modal.Kripke.Closure
 public import Foundation.Modal.Kripke.Irreflexivize
 
 @[expose] public section

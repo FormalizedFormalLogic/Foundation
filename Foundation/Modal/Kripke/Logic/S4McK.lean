@@ -1,7 +1,5 @@
 module
 
-public import Foundation.Modal.Kripke.Logic.K4
-public import Foundation.Modal.Kripke.AxiomMcK
 public import Foundation.Modal.Kripke.Logic.S4
 public import Foundation.Modal.Kripke.Logic.K4McK
 

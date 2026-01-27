@@ -3,9 +3,6 @@ module
 public import Foundation.Modal.Kripke.Logic.Grz.Completeness
 public import Foundation.Modal.Kripke.Logic.S4Point2McK
 public import Mathlib.Data.Finite.Sum
-public import Mathlib.Data.Set.Finite.Basic
-public import Mathlib.Data.Fintype.Pigeonhole
-public import Lean.Meta.Tactic.Simp.BuiltinSimprocs.Fin
 
 @[expose] public section
 

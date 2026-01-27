@@ -1,6 +1,5 @@
 module
 
-public import Foundation.Modal.Neighborhood.Basic
 public import Foundation.Modal.Neighborhood.AxiomM
 public import Foundation.Modal.Neighborhood.AxiomC
 public import Foundation.Modal.Neighborhood.AxiomN

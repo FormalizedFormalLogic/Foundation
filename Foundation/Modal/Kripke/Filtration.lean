@@ -1,10 +1,6 @@
 module
 
-public import Mathlib.Data.Set.Finite.Powerset
-public import Foundation.Modal.Kripke.Closure
 public import Foundation.Modal.Kripke.Rooted
-public import Foundation.Modal.Kripke.AxiomPoint3
-public import Foundation.Modal.Kripke.AxiomWeakPoint3
 
 @[expose] public section
 

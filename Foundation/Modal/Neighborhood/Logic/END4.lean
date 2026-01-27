@@ -1,8 +1,6 @@
 module
 
-public import Foundation.Modal.Neighborhood.Hilbert
 public import Foundation.Modal.Neighborhood.Logic.END
-public import Foundation.Modal.Neighborhood.Logic.E4
 public import Foundation.Modal.Neighborhood.Logic.EN4
 
 @[expose] public section

@@ -1,8 +1,6 @@
 module
 
-public import Foundation.Propositional.Kripke2.Basic
 public import Foundation.Propositional.Kripke2.FTheory
-public import Mathlib.Tactic.TFAE
 
 
 @[expose] public section
