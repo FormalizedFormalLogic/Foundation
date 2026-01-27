@@ -45,7 +45,7 @@ lemma validate_AxiomGrz_of_refl_trans_wcwf [F.IsReflexive] [F.IsTransitive] [F.I
     simpa [X] using this;
 
   rintro w (⟨hw₁, hw₂⟩ | ⟨hw₁, hw₂, hw₃⟩);
-  . have : Satisfies M w (□((.atom 0) ➝ □(.atom 0)) ➝ (.atom 0)) := hw₁ w (IsRefl.refl w);
+  . have : Satisfies M w (□((.atom 0) ➝ □(.atom 0)) ➝ (.atom 0)) := hw₁ w (Std.Refl.refl w);
     have : ¬Satisfies M w (□(atom 0 ➝ □atom 0)) := not_imp_not.mpr this hw₂;
     obtain ⟨x, Rwx, hx, ⟨y, Rxy, hy⟩⟩ := by simpa [Satisfies] using this;
     use x;

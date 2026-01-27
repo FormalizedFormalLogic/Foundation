@@ -83,7 +83,7 @@ private lemma mainlemma_aux {i : M} (hri : r ≺ i) :
     simp only [Realization.interpret];
     constructor;
     . intro h;
-      apply C!_trans $ S.SC3 i $ (by rintro rfl; exact IsIrrefl.irrefl _ hri);
+      apply C!_trans $ S.SC3 i $ (by rintro rfl; exact Std.Irrefl.irrefl _ hri);
       apply prov_distribute_imply';
       apply left_Fdisj'!_intro;
       rintro j Rij;
@@ -182,7 +182,7 @@ abbrev WChain (i j : F) := {l : List F // l.ChainI (· ≻ ·) j i}
 
 instance (i j : F) : Finite (WChain j i) :=
   List.ChainI.finite_of_irreflexive_of_transitive
-    (by exact IsIrrefl.irrefl (r := (· ≺ ·)))
+    (by exact Std.Irrefl.irrefl (r := (· ≺ ·)))
     (by intro x y z hxy hyz
         exact IsTrans.trans (r := (· ≺ ·)) z y x hyz hxy)
     i j
@@ -508,7 +508,7 @@ lemma solovay_root_sound [𝗜𝚺₁ ⪯ T] [T.SoundOn (Hierarchy 𝚷 2)] : T.
   have : T.Solovay ℕ r ∨ ∃ j, r ≺ j ∧ T.Solovay ℕ j := Θ.disjunction (V := ℕ) (T := T) r ⟨[r], by simp⟩
   rcases this with (H | ⟨i, hri, Hi⟩)
   · assumption
-  · have : ¬T.Solovay ℕ i := NS i (by rintro rfl; exact IsIrrefl.irrefl r hri)
+  · have : ¬T.Solovay ℕ i := NS i (by rintro rfl; exact Std.Irrefl.irrefl r hri)
     contradiction
 
 lemma solovay_unprovable [𝗜𝚺₁ ⪯ T] [T.SoundOn (Hierarchy 𝚷 2)] {i : F} (h : r ≠ i) : T ⊬ ∼T.solovay i := by

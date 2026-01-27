@@ -364,7 +364,7 @@ class Translation (L : Logic _) (m₁ m₂ : Modality) where
 
 notation:90 M₁ " ⤳[" L "] " M₂ => Translation L M₁ M₂
 
-instance : IsRefl _ (· ⤳[L] ·) := ⟨by
+instance : Std.Refl (· ⤳[L] ·) := ⟨by
   intro M;
   constructor;
   simp;
@@ -406,7 +406,7 @@ instance : Std.Symm (· ≅[L] ·) := ⟨by
   constructor <;> infer_instance;
 ⟩
 
-instance : IsRefl _ (· ≅[L] ·) := ⟨by
+instance : Std.Refl (· ≅[L] ·) := ⟨by
   intro _;
   apply iff_equivalence_bi_translate.mpr;
   constructor <;> apply _root_.refl;

@@ -12,9 +12,9 @@ variable {α} {R : Rel α α}
 def Serial (R : Rel α α) := ∀ x, ∃ y, R x y
 class IsSerial (R : Rel α α) where serial : Serial R
 
-instance [IsRefl _ R] : IsSerial R := ⟨fun x ↦ ⟨x, IsRefl.refl x⟩⟩
+instance [Std.Refl R] : IsSerial R := ⟨fun x ↦ ⟨x, Std.Refl.refl x⟩⟩
 
-instance [Symm R] [IsTrans _ R] [IsSerial R] : IsRefl α R := ⟨by
+instance [Symm R] [IsTrans _ R] [IsSerial R] : Std.Refl R := ⟨by
   rintro x;
   obtain ⟨y, Rxy⟩ := IsSerial.serial (R := R) x;
   apply IsTrans.trans;
