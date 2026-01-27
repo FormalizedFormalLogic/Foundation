@@ -175,7 +175,108 @@ instance : CoherenceSpace Unit := ⊥
 /-- A doubleton set is a coherence space -/
 instance : CoherenceSpace Bool := ⊥
 
-/-! #### Additive conjunction -/
+variable {α β : Type*} [CoherenceSpace α] [CoherenceSpace β]
+
+/-! #### Linear negation -/
+
+inductive LNeg (α : Type*) : Type _
+  | mk : α → LNeg α
+
+namespace LNeg
+
+inductive Coherence : LNeg α → LNeg α → Prop
+  | mk {a₀ a₁ : α} : a₀ ≍ a₁ → Coherence (mk a₀) (mk a₁)
+
+instance : CoherenceSpace (LNeg α) where
+  Coherence p q := Coherence p q
+  reflexive p := by
+    rcases p with ⟨a⟩
+    exact Coherence.mk (by simp)
+  symmetric p q := by
+    rintro ⟨h⟩
+    exact Coherence.mk (symm h)
+
+lemma coherence_def (p q : LNeg α) : p ⁐ q ↔ Coherence p q := by rfl
+
+@[simp] lemma mk_coherence_mk_iff {a₀ a₁ : α} :
+    mk a₀ ⁐ mk a₁ ↔ a₀ ≍ a₁ := by
+  constructor
+  · rintro ⟨h⟩
+    exact h
+  · rintro h
+    exact Coherence.mk h
+
+end LNeg
+
+/-! #### ⨂: Multiplicative conjunction -/
+
+inductive Tensor (α β : Type*) : Type _
+  | mk : α → β → Tensor α β
+
+infixr:30 (priority := low) " ⨂ " => Tensor
+
+namespace Tensor
+
+inductive Coherence : α ⨂ β → α ⨂ β → Prop
+  | pair {a₀ a₁ : α} {b₀ b₁ : β} : a₀ ⁐ a₁ → b₀ ⁐ b₁ → Coherence (mk a₀ b₀) (mk a₁ b₁)
+
+instance : CoherenceSpace (α ⨂ β) where
+  Coherence p q := Coherence p q
+  reflexive p := by
+    rcases p with ⟨a, b⟩
+    exact Coherence.pair (by rfl) (by rfl)
+  symmetric p q := by
+    rintro ⟨ha, hb⟩
+    exact Coherence.pair (symm ha) (symm hb)
+
+lemma coherence_def (p q : α ⨂ β) : p ⁐ q ↔ Coherence p q := by rfl
+
+@[simp] lemma mk_coherence_mk_iff {a₀ a₁ : α} {b₀ b₁ : β} :
+    mk a₀ b₀ ⁐ mk a₁ b₁ ↔ a₀ ⁐ a₁ ∧ b₀ ⁐ b₁ := by
+  constructor
+  · rintro ⟨ha, hb⟩
+    exact ⟨ha, hb⟩
+  · rintro ⟨ha, hb⟩
+    exact Coherence.pair ha hb
+
+end Tensor
+
+/-! #### ⅋: Multiplicative disjunction -/
+
+inductive Par (α β : Type*) : Type _
+  | mk : α → β → Par α β
+
+infixr:30 (priority := low) " ⅋ " => Par
+
+namespace Par
+
+inductive Coherence : α ⅋ β → α ⅋ β → Prop
+  | left {a₀ a₁ : α} {b₀ b₁ : β} : a₀ ⁐ a₁ → Coherence (mk a₀ b₀) (mk a₁ b₁)
+  | right {a₀ a₁ : α} {b₀ b₁ : β} : b₀ ⁐ b₁ → Coherence (mk a₀ b₀) (mk a₁ b₁)
+
+instance : CoherenceSpace (α ⅋ β) where
+  Coherence p q := Coherence p q
+  reflexive p := by
+    rcases p with ⟨a, b⟩
+    exact Coherence.left (by rfl)
+  symmetric p q := by
+    rintro (h | h)
+    · exact Coherence.left (symm h)
+    · exact Coherence.right (symm h)
+
+lemma coherence_def (p q : α ⅋ β) : p ⁐ q ↔ Coherence p q := by rfl
+
+@[simp] lemma mk_coherence_mk_iff {a₀ a₁ : α} {b₀ b₁ : β} :
+    mk a₀ b₀ ⁐ mk a₁ b₁ ↔ a₀ ⁐ a₁ ∨ b₀ ⁐ b₁ := by
+  constructor
+  · rintro (h | h) <;> tauto
+  · rintro (h | h)
+    · exact Coherence.left h
+    · exact Coherence.right h
+
+end Par
+
+/-! #### &: Additive conjunction -/
 
 /-- An additive conjunction of two types -/
 inductive With (α β : Type*) : Type _
@@ -185,8 +286,6 @@ inductive With (α β : Type*) : Type _
 infixr:30 (priority := low) " & " => With
 
 namespace With
-
-variable {α β : Type*} [CoherenceSpace α] [CoherenceSpace β]
 
 inductive Coherence : α & β → α & β → Prop
   | inl {a₀ a₁ : α} : a₀ ⁐ a₁ → Coherence (inl a₀) (inl a₁)
@@ -212,7 +311,7 @@ lemma coherence_def (p q : α & β) : p ⁐ q ↔ Coherence p q := by rfl
 
 end With
 
-/-! #### Additive disjunction -/
+/-! #### ⨁: Additive disjunction -/
 
 /-- An additive disjunction of two types -/
 inductive Plus (α β : Type*) : Type _
@@ -222,8 +321,6 @@ inductive Plus (α β : Type*) : Type _
 infixr:30 " ⨁ " => Plus
 
 namespace Plus
-
-variable {α β : Type*} [CoherenceSpace α] [CoherenceSpace β]
 
 inductive Coherence : α ⨁ β → α ⨁ β → Prop
   | inl {a₀ a₁ : α} : a₀ ⁐ a₁ → Coherence (inl a₀) (inl a₁)
