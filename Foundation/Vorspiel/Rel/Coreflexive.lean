@@ -12,9 +12,9 @@ variable {α} {R : Rel α α}
 def Coreflexive (R : Rel α α) := ∀ ⦃x y⦄, R x y → x = y
 class IsCoreflexive (R : Rel α α) where corefl : Coreflexive R
 
-instance [Symm R] [IsAntisymm _ R] : IsCoreflexive R := ⟨by
+instance [Symm R] [Std.Antisymm R] : IsCoreflexive R := ⟨by
   intro x y Rxy;
-  apply IsAntisymm.antisymm _ _ Rxy;
+  apply Std.Antisymm.antisymm _ _ Rxy;
   exact Symm.symm _ _ Rxy;
 ⟩
 

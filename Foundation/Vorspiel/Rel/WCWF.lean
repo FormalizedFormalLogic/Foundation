@@ -56,7 +56,7 @@ lemma antisymm_of_weaklyConverseWellFounded : WeaklyConverseWellFounded rel → 
     . use y; simp_all [Rel.IrreflGen];
     . use x; simp_all [Rel.IrreflGen];
 
-instance [IsWeaklyConverseWellFounded _ rel] : IsAntisymm _ rel := ⟨by
+instance [IsWeaklyConverseWellFounded _ rel] : Std.Antisymm rel := ⟨by
   apply antisymm_of_weaklyConverseWellFounded;
   apply isWeaklyConverseWellFounded_iff _ _ |>.mp;
   assumption;
@@ -85,11 +85,11 @@ lemma weaklyConverseWellFounded_of_finite_trans_antisymm (hFin : Finite α) (R_t
     have := H (i + 1) j this;
     simpa [e];
 
-instance [Finite α] [IsTrans _ rel] [IsAntisymm _ rel] : IsWeaklyConverseWellFounded α rel := ⟨by
+instance [Finite α] [IsTrans _ rel] [Std.Antisymm rel] : IsWeaklyConverseWellFounded α rel := ⟨by
   apply weaklyConverseWellFounded_of_finite_trans_antisymm;
   . assumption;
   . exact IsTrans.trans;
-  . exact IsAntisymm.antisymm;
+  . exact Std.Antisymm.antisymm;
 ⟩
 
 end

@@ -20,7 +20,7 @@ class IsIsolated (R : Rel α α) where
 
 instance [IsIsolated R] : IsCoreflexive R := ⟨by simp_all [Coreflexive]⟩
 
-instance [IsIsolated R] : IsIrrefl α R := ⟨by simp_all⟩
+instance [IsIsolated R] : Std.Irrefl R := ⟨by simp_all⟩
 
 instance [IsIsolated R] : IsTrans α R := ⟨by simp_all⟩
 

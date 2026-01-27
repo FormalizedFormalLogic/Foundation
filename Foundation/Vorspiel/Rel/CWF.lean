@@ -30,10 +30,10 @@ lemma ConverseWellFounded.iff_has_max : ConverseWellFounded R ↔ (∀ (s : Set 
 lemma ConverseWellFounded.has_max (h : ConverseWellFounded R) : ∀ (s : Set α), Set.Nonempty s → ∃ m ∈ s, ∀ x ∈ s, ¬(R m x) := by
   apply ConverseWellFounded.iff_has_max.mp h;
 
-instance [Finite α] [IsTrans α R] [IsIrrefl α R] : IsConverseWellFounded _ R := ⟨by
+instance [Finite α] [IsTrans α R] [Std.Irrefl R] : IsConverseWellFounded _ R := ⟨by
   apply @Finite.wellFounded_of_trans_of_irrefl _ _ _
     ⟨by intro a b c rba rcb; exact IsTrans.trans c b a rcb rba⟩
-    ⟨by simp [flip, IsIrrefl.irrefl]⟩
+    ⟨by simp [flip, Std.Irrefl.irrefl]⟩
 ⟩
 
 lemma Finite.converseWellFounded_of_trans_irrefl'

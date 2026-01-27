@@ -26,7 +26,7 @@ instance : Coe (F.World) (F^≠.World) := ⟨id⟩
 instance [Finite F] : Finite (F^≠) := inferInstance
 instance [F.IsFinite] : (F^≠).IsFinite := inferInstance
 
-instance : (F^≠).IsIrreflexive := ⟨IsIrrefl.irrefl⟩
+instance : (F^≠).IsIrreflexive := ⟨Std.Irrefl.irrefl⟩
 
 instance [F.IsAntisymmetric] [F.IsTransitive] : (F^≠).IsTransitive := inferInstance
 

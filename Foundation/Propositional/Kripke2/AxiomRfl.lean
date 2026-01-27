@@ -19,8 +19,8 @@ variable {F : Kripke2.Frame}
 
 namespace Frame
 
-protected abbrev IsReflexive (F : Kripke2.Frame) := _root_.IsRefl _ F.Rel
-@[simp, grind .] lemma refl [F.IsReflexive] : ∀ x : F, x ≺ x := IsRefl.refl
+protected abbrev IsReflexive (F : Kripke2.Frame) := _root_.Std.Refl F.Rel
+@[simp, grind .] lemma refl [F.IsReflexive] : ∀ x : F, x ≺ x := Std.Refl.refl
 
 instance [F.IsReflexive] : F.IsSerial := inferInstance
 

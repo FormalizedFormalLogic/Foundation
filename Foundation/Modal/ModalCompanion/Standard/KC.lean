@@ -95,7 +95,7 @@ instance : Entailment.HasAxiomPoint2 Propositional.KC.smallestMC where
       constructor;
       . assumption;
       . apply Satisfies.negneg_def.mp h u
-        apply IsRefl.refl;
+        apply Std.Refl.refl;
 
 instance : Modal.S4Point2 ≊ Propositional.KC.smallestMC := by
   apply Logic.equiv_of_provable;
