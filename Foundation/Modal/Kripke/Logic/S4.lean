@@ -1,7 +1,5 @@
 module
 
-public import Foundation.Modal.Entailment.KT
-public import Foundation.Modal.Kripke.Filtration
 public import Foundation.Modal.Kripke.Logic.KD4
 public import Foundation.Modal.Kripke.Logic.KT
 

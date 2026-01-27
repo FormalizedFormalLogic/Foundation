@@ -1,7 +1,5 @@
 module
 
-public import Mathlib.Data.Nat.Bits
-public import Mathlib.Tactic.Cases
 public import Foundation.Vorspiel.Matrix
 
 @[expose] public section

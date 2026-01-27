@@ -1,6 +1,5 @@
 module
 
-public import Foundation.Modal.Entailment.GL
 public import Foundation.InterpretabilityLogic.Entailment.ILMinus_J2
 
 @[expose] public section

@@ -1,7 +1,5 @@
 module
 
-public import Foundation.Modal.Kripke.Basic
-public import Foundation.Modal.Kripke.AxiomGeach
 public import Foundation.Modal.Kripke.Irreflexive
 
 @[expose] public section

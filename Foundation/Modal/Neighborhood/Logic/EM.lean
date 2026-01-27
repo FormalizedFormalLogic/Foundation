@@ -1,8 +1,6 @@
 module
 
 public import Foundation.Modal.Neighborhood.Logic.E
-public import Foundation.Modal.Neighborhood.Supplementation
-public import Foundation.Modal.Neighborhood.AxiomC
 
 @[expose] public section
 

@@ -1,7 +1,6 @@
 module
 
 public import Foundation.Modal.Formula.Basic
-public import Foundation.Logic.Semantics
 public import Foundation.Propositional.Entailment.Cl.Basic
 
 @[expose] public section

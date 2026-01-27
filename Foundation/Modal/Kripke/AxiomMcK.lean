@@ -1,13 +1,6 @@
 module
 
-public import Foundation.Modal.Kripke.Basic
-public import Foundation.Modal.Kripke.AxiomGeach
-public import Foundation.Modal.Hilbert.Normal.Basic
-public import Foundation.Modal.Entailment.K4
-public import Foundation.Modal.Kripke.Logic.K
 public import Foundation.Modal.Kripke.Logic.K4
-public import Foundation.Modal.Kripke.Completeness
-public import Mathlib.Order.Preorder.Finite
 
 @[expose] public section
 

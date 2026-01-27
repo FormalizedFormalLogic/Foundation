@@ -2,8 +2,6 @@ module
 
 public import Foundation.Modal.Formula.Basic
 public import Foundation.Modal.Entailment.K
-public import Foundation.Propositional.Formula.Basic
-public import Foundation.Propositional.Entailment.Cl.Basic
 
 @[expose] public section
 

@@ -1,9 +1,7 @@
 module
 
-public import Foundation.Modal.Entailment.GL
 public import Foundation.Modal.ComplementClosedConsistentFinset
 public import Foundation.Modal.Kripke.Logic.GL.Soundness
-public import Foundation.Modal.Kripke.Hilbert
 public import Foundation.Modal.Kripke.Logic.K4
 
 @[expose] public section

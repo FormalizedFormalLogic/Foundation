@@ -1,7 +1,6 @@
 module
 
 public import Foundation.Propositional.Kripke.AxiomLEM
-public import Foundation.Propositional.Kripke.AxiomDummett
 public import Foundation.Propositional.Kripke.Logic.LC
 
 @[expose] public section

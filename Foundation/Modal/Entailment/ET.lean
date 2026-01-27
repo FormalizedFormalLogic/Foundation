@@ -1,7 +1,6 @@
 module
 
 public import Foundation.Modal.Entailment.E
-public import Foundation.Modal.Entailment.DiaDuality
 
 @[expose] public section
 

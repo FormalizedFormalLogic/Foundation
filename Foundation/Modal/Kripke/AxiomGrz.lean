@@ -1,7 +1,6 @@
 module
 
 public import Foundation.Modal.Kripke.Logic.K
-public import Foundation.Modal.Kripke.Antisymmetric
 
 @[expose] public section
 

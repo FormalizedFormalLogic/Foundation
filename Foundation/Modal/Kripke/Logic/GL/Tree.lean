@@ -2,7 +2,6 @@ module
 
 public import Foundation.Modal.Kripke.Logic.GL.Completeness
 public import Foundation.Modal.Kripke.Tree
-public import Mathlib.Tactic.TFAE
 
 @[expose] public section
 

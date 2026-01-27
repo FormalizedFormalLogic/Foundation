@@ -1,7 +1,6 @@
 module
 
 public import Foundation.FirstOrder.Arithmetic.R0.Basic
-public import Mathlib.Computability.Primrec.List
 public import Foundation.Vorspiel.Arithmetic
 public import Foundation.Vorspiel.Computability
 

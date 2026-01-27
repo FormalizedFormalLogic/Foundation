@@ -1,7 +1,6 @@
 module
 
 public import Foundation.Modal.Kripke.Preservation
-public import Foundation.Modal.Kripke.Irreflexive
 public import Foundation.Modal.Kripke.Asymmetric
 public import Foundation.Modal.Kripke.AxiomWeakPoint2
 public import Foundation.Modal.Kripke.AxiomPoint3

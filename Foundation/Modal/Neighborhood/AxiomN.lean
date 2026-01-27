@@ -1,6 +1,5 @@
 module
 
-public import Foundation.Modal.Neighborhood.Basic
 public import Foundation.Modal.Neighborhood.Completeness
 public import Foundation.Modal.Entailment.EN
 

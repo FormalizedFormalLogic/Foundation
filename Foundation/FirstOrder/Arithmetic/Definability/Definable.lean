@@ -1,7 +1,6 @@
 module
 
 public import Foundation.FirstOrder.Arithmetic.Definability.Hierarchy
-public import Foundation.FirstOrder.Arithmetic.PeanoMinus.Basic
 
 @[expose] public section
 namespace LO.FirstOrder.Arithmetic.HierarchySymbol

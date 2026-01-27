@@ -1,8 +1,6 @@
 module
 
-public import Foundation.InterpretabilityLogic.Entailment.IL
 public import Foundation.InterpretabilityLogic.Entailment.IL_Rstar
-public import Foundation.InterpretabilityLogic.Entailment.ILMinus_J4
 
 @[expose] public section
 

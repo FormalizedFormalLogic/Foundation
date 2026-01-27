@@ -1,6 +1,5 @@
 module
 
-public import Foundation.Modal.Kripke.Logic.Grz.Completeness
 public import Foundation.Modal.Kripke.Logic.Triv
 public import Foundation.Modal.Kripke.Logic.S5
 

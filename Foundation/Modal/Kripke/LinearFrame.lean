@@ -1,10 +1,6 @@
 module
 
-public import Foundation.Modal.Kripke.Preservation
 public import Foundation.Modal.Kripke.Rooted
-public import Foundation.Modal.Kripke.AxiomWeakPoint3
-public import Mathlib.Order.Interval.Finset.Defs
-public import Mathlib.Order.Interval.Finset.Nat
 
 @[expose] public section
 

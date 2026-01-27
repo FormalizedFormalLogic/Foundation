@@ -1,8 +1,6 @@
 module
 
-public import Foundation.Modal.Neighborhood.AxiomGeach
 public import Foundation.Modal.Neighborhood.AxiomK
-public import Foundation.Modal.Neighborhood.Hilbert
 public import Foundation.Modal.Neighborhood.Logic.E4
 public import Foundation.Modal.Neighborhood.Logic.EC
 public import Foundation.Modal.Neighborhood.Logic.EM

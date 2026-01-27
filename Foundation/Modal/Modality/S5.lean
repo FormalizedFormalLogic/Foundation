@@ -1,7 +1,6 @@
 module
 
 public import Foundation.Modal.Modality.Basic
-public import Foundation.Modal.Entailment.S5
 public import Foundation.Modal.Kripke.Logic.S5
 
 @[expose] public section

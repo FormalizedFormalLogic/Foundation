@@ -1,9 +1,7 @@
 module
 
 public import Foundation.Modal.Kripke.AxiomL
-public import Mathlib.Order.Interval.Finset.Nat
 public import Foundation.Modal.Kripke.Logic.K
-public import Foundation.Modal.Entailment.GL
 
 @[expose] public section
 

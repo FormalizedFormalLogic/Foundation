@@ -1,7 +1,5 @@
 module
 
-public import Foundation.Modal.Axioms
-public import Foundation.Modal.Formula.Basic
 public import Foundation.Modal.Logic.Basic
 
 @[expose] public section

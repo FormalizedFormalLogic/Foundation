@@ -1,6 +1,5 @@
 module
 
-public import Foundation.Propositional.Kripke2.Basic
 public import Foundation.Propositional.Kripke2.FTheory
 
 @[expose] public section

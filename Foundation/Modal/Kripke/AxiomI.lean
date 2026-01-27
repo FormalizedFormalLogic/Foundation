@@ -1,6 +1,5 @@
 module
 
-public import Foundation.Modal.LogicSymbol
 public import Foundation.Modal.Kripke.AxiomL
 
 @[expose] public section

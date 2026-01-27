@@ -1,6 +1,5 @@
 module
 
-public import Foundation.Logic.Entailment
 public import Foundation.Propositional.Entailment.Cl.Basic
 
 /-!

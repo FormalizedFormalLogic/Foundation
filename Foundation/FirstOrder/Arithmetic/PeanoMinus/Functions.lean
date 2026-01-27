@@ -1,8 +1,6 @@
 module
 
-public import Foundation.FirstOrder.Arithmetic.PeanoMinus.Basic
 public import Foundation.FirstOrder.Arithmetic.Definability
-public import Mathlib.Algebra.GroupWithZero.Divisibility
 public import Mathlib.Algebra.Prime.Lemmas
 
 @[expose] public section

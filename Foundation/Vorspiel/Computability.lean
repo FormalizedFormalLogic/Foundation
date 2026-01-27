@@ -1,7 +1,6 @@
 module
 
 public import Mathlib.Computability.Halting
-public import Mathlib.Computability.Partrec
 
 @[expose]
 public section

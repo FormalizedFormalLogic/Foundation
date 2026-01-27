@@ -1,6 +1,5 @@
 module
 
-public import Foundation.Modal.Kripke.Preservation
 public import Foundation.Modal.Kripke.Rooted
 public import Mathlib.Data.Finite.Card
 

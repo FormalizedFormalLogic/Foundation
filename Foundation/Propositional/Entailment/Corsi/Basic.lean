@@ -1,5 +1,4 @@
 module
-public import Foundation.Propositional.Entailment.Minimal.Basic
 public import Foundation.Propositional.Entailment.Int.Basic
 
 @[expose] public section

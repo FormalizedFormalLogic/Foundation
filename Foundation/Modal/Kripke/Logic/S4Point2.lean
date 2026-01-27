@@ -1,11 +1,7 @@
 module
 
-public import Foundation.Modal.Kripke.AxiomGeach
-public import Foundation.Modal.Kripke.Hilbert
-public import Foundation.Modal.Kripke.Filtration
 public import Foundation.Modal.Kripke.Logic.S4
 public import Foundation.Modal.Kripke.Logic.K4Point2
-public import Foundation.Modal.Kripke.Rooted
 
 @[expose] public section
 

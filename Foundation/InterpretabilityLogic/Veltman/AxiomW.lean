@@ -1,9 +1,6 @@
 module
 
-public import Foundation.InterpretabilityLogic.Veltman.Basic
-public import Foundation.InterpretabilityLogic.Veltman.AxiomJ2
 public import Foundation.InterpretabilityLogic.Veltman.Logic.IL
-public import Mathlib.Tactic.TFAE
 
 @[expose] public section
 

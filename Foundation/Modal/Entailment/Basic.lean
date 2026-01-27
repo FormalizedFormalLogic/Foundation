@@ -1,7 +1,6 @@
 module
 
 public import Foundation.Logic.Disjunctive
-public import Foundation.Propositional.Entailment.Cl.Basic
 public import Foundation.Modal.Axioms
 
 @[expose] public section

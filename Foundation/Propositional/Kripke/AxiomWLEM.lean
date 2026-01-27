@@ -1,6 +1,5 @@
 module
 
-public import Foundation.Propositional.Entailment.KC
 public import Foundation.Propositional.Kripke.Completeness
 
 @[expose] public section
