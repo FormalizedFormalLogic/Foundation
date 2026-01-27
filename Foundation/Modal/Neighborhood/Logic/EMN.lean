@@ -1,6 +1,5 @@
 module
 
-public import Foundation.Modal.Neighborhood.Hilbert
 public import Foundation.Modal.Neighborhood.Logic.EN
 public import Foundation.Modal.Neighborhood.Logic.EM
 

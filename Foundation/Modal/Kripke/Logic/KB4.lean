@@ -1,7 +1,5 @@
 module
 
-public import Foundation.Modal.Kripke.AxiomGeach
-public import Foundation.Modal.Kripke.Hilbert
 public import Foundation.Modal.Kripke.Logic.K45
 public import Foundation.Modal.Kripke.Logic.KB
 

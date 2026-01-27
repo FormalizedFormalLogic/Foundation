@@ -1,11 +1,8 @@
 module
 
 public import Foundation.Modal.Kripke.Logic.S4
-public import Foundation.Modal.Kripke.AxiomGeach
 public import Foundation.Modal.Kripke.AxiomMk
-public import Foundation.Modal.Logic.Basic
 
-public import Foundation.Modal.Kripke.Hilbert
 
 @[expose] public section
 

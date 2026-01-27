@@ -1,7 +1,6 @@
 module
 
 public import Foundation.FirstOrder.Arithmetic.Basic
-public import Foundation.Propositional.Entailment.Cl.Basic
 public import Foundation.Meta.ClProver
 
 @[expose] public section

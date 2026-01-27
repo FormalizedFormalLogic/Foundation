@@ -1,7 +1,6 @@
 module
 
 public import Foundation.FirstOrder.Incompleteness.GödelRosser
-public import Foundation.Meta.ClProver
 public import Foundation.Logic.LindenbaumAlgebra
 
 @[expose] public section

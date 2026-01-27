@@ -1,9 +1,6 @@
 module
 
-public import Foundation.Propositional.FMT.Hilbert
 public import Foundation.Propositional.FMT.Completeness
-public import Foundation.Propositional.Hilbert.WF_VF
-public import Foundation.Propositional.Hilbert.VF.Disjunctive
 
 
 @[expose] public section

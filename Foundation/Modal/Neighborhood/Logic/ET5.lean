@@ -1,10 +1,7 @@
 module
 
-public import Foundation.Modal.Neighborhood.AxiomGeach
-public import Foundation.Modal.Neighborhood.AxiomN
 public import Foundation.Modal.Neighborhood.Logic.END4
 public import Foundation.Modal.Neighborhood.Logic.ENT4
-public import Foundation.Modal.Neighborhood.Logic.ET
 public import Foundation.Modal.Neighborhood.Logic.E5
 
 @[expose] public section

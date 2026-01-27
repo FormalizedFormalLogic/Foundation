@@ -1,6 +1,5 @@
 module
 
-public import Foundation.FirstOrder.Arithmetic.Basic
 public import Foundation.FirstOrder.Arithmetic.R0.Basic
 public import Mathlib.Data.ENat.Basic
 

@@ -1,6 +1,5 @@
 module
 
-public import Foundation.Modal.Kripke.Completeness
 public import Foundation.Modal.Kripke.AxiomWeakPoint3
 
 @[expose] public section

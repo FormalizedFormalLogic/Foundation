@@ -1,7 +1,6 @@
 module
 
 public import Foundation.FirstOrder.Basic
-public import Foundation.Modal.Formula.NNFormula
 public import Foundation.Modal.Kripke.NNFormula
 
 @[expose] public section

@@ -3,7 +3,6 @@ module
 public import Foundation.Modal.Boxdot.Basic
 public import Foundation.Modal.Kripke.Tree
 
-public import Mathlib.Algebra.Order.BigOperators.Group.Finset
 public import Mathlib.Data.Finite.Sum
 
 @[expose] public section

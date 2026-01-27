@@ -1,7 +1,6 @@
 module
 
 public import Foundation.InterpretabilityLogic.Formula.Basic
-public import Foundation.Modal.Formula.Basic
 
 @[expose] public section
 

@@ -1,8 +1,5 @@
 module
 
-public import Foundation.Modal.LogicSymbol
-public import Foundation.Modal.Formula.Basic
-public import Foundation.Modal.Hilbert.Normal.Basic
 public import Foundation.Logic.LindenbaumAlgebra
 public import Foundation.Modal.Kripke.Logic.K
 

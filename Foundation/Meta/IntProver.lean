@@ -1,8 +1,9 @@
 module
 
-public meta import Foundation.Meta.Qq
 public meta import Foundation.Meta.Lit
 public meta import Foundation.Meta.TwoSided
+public import Foundation.Meta.Lit
+public import Foundation.Meta.TwoSided
 
 /-!
 # Proof automation based on the proof search on (modified) $\mathbf{LJpm}^*$

@@ -1,6 +1,5 @@
 module
 
-public import Foundation.InterpretabilityLogic.Formula.Substitution
 public import Foundation.InterpretabilityLogic.Axioms
 public import Foundation.InterpretabilityLogic.Logic.Basic
 public import Foundation.InterpretabilityLogic.Formula.OfModal

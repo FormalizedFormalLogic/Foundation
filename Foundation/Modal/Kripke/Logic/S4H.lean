@@ -1,10 +1,7 @@
 module
 
 public import Foundation.Modal.Kripke.Logic.Grz.Completeness
-public import Foundation.Modal.Kripke.Logic.S4
 public import Foundation.Modal.Kripke.AxiomH
-public import Foundation.Modal.Kripke.Filtration
-public import Foundation.Modal.Kripke.Rooted
 
 @[expose] public section
 

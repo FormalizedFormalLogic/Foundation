@@ -2,7 +2,6 @@ module
 
 public import Foundation.Propositional.Entailment.Cl.Łukasiewicz
 public import Foundation.Modal.Logic.Basic
-public import Foundation.Meta.ClProver
 
 @[expose] public section
 

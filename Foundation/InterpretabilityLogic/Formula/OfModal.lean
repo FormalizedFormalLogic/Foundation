@@ -1,7 +1,6 @@
 module
 
 public import Foundation.InterpretabilityLogic.Formula.Substitution
-public import Foundation.Modal.Formula.Basic
 
 @[expose] public section
 

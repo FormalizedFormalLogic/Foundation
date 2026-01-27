@@ -1,8 +1,5 @@
 module
 
-public import Foundation.Modal.Kripke.Irreflexive
-public import Foundation.Modal.Kripke.AxiomWeakPoint2
-public import Foundation.Modal.Kripke.AxiomPoint3
 public import Foundation.Modal.Kripke.Rooted
 
 @[expose] public section

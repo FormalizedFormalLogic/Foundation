@@ -1,6 +1,5 @@
 module
 
-public import Foundation.InterpretabilityLogic.Veltman.Logic.IL
 public import Foundation.InterpretabilityLogic.Veltman.AxiomW
 
 @[expose] public section

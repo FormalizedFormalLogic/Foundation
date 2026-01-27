@@ -1,7 +1,6 @@
 module
 
 public import Foundation.FirstOrder.Bootstrapping.DerivabilityCondition
-public import Foundation.Propositional.Entailment.Cl.Basic
 
 @[expose] public section
 /-!

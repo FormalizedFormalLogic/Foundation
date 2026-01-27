@@ -1,7 +1,6 @@
 module
 
 public import Foundation.Modal.Kripke.AxiomFourN
-public import Foundation.Modal.Kripke.Hilbert
 public import Foundation.Modal.Kripke.Logic.KTc
 
 @[expose] public section

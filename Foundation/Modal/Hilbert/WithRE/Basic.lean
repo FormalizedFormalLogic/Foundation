@@ -1,7 +1,5 @@
 module
 
-public import Foundation.Modal.Formula.Basic
-public import Foundation.Modal.Entailment.K
 public import Foundation.Modal.Entailment.EMCN
 public import Foundation.Modal.Entailment.END
 public import Foundation.Modal.Entailment.ET5

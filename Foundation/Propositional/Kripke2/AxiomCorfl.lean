@@ -1,7 +1,6 @@
 module
 
 public import Foundation.Propositional.Kripke2.Basic
-public import Foundation.Propositional.Entailment.Corsi.Basic
 
 @[expose] public section
 

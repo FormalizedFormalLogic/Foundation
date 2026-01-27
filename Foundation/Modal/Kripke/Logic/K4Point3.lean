@@ -1,8 +1,5 @@
 module
 
-public import Foundation.Modal.Kripke.AxiomWeakPoint3
-public import Foundation.Modal.Kripke.AxiomGeach
-public import Foundation.Modal.Kripke.Hilbert
 public import Foundation.Modal.Kripke.Logic.K4
 
 @[expose] public section

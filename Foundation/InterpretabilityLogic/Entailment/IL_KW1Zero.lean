@@ -1,6 +1,5 @@
 module
 
-public import Foundation.InterpretabilityLogic.Entailment.IL_W
 public import Foundation.InterpretabilityLogic.Entailment.IL_KW2
 
 @[expose] public section

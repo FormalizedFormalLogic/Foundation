@@ -1,9 +1,6 @@
 module
 
-public import Foundation.Modal.Neighborhood.Hilbert
-public import Foundation.Modal.Neighborhood.AxiomC
 public import Foundation.Modal.Neighborhood.Logic.E
-public import Foundation.Modal.Neighborhood.Supplementation
 
 @[expose] public section
 

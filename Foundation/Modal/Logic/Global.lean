@@ -1,7 +1,6 @@
 module
 
 public import Foundation.Modal.Hilbert.Normal.Basic
-public import Foundation.Meta.ClProver
 
 
 @[expose] public section

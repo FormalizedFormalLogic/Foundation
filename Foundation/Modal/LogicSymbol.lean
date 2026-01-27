@@ -1,6 +1,5 @@
 module
 public import Foundation.Logic.LogicSymbol
-public import Mathlib.Data.PNat.Basic
 
 @[expose] public section
 

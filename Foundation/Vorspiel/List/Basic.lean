@@ -1,5 +1,4 @@
 module
-public import Mathlib.Data.Fin.VecNotation
 public import Mathlib.Data.Fintype.Sigma
 public import Mathlib.Data.Fintype.Vector
 public import Mathlib.Data.List.GetD

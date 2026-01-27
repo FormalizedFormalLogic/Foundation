@@ -1,7 +1,5 @@
 module
 
-public import Foundation.Logic.Disjunctive
-public import Foundation.Propositional.Entailment.Corsi
 public import Foundation.Propositional.Hilbert.Axiom
 public import Foundation.Propositional.Logic.Basic
 

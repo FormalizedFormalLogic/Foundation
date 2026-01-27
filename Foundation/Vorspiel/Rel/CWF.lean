@@ -1,7 +1,6 @@
 module
 
 public import Mathlib.Data.Fintype.Card
-public import Mathlib.Order.WellFounded
 public import Mathlib.Data.Finset.Lattice.Fold
 public import Foundation.Vorspiel.Rel.Connected
 
