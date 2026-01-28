@@ -367,6 +367,26 @@ lemma arrowPar_strictCoherence_iff (f g : (i : ι) → ρ i) :
 
 end CoherenceSpace
 
+/-! #### ⊸: Linear implication -/
+
+abbrev Lolli (α β : Type*) : Type _ := αᗮ ⅋ β
+
+infixr:30 " ⊸ " => Lolli
+
+namespace Lolli
+
+variable {α β : Type*} [CoherenceSpace α] [CoherenceSpace β]
+
+protected def id : Clique (α ⊸ α) := ⟨{.mk (.mk a) a | a}, by
+  rintro ⟨a₀, n₀⟩ h₀ ⟨a₁, n₁⟩ h₁
+  have : .mk n₀ = a₀ := by simpa using h₀
+  rcases this
+  have : .mk n₁ = a₁ := by simpa using h₁
+  rcases this
+  simp [Par.mk_coherence_mk_iff]; grind⟩
+
+end Lolli
+
 /-! #### &: Additive conjunction -/
 
 /-- An additive conjunction of two types -/
