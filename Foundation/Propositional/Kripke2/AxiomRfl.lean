@@ -36,7 +36,7 @@ lemma valid_axiomRfl_of_isReflexive [F.IsReflexive] : F ⊧ Axioms.Rfl φ ψ := 
 lemma isReflexive_of_valid_axiomRfl (h : F ⊧ Axioms.Rfl #0 #1) : F.IsReflexive := by
   constructor;
   intro x;
-  have := @h (λ w a => match a with | 0 => w = x | 1 => x ≺ w | _ => False) F.root x F.rooted $ by
+  have := @h (λ a w => match a with | 0 => w = x | 1 => x ≺ w | _ => False) F.root x F.rooted $ by
     apply Satisfies.def_and.mpr;
     constructor;
     . tauto;

@@ -372,7 +372,7 @@ end pointGenerate
 end Frame
 
 
-def Model.pointGenerate (M : Kripke.Model) (r : M.World) : Model := ⟨M.toFrame↾r, λ w a => M.Val w.1 a⟩
+def Model.pointGenerate (M : Kripke.Model) (r : M.World) : Model := ⟨M.toFrame↾r, λ a w => M.Val a w.1⟩
 infix:100 "↾" => Model.pointGenerate
 
 namespace Model.pointGenerate

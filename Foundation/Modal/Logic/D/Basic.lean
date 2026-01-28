@@ -171,11 +171,11 @@ def tailModel₀ (M : Kripke.Model) {r} [M.IsRootedBy r] (o : ℕ → Prop) : Kr
     | .inr $ .inl _, .inr $ .inr _ => True
     | .inr $ .inr _, .inr $ .inl _ => False
     | .inr $ .inr x, .inr $ .inr y => x ≺ y
-  Val x p :=
+  Val p x :=
     match x with
     | .inl _        => o p
-    | .inr $ .inl _ => M.Val r p
-    | .inr $ .inr x => M.Val x p
+    | .inr $ .inl _ => M.Val p r
+    | .inr $ .inr x => M.Val p x
 
 namespace tailModel₀
 
@@ -374,7 +374,7 @@ lemma of_provable_rflSubformula_original_root [M.IsTransitive]
 end tailModel₀
 
 
-def tailModel (M : Kripke.Model) {r} [M.IsRootedBy r] : Kripke.Model := tailModel₀ M (M.Val r)
+def tailModel (M : Kripke.Model) {r} [M.IsRootedBy r] : Kripke.Model := tailModel₀ M (M · r)
 
 namespace tailModel
 
@@ -481,7 +481,7 @@ theorem GL_D_TFAE :
         . assumption;
         . simpa [Finset.LO.preboxItr, Finset.LO.boxItr] using Satisfies.fdisj_def.not.mp hx;
 
-      let Mt := tailModel₀ (M↾x) (λ p => M.Val r p);
+      let Mt := tailModel₀ (M↾x) (λ p => M.Val p r);
 
       have : ∀ ψ ∈ φ.subformulas, (tailModel₀.root : Mt) ⊧ ψ ↔ r ⊧ ψ := by
         intro ψ hψ;

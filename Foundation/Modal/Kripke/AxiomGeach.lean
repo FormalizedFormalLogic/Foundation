@@ -190,7 +190,7 @@ lemma validate_AxiomTc_of_coreflexive [corefl : F.IsCoreflexive] : F ⊧ (Axioms
 
 lemma isGeachConvergent_of_validate_axiomGeach {g} (h : F ⊧ (Axioms.Geach g (.atom 0))) : F.IsGeachConvergent g := ⟨by
   rintro x y z Rxy Rxz;
-  let V : Kripke.Valuation F := λ v _ => y ≺^[g.m] v;
+  let V : Kripke.Valuation F := λ _ v => y ≺^[g.m] v;
   have : Satisfies ⟨F, V⟩ x (□^[g.j](◇^[g.n](.atom 0)))  := h V x $ by
     apply Satisfies.diaItr_def.mpr;
     use y;

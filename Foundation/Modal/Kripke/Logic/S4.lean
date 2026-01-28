@@ -68,7 +68,7 @@ instance : Modal.KT ⪱ Modal.S4 := by
       apply Kripke.not_validOnFrameClass_of_exists_model_world;
       let M : Model := ⟨
           ⟨Fin 3, λ x y => (x = 0 ∧ y ≠ 2) ∨ (x = 1 ∧ y ≠ 0) ∨ (x = 2 ∧ y = 2)⟩,
-          λ w _ => w = 0 ∨ w = 1
+          λ _ w => w = 0 ∨ w = 1
         ⟩;
       use M, 0;
       constructor;
@@ -97,7 +97,7 @@ instance : Modal.KD4 ⪱ Modal.S4 := by
     . exact axiomT!;
     . apply Sound.not_provable_of_countermodel (𝓜 := FrameClass.KD4)
       apply Kripke.not_validOnFrameClass_of_exists_model_world;
-      use ⟨⟨Fin 3, λ _ y => y = 1⟩, (λ w _ => w = 1)⟩, 0;
+      use ⟨⟨Fin 3, λ _ y => y = 1⟩, (λ _ w => w = 1)⟩, 0;
       constructor;
       . refine {
           serial := by simp [Serial],

@@ -66,7 +66,7 @@ instance : Modal.K ⪱ Modal.K4 := by
     . simp;
     . apply Sound.not_provable_of_countermodel (𝓜 := FrameClass.K)
       apply Kripke.not_validOnFrameClass_of_exists_model_world;
-      let M : Model := ⟨⟨Fin 2, λ x y => x ≠ y⟩, λ w _ => w = 1⟩;
+      let M : Model := ⟨⟨Fin 2, λ x y => x ≠ y⟩, λ _ w => w = 1⟩;
       use M, 0;
       constructor
       . trivial;

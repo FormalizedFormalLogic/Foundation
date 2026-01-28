@@ -59,7 +59,7 @@ instance : Modal.S4Point3 ⪱ Modal.S4Point4 := by
       apply Kripke.not_validOnFrameClass_of_exists_model_world;
       let M : Model := ⟨
         ⟨Fin 3, λ x y => x ≤ y⟩,
-        λ w a => w ≠ 1
+        λ a w => w ≠ 1
       ⟩;
       use M, 0;
       constructor;

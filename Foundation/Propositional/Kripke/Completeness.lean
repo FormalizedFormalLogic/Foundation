@@ -54,7 +54,7 @@ end canonicalFrame
 
 def canonicalModel (𝓢 : S) [Entailment.Consistent 𝓢] [Entailment.Int 𝓢] : Kripke.Model where
   toFrame := Kripke.canonicalFrame 𝓢
-  Val := ⟨λ t a => (atom a) ∈ t.1.1, by aesop⟩
+  Val := ⟨λ a t => (atom a) ∈ t.1.1, by aesop⟩
 
 namespace canonicalModel
 

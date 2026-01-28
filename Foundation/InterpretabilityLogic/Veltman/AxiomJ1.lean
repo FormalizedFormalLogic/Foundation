@@ -29,7 +29,7 @@ lemma validate_axiomJ1_of_J1 [F.HasAxiomJ1] : F ⊧ Axioms.J1 φ ψ := by
 lemma Frame.HasAxiomJ1.of_validate_axiomJ1 (h : F ⊧ Axioms.J1 (.atom 0) (.atom 1)) : F.HasAxiomJ1 := by
   constructor;
   intro x y Rxy;
-  obtain ⟨z, Sxyz, hz⟩ := @h (λ u _ => u = y) x (by tauto) y Rxy (by tauto);
+  obtain ⟨z, Sxyz, hz⟩ := @h (λ _ u => u = y) x (by tauto) y Rxy (by tauto);
   replace hz : z = y := by
     simp only [Satisfies] at hz;
     grind;

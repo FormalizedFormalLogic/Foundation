@@ -53,7 +53,7 @@ instance : Modal.KD4 ⪱ Modal.KD45 := by
       apply Kripke.not_validOnFrameClass_of_exists_model_world;
       let M : Model := ⟨
           ⟨Fin 3, λ x y => x = y ∨ x < y⟩,
-          λ w _ => w = 0
+          λ _ w => w = 0
         ⟩;
       use M, 0;
       constructor;
@@ -75,7 +75,7 @@ instance : Modal.KD5 ⪱ Modal.KD45 := by
     . exact axiomFour!;
     . apply Sound.not_provable_of_countermodel (𝓜 := FrameClass.KD5)
       apply Kripke.not_validOnFrameClass_of_exists_model_world;
-      let M : Model := ⟨⟨Fin 3, λ x y => (x = 0 ∧ y = 1) ∨ (x ≠ 0 ∧ y ≠ 0)⟩, λ w _ => w = 1⟩;
+      let M : Model := ⟨⟨Fin 3, λ x y => (x = 0 ∧ y = 1) ∨ (x ≠ 0 ∧ y ≠ 0)⟩, λ _ w => w = 1⟩;
       use M, 0;
       constructor;
       . refine {
@@ -112,7 +112,7 @@ instance : Modal.K45 ⪱ Modal.KD45 := by
     . exact axiomD!;
     . apply Sound.not_provable_of_countermodel (𝓜 := FrameClass.K45)
       apply Kripke.not_validOnFrameClass_of_exists_model_world;
-      use ⟨⟨Fin 1, λ x y => False⟩, λ w _ => True⟩, 0;
+      use ⟨⟨Fin 1, λ x y => False⟩, λ _ w => True⟩, 0;
       constructor;
       . simp only [Set.mem_setOf_eq];
         refine { trans := by simp, reucl := by simp [RightEuclidean] }

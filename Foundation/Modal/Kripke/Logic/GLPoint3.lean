@@ -100,7 +100,7 @@ private def complete.filteredModel
   World := { x // x = v ∨ (v ≺ x ∧ ∃ ψ ∈ (□⁻¹'φ.subformulas), □ψ ∈ v.1.2 ∧ □ψ ∈ x.1.1 ∧ ψ ∈ x.1.2) }
   world_nonempty := ⟨v, by grind⟩
   Rel := λ x y => x.1 ≺ y.1
-  Val := λ x => (canonicalModel Modal.GLPoint3).Val x
+  Val := λ a x => (canonicalModel Modal.GLPoint3).Val a x
 
 private instance complete.filteredModel.isFiniteGLPoint3 : Frame.IsFiniteGLPoint3 (complete.filteredModel v φ hv₁ hv₂).toFrame where
   trans := by
@@ -246,7 +246,7 @@ instance : Modal.GL ⪱ Modal.GLPoint3 := by
     constructor;
     . simp;
     . apply Sound.not_provable_of_countermodel (𝓜 := Kripke.FrameClass.finite_GL);
-      let M : Model := ⟨⟨Fin 3, λ x y => (x = 0 ∧ y = 1) ∨ (x = 0 ∧ y = 2)⟩, (λ w a => match a with | 0 => w = 1 | 1 => w = 2 | _ => False)⟩;
+      let M : Model := ⟨⟨Fin 3, λ x y => (x = 0 ∧ y = 1) ∨ (x = 0 ∧ y = 2)⟩, (λ a w => match a with | 0 => w = 1 | 1 => w = 2 | _ => False)⟩;
       apply Kripke.not_validOnFrameClass_of_exists_model_world;
       use M, 0;
       constructor;
@@ -271,7 +271,7 @@ instance : Modal.K4Point3 ⪱ Modal.GLPoint3 := by
     . simp;
     . apply Sound.not_provable_of_countermodel (𝓜 := Kripke.FrameClass.K4Point3);
       apply Kripke.not_validOnFrameClass_of_exists_model_world;
-      use ⟨⟨Fin 2, λ x y => x ≤ y⟩, (λ w a => False)⟩, 0;
+      use ⟨⟨Fin 2, λ x y => x ≤ y⟩, (λ a w => False)⟩, 0;
       constructor;
       . apply Set.mem_setOf_eq.mpr;
         constructor;

@@ -192,7 +192,7 @@ instance : Modal.KT ⪱ Modal.KTMk := by
     . exact axiomMk!;
     . apply Sound.not_provable_of_countermodel (𝓜 := Kripke.FrameClass.KT);
       apply Kripke.not_validOnFrameClass_of_exists_model_world;
-      use ⟨⟨Fin 3, λ x y => x = y ∨ x + 1 = y⟩, λ w a => match a with | 0 => w ≠ 2 | 1 => w = 0 | _ => True⟩, 0;
+      use ⟨⟨Fin 3, λ x y => x = y ∨ x + 1 = y⟩, λ a w => match a with | 0 => w ≠ 2 | 1 => w = 0 | _ => True⟩, 0;
       constructor;
       . exact { refl := by omega; }
       . suffices ∀ (x : Fin 3), 0 = x ∨ 1 = x → (∀ y, x = y ∨ x + 1 = y → ∀ z, y = z ∨ y + 1 = z → z ≠ 2) → x ≠ 0 ∧ x + 1 ≠ 0 by

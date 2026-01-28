@@ -99,7 +99,7 @@ protected abbrev provable_gödelWeakTranslated_of_provable_VF.lemma.translate (M
     | _, _, _ => True
   root := .inl ()
   rooted := by grind
-  Val x a :=
+  Val a x :=
     match x with
     | .inl () => True
     | .inr x => M.Valuation x a
@@ -136,7 +136,7 @@ protected abbrev provable_VF_of_provable_gödelWeakTranslated.lemma.translate (M
     match φ with
     | ψ ➝ χ => ∃ ψ' χ', ψ'ᶜ = ψ ∧ χ'ᶜ = χ ∧ M.Rel' (ψ' ➝ χ') x y
     | _     => True
-  Valuation x a := M.Val x a
+  Valuation x a := M.Val a x
 
 lemma provable_VF_of_provable_gödelWeakTranslated.lemma {M : FMT.Model} {w : M.World} {φ : Propositional.Formula ℕ} :
   Formula.PLoN.Forces (M := lemma.translate M) w (φᶜ) ↔ Propositional.Formula.FMT.Forces (M := M) w φ := by
