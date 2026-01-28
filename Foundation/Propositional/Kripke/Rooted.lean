@@ -76,7 +76,7 @@ end Frame
 def Model.pointGenerate (M : Kripke.Model) (r : M.World) : Model where
   toFrame := M.toFrame↾r
   Val := ⟨
-    λ w a => M.Val w.1 a,
+    λ a w => M.Val a w.1,
     by rintro ⟨x, (rfl | hx)⟩ ⟨y, (rfl | hy)⟩ r a hx; all_goals exact M.Val.hereditary (by tauto) hx;
   ⟩
 infix:100 "↾" => Model.pointGenerate

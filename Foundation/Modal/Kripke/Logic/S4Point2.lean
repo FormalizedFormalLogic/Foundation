@@ -98,7 +98,7 @@ instance : Modal.S4 ⪱ Modal.S4Point2 := by
     . exact axiomPoint2!;
     . apply Sound.not_provable_of_countermodel (𝓜 := FrameClass.S4)
       apply Kripke.not_validOnFrameClass_of_exists_model_world;
-      let M : Model := ⟨⟨Fin 3, λ x y => (x = 0) ∨ (x = y) ⟩, λ w _ => w = 1⟩;
+      let M : Model := ⟨⟨Fin 3, λ x y => (x = 0) ∨ (x = y) ⟩, λ _ w => w = 1⟩;
       use M, 0;
       constructor;
       . simp only [Set.mem_setOf_eq]; refine { refl := by omega, trans := by omega; };
@@ -130,7 +130,7 @@ instance : Modal.K4Point2 ⪱ Modal.S4Point2 := by
       apply Kripke.not_validOnFrameClass_of_exists_model_world;
       let M : Model := ⟨
         ⟨Fin 2, λ x y => x < y⟩,
-        λ w a => False
+        λ a w => False
       ⟩;
       use M, 0;
       constructor;

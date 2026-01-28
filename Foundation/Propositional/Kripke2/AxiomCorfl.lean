@@ -29,7 +29,7 @@ lemma valid_axiomCorfl_of_IsCoreflexive [F.IsCoreflexive] : F ⊧ Axioms.Corefl 
 lemma isCoreflexive_of_valid_axiomCorfl (h : F ⊧ Axioms.Corefl #0 #1) : F.IsCoreflexive := by
   constructor;
   intro x y Rxy;
-  rcases @h (λ w a => match a with | 0 => w = x | 1 => w = y | _ => False) F.root with ⟨h₁, (h₂ | h₂)⟩;
+  rcases @h (λ a w => match a with | 0 => w = x | 1 => w = y | _ => False) F.root with ⟨h₁, (h₂ | h₂)⟩;
   . exact @h₁ x F.rooted rfl y Rxy rfl |>.symm;
   . have := @h₂ x F.rooted rfl;
     tauto;

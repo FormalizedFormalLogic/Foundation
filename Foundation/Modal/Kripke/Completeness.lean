@@ -26,7 +26,7 @@ abbrev canonicalFrame (𝓢 : S) [Entailment.Consistent 𝓢] [Entailment.K 𝓢
 
 abbrev canonicalModel (𝓢 : S) [Entailment.Consistent 𝓢] [Entailment.K 𝓢] : Model where
   toFrame := canonicalFrame 𝓢
-  Val t a := (atom a) ∈ t.1.1
+  Val a t := (atom a) ∈ t.1.1
 
 @[reducible]
 instance : Semantics (canonicalModel 𝓢) (Formula ℕ) := Formula.Kripke.Satisfies.semantics (M := canonicalModel 𝓢)

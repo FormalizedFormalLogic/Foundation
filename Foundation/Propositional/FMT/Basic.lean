@@ -37,7 +37,7 @@ abbrev FrameClass := Set Frame
 
 
 
-abbrev Valuation (F : Frame) := F.World → ℕ → Prop
+abbrev Valuation (F : Frame) := ℕ → F.World → Prop
 
 
 structure Model extends Frame where
@@ -46,7 +46,7 @@ structure Model extends Frame where
 namespace Model
 
 instance : CoeSort (Model) (Type) := ⟨λ M => M.World⟩
-instance : CoeFun (Model) (λ M => M.World → ℕ → Prop) := ⟨fun m => m.Val⟩
+instance : CoeFun (Model) (λ M => ℕ → M.World → Prop) := ⟨fun m => m.Val⟩
 
 end Model
 
@@ -62,7 +62,7 @@ open FMT
 
 @[simp, grind .]
 def Forces {M : outParam (FMT.Model)} (x : M.World) : Formula ℕ → Prop
-  | atom a => M x a
+  | atom a => M a x
   | ⊥      => False
   | φ ⋏ ψ  => Forces x φ ∧ Forces x ψ
   | φ ⋎ ψ  => Forces x φ ∨ Forces x ψ
@@ -76,7 +76,7 @@ namespace Forces
 
 variable {M : FMT.Model} {x y : M.World} {a : ℕ} {φ ψ χ : Formula ℕ}
 
-@[grind =] protected lemma def_atom : x ⊩ (atom a) ↔ M x a := by rfl
+@[grind =] protected lemma def_atom : x ⊩ (atom a) ↔ M a x := by rfl
 @[simp, grind .] protected lemma def_bot : x ⊮ ⊥ := by simp;
 @[simp, grind .] protected lemma def_top : x ⊩ ⊤ := by simp;
 

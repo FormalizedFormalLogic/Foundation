@@ -21,7 +21,7 @@ instance : Modal.S5 ⪱ Modal.S5Grz := by
     . simp;
     . apply Sound.not_provable_of_countermodel (𝓜 := Kripke.FrameClass.universal);
       apply Kripke.not_validOnFrameClass_of_exists_model_world;
-      use ⟨⟨Fin 2, λ x y => True⟩, λ w _ => w = 1⟩, 0;
+      use ⟨⟨Fin 2, λ x y => True⟩, λ _ w => w = 1⟩, 0;
       constructor;
       . exact { universal := by tauto }
       . simp [Semantics.Models, Satisfies];
@@ -36,7 +36,7 @@ instance : Modal.Grz ⪱ Modal.S5Grz := by
     . simp;
     . apply Sound.not_provable_of_countermodel (𝓜 := Kripke.FrameClass.finite_Grz);
       apply Kripke.not_validOnFrameClass_of_exists_model_world;
-      let M : Model := ⟨⟨Fin 2, λ x y => x ≤ y⟩, (λ w _ => w = 0)⟩;
+      let M : Model := ⟨⟨Fin 2, λ x y => x ≤ y⟩, (λ _ w => w = 0)⟩;
       use M, 0;
       constructor;
       . refine {

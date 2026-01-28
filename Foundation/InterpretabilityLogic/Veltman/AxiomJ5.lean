@@ -30,7 +30,7 @@ lemma validate_axiomJ5_of_J5 [F.HasAxiomJ5] : F ⊧ Axioms.J5 φ := by
 lemma Frame.HasAxiomJ5.of_validate_axiomJ5 (h : F ⊧ Axioms.J5 (.atom 0)) : F.HasAxiomJ5 := by
   constructor;
   intro w x y Rwx Rwy;
-  obtain ⟨z, Swxz, hz⟩ := @h (λ u _ => u = y) w x (by tauto) (by tauto);
+  obtain ⟨z, Swxz, hz⟩ := @h (λ a u => u = y) w x (by tauto) (by tauto);
   replace hz : z = y := by
     simp only [Satisfies] at hz;
     grind;

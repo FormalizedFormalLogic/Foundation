@@ -44,7 +44,7 @@ lemma validate_axiomJ4_of_HasAxiomJ4 [F.HasAxiomJ4] : F ⊧ Axioms.J4 φ ψ := b
 lemma Frame.HasAxiomJ4.of_validate_axiomJ4 (h : F ⊧ Axioms.J4 (.atom 0) (.atom 1)) : F.HasAxiomJ4 := by
   constructor;
   intro w x y Swxy;
-  have := @h (λ u a => match a with | 0 => u = x | 1 => u = y | _ => False) w ?_ ?_;
+  have := @h (λ a u => match a with | 0 => u = x | 1 => u = y | _ => False) w ?_ ?_;
   . obtain ⟨z, Rwz, hz⟩ := Satisfies.dia_def.mp this;
     replace hz : z = y := by
       simp [Semantics.Models, Satisfies] at hz;

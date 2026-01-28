@@ -13,7 +13,7 @@ def complexityLimitedFrame (F : Kripke.Frame) (r : F.World) (φ : Formula ℕ) :
 
 def complexityLimitedModel (M : Kripke.Model) (w : M.World) (φ : Formula ℕ) : Kripke.Model where
   toFrame := complexityLimitedFrame M.toFrame w φ
-  Val x a := M.Val x.1 a
+  Val a x := M.Val a x.1
 
 section
 

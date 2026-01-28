@@ -110,7 +110,7 @@ instance : Modal.GrzPoint2 ⪱ Modal.GrzPoint3 := by
       let F : Frame := ⟨Fin 4, λ x y => x = 0 ∨ x = y ∨ y = 3⟩;
       let M : Model := ⟨
         F,
-        λ x a => match a with | 0 => (1 : F.World) ≺ x | 1 => (2 : F.World) ≺ x | _ => False
+        λ a x => match a with | 0 => (1 : F.World) ≺ x | 1 => (2 : F.World) ≺ x | _ => False
       ⟩;
       use M, 0;
       constructor;
@@ -157,7 +157,7 @@ instance : Modal.S4Point3 ⪱ Modal.GrzPoint3 := by
     . simp;
     . apply Sound.not_provable_of_countermodel (𝓜 := Kripke.FrameClass.S4Point3);
       apply Kripke.not_validOnFrameClass_of_exists_model_world;
-      use ⟨⟨Fin 2, λ x y => True⟩, λ w _ => w = 1⟩, 0;
+      use ⟨⟨Fin 2, λ x y => True⟩, λ _ w => w = 1⟩, 0;
       constructor;
       . exact {
           refl := by simp,

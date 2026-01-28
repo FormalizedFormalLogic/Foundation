@@ -96,7 +96,7 @@ instance : Modal.KTc ⪱ Modal.Ver := by
     . simp;
     . apply Sound.not_provable_of_countermodel (𝓜 := Kripke.FrameClass.KTc);
       apply Kripke.not_validOnFrameClass_of_exists_model_world;
-      let M : Model := ⟨⟨Fin 1, λ x y => True⟩, λ w _ => False⟩;
+      let M : Model := ⟨⟨Fin 1, λ x y => True⟩, λ _ w => False⟩;
       use M, 0;
       constructor;
       . refine ⟨by unfold Coreflexive; trivial⟩
@@ -116,7 +116,7 @@ instance : Modal.GLPoint3 ⪱ Modal.Ver := by
     . simp;
     . apply Sound.not_provable_of_countermodel (𝓜 := Kripke.FrameClass.finite_GLPoint3);
       apply Kripke.not_validOnFrameClass_of_exists_model_world;
-      use ⟨⟨Fin 2, λ x y => x < y⟩, (λ w a => False)⟩, 0;
+      use ⟨⟨Fin 2, λ x y => x < y⟩, (λ a w => False)⟩, 0;
       constructor;
       . exact {}
       . simp only [Semantics.Models, Satisfies, imp_false, not_forall, not_not];

@@ -154,10 +154,10 @@ end Frame.extendRoot
 
 def Model.extendRoot (M : Kripke.Model) {r : M.World} [M.IsRootedBy r] (n : ℕ+) : Kripke.Model where
   toFrame := M.toFrame.extendRoot n
-  Val x a :=
+  Val a x :=
     match x with
-    | .inl _ => M.Val r a
-    | .inr x => M.Val x a
+    | .inl _ => M.Val a r
+    | .inr x => M.Val a x
 
 namespace Model.extendRoot
 
