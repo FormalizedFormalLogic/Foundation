@@ -31,7 +31,7 @@ instance : Std.Refl (α := α) Coherence := ⟨reflexive⟩
 
 instance : Std.Symm (α := α) Coherence := ⟨symmetric⟩
 
-@[simp, refl] protected lemma Coherence.refl (x : α) : x ⁐ x := reflexive x
+@[simp, refl, grind .] protected lemma Coherence.refl (x : α) : x ⁐ x := reflexive x
 
 lemma Coherence.symm {x y : α} : x ⁐ y → y ⁐ x := fun h ↦ symmetric h
 
@@ -41,7 +41,7 @@ def Incoherence (x y : α) : Prop := ¬x ⁐ y ∨ x = y
 
 infix:40 (priority := high) " ≍ " => Incoherence
 
-@[simp, refl] lemma Incoherence.refl (x : α) : x ≍ x := by simp [Incoherence]
+@[simp, refl, grind .] lemma Incoherence.refl (x : α) : x ≍ x := by simp [Incoherence]
 
 lemma Incoherence.symm {x y : α} : x ≍ y → y ≍ x := by
   intro h; cases h
@@ -54,13 +54,42 @@ instance : Std.Refl (α := α) Incoherence := ⟨Incoherence.refl⟩
 
 instance : Std.Symm (α := α) Incoherence := ⟨fun _ _ ↦ Incoherence.symm⟩
 
-abbrev StrictIncoherence (x y : α) : Prop := ¬x ⁐ y
+def StrictIncoherence (x y : α) : Prop := ¬x ⁐ y
 
 infix:40 " ⌣ " => StrictIncoherence
 
-abbrev StrictCoherence (x y : α) : Prop := ¬x ≍ y
+lemma StrictIncoherence.iff_incoherence_ne (x y : α) : x ⌣ y ↔ x ≍ y ∧ x ≠ y := by
+  simp [StrictIncoherence, Incoherence]; grind
+
+lemma Incoherence.iff_strictIncoherence_or_eq (x y : α) : x ≍ y ↔ x ⌣ y ∨ x = y := by
+  simp [StrictIncoherence, Incoherence]
+
+lemma StrictIncoherence.symm {x y : α} : x ⌣ y → y ⌣ x := by
+  simp [StrictIncoherence]; grind
+
+@[grind =] lemma StrictIncoherence.symm_iff {x y : α} : x ⌣ y ↔ y ⌣ x := ⟨symm, symm⟩
+
+instance : Std.Symm (α := α) StrictIncoherence := ⟨fun _ _ ↦ StrictIncoherence.symm⟩
+
+def StrictCoherence (x y : α) : Prop := ¬x ≍ y
 
 infix:40 " ⌢ " => StrictCoherence
+
+lemma StrictCoherence.iff_coherence_ne (x y : α) : x ⌢ y ↔ x ⁐ y ∧ x ≠ y := by
+  simp [StrictCoherence, Incoherence]
+
+lemma Coherences.iff_strictCoherence_or_eq (x y : α) : x ⁐ y ↔ x ⌢ y ∨ x = y := by
+  simp [StrictCoherence, Incoherence]; grind
+
+lemma StrictCoherence.symm {x y : α} : x ⌢ y → y ⌢ x := by
+  simp [StrictCoherence]; grind
+
+@[grind =] lemma StrictCoherence.symm_iff {x y : α} : x ⌢ y ↔ y ⌢ x := ⟨symm, symm⟩
+
+instance : Std.Symm (α := α) StrictCoherence := ⟨fun _ _ ↦ StrictCoherence.symm⟩
+
+@[grind .] lemma trichotomous (x y : α) : x ⌢ y ∨ x = y ∨ x ⌣ y := by
+  simp [StrictCoherence, StrictIncoherence, Incoherence]; grind
 
 end CoherenceSpace
 
@@ -137,6 +166,8 @@ lemma le_def (a b : Clique α) : a ≤ b ↔ (a : Set α) ⊆ b := by rfl
 end Clique
 
 /-! ### Basic coherence spaces -/
+
+open CoherenceSpace
 
 instance : Bot (CoherenceSpace α) := ⟨{
   Coherence := Eq
@@ -250,29 +281,41 @@ infixr:30 (priority := low) " ⅋ " => Par
 
 namespace Par
 
+def toPair : α ⅋ β → α × β
+| mk a b => (a, b)
+
 inductive Coherence : α ⅋ β → α ⅋ β → Prop
-  | left {a₀ a₁ : α} {b₀ b₁ : β} : a₀ ⁐ a₁ → Coherence (mk a₀ b₀) (mk a₁ b₁)
-  | right {a₀ a₁ : α} {b₀ b₁ : β} : b₀ ⁐ b₁ → Coherence (mk a₀ b₀) (mk a₁ b₁)
+  | refl (p) : Coherence p p
+  | left {a₀ a₁ : α} {b₀ b₁ : β} : a₀ ⌢ a₁ → Coherence (mk a₀ b₀) (mk a₁ b₁)
+  | right {a₀ a₁ : α} {b₀ b₁ : β} : b₀ ⌢ b₁ → Coherence (mk a₀ b₀) (mk a₁ b₁)
 
 instance : CoherenceSpace (α ⅋ β) where
   Coherence p q := Coherence p q
-  reflexive p := by
-    rcases p with ⟨a, b⟩
-    exact Coherence.left (by rfl)
+  reflexive p := Coherence.refl _
   symmetric p q := by
-    rintro (h | h)
+    rintro (h | h | h)
+    · exact Coherence.refl _
     · exact Coherence.left (symm h)
     · exact Coherence.right (symm h)
 
 lemma coherence_def (p q : α ⅋ β) : p ⁐ q ↔ Coherence p q := by rfl
 
-@[simp] lemma mk_coherence_mk_iff {a₀ a₁ : α} {b₀ b₁ : β} :
-    mk a₀ b₀ ⁐ mk a₁ b₁ ↔ a₀ ⁐ a₁ ∨ b₀ ⁐ b₁ := by
+lemma mk_coherence_mk_iff {a₀ a₁ : α} {b₀ b₁ : β} :
+    mk a₀ b₀ ⁐ mk a₁ b₁ ↔ (a₀ = a₁ ∧ b₀ = b₁) ∨ a₀ ⌢ a₁ ∨ b₀ ⌢ b₁ := by
   constructor
-  · rintro (h | h) <;> tauto
-  · rintro (h | h)
+  · rintro (h | h | h)
+    · simp
+    · right; left; exact h
+    · right; right; exact h
+  · rintro (h | h | h)
+    · simp [h]
     · exact Coherence.left h
     · exact Coherence.right h
+
+@[simp] lemma mk_strictCoherence_mk_iff {a₀ a₁ : α} {b₀ b₁ : β} :
+    mk a₀ b₀ ⌢ mk a₁ b₁ ↔ a₀ ⌢ a₁ ∨ b₀ ⌢ b₁ := by
+  simp [StrictCoherence, Incoherence, mk_coherence_mk_iff]
+  tauto
 
 end Par
 
