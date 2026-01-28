@@ -213,12 +213,14 @@ variable {α β : Type*} [CoherenceSpace α] [CoherenceSpace β]
 inductive LNeg (α : Type*) : Type _
   | mk : α → LNeg α
 
+postfix:max (priority := low) "ᗮ" => LNeg
+
 namespace LNeg
 
-inductive Coherence : LNeg α → LNeg α → Prop
+inductive Coherence : αᗮ → αᗮ → Prop
   | mk {a₀ a₁ : α} : a₀ ≍ a₁ → Coherence (mk a₀) (mk a₁)
 
-instance : CoherenceSpace (LNeg α) where
+instance : CoherenceSpace αᗮ where
   Coherence p q := Coherence p q
   reflexive p := by
     rcases p with ⟨a⟩
@@ -227,7 +229,7 @@ instance : CoherenceSpace (LNeg α) where
     rintro ⟨h⟩
     exact Coherence.mk (symm h)
 
-lemma coherence_def (p q : LNeg α) : p ⁐ q ↔ Coherence p q := by rfl
+lemma coherence_def (p q : αᗮ) : p ⁐ q ↔ Coherence p q := by rfl
 
 @[simp] lemma mk_coherence_mk_iff {a₀ a₁ : α} :
     mk a₀ ⁐ mk a₁ ↔ a₀ ≍ a₁ := by
@@ -318,6 +320,40 @@ lemma mk_coherence_mk_iff {a₀ a₁ : α} {b₀ b₁ : β} :
   tauto
 
 end Par
+
+namespace CoherenceSpace
+
+variable {ι : Type*} {ρ : ι → Type*} [(i : ι) → CoherenceSpace (ρ i)]
+
+inductive ArrowParCoherence : (f g : (i : ι) → ρ i) → Prop
+  | refl (f) : ArrowParCoherence f f
+  | pointwise {f g : (i : ι) → ρ i} (i : ι) : f i ⌢ g i → ArrowParCoherence f g
+
+instance arrowPar : CoherenceSpace ((i : ι) → ρ i) where
+  Coherence f g := ArrowParCoherence f g
+  reflexive f := ArrowParCoherence.refl f
+  symmetric f g := by
+    rintro (h | ⟨_, h⟩)
+    · exact ArrowParCoherence.refl _
+    · exact ArrowParCoherence.pointwise _ (symm h)
+
+lemma arrowPar_coherence_def (f g : (i : ι) → ρ i) : f ⁐ g ↔ ArrowParCoherence f g := by rfl
+
+lemma arrowPar_coherence_iff (f g : (i : ι) → ρ i) :
+    f ⁐ g ↔ f = g ∨ ∃ i, f i ⌢ g i := by
+  constructor
+  · rintro (h | ⟨i, h⟩) <;> grind
+  · rintro (rfl | ⟨i, h⟩)
+    · exact ArrowParCoherence.refl _
+    · exact ArrowParCoherence.pointwise i h
+
+
+lemma arrowPar_strictCoherence_iff (f g : (i : ι) → ρ i) :
+    f ⌢ g ↔ ∃ i, f i ⌢ g i := by
+  simp [StrictCoherence.iff_coherence_ne, arrowPar_coherence_iff]
+  grind
+
+end CoherenceSpace
 
 /-! #### &: Additive conjunction -/
 
