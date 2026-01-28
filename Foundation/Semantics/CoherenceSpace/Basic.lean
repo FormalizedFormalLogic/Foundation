@@ -239,6 +239,19 @@ lemma coherence_def (p q : αᗮ) : p ⁐ q ↔ Coherence p q := by rfl
   · rintro h
     exact Coherence.mk h
 
+@[simp] lemma mk_strictCoherence_mk_iff {a₀ a₁ : α} :
+    mk a₀ ⌢ mk a₁ ↔ a₀ ⌣ a₁ := by
+  simp [StrictCoherence.iff_coherence_ne,
+    StrictIncoherence.iff_incoherence_ne, mk_coherence_mk_iff]
+
+@[simp] lemma mk_incoherence_mk_iff {a₀ a₁ : α} :
+    mk a₀ ≍ mk a₁ ↔ a₀ ⁐ a₁ := by
+  simp [Incoherence, mk_coherence_mk_iff]; grind
+
+@[simp] lemma mk_strictIncoherence_mk_iff {a₀ a₁ : α} :
+    mk a₀ ⌣ mk a₁ ↔ a₀ ⌢ a₁ := by
+  simp [StrictIncoherence, mk_coherence_mk_iff]; rfl
+
 end LNeg
 
 /-! #### ⨂: Multiplicative conjunction -/
@@ -347,7 +360,6 @@ lemma arrowPar_coherence_iff (f g : (i : ι) → ρ i) :
     · exact ArrowParCoherence.refl _
     · exact ArrowParCoherence.pointwise i h
 
-
 lemma arrowPar_strictCoherence_iff (f g : (i : ι) → ρ i) :
     f ⌢ g ↔ ∃ i, f i ⌢ g i := by
   simp [StrictCoherence.iff_coherence_ne, arrowPar_coherence_iff]
@@ -390,6 +402,31 @@ lemma coherence_def (p q : α & β) : p ⁐ q ↔ Coherence p q := by rfl
 
 end With
 
+inductive BigWith {ι : Type*} (ρ : ι → Type*) : Type _
+  | mk : ρ i → BigWith ρ
+
+namespace BigWith
+
+variable {ι : Type*} {ρ : ι → Type*} [(i : ι) → CoherenceSpace (ρ i)]
+
+inductive Coherence : BigWith ρ → BigWith ρ → Prop
+  | mk {a₀ a₁ : ρ i} : a₀ ⁐ a₁ → Coherence (mk a₀) (mk a₁)
+  | of_ne (a : ρ i) (b : ρ j) : i ≠ j → Coherence (mk a) (mk b)
+
+instance : CoherenceSpace (BigWith ρ) where
+  Coherence p q := p.Coherence q
+  reflexive p := by
+    rcases p with ⟨a⟩
+    exact Coherence.mk (by rfl)
+  symmetric p q := by
+    rintro (h | ⟨_, _, h⟩)
+    · exact Coherence.mk (symm h)
+    · exact Coherence.of_ne _ _ (Ne.symm h)
+
+lemma coherence_def (p q : BigWith ρ) : p ⁐ q ↔ Coherence p q := by rfl
+
+end BigWith
+
 /-! #### ⨁: Additive disjunction -/
 
 /-- An additive disjunction of two types -/
@@ -420,5 +457,28 @@ instance : CoherenceSpace (α ⨁ β) where
 lemma coherence_def (p q : α ⨁ β) : p ⁐ q ↔ Coherence p q := by rfl
 
 end Plus
+
+inductive BigPlus {ι : Type*} (ρ : ι → Type*) : Type _
+  | mk : ρ i → BigPlus ρ
+
+namespace BigPlus
+
+variable {ι : Type*} {ρ : ι → Type*} [(i : ι) → CoherenceSpace (ρ i)]
+
+inductive Coherence : BigPlus ρ → BigPlus ρ → Prop
+  | mk {a₀ a₁ : ρ i} : a₀ ⁐ a₁ → Coherence (mk a₀) (mk a₁)
+
+instance : CoherenceSpace (BigPlus ρ) where
+  Coherence p q := p.Coherence q
+  reflexive p := by
+    rcases p with ⟨a⟩
+    exact Coherence.mk (by rfl)
+  symmetric p q := by
+    rintro ⟨h⟩
+    exact Coherence.mk (symm h)
+
+lemma coherence_def (p q : BigPlus ρ) : p ⁐ q ↔ Coherence p q := by rfl
+
+end BigPlus
 
 end LO
