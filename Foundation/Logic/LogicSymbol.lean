@@ -21,50 +21,25 @@ namespace LO
 
 section logicNotation
 
-@[notation_class] class Tilde (α : Type*) where
-  tilde : α → α
-
-@[notation_class] class Arrow (α : Type*) where
-  arrow : α → α → α
-
-@[notation_class] class Wedge (α : Type*) where
-  wedge : α → α → α
-
-@[notation_class] class Vee (α : Type*) where
-  vee : α → α → α
-
 class LogicalConnective (α : Type*)
   extends Top α, Bot α, Tilde α, Arrow α, Wedge α, Vee α
-
-prefix:75 "∼" => Tilde.tilde
-
-infixr:60 " ➝ " => Arrow.arrow
-
-infixr:69 " ⋏ " => Wedge.wedge
-
-infixr:68 " ⋎ " => Vee.vee
-
-attribute [match_pattern]
-  Tilde.tilde
-  Arrow.arrow
-  Wedge.wedge
-  Vee.vee
 
 end logicNotation
 
 class DeMorgan (F : Type*) [LogicalConnective F] where
-  verum           : ∼(⊤ : F) = ⊥
-  falsum          : ∼(⊥ : F) = ⊤
+  verum : ∼(⊤ : F) = ⊥
+  falsum : ∼(⊥ : F) = ⊤
   imply (φ ψ : F) : (φ ➝ ψ) = ∼φ ⋎ ψ
-  and (φ ψ : F)   : ∼(φ ⋏ ψ) = ∼φ ⋎ ∼ψ
-  or (φ ψ : F)    : ∼(φ ⋎ ψ) = ∼φ ⋏ ∼ψ
-  neg (φ : F)     : ∼∼φ = φ
+  and (φ ψ : F) : ∼(φ ⋏ ψ) = ∼φ ⋎ ∼ψ
+  or (φ ψ : F) : ∼(φ ⋎ ψ) = ∼φ ⋏ ∼ψ
+  neg (φ : F) : ∼∼φ = φ
 
 attribute [simp] DeMorgan.verum DeMorgan.falsum DeMorgan.and DeMorgan.or DeMorgan.neg
 
 /-- Introducing `∼φ` as an abbreviation of `φ ➝ ⊥`. -/
 class NegAbbrev (F : Type*) [Tilde F] [Arrow F] [Bot F] where
   protected neg {φ : F} : ∼φ = φ ➝ ⊥
+
 attribute [grind =] NegAbbrev.neg
 
 /-- Introducing `∼φ`, `φ ⋎ ψ`, `φ ⋏ ψ`, `⊤` as abbreviation. -/
@@ -72,6 +47,7 @@ class ŁukasiewiczAbbrev (F : Type*) [LogicalConnective F] extends NegAbbrev F w
   protected top : ⊤ = ∼(⊥ : F)
   protected or {φ ψ : F} : φ ⋎ ψ = ∼φ ➝ ψ
   protected and {φ ψ : F} : φ ⋏ ψ = ∼(φ ➝ ∼ψ)
+
 attribute [grind =] ŁukasiewiczAbbrev.and ŁukasiewiczAbbrev.or ŁukasiewiczAbbrev.top
 
 namespace LogicalConnective

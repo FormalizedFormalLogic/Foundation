@@ -8,20 +8,9 @@ namespace LO
 
 variable {F} {n m : ℕ} {φ : F}
 
-@[notation_class]
-class Box (F : Type*) where
-  box : F → F
-
-@[notation_class]
-class Dia (F : Type*) where
-  dia : F → F
-
 namespace Box
 
 variable [Box F]
-
-prefix:76 "□" => Box.box
-attribute [match_pattern] Box.box
 
 abbrev boxItr (n : ℕ) : F → F := (□·)^[n]
 notation:76 "□^[" n "]" φ:80 => boxItr n φ
@@ -55,9 +44,6 @@ end Box
 namespace Dia
 
 variable [Dia F]
-
-prefix:76 "◇" => Dia.dia
-attribute [match_pattern] Dia.dia
 
 abbrev diaItr (n : ℕ) : F → F := (◇·)^[n]
 notation:76 "◇^[" n "]" φ:80 => diaItr n φ

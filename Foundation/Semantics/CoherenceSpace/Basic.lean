@@ -99,7 +99,7 @@ def IsClique [CoherenceSpace α] (s : Set α) : Prop := ∀ x ∈ s, ∀ y ∈ s
 
 def IsCoclique [CoherenceSpace α] (s : Set α) : Prop := ∀ x ∈ s, ∀ y ∈ s, x ≍ y
 
-def Clique (α : Type*) [CoherenceSpace α] : Set (Set α) := {s | IsClique s}
+def Point (α : Type*) [CoherenceSpace α] : Set (Set α) := {s | IsClique s}
 
 namespace IsClique
 
@@ -135,35 +135,35 @@ lemma sUnion_of_union {M : Set (Set α)} (h : ∀ a ∈ M, ∀ b ∈ M, IsClique
 
 end IsClique
 
-namespace Clique
+namespace Point
 
 open IsClique
 
 variable {α : Type*} [CoherenceSpace α]
 
-@[simp] lemma mem_clique_iff {s : Set α} : s ∈ Clique α ↔ IsClique s := by rfl
+@[simp] lemma mem_clique_iff {s : Set α} : s ∈ Point α ↔ IsClique s := by rfl
 
-def colimit' (s : Set (Set α)) (h : ∀ a ∈ s, IsClique a) (directed : DirectedOn (· ⊆ ·) s) : Clique α :=
+def colimit' (s : Set (Set α)) (h : ∀ a ∈ s, IsClique a) (directed : DirectedOn (· ⊆ ·) s) : Point α :=
   ⟨⋃₀ s, sUnion_of_union fun a ha b hb ↦ by
     have : ∃ c ∈ s, a ⊆ c ∧ b ⊆ c := directed a ha b hb
     rcases this with ⟨c, hcs, hac, hbc⟩
     refine (h c hcs).of_subset (Set.union_subset hac hbc)⟩
 
-def colimit (s : Set (Clique α)) (directed : DirectedOn (· ≤ ·) s) : Clique α :=
+def colimit (s : Set (Point α)) (directed : DirectedOn (· ≤ ·) s) : Point α :=
   colimit' s (by simp; tauto) (directedOn_onFun_iff.mp directed)
 
-@[simp] lemma val_colimit (s : Set (Clique α)) (directed : DirectedOn (· ≤ ·) s) :
+@[simp] lemma val_colimit (s : Set (Point α)) (directed : DirectedOn (· ≤ ·) s) :
     (colimit s directed : Set α) = ⋃₀ s := by rfl
 
-instance : Min (Clique α) := ⟨fun a b ↦ ⟨a ∩ b, a.prop.of_subset <| by simp⟩⟩
+instance : Min (Point α) := ⟨fun a b ↦ ⟨a ∩ b, a.prop.of_subset <| by simp⟩⟩
 
-@[simp] lemma inf_def (a b : Clique α) : ((a ⊓ b : Clique α) : Set α) = ↑a ∩ ↑b := by rfl
+@[simp] lemma inf_def (a b : Point α) : ((a ⊓ b : Point α) : Set α) = ↑a ∩ ↑b := by rfl
 
-@[simp] lemma prop_iff (a : Clique α) : IsClique (a : Set α) := a.prop
+@[simp] lemma prop_iff (a : Point α) : IsClique (a : Set α) := a.prop
 
-lemma le_def (a b : Clique α) : a ≤ b ↔ (a : Set α) ⊆ b := by rfl
+lemma le_def (a b : Point α) : a ≤ b ↔ (a : Set α) ⊆ b := by rfl
 
-end Clique
+end Point
 
 /-! ### Basic coherence spaces -/
 
@@ -259,14 +259,12 @@ end LNeg
 inductive Tensor (α β : Type*) : Type _
   | mk : α → β → Tensor α β
 
-infixr:30 (priority := low) " ⨂ " => Tensor
-
 namespace Tensor
 
-inductive Coherence : α ⨂ β → α ⨂ β → Prop
+inductive Coherence : Tensor α β → Tensor α β → Prop
   | pair {a₀ a₁ : α} {b₀ b₁ : β} : a₀ ⁐ a₁ → b₀ ⁐ b₁ → Coherence (mk a₀ b₀) (mk a₁ b₁)
 
-instance : CoherenceSpace (α ⨂ β) where
+instance : CoherenceSpace (Tensor α β) where
   Coherence p q := Coherence p q
   reflexive p := by
     rcases p with ⟨a, b⟩
@@ -275,7 +273,7 @@ instance : CoherenceSpace (α ⨂ β) where
     rintro ⟨ha, hb⟩
     exact Coherence.pair (symm ha) (symm hb)
 
-lemma coherence_def (p q : α ⨂ β) : p ⁐ q ↔ Coherence p q := by rfl
+lemma coherence_def (p q : Tensor α β) : p ⁐ q ↔ Coherence p q := by rfl
 
 @[simp] lemma mk_coherence_mk_iff {a₀ a₁ : α} {b₀ b₁ : β} :
     mk a₀ b₀ ⁐ mk a₁ b₁ ↔ a₀ ⁐ a₁ ∧ b₀ ⁐ b₁ := by
@@ -292,19 +290,17 @@ end Tensor
 inductive Par (α β : Type*) : Type _
   | mk : α → β → Par α β
 
-infixr:30 (priority := low) " ⅋ " => Par
-
 namespace Par
 
-def toPair : α ⅋ β → α × β
+def toPair : Par α β → α × β
 | mk a b => (a, b)
 
-inductive Coherence : α ⅋ β → α ⅋ β → Prop
+inductive Coherence : Par α β → Par α β → Prop
   | refl (p) : Coherence p p
   | left {a₀ a₁ : α} {b₀ b₁ : β} : a₀ ⌢ a₁ → Coherence (mk a₀ b₀) (mk a₁ b₁)
   | right {a₀ a₁ : α} {b₀ b₁ : β} : b₀ ⌢ b₁ → Coherence (mk a₀ b₀) (mk a₁ b₁)
 
-instance : CoherenceSpace (α ⅋ β) where
+instance : CoherenceSpace (Par α β) where
   Coherence p q := Coherence p q
   reflexive p := Coherence.refl _
   symmetric p q := by
@@ -313,7 +309,7 @@ instance : CoherenceSpace (α ⅋ β) where
     · exact Coherence.left (symm h)
     · exact Coherence.right (symm h)
 
-lemma coherence_def (p q : α ⅋ β) : p ⁐ q ↔ Coherence p q := by rfl
+lemma coherence_def (p q : Par α β) : p ⁐ q ↔ Coherence p q := by rfl
 
 lemma mk_coherence_mk_iff {a₀ a₁ : α} {b₀ b₁ : β} :
     mk a₀ b₀ ⁐ mk a₁ b₁ ↔ (a₀ = a₁ ∧ b₀ = b₁) ∨ a₀ ⌢ a₁ ∨ b₀ ⌢ b₁ := by
@@ -369,15 +365,13 @@ end CoherenceSpace
 
 /-! #### ⊸: Linear implication -/
 
-abbrev Lolli (α β : Type*) : Type _ := αᗮ ⅋ β
-
-infixr:30 " ⊸ " => Lolli
+abbrev Lolli (α β : Type*) : Type _ := Par αᗮ β
 
 namespace Lolli
 
 variable {α β : Type*} [CoherenceSpace α] [CoherenceSpace β]
 
-protected def id : Clique (α ⊸ α) := ⟨{.mk (.mk a) a | a}, by
+protected def id : Point (Lolli α α) := ⟨{.mk (.mk a) a | a}, by
   rintro ⟨a₀, n₀⟩ h₀ ⟨a₁, n₁⟩ h₁
   have : .mk n₀ = a₀ := by simpa using h₀
   rcases this
@@ -394,18 +388,16 @@ inductive With (α β : Type*) : Type _
   | inl : α → With α β
   | inr : β → With α β
 
-infixr:30 (priority := low) " & " => With
-
 namespace With
 
-inductive Coherence : α & β → α & β → Prop
+inductive Coherence : With α β → With α β → Prop
   | inl {a₀ a₁ : α} : a₀ ⁐ a₁ → Coherence (inl a₀) (inl a₁)
   | inr {b₀ b₁ : β} : b₀ ⁐ b₁ → Coherence (inr b₀) (inr b₁)
   | inl_inr (a : α) (b : β) : Coherence (inl a) (inr b)
   | inr_inl (a : α) (b : β) : Coherence (inr b) (inl a)
 
 /-- An additive conjunction of coherence spaces is also a coherence space -/
-instance : CoherenceSpace (α & β) where
+instance : CoherenceSpace (With α β) where
   Coherence p q := Coherence p q
   reflexive p := by
     rcases p
@@ -418,7 +410,7 @@ instance : CoherenceSpace (α & β) where
     · exact Coherence.inr_inl _ _
     · exact Coherence.inl_inr _ _
 
-lemma coherence_def (p q : α & β) : p ⁐ q ↔ Coherence p q := by rfl
+lemma coherence_def (p q : With α β) : p ⁐ q ↔ Coherence p q := by rfl
 
 end With
 
@@ -454,16 +446,14 @@ inductive Plus (α β : Type*) : Type _
   | inl : α → Plus α β
   | inr : β → Plus α β
 
-infixr:30 " ⨁ " => Plus
-
 namespace Plus
 
-inductive Coherence : α ⨁ β → α ⨁ β → Prop
+inductive Coherence : Plus α β → Plus α β → Prop
   | inl {a₀ a₁ : α} : a₀ ⁐ a₁ → Coherence (inl a₀) (inl a₁)
   | inr {b₀ b₁ : β} : b₀ ⁐ b₁ → Coherence (inr b₀) (inr b₁)
 
 /-- An additive conjunction of coherence spaces is also a coherence space -/
-instance : CoherenceSpace (α ⨁ β) where
+instance : CoherenceSpace (Plus α β) where
   Coherence p q := Coherence p q
   reflexive p := by
     rcases p
@@ -474,7 +464,7 @@ instance : CoherenceSpace (α ⨁ β) where
     · exact Coherence.inl (symm h)
     · exact Coherence.inr (symm h)
 
-lemma coherence_def (p q : α ⨁ β) : p ⁐ q ↔ Coherence p q := by rfl
+lemma coherence_def (p q : Plus α β) : p ⁐ q ↔ Coherence p q := by rfl
 
 end Plus
 

@@ -16,6 +16,7 @@ public import Foundation.Vorspiel.List.ChainI
 public import Foundation.Vorspiel.Matrix
 public import Foundation.Vorspiel.Nat.Basic
 public import Foundation.Vorspiel.Nat.Matrix
+public import Foundation.Vorspiel.NotationClass
 public import Foundation.Vorspiel.Order
 public import Foundation.Vorspiel.Rel.Basic
 public import Foundation.Vorspiel.Rel.Connected
