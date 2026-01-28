@@ -39,8 +39,8 @@ lemma validate_WeakPoint3_of_weakConnected [F.IsPiecewiseConnected] : F ⊧ (Axi
   rintro V x;
   apply Satisfies.or_def.mpr;
   suffices
-    (∀ (y : F.World), x ≺ y → V y 0 → (∀ (x : F.World), y ≺ x → V x 0) → V y 1) ∨
-    (∀ (y : F.World), x ≺ y → V y 1 → (∀ (x : F.World), y ≺ x → V x 1) → V y 0)
+    (∀ (y : F.World), x ≺ y → V 0 y → (∀ (x : F.World), y ≺ x → V 0 x) → V 1 y) ∨
+    (∀ (y : F.World), x ≺ y → V 1 y → (∀ (x : F.World), y ≺ x → V 1 x) → V 0 y)
     by simpa [Semantics.Models, Satisfies];
   by_contra hC;
   push_neg at hC;
@@ -60,7 +60,7 @@ lemma isPiecewiseConnected_of_validate_axiomWeakPoint3 (h : F ⊧ (Axioms.WeakPo
     contrapose!;
     rintro ⟨x, y, z, Rxy, Rxz, nRyz, nyz, nRzy⟩;
     apply ValidOnFrame.not_of_exists_valuation_world;
-    use (λ w a => match a with | 0 => w = y ∨ y ≺ w | 1 => w = z ∨ z ≺ w | _ => True), x;
+    use (λ a w => match a with | 0 => w = y ∨ y ≺ w | 1 => w = z ∨ z ≺ w | _ => True), x;
     suffices
       ∃ w, x ≺ w ∧ (w = y ∨ y ≺ w) ∧ (∀ (v : F.World), w ≺ v → ¬v = y → y ≺ v) ∧ ¬w = z ∧ ¬z ≺ w ∧
       ∃ w, x ≺ w ∧ (w = z ∨ z ≺ w) ∧ (∀ (v : F.World), w ≺ v → ¬v = z → z ≺ v) ∧ ¬w = y ∧ ¬y ≺ w by

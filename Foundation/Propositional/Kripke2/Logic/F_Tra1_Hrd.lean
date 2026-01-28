@@ -55,7 +55,7 @@ instance : Propositional.F_Tra1 ⪱ Propositional.F_Tra1_Hrd := by
       simp;
     . apply Sound.not_provable_of_countermodel (𝓜 := Kripke2.FrameClass.F_Tra1);
       apply Kripke2.not_validOnFrameClass_of_exists_model_world;
-      use ⟨⟨Fin 2, (λ x y => x ≤ y), 0, by simp⟩, λ x _ => x = 0⟩, 0;
+      use ⟨⟨Fin 2, (λ x y => x ≤ y), 0, by simp⟩, λ _ x => x = 0⟩, 0;
       constructor;
       . apply Set.mem_setOf_eq.mpr;
         exact { trans := by omega; }

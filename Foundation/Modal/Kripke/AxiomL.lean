@@ -48,7 +48,7 @@ lemma isTransitive_of_validate_axiomL (h : F ⊧ (Axioms.L (.atom 0))) : F.IsTra
     intro hT;
     obtain ⟨w, v, Rwv, u, Rvu, nRwu⟩ := by simpa [Transitive] using hT;
     apply ValidOnFrame.not_of_exists_valuation_world;
-    use (λ w _ => w ≠ v ∧ w ≠ u), w;
+    use (λ _ w => w ≠ v ∧ w ≠ u), w;
     apply Satisfies.imp_def.not.mpr;
     push_neg;
     constructor;
@@ -76,7 +76,7 @@ lemma isConverseWellFounded_of_validate_axiomL (h : F ⊧ (Axioms.L (.atom 0))) 
     intro hCF;
     obtain ⟨X, ⟨x, _⟩, hX₂⟩ := by simpa using ConverseWellFounded.iff_has_max.not.mp hCF;
     apply ValidOnFrame.not_of_exists_valuation_world;
-    use (λ w _ => w ∉ X), x;
+    use (λ _ w => w ∉ X), x;
     apply Satisfies.imp_def.not.mpr;
     push_neg;
     constructor;

@@ -38,7 +38,7 @@ open Formula (atom) in
 lemma Frame.HasAxiomR.of_validate_axiomP₀ [F.IsIL] (h : F ⊧ Axioms.P₀ (.atom 0) (.atom 1)) : F.HasAxiomR := by
   constructor;
   intro x y z u v Rxy Ryz Sxzu Ruv;
-  have := @h (λ w a =>
+  have := @h (λ a w =>
     match a with
     | 0 => w = z
     | 1 => w = v

@@ -47,7 +47,7 @@ instance : Modal.K4 ⪱ Modal.K4Point3 := by
       apply Kripke.not_validOnFrameClass_of_exists_model_world;
       let M : Model := ⟨
         ⟨Fin 3, λ x y => x = 0 ∧ y ≠ 0⟩,
-        λ w a => if a = 0 then w = 1 else w = 2
+        λ a w => if a = 0 then w = 1 else w = 2
       ⟩;
       use M, 0;
       constructor;

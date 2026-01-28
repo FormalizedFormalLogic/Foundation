@@ -61,7 +61,7 @@ instance : Modal.KB4 ⪱ Modal.KTc := by
     . simp;
     . apply Sound.not_provable_of_countermodel (𝓜 := FrameClass.KB4)
       apply Kripke.not_validOnFrameClass_of_exists_model_world;
-      let M : Model := ⟨⟨Fin 2, λ x y => True⟩, λ w _ => w = 0⟩;
+      let M : Model := ⟨⟨Fin 2, λ x y => True⟩, λ _ w => w = 0⟩;
       use M, 0;
       constructor;
       . exact {

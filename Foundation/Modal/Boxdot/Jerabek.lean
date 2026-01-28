@@ -298,9 +298,9 @@ theorem jerabek_SBDP
     obtain ⟨M, x, hMC, hF⟩ := Kripke.exists_model_world_of_not_validOnFrameClass this;
     let M₂ : Kripke.Model := {
       toFrame := M.toFrame.twice
-      Val := λ ⟨w, i⟩ a =>
+      Val := λ a ⟨w, i⟩ =>
         if   a = q then i = true
-        else M.Val w a
+        else M.Val a w
     }
     have : M.IsReflexive := by
       apply reflexive_of_validate_AxiomT;

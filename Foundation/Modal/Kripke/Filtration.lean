@@ -76,7 +76,7 @@ class FilterOf (FM : Model) (M : outParam Kripke.Model) (T : outParam (FormulaSe
   def_rel_forth : ∀ {x y : M}, x ≺ y → (cast def_world.symm ⟦x⟧) ≺ (cast def_world.symm ⟦y⟧)
   def_rel_back : ∀ {x y : M}, (cast def_world.symm ⟦x⟧) ≺ (cast def_world.symm ⟦y⟧) → ∀ φ, □φ ∈ T → (x ⊧ □φ → y ⊧ φ)
   def_valuation X a : (ha : (atom a) ∈ T) →
-    FM X a ↔ Quotient.lift (λ x => M x a) (by
+    FM a X ↔ Quotient.lift (λ x => M a x) (by
       intro x y h;
       apply eq_iff_iff.mpr;
       constructor;
@@ -142,7 +142,7 @@ lemma isSerial (filterOf : FilterOf FM M T) [M.IsSerial] : FM.IsSerial where
 end FilterOf
 
 
-abbrev standardFiltrationValuation (X : FilterEqvQuotient M T) (a : ℕ) := (ha : (atom a) ∈ T) → Quotient.lift (λ x => M x a) (by
+abbrev standardFiltrationValuation (a : ℕ) (X : FilterEqvQuotient M T) := (ha : (atom a) ∈ T) → Quotient.lift (λ x => M a x) (by
   intro x y h;
   apply eq_iff_iff.mpr;
   constructor;

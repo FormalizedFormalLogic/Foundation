@@ -95,7 +95,7 @@ instance : Propositional.VF ⪱ Propositional.WF := by
         ,
         root := 0,
         rooted := by grind
-        Val x a := x = 2 → a = 0
+        Val a x := x = 2 → a = 0
       }, 0;
       constructor;
       . tauto;

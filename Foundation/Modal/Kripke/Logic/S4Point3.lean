@@ -108,7 +108,7 @@ instance : Modal.S4Point2 ⪱ Modal.S4Point3 := by
       apply Kripke.not_validOnFrameClass_of_exists_model_world;
       let M : Model := ⟨
         ⟨Fin 4, λ x y => ¬(x = 1 ∧ y = 2) ∧ ¬(x = 2 ∧ y = 1) ∧ (x ≤ y)⟩,
-        λ w a => (a = 0 ∧ (w = 1 ∨ w = 3)) ∨ (a = 1 ∧ (w = 2 ∨ w = 3))
+        λ a w => (a = 0 ∧ (w = 1 ∨ w = 3)) ∨ (a = 1 ∧ (w = 2 ∨ w = 3))
       ⟩;
       use M, 0;
       constructor;
@@ -149,7 +149,7 @@ instance : Modal.K4Point3 ⪱ Modal.S4Point3 := by
       apply Kripke.not_validOnFrameClass_of_exists_model_world;
       let M : Model := ⟨
         ⟨Fin 2, λ x y => x < y⟩,
-        λ w a => False
+        λ a w => False
       ⟩;
       use M, 0;
       constructor;

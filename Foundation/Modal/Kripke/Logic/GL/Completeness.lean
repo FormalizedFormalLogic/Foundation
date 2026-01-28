@@ -48,7 +48,7 @@ end miniCanonicalFrame
 
 abbrev miniCanonicalModel (φ : Formula ℕ) : Kripke.Model where
   toFrame := miniCanonicalFrame φ
-  Val X a := (atom a) ∈ X
+  Val a X := (atom a) ∈ X
 
 
 lemma truthlemma_lemma1

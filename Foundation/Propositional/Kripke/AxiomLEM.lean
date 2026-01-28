@@ -46,7 +46,7 @@ lemma validate_axiomLEM_of_isEuclidean [F.IsEuclidean] : F ⊧ (Axioms.LEM (.ato
 
 lemma isEuclidean_of_validate_axiomLEM (h : F ⊧ (Axioms.LEM (.atom 0))) : F.IsEuclidean := ⟨by
   rintro x y z Rxy Rxz;
-  let V : Kripke.Valuation F := ⟨λ {v a} => y ≺ v, by
+  let V : Kripke.Valuation F := ⟨λ {a v} => y ≺ v, by
     intro w v Rwv a Rzw;
     exact F.trans Rzw Rwv;
   ⟩;

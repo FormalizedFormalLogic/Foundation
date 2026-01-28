@@ -118,7 +118,7 @@ instance : Modal.K ⪱ Modal.K4n n := by
     . simp;
     . apply Sound.not_provable_of_countermodel (𝓜 := FrameClass.K);
       apply Kripke.not_validOnFrameClass_of_exists_model_world;
-      let M : Model := ⟨counterframe n, λ w a => w = n⟩;
+      let M : Model := ⟨counterframe n, λ a w => w = n⟩;
       use M, 0;
       constructor;
       . simp;
@@ -148,7 +148,7 @@ lemma succ_strictlyWeakerThan : Modal.K4n (n + 1) ⪱ Modal.K4n n := by
     . simp;
     . apply Sound.not_provable_of_countermodel (𝓜 := FrameClass.K4n (n + 1))
       apply Kripke.not_validOnFrameClass_of_exists_model_world;
-      let M : Model := ⟨counterframe n, λ w a => w ≠ counterframe.last⟩;
+      let M : Model := ⟨counterframe n, λ a w => w ≠ counterframe.last⟩;
       use M, 0;
       constructor;
       . apply Set.mem_setOf_eq.mpr;

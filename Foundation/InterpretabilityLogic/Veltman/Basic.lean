@@ -41,12 +41,12 @@ end Frame
 
 abbrev FrameClass := Set (Frame)
 
-abbrev Valuation (F : Frame) := F.World → ℕ → Prop
+abbrev Valuation (F : Frame) := ℕ → F.World → Prop
 
 structure Model extends toVeltmanFrame : Veltman.Frame where
   Val : Valuation toVeltmanFrame
 instance : CoeSort Model Type := ⟨λ M => M.toKripkeFrame.World⟩
-instance : CoeFun (Model) (λ M => M.World → ℕ → Prop) := ⟨fun m => m.Val⟩
+instance : CoeFun (Model) (λ M => ℕ → M.World → Prop) := ⟨fun m => m.Val⟩
 
 def Model.toKripkeModel (M : Veltman.Model) : Modal.Kripke.Model := ⟨M.toKripkeFrame, M.Val⟩
 
@@ -58,7 +58,7 @@ open Veltman
 namespace Formula.Veltman
 
 def Satisfies (M : Veltman.Model) (x : M.World) : Formula ℕ → Prop
-  | atom a  => M x a
+  | atom a  => M a x
   | ⊥  => False
   | φ ➝ ψ => (Satisfies M x φ) ➝ (Satisfies M x ψ)
   | □φ   => ∀ y, x ≺ y → (Satisfies M y φ)
@@ -73,7 +73,7 @@ variable {M : Veltman.Model} {x : M.World} {φ ψ : Formula ℕ}
 
 @[simp] protected lemma iff_models : x ⊧ φ ↔ Veltman.Satisfies M x φ := iff_of_eq rfl
 
-@[simp] lemma atom_def : x ⊧ atom a ↔ M x a := by simp [Satisfies];
+@[simp] lemma atom_def : x ⊧ atom a ↔ M a x := by simp [Satisfies];
 
 protected lemma bot_def : ¬x ⊧ ⊥ := by simp [Satisfies];
 
@@ -115,7 +115,7 @@ lemma trans (hpq : x ⊧ φ ➝ ψ) (hqr : x ⊧ ψ ➝ χ) : x ⊧ φ ➝ χ :=
 lemma mdp (hpq : x ⊧ φ ➝ ψ) (hp : x ⊧ φ) : x ⊧ ψ := by simp_all;
 
 lemma iff_subst_self {x : F.World} (s : Substitution ℕ) :
-  letI U : Veltman.Valuation F := λ w a => Satisfies ⟨F, V⟩ w ((atom a)⟦s⟧);
+  letI U : Veltman.Valuation F := λ a w => Satisfies ⟨F, V⟩ w ((atom a)⟦s⟧);
   Satisfies ⟨F, U⟩ x φ ↔ Satisfies ⟨F, V⟩ x (φ⟦s⟧) := by
   induction φ generalizing x with
   | hatom a => simp [Satisfies];
@@ -295,7 +295,7 @@ protected lemma subst (h : F ⊧ φ) : F ⊧ φ⟦s⟧ := by
   replace hC := iff_not_exists_valuation_world.mp hC;
   obtain ⟨V, ⟨x, hx⟩⟩ := hC;
   apply Satisfies.iff_subst_self s |>.not.mpr hx;
-  exact h (λ w a => Satisfies ⟨F, V⟩ w (atom a⟦s⟧)) x;
+  exact h (λ a w => Satisfies ⟨F, V⟩ w (atom a⟦s⟧)) x;
 
 /-- For **modal** formula `φ`, Veltman frame `F`. `F ⊧ φ` if and only if `F.toKripkeFrame ⊧ φ` -/
 lemma kripkeLift {φ : Modal.Formula _} : F ⊧ ↑φ ↔ F.toKripkeFrame ⊧ φ := by

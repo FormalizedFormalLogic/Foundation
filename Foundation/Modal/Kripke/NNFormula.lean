@@ -14,8 +14,8 @@ variable {φ ψ : NNFormula ℕ}
 namespace NNFormula.Kripke
 
 def Satisfies (M : Kripke.Model) (x : M.World) : NNFormula ℕ → Prop
-  | atom a  =>  M x a
-  | natom a => ¬M x a
+  | atom a  =>  M a x
+  | natom a => ¬M a x
   | ⊤       => True
   | ⊥       => False
   | φ ⋎ ψ   => Satisfies M x φ ∨ Satisfies M x ψ
@@ -32,10 +32,10 @@ protected instance semantics : Semantics M (NNFormula ℕ) := ⟨λ x ↦ Satisf
 protected lemma iff_models : x ⊧ φ ↔ Satisfies M x φ := iff_of_eq rfl
 
 @[simp]
-protected lemma atom_def (a : ℕ) : x ⊧ (atom a) ↔ M x a := by simp [Satisfies.iff_models, Satisfies];
+protected lemma atom_def (a : ℕ) : x ⊧ (atom a) ↔ M a x := by simp [Satisfies.iff_models, Satisfies];
 
 @[simp]
-protected lemma natom_def (a : ℕ) : x ⊧ (natom a) ↔ ¬M x a := by simp [Satisfies.iff_models, Satisfies];
+protected lemma natom_def (a : ℕ) : x ⊧ (natom a) ↔ ¬M a x := by simp [Satisfies.iff_models, Satisfies];
 
 protected lemma top_def : x ⊧ ⊤ := by simp [Satisfies.iff_models, Satisfies];
 

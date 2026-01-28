@@ -44,7 +44,7 @@ instance : Modal.K4 ⪱ Modal.K4McK := by
     . exact axiomMcK!;
     . apply Sound.not_provable_of_countermodel (𝓜 := FrameClass.K4)
       apply Kripke.not_validOnFrameClass_of_exists_model_world;
-      use ⟨⟨Fin 1, λ x y => False⟩, λ w _ => False⟩, 0;
+      use ⟨⟨Fin 1, λ x y => False⟩, λ _ w => False⟩, 0;
       constructor;
       . simp only [Set.mem_setOf_eq]; refine { trans := by simp; }
       . simp [Semantics.Models, Satisfies];
