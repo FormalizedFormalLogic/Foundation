@@ -63,13 +63,14 @@ infix:68 " ⨁ " => HasPlus.plus
 class HasBang (α : Type*) where
   bang : α → α
 
-/-- Note that this notation "ǃ" (U+01C3) is distinct from "!" (U+0021) -/
-prefix:75 "ǃ" => HasBang.bang
+/-- Note that this notation "！" (U+FF01) is distinct from "!" (U+0021) -/
+prefix:75 "！" => HasBang.bang
 
 class HasQuest (α : Type*) where
   quest : α → α
 
-prefix:75 "?" => HasQuest.quest
+/-- Notice that this notation "？" (U+FF1F) is distinct from "?" (U+003F) -/
+prefix:75 "？" => HasQuest.quest
 
 class HasLolli (α : Type*) where
   lolli : α → α → α
