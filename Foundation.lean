@@ -1,8 +1,6 @@
 module
 
 -- public import Foundation.Modal.Kripke.Logic.KD4Point3Z
-public import Foundation.Semantics.CoherenceSpace.Basic
-public import Foundation.Semantics.CoherenceSpace.StableFunction
 public import Foundation.FirstOrder.Arithmetic.Basic
 public import Foundation.FirstOrder.Arithmetic.Basic.Hierarchy
 public import Foundation.FirstOrder.Arithmetic.Basic.Misc
@@ -108,7 +106,6 @@ public import Foundation.FirstOrder.Kripke.Intuitionistic
 public import Foundation.FirstOrder.Kripke.WeakForcing
 public import Foundation.FirstOrder.NegationTranslation.GoedelGentzen
 public import Foundation.FirstOrder.NegationTranslation.Girard
-public import Foundation.FirstOrder.NotationClass
 public import Foundation.FirstOrder.Order.Le
 public import Foundation.FirstOrder.SetTheory.Basic
 public import Foundation.FirstOrder.SetTheory.Basic.Axioms
@@ -189,6 +186,7 @@ public import Foundation.InterpretabilityLogic.Veltman.Logic.ILMinus_J2Plus_J5
 public import Foundation.InterpretabilityLogic.Veltman.Logic.ILMinus_J4Plus
 public import Foundation.InterpretabilityLogic.Veltman.Logic.ILMinus_J4Plus_J5
 public import Foundation.InterpretabilityLogic.Veltman.Logic.ILMinus_J5
+public import Foundation.LinearLogic.MLL
 public import Foundation.Logic.Calculus
 public import Foundation.Logic.Decidability
 public import Foundation.Logic.Disjunctive
@@ -518,3 +516,5 @@ public import Foundation.ProvabilityLogic.Realization
 public import Foundation.ProvabilityLogic.S.Completeness
 public import Foundation.ProvabilityLogic.S.Soundness
 public import Foundation.ProvabilityLogic.SolovaySentences
+public import Foundation.Semantics.CoherenceSpace.Basic
+public import Foundation.Semantics.CoherenceSpace.StableFunction
