@@ -1,0 +1,74 @@
+# This is a config file for bibtool, see http://www.gerd-neugebauer.de/software/TeX/BibTool/en/
+# Borrow from https://github.com/oscar-system/Oscar.jl/blob/master/.bibtoolrsc
+
+sort = on
+sort.order{* =
+    bibkey
+    author
+    title
+    editor
+    booktitle
+    mrnumber
+    zbl
+    journal
+    fjournal
+    series
+    volume
+    number
+    note
+    howpublished
+    address
+    organization
+    publisher
+    edition
+    pages
+    year
+    month
+    doi
+    url
+}
+sort.cased = off
+
+delete.field = { keywords }
+delete.field = { abstract }
+delete.field = { file }
+
+print.align.key = 0
+print.line.length = 120
+print.use.tab = off
+
+preserve.key.case = on
+
+# Unify key format
+key.base = upper
+key.number.separator = {}
+key.format =
+{
+  %s(bibkey)
+ #
+    %.1#n(author)
+    { %1.3n(author) }
+    { %2d(year) }
+ #
+    { %+8.1n(author) }
+    { %2d(year) }
+}
+
+# Remove empty fields
+rewrite.rule { "^{ *}$" }
+
+# Normalize the month field to e.g. `jan` (without braces), see https://github.com/ge-ne/bibtool/issues/66#issuecomment-577283871
+rewrite.case.sensitive = Off
+rewrite.rule { month "{\([^#]*\)}" "\1"}
+rewrite.rule { month "^ *\(1\|Jan.*\|jan.+\) *$" "jan" }
+rewrite.rule { month "^ *\(2\|Feb.*\|feb.+\) *$" "feb" }
+rewrite.rule { month "^ *\(3\|Mar.*\|mar.+\) *$" "mar" }
+rewrite.rule { month "^ *\(4\|Apr.*\|apr.+\) *$" "apr" }
+rewrite.rule { month "^ *\(5\|May.*\|may.+\) *$" "may" }
+rewrite.rule { month "^ *\(6\|Jun.*\|jun.+\) *$" "jun" }
+rewrite.rule { month "^ *\(7\|Jul.*\|jul.+\) *$" "jul" }
+rewrite.rule { month "^ *\(8\|Aug.*\|aug.+\) *$" "aug" }
+rewrite.rule { month "^ *\(9\|Sep.*\|sep.+\) *$" "sep" }
+rewrite.rule { month "^ *\(10\|Oct.*\|oct.+\) *$" "oct" }
+rewrite.rule { month "^ *\(11\|Nov.*\|nov.+\) *$" "nov" }
+rewrite.rule { month "^ *\(12\|Dec.*\|dec.+\) *$" "dec" }
