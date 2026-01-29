@@ -5,8 +5,7 @@ public import Foundation.Semantics.CoherenceSpace.Basic
 /-!
 # Stable functions
 
-reference:
-- Jean-Yves Girard, Proofs and Types
+Reference: Jean-Yves Girard, Paul Taylor; Yves Lafont, Proofs and Types [G.T.L89]
 -/
 
 @[expose] public section

@@ -5,9 +5,7 @@ public import Foundation.Vorspiel
 /-!
 # Coherence space for denotational semantics of logics
 
-reference:
-- Jean-Yves Girard, Proofs and Types
-- nLab, coherence space, https://ncatlab.org/nlab/show/coherence+space
+Reference: Jean-Yves Girard, Paul Taylor; Yves Lafont, Proofs and Types [G.T.L89]
 -/
 
 @[expose] public section
