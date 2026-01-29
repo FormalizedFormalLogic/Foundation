@@ -5,7 +5,7 @@ public import Foundation.FirstOrder.Intuitionistic.Deduction
 /-!
 # Girard's negation translation
 
-reference: Girard. "A new constructive logic: classic logic"
+reference: Girard. "A new constructive logic: classic logic" [Gir91]
 -/
 
 namespace LO.FirstOrder.Semiformula
