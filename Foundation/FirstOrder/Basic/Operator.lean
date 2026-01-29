@@ -1,7 +1,6 @@
 module
 
 public import Foundation.FirstOrder.Basic.Semantics.Semantics
-public import Foundation.FirstOrder.NotationClass
 
 @[expose] public section
 
@@ -654,7 +653,7 @@ variable {L}
     Structure.Mul.mul (L := L) (v 0) (v 1)
 
 @[simp] lemma exp_eq_of_lang [L.Exp] [Exp M] [Structure.Exp L M] {v : Fin 1 → M} :
-    Structure.func (L := L) Language.Exp.exp v = _root_.Exp.exp (v 0) := by
+    Structure.func (L := L) Language.Exp.exp v = LO.Exp.exp (v 0) := by
   simpa [val_func, ←Matrix.fun_eq_vec_one] using
     Structure.Exp.exp (L := L) (v 0)
 
