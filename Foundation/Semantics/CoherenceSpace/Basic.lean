@@ -5,7 +5,7 @@ public import Foundation.Vorspiel
 /-!
 # Coherence space for denotational semantics of logics
 
-Reference: Jean-Yves Girard, Paul Taylor; Yves Lafont, Proofs and Types [G.T.L89]
+Reference: Jean-Yves Girard, Paul Taylor, Yves Lafont, Proofs and Types [G.T.L89]
 -/
 
 @[expose] public section
