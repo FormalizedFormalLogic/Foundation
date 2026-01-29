@@ -11,7 +11,7 @@ namespace LO
 class ModalAlgebra (α : Type*) extends BooleanAlgebra α, Box α, Dia α where
   box_top : □(⊤ : α) = ⊤
   box_meet (a b : α) : □(a ⊓ b) = □a ⊓ □b
-  dual_dia {a : α} : (◇a) = (□aᶜ)ᶜ
+  dual_dia {a : α} : (◇a) = ￢□(￢a)
 
 namespace ModalAlgebra
 
@@ -20,10 +20,10 @@ variable {a b : α}
 
 attribute [grind =] dual_dia
 
-@[grind =] lemma dual_box {a : α} : □a = (◇aᶜ)ᶜ := by simp [dual_dia]
+@[grind =] lemma dual_box {a : α} : □a = ￢◇(￢a) := by simp [dual_dia]
 
-@[grind =] lemma compl_box : (□a)ᶜ = ◇aᶜ := by simp [dual_box];
-@[grind =] lemma compl_dia : (◇a)ᶜ = □aᶜ := by simp [dual_dia];
+@[grind =] lemma compl_box : ￢(□a) = ◇(￢a) := by simp [dual_box];
+@[grind =] lemma compl_dia : ￢(◇a) = □(￢a) := by simp [dual_dia];
 
 attribute [simp, grind .] box_top
 @[simp, grind .] lemma dia_bot : ◇(⊥ : α) = ⊥ := by simp [dual_dia];
@@ -48,7 +48,7 @@ lemma dia_monotone (h : a ≤ b) : ◇a ≤ ◇b := calc
 
 @[grind <-]
 lemma box_monotone (h : a ≤ b) : □a ≤ □b := by
-  simpa [dual_box] using dia_monotone (show bᶜ ≤ aᶜ by simpa);
+  simpa [dual_box] using dia_monotone (show ￢b ≤ ￢a by simpa);
 
 end ModalAlgebra
 
@@ -143,7 +143,7 @@ variable [ModalAlgebra H] {V : α → H} {φ ψ : Formula α}
 @[simp, grind =] lemma eq_value_imp : (V ⊩ φ ➝ ψ) = (V ⊩ φ) ⇨ (V ⊩ ψ) := by simp [value];
 @[simp, grind =] lemma eq_value_and : (V ⊩ φ ⋏ ψ) = (V ⊩ φ) ⊓ (V ⊩ ψ) := by simp [value];
 @[simp, grind =] lemma eq_value_or  : (V ⊩ φ ⋎ ψ) = (V ⊩ φ) ⊔ (V ⊩ ψ) := by simp [value, himp_eq, sup_comm];
-@[simp, grind =] lemma eq_value_neg : (V ⊩ ∼φ) = (V ⊩ φ)ᶜ := by simp [value];
+@[simp, grind =] lemma eq_value_neg : (V ⊩ ∼φ) = ￢(V ⊩ φ) := by simp [value];
 @[simp, grind =] lemma eq_value_box : (V ⊩ □φ) = □(V ⊩ φ) := by simp [value];
 @[simp, grind =] lemma eq_value_dia : (V ⊩ ◇φ) = ◇(V ⊩ φ) := by simp [ModalAlgebra.dual_dia, value];
 
