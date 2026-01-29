@@ -5,7 +5,7 @@ public import Foundation.FirstOrder.SetTheory.Basic
 /-!
 # Zermelo set theory
 
-reference: Ralf Schindler, "Set Theory, Exploring Independence and Truth"
+reference: Ralf Schindler, "Set Theory, Exploring Independence and Truth" [Sch14]
 -/
 
 @[expose] public section

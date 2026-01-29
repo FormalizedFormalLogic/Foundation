@@ -108,6 +108,22 @@ jobs:
         with:
           path: pages/_output
 
+  check-references:
+    name: Check references.bib format
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - name: Install bibtool
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y bibtool
+      - name: Format references.bib
+        run: |
+          bibtool -r .bibtoolrsc -i references.bib -o references.bib.formatted
+      - name: Check if formatted correctly
+        run: |
+          diff -u references.bib references.bib.formatted || (echo "references.bib is not formatted" && exit 1)
+
   deploy:
     runs-on: ubuntu-latest
     needs: build
