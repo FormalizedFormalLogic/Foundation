@@ -96,6 +96,8 @@ scoped prefix:45 "⊢ " => Derivable
 
 namespace Derivation
 
+def cast (d : ⊢! Γ) (e : Γ = Δ) : ⊢! Δ := e ▸ d
+
 def rotate (d : ⊢! φ :: Γ) : ⊢! Γ ++ [φ] :=
   d.exchange (by grind only [List.perm_comm, List.perm_append_singleton])
 
@@ -108,6 +110,19 @@ def em : (φ : Formula) → ⊢! [φ, ∼φ]
   |    φ ⅋ ψ => ((em φ).rotate.tensor (em ψ).rotate).rotate.par
 
 end Derivation
+
+namespace Proof
+
+open Derivation
+
+def identity : 𝐌𝐋𝐋 ⊢! φ ⊸ φ := (em φ).rotate.par
+
+def modusPonens (d₁ : 𝐌𝐋𝐋 ⊢! φ ⊸ ψ) (d₂ : 𝐌𝐋𝐋 ⊢! φ) : 𝐌𝐋𝐋 ⊢! ψ :=
+  have d₁ : ⊢! [∼(φ ⨂ ∼ψ)] := d₁.cast <| by simp [Formula.lolli_def]
+  have b : ⊢! [φ ⨂ ∼ψ, ∼φ, ψ] := (em φ).tensor (em ψ).rotate
+  cut d₂ (cut b d₁)
+
+end Proof
 
 example : 𝐌𝐋𝐋 ⊢ φ ⅋ ∼φ := ⟨Derivation.par (Derivation.em _)⟩
 
