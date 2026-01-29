@@ -1,7 +1,6 @@
 module
 
 public import Foundation.Propositional.Formula.Basic
-public import Foundation.Propositional.Entailment.Cl.Basic
 public import Foundation.Propositional.Entailment.KrieselPutnam
 public import Foundation.Propositional.Entailment.Scott
 public import Foundation.Propositional.Entailment.Corsi

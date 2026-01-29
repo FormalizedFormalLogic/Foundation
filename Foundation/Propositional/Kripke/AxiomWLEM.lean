@@ -1,6 +1,5 @@
 module
 
-public import Foundation.Propositional.Entailment.KC
 public import Foundation.Propositional.Kripke.Completeness
 
 @[expose] public section
@@ -48,13 +47,13 @@ lemma validate_axiomWLEM_of_isPiecewiseStronglyConvergent [F.IsPiecewiseStrongly
 
 lemma isPiecewiseStronglyConvergent_of_validate_axiomWLEM (h : F ⊧ (Axioms.WLEM (.atom 0))) : F.IsPiecewiseStronglyConvergent := ⟨by
   rintro x y z Rxy Ryz;
-  let V : Kripke.Valuation F := ⟨λ {v a} => y ≺ v, by
+  let V : Kripke.Valuation F := ⟨λ {a v} => y ≺ v, by
     intro w v Rwv a Ryw;
     apply F.trans Ryw Rwv;
   ⟩;
   replace h : F ⊧ (Axioms.WLEM (.atom 0)) := by simpa using h;
   have : ¬Satisfies ⟨F, V⟩ x (∼(.atom 0)) := by
-    suffices ∃ y, x ≺ y ∧ V y 0 by simpa [Satisfies];
+    suffices ∃ y, x ≺ y ∧ V 0 y by simpa [Satisfies];
     use y;
     constructor;
     . exact Rxy;

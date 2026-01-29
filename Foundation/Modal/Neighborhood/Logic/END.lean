@@ -1,6 +1,5 @@
 module
 
-public import Foundation.Modal.Neighborhood.Hilbert
 public import Foundation.Modal.Neighborhood.Logic.Incomparability.ED_EP
 
 @[expose] public section

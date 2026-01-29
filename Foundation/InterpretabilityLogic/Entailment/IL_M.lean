@@ -2,7 +2,6 @@ module
 
 public import Foundation.InterpretabilityLogic.Entailment.IL_Rstar
 public import Foundation.InterpretabilityLogic.Entailment.IL_R_W
-public import Foundation.InterpretabilityLogic.Entailment.ILMinus_M
 
 @[expose] public section
 

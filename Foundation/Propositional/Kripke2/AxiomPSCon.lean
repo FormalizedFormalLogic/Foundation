@@ -1,7 +1,6 @@
 module
 
 public import Foundation.Propositional.Kripke2.Basic
-public import Foundation.Propositional.Entailment.LC
 
 @[expose] public section
 
@@ -45,7 +44,7 @@ lemma valid_axiomPSCon_of_IsPiecewiseStronglyConnected [F.IsPiecewiseStronglyCon
 lemma isPiecewiseStronglyConnected_of_valid_axiomPSCon (h : F ⊧ Axioms.PSCon #0 #1 #2 #3) : F.IsPiecewiseStronglyConnected := by
   constructor;
   intro x y z Rxy Rxz;
-  rcases @h (λ w a => match a with | 0 => z = w | 1 => w ≺ y | 2 => y = w | 3 => w ≺ z | _ => False) x with h | h;
+  rcases @h (λ a w => match a with | 0 => z = w | 1 => w ≺ y | 2 => y = w | 3 => w ≺ z | _ => False) x with h | h;
   . left;
     apply h Rxy;
     constructor;

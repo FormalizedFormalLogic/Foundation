@@ -3,7 +3,6 @@ module
 public import Foundation.Propositional.Kripke.Completeness
 public import Foundation.Propositional.Kripke.Hilbert
 public import Foundation.Propositional.Kripke.Filtration
-public import Foundation.Logic.Disjunctive
 
 @[expose] public section
 
@@ -83,10 +82,10 @@ abbrev counterexampleDPFrame (F₁ : Kripke.Frame) (F₂ : Kripke.Frame) (w₁ :
 abbrev counterexampleDPModel (M₁ : Kripke.Model) (M₂ : Kripke.Model) (w₁ : M₁.World) (w₂ : M₂.World) : Model where
   toFrame := counterexampleDPFrame M₁.toFrame M₂.toFrame w₁ w₂;
   Val := ⟨
-    λ w a =>
+    λ a w =>
       match w with
-      | Sum.inr $ Sum.inl w => M₁ w a
-      | Sum.inr $ Sum.inr w => M₂ w a
+      | Sum.inr $ Sum.inl w => M₁ a w
+      | Sum.inr $ Sum.inr w => M₂ a w
       | _ => False,
     by
       simp only [counterexampleDPFrame, Sum.forall, imp_false, not_false_eq_true, implies_true, imp_self, IsEmpty.forall_iff, and_self, and_true, true_and];

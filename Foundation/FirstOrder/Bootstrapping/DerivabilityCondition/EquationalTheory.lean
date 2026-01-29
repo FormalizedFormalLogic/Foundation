@@ -1,7 +1,6 @@
 module
 
 public import Foundation.Meta.ClProver
-public import Foundation.FirstOrder.Arithmetic.Induction
 public import Foundation.FirstOrder.Bootstrapping.DerivabilityCondition.D1
 
 @[expose] public section

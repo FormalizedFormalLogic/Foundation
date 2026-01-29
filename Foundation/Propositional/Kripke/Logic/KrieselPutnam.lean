@@ -55,7 +55,7 @@ instance : Propositional.Int ⪱ Propositional.KrieselPutnam := by
           trans := by omega;
           antisymm := by omega;
         }
-        Val := ⟨λ w a =>
+        Val := ⟨λ a w =>
           match a with
           | 0 => w = 2
           | 1 => w = 3

@@ -122,15 +122,16 @@ open ProvabilityAbstraction
 
 variable {L : Language} [L.Encodable] [L.LORDefinable]
 
-variable {T : Theory L} [T.Δ₁] [Entailment.Consistent T]
+variable {T : Theory L} [T.Δ₁]
 
 variable (T)
 
 noncomputable abbrev _root_.LO.FirstOrder.Theory.rosserProvability : Provability 𝗜𝚺₁ T where
   prov := T.rosserProvable
 
-instance : T.rosserProvability.HBL1 := ⟨rosserProvable_D1⟩
-instance : T.rosserProvability.Rosser := ⟨rosserProvable_rosser⟩
+instance [Entailment.Consistent T] : T.rosserProvability.HBL1 := ⟨rosserProvable_D1⟩
+
+instance [Entailment.Consistent T] : T.rosserProvability.Rosser := ⟨rosserProvable_rosser⟩
 
 lemma rosserProvability_def (σ : Sentence L) : T.rosserProvability σ = T.rosserPred σ := rfl
 

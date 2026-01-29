@@ -53,14 +53,14 @@ end
 abbrev FrameClass := Set (Frame)
 
 structure Valuation (F : Frame) where
-  Val : F.World → ℕ → Prop
-  hereditary : ∀ {w₁ w₂ : F.World}, (w₁ ≺ w₂) → ∀ {a}, (Val w₁ a) → (Val w₂ a)
-instance {F : Frame} : CoeFun (Valuation F) (λ _ => F.World → ℕ → Prop) := ⟨Valuation.Val⟩
+  Val : ℕ → F.World → Prop
+  hereditary : ∀ {w₁ w₂ : F.World}, (w₁ ≺ w₂) → ∀ {a}, (Val a w₁) → (Val a w₂)
+instance {F : Frame} : CoeFun (Valuation F) (λ _ => ℕ → F.World → Prop) := ⟨Valuation.Val⟩
 
 structure Model extends Frame where
   Val : Valuation toFrame
 instance : CoeSort (Model) (Type) := ⟨λ M => M.World⟩
-instance : CoeFun (Model) (λ M => M.World → ℕ → Prop) := ⟨fun m => m.Val⟩
+instance : CoeFun (Model) (λ M => ℕ → M.World → Prop) := ⟨fun m => m.Val⟩
 
 end Kripke
 
@@ -71,7 +71,7 @@ open Formula
 namespace Formula.Kripke
 
 def Satisfies (M : Kripke.Model) (w : M.World) : Formula ℕ → Prop
-  | atom a => M w a
+  | atom a => M a w
   | ⊥      => False
   | φ ⋏ ψ  => Satisfies M w φ ∧ Satisfies M w ψ
   | φ ⋎ ψ  => Satisfies M w φ ∨ Satisfies M w ψ
@@ -85,7 +85,7 @@ variable {M : Kripke.Model} {w w' : M.World} {a : ℕ} {φ ψ χ : Formula ℕ}
 
 @[simp] protected lemma iff_models : w ⊧ φ ↔ Formula.Kripke.Satisfies M w φ := iff_of_eq rfl
 
-@[simp] lemma atom_def : w ⊧ atom a ↔ M w a := by simp [Satisfies];
+@[simp] lemma atom_def : w ⊧ atom a ↔ M a w := by simp [Satisfies];
 
 @[simp] lemma top_def  : w ⊧ ⊤ ↔ True := by simp [Satisfies];
 
@@ -131,7 +131,7 @@ lemma negEquiv : w ⊧ ∼φ ↔ w ⊧ φ ➝ ⊥ := by simp_all [Satisfies];
 
 lemma iff_subst_self {F : Frame} {V : Valuation F} {x : F.World} (s) :
   letI U : Kripke.Valuation F := ⟨
-    λ w a => Satisfies ⟨F, V⟩ w ((.atom a)⟦s⟧),
+    λ a w => Satisfies ⟨F, V⟩ w ((.atom a)⟦s⟧),
     fun {_ _} Rwv {_} => formula_hereditary Rwv
   ⟩;
   Satisfies ⟨F, U⟩ x φ ↔ Satisfies ⟨F, V⟩ x (φ⟦s⟧) := by

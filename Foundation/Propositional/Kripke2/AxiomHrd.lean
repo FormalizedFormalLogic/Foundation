@@ -16,7 +16,7 @@ variable {M : Kripke2.Model} {φ ψ χ : Formula ℕ}
 namespace Model
 
 protected class IsHereditary (M : Kripke2.Model) where
-  hereditary : ∀ {a x y}, M x a → x ≺ y → M y a
+  hereditary : ∀ {a x y}, M a x → x ≺ y → M a y
 export IsHereditary (hereditary)
 
 end Model

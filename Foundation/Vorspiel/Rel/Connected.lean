@@ -30,9 +30,9 @@ def PiecewiseStronglyConnected (R : Rel α α) := ∀ ⦃x y z⦄, R x y → R x
 class IsPiecewiseStronglyConnected (R : Rel α α) where
   ps_connected : PiecewiseStronglyConnected R
 
-instance [IsTotal _ R] : IsPiecewiseStronglyConnected R := ⟨fun ⦃_ y z⦄ _ _ ↦ IsTotal.total y z⟩
+instance [Std.Total R] : IsPiecewiseStronglyConnected R := ⟨fun ⦃_ y z⦄ _ _ ↦ Std.Total.total y z⟩
 
-instance [IsPiecewiseConnected R] [IsRefl _ R] : IsPiecewiseStronglyConnected R := ⟨by
+instance [IsPiecewiseConnected R] [Std.Refl R] : IsPiecewiseStronglyConnected R := ⟨by
   intro x y z Rxy Rxz;
   rcases IsPiecewiseConnected.p_connected Rxy Rxz with (Ryz | rfl | Rzy);
   . tauto;
@@ -45,16 +45,16 @@ instance [IsPiecewiseStronglyConnected R] : IsPiecewiseConnected R := ⟨by
   rcases IsPiecewiseStronglyConnected.ps_connected Rxy Rxz <;> tauto;
 ⟩
 
-instance [IsRefl _ R] [IsPiecewiseStronglyConnected R] : IsPiecewiseStronglyConvergent R := ⟨by
+instance [Std.Refl R] [IsPiecewiseStronglyConnected R] : IsPiecewiseStronglyConvergent R := ⟨by
   intro x y z Rxy Rxz;
   rcases IsPiecewiseStronglyConnected.ps_connected Rxy Rxz with (Ryz | Rzy);
   . use z;
     constructor;
     . assumption;
-    . apply IsRefl.refl;
+    . apply Std.Refl.refl;
   . use y;
     constructor;
-    . apply IsRefl.refl;
+    . apply Std.Refl.refl;
     . assumption;
 ⟩
 

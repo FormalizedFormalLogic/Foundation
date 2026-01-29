@@ -1,7 +1,5 @@
 module
 
-public import Foundation.Modal.Axioms
-public import Foundation.Modal.Formula.Basic
 public import Foundation.Modal.Logic.Basic
 
 @[expose] public section
@@ -58,7 +56,7 @@ def blackpoint : Frame := ⟨Unit, λ _ _ => False⟩
 instance : Finite blackpoint.World := by
   dsimp [blackpoint];
   infer_instance;
-instance : IsIrrefl _ blackpoint.Rel := by tauto
+instance : Std.Irrefl blackpoint.Rel := by tauto
 instance : IsTrans _ blackpoint.Rel := ⟨by tauto⟩
 instance : IsStrictOrder _ blackpoint.Rel where
 -- instance : IsConnected _ blackpoint.Rel := ⟨by tauto⟩
@@ -67,19 +65,19 @@ end
 
 abbrev FrameClass := Set (Frame)
 
-abbrev Valuation (F : Frame) := F.World → ℕ → Prop
+abbrev Valuation (F : Frame) := ℕ → F.World → Prop
 
 structure Model extends Frame where
   Val : Valuation toFrame
 instance : CoeSort Model Type := ⟨λ M => M.toFrame.World⟩
-instance : CoeFun (Model) (λ M => M.World → ℕ → Prop) := ⟨fun m => m.Val⟩
+instance : CoeFun (Model) (λ M => ℕ → M.World → Prop) := ⟨fun m => m.Val⟩
 
 end Kripke
 
 namespace Formula.Kripke
 
 def Satisfies (M : Kripke.Model) (x : M.World) : Formula ℕ → Prop
-  | atom a  => M x a
+  | atom a  => M a x
   | ⊥  => False
   | φ ➝ ψ => (Satisfies M x φ) ➝ (Satisfies M x ψ)
   | □φ   => ∀ y, x ≺ y → (Satisfies M y φ)
@@ -92,7 +90,7 @@ variable {M : Kripke.Model} {x : M.World} {φ ψ : Formula ℕ}
 
 @[simp] protected lemma iff_models : x ⊧ φ ↔ Kripke.Satisfies M x φ := iff_of_eq rfl
 
-@[simp] lemma atom_def : x ⊧ atom a ↔ M x a := by simp [Satisfies];
+@[simp] lemma atom_def : x ⊧ atom a ↔ M a x := by simp [Satisfies];
 
 protected lemma bot_def : ¬x ⊧ ⊥ := by simp [Satisfies];
 
@@ -343,7 +341,7 @@ lemma boxItr_dual : x ⊧ □^[n]φ ↔ x ⊧ ∼◇^[n](∼φ) := by
 lemma not_imp : ¬(x ⊧ φ ➝ ψ) ↔ x ⊧ φ ⋏ ∼ψ := by simp [Semantics.NotModels];
 
 lemma iff_subst_self {x : F.World} (s : Substitution ℕ) :
-  letI U : Kripke.Valuation F := λ w a => Satisfies ⟨F, V⟩ w ((atom a)⟦s⟧);
+  letI U : Kripke.Valuation F := λ a w => Satisfies ⟨F, V⟩ w ((atom a)⟦s⟧);
   Satisfies ⟨F, U⟩ x φ ↔ Satisfies ⟨F, V⟩ x (φ⟦s⟧) := by
   induction φ generalizing x with
   | hatom a => simp [Satisfies];
@@ -485,7 +483,7 @@ protected lemma subst (h : F ⊧ φ) : F ⊧ φ⟦s⟧ := by
   replace hC := iff_not_exists_valuation_world.mp hC;
   obtain ⟨V, ⟨x, hx⟩⟩ := hC;
   apply Satisfies.iff_subst_self s |>.not.mpr hx;
-  exact h (λ w a => Satisfies ⟨F, V⟩ w (atom a⟦s⟧)) x;
+  exact h (λ a w => Satisfies ⟨F, V⟩ w (atom a⟦s⟧)) x;
 
 protected lemma implyK : F ⊧ (Axioms.ImplyK φ ψ) := by intro V; exact ValidOnModel.implyK (M := ⟨F, V⟩);
 

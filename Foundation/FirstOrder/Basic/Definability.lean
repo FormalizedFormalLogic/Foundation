@@ -1,6 +1,5 @@
 module
 public import Foundation.FirstOrder.Basic.Semantics.Elementary
-public import Foundation.FirstOrder.Basic.Operator
 public import Foundation.FirstOrder.Basic.BinderNotation
 public import Foundation.FirstOrder.Basic.AesopInit
 @[expose] public section
@@ -200,30 +199,30 @@ lemma of_iff {P Q : (Fin k → M) → Prop} (H : L.Definable Q) (h : ∀ x, P x 
   · exact ⟨⊤, by intro _; simp [hp]⟩
   · exact ⟨⊥, by intro _; simp [hp]⟩
 
-@[grind] lemma and {R S : (Fin k → M) → Prop} (hR : L.Definable R) (hS : L.Definable S) :
+@[grind .] lemma and {R S : (Fin k → M) → Prop} (hR : L.Definable R) (hS : L.Definable S) :
     L.Definable fun v : Fin k → M ↦ R v ∧ S v := by
   rcases hR with ⟨φ, hR⟩
   rcases hS with ⟨ψ, hS⟩
   exact ⟨φ ⋏ ψ, by intro _; simp [hR.iff, hS.iff]⟩
 
-@[grind] lemma or {R S : (Fin k → M) → Prop} (hR : L.Definable R) (hS : L.Definable S) :
+@[grind .] lemma or {R S : (Fin k → M) → Prop} (hR : L.Definable R) (hS : L.Definable S) :
     L.Definable fun v : Fin k → M ↦ R v ∨ S v := by
   rcases hR with ⟨φ, hR⟩
   rcases hS with ⟨ψ, hS⟩
   exact ⟨φ ⋎ ψ, by intro _; simp [hR.iff, hS.iff]⟩
 
-@[grind] lemma imp {R S : (Fin k → M) → Prop} (hR : L.Definable R) (hS : L.Definable S) :
+@[grind .] lemma imp {R S : (Fin k → M) → Prop} (hR : L.Definable R) (hS : L.Definable S) :
     L.Definable fun v : Fin k → M ↦ R v → S v := by
   rcases hR with ⟨φ, hR⟩
   rcases hS with ⟨ψ, hS⟩
   exact ⟨φ ➝ ψ, by intro _; simp [hR.iff, hS.iff]⟩
 
-@[grind] lemma not {R : (Fin k → M) → Prop} (hR : L.Definable R) :
+@[grind .] lemma not {R : (Fin k → M) → Prop} (hR : L.Definable R) :
     L.Definable fun v : Fin k → M ↦ ¬R v := by
   rcases hR with ⟨φ, hR⟩
   exact ⟨∼φ, by intro _; simp [hR.iff]⟩
 
-@[grind] lemma biconditional {R S : (Fin k → M) → Prop} (hR : L.Definable R) (hS : L.Definable S) :
+@[grind .] lemma biconditional {R S : (Fin k → M) → Prop} (hR : L.Definable R) (hS : L.Definable S) :
     L.Definable fun v : Fin k → M ↦ R v ↔ S v := by
   rcases hR with ⟨φ, hR⟩
   rcases hS with ⟨ψ, hS⟩

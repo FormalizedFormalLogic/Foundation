@@ -1,9 +1,7 @@
 module
 
-public import Foundation.Modal.Entailment.GL
 public import Foundation.Modal.ComplementClosedConsistentFinset
 public import Foundation.Modal.Kripke.Logic.GL.Soundness
-public import Foundation.Modal.Kripke.Hilbert
 public import Foundation.Modal.Kripke.Logic.K4
 
 @[expose] public section
@@ -50,7 +48,7 @@ end miniCanonicalFrame
 
 abbrev miniCanonicalModel (φ : Formula ℕ) : Kripke.Model where
   toFrame := miniCanonicalFrame φ
-  Val X a := (atom a) ∈ X
+  Val a X := (atom a) ∈ X
 
 
 lemma truthlemma_lemma1

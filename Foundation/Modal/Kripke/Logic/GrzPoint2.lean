@@ -3,9 +3,6 @@ module
 public import Foundation.Modal.Kripke.Logic.Grz.Completeness
 public import Foundation.Modal.Kripke.Logic.S4Point2McK
 public import Mathlib.Data.Finite.Sum
-public import Mathlib.Data.Set.Finite.Basic
-public import Mathlib.Data.Fintype.Pigeonhole
-public import Lean.Meta.Tactic.Simp.BuiltinSimprocs.Fin
 
 @[expose] public section
 
@@ -151,10 +148,10 @@ instance : Complete Modal.GrzPoint2 FrameClass.finite_GrzPoint2 := ⟨by
       | _, (Sum.inr _) => True
       | (Sum.inl x), (Sum.inl y) => RM.Rel x y
       | _, _ => False
-    Val x a :=
+    Val a x :=
       match x with
-      | Sum.inl x => RM.Val x a
-      | _ => ∀ y ∈ RM.toFrame.terminals, RM.Val y a
+      | Sum.inl x => RM.Val a x
+      | _ => ∀ y ∈ RM.toFrame.terminals, RM.Val a y
   };
   apply not_validOnFrameClass_of_exists_model_world;
   use M', (Sum.inl r');
@@ -185,7 +182,7 @@ instance : Complete Modal.GrzPoint2 FrameClass.finite_GrzPoint2 := ⟨by
         rintro x y z Rxy Ryz;
         use (Sum.inr ());
     }
-  . have H₁ : ∀ a ∈ φ.atoms, ∀ t ∈ RM.toFrame.terminals, ∀ t' ∈ RM.toFrame.terminals, RM t a → RM t' a := by
+  . have H₁ : ∀ a ∈ φ.atoms, ∀ t ∈ RM.toFrame.terminals, ∀ t' ∈ RM.toFrame.terminals, RM a t → RM a t' := by
       intro a ha t t_terminal t' t'_terminal hy;
       by_contra hy';
       have : ¬t' ⊧ (◇atom a) := Kripke.Satisfies.dia_at_terminal t'_terminal hy';
@@ -285,7 +282,7 @@ instance : Modal.Grz ⪱ Modal.GrzPoint2 := by
       apply Kripke.not_validOnFrameClass_of_exists_model_world;
       let M : Model := ⟨
         ⟨Fin 3, λ x y => x = 0 ∨ x = y⟩,
-        λ x a => x = 1
+        λ a x => x = 1
       ⟩;
       use M, 0;
       constructor;
@@ -325,7 +322,7 @@ instance : Modal.S4Point2McK ⪱ Modal.GrzPoint2 := by
     . simp;
     . apply Sound.not_provable_of_countermodel (𝓜 := Kripke.FrameClass.S4Point2McK);
       apply Kripke.not_validOnFrameClass_of_exists_model_world;
-      use ⟨⟨Fin 3, λ x y => y = 2 ∨ x = 0 ∨ x = 1⟩, λ w _ => w = 1 ∨ w = 2⟩, 0;
+      use ⟨⟨Fin 3, λ x y => y = 2 ∨ x = 0 ∨ x = 1⟩, λ _ w => w = 1 ∨ w = 2⟩, 0;
       constructor;
       . apply Set.mem_setOf_eq.mpr;
         exact {

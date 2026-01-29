@@ -1,7 +1,5 @@
 module
 
-public import Foundation.Modal.Kripke.AxiomGeach
-public import Foundation.Modal.Kripke.Hilbert
 public import Foundation.Modal.Kripke.Logic.K45
 public import Foundation.Modal.Kripke.Logic.KB
 
@@ -57,7 +55,7 @@ instance : Modal.K45 ⪱ Modal.KB4 := by
     . simp;
     . apply Sound.not_provable_of_countermodel (𝓜 := FrameClass.K45);
       apply Kripke.not_validOnFrameClass_of_exists_model_world;
-      use ⟨⟨Fin 2, λ x y => y = 1⟩, λ w _ => w = 0⟩, 0;
+      use ⟨⟨Fin 2, λ x y => y = 1⟩, λ _ w => w = 0⟩, 0;
       constructor;
       . simp only [Fin.isValue, Set.mem_setOf_eq];
         refine { trans := by omega, reucl := by tauto };
@@ -72,7 +70,7 @@ instance : Modal.KB ⪱ Modal.KB4 := by
     . simp;
     . apply Sound.not_provable_of_countermodel (𝓜 := FrameClass.KB);
       apply Kripke.not_validOnFrameClass_of_exists_model_world;
-      use ⟨⟨Bool, λ x y => x != y⟩, λ w _ => w = true⟩, false;
+      use ⟨⟨Bool, λ x y => x != y⟩, λ _ w => w = true⟩, false;
       constructor;
       . simp only [bne_iff_ne, ne_eq, Set.mem_setOf_eq];
         refine { symm := by tauto };

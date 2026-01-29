@@ -1,7 +1,6 @@
 module
 
 public import Foundation.FirstOrder.Basic
-public import Foundation.Modal.Formula.NNFormula
 public import Foundation.Modal.Kripke.NNFormula
 
 @[expose] public section
@@ -82,10 +81,10 @@ instance {M : Model} : FirstOrder.Structure 𝓛𝓕 M.World where
   func := fun _ f => PEmpty.elim f
   rel := fun _ r =>
     match r with
-    | .pred p => fun v => M (v 0) p
+    | .pred p => fun v => M p (v 0)
     | .lt     => fun v => v 0 ≺ v 1
 
-@[simp] lemma forces_iff_val : (forces a).val ![x] ↔ M.Val x a:= by rfl
+@[simp] lemma forces_iff_val : (forces a).val ![x] ↔ M.Val a x:= by rfl
 
 @[simp] lemma lt_iff_rel : (@Operator.LT.lt 𝓛𝓕 _).val ![x, y] ↔ x ≺ y := by rfl
 

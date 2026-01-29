@@ -1,8 +1,6 @@
 module
 
-public import Foundation.Propositional.Kripke2.Basic
 public import Foundation.Propositional.Kripke2.AxiomSer
-public import Foundation.Propositional.Kripke2.FTheory
 
 @[expose] public section
 
@@ -46,7 +44,7 @@ lemma valid_axiomSym_of_isSymmetric [F.IsSymmetric] : F ⊧ Axioms.Sym φ ψ := 
 lemma isSymmetric_of_valid_axiomSym (h : F ⊧ Axioms.Sym #0 #1) : F.IsSymmetric := by
   constructor;
   intro x y Rxy;
-  rcases @h (λ w a => match a with | 0 => w = x | 1 => y ≺ w | _ => False) F.root x F.rooted (by tauto) with h | h;
+  rcases @h (λ a w => match a with | 0 => w = x | 1 => y ≺ w | _ => False) F.root x F.rooted (by tauto) with h | h;
   . assumption;
   . have := h Rxy;
     simp [Satisfies] at this;

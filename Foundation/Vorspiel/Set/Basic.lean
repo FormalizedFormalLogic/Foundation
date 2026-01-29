@@ -1,7 +1,5 @@
 module
 
-public import Mathlib.Data.Finset.Insert
-public import Mathlib.Data.Set.Insert
 public import Mathlib.Data.Set.Countable
 public import Mathlib.Tactic.TautoSet
 public import Mathlib.Data.Set.Finite.Range

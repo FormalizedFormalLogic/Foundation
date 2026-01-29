@@ -47,7 +47,7 @@ instance : Modal.K5 ⪱ Modal.K45 := by
     . simp;
     . apply Sound.not_provable_of_countermodel (𝓜 := FrameClass.K5);
       apply Kripke.not_validOnFrameClass_of_exists_model_world;
-      let M : Model := ⟨⟨Fin 3, λ x y => (x = 0 ∧ y = 1) ∨ (x ≠ 0 ∧ y ≠ 0)⟩, λ w _ => w = 1⟩;
+      let M : Model := ⟨⟨Fin 3, λ x y => (x = 0 ∧ y = 1) ∨ (x ≠ 0 ∧ y ≠ 0)⟩, λ _ w => w = 1⟩;
       use M, 0;
       constructor;
       . simp only [Set.mem_setOf_eq];
@@ -72,7 +72,7 @@ instance : Modal.K4Point3 ⪱ Modal.K45 := by
       apply Kripke.not_validOnFrameClass_of_exists_model_world;
       let M : Model := ⟨
         ⟨Fin 3, λ x y => x < y⟩,
-        λ w a => w = 2
+        λ a w => w = 2
       ⟩;
       use M, 0;
       constructor;

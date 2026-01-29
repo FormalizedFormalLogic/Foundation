@@ -1,8 +1,5 @@
 module
 
-public import Mathlib.Data.List.Nodup
-public import Mathlib.Data.List.Range
-public import Mathlib.Data.Fintype.Card
 public import Mathlib.Data.Fintype.List
 public import Foundation.Vorspiel.Fin.Basic
 
@@ -94,7 +91,7 @@ lemma connected_of_trans' (h : List.IsChain R l) (eij : i ≠ j) : R (l.get i) (
 lemma connected_of_trans [DecidableEq α] (h : List.IsChain R l) (hx : x ∈ l) (hy : y ∈ l) (exy : x ≠ y) : R x y ∨ R y x := by
   grind;
 
-lemma noDup_of_irrefl_trans (h : List.IsChain R l) [IsIrrefl _ R] : l.Nodup := by
+lemma noDup_of_irrefl_trans (h : List.IsChain R l) [Std.Irrefl R] : l.Nodup := by
   apply List.nodup_iff_getElem?_ne_getElem?.mpr;
   intro i j hij hj;
   let i' : Fin l.length := ⟨i, by omega⟩;
@@ -106,14 +103,14 @@ lemma noDup_of_irrefl_trans (h : List.IsChain R l) [IsIrrefl _ R] : l.Nodup := b
   ] using hC;
   have : R (l.get i') (l.get j') := of_lt h (by simpa);
   rw [hC] at this;
-  exact IsIrrefl.irrefl _ this;
+  exact Std.Irrefl.irrefl _ this;
 
-lemma nodup_of_trans_irreflex [IsIrrefl _ R] (h_chain : l.IsChain R) : l.Nodup := by
+lemma nodup_of_trans_irreflex [Std.Irrefl R] (h_chain : l.IsChain R) : l.Nodup := by
   by_contra hC;
   replace ⟨d, hC⟩ := List.exists_duplicate_iff_not_nodup.mpr hC;
   have := List.duplicate_iff_sublist.mp hC;
   have := @List.IsChain.sublist α R [d, d] l ⟨by apply IsTrans.trans⟩ h_chain this;
-  apply IsIrrefl.irrefl d (r := R);
+  apply Std.Irrefl.irrefl d (r := R);
   simpa;
 
 end IsChain
@@ -121,7 +118,7 @@ end IsChain
 
 instance finiteNodupList [DecidableEq α] [Finite α] : Finite { l : List α // l.Nodup } := @fintypeNodupList α (Fintype.ofFinite α) |>.finite
 
-lemma chains_finite [DecidableEq α] [Finite α] [IsTrans _ R] [IsIrrefl _ R] : Finite { l : List α // l.IsChain R } := by
+lemma chains_finite [DecidableEq α] [Finite α] [IsTrans _ R] [Std.Irrefl R] : Finite { l : List α // l.IsChain R } := by
   apply @Finite.of_injective { l : List α // l.IsChain R } { l : List α // l.Nodup } _ ?f;
   case f => intro ⟨l, hl⟩; refine ⟨l, List.IsChain.nodup_of_trans_irreflex hl⟩;
   simp [Function.Injective];

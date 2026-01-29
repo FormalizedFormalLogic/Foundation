@@ -1,12 +1,6 @@
 module
 
-public import Foundation.Modal.Neighborhood.AxiomGeach
-public import Foundation.Modal.Neighborhood.AxiomM
-public import Foundation.Modal.Neighborhood.AxiomC
-public import Foundation.Modal.Neighborhood.Logic.E
 public import Foundation.Modal.Neighborhood.Logic.ED
-public import Foundation.Modal.Neighborhood.Filtration
-public import Foundation.Modal.Entailment.ET
 
 @[expose] public section
 

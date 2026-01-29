@@ -2,7 +2,6 @@ module
 
 public import Foundation.Modal.Kripke.Logic.KT
 public import Foundation.Modal.Kripke.Logic.KDB
-public import Foundation.Modal.Kripke.Filtration
 
 @[expose] public section
 
@@ -67,7 +66,7 @@ instance : Modal.KT ⪱ Modal.KTB := by
     . exact axiomB!;
     . apply Sound.not_provable_of_countermodel (𝓜 := FrameClass.KT);
       apply Kripke.not_validOnFrameClass_of_exists_model_world;
-      let M : Model := ⟨⟨Fin 2, λ x y => x ≤ y⟩, λ w _ => w = 0⟩;
+      let M : Model := ⟨⟨Fin 2, λ x y => x ≤ y⟩, λ _ w => w = 0⟩;
       use M, 0;
       constructor;
       . tauto;
@@ -89,7 +88,7 @@ instance : Modal.KDB ⪱ Modal.KTB := by
     . exact axiomT!;
     . apply Sound.not_provable_of_countermodel (𝓜 := FrameClass.KDB);
       apply Kripke.not_validOnFrameClass_of_exists_model_world;
-      use ⟨⟨Fin 2, λ x y => x ≠ y⟩, λ x _ => x = 1⟩, 0;
+      use ⟨⟨Fin 2, λ x y => x ≠ y⟩, λ _ x => x = 1⟩, 0;
       constructor;
       . refine {
           serial := by

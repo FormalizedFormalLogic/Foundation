@@ -1,7 +1,5 @@
 module
 
-public import Foundation.Modal.Kripke.AxiomGeach
-public import Foundation.Modal.Kripke.Hilbert
 public import Foundation.Modal.Kripke.Logic.KB
 public import Foundation.Modal.Kripke.Logic.KD
 
@@ -47,7 +45,7 @@ instance : Modal.KD ⪱ Modal.KDB := by
     . exact axiomB!;
     . apply Sound.not_provable_of_countermodel (𝓜 := FrameClass.KD)
       apply Kripke.not_validOnFrameClass_of_exists_model_world;
-      let M : Model := ⟨⟨Fin 2, λ x y => x ≤ y⟩, λ w _ => w = 0⟩;
+      let M : Model := ⟨⟨Fin 2, λ x y => x ≤ y⟩, λ _ w => w = 0⟩;
       use M, 0;
       constructor;
       . refine { serial := by intro x; use 1; omega;}
@@ -66,7 +64,7 @@ instance : Modal.KB ⪱ Modal.KDB := by
     . exact axiomD!;
     . apply Sound.not_provable_of_countermodel (𝓜 := FrameClass.KB)
       apply Kripke.not_validOnFrameClass_of_exists_model_world;
-      use ⟨⟨Fin 1, λ x y => False⟩, λ w _ => w = 0⟩, 0;
+      use ⟨⟨Fin 1, λ x y => False⟩, λ _ w => w = 0⟩, 0;
       constructor;
       . refine { symm := by simp; };
       . simp [Semantics.Models, Satisfies];

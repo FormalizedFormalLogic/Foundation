@@ -343,7 +343,7 @@ open Formula.Kripke2
 abbrev canonicalModel (L : Logic ℕ) [Entailment.F L] [Entailment.Disjunctive L] : Kripke2.Model where
   World := PrimeFTheory L
   Rel T U := ∀ {φ ψ}, φ ➝ ψ ∈ T.theory → φ ∈ U.theory → ψ ∈ U.theory
-  Val T a := (atom a) ∈ T.theory
+  Val a T := (atom a) ∈ T.theory
   root := emptyPrimeFTheory L
   rooted := by
     intro T φ ψ hφψ hφ;

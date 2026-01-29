@@ -77,7 +77,7 @@ instance : Modal.N ⪱ Modal.K := by
           if ξ = (.atom 0) ➝ (.atom 1) then False
           else x < y
         Valuation :=
-          λ w a =>
+          λ a w =>
           match a with
           | 0 => w = 1
           | 1 => w = 0

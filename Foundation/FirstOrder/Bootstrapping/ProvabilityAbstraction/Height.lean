@@ -1,7 +1,5 @@
 module
 
-public import Foundation.FirstOrder.Bootstrapping.DerivabilityCondition
-public import Foundation.FirstOrder.Bootstrapping.ProvabilityAbstraction.Basic
 public import Foundation.FirstOrder.Incompleteness.Examples
 public import Foundation.Vorspiel.ENat
 

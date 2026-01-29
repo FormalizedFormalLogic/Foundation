@@ -8,6 +8,8 @@ public import Foundation.FirstOrder.Intuitionistic.Deduction
 reference: Girard. "A new constructive logic: classic logic" [Gir91]
 -/
 
+@[expose] public section
+
 namespace LO.FirstOrder.Semiformula
 
 variable {L : Language} {ξ : Type*}

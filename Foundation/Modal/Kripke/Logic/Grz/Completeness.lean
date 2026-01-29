@@ -85,7 +85,7 @@ instance : (miniCanonicalFrame 𝓢 φ).IsFiniteGrz where
 
 abbrev miniCanonicalModel (𝓢 : S) [Entailment.Grz 𝓢] [Entailment.Consistent 𝓢] (φ : Formula ℕ) : Kripke.Model where
   toFrame := miniCanonicalFrame 𝓢 φ
-  Val X a := (atom a) ∈ X
+  Val a X := (atom a) ∈ X
 
 omit [Consistent 𝓢] [Entailment.Grz 𝓢] in
 lemma truthlemma_lemma1
@@ -278,7 +278,7 @@ instance : Modal.S4McK ⪱ Modal.Grz := by
     . simp;
     . apply Sound.not_provable_of_countermodel (𝓜 := FrameClass.S4McK)
       apply Kripke.not_validOnFrameClass_of_exists_model_world;
-      use ⟨⟨Fin 3, λ x y => y = 2 ∨ x = 0 ∨ x = 1⟩, λ w _ => w = 1 ∨ w = 2⟩, 0;
+      use ⟨⟨Fin 3, λ x y => y = 2 ∨ x = 0 ∨ x = 1⟩, λ _ w => w = 1 ∨ w = 2⟩, 0;
       constructor;
       . exact {
           refl := by omega,

@@ -1,7 +1,6 @@
 module
 
 public import Foundation.InterpretabilityLogic.Veltman.Logic.IL_R
-public import Foundation.InterpretabilityLogic.Veltman.Logic.IL_W
 public import Foundation.InterpretabilityLogic.Veltman.Logic.IL_M₀_W
 
 @[expose] public section

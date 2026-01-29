@@ -15,9 +15,9 @@ namespace Frame
 class IsGeachConvergent (F : Frame) (g : Axioms.Geach.Taple) where
   gconv : ∀ ⦃x y z : F⦄, x ≺^[g.i] y → x ≺^[g.j] z → ∃ u, y ≺^[g.m] u ∧ z ≺^[g.n] u
 
-protected abbrev IsReflexive (F : Frame) := _root_.IsRefl _ F
+protected abbrev IsReflexive (F : Frame) := _root_.Std.Refl F
 
-@[simp] lemma refl [F.IsReflexive] : ∀ {x : F.World}, x ≺ x := by apply IsRefl.refl
+@[simp] lemma refl [F.IsReflexive] : ∀ {x : F.World}, x ≺ x := by apply Std.Refl.refl
 
 @[simp]
 instance [F.IsGeachConvergent ⟨0, 0, 1, 0⟩] : F.IsReflexive where
@@ -190,7 +190,7 @@ lemma validate_AxiomTc_of_coreflexive [corefl : F.IsCoreflexive] : F ⊧ (Axioms
 
 lemma isGeachConvergent_of_validate_axiomGeach {g} (h : F ⊧ (Axioms.Geach g (.atom 0))) : F.IsGeachConvergent g := ⟨by
   rintro x y z Rxy Rxz;
-  let V : Kripke.Valuation F := λ v _ => y ≺^[g.m] v;
+  let V : Kripke.Valuation F := λ _ v => y ≺^[g.m] v;
   have : Satisfies ⟨F, V⟩ x (□^[g.j](◇^[g.n](.atom 0)))  := h V x $ by
     apply Satisfies.diaItr_def.mpr;
     use y;

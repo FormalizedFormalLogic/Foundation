@@ -1,7 +1,5 @@
 module
 
-public import Foundation.Modal.Kripke.Logic.K4
-public import Foundation.Modal.Kripke.AxiomMcK
 public import Foundation.Modal.Kripke.Logic.S4
 public import Foundation.Modal.Kripke.Logic.K4McK
 
@@ -55,7 +53,7 @@ instance : Modal.S4 ⪱ Modal.S4McK := by
     . exact axiomMcK!;
     . apply Sound.not_provable_of_countermodel (𝓜 := FrameClass.S4)
       apply Kripke.not_validOnFrameClass_of_exists_model_world;
-      let M : Model := ⟨⟨Fin 2, λ x y => True⟩, λ w _ => w = 0⟩;
+      let M : Model := ⟨⟨Fin 2, λ x y => True⟩, λ _ w => w = 0⟩;
       use M, 0;
       constructor;
       . refine {
@@ -75,7 +73,7 @@ instance : Modal.K4McK ⪱ Modal.S4McK := by
     . simp;
     . apply Sound.not_provable_of_countermodel (𝓜 := FrameClass.K4McK)
       apply Kripke.not_validOnFrameClass_of_exists_model_world;
-      let M : Model := ⟨⟨Fin 2, λ x y => y = 1⟩, λ w _ => w = 1⟩;
+      let M : Model := ⟨⟨Fin 2, λ x y => y = 1⟩, λ _ w => w = 1⟩;
       use M, 0;
       constructor;
       . exact {

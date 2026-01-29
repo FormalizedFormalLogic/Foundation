@@ -2,7 +2,6 @@ module
 
 public import Foundation.Propositional.Kripke.AxiomWLEM
 public import Foundation.Propositional.Kripke.Rooted
-public import Foundation.Propositional.Kripke.Logic.Int
 public import Foundation.Propositional.Kripke.Logic.KrieselPutnam
 
 

@@ -499,7 +499,9 @@ lemma finset_comprehension_aux (Γ : Polarity) {P : V → Prop} (hP : Γ-[m]-Pre
     ⟨under a, pred_lt_self_of_pos (by simp), fun i hi _ ↦ by simpa [mem_under_iff] using hi⟩
   rcases this with ⟨s, hsn, hs⟩
   have : Γ.alt-[m]-Predicate (fun s : V ↦ ∀ i < a, P i → i ∈ s) := by
-    apply HierarchySymbol.Definable.ball_blt; simp; apply HierarchySymbol.Definable.imp
+    apply HierarchySymbol.Definable.ball_blt
+    · simp
+    apply HierarchySymbol.Definable.imp
     · simpa using HierarchySymbol.Definable.bcomp₁ (by definability)
     · simpa using HierarchySymbol.Definable.bcomp₂ (by definability) (by definability)
   have : ∃ t, (∀ i < a, P i → i ∈ t) ∧ ∀ t' < t, ∃ x < a, P x ∧ x ∉ (t' : V) := by

@@ -1,7 +1,6 @@
 module
 
 public import Foundation.Modal.Kripke.Logic.K
-public import Foundation.Modal.Kripke.Antisymmetric
 
 @[expose] public section
 
@@ -45,7 +44,7 @@ lemma validate_AxiomGrz_of_refl_trans_wcwf [F.IsReflexive] [F.IsTransitive] [F.I
     simpa [X] using this;
 
   rintro w (⟨hw₁, hw₂⟩ | ⟨hw₁, hw₂, hw₃⟩);
-  . have : Satisfies M w (□((.atom 0) ➝ □(.atom 0)) ➝ (.atom 0)) := hw₁ w (IsRefl.refl w);
+  . have : Satisfies M w (□((.atom 0) ➝ □(.atom 0)) ➝ (.atom 0)) := hw₁ w (Std.Refl.refl w);
     have : ¬Satisfies M w (□(atom 0 ➝ □atom 0)) := not_imp_not.mpr this hw₂;
     obtain ⟨x, Rwx, hx, ⟨y, Rxy, hy⟩⟩ := by simpa [Satisfies] using this;
     use x;
@@ -125,7 +124,7 @@ lemma WCWF_of_validate_AxiomGrz (h : F ⊧ Axioms.Grz (.atom 0)) : F.IsWeaklyCon
     simp only [IrreflGen, ne_eq] at hf;
     apply ValidOnFrame.not_of_exists_valuation_world;
     by_cases H : ∀ j₁ j₂, (j₁ < j₂ → f j₂ ≠ f j₁)
-    . use (λ v _ => ∀ i, v ≠ f (2 * i)), (f 0);
+    . use (λ _ v => ∀ i, v ≠ f (2 * i)), (f 0);
       apply Classical.not_imp.mpr
       constructor;
       . suffices Satisfies ⟨F, _⟩ (f 0) (□(∼(.atom 0) ➝ ∼(□((.atom 0) ➝ □(.atom 0))))) by
@@ -152,7 +151,7 @@ lemma WCWF_of_validate_AxiomGrz (h : F ⊧ Axioms.Grz (.atom 0)) : F.IsWeaklyCon
         use 0;
     . push_neg at H;
       obtain ⟨j, k, ljk, ejk⟩ := H;
-      let V : Valuation F := (λ v _ => v ≠ f j);
+      let V : Valuation F := (λ _ v => v ≠ f j);
       use V, (f j);
       apply Classical.not_imp.mpr;
       constructor;

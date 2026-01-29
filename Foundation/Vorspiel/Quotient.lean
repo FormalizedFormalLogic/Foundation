@@ -1,8 +1,6 @@
 module
 
 public import Foundation.Vorspiel.Fin.Matrix
-public import Foundation.Vorspiel.Fin.Basic
-public import Foundation.Vorspiel.Matrix
 
 @[expose] public section
 

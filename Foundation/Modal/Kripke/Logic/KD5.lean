@@ -1,7 +1,5 @@
 module
 
-public import Foundation.Modal.Kripke.AxiomGeach
-public import Foundation.Modal.Kripke.Hilbert
 public import Foundation.Modal.Kripke.Logic.K5
 public import Foundation.Modal.Kripke.Logic.KD
 
@@ -45,7 +43,7 @@ instance : Modal.KD ⪱ Modal.KD5 := by
     . exact axiomFive!;
     . apply Sound.not_provable_of_countermodel (𝓜 := FrameClass.KD)
       apply Kripke.not_validOnFrameClass_of_exists_model_world;
-      let M : Model := ⟨⟨Fin 2, λ x y => x ≤ y⟩, λ w _ => w = 0⟩;
+      let M : Model := ⟨⟨Fin 2, λ x y => x ≤ y⟩, λ _ w => w = 0⟩;
       use M, 0;
       constructor;
       . tauto;
@@ -66,7 +64,7 @@ instance : Modal.K5 ⪱ Modal.KD5 := by
     . exact axiomD!;
     . apply Sound.not_provable_of_countermodel (𝓜 := FrameClass.K5)
       apply Kripke.not_validOnFrameClass_of_exists_model_world;
-      use ⟨⟨Fin 1, λ x y => False⟩, λ w _ => w = 0⟩, 0;
+      use ⟨⟨Fin 1, λ x y => False⟩, λ _ w => w = 0⟩, 0;
       constructor;
       . refine { reucl := by simp [RightEuclidean]; };
       . simp [Semantics.Models, Satisfies];

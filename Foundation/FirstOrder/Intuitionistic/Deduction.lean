@@ -153,8 +153,6 @@ def allIffAllOfIff {φ ψ} (b : Λ ⊢! free φ ⭤ free ψ) : Λ ⊢! ∀' φ �
   (allImplyAllOfAllImply φ ψ ⨀ gen (Entailment.cast (by simp) (Entailment.K_left b)))
   (allImplyAllOfAllImply ψ φ ⨀ gen (Entailment.cast (by simp) (Entailment.K_right b)))
 
-set_option diagnostics true in
-set_option profiler true in
 def dneOfNegative [L.DecidableEq] : {φ : SyntacticFormulaᵢ L} → φ.IsNegative → Λ ⊢! ∼∼φ ➝ φ
   | ⊥,     _ => Entailment.CNNOO
   | φ ⋏ ψ, h =>

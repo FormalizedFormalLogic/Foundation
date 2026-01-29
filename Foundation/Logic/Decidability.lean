@@ -1,6 +1,7 @@
 module
 
 public import Foundation.Logic.Entailment
+public import Foundation.Vorspiel.Computability
 
 @[expose] public section
 

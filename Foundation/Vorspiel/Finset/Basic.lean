@@ -1,9 +1,6 @@
 module
 
-public import Mathlib.Data.Fin.Basic
 public import Mathlib.Data.Fin.VecNotation
-public import Mathlib.Data.Finset.Basic
-public import Mathlib.Data.Finset.Insert
 public import Mathlib.Data.Finset.Preimage
 public import Mathlib.Data.Finset.Sort
 public import Mathlib.Data.Fintype.Sigma

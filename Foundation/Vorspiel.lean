@@ -2,7 +2,6 @@ module
 
 -- public import Foundation.Vorspiel.ENat
 public import Foundation.Vorspiel.AdjunctiveSet
-public import Foundation.Vorspiel.Computability
 public import Foundation.Vorspiel.ExistsUnique
 public import Foundation.Vorspiel.Fin.Basic
 public import Foundation.Vorspiel.Fin.Basic

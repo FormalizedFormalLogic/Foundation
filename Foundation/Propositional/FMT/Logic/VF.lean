@@ -1,9 +1,6 @@
 module
 
-public import Foundation.Propositional.FMT.Hilbert
 public import Foundation.Propositional.FMT.Completeness
-public import Foundation.Propositional.Hilbert.WF_VF
-public import Foundation.Propositional.Hilbert.VF.Disjunctive
 
 
 @[expose] public section
@@ -98,7 +95,7 @@ instance : Propositional.VF ⪱ Propositional.WF := by
         ,
         root := 0,
         rooted := by grind
-        Val x a := x = 2 → a = 0
+        Val a x := x = 2 → a = 0
       }, 0;
       constructor;
       . tauto;

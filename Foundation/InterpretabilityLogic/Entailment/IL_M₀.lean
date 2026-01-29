@@ -1,6 +1,5 @@
 module
 
-public import Foundation.InterpretabilityLogic.Entailment.IL
 public import Foundation.InterpretabilityLogic.Entailment.ILMinus_M
 public import Foundation.InterpretabilityLogic.Entailment.IL_W
 

@@ -1,8 +1,5 @@
 module
 
-public import Mathlib.Data.Set.Finite.Powerset
-public import Foundation.Modal.Neighborhood.AxiomGeach
-public import Foundation.Modal.Neighborhood.Supplementation
 public import Foundation.Modal.Neighborhood.IntersectionClosure
 
 @[expose] public section

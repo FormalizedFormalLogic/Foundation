@@ -1,9 +1,6 @@
 module
 
-public import Foundation.Propositional.ClassicalSemantics.Basic
-public import Foundation.Propositional.Tait.Calculus
 public import Foundation.Propositional.ClassicalSemantics.Tait
-public import Mathlib.Algebra.Order.BigOperators.Group.List
 
 @[expose] public section
 

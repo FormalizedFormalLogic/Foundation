@@ -1,7 +1,6 @@
 module
 
 public import Foundation.FirstOrder.Arithmetic.Definability.BoundedDefinable
-public import Foundation.FirstOrder.Arithmetic.R0.Basic
 
 @[expose] public section
 namespace LO.FirstOrder.Arithmetic

@@ -1,7 +1,6 @@
 module
 
 public import Mathlib.Order.PFilter
-public import Mathlib.Data.Set.Countable
 public import Foundation.Vorspiel
 
 @[expose] public section

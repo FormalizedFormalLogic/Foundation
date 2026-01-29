@@ -4,7 +4,6 @@ public import Mathlib.Tactic.Cases
 public import Mathlib.Tactic.TautoSet
 public import Mathlib.Algebra.GroupWithZero.Nat
 public import Mathlib.Algebra.Order.Group.Nat
-public import Mathlib.Order.Heyting.Basic
 
 @[expose]
 public section

@@ -59,7 +59,7 @@ instance : Modal.S4Point3McK ⪱ Modal.S4Point4McK := by
     . simp;
     . apply Sound.not_provable_of_countermodel (𝓜 := Kripke.FrameClass.S4Point3McK);
       apply Kripke.not_validOnFrameClass_of_exists_model_world;
-      let M : Model := ⟨⟨Fin 3, λ x y => x ≤ y⟩, λ w a => w ≠ 1⟩;
+      let M : Model := ⟨⟨Fin 3, λ x y => x ≤ y⟩, λ a w => w ≠ 1⟩;
       use M, 0;
       constructor
       . exact {
@@ -86,7 +86,7 @@ instance : Modal.S4Point4 ⪱ Modal.S4Point4McK := by
     . simp;
     . apply Sound.not_provable_of_countermodel (𝓜 := Kripke.FrameClass.S4Point4);
       apply Kripke.not_validOnFrameClass_of_exists_model_world;
-      let M : Model := ⟨⟨Fin 2, λ x y => True⟩, λ w _ => w = 0⟩;
+      let M : Model := ⟨⟨Fin 2, λ x y => True⟩, λ _ w => w = 0⟩;
       use M, 0;
       constructor;
       . exact {

@@ -1,7 +1,6 @@
 module
 
 public import Foundation.Modal.Entailment.ETB
-public import Foundation.Modal.Entailment.EN
 public import Foundation.Modal.Entailment.AxiomGeach
 
 @[expose] public section

@@ -2,7 +2,6 @@ module
 
 public import Foundation.ProvabilityLogic.Classification.LetterlessTrace
 public import Foundation.Modal.Boxdot.GL_S
-public import Foundation.Modal.Logic.SumQuasiNormal
 public import Foundation.Modal.Logic.D.Basic
 
 @[expose] public section
@@ -198,10 +197,10 @@ def Model.boneLengthening (M : Kripke.Model) (a : M) (n : ℕ) : Kripke.Model wh
     | .inl x, .inr _ => x ≺ a
     | .inr _, .inl y => y = a ∨ a ≺ y
     | .inr i, .inr j => i > j
-  Val x p :=
+  Val p x :=
     match x with
-    | .inl w => M.Val w p
-    | .inr _ => M.Val a p
+    | .inl w => M.Val p w
+    | .inr _ => M.Val p a
 
 namespace Model.boneLengthening
 

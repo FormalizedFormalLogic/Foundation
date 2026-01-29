@@ -1,11 +1,6 @@
 module
 
-public import Foundation.FirstOrder.Arithmetic.Basic
-public import Foundation.FirstOrder.Arithmetic.R0.Basic
 public import Foundation.FirstOrder.Arithmetic.Q.Basic
-public import Mathlib.Algebra.Order.Monoid.Canonical.Defs
-public import Mathlib.Data.Nat.Cast.Order.Basic
-public import Mathlib.Algebra.Order.Sub.Basic
 
 @[expose] public section
 /-!

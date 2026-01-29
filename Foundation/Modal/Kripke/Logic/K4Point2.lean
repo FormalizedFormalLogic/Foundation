@@ -1,8 +1,5 @@
 module
 
-public import Foundation.Modal.Kripke.AxiomWeakPoint2
-public import Foundation.Modal.Kripke.AxiomGeach
-public import Foundation.Modal.Kripke.Hilbert
 public import Foundation.Modal.Kripke.Logic.K4
 
 @[expose] public section
@@ -49,7 +46,7 @@ instance : Modal.K4 ⪱ Modal.K4Point2 := by
       apply Kripke.not_validOnFrameClass_of_exists_model_world;
       let M : Model := ⟨
         ⟨Fin 2, λ x y => x = 0⟩,
-        λ w a => if a = 0 then True else w = 0
+        λ a w => if a = 0 then True else w = 0
       ⟩;
       use M, 0;
       constructor;

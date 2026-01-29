@@ -1,8 +1,6 @@
 module
 
 public import Foundation.Modal.Kripke.Rooted
-public import Foundation.Modal.Kripke.Antisymmetric
-public import Foundation.Modal.Kripke.Asymmetric
 
 @[expose] public section
 
@@ -180,12 +178,12 @@ instance {F : Frame} [DecidableEq F.World] [Finite F] {r : F.World} (F_trans : T
     (Frame.pointGenerate.rel_irrefl F_irrefl)
 -/
 
-def Model.mkTreeUnravelling (M : Kripke.Model) (r : M.World) : Kripke.Model := ⟨M.toFrame.mkTreeUnravelling r, λ c a => M.Val (c.1.getLast (by simp)) a⟩
+def Model.mkTreeUnravelling (M : Kripke.Model) (r : M.World) : Kripke.Model := ⟨M.toFrame.mkTreeUnravelling r, λ a c => M.Val a (c.1.getLast (by simp))⟩
 
 def Model.mkTreeUnravelling.pMorphism (M : Kripke.Model) (r : M.World) : (M.mkTreeUnravelling r) →ₚ M :=
   PseudoEpimorphism.ofAtomic (Frame.treeUnravelling.pMorphism M.toFrame r) $ by rfl;
 
-def Model.mkTransTreeUnravelling (M : Kripke.Model) (r : M.World) : Kripke.Model := ⟨M.toFrame.mkTransTreeUnravelling r, λ c a => M.Val (c.1.getLast (by simp)) a⟩
+def Model.mkTransTreeUnravelling (M : Kripke.Model) (r : M.World) : Kripke.Model := ⟨M.toFrame.mkTransTreeUnravelling r, λ a c => M.Val a (c.1.getLast (by simp))⟩
 
 namespace Model.mkTransTreeUnravelling
 

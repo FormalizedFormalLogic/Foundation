@@ -1,7 +1,6 @@
 module
 
 public import Foundation.Logic.LogicSymbol
-public import Mathlib.Logic.Encodable.Basic
 
 @[expose]
 public section

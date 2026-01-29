@@ -1,10 +1,7 @@
 module
 
 public import Foundation.Modal.Kripke.Logic.Grz.Completeness
-public import Foundation.Modal.Kripke.Logic.S4
 public import Foundation.Modal.Kripke.AxiomH
-public import Foundation.Modal.Kripke.Filtration
-public import Foundation.Modal.Kripke.Rooted
 
 @[expose] public section
 
@@ -66,7 +63,7 @@ instance : Modal.Grz ⪱ Modal.S4H := by
     . simp;
     . apply Sound.not_provable_of_countermodel (𝓜 := FrameClass.finite_Grz)
       apply Kripke.not_validOnFrameClass_of_exists_model_world;
-      let M : Model := ⟨⟨Fin 3, λ x y => x ≤ y⟩, λ w a => w ≠ 1⟩;
+      let M : Model := ⟨⟨Fin 3, λ x y => x ≤ y⟩, λ a w => w ≠ 1⟩;
       use M, 0;
       constructor;
       . simp only [Set.mem_setOf_eq];

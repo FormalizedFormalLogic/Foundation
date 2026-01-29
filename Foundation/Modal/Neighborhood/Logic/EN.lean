@@ -1,7 +1,5 @@
 module
 
-public import Foundation.Modal.Neighborhood.Hilbert
-public import Foundation.Modal.Neighborhood.AxiomN
 public import Foundation.Modal.Neighborhood.Logic.E
 public import Foundation.Modal.PLoN.Logic.N
 

@@ -1,7 +1,5 @@
 module
 
-public import Foundation.Modal.Kripke.AxiomGeach
-public import Foundation.Modal.Kripke.Hilbert
 public import Foundation.Modal.Kripke.Logic.K
 
 @[expose] public section
@@ -57,7 +55,7 @@ instance : Modal.K ⪱ Modal.KD := by
     . exact axiomD!;
     . apply Sound.not_provable_of_countermodel (𝓜 := FrameClass.K)
       apply Kripke.not_validOnFrameClass_of_exists_model_world;
-      use ⟨⟨Fin 1, λ x y => False⟩, λ w _ => False⟩, 0;
+      use ⟨⟨Fin 1, λ x y => False⟩, λ _ w => False⟩, 0;
       constructor;
       . trivial;
       . simp [Semantics.Models, Satisfies];

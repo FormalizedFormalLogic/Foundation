@@ -1,6 +1,5 @@
 module
 
-public import Foundation.FirstOrder.Basic.Syntax.Rew
 public import Foundation.FirstOrder.Basic.Syntax.Theory
 public import Foundation.Vorspiel.IsEmpty
 public import Foundation.Vorspiel.Empty

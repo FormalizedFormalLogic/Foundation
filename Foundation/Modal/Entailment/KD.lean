@@ -1,6 +1,5 @@
 module
 
-public import Foundation.Modal.Entailment.K
 public import Foundation.Modal.Entailment.END
 
 @[expose] public section

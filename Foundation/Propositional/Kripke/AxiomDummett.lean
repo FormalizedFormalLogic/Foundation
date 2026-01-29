@@ -1,7 +1,6 @@
 module
 
 public import Foundation.Propositional.Kripke.Completeness
-public import Foundation.Propositional.Entailment.LC
 
 @[expose] public section
 
@@ -50,7 +49,7 @@ lemma validate_axiomDummett_of_isPiecewiseStronglyConnected [F.IsPiecewiseStrong
 
 lemma isPiecewiseStronglyConnected_of_validate_axiomDummett (h : F ⊧ (Axioms.Dummett (.atom 0) (.atom 1))) : F.IsPiecewiseStronglyConnected := ⟨by
   rintro x y z Rxy Ryz;
-  let V : Kripke.Valuation F := ⟨λ {v a} => match a with | 0 => y ≺ v | 1 => z ≺ v | _ => True, by
+  let V : Kripke.Valuation F := ⟨λ {a v} => match a with | 0 => y ≺ v | 1 => z ≺ v | _ => True, by
     intro w v Rwv a ha;
     split at ha;
     . apply F.trans ha Rwv

@@ -1,9 +1,7 @@
 module
 
 public import Foundation.Modal.Kripke.AxiomL
-public import Mathlib.Order.Interval.Finset.Nat
 public import Foundation.Modal.Kripke.Logic.K
-public import Foundation.Modal.Entailment.GL
 
 @[expose] public section
 
@@ -30,7 +28,7 @@ lemma valid_atomic_axiomHen_of_valid_atomic_axiomL : F ⊧ (Axioms.L (atom a)) �
 lemma valid_atomic_axiomL_of_valid_atomic_axiomHen : F ⊧ Axioms.Hen (atom a) → F ⊧ Axioms.L (atom a) := by
   intro hH V x hx;
 
-  let V' : Valuation F := λ w a => ∀ n : ℕ, Satisfies ⟨F, V⟩ w (□^[n] a);
+  let V' : Valuation F := λ a w => ∀ n : ℕ, Satisfies ⟨F, V⟩ w (□^[n] a);
 
   have h₁ : Satisfies ⟨F, V'⟩ x (□(□a ⭤ a)) := by
     intro y Rxy;
@@ -114,7 +112,7 @@ end cresswellFrame
 
 
 
-abbrev cresswellModel : Kripke.Model := ⟨cresswellFrame, λ w _ => w ≠ 0♯⟩
+abbrev cresswellModel : Kripke.Model := ⟨cresswellFrame, λ _ w => w ≠ 0♯⟩
 
 namespace cresswellModel
 
@@ -380,7 +378,7 @@ instance : Modal.K ⪱ Modal.KHen := by
     . exact axiomHen!;
     . apply Sound.not_provable_of_countermodel (𝓜 := FrameClass.K)
       apply Kripke.not_validOnFrameClass_of_exists_model_world;
-      use ⟨⟨Fin 1, λ x y => True⟩, λ w _ => False⟩, 0;
+      use ⟨⟨Fin 1, λ x y => True⟩, λ _ w => False⟩, 0;
       simp [Satisfies, Semantics.Models];
 
 instance : Modal.KHen ⪱ Modal.GL := by

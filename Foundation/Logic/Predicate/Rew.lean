@@ -2,7 +2,6 @@ module
 
 public import Foundation.Logic.Predicate.Quantifier
 public import Foundation.Logic.Predicate.Term
-public import Foundation.Vorspiel
 
 /-!
 # Rewriting

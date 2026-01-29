@@ -1,8 +1,5 @@
 module
 
-public import Foundation.Modal.Kripke.Irreflexive
-public import Foundation.Modal.Kripke.AxiomWeakPoint2
-public import Foundation.Modal.Kripke.AxiomPoint3
 public import Foundation.Modal.Kripke.Rooted
 
 @[expose] public section
@@ -26,7 +23,7 @@ instance : Coe (F.World) (F^≠.World) := ⟨id⟩
 instance [Finite F] : Finite (F^≠) := inferInstance
 instance [F.IsFinite] : (F^≠).IsFinite := inferInstance
 
-instance : (F^≠).IsIrreflexive := ⟨IsIrrefl.irrefl⟩
+instance : (F^≠).IsIrreflexive := ⟨Std.Irrefl.irrefl⟩
 
 instance [F.IsAntisymmetric] [F.IsTransitive] : (F^≠).IsTransitive := inferInstance
 

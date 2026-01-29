@@ -1,7 +1,5 @@
 module
 
-public import Foundation.Modal.Kripke.AxiomGeach
-public import Foundation.Modal.Kripke.Hilbert
 public import Foundation.Modal.Kripke.Logic.K4
 public import Foundation.Modal.Kripke.Logic.KD
 
@@ -55,7 +53,7 @@ instance : Modal.KD ⪱ Modal.KD4 := by
     . exact axiomFour!;
     . apply Sound.not_provable_of_countermodel (𝓜 := FrameClass.KD)
       apply Kripke.not_validOnFrameClass_of_exists_model_world;
-      use ⟨⟨Bool, λ x y => x != y⟩, λ w _ => w = true⟩, false;
+      use ⟨⟨Bool, λ x y => x != y⟩, λ _ w => w = true⟩, false;
       constructor;
       . exact { serial := by simp [Serial]; };
       . simp [Semantics.Models, Satisfies];
@@ -70,7 +68,7 @@ instance : Modal.K4 ⪱ Modal.KD4 := by
     . exact axiomD!;
     . apply Sound.not_provable_of_countermodel (𝓜 := FrameClass.K4)
       apply Kripke.not_validOnFrameClass_of_exists_model_world;
-      use ⟨⟨Fin 1, λ x y => False⟩, λ w _ => w = 0⟩, 0;
+      use ⟨⟨Fin 1, λ x y => False⟩, λ _ w => w = 0⟩, 0;
       constructor;
       . exact { trans := by simp; }
       . simp [Semantics.Models, Satisfies];

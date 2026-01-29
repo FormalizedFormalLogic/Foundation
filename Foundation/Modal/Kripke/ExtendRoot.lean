@@ -3,7 +3,6 @@ module
 public import Foundation.Modal.Boxdot.Basic
 public import Foundation.Modal.Kripke.Tree
 
-public import Mathlib.Algebra.Order.BigOperators.Group.Finset
 public import Mathlib.Data.Finite.Sum
 
 @[expose] public section
@@ -68,7 +67,7 @@ instance isAsymmetric [F.IsAsymmetric] : (F.extendRoot n).IsAsymmetric := ⟨by
   match x, y with
   | .inr x, .inr y =>
     suffices ¬y ≺ x by tauto;
-    exact IsAsymm.asymm _ _ hxy;
+    exact Std.Asymm.asymm _ _ hxy;
   | .inl i, .inl j => simp_all [Frame.extendRoot]; omega;
   | .inl _, .inr _ => simp_all [Frame.extendRoot];
   | .inr _, .inl _ => simp_all [Frame.extendRoot];
@@ -155,10 +154,10 @@ end Frame.extendRoot
 
 def Model.extendRoot (M : Kripke.Model) {r : M.World} [M.IsRootedBy r] (n : ℕ+) : Kripke.Model where
   toFrame := M.toFrame.extendRoot n
-  Val x a :=
+  Val a x :=
     match x with
-    | .inl _ => M.Val r a
-    | .inr x => M.Val x a
+    | .inl _ => M.Val a r
+    | .inr x => M.Val a x
 
 namespace Model.extendRoot
 
@@ -240,7 +239,7 @@ section
 
 open Classical
 
-variable {M : Kripke.Model} [Finite M.World] [IsTrans _ M.Rel] [IsIrrefl _ M.Rel]
+variable {M : Kripke.Model} [Finite M.World] [IsTrans _ M.Rel] [Std.Irrefl M.Rel]
 variable {A : Formula _}
 variable {l : List M.World} {n : ℕ+}
 
@@ -341,7 +340,7 @@ namespace Model.extendRoot
 
 open Classical
 
-variable {M : Model} {r : M.World} [M.IsFinite] [IsTrans _ M.Rel] [IsIrrefl _ M.Rel] [M.IsRootedBy r] {x y : M.World}
+variable {M : Model} {r : M.World} [M.IsFinite] [IsTrans _ M.Rel] [Std.Irrefl M.Rel] [M.IsRootedBy r] {x y : M.World}
 
 lemma inr_satisfies_axiomT_set
     {Γ : Finset (Modal.Formula ℕ)} :

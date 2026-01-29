@@ -1,6 +1,8 @@
 module
 
 -- public import Foundation.Modal.Kripke.Logic.KD4Point3Z
+public import Foundation.Semantics.CoherenceSpace.Basic
+public import Foundation.Semantics.CoherenceSpace.StableFunction
 public import Foundation.FirstOrder.Arithmetic.Basic
 public import Foundation.FirstOrder.Arithmetic.Basic.Hierarchy
 public import Foundation.FirstOrder.Arithmetic.Basic.Misc
@@ -258,6 +260,7 @@ public import Foundation.Modal.Hilbert.WithLoeb.Basic
 public import Foundation.Modal.Hilbert.WithRE_Normal
 public import Foundation.Modal.Hilbert.WithRE.Basic
 public import Foundation.Modal.Kripke
+public import Foundation.Modal.Kripke.Algebra
 public import Foundation.Modal.Kripke.Antisymmetric
 public import Foundation.Modal.Kripke.Asymmetric
 public import Foundation.Modal.Kripke.AxiomFourN

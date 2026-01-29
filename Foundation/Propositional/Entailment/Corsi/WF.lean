@@ -1,6 +1,5 @@
 module
 
-public import Foundation.Propositional.Entailment.Corsi.Basic
 public import Foundation.Propositional.Entailment.Corsi.VF
 
 @[expose] public section

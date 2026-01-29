@@ -1,6 +1,5 @@
 module
 
-public import Foundation.InterpretabilityLogic.Veltman.Basic
 public import Foundation.InterpretabilityLogic.Veltman.Logic.IL
 
 @[expose] public section
@@ -52,7 +51,7 @@ lemma Frame.HasAxiomM.of_validate_axiomKM1 (h : F ⊧ Axioms.KM1 (.atom 0) (.ato
   constructor;
   dsimp [Axioms.KM1] at h;
   intro w x y z Swxy Ryz;
-  have := @h (λ u a => match a with | 0 => u = x | 1 => u = y ∨ u = z | _ => False) w ?_ x ?_;
+  have := @h (λ a u => match a with | 0 => u = x | 1 => u = y ∨ u = z | _ => False) w ?_ x ?_;
   . obtain ⟨v, Rwv, hv⟩ := Satisfies.dia_def.mp $ this (by tauto)
     rcases hv with (hv | hv);
     . apply F.trans Rwv;
