@@ -88,13 +88,13 @@ notation "𝐌𝐋𝐋" => Symbol.mll
 
 instance : Entailment Symbol Formula := ⟨fun _ ↦ Proof⟩
 
-namespace Derivation
-
 scoped prefix:45 "⊢! " => Derivation
 
 abbrev Derivable (Γ : Sequent) : Prop := Nonempty (Derivation Γ)
 
 scoped prefix:45 "⊢ " => Derivable
+
+namespace Derivation
 
 def rotate (d : ⊢! φ :: Γ) : ⊢! Γ ++ [φ] :=
   d.exchange (by grind only [List.perm_comm, List.perm_append_singleton])
