@@ -34,7 +34,6 @@ Main results of this repository. More detailed explanations are provided in the 
   - [Solovay's Arithmetical Completeness Theorem for GL][provability_logic:GL_arith_complete]
 - `InterpretabilityLogic`: [Interpretability Logic][interpretability_logic]
   - [Veltman Semantics][interpretability_logic:veltman]
-  - [Verbugge Semantics][interpretability_logic:verbugge] (a.k.a generalized Veltman semantics)
   - [Interpretability Logic Zoo](#interpretability-logic-zoo)
 - `Meta`: Proof automation.
 - `Logic`: Fundamental tools for various logics.
@@ -68,7 +67,7 @@ Main results of this repository. More detailed explanations are provided in the 
 [provability_logic:GL_arith_complete]: ./Foundation/ProvabilityLogic/GL/Completeness.lean
 [interpretability_logic]: ./Foundation/InterpretabilityLogic/
 [interpretability_logic:veltman]: ./Foundation/InterpretabilityLogic/Veltman/
-[interpretability_logic:verbugge]: ./Foundation/InterpretabilityLogic/
+[interpretability_logic:verbugge]: ./Foundation/InterpretabilityLogic/Verbrugge/
 
 ## Documents
 
