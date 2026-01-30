@@ -120,6 +120,12 @@ Automatically generated diagrams "Zoo", illustrate the Lean4-verified interrelat
 lake build Foundation
 ```
 
+## References
+
+```
+bibtool -r .bibtoolrsc -i references.bib -o references.bib
+```
+
 ## Developers
 
 List of contact information and areas of expertise of the current main developers.

@@ -8,7 +8,7 @@ public import Foundation.Meta.TwoSided
 /-!
 # Proof automation based on the proof search on (modified) $\mathbf{LJpm}^*$
 
-main reference: Grigori Mints, A Short Introduction to Intuitionistic Logic
+main reference: Grigori Mints, A Short Introduction to Intuitionistic Logic [Min00]
 -/
 
 public meta section
