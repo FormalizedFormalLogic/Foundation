@@ -278,15 +278,6 @@ def FormulaSet.letterlessTrace (X : Modal.FormulaSet ℕ) (_ : X.Letterless := b
 
 namespace FormulaSet
 
-<<<<<<< HEAD
-abbrev letterless (X : Modal.FormulaSet α) := ∀ φ ∈ X, φ.letterless
-
-protected def Regular (T : ArithmeticTheory) [T.Δ₁] (X : Modal.FormulaSet ℕ) := ∀ φ ∈ X, φ.Regular T
-
-protected def Singular (T : ArithmeticTheory) [T.Δ₁] (X : Modal.FormulaSet ℕ) := ¬X.Regular T
-
-=======
->>>>>>> origin/master
 lemma exists_singular_of_singular (hX_singular : X.Singular T) : ∃ φ ∈ X, φ.Singular T := by
   simpa [FormulaSet.Singular, FormulaSet.Regular] using hX_singular;
 
@@ -301,16 +292,6 @@ lemma iff_subset_letterlessSpectrum_subset_letterlessTrace (hX hY) : X.letterles
 lemma iff_eq_letterlessSpectrum_eq_letterlessTrace (hX hY)  : X.letterlessSpectrum hX = Y.letterlessSpectrum hY ↔ X.letterlessTrace = Y.letterlessTrace := by simp [FormulaSet.letterlessTrace];
 
 end FormulaSet
-
-lemma Logic.sumQuasiNormal.iff_provable_finite_provable_letterless [DecidableEq α] {L₁ L₂ : Logic α} {φ : Formula _} [L₁.IsQuasiNormal] (L₂_letterless : FormulaSet.letterless L₂)
-  : sumQuasiNormal L₁ L₂ ⊢! φ ↔ ∃ X : Finset _, (↑X ⊆ L₂) ∧ L₁ ⊢! X.conj ➝ φ := by
-  apply iff_provable_finite_provable;
-  rintro Y hY s ψ;
-  suffices ∀ ξ ∈ Y, ξ⟦s⟧ = ψ → ψ ∈ L₂ by simpa;
-  rintro ξ hξ rfl;
-  rw [Formula.subst.subst_letterless (L₂_letterless _ $ hY hξ)];
-  apply hY;
-  simpa;
 
 /-- boxbot instance of axiomT -/
 abbrev TBB (n : ℕ) : Formula ℕ := □^[(n + 1)]⊥ ➝ □^[n]⊥
