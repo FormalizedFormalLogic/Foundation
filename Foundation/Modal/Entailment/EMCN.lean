@@ -1,12 +1,16 @@
-import Foundation.Modal.Entailment.EMC
-import Foundation.Modal.Entailment.EN
-import Foundation.Modal.Entailment.K
+module
+
+public import Foundation.Modal.Entailment.EMC
+public import Foundation.Modal.Entailment.EN
+public import Foundation.Modal.Entailment.K
+
+@[expose] public section
 
 namespace LO.Modal.Entailment
 
 open LO.Entailment
 
-variable {S F : Type*} [BasicModalLogicalConnective F] [DecidableEq F] [Entailment F S]
+variable {S F : Type*} [BasicModalLogicalConnective F] [DecidableEq F] [Entailment S F]
 variable {𝓢 : S}
 
 instance [Entailment.EMCN 𝓢] : Entailment.K 𝓢 where
@@ -17,3 +21,4 @@ instance [Entailment.K 𝓢] : Entailment.EMCN 𝓢 where
     . exact axiomK' $ nec $ K_right h;
 
 end LO.Modal.Entailment
+end

@@ -1,13 +1,16 @@
-import Foundation.Modal.Kripke.Logic.KT
-import Foundation.Modal.Kripke.Logic.KDB
-import Foundation.Modal.Kripke.Filtration
+module
+
+public import Foundation.Modal.Kripke.Logic.KT
+public import Foundation.Modal.Kripke.Logic.KDB
+
+@[expose] public section
 
 namespace LO.Modal
 
 open Entailment
 open Formula
 open Kripke
-open Hilbert.Kripke
+open Modal.Kripke
 
 namespace Kripke
 
@@ -24,25 +27,20 @@ protected abbrev FrameClass.finite_KTB: FrameClass := { F | F.IsFiniteKTB }
 end Kripke
 
 
-namespace Hilbert.KTB.Kripke
-
-instance : Sound Hilbert.KTB FrameClass.KTB := instSound_of_validates_axioms $ by
+instance : Sound Modal.KTB FrameClass.KTB := instSound_of_validates_axioms $ by
   apply FrameClass.validates_with_AxiomK_of_validates;
   constructor;
   rintro _ (rfl | rfl) F ⟨_, _⟩;
   . exact validate_AxiomT_of_reflexive;
   . exact validate_AxiomB_of_symmetric;
 
-instance : Entailment.Consistent Hilbert.KTB := consistent_of_sound_frameclass FrameClass.KTB $ by
+instance : Entailment.Consistent Modal.KTB := consistent_of_sound_frameclass FrameClass.KTB $ by
   use whitepoint;
   constructor;
 
+instance : Canonical Modal.KTB FrameClass.KTB := ⟨by constructor⟩
 
-instance : Canonical Hilbert.KTB FrameClass.KTB := ⟨by constructor⟩
-
-instance : Complete Hilbert.KTB FrameClass.KTB := inferInstance
-
-instance : Complete Hilbert.KTB FrameClass.finite_KTB := ⟨by
+instance : Complete Modal.KTB FrameClass.finite_KTB := ⟨by
   intro φ hp;
   apply Complete.complete (𝓜 := FrameClass.KTB);
   intro F hF V x;
@@ -59,28 +57,28 @@ instance : Complete Hilbert.KTB FrameClass.finite_KTB := ⟨by
   }
 ⟩
 
-
-instance : Hilbert.KT ⪱ Hilbert.KTB := by
+instance : Modal.KT ⪱ Modal.KTB := by
   constructor;
-  . apply Hilbert.Normal.weakerThan_of_subset_axioms $ by simp;
+  . grind;
   . apply Entailment.not_weakerThan_iff.mpr;
     use (Axioms.B (.atom 0));
     constructor;
     . exact axiomB!;
     . apply Sound.not_provable_of_countermodel (𝓜 := FrameClass.KT);
       apply Kripke.not_validOnFrameClass_of_exists_model_world;
-      let M : Model := ⟨⟨Fin 2, λ x y => x ≤ y⟩, λ w _ => w = 0⟩;
+      let M : Model := ⟨⟨Fin 2, λ x y => x ≤ y⟩, λ _ w => w = 0⟩;
       use M, 0;
       constructor;
       . tauto;
       . suffices ∃ x, (0 : M.World) ≺ x ∧ ¬x ≺ 0 by
-          simpa [M, Semantics.Realize, Satisfies];
+          simp [M, Semantics.Models, Satisfies];
+          grind;
         use 1;
         omega;
 
-instance : Hilbert.KDB ⪱ Hilbert.KTB := by
+instance : Modal.KDB ⪱ Modal.KTB := by
   constructor;
-  . apply Hilbert.Kripke.weakerThan_of_subset_frameClass FrameClass.KDB FrameClass.KTB;
+  . apply Modal.Kripke.weakerThan_of_subset_frameClass FrameClass.KDB FrameClass.KTB;
     intro F hF;
     simp_all only [Set.mem_setOf_eq];
     infer_instance;
@@ -90,7 +88,7 @@ instance : Hilbert.KDB ⪱ Hilbert.KTB := by
     . exact axiomT!;
     . apply Sound.not_provable_of_countermodel (𝓜 := FrameClass.KDB);
       apply Kripke.not_validOnFrameClass_of_exists_model_world;
-      use ⟨⟨Fin 2, λ x y => x ≠ y⟩, λ x _ => x = 1⟩, 0;
+      use ⟨⟨Fin 2, λ x y => x ≠ y⟩, λ _ x => x = 1⟩, 0;
       constructor;
       . refine {
           serial := by
@@ -98,15 +96,10 @@ instance : Hilbert.KDB ⪱ Hilbert.KTB := by
             match x with
             | 0 => use 1; omega;
             | 1 => use 0; omega;
-          symm := by simp; omega
+          symm := by simp;
         };
-      . simp [Semantics.Realize, Satisfies];
-        omega;
-
-end Hilbert.KTB.Kripke
-
-instance : Modal.KT ⪱ Modal.KTB := inferInstance
-
-instance : Modal.KDB ⪱ Modal.KTB := inferInstance
+      . simp [Semantics.Models, Satisfies];
+        grind;
 
 end LO.Modal
+end

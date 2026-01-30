@@ -1,5 +1,9 @@
-import Foundation.Propositional.NNFormula
-import Foundation.Logic.Calculus
+module
+
+public import Foundation.Propositional.Formula.NNFormula
+public import Foundation.Logic.Calculus
+
+@[expose] public section
 
 namespace LO.Propositional
 
@@ -16,7 +20,7 @@ inductive Derivation (T : Theory α) : Sequent α → Type _
 | cut {Δ φ}   : Derivation T (φ :: Δ) → Derivation T (∼φ :: Δ) → Derivation T Δ
 | axm {φ}    : φ ∈ T → Derivation T [φ]
 
-instance : OneSided (NNFormula α) (Theory α) := ⟨Derivation⟩
+instance : OneSided (Theory α) (NNFormula α) := ⟨Derivation⟩
 
 namespace Derivation
 
@@ -67,7 +71,7 @@ instance : Tait (NNFormula α) (Theory α) where
 
 instance : Tait.Cut (NNFormula α) (Theory α) := ⟨Derivation.cut⟩
 
-def trans (F : U ⊢* T) {Γ : Sequent α} : T ⟹ Γ → U ⟹ Γ
+def trans (F : U ⊢!* T) {Γ : Sequent α} : T ⟹ Γ → U ⟹ Γ
   | axL Γ φ   => axL Γ φ
   | verum Γ   => verum Γ
   | and d₁ d₂ => and (trans F d₁) (trans F d₂)
@@ -125,7 +129,7 @@ def deductionAux {Γ : Sequent α} {φ} : T ⟹ Γ → T \ {φ} ⟹ ∼φ :: Γ
 def deduction {Γ : Sequent α} {φ} (d : insert φ T ⟹ Γ) : T ⟹ ∼φ :: Γ := Tait.ofAxiomSubset (by simp) (deductionAux d)
 
 lemma inconsistent_iff_provable :
-    Entailment.Inconsistent (insert φ T) ↔ T ⊢! ∼φ := by
+    Entailment.Inconsistent (insert φ T) ↔ T ⊢ ∼φ := by
   constructor
   · intro h; exact ⟨deduction (Tait.inconsistent_iff_provable.mp h).get⟩
   · rintro b
@@ -157,3 +161,4 @@ abbrev NNFormula.Tautology (φ : NNFormula α) := Sequent.Tautology [φ]
 abbrev NNFormula.IsTautology (φ : NNFormula α) := Sequent.IsTautology [φ]
 
 end LO.Propositional
+end

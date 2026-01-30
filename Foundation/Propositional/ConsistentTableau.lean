@@ -1,8 +1,9 @@
-import Foundation.Propositional.Formula
-import Foundation.Logic.HilbertStyle.Supplemental
-import Foundation.Vorspiel.List.Supplemental
-import Foundation.Vorspiel.Finset.Supplemental
-import Foundation.Vorspiel.Set.Supplemental
+module
+
+public import Foundation.Propositional.Formula.Basic
+public import Foundation.Propositional.Entailment.Cl.Basic
+
+@[expose] public section
 
 namespace LO.Propositional
 
@@ -10,9 +11,8 @@ open Entailment FiniteContext
 open Formula
 
 variable {α : Type*}
-variable {S} [Entailment (Formula α) S]
+variable {S} [Entailment S (Formula α)]
 variable {𝓢 : S}
-
 
 def Tableau (α : Type u) := Set (Formula α) × Set (Formula α)
 
@@ -32,9 +32,9 @@ instance : HasSubset (Tableau α) := ⟨λ t₁ t₂ => t₁.1 ⊆ t₂.1 ∧ t�
   . intro h; cases h; simp;
   . rintro ⟨h₁, h₂⟩; cases t₁; cases t₂; simp_all;
 
-lemma not_mem₂ (hCon : t.Consistent 𝓢) {Γ : Finset (Formula α)} (hΓ : ∀ φ ∈ Γ, φ ∈ t.1) (h : 𝓢 ⊢! Γ.conj ➝ ψ) : ψ ∉ t.2 := by
+lemma not_mem₂ (hCon : t.Consistent 𝓢) {Γ : Finset (Formula α)} (hΓ : ∀ φ ∈ Γ, φ ∈ t.1) (h : 𝓢 ⊢ Γ.conj ➝ ψ) : ψ ∉ t.2 := by
   by_contra hC;
-  have : 𝓢 ⊢! Γ.conj ➝ (Finset.disj {ψ}) := by simpa;
+  have : 𝓢 ⊢ Γ.conj ➝ (Finset.disj {ψ}) := by simpa;
   have : 𝓢 ⊬ Γ.conj ➝ (Finset.disj {ψ}) := hCon (by aesop) (by aesop);
   contradiction;
 
@@ -50,7 +50,7 @@ lemma disjoint_of_consistent (hCon : t.Consistent 𝓢) : Disjoint t.1 t.2 := by
     (by simp_all only [Finset.coe_singleton, Set.singleton_subset_iff]; apply hp₁; assumption)
     (by simp_all only [Finset.coe_singleton, Set.singleton_subset_iff]; apply hp₂; assumption);
   replace this : 𝓢 ⊬ φ ➝ φ := by simpa using this;
-  have : 𝓢 ⊢! φ ➝ φ := C!_id;
+  have : 𝓢 ⊢ φ ➝ φ := C!_id;
   contradiction;
 
 variable [DecidableEq α]
@@ -72,7 +72,7 @@ lemma iff_consistent_insert₁
     refine C!_trans ?_ hC;
     . exact C!_trans CKFConjinsertFConj! $ CFConj_FConj!_of_subset $ Finset.insert_erase_subset φ Γ
 
-lemma iff_not_consistent_insert₁ : ¬Tableau.Consistent 𝓢 ((insert φ T), U) ↔ ∃ Γ Δ : Finset (Formula α), (↑Γ ⊆ T) ∧ (↑Δ ⊆ U) ∧ 𝓢 ⊢! φ ⋏ Γ.conj ➝ Δ.disj := by
+lemma iff_not_consistent_insert₁ : ¬Tableau.Consistent 𝓢 ((insert φ T), U) ↔ ∃ Γ Δ : Finset (Formula α), (↑Γ ⊆ T) ∧ (↑Δ ⊆ U) ∧ 𝓢 ⊢ φ ⋏ Γ.conj ➝ Δ.disj := by
   constructor;
   . contrapose!; apply iff_consistent_insert₁.mpr;
   . contrapose!; apply iff_consistent_insert₁.mp;
@@ -95,7 +95,7 @@ lemma iff_consistent_insert₂ : Tableau.Consistent 𝓢 (T, (insert φ U)) ↔ 
       simp only [Finset.mem_toList, Finset.mem_insert, Finset.mem_erase, ne_eq];
       tauto;
 
-lemma iff_not_consistent_insert₂ : ¬Tableau.Consistent 𝓢 (T, (insert φ U)) ↔ ∃ Γ Δ : Finset (Formula α), (↑Γ ⊆ T) ∧ (↑Δ ⊆ U) ∧ 𝓢 ⊢! Γ.conj ➝ φ ⋎ Δ.disj := by
+lemma iff_not_consistent_insert₂ : ¬Tableau.Consistent 𝓢 (T, (insert φ U)) ↔ ∃ Γ Δ : Finset (Formula α), (↑Γ ⊆ T) ∧ (↑Δ ⊆ U) ∧ 𝓢 ⊢ Γ.conj ➝ φ ⋎ Δ.disj := by
   constructor;
   . contrapose!; apply iff_consistent_insert₂.mpr;
   . contrapose!; apply iff_consistent_insert₂.mp;
@@ -118,12 +118,11 @@ lemma consistent_either (hCon : t.Consistent 𝓢) (φ : Formula α) : Tableau.C
   . simp only [Finset.coe_union, Set.union_subset_iff]; tauto;
   . simp only [Finset.coe_union, Set.union_subset_iff]; tauto;
 
-  -- have : 𝓢 ⊢! ⋀(Γ₁ ++ Γ₂) ➝ ⋁(Δ₁ ++ Δ₂) := C!_trans (K!_left EConj₂AppendKConj₂Conj₂!) $ C!_trans (cut! h₁ h₂) (K!_right EDisj₂AppendADisj₂Disj₂!);
+  -- have : 𝓢 ⊢ ⋀(Γ₁ ++ Γ₂) ➝ ⋁(Δ₁ ++ Δ₂) := C!_trans (K!_left EConj₂AppendKConj₂Conj₂!) $ C!_trans (cut! h₁ h₂) (K!_right EDisj₂AppendADisj₂Disj₂!);
 
 end Consistent
 
 end
-
 
 abbrev Saturated (t : Tableau α) := ∀ φ : Formula α, φ ∈ t.1 ∨ φ ∈ t.2
 
@@ -143,7 +142,6 @@ lemma mem₁_of_not_mem₂ (hMat : Saturated t) : φ ∉ t.2 → φ ∈ t.1 := b
   cases (hMat φ) with
   | inl _ => assumption;
   | inr h' => exact absurd h' h;
-
 
 lemma not_mem₁_iff_mem₂ (hCon : t.Consistent 𝓢) (hMat : Saturated t) : φ ∉ t.1 ↔ φ ∈ t.2 := by
   constructor;
@@ -212,7 +210,6 @@ def lindenbaum_maximal [Encodable α] (t : Tableau α) : Tableau α := (⋃ i, t
 local notation:max t"∞" => lindenbaum_maximal 𝓢 t
 
 @[simp] lemma lindenbaum_next_indexed_zero [Encodable α] {t : Tableau α} : (t.lindenbaum_next_indexed 𝓢 0) = t := by simp [lindenbaum_next_indexed]
-
 
 variable {𝓢}
 
@@ -338,9 +335,7 @@ end lindenbaum
 
 end Tableau
 
-
 open Tableau
-
 
 def SaturatedConsistentTableau (𝓢 : S) := {t : Tableau α // Saturated t ∧ t.Consistent 𝓢}
 
@@ -360,7 +355,7 @@ instance [Entailment.Consistent 𝓢] [Entailment.Int 𝓢] [DecidableEq α] [En
 
 variable {t t₁ t₂ : SaturatedConsistentTableau 𝓢}
 
-lemma not_mem₂ {Γ : Finset (Formula α)} (hΓ : ↑Γ ⊆ t.1.1) (h : 𝓢 ⊢! Γ.conj ➝ ψ) : ψ ∉ t.1.2 := t.1.not_mem₂ t.consistent hΓ h
+lemma not_mem₂ {Γ : Finset (Formula α)} (hΓ : ↑Γ ⊆ t.1.1) (h : 𝓢 ⊢ Γ.conj ➝ ψ) : ψ ∉ t.1.2 := t.1.not_mem₂ t.consistent hΓ h
 
 variable [Entailment.Int 𝓢]
 
@@ -381,12 +376,11 @@ lemma equality_of₁ (e₁ : t₁.1.1 = t₂.1.1) : t₁ = t₂ := by
 
 lemma equality_of₂ (e₂ : t₁.1.2 = t₂.1.2) : t₁ = t₂ := equality_of₁ $ saturated_duality.mpr e₂
 
-
 section
 
 variable [DecidableEq α] [Encodable α]
 
-lemma iff_provable_include₁ : T *⊢[𝓢]! φ ↔ ∀ t : SaturatedConsistentTableau 𝓢, (T ⊆ t.1.1) → φ ∈ t.1.1 := by
+lemma iff_provable_include₁ : T *⊢[𝓢] φ ↔ ∀ t : SaturatedConsistentTableau 𝓢, (T ⊆ t.1.1) → φ ∈ t.1.1 := by
   constructor;
   . intro h t hT;
     by_contra hφ;
@@ -404,11 +398,8 @@ lemma iff_provable_include₁ : T *⊢[𝓢]! φ ↔ ∀ t : SaturatedConsistent
     by_contra! hC;
     obtain ⟨t, ht⟩ := lindenbaum (𝓢 := 𝓢) (t₀ := ⟨T, {φ}⟩) $ by
       intro Γ Δ hΓ hΔ;
-      revert hC;
-      contrapose;
-      simp only [not_not];
-      intro h;
-      replace h : T *⊢[𝓢]! Δ.disj := Context.weakening! (by simpa using hΓ) $ FConj_DT.mp h;
+      contrapose! hC;
+      replace h : T *⊢[𝓢] Δ.disj := Context.weakening! (by simpa using hΓ) $ FConj_DT.mp hC;
       rcases Set.subset_singleton_iff_eq.mp hΔ with (hΔ | hΔ);
       . simp only [Finset.coe_eq_empty] at hΔ;
         subst hΔ;
@@ -420,9 +411,9 @@ lemma iff_provable_include₁ : T *⊢[𝓢]! φ ↔ ∀ t : SaturatedConsistent
     apply ht.2;
     simp;
 
-lemma iff_provable_include₁_finset {Γ : Finset (Formula α)} : ↑Γ *⊢[𝓢]! φ ↔ ∀ t : SaturatedConsistentTableau 𝓢, (↑Γ ⊆ t.1.1) → φ ∈ t.1.1 := iff_provable_include₁
+lemma iff_provable_include₁_finset {Γ : Finset (Formula α)} : ↑Γ *⊢[𝓢] φ ↔ ∀ t : SaturatedConsistentTableau 𝓢, (↑Γ ⊆ t.1.1) → φ ∈ t.1.1 := iff_provable_include₁
 
-lemma iff_provable_mem₁ : 𝓢 ⊢! φ ↔ ∀ t : SaturatedConsistentTableau 𝓢, φ ∈ t.1.1 := by
+lemma iff_provable_mem₁ : 𝓢 ⊢ φ ↔ ∀ t : SaturatedConsistentTableau 𝓢, φ ∈ t.1.1 := by
   constructor;
   . intro h t;
     apply iff_provable_include₁ (T := ∅) |>.mp;
@@ -433,19 +424,15 @@ lemma iff_provable_mem₁ : 𝓢 ⊢! φ ↔ ∀ t : SaturatedConsistentTableau 
 
 end
 
-
-
-
-
 section Saturated
 
-lemma mdp_mem₁_provable (h : 𝓢 ⊢! φ ➝ ψ) (hp₁ : φ ∈ t.1.1) : ψ ∈ t.1.1 := by
+lemma mdp_mem₁_provable (h : 𝓢 ⊢ φ ➝ ψ) (hp₁ : φ ∈ t.1.1) : ψ ∈ t.1.1 := by
   apply iff_not_mem₂_mem₁.mp;
   by_contra hq₂;
   apply by simpa using t.consistent (Γ := {φ}) (Δ := {ψ}) (by simpa) (by simpa);
   exact h;
 
-lemma mdp_mem₂_provable (h : 𝓢 ⊢! φ ➝ ψ) (hp₁ : ψ ∈ t.1.2) : φ ∈ t.1.2 := by
+lemma mdp_mem₂_provable (h : 𝓢 ⊢ φ ➝ ψ) (hp₁ : ψ ∈ t.1.2) : φ ∈ t.1.2 := by
   by_contra hq₂;
   have := iff_not_mem₂_mem₁.mpr $ mdp_mem₁_provable h $ iff_not_mem₂_mem₁.mp hq₂;
   contradiction;
@@ -464,7 +451,7 @@ lemma mdp_mem₂_provable (h : 𝓢 ⊢! φ ➝ ψ) (hp₁ : ψ ∈ t.1.2) : φ 
 
 @[simp] lemma mem₂_falsum : ⊥ ∈ t.1.2 := iff_not_mem₁_mem₂.mp not_mem₁_falsum
 
-lemma mem₁_of_provable : 𝓢 ⊢! φ → φ ∈ t.1.1 := by
+lemma mem₁_of_provable : 𝓢 ⊢ φ → φ ∈ t.1.1 := by
   intro h;
   exact mdp_mem₁_provable (C!_of_conseq! h) mem₁_verum;
 
@@ -603,7 +590,7 @@ private lemma of_mem₂_imp [DecidableEq α] [Encodable α] [Entailment.Cl 𝓢]
     . contradiction;
     . have := iff_not_mem₁_mem₂.mpr h;
       contradiction;
-  . have : ψ ➝ (φ ➝ ψ) ∈ t.1.1 := iff_provable_mem₁.mp imply₁! t;
+  . have : ψ ➝ (φ ➝ ψ) ∈ t.1.1 := iff_provable_mem₁.mp implyK! t;
     have : φ ➝ ψ ∉ t.1.2 := iff_not_mem₂_mem₁.mpr $ mdp_mem₁ this (iff_not_mem₂_mem₁.mp hψ);
     contradiction;
 
@@ -617,7 +604,6 @@ lemma iff_mem₁_imp [DecidableEq α] [Encodable α] [Entailment.Cl 𝓢] : φ �
     constructor;
     . exact iff_not_mem₂_mem₁.mpr hφ;
     . exact iff_not_mem₁_mem₂.mpr hψ;
-
 
 lemma iff_mem₂_imp [DecidableEq α] [Encodable α] [Entailment.Cl 𝓢] : φ ➝ ψ ∈ t.1.2 ↔ (φ ∈ t.1.1 ∧ ψ ∈ t.1.2) := by
   constructor;
@@ -655,3 +641,4 @@ end Saturated
 end SaturatedConsistentTableau
 
 end LO.Propositional
+end

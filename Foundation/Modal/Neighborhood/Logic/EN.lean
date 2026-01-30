@@ -1,7 +1,9 @@
-import Foundation.Modal.Neighborhood.Hilbert
-import Foundation.Modal.Neighborhood.AxiomN
-import Foundation.Modal.Neighborhood.Logic.E
-import Foundation.Modal.PLoN.Logic.N
+module
+
+public import Foundation.Modal.Neighborhood.Logic.E
+public import Foundation.Modal.PLoN.Logic.N
+
+@[expose] public section
 
 namespace LO.Modal
 
@@ -19,83 +21,89 @@ protected abbrev FrameClass.EN : FrameClass := { F | F.IsEN }
 end Neighborhood
 
 
-namespace Hilbert
+namespace EN
 
-namespace EN.Neighborhood
-
-instance : Sound Hilbert.EN FrameClass.EN := instSound_of_validates_axioms $ by
+instance Neighborhood.sound : Sound Modal.EN FrameClass.EN := instSound_of_validates_axioms $ by
   constructor;
   rintro _ (rfl | rfl) F hF;
   simp_all;
 
-instance : Entailment.Consistent Hilbert.EN := consistent_of_sound_frameclass FrameClass.EN $ by
+instance consistent : Entailment.Consistent Modal.EN := consistent_of_sound_frameclass FrameClass.EN $ by
   use Frame.simple_blackhole;
   simp only [Set.mem_setOf_eq];
   infer_instance;
 
-instance : Complete Hilbert.EN FrameClass.EN := complete_of_canonical_frame FrameClass.EN (minimalCanonicalFrame (Hilbert.EN)) $ by
+instance Neighborhood.complete : Complete Modal.EN FrameClass.EN := (basicCanonicity Modal.EN).completeness $ by
   apply Set.mem_setOf_eq.mpr;
   infer_instance;
 
-end EN.Neighborhood
+end EN
 
-instance : Hilbert.E ⪱ Hilbert.EN := by
+
+instance : Modal.EN ⪱ Modal.ECN := by
   constructor;
   . apply Hilbert.WithRE.weakerThan_of_subset_axioms;
     simp;
   . apply Entailment.not_weakerThan_iff.mpr;
-    use Axioms.N;
+    use (Axioms.C (.atom 0) (.atom 1));
     constructor;
     . simp;
-    . apply Sound.not_provable_of_countermodel (𝓜 := FrameClass.E);
+    . apply Sound.not_provable_of_countermodel (𝓜 := FrameClass.EN);
       apply not_validOnFrameClass_of_exists_model_world;
       let M : Model := {
-        World := Fin 1,
-        𝒩 := λ w => ∅,
-        Val := λ w => Set.univ
+        World := Fin 2,
+        𝒩 := λ w =>
+          match w with
+          | 0 => {{0}, {1}, {0, 1}, Set.univ}
+          | 1 => {{1}, {0, 1}, Set.univ},
+        Val := λ w =>
+          match w with
+          | 0 => {0}
+          | 1 => {1}
+          | _ => Set.univ
       };
       use M, 0;
       constructor;
-      . tauto;
-      . simp! [M, Semantics.Realize, Satisfies];
+      . exact {
+          contains_unit := by
+            ext x;
+            match x with | 0 | 1 => simp_all [M]
+        }
+      . simp! [M, Semantics.Models, Satisfies];
+        tauto_set;
 
-end Hilbert
-
-instance : 𝐄 ⪱ 𝐄𝐍 := inferInstance
-instance : Modal.N ⪱ 𝐄𝐍 := by
+instance : Modal.EN ⪱ Modal.EMN := by
   constructor;
-  . suffices ∀ φ, Hilbert.N ⊢! φ → Hilbert.EN ⊢! φ by
-      apply Entailment.weakerThan_iff.mpr;
-      simpa;
-    intro φ hφ;
-    induction hφ using Hilbert.Normal.rec! with
-    | axm s h => simp at h;
-    | mdp ihφψ ihφ => apply ihφψ ⨀ ihφ;
-    | nec ihφ => apply Entailment.nec! ihφ;
-    | _ => simp;
-  . suffices ∃ φ, Hilbert.EN ⊢! φ ∧ Hilbert.N ⊬ φ by
-      apply Entailment.not_weakerThan_iff.mpr;
-      simpa using this;
-    use □(.atom 0) ⭤ □(∼∼.atom 0);
+  . apply Hilbert.WithRE.weakerThan_of_subset_axioms;
+    simp;
+  . apply Entailment.not_weakerThan_iff.mpr;
+    use (Axioms.M (.atom 0) (.atom 1));
     constructor;
-    . apply re!;
-      cl_prover;
-    . apply Sound.not_provable_of_countermodel (𝓜 := PLoN.AllFrameClass);
-      apply Formula.PLoN.ValidOnFrameClass.not_of_exists_model;
-      let M : PLoN.Model := {
+    . simp;
+    . apply Sound.not_provable_of_countermodel (𝓜 := FrameClass.EN);
+      apply not_validOnFrameClass_of_exists_model_world;
+      let M : Model := {
         World := Fin 2,
-        Rel ξ x y := if ξ = ∼∼(.atom 0) then True else False,
-        Valuation x a := x = 0
+        𝒩 := λ w =>
+          match w with
+          | 0 => {∅, Set.univ}
+          | 1 => {Set.univ},
+        Val := λ w =>
+          match w with
+          | 0 => {0}
+          | 1 => {1}
+          | _ => Set.univ
       };
-      use M;
+      use M, 0;
       constructor;
-      . tauto;
-      . suffices (∃ x : M.World, ∀ y : M.World, (PLoN.Frame.Rel' (.atom 0) x y) → y = 0) ∧ ∃ x : M.World, x ≠ 0 by
-          simpa [M, Semantics.Realize, Formula.PLoN.ValidOnModel, Formula.PLoN.Satisfies] using this;
-        constructor;
-        . use 0;
-          simp [M, PLoN.Frame.Rel'];
-        . use 1;
-          simp [M];
+      . exact {
+          contains_unit := by
+            ext x;
+            match x with | 0 | 1 => simp_all [M]
+        }
+      . simp! [M, Semantics.Models, Satisfies];
+        grind;
+
 
 end LO.Modal
+end

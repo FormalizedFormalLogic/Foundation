@@ -1,4 +1,8 @@
-import Foundation.Modal.Kripke.Completeness
+module
+
+public import Foundation.Modal.Kripke.Completeness
+
+@[expose] public section
 
 namespace LO.Modal
 
@@ -32,7 +36,7 @@ lemma validate_axiomMk_of_satisfiesMakinsonCondition [F.SatisfiesMakinsonConditi
   . apply Satisfies.and_def.mpr;
     constructor;
     . suffices Satisfies ⟨F, V⟩ y (□^[2](.atom 0)) by simpa using this;
-      apply Satisfies.multibox_def.mpr
+      apply Satisfies.boxItr_def.mpr
       intro z Ryz;
       apply hx₁;
       apply hz;
@@ -44,7 +48,7 @@ end definability
 
 section canonicality
 
-variable {S} [Entailment (Formula ℕ) S]
+variable {S} [Entailment S (Formula ℕ)]
 variable {𝓢 : S} [Entailment.Consistent 𝓢] [Entailment.K 𝓢]
 
 open Formula.Kripke
@@ -59,7 +63,7 @@ instance [Entailment.HasAxiomT 𝓢] [Entailment.HasAxiomMk 𝓢] : (canonicalFr
   sorry;
   /-
   rintro x;
-  obtain ⟨y, hy⟩ := lindenbaum (𝓢 := 𝓢) (t₀ := ⟨x.1.1.prebox, x.1.2.box ∪ x.1.2.dia⟩) $ by
+  obtain ⟨y, hy⟩ := lindenbaum (𝓢 := 𝓢) (t₀ := ⟨□⁻¹'x.1.1, x.1.2.box ∪ x.1.2.dia⟩) $ by
     rintro Γ Δ hΓ hΔ;
     by_contra! hC;
     let Δ₁ := { φ ∈ Δ | φ ∈ x.1.2.box };
@@ -72,8 +76,8 @@ instance [Entailment.HasAxiomT 𝓢] [Entailment.HasAxiomMk 𝓢] : (canonicalFr
         rcases hΔ h with h₁ | h₂ <;> tauto;
       . tauto;
     rw [eΔ] at hC;
-    have : 𝓢 ⊢! Γ.conj ➝ Δ₁.disj ⋎ Δ₂.disj := C!_trans hC CFdisjUnionAFdisj;
-    have : 𝓢 ⊢! □Γ.prebox.conj ➝ Δ₁.disj ⋎ Δ₂.disj := C!_trans (by
+    have : 𝓢 ⊢ Γ.conj ➝ Δ₁.disj ⋎ Δ₂.disj := C!_trans hC CFdisjUnionAFdisj;
+    have : 𝓢 ⊢ □Γ.prebox.conj ➝ Δ₁.disj ⋎ Δ₂.disj := C!_trans (by
       apply right_Fconj!_intro;
       intro φ hφ;
       have := hΓ hφ;
@@ -90,7 +94,7 @@ instance [Entailment.HasAxiomT 𝓢] [Entailment.HasAxiomMk 𝓢] : (canonicalFr
   . rintro z Ryz;
     apply def_rel_dia_mem₂.mpr;
     intro φ hφ;
-    apply def_multirel_multidia_mem₂.mp Ryz;
+    apply def_multirel_diaItr_mem₂.mp Ryz;
     exact @hy.2 (◇◇φ) (by simpa);
   -/
 ⟩
@@ -102,3 +106,4 @@ end canonicality
 end Kripke
 
 end LO.Modal
+end

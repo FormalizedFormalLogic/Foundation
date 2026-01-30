@@ -1,5 +1,9 @@
-import Foundation.Modal.Kripke.Logic.GL.Tree
-import Foundation.Modal.Kripke.ExtendRoot
+module
+
+public import Foundation.Modal.Kripke.Logic.GL.Tree
+public import Foundation.Modal.Kripke.ExtendRoot
+
+@[expose] public section
 
 namespace LO.Modal
 
@@ -8,10 +12,8 @@ open Kripke
 open Formula.Kripke
 open Relation
 
-namespace Logic.GL
-
 open Model in
-lemma imply_boxdot_plain_of_imply_box_box : Modal.GL ⊢! □φ ➝ □ψ → Modal.GL ⊢! ⊡φ ➝ ψ := by
+lemma imply_boxdot_plain_of_imply_box_box : Modal.GL ⊢ □φ ➝ □ψ → Modal.GL ⊢ ⊡φ ➝ ψ := by
   contrapose;
   intro h;
   have := GL.Kripke.iff_unprovable_exists_unsatisfies_FiniteTransitiveTree.mp h;
@@ -44,14 +46,13 @@ lemma imply_boxdot_plain_of_imply_box_box : Modal.GL ⊢! □φ ➝ □ψ → Mo
   . exact {};
   . tauto;
 
-theorem unnecessitation! : Modal.GL ⊢! □φ → Modal.GL ⊢! φ := by
+theorem unnecessitation! : Modal.GL ⊢ □φ → Modal.GL ⊢ φ := by
   intro h;
-  have : Modal.GL ⊢! □⊤ ➝ □φ := C!_of_conseq! (ψ := □⊤) h;
-  have : Modal.GL ⊢! ⊡⊤ ➝ φ := imply_boxdot_plain_of_imply_box_box this;
+  have : Modal.GL ⊢ □⊤ ➝ □φ := C!_of_conseq! (ψ := □⊤) h;
+  have : Modal.GL ⊢ ⊡⊤ ➝ φ := imply_boxdot_plain_of_imply_box_box this;
   exact this ⨀ boxdotverum!;
 
 noncomputable instance : Entailment.Unnecessitation Modal.GL := ⟨λ h => unnecessitation! ⟨h⟩ |>.some⟩
 
-end Logic.GL
-
 end LO.Modal
+end

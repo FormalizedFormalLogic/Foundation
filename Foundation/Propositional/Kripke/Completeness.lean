@@ -1,9 +1,13 @@
-import Foundation.Propositional.Kripke.Basic
-import Foundation.Propositional.ConsistentTableau
+module
+
+public import Foundation.Propositional.Kripke.Basic
+public import Foundation.Propositional.ConsistentTableau
+
+@[expose] public section
 
 namespace LO.Propositional
 
-variable {S} [Entailment (Formula ℕ) S]
+variable {S} [Entailment S (Formula ℕ)]
 variable {𝓢 : S} [Entailment.Consistent 𝓢] [Entailment.Int 𝓢]
 variable {t t₁ t₂ : SaturatedConsistentTableau 𝓢} {φ ψ : Formula ℕ}
 
@@ -50,7 +54,7 @@ end canonicalFrame
 
 def canonicalModel (𝓢 : S) [Entailment.Consistent 𝓢] [Entailment.Int 𝓢] : Kripke.Model where
   toFrame := Kripke.canonicalFrame 𝓢
-  Val := ⟨λ t a => (atom a) ∈ t.1.1, by aesop⟩
+  Val := ⟨λ a t => (atom a) ∈ t.1.1, by aesop⟩
 
 namespace canonicalModel
 
@@ -112,18 +116,18 @@ private lemma truthlemma.himp
     . simp only [Finset.coe_insert, Finset.coe_singleton];
       apply Set.doubleton_subset.mpr;
       tauto;
-    . suffices 𝓢 ⊢! Finset.conj {φ, φ ➝ ψ} ➝ Finset.disj {ψ} by simpa;
+    . suffices 𝓢 ⊢ Finset.conj {φ, φ ➝ ψ} ➝ Finset.disj {ψ} by simpa;
       apply CFConj_CDisj!_of_innerMDP (φ := φ) (ψ := ψ) <;> simp;
 
 lemma truthlemma : t ⊧ φ ↔ φ ∈ t.1.1 := by
   induction φ generalizing t with
   | hatom => tauto;
-  | hfalsum => simp only [Semantics.Bot.realize_bot, not_mem₁_falsum];
+  | hfalsum => simp only [Semantics.Bot.models_falsum, not_mem₁_falsum];
   | himp φ ψ ihp ihq => exact truthlemma.himp ihp ihq;
   | hand φ ψ ihp ihq => simp [SaturatedConsistentTableau.iff_mem₁_and, *];
   | hor φ ψ ihp ihq => simp [SaturatedConsistentTableau.iff_mem₁_or, *];
 
-lemma iff_valid_on_canonicalModel_deducible : (Kripke.canonicalModel 𝓢) ⊧ φ ↔ 𝓢 ⊢! φ := by
+lemma iff_valid_on_canonicalModel_deducible : (Kripke.canonicalModel 𝓢) ⊧ φ ↔ 𝓢 ⊢ φ := by
   constructor;
   . contrapose;
     intro h;
@@ -167,3 +171,4 @@ instance instCompleteOfCanonical [Canonical 𝓢 C] : Complete 𝓢 C := ⟨by
 end Kripke
 
 end LO.Propositional
+end

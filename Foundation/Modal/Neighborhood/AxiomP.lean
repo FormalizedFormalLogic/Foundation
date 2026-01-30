@@ -1,4 +1,8 @@
-import Foundation.Modal.Neighborhood.Basic
+module
+
+public import Foundation.Modal.Neighborhood.Basic
+
+@[expose] public section
 
 namespace LO.Modal.Neighborhood
 
@@ -9,7 +13,8 @@ variable {F : Frame}
 class Frame.NotContainsEmpty (F : Frame) : Prop where
   not_contains_empty : ∀ x, ∅ ∉ F.𝒩 x
 
-lemma Frame.not_contains_empty [F.NotContainsEmpty] {x : F} : ∅ ∉ F.𝒩 x := Frame.NotContainsEmpty.not_contains_empty x
+@[simp] lemma Frame.not_contains_empty [F.NotContainsEmpty] {x : F} : ∅ ∉ F.𝒩 x := Frame.NotContainsEmpty.not_contains_empty x
+@[simp] lemma Frame.mem_dia_univ {F : Frame} [F.NotContainsEmpty] {x : F} : x ∈ F.dia Set.univ := by simp
 
 instance : Frame.simple_blackhole.NotContainsEmpty := ⟨by simp only [Set.mem_singleton_iff, forall_const]; tauto_set⟩
 
@@ -29,3 +34,4 @@ lemma notContainsEmpty_of_valid_axiomP (h : F ⊧ Axioms.P) : F.NotContainsEmpty
   simpa [Satisfies] using this;
 
 end LO.Modal.Neighborhood
+end

@@ -1,13 +1,16 @@
-import Zoo.Basic
+module
+
 import Foundation.Modal.Hilbert.Normal.Basic
--- import Foundation.Modal.Kripke.Logic.S5
+public meta import Zoo.Basic
+public meta import Mathlib.Lean.Expr.Basic
+public meta import Qq.MetaM
 
 open Lean Meta Qq Elab Command
 open LO.Modal
 
 namespace Zoo
 
-def isMatch (ci : ConstantInfo) : MetaM (Option Edge) := withNewMCtxDepth do
+meta def isMatch (ci : ConstantInfo) : MetaM (Option Edge) := withNewMCtxDepth do
   match ← inferTypeQ ci.type with
   | ⟨1, ~q(Prop), ~q(LO.Entailment.StrictlyWeakerThan (S := Logic ℕ) (T := Logic ℕ) $a $b)⟩ =>
     return some ⟨toString (←Lean.PrettyPrinter.ppExpr a), toString (←Lean.PrettyPrinter.ppExpr b), .ssub⟩
@@ -17,7 +20,7 @@ def isMatch (ci : ConstantInfo) : MetaM (Option Edge) := withNewMCtxDepth do
     return some ⟨toString (←Lean.PrettyPrinter.ppExpr a), toString (←Lean.PrettyPrinter.ppExpr b), .eq⟩
   | _ => return none
 
-def findMatches : MetaM Json := do
+meta def findMatches : MetaM Json := do
   let mut edges : Edges := .emptyWithCapacity
   for (name, ci) in (← getEnv).constants do
     if ci.isUnsafe then continue
@@ -33,8 +36,8 @@ def findMatches : MetaM Json := do
 end Zoo
 
 
-unsafe def main : IO Unit := do
+public meta def main : IO Unit := do
   initSearchPath (← findSysroot)
   let env ← importModules (loadExts := true) #[`Foundation] {}
   let ⟨s, _, _⟩ ← Zoo.findMatches.toIO { fileName := "<compiler>", fileMap := default } { env := env }
-  IO.FS.writeFile "Zoo/modal.json" s.pretty
+  IO.FS.writeFile "Zoo/Modal.json" s.pretty

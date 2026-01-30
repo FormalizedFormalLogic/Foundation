@@ -1,8 +1,8 @@
-import Foundation.Modal.Neighborhood.AxiomC
-import Foundation.Modal.Neighborhood.AxiomGeach
-import Foundation.Modal.Neighborhood.AxiomM
-import Foundation.Modal.Neighborhood.AxiomN
-import Foundation.Modal.Neighborhood.Logic.E
+module
+
+public import Foundation.Modal.Neighborhood.Logic.E
+
+@[expose] public section
 
 namespace LO.Modal
 
@@ -18,52 +18,44 @@ instance : Frame.simple_blackhole.IsSerial := by
   simp only [Frame.box, Set.mem_singleton_iff, Set.mem_setOf_eq, Frame.dia, Set.compl_univ_iff, Set.mem_compl_iff];
   tauto_set;
 
-
 @[reducible] protected alias Frame.IsED := Frame.IsSerial
 protected abbrev FrameClass.ED : FrameClass := { F | F.IsED }
 
+instance : Frame.simple_whitehole.IsED where
+  serial := by simp_all [Frame.simple_whitehole, Frame.box];
 
 end Neighborhood
 
 
-namespace Hilbert
+namespace ED
 
-namespace ED.Neighborhood
-
-instance : Sound Hilbert.ED FrameClass.ED := instSound_of_validates_axioms $ by
-  simp only [Semantics.RealizeSet.singleton_iff];
+instance Neighborhood.sound : Sound Modal.ED FrameClass.ED := instSound_of_validates_axioms $ by
+  simp only [Semantics.ModelsSet.singleton_iff];
   intro F hF;
   replace hF := Set.mem_setOf_eq.mp hF;
   simp;
 
-instance : Entailment.Consistent Hilbert.ED := consistent_of_sound_frameclass FrameClass.ED $ by
+instance consistent : Entailment.Consistent Modal.ED := consistent_of_sound_frameclass FrameClass.ED $ by
   use Frame.simple_blackhole;
   simp only [Set.mem_setOf_eq];
   infer_instance;
 
-end ED.Neighborhood
+end ED
 
-instance : Hilbert.E ⪱ Hilbert.ED := by
+instance : Modal.ED ⪱ Modal.END := by
   constructor;
   . apply Hilbert.WithRE.weakerThan_of_subset_axioms;
     simp;
   . apply Entailment.not_weakerThan_iff.mpr;
-    use (Axioms.D (.atom 0));
+    use Axioms.N;
     constructor;
     . simp;
-    . apply Sound.not_provable_of_countermodel (𝓜 := FrameClass.E);
+    . apply Sound.not_provable_of_countermodel (𝓜 := FrameClass.ED);
       apply not_validOnFrameClass_of_exists_frame;
-      use ⟨Fin 2, λ w => match w with | 0 => {{0}} | 1 => Set.univ⟩
+      use Frame.simple_whitehole;
       constructor;
-      . tauto;
-      . apply not_imp_not.mpr isSerial_of_valid_axiomD;
-        by_contra! hC;
-        have := @hC.serial {1} 1;
-        simp [Frame.box, Frame.dia] at this;
-
-
-end Hilbert
-
-instance : 𝐄 ⪱ 𝐄𝐃 := inferInstance
+      . apply Set.mem_setOf_eq.mpr; infer_instance;
+      . simp;
 
 end LO.Modal
+end

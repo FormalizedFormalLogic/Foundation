@@ -1,6 +1,9 @@
-import Foundation.FirstOrder.Basic
-import Foundation.Modal.NNFormula
-import Foundation.Modal.Kripke.NNFormula
+module
+
+public import Foundation.FirstOrder.Basic
+public import Foundation.Modal.Kripke.NNFormula
+
+@[expose] public section
 
 namespace LO.FirstOrder
 
@@ -39,7 +42,7 @@ open Lean PrettyPrinter Delaborator
 syntax:45 first_order_term:45 " ⊩ " term :max : first_order_formula
 
 macro_rules
-  | `(⤫formula[ $binders* | $fbinders* | $t:first_order_term ⊩ $a:term]) => `(Semiformula.Operator.operator (forces $a) ![⤫term[ $binders* | $fbinders* | $t ]])
+  | `(⤫formula(lit)[ $binders* | $fbinders* | $t:first_order_term ⊩ $a:term]) => `(Semiformula.Operator.operator (forces $a) ![⤫term(lit)[ $binders* | $fbinders* | $t ]])
 
 def transitive : Sentence 𝓛𝓕 := “∀ x y z, x < y → y < z → x < z”
 
@@ -52,7 +55,7 @@ end LO.FirstOrder
 
 namespace LO.Modal
 
-open NNFormula
+open NNFormula FirstOrder
 
 def standardTranslation : NNFormula ℕ → FirstOrder.Semisentence 𝓛𝓕 1
   | .atom  a => “x. x ⊩ a”
@@ -78,10 +81,10 @@ instance {M : Model} : FirstOrder.Structure 𝓛𝓕 M.World where
   func := fun _ f => PEmpty.elim f
   rel := fun _ r =>
     match r with
-    | .pred p => fun v => M (v 0) p
+    | .pred p => fun v => M p (v 0)
     | .lt     => fun v => v 0 ≺ v 1
 
-@[simp] lemma forces_iff_val : (forces a).val ![x] ↔ M.Val x a:= by rfl
+@[simp] lemma forces_iff_val : (forces a).val ![x] ↔ M.Val a x:= by rfl
 
 @[simp] lemma lt_iff_rel : (@Operator.LT.lt 𝓛𝓕 _).val ![x, y] ↔ x ≺ y := by rfl
 
@@ -117,8 +120,8 @@ lemma correspondence_satisfies : x ⊧ φ ↔ M ⊧/![x] φ¹ := by
   | _ => simp_all [standardTranslation];
 
 /-- BdRV Prop 2.47 (ii) -/
-lemma correspondence_validOnModel : M ⊧ φ ↔ M ⊧ₘ₀ ∀' φ¹ := by
-  suffices M ⊧ φ ↔ ∀ x : M.World, M ⊧/![x] φ¹ by simpa [FirstOrder.models₀_iff];
+lemma correspondence_validOnModel : M ⊧ φ ↔ M ⊧ₘ ∀' φ¹ := by
+  suffices M ⊧ φ ↔ ∀ x : M.World, M ⊧/![x] φ¹ by simpa [FirstOrder.models_iff];
   constructor;
   . intro h x; apply correspondence_satisfies.mp $ h x;
   . intro h x; exact correspondence_satisfies.mpr $ h x;
@@ -128,3 +131,4 @@ end Kripke.FirstOrder
 
 
 end LO.Modal
+end

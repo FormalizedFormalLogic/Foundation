@@ -1,26 +1,31 @@
-import Foundation.Propositional.Hilbert.WellKnown
-import Foundation.Propositional.ClassicalSemantics.Basic
-import Foundation.Propositional.ConsistentTableau
+module
+
+public import Foundation.Propositional.Hilbert.Standard
+public import Foundation.Propositional.ClassicalSemantics.Basic
+public import Foundation.Propositional.ConsistentTableau
+
+@[expose] public section
 
 namespace LO.Propositional
 
+open LO.Entailment
 open Semantics
 open ClassicalSemantics
 open Formula.ClassicalSemantics
 
-namespace Hilbert.Cl
+namespace Cl
 
-theorem soundness (h : Hilbert.Cl ⊢! φ) : φ.isTautology := by
+theorem soundness (h : Propositional.Cl ⊢ φ) : φ.Tautology := by
   intro v;
   induction h with
   | axm _ h => rcases h with (rfl | rfl) <;> tauto;
   | mdp ihφψ ihφ => exact ihφψ ihφ;
-  | andElimL => simp [Semantics.Realize, val]; tauto;
-  | andElimR => simp [Semantics.Realize, val];
-  | orElim => simp [Semantics.Realize, val]; tauto;
+  | andElimL => simp [Semantics.Models, val]; tauto;
+  | andElimR => simp [Semantics.Models, val];
+  | orElim => simp [Semantics.Models, val]; tauto;
   | _ => tauto;
 
-lemma not_provable_of_exists_valuation : (∃ v : Valuation _, ¬(v ⊧ φ)) → Hilbert.Cl ⊬ φ := by
+lemma not_provable_of_exists_valuation : (∃ v : Valuation _, ¬(v ⊧ φ)) → Propositional.Cl ⊬ φ := by
   contrapose!;
   simpa using soundness;
 
@@ -30,12 +35,12 @@ open
   Entailment
   SaturatedConsistentTableau
 
-def canonicalVal (T : SaturatedConsistentTableau Hilbert.Cl) : Valuation ℕ := λ a => (.atom a) ∈ T.1.1
+def canonicalVal (T : SaturatedConsistentTableau Propositional.Cl) : Valuation ℕ := λ a => (.atom a) ∈ T.1.1
 
-lemma truthlemma {T : SaturatedConsistentTableau Hilbert.Cl} : (canonicalVal T) ⊧ φ ↔ φ ∈ T.1.1 := by
+lemma truthlemma {T : SaturatedConsistentTableau Propositional.Cl} : (canonicalVal T) ⊧ φ ↔ φ ∈ T.1.1 := by
   induction φ with
   | hatom => simp [canonicalVal];
-  | hfalsum => simp [canonicalVal];
+  | hfalsum => simp
   | himp φ ψ ihφ ihψ =>
     constructor;
     . intro hφψ;
@@ -77,10 +82,10 @@ lemma truthlemma {T : SaturatedConsistentTableau Hilbert.Cl} : (canonicalVal T) 
       . left; apply ihφ.mpr hφ;
       . right; apply ihψ.mpr hψ;
 
-theorem completeness : (φ.isTautology) → (Hilbert.Cl ⊢! φ) := by
+theorem completeness : (φ.Tautology) → (Propositional.Cl ⊢ φ) := by
   contrapose;
   intro h;
-  obtain ⟨T, hT⟩ := lindenbaum (𝓢 := Hilbert.Cl) (t₀ := (∅, {φ})) $ by
+  obtain ⟨T, hT⟩ := lindenbaum (𝓢 := Propositional.Cl) (t₀ := (∅, {φ})) $ by
     intro Γ Δ hΓ hΔ;
     by_contra hC;
     apply h;
@@ -93,7 +98,7 @@ theorem completeness : (φ.isTautology) → (Hilbert.Cl ⊢! φ) := by
     . simp only [Finset.coe_eq_singleton] at hΔ;
       subst hΔ;
       exact (by simpa using hC) ⨀ verum!;
-  unfold Formula.isTautology Semantics.Valid;
+  unfold Formula.Tautology Semantics.Valid;
   push_neg;
   use (canonicalVal T);
   apply truthlemma.not.mpr;
@@ -101,34 +106,25 @@ theorem completeness : (φ.isTautology) → (Hilbert.Cl ⊢! φ) := by
   apply hT.2;
   tauto;
 
-theorem iff_isTautology_provable : φ.isTautology ↔ Hilbert.Cl ⊢! φ := ⟨
-  completeness,
+@[grind =]
+theorem iff_provable_tautology : Propositional.Cl ⊢ φ ↔ φ.Tautology := ⟨
   soundness,
+  completeness,
 ⟩
 
-lemma exists_valuation_of_not_provable : ¬(Hilbert.Cl ⊢! φ) → ∃ v : Valuation _, ¬(v ⊧ φ) := by
+lemma exists_valuation_of_not_provable : ¬(Propositional.Cl ⊢ φ) → ∃ v : Valuation _, ¬(v ⊧ φ) := by
   contrapose!;
   simpa using completeness;
 
 end Completeness
 
-end Hilbert.Cl
+theorem tautologies : Propositional.Cl = { φ | φ.Tautology } := by
+  ext;
+  rw [←Logic.iff_provable];
+  apply iff_provable_tautology;
 
+end Cl
 
-namespace Logic.Cl
-
-variable {φ : Formula ℕ}
-
-theorem tautologies : 𝐂𝐥 = { φ | φ.isTautology } := by
-  ext φ;
-  simp [Hilbert.Cl.iff_isTautology_provable, Entailment.theory];
-
-lemma exists_valuation_of_not (h : 𝐂𝐥 ⊬ φ) : ∃ v : Valuation _, ¬(v ⊧ φ) := by
-  apply Hilbert.Cl.exists_valuation_of_not_provable;
-  tauto;
-
-lemma iff_isTautology : 𝐂𝐥 ⊢! φ ↔ φ.isTautology := by simp [tautologies];
-
-end Logic.Cl
 
 end LO.Propositional
+end

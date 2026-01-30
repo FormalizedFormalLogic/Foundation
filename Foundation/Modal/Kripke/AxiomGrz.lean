@@ -1,6 +1,8 @@
-import Foundation.Modal.Kripke.Logic.K
-import Foundation.Vorspiel.HRel.WCWF
-import Foundation.Modal.Kripke.Antisymmetric
+module
+
+public import Foundation.Modal.Kripke.Logic.K
+
+@[expose] public section
 
 namespace LO.Modal
 
@@ -10,19 +12,15 @@ open Entailment
 open Kripke
 open Formula (atom)
 open Formula.Kripke
-open HRel (IrreflGen)
+open Rel (IrreflGen)
 
 variable {F : Kripke.Frame}
-
 
 protected abbrev Frame.IsWeaklyConverseWellFounded (F : Frame) := _root_.IsWeaklyConverseWellFounded _ F.Rel
 
 lemma Frame.wcwf [F.IsWeaklyConverseWellFounded] : _root_.WeaklyConverseWellFounded F.Rel := IsWeaklyConverseWellFounded.wcwf
 
-
 instance [F.IsFinite] [F.IsTransitive] [F.IsAntisymmetric] : F.IsWeaklyConverseWellFounded := ⟨IsWeaklyConverseWellFounded.wcwf⟩
-
-
 
 lemma validate_AxiomGrz_of_refl_trans_wcwf [F.IsReflexive] [F.IsTransitive] [F.IsWeaklyConverseWellFounded] : F ⊧ (Axioms.Grz (.atom 0)) := by
   intro V;
@@ -46,7 +44,7 @@ lemma validate_AxiomGrz_of_refl_trans_wcwf [F.IsReflexive] [F.IsTransitive] [F.I
     simpa [X] using this;
 
   rintro w (⟨hw₁, hw₂⟩ | ⟨hw₁, hw₂, hw₃⟩);
-  . have : Satisfies M w (□((.atom 0) ➝ □(.atom 0)) ➝ (.atom 0)) := hw₁ w (IsRefl.refl w);
+  . have : Satisfies M w (□((.atom 0) ➝ □(.atom 0)) ➝ (.atom 0)) := hw₁ w (Std.Refl.refl w);
     have : ¬Satisfies M w (□(atom 0 ➝ □atom 0)) := not_imp_not.mpr this hw₂;
     obtain ⟨x, Rwx, hx, ⟨y, Rxy, hy⟩⟩ := by simpa [Satisfies] using this;
     use x;
@@ -79,7 +77,6 @@ lemma validate_AxiomGrz_of_refl_trans_wcwf [F.IsReflexive] [F.IsTransitive] [F.I
 
 lemma validate_AxiomGrz_of_finite_strict_preorder [F.IsFinite] [F.IsPartialOrder] : F ⊧ (Axioms.Grz (.atom 0)) := validate_AxiomGrz_of_refl_trans_wcwf
 
-
 lemma validate_AxiomT_AxiomFour_of_validate_Grz (h : F ⊧ Axioms.Grz (.atom 0)) : F ⊧ □(.atom 0) ➝ ((.atom 0) ⋏ □□(.atom 0)) := by
   let ψ : Formula _ := (.atom 0) ⋏ (□(.atom 0) ➝ □□(.atom 0));
   intro V x;
@@ -92,7 +89,7 @@ lemma validate_AxiomT_AxiomFour_of_validate_Grz (h : F ⊧ Axioms.Grz (.atom 0))
     . exact h₂.1;
     . exact h₂.2 h₁;
   intro h₁;
-  have h₂ : Satisfies ⟨F, V⟩ x (□(atom 0) ➝ □(□(ψ ➝ □ψ) ➝ ψ)) := (Sound.sound (𝓢 := Hilbert.K) (𝓜 := FrameClass.K) lemma_Grz₁!) (by trivial) V x;
+  have h₂ : Satisfies ⟨F, V⟩ x (□(atom 0) ➝ □(□(ψ ➝ □ψ) ➝ ψ)) := (Sound.sound (𝓢 := Modal.K) (𝓜 := FrameClass.K) lemma_Grz₁!) (by trivial) V x;
   have h₃ : Satisfies ⟨F, V⟩ x (□(□(ψ ➝ □ψ) ➝ ψ) ➝ ψ) := Satisfies.iff_subst_self (s := λ a => if a = 0 then ψ else a) |>.mp $ h _ _;
   exact h₃ $ h₂ $ h₁;
 
@@ -127,7 +124,7 @@ lemma WCWF_of_validate_AxiomGrz (h : F ⊧ Axioms.Grz (.atom 0)) : F.IsWeaklyCon
     simp only [IrreflGen, ne_eq] at hf;
     apply ValidOnFrame.not_of_exists_valuation_world;
     by_cases H : ∀ j₁ j₂, (j₁ < j₂ → f j₂ ≠ f j₁)
-    . use (λ v _ => ∀ i, v ≠ f (2 * i)), (f 0);
+    . use (λ _ v => ∀ i, v ≠ f (2 * i)), (f 0);
       apply Classical.not_imp.mpr
       constructor;
       . suffices Satisfies ⟨F, _⟩ (f 0) (□(∼(.atom 0) ➝ ∼(□((.atom 0) ➝ □(.atom 0))))) by
@@ -154,7 +151,7 @@ lemma WCWF_of_validate_AxiomGrz (h : F ⊧ Axioms.Grz (.atom 0)) : F.IsWeaklyCon
         use 0;
     . push_neg at H;
       obtain ⟨j, k, ljk, ejk⟩ := H;
-      let V : Valuation F := (λ v _ => v ≠ f j);
+      let V : Valuation F := (λ _ v => v ≠ f j);
       use V, (f j);
       apply Classical.not_imp.mpr;
       constructor;
@@ -173,13 +170,8 @@ lemma WCWF_of_validate_AxiomGrz (h : F ⊧ Axioms.Grz (.atom 0)) : F.IsWeaklyCon
             . have : j + 1 < k := by omega;
               exact H this;
         intro x hx;
-        contrapose;
-        have : Satisfies ⟨F, V⟩ (f j) (□(∼(.atom 0) ➝ ∼□((.atom 0) ➝ □(.atom 0)))) := by
-          simp_all [Satisfies, V];
-          rintro x hx rfl;
-          use f (j + 1);
-          refine ⟨(hf j).1, Ne.symm $ (hf j).2, this.2⟩;
-        exact this _ hx;
+        simp only [Satisfies, LogicalConnective.Prop.arrow_eq, imp_false, Classical.not_imp, not_forall] at ⊢ this;
+        grind;
       . simp [Satisfies, V];
 
 /-
@@ -223,3 +215,4 @@ protected instance FrameClass.finite_strict_preorder.definability
 end Kripke
 
 end LO.Modal
+end

@@ -1,11 +1,12 @@
-import Foundation.Modal.Kripke.Completeness
-import Foundation.Vorspiel.HRel.Convergent
+module
 
+public import Foundation.Modal.Kripke.Completeness
+
+@[expose] public section
 
 namespace LO.Modal
 
 namespace Kripke
-
 
 variable {F : Kripke.Frame}
 
@@ -18,10 +19,8 @@ lemma p_convergent [F.IsPiecewiseConvergent] {x y z : F.World} : x ≺ y → x �
 
 end Frame
 
-
 instance : whitepoint.IsPiecewiseConvergent where
   p_convergent := by tauto
-
 
 section definability
 
@@ -32,9 +31,9 @@ lemma validate_WeakPoint2_of_weakConfluent [F.IsPiecewiseConvergent] : F ⊧ (Ax
   rintro V x;
   apply Satisfies.imp_def.mpr;
   suffices
-    ∀ y, x ≺ y → (∀ u, y ≺ u → V u 0) → V y 1 →
-    ∀ z, x ≺ z → (∀ u, z ≺ u → ¬V u 0) → V z 1
-    by simpa [Semantics.Realize, Satisfies];
+    ∀ y, x ≺ y → (∀ u, y ≺ u → V 0 u) → V 1 y →
+    ∀ z, x ≺ z → (∀ u, z ≺ u → ¬V 0 u) → V 1 z
+    by simpa [Semantics.Models, Satisfies];
   intro y Rxy h₁ hy₁ z Rxz h₂;
   by_contra hC;
   have nyz : y ≠ z := by
@@ -42,8 +41,8 @@ lemma validate_WeakPoint2_of_weakConfluent [F.IsPiecewiseConvergent] : F ⊧ (Ax
     subst hC;
     contradiction;
   obtain ⟨u, Ryu, Rzu⟩ := IsPiecewiseConvergent.p_convergent Rxy Rxz nyz;
-  have : V u 0 := h₁ _ Ryu;
-  have : ¬V u 0 := h₂ _ Rzu;
+  have : V 0 u := h₁ _ Ryu;
+  have : ¬V 0 u := h₂ _ Rzu;
   contradiction;
 
 lemma isPiecewiseConvergent_of_validate_axiomWeakPoint2 (h : F ⊧ (Axioms.WeakPoint2 (.atom 0) (.atom 1))) : F.IsPiecewiseConvergent where
@@ -53,22 +52,16 @@ lemma isPiecewiseConvergent_of_validate_axiomWeakPoint2 (h : F ⊧ (Axioms.WeakP
     contrapose!;
     rintro ⟨x, y, z, Rxy, Rxz, nyz, hu⟩;
     apply ValidOnFrame.not_of_exists_valuation_world;
-    use (λ w a => match a with | 0 => y ≺ w | 1 => w = y | _ => False), x;
+    use (λ a w => match a with | 0 => y ≺ w | 1 => w = y | _ => False), x;
     suffices x ≺ y ∧ ∃ z, x ≺ z ∧ (∀ u, z ≺ u → ¬y ≺ u) ∧ ¬z = y by
-      simpa [Satisfies, Semantics.Realize];
-    refine ⟨Rxy, z, Rxz, ?_, by tauto⟩;
-    . intro u;
-      contrapose;
-      push_neg;
-      intro Ryu;
-      exact hu u Ryu;
+      simpa [Satisfies, Semantics.Models];
+    refine ⟨Rxy, z, Rxz, by grind, by tauto⟩;
 
 end definability
 
-
 section canonicality
 
-variable {S} [Entailment (Formula ℕ) S]
+variable {S} [Entailment S (Formula ℕ)]
 variable {𝓢 : S} [Entailment.Consistent 𝓢] [Entailment.K 𝓢]
 
 open LO.Entailment LO.Modal.Entailment
@@ -79,17 +72,25 @@ open canonicalModel
 instance [Entailment.HasAxiomWeakPoint2 𝓢] : (canonicalFrame 𝓢).IsPiecewiseConvergent where
   p_convergent := by
     rintro x y z Rxy Rxz eyz;
-    have ⟨u, hu⟩ := lindenbaum (𝓢 := 𝓢) (t₀ := ⟨y.1.1.prebox, z.1.2.predia⟩) $ by
+    have ⟨u, hu⟩ := lindenbaum (𝓢 := 𝓢) (t₀ := ⟨□⁻¹'y.1.1, ◇'⁻¹z.1.2⟩) $ by
       rintro Γ Δ hΓ hΔ;
       by_contra hC;
-      have hγ : □(Γ.conj) ∈ y.1.1 := y.mdp_mem₁_provable collect_box_fconj! $ iff_mem₁_fconj.mpr (by simpa using hΓ);
-      have hδ : ◇(Δ.disj) ∈ z.1.2 := mdp_mem₂_provable distribute_dia_fdisj! $ iff_mem₂_fdisj.mpr (by simpa using hΔ);
+      have hγ : □(Γ.conj) ∈ y.1.1 := y.mdp_mem₁_provable collect_box_fconj! $ iff_mem₁_fconj.mpr $ by
+        intro χ hχ;
+        obtain ⟨ξ, hξ, rfl⟩ := Finset.LO.exists_of_mem_box hχ;
+        apply hΓ;
+        assumption;
+      have hδ : ◇(Δ.disj) ∈ z.1.2 := mdp_mem₂_provable distribute_dia_fdisj! $ iff_mem₂_fdisj.mpr $ by
+        intro χ hχ;
+        obtain ⟨ξ, hξ, rfl⟩ := Finset.LO.exists_of_mem_dia hχ;
+        apply hΔ;
+        assumption;
       generalize Γ.conj = γ₁ at hγ hC;
       generalize Δ.disj = δ₁ at hδ hC;
       obtain ⟨δ₂, hδ₂₁, hδ₂₂⟩ := exists₁₂_of_ne eyz;
 
-      have : 𝓢 ⊢! □γ₁ ➝ □δ₁ := imply_box_distribute'! hC;
-      have : 𝓢 ⊢! □γ₁ ⋏ δ₂ ➝ □δ₁ ⋏ δ₂ := CKK!_of_C! this;
+      have : 𝓢 ⊢ □γ₁ ➝ □δ₁ := imply_box_distribute'! hC;
+      have : 𝓢 ⊢ □γ₁ ⋏ δ₂ ➝ □δ₁ ⋏ δ₂ := CKK!_of_C! this;
       have : □δ₁ ⋏ δ₂ ∈ y.1.1 := mdp_mem₁_provable this $ by
         apply iff_mem₁_and.mpr; constructor <;> assumption;
       have : ◇(□δ₁ ⋏ δ₂) ∈ x.1.1 := def_rel_dia_mem₁.mp Rxy this;
@@ -114,3 +115,4 @@ end canonicality
 end Kripke
 
 end LO.Modal
+end

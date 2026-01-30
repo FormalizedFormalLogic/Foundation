@@ -1,6 +1,8 @@
-import Foundation.Propositional.Kripke.Completeness
-import Foundation.Propositional.Entailment.Cl
-import Foundation.Vorspiel.HRel.Euclidean
+module
+
+public import Foundation.Propositional.Kripke.Completeness
+
+@[expose] public section
 
 namespace LO.Propositional
 
@@ -9,12 +11,11 @@ open Formula.Kripke
 
 namespace Kripke
 
-protected abbrev Frame.IsSymmetric (F : Frame) := _root_.IsSymm _ F.Rel
-lemma Frame.symm {F : Frame} [F.IsSymmetric] : ∀ ⦃x y : F⦄, x ≺ y → y ≺ x := by apply IsSymm.symm
+protected abbrev Frame.IsSymmetric (F : Frame) := _root_.Std.Symm F.Rel
+lemma Frame.symm {F : Frame} [F.IsSymmetric] : ∀ ⦃x y : F⦄, x ≺ y → y ≺ x := by apply Std.Symm.symm
 
 protected abbrev Frame.IsEuclidean (F : Frame) := _root_.IsRightEuclidean F.Rel
 lemma Frame.eucl {F : Frame} [F.IsEuclidean] : ∀ ⦃x y z : F⦄, x ≺ y → x ≺ z → y ≺ z := by apply IsRightEuclidean.reucl
-lemma Frame.eucl' {F : Frame} [F.IsEuclidean] : ∀ ⦃x y z : F⦄, x ≺ y → x ≺ z → z ≺ y := by apply IsRightEuclidean.reucl'
 
 section definability
 
@@ -45,13 +46,13 @@ lemma validate_axiomLEM_of_isEuclidean [F.IsEuclidean] : F ⊧ (Axioms.LEM (.ato
 
 lemma isEuclidean_of_validate_axiomLEM (h : F ⊧ (Axioms.LEM (.atom 0))) : F.IsEuclidean := ⟨by
   rintro x y z Rxy Rxz;
-  let V : Kripke.Valuation F := ⟨λ {v a} => y ≺ v, by
+  let V : Kripke.Valuation F := ⟨λ {a v} => y ≺ v, by
     intro w v Rwv a Rzw;
     exact F.trans Rzw Rwv;
   ⟩;
   suffices Satisfies ⟨F, V⟩ z (.atom 0) by simpa [Satisfies] using this;
   apply V.hereditary Rxz;
-  have : ∀ (w : F.World), x ≺ w → y ≺ w → y ≺ x := by simpa [Semantics.Realize, Satisfies, V, or_iff_not_imp_right] using h V x;
+  have : ∀ (w : F.World), x ≺ w → y ≺ w → y ≺ x := by simpa [Semantics.Models, Satisfies, V, or_iff_not_imp_right] using h V x;
   apply this y;
   . exact Rxy;
   . apply F.refl;
@@ -59,10 +60,9 @@ lemma isEuclidean_of_validate_axiomLEM (h : F ⊧ (Axioms.LEM (.atom 0))) : F.Is
 
 end definability
 
-
 section canonicality
 
-variable {S} [Entailment (Formula ℕ) S]
+variable {S} [Entailment S (Formula ℕ)]
 variable {𝓢 : S} [Entailment.Consistent 𝓢] [Entailment.Int 𝓢]
 
 open Formula.Kripke
@@ -93,7 +93,7 @@ instance [Entailment.HasAxiomLEM 𝓢] : (canonicalFrame 𝓢).IsEuclidean := �
 
 end canonicality
 
-
 end Kripke
 
 end LO.Propositional
+end

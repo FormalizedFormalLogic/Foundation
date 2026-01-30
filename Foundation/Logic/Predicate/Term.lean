@@ -1,4 +1,8 @@
-import Foundation.Logic.Predicate.Language
+module
+
+public import Foundation.Logic.Predicate.Language
+
+@[expose] public section
 
 /-!
 # Terms of first-order logic
@@ -60,13 +64,13 @@ variable [∀ k, DecidableEq (L.Func k)] [DecidableEq ξ]
 
 def hasDecEq : (t u : Semiterm L ξ n) → Decidable (Eq t u)
   |                   #x,                   #y => by simpa using decEq x y
-  |                   #_,                   &_ => isFalse Semiterm.noConfusion
-  |                   #_,             func _ _ => isFalse Semiterm.noConfusion
-  |                   &_,                   #_ => isFalse Semiterm.noConfusion
+  |                   #_,                   &_ => isFalse (by simp)
+  |                   #_,             func _ _ => isFalse (by simp)
+  |                   &_,                   #_ => isFalse (by simp)
   |                   &x,                   &y => by simpa using decEq x y
-  |                   &_,             func _ _ => isFalse Semiterm.noConfusion
-  |             func _ _,                   #_ => isFalse Semiterm.noConfusion
-  |             func _ _,                   &_ => isFalse Semiterm.noConfusion
+  |                   &_,             func _ _ => isFalse (by simp)
+  |             func _ _,                   #_ => isFalse (by simp)
+  |             func _ _,                   &_ => isFalse (by simp)
   | @func L ξ _ k₁ r₁ v₁, @func L ξ _ k₂ r₂ v₂ => by
       by_cases e : k₁ = k₂
       · rcases e with rfl
@@ -224,3 +228,4 @@ end Semiterm
 end FirstOrder
 
 end LO
+end

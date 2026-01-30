@@ -1,50 +1,30 @@
-import Foundation.FirstOrder.Internal.FixedPoint
-import Foundation.Meta.ClProver
+module
 
-namespace LO.ISigma1
+public import Foundation.FirstOrder.Bootstrapping.FixedPoint
+public import Foundation.Meta.ClProver
 
-open FirstOrder Entailment
+@[expose] public section
+namespace LO.FirstOrder.Arithmetic
 
 variable {T : Theory ℒₒᵣ} [𝗜𝚺₁ ⪯ T] [Entailment.Consistent T]
 
-/--
-  There is no predicate `τ`, s.t. for any sentence `σ`, `σ` is provable in `T` iff `τ/[⌜σ⌝]` is so.
--/
-lemma not_exists_tarski_predicate : ¬∃ τ : Semisentence ℒₒᵣ 1, ∀ σ, T ⊢!. σ ⭤ τ/[⌜σ⌝] := by
+/-- There is no predicate `τ`, s.t. for any sentence `σ`, `σ` is provable in `T` iff `τ/[⌜σ⌝]` is so. -/
+lemma not_exists_tarski_predicate : ¬∃ τ : Semisentence ℒₒᵣ 1, ∀ σ, T ⊢ σ ⭤ τ/[⌜σ⌝] := by
   rintro ⟨τ, hτ⟩;
-  apply Entailment.Consistent.not_bot (𝓢 := T.toAxiom);
+  apply Entailment.Consistent.not_bot (𝓢 := T);
   . infer_instance;
-  . have h₁ : T ⊢!. fixedpoint (∼τ) ⭤ τ/[⌜fixedpoint (∼τ)⌝] := by simpa using hτ $ fixedpoint “x. ¬!τ x”;;
-    have h₂ : T ⊢!. fixedpoint (∼τ) ⭤ ∼τ/[⌜fixedpoint (∼τ)⌝] := by simpa using diagonal (T := T) “x. ¬!τ x”;
+  . have h₁ : T ⊢ fixedpoint (∼τ) ⭤ τ/[⌜fixedpoint (∼τ)⌝] := by simpa using hτ $ fixedpoint “x. ¬!τ x”;;
+    have h₂ : T ⊢ fixedpoint (∼τ) ⭤ ∼τ/[⌜fixedpoint (∼τ)⌝] := by simpa using diagonal (T := T) “x. ¬!τ x”;
     cl_prover [h₁, h₂];
 
-end LO.ISigma1
-
-
-namespace LO.FirstOrderTrueArith
-
-open FirstOrder Arithmetic
-
-lemma provable_iff₀ {σ : Sentence ℒₒᵣ} : 𝗧𝗔 ⊢!. σ ↔ ℕ ⊧ₘ₀ σ := by
-  apply Iff.trans ?_ $ provable_iff (φ := σ);
-  exact Axiom.provable_iff;
-
-end LO.FirstOrderTrueArith
-
-
-
-namespace LO.FirstOrder.Arithmetic
-
-/--
-  Tarski's Undefinability of Truth Theorem.
--/
-theorem undefinability_of_truth : ¬∃ τ : Semisentence ℒₒᵣ 1, ∀ σ : Sentence ℒₒᵣ, ℕ ⊧ₘ₀ σ ↔ ℕ ⊧ₘ₀ τ/[⌜σ⌝] := by
-  have := ISigma1.not_exists_tarski_predicate (T := 𝗧𝗔);
+/-- Tarski's Undefinability of Truth Theorem. -/
+theorem undefinability_of_truth : ¬∃ τ : Semisentence ℒₒᵣ 1, ∀ σ : Sentence ℒₒᵣ, ℕ ⊧ₘ σ ↔ ℕ ⊧ₘ τ/[⌜σ⌝] := by
+  have := not_exists_tarski_predicate (T := 𝗧𝗔);
   contrapose! this;
   obtain ⟨τ, hτ⟩ := this;
   use τ;
   intro σ;
-  apply FirstOrderTrueArith.provable_iff₀.mpr;
+  apply TA.provable_iff.mpr;
   simpa using hτ σ;
 
 end LO.FirstOrder.Arithmetic

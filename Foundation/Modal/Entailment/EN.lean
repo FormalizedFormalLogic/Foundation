@@ -1,10 +1,14 @@
-import Foundation.Modal.Entailment.EM
+module
+
+public import Foundation.Modal.Entailment.EM
+
+@[expose] public section
 
 namespace LO.Modal.Entailment
 
 open LO.Entailment
 
-variable {S F : Type*} [BasicModalLogicalConnective F] [DecidableEq F] [Entailment F S]
+variable {S F : Type*} [BasicModalLogicalConnective F] [DecidableEq F] [Entailment S F]
 variable {𝓢 : S}
 
 instance [Entailment.EN 𝓢] : Entailment.Necessitation 𝓢 where
@@ -14,3 +18,4 @@ instance [Entailment.Minimal 𝓢] [Entailment.Necessitation 𝓢] : Entailment.
   N := nec verum
 
 end LO.Modal.Entailment
+end

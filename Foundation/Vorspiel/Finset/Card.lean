@@ -1,5 +1,10 @@
-import Mathlib.Algebra.Order.BigOperators.Group.Finset
-import Mathlib.Algebra.Order.Ring.Nat
+module
+
+public import Mathlib.Algebra.Order.BigOperators.Group.Finset
+public import Mathlib.Algebra.Order.Ring.Nat
+
+@[expose]
+public section
 
 namespace Finset
 
@@ -26,3 +31,5 @@ lemma sum_le_card
     _ = s.card * n   := by simp_all;
 
 end Finset
+
+end

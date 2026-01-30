@@ -1,11 +1,14 @@
-import Foundation.Propositional.Kripke.AxiomLEM
-import Foundation.Propositional.Kripke.AxiomDummett
-import Foundation.Propositional.Kripke.Logic.LC
+module
+
+public import Foundation.Propositional.Kripke.AxiomLEM
+public import Foundation.Propositional.Kripke.Logic.LC
+
+@[expose] public section
 
 namespace LO.Propositional
 
 open Kripke
-open Hilbert.Kripke
+open Modal.Kripke
 open Formula.Kripke
 
 
@@ -32,34 +35,32 @@ end Kripke
 
 
 
-namespace Hilbert
+namespace Cl
 
-namespace Cl.Kripke
-
-instance : Sound Hilbert.Cl FrameClass.Cl :=
+instance : Sound Propositional.Cl FrameClass.Cl :=
   instSound_of_validates_axioms $ by
     apply FrameClass.Validates.withAxiomEFQ;
     rintro F hF _ rfl;
     replace hF := Set.mem_setOf_eq.mp hF;
     apply validate_axiomLEM_of_isEuclidean;
 
-instance : Sound Hilbert.Cl FrameClass.finite_Cl :=
+instance : Sound Propositional.Cl FrameClass.finite_Cl :=
   instSound_of_validates_axioms $ by
     apply FrameClass.Validates.withAxiomEFQ;
     rintro F ⟨_, hF⟩ _ rfl;
     apply validate_axiomLEM_of_isEuclidean;
 
-instance : Entailment.Consistent Hilbert.Cl := consistent_of_sound_frameclass FrameClass.Cl $ by
+instance : Entailment.Consistent Propositional.Cl := consistent_of_sound_frameclass FrameClass.Cl $ by
   use whitepoint;
   apply Set.mem_setOf_eq.mpr;
   infer_instance
 
-instance : Canonical Hilbert.Cl FrameClass.Cl :=  ⟨by
+instance : Canonical Propositional.Cl FrameClass.Cl :=  ⟨by
   apply Set.mem_setOf_eq.mpr;
   infer_instance;
 ⟩
 
-instance : Complete Hilbert.Cl FrameClass.Cl := inferInstance
+instance : Complete Propositional.Cl FrameClass.Cl := inferInstance
 
 section FFP
 
@@ -67,8 +68,8 @@ open
   finestFiltrationTransitiveClosureModel
   Relation
 
-instance : Complete Hilbert.Cl FrameClass.finite_Cl := by
-  suffices Complete Hilbert.Cl { F : Frame | F.IsFinite ∧ F.IsSymmetric } by
+instance : Complete Propositional.Cl FrameClass.finite_Cl := by
+  suffices Complete Propositional.Cl { F : Frame | F.IsFinite ∧ F.IsSymmetric } by
     convert this;
     constructor;
     . rintro ⟨_, hF⟩; exact ⟨by tauto, inferInstance⟩;
@@ -100,25 +101,26 @@ instance : Complete Hilbert.Cl FrameClass.finite_Cl := by
     . apply TransGen.single;
       use ⟨y, by tauto⟩, ⟨x, by tauto⟩;
       refine ⟨by tauto, by tauto, ?_⟩;
-      . have : y ≺ x := IsSymm.symm _ _ Rry;
+      . have : y ≺ x := Std.Symm.symm _ _ Rry;
         tauto;
     . apply TransGen.single;
       use ⟨y, by tauto⟩, ⟨x, by tauto⟩;
       refine ⟨by tauto, by tauto, ?_⟩;
-      . have : x ≺ y := IsSymm.symm _ _ Rrx;
+      . have : x ≺ y := Std.Symm.symm _ _ Rrx;
         tauto;
     . apply Relation.TransGen.single;
       use ⟨y, by tauto⟩, ⟨x, by tauto⟩;
       refine ⟨by tauto, by tauto, ?_⟩;
-      . simpa using F.eucl' Rrx Rry;
+      . exact F.eucl Rry Rrx;
 
 end FFP
 
-end Cl.Kripke
+end Cl
 
-instance : Hilbert.LC ⪱ Hilbert.Cl := by
+
+instance : Propositional.LC ⪱ Propositional.Cl := by
   constructor;
-  . apply Hilbert.weakerThan_of_provable_axioms;
+  . apply Hilbert.Standard.weakerThan_of_provable_axioms;
     rintro φ (rfl | rfl) <;> simp;
   . apply Entailment.not_weakerThan_iff.mpr;
     use Axioms.LEM (.atom 0);
@@ -143,17 +145,10 @@ instance : Hilbert.LC ⪱ Hilbert.Cl := by
         have := @F.eucl _ 0 1 0;
         omega;
 
-instance : Hilbert.Int ⪱ Hilbert.Cl := calc
-  Hilbert.Int ⪱ Hilbert.KC := inferInstance
-  _           ⪱ Hilbert.LC := inferInstance
-  _           ⪱ Hilbert.Cl := inferInstance
-
-end Hilbert
-
-propositional_kripke 𝐂𝐥 FrameClass.Cl
-propositional_kripke 𝐂𝐥 FrameClass.finite_Cl
-
-instance : 𝐋𝐂 ⪱ 𝐂𝐥 := inferInstance
-instance : 𝐈𝐧𝐭 ⪱ 𝐂𝐥 := inferInstance
+instance : Propositional.Int ⪱ Propositional.Cl := calc
+  Propositional.Int ⪱ Propositional.KC := inferInstance
+  _   ⪱ Propositional.LC := inferInstance
+  _   ⪱ Propositional.Cl := inferInstance
 
 end LO.Propositional
+end

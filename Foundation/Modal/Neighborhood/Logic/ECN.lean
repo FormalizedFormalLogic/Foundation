@@ -1,6 +1,9 @@
-import Foundation.Modal.Neighborhood.Hilbert
-import Foundation.Modal.Neighborhood.Logic.EN
-import Foundation.Modal.Neighborhood.Logic.EC
+module
+
+public import Foundation.Modal.Neighborhood.Logic.EN
+public import Foundation.Modal.Neighborhood.Logic.EC
+
+@[expose] public section
 
 namespace LO.Modal
 
@@ -15,84 +18,36 @@ protected abbrev FrameClass.ECN : FrameClass := { F | F.IsECN }
 
 end Neighborhood
 
+namespace ECN
 
-namespace Hilbert
-
-namespace ECN.Neighborhood
-
-instance : Sound Hilbert.ECN FrameClass.ECN := instSound_of_validates_axioms $ by
+instance Neighborhood.sound : Sound Modal.ECN FrameClass.ECN := instSound_of_validates_axioms $ by
   constructor;
   rintro _ (rfl | rfl) F (rfl | rfl) <;> simp;
 
-instance : Entailment.Consistent Hilbert.ECN := consistent_of_sound_frameclass FrameClass.ECN $ by
+instance consistent : Entailment.Consistent Modal.ECN := consistent_of_sound_frameclass FrameClass.ECN $ by
   use Frame.simple_blackhole;
   simp only [Set.mem_setOf_eq];
   constructor;
 
-instance : Complete Hilbert.ECN FrameClass.ECN := complete_of_canonical_frame FrameClass.ECN (minimalCanonicalFrame (Hilbert.ECN)) $ by
+instance Neighborhood.complete : Complete Modal.ECN FrameClass.ECN := (basicCanonicity Modal.ECN).completeness $ by
   apply Set.mem_setOf_eq.mpr;
   constructor;
 
-end ECN.Neighborhood
+end ECN
 
-instance : Hilbert.EC ⪱ Hilbert.ECN := by
+instance : Modal.ECN ⪱ Modal.EMCN := by
   constructor;
   . apply Hilbert.WithRE.weakerThan_of_subset_axioms;
     simp;
   . apply Entailment.not_weakerThan_iff.mpr;
-    use Axioms.N;
+    use (Axioms.M (.atom 0) (.atom 1));
     constructor;
     . simp;
-    . apply Sound.not_provable_of_countermodel (𝓜 := FrameClass.EC);
-      apply not_validOnFrameClass_of_exists_model_world;
-      let M : Model := {
-        World := Fin 3,
-        𝒩 := λ w =>
-          match w with
-          | 0 => {{1}}
-          | 1 => {{0}, {0, 1}}
-          | 2 => {{0}, {1, 2}, ∅},
-        Val := λ w =>
-          match w with
-          | 0 => {0, 1}
-          | 1 => {1, 2}
-          | _ => Set.univ
-      };
-      use M, 0;
-      constructor;
-      . exact {
-          regular := by
-            rintro X Y w ⟨hwX, hwY⟩;
-            match w with
-            | 0 => simp_all [M];
-            | 1 =>
-              rcases hwX with (rfl | rfl) <;>
-              rcases hwY with (rfl | rfl) <;>
-              simp_all [M];
-            | 2 =>
-              rcases hwX with (rfl | rfl | rfl) <;>
-              rcases hwY with (rfl | rfl | rfl) <;>
-              simp [M]
-        }
-      . simp! [M, Semantics.Realize, Satisfies];
-        tauto_set;
-
-instance : Hilbert.EN ⪱ Hilbert.ECN := by
-  constructor;
-  . apply Hilbert.WithRE.weakerThan_of_subset_axioms;
-    simp;
-  . apply Entailment.not_weakerThan_iff.mpr;
-    use (Axioms.C (.atom 0) (.atom 1));
-    constructor;
-    . simp;
-    . apply Sound.not_provable_of_countermodel (𝓜 := FrameClass.EN);
+    . apply Sound.not_provable_of_countermodel (𝓜 := FrameClass.ECN);
       apply not_validOnFrameClass_of_exists_model_world;
       let M : Model := {
         World := Fin 2,
-        𝒩 := λ w =>
-          match w with
-          | 0 => {{0}, {1}, {0, 1}, Set.univ}
-          | 1 => {{1}, {0, 1}, Set.univ},
+        𝒩 := λ w => {∅, {0, 1}},
         Val := λ w =>
           match w with
           | 0 => {0}
@@ -104,14 +59,16 @@ instance : Hilbert.EN ⪱ Hilbert.ECN := by
       . exact {
           contains_unit := by
             ext x;
-            match x with | 0 | 1 => simp_all [M]
+            match x with | 0 | 1 => simp_all [M, Set.Fin2.eq_univ];
+          regular := by
+            rintro X Y w ⟨hwX, hwY⟩;
+            simp_all only [Fin.isValue, Set.mem_setOf_eq, Set.mem_insert_iff, Set.mem_singleton_iff, M];
+            rcases hwX with (rfl | rfl) <;>
+            rcases hwY with (rfl | rfl) <;>
+            simp;
         }
-      . simp! [M, Semantics.Realize, Satisfies];
-        tauto_set;
-
-end Hilbert
-
-instance : 𝐄𝐂 ⪱ 𝐄𝐂𝐍 := inferInstance
-instance : 𝐄𝐍 ⪱ 𝐄𝐂𝐍 := inferInstance
+      . simp [M, Semantics.Models, Satisfies];
+        grind;
 
 end LO.Modal
+end

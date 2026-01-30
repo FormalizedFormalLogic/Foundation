@@ -1,34 +1,36 @@
-import Foundation.Propositional.Hilbert.WellKnown
-import Foundation.Propositional.Kripke.Completeness
-import Foundation.Propositional.Kripke.Hilbert
-import Foundation.Propositional.Kripke.Filtration
-import Foundation.Logic.Disjunctive
+module
+
+public import Foundation.Propositional.Kripke.Completeness
+public import Foundation.Propositional.Kripke.Hilbert
+public import Foundation.Propositional.Kripke.Filtration
+
+@[expose] public section
 
 namespace LO.Propositional
 
 open Kripke
 open Formula.Kripke
-open Hilbert.Kripke
+open Modal.Kripke
 
 @[reducible] protected alias Kripke.FrameClass.Int := FrameClass.all
 @[reducible] protected alias Kripke.FrameClass.finite_Int := FrameClass.finite_all
 
 
-namespace Hilbert.Int.Kripke
+namespace Int
 
-instance : Sound Hilbert.Int FrameClass.Int := instSound_of_validates_axioms FrameClass.all.validates_AxiomEFQ
+instance : Sound Propositional.Int FrameClass.Int := instSound_of_validates_axioms FrameClass.all.validates_AxiomEFQ
 
-instance : Entailment.Consistent Hilbert.Int := consistent_of_sound_frameclass FrameClass.Int $ by simp
+instance : Entailment.Consistent Propositional.Int := consistent_of_sound_frameclass FrameClass.Int $ by simp
 
-instance : Sound Hilbert.Int FrameClass.finite_Int := instSound_of_validates_axioms FrameClass.finite_all.validates_AxiomEFQ
+instance : Sound Propositional.Int FrameClass.finite_Int := instSound_of_validates_axioms FrameClass.finite_all.validates_AxiomEFQ
 
-instance : Canonical Hilbert.Int FrameClass.Int := by tauto;
+instance : Canonical Propositional.Int FrameClass.Int := by tauto;
 
-instance : Complete Hilbert.Int FrameClass.Int := inferInstance
+instance : Complete Propositional.Int FrameClass.Int := inferInstance
 
 section FFP
 
-instance : Complete Hilbert.Int FrameClass.finite_Int := ⟨by
+instance : Complete Propositional.Int FrameClass.finite_Int := ⟨by
   intro φ hφ;
   apply Complete.complete (𝓜 := FrameClass.Int);
   intro F _ V x;
@@ -80,10 +82,10 @@ abbrev counterexampleDPFrame (F₁ : Kripke.Frame) (F₂ : Kripke.Frame) (w₁ :
 abbrev counterexampleDPModel (M₁ : Kripke.Model) (M₂ : Kripke.Model) (w₁ : M₁.World) (w₂ : M₂.World) : Model where
   toFrame := counterexampleDPFrame M₁.toFrame M₂.toFrame w₁ w₂;
   Val := ⟨
-    λ w a =>
+    λ a w =>
       match w with
-      | Sum.inr $ Sum.inl w => M₁ w a
-      | Sum.inr $ Sum.inr w => M₂ w a
+      | Sum.inr $ Sum.inl w => M₁ a w
+      | Sum.inr $ Sum.inr w => M₂ a w
       | _ => False,
     by
       simp only [counterexampleDPFrame, Sum.forall, imp_false, not_false_eq_true, implies_true, imp_self, IsEmpty.forall_iff, and_self, and_true, true_and];
@@ -128,7 +130,7 @@ lemma satisfies_right_on_counterexampleDPModel :
       exact ihq.mpr $ h (by simpa) $ ihp.mp hp;
   | _ => simp_all [counterexampleDPModel, Satisfies.iff_models, Satisfies];
 
-theorem disjunctive : Hilbert.Int ⊢! φ ⋎ ψ → Hilbert.Int ⊢! φ ∨ Hilbert.Int ⊢! ψ := by
+theorem disjunctive : Propositional.Int ⊢ φ ⋎ ψ → Propositional.Int ⊢ φ ∨ Propositional.Int ⊢ ψ := by
   contrapose!;
   rintro ⟨hnφ, hnψ⟩;
 
@@ -151,15 +153,11 @@ theorem disjunctive : Hilbert.Int ⊢! φ ⋎ ψ → Hilbert.Int ⊢! φ ∨ Hil
       . exact satisfies_right_on_counterexampleDPModel.not.mp hψ;
       . apply M₂.refl;
 
-instance : Entailment.Disjunctive Hilbert.Int := ⟨disjunctive⟩
+instance : Entailment.Disjunctive Propositional.Int := ⟨disjunctive⟩
 
 end DP
 
-end Hilbert.Int.Kripke
-
-
-propositional_kripke 𝐈𝐧𝐭 FrameClass.Int
-propositional_kripke 𝐈𝐧𝐭 FrameClass.finite_Int
-
+end Int
 
 end LO.Propositional
+end

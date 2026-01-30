@@ -1,6 +1,9 @@
-import Foundation.Modal.Modality.Basic
-import Foundation.Modal.Entailment.S5
-import Foundation.Modal.Kripke.Logic.S5
+module
+
+public import Foundation.Modal.Modality.Basic
+public import Foundation.Modal.Kripke.Logic.S5
+
+@[expose] public section
 
 namespace LO.Modal
 
@@ -23,6 +26,14 @@ lemma modal_reduction_0 : ModalReduction Modal.S5 0 Modal.S5.modalities := Modal
 
 lemma modal_reduction_1 : ModalReduction Modal.S5 1 Modal.S5.modalities := ModalReduction.reducible_1_of_mem (by simp) (by simp) (by simp)
 
+instance : Entailment.S5 Modal.S5 where
+instance : Entailment.S4 Modal.S5 where
+  Four _ := by
+    constructor;
+    apply Modal.Logic.iff_provable.mp;
+    apply Entailment.WeakerThan.pbl (𝓢 := Modal.S4);
+    simp;
+
 instance : (□□) ≅[Modal.S5] (□) := by
   apply iff_equivalence_bi_translate.mpr;
   constructor;
@@ -39,10 +50,8 @@ instance : (◇◇) ≅[Modal.S5] (◇) := by
   apply iff_equivalence_bi_translate.mpr;
   constructor;
   . apply translation_of_axiomInstance (a := 0);
-    apply Entailment.WeakerThan.pbl (𝓢 := Modal.S4);
-    simp;
+    exact axiomFourDual;
   . apply translation_of_axiomInstance (a := 0);
-    apply Entailment.WeakerThan.pbl (𝓢 := Modal.S4);
     simp;
 instance : (◇□) ≅[Modal.S5] (□) := by
   apply iff_equivalence_bi_translate.mpr;
@@ -135,3 +144,4 @@ theorem modal_reduction : ∀ n, ModalReduction Modal.S5 n S5.modalities := Moda
 end S5
 
 end LO.Modal
+end

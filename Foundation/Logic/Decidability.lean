@@ -1,10 +1,15 @@
-import Foundation.Logic.Entailment
+module
+
+public import Foundation.Logic.Entailment
+public import Foundation.Vorspiel.Computability
+
+@[expose] public section
 
 namespace LO.Entailment
 
 section
 
-variable {F S : Type*} [Primcodable F] [Entailment F S]
+variable {F S : Type*} [Primcodable F] [Entailment S F]
 
 variable (𝓢 : S)
 
@@ -24,3 +29,5 @@ lemma decidable_of_incomplete : Inconsistent 𝓢 → Decidable 𝓢 :=
 end
 
 end LO.Entailment
+
+end

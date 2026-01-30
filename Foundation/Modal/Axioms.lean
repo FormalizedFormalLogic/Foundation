@@ -1,4 +1,9 @@
-import Foundation.Modal.LogicSymbol
+module
+
+public import Foundation.Modal.LogicSymbol
+
+@[expose]
+public section
 
 namespace LO.Modal.Axioms
 
@@ -33,6 +38,8 @@ protected abbrev P : F := ∼(□⊥)
 
 /-- Axiom for transivity -/
 protected abbrev Four := □φ ➝ □□φ
+
+protected abbrev FourN (n : ℕ) (φ : F) := □^[n]φ ➝ □^[(n + 1)]φ
 
 /-- Axiom for euclidean -/
 protected abbrev Five := ◇φ ➝ □◇φ
@@ -110,6 +117,13 @@ protected structure Geach.Taple where
 /--
   Axiom for Geach confluency.
 -/
-protected abbrev Geach (g : Geach.Taple) (φ : F) := ◇^[g.i](□^[g.m]φ) ➝ □^[g.j](◇^[g.n]φ)
+protected abbrev Geach (g : Geach.Taple) (φ : F) := (◇^[g.i](□^[g.m]φ)) ➝ (□^[g.j](◇^[g.n]φ))
+
+/--
+  Section 13 in Boolos 1994
+-/
+protected abbrev I := □(□φ ➝ □ψ) ⋎ □(□ψ ➝ ⊡φ)
 
 end LO.Modal.Axioms
+
+end

@@ -1,6 +1,8 @@
-import Foundation.Vorspiel.HRel.CWF
-import Foundation.Modal.Kripke.AxiomGeach
-import Foundation.Modal.Kripke.Irreflexive
+module
+
+public import Foundation.Modal.Kripke.Irreflexive
+
+@[expose] public section
 
 namespace LO.Modal
 
@@ -10,24 +12,22 @@ open Formula.Kripke
 
 variable {F : Kripke.Frame}
 
-
 protected abbrev Frame.IsConverseWellFounded (F : Frame) := _root_.IsConverseWellFounded _ F.Rel
 
 lemma Frame.cwf [F.IsConverseWellFounded] : ConverseWellFounded F.Rel := IsConverseWellFounded.cwf
 
 instance [F.IsFinite] [F.IsTransitive] [F.IsIrreflexive] : F.IsConverseWellFounded := ⟨IsConverseWellFounded.cwf⟩
 
-
-lemma validate_AxiomL_of_trans_cwf [F.IsTransitive] [F.IsConverseWellFounded] : F ⊧ (Axioms.L (.atom 0)) := by
+lemma validate_AxiomL_of_trans_cwf [F.IsTransitive] [F.IsConverseWellFounded] : F ⊧ (Axioms.L φ) := by
   rintro V w;
   apply Satisfies.imp_def.mpr;
   contrapose;
   intro h;
   obtain ⟨x, Rwx, h⟩ := by simpa using Satisfies.box_def.not.mp h;
-  obtain ⟨m, ⟨⟨Rwm, hm⟩, hm₂⟩⟩ := F.cwf.has_min ({ x | w ≺ x ∧ ¬(Satisfies ⟨F, V⟩ x (.atom 0)) }) $ by
+  obtain ⟨m, ⟨⟨Rwm, hm⟩, hm₂⟩⟩ := F.cwf.has_min ({ x | w ≺ x ∧ ¬(Satisfies ⟨F, V⟩ x φ) }) $ by
     use x;
     tauto;
-  replace hm₂ : ∀ x, w ≺ x → ¬Satisfies ⟨F, V⟩ x (.atom 0) → ¬m ≺ x := by simpa using hm₂;
+  replace hm₂ : ∀ x, w ≺ x → ¬Satisfies ⟨F, V⟩ x φ → ¬m ≺ x := by simpa using hm₂;
   apply Satisfies.not_box_def.mpr;
   use m;
   constructor;
@@ -39,7 +39,7 @@ lemma validate_AxiomL_of_trans_cwf [F.IsTransitive] [F.IsConverseWellFounded] : 
       exact rmn;
     . assumption;
 
-lemma validate_AxiomL_of_finite_trans_irrefl [F.IsFinite] [F.IsTransitive] [F.IsIrreflexive] : F ⊧ (Axioms.L (.atom 0)) := validate_AxiomL_of_trans_cwf
+lemma validate_AxiomL_of_finite_trans_irrefl [F.IsFinite] [F.IsTransitive] [F.IsIrreflexive] : F ⊧ (Axioms.L φ) := validate_AxiomL_of_trans_cwf
 
 lemma isTransitive_of_validate_axiomL (h : F ⊧ (Axioms.L (.atom 0))) : F.IsTransitive where
   trans := by
@@ -48,7 +48,7 @@ lemma isTransitive_of_validate_axiomL (h : F ⊧ (Axioms.L (.atom 0))) : F.IsTra
     intro hT;
     obtain ⟨w, v, Rwv, u, Rvu, nRwu⟩ := by simpa [Transitive] using hT;
     apply ValidOnFrame.not_of_exists_valuation_world;
-    use (λ w _ => w ≠ v ∧ w ≠ u), w;
+    use (λ _ w => w ≠ v ∧ w ≠ u), w;
     apply Satisfies.imp_def.not.mpr;
     push_neg;
     constructor;
@@ -67,7 +67,7 @@ lemma isTransitive_of_validate_axiomL (h : F ⊧ (Axioms.L (.atom 0))) : F.IsTra
       use v;
       constructor;
       . assumption;
-      . simp [Semantics.Realize, Satisfies];
+      . simp [Semantics.Models, Satisfies];
 
 lemma isConverseWellFounded_of_validate_axiomL (h : F ⊧ (Axioms.L (.atom 0))) : F.IsConverseWellFounded where
   cwf := by
@@ -76,7 +76,7 @@ lemma isConverseWellFounded_of_validate_axiomL (h : F ⊧ (Axioms.L (.atom 0))) 
     intro hCF;
     obtain ⟨X, ⟨x, _⟩, hX₂⟩ := by simpa using ConverseWellFounded.iff_has_max.not.mp hCF;
     apply ValidOnFrame.not_of_exists_valuation_world;
-    use (λ w _ => w ∉ X), x;
+    use (λ _ w => w ∉ X), x;
     apply Satisfies.imp_def.not.mpr;
     push_neg;
     constructor;
@@ -95,7 +95,7 @@ lemma isConverseWellFounded_of_validate_axiomL (h : F ⊧ (Axioms.L (.atom 0))) 
       use y;
       constructor;
       . assumption;
-      . simpa [Semantics.Realize, Satisfies];
+      . simpa [Semantics.Models, Satisfies];
 
 /-
 protected instance FrameClass.transitive_cwf.definability : FrameClass.trans_cwf.DefinedByFormula (Axioms.L (.atom 0)) := ⟨by
@@ -129,3 +129,4 @@ protected instance FrameClass.finite_trans_irrefl.definability : FrameClass.fini
 end Kripke
 
 end LO.Modal
+end

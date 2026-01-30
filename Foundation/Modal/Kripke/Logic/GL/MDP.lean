@@ -1,15 +1,14 @@
-import Foundation.Modal.Kripke.Logic.GL.Unnecessitation
+module
+
+public import Foundation.Modal.Kripke.Logic.GL.Unnecessitation
+
+@[expose] public section
 
 namespace LO.Modal
 
 open LO.Entailment LO.Entailment.FiniteContext LO.Modal.Entailment
 open Kripke
 open Formula.Kripke
-
-instance : Entailment.GL Modal.GL where
-  L φ := by
-    constructor;
-    simp [Modal.GL, Entailment.theory];
 
 namespace GL
 
@@ -96,10 +95,10 @@ end mdpCounterexmpleFrame
 
 abbrev mdpCounterexmpleModel (M₁ M₂ : Model) (r₁ r₂) [M₁.IsFiniteTree r₁] [M₂.IsFiniteTree r₂] : Model where
   toFrame := mdpCounterexmpleFrame (M₁.toFrame) (M₂.toFrame) r₁ r₂;
-  Val := λ x a =>
+  Val := λ a x =>
     match x with
-    | .inr (.inl x) => M₁.Val x a
-    | .inr (.inr x) => M₂.Val x a
+    | .inr (.inl x) => M₁.Val a x
+    | .inr (.inr x) => M₂.Val a x
     | .inl _ => True
 
 namespace mdpCounterexmpleModel
@@ -130,14 +129,14 @@ end mdpCounterexmpleModel
 end Kripke
 
 
-lemma MDP_Aux {X : Set _} (h : (X.box) *⊢[Modal.GL]! □φ₁ ⋎ □φ₂) : (X.box) *⊢[Modal.GL]! □φ₁ ∨ (X.box) *⊢[Modal.GL]! □φ₂ := by
+lemma MDP_Aux {X : Set _} (h : (□'X) *⊢[Modal.GL] □φ₁ ⋎ □φ₂) : (□'X) *⊢[Modal.GL] □φ₁ ∨ (□'X) *⊢[Modal.GL] □φ₂ := by
   obtain ⟨Δ, sΓ, hΓ⟩ := Context.provable_iff_boxed.mp h;
 
-  have : Modal.GL ⊢! ⋀Δ.box ➝ (□φ₁ ⋎ □φ₂) := FiniteContext.provable_iff.mp hΓ;
-  have : Modal.GL ⊢! □⋀Δ ➝ (□φ₁ ⋎ □φ₂) := C!_trans (by simp) this;
+  have : Modal.GL ⊢ ⋀(□'Δ) ➝ (□φ₁ ⋎ □φ₂) := FiniteContext.provable_iff.mp hΓ;
+  have : Modal.GL ⊢ □⋀Δ ➝ (□φ₁ ⋎ □φ₂) := C!_trans (by simp) this;
   generalize e : ⋀Δ = c at this;
 
-  have : (Modal.GL ⊢! ⊡c ➝ φ₁) ∨ (Modal.GL ⊢! ⊡c ➝ φ₂) := by
+  have : (Modal.GL ⊢ ⊡c ➝ φ₁) ∨ (Modal.GL ⊢ ⊡c ➝ φ₂) := by
     by_contra! hC;
     have ⟨h₁, h₂⟩ : (Modal.GL ⊬ ⊡c ➝ φ₁) ∧ (Modal.GL ⊬ ⊡c ➝ φ₂) := hC;
 
@@ -189,12 +188,12 @@ lemma MDP_Aux {X : Set _} (h : (X.box) *⊢[Modal.GL]! □φ₁ ⋎ □φ₂) : 
     have := imply_box_box_of_imply_boxdot_plain! h;
     have := C!_trans collect_box_conj! this;
     have := FiniteContext.provable_iff.mpr this;
-    have := Context.provable_iff.mpr $ by use Δ.box;
+    have := Context.provable_iff.mpr $ by use (□'Δ);
     tauto;
   };
 
-theorem modal_disjunctive (h : Modal.GL ⊢! □φ₁ ⋎ □φ₂) : Modal.GL ⊢! φ₁ ∨ Modal.GL ⊢! φ₂ := by
-  have : ∅ *⊢[Modal.GL]! □φ₁ ∨ ∅ *⊢[Modal.GL]! □φ₂ := by simpa using MDP_Aux (X := ∅) (φ₁ := φ₁) (φ₂ := φ₂) $ Context.of! h;
+theorem modal_disjunctive (h : Modal.GL ⊢ □φ₁ ⋎ □φ₂) : Modal.GL ⊢ φ₁ ∨ Modal.GL ⊢ φ₂ := by
+  have : ∅ *⊢[Modal.GL] □φ₁ ∨ ∅ *⊢[Modal.GL] □φ₂ := by simpa [Set.LO.boxItr, Set.LO.preboxItr] using MDP_Aux (X := ∅) (φ₁ := φ₁) (φ₂ := φ₂) $ Context.of! h;
   rcases this with (h | h) <;> {
     have := unnec! $ Context.emptyPrf! h;
     tauto;
@@ -204,3 +203,4 @@ instance : ModalDisjunctive Modal.GL := ⟨modal_disjunctive⟩
 end GL
 
 end LO.Modal
+end

@@ -1,12 +1,16 @@
+module
+
 import Foundation.Propositional.Logic.Basic
-import Zoo.Basic
+public meta import Zoo.Basic
+public meta import Mathlib.Lean.Expr.Basic
+public meta import Qq.MetaM
 
 open Lean Meta Qq Elab Command PrettyPrinter
 open LO.Propositional
 
 namespace Zoo
 
-def isMatch (ci : ConstantInfo) : MetaM (Option Edge) := withNewMCtxDepth do
+meta def isMatch (ci : ConstantInfo) : MetaM (Option Edge) := withNewMCtxDepth do
   match ← inferTypeQ ci.type with
   | ⟨1, ~q(Prop), ~q(LO.Entailment.StrictlyWeakerThan (S := Logic ℕ) (T := Logic ℕ) $a $b)⟩ =>
     return some ⟨s!"{←PrettyPrinter.ppExpr a}", s!"{←PrettyPrinter.ppExpr b}", .ssub⟩
@@ -14,7 +18,7 @@ def isMatch (ci : ConstantInfo) : MetaM (Option Edge) := withNewMCtxDepth do
     return some ⟨s!"{←PrettyPrinter.ppExpr a}", s!"{←PrettyPrinter.ppExpr b}", .sub⟩
   | _ => return none
 
-def findMatches : MetaM Json := do
+meta def findMatches : MetaM Json := do
   let mut edges : Edges := .emptyWithCapacity
   for (name, ci) in (← getEnv).constants do
     if ci.isUnsafe then continue
@@ -29,8 +33,9 @@ def findMatches : MetaM Json := do
 
 end Zoo
 
-unsafe def main : IO Unit := do
+
+public meta def main : IO Unit := do
   initSearchPath (← findSysroot)
   let env ← importModules (loadExts := true) #[`Foundation] {}
   let ⟨s, _, _⟩ ← Zoo.findMatches.toIO { fileName := "<compiler>", fileMap := default } { env := env }
-  IO.FS.writeFile "Zoo/propositional.json" s.pretty
+  IO.FS.writeFile "Zoo/Propositional.json" s.pretty

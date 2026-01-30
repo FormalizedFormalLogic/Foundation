@@ -1,4 +1,8 @@
-import Foundation.Vorspiel.Vorspiel
+module
+
+public import Foundation.Vorspiel
+
+@[expose] public section
 
 /-!
 # Logic Symbols
@@ -17,51 +21,34 @@ namespace LO
 
 section logicNotation
 
-@[notation_class] class Tilde (α : Type*) where
-  tilde : α → α
-
-@[notation_class] class Arrow (α : Type*) where
-  arrow : α → α → α
-
-@[notation_class] class Wedge (α : Type*) where
-  wedge : α → α → α
-
-@[notation_class] class Vee (α : Type*) where
-  vee : α → α → α
-
 class LogicalConnective (α : Type*)
   extends Top α, Bot α, Tilde α, Arrow α, Wedge α, Vee α
-
-prefix:75 "∼" => Tilde.tilde
-
-infixr:60 " ➝ " => Arrow.arrow
-
-infixr:69 " ⋏ " => Wedge.wedge
-
-infixr:68 " ⋎ " => Vee.vee
-
-attribute [match_pattern]
-  Tilde.tilde
-  Arrow.arrow
-  Wedge.wedge
-  Vee.vee
 
 end logicNotation
 
 class DeMorgan (F : Type*) [LogicalConnective F] where
-  verum           : ∼(⊤ : F) = ⊥
-  falsum          : ∼(⊥ : F) = ⊤
+  verum : ∼(⊤ : F) = ⊥
+  falsum : ∼(⊥ : F) = ⊤
   imply (φ ψ : F) : (φ ➝ ψ) = ∼φ ⋎ ψ
-  and (φ ψ : F)   : ∼(φ ⋏ ψ) = ∼φ ⋎ ∼ψ
-  or (φ ψ : F)    : ∼(φ ⋎ ψ) = ∼φ ⋏ ∼ψ
-  neg (φ : F)     : ∼∼φ = φ
+  and (φ ψ : F) : ∼(φ ⋏ ψ) = ∼φ ⋎ ∼ψ
+  or (φ ψ : F) : ∼(φ ⋎ ψ) = ∼φ ⋏ ∼ψ
+  neg (φ : F) : ∼∼φ = φ
 
 attribute [simp] DeMorgan.verum DeMorgan.falsum DeMorgan.and DeMorgan.or DeMorgan.neg
 
 /-- Introducing `∼φ` as an abbreviation of `φ ➝ ⊥`. -/
 class NegAbbrev (F : Type*) [Tilde F] [Arrow F] [Bot F] where
-  neg {φ : F} : ∼φ = φ ➝ ⊥
--- attribute [simp] NegAbbrev.neg
+  protected neg {φ : F} : ∼φ = φ ➝ ⊥
+
+attribute [grind =] NegAbbrev.neg
+
+/-- Introducing `∼φ`, `φ ⋎ ψ`, `φ ⋏ ψ`, `⊤` as abbreviation. -/
+class ŁukasiewiczAbbrev (F : Type*) [LogicalConnective F] extends NegAbbrev F where
+  protected top : ⊤ = ∼(⊥ : F)
+  protected or {φ ψ : F} : φ ⋎ ψ = ∼φ ➝ ψ
+  protected and {φ ψ : F} : φ ⋏ ψ = ∼(φ ➝ ∼ψ)
+
+attribute [grind =] ŁukasiewiczAbbrev.and ŁukasiewiczAbbrev.or ŁukasiewiczAbbrev.top
 
 namespace LogicalConnective
 
@@ -524,12 +511,12 @@ macro_rules (kind := biguconj)
   |      `(⩕ $i:ident ∈ $s:term, $v) => `(Finset.conj' $s fun $i ↦ $v)
 
 @[app_unexpander uconj]
-def uconjUnexpsnder : Unexpander
+meta def uconjUnexpsnder : Unexpander
   | `($_ fun $i ↦ $v) => `(⩕ $i, $v)
   |                 _ => throw ()
 
 @[app_unexpander Finset.conj']
-def conj'Unexpsnder : Unexpander
+meta def conj'Unexpsnder : Unexpander
   | `($_ $s fun $i ↦ $v) => `(⩕ $i ∈ $s, $v)
   |                    _ => throw ()
 
@@ -546,12 +533,12 @@ macro_rules (kind := bigudisj)
   |      `(⩖ $i:ident ∈ $s:term, $v) => `(Finset.disj' $s fun $i ↦ $v)
 
 @[app_unexpander udisj]
-def udisjUnexpsnder : Unexpander
+meta def udisjUnexpsnder : Unexpander
   | `($_ fun $i ↦ $v) => `(⩖ $i, $v)
   |                 _ => throw ()
 
 @[app_unexpander Finset.disj']
-def disj'Unexpsnder : Unexpander
+meta def disj'Unexpsnder : Unexpander
   | `($_ $s fun $i ↦ $v) => `(⩖ $i ∈ $s, $v)
   |                    _ => throw ()
 
@@ -641,3 +628,5 @@ lemma map_udisj [LogicalConnective β] [FunLike F α β] [LogicalConnective.HomC
     Φ (udisj f) ↔ ∃ i, Φ (f i) := by simp [udisj]
 
 end Finset
+
+end

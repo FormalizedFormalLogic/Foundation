@@ -1,12 +1,11 @@
-import Foundation.FirstOrder.Arithmetic.Basic.Model
+module
 
-namespace LO
+public import Foundation.FirstOrder.Arithmetic.Basic.Model
 
-namespace FirstOrder
+@[expose] public section
+namespace LO.FirstOrder.Arithmetic
 
 variable {L : Language} [L.LT]
-
-namespace Arithmetic
 
 inductive Hierarchy : Polarity → ℕ → {n : ℕ} → Semiformula L ξ n → Prop
   | verum (Γ s n)                                    : Hierarchy Γ s (⊤ : Semiformula L ξ n)
@@ -285,11 +284,13 @@ set_option linter.flexible false in
       rcases eq with ⟨φ₁, rfl, φ₂, rfl, rfl⟩
       simpa using ⟨ihp rfl, ihq rfl⟩
     case ball pos _ ih =>
-      simp [Rew.eq_lt_iff] at eq
+      simp only [Rew.eq_lt_iff, Rew.q_eq_zero_iff, Matrix.vecCons_empty_eq_singleton,
+        exists_and_left, exists_eq_left] at eq
       rcases eq with ⟨hp, ⟨u, rfl, s, hs, rfl⟩, φ, rfl, rfl⟩
       simpa [show u.Positive from by simpa using pos] using ih rfl
     case bex pos _ ih =>
-      simp [Rew.eq_lt_iff] at eq
+      simp only [Rew.eq_lt_iff, Rew.q_eq_zero_iff, Matrix.vecCons_empty_eq_singleton,
+        exists_and_left, exists_eq_left] at eq
       rcases eq with ⟨hp, ⟨u, rfl, s, hs, rfl⟩, φ, rfl, rfl⟩
       simpa [show u.Positive from by simpa using pos] using ih rfl
     case all ih =>
@@ -333,14 +334,6 @@ lemma of_open {φ : Semiformula L ξ n} : φ.Open → Hierarchy Γ s φ := by
   case hor ihp ihq => intro hp hq; exact ⟨ihp hp, ihq hq⟩
 
 variable {L : Language} [L.ORing]
-
-set_option linter.flexible false in
-lemma oringEmb {φ : Semiformula ℒₒᵣ ξ n} : Hierarchy Γ s φ → Hierarchy Γ s (Semiformula.lMap (Language.oringEmb : ℒₒᵣ →ᵥ L) φ) := by
-  intro h; induction h <;> try simp [*, Semiformula.lMap_rel, Semiformula.lMap_nrel]
-  case sigma ih => exact ih.accum _
-  case pi ih => exact ih.accum _
-  case dummy_pi ih => exact ih.dummy_pi
-  case dummy_sigma ih => exact ih.dummy_sigma
 
 lemma iff_iff {φ ψ : Semiformula L ξ n} :
     Hierarchy b s (φ ⭤ ψ) ↔ (Hierarchy b s φ ∧ Hierarchy b.alt s φ ∧ Hierarchy b s ψ ∧ Hierarchy b.alt s ψ) := by
@@ -483,7 +476,7 @@ end Arithmetic
 abbrev ArithmeticTheory.SoundOnHierarchy (T : ArithmeticTheory) (Γ : Polarity) (k : ℕ) := T.SoundOn (Arithmetic.Hierarchy Γ k)
 
 lemma ArithmeticTheory.soundOnHierarchy (T : ArithmeticTheory) (Γ : Polarity) (k : ℕ) [T.SoundOnHierarchy Γ k] :
-    T ⊢!. σ → Arithmetic.Hierarchy Γ k σ → ℕ ⊧ₘ₀ σ := SoundOn.sound
+    T ⊢ σ → Arithmetic.Hierarchy Γ k σ → ℕ ⊧ₘ σ := SoundOn.sound
 
 instance (T : ArithmeticTheory) [T.SoundOnHierarchy 𝚺 1] : Entailment.Consistent T :=
   T.consistent_of_sound (Arithmetic.Hierarchy 𝚺 1) (by simp)

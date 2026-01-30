@@ -1,38 +1,40 @@
-import Foundation.FirstOrder.Incompleteness.First
+module
 
+public import Foundation.FirstOrder.Incompleteness.First
 
-
+@[expose] public section
 namespace LO.FirstOrder.Arithmetic
 
 variable (T : ArithmeticTheory) [T.Δ₁] [𝗜𝚺₁ ⪯ T] [T.SoundOnHierarchy 𝚺 1]
 
-open LO.Entailment FirstOrder Arithmetic ISigma1 Metamath
+open LO.Entailment
 
 open Classical
 
 lemma incomplete_of_REPred_not_ComputablePred_Nat' {P : ℕ → Prop} (hRE : REPred P) (hC : ¬ComputablePred P) :
-  ∃ φ : ArithmeticSemisentence 1, ∃ a : ℕ, T ⊬. φ/[a] ∧ T ⊬. ∼φ/[a] := by
+  ∃ φ : ArithmeticSemisentence 1, ∃ a : ℕ, T ⊬ φ/[a] ∧ T ⊬ ∼φ/[a] := by
   let φ := codeOfREPred P;
   use φ;
-  have hP : P = { n : ℕ | T ⊢!. φ/[n] } := Set.ext fun x ↦ re_complete hRE;
-  have ⟨d, hd⟩ : ∃ d : ℕ, ¬(¬P d ↔ T ⊢!. ∼φ/[d]) := by
+  have hP : P = { n : ℕ | T ⊢ φ/[n] } := Set.ext fun x ↦ re_complete hRE;
+  have ⟨d, hd⟩ : ∃ d : ℕ, ¬(¬P d ↔ T ⊢ ∼φ/[d]) := by
     by_contra h;
     apply hC;
     apply ComputablePred.computable_iff_re_compl_re.mpr;
     constructor;
     . assumption;
-    . suffices REPred fun a : ℕ ↦ T ⊬. φ/[a] by simpa [hP] using this;
-      have : 𝚺₁-Predicate fun b : ℕ ↦ T.Provable (neg ℒₒᵣ <| substs ℒₒᵣ ?[InternalArithmetic.numeral b] ⌜φ⌝) := by clear hP; definability;
+    . suffices REPred fun a : ℕ ↦ T ⊬ φ/[a] by simpa [hP] using this;
+      have : 𝚺₁-Predicate fun b : ℕ ↦ T.Provable (Bootstrapping.neg ℒₒᵣ <| Bootstrapping.subst ℒₒᵣ ?[Bootstrapping.Arithmetic.numeral b] ⌜φ⌝) := by clear hP; definability;
       apply REPred.of_eq (re_iff_sigma1.mpr this);
       intro a;
       push_neg at h;
-      apply Iff.trans ?_ $ show T ⊢!. ∼φ/[a] ↔ ¬T ⊢!. φ/[a] by simpa [hP] using h a |>.symm;
-      apply Iff.trans ?_ $ show T ⊢! ∼(φ : SyntacticSemiformula ℒₒᵣ 1)/[↑a] ↔ T ⊢!. ∼φ/[a] by
-        convert Axiom.provable_iff.symm;
-        simp [Rewriting.embedding_substs_eq_substs_coe₁];
+      apply Iff.trans ?_ $ show T ⊢ ∼φ/[a] ↔ ¬T ⊢ φ/[a] by simpa [hP] using h a |>.symm;
       constructor;
-      . rintro hP; apply Theory.Provable.sound; simpa [Semiformula.quote_def] using hP;
-      . rintro hφ; simpa [Semiformula.quote_def] using internalize_provability (V := ℕ) hφ;
+      . rintro hP
+        apply Theory.Provable.sound
+        simpa [Sentence.quote_def, Semiformula.quote_def, Rewriting.emb_subst_eq_subst_coe₁] using hP;
+      . rintro hφ
+        simpa [Sentence.quote_def, Semiformula.quote_def, Rewriting.emb_subst_eq_subst_coe₁] using
+          Bootstrapping.internalize_provability (V := ℕ) hφ;
   push_neg at hd;
   rcases hd with (⟨hd₁, hd₂⟩ | ⟨hd₁, hd₂⟩);
   . use d;
@@ -40,15 +42,15 @@ lemma incomplete_of_REPred_not_ComputablePred_Nat' {P : ℕ → Prop} (hRE : REP
     . simpa [hP] using hd₁;
     . simpa;
   . exfalso;
-    apply Entailment.Consistent.not_bot (𝓢 := T.toAxiom) inferInstance;
-    replace hd₁ : T ⊢!. φ/[d] := by simpa [hP] using hd₁;
+    apply Entailment.Consistent.not_bot (𝓢 := T) inferInstance;
+    replace hd₁ : T ⊢ φ/[d] := by simpa [hP] using hd₁;
     cl_prover [hd₁, hd₂];
 
 /--
   If r.e. but not recursive predicate `P` on `ℕ` exists, then implies incompleteness.
 -/
 lemma incomplete_of_REPred_not_ComputablePred_Nat
-    {P : ℕ → Prop} (hRE : REPred P) (hC : ¬ComputablePred P) : Entailment.Incomplete (T : Axiom ℒₒᵣ) := by
+    {P : ℕ → Prop} (hRE : REPred P) (hC : ¬ComputablePred P) : Entailment.Incomplete T := by
   obtain ⟨φ, a, hφ₁, hφ₂⟩ := incomplete_of_REPred_not_ComputablePred_Nat' T hRE hC;
   apply incomplete_def.mpr;
   use φ/[⌜a⌝];

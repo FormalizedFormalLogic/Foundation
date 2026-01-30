@@ -1,12 +1,10 @@
-import Foundation.Modal.Logic.Extension
-import Foundation.Modal.Logic.Basic
-import Foundation.Modal.Logic.GL.Independency
-import Foundation.Modal.Kripke.Logic.GL.Soundness
-import Foundation.Modal.Logic.S.Basic
-import Foundation.Modal.Entailment.GL
-import Mathlib.Tactic.TFAE
-import Mathlib.Order.WellFoundedSet
-import Foundation.Modal.Maximal.Unprovability
+module
+
+public import Foundation.Modal.Logic.GL.Independency
+public import Foundation.Modal.Logic.S.Basic
+public import Mathlib.Order.WellFoundedSet
+
+@[expose] public section
 
 namespace LO.Modal
 
@@ -20,11 +18,13 @@ instance : Entailment.HasAxiomP Modal.D where
   P := by
     constructor;
     apply Logic.sumQuasiNormal.mem₂;
+    apply Logic.iff_provable.mpr;
     simp;
 
-lemma D.mem_axiomDz : Modal.D ⊢! □(□φ ⋎ □ψ) ➝ □φ ⋎ □ψ := by
-  apply Logic.subst! (φ := □(□(atom 0) ⋎ □(.atom 1)) ➝ □(atom 0) ⋎ □(.atom 1)) (s := λ a => if a = 0 then φ else ψ);
+lemma D.mem_axiomDz : Modal.D ⊢ □(□φ ⋎ □ψ) ➝ □φ ⋎ □ψ := by
+  apply Logic.subst (φ := □(□(atom 0) ⋎ □(.atom 1)) ➝ □(atom 0) ⋎ □(.atom 1)) (s := λ a => if a = 0 then φ else ψ);
   apply Logic.sumQuasiNormal.mem₂!;
+  apply Logic.iff_provable.mpr;
   simp;
 
 instance : Modal.GL ⪱ Modal.D := by
@@ -39,7 +39,7 @@ instance : Modal.GL ⪱ Modal.D := by
 section
 
 private inductive D' : Logic ℕ
-  | mem_GL {φ} : Modal.GL ⊢! φ → Modal.D' φ
+  | mem_GL {φ} : Modal.GL ⊢ φ → Modal.D' φ
   | axiomP : Modal.D' (∼□⊥)
   | axiomD (φ ψ) : Modal.D' (□(□φ ⋎ □ψ) ➝ □φ ⋎ □ψ)
   | mdp  {φ ψ} : Modal.D' (φ ➝ ψ) → Modal.D' φ → Modal.D' ψ
@@ -67,7 +67,7 @@ private lemma D'.eq_D : Modal.D' = Modal.D := by
       induction ihφ with
       | mem_GL h =>
         apply Modal.D'.mem_GL;
-        apply subst!;
+        apply Logic.subst;
         exact h;
       | axiomP => apply Modal.D'.axiomP;
       | axiomD _ _ => apply Modal.D'.axiomD;
@@ -75,12 +75,12 @@ private lemma D'.eq_D : Modal.D' = Modal.D := by
 
 -- TODO: Remove `eq_D_D'`?
 protected def D.rec'
-  {motive  : (φ : Formula ℕ) → (Modal.D ⊢! φ) → Prop}
-  (mem_GL  : ∀ {φ}, (h : Modal.GL ⊢! φ) → motive φ (sumQuasiNormal.mem₁! h))
+  {motive  : (φ : Formula ℕ) → (Modal.D ⊢ φ) → Prop}
+  (mem_GL  : ∀ {φ}, (h : Modal.GL ⊢ φ) → motive φ (sumQuasiNormal.mem₁! h))
   (axiomP  : motive (∼□⊥) (by simp))
   (axiomDz : ∀ {φ ψ}, motive (□(□φ ⋎ □ψ) ➝ □φ ⋎ □ψ) (Modal.D.mem_axiomDz))
-  (mdp : ∀ {φ ψ}, {hφψ : Modal.D ⊢! φ ➝ ψ} → {hφ : Modal.D ⊢! φ} → (motive (φ ➝ ψ) hφψ) → (motive φ hφ) → motive ψ (hφψ ⨀ hφ))
-  : ∀ {φ}, (h : Modal.D ⊢! φ) → motive φ h := by
+  (mdp : ∀ {φ ψ}, {hφψ : Modal.D ⊢ φ ➝ ψ} → {hφ : Modal.D ⊢ φ} → (motive (φ ➝ ψ) hφψ) → (motive φ hφ) → motive ψ (hφψ ⨀ hφ))
+  : ∀ {φ}, (h : Modal.D ⊢ φ) → motive φ h := by
   intro φ h;
   replace h := iff_provable.mp $ Modal.D'.eq_D ▸ h;
   induction h with
@@ -101,42 +101,34 @@ end
 
 section
 
-attribute [-simp] Logic.iff_provable
 open LO.Entailment LO.Modal.Entailment
 
-instance : Entailment.GL Modal.GL where
-  L _ := by
-    constructor;
-    apply Logic.iff_provable.mp;
-    apply Hilbert.Normal.iff_logic_provable_provable.mpr;
-    simp;
-
 @[simp]
-lemma GL.box_disj_Tc {l : List (Formula ℕ)} : Modal.GL ⊢! l.box.disj ➝ □l.box.disj := by
+lemma GL.box_disj_Tc {l : List (Formula ℕ)} : Modal.GL ⊢ (□'l).disj ➝ □(□'l).disj := by
   apply left_Disj!_intro;
   intro ψ hψ;
-  obtain ⟨ψ, hψ, rfl⟩ := List.exists_box_of_mem_box hψ;
+  obtain ⟨ψ, hψ, rfl⟩ := List.LO.exists_of_mem_box hψ;
   apply C!_trans axiomFour!;
   apply axiomK'!;
   apply nec!;
   apply right_Disj!_intro;
   assumption;
 
-lemma D.ldisj_axiomDz {l : List (Formula ℕ)} : Modal.D ⊢! □(l.box.disj) ➝ l.box.disj := by
+lemma D.ldisj_axiomDz {l : List (Formula ℕ)} : Modal.D ⊢ □((□'l).disj) ➝ (□'l).disj := by
   induction l with
   | nil => exact axiomP!;
   | cons φ l ih =>
-    apply C!_replace ?_ ?_ (D.mem_axiomDz (φ := φ) (ψ := l.box.disj));
+    apply C!_replace ?_ ?_ (D.mem_axiomDz (φ := φ) (ψ := (□'l).disj));
     . apply sumQuasiNormal.mem₁!;
       apply axiomK'!;
       apply nec!;
-      suffices Modal.GL ⊢! □φ ⋎ l.box.disj ➝ □φ ⋎ □l.box.disj by simpa;
-      have : Modal.GL ⊢! l.box.disj ➝ □l.box.disj := GL.box_disj_Tc;
+      suffices Modal.GL ⊢ □φ ⋎ (□'l).disj ➝ □φ ⋎ □(□'l).disj by simpa;
+      have : Modal.GL ⊢ (□'l).disj ➝ □(□'l).disj := GL.box_disj_Tc;
       cl_prover [this];
-    . suffices Modal.D ⊢! □φ ⋎ □l.box.disj ➝ □φ ⋎ l.box.disj by simpa;
+    . suffices Modal.D ⊢ □φ ⋎ □(□'l).disj ➝ □φ ⋎ (□'l).disj by simpa;
       cl_prover [ih];
 
-lemma D.fdisj_axiomDz {s : Finset (Formula ℕ)} : Modal.D ⊢! □(s.box.disj) ➝ s.box.disj := by
+lemma D.fdisj_axiomDz {s : Finset (Formula ℕ)} : Modal.D ⊢ □((□'s).disj) ➝ (□'s).disj := by
   apply C!_replace ?_ ?_ $ D.ldisj_axiomDz (l := s.toList);
   . apply sumQuasiNormal.mem₁!;
     apply axiomK'!;
@@ -144,19 +136,18 @@ lemma D.fdisj_axiomDz {s : Finset (Formula ℕ)} : Modal.D ⊢! □(s.box.disj) 
     apply left_Fdisj!_intro;
     rintro ψ hψ;
     apply right_Disj!_intro;
-    obtain ⟨ψ, hψ, rfl⟩ : ∃ a ∈ s, □a = ψ := by simpa using hψ;
-    apply List.box_mem_of;
-    simpa;
+    obtain ⟨ψ, hψ, rfl⟩ : ∃ a ∈ s, □a = ψ := Finset.LO.exists_of_mem_box hψ;
+    grind;
   . apply left_Disj!_intro;
     intro ψ hψ;
     apply right_Fdisj!_intro;
-    obtain ⟨ψ, hψ₂, rfl⟩ := List.exists_box_of_mem_box hψ;
-    simpa using hψ₂;
+    obtain ⟨ψ, hψ₂, rfl⟩ := List.LO.exists_of_mem_box hψ;
+    grind;
 
-lemma D.axiomFour : Modal.D ⊢! □□φ ➝ □φ := by
-  simpa using Logic.subst! (λ _ => φ) $ fdisj_axiomDz (s := {(.atom 0)});
+lemma D.axiomFour : Modal.D ⊢ □□φ ➝ □φ := by
+  simpa [Finset.LO.preboxItr, Finset.LO.boxItr] using fdisj_axiomDz (s := {φ});
 
-noncomputable abbrev Formula.dzSubformula (φ : Formula ℕ) := φ.subformulas.prebox.powerset.image (λ s => □(s.box.disj) ➝ s.box.disj)
+noncomputable abbrev Formula.dzSubformula (φ : Formula ℕ) := (□⁻¹'φ.subformulas).powerset.image (λ s => □((□'s).disj) ➝ (□'s).disj)
 
 
 namespace Kripke
@@ -180,11 +171,11 @@ def tailModel₀ (M : Kripke.Model) {r} [M.IsRootedBy r] (o : ℕ → Prop) : Kr
     | .inr $ .inl _, .inr $ .inr _ => True
     | .inr $ .inr _, .inr $ .inl _ => False
     | .inr $ .inr x, .inr $ .inr y => x ≺ y
-  Val x p :=
+  Val p x :=
     match x with
     | .inl _        => o p
-    | .inr $ .inl _ => M.Val r p
-    | .inr $ .inr x => M.Val x p
+    | .inr $ .inl _ => M.Val p r
+    | .inr $ .inr x => M.Val p x
 
 namespace tailModel₀
 
@@ -328,11 +319,11 @@ lemma modal_equivalent_extendRoot_nat {n : ℕ+} {i : Fin n} : ModalEquivalent (
 open Formula.Kripke in
 lemma of_provable_rflSubformula_original_root [M.IsTransitive]
   {φ : Formula _}
-  (hS : r ⊧ (φ.subformulas.prebox.image (λ ψ => □ψ ➝ ψ)).conj) :
+  (hS : r ⊧ ((□⁻¹'φ.subformulas).image (λ ψ => □ψ ➝ ψ)).conj) :
   ∀ ψ ∈ φ.subformulas, ∀ i : ℕ, r ⊧ ψ ↔ (tailModel₀.embed_nat i : tailModel₀ M o) ⊧ ψ := by
   intro ψ hψ i;
   induction ψ generalizing i with
-  | hatom p => simp [Semantics.Realize, tailModel₀, Satisfies];
+  | hatom p => simp [Semantics.Models, tailModel₀, Satisfies];
   | hfalsum => simp;
   | himp ψ ξ ihψ ihξ => simp [ihψ (by grind) i, ihξ (by grind) i];
   | hbox ψ ihψ =>
@@ -340,7 +331,9 @@ lemma of_provable_rflSubformula_original_root [M.IsTransitive]
     calc
       _ ↔ (∀ x, r ≺ x → x ⊧ ψ) ∧ r ⊧ ψ := by
         suffices (∀ y, r ≺ y → y ⊧ ψ) → r ⊧ ψ by simpa [Satisfies];
-        apply Satisfies.fconj_def.mp hS (□ψ ➝ ψ) (by simpa);
+        apply Satisfies.fconj_def.mp hS (□ψ ➝ ψ) $ by
+          simp only [Finset.LO.preboxItr, Function.iterate_one, Finset.mem_image, Finset.mem_preimage];
+          use ψ;
       _ ↔ (∀ x : M, x ⊧ ψ) ∧ r ⊧ ψ := by
         suffices (∀ x, r ≺ x → x ⊧ ψ) ∧ r ⊧ ψ → (∀ x : M, x ⊧ ψ) by tauto;
         rintro ⟨h₁, h₂⟩ y;
@@ -381,7 +374,7 @@ lemma of_provable_rflSubformula_original_root [M.IsTransitive]
 end tailModel₀
 
 
-def tailModel (M : Kripke.Model) {r} [M.IsRootedBy r] : Kripke.Model := tailModel₀ M (M.Val r)
+def tailModel (M : Kripke.Model) {r} [M.IsRootedBy r] : Kripke.Model := tailModel₀ M (M · r)
 
 namespace tailModel
 
@@ -405,16 +398,16 @@ open Formula.Kripke
 
 theorem GL_D_TFAE :
   [
-    Modal.D ⊢! φ,
+    Modal.D ⊢ φ,
     ∀ M : Kripke.Model, ∀ r, [M.IsFiniteTree r] → ∀ o, (tailModel₀.root (M := M) (o := o)) ⊧ φ,
     ∀ M : Kripke.Model, ∀ r, [M.IsFiniteTree r] → r ⊧ φ.dzSubformula.conj ➝ φ,
-    Modal.GL ⊢! φ.dzSubformula.conj ➝ φ,
+    Modal.GL ⊢ φ.dzSubformula.conj ➝ φ,
   ].TFAE := by
     tfae_have 1 → 2 := by
       intro h M r _ o;
       induction h using D.rec' with
       | mem_GL h =>
-        apply Sound.sound (𝓜 := Kripke.FrameClass.infinite_GL) h;
+        apply Sound.sound (𝓜 := Kripke.FrameClass.GL) h;
         apply Set.mem_setOf_eq.mpr;
         exact {
           trans := by intro x y z; exact Frame.trans (F := tailModel₀ M o |>.toFrame),
@@ -428,8 +421,8 @@ theorem GL_D_TFAE :
         . exact tailModel₀.rel_root_embed_original;
         . tauto;
       | @axiomDz φ ψ =>
-        contrapose!;
         intro h;
+        contrapose! h;
         replace h := Satisfies.or_def.not.mp h;
         push_neg at h;
         obtain ⟨x, Rrx, hx⟩ := Satisfies.not_box_def.mp h.1;
@@ -470,30 +463,30 @@ theorem GL_D_TFAE :
     tfae_have 2 → 3 := by
       contrapose!;
       rintro ⟨M, r, _, h⟩;
-      have h₁ : ∀ X ⊆ φ.subformulas.prebox, Satisfies M r (□X.box.disj ➝ X.box.disj) := by simpa using Satisfies.not_imp_def.mp h |>.1;
+      have h₁ : ∀ X ⊆ (□⁻¹'φ.subformulas), Satisfies M r (□(□'X).disj ➝ (□'X).disj) := by simpa using Satisfies.not_imp_def.mp h |>.1;
       have h₂ := Satisfies.not_imp_def.mp h |>.2;
 
-      let X := φ.subformulas.prebox.filter (λ ψ => ¬(r ⊧ □ψ));
+      let X := (□⁻¹'φ.subformulas).filter (λ ψ => ¬(r ⊧ □ψ));
       obtain ⟨x, Rrx, hx⟩ : ∃ x, r ≺ x ∧ ∀ ψ ∈ X, ¬x ⊧ □ψ := by
-        have : r ⊧ ∼(X.box.disj) := by
+        have : r ⊧ ∼((□'X).disj) := by
           apply Satisfies.not_def.mpr;
           apply Satisfies.fdisj_def.not.mpr;
-          simp [X];
-        have : r ⊧ ∼□(X.box.disj) := by
+          simp [X, Finset.LO.preboxItr, Finset.LO.boxItr];
+        have : r ⊧ ∼□((□'X).disj) := by
           have := h₁ X $ by simp [X];
           tauto;
         obtain ⟨x, Rrx, hx⟩ := Satisfies.not_box_def.mp this;
         use x;
         constructor;
         . assumption;
-        . simpa using Satisfies.fdisj_def.not.mp hx;
+        . simpa [Finset.LO.preboxItr, Finset.LO.boxItr] using Satisfies.fdisj_def.not.mp hx;
 
-      let Mt := tailModel₀ (M↾x) (λ p => M.Val r p);
+      let Mt := tailModel₀ (M↾x) (λ p => M.Val p r);
 
       have : ∀ ψ ∈ φ.subformulas, (tailModel₀.root : Mt) ⊧ ψ ↔ r ⊧ ψ := by
         intro ψ hψ;
         induction ψ with
-        | hatom p => simp [tailModel₀, tailModel₀.root, Satisfies, Semantics.Realize]; -- TODO: extract
+        | hatom p => simp [tailModel₀, tailModel₀.root, Satisfies, Semantics.Models]; -- TODO: extract
         | hfalsum => simp;
         | himp φ ψ ihφ ihψ => simp [ihφ (by grind), ihψ (by grind)];
         | hbox ψ ihψ =>
@@ -506,7 +499,7 @@ theorem GL_D_TFAE :
               tailModel₀.modal_equivalent_original |>.mpr $ this;
             contrapose! this;
             apply hx;
-            simp_all [X];
+            simp_all [X, Finset.LO.preboxItr, Finset.LO.boxItr];
           . intro h w Rrw;
             have H₁ : ∀ w : M↾x, w ⊧ ψ := by
               intro w;
@@ -514,7 +507,7 @@ theorem GL_D_TFAE :
               apply h;
               rcases w.2 with (_ | Rrw);
               . convert Rrx;
-              . apply M.trans Rrx $ HRel.TransGen.unwrap Rrw;
+              . apply M.trans Rrx $ Rel.TransGen.unwrap Rrw;
             match w with
             | .inl _ => contradiction;
             | .inr $ .inr w => exact tailModel₀.modal_equivalent_original.mp $ H₁ w;
@@ -523,14 +516,14 @@ theorem GL_D_TFAE :
               . apply H₁;
               . apply Model.pointGenerate.modal_equivalent_at_root x |>.mpr;
                 apply Satisfies.conj_def.mpr;
-                suffices ∀ (ψ : Formula ℕ), □ψ ∈ φ.subformulas → x ⊧ (□ψ ➝ ψ) by simpa;
+                suffices ∀ (ψ : Formula ℕ), □ψ ∈ φ.subformulas → x ⊧ (□ψ ➝ ψ) by simpa [Finset.LO.preboxItr, Finset.LO.boxItr];
                 intro ψ hψ hψ;
                 have : ψ ∉ X := by
                   contrapose! hψ;
                   apply hx;
                   assumption;
                 have : r ⊧ (□ψ) := by
-                  simp [X] at this;
+                  simp [X, Finset.LO.preboxItr, Finset.LO.boxItr] at this;
                   tauto;
                 apply this;
                 assumption;
@@ -539,14 +532,14 @@ theorem GL_D_TFAE :
     tfae_have 4 ↔ 3 := GL.Kripke.iff_provable_satisfies_FiniteTransitiveTree
     tfae_have 4 → 1 := by
       intro h;
-      apply (show Modal.D ⊢! φ.dzSubformula.conj ➝ φ by exact sumQuasiNormal.mem₁! h) ⨀ ?_;
+      apply (show Modal.D ⊢ φ.dzSubformula.conj ➝ φ by exact sumQuasiNormal.mem₁! h) ⨀ ?_;
       apply FConj!_iff_forall_provable.mpr;
       intro ψ hψ;
-      obtain ⟨s, _, rfl⟩ : ∃ s ⊆ φ.subformulas.prebox, □s.box.disj ➝ s.box.disj = ψ := by simpa using hψ;
+      obtain ⟨s, _, rfl⟩ : ∃ s ⊆ (□⁻¹'φ.subformulas), □(□'s).disj ➝ (□'s).disj = ψ := by simpa using hψ;
       exact D.fdisj_axiomDz;
     tfae_finish;
 
-lemma iff_provable_D_provable_GL : Modal.D ⊢! φ ↔ Modal.GL ⊢! φ.dzSubformula.conj ➝ φ := GL_D_TFAE (φ := φ) |>.out 0 3
+lemma iff_provable_D_provable_GL : Modal.D ⊢ φ ↔ Modal.GL ⊢ φ.dzSubformula.conj ➝ φ := GL_D_TFAE (φ := φ) |>.out 0 3
 
 lemma D.unprovable_T : Modal.D ⊬ (Axioms.T (.atom 0)) := by
   apply GL_D_TFAE |>.out 0 1 |>.not.mpr;
@@ -560,7 +553,7 @@ lemma D.unprovable_T : Modal.D ⊬ (Axioms.T (.atom 0)) := by
   . exact {
       world_finite := inferInstance,
       root_generates := by
-        suffices ∀ w : Fin 1, w = 0 by simpa [M];
+        suffices ∀ w : Fin 1, w = 0 by simp [M];
         trivial;
     }
   . apply Satisfies.not_imp_def.mpr
@@ -590,3 +583,4 @@ end
 end
 
 end LO.Modal
+end

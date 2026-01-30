@@ -2,15 +2,7 @@ name: CI
 
 on:
   push:
-    branches:
-      - "master"
-  pull_request:
   merge_group:
-  workflow_dispatch:
-
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
 
 permissions:
   contents: read
@@ -24,8 +16,7 @@ jobs:
     steps:
       # We don't use https://github.com/leanprover/lean-action.
       # Because caching strategy is not suitable for our project.
-
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Setup elan
         run: |
           curl https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -sSf | sh -s -- -y --default-toolchain none
@@ -34,30 +25,18 @@ jobs:
         uses: ts-graphviz/setup-graphviz@v2
       - name: Setup typst
         uses: typst-community/setup-typst@v4
-      - name: Setup mdbook
-        uses: baptiste0928/cargo-install@v3
-        with:
-          crate: mdbook
-          version: "0.4.51"
-      - name: Setup mdbook-katex
-        uses: baptiste0928/cargo-install@v3
-        with:
-          crate: mdbook-katex
-          version: "0.9.4"
       - name: Print tools version
         run: |
           lake --version
           dot -V
           typst --version
-          mdbook --version
-          mdbook-katex --version
 
       # Restore project cache
       - name: Restore cache
         id: cache-restore
-        uses: actions/cache/restore@v4
+        uses: actions/cache/restore@v5
         with:
-          path: .lake
+          path: .lake/build
           key: lake-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('lean-toolchain') }}-${{ hashFiles('lake-manifest.json') }}-${{ github.sha }}
           restore-keys: |
             lake-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('lean-toolchain') }}-${{ hashFiles('lake-manifest.json') }}
@@ -65,57 +44,85 @@ jobs:
       # Build project
       - name: Get Mathlib cache
         run: lake exe cache get
-      - name: Build project
-        run: lake build --keep-toolchain
+      - name: Build Foundation
+        run: lake build --keep-toolchain Foundation
+      - name: Build executables
+        run: |
+          lake build --keep-toolchain \
+            Zoo_Arith \
+            Zoo_SetTheory \
+            Zoo_Propositional \
+            Zoo_Modal \
+            Zoo_InterpretabilityLogic
 
       # Build import-graph
       - name: Generate import graph
         run: |
-          lake exe graph ./import_graph.png
-          lake exe graph ./import_graph.pdf
-          lake exe graph ./import_graph.html
-      - name: Copy import graph to pages
-        run: |
-          cp ./import_graph.png ./pages/src/assets
-          cp ./import_graph.pdf ./pages/src/assets
-          cp ./import_graph.html ./pages/src/assets
+          lake exe graph ./pages/_output/import_graph.png
+          lake exe graph ./pages/_output/import_graph.pdf
+          lake exe graph ./pages/_output/import_graph.html
 
+      # Build zoo
       - name: Generate Propositional Zoo
         run: |
-          lake exe generate_propositional_zoo
-          typst compile ./Zoo/propositional.typ ./pages/src/assets/propositional_zoo.png
-      - name: Generate Modal Zoo
-        run: |
-          lake exe generate_modal_zoo
-          typst compile ./Zoo/modal.typ ./pages/src/assets/modal_zoo.png
+          lake exe Zoo_Propositional
+          typst compile ./Zoo/Propositional.typ ./pages/_output/zoo/Propositional.png
+          typst compile ./Zoo/Propositional.typ ./pages/_output/zoo/Propositional.pdf
       - name: Generate Arith Zoo
         run: |
-          lake exe generate_arith_zoo
-          typst compile ./Zoo/arith.typ ./pages/src/assets/arith_zoo.png
+          lake exe Zoo_Arith
+          typst compile ./Zoo/Arith.typ ./pages/_output/zoo/Arith.png
+          typst compile ./Zoo/Arith.typ ./pages/_output/zoo/Arith.pdf
+      - name: Generate SetTheory Zoo
+        run: |
+          lake exe Zoo_SetTheory
+          typst compile ./Zoo/SetTheory.typ ./pages/_output/zoo/SetTheory.png
+          typst compile ./Zoo/SetTheory.typ ./pages/_output/zoo/SetTheory.pdf
+      - name: Generate Modal Zoo
+        run: |
+          lake exe Zoo_Modal
+          typst compile ./Zoo/Modal.typ ./pages/_output/zoo/Modal.png
+          typst compile ./Zoo/Modal.typ ./pages/_output/zoo/Modal.pdf
+      - name: Generate InterpretabilityLogic Zoo
+        run: |
+          lake exe Zoo_InterpretabilityLogic
+          typst compile ./Zoo/InterpretabilityLogic.typ ./pages/_output/zoo/InterpretabilityLogic.png
+          typst compile ./Zoo/InterpretabilityLogic.typ ./pages/_output/zoo/InterpretabilityLogic.pdf
 
-      # Build doc
-      - name: Build docs
+      # Build Doc
+      - name: Build doc
         run: lake build Foundation:docs
-      - name: Copy docs to pages
+      - name: Copy doc to pages
         run: cp -r .lake/build/doc ./pages/_output/doc
 
       # Save project cache
       - name: Save project cache
         id: cache-save
-        uses: actions/cache/save@v4
+        uses: actions/cache/save@v5
         with:
-          path: .lake
+          path: .lake/build
           key: ${{ steps.cache-restore.outputs.cache-primary-key }}
 
-      # Build book
-      - name: Build book
-        run: mdbook build
-        working-directory: pages
-
       # Upload pages artifact
-      - uses: actions/upload-pages-artifact@v3
+      - uses: actions/upload-pages-artifact@v4
         with:
           path: pages/_output
+
+  check-references:
+    name: Check references.bib format
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - name: Install bibtool
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y bibtool
+      - name: Format references.bib
+        run: |
+          bibtool -r .bibtoolrsc -i references.bib -o references.bib.formatted
+      - name: Check if formatted correctly
+        run: |
+          diff -u references.bib references.bib.formatted || (echo "references.bib is not formatted" && exit 1)
 
   deploy:
     runs-on: ubuntu-latest

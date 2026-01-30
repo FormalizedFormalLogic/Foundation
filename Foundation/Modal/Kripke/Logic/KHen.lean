@@ -1,15 +1,18 @@
-import Foundation.Modal.Kripke.AxiomL
-import Foundation.Modal.Hilbert.Normal.Basic
-import Mathlib.Order.Interval.Finset.Nat
-import Foundation.Modal.Kripke.Logic.K
-import Foundation.Modal.Entailment.GL
+module
+
+public import Foundation.Modal.Kripke.AxiomL
+public import Foundation.Modal.Kripke.Logic.K
+
+@[expose] public section
 
 namespace LO.Modal
 
-open System
-open Kripke
+open Entailment
 open Formula
 open Formula.Kripke
+open Kripke
+open System
+
 
 namespace Kripke
 
@@ -25,7 +28,7 @@ lemma valid_atomic_axiomHen_of_valid_atomic_axiomL : F ⊧ (Axioms.L (atom a)) �
 lemma valid_atomic_axiomL_of_valid_atomic_axiomHen : F ⊧ Axioms.Hen (atom a) → F ⊧ Axioms.L (atom a) := by
   intro hH V x hx;
 
-  let V' : Valuation F := λ w a => ∀ n : ℕ, Satisfies ⟨F, V⟩ w (□^[n] a);
+  let V' : Valuation F := λ a w => ∀ n : ℕ, Satisfies ⟨F, V⟩ w (□^[n] a);
 
   have h₁ : Satisfies ⟨F, V'⟩ x (□(□a ⭤ a)) := by
     intro y Rxy;
@@ -90,11 +93,7 @@ postfix:max "♭" => flat
 variable {n m : ℕ} {x y : cresswellFrame.World}
 
 lemma trichonomy : x ≺ y ∨ x = y ∨ y ≺ x := by
-  match x, y with
-  | x♯, y♯ => simp [cresswellFrame, Frame.Rel']; omega;
-  | x♭, y♯ => simp [cresswellFrame, Frame.Rel'];
-  | x♯, y♭ => simp [cresswellFrame, Frame.Rel'];
-  | x♭, y♭ => simp [cresswellFrame, Frame.Rel']; omega;
+  match x, y with | x♯, y♯ | x♭, y♯ | x♯, y♭ | x♭, y♭ => grind;;
 
 @[simp] lemma sharp_to_flat : n♯ ≺ m♭ := by simp [Frame.Rel']
 
@@ -113,7 +112,7 @@ end cresswellFrame
 
 
 
-abbrev cresswellModel : Kripke.Model := ⟨cresswellFrame, λ w _ => w ≠ 0♯⟩
+abbrev cresswellModel : Kripke.Model := ⟨cresswellFrame, λ _ w => w ≠ 0♯⟩
 
 namespace cresswellModel
 
@@ -130,7 +129,7 @@ lemma cresswellModel.not_valid_axiomFour : ¬(Satisfies cresswellModel 2♯ (Axi
     match x with
     | n♯ =>
       intro h2n;
-      suffices n ≠ 0 by simpa [Satisfies];
+      suffices n ≠ 0 by simp [Satisfies]; grind
       omega;
     | n♭ => simp [Satisfies];
   . apply Satisfies.box_def.not.mpr
@@ -153,7 +152,7 @@ namespace cresswellModel.truthset
 
 lemma infinite_of_all_flat (h : ∀ n, n♭ ∈ ‖φ‖) : (‖φ‖.Infinite) := by
   apply Set.infinite_coe_iff.mp;
-  exact Infinite.of_injective (λ n => ⟨n♭, h n⟩) $ by simp [Function.Injective]
+  exact Infinite.of_injective (λ n => ⟨n♭, h n⟩) $ by simp [Function.Injective];
 
 -- TODO: need golf
 lemma exists_max_sharp (h₁ : ∀ n, n♭ ∈ ‖φ‖) (h₂ : ‖φ‖ᶜ.Finite) (h₃ : ‖φ‖ᶜ.Nonempty) :
@@ -166,12 +165,8 @@ lemma exists_max_sharp (h₁ : ∀ n, n♭ ∈ ‖φ‖) (h₂ : ‖φ‖ᶜ.Fin
     use x;
   use (s.max' se);
   constructor;
-  . obtain ⟨f, hx₁⟩ := by simpa using @hs _ |>.mp $ Finset.max'_mem _ se;
-    match f with
-    | 0 => exact hx₁;
-    | 1 =>
-      have := hx₁ $ h₁ _;
-      contradiction;
+  . have : ¬Satisfies cresswellModel (s.max' se, 0) φ ∨ ¬Satisfies cresswellModel (s.max' se, 1) φ := by simpa using @hs _ |>.mp $ Finset.max'_mem _ se;
+    rcases this with (h | h) <;> tauto;
   . intro m hm;
     by_contra hC;
     have : m < m := Finset.max'_lt_iff (H := se) |>.mp hm m (by
@@ -244,7 +239,7 @@ lemma either_finite_cofinite : (‖φ‖.Finite) ∨ (‖φ‖ᶜ.Finite) := by
         | m♯, k♯ =>
           by_contra hC; simp at hC;
           replace Rxy := sharp_to_sharp.mp Rxy;
-          have : k♯ ∈ ‖φ‖ := @hn_max k (by omega);
+          have : k♯ ∈ ‖φ‖ := @hn_max k (by grind);
           contradiction;
         | m♭, k♯ => simp at Rxy;
         | _♯, k♭ => have := h k; contradiction;
@@ -261,7 +256,7 @@ lemma either_finite_cofinite : (‖φ‖.Finite) ∨ (‖φ‖ᶜ.Finite) := by
           contradiction;
         | m♭ =>
           by_contra hC;
-          have := hx n♭ $ (cresswellFrame.flat_to_flat.mpr $ by simpa using hC);
+          have := hx n♭ $ cresswellFrame.flat_to_flat.mpr $ by grind;;
           contradiction;
 
 end cresswellModel.truthset
@@ -345,9 +340,9 @@ lemma cresswellModel.valid_axiomHen : cresswellModel ⊧ □(□φ ⭤ φ) ➝ �
 end Kripke
 
 
-namespace Logic.KHen
+namespace KHen
 
-lemma Kripke.valid_cresswellModel_of_provable : Hilbert.KHen ⊢! φ → cresswellModel ⊧ φ := by
+lemma Kripke.valid_cresswellModel_of_provable : Modal.KHen ⊢ φ → cresswellModel ⊧ φ := by
   intro h;
   induction h using Hilbert.Normal.rec! with
   | axm s h =>
@@ -356,44 +351,37 @@ lemma Kripke.valid_cresswellModel_of_provable : Hilbert.KHen ⊢! φ → cresswe
     . exact cresswellModel.valid_axiomHen;
   | mdp ihφψ ihφ => exact Kripke.ValidOnModel.mdp ihφψ ihφ;
   | nec ihφ => exact Kripke.ValidOnModel.nec ihφ;
-  | imply₁ => exact Kripke.ValidOnModel.imply₁;
-  | imply₂ => exact Kripke.ValidOnModel.imply₂;
+  | implyK => exact Kripke.ValidOnModel.implyK;
+  | implyS => exact Kripke.ValidOnModel.implyS;
   | ec => exact Kripke.ValidOnModel.elimContra;
 
-lemma unprovable_atomic_axiomFour : Hilbert.KHen ⊬ Axioms.Four (atom a) := by
+lemma unprovable_atomic_axiomFour : Modal.KHen ⊬ Axioms.Four (atom a) := by
   by_contra hC;
   exact cresswellModel.not_valid_axiomFour $ Kripke.valid_cresswellModel_of_provable hC 2♯;
 
-theorem Kripke.incomplete : ¬∃ C : Kripke.FrameClass, ∀ φ, Hilbert.KHen ⊢! φ ↔ C ⊧ φ := by
+theorem Kripke.incomplete : ¬∃ C : Kripke.FrameClass, ∀ φ, Modal.KHen ⊢ φ ↔ C ⊧ φ := by
   rintro ⟨C, h⟩;
   have : C ⊧ Axioms.Hen (atom 0) := @h (Axioms.Hen (atom 0)) |>.mp $ by simp;
   have : C ⊧ Axioms.Four (atom 0) := fun {F} hF => valid_atomic_axiomFour_of_valid_atomic_axiomH (this hF);
-  have : Hilbert.KHen ⊢! Axioms.Four (atom 0) := @h (Axioms.Four (atom 0)) |>.mpr this;
+  have : Modal.KHen ⊢ Axioms.Four (atom 0) := @h (Axioms.Four (atom 0)) |>.mpr this;
   exact @unprovable_atomic_axiomFour _ this;
 
-end Logic.KHen
+end KHen
 
 
-namespace Logic
-
-open Formula
-open Entailment
-open Kripke
-
-instance : Hilbert.K ⪱ Hilbert.KHen := by
+instance : Modal.K ⪱ Modal.KHen := by
   constructor;
-  . apply Hilbert.Normal.weakerThan_of_subset_axioms; simp;
+  . grind;
   . apply Entailment.not_weakerThan_iff.mpr;
     use (Axioms.Hen (.atom 0));
     constructor;
     . exact axiomHen!;
     . apply Sound.not_provable_of_countermodel (𝓜 := FrameClass.K)
       apply Kripke.not_validOnFrameClass_of_exists_model_world;
-      use ⟨⟨Fin 1, λ x y => True⟩, λ w _ => False⟩, 0;
-      simp [Satisfies, Semantics.Realize];
-      constructor <;> tauto;
+      use ⟨⟨Fin 1, λ x y => True⟩, λ _ w => False⟩, 0;
+      simp [Satisfies, Semantics.Models];
 
-instance : Hilbert.KHen ⪱ Hilbert.GL := by
+instance : Modal.KHen ⪱ Modal.GL := by
   constructor;
   . apply Hilbert.Normal.weakerThan_of_provable_axioms;
     rintro _ (rfl | rfl | rfl) <;> simp;
@@ -401,12 +389,7 @@ instance : Hilbert.KHen ⪱ Hilbert.GL := by
     use (Axioms.Four (.atom 0));
     constructor;
     . exact axiomFour!;
-    . apply Logic.KHen.unprovable_atomic_axiomFour;
-
-end Logic
-
-instance : Modal.K ⪱ Modal.KHen := inferInstance
-
-instance : Modal.KHen ⪱ Modal.GL := inferInstance
+    . apply KHen.unprovable_atomic_axiomFour;
 
 end LO.Modal
+end

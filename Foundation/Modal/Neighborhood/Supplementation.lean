@@ -1,28 +1,42 @@
-import Foundation.Modal.Neighborhood.Basic
-import Foundation.Modal.Neighborhood.AxiomM
-import Foundation.Modal.Neighborhood.AxiomC
-import Foundation.Modal.Neighborhood.AxiomN
-import Foundation.Modal.Neighborhood.AxiomGeach
+module
+
+public import Foundation.Modal.Neighborhood.AxiomM
+public import Foundation.Modal.Neighborhood.AxiomC
+public import Foundation.Modal.Neighborhood.AxiomN
+public import Foundation.Modal.Neighborhood.AxiomGeach
+
+@[expose] public section
 
 namespace LO.Modal.Neighborhood
 
 variable {F : Frame}
 
-def Frame.Supplementation (F : Frame) : Frame := Frame.mk_ℬ F.World (λ X => (Set.sUnion { F.box Y | Y ⊆ X }))
+def Frame.supplementation (F : Frame) : Frame where
+  World := F.World
+  𝒩 a X := ∃ Y ⊆ X, a ∈ F.box Y
 
-local postfix:80 "♯" => Frame.Supplementation
+namespace Frame.supplementation
 
-namespace Frame.Supplementation
-
-lemma iff_exists_subset {X : Set (F.World)} {w : F.World} : w ∈ F♯.box X ↔ ∃ Y ⊆ X, w ∈ F.box Y := by
-  simp [Frame.Supplementation, Frame.box, Frame.mk_ℬ, Set.mem_sUnion, Set.mem_setOf_eq, exists_exists_and_eq_and]
-
-lemma subset (X : Set (F.World)) : F.box X ⊆ F♯.box X := by
-  intro x;
-  simp [Frame.Supplementation, Frame.box, Frame.mk_ℬ];
+lemma iff_exists_subset {X : Set (F.World)} {w : F.World} : w ∈ F.supplementation.box X ↔ ∃ Y ⊆ X, w ∈ F.box Y := by
+  simp [Frame.supplementation];
   tauto;
 
-lemma monotonic {X Y : Set (F.World)} (h : X ⊆ Y) : F♯.box X ⊆ F♯.box Y := by
+lemma mem_box_of_mem_original_box : x ∈ F.box X → x ∈ F.supplementation.box X := by
+  intro hx;
+  use X;
+
+lemma box_aux {X : Set (F.World)} : F.supplementation.box X = ⋃₀ {x | ∃ Y ⊆ X, F.box Y = x} := by
+  ext w;
+  simp only [supplementation, Set.mem_setOf_eq, Set.mem_sUnion, exists_exists_and_eq_and]
+  constructor;
+  . rintro ⟨Y, hY₁, hY₂⟩; use Y;
+  . rintro ⟨Y, hY₁, hY₂⟩; use Y;
+
+lemma subset (X : Set (F.World)) : F.box X ⊆ F.supplementation.box X := by
+  intro x _;
+  use X;
+
+lemma monotonic {X Y : Set (F.World)} (h : X ⊆ Y) : F.supplementation.box X ⊆ F.supplementation.box Y := by
   intro x hX;
   obtain ⟨X', hX', hX⟩ := iff_exists_subset.mp hX;
   apply iff_exists_subset.mpr;
@@ -31,7 +45,7 @@ lemma monotonic {X Y : Set (F.World)} (h : X ⊆ Y) : F♯.box X ⊆ F♯.box Y 
   . apply Set.Subset.trans hX' h;
   . assumption;
 
-lemma monotonic_iterated {X Y : Set (F.World)} (h : X ⊆ Y) (n) : F♯.box^[n] X ⊆ F♯.box^[n] Y := by
+lemma monotonic_iterated {X Y : Set (F.World)} (h : X ⊆ Y) (n) : F.supplementation.box^[n] X ⊆ F.supplementation.box^[n] Y := by
   induction n with
   | zero => simpa;
   | succ n ih =>
@@ -39,18 +53,17 @@ lemma monotonic_iterated {X Y : Set (F.World)} (h : X ⊆ Y) (n) : F♯.box^[n] 
     apply monotonic;
     apply ih;
 
-lemma itl_reduce : F♯♯.box X = F♯.box X := by
+lemma itl_reduce : F.supplementation.supplementation.box X = F.supplementation.box X := by
   ext x;
-  simp only [Supplementation, mk_ℬ, Set.mem_setOf_eq, Set.mem_sUnion, exists_exists_and_eq_and]
   constructor;
   . rintro ⟨Y, RYX, Z, RZY, hZ⟩;
     use Z;
     constructor;
     . tauto_set;
     . assumption;
-  . tauto;
+  . apply subset;
 
-instance : F♯.IsMonotonic := by
+instance isMonotonic : F.supplementation.IsMonotonic := by
   constructor;
   rintro X Y x hx;
   obtain ⟨W, hW₁, hW₂⟩ := iff_exists_subset.mp hx;
@@ -61,7 +74,7 @@ instance : F♯.IsMonotonic := by
     . tauto_set;
     . assumption;
 
-instance [F.IsReflexive] : F♯.IsReflexive := by
+instance isReflexive [F.IsReflexive] : F.supplementation.IsReflexive := by
   constructor;
   intro X w hw;
   replace ⟨Y, hY₁, hY₂⟩ := iff_exists_subset.mp hw;
@@ -69,14 +82,18 @@ instance [F.IsReflexive] : F♯.IsReflexive := by
   apply F.refl;
   exact hY₂;
 
-instance [F.ContainsUnit] : F♯.ContainsUnit := by
+instance containsUnit [F.ContainsUnit] : F.supplementation.ContainsUnit := by
   constructor;
   ext x;
-  suffices ∃ a, a ∈ F.𝒩 x by simpa [Supplementation, mk_ℬ];
+  suffices ∃ Y ⊆ Set.univ, Y ∈ F.𝒩 x by
+    simp only [supplementation, Set.mem_setOf_eq, Set.mem_univ, iff_true];
+    exact this;
   use Set.univ;
-  simp;
+  constructor;
+  . rfl;
+  . simp;
 
-instance [F.IsTransitive] : F♯.IsTransitive := by
+instance isTransitive [F.IsTransitive] : F.supplementation.IsTransitive := by
   constructor;
   intro X w hw;
   obtain ⟨Y, hYX, hY⟩ := iff_exists_subset.mp hw;
@@ -84,7 +101,7 @@ instance [F.IsTransitive] : F♯.IsTransitive := by
   apply monotonic $ subset Y;
   apply subset (F.box Y) $ F.trans hY;
 
-instance [F.IsRegular] : F♯.IsRegular := by
+instance isRegular [F.IsRegular] : F.supplementation.IsRegular := by
   constructor;
   rintro X Y w ⟨hX, hY⟩;
   apply iff_exists_subset.mpr;
@@ -96,53 +113,69 @@ instance [F.IsRegular] : F♯.IsRegular := by
   . apply @Frame.regular F _ X' Y';
     tauto;
 
-end Frame.Supplementation
+end Frame.supplementation
 
 
 section
 
-open MaximalConsistentSet (proofset)
-open MaximalConsistentSet.proofset
+open MaximalConsistentSet
+open Formula (atom)
+open Formula.Neighborhood
+open MaximalConsistentSet
+open proofset
 
-variable {S} [Entailment (Formula ℕ) S]
-variable {𝓢 : S} [Entailment.Consistent 𝓢]
+variable {S} [Entailment S (Formula ℕ)]
+variable {𝓢 : S} [Entailment.EM 𝓢] [Entailment.Consistent 𝓢]
 
-abbrev maximalCanonicalFrame (𝓢 : S) [Entailment.E 𝓢] [Entailment.Consistent 𝓢] : Frame := (minimalCanonicalFrame 𝓢)♯
-
-variable [Entailment.EM 𝓢]
-
-instance : (maximalCanonicalFrame 𝓢).IsCanonical 𝓢 where
-  box_proofset := by
-    intro φ;
-    apply Set.eq_of_subset_of_subset;
-    . intro Γ;
-      simp only [
-        Frame.Supplementation, Frame.mk_ℬ, Set.mem_setOf_eq, Set.mem_sUnion,
-        exists_exists_and_eq_and, forall_exists_index, and_imp
-      ];
-      intro X hX h;
-      split at h;
-      . rename_i hψ;
-        rw [hψ.choose_spec] at hX;
-        apply box_subset_of_subset hX;
-        apply h;
-      . contradiction;
-    . intro Γ;
-      simp only [
-        Frame.Supplementation, Frame.mk_ℬ, Set.mem_setOf_eq, Set.mem_sUnion,
-        exists_exists_and_eq_and
-      ];
-      intro hΓ;
+abbrev supplementedBasicCanonicity (𝓢 : S) [Entailment.EM 𝓢] [Entailment.Consistent 𝓢] : Canonicity 𝓢 where
+  𝒩 := (basicCanonicity 𝓢).toModel.supplementation.𝒩
+  def_𝒩 := by
+    intro X φ;
+    constructor;
+    . rintro h;
       use proofset 𝓢 φ;
-      constructor
-      . rfl;
-      . split;
-        . rename_i hψ;
-          rw [←eq_boxed_of_eq hψ.choose_spec];
-          apply hΓ;
-        . simp_all;
+      constructor;
+      . simp;
+      . use φ;
+    . rintro ⟨Y, hψ₁, ⟨ψ, hψ₂, rfl⟩⟩;
+      apply proofset.box_subset_of_subset hψ₁ hψ₂;
+  V a := proofset 𝓢 (.atom a);
+  def_V := by simp;
+
+instance : (supplementedBasicCanonicity 𝓢).toModel.IsMonotonic := Frame.supplementation.isMonotonic (F := (basicCanonicity 𝓢).toModel.toFrame)
+
+instance [Entailment.HasAxiomC 𝓢] : (supplementedBasicCanonicity 𝓢).toModel.IsRegular := Frame.supplementation.isRegular (F := (basicCanonicity 𝓢).toModel.toFrame)
+
+instance [Entailment.HasAxiomN 𝓢] : (supplementedBasicCanonicity 𝓢).toModel.ContainsUnit := Frame.supplementation.containsUnit (F := (basicCanonicity 𝓢).toModel.toFrame)
+
+instance [Entailment.HasAxiomT 𝓢] : (supplementedBasicCanonicity 𝓢).toModel.IsReflexive := Frame.supplementation.isReflexive (F := (basicCanonicity 𝓢).toModel.toFrame)
+
+instance [Entailment.HasAxiomFour 𝓢] : (supplementedBasicCanonicity 𝓢).toModel.IsTransitive := Frame.supplementation.isTransitive (F := (basicCanonicity 𝓢).toModel.toFrame)
+
+
+def supplementedRelativeCanonicity (𝓢 : S) [Entailment.EM 𝓢] [Entailment.Consistent 𝓢]
+  (P : MaximalConsistentSet 𝓢 → Set (Proofset 𝓢))
+  (hP : ∀ Y : Proofset 𝓢, Y.IsNonproofset → ∀ X, Y ∈ P X → ∀ φ, Y ⊆ proofset 𝓢 φ → □φ ∈ X) -- might be too strong assumption
+  : Canonicity 𝓢 where
+  𝒩 := (relativeBasicCanonicity 𝓢 P).toModel.supplementation.𝒩
+  def_𝒩 := by
+    intro X φ;
+    constructor;
+    . rintro h;
+      use proofset 𝓢 φ;
+      constructor;
+      . simp;
+      . left;
+        use φ;
+    . rintro ⟨Y, _, (⟨ψ, _, rfl⟩ | ⟨_, _⟩)⟩;
+      . apply proofset.box_subset_of_subset (φ := ψ) <;> assumption;
+      . apply hP Y <;> assumption;
+  V a := proofset 𝓢 (.atom a);
+  def_V := by simp;
 
 end
 
 
+
 end LO.Modal.Neighborhood
+end

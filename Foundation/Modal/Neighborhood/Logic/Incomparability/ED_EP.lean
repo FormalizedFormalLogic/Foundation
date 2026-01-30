@@ -1,5 +1,9 @@
-import Foundation.Modal.Neighborhood.Logic.EP
-import Foundation.Modal.Neighborhood.Logic.ED
+module
+
+public import Foundation.Modal.Neighborhood.Logic.EP
+public import Foundation.Modal.Neighborhood.Logic.ED
+
+@[expose] public section
 
 namespace LO.Modal
 
@@ -8,25 +12,7 @@ open Neighborhood
 open Hilbert.Neighborhood
 open Formula.Neighborhood
 
-namespace Hilbert
-
-@[simp]
-lemma EP.unprovable_AxiomD : Hilbert.EP ⊬ Axioms.D (.atom a) := by
-  apply Sound.not_provable_of_countermodel (𝓜 := FrameClass.EP);
-  apply not_validOnFrameClass_of_exists_frame;
-  use ⟨Fin 2, λ w => match w with | 0 => {{0}} | 1 => {{0},{1},{0,1}}⟩
-  constructor;
-  . constructor;
-    intro x;
-    match x with
-    | 0 | 1 => simp; tauto_set;
-  . apply not_imp_not.mpr isSerial_of_valid_axiomD;
-    by_contra! hC;
-    have := @hC |>.serial {1} 1;
-    simp [Frame.box, Frame.dia] at this;
-    tauto_set;
-
-instance : Incomparable Hilbert.ED Hilbert.EP := by
+instance : Incomparable Modal.ED Modal.EP := by
   apply Incomparable.of_unprovable;
   . use (Axioms.D (.atom 0));
     constructor;
@@ -51,8 +37,5 @@ instance : Incomparable Hilbert.ED Hilbert.EP := by
         have := hC |>.not_contains_empty;
         simpa using @this 1;
 
-end Hilbert
-
-instance : Entailment.Incomparable 𝐄𝐃 𝐄𝐏 := inferInstance
-
 end LO.Modal
+end

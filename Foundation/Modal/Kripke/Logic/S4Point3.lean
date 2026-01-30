@@ -1,16 +1,16 @@
-import Foundation.Modal.Kripke.Logic.S4
-import Foundation.Modal.Kripke.AxiomPoint3
-import Foundation.Modal.Kripke.Filtration
-import Foundation.Modal.Kripke.Rooted
-import Foundation.Modal.Kripke.Logic.S4Point2
-import Foundation.Modal.Kripke.Logic.K4Point3
+module
+
+public import Foundation.Modal.Kripke.Logic.S4Point2
+public import Foundation.Modal.Kripke.Logic.K4Point3
+
+@[expose] public section
 
 namespace LO.Modal
 
 open Entailment
 open Formula
 open Kripke
-open Hilbert.Kripke
+open Modal.Kripke
 
 namespace Kripke
 
@@ -34,9 +34,7 @@ protected abbrev FrameClass.finite_linearPreorder : FrameClass := { F | F.IsFini
 end Kripke
 
 
-namespace Logic.S4Point3.Kripke
-
-instance : Sound Hilbert.S4Point3 FrameClass.S4Point3 := instSound_of_validates_axioms $ by
+instance : Sound Modal.S4Point3 FrameClass.S4Point3 := instSound_of_validates_axioms $ by
   apply FrameClass.validates_with_AxiomK_of_validates;
   constructor;
   rintro _ (rfl | rfl | rfl) F ⟨_, _⟩;
@@ -44,16 +42,16 @@ instance : Sound Hilbert.S4Point3 FrameClass.S4Point3 := instSound_of_validates_
   . exact validate_AxiomFour_of_transitive;
   . exact validate_axiomPoint3_of_isPiecewiseStronglyConnected;
 
-instance : Entailment.Consistent Hilbert.S4Point3 :=
+instance : Entailment.Consistent Modal.S4Point3 :=
   consistent_of_sound_frameclass FrameClass.S4Point3 $ by
     use whitepoint;
     constructor;
 
-instance : Canonical Hilbert.S4Point3 FrameClass.S4Point3 := ⟨by constructor⟩
+instance : Canonical Modal.S4Point3 FrameClass.S4Point3 := ⟨by constructor⟩
 
-instance : Complete Hilbert.S4Point3 FrameClass.S4Point3 := inferInstance
+instance : Complete Modal.S4Point3 FrameClass.S4Point3 := inferInstance
 
-instance : Complete Hilbert.S4Point3 { F : Frame | F.IsLinearPreorder } := ⟨by
+instance : Complete Modal.S4Point3 { F : Frame | F.IsLinearPreorder } := ⟨by
   intro φ hφ;
   apply Complete.complete (𝓜 := FrameClass.S4Point3);
   intro F hF V r;
@@ -69,7 +67,7 @@ open
   finestFiltrationTransitiveClosureModel
   Relation
 
-instance : Sound Hilbert.S4Point3 FrameClass.finite_S4Point3 := instSound_of_validates_axioms $ by
+instance : Sound Modal.S4Point3 FrameClass.finite_S4Point3 := instSound_of_validates_axioms $ by
   apply FrameClass.validates_with_AxiomK_of_validates;
   constructor;
   rintro _ (rfl | rfl | rfl) F ⟨_, _⟩;
@@ -77,7 +75,7 @@ instance : Sound Hilbert.S4Point3 FrameClass.finite_S4Point3 := instSound_of_val
   . exact validate_AxiomFour_of_transitive;
   . exact validate_axiomPoint3_of_isPiecewiseStronglyConnected;
 
-instance : Complete Hilbert.S4Point3 FrameClass.finite_S4Point3 := ⟨by
+instance : Complete Modal.S4Point3 FrameClass.finite_S4Point3 := ⟨by
   intro φ hφ;
   apply Complete.complete (𝓜 := FrameClass.S4Point3);
   rintro F hF V r;
@@ -96,9 +94,9 @@ instance : Complete Hilbert.S4Point3 FrameClass.finite_S4Point3 := ⟨by
 end FFP
 
 
-instance : Hilbert.S4Point2 ⪱ Hilbert.S4Point3 := by
+instance : Modal.S4Point2 ⪱ Modal.S4Point3 := by
   constructor;
-  . apply Hilbert.Kripke.weakerThan_of_subset_frameClass (FrameClass.S4Point2) (FrameClass.S4Point3);
+  . apply Modal.Kripke.weakerThan_of_subset_frameClass (FrameClass.S4Point2) (FrameClass.S4Point3);
     intro F hF;
     simp_all only [Set.mem_setOf_eq];
     infer_instance;
@@ -110,7 +108,7 @@ instance : Hilbert.S4Point2 ⪱ Hilbert.S4Point3 := by
       apply Kripke.not_validOnFrameClass_of_exists_model_world;
       let M : Model := ⟨
         ⟨Fin 4, λ x y => ¬(x = 1 ∧ y = 2) ∧ ¬(x = 2 ∧ y = 1) ∧ (x ≤ y)⟩,
-        λ w a => (a = 0 ∧ (w = 1 ∨ w = 3)) ∨ (a = 1 ∧ (w = 2 ∨ w = 3))
+        λ a w => (a = 0 ∧ (w = 1 ∨ w = 3)) ∨ (a = 1 ∧ (w = 2 ∨ w = 3))
       ⟩;
       use M, 0;
       constructor;
@@ -125,21 +123,21 @@ instance : Hilbert.S4Point2 ⪱ Hilbert.S4Point3 := by
         . apply Kripke.Satisfies.box_def.not.mpr;
           push_neg;
           use 1;
-          simp [Satisfies, Semantics.Realize, M];
-          constructor <;> omega;
+          simp [Satisfies, Semantics.Models, M];
+          constructor <;> grind;
         . apply Kripke.Satisfies.box_def.not.mpr;
           push_neg;
           use 2;
-          simp [Satisfies, Semantics.Realize, M];
-          constructor <;> omega;
+          simp [Satisfies, Semantics.Models, M];
+          constructor <;> grind;
 
-instance : Hilbert.S4 ⪱ Hilbert.S4Point3 := calc
-  Hilbert.S4 ⪱ Hilbert.S4Point2 := by infer_instance
-  _          ⪱ Hilbert.S4Point3 := by infer_instance
+instance : Modal.S4 ⪱ Modal.S4Point3 := calc
+  Modal.S4 ⪱ Modal.S4Point2 := by infer_instance
+  _          ⪱ Modal.S4Point3 := by infer_instance
 
-instance : Hilbert.K4Point3 ⪱ Hilbert.S4Point3 := by
+instance : Modal.K4Point3 ⪱ Modal.S4Point3 := by
   constructor;
-  . apply Hilbert.Kripke.weakerThan_of_subset_frameClass (FrameClass.K4Point3) (FrameClass.S4Point3);
+  . apply Modal.Kripke.weakerThan_of_subset_frameClass (FrameClass.K4Point3) (FrameClass.S4Point3);
     intro F hF;
     simp_all only [Set.mem_setOf_eq];
     infer_instance;
@@ -151,30 +149,24 @@ instance : Hilbert.K4Point3 ⪱ Hilbert.S4Point3 := by
       apply Kripke.not_validOnFrameClass_of_exists_model_world;
       let M : Model := ⟨
         ⟨Fin 2, λ x y => x < y⟩,
-        λ w a => False
+        λ a w => False
       ⟩;
       use M, 0;
       constructor;
       . refine {
           trans := by omega,
-          p_connected := by simp [M, PiecewiseConnected]; omega
+          p_connected := by simp [M, PiecewiseConnected];
         };
       . suffices ∃ x, (0 : M.World) ≺ x ∧ (∀ y, ¬x ≺ y) ∧ ∃ x, (0 : M.World) ≺ x ∧ ∀ y, ¬x ≺ y by
-          simpa [M, Semantics.Realize, Satisfies];
+          simpa [M, Semantics.Models, Satisfies];
         use 1;
         refine ⟨?_, ?_, ⟨1, ?_, ?_⟩⟩;
         repeat omega;
-
-end Logic.S4Point3.Kripke
-
-instance : Modal.S4Point2 ⪱ Modal.S4Point3 := inferInstance
-
-instance : Modal.S4 ⪱ Modal.S4Point3 := inferInstance
 
 instance : Modal.KT ⪱ Modal.S4Point3 := calc
   Modal.KT ⪱ Modal.S4       := by infer_instance
   _        ⪱ Modal.S4Point3 := by infer_instance
 
-instance : Modal.K4Point3 ⪱ Modal.S4Point3 := inferInstance
 
 end LO.Modal
+end

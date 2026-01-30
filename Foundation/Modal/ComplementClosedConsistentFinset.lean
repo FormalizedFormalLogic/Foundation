@@ -1,13 +1,16 @@
-import Mathlib.Data.Set.Finite.Powerset
-import Foundation.Modal.MaximalConsistentSet
-import Foundation.Modal.Complement
+module
+
+public import Foundation.Modal.MaximalConsistentSet
+public import Foundation.Modal.Formula.Complement
+
+@[expose] public section
 
 namespace LO.Modal
 
 open LO.Entailment
 
 variable {α : Type*} [DecidableEq α]
-variable {S} [Entailment (Formula α) S]
+variable {S} [Entailment S (Formula α)]
 variable {𝓢 : S}
 
 namespace FormulaFinset
@@ -36,11 +39,11 @@ lemma empty_conisistent [Entailment.Consistent 𝓢] : FormulaFinset.Consistent 
   simp only [Finset.coe_empty];
   apply FormulaSet.emptyset_consistent;
 
-lemma provable_iff_insert_neg_not_consistent : FormulaFinset.Inconsistent 𝓢 (insert (∼φ) Φ) ↔ ↑Φ *⊢[𝓢]! φ := by
+lemma provable_iff_insert_neg_not_consistent : FormulaFinset.Inconsistent 𝓢 (insert (∼φ) Φ) ↔ ↑Φ *⊢[𝓢] φ := by
   apply Iff.trans iff_inconsistent_inconsistent.symm;
   simpa using FormulaSet.provable_iff_insert_neg_not_consistent;
 
-lemma neg_provable_iff_insert_not_consistent : FormulaFinset.Inconsistent 𝓢 (insert (φ) Φ) ↔ ↑Φ *⊢[𝓢]! ∼φ := by
+lemma neg_provable_iff_insert_not_consistent : FormulaFinset.Inconsistent 𝓢 (insert (φ) Φ) ↔ ↑Φ *⊢[𝓢] ∼φ := by
   apply Iff.trans iff_inconsistent_inconsistent.symm;
   simpa using FormulaSet.neg_provable_iff_insert_not_consistent;
 
@@ -48,6 +51,7 @@ lemma unprovable_iff_singleton_neg_consistent : FormulaFinset.Consistent 𝓢 ({
   apply Iff.trans iff_theory_consistent_formulae_consistent.symm;
   simpa using FormulaSet.unprovable_iff_singleton_neg_consistent;
 
+@[grind =]
 lemma unprovable_iff_singleton_compl_consistent : FormulaFinset.Consistent 𝓢 ({-φ}) ↔ 𝓢 ⊬ φ := by
   rcases (Formula.complement.or φ) with (hp | ⟨ψ, rfl⟩);
   . rw [hp];
@@ -56,16 +60,8 @@ lemma unprovable_iff_singleton_compl_consistent : FormulaFinset.Consistent 𝓢 
     apply Iff.trans iff_theory_consistent_formulae_consistent.symm;
     simpa using FormulaSet.unprovable_iff_singleton_consistent;
 
-lemma provable_iff_singleton_compl_inconsistent : (FormulaFinset.Inconsistent 𝓢 ({-φ})) ↔ 𝓢 ⊢! φ := by
-  constructor;
-  . contrapose;
-    unfold Inconsistent;
-    push_neg;
-    apply unprovable_iff_singleton_compl_consistent.mpr;
-  . contrapose;
-    unfold Inconsistent;
-    push_neg;
-    apply unprovable_iff_singleton_compl_consistent.mp;
+@[grind =]
+lemma provable_iff_singleton_compl_inconsistent : (FormulaFinset.Inconsistent 𝓢 ({-φ})) ↔ 𝓢 ⊢ φ := by grind;
 
 lemma intro_union_consistent (h : ∀ {Γ₁ Γ₂ : FormulaFinset _}, (Γ₁ ⊆ P₁) → (Γ₂ ⊆ P₂) → (Γ₁ ∪ Γ₂) *⊬[𝓢] ⊥)
   : FormulaFinset.Consistent 𝓢 (P₁ ∪ P₂) := by
@@ -115,11 +111,11 @@ lemma next_consistent [Entailment.Cl 𝓢]
   . simpa;
   . rename_i h;
     by_contra hC;
-    have h₁ : ↑Φ *⊢[𝓢]! ∼φ := FormulaFinset.neg_provable_iff_insert_not_consistent (𝓢 := 𝓢) (Φ := Φ) (φ := φ) |>.mp h;
-    have h₂ : ↑Φ *⊢[𝓢]! ∼-φ := @FormulaFinset.neg_provable_iff_insert_not_consistent α _ (𝓢 := 𝓢) _ _ (Φ := Φ) (-φ) |>.mp $ by
+    have h₁ : ↑Φ *⊢[𝓢] ∼φ := FormulaFinset.neg_provable_iff_insert_not_consistent (𝓢 := 𝓢) (Φ := Φ) (φ := φ) |>.mp h;
+    have h₂ : ↑Φ *⊢[𝓢] ∼-φ := @FormulaFinset.neg_provable_iff_insert_not_consistent α _ (𝓢 := 𝓢) _ _ (Φ := Φ) (-φ) |>.mp $ by
       unfold FormulaFinset.Inconsistent;
       simpa using hC;
-    have : ↑Φ *⊢[𝓢]! ⊥ := neg_complement_derive_bot h₁ h₂;
+    have : ↑Φ *⊢[𝓢] ⊥ := neg_complement_derive_bot h₁ h₂;
     contradiction;
 
 lemma enum_consistent [Entailment.Cl 𝓢]
@@ -254,7 +250,7 @@ lemma lindenbaum
 
 noncomputable instance [Entailment.Consistent 𝓢] : Inhabited (ComplementClosedConsistentFinset 𝓢 Ψ) := ⟨lindenbaum (Φ := ∅) (Ψ := Ψ) (by simp) (FormulaFinset.empty_conisistent) |>.choose⟩
 
-lemma membership_iff (hq_sub : ψ ∈ Ψ) : (ψ ∈ X) ↔ (X *⊢[𝓢]! ψ) := by
+lemma membership_iff (hq_sub : ψ ∈ Ψ) : (ψ ∈ X) ↔ (X *⊢[𝓢] ψ) := by
   constructor;
   . intro h; exact Context.by_axm! h;
   . intro hp;
@@ -263,7 +259,7 @@ lemma membership_iff (hq_sub : ψ ∈ Ψ) : (ψ ∈ X) ↔ (X *⊢[𝓢]! ψ) :=
       assumption;
       exact X.closed.either ψ hq_sub;
     by_contra hC;
-    have hnp : X *⊢[𝓢]! -ψ := Context.by_axm! hC;
+    have hnp : X *⊢[𝓢] -ψ := Context.by_axm! hC;
     have := complement_derive_bot hp hnp;
     simpa;
 
@@ -282,23 +278,23 @@ lemma iff_not_mem_compl (hq_sub : ψ ∈ Ψ := by grind) : (ψ ∈ X) ↔ (-ψ �
     | hfalsum => exact unprovable_falsum hq;
     | hatom a =>
       simp only [Formula.complement] at hnq;
-      have : ↑X *⊢[𝓢]! ∼(atom a) := Context.by_axm! hnq;
-      have : ↑X *⊢[𝓢]! ⊥ := complement_derive_bot hq this;
+      have : ↑X *⊢[𝓢] ∼(atom a) := Context.by_axm! hnq;
+      have : ↑X *⊢[𝓢] ⊥ := complement_derive_bot hq this;
       simpa;
     | hbox ψ =>
       simp only [Formula.complement] at hnq;
-      have : ↑X *⊢[𝓢]! ∼(□ψ) := Context.by_axm! hnq;
-      have : ↑X *⊢[𝓢]! ⊥ := complement_derive_bot hq this;
+      have : ↑X *⊢[𝓢] ∼(□ψ) := Context.by_axm! hnq;
+      have : ↑X *⊢[𝓢] ⊥ := complement_derive_bot hq this;
       simpa;
     | hneg ψ =>
       simp only [Formula.complement] at hnq;
-      have : ↑X *⊢[𝓢]! ψ := Context.by_axm! hnq;
-      have : ↑X *⊢[𝓢]! ⊥ := complement_derive_bot hq this;
+      have : ↑X *⊢[𝓢] ψ := Context.by_axm! hnq;
+      have : ↑X *⊢[𝓢] ⊥ := complement_derive_bot hq this;
       simpa;
     | himp ψ χ h =>
       simp only [Formula.complement.imp_def₁ h] at hnq;
-      have : ↑X *⊢[𝓢]! ∼(ψ ➝ χ) := Context.by_axm! hnq;
-      have : ↑X *⊢[𝓢]! ⊥ := this ⨀ hq;
+      have : ↑X *⊢[𝓢] ∼(ψ ➝ χ) := Context.by_axm! hnq;
+      have : ↑X *⊢[𝓢] ⊥ := this ⨀ hq;
       simpa;
   . intro h; exact mem_of_not_mem_compl (by assumption) h;
 
@@ -353,3 +349,4 @@ end
 
 
 end LO.Modal
+end

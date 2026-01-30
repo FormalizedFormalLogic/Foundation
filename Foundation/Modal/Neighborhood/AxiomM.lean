@@ -1,4 +1,8 @@
-import Foundation.Modal.Neighborhood.Basic
+module
+
+public import Foundation.Modal.Neighborhood.Basic
+
+@[expose] public section
 
 namespace LO.Modal.Neighborhood
 
@@ -10,6 +14,12 @@ class Frame.IsMonotonic (F : Frame) : Prop where
   mono : ∀ X Y : Set F, F.box (X ∩ Y) ⊆ F.box X ∩ F.box Y
 
 lemma Frame.mono [Frame.IsMonotonic F] {X Y : Set F} : F.box (X ∩ Y) ⊆ F.box X ∩ F.box Y := by apply IsMonotonic.mono
+
+lemma Frame.mono' [F.IsMonotonic] {X Y : Set F} : X ⊆ Y → F.box X ⊆ F.box Y := by
+  intro h x hx;
+  have := F.mono (X := X) (Y := Y);
+  rw [(show X ∩ Y = X by tauto_set)] at this;
+  tauto_set;
 
 instance : Frame.simple_blackhole.IsMonotonic := ⟨by
   intro X Y e he;
@@ -29,3 +39,4 @@ lemma valid_axiomM_of_isMonotonic [F.IsMonotonic] : F ⊧ Axioms.M (.atom 0) (.a
   apply Frame.mono;
 
 end LO.Modal.Neighborhood
+end

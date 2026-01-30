@@ -1,5 +1,8 @@
-import Foundation.FirstOrder.Completeness.Completeness
+module
 
+public import Foundation.FirstOrder.Completeness.Completeness
+
+@[expose] public section
 namespace LO.FirstOrder
 
 namespace ModelsTheory
@@ -8,7 +11,7 @@ variable {L : Language.{u}} (M : Type w) [Nonempty M] [Structure L M] (T U V : T
 
 lemma of_provably_subtheory [T ⪯ U] (h : M ⊧ₘ* U) : M ⊧ₘ* T := ⟨by
   intro φ hp
-  have : U ⊢! φ := (inferInstanceAs (T ⪯ U)).pbl (Entailment.by_axm _ hp)
+  have : U ⊢ φ := (inferInstanceAs (T ⪯ U)).pbl (Entailment.by_axm _ hp)
   exact consequence_iff'.{u, w}.mp (sound! this) M⟩
 
 lemma of_provably_subtheory' [T ⪯ U] [M ⊧ₘ* U] : M ⊧ₘ* T := of_provably_subtheory M T U inferInstance
@@ -25,15 +28,14 @@ end ModelsTheory
 
 variable {L : Language.{u}} [L.Eq] {T : Theory L} [𝗘𝗤 ⪯ T]
 
-lemma EQ.provOf (φ : SyntacticFormula L)
+lemma EQ.provOf (φ : Sentence L)
   (H : ∀ (M : Type (max u w))
          [Nonempty M]
          [Structure L M] [Structure.Eq L M]
          [M ⊧ₘ* T],
          M ⊧ₘ φ) :
     T ⊨ φ := consequence_iff_consequence.{u, w}.mp <| consequence_iff_eq.mpr fun M _ _ _ hT =>
-  letI : (Structure.Model L M) ⊧ₘ* T :=
-    ((Structure.ElementaryEquiv.modelsTheory (Structure.Model.elementaryEquiv L M)).mp hT)
-  (Structure.ElementaryEquiv.models (Structure.Model.elementaryEquiv L M)).mpr (H (Structure.Model L M))
+  letI : Structure.Model L M ⊧ₘ* T := Structure.ElementaryEquiv.modelsTheory.mp hT
+  Structure.ElementaryEquiv.models.mpr (H (Structure.Model L M))
 
 end LO.FirstOrder

@@ -1,6 +1,10 @@
-import Foundation.Modal.Kripke.AxiomVer
-import Foundation.Modal.Kripke.Logic.GLPoint3
-import Foundation.Modal.Kripke.Logic.KTc
+module
+
+public import Foundation.Modal.Kripke.AxiomVer
+public import Foundation.Modal.Kripke.Logic.GLPoint3
+public import Foundation.Modal.Kripke.Logic.KTc
+
+@[expose] public section
 
 namespace LO.Modal
 
@@ -8,7 +12,7 @@ open Entailment
 open Entailment.Context
 open Formula
 open Formula.Kripke
-open Hilbert.Kripke
+open Modal.Kripke
 open Kripke
 
 namespace Kripke
@@ -28,9 +32,8 @@ protected abbrev FrameClass.finite_Ver : FrameClass := { F | F.IsFiniteVer }
 end Kripke
 
 
-namespace Hilbert.Ver.Kripke
 
-instance : Sound Hilbert.Ver FrameClass.Ver := instSound_of_validates_axioms $ by
+instance : Sound Modal.Ver FrameClass.Ver := instSound_of_validates_axioms $ by
   apply FrameClass.validates_with_AxiomK_of_validates;
   constructor;
   simp only [Set.mem_singleton_iff, forall_eq];
@@ -38,7 +41,7 @@ instance : Sound Hilbert.Ver FrameClass.Ver := instSound_of_validates_axioms $ b
   simp_all only [Set.mem_setOf_eq];
   exact validate_AxiomVer_of_isIsolated;
 
-instance : Sound (Hilbert.Ver) Kripke.FrameClass.finite_Ver := instSound_of_validates_axioms $ by
+instance : Sound Modal.Ver Kripke.FrameClass.finite_Ver := instSound_of_validates_axioms $ by
   apply FrameClass.validates_with_AxiomK_of_validates;
   constructor;
   simp only [Set.mem_singleton_iff, forall_eq];
@@ -46,21 +49,21 @@ instance : Sound (Hilbert.Ver) Kripke.FrameClass.finite_Ver := instSound_of_vali
   simp_all only [Set.mem_setOf_eq];
   exact validate_AxiomVer_of_isIsolated;
 
-instance : Entailment.Consistent Hilbert.Ver := consistent_of_sound_frameclass FrameClass.Ver $ by
+instance : Entailment.Consistent Modal.Ver := consistent_of_sound_frameclass FrameClass.Ver $ by
   use blackpoint;
   apply Set.mem_setOf_eq.mpr;
   infer_instance;
 
-instance : Kripke.Canonical Hilbert.Ver FrameClass.Ver := ⟨by
+instance : Kripke.Canonical Modal.Ver FrameClass.Ver := ⟨by
   apply Set.mem_setOf_eq.mpr;
   infer_instance;
 ⟩
 
-instance : Complete Hilbert.Ver FrameClass.Ver := inferInstance
+instance : Complete Modal.Ver FrameClass.Ver := inferInstance
 
-instance : Complete (Hilbert.Ver) Kripke.FrameClass.finite_Ver := ⟨by
+instance : Complete Modal.Ver Kripke.FrameClass.finite_Ver := ⟨by
   intro φ hφ;
-  apply LO.Complete.complete (𝓢 := Hilbert.Ver) (𝓜 := FrameClass.Ver);
+  apply LO.Complete.complete (𝓢 := Modal.Ver) (𝓜 := FrameClass.Ver);
   intro F hF V r;
   apply Model.pointGenerate.modal_equivalent_at_root (r := r) |>.mp;
   apply hφ;
@@ -81,9 +84,9 @@ instance : Complete (Hilbert.Ver) Kripke.FrameClass.finite_Ver := ⟨by
 ⟩
 
 
-instance : Hilbert.KTc ⪱ Hilbert.Ver := by
+instance : Modal.KTc ⪱ Modal.Ver := by
   constructor;
-  . apply Hilbert.Kripke.weakerThan_of_subset_frameClass FrameClass.KTc FrameClass.Ver;
+  . apply Modal.Kripke.weakerThan_of_subset_frameClass FrameClass.KTc FrameClass.Ver;
     intro F hF;
     simp_all only [Set.mem_setOf_eq];
     infer_instance;
@@ -93,17 +96,17 @@ instance : Hilbert.KTc ⪱ Hilbert.Ver := by
     . simp;
     . apply Sound.not_provable_of_countermodel (𝓜 := Kripke.FrameClass.KTc);
       apply Kripke.not_validOnFrameClass_of_exists_model_world;
-      let M : Model := ⟨⟨Fin 1, λ x y => True⟩, λ w _ => False⟩;
+      let M : Model := ⟨⟨Fin 1, λ x y => True⟩, λ _ w => False⟩;
       use M, 0;
       constructor;
       . refine ⟨by unfold Coreflexive; trivial⟩
       . suffices ∃ x, (0 : M.World) ≺ x by
-          simpa [Satisfies, Semantics.Realize];
+          simpa [Satisfies, Semantics.Models];
         use 0;
 
-instance : Hilbert.GLPoint3 ⪱ Hilbert.Ver := by
+instance : Modal.GLPoint3 ⪱ Modal.Ver := by
   constructor;
-  . apply Hilbert.Kripke.weakerThan_of_subset_frameClass { F : Frame | F.IsFiniteGLPoint3' } FrameClass.finite_Ver;
+  . apply Modal.Kripke.weakerThan_of_subset_frameClass { F : Frame | F.IsFiniteGLPoint3' } FrameClass.finite_Ver;
     intro F hF;
     simp_all only [Set.mem_setOf_eq];
     infer_instance;
@@ -113,17 +116,12 @@ instance : Hilbert.GLPoint3 ⪱ Hilbert.Ver := by
     . simp;
     . apply Sound.not_provable_of_countermodel (𝓜 := Kripke.FrameClass.finite_GLPoint3);
       apply Kripke.not_validOnFrameClass_of_exists_model_world;
-      use ⟨⟨Fin 2, λ x y => x < y⟩, (λ w a => False)⟩, 0;
+      use ⟨⟨Fin 2, λ x y => x < y⟩, (λ a w => False)⟩, 0;
       constructor;
       . exact {}
-      . simp only [Semantics.Realize, Satisfies, imp_false, not_forall, not_not];
+      . simp only [Semantics.Models, Satisfies, imp_false, not_forall, not_not];
         use 1;
         tauto;
 
-end Hilbert.Ver.Kripke
-
-instance : Modal.KTc ⪱ Modal.Ver := inferInstance
-
-instance : Modal.GLPoint3 ⪱ Modal.Ver := inferInstance
-
 end LO.Modal
+end

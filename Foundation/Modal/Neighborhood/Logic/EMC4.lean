@@ -1,7 +1,8 @@
-import Foundation.Modal.Neighborhood.Hilbert
-import Foundation.Modal.Neighborhood.AxiomGeach
-import Foundation.Modal.Neighborhood.Logic.E4
-import Foundation.Modal.Neighborhood.Logic.EMC
+module
+
+public import Foundation.Modal.Neighborhood.Logic.EMC
+
+@[expose] public section
 
 namespace LO.Modal
 
@@ -14,45 +15,46 @@ namespace Neighborhood
 protected class Frame.IsEMC4 (F : Frame) extends F.IsMonotonic, F.IsRegular, F.IsTransitive where
 protected abbrev FrameClass.EMC4 : FrameClass := { F | F.IsEMC4 }
 
+protected class Frame.IsFiniteEMC4 (F : Frame) extends F.IsEMC4, F.IsFinite where
+protected abbrev FrameClass.finite_EMC4 : FrameClass := { F | F.IsFiniteEMC4 }
+
 end Neighborhood
 
+namespace EMC4
 
-namespace Hilbert
-
-namespace E4.Neighborhood
-
-instance : Sound Hilbert.EMC4 FrameClass.EMC4 := instSound_of_validates_axioms $ by
+instance Neighborhood.sound : Sound Modal.EMC4 FrameClass.EMC4 := instSound_of_validates_axioms $ by
   constructor;
   rintro _ (rfl | rfl | rfl) F (rfl | rfl) <;> simp;
 
-instance : Entailment.Consistent Hilbert.EMC4 := consistent_of_sound_frameclass FrameClass.EMC4 $ by
+instance consistent : Entailment.Consistent Modal.EMC4 := consistent_of_sound_frameclass FrameClass.EMC4 $ by
   use Frame.simple_blackhole;
   simp only [Set.mem_setOf_eq];
   constructor;
 
-instance : Complete Hilbert.EMC4 FrameClass.EMC4 := complete_of_canonical_frame FrameClass.EMC4 (maximalCanonicalFrame (Hilbert.EMC4)) $ by
+instance Neighborhood.complete : Complete Modal.EMC4 FrameClass.EMC4 := (supplementedBasicCanonicity Modal.EMC4).completeness $ by
   apply Set.mem_setOf_eq.mpr;
   constructor;
 
-end E4.Neighborhood
+/-- FFP of `Modal.EMC4` -/
+instance Neighborhood.finite_complete : Complete Modal.EMC4 FrameClass.finite_EMC4 := ⟨by
+  intro φ hφ;
+  apply Complete.complete (𝓜 := FrameClass.EMC4);
+  intro F F_trans V x;
+  replace F_trans := Set.mem_setOf_eq.mp F_trans;
 
-instance : Hilbert.EMC ⪱ Hilbert.EMC4 := by
-  constructor;
-  . apply Hilbert.WithRE.weakerThan_of_subset_axioms;
-    simp;
-  . apply Entailment.not_weakerThan_iff.mpr;
-    use (Axioms.Four (.atom 0));
-    constructor;
-    . simp;
-    . apply Sound.not_provable_of_countermodel (𝓜 := FrameClass.EMC);
-      apply not_validOnFrameClass_of_exists_frame;
-      use Frame.trivial_nontransitive;
-      constructor;
-      . constructor;
-      . simp;
+  let M : Model := ⟨F, V⟩;
+  apply quasiFilteringTransitiveFiltration M φ.subformulas (by simp) |>.filtration_satisfies _ (by grind) |>.mp;
+  apply hφ;
+  apply Set.mem_setOf_eq.mpr;
+  exact {
+    world_finite := by apply FilterEqvQuotient.finite $ by simp;
+    trans := by apply quasiFilteringTransitiveFiltration.isTransitive.trans;
+    mono := by apply quasiFilteringTransitiveFiltration.isMonotonic.mono;
+    regular := by apply quasiFilteringTransitiveFiltration.isRegular.regular;
+  };
+⟩
 
-end Hilbert
-
-instance : 𝐄 ⪱ 𝐄𝟒 := inferInstance
+end EMC4
 
 end LO.Modal
+end

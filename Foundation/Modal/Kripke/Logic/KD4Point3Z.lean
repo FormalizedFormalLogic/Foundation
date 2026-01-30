@@ -1,9 +1,12 @@
-import Foundation.Modal.Kripke.AxiomL
-import Foundation.Modal.Kripke.Logic.Soundness
-import Foundation.Modal.Hilbert.Normal.Basic
-import Foundation.Modal.Kripke.LinearFrame
-import Foundation.Modal.Kripke.AxiomWeakPoint3
-import Foundation.Modal.Kripke.AxiomGeach
+module
+
+public import Foundation.Modal.Kripke.AxiomL
+public import Foundation.Modal.Kripke.Logic.Soundness
+public import Foundation.Modal.Kripke.LinearFrame
+public import Foundation.Modal.Kripke.AxiomWeakPoint3
+public import Foundation.Modal.Kripke.AxiomGeach
+
+@[expose] public section
 
 namespace LO.Modal
 
@@ -12,12 +15,10 @@ open Formula.Kripke
 open Entailment
 open Entailment.Context
 open Kripke
-open Hilbert.Kripke
+open Modal.Kripke
 
-namespace Logic.KD4Point3Z.Kripke
-
-instance : Sound Hilbert.KD4Point3Z natLT := instSound_of_frame_validates_axioms $ by
-  simp only [Semantics.RealizeSet.insert_iff, ValidOnFrame.models_iff, Semantics.RealizeSet.singleton_iff];
+instance : Sound Modal.KD4Point3Z natLT := instSound_of_frame_validates_axioms $ by
+  simp only [Semantics.ModelsSet.insert_iff, ValidOnFrame.models_iff, Semantics.ModelsSet.singleton_iff];
   refine ⟨?_, ?_, ?_, ?_, ?_⟩;
   . apply FrameClass.K.validates_axiomK <;> tauto;
   . apply validate_AxiomD_of_serial;
@@ -27,6 +28,5 @@ instance : Sound Hilbert.KD4Point3Z natLT := instSound_of_frame_validates_axioms
 
 instance : Entailment.Consistent Logic.KD4Point3Z := consistent_of_sound_frames natLT
 
-end Logic.KD4Point3Z.Kripke
-
 end LO.Modal
+end

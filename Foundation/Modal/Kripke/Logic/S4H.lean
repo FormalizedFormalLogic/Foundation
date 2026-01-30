@@ -1,15 +1,16 @@
-import Foundation.Modal.Kripke.Logic.Grz.Completeness
-import Foundation.Modal.Kripke.Logic.S4
-import Foundation.Modal.Kripke.AxiomH
-import Foundation.Modal.Kripke.Filtration
-import Foundation.Modal.Kripke.Rooted
+module
+
+public import Foundation.Modal.Kripke.Logic.Grz.Completeness
+public import Foundation.Modal.Kripke.AxiomH
+
+@[expose] public section
 
 namespace LO.Modal
 
 open Entailment
 open Formula
 open Kripke
-open Hilbert.Kripke
+open Modal.Kripke
 
 
 namespace Kripke
@@ -27,11 +28,9 @@ instance [F.IsFiniteS4H] : F.IsFiniteGrz where
 end Kripke
 
 
-namespace Hilbert
+namespace S4H
 
-namespace S4H.Kripke
-
-instance : Sound (Hilbert.S4H) FrameClass.S4H := instSound_of_validates_axioms $ by
+instance : Sound (Modal.S4H) FrameClass.S4H := instSound_of_validates_axioms $ by
   apply FrameClass.validates_with_AxiomK_of_validates;
   constructor;
   rintro _ (rfl | rfl | rfl) F ⟨_, _⟩;
@@ -39,19 +38,20 @@ instance : Sound (Hilbert.S4H) FrameClass.S4H := instSound_of_validates_axioms $
   . exact validate_AxiomFour_of_transitive;
   . exact validate_axiomH_of_isDetourFree;
 
-instance : Entailment.Consistent (Hilbert.S4H) := consistent_of_sound_frameclass FrameClass.S4H $ by
+instance : Entailment.Consistent (Modal.S4H) := consistent_of_sound_frameclass FrameClass.S4H $ by
   use whitepoint;
   constructor;
 
-instance : Canonical (Hilbert.S4H) FrameClass.S4H := ⟨by constructor⟩
+instance : Canonical (Modal.S4H) FrameClass.S4H := ⟨by constructor⟩
 
-instance : Complete (Hilbert.S4H) FrameClass.S4H := inferInstance
+instance : Complete (Modal.S4H) FrameClass.S4H := inferInstance
 
-instance : Complete Hilbert.S4H FrameClass.finite_S4H := by sorry
+instance : Complete Modal.S4H FrameClass.finite_S4H := by sorry
 
-end S4H.Kripke
+end S4H
 
-instance : Hilbert.Grz ⪱ Hilbert.S4H := by
+
+instance : Modal.Grz ⪱ Modal.S4H := by
   constructor;
   . apply weakerThan_of_subset_frameClass (FrameClass.finite_Grz) (FrameClass.finite_S4H)
     intro F hF;
@@ -63,22 +63,20 @@ instance : Hilbert.Grz ⪱ Hilbert.S4H := by
     . simp;
     . apply Sound.not_provable_of_countermodel (𝓜 := FrameClass.finite_Grz)
       apply Kripke.not_validOnFrameClass_of_exists_model_world;
-      let M : Model := ⟨⟨Fin 3, λ x y => x ≤ y⟩, λ w a => w ≠ 1⟩;
+      let M : Model := ⟨⟨Fin 3, λ x y => x ≤ y⟩, λ a w => w ≠ 1⟩;
       use M, 0;
       constructor;
       . simp only [Set.mem_setOf_eq];
         exact {}
       . suffices ∃ x : M, (0 : M) ≺ x ∧ ∃ y, x ≺ y ∧ y ≠ 1 ∧ x = 1 by
-          simpa [Semantics.Realize, Satisfies, M];
+          simp [Semantics.Models, Satisfies, M];
+          grind;
         use 1;
         constructor;
         . tauto;
         . use 2;
-          simp [M];
-          omega;
+          grind;
 
-end Hilbert
-
-instance : Modal.Grz ⪱ Modal.S4H := inferInstance
 
 end LO.Modal
+end

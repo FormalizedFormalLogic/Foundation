@@ -1,13 +1,16 @@
-import Foundation.Propositional.Kripke.AxiomWeakLEM
-import Foundation.Propositional.Kripke.Rooted
-import Foundation.Propositional.Kripke.Logic.Int
-import Foundation.Propositional.Kripke.Logic.KrieselPutnam
+module
 
+public import Foundation.Propositional.Kripke.AxiomWLEM
+public import Foundation.Propositional.Kripke.Rooted
+public import Foundation.Propositional.Kripke.Logic.KrieselPutnam
+
+
+@[expose] public section
 
 namespace LO.Propositional
 
 open Kripke
-open Hilbert.Kripke
+open Modal.Kripke
 open Formula.Kripke
 
 
@@ -34,35 +37,33 @@ instance [F.IsKC] : F.IsKrieselPutnam := ⟨by
 end Kripke
 
 
-namespace Hilbert
+namespace KC
 
-namespace KC.Kripke
-
-instance : Sound Hilbert.KC FrameClass.KC :=
+instance : Sound Propositional.KC FrameClass.KC :=
   instSound_of_validates_axioms $ by
     apply FrameClass.Validates.withAxiomEFQ;
     rintro F hF _ rfl;
     replace hF := Set.mem_setOf_eq.mp hF;
-    apply validate_axiomWeakLEM_of_isPiecewiseStronglyConvergent
+    apply validate_axiomWLEM_of_isPiecewiseStronglyConvergent
 
-instance : Sound Hilbert.KC FrameClass.finite_KC :=
+instance : Sound Propositional.KC FrameClass.finite_KC :=
   instSound_of_validates_axioms $ by
     apply FrameClass.Validates.withAxiomEFQ;
     rintro F hF _ rfl;
     replace hF := Set.mem_setOf_eq.mp hF;
-    apply validate_axiomWeakLEM_of_isPiecewiseStronglyConvergent
+    apply validate_axiomWLEM_of_isPiecewiseStronglyConvergent
 
-instance : Entailment.Consistent Hilbert.KC := consistent_of_sound_frameclass FrameClass.KC $ by
+instance : Entailment.Consistent Propositional.KC := consistent_of_sound_frameclass FrameClass.KC $ by
   use whitepoint;
   apply Set.mem_setOf_eq.mpr;
   infer_instance;
 
-instance : Canonical Hilbert.KC FrameClass.KC := ⟨by
+instance : Canonical Propositional.KC FrameClass.KC := ⟨by
   apply Set.mem_setOf_eq.mpr;
   infer_instance;
 ⟩
 
-instance : Complete Hilbert.KC FrameClass.KC := inferInstance
+instance : Complete Propositional.KC FrameClass.KC := inferInstance
 
 section FFP
 
@@ -70,7 +71,7 @@ open
   finestFiltrationTransitiveClosureModel
   Relation
 
-instance : Complete (Hilbert.KC) FrameClass.finite_KC := ⟨by
+instance : Complete (Propositional.KC) FrameClass.finite_KC := ⟨by
   intro φ hφ;
   apply Complete.complete (𝓜 := FrameClass.KC);
   rintro F F_con V r;
@@ -132,16 +133,17 @@ instance : Complete (Hilbert.KC) FrameClass.finite_KC := ⟨by
 
 end FFP
 
-end KC.Kripke
+end KC
 
-instance : Hilbert.KrieselPutnam ⪱ Hilbert.KC := by
+
+instance : Propositional.KrieselPutnam ⪱ Propositional.KC := by
   constructor;
   . apply weakerThan_of_subset_frameClass FrameClass.KrieselPutnam FrameClass.KC;
     intro F hF;
     simp_all only [Set.mem_setOf_eq];
     infer_instance
   . apply Entailment.not_weakerThan_iff.mpr;
-    use Axioms.WeakLEM (.atom 0);
+    use Axioms.WLEM (.atom 0);
     constructor;
     . simp;
     . apply Sound.not_provable_of_countermodel (𝓜 := FrameClass.KrieselPutnam)
@@ -161,14 +163,6 @@ instance : Hilbert.KrieselPutnam ⪱ Hilbert.KC := by
           kriesel_putnam := by
             rintro x y z ⟨Rxy, Rxz, nRyz, nRzy⟩;
             match x, y, z with
-            | _, 0, 0
-            | _, 1, 1
-            | _, 2, 2 => simp_all;
-            | 1, _, 2
-            | 2, _, 1
-            | 0, 0, _
-            | 0, 1, 0
-            | 0, 2, 0 => omega;
             | 0, 1, 2
             | 0, 2, 1 =>
               use 0;
@@ -178,21 +172,23 @@ instance : Hilbert.KrieselPutnam ⪱ Hilbert.KC := by
               | 0 => use 1; tauto;
               | 1 => use 1; tauto;
               | 2 => use 2; tauto;
+            | _, 0, 0
+            | _, 1, 1
+            | _, 2, 2
+            | 1, _, 2
+            | 2, _, 1
+            | 0, 0, _
+            | 0, 1, 0
+            | 0, 2, 0 => omega;
         }
-      . apply not_imp_not.mpr $ Kripke.isPiecewiseStronglyConvergent_of_validate_axiomWeakLEM;
+      . apply not_imp_not.mpr $ Kripke.isPiecewiseStronglyConvergent_of_validate_axiomWLEM;
         by_contra hC;
         have := @F.ps_convergent _ 0 1 2;
         omega;
 
-instance : Hilbert.Int ⪱ Hilbert.KC := calc
-  Hilbert.Int ⪱ Hilbert.KrieselPutnam := inferInstance
-  _           ⪱ Hilbert.KC := inferInstance
-
-end Hilbert
-
-propositional_kripke 𝐊𝐂 FrameClass.KC
-propositional_kripke 𝐊𝐂 FrameClass.finite_KC
-
-instance : 𝐊𝐏 ⪱ 𝐊𝐂 := inferInstance
+instance : Propositional.Int ⪱ Propositional.KC := calc
+  Propositional.Int ⪱ Propositional.KrieselPutnam := inferInstance
+  _   ⪱ Propositional.KC := inferInstance
 
 end LO.Propositional
+end

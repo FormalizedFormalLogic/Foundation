@@ -1,4 +1,8 @@
-import Foundation.Logic.Entailment
+module
+
+public import Foundation.Logic.Entailment
+
+@[expose] public section
 
 /-!
 # Language of first-order logic
@@ -20,10 +24,13 @@ structure Language where
 
 namespace Language
 
-class IsRelational (L : Language) where
-  func_empty : ∀ k, IsEmpty (L.Func (k + 1))
+class Relational (L : Language) where
+  func_empty : ∀ k, IsEmpty (L.Func k)
 
-class IsConstant (L : Language) extends IsRelational L where
+instance {L : Language} [L.Relational] : IsEmpty (L.Func k) := Relational.func_empty k
+
+class IsConstant (L : Language) where
+  func_empty : ∀ k, IsEmpty (L.Func (k + 1))
   rel_empty  : ∀ k, IsEmpty (L.Rel k)
 
 class ConstantInhabited (L : Language) extends Inhabited (L.Func 0)
@@ -252,6 +259,9 @@ protected class Eq (L : Language) where
 protected class LT (L : Language) where
   lt : L.Rel 2
 
+protected class Mem (L : Language) where
+  mem : L.Rel 2
+
 protected class Zero (L : Language) where
   zero : L.Func 0
 
@@ -276,7 +286,7 @@ class Pairing (L : Language) where
 class Star (L : Language) where
   star : L.Func 0
 
-attribute [match_pattern] Zero.zero One.one Add.add Mul.mul Exp.exp Eq.eq LT.lt Star.star
+attribute [match_pattern] Zero.zero One.one Add.add Mul.mul Exp.exp Eq.eq LT.lt Mem.mem Star.star
 
 class ORing (L : Language) extends L.Eq, L.LT, L.Zero, L.One, L.Add, L.Mul
 
@@ -396,7 +406,8 @@ protected class Language.DecidableEq (L : Language) where
   func : (k : ℕ) → DecidableEq (L.Func k)
   rel : (k : ℕ) → DecidableEq (L.Rel k)
 
-instance (L : Language) [(k : ℕ) → DecidableEq (L.Func k)] [(k : ℕ) → DecidableEq (L.Rel k)] : L.DecidableEq := ⟨fun _ ↦ inferInstance, fun _ ↦ inferInstance⟩
+instance (L : Language) [(k : ℕ) → DecidableEq (L.Func k)] [(k : ℕ) → DecidableEq (L.Rel k)] : L.DecidableEq :=
+  ⟨fun _ ↦ inferInstance, fun _ ↦ inferInstance⟩
 
 instance (L : Language) [L.DecidableEq] (k : ℕ) : DecidableEq (L.Func k) := Language.DecidableEq.func k
 
@@ -427,3 +438,4 @@ instance : Language.Finite ℒₒᵣ where
 end FirstOrder
 
 end LO
+end

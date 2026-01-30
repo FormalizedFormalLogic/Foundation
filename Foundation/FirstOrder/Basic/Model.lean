@@ -1,5 +1,7 @@
-import Foundation.FirstOrder.Basic.Operator
-import Foundation.FirstOrder.Basic.Semantics.Elementary
+module
+public import Foundation.FirstOrder.Basic.Operator
+public import Foundation.FirstOrder.Basic.Semantics.Elementary
+@[expose] public section
 
 namespace LO
 
@@ -25,7 +27,7 @@ instance : Structure L (Model L M) := Structure.ofEquiv (equiv L M)
 instance [h : Nonempty M] : Nonempty (Model L M) := by
   rcases h with ⟨x⟩; exact ⟨equiv L M x⟩
 
-lemma elementaryEquiv (L : Language) (M : Type*) [Nonempty M] [Structure L M] : M ≡ₑ[L] Model L M :=
+instance elementaryEquiv (L : Language) (M : Type*) [Nonempty M] [Structure L M] : M ≡ₑ[L] Model L M :=
   ElementaryEquiv.ofEquiv _
 
 section
@@ -188,14 +190,13 @@ lemma Semiformula.evalm_uLift {e : Fin n → ULift.{v'} M} {ε : ξ → ULift.{v
 
 variable (L M)
 
-lemma uLift_elementaryEquiv [Nonempty M] : ULift.{v'} M ≡ₑ[L] M := by
-  intro σ; simp [models_iff, Semiformula.evalm_uLift, Matrix.empty_eq, Empty.eq_elim]
-  constructor
-  · intro h f; exact h _
-  · intro h f; exact h (fun x ↦ (f x).down)
+lemma uLift_elementaryEquiv [Nonempty M] : ULift.{v'} M ≡ₑ[L] M := ⟨by
+  intro σ; simp [models_iff, Semiformula.evalm_uLift, Matrix.empty_eq, Empty.eq_elim]⟩
 
 end ULift
 
 end FirstOrder
 
 end LO
+
+end

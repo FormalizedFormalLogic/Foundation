@@ -1,4 +1,8 @@
-import Foundation.Modal.Kripke.Rooted
+module
+
+public import Foundation.Modal.Kripke.Rooted
+
+@[expose] public section
 
 namespace LO.Modal
 
@@ -72,7 +76,7 @@ lemma isDetourFree_of_validate_axiomH (h : F ⊧ (Axioms.H (.atom 0))) : F.IsDet
   contrapose! h;
   rcases h with ⟨x, u, y, Rxu, Ruy, neux, neuy⟩;
   apply ValidOnFrame.not_of_exists_valuation_world;
-  use λ w _ => w ≠ u, x;
+  use λ _ w => w ≠ u, x;
   simp [Satisfies];
   tauto;
 
@@ -81,7 +85,7 @@ end definability
 
 section canonicality
 
-variable {S} [Entailment (Formula ℕ) S]
+variable {S} [Entailment S (Formula ℕ)]
 variable {𝓢 : S} [Entailment.Consistent 𝓢] [Entailment.K 𝓢]
 
 open Formula.Kripke
@@ -121,3 +125,4 @@ end canonicality
 end Kripke
 
 end LO.Modal
+end

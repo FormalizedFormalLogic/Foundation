@@ -1,10 +1,15 @@
-import Foundation.Meta.TwoSided
-import Foundation.Meta.Qq
-import Foundation.Meta.Lit
+module
+
+public meta import Foundation.Meta.Lit
+public meta import Foundation.Meta.TwoSided
+public import Foundation.Meta.Lit
+public import Foundation.Meta.TwoSided
 
 /-!
 # Proof automation based on the proof search on $\mathbf{LK}$
 -/
+
+public meta section
 
 namespace LO.Meta
 
@@ -16,17 +21,17 @@ namespace Theorems
 
 open Entailment TwoSided FiniteContext
 
-variable {F : Type*} [LogicalConnective F] [DecidableEq F] {S : Type*} [Entailment F S] (𝓢 : S) [Entailment.Cl 𝓢]
+variable {F : Type*} [LogicalConnective F] [DecidableEq F] {S : Type*} [Entailment S F] (𝓢 : S) [Entailment.Cl 𝓢]
 
 local notation Γ:45 " ⟹ " Δ:46 => TwoSided 𝓢 Γ Δ
 
-lemma to_provable (φ) (h : [] ⟹ [φ]) : 𝓢 ⊢! φ := TwoSided.to_provable h
+lemma to_provable (φ) (h : [] ⟹ [φ]) : 𝓢 ⊢ φ := TwoSided.to_provable h
 
 lemma rotate_right (Γ Δ φ) (hφ : Γ ⟹ Δ ++ [φ]) : Γ ⟹ φ :: Δ := TwoSided.rotate_right hφ
 
 lemma rotate_left (Γ Δ φ) (hφ : (Γ ++ [φ]) ⟹ Δ) : (φ :: Γ) ⟹ Δ := TwoSided.rotate_left hφ
 
-lemma add_hyp (𝒯 : S) (s : 𝒯 ⪯ 𝓢) (Γ Δ φ) (hφ : 𝒯 ⊢! φ) (h : (φ :: Γ) ⟹ Δ) : Γ ⟹ Δ := TwoSided.add_hyp hφ h
+lemma add_hyp (𝒯 : S) (s : 𝒯 ⪯ 𝓢) (Γ Δ φ) (hφ : 𝒯 ⊢ φ) (h : (φ :: Γ) ⟹ Δ) : Γ ⟹ Δ := TwoSided.add_hyp hφ h
 
 lemma right_closed (Γ Δ φ) (h : φ ∈ Γ) : Γ ⟹ φ :: Δ := TwoSided.right_closed h
 
@@ -84,7 +89,7 @@ structure Context where
   LC : Q(LogicalConnective $F)
   DC : Q(DecidableEq $F)
   S : Q(Type levelS)
-  E : Q(Entailment.{_, _, levelE} $F $S)
+  E : Q(Entailment.{_, _, levelE} $S $F)
   𝓢 : Q($S)
   CL : Q(Entailment.Cl $𝓢)
 
@@ -94,7 +99,7 @@ abbrev M := ReaderT Context AtomM
 #check Mathlib.Tactic.AtomM
 
 /-- Apply the function
-  `n : ∀ {F} [LogicalConnective F] [DecidableEq F] {S} [Entailment F S] {𝓢} [Entailment.Cl 𝓢], _` to the
+  `n : ∀ {F} [LogicalConnective F] [DecidableEq F] {S} [Entailment S F] {𝓢} [Entailment.Cl 𝓢], _` to the
 implicit parameters in the context, and the given list of arguments. -/
 def Context.app (c : Context) (n : Name) : Array Expr → Expr :=
   mkAppN <| @Expr.const n [c.levelF, c.levelS, c.levelE]
@@ -105,7 +110,7 @@ def iapp (n : Name) (xs : Array Expr) : M Expr := do
   return c.app n xs
 
 def getGoalTwoSided (e : Q(Prop)) : MetaM ((c : Context) × List Q($c.F) × List Q($c.F)) := do
-  let ~q(@Entailment.TwoSided $F $LC $S $E $𝓢 $p $q) := e | throwError m!"(getGoal) error: {e} not a form of _ ⊢! _"
+  let ~q(@Entailment.TwoSided $F $LC $S $E $𝓢 $p $q) := e | throwError m!"(getGoal) error: {e} not a form of _ ⊢ _"
   let .some DC ← trySynthInstanceQ q(DecidableEq $F)
     | throwError m! "error: failed to find instance DecidableEq {F}"
   let .some CL ← trySynthInstanceQ q(Entailment.Cl $𝓢)
@@ -115,7 +120,7 @@ def getGoalTwoSided (e : Q(Prop)) : MetaM ((c : Context) × List Q($c.F) × List
   return ⟨⟨_, _, _, F, LC, DC, S, E, 𝓢, CL⟩, Γ, Δ⟩
 
 def getGoalProvable (e : Q(Prop)) : MetaM ((c : Context) × Q($c.F)) := do
-  let ~q(@Entailment.Provable $F $S $E $𝓢 $p) := e | throwError m!"(getGoal) error: {e} not a form of _ ⊢! _"
+  let ~q(@Entailment.Provable $F $S $E $𝓢 $p) := e | throwError m!"(getGoal) error: {e} not a form of _ ⊢ _"
   let .some DC ← trySynthInstanceQ q(DecidableEq $F)
     | throwError m! "error: failed to find instance DecidableEq {F}"
   let .some LC ← trySynthInstanceQ q(LogicalConnective $F)
@@ -347,14 +352,14 @@ structure HypInfo where
   levelE : Level
   F : Q(Type levelF)
   S : Q(Type levelS)
-  E : Q(Entailment.{_, _, levelE} $F $S)
+  E : Q(Entailment.{_, _, levelE} $S $F)
   𝓢 : Q($S)
   φ : Q($F)
-  proof : Q($𝓢 ⊢! $φ)
+  proof : Q($𝓢 ⊢ $φ)
 
 def synthProvable (e : Expr) : MetaM HypInfo := do
   let (ty : Q(Prop)) ← inferType e
-  let ~q(@Entailment.Provable $F $S $E $𝓢 $φ) := ty | throwError m!"(getGoal) error: {e} not a form of _ ⊢! _"
+  let ~q(@Entailment.Provable $F $S $E $𝓢 $φ) := ty | throwError m!"(getGoal) error: {e} not a form of _ ⊢ _"
   return ⟨_, _, _, F, S, E, 𝓢, φ, e⟩
 
 structure CompatibleHypInfo where
@@ -431,3 +436,5 @@ elab "cl_prover" n:(num)? seq:(termSeq)? : tactic => withMainContext do
 end ClProver
 
 end LO.Meta
+
+end

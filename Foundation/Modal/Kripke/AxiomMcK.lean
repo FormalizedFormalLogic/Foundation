@@ -1,17 +1,12 @@
-import Foundation.Modal.Kripke.Basic
-import Foundation.Modal.Kripke.AxiomGeach
-import Foundation.Modal.Hilbert.Normal.Basic
-import Foundation.Modal.Entailment.K4
-import Foundation.Modal.Kripke.Logic.K
-import Foundation.Modal.Kripke.Logic.K4
-import Foundation.Modal.Kripke.Completeness
-import Mathlib.Order.Preorder.Finite
+module
 
+public import Foundation.Modal.Kripke.Logic.K4
+
+@[expose] public section
 
 namespace LO.Modal
 
-@[simp]
-lemma eq_box_toSet_toSet_box {F : Type*} [Box F] [DecidableEq F] {s : Finset F} : s.toSet.box = s.box.toSet := by ext φ; simp;
+instance : Modal.K ⪯ Modal.K4McK := Hilbert.Normal.weakerThan_of_subset_axioms (by simp)
 
 
 namespace Logic.K
@@ -21,7 +16,7 @@ open Formula.Kripke
 
 variable {φ ψ : Formula _}
 
-lemma axiomMcK_DiaCDiaBox! : Hilbert.K ⊢! (□◇φ ➝ ◇□φ) ⭤ ◇(◇φ ➝ □φ) := by
+lemma axiomMcK_DiaCDiaBox! : Modal.K ⊢ (□◇φ ➝ ◇□φ) ⭤ ◇(◇φ ➝ □φ) := by
   apply Complete.complete (𝓜 := Kripke.FrameClass.K);
   intro F _ V x;
   apply Satisfies.iff_def.mpr;
@@ -50,7 +45,7 @@ lemma axiomMcK_DiaCDiaBox! : Hilbert.K ⊢! (□◇φ ➝ ◇□φ) ⭤ ◇(◇�
     . assumption;
     . exact hy $ hx₂ _ Rxy;
 
-lemma CKDiaBoxDiaK! : Hilbert.K ⊢! (◇φ ⋏ □ψ) ➝ ◇(φ ⋏ ψ) := by
+lemma CKDiaBoxDiaK! : Modal.K ⊢ (◇φ ⋏ □ψ) ➝ ◇(φ ⋏ ψ) := by
   apply Complete.complete (𝓜 := Kripke.FrameClass.K);
   intro F _ V x hx;
   have ⟨hx₁, hx₂⟩ := Satisfies.and_def.mp hx;
@@ -64,7 +59,7 @@ lemma CKDiaBoxDiaK! : Hilbert.K ⊢! (◇φ ⋏ □ψ) ➝ ◇(φ ⋏ ψ) := by
     . assumption
     . apply hx₂ _ Rxy;
 
-lemma CKBoxDiaDiaK! : Hilbert.K ⊢! (□φ ⋏ ◇ψ) ➝ ◇(φ ⋏ ψ) := by
+lemma CKBoxDiaDiaK! : Modal.K ⊢ (□φ ⋏ ◇ψ) ➝ ◇(φ ⋏ ψ) := by
   apply Complete.complete (𝓜 := Kripke.FrameClass.K);
   intro F _ V x hx;
   have ⟨hx₁, hx₂⟩ := Satisfies.and_def.mp hx;
@@ -87,33 +82,33 @@ open LO.Entailment Entailment.FiniteContext LO.Modal.Entailment
 
 variable {φ ψ : Formula _}
 
-lemma CKDiaBoxDiaK! : Hilbert.K4McK ⊢! (◇φ ⋏ □ψ) ➝ ◇(φ ⋏ ψ) := WeakerThan.pbl Logic.K.CKDiaBoxDiaK!
+lemma CKDiaBoxDiaK! : Modal.K4McK ⊢ (◇φ ⋏ □ψ) ➝ ◇(φ ⋏ ψ) := WeakerThan.pbl Logic.K.CKDiaBoxDiaK!
 
-lemma CKBoxDiaDiaK! : Hilbert.K4McK ⊢! (□φ ⋏ ◇ψ) ➝ ◇(φ ⋏ ψ) := WeakerThan.pbl Logic.K.CKBoxDiaDiaK!
+lemma CKBoxDiaDiaK! : Modal.K4McK ⊢ (□φ ⋏ ◇ψ) ➝ ◇(φ ⋏ ψ) := WeakerThan.pbl Logic.K.CKBoxDiaDiaK!
 
-lemma DiaK!_of_CKBoxDia (h : Hilbert.K4McK ⊢! ◇φ ⋏ □ψ) : Hilbert.K4McK ⊢! ◇(φ ⋏ ψ) := CKDiaBoxDiaK! ⨀ h
-lemma DiaK!_of_CKDiaBox (h : Hilbert.K4McK ⊢! □φ ⋏ ◇ψ) : Hilbert.K4McK ⊢! ◇(φ ⋏ ψ) := CKBoxDiaDiaK! ⨀ h
+lemma DiaK!_of_CKBoxDia (h : Modal.K4McK ⊢ ◇φ ⋏ □ψ) : Modal.K4McK ⊢ ◇(φ ⋏ ψ) := CKDiaBoxDiaK! ⨀ h
+lemma DiaK!_of_CKDiaBox (h : Modal.K4McK ⊢ □φ ⋏ ◇ψ) : Modal.K4McK ⊢ ◇(φ ⋏ ψ) := CKBoxDiaDiaK! ⨀ h
 
-lemma DiaCDiaBox! : Hilbert.K4McK ⊢! ◇(◇φ ➝ □φ) :=
+lemma DiaCDiaBox! : Modal.K4McK ⊢ ◇(◇φ ➝ □φ) :=
   (WeakerThan.pbl $ C_of_E_mp! $ Logic.K.axiomMcK_DiaCDiaBox!) ⨀ (by simp)
 
-lemma DiaConjCDiabox {Γ : List _} (hΓ : Γ ≠ []) : Hilbert.K4McK ⊢! ◇(Γ.map (λ φ => ◇φ ➝ □φ)).conj := by
+lemma DiaConjCDiabox {Γ : List _} (hΓ : Γ ≠ []) : Modal.K4McK ⊢ ◇(Γ.map (λ φ => ◇φ ➝ □φ)).conj := by
   induction Γ using List.induction_with_singleton with
   | hnil => tauto;
   | hsingle φ =>
     apply diaK''! ?_ $ DiaCDiaBox! (φ := φ);
     apply right_K!_intro <;> simp;
   | hcons φ Γ _ ih =>
-    have : Hilbert.K4McK ⊢! ◇□(◇φ ➝ □φ) ⋏ □◇(List.map (fun φ ↦ (◇φ ➝ □φ)) Γ).conj := by
+    have : Modal.K4McK ⊢ ◇□(◇φ ➝ □φ) ⋏ □◇(List.map (fun φ ↦ (◇φ ➝ □φ)) Γ).conj := by
       apply K!_intro;
       . exact axiomMcK! ⨀ (nec! DiaCDiaBox!);
       . exact nec! $ ih $ by assumption;
-    have : Hilbert.K4McK ⊢! ◇(□(◇φ ➝ □φ) ⋏ ◇(List.map (fun φ ↦ ◇φ ➝ □φ) Γ).conj) := DiaK!_of_CKBoxDia this;
-    replace : Hilbert.K4McK ⊢! ◇◇((◇φ ➝ □φ) ⋏ (List.map (fun φ ↦ ◇φ ➝ □φ) Γ).conj) := diaK''! CKBoxDiaDiaK! this;
-    replace : Hilbert.K4McK ⊢! ◇((◇φ ➝ □φ) ⋏ (List.map (fun φ ↦ ◇φ ➝ □φ) Γ).conj) := diaFour'! this;
+    have : Modal.K4McK ⊢ ◇(□(◇φ ➝ □φ) ⋏ ◇(List.map (fun φ ↦ ◇φ ➝ □φ) Γ).conj) := DiaK!_of_CKBoxDia this;
+    replace : Modal.K4McK ⊢ ◇◇((◇φ ➝ □φ) ⋏ (List.map (fun φ ↦ ◇φ ➝ □φ) Γ).conj) := diaK''! CKBoxDiaDiaK! this;
+    replace : Modal.K4McK ⊢ ◇((◇φ ➝ □φ) ⋏ (List.map (fun φ ↦ ◇φ ➝ □φ) Γ).conj) := diaFour'! this;
     exact this;
 
-lemma DiaFconjCDiabox {Γ : Finset _} (hΓ : Γ ≠ ∅) : Hilbert.K4McK ⊢! ◇(Γ.image (λ φ => ◇φ ➝ □φ)).conj := by
+lemma DiaFconjCDiabox {Γ : Finset _} (hΓ : Γ ≠ ∅) : Modal.K4McK ⊢ ◇(Γ.image (λ φ => ◇φ ➝ □φ)).conj := by
   apply diaK''! ?_ (h₂ := DiaConjCDiabox (Γ := Γ.toList) ?_);
   . apply right_Fconj!_intro;
     intro ψ hψ;
@@ -171,7 +166,7 @@ end definability
 
 section canonicality
 
-variable {H : Hilbert.Normal ℕ} [Entailment.Consistent H] [Entailment.K H]
+variable {Ax : Axiom ℕ} [Entailment.Consistent (Hilbert.Normal Ax)] [Entailment.K (Hilbert.Normal Ax)]
 
 open Formula.Kripke
 open LO.Entailment Entailment.FiniteContext LO.Modal.Entailment
@@ -181,11 +176,11 @@ open MaximalConsistentTableau
 namespace Canonical
 
 open Classical in
-instance [Hilbert.K4McK ⪯ H] : (canonicalFrame H).SatisfiesMcKinseyCondition := ⟨by
+instance [Modal.K4McK ⪯ (Hilbert.Normal Ax)] : (canonicalFrame (Hilbert.Normal Ax)).SatisfiesMcKinseyCondition := ⟨by
   rintro x;
-  have ⟨y, hy⟩ := lindenbaum (𝓢 := H) (t₀ := ⟨x.1.1.prebox ∪ Set.univ.image (λ φ => ◇φ ➝ □φ), ∅⟩) $ by
+  have ⟨y, hy⟩ := lindenbaum (𝓢 := (Hilbert.Normal Ax)) (t₀ := ⟨□⁻¹'x.1.1 ∪ Set.univ.image (λ φ => ◇φ ➝ □φ), ∅⟩) $ by
     intro Γ Δ hΓ hΔ;
-    suffices H ⊬ Γ.conj ➝ ⊥ by
+    suffices (Hilbert.Normal Ax) ⊬ Γ.conj ➝ ⊥ by
       simp only [Set.subset_empty_iff, Finset.coe_eq_empty] at hΔ;
       subst hΔ;
       simpa;
@@ -193,22 +188,20 @@ instance [Hilbert.K4McK ⪯ H] : (canonicalFrame H).SatisfiesMcKinseyCondition :
     replace hC := FConj_DT.mp hC;
 
     let Γ' := insert (◇⊤ ➝ □⊤) Γ;
-    replace hC : Γ'.toSet *⊢[H]! ⊥ := Context.weakening! (by simp [Γ']) hC;
+    replace hC : Γ'.toSet *⊢[(Hilbert.Normal Ax)] ⊥ := Context.weakening! (by simp [Γ']) hC;
 
-    let Γ'₁ := { φ ∈ Γ' | φ ∈ x.1.1.prebox };
+    let Γ'₁ := { φ ∈ Γ' | φ ∈ □⁻¹'x.1.1 };
     let Γ'₂ := { φ ∈ Γ' | ∃ ψ, ◇ψ ➝ □ψ = φ };
     apply MaximalConsistentTableau.neither (t := x) (φ := ◇Γ'₂.conj);
     constructor;
     . apply iff_provable_mem₁.mp;
-      apply WeakerThan.pbl (𝓢 := Hilbert.K4McK);
-      convert Logic.K4McK.DiaFconjCDiabox (Γ := Γ'.preimage (λ φ => ◇φ ➝ □φ) (by simp [Set.InjOn])) ?_
+      apply WeakerThan.pbl (𝓢 := Modal.K4McK);
+      convert Logic.K4McK.DiaFconjCDiabox (Γ := Γ'.preimage (λ φ => ◇φ ➝ □φ) (by grind [Set.InjOn, Formula.inj_dia, Formula.inj_imp])) ?_
       . simp [Γ'₂, Finset.image_preimage];
-      . simp [
-          Γ',
-          (show insert (◇⊤ ➝ □⊤) Γ = {◇⊤ ➝ □⊤} ∪ Γ by ext; simp),
-          (show Finset.preimage {◇⊤ ➝ □⊤} (fun φ ↦ ◇φ ➝ □φ) (by simp [Set.InjOn]) = {(⊤ : Formula ℕ)} by ext; simp),
-        ];
-    . replace hC : (Γ'₁ ∪ Γ'₂).toSet *⊢[H]! ⊥ := by
+      . simp only [ne_eq, Finset.eq_empty_iff_forall_notMem, Finset.mem_preimage, Finset.mem_insert, not_or, not_forall, not_and, Decidable.not_not, Γ'];
+        use ⊤;
+        grind;
+    . replace hC : (Γ'₁ ∪ Γ'₂).toSet *⊢[(Hilbert.Normal Ax)] ⊥ := by
         convert hC;
         ext φ;
         simp only [Set.mem_preimage, Function.iterate_one, Finset.mem_union, Finset.mem_filter, Finset.mem_insert, Γ'₁, Γ', Γ'₂];
@@ -219,34 +212,34 @@ instance [Hilbert.K4McK ⪯ H] : (canonicalFrame H).SatisfiesMcKinseyCondition :
           . have := hΓ h;
             simp at this ⊢;
             tauto;
-      replace hC : Γ'₁.toSet.box *⊢[H]! □(∼Γ'₂.conj) := Context.nec! $ N!_iff_CO!.mpr $ FConj_DT'.mpr hC;
-      replace hC : Γ'₁.box.toSet *⊢[H]! □(∼Γ'₂.conj) := by convert hC; simp;
-      replace hC : Γ'₁.box.toSet *⊢[H]! ∼◇(Γ'₂.conj) := by
+      replace hC : ↑(□'Γ'₁) *⊢[(Hilbert.Normal Ax)] □(∼Γ'₂.conj) := by
+        rw [Finset.LO.eq_box_toSet_toSet_box];
+        apply Context.nec! $ N!_iff_CO!.mpr $ FConj_DT'.mpr hC;
+      replace hC : ↑(□'Γ'₁) *⊢[(Hilbert.Normal Ax)] ∼◇(Γ'₂.conj) := by
         apply FConj_DT.mp;
         apply C!_trans $ FConj_DT.mpr hC;
         simp;
       apply iff_mem₁_neg.mp;
       apply iff_provable_include₁.mp hC x;
       intro _;
-      simp only [Set.mem_preimage, Function.iterate_one, Finset.coe_image, Finset.coe_filter,
-        Set.mem_image, Set.mem_setOf_eq, forall_exists_index, and_imp, Γ'₁];
+      simp only [Finset.LO.boxItr, Function.iterate_one, Finset.coe_image, Finset.coe_filter, Set.mem_image, Set.mem_setOf_eq, forall_exists_index, and_imp, Γ'₁];
       rintro χ hχ _ rfl;
       assumption;
-  have Rxy : (canonicalFrame H).Rel x y := by
+  have Rxy : (canonicalFrame (Hilbert.Normal Ax)).Rel x y := by
     dsimp [canonicalFrame];
-    trans (x.1.1.prebox ∪ Set.univ.image (λ φ => ◇φ ➝ □φ));
+    trans (□⁻¹'x.1.1 ∪ Set.univ.image (λ φ => ◇φ ➝ □φ));
     . apply Set.subset_union_left;
     . simpa using hy;
-  by_cases hy : ∃ z, (canonicalFrame H).Rel y z;
+  by_cases hy : ∃ z, (canonicalFrame (Hilbert.Normal Ax)).Rel y z;
   . obtain ⟨z, Ryz⟩ := hy;
     use z;
     constructor;
-    . exact (canonicalFrame H).trans Rxy Ryz;
+    . exact (canonicalFrame (Hilbert.Normal Ax)).trans Rxy Ryz;
     . intro u Rzu;
       by_contra! ezu;
       obtain ⟨ξ, hξ₁, hξ₂⟩ := exists₁₂_of_ne ezu;
       have : □ξ ∈ y.1.1 := iff_mem₁_imp'.mp (by apply hy.1; simp) $ def_rel_dia_mem₁.mp Ryz hξ₁;
-      have : ξ ∈ u.1.1 := def_rel_box_mem₁.mp ((canonicalFrame H).trans Ryz Rzu) this;
+      have : ξ ∈ u.1.1 := def_rel_box_mem₁.mp ((canonicalFrame (Hilbert.Normal Ax)).trans Ryz Rzu) this;
       exact iff_not_mem₂_mem₁.mpr this hξ₂;
   . use y;
     constructor;
@@ -261,3 +254,4 @@ end canonicality
 end Kripke
 
 end LO.Modal
+end

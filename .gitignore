@@ -1,10 +1,15 @@
 .lake
 
+# Verso
+_out
+
 # VSCode
 .vscode/settings.json
+.vscode/mcp.json
 
 # import graph
 import_graph.pdf
 
 # Claude
 .claude/settings.local.json
+

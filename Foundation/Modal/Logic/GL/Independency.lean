@@ -1,6 +1,10 @@
-import Foundation.Modal.Maximal.Unprovability
-import Foundation.Modal.Kripke.Logic.GL.MDP
+module
 
+public import Foundation.Modal.Maximal.Unprovability
+public import Foundation.Modal.Kripke.Logic.GL.MDP
+
+
+@[expose] public section
 
 namespace LO.Modal
 
@@ -22,12 +26,11 @@ namespace GL
 variable {n : ℕ} {φ : Formula ℕ}
 
 lemma unprovable_notbox : Modal.GL ⊬ ∼□φ := by
-  apply Hilbert.Normal.iff_logic_provable_provable.not.mpr;
   by_contra hC;
-  have : Hilbert.GL ⊢! ∼□φ ➝ ∼□⊥ := contra! (imply_box_distribute'! efq!)
-  have : Hilbert.GL ⊢! ∼□⊥ := this ⨀ hC;
-  have : Hilbert.Cl ⊢! (⊥ ➝ ⊥) ➝ ⊥ := by simpa using Logic.GL.provable_verTranslated_Cl this;
-  have := Hilbert.Cl.soundness this (λ _ => False);
+  have : Modal.GL ⊢ ∼□φ ➝ ∼□⊥ := contra! (imply_box_distribute'! efq!)
+  have : Modal.GL ⊢ ∼□⊥ := this ⨀ hC;
+  have : Propositional.Cl ⊢ (⊥ ➝ ⊥) ➝ ⊥ := GL.provable_verTranslated_Cl this;
+  have := Propositional.Cl.soundness this (λ _ => False);
   tauto;
 
 lemma unprovable_independency : Modal.GL ⊬ independency φ := by
@@ -38,12 +41,11 @@ lemma unprovable_not_independency_of_consistency : Modal.GL ⊬ ∼(independency
   by_contra hC;
   rcases modal_disjunctive (A!_of_ANNNN! $ ANN!_of_NK! hC) with (h | h);
   . apply unprovable_notbox h;
-  . apply Consistent.not_bot inferInstance (𝓢 := Hilbert.GL);
-    simpa using unnec! $ of_NN! h;
-
+  . apply Logic.no_bot (L := Modal.GL);
+    exact unnec! $ of_NN! h;
 
 /-
-theorem undecidable_independency_of_consistency : Independent Hilbert.GL (independency (∼□⊥)) := by
+theorem undecidable_independency_of_consistency : Independent Modal.GL (independency (∼□⊥)) := by
   constructor;
   . exact unprovable_independency;
   . exact unprovable_not_independency_of_consistency;
@@ -69,7 +71,7 @@ lemma unprovable_not_higherIndependency_of_consistency : Modal.GL ⊬ ∼(higher
     . exact ih h;
 
 /-
-theorem undecidable_higherIndependency_of_consistency : Independent Hilbert.GL (higherIndependency (∼□⊥) n) := by
+theorem undecidable_higherIndependency_of_consistency : Independent Modal.GL (higherIndependency (∼□⊥) n) := by
   constructor;
   . exact unprovable_higherIndependency_of_consistency;
   . exact unprovable_not_higherIndependency_of_consistency;
@@ -78,3 +80,4 @@ theorem undecidable_higherIndependency_of_consistency : Independent Hilbert.GL (
 end GL
 
 end LO.Modal
+end

@@ -1,5 +1,9 @@
-import Foundation.Modal.Kripke.Logic.GrzPoint2
-import Foundation.Modal.Kripke.Logic.S4Point3
+module
+
+public import Foundation.Modal.Kripke.Logic.GrzPoint2
+public import Foundation.Modal.Kripke.Logic.S4Point3
+
+@[expose] public section
 
 namespace LO.Modal
 
@@ -14,7 +18,7 @@ open Entailment
 open Entailment.Context
 open Formula
 open Formula.Kripke
-open Hilbert.Kripke
+open Modal.Kripke
 open Kripke
 
 namespace Kripke
@@ -32,30 +36,27 @@ instance : whitepoint.IsStronglyConnected := ⟨by tauto⟩
 
 end Kripke
 
-
-namespace Logic.GrzPoint3.Kripke
-
-instance : Sound Hilbert.GrzPoint3 FrameClass.finite_GrzPoint3 := instSound_of_validates_axioms $ by
+instance : Sound Modal.GrzPoint3 FrameClass.finite_GrzPoint3 := instSound_of_validates_axioms $ by
   apply FrameClass.validates_with_AxiomK_of_validates;
   constructor;
   rintro _ (rfl | rfl) F ⟨_, _⟩;
   . exact validate_AxiomGrz_of_finite_strict_preorder;
   . exact validate_axiomPoint3_of_isPiecewiseStronglyConnected;
 
-instance : Sound Hilbert.GrzPoint3 { F : Frame | F.IsFiniteGrzPoint3' } := instSound_of_validates_axioms $ by
+instance : Sound Modal.GrzPoint3 { F : Frame | F.IsFiniteGrzPoint3' } := instSound_of_validates_axioms $ by
   apply FrameClass.validates_with_AxiomK_of_validates;
   constructor;
   rintro _ (rfl | rfl) F ⟨_, _⟩;
   . exact validate_AxiomGrz_of_finite_strict_preorder;
   . exact validate_axiomPoint3_of_isPiecewiseStronglyConnected;
 
-instance : Entailment.Consistent Hilbert.GrzPoint3 :=
+instance : Entailment.Consistent Modal.GrzPoint3 :=
   consistent_of_sound_frameclass FrameClass.finite_GrzPoint3 $ by
     use whitepoint;
     constructor;
 
-instance : Complete Hilbert.GrzPoint3 FrameClass.finite_GrzPoint3 :=
-  Hilbert.Grz.Kripke.complete_of_mem_miniCanonicalFrame FrameClass.finite_GrzPoint3 $ by
+instance : Complete Modal.GrzPoint3 FrameClass.finite_GrzPoint3 :=
+  Modal.Grz.Kripke.complete_of_mem_miniCanonicalFrame FrameClass.finite_GrzPoint3 $ by
     sorry;
     /-
     intro φ;
@@ -87,8 +88,6 @@ instance : Complete Hilbert.GrzPoint3 FrameClass.finite_GrzPoint3 :=
       . sorry;
     -/
 
-end Logic.GrzPoint3.Kripke
-
 namespace Logic
 
 open Formula
@@ -96,9 +95,9 @@ open Entailment
 open Kripke
 
 
-instance : Hilbert.GrzPoint2 ⪱ Hilbert.GrzPoint3 := by
+instance : Modal.GrzPoint2 ⪱ Modal.GrzPoint3 := by
   constructor;
-  . apply Hilbert.Kripke.weakerThan_of_subset_frameClass FrameClass.finite_GrzPoint2 FrameClass.finite_GrzPoint3;
+  . apply Modal.Kripke.weakerThan_of_subset_frameClass FrameClass.finite_GrzPoint2 FrameClass.finite_GrzPoint3;
     intro F hF;
     simp_all only [Set.mem_setOf_eq];
     infer_instance;
@@ -111,7 +110,7 @@ instance : Hilbert.GrzPoint2 ⪱ Hilbert.GrzPoint3 := by
       let F : Frame := ⟨Fin 4, λ x y => x = 0 ∨ x = y ∨ y = 3⟩;
       let M : Model := ⟨
         F,
-        λ x a => match a with | 0 => (1 : F.World) ≺ x | 1 => (2 : F.World) ≺ x | _ => False
+        λ a x => match a with | 0 => (1 : F.World) ≺ x | 1 => (2 : F.World) ≺ x | _ => False
       ⟩;
       use M, 0;
       constructor;
@@ -136,7 +135,7 @@ instance : Hilbert.GrzPoint2 ⪱ Hilbert.GrzPoint3 := by
             push_neg;
             constructor;
             . tauto;
-            . simp [M, Semantics.Realize, Satisfies, Frame.Rel', F];
+            . simp [M, Semantics.Models, Satisfies, Frame.Rel', F];
         . apply Satisfies.box_def.not.mpr;
           push_neg;
           use 2;
@@ -146,9 +145,9 @@ instance : Hilbert.GrzPoint2 ⪱ Hilbert.GrzPoint3 := by
             push_neg;
             constructor;
             . tauto;
-            . simp [M, Semantics.Realize, Satisfies, Frame.Rel', F];
+            . simp [M, Semantics.Models, Satisfies, Frame.Rel', F];
 
-instance : Hilbert.S4Point3 ⪱ Hilbert.GrzPoint3 := by
+instance : Modal.S4Point3 ⪱ Modal.GrzPoint3 := by
   constructor;
   . apply Hilbert.Normal.weakerThan_of_provable_axioms;
     rintro _ (rfl | rfl | rfl | rfl) <;> simp;
@@ -158,7 +157,7 @@ instance : Hilbert.S4Point3 ⪱ Hilbert.GrzPoint3 := by
     . simp;
     . apply Sound.not_provable_of_countermodel (𝓜 := Kripke.FrameClass.S4Point3);
       apply Kripke.not_validOnFrameClass_of_exists_model_world;
-      use ⟨⟨Fin 2, λ x y => True⟩, λ w _ => w = 1⟩, 0;
+      use ⟨⟨Fin 2, λ x y => True⟩, λ _ w => w = 1⟩, 0;
       constructor;
       . exact {
           refl := by simp,
@@ -167,12 +166,11 @@ instance : Hilbert.S4Point3 ⪱ Hilbert.GrzPoint3 := by
             rintro x y z Rxy Rxz;
             simp;
         };
-      . simp [Semantics.Realize, Satisfies];
+      . simp [Semantics.Models, Satisfies];
 
 end Logic
 
-instance : Modal.GrzPoint2 ⪱ Modal.GrzPoint3 := inferInstance
 
-instance : Modal.S4Point3 ⪱ Modal.GrzPoint3 := inferInstance
 
 end LO.Modal
+end

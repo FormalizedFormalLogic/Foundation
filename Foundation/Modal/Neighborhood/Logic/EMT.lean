@@ -1,5 +1,8 @@
-import Foundation.Modal.Neighborhood.Logic.EM
-import Foundation.Modal.Neighborhood.AxiomGeach
+module
+
+public import Foundation.Modal.Neighborhood.Logic.EM
+
+@[expose] public section
 
 namespace LO.Modal
 
@@ -20,44 +23,38 @@ protected abbrev FrameClass.EMT : FrameClass := { F | F.IsEMT }
 end Neighborhood
 
 
-namespace Hilbert
+namespace EMT
 
-namespace EMT.Neighborhood
-
-instance : Sound Hilbert.EMT FrameClass.EMT := instSound_of_validates_axioms $ by
+instance Neighborhood.sound : Sound Modal.EMT FrameClass.EMT := instSound_of_validates_axioms $ by
   constructor;
   rintro _ (rfl | rfl) F (rfl | rfl) <;> simp;
 
-instance : Entailment.Consistent Hilbert.EMT := consistent_of_sound_frameclass FrameClass.EMT $ by
+instance consistent : Entailment.Consistent Modal.EMT := consistent_of_sound_frameclass FrameClass.EMT $ by
   use Frame.simple_blackhole;
   apply Set.mem_setOf_eq.mpr;
   constructor;
 
-instance : Complete Hilbert.EMT FrameClass.EMT := complete_of_canonical_frame FrameClass.EMT (maximalCanonicalFrame (Hilbert.EMT)) $ by
+instance Neighborhood.complete : Complete Modal.EMT FrameClass.EMT := (supplementedBasicCanonicity Modal.EMT).completeness $ by
   apply Set.mem_setOf_eq.mpr;
   constructor;
 
-end EMT.Neighborhood
+end EMT
 
-instance : Hilbert.EM ⪱ Hilbert.EMT := by
+
+instance : Modal.EMT ⪱ Modal.EMT4 := by
   constructor;
   . apply Hilbert.WithRE.weakerThan_of_subset_axioms;
-    simp;
+    grind;
   . apply Entailment.not_weakerThan_iff.mpr;
-    use (Axioms.T (.atom 0));
+    use (Axioms.Four (.atom 0));
     constructor;
     . simp;
-    . apply Sound.not_provable_of_countermodel (𝓜 := FrameClass.EM);
+    . apply Sound.not_provable_of_countermodel (𝓜 := FrameClass.EMT);
       apply not_validOnFrameClass_of_exists_frame;
-      use ⟨Fin 1, λ _ => Set.univ⟩;
+      use Frame.trivial_nontransitive;
       constructor;
-      . exact ⟨by tauto⟩;
-      . apply not_imp_not.mpr isReflexive_of_valid_axiomT;
-        by_contra! hC;
-        simpa [Frame.box] using @hC.refl ∅;
-
-end Hilbert
-
-instance : 𝐄𝐌 ⪱ 𝐄𝐌𝐓 := inferInstance
+      . constructor;
+      . simp;
 
 end LO.Modal
+end

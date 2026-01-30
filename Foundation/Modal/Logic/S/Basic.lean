@@ -1,5 +1,9 @@
-import Foundation.Modal.Logic.Extension
-import Foundation.Modal.Maximal.Unprovability
+module
+
+public import Foundation.Modal.Logic.SumQuasiNormal
+public import Foundation.Modal.Maximal.Unprovability
+
+@[expose] public section
 
 namespace LO.Modal
 
@@ -14,6 +18,7 @@ instance : Entailment.HasAxiomT Modal.S where
     constructor;
     apply Logic.sumQuasiNormal.subst (φ := Axioms.T (.atom 0)) (s := λ _ => φ);
     apply Logic.sumQuasiNormal.mem₂;
+    apply Logic.iff_provable.mpr;
     simp;
 
 instance : Modal.GL ⪱ Modal.S := by
@@ -23,12 +28,12 @@ instance : Modal.GL ⪱ Modal.S := by
     use (Axioms.T (.atom 0));
     constructor;
     . simp;
-    . simpa using Logic.GL.unprovable_AxiomT;
+    . grind;
 
 section
 
 private inductive S' : Logic ℕ
-  | mem_GL {φ} : Modal.GL ⊢! φ → Modal.S' φ
+  | mem_GL {φ} : Modal.GL ⊢ φ → Modal.S' φ
   | axiomT (φ) : Modal.S' (Axioms.T φ)
   | mdp  {φ ψ} : Modal.S' (φ ➝ ψ) → Modal.S' φ → Modal.S' ψ
 
@@ -58,18 +63,18 @@ private lemma S'.eq_S : Modal.S' = Modal.S := by
       induction ihφ with
       | mem_GL h =>
         apply Modal.S'.mem_GL;
-        apply subst!;
+        apply Logic.subst;
         exact h;
       | axiomT _ => apply Modal.S'.axiomT;
       | mdp _ _ ihφψ ihφ => apply Modal.S'.mdp ihφψ ihφ;
 
 -- TODO: Remove `eq_S_S'`?
 protected def S.rec'
-  {motive : (φ : Formula ℕ) → (Modal.S ⊢! φ) → Prop}
-  (mem_GL : ∀ {φ}, (h : Modal.GL ⊢! φ) → motive φ (sumQuasiNormal.mem₁! h))
+  {motive : (φ : Formula ℕ) → (Modal.S ⊢ φ) → Prop}
+  (mem_GL : ∀ {φ}, (h : Modal.GL ⊢ φ) → motive φ (sumQuasiNormal.mem₁! h))
   (axiomT : ∀ {φ}, motive (Axioms.T φ) (by simp))
-  (mdp : ∀ {φ ψ}, {hφψ : Modal.S ⊢! φ ➝ ψ} → {hφ : Modal.S ⊢! φ} → (motive (φ ➝ ψ) hφψ) → (motive φ hφ) → motive ψ (hφψ ⨀ hφ))
-  : ∀ {φ}, (h : Modal.S ⊢! φ) → motive φ h := by
+  (mdp : ∀ {φ ψ}, {hφψ : Modal.S ⊢ φ ➝ ψ} → {hφ : Modal.S ⊢ φ} → (motive (φ ➝ ψ) hφψ) → (motive φ hφ) → motive ψ (hφψ ⨀ hφ))
+  : ∀ {φ}, (h : Modal.S ⊢ φ) → motive φ h := by
   intro φ h;
   replace h := iff_provable.mp $ Modal.S'.eq_S ▸ h;
   induction h with
@@ -87,3 +92,4 @@ protected def S.rec'
 end
 
 end LO.Modal
+end

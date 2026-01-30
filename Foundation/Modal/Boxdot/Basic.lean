@@ -1,13 +1,16 @@
-import Foundation.Modal.Hilbert.Normal.Basic
-import Foundation.Modal.Kripke.Closure
-import Foundation.Modal.Kripke.Irreflexivize
+module
+
+public import Foundation.Modal.Hilbert.Normal.Basic
+public import Foundation.Modal.Kripke.Irreflexivize
+
+@[expose] public section
 
 namespace LO.Modal
 
 open LO.Entailment LO.Modal.Entailment
 open Formula
 
-variable {φ : Formula α}
+variable {φ : Formula α} {Ax Ax₁ Ax₂ : Axiom α}
 
 def Formula.boxdotTranslate : Formula α → Formula α
   | atom a => .atom a
@@ -17,19 +20,17 @@ def Formula.boxdotTranslate : Formula α → Formula α
 postfix:90 "ᵇ" => Formula.boxdotTranslate
 
 
-theorem Hilbert.of_provable_boxdotTranslated_axiomInstances {H₁ H₂ : Hilbert.Normal α} [Entailment.K H₂]
-  (h : ∀ φ ∈ H₁.axiomInstances, H₂ ⊢! φᵇ) : H₁ ⊢! φ → H₂ ⊢! φᵇ := by
+theorem Hilbert.Normal.of_provable_boxdotTranslated_axiomInstances [Entailment.K (Hilbert.Normal Ax₂)]
+  (h : ∀ φ ∈ Ax₁.instances, Hilbert.Normal Ax₂ ⊢ φᵇ) : Hilbert.Normal Ax₁ ⊢ φ → Hilbert.Normal Ax₂ ⊢ φᵇ := by
   intro d;
   induction d using Hilbert.Normal.rec! with
-  | @axm φ s hs =>
-    apply h;
-    use φ;
-    tauto;
+  | @axm φ s hs => apply h; use φ; tauto;
   | mdp ihpq ihp => exact ihpq ⨀ ihp;
   | nec ihp => exact boxdot_nec! $ ihp;
-  | imply₂ => exact imply₂!;
-  | imply₁ => exact imply₁!;
+  | implyS => exact implyS!;
+  | implyK => exact implyK!;
   | ec => exact elim_contra!;
+
 
 namespace Formula.Kripke.Satisfies
 
@@ -115,32 +116,32 @@ lemma iff_boxdotTranslateMultibox_boxdotTranslateBoxlt : x ⊧ (□^[n]φ)ᵇ �
   | zero => simp;
   | succ n ih =>
     suffices (∀ k < n + 1, x ⊧ (□^[k]φᵇ)) ∧ x ⊧ (□(□^[n]φ)ᵇ) ↔ (∀ k < n + 2, x ⊧ (□^[k]φᵇ)) by
-      simpa [Box.boxdot, boxdotTranslate, ih];
+      simpa [Box.boxdot, boxdotTranslate, ih, Box.boxLe];
     constructor;
     . rintro ⟨h₁, h₂⟩ k hk;
-      apply Satisfies.multibox_def.mpr;
+      apply Satisfies.boxItr_def.mpr;
       intro y Rxy;
       by_cases ek : k = n + 1;
       . subst ek;
         obtain ⟨u, Ryu, Ruy⟩ := Rxy;
-        apply Satisfies.multibox_def.mp (Satisfies.fconj_def.mp (ih.mp $ h₂ u Ryu) _ ?_) Ruy;
+        apply Satisfies.boxItr_def.mp (Satisfies.fconj_def.mp (ih.mp $ h₂ u Ryu) _ ?_) Ruy;
         . simp;
           tauto;
-      . exact Satisfies.multibox_def.mp (h₁ k (by omega)) Rxy;
+      . exact Satisfies.boxItr_def.mp (h₁ k (by omega)) Rxy;
     . intro h;
       constructor;
       . intro k hk;
-        apply Satisfies.multibox_def.mpr;
+        apply Satisfies.boxItr_def.mpr;
         intro y Rxy;
-        apply Satisfies.multibox_def.mp (@h k (by omega)) Rxy;
+        apply Satisfies.boxItr_def.mp (@h k (by omega)) Rxy;
       . intro y Rxy;
         apply ih.mpr;
         apply Satisfies.fconj_def.mpr;
         simp only [Finset.mem_image, Finset.mem_range, Satisfies.iff_models, forall_exists_index, and_imp, forall_apply_eq_imp_iff₂];
         intro k hk;
-        apply Satisfies.multibox_def.mpr;
+        apply Satisfies.boxItr_def.mpr;
         intro u Ryu;
-        apply Satisfies.multibox_def.mp $ @h (k + 1) (by omega);
+        apply Satisfies.boxItr_def.mp $ @h (k + 1) (by omega);
         use y;
 
 end Formula.Kripke.Satisfies
@@ -202,7 +203,7 @@ lemma iff_reflexivize_irreflexivize [F.IsReflexive] {x : F.World} {V} : (Satisfi
       apply ihp (x := y) |>.mp;
       exact h y $ by
         induction Rxy with
-        | refl => apply IsRefl.refl;
+        | refl => apply Std.Refl.refl;
         | single h => exact h.1;
     . intro h y Rxy;
       by_cases e : x = y;
@@ -221,3 +222,4 @@ lemma iff_reflexivize_irreflexivize' [F.IsReflexive] : (F ⊧ φ) ↔ ((F^≠^=)
 end Kripke
 
 end LO.Modal
+end

@@ -1,14 +1,18 @@
-import Foundation.Logic.HilbertStyle.Supplemental
+module
+
+public import Foundation.Propositional.Entailment.Cl.Basic
+
+@[expose] public section
 
 namespace LO
 
-variable {F S : Type*} [LogicalConnective F] [Entailment F S]
+variable {F S : Type*} [LogicalConnective F] [Entailment S F]
 
 namespace Entailment
 
 variable (𝓢 : S)
 
-def ProvablyEquivalent (φ ψ : F) : Prop := 𝓢 ⊢! φ ⭤ ψ
+def ProvablyEquivalent (φ ψ : F) : Prop := 𝓢 ⊢ φ ⭤ ψ
 
 local infix:45 " ≡ " => ProvablyEquivalent 𝓢
 
@@ -20,7 +24,7 @@ protected lemma ProvablyEquivalent.symm [Entailment.Minimal 𝓢] {φ ψ : F} : 
 
 protected lemma ProvablyEquivalent.trans [Entailment.Minimal 𝓢] {φ ψ χ : F} : φ ≡ ψ → ψ ≡ χ → φ ≡ χ := E!_trans
 
-lemma provable_iff_provablyEquivalent_verum [Entailment.Minimal 𝓢] {φ : F} : 𝓢 ⊢! φ ↔ φ ≡ ⊤ :=
+lemma provable_iff_provablyEquivalent_verum [Entailment.Minimal 𝓢] {φ : F} : 𝓢 ⊢ φ ↔ φ ≡ ⊤ :=
   ⟨fun h ↦ E!_intro CV! (C!_of_conseq! h), fun h ↦ (K!_right h) ⨀ verum!⟩
 
 variable (𝓢)
@@ -38,9 +42,9 @@ variable [Entailment.Minimal 𝓢]
 lemma of_eq_of {φ ψ : F} : (⟦φ⟧ : LindenbaumAlgebra 𝓢) = ⟦ψ⟧ ↔ φ ≡ ψ := Quotient.eq (r := ProvablyEquivalent.setoid 𝓢)
 
 instance [DecidableEq F] : LE (LindenbaumAlgebra 𝓢) :=
-  ⟨Quotient.lift₂ (fun φ ψ ↦ 𝓢 ⊢! φ ➝ ψ) fun φ₁ ψ₁ φ₂ ψ₂ hp hq ↦ by simp only [eq_iff_iff, C!_repalce hp hq]⟩
+  ⟨Quotient.lift₂ (fun φ ψ ↦ 𝓢 ⊢ φ ➝ ψ) fun φ₁ ψ₁ φ₂ ψ₂ hp hq ↦ by simp only [C!_repalce hp hq]⟩
 
-lemma le_def [DecidableEq F] {φ ψ : F} : (⟦φ⟧ : LindenbaumAlgebra 𝓢) ≤ ⟦ψ⟧ ↔ 𝓢 ⊢! φ ➝ ψ := iff_of_eq rfl
+lemma le_def [DecidableEq F] {φ ψ : F} : (⟦φ⟧ : LindenbaumAlgebra 𝓢) ≤ ⟦ψ⟧ ↔ 𝓢 ⊢ φ ➝ ψ := iff_of_eq rfl
 
 instance : Top (LindenbaumAlgebra 𝓢) := ⟨⟦⊤⟧⟩
 
@@ -55,7 +59,7 @@ instance [DecidableEq F] : Max (LindenbaumAlgebra 𝓢) := ⟨Quotient.lift₂ (
 instance [DecidableEq F] : HImp (LindenbaumAlgebra 𝓢) := ⟨Quotient.lift₂ (fun φ ψ ↦ ⟦φ ➝ ψ⟧) fun φ₁ ψ₁ φ₂ ψ₂ hp hq ↦ by
   simpa only [Quotient.eq] using ECC!_of_E!_of_E! hp hq⟩
 
-instance [DecidableEq F] : HasCompl (LindenbaumAlgebra 𝓢) := ⟨Quotient.lift (fun φ ↦ ⟦∼φ⟧) fun φ₁ φ₂ hp ↦ by
+instance [DecidableEq F] : Compl (LindenbaumAlgebra 𝓢) := ⟨Quotient.lift (fun φ ↦ ⟦∼φ⟧) fun φ₁ φ₂ hp ↦ by
   simpa only [Quotient.eq] using ENN!_of_E! hp⟩
 
 lemma top_def : (⊤ : LindenbaumAlgebra 𝓢) = ⟦⊤⟧ := rfl
@@ -132,8 +136,9 @@ instance [DecidableEq F] : GeneralizedHeytingAlgebra (LindenbaumAlgebra 𝓢) wh
 
 variable {𝓢}
 
-lemma provable_iff_eq_top {φ : F} : 𝓢 ⊢! φ ↔ (⟦φ⟧ : LindenbaumAlgebra 𝓢) = ⊤ := by
-  simp [top_def, provable_iff_provablyEquivalent_verum]; rfl
+lemma provable_iff_eq_top {φ : F} : 𝓢 ⊢ φ ↔ (⟦φ⟧ : LindenbaumAlgebra 𝓢) = ⊤ := by
+  simp [top_def, provable_iff_provablyEquivalent_verum, Quotient.eq];
+  simp [ProvablyEquivalent, ProvablyEquivalent.setoid]
 
 lemma inconsistent_iff_trivial : Inconsistent 𝓢 ↔ (∀ φ : LindenbaumAlgebra 𝓢, φ = ⊤) := by
   simp only [Inconsistent, provable_iff_eq_top]
@@ -206,3 +211,5 @@ end classical
 end Entailment
 
 end LO
+
+end

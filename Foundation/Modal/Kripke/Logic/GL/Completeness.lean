@@ -1,8 +1,10 @@
-import Foundation.Modal.Entailment.GL
-import Foundation.Modal.ComplementClosedConsistentFinset
-import Foundation.Modal.Kripke.Logic.GL.Soundness
-import Foundation.Modal.Kripke.Hilbert
-import Foundation.Modal.Kripke.Logic.K4
+module
+
+public import Foundation.Modal.ComplementClosedConsistentFinset
+public import Foundation.Modal.Kripke.Logic.GL.Soundness
+public import Foundation.Modal.Kripke.Logic.K4
+
+@[expose] public section
 
 namespace LO.Modal
 
@@ -13,15 +15,15 @@ open Entailment Entailment.FiniteContext
 open Formula.Kripke
 open ComplementClosedConsistentFinset
 
-namespace Hilbert.GL.Kripke
+namespace GL.Kripke
 
 variable {φ ψ : Formula ℕ}
 
 abbrev miniCanonicalFrame (φ : Formula ℕ) : Kripke.Frame where
-  World := ComplementClosedConsistentFinset Hilbert.GL φ.subformulas
+  World := ComplementClosedConsistentFinset Modal.GL φ.subformulas
   Rel X Y :=
-    (∀ ψ ∈ φ.subformulas.prebox, □ψ ∈ X → (ψ ∈ Y ∧ □ψ ∈ Y)) ∧
-    (∃ χ ∈ φ.subformulas.prebox, □χ ∉ X ∧ □χ ∈ Y)
+    (∀ ψ ∈ □⁻¹'φ.subformulas, □ψ ∈ X → (ψ ∈ Y ∧ □ψ ∈ Y)) ∧
+    (∃ χ ∈ □⁻¹'φ.subformulas, □χ ∉ X ∧ □χ ∈ Y)
 
 namespace miniCanonicalFrame
 
@@ -46,57 +48,66 @@ end miniCanonicalFrame
 
 abbrev miniCanonicalModel (φ : Formula ℕ) : Kripke.Model where
   toFrame := miniCanonicalFrame φ
-  Val X a := (atom a) ∈ X
+  Val a X := (atom a) ∈ X
 
 
 lemma truthlemma_lemma1
-  {X : ComplementClosedConsistentFinset Hilbert.GL φ.subformulas} (hq : □ψ ∈ φ.subformulas)
-  : ((X.1.prebox ∪ X.1.prebox.box) ∪ {□ψ, -ψ}) ⊆ φ.subformulas⁻ := by
+  {X : ComplementClosedConsistentFinset Modal.GL φ.subformulas} (hq : □ψ ∈ φ.subformulas)
+  : ((□⁻¹'X.1 ∪ □'□⁻¹'X.1) ∪ {□ψ, -ψ}) ⊆ φ.subformulas⁻ := by
   intro χ hr;
-  replace hr : χ = □ψ ∨ □χ ∈ X ∨ (∃ a, □a ∈ X ∧ □a = χ) ∨ χ = -ψ := by simpa using hr;
-  rcases hr with (rfl | hp | ⟨χ, hr, rfl⟩ | rfl);
+  replace hr : χ = □ψ ∨ χ = -ψ ∨ □χ ∈ X ∨ ∃ a, □a ∈ X ∧ □a = χ := by
+    simpa [Finset.LO.preboxItr, Finset.LO.boxItr] using hr;
+  rcases hr with (rfl | rfl | hp | ⟨χ, hr, rfl⟩);
   . apply Finset.mem_union.mpr;
     tauto;
-  . have := X.closed.subset hp;
-    have := FormulaFinset.complementary_mem_box (by grind) this;
-    apply Finset.mem_union.mpr;
-    grind;
-  . exact X.closed.subset hr;
   . apply Finset.mem_union.mpr;
     right;
     apply Finset.mem_image.mpr;
     use ψ;
     grind;
+  . have := X.closed.subset hp;
+    have := FormulaFinset.complementary_mem_box (by grind) this;
+    apply Finset.mem_union.mpr;
+    grind;
+  . exact X.closed.subset hr;
 
 lemma truthlemma_lemma2
-  {X : ComplementClosedConsistentFinset Hilbert.GL φ.subformulas}
+  {X : ComplementClosedConsistentFinset Modal.GL φ.subformulas}
   (hψ₁ : □ψ ∈ φ.subformulas)
   (hψ₂ : □ψ ∉ X)
-  : FormulaFinset.Consistent Hilbert.GL ((X.1.prebox ∪ X.1.prebox.box) ∪ {□ψ, -ψ}) := by
+  : FormulaFinset.Consistent Modal.GL ((□⁻¹'X.1 ∪ □'□⁻¹'X.1) ∪ {□ψ, -ψ}) := by
   apply FormulaFinset.intro_union_consistent;
   rintro Γ₁ Γ₂ hΓ₁ hΓ₂;
   by_contra hC;
   apply hψ₂;
   have := Context.deduct! $ Context.weakening! (Γ := Γ₁ ∪ Γ₂) (Δ := insert (-ψ) (insert (□ψ) Γ₁)) ?_ hC;
-  . replace : (insert (□ψ) Γ₁) *⊢[Hilbert.GL]! ψ := of_imply_complement_bot this;
-    replace := Context.deduct! this;
-    replace : ↑Γ₁.box *⊢[Hilbert.GL]! □(□ψ ➝ ψ) := by simpa using Context.nec! this;
-    replace := axiomL! ⨀ this;
-    replace : (X.1.prebox.box ∪ X.1.prebox.multibox 2) *⊢[Hilbert.GL]! □ψ := Context.weakening! ?_ this;
-    . replace : X.1.prebox.box *⊢[Hilbert.GL]! (X.1.prebox.multibox 2).conj ➝ □ψ := FConj_DT'.mpr $ by simpa using this;
-      replace : X.1.prebox.box *⊢[Hilbert.GL]! (X.1.prebox.box).conj ➝ □ψ := C!_trans ?_ this;
-      . replace := FConj_DT'.mp this;
-        have : X *⊢[Hilbert.GL]! □ψ := Context.weakening! (by simp) this;
+  . replace : (insert (□ψ) Γ₁) *⊢[Modal.GL] ψ := of_imply_complement_bot this;
+    replace : ↑Γ₁ *⊢[Modal.GL] □ψ ➝ ψ:= Context.deduct! this;
+    replace : ↑(□'Γ₁) *⊢[Modal.GL] □(□ψ ➝ ψ) := by simpa using Context.nec! this;
+    replace : ↑(□'Γ₁) *⊢[Modal.GL] □ψ := axiomL! ⨀ this;
+    replace : ↑(□'□⁻¹'X.1 ∪ □^[2]'□⁻¹'X.1) *⊢[Modal.GL] □ψ := Context.weakening! ?_ this;
+    . replace : ↑(□'□⁻¹'X.1) *⊢[Modal.GL] ((□^[2]'□⁻¹'X.1).conj) ➝ □ψ := FConj_DT'.mpr this;
+      replace : ↑(□'□⁻¹'X.1) *⊢[Modal.GL] (□'□⁻¹'X.1).conj ➝ □ψ := C!_trans ?_ this;
+      . replace : ↑(□'□⁻¹'X.1 ∪ □'□⁻¹'↑X) *⊢[Modal.GL] □ψ := FConj_DT'.mp this;
+        have : X *⊢[Modal.GL] □ψ := Context.weakening! (by grind) this;
         exact membership_iff hψ₁ |>.mpr this;
       . apply CFconjFconj!_of_provable;
         intro ξ hξ;
-        obtain ⟨ξ, h, rfl⟩ := Finset.exists_multibox_of_mem_multibox hξ;
+        obtain ⟨ξ, h, rfl⟩ := Finset.LO.exists_of_mem_boxItr hξ;
         apply axiomFour'!;
         apply Context.by_axm!
-        simpa using h;
-    . simp only [Finset.coe_image, Function.iterate_one, Finset.coe_preimage, Box.multibox_succ, Set.image_subset_iff, Set.preimage_union];
-      intro ξ hξ;
-      simpa using hΓ₁ hξ;
+        grind;
+    . intro ξ hξ;
+      simp only [Finset.LO.boxItr, Finset.coe_image, Set.mem_image,
+        SetLike.mem_coe, Finset.LO.preboxItr, Box.boxItr_succ, Finset.coe_union,
+        Finset.coe_preimage, Set.mem_union, Set.mem_preimage] at ⊢ hξ;
+      rcases hξ with ⟨ξ, ⟨hξ, rfl⟩⟩;
+      rcases (Finset.mem_union.mp $ hΓ₁ hξ) with hξ | hξ;
+      . grind;
+      . right;
+        obtain ⟨ζ, hζ, rfl⟩ := Finset.LO.exists_of_mem_boxItr hξ;
+        use ζ;
+        grind;
   . intro ξ;
     simp only [Set.mem_union, Finset.mem_coe, Set.mem_insert_iff];
     rintro (hξ₁ | hξ₂);
@@ -152,12 +163,13 @@ lemma truthlemma {X : (miniCanonicalModel φ).World} (q_sub : ψ ∈ φ.subformu
         . intros;
           constructor;
           . apply hY₁.1.1;
-            simpa;
+            simpa [Finset.LO.preboxItr];
           · apply hY₁.1.2;
-            simpa;
+            apply Finset.LO.mem_box_prebox_of_mem_of_mem_box;
+            assumption;
         . use ψ;
           refine ⟨?_, ?_, ?_⟩;
-          . simpa;
+          . simpa [Finset.LO.preboxItr, Finset.LO.boxItr];
           . simpa;
           . apply hY₁.2;
             simp;
@@ -170,9 +182,9 @@ lemma truthlemma {X : (miniCanonicalModel φ).World} (q_sub : ψ ∈ φ.subformu
     . intro h Y RXY;
       apply ih (by grind) |>.mpr;
       refine RXY.1 ψ ?_ h |>.1;
-      simpa;
+      simpa [Finset.LO.preboxItr, Finset.LO.boxItr];
 
-instance : Complete Hilbert.GL Kripke.FrameClass.finite_GL := ⟨by
+instance FFP : Complete Modal.GL Kripke.FrameClass.finite_GL := ⟨by
   intro φ;
   contrapose;
   intro h;
@@ -202,16 +214,7 @@ instance : Complete Hilbert.GL Kripke.FrameClass.finite_GL := ⟨by
       all_goals grind;
 ⟩
 
-end Hilbert.GL.Kripke
-
-namespace Logic
-
-open Formula
-open Entailment
-open Kripke
-
-
-end Logic
-
+end GL.Kripke
 
 end LO.Modal
+end

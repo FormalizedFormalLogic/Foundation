@@ -1,8 +1,8 @@
-import Mathlib.Data.Set.Finite.Powerset
-import Foundation.Modal.Kripke.Closure
-import Foundation.Modal.Kripke.Rooted
-import Foundation.Modal.Kripke.AxiomPoint3
-import Foundation.Modal.Kripke.AxiomWeakPoint3
+module
+
+public import Foundation.Modal.Kripke.Rooted
+
+@[expose] public section
 
 universe u v
 
@@ -76,7 +76,7 @@ class FilterOf (FM : Model) (M : outParam Kripke.Model) (T : outParam (FormulaSe
   def_rel_forth : ∀ {x y : M}, x ≺ y → (cast def_world.symm ⟦x⟧) ≺ (cast def_world.symm ⟦y⟧)
   def_rel_back : ∀ {x y : M}, (cast def_world.symm ⟦x⟧) ≺ (cast def_world.symm ⟦y⟧) → ∀ φ, □φ ∈ T → (x ⊧ □φ → y ⊧ φ)
   def_valuation X a : (ha : (atom a) ∈ T) →
-    FM X a ↔ Quotient.lift (λ x => M x a) (by
+    FM a X ↔ Quotient.lift (λ x => M a x) (by
       intro x y h;
       apply eq_iff_iff.mpr;
       constructor;
@@ -128,7 +128,7 @@ lemma isReflexive (filterOf : FilterOf FM M T) [M.IsReflexive] : FM.IsReflexive 
   refl := by
     intro X;
     obtain ⟨x, hx⟩ := Quotient.exists_rep (cast (filterOf.def_world) X);
-    convert filterOf.def_rel_forth $ IsRefl.refl x <;> simp_all;
+    convert filterOf.def_rel_forth $ Std.Refl.refl x <;> simp_all;
 
 lemma isSerial (filterOf : FilterOf FM M T) [M.IsSerial] : FM.IsSerial where
   serial := by
@@ -142,7 +142,7 @@ lemma isSerial (filterOf : FilterOf FM M T) [M.IsSerial] : FM.IsSerial where
 end FilterOf
 
 
-abbrev standardFiltrationValuation (X : FilterEqvQuotient M T) (a : ℕ) := (ha : (atom a) ∈ T) → Quotient.lift (λ x => M x a) (by
+abbrev standardFiltrationValuation (a : ℕ) (X : FilterEqvQuotient M T) := (ha : (atom a) ∈ T) → Quotient.lift (λ x => M a x) (by
   intro x y h;
   apply eq_iff_iff.mpr;
   constructor;
@@ -213,7 +213,7 @@ instance isSymmetric [M.IsSymmetric] : (finestFiltrationModel M T).IsSymmetric w
   symm := by
     rintro _ _ ⟨x, y, rfl, rfl, Rxy⟩;
     use y, x;
-    refine ⟨by trivial, by trivial, IsSymm.symm _ _ Rxy⟩;
+    refine ⟨by trivial, by trivial, Std.Symm.symm _ _ Rxy⟩;
 
 end finestFiltrationModel
 
@@ -234,10 +234,10 @@ instance filterOf [trans : M.IsTransitive] : FilterOf (finestFiltrationTransitiv
   def_rel_back := by
     rintro x y RXY φ hφ hx;
     simp only [cast_eq] at RXY;
-    replace ⟨n, RXY⟩ := HRel.TransGen.exists_iterate.mp RXY;
+    replace ⟨n, RXY⟩ := Rel.TransGen.exists_iterate.mp RXY;
     induction n using PNat.recOn generalizing x with
     | one =>
-      simp only [PNat.val_ofNat, HRel.Iterate.iff_succ, HRel.Iterate.iff_zero, exists_eq_right] at RXY;
+      simp only [PNat.val_ofNat, Rel.Iterate.iff_succ, Rel.Iterate.iff_zero, exists_eq_right] at RXY;
       obtain ⟨u, v, exu, eyv, Ruv⟩ := RXY;
       have : u ⊧ □φ := FilterEqvQuotient.iff_of_eq exu hφ |>.mp hx;
       have : v ⊧ φ := this _ Ruv;
@@ -274,20 +274,20 @@ instance rooted_isPiecewiseStronglyConvergent [preorder : M.IsPreorder] [ps_conv
       constructor;
       . apply Relation.TransGen.single;
         suffices y ≺ z by tauto;
-        exact HRel.TransGen.unwrap Rrz;
+        exact Rel.TransGen.unwrap Rrz;
       . apply Relation.TransGen.single;
         suffices z ≺ z by tauto;
-        apply IsRefl.refl ;
+        apply Std.Refl.refl ;
     . use ⟦⟨y, by tauto⟩⟧;
       constructor;
       . apply Relation.TransGen.single;
         suffices y ≺ y by tauto;
-        apply IsRefl.refl;
+        apply Std.Refl.refl;
       . apply Relation.TransGen.single;
         suffices z ≺ y by tauto;
-        exact HRel.TransGen.unwrap Rry;
-    . replace Rry := HRel.TransGen.unwrap Rry;
-      replace Rrz := HRel.TransGen.unwrap Rrz;
+        exact Rel.TransGen.unwrap Rry;
+    . replace Rry := Rel.TransGen.unwrap Rry;
+      replace Rrz := Rel.TransGen.unwrap Rrz;
       obtain ⟨u, Ruy, Ruz⟩ := M.ps_convergent Rry Rrz;
       use ⟦⟨u, by
         right;
@@ -304,7 +304,7 @@ instance rooted_isPiecewiseStronglyConnected [preorder : M.IsPreorder] [ps_conne
     . simp only [or_self];
       apply Relation.TransGen.single;
       suffices z ≺ z by tauto;
-      apply IsRefl.refl;
+      apply Std.Refl.refl;
     . left;
       apply Relation.TransGen.single;
       suffices y ≺ z by tauto;
@@ -331,3 +331,4 @@ end finestFiltrationTransitiveClosureModel
 end Kripke
 
 end LO.Modal
+end

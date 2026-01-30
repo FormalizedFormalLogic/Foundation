@@ -1,5 +1,8 @@
-import Foundation.Modal.Kripke.Completeness
-import Foundation.Vorspiel.HRel.Isolated
+module
+
+public import Foundation.Modal.Kripke.Completeness
+
+@[expose] public section
 
 namespace LO.Modal
 
@@ -27,12 +30,11 @@ lemma isIsolated_of_validate_AxiomVer {F : Frame} (h : F ⊧ (Axioms.Ver (.atom 
     have := h (λ _ _ => False) x y Rxy;
     simp [Formula.Kripke.Satisfies] at this;
 
-
 end definability
 
 section canonicality
 
-variable {S} [Entailment (Formula ℕ) S]
+variable {S} [Entailment S (Formula ℕ)]
 variable {𝓢 : S} [Entailment.Consistent 𝓢] [Entailment.K 𝓢]
 
 open Formula.Kripke
@@ -51,3 +53,4 @@ end canonicality
 end Kripke
 
 end LO.Modal
+end

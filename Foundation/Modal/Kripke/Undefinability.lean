@@ -1,4 +1,8 @@
-import Foundation.Modal.Kripke.Preservation
+module
+
+public import Foundation.Modal.Kripke.Preservation
+
+@[expose] public section
 
 namespace LO.Modal
 
@@ -19,13 +23,9 @@ theorem undefinable_irreflexive : ¬∃ φ, ∀ F, F ∈ FrameClass.irrefl ↔ (
     back := by
       intro x y h;
       use 1 - x;
-      constructor;
-      . simpa;
-      . omega;
+      grind;
   };
-  have f_surjective : Function.Surjective f := by
-    simp [Function.Surjective];
-    aesop;
+  have f_surjective : Function.Surjective f := by simp [Function.Surjective];
 
   have : F₁.IsIrreflexive := { irrefl := by omega; }
   have : F₂.IsIrreflexive := by
@@ -38,3 +38,4 @@ theorem undefinable_irreflexive : ¬∃ φ, ∀ F, F ∈ FrameClass.irrefl ↔ (
 end Kripke
 
 end LO.Modal
+end

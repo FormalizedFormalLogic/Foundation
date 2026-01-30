@@ -1,4 +1,8 @@
-import Foundation.Modal.Entailment.Basic
+module
+
+public import Foundation.Modal.Entailment.Basic
+
+@[expose] public section
 
 namespace LO.Modal
 
@@ -6,7 +10,7 @@ open LO.Entailment LO.Entailment.FiniteContext LO.Modal.Entailment
 
 namespace Entailment
 
-variable {S F : Type*} [BasicModalLogicalConnective F] [DecidableEq F] [Entailment F S]
+variable {S F : Type*} [BasicModalLogicalConnective F] [DecidableEq F] [Entailment S F]
 variable {𝓢 : S}
 
 protected class K4Hen (𝓢 : S) extends Entailment.K4 𝓢, HasAxiomHen 𝓢
@@ -21,3 +25,7 @@ instance : HenkinRule 𝓢 where
 end K4Hen
 
 end Entailment
+
+end LO.Modal
+
+end

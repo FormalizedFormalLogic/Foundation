@@ -1,5 +1,5 @@
-[Book]: https://formalizedformallogic.github.io/Foundation/book
 [Doc]: https://FormalizedFormalLogic.github.io/Foundation/doc
+[Catalogue]: https://FormalizedFormalLogic.github.io/Catalogue
 
 # Foundation
 
@@ -7,78 +7,124 @@ Formalizing mathematical logic in Lean 4.
 
 ## Structure & Summary
 
-Main results of this repository. More detailed explanations are provided in the [Book] and [Doc].
+Main results of this repository. More detailed explanations are provided in the [Catalogue] and [Doc].
 
-- `FirstOrder`: [First-Order Logic][first_order] and [Arithmetics][arith]
-  - [Completeness Theorem][first_order:completeness]
-  - [Cut-elimination of first-order sequent calculus _(Gentzen's Hauptsatz)_][first_order:haupstaz]
-  - [Arithmetic][arith]
-  - Gödel's [First][arith:goedel_it1] and [Second][arith:goedel_it2] Incompleteness Theorems
-  - [Arithmetic Theory Zoo](#arithmetic-theory-zoo)
-- `IntFO`: [Intuitionistic First-Order Logic][first_order]
-  - [Gödel-Gentzen Translation][first_order:goedel_translation]
-- `Modal`: [Basic Modal Logic][modal:logic] (with modal operators $\Box, \Diamond$)
-  - [Kripke completeness for well-known subsystems][modal:logic_kripke_completeness]
-  - [Modal Logic Zoo](#modal-logic-zoo)
-  - [Gödel-McKinsey-Tarski Theorem][modal:gmt_theorem] and [Modal Companions](modal:companion)
 - `Propositional`: [Propositional Logic][prop]
-  - [Tait-style calculus][prop:classical_tait] and [completeness][prop:classical_tait_complete]
+  - [Tait-style Calculus][prop:classical_tait] and [Completeness][prop:classical_tait_complete]
   - [Completeness for Kripke semantics][prop:kripke]
   - [Disjunctive Property of intuitionistic logic][prop:int_disjunctive]
   - [Propositional Logic Zoo](#propositional-logic-zoo)
+- `FirstOrder`: [First-Order Logic][first_order]
+  - [Completeness Theorem][first_order:completeness]
+  - [Cut-Elimination of First-Order Sequent Calculus _(Gentzen's Hauptsatz)_][first_order:haupstaz]
+  - [Gödel-Gentzen Translation][first_order:goedel_translation]
+  - [Arithmetic][arith]
+    - Gödel's [First][arith:goedel_it1] and [Second][arith:goedel_it2] Incompleteness Theorems
+    - [Arithmetic Theory Zoo](#arithmetic-theory-zoo)
+  - [Set Theory][setTheory]
+    - [Consistency of ZFC][setTheory:zfc_consistent]
+    - [Set Theory Zoo](#set-theory-zoo)
+- `Modal`: [Basic Modal Logic][modal:logic] (with modal operators $\Box, \Diamond$)
+  - [Kripke Semantics][modal:kripke_semantics]
+  - [Neighborhood Semantics][modal:neighborhood_semantics]
+  - [Gödel-McKinsey-Tarski Theorem][modal:gmt_theorem] and [Modal Companions](modal:companion)
+  - [Boxdot Conjecture][modal:boxdot_conjecture]
+  - [Modal Logic Zoo](#modal-logic-zoo)
 - `ProvabilityLogic`: [Provability Logic][provability_logic]
   - [Solovay's Arithmetical Completeness Theorem for GL][provability_logic:GL_arith_complete]
+- `InterpretabilityLogic`: [Interpretability Logic][interpretability_logic]
+  - [Veltman Semantics][interpretability_logic:veltman]
+  - [Interpretability Logic Zoo](#interpretability-logic-zoo)
 - `Meta`: Proof automation.
 - `Logic`: Fundamental tools for various logics.
 - `Vospiel`: Supplemental definitions and theorems for mathlib.
 
-
 [prop]: ./Foundation/Propositional
 [prop:classical_tait]: ./Foundation/Propositional/Tait/Calculus.lean
-[prop:classical_tait_complete]: ./Foundation/Propositional/Classical/Tait.lean
-[prop:classical_complete]: ./Foundation/Propositional/Classical/Tait.lean
+[prop:classical_tait_complete]: ./Foundation/Propositional/ClassicalSemantics/Tait.lean
+[prop:classical_complete]: ./Foundation/Propositional/ClassicalSemantics/Tait.lean
 [prop:kripke]: ./Foundation/Propositional/Kripke
-[prop:int_disjunctive]: ./Foundation/Propositional/Kripke/Hilbert/Int.lean
+[prop:int_disjunctive]: ./Foundation/Propositional/Kripke/Logic/Int.lean
 [prop:sublogics]: ./Foundation/Propositional/Logic/Sublogic.lean
-[first_order]: https://formalizedformallogic.github.io/Foundation/book/first_order/index.html
-[first_order:completeness]: https://formalizedformallogic.github.io/Foundation/book/first_order/completeness.html
+[first_order]: ./Foundation/FirstOrder
+[first_order:completeness]: ./Foundation/FirstOrder/Completeness/Completeness.lean
 [first_order:haupstaz]: ./Foundation/FirstOrder/Hauptsatz.lean
-[first_order:goedel_translation]: ./Foundation/IntFO/Translation.lean
-[arith]: https://formalizedformallogic.github.io/Foundation/book/first_order/arithmetics.html
-[arithmetization]: ./Foundation/Arithmetization
-[arith:goedel_it1]: https://formalizedformallogic.github.io/Foundation/book/first_order/goedel1.html
-[arith:goedel_it2]: https://formalizedformallogic.github.io/Foundation/book/first_order/goedel2.html
+[first_order:goedel_translation]: ./Foundation/FirstOrder/NegationTranslation/GoedelGentzen.lean
+[first_order:downward_loewenheim_skolem]: ./Foundation/FirstOrder/Skolemization/Hull.lean
+[arith]: ./Foundation/FirstOrder/Arithmetic/
+[setTheory]: ./Foundation/FirstOrder/SetTheory/
+[setTheory:zfc_consistent]: ./Foundation/FirstOrder/SetTheory/Universe.lean
+[arithmetization]: ./Foundation/FirstOrder/Bootstrapping/
+[arith:goedel_it1]: ./Foundation/FirstOrder/Incompleteness/First.lean
+[arith:goedel_it2]: ./Foundation/FirstOrder/Incompleteness/Second.lean
 [modal:logic]: ./Foundation/Modal
-[modal:logic_kripke_completeness]: ./Foundation/Modal/Kripke/Hilbert
-[modal:gmt_theorem]: ./Foundation/Modal/ModalCompanion/Int.lean
-[modal:companion]: ./Foundation/Modal/ModalCompanion
-[provability_logic]: ./Foundation/ProvabilityLogic
+[modal:kripke_semantics]: ./Foundation/Modal/Kripke/
+[modal:neighborhood_semantics]: ./Foundation/Modal/Neighborhood/
+[modal:gmt_theorem]: ./Foundation/Modal/ModalCompanion/Standard/Int.lean
+[modal:companion]: ./Foundation/Modal/ModalCompanion/
+[modal:boxdot_conjecture]: ./Foundation/Modal/Boxdot/
+[provability_logic]: ./Foundation/ProvabilityLogic/
 [provability_logic:GL_arith_complete]: ./Foundation/ProvabilityLogic/GL/Completeness.lean
+[interpretability_logic]: ./Foundation/InterpretabilityLogic/
+[interpretability_logic:veltman]: ./Foundation/InterpretabilityLogic/Veltman/
+[interpretability_logic:verbugge]: ./Foundation/InterpretabilityLogic/Verbrugge/
 
 ## Documents
 
-- [Book], summary of results.
-- [Doc], documentation generated by [doc-gen4](https://github.com/leanprover/doc-gen4).
+- [Catalogue], summary of results, _generated by [verso]_.
+- [Doc], catelogue of definitions and theorems, _generated by [doc-gen4](https://github.com/leanprover/doc-gen4)_.
+
+[Monthly Reports]: https://formalizedformallogic.github.io/Foundation/book/Monthly-Reports
 
 ## Zoo
 
 Automatically generated diagrams "Zoo", illustrate the Lean4-verified interrelationships among proof systems.
 
-- A solid arrow $\mathsf{A} \rightarrow \mathsf{B}$ indicates that $\mathsf{B}$ is strictly stronger than $\mathsf{A}$; that is, $\mathsf{B}$ is stronger than $\mathsf{A}$, while $\mathsf{A}$ is not stronger than $\mathsf{B}$, in terms of provability strength.
-- A dashed arrow $\mathsf{A} \dashrightarrow \mathsf{B}$ indicates that $\mathsf{B}$ is stronger than $\mathsf{A}$ in terms of provability strength.
+- A solid arrow $\mathsf{A} \leftarrow \mathsf{B}$ indicates that $\mathsf{B}$ is strictly stronger than $\mathsf{A}$; that is, $\mathsf{B}$ is stronger than $\mathsf{A}$, while $\mathsf{A}$ is not stronger than $\mathsf{B}$, in terms of provability strength.
+- A dashed arrow $\mathsf{A} \dashleftarrow \mathsf{B}$ indicates that $\mathsf{B}$ is stronger than $\mathsf{A}$ in terms of provability strength.
 - A double line $\mathsf{A} \xlongequal{} \mathsf{B}$ indicates that $\mathsf{A}$ and $\mathsf{B}$ are equivalent in terms of provability strength.
 
 ### Arithmetic Theory Zoo
 
-![Arithmetic Theory Zoo](https://formalizedformallogic.github.io/Foundation/book/assets/arith_zoo.png)
+![Arithmetic Theory Zoo](https://formalizedformallogic.github.io/Foundation/zoo/Arith.png)
 
-### Modal Logic Zoo
+[PDF version](https://formalizedformallogic.github.io/Foundation/zoo/Arith.pdf)
 
-![Modal Logic Zoo](https://formalizedformallogic.github.io/Foundation/book/assets/modal_zoo.png)
+### Set Theory Zoo
+
+![Set Theory Zoo](https://formalizedformallogic.github.io/Foundation/zoo/SetTheory.png)
+
+[PDF version](https://formalizedformallogic.github.io/Foundation/zoo/SetTheory.pdf)
 
 ### Propositional Logic Zoo
 
-![Propositional Logic Zoo](https://formalizedformallogic.github.io/Foundation/book/assets/propositional_zoo.png)
+![Propositional Logic Zoo](https://formalizedformallogic.github.io/Foundation/zoo/Propositional.png)
+
+[PDF version](https://formalizedformallogic.github.io/Foundation/zoo/Propositional.pdf)
+
+### Modal Logic Zoo
+
+![Modal Logic Zoo](https://formalizedformallogic.github.io/Foundation/zoo/Modal.png)
+
+[PDF version](https://formalizedformallogic.github.io/Foundation/zoo/Modal.pdf)
+
+### Interpretability Logic Zoo
+
+![Interpretability Logic Zoo](https://formalizedformallogic.github.io/Foundation/zoo/InterpretabilityLogic.png)
+
+[PDF version](https://formalizedformallogic.github.io/Foundation/zoo/InterpretabilityLogic.pdf)
+
+## Build
+
+```shell
+lake build Foundation
+```
+
+## References
+
+```
+bibtool -r .bibtoolrsc -i references.bib -o references.bib
+```
 
 ## Developers
 
@@ -95,11 +141,11 @@ If you have any interest or questions, [create a new issue](https://github.com/F
   - Modal logic.
   - Propositional logic (including intermediate logic).
   - Provability logic.
+  - Interpretability Logic.
   - Miscellaneous repository maintenance (e.g. GitHub Actions)
 
 [iehality:github]: https://github.com/iehality
 [iehality:email]: mailto:palalansouki@gmail.com
-
 [SnO2WMaN:github]: https://github.com/SnO2WMaN
 [SnO2WMaN:email]: mailto:me@sno2wman.net
 
@@ -107,10 +153,23 @@ If you with to cite this repository in academic papers, refer to [CITATION.cff](
 
 ## Financial Supports
 
-Any financial supports would be grateful. If you considered, [please contact us](#Developers).
+Any financial supports would be grateful for us.
+If you found this project valuable, to sustain our OSS development, please consider support us.
 
-### Previous Sponsors
+### Open Collective
 
-Companies and organizations that have supported us in the past.
+[![Open Collective](https://opencollective.com/formalizedformallogic/donate/button.png?color=gray)][opencollective]
+
+We would like to thanks the following backers.
+
+[![Open Collective Backers](https://opencollective.com/formalizedformallogic/backers.svg)][opencollective:backers]
+
+[opencollective]: https://opencollective.com/formalizedformallogic
+[opencollective:backers]: https://opencollective.com/formalizedformallogic#backers
+
+### Previous Backers
+
+Individuals and organizations that have supported us in the past.
 
 - [Proxima Technology](https://proxima-ai-tech.com) (2024-2025)
+- [随時 (@zuizi)](https://x.com/zuizi) (2025-10)

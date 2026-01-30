@@ -1,31 +1,31 @@
-import Foundation.FirstOrder.Basic
-import Foundation.FirstOrder.Completeness.Corollaries
-import Foundation.Vorspiel.ExistsUnique
+module
 
+public import Foundation.FirstOrder.Completeness.Corollaries
+
+@[expose] public section
 /-!
-# Translation and interpretation, bi-interpretation
-
+# (Direct) Interpretation
 -/
 
 namespace LO.FirstOrder
 
 @[ext]
-structure Translation {L₁ : Language} [L₁.Eq] (T : Theory L₁) [𝗘𝗤 ⪯ T] (L₂ : Language) [L₂.Eq] where
+structure DirectTranslation {L₁ : Language} [L₁.Eq] (T : Theory L₁) [𝗘𝗤 ⪯ T] (L₂ : Language) [L₂.Eq] where
   domain : Semisentence L₁ 1
   rel {k} : L₂.Rel k → Semisentence L₁ k
   func {k} : L₂.Func k → Semisentence L₁ (k + 1)
   domain_nonempty :
-    T ⊢!. ∃' domain
+    T ⊢ ∃' domain
   func_defined {k} (f : L₂.Func k) :
-    T ⊢!. ∀* ((Matrix.conj fun i ↦ domain/[#i]) ➝ ∃'! (domain/[#0] ⋏ func f))
+    T ⊢ ∀* ((Matrix.conj fun i ↦ domain/[#i]) ➝ ∃'! (domain/[#0] ⋏ func f))
   preserve_eq :
-    T ⊢!. “∀ x y, !domain x → !domain y → (!(rel Language.Eq.eq) x y ↔ x = y)”
+    T ⊢ “∀ x y, !domain x → !domain y → (!(rel Language.Eq.eq) x y ↔ x = y)”
 
-namespace Translation
+namespace DirectTranslation
 
 variable {L₁ L₂ : Language} [L₁.Eq] [L₂.Eq] {T : Theory L₁} [𝗘𝗤 ⪯ T]
 
-variable (π : Translation T L₂)
+variable (π : DirectTranslation T L₂)
 
 def fal (φ : Semiformula L₁ ξ (n + 1)) : Semiformula L₁ ξ n := ∀[Rew.emb ▹ π.domain/[#0]] φ
 
@@ -45,7 +45,7 @@ def varEqual : Semiterm L₂ ξ n → Semiformula L₁ ξ (n + 1)
     ∀^[k] (
       (Matrix.conj fun i ↦
         Rew.emb ▹ π.domain/[#(i.addCast (n + 1))] ⋏
-        Rew.substs (#(i.addCast (n + 1)) :> fun j ↦ #((j.addNat 1).addNat k)) ▹ varEqual (v i))
+        Rew.subst (#(i.addCast (n + 1)) :> fun j ↦ #((j.addNat 1).addNat k)) ▹ varEqual (v i))
       ➝ (Rew.embSubsts (#((0 : Fin (n + 1)).addNat k) :> fun i ↦ #(i.addCast (n + 1))) ▹ π.func f)
     )
 
@@ -53,7 +53,7 @@ def translateRel {k} (r : L₂.Rel k) (v : Fin k → Semiterm L₂ ξ n) : Semif
   ∀^[k] (
     (Matrix.conj fun i ↦
       Rew.emb ▹ π.domain/[#(i.addCast n)] ⋏
-      Rew.substs (#(i.addCast n) :> fun j ↦ #(j.addNat k)) ▹ π.varEqual (v i))
+      Rew.subst (#(i.addCast n) :> fun j ↦ #(j.addNat k)) ▹ π.varEqual (v i))
     ➝ (Rew.embSubsts (fun i ↦ #(i.addCast n)) ▹ π.rel r)
   )
 
@@ -68,7 +68,7 @@ def translateAux {n} : Semiformula L₂ ξ n → Semiformula L₁ ξ n
   |      ∃' φ => ∃_[π] translateAux φ
 
 lemma translateAux_neg {n : ℕ} (φ : Semiformula L₂ ξ n) : π.translateAux (∼φ) = ∼π.translateAux φ := by
-  induction φ using Semiformula.rec' <;> simp [translateAux, *, ←Semiformula.neg_eq]
+  induction φ using Semiformula.rec' <;> simp [translateAux, *]
 
 def translate : Semiformula L₂ ξ n →ˡᶜ Semiformula L₁ ξ n where
   toTr := π.translateAux
@@ -108,7 +108,7 @@ variable {π}
 lemma dom_iff {x : M} : π.Dom x ↔ M ⊧/![x] π.domain := iff_of_eq rfl
 
 lemma domain_exists [Nonempty M] [M ⊧ₘ* T] : ∃ x : M, π.Dom x := by
-  simpa [models₀_iff] using models_of_provable₀ (M := M) inferInstance π.domain_nonempty
+  simpa [models_iff] using models_of_provable (M := M) inferInstance π.domain_nonempty
 
 variable (π M)
 
@@ -163,7 +163,7 @@ variable [Nonempty M] [M ⊧ₘ* T] [Structure.Eq L₁ M]
 lemma func_existsUnique_on_dom {k} (f : L₂.Func k) :
     ∀ (v : Fin k → M), (∀ i, π.Dom (v i)) → ∃! y, π.Dom y ∧ Evalbm M (y :> v) (π.func f) := by
   simpa [Dom, models_iff, eval_substs, Matrix.constant_eq_singleton] using
-    models_of_provable₀ (M := M) inferInstance (π.func_defined f)
+    models_of_provable (M := M) inferInstance (π.func_defined f)
 
 lemma func_existsUnique {k} (f : L₂.Func k) (v : Fin k → π.Model M) :
     ∃! y : π.Model M, M ⊧/(y :> fun i ↦ v i) (π.func f) := by
@@ -189,20 +189,20 @@ lemma rel_iff {k} (r : L₂.Rel k) (v : Fin k → π.Model M) :
 @[simp] lemma eq_iff' {a b : π.Model M} :
     M ⊧/![a, b] (π.rel Language.Eq.eq) ↔ a = b := by
   have : ∀ x y, π.Dom x → π.Dom y → (M ⊧/![x, y] (π.rel Language.Eq.eq) ↔ x = y) := by
-    simpa [models₀_iff, Matrix.comp_vecCons', Matrix.constant_eq_singleton, ←dom_iff]
-      using models_of_provable₀ (inferInstanceAs (M ⊧ₘ* T)) π.preserve_eq
+    simpa [models_iff, Matrix.comp_vecCons', Matrix.constant_eq_singleton, ←dom_iff]
+      using models_of_provable (inferInstanceAs (M ⊧ₘ* T)) π.preserve_eq
   simpa using this a b
 
 @[simp] lemma eq_iff (v : Fin 2 → π.Model M) :
     Structure.rel (Language.Eq.eq : L₂.Rel 2) v ↔ v 0 = v 1 := by
-  simp [Model.rel_iff, eval_rel, Subtype.val_inj]
+  simp [Model.rel_iff]
   simp [Matrix.fun_eq_vec_two (v := fun i ↦ (v i : M))]
 
 instance : Structure.Eq L₂ (π.Model M) where
   eq a b := by simp [Operator.val, Operator.Eq.sentence_eq, eval_rel]
 
 lemma func_iff {k} {f : L₂.Func k} {y : π.Model M} {v : Fin k → π.Model M} :
-    y = Structure.func f v ↔ Evalbm M (y :> fun i ↦ v i) (π.func f) := Classical.choose!_eq_iff _
+    y = Structure.func f v ↔ Evalbm M (y :> fun i ↦ v i) (π.func f) := Classical.choose!_eq_iff_right _
 
 lemma func_iff' {k} {f : L₂.Func k} {y : M} {v : Fin k → π.Model M} :
     y = Structure.func f v ↔ π.Dom y ∧ Evalbm M (y :> fun i ↦ v i) (π.func f) := by
@@ -217,8 +217,8 @@ lemma func_iff' {k} {f : L₂.Func k} {y : M} {v : Fin k → π.Model M} :
 lemma eval_varEqual_iff {t : Semiterm L₂ ξ n} {ε : ξ → π.Model M} {y : π.Model M} {x : Fin n → π.Model M} :
     Evalm M (y :> fun i ↦ x i) (fun x ↦ ε x) (π.varEqual t) ↔ y = t.valm (π.Model M) x ε := by
   match t with
-  |                     #_ => simp [varEqual, Subtype.coe_inj]
-  |                     &_ => simp [varEqual, Subtype.coe_inj]
+  |                     #_ => simp [varEqual]
+  |                     &_ => simp [varEqual]
   | .func (arity := k) f v =>
     suffices
       (∀ w : Fin k → M,
@@ -289,15 +289,10 @@ lemma evalb_doubleton_translate_iff {φ : Semisentence L₂ 2} {x y : π.Model M
     M ⊧/![x, y] (π.translate φ) ↔ (π.Model M) ⊧/![x, y] φ := by
   simp [←eval_translate_iff, Empty.eq_elim, Matrix.constant_eq_singleton, Matrix.comp_vecCons']
 
-lemma translate_iff₀ {σ : Sentence L₂} :
-    M ⊧ₘ₀ π.translate σ ↔ π.Model M ⊧ₘ₀ σ := by
-  simpa [models₀_iff, Matrix.empty_eq, Empty.eq_elim] using
+lemma translate_iff {σ : Sentence L₂} :
+    M ⊧ₘ π.translate σ ↔ π.Model M ⊧ₘ σ := by
+  simpa [models_iff, Matrix.empty_eq, Empty.eq_elim] using
     eval_translate_iff (M := M) (π := π) (ε := Empty.elim) (e := ![]) (φ := σ)
-
-@[simp] lemma translate_close₀_iff {φ : SyntacticFormula L₂} :
-    M ⊧ₘ₀ π.translate (∀∀₀ φ) ↔ π.Model M ⊧ₘ φ := by
-  simp only [translate_iff₀]
-  simp [models_iff, eval_close]
 
 end Model
 
@@ -305,48 +300,48 @@ end semantics
 
 variable (T)
 
-protected def id : Translation T L₁ where
+protected def id : DirectTranslation T L₁ where
   domain := ⊤
   rel R := Semiformula.rel R (#·)
   func f := “z. z = !!(Semiterm.func f (#·.succ))”
-  domain_nonempty := complete₀ <| EQ.provOf.{_,0} _ fun _ _ _ _ ↦ (by simp [models_iff])
-  func_defined {k} f := complete₀ <| EQ.provOf.{_,0} _ fun _ _ _ _ _ ↦ by
+  domain_nonempty := complete <| EQ.provOf.{_,0} _ fun _ _ _ _ ↦ (by simp [models_iff])
+  func_defined {k} f := complete <| EQ.provOf.{_,0} _ fun _ _ _ _ _ ↦ by
     simp [models_iff, Semiterm.val_func]
-  preserve_eq := complete₀ <| EQ.provOf.{_,0} _ fun M _ _ _ _ ↦ by
+  preserve_eq := complete <| EQ.provOf.{_,0} _ fun M _ _ _ _ ↦ by
     simp [models_iff, Matrix.comp_vecCons', Matrix.constant_eq_singleton, Semiformula.eval_rel]
 
-lemma id_func_def : (Translation.id T).func f = “z. z = !!(Semiterm.func f (#·.succ))” := rfl
+lemma id_func_def : (DirectTranslation.id T).func f = “z. z = !!(Semiterm.func f (#·.succ))” := rfl
 
-lemma id_rel_def : (Translation.id T).rel R = Semiformula.rel R (#·) := rfl
+lemma id_rel_def : (DirectTranslation.id T).rel R = Semiformula.rel R (#·) := rfl
 
 variable {T}
 
 section semantics
 
-open Translation Semiformula
+open DirectTranslation Semiformula
 
 variable {M : Type*} [Structure L₁ M]
 
-@[simp] lemma id_Dom (x : M) : (Translation.id T).Dom x := by simp [dom_iff, Translation.id]
+@[simp] lemma id_Dom (x : M) : (DirectTranslation.id T).Dom x := by simp [dom_iff, DirectTranslation.id]
 
 variable [Nonempty M] [M ⊧ₘ* T] [Structure.Eq L₁ M]
 
 @[simp] lemma id_val_eq
-    {ε : ξ → (Translation.id T).Model M} {e : Fin n → (Translation.id T).Model M} {t : Semiterm L₁ ξ n} :
-    t.valm ((Translation.id T).Model M) e ε = t.valm M (fun x ↦ e x) (fun x ↦ ε x) := by
+    {ε : ξ → (DirectTranslation.id T).Model M} {e : Fin n → (DirectTranslation.id T).Model M} {t : Semiterm L₁ ξ n} :
+    t.valm ((DirectTranslation.id T).Model M) e ε = t.valm M (fun x ↦ e x) (fun x ↦ ε x) := by
   match t with
   |        #x => simp
   |        &x => simp
   | .func f v =>
-    have : ∀ i, (v i).valm ((Translation.id T).Model M) e ε = (v i).valm M (fun x ↦ e x) (fun x ↦ ε x) := fun i ↦
+    have : ∀ i, (v i).valm ((DirectTranslation.id T).Model M) e ε = (v i).valm M (fun x ↦ e x) (fun x ↦ ε x) := fun i ↦
       id_val_eq (t := v i) (e := e) (ε := ε)
     symm
     simp [Semiterm.val_func, Model.func_iff',
       id_func_def, Semiterm.val_func, this]
 
 @[simp] lemma id_models_iff
-    {ε : ξ → (Translation.id T).Model M} {e : Fin n → (Translation.id T).Model M} {φ : Semiformula L₁ ξ n} :
-    Evalm ((Translation.id T).Model M) e ε φ ↔ Evalm M (fun x ↦ e x) (fun x ↦ ε x) φ := by
+    {ε : ξ → (DirectTranslation.id T).Model M} {e : Fin n → (DirectTranslation.id T).Model M} {φ : Semiformula L₁ ξ n} :
+    Evalm ((DirectTranslation.id T).Model M) e ε φ ↔ Evalm M (fun x ↦ e x) (fun x ↦ ε x) φ := by
   match φ with
   |  .rel R v => simp [eval_rel, Model.rel_iff, id_rel_def]
   | .nrel R v => simp [eval_nrel, eval_rel, Model.rel_iff, id_rel_def]
@@ -367,27 +362,27 @@ variable [Nonempty M] [M ⊧ₘ* T] [Structure.Eq L₁ M]
 
 end semantics
 
-end Translation
+end DirectTranslation
 
-class Interpretation {L₁ L₂ : Language} [L₁.Eq] [L₂.Eq] (T : Theory L₁) [𝗘𝗤 ⪯ T] (U : Theory L₂) where
-  trln : Translation T L₂
-  interpret_theory : ∀ φ ∈ U, T ⊢!. trln.translate (∀∀₀φ)
+class DirectInterpretation {L₁ L₂ : Language} [L₁.Eq] [L₂.Eq] (T : Theory L₁) [𝗘𝗤 ⪯ T] (U : Theory L₂) where
+  trln : DirectTranslation T L₂
+  interpret_theory : ∀ φ ∈ U, T ⊢ trln.translate φ
 
-infix:50 " ⊳ " => Interpretation
+infix:50 " ⊳ " => DirectInterpretation
 
 abbrev InterpretedBy {L₁ L₂ : Language} [L₁.Eq] [L₂.Eq] (U : Theory L₂) (T : Theory L₁) [𝗘𝗤 ⪯ T] := T ⊳ U
 
 infix:50 " ⊲ " => InterpretedBy
 
-class Biinterpretation {L₁ L₂ : Language} [L₁.Eq] [L₂.Eq] (T : Theory L₁) [𝗘𝗤 ⪯ T] (U : Theory L₂) [𝗘𝗤 ⪯ U] where
+class MutualDirectInterpretation {L₁ L₂ : Language} [L₁.Eq] [L₂.Eq] (T : Theory L₁) [𝗘𝗤 ⪯ T] (U : Theory L₂) [𝗘𝗤 ⪯ U] where
   r : T ⊳ U
   l : T ⊲ U
 
-infix:50 " ⋈ " => Biinterpretation
+infix:50 " ⋈ " => MutualDirectInterpretation
 
-namespace Interpretation
+namespace DirectInterpretation
 
-open Translation
+open DirectTranslation
 
 section
 
@@ -401,27 +396,22 @@ open Classical in
 instance model_models_theory {M : Type v} [Nonempty M] [Structure L₁ M] [Structure.Eq L₁ M] (hT : M ⊧ₘ* T) :
     π.Model M ⊧ₘ* U :=
   modelsTheory_iff.mpr fun {σ} hσ ↦
-    Model.translate_close₀_iff.mp <| consequence_iff'.mp (sound!₀ (π.interpret_theory σ hσ)) M
-
-lemma of_provability {φ : SyntacticFormula L₂} (h : U ⊢! φ) : T ⊢!. π.translate (∀∀₀ φ) :=
-  complete₀ <| EQ.provOf.{_,0} _ fun _ _ _ _ hT ↦
-    Model.translate_close₀_iff.mpr <| models_of_provable (π.model_models_theory hT) h
+    Model.translate_iff.mp <| consequence_iff'.mp (sound! (π.interpret_theory σ hσ)) M
 
 open Classical in
-lemma of_provability₀ {σ : Sentence L₂} (h : U ⊢!. σ) : T ⊢!. π.translate σ :=
-  complete₀ <| EQ.provOf.{_,0} _ fun _ _ _ _ hT ↦
-    Model.translate_iff₀.mpr <| models_of_provable (π.model_models_theory hT) (Axiom.provable_iff.mp h)
+lemma of_provability {σ : Sentence L₂} (h : U ⊢ σ) : T ⊢ π.translate σ :=
+  complete <| EQ.provOf.{_,0} _ fun _ _ _ _ hT ↦
+    Model.translate_iff.mpr <| models_of_provable (π.model_models_theory hT) h
 
 end
 
 def ofWeakerThan {L : Language} [L.Eq] (T U : Theory L) [𝗘𝗤 ⪯ T] [U ⪯ T] : U ⊲ T where
-  trln := Translation.id T
-  interpret_theory φ hφ := complete₀ <| EQ.provOf.{_,0} _ fun M _ _ _ hT ↦
-    Model.translate_close₀_iff.mpr <| by
-      simp only [models_iff, id_models_iff, Matrix.empty_eq]
-      intro f
-      have : T ⊢! φ := Entailment.weakerThan_iff.mp (inferInstanceAs (U ⪯ T)) (Entailment.by_axm _ (by simp [hφ]))
-      exact models_iff.mp (models_of_provable hT this) (fun x ↦ f x)
+  trln := DirectTranslation.id T
+  interpret_theory φ hφ := complete <| EQ.provOf.{_,0} _ fun M _ _ _ hT ↦
+    Model.translate_iff.mpr <| by
+      suffices M ⊧/ ![] φ by simpa [models_iff, Empty.eq_elim, Matrix.empty_eq]
+      have : T ⊢ φ := Entailment.weakerThan_iff.mp (inferInstanceAs (U ⪯ T)) (Entailment.by_axm _ (by simp [hφ]))
+      exact models_of_provable hT this
 
 protected instance refl {L : Language} [L.Eq] (T : Theory L) [𝗘𝗤 ⪯ T] : T ⊳ T := ofWeakerThan T T
 
@@ -429,14 +419,13 @@ section composition
 
 variable {L₁ L₂ L₃ : Language} [L₁.Eq] [L₂.Eq] [L₃.Eq] {T₁ : Theory L₁} {T₂ : Theory L₂} {T₃ : Theory L₃} [𝗘𝗤 ⪯ T₁] [𝗘𝗤 ⪯ T₂] [𝗘𝗤 ⪯ T₃]
 
-def compTranslation (τ : Translation T₂ L₃) (π : T₁ ⊳ T₂) : Translation T₁ L₃ where
+def compDirectTranslation (τ : DirectTranslation T₂ L₃) (π : T₁ ⊳ T₂) : DirectTranslation T₁ L₃ where
   domain := π.trln.domain ⋏ π.translate τ.domain
-  domain_nonempty := by simpa [exs] using π.of_provability₀ τ.domain_nonempty
+  domain_nonempty := by simpa [exs] using π.of_provability τ.domain_nonempty
   rel R := π.translate (τ.rel R)
   func {k} f := π.translate (τ.func f)
-  func_defined {k} f := complete₀ <| EQ.provOf.{_,0} _ fun M _ _ _ hT ↦ by
+  func_defined {k} f := complete <| EQ.provOf.{_,0} _ fun M _ _ _ hT ↦ by
     apply models_iff.mpr
-    intro x
     suffices
       ∀ w,
       (∀ i, π.trln.Dom (w i) ∧ M ⊧/![w i] (π.translate τ.domain)) →
@@ -456,10 +445,9 @@ def compTranslation (τ : Translation T₂ L₃) (π : T₁ ⊳ T₂) : Translat
       let y' : τ.Model (π.Model M) := ⟨⟨y, hy⟩, Model.evalb_translate_iff.mp <| by simpa [Matrix.constant_eq_singleton] using hhy⟩
       suffices y' = Structure.func f w' by simpa [y'] using congr_arg Model.val <| congr_arg Model.val this
       apply Model.func_iff.mpr <| Model.evalb_cons_translate_iff.mp <| by simpa [y', w'] using hf
-  preserve_eq := complete₀ <| EQ.provOf.{_,0} _ fun M _ _ _ hT ↦ by
+  preserve_eq := complete <| EQ.provOf.{_,0} _ fun M _ _ _ hT ↦ by
     apply models_iff.mpr
     have : π.Model M ⊧ₘ* T₂ := π.model_models_theory hT
-    intro x
     suffices
       ∀ (x y : M),
         π.trln.Dom x → M ⊧/![x] (π.translate τ.domain) →
@@ -472,123 +460,120 @@ def compTranslation (τ : Translation T₂ L₃) (π : T₁ ⊳ T₂) : Translat
     rw [show x = ↑↑x' by simp [x'], show y = ↑↑y' by simp [y']]
     simp [Model.evalb_doubleton_translate_iff]
 
-@[simp] lemma compTranslation_domain_def (τ : Translation T₂ L₃) (π : T₁ ⊳ T₂) :
-    (compTranslation τ π).domain = π.trln.domain ⋏ π.translate τ.domain := rfl
+@[simp] lemma compDirectTranslation_domain_def (τ : DirectTranslation T₂ L₃) (π : T₁ ⊳ T₂) :
+    (compDirectTranslation τ π).domain = π.trln.domain ⋏ π.translate τ.domain := rfl
 
-@[simp] lemma compTranslation_func_def (τ : Translation T₂ L₃) (π : T₁ ⊳ T₂) (f : L₃.Func k) :
-    (compTranslation τ π).func f = π.translate (τ.func f) := rfl
+@[simp] lemma compDirectTranslation_func_def (τ : DirectTranslation T₂ L₃) (π : T₁ ⊳ T₂) (f : L₃.Func k) :
+    (compDirectTranslation τ π).func f = π.translate (τ.func f) := rfl
 
-@[simp] lemma compTranslation_rel_def (τ : Translation T₂ L₃) (π : T₁ ⊳ T₂) (R : L₃.Rel k) :
-    (compTranslation τ π).rel R = π.translate (τ.rel R) := rfl
+@[simp] lemma compDirectTranslation_rel_def (τ : DirectTranslation T₂ L₃) (π : T₁ ⊳ T₂) (R : L₃.Rel k) :
+    (compDirectTranslation τ π).rel R = π.translate (τ.rel R) := rfl
 
 section semantics
 
 open Semiformula
 
-variable (τ : Translation T₂ L₃) (π : T₁ ⊳ T₂)
+variable (τ : DirectTranslation T₂ L₃) (π : T₁ ⊳ T₂)
     {M : Type*} [Nonempty M] [Structure L₁ M] [Structure.Eq L₁ M] [M ⊧ₘ* T₁]
 
-lemma compTranslation_Dom_iff {x : M} : (compTranslation τ π).Dom x ↔ (∃ z : τ.Model (π.Model M), x = z) := by
+lemma compDirectTranslation_Dom_iff {x : M} : (compDirectTranslation τ π).Dom x ↔ (∃ z : τ.Model (π.Model M), x = z) := by
   suffices π.trln.Dom x ∧ M ⊧/![x] (π.translate τ.domain) ↔ ∃ z : τ.Model (π.Model M), x = ↑↑z by
-    simpa [dom_iff (π := compTranslation τ π), ←dom_iff (π := π.trln)]
+    simpa [dom_iff (π := compDirectTranslation τ π), ←dom_iff (π := π.trln)]
   constructor
   · rintro ⟨hx, H⟩
     exact ⟨⟨⟨x, hx⟩, by simpa [dom_iff, ←Model.evalb_singleton_translate_iff] using H⟩, by simp⟩
   · rintro ⟨z, rfl, hz⟩; simp [Model.evalb_singleton_translate_iff]
 
-lemma val_compTranslation_Model_equiv {t : Semiterm L₃ ξ n}
-    {ε : ξ → (compTranslation τ π).Model M} {ε' : ξ → τ.Model (π.Model M)} (hε : ∀ x, (ε x : M) = ε' x)
-    {e : Fin n → (compTranslation τ π).Model M} {e' : Fin n → τ.Model (π.Model M)} (he : ∀ x, (e x : M) = e' x) :
-    (t.valm ((compTranslation τ π).Model M) e ε : M) = t.valm (τ.Model (π.Model M)) e' ε' := by
+lemma val_compDirectTranslation_Model_equiv {t : Semiterm L₃ ξ n}
+    {ε : ξ → (compDirectTranslation τ π).Model M} {ε' : ξ → τ.Model (π.Model M)} (hε : ∀ x, (ε x : M) = ε' x)
+    {e : Fin n → (compDirectTranslation τ π).Model M} {e' : Fin n → τ.Model (π.Model M)} (he : ∀ x, (e x : M) = e' x) :
+    (t.valm ((compDirectTranslation τ π).Model M) e ε : M) = t.valm (τ.Model (π.Model M)) e' ε' := by
   match t with
   |        #x => simp [he]
   |        &x => simp [hε]
   | .func f v =>
-    have ih : ∀ i, ((v i).valm ((compTranslation τ π).Model M) e ε : M) = (v i).valm (τ.Model (π.Model M)) e' ε' :=
-      fun i ↦ val_compTranslation_Model_equiv hε he
+    have ih : ∀ i, ((v i).valm ((compDirectTranslation τ π).Model M) e ε : M) = (v i).valm (τ.Model (π.Model M)) e' ε' :=
+      fun i ↦ val_compDirectTranslation_Model_equiv hε he
     suffices
       (↑(Structure.func f fun i ↦ (v i).val (Model.struc τ (π.Model M)) e' ε') : M) =
-      (Structure.func f fun i ↦ Semiterm.val (Model.struc (compTranslation τ π) M) e ε (v i)) by symm; simpa [Semiterm.val_func]
+      (Structure.func f fun i ↦ Semiterm.val (Model.struc (compDirectTranslation τ π) M) e ε (v i)) by symm; simpa [Semiterm.val_func]
     apply Model.func_iff'.mpr
-    simp [compTranslation_Dom_iff, Model.evalb_cons_translate_iff, ih]
+    simp [compDirectTranslation_Dom_iff, Model.evalb_cons_translate_iff, ih]
 
-lemma eval_compTranslation_Model_equiv {φ : Semiformula L₃ ξ n}
-    {ε : ξ → (compTranslation τ π).Model M} {ε' : ξ → τ.Model (π.Model M)} (hε : ∀ x, (ε x : M) = ε' x)
-    {e : Fin n → (compTranslation τ π).Model M} {e' : Fin n → τ.Model (π.Model M)} (he : ∀ x, (e x : M) = e' x) :
-    Semiformula.Evalm ((compTranslation τ π).Model M) e ε φ ↔ Semiformula.Evalm (τ.Model (π.Model M)) e' ε' φ := by
+lemma eval_compDirectTranslation_Model_equiv {φ : Semiformula L₃ ξ n}
+    {ε : ξ → (compDirectTranslation τ π).Model M} {ε' : ξ → τ.Model (π.Model M)} (hε : ∀ x, (ε x : M) = ε' x)
+    {e : Fin n → (compDirectTranslation τ π).Model M} {e' : Fin n → τ.Model (π.Model M)} (he : ∀ x, (e x : M) = e' x) :
+    Semiformula.Evalm ((compDirectTranslation τ π).Model M) e ε φ ↔ Semiformula.Evalm (τ.Model (π.Model M)) e' ε' φ := by
   match φ with
   | .rel R v =>
-    have ih : ∀ i, ((v i).valm ((compTranslation τ π).Model M) e ε : M) = (v i).valm (τ.Model (π.Model M)) e' ε' :=
-      fun i ↦ val_compTranslation_Model_equiv τ π hε he
+    have ih : ∀ i, ((v i).valm ((compDirectTranslation τ π).Model M) e ε : M) = (v i).valm (τ.Model (π.Model M)) e' ε' :=
+      fun i ↦ val_compDirectTranslation_Model_equiv τ π hε he
     simp [eval_rel, Model.rel_iff, Model.evalb_translate_iff, ih]
   | .nrel R v =>
-    have ih : ∀ i, ((v i).valm ((compTranslation τ π).Model M) e ε : M) = (v i).valm (τ.Model (π.Model M)) e' ε' :=
-      fun i ↦ val_compTranslation_Model_equiv τ π hε he
+    have ih : ∀ i, ((v i).valm ((compDirectTranslation τ π).Model M) e ε : M) = (v i).valm (τ.Model (π.Model M)) e' ε' :=
+      fun i ↦ val_compDirectTranslation_Model_equiv τ π hε he
     simp [eval_nrel, Model.rel_iff, Model.evalb_translate_iff, ih]
   | ⊤ => simp
   | ⊥ => simp
-  | φ ⋏ ψ => simp [eval_compTranslation_Model_equiv (φ := φ) hε he, eval_compTranslation_Model_equiv (φ := ψ) hε he]
-  | φ ⋎ ψ => simp [eval_compTranslation_Model_equiv (φ := φ) hε he, eval_compTranslation_Model_equiv (φ := ψ) hε he]
+  | φ ⋏ ψ => simp [eval_compDirectTranslation_Model_equiv (φ := φ) hε he, eval_compDirectTranslation_Model_equiv (φ := ψ) hε he]
+  | φ ⋎ ψ => simp [eval_compDirectTranslation_Model_equiv (φ := φ) hε he, eval_compDirectTranslation_Model_equiv (φ := ψ) hε he]
   | ∀' φ =>
     simp only [eval_all, Nat.succ_eq_add_one]
     constructor
     · intro h x
-      apply (eval_compTranslation_Model_equiv hε ?_).mp <| h ⟨x, by simp [compTranslation_Dom_iff]⟩
+      apply (eval_compDirectTranslation_Model_equiv hε ?_).mp <| h ⟨x, by simp [compDirectTranslation_Dom_iff]⟩
       intro i; cases i using Fin.cases <;> simp [he]
     · intro h x
-      rcases (compTranslation_Dom_iff τ π).mp x.dom with ⟨z, hz⟩
-      apply (eval_compTranslation_Model_equiv hε ?_).mpr (h z)
+      rcases (compDirectTranslation_Dom_iff τ π).mp x.dom with ⟨z, hz⟩
+      apply (eval_compDirectTranslation_Model_equiv hε ?_).mpr (h z)
       · intro i; cases i using Fin.cases <;> simp [he, hz]
   | ∃' φ =>
     simp only [eval_ex, Nat.succ_eq_add_one]
     constructor
     · rintro ⟨x, hx⟩
-      rcases (compTranslation_Dom_iff τ π).mp x.dom with ⟨z, hz⟩
+      rcases (compDirectTranslation_Dom_iff τ π).mp x.dom with ⟨z, hz⟩
       refine ⟨z, ?_⟩
-      apply (eval_compTranslation_Model_equiv hε ?_).mp hx
+      apply (eval_compDirectTranslation_Model_equiv hε ?_).mp hx
       intro i; cases i using Fin.cases <;> simp [he, hz]
     · rintro ⟨x, hx⟩
-      refine ⟨⟨x, by simp [compTranslation_Dom_iff]⟩, ?_⟩
-      apply (eval_compTranslation_Model_equiv hε ?_).mpr hx
+      refine ⟨⟨x, by simp [compDirectTranslation_Dom_iff]⟩, ?_⟩
+      apply (eval_compDirectTranslation_Model_equiv hε ?_).mpr hx
       intro i; cases i using Fin.cases <;> simp [he]
 
-lemma compTranslation_Model_equiv :
-    (compTranslation τ π).Model M ≡ₑ[L₃] τ.Model (π.Model M) := fun φ ↦ by
+instance compDirectTranslation_Model_equiv :
+    (compDirectTranslation τ π).Model M ≡ₑ[L₃] τ.Model (π.Model M) := .mk <| fun {φ} ↦ by
   simp only [models_iff]
   constructor
-  · intro h ε
-    apply (eval_compTranslation_Model_equiv τ π (by simp) (by simp)).mp (h fun i ↦ ⟨ε i, by simp [compTranslation_Dom_iff]⟩)
-  · intro h ε
-    have : ∀ i, ∃ z : τ.Model (π.Model M), (ε i : M) = z := fun i ↦ (compTranslation_Dom_iff τ π).mp (ε i).dom
-    choose f hf using this
-    exact (eval_compTranslation_Model_equiv τ π hf (by simp)).mpr (h f)
+  · intro h
+    apply (eval_compDirectTranslation_Model_equiv τ π (by simp) (by simp)).mp h
+  · intro h
+    exact (eval_compDirectTranslation_Model_equiv τ π (by simp) (by simp)).mpr h
 
 end semantics
 
 protected def comp (τ : T₂ ⊳ T₃) (π : T₁ ⊳ T₂) : T₁ ⊳ T₃ where
-  trln := compTranslation τ.trln π
-  interpret_theory φ hφ := complete₀ <| EQ.provOf.{_,0} _ fun M _ _ _ hT ↦ by
+  trln := compDirectTranslation τ.trln π
+  interpret_theory φ hφ := complete <| EQ.provOf.{_,0} _ fun M _ _ _ hT ↦ by
     apply models_iff.mpr
-    intro x
     suffices τ.Model (π.Model M) ⊧ₘ φ by
-      apply Model.translate_close₀_iff.mpr <| (compTranslation_Model_equiv τ.trln π φ).mpr this
+      apply Model.translate_iff.mpr <| (compDirectTranslation_Model_equiv τ.trln π).models.mpr this
     have : τ.Model (π.Model M) ⊧ₘ* T₃ := inferInstance
     exact modelsTheory_iff.mp this hφ
 
 end composition
 
-end Interpretation
+end DirectInterpretation
 
-namespace Biinterpretation
+namespace MutualDirectInterpretation
 
 variable {L₁ L₂ L₃ : Language} [L₁.Eq] [L₂.Eq] [L₃.Eq] {T₁ : Theory L₁} {T₂ : Theory L₂} {T₃ : Theory L₃} [𝗘𝗤 ⪯ T₁] [𝗘𝗤 ⪯ T₂] [𝗘𝗤 ⪯ T₃]
 
-protected instance refl (T : Theory L₁) [𝗘𝗤 ⪯ T] : T ⋈ T := ⟨Interpretation.refl T, Interpretation.refl T⟩
+protected instance refl (T : Theory L₁) [𝗘𝗤 ⪯ T] : T ⋈ T := ⟨DirectInterpretation.refl T, DirectInterpretation.refl T⟩
 
 protected def symm (π : T₁ ⋈ T₂) : T₂ ⋈ T₁ := ⟨π.l, π.r⟩
 
 protected def trans (π : T₁ ⋈ T₂) (τ : T₂ ⋈ T₃) : T₁ ⋈ T₃ := ⟨τ.r.comp π.r, π.l.comp τ.l⟩
 
-end Biinterpretation
+end MutualDirectInterpretation
 
 end LO.FirstOrder

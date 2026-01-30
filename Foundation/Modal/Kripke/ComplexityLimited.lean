@@ -1,4 +1,8 @@
-import Foundation.Modal.Kripke.Basic
+module
+
+public import Foundation.Modal.Kripke.Basic
+
+@[expose] public section
 
 namespace LO.Modal.Kripke
 
@@ -9,7 +13,7 @@ def complexityLimitedFrame (F : Kripke.Frame) (r : F.World) (φ : Formula ℕ) :
 
 def complexityLimitedModel (M : Kripke.Model) (w : M.World) (φ : Formula ℕ) : Kripke.Model where
   toFrame := complexityLimitedFrame M.toFrame w φ
-  Val x a := M.Val x.1 a
+  Val a x := M.Val a x.1
 
 section
 
@@ -38,7 +42,7 @@ lemma iff_satisfy_complexityLimitedModel_aux
       . use (n + 1);
         constructor;
         . assumption;
-        . apply HRel.Iterate.forward.mpr;
+        . apply Rel.Iterate.forward.mpr;
           use x; constructor; assumption; exact Rxy;
     . rintro h y Rxy;
       apply ihq (subformulas.mem_box hq) ?_ |>.mpr;
@@ -46,7 +50,7 @@ lemma iff_satisfy_complexityLimitedModel_aux
       . use (n + 1);
         constructor;
         . assumption;
-        . apply HRel.Iterate.forward.mpr;
+        . apply Rel.Iterate.forward.mpr;
           use x;
   | himp ψ₁ ψ₂ ihq₁ ihq₂ =>
     obtain ⟨n, hn, hx⟩ := hx;
@@ -88,3 +92,4 @@ end
 
 
 end LO.Modal.Kripke
+end

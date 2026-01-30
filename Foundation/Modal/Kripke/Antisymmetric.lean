@@ -1,5 +1,9 @@
-import Foundation.Modal.Kripke.AxiomGeach
+module
 
+public import Foundation.Modal.Kripke.AxiomGeach
+
+
+@[expose] public section
 
 namespace LO.Modal
 
@@ -8,12 +12,13 @@ namespace Kripke
 variable {F : Kripke.Frame}
 
 
-protected abbrev Frame.IsAntisymmetric (F : Frame) := IsAntisymm _ F.Rel
+protected abbrev Frame.IsAntisymmetric (F : Frame) := Std.Antisymm F.Rel
 
-lemma Frame.antisymm [F.IsAntisymmetric] : ∀ {x y : F.World}, x ≺ y → y ≺ x → x = y := by apply IsAntisymm.antisymm
+lemma Frame.antisymm [F.IsAntisymmetric] : ∀ {x y : F.World}, x ≺ y → y ≺ x → x = y := by apply Std.Antisymm.antisymm
 
 protected class Frame.IsPartialOrder (F : Frame) extends F.IsReflexive, F.IsTransitive, F.IsAntisymmetric
 
 end Kripke
 
 end LO.Modal
+end

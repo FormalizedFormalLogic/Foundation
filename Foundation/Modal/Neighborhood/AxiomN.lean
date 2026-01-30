@@ -1,6 +1,9 @@
-import Foundation.Modal.Neighborhood.Basic
-import Foundation.Modal.Neighborhood.Completeness
-import Foundation.Modal.Entailment.EN
+module
+
+public import Foundation.Modal.Neighborhood.Completeness
+public import Foundation.Modal.Entailment.EN
+
+@[expose] public section
 
 namespace LO.Modal.Neighborhood
 
@@ -30,30 +33,32 @@ lemma containsUnit_of_valid_axiomN (h : F ⊧ Axioms.N) : F.ContainsUnit := by
   ext x;
   simpa [Satisfies] using @h (λ _ => Set.univ) x;
 
-
 section
 
-variable [Entailment (Formula ℕ) S]
-variable {𝓢 : S} [Entailment.Consistent 𝓢] [Entailment.EN 𝓢]
+variable [Entailment S (Formula ℕ)]
+variable {𝓢 : S} [Entailment.Consistent 𝓢] [Entailment.E 𝓢]
 
 open Entailment
 open MaximalConsistentSet
-open MaximalConsistentSet.proofset
+open proofset
 
-instance : (minimalCanonicalFrame 𝓢).ContainsUnit := by
+instance [Entailment.HasAxiomN 𝓢] : (basicCanonicity 𝓢).toModel.ContainsUnit := by
   constructor;
-  dsimp [minimalCanonicalFrame, Frame.mk_ℬ, Frame.box];
-  split;
-  . rename_i h;
-    apply iff_provable_eq_univ.mp;
-    apply nec!;
-    apply iff_provable_eq_univ.mpr;
-    apply h.choose_spec.symm;
-  . rename_i h;
-    push_neg at h;
-    simpa using @h ⊤;
+  ext x;
+  simp only [basicCanonicity, Canonicity.toModel, Frame.box, Set.mem_setOf_eq, Set.mem_univ, iff_true];
+  use ⊤;
+  simp [MaximalConsistentSet.mem_of_prove]
+
+instance [Entailment.HasAxiomN 𝓢] : (relativeBasicCanonicity 𝓢 P).toModel.ContainsUnit := by
+  constructor;
+  ext x;
+  suffices Set.univ ∈ (relativeBasicCanonicity 𝓢 P).toModel.𝒩 x by simpa;
+  left;
+  use ⊤;
+  simp [MaximalConsistentSet.mem_of_prove]
 
 end
 
 
 end LO.Modal.Neighborhood
+end

@@ -1,5 +1,6 @@
-import Foundation.FirstOrder.Arithmetic.Definability.Init
-import Foundation.FirstOrder.Arithmetic.Definability.Hierarchy
-import Foundation.FirstOrder.Arithmetic.Definability.Boldface
-import Foundation.FirstOrder.Arithmetic.Definability.BoundedBoldface
-import Foundation.FirstOrder.Arithmetic.Definability.Absoluteness
+module
+
+public import Foundation.FirstOrder.Arithmetic.Definability.Hierarchy
+public import Foundation.FirstOrder.Arithmetic.Definability.Definable
+public import Foundation.FirstOrder.Arithmetic.Definability.BoundedDefinable
+public import Foundation.FirstOrder.Arithmetic.Definability.Absoluteness

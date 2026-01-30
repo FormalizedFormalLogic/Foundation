@@ -1,4 +1,8 @@
-import Foundation.FirstOrder.Basic.BinderNotation
+module
+
+public import Foundation.FirstOrder.Basic.BinderNotation
+
+@[expose] public section
 
 namespace LO.FirstOrder
 
@@ -7,7 +11,6 @@ variable {L : Language} [(k : ℕ) → Encodable (L.Func k)]
 variable {ξ : Type*} [Encodable ξ]
 
 open Encodable
-
 namespace Semiterm
 
 def toNat {n : ℕ} : Semiterm L ξ n → ℕ
@@ -30,7 +33,7 @@ def ofNat (n : ℕ) : ℕ → Option (Semiterm L ξ n)
         (decode ef).bind fun f : L.Func arity ↦
         (Matrix.getM fun i ↦
           have : v' i < e + 1 :=
-            Nat.lt_succ.mpr
+            Nat.lt_succ_iff.mpr
               <| le_trans (le_of_lt <| Nat.lt_of_eq_natToVec hv i)
               <| le_trans (Nat.unpair_right_le _)
               <| le_trans (Nat.unpair_right_le _)
@@ -45,11 +48,11 @@ lemma ofNat_toNat {n : ℕ} : ∀ t : Semiterm L ξ n, ofNat n (toNat t) = some 
   |       &x => by simp [toNat, ofNat]
   | func f v => by
       suffices (Matrix.getM fun i ↦ ofNat n (v i).toNat) = some v by
-        simp only [toNat, ofNat, Nat.unpair_pair, Option.pure_def, Option.bind_eq_bind]
+        simp only [toNat, ofNat, Nat.unpair_pair]
         rw [Nat.unpair_pair, Nat.unpair_pair, Nat.unpair_pair, Nat.natToVec_vecToNat]
         simpa
       have : (fun i ↦ ofNat n (toNat (v i))) = (fun i ↦ pure (v i)) := funext <| fun i ↦ ofNat_toNat (v i)
-      simp [this, Matrix.getM_pure]
+      simp [this]
 
 instance encodable : Encodable (Semiterm L ξ n) where
   encode := toNat
@@ -113,26 +116,26 @@ def ofNat : (n : ℕ) → ℕ → Option (Semiformula L ξ n)
     | 2 => some ⊤
     | 3 => some ⊥
     | 4 =>
-      have : c.unpair.1 < e + 1 := Nat.lt_succ.mpr <| le_trans (Nat.unpair_left_le _) <| Nat.unpair_right_le _
-      have : c.unpair.2 < e + 1 := Nat.lt_succ.mpr <| le_trans (Nat.unpair_right_le _) <| Nat.unpair_right_le _
+      have : c.unpair.1 < e + 1 := Nat.lt_succ_iff.mpr <| le_trans (Nat.unpair_left_le _) <| Nat.unpair_right_le _
+      have : c.unpair.2 < e + 1 := Nat.lt_succ_iff.mpr <| le_trans (Nat.unpair_right_le _) <| Nat.unpair_right_le _
       do
         let φ ← ofNat n c.unpair.1
         let ψ ← ofNat n c.unpair.2
         return φ ⋏ ψ
     | 5 =>
-      have : c.unpair.1 < e + 1 := Nat.lt_succ.mpr <| le_trans (Nat.unpair_left_le _) <| Nat.unpair_right_le _
-      have : c.unpair.2 < e + 1 := Nat.lt_succ.mpr <| le_trans (Nat.unpair_right_le _) <| Nat.unpair_right_le _
+      have : c.unpair.1 < e + 1 := Nat.lt_succ_iff.mpr <| le_trans (Nat.unpair_left_le _) <| Nat.unpair_right_le _
+      have : c.unpair.2 < e + 1 := Nat.lt_succ_iff.mpr <| le_trans (Nat.unpair_right_le _) <| Nat.unpair_right_le _
       do
         let φ ← ofNat n c.unpair.1
         let ψ ← ofNat n c.unpair.2
         return φ ⋎ ψ
     | 6 =>
-      have : c < e + 1 := Nat.lt_succ.mpr <| Nat.unpair_right_le _
+      have : c < e + 1 := Nat.lt_succ_iff.mpr <| Nat.unpair_right_le _
       do
         let φ ← ofNat (n + 1) c
         return ∀' φ
     | 7 =>
-      have : c < e + 1 := Nat.lt_succ.mpr <| Nat.unpair_right_le _
+      have : c < e + 1 := Nat.lt_succ_iff.mpr <| Nat.unpair_right_le _
       do
         let φ ← ofNat (n + 1) c
         return ∃' φ
@@ -140,13 +143,13 @@ def ofNat : (n : ℕ) → ℕ → Option (Semiformula L ξ n)
 
 lemma ofNat_toNat {n : ℕ} : ∀ φ : Semiformula L ξ n, ofNat n (toNat φ) = some φ
   |  rel R v => by
-    simp only [toNat, ofNat, Nat.unpair_pair, Option.pure_def, Option.bind_eq_bind]
+    simp only [toNat, ofNat, Nat.unpair_pair]
     rw [Nat.unpair_pair, Nat.unpair_pair]
-    simp [Matrix.getM_pure]
+    simp
   | nrel R v => by
-    simp only [toNat, ofNat, Nat.unpair_pair, Option.pure_def, Option.bind_eq_bind]
+    simp only [toNat, ofNat, Nat.unpair_pair]
     rw [Nat.unpair_pair, Nat.unpair_pair]
-    simp [Matrix.getM_pure]
+    simp
   |        ⊤ => by simp [toNat, ofNat]
   |        ⊥ => by simp [toNat, ofNat]
   |    φ ⋎ ψ => by simp [toNat, ofNat, ofNat_toNat φ, ofNat_toNat ψ]
@@ -183,21 +186,37 @@ lemma encode_all (φ : Semiformula L ξ (n + 1)) : encode (∀' φ) = (Nat.pair 
 lemma encode_ex (φ : Semiformula L ξ (n + 1)) : encode (∃' φ) = (Nat.pair 7 <| φ.toNat) + 1 := rfl
 
 @[simp] lemma encode_emb (σ : Semisentence L n) :
-    encode (Rewriting.embedding σ : Semiformula L ξ n) = encode σ := by
+    encode (Rewriting.emb σ : Semiformula L ξ n) = encode σ := by
   induction σ using rec' <;>
     simp [coe_rel, coe_nrel,
       encode_rel, encode_nrel, encode_verum, encode_falsum, encode_and, encode_or, encode_all, encode_ex,
       ← encode_eq_toNat, *]
 
 @[simp] lemma encode_inj_sentence {σ : Semisentence L n} {φ : Semiformula L ξ n} :
-    encode φ = encode σ ↔ φ = Rewriting.embedding σ := by
+    encode φ = encode σ ↔ φ = Rewriting.emb σ := by
   constructor
   · intro h; apply encode_inj.mp; simpa
   · rintro rfl; simp
 
 @[simp] lemma encode_inj_sentence' {σ : Semisentence L n} {φ : Semiformula L ξ n} :
-    encode σ = encode φ ↔ φ = Rewriting.embedding σ := by rw [←encode_inj_sentence, eq_comm]
+    encode σ = encode φ ↔ φ = Rewriting.emb σ := by rw [←encode_inj_sentence, eq_comm]
 
 end Semiformula
 
+section
+
+variable {L : Language} [L.Encodable]
+
+instance Semiterm.countable [Countable ξ] : Countable (Semiterm L ξ n) := by
+  have : Encodable ξ := Encodable.ofCountable ξ
+  exact Encodable.countable
+
+instance Semiformula.countable [Countable ξ] : Countable (Semiformula L ξ n) := by
+  have : Encodable ξ := Encodable.ofCountable ξ
+  exact Encodable.countable
+
+end
+
 end LO.FirstOrder
+
+end

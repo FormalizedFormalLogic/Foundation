@@ -1,13 +1,17 @@
-import Foundation.Modal.Entailment.K
-import Foundation.Modal.Entailment.END
+module
+
+public import Foundation.Modal.Entailment.END
+
+@[expose] public section
 
 namespace LO.Modal.Entailment
 
 open LO.Entailment LO.Entailment.FiniteContext LO.Modal.Entailment
 
-variable {S F : Type*} [BasicModalLogicalConnective F] [DecidableEq F] [Entailment F S]
+variable {S F : Type*} [BasicModalLogicalConnective F] [DecidableEq F] [Entailment S F]
 variable {𝓢 : S}
 
-noncomputable instance [Entailment.KD 𝓢] : Entailment.END 𝓢 where
+instance [Entailment.KD 𝓢] : Entailment.END 𝓢 where
 
 end LO.Modal.Entailment
+end

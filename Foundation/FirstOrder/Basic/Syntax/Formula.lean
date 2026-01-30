@@ -1,5 +1,10 @@
-import Foundation.Logic.Predicate.Term
-import Foundation.Logic.Predicate.Quantifier
+module
+
+public import Foundation.Logic.Predicate.Term
+public import Foundation.Logic.Predicate.Quantifier
+public import Mathlib.Data.Nat.Cast.Order.Basic
+
+@[expose] public section
 
 /-!
 # Formulas of first-order logic
@@ -461,7 +466,7 @@ lemma lt_fvSup_of_fvar? {φ : SyntacticSemiformula L n} : φ.FVar? m → m < φ.
   have : ∃ s : ℕ, φ.freeVariables.max = s := Finset.max_of_mem hm
   rcases this with ⟨s, hs⟩
   have : m ≤ s := by
-    have : (m : WithBot ℕ) ≤ ↑s := by simpa [hs] using Finset.le_max hm
+    have : (m : WithBot ℕ) ≤ ↑s := by simpa [hs, -Nat.cast_le] using Finset.le_max hm
     exact WithBot.coe_le_coe.mp this
   simpa [hs, WithBot.recBotCoe] using Nat.lt_add_one_of_le this
 
@@ -475,15 +480,15 @@ end FreeVariables
 
 section
 
-variable {α : Type*} [LinearOrder  α]
+variable {α : Type*} [LinearOrder α]
 
 lemma List.maximam?_some_of_not_nil {l : List α} (h : l ≠ []) : l.max?.isSome := by
   cases l
   case nil => simp at h
   case cons l => simp [List.max?_cons]
 
-lemma List.maximam?_eq_some {l : List α} {a} (h : l.max? = some a) : ∀ x ∈ l, x ≤ a :=
-  List.max?_le_iff (by simp) h (x := a) |>.mp (by rfl)
+lemma List.maximam?_eq_some [Std.LawfulOrderSup α] {l : List α} {a} (h : l.max? = some a) : ∀ x ∈ l, x ≤ a :=
+  List.max?_le_iff h (x := a) |>.mp (by rfl)
 
 end
 
@@ -507,8 +512,8 @@ def lMapAux (Φ : L₁ →ᵥ L₂) {n} : Semiformula L₁ ξ n → Semiformula 
   |     ∃' φ => ∃' lMapAux Φ φ
 
 lemma lMapAux_neg {n} (φ : Semiformula L₁ ξ n) :
-    (∼φ).lMapAux Φ = ∼φ.lMapAux Φ :=
-  by induction φ using Semiformula.rec' <;> simp [*, lMapAux, ←Semiformula.neg_eq]
+    (∼φ).lMapAux Φ = ∼φ.lMapAux Φ := by
+  induction φ using Semiformula.rec' <;> simp [*, lMapAux]
 
 def lMap (Φ : L₁ →ᵥ L₂) {n} : Semiformula L₁ ξ n →ˡᶜ Semiformula L₂ ξ n where
   toTr := lMapAux Φ
@@ -670,26 +675,5 @@ end enumarateFVar
 
 end Semiformula
 
-abbrev Theory (L : Language) := Set (SyntacticFormula L)
-
-abbrev ClosedTheory (L : Language) := Set (Sentence L)
-
-instance : AdjunctiveSet (SyntacticFormula L) (Theory L) := inferInstance
-
-instance : AdjunctiveSet (Sentence L) (ClosedTheory L) := inferInstance
-
-def Theory.lMap (Φ : L₁ →ᵥ L₂) (T : Theory L₁) : Theory L₂ := Semiformula.lMap Φ '' T
-
-namespace Theory
-
-variable (T U : Theory L)
-
-instance {L : Language} : Add (Theory L) := ⟨(· ∪ ·)⟩
-
-lemma add_def : T + U = T ∪ U := rfl
-
-end Theory
-
-abbrev ArithmeticTheory := Theory ℒₒᵣ
-
 end LO.FirstOrder
+end

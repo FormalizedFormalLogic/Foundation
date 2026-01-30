@@ -1,4 +1,8 @@
-import Foundation.Propositional.ClassicalSemantics.Basic
+module
+
+public import Foundation.Propositional.ClassicalSemantics.Basic
+
+@[expose] public section
 
 namespace LO.Propositional.ClassicalSemantics
 
@@ -12,12 +16,12 @@ open Formula.ClassicalSemantics
 open Classical in
 noncomputable def vfSubst (v : Valuation α) : ZeroSubstitution α := ⟨
     λ a => if v a then ⊤ else ⊥,
-    by intro a; simp [Formula.subst.subst_atom]; split <;> tauto;
+    by intro a; simp [Formula.subst_atom]; split <;> tauto;
 ⟩
 
-theorem exists_neg_zeroSubst_of_not_isTautology (h : ¬φ.isTautology)
-  : ∃ s : ZeroSubstitution α, Formula.isTautology (∼(φ⟦s.1⟧)) := by
-  unfold Formula.isTautology Valid at h;
+theorem exists_neg_zeroSubst_of_not_tautology (h : ¬φ.Tautology)
+  : ∃ s : ZeroSubstitution α, Formula.Tautology (∼(φ⟦s.1⟧)) := by
+  unfold Formula.Tautology Valid at h;
   push_neg at h;
   obtain ⟨v, hv⟩ := h;
   use vfSubst v;
@@ -29,13 +33,13 @@ theorem exists_neg_zeroSubst_of_not_isTautology (h : ¬φ.isTautology)
     simp [vfSubst];
     split <;> tauto;
 
-lemma isTautology_of_forall_zeroSubst : (∀ s : ZeroSubstitution α, ¬(∼(φ⟦s.1⟧)).isTautology) → φ.isTautology := by
+lemma tautology_of_forall_zeroSubst : (∀ s : ZeroSubstitution α, ¬(∼(φ⟦s.1⟧)).Tautology) → φ.Tautology := by
   contrapose!;
-  apply exists_neg_zeroSubst_of_not_isTautology;
+  apply exists_neg_zeroSubst_of_not_tautology;
 
 set_option push_neg.use_distrib true in
-lemma isTautology_vfSubst : v ⊧ φ ↔ (φ⟦(vfSubst v).1⟧.isTautology) := by
-  simp only [Formula.isTautology, Valid, Formula.subst.subst_atom];
+lemma vfSubst_tautology : v ⊧ φ ↔ (φ⟦(vfSubst v)⟧.Tautology) := by
+  simp only [Formula.Tautology, Valid, Formula.subst_atom];
   induction φ with
   | hatom a =>
     dsimp [vfSubst];
@@ -58,14 +62,14 @@ lemma isTautology_vfSubst : v ⊧ φ ↔ (φ⟦(vfSubst v).1⟧.isTautology) := 
       apply ihφ.mpr;
       intro u;
       apply equiv_of_letterless ?_ u w |>.mpr hφ;
-      exact φ.letterless_zeroSubst;
+      grind;
     . intro h hφ;
       apply ihψ.mpr;
       intro w;
       apply equiv_of_letterless ?_ v w |>.mp;
       . apply h;
         apply ihφ.mp hφ;
-      exact ψ.letterless_zeroSubst;
+      grind;
   | hor φ ψ ihφ ihψ =>
     constructor;
     . rintro (h | h) w;
@@ -77,12 +81,12 @@ lemma isTautology_vfSubst : v ⊧ φ ↔ (φ⟦(vfSubst v).1⟧.isTautology) := 
         apply ihφ.mpr;
         intro w;
         apply equiv_of_letterless ?_ v w |>.mp hφ;
-        exact φ.letterless_zeroSubst;
+        grind;
       . right;
         apply ihψ.mpr;
         intro w;
         apply equiv_of_letterless ?_ v w |>.mp hψ;
-        exact ψ.letterless_zeroSubst;
+        grind;
   | hand φ ψ ihφ ihψ =>
     constructor;
     . rintro ⟨hφ, hψ⟩ w;
@@ -95,10 +99,11 @@ lemma isTautology_vfSubst : v ⊧ φ ↔ (φ⟦(vfSubst v).1⟧.isTautology) := 
       . apply ihφ.mpr;
         intro w;
         apply equiv_of_letterless ?_ v w |>.mp $ h v |>.1;
-        exact φ.letterless_zeroSubst;
+        grind;
       . apply ihψ.mpr;
         intro w;
         apply equiv_of_letterless ?_ v w |>.mp $ h v |>.2;
-        exact ψ.letterless_zeroSubst;
+        grind;
 
 end LO.Propositional.ClassicalSemantics
+end

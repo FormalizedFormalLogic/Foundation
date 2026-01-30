@@ -1,8 +1,11 @@
-import Foundation.Modal.Kripke.Preservation
-import Foundation.Modal.Kripke.Irreflexive
-import Foundation.Modal.Kripke.Asymmetric
-import Foundation.Modal.Kripke.AxiomWeakPoint2
-import Foundation.Modal.Kripke.AxiomPoint3
+module
+
+public import Foundation.Modal.Kripke.Preservation
+public import Foundation.Modal.Kripke.Asymmetric
+public import Foundation.Modal.Kripke.AxiomWeakPoint2
+public import Foundation.Modal.Kripke.AxiomPoint3
+
+@[expose] public section
 
 namespace LO.Modal
 
@@ -24,8 +27,8 @@ protected abbrev IsStronglyConvergent (F : Frame) := _root_.IsStronglyConvergent
 lemma strongly_convergent [F.IsStronglyConvergent] : ∀ x y : F.World, ∃ u, x ≺ u ∧ y ≺ u := by apply IsStronglyConvergent.s_convergent
 
 
-protected abbrev IsStronglyConnected (F : Frame) := _root_.IsTotal _ F.Rel
-lemma s_connected [F.IsStronglyConnected] : ∀ {x y : F.World}, x ≺ y ∨ y ≺ x := by apply IsTotal.total
+protected abbrev IsStronglyConnected (F : Frame) := _root_.Std.Total F.Rel
+lemma s_connected [F.IsStronglyConnected] : ∀ {x y : F.World}, x ≺ y ∨ y ≺ x := by apply Std.Total.total
 
 protected abbrev IsConnected (F : Frame) := _root_.IsTrichotomous _ F.Rel
 lemma connected [F.IsConnected] : ∀ x y : F.World, x ≺ y ∨ x = y ∨ y ≺ x := by apply IsTrichotomous.trichotomous
@@ -55,7 +58,7 @@ lemma root_generates [F.IsRooted] : ∀ x ≠ F.root, F.root ≺^+ x := by
 
 lemma root_generates' [F.IsRooted] [F.IsTransitive] : ∀ x ≠ F.root, F.root ≺ x := by
   intro x hx;
-  exact HRel.TransGen.unwrap $ F.root_generates _ hx;
+  exact Rel.TransGen.unwrap $ F.root_generates _ hx;
 
 /-- `Frame.root` is first. -/
 @[simp] lemma root_first [F.IsRooted] [F.IsTransitive] [F.IsReflexive] : ∀ x, F.root ≺ x := by
@@ -71,7 +74,7 @@ lemma root_generates! [F.IsRootedBy r] : ∀ x ≠ r, r ≺^+ x := IsRootedBy.ro
 /-- Explicit version of `root_generates'` for rooted by `r`. -/
 lemma root_genaretes'! [F.IsTransitive] [F.IsRootedBy r] : ∀ x ≠ r, r ≺ x := by
   intro x hx;
-  apply HRel.TransGen.unwrap;
+  apply Rel.TransGen.unwrap;
   exact IsRootedBy.root_generates x hx;
 
 @[simp] lemma root_first! [F.IsRootedBy r] [F.IsTransitive] [F.IsReflexive] : ∀ x, r ≺ x := by
@@ -186,8 +189,8 @@ protected abbrev roots : { s : Set (F↾R) // s.Nonempty } := ⟨{ r | r.1 ∈ R
 lemma trans_rel_of_origin_trans_rel {hx hy} (Rxy : F.Rel.TransGen x y)
   : ((F↾R)^+.Rel ⟨x, hx⟩ ⟨y, hy⟩) := by
   induction Rxy using TransGen.head_induction_on with
-  | base h => exact _root_.Relation.TransGen.single h;
-  | @ih a c ha hb hc =>
+  | single h => exact _root_.Relation.TransGen.single h;
+  | @head a c ha hb hc =>
     let b : (F.setGenerate R).World := ⟨c, by
       rcases hx with hx | ⟨r₁, hR₁, Rr₁a⟩ <;>
       rcases hy with hy | ⟨r₂, hR₂, Rr₂b⟩;
@@ -234,8 +237,8 @@ variable {F : Frame} {r : outParam (F.World)}
 lemma trans_rel_of_origin_trans_rel {hx hy} (Rxy : F.TransGen x y)
   : ((F↾r)^+.Rel ⟨x, hx⟩ ⟨y, hy⟩) := by
   induction Rxy using TransGen.head_induction_on with
-  | base h => exact Relation.TransGen.single h;
-  | @ih a c ha hb hc =>
+  | single h => exact Relation.TransGen.single h;
+  | @head a c ha hb hc =>
     let b : (F↾r).World := ⟨c, by
       rcases hx with rfl | Rra <;>
       rcases hy with rfl | Rrb;
@@ -250,15 +253,15 @@ lemma trans_rel_of_origin_trans_rel {hx hy} (Rxy : F.TransGen x y)
 
 lemma origin_trans_rel_of_trans_rel {u v : (F↾r).World} (Ruv : (F↾r).TransGen u v) : F.TransGen u.1 v.1 := by
   induction Ruv using TransGen.head_induction_on with
-  | base h => exact Relation.TransGen.single h;
-  | ih a b c => exact TransGen.head a c;
+  | single h => exact Relation.TransGen.single h;
+  | head a b c => exact TransGen.head a c;
 
 protected abbrev root : (F↾r).World := ⟨r, by tauto⟩
 
 instance : (F↾r).IsRootedBy pointGenerate.root where
   root_generates := by
     rintro ⟨w, (rfl | Rrw)⟩ hw;
-    . simp at hw;
+    . grind;
     . apply trans_rel_of_origin_trans_rel;
       exact Rrw;
 
@@ -269,7 +272,7 @@ instance [F.IsFinite] : (F↾r).IsFinite := inferInstance
 instance [DecidableEq F.World] : DecidableEq (F↾r).World := Subtype.instDecidableEq
 
 instance isReflexive [F.IsReflexive] : (F↾r).IsReflexive where
-  refl := by rintro ⟨x, (rfl | hx)⟩ <;> exact IsRefl.refl x;
+  refl := by rintro ⟨x, (rfl | hx)⟩ <;> exact Std.Refl.refl x;
 
 instance isTransitive [F.IsTransitive] : (F↾r).IsTransitive where
   trans := by
@@ -295,15 +298,14 @@ instance isIrreflexive [F.IsIrreflexive] : (F↾r).IsIrreflexive := ⟨by rintro
 
 instance isAsymmetric [F.IsAsymmetric] : (F↾r).IsAsymmetric := ⟨by
   rintro ⟨x, (rfl | hx)⟩ ⟨y, (rfl | hy)⟩ Rxy <;>
-  { dsimp at Rxy; apply IsAsymm.asymm _ _ Rxy; }
+  { dsimp at Rxy; apply Std.Asymm.asymm _ _ Rxy; }
 ⟩
 
 instance isPiecewiseConvergent [F.IsPiecewiseConvergent] : (F↾r).IsPiecewiseConvergent := ⟨by
   rintro ⟨x, (rfl | Rrx)⟩ ⟨y, (rfl | Rry)⟩ ⟨z, (rfl | Rrz)⟩ Rxy Rxz nexy;
-  any_goals contradiction;
-  case mk.inl.mk.inr.mk.inr | mk.inr.mk.inr.mk.inr =>
+  case inl.inr.inr | inr.inr.inr =>
     have ⟨u, Ryu, Rzu⟩ := F.p_convergent Rxy Rxz $ by simp_all;
-    use ⟨u, by right; apply HRel.TransGen.tail Rry Ryu⟩;
+    use ⟨u, by right; apply Rel.TransGen.tail Rry Ryu⟩;
   all_goals
   . have ⟨u, _⟩ := F.p_convergent Rxy Rxz $ by simp_all;
     use ⟨u, by tauto⟩;
@@ -311,11 +313,11 @@ instance isPiecewiseConvergent [F.IsPiecewiseConvergent] : (F↾r).IsPiecewiseCo
 
 instance isPiecewiseStronglyConvergent [F.IsPiecewiseStronglyConvergent] : (F↾r).IsPiecewiseStronglyConvergent := ⟨by
   rintro ⟨x, (rfl | Rrx)⟩ ⟨y, (rfl | Rry)⟩ ⟨z, (rfl | Rrz)⟩ Rxy Rxz;
-  case mk.inl.mk.inl.mk.inl => tauto;
-  case mk.inr.mk.inr.mk.inr | mk.inl.mk.inr.mk.inr =>
+  case inl.inl.inl => tauto;
+  case inr.inr.inr | inl.inr.inr =>
     obtain ⟨u, Ryu, Rzu⟩ := F.ps_convergent Rxy Rxz;
     use ⟨u, ?_⟩;
-    . right; exact HRel.TransGen.tail Rry Ryu;
+    . right; exact Rel.TransGen.tail Rry Ryu;
   all_goals
   . obtain ⟨u, Ryu, Rzu⟩ := F.ps_convergent Rxy Rxz;
     use ⟨u, by tauto⟩;
@@ -370,7 +372,7 @@ end pointGenerate
 end Frame
 
 
-def Model.pointGenerate (M : Kripke.Model) (r : M.World) : Model := ⟨M.toFrame↾r, λ w a => M.Val w.1 a⟩
+def Model.pointGenerate (M : Kripke.Model) (r : M.World) : Model := ⟨M.toFrame↾r, λ a w => M.Val a w.1⟩
 infix:100 "↾" => Model.pointGenerate
 
 namespace Model.pointGenerate
@@ -429,3 +431,4 @@ end Model.pointGenerate
 end Kripke
 
 end LO.Modal
+end

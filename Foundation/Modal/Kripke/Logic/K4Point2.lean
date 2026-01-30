@@ -1,15 +1,15 @@
-import Foundation.Modal.Kripke.AxiomWeakPoint2
-import Foundation.Modal.Kripke.AxiomGeach
-import Foundation.Modal.Kripke.Hilbert
-import Foundation.Modal.Hilbert.Normal.Basic
-import Foundation.Modal.Kripke.Logic.K4
+module
+
+public import Foundation.Modal.Kripke.Logic.K4
+
+@[expose] public section
 
 namespace LO.Modal
 
 open Entailment
 open Formula
 open Kripke
-open Hilbert.Kripke
+open Modal.Kripke
 
 namespace Kripke
 
@@ -19,29 +19,25 @@ abbrev FrameClass.K4Point2 : FrameClass := { F | F.IsK4Point2 }
 
 end Kripke
 
-
-namespace Hilbert.K4Point2.Kripke
-
-instance : Sound (Hilbert.K4Point2) Kripke.FrameClass.K4Point2 := instSound_of_validates_axioms $ by
+instance : Sound (Modal.K4Point2) Kripke.FrameClass.K4Point2 := instSound_of_validates_axioms $ by
   apply FrameClass.validates_with_AxiomK_of_validates;
   constructor;
   rintro _ (rfl | rfl) F ⟨_, _⟩;
   . exact validate_AxiomFour_of_transitive;
   . exact validate_WeakPoint2_of_weakConfluent;
 
-instance : Entailment.Consistent Hilbert.K4Point2 :=
+instance : Entailment.Consistent Modal.K4Point2 :=
   consistent_of_sound_frameclass Kripke.FrameClass.K4Point2 $ by
     use whitepoint;
     constructor;
 
-instance : Canonical (Hilbert.K4Point2) Kripke.FrameClass.K4Point2 :=  ⟨by constructor⟩
+instance : Canonical (Modal.K4Point2) Kripke.FrameClass.K4Point2 :=  ⟨by constructor⟩
 
-instance : Complete (Hilbert.K4Point2) Kripke.FrameClass.K4Point2 := inferInstance
+instance : Complete (Modal.K4Point2) Kripke.FrameClass.K4Point2 := inferInstance
 
-
-instance : Hilbert.K4 ⪱ Hilbert.K4Point2 := by
+instance : Modal.K4 ⪱ Modal.K4Point2 := by
   constructor;
-  . apply Hilbert.Normal.weakerThan_of_subset_axioms $ by simp;
+  . grind;
   . apply Entailment.not_weakerThan_iff.mpr;
     use (Axioms.WeakPoint2 (.atom 0) (.atom 1));
     constructor;
@@ -50,21 +46,16 @@ instance : Hilbert.K4 ⪱ Hilbert.K4Point2 := by
       apply Kripke.not_validOnFrameClass_of_exists_model_world;
       let M : Model := ⟨
         ⟨Fin 2, λ x y => x = 0⟩,
-        λ w a => if a = 0 then True else w = 0
+        λ a w => if a = 0 then True else w = 0
       ⟩;
       use M, 0;
       constructor;
       . simp only [Set.mem_setOf_eq];
         exact { trans := by omega };
-      . suffices ∃ (x : M.World), (∀ y, ¬x ≺ y) ∧ x ≠ 0 by
-          simpa [M, Semantics.Realize, Satisfies];
-        use 1;
-        constructor;
-        . omega;
-        . trivial;
-
-end Hilbert.K4Point2.Kripke
-
-instance : Modal.K4 ⪱ Modal.K4Point2 := inferInstance
+      . suffices ¬(0 : M) ≺ 0 ∨ ¬(1 : M) ≺ 0 by
+          simp [Semantics.Models, Satisfies, M];
+          grind;
+        omega;
 
 end LO.Modal
+end
