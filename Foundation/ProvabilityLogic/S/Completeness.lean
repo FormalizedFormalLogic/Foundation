@@ -190,11 +190,11 @@ lemma GL_S_TFAE :
 
 theorem S.arithmetical_completeness_iff : Modal.S ⊢ A ↔ ∀ f : T.StandardRealization, ℕ ⊧ₘ f A := GL_S_TFAE.out 1 2
 
-theorem provabilityLogic_PA_TA_eq_S : (T.ProvabilityLogicOf 𝗧𝗔).1 ≊ Modal.S := by
+theorem provabilityLogic_PA_TA_eq_S : (T.ProvabilityLogicOf 𝗧𝗔) ≊ Modal.S := by
   apply Logic.iff_equal_provable_equiv.mp
   ext A;
   simpa [Logic.iff_provable, ProvabilityLogicOf, TA.provable_iff] using S.arithmetical_completeness_iff.symm
 
-instance : (𝗣𝗔.ProvabilityLogicOf 𝗧𝗔).1 ≊ Modal.S := provabilityLogic_PA_TA_eq_S
+instance : (𝗣𝗔.ProvabilityLogicOf 𝗧𝗔) ≊ Modal.S := provabilityLogic_PA_TA_eq_S
 
 end LO.ProvabilityLogic

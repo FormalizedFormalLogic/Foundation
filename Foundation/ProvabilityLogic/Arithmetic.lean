@@ -13,14 +13,8 @@ open FirstOrder
 
 namespace Modal
 
-/-- `L` is provability logic of `U` on `T` -/
-abbrev Logic.IsProvabilityLogicOf (L : Modal.Logic ℕ) (T U : ArithmeticTheory) [T.Δ₁] := ∀ A ∈ L, ∀ f : T.StandardRealization, U ⊢ f A
-
-/-- `L` is provability logic of `U` on `T` -/
-abbrev Logic.IsProvabilityLogic (L : Modal.Logic ℕ) : Prop := ∃ T : ArithmeticTheory, ∃ TΔ₁ : T.Δ₁, ∃ U, @Logic.IsProvabilityLogicOf L T U TΔ₁
-
-/-- Provability Logics of `U` on `T` -/
-abbrev ProvabilityLogic := { L : Modal.Logic ℕ // Logic.IsProvabilityLogic L }
+/-- `L` is provability logic of `T` relative to metatheory `U` -/
+def Logic.IsProvabilityLogicOf (L : Modal.Logic ℕ) (T U : ArithmeticTheory) [T.Δ₁] := ∀ A, L ⊢ A ↔ ∀ f : T.StandardRealization, U ⊢ f A
 
 end Modal
 
@@ -31,13 +25,19 @@ namespace ArithmeticTheory
 
 variable {T U : ArithmeticTheory} [T.Δ₁] {A : Modal.Formula ℕ}
 
-/-- Provability Logic of `U` on `T` -/
-def ProvabilityLogicOf (T U : ArithmeticTheory) [T.Δ₁] : Modal.ProvabilityLogic := ⟨{A | ∀ f : T.StandardRealization, U ⊢ f A}, ⟨T, inferInstance, U, λ _ h f => h f⟩⟩
+/-- Provability Logic of `T` relative to metatheory `U` -/
+def ProvabilityLogicOf (T U : ArithmeticTheory) [T.Δ₁] : Modal.Logic ℕ := {A | ∀ f : T.StandardRealization, U ⊢ f A}
+
+@[simp, grind .]
+lemma isProvabilityLogic_ProvabilityLogicOf : (ProvabilityLogicOf T U).IsProvabilityLogicOf T U := by
+  simp [Modal.Logic.IsProvabilityLogicOf, ProvabilityLogicOf];
+  grind;
 
 @[grind =]
-lemma ProvabilityLogicOf.provable_iff : (T.ProvabilityLogicOf U).1 ⊢ A ↔ ∀ f : T.StandardRealization, U ⊢ f A := by simp [Modal.Logic.iff_provable, ProvabilityLogicOf]
+lemma ProvabilityLogicOf.provable_iff : (T.ProvabilityLogicOf U) ⊢ A ↔ ∀ f : T.StandardRealization, U ⊢ f A := by
+  simp [Modal.Logic.iff_provable, ProvabilityLogicOf]
 
-instance : Entailment.Łukasiewicz (T.ProvabilityLogicOf U).1 where
+instance : Entailment.Łukasiewicz (T.ProvabilityLogicOf U) where
   mdp := by
     rintro A B ⟨hA⟩ ⟨hB⟩;
     constructor;
@@ -64,7 +64,7 @@ instance : Entailment.Łukasiewicz (T.ProvabilityLogicOf U).1 where
     dsimp [ProvabilityLogic.Realization.interpret];
     cl_prover;
 
-instance : Entailment.Cl (T.ProvabilityLogicOf U).1 where
+instance : Entailment.Cl (T.ProvabilityLogicOf U) where
 
 end ArithmeticTheory
 

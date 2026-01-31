@@ -463,21 +463,22 @@ open Modal
 open Modal.Kripke
 open Formula.Kripke
 
-variable {T U : ArithmeticTheory} [T.Δ₁] [𝗜𝚺₁ ⪯ T] [T ⪯ U] {A : Formula ℕ}
+variable {T U : ArithmeticTheory} [T.Δ₁]
+variable {A : Formula ℕ}
 
-lemma provable_TBB_of_mem_trace {n : ℕ} (h : n ∈ (T.ProvabilityLogicOf U).1.trace) : (T.ProvabilityLogicOf U).1 ⊢ Modal.TBB n := by
-  have : 𝗜𝚺₁ ⪯ U := WeakerThan.trans (𝓣 := T) inferInstance inferInstance;
-
+lemma provable_TBB_of_mem_trace
+  [𝗜𝚺₁ ⪯ T] [𝗜𝚺₁ ⪯ U]
+  {L : Logic _} (hPL : L.IsProvabilityLogicOf T U)
+  {n : ℕ} (h : n ∈ L.trace) : L ⊢ Modal.TBB n := by
   obtain ⟨A, hA₁, ⟨M, r, _, _, rfl, h₂⟩⟩ := by simpa using h;
-  replace hA₁ : ∀ f : T.StandardRealization, U ⊢ f A := ProvabilityLogicOf.provable_iff.mp (by grind);
+  replace hA₁ : ∀ f : T.StandardRealization, U ⊢ f A := hPL A |>.mp $ by grind;
 
   let M₀ := M.extendRoot 1;
   let r₀ : M₀ := Frame.extendRoot.root
-  have Rr₀ : ∀ {x : M}, r₀ ≺ x := λ {x} => Frame.root_genaretes'! (r := r₀) x (by simp)
+  have Rr₀ : ∀ {x : M}, r₀ ≺ x := λ {x} => Frame.root_genaretes'! (r := r₀) x (by simp);
 
   have : M₀.IsFiniteTree r₀ := {};
   let S : SolovaySentences T.standardProvability M₀.toFrame r₀ := SolovaySentences.standard T M₀.toFrame;
-
   have : M₀ ⊧ A ➝ (Modal.TBB M.height) := by
     rintro x hA;
     rcases Nat.lt_trichotomy (Frame.rank x) M.height with h | h | h;
@@ -509,142 +510,150 @@ lemma provable_TBB_of_mem_trace {n : ℕ} (h : n ∈ (T.ProvabilityLogicOf U).1.
       apply this;
   have : 𝗜𝚺₁ ⊢ (⩖ j, S j) ➝ S.realization (A ➝ (Modal.TBB M.height)) := left_Udisj!_intro _ this
   have : 𝗜𝚺₁ ⊢ S.realization (A ➝ (Modal.TBB M.height)) := by cl_prover [this, S.SC4];
-
   have : U ⊢ S.realization (Modal.TBB M.height) := by
     have : U ⊢ S.realization A ➝ S.realization (Modal.TBB M.height) := WeakerThan.pbl this;
     cl_prover [this, hA₁ S.realization];
-  apply ProvabilityLogicOf.provable_iff.mpr;
-  intro g;
-  grind;
+  apply hPL _ |>.mpr;
+  grind only [
+    Realization.interpret.def_imp,
+    Realization.interpret.def_boxItr,
+    Realization.interpret.def_box,
+    Realization.interpret.def_bot
+  ];
 
 /-- Corollary 48 in [A.B05] -/
-theorem eq_provablityLogic_GLα_of_coinfinite_trace (h : (T.ProvabilityLogicOf U).1.trace.Coinfinite) : (T.ProvabilityLogicOf U).1 = Modal.GLα (T.ProvabilityLogicOf U).1.trace := by
+theorem eq_provablityLogic_GLα_of_coinfinite_trace
+  [𝗜𝚺₁ ⪯ T] [𝗜𝚺₁ ⪯ U] [T ⪯ U] -- TODO: `[T ⪯ U]` might be necessary
+  {L : Logic _} [Entailment.ModusPonens L]
+  (hPL : L.IsProvabilityLogicOf T U) (hCi : L.trace.Coinfinite)
+  : L = Modal.GLα L.trace := by
   apply Set.Subset.antisymm;
-  . apply subset_GLα_of_trace_coinfinite h;
+  . apply subset_GLα_of_trace_coinfinite hCi;
   . intro A;
-    suffices Modal.GLα (T.ProvabilityLogicOf U).1.trace ⊢ A → (T.ProvabilityLogicOf U).1 ⊢ A by grind;
+    suffices Modal.GLα L.trace ⊢ A → L ⊢ A by grind;
     intro hA;
     induction hA using
-      Modal.Logic.sumQuasiNormal.rec!_omitSubst_strong (L₁ := Modal.GL) (L₂ := (T.ProvabilityLogicOf U).1.trace.image TBB)
+      Modal.Logic.sumQuasiNormal.rec!_omitSubst_strong (L₁ := Modal.GL) (L₂ := L.trace.image TBB)
       inferInstance $ Logic.substitution_of_letterless $ Modal.TBBSet_letterless
       with
     | mem₁ hA =>
-      apply ProvabilityLogicOf.provable_iff.mpr;
+      apply hPL _ |>.mpr;
       intro f;
       exact WeakerThan.pbl $ GL.arithmetical_soundness hA;
     | mem₂ hA =>
-      replace hA := Modal.Logic.iff_provable.mp hA;
       obtain ⟨n, ⟨N, ⟨A, hA₁, hA₂⟩, hN₂⟩, rfl⟩ := hA;
-      apply provable_TBB_of_mem_trace;
+      apply provable_TBB_of_mem_trace hPL;
       simp_all only [Set.mem_iUnion, exists_prop];
       use A;
-    | mdp ihAB ihA => exact ihAB ⨀ ihA;
+    | mdp ihAB ihA =>
+      exact ihAB ⨀ ihA;
 
-@[grind ⇐]
-lemma cofinite_of_not_subset_S (h : ¬(T.ProvabilityLogicOf U).1 ⊆ Modal.S) : (T.ProvabilityLogicOf U).1.trace.Cofinite := by
-  contrapose! h;
-  rw [eq_provablityLogic_GLα_of_coinfinite_trace h];
+lemma cofinite_of_not_subset_S
+  [𝗜𝚺₁ ⪯ T] [𝗜𝚺₁ ⪯ U] [T ⪯ U]
+  {L : Logic _} [Entailment.ModusPonens L]
+  (hPL : L.IsProvabilityLogicOf T U) (hS : ¬L ⊆ Modal.S) : L.trace.Cofinite := by
+  contrapose! hS;
+  rw [eq_provablityLogic_GLα_of_coinfinite_trace hPL hS];
   simp;
 
-lemma provable_TBBMinus_of_mem_trace (h : ¬(T.ProvabilityLogicOf U).1 ⊆ Modal.S) : (T.ProvabilityLogicOf U).1 ⊢ ∼⩕ i ∈ (cofinite_of_not_subset_S h).toFinset, TBB i := by
-  have : 𝗜𝚺₁ ⪯ U := WeakerThan.trans (𝓣 := T) inferInstance inferInstance;
-
-  obtain ⟨A, hA₁, hA₂⟩ := Set.not_subset.mp h;
-  replace hA₁ : (T.ProvabilityLogicOf U).1 ⊢ A := by grind;
-  replace hA₂ : Modal.GL ⊬ A.rflSubformula.conj ➝ A := Modal.Logic.iff_provable_rflSubformula_GL_provable_S.not.mpr $ by grind;
-
+lemma provable_TBBMinus_of_mem_trace
+  [𝗜𝚺₁ ⪯ T] [𝗜𝚺₁ ⪯ U] [T ⪯ U]
+  {L : Logic _} [Entailment.Cl L]
+  (hPL : L.IsProvabilityLogicOf T U) (hS : ¬L ⊆ Modal.S)
+  : L ⊢ ∼⩕ i ∈ (cofinite_of_not_subset_S hPL hS).toFinset, TBB i := by
+  obtain ⟨A, hA₁, hA₂⟩ := Set.not_subset.mp hS;
+  replace hA₁ : L ⊢ A := Logic.iff_provable.mpr hA₁;
+  replace hA₂ : Modal.GL ⊬ A.rflSubformula.conj ➝ A := Modal.Logic.iff_provable_rflSubformula_GL_provable_S.not.mpr $ Logic.iff_provable.not.mpr hA₂;
   obtain ⟨M₁, r₁, _, hM⟩ := Modal.GL.Kripke.iff_unprovable_exists_unsatisfies_FiniteTransitiveTree.mp hA₂;
-  have : Fintype M₁ := Fintype.ofFinite _;
+  have : Fintype M₁.World := Fintype.ofFinite _;
+  have : M₁.IsFiniteTree r₁ := {};
 
   let M₀ := Model.extendRoot M₁ 1;
   let r₀ : M₀.World := Model.extendRoot.root;
   have : Fintype M₀.World := Fintype.ofFinite _
 
-  let R := Set.Finite.inter_of_left (s := (Finset.range M₁.height)) (t := (T.ProvabilityLogicOf U).1.trace) (Finset.finite_toSet _) |>.toFinset;
-
+  let R := Set.Finite.inter_of_left (s := (Finset.range M₁.height)) (t := L.trace) (Finset.finite_toSet _) |>.toFinset;
   let B := A ⋏ ⩕ i ∈ R, TBB i;
-  have hB : (T.ProvabilityLogicOf U).1 ⊢ B := by
-    suffices (T.ProvabilityLogicOf U).1 ⊢ A ∧ ∀ i ∈ R, (T.ProvabilityLogicOf U).1 ⊢ TBB i by
+  have hB : L ⊢ B := by
+    suffices L ⊢ A ∧ ∀ i ∈ R, L ⊢ TBB i by
       have ⟨h₁, h₂⟩ := this;
-      replace h₂ : (T.ProvabilityLogicOf U).1 ⊢ ⩕ i ∈ R, TBB i := Entailment.FConj'_iff_forall_provable.mpr h₂;
+      replace h₂ : L ⊢ ⩕ i ∈ R, TBB i := Entailment.FConj'_iff_forall_provable.mpr h₂;
       cl_prover [h₁, h₂];
     constructor;
     . assumption;
     . rintro i hi;
-      apply provable_TBB_of_mem_trace;
+      apply provable_TBB_of_mem_trace hPL;
       simp_all [R, Logic.trace];
 
-  have : M₁.IsFiniteTree r₁ := {};
-  let S := SolovaySentences.standard T M₀.toFrame;
+  letI S := SolovaySentences.standard T M₀.toFrame;
+  letI Tr := cofinite_of_not_subset_S hPL hS |>.toFinset;
 
-  have H₁ : 𝗜𝚺₁ ⊢ (S.realization B ➝ S.realization (∼⩕ n ∈ (cofinite_of_not_subset_S h).toFinset, TBB n)) := by
-    apply ?_ ⨀ S.SC4;
-    apply left_Udisj!_intro _;
-    rintro (a | i);
-    . suffices 𝗜𝚺₁ ⊢ S r₀ ➝ S.realization B ➝ S.realization (∼⩕ n ∈ (cofinite_of_not_subset_S h).toFinset, TBB n) by
-        rwa [(show Sum.inl a = r₀ by simp [r₀])];
-      have H₁ : 𝗜𝚺₁ ⊢ S r₀ ➝ ∼S.realization A := by
-        convert SolovaySentences.rfl_mainlemma_neg (T := T) hM A (by grind) ?_;
-        exact Satisfies.not_imp_def.mp hM |>.2;
-      have H₂ : 𝗜𝚺₁ ⊢ S.realization B ⭤ S.realization A ⋏ S.realization (⩕ n ∈ R, TBB n) := Realization.interpret.iff_provable_and_inside;
-      cl_prover [H₁, H₂];
-    . suffices 𝗜𝚺₁ ⊢ S i ➝ S.realization (B ➝ (∼⩕ n ∈ (cofinite_of_not_subset_S h).toFinset, TBB n)) by simpa;
-      apply SolovaySentences.mainlemma (S := S) (T := T) (i := i) ?_ ?_;
-      . apply Frame.root_genaretes'!;
-        simp;
-      . intro h;
-        apply Satisfies.not_def.mpr;
-        apply Satisfies.not_fconj'_def.mpr;
-        use Frame.rank (i : M₀);
-        constructor;
-        . by_contra hC;
-          apply iff_satisfies_TBB_ne_rank (w := (i : M₀)) (n := Frame.rank (i : M₀)) |>.mp;
-          . apply Satisfies.fconj'_def.mp $ Satisfies.and_def.mp h |>.2;
-            suffices Frame.rank (i : M₀) < M₁.height ∧ Frame.rank (i : M₀) ∈ (T.ProvabilityLogicOf U).1.trace by simpa [R];
-            constructor;
-            . suffices Frame.rank i < M₁.height by calc
-                _ = Frame.rank (i : M₁) := by convert Frame.extendRoot.eq_original_height
-                _ < _                   := this;
-              apply Frame.rank_lt_whole_height;
-              apply M₁.root_genaretes'!;
-              rintro rfl;
-              apply Satisfies.not_imp_def.mp hM |>.2;
-              apply Model.extendRoot.modal_equivalence_original_world.mpr;
-              exact Satisfies.and_def.mp h |>.1;
-            . simpa using hC;
-          . rfl;
-        . apply iff_satisfies_TBB_ne_rank.not.mpr;
-          simp;
-
-  replace H₁ : U ⊢ S.realization B ➝ S.realization (∼⩕ n ∈ (cofinite_of_not_subset_S h).toFinset, TBB n) := WeakerThan.pbl H₁;
-  have H₂ : U ⊢ S.realization B := ProvabilityLogicOf.provable_iff.mp hB (f := S.realization);
-  have H : U ⊢ S.realization (∼⩕ n ∈ (cofinite_of_not_subset_S h).toFinset, TBB n) := by cl_prover [H₁, H₂];
-
-  apply ProvabilityLogicOf.provable_iff.mpr;
+  apply hPL _ |>.mpr;
   intro g;
-  apply Realization.iff_provable_letterless_interpret ?_ |>.mp H;
-  apply TBBMinus_letterless';
+  apply Realization.iff_provable_letterless_interpret ?_ |>.mp;
+  . show U ⊢ S.realization (∼⩕ n ∈ Tr, TBB n);
+    apply Entailment.mdp! (φ := S.realization B) ?_ $ hPL _ |>.mp hB S.realization;
+    . apply WeakerThan.pbl (𝓢 := 𝗜𝚺₁);
+      show 𝗜𝚺₁ ⊢ (S.realization B ➝ S.realization (∼⩕ n ∈ Tr, TBB n));
+      apply ?_ ⨀ S.SC4;
+      apply left_Udisj!_intro _;
+      rintro (a | i);
+      . rw [(show Sum.inl a = r₀ by simp [r₀])];
+        have H₁ : 𝗜𝚺₁ ⊢ S r₀ ➝ ∼S.realization A := by
+          convert SolovaySentences.rfl_mainlemma_neg (T := T) hM A (by simp) $ Satisfies.not_imp_def.mp hM |>.2;
+        have H₂ : 𝗜𝚺₁ ⊢ S.realization B ⭤ S.realization A ⋏ S.realization (⩕ n ∈ R, TBB n) := Realization.interpret.iff_provable_and_inside;
+        cl_prover [H₁, H₂];
+      . suffices 𝗜𝚺₁ ⊢ S i ➝ S.realization (B ➝ (∼⩕ n ∈ Tr, TBB n)) by simpa;
+        apply SolovaySentences.mainlemma (S := S) (T := T) (i := i);
+        . apply Frame.root_genaretes'!;
+          simp;
+        . intro h;
+          apply Satisfies.not_def.mpr;
+          apply Satisfies.not_fconj'_def.mpr;
+          use Frame.rank (i : M₀);
+          constructor;
+          . by_contra hC;
+            apply iff_satisfies_TBB_ne_rank (w := (i : M₀)) (n := Frame.rank (i : M₀)) |>.mp;
+            . apply Satisfies.fconj'_def.mp $ Satisfies.and_def.mp h |>.2;
+              suffices Frame.rank (i : M₀) < M₁.height ∧ Frame.rank (i : M₀) ∈ L.trace by simpa [R];
+              constructor;
+              . suffices Frame.rank i < M₁.height by calc
+                  _ = Frame.rank (i : M₁) := by convert Frame.extendRoot.eq_original_height
+                  _ < _                   := this;
+                apply Frame.rank_lt_whole_height;
+                apply M₁.root_genaretes'!;
+                rintro rfl;
+                apply Satisfies.not_imp_def.mp hM |>.2;
+                apply Model.extendRoot.modal_equivalence_original_world.mpr;
+                exact Satisfies.and_def.mp h |>.1;
+              . simpa [Tr] using hC;
+            . rfl;
+          . apply iff_satisfies_TBB_ne_rank.not.mpr;
+            simp;
+  . apply TBBMinus_letterless';
 
 /-- Lemma 49 in [A.B05] -/
-theorem eq_provabilityLogic_GLβMinus_of_not_subset_S (h : ¬(T.ProvabilityLogicOf U).1 ⊆ Modal.S) : (T.ProvabilityLogicOf U).1 = Modal.GLβMinus (T.ProvabilityLogicOf U).1.trace := by
+theorem eq_provabilityLogic_GLβMinus_of_not_subset_S
+  [𝗜𝚺₁ ⪯ T] [𝗜𝚺₁ ⪯ U] [T ⪯ U]
+  {L : Logic _} [Entailment.Cl L] (hPL : L.IsProvabilityLogicOf T U) (hS : ¬L ⊆ Modal.S)
+  : L = Modal.GLβMinus L.trace (cofinite_of_not_subset_S hPL hS) := by
   apply Set.Subset.antisymm;
   . apply subset_GLβMinus_of_trace_cofinite;
-    grind;
+    apply cofinite_of_not_subset_S hPL hS;
   . intro A;
-    suffices Modal.GLβMinus (T.ProvabilityLogicOf U).1.trace ⊢ A → (T.ProvabilityLogicOf U).1 ⊢ A by grind;
+    rw [←Logic.iff_provable, ←Logic.iff_provable]
     intro hA;
-    dsimp [Modal.GLβMinus] at hA;
-    induction hA using Modal.Logic.sumQuasiNormal.rec!_omitSubst_strong (L₁ := Modal.GL) (L₂ := {∼(⩕ n ∈ (cofinite_of_not_subset_S h).toFinset, (TBB n))}) inferInstance (Logic.substitution_of_letterless (by grind)) with
+    induction hA using
+      Modal.Logic.sumQuasiNormal.rec!_omitSubst_strong (L₁ := Modal.GL) (L₂ := {∼(⩕ n ∈ (cofinite_of_not_subset_S hPL hS).toFinset, (TBB n))})
+      inferInstance (Logic.substitution_of_letterless TBBMinus_letterless) with
     | mem₁ hA =>
-      apply ProvabilityLogicOf.provable_iff.mpr;
+      apply hPL _ |>.mpr;
       intro f;
       exact WeakerThan.pbl $ GL.arithmetical_soundness hA;
     | mem₂ hA =>
-      suffices (T.ProvabilityLogicOf U).1 ⊢ ∼(⩕ n ∈ (cofinite_of_not_subset_S h).toFinset, (TBB n)) by
-        replace hA := Logic.iff_provable.mp hA;
-        subst hA;
-        exact this;
-      exact provable_TBBMinus_of_mem_trace h;
+      replace hA := Logic.iff_provable.mp hA;
+      subst hA;
+      exact provable_TBBMinus_of_mem_trace hPL hS;
     | mdp ihAB ihA => exact ihAB ⨀ ihA;
 
 end ProvabilityLogic
