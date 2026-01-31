@@ -2,6 +2,7 @@ module
 
 public import Foundation.Modal.Logic.S.Basic
 public import Foundation.ProvabilityLogic.GL.Completeness
+public import Foundation.ProvabilityLogic.GL.Uniform
 
 @[expose] public section
 
@@ -957,48 +958,94 @@ namespace ProvabilityLogic
 
 open LO.Entailment
 open FirstOrder.ArithmeticTheory
+open Classical
 
-theorem letterless_provabilityLogic {T : ArithmeticTheory} [𝗜𝚺₁ ⪯ T] [T.Δ₁] [ℕ ⊧ₘ* T] (X : Modal.FormulaSet ℕ) (X_letterless : X.letterless) :
-  ProvabilityLogic T (T + X.image ((letterlessStandardRealization T) ·)) = Modal.GL.sumQuasiNormal X := by
-  generalize eU : T + X.image ((letterlessStandardRealization T) ·) = U;
+
+lemma injective_letterlessStandardRealization
+  (A B : Modal.Formula ℕ) (hA : A.Letterless) (hB : B.Letterless)
+  (h : T.LetterlessStandardRealization A = T.LetterlessStandardRealization B):
+  A = B := by
+  match A, B with
+  | .atom a, _ => simp [Modal.Formula.Letterless] at hA;
+  | _, .atom b => simp [Modal.Formula.Letterless] at hB;
+  | ⊥, ⊥ => rfl;
+  | (A₁ ➝ A₂), (B₁ ➝ B₂) =>
+    simp only [Realization.interpret.def_imp, Semiformula.imp_inj] at h;
+    rw [injective_letterlessStandardRealization A₁ B₁ (by grind) (by grind) h.1, injective_letterlessStandardRealization A₂ B₂ (by grind) (by grind) h.2];
+  | □A₁, □B₁ =>
+    simp at h;
+    sorry;
+  -- | (A₁ ➝ A₂), ⊥ => simp at h;
+
+lemma injOn_letterlessStandardRealization (hX : X.Letterless) : Set.InjOn (T.LetterlessStandardRealization) X := by
+  intro A hA B hB hAB;
+  apply injective_letterlessStandardRealization A B _ _ hAB <;> grind;
+
+theorem letterless_provabilityLogic
+  {T : ArithmeticTheory} [𝗜𝚺₁ ⪯ T] [T.Δ₁] [ℕ ⊧ₘ* T]
+  (X : Modal.FormulaSet ℕ) (X_letterless : X.Letterless) :
+  ProvabilityLogic T (T + X.image (T.LetterlessStandardRealization)) = Modal.GL.sumQuasiNormal X := by
+  generalize eU : T + X.image (T.LetterlessStandardRealization) = U;
   ext A;
-  suffices T.ProvabilityLogic U ⊢! A ↔ Modal.GL.sumQuasiNormal X ⊢! A by
-    simpa [Modal.Logic.iff_provable];
+  suffices (ProvabilityLogic T U) ⊢ A ↔ Modal.GL.sumQuasiNormal X ⊢ A by simpa [Modal.Logic.iff_provable];
   constructor;
   . intro h;
     apply Modal.Logic.sumQuasiNormal.iff_provable_finite_provable_letterless X_letterless |>.mpr;
-    replace h := ProvabilityLogic.provable_iff.mp h;
-    have : U ⊢!. (GL.uniformStandardRealization T) A := h (GL.uniformStandardRealization T);
+    have : U ⊢ (GL.uniformStandardRealization T) A := ProvabilityLogic.provable_iff.mp h $ GL.uniformStandardRealization T;
     obtain ⟨Γ, hΓX, H⟩ : ∃ Γ : Finset _,
       ↑Γ ⊆ X ∧
-      T ⊢!. (Γ.image (letterlessStandardRealization T ·)).conj ➝ (GL.uniformStandardRealization T) A := by
+      T ⊢ (Γ.image (T.LetterlessStandardRealization)).conj ➝ (GL.uniformStandardRealization T) A := by
         sorry;
+        /-
+        subst eU;
+        obtain ⟨⟨s, hs⟩, b⟩ := Theory.compact this;
+        use { φ ∈ s | φ ∉ T } |>.preimage T.LetterlessStandardRealization $ by
+          apply ww;
+          intro B hB;
+          simp at hB;
+          obtain ⟨hB₁, hB₂⟩ := hB;
+          rcases Set.mem_or_mem_of_mem_union $ hs hB₁ with _ | hB_X;
+          . contradiction
+          . apply X_letterless;
+            simp at hB_X;
+            obtain ⟨C, hC, hC₂⟩ := hB_X;
+            sorry;
+
+        . constructor;
+          . intro B hB;
+            simp only [Finset.coe_preimage, Finset.coe_filter, Set.preimage_setOf_eq,  Set.mem_setOf_eq] at hB;
+            subst eU;
+            obtain ⟨hB₁, hB₂⟩ := hB;
+            rcases Set.mem_or_mem_of_mem_union $ hs hB₁ with _ | hB_X;
+            . contradiction;
+            . simp at hB_X;
+              sorry;
+          . sorry;
+        -/
     use Γ;
     constructor;
     . assumption;
-    . replace H : T ⊢!. (GL.uniformStandardRealization T) (Γ.conj) ➝ (GL.uniformStandardRealization T) A := by
-        apply C!_trans ?_ H;
-        sorry;
-      exact GL.uniformStandardRealization_spec.mp H;
+    . apply GL.uniformStandardRealization_spec.mp $ C!_trans (by
+        sorry
+      ) H;
   . intro h;
     apply ProvabilityLogic.provable_iff.mpr;
     intro f;
     obtain ⟨Y, hYX, hY⟩ := Modal.Logic.sumQuasiNormal.iff_provable_finite_provable_letterless X_letterless |>.mp h;
-    have H : T ⊢!. (f Y.conj) ➝ (f A) := GL.arithmetical_soundness hY;
-    have hf : f Y.conj = (letterlessStandardRealization T) Y.conj := Realization.letterless_interpret $ by
-      apply Modal.Formula.letterless.of_fconj;
-      intro _ _
-      apply X_letterless;
-      apply hYX;
-      assumption;
-    rw [hf] at H;
-    replace H : U ⊢!. letterlessStandardRealization T Y.conj ➝ f A := by
-      subst eU;
-      apply WeakerThan.pbl H;
+    have H : T ⊢ (f Y.conj) ➝ (f A) := GL.arithmetical_soundness hY;
+    rw [
+      show f Y.conj = T.LetterlessStandardRealization Y.conj from
+        Realization.letterless_interpret $ Modal.Formula.letterless_fconj.mpr λ B hB ↦ X_letterless B $ hYX hB
+    ] at H;
+    replace H : U ⊢ T.LetterlessStandardRealization Y.conj ➝ f A := eU ▸ WeakerThan.pbl H;
     apply Entailment.mdp! H;
-    apply Realization.interpret.iff_provable_fconj (f := letterlessStandardRealization T) |>.mpr;
+    apply Realization.interpret.iff_provable_fconj (f := T.LetterlessStandardRealization) |>.mpr;
     intro B hB;
-    have B_letterless : B.letterless := X_letterless B (hYX hB)
+    replace hB : T.LetterlessStandardRealization B ∈ T.LetterlessStandardRealization '' X := by
+      use B;
+      simp [hYX hB];
+    subst eU;
+    -- similar Context.byAxm;
     sorry;
 
 end ProvabilityLogic
