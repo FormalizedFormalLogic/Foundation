@@ -40,42 +40,47 @@ class Dia (α : Type*) where
 
 prefix:76 "◇" => Dia.dia
 
-class HasTensor (α : Type*) where
+class Rhd (α : Type*) where
+  rhd : α → α → α
+
+infixl:70 " ▷ " => Rhd.rhd
+
+class Tensor (α : Type*) where
   tensor : α → α → α
 
-infix:69 " ⨂ " => HasTensor.tensor
+infix:69 " ⨂ " => Tensor.tensor
 
-class HasPar (α : Type*) where
+class Par (α : Type*) where
   par : α → α → α
 
-infix:68 " ⅋ " => HasPar.par
+infix:68 " ⅋ " => Par.par
 
-class HasWith (α : Type*) where
+class With (α : Type*) where
   with_ : α → α → α
 
-infix:69 " & " => HasWith.with_
+infix:69 " & " => With.with_
 
-class HasPlus (α : Type*) where
+class Plus (α : Type*) where
   plus : α → α → α
 
-infix:68 " ⨁ " => HasPlus.plus
+infix:68 " ⨁ " => Plus.plus
 
-class HasBang (α : Type*) where
+class Lolli (α : Type*) where
+  lolli : α → α → α
+
+infixr:60 " ⊸ " => Lolli.lolli
+
+class Bang (α : Type*) where
   bang : α → α
 
 /-- Note that this notation "！" (U+FF01) is distinct from "!" (U+0021) -/
-prefix:75 "！" => HasBang.bang
+prefix:75 "！" => Bang.bang
 
-class HasQuest (α : Type*) where
+class Quest (α : Type*) where
   quest : α → α
 
 /-- Notice that this notation "？" (U+FF1F) is distinct from "?" (U+003F) -/
-prefix:75 "？" => HasQuest.quest
-
-class HasLolli (α : Type*) where
-  lolli : α → α → α
-
-infixr:60 " ⊸ " => HasLolli.lolli
+prefix:75 "？" => Quest.quest
 
 attribute [match_pattern]
   Tilde.tilde
@@ -84,13 +89,14 @@ attribute [match_pattern]
   Vee.vee
   Box.box
   Dia.dia
-  HasTensor.tensor
-  HasPar.par
-  HasWith.with_
-  HasPlus.plus
-  HasBang.bang
-  HasQuest.quest
-  HasLolli.lolli
+  Rhd.rhd
+  Tensor.tensor
+  Par.par
+  With.with_
+  Plus.plus
+  Lolli.lolli
+  Bang.bang
+  Quest.quest
 
 class Exp (α : Type*) where
   exp : α → α
