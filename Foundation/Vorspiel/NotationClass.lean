@@ -58,7 +58,7 @@ infix:68 " ⅋ " => Par.par
 class With (α : Type*) where
   with_ : α → α → α
 
-infix:69 " & " => With.with_
+infix:69 " 🙲 " => With.with_
 
 class Plus (α : Type*) where
   plus : α → α → α

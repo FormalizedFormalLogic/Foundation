@@ -167,7 +167,7 @@ end Point
 
 /-! ### Basic coherence spaces -/
 
-open CoherenceSpace
+namespace CoherenceSpace
 
 instance : Bot (CoherenceSpace α) := ⟨{
   Coherence := Eq
@@ -179,23 +179,23 @@ instance : Top (CoherenceSpace α) := ⟨{
   reflexive _ := by trivial
   symmetric _ _ _ := by trivial }⟩
 
-inductive CoherenceSpace.Top
+inductive Top
 
-inductive CoherenceSpace.Zero
+inductive Zero
 
-instance : CoherenceSpace CoherenceSpace.Top := ⊥
+instance : CoherenceSpace Top := ⊥
 
 instance : CoherenceSpace CoherenceSpace.Zero := ⊥
 
-inductive CoherenceSpace.One where
-  | star : CoherenceSpace.One
+inductive One where
+  | star : One
 
-inductive CoherenceSpace.Bot where
+inductive Bot where
   | absurd : CoherenceSpace.Bot
 
-instance : CoherenceSpace CoherenceSpace.One := ⊤
+instance : CoherenceSpace One := ⊤
 
-instance : CoherenceSpace CoherenceSpace.Bot := ⊤
+instance : CoherenceSpace Bot := ⊤
 
 /-- A empty set is a coherence space -/
 instance : CoherenceSpace PEmpty := ⊥
@@ -330,7 +330,7 @@ lemma mk_coherence_mk_iff {a₀ a₁ : α} {b₀ b₁ : β} :
 
 end Par
 
-namespace CoherenceSpace
+section ArrowPar
 
 variable {ι : Type*} {ρ : ι → Type*} [(i : ι) → CoherenceSpace (ρ i)]
 
@@ -361,7 +361,7 @@ lemma arrowPar_strictCoherence_iff (f g : (i : ι) → ρ i) :
   simp [StrictCoherence.iff_coherence_ne, arrowPar_coherence_iff]
   grind
 
-end CoherenceSpace
+end ArrowPar
 
 /-! #### ⊸: Linear implication -/
 
@@ -490,5 +490,7 @@ instance : CoherenceSpace (BigPlus ρ) where
 lemma coherence_def (p q : BigPlus ρ) : p ⁐ q ↔ Coherence p q := by rfl
 
 end BigPlus
+
+end CoherenceSpace
 
 end LO
