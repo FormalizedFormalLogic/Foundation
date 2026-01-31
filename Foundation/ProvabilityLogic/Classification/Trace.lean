@@ -458,7 +458,7 @@ namespace ProvabilityLogic
 open LO.Entailment Entailment.FiniteContext
 open FirstOrder FirstOrder.ProvabilityAbstraction
 open Arithmetic
-open ArithmeticTheory (ProvabilityLogicOf)
+open ArithmeticTheory (provabilityLogicOn)
 open Modal
 open Modal.Kripke
 open Formula.Kripke
@@ -468,7 +468,7 @@ variable {A : Formula ℕ}
 
 lemma provable_TBB_of_mem_trace
   [𝗜𝚺₁ ⪯ T] [𝗜𝚺₁ ⪯ U]
-  {L : Logic _} (hPL : L.IsProvabilityLogicOf T U)
+  {L : Logic _} (hPL : L.IsProvabilityLogic T U)
   {n : ℕ} (h : n ∈ L.trace) : L ⊢ Modal.TBB n := by
   obtain ⟨A, hA₁, ⟨M, r, _, _, rfl, h₂⟩⟩ := by simpa using h;
   replace hA₁ : ∀ f : T.StandardRealization, U ⊢ f A := hPL A |>.mp $ by grind;
@@ -525,7 +525,7 @@ lemma provable_TBB_of_mem_trace
 theorem eq_provablityLogic_GLα_of_coinfinite_trace
   [𝗜𝚺₁ ⪯ T] [𝗜𝚺₁ ⪯ U] [T ⪯ U] -- TODO: `[T ⪯ U]` might be necessary
   {L : Logic _} [Entailment.ModusPonens L]
-  (hPL : L.IsProvabilityLogicOf T U) (hCi : L.trace.Coinfinite)
+  (hPL : L.IsProvabilityLogic T U) (hCi : L.trace.Coinfinite)
   : L = Modal.GLα L.trace := by
   apply Set.Subset.antisymm;
   . apply subset_GLα_of_trace_coinfinite hCi;
@@ -551,7 +551,7 @@ theorem eq_provablityLogic_GLα_of_coinfinite_trace
 lemma cofinite_of_not_subset_S
   [𝗜𝚺₁ ⪯ T] [𝗜𝚺₁ ⪯ U] [T ⪯ U]
   {L : Logic _} [Entailment.ModusPonens L]
-  (hPL : L.IsProvabilityLogicOf T U) (hS : ¬L ⊆ Modal.S) : L.trace.Cofinite := by
+  (hPL : L.IsProvabilityLogic T U) (hS : ¬L ⊆ Modal.S) : L.trace.Cofinite := by
   contrapose! hS;
   rw [eq_provablityLogic_GLα_of_coinfinite_trace hPL hS];
   simp;
@@ -559,7 +559,7 @@ lemma cofinite_of_not_subset_S
 lemma provable_TBBMinus_of_mem_trace
   [𝗜𝚺₁ ⪯ T] [𝗜𝚺₁ ⪯ U] [T ⪯ U]
   {L : Logic _} [Entailment.Cl L]
-  (hPL : L.IsProvabilityLogicOf T U) (hS : ¬L ⊆ Modal.S)
+  (hPL : L.IsProvabilityLogic T U) (hS : ¬L ⊆ Modal.S)
   : L ⊢ ∼⩕ i ∈ (cofinite_of_not_subset_S hPL hS).toFinset, TBB i := by
   obtain ⟨A, hA₁, hA₂⟩ := Set.not_subset.mp hS;
   replace hA₁ : L ⊢ A := Logic.iff_provable.mpr hA₁;
@@ -635,7 +635,7 @@ lemma provable_TBBMinus_of_mem_trace
 /-- Lemma 49 in [A.B05] -/
 theorem eq_provabilityLogic_GLβMinus_of_not_subset_S
   [𝗜𝚺₁ ⪯ T] [𝗜𝚺₁ ⪯ U] [T ⪯ U]
-  {L : Logic _} [Entailment.Cl L] (hPL : L.IsProvabilityLogicOf T U) (hS : ¬L ⊆ Modal.S)
+  {L : Logic _} [Entailment.Cl L] (hPL : L.IsProvabilityLogic T U) (hS : ¬L ⊆ Modal.S)
   : L = Modal.GLβMinus L.trace (cofinite_of_not_subset_S hPL hS) := by
   apply Set.Subset.antisymm;
   . apply subset_GLβMinus_of_trace_cofinite;
