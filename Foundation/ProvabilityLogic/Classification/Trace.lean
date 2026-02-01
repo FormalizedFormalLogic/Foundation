@@ -524,9 +524,9 @@ lemma provable_TBB_of_mem_trace
 /-- Corollary 48 in [A.B05] -/
 theorem eq_provablityLogic_GLα_of_coinfinite_trace
   [𝗜𝚺₁ ⪯ T] [𝗜𝚺₁ ⪯ U] [T ⪯ U] -- TODO: `[T ⪯ U]` might be necessary
-  {L : Logic _} [Entailment.ModusPonens L]
-  (hPL : L.IsProvabilityLogic T U) (hCi : L.trace.Coinfinite)
+  {L : Logic _} (hPL : L.IsProvabilityLogic T U) (hCi : L.trace.Coinfinite)
   : L = Modal.GLα L.trace := by
+  haveI := Logic.inst_Cl_of_isProvabilityLogic hPL;
   apply Set.Subset.antisymm;
   . apply subset_GLα_of_trace_coinfinite hCi;
   . intro A;
@@ -550,17 +550,18 @@ theorem eq_provablityLogic_GLα_of_coinfinite_trace
 
 lemma cofinite_of_not_subset_S
   [𝗜𝚺₁ ⪯ T] [𝗜𝚺₁ ⪯ U] [T ⪯ U]
-  {L : Logic _} [Entailment.ModusPonens L]
-  (hPL : L.IsProvabilityLogic T U) (hS : ¬L ⊆ Modal.S) : L.trace.Cofinite := by
+  {L : Logic _} (hPL : L.IsProvabilityLogic T U) (hS : ¬L ⊆ Modal.S)
+  : L.trace.Cofinite := by
   contrapose! hS;
   rw [eq_provablityLogic_GLα_of_coinfinite_trace hPL hS];
   simp;
 
 lemma provable_TBBMinus_of_mem_trace
   [𝗜𝚺₁ ⪯ T] [𝗜𝚺₁ ⪯ U] [T ⪯ U]
-  {L : Logic _} [Entailment.Cl L]
-  (hPL : L.IsProvabilityLogic T U) (hS : ¬L ⊆ Modal.S)
+  {L : Logic _} (hPL : L.IsProvabilityLogic T U) (hS : ¬L ⊆ Modal.S)
   : L ⊢ ∼⩕ i ∈ (cofinite_of_not_subset_S hPL hS).toFinset, TBB i := by
+  haveI := Logic.inst_Cl_of_isProvabilityLogic hPL;
+
   obtain ⟨A, hA₁, hA₂⟩ := Set.not_subset.mp hS;
   replace hA₁ : L ⊢ A := Logic.iff_provable.mpr hA₁;
   replace hA₂ : Modal.GL ⊬ A.rflSubformula.conj ➝ A := Modal.Logic.iff_provable_rflSubformula_GL_provable_S.not.mpr $ Logic.iff_provable.not.mpr hA₂;
@@ -635,8 +636,10 @@ lemma provable_TBBMinus_of_mem_trace
 /-- Lemma 49 in [A.B05] -/
 theorem eq_provabilityLogic_GLβMinus_of_not_subset_S
   [𝗜𝚺₁ ⪯ T] [𝗜𝚺₁ ⪯ U] [T ⪯ U]
-  {L : Logic _} [Entailment.Cl L] (hPL : L.IsProvabilityLogic T U) (hS : ¬L ⊆ Modal.S)
+  {L : Logic _} (hPL : L.IsProvabilityLogic T U) (hS : ¬L ⊆ Modal.S)
   : L = Modal.GLβMinus L.trace (cofinite_of_not_subset_S hPL hS) := by
+  haveI := Logic.inst_Cl_of_isProvabilityLogic hPL;
+
   apply Set.Subset.antisymm;
   . apply subset_GLβMinus_of_trace_cofinite;
     apply cofinite_of_not_subset_S hPL hS;
