@@ -1,9 +1,11 @@
 module
 
 public import Foundation.ProvabilityLogic.Realization
+public import Foundation.ProvabilityLogic.GL.Soundness
 /-!
 # Provability logic of arithmetic theory
 -/
+
 
 @[expose] public section
 
@@ -51,6 +53,18 @@ def inst_Łukasiewiicz_of_isProvabilityLogic (hPL : L.IsProvabilityLogic T U) : 
 def inst_Cl_of_isProvabilityLogic (hPL : L.IsProvabilityLogic T U) : Entailment.Cl L := by
   have := inst_Łukasiewiicz_of_isProvabilityLogic hPL;
   infer_instance;
+
+lemma subset_GL_of_isProvabilityLogic [𝗜𝚺₁ ⪯ T] [𝗜𝚺₁ ⪯ U] [T ⪯ U] (hPL : L.IsProvabilityLogic T U) : Modal.GL ⊆ L := by
+  intro A hA;
+  simp only [←Modal.Logic.iff_provable] at ⊢ hA;
+  apply hPL A |>.mpr;
+  intro f;
+  apply Entailment.WeakerThan.pbl (𝓢 := T);
+  apply ProvabilityLogic.GL.arithmetical_soundness (𝔅 := T.standardProvability) hA;
+
+lemma provable_GL_of_isProvabilityLogic [𝗜𝚺₁ ⪯ T] [𝗜𝚺₁ ⪯ U] [T ⪯ U] (hPL : L.IsProvabilityLogic T U) : Modal.GL ⊢ A → L ⊢ A := by
+  simp only [Modal.Logic.iff_provable];
+  apply subset_GL_of_isProvabilityLogic hPL;
 
 end Logic
 

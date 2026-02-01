@@ -374,6 +374,9 @@ lemma Formula.trace.finite_of_coinfinite (h_ci : φ.trace.Coinfinite) : φ.trace
   apply or_iff_not_imp_right.mp $ Formula.trace.finite_or_cofinite;
   simpa;
 
+/--
+  `L` is contained in `GLα L.trace` when `L.trace` is coinfinite
+-/
 lemma subset_GLα_of_trace_coinfinite (hL : L.trace.Coinfinite) : L ⊆ Modal.GLα L.trace := by
   intro φ hφ;
   apply Modal.Logic.iff_provable.mp;
@@ -403,6 +406,9 @@ lemma subset_GLα_of_trace_coinfinite (hL : L.trace.Coinfinite) : L ⊆ Modal.GL
       apply hr _ hC rfl;
     . rfl;
 
+/--
+  `L` is contained in `GLβMinus L.trace` when `L.trace` is cofinite
+-/
 lemma subset_GLβMinus_of_trace_cofinite (hL : L.trace.Cofinite) : L ⊆ Modal.GLβMinus L.trace := by
   intro φ hφ;
   apply Modal.Logic.iff_provable.mp;
@@ -431,8 +437,6 @@ lemma subset_GLβMinus_of_trace_cofinite (hL : L.trace.Cofinite) : L ⊆ Modal.G
       apply hr M.height φ hφ hC rfl;
     . rfl;
 
-protected abbrev GLαOmega := Modal.GLα Set.univ
-
 @[simp]
 lemma eq_GLβMinusOmega : Modal.GLβMinus Set.univ = Set.univ := by
   apply Set.eq_univ_iff_forall.mpr;
@@ -444,12 +448,6 @@ lemma eq_GLβMinusOmega : Modal.GLβMinus Set.univ = Set.univ := by
   . simp;
   . suffices Modal.GL ⊢ ∼⊤ ➝ φ by simpa;
     cl_prover;
-
-protected abbrev D_inter_GLβMinus (β : Set ℕ) (hβ : β.Cofinite := by grind) := Modal.D ∩ Modal.GLβMinus β
-@[simp] lemma eq_D_inter_GLβMinusOmega : Modal.D_inter_GLβMinus Set.univ = Modal.D := by simp
-
-protected abbrev S_inter_GLβMinus (β : Set ℕ) (hβ : β.Cofinite := by grind) := Modal.S ∩ Modal.GLβMinus β
-@[simp] lemma eq_S_inter_GLβMinusOmega : Modal.S_inter_GLβMinus Set.univ = Modal.S := by simp
 
 end Modal
 
@@ -521,9 +519,13 @@ lemma provable_TBB_of_mem_trace
     Realization.interpret.def_bot
   ];
 
-/-- Corollary 48 in [A.B05] -/
+
+/--
+  `L` equals `GLα L.trace` when `L.trace` is coinfinite.
+  - Corollary 48 in [A.B05]
+-/
 theorem eq_provablityLogic_GLα_of_coinfinite_trace
-  [𝗜𝚺₁ ⪯ T] [𝗜𝚺₁ ⪯ U] [T ⪯ U] -- TODO: `[T ⪯ U]` might be necessary
+  [𝗜𝚺₁ ⪯ T] [𝗜𝚺₁ ⪯ U] [T ⪯ U] -- TODO: `[T ⪯ U]` might not be necessary
   {L : Logic _} (hPL : L.IsProvabilityLogic T U) (hCi : L.trace.Coinfinite)
   : L = Modal.GLα L.trace := by
   haveI := Logic.inst_Cl_of_isProvabilityLogic hPL;
@@ -633,7 +635,10 @@ lemma provable_TBBMinus_of_mem_trace
             simp;
   . apply TBBMinus_letterless';
 
-/-- Lemma 49 in [A.B05] -/
+/--
+  `L` equals `GLβMinus L.trace` when `L` is not a subset of `S`.
+  - Lemma 49 in [A.B05]
+-/
 theorem eq_provabilityLogic_GLβMinus_of_not_subset_S
   [𝗜𝚺₁ ⪯ T] [𝗜𝚺₁ ⪯ U] [T ⪯ U]
   {L : Logic _} (hPL : L.IsProvabilityLogic T U) (hS : ¬L ⊆ Modal.S)
