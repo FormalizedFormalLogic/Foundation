@@ -82,9 +82,6 @@ open Formula.Kripke
 variable {T U : ArithmeticTheory} [Theory.Δ₁ T] [𝗜𝚺₁ ⪯ T] [𝗜𝚺₁ ⪯ U] [T ⪯ U]
 variable {L : Modal.Logic ℕ}
 
-@[grind .] lemma GLαω_ssubset_D : Modal.GLαω ⊂ Modal.D := by sorry;
-@[grind .] lemma D_ssubset_S : Modal.D ⊂ Modal.S := by sorry;
-
 /--
   Corollary 50 (half) in [A.B05]
 -/
@@ -120,35 +117,40 @@ theorem no_logic_between_D_S
   (L : Modal.Logic ℕ) (hPL : L.IsProvabilityLogic T U) (hT : L.trace = Set.univ)
   : ¬((Modal.D ⊂ L) ∧ (L ⊂ Modal.S)) := by sorry;
 
-lemma beklemishev_lemma
-  (L : Modal.Logic ℕ) (hPL : L.IsProvabilityLogic T U) (hT : L.trace = Set.univ) (hS : L ⊆ Modal.S)
-  : L = Modal.GLαω ∨ L = Modal.D ∨ L = Modal.S := by
-  wlog hS : L ⊂ Modal.S; . grind;
-  have hGLαω_sub := subset_GLαω_of_eq_trace_univ L hPL hT;
-  /-
-  have H₂ := no_logic_between_GLαω_D L hPL hT;
-  push_neg at H₂;
-  have H₃ := no_logic_between_D_S L hPL hT;
-  push_neg at H₃;
-  -/
-  rcases show (L = Modal.GLαω ∨ Modal.GLαω ⊂ L) by grind with (_ | h); . grind;
-  rcases show (L = Modal.S ∨ L ⊂ Modal.S) by grind with (_ | h); . grind;
-  right; right;
 
-  have H₁ : ¬L ⊂ Modal.D := by grind [no_logic_between_GLαω_D L hPL hT];
-  have H₂ : ¬Modal.D ⊂ L  := by grind [no_logic_between_D_S L hPL hT];
-
-  have H₁ := Set.ssubset_iff_subset_ne.not.mp H₁;
-  push_neg at H₁;
-
-  have H₂ := Set.ssubset_iff_subset_ne.not.mp H₂;
-  push_neg at H₂;
-
+/--
+  Assertion 1 in [Bek90]
+-/
+theorem eq_S_of_not_subset_D_of_eq_trace_univ
+  (L : Modal.Logic ℕ) (hPL : L.IsProvabilityLogic T U) (hT : L.trace = Set.univ)
+  : Modal.D ⊂ L → L = Modal.S := by
+  have := no_logic_between_D_S L hPL hT;
+  push_neg at this;
   sorry;
 
 /--
+  If `L.trace` is omega then `L` is one of `GLαω`, `D`, and `S`.
+  - Assertion 3 in [Bek90]
+-/
+lemma classification_S_sublogics_of_omega_trace
+  (L : Modal.Logic ℕ) (hPL : L.IsProvabilityLogic T U) (hT : L.trace = Set.univ) (L_subset_S : L ⊆ Modal.S) :
+  L = Modal.GLαω ∨
+  L = Modal.D ∨
+  L = Modal.S
+  := by
+  wlog GLαω_ssubset_L : Modal.GLαω ⊂ L; . grind [subset_GLαω_of_eq_trace_univ];
+
+  -- By Assertion 2 in [Bek90] using `GLαω_ssubset_L`
+  have : Modal.D ⊆ L := by sorry;
+  rcases Set.eq_or_ssubset_of_subset this with rfl | D_ssubset_L;
+  case inl => grind;
+
+  right; right;
+  apply eq_S_of_not_subset_D_of_eq_trace_univ L hPL hT D_ssubset_L;
+
+/--
   Suppose `L.trace` is cofinite and `L ⊆ S`.
-  Then, `L` is provability logic if and only if `L = (L.αPL L.traceᶜ) ∩ (GLβMinus L.trace)`.
+  Then `L` is provability logic iff `L = (L.αPL L.traceᶜ) ∩ (GLβMinus L.trace)`.
 -/
 theorem iff_isProvabilityLogic_eq_inter_αPL_GLβMinus_of_cofinite_trace_of_subset_S
   (L : Modal.Logic ℕ) (hCf : L.trace.Cofinite) (hS : L ⊆ Modal.S) :
@@ -159,13 +161,15 @@ theorem iff_isProvabilityLogic_eq_inter_αPL_GLβMinus_of_cofinite_trace_of_subs
   . rintro h;
     sorry;
 
-lemma artemov_isProvabilityLogic [L.Substitution] (hPL : L.IsProvabilityLogic T U) : (L.αPL L.traceᶜ).IsProvabilityLogic T (U + (L.traceᶜ.image (T.LetterlessStandardRealization $ Modal.TBB ·))) := by
+lemma artemov_isProvabilityLogic [L.Substitution] (hPL : L.IsProvabilityLogic T U)
+  : (L.αPL L.traceᶜ).IsProvabilityLogic T (U + (L.traceᶜ.image (T.LetterlessStandardRealization $ Modal.TBB ·))) := by
   apply Modal.Logic.αPL_isProvabilityLogic hPL;
 
 lemma artemov_subset_S (hS : L ⊆ Modal.S) : L.αPL L.traceᶜ ⊆ Modal.S := by
   apply Modal.Logic.αPL_subset_S hS;
 
-lemma artemov_trace_univ (hS : L ⊆ Modal.S) : (L.αPL L.traceᶜ).trace = Set.univ := by
+lemma artemov_trace_univ (hS : L ⊆ Modal.S)
+  : (L.αPL L.traceᶜ).trace = Set.univ := by
   simp [Set.eq_univ_iff_forall, Modal.Logic.αPL];
   intro n;
   use (TBB n);
@@ -178,7 +182,7 @@ lemma artemov_inbetween_GLαω_S [L.Substitution] (hPL : L.IsProvabilityLogic T 
   have : T ⪯ U + (L.traceᶜ.image (T.LetterlessStandardRealization $ Modal.TBB ·)) := by trans U <;> infer_instance;
   apply subset_GLαω_of_eq_trace_univ (L := (L.αPL L.traceᶜ)) (artemov_isProvabilityLogic hPL) (artemov_trace_univ hS);
 
-lemma classification_lemma
+lemma classification_S_sublogics_of_cofinite_trace
   [L.Substitution] (hPL : L.IsProvabilityLogic T U) (hCf : L.trace.Cofinite) (hS : L ⊆ Modal.S) :
   L = Modal.GLαω ∩ (Modal.GLβMinus L.trace) ∨
   L = Modal.D ∩ (Modal.GLβMinus L.trace) ∨
@@ -186,11 +190,13 @@ lemma classification_lemma
   := by
   have : 𝗜𝚺₁ ⪯ U + (L.traceᶜ.image (T.LetterlessStandardRealization $ Modal.TBB ·)) := by trans U <;> infer_instance;
   have : T ⪯ U + (L.traceᶜ.image (T.LetterlessStandardRealization $ Modal.TBB ·)) := by trans U <;> infer_instance;
-  rcases beklemishev_lemma (L := (L.αPL L.traceᶜ)) (artemov_isProvabilityLogic hPL) (artemov_trace_univ hS) (artemov_subset_S hS) with (_ | _ | _) <;>
+  rcases classification_S_sublogics_of_omega_trace (L := (L.αPL L.traceᶜ)) (artemov_isProvabilityLogic hPL) (artemov_trace_univ hS) (artemov_subset_S hS) with (_ | _ | _);
+  . grind [iff_isProvabilityLogic_eq_inter_αPL_GLβMinus_of_cofinite_trace_of_subset_S L hCf hS |>.mp hPL];
+  . grind [iff_isProvabilityLogic_eq_inter_αPL_GLβMinus_of_cofinite_trace_of_subset_S L hCf hS |>.mp hPL];
   . grind [iff_isProvabilityLogic_eq_inter_αPL_GLβMinus_of_cofinite_trace_of_subset_S L hCf hS |>.mp hPL];
 
 open Classical in
-theorem classification_provability_logic
+theorem classification_provability_logics
   (L : Modal.Logic ℕ) [L.Substitution] (hPL : L.IsProvabilityLogic T U) :
   if h_coinfinite : L.trace.Coinfinite then
     L = Modal.GLα L.trace
@@ -199,13 +205,13 @@ theorem classification_provability_logic
     if ¬(L ⊆ Modal.S) then
       L = Modal.GLβMinus L.trace
     else
-      L = Modal.GLαω                   ∨
+      L = Modal.GLαω                       ∨
       L = Modal.D ∩ Modal.GLβMinus L.trace ∨
       L = Modal.S ∩ Modal.GLβMinus L.trace
   := by
   split_ifs with h_coinfinite h_S;
   . exact eq_provablityLogic_GLα_of_coinfinite_trace hPL h_coinfinite;
-  . rcases classification_lemma hPL (Set.iff_cofinite_not_coinfinite.mpr h_coinfinite) h_S with (_ | _ | _);
+  . rcases classification_S_sublogics_of_cofinite_trace hPL (Set.iff_cofinite_not_coinfinite.mpr h_coinfinite) h_S with (_ | _ | _);
     . left;
       sorry;
     . grind;
