@@ -82,21 +82,21 @@ lemma symm : sumQuasiNormal L₁ L₂ = sumQuasiNormal L₂ L₁ := by
     | mdp _ _ ihφψ ihφ => exact sumQuasiNormal.mdp ihφψ ihφ;
     | subst _ ihφ => exact sumQuasiNormal.subst ihφ;
 
-variable [DecidableEq α]
+-- variable [DecidableEq α]
 
-instance [Entailment.Cl L₁] : Entailment.Łukasiewicz (sumQuasiNormal L₁ L₂) where
+instance [DecidableEq α] [Entailment.Cl L₁] : Entailment.Łukasiewicz (sumQuasiNormal L₁ L₂) where
   implyK {_ _} := by constructor; apply sumQuasiNormal.mem₁; simp;
   implyS {_ _ _} := by constructor; apply sumQuasiNormal.mem₁; simp;
   elimContra {_ _} := by constructor; apply sumQuasiNormal.mem₁; simp;
 
-instance [L₁.IsQuasiNormal] : (sumQuasiNormal L₁ L₂).IsQuasiNormal where
+instance [DecidableEq α] [L₁.IsQuasiNormal] : (sumQuasiNormal L₁ L₂).IsQuasiNormal where
   K _ _ := by constructor; apply sumQuasiNormal.mem₁; simp;
   subst s hφ := by
     rw [iff_provable] at ⊢ hφ;
     apply sumQuasiNormal.subst;
     assumption;
 
-instance [L₂.IsQuasiNormal] : (sumQuasiNormal L₁ L₂).IsQuasiNormal := by
+instance [DecidableEq α] [L₂.IsQuasiNormal] : (sumQuasiNormal L₁ L₂).IsQuasiNormal := by
   rw [sumQuasiNormal.symm];
   infer_instance;
 
@@ -109,7 +109,6 @@ instance : L₂ ⪯ sumQuasiNormal L₁ L₂ := by
   rw [sumQuasiNormal.symm];
   infer_instance;
 
-omit [DecidableEq α] in
 lemma iff_subset {X Y} : L.sumQuasiNormal Y ⊆ L.sumQuasiNormal X ↔ ∀ ψ ∈ Y, L.sumQuasiNormal X ⊢ ψ := by
   constructor;
   . intro h ψ hψ;
@@ -125,13 +124,17 @@ lemma iff_subset {X Y} : L.sumQuasiNormal Y ⊆ L.sumQuasiNormal X ↔ ∀ ψ �
     | mdp ihφψ ihφ => exact ihφψ ⨀ ihφ;
     | subst ihφ => apply Logic.subst; assumption;
 
+@[simp, grind .] lemma subset₁ : L₁ ⊆ sumQuasiNormal L₁ L₂ := by grind;
+@[simp, grind .] lemma subset₂ : L₂ ⊆ sumQuasiNormal L₁ L₂ := by grind;
+
 section
 
-variable [L₁.IsQuasiNormal]
+-- variable [L₁.IsQuasiNormal]
+variable [Entailment.Cl L₁]
 
 open LO.Entailment
 
-lemma provable_of_finite_provable : (∃ X : Finset _, (X.toSet ⊆ L₂) ∧ L₁ ⊢ X.conj ➝ φ) → sumQuasiNormal L₁ L₂ ⊢ φ := by
+lemma provable_of_finite_provable [DecidableEq α] : (∃ X : Finset _, (X.toSet ⊆ L₂) ∧ L₁ ⊢ X.conj ➝ φ) → sumQuasiNormal L₁ L₂ ⊢ φ := by
   rintro ⟨X, hX₂, hφ⟩;
   apply (WeakerThan.pbl (𝓣 := sumQuasiNormal L₁ L₂) hφ) ⨀ ?_;
   apply FConj!_iff_forall_provable.mpr;
@@ -140,7 +143,7 @@ lemma provable_of_finite_provable : (∃ X : Finset _, (X.toSet ⊆ L₂) ∧ L�
   apply iff_provable.mpr;
   apply hX₂ hχ;
 
-lemma finite_provable_of_provable (h : ∀ ξ ∈ L₂, ∀ s : Substitution _, ξ⟦s⟧ ∈ L₂) :
+lemma finite_provable_of_provable [DecidableEq α] [L₁.Substitution] (h : ∀ ξ ∈ L₂, ∀ s : Substitution _, ξ⟦s⟧ ∈ L₂) :
   sumQuasiNormal L₁ L₂ ⊢ φ → ∃ X : Finset _, (↑X ⊆ L₂) ∧ L₁ ⊢ X.conj ➝ φ := by
   intro h;
   induction h using sumQuasiNormal.rec! with
@@ -174,18 +177,16 @@ lemma finite_provable_of_provable (h : ∀ ξ ∈ L₂, ∀ s : Substitution _, 
     . apply C!_trans ?_ (Logic.subst s hφ);
       exact fconj_subst;
 
-lemma iff_provable_finite_provable (h : ∀ ξ ∈ L₂, ∀ s : Substitution _, ξ⟦s⟧ ∈ L₂)  :
+lemma iff_provable_finite_provable [DecidableEq α] [L₁.Substitution] (h : ∀ ξ ∈ L₂, ∀ s : Substitution _, ξ⟦s⟧ ∈ L₂)  :
   sumQuasiNormal L₁ L₂ ⊢ φ ↔ ∃ X : Finset _, (↑X ⊆ L₂) ∧ L₁ ⊢ X.conj ➝ φ := ⟨finite_provable_of_provable h, provable_of_finite_provable⟩
 
-omit [DecidableEq α] in
-lemma iff_provable_finite_provable_letterless [DecidableEq α] {L₁ L₂ : Logic α} {φ : Formula _} [L₁.IsQuasiNormal] (L₂_letterless : FormulaSet.Letterless L₂)
+lemma iff_provable_finite_provable_letterless [DecidableEq α] [L₁.Substitution] (L₂_letterless : FormulaSet.Letterless L₂)
   : sumQuasiNormal L₁ L₂ ⊢ φ ↔ ∃ X : Finset _, (↑X ⊆ L₂) ∧ L₁ ⊢ X.conj ➝ φ := by
   apply iff_provable_finite_provable;
   grind;
 
 end
 
-omit [DecidableEq α] in
 @[simp]
 lemma with_empty [DecidableEq α] {L₁ : Logic α} [L₁.IsQuasiNormal] : L₁.sumQuasiNormal ∅ = L₁ := by
   ext φ;
@@ -199,6 +200,36 @@ lemma with_empty [DecidableEq α] {L₁ : Logic α} [L₁.IsQuasiNormal] : L₁.
     | subst ihφ => exact Logic.subst _ ihφ;
   . intro h;
     exact Entailment.WeakerThan.pbl h;
+
+/-- If `L₁` and `L₂` are already subset `L₃`, then `L₁ + L₂` is a subset of `L₃`. -/
+lemma covered [Entailment.ModusPonens L₃] [Logic.Substitution L₃] (hX : L₁ ⊆ L₃) (h : L₂ ⊆ L₃) : sumQuasiNormal L₁ L₂ ⊆ L₃ := by
+  intro A hA;
+  rw [←Logic.iff_provable] at hA ⊢;
+  induction hA using Modal.Logic.sumQuasiNormal.rec! with
+  | mem₁ hA => grind;
+  | mem₂ hA => grind;
+  | subst ihA => apply Logic.subst _ ihA;
+  | mdp ihAB ihA => exact ihAB ⨀ ihA;
+
+@[grind =]
+lemma sum_sum_eq_sum_union : (L.sumQuasiNormal X).sumQuasiNormal Y = L.sumQuasiNormal (X ∪ Y) := by
+  apply Set.Subset.antisymm;
+  . apply covered;
+    . apply covered;
+      . grind;
+      . trans (L.sumQuasiNormal X);
+        . grind;
+        . grind [iff_subset];
+    . trans (L.sumQuasiNormal Y);
+      . grind;
+      . grind [iff_subset];
+  . apply covered;
+    . trans (L.sumQuasiNormal X) <;> grind;
+    . apply Set.union_subset_iff.mpr;
+      constructor;
+      . trans (L.sumQuasiNormal X) <;> grind;
+      . grind;
+
 
 end sumQuasiNormal
 
@@ -338,6 +369,23 @@ lemma sumQuasiNormal.rec!_omitSubst_strong (hL₁ : L₁.Substitution) (hL₂ : 
   apply sumQuasiNormal.rec!_omitSubst;
   . intro φ h _; apply mem₁; grind;
   . intro φ h _; apply mem₂; grind;
+  . assumption;
+
+lemma sumQuasiNormal.rec_letterless_expansion [L₁.Substitution] (X : FormulaSet α) (hX : X.Letterless)
+  {motive : (φ : Formula α) → ((L₁.sumQuasiNormal X) ⊢ φ) → Sort}
+  (mem₁  : ∀ {φ}, (h : L₁ ⊢ φ) → motive φ (mem₁! h))
+  (mem₂  : ∀ {φ}, (h : φ ∈ X) → motive φ (mem₂! $ Logic.iff_provable.mpr h))
+  (mdp   : ∀ {φ ψ : Formula α},
+           {hφψ : (L₁.sumQuasiNormal X) ⊢ (φ ➝ ψ)} → {hφ : (L₁.sumQuasiNormal X) ⊢ φ} →
+           motive (φ ➝ ψ) hφψ → motive φ hφ → motive ψ (hφψ ⨀ hφ)
+  )
+  : ∀ {φ}, (h : L₁.sumQuasiNormal X ⊢ φ) → motive φ h := by
+  apply rec!_omitSubst_strong;
+  . assumption;
+  . apply Modal.Logic.substitution_of_letterless hX;
+  . assumption;
+  . simp only [←Logic.iff_provable] at mem₂;
+    apply mem₂;
   . assumption;
 
 end Logic
