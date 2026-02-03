@@ -457,7 +457,7 @@ open LO.Entailment Entailment.FiniteContext
 open FirstOrder FirstOrder.ProvabilityAbstraction
 open Arithmetic
 open ArithmeticTheory (provabilityLogicOn)
-open Modal
+open LO.Modal
 open Modal.Kripke
 open Formula.Kripke
 

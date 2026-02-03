@@ -956,6 +956,43 @@ end
 end Modal
 
 
+namespace FirstOrder.Theory
+
+open LO.Entailment
+
+variable
+  {L : Language} [L.DecidableEq]
+  {T U : Theory L} [DecidablePred (· ∈ T)] [DecidablePred (· ∈ U)]
+  {φ : Sentence L}
+
+lemma compact_add_right (h : (T + U) ⊢ φ) : ∃ (s : { s : Finset (Sentence L) // ↑s ⊆ U }), T ⊢ s.1.conj ➝ φ := by
+  obtain ⟨⟨s, hsTU⟩, hs⟩ := Theory.compact' h;
+  let sT := { ψ ∈ s | ψ ∈ T };
+  let sU := { ψ ∈ s | ψ ∈ U };
+
+  use ⟨sU, λ _ => by simp [sU]⟩;
+
+  have : (∅ : Theory _) ⊢ sT.conj ➝ sU.conj ➝ φ := CK!_iff_CC!.mp $ C!_trans CKFconjFconjUnion! $ by
+    have : sT ∪ sU = s:= by
+      ext ψ;
+      constructor;
+      . grind;
+      . intro hψ; rcases hsTU hψ with (hψT | hψU) <;> grind;
+    rwa [this];
+  apply Entailment.mdp! $ Axiomatized.weakening! (λ _ => by simp) this;
+  apply Entailment.FConj!_iff_forall_provable.mpr;
+  intro ψ hψ;
+  apply Axiomatized.provable_axm;
+  grind;
+
+lemma compact_add_left (h : (T + U) ⊢ φ) : ∃ (s : { s : Finset (Sentence L) // ↑s ⊆ T }), U ⊢ s.1.conj ➝ φ := by
+  rw [show (T + U = U + T) by simp [add_def, Set.union_comm]] at h
+  simpa using compact_add_right h;
+
+end FirstOrder.Theory
+
+
+
 namespace ProvabilityLogic
 
 open LO.Entailment
@@ -983,6 +1020,90 @@ lemma injOn_letterlessStandardRealization (hX : X.Letterless) : Set.InjOn (T.Let
   intro A hA B hB hAB;
   apply injective_letterlessStandardRealization A B _ _ hAB <;> grind;
 
+theorem letterless_provabilityLogic
+  {T : ArithmeticTheory} [𝗜𝚺₁ ⪯ T] [T.Δ₁] [ℕ ⊧ₘ* T]
+  (X : Modal.FormulaSet ℕ) (X_letterless : X.Letterless) :
+  (Modal.GL.sumQuasiNormal X).IsProvabilityLogic T (T + (T.LetterlessStandardRealization '' X)) := by
+  intro A;
+  rw [Modal.Logic.sumQuasiNormal.iff_provable_finite_provable_letterless X_letterless];
+  constructor;
+  . rintro ⟨Γ, hΓ₁, hΓ₂⟩ f;
+    have H : T ⊢ (f Γ.conj) ➝ (f A) := GL.arithmetical_soundness hΓ₂;
+    rw [
+      show f Γ.conj = T.LetterlessStandardRealization Γ.conj from
+        Realization.letterless_interpret $ Modal.Formula.letterless_fconj.mpr λ B hB ↦ X_letterless B $ hΓ₁ hB
+    ] at H;
+    apply Entailment.mdp! $ WeakerThan.pbl H;
+    apply Realization.interpret.iff_provable_fconj.mpr;
+    intro B hB;
+    apply Axiomatized.provable_axm;
+    right;
+    use B;
+    constructor;
+    . apply hΓ₁ hB;
+    . rfl;
+  . intro h;
+    have := h (GL.uniformStandardRealization T);
+    obtain ⟨Γ, hΓX, H⟩ : ∃ Γ : Finset _, ↑Γ ⊆ X ∧
+      T ⊢ (Γ.image (GL.uniformStandardRealization T)).conj ➝ (GL.uniformStandardRealization T) A := by
+      obtain ⟨s, hs⟩ := Theory.compact_add_right this;
+      let sM := { B | (GL.uniformStandardRealization T) B ∈ s.1 };
+      have : sM.Finite := by sorry;
+      use this.toFinset;
+      constructor;
+      . sorry;
+      . apply Entailment.C!_trans ?_ hs;
+        apply Entailment.CFConj_FConj!_of_subset;
+        intro φ hφ;
+        obtain ⟨B, hB, rfl⟩ := s.2 hφ;
+        simp only [Finset.mem_image, Set.Finite.mem_toFinset];
+        use B;
+        simpa [sM, Realization.letterless_interpret (f₁ := GL.uniformStandardRealization T) (f₂ := T.LetterlessStandardRealization) $ X_letterless B hB];
+    use Γ;
+    constructor;
+    . assumption;
+    . apply GL.uniformStandardRealization_spec (T := T) |>.mp;
+      apply C!_trans ?_ H;
+      suffices T ⊢ (Γ.image (GL.uniformStandardRealization T)).conj ➝ (Finset.image (GL.uniformStandardRealization T) Γ).conj by
+        sorry;
+      cl_prover;
+      /-
+      apply GL.uniformStandardRealization_spec (T := T) |>.mp;
+      sorry;
+      -/
+
+end ProvabilityLogic
+
+@[simp, grind .]
+lemma Modal.GLα.isProvabilityLogic {T : ArithmeticTheory} [𝗜𝚺₁ ⪯ T] [T.Δ₁] [ℕ ⊧ₘ* T] {α : Set ℕ}
+  : (Modal.GLα α).IsProvabilityLogic T (T + ((T.LetterlessStandardRealization $ Modal.TBB ·) '' α)) := by
+  suffices (T.LetterlessStandardRealization $ Modal.TBB ·) '' α = T.LetterlessStandardRealization '' (Modal.TBB '' α) by
+    rw [this];
+    apply letterless_provabilityLogic;
+    simp;
+  ext i;
+  simp;
+
+@[simp, grind .]
+lemma Modal.GLαω.isProvabilityLogic {T : ArithmeticTheory} [𝗜𝚺₁ ⪯ T] [T.Δ₁] [ℕ ⊧ₘ* T]
+  : Modal.GLαω.IsProvabilityLogic T (T + ((T.LetterlessStandardRealization ∘ Modal.TBB) '' Set.univ)) := by
+  apply Modal.GLα.isProvabilityLogic;
+
+lemma Modal.GLβMinus.isProvabilityLogic {T : ArithmeticTheory} [𝗜𝚺₁ ⪯ T] [T.Δ₁] [ℕ ⊧ₘ* T] {β : Set ℕ} (hβ : β.Cofinite)
+  : (Modal.GLβMinus β).IsProvabilityLogic T (T + { ∼⩕ n ∈ hβ.toFinset, T.LetterlessStandardRealization $ Modal.TBB n }) := by
+  suffices ({ ∼⩕ n ∈ hβ.toFinset, T.LetterlessStandardRealization $ Modal.TBB n}) = (T.LetterlessStandardRealization '' { ∼⩕ n ∈ hβ.toFinset, Modal.TBB n }) by
+    rw [this];
+    apply letterless_provabilityLogic;
+    simp;
+  ext i;
+  simp only [Set.image_singleton, Set.mem_singleton_iff];
+  constructor;
+  . rintro rfl;
+    sorry;
+  . rintro rfl;
+    sorry;
+
+/-
 theorem letterless_provabilityLogic
   {T : ArithmeticTheory} [𝗜𝚺₁ ⪯ T] [T.Δ₁] [ℕ ⊧ₘ* T]
   (X : Modal.FormulaSet ℕ) (X_letterless : X.Letterless) :
@@ -1049,7 +1170,6 @@ theorem letterless_provabilityLogic
     subst eU;
     -- similar Context.byAxm;
     sorry;
-
-end ProvabilityLogic
+-/
 
 end LO
