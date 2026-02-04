@@ -166,7 +166,7 @@ lemma iff_provable_and : U ⊢ f (A ⋏ B) ↔ U ⊢ (f A) ∧ U ⊢ (f B) := by
     apply iff_provable_and'.mpr;
     cl_prover [hA, hB];
 
-lemma iff_provable_lconj_inside {Γ : List _} : U ⊢ f (⋀Γ) ⭤ ⋀(Γ.map (λ γ => f γ)) := by
+lemma iff_provable_lconj_inside {Γ : List _} : U ⊢ f (⋀Γ) ⭤ ⋀(Γ.map f) := by
   induction Γ using List.induction_with_singleton with
   | hcons A Γ h ih =>
     simp only [
@@ -177,6 +177,12 @@ lemma iff_provable_lconj_inside {Γ : List _} : U ⊢ f (⋀Γ) ⭤ ⋀(Γ.map (
     cl_prover [ih];
   | hnil => simp only [List.conj₂_nil, interpret, List.map_nil]; cl_prover;
   | hsingle => simp;
+
+lemma iff_provable_fconj_inside : T ⊢ f Γ.conj ⭤ (Finset.image f Γ).conj := by
+  apply E!_trans $ iff_provable_lconj_inside;
+  apply E!_intro;
+  . apply Entailment.CConj₂Conj₂!_of_subset; simp;
+  . apply Entailment.CConj₂Conj₂!_of_subset; simp;
 
 @[simp, grind =]
 lemma iff_provable_lconj₂ {l : List (Formula _)} : U ⊢ f (l.conj₂) ↔ ∀ A ∈ l, U ⊢ f A := by

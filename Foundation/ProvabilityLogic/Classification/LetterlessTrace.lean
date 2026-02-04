@@ -327,10 +327,10 @@ lemma TBB_conj'_letterless : (⩕ n ∈ s, TBB n).Letterless := by
   grind;
 
 @[simp, grind .]
-lemma TBBSet_letterless : FormulaSet.Letterless ((λ i => TBB i) '' α) := by simp [FormulaSet.Letterless]
+lemma TBBSet_letterless : FormulaSet.Letterless (TBB '' α) := by simp [FormulaSet.Letterless]
 
 @[simp]
-lemma TBBSet_letterlessTrace : FormulaSet.letterlessTrace (α.image (λ i => TBB i)) = α := by
+lemma TBBSet_letterlessTrace : FormulaSet.letterlessTrace (TBB '' α) = α := by
   simp [FormulaSet.def_letterlessTrace_union];
 
 @[simp, grind .]
@@ -378,7 +378,7 @@ lemma TBB_conj'_regular : (⩕ n ∈ s, TBB n).Regular T := by
   grind;
 
 @[simp high]
-lemma TBBSet_regular : FormulaSet.Regular T ((fun i ↦ TBB i) '' α) := by
+lemma TBBSet_regular : FormulaSet.Regular T (TBB '' α) := by
   rintro _ ⟨_, _, rfl⟩;
   grind;
 
@@ -872,7 +872,7 @@ lemma GL.iff_eq_closed_sumQuasiNormal_eq_letterlessSpectrum (hXY : (X.Regular T 
 
 
 
-protected abbrev GLα (α : Set ℕ) : Logic ℕ := Modal.GL.sumQuasiNormal (α.image (λ i => TBB i))
+protected abbrev GLα (α : Set ℕ) : Logic ℕ := Modal.GL.sumQuasiNormal (TBB '' α)
 
 protected abbrev GLαω : Logic ℕ := Modal.GLα Set.univ
 
@@ -931,7 +931,7 @@ theorem GL.eq_closed_sumQuasiNormal_GLα_or_GLβMinus :
 
 lemma iff_GLα_subset : Modal.GLα α₁ ⊆ Modal.GLα α₂ ↔ α₁ ⊆ α₂ := by
   calc
-    _ ↔ FormulaSet.letterlessTrace (α₁.image (λ i => TBB i)) ⊆ FormulaSet.letterlessTrace (α₂.image (λ i => TBB i)) := by
+    _ ↔ FormulaSet.letterlessTrace (α₁.image TBB) ⊆ FormulaSet.letterlessTrace (α₂.image TBB) := by
       apply GL.iff_subset_closed_sumQuasiNormal_subset_letterlessTrace (T := 𝗣𝗔) (by grind) (by grind);
       simp;
     _ ↔ α₁ ⊆ α₂ := by simp;
@@ -1036,7 +1036,6 @@ theorem letterless_provabilityLogic
     use B;
     tauto;
   . intro h;
-    -- have := h (GL.uniformStandardRealization T);
     obtain ⟨Γ, hΓX, H⟩ :
       ∃ Γ : Finset (Modal.Formula ℕ), ↑Γ ⊆ X ∧ T ⊢ (Γ.image (GL.uniformStandardRealization T)).conj ➝ (GL.uniformStandardRealization T) A := by
       obtain ⟨⟨s, hs₁⟩, hs₂⟩ := Theory.compact_add_right $ h (GL.uniformStandardRealization T);
@@ -1054,16 +1053,14 @@ theorem letterless_provabilityLogic
     . assumption;
     . apply GL.uniformStandardRealization_spec (T := T) |>.mp;
       apply C!_trans ?_ H;
-      suffices T ⊢ (Γ.image (GL.uniformStandardRealization T)).conj ➝ (Finset.image (GL.uniformStandardRealization T) Γ).conj by
-        sorry;
-      cl_prover;
+      exact C_of_E_mp! $ Realization.interpret.iff_provable_fconj_inside (f := GL.uniformStandardRealization T);
 
 end ProvabilityLogic
 
 @[simp, grind .]
 lemma Modal.GLα.isProvabilityLogic {T : ArithmeticTheory} [𝗜𝚺₁ ⪯ T] [T.Δ₁] [ℕ ⊧ₘ* T] {α : Set ℕ}
-  : (Modal.GLα α).IsProvabilityLogic T (T + ((T.LetterlessStandardRealization $ Modal.TBB ·) '' α)) := by
-  suffices (T.LetterlessStandardRealization $ Modal.TBB ·) '' α = T.LetterlessStandardRealization '' (Modal.TBB '' α) by
+  : (Modal.GLα α).IsProvabilityLogic T (T + ((T.LetterlessStandardRealization ∘ Modal.TBB) '' α)) := by
+  suffices (T.LetterlessStandardRealization ∘ Modal.TBB) '' α = T.LetterlessStandardRealization '' (Modal.TBB '' α) by
     rw [this];
     apply letterless_provabilityLogic;
     simp;
@@ -1076,19 +1073,11 @@ lemma Modal.GLαω.isProvabilityLogic {T : ArithmeticTheory} [𝗜𝚺₁ ⪯ T]
   apply Modal.GLα.isProvabilityLogic;
 
 /-
+-- TODO: probably not use.
 lemma Modal.GLβMinus.isProvabilityLogic {T : ArithmeticTheory} [𝗜𝚺₁ ⪯ T] [T.Δ₁] [ℕ ⊧ₘ* T] {β : Set ℕ} (hβ : β.Cofinite)
-  : (Modal.GLβMinus β).IsProvabilityLogic T (T + { ∼⩕ n ∈ hβ.toFinset, T.LetterlessStandardRealization $ Modal.TBB n }) := by
-  suffices ({ ∼⩕ n ∈ hβ.toFinset, T.LetterlessStandardRealization $ Modal.TBB n}) = (T.LetterlessStandardRealization '' { ∼⩕ n ∈ hβ.toFinset, Modal.TBB n }) by
-    rw [this];
-    apply letterless_provabilityLogic;
-    simp;
-  ext i;
-  simp only [Set.image_singleton, Set.mem_singleton_iff];
-  constructor;
-  . rintro rfl;
-    sorry;
-  . rintro rfl;
-    sorry;
+  : (Modal.GLβMinus β).IsProvabilityLogic T (T + { ∼⩕ n ∈ hβ.toFinset, T.LetterlessStandardRealization $ Modal.TBB n }) := by sorry;
 -/
 
 end LO
+
+end
