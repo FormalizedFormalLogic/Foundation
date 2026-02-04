@@ -10,6 +10,18 @@ open Entailment FiniteContext
 open FirstOrder ProvabilityAbstraction
 open Modal Modal.Hilbert
 
+namespace Entailment
+
+variable {S F} {𝓢 : S} [LogicalConnective F] [Entailment S F] [Entailment.Minimal 𝓢]
+
+lemma E!_replace (h₁ : 𝓢 ⊢ φ₁ ⭤ ψ₁) (h₂ : 𝓢 ⊢ φ₂ ⭤ ψ₂) (h₃ : 𝓢 ⊢ φ₁ ⭤ φ₂) : 𝓢 ⊢ ψ₁ ⭤ ψ₂ := by
+  apply E!_intro;
+  . apply C!_replace (C_of_E_mpr! h₁) (C_of_E_mp! h₂) (C_of_E_mp! h₃);
+  . apply C!_replace (C_of_E_mpr! h₂) (C_of_E_mp! h₁) (C_of_E_mpr! h₃);
+
+end Entailment
+
+
 variable {L : Language} [L.ReferenceableBy L] {T₀ T U : Theory L}
 
 namespace ProvabilityLogic
@@ -153,6 +165,24 @@ lemma iff_provable_and : U ⊢ f (A ⋏ B) ↔ U ⊢ (f A) ∧ U ⊢ (f B) := by
   . rintro ⟨hA, hB⟩;
     apply iff_provable_and'.mpr;
     cl_prover [hA, hB];
+
+lemma iff_provable_lconj_inside {Γ : List _} : U ⊢ f (⋀Γ) ⭤ ⋀(Γ.map f) := by
+  induction Γ using List.induction_with_singleton with
+  | hcons A Γ h ih =>
+    simp only [
+      List.conj₂_cons_nonempty h, List.map_cons,
+      List.conj₂_cons_nonempty (List.map_eq_nil_iff.not.mpr h)
+    ];
+    apply E!_trans $ iff_provable_and_inside;
+    cl_prover [ih];
+  | hnil => simp only [List.conj₂_nil, interpret, List.map_nil]; cl_prover;
+  | hsingle => simp;
+
+lemma iff_provable_fconj_inside : T ⊢ f Γ.conj ⭤ (Finset.image f Γ).conj := by
+  apply E!_trans $ iff_provable_lconj_inside;
+  apply E!_intro;
+  . apply Entailment.CConj₂Conj₂!_of_subset; simp;
+  . apply Entailment.CConj₂Conj₂!_of_subset; simp;
 
 @[simp, grind =]
 lemma iff_provable_lconj₂ {l : List (Formula _)} : U ⊢ f (l.conj₂) ↔ ∀ A ∈ l, U ⊢ f A := by

@@ -76,7 +76,7 @@ open LO.Entailment Entailment.FiniteContext
 open FirstOrder FirstOrder.ProvabilityAbstraction
 open Arithmetic
 open ArithmeticTheory
-open Modal
+open LO.Modal
 open Modal.Logic
 open Modal.Kripke
 open Formula.Kripke
@@ -231,9 +231,7 @@ lemma eq_GLαω_inter_GLβMinus_GLα (hβ : L.trace.Cofinite) : Modal.GLα L.tra
   let L₁ := (Modal.GLα L.trace).αPL (Modal.GLα L.trace).traceᶜ;
   let L₂ := Modal.GLβMinus (Modal.GLα L.trace).trace (by simpa);
   trans (L₁ ∩ L₂);
-  . apply iff_isProvabilityLogic_eq_inter_αPL_GLβMinus_of_cofinite_trace_of_subset_S (T := 𝗜𝚺₁) (U := 𝗜𝚺₁) (L := Modal.GLα L.trace) ?_ ?_ |>.mp;
-    . -- letterless_provabilityLogic
-      sorry;
+  . apply iff_isProvabilityLogic_eq_inter_αPL_GLβMinus_of_cofinite_trace_of_subset_S (L := Modal.GLα L.trace) ?_ ?_ |>.mp $ Modal.GLα.isProvabilityLogic (T := 𝗜𝚺₁)
     . simpa only [GLα.eq_trace];
     . simp;
   . have : L₁ = Modal.GLαω := by
