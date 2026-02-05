@@ -9,7 +9,6 @@ namespace LO
 open FirstOrder
 open ArithmeticTheory
 
-
 namespace Modal
 
 namespace Logic
@@ -182,56 +181,43 @@ lemma classification_S_sublogics_of_omega_trace
   . apply eq_S_of_not_subset_D_of_omega_trace L hPL hT D_ssubset_L;
 
 /--
-  Suppose `L.trace` is cofinite and `L ⊆ S`.
-  Then `L` is provability logic iff `L = (L.αPL L.traceᶜ) ∩ (GLβMinus L.trace)`.
+  Let `L` be provability logic `L.trace` is cofinite and `L ⊆ S`.
+  Then `L = (L.αPL L.traceᶜ) ∩ (GLβMinus L.trace)`.
 -/
-theorem iff_isProvabilityLogic_eq_inter_αPL_GLβMinus_of_cofinite_trace_of_subset_S
-  (L : Modal.Logic ℕ) (hCf : L.trace.Cofinite) (hS : L ⊆ Modal.S)
-  -- TODO: `U` is not correct in `L.IsProvabilityLogic T U`, might be `U + (...)`
-  : L.IsProvabilityLogic T U ↔ L = (L.αPL L.traceᶜ) ∩ (Modal.GLβMinus L.trace) := by
-  have : 𝗜𝚺₁ ⪯ U := by sorry;
-  have : T ⪯ U := by sorry;
+theorem eq_inter_αPL_GLβMinus_of_isProvabilityLogic_of_cofinite_trace_of_subset_S
+  (L : Modal.Logic ℕ) (hPL : L.IsProvabilityLogic T U) (hCf : L.trace.Cofinite) (hS : L ⊆ Modal.S)
+  : L = (L.αPL L.traceᶜ) ∩ (Modal.GLβMinus L.trace) := by
+  have := Modal.Logic.inst_Cl_of_isProvabilityLogic hPL;
+  have : L.Substitution := by sorry;
 
-  constructor;
-  . intro hPL;
-    have := Modal.Logic.inst_Cl_of_isProvabilityLogic hPL;
-    have : L.Substitution := by sorry;
-
-    apply Set.Subset.antisymm;
-    . intro A hA;
-      constructor;
-      . exact Logic.sumQuasiNormal.mem₁ $ Logic.iff_provable.mpr hA;
-      . exact subset_GLβMinus_of_trace_cofinite hCf hA;
-    . rintro A ⟨h₁, h₂⟩;
-      simp only [Logic.αPL, ←Logic.iff_provable] at h₁ h₂ ⊢;
-      obtain ⟨Γ, hΓ, h₁⟩ := sumQuasiNormal.iff_provable_finite_provable_letterless TBBSet_letterless |>.mp h₁;
-      obtain ⟨Δ, hΔ, h₂⟩ := sumQuasiNormal.iff_provable_finite_provable_letterless TBBMinus_letterless |>.mp h₂;
-      apply of_C!_of_C!_of_A! (φ := (⩕ n ∈ hCf.toFinset, TBB n)) ?_ ?_ lem!;
-      . show L ⊢ (⩕ n ∈ hCf.toFinset, TBB n) ➝ A;
-        apply Entailment.C!_trans ?_ h₁;
-        suffices L ⊢ Finset.conj ((Set.Finite.toFinset hCf).image TBB) ➝ Γ.conj by sorry;
-        apply CFConj_FConj!_of_subset;
-        intro γ hγ;
-        obtain ⟨n, hn, rfl⟩ := hΓ hγ;
-        simp only [
-          Set.compl_iUnion, Set.mem_iInter, Set.mem_compl_iff, Finset.mem_image,
-          Set.Finite.mem_toFinset
-        ] at hn ⊢;
-        use n;
-      . show L ⊢ (∼⩕ n ∈ hCf.toFinset, TBB n) ➝ A;
-        rw [(show (∼⩕ n ∈ hCf.toFinset, TBB n) = Finset.conj {∼⩕ n ∈ hCf.toFinset, TBB n} by simp)];
-        apply Entailment.C!_trans (CFConj_FConj!_of_subset ?_) $ Modal.Logic.provable_GL_of_isProvabilityLogic hPL h₂;
-        intro δ hδ;
-        grind [hΔ hδ];
-  . rintro h;
-    rw [h];
-    sorry;
+  apply Set.Subset.antisymm;
+  . intro A hA;
+    constructor;
+    . exact Logic.sumQuasiNormal.mem₁ $ Logic.iff_provable.mpr hA;
+    . exact subset_GLβMinus_of_trace_cofinite hCf hA;
+  . rintro A ⟨h₁, h₂⟩;
+    simp only [Logic.αPL, ←Logic.iff_provable] at h₁ h₂ ⊢;
+    obtain ⟨Γ, hΓ, h₁⟩ := sumQuasiNormal.iff_provable_finite_provable_letterless TBBSet_letterless |>.mp h₁;
+    obtain ⟨Δ, hΔ, h₂⟩ := sumQuasiNormal.iff_provable_finite_provable_letterless TBBMinus_letterless |>.mp h₂;
+    apply of_C!_of_C!_of_A! (φ := (⩕ n ∈ hCf.toFinset, TBB n)) ?_ ?_ lem!;
+    . show L ⊢ (⩕ n ∈ hCf.toFinset, TBB n) ➝ A;
+      apply Entailment.C!_trans ?_ h₁;
+      apply right_Fconj!_intro;
+      intro B hB;
+      obtain ⟨n, hn, rfl⟩ := hΓ hB;
+      apply left_Fconj'!_intro;
+      simpa using hn;
+    . show L ⊢ (∼⩕ n ∈ hCf.toFinset, TBB n) ➝ A;
+      rw [(show (∼⩕ n ∈ hCf.toFinset, TBB n) = Finset.conj {∼⩕ n ∈ hCf.toFinset, TBB n} by simp)];
+      apply Entailment.C!_trans (CFConj_FConj!_of_subset ?_) $ Modal.Logic.provable_GL_of_isProvabilityLogic hPL h₂;
+      intro δ hδ;
+      grind [hΔ hδ];
 
 lemma eq_GLαω_inter_GLβMinus_GLα (hβ : L.trace.Cofinite) : Modal.GLα L.trace = Modal.GLαω ∩ (Modal.GLβMinus L.trace) := by
   let L₁ := (Modal.GLα L.trace).αPL (Modal.GLα L.trace).traceᶜ;
   let L₂ := Modal.GLβMinus (Modal.GLα L.trace).trace (by simpa);
   trans (L₁ ∩ L₂);
-  . apply iff_isProvabilityLogic_eq_inter_αPL_GLβMinus_of_cofinite_trace_of_subset_S (L := Modal.GLα L.trace) ?_ ?_ |>.mp $ Modal.GLα.isProvabilityLogic (T := 𝗜𝚺₁)
+  . apply eq_inter_αPL_GLβMinus_of_isProvabilityLogic_of_cofinite_trace_of_subset_S (L := Modal.GLα L.trace) (Modal.GLα.isProvabilityLogic (T := 𝗜𝚺₁)) ?_ ?_;
     . simpa only [GLα.eq_trace];
     . simp;
   . have : L₁ = Modal.GLαω := by
@@ -272,8 +258,8 @@ lemma classification_S_sublogics_of_cofinite_trace
   rcases classification_S_sublogics_of_omega_trace (L := (L.αPL L.traceᶜ))
     (aPL_compl_trace_isProvabilityLogic hPL) (aPL_compl_trace_omega_trace hS) (aPL_compl_trace_subset_S hS)
     with _ | _ | _;
-  case inl => grind [iff_isProvabilityLogic_eq_inter_αPL_GLβMinus_of_cofinite_trace_of_subset_S, eq_GLαω_inter_GLβMinus_GLα hCf];
-  all_goals. grind [iff_isProvabilityLogic_eq_inter_αPL_GLβMinus_of_cofinite_trace_of_subset_S];
+  case inl => grind [eq_inter_αPL_GLβMinus_of_isProvabilityLogic_of_cofinite_trace_of_subset_S, eq_GLαω_inter_GLβMinus_GLα hCf];
+  all_goals. grind [eq_inter_αPL_GLβMinus_of_isProvabilityLogic_of_cofinite_trace_of_subset_S];
 
 open Classical in
 /--
