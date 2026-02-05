@@ -10,18 +10,6 @@ open Entailment FiniteContext
 open FirstOrder ProvabilityAbstraction
 open Modal Modal.Hilbert
 
-namespace Entailment
-
-variable {S F} {𝓢 : S} [LogicalConnective F] [Entailment S F] [Entailment.Minimal 𝓢]
-
-lemma E!_replace (h₁ : 𝓢 ⊢ φ₁ ⭤ ψ₁) (h₂ : 𝓢 ⊢ φ₂ ⭤ ψ₂) (h₃ : 𝓢 ⊢ φ₁ ⭤ φ₂) : 𝓢 ⊢ ψ₁ ⭤ ψ₂ := by
-  apply E!_intro;
-  . apply C!_replace (C_of_E_mpr! h₁) (C_of_E_mp! h₂) (C_of_E_mp! h₃);
-  . apply C!_replace (C_of_E_mpr! h₂) (C_of_E_mp! h₁) (C_of_E_mpr! h₃);
-
-end Entailment
-
-
 variable {L : Language} [L.ReferenceableBy L] {T₀ T U : Theory L}
 
 namespace ProvabilityLogic
