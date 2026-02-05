@@ -36,10 +36,8 @@ jobs:
         id: cache-restore
         uses: actions/cache/restore@v5
         with:
-          path: .lake/build
-          key: lake-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('lean-toolchain') }}-${{ hashFiles('lake-manifest.json') }}-${{ github.sha }}
-          restore-keys: |
-            lake-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('lean-toolchain') }}-${{ hashFiles('lake-manifest.json') }}
+          path: .lake
+          key: lake-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('lean-toolchain') }}-${{ hashFiles('lake-manifest.json') }}
       - name: Get Mathlib cache
         if: steps.cache-restore.outputs.cache-hit != 'true'
         run: lake exe cache get
@@ -66,7 +64,7 @@ jobs:
         id: cache-save
         uses: actions/cache/save@v5
         with:
-          path: .lake/build
+          path: .lake
           key: ${{ steps.cache-restore.outputs.cache-primary-key }}
 
       # Upload pages artifact
