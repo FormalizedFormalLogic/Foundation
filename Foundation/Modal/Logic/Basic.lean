@@ -137,7 +137,7 @@ end
 
 section
 
-variable [DecidableEq α] [L.IsQuasiNormal]
+variable [DecidableEq α] [Entailment.Cl L]
 
 lemma lconj_subst {X : List (Formula α)} {s : Substitution α} : L ⊢ (X.map (·⟦s⟧)).conj₂ ➝ X.conj₂⟦s⟧ := by
   induction X using List.induction_with_singleton with

@@ -6,7 +6,7 @@ public import Foundation.FirstOrder.SetTheory.Z
 /-!
 # Ordinals and transitive sets
 
-reference: Ralf Schindler, "Set Theory, Exploring Independence and Truth"
+reference: Ralf Schindler, "Set Theory, Exploring Independence and Truth" [Sch14]
 -/
 
 namespace LO.FirstOrder.SetTheory
