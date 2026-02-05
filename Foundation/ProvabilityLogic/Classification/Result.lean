@@ -181,14 +181,13 @@ lemma classification_S_sublogics_of_omega_trace
   . apply eq_S_of_not_subset_D_of_omega_trace L hPL hT D_ssubset_L;
 
 /--
-  Let `L` be provability logic `L.trace` is cofinite and `L ⊆ S`.
+  Let `L` be provability logic `L.trace` is cofinite.
   Then `L = (L.αPL L.traceᶜ) ∩ (GLβMinus L.trace)`.
 -/
-theorem eq_inter_αPL_GLβMinus_of_isProvabilityLogic_of_cofinite_trace_of_subset_S
-  (L : Modal.Logic ℕ) (hPL : L.IsProvabilityLogic T U) (hCf : L.trace.Cofinite) (hS : L ⊆ Modal.S)
+theorem eq_inter_αPL_GLβMinus_of_isProvabilityLogic_of_cofinite_trace
+  (L : Modal.Logic ℕ) [L.Substitution] (hPL : L.IsProvabilityLogic T U) (hCf : L.trace.Cofinite)
   : L = (L.αPL L.traceᶜ) ∩ (Modal.GLβMinus L.trace) := by
   have := Modal.Logic.inst_Cl_of_isProvabilityLogic hPL;
-  have : L.Substitution := by sorry;
 
   apply Set.Subset.antisymm;
   . intro A hA;
@@ -217,9 +216,8 @@ lemma eq_GLαω_inter_GLβMinus_GLα (hβ : L.trace.Cofinite) : Modal.GLα L.tra
   let L₁ := (Modal.GLα L.trace).αPL (Modal.GLα L.trace).traceᶜ;
   let L₂ := Modal.GLβMinus (Modal.GLα L.trace).trace (by simpa);
   trans (L₁ ∩ L₂);
-  . apply eq_inter_αPL_GLβMinus_of_isProvabilityLogic_of_cofinite_trace_of_subset_S (L := Modal.GLα L.trace) (Modal.GLα.isProvabilityLogic (T := 𝗜𝚺₁)) ?_ ?_;
+  . apply eq_inter_αPL_GLβMinus_of_isProvabilityLogic_of_cofinite_trace (L := Modal.GLα L.trace) (Modal.GLα.isProvabilityLogic (T := 𝗜𝚺₁)) ?_;
     . simpa only [GLα.eq_trace];
-    . simp;
   . have : L₁ = Modal.GLαω := by
       subst L₁;
       rw [
@@ -258,8 +256,8 @@ lemma classification_S_sublogics_of_cofinite_trace
   rcases classification_S_sublogics_of_omega_trace (L := (L.αPL L.traceᶜ))
     (aPL_compl_trace_isProvabilityLogic hPL) (aPL_compl_trace_omega_trace hS) (aPL_compl_trace_subset_S hS)
     with _ | _ | _;
-  case inl => grind [eq_inter_αPL_GLβMinus_of_isProvabilityLogic_of_cofinite_trace_of_subset_S, eq_GLαω_inter_GLβMinus_GLα hCf];
-  all_goals. grind [eq_inter_αPL_GLβMinus_of_isProvabilityLogic_of_cofinite_trace_of_subset_S];
+  case inl => grind [eq_inter_αPL_GLβMinus_of_isProvabilityLogic_of_cofinite_trace, eq_GLαω_inter_GLβMinus_GLα hCf];
+  all_goals. grind [eq_inter_αPL_GLβMinus_of_isProvabilityLogic_of_cofinite_trace];
 
 open Classical in
 /--
