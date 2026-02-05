@@ -40,10 +40,11 @@ jobs:
           key: lake-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('lean-toolchain') }}-${{ hashFiles('lake-manifest.json') }}-${{ github.sha }}
           restore-keys: |
             lake-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('lean-toolchain') }}-${{ hashFiles('lake-manifest.json') }}
+      - name: Get Mathlib cache
+        if: steps.cache-restore.outputs.cache-hit != 'true'
+        run: lake exe cache get
 
       # Build project
-      - name: Get Mathlib cache
-        run: lake exe cache get
       - name: Build Foundation
         run: lake build --keep-toolchain Foundation
       - name: Build executables
