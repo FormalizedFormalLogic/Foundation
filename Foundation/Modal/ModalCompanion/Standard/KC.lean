@@ -1,6 +1,10 @@
-import Foundation.Modal.ModalCompanion.Standard.Int
-import Foundation.Modal.Kripke.Logic.GrzPoint2
-import Foundation.Propositional.Kripke.Logic.KC
+module
+
+public import Foundation.Modal.ModalCompanion.Standard.Int
+public import Foundation.Modal.Kripke.Logic.GrzPoint2
+public import Foundation.Propositional.Kripke.Logic.KC
+
+@[expose] public section
 
 namespace LO.Propositional
 
@@ -91,7 +95,7 @@ instance : Entailment.HasAxiomPoint2 Propositional.KC.smallestMC where
       constructor;
       . assumption;
       . apply Satisfies.negneg_def.mp h u
-        apply IsRefl.refl;
+        apply Std.Refl.refl;
 
 instance : Modal.S4Point2 ≊ Propositional.KC.smallestMC := by
   apply Logic.equiv_of_provable;
@@ -177,3 +181,4 @@ instance : ModalCompanion Propositional.KC Modal.GrzPoint2 := by
 end GrzPoint2
 
 end LO.Modal
+end

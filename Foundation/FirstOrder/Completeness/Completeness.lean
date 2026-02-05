@@ -1,7 +1,10 @@
-import Foundation.FirstOrder.Completeness.SearchTree
-import Foundation.FirstOrder.Completeness.SubLanguage
-import Foundation.FirstOrder.Ultraproduct
+module
 
+public import Foundation.FirstOrder.Completeness.SearchTree
+public import Foundation.FirstOrder.Completeness.SubLanguage
+public import Foundation.FirstOrder.Ultraproduct
+
+@[expose] public section
 namespace LO
 
 namespace FirstOrder
@@ -15,7 +18,7 @@ section Encodable
 variable [L.Encodable]
 
 noncomputable def Derivation.completeness_of_encodable
-  {Γ : Sequent L} (h : ∀ M [Nonempty M] [Structure L M], M ⊧ₘ* T → ∃ φ ∈ Γ, ∀ f, Semiformula.Evalfm M f φ) : (T : SyntacticFormulas L) ⟹ Γ := by
+  {Γ : Sequent L} (h : ∀ M [Nonempty M] [Structure L M], M ⊧ₘ* T → ∃ φ ∈ Γ, ∀ f, Semiformula.Evalfm M f φ) : (T : Schema L) ⟹ Γ := by
   have : WellFounded (SearchTree.Lt T Γ) := by
     by_contra nwf
     have : ∃ φ ∈ Γ, ∀ f, Semiformula.Evalfm (Model T Γ) f φ := h _ (Model.models nwf)

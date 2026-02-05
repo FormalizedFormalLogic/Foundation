@@ -1,5 +1,9 @@
-import Foundation.FirstOrder.Basic
+module
 
+public import Foundation.FirstOrder.Basic
+public import Mathlib.Logic.Encodable.Pi
+
+@[expose] public section
 namespace LO
 
 namespace FirstOrder
@@ -50,7 +54,6 @@ def Code.equiv (L : Language.{u}) :
     rcases x with (⟨_, _, _⟩ | ⟨⟩ | ⟨_, _⟩ | ⟨_, _⟩ | _ | ⟨_, _⟩ | _) <;> simp
 
 instance [L.DecidableEq] [L.Encodable] : Encodable (Code L) :=
-  haveI : Encodable Empty := IsEmpty.toEncodable
   Encodable.ofEquiv _ (Code.equiv L)
 
 end Entailment

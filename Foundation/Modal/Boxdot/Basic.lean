@@ -1,6 +1,9 @@
-import Foundation.Modal.Hilbert.Normal.Basic
-import Foundation.Modal.Kripke.Closure
-import Foundation.Modal.Kripke.Irreflexivize
+module
+
+public import Foundation.Modal.Hilbert.Normal.Basic
+public import Foundation.Modal.Kripke.Irreflexivize
+
+@[expose] public section
 
 namespace LO.Modal
 
@@ -200,7 +203,7 @@ lemma iff_reflexivize_irreflexivize [F.IsReflexive] {x : F.World} {V} : (Satisfi
       apply ihp (x := y) |>.mp;
       exact h y $ by
         induction Rxy with
-        | refl => apply IsRefl.refl;
+        | refl => apply Std.Refl.refl;
         | single h => exact h.1;
     . intro h y Rxy;
       by_cases e : x = y;
@@ -219,3 +222,4 @@ lemma iff_reflexivize_irreflexivize' [F.IsReflexive] : (F ⊧ φ) ↔ ((F^≠^=)
 end Kripke
 
 end LO.Modal
+end

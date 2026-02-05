@@ -1,6 +1,10 @@
-import Foundation.Propositional.Hilbert.Standard.Basic
-import Foundation.Meta.IntProver
-import Foundation.Meta.ClProver
+module
+
+public import Foundation.Propositional.Hilbert.Standard.Basic
+public import Foundation.Meta.IntProver
+public import Foundation.Meta.ClProver
+
+@[expose] public section
 
 namespace LO.Propositional
 
@@ -36,3 +40,4 @@ theorem iff_provable_not_Int_not_Cl : Propositional.Int ⊢ ∼φ ↔ Propositio
     exact tne'! $ glivenko.mpr d;
 
 end LO.Propositional
+end

@@ -1,8 +1,9 @@
-import Foundation.Propositional.FMT.Hilbert
-import Foundation.Propositional.FMT.Completeness
-import Foundation.Propositional.Hilbert.WF_VF
-import Foundation.Propositional.Hilbert.VF.Disjunctive
+module
 
+public import Foundation.Propositional.FMT.Completeness
+
+
+@[expose] public section
 
 namespace LO.Propositional
 
@@ -53,7 +54,6 @@ lemma unprovable_top_dntop : Propositional.VF ⊬ ⊤ ⭤ ∼∼⊤ := by
     World := Fin 3,
     Rel φ x y :=
       match φ with
-      | ⊤ ⭤ ∼∼⊤ => x ≤ y
       | ∼∼⊤     => x ≤ y
       | ∼⊤      => x ≠ 2
       | _       => True
@@ -65,7 +65,7 @@ lemma unprovable_top_dntop : Propositional.VF ⊬ ⊤ ⭤ ∼∼⊤ := by
   use M, 0
   constructor;
   . tauto;
-  . suffices ∃ x y : M, x ≺[∼⊤ ➝ ⊥] y ∧ ∀ (x : M), ¬y ≺[⊤ ➝ ⊥] x by simpa [M] using this;
+  . suffices ∃ x y : M, x ≺[∼∼⊤] y ∧ ∀ (x : M), ¬y ≺[∼⊤] x by simpa [M] using this;
     use 1, 2;
     grind;
 
@@ -95,11 +95,13 @@ instance : Propositional.VF ⪱ Propositional.WF := by
         ,
         root := 0,
         rooted := by grind
-        Val x a := x = 2 → a = 0
+        Val a x := x = 2 → a = 0
       }, 0;
       constructor;
       . tauto;
       . simp;
-        tauto;
+        grind;
+
 
 end LO.Propositional
+end

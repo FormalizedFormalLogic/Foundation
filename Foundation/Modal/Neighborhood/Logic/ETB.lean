@@ -1,5 +1,9 @@
-import Foundation.Modal.Neighborhood.Logic.EB
-import Foundation.Modal.Neighborhood.Logic.ET
+module
+
+public import Foundation.Modal.Neighborhood.Logic.EB
+public import Foundation.Modal.Neighborhood.Logic.ET
+
+@[expose] public section
 
 namespace LO.Modal
 
@@ -68,3 +72,4 @@ instance : Modal.EB ⪱ Modal.ETB := by
         simpa [Frame.box] using @hC.refl ∅;
 
 end LO.Modal
+end

@@ -1,5 +1,8 @@
-import Foundation.FirstOrder.Basic.Semantics.Semantics
-import Foundation.Vorspiel.NotationClass
+module
+
+public import Foundation.FirstOrder.Basic.Semantics.Semantics
+
+@[expose] public section
 
 namespace LO
 
@@ -238,12 +241,12 @@ variable {L : Language}
 @[simp] lemma complexity_add [L.Add] (t u : Semiterm L ξ n) :
     (Operator.Add.add.operator ![t, u]).complexity = max t.complexity u.complexity + 1 := by
   simp [Operator.operator, Operator.Add.term_eq, complexity_func, Rew.func]
-  simp [show (Finset.univ : Finset (Fin 2)) = {0, 1} from by ext i; cases i using Fin.cases <;> simp [Fin.eq_zero]]
+  simp [show (Finset.univ : Finset (Fin 2)) = {0, 1} from by ext i; cases i using Fin.cases <;> simp]
 
 @[simp] lemma complexity_mul [L.Mul] (t u : Semiterm L ξ n) :
     (Operator.Mul.mul.operator ![t, u]).complexity = max t.complexity u.complexity + 1 := by
   simp [Operator.operator, Operator.Mul.term_eq, complexity_func, Rew.func]
-  simp [show (Finset.univ : Finset (Fin 2)) = {0, 1} from by ext i; cases i using Fin.cases <;> simp [Fin.eq_zero]]
+  simp [show (Finset.univ : Finset (Fin 2)) = {0, 1} from by ext i; cases i using Fin.cases <;> simp]
 
 end complexity
 
@@ -383,7 +386,8 @@ lemma LE.def_of_Eq_of_LT [Operator.Eq L] [Operator.LT L] :
 
 @[simp] lemma LE.le_inj [L.Eq] [L.LT] {t₁ t₂ u₁ u₂ : Semiterm L ξ₂ n₂} :
     LE.le.operator ![t₁, u₁] = LE.le.operator ![t₂, u₂] ↔ t₁ = t₂ ∧ u₁ = u₂ := by
-  simp [operator, LE.sentence_eq, Eq.sentence_eq, LT.sentence_eq, Matrix.fun_eq_vec_two]
+  simp [operator, LE.sentence_eq, Eq.sentence_eq, LT.sentence_eq, Matrix.fun_eq_vec_two];
+
 
 lemma lt_def [L.LT] (t u : Semiterm L ξ n) :
     LT.lt.operator ![t, u] = Semiformula.rel Language.LT.lt ![t, u] := by simp [operator, LT.sentence_eq, rew_rel]
@@ -649,7 +653,7 @@ variable {L}
     Structure.Mul.mul (L := L) (v 0) (v 1)
 
 @[simp] lemma exp_eq_of_lang [L.Exp] [Exp M] [Structure.Exp L M] {v : Fin 1 → M} :
-    Structure.func (L := L) Language.Exp.exp v = _root_.Exp.exp (v 0) := by
+    Structure.func (L := L) Language.Exp.exp v = LO.Exp.exp (v 0) := by
   simpa [val_func, ←Matrix.fun_eq_vec_one] using
     Structure.Exp.exp (L := L) (v 0)
 
@@ -717,3 +721,5 @@ end Semiterm
 end FirstOrder
 
 end LO
+
+end

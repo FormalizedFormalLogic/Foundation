@@ -1,4 +1,9 @@
-import Foundation.Vorspiel.Rel.Basic
+module
+
+public import Foundation.Vorspiel.Rel.Basic
+
+@[expose]
+public section
 
 variable {α} {R : Rel α α}
 
@@ -36,3 +41,5 @@ instance [IsPiecewiseStronglyConvergent R] : IsPiecewiseConvergent R := ⟨by
   rintro x y z Rxy Rxz _;
   apply IsPiecewiseStronglyConvergent.ps_convergent Rxy Rxz;
 ⟩
+
+end

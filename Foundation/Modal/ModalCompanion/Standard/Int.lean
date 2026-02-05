@@ -1,8 +1,11 @@
-import Foundation.Modal.Boxdot.GL_Grz
-import Foundation.Modal.Logic.SumNormal
-import Foundation.Modal.ModalCompanion.Standard.Basic
-import Foundation.Propositional.Hilbert.Standard
-import Foundation.Propositional.Kripke.Logic.Int
+module
+
+public import Foundation.Modal.Boxdot.GL_Grz
+public import Foundation.Modal.ModalCompanion.Standard.Basic
+public import Foundation.Propositional.Hilbert.Standard
+public import Foundation.Propositional.Kripke.Logic.Int
+
+@[expose] public section
 
 namespace LO.Modal
 
@@ -121,3 +124,4 @@ theorem embedding_Int_GL : Propositional.Int ⊢ φ ↔ Modal.GL ⊢ φᵍᵇ:= 
 
 
 end LO.Modal
+end

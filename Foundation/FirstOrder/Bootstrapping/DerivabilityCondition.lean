@@ -1,9 +1,12 @@
-import Foundation.FirstOrder.Bootstrapping.DerivabilityCondition.D1
-import Foundation.FirstOrder.Bootstrapping.DerivabilityCondition.D2
-import Foundation.FirstOrder.Bootstrapping.DerivabilityCondition.D3
-import Foundation.FirstOrder.Bootstrapping.ProvabilityAbstraction.Basic
-import Foundation.FirstOrder.Bootstrapping.FixedPoint
+module
 
+public import Foundation.FirstOrder.Bootstrapping.DerivabilityCondition.D1
+public import Foundation.FirstOrder.Bootstrapping.DerivabilityCondition.D2
+public import Foundation.FirstOrder.Bootstrapping.DerivabilityCondition.D3
+public import Foundation.FirstOrder.Bootstrapping.ProvabilityAbstraction.Basic
+public import Foundation.FirstOrder.Bootstrapping.FixedPoint
+
+@[expose] public section
 /-!
 # Derivability conditions of standard provability predicate
 -/

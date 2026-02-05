@@ -1,2 +1,6 @@
-import Foundation.Modal.Algebra.Basic
-import Foundation.Modal.Algebra.Magari
+module
+
+public import Foundation.Modal.Algebra.Basic
+public import Foundation.Modal.Algebra.Magari
+@[expose] public section
+end

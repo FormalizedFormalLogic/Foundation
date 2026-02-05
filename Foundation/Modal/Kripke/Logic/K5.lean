@@ -1,6 +1,8 @@
-import Foundation.Modal.Kripke.AxiomGeach
-import Foundation.Modal.Kripke.Hilbert
-import Foundation.Modal.Kripke.Logic.K
+module
+
+public import Foundation.Modal.Kripke.Logic.K
+
+@[expose] public section
 
 namespace LO.Modal
 
@@ -46,14 +48,14 @@ end K5.Kripke
 
 instance : Modal.K ⪱ Modal.K5 := by
   constructor;
-  . apply Hilbert.Normal.weakerThan_of_subset_axioms $ by simp;
+  . grind;
   . apply Entailment.not_weakerThan_iff.mpr;
     use (Axioms.Five (.atom 0));
     constructor;
     . simp;
     . apply Sound.not_provable_of_countermodel (𝓜 := FrameClass.K)
       apply Kripke.not_validOnFrameClass_of_exists_model_world;
-      let M : Model := ⟨⟨Fin 2, λ x _ => x = 0⟩, λ w _ => w = 0⟩;
+      let M : Model := ⟨⟨Fin 2, λ x _ => x = 0⟩, λ _ w => w = 0⟩;
       use M, 0;
       constructor;
       . trivial;
@@ -65,3 +67,4 @@ end Hilbert
 
 
 end LO.Modal
+end

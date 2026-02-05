@@ -1,6 +1,9 @@
-import Foundation.Modal.Modality.Basic
-import Foundation.Modal.Entailment.S5
-import Foundation.Modal.Kripke.Logic.S5
+module
+
+public import Foundation.Modal.Modality.Basic
+public import Foundation.Modal.Kripke.Logic.S5
+
+@[expose] public section
 
 namespace LO.Modal
 
@@ -141,3 +144,4 @@ theorem modal_reduction : ∀ n, ModalReduction Modal.S5 n S5.modalities := Moda
 end S5
 
 end LO.Modal
+end

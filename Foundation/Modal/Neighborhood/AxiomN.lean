@@ -1,6 +1,9 @@
-import Foundation.Modal.Neighborhood.Basic
-import Foundation.Modal.Neighborhood.Completeness
-import Foundation.Modal.Entailment.EN
+module
+
+public import Foundation.Modal.Neighborhood.Completeness
+public import Foundation.Modal.Entailment.EN
+
+@[expose] public section
 
 namespace LO.Modal.Neighborhood
 
@@ -58,3 +61,4 @@ end
 
 
 end LO.Modal.Neighborhood
+end

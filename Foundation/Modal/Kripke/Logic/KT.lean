@@ -1,7 +1,8 @@
-import Foundation.Modal.Kripke.AxiomGeach
-import Foundation.Modal.Kripke.Hilbert
-import Foundation.Modal.Kripke.Logic.KD
-import Foundation.Modal.Entailment.KT
+module
+
+public import Foundation.Modal.Kripke.Logic.KD
+
+@[expose] public section
 
 namespace LO.Modal
 
@@ -53,9 +54,10 @@ instance : Modal.KD ⪱ Modal.KT := by
     . exact axiomT!;
     . apply Sound.not_provable_of_countermodel (𝓜 := FrameClass.KD)
       apply Kripke.not_validOnFrameClass_of_exists_model_world;
-      use ⟨⟨Fin 2, λ x y => y = 1⟩, λ w _ => w = 1⟩, 0;
+      use ⟨⟨Fin 2, λ x y => y = 1⟩, λ _ w => w = 1⟩, 0;
       constructor;
       . exact { serial := by tauto };
       . simp [Semantics.Models, Satisfies];
 
 end LO.Modal
+end

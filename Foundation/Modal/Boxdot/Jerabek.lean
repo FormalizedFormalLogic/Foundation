@@ -1,14 +1,17 @@
+module
+
 /-
   Jeřábek's proof of boxdot conjecture.
 
   References:
   - E. Jeřábek - "Cluster Expansion and the Boxdot Conjecture": https://arxiv.org/abs/1308.0994
 -/
-import Foundation.Modal.Boxdot.Basic
-import Foundation.Modal.Kripke.Logic.KTB
-import Foundation.Modal.Kripke.Logic.S5
-import Foundation.Modal.Kripke.Logic.S4McK
-import Foundation.Modal.Logic.Global
+public import Foundation.Modal.Boxdot.Basic
+public import Foundation.Modal.Kripke.Logic.S5
+public import Foundation.Modal.Kripke.Logic.S4McK
+public import Foundation.Modal.Logic.Global
+
+@[expose] public section
 
 namespace LO.Modal
 
@@ -239,7 +242,11 @@ theorem jerabek_SBDP
       simp only [Finset.coe_image, Set.mem_image, Finset.mem_coe, XB];
       use (□((flag (atom q) b) ➝ ψ) ➝ ψ);
       constructor;
-      . match b with | true | false => simpa [X, X₀, X₁, flag] using hψ;
+      . match b with
+        | true
+        | false =>
+          simp [X, X₀, X₁, flag, Finset.LO.preboxItr];
+          grind;
       . rfl;
     have H₃ : ∀ b, (L, XB.toSet) ⊢ (flag (.atom q) b) ➝ (□ψᵇ ➝ ψᵇ) := by
       intro b;
@@ -291,9 +298,9 @@ theorem jerabek_SBDP
     obtain ⟨M, x, hMC, hF⟩ := Kripke.exists_model_world_of_not_validOnFrameClass this;
     let M₂ : Kripke.Model := {
       toFrame := M.toFrame.twice
-      Val := λ ⟨w, i⟩ a =>
+      Val := λ a ⟨w, i⟩ =>
         if   a = q then i = true
-        else M.Val w a
+        else M.Val a w
     }
     have : M.IsReflexive := by
       apply reflexive_of_validate_AxiomT;
@@ -388,3 +395,4 @@ theorem S5.BDP : Modal.S5.BoxdotProperty := jerabek_BDP Modal.S5 Kripke.FrameCla
 end
 
 end LO.Modal
+end

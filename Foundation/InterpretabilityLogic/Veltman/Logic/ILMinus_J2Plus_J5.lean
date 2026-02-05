@@ -1,5 +1,9 @@
-import Foundation.InterpretabilityLogic.Veltman.Logic.ILMinus_J4Plus_J5
-import Foundation.InterpretabilityLogic.Veltman.Logic.ILMinus_J2Plus
+module
+
+public import Foundation.InterpretabilityLogic.Veltman.Logic.ILMinus_J4Plus_J5
+public import Foundation.InterpretabilityLogic.Veltman.Logic.ILMinus_J2Plus
+
+@[expose] public section
 
 namespace LO.InterpretabilityLogic
 
@@ -97,3 +101,4 @@ instance : InterpretabilityLogic.ILMinus_J4Plus_J5 ⪱ InterpretabilityLogic.ILM
         simp [Frame.SRel'] at this;
 
 end LO.InterpretabilityLogic
+end

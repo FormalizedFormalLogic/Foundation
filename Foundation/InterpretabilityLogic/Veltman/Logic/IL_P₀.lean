@@ -1,5 +1,8 @@
-import Foundation.InterpretabilityLogic.Veltman.Logic.IL
-import Foundation.InterpretabilityLogic.Veltman.AxiomR
+module
+
+public import Foundation.InterpretabilityLogic.Veltman.AxiomR
+
+@[expose] public section
 
 namespace LO.InterpretabilityLogic
 
@@ -69,6 +72,7 @@ instance : InterpretabilityLogic.IL ⪱ InterpretabilityLogic.IL_P₀ := by
         constructor;
       . by_contra hC;
         have : F.SRel' 1 2 4 := Frame.HasAxiomR.of_validate_axiomP₀ hC |>.S_R (x := 0) (u := 3) (by tauto) (by tauto) (by tauto) (by tauto);
-        simp [F, Frame.SRel'] at this;
+        grind;
 
 end LO.InterpretabilityLogic
+end

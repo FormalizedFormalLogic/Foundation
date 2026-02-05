@@ -1,6 +1,9 @@
-import Foundation.ProvabilityLogic.Realization
-import Foundation.Modal.PLoN.Logic.N
+module
 
+public import Foundation.ProvabilityLogic.Realization
+public import Foundation.Modal.PLoN.Logic.N
+
+@[expose] public section
 namespace LO.ProvabilityLogic
 
 open Entailment

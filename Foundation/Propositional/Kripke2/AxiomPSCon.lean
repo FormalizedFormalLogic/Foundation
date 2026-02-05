@@ -1,9 +1,8 @@
-import Foundation.Propositional.Kripke2.Basic
-import Foundation.Propositional.Entailment.LC
-import Foundation.Vorspiel.Rel.Convergent
-import Foundation.Vorspiel.Rel.Euclidean
-import Foundation.Vorspiel.Rel.Coreflexive
-import Foundation.Vorspiel.Rel.Connected
+module
+
+public import Foundation.Propositional.Kripke2.Basic
+
+@[expose] public section
 
 namespace LO.Propositional
 
@@ -15,7 +14,6 @@ variable (φ ψ χ ξ : F)
 protected abbrev PSCon := ((χ ⋏ (φ ➝ ψ)) ➝ ξ) ⋎ ((φ ⋏ (χ ➝ ξ)) ➝ ψ)
 
 end Axioms
-
 
 open Kripke2
 open Formula.Kripke2
@@ -46,7 +44,7 @@ lemma valid_axiomPSCon_of_IsPiecewiseStronglyConnected [F.IsPiecewiseStronglyCon
 lemma isPiecewiseStronglyConnected_of_valid_axiomPSCon (h : F ⊧ Axioms.PSCon #0 #1 #2 #3) : F.IsPiecewiseStronglyConnected := by
   constructor;
   intro x y z Rxy Rxz;
-  rcases @h (λ w a => match a with | 0 => z = w | 1 => w ≺ y | 2 => y = w | 3 => w ≺ z | _ => False) x with h | h;
+  rcases @h (λ a w => match a with | 0 => z = w | 1 => w ≺ y | 2 => y = w | 3 => w ≺ z | _ => False) x with h | h;
   . left;
     apply h Rxy;
     constructor;
@@ -65,3 +63,4 @@ lemma isPiecewiseStronglyConnected_of_valid_axiomPSCon (h : F ⊧ Axioms.PSCon #
 end Kripke2
 
 end LO.Propositional
+end

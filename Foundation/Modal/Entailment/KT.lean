@@ -1,7 +1,10 @@
-import Foundation.Modal.Entailment.K
-import Foundation.Modal.Entailment.KP
-import Foundation.Modal.Entailment.KD
-import Foundation.Modal.Entailment.ET
+module
+
+public import Foundation.Modal.Entailment.KP
+public import Foundation.Modal.Entailment.KD
+public import Foundation.Modal.Entailment.ET
+
+@[expose] public section
 
 namespace LO.Modal.Entailment
 
@@ -42,3 +45,4 @@ omit [DecidableEq F] in
 end
 
 end LO.Modal.Entailment
+end

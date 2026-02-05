@@ -1,5 +1,10 @@
-import Foundation.Vorspiel.Rel.Euclidean
-import Foundation.Vorspiel.Rel.Convergent
+module
+
+public import Foundation.Vorspiel.Rel.Euclidean
+public import Foundation.Vorspiel.Rel.Convergent
+
+@[expose]
+public section
 
 variable {α} {R : Rel α α}
 
@@ -16,8 +21,8 @@ instance [IsTrichotomous _ R] : IsPiecewiseConnected R :=
 
 instance [IsRightEuclidean R] : IsPiecewiseConnected R := ⟨by
   intro x y z Rxy Rxz;
-  have : R y z := IsRightEuclidean.reucl Rxy Rxz;
-  tauto;
+  left;
+  exact IsRightEuclidean.reucl Rxy Rxz;
 ⟩
 
 def PiecewiseStronglyConnected (R : Rel α α) := ∀ ⦃x y z⦄, R x y → R x z → (R y z ∨ R z y)
@@ -25,9 +30,9 @@ def PiecewiseStronglyConnected (R : Rel α α) := ∀ ⦃x y z⦄, R x y → R x
 class IsPiecewiseStronglyConnected (R : Rel α α) where
   ps_connected : PiecewiseStronglyConnected R
 
-instance [IsTotal _ R] : IsPiecewiseStronglyConnected R := ⟨fun ⦃_ y z⦄ _ _ ↦ IsTotal.total y z⟩
+instance [Std.Total R] : IsPiecewiseStronglyConnected R := ⟨fun ⦃_ y z⦄ _ _ ↦ Std.Total.total y z⟩
 
-instance [IsPiecewiseConnected R] [IsRefl _ R] : IsPiecewiseStronglyConnected R := ⟨by
+instance [IsPiecewiseConnected R] [Std.Refl R] : IsPiecewiseStronglyConnected R := ⟨by
   intro x y z Rxy Rxz;
   rcases IsPiecewiseConnected.p_connected Rxy Rxz with (Ryz | rfl | Rzy);
   . tauto;
@@ -40,15 +45,17 @@ instance [IsPiecewiseStronglyConnected R] : IsPiecewiseConnected R := ⟨by
   rcases IsPiecewiseStronglyConnected.ps_connected Rxy Rxz <;> tauto;
 ⟩
 
-instance [IsRefl _ R] [IsPiecewiseStronglyConnected R] : IsPiecewiseStronglyConvergent R := ⟨by
+instance [Std.Refl R] [IsPiecewiseStronglyConnected R] : IsPiecewiseStronglyConvergent R := ⟨by
   intro x y z Rxy Rxz;
   rcases IsPiecewiseStronglyConnected.ps_connected Rxy Rxz with (Ryz | Rzy);
   . use z;
     constructor;
     . assumption;
-    . apply IsRefl.refl;
+    . apply Std.Refl.refl;
   . use y;
     constructor;
-    . apply IsRefl.refl;
+    . apply Std.Refl.refl;
     . assumption;
 ⟩
+
+end

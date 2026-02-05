@@ -1,5 +1,8 @@
-import Foundation.InterpretabilityLogic.Formula.Basic
-import Foundation.Modal.Formula
+module
+
+public import Foundation.InterpretabilityLogic.Formula.Basic
+
+@[expose] public section
 
 namespace LO.InterpretabilityLogic
 
@@ -62,3 +65,4 @@ lemma Formula.comp_subst {s₁ s₂ : Substitution α} {φ : Formula α} : φ⟦
 
 
 end LO.InterpretabilityLogic
+end

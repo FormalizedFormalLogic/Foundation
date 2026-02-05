@@ -1,6 +1,9 @@
-import Foundation.ProvabilityLogic.SolovaySentences
-import Foundation.ProvabilityLogic.Arithmetic
+module
 
+public import Foundation.ProvabilityLogic.SolovaySentences
+public import Foundation.ProvabilityLogic.Arithmetic
+
+@[expose] public section
 /-!
 # Solovay's arithmetical completeness of $\mathsf{GL}$ and $\mathsf{GL} + \square^n \bot$
 -/
@@ -11,7 +14,7 @@ open LO.Entailment Entailment.FiniteContext
 open FirstOrder
 open Modal
 open Modal.Kripke
-open ArithmeticTheory (ProvabilityLogic)
+open ArithmeticTheory (provabilityLogicOn)
 
 variable {T : ArithmeticTheory} [T.Δ₁] [𝗜𝚺₁ ⪯ T] {A : Modal.Formula _}
 
@@ -71,11 +74,10 @@ theorem GL.arithmetical_completeness_sound_iff [T.SoundOnHierarchy 𝚺 1] {A} :
 
 /-- Provability logic of $\Sigma_1$-sound theory contains $\mathsf{I}\Sigma_1$ is $\mathsf{GL}$-/
 theorem provabilityLogic_eq_GL_of_sigma1_sound [T.SoundOnHierarchy 𝚺 1] :
-    ProvabilityLogic T T ≊ Modal.GL := by
+  (T.provabilityLogicOn T) ≊ Modal.GL := by
   apply Logic.iff_equal_provable_equiv.mp
   ext A;
-  simpa [ArithmeticTheory.ProvabilityLogic, Logic.iff_provable] using
-    GL.arithmetical_completeness_sound_iff
+  simpa [Logic.iff_provable] using GL.arithmetical_completeness_sound_iff
 
 open Classical
 
@@ -97,12 +99,11 @@ theorem GLPlusBoxBot.arithmetical_completeness_iff :
 
 /-- Provability logic of theory contains $\mathsf{I}\Sigma_1$ is $\mathsf{GL} + \square^{\text{height of } T} \bot$-/
 theorem provabilityLogic_eq_GLPlusBoxBot :
-    ProvabilityLogic T T ≊ Modal.GLPlusBoxBot T.height := by
+  (T.provabilityLogicOn T) ≊ Modal.GLPlusBoxBot T.height := by
   apply Logic.iff_equal_provable_equiv.mp
   ext A
-  simpa [ArithmeticTheory.ProvabilityLogic, Logic.iff_provable] using
-    GLPlusBoxBot.arithmetical_completeness_iff
+  simpa [Logic.iff_provable] using GLPlusBoxBot.arithmetical_completeness_iff
 
-instance : ProvabilityLogic 𝗣𝗔 𝗣𝗔 ≊ Modal.GL := provabilityLogic_eq_GL_of_sigma1_sound
+instance : (𝗣𝗔.provabilityLogicOn 𝗣𝗔) ≊ Modal.GL := provabilityLogic_eq_GL_of_sigma1_sound
 
 end LO.ProvabilityLogic

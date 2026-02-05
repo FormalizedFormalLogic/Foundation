@@ -1,7 +1,8 @@
-import Foundation.Modal.Neighborhood.Hilbert
-import Foundation.Modal.Neighborhood.AxiomC
-import Foundation.Modal.Neighborhood.Logic.E
-import Foundation.Modal.Neighborhood.Supplementation
+module
+
+public import Foundation.Modal.Neighborhood.Logic.E
+
+@[expose] public section
 
 namespace LO.Modal
 
@@ -117,8 +118,7 @@ instance : Modal.EC ⪱ Modal.EMC := by
               simp [M]
         }
       . simp! [M, Semantics.Models, Satisfies];
-        ext x;
-        simp!;
-        omega;
+        grind;
 
 end LO.Modal
+end

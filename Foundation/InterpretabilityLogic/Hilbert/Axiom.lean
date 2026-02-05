@@ -1,6 +1,10 @@
-import Foundation.InterpretabilityLogic.Formula.Substitution
-import Foundation.Modal.Axioms
-import Foundation.InterpretabilityLogic.Axioms
+module
+
+public import Foundation.InterpretabilityLogic.Formula.Substitution
+public import Foundation.Modal.Axioms
+public import Foundation.InterpretabilityLogic.Axioms
+
+@[expose] public section
 
 namespace LO.InterpretabilityLogic
 
@@ -417,3 +421,4 @@ lemma ne_M_J6 : Axioms.M (atom 0) (atom 1) (atom 2) ≠ Axioms.J6 (atom 0) := by
 end
 
 end LO.InterpretabilityLogic
+end

@@ -1,5 +1,9 @@
-import Foundation.Modal.Kripke.Logic.S4Point2McK
-import Foundation.Modal.Kripke.Logic.S4Point3
+module
+
+public import Foundation.Modal.Kripke.Logic.S4Point2McK
+public import Foundation.Modal.Kripke.Logic.S4Point3
+
+@[expose] public section
 
 namespace LO.Modal
 
@@ -21,7 +25,7 @@ protected abbrev FrameClass.S4Point3McK : FrameClass := { F | F.IsS4Point3McK }
 end Kripke
 
 
-namespace Modal.S4Point3McK.Kripke
+namespace S4Point3McK.Kripke
 
 instance : Sound (Modal.S4Point3McK) FrameClass.S4Point3McK := instSound_of_validates_axioms $ by
   apply FrameClass.validates_with_AxiomK_of_validates;
@@ -56,7 +60,7 @@ instance : Modal.S4Point2McK ⪱ Modal.S4Point3McK := by
       apply Kripke.not_validOnFrameClass_of_exists_model_world;
       let M : Model := ⟨
         ⟨Fin 4, λ x y => x = 0 ∨ y = 3 ∨ x = y⟩,
-        λ w a => match a with | 0 => w = 1 ∨ w = 3 | 1 => w = 2 ∨ w = 3 | _ => False
+        λ a w => match a with | 0 => w = 1 ∨ w = 3 | 1 => w = 2 ∨ w = 3 | _ => False
       ⟩;
       use M, 0;
       constructor
@@ -90,7 +94,7 @@ instance : Modal.S4Point3 ⪱ Modal.S4Point3McK := by
     . simp;
     . apply Sound.not_provable_of_countermodel (𝓜 := Kripke.FrameClass.S4Point3);
       apply Kripke.not_validOnFrameClass_of_exists_model_world;
-      let M : Model := ⟨⟨Fin 2, λ x y => True⟩, λ w _ => w = 0⟩;
+      let M : Model := ⟨⟨Fin 2, λ x y => True⟩, λ _ w => w = 0⟩;
       use M, 0;
       constructor;
       . exact {
@@ -98,12 +102,14 @@ instance : Modal.S4Point3 ⪱ Modal.S4Point3McK := by
           trans := by tauto,
           ps_connected := by tauto;
         }
-      . suffices ∃ x : M, x ≠ 0 by simpa [M, Semantics.Models, Satisfies];
+      . suffices ∃ x : M, x ≠ 0 by
+          simp [M, Semantics.Models, Satisfies];
         use 1;
         trivial;
 
-end Modal.S4Point3McK.Kripke
+end S4Point3McK.Kripke
 
 
 
 end LO.Modal
+end

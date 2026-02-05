@@ -1,9 +1,12 @@
-import Foundation.FirstOrder.NegationTranslation.GoedelGentzen
+module
 
+public import Foundation.FirstOrder.NegationTranslation.GoedelGentzen
+
+@[expose] public section
 /-!
 # Algebraic proofs of cut elimination
 
-Main reference: Jeremy Avigad, Algebraic proofs of cut elimination, The Journal of Logic and Algebraic Programming, Volume 49, Issues 1–2, 2001, Pages 15-30
+Main reference: Jeremy Avigad, Algebraic proofs of cut elimination [Avi01]
  -/
 
 namespace LO.FirstOrder
@@ -13,8 +16,8 @@ variable {L : Language.{u}}
 namespace Derivation
 
 inductive IsCutFree : {Γ : Sequent L} → ⊢ᵀ Γ → Prop
-| axL (Γ) {k} (r : L.Rel k) (v)                 : IsCutFree (axL Γ r v)
-| verum (Γ)                                     : IsCutFree (verum Γ)
+| axL {k} (r : L.Rel k) (v)                     : IsCutFree (axL r v)
+| verum                                         : IsCutFree verum
 | or {Γ φ ψ} {d : ⊢ᵀ φ :: ψ :: Γ}               : IsCutFree d → IsCutFree d.or
 | and {Γ φ ψ} {dφ : ⊢ᵀ φ :: Γ} {dψ : ⊢ᵀ ψ :: Γ} : IsCutFree dφ → IsCutFree dψ → IsCutFree (dφ.and dψ)
 | all {Γ φ} {d : ⊢ᵀ Rewriting.free φ :: Γ⁺}     : IsCutFree d → IsCutFree d.all
@@ -68,7 +71,7 @@ variable {Γ Δ : Sequent L}
 end Derivation
 
 inductive PositiveDerivationFrom (Ξ : Sequent L) : Sequent L → Type _
-| verum (Γ)    : PositiveDerivationFrom Ξ (⊤ :: Γ)
+| verum    : PositiveDerivationFrom Ξ [⊤]
 | or {Γ φ ψ}   : PositiveDerivationFrom Ξ (φ :: ψ :: Γ) → PositiveDerivationFrom Ξ (φ ⋎ ψ :: Γ)
 | ex {Γ φ} (t) : PositiveDerivationFrom Ξ (φ/[t] :: Γ) → PositiveDerivationFrom Ξ ((∃' φ) :: Γ)
 | wk {Γ Δ}     : PositiveDerivationFrom Ξ Δ → Δ ⊆ Γ → PositiveDerivationFrom Ξ Γ
@@ -83,14 +86,14 @@ variable {Ξ Γ Δ : Sequent L}
 def ofSubset (ss : Ξ ⊆ Γ) : Ξ ⟶⁺ Γ := wk .id ss
 
 def trans {Ξ Γ Δ : Sequent L} : Ξ ⟶⁺ Γ → Γ ⟶⁺ Δ → Ξ ⟶⁺ Δ
-  | _, verum Γ => verum Γ
+  | _, verum => verum
   | b, or d    => or (b.trans d)
   | b, ex t d  => ex t (b.trans d)
   | b, wk d h  => wk (b.trans d) h
   | b, .id     => b
 
 def cons {Ξ Γ : Sequent L} (φ) : Ξ ⟶⁺ Γ → φ :: Ξ ⟶⁺ φ :: Γ
-  | verum Γ         => wk (verum Γ) (List.subset_cons_self _ _)
+  | verum         => wk verum (List.subset_cons_self _ _)
   | @or _ _ Γ ψ χ d =>
     have : φ :: Ξ ⟶⁺ ψ :: χ :: φ :: Γ := wk (cons φ d) (by simp; tauto)
     wk (or this) (by simp)
@@ -105,14 +108,14 @@ def append {Ξ Γ : Sequent L} : (Δ : Sequent L) → Ξ ⟶⁺ Γ → Δ ++ Ξ 
   | φ :: Δ, d => (d.append Δ).cons φ
 
 def add {Γ Δ Ξ Θ : Sequent L} : Γ ⟶⁺ Δ → Ξ ⟶⁺ Θ → Γ ++ Ξ ⟶⁺ Δ ++ Θ
-  | verum Δ, d => verum _
+  | verum,   d => wk verum (by simp)
   | or d,    b => or (d.add b)
   | ex t d,  b => ex t (d.add b)
   | wk d h,  b => wk (d.add b) (by simp [h])
   | .id,     b => b.append Γ
 
 def graft {Ξ Γ : Sequent L} (b : ⊢ᵀ Ξ) : Ξ ⟶⁺ Γ → ⊢ᵀ Γ
-  | verum Γ => .verum Γ
+  | .verum => .verum
   | or d    => .or (d.graft b)
   | ex t d  => .ex t (d.graft b)
   | wk d h  => .wk (d.graft b) h
@@ -263,7 +266,6 @@ open LawfulSyntacticRewriting
 def modusPonens {φ ψ : SyntacticFormulaᵢ L} (f : p ⊩ φ ➝ ψ) (g : p ⊩ φ) : p ⊩ ψ :=
   f.implyEquiv p (StrongerThan.refl p) g
 
-noncomputable
 def ofMinimalProof {φ : SyntacticFormulaᵢ L} : 𝗠𝗶𝗻¹ ⊢! φ → ⊩ φ
   | .mdp (φ := ψ) b d => fun p ↦
     let b : p ⊩ ψ ➝ φ := ofMinimalProof b p
@@ -324,9 +326,9 @@ def ofMinimalProof {φ : SyntacticFormulaᵢ L} : 𝗠𝗶𝗻¹ ⊢! φ → ⊩
   termination_by b => HilbertProofᵢ.depth b
 
 def relRefl {k} (R : L.Rel k) (v : Fin k → SyntacticTerm L) : [.rel R v] ⊩ rel R v :=
-  relEquiv.symm ⟨Derivation.axL _ _ _, by simp⟩
+  relEquiv.symm ⟨Derivation.axL _ _, by simp⟩
 
-private def refl.or (ihφ : [φ] ⊩ φᴺ) (ihψ : [ψ] ⊩ ψᴺ) : [φ ⋎ ψ] ⊩ (φ ⋎ ψ)ᴺ :=
+protected def refl.or (ihφ : [φ] ⊩ φᴺ) (ihψ : [ψ] ⊩ ψᴺ) : [φ ⋎ ψ] ⊩ (φ ⋎ ψ)ᴺ :=
   implyOf fun q dq ↦
     let ⟨dφ, dψ⟩ : q ⊩ ∼φᴺ × q ⊩ ∼ψᴺ := dq.andEquiv
     let ihφ : [φ] ⊩ φᴺ := ihφ
@@ -339,7 +341,7 @@ private def refl.or (ihφ : [φ] ⊩ φᴺ) (ihψ : [ψ] ⊩ ψᴺ) : [φ ⋎ ψ
       (Derivation.cast bbφ (by simp [inf_def])) (Derivation.cast bbψ (by simp [inf_def]))
     falsumEquiv.symm ⟨Derivation.cast band (by simp [inf_def]), by simp [band, hbbφ, hbbψ]⟩
 
-private def refl.ex (d : ∀ x, [φ/[&x]] ⊩ (φ/[&x])ᴺ) : [∃' φ] ⊩ (∃' φ)ᴺ :=
+protected def refl.ex (d : ∀ x, [φ/[&x]] ⊩ (φ/[&x])ᴺ) : [∃' φ] ⊩ (∃' φ)ᴺ :=
   implyOf fun q f ↦
     let x := newVar ((∀' ∼φ) :: ∼q)
     let ih : [φ/[&x]] ⊩ φᴺ/[&x] := cast (d x) (by simp [Semiformula.subst_doubleNegation])
@@ -356,7 +358,7 @@ private def refl.ex (d : ∀ x, [φ/[&x]] ⊩ (φ/[&x])ᴺ) : [∃' φ] ⊩ (∃
 
 protected def refl : (φ : SyntacticFormula L) → [φ] ⊩ φᴺ
   |         ⊤ => implyEquiv.symm fun q sqp dφ ↦ dφ
-  |         ⊥ => falsumEquiv.symm ⟨Derivation.verum _, by simp⟩
+  |         ⊥ => falsumEquiv.symm ⟨Derivation.verum, by simp⟩
   |  .rel R v => implyOf fun q dq ↦
     let b : [.rel R v] ⊓ q ⊩ rel R v := (relRefl R v).monotone (StrongerThan.minLeLeft _ _)
     dq.implyEquiv ([.rel R v] ⊓ q) (StrongerThan.minLeRight _ _) b
@@ -386,7 +388,6 @@ def conj' : {Γ : Sequent L} → (b : (φ : SyntacticFormula L) → φ ∈ Γ �
 
 end Forces
 
-noncomputable
 def main [L.DecidableEq] {Γ : Sequent L} : ⊢ᵀ Γ → {d : ⊢ᵀ Γ // Derivation.IsCutFree d} := fun d ↦
   let d : 𝗠𝗶𝗻¹ ⊢! ⋀(∼Γ)ᴺ ➝ ⊥ := Entailment.FiniteContext.toDef (Derivation.gödelGentzen d)
   let ff : ∼Γ ⊩ ⋀(∼Γ)ᴺ ➝ ⊥ := Forces.ofMinimalProof d (∼Γ)

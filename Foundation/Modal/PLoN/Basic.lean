@@ -1,4 +1,9 @@
-import Foundation.Modal.Formula
+module
+
+public import Foundation.Modal.Formula.Basic
+public import Foundation.Propositional.Entailment.Cl.Basic
+
+@[expose] public section
 
 namespace LO.Modal
 
@@ -135,7 +140,7 @@ protected lemma re : ¬∀ M : Model, ∀ φ ψ, M ⊧ φ ⭤ ψ → M ⊧ □φ
       | 0 => tauto;
       | 1 => simp [M, Frame.Rel'];
     . use 1;
-      simp [M];
+      grind;
 
 
 end ValidOnModel
@@ -191,3 +196,4 @@ end
 end PLoN
 
 end LO.Modal
+end

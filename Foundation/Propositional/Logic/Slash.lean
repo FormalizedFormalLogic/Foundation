@@ -1,5 +1,9 @@
-import Foundation.Propositional.Logic.Basic
-import Foundation.Propositional.Entailment.Corsi
+module
+
+public import Foundation.Propositional.Logic.Basic
+public import Foundation.Propositional.Entailment.Corsi
+
+@[expose] public section
 
 namespace LO.Propositional
 
@@ -59,3 +63,5 @@ instance instDisjunctive_of_AczelSlashable [L.AczelSlashable] : Entailment.Disju
 end
 
 end LO.Propositional
+
+end

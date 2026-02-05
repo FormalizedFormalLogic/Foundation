@@ -1,7 +1,8 @@
-import Foundation.Modal.Kripke.Basic
-import Foundation.Modal.Kripke.AxiomGeach
-import Foundation.Vorspiel.Rel.Basic
-import Foundation.Modal.Kripke.Irreflexive
+module
+
+public import Foundation.Modal.Kripke.Irreflexive
+
+@[expose] public section
 
 namespace LO.Modal.Kripke
 
@@ -31,7 +32,6 @@ instance [F.IsTransitive] [F.IsIrreflexive] : F^=.IsAntisymmetric := ⟨by apply
 instance [F.IsTransitive] [F.IsIrreflexive] : F^=.IsPartialOrder where
 
 end ReflGen
-
 
 abbrev TransRel := F.Rel.TransGen
 infix:50 " ≺^+ " => TransRel
@@ -80,3 +80,4 @@ end ReflTransGen
 end Frame
 
 end LO.Modal.Kripke
+end

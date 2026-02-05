@@ -1,5 +1,9 @@
-import Foundation.Modal.Kripke.Logic.KB4
+module
 
+public import Foundation.Modal.Kripke.Logic.KB4
+
+
+@[expose] public section
 
 namespace LO.Modal
 
@@ -23,7 +27,7 @@ end Kripke
 
 
 
-namespace Modal.KTc.Kripke
+namespace KTc.Kripke
 
 instance : Sound (Modal.KTc) Kripke.FrameClass.KTc := instSound_of_validates_axioms $ by
   apply FrameClass.validates_with_AxiomK_of_validates;
@@ -57,7 +61,7 @@ instance : Modal.KB4 ⪱ Modal.KTc := by
     . simp;
     . apply Sound.not_provable_of_countermodel (𝓜 := FrameClass.KB4)
       apply Kripke.not_validOnFrameClass_of_exists_model_world;
-      let M : Model := ⟨⟨Fin 2, λ x y => True⟩, λ w _ => w = 0⟩;
+      let M : Model := ⟨⟨Fin 2, λ x y => True⟩, λ _ w => w = 0⟩;
       use M, 0;
       constructor;
       . exact {
@@ -66,7 +70,7 @@ instance : Modal.KB4 ⪱ Modal.KTc := by
         }
       . simp [M, Semantics.Models, Satisfies];
 
-end Modal.KTc.Kripke
-
+end KTc.Kripke
 
 end LO.Modal
+end

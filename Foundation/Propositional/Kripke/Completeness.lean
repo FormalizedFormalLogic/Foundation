@@ -1,5 +1,9 @@
-import Foundation.Propositional.Kripke.Basic
-import Foundation.Propositional.ConsistentTableau
+module
+
+public import Foundation.Propositional.Kripke.Basic
+public import Foundation.Propositional.ConsistentTableau
+
+@[expose] public section
 
 namespace LO.Propositional
 
@@ -50,7 +54,7 @@ end canonicalFrame
 
 def canonicalModel (𝓢 : S) [Entailment.Consistent 𝓢] [Entailment.Int 𝓢] : Kripke.Model where
   toFrame := Kripke.canonicalFrame 𝓢
-  Val := ⟨λ t a => (atom a) ∈ t.1.1, by aesop⟩
+  Val := ⟨λ a t => (atom a) ∈ t.1.1, by aesop⟩
 
 namespace canonicalModel
 
@@ -167,3 +171,4 @@ instance instCompleteOfCanonical [Canonical 𝓢 C] : Complete 𝓢 C := ⟨by
 end Kripke
 
 end LO.Propositional
+end

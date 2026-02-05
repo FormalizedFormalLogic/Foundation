@@ -1,5 +1,8 @@
-import Foundation.FirstOrder.Arithmetic.HFS.Fixpoint
+module
 
+public import Foundation.FirstOrder.Arithmetic.HFS.Fixpoint
+
+@[expose] public section
 /-!
 
 # Vec
@@ -24,7 +27,7 @@ macro_rules
   | `(?[]) => `(0)
 
 @[app_unexpander Adjoin.adjoin]
-def adjoinUnexpander : Lean.PrettyPrinter.Unexpander
+meta def adjoinUnexpander : Lean.PrettyPrinter.Unexpander
   | `($_ $term ?[$terms,*]) => `(?[$term, $terms,*])
   | `($_ $term 0) => `(?[$term])
   | _ => throw ()

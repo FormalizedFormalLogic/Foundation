@@ -11,7 +11,6 @@ weak.linter.style.multiGoal = true
 [[require]]
 scope = "leanprover-community"
 name = "mathlib"
-rev = "f317236f66fce00be8a8e0f01cdd31619909f887"
 
 [[require]]
 scope = "leanprover"
@@ -19,31 +18,3 @@ name = "doc-gen4"
 
 [[lean_lib]]
 name = "Foundation"
-
-[[lean_exe]]
-name = "Zoo_Arith"
-root = "Zoo.Arith"
-supportInterpreter = true
-
-[[lean_exe]]
-name = "Zoo_SetTheory"
-root = "Zoo.SetTheory"
-supportInterpreter = true
-
-[[lean_exe]]
-name = "Zoo_Modal"
-root = "Zoo.Modal"
-supportInterpreter = true
-
-[[lean_exe]]
-name = "Zoo_InterpretabilityLogic"
-root = "Zoo.InterpretabilityLogic"
-supportInterpreter = true
-
-[[lean_exe]]
-name = "Zoo_Propositional"
-root = "Zoo.Propositional"
-supportInterpreter = true
-
-[[lean_lib]]
-name = "Zoo"

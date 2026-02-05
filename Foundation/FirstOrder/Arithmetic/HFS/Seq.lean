@@ -1,5 +1,8 @@
-import Foundation.FirstOrder.Arithmetic.HFS.Basic
+module
 
+public import Foundation.FirstOrder.Arithmetic.HFS.Basic
+
+@[expose] public section
 /-!
 
 # Sequence
@@ -322,7 +325,7 @@ macro_rules
   | `(!⟦⟧) => `(∅)
 
 @[app_unexpander seqCons]
-def vecConsUnexpander : Lean.PrettyPrinter.Unexpander
+meta def vecConsUnexpander : Lean.PrettyPrinter.Unexpander
   | `($_ !⟦$term2, $terms,*⟧ $term) => `(!⟦$term2, $terms,*, $term⟧)
   | `($_ !⟦$term2⟧ $term) => `(!⟦$term2, $term⟧)
   | `($_ ∅ $term) => `(!⟦$term⟧)

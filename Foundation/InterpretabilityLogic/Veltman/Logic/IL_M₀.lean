@@ -1,5 +1,8 @@
-import Foundation.InterpretabilityLogic.Veltman.Logic.IL
-import Foundation.InterpretabilityLogic.Veltman.AxiomM₀
+module
+
+public import Foundation.InterpretabilityLogic.Veltman.AxiomM₀
+
+@[expose] public section
 
 namespace LO.InterpretabilityLogic
 
@@ -72,6 +75,7 @@ instance : InterpretabilityLogic.IL ⪱ InterpretabilityLogic.IL_M₀ := by
         constructor;
       . by_contra hC;
         have : F.Rel' 1 4 := Veltman.Frame.HasAxiomM₀.of_validate_axiomM₀ hC |>.S_M₀ (a := 0) (c := 2) (d := 3) (by tauto) (by tauto) (by tauto) (by tauto);
-        simp [F, Modal.Kripke.Frame.Rel'] at this;
+        grind;
 
 end LO.InterpretabilityLogic
+end

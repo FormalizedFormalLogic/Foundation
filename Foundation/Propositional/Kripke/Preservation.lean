@@ -1,4 +1,8 @@
-import Foundation.Propositional.Kripke.Basic
+module
+
+public import Foundation.Propositional.Kripke.Basic
+
+@[expose] public section
 
 namespace LO.Propositional
 
@@ -10,7 +14,7 @@ section Bisimulation
 
 structure Model.Bisimulation (M₁ M₂ : Kripke.Model) where
   toRel : M₁.World → M₂.World → Prop
-  atomic {x₁ : M₁.World} {x₂ : M₂.World} {a : ℕ} : toRel x₁ x₂ → ((M₁ x₁ a) ↔ (M₂ x₂ a))
+  atomic {x₁ : M₁.World} {x₂ : M₂.World} {a : ℕ} : toRel x₁ x₂ → ((M₁ a x₁) ↔ (M₂ a x₂))
   forth {x₁ y₁ : M₁.World} {x₂ : M₂.World} : toRel x₁ x₂ → x₁ ≺ y₁ → ∃ y₂ : M₂.World, toRel y₁ y₂ ∧ x₂ ≺ y₂
   back {x₁ : M₁.World} {x₂ y₂ : M₂.World} : toRel x₁ x₂ → x₂ ≺ y₂ → ∃ y₁ : M₁.World, toRel y₁ y₂ ∧ x₁ ≺ y₁
 
@@ -116,7 +120,7 @@ end Frame.PseudoEpimorphism
 
 
 structure Model.PseudoEpimorphism (M₁ M₂ : Kripke.Model) extends M₁.toFrame →ₚ M₂.toFrame where
-  atomic {w : M₁.World} : (M₁ w a) ↔ (M₂ (toFun w) a)
+  atomic {w : M₁.World} : (M₁ a w) ↔ (M₂ a (toFun w))
 
 infix:80 " →ₚ " => Model.PseudoEpimorphism
 
@@ -126,7 +130,7 @@ namespace Model.PseudoEpimorphism
 
 variable {M M₁ M₂ M₃ : Kripke.Model}
 
-def ofAtomic (f : M₁.toFrame →ₚ M₂.toFrame) (atomic : ∀ {w a}, (M₁ w a) ↔ (M₂ (f w) a)) : M₁ →ₚ M₂ where
+def ofAtomic (f : M₁.toFrame →ₚ M₂.toFrame) (atomic : ∀ {w a}, (M₁ a w) ↔ (M₂ a (f w) )) : M₁ →ₚ M₂ where
   toFun := f
   forth := f.forth
   back := f.back
@@ -177,3 +181,4 @@ end PseudoEpimorphism
 end Kripke
 
 end LO.Propositional
+end

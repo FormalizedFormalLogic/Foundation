@@ -1,4 +1,8 @@
-import Foundation.Modal.Entailment.E
+module
+
+public import Foundation.Modal.Entailment.E
+
+@[expose] public section
 
 namespace LO.Modal.Entailment
 
@@ -35,3 +39,4 @@ def axiomFiveDual! [HasAxiomFive 𝓢] : 𝓢 ⊢! ◇□φ ➝ □φ := axiomGe
 @[simp] lemma axiomFiveDual [HasAxiomFive 𝓢] : 𝓢 ⊢ ◇□φ ➝ □φ := ⟨axiomFiveDual!⟩
 
 end LO.Modal.Entailment
+end

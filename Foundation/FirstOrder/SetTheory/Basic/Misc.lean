@@ -1,6 +1,9 @@
-import Foundation.FirstOrder.Completeness.Corollaries
-import Mathlib.SetTheory.Cardinal.Basic
+module
 
+public import Foundation.FirstOrder.Completeness.Corollaries
+public import Mathlib.SetTheory.Cardinal.Basic
+
+@[expose] public section
 /-! # Preperations for set theory
 
 - *NOTE*:

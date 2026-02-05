@@ -1,5 +1,9 @@
-import Foundation.Propositional.ClassicalSemantics.Basic
-import Foundation.Propositional.NNFormula
+module
+
+public import Foundation.Propositional.ClassicalSemantics.Basic
+public import Foundation.Propositional.Formula.NNFormula
+
+@[expose] public section
 
 namespace LO.Propositional
 
@@ -68,3 +72,4 @@ end NNFormula
 
 
 end LO.Propositional
+end

@@ -1,14 +1,16 @@
-import Mathlib.Data.Finset.Insert
-import Mathlib.Data.Set.Insert
-import Mathlib.Data.Set.Countable
-import Mathlib.Tactic.TautoSet
+module
+
+public import Mathlib.Data.Set.Countable
+public import Mathlib.Tactic.TautoSet
+
+@[expose]
+public section
 
 namespace Set
 
 variable {α : Type*} {s t : Set α} {a b : α}
 
 abbrev Cofinite (s : Set α) := sᶜ.Finite
-
 abbrev Coinfinite (s : Set α) := sᶜ.Infinite
 
 @[push] lemma iff_cofinite_not_coinfinite : s.Cofinite ↔ ¬s.Coinfinite := by simp;
@@ -43,3 +45,5 @@ lemma cofinite_union_right (ht : t.Cofinite) : (s ∪ t).Cofinite := by
   exact (show (t ∪ s) = (s ∪ t) by tauto_set) ▸ cofinite_union_left ht;
 
 end Set
+
+end

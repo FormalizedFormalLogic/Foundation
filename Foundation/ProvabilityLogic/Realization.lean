@@ -1,7 +1,9 @@
-import Foundation.FirstOrder.Bootstrapping.DerivabilityCondition
-import Foundation.Modal.Hilbert.Normal.Basic
-import Foundation.Modal.Letterless
+module
 
+public import Foundation.FirstOrder.Bootstrapping.DerivabilityCondition
+public import Foundation.Modal.Hilbert.Normal.Basic
+
+@[expose] public section
 namespace LO
 
 open Entailment FiniteContext
@@ -34,14 +36,14 @@ instance : CoeFun (Realization 𝔅) (fun _ ↦ Formula ℕ → FirstOrder.Sente
 @[grind ⇒]
 lemma letterless_interpret (A_letterless : A.Letterless) : f₁ A = f₂ A := by
   induction A with
-  | hatom a => simp at A_letterless;
+  | hatom a => grind;
   | hfalsum => simp_all [Realization.interpret];
   | himp A B ihA ihB =>
-    replace ihA := ihA $ Modal.Formula.Letterless.def_imp₁ A_letterless;
-    replace ihB := ihB $ Modal.Formula.Letterless.def_imp₂ A_letterless;
+    replace ihA := ihA $ by grind;
+    replace ihB := ihB $ by grind;
     simp_all [Realization.interpret];
   | hbox A ihA =>
-    replace ihA := ihA $ Modal.Formula.Letterless.def_box A_letterless;
+    replace ihA := ihA $ by grind;
     simp_all [Realization.interpret];
 
 @[grind ⇒]
@@ -151,6 +153,24 @@ lemma iff_provable_and : U ⊢ f (A ⋏ B) ↔ U ⊢ (f A) ∧ U ⊢ (f B) := by
   . rintro ⟨hA, hB⟩;
     apply iff_provable_and'.mpr;
     cl_prover [hA, hB];
+
+lemma iff_provable_lconj_inside {Γ : List _} : U ⊢ f (⋀Γ) ⭤ ⋀(Γ.map f) := by
+  induction Γ using List.induction_with_singleton with
+  | hcons A Γ h ih =>
+    simp only [
+      List.conj₂_cons_nonempty h, List.map_cons,
+      List.conj₂_cons_nonempty (List.map_eq_nil_iff.not.mpr h)
+    ];
+    apply E!_trans $ iff_provable_and_inside;
+    cl_prover [ih];
+  | hnil => simp only [List.conj₂_nil, interpret, List.map_nil]; cl_prover;
+  | hsingle => simp;
+
+lemma iff_provable_fconj_inside : T ⊢ f Γ.conj ⭤ (Finset.image f Γ).conj := by
+  apply E!_trans $ iff_provable_lconj_inside;
+  apply E!_intro;
+  . apply Entailment.CConj₂Conj₂!_of_subset; simp;
+  . apply Entailment.CConj₂Conj₂!_of_subset; simp;
 
 @[simp, grind =]
 lemma iff_provable_lconj₂ {l : List (Formula _)} : U ⊢ f (l.conj₂) ↔ ∀ A ∈ l, U ⊢ f A := by

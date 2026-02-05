@@ -1,8 +1,8 @@
-import Mathlib.Data.Set.Finite.Powerset
-import Foundation.Modal.Kripke.Closure
-import Foundation.Modal.Kripke.Rooted
-import Foundation.Modal.Kripke.AxiomPoint3
-import Foundation.Modal.Kripke.AxiomWeakPoint3
+module
+
+public import Foundation.Modal.Kripke.Rooted
+
+@[expose] public section
 
 universe u v
 
@@ -76,7 +76,7 @@ class FilterOf (FM : Model) (M : outParam Kripke.Model) (T : outParam (FormulaSe
   def_rel_forth : ∀ {x y : M}, x ≺ y → (cast def_world.symm ⟦x⟧) ≺ (cast def_world.symm ⟦y⟧)
   def_rel_back : ∀ {x y : M}, (cast def_world.symm ⟦x⟧) ≺ (cast def_world.symm ⟦y⟧) → ∀ φ, □φ ∈ T → (x ⊧ □φ → y ⊧ φ)
   def_valuation X a : (ha : (atom a) ∈ T) →
-    FM X a ↔ Quotient.lift (λ x => M x a) (by
+    FM a X ↔ Quotient.lift (λ x => M a x) (by
       intro x y h;
       apply eq_iff_iff.mpr;
       constructor;
@@ -128,7 +128,7 @@ lemma isReflexive (filterOf : FilterOf FM M T) [M.IsReflexive] : FM.IsReflexive 
   refl := by
     intro X;
     obtain ⟨x, hx⟩ := Quotient.exists_rep (cast (filterOf.def_world) X);
-    convert filterOf.def_rel_forth $ IsRefl.refl x <;> simp_all;
+    convert filterOf.def_rel_forth $ Std.Refl.refl x <;> simp_all;
 
 lemma isSerial (filterOf : FilterOf FM M T) [M.IsSerial] : FM.IsSerial where
   serial := by
@@ -142,7 +142,7 @@ lemma isSerial (filterOf : FilterOf FM M T) [M.IsSerial] : FM.IsSerial where
 end FilterOf
 
 
-abbrev standardFiltrationValuation (X : FilterEqvQuotient M T) (a : ℕ) := (ha : (atom a) ∈ T) → Quotient.lift (λ x => M x a) (by
+abbrev standardFiltrationValuation (a : ℕ) (X : FilterEqvQuotient M T) := (ha : (atom a) ∈ T) → Quotient.lift (λ x => M a x) (by
   intro x y h;
   apply eq_iff_iff.mpr;
   constructor;
@@ -277,12 +277,12 @@ instance rooted_isPiecewiseStronglyConvergent [preorder : M.IsPreorder] [ps_conv
         exact Rel.TransGen.unwrap Rrz;
       . apply Relation.TransGen.single;
         suffices z ≺ z by tauto;
-        apply IsRefl.refl ;
+        apply Std.Refl.refl ;
     . use ⟦⟨y, by tauto⟩⟧;
       constructor;
       . apply Relation.TransGen.single;
         suffices y ≺ y by tauto;
-        apply IsRefl.refl;
+        apply Std.Refl.refl;
       . apply Relation.TransGen.single;
         suffices z ≺ y by tauto;
         exact Rel.TransGen.unwrap Rry;
@@ -304,7 +304,7 @@ instance rooted_isPiecewiseStronglyConnected [preorder : M.IsPreorder] [ps_conne
     . simp only [or_self];
       apply Relation.TransGen.single;
       suffices z ≺ z by tauto;
-      apply IsRefl.refl;
+      apply Std.Refl.refl;
     . left;
       apply Relation.TransGen.single;
       suffices y ≺ z by tauto;
@@ -331,3 +331,4 @@ end finestFiltrationTransitiveClosureModel
 end Kripke
 
 end LO.Modal
+end

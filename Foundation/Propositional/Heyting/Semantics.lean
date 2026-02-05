@@ -1,6 +1,9 @@
-import Foundation.Propositional.Hilbert.Standard.Basic
-import Foundation.Vorspiel.Order
-import Foundation.Logic.LindenbaumAlgebra
+module
+
+public import Foundation.Propositional.Hilbert.Standard.Basic
+public import Foundation.Logic.LindenbaumAlgebra
+
+@[expose] public section
 
 namespace LO.Propositional
 
@@ -153,3 +156,4 @@ instance [DecidableEq α] [Ax.HasEFQ] : Complete (Hilbert.Standard Ax) (mod.{_,u
 end HeytingSemantics
 
 end LO.Propositional
+end

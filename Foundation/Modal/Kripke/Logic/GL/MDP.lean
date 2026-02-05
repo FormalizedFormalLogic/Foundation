@@ -1,4 +1,8 @@
-import Foundation.Modal.Kripke.Logic.GL.Unnecessitation
+module
+
+public import Foundation.Modal.Kripke.Logic.GL.Unnecessitation
+
+@[expose] public section
 
 namespace LO.Modal
 
@@ -91,10 +95,10 @@ end mdpCounterexmpleFrame
 
 abbrev mdpCounterexmpleModel (M₁ M₂ : Model) (r₁ r₂) [M₁.IsFiniteTree r₁] [M₂.IsFiniteTree r₂] : Model where
   toFrame := mdpCounterexmpleFrame (M₁.toFrame) (M₂.toFrame) r₁ r₂;
-  Val := λ x a =>
+  Val := λ a x =>
     match x with
-    | .inr (.inl x) => M₁.Val x a
-    | .inr (.inr x) => M₂.Val x a
+    | .inr (.inl x) => M₁.Val a x
+    | .inr (.inr x) => M₂.Val a x
     | .inl _ => True
 
 namespace mdpCounterexmpleModel
@@ -199,3 +203,4 @@ instance : ModalDisjunctive Modal.GL := ⟨modal_disjunctive⟩
 end GL
 
 end LO.Modal
+end

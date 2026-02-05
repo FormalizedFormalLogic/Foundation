@@ -1,5 +1,8 @@
-import Foundation.FirstOrder.Arithmetic.Exponential.Exp
+module
 
+public import Foundation.FirstOrder.Arithmetic.Exponential.Exp
+
+@[expose] public section
 /-!
 # Logarithmic function
 -/

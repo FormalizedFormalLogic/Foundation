@@ -1,9 +1,9 @@
-import Foundation.FirstOrder.Arithmetic.PeanoMinus.Basic
-import Foundation.FirstOrder.Arithmetic.Definability
-import Mathlib.Algebra.GroupWithZero.Divisibility
-import Mathlib.Algebra.Prime.Lemmas
-import Foundation.Vorspiel.ExistsUnique
+module
 
+public import Foundation.FirstOrder.Arithmetic.Definability
+public import Mathlib.Algebra.Prime.Lemmas
+
+@[expose] public section
 /-!
 # Functions and relations defined in $\mathsf{PA^-}$
 
@@ -212,7 +212,9 @@ theorem units_eq_one (u : Vˣ) : u = 1 :=
 
 section Prime
 
-instance : CancelCommMonoidWithZero V where
+instance : CommMonoidWithZero V where
+
+instance : IsCancelMulZero V where
 
 open Classical in
 lemma eq_one_or_eq_of_dvd_of_prime {p a : V} (pp : Prime p) (hxp : a ∣ p) : a = 1 ∨ a = p := by

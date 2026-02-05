@@ -1,5 +1,9 @@
-import Foundation.Modal.ComplementClosedConsistentFinset
-import Foundation.Modal.Kripke.Logic.Grz.Soundness
+module
+
+public import Foundation.Modal.ComplementClosedConsistentFinset
+public import Foundation.Modal.Kripke.Logic.Grz.Soundness
+
+@[expose] public section
 
 namespace LO.Modal
 
@@ -14,9 +18,8 @@ namespace subformulasGrz
 
 @[simp, grind .] lemma mem_self : φ ∈ φ.subformulasGrz := by simp [subformulasGrz, subformulas.mem_self]
 
-@[grind ⇒] protected lemma mem_of_mem_subformula (h : ψ ∈ φ.subformulas) : ψ ∈ φ.subformulasGrz := by simp_all [subformulasGrz];
-
-@[grind ⇒] lemma mem_boximpbox (h : ψ ∈ (□⁻¹'φ.subformulas)) : □(ψ ➝ □ψ) ∈ φ.subformulasGrz := by simp_all [subformulasGrz];
+@[grind ⇒] protected lemma mem_of_mem_subformula (h : ψ ∈ φ.subformulas) : ψ ∈ φ.subformulasGrz := by grind;
+@[grind ⇒] lemma mem_boximpbox (h : ψ ∈ (□⁻¹'φ.subformulas)) : □(ψ ➝ □ψ) ∈ φ.subformulasGrz := by grind;
 
 @[grind ⇒]
 protected lemma mem_imp (h : (ψ ➝ χ) ∈ φ.subformulasGrz) : ψ ∈ φ.subformulasGrz ∧ χ ∈ φ.subformulasGrz := by
@@ -82,7 +85,7 @@ instance : (miniCanonicalFrame 𝓢 φ).IsFiniteGrz where
 
 abbrev miniCanonicalModel (𝓢 : S) [Entailment.Grz 𝓢] [Entailment.Consistent 𝓢] (φ : Formula ℕ) : Kripke.Model where
   toFrame := miniCanonicalFrame 𝓢 φ
-  Val X a := (atom a) ∈ X
+  Val a X := (atom a) ∈ X
 
 omit [Consistent 𝓢] [Entailment.Grz 𝓢] in
 lemma truthlemma_lemma1
@@ -195,12 +198,14 @@ lemma truthlemma {X : (miniCanonicalModel 𝓢 φ).World} (q_sub : ψ ∈ φ.sub
         . constructor;
           . intro χ _ hr₂;
             apply hY.1;
-            simpa [Finset.LO.preboxItr, Finset.LO.boxItr]
+            apply Finset.LO.mem_box_prebox_of_mem_of_mem_box;
+            simpa;
           . apply imp_iff_not_or (b := X = Y) |>.mpr;
             left; push_neg;
             use (ψ ➝ □ψ);
             refine ⟨?_, ?_, ?_⟩;
-            . simp_all [Finset.LO.preboxItr, Finset.LO.boxItr];
+            . simp [Formula.subformulasGrz, Finset.LO.preboxItr];
+              grind;
             . apply hY.2;
               simp;
             . by_contra hC;
@@ -273,26 +278,26 @@ instance : Modal.S4McK ⪱ Modal.Grz := by
     . simp;
     . apply Sound.not_provable_of_countermodel (𝓜 := FrameClass.S4McK)
       apply Kripke.not_validOnFrameClass_of_exists_model_world;
-      use ⟨⟨Fin 3, λ x y => y = 2 ∨ x = 0 ∨ x = 1⟩, λ w _ => w = 1 ∨ w = 2⟩, 0;
+      use ⟨⟨Fin 3, λ x y => y = 2 ∨ x = 0 ∨ x = 1⟩, λ _ w => w = 1 ∨ w = 2⟩, 0;
       constructor;
       . exact {
           refl := by omega,
           trans := by omega,
           mckinsey := by simp;
         }
-      . suffices ∀ (x : Fin 3), (∀ (y : Fin 3), x = 0 ∨ x = 1 → y = 1 ∨ y = 2 → ∀ (z : Fin 3), y = 0 ∨ y = 1 → z = 1 ∨ z = 2) → x ≠ 1 → x = 2 by
+      . suffices (∀ x : Fin 3, (∀ (y : Fin 3), x = 0 ∨ x = 1 → y = 1 ∨ y = 2 → ∀ z : Fin 3, y = 0 ∨ y = 1 → z = 1 ∨ z = 2) → x ≠ 1 → x = 2) by
           simpa [Semantics.Models, Satisfies];
-        intro x hx hxn1;
-        by_contra hxn2;
-        rcases @hx 1 (by omega) (by tauto) x (by omega);
-        . contradiction;
-        . contradiction;
+        by_contra! hC;
+        obtain ⟨x, hx, _, _⟩ := hC;
+        have := hx 1 (by grind) (by grind) 0 (by grind);
+        grind;
 
 instance : Modal.S4 ⪱ Modal.Grz := calc
   Modal.S4 ⪱ Modal.S4McK := by infer_instance
-  _          ⪱ Modal.Grz   := by infer_instance
+  _        ⪱ Modal.Grz   := by infer_instance
 
 end Grz.Kripke
 
 
 end LO.Modal
+end

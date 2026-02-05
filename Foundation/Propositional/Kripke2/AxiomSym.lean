@@ -1,9 +1,8 @@
-import Foundation.Propositional.Kripke2.Basic
-import Foundation.Propositional.Kripke2.AxiomSer
-import Foundation.Vorspiel.Rel.Convergent
-import Foundation.Vorspiel.Rel.Euclidean
-import Foundation.Vorspiel.Rel.Coreflexive
-import Foundation.Propositional.Kripke2.FTheory
+module
+
+public import Foundation.Propositional.Kripke2.AxiomSer
+
+@[expose] public section
 
 namespace LO.Propositional
 
@@ -27,7 +26,6 @@ instance [F.IsSymmetric] : Frame.IsSerial F where
 
 end Frame
 
-
 @[simp high, grind .]
 lemma valid_axiomSym_of_isSymmetric [F.IsSymmetric] : F ⊧ Axioms.Sym φ ψ := by
   intro V x y Rxy h₁;
@@ -46,7 +44,7 @@ lemma valid_axiomSym_of_isSymmetric [F.IsSymmetric] : F ⊧ Axioms.Sym φ ψ := 
 lemma isSymmetric_of_valid_axiomSym (h : F ⊧ Axioms.Sym #0 #1) : F.IsSymmetric := by
   constructor;
   intro x y Rxy;
-  rcases @h (λ w a => match a with | 0 => w = x | 1 => y ≺ w | _ => False) F.root x F.rooted (by tauto) with h | h;
+  rcases @h (λ a w => match a with | 0 => w = x | 1 => y ≺ w | _ => False) F.root x F.rooted (by tauto) with h | h;
   . assumption;
   . have := h Rxy;
     simp [Satisfies] at this;
@@ -54,3 +52,4 @@ lemma isSymmetric_of_valid_axiomSym (h : F ⊧ Axioms.Sym #0 #1) : F.IsSymmetric
 end Kripke2
 
 end LO.Propositional
+end

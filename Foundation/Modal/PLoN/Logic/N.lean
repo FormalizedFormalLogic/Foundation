@@ -1,6 +1,10 @@
-import Foundation.Modal.PLoN.Hilbert
-import Foundation.Modal.PLoN.Completeness
-import Foundation.Modal.Hilbert.WithRE.Basic
+module
+
+public import Foundation.Modal.PLoN.Hilbert
+public import Foundation.Modal.PLoN.Completeness
+public import Foundation.Modal.Hilbert.WithRE.Basic
+
+@[expose] public section
 
 namespace LO.Modal
 
@@ -60,7 +64,7 @@ instance : Modal.N ⪱ Modal.EN := by
 
 instance : Modal.N ⪱ Modal.K := by
   constructor;
-  . apply Hilbert.Normal.weakerThan_of_subset_axioms $ by simp;
+  . grind;
   . apply Entailment.not_weakerThan_iff.mpr;
     use Axioms.K (.atom 0) (.atom 1);
     constructor;
@@ -73,7 +77,7 @@ instance : Modal.N ⪱ Modal.K := by
           if ξ = (.atom 0) ➝ (.atom 1) then False
           else x < y
         Valuation :=
-          λ w a =>
+          λ a w =>
           match a with
           | 0 => w = 1
           | 1 => w = 0
@@ -84,3 +88,4 @@ instance : Modal.N ⪱ Modal.K := by
       . simp [Frame.Rel'];
 
 end LO.Modal
+end

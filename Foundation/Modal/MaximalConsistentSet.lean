@@ -1,7 +1,10 @@
-import Foundation.Modal.Formula
-import Foundation.Modal.Entailment.K
-import Foundation.Vorspiel.Set.Supplemental
-import Foundation.Meta.ClProver
+module
+
+public import Foundation.Modal.Formula.Basic
+public import Foundation.Modal.Entailment.K
+public import Foundation.Meta.ClProver
+
+@[expose] public section
 
 namespace LO.Modal
 
@@ -202,7 +205,6 @@ lemma not_singleton_consistent [Entailment.Necessitation 𝓢] (T_consis : Consi
     have : 𝓢 ⊢ ∼□φ ➝ ⊥ := by cl_prover [this];
     simpa using Context.deductInv! $ Context.provable_iff_provable.mp this;
 
-
 lemma either_consistent (T_consis : Consistent 𝓢 T) (φ) : Consistent 𝓢 (insert φ T) ∨ Consistent 𝓢 (insert (∼φ) T) := by
   by_contra! hC;
   obtain ⟨hC₁, hC₂⟩ := hC;
@@ -263,8 +265,6 @@ lemma exists_consistent_maximal_of_consistent (T_consis : Consistent 𝓢 T)
 protected alias lindenbaum := exists_consistent_maximal_of_consistent
 
 end FormulaSet
-
-
 
 open FormulaSet
 
@@ -426,7 +426,6 @@ lemma iff_congr : (Ω.1 *⊢[𝓢] (φ ⭤ ψ)) → ((φ ∈ Ω) ↔ (ψ ∈ Ω)
   . intro hp; exact iff_mem_imp.mp (membership_iff.mpr $ K!_left hpq) hp;
   . intro hq; exact iff_mem_imp.mp (membership_iff.mpr $ K!_right hpq) hq;
 
-
 lemma intro_equality {h : ∀ φ, φ ∈ Ω₁.1 → φ ∈ Ω₂.1} : Ω₁ = Ω₂ := by
   exact equality_def.mpr $ Set.eq_of_subset_of_subset
     (by intro φ hp; exact h φ hp)
@@ -449,7 +448,6 @@ lemma neg_imp (h : ψ ∈ Ω₂ → φ ∈ Ω₁) : (∼φ ∈ Ω₁) → (∼ψ
 lemma neg_iff (h : φ ∈ Ω₁ ↔ ψ ∈ Ω₂) : (∼φ ∈ Ω₁) ↔ (∼ψ ∈ Ω₂) := ⟨neg_imp $ h.mpr, neg_imp $ h.mp⟩
 
 lemma iff_mem_conj : (⋀Γ ∈ Ω) ↔ (∀ φ ∈ Γ, φ ∈ Ω) := by simp [membership_iff, Conj₂!_iff_forall_provable];
-
 
 section
 
@@ -488,7 +486,6 @@ lemma iff_mem_boxItr : (□^[n]φ ∈ Ω) ↔ (∀ {Ω' : MaximalConsistentSet �
 
 lemma iff_mem_box : (□φ ∈ Ω) ↔ (∀ {Ω' : MaximalConsistentSet 𝓢}, ((□⁻¹'Ω.1) ⊆ Ω'.1) → (φ ∈ Ω')) := iff_mem_boxItr (n := 1)
 
-
 lemma boxItr_dn_iff : (□^[n](∼∼φ) ∈ Ω) ↔ (□^[n]φ ∈ Ω) := by
   simp only [iff_mem_boxItr];
   constructor;
@@ -498,7 +495,6 @@ lemma boxItr_dn_iff : (□^[n](∼∼φ) ∈ Ω) ↔ (□^[n]φ ∈ Ω) := by
     exact iff_mem_negneg.mpr $ h hΩ;
 
 lemma box_dn_iff : (□(∼∼φ) ∈ Ω) ↔ (□φ ∈ Ω) := boxItr_dn_iff (n := 1)
-
 
 lemma mem_boxItr_dual : □^[n]φ ∈ Ω ↔ ∼(◇^[n](∼φ)) ∈ Ω := by
   simp only [membership_iff];
@@ -603,3 +599,4 @@ end
 end MaximalConsistentSet
 
 end LO.Modal
+end

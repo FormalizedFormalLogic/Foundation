@@ -1,6 +1,7 @@
-import Foundation.FirstOrder.Basic.Semantics.Semantics
-import Foundation.FirstOrder.Basic.Calculus
-import Foundation.Propositional.Entailment.Cl.Basic
+module
+public import Foundation.FirstOrder.Basic.Semantics.Semantics
+public import Foundation.FirstOrder.Basic.Calculus
+@[expose] public section
 
 namespace LO.FirstOrder
 
@@ -59,3 +60,5 @@ def Entailment.paddingIff [L.DecidableEq] [DecidableEq ξ] [Entailment S (Formul
     𝓢 ⊢ φ.padding k ⭤ φ := ⟨paddingIff φ k⟩
 
 end LO.FirstOrder
+
+end

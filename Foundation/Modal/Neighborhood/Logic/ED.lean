@@ -1,8 +1,8 @@
-import Foundation.Modal.Neighborhood.AxiomC
-import Foundation.Modal.Neighborhood.AxiomGeach
-import Foundation.Modal.Neighborhood.AxiomM
-import Foundation.Modal.Neighborhood.AxiomN
-import Foundation.Modal.Neighborhood.Logic.E
+module
+
+public import Foundation.Modal.Neighborhood.Logic.E
+
+@[expose] public section
 
 namespace LO.Modal
 
@@ -58,3 +58,4 @@ instance : Modal.ED ⪱ Modal.END := by
       . simp;
 
 end LO.Modal
+end

@@ -1,5 +1,8 @@
-import Foundation.InterpretabilityLogic.Entailment.IL_W
-import Foundation.InterpretabilityLogic.Entailment.IL_KW2
+module
+
+public import Foundation.InterpretabilityLogic.Entailment.IL_KW2
+
+@[expose] public section
 
 namespace LO.InterpretabilityLogic.Entailment
 
@@ -16,3 +19,4 @@ instance : Entailment.HasAxiomKW2 𝓢 where
   axiomKW2! {_ _} := C_trans (R2! and₂) axiomKW1Zero!
 
 end LO.InterpretabilityLogic.Entailment
+end

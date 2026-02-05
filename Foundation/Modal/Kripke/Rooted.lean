@@ -1,8 +1,11 @@
-import Foundation.Modal.Kripke.Preservation
-import Foundation.Modal.Kripke.Irreflexive
-import Foundation.Modal.Kripke.Asymmetric
-import Foundation.Modal.Kripke.AxiomWeakPoint2
-import Foundation.Modal.Kripke.AxiomPoint3
+module
+
+public import Foundation.Modal.Kripke.Preservation
+public import Foundation.Modal.Kripke.Asymmetric
+public import Foundation.Modal.Kripke.AxiomWeakPoint2
+public import Foundation.Modal.Kripke.AxiomPoint3
+
+@[expose] public section
 
 namespace LO.Modal
 
@@ -24,8 +27,8 @@ protected abbrev IsStronglyConvergent (F : Frame) := _root_.IsStronglyConvergent
 lemma strongly_convergent [F.IsStronglyConvergent] : ∀ x y : F.World, ∃ u, x ≺ u ∧ y ≺ u := by apply IsStronglyConvergent.s_convergent
 
 
-protected abbrev IsStronglyConnected (F : Frame) := _root_.IsTotal _ F.Rel
-lemma s_connected [F.IsStronglyConnected] : ∀ {x y : F.World}, x ≺ y ∨ y ≺ x := by apply IsTotal.total
+protected abbrev IsStronglyConnected (F : Frame) := _root_.Std.Total F.Rel
+lemma s_connected [F.IsStronglyConnected] : ∀ {x y : F.World}, x ≺ y ∨ y ≺ x := by apply Std.Total.total
 
 protected abbrev IsConnected (F : Frame) := _root_.IsTrichotomous _ F.Rel
 lemma connected [F.IsConnected] : ∀ x y : F.World, x ≺ y ∨ x = y ∨ y ≺ x := by apply IsTrichotomous.trichotomous
@@ -258,7 +261,7 @@ protected abbrev root : (F↾r).World := ⟨r, by tauto⟩
 instance : (F↾r).IsRootedBy pointGenerate.root where
   root_generates := by
     rintro ⟨w, (rfl | Rrw)⟩ hw;
-    . simp at hw;
+    . grind;
     . apply trans_rel_of_origin_trans_rel;
       exact Rrw;
 
@@ -269,7 +272,7 @@ instance [F.IsFinite] : (F↾r).IsFinite := inferInstance
 instance [DecidableEq F.World] : DecidableEq (F↾r).World := Subtype.instDecidableEq
 
 instance isReflexive [F.IsReflexive] : (F↾r).IsReflexive where
-  refl := by rintro ⟨x, (rfl | hx)⟩ <;> exact IsRefl.refl x;
+  refl := by rintro ⟨x, (rfl | hx)⟩ <;> exact Std.Refl.refl x;
 
 instance isTransitive [F.IsTransitive] : (F↾r).IsTransitive where
   trans := by
@@ -295,7 +298,7 @@ instance isIrreflexive [F.IsIrreflexive] : (F↾r).IsIrreflexive := ⟨by rintro
 
 instance isAsymmetric [F.IsAsymmetric] : (F↾r).IsAsymmetric := ⟨by
   rintro ⟨x, (rfl | hx)⟩ ⟨y, (rfl | hy)⟩ Rxy <;>
-  { dsimp at Rxy; apply IsAsymm.asymm _ _ Rxy; }
+  { dsimp at Rxy; apply Std.Asymm.asymm _ _ Rxy; }
 ⟩
 
 instance isPiecewiseConvergent [F.IsPiecewiseConvergent] : (F↾r).IsPiecewiseConvergent := ⟨by
@@ -369,7 +372,7 @@ end pointGenerate
 end Frame
 
 
-def Model.pointGenerate (M : Kripke.Model) (r : M.World) : Model := ⟨M.toFrame↾r, λ w a => M.Val w.1 a⟩
+def Model.pointGenerate (M : Kripke.Model) (r : M.World) : Model := ⟨M.toFrame↾r, λ a w => M.Val a w.1⟩
 infix:100 "↾" => Model.pointGenerate
 
 namespace Model.pointGenerate
@@ -428,3 +431,4 @@ end Model.pointGenerate
 end Kripke
 
 end LO.Modal
+end

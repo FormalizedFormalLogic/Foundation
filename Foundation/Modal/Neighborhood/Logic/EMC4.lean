@@ -1,7 +1,8 @@
-import Foundation.Modal.Neighborhood.Hilbert
-import Foundation.Modal.Neighborhood.AxiomGeach
-import Foundation.Modal.Neighborhood.Logic.E4
-import Foundation.Modal.Neighborhood.Logic.EMC
+module
+
+public import Foundation.Modal.Neighborhood.Logic.EMC
+
+@[expose] public section
 
 namespace LO.Modal
 
@@ -56,3 +57,4 @@ instance Neighborhood.finite_complete : Complete Modal.EMC4 FrameClass.finite_EM
 end EMC4
 
 end LO.Modal
+end

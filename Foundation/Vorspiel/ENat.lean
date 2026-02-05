@@ -1,4 +1,10 @@
-import Mathlib.Data.ENat.Basic
+module
+
+public import Mathlib.Data.ENat.Basic
+
+
+@[expose]
+public section
 
 namespace ENat
 
@@ -15,7 +21,7 @@ theorem lt_find (n : ℕ) (h : ∀ m ≤ n, ¬P m) : (n : ℕ∞) < find P := by
 
 theorem exists_of_find_le (n : ℕ) (h : find P ≤ (n : ENat)) : ∃ m ≤ n, P m := by
   by_contra A
-  exact IsIrrefl.irrefl _ <| lt_of_le_of_lt h <| lt_find P n (by simpa using A)
+  exact Std.Irrefl.irrefl _ <| lt_of_le_of_lt h <| lt_find P n (by simpa using A)
 
 lemma find_eq_top_iff : find P = ⊤ ↔ ∀ (n : ℕ), ¬P n := by simp [find]
 
@@ -24,3 +30,5 @@ lemma find_le (n : ℕ) (h : P n) : find P ≤ ↑n := by
   exact ⟨n, by rfl, h⟩
 
 end ENat
+
+end

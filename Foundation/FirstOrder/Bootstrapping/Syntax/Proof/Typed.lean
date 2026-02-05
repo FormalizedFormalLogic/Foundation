@@ -1,7 +1,8 @@
-import Foundation.FirstOrder.Bootstrapping.Syntax.Formula.Typed
-import Foundation.FirstOrder.Bootstrapping.Syntax.Proof.Basic
-import Foundation.Propositional.Entailment.Cl.Basic
+module
 
+public import Foundation.FirstOrder.Bootstrapping.Syntax.Proof.Basic
+
+@[expose] public section
 /-!
 # Typed internal Tait-calculus
 -/
@@ -411,24 +412,17 @@ noncomputable def specialize {φ : Semiformula V L 1} (b : T ⊢! ∀' φ) (t : 
 noncomputable def specialize₂ {φ : Semiformula V L 2} (b : T ⊢! ∀' ∀' φ) (t u : Term V L) :
     T ⊢! φ.subst ![t, u] := by
   have : T ⊢! ∀' Semiformula.subst (SemitermVec.q ![u]) φ := by simpa using specialize b u
-  simpa [SemitermVec.q, Semiformula.substs_substs] using specialize this t
+  simpa [Semiformula.substs_substs] using specialize this t
 
 noncomputable def specialize₃ {φ : Semiformula V L 3} (b : T ⊢! ∀' ∀' ∀' φ) (t₁ t₂ t₃ : Term V L) :
     T ⊢! φ.subst ![t₁, t₂, t₃] := by
-  have := by simpa using specialize b t₃
-  have := by simpa using specialize this t₂
-  have := by simpa using specialize this t₁
-  simp [Semiformula.substs_substs] at this
-  simpa [SemitermVec.q] using this
+  have : T ⊢! ∀' Semiformula.subst (SemitermVec.q ![t₂, t₃]) φ := by simpa using specialize₂ b t₂ t₃;
+  simpa [Semiformula.substs_substs] using specialize this t₁;
 
 noncomputable def specialize₄ {φ : Semiformula V L 4} (b : T ⊢! ∀' ∀' ∀' ∀' φ) (t₁ t₂ t₃ t₄ : Term V L) :
     T ⊢! φ.subst ![t₁, t₂, t₃, t₄] := by
-  have := by simpa using specialize b t₄
-  have := by simpa using specialize this t₃
-  have := by simpa using specialize this t₂
-  have := by simpa using specialize this t₁
-  simp [Semiformula.substs_substs, Semiterm.substs_substs] at this
-  simpa [SemitermVec.q, Semiterm.bShift_substs_succ] using this
+  have : T ⊢! ∀' Semiformula.subst (SemitermVec.q ![t₂, t₃, t₄]) φ := by simpa using specialize₃ b t₂ t₃ t₄;
+  simpa [Semiformula.substs_substs] using specialize this t₁;
 
 lemma specialize! {φ : Semiformula V L 1} (b : T ⊢ (∀' φ)) (t : Term V L) : T ⊢ φ.subst ![t] := ⟨TDerivation.specialize b.get t⟩
 

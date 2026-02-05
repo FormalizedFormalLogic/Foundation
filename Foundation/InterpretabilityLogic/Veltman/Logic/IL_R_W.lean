@@ -1,6 +1,9 @@
-import Foundation.InterpretabilityLogic.Veltman.Logic.IL_R
-import Foundation.InterpretabilityLogic.Veltman.Logic.IL_W
-import Foundation.InterpretabilityLogic.Veltman.Logic.IL_M₀_W
+module
+
+public import Foundation.InterpretabilityLogic.Veltman.Logic.IL_R
+public import Foundation.InterpretabilityLogic.Veltman.Logic.IL_M₀_W
+
+@[expose] public section
 
 namespace LO.InterpretabilityLogic
 
@@ -87,7 +90,7 @@ instance : InterpretabilityLogic.IL_M₀_W ⪱ InterpretabilityLogic.IL_R_W := b
         constructor;
       . by_contra hC;
         have : F.SRel' 1 2 4 := Frame.HasAxiomR.of_validate_axiomR hC |>.S_R (x := 0) (u := 3) (by tauto) (by tauto) (by tauto) (by tauto);
-        simp [F, Frame.SRel'] at this;
+        grind;
 
 instance «IL_R ⪱ IL_R_W» : InterpretabilityLogic.IL_R ⪱ InterpretabilityLogic.IL_R_W := by
   constructor;
@@ -122,8 +125,7 @@ instance «IL_R ⪱ IL_R_W» : InterpretabilityLogic.IL_R ⪱ InterpretabilityLo
         have : ∀ (x : F.World), (1 : F.World) ≺ x → ¬x ≺[(0 : F.World)] 1 := by
           simpa [Frame.RS, Relation.Comp, flip]
           using Frame.HasAxiomW.of_validate_axiomW hC |>.S_W 0 |>.isIrrefl.irrefl 1;
-        apply @this 2;
-        . omega;
-        . simp [Frame.SRel', F];
+        apply @this 2 <;> grind;
 
 end LO.InterpretabilityLogic
+end

@@ -1,4 +1,8 @@
-import Foundation.Logic.Entailment
+module
+
+public import Foundation.Logic.Entailment
+
+@[expose] public section
 
 /-!
 # Language of first-order logic
@@ -434,3 +438,4 @@ instance : Language.Finite ℒₒᵣ where
 end FirstOrder
 
 end LO
+end

@@ -1,6 +1,9 @@
-import Foundation.Modal.Kripke.AxiomGeach
-import Foundation.Modal.Kripke.Filtration
+module
 
+public import Foundation.Modal.Kripke.Filtration
+
+
+@[expose] public section
 
 namespace LO.Modal
 
@@ -57,3 +60,4 @@ end Canonical
 end Kripke
 
 end LO.Modal
+end

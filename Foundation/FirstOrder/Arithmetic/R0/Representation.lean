@@ -1,7 +1,10 @@
-import Foundation.FirstOrder.Arithmetic.R0.Basic
-import Foundation.Vorspiel.Arithmetic
-import Mathlib.Computability.Primrec
+module
 
+public import Foundation.FirstOrder.Arithmetic.R0.Basic
+public import Foundation.Vorspiel.Arithmetic
+public import Foundation.Vorspiel.Computability
+
+@[expose] public section
 open Encodable Denumerable
 
 namespace LO.FirstOrder.Arithmetic
@@ -23,7 +26,7 @@ lemma term_primrec {k f} : (t : Semiterm ℒₒᵣ ξ k) → Primrec (fun v : Li
 lemma sigma1_re (ε : ξ → ℕ) {k} {φ : Semiformula ℒₒᵣ ξ k} (hp : Hierarchy 𝚺 1 φ) :
     REPred fun v : List.Vector ℕ k ↦ Semiformula.Evalm ℕ v.get ε φ := by
   apply sigma₁_induction' hp
-  case hVerum => simp
+  case hVerum => simp;
   case hFalsum => simp
   case hEQ =>
     intro n t₁ t₂

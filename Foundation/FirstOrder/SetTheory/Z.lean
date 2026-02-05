@@ -1,11 +1,14 @@
-import Foundation.FirstOrder.SetTheory.Basic
-import Foundation.Vorspiel.ExistsUnique
+module
+
+public import Foundation.FirstOrder.SetTheory.Basic
 
 /-!
 # Zermelo set theory
 
-reference: Ralf Schindler, "Set Theory, Exploring Independence and Truth"
+reference: Ralf Schindler, "Set Theory, Exploring Independence and Truth" [Sch14]
 -/
+
+@[expose] public section
 
 namespace LO.FirstOrder.SetTheory
 
@@ -307,13 +310,13 @@ open Lean Elab Term Meta
 syntax (name := internalSetBuilder) "{" binderIdent " ∈ " term " ; " term "}" : term
 
 @[term_elab internalSetBuilder]
-def elabInternalSetBuilder : TermElab
+meta def elabInternalSetBuilder : TermElab
   | `({ $x:ident ∈ $s ; $p }), expectedType? => do
     elabTerm (← `(sep $s (fun $x:ident ↦ $p) (by definability))) expectedType?
   | _, _ => throwUnsupportedSyntax
 
 @[app_unexpander sep]
-def sep.unexpander : Lean.PrettyPrinter.Unexpander
+meta def sep.unexpander : Lean.PrettyPrinter.Unexpander
   | `($_ $s $P $_) =>
     match P with
     | `(fun $x:ident ↦ $p) => `({ $x:ident ∈ $s ; $p })
@@ -465,7 +468,7 @@ macro_rules
   | `(⟨$term:term⟩ₖ) => `($term)
 
 @[app_unexpander kpair]
-def pairUnexpander : Lean.PrettyPrinter.Unexpander
+meta def pairUnexpander : Lean.PrettyPrinter.Unexpander
   | `($_ $term $term2) => `(⟨$term, $term2⟩ₖ)
   | _ => throw ()
 

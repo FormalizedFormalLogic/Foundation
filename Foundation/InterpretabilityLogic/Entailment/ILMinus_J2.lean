@@ -1,6 +1,10 @@
-import Foundation.InterpretabilityLogic.Entailment.ILMinus_J4
-import Foundation.InterpretabilityLogic.Entailment.ILMinus_J1
-import Foundation.Meta.ClProver
+module
+
+public import Foundation.InterpretabilityLogic.Entailment.ILMinus_J4
+public import Foundation.InterpretabilityLogic.Entailment.ILMinus_J1
+public import Foundation.Meta.ClProver
+
+@[expose] public section
 
 namespace LO.InterpretabilityLogic.Entailment
 
@@ -90,3 +94,4 @@ instance [Entailment.ILMinus_J2Plus 𝓢] : Entailment.ILMinus_J4Plus 𝓢 where
 instance [Entailment.ILMinus_J1 𝓢] [Entailment.ILMinus_J2 𝓢] : Entailment.ILMinus_J2Plus 𝓢 where
 
 end LO.InterpretabilityLogic.Entailment
+end

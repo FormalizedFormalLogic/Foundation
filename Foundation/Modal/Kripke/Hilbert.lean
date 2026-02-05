@@ -1,5 +1,9 @@
-import Foundation.Modal.Hilbert.Normal.Basic
-import Foundation.Modal.Kripke.Basic
+module
+
+public import Foundation.Modal.Hilbert.Normal.Basic
+public import Foundation.Modal.Kripke.Basic
+
+@[expose] public section
 
 namespace LO.Modal
 
@@ -80,3 +84,4 @@ lemma weakerThan_of_subset_frameClass
 end Kripke
 
 end LO.Modal
+end

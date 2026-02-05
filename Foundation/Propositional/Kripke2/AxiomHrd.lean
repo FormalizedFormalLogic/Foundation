@@ -1,7 +1,8 @@
-import Foundation.Propositional.Kripke2.Basic
-import Foundation.Vorspiel.Rel.Convergent
-import Foundation.Vorspiel.Rel.Euclidean
-import Foundation.Vorspiel.Rel.Coreflexive
+module
+
+public import Foundation.Propositional.Kripke2.Basic
+
+@[expose] public section
 
 namespace LO.Propositional
 
@@ -12,15 +13,13 @@ namespace Kripke2
 
 variable {M : Kripke2.Model} {φ ψ χ : Formula ℕ}
 
-
 namespace Model
 
 protected class IsHereditary (M : Kripke2.Model) where
-  hereditary : ∀ {a x y}, M x a → x ≺ y → M y a
+  hereditary : ∀ {a x y}, M a x → x ≺ y → M a y
 export IsHereditary (hereditary)
 
 end Model
-
 
 @[simp high, grind .]
 lemma valid_axiomHrd_of_isHereditary {a} [M.IsHereditary] : M ⊧ Axioms.Hrd #a := by
@@ -36,3 +35,4 @@ lemma isHereditary_of_valid_axiomHrd (h : ∀ a, M ⊧ Axioms.Hrd #a) : M.IsHere
 end Kripke2
 
 end LO.Propositional
+end

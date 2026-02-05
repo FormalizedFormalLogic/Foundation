@@ -1,6 +1,9 @@
-import Foundation.Modal.Logic.GL.Independency
-import Foundation.ProvabilityLogic.GL.Completeness
+module
 
+public import Foundation.Modal.Logic.GL.Independency
+public import Foundation.ProvabilityLogic.GL.Completeness
+
+@[expose] public section
 namespace LO.FirstOrder
 
 open LO.Entailment

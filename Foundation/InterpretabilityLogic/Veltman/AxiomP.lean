@@ -1,4 +1,8 @@
-import Foundation.InterpretabilityLogic.Veltman.Basic
+module
+
+public import Foundation.InterpretabilityLogic.Veltman.Basic
+
+@[expose] public section
 
 namespace LO.InterpretabilityLogic.Veltman
 
@@ -26,7 +30,7 @@ lemma validate_axiomP_of_HasAxiomP [F.HasAxiomP] : F ⊧ Axioms.P φ ψ := by
 lemma Frame.HasAxiomP.of_validate_axiomP (h : F ⊧ Axioms.P (.atom 0) (.atom 1)) : F.HasAxiomP := by
   constructor;
   intro w x y z Rwx Rxy Swyz;
-  have := @h (λ u a => match a with | 0 => u = y | 1 => u = z | _ => False) w ?_ x Rwx y Rxy ?_;
+  have := @h (λ a u => match a with | 0 => u = y | 1 => u = z | _ => False) w ?_ x Rwx y Rxy ?_;
   . obtain ⟨v, Sxyv, hv⟩ := this;
     apply hv ▸ Sxyv;
   . intro v Rwv hv;
@@ -37,3 +41,4 @@ lemma Frame.HasAxiomP.of_validate_axiomP (h : F ⊧ Axioms.P (.atom 0) (.atom 1)
   . tauto;
 
 end LO.InterpretabilityLogic.Veltman
+end

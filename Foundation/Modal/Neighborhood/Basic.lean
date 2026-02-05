@@ -1,8 +1,8 @@
-import Foundation.Vorspiel.Rel.Basic
-import Foundation.Modal.Axioms
-import Foundation.Modal.Formula
-import Foundation.Modal.Letterless
-import Foundation.Modal.Logic.Basic
+module
+
+public import Foundation.Modal.Logic.Basic
+
+@[expose] public section
 
 namespace LO.Modal
 
@@ -50,7 +50,6 @@ end
 end Frame
 
 abbrev FrameClass := Set Frame
-
 
 abbrev Valuation (F : Frame) := ℕ → Set F.World
 
@@ -105,7 +104,6 @@ lemma eq_diaItr {n : ℕ} : M (◇^[n] φ) = M.dia^[n] (M φ) := by
 
 @[simp, grind =] lemma eq_dia : M (◇φ) = M.dia (M φ) := eq_diaItr (n := 1)
 
-
 lemma eq_subst :
   letI U : Valuation M.toFrame := λ a => M ((atom a)⟦s⟧)
   M (φ⟦s⟧) = (⟨M.toFrame, U⟩ : Model) φ := by
@@ -113,9 +111,7 @@ lemma eq_subst :
 
 end Model.truthset
 
-
 end Neighborhood
-
 
 namespace Formula.Neighborhood
 
@@ -166,7 +162,6 @@ lemma iff_subst_self {M : Model} {x : M.World} (s) :
   simp [Satisfies, Model.truthset.eq_subst];
 
 end Satisfies
-
 
 def ValidOnModel (M : Model) (φ : Formula ℕ) : Prop := ∀ x, Satisfies M x φ
 
@@ -224,8 +219,6 @@ protected lemma re (hφ : M ⊧ φ ⭤ ψ) : M ⊧ □φ ⭤ □ψ := by
 
 end ValidOnModel
 
-
-
 def ValidOnFrame (F : Neighborhood.Frame) (φ : Formula ℕ) : Prop := ∀ V, (⟨F, V⟩ : Model) ⊧ φ
 
 namespace ValidOnFrame
@@ -258,7 +251,6 @@ protected lemma re (hφ : F ⊧ φ ⭤ ψ) : F ⊧ □φ ⭤ □ψ := by
 @[simp] protected lemma implyS : F ⊧ Axioms.ImplyS φ ψ ξ := λ _ ↦ ValidOnModel.implyS
 
 @[simp] protected lemma elimContra : F ⊧ Axioms.ElimContra φ ψ := λ _ ↦ ValidOnModel.elimContra
-
 
 lemma iff_not_exists_valuation_world : (¬F ⊧ φ) ↔ (∃ V : Valuation F, ∃ x : (⟨F, V⟩ : Model).World, ¬Satisfies _ x φ) := by
   simp [ValidOnFrame, Satisfies, ValidOnModel, Semantics.Models];
@@ -293,7 +285,6 @@ end
 
 end Formula.Neighborhood
 
-
 namespace Neighborhood
 
 abbrev Frame.logic (F : Frame) : Logic ℕ := { φ | F ⊧ φ }
@@ -301,6 +292,5 @@ abbrev FrameClass.logic (C : FrameClass) : Logic ℕ := { φ | C ⊧ φ }
 
 end Neighborhood
 
-
-
 end LO.Modal
+end

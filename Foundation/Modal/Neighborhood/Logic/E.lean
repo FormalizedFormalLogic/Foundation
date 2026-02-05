@@ -1,11 +1,11 @@
-import Foundation.Modal.Neighborhood.Hilbert
-import Foundation.Modal.Neighborhood.Completeness
-import Foundation.Modal.Neighborhood.Filtration
-import Foundation.Modal.Neighborhood.AxiomC
-import Foundation.Modal.Neighborhood.AxiomGeach
-import Foundation.Modal.Neighborhood.AxiomP
-import Foundation.Modal.Neighborhood.AxiomN
+module
 
+public import Foundation.Modal.Neighborhood.Hilbert
+public import Foundation.Modal.Neighborhood.Filtration
+public import Foundation.Modal.Neighborhood.AxiomP
+
+
+@[expose] public section
 
 @[simp]
 lemma Set.inter_eq_univ {s t : Set α} : s ∩ t = Set.univ ↔ s = Set.univ ∧ t = Set.univ := by
@@ -113,10 +113,8 @@ instance : Modal.E ⪱ Modal.EM := by
       use M, 0;
       constructor;
       . tauto;
-      . simp! [M, Semantics.Models, Satisfies];
-        ext x;
-        simp;
-        omega;
+      . simp [M, Semantics.Models, Satisfies];
+        grind;
 
 instance : Modal.E ⪱ Modal.EC := by
   constructor;
@@ -143,7 +141,7 @@ instance : Modal.E ⪱ Modal.EC := by
       use M, 0;
       constructor;
       . tauto;
-      . simp [M, Semantics.Models, Satisfies]
+      . simp [M, Semantics.Models, Satisfies];
 
 instance : Modal.E ⪱ Modal.EN := by
   constructor;
@@ -187,9 +185,7 @@ instance : Modal.E ⪱ Modal.EM := by
       constructor;
       . tauto;
       . simp! [M, Semantics.Models, Satisfies];
-        ext x;
-        simp;
-        omega;
+        grind;
 
 instance : Modal.E ⪱ Modal.EC := by
   constructor;
@@ -216,7 +212,7 @@ instance : Modal.E ⪱ Modal.EC := by
       use M, 0;
       constructor;
       . tauto;
-      . simp [M, Semantics.Models, Satisfies]
+      . simp [M, Semantics.Models, Satisfies];
 
 instance : Modal.E ⪱ Modal.EN := by
   constructor;
@@ -262,9 +258,7 @@ instance : Modal.E ⪱ Modal.EK := by
       . simp! [M, Semantics.Models, Satisfies];
         constructor;
         . intro;
-          ext x;
-          simp;
-          omega;
+          grind;
         . tauto_set;
 
 instance : Modal.E ⪱ Modal.ED := by
@@ -321,3 +315,4 @@ instance : Modal.E ⪱ Modal.EB := by
         simp [Frame.box] at this;
 
 end LO.Modal
+end

@@ -1,6 +1,9 @@
-import Foundation.Modal.Entailment.ETB
-import Foundation.Modal.Entailment.EN
-import Foundation.Modal.Entailment.AxiomGeach
+module
+
+public import Foundation.Modal.Entailment.ETB
+public import Foundation.Modal.Entailment.AxiomGeach
+
+@[expose] public section
 
 namespace LO.Modal.Entailment
 
@@ -32,3 +35,4 @@ end ET5
 
 
 end LO.Modal.Entailment
+end

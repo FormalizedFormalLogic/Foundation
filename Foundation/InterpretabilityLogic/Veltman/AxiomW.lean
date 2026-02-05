@@ -1,7 +1,8 @@
-import Foundation.InterpretabilityLogic.Veltman.Basic
-import Foundation.InterpretabilityLogic.Veltman.AxiomJ2
-import Foundation.InterpretabilityLogic.Veltman.Logic.IL
-import Mathlib.Tactic.TFAE
+module
+
+public import Foundation.InterpretabilityLogic.Veltman.Logic.IL
+
+@[expose] public section
 
 namespace LO.InterpretabilityLogic.Veltman
 
@@ -57,7 +58,7 @@ lemma Frame.HasAxiomW.of_validate_axiomF [F.IsIL] (h : F ⊧ Axioms.F (.atom 0))
   obtain ⟨f, hf⟩ := not_isEmpty_iff.mp $ wellFounded_iff_isEmpty_descending_chain.not.mp hw;
   replace hf : ∀ n, ∃ v, (f n) ≺ v ∧ v ≺[w] (f (n + 1)) := by simpa [RS, Relation.Comp, flip] using hf;
   apply ValidOnFrame.iff_not_exists_valuation_world.mpr;
-  use (λ u a => match a with | 0 => ∃ i > 0, u = (hf i).choose | _ => False), w;
+  use (λ a u => match a with | 0 => ∃ i > 0, u = (hf i).choose | _ => False), w;
   apply Satisfies.not_imp_def.mpr;
   constructor;
   . apply Satisfies.rhd_def.mpr;
@@ -110,3 +111,4 @@ lemma validate_axiomF_of_HasAxiomW [F.IsIL] [F.HasAxiomW] : F ⊧ Axioms.F φ :=
 lemma Frame.HasAxiomW.of_validate_axiomW [F.IsIL] (h : F ⊧ Axioms.W (.atom 0) (.atom 1)) : F.HasAxiomW := TFAE_HasAxiomW.out 1 0 |>.mp h
 
 end LO.InterpretabilityLogic.Veltman
+end

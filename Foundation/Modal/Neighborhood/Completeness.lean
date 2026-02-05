@@ -1,6 +1,10 @@
-import Foundation.Modal.MaximalConsistentSet
-import Foundation.Modal.Neighborhood.Basic
-import Foundation.Modal.Entailment.EM
+module
+
+public import Foundation.Modal.MaximalConsistentSet
+public import Foundation.Modal.Neighborhood.Basic
+public import Foundation.Modal.Entailment.EM
+
+@[expose] public section
 
 namespace LO.Modal
 
@@ -313,3 +317,4 @@ abbrev maximalRelativeMaximalCanonicity (𝓢 : S) [Entailment.E 𝓢] : Canonic
 end Neighborhood
 
 end LO.Modal
+end

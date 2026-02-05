@@ -1,4 +1,8 @@
-import Foundation.Propositional.ClassicalSemantics.Basic
+module
+
+public import Foundation.Propositional.ClassicalSemantics.Basic
+
+@[expose] public section
 
 namespace LO.Propositional.ClassicalSemantics
 
@@ -102,3 +106,4 @@ lemma vfSubst_tautology : v ⊧ φ ↔ (φ⟦(vfSubst v)⟧.Tautology) := by
         grind;
 
 end LO.Propositional.ClassicalSemantics
+end

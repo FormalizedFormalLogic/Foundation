@@ -1,8 +1,9 @@
-import Foundation.FirstOrder.Intuitionistic.Deduction
-import Foundation.FirstOrder.Kripke.Basic
-import Foundation.Logic.Predicate.Relational
-import Foundation.Logic.ForcingRelation
+module
 
+public import Foundation.FirstOrder.Intuitionistic.Deduction
+public import Foundation.FirstOrder.Kripke.Basic
+
+@[expose] public section
 /-! # Kripke semantics for intuitionistic first-order logic -/
 
 namespace LO.FirstOrder

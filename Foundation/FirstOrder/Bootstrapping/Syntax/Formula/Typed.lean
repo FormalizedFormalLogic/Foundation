@@ -1,6 +1,9 @@
-import Foundation.FirstOrder.Bootstrapping.Syntax.Term.Typed
-import Foundation.FirstOrder.Bootstrapping.Syntax.Formula.Iteration
+module
 
+public import Foundation.FirstOrder.Bootstrapping.Syntax.Term.Typed
+public import Foundation.FirstOrder.Bootstrapping.Syntax.Formula.Iteration
+
+@[expose] public section
 /-!
 # Typed Formalized Semiformula/Formula
 -/
@@ -215,7 +218,7 @@ lemma subst_eq_self {n : ℕ} (w : SemitermVec V L n n) (φ : Semiformula V L n)
 @[simp] lemma subst_eq_self₁ (φ : Semiformula V L 1) :
     φ.subst ![Semiterm.bvar 0] = φ := by
   apply subst_eq_self
-  simp [Fin.fin_one_eq_zero]
+  simp
 
 @[simp] lemma subst_nil_eq_self (w : SemitermVec V L 0 0) (φ : Semiformula V L 0) :
     φ.subst w = φ := subst_eq_self _ _ (by simp)

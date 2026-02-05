@@ -1,7 +1,11 @@
-import Foundation.Modal.PLoN.Logic.N
-import Foundation.Modal.Logic.SumNormal
-import Foundation.Propositional.FMT.Logic
-import Foundation.Propositional.Kripke.Logic.Cl
+module
+
+public import Foundation.Modal.PLoN.Logic.N
+public import Foundation.Modal.Logic.SumNormal
+public import Foundation.Propositional.FMT.Logic
+public import Foundation.Propositional.Kripke.Logic.Cl
+
+@[expose] public section
 
 namespace LO
 
@@ -11,8 +15,8 @@ open Propositional
 
 namespace Modal.Formula
 
-@[grind .] lemma neq_and_or {φ ψ χ ξ : Formula α} : φ ⋏ ψ ≠ χ ⋎ ξ := by rw [←Formula.or_eq, ←Formula.and_eq]; simp;
-@[grind .] lemma neq_or_and {φ ψ χ ξ : Formula α} : φ ⋎ ψ ≠ χ ⋏ ξ := by rw [←Formula.and_eq, ←Formula.or_eq]; simp;
+@[grind .] lemma neq_and_or {φ ψ χ ξ : Formula α} : φ ⋏ ψ ≠ χ ⋎ ξ := by rw [Formula.or_eq, Formula.and_eq]; simp;
+@[grind .] lemma neq_or_and {φ ψ χ ξ : Formula α} : φ ⋎ ψ ≠ χ ⋏ ξ := by rw [Formula.and_eq, Formula.or_eq]; simp;
 
 end Modal.Formula
 
@@ -60,12 +64,16 @@ lemma gödelWeakTranslate.injective : Function.Injective (gödelWeakTranslate (�
   match φ, ψ with
   | #a, #b => grind
   | ⊥, ⊥ => rfl
-  | φ₁ ⋏ φ₂, ψ₁ ⋏ ψ₂ | φ₁ ⋎ φ₂, ψ₁ ⋎ ψ₂ | φ₁ ➝ φ₂, ψ₁ ➝ ψ₂ =>
-    suffices φ₁ = ψ₁ ∧ φ₂ = ψ₂ by simpa;
-    have ⟨h₁, h₂⟩ : φ₁ᶜ = ψ₁ᶜ ∧ φ₂ᶜ = ψ₂ᶜ := by simpa [gödelWeakTranslate] using h;
-    constructor;
-    . apply gödelWeakTranslate.injective h₁;
-    . apply gödelWeakTranslate.injective h₂;
+  | φ₁ ⋏ φ₂, ψ₁ ⋏ ψ₂ =>
+    obtain ⟨h₁, h₂⟩ := Modal.Formula.inj_and.mp h;
+    simp [gödelWeakTranslate.injective h₁, gödelWeakTranslate.injective h₂];
+  | φ₁ ⋎ φ₂, ψ₁ ⋎ ψ₂ =>
+    obtain ⟨h₁, h₂⟩ := Modal.Formula.inj_or.mp h;
+    simp [gödelWeakTranslate.injective h₁, gödelWeakTranslate.injective h₂];
+  | φ₁ ➝ φ₂, ψ₁ ➝ ψ₂ =>
+    dsimp [gödelWeakTranslate] at h;
+    obtain ⟨h₁, h₂⟩ := Modal.Formula.inj_imp.mp $ Modal.Formula.inj_box.mp h;
+    simp [gödelWeakTranslate.injective h₁, gödelWeakTranslate.injective h₂];
   | #a, ⊥ | #a, φ₁ ⋏ φ₂ | #a, φ₁ ⋎ φ₂ | #a, φ₁ ➝ φ₂
   | ⊥, #a | ⊥, φ₁ ⋏ φ₂ | ⊥, φ₁ ⋎ φ₂ | ⊥, φ₁ ➝ φ₂
   | φ₁ ⋏ φ₂, #a | φ₁ ⋏ φ₂, ⊥
@@ -91,7 +99,7 @@ protected abbrev provable_gödelWeakTranslated_of_provable_VF.lemma.translate (M
     | _, _, _ => True
   root := .inl ()
   rooted := by grind
-  Val x a :=
+  Val a x :=
     match x with
     | .inl () => True
     | .inr x => M.Valuation x a
@@ -128,7 +136,7 @@ protected abbrev provable_VF_of_provable_gödelWeakTranslated.lemma.translate (M
     match φ with
     | ψ ➝ χ => ∃ ψ' χ', ψ'ᶜ = ψ ∧ χ'ᶜ = χ ∧ M.Rel' (ψ' ➝ χ') x y
     | _     => True
-  Valuation x a := M.Val x a
+  Valuation x a := M.Val a x
 
 lemma provable_VF_of_provable_gödelWeakTranslated.lemma {M : FMT.Model} {w : M.World} {φ : Propositional.Formula ℕ} :
   Formula.PLoN.Forces (M := lemma.translate M) w (φᶜ) ↔ Propositional.Formula.FMT.Forces (M := M) w φ := by
@@ -178,3 +186,4 @@ lemma VF_modal_companion_TFAE : [
 end Modal
 
 end LO
+end

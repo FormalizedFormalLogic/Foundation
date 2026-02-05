@@ -1,4 +1,8 @@
-import Foundation.Modal.Entailment.E
+module
+
+public import Foundation.Modal.Entailment.E
+
+@[expose] public section
 
 namespace LO.Modal.Entailment
 
@@ -41,13 +45,6 @@ instance : Entailment.RE 𝓢 where
   re a := box_congruence a
 
 instance : Entailment.E 𝓢 where
-
--- TODO: move
-omit [DecidableEq F] in
-lemma E!_replace (h₁ : 𝓢 ⊢ φ₁ ⭤ ψ₁) (h₂ : 𝓢 ⊢ φ₂ ⭤ ψ₂) (h₃ : 𝓢 ⊢ φ₁ ⭤ φ₂) : 𝓢 ⊢ ψ₁ ⭤ ψ₂ := by
-  apply E!_intro;
-  . apply C!_replace (C_of_E_mpr! h₁) (C_of_E_mp! h₂) (C_of_E_mp! h₃);
-  . apply C!_replace (C_of_E_mpr! h₂) (C_of_E_mp! h₁) (C_of_E_mpr! h₃);
 
 lemma dia_congruence! (h : 𝓢 ⊢ φ ⭤ ψ) : 𝓢 ⊢ ◇φ ⭤ ◇ψ := by
   apply E!_replace (E!_symm $ dia_duality!) (E!_symm $ dia_duality!);
@@ -640,3 +637,4 @@ lemma box_congruence! (h : Γ *⊢[𝓢] φ ⭤ ψ) : (□'Γ) *⊢[𝓢] □φ 
 end Context
 
 end LO.Modal.Entailment
+end

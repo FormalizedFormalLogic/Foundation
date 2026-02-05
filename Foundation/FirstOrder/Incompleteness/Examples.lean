@@ -1,6 +1,9 @@
-import Foundation.FirstOrder.Incompleteness.First
-import Foundation.FirstOrder.Incompleteness.Second
+module
 
+public import Foundation.FirstOrder.Incompleteness.First
+public import Foundation.FirstOrder.Incompleteness.Second
+
+@[expose] public section
 /-!
 # $\Delta_1$-definability of theories
 

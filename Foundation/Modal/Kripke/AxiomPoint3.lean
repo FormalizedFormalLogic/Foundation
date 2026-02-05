@@ -1,5 +1,8 @@
-import Foundation.Modal.Kripke.Completeness
-import Foundation.Modal.Kripke.AxiomWeakPoint3
+module
+
+public import Foundation.Modal.Kripke.AxiomWeakPoint3
+
+@[expose] public section
 
 namespace LO.Modal
 
@@ -34,8 +37,8 @@ lemma validate_axiomPoint3_of_isPiecewiseStronglyConnected [F.IsPiecewiseStrongl
   rintro V x;
   apply Satisfies.or_def.mpr;
   suffices
-    (∀ y, x ≺ y → (∀ z, y ≺ z → V z 0) → V y 1) ∨
-    (∀ y, x ≺ y → (∀ z, y ≺ z → V z 1) → V y 0)
+    (∀ y, x ≺ y → (∀ z, y ≺ z → V 0 z) → V 1 y) ∨
+    (∀ y, x ≺ y → (∀ z, y ≺ z → V 1 z) → V 0 y)
     by simpa [Semantics.Models, Satisfies];
   by_contra hC;
   push_neg at hC;
@@ -51,7 +54,7 @@ lemma isPiecewiseStronglyConnected_of_validate_axiomPoint3 (h : F ⊧ (Axioms.Po
     contrapose!;
     rintro ⟨x, y, z, Rxy, Rxz, nRyz, nRzy⟩;
     apply ValidOnFrame.not_of_exists_valuation_world;
-    use (λ w a => match a with | 0 => y ≺ w | 1 => z ≺ w | _ => False), x;
+    use (λ a w => match a with | 0 => y ≺ w | 1 => z ≺ w | _ => False), x;
     suffices ∃ y', x ≺ y' ∧ (∀ z', y' ≺ z' → y ≺ z') ∧ ¬z ≺ y' ∧ (∃ z', x ≺ z' ∧ (∀ y, z' ≺ y → z ≺ y) ∧ ¬y ≺ z') by
       simpa [Semantics.Models, Satisfies];
     refine ⟨y, Rxy, by tauto, nRzy, z, Rxz, by tauto, nRyz⟩;
@@ -106,3 +109,4 @@ open Formula.Kripke
 end Kripke
 
 end LO.Modal
+end

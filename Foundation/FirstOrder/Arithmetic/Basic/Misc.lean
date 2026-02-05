@@ -1,5 +1,8 @@
-import Foundation.FirstOrder.Order.Le
+module
 
+public import Foundation.FirstOrder.Order.Le
+
+@[expose] public section
 /-! # Preperations for arithmetic
 
 - *NOTE*:

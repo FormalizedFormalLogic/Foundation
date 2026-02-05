@@ -1,10 +1,11 @@
-import Foundation.Modal.Kripke.Rooted
-import Foundation.Modal.Kripke.Logic.KTB
-import Foundation.Modal.Kripke.Logic.KD45
-import Foundation.Modal.Kripke.Logic.KB4
-import Foundation.Modal.Kripke.Logic.S4
-import Foundation.Modal.Kripke.Logic.S4Point4
-import Foundation.Vorspiel.Rel.Universal
+module
+
+public import Foundation.Modal.Kripke.Logic.KTB
+public import Foundation.Modal.Kripke.Logic.KD45
+public import Foundation.Modal.Kripke.Logic.KB4
+public import Foundation.Modal.Kripke.Logic.S4Point4
+
+@[expose] public section
 
 namespace LO.Modal
 
@@ -12,8 +13,6 @@ open Entailment
 open Formula
 open Kripke
 open Modal.Kripke
-
-
 
 namespace Kripke
 
@@ -60,8 +59,6 @@ lemma iff_validOnUniversalFrameClass_validOnReflexiveEuclideanFrameClass : Frame
 
 end Kripke
 
-
-
 instance : Sound Modal.S5 FrameClass.S5 := instSound_of_validates_axioms $ by
   apply FrameClass.validates_with_AxiomK_of_validates;
   constructor;
@@ -90,9 +87,6 @@ instance : Complete Modal.S5 FrameClass.universal := ⟨by
   exact hF;
 ⟩
 
-
-
-
 instance : Modal.KTB ⪱ Modal.S5 := by
   constructor;
   . apply Modal.Kripke.weakerThan_of_subset_frameClass (FrameClass.KTB) (FrameClass.S5);
@@ -105,7 +99,7 @@ instance : Modal.KTB ⪱ Modal.S5 := by
     . exact axiomFive!;
     . apply Sound.not_provable_of_countermodel (𝓜 := FrameClass.KTB)
       apply Kripke.not_validOnFrameClass_of_exists_model_world;
-      let M : Model := ⟨⟨Fin 3, λ x y => (x = 0) ∨ (x = 1 ∧ y ≠ 2) ∨ (x = 2 ∧ y ≠ 1)⟩, λ x _ => x = 1⟩;
+      let M : Model := ⟨⟨Fin 3, λ x y => (x = 0) ∨ (x = 1 ∧ y ≠ 2) ∨ (x = 2 ∧ y ≠ 1)⟩, λ _ x => x = 1⟩;
       use M, 0;
       constructor;
       . refine { refl := by omega, symm := by omega };
@@ -128,7 +122,7 @@ instance : Modal.KD45 ⪱ Modal.S5 := by
     . exact axiomT!;
     . apply Sound.not_provable_of_countermodel (𝓜 := FrameClass.KD45)
       apply Kripke.not_validOnFrameClass_of_exists_model_world;
-      let M : Model := ⟨⟨Fin 2, λ x y => (x = 0 ∧ y = 1) ∨ (x = 1 ∧ y = 1)⟩, λ x _ => x = 1⟩;
+      let M : Model := ⟨⟨Fin 2, λ x y => (x = 0 ∧ y = 1) ∨ (x = 1 ∧ y = 1)⟩, λ _ x => x = 1⟩;
       use M, 0;
       constructor;
       . refine {
@@ -137,7 +131,7 @@ instance : Modal.KD45 ⪱ Modal.S5 := by
           reucl := by simp [RightEuclidean]; omega
         }
       . simp [Semantics.Models, Satisfies, M];
-        tauto;
+        grind;
 
 instance : Modal.KB4 ⪱ Modal.S5 := by
   constructor;
@@ -151,7 +145,7 @@ instance : Modal.KB4 ⪱ Modal.S5 := by
     . exact axiomT!;
     . apply Sound.not_provable_of_countermodel (𝓜 := FrameClass.KB4)
       apply Kripke.not_validOnFrameClass_of_exists_model_world;
-      use ⟨⟨Fin 1, λ x y => False⟩, λ x _ => False⟩, 0;
+      use ⟨⟨Fin 1, λ x y => False⟩, λ _ x => False⟩, 0;
       constructor;
       . refine { symm := by tauto, trans := by tauto };
       . simp [Semantics.Models, Satisfies];
@@ -168,7 +162,7 @@ instance : Modal.S4Point4 ⪱ Modal.S5 := by
     . simp;
     . apply Sound.not_provable_of_countermodel (𝓜 := FrameClass.S4Point4)
       apply Kripke.not_validOnFrameClass_of_exists_model_world;
-      let M : Model := ⟨⟨Fin 2, λ x y => x ≤ y⟩, λ w a => w = 0⟩;
+      let M : Model := ⟨⟨Fin 2, λ x y => x ≤ y⟩, λ a w => w = 0⟩;
       use M, 0;
       constructor;
       . refine {
@@ -181,7 +175,8 @@ instance : Modal.S4Point4 ⪱ Modal.S5 := by
             | 1, 1 => contradiction;
         };
       . suffices (0 : M.World) ≺ 0 ∧ ∃ x : M.World, (0 : M) ≺ x ∧ ¬x ≺ 0 by
-          simpa [M, Semantics.Models, Satisfies];
+          simp [M, Semantics.Models, Satisfies];
+          grind;
         constructor;
         . omega;
         . use 1;
@@ -205,3 +200,4 @@ instance : Modal.KT ⪱ Modal.S5 := calc
   _        ⪱ Modal.S5 := by infer_instance
 
 end LO.Modal
+end

@@ -1,6 +1,9 @@
-import Foundation.Modal.Kripke.Logic.Grz.Completeness
-import Foundation.Modal.Kripke.Logic.Triv
-import Foundation.Modal.Kripke.Logic.S5
+module
+
+public import Foundation.Modal.Kripke.Logic.Triv
+public import Foundation.Modal.Kripke.Logic.S5
+
+@[expose] public section
 
 namespace LO.Modal.Logic
 
@@ -11,18 +14,17 @@ open Modal.Kripke
 
 instance : Modal.S5 ⪱ Modal.S5Grz := by
   constructor;
-  . exact Hilbert.Normal.weakerThan_of_subset_axioms (by simp)
+  . grind;
   . apply Entailment.not_weakerThan_iff.mpr;
     use Axioms.Grz (.atom 0);
     constructor;
     . simp;
     . apply Sound.not_provable_of_countermodel (𝓜 := Kripke.FrameClass.universal);
       apply Kripke.not_validOnFrameClass_of_exists_model_world;
-      use ⟨⟨Fin 2, λ x y => True⟩, λ w _ => w = 1⟩, 0;
+      use ⟨⟨Fin 2, λ x y => True⟩, λ _ w => w = 1⟩, 0;
       constructor;
       . exact { universal := by tauto }
       . simp [Semantics.Models, Satisfies];
-        tauto;
 
 instance : Modal.Grz ⪱ Modal.S5Grz := by
   constructor;
@@ -34,7 +36,7 @@ instance : Modal.Grz ⪱ Modal.S5Grz := by
     . simp;
     . apply Sound.not_provable_of_countermodel (𝓜 := Kripke.FrameClass.finite_Grz);
       apply Kripke.not_validOnFrameClass_of_exists_model_world;
-      let M : Model := ⟨⟨Fin 2, λ x y => x ≤ y⟩, (λ w _ => w = 0)⟩;
+      let M : Model := ⟨⟨Fin 2, λ x y => x ≤ y⟩, (λ _ w => w = 0)⟩;
       use M, 0;
       constructor;
       . refine {
@@ -59,3 +61,4 @@ instance : Sound Modal.S5Grz FrameClass.finite_Triv := by
   infer_instance;
 
 end LO.Modal.Logic
+end

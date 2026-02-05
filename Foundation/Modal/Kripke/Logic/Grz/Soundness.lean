@@ -1,6 +1,9 @@
-import Foundation.Modal.Kripke.AxiomGrz
-import Foundation.Modal.Kripke.Logic.S4McK
-import Mathlib.Order.Preorder.Finite
+module
+
+public import Foundation.Modal.Kripke.AxiomGrz
+public import Foundation.Modal.Kripke.Logic.S4McK
+
+@[expose] public section
 
 namespace LO.Modal
 
@@ -55,3 +58,4 @@ instance : Entailment.Consistent Modal.Grz :=
     constructor;
 
 end LO.Modal
+end

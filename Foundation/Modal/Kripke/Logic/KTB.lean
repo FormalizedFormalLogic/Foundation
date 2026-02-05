@@ -1,6 +1,9 @@
-import Foundation.Modal.Kripke.Logic.KT
-import Foundation.Modal.Kripke.Logic.KDB
-import Foundation.Modal.Kripke.Filtration
+module
+
+public import Foundation.Modal.Kripke.Logic.KT
+public import Foundation.Modal.Kripke.Logic.KDB
+
+@[expose] public section
 
 namespace LO.Modal
 
@@ -56,19 +59,20 @@ instance : Complete Modal.KTB FrameClass.finite_KTB := ⟨by
 
 instance : Modal.KT ⪱ Modal.KTB := by
   constructor;
-  . apply Hilbert.Normal.weakerThan_of_subset_axioms $ by simp;
+  . grind;
   . apply Entailment.not_weakerThan_iff.mpr;
     use (Axioms.B (.atom 0));
     constructor;
     . exact axiomB!;
     . apply Sound.not_provable_of_countermodel (𝓜 := FrameClass.KT);
       apply Kripke.not_validOnFrameClass_of_exists_model_world;
-      let M : Model := ⟨⟨Fin 2, λ x y => x ≤ y⟩, λ w _ => w = 0⟩;
+      let M : Model := ⟨⟨Fin 2, λ x y => x ≤ y⟩, λ _ w => w = 0⟩;
       use M, 0;
       constructor;
       . tauto;
       . suffices ∃ x, (0 : M.World) ≺ x ∧ ¬x ≺ 0 by
-          simpa [M, Semantics.Models, Satisfies];
+          simp [M, Semantics.Models, Satisfies];
+          grind;
         use 1;
         omega;
 
@@ -84,7 +88,7 @@ instance : Modal.KDB ⪱ Modal.KTB := by
     . exact axiomT!;
     . apply Sound.not_provable_of_countermodel (𝓜 := FrameClass.KDB);
       apply Kripke.not_validOnFrameClass_of_exists_model_world;
-      use ⟨⟨Fin 2, λ x y => x ≠ y⟩, λ x _ => x = 1⟩, 0;
+      use ⟨⟨Fin 2, λ x y => x ≠ y⟩, λ _ x => x = 1⟩, 0;
       constructor;
       . refine {
           serial := by
@@ -95,7 +99,7 @@ instance : Modal.KDB ⪱ Modal.KTB := by
           symm := by simp;
         };
       . simp [Semantics.Models, Satisfies];
-        omega;
-
+        grind;
 
 end LO.Modal
+end

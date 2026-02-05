@@ -1,5 +1,9 @@
-import Foundation.Propositional.Kripke2.Logic.F_Ser
-import Foundation.Propositional.Kripke2.AxiomRfl
+module
+
+public import Foundation.Propositional.Kripke2.Logic.F_Ser
+public import Foundation.Propositional.Kripke2.AxiomRfl
+
+@[expose] public section
 
 namespace LO.Propositional
 
@@ -65,6 +69,8 @@ instance : Propositional.F_Ser ⪱ Propositional.F_Rfl := by
             | 1 => use 0; omega;
         }
       . by_contra hC;
-        simpa using isReflexive_of_valid_axiomRfl hC |>.refl 1;
+        have := isReflexive_of_valid_axiomRfl hC |>.refl 1;
+        grind;
 
 end LO.Propositional
+end

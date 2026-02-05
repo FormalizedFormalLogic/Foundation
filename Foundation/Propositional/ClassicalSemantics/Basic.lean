@@ -1,5 +1,9 @@
-import Foundation.Propositional.Formula
-import Foundation.Logic.Semantics
+module
+
+public import Foundation.Propositional.Formula.Basic
+public import Foundation.Logic.Semantics
+
+@[expose] public section
 
 namespace LO.Propositional
 
@@ -80,8 +84,8 @@ lemma iff_subst_self (s) :
 lemma equiv_of_letterless (hl : φ.Letterless) : ∀ v w : Valuation _, v ⊧ φ ↔ w ⊧ φ := by
   intro v w;
   induction φ with
-  | hatom a => simp at hl;
-  | hfalsum => simp;
+  | hatom a => grind;
+  | hfalsum => grind;
   | himp φ ψ ihφ ihψ =>
     simp only [Formula.Letterless] at hl;
     replace ihφ := ihφ hl.1;
@@ -169,3 +173,4 @@ end
 
 
 end LO.Propositional
+end

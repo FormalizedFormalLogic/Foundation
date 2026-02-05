@@ -1,6 +1,9 @@
-import Foundation.Modal.Kripke.AxiomFourN
-import Foundation.Modal.Kripke.Hilbert
-import Foundation.Modal.Kripke.Logic.KTc
+module
+
+public import Foundation.Modal.Kripke.AxiomFourN
+public import Foundation.Modal.Kripke.Logic.KTc
+
+@[expose] public section
 
 namespace LO.Modal
 
@@ -108,14 +111,14 @@ instance : Frame.IsWeakTransitive (counterframe n) (n + 1) := by
 
 instance : Modal.K ⪱ Modal.K4n n := by
   constructor;
-  . apply Hilbert.Normal.weakerThan_of_subset_axioms $ by simp;
+  . grind;
   . apply Entailment.not_weakerThan_iff.mpr;
     use (Axioms.FourN n (.atom 0));
     constructor;
     . simp;
     . apply Sound.not_provable_of_countermodel (𝓜 := FrameClass.K);
       apply Kripke.not_validOnFrameClass_of_exists_model_world;
-      let M : Model := ⟨counterframe n, λ w a => w = n⟩;
+      let M : Model := ⟨counterframe n, λ a w => w = n⟩;
       use M, 0;
       constructor;
       . simp;
@@ -145,7 +148,7 @@ lemma succ_strictlyWeakerThan : Modal.K4n (n + 1) ⪱ Modal.K4n n := by
     . simp;
     . apply Sound.not_provable_of_countermodel (𝓜 := FrameClass.K4n (n + 1))
       apply Kripke.not_validOnFrameClass_of_exists_model_world;
-      let M : Model := ⟨counterframe n, λ w a => w ≠ counterframe.last⟩;
+      let M : Model := ⟨counterframe n, λ a w => w ≠ counterframe.last⟩;
       use M, 0;
       constructor;
       . apply Set.mem_setOf_eq.mpr;
@@ -210,3 +213,4 @@ end K4n
 
 
 end LO.Modal
+end

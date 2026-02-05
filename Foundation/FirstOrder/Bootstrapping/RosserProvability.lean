@@ -1,5 +1,8 @@
-import Foundation.FirstOrder.Bootstrapping.WitnessComparison
+module
 
+public import Foundation.FirstOrder.Bootstrapping.WitnessComparison
+
+@[expose] public section
 /-!
 # Rosser's provability predicate
 -/
@@ -119,7 +122,7 @@ open ProvabilityAbstraction
 
 variable {L : Language} [L.Encodable] [L.LORDefinable]
 
-variable {T : Theory L} [T.Δ₁] [Entailment.Consistent T]
+variable {T : Theory L} [T.Δ₁]
 
 variable (T)
 

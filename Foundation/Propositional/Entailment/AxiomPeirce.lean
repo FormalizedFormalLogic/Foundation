@@ -1,5 +1,7 @@
-import Foundation.Logic.Entailment
-import Foundation.Propositional.Entailment.Minimal.Basic
+module
+public import Foundation.Propositional.Entailment.Minimal.Basic
+
+@[expose] public section
 
 namespace LO.Axioms
 
@@ -43,3 +45,5 @@ end Context
 end
 
 end LO.Entailment
+
+end

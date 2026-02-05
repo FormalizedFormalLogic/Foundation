@@ -1,5 +1,8 @@
-import Foundation.InterpretabilityLogic.Veltman.Basic
-import Foundation.InterpretabilityLogic.Veltman.Logic.IL
+module
+
+public import Foundation.InterpretabilityLogic.Veltman.Logic.IL
+
+@[expose] public section
 
 namespace LO.InterpretabilityLogic.Veltman
 
@@ -36,7 +39,7 @@ open Formula (atom) in
 lemma Frame.HasAxiomM₀.of_validate_axiomM₀ [F.IsIL] (h : F ⊧ Axioms.M₀ (.atom 0) (.atom 1) (.atom 2)) : F.HasAxiomM₀ := by
   constructor;
   intro a b c d e Rab Rbc Sacd Rde;
-  have ⟨x, Sabx, h₁⟩ := @h (λ w p => match p with | 0 => c = w | 1 => d = w | 2 => b ≺ w | _ => False) a ?_ b ?_ ?_;
+  have ⟨x, Sabx, h₁⟩ := @h (λ p w => match p with | 0 => c = w | 1 => d = w | 2 => b ≺ w | _ => False) a ?_ b ?_ ?_;
   . obtain ⟨rfl, h₂⟩ := Satisfies.and_def.mp h₁;
     apply h₂ _ Rde;
   . rintro _ Rac rfl;
@@ -54,3 +57,4 @@ lemma Frame.HasAxiomM₀.of_validate_axiomM₀ [F.IsIL] (h : F ⊧ Axioms.M₀ (
       tauto;
 
 end LO.InterpretabilityLogic.Veltman
+end

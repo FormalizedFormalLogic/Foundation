@@ -1,7 +1,9 @@
-import Foundation.FirstOrder.Incompleteness.GödelRosser
-import Foundation.Meta.ClProver
-import Foundation.Logic.LindenbaumAlgebra
+module
 
+public import Foundation.FirstOrder.Incompleteness.GödelRosser
+public import Foundation.Logic.LindenbaumAlgebra
+
+@[expose] public section
 namespace LO
 
 namespace Entailment

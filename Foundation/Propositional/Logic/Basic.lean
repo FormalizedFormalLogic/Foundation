@@ -1,5 +1,9 @@
-import Foundation.Propositional.Formula
-import Foundation.Modal.Entailment.Basic
+module
+
+public import Foundation.Propositional.Formula.Basic
+public import Foundation.Propositional.Entailment.Cl.Basic
+
+@[expose] public section
 
 namespace LO.Propositional
 
@@ -107,3 +111,5 @@ instance [Consistent L] : L ⪱ (Set.univ : Logic α) := by
 end
 
 end LO.Propositional
+
+end

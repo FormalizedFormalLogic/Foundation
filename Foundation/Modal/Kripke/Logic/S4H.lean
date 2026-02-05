@@ -1,8 +1,9 @@
-import Foundation.Modal.Kripke.Logic.Grz.Completeness
-import Foundation.Modal.Kripke.Logic.S4
-import Foundation.Modal.Kripke.AxiomH
-import Foundation.Modal.Kripke.Filtration
-import Foundation.Modal.Kripke.Rooted
+module
+
+public import Foundation.Modal.Kripke.Logic.Grz.Completeness
+public import Foundation.Modal.Kripke.AxiomH
+
+@[expose] public section
 
 namespace LO.Modal
 
@@ -62,19 +63,20 @@ instance : Modal.Grz ⪱ Modal.S4H := by
     . simp;
     . apply Sound.not_provable_of_countermodel (𝓜 := FrameClass.finite_Grz)
       apply Kripke.not_validOnFrameClass_of_exists_model_world;
-      let M : Model := ⟨⟨Fin 3, λ x y => x ≤ y⟩, λ w a => w ≠ 1⟩;
+      let M : Model := ⟨⟨Fin 3, λ x y => x ≤ y⟩, λ a w => w ≠ 1⟩;
       use M, 0;
       constructor;
       . simp only [Set.mem_setOf_eq];
         exact {}
       . suffices ∃ x : M, (0 : M) ≺ x ∧ ∃ y, x ≺ y ∧ y ≠ 1 ∧ x = 1 by
-          simpa [Semantics.Models, Satisfies, M];
+          simp [Semantics.Models, Satisfies, M];
+          grind;
         use 1;
         constructor;
         . tauto;
         . use 2;
-          simp [M];
-          omega;
+          grind;
 
 
 end LO.Modal
+end

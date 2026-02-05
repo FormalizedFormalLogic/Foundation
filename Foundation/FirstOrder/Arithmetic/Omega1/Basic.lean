@@ -1,5 +1,8 @@
-import Foundation.FirstOrder.Arithmetic.Exponential
+module
 
+public import Foundation.FirstOrder.Arithmetic.Exponential
+
+@[expose] public section
 /-!
 # Theory $\mathsf{I}\Sigma_0 + \Omega_1$
 

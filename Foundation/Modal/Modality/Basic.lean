@@ -1,7 +1,10 @@
-import Foundation.Modal.Hilbert.Normal.Basic
-import Foundation.Modal.Logic.SumNormal
-import Foundation.Meta.ClProver
+module
 
+public import Foundation.Modal.Hilbert.Normal.Basic
+public import Foundation.Modal.Logic.SumNormal
+
+
+@[expose] public section
 
 namespace LO.Modal
 
@@ -360,7 +363,7 @@ class Translation (L : Logic _) (m₁ m₂ : Modality) where
 
 notation:90 M₁ " ⤳[" L "] " M₂ => Translation L M₁ M₂
 
-instance : IsRefl _ (· ⤳[L] ·) := ⟨by
+instance : Std.Refl (· ⤳[L] ·) := ⟨by
   intro M;
   constructor;
   simp;
@@ -402,7 +405,7 @@ instance : Std.Symm (· ≅[L] ·) := ⟨by
   constructor <;> infer_instance;
 ⟩
 
-instance : IsRefl _ (· ≅[L] ·) := ⟨by
+instance : Std.Refl (· ≅[L] ·) := ⟨by
   intro _;
   apply iff_equivalence_bi_translate.mpr;
   constructor <;> apply _root_.refl;
@@ -801,3 +804,4 @@ end
 end
 
 end LO.Modal
+end

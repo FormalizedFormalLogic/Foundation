@@ -1,5 +1,9 @@
-import Foundation.Modal.Logic.Basic
-import Foundation.InterpretabilityLogic.Formula.Substitution
+module
+
+public import Foundation.Modal.Logic.Basic
+public import Foundation.InterpretabilityLogic.Formula.Substitution
+
+@[expose] public section
 
 namespace LO.InterpretabilityLogic
 
@@ -132,3 +136,4 @@ end
 end Logic
 
 end LO.InterpretabilityLogic
+end

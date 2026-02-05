@@ -1,6 +1,9 @@
-import Foundation.InterpretabilityLogic.Entailment.IL_Rstar
-import Foundation.InterpretabilityLogic.Entailment.IL_R_W
-import Foundation.InterpretabilityLogic.Entailment.ILMinus_M
+module
+
+public import Foundation.InterpretabilityLogic.Entailment.IL_Rstar
+public import Foundation.InterpretabilityLogic.Entailment.IL_R_W
+
+@[expose] public section
 
 namespace LO.InterpretabilityLogic.Entailment
 
@@ -83,3 +86,4 @@ instance «IL(M)_⊢_W» : Entailment.HasAxiomW 𝓢 where
   axiomW! {_ _} := deduct' $ rhdTrans! (of K6) axiomM!
 
 end LO.InterpretabilityLogic.Entailment
+end

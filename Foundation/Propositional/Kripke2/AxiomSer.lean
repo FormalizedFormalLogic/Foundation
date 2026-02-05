@@ -1,8 +1,8 @@
-import Foundation.Propositional.Kripke2.Basic
-import Foundation.Propositional.Kripke2.FTheory
-import Foundation.Vorspiel.Rel.Convergent
-import Foundation.Vorspiel.Rel.Euclidean
-import Foundation.Vorspiel.Rel.Coreflexive
+module
+
+public import Foundation.Propositional.Kripke2.FTheory
+
+@[expose] public section
 
 namespace LO.Propositional
 
@@ -13,14 +13,12 @@ namespace Kripke2
 
 variable {F : Kripke2.Frame}
 
-
 namespace Frame
 
 protected abbrev IsSerial (F : Kripke2.Frame) := _root_.IsSerial F.Rel
 lemma serial [F.IsSerial] : ∀ x : F, ∃ y, x ≺ y := IsSerial.serial
 
 end Frame
-
 
 @[simp high, grind .]
 lemma valid_axiomSer_of_isSerial [F.IsSerial] : F ⊧ Axioms.Ser := by
@@ -51,3 +49,4 @@ instance [Entailment.F L] [Entailment.HasAxiomSer L] [Entailment.Disjunctive L] 
 end Kripke2
 
 end LO.Propositional
+end

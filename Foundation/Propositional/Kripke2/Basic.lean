@@ -1,6 +1,9 @@
-import Foundation.Propositional.Logic.Basic
-import Foundation.Propositional.Entailment.Corsi.Basic
-import Foundation.Vorspiel.Rel.Basic
+module
+
+public import Foundation.Propositional.Logic.Basic
+public import Foundation.Propositional.Entailment.Corsi.Basic
+
+@[expose] public section
 
 namespace LO.Propositional
 
@@ -30,10 +33,7 @@ end Frame
 
 abbrev FrameClass := Set Frame
 
-
-
-abbrev Valuation (F : Frame) := F.World → ℕ → Prop
-
+abbrev Valuation (F : Frame) := ℕ → F.World → Prop
 
 structure Model extends Frame where
   Val : Valuation toFrame
@@ -41,7 +41,7 @@ structure Model extends Frame where
 namespace Model
 
 instance : CoeSort (Model) (Type) := ⟨λ M => M.World⟩
-instance : CoeFun (Model) (λ M => M.World → ℕ → Prop) := ⟨fun m => m.Val⟩
+instance : CoeFun (Model) (λ M => ℕ → M.World → Prop) := ⟨fun m => m.Val⟩
 
 end Model
 
@@ -49,14 +49,12 @@ abbrev ModelClass := Set Model
 
 end Kripke2
 
-
-
 namespace Formula.Kripke2
 
 open Kripke2
 
 def Satisfies (M : Kripke2.Model) (x : M.World) : Formula ℕ → Prop
-  | atom a => M x a
+  | atom a => M a x
   | ⊥      => False
   | φ ⋏ ψ  => Satisfies M x φ ∧ Satisfies M x ψ
   | φ ⋎ ψ  => Satisfies M x φ ∨ Satisfies M x ψ
@@ -70,7 +68,7 @@ variable {M : Kripke2.Model} {x y : M.World} {a : ℕ} {φ ψ χ : Formula ℕ}
 
 @[simp, grind =] protected lemma iff_models : x ⊧ φ ↔ Satisfies M x φ := iff_of_eq rfl
 
-@[grind =] protected lemma def_atom : x ⊧ atom a ↔ M x a := by simp [Satisfies];
+@[grind =] protected lemma def_atom : x ⊧ atom a ↔ M a x := by simp [Satisfies];
 @[simp high, grind .] protected lemma def_top : x ⊧ ⊤ := by simp [Satisfies];
 @[simp high, grind .] protected lemma def_bot : x ⊭ ⊥ := by simp [Semantics.NotModels, Satisfies];
 
@@ -98,7 +96,7 @@ instance : Semantics.And M.World := ⟨by grind⟩
 instance : Semantics.Or M.World := ⟨by grind⟩
 
 lemma iff_subst_self {F : Kripke2.Frame} {V : Kripke2.Valuation F} {x : F.World} (s : Substitution ℕ) :
-  letI U : Kripke2.Valuation F := λ w a => Satisfies ⟨F, V⟩ w ((.atom a)⟦s⟧)
+  letI U : Kripke2.Valuation F := λ a w => Satisfies ⟨F, V⟩ w ((.atom a)⟦s⟧)
   Satisfies ⟨F, U⟩ x φ ↔ Satisfies ⟨F, V⟩ x (φ⟦s⟧) := by
   induction φ generalizing x with
   | hatom a => simp [Satisfies];
@@ -128,7 +126,6 @@ lemma iff_subst_self {F : Kripke2.Frame} {V : Kripke2.Valuation F} {x : F.World}
 
 end Satisfies
 
-
 def ValidOnModel (M : Kripke2.Model) (φ : Formula ℕ) : Prop := ∀ x : M.World, Satisfies M x φ
 
 namespace ValidOnModel
@@ -150,7 +147,6 @@ alias ⟨exists_world_of_not, not_of_exists_world⟩ := iff_not_models_exists_wo
 
 end ValidOnModel
 
-
 def ValidOnFrame (F : Kripke2.Frame) (φ : Formula ℕ) : Prop := ∀ V : Kripke2.Valuation F, (⟨F, V⟩ : Kripke2.Model) ⊧ φ
 
 namespace ValidOnFrame
@@ -167,10 +163,8 @@ variable {F : Kripke2.Frame} {φ ψ χ : Formula ℕ}
 instance : Semantics.Top (Kripke2.Frame) := ⟨by grind⟩
 instance : Semantics.Bot (Kripke2.Frame) := ⟨by grind⟩
 
-
 lemma iff_not_exists_valuation : (F ⊭ φ) ↔ (∃ V : Kripke2.Valuation F, ¬(⟨F, V⟩ : Kripke2.Model) ⊧ φ) := by grind;
 alias ⟨exists_valuation_of_not, not_of_exists_valuation⟩ := iff_not_exists_valuation
-
 
 lemma iff_not_exists_valuation_world : (F ⊭ φ) ↔ (∃ V : Kripke2.Valuation F, ∃ x : (⟨F, V⟩ : Kripke2.Model).World, ¬Satisfies _ x φ) := by
   simp [ValidOnFrame, ValidOnModel, Semantics.Models, Semantics.NotModels];
@@ -187,12 +181,9 @@ end ValidOnFrame
 
 end Formula.Kripke2
 
-
 namespace Kripke2
 
-
 open Formula.Kripke2
-
 
 section
 
@@ -218,7 +209,6 @@ alias ⟨exists_model_world_of_not_validOnFrameClass, not_validOnFrameClass_of_e
 
 end
 
-
 section
 
 variable {C : ModelClass} {φ ψ χ : Formula ℕ}
@@ -236,7 +226,6 @@ lemma iff_not_validOnModelClass_exists_model_world : C ⊭ φ ↔ ∃ M : Kripke
 alias ⟨exists_model_world_of_not_validOnModelClass, not_validOnModelClass_of_exists_model_world⟩ := iff_not_validOnModelClass_exists_model_world
 
 end
-
 
 section
 
@@ -309,8 +298,10 @@ lemma invalid_implyS :
   F ⊭ (atom 0) ➝ (atom 1) ➝ (atom 0) := by
   intro F;
   apply ValidOnFrame.iff_not_exists_valuation_world.mpr;
-  use (λ x a => match a with | 0 => x = 1 | 1 => x = 0 ∨ x = 2 | _ => False), 0;
-  suffices 0 ≺ 1 on F ∧ ∃ x, 1 ≺ x on F ∧ (x = 0 ∨ x = 2) ∧ x ≠ 1 by simpa [F, Satisfies];
+  use (λ a x => match a with | 0 => x = 1 | 1 => x = 0 ∨ x = 2 | _ => False), 0;
+  suffices 0 ≺ 1 on F ∧ ∃ x, 1 ≺ x on F ∧ (x = 0 ∨ x = 2) ∧ x ≠ 1 by
+    simp [Satisfies, F];
+    grind;
   constructor;
   . tauto;
   . use 2;
@@ -320,5 +311,5 @@ end
 
 end Kripke2
 
-
 end LO.Propositional
+end

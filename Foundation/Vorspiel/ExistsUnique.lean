@@ -1,4 +1,9 @@
-import Foundation.Vorspiel.Vorspiel
+module
+
+public import Mathlib.Logic.IsEmpty
+
+@[expose]
+public section
 
 namespace Classical
 variable {α : Sort*} {p : α → Prop} {r : α → α → Prop}
@@ -41,3 +46,5 @@ lemma extendedChoose!_eq_iff (h : ∀ x, p x → ∃! y, r x y) (default : α) (
   ⟨by rintro rfl; exact extendedchoose!_spec h default hpx, extendedChoose!_uniq h default hpx⟩
 
 end Classical
+
+end

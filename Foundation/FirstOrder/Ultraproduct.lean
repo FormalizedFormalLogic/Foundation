@@ -1,6 +1,9 @@
-import Foundation.FirstOrder.Basic
-import Mathlib.Order.Filter.Ultrafilter.Basic
+module
 
+public import Foundation.FirstOrder.Basic
+public import Mathlib.Order.Filter.Ultrafilter.Basic
+
+@[expose] public section
 namespace LO
 
 namespace FirstOrder

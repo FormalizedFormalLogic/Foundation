@@ -1,5 +1,9 @@
-import Foundation.Propositional.Kripke2.Logic.F_Rfl
-import Foundation.Propositional.Kripke2.Logic.F_Tra1
+module
+
+public import Foundation.Propositional.Kripke2.Logic.F_Rfl
+public import Foundation.Propositional.Kripke2.Logic.F_Tra1
+
+@[expose] public section
 
 namespace LO.Propositional
 
@@ -50,7 +54,8 @@ instance : Propositional.F_Rfl ⪱ Propositional.F_Rfl_Tra1 := by
       . apply Set.mem_setOf_eq.mpr;
         exact { refl := by omega; }
       . by_contra hC;
-        simpa using IsTransitive_of_valid_axiomTra₁ hC |>.trans 1 2 3 (by omega) (by omega);
+        have := IsTransitive_of_valid_axiomTra₁ hC |>.trans 1 2 3 (by omega) (by omega);
+        grind;
 
 instance : Propositional.F_Tra1 ⪱ Propositional.F_Rfl_Tra1 := by
   constructor;
@@ -70,3 +75,4 @@ instance : Propositional.F_Tra1 ⪱ Propositional.F_Rfl_Tra1 := by
         simpa using isReflexive_of_valid_axiomRfl hC |>.refl 1;
 
 end LO.Propositional
+end

@@ -1,6 +1,8 @@
-import Foundation.Propositional.Kripke.Completeness
-import Foundation.Propositional.Entailment.LC
-import Foundation.Vorspiel.Rel.Connected
+module
+
+public import Foundation.Propositional.Kripke.Completeness
+
+@[expose] public section
 
 namespace LO.Propositional
 
@@ -12,7 +14,6 @@ namespace Kripke
 protected abbrev Frame.IsPiecewiseStronglyConnected (F : Frame) := _root_.IsPiecewiseStronglyConnected F.Rel
 lemma Frame.ps_connected {F : Frame} [F.IsPiecewiseStronglyConnected] : ∀ ⦃x y z : F⦄, x ≺ y → x ≺ z → y ≺ z ∨ z ≺ y := by
   apply IsPiecewiseStronglyConnected.ps_connected
-
 
 section definability
 
@@ -48,7 +49,7 @@ lemma validate_axiomDummett_of_isPiecewiseStronglyConnected [F.IsPiecewiseStrong
 
 lemma isPiecewiseStronglyConnected_of_validate_axiomDummett (h : F ⊧ (Axioms.Dummett (.atom 0) (.atom 1))) : F.IsPiecewiseStronglyConnected := ⟨by
   rintro x y z Rxy Ryz;
-  let V : Kripke.Valuation F := ⟨λ {v a} => match a with | 0 => y ≺ v | 1 => z ≺ v | _ => True, by
+  let V : Kripke.Valuation F := ⟨λ {a v} => match a with | 0 => y ≺ v | 1 => z ≺ v | _ => True, by
     intro w v Rwv a ha;
     split at ha;
     . apply F.trans ha Rwv
@@ -66,7 +67,6 @@ lemma isPiecewiseStronglyConnected_of_validate_axiomDummett (h : F ⊧ (Axioms.D
 ⟩
 
 end definability
-
 
 section canonicality
 
@@ -103,3 +103,4 @@ end canonicality
 end Kripke
 
 end LO.Propositional
+end

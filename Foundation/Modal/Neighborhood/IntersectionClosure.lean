@@ -1,9 +1,8 @@
-import Foundation.Modal.Neighborhood.Basic
-import Foundation.Modal.Neighborhood.AxiomM
-import Foundation.Modal.Neighborhood.AxiomC
-import Foundation.Modal.Neighborhood.AxiomN
-import Foundation.Modal.Neighborhood.AxiomGeach
-import Foundation.Modal.Neighborhood.Supplementation
+module
+
+public import Foundation.Modal.Neighborhood.Supplementation
+
+@[expose] public section
 
 namespace LO.Modal.Neighborhood
 
@@ -146,3 +145,4 @@ lemma mem_box_of_mem_original_box {x : F} {s : Set F} : x ∈ F.box s → x ∈ 
 end Frame.quasiFiltering
 
 end LO.Modal.Neighborhood
+end

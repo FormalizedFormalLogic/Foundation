@@ -1,5 +1,7 @@
-import Foundation.Propositional.Entailment.Minimal.Basic
-import Foundation.Propositional.Entailment.AxiomEFQ
+module
+public import Foundation.Propositional.Entailment.AxiomEFQ
+
+@[expose] public section
 
 namespace LO.Entailment
 
@@ -397,3 +399,5 @@ lemma inconsistent_of_provable_of_unprovable {φ : F}
 end consistency
 
 end LO.Entailment
+
+end

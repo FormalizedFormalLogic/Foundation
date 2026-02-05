@@ -1,6 +1,8 @@
-import Foundation.FirstOrder.Arithmetic.Schemata
-import Mathlib.Logic.Nonempty
+module
 
+public import Foundation.FirstOrder.Arithmetic.Schemata
+
+@[expose] public section
 /-!
 # Basic properties of theory $\mathsf{IOpen}$
 
@@ -514,7 +516,7 @@ macro_rules
   | `(⟪$term:term⟫) => `($term)
 
 @[app_unexpander pair]
-def pairUnexpander : Lean.PrettyPrinter.Unexpander
+meta def pairUnexpander : Lean.PrettyPrinter.Unexpander
   | `($_ $term $term2) => `(⟪$term, $term2⟫)
   | _ => throw ()
 

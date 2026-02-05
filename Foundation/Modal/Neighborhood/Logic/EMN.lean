@@ -1,8 +1,11 @@
-import Foundation.Modal.Neighborhood.Hilbert
-import Foundation.Modal.Neighborhood.Logic.EN
-import Foundation.Modal.Neighborhood.Logic.EM
+module
+
+public import Foundation.Modal.Neighborhood.Logic.EN
+public import Foundation.Modal.Neighborhood.Logic.EM
 
 
+
+@[expose] public section
 
 namespace LO.Modal
 
@@ -57,3 +60,4 @@ instance : Modal.EMN ⪱ Modal.EMCN := by
       . simp;
 
 end LO.Modal
+end

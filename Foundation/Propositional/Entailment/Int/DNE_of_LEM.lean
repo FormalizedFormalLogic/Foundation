@@ -1,8 +1,7 @@
-import Foundation.Propositional.Entailment.Int.Basic
-import Foundation.Propositional.Entailment.AxiomEFQ
-import Foundation.Propositional.Entailment.AxiomLEM
-import Foundation.Propositional.Entailment.AxiomDNE
-import Foundation.Propositional.Entailment.Cl.Basic
+module
+public import Foundation.Propositional.Entailment.Cl.Basic
+
+@[expose] public section
 
 namespace LO.Entailment
 
@@ -24,3 +23,5 @@ instance [HasAxiomLEM 𝓢] : HasAxiomDNE 𝓢 where
 instance [HasAxiomLEM 𝓢] : Entailment.Cl 𝓢 where
 
 end LO.Entailment
+
+end

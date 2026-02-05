@@ -1,10 +1,10 @@
-import Foundation.Modal.Neighborhood.AxiomGeach
-import Foundation.Modal.Neighborhood.Hilbert
-import Foundation.Modal.Neighborhood.Logic.E4
-import Foundation.Modal.Neighborhood.Logic.EC
-import Foundation.Modal.Neighborhood.Logic.EM
-import Foundation.Vorspiel.Set.Fin
+module
 
+public import Foundation.Modal.Neighborhood.Logic.E4
+public import Foundation.Modal.Neighborhood.Logic.EC
+public import Foundation.Modal.Neighborhood.Logic.EM
+
+@[expose] public section
 
 namespace LO.Modal
 
@@ -22,7 +22,6 @@ instance : Frame.simple_whitehole.IsEMC where
   regular := by simp_all [Frame.simple_whitehole, Frame.box];
 
 end Neighborhood
-
 
 namespace EMC
 
@@ -44,7 +43,7 @@ end EMC
 instance : Modal.EMC ⪱ Modal.EMCN := by
   constructor;
   . apply Hilbert.WithRE.weakerThan_of_subset_axioms;
-    simp;
+    grind;
   . apply Entailment.not_weakerThan_iff.mpr;
     use Axioms.N;
     constructor;
@@ -59,7 +58,7 @@ instance : Modal.EMC ⪱ Modal.EMCN := by
 instance : Modal.EMC ⪱ Modal.EMC4 := by
   constructor;
   . apply Hilbert.WithRE.weakerThan_of_subset_axioms;
-    simp;
+    grind;
   . apply Entailment.not_weakerThan_iff.mpr;
     use (Axioms.Four (.atom 0));
     constructor;
@@ -72,3 +71,4 @@ instance : Modal.EMC ⪱ Modal.EMC4 := by
       . simp;
 
 end LO.Modal
+end

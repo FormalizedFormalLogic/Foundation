@@ -1,12 +1,20 @@
-import Foundation.FirstOrder.Arithmetic.Exponential.Log
+module
+
+public import Foundation.FirstOrder.Arithmetic.Exponential.Log
 
 /-!
 # $\mathrm{Bit}$ predicate
 -/
 
+@[expose] public section
+
 namespace LO.FirstOrder.Arithmetic
 
-variable {V : Type*} [ORingStructure V] [V ⊧ₘ* 𝗜𝚺₁]
+variable {V : Type*} [ORingStructure V]
+
+section
+
+variable [V ⊧ₘ* 𝗜𝚺₁]
 
 section model
 
@@ -474,21 +482,26 @@ lemma insert_remove {i a : V} (h : i ∈ a) : insert i (bitRemove i a) = a := me
   · rintro (rfl | ⟨_, hj⟩) <;> assumption
   · intro hj; simp [hj, eq_or_ne j i]
 
+end model
+
+end
+
+
 section
 
 variable {m : ℕ} [Fact (1 ≤ m)] [V ⊧ₘ* 𝗜𝗡𝗗 𝚺 m]
 
-omit [V ⊧ₘ* 𝗜𝚺₁]
-
-private lemma finset_comprehension_aux (Γ : Polarity) {P : V → Prop} (hP : Γ-[m]-Predicate P) (a : V) :
-    haveI : V ⊧ₘ* 𝗜𝚺₁ := mod_ISigma_of_le (show 1 ≤ m from Fact.out)
-    ∃ s < Exp.exp a, ∀ i < a, i ∈ s ↔ P i := by
+lemma finset_comprehension_aux (Γ : Polarity) {P : V → Prop} (hP : Γ-[m]-Predicate P) (a : V) :
+  haveI : V ⊧ₘ* 𝗜𝚺₁ := mod_ISigma_of_le (show 1 ≤ m from Fact.out)
+  ∃ s < Exp.exp a, ∀ i < a, i ∈ s ↔ P i := by
   haveI : V ⊧ₘ* 𝗜𝚺₁ := mod_ISigma_of_le (show 1 ≤ m from Fact.out)
   have : ∃ s < Exp.exp a, ∀ i < a, P i → i ∈ s :=
     ⟨under a, pred_lt_self_of_pos (by simp), fun i hi _ ↦ by simpa [mem_under_iff] using hi⟩
   rcases this with ⟨s, hsn, hs⟩
   have : Γ.alt-[m]-Predicate (fun s : V ↦ ∀ i < a, P i → i ∈ s) := by
-    apply HierarchySymbol.Definable.ball_blt; simp; apply HierarchySymbol.Definable.imp
+    apply HierarchySymbol.Definable.ball_blt
+    · simp
+    apply HierarchySymbol.Definable.imp
     · simpa using HierarchySymbol.Definable.bcomp₁ (by definability)
     · simpa using HierarchySymbol.Definable.bcomp₂ (by definability) (by definability)
   have : ∃ t, (∀ i < a, P i → i ∈ t) ∧ ∀ t' < t, ∃ x < a, P x ∧ x ∉ (t' : V) := by
@@ -534,6 +547,11 @@ theorem finset_comprehension_exists_unique {P : V → Prop} (hP : Γ-[m]-Predica
 
 end
 
+
+section
+
+variable [V ⊧ₘ* 𝗜𝚺₁]
+
 instance : Fact (1 ≤ 1) := ⟨by rfl⟩
 
 theorem finset_comprehension₁ {P : V → Prop} (hP : Γ-[1]-Predicate P) (a : V) :
@@ -566,6 +584,6 @@ theorem finite_comprehension₁! {P : V → Prop} (hP : Γ-[1]-Predicate P) (fin
       fun h ↦ (Hs i (mh i h)).mpr h⟩
   exact ExistsUnique.intro s H (fun s' H' ↦ mem_ext <| fun i ↦ by simp [H, H'])
 
-end model
+end
 
 end LO.FirstOrder.Arithmetic

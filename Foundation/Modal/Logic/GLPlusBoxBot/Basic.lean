@@ -1,8 +1,12 @@
-import Foundation.Modal.Logic.SumQuasiNormal
-import Foundation.Modal.Maximal.Unprovability
-import Mathlib.Data.ENat.Basic
-import Foundation.Modal.Kripke.Logic.GL.Completeness
+module
 
+public import Foundation.Modal.Logic.SumQuasiNormal
+public import Foundation.Modal.Maximal.Unprovability
+public import Mathlib.Data.ENat.Basic
+public import Foundation.Modal.Kripke.Logic.GL.Completeness
+
+
+@[expose] public section
 
 namespace LO.Modal
 
@@ -76,3 +80,4 @@ lemma Logic.GLPlusBoxBot.weakerThan_lt {n m : ℕ} (hmn : m > n) : (Modal.GLPlus
 end
 
 end LO.Modal
+end

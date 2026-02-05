@@ -1,5 +1,9 @@
-import Foundation.Propositional.Hilbert.F.Deduction
-import Foundation.Propositional.Kripke2.Basic
+module
+
+public import Foundation.Propositional.Hilbert.F.Deduction
+public import Foundation.Propositional.Kripke2.Basic
+
+@[expose] public section
 
 namespace LO.Propositional
 
@@ -339,7 +343,7 @@ open Formula.Kripke2
 abbrev canonicalModel (L : Logic ℕ) [Entailment.F L] [Entailment.Disjunctive L] : Kripke2.Model where
   World := PrimeFTheory L
   Rel T U := ∀ {φ ψ}, φ ➝ ψ ∈ T.theory → φ ∈ U.theory → ψ ∈ U.theory
-  Val T a := (atom a) ∈ T.theory
+  Val a T := (atom a) ∈ T.theory
   root := emptyPrimeFTheory L
   rooted := by
     intro T φ ψ hφψ hφ;
@@ -389,3 +393,4 @@ theorem provable_of_validOncanonicalModel : (canonicalModel L) ⊧ φ → L ⊢ 
 end Kripke2
 
 end LO.Propositional
+end

@@ -1,5 +1,7 @@
-import Foundation.Propositional.Entailment.KC
+module
+public import Foundation.Propositional.Entailment.KC
 
+@[expose] public section
 
 namespace LO.Axioms
 
@@ -78,3 +80,5 @@ instance : Entailment.KC 𝓢 where
 end
 
 end LO.Entailment
+
+end

@@ -1,5 +1,7 @@
-import Foundation.Propositional.Entailment.Minimal.Basic
-import Foundation.Propositional.Entailment.Int.Basic
+module
+public import Foundation.Propositional.Entailment.Int.Basic
+
+@[expose] public section
 
 namespace LO.Propositional
 

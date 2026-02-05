@@ -1,7 +1,8 @@
-import Foundation.InterpretabilityLogic.Veltman.Basic
-import Foundation.InterpretabilityLogic.Veltman.AxiomJ2
-import Foundation.InterpretabilityLogic.Veltman.Logic.IL
-import Mathlib.Tactic.TFAE
+module
+
+public import Foundation.InterpretabilityLogic.Veltman.Logic.IL
+
+@[expose] public section
 
 namespace LO.InterpretabilityLogic.Veltman
 
@@ -37,7 +38,7 @@ open Formula (atom) in
 lemma Frame.HasAxiomR.of_validate_axiomP₀ [F.IsIL] (h : F ⊧ Axioms.P₀ (.atom 0) (.atom 1)) : F.HasAxiomR := by
   constructor;
   intro x y z u v Rxy Ryz Sxzu Ruv;
-  have := @h (λ w a =>
+  have := @h (λ a w =>
     match a with
     | 0 => w = z
     | 1 => w = v
@@ -84,3 +85,4 @@ lemma validate_axiomP₀_of_HasAxiomR [F.IsIL] [F.HasAxiomR] : F ⊧ Axioms.P₀
   apply ValidOnFrame.subst (s := λ n => match n with | 0 => φ | 1 => ψ | _ => ⊥) this;
 
 end LO.InterpretabilityLogic.Veltman
+end

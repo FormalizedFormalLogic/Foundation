@@ -1,5 +1,8 @@
-import Foundation.Propositional.FMT.Logic.VF
-import Foundation.Propositional.FMT.AxiomSer
+module
+
+public import Foundation.Propositional.FMT.AxiomSer
+
+@[expose] public section
 
 namespace LO.Propositional
 
@@ -74,3 +77,4 @@ instance : Propositional.VF ⪱ Propositional.VF_Ser := by
         . tauto;
 
 end LO.Propositional
+end

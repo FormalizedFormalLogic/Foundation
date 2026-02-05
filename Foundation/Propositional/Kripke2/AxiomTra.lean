@@ -1,7 +1,9 @@
-import Foundation.Propositional.Kripke2.Basic
-import Foundation.Propositional.Kripke2.FTheory
-import Mathlib.Tactic.TFAE
+module
 
+public import Foundation.Propositional.Kripke2.FTheory
+
+
+@[expose] public section
 
 namespace LO.Propositional
 
@@ -31,7 +33,7 @@ lemma valid_axiomTra₁_of_IsTransitive [F.IsTransitive] : F ⊧ Axioms.Tra1 φ 
 lemma IsTransitive_of_valid_axiomTra₁ (h : F ⊧ Axioms.Tra1 #0 #1 #2) : F.IsTransitive := by
   constructor;
   intro x y z Rxy Ryz;
-  apply @h (λ w a => match a with | 0 => y ≺ w | 1 => x ≺ w | 2 => x ≺ w | _ => False) F.root x F.rooted ?_ y Rxy ?_ z Ryz ?_;
+  apply @h (λ a w => match a with | 0 => y ≺ w | 1 => x ≺ w | 2 => x ≺ w | _ => False) F.root x F.rooted ?_ y Rxy ?_ z Ryz ?_;
   all_goals tauto;
 
 @[simp high, grind .]
@@ -46,7 +48,7 @@ lemma valid_axiomTra₂_of_IsTransitive [F.IsTransitive] : F ⊧ Axioms.Tra2 φ 
 lemma IsTransitive_of_valid_axiomTra₂ (h : F ⊧ Axioms.Tra2 #0 #1 #2) : F.IsTransitive := by
   constructor;
   intro x y z Rxy Ryz;
-  apply @h (λ w a => match a with | 0 => w = z | 1 => x ≺ w | 2 => x ≺ w | _ => False) F.root x F.rooted ?_ y Rxy ?_ z Ryz ?_;
+  apply @h (λ a w => match a with | 0 => w = z | 1 => x ≺ w | 2 => x ≺ w | _ => False) F.root x F.rooted ?_ y Rxy ?_ z Ryz ?_;
   all_goals tauto;
 
 lemma TFAE_IsTransitive : [
@@ -71,3 +73,4 @@ instance [Entailment.F L] [Entailment.HasAxiomTra1 L] [Entailment.Disjunctive L]
 end Kripke2
 
 end LO.Propositional
+end

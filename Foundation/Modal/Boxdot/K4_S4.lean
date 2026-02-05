@@ -1,7 +1,10 @@
-import Foundation.Modal.Boxdot.Basic
-import Foundation.Modal.Entailment.S4
-import Foundation.Modal.Kripke.Logic.K4
-import Foundation.Modal.Kripke.Logic.S4
+module
+
+public import Foundation.Modal.Boxdot.Basic
+public import Foundation.Modal.Entailment.S4
+public import Foundation.Modal.Kripke.Logic.S4
+
+@[expose] public section
 
 namespace LO.Modal
 
@@ -31,3 +34,4 @@ theorem iff_boxdotTranslatedK4_S4 : Modal.K4 ⊢ φᵇ ↔ Modal.S4 ⊢ φ := �
 ⟩
 
 end LO.Modal
+end

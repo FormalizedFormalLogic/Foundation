@@ -1,10 +1,8 @@
-import Foundation.FirstOrder.Arithmetic.Basic
-import Foundation.FirstOrder.Arithmetic.R0.Basic
-import Foundation.FirstOrder.Arithmetic.Q.Basic
-import Mathlib.Algebra.Order.Monoid.Canonical.Defs
-import Mathlib.Data.Nat.Cast.Order.Basic
-import Mathlib.Algebra.Order.Sub.Basic
+module
 
+public import Foundation.FirstOrder.Arithmetic.Q.Basic
+
+@[expose] public section
 /-!
 # Theory $\mathsf{PA^-}$
 

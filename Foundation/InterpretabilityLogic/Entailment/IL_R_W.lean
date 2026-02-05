@@ -1,6 +1,9 @@
-import Foundation.InterpretabilityLogic.Entailment.IL_R
-import Foundation.InterpretabilityLogic.Entailment.IL_W
-import Foundation.InterpretabilityLogic.Entailment.IL_M₀_W
+module
+
+public import Foundation.InterpretabilityLogic.Entailment.IL_R
+public import Foundation.InterpretabilityLogic.Entailment.IL_M₀_W
+
+@[expose] public section
 
 namespace LO.InterpretabilityLogic.Entailment
 
@@ -28,3 +31,4 @@ instance : HasAxiomRstar 𝓢 where
       simp;
 
 end LO.InterpretabilityLogic.Entailment
+end

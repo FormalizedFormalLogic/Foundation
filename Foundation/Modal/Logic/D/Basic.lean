@@ -1,12 +1,10 @@
-import Foundation.Modal.Logic.SumNormal
-import Foundation.Modal.Logic.Basic
-import Foundation.Modal.Logic.GL.Independency
-import Foundation.Modal.Kripke.Logic.GL.Soundness
-import Foundation.Modal.Logic.S.Basic
-import Foundation.Modal.Entailment.GL
-import Mathlib.Tactic.TFAE
-import Mathlib.Order.WellFoundedSet
-import Foundation.Modal.Maximal.Unprovability
+module
+
+public import Foundation.Modal.Logic.GL.Independency
+public import Foundation.Modal.Logic.S.Basic
+public import Mathlib.Order.WellFoundedSet
+
+@[expose] public section
 
 namespace LO.Modal
 
@@ -173,11 +171,11 @@ def tailModel₀ (M : Kripke.Model) {r} [M.IsRootedBy r] (o : ℕ → Prop) : Kr
     | .inr $ .inl _, .inr $ .inr _ => True
     | .inr $ .inr _, .inr $ .inl _ => False
     | .inr $ .inr x, .inr $ .inr y => x ≺ y
-  Val x p :=
+  Val p x :=
     match x with
     | .inl _        => o p
-    | .inr $ .inl _ => M.Val r p
-    | .inr $ .inr x => M.Val x p
+    | .inr $ .inl _ => M.Val p r
+    | .inr $ .inr x => M.Val p x
 
 namespace tailModel₀
 
@@ -333,7 +331,9 @@ lemma of_provable_rflSubformula_original_root [M.IsTransitive]
     calc
       _ ↔ (∀ x, r ≺ x → x ⊧ ψ) ∧ r ⊧ ψ := by
         suffices (∀ y, r ≺ y → y ⊧ ψ) → r ⊧ ψ by simpa [Satisfies];
-        apply Satisfies.fconj_def.mp hS (□ψ ➝ ψ) (by simpa [Finset.LO.preboxItr]);
+        apply Satisfies.fconj_def.mp hS (□ψ ➝ ψ) $ by
+          simp only [Finset.LO.preboxItr, Function.iterate_one, Finset.mem_image, Finset.mem_preimage];
+          use ψ;
       _ ↔ (∀ x : M, x ⊧ ψ) ∧ r ⊧ ψ := by
         suffices (∀ x, r ≺ x → x ⊧ ψ) ∧ r ⊧ ψ → (∀ x : M, x ⊧ ψ) by tauto;
         rintro ⟨h₁, h₂⟩ y;
@@ -374,7 +374,7 @@ lemma of_provable_rflSubformula_original_root [M.IsTransitive]
 end tailModel₀
 
 
-def tailModel (M : Kripke.Model) {r} [M.IsRootedBy r] : Kripke.Model := tailModel₀ M (M.Val r)
+def tailModel (M : Kripke.Model) {r} [M.IsRootedBy r] : Kripke.Model := tailModel₀ M (M · r)
 
 namespace tailModel
 
@@ -481,7 +481,7 @@ theorem GL_D_TFAE :
         . assumption;
         . simpa [Finset.LO.preboxItr, Finset.LO.boxItr] using Satisfies.fdisj_def.not.mp hx;
 
-      let Mt := tailModel₀ (M↾x) (λ p => M.Val r p);
+      let Mt := tailModel₀ (M↾x) (λ p => M.Val p r);
 
       have : ∀ ψ ∈ φ.subformulas, (tailModel₀.root : Mt) ⊧ ψ ↔ r ⊧ ψ := by
         intro ψ hψ;
@@ -583,3 +583,4 @@ end
 end
 
 end LO.Modal
+end

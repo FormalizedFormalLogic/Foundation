@@ -1,5 +1,9 @@
-import Foundation.Propositional.Kripke.AxiomKrieselPutnam
-import Foundation.Propositional.Kripke.Logic.Int
+module
+
+public import Foundation.Propositional.Kripke.AxiomKrieselPutnam
+public import Foundation.Propositional.Kripke.Logic.Int
+
+@[expose] public section
 
 namespace LO.Propositional
 
@@ -51,7 +55,7 @@ instance : Propositional.Int ⪱ Propositional.KrieselPutnam := by
           trans := by omega;
           antisymm := by omega;
         }
-        Val := ⟨λ w a =>
+        Val := ⟨λ a w =>
           match a with
           | 0 => w = 2
           | 1 => w = 3
@@ -106,3 +110,4 @@ instance : Propositional.Int ⪱ Propositional.KrieselPutnam := by
               . simp [Semantics.Models, Satisfies, M, Frame.Rel'];
 
 end LO.Propositional
+end

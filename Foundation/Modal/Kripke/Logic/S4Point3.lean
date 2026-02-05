@@ -1,9 +1,9 @@
-import Foundation.Modal.Kripke.Logic.S4
-import Foundation.Modal.Kripke.AxiomPoint3
-import Foundation.Modal.Kripke.Filtration
-import Foundation.Modal.Kripke.Rooted
-import Foundation.Modal.Kripke.Logic.S4Point2
-import Foundation.Modal.Kripke.Logic.K4Point3
+module
+
+public import Foundation.Modal.Kripke.Logic.S4Point2
+public import Foundation.Modal.Kripke.Logic.K4Point3
+
+@[expose] public section
 
 namespace LO.Modal
 
@@ -108,7 +108,7 @@ instance : Modal.S4Point2 ⪱ Modal.S4Point3 := by
       apply Kripke.not_validOnFrameClass_of_exists_model_world;
       let M : Model := ⟨
         ⟨Fin 4, λ x y => ¬(x = 1 ∧ y = 2) ∧ ¬(x = 2 ∧ y = 1) ∧ (x ≤ y)⟩,
-        λ w a => (a = 0 ∧ (w = 1 ∨ w = 3)) ∨ (a = 1 ∧ (w = 2 ∨ w = 3))
+        λ a w => (a = 0 ∧ (w = 1 ∨ w = 3)) ∨ (a = 1 ∧ (w = 2 ∨ w = 3))
       ⟩;
       use M, 0;
       constructor;
@@ -124,12 +124,12 @@ instance : Modal.S4Point2 ⪱ Modal.S4Point3 := by
           push_neg;
           use 1;
           simp [Satisfies, Semantics.Models, M];
-          constructor <;> omega;
+          constructor <;> grind;
         . apply Kripke.Satisfies.box_def.not.mpr;
           push_neg;
           use 2;
           simp [Satisfies, Semantics.Models, M];
-          constructor <;> omega;
+          constructor <;> grind;
 
 instance : Modal.S4 ⪱ Modal.S4Point3 := calc
   Modal.S4 ⪱ Modal.S4Point2 := by infer_instance
@@ -149,7 +149,7 @@ instance : Modal.K4Point3 ⪱ Modal.S4Point3 := by
       apply Kripke.not_validOnFrameClass_of_exists_model_world;
       let M : Model := ⟨
         ⟨Fin 2, λ x y => x < y⟩,
-        λ w a => False
+        λ a w => False
       ⟩;
       use M, 0;
       constructor;
@@ -169,3 +169,4 @@ instance : Modal.KT ⪱ Modal.S4Point3 := calc
 
 
 end LO.Modal
+end

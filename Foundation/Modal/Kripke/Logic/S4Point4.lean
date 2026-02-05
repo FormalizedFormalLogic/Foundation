@@ -1,5 +1,9 @@
-import Foundation.Modal.Kripke.Logic.S4Point3
-import Foundation.Modal.Kripke.AxiomPoint4
+module
+
+public import Foundation.Modal.Kripke.Logic.S4Point3
+public import Foundation.Modal.Kripke.AxiomPoint4
+
+@[expose] public section
 
 namespace LO.Modal
 
@@ -21,7 +25,7 @@ instance [F.IsS4Point4] : F.IsS4Point3 where
 end Kripke
 
 
-namespace Modal.S4Point4.Kripke
+namespace S4Point4.Kripke
 
 instance : Sound Modal.S4Point4 FrameClass.S4Point4 := instSound_of_validates_axioms $ by
   apply FrameClass.validates_with_AxiomK_of_validates;
@@ -55,17 +59,19 @@ instance : Modal.S4Point3 ⪱ Modal.S4Point4 := by
       apply Kripke.not_validOnFrameClass_of_exists_model_world;
       let M : Model := ⟨
         ⟨Fin 3, λ x y => x ≤ y⟩,
-        λ w a => w ≠ 1
+        λ a w => w ≠ 1
       ⟩;
       use M, 0;
       constructor;
       . exact {};
       . suffices ∃ x : M.World, (0 : M.World) ≺ x ∧ ¬x ≺ 1 ∧ (0 : M.World) ≺ 1 by
-          simpa [Semantics.Models, Satisfies, M];
+          simp [Semantics.Models, Satisfies, M];
+          grind;
         use 2;
         omega;
 
-end Modal.S4Point4.Kripke
+end S4Point4.Kripke
 
 
 end LO.Modal
+end

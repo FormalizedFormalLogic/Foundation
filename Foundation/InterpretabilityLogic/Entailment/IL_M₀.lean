@@ -1,6 +1,9 @@
-import Foundation.InterpretabilityLogic.Entailment.IL
-import Foundation.InterpretabilityLogic.Entailment.ILMinus_M
-import Foundation.InterpretabilityLogic.Entailment.IL_W
+module
+
+public import Foundation.InterpretabilityLogic.Entailment.ILMinus_M
+public import Foundation.InterpretabilityLogic.Entailment.IL_W
+
+@[expose] public section
 
 namespace LO.InterpretabilityLogic.Entailment
 
@@ -14,3 +17,4 @@ protected class IL_M₀ (𝓢 : S) extends InterpretabilityLogic.Entailment.IL �
 variable [Entailment.IL_M₀ 𝓢]
 
 end LO.InterpretabilityLogic.Entailment
+end

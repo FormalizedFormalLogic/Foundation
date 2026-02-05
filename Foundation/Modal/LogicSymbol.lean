@@ -1,24 +1,16 @@
-import Foundation.Logic.LogicSymbol
-import Mathlib.Data.PNat.Basic
+module
+public import Foundation.Logic.LogicSymbol
+
+@[expose] public section
+
 
 namespace LO
 
 variable {F} {n m : ℕ} {φ : F}
 
-@[notation_class]
-class Box (F : Type*) where
-  box : F → F
-
-@[notation_class]
-class Dia (F : Type*) where
-  dia : F → F
-
 namespace Box
 
 variable [Box F]
-
-prefix:76 "□" => Box.box
-attribute [match_pattern] Box.box
 
 abbrev boxItr (n : ℕ) : F → F := (□·)^[n]
 notation:76 "□^[" n "]" φ:80 => boxItr n φ
@@ -52,9 +44,6 @@ end Box
 namespace Dia
 
 variable [Dia F]
-
-prefix:76 "◇" => Dia.dia
-attribute [match_pattern] Dia.dia
 
 abbrev diaItr (n : ℕ) : F → F := (◇·)^[n]
 notation:76 "◇^[" n "]" φ:80 => diaItr n φ
@@ -503,5 +492,7 @@ lemma mem_diaItr_of_toList_diaItr (h : φ ∈ ◇^[n]'s.toList) : φ ∈ (◇^[n
 lemma mem_dia_of_toList_dia (h : φ ∈ ◇'s.toList) : φ ∈ ◇'s := mem_diaItr_of_toList_diaItr h
 
 end Finset.LO
+
+end
 
 end

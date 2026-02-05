@@ -1,7 +1,8 @@
-import Foundation.Modal.Kripke.AxiomWeakPoint2
-import Foundation.Modal.Kripke.AxiomGeach
-import Foundation.Modal.Kripke.Hilbert
-import Foundation.Modal.Kripke.Logic.K4
+module
+
+public import Foundation.Modal.Kripke.Logic.K4
+
+@[expose] public section
 
 namespace LO.Modal
 
@@ -36,7 +37,7 @@ instance : Complete (Modal.K4Point2) Kripke.FrameClass.K4Point2 := inferInstance
 
 instance : Modal.K4 ⪱ Modal.K4Point2 := by
   constructor;
-  . apply Hilbert.Normal.weakerThan_of_subset_axioms $ by simp;
+  . grind;
   . apply Entailment.not_weakerThan_iff.mpr;
     use (Axioms.WeakPoint2 (.atom 0) (.atom 1));
     constructor;
@@ -45,13 +46,16 @@ instance : Modal.K4 ⪱ Modal.K4Point2 := by
       apply Kripke.not_validOnFrameClass_of_exists_model_world;
       let M : Model := ⟨
         ⟨Fin 2, λ x y => x = 0⟩,
-        λ w a => if a = 0 then True else w = 0
+        λ a w => if a = 0 then True else w = 0
       ⟩;
       use M, 0;
       constructor;
       . simp only [Set.mem_setOf_eq];
         exact { trans := by omega };
-      . suffices ¬(0 : M) ≺ 0 ∨ ¬(1 : M) ≺ 0 by simp [Semantics.Models, Satisfies]; simpa [M]
+      . suffices ¬(0 : M) ≺ 0 ∨ ¬(1 : M) ≺ 0 by
+          simp [Semantics.Models, Satisfies, M];
+          grind;
         omega;
 
 end LO.Modal
+end

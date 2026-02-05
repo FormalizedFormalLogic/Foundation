@@ -1,4 +1,8 @@
-import Foundation.InterpretabilityLogic.Veltman.AxiomJ4
+module
+
+public import Foundation.InterpretabilityLogic.Veltman.AxiomJ4
+
+@[expose] public section
 
 namespace LO.InterpretabilityLogic.Veltman
 
@@ -53,7 +57,7 @@ lemma Frame.HasAxiomJ2.of_validate_axiomJ2 (h : F ⊧ Axioms.J2 (.atom 0) (.atom
     S_J4 := Frame.HasAxiomJ4.of_validate_axiomJ4 (validate_axiomJ4_of_validate_axiomJ2 h) |>.S_J4
     S_J2 := by
       intro w x y z Swxy Swyz;
-      have := @h (λ u a => match a with | 0 => u = x | 1 => u = y | 2 => u = z | _ => False) w;
+      have := @h (λ a u => match a with | 0 => u = x | 1 => u = y | 2 => u = z | _ => False) w;
       have := @this ?_ ?_ x ?_ $ by tauto;
       . obtain ⟨u, Swxu, hu⟩ := this;
         have : u = z := by simpa [Semantics.Models, Satisfies] using hu;
@@ -86,3 +90,4 @@ lemma validate_axiomJ2_iff_validate_axiomJ2Plus : (F ⊧ Axioms.J2 (.atom 0) (.a
 ⟩
 
 end LO.InterpretabilityLogic.Veltman
+end

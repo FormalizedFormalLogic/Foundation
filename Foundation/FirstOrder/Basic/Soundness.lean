@@ -1,5 +1,7 @@
-import Foundation.FirstOrder.Basic.Semantics.Semantics
-import Foundation.FirstOrder.Basic.Calculus
+module
+public import Foundation.FirstOrder.Basic.Semantics.Semantics
+public import Foundation.FirstOrder.Basic.Calculus
+@[expose] public section
 
 namespace LO
 
@@ -13,56 +15,55 @@ variable {L : Language} {T : Theory L}
 namespace Derivation
 
 lemma sound (M : Type*) [s : Structure L M] [Nonempty M] [M ⊧ₘ* T] (ε : ℕ → M) {Γ : Sequent L} :
-    (T : SyntacticFormulas L) ⟹ Γ → ∃ φ ∈ Γ, Evalfm M ε φ
-  | @axL _ _ Δ _ r v => by
+    (T : Schema L) ⟹ Γ → ∃ φ ∈ Γ, Evalfm M ε φ
+  | axm (φ := φ) h => ⟨φ, by simp, by
+      have : ∃ σ ∈ T, ↑σ = φ := by simpa [Theory.toSchema] using h
+      rcases this with ⟨σ, hσ, rfl⟩
+      simpa using Theory.models M T hσ⟩
+  | axL r v => by
     by_cases h : s.rel r (Semiterm.valm M ![] ε ∘ v)
     · exact ⟨rel r v, by simp, h⟩
     · exact ⟨nrel r v, by simp, h⟩
-  | verum Δ => ⟨⊤, by simp⟩
-  | @or _ _ Δ φ ψ d => by
-    have : Evalfm M ε φ ∨ Evalfm M ε ψ ∨ ∃ ψ ∈ Δ, Evalfm M ε ψ := by simpa using sound M ε d
+  | verum => ⟨⊤, by simp⟩
+  | or (Γ := Γ) (φ := φ) (ψ := ψ) d => by
+    have : Evalfm M ε φ ∨ Evalfm M ε ψ ∨ ∃ ψ ∈ Γ, Evalfm M ε ψ := by simpa using sound M ε d
     rcases this with (hp | hq | ⟨r, hr, hhr⟩)
     · exact ⟨φ ⋎ ψ, by simp, by simp [hp]⟩
     · exact ⟨φ ⋎ ψ, by simp, by simp [hq]⟩
     · exact ⟨r, by simp [hr], hhr⟩
-  | @and _ _ Δ φ ψ dp dq => by
-    have : Evalfm M ε φ ∨ ∃ r ∈ Δ, Evalfm M ε r := by simpa using sound M ε dp
+  | and (Γ := Γ) (φ := φ) (ψ := ψ) dp dq => by
+    have : Evalfm M ε φ ∨ ∃ r ∈ Γ, Evalfm M ε r := by simpa using sound M ε dp
     rcases this with (hp | ⟨r, hr, hhr⟩)
-    · have : Evalfm M ε ψ ∨ ∃ r ∈ Δ, Evalfm M ε r := by simpa using sound M ε dq
+    · have : Evalfm M ε ψ ∨ ∃ r ∈ Γ, Evalfm M ε r := by simpa using sound M ε dq
       rcases this with (hq | ⟨r, hr, hhr⟩)
       · exact ⟨φ ⋏ ψ, by simp, by simp [hp, hq]⟩
       · exact ⟨r, by simp [hr], hhr⟩
     · exact ⟨r, by simp [hr], hhr⟩
-  | @all _ _ Δ φ d => by
-    have : (∀ a : M, Evalm M ![a] ε φ) ∨ ∃ ψ ∈ Δ, Evalfm M ε ψ := by
+  | all (Γ := Γ) (φ := φ) d => by
+    have : (∀ a : M, Evalm M ![a] ε φ) ∨ ∃ ψ ∈ Γ, Evalfm M ε ψ := by
       simpa [Rewriting.shifts, Matrix.vecConsLast_vecEmpty, forall_or_right]
         using fun a : M => sound M (a :>ₙ ε) d
     rcases this with (hp | ⟨ψ, hq, hhq⟩)
     · exact ⟨∀' φ, by simp, hp⟩
     · exact ⟨ψ, by simp [hq], hhq⟩
-  | @ex _ _ Δ φ t d => by
-    have : Evalm M ![t.valm M ![] ε] ε φ ∨ ∃ φ ∈ Δ, Evalfm M ε φ := by
+  | ex (Γ := Γ) (φ := φ) t d => by
+    have : Evalm M ![t.valm M ![] ε] ε φ ∨ ∃ φ ∈ Γ, Evalfm M ε φ := by
       simpa [eval_substs, Matrix.constant_eq_singleton] using sound M ε d
     rcases this with (hp | ⟨ψ, hq, hhq⟩)
     · exact ⟨∃' φ, by simp, t.valm M ![] ε, hp⟩
     · exact ⟨ψ, by simp [hq], hhq⟩
-  | @wk _ _ Γ Δ d ss => by
+  | wk (Δ := Δ) (Γ := Γ) d ss => by
     have : ∃ φ ∈ Δ, Evalfm M ε φ := sound M ε d
     rcases this with ⟨φ, hp, h⟩
     exact ⟨φ, ss hp, h⟩
-  | @cut _ _ Δ φ d dn => by
-    have h : Evalfm M ε φ ∨ ∃ ψ ∈ Δ, Evalfm M ε ψ := by simpa using sound M ε d
-    have hn : ¬Evalfm M ε φ ∨ ∃ ψ ∈ Δ, Evalfm M ε ψ := by simpa using sound M ε dn
+  | cut (Γ := Γ) (φ := φ) d dn => by
+    have h : Evalfm M ε φ ∨ ∃ ψ ∈ Γ, Evalfm M ε ψ := by simpa using sound M ε d
+    have hn : ¬Evalfm M ε φ ∨ ∃ ψ ∈ Γ, Evalfm M ε ψ := by simpa using sound M ε dn
     rcases h with (h | ⟨ψ, h, hq⟩)
     · rcases hn with (hn | ⟨ψ, hn, hq⟩)
       · contradiction
       · exact ⟨ψ, by simp [hn], hq⟩
     · exact ⟨ψ, by simp [h], hq⟩
-  | axm (φ := φ) h => ⟨φ, by simp, by
-      have : ∃ σ ∈ T, ↑σ = φ := by
-        simpa [Theory.toSyntacticFormulas] using h
-      rcases this with ⟨σ, hσ, rfl⟩
-      simpa using Theory.models M T hσ⟩
 
 end Derivation
 
@@ -104,3 +105,5 @@ end sound
 end FirstOrder
 
 end LO
+
+end

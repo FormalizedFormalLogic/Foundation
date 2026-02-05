@@ -1,4 +1,8 @@
-import Foundation.Modal.Kripke.Closure
+module
+
+public import Foundation.Modal.Kripke.Closure
+
+@[expose] public section
 
 namespace LO.Modal
 
@@ -10,7 +14,7 @@ section Bisimulation
 
 structure Model.Bisimulation (M₁ M₂ : Kripke.Model) where
   toRel : M₁.World → M₂.World → Prop
-  atomic {x₁ : M₁.World} {x₂ : M₂.World} {a : ℕ} : toRel x₁ x₂ → ((M₁ x₁ a) ↔ (M₂ x₂ a))
+  atomic {x₁ : M₁.World} {x₂ : M₂.World} {a : ℕ} : toRel x₁ x₂ → ((M₁ a x₁) ↔ (M₂ a x₂))
   forth {x₁ y₁ : M₁.World} {x₂ : M₂.World} : toRel x₁ x₂ → x₁ ≺ y₁ → ∃ y₂ : M₂.World, toRel y₁ y₂ ∧ x₂ ≺ y₂
   back {x₁ : M₁.World} {x₂ y₂ : M₂.World} : toRel x₁ x₂ → x₂ ≺ y₂ → ∃ y₁ : M₁.World, toRel y₁ y₂ ∧ x₁ ≺ y₁
 
@@ -161,7 +165,7 @@ end Frame.PseudoEpimorphism
 
 
 structure Model.PseudoEpimorphism (M₁ M₂ : Kripke.Model) extends M₁.toFrame →ₚ M₂.toFrame where
-  atomic {w : M₁.World} : (M₁ w a) ↔ (M₂ (toFun w) a)
+  atomic {w : M₁.World} : (M₁ a w) ↔ (M₂ a (toFun w))
 
 infix:80 " →ₚ " => Model.PseudoEpimorphism
 
@@ -171,7 +175,7 @@ namespace Model.PseudoEpimorphism
 
 variable {M M₁ M₂ M₃ : Kripke.Model}
 
-def ofAtomic (f : M₁.toFrame →ₚ M₂.toFrame) (atomic : ∀ {w a}, (M₁ w a) ↔ (M₂ (f w) a)) : M₁ →ₚ M₂ where
+def ofAtomic (f : M₁.toFrame →ₚ M₂.toFrame) (atomic : ∀ {w a}, (M₁ a w) ↔ (M₂ a (f w))) : M₁ →ₚ M₂ where
   toFun := f
   forth := f.forth
   back := f.back
@@ -223,7 +227,7 @@ variable {F₁ F₂ : Kripke.Frame} {M₁ M₂ : Kripke.Model} {φ : Formula ℕ
 lemma validOnFrame_of_surjective_pseudoMorphism (f : F₁ →ₚ F₂) (f_surjective : Function.Surjective f) : F₁ ⊧ φ → F₂ ⊧ φ := by
   intro h V₂ u;
   obtain ⟨x, rfl⟩ := f_surjective u;
-  refine (Model.PseudoEpimorphism.ofAtomic (M₁ := ⟨F₁, λ w a => V₂ (f w) a⟩) (M₂ := ⟨F₂, V₂⟩) f ?_).modal_equivalence x |>.mp $ h _ x;
+  refine (Model.PseudoEpimorphism.ofAtomic (M₁ := ⟨F₁, λ a w => V₂ a (f w)⟩) (M₂ := ⟨F₂, V₂⟩) f ?_).modal_equivalence x |>.mp $ h _ x;
   simp;
 
 lemma theory_ValidOnFrame_of_surjective_pseudoMorphism (f : F₁ →ₚ F₂) (f_surjective : Function.Surjective f) : F₁ ⊧* T → F₂ ⊧* T := by
@@ -248,14 +252,14 @@ end Frame.GeneratedSub
 
 
 structure Model.GeneratedSub (M₁ M₂ : Kripke.Model) extends M₁.toFrame ⥹ M₂.toFrame where
-  atomic : ∀ a, ∀ w, (M₁ w a) ↔ (M₂ (toFun w) a)
+  atomic : ∀ a, ∀ w, (M₁ a w) ↔ (M₂ a (toFun w))
 infix:80 " ⥹ " => Model.GeneratedSub
 
 namespace Model.GeneratedSub
 
 variable {M₁ M₂ : Kripke.Model}
 
-def ofAtomic (g : M₁.toFrame ⥹ M₂.toFrame) (atomic : ∀ a w, M₁ w a ↔ M₂ (g.toFun w) a) : M₁ ⥹ M₂ where
+def ofAtomic (g : M₁.toFrame ⥹ M₂.toFrame) (atomic : ∀ a w, M₁ a w ↔ M₂ a (g.toFun w)) : M₁ ⥹ M₂ where
   toFun := g.toFun
   forth := g.forth
   back := g.back
@@ -314,3 +318,4 @@ end Frame
 end Kripke
 
 end LO.Modal
+end

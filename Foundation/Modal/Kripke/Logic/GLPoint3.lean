@@ -1,8 +1,12 @@
-import Foundation.Modal.Kripke.Logic.GL.Completeness
-import Foundation.Modal.Kripke.Logic.K4Point3
-import Foundation.Modal.Logic.Global
-import Mathlib.Data.Finite.Sum
+module
 
+public import Foundation.Modal.Kripke.Logic.GL.Completeness
+public import Foundation.Modal.Kripke.Logic.K4Point3
+public import Foundation.Modal.Logic.Global
+public import Mathlib.Data.Finite.Sum
+
+
+@[expose] public section
 
 lemma Finite.of_scoped_subtype {P Q : α → Prop} (h : ∀ x : α, Q x → P x) [Finite { x // P x }] : Finite { x // Q x } := by
   apply Finite.of_injective (β := { x // P x }) (λ x => ⟨x.1, h _ x.2⟩);
@@ -94,9 +98,9 @@ private def complete.filteredModel
   (_ : □φ ∈ v.1.1) (_ : φ ∈ v.1.2)
   : Kripke.Model where
   World := { x // x = v ∨ (v ≺ x ∧ ∃ ψ ∈ (□⁻¹'φ.subformulas), □ψ ∈ v.1.2 ∧ □ψ ∈ x.1.1 ∧ ψ ∈ x.1.2) }
-  world_nonempty := ⟨v, by simp⟩
+  world_nonempty := ⟨v, by grind⟩
   Rel := λ x y => x.1 ≺ y.1
-  Val := λ x => (canonicalModel Modal.GLPoint3).Val x
+  Val := λ a x => (canonicalModel Modal.GLPoint3).Val a x
 
 private instance complete.filteredModel.isFiniteGLPoint3 : Frame.IsFiniteGLPoint3 (complete.filteredModel v φ hv₁ hv₂).toFrame where
   trans := by
@@ -123,7 +127,7 @@ private instance complete.filteredModel.isFiniteGLPoint3 : Frame.IsFiniteGLPoint
     have : Finite { ψ // ψ ∈ (□⁻¹'φ.subformulas) ∧ ∼□ψ ∈ v.1.1 } := Finite.of_scoped_subtype (P := λ ψ => ψ ∈ (□⁻¹'φ.subformulas)) $ by tauto;
     apply Finite.of_surjective (α := Unit ⊕ { ψ // ψ ∈ (□⁻¹'φ.subformulas : Finset (Formula ℕ)) ∧ ∼□ψ ∈ v.1.1 })
       (f := λ x => match x with
-        | .inl _ => ⟨v, by simp⟩
+        | .inl _ => ⟨v, by grind⟩
         | .inr ψ =>
           letI u := lemma₂ (v := v) ψ.2.2;
           ⟨u.choose, by
@@ -160,7 +164,7 @@ private lemma complete.filteredModel.truthlemma : ∀ x : (complete.filteredMode
       intro h;
       apply Satisfies.not_box_def.mpr;
       have : □ψ ∉ v.1.1 := by
-        rcases (filteredModel v φ _ _).connected ⟨v, by simp⟩ x with (Rvx | rfl | Rxv);
+        rcases (filteredModel v φ _ _).connected ⟨v, by grind⟩ x with (Rvx | rfl | Rxv);
         . contrapose! h;
           apply Rvx;
           apply mdp_mem₁_provable ?_ $ h;
@@ -223,7 +227,7 @@ instance complete : Complete Modal.GLPoint3 FrameClass.finite_GLPoint3 := ⟨by
       exact (lemma₂ $ (iff_mem₁_neg'.mpr h)) |>.choose_spec.1.2.2;
 
   apply Kripke.not_validOnFrameClass_of_exists_model_world;
-  use (complete.filteredModel v φ hv₁ hv₂), ⟨v, by simp⟩;
+  use (complete.filteredModel v φ hv₁ hv₂), ⟨v, by grind⟩;
   constructor;
   . apply Set.mem_setOf_eq.mpr; infer_instance;
   . apply filteredModel.truthlemma _ _ (by grind) |>.not.mpr;
@@ -242,7 +246,7 @@ instance : Modal.GL ⪱ Modal.GLPoint3 := by
     constructor;
     . simp;
     . apply Sound.not_provable_of_countermodel (𝓜 := Kripke.FrameClass.finite_GL);
-      let M : Model := ⟨⟨Fin 3, λ x y => (x = 0 ∧ y = 1) ∨ (x = 0 ∧ y = 2)⟩, (λ w a => match a with | 0 => w = 1 | 1 => w = 2 | _ => False)⟩;
+      let M : Model := ⟨⟨Fin 3, λ x y => (x = 0 ∧ y = 1) ∨ (x = 0 ∧ y = 2)⟩, (λ a w => match a with | 0 => w = 1 | 1 => w = 2 | _ => False)⟩;
       apply Kripke.not_validOnFrameClass_of_exists_model_world;
       use M, 0;
       constructor;
@@ -252,7 +256,8 @@ instance : Modal.GL ⪱ Modal.GLPoint3 := by
           irrefl := by omega
         };
       . suffices (0 : M.World) ≺ 1 ∧ (∀ x, (1 : M.World) ≺ x → x = 1) ∧ (0 : M.World) ≺ 2 ∧ ∀ x, (2 : M.World) ≺ x → x = 2 by
-          simpa [Semantics.Models, Satisfies, ValidOnFrame, M];
+          simp [Semantics.Models, Satisfies, ValidOnFrame, M];
+          grind;
         refine ⟨?_, ?_, ?_, ?_⟩;
         all_goals omega;
 
@@ -266,7 +271,7 @@ instance : Modal.K4Point3 ⪱ Modal.GLPoint3 := by
     . simp;
     . apply Sound.not_provable_of_countermodel (𝓜 := Kripke.FrameClass.K4Point3);
       apply Kripke.not_validOnFrameClass_of_exists_model_world;
-      use ⟨⟨Fin 2, λ x y => x ≤ y⟩, (λ w a => False)⟩, 0;
+      use ⟨⟨Fin 2, λ x y => x ≤ y⟩, (λ a w => False)⟩, 0;
       constructor;
       . apply Set.mem_setOf_eq.mpr;
         constructor;
@@ -276,3 +281,4 @@ instance : Modal.K4Point3 ⪱ Modal.GLPoint3 := by
 end GLPoint3.Kripke
 
 end LO.Modal
+end

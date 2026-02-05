@@ -1,9 +1,12 @@
-import Foundation.FirstOrder.SetTheory.Z
+module
 
+public import Foundation.FirstOrder.SetTheory.Z
+
+@[expose] public section
 /-!
 # Ordinals and transitive sets
 
-reference: Ralf Schindler, "Set Theory, Exploring Independence and Truth"
+reference: Ralf Schindler, "Set Theory, Exploring Independence and Truth" [Sch14]
 -/
 
 namespace LO.FirstOrder.SetTheory

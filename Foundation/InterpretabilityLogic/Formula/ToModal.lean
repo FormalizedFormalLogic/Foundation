@@ -1,5 +1,8 @@
-import Foundation.InterpretabilityLogic.Formula.Basic
-import Foundation.Modal.Formula
+module
+
+public import Foundation.InterpretabilityLogic.Formula.Basic
+
+@[expose] public section
 
 namespace LO.InterpretabilityLogic.Formula
 
@@ -22,3 +25,4 @@ def toModalFormula (φ : Formula α) (_ : φ.RhdFree := by grind) : Modal.Formul
   | box φ   => □(φ.toModalFormula)
 
 end LO.InterpretabilityLogic.Formula
+end

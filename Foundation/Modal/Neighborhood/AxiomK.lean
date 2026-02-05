@@ -1,4 +1,8 @@
-import Foundation.Modal.Neighborhood.Basic
+module
+
+public import Foundation.Modal.Neighborhood.Basic
+
+@[expose] public section
 
 namespace LO.Modal.Neighborhood
 
@@ -31,3 +35,4 @@ lemma hasPropertyK_of_valid_axiomK (h : F ⊧ Axioms.K (.atom 0) (.atom 1)) : F.
   apply this <;> assumption;
 
 end LO.Modal.Neighborhood
+end

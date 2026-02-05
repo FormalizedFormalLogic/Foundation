@@ -1,4 +1,8 @@
-import Foundation.Modal.Kripke.Rooted
+module
+
+public import Foundation.Modal.Kripke.Rooted
+
+@[expose] public section
 
 namespace LO.Modal
 
@@ -72,7 +76,7 @@ lemma isDetourFree_of_validate_axiomH (h : F ⊧ (Axioms.H (.atom 0))) : F.IsDet
   contrapose! h;
   rcases h with ⟨x, u, y, Rxu, Ruy, neux, neuy⟩;
   apply ValidOnFrame.not_of_exists_valuation_world;
-  use λ w _ => w ≠ u, x;
+  use λ _ w => w ≠ u, x;
   simp [Satisfies];
   tauto;
 
@@ -121,3 +125,4 @@ end canonicality
 end Kripke
 
 end LO.Modal
+end

@@ -44,16 +44,8 @@ jobs:
       # Build project
       - name: Get Mathlib cache
         run: lake exe cache get
-      - name: Build project
-        run: lake build --keep-toolchain Foundation
-      - name: Build executables
-        run: |
-          lake build --keep-toolchain \
-            Zoo_Arith \
-            Zoo_SetTheory \
-            Zoo_Propositional \
-            Zoo_Modal \
-            Zoo_InterpretabilityLogic
+      - name: Build Foundation
+        run: lake build Foundation
 
       # Build import-graph
       - name: Generate import graph
@@ -61,33 +53,6 @@ jobs:
           lake exe graph ./pages/_output/import_graph.png
           lake exe graph ./pages/_output/import_graph.pdf
           lake exe graph ./pages/_output/import_graph.html
-
-      # Build zoo
-      - name: Generate Propositional Zoo
-        run: |
-          lake exe Zoo_Propositional
-          typst compile ./Zoo/Propositional.typ ./pages/_output/zoo/Propositional.png
-          typst compile ./Zoo/Propositional.typ ./pages/_output/zoo/Propositional.pdf
-      - name: Generate Arith Zoo
-        run: |
-          lake exe Zoo_Arith
-          typst compile ./Zoo/Arith.typ ./pages/_output/zoo/Arith.png
-          typst compile ./Zoo/Arith.typ ./pages/_output/zoo/Arith.pdf
-      - name: Generate SetTheory Zoo
-        run: |
-          lake exe Zoo_SetTheory
-          typst compile ./Zoo/SetTheory.typ ./pages/_output/zoo/SetTheory.png
-          typst compile ./Zoo/SetTheory.typ ./pages/_output/zoo/SetTheory.pdf
-      - name: Generate Modal Zoo
-        run: |
-          lake exe Zoo_Modal
-          typst compile ./Zoo/Modal.typ ./pages/_output/zoo/Modal.png
-          typst compile ./Zoo/Modal.typ ./pages/_output/zoo/Modal.pdf
-      - name: Generate InterpretabilityLogic Zoo
-        run: |
-          lake exe Zoo_InterpretabilityLogic
-          typst compile ./Zoo/InterpretabilityLogic.typ ./pages/_output/zoo/InterpretabilityLogic.png
-          typst compile ./Zoo/InterpretabilityLogic.typ ./pages/_output/zoo/InterpretabilityLogic.pdf
 
       # Build Doc
       - name: Build doc
@@ -107,6 +72,22 @@ jobs:
       - uses: actions/upload-pages-artifact@v4
         with:
           path: pages/_output
+
+  check-references:
+    name: Check references.bib format
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - name: Install bibtool
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y bibtool
+      - name: Format references.bib
+        run: |
+          bibtool -r .bibtoolrsc -i references.bib -o references.bib.formatted
+      - name: Check if formatted correctly
+        run: |
+          diff -u references.bib references.bib.formatted || (echo "references.bib is not formatted" && exit 1)
 
   deploy:
     runs-on: ubuntu-latest

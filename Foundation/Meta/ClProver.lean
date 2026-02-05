@@ -1,10 +1,15 @@
-import Foundation.Meta.TwoSided
-import Foundation.Meta.Qq
-import Foundation.Meta.Lit
+module
+
+public meta import Foundation.Meta.Lit
+public meta import Foundation.Meta.TwoSided
+public import Foundation.Meta.Lit
+public import Foundation.Meta.TwoSided
 
 /-!
 # Proof automation based on the proof search on $\mathbf{LK}$
 -/
+
+public meta section
 
 namespace LO.Meta
 
@@ -431,3 +436,5 @@ elab "cl_prover" n:(num)? seq:(termSeq)? : tactic => withMainContext do
 end ClProver
 
 end LO.Meta
+
+end

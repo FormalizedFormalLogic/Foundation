@@ -1,11 +1,12 @@
-import Foundation.Modal.Kripke.Completeness
-import Foundation.Vorspiel.Rel.Convergent
+module
 
+public import Foundation.Modal.Kripke.Completeness
+
+@[expose] public section
 
 namespace LO.Modal
 
 namespace Kripke
-
 
 variable {F : Kripke.Frame}
 
@@ -18,10 +19,8 @@ lemma p_convergent [F.IsPiecewiseConvergent] {x y z : F.World} : x ≺ y → x �
 
 end Frame
 
-
 instance : whitepoint.IsPiecewiseConvergent where
   p_convergent := by tauto
-
 
 section definability
 
@@ -32,8 +31,8 @@ lemma validate_WeakPoint2_of_weakConfluent [F.IsPiecewiseConvergent] : F ⊧ (Ax
   rintro V x;
   apply Satisfies.imp_def.mpr;
   suffices
-    ∀ y, x ≺ y → (∀ u, y ≺ u → V u 0) → V y 1 →
-    ∀ z, x ≺ z → (∀ u, z ≺ u → ¬V u 0) → V z 1
+    ∀ y, x ≺ y → (∀ u, y ≺ u → V 0 u) → V 1 y →
+    ∀ z, x ≺ z → (∀ u, z ≺ u → ¬V 0 u) → V 1 z
     by simpa [Semantics.Models, Satisfies];
   intro y Rxy h₁ hy₁ z Rxz h₂;
   by_contra hC;
@@ -42,8 +41,8 @@ lemma validate_WeakPoint2_of_weakConfluent [F.IsPiecewiseConvergent] : F ⊧ (Ax
     subst hC;
     contradiction;
   obtain ⟨u, Ryu, Rzu⟩ := IsPiecewiseConvergent.p_convergent Rxy Rxz nyz;
-  have : V u 0 := h₁ _ Ryu;
-  have : ¬V u 0 := h₂ _ Rzu;
+  have : V 0 u := h₁ _ Ryu;
+  have : ¬V 0 u := h₂ _ Rzu;
   contradiction;
 
 lemma isPiecewiseConvergent_of_validate_axiomWeakPoint2 (h : F ⊧ (Axioms.WeakPoint2 (.atom 0) (.atom 1))) : F.IsPiecewiseConvergent where
@@ -53,13 +52,12 @@ lemma isPiecewiseConvergent_of_validate_axiomWeakPoint2 (h : F ⊧ (Axioms.WeakP
     contrapose!;
     rintro ⟨x, y, z, Rxy, Rxz, nyz, hu⟩;
     apply ValidOnFrame.not_of_exists_valuation_world;
-    use (λ w a => match a with | 0 => y ≺ w | 1 => w = y | _ => False), x;
+    use (λ a w => match a with | 0 => y ≺ w | 1 => w = y | _ => False), x;
     suffices x ≺ y ∧ ∃ z, x ≺ z ∧ (∀ u, z ≺ u → ¬y ≺ u) ∧ ¬z = y by
       simpa [Satisfies, Semantics.Models];
     refine ⟨Rxy, z, Rxz, by grind, by tauto⟩;
 
 end definability
-
 
 section canonicality
 
@@ -117,3 +115,4 @@ end canonicality
 end Kripke
 
 end LO.Modal
+end

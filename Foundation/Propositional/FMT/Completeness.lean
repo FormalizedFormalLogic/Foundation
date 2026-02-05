@@ -1,5 +1,9 @@
-import Foundation.Propositional.FMT.Hilbert
-import Foundation.Propositional.Hilbert.WF_VF
+module
+
+public import Foundation.Propositional.FMT.Hilbert
+public import Foundation.Propositional.Hilbert.WF_VF
+
+@[expose] public section
 
 namespace LO.Propositional
 
@@ -358,7 +362,7 @@ noncomputable def HintikkaModel (L : Logic ℕ) [Entailment.VF L] [Entailment.Co
           . apply ConsistentSaturatedHintikkaPair.iff_mem₁_not_mem₂.mpr hI₁;
           . apply ConsistentSaturatedHintikkaPair.iff_mem₂_not_mem₁.mpr hI₂;
       | χ ⋏ ξ | χ ⋎ ξ | ⊥ | #a => tauto;
-    Val H a := (ha : #a ∈ φ.subformulas) → ⟨#a, ha⟩ ∈ H.1.1
+    Val a H := (ha : #a ∈ φ.subformulas) → ⟨#a, ha⟩ ∈ H.1.1
   }
 
 open Formula.FMT in
@@ -418,3 +422,4 @@ end FMT
 
 
 end LO.Propositional
+end

@@ -1,6 +1,10 @@
-import Foundation.Modal.Entailment.EMC
-import Foundation.Modal.Entailment.EN
-import Foundation.Modal.Entailment.K
+module
+
+public import Foundation.Modal.Entailment.EMC
+public import Foundation.Modal.Entailment.EN
+public import Foundation.Modal.Entailment.K
+
+@[expose] public section
 
 namespace LO.Modal.Entailment
 
@@ -17,3 +21,4 @@ instance [Entailment.K 𝓢] : Entailment.EMCN 𝓢 where
     . exact axiomK' $ nec $ K_right h;
 
 end LO.Modal.Entailment
+end

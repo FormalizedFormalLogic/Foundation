@@ -1,4 +1,7 @@
-import Foundation.Propositional.Entailment.Corsi.WF
+module
+public import Foundation.Propositional.Entailment.Corsi.WF
+
+@[expose] public section
 
 namespace LO.Propositional
 
@@ -67,3 +70,5 @@ end Entailment
 
 
 end LO.Propositional
+
+end

@@ -1,5 +1,9 @@
-import Foundation.Propositional.ClassicalSemantics.NNFormula
-import Foundation.Propositional.Tait.Calculus
+module
+
+public import Foundation.Propositional.ClassicalSemantics.NNFormula
+public import Foundation.Propositional.Tait.Calculus
+
+@[expose] public section
 
 namespace LO.Propositional
 
@@ -213,3 +217,4 @@ theorem Sequent.notTautology_iff : ¬Γ.IsTautology ↔ ∃ v : Valuation α, �
 end Propositional
 
 end LO
+end

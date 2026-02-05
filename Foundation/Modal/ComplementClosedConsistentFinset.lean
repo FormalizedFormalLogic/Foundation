@@ -1,6 +1,9 @@
-import Mathlib.Data.Set.Finite.Powerset
-import Foundation.Modal.MaximalConsistentSet
-import Foundation.Modal.Complement
+module
+
+public import Foundation.Modal.MaximalConsistentSet
+public import Foundation.Modal.Formula.Complement
+
+@[expose] public section
 
 namespace LO.Modal
 
@@ -346,3 +349,4 @@ end
 
 
 end LO.Modal
+end

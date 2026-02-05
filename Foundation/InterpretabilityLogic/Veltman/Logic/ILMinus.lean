@@ -1,5 +1,9 @@
-import Foundation.InterpretabilityLogic.Veltman.Hilbert
+module
 
+public import Foundation.InterpretabilityLogic.Veltman.Hilbert
+
+
+@[expose] public section
 
 namespace LO.Modal.Kripke
 
@@ -46,3 +50,4 @@ end ILMinus
 
 
 end LO.InterpretabilityLogic
+end

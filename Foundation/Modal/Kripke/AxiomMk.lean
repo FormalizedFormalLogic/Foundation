@@ -1,4 +1,8 @@
-import Foundation.Modal.Kripke.Completeness
+module
+
+public import Foundation.Modal.Kripke.Completeness
+
+@[expose] public section
 
 namespace LO.Modal
 
@@ -102,3 +106,4 @@ end canonicality
 end Kripke
 
 end LO.Modal
+end

@@ -1,6 +1,9 @@
-import Foundation.Modal.Kripke.Completeness
-import Foundation.Modal.Kripke.AxiomGeach
-import Foundation.Modal.Kripke.AxiomPoint3
+module
+
+public import Foundation.Modal.Kripke.AxiomGeach
+public import Foundation.Modal.Kripke.AxiomPoint3
+
+@[expose] public section
 
 namespace LO.Modal
 
@@ -70,9 +73,9 @@ lemma sobocinskiCondition_of_validate_axiomPoint4 (h : F ⊧ (Axioms.Point4 (.at
     contrapose!;
     rintro ⟨x, y, z, nexy, Rxy, Rxz, Rzy⟩;
     apply ValidOnFrame.not_of_exists_valuation_world;
-    suffices ∃ V : Valuation F, ∃ x z, x ≺ z ∧ (∀ w, z ≺ w → V w 0) ∧ V x 0 ∧ ∃ y, x ≺ y ∧ ¬V y 0 by
+    suffices ∃ V : Valuation F, ∃ x z, x ≺ z ∧ (∀ w, z ≺ w → V 0 w) ∧ V 0 x ∧ ∃ y, x ≺ y ∧ ¬V 0 y by
       simpa [Axioms.Point4, Satisfies];
-    use (λ w _ => w = x ∨ z ≺ w), x, z;
+    use (λ _ w => w = x ∨ z ≺ w), x, z;
     refine ⟨?_, ?_, ?_, ?_⟩;
     . assumption;
     . tauto;
@@ -120,3 +123,4 @@ end canonicality
 end Kripke
 
 end LO.Modal
+end

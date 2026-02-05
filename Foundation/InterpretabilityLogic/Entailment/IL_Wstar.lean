@@ -1,4 +1,8 @@
-import Foundation.InterpretabilityLogic.Entailment.IL_W
+module
+
+public import Foundation.InterpretabilityLogic.Entailment.IL_W
+
+@[expose] public section
 
 namespace LO.InterpretabilityLogic.Entailment
 
@@ -56,3 +60,4 @@ instance : Entailment.HasAxiomM₀ 𝓢 := by
     simp;
 
 end LO.InterpretabilityLogic.Entailment
+end

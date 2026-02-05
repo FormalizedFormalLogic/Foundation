@@ -1,7 +1,11 @@
-import Mathlib.Data.Set.Insert
+module
+
+public import Mathlib.Data.Set.Insert
+
+
+@[expose] public section
 
 namespace Set
-
 
 namespace Fin1
 
@@ -79,3 +83,5 @@ protected lemma eq_univ : Set.univ (α := Fin 3) = {0, 1, 2} := by ext x; match 
 end Fin3
 
 end Set
+
+end

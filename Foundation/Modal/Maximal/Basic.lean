@@ -1,6 +1,9 @@
-import Foundation.Propositional.Hilbert.Standard.Basic
-import Foundation.Propositional.ClassicalSemantics.Hilbert
-import Foundation.Modal.Hilbert.Normal.Basic
+module
+
+public import Foundation.Propositional.ClassicalSemantics.Hilbert
+public import Foundation.Modal.Hilbert.Normal.Basic
+
+@[expose] public section
 
 namespace LO.Modal
 
@@ -143,3 +146,4 @@ end Ver
 
 
 end LO.Modal
+end
