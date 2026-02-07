@@ -44,6 +44,13 @@ lemma cofinite_union_left (hs : s.Cofinite) : (s ∪ t).Cofinite := by
 lemma cofinite_union_right (ht : t.Cofinite) : (s ∪ t).Cofinite := by
   exact (show (t ∪ s) = (s ∪ t) by tauto_set) ▸ cofinite_union_left ht;
 
+@[grind <=]
+lemma cofinite_inter (hs : s.Cofinite) (ht : t.Cofinite) : (s ∩ t).Cofinite := by
+  simp_all [Set.Cofinite, Set.compl_inter];
+
+@[grind <=]
+lemma cofinite_compl (hs : s.Finite) : sᶜ.Cofinite := by simpa [Set.Cofinite];
+
 end Set
 
 end
