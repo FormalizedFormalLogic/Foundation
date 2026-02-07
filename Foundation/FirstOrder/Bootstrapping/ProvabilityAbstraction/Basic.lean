@@ -21,7 +21,8 @@ namespace ProvabilityAbstraction
 
 structure Provability [L.ReferenceableBy L₀] (T₀ : Theory L₀) (T : Theory L) where
   prov : Semisentence L₀ 1
-
+  /-- Derivability condition `D1` -/
+  prov_def {σ : Sentence L} : T ⊢ σ → T₀ ⊢ prov/[⌜σ⌝]
 
 namespace Provability
 
@@ -43,9 +44,7 @@ variable
   {L₀ L : Language} [L.ReferenceableBy L₀]
   {T₀ : Theory L₀} {T : Theory L}
 
-class Provability.HBL1 (𝔅 : Provability T₀ T) where
-  D1 {σ : Sentence L} : T ⊢ σ → T₀ ⊢ 𝔅 σ
-export Provability.HBL1 (D1)
+lemma D1 {𝔅 : Provability T₀ T} {σ : Sentence L} : T ⊢ σ → T₀ ⊢ 𝔅 σ := fun h ↦ 𝔅.prov_def h
 
 class Provability.HBL2 [L.ReferenceableBy L₀] {T₀ : Theory L₀} {T : Theory L} (𝔅 : Provability T₀ T) where
   D2 {σ τ : Sentence L} : T₀ ⊢ 𝔅 (σ ➝ τ) ➝ 𝔅 σ ➝ 𝔅 τ
@@ -55,7 +54,7 @@ class Provability.HBL3 [L.ReferenceableBy L] {T₀ T : Theory L} (𝔅 : Provabi
   D3 {σ : Sentence L} : T₀ ⊢ 𝔅 σ ➝ 𝔅 (𝔅 σ)
 export Provability.HBL3 (D3)
 
-class Provability.HBL [L.ReferenceableBy L] {T₀ T : Theory L} (𝔅 : Provability T₀ T) extends 𝔅.HBL1, 𝔅.HBL2, 𝔅.HBL3
+class Provability.HBL [L.ReferenceableBy L] {T₀ T : Theory L} (𝔅 : Provability T₀ T) extends 𝔅.HBL2, 𝔅.HBL3
 
 class Provability.Löb [L.ReferenceableBy L] {T₀ T : Theory L} (𝔅 : Provability T₀ T) where
   LT {σ : Sentence L} : T ⊢ 𝔅 σ ➝ σ → T ⊢ σ
@@ -101,31 +100,31 @@ lemma D2' [𝔅.HBL2] : T₀ ⊢ 𝔅 (σ ➝ τ) → T₀ ⊢ 𝔅 σ ➝ 𝔅 
   intro h;
   exact D2 ⨀ h;
 
-lemma prov_distribute_imply [𝔅.HBL1] [𝔅.HBL2] (h : T ⊢ σ ➝ τ) : T₀ ⊢ 𝔅 σ ➝ 𝔅 τ := D2' $ D1 h
+lemma prov_distribute_imply [𝔅.HBL2] (h : T ⊢ σ ➝ τ) : T₀ ⊢ 𝔅 σ ➝ 𝔅 τ := D2' $ D1 h
 
-lemma prov_distribute_iff [𝔅.HBL1] [𝔅.HBL2] (h : T ⊢ σ ⭤ τ) : T₀ ⊢ 𝔅 σ ⭤ 𝔅 τ := by
+lemma prov_distribute_iff [𝔅.HBL2] (h : T ⊢ σ ⭤ τ) : T₀ ⊢ 𝔅 σ ⭤ 𝔅 τ := by
   apply E!_intro;
   . exact prov_distribute_imply $ K!_left h;
   . exact prov_distribute_imply $ K!_right h;
 
-lemma dia_distribute_imply [L₀.DecidableEq] [L.DecidableEq] [𝔅.HBL1] [𝔅.HBL2]
+lemma dia_distribute_imply [L₀.DecidableEq] [L.DecidableEq] [𝔅.HBL2]
   (h : T ⊢ σ ➝ τ) : T₀ ⊢ 𝔅.dia σ ➝ 𝔅.dia τ := by
   have : T₀ ⊢ 𝔅 (∼τ) ➝ 𝔅 (∼σ) := prov_distribute_imply $ by cl_prover [h];
   cl_prover [this]
 
-lemma prov_distribute_and [𝔅.HBL1] [𝔅.HBL2] [L₀.DecidableEq] : T₀ ⊢ 𝔅 (σ ⋏ τ) ➝ 𝔅 σ ⋏ 𝔅 τ := by
+lemma prov_distribute_and [𝔅.HBL2] [L₀.DecidableEq] : T₀ ⊢ 𝔅 (σ ⋏ τ) ➝ 𝔅 σ ⋏ 𝔅 τ := by
   have h₁ : T₀ ⊢ 𝔅 (σ ⋏ τ) ➝ 𝔅 σ := D2' $ D1 and₁!;
   have h₂ : T₀ ⊢ 𝔅 (σ ⋏ τ) ➝ 𝔅 τ := D2' $ D1 and₂!;
   cl_prover [h₁, h₂];
 
-lemma prov_distribute_and' [𝔅.HBL1] [𝔅.HBL2] [L₀.DecidableEq] : T₀ ⊢ 𝔅 (σ ⋏ τ) → T₀ ⊢ 𝔅 σ ⋏ 𝔅 τ := λ h => prov_distribute_and ⨀ h
+lemma prov_distribute_and' [𝔅.HBL2] [L₀.DecidableEq] : T₀ ⊢ 𝔅 (σ ⋏ τ) → T₀ ⊢ 𝔅 σ ⋏ 𝔅 τ := λ h => prov_distribute_and ⨀ h
 
-lemma prov_collect_and [𝔅.HBL1] [𝔅.HBL2] [L₀.DecidableEq] [L.DecidableEq] : T₀ ⊢ 𝔅 σ ⋏ 𝔅 τ ➝ 𝔅 (σ ⋏ τ) := by
+lemma prov_collect_and [𝔅.HBL2] [L₀.DecidableEq] [L.DecidableEq] : T₀ ⊢ 𝔅 σ ⋏ 𝔅 τ ➝ 𝔅 (σ ⋏ τ) := by
   have h₁ : T₀ ⊢ 𝔅 σ ➝ 𝔅 (τ ➝ σ ⋏ τ) := prov_distribute_imply $ by cl_prover
   have h₂ : T₀ ⊢ 𝔅 (τ ➝ σ ⋏ τ) ➝ 𝔅 τ ➝ 𝔅 (σ ⋏ τ) := D2;
   cl_prover [h₁, h₂];
 
-lemma sound_iff₀ [𝔅.HBL1] [𝔅.Sound₀] : T₀ ⊢ 𝔅 σ ↔ T ⊢ σ := ⟨sound₀, D1⟩
+lemma sound_iff₀ [𝔅.Sound₀] : T₀ ⊢ 𝔅 σ ↔ T ⊢ σ := ⟨sound₀, D1⟩
 
 end
 
@@ -136,7 +135,7 @@ variable
   {𝔅 : Provability T₀ T}
   {σ τ : Sentence L}
 
-lemma D1_shift [𝔅.HBL1] : T ⊢ σ → T ⊢ 𝔅 σ := by
+lemma D1_shift : T ⊢ σ → T ⊢ 𝔅 σ := by
   intro h;
   apply Entailment.WeakerThan.pbl (𝓢 := T₀);
   apply D1 h;
@@ -150,13 +149,13 @@ lemma D3_shift [𝔅.HBL3] : T ⊢ 𝔅 σ ➝ 𝔅 (𝔅 σ) := by
 lemma FLT_shift [𝔅.FormalizedLöb] : T ⊢ 𝔅 (𝔅 σ ➝ σ) ➝ 𝔅 σ := by
   apply Entailment.WeakerThan.pbl (𝓢 := T₀) $ FLT;
 
-lemma prov_distribute_imply' [𝔅.HBL1] [𝔅.HBL2] (h : T₀ ⊢ σ ➝ τ) : T₀ ⊢ 𝔅 σ ➝ 𝔅 τ :=
+lemma prov_distribute_imply' [𝔅.HBL2] (h : T₀ ⊢ σ ➝ τ) : T₀ ⊢ 𝔅 σ ➝ 𝔅 τ :=
   prov_distribute_imply $ WeakerThan.pbl h
 
-lemma prov_distribute_imply'' [𝔅.HBL1] [𝔅.HBL2] (h : T ⊢ σ ➝ τ) : T ⊢ 𝔅 σ ➝ 𝔅 τ :=
+lemma prov_distribute_imply'' [𝔅.HBL2] (h : T ⊢ σ ➝ τ) : T ⊢ 𝔅 σ ➝ 𝔅 τ :=
   WeakerThan.pbl $ prov_distribute_imply h
 
-lemma sound_iff [𝔅.HBL1] [𝔅.Sound] : T ⊢ 𝔅 σ ↔ T ⊢ σ := ⟨sound, fun h ↦ WeakerThan.pbl (D1 h)⟩
+lemma sound_iff [𝔅.Sound] : T ⊢ 𝔅 σ ↔ T ⊢ σ := ⟨sound, fun h ↦ WeakerThan.pbl (D1 h)⟩
 
 end
 
@@ -184,7 +183,7 @@ section First
 variable [L.DecidableEq]
 variable [T₀ ⪯ T] [Consistent T]
 
-theorem unprovable_gödel [𝔅.HBL1] : T ⊬ (gödel 𝔅) := by
+theorem unprovable_gödel : T ⊬ (gödel 𝔅) := by
   intro h;
   have h₁ : T ⊢ 𝔅 (gödel 𝔅) := D1_shift h;
   have h₂ : T ⊢ (gödel 𝔅) ⭤ ∼𝔅 (gödel 𝔅) := WeakerThan.pbl $ gödel_spec;
@@ -200,12 +199,12 @@ theorem unrefutable_gödel [GödelSound 𝔅] : T ⊬ ∼(gödel 𝔅) := by
   have : ¬Consistent T := not_consistent_iff_inconsistent.mpr <| inconsistent_iff_provable_bot.mpr this
   contradiction;
 
-theorem gödel_independent [𝔅.HBL1] [GödelSound 𝔅] : Independent T (gödel 𝔅) := by
+theorem gödel_independent [GödelSound 𝔅] : Independent T (gödel 𝔅) := by
   constructor
   . apply unprovable_gödel
   . apply unrefutable_gödel
 
-theorem first_incompleteness [𝔅.HBL1] [GödelSound 𝔅] : Incomplete T :=
+theorem first_incompleteness [GödelSound 𝔅] : Incomplete T :=
   incomplete_def.mpr ⟨(gödel 𝔅), gödel_independent⟩
 
 end First
@@ -327,12 +326,12 @@ theorem unrefutable_rosser [𝔅.Rosser] : T ⊬ ∼𝐑 := by
     (N!_iff_CO!.mp hnρ) ⨀ hρ;
   contradiction
 
-theorem rosser_independent [L.DecidableEq] [𝔅.HBL1] [𝔅.Rosser] : Independent T 𝐑 := by
+theorem rosser_independent [L.DecidableEq] [𝔅.Rosser] : Independent T 𝐑 := by
   constructor
   . apply unprovable_gödel
   . apply unrefutable_rosser
 
-theorem rosser_first_incompleteness [L.DecidableEq] (𝔅 : Provability T₀ T) [𝔅.HBL1] [𝔅.Rosser] : Incomplete T :=
+theorem rosser_first_incompleteness [L.DecidableEq] (𝔅 : Provability T₀ T) [𝔅.Rosser] : Incomplete T :=
   incomplete_def.mpr ⟨gödel 𝔅, rosser_independent⟩
 
 omit [Diagonalization T₀] [Consistent T] in
