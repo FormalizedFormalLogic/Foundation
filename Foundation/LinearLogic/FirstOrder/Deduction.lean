@@ -25,8 +25,8 @@ inductive Derivation : Sequent L → Type _ where
   | par : Derivation (φ :: ψ :: Γ) → Derivation (φ ⅋ ψ :: Γ)
   | verum (Γ) : Derivation (⊤ :: Γ)
   | with : Derivation (φ :: Γ) → Derivation (ψ :: Γ) → Derivation (φ ＆ ψ :: Γ)
-  | plusRight : Derivation (φ :: Γ) → (ψ : Statement L) → Derivation (φ ⨁ ψ :: Γ)
   | plusLeft : Derivation (ψ :: Γ) → (φ : Statement L) → Derivation (φ ⨁ ψ :: Γ)
+  | plusRight : Derivation (φ :: Γ) → (ψ : Statement L) → Derivation (φ ⨁ ψ :: Γ)
   | ofCourse : Derivation (φ :: Γ) → Sequent.IsQuest Γ → Derivation (！φ :: Γ)
   | weakening : Derivation Γ → Derivation (？φ :: Γ)
   | dereliction : Derivation (φ :: Γ) → Derivation (？φ :: Γ)
@@ -161,18 +161,16 @@ def identity : (φ : Statement L) → ⊢! [φ, ∼φ]
   |     φ ⨁ ψ => (((identity φ).plusRight ψ).rotate.with ((identity ψ).plusLeft φ).rotate).rotate
   |        ！φ => (identity φ).rotate.dereliction.rotate.ofCourse (by simp [Sequent.IsQuest])
   |        ？φ => (identity φ).dereliction.rotate.ofCourse (by simp [Sequent.IsQuest]) |>.rotate
-  |     ∀' φ =>
+  |      ∀' φ =>
     have : ⊢! [(∼φ.shift)/[&0], φ.free] := (identity φ.free).rotate.cast (by simp)
     have : ⊢! φ.free :: [∃' ∼φ]⁺ := (this.ex _).rotate.cast (by simp)
     this.all
-  |     ∃' φ =>
+  |      ∃' φ =>
     have : ⊢! [φ.shift/[&0], ∼φ.free] := (identity φ.free).cast (by simp)
     have : ⊢! (∼φ).free :: [∃' φ]⁺ := (this.ex _).rotate.cast (by simp)
     this.all.rotate
   termination_by φ => φ.complexity
 
 end Derivation
-
-
 
 end LO.FirstOrder.LinearLogic
