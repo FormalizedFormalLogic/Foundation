@@ -17,22 +17,23 @@ open FirstOrder
 inductive Semiformula (L : Language) (ξ : Type*) : ℕ → Type _ where
   |    rel : {arity : ℕ} → L.Rel arity → (Fin arity → Semiterm L ξ n) → Semiformula L ξ n
   |   nrel : {arity : ℕ} → L.Rel arity → (Fin arity → Semiterm L ξ n) → Semiformula L ξ n
-  /-- Multiplicative connectives -/
+  /-- Literals -/
   |    one : Semiformula L ξ n
   | falsum : Semiformula L ξ n
   | tensor : Semiformula L ξ n → Semiformula L ξ n → Semiformula L ξ n
   |    par : Semiformula L ξ n → Semiformula L ξ n → Semiformula L ξ n
-  /-- Additive connectives -/
+  /-- Multiplicative connectives -/
   |  verum : Semiformula L ξ n
   |   zero : Semiformula L ξ n
   |   with : Semiformula L ξ n → Semiformula L ξ n → Semiformula L ξ n
   |   plus : Semiformula L ξ n → Semiformula L ξ n → Semiformula L ξ n
-  /-- Exponentials -/
+  /-- Additive connectives -/
   |   bang : Semiformula L ξ n → Semiformula L ξ n
   |  quest : Semiformula L ξ n → Semiformula L ξ n
-  /-- Quantifiers -/
+  /-- Exponentials -/
   |    all : Semiformula L ξ (n + 1) → Semiformula L ξ n
   |     ex : Semiformula L ξ (n + 1) → Semiformula L ξ n
+  /-- Quantifiers -/
 
 abbrev Formula (L : Language) (ξ : Type*) := Semiformula L ξ 0
 
