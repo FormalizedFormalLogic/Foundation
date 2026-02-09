@@ -21,7 +21,7 @@ inductive Formula where
 
 namespace Formula
 
-instance : MultiplicativeLinearConnective Formula where
+instance : MultiplicativeConnective Formula where
   one := one
   bot := falsum
   tensor := tensor
@@ -43,7 +43,7 @@ instance : Tilde Formula := ⟨neg⟩
 
 @[simp] lemma neg_natom (p : ℕ) : ∼natom p = atom p := rfl
 
-instance : MultiplicativeLinearConnective.DeMorgan Formula where
+instance : MultiplicativeConnective.DeMorgan Formula where
   one := rfl
   falsum := rfl
   tensor _ _ := rfl
