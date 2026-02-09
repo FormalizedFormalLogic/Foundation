@@ -9,7 +9,7 @@ public import Foundation.LinearLogic.LogicSymbol
 
 @[expose] public section
 
-namespace LO.LinearLogic.MLL
+namespace LO.Propositional.LinearLogic.Multiplicative
 
 inductive Formula where
   | atom : ℕ → Formula
@@ -70,7 +70,7 @@ variable {α : Type*}
 abbrev Sequent := List Formula
 
 inductive Derivation : Sequent → Type _
-  | identity (p : ℕ) : Derivation [.atom p, .natom p]
+  | protected id (p : ℕ) : Derivation [.atom p, .natom p]
   | cut : Derivation (φ :: Γ) → Derivation (∼φ :: Δ) → Derivation (Γ ++ Δ)
   | exchange : Derivation Γ → Γ.Perm Δ → Derivation Δ
   | one : Derivation [1]
@@ -100,13 +100,13 @@ def cast (d : ⊢! Γ) (e : Γ = Δ) : ⊢! Δ := e ▸ d
 def rotate (d : ⊢! φ :: Γ) : ⊢! Γ ++ [φ] :=
   d.exchange (by grind only [List.perm_comm, List.perm_append_singleton])
 
-def em : (φ : Formula) → ⊢! [φ, ∼φ]
-  |  .atom a => identity a
-  | .natom a => (identity a).rotate
+def identity : (φ : Formula) → ⊢! [φ, ∼φ]
+  |  .atom a => .id a
+  | .natom a => (Derivation.id a).rotate
   |        1 => (falsum one).rotate
   |        ⊥ => falsum one
-  |    φ ⨂ ψ => ((em φ).tensor (em ψ)).rotate.par.rotate
-  |    φ ⅋ ψ => ((em φ).rotate.tensor (em ψ).rotate).rotate.par
+  |    φ ⨂ ψ => ((identity φ).tensor (identity ψ)).rotate.par.rotate
+  |    φ ⅋ ψ => ((identity φ).rotate.tensor (identity ψ).rotate).rotate.par
 
 end Derivation
 
@@ -114,17 +114,17 @@ namespace Proof
 
 open Derivation
 
-def identity : 𝐌𝐋𝐋 ⊢! φ ⊸ φ := (em φ).rotate.par
+def identity' : 𝐌𝐋𝐋 ⊢! φ ⊸ φ := (identity φ).rotate.par
 
 def modusPonens (d₁ : 𝐌𝐋𝐋 ⊢! φ ⊸ ψ) (d₂ : 𝐌𝐋𝐋 ⊢! φ) : 𝐌𝐋𝐋 ⊢! ψ :=
   have d₁ : ⊢! [∼(φ ⨂ ∼ψ)] := d₁.cast <| by simp [Formula.lolli_def]
-  have b : ⊢! [φ ⨂ ∼ψ, ∼φ, ψ] := (em φ).tensor (em ψ).rotate
+  have b : ⊢! [φ ⨂ ∼ψ, ∼φ, ψ] := (identity φ).tensor (identity ψ).rotate
   cut d₂ (cut b d₁)
 
 end Proof
 
-example : 𝐌𝐋𝐋 ⊢ φ ⅋ ∼φ := ⟨Derivation.par (Derivation.em _)⟩
+example : 𝐌𝐋𝐋 ⊢ φ ⅋ ∼φ := ⟨Derivation.par (Derivation.identity _)⟩
 
-end LO.LinearLogic.MLL
+end LO.Propositional.LinearLogic.Multiplicative
 
 end
