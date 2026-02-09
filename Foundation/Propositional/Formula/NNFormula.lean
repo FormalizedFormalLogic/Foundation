@@ -92,7 +92,7 @@ instance : DeMorgan (NNFormula α) where
   and := by simp
   or := by simp
   imply := by simp [imp_eq]
-  neg := by simp
+  neg_involutive := by simp
 
 def complexity : NNFormula α → ℕ
 | ⊤       => 0
