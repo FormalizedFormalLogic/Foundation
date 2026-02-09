@@ -2,7 +2,7 @@ module
 public import Foundation.Logic.Calculus
 public import Foundation.FirstOrder.Basic.Syntax.Theory
 
-/-! # One-sided sequent calculus for first-Order logic -/
+/-! # One-sided sequent calculus for first-order classical logic -/
 
 @[expose] public section
 
