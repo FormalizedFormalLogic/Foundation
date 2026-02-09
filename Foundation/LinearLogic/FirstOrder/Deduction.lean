@@ -28,7 +28,7 @@ inductive Derivation : Sequent L → Type _ where
   | plusLeft : Derivation (ψ :: Γ) → (φ : Statement L) → Derivation (φ ⨁ ψ :: Γ)
   | plusRight : Derivation (φ :: Γ) → (ψ : Statement L) → Derivation (φ ⨁ ψ :: Γ)
   | ofCourse : Derivation (φ :: Γ) → Sequent.IsQuest Γ → Derivation (！φ :: Γ)
-  | weakening : Derivation Γ → Derivation (？φ :: Γ)
+  | weakening : Derivation Γ → (φ : Statement L) → Derivation (？φ :: Γ)
   | dereliction : Derivation (φ :: Γ) → Derivation (？φ :: Γ)
   | contraction : Derivation (？φ :: ？φ :: Γ) → Derivation (？φ :: Γ)
   | all : Derivation (φ.free :: Γ⁺) → Derivation ((∀' φ) :: Γ)
@@ -41,18 +41,14 @@ abbrev Sentence.Proof (σ : Sentence L) : Type _ := Derivation [(σ : Statement 
 inductive SymbolFV (L : Language) where
   | symbol : SymbolFV L
 
-abbrev SymbolFV.symbol' (L : Language) : SymbolFV L := .symbol
-
-notation "𝐋𝐋𝐕" => SymbolFV.symbol'
+notation "𝐋𝐋₀" => SymbolFV.symbol
 
 instance : Entailment (SymbolFV L) (Statement L) := ⟨fun _ ↦ Statement.Proof⟩
 
 inductive Symbol (L : Language) where
   | symbol : Symbol L
 
-abbrev Symbol.symbol' (L : Language) : Symbol L := .symbol
-
-notation "𝐋𝐋" => Symbol.symbol'
+notation "𝐋𝐋" => Symbol.symbol
 
 instance : Entailment (Symbol L) (Sentence L) := ⟨fun _ ↦ Sentence.Proof⟩
 
@@ -84,7 +80,7 @@ def height {Γ : Sequent L} : ⊢! Γ → ℕ
   |  plusLeft d _ => height d + 1
   | plusRight d _ => height d + 1
   |  ofCourse d _ => height d + 1
-  |   weakening d => height d + 1
+  | weakening d _ => height d + 1
   | dereliction d => height d + 1
   | contraction d => height d + 1
   |         all d => height d + 1
@@ -129,7 +125,7 @@ section height
     (d.ofCourse hΓ).height = d.height + 1 := rfl
 
 @[simp] lemma height_weakening (d : ⊢! Γ) (φ) :
-    (d.weakening (φ := φ)).height = d.height + 1 := rfl
+    (d.weakening φ).height = d.height + 1 := rfl
 
 @[simp] lemma height_dereliction (d : ⊢! φ :: Γ) :
     d.dereliction.height = d.height + 1 := rfl
