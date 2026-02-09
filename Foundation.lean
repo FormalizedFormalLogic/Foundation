@@ -189,7 +189,7 @@ public import Foundation.InterpretabilityLogic.Veltman.Logic.ILMinus_J5
 public import Foundation.LinearLogic.MLL
 public import Foundation.LinearLogic.FirstOrder.Formula
 public import Foundation.LinearLogic.FirstOrder.Rew
-public import Foundation.LinearLogic.FirstOrder.Deduction
+public import Foundation.LinearLogic.FirstOrder.Calculus
 public import Foundation.Logic.Calculus
 public import Foundation.Logic.Decidability
 public import Foundation.Logic.Disjunctive

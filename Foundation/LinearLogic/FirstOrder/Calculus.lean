@@ -69,22 +69,22 @@ def rotate (d : ⊢! φ :: Γ) : ⊢! Γ ++ [φ] :=
 
 def height {Γ : Sequent L} : ⊢! Γ → ℕ
   |       .id _ _ => 0
-  |     cut d₁ d₂ => max (height d₁) (height d₂) + 1
-  |  exchange d _ => height d
+  |     cut d₁ d₂ => max d₁.height d₂.height + 1
+  |  exchange d _ => d.height
   |           one => 0
-  |      falsum d => height d + 1
-  |  tensor d₁ d₂ => max (height d₁) (height d₂) + 1
-  |         par d => height d + 1
+  |      falsum d => d.height + 1
+  |  tensor d₁ d₂ => max d₁.height d₂.height + 1
+  |         par d => d.height + 1
   |       verum _ => 0
-  |   .with d₁ d₂ => max (height d₁) (height d₂) + 1
-  |  plusLeft d _ => height d + 1
-  | plusRight d _ => height d + 1
-  |  ofCourse d _ => height d + 1
-  | weakening d _ => height d + 1
-  | dereliction d => height d + 1
-  | contraction d => height d + 1
-  |         all d => height d + 1
-  |        ex _ d => height d + 1
+  |   .with d₁ d₂ => max d₁.height d₂.height + 1
+  |  plusLeft d _ => d.height + 1
+  | plusRight d _ => d.height + 1
+  |  ofCourse d _ => d.height + 1
+  | weakening d _ => d.height + 1
+  | dereliction d => d.height + 1
+  | contraction d => d.height + 1
+  |         all d => d.height + 1
+  |        ex _ d => d.height + 1
 
 section height
 
