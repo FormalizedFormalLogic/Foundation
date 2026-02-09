@@ -1,7 +1,7 @@
 module
 
 public import Foundation.FirstOrder.Basic
-public import Foundation.Logic.Predicate.Relational
+public import Foundation.Syntax.Predicate.Relational
 public import Foundation.Logic.ForcingRelation
 public import Foundation.Vorspiel.Preorder
 

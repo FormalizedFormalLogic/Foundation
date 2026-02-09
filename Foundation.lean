@@ -187,6 +187,9 @@ public import Foundation.InterpretabilityLogic.Veltman.Logic.ILMinus_J4Plus
 public import Foundation.InterpretabilityLogic.Veltman.Logic.ILMinus_J4Plus_J5
 public import Foundation.InterpretabilityLogic.Veltman.Logic.ILMinus_J5
 public import Foundation.LinearLogic.MLL
+public import Foundation.LinearLogic.FirstOrder.Formula
+public import Foundation.LinearLogic.FirstOrder.Rew
+public import Foundation.LinearLogic.FirstOrder.Calculus
 public import Foundation.Logic.Calculus
 public import Foundation.Logic.Decidability
 public import Foundation.Logic.Disjunctive
@@ -194,11 +197,6 @@ public import Foundation.Logic.Entailment
 public import Foundation.Logic.ForcingRelation
 public import Foundation.Logic.LindenbaumAlgebra
 public import Foundation.Logic.LogicSymbol
-public import Foundation.Logic.Predicate.Language
-public import Foundation.Logic.Predicate.Quantifier
-public import Foundation.Logic.Predicate.Relational
-public import Foundation.Logic.Predicate.Rew
-public import Foundation.Logic.Predicate.Term
 public import Foundation.Logic.Semantics
 public import Foundation.Meta.Test
 public import Foundation.Meta.TwoSided
@@ -519,3 +517,8 @@ public import Foundation.ProvabilityLogic.S.Soundness
 public import Foundation.ProvabilityLogic.SolovaySentences
 public import Foundation.Semantics.CoherenceSpace.Basic
 public import Foundation.Semantics.CoherenceSpace.StableFunction
+public import Foundation.Syntax.Predicate.Language
+public import Foundation.Syntax.Predicate.Quantifier
+public import Foundation.Syntax.Predicate.Relational
+public import Foundation.Syntax.Predicate.Rew
+public import Foundation.Syntax.Predicate.Term

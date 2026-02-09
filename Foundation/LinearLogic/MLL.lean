@@ -1,5 +1,7 @@
 module
+
 public import Foundation.Logic.Entailment
+public import Foundation.LinearLogic.LogicSymbol
 
 /-!
 # Multiplicative linear logic
@@ -7,25 +9,23 @@ public import Foundation.Logic.Entailment
 
 @[expose] public section
 
-namespace LO.LinearLogic.MLL
+namespace LO.Propositional.LinearLogic.Multiplicative
 
 inductive Formula where
   | atom : ℕ → Formula
   | natom : ℕ → Formula
   | one : Formula
-  | bot : Formula
+  | falsum : Formula
   | tensor : Formula → Formula → Formula
   | par : Formula → Formula → Formula
 
 namespace Formula
 
-instance : One Formula := ⟨one⟩
-
-instance : Bot Formula := ⟨bot⟩
-
-instance : HasTensor Formula := ⟨tensor⟩
-
-instance : HasPar Formula := ⟨par⟩
+instance : MultiplicativeConnective Formula where
+  one := one
+  bot := falsum
+  tensor := tensor
+  par := par
 
 variable {α : Type*}
 
@@ -43,13 +43,11 @@ instance : Tilde Formula := ⟨neg⟩
 
 @[simp] lemma neg_natom (p : ℕ) : ∼natom p = atom p := rfl
 
-@[simp] lemma neg_one : ∼(1 : Formula) = ⊥ := rfl
-
-@[simp] lemma neg_bot : ∼(⊥ : Formula) = 1 := rfl
-
-@[simp] lemma neg_tensor (φ ψ : Formula) : ∼(φ ⨂ ψ) = ∼φ ⅋ ∼ψ := rfl
-
-@[simp] lemma neg_par (φ ψ : Formula) : ∼(φ ⅋ ψ) = ∼φ ⨂ ∼ψ := rfl
+instance : MultiplicativeConnective.DeMorgan Formula where
+  one := rfl
+  falsum := rfl
+  tensor _ _ := rfl
+  par _ _ := rfl
 
 @[simp] lemma neg_neg (φ : Formula) : ∼∼φ = φ := by
   match φ with
@@ -60,7 +58,8 @@ instance : Tilde Formula := ⟨neg⟩
   |   φ ⅋ ψ => simp [neg_neg φ, neg_neg ψ]
   |   φ ⨂ ψ => simp [neg_neg φ, neg_neg ψ]
 
-instance : HasLolli Formula := ⟨fun φ ψ ↦ ∼φ ⅋ ψ⟩
+instance : NegInvolutive Formula where
+  neg_involutive := neg_neg
 
 lemma lolli_def (φ ψ : Formula) : φ ⊸ ψ = ∼φ ⅋ ψ := rfl
 
@@ -71,11 +70,11 @@ variable {α : Type*}
 abbrev Sequent := List Formula
 
 inductive Derivation : Sequent → Type _
-  | identity (p : ℕ) : Derivation [.atom p, .natom p]
+  | protected id (p : ℕ) : Derivation [.atom p, .natom p]
   | cut : Derivation (φ :: Γ) → Derivation (∼φ :: Δ) → Derivation (Γ ++ Δ)
   | exchange : Derivation Γ → Γ.Perm Δ → Derivation Δ
   | one : Derivation [1]
-  | false : Derivation Γ → Derivation (⊥ :: Γ)
+  | falsum : Derivation Γ → Derivation (⊥ :: Γ)
   | tensor : Derivation (φ :: Γ) → Derivation (ψ :: Δ) → Derivation (φ ⨂ ψ :: (Γ ++ Δ))
   | par : Derivation (φ :: ψ :: Γ) → Derivation (φ ⅋ ψ :: Γ)
 
@@ -101,13 +100,13 @@ def cast (d : ⊢! Γ) (e : Γ = Δ) : ⊢! Δ := e ▸ d
 def rotate (d : ⊢! φ :: Γ) : ⊢! Γ ++ [φ] :=
   d.exchange (by grind only [List.perm_comm, List.perm_append_singleton])
 
-def em : (φ : Formula) → ⊢! [φ, ∼φ]
-  |  .atom a => identity a
-  | .natom a => (identity a).rotate
-  |        1 => (false one).rotate
-  |        ⊥ => false one
-  |    φ ⨂ ψ => ((em φ).tensor (em ψ)).rotate.par.rotate
-  |    φ ⅋ ψ => ((em φ).rotate.tensor (em ψ).rotate).rotate.par
+def identity : (φ : Formula) → ⊢! [φ, ∼φ]
+  |  .atom a => .id a
+  | .natom a => (Derivation.id a).rotate
+  |        1 => (falsum one).rotate
+  |        ⊥ => falsum one
+  |    φ ⨂ ψ => ((identity φ).tensor (identity ψ)).rotate.par.rotate
+  |    φ ⅋ ψ => ((identity φ).rotate.tensor (identity ψ).rotate).rotate.par
 
 end Derivation
 
@@ -115,17 +114,17 @@ namespace Proof
 
 open Derivation
 
-def identity : 𝐌𝐋𝐋 ⊢! φ ⊸ φ := (em φ).rotate.par
+def identity' : 𝐌𝐋𝐋 ⊢! φ ⊸ φ := (identity φ).rotate.par
 
 def modusPonens (d₁ : 𝐌𝐋𝐋 ⊢! φ ⊸ ψ) (d₂ : 𝐌𝐋𝐋 ⊢! φ) : 𝐌𝐋𝐋 ⊢! ψ :=
   have d₁ : ⊢! [∼(φ ⨂ ∼ψ)] := d₁.cast <| by simp [Formula.lolli_def]
-  have b : ⊢! [φ ⨂ ∼ψ, ∼φ, ψ] := (em φ).tensor (em ψ).rotate
+  have b : ⊢! [φ ⨂ ∼ψ, ∼φ, ψ] := (identity φ).tensor (identity ψ).rotate
   cut d₂ (cut b d₁)
 
 end Proof
 
-example : 𝐌𝐋𝐋 ⊢ φ ⅋ ∼φ := ⟨Derivation.par (Derivation.em _)⟩
+example : 𝐌𝐋𝐋 ⊢ φ ⅋ ∼φ := ⟨Derivation.par (Derivation.identity _)⟩
 
-end LO.LinearLogic.MLL
+end LO.Propositional.LinearLogic.Multiplicative
 
 end
