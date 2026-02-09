@@ -194,11 +194,11 @@ public import Foundation.Logic.Entailment
 public import Foundation.Logic.ForcingRelation
 public import Foundation.Logic.LindenbaumAlgebra
 public import Foundation.Logic.LogicSymbol
-public import Foundation.Logic.Predicate.Language
-public import Foundation.Logic.Predicate.Quantifier
-public import Foundation.Logic.Predicate.Relational
-public import Foundation.Logic.Predicate.Rew
-public import Foundation.Logic.Predicate.Term
+public import Foundation.Syntax.Predicate.Language
+public import Foundation.Syntax.Predicate.Quantifier
+public import Foundation.Syntax.Predicate.Relational
+public import Foundation.Syntax.Predicate.Rew
+public import Foundation.Syntax.Predicate.Term
 public import Foundation.Logic.Semantics
 public import Foundation.Meta.Test
 public import Foundation.Meta.TwoSided

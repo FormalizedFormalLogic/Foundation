@@ -1,6 +1,6 @@
 module
 
-public import Foundation.Logic.Predicate.Language
+public import Foundation.Syntax.Predicate.Language
 
 @[expose] public section
 

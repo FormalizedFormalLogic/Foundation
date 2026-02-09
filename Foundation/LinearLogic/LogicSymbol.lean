@@ -36,8 +36,8 @@ namespace AdditiveConnective
 class DeMorgan (F : Type*) [AdditiveConnective F] [Tilde F] where
   verum : ∼(⊤ : F) = 0
   zero : ∼(0 : F) = ⊤
-  with_ (φ ψ : F) : ∼(φ 🙲 ψ) = ∼φ ⨁ ∼ψ
-  plus (φ ψ : F) : ∼(φ ⨁ ψ) = ∼φ 🙲 ∼ψ
+  with_ (φ ψ : F) : ∼(φ ＆ ψ) = ∼φ ⨁ ∼ψ
+  plus (φ ψ : F) : ∼(φ ⨁ ψ) = ∼φ ＆ ∼ψ
 
 attribute [simp] DeMorgan.verum DeMorgan.zero DeMorgan.with_ DeMorgan.plus DeMorgan.neg
 

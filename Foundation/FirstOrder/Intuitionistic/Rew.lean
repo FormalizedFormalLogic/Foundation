@@ -3,18 +3,19 @@ module
 public import Foundation.FirstOrder.Intuitionistic.Formula
 
 @[expose] public section
+
 namespace LO.FirstOrder
 
 namespace Semiformulaᵢ
 
-def rewAux ⦃n₁ n₂ : ℕ⦄ : Rew L ξ₁ n₁ ξ₂ n₂ → Semiformulaᵢ L ξ₁ n₁ → Semiformulaᵢ L ξ₂ n₂
-  | _, ⊥        => ⊥
-  | ω, rel r v  => rel r (ω ∘ v)
-  | ω, φ ⋏ ψ    => rewAux ω φ ⋏ rewAux ω ψ
-  | ω, φ ⋎ ψ    => rewAux ω φ ⋎ rewAux ω ψ
-  | ω, φ ➝ ψ    => rewAux ω φ ➝ rewAux ω ψ
-  | ω, ∀' φ     => ∀' rewAux ω.q φ
-  | ω, ∃' φ     => ∃' rewAux ω.q φ
+def rewAux (ω : Rew L ξ₁ n₁ ξ₂ n₂) : Semiformulaᵢ L ξ₁ n₁ → Semiformulaᵢ L ξ₂ n₂
+  |       ⊥ => ⊥
+  | rel r v => rel r (ω ∘ v)
+  |   φ ⋏ ψ => rewAux ω φ ⋏ rewAux ω ψ
+  |   φ ⋎ ψ => rewAux ω φ ⋎ rewAux ω ψ
+  |   φ ➝ ψ => rewAux ω φ ➝ rewAux ω ψ
+  |    ∀' φ => ∀' rewAux ω.q φ
+  |    ∃' φ => ∃' rewAux ω.q φ
 
 def rew (ω : Rew L ξ₁ n₁ ξ₂ n₂) : Semiformulaᵢ L ξ₁ n₁ →ˡᶜ Semiformulaᵢ L ξ₂ n₂ where
   toTr := rewAux ω

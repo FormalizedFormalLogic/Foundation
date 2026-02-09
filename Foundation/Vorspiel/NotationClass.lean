@@ -56,9 +56,10 @@ class Par (α : Type*) where
 infix:68 " ⅋ " => Par.par
 
 class With (α : Type*) where
-  with_ : α → α → α
+  with' : α → α → α
 
-infix:69 " 🙲 " => With.with_
+/-- Note that this notation "＆" (U+FF06) is distinct from "&" (U+0026) -/
+infix:69 " ＆ " => With.with'
 
 class Plus (α : Type*) where
   plus : α → α → α
@@ -92,7 +93,7 @@ attribute [match_pattern]
   Rhd.rhd
   Tensor.tensor
   Par.par
-  With.with_
+  With.with'
   Plus.plus
   Lolli.lolli
   Bang.bang

@@ -1,7 +1,7 @@
 module
 
-public import Foundation.Logic.Predicate.Quantifier
-public import Foundation.Logic.Predicate.Term
+public import Foundation.Syntax.Predicate.Quantifier
+public import Foundation.Syntax.Predicate.Term
 
 /-!
 # Rewriting
@@ -90,9 +90,9 @@ lemma comp_app (ω₂ : Rew L ξ₂ n₂ ξ₃ n₃) (ω₁ : Rew L ξ₁ n₁ �
 @[simp] lemma comp_id (ω : Rew L ξ₁ n₁ ξ₂ n₂) : ω.comp Rew.id = ω := by ext <;> simp [comp_app]
 
 def bindAux (b : Fin n₁ → Semiterm L ξ₂ n₂) (e : ξ₁ → Semiterm L ξ₂ n₂) : Semiterm L ξ₁ n₁ → Semiterm L ξ₂ n₂
-  | (#x)       => b x
-  | (&x)       => e x
-  | (func f v) => func f (fun i => bindAux b e (v i))
+  |       #x => b x
+  |       &x => e x
+  | func f v => func f (fun i => bindAux b e (v i))
 
 def bind (b : Fin n₁ → Semiterm L ξ₂ n₂) (e : ξ₁ → Semiterm L ξ₂ n₂) : Rew L ξ₁ n₁ ξ₂ n₂ where
   toFun := bindAux b e
@@ -140,7 +140,7 @@ lemma eq_id_of_eq {ω : Rew L ξ n ξ n} (hb : ∀ x, ω #x = #x) (he : ∀ x, �
   simp [this]
 
 def qpow (ω : Rew L ξ₁ n₁ ξ₂ n₂) : (k : ℕ) → Rew L ξ₁ (n₁ + k) ξ₂ (n₂ + k)
-  | 0     => ω
+  |     0 => ω
   | k + 1 => (ω.qpow k).q
 
 @[simp] lemma qpow_zero (ω : Rew L ξ₁ n₁ ξ₂ n₂) : qpow ω 0 = ω := rfl
@@ -176,15 +176,15 @@ variable (b : Fin n₁ → Fin n₂) (e : ξ₁ → ξ₂)
 @[simp] lemma map_id : map (L := L) (id : Fin n → Fin n) (id : ξ → ξ) = Rew.id := by ext <;> simp
 
 lemma map_inj {b : Fin n₁ → Fin n₂} {e : ξ₁ → ξ₂} (hb : Function.Injective b) (he : Function.Injective e) :
-    Function.Injective $ map (L := L) b e
-  | #x,                    #y                    => by simpa using @hb _ _
-  | #x,                    &y                    => by simp
-  | #x,                    func f w              => by simp [Rew.func]
-  | &x,                    #y                    => by simp
-  | &x,                    &y                    => by simpa using @he _ _
-  | &x,                    func f w              => by simp [Rew.func]
-  | func f v,              #y                    => by simp [Rew.func]
-  | func f v,              &y                    => by simp [Rew.func]
+    Function.Injective <| map (L := L) b e
+  |                    #x,                    #y => by simpa using @hb _ _
+  |                    #x,                    &y => by simp
+  |                    #x,              func f w => by simp [Rew.func]
+  |                    &x,                    #y => by simp
+  |                    &x,                    &y => by simpa using @he _ _
+  |                    &x,              func f w => by simp [Rew.func]
+  |              func f v,                    #y => by simp [Rew.func]
+  |              func f v,                    &y => by simp [Rew.func]
   | func (arity := k) f v, func (arity := l) g w => fun h ↦ by
     have : k = l := by simp [Rew.func] at h; simp_all
     rcases this
@@ -458,12 +458,7 @@ lemma q_rewrite (f : ξ₁ → Semiterm L ξ₂ n) :
 
 lemma q_toS :
     (toS : Rew L (Fin n) 0 Empty n).q = bind ![#0] (#·.succ) := by
-  ext x
-  · suffices x = 0 by simpa
-    cases x using Fin.cases
-    · simp
-    · exact Fin.elim0 (by assumption)
-  · simp
+  ext x <;> simp
 
 @[simp] lemma qpow_castLE {n n'} (h : n ≤ n') :
     (castLE h : Rew L ξ n ξ n').qpow k = castLE (Nat.add_le_add_right h k) := by
@@ -577,13 +572,13 @@ lemma shift_comp_subst1 (t : SyntacticSemiterm L n₂) :
   · exact IsEmpty.elim e x
 
 lemma rewrite_comp_free_eq_subst (t : SyntacticTerm L) :
-    (rewrite (t :>ₙ Semiterm.fvar)).comp free = subst ![t] := by ext x <;> simp [comp_app, Fin.eq_zero]
+    (rewrite (t :>ₙ Semiterm.fvar)).comp free = subst ![t] := by ext x <;> simp [comp_app]
 
 lemma rewrite_comp_shift_eq_id (t : SyntacticTerm L) :
     (rewrite (t :>ₙ Semiterm.fvar)).comp shift = Rew.id := by ext x <;> simp [comp_app]
 
 @[simp] lemma subst_mbar_zero_comp_shift_eq_free :
-    (subst (L := L) ![&0]).comp shift = free := by ext x <;> simp [comp_app, Fin.eq_zero]
+    (subst (L := L) ![&0]).comp shift = free := by ext x <;> simp [comp_app]
 
 @[simp] lemma subst_comp_bShift_eq_id (v : Fin 1 → Semiterm L ξ 0) :
     (subst (L := L) v).comp bShift = Rew.id := by
@@ -608,7 +603,7 @@ lemma free_comp_subst_eq_subst_comp_shift {n'} (w : Fin n' → SyntacticSemiterm
 
 lemma rewrite_comp_fix_eq_subst (t) :
     ((rewrite (t :>ₙ (&·))).comp free : SyntacticRew L 1 0) = subst ![t] := by
-  ext x <;> simp [comp_app, Fin.eq_zero]
+  ext x <;> simp [comp_app]
 
 lemma bShift_eq_rewrite :
     (Rew.bShift : SyntacticRew L 0 1) = Rew.subst ![] := by
@@ -711,10 +706,8 @@ lemma emb_bShift_term {o : Type v₁} [IsEmpty o] (t : Semiterm L o n) :
 
 end Rew
 
-/-!
-### Rewriting system of terms
+/-! ### Rewriting system of terms -/
 
--/
 namespace Semiterm
 
 variable {L L' L₁ L₂ L₃ : Language} {ξ ξ' ξ₁ ξ₂ ξ₃ : Type*} {n n₁ n₂ n₃ : ℕ}
@@ -811,10 +804,7 @@ def toEmpty [DecidableEq ξ] {n : ℕ} : (t : Semiterm L ξ n) → t.freeVariabl
 
 end Semiterm
 
-/-!
-### Rewriting system of formulae
-
--/
+/-! ### Rewriting system of formulae -/
 
 class FreeVar (ξ : outParam Type*) (F : ℕ → Type*) where
 
@@ -909,7 +899,7 @@ namespace LawfulSyntacticRewriting
 
 variable {S : ℕ → Type*} [LCWQ S] [SyntacticRewriting L S S]
 
-open Rewriting ReflectiveRewriting TransitiveRewriting InjMapRewriting
+open Rewriting ReflectiveRewriting TransitiveRewriting InjMapRewriting Semiterm
 
 lemma fix_allClosure (φ : S n) :
     ∀' fix (∀* φ) = ∀* fix φ := by
@@ -956,7 +946,7 @@ lemma shift_injective : Function.Injective fun φ : S n ↦ shift φ :=
 lemma free_rewrite_eq (f : ℕ → SyntacticTerm L) (φ : S 1) :
     free ((Rew.rewrite fun x ↦ Rew.bShift (f x)) ▹ φ) =
     Rew.rewrite (&0 :>ₙ fun x ↦ Rew.shift (f x)) ▹ free φ := by
-  simpa [← comp_app] using smul_ext' <| by ext x <;> simp [Rew.comp_app, Fin.eq_zero]
+  simpa [← comp_app] using smul_ext' <| by ext x <;> simp [Rew.comp_app]
 
 lemma shift_rewrite_eq (f : ℕ → SyntacticTerm L) (φ : S 0) :
     shift (Rew.rewrite f ▹ φ) = (Rew.rewrite (&0 :>ₙ fun x ↦ Rew.shift (f x))) ▹ shift φ := by
@@ -987,7 +977,7 @@ lemma rewrite_subst_nil (f : ℕ → SyntacticTerm L) (φ : S 0) :
 
 lemma rewrite_free_eq_subst (t : SyntacticTerm L) (φ : S 1) :
     Rew.rewrite (t :>ₙ fun x ↦ &x) ▹ free φ = φ/[t] := by
-  simpa [←comp_app] using smul_ext' <| by ext x <;> simp [Rew.comp_app, Fin.fin_one_eq_zero]
+  simpa [←comp_app] using smul_ext' <| by ext x <;> simp [Rew.comp_app]
 
 def shiftEmb : S n ↪ S n where
   toFun := shift
@@ -1012,7 +1002,7 @@ namespace Rewriting
 
 variable {ο ξ : Type*} [IsEmpty ο] {O F : ℕ → Type*} [LCWQ O] [LCWQ F]
 
-open ReflectiveRewriting TransitiveRewriting InjMapRewriting
+open ReflectiveRewriting TransitiveRewriting InjMapRewriting Semiterm
 
 lemma emb_injective [Rewriting L ο O ξ F] [InjMapRewriting L ο O ξ F] : Function.Injective fun φ : O n ↦ (emb (ξ := ξ) φ : F n) :=
   smul_map_injective Function.injective_id (IsEmpty.elim inferInstance)
@@ -1060,11 +1050,10 @@ variable {S : ℕ → Type*} [LCWQ S] [SyntacticRewriting L S S] [LawfulSyntacti
     φ/[(#0 : Semiterm L ξ 1)] = φ := by
   suffices φ/[(#0 : Semiterm L ξ 1)] = Rew.id ▹ φ by rwa [ReflectiveRewriting.id_app] at this
   apply smul_ext'
-  ext x
-  · simp [Fin.fin_one_eq_zero x]
-  · simp
+  ext x <;> simp
 
 end Rewriting
 
 end LO.FirstOrder
+
 end

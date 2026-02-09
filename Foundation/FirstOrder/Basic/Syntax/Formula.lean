@@ -1,7 +1,7 @@
 module
 
-public import Foundation.Logic.Predicate.Term
-public import Foundation.Logic.Predicate.Quantifier
+public import Foundation.Syntax.Predicate.Term
+public import Foundation.Syntax.Predicate.Quantifier
 public import Mathlib.Data.Nat.Cast.Order.Basic
 
 @[expose] public section
@@ -84,7 +84,7 @@ instance : DeMorgan (Semiformula L ξ n) where
   imply := fun _ _ => rfl
   and := fun _ _ => rfl
   or := fun _ _ => rfl
-  neg := neg_neg
+  neg_involutive := neg_neg
 
 instance : Quantifier (Semiformula L ξ) where
   univ := all

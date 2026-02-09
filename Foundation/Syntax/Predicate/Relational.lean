@@ -1,6 +1,6 @@
 module
 
-public import Foundation.Logic.Predicate.Rew
+public import Foundation.Syntax.Predicate.Rew
 
 @[expose] public section
 
