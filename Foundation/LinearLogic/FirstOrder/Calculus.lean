@@ -2,7 +2,7 @@ module
 
 public import Foundation.LinearLogic.FirstOrder.Rew
 
-/-! # One-sided sequent calculus for first-Order linear logic -/
+/-! # One-sided sequent calculus for first-order linear logic -/
 
 @[expose] public section
 
@@ -14,7 +14,7 @@ abbrev Sequent.IsQuest (Γ : Sequent L) : Prop := ∀ φ ∈ Γ, φ.IsQuest
 
 variable {L : Language}
 
-/-- Derivation of first-Order linear logic -/
+/-- Derivation of first-order linear logic -/
 inductive Derivation : Sequent L → Type _ where
   | protected id (r : L.Rel k) (v) : Derivation [.rel r v, .nrel r v]
   | cut : Derivation (φ :: Γ) → Derivation (∼φ :: Δ) → Derivation (Γ ++ Δ)
