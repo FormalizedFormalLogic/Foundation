@@ -3,7 +3,7 @@ public import Foundation.FirstOrder.Basic.Semantics.Semantics
 public import Foundation.FirstOrder.Basic.Calculus
 @[expose] public section
 
-/-- # Soundness theorem for first-order classical logic -/
+/-! # Soundness theorem for first-order classical logic -/
 
 namespace LO
 
