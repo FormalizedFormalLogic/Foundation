@@ -200,9 +200,7 @@ public import Foundation.Logic.LogicSymbol
 public import Foundation.Logic.Semantics
 public import Foundation.Meta.Test
 public import Foundation.Meta.TwoSided
-public import Foundation.Modal.Algebra
 public import Foundation.Modal.Algebra.Basic
-public import Foundation.Modal.Algebra.Magari
 public import Foundation.Modal.Axioms
 public import Foundation.Modal.Boxdot.Basic
 public import Foundation.Modal.Boxdot.GL_S
@@ -515,6 +513,8 @@ public import Foundation.ProvabilityLogic.Realization
 public import Foundation.ProvabilityLogic.S.Completeness
 public import Foundation.ProvabilityLogic.S.Soundness
 public import Foundation.ProvabilityLogic.SolovaySentences
+public import Foundation.Semantics.Algebra.Modal.Basic
+public import Foundation.Semantics.Algebra.Modal.Magari
 public import Foundation.Semantics.CoherenceSpace.Basic
 public import Foundation.Semantics.CoherenceSpace.StableFunction
 public import Foundation.Syntax.Predicate.Language

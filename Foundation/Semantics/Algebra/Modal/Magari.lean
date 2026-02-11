@@ -1,6 +1,6 @@
 module
 
-public import Foundation.Modal.Algebra.Basic
+public import Foundation.Semantics.Algebra.Modal.Basic
 
 @[expose] public section
 
