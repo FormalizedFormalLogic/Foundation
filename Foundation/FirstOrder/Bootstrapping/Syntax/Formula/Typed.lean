@@ -132,6 +132,8 @@ instance : DeMorgan (Semiformula V L n) where
   and _ _ := by ext; simp
   or _ _ := by ext; simp
   imply _ _ := by ext; simp; rfl
+
+instance : NegInvolutive (Semiformula L ξ n) where
   neg_involutive _ := by ext; simp
 
 @[simp] lemma neg_all (φ : Semiformula V L (n + 1)) : ∼(∀⁰ φ) = ∃⁰ (∼φ) := by ext; simp

@@ -84,6 +84,8 @@ instance : DeMorgan (Semiformula L ξ n) where
   imply := fun _ _ => rfl
   and := fun _ _ => rfl
   or := fun _ _ => rfl
+
+instance : NegInvolutive (Semiformula L ξ n) where
   neg_involutive := neg_neg
 
 instance : Quantifier (Semiformula L ξ) where
