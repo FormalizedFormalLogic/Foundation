@@ -53,8 +53,8 @@ lemma smash_exists_unique (x y : V) : ∃! z, Exponential (‖x‖ * ‖y‖) z 
   rcases exists_exponential_sq_length y with ⟨z, h⟩
   have : ‖x‖ * ‖y‖ < ‖z‖ :=
     lt_of_le_of_lt (by simpa [sq] using mul_le_mul_right (length_monotone le)) h.lt_length
-  have : Exponential (‖x‖ * ‖y‖) (bexsp z (‖x‖ * ‖y‖)) := exp_bexsp_of_lt (a := z) (x := ‖x‖ * ‖y‖) this
-  exact ExistsUnique.intro (bexsp z (‖x‖ * ‖y‖)) this (fun z' H' ↦ H'.uniq this)
+  have : Exponential (‖x‖ * ‖y‖) (bexp z (‖x‖ * ‖y‖)) := exp_bexp_of_lt (a := z) (x := ‖x‖ * ‖y‖) this
+  exact ExistsUnique.intro (bexp z (‖x‖ * ‖y‖)) this (fun z' H' ↦ H'.uniq this)
 
 instance : Smash V := ⟨fun a b ↦ Classical.choose! (smash_exists_unique a b)⟩
 
@@ -111,7 +111,7 @@ lemma lt_smash_one_iff {a b : V} : a < b ⨳ 1 ↔ ‖a‖ ≤ ‖b‖ := by sim
 lemma smash_monotone {a₁ a₂ b₁ b₂ : V} (h₁ : a₁ ≤ b₁) (h₂ : a₂ ≤ b₂) : a₁ ⨳ a₂ ≤ b₁ ⨳ b₂ :=
   (exponential_smash a₁ a₂).monotone_le (exponential_smash b₁ b₂) (mul_le_mul (length_monotone h₁) (length_monotone h₂) (by simp) (by simp))
 
-lemma bexsp_eq_smash (a b : V) : bexsp (a ⨳ b) (‖a‖ * ‖b‖) = a ⨳ b := bexsp_eq_of_exp (by simp [length_smash]) (exponential_smash a b)
+lemma bexp_eq_smash (a b : V) : bexp (a ⨳ b) (‖a‖ * ‖b‖) = a ⨳ b := bexp_eq_of_exp (by simp [length_smash]) (exponential_smash a b)
 
 lemma smash_two_mul (a : V) {b} (pos : 0 < b) : a ⨳ (2 * b) = (a ⨳ b) * (a ⨳ 1) := by
   have h₁ : Exponential (‖a‖ * ‖b‖ + ‖a‖) (a ⨳ (2 * b)) := by
