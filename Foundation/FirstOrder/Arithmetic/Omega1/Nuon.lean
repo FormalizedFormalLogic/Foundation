@@ -21,24 +21,24 @@ lemma mul_len_lt_len_smash {i I L : V} (hi : i ≤ ‖I‖) : i * ‖L‖ < ‖I
 lemma mul_len_lt_len_smash' {i K z : V} (hi : i ≤ ‖z‖) : i * ‖‖K‖‖ < ‖z ⨳ ‖K‖‖ := by
   simpa [length_smash, lt_succ_iff_le] using _root_.mul_le_mul_left hi ‖‖K‖‖
 
-noncomputable def ext (L S i : V) : V := S / bexp S (i * ‖L‖) % (L ⨳ 1)
+noncomputable def ext (L S i : V) : V := S / bexsp S (i * ‖L‖) % (L ⨳ 1)
 
 local notation S "{" L "}[" i "]" => ext L S i
 
-lemma ext_eq_zero_of_lt {L S i : V} (h : ‖S‖ ≤ i * ‖L‖) : S{L}[i] = 0 := by simp [ext, bexp_eq_zero_of_le h]
+lemma ext_eq_zero_of_lt {L S i : V} (h : ‖S‖ ≤ i * ‖L‖) : S{L}[i] = 0 := by simp [ext, bexsp_eq_zero_of_le h]
 
 @[simp] lemma ext_le_self (L S i : V) : S{L}[i] ≤ S := le_trans (mod_le _ _) (by simp)
 
 lemma ext_graph_aux (z S L i : V) : z = S{L}[i] ↔ (‖S‖ ≤ i * ‖L‖ → z = 0) ∧ (i * ‖L‖ < ‖S‖ → ∃ b ≤ S, Exponential (i * ‖L‖) b ∧ z = S / b % (L ⨳ 1)) := by
   rcases show ‖S‖ ≤ i * ‖L‖ ∨ i * ‖L‖ < ‖S‖ from le_or_gt _ _ with (le | lt)
   · simp [ext_eq_zero_of_lt le, le, not_lt.mpr le]
-  · suffices z = S / bexp S (i * ‖L‖) % L ⨳ 1 ↔ ∃ b ≤ S, Exponential (i * ‖L‖) b ∧ z = S / b % L ⨳ 1 by
+  · suffices z = S / bexsp S (i * ‖L‖) % L ⨳ 1 ↔ ∃ b ≤ S, Exponential (i * ‖L‖) b ∧ z = S / b % L ⨳ 1 by
       simpa [lt, not_le.mpr lt, ext]
-    have := exp_bexp_of_lt lt
+    have := exp_bexsp_of_lt lt
     constructor
-    · rintro rfl; exact ⟨bexp S (i * ‖L‖), by simp, exp_bexp_of_lt lt, rfl⟩
+    · rintro rfl; exact ⟨bexsp S (i * ‖L‖), by simp, exp_bexsp_of_lt lt, rfl⟩
     · rintro ⟨b, _, H, rfl⟩
-      rcases H.uniq (exp_bexp_of_lt lt); rfl
+      rcases H.uniq (exp_bexsp_of_lt lt); rfl
 
 lemma ext_graph (z S L i : V) : z = S{L}[i] ↔
     ∃ lS ≤ S, lS = ‖S‖ ∧ ∃ lL ≤ L, lL = ‖L‖ ∧
@@ -85,26 +85,26 @@ lemma ext_zero_eq_self_of_le {L S : V} (h : ‖S‖ ≤ ‖L‖) : S{L}[0] = S :
   rcases zero_le S with (rfl | pos)
   · simp [ext]
   · simp [ext]
-    have : bexp S 0 = 1 := (exp_bexp_of_lt (show 0 < ‖S‖ from by simp [pos])).zero_uniq
+    have : bexsp S 0 = 1 := (exp_bexsp_of_lt (show 0 < ‖S‖ from by simp [pos])).zero_uniq
     simp [this, lt_smash_one_iff.mpr h]
 
-lemma ext_eq_of_ge {L S S' i : V} (h : S ≤ S') : S / bexp S' (i * ‖L‖) % (L ⨳ 1) = S{L}[i] := by
+lemma ext_eq_of_ge {L S S' i : V} (h : S ≤ S') : S / bexsp S' (i * ‖L‖) % (L ⨳ 1) = S{L}[i] := by
   rcases show i * ‖L‖ < ‖S‖ ∨ ‖S‖ ≤ i * ‖L‖ from lt_or_ge (i * ‖L‖) ‖S‖ with (lt | le)
-  · unfold ext; congr 2; exact bexp_eq_of_lt_length (lt_of_lt_of_le lt $ length_monotone h) lt
+  · unfold ext; congr 2; exact bexsp_eq_of_lt_length (lt_of_lt_of_le lt $ length_monotone h) lt
   · simp only [ext_eq_zero_of_lt le]
     rcases show i * ‖L‖ < ‖S'‖ ∨ ‖S'‖ ≤ i * ‖L‖ from lt_or_ge (i * ‖L‖) ‖S'‖ with (lt' | le')
-    · have : S < bexp S' (i * ‖L‖) := ((exp_bexp_of_lt lt').lt_iff_len_le).mpr le
+    · have : S < bexsp S' (i * ‖L‖) := ((exp_bexsp_of_lt lt').lt_iff_len_le).mpr le
       simp [this]
-    · simp [bexp_eq_zero_of_le le']
+    · simp [bexsp_eq_zero_of_le le']
 
-lemma ext_eq_of_gt {L S S' i : V} (h : i * ‖L‖ < ‖S'‖) : S / bexp S' (i * ‖L‖) % (L ⨳ 1) = S{L}[i] := by
+lemma ext_eq_of_gt {L S S' i : V} (h : i * ‖L‖ < ‖S'‖) : S / bexsp S' (i * ‖L‖) % (L ⨳ 1) = S{L}[i] := by
   rcases show i * ‖L‖ < ‖S‖ ∨ ‖S‖ ≤ i * ‖L‖ from lt_or_ge (i * ‖L‖) ‖S‖ with (lt | le)
-  · unfold ext; congr 2; exact bexp_eq_of_lt_length h lt
+  · unfold ext; congr 2; exact bexsp_eq_of_lt_length h lt
   · simp only [ext_eq_zero_of_lt le]
-    have : S < bexp S' (i * ‖L‖) := ((exp_bexp_of_lt h).lt_iff_len_le).mpr le
+    have : S < bexsp S' (i * ‖L‖) := ((exp_bexsp_of_lt h).lt_iff_len_le).mpr le
     simp [this]
 
-lemma ext_eq_smash_of_le {L S i : V} (h : i ≤ ‖I‖) : S / bexp (I ⨳ L) (i * ‖L‖) % (L ⨳ 1) = S{L}[i] :=
+lemma ext_eq_smash_of_le {L S i : V} (h : i ≤ ‖I‖) : S / bexsp (I ⨳ L) (i * ‖L‖) % (L ⨳ 1) = S{L}[i] :=
   ext_eq_of_gt (mul_len_lt_len_smash h)
 
 lemma ext_add₁_pow2 {L i S₁ S₂ p : V} (pp : Pow2 p) (h : (i + 1) * ‖L‖ < ‖p‖) :
@@ -115,50 +115,50 @@ lemma ext_add₁_pow2 {L i S₁ S₂ p : V} (pp : Pow2 p) (h : (i + 1) * ‖L‖
         i * ‖L‖ ≤ (i + 1) * ‖L‖ := mul_le_mul_right (by simp)
         _       < ‖p‖           := h
         _       ≤ ‖S₁ + S₂ * p‖ := length_monotone (le_add_left (le_mul_of_pos_left pos₂))
-  have : Exponential ((i + 1) * ‖L‖) (bexp (S₁ + S₂ * p) (i * ‖L‖) * L ⨳ 1) := by
+  have : Exponential ((i + 1) * ‖L‖) (bexsp (S₁ + S₂ * p) (i * ‖L‖) * L ⨳ 1) := by
     simpa [add_mul]
       using Exponential.add_mul (by simp [lt_len]) (by simpa using exponential_smash L 1)
-  have : bexp (S₁ + S₂ * p) (i * ‖L‖) * L ⨳ 1 ∣ p :=
-    Pow2.dvd_of_le (by simpa using bexp_pow2 lt_len) pp (this.monotone_le (exponential_of_pow2 pp) (le_log_of_lt_length h))
+  have : bexsp (S₁ + S₂ * p) (i * ‖L‖) * L ⨳ 1 ∣ p :=
+    Pow2.dvd_of_le (by simpa using bexsp_pow2 lt_len) pp (this.monotone_le (exponential_of_pow2 pp) (le_log_of_lt_length h))
   rcases this with ⟨q, hq⟩
   calc
-    (S₁ + S₂ * p){L}[i] = (S₁ + p * S₂) / bexp (S₁ + S₂ * p) (i * ‖L‖) % L ⨳ 1         := by simp [ext, mul_comm S₂]
-    _                   = (S₁ + bexp (S₁ + S₂ * p) (i * ‖L‖) * (L ⨳ 1 * q * S₂)) / bexp (S₁ + S₂ * p) (i * ‖L‖) % L ⨳ 1 := by simp [←mul_assoc, ←hq]
-    _                   = (S₁ / bexp (S₁ + S₂ * p) (i * ‖L‖) + L ⨳ 1 * q * S₂) % L ⨳ 1 := by rw [div_add_mul_self' _ _ (bexp_pos lt_len)]
-    _                   = S₁ / bexp (S₁ + S₂ * p) (i * ‖L‖) % L ⨳ 1                    := by simp [mul_assoc]
+    (S₁ + S₂ * p){L}[i] = (S₁ + p * S₂) / bexsp (S₁ + S₂ * p) (i * ‖L‖) % L ⨳ 1         := by simp [ext, mul_comm S₂]
+    _                   = (S₁ + bexsp (S₁ + S₂ * p) (i * ‖L‖) * (L ⨳ 1 * q * S₂)) / bexsp (S₁ + S₂ * p) (i * ‖L‖) % L ⨳ 1 := by simp [←mul_assoc, ←hq]
+    _                   = (S₁ / bexsp (S₁ + S₂ * p) (i * ‖L‖) + L ⨳ 1 * q * S₂) % L ⨳ 1 := by rw [div_add_mul_self' _ _ (bexsp_pos lt_len)]
+    _                   = S₁ / bexsp (S₁ + S₂ * p) (i * ‖L‖) % L ⨳ 1                    := by simp [mul_assoc]
     _                   = S₁{L}[i]                                                     := ext_eq_of_ge le_self_add
 
-lemma ext_add₁_bexp {L i j S₁ S₂ : V} (hi : i ≤ ‖I‖) (hij : j < i) :
-    (S₁ + S₂ * bexp (I ⨳ L) (i * ‖L‖)){L}[j] = S₁{L}[j] :=
-  ext_add₁_pow2 (bexp_pow2 $ mul_len_lt_len_smash hi)
-    (by rw [len_bexp (mul_len_lt_len_smash hi), lt_succ_iff_le]; exact mul_le_mul_right (succ_le_iff_lt.mpr hij))
+lemma ext_add₁_bexsp {L i j S₁ S₂ : V} (hi : i ≤ ‖I‖) (hij : j < i) :
+    (S₁ + S₂ * bexsp (I ⨳ L) (i * ‖L‖)){L}[j] = S₁{L}[j] :=
+  ext_add₁_pow2 (bexsp_pow2 $ mul_len_lt_len_smash hi)
+    (by rw [len_bexsp (mul_len_lt_len_smash hi), lt_succ_iff_le]; exact mul_le_mul_right (succ_le_iff_lt.mpr hij))
 
-lemma ext_add₂_bexp {I i j S₁ S₂ : V} (hij : i + j ≤ ‖I‖) (hS₁ : ‖S₁‖ ≤ i * ‖L‖) :
-    (S₁ + S₂ * bexp (I ⨳ L) (i * ‖L‖)){L}[i + j] = S₂{L}[j] := by
-  have hie : Exponential (i * ‖L‖) (bexp (I ⨳ L) (i * ‖L‖)) := exp_bexp_of_lt (mul_len_lt_len_smash $ le_trans le_self_add hij)
-  calc  (S₁ + S₂ * bexp (I ⨳ L) (i * ‖L‖)){L}[i + j]
-      = (S₁ + S₂ * bexp (I ⨳ L) (i * ‖L‖)) / bexp (I ⨳ L) ((i + j) * ‖L‖) % (L ⨳ 1)                    := by rw [ext_eq_smash_of_le hij]
-    _ = (S₁ + S₂ * bexp (I ⨳ L) (i * ‖L‖)) / bexp (I ⨳ L) (i * ‖L‖) / bexp (I ⨳ L) (j * ‖L‖) % (L ⨳ 1) := by
-      simp only [add_mul, ← Arithmetic.div_mul]; congr 2; exact bexp_add (by simp [←add_mul, mul_len_lt_len_smash hij])
-    _ = S₂ / bexp (I ⨳ L) (j * ‖L‖) % (L ⨳ 1)                                                          := by
+lemma ext_add₂_bexsp {I i j S₁ S₂ : V} (hij : i + j ≤ ‖I‖) (hS₁ : ‖S₁‖ ≤ i * ‖L‖) :
+    (S₁ + S₂ * bexsp (I ⨳ L) (i * ‖L‖)){L}[i + j] = S₂{L}[j] := by
+  have hie : Exponential (i * ‖L‖) (bexsp (I ⨳ L) (i * ‖L‖)) := exp_bexsp_of_lt (mul_len_lt_len_smash $ le_trans le_self_add hij)
+  calc  (S₁ + S₂ * bexsp (I ⨳ L) (i * ‖L‖)){L}[i + j]
+      = (S₁ + S₂ * bexsp (I ⨳ L) (i * ‖L‖)) / bexsp (I ⨳ L) ((i + j) * ‖L‖) % (L ⨳ 1)                    := by rw [ext_eq_smash_of_le hij]
+    _ = (S₁ + S₂ * bexsp (I ⨳ L) (i * ‖L‖)) / bexsp (I ⨳ L) (i * ‖L‖) / bexsp (I ⨳ L) (j * ‖L‖) % (L ⨳ 1) := by
+      simp only [add_mul, ← Arithmetic.div_mul]; congr 2; exact bexsp_add (by simp [←add_mul, mul_len_lt_len_smash hij])
+    _ = S₂ / bexsp (I ⨳ L) (j * ‖L‖) % (L ⨳ 1)                                                          := by
       congr 2; rw [div_add_mul_self, div_eq_zero_of_lt] <;> simp [hie.lt_iff_len_le.mpr hS₁, hie.range_pos]
     _ = S₂{L}[j]                                                                                       := ext_eq_smash_of_le (le_trans le_add_self hij)
 
-noncomputable def append (I L S i X : V) : V := S % bexp (I ⨳ L) (i * ‖L‖) + X * bexp (I ⨳ L) (i * ‖L‖)
+noncomputable def append (I L S i X : V) : V := S % bexsp (I ⨳ L) (i * ‖L‖) + X * bexsp (I ⨳ L) (i * ‖L‖)
 
-lemma append_nil (I L S i : V) : append I L S i 0 = S % bexp (I ⨳ L) (i * ‖L‖) := by simp [append]
+lemma append_nil (I L S i : V) : append I L S i 0 = S % bexsp (I ⨳ L) (i * ‖L‖) := by simp [append]
 
 lemma len_append (I L S : V) {i X} (hi : i ≤ ‖I‖) (hX : 0 < X) : ‖append I L S i X‖ = ‖X‖ + i * ‖L‖ := calc
-  ‖append I L S i X‖ = ‖X * bexp (I ⨳ L) (i * ‖L‖) + S % bexp (I ⨳ L) (i * ‖L‖)‖ := by simp [append, add_comm]
-  _                  = ‖X‖ + log (bexp (I ⨳ L) (i * ‖L‖))                        := length_mul_pow2_add_of_lt hX
-                                                                                      (bexp_pow2 $ mul_len_lt_len_smash hi)
-                                                                                      (mod_lt _ $ bexp_pos $ mul_len_lt_len_smash hi)
-  _                  = ‖X‖ + i * ‖L‖                                             := by simp [log_bexp (mul_len_lt_len_smash hi)]
+  ‖append I L S i X‖ = ‖X * bexsp (I ⨳ L) (i * ‖L‖) + S % bexsp (I ⨳ L) (i * ‖L‖)‖ := by simp [append, add_comm]
+  _                  = ‖X‖ + log (bexsp (I ⨳ L) (i * ‖L‖))                        := length_mul_pow2_add_of_lt hX
+                                                                                      (bexsp_pow2 $ mul_len_lt_len_smash hi)
+                                                                                      (mod_lt _ $ bexsp_pos $ mul_len_lt_len_smash hi)
+  _                  = ‖X‖ + i * ‖L‖                                             := by simp [log_bexsp (mul_len_lt_len_smash hi)]
 
 lemma append_lt_smash (I L S : V) {i X} (hi : i < ‖I‖) (hX : ‖X‖ ≤ ‖L‖) : append I L S i X < I ⨳ L := by
   rcases zero_le X with (rfl | pos)
   · simpa [append_nil]
-      using lt_of_lt_of_le (mod_lt _ (bexp_pos $ mul_len_lt_len_smash $ le_of_lt hi)) (by simp)
+      using lt_of_lt_of_le (mod_lt _ (bexsp_pos $ mul_len_lt_len_smash $ le_of_lt hi)) (by simp)
   · suffices ‖X‖ + i * ‖L‖ ≤ ‖I‖ * ‖L‖ by simpa [lt_smash_iff, len_append I L S (le_of_lt hi) pos]
     calc
       ‖X‖ + i * ‖L‖ ≤ (i + 1) * ‖L‖ := by simp [add_mul, add_comm (i * ‖L‖), hX]
@@ -167,24 +167,24 @@ lemma append_lt_smash (I L S : V) {i X} (hi : i < ‖I‖) (hX : ‖X‖ ≤ ‖
 lemma append_lt_sq_smash (I L S : V) {i X} (hi : i ≤ ‖I‖) (hX : ‖X‖ ≤ ‖L‖) (Ipos : 0 < I) : append I L S i X < (I ⨳ L)^2 := by
   rcases hi with (rfl | hi)
   · calc
-      append I L S ‖I‖ X = S % I ⨳ L + X * I ⨳ L := by simp [append, bexp_eq_smash]
+      append I L S ‖I‖ X = S % I ⨳ L + X * I ⨳ L := by simp [append, bexsp_eq_smash]
       _                  < (X + 1) * I ⨳ L       := by simp [add_mul, add_comm]
       _                  ≤ L ⨳ 1 * I ⨳ L         := mul_le_mul_right (succ_le_iff_lt.mpr $ lt_smash_one_iff.mpr hX)
       _                  ≤ (I ⨳ L) ^ 2           := by simpa [sq, smash_comm L 1] using smash_monotone (pos_iff_one_le.mp Ipos) (by rfl)
   · exact lt_of_lt_of_le (append_lt_smash I L S hi hX) (by simp)
 
 lemma ext_append_last (I L S : V) {i X} (hi : i ≤ ‖I‖) (hX : ‖X‖ ≤ ‖L‖) : (append I L S i X){L}[i] = X := calc
-  (append I L S i X){L}[i] = (S % bexp (I ⨳ L) (i * ‖L‖) + X * bexp (I ⨳ L) (i * ‖L‖)){L}[i + 0] := by simp [append]
-  _                        =  X{L}[0]                                                            := ext_add₂_bexp (by simpa using hi)
-                                                                                                      ((exp_bexp_of_lt (mul_len_lt_len_smash hi)).lt_iff_len_le.mp
-                                                                                                        (mod_lt _ $ bexp_pos $ mul_len_lt_len_smash hi))
+  (append I L S i X){L}[i] = (S % bexsp (I ⨳ L) (i * ‖L‖) + X * bexsp (I ⨳ L) (i * ‖L‖)){L}[i + 0] := by simp [append]
+  _                        =  X{L}[0]                                                            := ext_add₂_bexsp (by simpa using hi)
+                                                                                                      ((exp_bexsp_of_lt (mul_len_lt_len_smash hi)).lt_iff_len_le.mp
+                                                                                                        (mod_lt _ $ bexsp_pos $ mul_len_lt_len_smash hi))
   _                        =  X                                                                  := ext_zero_eq_self_of_le hX
 
 lemma ext_append_lt (I L S : V) {i j X} (hi : i ≤ ‖I‖) (hij : j < i) :
     (append I L S i X){L}[j] = S{L}[j] := calc
-  (append I L S i X){L}[j] = (S % bexp (I ⨳ L) (i * ‖L‖) + X * bexp (I ⨳ L) (i * ‖L‖)){L}[j] := rfl
-  _                        = (S % bexp (I ⨳ L) (i * ‖L‖)){L}[j]                              := ext_add₁_bexp hi hij
-  _                        = (S % bexp (I ⨳ L) (i * ‖L‖) + (S / bexp (I ⨳ L) (i * ‖L‖)) * bexp (I ⨳ L) (i * ‖L‖)){L}[j] := Eq.symm <| ext_add₁_bexp hi hij
+  (append I L S i X){L}[j] = (S % bexsp (I ⨳ L) (i * ‖L‖) + X * bexsp (I ⨳ L) (i * ‖L‖)){L}[j] := rfl
+  _                        = (S % bexsp (I ⨳ L) (i * ‖L‖)){L}[j]                              := ext_add₁_bexsp hi hij
+  _                        = (S % bexsp (I ⨳ L) (i * ‖L‖) + (S / bexsp (I ⨳ L) (i * ‖L‖)) * bexsp (I ⨳ L) (i * ‖L‖)){L}[j] := Eq.symm <| ext_add₁_bexsp hi hij
   _                        = S{L}[j]                                                         := by rw [add_comm, mul_comm, div_add_mod]
 
 section
@@ -410,14 +410,14 @@ section
   4. $\| A \| < \|I\|^2$
 -/
 
-noncomputable def polyI (A : V) : V := bexp (2 * A) (√‖A‖)
+noncomputable def polyI (A : V) : V := bexsp (2 * A) (√‖A‖)
 
 noncomputable def polyL (A : V) : V := ‖polyI A‖ ^ 2
 
 def polyU (A : V) : V := (2 * A + 1) ^ 128
 
 lemma len_polyI {A : V} (pos : 0 < A) : ‖polyI A‖ = √‖A‖ + 1 :=
-  len_bexp (show √‖A‖ < ‖2 * A‖ from by simp [length_two_mul_of_pos pos, lt_succ_iff_le])
+  len_bexsp (show √‖A‖ < ‖2 * A‖ from by simp [length_two_mul_of_pos pos, lt_succ_iff_le])
 
 lemma polyI_le {A : V} (pos : 0 < A) : ‖A‖ < ‖polyI A‖ ^ 2 := by simp [len_polyI pos]
 
@@ -442,29 +442,29 @@ lemma four_mul_smash_self (a : V) : (4 * a) ⨳ (4 * a) ≤ (a ⨳ a) ^ 16 := ca
 
 @[simp] lemma pow_four_le_pow_four {a b : V} : a ^ 4 ≤ b ^ 4 ↔ a ≤ b := by simp [pow_four_eq_sq_sq]
 
-lemma bexp_four_mul {a a' x : V} (hx : 4 * x < ‖a‖) (hx' : x < ‖a'‖) :
-    bexp a (4 * x) = (bexp a' x) ^ 4 := by
-  rw [four_mul_eq_two_mul_two_mul, bexp_two_mul (a' := a), bexp_two_mul (a := a), pow_four_eq_sq_sq]
+lemma bexsp_four_mul {a a' x : V} (hx : 4 * x < ‖a‖) (hx' : x < ‖a'‖) :
+    bexsp a (4 * x) = (bexsp a' x) ^ 4 := by
+  rw [four_mul_eq_two_mul_two_mul, bexsp_two_mul (a' := a), bexsp_two_mul (a := a), pow_four_eq_sq_sq]
   · exact lt_of_le_of_lt (by simp [four_mul_eq_two_mul_two_mul]) hx
   · exact hx'
   · simpa [four_mul_eq_two_mul_two_mul] using hx
   · exact lt_of_le_of_lt (by simp [four_mul_eq_two_mul_two_mul]) hx
 
 lemma polyI_smash_self_polybounded {A : V} (pos : 0 < A) : (polyI A) ⨳ (polyI A) ≤ (2 * A + 1) ^ 4 := calc
-  (polyI A) ⨳ (polyI A) = bexp ((polyI A) ⨳ (polyI A)) ((√‖A‖ + 1) ^ 2) := Eq.symm <| by simpa [sq, len_polyI pos] using bexp_eq_smash (polyI A) (polyI A)
-  _                     ≤ bexp ((2 * A) ⨳ (2 * A)) ((2 * √‖A‖) ^ 2)     :=
-    (bexp_monotone_le
+  (polyI A) ⨳ (polyI A) = bexsp ((polyI A) ⨳ (polyI A)) ((√‖A‖ + 1) ^ 2) := Eq.symm <| by simpa [sq, len_polyI pos] using bexsp_eq_smash (polyI A) (polyI A)
+  _                     ≤ bexsp ((2 * A) ⨳ (2 * A)) ((2 * √‖A‖) ^ 2)     :=
+    (bexsp_monotone_le
       (by simp [length_smash, ←sq, len_polyI pos])
       (by simp [length_smash, lt_succ_iff_le, ←sq, length_two_mul_of_pos pos])).mpr
     (by simp [two_mul, ←pos_iff_one_le, pos])
-  _                     ≤ bexp ((2 * A) ⨳ (2 * A)) (4 * (√‖A‖) ^ 2)     := by simp [mul_pow, two_pow_two_eq_four]
-  _                     = (bexp (A ⨳ 1) ((√‖A‖) ^ 2)) ^ 4               :=
-    bexp_four_mul
+  _                     ≤ bexsp ((2 * A) ⨳ (2 * A)) (4 * (√‖A‖) ^ 2)     := by simp [mul_pow, two_pow_two_eq_four]
+  _                     = (bexsp (A ⨳ 1) ((√‖A‖) ^ 2)) ^ 4               :=
+    bexsp_four_mul
       (by simp [length_smash, lt_succ_iff_le, ←sq, length_two_mul_of_pos pos, ←two_pow_two_eq_four, ←mul_pow])
       (by simp [length_smash, lt_succ_iff_le])
-  _                     ≤ (bexp (A ⨳ 1) ‖A‖) ^ 4                        := by
-    simpa using (bexp_monotone_le (by simp [length_smash, lt_succ_iff_le]) (by simp [length_smash])).mpr (by simp)
-  _                     = (A ⨳ 1) ^ 4                                   := by congr 1; simpa using bexp_eq_smash A 1
+  _                     ≤ (bexsp (A ⨳ 1) ‖A‖) ^ 4                        := by
+    simpa using (bexsp_monotone_le (by simp [length_smash, lt_succ_iff_le]) (by simp [length_smash])).mpr (by simp)
+  _                     = (A ⨳ 1) ^ 4                                   := by congr 1; simpa using bexsp_eq_smash A 1
   _                     ≤ (2 * A + 1) ^ 4                               := by simp
 
 lemma polyI_smash_polyL_polybounded {A : V} (pos : 0 < A) : (polyI A) ⨳ (polyL A) ≤ (2 * A + 1) ^ 64 := calc
@@ -512,12 +512,12 @@ def isSeriesDef : 𝚺₀.Semisentence 6 := .mkSigma
         !segmentDef U L A (lI * l) lI x y”
 
 omit [V ⊧ₘ* 𝗜𝚺₀ + 𝝮₁] in
-lemma bex_eq_le_iff {p : V → Prop} {b : V} :
+lemma bexs_eq_le_iff {p : V → Prop} {b : V} :
     (∃ a ≤ z, a = b ∧ p a) ↔ (b ≤ z ∧ p b) :=
   ⟨by rintro ⟨a, hp, rfl, hr⟩; exact ⟨hp, hr⟩, by rintro ⟨hp, hr⟩; exact ⟨b, hp, rfl, hr⟩⟩
 
 omit [V ⊧ₘ* 𝗜𝚺₀ + 𝝮₁] in
-lemma bex_eq_lt_iff {p : V → Prop} {b : V} :
+lemma bexs_eq_lt_iff {p : V → Prop} {b : V} :
     (∃ a < z, a = b ∧ p a) ↔ (b < z ∧ p b) :=
   ⟨by rintro ⟨a, hp, rfl, hr⟩; exact ⟨hp, hr⟩, by rintro ⟨hp, hr⟩; exact ⟨b, hp, rfl, hr⟩⟩
 
@@ -551,7 +551,7 @@ def nuonAuxDef : 𝚺₀.Semisentence 3 := .mkSigma
   “A k n.
     ∃ lA <⁺ A, !lengthDef lA A ∧
     ∃ sA <⁺ lA, !sqrtDef sA lA ∧
-    ∃ g <⁺ 2 * A, !bexpDef g (2 * A) sA ∧
+    ∃ g <⁺ 2 * A, !bexspDef g (2 * A) sA ∧
     ∃ lg <⁺ g, !lengthDef lg g ∧
       !seriesSegmentDef ((2 * A + 1) ^' 128) g (lg ²) A k n”
 

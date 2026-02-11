@@ -137,7 +137,7 @@ variable (c v)
 open Classical in
 lemma CSeq.exists (l : V) : ∃ s, c.CSeq v s ∧ l + 1 = lh s := by
   induction l using ISigma1.sigma1_succ_induction
-  · apply HierarchySymbol.Definable.ex
+  · apply HierarchySymbol.Definable.exs
     apply HierarchySymbol.Definable.and
     · exact ⟨p.cseqDef.rew (Rew.embSubsts <| #0 :> fun i ↦ &(v i)), by
         intro w; simpa [Matrix.comp_vecCons'] using c.cseq_defined_iff (w 0 :> v)⟩
@@ -151,7 +151,7 @@ lemma CSeq.exists (l : V) : ∃ s, c.CSeq v s ∧ l + 1 = lh s := by
     rcases this with ⟨z, hz⟩
     exact ⟨s ⁀' c.succ v l z, Hs.successor hls hz, by simp [Hs.seq, hls]⟩
 
-lemma cSeq_result_existsUnique (l : V) : ∃! z, ∃ s, c.CSeq v s ∧ l + 1 = lh s ∧ ⟪l, z⟫ ∈ s := by
+lemma cSeq_result_exsistsUnique (l : V) : ∃! z, ∃ s, c.CSeq v s ∧ l + 1 = lh s ∧ ⟪l, z⟫ ∈ s := by
   rcases CSeq.exists c v l with ⟨s, Hs, h⟩
   have : ∃ z, ⟪l, z⟫ ∈ s := Hs.seq.exists (show l < lh s from by simp [←h])
   rcases this with ⟨z, hz⟩
@@ -159,10 +159,10 @@ lemma cSeq_result_existsUnique (l : V) : ∃! z, ∃ s, c.CSeq v s ∧ l + 1 = l
     rintro z' ⟨s', Hs', h', hz'⟩
     exact Eq.symm <| Hs.unique Hs' (by simp [←h, ←h']) (show l < lh s from by simp [←h]) hz hz')
 
-noncomputable def result (u : V) : V := Classical.choose! (c.cSeq_result_existsUnique v u)
+noncomputable def result (u : V) : V := Classical.choose! (c.cSeq_result_exsistsUnique v u)
 
 lemma result_spec (u : V) : ∃ s, c.CSeq v s ∧ u + 1 = lh s ∧ ⟪u, c.result v u⟫ ∈ s :=
-  Classical.choose!_spec (c.cSeq_result_existsUnique v u)
+  Classical.choose!_spec (c.cSeq_result_exsistsUnique v u)
 
 @[simp] theorem result_zero : c.result v 0 = c.zero v := by
   rcases c.result_spec v 0 with ⟨s, Hs, _, h0⟩
@@ -172,7 +172,7 @@ lemma result_spec (u : V) : ∃ s, c.CSeq v s ∧ u + 1 = lh s ∧ ⟪u, c.resul
   rcases c.result_spec v u with ⟨s, Hs, hk, h⟩
   have : CSeq c v (s ⁀' c.succ v u (result c v u) ) := Hs.successor hk h
   exact Eq.symm
-    <| Classical.choose_uniq (c.cSeq_result_existsUnique v (u + 1))
+    <| Classical.choose_uniq (c.cSeq_result_exsistsUnique v (u + 1))
     ⟨_, this, by simp [Hs.seq, hk], by simp [hk]⟩
 
 lemma result_graph (z u : V) : z = c.result v u ↔ ∃ s, c.CSeq v s ∧ ⟪u, z⟫ ∈ s :=

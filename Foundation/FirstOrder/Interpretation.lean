@@ -15,9 +15,9 @@ structure DirectTranslation {L₁ : Language} [L₁.Eq] (T : Theory L₁) [𝗘�
   rel {k} : L₂.Rel k → Semisentence L₁ k
   func {k} : L₂.Func k → Semisentence L₁ (k + 1)
   domain_nonempty :
-    T ⊢ ∃' domain
+    T ⊢ ∃⁰ domain
   func_defined {k} (f : L₂.Func k) :
-    T ⊢ ∀* ((Matrix.conj fun i ↦ domain/[#i]) ➝ ∃'! (domain/[#0] ⋏ func f))
+    T ⊢ ∀⁰* ((Matrix.conj fun i ↦ domain/[#i]) ➝ ∃⁰! (domain/[#0] ⋏ func f))
   preserve_eq :
     T ⊢ “∀ x y, !domain x → !domain y → (!(rel Language.Eq.eq) x y ↔ x = y)”
 
@@ -27,9 +27,9 @@ variable {L₁ L₂ : Language} [L₁.Eq] [L₂.Eq] {T : Theory L₁} [𝗘𝗤 
 
 variable (π : DirectTranslation T L₂)
 
-def fal (φ : Semiformula L₁ ξ (n + 1)) : Semiformula L₁ ξ n := ∀[Rew.emb ▹ π.domain/[#0]] φ
+def fal (φ : Semiformula L₁ ξ (n + 1)) : Semiformula L₁ ξ n := ∀⁰[Rew.emb ▹ π.domain/[#0]] φ
 
-def exs (φ : Semiformula L₁ ξ (n + 1)) : Semiformula L₁ ξ n := ∃[Rew.emb ▹ π.domain/[#0]] φ
+def exs (φ : Semiformula L₁ ξ (n + 1)) : Semiformula L₁ ξ n := ∃⁰[Rew.emb ▹ π.domain/[#0]] φ
 
 notation:64 "∀_[" π "] " ψ => fal π ψ
 notation:64 "∃_[" π "] " ψ => exs π ψ
@@ -42,7 +42,7 @@ def varEqual : Semiterm L₂ ξ n → Semiformula L₁ ξ (n + 1)
   |                     #x => “z. z = #x.succ”
   |                     &x => “z. z = &x”
   | .func (arity := k) f v =>
-    ∀^[k] (
+    ∀⁰^[k] (
       (Matrix.conj fun i ↦
         Rew.emb ▹ π.domain/[#(i.addCast (n + 1))] ⋏
         Rew.subst (#(i.addCast (n + 1)) :> fun j ↦ #((j.addNat 1).addNat k)) ▹ varEqual (v i))
@@ -50,7 +50,7 @@ def varEqual : Semiterm L₂ ξ n → Semiformula L₁ ξ (n + 1)
     )
 
 def translateRel {k} (r : L₂.Rel k) (v : Fin k → Semiterm L₂ ξ n) : Semiformula L₁ ξ n :=
-  ∀^[k] (
+  ∀⁰^[k] (
     (Matrix.conj fun i ↦
       Rew.emb ▹ π.domain/[#(i.addCast n)] ⋏
       Rew.subst (#(i.addCast n) :> fun j ↦ #(j.addNat k)) ▹ π.varEqual (v i))
@@ -64,8 +64,8 @@ def translateAux {n} : Semiformula L₂ ξ n → Semiformula L₁ ξ n
   |         ⊥ => ⊥
   |     φ ⋏ ψ => translateAux φ ⋏ translateAux ψ
   |     φ ⋎ ψ => translateAux φ ⋎ translateAux ψ
-  |      ∀' φ => ∀_[π] translateAux φ
-  |      ∃' φ => ∃_[π] translateAux φ
+  |      ∀⁰ φ => ∀_[π] translateAux φ
+  |      ∃⁰ φ => ∃_[π] translateAux φ
 
 lemma translateAux_neg {n : ℕ} (φ : Semiformula L₂ ξ n) : π.translateAux (∼φ) = ∼π.translateAux φ := by
   induction φ using Semiformula.rec' <;> simp [translateAux, *]
@@ -88,10 +88,10 @@ variable {π}
     π.translate (Semiformula.nrel R v) = ∼π.translateRel R v := rfl
 
 @[simp] lemma translate_all (φ : Semiformula L₂ ξ (n + 1)) :
-    π.translate (∀' φ) = ∀_[π] π.translate φ := rfl
+    π.translate (∀⁰ φ) = ∀_[π] π.translate φ := rfl
 
 @[simp] lemma translate_ex (φ : Semiformula L₂ ξ (n + 1)) :
-    π.translate (∃' φ) = ∃_[π] π.translate φ := rfl
+    π.translate (∃⁰ φ) = ∃_[π] π.translate φ := rfl
 
 section semantics
 
@@ -263,12 +263,12 @@ lemma eval_translate_iff {φ : Semiformula L₂ ξ n} {ε : ξ → π.Model M} {
   |         ⊥ => simp
   |     φ ⋏ ψ => simp [eval_translate_iff (φ := φ), eval_translate_iff (φ := ψ)]
   |     φ ⋎ ψ => simp [eval_translate_iff (φ := φ), eval_translate_iff (φ := ψ)]
-  |      ∀' φ =>
+  |      ∀⁰ φ =>
     suffices
       (∀ a : π.Model M, Evalm M (a :> fun i ↦ ↑(e i)) (fun i ↦ ↑(ε i)) (π.translate φ)) ↔
       (∀ a : π.Model M, Evalm (π.Model M) (a :> e) ε φ) by simpa
     exact forall_congr' fun a ↦ by simp [←eval_translate_iff (φ := φ), Matrix.comp_vecCons']
-  |      ∃' φ =>
+  |      ∃⁰ φ =>
     suffices
       (∃ a : π.Model M, Evalm M (a :> fun i ↦ ↑(e i)) (fun i ↦ ↑(ε i)) (π.translate φ)) ↔
       (∃ a : π.Model M, Evalm (π.Model M) (a :> e) ε φ) by simpa
@@ -349,12 +349,12 @@ variable [Nonempty M] [M ⊧ₘ* T] [Structure.Eq L₁ M]
   |         ⊥ => simp
   |     φ ⋏ ψ => simp [id_models_iff (φ := φ), id_models_iff (φ := ψ)]
   |     φ ⋎ ψ => simp [id_models_iff (φ := φ), id_models_iff (φ := ψ)]
-  |      ∀' φ =>
+  |      ∀⁰ φ =>
     simp only [eval_all, Nat.succ_eq_add_one, id_models_iff (φ := φ), Matrix.comp_vecCons']
     constructor
     · intro h x; simpa using h ⟨x, by simp⟩
     · rintro h x; simpa using h x
-  |      ∃' φ =>
+  |      ∃⁰ φ =>
     simp only [eval_ex, Nat.succ_eq_add_one, id_models_iff (φ := φ), Matrix.comp_vecCons']
     constructor
     · rintro ⟨x, h⟩; exact ⟨x, h⟩
@@ -517,7 +517,7 @@ lemma eval_compDirectTranslation_Model_equiv {φ : Semiformula L₃ ξ n}
   | ⊥ => simp
   | φ ⋏ ψ => simp [eval_compDirectTranslation_Model_equiv (φ := φ) hε he, eval_compDirectTranslation_Model_equiv (φ := ψ) hε he]
   | φ ⋎ ψ => simp [eval_compDirectTranslation_Model_equiv (φ := φ) hε he, eval_compDirectTranslation_Model_equiv (φ := ψ) hε he]
-  | ∀' φ =>
+  | ∀⁰ φ =>
     simp only [eval_all, Nat.succ_eq_add_one]
     constructor
     · intro h x
@@ -527,7 +527,7 @@ lemma eval_compDirectTranslation_Model_equiv {φ : Semiformula L₃ ξ n}
       rcases (compDirectTranslation_Dom_iff τ π).mp x.dom with ⟨z, hz⟩
       apply (eval_compDirectTranslation_Model_equiv hε ?_).mpr (h z)
       · intro i; cases i using Fin.cases <;> simp [he, hz]
-  | ∃' φ =>
+  | ∃⁰ φ =>
     simp only [eval_ex, Nat.succ_eq_add_one]
     constructor
     · rintro ⟨x, hx⟩

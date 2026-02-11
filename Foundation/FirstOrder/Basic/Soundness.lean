@@ -46,13 +46,13 @@ lemma sound (M : Type*) [s : Structure L M] [Nonempty M] [M ⊧ₘ* T] (ε : ℕ
       simpa [Rewriting.shifts, Matrix.vecConsLast_vecEmpty, forall_or_right]
         using fun a : M => sound M (a :>ₙ ε) d
     rcases this with (hp | ⟨ψ, hq, hhq⟩)
-    · exact ⟨∀' φ, by simp, hp⟩
+    · exact ⟨∀⁰ φ, by simp, hp⟩
     · exact ⟨ψ, by simp [hq], hhq⟩
-  | ex (Γ := Γ) (φ := φ) t d => by
+  | exs (Γ := Γ) (φ := φ) t d => by
     have : Evalm M ![t.valm M ![] ε] ε φ ∨ ∃ φ ∈ Γ, Evalfm M ε φ := by
       simpa [eval_substs, Matrix.constant_eq_singleton] using sound M ε d
     rcases this with (hp | ⟨ψ, hq, hhq⟩)
-    · exact ⟨∃' φ, by simp, t.valm M ![] ε, hp⟩
+    · exact ⟨∃⁰ φ, by simp, t.valm M ![] ε, hp⟩
     · exact ⟨ψ, by simp [hq], hhq⟩
   | wk (Δ := Δ) (Γ := Γ) d ss => by
     have : ∃ φ ∈ Δ, Evalfm M ε φ := sound M ε d

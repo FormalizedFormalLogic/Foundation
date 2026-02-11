@@ -44,7 +44,7 @@ lemma term_add_assoc (t₁ t₂ t₃ : Term V ℒₒᵣ) :
     provable_of_models.{0} _ _ fun M _ hM ↦ by
       have : M ⊧ₘ* 𝗣𝗔⁻ := models_of_subtheory hM
       simp [models_iff, add_assoc]
-  have : T.internalize V ⊢ ∀' ∀' ∀' (#'2 + (#'1 + #'0) ≐ #'2 + #'1 + #'0) := by
+  have : T.internalize V ⊢ ∀⁰ ∀⁰ ∀⁰ (#'2 + (#'1 + #'0) ≐ #'2 + #'1 + #'0) := by
     simpa using internal_provable_of_outer_provable (V := V) this
   simpa using TProof.specialize₃! this t₃ t₂ t₁
 
@@ -54,7 +54,7 @@ lemma numeral_add (n m : V) :
   · simp only [tprovable_iff_provable, val_equals, val_add, val_numeral]
     definability
   case zero =>
-    have : T.internalize V ⊢ ∀' ((#'0 + 𝕹 0) ≐ #'0) := by
+    have : T.internalize V ⊢ ∀⁰ ((#'0 + 𝕹 0) ≐ #'0) := by
       have : T ⊢ “∀ x, x + 0 = x” :=
         provable_of_models.{0} _ _ fun M _ hM ↦ by
           have : M ⊧ₘ* 𝗣𝗔⁻ := models_of_subtheory hM
@@ -86,7 +86,7 @@ lemma numeral_mul (n m : V) :
   · simp only [tprovable_iff_provable, val_equals, val_mul, val_numeral]
     definability
   case zero =>
-    have : T.internalize V ⊢ ∀' ((#'0 * 𝕹 0) ≐ 𝕹 0) := by
+    have : T.internalize V ⊢ ∀⁰ ((#'0 * 𝕹 0) ≐ 𝕹 0) := by
       have : T ⊢ “∀ x, x * 0 = 0” :=
         provable_of_models.{0} _ _ fun M _ hM ↦ by
           have : M ⊧ₘ* 𝗣𝗔⁻ := models_of_subtheory hM
@@ -95,7 +95,7 @@ lemma numeral_mul (n m : V) :
       simpa using this
     simpa using TProof.specialize! this (𝕹 n)
   case one =>
-    have : T.internalize V ⊢ ∀' ((#'0 * 𝕹 1) ≐ #'0) := by
+    have : T.internalize V ⊢ ∀⁰ ((#'0 * 𝕹 1) ≐ #'0) := by
       have : T ⊢ “∀ x, x * 1 = x” :=
         provable_of_models.{0} _ _ fun M _ hM ↦ by
           have : M ⊧ₘ* 𝗣𝗔⁻ := models_of_subtheory hM
@@ -188,7 +188,7 @@ lemma lt_iff_substItrDisj (t : Term V ℒₒᵣ) (m : V) :
     definability
   case zero =>
     suffices T.internalize V ⊢ (t <' 𝕹 0) ⭤ ⊥ by simpa
-    have : T.internalize V ⊢ ∀' ((#'0 <' 𝕹 0) ⭤ ⊥) := by
+    have : T.internalize V ⊢ ∀⁰ ((#'0 <' 𝕹 0) ⭤ ⊥) := by
       have : T ⊢ “∀ x, x < 0 ↔ ⊥” :=
         provable_of_models.{0} _ _ fun M _ hM ↦ by
           have : M ⊧ₘ* 𝗣𝗔⁻ := models_of_subtheory hM
@@ -197,7 +197,7 @@ lemma lt_iff_substItrDisj (t : Term V ℒₒᵣ) (m : V) :
     simpa using TProof.specialize! this t
   case one =>
     suffices T.internalize V ⊢ (t <' 𝕹 1) ⭤ (t ≐ 𝕹 0) ⋎ ⊥ by simpa
-    have : T.internalize V ⊢ ∀' ((#'0 <' 𝕹 1) ⭤ (#'0 ≐ 𝕹 0) ⋎ ⊥) := by
+    have : T.internalize V ⊢ ∀⁰ ((#'0 <' 𝕹 1) ⭤ (#'0 ≐ 𝕹 0) ⋎ ⊥) := by
       have : T ⊢ “∀ x, x < 1 ↔ x = 0 ∨ ⊥” :=
         provable_of_models.{0} _ _ fun M _ hM ↦ by
           have : M ⊧ₘ* 𝗣𝗔⁻ := models_of_subtheory hM
@@ -210,7 +210,7 @@ lemma lt_iff_substItrDisj (t : Term V ℒₒᵣ) (m : V) :
           (t <' 𝕹(m + 1) + 𝕹 1) ⭤ (t ≐ 𝕹(m + 1)) ⋎ substItrDisj ![t] (#'1 ≐ #'0) (m + 1) by
       simpa [←one_add_one_eq_two, ←add_assoc]
     have : T.internalize V ⊢ (t <' 𝕹(m + 1) + 𝕹 1) ⭤ (t ≐ 𝕹(m + 1)) ⋎ (t <' 𝕹(m + 1)) := by
-      have : T.internalize V ⊢ ∀' ∀' ((#'0 <' #'1 + 𝕹 1) ⭤ (#'0 ≐ #'1) ⋎ (#'0 <' #'1)) := by
+      have : T.internalize V ⊢ ∀⁰ ∀⁰ ((#'0 <' #'1 + 𝕹 1) ⭤ (#'0 ≐ #'1) ⋎ (#'0 <' #'1)) := by
         have : T ⊢ “∀ m x, x < m + 1 ↔ x = m ∨ x < m” :=
           provable_of_models.{0} _ _ fun M _ hM ↦ by
             have : M ⊧ₘ* 𝗣𝗔⁻ := models_of_subtheory hM
@@ -237,10 +237,10 @@ lemma ball_intro (φ : Semiformula V ℒₒᵣ 1) (n : V)
     have ec : T.internalize V ⊢ (&'0 ≐ 𝕹 i) ➝ (𝕹 i ≐ &'0) := eq_symm T (Semiterm.fvar 0) (𝕹 i)
     cl_prover [hi, rl, ec]
 
-lemma bex_intro (φ : Semiformula V ℒₒᵣ 1) (n : V) {i}
+lemma bexs_intro (φ : Semiformula V ℒₒᵣ 1) (n : V) {i}
     (hi : i < n) (b : T.internalize V ⊢ φ.subst ![𝕹 i]) :
-    T.internalize V ⊢ φ.bex (𝕹 n) := by
-  apply TProof.ex! (𝕹 i)
+    T.internalize V ⊢ φ.bexs (𝕹 n) := by
+  apply TProof.exs! (𝕹 i)
   suffices T.internalize V ⊢ (𝕹 i <' 𝕹 n) ⋏ φ.subst ![𝕹 i] by simpa
   apply K!_intro
   · exact numeral_lt T hi
@@ -250,8 +250,8 @@ lemma ball_replace (φ : Semiformula V ℒₒᵣ 1) (t u : Term V ℒₒᵣ) :
     T.internalize V ⊢ (t ≐ u) ➝ φ.ball t ➝ φ.ball u := by
   simpa [SemitermVec.q, Semiformula.substs_substs] using replace T ((φ.subst ![#'0]).ball #'0) t u
 
-lemma bex_replace (φ : Semiformula V ℒₒᵣ 1) (t u : Term V ℒₒᵣ) :
-    T.internalize V ⊢ (t ≐ u) ➝ φ.bex t ➝ φ.bex u := by
-  simpa [SemitermVec.q, Semiformula.substs_substs] using replace T ((φ.subst ![#'0]).bex #'0) t u
+lemma bexs_replace (φ : Semiformula V ℒₒᵣ 1) (t u : Term V ℒₒᵣ) :
+    T.internalize V ⊢ (t ≐ u) ➝ φ.bexs t ➝ φ.bexs u := by
+  simpa [SemitermVec.q, Semiformula.substs_substs] using replace T ((φ.subst ![#'0]).bexs #'0) t u
 
 end LO.FirstOrder.Arithmetic.Bootstrapping.Arithmetic

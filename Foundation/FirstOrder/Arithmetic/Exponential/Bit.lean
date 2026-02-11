@@ -57,11 +57,11 @@ lemma not_mem_of_lt_exp {i a : V} (h : a < Exp.exp i) : i ∉ a := fun H ↦ by 
     .ball_lt hf (.imp (HierarchySymbol.Definable.comp₂ (P := (· ∈ ·)) (.var 0) (hf.retraction Fin.succ)) h)
   exact this.of_iff <| by intro v; exact ⟨fun h x _ hxv ↦ h x hxv, fun h x hx ↦ h x (lt_of_mem hx) hx⟩
 
-@[definability] lemma HierarchySymbol.Definable.bex_mem (Γ m) {P : (Fin k → V) → V → Prop} {f : (Fin k → V) → V}
+@[definability] lemma HierarchySymbol.Definable.bexs_mem (Γ m) {P : (Fin k → V) → V → Prop} {f : (Fin k → V) → V}
     (hf : 𝚺-[m + 1].DefinableFunction f) (h : Γ-[m + 1].Definable (fun w ↦ P (w ·.succ) (w 0))) :
     Γ-[m + 1].Definable (fun v ↦ ∃ x ∈ f v, P v x) := by
   have : Γ-[m + 1].Definable (fun v ↦ ∃ x < f v, x ∈ f v ∧ P v x) :=
-    .bex_lt hf (.and (HierarchySymbol.Definable.comp₂ (P := (· ∈ ·)) (.var 0) (hf.retraction _)) h)
+    .bexs_lt hf (.and (HierarchySymbol.Definable.comp₂ (P := (· ∈ ·)) (.var 0) (hf.retraction _)) h)
   exact this.of_iff <| by
     intro v; exact ⟨by rintro ⟨x, hx, hxv⟩; exact ⟨x, lt_of_mem hx, hx, hxv⟩, by rintro ⟨x, _, hx, hvx⟩; exact ⟨x, hx, hvx⟩⟩
 
@@ -78,7 +78,7 @@ lemma operator_mem_def : Semiformula.Operator.Mem.mem.sentence = bitDef.val := b
 
 def ballIn (t : Semiterm ℒₒᵣ ξ n) (p : Semiformula ℒₒᵣ ξ (n + 1)) : Semiformula ℒₒᵣ ξ n := “∀ x < !!t, x ∈ !!(Rew.bShift t) → !p x ⋯”
 
-def bexIn (t : Semiterm ℒₒᵣ ξ n) (p : Semiformula ℒₒᵣ ξ (n + 1)) : Semiformula ℒₒᵣ ξ n := “∃ x < !!t, x ∈ !!(Rew.bShift t) ∧ !p x ⋯”
+def bexsIn (t : Semiterm ℒₒᵣ ξ n) (p : Semiformula ℒₒᵣ ξ (n + 1)) : Semiformula ℒₒᵣ ξ n := “∃ x < !!t, x ∈ !!(Rew.bShift t) ∧ !p x ⋯”
 
 @[simp] lemma Hierarchy.bit {t u : Semiterm ℒₒᵣ μ n} : Hierarchy Γ s “!!t ∈ !!u” := by
   simp [Semiformula.Operator.operator, Matrix.fun_eq_vec_two, operator_mem_def]
@@ -88,9 +88,9 @@ def bexIn (t : Semiterm ℒₒᵣ ξ n) (p : Semiformula ℒₒᵣ ξ (n + 1)) :
   simp only [Arithmetic.ballIn]
   simp [Semiformula.Operator.operator, operator_mem_def]
 
-@[simp] lemma Hieralchy.bexIn {Γ m} (t : Semiterm ℒₒᵣ ξ n) (p : Semiformula ℒₒᵣ ξ (n + 1)) :
-    Hierarchy Γ m (bexIn t p) ↔ Hierarchy Γ m p := by
-  simp only [Arithmetic.bexIn]
+@[simp] lemma Hieralchy.bexsIn {Γ m} (t : Semiterm ℒₒᵣ ξ n) (p : Semiformula ℒₒᵣ ξ (n + 1)) :
+    Hierarchy Γ m (bexsIn t p) ↔ Hierarchy Γ m p := by
+  simp only [Arithmetic.bexsIn]
   simp [Semiformula.Operator.operator, operator_mem_def]
 
 def memRel : 𝚺₀.Semisentence 3 := .mkSigma
@@ -118,7 +118,7 @@ macro_rules
   | `(⤫formula(lit)[ $binders* | $fbinders* | ∃ $x ∈' $t, $p]) => do
     if binders.elem x then Macro.throwErrorAt x "error: variable is duplicated." else
     let binders' := binders.insertIdx 0 x
-    `(bexIn ⤫term(lit)[$binders* | $fbinders* | $t] ⤫formula(lit)[$binders'* | $fbinders* | $p])
+    `(bexsIn ⤫term(lit)[$binders* | $fbinders* | $t] ⤫formula(lit)[$binders'* | $fbinders* | $p])
 
 syntax:45 first_order_term:45 " ∼[" first_order_term "]" first_order_term:0 : first_order_formula
 syntax:45 first_order_term:45 " ≁[" first_order_term "]" first_order_term:0 : first_order_formula
@@ -158,11 +158,11 @@ scoped instance : Structure.Mem ℒₒᵣ V := ⟨by intro a b; simp [Semiformul
   · intro h x hx; exact h x (lt_of_mem hx) hx
   · intro h x _ hx; exact h x hx
 
-@[simp] lemma eval_bexIn {t : Semiterm ℒₒᵣ ξ n} {p : Semiformula ℒₒᵣ ξ (n + 1)} {e ε} :
-    Semiformula.Evalm V e ε (bexIn t p) ↔ ∃ x ∈ t.valm V e ε, Semiformula.Evalm V (x :> e) ε p := by
+@[simp] lemma eval_bexsIn {t : Semiterm ℒₒᵣ ξ n} {p : Semiformula ℒₒᵣ ξ (n + 1)} {e ε} :
+    Semiformula.Evalm V e ε (bexsIn t p) ↔ ∃ x ∈ t.valm V e ε, Semiformula.Evalm V (x :> e) ε p := by
   suffices
     (∃ x < t.valm V e ε, x ∈ t.valm V e ε ∧ Semiformula.Evalm V (x :> e) ε p) ↔
-    ∃ x ∈ t.valm V e ε, Semiformula.Evalm V (x :> e) ε p by simpa [bexIn]
+    ∃ x ∈ t.valm V e ε, Semiformula.Evalm V (x :> e) ε p by simpa [bexsIn]
   constructor
   · rintro ⟨x, _, hx, h⟩; exact ⟨x, hx, h⟩
   · rintro ⟨x, hx, h⟩; exact ⟨x, lt_of_mem hx, hx, h⟩

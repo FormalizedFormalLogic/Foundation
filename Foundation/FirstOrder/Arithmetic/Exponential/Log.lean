@@ -290,121 +290,121 @@ lemma brange_exists_unique (a : V) : ∀ x < ‖a‖, ∃! y, Exponential x y :=
     have : 2 * y ≤ a := (le_iff_le_log_of_exp H.succ this).mpr (le_log_of_lt_length hx)
     exact ⟨2 * y, this, H.succ⟩
 
-lemma bexp_exists_unique (a x : V) : ∃! y, (x < ‖a‖ → Exponential x y) ∧ (‖a‖ ≤ x → y = 0) := by
+lemma bexsp_exists_unique (a x : V) : ∃! y, (x < ‖a‖ → Exponential x y) ∧ (‖a‖ ≤ x → y = 0) := by
   by_cases hx : x < ‖a‖
   · simpa [hx, show ¬‖a‖ ≤ x from by simpa using hx, log_exists_unique_pos]
     using brange_exists_unique a x hx
   · simp [hx, show ‖a‖ ≤ x from by simpa using hx]
 
-/-- `bexp a x = exp x` if `x < ‖a‖`; `= 0` o.w.-/
-noncomputable def bexp (a x : V) : V := Classical.choose! (bexp_exists_unique a x)
+/-- `bexsp a x = exp x` if `x < ‖a‖`; `= 0` o.w.-/
+noncomputable def bexsp (a x : V) : V := Classical.choose! (bexsp_exists_unique a x)
 
-lemma exp_bexp_of_lt {a x : V} (h : x < ‖a‖) : Exponential x (bexp a x) :=
-  (Classical.choose!_spec (bexp_exists_unique a x)).1 h
+lemma exp_bexsp_of_lt {a x : V} (h : x < ‖a‖) : Exponential x (bexsp a x) :=
+  (Classical.choose!_spec (bexsp_exists_unique a x)).1 h
 
-lemma bexp_eq_zero_of_le {a x : V} (h : ‖a‖ ≤ x) : bexp a x = 0 :=
-  (Classical.choose!_spec (bexp_exists_unique a x)).2 h
+lemma bexsp_eq_zero_of_le {a x : V} (h : ‖a‖ ≤ x) : bexsp a x = 0 :=
+  (Classical.choose!_spec (bexsp_exists_unique a x)).2 h
 
-@[simp] lemma bexp_zero (x : V): bexp 0 x = 0 := bexp_eq_zero_of_le (by simp)
+@[simp] lemma bexsp_zero (x : V): bexsp 0 x = 0 := bexsp_eq_zero_of_le (by simp)
 
-@[simp] lemma exp_bexp_of_lt_iff {a x : V} : Exponential x (bexp a x) ↔ x < ‖a‖ :=
+@[simp] lemma exp_bexsp_of_lt_iff {a x : V} : Exponential x (bexsp a x) ↔ x < ‖a‖ :=
   ⟨by intro h; by_contra A
-      have : bexp a x = 0 := bexp_eq_zero_of_le (not_lt.mp A)
+      have : bexsp a x = 0 := bexsp_eq_zero_of_le (not_lt.mp A)
       simp [this] at h
       have := h.range_pos; simp_all,
-   exp_bexp_of_lt⟩
+   exp_bexsp_of_lt⟩
 
-@[simp] lemma bexp_le_self (a x : V) : bexp a x ≤ a := by
+@[simp] lemma bexsp_le_self (a x : V) : bexsp a x ≤ a := by
   rcases show x < ‖a‖ ∨ ‖a‖ ≤ x from lt_or_ge _ _ with (lt | le)
   · have : 0 < a := pos_of_lt_length lt
-    exact (le_iff_le_log_of_exp (exp_bexp_of_lt lt) this).mpr (le_log_of_lt_length lt)
-  · simp [bexp_eq_zero_of_le le]
+    exact (le_iff_le_log_of_exp (exp_bexsp_of_lt lt) this).mpr (le_log_of_lt_length lt)
+  · simp [bexsp_eq_zero_of_le le]
 
-lemma bexp_graph {y a x : V} : y = bexp a x ↔ ∃ l ≤ a, l = ‖a‖ ∧ (x < l → Exponential x y) ∧ (l ≤ x → y = 0) :=
-  ⟨by rintro rfl; exact ⟨‖a‖, by simp, rfl, exp_bexp_of_lt, bexp_eq_zero_of_le⟩, by
+lemma bexsp_graph {y a x : V} : y = bexsp a x ↔ ∃ l ≤ a, l = ‖a‖ ∧ (x < l → Exponential x y) ∧ (l ≤ x → y = 0) :=
+  ⟨by rintro rfl; exact ⟨‖a‖, by simp, rfl, exp_bexsp_of_lt, bexsp_eq_zero_of_le⟩, by
     rintro ⟨_, _, rfl, hlt, hle⟩
     rcases show x < ‖a‖ ∨ ‖a‖ ≤ x from lt_or_ge _ _ with (lt | le)
-    · exact (hlt lt).uniq (exp_bexp_of_lt lt)
-    · rcases hle le; simp [bexp_eq_zero_of_le le]⟩
+    · exact (hlt lt).uniq (exp_bexsp_of_lt lt)
+    · rcases hle le; simp [bexsp_eq_zero_of_le le]⟩
 
-def _root_.LO.FirstOrder.Arithmetic.bexpDef : 𝚺₀.Semisentence 3 := .mkSigma
+def _root_.LO.FirstOrder.Arithmetic.bexspDef : 𝚺₀.Semisentence 3 := .mkSigma
   “y a x. ∃ l <⁺ a, !lengthDef l a ∧ (x < l → !exponentialDef x y) ∧ (l ≤ x → y = 0)”
 
-instance bexp_defined : 𝚺₀-Function₂[V] bexp via bexpDef := .mk fun v ↦ by simp [bexpDef, bexp_graph]
+instance bexsp_defined : 𝚺₀-Function₂[V] bexsp via bexspDef := .mk fun v ↦ by simp [bexspDef, bexsp_graph]
 
-instance bexp_definable : 𝚺₀-Function₂[V] bexp := bexp_defined.to_definable
+instance bexsp_definable : 𝚺₀-Function₂[V] bexsp := bexsp_defined.to_definable
 
-instance : Bounded₂ (bexp : V → V → V) := ⟨#0, λ _ ↦ by simp⟩
+instance : Bounded₂ (bexsp : V → V → V) := ⟨#0, λ _ ↦ by simp⟩
 
-lemma bexp_monotone_iff {a i j : V} (hi : i < ‖a‖) (hj : j < ‖a‖) : bexp a i < bexp a j ↔ i < j :=
+lemma bexsp_monotone_iff {a i j : V} (hi : i < ‖a‖) (hj : j < ‖a‖) : bexsp a i < bexsp a j ↔ i < j :=
   Iff.symm <| Exponential.monotone_iff (by simp [hi]) (by simp [hj])
 
-lemma bexp_monotone_le_iff {a i j : V} (hi : i < ‖a‖) (hj : j < ‖a‖) : bexp a i ≤ bexp a j ↔ i ≤ j :=
+lemma bexsp_monotone_le_iff {a i j : V} (hi : i < ‖a‖) (hj : j < ‖a‖) : bexsp a i ≤ bexsp a j ↔ i ≤ j :=
   Iff.symm <| Exponential.monotone_le_iff (by simp [hi]) (by simp [hj])
 
-lemma bexp_eq_of_lt_length {i a a' : V} (ha : i < ‖a‖) (ha' : i < ‖a'‖) : bexp a i = bexp a' i := by
-  have H : Exponential i (bexp a i) := by simp [ha]
-  have H' : Exponential i (bexp a' i) := by simp [ha']
+lemma bexsp_eq_of_lt_length {i a a' : V} (ha : i < ‖a‖) (ha' : i < ‖a'‖) : bexsp a i = bexsp a' i := by
+  have H : Exponential i (bexsp a i) := by simp [ha]
+  have H' : Exponential i (bexsp a' i) := by simp [ha']
   exact H.uniq H'
 
-@[simp] lemma bexp_pow2 {a x : V} (h : x < ‖a‖) : Pow2 (bexp a x) := (exp_bexp_of_lt h).range_pow2
+@[simp] lemma bexsp_pow2 {a x : V} (h : x < ‖a‖) : Pow2 (bexsp a x) := (exp_bexsp_of_lt h).range_pow2
 
-@[simp] lemma lt_bexp {a x : V} (h : x < ‖a‖) : x < bexp a x := (exp_bexp_of_lt h).lt
+@[simp] lemma lt_bexsp {a x : V} (h : x < ‖a‖) : x < bexsp a x := (exp_bexsp_of_lt h).lt
 
-@[simp] lemma bexp_pos {a x : V} (h : x < ‖a‖) : 0 < bexp a x := (exp_bexp_of_lt h).range_pos
+@[simp] lemma bexsp_pos {a x : V} (h : x < ‖a‖) : 0 < bexsp a x := (exp_bexsp_of_lt h).range_pos
 
-lemma lt_bexp_len {a x : V} (h : ‖x‖ < ‖a‖) : x < bexp a ‖x‖ := lt_exp_len_self (exp_bexp_of_lt h)
+lemma lt_bexsp_len {a x : V} (h : ‖x‖ < ‖a‖) : x < bexsp a ‖x‖ := lt_exp_len_self (exp_bexsp_of_lt h)
 
-lemma bexp_eq_of_exp {a x : V} (h : x < ‖a‖) (H : Exponential x y) : bexp a x = y := (exp_bexp_of_lt h).uniq H
+lemma bexsp_eq_of_exp {a x : V} (h : x < ‖a‖) (H : Exponential x y) : bexsp a x = y := (exp_bexsp_of_lt h).uniq H
 
-lemma log_bexp {a x : V} (h : x < ‖a‖) : log (bexp a x) = x := Exponential.log_eq_of_exp (exp_bexp_of_lt h)
+lemma log_bexsp {a x : V} (h : x < ‖a‖) : log (bexsp a x) = x := Exponential.log_eq_of_exp (exp_bexsp_of_lt h)
 
-lemma len_bexp {a x : V} (h : x < ‖a‖) : ‖bexp a x‖ = x + 1 := by rw [length_of_pos (bexp_pos h), log_bexp h]
+lemma len_bexsp {a x : V} (h : x < ‖a‖) : ‖bexsp a x‖ = x + 1 := by rw [length_of_pos (bexsp_pos h), log_bexsp h]
 
-@[simp] lemma bexp_zero_zero : bexp (0 : V) 0 = 0 := bexp_eq_zero_of_le (by simp)
+@[simp] lemma bexsp_zero_zero : bexsp (0 : V) 0 = 0 := bexsp_eq_zero_of_le (by simp)
 
-@[simp] lemma bexp_pos_zero {a : V} (h : 0 < a) : bexp a 0 = 1 := bexp_eq_of_exp (by simpa) (by simp)
+@[simp] lemma bexsp_pos_zero {a : V} (h : 0 < a) : bexsp a 0 = 1 := bexsp_eq_of_exp (by simpa) (by simp)
 
-lemma bexp_monotone {a₁ x₁ a₂ x₂ : V} (h₁ : x₁ < ‖a₁‖) (h₂ : x₂ < ‖a₂‖) :
-  bexp a₁ x₁ < bexp a₂ x₂ ↔ x₁ < x₂ := Iff.symm <| (exp_bexp_of_lt h₁).monotone_iff (exp_bexp_of_lt h₂)
+lemma bexsp_monotone {a₁ x₁ a₂ x₂ : V} (h₁ : x₁ < ‖a₁‖) (h₂ : x₂ < ‖a₂‖) :
+  bexsp a₁ x₁ < bexsp a₂ x₂ ↔ x₁ < x₂ := Iff.symm <| (exp_bexsp_of_lt h₁).monotone_iff (exp_bexsp_of_lt h₂)
 
-lemma bexp_monotone_le {a₁ x₁ a₂ x₂ : V} (h₁ : x₁ < ‖a₁‖) (h₂ : x₂ < ‖a₂‖) :
-  bexp a₁ x₁ ≤ bexp a₂ x₂ ↔ x₁ ≤ x₂ := Iff.symm <| (exp_bexp_of_lt h₁).monotone_le_iff (exp_bexp_of_lt h₂)
+lemma bexsp_monotone_le {a₁ x₁ a₂ x₂ : V} (h₁ : x₁ < ‖a₁‖) (h₂ : x₂ < ‖a₂‖) :
+  bexsp a₁ x₁ ≤ bexsp a₂ x₂ ↔ x₁ ≤ x₂ := Iff.symm <| (exp_bexsp_of_lt h₁).monotone_le_iff (exp_bexsp_of_lt h₂)
 
-lemma bexp_add {x₁ x₂ a : V} (h : x₁ + x₂ < ‖a‖) :
-    bexp a (x₁ + x₂) = bexp a x₁ * bexp a x₂ :=
-  (exp_bexp_of_lt h).uniq ((exp_bexp_of_lt (lt_of_le_of_lt le_self_add h)).add_mul (exp_bexp_of_lt (lt_of_le_of_lt le_add_self h)))
+lemma bexsp_add {x₁ x₂ a : V} (h : x₁ + x₂ < ‖a‖) :
+    bexsp a (x₁ + x₂) = bexsp a x₁ * bexsp a x₂ :=
+  (exp_bexsp_of_lt h).uniq ((exp_bexsp_of_lt (lt_of_le_of_lt le_self_add h)).add_mul (exp_bexsp_of_lt (lt_of_le_of_lt le_add_self h)))
 
-lemma bexp_two_mul {a a' x : V} (hx : 2 * x < ‖a‖) (hx' : x < ‖a'‖) :
-    bexp a (2 * x) = (bexp a' x) ^ 2 :=
-  bexp_eq_of_exp hx (exp_bexp_of_lt hx').bit_zero
+lemma bexsp_two_mul {a a' x : V} (hx : 2 * x < ‖a‖) (hx' : x < ‖a'‖) :
+    bexsp a (2 * x) = (bexsp a' x) ^ 2 :=
+  bexsp_eq_of_exp hx (exp_bexsp_of_lt hx').bit_zero
 
-lemma bexp_two_mul_succ {a i : V} : bexp (2 * a) (i + 1) = 2 * bexp a i := by
+lemma bexsp_two_mul_succ {a i : V} : bexsp (2 * a) (i + 1) = 2 * bexsp a i := by
   rcases zero_le a with (rfl | pos)
   · simp
   rcases show i ≥ ‖a‖ ∨ i < ‖a‖ from le_or_gt ‖a‖ i with (h | h)
-  · simp [bexp_eq_zero_of_le, h, show ‖2 * a‖ ≤ i + 1 from by simp [length_two_mul_of_pos pos, h]]
-  · exact bexp_eq_of_exp (by simp [length_two_mul_of_pos pos, h]) (exp_bexp_of_lt h).succ
+  · simp [bexsp_eq_zero_of_le, h, show ‖2 * a‖ ≤ i + 1 from by simp [length_two_mul_of_pos pos, h]]
+  · exact bexsp_eq_of_exp (by simp [length_two_mul_of_pos pos, h]) (exp_bexsp_of_lt h).succ
 
-lemma bexp_two_mul_add_one_succ {a i : V} : bexp (2 * a + 1) (i + 1) = 2 * bexp a i := by
+lemma bexsp_two_mul_add_one_succ {a i : V} : bexsp (2 * a + 1) (i + 1) = 2 * bexsp a i := by
   rcases show i ≥ ‖a‖ ∨ i < ‖a‖ from le_or_gt ‖a‖ i with (h | h)
-  · simp [bexp_eq_zero_of_le, h, show ‖2 * a + 1‖ ≤ i + 1 from by simp [length_two_mul_add_one, h]]
-  · exact bexp_eq_of_exp (by simp [length_two_mul_add_one, h]) (exp_bexp_of_lt h).succ
+  · simp [bexsp_eq_zero_of_le, h, show ‖2 * a + 1‖ ≤ i + 1 from by simp [length_two_mul_add_one, h]]
+  · exact bexsp_eq_of_exp (by simp [length_two_mul_add_one, h]) (exp_bexsp_of_lt h).succ
 
-noncomputable def fbit (a i : V) : V := (a / bexp a i) % 2
+noncomputable def fbit (a i : V) : V := (a / bexsp a i) % 2
 
 @[simp] lemma fbit_lt_two (a i : V) : fbit a i < 2 := by simp [fbit]
 
 @[simp] lemma fbit_le_one (a i : V) : fbit a i ≤ 1 := lt_two_iff_le_one.mp (by simp [fbit])
 
-lemma fbit_eq_one_iff {a i : V} : fbit a i = 1 ↔ LenBit (bexp a i) a := by simp [fbit, LenBit.iff_rem]
+lemma fbit_eq_one_iff {a i : V} : fbit a i = 1 ↔ LenBit (bexsp a i) a := by simp [fbit, LenBit.iff_rem]
 
-lemma fbit_eq_zero_iff {a i : V} : fbit a i = 0 ↔ ¬LenBit (bexp a i) a := by simp [fbit, LenBit.iff_rem]
+lemma fbit_eq_zero_iff {a i : V} : fbit a i = 0 ↔ ¬LenBit (bexsp a i) a := by simp [fbit, LenBit.iff_rem]
 
-lemma fbit_eq_zero_of_le {a i : V} (hi : ‖a‖ ≤ i) : fbit a i = 0 := by simp [fbit, bexp_eq_zero_of_le hi]
+lemma fbit_eq_zero_of_le {a i : V} (hi : ‖a‖ ≤ i) : fbit a i = 0 := by simp [fbit, bexsp_eq_zero_of_le hi]
 
 def _root_.LO.FirstOrder.Arithmetic.fbitDef : 𝚺₀.Semisentence 3 := .mkSigma
-  “b a i. ∃ x <⁺ a, !bexpDef x a i ∧ ∃ y <⁺ a, !divDef y a x ∧ !remDef b y 2”
+  “b a i. ∃ x <⁺ a, !bexspDef x a i ∧ ∃ y <⁺ a, !divDef y a x ∧ !remDef b y 2”
 
 instance fbit_defined : 𝚺₀-Function₂[V] fbit via fbitDef := .mk fun v ↦ by simp [fbitDef, fbit, numeral_eq_natCast]
 
@@ -415,15 +415,15 @@ instance : Bounded₂ (fbit : V → V → V) := ⟨‘1’, λ _ ↦ by simp⟩
 @[simp] lemma fbit_zero (i : V) : fbit 0 i = 0 := by simp [fbit]
 
 @[simp] lemma fbit_mul_two_mul (a i : V) : fbit (2 * a) (i + 1) = fbit a i := by
-  simp [fbit, bexp_two_mul_succ, div_cancel_left]
+  simp [fbit, bexsp_two_mul_succ, div_cancel_left]
 
 @[simp] lemma fbit_mul_two_add_one_mul (a i : V) : fbit (2 * a + 1) (i + 1) = fbit a i := by
-  simp [fbit, bexp_two_mul_add_one_succ, Arithmetic.div_mul]
+  simp [fbit, bexsp_two_mul_add_one_succ, Arithmetic.div_mul]
 
 @[simp] lemma fbit_two_mul_zero_eq_zero (a : V) : fbit (2 * a) 0 = 0 := by
   rcases zero_le a with (rfl | pos)
   · simp
-  · have : bexp (2 * a) 0 = 1 := bexp_eq_of_exp (by simp [pos]) (by simp)
+  · have : bexsp (2 * a) 0 = 1 := bexsp_eq_of_exp (by simp [pos]) (by simp)
     simp [fbit, this]
 
 @[simp] lemma fbit_two_mul_add_one_zero_eq_one (a : V) : fbit (2 * a + 1) 0 = 1 := by simp [fbit]

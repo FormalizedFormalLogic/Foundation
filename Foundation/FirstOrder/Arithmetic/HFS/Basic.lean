@@ -110,7 +110,7 @@ private lemma union_graph {u s t : V} : u = s ∪ t ↔ ∀ x < u + s + t, (x �
       · exact h x (lt_of_lt_of_le (lt_of_mem hx) (by simp )) |>.mpr (Or.inr hx)⟩
 
 def _root_.LO.FirstOrder.Arithmetic.unionDef : 𝚺₀.Semisentence 3 := .mkSigma
-  “∀[#0 < #1 + #2 + #3](#0 ∈ #1 ↔ #0 ∈ #2 ∨ #0 ∈ #3)”
+  “∀⁰[#0 < #1 + #2 + #3](#0 ∈ #1 ↔ #0 ∈ #2 ∨ #0 ∈ #3)”
 
 instance union_defined : 𝚺₀-Function₂ ((· ∪ ·) : V → V → V) via unionDef := .mk fun v ↦ by
   simp [unionDef, union_graph]

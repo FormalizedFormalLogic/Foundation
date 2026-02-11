@@ -107,7 +107,7 @@ lemma bold_sigma_one_completeness {n} {φ : Semiformula ℒₒᵣ ξ n} (hp : Hi
     intro n t φ _ ihp e hp x hx
     rcases lt_numeral_iff.mp hx with ⟨x, rfl⟩
     simpa [Matrix.comp_vecCons'] using ihp (hp x (by simp))
-  case hEx =>
+  case hExs =>
     simp only [Semiformula.eval_ex, Nat.succ_eq_add_one, forall_exists_index]
     intro n φ _ ihp e x hp
     exact ⟨numeral x, by simpa [Matrix.comp_vecCons'] using ihp hp⟩

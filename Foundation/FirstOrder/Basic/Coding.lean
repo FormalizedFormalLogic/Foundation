@@ -84,8 +84,8 @@ def toNat {n : ℕ} : Semiformula L ξ n → ℕ
   |                         ⊥ => (Nat.pair 3 0) + 1
   |                     φ ⋏ ψ => (Nat.pair 4 <| φ.toNat.pair ψ.toNat) + 1
   |                     φ ⋎ ψ => (Nat.pair 5 <| φ.toNat.pair ψ.toNat) + 1
-  |                      ∀' φ => (Nat.pair 6 <| φ.toNat) + 1
-  |                      ∃' φ => (Nat.pair 7 <| φ.toNat) + 1
+  |                      ∀⁰ φ => (Nat.pair 6 <| φ.toNat) + 1
+  |                      ∃⁰ φ => (Nat.pair 7 <| φ.toNat) + 1
 
 def ofNat : (n : ℕ) → ℕ → Option (Semiformula L ξ n)
   | _,     0 => none
@@ -133,12 +133,12 @@ def ofNat : (n : ℕ) → ℕ → Option (Semiformula L ξ n)
       have : c < e + 1 := Nat.lt_succ_iff.mpr <| Nat.unpair_right_le _
       do
         let φ ← ofNat (n + 1) c
-        return ∀' φ
+        return ∀⁰ φ
     | 7 =>
       have : c < e + 1 := Nat.lt_succ_iff.mpr <| Nat.unpair_right_le _
       do
         let φ ← ofNat (n + 1) c
-        return ∃' φ
+        return ∃⁰ φ
     | _ => none
 
 lemma ofNat_toNat {n : ℕ} : ∀ φ : Semiformula L ξ n, ofNat n (toNat φ) = some φ
@@ -154,8 +154,8 @@ lemma ofNat_toNat {n : ℕ} : ∀ φ : Semiformula L ξ n, ofNat n (toNat φ) = 
   |        ⊥ => by simp [toNat, ofNat]
   |    φ ⋎ ψ => by simp [toNat, ofNat, ofNat_toNat φ, ofNat_toNat ψ]
   |    φ ⋏ ψ => by simp [toNat, ofNat, ofNat_toNat φ, ofNat_toNat ψ]
-  |     ∀' φ => by simp [toNat, ofNat, ofNat_toNat φ]
-  |     ∃' φ => by simp [toNat, ofNat, ofNat_toNat φ]
+  |     ∀⁰ φ => by simp [toNat, ofNat, ofNat_toNat φ]
+  |     ∃⁰ φ => by simp [toNat, ofNat, ofNat_toNat φ]
 
 instance encodable : Encodable (Semiformula L ξ n) where
   encode := toNat
@@ -181,9 +181,9 @@ lemma encode_and (φ ψ : Semiformula L ξ n) : encode (φ ⋏ ψ) = (Nat.pair 4
 
 lemma encode_or (φ ψ : Semiformula L ξ n) : encode (φ ⋎ ψ) = (Nat.pair 5 <| φ.toNat.pair ψ.toNat) + 1 := rfl
 
-lemma encode_all (φ : Semiformula L ξ (n + 1)) : encode (∀' φ) = (Nat.pair 6 <| φ.toNat) + 1 := rfl
+lemma encode_all (φ : Semiformula L ξ (n + 1)) : encode (∀⁰ φ) = (Nat.pair 6 <| φ.toNat) + 1 := rfl
 
-lemma encode_ex (φ : Semiformula L ξ (n + 1)) : encode (∃' φ) = (Nat.pair 7 <| φ.toNat) + 1 := rfl
+lemma encode_ex (φ : Semiformula L ξ (n + 1)) : encode (∃⁰ φ) = (Nat.pair 7 <| φ.toNat) + 1 := rfl
 
 @[simp] lemma encode_emb (σ : Semisentence L n) :
     encode (Rewriting.emb σ : Semiformula L ξ n) = encode σ := by
