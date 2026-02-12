@@ -1,6 +1,7 @@
 module
 
 public import Foundation.FirstOrder.SetTheory.Basic
+public import Foundation.Vorspiel.ExistsUnique
 
 /-!
 # Zermelo set theory

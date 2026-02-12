@@ -1,6 +1,5 @@
 module
 
-public import Foundation.ProvabilityLogic.Realization
 public import Foundation.ProvabilityLogic.GL.Soundness
 /-!
 # Provability logic of arithmetic theory

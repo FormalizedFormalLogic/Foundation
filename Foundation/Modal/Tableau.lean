@@ -2,6 +2,7 @@ module
 
 public import Foundation.Modal.Formula.Basic
 public import Foundation.Modal.Entailment.K
+public import Foundation.Vorspiel.Set.Basic
 
 @[expose] public section
 

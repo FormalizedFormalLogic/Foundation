@@ -1,6 +1,7 @@
 module
 
 public import Foundation.FirstOrder.Completeness.Corollaries
+public import Foundation.Vorspiel.ExistsUnique
 
 @[expose] public section
 /-!

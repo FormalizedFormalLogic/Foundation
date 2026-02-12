@@ -1,6 +1,7 @@
 module
 
-public import Foundation.Vorspiel
+public import Foundation.Vorspiel.Nat.Matrix
+public import Foundation.Vorspiel.NotationClass
 
 /-!
 # Coherence space for denotational semantics of logics
@@ -492,3 +493,5 @@ end BigPlus
 end CoherenceSpace
 
 end LO
+
+#min_imports

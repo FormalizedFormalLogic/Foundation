@@ -1,5 +1,7 @@
 module
+
 public import Foundation.Logic.Semantics
+public import Foundation.Vorspiel.AdjunctiveSet
 
 /-!
 # Basic definitions and properties of proof system related notions
