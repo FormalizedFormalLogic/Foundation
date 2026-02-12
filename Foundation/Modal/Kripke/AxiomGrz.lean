@@ -1,6 +1,7 @@
 module
 
 public import Foundation.Modal.Kripke.Logic.K
+public import Foundation.Vorspiel.Rel.WCWF
 
 @[expose] public section
 

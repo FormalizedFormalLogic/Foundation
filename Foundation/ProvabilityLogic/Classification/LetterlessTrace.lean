@@ -1,7 +1,6 @@
 module
 
 public import Foundation.Modal.Logic.S.Basic
-public import Foundation.ProvabilityLogic.GL.Completeness
 public import Foundation.ProvabilityLogic.GL.Uniform
 
 @[expose] public section

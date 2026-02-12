@@ -1,6 +1,7 @@
 module
 
 public import Foundation.Propositional.Logic.Basic
+public import Foundation.Vorspiel.Rel.Basic
 
 @[expose] public section
 

@@ -3,6 +3,7 @@ module
 public import Foundation.FirstOrder.SetTheory.Basic
 public import Mathlib.Data.QPF.Univariate.Basic
 public import Mathlib.SetTheory.Cardinal.Aleph
+public import Foundation.Vorspiel.Small
 
 @[expose] public section
 /-!

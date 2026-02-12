@@ -2,6 +2,7 @@ module
 
 public import Foundation.Modal.Boxdot.Basic
 public import Foundation.Modal.Kripke.Tree
+public import Foundation.Vorspiel.Finset.Card
 
 public import Mathlib.Data.Finite.Sum
 

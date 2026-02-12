@@ -1,6 +1,7 @@
 module
 
 public import Foundation.FirstOrder.Completeness.Coding
+public import Foundation.Vorspiel.Order
 
 @[expose] public section
 namespace LO
