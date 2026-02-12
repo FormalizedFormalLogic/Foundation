@@ -1,6 +1,7 @@
 module
 
 public import Foundation.Modal.Kripke.Completeness
+public import Foundation.Vorspiel.Rel.Isolated
 
 @[expose] public section
 

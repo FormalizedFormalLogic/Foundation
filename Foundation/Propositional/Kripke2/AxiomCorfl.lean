@@ -1,6 +1,7 @@
 module
 
 public import Foundation.Propositional.Kripke2.Basic
+public import Foundation.Vorspiel.Rel.Coreflexive
 
 @[expose] public section
 

@@ -1,6 +1,7 @@
 module
 
-public import Foundation.Vorspiel
+public import Foundation.Vorspiel.List.Basic
+public import Foundation.Vorspiel.NotationClass
 
 @[expose] public section
 

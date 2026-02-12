@@ -2,6 +2,7 @@ module
 
 public import Foundation.Modal.Kripke.Rank
 public import Foundation.ProvabilityLogic.GL.Soundness
+public import Foundation.Vorspiel.List.ChainI
 
 @[expose] public section
 /-!

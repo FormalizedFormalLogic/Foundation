@@ -148,7 +148,7 @@ lemma iff_eq_height_eq_original_root {x : F.extendRoot 1} : Frame.rank x = F.hei
   . rcases x with (a | x);
     . intro h;
       have := h ▸ height_succ (F := F);
-      simp [Frame.height] at this;
+      simp [Frame.height, extendRoot.root] at this
     . intro h;
       suffices x = r by simp [this];
       apply Frame.eq_height_root.mp;

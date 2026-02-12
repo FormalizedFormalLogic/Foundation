@@ -1,6 +1,7 @@
 module
 
 public import Foundation.Modal.Neighborhood.Logic.E
+public import Foundation.Vorspiel.Set.Fin
 
 @[expose] public section
 
