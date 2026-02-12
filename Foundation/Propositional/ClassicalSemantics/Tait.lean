@@ -2,7 +2,6 @@ module
 
 public import Foundation.Propositional.ClassicalSemantics.NNFormula
 public import Foundation.Propositional.Tait.Calculus
-public import Mathlib.Order.Zorn
 public import Foundation.Vorspiel.Set.Basic
 
 @[expose] public section
