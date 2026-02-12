@@ -19,7 +19,7 @@ def Frame.extendRoot (F : Kripke.Frame) {r : F.World} [F.IsRootedBy r] (n : ℕ+
     | .inr x, .inr y => x ≺ y
     | .inr _, .inl _ => False
     | .inl _, .inr _ => True
-    | .inl i, .inl j => i < j
+    | .inl i, .inl j => j < i
 
 namespace Frame.extendRoot
 
@@ -37,7 +37,7 @@ instance isFinite [F.IsFinite] : (F.extendRoot n).IsFinite := by
 
 instance fintype [Fintype F] : Fintype (F.extendRoot n) := instFintypeSum (Fin n) F
 
-protected abbrev root : (F.extendRoot n).World := .inl 0
+protected abbrev root : (F.extendRoot n).World := .inl ⟨n - 1, by simp⟩
 
 instance instIsRooted : (F.extendRoot n).IsRootedBy extendRoot.root where
   root_generates := by
@@ -46,20 +46,20 @@ instance instIsRooted : (F.extendRoot n).IsRootedBy extendRoot.root where
     | .inl j =>
       obtain ⟨j, hj⟩ := j;
       apply Relation.TransGen.single;
-      apply Nat.zero_lt_of_not_zero;
-      simp_all [Frame.Rel', Frame.extendRoot]
+      simp_all [extendRoot, extendRoot.root];
+      omega;
     | .inr x =>
       apply Relation.TransGen.single;
       tauto;
 
-protected abbrev chain : List (F.extendRoot n) := List.finRange n |>.map (extend ·)
+protected abbrev chain : List (F.extendRoot n) := List.finRange n |>.reverse.map (extend ·)
 
 @[simp]
 lemma chain_length : extendRoot.chain (F := F) (r := r) (n := n).length = n := by simp
 
 @[simp]
 lemma chain_IsChain : List.IsChain (· ≺ ·) (extendRoot.chain (F := F) (r := r) (n := n)) := by
-  apply List.isChain_map_of_isChain (R := λ a b => a < b);
+  apply List.isChain_map_of_isChain (R := λ a b => a > b);
   . tauto;
   . simp;
 
@@ -104,14 +104,11 @@ def pMorphism : F →ₚ F.extendRoot n where
     | .inr y => use y; simpa using h;
 
 lemma not_root_of_from_root [F.IsTree r] {x : F.extendRoot n} (h : extendRoot.root ≺ x) :
-    (∃ i > 0, x = extend i) ∨ x = r ∨ embed r ≺ x := by
+  (∃ i : Fin n, x = extend i) ∨ x = r ∨ embed r ≺ x := by
   match x with
   | .inl i =>
     left;
     use i;
-    constructor;
-    . simp_all [Frame.Rel', extendRoot];
-    . tauto;
   | .inr x =>
     by_cases e : x = r;
     . tauto;
@@ -121,21 +118,21 @@ lemma not_root_of_from_root [F.IsTree r] {x : F.extendRoot n} (h : extendRoot.ro
       apply Frame.root_genaretes'! (x := x) (by tauto);
 
 lemma not_root_of_from_root' [F.IsTree r] {x : F.extendRoot n} (h : extendRoot.root ≺ x) :
-    (∃ i > 0, x = extend i) ∨ x = r ∨ ∃ x₀ : F, x = x₀ ∧ r ≺ x₀ := by
+  (∃ i : Fin n, x = extend i) ∨ x = r ∨ ∃ x₀ : F, x = x₀ ∧ r ≺ x₀ := by
   rcases not_root_of_from_root h with (h | h | h)
-  · aesop
-  · aesop
-  · right; right
+  · tauto;
+  · tauto;
+  · right; right;
     rcases pMorphism.back h with ⟨x₀, rfl, hx₀⟩
     exact ⟨x₀, rfl, hx₀⟩
 
 lemma not_root_of_from_root₁ [F.IsTree r] {x : F.extendRoot 1} (h : extendRoot.root ≺ x) :
-    x = r ∨ embed r ≺ x := by
-  rcases not_root_of_from_root h with (⟨i, hi, rfl⟩ | hr | hr) <;> simp_all
+  x = r ∨ embed r ≺ x := by
+  rcases not_root_of_from_root h with (⟨i, hi, rfl⟩ | hr | hr) <;> simp_all [extendRoot.root]
 
 lemma not_root_of_from_root'₁ [F.IsTree r] {x : F.extendRoot 1} (h : extendRoot.root ≺ x) :
-    x = r ∨ ∃ x₀ : F, x = x₀ ∧ r ≺ x₀ := by
-  rcases not_root_of_from_root' h with (⟨i, hi, rfl⟩ | hr | hr) <;> simp_all
+  x = r ∨ ∃ x₀ : F, x = x₀ ∧ r ≺ x₀ := by
+  rcases not_root_of_from_root' h with (⟨i, hi, rfl⟩ | hr | hr) <;> simp_all [extendRoot.root]
 
 lemma eq_inr_of_root_rel [F.IsTree r] {x : F.extendRoot 1} (h : extendRoot.root ≺ x) :
     ∃ x₀ : F, x = x₀ := by
