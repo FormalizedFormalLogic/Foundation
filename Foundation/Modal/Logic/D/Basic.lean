@@ -289,7 +289,7 @@ lemma satisfies_box_of_satisfies_box_at_root [M.IsTransitive] (h : (tailModel₀
 protected def pMorphism_extendRoot : M.extendRoot n →ₚ (tailModel₀ M o) where
   toFun := λ x =>
     match x with
-    | .inl i => embed_nat (n - i - 1) -- TODO: fix
+    | .inl i => embed_nat i
     | .inr x => embed_original x
   forth := by
     rintro (x | x) (y | y) Rxy <;>
@@ -299,10 +299,9 @@ protected def pMorphism_extendRoot : M.extendRoot n →ₚ (tailModel₀ M o) wh
     rintro (x | x) (y | y | y) Rxy;
     case inl.inr.inl =>
       simp_all [Frame.Rel', tailModel₀, Model.extendRoot, Frame.extendRoot];
-      use ⟨n - y - 1, by omega⟩;
+      use ⟨y, by omega⟩;
       constructor;
       . simp;
-        omega;
       . apply Fin.lt_def.mpr;
         simp;
         omega;
@@ -313,7 +312,7 @@ protected def pMorphism_extendRoot : M.extendRoot n →ₚ (tailModel₀ M o) wh
 lemma modal_equivalent_extendRoot_original {x : M} : ModalEquivalent (M₁ := M.extendRoot n) (M₂ := tailModel₀ M o) x (embed_original x) := by
   apply tailModel₀.pMorphism_extendRoot.modal_equivalence;
 
-lemma modal_equivalent_extendRoot_nat {n : ℕ+} {i : Fin n} : ModalEquivalent (M₁ := M.extendRoot n) (M₂ := tailModel₀ M o) (Sum.inl i) (embed_nat (n - i - 1)) := by
+lemma modal_equivalent_extendRoot_nat {n : ℕ+} {i : Fin n} : ModalEquivalent (M₁ := M.extendRoot n) (M₂ := tailModel₀ M o) (Sum.inl i) (embed_nat i) := by
   apply tailModel₀.pMorphism_extendRoot.modal_equivalence;
 
 open Formula.Kripke in

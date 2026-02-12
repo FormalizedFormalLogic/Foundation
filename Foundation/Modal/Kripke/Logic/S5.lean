@@ -4,6 +4,7 @@ public import Foundation.Modal.Kripke.Logic.KTB
 public import Foundation.Modal.Kripke.Logic.KD45
 public import Foundation.Modal.Kripke.Logic.KB4
 public import Foundation.Modal.Kripke.Logic.S4Point4
+public import Foundation.Vorspiel.Rel.Universal
 
 @[expose] public section
 

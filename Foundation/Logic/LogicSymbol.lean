@@ -1,6 +1,7 @@
 module
 
-public import Foundation.Vorspiel
+public import Foundation.Vorspiel.List.Basic
+public import Foundation.Vorspiel.NotationClass
 
 @[expose] public section
 
@@ -19,22 +20,22 @@ a function that preserves logical connectives.
 
 namespace LO
 
-section logicNotation
-
 class LogicalConnective (α : Type*)
   extends Top α, Bot α, Tilde α, Arrow α, Wedge α, Vee α
 
-end logicNotation
+class NegInvolutive (F : Type*) [Tilde F] where
+  neg_involutive (φ : F) : ∼∼φ = φ
 
-class DeMorgan (F : Type*) [LogicalConnective F] where
+class DeMorgan (F : Type*) [LogicalConnective F] extends NegInvolutive F where
   verum : ∼(⊤ : F) = ⊥
   falsum : ∼(⊥ : F) = ⊤
   imply (φ ψ : F) : (φ ➝ ψ) = ∼φ ⋎ ψ
   and (φ ψ : F) : ∼(φ ⋏ ψ) = ∼φ ⋎ ∼ψ
   or (φ ψ : F) : ∼(φ ⋎ ψ) = ∼φ ⋏ ∼ψ
-  neg (φ : F) : ∼∼φ = φ
 
-attribute [simp] DeMorgan.verum DeMorgan.falsum DeMorgan.and DeMorgan.or DeMorgan.neg
+alias DeMorgan.neg := NegInvolutive.neg_involutive
+
+attribute [simp] NegInvolutive.neg_involutive DeMorgan.verum DeMorgan.falsum DeMorgan.and DeMorgan.or
 
 /-- Introducing `∼φ` as an abbreviation of `φ ➝ ⊥`. -/
 class NegAbbrev (F : Type*) [Tilde F] [Arrow F] [Bot F] where
@@ -90,7 +91,7 @@ instance : DeMorgan Prop where
   imply := fun _ _ => by simp [imp_iff_not_or]
   and := fun _ _ => by simp [-not_and, not_and_or]
   or := fun _ _ => by simp [not_or]
-  neg := fun _ => by simp
+  neg_involutive := fun _ => by simp
 
 class HomClass (F : Type*) (α β : outParam Type*) [LogicalConnective α] [LogicalConnective β] [FunLike F α β] where
   map_top : ∀ (f : F), f ⊤ = ⊤

@@ -92,7 +92,7 @@ instance : DeMorgan (NNFormula α) where
   and := by simp
   or := by simp
   imply := by simp [imp_eq]
-  neg := by simp
+  neg_involutive := by simp
 
 def complexity : NNFormula α → ℕ
 | ⊤       => 0
@@ -193,8 +193,6 @@ lemma ne_of_ne_complexity {φ ψ : NNFormula α} (h : φ.complexity ≠ ψ.compl
 end NNFormula
 
 abbrev Theory (α : Type*) := Set (NNFormula α)
-
-instance : AdjunctiveSet (NNFormula α) (Theory α) := inferInstance
 
 end LO.Propositional
 end

@@ -2,17 +2,7 @@ module
 public import Foundation.FirstOrder.Basic.Calculus
 @[expose] public section
 
-/-!
-
-end LO
-
-end
-
-# Derivation2
-
-Different characterizations of proof.
-
--/
+/-! # Alternative definition of proof -/
 
 namespace LO.FirstOrder
 

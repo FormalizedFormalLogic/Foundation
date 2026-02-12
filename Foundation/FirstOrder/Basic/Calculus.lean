@@ -1,6 +1,9 @@
 module
 public import Foundation.Logic.Calculus
 public import Foundation.FirstOrder.Basic.Syntax.Theory
+public import Mathlib.Data.List.MinMax
+
+/-! # One-sided sequent calculus for first-order classical logic -/
 
 @[expose] public section
 
@@ -39,39 +42,39 @@ variable {𝓢 U : Schema L} {Δ Δ₁ Δ₂ Γ : Sequent L} {φ ψ r : Syntacti
 
 open Rewriting LawfulSyntacticRewriting
 
-def length {Δ : Sequent L} : 𝓢 ⟹ Δ → ℕ
+def height {Δ : Sequent L} : 𝓢 ⟹ Δ → ℕ
   | axL _ _   => 0
   | verum     => 0
-  | or d      => d.length.succ
-  | and dp dq => (max (length dp) (length dq)).succ
-  | all d     => d.length.succ
-  | ex _ d    => d.length.succ
-  | wk d _    => d.length.succ
-  | cut dp dn => (max (length dp) (length dn)).succ
+  | or d      => d.height.succ
+  | and dp dq => (max (height dp) (height dq)).succ
+  | all d     => d.height.succ
+  | ex _ d    => d.height.succ
+  | wk d _    => d.height.succ
+  | cut dp dn => (max (height dp) (height dn)).succ
   | axm _     => 0
 
-section length
+section height
 
-@[simp] lemma length_axL {k} {r : L.Rel k} {v} :
-  length (axL (𝓢 := 𝓢) r v) = 0 := rfl
+@[simp] lemma height_axL {k} {r : L.Rel k} {v} :
+  height (axL (𝓢 := 𝓢) r v) = 0 := rfl
 
-@[simp] lemma length_verum : length (verum : Derivation 𝓢 [⊤]) = 0 := rfl
+@[simp] lemma height_verum : height (verum : Derivation 𝓢 [⊤]) = 0 := rfl
 
-@[simp] lemma length_and {φ ψ} (dp : 𝓢 ⟹ φ :: Δ) (dq : 𝓢 ⟹ ψ :: Δ) :
-    length (and dp dq) = (max (length dp) (length dq)).succ := rfl
+@[simp] lemma height_and {φ ψ} (dp : 𝓢 ⟹ φ :: Δ) (dq : 𝓢 ⟹ ψ :: Δ) :
+    height (and dp dq) = (max (height dp) (height dq)).succ := rfl
 
-@[simp] lemma length_or {φ ψ} (d : 𝓢 ⟹ φ :: ψ :: Δ) : length (or d) = d.length.succ := rfl
+@[simp] lemma height_or {φ ψ} (d : 𝓢 ⟹ φ :: ψ :: Δ) : height (or d) = d.height.succ := rfl
 
-@[simp] lemma length_all {φ} (d : 𝓢 ⟹ Rewriting.free φ :: Δ⁺) : length (all d) = d.length.succ := rfl
+@[simp] lemma height_all {φ} (d : 𝓢 ⟹ Rewriting.free φ :: Δ⁺) : height (all d) = d.height.succ := rfl
 
-@[simp] lemma length_ex {t} {φ} (d : 𝓢 ⟹ φ/[t] :: Δ) : length (ex t d) = d.length.succ := rfl
+@[simp] lemma height_ex {t} {φ} (d : 𝓢 ⟹ φ/[t] :: Δ) : height (ex t d) = d.height.succ := rfl
 
-@[simp] lemma length_wk (d : 𝓢 ⟹ Δ) (h : Δ ⊆ Γ) : length (wk d h) = d.length.succ := rfl
+@[simp] lemma height_wk (d : 𝓢 ⟹ Δ) (h : Δ ⊆ Γ) : height (wk d h) = d.height.succ := rfl
 
-@[simp] lemma length_cut {φ} (dp : 𝓢 ⟹ φ :: Δ) (dn : 𝓢 ⟹ (∼φ) :: Δ) :
-  length (cut dp dn) = (max (length dp) (length dn)).succ := rfl
+@[simp] lemma height_cut {φ} (dp : 𝓢 ⟹ φ :: Δ) (dn : 𝓢 ⟹ (∼φ) :: Δ) :
+  height (cut dp dn) = (max (height dp) (height dn)).succ := rfl
 
-end length
+end height
 
 section Repr
 variable [∀ k, ToString (L.Func k)] [∀ k, ToString (L.Rel k)]
@@ -124,11 +127,11 @@ protected abbrev cast (d : 𝓢 ⟹ Δ) (e : Δ = Γ) : 𝓢 ⟹ Γ := e ▸ d
 
 @[simp] lemma cast_eq (d : 𝓢 ⟹ Δ) (e : Δ = Δ) : Derivation.cast d e = d := rfl
 
-@[simp] lemma length_cast (d : 𝓢 ⟹ Δ) (e : Δ = Γ) :
-    length (Derivation.cast d e) = length d := by rcases e with rfl; simp [Derivation.cast]
+@[simp] lemma height_cast (d : 𝓢 ⟹ Δ) (e : Δ = Γ) :
+    height (Derivation.cast d e) = height d := by rcases e with rfl; simp [Derivation.cast]
 
-@[simp] lemma length_cast' (d : 𝓢 ⟹ Δ) (e : Δ = Γ) :
-    length (e ▸ d) = length d := by rcases e with rfl; simp
+@[simp] lemma height_cast' (d : 𝓢 ⟹ Δ) (e : Δ = Γ) :
+    height (e ▸ d) = height d := by rcases e with rfl; simp
 
 alias weakening := wk
 

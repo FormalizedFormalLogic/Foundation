@@ -2,7 +2,6 @@ module
 
 public import Foundation.Modal.Neighborhood.Logic.EMT
 public import Foundation.Modal.Neighborhood.Logic.E4
-import Foundation.Modal.Neighborhood.Logic.ET
 
 @[expose] public section
 

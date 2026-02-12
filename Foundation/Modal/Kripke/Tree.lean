@@ -1,6 +1,7 @@
 module
 
 public import Foundation.Modal.Kripke.Rooted
+public import Foundation.Vorspiel.List.Chain
 
 @[expose] public section
 

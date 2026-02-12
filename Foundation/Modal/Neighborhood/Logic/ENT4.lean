@@ -2,6 +2,7 @@ module
 
 public import Foundation.Modal.Neighborhood.Logic.EN4
 public import Foundation.Modal.Neighborhood.Logic.ET4
+public import Foundation.Vorspiel.Set.Fin
 
 @[expose] public section
 

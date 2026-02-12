@@ -2,7 +2,10 @@ module
 
 public import Foundation.FirstOrder.Intuitionistic.Rew
 
+/-! # Hilbert-style deduction system for first-order intuitionistic logic -/
+
 @[expose] public section
+
 namespace LO.FirstOrder
 
 abbrev Sequentᵢ (L : Language) := List (SyntacticFormulaᵢ L)

@@ -101,8 +101,7 @@ instance : Modal.EN ⪱ Modal.EMN := by
             ext x;
             match x with | 0 | 1 => simp_all [M]
         }
-      . simp! [M, Semantics.Models, Satisfies];
-        grind;
+      . simp [M, Semantics.Models, Satisfies];
 
 
 end LO.Modal

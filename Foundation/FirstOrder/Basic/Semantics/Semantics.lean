@@ -7,7 +7,7 @@ public import Foundation.Vorspiel.Empty
 @[expose] public section
 
 /-!
-# Semantics of first-order logic
+# Model-theoretic semantics of first-order classical logic
 
 This file defines the structure and the evaluation of terms and formulas by Tarski's truth definition.
 -/

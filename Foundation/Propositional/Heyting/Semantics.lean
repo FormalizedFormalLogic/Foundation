@@ -2,6 +2,7 @@ module
 
 public import Foundation.Propositional.Hilbert.Standard.Basic
 public import Foundation.Logic.LindenbaumAlgebra
+public import Foundation.Vorspiel.Order
 
 @[expose] public section
 
