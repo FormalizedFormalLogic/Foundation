@@ -2,6 +2,7 @@ module
 
 public import Foundation.Modal.Logic.S.Basic
 public import Foundation.ProvabilityLogic.GL.Uniform
+public import Foundation.Vorspiel.Set.Cofinite
 
 @[expose] public section
 
