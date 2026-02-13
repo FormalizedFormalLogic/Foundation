@@ -39,13 +39,13 @@ abbrev Eq.funcExt {k} (f : L.Func k) : Sentence L :=
   let σ : Semisentence L (k + k) :=
     (Matrix.conj fun i : Fin k ↦ “#(i.addCast k) = #(i.addNat k)”) ➝
       op(=).operator ![Semiterm.func f (fun i ↦ #(i.addCast k)), Semiterm.func f (fun i ↦ #(i.addNat k))]
-  ∀* σ
+  ∀⁰* σ
 
 abbrev Eq.relExt {k} (r : L.Rel k) : Sentence L :=
   let σ : Semisentence L (k + k) :=
     (Matrix.conj fun i : Fin k ↦ “#(i.addCast k) = #(i.addNat k)”) ➝
       Semiformula.rel r (fun i ↦ #(i.addCast k)) ➝ Semiformula.rel r (fun i ↦ #(i.addNat k))
-  ∀* σ
+  ∀⁰* σ
 
 inductive eqAxiom : Theory L
   | refl : eqAxiom (Eq.refl L)
@@ -199,7 +199,7 @@ lemma eval_mk {e} {ε} {φ : Semiformula L μ n} :
     · intro h a;
       induction' a using Quotient.ind with a
       simpa [Matrix.comp_vecCons] using ih.mpr (h a)
-  case hex n φ ih =>
+  case hexs n φ ih =>
     constructor
     · intro ⟨a, h⟩
       induction' a using Quotient.ind with a
@@ -325,12 +325,12 @@ namespace Semiformula
 def existsUnique {ξ} (φ : Semiformula L ξ (n + 1)) : Semiformula L ξ n :=
   “∃ y, !φ y ⋯ ∧ ∀ z, !φ z ⋯ → z = y”
 
-prefix:64 "∃'! " => existsUnique
+prefix:64 "∃⁰! " => existsUnique
 
 variable {M : Type*} [s : Structure L M] [Structure.Eq L M]
 
 @[simp] lemma eval_existsUnique {e ε} {φ : Semiformula L ξ (n + 1)} :
-    Eval s e ε (∃'! φ) ↔ ∃! x, Eval s (x :> e) ε φ := by
+    Eval s e ε (∃⁰! φ) ↔ ∃! x, Eval s (x :> e) ε φ := by
   simp [existsUnique, Semiformula.eval_substs, Matrix.comp_vecCons', ExistsUnique]
 
 end Semiformula
@@ -346,11 +346,11 @@ macro_rules
   | `(⤫formula($type)[ $binders* | $fbinders* | ∃! $φ:first_order_formula ]) => do
     let v := mkIdent (Name.mkSimple ("var" ++ toString binders.size))
     let binders' := binders.insertIdx 0 v
-    `(∃'! ⤫formula($type)[ $binders'* | $fbinders* | $φ])
+    `(∃⁰! ⤫formula($type)[ $binders'* | $fbinders* | $φ])
   | `(⤫formula($type)[ $binders* | $fbinders* | ∃! $x, $φ ])                 => do
     if binders.elem x then Macro.throwErrorAt x "error: variable is duplicated." else
     let binders' := binders.insertIdx 0 x
-    `(∃'! ⤫formula($type)[ $binders'* | $fbinders* | $φ ])
+    `(∃⁰! ⤫formula($type)[ $binders'* | $fbinders* | $φ ])
 
 end BinderNotation
 

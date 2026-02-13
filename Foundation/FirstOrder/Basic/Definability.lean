@@ -235,12 +235,12 @@ lemma of_iff {P Q : (Fin k → M) → Prop} (H : L.Definable Q) (h : ∀ x, P x 
 lemma all {R : (Fin k → M) → M → Prop} (hR : L.Definable fun w ↦ R (w ·.succ) (w 0)) :
     L.Definable fun v : Fin k → M ↦ ∀ x, R v x := by
   rcases hR with ⟨φ, hR⟩
-  exact ⟨∀' φ, fun v ↦ by simp [hR.iff]⟩
+  exact ⟨∀⁰ φ, fun v ↦ by simp [hR.iff]⟩
 
-lemma ex {R : (Fin k → M) → M → Prop} (hR : L.Definable fun w ↦ R (w ·.succ) (w 0)) :
+lemma exs {R : (Fin k → M) → M → Prop} (hR : L.Definable fun w ↦ R (w ·.succ) (w 0)) :
     L.Definable fun v : Fin k → M ↦ ∃ x, R v x := by
   rcases hR with ⟨φ, hR⟩
-  exact ⟨∃' φ, fun v ↦ by simp [hR.iff]⟩
+  exact ⟨∃⁰ φ, fun v ↦ by simp [hR.iff]⟩
 
 instance eq [L.Eq] [Structure.Eq L M] : L-relation[M] Eq := ⟨“x y. x = y”, fun _ ↦ by simp⟩
 
@@ -264,7 +264,7 @@ lemma fintype_all [Fintype ι] {P : ι → (Fin k → M) → Prop}
     (h : ∀ i, L.Definable fun w : Fin k → M ↦ P i w) : L.Definable fun v : Fin k → M ↦ ∀ i, P i v := by
   simpa using fconj Finset.univ h
 
-lemma fintype_ex [Fintype ι] {P : ι → (Fin k → M) → Prop}
+lemma fintype_exs [Fintype ι] {P : ι → (Fin k → M) → Prop}
     (h : ∀ i, L.Definable fun w : Fin k → M ↦ P i w) : L.Definable fun v : Fin k → M ↦ ∃ i, P i v := by
   simpa using fdisj Finset.univ h
 
@@ -273,7 +273,7 @@ lemma retraction (h : L.Definable P) {n} (f : Fin k → Fin n) :
   rcases h with ⟨φ, hφ⟩
   exact ⟨(Rew.subst fun i ↦ #(f i)) ▹ φ, fun v ↦ by simp [←hφ.iff]⟩
 
-lemma exVec {k l} {P : (Fin k → M) → (Fin l → M) → Prop}
+lemma exsVec {k l} {P : (Fin k → M) → (Fin l → M) → Prop}
     (h : L.Definable fun w : Fin (k + l) → M ↦ P (fun i ↦ w (i.castAdd l)) (fun j ↦ w (j.natAdd k))) :
     L.Definable fun v : Fin k → M ↦ ∃ ys : Fin l → M, P v ys := by
   induction l generalizing k
@@ -284,7 +284,7 @@ lemma exVec {k l} {P : (Fin k → M) → (Fin l → M) → Prop}
       constructor
       · rintro ⟨ys, h⟩; exact ⟨ys 0, (ys ·.succ), by simpa using h⟩
       · rintro ⟨y, ys, h⟩; exact ⟨_, h⟩
-    apply ex; apply ih
+    apply exs; apply ih
     let g : Fin (k + (l + 1)) → Fin (k + 1 + l) := Matrix.vecAppend rfl (fun x ↦ x.succ.castAdd l) (Fin.castAdd l 0 :> fun j ↦ j.natAdd (k + 1))
     exact of_iff (retraction h g) (by
       intro v; simp only [g]
@@ -321,7 +321,7 @@ lemma substitution {P : (Fin k → M) → Prop} {f : Fin k → (Fin l → M) →
     (hP : L.Definable P) (hf : ∀ i, L.DefinableFunction (f i)) :
     L.Definable fun z ↦ P (f · z) := by
   have : L.Definable fun z ↦ ∃ ys : Fin k → M, (∀ i, ys i = f i z) ∧ P ys := by
-    apply exVec; apply and
+    apply exsVec; apply and
     · apply fintype_all; intro i
       simpa using retraction (hf i) (i.natAdd l :> fun i ↦ i.castAdd k)
     · exact retraction hP (Fin.natAdd l)
@@ -477,7 +477,7 @@ attribute [aesop 11 (rule_sets := [Definability]) safe]
   Definable.and
   Definable.or
   Definable.all
-  Definable.ex
+  Definable.exs
 
 macro "definability" : attr =>
   `(attr|aesop 10 (rule_sets := [$(Lean.mkIdent `Definability):ident]) safe)

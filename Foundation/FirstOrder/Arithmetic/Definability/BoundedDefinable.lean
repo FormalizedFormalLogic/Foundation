@@ -146,22 +146,22 @@ lemma ball_blt {P : (Fin k → V) → V → Prop} {f : (Fin k → V) → V}
     ℌ.Definable fun v ↦ ∀ x < f v, P v x := by
   rcases hf.bounded with ⟨bf, hbf⟩
   have : ℌ.Definable fun v ↦ ∃ x ≤ Semiterm.valm V v id bf, x = f v ∧ ∀ y < x, P v y := by
-    apply bex'; apply and
+    apply bexs'; apply and
     · exact hf.definable
     · suffices ℌ.Definable fun x ↦ ∀ y < Semiterm.valm (L := ℒₒᵣ) V x id (#0), P (fun x_1 ↦ x x_1.succ) y by simpa
       apply ball ?_ #0
       simpa using h.retraction (0 :> (·.succ.succ))
   exact this.of_iff <| fun v ↦ ⟨fun h ↦ ⟨f v, hbf v, rfl, h⟩, by rintro ⟨y, hy, rfl, h⟩; exact h⟩
 
-lemma bex_blt {P : (Fin k → V) → V → Prop} {f : (Fin k → V) → V}
+lemma bexs_blt {P : (Fin k → V) → V → Prop} {f : (Fin k → V) → V}
     (hf : DefinableBoundedFunction f) (h : ℌ.Definable fun w ↦ P (w ·.succ) (w 0)) :
     ℌ.Definable fun v ↦ ∃ x < f v, P v x := by
   rcases hf.bounded with ⟨bf, hbf⟩
   have : ℌ.Definable fun v ↦ ∃ x ≤ Semiterm.valm V v id bf, x = f v ∧ ∃ y < x, P v y := by
-    apply bex'; apply and
+    apply bexs'; apply and
     · exact hf.definable
     · suffices ℌ.Definable fun x ↦ ∃ y < Semiterm.valm (L := ℒₒᵣ) V x id (#0), P (fun x_1 ↦ x x_1.succ) y by simpa
-      apply bex ?_ #0
+      apply bexs ?_ #0
       simpa using h.retraction (0 :> (·.succ.succ))
   exact this.of_iff <| fun v ↦ ⟨fun h ↦ ⟨f v, hbf v, rfl, h⟩, by rintro ⟨y, hy, rfl, h⟩; exact h⟩
 
@@ -170,22 +170,22 @@ lemma ball_ble {P : (Fin k → V) → V → Prop} {f : (Fin k → V) → V}
     ℌ.Definable fun v ↦ ∀ x ≤ f v, P v x := by
   rcases hf.bounded with ⟨bf, hbf⟩
   have : ℌ.Definable fun v ↦ ∃ x ≤ Semiterm.valm V v id bf, x = f v ∧ ∀ y ≤ x, P v y := by
-    apply bex'; apply and
+    apply bexs'; apply and
     · exact hf.definable
     · suffices ℌ.Definable fun x ↦ ∀ y ≤ Semiterm.valm (L := ℒₒᵣ) V x id (#0), P (fun x_1 ↦ x x_1.succ) y by simpa
       apply ball' ?_ #0
       simpa using h.retraction (0 :> (·.succ.succ))
   exact this.of_iff <| fun v ↦ ⟨fun h ↦ ⟨f v, hbf v, rfl, h⟩, by rintro ⟨y, hy, rfl, h⟩; exact h⟩
 
-lemma bex_ble {P : (Fin k → V) → V → Prop} {f : (Fin k → V) → V}
+lemma bexs_ble {P : (Fin k → V) → V → Prop} {f : (Fin k → V) → V}
     (hf : DefinableBoundedFunction f) (h : ℌ.Definable fun w ↦ P (w ·.succ) (w 0)) :
     ℌ.Definable fun v ↦ ∃ x ≤ f v, P v x := by
   rcases hf.bounded with ⟨bf, hbf⟩
   have : ℌ.Definable fun v ↦ ∃ x ≤ Semiterm.valm V v id bf, x = f v ∧ ∃ y ≤ x, P v y := by
-    apply bex'; apply and
+    apply bexs'; apply and
     · exact hf.definable
     · suffices ℌ.Definable fun x ↦ ∃ y ≤ Semiterm.valm (L := ℒₒᵣ) V x id (#0), P (fun x_1 ↦ x x_1.succ) y by simpa
-      apply bex' ?_ #0
+      apply bexs' ?_ #0
       simpa using h.retraction (0 :> (·.succ.succ))
   exact this.of_iff <| fun v ↦ ⟨fun h ↦ ⟨f v, hbf v, rfl, h⟩, by rintro ⟨y, hy, rfl, h⟩; exact h⟩
 
@@ -193,26 +193,26 @@ lemma ball_blt_zero {P : (Fin k → V) → V → Prop} {f : (Fin k → V) → V}
     (hf : DefinableBoundedFunction f) (h : Γ-[0].Definable fun w ↦ P (w ·.succ) (w 0)) :
     Γ-[0].Definable fun v ↦ ∀ x < f v, P v x := ball_blt hf h
 
-lemma bex_blt_zero {P : (Fin k → V) → V → Prop} {f : (Fin k → V) → V}
+lemma bexs_blt_zero {P : (Fin k → V) → V → Prop} {f : (Fin k → V) → V}
     (hf : DefinableBoundedFunction f) (h : Γ-[0].Definable fun w ↦ P (w ·.succ) (w 0)) :
-    Γ-[0].Definable fun v ↦ ∃ x < f v, P v x := bex_blt hf h
+    Γ-[0].Definable fun v ↦ ∃ x < f v, P v x := bexs_blt hf h
 
 lemma ball_ble_zero {P : (Fin k → V) → V → Prop} {f : (Fin k → V) → V}
     (hf : DefinableBoundedFunction f) (h : Γ-[0].Definable fun w ↦ P (w ·.succ) (w 0)) :
     Γ-[0].Definable fun v ↦ ∀ x ≤ f v, P v x := ball_ble hf h
 
-lemma bex_ble_zero {P : (Fin k → V) → V → Prop} {f : (Fin k → V) → V}
+lemma bexs_ble_zero {P : (Fin k → V) → V → Prop} {f : (Fin k → V) → V}
     (hf : DefinableBoundedFunction f) (h : Γ-[0].Definable fun w ↦ P (w ·.succ) (w 0)) :
-    Γ-[0].Definable fun v ↦ ∃ x ≤ f v, P v x := bex_ble hf h
+    Γ-[0].Definable fun v ↦ ∃ x ≤ f v, P v x := bexs_ble hf h
 
-lemma bex_vec_le_boldfaceBoundedFunction {k} {φ : Fin l → (Fin k → V) → V} {P : (Fin k → V) → (Fin l → V) → Prop}
+lemma bexs_vec_le_boldfaceBoundedFunction {k} {φ : Fin l → (Fin k → V) → V} {P : (Fin k → V) → (Fin l → V) → Prop}
     (pp : ∀ i, DefinableBoundedFunction (φ i)) (hP : ℌ.Definable fun w : Fin (k + l) → V ↦ P (fun i ↦ w (i.castAdd l)) (fun j ↦ w (j.natAdd k))) :
     ℌ.Definable fun v ↦ ∃ w ≤ (φ · v), P v w := by
   induction l generalizing k
   case zero => simpa [Matrix.empty_eq (α := V)] using hP
   case succ l ih =>
     simp only [Fin.exists_le_vec_iff_exists_le_exists_vec]
-    apply bex_ble (pp 0)
+    apply bexs_ble (pp 0)
     apply ih
     · intro i; apply DefinableBoundedFunction.retraction (pp i.succ)
     · let g : Fin (k + (l + 1)) → Fin (k + 1 + l) := Matrix.vecAppend rfl (fun x ↦ x.succ.castAdd l) (Fin.castAdd l 0 :> fun j ↦ j.natAdd (k + 1))
@@ -229,7 +229,7 @@ lemma substitution_boldfaceBoundedFunction {f : Fin k → (Fin l → V) → V}
     (hP : ℌ.Definable P) (hf : ∀ i, DefinableBoundedFunction (f i)) :
     ℌ.Definable fun z ↦ P (f · z) := by
   have : ℌ.Definable fun v ↦ ∃ w ≤ (f · v), (∀ i, w i = f i v) ∧ P w := by
-    apply bex_vec_le_boldfaceBoundedFunction hf
+    apply bexs_vec_le_boldfaceBoundedFunction hf
     apply and
     · apply fintype_all; intro i
       simpa using retraction (.of_zero (hf i).2) (i.natAdd l :> Fin.castAdd k)
@@ -396,8 +396,8 @@ attribute [aesop 6 (rule_sets := [Definability]) safe]
 attribute [aesop 8 (rule_sets := [Definability]) safe]
   Definable.ball_blt_zero
   Definable.ball_ble_zero
-  Definable.bex_blt_zero
-  Definable.bex_ble_zero
+  Definable.bexs_blt_zero
+  Definable.bexs_ble_zero
 
 example (c : V) : DefinableBoundedFunction₂ (fun x _ : V ↦ c + 2 * x^2) := by definability
 

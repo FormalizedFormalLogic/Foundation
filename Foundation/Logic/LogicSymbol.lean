@@ -26,7 +26,7 @@ class LogicalConnective (α : Type*)
 class NegInvolutive (F : Type*) [Tilde F] where
   neg_involutive (φ : F) : ∼∼φ = φ
 
-class DeMorgan (F : Type*) [LogicalConnective F] extends NegInvolutive F where
+class DeMorgan (F : Type*) [LogicalConnective F] where
   verum : ∼(⊤ : F) = ⊥
   falsum : ∼(⊥ : F) = ⊤
   imply (φ ψ : F) : (φ ➝ ψ) = ∼φ ⋎ ψ
@@ -91,6 +91,8 @@ instance : DeMorgan Prop where
   imply := fun _ _ => by simp [imp_iff_not_or]
   and := fun _ _ => by simp [-not_and, not_and_or]
   or := fun _ _ => by simp [not_or]
+
+instance : NegInvolutive Prop where
   neg_involutive := fun _ => by simp
 
 class HomClass (F : Type*) (α β : outParam Type*) [LogicalConnective α] [LogicalConnective β] [FunLike F α β] where

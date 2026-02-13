@@ -141,7 +141,7 @@ noncomputable def orIntro (s p q d : V) : V := ⟪s, 3, p, q, d⟫ + 1
 
 noncomputable def allIntro (s p d : V) : V := ⟪s, 4, p, d⟫ + 1
 
-noncomputable def exIntro (s p t d : V) : V := ⟪s, 5, p, t, d⟫ + 1
+noncomputable def exsIntro (s p t d : V) : V := ⟪s, 5, p, t, d⟫ + 1
 
 noncomputable def wkRule (s d : V) : V := ⟪s, 6, d⟫ + 1
 
@@ -178,10 +178,10 @@ def allIntroGraph : 𝚺₀.Semisentence 4 :=
 
 instance allIntro.defined : 𝚺₀-Function₃ (allIntro : V → V → V → V) via allIntroGraph := .mk fun v ↦ by simp_all [allIntroGraph, allIntro]
 
-def exIntroGraph : 𝚺₀.Semisentence 5 :=
+def exsIntroGraph : 𝚺₀.Semisentence 5 :=
   .mkSigma “y s p t d. ∃ y' < y, !pair₅Def y' s 5 p t d ∧ y = y' + 1”
 
-instance exIntro.defined : 𝚺₀-Function₄ (exIntro : V → V → V → V → V) via exIntroGraph := .mk fun v ↦ by simp_all [exIntroGraph, numeral_eq_natCast, exIntro]
+instance exsIntro.defined : 𝚺₀-Function₄ (exsIntro : V → V → V → V → V) via exsIntroGraph := .mk fun v ↦ by simp_all [exsIntroGraph, numeral_eq_natCast, exsIntro]
 
 def wkRuleGraph : 𝚺₀.Semisentence 3 :=
   .mkSigma “y s d. ∃ y' < y, !pair₃Def y' s 6 d ∧ y = y' + 1”
@@ -233,12 +233,12 @@ instance axm_defined : 𝚺₀-Function₂ (axm : V → V → V) via axmGraph :=
 @[simp] lemma s_lt_allIntro (s p d : V) : d < allIntro s p d :=
   le_iff_lt_succ.mp <| le_trans (le_trans (by simp) <| le_pair_right _ _) <| le_pair_right _ _
 
-@[simp] lemma seq_lt_exIntro (s p t d : V) : s < exIntro s p t d := le_iff_lt_succ.mp <| le_pair_left _ _
-@[simp] lemma p_lt_exIntro (s p t d : V) : p < exIntro s p t d :=
+@[simp] lemma seq_lt_exsIntro (s p t d : V) : s < exsIntro s p t d := le_iff_lt_succ.mp <| le_pair_left _ _
+@[simp] lemma p_lt_exsIntro (s p t d : V) : p < exsIntro s p t d :=
   le_iff_lt_succ.mp <| le_trans (le_trans (le_pair_left _ _) <| le_pair_right _ _) <| le_pair_right _ _
-@[simp] lemma t_lt_exIntro (s p t d : V) : t < exIntro s p t d :=
+@[simp] lemma t_lt_exsIntro (s p t d : V) : t < exsIntro s p t d :=
   le_iff_lt_succ.mp <| le_trans (le_trans (le_trans (le_pair_left _ _) <| le_pair_right _ _) <| le_pair_right _ _) <| le_pair_right _ _
-@[simp] lemma d_lt_exIntro (s p t d : V) : d < exIntro s p t d :=
+@[simp] lemma d_lt_exsIntro (s p t d : V) : d < exsIntro s p t d :=
   le_iff_lt_succ.mp <| le_trans (le_trans (le_trans (le_pair_right _ _) <| le_pair_right _ _) <| le_pair_right _ _) <| le_pair_right _ _
 
 @[simp] lemma seq_lt_wkRule (s d : V) : s < wkRule s d := le_iff_lt_succ.mp <| le_pair_left _ _
@@ -263,7 +263,7 @@ instance axm_defined : 𝚺₀-Function₂ (axm : V → V → V) via axmGraph :=
 @[simp] lemma fstIdx_andIntro (s p q dp dq : V) : fstIdx (andIntro s p q dp dq) = s := by simp [fstIdx, andIntro]
 @[simp] lemma fstIdx_orIntro (s p q dpq : V) : fstIdx (orIntro s p q dpq) = s := by simp [fstIdx, orIntro]
 @[simp] lemma fstIdx_allIntro (s p d : V) : fstIdx (allIntro s p d) = s := by simp [fstIdx, allIntro]
-@[simp] lemma fstIdx_exIntro (s p t d : V) : fstIdx (exIntro s p t d) = s := by simp [fstIdx, exIntro]
+@[simp] lemma fstIdx_exsIntro (s p t d : V) : fstIdx (exsIntro s p t d) = s := by simp [fstIdx, exsIntro]
 @[simp] lemma fstIdx_wkRule (s d : V) : fstIdx (wkRule s d) = s := by simp [fstIdx, wkRule]
 @[simp] lemma fstIdx_shiftRule (s d : V) : fstIdx (shiftRule s d) = s := by simp [fstIdx, shiftRule]
 @[simp] lemma fstIdx_cutRule (s p d₁ d₂ : V) : fstIdx (cutRule s p d₁ d₂) = s := by simp [fstIdx, cutRule]
@@ -284,7 +284,7 @@ def Phi (C : Set V) (d : V) : Prop :=
     (∃ s p q dp dq, d = andIntro s p q dp dq ∧ p ^⋏ q ∈ s ∧ (fstIdx dp = insert p s ∧ dp ∈ C) ∧ (fstIdx dq = insert q s ∧ dq ∈ C)) ∨
     (∃ s p q dpq, d = orIntro s p q dpq ∧ p ^⋎ q ∈ s ∧ fstIdx dpq = insert p (insert q s) ∧ dpq ∈ C) ∨
     (∃ s p dp, d = allIntro s p dp ∧ ^∀ p ∈ s ∧ fstIdx dp = insert (free L p) (setShift L s) ∧ dp ∈ C) ∨
-    (∃ s p t dp, d = exIntro s p t dp ∧ ^∃ p ∈ s ∧ IsTerm L t ∧ fstIdx dp = insert (substs1 L t p) s ∧ dp ∈ C) ∨
+    (∃ s p t dp, d = exsIntro s p t dp ∧ ^∃ p ∈ s ∧ IsTerm L t ∧ fstIdx dp = insert (substs1 L t p) s ∧ dp ∈ C) ∨
     (∃ s d', d = wkRule s d' ∧ fstIdx d' ⊆ s ∧ d' ∈ C) ∨
     (∃ s d', d = shiftRule s d' ∧ s = setShift L (fstIdx d') ∧ d' ∈ C) ∨
     (∃ s p d₁ d₂, d = cutRule s p d₁ d₂ ∧ (fstIdx d₁ = insert p s ∧ d₁ ∈ C) ∧ (fstIdx d₂ = insert (neg L p) s ∧ d₂ ∈ C)) ∨
@@ -302,7 +302,7 @@ private lemma phi_iff (C d : V) :
       (∃ s < d, ∃ p < d, ∃ dp < d,
         d = allIntro s p dp ∧ ^∀ p ∈ s ∧ fstIdx dp = insert (free L p) (setShift L s) ∧ dp ∈ C) ∨
       (∃ s < d, ∃ p < d, ∃ t < d, ∃ dp < d,
-        d = exIntro s p t dp ∧ ^∃ p ∈ s ∧ IsTerm L t ∧ fstIdx dp = insert (substs1 L t p) s ∧ dp ∈ C) ∨
+        d = exsIntro s p t dp ∧ ^∃ p ∈ s ∧ IsTerm L t ∧ fstIdx dp = insert (substs1 L t p) s ∧ dp ∈ C) ∨
       (∃ s < d, ∃ d' < d,
         d = wkRule s d' ∧ fstIdx d' ⊆ s ∧ d' ∈ C) ∨
       (∃ s < d, ∃ d' < d,
@@ -359,7 +359,7 @@ noncomputable def blueprint : Fixpoint.Blueprint 0 := ⟨.mkDelta
         ∃ c, !fstIdxDef c dp ∧ ∃ fp, !(freeGraph L) fp p ∧ ∃ ss, !(setShiftGraph L) ss s ∧
         !insertDef c fp ss ∧ dp ∈ C) ∨
       (∃ s < d, ∃ p < d, ∃ t < d, ∃ dp < d,
-        !exIntroGraph d s p t dp ∧ (∃ ex, !qqExDef ex p ∧ ex ∈ s) ∧
+        !exsIntroGraph d s p t dp ∧ (∃ ex, !qqExsDef ex p ∧ ex ∈ s) ∧
         !(isSemiterm L).sigma 0 t ∧ ∃ c, !fstIdxDef c dp ∧ ∃ pt, !(substs1Graph L) pt t p ∧ !insertDef c pt s ∧ dp ∈ C) ∨
       (∃ s < d, ∃ d' < d,
         !wkRuleGraph d s d' ∧ ∃ c, !fstIdxDef c d' ∧ !bitSubsetDef c s ∧ d' ∈ C) ∨
@@ -388,7 +388,7 @@ noncomputable def blueprint : Fixpoint.Blueprint 0 := ⟨.mkDelta
         ∀ c, !fstIdxDef c dp → ∀ fp, !(freeGraph L) fp p → ∀ ss, !(setShiftGraph L) ss s →
           !insertDef c fp ss ∧ dp ∈ C) ∨
       (∃ s < d, ∃ p < d, ∃ t < d, ∃ dp < d,
-        !exIntroGraph d s p t dp ∧ (∀ ex, !qqExDef ex p → ex ∈ s) ∧
+        !exsIntroGraph d s p t dp ∧ (∀ ex, !qqExsDef ex p → ex ∈ s) ∧
         !(isSemiterm L).pi 0 t ∧
         ∀ c, !fstIdxDef c dp → ∀ pt, !(substs1Graph L) pt t p → !insertDef c pt s ∧ dp ∈ C) ∨
       (∃ s < d, ∃ d' < d,
@@ -539,7 +539,7 @@ lemma case_iff {d : V} :
       (∃ s p q dp dq, d = andIntro s p q dp dq ∧ p ^⋏ q ∈ s ∧ T.DerivationOf dp (insert p s) ∧ T.DerivationOf dq (insert q s)) ∨
       (∃ s p q dpq, d = orIntro s p q dpq ∧ p ^⋎ q ∈ s ∧ T.DerivationOf dpq (insert p (insert q s))) ∨
       (∃ s p dp, d = allIntro s p dp ∧ ^∀ p ∈ s ∧ T.DerivationOf dp (insert (free L p) (setShift L s))) ∨
-      (∃ s p t dp, d = exIntro s p t dp ∧ ^∃ p ∈ s ∧ IsTerm L t ∧ T.DerivationOf dp (insert (substs1 L t p) s)) ∨
+      (∃ s p t dp, d = exsIntro s p t dp ∧ ^∃ p ∈ s ∧ IsTerm L t ∧ T.DerivationOf dp (insert (substs1 L t p) s)) ∨
       (∃ s d', d = wkRule s d' ∧ fstIdx d' ⊆ s ∧ T.Derivation d') ∨
       (∃ s d', d = shiftRule s d' ∧ s = setShift L (fstIdx d') ∧ T.Derivation d') ∨
       (∃ s p d₁ d₂, d = cutRule s p d₁ d₂ ∧ T.DerivationOf d₁ (insert p s) ∧ T.DerivationOf d₂ (insert (neg L p) s)) ∨
@@ -558,8 +558,8 @@ lemma induction1 (Γ) {P : V → Prop} (hP : Γ-[1]-Predicate P)
       P d → P (orIntro s p q d))
     (hAll : ∀ s, IsFormulaSet L s → ∀ p d, ^∀ p ∈ s → T.DerivationOf d (insert (free L p) (setShift L s)) →
       P d → P (allIntro s p d))
-    (hEx : ∀ s, IsFormulaSet L s → ∀ p t d, ^∃ p ∈ s → IsTerm L t → T.DerivationOf d (insert (substs1 L t p) s) →
-      P d → P (exIntro s p t d))
+    (hExs : ∀ s, IsFormulaSet L s → ∀ p t d, ^∃ p ∈ s → IsTerm L t → T.DerivationOf d (insert (substs1 L t p) s) →
+      P d → P (exsIntro s p t d))
     (hWk : ∀ s, IsFormulaSet L s → ∀ d, fstIdx d ⊆ s → T.Derivation d →
       P d → P (wkRule s d))
     (hShift : ∀ s, IsFormulaSet L s → ∀ d, s = setShift L (fstIdx d) → T.Derivation d →
@@ -580,7 +580,7 @@ lemma induction1 (Γ) {P : V → Prop} (hP : Γ-[1]-Predicate P)
     · exact hAnd s (by simpa using hds) p q dp dq hpq ⟨h₁.1, (ih dp h₁.2).1⟩ ⟨h₂.1, (ih dq h₂.2).1⟩ (ih dp h₁.2).2 (ih dq h₂.2).2
     · exact hOr s (by simpa using hds) p q d hpq ⟨h.1, (ih d h.2).1⟩ (ih d h.2).2
     · exact hAll s (by simpa using hds) p d hp ⟨h, (ih d hC).1⟩ (ih d hC).2
-    · exact hEx s (by simpa using hds) p t d hp ht ⟨h, (ih d hC).1⟩ (ih d hC).2
+    · exact hExs s (by simpa using hds) p t d hp ht ⟨h, (ih d hC).1⟩ (ih d hC).2
     · exact hWk s (by simpa using hds) d h (ih d hC).1 (ih d hC).2
     · exact hShift s (by simpa using hds) d h (ih d hC).1 (ih d hC).2
     · exact hCut s (by simpa using hds) p d₁ d₂ ⟨h₁, (ih d₁ hC₁).1⟩ ⟨h₂, (ih d₂ hC₂).1⟩ (ih d₁ hC₁).2 (ih d₂ hC₂).2
@@ -617,12 +617,12 @@ lemma allIntro {s p dp : V} (h : ^∀ p ∈ s)
     ⟨by simp only [fstIdx_allIntro]; intro q hq; simpa using hdp.isFormulaSet (shift L q) (by simp [shift_mem_setShift hq]),
       Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inl ⟨s, p, dp, rfl, h, hdp⟩⟩
 
-lemma exIntro {s p t dp : V}
+lemma exsIntro {s p t dp : V}
     (h : ^∃ p ∈ s) (ht : IsTerm L t)
     (hdp : T.DerivationOf dp (insert (substs1 L t p) s)) :
-    T.Derivation (exIntro s p t dp) :=
+    T.Derivation (exsIntro s p t dp) :=
   Theory.Derivation.mk
-    ⟨by simp only [fstIdx_exIntro]; intro q hq; exact hdp.isFormulaSet q (by simp [hq]),
+    ⟨by simp only [fstIdx_exsIntro]; intro q hq; exact hdp.isFormulaSet q (by simp [hq]),
       Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inl ⟨s, p, t, dp, rfl, h, ht, hdp⟩⟩
 
 lemma wkRule {s s' d : V} (hs : IsFormulaSet L s)
@@ -665,7 +665,7 @@ lemma of_ss (h : T.Δ₁Class (V := V) ⊆ U.Δ₁Class) {d : V} : T.Derivation 
   · intro s _ p d hp hd ih
     apply Derivation.allIntro hp ⟨hd.1, ih⟩
   · intro s _ p t d hp ht hd ih
-    apply Derivation.exIntro hp ht ⟨hd.1, ih⟩
+    apply Derivation.exsIntro hp ht ⟨hd.1, ih⟩
   · intro s hs d h _ ih
     apply Derivation.wkRule hs h ⟨rfl, ih⟩
   · rintro s hs d rfl _ ih
@@ -707,7 +707,7 @@ lemma all_m {s p : V} (h : ^∀ p ∈ s) (hp : T.Derivable (insert (free L p) (s
 lemma ex_m {s p t : V} (h : ^∃ p ∈ s) (ht : IsTerm L t) (hp : T.Derivable (insert (substs1 L t p) s)) :
     T.Derivable s := by
   rcases hp with ⟨dp, hdp⟩
-  exact ⟨exIntro s p t dp, by simp, Derivation.exIntro h ht hdp⟩
+  exact ⟨exsIntro s p t dp, by simp, Derivation.exsIntro h ht hdp⟩
 
 lemma wk {s s' : V} (hs : IsFormulaSet L s) (h : s' ⊆ s) (hd : T.Derivable s') :
     T.Derivable s := by
@@ -821,7 +821,7 @@ lemma disj (ps s : V) {i} (hps : ∀ i < len ps, IsFormula L ps.[i])
 lemma all {p s : V} (hp : IsSemiformula L 1 p) (dp : T.Derivable (insert (free L p) (setShift L s))) : T.Derivable (insert (^∀ p) s) :=
   all_m (p := p) (by simp) (wk (by simp [hp, by simpa using dp.isFormulaSet]) (by intro x; simp; tauto) dp)
 
-lemma ex {p t s : V} (hp : IsSemiformula L 1 p) (ht : IsTerm L t)
+lemma exs {p t s : V} (hp : IsSemiformula L 1 p) (ht : IsTerm L t)
     (dp : T.Derivable (insert (substs1 L t p) s)) : T.Derivable (insert (^∃ p) s) :=
   ex_m (p := p) (by simp) ht <| wk (by simp [hp, by simpa using dp.isFormulaSet]) (by intro x; simp; tauto) dp
 

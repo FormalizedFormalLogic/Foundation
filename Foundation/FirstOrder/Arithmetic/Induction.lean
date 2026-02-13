@@ -47,7 +47,7 @@ theorem bounded_all_sigma1_order_induction {f : V → V → V} (hf : 𝚺₁-Fun
     intro k hk
     induction k using ISigma1.sigma1_succ_induction
     · apply Definable.imp (Definable.comp₂ (by definability) (by definability))
-      apply Definable.ex
+      apply Definable.exs
       apply Definable.and (Definable.comp₁ (by definability))
       apply Definable.and
         (Definable.comp₂

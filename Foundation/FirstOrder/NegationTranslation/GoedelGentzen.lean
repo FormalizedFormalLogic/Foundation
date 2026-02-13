@@ -23,14 +23,14 @@ end Sequent
 namespace Semiformula
 
 def doubleNegation {n} : Semiformula L ξ n → Semiformulaᵢ L ξ n
-  | rel r v  => ∼∼(.rel r v)
+  |  rel r v => ∼∼(.rel r v)
   | nrel r v => ∼(.rel r v)
-  | ⊤        => ⊤
-  | ⊥        => ⊥
-  | φ ⋏ ψ    => φ.doubleNegation ⋏ ψ.doubleNegation
-  | φ ⋎ ψ    => ∼(∼φ.doubleNegation ⋏ ∼ψ.doubleNegation)
-  | ∀' φ     => ∀' φ.doubleNegation
-  | ∃' φ     => ∼(∀' ∼φ.doubleNegation)
+  |        ⊤ => ⊤
+  |        ⊥ => ⊥
+  |    φ ⋏ ψ => φ.doubleNegation ⋏ ψ.doubleNegation
+  |    φ ⋎ ψ => ∼(∼φ.doubleNegation ⋏ ∼ψ.doubleNegation)
+  |     ∀⁰ φ => ∀⁰ φ.doubleNegation
+  |     ∃⁰ φ => ∼(∀⁰ ∼φ.doubleNegation)
 
 scoped[LO.FirstOrder] postfix:max "ᴺ" => Semiformula.doubleNegation
 
@@ -46,9 +46,9 @@ scoped[LO.FirstOrder] postfix:max "ᴺ" => Semiformula.doubleNegation
 
 @[simp] lemma doubleNegation_or (φ ψ : Semiformula L ξ n) : (φ ⋎ ψ)ᴺ = ∼(∼φᴺ ⋏ ∼ψᴺ) := rfl
 
-@[simp] lemma doubleNegation_all (φ : Semiformula L ξ (n + 1)) : (∀' φ)ᴺ = ∀' φᴺ := rfl
+@[simp] lemma doubleNegation_all (φ : Semiformula L ξ (n + 1)) : (∀⁰ φ)ᴺ = ∀⁰ φᴺ := rfl
 
-@[simp] lemma doubleNegation_ex (φ : Semiformula L ξ (n + 1)) : (∃' φ)ᴺ = ∼(∀' ∼φᴺ) := rfl
+@[simp] lemma doubleNegation_ex (φ : Semiformula L ξ (n + 1)) : (∃⁰ φ)ᴺ = ∼(∀⁰ ∼φᴺ) := rfl
 
 lemma doubleNegation_imply (φ ψ : Semiformula L ξ n) : (φ ➝ ψ)ᴺ = ∼(∼(∼φ)ᴺ ⋏ ∼ψᴺ) := by simp [imp_eq]
 
@@ -93,33 +93,33 @@ variable {L : Language} [L.DecidableEq] {T : Theory L} {Λ : Hilbertᵢ L}
 open Rewriting LO.Entailment Entailment.FiniteContext HilbertProofᵢ
 
 def negDoubleNegation : (φ : SyntacticFormula L) → Λ ⊢! ∼φᴺ ⭤ (∼φ)ᴺ
-  | .rel r v  => Entailment.tneIff (φ := Semiformulaᵢ.rel r v)
+  | .rel r v => Entailment.tneIff (φ := Semiformulaᵢ.rel r v)
   | .nrel r v => Entailment.E_Id (φ := ∼∼(Semiformulaᵢ.rel r v))
-  | ⊤         => Entailment.ENNOO
-  | ⊥         => Entailment.E_Id (φ := ∼⊥)
-  | φ ⋏ ψ     =>
+  | ⊤ => Entailment.ENNOO
+  | ⊥ => Entailment.E_Id (φ := ∼⊥)
+  | φ ⋏ ψ =>
     have ihφ : Λ ⊢! ∼φᴺ ⭤ (∼φ)ᴺ := negDoubleNegation φ
     have ihψ : Λ ⊢! ∼ψᴺ ⭤ (∼ψ)ᴺ := negDoubleNegation ψ
     have : Λ ⊢! φᴺ ⋏ ψᴺ ⭤ ∼(∼φ)ᴺ ⋏ ∼(∼ψ)ᴺ :=
       Entailment.EKK_of_E_of_E (iffnegOfNegIff (by simp) ihφ) (iffnegOfNegIff (by simp) ihψ)
     Entailment.ENN_of_E this
-  | φ ⋎ ψ     =>
+  | φ ⋎ ψ =>
     have ihφ : Λ ⊢! ∼φᴺ ⭤ (∼φ)ᴺ := negDoubleNegation φ
     have ihψ : Λ ⊢! ∼ψᴺ ⭤ (∼ψ)ᴺ := negDoubleNegation ψ
     have : Λ ⊢! ∼φᴺ ⋏ ∼ψᴺ ⭤ (∼φ)ᴺ ⋏ (∼ψ)ᴺ := Entailment.EKK_of_E_of_E ihφ ihψ
     have : Λ ⊢! ∼∼(∼φᴺ ⋏ ∼ψᴺ) ⭤ (∼φ)ᴺ ⋏ (∼ψ)ᴺ := Entailment.E_trans (DN_of_isNegative (by simp)) this
     this
-  | ∀' φ      =>
+  | ∀⁰ φ =>
     have ihφ : Λ ⊢! ∼(free φ)ᴺ ⭤ (∼(free φ))ᴺ := negDoubleNegation (free φ)
     have : Λ ⊢! (free φ)ᴺ ⭤ (∼(∼(free φ))ᴺ) := iffnegOfNegIff (by simp) ihφ
-    have : Λ ⊢! ∀' φᴺ ⭤ ∀' ∼(∼φ)ᴺ :=
+    have : Λ ⊢! ∀⁰ φᴺ ⭤ ∀⁰ ∼(∼φ)ᴺ :=
       allIffAllOfIff <| Entailment.cast (by simp [Semiformula.rew_doubleNegation]) this
     Entailment.ENN_of_E this
-  | ∃' φ      =>
+  | ∃⁰ φ =>
     have ihφ : Λ ⊢! ∼(free φ)ᴺ ⭤ (∼(free φ))ᴺ := negDoubleNegation (free φ)
-    have : Λ ⊢! ∀' ∼φᴺ ⭤ ∀' (∼φ)ᴺ :=
+    have : Λ ⊢! ∀⁰ ∼φᴺ ⭤ ∀⁰ (∼φ)ᴺ :=
       allIffAllOfIff <| Entailment.cast (by simp [Semiformula.rew_doubleNegation]) ihφ
-    have : Λ ⊢! ∼∼(∀' ∼φᴺ) ⭤ ∀' (∼φ)ᴺ := Entailment.E_trans (DN_of_isNegative (by simp)) this
+    have : Λ ⊢! ∼∼(∀⁰ ∼φᴺ) ⭤ ∀⁰ (∼φ)ᴺ := Entailment.E_trans (DN_of_isNegative (by simp)) this
     this
   termination_by φ => φ.complexity
 
@@ -169,10 +169,10 @@ def gödelGentzen {Γ : Sequent L} : ⊢ᵀ Γ → (∼Γ)ᴺ ⊢[Λ]! ⊥
     have : ((∼Γ)ᴺ)⁺ ⊢[Λ]! free (∼(∼φ)ᴺ) :=
       FiniteContext.cast (deduct (gödelGentzen d)) eΓ (by simp [Semiformula.rew_doubleNegation]; rfl)
     deductInv <| dni' <| geNOverFiniteContext this
-  | ex (Γ := Γ) (φ := φ) t d =>
+  | exs (Γ := Γ) (φ := φ) t d =>
     have ih : (∼Γ)ᴺ ⊢[Λ]! ∼((∼φ)ᴺ/[t]) :=
       Entailment.cast (by simp [Semiformula.rew_doubleNegation]; rfl) <| deduct (gödelGentzen d)
-    have : ((∀' (∼φ)ᴺ) :: (∼Γ)ᴺ) ⊢[Λ]! (∼φ)ᴺ/[t] := specializeOverContext (nthAxm 0) t
+    have : ((∀⁰ (∼φ)ᴺ) :: (∼Γ)ᴺ) ⊢[Λ]! (∼φ)ᴺ/[t] := specializeOverContext (nthAxm 0) t
     (FiniteContext.weakening (by simp) ih) ⨀ this
   | cut (Γ := Γ) (φ := φ) dp dn =>
     have ihp : ((∼φ)ᴺ :: (∼Γ)ᴺ) ⊢[Λ]! ⊥ := gödelGentzen dp

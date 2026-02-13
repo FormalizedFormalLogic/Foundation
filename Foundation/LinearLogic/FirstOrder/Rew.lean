@@ -21,8 +21,8 @@ def rewAux (ω : Rew L ξ₁ n₁ ξ₂ n₂) : Semiformula L ξ₁ n₁ → Sem
   |    φ ⨁ ψ => rewAux ω φ ⨁ rewAux ω ψ
   |       ！φ => ！rewAux ω φ
   |       ？φ => ？rewAux ω φ
-  |     ∀' φ => ∀' rewAux ω.q φ
-  |     ∃' φ => ∃' rewAux ω.q φ
+  |     ∀⁰ φ => ∀⁰ rewAux ω.q φ
+  |     ∃⁰ φ => ∃⁰ rewAux ω.q φ
 
 lemma rewAux_neg (ω : Rew L ξ₁ n₁ ξ₂ n₂) (φ : Semiformula L ξ₁ n₁) :
     rewAux ω (∼φ) = ∼rewAux ω φ := by
@@ -40,7 +40,7 @@ def rew (ω : Rew L ξ₁ n₁ ξ₂ n₂) : Semiformula L ξ₁ n₁ →ˡᶜ S
 instance : Rewriting L ξ (Semiformula L ξ) ζ (Semiformula L ζ) where
   app := rew
   app_all (_ _) := rfl
-  app_ex (_ _) := rfl
+  app_exs (_ _) := rfl
 
 instance : Coe (Semisentence L n) (Semistatement L n) := ⟨Rewriting.emb (ξ := ℕ)⟩
 
@@ -94,56 +94,56 @@ private lemma map_inj {b : Fin n₁ → Fin n₂} {f : ξ₁ → ξ₂}
       simp only [rew_rel, rel.injEq, and_imp]
       rintro rfl; simp only [heq_eq_eq, true_and]; rintro rfl h; simp only [true_and]
       funext i; exact Rew.map_inj hb hf (congr_fun h i)
-    | nrel _ _ | 1 | ⊥ | _ ⨂ _ | _ ⅋ _ | ⊤ | 0 | _ ＆ _ | _ ⨁ _ | ！_ | ？_ | ∀' _ | ∃' _ => by simp [rew_rel, rew_nrel]
+    | nrel _ _ | 1 | ⊥ | _ ⨂ _ | _ ⅋ _ | ⊤ | 0 | _ ＆ _ | _ ⨁ _ | ！_ | ？_ | ∀⁰ _ | ∃⁰ _ => by simp [rew_rel, rew_nrel]
   | nrel r v => fun φ ↦
     match φ with
     | nrel s w => by
       simp only [rew_nrel, nrel.injEq, and_imp]
       rintro rfl; simp only [heq_eq_eq, true_and]; rintro rfl h; simp only [true_and]
       funext i; exact Rew.map_inj hb hf (congr_fun h i)
-    | rel _ _ | 1 | ⊥ | _ ⨂ _ | _ ⅋ _ | ⊤ | 0 | _ ＆ _ | _ ⨁ _ | ！_ | ？_ | ∀' _ | ∃' _ => by simp [rew_rel, rew_nrel]
+    | rel _ _ | 1 | ⊥ | _ ⨂ _ | _ ⅋ _ | ⊤ | 0 | _ ＆ _ | _ ⨁ _ | ！_ | ？_ | ∀⁰ _ | ∃⁰ _ => by simp [rew_rel, rew_nrel]
   | 1 => by intro φ; cases φ using cases' <;> simp [rew_rel, rew_nrel]
   | ⊥ => by intro φ; cases φ using cases' <;> simp [rew_rel, rew_nrel]
   | φ ⨂ ψ => fun χ ↦
     match χ with
     | _ ⨂ _ => by simpa using fun hp hq ↦ ⟨map_inj hb hf hp, map_inj hb hf hq⟩
-    | rel _ _ | nrel _ _ | 1 | ⊥ | _ ⅋ _ | ⊤ | 0 | _ ＆ _ | _ ⨁ _ | ！_ | ？_ | ∀' _ | ∃' _ => by simp [rew_rel, rew_nrel]
+    | rel _ _ | nrel _ _ | 1 | ⊥ | _ ⅋ _ | ⊤ | 0 | _ ＆ _ | _ ⨁ _ | ！_ | ？_ | ∀⁰ _ | ∃⁰ _ => by simp [rew_rel, rew_nrel]
   | φ ⅋ ψ => fun χ ↦
     match χ with
     | _ ⅋ _ => by simpa using fun hp hq ↦ ⟨map_inj hb hf hp, map_inj hb hf hq⟩
-    | rel _ _ | nrel _ _ | 1 | ⊥ | _ ⨂ _ | ⊤ | 0 | _ ＆ _ | _ ⨁ _ | ！_ | ？_ | ∀' _ | ∃' _ => by simp [rew_rel, rew_nrel]
+    | rel _ _ | nrel _ _ | 1 | ⊥ | _ ⨂ _ | ⊤ | 0 | _ ＆ _ | _ ⨁ _ | ！_ | ？_ | ∀⁰ _ | ∃⁰ _ => by simp [rew_rel, rew_nrel]
   | ⊤ => by intro φ; cases φ using cases' <;> simp [rew_rel, rew_nrel]
   | 0 => by intro φ; cases φ using cases' <;> simp [rew_rel, rew_nrel]
   | φ ＆ ψ => fun χ ↦
     match χ with
     | _ ＆ _ => by simpa using fun hp hq ↦ ⟨map_inj hb hf hp, map_inj hb hf hq⟩
-    | rel _ _ | nrel _ _ | 1 | ⊥ | _ ⨂ _ | _ ⅋ _ | ⊤ | 0 | _ ⨁ _ | ！_ | ？_ | ∀' _ | ∃' _ => by simp [rew_rel, rew_nrel]
+    | rel _ _ | nrel _ _ | 1 | ⊥ | _ ⨂ _ | _ ⅋ _ | ⊤ | 0 | _ ⨁ _ | ！_ | ？_ | ∀⁰ _ | ∃⁰ _ => by simp [rew_rel, rew_nrel]
   | φ ⨁ ψ => fun χ ↦
     match χ with
     | _ ⨁ _ => by simpa using fun hp hq ↦ ⟨map_inj hb hf hp, map_inj hb hf hq⟩
-    | rel _ _ | nrel _ _ | 1 | ⊥ | _ ⨂ _ | _ ⅋ _ | ⊤ | 0 | _ ＆ _ | ！_ | ？_ | ∀' _ | ∃' _ => by simp [rew_rel, rew_nrel]
+    | rel _ _ | nrel _ _ | 1 | ⊥ | _ ⨂ _ | _ ⅋ _ | ⊤ | 0 | _ ＆ _ | ！_ | ？_ | ∀⁰ _ | ∃⁰ _ => by simp [rew_rel, rew_nrel]
   | ！φ => fun ψ ↦
     match ψ with
     | ！_ => by simpa using fun hp ↦ map_inj hb hf hp
-    | rel _ _ | nrel _ _ | 1 | ⊥ | _ ⨂ _ | _ ⅋ _ | ⊤ | 0 | _ ＆ _ | _ ⨁ _ | ？_ | ∀' _ | ∃' _ => by simp [rew_rel, rew_nrel]
+    | rel _ _ | nrel _ _ | 1 | ⊥ | _ ⨂ _ | _ ⅋ _ | ⊤ | 0 | _ ＆ _ | _ ⨁ _ | ？_ | ∀⁰ _ | ∃⁰ _ => by simp [rew_rel, rew_nrel]
   | ？φ => fun ψ ↦
     match ψ with
     | ？_ => by simpa using fun hp ↦ map_inj hb hf hp
-    | rel _ _ | nrel _ _ | 1 | ⊥ | _ ⨂ _ | _ ⅋ _ | ⊤ | 0 | _ ＆ _ | _ ⨁ _ | ！_ | ∀' _ | ∃' _ => by simp [rew_rel, rew_nrel]
-  | ∀' φ => fun ψ ↦
+    | rel _ _ | nrel _ _ | 1 | ⊥ | _ ⨂ _ | _ ⅋ _ | ⊤ | 0 | _ ＆ _ | _ ⨁ _ | ！_ | ∀⁰ _ | ∃⁰ _ => by simp [rew_rel, rew_nrel]
+  | ∀⁰ φ => fun ψ ↦
     match ψ with
-    | ∀' _ => by
+    | ∀⁰ _ => by
       simp only [Rewriting.app_all, Rew.q_map, Nat.succ_eq_add_one, all_inj]
       exact fun h ↦ map_inj (b := 0 :> Fin.succ ∘ b)
         (Matrix.injective_vecCons ((Fin.succ_injective _).comp hb) (fun _ ↦ (Fin.succ_ne_zero _).symm)) hf h
-    | rel _ _ | nrel _ _ | 1 | ⊥ | _ ⨂ _ | _ ⅋ _ | ⊤ | 0 | _ ＆ _ | _ ⨁ _ | ！_ | ？_ | ∃' _ => by simp [rew_rel, rew_nrel]
-  | ∃' φ => fun ψ ↦
+    | rel _ _ | nrel _ _ | 1 | ⊥ | _ ⨂ _ | _ ⅋ _ | ⊤ | 0 | _ ＆ _ | _ ⨁ _ | ！_ | ？_ | ∃⁰ _ => by simp [rew_rel, rew_nrel]
+  | ∃⁰ φ => fun ψ ↦
     match ψ with
-    | ∃' _ => by
-      simp only [Rewriting.app_ex, Rew.q_map, Nat.succ_eq_add_one, ex_inj]
+    | ∃⁰ _ => by
+      simp only [Rewriting.app_exs, Rew.q_map, Nat.succ_eq_add_one, exs_inj]
       exact fun h ↦ map_inj (b := 0 :> Fin.succ ∘ b)
         (Matrix.injective_vecCons ((Fin.succ_injective _).comp hb) (fun _ ↦ (Fin.succ_ne_zero _).symm)) hf h
-    | rel _ _ | nrel _ _ | 1 | ⊥ | _ ⨂ _ | _ ⅋ _ | ⊤ | 0 | _ ＆ _ | _ ⨁ _ | ！_ | ？_ | ∀' _ => by simp [rew_rel, rew_nrel]
+    | rel _ _ | nrel _ _ | 1 | ⊥ | _ ⨂ _ | _ ⅋ _ | ⊤ | 0 | _ ＆ _ | _ ⨁ _ | ！_ | ？_ | ∀⁰ _ => by simp [rew_rel, rew_nrel]
 
 instance : ReflectiveRewriting L ξ (Semiformula L ξ) where
   id_app (φ) := by induction φ using rec' <;> simp [rew_rel, rew_nrel, *]
