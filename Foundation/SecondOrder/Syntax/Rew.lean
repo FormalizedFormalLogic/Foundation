@@ -306,6 +306,7 @@ def comp (Ω₂₃ : Rew L Ξ₂ N₂ Ξ₃ N₃ ξ) (Ω₁₂ : Rew L Ξ₁ N�
 @[simp] lemma comp_fv (Ω₂₃ : Rew L Ξ₂ N₂ Ξ₃ N₃ ξ) (Ω₁₂ : Rew L Ξ₁ N₁ Ξ₂ N₂ ξ) (X : Ξ₁) :
     (Ω₂₃.comp Ω₁₂).fv X = Ω₂₃ • Ω₁₂.fv X := rfl
 
+/-
 lemma app_b₁Shift_eq_q_app_b₁Shift (Ω : Rew L Ξ₁ N₁ Ξ₂ N₂ ξ) (φ : Semiformula L Ξ₁ ξ N₁ n) :
     (Ω • φ).bmap Fin.succ = Ω𐞥 • φ.bmap Fin.succ := by
   induction φ using Semiformula.rec' generalizing N₂ <;> simp [*, bmap_comm]
@@ -347,6 +348,8 @@ def b₁shift : Rew L Ξ N Ξ (N + 1) ξ where
 @[simp] lemma app_b₁shift (φ : Semiformula L Ξ ξ N n) :
     Rew.b₁shift • φ = φ.b₁Shift := by
   induction φ using Semiformula.rec' <;> simp [*]
+
+-/
 
 end Rew
 
