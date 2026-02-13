@@ -140,6 +140,24 @@ lemma neg_neg (φ : Semiformula L Ξ ξ N n) : ∼∼φ = φ :=
 
 instance : NegInvolutive (Semiformula L Ξ ξ N n) := ⟨neg_neg⟩
 
+@[simp] lemma and_inj {φ₁ φ₂ ψ₁ ψ₂ : Semiformula L Ξ ξ N n} :
+    φ₁ ⋏ φ₂ = ψ₁ ⋏ ψ₂ ↔ φ₁ = ψ₁ ∧ φ₂ = ψ₂ := iff_of_eq (by apply and.injEq)
+
+@[simp] lemma or_inj {φ₁ φ₂ ψ₁ ψ₂ : Semiformula L Ξ ξ N n} :
+    φ₁ ⋎ φ₂ = ψ₁ ⋎ ψ₂ ↔ φ₁ = ψ₁ ∧ φ₂ = ψ₂ := iff_of_eq (by apply or.injEq)
+
+@[simp] lemma all₀_inj {φ ψ : Semiformula L Ξ ξ N (n + 1)} :
+    ∀⁰ φ = ∀⁰ ψ ↔ φ = ψ := iff_of_eq (by apply all₀.injEq)
+
+@[simp] lemma exs₀_inj {φ ψ : Semiformula L Ξ ξ N (n + 1)} :
+    ∃⁰ φ = ∃⁰ ψ ↔ φ = ψ := iff_of_eq (by apply exs₀.injEq)
+
+@[simp] lemma all₁_inj {φ ψ : Semiformula L Ξ ξ (N + 1) n} :
+    ∀¹ φ = ∀¹ ψ ↔ φ = ψ := iff_of_eq (by apply all₁.injEq)
+
+@[simp] lemma exs₁_inj {φ ψ : Semiformula L Ξ ξ (N + 1) n} :
+    ∃¹ φ = ∃¹ ψ ↔ φ = ψ := iff_of_eq (by apply exs₁.injEq)
+
 @[elab_as_elim]
 def cases' {C : ∀ N n, Semiformula L Ξ ξ N n → Sort w}
     (hRel : ∀ {N n k : ℕ} (r : L.Rel k) (v : Fin k → Semiterm L ξ n), C N n (rel r v))
