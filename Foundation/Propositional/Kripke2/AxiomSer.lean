@@ -1,6 +1,7 @@
 module
 
 public import Foundation.Propositional.Kripke2.FTheory
+public import Foundation.Vorspiel.Rel.Serial
 
 @[expose] public section
 

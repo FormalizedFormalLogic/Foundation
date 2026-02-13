@@ -2,6 +2,7 @@ module
 
 public import Foundation.FirstOrder.Arithmetic.Definability
 public import Mathlib.Algebra.Prime.Lemmas
+public import Foundation.Vorspiel.ExistsUnique
 
 @[expose] public section
 /-!

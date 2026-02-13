@@ -1,7 +1,6 @@
 module
 
 public import Foundation.FirstOrder.Basic
-public import Foundation.Logic.Entailment
 public import Foundation.LinearLogic.LogicSymbol
 
 /-!

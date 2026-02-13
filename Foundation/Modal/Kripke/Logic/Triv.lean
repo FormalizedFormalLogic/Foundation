@@ -3,6 +3,7 @@ module
 public import Foundation.Modal.Kripke.Logic.KTc
 public import Foundation.Modal.Kripke.Logic.GrzPoint3
 public import Foundation.Modal.Kripke.Logic.S4Point4McK
+public import Foundation.Vorspiel.Rel.Equality
 
 @[expose] public section
 

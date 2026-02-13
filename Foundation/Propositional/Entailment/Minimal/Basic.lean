@@ -1,5 +1,7 @@
 module
+
 public import Foundation.Logic.Entailment
+public import Foundation.Vorspiel.Finset.Basic
 
 @[expose] public section
 

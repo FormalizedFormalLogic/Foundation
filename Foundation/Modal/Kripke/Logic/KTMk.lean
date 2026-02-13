@@ -2,7 +2,7 @@ module
 
 public import Foundation.Modal.Kripke.Logic.S4
 public import Foundation.Modal.Kripke.AxiomMk
-
+public import Foundation.Vorspiel.List.Chain
 
 @[expose] public section
 

@@ -196,7 +196,5 @@ end NNFormula
 
 abbrev Theory (α : Type*) := Set (NNFormula α)
 
-instance : AdjunctiveSet (NNFormula α) (Theory α) := inferInstance
-
 end LO.Propositional
 end

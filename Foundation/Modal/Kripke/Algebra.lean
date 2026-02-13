@@ -1,9 +1,6 @@
 module
 
-public import Foundation.Modal.Formula.Basic
-public import Foundation.Modal.Logic.Basic
 public import Foundation.Modal.Algebra.Basic
-public import Foundation.Modal.Kripke.Basic
 
 @[expose] public section
 

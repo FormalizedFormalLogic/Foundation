@@ -3,6 +3,7 @@ public import Foundation.FirstOrder.Basic.BinderNotation
 public import Foundation.FirstOrder.Basic.Semantics.Elementary
 public import Foundation.FirstOrder.Basic.Soundness
 public import Foundation.Vorspiel.Quotient
+public import Foundation.Vorspiel.Finset.Card
 
 @[expose] public section
 

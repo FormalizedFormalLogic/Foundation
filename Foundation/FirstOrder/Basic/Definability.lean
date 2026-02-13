@@ -1,7 +1,11 @@
 module
+
 public import Foundation.FirstOrder.Basic.Semantics.Elementary
 public import Foundation.FirstOrder.Basic.BinderNotation
 public import Foundation.FirstOrder.Basic.AesopInit
+public import Foundation.Vorspiel.Finset.Card
+public import Foundation.Vorspiel.Graph
+
 @[expose] public section
 
 /-!

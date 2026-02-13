@@ -1,6 +1,7 @@
 module
 
 public import Foundation.FirstOrder.Basic.BinderNotation
+public import Foundation.Vorspiel.Nat.Matrix
 
 @[expose] public section
 

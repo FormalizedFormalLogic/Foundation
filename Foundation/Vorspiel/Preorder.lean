@@ -1,7 +1,8 @@
 module
 
 public import Mathlib.Order.PFilter
-public import Foundation.Vorspiel
+public import Foundation.Vorspiel.Finset.Card
+public import Mathlib.Data.Set.Countable
 
 @[expose] public section
 

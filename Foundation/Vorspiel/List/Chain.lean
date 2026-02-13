@@ -34,15 +34,34 @@ end
 
 section
 
-lemma range.le_isChain_succ : List.IsChain (· < ·) (List.range (n + 1)) := by
-  apply List.isChain_range_succ (· < ·) n |>.mpr;
+
+variable [Preorder α]
+
+lemma range.le_isChain_map_strictMono_succ (f : ℕ → α) (f_mono : StrictMono f) : List.IsChain (· < ·) (List.map f (List.range (n + 1))) := by
+  apply List.isChain_map_of_isChain f f_mono;
+  apply List.isChain_range_succ _ n |>.mpr;
   omega;
+
+lemma range.le_isChain_map_strictMono (f : ℕ → α) (f_mono : StrictMono f) : List.IsChain (· < ·) (List.map f (List.range n)) := by
+  match n with
+  | 0 => simp;
+  | n + 1 => apply range.le_isChain_map_strictMono_succ f f_mono;
 
 @[simp]
 lemma range.le_isChain : List.IsChain (· < ·) (List.range n) := by
+  simpa using range.le_isChain_map_strictMono id (by simp [StrictMono]);
+
+lemma range.lt_isChain_map_strictAnti_succ (f : ℕ → α) (f_anti : StrictAnti f) : List.IsChain (· > ·) (List.map f (List.range (n + 1))) := by
+  apply List.isChain_map_of_isChain f;
+  . tauto;
+  . apply List.isChain_range_succ _ n |>.mpr;
+    omega;
+
+lemma range.lt_isChain_map_strictAnti (f : ℕ → α) (f_anti : StrictAnti f) : List.IsChain (· > ·) (List.map f (List.range n)) := by
   match n with
   | 0 => simp;
-  | n + 1 => apply le_isChain_succ;
+  | n + 1 => apply range.lt_isChain_map_strictAnti_succ f f_anti;
+
 
 lemma finRange.le_isChain_succ : List.IsChain (· < ·) (List.finRange (n + 1)) := by
   rw [finRange_succ];
@@ -62,11 +81,39 @@ lemma finRange.le_isChain_succ : List.IsChain (· < ·) (List.finRange (n + 1)) 
       apply this;
       exact ih;
 
+lemma finRange.le_isChain_map_strictMono_succ (f : Fin (n + 1) → α) (f_mono : StrictMono f)
+  : List.IsChain (· < ·) (List.map f (List.finRange (n + 1))) := by
+  apply List.isChain_map_of_isChain f f_mono;
+  apply finRange.le_isChain_succ;
+
+lemma finRange.le_isChain_map_strictMono (f : Fin n → α) (f_mono : StrictMono f)
+  : List.IsChain (· < ·) (List.map f (List.finRange n)) := by
+  match n with
+  | 0 => simp [List.finRange_zero];
+  | n + 1 => apply finRange.le_isChain_map_strictMono_succ f f_mono;
+
 @[simp]
 lemma finRange.le_isChain : List.IsChain (· < ·) (List.finRange n) := by
+  simpa using finRange.le_isChain_map_strictMono id (by simp [StrictMono]);
+
+
+lemma finRange.lt_isChain_map_strictAnti_succ (f : Fin (n + 1) → α) (f_anti : StrictAnti f)
+  : List.IsChain (· > ·) (List.map f (List.finRange (n + 1))) := by
+  apply List.isChain_map_of_isChain f;
+  . tauto;
+  . apply finRange.le_isChain_succ;
+
+lemma finRange.lt_isChain_map_strictAnti (f : Fin n → α) (f_anti : StrictAnti f)
+  : List.IsChain (· > ·) (List.map f (List.finRange n)) := by
   match n with
-  | 0 => simp [List.finRange_zero]
-  | n + 1 => apply finRange.le_isChain_succ;
+  | 0 => simp [List.finRange_zero];
+  | n + 1 => apply finRange.lt_isChain_map_strictAnti_succ f f_anti;
+
+@[simp]
+lemma finRange.rev_lt_isChain : List.IsChain (· > ·) (List.finRange n |>.reverse) := by
+  rw [finRange_reverse];
+  apply finRange.lt_isChain_map_strictAnti;
+  simp [StrictAnti];
 
 end
 

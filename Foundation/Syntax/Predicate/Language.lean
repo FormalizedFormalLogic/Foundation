@@ -1,6 +1,7 @@
 module
 
 public import Foundation.Logic.Entailment
+public import Mathlib.Logic.Encodable.Basic
 
 @[expose] public section
 

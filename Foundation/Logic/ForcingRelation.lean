@@ -1,6 +1,7 @@
 module
 
 public import Foundation.Logic.LogicSymbol
+public import Foundation.Vorspiel.AdjunctiveSet
 
 /-! # Forcing relation -/
 

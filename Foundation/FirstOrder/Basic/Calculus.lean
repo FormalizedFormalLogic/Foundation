@@ -1,6 +1,7 @@
 module
 public import Foundation.Logic.Calculus
 public import Foundation.FirstOrder.Basic.Syntax.Theory
+public import Mathlib.Data.List.MinMax
 
 /-! # One-sided sequent calculus for first-order classical logic -/
 
