@@ -18,6 +18,9 @@ The quantification is represented by de Bruijn index.
 
 namespace LO.FirstOrder
 
+/--
+A semiformula of language L. Free variables are of type `ξ`, and bound variables are implemented as de Bruijn indices, of a type `Fin n` separate from free variables.
+-/
 inductive Semiformula (L : Language) (ξ : Type*) : ℕ → Type _ where
   |  verum : Semiformula L ξ n
   | falsum : Semiformula L ξ n
@@ -176,6 +179,9 @@ abbrev rel! (L : Language) (k) (r : L.Rel k) (v : Fin k → Semiterm L ξ n) := 
 
 abbrev nrel! (L : Language) (k) (r : L.Rel k) (v : Fin k → Semiterm L ξ n) := nrel r v
 
+/--
+The complexity of a semiformula, taking max at logical connectives.
+-/
 def complexity {n : ℕ} : Semiformula L ξ n → ℕ
 |        ⊤ => 0
 |        ⊥ => 0
