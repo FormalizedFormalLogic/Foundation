@@ -6,23 +6,6 @@ public import Foundation.Logic.LogicSymbol
 
 namespace LO
 
-@[notation_class] class SigmaSymbol (α : Type*) where
-  sigma : α
-
-@[notation_class] class PiSymbol (α : Type*) where
-  pi : α
-
-@[notation_class] class DeltaSymbol (α : Type*) where
-  delta : α
-
-notation "𝚺" => SigmaSymbol.sigma
-
-notation "𝚷" => PiSymbol.pi
-
-notation "𝚫" => DeltaSymbol.delta
-
-attribute [match_pattern] SigmaSymbol.sigma PiSymbol.pi DeltaSymbol.delta
-
 inductive Polarity where | sigma | pi
 
 namespace Polarity
@@ -96,21 +79,23 @@ def alt : SigmaPiDelta → SigmaPiDelta
 
 end SigmaPiDelta
 
-@[notation_class] class UnivQuantifier (α : ℕ → Type*) where
-  univ : ∀ {n}, α (n + 1) → α n
+/-! ## First-order quantifiers -/
 
-@[notation_class] class ExQuantifier (α : ℕ → Type*) where
-  ex : ∀ {n}, α (n + 1) → α n
+namespace FirstOrder
 
-prefix:64 "∀' " => UnivQuantifier.univ
+class UnivQuantifier (α : ℕ → Type*) where
+  all : α (n + 1) → α n
 
-prefix:64 "∃' " => ExQuantifier.ex
+prefix:64 "∀⁰ " => UnivQuantifier.all
 
-attribute [match_pattern]
-  UnivQuantifier.univ
-  ExQuantifier.ex
+class ExsQuantifier (α : ℕ → Type*) where
+  exs : α (n + 1) → α n
 
-class Quantifier (α : ℕ → Type*) extends UnivQuantifier α, ExQuantifier α
+prefix:64 "∃⁰ " => ExsQuantifier.exs
+
+attribute [match_pattern] UnivQuantifier.all ExsQuantifier.exs
+
+class Quantifier (α : ℕ → Type*) extends UnivQuantifier α, ExsQuantifier α
 
 /-- Logical Connectives with Quantifiers. -/
 class LCWQ (α : ℕ → Type*) extends Quantifier α where
@@ -121,89 +106,177 @@ instance (α : ℕ → Type*) [LCWQ α] (n : ℕ) : LogicalConnective (α n) := 
 instance (α : ℕ → Type*) [Quantifier α] [(n : ℕ) → LogicalConnective (α n)] : LCWQ α where
   connectives := inferInstance
 
-section
-
-variable {α : ℕ → Type*} [UnivQuantifier α] [ExQuantifier α]
-
-def quant : Polarity → α (n + 1) → α n
-  | 𝚺, φ => ∃' φ
-  | 𝚷, φ => ∀' φ
-
-@[simp] lemma quant_sigma (φ : α (n + 1)) : quant 𝚺 φ = ∃' φ := rfl
-
-@[simp] lemma quant_pi (φ : α (n + 1)) : quant 𝚷 φ = ∀' φ := rfl
-
-end
-
 section UnivQuantifier
 
 variable {α : ℕ → Type*} [UnivQuantifier α]
 
-def univClosure : {n : ℕ} → α n → α 0
-  | 0,     a => a
-  | _ + 1, a => univClosure (∀' a)
+def allClosure : {n : ℕ} → α n → α 0
+  |     0, a => a
+  | _ + 1, a => allClosure (∀⁰ a)
 
-prefix:64 "∀* " => univClosure
+prefix:64 "∀⁰* " => allClosure
 
-@[simp] lemma univClosure_zero (a : α 0) : ∀* a = a := rfl
+@[simp] lemma allClosure_zero (a : α 0) : ∀⁰* a = a := rfl
 
-lemma univClosure_succ {n} (a : α (n + 1)) : ∀* a = ∀* ∀' a := rfl
+lemma allClosure_succ {n} (a : α (n + 1)) : ∀⁰* a = ∀⁰* ∀⁰ a := rfl
 
-def univItr : (k : ℕ) → α (n + k) → α n
-  | 0,     a => a
-  | k + 1, a => univItr k (∀' a)
+def allItr : (k : ℕ) → α (n + k) → α n
+  |     0, a => a
+  | k + 1, a => allItr k (∀⁰ a)
 
-notation "∀^[" k "] " φ:64 => univItr k φ
+notation "∀⁰^[" k "] " φ:64 => allItr k φ
 
-@[simp] lemma univItr_zero (a : α n) : ∀^[0] a = a := rfl
+@[simp] lemma allItr_zero (a : α n) : ∀⁰^[0] a = a := rfl
 
-@[simp] lemma univItr_one (a : α (n + 1)) : ∀^[1] a = ∀' a := rfl
+@[simp] lemma allItr_one (a : α (n + 1)) : ∀⁰^[1] a = ∀⁰ a := rfl
 
-lemma univItr_succ {k} (a : α (n + (k + 1))) : ∀^[k + 1] a = ∀^[k] (∀' a) := rfl
+lemma allItr_succ {k} (a : α (n + (k + 1))) : ∀⁰^[k + 1] a = ∀⁰^[k] (∀⁰ a) := rfl
 
 end UnivQuantifier
 
-section ExQuantifier
+section ExsQuantifier
 
-variable {α : ℕ → Type*} [ExQuantifier α]
+variable {α : ℕ → Type*} [ExsQuantifier α]
 
-def exClosure : {n : ℕ} → α n → α 0
-  | 0,     a => a
-  | _ + 1, a => exClosure (∃' a)
+def exsClosure : {n : ℕ} → α n → α 0
+  |     0, a => a
+  | _ + 1, a => exsClosure (∃⁰ a)
 
-prefix:64 "∃* " => exClosure
+prefix:64 "∃⁰* " => exsClosure
 
-@[simp] lemma exClosure_zero (a : α 0) : ∃* a = a := rfl
+@[simp] lemma exsClosure_zero (a : α 0) : ∃⁰* a = a := rfl
 
-lemma exClosure_succ {n} (a : α (n + 1)) : ∃* a = ∃* ∃' a := rfl
+lemma exsClosure_succ {n} (a : α (n + 1)) : ∃⁰* a = ∃⁰* ∃⁰ a := rfl
 
-def exItr : (k : ℕ) → α (n + k) → α n
-  | 0,     a => a
-  | k + 1, a => exItr k (∃' a)
+def exsItr : (k : ℕ) → α (n + k) → α n
+  |     0, a => a
+  | k + 1, a => exsItr k (∃⁰ a)
 
-notation "∃^[" k "] " φ:64 => exItr k φ
+notation "∃⁰^[" k "] " φ:64 => exsItr k φ
 
-@[simp] lemma exItr_zero (a : α n) : ∃^[0] a = a := rfl
+@[simp] lemma exsItr_zero (a : α n) : ∃⁰^[0] a = a := rfl
 
-@[simp] lemma exItr_one (a : α (n + 1)) : ∃^[1] a = ∃' a := rfl
+@[simp] lemma exsItr_one (a : α (n + 1)) : ∃⁰^[1] a = ∃⁰ a := rfl
 
-lemma exItr_succ {k} (a : α (n + (k + 1))) : ∃^[k + 1] a = ∃^[k] (∃' a) := rfl
+lemma exsItr_succ {k} (a : α (n + (k + 1))) : ∃⁰^[k + 1] a = ∃⁰^[k] (∃⁰ a) := rfl
 
-end ExQuantifier
+end ExsQuantifier
 
 section quantifier
 
 variable {α : ℕ → Type*}
 
-def ball [UnivQuantifier α] [Arrow (α (n + 1))] (φ : α (n + 1)) (ψ : α (n + 1)) : α n := ∀' (φ ➝ ψ)
+def ball [UnivQuantifier α] [Arrow (α (n + 1))] (φ : α (n + 1)) (ψ : α (n + 1)) : α n := ∀⁰ (φ ➝ ψ)
 
-def bex [ExQuantifier α] [Wedge (α (n + 1))] (φ : α (n + 1)) (ψ : α (n + 1)) : α n := ∃' (φ ⋏ ψ)
+def bexs [ExsQuantifier α] [Wedge (α (n + 1))] (φ : α (n + 1)) (ψ : α (n + 1)) : α n := ∃⁰ (φ ⋏ ψ)
 
-notation:64 "∀[" φ "] " ψ => ball φ ψ
+notation:64 "∀⁰[" φ "] " ψ => ball φ ψ
 
-notation:64 "∃[" φ "] " ψ => bex φ ψ
+notation:64 "∃⁰[" φ "] " ψ => bexs φ ψ
 
 end quantifier
 
+end FirstOrder
+
+/-! ## Second-order quantifiers -/
+
+namespace SecondOrder
+
+class UnivQuantifier (α : ℕ → ℕ → Type*) where
+  all₁ : α (m + 1) n → α m n
+
+prefix:64 "∀¹ " => UnivQuantifier.all₁
+
+class ExsQuantifier (α : ℕ → ℕ → Type*) where
+  exs₁ : α (m + 1) n → α m n
+
+prefix:64 "∃¹ " => ExsQuantifier.exs₁
+
+attribute [match_pattern] UnivQuantifier.all₁ ExsQuantifier.exs₁
+
+class Quantifier (α : ℕ → ℕ → Type*) extends UnivQuantifier α, ExsQuantifier α
+
+/-- Logical Connectives with Quantifiers. -/
+class LCWQ (α : ℕ → ℕ → Type*) extends Quantifier α where
+  firstOrder : (m : ℕ) → FirstOrder.LCWQ (α m)
+
+instance (α : ℕ → ℕ → Type*) [LCWQ α] (m : ℕ) : FirstOrder.LCWQ (α m) := LCWQ.firstOrder m
+
+instance (α : ℕ → ℕ → Type*) [Quantifier α] [(m : ℕ) → FirstOrder.LCWQ (α m)] : LCWQ α where
+  firstOrder := inferInstance
+
+section UnivQuantifier
+
+variable {α : ℕ → ℕ → Type*} [UnivQuantifier α]
+
+def allClosure : {m : ℕ} → α m n → α 0 n
+  |     0, a => a
+  | _ + 1, a => allClosure (∀¹ a)
+
+prefix:64 "∀¹* " => allClosure
+
+@[simp] lemma allClosure_zero (a : α 0 n) : ∀¹* a = a := rfl
+
+lemma allClosure_succ {n} (a : α (n + 1) n) : ∀¹* a = ∀¹* ∀¹ a := rfl
+
+def allItr : (k : ℕ) → α (m + k) n → α m n
+  |     0, a => a
+  | k + 1, a => allItr k (∀¹ a)
+
+notation "∀¹^[" k "] " φ:64 => allItr k φ
+
+@[simp] lemma allItr_zero (a : α m n) : ∀¹^[0] a = a := rfl
+
+@[simp] lemma allItr_one (a : α (m + 1) n) : ∀¹^[1] a = ∀¹ a := rfl
+
+lemma allItr_succ {k} (a : α (m + (k + 1)) n) : ∀¹^[k + 1] a = ∀¹^[k] (∀¹ a) := rfl
+
+end UnivQuantifier
+
+section ExsQuantifier
+
+variable {α : ℕ → ℕ → Type*} [ExsQuantifier α]
+
+def exsClosure : {m : ℕ} → α m n → α 0 n
+  |     0, a => a
+  | _ + 1, a => exsClosure (∃¹ a)
+
+prefix:64 "∃¹* " => exsClosure
+
+@[simp] lemma exsClosure_zero (a : α 0 n) : ∃¹* a = a := rfl
+
+lemma exsClosure_succ {n} (a : α (m + 1) n) : ∃¹* a = ∃¹* ∃¹ a := rfl
+
+def exsItr : (k : ℕ) → α (m + k) n → α m n
+  |     0, a => a
+  | k + 1, a => exsItr k (∃¹ a)
+
+notation "∃¹^[" k "] " φ:64 => exsItr k φ
+
+@[simp] lemma exsItr_zero (a : α m n) : ∃¹^[0] a = a := rfl
+
+@[simp] lemma exsItr_one (a : α (m + 1) n) : ∃¹^[1] a = ∃¹ a := rfl
+
+lemma exsItr_succ {k} (a : α (m + (k + 1)) n) : ∃¹^[k + 1] a = ∃¹^[k] (∃¹ a) := rfl
+
+end ExsQuantifier
+
+section quantifier
+
+variable {α : ℕ → ℕ → Type*}
+
+def ball [UnivQuantifier α] [Arrow (α (m + 1) n)] (φ : α (m + 1) n) (ψ : α (m + 1) n) : α m n := ∀¹ (φ ➝ ψ)
+
+def bexs [ExsQuantifier α] [Wedge (α (m + 1) n)] (φ : α (m + 1) n) (ψ : α (m + 1) n) : α m n := ∃¹ (φ ⋏ ψ)
+
+notation:64 "∀¹[" φ "] " ψ => ball φ ψ
+
+notation:64 "∃¹[" φ "] " ψ => bexs φ ψ
+
+end quantifier
+
+end SecondOrder
+
 end LO
+
 end

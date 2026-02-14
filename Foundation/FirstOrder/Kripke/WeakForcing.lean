@@ -49,10 +49,10 @@ variable {p q r : ℙ} {bv : Fin n → Name} {fv : ξ → Name}
   grind
 
 @[simp] lemma all {φ : Semiformula L ξ (n + 1)} :
-    p ⊩ᶜ[bv|fv] ∀' φ ↔ ∀ q ≤ p, ∀ x : q, q ⊩ᶜ[↑x :> bv|fv] φ := by simp [WeaklyForces]
+    p ⊩ᶜ[bv|fv] ∀⁰ φ ↔ ∀ q ≤ p, ∀ x : q, q ⊩ᶜ[↑x :> bv|fv] φ := by simp [WeaklyForces]
 
 @[simp] lemma all_of_constantDomain [ConstantDomain ℙ] {φ : Semiformula L ξ (n + 1)} :
-    p ⊩ᶜ[bv|fv] ∀' φ ↔ ∀ x : Name, p ⊩ᶜ[x :> bv|fv] φ := by simp [WeaklyForces, -Forces.all]
+    p ⊩ᶜ[bv|fv] ∀⁰ φ ↔ ∀ x : Name, p ⊩ᶜ[x :> bv|fv] φ := by simp [WeaklyForces, -Forces.all]
 
 lemma rew {bv : Fin n₂ → Name} {fv : ξ₂ → Name} {ω : Rew L ξ₁ n₁ ξ₂ n₂} {φ : Semiformula L ξ₁ n₁} :
     p ⊩ᶜ[bv|fv] (ω ▹ φ) ↔
@@ -60,7 +60,7 @@ lemma rew {bv : Fin n₂ → Name} {fv : ξ₂ → Name} {ω : Rew L ξ₁ n₁ 
   simp [WeaklyForces, ←Semiformula.rew_doubleNegation, Forces.rew]
 
 @[simp] lemma ex {φ : Semiformula L ξ (n + 1)} :
-    p ⊩ᶜ[bv|fv] ∃' φ ↔ ∀ q ≤ p, ∃ r ≤ q, ∃ x : r, r ⊩ᶜ[↑x :> bv|fv] φ := by
+    p ⊩ᶜ[bv|fv] ∃⁰ φ ↔ ∀ q ≤ p, ∃ r ≤ q, ∃ x : r, r ⊩ᶜ[↑x :> bv|fv] φ := by
   suffices
       (∀ q ≤ p, ∃ r ≤ q, ∃ x ∈ Domain r, ∃ s ≤ r, s ⊩ᶜ[x :> bv|fv] φ) ↔
       (∀ q ≤ p, ∃ r ≤ q, ∃ x ∈ Domain r, r ⊩ᶜ[x :> bv|fv] φ) by
@@ -74,7 +74,7 @@ lemma rew {bv : Fin n₂ → Name} {fv : ξ₂ → Name} {ω : Rew L ξ₁ n₁ 
     exact ⟨r, hrq, x, hx, r, by rfl, H⟩
 
 @[simp] lemma ex_of_constantDomain [ConstantDomain ℙ] {φ : Semiformula L ξ (n + 1)} :
-    p ⊩ᶜ[bv|fv] ∃' φ ↔ ∀ q ≤ p, ∃ r ≤ q, ∃ x : Name, r ⊩ᶜ[x :> bv|fv] φ := by simp
+    p ⊩ᶜ[bv|fv] ∃⁰ φ ↔ ∀ q ≤ p, ∃ r ≤ q, ∃ x : Name, r ⊩ᶜ[x :> bv|fv] φ := by simp
 
 lemma monotone {φ : Semiformula L ξ n} :
     p ⊩ᶜ[bv|fv] φ → ∀ q ≤ p, q ⊩ᶜ[bv|fv] φ := fun h ↦ Forces.monotone h
@@ -115,7 +115,7 @@ lemma generic {p : ℙ} {n} {bv : Fin n → Name} {fv : ξ → Name} {φ : Semif
     rcases h q hqp with ⟨r, hrq, H⟩
     rcases H r (by rfl) with ⟨s, hsr, Hs⟩
     exact ⟨s, le_trans hsr hrq, Hs⟩
-  | ∀' φ => by
+  | ∀⁰ φ => by
     suffices
       (∀ q ≤ p, ∃ r ≤ q, ∀ q ≤ r, ∀ a ∈ Domain q, q ⊩ᶜ[a :> bv|fv] φ) →
       (∀ q ≤ p, ∀ x ∈ Domain q, q ⊩ᶜ[x :> bv|fv] φ) by simpa
@@ -124,7 +124,7 @@ lemma generic {p : ℙ} {n} {bv : Fin n → Name} {fv : ξ → Name} {φ : Semif
     intro r hrq
     rcases h r (le_trans hrq hqp) with ⟨s, hsr, Hs⟩
     exact ⟨s, hsr, Hs s (by rfl) x (domain_monotone hx _ (le_trans hsr hrq))⟩
-  | ∃' φ => by
+  | ∃⁰ φ => by
     suffices
       (∀ q ≤ p, ∃ r ≤ q, ∀ q ≤ r, ∃ r ≤ q, ∃ x ∈ Domain r, r ⊩ᶜ[x :> bv|fv] φ) →
       (∀ q ≤ p, ∃ r ≤ q, ∃ x ∈ Domain r, r ⊩ᶜ[x :> bv|fv] φ) by simpa
@@ -195,7 +195,7 @@ lemma generic_iff_not {φ : Semiformula L ξ n} :
         intro q hqp Hq
         rcases h q hqp with ⟨r, hrq, H⟩
         exact (H r (by rfl)).2 (Hq.monotone _ hrq)
-  | ∀' φ => by
+  | ∀⁰ φ => by
     suffices
       (∀ q ≤ p, ∃ r ≤ q, ∃ a ∈ Domain r, r ⊩ᶜ[a :> bv|fv] ∼φ) ↔
       (∀ q ≤ p, ∃ r ≤ q, ∃ x ∈ Domain r, ¬r ⊩ᶜ[x :> bv|fv] φ) by simpa
@@ -207,7 +207,7 @@ lemma generic_iff_not {φ : Semiformula L ξ n} :
       rcases h q hqp with ⟨r, hrq, x, hx, H⟩
       rcases generic_iff_not.mp H with ⟨s, hsr, Hs⟩
       exact ⟨s, le_trans hsr hrq, x, domain_antimonotone hsr hx, WeaklyForces.not.mpr Hs⟩
-  | ∃' φ => by
+  | ∃⁰ φ => by
     suffices
       (∀ q ≤ p, ∀ a ∈ Domain q, q ⊩ᶜ[a :> bv|fv] ∼φ) ↔
       (∀ q ≤ p, ∃ r ≤ q, ∀ s ≤ r, ∀ x ∈ Domain s, ¬s ⊩ᶜ[x :> bv|fv] φ) by simpa

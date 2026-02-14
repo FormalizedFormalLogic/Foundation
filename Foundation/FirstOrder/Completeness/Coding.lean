@@ -19,7 +19,7 @@ inductive Code (L : Language.{u})
   | and : SyntacticFormula L → SyntacticFormula L → Code L
   | or : SyntacticFormula L → SyntacticFormula L → Code L
   | all : SyntacticSemiformula L 1 → Code L
-  | ex : SyntacticSemiformula L 1 → SyntacticTerm L → Code L
+  | exs : SyntacticSemiformula L 1 → SyntacticTerm L → Code L
   | id : Sentence L → Code L
 
 def Code.equiv (L : Language.{u}) :
@@ -38,7 +38,7 @@ def Code.equiv (L : Language.{u}) :
     | (Code.and φ ψ) => Sum.inr $ Sum.inr $ Sum.inl (φ, ψ)
     | (Code.or φ ψ)  => Sum.inr $ Sum.inr $ Sum.inr $ Sum.inl (φ, ψ)
     | (Code.all φ)   => Sum.inr $ Sum.inr $ Sum.inr $ Sum.inr $ Sum.inl φ
-    | (Code.ex φ t)  => Sum.inr $ Sum.inr $ Sum.inr $ Sum.inr $ Sum.inr $ Sum.inl (φ, t)
+    | (Code.exs φ t)  => Sum.inr $ Sum.inr $ Sum.inr $ Sum.inr $ Sum.inr $ Sum.inl (φ, t)
     | (Code.id σ)    => Sum.inr $ Sum.inr $ Sum.inr $ Sum.inr $ Sum.inr $ Sum.inr σ
   invFun := fun x =>
     match x with
@@ -47,7 +47,7 @@ def Code.equiv (L : Language.{u}) :
     | (Sum.inr $ Sum.inr $ Sum.inl (φ, ψ))                               => Code.and φ ψ
     | (Sum.inr $ Sum.inr $ Sum.inr $ Sum.inl (φ, ψ))                     => Code.or φ ψ
     | (Sum.inr $ Sum.inr $ Sum.inr $ Sum.inr $ Sum.inl φ)                => Code.all φ
-    | (Sum.inr $ Sum.inr $ Sum.inr $ Sum.inr $ Sum.inr $ Sum.inl (φ, t)) => Code.ex φ t
+    | (Sum.inr $ Sum.inr $ Sum.inr $ Sum.inr $ Sum.inr $ Sum.inl (φ, t)) => Code.exs φ t
     | (Sum.inr $ Sum.inr $ Sum.inr $ Sum.inr $ Sum.inr $ Sum.inr σ)      => Code.id σ
   left_inv := fun c => by cases c <;> simp
   right_inv := fun x => by

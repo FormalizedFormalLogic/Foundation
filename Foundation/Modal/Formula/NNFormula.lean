@@ -100,9 +100,11 @@ instance : ModalDeMorgan (NNFormula α) where
   imply   := by tauto;
   and     := by tauto;
   or      := by tauto;
-  neg_involutive := by grind;
   neg_dia := by tauto;
   neg_box := by tauto;
+
+instance : NegInvolutive (NNFormula α) where
+  neg_involutive := by grind;
 
 section toString
 

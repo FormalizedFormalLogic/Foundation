@@ -132,12 +132,12 @@ theorem bold_sigma_one_complete {n} {φ : Semisentence ℒₒᵣ n} (hp : Hierar
         simpa [Semiformula.substs_substs, Matrix.map_map_comp']
       exact ih (h i hi)
     exact ball_replace T ((toNumVec w).q ⤔ ⌜φ⌝) _ _ ⨀ (eq_comm <| term_complete T t w) ⨀ this
-  case hEx =>
+  case hExs =>
     intro n φ hφ ih w hφ
     have : ∃ a, V ⊧/(a :> w) φ := by simpa using hφ
     rcases this with ⟨i, hφ⟩
-    suffices T.internalize V ⊢ ∃' ((toNumVec w).q ⤔ ⌜φ⌝) by simpa
-    apply TProof.ex! (𝕹 i)
+    suffices T.internalize V ⊢ ∃⁰ ((toNumVec w).q ⤔ ⌜φ⌝) by simpa
+    apply TProof.exs! (𝕹 i)
     suffices T.internalize V ⊢ (toNumVec (i :> w) ⤔ ⌜φ⌝) by
       simpa [Semiformula.substs_substs, Matrix.map_map_comp']
     exact ih hφ

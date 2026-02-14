@@ -75,7 +75,7 @@ lemma find_minimal_proof_fintype [Fintype ι] (φ : ι → V) (H : T.Provable (�
   have : ∃ z, (∃ j, T.Proof z (φ j)) ∧ ∀ w < z, ∀ x, ¬T.Proof w (φ x) := by
     simpa using
       InductionOnHierarchy.least_number_sigma 𝚺 1 (P := fun z ↦ ∃ j, T.Proof z (φ j))
-        (HierarchySymbol.Definable.fintype_ex fun j ↦ by definability) (x := dᵢ) ⟨i, Hdᵢ⟩
+        (HierarchySymbol.Definable.fintype_exs fun j ↦ by definability) (x := dᵢ) ⟨i, Hdᵢ⟩
   rcases this with ⟨z, ⟨j, hj⟩, H⟩
   exact ⟨j, fun k ↦ ⟨z, hj, fun w hw ↦ H w hw k⟩⟩
 

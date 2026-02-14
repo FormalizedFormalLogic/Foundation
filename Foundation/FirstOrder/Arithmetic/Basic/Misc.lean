@@ -65,10 +65,10 @@ def Semiformula.toStringORing : ∀ {n}, Semiformula ℒₒᵣ ξ n → String
   | _,         nrel Language.LT.lt v => (v 0).toStringORing ++ " \\not < " ++ (v 1).toStringORing
   | _,                         φ ⋏ ψ => "[" ++ φ.toStringORing ++ "]" ++ " \\land " ++ "[" ++ ψ.toStringORing ++ "]"
   | _,                         φ ⋎ ψ => "[" ++ φ.toStringORing ++ "]" ++ " \\lor "  ++ "[" ++ ψ.toStringORing ++ "]"
-  | n, ∀' (rel Language.LT.lt v ➝ φ) => "(\\forall x_{" ++ toString n ++ "} < " ++ (v 1).toStringORing ++ ") " ++ "[" ++ φ.toStringORing ++ "]"
-  | n, ∃' (rel Language.LT.lt v ⋏ φ) => "(\\exists x_{" ++ toString n ++ "} < " ++ (v 1).toStringORing ++ ") " ++ "[" ++ φ.toStringORing ++ "]"
-  | n,                          ∀' φ => "(\\forall x_{" ++ toString n ++ "}) " ++ "[" ++ φ.toStringORing ++ "]"
-  | n,                          ∃' φ => "(\\exists x_{" ++ toString n ++ "}) " ++ "[" ++ φ.toStringORing ++ "]"
+  | n, ∀⁰ (rel Language.LT.lt v ➝ φ) => "(\\forall x_{" ++ toString n ++ "} < " ++ (v 1).toStringORing ++ ") " ++ "[" ++ φ.toStringORing ++ "]"
+  | n, ∃⁰ (rel Language.LT.lt v ⋏ φ) => "(\\exists x_{" ++ toString n ++ "} < " ++ (v 1).toStringORing ++ ") " ++ "[" ++ φ.toStringORing ++ "]"
+  | n,                          ∀⁰ φ => "(\\forall x_{" ++ toString n ++ "}) " ++ "[" ++ φ.toStringORing ++ "]"
+  | n,                          ∃⁰ φ => "(\\exists x_{" ++ toString n ++ "}) " ++ "[" ++ φ.toStringORing ++ "]"
 
 instance : Repr (Semiformula ℒₒᵣ ξ n) := ⟨fun φ _ ↦ φ.toStringORing⟩
 
@@ -131,7 +131,7 @@ variable {L : Language} [L.LT] [L.Zero] [L.One] [L.Add]
 
 def ballLTSucc (t : Semiterm L ξ n) (φ : Semiformula L ξ (n + 1)) : Semiformula L ξ n := φ.ballLT ‘!!t + 1’
 
-def bexLTSucc (t : Semiterm L ξ n) (φ : Semiformula L ξ (n + 1)) : Semiformula L ξ n := φ.bexLT ‘!!t + 1’
+def bexsLTSucc (t : Semiterm L ξ n) (φ : Semiformula L ξ (n + 1)) : Semiformula L ξ n := φ.bexsLT ‘!!t + 1’
 
 variable {M : Type*} {s : Structure L M} [LT M] [One M] [Add M] [Structure.LT L M] [Structure.One L M] [Structure.Add L M]
 
@@ -141,9 +141,9 @@ lemma eval_ballLTSucc {e ε} :
     Eval s e ε (φ.ballLTSucc t) ↔ ∀ x < t.val s e ε + 1, Eval s (x :> e) ε φ := by
   simp [ballLTSucc, Semiterm.Operator.numeral]
 
-lemma eval_bexLTSucc {e ε} :
-    Eval s e ε (φ.bexLTSucc t) ↔ ∃ x < t.val s e ε + 1, Eval s (x :> e) ε φ := by
-  simp [bexLTSucc, Semiterm.Operator.numeral]
+lemma eval_bexsLTSucc {e ε} :
+    Eval s e ε (φ.bexsLTSucc t) ↔ ∃ x < t.val s e ε + 1, Eval s (x :> e) ε φ := by
+  simp [bexsLTSucc, Semiterm.Operator.numeral]
 
 end Semiformula
 
@@ -163,7 +163,7 @@ macro_rules
   | `(⤫formula(lit)[ $binders* | $fbinders* | ∃ $x <⁺ $t, $φ]) => do
     if binders.elem x then Macro.throwErrorAt x "error: variable is duplicated." else
     let binders' := binders.insertIdx 0 x
-    `(Semiformula.bexLTSucc ⤫term(lit)[ $binders* | $fbinders* | $t ] ⤫formula(lit)[ $binders'* | $fbinders* | $φ ])
+    `(Semiformula.bexsLTSucc ⤫term(lit)[ $binders* | $fbinders* | $t ] ⤫formula(lit)[ $binders'* | $fbinders* | $φ ])
 
 end BinderNotation
 

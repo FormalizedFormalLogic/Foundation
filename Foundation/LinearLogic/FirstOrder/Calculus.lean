@@ -31,8 +31,8 @@ inductive Derivation : Sequent L → Type _ where
   | weakening : Derivation Γ → (φ : Statement L) → Derivation (？φ :: Γ)
   | dereliction : Derivation (φ :: Γ) → Derivation (？φ :: Γ)
   | contraction : Derivation (？φ :: ？φ :: Γ) → Derivation (？φ :: Γ)
-  | all : Derivation (φ.free :: Γ⁺) → Derivation ((∀' φ) :: Γ)
-  | ex (t) : Derivation (φ/[t] :: Γ) → Derivation ((∃' φ) :: Γ)
+  | all : Derivation (φ.free :: Γ⁺) → Derivation ((∀⁰ φ) :: Γ)
+  | exs (t) : Derivation (φ/[t] :: Γ) → Derivation ((∃⁰ φ) :: Γ)
 
 abbrev Statement.Proof (φ : Statement L) : Type _ := Derivation [φ]
 
@@ -84,7 +84,7 @@ def height {Γ : Sequent L} : ⊢! Γ → ℕ
   | dereliction d => d.height + 1
   | contraction d => d.height + 1
   |         all d => d.height + 1
-  |        ex _ d => d.height + 1
+  |       exs _ d => d.height + 1
 
 section height
 
@@ -136,8 +136,8 @@ section height
 @[simp] lemma height_all {φ : Semistatement L 1} (d : ⊢! φ.free :: Γ⁺) :
     d.all.height = d.height + 1 := rfl
 
-@[simp] lemma height_ex {φ : Semistatement L 1} {t} (d : ⊢! φ/[t] :: Γ) :
-    (d.ex t).height = d.height + 1 := rfl
+@[simp] lemma height_exs {φ : Semistatement L 1} {t} (d : ⊢! φ/[t] :: Γ) :
+    (d.exs t).height = d.height + 1 := rfl
 
 @[simp] lemma height_cast (d : ⊢! Γ) (e : Γ = Δ) :
     (d.cast e).height = d.height := by rcases e; rfl
@@ -157,13 +157,13 @@ def identity : (φ : Statement L) → ⊢! [φ, ∼φ]
   |     φ ⨁ ψ => (((identity φ).plusRight ψ).rotate.with ((identity ψ).plusLeft φ).rotate).rotate
   |        ！φ => (identity φ).rotate.dereliction.rotate.ofCourse (by simp [Sequent.IsQuest])
   |        ？φ => (identity φ).dereliction.rotate.ofCourse (by simp [Sequent.IsQuest]) |>.rotate
-  |      ∀' φ =>
+  |      ∀⁰ φ =>
     have : ⊢! [(∼φ.shift)/[&0], φ.free] := (identity φ.free).rotate.cast (by simp)
-    have : ⊢! φ.free :: [∃' ∼φ]⁺ := (this.ex _).rotate.cast (by simp)
+    have : ⊢! φ.free :: [∃⁰ ∼φ]⁺ := (this.exs _).rotate.cast (by simp)
     this.all
-  |      ∃' φ =>
+  |      ∃⁰ φ =>
     have : ⊢! [φ.shift/[&0], ∼φ.free] := (identity φ.free).cast (by simp)
-    have : ⊢! (∼φ).free :: [∃' φ]⁺ := (this.ex _).rotate.cast (by simp)
+    have : ⊢! (∼φ).free :: [∃⁰ φ]⁺ := (this.exs _).rotate.cast (by simp)
     this.all.rotate
   termination_by φ => φ.complexity
 

@@ -94,10 +94,10 @@ def Semiformula.toStringSet : ∀ {n}, Semiformula ℒₛₑₜ ξ n → String
   | _,         .nrel Language.Mem.mem v => s!"{(v 0).toStringSet} ∉ {(v 1).toStringSet}"
   | _,                           φ ⋏ ψ => s!"[{φ.toStringSet}] ∧ [{ψ.toStringSet}]"
   | _,                           φ ⋎ ψ => s!"[{φ.toStringSet}] ∨ [{ψ.toStringSet}]"
-  | n, ∀' (rel Language.Mem.mem v ➝ φ) => s!"(∀ x{toString n} ∈ {(v 1).toStringSet}) [{φ.toStringSet}]"
-  | n, ∃' (rel Language.Mem.mem v ⋏ φ) => s!"(∃ x{toString n} ∈ {(v 1).toStringSet}) [{φ.toStringSet}]"
-  | n,                            ∀' φ => s!"(∀ x{toString n}) [{φ.toStringSet}]"
-  | n,                            ∃' φ => s!"(∃ x{toString n}) [{φ.toStringSet}]"
+  | n, ∀⁰ (rel Language.Mem.mem v ➝ φ) => s!"(∀ x{toString n} ∈ {(v 1).toStringSet}) [{φ.toStringSet}]"
+  | n, ∃⁰ (rel Language.Mem.mem v ⋏ φ) => s!"(∃ x{toString n} ∈ {(v 1).toStringSet}) [{φ.toStringSet}]"
+  | n,                            ∀⁰ φ => s!"(∀ x{toString n}) [{φ.toStringSet}]"
+  | n,                            ∃⁰ φ => s!"(∃ x{toString n}) [{φ.toStringSet}]"
 
 instance : Repr (Semiformula ℒₛₑₜ ξ n) := ⟨fun φ _ ↦ φ.toStringSet⟩
 

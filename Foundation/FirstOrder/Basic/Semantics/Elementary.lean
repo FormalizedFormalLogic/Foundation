@@ -180,9 +180,9 @@ lemma eval_hom_iff_of_open {n} {e₁ : Fin n → M₁} {ε₁ : ξ → M₁} : {
   | φ ⋏ ψ,    h => by simp at h ⊢; simp [eval_hom_iff_of_open h.1, eval_hom_iff_of_open h.2]
   | φ ⋎ ψ,    h => by simp at h ⊢; simp [eval_hom_iff_of_open h.1, eval_hom_iff_of_open h.2]
 
-lemma eval_hom_univClosure {n} {ε₁ : ξ → M₁} {φ : Semiformula L ξ n} (hp : φ.Open) :
-    Evalf s₂ (Θ ∘ ε₁) (∀* φ) → Evalf s₁ ε₁ (∀* φ) := by
-  simp only [eval_univClosure]
+lemma eval_hom_allClosure {n} {ε₁ : ξ → M₁} {φ : Semiformula L ξ n} (hp : φ.Open) :
+    Evalf s₂ (Θ ∘ ε₁) (∀⁰* φ) → Evalf s₁ ε₁ (∀⁰* φ) := by
+  simp only [eval_allClosure]
   intro h e₁; exact (eval_hom_iff_of_open Θ hp).mpr (h (Θ ∘ e₁))
 
 end Semiformula
@@ -267,7 +267,7 @@ lemma eval_iff_of_equiv {f₁ f₂ b₁ b₂}
     simp [eval_iff_of_equiv I hf hb hrel hfunc φ, eval_iff_of_equiv I hf hb hrel hfunc ψ]
   | φ ⋎ ψ => by
     simp [eval_iff_of_equiv I hf hb hrel hfunc φ, eval_iff_of_equiv I hf hb hrel hfunc ψ]
-  | ∀' φ => by
+  | ∀⁰ φ => by
     suffices
       (∀ x₁ : M₁, φ.Eval s₁ (x₁ :> b₁) f₁) ↔ (∀ x₂ : M₂, φ.Eval s₂ (x₂ :> b₂) f₂) by simpa
     constructor
@@ -283,7 +283,7 @@ lemma eval_iff_of_equiv {f₁ f₂ b₁ b₂}
           (by intro i; cases i using Fin.cases <;> simp [hb])
           hrel hfunc φ
       exact this.mpr (h _)
-  | ∃' φ => by
+  | ∃⁰ φ => by
     suffices
       (∃ x₁, φ.Eval s₁ (x₁ :> b₁) f₁) ↔ (∃ x₂, φ.Eval s₂ (x₂ :> b₂) f₂) by simpa
     constructor

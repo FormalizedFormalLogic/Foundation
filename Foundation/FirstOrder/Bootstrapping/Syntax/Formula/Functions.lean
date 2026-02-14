@@ -23,10 +23,10 @@ def blueprint : UformulaRec1.Blueprint where
   falsum := .mkSigma “y param. !qqVerumDef y”
   and := .mkSigma “y param p₁ p₂ y₁ y₂. !qqOrDef y y₁ y₂”
   or := .mkSigma “y param p₁ p₂ y₁ y₂. !qqAndDef y y₁ y₂”
-  all := .mkSigma “y param p₁ y₁. !qqExDef y y₁”
-  ex := .mkSigma “y param p₁ y₁. !qqAllDef y y₁”
+  all := .mkSigma “y param p₁ y₁. !qqExsDef y y₁”
+  exs := .mkSigma “y param p₁ y₁. !qqAllDef y y₁”
   allChanges := .mkSigma “param' param. param' = 0”
-  exChanges := .mkSigma “param' param. param' = 0”
+  exsChanges := .mkSigma “param' param. param' = 0”
 
 noncomputable def construction : UformulaRec1.Construction V blueprint where
   rel {_} := fun k R v ↦ ^nrel k R v
@@ -36,9 +36,9 @@ noncomputable def construction : UformulaRec1.Construction V blueprint where
   and {_} := fun _ _ y₁ y₂ ↦ y₁ ^⋎ y₂
   or {_} := fun _ _ y₁ y₂ ↦ y₁ ^⋏ y₂
   all {_} := fun _ y₁ ↦ ^∃ y₁
-  ex {_} := fun _ y₁ ↦ ^∀ y₁
+  exs {_} := fun _ y₁ ↦ ^∀ y₁
   allChanges := fun _ ↦ 0
-  exChanges := fun _ ↦ 0
+  exsChanges := fun _ ↦ 0
   rel_defined := .mk fun v ↦ by simp [blueprint]
   nrel_defined := .mk fun v ↦ by simp [blueprint]
   verum_defined := .mk fun v ↦ by simp [blueprint]
@@ -46,7 +46,7 @@ noncomputable def construction : UformulaRec1.Construction V blueprint where
   and_defined := .mk fun v ↦ by simp [blueprint]
   or_defined := .mk fun v ↦ by simp [blueprint]
   all_defined := .mk fun v ↦ by simp [blueprint]
-  ex_defined := .mk fun v ↦ by simp [blueprint]
+  exs_defined := .mk fun v ↦ by simp [blueprint]
   allChanges_defined := .mk fun v ↦ by simp [blueprint]
   exChanges_defined := .mk fun v ↦ by simp [blueprint]
 
@@ -241,9 +241,9 @@ noncomputable def blueprint : UformulaRec1.Blueprint where
   and := .mkSigma “y param p₁ p₂ y₁ y₂. !qqAndDef y y₁ y₂”
   or := .mkSigma “y param p₁ p₂ y₁ y₂. !qqOrDef y y₁ y₂”
   all := .mkSigma “y param p₁ y₁. !qqAllDef y y₁”
-  ex := .mkSigma “y param p₁ y₁. !qqExDef y y₁”
+  exs := .mkSigma “y param p₁ y₁. !qqExsDef y y₁”
   allChanges := .mkSigma “param' param. param' = 0”
-  exChanges := .mkSigma “param' param. param' = 0”
+  exsChanges := .mkSigma “param' param. param' = 0”
 
 noncomputable def construction : UformulaRec1.Construction V (blueprint L) where
   rel {_} := fun k R v ↦ ^rel k R (termShiftVec L k v)
@@ -253,9 +253,9 @@ noncomputable def construction : UformulaRec1.Construction V (blueprint L) where
   and {_} := fun _ _ y₁ y₂ ↦ y₁ ^⋏ y₂
   or {_} := fun _ _ y₁ y₂ ↦ y₁ ^⋎ y₂
   all {_} := fun _ y₁ ↦ ^∀ y₁
-  ex {_} := fun _ y₁ ↦ ^∃ y₁
+  exs {_} := fun _ y₁ ↦ ^∃ y₁
   allChanges := fun _ ↦ 0
-  exChanges := fun _ ↦ 0
+  exsChanges := fun _ ↦ 0
   rel_defined := .mk fun v ↦ by simp [blueprint]
   nrel_defined := .mk fun v ↦ by simp [blueprint]
   verum_defined := .mk fun v ↦ by simp [blueprint]
@@ -263,7 +263,7 @@ noncomputable def construction : UformulaRec1.Construction V (blueprint L) where
   and_defined := .mk fun v ↦ by simp [blueprint]
   or_defined := .mk fun v ↦ by simp [blueprint]
   all_defined := .mk fun v ↦ by simp [blueprint]
-  ex_defined := .mk fun v ↦ by simp [blueprint]
+  exs_defined := .mk fun v ↦ by simp [blueprint]
   allChanges_defined := .mk fun v ↦ by simp [blueprint]
   exChanges_defined := .mk fun v ↦ by simp [blueprint]
 
@@ -309,7 +309,7 @@ end
 @[simp] lemma shift_all {p : V} (hp : IsUFormula L p) :
     shift L (^∀ p) = ^∀ (shift L p) := by simp [shift, hp, construction]
 
-@[simp] lemma shift_ex {p : V} (hp : IsUFormula L p) :
+@[simp] lemma shift_exs {p : V} (hp : IsUFormula L p) :
     shift L (^∃ p) = ^∃ (shift L p) := by simp [shift, hp, construction]
 
 lemma shift_not_uformula {x : V} (h : ¬IsUFormula L x) :
@@ -394,9 +394,9 @@ noncomputable def blueprint : UformulaRec1.Blueprint where
   and    := .mkSigma “y param p₁ p₂ y₁ y₂. !qqAndDef y y₁ y₂”
   or     := .mkSigma “y param p₁ p₂ y₁ y₂. !qqOrDef y y₁ y₂”
   all    := .mkSigma “y param p₁ y₁. !qqAllDef y y₁”
-  ex     := .mkSigma “y param p₁ y₁. !qqExDef y y₁”
+  exs     := .mkSigma “y param p₁ y₁. !qqExsDef y y₁”
   allChanges := .mkSigma “param' param. !(qVecGraph L) param' param”
-  exChanges  := .mkSigma “param' param. !(qVecGraph L) param' param”
+  exsChanges  := .mkSigma “param' param. !(qVecGraph L) param' param”
 
 noncomputable def construction : UformulaRec1.Construction V (blueprint L) where
   rel (param)  := fun k R v ↦ ^rel k R (termSubstVec L k param v)
@@ -406,9 +406,9 @@ noncomputable def construction : UformulaRec1.Construction V (blueprint L) where
   and _        := fun _ _ y₁ y₂ ↦ y₁ ^⋏ y₂
   or _         := fun _ _ y₁ y₂ ↦ y₁ ^⋎ y₂
   all _        := fun _ y₁ ↦ ^∀ y₁
-  ex _         := fun _ y₁ ↦ ^∃ y₁
+  exs _         := fun _ y₁ ↦ ^∃ y₁
   allChanges (param) := qVec L param
-  exChanges (param) := qVec L param
+  exsChanges (param) := qVec L param
   rel_defined := .mk fun v ↦ by simp [blueprint]
   nrel_defined := .mk fun v ↦ by simp [blueprint]
   verum_defined := .mk fun v ↦ by simp [blueprint]
@@ -416,7 +416,7 @@ noncomputable def construction : UformulaRec1.Construction V (blueprint L) where
   and_defined := .mk fun v ↦ by simp [blueprint]
   or_defined := .mk fun v ↦ by simp [blueprint]
   all_defined := .mk fun v ↦ by simp [blueprint]
-  ex_defined := .mk fun v ↦ by simp [blueprint]
+  exs_defined := .mk fun v ↦ by simp [blueprint]
   allChanges_defined := .mk fun v ↦ by simp [blueprint]
   exChanges_defined := .mk fun v ↦ by simp [blueprint]
 
@@ -478,7 +478,7 @@ lemma isUFormula_subst_ISigma1.sigma1_succ_induction {P : V → V → V → Prop
     (hor : ∀ w p q, IsUFormula L p → IsUFormula L q →
       P w p (subst L w p) → P w q (subst L w q) → P w (p ^⋎ q) (subst L w p ^⋎ subst L w q))
     (hall : ∀ w p, IsUFormula L p → P (qVec L w) p (subst L (qVec L w) p) → P w (^∀ p) (^∀ (subst L (qVec L w) p)))
-    (hex : ∀ w p, IsUFormula L p → P (qVec L w) p (subst L (qVec L w) p) → P w (^∃ p) (^∃ (subst L (qVec L w) p))) :
+    (hexs : ∀ w p, IsUFormula L p → P (qVec L w) p (subst L (qVec L w) p) → P w (^∃ p) (^∃ (subst L (qVec L w) p))) :
     ∀ {w p}, IsUFormula L p → P w p (subst L w p) := by
   suffices ∀ param p, IsUFormula L p → P param p ((construction L).result L param p) by
     intro w p hp; simpa using this w p hp
@@ -497,7 +497,7 @@ lemma isUFormula_subst_ISigma1.sigma1_succ_induction {P : V → V → V → Prop
   · intro param p hp ihp
     simpa using hall param p hp (by simpa [construction] using ihp)
   · intro param p hp ihp
-    simpa using hex param p hp (by simpa [construction] using ihp)
+    simpa using hexs param p hp (by simpa [construction] using ihp)
 
 lemma semiformula_subst_induction {P : V → V → V → V → Prop} (hP : 𝚺₁-Relation₄ P)
     (hRel : ∀ n w k R v, L.IsRel k R → IsSemitermVec L k n v → P n w (^relk R v) (^rel k R (termSubstVec L k w v)))
@@ -510,7 +510,7 @@ lemma semiformula_subst_induction {P : V → V → V → V → Prop} (hP : 𝚺�
       P n w p (subst L w p) → P n w q (subst L w q) → P n w (p ^⋎ q) (subst L w p ^⋎ subst L w q))
     (hall : ∀ n w p, IsSemiformula L (n + 1) p →
       P (n + 1) (qVec L w) p (subst L (qVec L w) p) → P n w (^∀ p) (^∀ (subst L (qVec L w) p)))
-    (hex : ∀ n w p, IsSemiformula L (n + 1) p →
+    (hexs : ∀ n w p, IsSemiformula L (n + 1) p →
       P (n + 1) (qVec L w) p (subst L (qVec L w) p) → P n w (^∃ p) (^∃ (subst L (qVec L w) p))) :
     ∀ {n p w}, IsSemiformula L n p → P n w p (subst L w p) := by
   suffices ∀ param n p, IsSemiformula L n p → P n param p ((construction L).result L param p) by
@@ -530,7 +530,7 @@ lemma semiformula_subst_induction {P : V → V → V → V → Prop} (hP : 𝚺�
   · intro n param p hp ihp
     simpa using hall n param p hp (by simpa [construction] using ihp)
   · intro n param p hp ihp
-    simpa using hex n param p hp (by simpa [construction] using ihp)
+    simpa using hexs n param p hp (by simpa [construction] using ihp)
 
 @[simp] lemma IsSemiformula.subst {n p m w : V} :
     IsSemiformula L n p → IsSemitermVec L n m w → IsSemiformula L m (subst L w p) := by
@@ -649,8 +649,8 @@ lemma shift_substs {p} (hp : IsSemiformula L n p) :
       termShift_qVec hw]
   · intro n p hp ih m w hw
     rw [substs_ex hp.isUFormula,
-      shift_ex (hp.subst hw.qVec).isUFormula,
-      shift_ex hp.isUFormula,
+      shift_exs (hp.subst hw.qVec).isUFormula,
+      shift_exs hp.isUFormula,
       substs_ex hp.shift.isUFormula,
       ih hw.qVec,
       termShift_qVec hw]
@@ -834,9 +834,9 @@ def blueprint : UformulaRec1.Blueprint where
   and := .mkSigma “y param p₁ p₂ y₁ y₂. !max.dfn y (y₁ + 1) (y₂ + 1)”
   or := .mkSigma “y param p₁ p₂ y₁ y₂. !max.dfn y (y₁ + 1) (y₂ + 1)”
   all := .mkSigma “y param p₁ y₁. y = y₁ + 1”
-  ex := .mkSigma “y param p₁ y₁. y = y₁ + 1”
+  exs := .mkSigma “y param p₁ y₁. y = y₁ + 1”
   allChanges := .mkSigma “param' param. param' = 0”
-  exChanges := .mkSigma “param' param. param' = 0”
+  exsChanges := .mkSigma “param' param. param' = 0”
 
 noncomputable def construction : UformulaRec1.Construction V blueprint where
   rel {_} := fun k R v ↦ 0
@@ -846,9 +846,9 @@ noncomputable def construction : UformulaRec1.Construction V blueprint where
   and {_} := fun _ _ y₁ y₂ ↦ max y₁ y₂ + 1
   or {_} := fun _ _ y₁ y₂ ↦ max y₁ y₂ + 1
   all {_} := fun _ y₁ ↦ y₁ + 1
-  ex {_} := fun _ y₁ ↦ y₁ + 1
+  exs {_} := fun _ y₁ ↦ y₁ + 1
   allChanges := fun _ ↦ 0
-  exChanges := fun _ ↦ 0
+  exsChanges := fun _ ↦ 0
   rel_defined := .mk fun v ↦ by simp [blueprint]
   nrel_defined := .mk fun v ↦ by simp [blueprint]
   verum_defined := .mk fun v ↦ by simp [blueprint]
@@ -856,7 +856,7 @@ noncomputable def construction : UformulaRec1.Construction V blueprint where
   and_defined := .mk fun v ↦ by simp [blueprint, max_add_add_right]
   or_defined := .mk fun v ↦ by simp [blueprint, max_add_add_right]
   all_defined := .mk fun v ↦ by simp [blueprint]
-  ex_defined := .mk fun v ↦ by simp [blueprint]
+  exs_defined := .mk fun v ↦ by simp [blueprint]
   allChanges_defined := .mk fun v ↦ by simp [blueprint]
   exChanges_defined := .mk fun v ↦ by simp [blueprint]
 
@@ -1007,7 +1007,7 @@ lemma IsFormula.sigma1_structural_induction {P : V → Prop} (hP : 𝚺₁-Predi
     (hand : ∀ p q, IsFormula L p → IsFormula L q → P p → P q → P (p ^⋏ q))
     (hor : ∀ p q, IsFormula L p → IsFormula L q → P p → P q → P (p ^⋎ q))
     (hall : ∀ p, IsSemiformula L 1 p → P (free L p) → P (^∀ p))
-    (hex : ∀ p, IsSemiformula L 1 p → P (free L p) → P (^∃ p)) {p} :
+    (hexs : ∀ p, IsSemiformula L 1 p → P (free L p) → P (^∃ p)) {p} :
     IsFormula L p → P p := by
   have hm : 𝚺₁-Function₁[V] formulaComplexity L := inferInstance
   let f : V → V := fun p ↦ max p (free L (π₂ (p - 1)))
@@ -1040,10 +1040,10 @@ lemma IsFormula.sigma1_structural_induction {P : V → Prop} (hP : 𝚺₁-Predi
       (h₁.free)
     exact hall _ h₁ this
   · have h₁ : IsSemiformula L 1 p₁ := by simpa using h₁
-    have : P (free L p₁) := ih (free L p₁) (by simp only [le_sup_iff, f]; right; simp [qqEx])
+    have : P (free L p₁) := ih (free L p₁) (by simp only [le_sup_iff, f]; right; simp [qqExs])
       (by simp [fomulaComplexity_free h₁, h₁.isUFormula])
       (h₁.free)
-    exact hex _ h₁ this
+    exact hexs _ h₁ this
 
 lemma IsFormula.sigma1_structural_induction₂ {P : V → Prop} (hP : 𝚺₁-Predicate P)
     (hrel : ∀ k r v, L.IsRel k r → IsSemitermVec L k 1 v → P (^rel k r v))
@@ -1053,7 +1053,7 @@ lemma IsFormula.sigma1_structural_induction₂ {P : V → Prop} (hP : 𝚺₁-Pr
     (hand : ∀ p q, IsSemiformula L 1 p → IsSemiformula L 1 q → P p → P q → P (p ^⋏ q))
     (hor : ∀ p q, IsSemiformula L 1 p → IsSemiformula L 1 q → P p → P q → P (p ^⋎ q))
     (hall : ∀ p, IsSemiformula L 2 p → P (free1 L p) → P (^∀ p))
-    (hex : ∀ p, IsSemiformula L 2 p → P (free1 L p) → P (^∃ p)) {p} :
+    (hexs : ∀ p, IsSemiformula L 2 p → P (free1 L p) → P (^∃ p)) {p} :
     IsSemiformula L 1 p → P p := by
   have hm : 𝚺₁-Function₁[V] formulaComplexity L := inferInstance
   let f : V → V := fun p ↦ max p (free1 L (π₂ (p - 1)))
@@ -1086,10 +1086,10 @@ lemma IsFormula.sigma1_structural_induction₂ {P : V → Prop} (hP : 𝚺₁-Pr
       h₁.free1
     exact hall _ h₁ this
   · have h₁ : IsSemiformula L 2 p₁ := by simpa  [one_add_one_eq_two] using h₁
-    have : P (free1 L p₁) := ih (free1 L p₁) (by simp only [le_sup_iff, f]; right; simp [qqEx])
+    have : P (free1 L p₁) := ih (free1 L p₁) (by simp only [le_sup_iff, f]; right; simp [qqExs])
       (by simp [fomulaComplexity_free1 h₁, h₁.isUFormula])
       h₁.free1
-    exact hex _ h₁ this
+    exact hexs _ h₁ this
 
 lemma IsFormula.sigma1_structural_induction₂_ss {P : V → Prop} (hP : 𝚺₁-Predicate P)
     (hrel : ∀ k r v, L.IsRel k r → IsSemitermVec L k 1 v → P (^rel k r v))
@@ -1099,7 +1099,7 @@ lemma IsFormula.sigma1_structural_induction₂_ss {P : V → Prop} (hP : 𝚺₁
     (hand : ∀ p q, IsSemiformula L 1 p → IsSemiformula L 1 q → P p → P q → P (p ^⋏ q))
     (hor : ∀ p q, IsSemiformula L 1 p → IsSemiformula L 1 q → P p → P q → P (p ^⋎ q))
     (hall : ∀ p, IsSemiformula L 2 p → P (free1 L <| shift L <| shift L <| p) → P (^∀ p))
-    (hex : ∀ p, IsSemiformula L 2 p → P (free1 L <| shift L <| shift L <| p) → P (^∃ p)) {p} :
+    (hexs : ∀ p, IsSemiformula L 2 p → P (free1 L <| shift L <| shift L <| p) → P (^∃ p)) {p} :
     IsSemiformula L 1 p → P p := by
   have hm : 𝚺₁-Function₁[V] formulaComplexity L := inferInstance
   let f : V → V := fun p ↦ max p (free1 L <| shift L <| shift L <| (π₂ (p - 1)))
@@ -1135,11 +1135,11 @@ lemma IsFormula.sigma1_structural_induction₂_ss {P : V → Prop} (hP : 𝚺₁
     exact hall _ h₁ this
   · have h₁ : IsSemiformula L 2 p₁ := by simpa [one_add_one_eq_two] using h₁
     have : P (free1 L <| shift L <| shift L <| p₁) :=
-      ih (free1 L <| shift L <| shift L <| p₁) (by simp only [le_sup_iff, f]; right; simp [qqEx])
+      ih (free1 L <| shift L <| shift L <| p₁) (by simp only [le_sup_iff, f]; right; simp [qqExs])
       (by rw [fomulaComplexity_free1 h₁.shift.shift, formulaComplexity_shift h₁.shift.isUFormula,
           formulaComplexity_shift h₁.isUFormula]; simp [h₁.isUFormula])
       h₁.shift.shift.free1
-    exact hex _ h₁ this
+    exact hexs _ h₁ this
 
 /-
 section fvfree
@@ -1172,10 +1172,10 @@ lemma Language.IsFVFree.or {n p q : V} (hp : L.IsFVFree n p) (hq : L.IsFVFree n 
     L.IsFVFree n (p ^⋎[n] q) := by simp [Language.IsFVFree, hp.1, hq.1, hp.2, hq.2]
 
 lemma Language.IsFVFree.all {n p : V} (hp : L.IsFVFree (n + 1) p) :
-    L.IsFVFree n (^∀[n] p) := by simp [Language.IsFVFree, hp.1, hp.2]
+    L.IsFVFree n (^∀⁰[n] p) := by simp [Language.IsFVFree, hp.1, hp.2]
 
-lemma Language.IsFVFree.ex {n p : V} (hp : L.IsFVFree (n + 1) p) :
-    L.IsFVFree n (^∃[n] p) := by simp [Language.IsFVFree, hp.1, hp.2]
+lemma Language.IsFVFree.exs {n p : V} (hp : L.IsFVFree (n + 1) p) :
+    L.IsFVFree n (^∃⁰[n] p) := by simp [Language.IsFVFree, hp.1, hp.2]
 
 @[simp] lemma Language.IsFVFree.neg_iff : L.IsFVFree n (neg L p) ↔ L.IsFVFree n p := by
   constructor

@@ -637,7 +637,7 @@ variable (ω : SyntacticRew L n₁ n₂)
 end ψ
 
 def fixitr (n : ℕ) : (m : ℕ) → SyntacticRew L n (n + m)
-  | 0     => Rew.id
+  |     0 => Rew.id
   | m + 1 => Rew.fix.comp (fixitr n m)
 
 @[simp] lemma fixitr_zero :
@@ -785,8 +785,8 @@ lemma fvar?_rew [DecidableEq ξ₁] [DecidableEq ξ₂]
   induction t <;> simp [Rew.func, *]
 
 def toEmpty [DecidableEq ξ] {n : ℕ} : (t : Semiterm L ξ n) → t.freeVariables = ∅ → ClosedSemiterm L n
-  | #x,        _ => #x
-  | &x,        h => by simp at h
+  |       #x, _ => #x
+  |       &x, h => by simp at h
   | func f v, h =>
     have : ∀ i, (v i).freeVariables = ∅ := by
       intro i; ext x
@@ -807,13 +807,11 @@ end Semiterm
 
 /-! ### Rewriting system of formulae -/
 
-class FreeVar (ξ : outParam Type*) (F : ℕ → Type*) where
-
 class Rewriting (L : outParam Language) (ξ : outParam Type*) (F : ℕ → Type*) (ζ : Type*) (G : outParam (ℕ → Type*))
     [LCWQ F] [LCWQ G] where
   app {n₁ n₂} : Rew L ξ n₁ ζ n₂ → F n₁ →ˡᶜ G n₂
-  app_all (ω₁₂ : Rew L ξ n₁ ζ n₂) (φ) : app ω₁₂ (∀' φ) = ∀' (app ω₁₂.q φ)
-  app_ex (ω₁₂ : Rew L ξ n₁ ζ n₂) (φ) : app ω₁₂ (∃' φ) = ∃' (app ω₁₂.q φ)
+  app_all (ω₁₂ : Rew L ξ n₁ ζ n₂) (φ) : app ω₁₂ (∀⁰ φ) = ∀⁰ (app ω₁₂.q φ)
+  app_exs (ω₁₂ : Rew L ξ n₁ ζ n₂) (φ) : app ω₁₂ (∃⁰ φ) = ∃⁰ (app ω₁₂.q φ)
 
 abbrev SyntacticRewriting (L : outParam Language) (F : ℕ → Type*) (G : outParam (ℕ → Type*)) [LCWQ F] [LCWQ G] :=
   Rewriting L ℕ F ℕ G
@@ -822,24 +820,24 @@ namespace Rewriting
 
 variable [LCWQ F] [LCWQ G] [Rewriting L ξ F ζ G]
 
-attribute [simp] app_all app_ex
+attribute [simp] app_all app_exs
 
 infixr:73 " ▹ " => app
 
 lemma smul_ext' {ω₁ ω₂ : Rew L ξ n₁ ζ n₂} (h : ω₁ = ω₂) {φ : F n₁} : ω₁ ▹ φ = ω₂ ▹ φ := by rw [h]
 
-@[simp] lemma smul_ball (ω : Rew L ξ n₁ ζ n₂) (φ ψ : F (n₁ + 1)) : ω ▹ (∀[φ] ψ) = ∀[ω.q ▹ φ] (ω.q ▹ ψ) := by simp [ball]
+@[simp] lemma smul_ball (ω : Rew L ξ n₁ ζ n₂) (φ ψ : F (n₁ + 1)) : ω ▹ (∀⁰[φ] ψ) = ∀⁰[ω.q ▹ φ] (ω.q ▹ ψ) := by simp [ball]
 
-@[simp] lemma smul_bex (ω : Rew L ξ n₁ ζ n₂) (φ ψ : F (n₁ + 1)) : ω ▹ (∃[φ] ψ) = ∃[ω.q ▹ φ] (ω.q ▹ ψ) := by simp [bex]
+@[simp] lemma smul_bexs (ω : Rew L ξ n₁ ζ n₂) (φ ψ : F (n₁ + 1)) : ω ▹ (∃⁰[φ] ψ) = ∃⁰[ω.q ▹ φ] (ω.q ▹ ψ) := by simp [bexs]
 
-@[simp] lemma smul_univItr (ω : Rew L ξ n₁ ζ n₂) (φ : F (n₁ + k)) :
-    ω ▹ (∀^[k] φ) = ∀^[k] (ω.qpow k ▹ φ : G (n₂ + k)) := by
-  induction k <;> simp [univItr_succ, *]
+@[simp] lemma smul_allItr (ω : Rew L ξ n₁ ζ n₂) (φ : F (n₁ + k)) :
+    ω ▹ (∀⁰^[k] φ) = ∀⁰^[k] (ω.qpow k ▹ φ : G (n₂ + k)) := by
+  induction k <;> simp [allItr_succ, *]
   rfl
 
-@[simp] lemma smul_exItr (ω : Rew L ξ n₁ ζ n₂) (φ : F (n₁ + k)) :
-    ω ▹ (∃^[k] φ) = ∃^[k] (ω.qpow k ▹ φ : G (n₂ + k)) := by
-  induction k <;> simp [exItr_succ, *]
+@[simp] lemma smul_exsItr (ω : Rew L ξ n₁ ζ n₂) (φ : F (n₁ + k)) :
+    ω ▹ (∃⁰^[k] φ) = ∃⁰^[k] (ω.qpow k ▹ φ : G (n₂ + k)) := by
+  induction k <;> simp [exsItr_succ, *]
   rfl
 
 abbrev subst [Rewriting L ξ F ξ F] (φ : F n₁) (w : Fin n₁ → Semiterm L ξ n₂) : F n₂ := Rew.subst w ▹ φ
@@ -903,10 +901,10 @@ variable {S : ℕ → Type*} [LCWQ S] [SyntacticRewriting L S S]
 open Rewriting ReflectiveRewriting TransitiveRewriting InjMapRewriting Semiterm
 
 lemma fix_allClosure (φ : S n) :
-    ∀' fix (∀* φ) = ∀* fix φ := by
+    ∀⁰ fix (∀⁰* φ) = ∀⁰* fix φ := by
   induction n
-  case zero => simp [univClosure_succ]
-  case succ n ih => simp [univClosure_succ, ih]
+  case zero => simp [allClosure_succ]
+  case succ n ih => simp [allClosure_succ, ih]
 
 @[simp] lemma shifts_cons (φ : S n) (Γ : List (S n)) :
     (φ :: Γ)⁺ = Rewriting.shift φ :: Γ⁺ := by simp [shifts]
@@ -987,7 +985,7 @@ def shiftEmb : S n ↪ S n where
 lemma shiftEmb_def (φ : S n) :
   shiftEmb φ = shift φ := rfl
 
-lemma allClosure_fixitr (φ : S 0) : ∀* Rew.fixitr 0 (m + 1) ▹ φ = ∀' Rew.fix ▹ (∀* Rew.fixitr 0 m ▹ φ) := by
+lemma allClosure_fixitr (φ : S 0) : ∀⁰* Rew.fixitr 0 (m + 1) ▹ φ = ∀⁰ Rew.fix ▹ (∀⁰* Rew.fixitr 0 m ▹ φ) := by
   simp [Rew.fixitr_succ, fix_allClosure, comp_app]; rfl
 
 @[simp] lemma mem_shifts_iff {φ : S n} {Γ : List (S n)} :
@@ -1008,8 +1006,8 @@ open ReflectiveRewriting TransitiveRewriting InjMapRewriting Semiterm
 lemma emb_injective [Rewriting L ο O ξ F] [InjMapRewriting L ο O ξ F] : Function.Injective fun φ : O n ↦ (emb (ξ := ξ) φ : F n) :=
   smul_map_injective Function.injective_id (IsEmpty.elim inferInstance)
 
-@[simp] lemma emb_univClosure [Rewriting L ο O ξ F] {σ : O n} :
-    (emb (ξ := ξ) (∀* σ)) = ∀* (emb (ξ := ξ) σ) := by induction n <;> simp [*, univClosure_succ]
+@[simp] lemma emb_allClosure [Rewriting L ο O ξ F] {σ : O n} :
+    (emb (ξ := ξ) (∀⁰* σ)) = ∀⁰* (emb (ξ := ξ) σ) := by induction n <;> simp [*, allClosure_succ]
 
 /-- `coe_subst_eq_subst_coe` -/
 lemma emb_subst_eq_subst_emb
@@ -1055,6 +1053,8 @@ variable {S : ℕ → Type*} [LCWQ S] [SyntacticRewriting L S S] [LawfulSyntacti
 
 end Rewriting
 
-end LO.FirstOrder
+end FirstOrder
+
+end LO
 
 end

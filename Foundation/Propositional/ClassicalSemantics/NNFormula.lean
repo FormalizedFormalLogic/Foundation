@@ -16,7 +16,7 @@ namespace NNFormula
 
 section val
 
-variable {F : Type*} [LogicalConnective F] [DeMorgan F] (v : α → F)
+variable {F : Type*} [LogicalConnective F] [DeMorgan F] [NegInvolutive F] (v : α → F)
 
 def valAux : NNFormula α → F
   | .atom a  => v a
