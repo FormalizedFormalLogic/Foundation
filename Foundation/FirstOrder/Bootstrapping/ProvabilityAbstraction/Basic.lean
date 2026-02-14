@@ -275,12 +275,12 @@ private lemma kreisel_specAux₁ [L.DecidableEq] [T₀ ⪯ T] : T₀ ⊢ 𝔅 (�
 
 variable [L.DecidableEq] [T₀ ⪯ T]
 
-theorem löb_theorm (H : T ⊢ 𝔅 σ ➝ σ) : T ⊢ σ := by
+theorem löb_theorem (H : T ⊢ 𝔅 σ ➝ σ) : T ⊢ σ := by
   have d₁ : T ⊢ 𝔅 (𝐊 σ) ➝ σ := C!_trans (WeakerThan.pbl kreisel_specAux₁) H;
   have d₂ : T ⊢ 𝔅 (𝐊 σ)     := WeakerThan.pbl (𝓢 := T₀) (D1 $ WeakerThan.pbl kreisel_specAux₂ ⨀ d₁);
   exact d₁ ⨀ d₂;
 
-instance : 𝔅.Löb := ⟨löb_theorm⟩
+instance : 𝔅.Löb := ⟨löb_theorem⟩
 
 theorem formalized_löb_theorem : T₀ ⊢ 𝔅 (𝔅 σ ➝ σ) ➝ 𝔅 σ := by
   have h₁ : T₀ ⊢ 𝔅 (𝐊 σ) ➝ 𝔅 σ := kreisel_specAux₁;
