@@ -122,7 +122,7 @@ open ProvabilityAbstraction
 
 variable {L : Language} [L.Encodable] [L.LORDefinable]
 
-variable {T : Theory L} [T.Δ₁]
+variable {T : Theory L} [T.Δ₁] [Entailment.Consistent T]
 
 variable (T)
 

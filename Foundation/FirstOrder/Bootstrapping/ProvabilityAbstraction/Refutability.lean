@@ -2,32 +2,29 @@ import Foundation.FirstOrder.Bootstrapping.RosserProvability
 
 namespace LO.FirstOrder
 
-namespace Derivation
+namespace Schema
 
-variable {𝓢 : SyntacticFormulas L} {φ : SyntacticSemiformula L 1}
+variable {𝓢 : Schema L}
 
-def specialize'! (t : SyntacticTerm L) (b : 𝓢 ⊢! ∀' φ) : 𝓢 ⊢! φ/[t] := by simpa using specialize (Γ := []) t b;
+open Derivation
 
-def specialize' (t : SyntacticTerm L) (b : 𝓢 ⊢ ∀' φ) : 𝓢 ⊢ φ/[t] := ⟨specialize'! t b.get⟩
+def specialize (φ : SyntacticSemiformula L 1) (t : SyntacticTerm L) : 𝓢 ⊢! ∀⁰ φ ➝ φ/[t] :=
+  have : 𝓢 ⟹ [(∼φ)/[t], φ/[t]] := Derivation.em (φ := φ/[t]) (by simp) (by simp)
+  have : 𝓢 ⟹ [∃⁰ ∼φ, φ/[t]] := this.exs t
+  this.or.cast (by simp [Semiformula.imp_eq])
 
-end Derivation
-
+end Schema
 
 namespace Theory
 
 variable {T : Theory L} {φ : Semisentence L 1}
 
-def specialize! (t) (b : T ⊢! ∀' φ) : T ⊢! (φ/[t]) := by
-  apply ofSyntacticProof;
-  sorry;
+def specialize! (φ : Semisentence L 1) (t) : T ⊢! ∀⁰ φ ➝ φ/[t] := ofSyntacticProof <| by
+  simpa [Semiformula.coe_subst_eq_subst_coe₁] using (Schema.specialize (𝓢 := T) φ (t : SyntacticTerm L))
 
-def specialize (t) (b : T ⊢ ∀' φ) : T ⊢ (φ/[t]) := by
-  have := Derivation.specialize' t $ provable_def.mp b;
-  apply provable_def.mpr;
-  sorry;
+lemma specialize (φ : Semisentence L 1) (t) : T ⊢ ∀⁰ φ ➝ φ/[t] := ⟨specialize! φ t⟩
 
 end Theory
-
 
 namespace ProvabilityAbstraction
 
@@ -148,8 +145,8 @@ lemma jeroslow_not_safe [𝔅.FormalizedCompleteOn 𝐉] : T ⊢ 𝐉 ➝ (𝔅 
 -/
 lemma unprovable_flon [consis : Consistent T] [𝔅.FormalizedCompleteOn 𝐉] : T ⊬ flon 𝔅 𝔚 := by
   contrapose! consis;
-  replace consis : T ⊢ ∀' safe 𝔅 𝔚 := by simpa [flon] using consis;
-  have h₁ : T ⊢ ∼(𝔅 𝐉 ⋏ 𝔚 𝐉) := by simpa [safe] using FirstOrder.Theory.specialize _ $ consis;
+  replace consis : T ⊢ ∀⁰ safe 𝔅 𝔚 := by simpa [flon] using consis;
+  have h₁ : T ⊢ ∼(𝔅 𝐉 ⋏ 𝔚 𝐉) := by simpa [safe] using FirstOrder.Theory.specialize _ _ ⨀ consis;
   have h₂ : T ⊢ 𝐉 ➝ 𝔅 𝐉 := Provability.formalized_complete_on;
   have h₃ : T ⊢ 𝐉 ⭤ 𝔚 𝐉 := jeroslow_def';
   have h₄ : T ⊢ ∼(𝔅 𝐉 ⋏ 𝔚 𝐉) ➝ ∼𝐉 := contra! $ by cl_prover [h₂, h₃];
