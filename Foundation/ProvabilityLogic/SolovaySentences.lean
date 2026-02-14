@@ -23,15 +23,15 @@ open Modal.Kripke
 open Modal.Formula.Kripke
 
 variable {L : Language} [L.DecidableEq] [L.ReferenceableBy L]
-         {T₀ T : Theory L} [T₀ ⪯ T] (𝔅 : Provability T₀ T) [𝔅.HBL]
+         {T U : Theory L} [T ⪯ U] (𝔅 : Provability T U) [𝔅.HBL]
          {A B : Modal.Formula _}
 
-structure SolovaySentences (F : Kripke.Frame) (r : F) [F.IsFiniteTree r] [Fintype F] where
+structure SolovaySentences (F : Kripke.Frame) (r : F) [F.IsTree r] [Fintype F] where
   σ : F → Sentence L
-  protected SC1 : ∀ i j, i ≠ j → T₀ ⊢ σ i ➝ ∼σ j
-  protected SC2 : ∀ i j, i ≺ j → T₀ ⊢ σ i ➝ 𝔅.dia (σ j)
-  protected SC3 : ∀ i, r ≠ i → T₀ ⊢ σ i ➝ 𝔅 (⩖ j ∈ { j : F | i ≺ j }, σ j)
-  protected SC4 : T₀ ⊢ ⩖ j, σ j
+  protected SC1 : ∀ i j, i ≠ j → T ⊢ σ i ➝ ∼σ j
+  protected SC2 : ∀ i j, i ≺ j → T ⊢ σ i ➝ 𝔅.dia (σ j)
+  protected SC3 : ∀ i, r ≠ i → T ⊢ σ i ➝ 𝔅 (⩖ j ∈ { j : F | i ≺ j }, σ j)
+  protected SC4 : T ⊢ ⩖ j, σ j
 
 attribute [coe] SolovaySentences.σ
 
@@ -49,8 +49,8 @@ noncomputable def realization :
     Realization 𝔅 := ⟨fun a ↦ ⩖ i ∈ { i : M | i ⊧ (.atom a) }, S i⟩
 
 private lemma mainlemma_aux {i : M} (hri : r ≺ i) :
-    (i ⊧ A → T₀ ⊢ S i ➝ S.realization A) ∧
-    (i ⊭ A → T₀ ⊢ S i ➝ ∼S.realization A) := by
+    (i ⊧ A → T ⊢ S i ➝ S.realization A) ∧
+    (i ⊭ A → T ⊢ S i ➝ ∼S.realization A) := by
   induction A generalizing i with
   | hfalsum => simp [Realization.interpret, Semantics.Models, Satisfies];
   | hatom a =>
@@ -90,18 +90,18 @@ private lemma mainlemma_aux {i : M} (hri : r ≺ i) :
       push_neg at this;
       obtain ⟨j, Rij, hA⟩ := this;
       have := CN!_of_CN!_right $ (ihA (IsTrans.trans _ _ _ hri Rij)).2 hA
-      have : T₀ ⊢ ∼𝔅 (∼S.σ j) ➝ ∼𝔅 (S.realization A) :=
+      have : T ⊢ ∼𝔅 (∼S.σ j) ➝ ∼𝔅 (S.realization A) :=
         contra! $ prov_distribute_imply' $ CN!_of_CN!_right $ (ihA (IsTrans.trans _ _ _ hri Rij)).2 hA;
       exact C!_trans (S.SC2 i j Rij) this;
 
 theorem mainlemma (S : SolovaySentences 𝔅 M.toFrame r) {i : M} (hri : r ≺ i) :
-    i ⊧ A → T₀ ⊢ S i ➝ S.realization A := (mainlemma_aux S hri).1
+    i ⊧ A → T ⊢ S i ➝ S.realization A := (mainlemma_aux S hri).1
 
 theorem mainlemma_neg (S : SolovaySentences 𝔅 M.toFrame r) {i : M} (hri : r ≺ i) :
-    i ⊭ A → T₀ ⊢ S i ➝ ∼S.realization A := (mainlemma_aux S hri).2
+    i ⊭ A → T ⊢ S i ➝ ∼S.realization A := (mainlemma_aux S hri).2
 
-lemma root_of_iterated_inconsistency : T₀ ⊢ ∼𝔅^[M.height] ⊥ ➝ S r := by
-  suffices T₀ ⊢ (⩖ j, S j) ➝ ∼S r ➝ 𝔅^[M.height] ⊥ by
+lemma root_of_iterated_inconsistency : T ⊢ ∼𝔅^[M.height] ⊥ ➝ S r := by
+  suffices T ⊢ (⩖ j, S j) ➝ ∼S r ➝ 𝔅^[M.height] ⊥ by
     cl_prover [this, S.SC4]
   apply Entailment.left_Udisj!_intro
   intro i
@@ -109,21 +109,21 @@ lemma root_of_iterated_inconsistency : T₀ ⊢ ∼𝔅^[M.height] ⊥ ➝ S r :
   · rcases hir
     cl_prover
   · have hri : r ≺ i := Frame.root_genaretes'! i hir
-    have : T₀ ⊢ S.σ i ➝ (↑𝔅)^[M.height] ⊥ := by
+    have : T ⊢ S.σ i ➝ (↑𝔅)^[M.height] ⊥ := by
       simpa using
         S.mainlemma hri (A := □^[M.height] ⊥)
           <| height_lt_iff_satisfies_boxbot.mp
           <| Frame.rank_lt_whole_height hri
     cl_prover [this]
 
-lemma theory_height [𝔅.Sound₀] (h : r ⊧ ◇(∼A)) (b : T ⊢ S.realization A) : 𝔅.height < M.height := by
+lemma theory_height [𝔅.Sound₀] (h : r ⊧ ◇(∼A)) (b : U ⊢ S.realization A) : 𝔅.height < M.height := by
   apply 𝔅.height_lt_pos_of_boxBot (height_pos_of_dia h)
   have : ∃ i, r ≺ i ∧ i ⊭ A := Formula.Kripke.Satisfies.dia_def.mp h
   rcases this with ⟨i, hi, hiA⟩
-  have b₀ : T₀ ⊢ 𝔅 (S.realization A) := D1 b
-  have b₁ : T₀ ⊢ ∼(↑𝔅)^[M.height] ⊥ ➝ S r := S.root_of_iterated_inconsistency
-  have b₂ : T₀ ⊢ S r ➝ 𝔅.dia (S i) := S.SC2 r i hi
-  have b₃ : T₀ ⊢ 𝔅.dia (S i) ➝ ∼𝔅 (S.realization A) := by
+  have b₀ : T ⊢ 𝔅 (S.realization A) := D1 b
+  have b₁ : T ⊢ ∼(↑𝔅)^[M.height] ⊥ ➝ S r := S.root_of_iterated_inconsistency
+  have b₂ : T ⊢ S r ➝ 𝔅.dia (S i) := S.SC2 r i hi
+  have b₃ : T ⊢ 𝔅.dia (S i) ➝ ∼𝔅 (S.realization A) := by
     simpa [Provability.dia] using dia_distribute_imply <| WeakerThan.pbl <| S.mainlemma_neg hi hiA
   cl_prover [b₀, b₁, b₂, b₃]
 
