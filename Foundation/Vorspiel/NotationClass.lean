@@ -1,6 +1,7 @@
 module
 
 public import Mathlib.Tactic.TypeStar
+public import Mathlib.Data.Nat.Basic
 
 /-!
 # Supplemental notation classes
@@ -117,6 +118,23 @@ class GödelQuote (α β : Sort*) where
   quote : α → β
 
 notation:max "⌜" x "⌝" => GödelQuote.quote x
+
+class SigmaSymbol (α : Type*) where
+  sigma : α
+
+class PiSymbol (α : Type*) where
+  pi : α
+
+class DeltaSymbol (α : Type*) where
+  delta : α
+
+notation "𝚺" => SigmaSymbol.sigma
+
+notation "𝚷" => PiSymbol.pi
+
+notation "𝚫" => DeltaSymbol.delta
+
+attribute [match_pattern] SigmaSymbol.sigma PiSymbol.pi DeltaSymbol.delta
 
 end LO
 

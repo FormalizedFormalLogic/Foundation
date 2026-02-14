@@ -95,7 +95,7 @@ lemma eval_Uprod [(i : I) → Nonempty (A i)] {φ : Semiformula L ξ n} :
         contradiction)
     · intro h x
       exact Filter.mem_of_superset h (by intro i h; simpa [val_vecCons_val_eq] using h (x.val i))
-  case hex φ _ =>
+  case hexs φ _ =>
     suffices
       (∃ x, {i | (Eval (s i) (fun x_1 ↦ ((x :> e) x_1).val i) fun x ↦ (ε x).val i) φ} ∈ 𝓤) ↔
       {i | ∃ x, (Eval (s i) (x :> fun x ↦ (e x).val i) fun x ↦ (ε x).val i) φ} ∈ 𝓤 by simp [*]

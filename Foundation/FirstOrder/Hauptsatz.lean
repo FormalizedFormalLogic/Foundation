@@ -16,13 +16,13 @@ variable {L : Language.{u}}
 namespace Derivation
 
 inductive IsCutFree : {Γ : Sequent L} → ⊢ᵀ Γ → Prop
-| axL {k} (r : L.Rel k) (v)                     : IsCutFree (axL r v)
-| verum                                         : IsCutFree verum
-| or {Γ φ ψ} {d : ⊢ᵀ φ :: ψ :: Γ}               : IsCutFree d → IsCutFree d.or
-| and {Γ φ ψ} {dφ : ⊢ᵀ φ :: Γ} {dψ : ⊢ᵀ ψ :: Γ} : IsCutFree dφ → IsCutFree dψ → IsCutFree (dφ.and dψ)
-| all {Γ φ} {d : ⊢ᵀ Rewriting.free φ :: Γ⁺}     : IsCutFree d → IsCutFree d.all
-| ex {Γ φ} (t) {d : ⊢ᵀ φ/[t] :: Γ}              : IsCutFree d → IsCutFree d.ex
-| wk {Δ Γ} {d : ⊢ᵀ Δ} (ss : Δ ⊆ Γ)              : IsCutFree d → IsCutFree (d.wk ss)
+| axL (r : L.Rel k) (v) : IsCutFree (axL r v)
+| verum : IsCutFree verum
+| or {d : ⊢ᵀ φ :: ψ :: Γ} : IsCutFree d → IsCutFree d.or
+| and {dφ : ⊢ᵀ φ :: Γ} {dψ : ⊢ᵀ ψ :: Γ} : IsCutFree dφ → IsCutFree dψ → IsCutFree (dφ.and dψ)
+| all {d : ⊢ᵀ Rewriting.free φ :: Γ⁺} : IsCutFree d → IsCutFree d.all
+| exs (t) {d : ⊢ᵀ φ/[t] :: Γ} : IsCutFree d → IsCutFree d.exs
+| wk  {d : ⊢ᵀ Δ} (ss : Δ ⊆ Γ) : IsCutFree d → IsCutFree (d.wk ss)
 
 attribute [simp] IsCutFree.axL IsCutFree.verum
 
@@ -38,8 +38,8 @@ variable {Γ Δ : Sequent L}
 @[simp] lemma isCutFree_all_iff {d : ⊢ᵀ Rewriting.free φ :: Γ⁺} :
     IsCutFree d.all ↔ IsCutFree d := ⟨by rintro ⟨⟩; assumption, .all⟩
 
-@[simp] lemma isCutFree_ex_iff {d : ⊢ᵀ φ/[t] :: Γ} :
-    IsCutFree d.ex ↔ IsCutFree d := ⟨by rintro ⟨⟩; assumption, .ex t⟩
+@[simp] lemma isCutFree_exs_iff {d : ⊢ᵀ φ/[t] :: Γ} :
+    IsCutFree d.exs ↔ IsCutFree d := ⟨by rintro ⟨⟩; assumption, .exs t⟩
 
 @[simp] lemma isCutFree_wk_iff {d : ⊢ᵀ Δ} {ss : Δ ⊆ Γ} :
     IsCutFree (d.wk ss) ↔ IsCutFree d := ⟨by rintro ⟨⟩; assumption, .wk _⟩
@@ -71,10 +71,10 @@ variable {Γ Δ : Sequent L}
 end Derivation
 
 inductive PositiveDerivationFrom (Ξ : Sequent L) : Sequent L → Type _
-| verum    : PositiveDerivationFrom Ξ [⊤]
-| or {Γ φ ψ}   : PositiveDerivationFrom Ξ (φ :: ψ :: Γ) → PositiveDerivationFrom Ξ (φ ⋎ ψ :: Γ)
-| ex {Γ φ} (t) : PositiveDerivationFrom Ξ (φ/[t] :: Γ) → PositiveDerivationFrom Ξ ((∃' φ) :: Γ)
-| wk {Γ Δ}     : PositiveDerivationFrom Ξ Δ → Δ ⊆ Γ → PositiveDerivationFrom Ξ Γ
+| verum : PositiveDerivationFrom Ξ [⊤]
+| or : PositiveDerivationFrom Ξ (φ :: ψ :: Γ) → PositiveDerivationFrom Ξ (φ ⋎ ψ :: Γ)
+| exs (t) : PositiveDerivationFrom Ξ (φ/[t] :: Γ) → PositiveDerivationFrom Ξ ((∃⁰ φ) :: Γ)
+| wk : PositiveDerivationFrom Ξ Δ → Δ ⊆ Γ → PositiveDerivationFrom Ξ Γ
 | protected id : PositiveDerivationFrom Ξ Ξ
 
 infix:45 " ⟶⁺ " => PositiveDerivationFrom
@@ -86,40 +86,40 @@ variable {Ξ Γ Δ : Sequent L}
 def ofSubset (ss : Ξ ⊆ Γ) : Ξ ⟶⁺ Γ := wk .id ss
 
 def trans {Ξ Γ Δ : Sequent L} : Ξ ⟶⁺ Γ → Γ ⟶⁺ Δ → Ξ ⟶⁺ Δ
-  | _, verum => verum
-  | b, or d    => or (b.trans d)
-  | b, ex t d  => ex t (b.trans d)
-  | b, wk d h  => wk (b.trans d) h
-  | b, .id     => b
+  | _,   verum => verum
+  | b,    or d => or (b.trans d)
+  | b, exs t d => exs t (b.trans d)
+  | b,  wk d h => wk (b.trans d) h
+  | b,     .id => b
 
 def cons {Ξ Γ : Sequent L} (φ) : Ξ ⟶⁺ Γ → φ :: Ξ ⟶⁺ φ :: Γ
-  | verum         => wk verum (List.subset_cons_self _ _)
-  | @or _ _ Γ ψ χ d =>
+  | verum => wk verum (List.subset_cons_self _ _)
+  | or (Γ := Γ) (φ := ψ) (ψ := χ) d =>
     have : φ :: Ξ ⟶⁺ ψ :: χ :: φ :: Γ := wk (cons φ d) (by simp; tauto)
     wk (or this) (by simp)
-  | @ex _ Ξ Γ ψ t d =>
+  | exs (Ξ := Ξ) (Γ := Γ) (φ := ψ) t d =>
     have : φ :: Ξ ⟶⁺ ψ/[t] :: φ :: Γ := wk (cons φ d) (by simp)
-    wk this.ex (by simp)
-  | wk d h          => wk (d.cons φ) (by simp [h])
-  | .id             => .id
+    wk this.exs (by simp)
+  | wk d h => wk (d.cons φ) (by simp [h])
+  | .id => .id
 
 def append {Ξ Γ : Sequent L} : (Δ : Sequent L) → Ξ ⟶⁺ Γ → Δ ++ Ξ ⟶⁺ Δ ++ Γ
   | [],     d => d
   | φ :: Δ, d => (d.append Δ).cons φ
 
 def add {Γ Δ Ξ Θ : Sequent L} : Γ ⟶⁺ Δ → Ξ ⟶⁺ Θ → Γ ++ Ξ ⟶⁺ Δ ++ Θ
-  | verum,   d => wk verum (by simp)
-  | or d,    b => or (d.add b)
-  | ex t d,  b => ex t (d.add b)
-  | wk d h,  b => wk (d.add b) (by simp [h])
-  | .id,     b => b.append Γ
+  |   verum, d => wk verum (by simp)
+  |    or d, b => or (d.add b)
+  | exs t d, b => exs t (d.add b)
+  |  wk d h, b => wk (d.add b) (by simp [h])
+  |     .id, b => b.append Γ
 
 def graft {Ξ Γ : Sequent L} (b : ⊢ᵀ Ξ) : Ξ ⟶⁺ Γ → ⊢ᵀ Γ
-  | .verum => .verum
-  | or d    => .or (d.graft b)
-  | ex t d  => .ex t (d.graft b)
-  | wk d h  => .wk (d.graft b) h
-  | .id     => b
+  |  .verum => .verum
+  |    or d => .or (d.graft b)
+  | exs t d => .exs t (d.graft b)
+  |  wk d h => .wk (d.graft b) h
+  |     .id => b
 
 lemma graft_isCutFree_of_isCutFree {b : ⊢ᵀ Ξ} {d : Ξ ⟶⁺ Γ} (hb : Derivation.IsCutFree b) : Derivation.IsCutFree (d.graft b) := by
   induction d <;> simp [graft, *]
@@ -157,7 +157,7 @@ def K_left {p : ℙ} (φ ψ : SyntacticFormula L) : φ ⋏ ψ :: p ≼ φ :: p :
 
 def K_right {p : ℙ} (φ ψ : SyntacticFormula L) : φ ⋏ ψ :: p ≼ ψ :: p := trans (and φ ψ) (ofSubset <| by simp)
 
-def all {p : ℙ} (φ : SyntacticSemiformula L 1) (t) : (∀' φ) :: p ≼ φ/[t] :: p := ⟨.ex t (by simpa [← Semiformula.neg_eq] using .id)⟩
+def all {p : ℙ} (φ : SyntacticSemiformula L 1) (t) : (∀⁰ φ) :: p ≼ φ/[t] :: p := ⟨.exs t (by simpa [← Semiformula.neg_eq] using .id)⟩
 
 def minLeLeft (p q : ℙ) : p ⊓ q ≼ p := ofSubset (by simp [inf_def])
 
@@ -172,13 +172,13 @@ def leMinRightOfLe (s : q ≼ p) : q ≼ p ⊓ q := leMinOfle s (.refl q)
 end StrongerThan
 
 def Forces (p : ℙ) : SyntacticFormulaᵢ L → Type u
-  | ⊥        => { b : ⊢ᵀ ∼p // Derivation.IsCutFree b }
+  |        ⊥ => { b : ⊢ᵀ ∼p // Derivation.IsCutFree b }
   | .rel R v => { b : ⊢ᵀ .rel R v :: ∼p // Derivation.IsCutFree b }
-  | φ ⋏ ψ    => Forces p φ × Forces p ψ
-  | φ ⋎ ψ    => Forces p φ ⊕ Forces p ψ
-  | φ ➝ ψ    => (q : ℙ) → q ≼ p → Forces q φ → Forces q ψ
-  | ∀' φ     => (t : SyntacticTerm L) → Forces p (φ/[t])
-  | ∃' φ     => (t : SyntacticTerm L) × Forces p (φ/[t])
+  |    φ ⋏ ψ => Forces p φ × Forces p ψ
+  |    φ ⋎ ψ => Forces p φ ⊕ Forces p ψ
+  |    φ ➝ ψ => (q : ℙ) → q ≼ p → Forces q φ → Forces q ψ
+  |     ∀⁰ φ => (t : SyntacticTerm L) → Forces p (φ/[t])
+  |     ∃⁰ φ => (t : SyntacticTerm L) × Forces p (φ/[t])
   termination_by φ => φ.complexity
 
 scoped infix:45 " ⊩ " => Forces
@@ -212,13 +212,13 @@ def implyEquiv {φ ψ : SyntacticFormulaᵢ L} : p ⊩ φ ➝ ψ ≃ ((q : ℙ) 
     unfold Forces
     exact .refl _
 
-def allEquiv {φ} : p ⊩ ∀' φ ≃ ((t : SyntacticTerm L) → Forces p (φ/[t])) := by
+def allEquiv {φ} : p ⊩ ∀⁰ φ ≃ ((t : SyntacticTerm L) → Forces p (φ/[t])) := by
   conv =>
     lhs
     unfold Forces
     exact .refl _
 
-def exEquiv {φ} : p ⊩ ∃' φ ≃ ((t : SyntacticTerm L) × Forces p (φ/[t])) := by
+def exsEquiv {φ} : p ⊩ ∃⁰ φ ≃ ((t : SyntacticTerm L) × Forces p (φ/[t])) := by
   conv =>
     lhs
     unfold Forces
@@ -227,31 +227,31 @@ def exEquiv {φ} : p ⊩ ∃' φ ≃ ((t : SyntacticTerm L) × Forces p (φ/[t])
 def cast {p : ℙ} (f : p ⊩ φ) (s : φ = ψ) : p ⊩ ψ := s ▸ f
 
 def monotone {q p : ℙ} (s : q ≼ p) : {φ : SyntacticFormulaᵢ L} → p ⊩ φ → q ⊩ φ
-  | ⊥,        b =>
+  | ⊥, b =>
     let ⟨d, hd⟩ := b.falsumEquiv
     falsumEquiv.symm ⟨s.val.graft d, PositiveDerivationFrom.graft_isCutFree_of_isCutFree hd⟩
   | .rel R v, b =>
     let ⟨d, hd⟩ := b.relEquiv
     relEquiv.symm ⟨s.val.cons (.rel R v) |>.graft d, PositiveDerivationFrom.graft_isCutFree_of_isCutFree hd⟩
-  | φ ⋏ ψ,    b => andEquiv.symm ⟨monotone s b.andEquiv.1, monotone s b.andEquiv.2⟩
-  | φ ⋎ ψ,    b => orEquiv.symm <| b.orEquiv.rec (fun b ↦ .inl <| b.monotone s) (fun b ↦ .inr <| b.monotone s)
-  | φ ➝ ψ,    b => implyEquiv.symm fun r srq bφ ↦ b.implyEquiv r (srq.trans s) bφ
-  | ∀' φ,     b => allEquiv.symm fun t ↦ (b.allEquiv t).monotone s
-  | ∃' φ,     b =>
-    let ⟨t, d⟩ : (t : SyntacticTerm L) × p ⊩ φ/[t] := b.exEquiv
-    exEquiv.symm ⟨t, d.monotone s⟩
+  | φ ⋏ ψ, b => andEquiv.symm ⟨monotone s b.andEquiv.1, monotone s b.andEquiv.2⟩
+  | φ ⋎ ψ, b => orEquiv.symm <| b.orEquiv.rec (fun b ↦ .inl <| b.monotone s) (fun b ↦ .inr <| b.monotone s)
+  | φ ➝ ψ, b => implyEquiv.symm fun r srq bφ ↦ b.implyEquiv r (srq.trans s) bφ
+  | ∀⁰ φ, b => allEquiv.symm fun t ↦ (b.allEquiv t).monotone s
+  | ∃⁰ φ, b =>
+    let ⟨t, d⟩ : (t : SyntacticTerm L) × p ⊩ φ/[t] := b.exsEquiv
+    exsEquiv.symm ⟨t, d.monotone s⟩
   termination_by φ => φ.complexity
 
 def explosion {p : ℙ} (b : p ⊩ ⊥) : (φ : SyntacticFormulaᵢ L) → p ⊩ φ
-  | ⊥        => b
+  | ⊥ => b
   | .rel R v =>
     let ⟨d, hd⟩ := b.falsumEquiv
     relEquiv.symm ⟨.wk d (by simp), by simp [hd]⟩
-  | φ ⋏ ψ    => andEquiv.symm ⟨b.explosion φ, b.explosion ψ⟩
-  | φ ⋎ ψ    => orEquiv.symm <| .inl <| b.explosion φ
-  | φ ➝ ψ    => implyEquiv.symm fun q sqp dφ ↦ (b.monotone sqp).explosion ψ
-  | ∀' φ     => allEquiv.symm fun t ↦ b.explosion (φ/[t])
-  | ∃' φ     => exEquiv.symm ⟨default, b.explosion (φ/[default])⟩
+  | φ ⋏ ψ => andEquiv.symm ⟨b.explosion φ, b.explosion ψ⟩
+  | φ ⋎ ψ => orEquiv.symm <| .inl <| b.explosion φ
+  | φ ➝ ψ => implyEquiv.symm fun q sqp dφ ↦ (b.monotone sqp).explosion ψ
+  | ∀⁰ φ => allEquiv.symm fun t ↦ b.explosion (φ/[t])
+  | ∃⁰ φ => exsEquiv.symm ⟨default, b.explosion (φ/[default])⟩
   termination_by φ => φ.complexity
 
 def efq (φ : SyntacticFormulaᵢ L) : ⊩ ⊥ ➝ φ := fun _ ↦ implyEquiv.symm fun _ _ d ↦ d.explosion φ
@@ -316,11 +316,11 @@ def ofMinimalProof {φ : SyntacticFormulaᵢ L} : 𝗠𝗶𝗻¹ ⊢! φ → ⊩
       let d : q ⊩ φ ➝ ψ/[t] := by simpa using (b.allEquiv t)
       d.implyEquiv r srq bφ
   | .ex₁ t φ => fun p ↦
-    implyEquiv.symm fun q sqp bφ ↦ exEquiv.symm ⟨t, bφ⟩
+    implyEquiv.symm fun q sqp bφ ↦ exsEquiv.symm ⟨t, bφ⟩
   | .ex₂ φ ψ => fun p ↦
     implyEquiv.symm fun q sqp b ↦
       implyEquiv.symm fun r srq bφ ↦
-        let ⟨t, dt⟩ : (t : SyntacticTerm L) × r ⊩ φ/[t] := bφ.exEquiv
+        let ⟨t, dt⟩ : (t : SyntacticTerm L) × r ⊩ φ/[t] := bφ.exsEquiv
         let d : q ⊩ φ/[t] ➝ ψ := by simpa using b.allEquiv t
       d.implyEquiv r srq dt
   termination_by b => HilbertProofᵢ.depth b
@@ -341,18 +341,18 @@ protected def refl.or (ihφ : [φ] ⊩ φᴺ) (ihψ : [ψ] ⊩ ψᴺ) : [φ ⋎ 
       (Derivation.cast bbφ (by simp [inf_def])) (Derivation.cast bbψ (by simp [inf_def]))
     falsumEquiv.symm ⟨Derivation.cast band (by simp [inf_def]), by simp [band, hbbφ, hbbψ]⟩
 
-protected def refl.ex (d : ∀ x, [φ/[&x]] ⊩ (φ/[&x])ᴺ) : [∃' φ] ⊩ (∃' φ)ᴺ :=
+protected def refl.exs (d : ∀ x, [φ/[&x]] ⊩ (φ/[&x])ᴺ) : [∃⁰ φ] ⊩ (∃⁰ φ)ᴺ :=
   implyOf fun q f ↦
-    let x := newVar ((∀' ∼φ) :: ∼q)
+    let x := newVar ((∀⁰ ∼φ) :: ∼q)
     let ih : [φ/[&x]] ⊩ φᴺ/[&x] := cast (d x) (by simp [Semiformula.subst_doubleNegation])
     let b : [φ/[&x]] ⊓ q ⊩ ⊥ :=
       (f.allEquiv &x).implyEquiv ([φ/[&x]] ⊓ q) (StrongerThan.minLeRight _ _) (ih.monotone (StrongerThan.minLeLeft _ _))
     let ⟨b, hb⟩ := b.falsumEquiv
-    let ba : ⊢ᵀ (∀' ∼φ) :: ∼q :=
+    let ba : ⊢ᵀ (∀⁰ ∼φ) :: ∼q :=
       Derivation.genelalizeByNewver (m := x)
-        (by have : ¬Semiformula.FVar? (∀' ∼φ) x := not_fvar?_newVar (by simp)
+        (by have : ¬Semiformula.FVar? (∀⁰ ∼φ) x := not_fvar?_newVar (by simp)
             simpa using this)
-        (fun ψ hψ ↦ not_fvar?_newVar (List.mem_cons_of_mem (∀' ∼φ) hψ))
+        (fun ψ hψ ↦ not_fvar?_newVar (List.mem_cons_of_mem (∀⁰ ∼φ) hψ))
         (Derivation.cast b (by simp [inf_def]))
     falsumEquiv.symm ⟨ba, by simp [ba, hb]⟩
 
@@ -370,20 +370,20 @@ protected def refl : (φ : SyntacticFormula L) → [φ] ⊩ φᴺ
     let ihψ : [ψ] ⊩ ψᴺ := Forces.refl ψ
     andEquiv.symm ⟨ihφ.monotone (.K_left φ ψ), ihψ.monotone (.K_right φ ψ)⟩
   |     φ ⋎ ψ => refl.or (Forces.refl φ) (Forces.refl ψ)
-  |      ∀' φ => allEquiv.symm fun t ↦
+  |      ∀⁰ φ => allEquiv.symm fun t ↦
     let b : [φ/[t]] ⊩ φᴺ/[t] := by simpa [Semiformula.rew_doubleNegation] using Forces.refl (φ/[t])
     b.monotone (StrongerThan.all φ t)
-  |      ∃' φ => refl.ex fun x ↦ Forces.refl (φ/[&x])
+  |      ∃⁰ φ => refl.exs fun x ↦ Forces.refl (φ/[&x])
   termination_by φ => φ.complexity
 
 def conj : {Γ : Sequentᵢ L} → (b : (φ : SyntacticFormulaᵢ L) → φ ∈ Γ → p ⊩ φ) → p ⊩ ⋀Γ
-  | [],          _ => implyEquiv.symm fun q sqp bφ ↦ bφ
-  | [φ],         b => b φ (by simp)
+  | [], _ => implyEquiv.symm fun q sqp bφ ↦ bφ
+  | [φ], b => b φ (by simp)
   | φ :: ψ :: Γ, b => andEquiv.symm ⟨b φ (by simp), conj (fun χ hχ ↦ b χ (List.mem_cons_of_mem φ hχ))⟩
 
 def conj' : {Γ : Sequent L} → (b : (φ : SyntacticFormula L) → φ ∈ Γ → p ⊩ φᴺ) → p ⊩ ⋀Γᴺ
-  | [],          _ => implyEquiv.symm fun q sqp bφ ↦ bφ
-  | [φ],         b => b φ (by simp)
+  | [], _ => implyEquiv.symm fun q sqp bφ ↦ bφ
+  | [φ], b => b φ (by simp)
   | φ :: ψ :: Γ, b => andEquiv.symm ⟨b φ (by simp), conj' (fun χ hχ ↦ b χ (List.mem_cons_of_mem φ hχ))⟩
 
 end Forces

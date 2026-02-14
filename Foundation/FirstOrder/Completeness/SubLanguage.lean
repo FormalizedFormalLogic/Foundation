@@ -80,8 +80,8 @@ noncomputable def langFunc {n} : Semiformula L ξ n → Finset (Σ k, L.Func k)
   | nrel _ v => Finset.biUnion Finset.univ (fun i => (v i).lang)
   | φ ⋏ ψ    => langFunc φ ∪ langFunc ψ
   | φ ⋎ ψ    => langFunc φ ∪ langFunc ψ
-  | ∀' φ     => langFunc φ
-  | ∃' φ     => langFunc φ
+  | ∀⁰ φ     => langFunc φ
+  | ∃⁰ φ     => langFunc φ
 
 noncomputable def langRel {n} : Semiformula L ξ n → Finset (Σ k, L.Rel k)
   | ⊤        => ∅
@@ -90,8 +90,8 @@ noncomputable def langRel {n} : Semiformula L ξ n → Finset (Σ k, L.Rel k)
   | nrel r _ => {⟨_, r⟩}
   | φ ⋏ ψ    => langRel φ ∪ langRel ψ
   | φ ⋎ ψ    => langRel φ ∪ langRel ψ
-  | ∀' φ     => langRel φ
-  | ∃' φ     => langRel φ
+  | ∀⁰ φ     => langRel φ
+  | ∃⁰ φ     => langRel φ
 
 lemma langFunc_rel_ss {k} (r : L.Rel k) (v : Fin k → Semiterm L ξ n) (i) :
     (v i).lang ⊆ (rel r v).langFunc := by
@@ -118,8 +118,8 @@ def toSubLanguage' (pf : ∀ k, L.Func k → Prop) (pr : ∀ k, L.Rel k → Prop
   | φ ⋎ ψ,    hf, hr =>
       toSubLanguage' pf pr φ (fun k f h => hf k f (Finset.mem_union_left _ h)) (fun k r h => hr k r (Finset.mem_union_left _ h)) ⋎
       toSubLanguage' pf pr ψ (fun k f h => hf k f (Finset.mem_union_right _ h)) (fun k r h => hr k r (Finset.mem_union_right _ h))
-  | ∀' φ,     hf, hr => ∀' toSubLanguage' pf pr φ hf hr
-  | ∃' φ,     hf, hr => ∃' toSubLanguage' pf pr φ hf hr
+  | ∀⁰ φ,     hf, hr => ∀⁰ toSubLanguage' pf pr φ hf hr
+  | ∃⁰ φ,     hf, hr => ∃⁰ toSubLanguage' pf pr φ hf hr
 
 @[simp] lemma lMap_toSubLanguage'
   (pf : ∀ k, L.Func k → Prop) (pr : ∀ k, L.Rel k → Prop) {n} (φ : Semiformula L ξ n)

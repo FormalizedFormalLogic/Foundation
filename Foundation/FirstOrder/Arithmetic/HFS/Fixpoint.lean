@@ -192,7 +192,7 @@ lemma finite_upperbound (m : V) : ∃ s, ∀ z < m, c.Fixpoint v z → z ∈ c.l
   have : ∃ F : V, ∀ x, x ∈ F ↔ x < m ∧ c.Fixpoint v x := by
     have : 𝚺₁-Predicate fun x ↦ x < m ∧ c.Fixpoint v x :=
       HierarchySymbol.Definable.and (by definability)
-        (HierarchySymbol.Definable.ex
+        (HierarchySymbol.Definable.exs
           (HierarchySymbol.Definable.comp₂
             ⟨φ.limSeqDef.rew <| Rew.embSubsts (#0 :> #1 :> fun i ↦ &(v i)), by intro v; simp [c.eval_limSeqDef]⟩
             (by definability)))

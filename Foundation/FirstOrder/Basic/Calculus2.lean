@@ -12,15 +12,15 @@ section derivation2
 
 inductive Derivation2 (𝓢 : Schema L) : Finset (SyntacticFormula L) → Type _
 | closed (Γ) (φ : SyntacticFormula L) : φ ∈ Γ → ∼φ ∈ Γ → Derivation2 𝓢 Γ
-| axm  {Γ} (φ : SyntacticFormula L) : φ ∈ 𝓢 → φ ∈ Γ → Derivation2 𝓢 Γ
+| axm {Γ} (φ : SyntacticFormula L) : φ ∈ 𝓢 → φ ∈ Γ → Derivation2 𝓢 Γ
 | verum {Γ} : ⊤ ∈ Γ → Derivation2 𝓢 Γ
-| and   {Γ} {φ ψ : SyntacticFormula L} : φ ⋏ ψ ∈ Γ → Derivation2 𝓢 (insert φ Γ) → Derivation2 𝓢 (insert ψ Γ) → Derivation2 𝓢 Γ
-| or    {Γ} {φ ψ : SyntacticFormula L} : φ ⋎ ψ ∈ Γ → Derivation2 𝓢 (insert φ (insert ψ Γ)) → Derivation2 𝓢 Γ
-| all   {Γ} {φ : SyntacticSemiformula L 1} : ∀' φ ∈ Γ → Derivation2 𝓢 (insert (Rewriting.free φ) (Γ.image Rewriting.shift)) → Derivation2 𝓢 Γ
-| ex    {Γ} {φ : SyntacticSemiformula L 1} : ∃' φ ∈ Γ → (t : SyntacticTerm L) → Derivation2 𝓢 (insert (φ/[t]) Γ) → Derivation2 𝓢 Γ
-| wk    {Δ Γ} : Derivation2 𝓢 Δ → Δ ⊆ Γ → Derivation2 𝓢 Γ
+| and {Γ} {φ ψ : SyntacticFormula L} : φ ⋏ ψ ∈ Γ → Derivation2 𝓢 (insert φ Γ) → Derivation2 𝓢 (insert ψ Γ) → Derivation2 𝓢 Γ
+| or {Γ} {φ ψ : SyntacticFormula L} : φ ⋎ ψ ∈ Γ → Derivation2 𝓢 (insert φ (insert ψ Γ)) → Derivation2 𝓢 Γ
+| all {Γ} {φ : SyntacticSemiformula L 1} : ∀⁰ φ ∈ Γ → Derivation2 𝓢 (insert (Rewriting.free φ) (Γ.image Rewriting.shift)) → Derivation2 𝓢 Γ
+| exs {Γ} {φ : SyntacticSemiformula L 1} : ∃⁰ φ ∈ Γ → (t : SyntacticTerm L) → Derivation2 𝓢 (insert (φ/[t]) Γ) → Derivation2 𝓢 Γ
+| wk {Δ Γ} : Derivation2 𝓢 Δ → Δ ⊆ Γ → Derivation2 𝓢 Γ
 | shift {Γ}   : Derivation2 𝓢 Γ → Derivation2 𝓢 (Γ.image Rewriting.shift)
-| cut   {Γ φ} : Derivation2 𝓢 (insert φ Γ) → Derivation2 𝓢 (insert (∼φ) Γ) → Derivation2 𝓢 Γ
+| cut {Γ φ} : Derivation2 𝓢 (insert φ Γ) → Derivation2 𝓢 (insert (∼φ) Γ) → Derivation2 𝓢 Γ
 
 scoped infix:45 " ⟹₂" => Derivation2
 
@@ -53,8 +53,8 @@ def Derivation.toDerivation2 (𝓢) {Γ : Sequent L} : 𝓢 ⟹ Γ → 𝓢 ⟹�
     Derivation2.all (φ := φ) (by simp)
       (Derivation2.wk (Derivation.toDerivation2 𝓢 dp)
         (by simpa using Finset.insert_subset_insert _ (by simp [shifts_toFinset_eq_image_shift])))
-  | Derivation.ex (Γ := Γ) (φ := φ) t dp =>
-    Derivation2.ex (φ := φ) (by simp) t
+  | Derivation.exs (Γ := Γ) (φ := φ) t dp =>
+    Derivation2.exs (φ := φ) (by simp) t
       (Derivation2.wk (Derivation.toDerivation2 𝓢 dp) (by simp))
   | Derivation.wk d h =>
     Derivation2.wk (Derivation.toDerivation2 𝓢 d) (List.toFinset_mono h)
@@ -75,8 +75,8 @@ noncomputable def Derivation2.toDerivation {Γ : Finset (SyntacticFormula L)} : 
     Tait.or' (φ := φ) (ψ := ψ) (by simp [h]) (Tait.wk dpq.toDerivation <| by intro x; simp)
   | Derivation2.all (φ := φ) h d              =>
     Derivation.all' (φ := φ) (by simp [h]) (Tait.wk d.toDerivation <| by intro x; simp [Rewriting.shifts])
-  | Derivation2.ex (φ := φ) h t d             =>
-    Derivation.ex' (φ := φ) (by simp [h]) t (Tait.wk d.toDerivation <| by intro x; simp)
+  | Derivation2.exs (φ := φ) h t d             =>
+    Derivation.exs' (φ := φ) (by simp [h]) t (Tait.wk d.toDerivation <| by intro x; simp)
   | Derivation2.wk d h                        =>
     Tait.wk d.toDerivation (by intro x; simpa using @h x)
   | Derivation2.shift d                       =>

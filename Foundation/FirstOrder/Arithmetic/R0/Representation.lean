@@ -14,13 +14,13 @@ open Mathlib Encodable Semiterm.Operator.GödelNumber
 section
 
 lemma term_primrec {k f} : (t : Semiterm ℒₒᵣ ξ k) → Primrec (fun v : List.Vector ℕ k ↦ t.valm ℕ v.get f)
-  | #x                                 => by simpa using Primrec.vector_get.comp .id (.const _)
-  | &x                                 => by simpa using Primrec.const _
-  | Semiterm.func Language.Zero.zero _ => by simpa using Primrec.const 0
-  | Semiterm.func Language.One.one _   => by simpa using Primrec.const 1
-  | Semiterm.func Language.Add.add v   => by
+  |                         #x => by simpa using Primrec.vector_get.comp .id (.const _)
+  |                         &x => by simpa using Primrec.const _
+  | .func Language.Zero.zero _ => by simpa using Primrec.const 0
+  |   .func Language.One.one _ => by simpa using Primrec.const 1
+  |   .func Language.Add.add v => by
     simpa [Semiterm.val_func] using Primrec.nat_add.comp (term_primrec (v 0)) (term_primrec (v 1))
-  | Semiterm.func Language.Mul.mul v   => by
+  |   .func Language.Mul.mul v => by
     simpa [Semiterm.val_func] using Primrec.nat_mul.comp (term_primrec (v 0)) (term_primrec (v 1))
 
 lemma sigma1_re (ε : ξ → ℕ) {k} {φ : Semiformula ℒₒᵣ ξ k} (hp : Hierarchy 𝚺 1 φ) :
@@ -84,7 +84,7 @@ lemma sigma1_re (ε : ξ → ℕ) {k} {φ : Semiformula ℒₒᵣ ξ k} (hp : Hi
         rcases lt_or_eq_of_le (Nat.le_of_lt_succ hx) with (hx | rfl)
         · exact hs x hx
         · simpa [List.Vector.cons_get] using (H (x ::ᵥ v)).mpr hd
-  case hEx =>
+  case hExs =>
     intro n φ _ ih
     rcases REPred.iff'.mp ih with ⟨f, _, _⟩
     have : REPred fun vx : List.Vector ℕ n × ℕ ↦ Semiformula.Evalm ℕ (vx.2 :> vx.1.get) ε φ := by
@@ -104,11 +104,11 @@ def codeAux {k : ℕ} : Nat.ArithPart₁.Code k → Formula ℒₒᵣ (Fin (k + 
   |        Code.lt i j => “(&i.succ < &j.succ ∧ &0 = 1) ∨ (&i.succ ≮ &j.succ ∧ &0 = 0)”
   |        Code.proj i => “&0 = !!&i.succ”
   | @Code.comp _ n c d =>
-    exClosure ((Rew.bind (L := ℒₒᵣ) (ξ₁ := Fin (n + 1)) ![] (&0 :> (#·)) ▹ (codeAux c)) ⋏
+    exsClosure ((Rew.bind (L := ℒₒᵣ) (ξ₁ := Fin (n + 1)) ![] (&0 :> (#·)) ▹ (codeAux c)) ⋏
       Matrix.conj fun i ↦ Rew.bind (L := ℒₒᵣ) (ξ₁ := Fin (k + 1)) ![] (#i :> (&·.succ)) ▹ codeAux (d i))
   |       Code.rfind c =>
     (Rew.bind (L := ℒₒᵣ) (ξ₁ := Fin (k + 1 + 1)) ![] (‘0’ :> &0 :> (&·.succ)) ▹ codeAux c) ⋏
-    (∀[“z. z < &0”] ∃' “z. z ≠ 0” ⋏ ((Rew.bind (L := ℒₒᵣ) (ξ₁ := Fin (k + 1 + 1)) ![] (#0 :> #1 :> (&·.succ)) ▹ codeAux c)))
+    (∀⁰[“z. z < &0”] ∃⁰ “z. z ≠ 0” ⋏ ((Rew.bind (L := ℒₒᵣ) (ξ₁ := Fin (k + 1 + 1)) ![] (#0 :> #1 :> (&·.succ)) ▹ codeAux c)))
 
 def code (c : Code k) : Semisentence ℒₒᵣ (k + 1) := (Rew.bind (L := ℒₒᵣ) (ξ₁ := Fin (k + 1)) ![] (#0 :> (#·.succ))) ▹ (codeAux c)
 
@@ -171,7 +171,7 @@ private lemma codeAux_sigma_one {k} (c : Nat.ArithPart₁.Code k) : Hierarchy �
   case equal => simp [codeAux, Matrix.fun_eq_vec_two]
   case proj => simp [codeAux]
   case comp c d ihc ihg =>
-    exact Hierarchy.exClosure (by simp [ihc, ihg])
+    exact Hierarchy.exsClosure (by simp [ihc, ihg])
   case rfind k c ih => simp [codeAux, Matrix.fun_eq_vec_two]; simp [ih]
 
 @[simp] lemma code_sigma_one {k} (c : Nat.ArithPart₁.Code k) : Hierarchy 𝚺 1 (code c) :=

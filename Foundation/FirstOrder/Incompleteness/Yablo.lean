@@ -77,10 +77,10 @@ section
 variable {V : Type} [ORingStructure V] [V ⊧ₘ* 𝗜𝚺₁]
 variable {U : ArithmeticTheory} [𝗜𝚺₁ ⪯ U]
 
-lemma yablo_diagonal : U ⊢ ∀' (T.yablo ⭤ (T.yabloSystem)/[⌜T.yablo⌝, #0]) := parameterized_diagonal₁ _
+lemma yablo_diagonal : U ⊢ ∀⁰ (T.yablo ⭤ (T.yabloSystem)/[⌜T.yablo⌝, #0]) := parameterized_diagonal₁ _
 
 lemma yablo_diagonal_modeled (n : V) : V ⊧/![n] (T.yablo) ↔ ∀ m, n < m → ¬T.Provable (substNumeral ⌜T.yablo⌝ m) := by
-  have : V ⊧ₘ ∀' (T.yablo ⭤ ↑(T.yabloSystem)/[⌜T.yablo⌝, #0]) := models_of_provable (T := 𝗜𝚺₁) (by assumption) $ yablo_diagonal;
+  have : V ⊧ₘ ∀⁰ (T.yablo ⭤ ↑(T.yabloSystem)/[⌜T.yablo⌝, #0]) := models_of_provable (T := 𝗜𝚺₁) (by assumption) $ yablo_diagonal;
   have : ∀ (n : V), V ⊧/![n] (T.yablo) ↔ T.YabloSystem ⌜T.yablo⌝ n := by simpa [models_iff, Matrix.comp_vecCons'] using this;
   apply this;
 

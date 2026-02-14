@@ -193,7 +193,7 @@ lemma inconsistent_of_provable_and_refutable {φ} (bp : 𝓚 ⊢ φ) (br : 𝓚 
   inconsistent_iff_provable.mpr <| cut! bp br
 -/
 
-instance [Cut F K] : Entailment.Cl 𝓚 where
+instance [NegInvolutive F] [Cut F K] : Entailment.Cl 𝓚 where
   mdp {φ ψ dpq dp} :=
     let dpq : 𝓚 ⟹ [∼φ ⋎ ψ, ψ] := wk dpq (by simp [DeMorgan.imply])
     let dnq : 𝓚 ⟹ [∼(∼φ ⋎ ψ), ψ] :=
@@ -241,7 +241,7 @@ instance [Cut F K] : Entailment.Cl 𝓚 where
 
 lemma wkCut [Cut F K] (hp : 𝓚 ⟹! φ :: Δ) (hn : 𝓚 ⟹! ∼φ :: Δ) : 𝓚 ⟹! Δ := ⟨cut hp.get hn.get⟩
 
-def modusPonens [Cut F K] (b : 𝓚 ⊢! φ ➝ ψ) : 𝓚 ⟹ φ :: Γ → 𝓚 ⟹ ψ :: Γ := fun d ↦
+def modusPonens [NegInvolutive F] [Cut F K] (b : 𝓚 ⊢! φ ➝ ψ) : 𝓚 ⟹ φ :: Γ → 𝓚 ⟹ ψ :: Γ := fun d ↦
   cut (φ := φ)
     (wk d <| by simp) <|
     cut (φ := φ ➝ ψ)
@@ -249,7 +249,7 @@ def modusPonens [Cut F K] (b : 𝓚 ⊢! φ ➝ ψ) : 𝓚 ⟹ φ :: Γ → 𝓚
       have : 𝓚 ⟹ φ ⋏ ∼ψ :: ∼φ :: ψ :: Γ := and (em' φ) (em' ψ)
       ofEq this <| by simp [DeMorgan.imply]
 
-def modusPonens! [Cut F K] (b : 𝓚 ⊢ φ ➝ ψ) : 𝓚 ⟹! φ :: Γ → 𝓚 ⟹! ψ :: Γ := fun d ↦ ⟨modusPonens b.get d.get⟩
+def modusPonens! [NegInvolutive F] [Cut F K] (b : 𝓚 ⊢ φ ➝ ψ) : 𝓚 ⟹! φ :: Γ → 𝓚 ⟹! ψ :: Γ := fun d ↦ ⟨modusPonens b.get d.get⟩
 
 def cutFalsum [Cut F K] (d : 𝓚 ⟹ ⊥ :: Γ) : 𝓚 ⟹ Γ := Tait.cut (φ := ⊥) (Tait.wk d <| by simp) (ofEq (verum _ Γ) <| by simp)
 

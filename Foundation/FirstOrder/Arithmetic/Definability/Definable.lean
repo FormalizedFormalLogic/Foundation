@@ -426,27 +426,27 @@ lemma ball {P : (Fin k → V) → V → Prop} (h : ℌ.Definable fun w ↦ P (w 
   | 𝚷-[m] => exact ⟨HierarchySymbol.Semiformula.ball t φ, by intro v; simp [h.iff]⟩
   | 𝚫-[m] => exact ⟨HierarchySymbol.Semiformula.ball t φ, ⟨h.proper.ball, by intro v; simp [h.iff]⟩⟩
 
-lemma bex {P : (Fin k → V) → V → Prop} (h : ℌ.Definable fun w ↦ P (w ·.succ) (w 0)) (t : Semiterm ℒₒᵣ V k) :
+lemma bexs {P : (Fin k → V) → V → Prop} (h : ℌ.Definable fun w ↦ P (w ·.succ) (w 0)) (t : Semiterm ℒₒᵣ V k) :
     ℌ.Definable fun v ↦ ∃ x < t.valm V v id, P v x := by
   rcases h with ⟨φ, h⟩
   match ℌ with
-  | 𝚺-[m] => exact ⟨HierarchySymbol.Semiformula.bex t φ, by intro v; simp [h.iff]⟩
-  | 𝚷-[m] => exact ⟨HierarchySymbol.Semiformula.bex t φ, by intro v; simp [h.iff]⟩
-  | 𝚫-[m] => exact ⟨HierarchySymbol.Semiformula.bex t φ, ⟨h.proper.bex, by intro v; simp [h.iff]⟩⟩
+  | 𝚺-[m] => exact ⟨HierarchySymbol.Semiformula.bexs t φ, by intro v; simp [h.iff]⟩
+  | 𝚷-[m] => exact ⟨HierarchySymbol.Semiformula.bexs t φ, by intro v; simp [h.iff]⟩
+  | 𝚫-[m] => exact ⟨HierarchySymbol.Semiformula.bexs t φ, ⟨h.proper.bexs, by intro v; simp [h.iff]⟩⟩
 
 lemma ball' [V ⊧ₘ* 𝗣𝗔⁻] {P : (Fin k → V) → V → Prop} (h : ℌ.Definable fun w ↦ P (w ·.succ) (w 0)) (t : Semiterm ℒₒᵣ V k) :
     ℌ.Definable fun v ↦ ∀ x ≤ t.valm V v id, P v x := by
   apply (ball h ‘!!t + 1’).of_iff
   intro v; simp [lt_succ_iff_le]
 
-lemma bex' [V ⊧ₘ* 𝗣𝗔⁻] {P : (Fin k → V) → V → Prop} (h : ℌ.Definable fun w ↦ P (w ·.succ) (w 0)) (t : Semiterm ℒₒᵣ V k) :
+lemma bexs' [V ⊧ₘ* 𝗣𝗔⁻] {P : (Fin k → V) → V → Prop} (h : ℌ.Definable fun w ↦ P (w ·.succ) (w 0)) (t : Semiterm ℒₒᵣ V k) :
     ℌ.Definable fun v ↦ ∃ x ≤ t.valm V v id, P v x := by
-  apply (bex h ‘!!t + 1’).of_iff
+  apply (bexs h ‘!!t + 1’).of_iff
   intro v; simp [lt_succ_iff_le]
 
-lemma ex {P : (Fin k → V) → V → Prop} (h : 𝚺-[m + 1].Definable fun w ↦ P (w ·.succ) (w 0)) :
+lemma exs {P : (Fin k → V) → V → Prop} (h : 𝚺-[m + 1].Definable fun w ↦ P (w ·.succ) (w 0)) :
     𝚺-[m + 1].Definable fun v ↦ ∃ x, P v x := by
-  rcases h with ⟨φ, h⟩; exact ⟨φ.ex, by intro _; simp [h.iff]⟩
+  rcases h with ⟨φ, h⟩; exact ⟨φ.exs, by intro _; simp [h.iff]⟩
 
 lemma all {P : (Fin k → V) → V → Prop} (h : 𝚷-[m + 1].Definable fun w ↦ P (w ·.succ) (w 0)) :
     𝚷-[m + 1].Definable fun v ↦ ∀ x, P v x := by
@@ -479,7 +479,7 @@ lemma fintype_all [Fintype ι] {P : ι → (Fin k → V) → Prop}
     ℌ.Definable fun v : Fin k → V ↦ ∀ i, P i v := by
   simpa using fconj Finset.univ h
 
-lemma fintype_ex [Fintype ι] {P : ι → (Fin k → V) → Prop}
+lemma fintype_exs [Fintype ι] {P : ι → (Fin k → V) → Prop}
     (h : ∀ i, ℌ.Definable fun w : Fin k → V ↦ P i w) :
     ℌ.Definable fun v : Fin k → V ↦ ∃ i, P i v := by
   simpa using fdisj Finset.univ h
@@ -497,7 +497,7 @@ lemma of_sigma {f : (Fin k → V) → V} (h : 𝚺-[m].DefinableFunction f) {Γ}
       (by simpa using equal' 1 0)
     exact this.of_iff fun v ↦ by simp
 
-lemma exVec {k l} {P : (Fin k → V) → (Fin l → V) → Prop}
+lemma exsVec {k l} {P : (Fin k → V) → (Fin l → V) → Prop}
     (h : 𝚺-[m + 1].Definable fun w : Fin (k + l) → V ↦ P (fun i ↦ w (i.castAdd l)) (fun j ↦ w (j.natAdd k))) :
     𝚺-[m + 1].Definable fun v : Fin k → V ↦ ∃ ys : Fin l → V, P v ys := by
   induction l generalizing k
@@ -508,7 +508,7 @@ lemma exVec {k l} {P : (Fin k → V) → (Fin l → V) → Prop}
       constructor
       · rintro ⟨ys, h⟩; exact ⟨ys 0, (ys ·.succ), by simpa using h⟩
       · rintro ⟨y, ys, h⟩; exact ⟨_, h⟩
-    apply ex
+    apply exs
     apply ih
     let g : Fin (k + (l + 1)) → Fin (k + 1 + l) := Matrix.vecAppend rfl (fun x ↦ x.succ.castAdd l) (Fin.castAdd l 0 :> fun j ↦ j.natAdd (k + 1))
     exact of_iff (retraction h g) (by
@@ -545,7 +545,7 @@ lemma allVec {k l} {P : (Fin k → V) → (Fin l → V) → Prop}
 private lemma substitution_sigma {f : Fin k → (Fin l → V) → V} (hP : 𝚺-[m+1].Definable P) (hf : ∀ i, 𝚺-[m+1].DefinableFunction (f i)) :
     𝚺-[m+1].Definable fun z ↦ P (fun i ↦ f i z) := by
   have : 𝚺-[m+1].Definable fun z ↦ ∃ ys : Fin k → V, (∀ i, ys i = f i z) ∧ P ys := by
-    apply exVec; apply and
+    apply exsVec; apply and
     · apply fintype_all; intro i
       simpa using retraction (of_sigma (hf i)) (i.natAdd l :> fun i ↦ i.castAdd k)
     · exact retraction hP (Fin.natAdd l)
@@ -786,35 +786,35 @@ lemma ball_lt {Γ} {P : (Fin k → V) → V → Prop} {f : (Fin k → V) → V}
   rcases h with ⟨φ, hp⟩
   match Γ with
   | 𝚺 => exact
-    ⟨ .mkSigma (∃' (bf.val ⋏ (∀[“#0 < #1”] φ.val ⇜ (#0 :> (#·.succ.succ))))) (by simp),
+    ⟨ .mkSigma (∃⁰ (bf.val ⋏ (∀⁰[“#0 < #1”] φ.val ⇜ (#0 :> (#·.succ.succ))))) (by simp),
       by intro v; simp [hbf.df.iff, hp.df.iff] ⟩
   | 𝚷 => exact
-    ⟨ .mkPi (∀' (bf.val ➝ (∀[“#0 < #1”] φ.val ⇜ (#0 :> (#·.succ.succ))))) (by simp),
+    ⟨ .mkPi (∀⁰ (bf.val ➝ (∀⁰[“#0 < #1”] φ.val ⇜ (#0 :> (#·.succ.succ))))) (by simp),
       by intro v; simp [hbf.df.iff, hp.df.iff] ⟩
   | 𝚫 =>
     exact .of_sigma_of_pi
-      ⟨ .mkSigma (∃' (bf.val ⋏ (∀[“#0 < #1”] φ.sigma.val ⇜ (#0 :> (#·.succ.succ))))) (by simp),
+      ⟨ .mkSigma (∃⁰ (bf.val ⋏ (∀⁰[“#0 < #1”] φ.sigma.val ⇜ (#0 :> (#·.succ.succ))))) (by simp),
           by intro v; simp [hbf.df.iff, hp.df.iff, HierarchySymbol.Semiformula.val_sigma] ⟩
-      ⟨ .mkPi (∀' (bf.val ➝ (∀[“#0 < #1”] φ.pi.val ⇜ (#0 :> (#·.succ.succ))))) (by simp),
+      ⟨ .mkPi (∀⁰ (bf.val ➝ (∀⁰[“#0 < #1”] φ.pi.val ⇜ (#0 :> (#·.succ.succ))))) (by simp),
         by intro v; simp [hbf.df.iff, hp.df.iff, hp.proper.iff'] ⟩
 
-lemma bex_lt {Γ} {P : (Fin k → V) → V → Prop} {f : (Fin k → V) → V}
+lemma bexs_lt {Γ} {P : (Fin k → V) → V → Prop} {f : (Fin k → V) → V}
     (hf : 𝚺-[m + 1].DefinableFunction f) (h : Γ-[m + 1].Definable (fun w ↦ P (w ·.succ) (w 0))) :
     Γ-[m + 1].Definable (fun v ↦ ∃ x < f v, P v x) := by
   rcases hf with ⟨bf, hbf⟩
   rcases h with ⟨φ, hp⟩
   match Γ with
   | 𝚺 => exact
-    ⟨ .mkSigma (∃' (bf.val ⋏ (∃[“#0 < #1”] φ.val ⇜ (#0 :> (#·.succ.succ))))) (by simp),
+    ⟨ .mkSigma (∃⁰ (bf.val ⋏ (∃⁰[“#0 < #1”] φ.val ⇜ (#0 :> (#·.succ.succ))))) (by simp),
       by intro v; simp [hbf.df.iff, hp.df.iff] ⟩
   | 𝚷 => exact
-    ⟨ .mkPi (∀' (bf.val ➝ (∃[“#0 < #1”] φ.val ⇜ (#0 :> (#·.succ.succ))))) (by simp),
+    ⟨ .mkPi (∀⁰ (bf.val ➝ (∃⁰[“#0 < #1”] φ.val ⇜ (#0 :> (#·.succ.succ))))) (by simp),
       by intro v; simp [hbf.df.iff, hp.df.iff] ⟩
   | 𝚫 =>
     exact .of_sigma_of_pi
-      ⟨ .mkSigma (∃' (bf.val ⋏ (∃[“#0 < #1”] φ.sigma.val ⇜ (#0 :> (#·.succ.succ))))) (by simp),
+      ⟨ .mkSigma (∃⁰ (bf.val ⋏ (∃⁰[“#0 < #1”] φ.sigma.val ⇜ (#0 :> (#·.succ.succ))))) (by simp),
           by intro v; simp [hbf.df.iff, hp.df.iff, HierarchySymbol.Semiformula.val_sigma] ⟩
-      ⟨ .mkPi (∀' (bf.val ➝ (∃[“#0 < #1”] φ.pi.val ⇜ (#0 :> (#·.succ.succ))))) (by simp),
+      ⟨ .mkPi (∀⁰ (bf.val ➝ (∃⁰[“#0 < #1”] φ.pi.val ⇜ (#0 :> (#·.succ.succ))))) (by simp),
         by intro v; simp [hbf.df.iff, hp.df.iff, hp.proper.iff'] ⟩
 
 lemma ball_le [V ⊧ₘ* 𝗣𝗔⁻] {Γ} {P : (Fin k → V) → V → Prop} {f : (Fin k → V) → V}
@@ -823,10 +823,10 @@ lemma ball_le [V ⊧ₘ* 𝗣𝗔⁻] {Γ} {P : (Fin k → V) → V → Prop} {f
   have : Γ-[m + 1].Definable (fun v ↦ ∀ x < f v + 1, P v x) := ball_lt (DefinableFunction₂.comp hf (by simp)) h
   exact this.of_iff <| by intro v; simp [lt_succ_iff_le]
 
-lemma bex_le [V ⊧ₘ* 𝗣𝗔⁻] {Γ} {P : (Fin k → V) → V → Prop} {f : (Fin k → V) → V}
+lemma bexs_le [V ⊧ₘ* 𝗣𝗔⁻] {Γ} {P : (Fin k → V) → V → Prop} {f : (Fin k → V) → V}
     (hf : 𝚺-[m + 1].DefinableFunction f) (h : Γ-[m + 1].Definable (fun w ↦ P (w ·.succ) (w 0))) :
     Γ-[m + 1].Definable (fun v ↦ ∃ x ≤ f v, P v x) := by
-  have : Γ-[m + 1].Definable (fun v ↦ ∃ x < f v + 1, P v x) := bex_lt (DefinableFunction₂.comp hf (by simp)) h
+  have : Γ-[m + 1].Definable (fun v ↦ ∃ x < f v + 1, P v x) := bexs_lt (DefinableFunction₂.comp hf (by simp)) h
   exact this.of_iff <| by intro v; simp [lt_succ_iff_le]
 
 lemma ball_lt' {Γ} {P : (Fin k → V) → V → Prop} {f : (Fin k → V) → V}
@@ -857,8 +857,8 @@ attribute [aesop 6 (rule_sets := [Definability]) safe]
 attribute [aesop 8 (rule_sets := [Definability]) safe]
   Definable.ball_lt
   Definable.ball_le
-  Definable.bex_lt
-  Definable.bex_le
+  Definable.bexs_lt
+  Definable.bexs_le
 
 attribute [aesop 10 (rule_sets := [Definability]) safe]
   Definable.not
@@ -869,6 +869,6 @@ attribute [aesop 11 (rule_sets := [Definability]) safe]
   Definable.and
   Definable.or
   Definable.all
-  Definable.ex
+  Definable.exs
 
 end LO.FirstOrder.Arithmetic.HierarchySymbol

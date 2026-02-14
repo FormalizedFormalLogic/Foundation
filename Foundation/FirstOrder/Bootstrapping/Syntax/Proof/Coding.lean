@@ -171,9 +171,9 @@ noncomputable def typedQuote {Γ : Finset (SyntacticFormula L)} : T ⟹₂ Γ �
   |            or (φ := φ) (ψ := ψ) h b =>
     TDerivation.or' (show ⌜φ⌝ ⋎ ⌜ψ⌝ ∈ ⌜Γ⌝ by simpa using Sequent.quote_mem_quote.mpr h) <| b.typedQuote.cast (by simp)
   |           all (φ := φ) h d =>
-    TDerivation.all' (show ∀' ⌜φ⌝ ∈ ⌜Γ⌝ by simpa using Sequent.quote_mem_quote.mpr h) <| d.typedQuote.cast (by simp)
-  |          ex (φ := φ) h t d =>
-    TDerivation.ex' (show ∃' ⌜φ⌝ ∈ ⌜Γ⌝ by simpa using Sequent.quote_mem_quote.mpr h) ⌜t⌝ <| d.typedQuote.cast (by simp [Matrix.constant_eq_singleton])
+    TDerivation.all' (show ∀⁰ ⌜φ⌝ ∈ ⌜Γ⌝ by simpa using Sequent.quote_mem_quote.mpr h) <| d.typedQuote.cast (by simp)
+  |          exs (φ := φ) h t d =>
+    TDerivation.exs' (show ∃⁰ ⌜φ⌝ ∈ ⌜Γ⌝ by simpa using Sequent.quote_mem_quote.mpr h) ⌜t⌝ <| d.typedQuote.cast (by simp [Matrix.constant_eq_singleton])
   |           wk d ss => TDerivation.wk d.typedQuote (by simpa)
   |           shift d => (TDerivation.shift d.typedQuote).cast (by simp)
   | cut (φ := φ) d dn =>
@@ -202,8 +202,8 @@ lemma coe_typedQuote_val_eq (d : (T : Schema L) ⟹₂ Γ) : ↑(d.typedQuote �
   |           all h b => by
     simp [typedQuote, Bootstrapping.allIntro, nat_cast_pair, Sequent.coe_eq, Semiformula.coe_quote_eq_quote',
       b.coe_typedQuote_val_eq]
-  |          ex h t b => by
-    simp [typedQuote, Bootstrapping.exIntro, nat_cast_pair, Sequent.coe_eq,
+  |          exs h t b => by
+    simp [typedQuote, Bootstrapping.exsIntro, nat_cast_pair, Sequent.coe_eq,
       Semiterm.coe_quote_eq_quote', Semiformula.coe_quote_eq_quote',
       b.coe_typedQuote_val_eq]
   |           wk b ss => by
@@ -292,7 +292,7 @@ lemma Derivation.sound {d : ℕ} (h : T.Derivation d) : ∃ Γ, ⌜Γ⌝ = fstId
     rcases this.sound with ⟨φ, rfl⟩
     rcases ht.sound with ⟨t, rfl⟩
     rcases ih d (by simp) dd with ⟨Δ, hΔ, ⟨b⟩⟩
-    refine ⟨Derivation2.ex (φ := φ)
+    refine ⟨Derivation2.exs (φ := φ)
       (by simp [←Sequent.mem_quote_iff (V := ℕ), Semiformula.quote_ex, hps]) t
       (b.cast <| Sequent.quote_inj (V := ℕ) <| by
         simp [hΔ, hd, substs1, Matrix.constant_eq_singleton, Semiformula.quote_def, Semiterm.quote_def])⟩

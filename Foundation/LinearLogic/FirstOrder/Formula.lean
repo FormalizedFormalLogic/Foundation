@@ -31,7 +31,7 @@ inductive Semiformula (L : Language) (ξ : Type*) : ℕ → Type _ where
   |  quest : Semiformula L ξ n → Semiformula L ξ n
   /-- Exponentials -/
   |    all : Semiformula L ξ (n + 1) → Semiformula L ξ n
-  |     ex : Semiformula L ξ (n + 1) → Semiformula L ξ n
+  |    exs : Semiformula L ξ (n + 1) → Semiformula L ξ n
   /-- Quantifiers -/
 
 abbrev Formula (L : Language) (ξ : Type*) := Semiformula L ξ 0
@@ -65,8 +65,8 @@ instance : ExponentialConnective (Semiformula L ξ n) where
   quest := quest
 
 instance : Quantifier (Semiformula L ξ) where
-  univ := all
-  ex := ex
+  all := all
+  exs := exs
 
 @[simp] lemma tensor_inj (φ₁ ψ₁ φ₂ ψ₂ : Semiformula L ξ n) :
     φ₁ ⨂ ψ₁ = φ₂ ⨂ ψ₂ ↔ φ₁ = φ₂ ∧ ψ₁ = ψ₂ := iff_of_eq (by apply tensor.injEq)
@@ -87,10 +87,10 @@ instance : Quantifier (Semiformula L ξ) where
     ？φ₁ = ？φ₂ ↔ φ₁ = φ₂ := iff_of_eq (by apply quest.injEq)
 
 @[simp] lemma all_inj (φ₁ φ₂ : Semiformula L ξ (n + 1)) :
-    ∀' φ₁ = ∀' φ₂ ↔ φ₁ = φ₂ := iff_of_eq (by apply all.injEq)
+    ∀⁰ φ₁ = ∀⁰ φ₂ ↔ φ₁ = φ₂ := iff_of_eq (by apply all.injEq)
 
-@[simp] lemma ex_inj (φ₁ φ₂ : Semiformula L ξ (n + 1)) :
-    ∃' φ₁ = ∃' φ₂ ↔ φ₁ = φ₂ := iff_of_eq (by apply ex.injEq)
+@[simp] lemma exs_inj (φ₁ φ₂ : Semiformula L ξ (n + 1)) :
+    ∃⁰ φ₁ = ∃⁰ φ₂ ↔ φ₁ = φ₂ := iff_of_eq (by apply exs.injEq)
 
 def neg : Semiformula L ξ n → Semiformula L ξ n
   |  rel R v => nrel R v
@@ -105,8 +105,8 @@ def neg : Semiformula L ξ n → Semiformula L ξ n
   |    φ ⨁ ψ => φ.neg ＆ ψ.neg
   |       ！φ => ？φ.neg
   |       ？φ => ！φ.neg
-  |     ∀' φ => ∃' φ.neg
-  |     ∃' φ => ∀' φ.neg
+  |     ∀⁰ φ => ∃⁰ φ.neg
+  |     ∃⁰ φ => ∀⁰ φ.neg
 
 instance : Tilde (Semiformula L ξ n) := ⟨neg⟩
 
@@ -133,10 +133,10 @@ instance : ExponentialConnective.DeMorgan (Semiformula L ξ n) where
   ∼nrel R v = rel R v := rfl
 
 @[simp] lemma neg_all (φ : Semiformula L ξ (n + 1)) :
-  ∼(∀' φ) = ∃' ∼φ := rfl
+  ∼(∀⁰ φ) = ∃⁰ ∼φ := rfl
 
-@[simp] lemma neg_ex (φ : Semiformula L ξ (n + 1)) :
-  ∼(∃' φ) = ∀' ∼φ := rfl
+@[simp] lemma neg_exs (φ : Semiformula L ξ (n + 1)) :
+  ∼(∃⁰ φ) = ∀⁰ ∼φ := rfl
 
 lemma neg_neg {n} (φ : Semiformula L ξ n) : ∼∼φ = φ := by
   match φ with
@@ -152,8 +152,8 @@ lemma neg_neg {n} (φ : Semiformula L ξ n) : ∼∼φ = φ := by
   |    φ ⨁ ψ => simp [neg_neg φ, neg_neg ψ]
   |       ！φ => simp [neg_neg φ]
   |       ？φ => simp [neg_neg φ]
-  |     ∀' φ => simp [neg_neg φ]
-  |     ∃' φ => simp [neg_neg φ]
+  |     ∀⁰ φ => simp [neg_neg φ]
+  |     ∃⁰ φ => simp [neg_neg φ]
 
 instance : NegInvolutive (Semiformula L ξ n) := ⟨neg_neg⟩
 
@@ -188,8 +188,8 @@ def cases' {C : ∀ n, Semiformula L ξ n → Sort w}
     (hPlus : ∀ {n : ℕ} (φ ψ : Semiformula L ξ n), C n (φ ⨁ ψ))
     (hBang : ∀ {n : ℕ} (φ : Semiformula L ξ n), C n (！φ))
     (hQuest : ∀ {n : ℕ} (φ : Semiformula L ξ n), C n (？φ))
-    (hAll : ∀ {n : ℕ} (φ : Semiformula L ξ (n + 1)), C n (∀' φ))
-    (hEx : ∀ {n : ℕ} (φ : Semiformula L ξ (n + 1)), C n (∃' φ)) {n} :
+    (hAll : ∀ {n : ℕ} (φ : Semiformula L ξ (n + 1)), C n (∀⁰ φ))
+    (hExs : ∀ {n : ℕ} (φ : Semiformula L ξ (n + 1)), C n (∃⁰ φ)) {n} :
     (φ : Semiformula L ξ n) → C n φ
   | rel r v => hRel r v
   | nrel r v => hNrel r v
@@ -203,8 +203,8 @@ def cases' {C : ∀ n, Semiformula L ξ n → Sort w}
   | φ ⨁ ψ => hPlus φ ψ
   | ！φ => hBang φ
   | ？φ => hQuest φ
-  | ∀' φ => hAll φ
-  | ∃' φ => hEx φ
+  | ∀⁰ φ => hAll φ
+  | ∃⁰ φ => hExs φ
 
 @[elab_as_elim]
 def rec' {C : ∀ n, Semiformula L ξ n → Sort w}
@@ -220,27 +220,27 @@ def rec' {C : ∀ n, Semiformula L ξ n → Sort w}
   (hPlus : ∀ {n : ℕ} (φ ψ : Semiformula L ξ n), C n φ → C n ψ → C n (φ ⨁ ψ))
   (hBang : ∀ {n : ℕ} (φ : Semiformula L ξ n), C n φ → C n (！φ))
   (hQuest : ∀ {n : ℕ} (φ : Semiformula L ξ n), C n φ → C n (？φ))
-  (hAll : ∀ {n : ℕ} (φ : Semiformula L ξ (n + 1)), C (n + 1) φ → C n (∀' φ))
-  (hEx : ∀ {n : ℕ} (φ : Semiformula L ξ (n + 1)), C (n + 1) φ → C n (∃' φ)) {n} :
+  (hAll : ∀ {n : ℕ} (φ : Semiformula L ξ (n + 1)), C (n + 1) φ → C n (∀⁰ φ))
+  (hExs : ∀ {n : ℕ} (φ : Semiformula L ξ (n + 1)), C (n + 1) φ → C n (∃⁰ φ)) {n} :
     (φ : Semiformula L ξ n) → C n φ
   | rel r v => hRel r v
   | nrel r v => hNrel r v
   | 1 => hOne
   | ⊥ => hFalsum
-  | φ ⨂ ψ => hTensor φ ψ (rec' hRel hNrel hOne hFalsum hTensor hPar hVerum hZero hWith hPlus hBang hQuest hAll hEx φ)
-      (rec' hRel hNrel hOne hFalsum hTensor hPar hVerum hZero hWith hPlus hBang hQuest hAll hEx ψ)
-  | φ ⅋ ψ => hPar φ ψ (rec' hRel hNrel hOne hFalsum hTensor hPar hVerum hZero hWith hPlus hBang hQuest hAll hEx φ)
-      (rec' hRel hNrel hOne hFalsum hTensor hPar hVerum hZero hWith hPlus hBang hQuest hAll hEx ψ)
+  | φ ⨂ ψ => hTensor φ ψ (rec' hRel hNrel hOne hFalsum hTensor hPar hVerum hZero hWith hPlus hBang hQuest hAll hExs φ)
+      (rec' hRel hNrel hOne hFalsum hTensor hPar hVerum hZero hWith hPlus hBang hQuest hAll hExs ψ)
+  | φ ⅋ ψ => hPar φ ψ (rec' hRel hNrel hOne hFalsum hTensor hPar hVerum hZero hWith hPlus hBang hQuest hAll hExs φ)
+      (rec' hRel hNrel hOne hFalsum hTensor hPar hVerum hZero hWith hPlus hBang hQuest hAll hExs ψ)
   | ⊤ => hVerum
   | 0 => hZero
-  | φ ＆ ψ => hWith φ ψ (rec' hRel hNrel hOne hFalsum hTensor hPar hVerum hZero hWith hPlus hBang hQuest hAll hEx φ)
-      (rec' hRel hNrel hOne hFalsum hTensor hPar hVerum hZero hWith hPlus hBang hQuest hAll hEx ψ)
-  | φ ⨁ ψ => hPlus φ ψ (rec' hRel hNrel hOne hFalsum hTensor hPar hVerum hZero hWith hPlus hBang hQuest hAll hEx φ)
-      (rec' hRel hNrel hOne hFalsum hTensor hPar hVerum hZero hWith hPlus hBang hQuest hAll hEx ψ)
-  | ！φ => hBang φ (rec' hRel hNrel hOne hFalsum hTensor hPar hVerum hZero hWith hPlus hBang hQuest hAll hEx φ)
-  | ？φ => hQuest φ (rec' hRel hNrel hOne hFalsum hTensor hPar hVerum hZero hWith hPlus hBang hQuest hAll hEx φ)
-  | ∀' φ => hAll φ (rec' hRel hNrel hOne hFalsum hTensor hPar hVerum hZero hWith hPlus hBang hQuest hAll hEx φ)
-  | ∃' φ => hEx φ (rec' hRel hNrel hOne hFalsum hTensor hPar hVerum hZero hWith hPlus hBang hQuest hAll hEx φ)
+  | φ ＆ ψ => hWith φ ψ (rec' hRel hNrel hOne hFalsum hTensor hPar hVerum hZero hWith hPlus hBang hQuest hAll hExs φ)
+      (rec' hRel hNrel hOne hFalsum hTensor hPar hVerum hZero hWith hPlus hBang hQuest hAll hExs ψ)
+  | φ ⨁ ψ => hPlus φ ψ (rec' hRel hNrel hOne hFalsum hTensor hPar hVerum hZero hWith hPlus hBang hQuest hAll hExs φ)
+      (rec' hRel hNrel hOne hFalsum hTensor hPar hVerum hZero hWith hPlus hBang hQuest hAll hExs ψ)
+  | ！φ => hBang φ (rec' hRel hNrel hOne hFalsum hTensor hPar hVerum hZero hWith hPlus hBang hQuest hAll hExs φ)
+  | ？φ => hQuest φ (rec' hRel hNrel hOne hFalsum hTensor hPar hVerum hZero hWith hPlus hBang hQuest hAll hExs φ)
+  | ∀⁰ φ => hAll φ (rec' hRel hNrel hOne hFalsum hTensor hPar hVerum hZero hWith hPlus hBang hQuest hAll hExs φ)
+  | ∃⁰ φ => hExs φ (rec' hRel hNrel hOne hFalsum hTensor hPar hVerum hZero hWith hPlus hBang hQuest hAll hExs φ)
 
 def complexity : Semiformula L ξ n → ℕ
   |  rel _ _ => 0
@@ -255,8 +255,8 @@ def complexity : Semiformula L ξ n → ℕ
   |    φ ⨁ ψ => max (complexity φ) (complexity ψ) + 1
   |       ！φ => complexity φ + 1
   |       ？φ => complexity φ + 1
-  |     ∀' φ => complexity φ + 1
-  |     ∃' φ => complexity φ + 1
+  |     ∀⁰ φ => complexity φ + 1
+  |     ∃⁰ φ => complexity φ + 1
 
 @[simp] lemma complexity_rel (R : L.Rel arity) (v : Fin arity → Semiterm L ξ n) :
     complexity (rel R v) = 0 := rfl
@@ -307,14 +307,14 @@ def complexity : Semiformula L ξ n → ℕ
     (φ.quest).complexity = φ.complexity + 1 := rfl
 
 @[simp] lemma complexity_all (φ : Semiformula L ξ (n + 1)) :
-    (∀' φ).complexity = φ.complexity + 1 := rfl
+    (∀⁰ φ).complexity = φ.complexity + 1 := rfl
 @[simp] lemma complexity_all' (φ : Semiformula L ξ (n + 1)) :
     φ.all.complexity = φ.complexity + 1 := rfl
 
-@[simp] lemma complexity_ex (φ : Semiformula L ξ (n + 1)) :
-    (∃' φ).complexity = φ.complexity + 1 := rfl
-@[simp] lemma complexity_ex' (φ : Semiformula L ξ (n + 1)) :
-    φ.ex.complexity = φ.complexity + 1 := rfl
+@[simp] lemma complexity_exs (φ : Semiformula L ξ (n + 1)) :
+    (∃⁰ φ).complexity = φ.complexity + 1 := rfl
+@[simp] lemma complexity_exs' (φ : Semiformula L ξ (n + 1)) :
+    φ.exs.complexity = φ.complexity + 1 := rfl
 
 @[simp] lemma complexity_neg (φ : Semiformula L ξ n) :
     (∼φ).complexity = φ.complexity := by
@@ -333,8 +333,8 @@ inductive IsBang : Semiformula L ξ n → Prop
 @[simp] lemma IsBang.not_plus (φ ψ : Semiformula L ξ n) : ¬IsBang (φ ⨁ ψ) := by intro h; cases h
 @[simp] lemma IsBang.bang (φ : Semiformula L ξ n) : IsBang (！φ) := .intro
 @[simp] lemma IsBang.not_quant (φ : Semiformula L ξ n) : ¬IsBang (？φ) := by intro h; cases h
-@[simp] lemma IsBang.not_all (φ : Semiformula L ξ (n + 1)) : ¬IsBang (∀' φ) := by intro h; cases h
-@[simp] lemma IsBang.not_ex (φ : Semiformula L ξ (n + 1)) : ¬IsBang (∃' φ) := by intro h; cases h
+@[simp] lemma IsBang.not_all (φ : Semiformula L ξ (n + 1)) : ¬IsBang (∀⁰ φ) := by intro h; cases h
+@[simp] lemma IsBang.not_exs (φ : Semiformula L ξ (n + 1)) : ¬IsBang (∃⁰ φ) := by intro h; cases h
 
 inductive IsQuest : Semiformula L ξ n → Prop
   | intro : IsQuest (？φ)
@@ -349,9 +349,8 @@ inductive IsQuest : Semiformula L ξ n → Prop
 @[simp] lemma IsQuest.not_plus (φ ψ : Semiformula L ξ n) : ¬IsQuest (φ ⨁ ψ) := by intro h; cases h
 @[simp] lemma IsQuest.not_bang (φ : Semiformula L ξ n) : ¬IsQuest (！φ) := by intro h; cases h
 @[simp] lemma IsQuest.quest (φ : Semiformula L ξ n) : IsQuest (？φ) := .intro
-@[simp] lemma IsQuest.not_all (φ : Semiformula L ξ (n + 1)) : ¬IsQuest (∀' φ) := by intro h; cases h
-@[simp] lemma IsQuest.not_ex (φ : Semiformula L ξ (n + 1)) : ¬IsQuest (∃' φ) := by intro h; cases h
-
+@[simp] lemma IsQuest.not_all (φ : Semiformula L ξ (n + 1)) : ¬IsQuest (∀⁰ φ) := by intro h; cases h
+@[simp] lemma IsQuest.not_exs (φ : Semiformula L ξ (n + 1)) : ¬IsQuest (∃⁰ φ) := by intro h; cases h
 
 end Semiformula
 
