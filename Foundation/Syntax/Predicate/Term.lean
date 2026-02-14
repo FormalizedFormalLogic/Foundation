@@ -20,7 +20,7 @@ namespace LO
 namespace FirstOrder
 
 /--
-A semiterm of language L, with bound variables indexed by `Fin n` and free variables indexed by `ξ`. In `LO.FirstOrder.Semiformula`, bound variables are de Bruijn indices with a separate type from free variables, so two distinct types of variables for bound and free variables are supported here.
+A semiterm of language `L`, with bound variables indexed by `Fin n` and free variables indexed by `ξ`. In `LO.FirstOrder.Semiformula`, bound variables are de Bruijn indices with a separate type from free variables.
 -/
 inductive Semiterm (L : Language) (ξ : Type*) (n : ℕ)
   | bvar : Fin n → Semiterm L ξ n

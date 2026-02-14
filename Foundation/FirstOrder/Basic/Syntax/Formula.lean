@@ -19,7 +19,7 @@ The quantification is represented by de Bruijn index.
 namespace LO.FirstOrder
 
 /--
-A semiformula of language L. Free variables are of type `ξ`, and bound variables are implemented as de Bruijn indices, of a type `Fin n` separate from free variables.
+A semiformula of language `L`. Free variables are of type `ξ`, and bound variables are implemented as de Bruijn indices, of a type `Fin n` separate from free variables.
 -/
 inductive Semiformula (L : Language) (ξ : Type*) : ℕ → Type _ where
   |  verum : Semiformula L ξ n
