@@ -2,30 +2,6 @@ import Foundation.FirstOrder.Bootstrapping.RosserProvability
 
 namespace LO.FirstOrder
 
-namespace Schema
-
-variable {𝓢 : Schema L}
-
-open Derivation
-
-def specialize (φ : SyntacticSemiformula L 1) (t : SyntacticTerm L) : 𝓢 ⊢! ∀⁰ φ ➝ φ/[t] :=
-  have : 𝓢 ⟹ [(∼φ)/[t], φ/[t]] := Derivation.em (φ := φ/[t]) (by simp) (by simp)
-  have : 𝓢 ⟹ [∃⁰ ∼φ, φ/[t]] := this.exs t
-  this.or.cast (by simp [Semiformula.imp_eq])
-
-end Schema
-
-namespace Theory
-
-variable {T : Theory L} {φ : Semisentence L 1}
-
-def specialize! (φ : Semisentence L 1) (t) : T ⊢! ∀⁰ φ ➝ φ/[t] := ofSyntacticProof <| by
-  simpa [Semiformula.coe_subst_eq_subst_coe₁] using (Schema.specialize (𝓢 := T) φ (t : SyntacticTerm L))
-
-lemma specialize (φ : Semisentence L 1) (t) : T ⊢ ∀⁰ φ ➝ φ/[t] := ⟨specialize! φ t⟩
-
-end Theory
-
 namespace ProvabilityAbstraction
 
 open LO.Entailment FirstOrder Diagonalization Provability
