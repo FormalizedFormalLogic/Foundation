@@ -409,6 +409,7 @@ public import Foundation.Propositional.ClassicalSemantics.NNFormula
 public import Foundation.Propositional.ClassicalSemantics.Tait
 public import Foundation.Propositional.ClassicalSemantics.ZeroSubst
 public import Foundation.Propositional.ConsistentTableau
+public import Foundation.Propositional.Dialectica.Basic
 public import Foundation.Propositional.Decidable
 public import Foundation.Propositional.Entailment.AxiomDNE
 public import Foundation.Propositional.Entailment.AxiomEFQ
