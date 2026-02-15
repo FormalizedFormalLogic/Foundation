@@ -35,11 +35,12 @@ theorem provable_D2 {σ π} : 𝗜𝚺₁ ⊢ □(σ ➝ π) ➝ □σ ➝ □π
 
 variable (T)
 
-noncomputable abbrev _root_.LO.FirstOrder.Theory.standardProvability : Provability 𝗜𝚺₁ T := ⟨T.provable⟩
+noncomputable abbrev _root_.LO.FirstOrder.Theory.standardProvability : Provability 𝗜𝚺₁ T where
+  prov := T.provable
+  prov_def := provable_D1
 
 variable {T}
 
-instance : T.standardProvability.HBL1 := ⟨provable_D1⟩
 instance : T.standardProvability.HBL2 := ⟨provable_D2⟩
 
 lemma standardProvability_def (σ : Sentence L) : T.standardProvability σ = T.provabilityPred σ := rfl
