@@ -42,6 +42,8 @@ jobs:
         with:
           path: .lake/Foundation-x86_64-unknown-linux-gnu.tar.gz
           key: lake-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('lean-toolchain') }}-${{ hashFiles('lake-manifest.json') }}-${{ github.ref_name }}
+          restore-keys: |
+            lake-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('lean-toolchain') }}-${{ hashFiles('lake-manifest.json') }}
       - name: Unpack project cache
         if: steps.cache-restore.outputs.cache-hit == 'true'
         run: lake unpack
