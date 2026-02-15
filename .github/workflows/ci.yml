@@ -3,8 +3,10 @@ name: CI
 on:
   push:
     branches:
-      - main
+      - master
   pull_request:
+    branches:
+      - master
 
 permissions:
   contents: read
@@ -23,17 +25,11 @@ jobs:
         run: |
           curl https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -sSf | sh -s -- -y --default-toolchain none
           echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
-      - name: Setup graphviz
-        uses: ts-graphviz/setup-graphviz@v2
-      - name: Setup typst
-        uses: typst-community/setup-typst@v4
-      - name: Print tools version
+      - name: Print lake and lean version
         run: |
           lake --version
-          dot -V
-          typst --version
+          lean --version
 
-      # Restore project cache
       - name: Get Mathlib cache
         run: lake exe cache get
       - name: Restore cache
@@ -48,24 +44,14 @@ jobs:
         if: steps.cache-restore.outputs.cache-hit == 'true'
         run: lake unpack
 
-      # Build project
       - name: Build Foundation
         run: lake build Foundation
 
-      # Build import-graph
-      - name: Generate import graph
-        run: |
-          lake exe graph ./pages/_output/import_graph.png
-          lake exe graph ./pages/_output/import_graph.pdf
-          lake exe graph ./pages/_output/import_graph.html
-
-      # Build Doc
       - name: Build doc
-        run: lake build Foundation:docs
-      - name: Copy doc to pages
-        run: cp -r .lake/build/doc ./pages/_output/doc
+        run: |
+          lake build Foundation:docs
+          cp -r .lake/build/doc ./pages/_output/docs
 
-      # Save project cache
       - name: Pack project cache
         run: lake pack
       - name: Save project cache
@@ -76,8 +62,16 @@ jobs:
           path: .lake/Foundation-x86_64-unknown-linux-gnu.tar.gz
           key: ${{ steps.cache-restore.outputs.cache-primary-key }}
 
-      # Upload pages artifact
-      - uses: actions/upload-pages-artifact@v4
+      - name: Setup Graphviz
+        uses: ts-graphviz/setup-graphviz@v2
+      - name: Generate import graph
+        run: |
+          lake exe graph ./pages/_output/import_graph.png
+          lake exe graph ./pages/_output/import_graph.pdf
+          lake exe graph ./pages/_output/import_graph.html
+
+      - name: Upload pages artifact
+        uses: actions/upload-pages-artifact@v4
         with:
           path: pages/_output
 
@@ -99,8 +93,10 @@ jobs:
 
   deploy:
     runs-on: ubuntu-latest
-    needs: build
     if: github.ref == 'refs/heads/master'
+    needs:
+      - build
+      - check-references
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
