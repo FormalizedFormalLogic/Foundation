@@ -1,50 +1,38 @@
 import Foundation.FirstOrder.Bootstrapping.RosserProvability
 import Foundation.FirstOrder.Bootstrapping.ProvabilityAbstraction.Refutability
 
-namespace LO.FirstOrder
+namespace LO.FirstOrder.Arithmetic
 
-open FirstOrder Arithmetic
-open PeanoMinus ISigma0 ISigma1 Bootstrapping Derivation ProvabilityAbstraction
+open Bootstrapping Derivation ProvabilityAbstraction
 
-namespace Theory
+namespace Bootstrapping
 
 variable {V : Type*} [ORingStructure V] [V ⊧ₘ* 𝗜𝚺₁]
+
 variable {L : Language} [L.Encodable] [L.LORDefinable]
 
 variable {T U : Theory L} [T.Δ₁] [U.Δ₁]
 
-def Refutable (T : Theory L) [T.Δ₁] (φ : V) : Prop := T.Provable (neg L φ)
+def _root_.LO.FirstOrder.Theory.Refutable (T : Theory L) [T.Δ₁] (φ : V) : Prop := T.Provable (neg L φ)
 
-lemma Refutable.quote_iff {σ : Sentence L} : T.Refutable (V := V) ⌜σ⌝ ↔ T.Provable (V := V) ⌜∼σ⌝ := by
-  simp [Refutable, Sentence.quote_def, Semiformula.quote_def]
+lemma Refutable.quote_iff {σ : Sentence L} : T.Refutable (⌜σ⌝ : V) ↔ T.Provable (⌜∼σ⌝ : V) := by
+  simp [Theory.Refutable, Sentence.quote_def, Semiformula.quote_def]
 
-noncomputable def refutable (T : Theory L) [T.Δ₁] : 𝚺₁.Semisentence 1 := .mkSigma
-  “φ. ∀ nφ, !(negGraph L) nφ φ → !T.provable nφ” $ by
-    sorry;
-    /-
-    -- apply Hierarchy.all_iff.mpr;
-    apply Hierarchy.imp_iff.mpr;
-    constructor;
-    . apply Hierarchy.strict_mono (Γ := 𝚺) (s := 1) <;> simp;
-    . apply Hierarchy.strict_mono (Γ := 𝚺) (s := 1) <;> simp;
-    -/
+noncomputable def _root_.LO.FirstOrder.Theory.refutable (T : Theory L) [T.Δ₁] : 𝚺₁.Semisentence 1 := .mkSigma
+  “φ. ∃ nφ, !(negGraph L) nφ φ ∧ !T.provable nφ”
 
-lemma refutable_defined :𝚺₁-Predicate[V] T.Refutable via T.refutable := .mk fun v ↦ by
-  simp [Theory.refutable, Theory.Refutable];
+instance refutable_defined : 𝚺₁-Predicate[V] T.Refutable via T.refutable := .mk fun v ↦ by
+  simp [Theory.refutable, Theory.Refutable]
 
-noncomputable def standardRefutability (T : ArithmeticTheory) [T.Δ₁] : Refutability 𝗜𝚺₁ T where
+instance refutable_definable : 𝚺₁-Predicate[V] T.Refutable := refutable_defined.to_definable
+
+end Bootstrapping
+
+noncomputable def _root_.LO.FirstOrder.Theory.standardRefutability (T : ArithmeticTheory) [T.Δ₁] : Refutability 𝗜𝚺₁ T where
   refu := T.refutable.val
-  refu_def {σ} h := by
-    sorry;
+  refu_def {σ} h := provable_of_models _ _ fun (V : Type) _ _ ↦ by
+    simpa [models_iff, Refutable.quote_iff] using internalize_provability h (V := V)
 
-end Theory
-
-
-open ProvabilityAbstraction
-
-namespace Arithmetic
-
-variable {V : Type} [ORingStructure V] [V ⊧ₘ* 𝗜𝚺₁]
 variable {T U : ArithmeticTheory} [T.Δ₁]  -- [𝗜𝚺₁ ⪯ T] [𝗜𝚺₁ ⪯ U]
 
 @[simp]
