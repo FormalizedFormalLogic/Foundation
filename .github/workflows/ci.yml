@@ -2,6 +2,9 @@ name: CI
 
 on:
   push:
+    branches:
+      - main
+  pull_request:
   merge_group:
 
 permissions:
@@ -61,6 +64,7 @@ jobs:
 
       # Save project cache
       - name: Save project cache
+        if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
         id: cache-save
         uses: actions/cache/save@v5
         with:

@@ -114,6 +114,9 @@ def allClosure : {n : ℕ} → α n → α 0
   |     0, a => a
   | _ + 1, a => allClosure (∀⁰ a)
 
+/--
+The universal closure of a formula.
+-/
 prefix:64 "∀⁰* " => allClosure
 
 @[simp] lemma allClosure_zero (a : α 0) : ∀⁰* a = a := rfl
@@ -142,6 +145,9 @@ def exsClosure : {n : ℕ} → α n → α 0
   |     0, a => a
   | _ + 1, a => exsClosure (∃⁰ a)
 
+/--
+The existential closure of a formula.
+-/
 prefix:64 "∃⁰* " => exsClosure
 
 @[simp] lemma exsClosure_zero (a : α 0) : ∃⁰* a = a := rfl
