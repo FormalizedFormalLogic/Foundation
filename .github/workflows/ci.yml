@@ -41,7 +41,7 @@ jobs:
           restore-keys: |
             lake-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('lean-toolchain') }}-${{ hashFiles('lake-manifest.json') }}
       - name: Unpack project cache
-        if: steps.cache-restore.outputs.cache-hit == 'true'
+        if: hashFiles('.lake/Foundation-x86_64-unknown-linux-gnu.tar.gz') != ''
         run: lake unpack
 
       - name: Build Foundation
