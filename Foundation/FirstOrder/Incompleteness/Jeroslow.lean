@@ -3,6 +3,17 @@ module
 public import Foundation.FirstOrder.Bootstrapping.RosserProvability
 public import Foundation.FirstOrder.Bootstrapping.ProvabilityAbstraction.Refutability
 
+/-!
+# Jeroslow's Second Incompleteness Theorem
+
+Jeroslow's formulation of the second incompleteness theorem
+states that the sentence represents _formalized law of noncontradiction_ of `T`
+(i.e. no statement can be both formally proved in `T` and formally refutable in `T`)
+is not provable in `T` itself.
+
+## References
+- [Jeroslow, R. G., *Redundancies in the Hilbert-Bernays Derivability Conditions for Gödel's Second Incompleteness Theorem*][Jer73]
+-/
 
 @[expose] public section
 
@@ -97,11 +108,21 @@ namespace Arithmetic
 variable {L : Language} [L.Encodable] [L.LORDefinable]
 variable {T : ArithmeticTheory} [T.Δ₁]
 
+/--
+  Jeroslow sentence of `T` is not provable in `T` itself.
+-/
 theorem unprovable_jeroslow [𝗜𝚺₁ ⪯ T] [T.SoundOnHierarchy 𝚺 1]
   : T ⊬ T.jeroslow := ProvabilityAbstraction.unprovable_jeroslow (𝔚 := T.standardRefutability)
 
+/--
+  Jeroslow's formulation of the second incompleteness theorem.
+
+  The sentence represents _formalized law of noncontradiction_ of `T`
+  (i.e. no statement can be both formally proved in `T` and formally refutable in `T`)
+  is not provable in `T` itself.
+-/
 theorem unprovable_formalized_law_of_noncontradiction [𝗜𝚺₁ ⪯ T] [Entailment.Consistent T]
-  : T ⊬ (“∀ x, ¬((!T.provable x) ∧ (!T.refutable x))” : ArithmeticSentence) := by
+  : T ⊬ (∀⁰ ∼(T.provable ⋏ T.refutable) : ArithmeticSentence) := by
     simpa [flon, safe, -DeMorgan.and] using ProvabilityAbstraction.unprovable_flon
       (𝔅 := T.standardProvability) (𝔚 := T.standardRefutability)
 
