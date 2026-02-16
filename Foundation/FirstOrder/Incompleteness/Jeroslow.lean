@@ -69,18 +69,6 @@ private lemma provable_E_jeroslow_jeroslow' [𝗜𝚺₁ ⪯ U] : U ⊢ T.jerosl
 private lemma iff_provable_jeroslow_provable_jeroslow' [𝗜𝚺₁ ⪯ U] : U ⊢ (T.jeroslow) ↔ U ⊢ (T.jeroslow') := by
   apply Entailment.iff_of_E! provable_E_jeroslow_jeroslow';
 
-
-open LO.Entailment in
-lemma provable_sigma_one_complete_of_E [𝗜𝚺₁ ⪯ T] {σ π : Sentence ℒₒᵣ}
-  (hσ : Hierarchy 𝚺 1 σ) (hσπ : T ⊢ σ ⭤ π) : T ⊢ π ➝ T.standardProvability π := by
-  apply C!_trans (ψ := σ) ?_ $ C!_trans (ψ := T.standardProvability σ) ?_ ?_;
-  . cl_prover [hσπ];
-  . apply WeakerThan.pbl (𝓢 := 𝗜𝚺₁);
-    apply provable_sigma_one_complete hσ;
-  . apply WeakerThan.pbl (𝓢 := 𝗜𝚺₁);
-    apply ProvabilityAbstraction.prov_distribute_imply;
-    cl_prover [hσπ];
-
 open LO.Entailment in
 instance [𝗜𝚺₁ ⪯ T] [T.SoundOnHierarchy 𝚺 1] : T.standardRefutability.SoundOn (ProvabilityAbstraction.jeroslow T.standardRefutability) := by
   constructor;

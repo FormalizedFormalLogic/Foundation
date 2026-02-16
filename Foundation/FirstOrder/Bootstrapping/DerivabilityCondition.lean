@@ -92,6 +92,20 @@ instance [ArithmeticTheory.SoundOnHierarchy T 𝚺 1] : GödelSound T.standardPr
 
 instance [ArithmeticTheory.SoundOnHierarchy T 𝚺 1] : T.standardProvability.Sound := ⟨fun h ↦ provable_sound h⟩
 
+open LO.Entailment in
+/--
+  If `π` is equivalent to some 𝚺₁ sentence `σ`,
+  then `π ➝ □π` is provable in `T` (note: not `𝗜𝚺₁`, compare `provable_sigma_one_complete`)
+-/
+lemma provable_sigma_one_complete_of_E {σ π} [𝗜𝚺₁ ⪯ T]
+  (hσ : Hierarchy 𝚺 1 σ) (hσπ : T ⊢ σ ⭤ π) : T ⊢ π ➝ □π := by
+  apply C!_trans (ψ := σ) ?_ $ C!_trans (ψ := □σ) ?_ ?_;
+  . cl_prover [hσπ];
+  . apply WeakerThan.pbl $ provable_sigma_one_complete hσ;
+  . apply WeakerThan.pbl (𝓢 := 𝗜𝚺₁);
+    apply ProvabilityAbstraction.prov_distribute_imply (𝔅 := T.standardProvability);
+    cl_prover [hσπ];
+
 end arithmetic
 
 end LO.FirstOrder.Arithmetic
