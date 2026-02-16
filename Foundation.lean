@@ -64,6 +64,7 @@ public import Foundation.FirstOrder.Bootstrapping.DerivabilityCondition.PeanoMin
 public import Foundation.FirstOrder.Bootstrapping.FixedPoint
 public import Foundation.FirstOrder.Bootstrapping.ProvabilityAbstraction.Basic
 public import Foundation.FirstOrder.Bootstrapping.ProvabilityAbstraction.Height
+public import Foundation.FirstOrder.Bootstrapping.ProvabilityAbstraction.Refutability
 public import Foundation.FirstOrder.Bootstrapping.RosserProvability
 public import Foundation.FirstOrder.Bootstrapping.Syntax
 public import Foundation.FirstOrder.Bootstrapping.Syntax.Formula.Basic
@@ -92,6 +93,7 @@ public import Foundation.FirstOrder.Incompleteness.Examples
 public import Foundation.FirstOrder.Incompleteness.First
 public import Foundation.FirstOrder.Incompleteness.GödelRosser
 public import Foundation.FirstOrder.Incompleteness.Halting
+public import Foundation.FirstOrder.Incompleteness.Jeroslow
 public import Foundation.FirstOrder.Incompleteness.Löb
 public import Foundation.FirstOrder.Incompleteness.RestrictedProvability
 public import Foundation.FirstOrder.Incompleteness.Second
