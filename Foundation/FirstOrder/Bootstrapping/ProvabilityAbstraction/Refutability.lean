@@ -1,4 +1,8 @@
-import Foundation.FirstOrder.Bootstrapping.RosserProvability
+module
+
+public import Foundation.FirstOrder.Bootstrapping.RosserProvability
+
+@[expose] public section
 
 namespace LO.FirstOrder
 
@@ -117,7 +121,7 @@ lemma jeroslow_not_safe [𝔅.FormalizedCompleteOn 𝐉] : T ⊢ 𝐉 ➝ (𝔅 
 
 /--
   Formalized law of noncontradiction cannot be proved.
-  Alternative form of Gödel's second incompleteness theorem.
+  Alternative formulation of Gödel's second incompleteness theorem.
 -/
 lemma unprovable_flon [consis : Consistent T] [𝔅.FormalizedCompleteOn 𝐉] : T ⊬ flon 𝔅 𝔚 := by
   contrapose! consis;
@@ -134,7 +138,8 @@ lemma unprovable_flon [consis : Consistent T] [𝔅.FormalizedCompleteOn 𝐉] :
 
 end
 
-
 end ProvabilityAbstraction
 
 end LO.FirstOrder
+
+end
