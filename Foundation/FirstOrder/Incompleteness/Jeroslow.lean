@@ -8,7 +8,7 @@ public import Foundation.FirstOrder.Bootstrapping.ProvabilityAbstraction.Refutab
 
 Jeroslow's formulation of the second incompleteness theorem
 states that the sentence represents _formalized law of noncontradiction_ of `T`
-(i.e. no statement can be both formally proved in `T` and formally refutable in `T`)
+(i.e. no statement can be both formally proved in `T` and formally refuted in `T`)
 is not provable in `T` itself.
 
 ## References
@@ -118,7 +118,7 @@ theorem unprovable_jeroslow [𝗜𝚺₁ ⪯ T] [T.SoundOnHierarchy 𝚺 1]
   Jeroslow's formulation of the second incompleteness theorem.
 
   The sentence represents _formalized law of noncontradiction_ of `T`
-  (i.e. no statement can be both formally proved in `T` and formally refutable in `T`)
+  (i.e. no statement can be both formally proved in `T` and formally refuted in `T`)
   is not provable in `T` itself.
 -/
 theorem unprovable_formalized_law_of_noncontradiction [𝗜𝚺₁ ⪯ T] [Entailment.Consistent T]
