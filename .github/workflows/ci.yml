@@ -23,7 +23,7 @@ jobs:
       - uses: actions/checkout@v6
       - name: Setup elan
         run: |
-          curl https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -sSf | sh -s -- -y --default-toolchain none
+          curl https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -sSf | sh -s -- -y
           echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
       - name: Print lake and lean version
         run: |
@@ -37,7 +37,7 @@ jobs:
         uses: actions/cache/restore@v5
         with:
           path: .lake/Foundation-x86_64-unknown-linux-gnu.tar.gz
-          key: lake-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('lean-toolchain') }}-${{ hashFiles('lake-manifest.json') }}
+          key: lake-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('lean-toolchain') }}-${{ hashFiles('lake-manifest.json') }}-{{ github.sha }}
           restore-keys: |
             lake-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('lean-toolchain') }}-${{ hashFiles('lake-manifest.json') }}
       - name: Unpack project cache
@@ -48,9 +48,7 @@ jobs:
         run: lake build Foundation
 
       - name: Build doc
-        run: |
-          lake build Foundation:docs
-          cp -r .lake/build/doc ./pages/_output/docs
+        run: lake build Foundation:docs
 
       - name: Pack project cache
         run: lake pack
@@ -62,9 +60,14 @@ jobs:
           path: .lake/Foundation-x86_64-unknown-linux-gnu.tar.gz
           key: ${{ steps.cache-restore.outputs.cache-primary-key }}
 
+      - name: Copy doc
+        run: cp -r .lake/build/doc ./pages/_output/docs
+
       - name: Setup Graphviz
         uses: ts-graphviz/setup-graphviz@v2
+        if: github.ref == 'refs/heads/master'
       - name: Generate import graph
+        if: github.ref == 'refs/heads/master'
         run: |
           lake exe graph ./pages/_output/import_graph.png
           lake exe graph ./pages/_output/import_graph.pdf
@@ -72,6 +75,7 @@ jobs:
 
       - name: Upload pages artifact
         uses: actions/upload-pages-artifact@v4
+        if: github.ref == 'refs/heads/master'
         with:
           path: pages/_output
 
