@@ -95,9 +95,6 @@ jobs:
     needs:
       - build
       - check-references
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@v6
       - uses: pandoc/actions/setup@v1
@@ -121,6 +118,3 @@ jobs:
       - uses: actions/upload-pages-artifact@v4
         with:
           path: pages
-      - id: deployment
-        uses: actions/deploy-pages@v4
-        if: github.ref == 'refs/heads/master'
