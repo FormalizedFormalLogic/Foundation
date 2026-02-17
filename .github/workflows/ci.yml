@@ -35,9 +35,12 @@ jobs:
         uses: actions/cache/restore@v5
         with:
           path: .lake/Foundation-x86_64-unknown-linux-gnu.tar.gz
-          key: lake-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('lean-toolchain') }}-${{ hashFiles('lake-manifest.json') }}
+          # NOTE: including github SHA for avoding cache key reserving problem
+          key: lake-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('lean-toolchain') }}-${{ hashFiles('lake-manifest.json') }}-${{ github.sha }}
+          restore-keys: |
+            lake-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('lean-toolchain') }}-${{ hashFiles('lake-manifest.json') }}
       - name: Unpack project cache
-        if: steps.cache-restore.outputs.cache-hit == 'true'
+        if: hashFiles('.lake/Foundation-x86_64-unknown-linux-gnu.tar.gz') != ''
         run: lake unpack
 
       - name: Build Foundation
@@ -92,9 +95,13 @@ jobs:
   deploy:
     name: Generate page
     runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/master'
     needs:
       - build
       - check-references
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@v6
       - uses: pandoc/actions/setup@v1
@@ -118,3 +125,5 @@ jobs:
       - uses: actions/upload-pages-artifact@v4
         with:
           path: pages
+      - uses: actions/deploy-pages@v4
+        id: deployment
