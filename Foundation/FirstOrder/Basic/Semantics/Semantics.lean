@@ -558,14 +558,17 @@ variable (M : Type*) [Nonempty M] [s : Structure L M] {T U : Theory L}
 
 abbrev Models : Sentence L → Prop := Semantics.Models s.toStruc
 
+/-- Models a sentence -/
 infix:45 " ⊧ₘ " => Models
 
 abbrev ModelsTheory (T : Theory L) : Prop := Semantics.ModelsSet s.toStruc T
 
+/-- Models a set of sentences -/
 infix:45 " ⊧ₘ* " => ModelsTheory
 
 abbrev Consequence (T : Theory L) (σ : Sentence L) : Prop := T ⊨[SmallStruc L] σ
 
+/-- Semantic entailment -/
 infix:45 " ⊨ " => Consequence
 
 abbrev Satisfiable (T : Theory L) : Prop := Semantics.Satisfiable (SmallStruc L) T

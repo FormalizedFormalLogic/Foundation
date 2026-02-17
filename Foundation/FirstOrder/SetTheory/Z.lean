@@ -308,6 +308,9 @@ section set_notation
 
 open Lean Elab Term Meta
 
+/--
+Set-builder notation.
+-/
 syntax (name := internalSetBuilder) "{" binderIdent " ∈ " term " ; " term "}" : term
 
 @[term_elab internalSetBuilder]
