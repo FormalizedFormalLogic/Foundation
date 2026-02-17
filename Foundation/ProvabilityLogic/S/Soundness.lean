@@ -11,8 +11,8 @@ open Modal
 open FirstOrder
 open FirstOrder.ProvabilityAbstraction
 
-variable {T₀ T : FirstOrder.Theory ℒₒᵣ} [T₀ ⪯ T] [Diagonalization T₀]
-         {𝔅 : Provability T₀ T} [𝔅.HBL] [ℕ ⊧ₘ* T] [𝔅.SoundOnModel ℕ]
+variable {T U : FirstOrder.Theory ℒₒᵣ} [T ⪯ U] [Diagonalization T]
+         {𝔅 : Provability T U} [𝔅.HBL] [ℕ ⊧ₘ* U] [𝔅.SoundOnModel ℕ]
          {A B : Formula ℕ}
 
 theorem S.arithmetical_soundness (h : Modal.S ⊢ A) (f : Realization 𝔅) : ℕ ⊧ₘ f A := by
