@@ -56,23 +56,12 @@ jobs:
           path: .lake/Foundation-x86_64-unknown-linux-gnu.tar.gz
           key: ${{ steps.cache-restore.outputs.cache-primary-key }}
 
-      - name: Copy doc
-        if: github.ref == 'refs/heads/master'
-        run: cp -r .lake/build/doc ./pages/_output/docs
-      - name: Setup Graphviz
-        uses: ts-graphviz/setup-graphviz@v2
-        if: github.ref == 'refs/heads/master'
-      - name: Generate import graph
-        if: github.ref == 'refs/heads/master'
-        run: |
-          lake exe graph ./pages/_output/import_graph.png
-          lake exe graph ./pages/_output/import_graph.pdf
-          lake exe graph ./pages/_output/import_graph.html
-      - name: Upload pages artifact
-        uses: actions/upload-pages-artifact@v4
-        if: github.ref == 'refs/heads/master'
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
         with:
-          path: pages/_output
+          name: dotlake
+          path: .lake
+          retention-days: 1
 
   check-references:
     name: Check references.bib format
@@ -90,15 +79,84 @@ jobs:
         run: |
           diff -u references.bib references.bib.formatted || (echo "references.bib is not formatted" && exit 1)
 
-  deploy:
+  generate-import-graph:
+    name: Generate import graph
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/master'
+    needs:
+      - build
+    steps:
+      - uses: actions/checkout@v6
+      - name: Setup elan
+        run: |
+          curl https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -sSf | sh -s -- -y --default-toolchain none
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Setup Graphviz
+        uses: ts-graphviz/setup-graphviz@v2
+      - name: Print lake and lean version
+        run: |
+          lake --version
+          lean --version
+          dot -v
+      - name: Download `.lake`
+        uses: actions/download-artifact@v5
+        with:
+          name: dotlake
+      - name: Generate import graph
+        run: |
+          lake exe graph ./pages/import_graph.png
+          lake exe graph ./pages/import_graph.pdf
+          lake exe graph ./pages/import_graph.html
+      - name: Upload import graph
+        uses: actions/upload-artifact@v4
+        with:
+          name: import-graph
+          path: |
+            pages/import_graph.png
+            pages/import_graph.pdf
+            pages/import_graph.html
+          retention-days: 1
+
+  deploy:
+    name: Generate page
+    runs-on: ubuntu-latest
     needs:
       - build
       - check-references
+      - generate-import-graph
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
+      - uses: actions/checkout@v6
+      - uses: pandoc/actions/setup@v1
+
+      - name: Download `.lake`
+        uses: actions/download-artifact@v5
+        with:
+          name: dotlake
+      - name: Copy docs
+        run: |
+          cp -r .lake/build/doc pages/docs
+
+      - name: Download import graph
+        uses: actions/download-artifact@v5
+        with:
+          name: import-graph
+
+      - name: Compile README.md to index.html
+        run: |
+          pandoc \
+           README.md \
+           --from markdown \
+           --to html5 \
+           --standalone \
+           --katex \
+           --metadata title="FormalizedFormalLogic/Foundation"
+           --output pages/index.html
+
+      - uses: actions/upload-pages-artifact@v4
+        with:
+          path: pages
       - id: deployment
         uses: actions/deploy-pages@v4
+        if: github.ref == 'refs/heads/master'

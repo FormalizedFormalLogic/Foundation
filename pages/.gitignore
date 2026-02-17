@@ -1,4 +1,8 @@
-_output/docs/
-_output/import_graph.png
-_output/import_graph.pdf
-_output/import_graph.html
+docs/
+
+index.html
+
+import_graph.png
+import_graph.pdf
+import_graph.html
+
