@@ -60,8 +60,9 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: dotlake
-          path: .lake
+          path: .lake/
           retention-days: 1
+          include-hidden-files: true
 
   check-references:
     name: Check references.bib format
@@ -86,6 +87,11 @@ jobs:
       - build
     steps:
       - uses: actions/checkout@v6
+      - name: Download `.lake`
+        uses: actions/download-artifact@v5
+        with:
+          name: dotlake
+
       - name: Setup elan
         run: |
           curl https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -sSf | sh -s -- -y --default-toolchain none
@@ -97,10 +103,7 @@ jobs:
           lake --version
           lean --version
           dot -v
-      - name: Download `.lake`
-        uses: actions/download-artifact@v5
-        with:
-          name: dotlake
+
       - name: Generate import graph
         run: |
           lake exe graph ./pages/import_graph.png
