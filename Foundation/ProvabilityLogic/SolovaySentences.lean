@@ -39,15 +39,16 @@ variable {𝔅}
 
 namespace SolovaySentences
 
-instance {F : Kripke.Frame} {r : F} [F.IsFiniteTree r] [Fintype F] : CoeFun (SolovaySentences 𝔅 F r) (λ _ => F → Sentence L) := ⟨λ σ => σ.σ⟩
+instance {F : Kripke.Frame} {r : F} [Fintype F] : CoeFun (SolovaySentences 𝔅 F r) (λ _ => F → Sentence L) := ⟨λ σ => σ.σ⟩
 
-variable {M : Model} {r : M.World} [M.IsFiniteTree r] [Fintype M]
+variable {M : Model} [Fintype M] [M.IsIrreflexive] [M.IsTransitive] {r : M.World} [M.IsRootedBy r]
 
 variable (S : SolovaySentences 𝔅 M.toFrame r)
 
 noncomputable def realization :
     Realization 𝔅 := ⟨fun a ↦ ⩖ i ∈ { i : M | i ⊧ (.atom a) }, S i⟩
 
+omit [M.IsRootedBy r] in
 private lemma mainlemma_aux {i : M} (hri : r ≺ i) :
     (i ⊧ A → T₀ ⊢ S i ➝ S.realization A) ∧
     (i ⊭ A → T₀ ⊢ S i ➝ ∼S.realization A) := by
@@ -94,9 +95,11 @@ private lemma mainlemma_aux {i : M} (hri : r ≺ i) :
         contra! $ prov_distribute_imply' $ CN!_of_CN!_right $ (ihA (IsTrans.trans _ _ _ hri Rij)).2 hA;
       exact C!_trans (S.SC2 i j Rij) this;
 
+omit [M.IsRootedBy r] in
 theorem mainlemma (S : SolovaySentences 𝔅 M.toFrame r) {i : M} (hri : r ≺ i) :
     i ⊧ A → T₀ ⊢ S i ➝ S.realization A := (mainlemma_aux S hri).1
 
+omit [M.IsRootedBy r] in
 theorem mainlemma_neg (S : SolovaySentences 𝔅 M.toFrame r) {i : M} (hri : r ≺ i) :
     i ⊭ A → T₀ ⊢ S i ➝ ∼S.realization A := (mainlemma_aux S hri).2
 

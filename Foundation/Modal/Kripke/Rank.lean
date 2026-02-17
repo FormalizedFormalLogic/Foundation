@@ -175,7 +175,7 @@ end Frame
 
 section
 
-variable {M : Model} {r : M.World} [M.IsFiniteTree r] [Fintype M]
+variable {M : Model} [Fintype M] [M.IsTransitive] [M.IsConverseWellFounded] {r : M.World} [M.IsRootedBy r]
 
 lemma height_lt_iff_satisfies_boxbot {i : M} :
     M.rank i < n ↔ i ⊧ □^[n] ⊥ := by

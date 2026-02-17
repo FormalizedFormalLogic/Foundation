@@ -193,6 +193,8 @@ instance isTransitive [M.IsTransitive] : (M.extendRoot n).IsTransitive := Frame.
 
 instance isAsymmetric [M.IsAsymmetric] : (M.extendRoot n).IsAsymmetric := Frame.extendRoot.isAsymmetric
 
+instance isRooted [M.IsRootedBy r] : (M.extendRoot n).IsRootedBy extendRoot.root := Frame.extendRoot.instIsRooted
+
 instance isTree [M.IsTree r] : (M.extendRoot n).IsTree extendRoot.root := Frame.extendRoot.isTree
 
 instance isFiniteTree [M.IsFiniteTree r] : (M.extendRoot n).IsFiniteTree extendRoot.root := Frame.extendRoot.isFiniteTree
