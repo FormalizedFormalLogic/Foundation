@@ -352,6 +352,62 @@ inductive IsQuest : Semiformula L ξ n → Prop
 @[simp] lemma IsQuest.not_all (φ : Semiformula L ξ (n + 1)) : ¬IsQuest (∀⁰ φ) := by intro h; cases h
 @[simp] lemma IsQuest.not_exs (φ : Semiformula L ξ (n + 1)) : ¬IsQuest (∃⁰ φ) := by intro h; cases h
 
+/-! ### Polarity -/
+
+inductive Negative : Semiformula L ξ n → Prop
+  | nrel (R : L.Rel arity) (v : Fin arity → Semiterm L ξ n) : Negative (nrel R v)
+  | top : Negative (⊤ : Semiformula L ξ n)
+  | bot : Negative (⊥ : Semiformula L ξ n)
+  | par (φ ψ : Semiformula L ξ n) : Negative (φ ⅋ ψ)
+  | with (φ ψ : Semiformula L ξ n) : Negative (φ ＆ ψ)
+  | quest (φ : Semiformula L ξ n) : Negative (？φ)
+  | all (φ : Semiformula L ξ (n + 1)) : Negative (∀⁰ φ)
+
+attribute [simp] Negative.nrel Negative.top Negative.bot Negative.par Negative.with Negative.quest Negative.all
+
+@[simp] lemma rel_not_negative (r : L.Rel k) (v : Fin k → Semiterm L ξ n) : ¬Negative (rel r v) := by rintro ⟨⟩
+@[simp] lemma one_not_negative : ¬Negative (1 : Semiformula L ξ n) := by rintro ⟨⟩
+@[simp] lemma zero_not_negative : ¬Negative (0 : Semiformula L ξ n) := by rintro ⟨⟩
+@[simp] lemma tensor_not_negative (φ ψ : Semiformula L ξ n) : ¬Negative (φ ⨂ ψ) := by rintro ⟨⟩
+@[simp] lemma plus_not_negative (φ ψ : Semiformula L ξ n) : ¬Negative (φ ⨁ ψ) := by rintro ⟨⟩
+@[simp] lemma bang_not_negative (φ : Semiformula L ξ n) : ¬Negative (！φ) := by rintro ⟨⟩
+@[simp] lemma exs_not_negative (φ : Semiformula L ξ (n + 1)) : ¬Negative (∃⁰ φ) := by rintro ⟨⟩
+
+inductive Positive : Semiformula L ξ n → Prop
+  | rel (R : L.Rel arity) (v : Fin arity → Semiterm L ξ n) : Positive (rel R v)
+  | one : Positive (1 : Semiformula L ξ n)
+  | zero : Positive (0 : Semiformula L ξ n)
+  | tensor (φ ψ : Semiformula L ξ n) : Positive (φ ⨂ ψ)
+  | plus (φ ψ : Semiformula L ξ n) : Positive (φ ⨁ ψ)
+  | bang (φ : Semiformula L ξ n) : Positive (！φ)
+  | exs (φ : Semiformula L ξ (n + 1)) : Positive (∃⁰ φ)
+
+attribute [simp] Positive.rel Positive.one Positive.zero Positive.tensor Positive.plus Positive.bang Positive.exs
+
+@[simp] lemma nrel_not_positive (r : L.Rel k) (v : Fin k → Semiterm L ξ n) : ¬Positive (nrel r v) := by rintro ⟨⟩
+@[simp] lemma falsum_not_positive : ¬Positive (⊥ : Semiformula L ξ n) := by rintro ⟨⟩
+@[simp] lemma verum_not_positive : ¬Positive (⊤ : Semiformula L ξ n) := by rintro ⟨⟩
+@[simp] lemma par_not_positive (φ ψ : Semiformula L ξ n) : ¬Positive (φ ⅋ ψ) := by rintro ⟨⟩
+@[simp] lemma with_not_positive (φ ψ : Semiformula L ξ n) : ¬Positive (φ ＆ ψ) := by rintro ⟨⟩
+@[simp] lemma quest_not_positive (φ : Semiformula L ξ n) : ¬Positive (？φ) := by rintro ⟨⟩
+@[simp] lemma all_not_positive (φ : Semiformula L ξ (n + 1)) : ¬Positive (∀⁰ φ) := by rintro ⟨⟩
+
+@[simp] lemma not_negative_iff_positive (φ : Semiformula L ξ n) : ¬Negative φ ↔ Positive φ := by
+  induction φ using rec' <;> simp [*]
+
+@[simp] lemma not_positive_iff_negative (φ : Semiformula L ξ n) : ¬Positive φ ↔ Negative φ := by
+  induction φ using rec' <;> simp [*]
+
+instance : Decidable (Positive φ) :=
+  match φ with
+  |  rel _ _ | 1 | 0 | _ ⨂ _ | _ ⨁ _ | ！_ | ∃⁰ _ => Decidable.isTrue (by simp)
+  | nrel _ _ | ⊥ | ⊤ | _ ⅋ _ | _ ＆ _ | ？_ | ∀⁰ _ => Decidable.isFalse (by simp)
+
+instance : Decidable (Negative φ) :=
+  match φ with
+  | nrel _ _ | ⊤ | ⊥ | _ ⅋ _ | _ ＆ _ | ？_ | ∀⁰ _ => Decidable.isTrue (by simp)
+  |  rel _ _ | 1 | 0 | _ ⨂ _ | _ ⨁ _ | ！_ | ∃⁰ _ => Decidable.isFalse (by simp)
+
 end Semiformula
 
 end LO.FirstOrder.LinearLogic

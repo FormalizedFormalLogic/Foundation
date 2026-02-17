@@ -167,6 +167,23 @@ def identity : (φ : Statement L) → ⊢! [φ, ∼φ]
     this.all.rotate
   termination_by φ => φ.complexity
 
+def prec {α : Type*} (f : α → Statement L)
+  {C : (a : α) → (Γ : Sequent L) → ⊢! f a :: Γ → Type*}
+  (a : α) (Γ : Sequent L) (d : ⊢! f a :: Γ) : C a Γ d := sorry
+
+def verumInversion : ⊢! ⊤ :: Γ → ⊢! Γ
+  | d => by {  }
+
+
+/--/
+def negativeWeakening (d : ⊢! Γ) (φ) (h : φ.Negative) : ⊢! φ :: Γ :=
+  match φ with
+  | ⊤ => verum Γ
+  | ⊥ => d.falsum
+  | φ ＆ ψ => by {
+    have := d.negativeWeakening φ
+   }
+
 end Derivation
 
 end LO.FirstOrder.LinearLogic
