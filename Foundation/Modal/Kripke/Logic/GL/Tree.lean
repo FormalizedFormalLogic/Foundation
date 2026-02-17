@@ -29,20 +29,27 @@ open Kripke Kripke.Model
 theorem tree_completeness_TFAE : [
   Modal.GL ⊢ φ,
   FrameClass.finite_GL ⊧ φ,
+  ∀ F : Kripke.Frame, [F.IsFinite] → [F.IsTransitive] → [F.IsConverseWellFounded] → ∀ r, [F.IsRootedBy r] → F ⊧ φ,
+  ∀ F : Kripke.Frame, [F.IsFinite] → [F.IsTransitive] → [F.IsIrreflexive] → ∀ r, [F.IsRootedBy r] → F ⊧ φ,
   ∀ F : Kripke.Frame, ∀ r, [F.IsFiniteTree r] → F ⊧ φ,
   ∀ M : Kripke.Model, ∀ r, [M.IsFiniteTree r] → r ⊧ φ
 ].TFAE := by
   tfae_have 1 → 2 := by apply Sound.sound;
   tfae_have 2 → 1 := by apply Complete.complete;
   tfae_have 2 → 3 := by
+    intro h F _ _ Fcwf r _;
+    apply h;
+    exact {}
+  tfae_have 3 → 4 := by
+    intro h F _ _ r _ V x;
+    apply h;
+  tfae_have 4 → 5 := by
     intro h F r h_tree;
     apply h;
-    apply Set.mem_setOf_eq.mpr;
-    infer_instance;
-  tfae_have 3 → 4 := by
+  tfae_have 5 → 6 := by
     intro h M r _;
     apply h;
-  tfae_have 4 → 2 := by
+  tfae_have 6 → 2 := by
     rintro H F ⟨_, F_trans, F_irrefl⟩ V r;
     let M : Kripke.Model := ⟨F, V⟩;
     have : (M↾r).IsTransitive := Frame.pointGenerate.isTransitive;
@@ -57,7 +64,7 @@ theorem tree_completeness_TFAE : [
     exact pointGenerate.pMorphism.modal_equivalence _ |>.mp this;
   tfae_finish;
 
-lemma iff_provable_satisfies_FiniteTransitiveTree : Modal.GL ⊢ φ ↔ (∀ M : Kripke.Model, ∀ r, [M.IsFiniteTree r] → r ⊧ φ) := tree_completeness_TFAE (φ := φ) |>.out 0 3
+lemma iff_provable_satisfies_FiniteTransitiveTree : Modal.GL ⊢ φ ↔ (∀ M : Kripke.Model, ∀ r, [M.IsFiniteTree r] → r ⊧ φ) := tree_completeness_TFAE (φ := φ) |>.out 0 5
 
 lemma iff_unprovable_exists_unsatisfies_FiniteTransitiveTree : Modal.GL ⊬ φ ↔ ∃ M : Model, ∃ r, M.IsFiniteTree r ∧ ¬r ⊧ φ := by
   apply Iff.not_left;

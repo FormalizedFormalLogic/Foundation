@@ -2,6 +2,7 @@ module
 
 public import Foundation.Modal.Boxdot.Basic
 public import Foundation.Modal.Kripke.Tree
+public import Foundation.Modal.Kripke.AxiomL
 public import Foundation.Vorspiel.Finset.Card
 
 public import Mathlib.Data.Finite.Sum
@@ -86,6 +87,18 @@ instance isTransitive [F.IsTransitive] : (F.extendRoot n).IsTransitive := ⟨by
   | .inl _, .inl _, .inl _ => simp_all [Frame.extendRoot]; omega;
 ⟩
 
+instance isIrreflexive [F.IsIrreflexive] : (F.extendRoot n).IsIrreflexive := by
+  constructor;
+  intro x;
+  match x with
+  | .inl i => simp_all [Frame.extendRoot];
+  | .inr x => simp [Frame.extendRoot]
+
+instance [F.IsFinite] [F.IsIrreflexive] [F.IsTransitive] : (F.extendRoot n).IsConverseWellFounded := by
+  have : (F.extendRoot n).IsTransitive := extendRoot.isTransitive;
+  have : (F.extendRoot n).IsIrreflexive := extendRoot.isIrreflexive;
+  infer_instance;
+
 @[simp] lemma rooted_original [F.IsTransitive] {x : F.World} :
     (extendRoot.root (F := F) (r := r) (n := n)) ≺ x := by
   apply Frame.root_genaretes'!;
@@ -103,7 +116,7 @@ def pMorphism : F →ₚ F.extendRoot n where
     | .inl r => simp [Frame.Rel', Frame.extendRoot] at h;
     | .inr y => use y; simpa using h;
 
-lemma not_root_of_from_root [F.IsTree r] {x : F.extendRoot n} (h : extendRoot.root ≺ x) :
+lemma not_root_of_from_root [F.IsTransitive] {x : F.extendRoot n} (h : extendRoot.root ≺ x) :
   (∃ i : Fin n, x = extend i) ∨ x = r ∨ embed r ≺ x := by
   match x with
   | .inl i =>
@@ -117,7 +130,7 @@ lemma not_root_of_from_root [F.IsTree r] {x : F.extendRoot n} (h : extendRoot.ro
       apply pMorphism.forth;
       apply Frame.root_genaretes'! (x := x) (by tauto);
 
-lemma not_root_of_from_root' [F.IsTree r] {x : F.extendRoot n} (h : extendRoot.root ≺ x) :
+lemma not_root_of_from_root' [F.IsTransitive] {x : F.extendRoot n} (h : extendRoot.root ≺ x) :
   (∃ i : Fin n, x = extend i) ∨ x = r ∨ ∃ x₀ : F, x = x₀ ∧ r ≺ x₀ := by
   rcases not_root_of_from_root h with (h | h | h)
   · tauto;
@@ -126,15 +139,15 @@ lemma not_root_of_from_root' [F.IsTree r] {x : F.extendRoot n} (h : extendRoot.r
     rcases pMorphism.back h with ⟨x₀, rfl, hx₀⟩
     exact ⟨x₀, rfl, hx₀⟩
 
-lemma not_root_of_from_root₁ [F.IsTree r] {x : F.extendRoot 1} (h : extendRoot.root ≺ x) :
+lemma not_root_of_from_root₁ [F.IsTransitive] [F.IsIrreflexive] {x : F.extendRoot 1} (h : extendRoot.root ≺ x) :
   x = r ∨ embed r ≺ x := by
   rcases not_root_of_from_root h with (⟨i, hi, rfl⟩ | hr | hr) <;> simp_all [extendRoot.root]
 
-lemma not_root_of_from_root'₁ [F.IsTree r] {x : F.extendRoot 1} (h : extendRoot.root ≺ x) :
+lemma not_root_of_from_root'₁ [F.IsTransitive] [F.IsIrreflexive]  {x : F.extendRoot 1} (h : extendRoot.root ≺ x) :
   x = r ∨ ∃ x₀ : F, x = x₀ ∧ r ≺ x₀ := by
   rcases not_root_of_from_root' h with (⟨i, hi, rfl⟩ | hr | hr) <;> simp_all [extendRoot.root]
 
-lemma eq_inr_of_root_rel [F.IsTree r] {x : F.extendRoot 1} (h : extendRoot.root ≺ x) :
+lemma eq_inr_of_root_rel [F.IsTransitive] [F.IsIrreflexive]  {x : F.extendRoot 1} (h : extendRoot.root ≺ x) :
     ∃ x₀ : F, x = x₀ := by
   rcases not_root_of_from_root'₁ h with (rfl | ⟨x₀, rfl, hx₀⟩)
   · exact ⟨_, rfl⟩
@@ -351,8 +364,8 @@ lemma inr_satisfies_axiomT_set
     infer_instance;
   obtain ⟨x, hx₁, hx₂⟩ := @validates_axiomT_set_in_irrefl_trans_chain (M := M')
     (by infer_instance)
-    (by apply isTransitive)
-    (by apply isAsymmetric.isIrrefl)
+    inferInstance
+    inferInstance
     (l := Frame.extendRoot.chain)
     (Γ := Γ)
     (Frame.extendRoot.chain_length)

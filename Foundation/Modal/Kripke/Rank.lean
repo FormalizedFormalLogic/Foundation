@@ -12,11 +12,11 @@ noncomputable section
 namespace Kripke
 
 variable {φ ψ : Formula ℕ}
-         {F : Frame} {r : F} [Fintype F] [F.IsTree r] {x y i j : F}
+         {F : Frame} [Fintype F] [F.IsConverseWellFounded] [F.IsTransitive] {r : F} [F.IsRootedBy r] {x y i j : F}
 
-def Frame.rank (i : F) : ℕ := fcwHeight (· ≺ ·) i
+def Frame.rank [Fintype F] [F.IsConverseWellFounded] [F.IsTransitive] (i : F) : ℕ := fcwHeight (· ≺ ·) i
 
-def Frame.height (F : Frame) {r : F} [Fintype F] [F.IsTree r] : ℕ := Frame.rank r
+def Frame.height (F : Frame) {r : F} [Fintype F] [F.IsConverseWellFounded] [F.IsTransitive] [F.IsRootedBy r] : ℕ := Frame.rank r
 
 namespace Frame
 
