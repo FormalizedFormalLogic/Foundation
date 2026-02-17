@@ -408,6 +408,54 @@ instance : Decidable (Negative φ) :=
   | nrel _ _ | ⊤ | ⊥ | _ ⅋ _ | _ ＆ _ | ？_ | ∀⁰ _ => Decidable.isTrue (by simp)
   |  rel _ _ | 1 | 0 | _ ⨂ _ | _ ⨁ _ | ！_ | ∃⁰ _ => Decidable.isFalse (by simp)
 
+inductive HereditaryNegative : Semiformula L ξ n → Prop
+  | quest (φ : Semiformula L ξ n) : HereditaryNegative (？φ)
+  | verum : HereditaryNegative (⊤ : Semiformula L ξ n)
+  | falsum : HereditaryNegative (⊥ : Semiformula L ξ n)
+  | par {φ ψ : Semiformula L ξ n} : HereditaryNegative φ → HereditaryNegative ψ → HereditaryNegative (φ ⅋ ψ)
+  | with {φ ψ : Semiformula L ξ n} : HereditaryNegative φ → HereditaryNegative ψ → HereditaryNegative (φ ＆ ψ)
+  | all (φ : Semiformula L ξ (n + 1)) : HereditaryNegative φ → HereditaryNegative (∀⁰ φ)
+
+namespace HereditaryNegative
+
+attribute [simp] quest verum falsum
+
+@[simp] lemma par_iff {φ ψ : Semiformula L ξ n} :
+    HereditaryNegative (φ ⅋ ψ) ↔ HereditaryNegative φ ∧ HereditaryNegative ψ := by
+  constructor
+  · rintro ⟨h₁, h₂⟩; grind
+  · rintro ⟨h₁, h₂⟩; exact par h₁ h₂
+
+@[simp] lemma with_iff {φ ψ : Semiformula L ξ n} :
+    HereditaryNegative (φ ＆ ψ) ↔ HereditaryNegative φ ∧ HereditaryNegative ψ := by
+  constructor
+  · rintro ⟨h₁, h₂⟩; grind
+  · rintro ⟨h₁, h₂⟩; exact .with h₁ h₂
+
+@[simp] lemma all_iff {φ : Semiformula L ξ (n + 1)} :
+    HereditaryNegative (∀⁰ φ) ↔ HereditaryNegative φ := by
+  constructor
+  · rintro ⟨h⟩; assumption
+  · rintro h; exact all φ h
+
+@[simp] lemma not_rel (R : L.Rel arity) (v : Fin arity → Semiterm L ξ n) : ¬HereditaryNegative (rel R v) := by rintro ⟨⟩
+
+@[simp] lemma not_nrel (R : L.Rel arity) (v : Fin arity → Semiterm L ξ n) : ¬HereditaryNegative (nrel R v) := by rintro ⟨⟩
+
+@[simp] lemma not_one : ¬HereditaryNegative (1 : Semiformula L ξ n) := by rintro ⟨⟩
+
+@[simp] lemma not_zero : ¬HereditaryNegative (0 : Semiformula L ξ n) := by rintro ⟨⟩
+
+@[simp] lemma not_tensor (φ ψ : Semiformula L ξ n) : ¬HereditaryNegative (φ ⨂ ψ) := by rintro ⟨⟩
+
+@[simp] lemma not_plus (φ ψ : Semiformula L ξ n) : ¬HereditaryNegative (φ ⨁ ψ) := by rintro ⟨⟩
+
+@[simp] lemma not_bang (φ : Semiformula L ξ n) : ¬HereditaryNegative (！φ) := by rintro ⟨⟩
+
+@[simp] lemma not_exs (φ : Semiformula L ξ (n + 1)) : ¬HereditaryNegative (∃⁰ φ) := by rintro ⟨⟩
+
+end HereditaryNegative
+
 end Semiformula
 
 end LO.FirstOrder.LinearLogic
