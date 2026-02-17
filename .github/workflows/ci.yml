@@ -61,9 +61,9 @@ jobs:
       - uses: ts-graphviz/setup-graphviz@v2
       - name: Generate import graph
         run: |
-          lake exe graph ./pages/_output/import_graph.png
-          lake exe graph ./pages/_output/import_graph.pdf
-          lake exe graph ./pages/_output/import_graph.html
+          lake exe graph ./pages/import_graph.png
+          lake exe graph ./pages/import_graph.pdf
+          lake exe graph ./pages/import_graph.html
 
       - name: Upload lean artifacts
         uses: actions/upload-artifact@v4
