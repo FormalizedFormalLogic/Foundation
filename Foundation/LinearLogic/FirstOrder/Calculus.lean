@@ -195,7 +195,7 @@ def ofHereditaryNegative : (ν : Statement L) → ν.HereditaryNegative → ⊢!
     have : ⊢! [！(∼ν ⨁ ∼μ), ？μ] := ((identity μ).rotate.plusLeft (∼ν)).rotate.dereliction.rotate.ofCourse (by simp)
     have dμ : ⊢! [μ, ！(∼ν ⨁ ∼μ)] := (this.rotate.cut ihμ).rotate
     (dν.with dμ).rotate
-  | ∀⁰ ν, h =>
+  |   ∀⁰ ν, h =>
     have ih : ⊢! [∼？ν.free, ν.free] := ofHereditaryNegative ν.free (by rcases h; simpa)
     have : ⊢! [！(∃⁰ ∼ν.shift), ？ν.free] := (exs &0 <| (identity ν.free).dereliction.rotate.cast (by simp)).ofCourse (by simp)
     have : ⊢! (ν).free :: [∼？(∀⁰ ν)]⁺ := (this.rotate.cut ih).rotate.cast (by simp)
