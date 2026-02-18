@@ -35,16 +35,21 @@ jobs:
         uses: actions/cache/restore@v5
         with:
           path: .lake/Foundation-x86_64-unknown-linux-gnu.tar.gz
-          key: lake-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('lean-toolchain') }}-${{ hashFiles('lake-manifest.json') }}
+          # NOTE: including github SHA for avoding cache key reserving problem
+          key: lake-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('lean-toolchain') }}-${{ hashFiles('lake-manifest.json') }}-${{ github.sha }}
+          restore-keys: |
+            lake-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('lean-toolchain') }}-${{ hashFiles('lake-manifest.json') }}
       - name: Unpack project cache
-        if: steps.cache-restore.outputs.cache-hit == 'true'
+        if: hashFiles('.lake/Foundation-x86_64-unknown-linux-gnu.tar.gz') != ''
         run: lake unpack
 
       - name: Build Foundation
         run: lake build Foundation
 
-      - name: Build doc
+      - name: Build docs
         run: lake build Foundation:docs
+      - name: Copy docs to pages
+        run: cp -r .lake/build/doc pages/docs
 
       - name: Pack project cache
         run: lake pack
@@ -56,23 +61,20 @@ jobs:
           path: .lake/Foundation-x86_64-unknown-linux-gnu.tar.gz
           key: ${{ steps.cache-restore.outputs.cache-primary-key }}
 
-      - name: Copy doc
-        if: github.ref == 'refs/heads/master'
-        run: cp -r .lake/build/doc ./pages/_output/docs
-      - name: Setup Graphviz
-        uses: ts-graphviz/setup-graphviz@v2
-        if: github.ref == 'refs/heads/master'
+      - uses: ts-graphviz/setup-graphviz@v2
       - name: Generate import graph
-        if: github.ref == 'refs/heads/master'
         run: |
-          lake exe graph ./pages/_output/import_graph.png
-          lake exe graph ./pages/_output/import_graph.pdf
-          lake exe graph ./pages/_output/import_graph.html
-      - name: Upload pages artifact
-        uses: actions/upload-pages-artifact@v4
-        if: github.ref == 'refs/heads/master'
+          lake exe graph ./pages/import_graph.png
+          lake exe graph ./pages/import_graph.pdf
+          lake exe graph ./pages/import_graph.html
+
+      - name: Upload lean artifacts
+        uses: actions/upload-artifact@v4
         with:
-          path: pages/_output
+          name: lean-artifacts
+          path: pages
+          retention-days: 1
+          include-hidden-files: true
 
   check-references:
     name: Check references.bib format
@@ -91,6 +93,7 @@ jobs:
           diff -u references.bib references.bib.formatted || (echo "references.bib is not formatted" && exit 1)
 
   deploy:
+    name: Generate page
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/master'
     needs:
@@ -100,5 +103,27 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
-      - id: deployment
-        uses: actions/deploy-pages@v4
+      - uses: actions/checkout@v6
+      - uses: pandoc/actions/setup@v1
+
+      - name: Download lean artifacts
+        uses: actions/download-artifact@v5
+        with:
+          name: lean-artifacts
+
+      - name: Compile README.md to index.html
+        run: |
+          pandoc \
+           README.md \
+           --from markdown \
+           --to html5 \
+           --standalone \
+           --katex \
+           --metadata title="FormalizedFormalLogic/Foundation" \
+           --output pages/index.html
+
+      - uses: actions/upload-pages-artifact@v4
+        with:
+          path: pages
+      - uses: actions/deploy-pages@v4
+        id: deployment
