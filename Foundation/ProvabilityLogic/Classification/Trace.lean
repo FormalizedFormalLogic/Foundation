@@ -87,9 +87,8 @@ lemma subset_trace_of_provable_imp_GL (h : Modal.GL ⊢ φ ➝ ψ) : ψ.trace �
   apply iff_mem_trace.mpr;
   refine ⟨M, inferInstance, inferInstance, inferInstance, r, inferInstance, rfl, ?_⟩;
   contrapose! hr;
-  have : M.IsFiniteTree r := {}
-  apply GL.Kripke.iff_provable_satisfies_FiniteTransitiveTree.mp h;
-  assumption;
+  have := GL.Kripke.fintype_completeness_TFAE.out 0 2 |>.mp h;
+  exact this M r hr;
 
 end Formula
 
@@ -374,7 +373,9 @@ lemma Formula.trace.finite_or_cofinite : φ.trace.Finite ∨ φ.trace.Cofinite :
   have H₁ : r ⊧ ∼□^[(φ.rflSubformula.card + 1)]⊥ := height_lt_iff_satisfies_boxbot (i := r) (n := φ.rflSubformula.card + 1) |>.not.mp $ by
     rw [←Frame.height];
     omega;
-  have H₂ : r ⊧ ∼□^[(φ.rflSubformula.card + 1)]⊥ ➝ ◇φ.rflSubformula.conj := GL.Kripke.iff_provable_satisfies_FiniteTransitiveTree.mp (GL.formalized_validates_axiomT_set_in_irrefl_trans_chain) M r;
+
+  have := GL.Kripke.fintype_completeness_TFAE (φ := ∼□^[(φ.rflSubformula.card + 1)]⊥ ➝ ◇φ.rflSubformula.conj) |>.out 0 2 |>.mp GL.formalized_validates_axiomT_set_in_irrefl_trans_chain;
+  have H₂ : r ⊧ ∼□^[(φ.rflSubformula.card + 1)]⊥ ➝ ◇φ.rflSubformula.conj := this M r;
   obtain ⟨a, Rrx, hx⟩ := Satisfies.dia_def.mp $ H₂ H₁;
   replace Rrx : r ≠ a := by rintro rfl; apply M.irrefl _ Rrx;
 
@@ -413,8 +414,8 @@ lemma subset_GLα_of_trace_coinfinite (hL : L.trace.Coinfinite) : L ⊆ Modal.GL
   apply Logic.sumQuasiNormal.iff_provable_finite_provable_letterless ?_ |>.mpr ⟨(Tφ.image TBB), ?_, ?_⟩;
   . grind;
   . simpa [Tφ]
-  . apply GL.Kripke.tree_completeness_TFAE.out 5 0 |>.mp;
-    intro M r _ hr;
+  . apply GL.Kripke.fintype_completeness_TFAE.out 2 0 |>.mp;
+    intro M _ _ _ r _ hr;
     have : Fintype M.World := Fintype.ofFinite _;
     apply Formula.satisfies_of_not_mem_trace (n := M.height) |>.mp;
     . replace hr : ∀ n ∈ φ.trace, M.height ≠ n := by
@@ -443,8 +444,8 @@ lemma subset_GLβMinus_of_trace_cofinite (hL : L.trace.Cofinite) : L ⊆ Modal.G
   apply Logic.sumQuasiNormal.iff_provable_finite_provable_letterless ?_ |>.mpr ⟨{∼⩕ n ∈ Tφ, TBB n}, ?_, ?_⟩;
   . grind;
   . simp_all [Set.compl_iUnion, Tφ];
-  . apply GL.Kripke.tree_completeness_TFAE.out 5 0 |>.mp;
-    intro M r _ hr;
+  . apply GL.Kripke.fintype_completeness_TFAE.out 2 0 |>.mp;
+    intro M _ _ _ r _ hr;
     have : Fintype M.World := Fintype.ofFinite _;
     apply Formula.satisfies_of_not_mem_trace (n := M.height) |>.mp;
     . replace hr : ∀ (n : ℕ), ∀ x ∈ L, n ∈ x.trace → ¬M.height = n := by
@@ -496,10 +497,8 @@ lemma provable_TBB_of_mem_trace
 
   let M₀ := M.extendRoot 1;
   let r₀ : M₀ := Frame.extendRoot.root (n := 1);
-  have : M₀.IsRootedBy r₀ := Frame.extendRoot.instIsRooted
   have Rr₀ : ∀ {x : M}, r₀ ≺ x := λ {x} => Frame.root_genaretes'! (r := r₀) x (by simp);
 
-  have : M₀.IsFiniteTree r₀ := {};
   let S : SolovaySentences T.standardProvability M₀.toFrame r₀ := SolovaySentences.standard T M₀.toFrame;
   have : M₀ ⊧ A ➝ (Modal.TBB M.height) := by
     rintro x hA;
@@ -591,9 +590,7 @@ lemma provable_TBBMinus_of_mem_trace
   obtain ⟨A, hA₁, hA₂⟩ := Set.not_subset.mp hS;
   replace hA₁ : L ⊢ A := Logic.iff_provable.mpr hA₁;
   replace hA₂ : Modal.GL ⊬ A.rflSubformula.conj ➝ A := Modal.Logic.iff_provable_rflSubformula_GL_provable_S.not.mpr $ Logic.iff_provable.not.mpr hA₂;
-  obtain ⟨M₁, r₁, _, hM⟩ := Modal.GL.Kripke.iff_unprovable_exists_unsatisfies_FiniteTransitiveTree.mp hA₂;
-  have : Fintype M₁.World := Fintype.ofFinite _;
-  have : M₁.IsFiniteTree r₁ := {};
+  obtain ⟨M₁, _, _, _, r₁, _, hM⟩ := Modal.GL.Kripke.iff_unprovable_exists_fintype_rooted_model.mp hA₂;
 
   let M₀ := Model.extendRoot M₁ 1;
   let r₀ : M₀.World := Model.extendRoot.root;

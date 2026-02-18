@@ -1,6 +1,5 @@
 module
 
-public import Foundation.Modal.Kripke.Logic.GL.Tree
 public import Foundation.Modal.Kripke.ExtendRoot
 
 @[expose] public section

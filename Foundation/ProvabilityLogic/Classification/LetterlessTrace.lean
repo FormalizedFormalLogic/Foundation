@@ -508,14 +508,13 @@ lemma iff_GL_provable_letterlessSpectrum_Univ : Modal.GL ⊢ φ ↔ φ.letterles
   . intro h n;
     apply Kripke.letterlessSpectrum_TFAE (φ := φ) (by grind) |>.out 1 0 |>.mp;
     intro M _ _ _ r _ w _;
-    have := GL.Kripke.tree_completeness_TFAE.out 0 2 |>.mp h;
+    have := GL.Kripke.fintype_completeness_TFAE.out 0 1 |>.mp h;
     apply @this M.toFrame;
   . intro h;
-    apply GL.Kripke.tree_completeness_TFAE.out 2 0 |>.mp;
-    intro F _ _ _ r _ V w;
-    have : Fintype (⟨F, V⟩ : Kripke.Model).World := Fintype.ofFinite _
-    have := Kripke.letterlessSpectrum_TFAE (φ := φ) (n := Kripke.Frame.rank w) (by grind) |>.out 0 1 |>.mp;
-    apply this (by grind) _ r w rfl;
+    apply GL.Kripke.fintype_completeness_TFAE.out 1 0 |>.mp;
+    intro M _ _ _ r _ V x;
+    have := Kripke.letterlessSpectrum_TFAE (φ := φ) (n := Kripke.Frame.rank x) (by grind) |>.out 0 1 |>.mp;
+    apply this (by grind) _ r x rfl;
 
 lemma iff_GL_provable_C_subset_letterlessSpectrum : Modal.GL ⊢ (φ ➝ ψ) ↔ φ.letterlessSpectrum hφ ⊆ ψ.letterlessSpectrum hψ := by
   apply Iff.trans $ iff_GL_provable_letterlessSpectrum_Univ (show (φ ➝ ψ).Letterless by grind);
