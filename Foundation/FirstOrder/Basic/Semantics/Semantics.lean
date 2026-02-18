@@ -568,7 +568,7 @@ infix:45 " ⊧ₘ* " => ModelsTheory
 
 abbrev Consequence (T : Theory L) (σ : Sentence L) : Prop := T ⊨[SmallStruc L] σ
 
-/-- Semantic entailment -/
+/-- Semantic entailment, also known as logical consequence. -/
 infix:45 " ⊨ " => Consequence
 
 abbrev Satisfiable (T : Theory L) : Prop := Semantics.Satisfiable (SmallStruc L) T

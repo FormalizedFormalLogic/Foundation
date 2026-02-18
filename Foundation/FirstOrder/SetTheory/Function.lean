@@ -49,17 +49,13 @@ lemma domain_subset_of_subset_prod {R X Y : V} (h : R ⊆ X ×ˢ Y) : domain R �
   have : x ∈ X ∧ y ∈ Y := by simpa using h _ hy
   exact this.1
 
-lemma domain_union_subset {R₁ R₂ : V} : domain (R₁ ∪ R₂) ⊆ domain R₁ ∪ domain R₂ := by
-  intro p
-  simp only [mem_domain_iff, mem_union_iff]
-  intro ⟨y, hy⟩
-  (refine exists_or.mp ?_ ; use y)
+@[simp]
+lemma domain_union {R₁ R₂ : V} : domain (R₁ ∪ R₂) = domain R₁ ∪ domain R₂ := by
+  ext p
+  constructor <;> (simp_all only [mem_union_iff, mem_domain_iff]; grind)
 
 lemma domain_inter_subset {R₁ R₂ : V} : domain (R₁ ∩ R₂) ⊆ domain R₁ ∩ domain R₂ := by
-  intro p
-  simp only [mem_domain_iff, mem_inter_iff]
-  intro ⟨y, hy₁, hy₂⟩
-  apply And.intro <;> use y
+  intro p; simp only [mem_domain_iff, mem_inter_iff]; grind
 
 @[simp, grind .] lemma domain_insert {x y R : V} : domain (insert (⟨x, y⟩ₖ) R) = insert x (domain R) := by
   ext z; simp only [mem_domain_iff, mem_insert, kpair_iff]; grind
@@ -98,17 +94,13 @@ lemma range_subset_of_subset_prod {R X Y : V} (h : R ⊆ X ×ˢ Y) : range R ⊆
   have : x ∈ X ∧ y ∈ Y := by simpa using h _ hx
   exact this.2
 
-lemma range_union_subset {R₁ R₂ : V} : range (R₁ ∪ R₂) ⊆ range R₁ ∪ range R₂ := by
-  intro p
-  simp only [mem_range_iff, mem_union_iff]
-  intro ⟨y, hy⟩
-  (refine exists_or.mp ?_ ; use y)
+@[simp]
+lemma range_union {R₁ R₂ : V} : range (R₁ ∪ R₂) = range R₁ ∪ range R₂ := by
+  ext p
+  constructor <;> (simp_all only [mem_union_iff, mem_range_iff]; grind)
 
 lemma range_inter_subset {R₁ R₂ : V} : range (R₁ ∩ R₂) ⊆ range R₁ ∩ range R₂ := by
-  intro p
-  simp only [mem_range_iff, mem_inter_iff]
-  intro ⟨y, hy₁, hy₂⟩
-  apply And.intro <;> use y
+  intro p; simp only [mem_range_iff, mem_inter_iff]; grind
 
 @[simp, grind =] lemma range_insert {x y R : V} : range (insert (⟨x, y⟩ₖ) R) = insert y (range R) := by
   ext z; simp only [mem_range_iff, mem_insert, kpair_iff]; grind
