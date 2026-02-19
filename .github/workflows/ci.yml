@@ -28,6 +28,7 @@ jobs:
           lake --version
           lean --version
 
+      # Restore project cache
       - name: Get Mathlib cache
         run: lake exe cache get
       - name: Restore cache
@@ -91,6 +92,23 @@ jobs:
       - name: Check if formatted correctly
         run: |
           diff -u references.bib references.bib.formatted || (echo "references.bib is not formatted" && exit 1)
+
+  mk-all-check:
+    name: Check mk_all executed
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - name: Setup elan
+        run: |
+          curl https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -sSf | sh -s -- -y
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Check mk_all executed
+        run: |
+          lake exe mk_all --module
+          if [ -n "$(git diff)" ]; then
+            echo "Files were modified by mk_all. Please run 'lake exe mk_all --module' and commit the changes."
+            exit 1
+          fi
 
   deploy:
     name: Generate page

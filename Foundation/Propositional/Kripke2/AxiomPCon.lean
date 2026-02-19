@@ -6,6 +6,7 @@ module
 
 public import Foundation.Propositional.Kripke2.Basic
 public import Foundation.Propositional.Entailment.LC
+public import Foundation.Vorspiel.Rel.Connected
 
 @[expose] public section
 
@@ -47,7 +48,7 @@ end Frame
 
 -- TODO: need formula level hereditary
 @[simp high, grind .]
-lemma valid_axiomSym_of_isSymmetric [F.IsPiecewiseConnected] : F ⊧ Axioms.PCon₁ φ ψ := by
+lemma valid_axiomPCon₁_of_isPiecewiseConnected [F.IsPiecewiseConnected] : F ⊧ Axioms.PCon₁ φ ψ := by
   intro V x;
   by_contra hC;
   rcases Satisfies.not_def_or.mp hC with ⟨h₁, h₂⟩; clear hC;
