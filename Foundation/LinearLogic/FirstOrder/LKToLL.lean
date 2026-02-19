@@ -292,5 +292,14 @@ def toLL {Γ : Sequent L} : ⊢ᵀ Γ → ⊢ᴸ Γ‡
 
 end Derivation
 
+namespace Proof
+
+variable [L.DecidableEq]
+
+theorem toLL (φ : Sentence L) : 𝐋𝐊 ⊢ φ → 𝐋𝐋 ⊢ φ.Girardₗ := fun h ↦ ⟨by
+  have : 𝐋𝐊₀ ⊢ (φ : SyntacticFormula L) := by simpa using Proof.cast.mp h
+  simpa using Derivation.toLL this.get⟩
+
+end Proof
 
 end LO.FirstOrder
