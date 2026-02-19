@@ -190,6 +190,7 @@ public import Foundation.LinearLogic.MLL
 public import Foundation.LinearLogic.FirstOrder.Formula
 public import Foundation.LinearLogic.FirstOrder.Rew
 public import Foundation.LinearLogic.FirstOrder.Calculus
+public import Foundation.LinearLogic.FirstOrder.LKToLL
 public import Foundation.Logic.Calculus
 public import Foundation.Logic.Decidability
 public import Foundation.Logic.Disjunctive
