@@ -49,8 +49,6 @@ jobs:
 
       - name: Build docs
         run: lake build Foundation:docs
-      - name: Copy docs to pages
-        run: cp -r .lake/build/doc pages/docs
 
       - name: Pack project cache
         run: lake pack
@@ -65,15 +63,19 @@ jobs:
       - uses: ts-graphviz/setup-graphviz@v2
       - name: Generate import graph
         run: |
-          lake exe graph ./pages/import_graph.png
-          lake exe graph ./pages/import_graph.pdf
-          lake exe graph ./pages/import_graph.html
+          lake exe graph ./import_graph.png
+          lake exe graph ./import_graph.pdf
+          lake exe graph ./import_graph.html
 
       - name: Upload lean artifacts
         uses: actions/upload-artifact@v4
         with:
           name: lean-artifacts
-          path: pages
+          path: |
+            .lake/build/doc
+            import_graph.png
+            import_graph.pdf
+            import_graph.html
           retention-days: 1
           include-hidden-files: true
 
@@ -113,13 +115,13 @@ jobs:
   deploy:
     name: Generate page
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/master'
+    # if: github.ref == 'refs/heads/master'
     needs:
       - build
       - check-references
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+    # environment:
+    #   name: github-pages
+    #   url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@v6
       - uses: pandoc/actions/setup@v1
@@ -128,6 +130,12 @@ jobs:
         uses: actions/download-artifact@v5
         with:
           name: lean-artifacts
+      - name: Copy from artifacts to pages
+        run: |
+          cp -r $GITHUB_WORKSPACE/.lake/build/doc pages/docs
+          cp $GITHUB_WORKSPACE/import_graph.png pages/
+          cp $GITHUB_WORKSPACE/import_graph.pdf pages/
+          cp $GITHUB_WORKSPACE/import_graph.html pages/
 
       - name: Compile README.md to index.html
         run: |
@@ -143,5 +151,5 @@ jobs:
       - uses: actions/upload-pages-artifact@v4
         with:
           path: pages
-      - uses: actions/deploy-pages@v4
-        id: deployment
+      # - uses: actions/deploy-pages@v4
+      #   id: deployment
