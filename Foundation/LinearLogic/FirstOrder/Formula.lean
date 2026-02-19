@@ -529,6 +529,63 @@ instance (φ : Semiformula L ξ n) : Decidable φ.Negative :=
 
 end Negative
 
+inductive Positive : Semiformula L ξ n → Prop
+  | ofCourse (φ : Semiformula L ξ n) : Positive (！φ)
+  | zero : Positive (0 : Semiformula L ξ n)
+  | one : Positive (1 : Semiformula L ξ n)
+  | tensor : Positive φ → Positive ψ → Positive (φ ⨂ ψ)
+  | plus : Positive φ → Positive ψ → Positive (φ ⨁ ψ)
+  | exs : Positive φ → Positive (∃⁰ φ)
+
+namespace Positive
+
+attribute [simp] ofCourse zero one
+
+@[simp] lemma tensor_iff {φ ψ : Semiformula L ξ n} :
+    Positive (φ ⨂ ψ) ↔ Positive φ ∧ Positive ψ := by
+  constructor
+  · rintro ⟨h₁, h₂⟩; grind
+  · rintro ⟨h₁, h₂⟩; exact tensor h₁ h₂
+
+@[simp] lemma plus_iff {φ ψ : Semiformula L ξ n} :
+    Positive (φ ⨁ ψ) ↔ Positive φ ∧ Positive ψ := by
+  constructor
+  · rintro ⟨h₁, h₂⟩; grind
+  · rintro ⟨h₁, h₂⟩; exact plus h₁ h₂
+
+@[simp] lemma exs_iff {φ : Semiformula L ξ (n + 1)} :
+    Positive (∃⁰ φ) ↔ Positive φ := by
+  constructor
+  · rintro ⟨h⟩; assumption
+  · rintro h; exact exs h
+
+@[simp] lemma not_rel (R : L.Rel arity) (v : Fin arity → Semiterm L ξ n) : ¬Positive (rel R v) := by rintro ⟨⟩
+
+@[simp] lemma not_nrel (R : L.Rel arity) (v : Fin arity → Semiterm L ξ n) : ¬Positive (nrel R v) := by rintro ⟨⟩
+
+@[simp] lemma not_verum : ¬Positive (⊤ : Semiformula L ξ n) := by rintro ⟨⟩
+
+@[simp] lemma not_falsum : ¬Positive (⊥ : Semiformula L ξ n) := by rintro ⟨⟩
+
+@[simp] lemma not_par (φ ψ : Semiformula L ξ n) : ¬Positive (φ ⅋ ψ) := by rintro ⟨⟩
+
+@[simp] lemma not_with (φ ψ : Semiformula L ξ n) : ¬Positive (φ ＆ ψ) := by rintro ⟨⟩
+
+@[simp] lemma not_quest (φ : Semiformula L ξ n) : ¬Positive (？φ) := by rintro ⟨⟩
+
+@[simp] lemma not_all (φ : Semiformula L ξ (n + 1)) : ¬Positive (∀⁰ φ) := by rintro ⟨⟩
+
+@[simp] lemma neg_positive_iff_negative (φ : Semiformula L ξ n) : Positive (∼φ) ↔ Negative φ := by
+  induction φ using rec' <;> simp [*]
+
+@[simp] lemma neg_negative_iff_positive (φ : Semiformula L ξ n) : Negative (∼φ) ↔ Positive φ := by
+  induction φ using rec' <;> simp [*]
+
+@[simp, grind .] lemma positive_negative_disjoint (φ : Semiformula L ξ n) : ¬Positive φ ∨ ¬Negative φ := by
+  induction φ using rec' <;> simp [*]
+
+end Positive
+
 end Semiformula
 
 end LO.FirstOrder.LinearLogic
