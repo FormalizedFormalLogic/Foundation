@@ -33,7 +33,7 @@ section
 
 omit [ℕ ⊧ₘ* T]
 
-variable {M₁ : Kripke.Model} {r₁ : M₁} [M₁.IsFiniteTree r₁] {A : Formula _}
+variable {M₁ : Kripke.Model} {r₁ : M₁} [Fintype M₁.World] [M₁.IsIrreflexive] [M₁.IsTransitive] [M₁.IsRootedBy r₁] {A : Formula _}
 
 lemma refl_mainlemma_aux (hA : ¬r₁ ⊧ (A.rflSubformula.conj ➝ A)) :
   let M₀ := M₁.extendRoot 1
@@ -172,7 +172,7 @@ lemma GL_S_TFAE :
     contrapose;
     push_neg;
     intro hA;
-    obtain ⟨M₁, r₁, _, hA⟩ := GL.Kripke.iff_unprovable_exists_unsatisfies_FiniteTransitiveTree.mp hA;
+    obtain ⟨M₁, _, _, _, r₁, _, hA⟩ := GL.Kripke.iff_unprovable_exists_fintype_rooted_model.mp hA;
 
     let M₀ := Model.extendRoot M₁ 1;
     let r₀ : M₀.World := Model.extendRoot.root;
@@ -182,6 +182,7 @@ lemma GL_S_TFAE :
 
     have := Formula.Kripke.Satisfies.not_imp_def.mp hA |>.2;
     have : ℕ ⊧ₘ S r₀ ➝ ∼S.realization A := models_of_provable inferInstance $ by
+      show 𝗜𝚺₁ ⊢ S r₀ ➝ ∼S.realization A;
       convert SolovaySentences.rfl_mainlemma_neg (T := T) hA A (by grind) $ Formula.Kripke.Satisfies.not_imp_def.mp hA |>.2;
     simp only [Models, LO.Semantics.Not.models_not, LO.Semantics.Imp.models_imply] at this;
     exact this <| by
