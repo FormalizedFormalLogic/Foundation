@@ -22,7 +22,7 @@ theorem S.arithmetical_soundness (h : Modal.S ⊢ A) (f : Realization 𝔅) : �
   | axiomT =>
     simp only [Realization.interpret, Models, LO.Semantics.Imp.models_imply];
     intro h;
-    exact models_of_provable inferInstance (Iff.mp sound_on_model h)
+    exact models_of_provable inferInstance (Iff.mp Provability.sound_on_model h)
   | mdp ihAB ihA =>
     simp only [Realization.interpret, Models, LO.Semantics.Imp.models_imply] at ihAB;
     apply ihAB ihA;

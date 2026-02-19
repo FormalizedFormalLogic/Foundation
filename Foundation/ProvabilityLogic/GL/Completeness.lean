@@ -17,11 +17,13 @@ open Modal.Kripke
 open ArithmeticTheory (provabilityLogicOn)
 
 variable {T : ArithmeticTheory} [T.Δ₁] [𝗜𝚺₁ ⪯ T] {A : Modal.Formula _}
+  [T.standardProvability.SoundOnClass ((T.standardProvability^[·] ⊥) '' Set.univ)]
 
 theorem unprovable_realization_exists
-    (M₁ : Model) [Fintype M₁] {r₁ : M₁} [M₁.IsFiniteTree r₁]
-    (hA : r₁ ⊭ A) (h : M₁.height < T.height) :
-    ∃ f : T.StandardRealization, T ⊬ f A := by
+  (M₁ : Model) [Fintype M₁] {r₁ : M₁} [M₁.IsFiniteTree r₁]
+  (hA : r₁ ⊭ A) (h : M₁.height < T.height)
+  -- [(Theory.standardProvability T).SoundOn (((Theory.standardProvability T))^[(Frame.rank (F := M₁.toFrame) r₀).pred] ⊥)]
+  : ∃ f : T.StandardRealization, T ⊬ f A := by
   let M₀ := M₁.extendRoot 1
   let r₀ : M₀ := Frame.extendRoot.root
   have hdnA : r₀ ⊧ ◇(∼A) := by

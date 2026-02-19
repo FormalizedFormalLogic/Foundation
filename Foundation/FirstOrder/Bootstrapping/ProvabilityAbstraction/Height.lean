@@ -15,6 +15,12 @@ namespace ProvabilityAbstraction
 
 variable {𝔅 : Provability T₀ T}
 
+noncomputable def Provability.height (𝔅 : Provability T₀ T) : ENat := ENat.find (T ⊢ 𝔅^[·] ⊥)
+
+instance [𝔅.SoundOnClass ((𝔅^[·] ⊥) '' Set.univ)] {n} : 𝔅.SoundOn (𝔅^[n] ⊥) := by
+  apply Provability.SoundOn.mk';
+  apply 𝔅.sound_on_class _ (show 𝔅^[n] ⊥ ∈ (𝔅^[·] ⊥) '' Set.univ by simp);
+
 @[simp]
 lemma neg_iterated_prov (φ : Sentence L) : ∼(𝔅^[n] φ) = 𝔅.dia^[n] (∼φ) := by
   induction n generalizing φ <;> simp [Provability.dia, *]
@@ -36,13 +42,12 @@ lemma boxBot_monotone [T₀ ⪯ T] [𝔅.HBL] : n ≤ m → T ⊢ 𝔅^[n] ⊥ �
     have b₁ : T ⊢ 𝔅 (𝔅^[n] ⊥) ➝ 𝔅 (𝔅^[n + k] ⊥) := prov_distribute_imply'' ih
     cl_prover [b₀, b₁]
 
-lemma iIncon_unprovable_of_sigma1_sound [𝔅.Sound] [Entailment.Consistent T] : ∀ n, T ⊬ 𝔅^[n] ⊥
+lemma iIncon_unprovable_of_sigma1_sound [hSound : 𝔅.SoundOnClass ((𝔅^[·] ⊥) '' Set.univ)] [Entailment.Consistent T] : ∀ n, T ⊬ 𝔅^[n] ⊥
   |     0 => Entailment.consistent_iff_unprovable_bot.mp inferInstance
   | n + 1 => fun h ↦
     have : T ⊢ 𝔅 (𝔅^[n] ⊥) := by simpa [Function.iterate_succ_apply'] using h
-    iIncon_unprovable_of_sigma1_sound n <| Provability.Sound.sound this
+    iIncon_unprovable_of_sigma1_sound n <| hSound.sound_on_class _ (by simp) this
 
-noncomputable def Provability.height (𝔅 : Provability T₀ T) : ENat := ENat.find (T ⊢ 𝔅^[·] ⊥)
 
 namespace Provability
 
@@ -51,11 +56,10 @@ lemma height_eq_top_iff : 𝔅.height = ⊤ ↔ ∀ n, T ⊬ 𝔅^[n] ⊥ := ENa
 lemma height_le_of_boxBot {n : ℕ} (h : T ⊢ 𝔅^[n] ⊥) : 𝔅.height ≤ n :=
   ENat.find_le (T ⊢ 𝔅^[·] ⊥) n h
 
-lemma height_lt_pos_of_boxBot [𝔅.Sound₀] {n : ℕ} (pos : 0 < n) (h : T₀ ⊢ 𝔅^[n] ⊥) : 𝔅.height < n := by
+lemma height_lt_pos_of_boxBot [T₀ ⪯ T] {n : ℕ} (pos : 0 < n) [𝔅.SoundOn (𝔅^[n.pred] ⊥)] (h : T₀ ⊢ 𝔅^[n] ⊥) : 𝔅.height < n := by
   have e : n.pred.succ = n := Eq.symm <| (Nat.sub_eq_iff_eq_add pos).mp rfl
-  have : T₀ ⊢ 𝔅 (𝔅^[n.pred] ⊥) := by
-    rwa [←Function.iterate_succ_apply' (f := 𝔅), e]
-  have := height_le_of_boxBot (Provability.Sound₀.sound₀ this)
+  have : T ⊢ 𝔅 (𝔅^[n.pred] ⊥) := Entailment.WeakerThan.pbl $ by rwa [←Function.iterate_succ_apply' (f := 𝔅), e];
+  have : 𝔅.height ≤ n.pred := height_le_of_boxBot $ 𝔅.sound_on $ this;
   have : 𝔅.height < n := by
     rw [←e]
     exact lt_of_le_of_lt this <| ENat.coe_lt_coe.mpr <| by simp
@@ -70,7 +74,7 @@ lemma height_le_iff_boxBot [T₀ ⪯ T] [𝔅.HBL] {n : ℕ} :
     exact boxBot_monotone hmn ⨀ hm
   · exact height_le_of_boxBot
 
-lemma height_eq_top_of_sound_and_consistent [𝔅.Sound] [Entailment.Consistent T] : 𝔅.height = ⊤ :=
+lemma height_eq_top_of_sound_and_consistent [𝔅.SoundOnClass ((𝔅^[·] ⊥) '' Set.univ)] [Entailment.Consistent T] : 𝔅.height = ⊤ :=
   height_eq_top_iff.mpr iIncon_unprovable_of_sigma1_sound
 
 @[grind =>]
@@ -88,6 +92,11 @@ open ProvabilityAbstraction
 noncomputable abbrev ArithmeticTheory.height (T : ArithmeticTheory) [T.Δ₁] : ℕ∞ := T.standardProvability.height
 
 namespace Arithmetic
+
+instance {T : ArithmeticTheory} [T.Δ₁] [ArithmeticTheory.SoundOnHierarchy T 𝚺 1] : T.standardProvability.SoundOnClass ((T.standardProvability^[·] ⊥) '' Set.univ) := by
+  constructor;
+  intro σ hσ;
+  apply Arithmetic.provable_sound;
 
 @[grind =]
 lemma height_eq_top_of_sigma1_sound (T : ArithmeticTheory) [T.Δ₁] [ArithmeticTheory.SoundOnHierarchy T 𝚺 1] : T.height = ⊤ :=

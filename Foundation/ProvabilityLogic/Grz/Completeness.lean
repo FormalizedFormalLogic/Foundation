@@ -10,7 +10,7 @@ open Modal
 open Modal.Hilbert
 open FirstOrder FirstOrder.ProvabilityAbstraction
 open Entailment FiniteContext
-
+open Provability
 
 namespace Entailment
 
@@ -104,8 +104,9 @@ lemma iff_models_interpret_boxdot_strongInterpret
 end Realization
 
 theorem Grz.arithmetical_completeness_iff
-    {T : ArithmeticTheory} [T.Δ₁] [𝗜𝚺₁ ⪯ T] (height : T.height = ⊤) :
-    (∀ f : T.StandardRealization, T ⊢ f.strongInterpret A) ↔ Modal.Grz ⊢ A := by
+    {T : ArithmeticTheory} [T.Δ₁] [𝗜𝚺₁ ⪯ T] (height : T.height = ⊤)
+    [T.standardProvability.SoundOnClass (((T.standardProvability)^[·] ⊥) '' Set.univ)]
+    : (∀ f : T.StandardRealization, T ⊢ f.strongInterpret A) ↔ Modal.Grz ⊢ A := by
   constructor;
   . intro h;
     suffices Modal.GL ⊢ Aᵇ by apply iff_provable_boxdot_GL_provable_Grz.mp this;

@@ -49,11 +49,12 @@ namespace Arithmetic
 open Modal ProvabilityLogic
 open ProvabilityAbstraction
 
-variable {T : ArithmeticTheory} [T.Δ₁] {σ π : Sentence L}
+variable {T : ArithmeticTheory} [T.Δ₁]
+         {σ π : Sentence L}
          {f : T.StandardRealization}
          {A B : Modal.Formula _}
 
-example [𝗜𝚺₁ ⪯ T] (height : T.height = ⊤) : T ⊬ T.standardProvability.con := by
+example [𝗜𝚺₁ ⪯ T] (height : T.height = ⊤) [T.standardProvability.SoundOnClass (((T.standardProvability)^[·] ⊥) '' Set.univ)] : T ⊬ T.standardProvability.con := by
   have h := ProvabilityLogic.GL.arithmetical_completeness_iff height (T := T) |>.not.mpr $ GL.unprovable_notbox (φ := ⊥);
   push_neg at h;
   obtain ⟨f, h⟩ := h;
@@ -105,6 +106,8 @@ lemma iff_not_modalIndep_not_bewIndep :
   constructor;
   . intro h; exact (K!_left iff_not_modalIndep_not_bewIndep_inside) ⨀ h;
   . intro h; exact (K!_right iff_not_modalIndep_not_bewIndep_inside) ⨀ h;
+
+variable [T.standardProvability.SoundOnClass (((T.standardProvability)^[·] ⊥) '' Set.univ)]
 
 lemma unprovable_independency_of_consistency (height : T.height = ⊤) :
     T ⊬ T.standardProvability.indep (T.standardProvability.con) := by
