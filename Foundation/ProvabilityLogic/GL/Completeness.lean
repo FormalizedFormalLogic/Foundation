@@ -17,14 +17,19 @@ open Modal.Kripke
 open ArithmeticTheory (provabilityLogicOn)
 
 variable {T : ArithmeticTheory} [T.Δ₁] [𝗜𝚺₁ ⪯ T] {A : Modal.Formula _}
-  [T.standardProvability.SoundOnClass ((T.standardProvability^[·] ⊥) '' Set.univ)]
 
 theorem unprovable_realization_exists
-    (M₁ : Model) [Fintype M₁] {r₁ : M₁} [M₁.IsConverseWellFounded] [M₁.IsTransitive] [M₁.IsRootedBy r₁]
-    (hA : r₁ ⊭ A) (h : M₁.height < T.height) :
-    ∃ f : T.StandardRealization, T ⊬ f A := by
+  (M₁ : Model) [Fintype M₁] {r₁ : M₁} [M₁.IsConverseWellFounded] [M₁.IsTransitive] [M₁.IsRootedBy r₁]
+  (hA : r₁ ⊭ A) (h : M₁.height < T.height)
+  [T.standardProvability.SoundOn (T.standardProvability^[(Frame.rank r₁)] ⊥)]
+  : ∃ f : T.StandardRealization, T ⊬ f A := by
   let M₀ := M₁.extendRoot 1
   let r₀ : M₀ := Frame.extendRoot.root
+  have : T.standardProvability.SoundOn (T.standardProvability^[(Frame.rank r₀).pred] ⊥) := by
+    suffices (Frame.rank r₀).pred = Frame.rank r₁ by rwa [this]
+    have := Frame.extendRoot.height_succ (F := M₁.toFrame);
+    dsimp [Frame.height] at this;
+    simp [r₀, this];
   have hdnA : r₀ ⊧ ◇(∼A) := by
     suffices ∃ i, r₀ ≺ i ∧ i ⊭ A by simpa [Formula.Kripke.Satisfies]
     refine ⟨.inr r₁, ?_, ?_⟩
@@ -37,9 +42,11 @@ theorem unprovable_realization_exists
   have : T.height ≤ M₁.height := by
     apply Order.le_of_lt_add_one
     calc
-      (Theory.standardProvability T).height < M₀.height := S.theory_height hdnA hC
-      _                                     = M₁.height + 1 := by simp [M₀]
+      T.standardProvability.height < M₀.height     := S.theory_height hdnA hC
+      _                            = M₁.height + 1 := by simp [M₀]
   exact not_lt_of_ge this h
+
+variable [T.standardProvability.SoundOnClass ((T.standardProvability^[·] ⊥) '' Set.univ)]
 
 /-- Arithmetical completeness of $\mathsf{GL}$-/
 theorem GL.arithmetical_completeness (height : T.height = ⊤) :
