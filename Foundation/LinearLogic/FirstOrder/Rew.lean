@@ -160,8 +160,8 @@ instance : LawfulSyntacticRewriting L (Semistatement L) where
 @[simp] lemma complexity_rew (ω : Rew L ξ₁ n₁ ξ₂ n₂) (φ : Semiformula L ξ₁ n₁) : (ω ▹ φ).complexity = φ.complexity := by
   induction φ using rec' generalizing n₂ <;> simp [*, rew_rel, rew_nrel]
 
-@[simp] lemma HereditaryNegative.rew {ω : Rew L ξ₁ n₁ ξ₂ n₂} {φ : Semiformula L ξ₁ n₁} :
-    (ω ▹ φ).HereditaryNegative ↔ φ.HereditaryNegative := by
+@[simp] lemma Negative.rew {ω : Rew L ξ₁ n₁ ξ₂ n₂} {φ : Semiformula L ξ₁ n₁} :
+    (ω ▹ φ).Negative ↔ φ.Negative := by
   induction φ using rec' generalizing n₂ <;> simp [*, rew_rel, rew_nrel]
 
 end Semiformula
