@@ -26,7 +26,7 @@ variable {L : Language} [L.DecidableEq] [L.ReferenceableBy L]
          {T₀ T : Theory L} [T₀ ⪯ T] (𝔅 : Provability T₀ T) [𝔅.HBL]
          {A B : Modal.Formula _}
 
-structure SolovaySentences (F : Kripke.Frame) (r : F) [F.IsFiniteTree r] [Fintype F] where
+structure SolovaySentences (F : Kripke.Frame) (r : F) [Fintype F] where
   σ : F → Sentence L
   protected SC1 : ∀ i j, i ≠ j → T₀ ⊢ σ i ➝ ∼σ j
   protected SC2 : ∀ i j, i ≺ j → T₀ ⊢ σ i ➝ 𝔅.dia (σ j)
@@ -39,15 +39,16 @@ variable {𝔅}
 
 namespace SolovaySentences
 
-instance {F : Kripke.Frame} {r : F} [F.IsFiniteTree r] [Fintype F] : CoeFun (SolovaySentences 𝔅 F r) (λ _ => F → Sentence L) := ⟨λ σ => σ.σ⟩
+instance {F : Kripke.Frame} {r : F} [Fintype F] : CoeFun (SolovaySentences 𝔅 F r) (λ _ => F → Sentence L) := ⟨λ σ => σ.σ⟩
 
-variable {M : Model} {r : M.World} [M.IsFiniteTree r] [Fintype M]
+variable {M : Model} [Fintype M] [M.IsIrreflexive] [M.IsTransitive] {r : M.World} [M.IsRootedBy r]
 
 variable (S : SolovaySentences 𝔅 M.toFrame r)
 
 noncomputable def realization :
     Realization 𝔅 := ⟨fun a ↦ ⩖ i ∈ { i : M | i ⊧ (.atom a) }, S i⟩
 
+omit [M.IsRootedBy r] in
 private lemma mainlemma_aux {i : M} (hri : r ≺ i) :
     (i ⊧ A → T₀ ⊢ S i ➝ S.realization A) ∧
     (i ⊭ A → T₀ ⊢ S i ➝ ∼S.realization A) := by
@@ -94,9 +95,11 @@ private lemma mainlemma_aux {i : M} (hri : r ≺ i) :
         contra! $ prov_distribute_imply' $ CN!_of_CN!_right $ (ihA (IsTrans.trans _ _ _ hri Rij)).2 hA;
       exact C!_trans (S.SC2 i j Rij) this;
 
+omit [M.IsRootedBy r] in
 theorem mainlemma (S : SolovaySentences 𝔅 M.toFrame r) {i : M} (hri : r ≺ i) :
     i ⊧ A → T₀ ⊢ S i ➝ S.realization A := (mainlemma_aux S hri).1
 
+omit [M.IsRootedBy r] in
 theorem mainlemma_neg (S : SolovaySentences 𝔅 M.toFrame r) {i : M} (hri : r ≺ i) :
     i ⊭ A → T₀ ⊢ S i ➝ ∼S.realization A := (mainlemma_aux S hri).2
 
@@ -141,7 +144,7 @@ variable {T : ArithmeticTheory} [T.Δ₁]
 
 section frame
 
-variable {F : Kripke.Frame} {r : F} [F.IsFiniteTree r] [Fintype F]
+variable {F : Kripke.Frame} [Fintype F] [F.IsIrreflexive] [F.IsTransitive] {r : F} [F.IsRootedBy r]
 
 section model
 
@@ -176,7 +179,7 @@ variable (T)
 
 abbrev WChain (i j : F) := {l : List F // l.ChainI (· ≻ ·) j i}
 
-instance (i j : F) : Finite (WChain j i) :=
+instance (i j : F) [F.IsIrreflexive] [F.IsTransitive] : Finite (WChain j i) :=
   List.ChainI.finite_of_irreflexive_of_transitive
     (by exact Std.Irrefl.irrefl (r := (· ≺ ·)))
     (by intro x y z hxy hyz
@@ -191,15 +194,13 @@ def θChainAux (t : F → FirstOrder.Semiterm ℒₒᵣ Empty N) : List F → Se
   |         [_] => ⊤
   | j :: i :: ε => θChainAux t (i :: ε) ⋏ twoPointAux T t i j
 
-def θAux (t : F → FirstOrder.Semiterm ℒₒᵣ Empty N) (i : F) : Semisentence ℒₒᵣ N :=
-  haveI := Fintype.ofFinite (WChain r i)
-  ⩖ ε : WChain r i, θChainAux T t ε
-
+omit [F.IsIrreflexive] [F.IsTransitive] [F.IsRootedBy r] in
 lemma rew_twoPointAux (w : Fin N → FirstOrder.Semiterm ℒₒᵣ Empty N') (t : F → FirstOrder.Semiterm ℒₒᵣ Empty N) :
     Rew.subst w ▹ twoPointAux T t i j = twoPointAux T (fun i ↦ Rew.subst w (t i)) i j := by
   simp [twoPointAux, Finset.map_conj', Function.comp_def, ←TransitiveRewriting.comp_app,
     Rew.subst_comp_subst, Matrix.comp_vecCons', Matrix.constant_eq_singleton]
 
+omit [F.IsIrreflexive] [F.IsTransitive] [F.IsRootedBy r] in
 lemma rew_θChainAux (w : Fin N → FirstOrder.Semiterm ℒₒᵣ Empty N') (t : F → FirstOrder.Semiterm ℒₒᵣ Empty N) (ε : List F) :
     Rew.subst w ▹ θChainAux T t ε = θChainAux T (fun i ↦ Rew.subst w (t i)) ε := by
   match ε with
@@ -207,11 +208,15 @@ lemma rew_θChainAux (w : Fin N → FirstOrder.Semiterm ℒₒᵣ Empty N') (t :
   |         [_] => simp [θChainAux]
   | j :: i :: ε => simp [θChainAux, rew_θChainAux w _ (i :: ε), rew_twoPointAux]
 
+def θAux [F.IsIrreflexive] [F.IsTransitive] [F.IsRootedBy r] (t : F → FirstOrder.Semiterm ℒₒᵣ Empty N) (i : F) : Semisentence ℒₒᵣ N :=
+  haveI := Fintype.ofFinite (WChain r i)
+  ⩖ ε : WChain r i, θChainAux T t ε
+
 lemma rew_θAux (w : Fin N → FirstOrder.Semiterm ℒₒᵣ Empty N') (t : F → FirstOrder.Semiterm ℒₒᵣ Empty N) (i : F) :
     Rew.subst w ▹ θAux T t i = θAux T (fun i ↦ Rew.subst w (t i)) i := by
   simp [Finset.map_udisj, θAux, rew_θChainAux]
 
-def _root_.LO.FirstOrder.Theory.solovay (i : F) : Sentence ℒₒᵣ := exclusiveMultifixedpoint
+def _root_.LO.FirstOrder.Theory.solovay [F.IsIrreflexive] [F.IsTransitive] [F.IsRootedBy r] (i : F) : Sentence ℒₒᵣ := exclusiveMultifixedpoint
   (fun j ↦
     let jj := (Fintype.equivFin F).symm j
     θAux T (fun i ↦ #(Fintype.equivFin F i)) jj ⋏ ⩕ k ∈ { k : F | jj ≺ k }, T.consistentWith/[#(Fintype.equivFin F k)])
@@ -238,6 +243,7 @@ lemma solovay_diag (i : F) :
 
 @[simp] lemma solovay_exclusive {i j : F} : T.solovay i = T.solovay j ↔ i = j := by simp [Theory.solovay]
 
+omit [F.IsIrreflexive] [F.IsTransitive] in
 private lemma θChainAux_sigma1 (ε : List F) : Hierarchy 𝚺 1 (θChainAux T t ε) := by
   match ε with
   |          [] => simp [θChainAux]

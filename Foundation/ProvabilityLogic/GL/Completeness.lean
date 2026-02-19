@@ -20,10 +20,9 @@ variable {T : ArithmeticTheory} [T.Δ₁] [𝗜𝚺₁ ⪯ T] {A : Modal.Formula
   [T.standardProvability.SoundOnClass ((T.standardProvability^[·] ⊥) '' Set.univ)]
 
 theorem unprovable_realization_exists
-  (M₁ : Model) [Fintype M₁] {r₁ : M₁} [M₁.IsFiniteTree r₁]
-  (hA : r₁ ⊭ A) (h : M₁.height < T.height)
-  -- [(Theory.standardProvability T).SoundOn (((Theory.standardProvability T))^[(Frame.rank (F := M₁.toFrame) r₀).pred] ⊥)]
-  : ∃ f : T.StandardRealization, T ⊬ f A := by
+    (M₁ : Model) [Fintype M₁] {r₁ : M₁} [M₁.IsConverseWellFounded] [M₁.IsTransitive] [M₁.IsRootedBy r₁]
+    (hA : r₁ ⊭ A) (h : M₁.height < T.height) :
+    ∃ f : T.StandardRealization, T ⊬ f A := by
   let M₀ := M₁.extendRoot 1
   let r₀ : M₀ := Frame.extendRoot.root
   have hdnA : r₀ ⊧ ◇(∼A) := by
@@ -49,8 +48,7 @@ theorem GL.arithmetical_completeness (height : T.height = ⊤) :
     contrapose!;
     assumption;
   intro hA
-  obtain ⟨M₁, r₁, _, hA₁⟩ := GL.Kripke.iff_unprovable_exists_unsatisfies_FiniteTransitiveTree.mp hA
-  have : Fintype M₁ := Fintype.ofFinite _
+  obtain ⟨M₁, _, _, _, r₁, _, hA₁⟩ := GL.Kripke.iff_unprovable_exists_fintype_rooted_model.mp hA;
   exact unprovable_realization_exists M₁ hA₁ <| by simp [height]
 
 theorem GLPlusBoxBot.arithmetical_completeness_aux {n : ℕ} (height : n ≤ T.height) :
@@ -59,10 +57,8 @@ theorem GLPlusBoxBot.arithmetical_completeness_aux {n : ℕ} (height : n ≤ T.h
     contrapose!;
     assumption;
   intro hA
-  obtain ⟨M₁, r₁, _, hA₁⟩ := GL.Kripke.iff_unprovable_exists_unsatisfies_FiniteTransitiveTree.mp hA
-  have : Fintype M₁ := Fintype.ofFinite _
-  have hA₁ : r₁ ⊧ □^[n]⊥ ∧ r₁ ⊭ A := by
-    simpa [Formula.Kripke.Satisfies] using hA₁
+  obtain ⟨M₁, _, _, _, r₁, _, hA₁⟩ := GL.Kripke.iff_unprovable_exists_fintype_rooted_model.mp hA;
+  have hA₁ : r₁ ⊧ □^[n]⊥ ∧ r₁ ⊭ A := by simpa [Formula.Kripke.Satisfies] using hA₁
   have M₁_height : M₁.height < n := height_lt_iff_satisfies_boxbot.mpr hA₁.1
   exact unprovable_realization_exists M₁ hA₁.2 <| lt_of_lt_of_le (by simp [M₁_height]) height
 

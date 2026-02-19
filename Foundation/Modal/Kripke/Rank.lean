@@ -1,6 +1,5 @@
 module
 
-public import Foundation.Modal.Kripke.Logic.GL.Tree
 public import Foundation.Modal.Kripke.ExtendRoot
 
 @[expose] public section
@@ -12,11 +11,11 @@ noncomputable section
 namespace Kripke
 
 variable {φ ψ : Formula ℕ}
-         {F : Frame} {r : F} [Fintype F] [F.IsTree r] {x y i j : F}
+         {F : Frame} [Fintype F] [F.IsConverseWellFounded] [F.IsTransitive] {r : F} [F.IsRootedBy r] {x y i j : F}
 
-def Frame.rank (i : F) : ℕ := fcwHeight (· ≺ ·) i
+def Frame.rank [Fintype F] [F.IsConverseWellFounded] [F.IsTransitive] (i : F) : ℕ := fcwHeight (· ≺ ·) i
 
-def Frame.height (F : Frame) {r : F} [Fintype F] [F.IsTree r] : ℕ := Frame.rank r
+def Frame.height (F : Frame) {r : F} [Fintype F] [F.IsConverseWellFounded] [F.IsTransitive] [F.IsRootedBy r] : ℕ := Frame.rank r
 
 namespace Frame
 
@@ -175,7 +174,7 @@ end Frame
 
 section
 
-variable {M : Model} {r : M.World} [M.IsFiniteTree r] [Fintype M]
+variable {M : Model} [Fintype M] [M.IsTransitive] [M.IsConverseWellFounded] {r : M.World} [M.IsRootedBy r]
 
 lemma height_lt_iff_satisfies_boxbot {i : M} :
     M.rank i < n ↔ i ⊧ □^[n] ⊥ := by
