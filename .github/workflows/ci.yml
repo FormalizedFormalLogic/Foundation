@@ -36,9 +36,10 @@ jobs:
         uses: actions/cache/restore@v5
         with:
           path: .lake/Foundation-x86_64-unknown-linux-gnu.tar.gz
-          # NOTE: including github SHA for avoding cache key reserving problem
-          key: lake-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('lean-toolchain') }}-${{ hashFiles('lake-manifest.json') }}-${{ github.sha }}
+          # NOTE: including github branch name and SHA for avoding cache key reserving problem
+          key: lake-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('lean-toolchain') }}-${{ hashFiles('lake-manifest.json') }}-${{ github.ref_name }}-${{ github.sha }}
           restore-keys: |
+            lake-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('lean-toolchain') }}-${{ hashFiles('lake-manifest.json') }}-${{ github.ref_name }}
             lake-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('lean-toolchain') }}-${{ hashFiles('lake-manifest.json') }}
       - name: Unpack project cache
         if: hashFiles('.lake/Foundation-x86_64-unknown-linux-gnu.tar.gz') != ''
@@ -49,8 +50,6 @@ jobs:
 
       - name: Build docs
         run: lake build Foundation:docs
-      - name: Copy docs to pages
-        run: cp -r .lake/build/doc pages/docs
 
       - name: Pack project cache
         run: lake pack
@@ -65,15 +64,19 @@ jobs:
       - uses: ts-graphviz/setup-graphviz@v2
       - name: Generate import graph
         run: |
-          lake exe graph ./pages/import_graph.png
-          lake exe graph ./pages/import_graph.pdf
-          lake exe graph ./pages/import_graph.html
+          lake exe graph ./import_graph.png
+          lake exe graph ./import_graph.pdf
+          lake exe graph ./import_graph.html
 
       - name: Upload lean artifacts
         uses: actions/upload-artifact@v4
         with:
           name: lean-artifacts
-          path: pages
+          path: |
+            .lake/build/doc
+            import_graph.png
+            import_graph.pdf
+            import_graph.html
           retention-days: 1
           include-hidden-files: true
 
@@ -128,6 +131,13 @@ jobs:
         uses: actions/download-artifact@v5
         with:
           name: lean-artifacts
+      - name: Copy from artifacts to pages
+        run: |
+          cp -r "$GITHUB_WORKSPACE/.lake/build/doc" pages/docs
+          cp "$GITHUB_WORKSPACE/import_graph.png" \
+             "$GITHUB_WORKSPACE/import_graph.pdf" \
+             "$GITHUB_WORKSPACE/import_graph.html" \
+             pages/
 
       - name: Compile README.md to index.html
         run: |
