@@ -86,11 +86,7 @@ instance [𝗣𝗔⁻ ⪯ T] : T.standardProvability.HBL3 := ⟨provable_D3⟩
 
 instance [𝗣𝗔⁻ ⪯ T] : T.standardProvability.HBL where
 
-instance : T.standardProvability.Sound₀ := ⟨provable_sound⟩
-
-instance [ArithmeticTheory.SoundOnHierarchy T 𝚺 1] : GödelSound T.standardProvability := ⟨fun h ↦ by simpa using provable_sound h⟩
-
-instance [ArithmeticTheory.SoundOnHierarchy T 𝚺 1] : T.standardProvability.Sound := ⟨fun h ↦ provable_sound h⟩
+instance [ArithmeticTheory.SoundOnHierarchy T 𝚺 1] : T.standardProvability.SoundOnClass (Set.univ) := ⟨fun _ _ h ↦ provable_sound h⟩
 
 open LO.Entailment in
 /--

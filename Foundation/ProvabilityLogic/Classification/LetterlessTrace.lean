@@ -367,7 +367,7 @@ lemma TBB_regular : (TBB n).Regular T := by
   exfalso;
   have : ¬ℕ ⊧ₘ T.LetterlessStandardRealization (□^[(n + 1)]⊥) := by
     simp only [Box.boxItr_succ, Realization.interpret.def_box, Realization.interpret.def_boxItr, Realization.interpret.def_bot];
-    apply sound_on_model.not.mpr;
+    apply Provability.sound_on_model.not.mpr;
     apply iIncon_unprovable_of_sigma1_sound;
   apply this;
   exact h;
