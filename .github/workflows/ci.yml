@@ -36,9 +36,10 @@ jobs:
         uses: actions/cache/restore@v5
         with:
           path: .lake/Foundation-x86_64-unknown-linux-gnu.tar.gz
-          # NOTE: including github SHA for avoding cache key reserving problem
-          key: lake-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('lean-toolchain') }}-${{ hashFiles('lake-manifest.json') }}-${{ github.sha }}
+          # NOTE: including github branch name and SHA for avoding cache key reserving problem
+          key: lake-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('lean-toolchain') }}-${{ hashFiles('lake-manifest.json') }}-${{ github.ref_name }}-${{ github.sha }}
           restore-keys: |
+            lake-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('lean-toolchain') }}-${{ hashFiles('lake-manifest.json') }}-${{ github.ref_name }}
             lake-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('lean-toolchain') }}-${{ hashFiles('lake-manifest.json') }}
       - name: Unpack project cache
         if: hashFiles('.lake/Foundation-x86_64-unknown-linux-gnu.tar.gz') != ''
