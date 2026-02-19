@@ -5,6 +5,10 @@ public import Foundation.Modal.Boxdot.GL_S
 public import Foundation.Modal.Logic.D.Basic
 
 @[expose] public section
+
+
+
+
 namespace LO
 
 namespace Modal
@@ -17,31 +21,36 @@ open Formula.Kripke
 
 namespace Formula
 
-def trace (φ : Formula ℕ) : Set ℕ := { n | ∃ M : Kripke.Model, ∃ r, ∃ _ : M.IsTree r, ∃ _ : Fintype M, (M.height = n ∧ r ⊭ φ) }
+def trace (φ : Formula ℕ) : Set ℕ := { n |
+  ∃ M : Kripke.Model, ∃ _ : Fintype M, ∃ _ : M.IsTransitive, ∃ _ : M.IsConverseWellFounded, ∃ r, ∃ _ : M.IsRootedBy r,
+  (M.height = n ∧ r ⊭ φ)
+}
 
-lemma iff_mem_trace {n : ℕ} : n ∈ φ.trace ↔ ∃ M : Kripke.Model, ∃ r : M, ∃ _ : M.IsTree r, ∃ _ : Fintype M, M.height = n ∧ r ⊭ φ := by
+lemma iff_mem_trace {n : ℕ} :
+  n ∈ φ.trace ↔
+  ∃ M : Kripke.Model, ∃ _ : Fintype M, ∃ _ : M.IsTransitive, ∃ _ : M.IsConverseWellFounded, ∃ r, ∃ _ : M.IsRootedBy r, M.height = n ∧ r ⊭ φ := by
   simp [Formula.trace];
 
-lemma satisfies_of_not_mem_trace : n ∉ φ.trace ↔ (∀ M : Kripke.Model, ∀ r : M, [M.IsTree r] → [Fintype M] → M.height = n → r ⊧ φ) := by
+lemma satisfies_of_not_mem_trace :
+  n ∉ φ.trace ↔
+  ∀ M : Kripke.Model, ∀ _ : Fintype M, ∀ _ : M.IsTransitive, ∀ _ : M.IsConverseWellFounded, ∀ r, ∀ _ : M.IsRootedBy r, M.height = n → r ⊧ φ := by
   simp [Formula.trace];
 
 @[grind =]
 lemma eq_trace_trace_of_letterless {φ : Formula ℕ} (φ_letterless : φ.Letterless) : φ.trace = φ.letterlessTrace := by
   ext n;
   apply Iff.trans ?_ (Kripke.letterlessSpectrum_TFAE φ_letterless (n := n) |>.out 1 0 |>.not);
+  rw [iff_mem_trace];
   constructor;
-  . rintro ⟨M, r, _, M_fintype, rfl, h⟩;
+  . rintro ⟨M, _, _, _, r, _, rfl, hr⟩;
     push_neg;
-    refine ⟨M, r, {}, ?_, r, ?_, ?_⟩;
-    . assumption;
-    . rfl;
-    . assumption;
-  . dsimp [Formula.trace];
-    contrapose!;
-    rintro h M r _ _ x rfl;
+    refine ⟨M, inferInstance, inferInstance, inferInstance, r, inferInstance, r, by tauto⟩;
+  . contrapose!;
+    rintro h M _ _ _ r _ x rfl;
     apply Model.pointGenerate.modal_equivalent' x ⟨x, by tauto⟩ |>.mp;
     apply h;
-    apply Frame.pointGenerate.eq_original_height;
+    . apply Frame.pointGenerate.eq_original_height;
+    . infer_instance
 
 open Formula.Kripke
 
@@ -51,17 +60,18 @@ open Formula.Kripke
 lemma trace_and : (φ ⋏ ψ).trace = φ.trace ∪ ψ.trace := by
   ext n;
   calc
-    _ ↔ ∃ M : Kripke.Model, ∃ r : M, ∃ _ : M.IsTree r, ∃ _ : Fintype M, M.height = n ∧ (r ⊭ φ ∨ r ⊭ ψ) := by
+    _ ↔ ∃ M : Kripke.Model, ∃ _ : Fintype M, ∃ _ : M.IsTransitive, ∃ _ : M.IsConverseWellFounded, ∃ r, ∃ _ : M.IsRootedBy r, M.height = n ∧ (r ⊭ φ ∨ r ⊭ ψ) := by
       simp [Semantics.NotModels, trace, -not_and, not_and_or]
     _ ↔
-      (∃ M : Kripke.Model, ∃ r : M, ∃ _ : M.IsTree r, ∃ _ : Fintype M, M.height = n ∧ r ⊭ φ) ∨
-      (∃ M : Kripke.Model, ∃ r : M, ∃ _ : M.IsTree r, ∃ _ : Fintype M, M.height = n ∧ r ⊭ ψ) := by
+      (∃ M : Kripke.Model, ∃ _ : Fintype M, ∃ _ : M.IsTransitive, ∃ _ : M.IsConverseWellFounded, ∃ r, ∃ _ : M.IsRootedBy r, M.height = n ∧ r ⊭ φ) ∨
+      (∃ M : Kripke.Model, ∃ _ : Fintype M, ∃ _ : M.IsTransitive, ∃ _ : M.IsConverseWellFounded, ∃ r, ∃ _ : M.IsRootedBy r, M.height = n ∧ r ⊭ ψ) := by
       constructor;
-      . rintro ⟨M, r, _, _, _, (h | h)⟩;
-        . left; tauto;
-        . right; tauto;
-      . rintro (⟨M, r, _, _, _, _⟩ | ⟨M, r, _, _, _, _⟩) <;>
-        . refine ⟨M, r, by assumption, by assumption, by tauto⟩;
+      . rintro ⟨M, _, _, _, r, _, rfl, h⟩;
+        cases h with
+        | inl h => left; tauto
+        | inr h => right; tauto
+      . rintro (⟨M, _, _, _, r, _, rfl, hr⟩ | ⟨M, _, _, _, r, _, rfl, hr⟩) <;>
+        refine ⟨M, inferInstance, inferInstance, inferInstance, r, inferInstance, rfl, by grind⟩;
     _ ↔ _ := by simp [Formula.trace];
 
 lemma trace_lconj₂ {s : List (Formula ℕ)} : (s.conj₂).trace = ⋃ φ ∈ s, φ.trace := by
@@ -73,13 +83,12 @@ lemma trace_fconj {s : Finset (Formula ℕ)} : s.conj.trace = ⋃ φ ∈ s, φ.t
 
 lemma subset_trace_of_provable_imp_GL (h : Modal.GL ⊢ φ ➝ ψ) : ψ.trace ⊆ φ.trace := by
   intro n hn;
-  obtain ⟨M, r, _, _, rfl, h₁⟩ := iff_mem_trace.mp hn;
+  obtain ⟨M, _, _, _, r, _, rfl, hr⟩ := iff_mem_trace.mp hn;
   apply iff_mem_trace.mpr;
-  refine ⟨M, r, by assumption, by assumption, by rfl, ?_⟩;
-  contrapose! h₁;
-  have : M.IsFiniteTree r := {}
-  apply GL.Kripke.iff_provable_satisfies_FiniteTransitiveTree.mp h;
-  assumption;
+  refine ⟨M, inferInstance, inferInstance, inferInstance, r, inferInstance, rfl, ?_⟩;
+  contrapose! hr;
+  have := GL.Kripke.fintype_completeness_TFAE.out 0 2 |>.mp h;
+  exact this M r hr;
 
 end Formula
 
@@ -232,6 +241,21 @@ instance [M.IsTransitive] : (M.boneLengthening a k).IsTransitive where
       . apply M.irrefl _ $ Frame.trans Ryz Ray;
     . omega;
 
+instance [M.IsIrreflexive] : (M.boneLengthening a k).IsIrreflexive where
+  irrefl := by
+    rintro (x | i);
+    . apply M.irrefl x;
+    . simp [Model.boneLengthening];
+
+instance isRooted [M.IsTransitive] [M.IsRootedBy r] (hra : r ≠ a) : (M.boneLengthening a k).IsRootedBy r where
+  root_generates := by
+    rintro (x | i) <;>
+    . intro;
+      apply Rel.TransGen.unwrap_iff.mpr;
+      dsimp [Model.boneLengthening];
+      apply Frame.root_genaretes'!;
+      tauto;
+
 instance isTree [M.IsTree r] (hra : r ≠ a) : (M.boneLengthening a k).IsTree r where
   asymm := by
     rintro (x | i) (y | j) Rxy;
@@ -343,14 +367,15 @@ lemma Formula.trace.finite_or_cofinite : φ.trace.Finite ∨ φ.trace.Cofinite :
   intro tr_infinite;
 
   obtain ⟨m, hm₁, hm₂⟩ : ∃ m, m ∈ φ.trace ∧ φ.rflSubformula.card < m  := Set.infinite_iff_exists_gt.mp tr_infinite _;
-
-  obtain ⟨M, r,_, _, rfl, hr⟩ := iff_mem_trace.mp hm₁;
+  obtain ⟨M, _, _, _, r, _, rfl, hr⟩ := iff_mem_trace.mp hm₁;
   have : M.IsFiniteTree r := {}
 
   have H₁ : r ⊧ ∼□^[(φ.rflSubformula.card + 1)]⊥ := height_lt_iff_satisfies_boxbot (i := r) (n := φ.rflSubformula.card + 1) |>.not.mp $ by
     rw [←Frame.height];
     omega;
-  have H₂ : r ⊧ ∼□^[(φ.rflSubformula.card + 1)]⊥ ➝ ◇φ.rflSubformula.conj := GL.Kripke.iff_provable_satisfies_FiniteTransitiveTree.mp (GL.formalized_validates_axiomT_set_in_irrefl_trans_chain) M r;
+
+  have := GL.Kripke.fintype_completeness_TFAE (φ := ∼□^[(φ.rflSubformula.card + 1)]⊥ ➝ ◇φ.rflSubformula.conj) |>.out 0 2 |>.mp GL.formalized_validates_axiomT_set_in_irrefl_trans_chain;
+  have H₂ : r ⊧ ∼□^[(φ.rflSubformula.card + 1)]⊥ ➝ ◇φ.rflSubformula.conj := this M r;
   obtain ⟨a, Rrx, hx⟩ := Satisfies.dia_def.mp $ H₂ H₁;
   replace Rrx : r ≠ a := by rintro rfl; apply M.irrefl _ Rrx;
 
@@ -358,9 +383,8 @@ lemma Formula.trace.finite_or_cofinite : φ.trace.Finite ∨ φ.trace.Cofinite :
     intro k hmk;
     obtain ⟨k, rfl⟩ := Nat.exists_eq_add_of_le hmk;
     apply iff_mem_trace.mpr;
-    refine ⟨M.boneLengthening a k, r, ?_, ?_, ?_, ?_⟩;
-    . apply Model.boneLengthening.isTree Rrx;
-    . infer_instance;
+    refine ⟨M.boneLengthening a k, inferInstance, inferInstance, inferInstance, r, ?_, ?_, ?_⟩;
+    . apply Model.boneLengthening.isRooted Rrx;
     . apply Model.boneLengthening.eq_height Rrx;
     . exact Model.boneLengthening.mainlemma₂ hx (by grind) r |>.not.mp hr;
   apply Set.Cofinite.subset this;
@@ -390,8 +414,8 @@ lemma subset_GLα_of_trace_coinfinite (hL : L.trace.Coinfinite) : L ⊆ Modal.GL
   apply Logic.sumQuasiNormal.iff_provable_finite_provable_letterless ?_ |>.mpr ⟨(Tφ.image TBB), ?_, ?_⟩;
   . grind;
   . simpa [Tφ]
-  . apply GL.Kripke.tree_completeness_TFAE.out 3 0 |>.mp;
-    intro M r _ hr;
+  . apply GL.Kripke.fintype_completeness_TFAE.out 2 0 |>.mp;
+    intro M _ _ _ r _ hr;
     have : Fintype M.World := Fintype.ofFinite _;
     apply Formula.satisfies_of_not_mem_trace (n := M.height) |>.mp;
     . replace hr : ∀ n ∈ φ.trace, M.height ≠ n := by
@@ -420,8 +444,8 @@ lemma subset_GLβMinus_of_trace_cofinite (hL : L.trace.Cofinite) : L ⊆ Modal.G
   apply Logic.sumQuasiNormal.iff_provable_finite_provable_letterless ?_ |>.mpr ⟨{∼⩕ n ∈ Tφ, TBB n}, ?_, ?_⟩;
   . grind;
   . simp_all [Set.compl_iUnion, Tφ];
-  . apply GL.Kripke.tree_completeness_TFAE.out 3 0 |>.mp;
-    intro M r _ hr;
+  . apply GL.Kripke.fintype_completeness_TFAE.out 2 0 |>.mp;
+    intro M _ _ _ r _ hr;
     have : Fintype M.World := Fintype.ofFinite _;
     apply Formula.satisfies_of_not_mem_trace (n := M.height) |>.mp;
     . replace hr : ∀ (n : ℕ), ∀ x ∈ L, n ∈ x.trace → ¬M.height = n := by
@@ -468,14 +492,13 @@ lemma provable_TBB_of_mem_trace
   [𝗜𝚺₁ ⪯ T] [𝗜𝚺₁ ⪯ U]
   {L : Logic _} (hPL : L.IsProvabilityLogic T U)
   {n : ℕ} (h : n ∈ L.trace) : L ⊢ Modal.TBB n := by
-  obtain ⟨A, hA₁, ⟨M, r, _, _, rfl, h₂⟩⟩ := by simpa using h;
+  obtain ⟨A, hA₁, ⟨M, _, _, _, r, _, rfl, h₂⟩⟩ := by simpa using h;
   replace hA₁ : ∀ f : T.StandardRealization, U ⊢ f A := hPL A |>.mp $ by grind;
 
   let M₀ := M.extendRoot 1;
-  let r₀ : M₀ := Frame.extendRoot.root
+  let r₀ : M₀ := Frame.extendRoot.root (n := 1);
   have Rr₀ : ∀ {x : M}, r₀ ≺ x := λ {x} => Frame.root_genaretes'! (r := r₀) x (by simp);
 
-  have : M₀.IsFiniteTree r₀ := {};
   let S : SolovaySentences T.standardProvability M₀.toFrame r₀ := SolovaySentences.standard T M₀.toFrame;
   have : M₀ ⊧ A ➝ (Modal.TBB M.height) := by
     rintro x hA;
@@ -567,9 +590,7 @@ lemma provable_TBBMinus_of_mem_trace
   obtain ⟨A, hA₁, hA₂⟩ := Set.not_subset.mp hS;
   replace hA₁ : L ⊢ A := Logic.iff_provable.mpr hA₁;
   replace hA₂ : Modal.GL ⊬ A.rflSubformula.conj ➝ A := Modal.Logic.iff_provable_rflSubformula_GL_provable_S.not.mpr $ Logic.iff_provable.not.mpr hA₂;
-  obtain ⟨M₁, r₁, _, hM⟩ := Modal.GL.Kripke.iff_unprovable_exists_unsatisfies_FiniteTransitiveTree.mp hA₂;
-  have : Fintype M₁.World := Fintype.ofFinite _;
-  have : M₁.IsFiniteTree r₁ := {};
+  obtain ⟨M₁, _, _, _, r₁, _, hM⟩ := Modal.GL.Kripke.iff_unprovable_exists_fintype_rooted_model.mp hA₂;
 
   let M₀ := Model.extendRoot M₁ 1;
   let r₀ : M₀.World := Model.extendRoot.root;
@@ -621,7 +642,8 @@ lemma provable_TBBMinus_of_mem_trace
               suffices Frame.rank (i : M₀) < M₁.height ∧ Frame.rank (i : M₀) ∈ L.trace by simpa [R];
               constructor;
               . suffices Frame.rank i < M₁.height by calc
-                  _ = Frame.rank (i : M₁) := by convert Frame.extendRoot.eq_original_height
+                  _ = Frame.rank (i : M₁) := by
+                    convert @Frame.extendRoot.eq_original_height (F := M₁.toFrame) (x := i) _ _ _ r₁ _;
                   _ < _                   := this;
                 apply Frame.rank_lt_whole_height;
                 apply M₁.root_genaretes'!;

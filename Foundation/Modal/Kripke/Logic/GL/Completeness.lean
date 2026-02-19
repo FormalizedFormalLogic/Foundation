@@ -214,6 +214,60 @@ instance FFP : Complete Modal.GL Kripke.FrameClass.finite_GL := ⟨by
       all_goals grind;
 ⟩
 
+theorem finite_completeness_TFAE : [
+  Modal.GL ⊢ φ,
+  FrameClass.finite_GL ⊧ φ,
+  ∀ F : Kripke.Frame, [F.IsFinite] → [F.IsTransitive] → [F.IsIrreflexive] → ∀ r, [F.IsRootedBy r] → F ⊧ φ,
+  ∀ M : Kripke.Model, [M.IsFinite] → [M.IsTransitive] → [M.IsIrreflexive] → ∀ r, [M.IsRootedBy r] → r ⊧ φ,
+].TFAE := by
+  tfae_have 1 → 2 := by apply Sound.sound;
+  tfae_have 2 → 1 := by apply Complete.complete;
+  tfae_have 2 → 3 := by
+    intro h F _ _ Fcwf r _;
+    apply h;
+    exact {}
+  tfae_have 3 → 4 := by
+    intro h F _ _ _ r _;
+    apply h;
+  tfae_have 4 → 2 := by
+    rintro H F ⟨_, F_trans, F_irrefl⟩ V x;
+    let M : Kripke.Model := ⟨F, V⟩;
+    apply Model.pointGenerate.pMorphism.modal_equivalence _ |>.mp $
+      @H (M↾x) inferInstance inferInstance inferInstance _ inferInstance;
+  tfae_finish;
+
+lemma iff_unprovable_exists_finite_rooted_model : Modal.GL ⊬ φ ↔ ∃ M : Model, ∃ _ : M.IsFinite, ∃ _ : M.IsTransitive, ∃ _ : M.IsIrreflexive, ∃ r, ∃ _ : M.IsRootedBy r, ¬r ⊧ φ := by
+  apply Iff.not_left;
+  apply Iff.trans $ finite_completeness_TFAE (φ := φ) |>.out 0 3;
+  push_neg;
+  tauto;
+
+theorem fintype_completeness_TFAE : [
+  Modal.GL ⊢ φ,
+  ∀ F : Kripke.Frame, [Fintype F] → [F.IsTransitive] → [F.IsIrreflexive] → ∀ r, [F.IsRootedBy r] → F ⊧ φ,
+  ∀ M : Kripke.Model, [Fintype M] → [M.IsTransitive] → [M.IsIrreflexive] → ∀ r, [M.IsRootedBy r] → r ⊧ φ,
+].TFAE := by
+  tfae_have 1 → 2 := by
+    intro h F _ _ Fcwf r _;
+    have := finite_completeness_TFAE.out 0 2 |>.mp h;
+    grind;
+  tfae_have 2 → 3 := by
+    intro h F _ _ _ r _;
+    apply h;
+  tfae_have 3 → 1 := by
+    intro h;
+    apply finite_completeness_TFAE (φ := φ) |>.out 3 0 |>.mp;
+    intro M _;
+    have : Fintype M := Fintype.ofFinite M;
+    apply h;
+  tfae_finish;
+
+lemma iff_unprovable_exists_fintype_rooted_model : Modal.GL ⊬ φ ↔ ∃ M : Model, ∃ _ : Fintype M, ∃ _ : M.IsTransitive, ∃ _ : M.IsIrreflexive, ∃ r, ∃ _ : M.IsRootedBy r, ¬r ⊧ φ := by
+  apply Iff.not_left;
+  apply Iff.trans $ fintype_completeness_TFAE (φ := φ) |>.out 0 2;
+  push_neg;
+  tauto;
+
 end GL.Kripke
 
 end LO.Modal
