@@ -18,6 +18,8 @@ lemma Frame.cwf [F.IsConverseWellFounded] : ConverseWellFounded F.Rel := IsConve
 
 instance [F.IsFinite] [F.IsTransitive] [F.IsIrreflexive] : F.IsConverseWellFounded := ⟨IsConverseWellFounded.cwf⟩
 
+instance [F.IsConverseWellFounded] : F.IsIrreflexive := F.cwf.irrefl.swap
+
 lemma validate_AxiomL_of_trans_cwf [F.IsTransitive] [F.IsConverseWellFounded] : F ⊧ (Axioms.L φ) := by
   rintro V w;
   apply Satisfies.imp_def.mpr;

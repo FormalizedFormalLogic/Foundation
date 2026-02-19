@@ -3,7 +3,7 @@ name: Actionlint
 on:
   push:
     paths:
-      - ".github/**"
+      - ".github/workflows/**"
 
 jobs:
   actionlint:

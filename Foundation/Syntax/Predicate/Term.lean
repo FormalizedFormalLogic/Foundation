@@ -19,6 +19,9 @@ namespace LO
 
 namespace FirstOrder
 
+/--
+A semiterm of language `L`, with bound variables indexed by `Fin n` and free variables indexed by `ξ`. In `LO.FirstOrder.Semiformula`, bound variables are de Bruijn indices with a separate type from free variables.
+-/
 inductive Semiterm (L : Language) (ξ : Type*) (n : ℕ)
   | bvar : Fin n → Semiterm L ξ n
   | fvar : ξ → Semiterm L ξ n
@@ -84,6 +87,9 @@ instance : DecidableEq (Semiterm L ξ n) := hasDecEq
 
 end Decidable
 
+/--
+The complexity of a semiterm, taking suprema at function symbols.
+-/
 def complexity : Semiterm L ξ n → ℕ
   |       #_ => 0
   |       &_ => 0
@@ -101,6 +107,9 @@ lemma complexity_func {k} (f : L.Func k) (v : Fin k → Semiterm L ξ n) : (func
 
 abbrev func! (k) (f : L.Func k) (v : Fin k → Semiterm L ξ n) := func f v
 
+/--
+The set of bound variables occurring in a semiterm.
+-/
 def bv : Semiterm L ξ n → Finset (Fin n)
   |       #x => {x}
   |       &_ => ∅
@@ -129,12 +138,15 @@ namespace Positive
 end Positive
 
 lemma bv_eq_empty_of_positive {t : Semiterm L ξ 1} (ht : t.Positive) : t.bv = ∅ :=
-  Finset.eq_empty_of_forall_notMem <| by simp_all [Positive, Fin.eq_zero]
+  Finset.eq_empty_of_forall_notMem <| by simp_all [Positive]
 
 section freeVariables
 
 variable [DecidableEq ξ]
 
+/--
+The set of free variables occuring in a semiterm.
+-/
 def freeVariables : Semiterm L ξ n → Finset ξ
   |       #_ => ∅
   |       &x => {x}
@@ -167,6 +179,9 @@ section lMap
 
 variable (Φ : L₁ →ᵥ L₂)
 
+/--
+The map on terms induced from a homomorphism between languages.
+-/
 def lMap (Φ : L₁ →ᵥ L₂) : Semiterm L₁ ξ n → Semiterm L₂ ξ n
   |       #x => #x
   |       &x => &x

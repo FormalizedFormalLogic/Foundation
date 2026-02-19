@@ -19,24 +19,21 @@ lemma iff_provable_boxdot_GL_provable_boxdot_S : Modal.GL ⊢ φᵇ ↔ Modal.S 
   . apply Entailment.WeakerThan.wk;
     infer_instance;
   . intro h;
-    apply GL.Kripke.iff_provable_satisfies_FiniteTransitiveTree.mpr;
-    replace h := iff_provable_rflSubformula_GL_provable_S.mpr h;
-    replace h := GL.Kripke.iff_provable_satisfies_FiniteTransitiveTree.mp h;
-    intro M r _;
+    apply GL.Kripke.fintype_completeness_TFAE.out 2 0 |>.mp;
+    replace h := GL.Kripke.finite_completeness_TFAE.out 0 3 |>.mp $ iff_provable_rflSubformula_GL_provable_S.mpr h;
+
+    intro M _ _ _ r _;
+
     obtain ⟨i, hi⟩ := Kripke.Model.extendRoot.inr_satisfies_axiomT_set (M := M) (Γ := □⁻¹'φᵇ.subformulas);
+    apply Model.extendRoot.inl_satisfies_boxdot_iff (n := ⟨(□⁻¹'φᵇ.subformulas).card + 1, by omega⟩) (i := i) |>.mpr;
+
     let M₁ := M.extendRoot ⟨(□⁻¹'φᵇ.subformulas).card + 1, by omega⟩;
     let i₁ : M₁.World := Sum.inl i;
-    refine Model.extendRoot.inl_satisfies_boxdot_iff.mpr
-      $ Model.pointGenerate.modal_equivalent_at_root (r := i₁) |>.mp
-      $ @h (M₁↾i₁) Model.pointGenerate.root ?_ ?_;
-    . exact {};
-    . apply @Model.pointGenerate.modal_equivalent_at_root (r := i₁) |>.mpr
-      apply Satisfies.fconj_def.mpr;
-      intro ψ hψ;
-      apply Satisfies.fconj_def.mp hi;
-      simp only [Finset.mem_image, Finset.mem_preimage, Function.iterate_one] at hψ ⊢;
-      obtain ⟨ξ, hξ, rfl⟩ := hψ;
-      use ξ;
+    apply Model.pointGenerate.modal_equivalent_at_root (r := i₁) |>.mp $ h (M₁↾i₁) _;
+    apply Satisfies.fconj_def.mpr;
+    intro ψ hψ;
+    apply Satisfies.fconj_def.mp hi;
+    grind;
 
 end Modal.Logic
 
