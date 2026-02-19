@@ -108,6 +108,7 @@ public import Foundation.FirstOrder.Kripke.WeakForcing
 public import Foundation.FirstOrder.NegationTranslation.Girard
 public import Foundation.FirstOrder.NegationTranslation.GoedelGentzen
 public import Foundation.FirstOrder.Order.Le
+public import Foundation.FirstOrder.Polarity
 public import Foundation.FirstOrder.SetTheory.Basic
 public import Foundation.FirstOrder.SetTheory.Basic.Axioms
 public import Foundation.FirstOrder.SetTheory.Basic.Misc
@@ -189,10 +190,10 @@ public import Foundation.InterpretabilityLogic.Veltman.Logic.IL_R_W
 public import Foundation.InterpretabilityLogic.Veltman.Logic.IL_W
 public import Foundation.LinearLogic.FirstOrder.Calculus
 public import Foundation.LinearLogic.FirstOrder.Formula
+public import Foundation.LinearLogic.FirstOrder.LKToLL
 public import Foundation.LinearLogic.FirstOrder.Rew
 public import Foundation.LinearLogic.LogicSymbol
 public import Foundation.LinearLogic.MLL
-public import Foundation.LinearLogic.FirstOrder.LKToLL
 public import Foundation.Logic.Calculus
 public import Foundation.Logic.Decidability
 public import Foundation.Logic.Disjunctive
@@ -559,6 +560,7 @@ public import Foundation.Vorspiel.IsEmpty
 public import Foundation.Vorspiel.List.Basic
 public import Foundation.Vorspiel.List.Chain
 public import Foundation.Vorspiel.List.ChainI
+public import Foundation.Vorspiel.List.Perm
 public import Foundation.Vorspiel.Matrix
 public import Foundation.Vorspiel.Nat.Basic
 public import Foundation.Vorspiel.Nat.Matrix
