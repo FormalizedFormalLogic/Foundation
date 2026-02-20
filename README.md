@@ -108,18 +108,6 @@ Automatically generated[^1] diagrams "Zoo", illustrate the Lean4-verified interr
 
 ![Interpretability Logic Zoo](https://formalizedformallogic.github.io/Zoo/interpretability_logic.png)
 
-## Build
-
-```shell
-lake build Foundation
-```
-
-## References
-
-```
-bibtool -r .bibtoolrsc -i references.bib -o references.bib
-```
-
 ## Developers
 
 List of contact information and areas of expertise of the current main developers.
