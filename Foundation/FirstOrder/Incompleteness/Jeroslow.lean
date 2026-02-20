@@ -92,7 +92,7 @@ instance [𝗜𝚺₁ ⪯ T] [T.SoundOnHierarchy 𝚺 1] : T.standardRefutabilit
   ] using this;
 
 instance [𝗜𝚺₁ ⪯ T] : T.standardProvability.FormalizedCompleteOn (ProvabilityAbstraction.jeroslow T.standardRefutability) := by
-  apply Provability.FormalizedCompleteOn.mk';
+  constructor;
   apply provable_sigma_one_complete_of_E;
   . show Hierarchy 𝚺 1 T.jeroslow';
     exact jeroslow'_sigmaOne;

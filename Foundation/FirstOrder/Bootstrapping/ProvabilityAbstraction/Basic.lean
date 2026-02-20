@@ -78,42 +78,44 @@ class Rosser [L.ReferenceableBy L₀] {T₀ : Theory L₀} {T : Theory L} (𝔅 
   Ros {σ : Sentence L} : T ⊢ ∼σ → T₀ ⊢ ∼𝔅 σ
 export Rosser (Ros)
 
-class SoundOnModel
+
+/--
+  Abstract version of formalized `Γ`-completeness for provability `𝔅`
+
+  example: `[∀ σ ∈ 𝚺₁, 𝔅.FormalizedCompleteOn σ]` for formalized `𝚺₁`-completeness
+-/
+class FormalizedCompleteOn (𝔅 : Provability T₀ T) (σ) where
+  formalized_complete_on : T ⊢ σ ➝ 𝔅 σ
+export FormalizedCompleteOn (formalized_complete_on)
+attribute [simp, grind .] formalized_complete_on
+
+/--
+  NOTE: Named after [Vis21].
+-/
+class Kreisel [L.ReferenceableBy L] {T₀ T : Theory L} (𝔅 : Provability T₀ T) (σ) where
+  KR : T ⊢ 𝔅 σ → T ⊢ σ
+export Kreisel (KR)
+attribute [simp, grind .] KR
+
+class WeakKreisel [L.ReferenceableBy L] {T₀ T : Theory L} (𝔅 : Provability T₀ T) (σ) where
+  WKR : T₀ ⊢ 𝔅 σ → T ⊢ σ
+export WeakKreisel (WKR)
+attribute [simp, grind .] WKR
+
+
+class SoundOn
   [L.ReferenceableBy L₀] {T₀ : Theory L₀} {T : Theory L}
-  (𝔅 : Provability T₀ T) (N : outParam Type*) [Nonempty N] [Structure L₀ N] where
-  sound_on_model {σ : Sentence L} : N ⊧ₘ 𝔅 σ ↔ T ⊢ σ
-export SoundOnModel (sound_on_model)
-
-/-- Abstraction of formalized `Γ`-completeness (where `Γ` intended to class such `𝚺₁`) -/
-class FormalizedCompleteOnClass (Γ : Set (Sentence L)) where
-  formalized_complete_on_class (σ) (hσ : σ ∈ Γ) : T ⊢ σ ➝ 𝔅 σ
-export FormalizedCompleteOnClass (formalized_complete_on_class)
-attribute [simp, grind .] formalized_complete_on_class
-
-class FormalizedCompleteOn (𝔅 : Provability T₀ T) (σ : Sentence L) extends FormalizedCompleteOnClass 𝔅 (Γ := {σ}) where
-def FormalizedCompleteOn.mk' {σ : Sentence L} (h : T ⊢ σ ➝ 𝔅 σ) : FormalizedCompleteOn 𝔅 σ where
-  formalized_complete_on_class := by simpa using h
-
-@[simp, grind .]
-lemma formalized_complete_on [𝔅.FormalizedCompleteOn σ] : T ⊢ σ ➝ 𝔅 σ :=
-  𝔅.formalized_complete_on_class σ (show σ ∈ {σ} by simp)
+  (𝔅 : Provability T₀ T)
+  (M : outParam Type*) [Nonempty M] [Structure L₀ M]
+  (σ)
+  where
+  sound_on : M ⊧ₘ 𝔅 σ → T ⊢ σ
+export SoundOn (sound_on)
+attribute [simp, grind .] sound_on
 
 
-/-- Abstraction of soundness for `Γ`-soundness (where `Γ` intended to class such `𝚺₁`) -/
-class SoundOnClass [L.ReferenceableBy L] {T₀ T : Theory L} (𝔅 : Provability T₀ T) (Γ : Set (Sentence L)) where
-  sound_on_class (σ) (hσ : σ ∈ Γ) : T ⊢ 𝔅 σ → T ⊢ σ
-export SoundOnClass (sound_on_class)
-attribute [simp, grind .] sound_on_class
-
-class SoundOn [L.ReferenceableBy L] {T₀ T : Theory L} (𝔅 : Provability T₀ T) (σ : Sentence L) extends SoundOnClass 𝔅 (Γ := {σ})
-def SoundOn.mk' {σ : Sentence L} (h : T ⊢ 𝔅 σ → T ⊢ σ) : SoundOn 𝔅 σ where
-  sound_on_class := by simpa using h
-
-instance [𝔅.SoundOnClass Set.univ] : 𝔅.SoundOn σ := SoundOn.mk' _ $ 𝔅.sound_on_class _ (show σ ∈ Set.univ by simp)
-
-@[simp, grind .]
-lemma sound_on [𝔅.SoundOn σ] : T ⊢ 𝔅 σ → T ⊢ σ := SoundOnClass.sound_on_class σ (show σ ∈ {σ} by simp)
-
+instance [Nonempty M] [Structure L M] [𝔅.SoundOn M σ] [M ⊧ₘ* T₀] : 𝔅.WeakKreisel σ where
+  WKR h := SoundOn.sound_on $ models_of_provable inferInstance h;
 
 end Provability
 
@@ -220,19 +222,19 @@ theorem unprovable_gödel : T ⊬ (gödel 𝔅) := by
   have : ¬Consistent T := not_consistent_iff_inconsistent.mpr <| inconsistent_iff_provable_bot.mpr this;
   contradiction
 
-theorem unrefutable_gödel [𝔅.SoundOn (gödel 𝔅)] : T ⊬ ∼(gödel 𝔅) := by
+theorem unrefutable_gödel [𝔅.Kreisel (gödel 𝔅)] : T ⊬ ∼(gödel 𝔅) := by
   intro h₂;
-  have h₁ : T ⊢ (gödel 𝔅) := WeakerThan.pbl $ 𝔅.sound_on $ by cl_prover [gödel_spec (T₀ := T₀), h₂];
+  have h₁ : T ⊢ (gödel 𝔅) := WeakerThan.pbl $ 𝔅.KR $ by cl_prover [gödel_spec (T₀ := T₀), h₂];
   have : T ⊢ ⊥ := (N!_iff_CO!.mp $ WeakerThan.pbl $ h₂) ⨀ h₁;
   have : ¬Consistent T := not_consistent_iff_inconsistent.mpr <| inconsistent_iff_provable_bot.mpr this
   contradiction;
 
-theorem gödel_independent [𝔅.SoundOn (gödel 𝔅)] : Independent T (gödel 𝔅) := by
+theorem gödel_independent [𝔅.Kreisel (gödel 𝔅)] : Independent T (gödel 𝔅) := by
   constructor
   . apply unprovable_gödel
   . apply unrefutable_gödel
 
-theorem first_incompleteness [𝔅.SoundOn (gödel 𝔅)] : Incomplete T :=
+theorem first_incompleteness [𝔅.Kreisel (gödel 𝔅)] : Incomplete T :=
   incomplete_def.mpr ⟨(gödel 𝔅), gödel_independent⟩
 
 end First
@@ -270,13 +272,13 @@ theorem con_unprovable [Consistent T] : T ⊬ 𝔅.con := by
   have : T ⊢ 𝐆 := by cl_prover [h, this]
   exact unprovable_gödel this
 
-theorem con_unrefutable [Consistent T] [𝔅.SoundOn (gödel 𝔅)] : T ⊬ ∼𝔅.con := by
+theorem con_unrefutable [Consistent T] [𝔅.Kreisel (gödel 𝔅)] : T ⊬ ∼𝔅.con := by
   intro h
   have : T₀ ⊢ 𝐆 ⭤ 𝔅.con := gödel_iff_con
   have : T ⊢ ∼𝐆 := by cl_prover [h, this]
   exact unrefutable_gödel this
 
-theorem con_independent [Consistent T] [𝔅.SoundOn (gödel 𝔅)] : Independent T 𝔅.con := by
+theorem con_independent [Consistent T] [𝔅.Kreisel (gödel 𝔅)] : Independent T 𝔅.con := by
   constructor
   . apply con_unprovable
   . apply con_unrefutable
@@ -325,13 +327,13 @@ lemma unprovable_con_via_löb [Consistent T] [L.DecidableEq] [𝔅.Löb] : T ⊬
   contradiction
 -/
 
-lemma formalized_unprovable_not_con [Consistent T] [𝔅.SoundOn (gödel 𝔅)] : T ⊬ 𝔅.con ➝ ∼𝔅 (∼𝔅.con) := by
+lemma formalized_unprovable_not_con [Consistent T] [𝔅.Kreisel (gödel 𝔅)] : T ⊬ 𝔅.con ➝ ∼𝔅 (∼𝔅.con) := by
   by_contra hC;
   have : T ⊢ ∼𝔅.con := Löb.LT $ CN!_of_CN!_right hC;
   have : T ⊬ ∼𝔅.con := con_unrefutable;
   contradiction;
 
-lemma formalized_unrefutable_gödel [Consistent T] [𝔅.SoundOn (gödel 𝔅)] : T ⊬ 𝔅.con ➝ ∼𝔅 (∼(gödel 𝔅)) := by
+lemma formalized_unrefutable_gödel [Consistent T] [𝔅.Kreisel (gödel 𝔅)] : T ⊬ 𝔅.con ➝ ∼𝔅 (∼(gödel 𝔅)) := by
   by_contra hC;
   have : T ⊬ 𝔅.con ➝ ∼𝔅 (∼𝔅.con) := formalized_unprovable_not_con;
   have : T ⊢ 𝔅.con ➝ ∼𝔅 (∼𝔅.con) := C!_trans hC $ WeakerThan.pbl <| K!_left <| ENN!_of_E!
