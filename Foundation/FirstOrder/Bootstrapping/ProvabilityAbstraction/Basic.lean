@@ -366,7 +366,7 @@ theorem rosser_first_incompleteness [L.DecidableEq] (𝔅 : Provability T₀ T) 
 
 omit [Diagonalization T₀] [Consistent T] in
 /-- If `𝔅` satisfies Rosser provability condition, then `𝔅.con` is provable from `T`. -/
-theorem kriesel_remark [𝔅.Rosser] : T ⊢ 𝔅.con := by
+theorem kreisel_remark [𝔅.Rosser] : T ⊢ 𝔅.con := by
   have : T₀ ⊢ ∼𝔅 ⊥ := Ros (N!_iff_CO!.mpr (by simp));
   exact WeakerThan.pbl $ this;
 
