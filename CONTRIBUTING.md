@@ -2,7 +2,7 @@
 
 ## Commit convention
 
-Follow usual conventinal commit for PR title (we always squash merge).
+Follow usual conventional commit for PR title (we always squash merge).
 
 ```
 <type>(scope): <subject>
