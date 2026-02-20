@@ -38,11 +38,11 @@ lemma boxBot_monotone [T₀ ⪯ T] [𝔅.HBL] : n ≤ m → T ⊢ 𝔅^[n] ⊥ �
     have b₁ : T ⊢ 𝔅 (𝔅^[n] ⊥) ➝ 𝔅 (𝔅^[n + k] ⊥) := prov_distribute_imply'' ih
     cl_prover [b₀, b₁]
 
-lemma iIncon_unprovable_of_sigma1_sound [hSound : ∀ n, 𝔅.SyntacticalSoundOn (𝔅^[n] ⊥)] [Entailment.Consistent T] : ∀ n, T ⊬ 𝔅^[n] ⊥
+lemma iIncon_unprovable_of_sigma1_sound [hSound : ∀ n, 𝔅.Kriesel (𝔅^[n] ⊥)] [Entailment.Consistent T] : ∀ n, T ⊬ 𝔅^[n] ⊥
   |     0 => Entailment.consistent_iff_unprovable_bot.mp inferInstance
   | n + 1 => fun h ↦
     have : T ⊢ 𝔅 (𝔅^[n] ⊥) := by simpa [Function.iterate_succ_apply'] using h
-    iIncon_unprovable_of_sigma1_sound n <| hSound n |>.syntactical_sound_on this
+    iIncon_unprovable_of_sigma1_sound n <| hSound n |>.KR this
 
 
 namespace Provability
@@ -52,10 +52,10 @@ lemma height_eq_top_iff : 𝔅.height = ⊤ ↔ ∀ n, T ⊬ 𝔅^[n] ⊥ := ENa
 lemma height_le_of_boxBot {n : ℕ} (h : T ⊢ 𝔅^[n] ⊥) : 𝔅.height ≤ n :=
   ENat.find_le (T ⊢ 𝔅^[·] ⊥) n h
 
-lemma height_lt_pos_of_boxBot {n : ℕ} (pos : 0 < n) [𝔅.WeakSyntacticalSoundOn (𝔅^[n.pred] ⊥)] (h : T₀ ⊢ 𝔅^[n] ⊥) : 𝔅.height < n := by
+lemma height_lt_pos_of_boxBot {n : ℕ} (pos : 0 < n) [𝔅.WeakKriesel (𝔅^[n.pred] ⊥)] (h : T₀ ⊢ 𝔅^[n] ⊥) : 𝔅.height < n := by
   have e : n.pred.succ = n := Eq.symm <| (Nat.sub_eq_iff_eq_add pos).mp rfl
   have : T₀ ⊢ 𝔅 (𝔅^[n.pred] ⊥) := by rwa [←Function.iterate_succ_apply' (f := 𝔅), e];
-  have : 𝔅.height ≤ n.pred := height_le_of_boxBot $ 𝔅.weak_syntactical_sound_on this;
+  have : 𝔅.height ≤ n.pred := height_le_of_boxBot $ 𝔅.WKR this;
   have : 𝔅.height < n := by
     rw [←e]
     exact lt_of_le_of_lt this <| ENat.coe_lt_coe.mpr <| by simp
@@ -70,7 +70,7 @@ lemma height_le_iff_boxBot [T₀ ⪯ T] [𝔅.HBL] {n : ℕ} :
     exact boxBot_monotone hmn ⨀ hm
   · exact height_le_of_boxBot
 
-lemma height_eq_top_of_sound_and_consistent [∀ n, 𝔅.SyntacticalSoundOn (𝔅^[n] ⊥)] [Entailment.Consistent T] : 𝔅.height = ⊤ :=
+lemma height_eq_top_of_sound_and_consistent [∀ n, 𝔅.Kriesel (𝔅^[n] ⊥)] [Entailment.Consistent T] : 𝔅.height = ⊤ :=
   height_eq_top_iff.mpr iIncon_unprovable_of_sigma1_sound
 
 @[grind =>]

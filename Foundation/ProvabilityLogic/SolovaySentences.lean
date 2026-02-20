@@ -119,7 +119,7 @@ lemma root_of_iterated_inconsistency : T₀ ⊢ ∼𝔅^[M.height] ⊥ ➝ S r :
           <| Frame.rank_lt_whole_height hri
     cl_prover [this]
 
-lemma theory_height [𝔅.WeakSyntacticalSoundOn (𝔅^[(Frame.rank r).pred] ⊥)] (h : r ⊧ ◇(∼A)) (b : T ⊢ S.realization A) : 𝔅.height < M.height := by
+lemma theory_height [𝔅.WeakKriesel (𝔅^[(Frame.rank r).pred] ⊥)] (h : r ⊧ ◇(∼A)) (b : T ⊢ S.realization A) : 𝔅.height < M.height := by
   apply 𝔅.height_lt_pos_of_boxBot (height_pos_of_dia h)
   have : ∃ i, r ≺ i ∧ i ⊭ A := Formula.Kripke.Satisfies.dia_def.mp h
   rcases this with ⟨i, hi, hiA⟩

@@ -86,7 +86,7 @@ instance [𝗣𝗔⁻ ⪯ T] : T.standardProvability.HBL3 := ⟨provable_D3⟩
 
 instance [𝗣𝗔⁻ ⪯ T] : T.standardProvability.HBL where
 
-instance {σ} [ArithmeticTheory.SoundOnHierarchy T 𝚺 1] : T.standardProvability.SyntacticalSoundOn σ := ⟨by simpa using provable_sound⟩
+instance {σ} [ArithmeticTheory.SoundOnHierarchy T 𝚺 1] : T.standardProvability.Kriesel σ := ⟨by simpa using provable_sound⟩
 
 open LO.Entailment in
 /--
