@@ -16,7 +16,7 @@ open FirstOrder FirstOrder.ProvabilityAbstraction
 open ArithmeticTheory (provabilityLogicOn)
 
 variable {T₀ T : ArithmeticTheory} [T₀ ⪯ T] [Diagonalization T₀]
-         {𝔅 : Provability T₀ T} [𝔅.HBL] [ℕ ⊧ₘ* T] [𝔅.SoundOnModel ℕ]
+         {𝔅 : Provability T₀ T} [𝔅.HBL] [ℕ ⊧ₘ* T] [∀ σ, 𝔅.SoundOn ℕ σ]
          {A B : Formula ℕ}
 
 open Entailment FiniteContext
