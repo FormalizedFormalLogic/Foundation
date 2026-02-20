@@ -10,7 +10,7 @@ Follow usual conventional commit for PR title (we always squash merge).
 
 Choose `<type>` from below (should be one, but like `fix/doc` might be ok).
 - `add`: Adding new results, definition, theorems.
-- `fix`: Fixing exists results for something misformalized
+- `fix`: Fixing existing results for something misformalized
 - `refactor`: Rename and organize definitons/theorems. (essentially nothing changed about existing facts.)
 - `doc`: Adding or updating documents.
 - `ci`: Configure GitHub Actions.
