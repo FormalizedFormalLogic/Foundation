@@ -1,4 +1,4 @@
-[Doc]: https://FormalizedFormalLogic.github.io/Foundation/doc
+[Doc]: https://FormalizedFormalLogic.github.io/Foundation/docs
 [Catalogue]: https://FormalizedFormalLogic.github.io/Catalogue
 [Zoo]: https://github.com/FormalizedFormalLogic/Zoo
 
