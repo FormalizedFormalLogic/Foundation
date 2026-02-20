@@ -92,14 +92,14 @@ attribute [simp, grind .] formalized_complete_on
 /--
   NOTE: Named after [Vis21].
 -/
-class Kriesel [L.ReferenceableBy L] {T₀ T : Theory L} (𝔅 : Provability T₀ T) (σ) where
+class Kreisel [L.ReferenceableBy L] {T₀ T : Theory L} (𝔅 : Provability T₀ T) (σ) where
   KR : T ⊢ 𝔅 σ → T ⊢ σ
-export Kriesel (KR)
+export Kreisel (KR)
 attribute [simp, grind .] KR
 
-class WeakKriesel [L.ReferenceableBy L] {T₀ T : Theory L} (𝔅 : Provability T₀ T) (σ) where
+class WeakKreisel [L.ReferenceableBy L] {T₀ T : Theory L} (𝔅 : Provability T₀ T) (σ) where
   WKR : T₀ ⊢ 𝔅 σ → T ⊢ σ
-export WeakKriesel (WKR)
+export WeakKreisel (WKR)
 attribute [simp, grind .] WKR
 
 
@@ -114,7 +114,7 @@ export SoundOn (sound_on)
 attribute [simp, grind .] sound_on
 
 
-instance [Nonempty M] [Structure L M] [𝔅.SoundOn M σ] [M ⊧ₘ* T₀] : 𝔅.WeakKriesel σ where
+instance [Nonempty M] [Structure L M] [𝔅.SoundOn M σ] [M ⊧ₘ* T₀] : 𝔅.WeakKreisel σ where
   WKR h := SoundOn.sound_on $ models_of_provable inferInstance h;
 
 end Provability
@@ -222,19 +222,19 @@ theorem unprovable_gödel : T ⊬ (gödel 𝔅) := by
   have : ¬Consistent T := not_consistent_iff_inconsistent.mpr <| inconsistent_iff_provable_bot.mpr this;
   contradiction
 
-theorem unrefutable_gödel [𝔅.Kriesel (gödel 𝔅)] : T ⊬ ∼(gödel 𝔅) := by
+theorem unrefutable_gödel [𝔅.Kreisel (gödel 𝔅)] : T ⊬ ∼(gödel 𝔅) := by
   intro h₂;
   have h₁ : T ⊢ (gödel 𝔅) := WeakerThan.pbl $ 𝔅.KR $ by cl_prover [gödel_spec (T₀ := T₀), h₂];
   have : T ⊢ ⊥ := (N!_iff_CO!.mp $ WeakerThan.pbl $ h₂) ⨀ h₁;
   have : ¬Consistent T := not_consistent_iff_inconsistent.mpr <| inconsistent_iff_provable_bot.mpr this
   contradiction;
 
-theorem gödel_independent [𝔅.Kriesel (gödel 𝔅)] : Independent T (gödel 𝔅) := by
+theorem gödel_independent [𝔅.Kreisel (gödel 𝔅)] : Independent T (gödel 𝔅) := by
   constructor
   . apply unprovable_gödel
   . apply unrefutable_gödel
 
-theorem first_incompleteness [𝔅.Kriesel (gödel 𝔅)] : Incomplete T :=
+theorem first_incompleteness [𝔅.Kreisel (gödel 𝔅)] : Incomplete T :=
   incomplete_def.mpr ⟨(gödel 𝔅), gödel_independent⟩
 
 end First
@@ -272,13 +272,13 @@ theorem con_unprovable [Consistent T] : T ⊬ 𝔅.con := by
   have : T ⊢ 𝐆 := by cl_prover [h, this]
   exact unprovable_gödel this
 
-theorem con_unrefutable [Consistent T] [𝔅.Kriesel (gödel 𝔅)] : T ⊬ ∼𝔅.con := by
+theorem con_unrefutable [Consistent T] [𝔅.Kreisel (gödel 𝔅)] : T ⊬ ∼𝔅.con := by
   intro h
   have : T₀ ⊢ 𝐆 ⭤ 𝔅.con := gödel_iff_con
   have : T ⊢ ∼𝐆 := by cl_prover [h, this]
   exact unrefutable_gödel this
 
-theorem con_independent [Consistent T] [𝔅.Kriesel (gödel 𝔅)] : Independent T 𝔅.con := by
+theorem con_independent [Consistent T] [𝔅.Kreisel (gödel 𝔅)] : Independent T 𝔅.con := by
   constructor
   . apply con_unprovable
   . apply con_unrefutable
@@ -327,13 +327,13 @@ lemma unprovable_con_via_löb [Consistent T] [L.DecidableEq] [𝔅.Löb] : T ⊬
   contradiction
 -/
 
-lemma formalized_unprovable_not_con [Consistent T] [𝔅.Kriesel (gödel 𝔅)] : T ⊬ 𝔅.con ➝ ∼𝔅 (∼𝔅.con) := by
+lemma formalized_unprovable_not_con [Consistent T] [𝔅.Kreisel (gödel 𝔅)] : T ⊬ 𝔅.con ➝ ∼𝔅 (∼𝔅.con) := by
   by_contra hC;
   have : T ⊢ ∼𝔅.con := Löb.LT $ CN!_of_CN!_right hC;
   have : T ⊬ ∼𝔅.con := con_unrefutable;
   contradiction;
 
-lemma formalized_unrefutable_gödel [Consistent T] [𝔅.Kriesel (gödel 𝔅)] : T ⊬ 𝔅.con ➝ ∼𝔅 (∼(gödel 𝔅)) := by
+lemma formalized_unrefutable_gödel [Consistent T] [𝔅.Kreisel (gödel 𝔅)] : T ⊬ 𝔅.con ➝ ∼𝔅 (∼(gödel 𝔅)) := by
   by_contra hC;
   have : T ⊬ 𝔅.con ➝ ∼𝔅 (∼𝔅.con) := formalized_unprovable_not_con;
   have : T ⊢ 𝔅.con ➝ ∼𝔅 (∼𝔅.con) := C!_trans hC $ WeakerThan.pbl <| K!_left <| ENN!_of_E!
