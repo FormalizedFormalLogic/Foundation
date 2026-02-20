@@ -2,7 +2,7 @@ module
 
 public import Foundation.Propositional.Kripke.AxiomWLEM
 public import Foundation.Propositional.Kripke.Rooted
-public import Foundation.Propositional.Kripke.Logic.KrieselPutnam
+public import Foundation.Propositional.Kripke.Logic.KreiselPutnam
 
 
 @[expose] public section
@@ -24,7 +24,7 @@ protected class Frame.IsFiniteKC (F : Frame) extends F.IsFinite, F.IsKC
 protected abbrev FrameClass.KC : FrameClass := { F | F.IsPiecewiseStronglyConvergent }
 protected abbrev FrameClass.finite_KC : FrameClass := { F | F.IsFiniteKC }
 
-instance [F.IsKC] : F.IsKrieselPutnam := ⟨by
+instance [F.IsKC] : F.IsKreiselPutnam := ⟨by
   rintro x y z ⟨Rxy, Rxz, nRyz, nRzy⟩;
   use x;
   refine ⟨F.refl, Rxy, Rxz, ?_⟩;
@@ -136,9 +136,9 @@ end FFP
 end KC
 
 
-instance : Propositional.KrieselPutnam ⪱ Propositional.KC := by
+instance : Propositional.KreiselPutnam ⪱ Propositional.KC := by
   constructor;
-  . apply weakerThan_of_subset_frameClass FrameClass.KrieselPutnam FrameClass.KC;
+  . apply weakerThan_of_subset_frameClass FrameClass.KreiselPutnam FrameClass.KC;
     intro F hF;
     simp_all only [Set.mem_setOf_eq];
     infer_instance
@@ -146,7 +146,7 @@ instance : Propositional.KrieselPutnam ⪱ Propositional.KC := by
     use Axioms.WLEM (.atom 0);
     constructor;
     . simp;
-    . apply Sound.not_provable_of_countermodel (𝓜 := FrameClass.KrieselPutnam)
+    . apply Sound.not_provable_of_countermodel (𝓜 := FrameClass.KreiselPutnam)
       apply not_validOnFrameClass_of_exists_frame;
       let F : Frame := {
         World := Fin 3,
@@ -160,7 +160,7 @@ instance : Propositional.KrieselPutnam ⪱ Propositional.KC := by
       use F;
       constructor;
       . refine {
-          kriesel_putnam := by
+          kreisel_putnam := by
             rintro x y z ⟨Rxy, Rxz, nRyz, nRzy⟩;
             match x, y, z with
             | 0, 1, 2
@@ -187,7 +187,7 @@ instance : Propositional.KrieselPutnam ⪱ Propositional.KC := by
         omega;
 
 instance : Propositional.Int ⪱ Propositional.KC := calc
-  Propositional.Int ⪱ Propositional.KrieselPutnam := inferInstance
+  Propositional.Int ⪱ Propositional.KreiselPutnam := inferInstance
   _   ⪱ Propositional.KC := inferInstance
 
 end LO.Propositional
