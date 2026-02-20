@@ -14,7 +14,7 @@ Choose `<type>` from below (should be one, but like `fix/doc` might be ok).
 - `refactor`: Rename and organize definitons/theorems. (essentially nothing changed about existing facts.)
 - `doc`: Adding or updating documents.
 - `ci`: Configure GitHub Actions.
-- `chore`: Mainting other things (ex: version-up).
+- `chore`: Maintaining other things (ex: version-up).
 
 `scope` is optional, specify like `FirstOrder`, `Modal` if needed.
 
