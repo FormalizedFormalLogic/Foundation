@@ -68,7 +68,7 @@ lemma iff_interpret_boxdot_strongInterpret [𝔅.HBL2] :
   . intro h; exact (K!_right iff_interpret_boxdot_strongInterpret_inside) ⨀ h;
 
 lemma iff_models_interpret_boxdot_strongInterpret
-  {M} [Nonempty M] [Structure L M] [M ⊧ₘ* T] [𝔅.HBL2] [𝔅.SoundOnModel M] :
+  {M} [Nonempty M] [Structure L M] [M ⊧ₘ* T] [𝔅.HBL2] [∀ σ, 𝔅.SoundOn M σ] :
    M ⊧ₘ f (Aᵇ) ↔ M ⊧ₘ f.strongInterpret A := by
   induction A with
   | hatom φ => simp [Realization.interpret, strongInterpret, Formula.boxdotTranslate];
@@ -93,19 +93,20 @@ lemma iff_models_interpret_boxdot_strongInterpret
     . rintro ⟨h₁, h₂⟩;
       constructor;
       . exact ih.mp h₁;
-      . apply sound_on_model.mpr;
-        exact iff_interpret_boxdot_strongInterpret.mp $ sound_on_model.mp h₂;
+      . apply models_of_provable (T := T) inferInstance;
+        apply ProvabilityAbstraction.D1_shift;
+        exact iff_interpret_boxdot_strongInterpret.mp $ 𝔅.sound_on h₂;
     . rintro ⟨h₁, h₂⟩;
       constructor;
       . apply ih.mpr h₁;
-      . apply sound_on_model.mpr;
-        exact iff_interpret_boxdot_strongInterpret.mpr $ sound_on_model.mp h₂;
+      . apply models_of_provable (T := T) inferInstance;
+        apply ProvabilityAbstraction.D1_shift;
+        exact iff_interpret_boxdot_strongInterpret.mpr $ 𝔅.sound_on h₂;
 
 end Realization
 
 theorem Grz.arithmetical_completeness_iff
     {T : ArithmeticTheory} [T.Δ₁] [𝗜𝚺₁ ⪯ T] (height : T.height = ⊤)
-    [T.standardProvability.SoundOnClass (((T.standardProvability)^[·] ⊥) '' Set.univ)]
     : (∀ f : T.StandardRealization, T ⊢ f.strongInterpret A) ↔ Modal.Grz ⊢ A := by
   constructor;
   . intro h;
