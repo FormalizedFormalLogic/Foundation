@@ -441,7 +441,7 @@ public import Foundation.Propositional.Entailment.Corsi.WF
 public import Foundation.Propositional.Entailment.Int.Basic
 public import Foundation.Propositional.Entailment.Int.DNE_of_LEM
 public import Foundation.Propositional.Entailment.KC
-public import Foundation.Propositional.Entailment.KrieselPutnam
+public import Foundation.Propositional.Entailment.KreiselPutnam
 public import Foundation.Propositional.Entailment.LC
 public import Foundation.Propositional.Entailment.Minimal.Basic
 public import Foundation.Propositional.Entailment.Scott
@@ -471,7 +471,7 @@ public import Foundation.Propositional.Hilbert.WF
 public import Foundation.Propositional.Hilbert.WF.Basic
 public import Foundation.Propositional.Hilbert.WF_VF
 public import Foundation.Propositional.Kripke.AxiomDummett
-public import Foundation.Propositional.Kripke.AxiomKrieselPutnam
+public import Foundation.Propositional.Kripke.AxiomKreiselPutnam
 public import Foundation.Propositional.Kripke.AxiomLEM
 public import Foundation.Propositional.Kripke.AxiomWLEM
 public import Foundation.Propositional.Kripke.Basic
@@ -481,7 +481,7 @@ public import Foundation.Propositional.Kripke.Hilbert
 public import Foundation.Propositional.Kripke.Logic.Cl
 public import Foundation.Propositional.Kripke.Logic.Int
 public import Foundation.Propositional.Kripke.Logic.KC
-public import Foundation.Propositional.Kripke.Logic.KrieselPutnam
+public import Foundation.Propositional.Kripke.Logic.KreiselPutnam
 public import Foundation.Propositional.Kripke.Logic.LC
 public import Foundation.Propositional.Kripke.Preservation
 public import Foundation.Propositional.Kripke.Rooted
