@@ -15,12 +15,12 @@ variable {L : Language} [L.Encodable] [L.LORDefinable]
 
 variable (T : Theory L) [T.Δ₁]
 
-def _root_.LO.FirstOrder.Theory.RosserProvable (φ : V) : Prop := T.ProvabilityComparison φ (neg L φ)
+def _root_.LO.FirstOrder.Theory.RosserProvable (φ : V) : Prop := T.ProvabilityComparisonLT φ (neg L φ)
 
 section
 
 noncomputable def _root_.LO.FirstOrder.Theory.rosserProvable : 𝚺₁.Semisentence 1 := .mkSigma
-  “φ. ∃ nφ, !(negGraph L) nφ φ ∧ !T.provabilityComparison φ nφ”
+  “φ. ∃ nφ, !(negGraph L) nφ φ ∧ !T.provabilityComparisonLT φ nφ”
 
 instance _root_.LO.FirstOrder.Theory.RosserProvable_defined :
     𝚺₁-Predicate (T.RosserProvable : V → Prop) via T.rosserProvable := .mk fun v ↦ by
@@ -35,10 +35,10 @@ end
 
 variable {T}
 
-lemma rosser_quote {φ : SyntacticFormula L} : T.RosserProvable (V := V) ⌜φ⌝ ↔ T.ProvabilityComparison (V := V) ⌜φ⌝ ⌜∼φ⌝ := by
+lemma rosser_quote {φ : SyntacticFormula L} : T.RosserProvable (V := V) ⌜φ⌝ ↔ T.ProvabilityComparisonLT (V := V) ⌜φ⌝ ⌜∼φ⌝ := by
   simp [Theory.RosserProvable, Semiformula.quote_def]
 
-lemma rosser_quote₀ {φ : Sentence L} : T.RosserProvable (V := V) ⌜φ⌝ ↔ T.ProvabilityComparison (V := V) ⌜φ⌝ ⌜∼φ⌝ := by
+lemma rosser_quote₀ {φ : Sentence L} : T.RosserProvable (V := V) ⌜φ⌝ ↔ T.ProvabilityComparisonLT (V := V) ⌜φ⌝ ⌜∼φ⌝ := by
   simpa [Sentence.quote_def] using rosser_quote
 
 lemma rosser_quote_def {φ : SyntacticFormula L} :
@@ -47,7 +47,7 @@ lemma rosser_quote_def {φ : SyntacticFormula L} :
 lemma rosser_quote_def₀ {φ : Sentence L} :
     T.RosserProvable (V := V) ⌜φ⌝ ↔ ∃ b : V, T.Proof b ⌜φ⌝ ∧ ∀ b' < b, ¬T.Proof b' ⌜∼φ⌝ := by simpa [Sentence.quote_def] using rosser_quote
 
-def RosserProvable.to_provable {φ : V} : T.RosserProvable φ → T.Provable φ := ProvabilityComparison.to_provable
+def RosserProvable.to_provable {φ : V} : T.RosserProvable φ → T.Provable φ := ProvabilityComparisonLT.to_provable
 
 lemma provable_of_standard_proof {n : ℕ} {φ : Sentence L} : T.Proof (n : V) ⌜φ⌝ → T ⊢ φ := fun h ↦ by
   have : T.Proof n ⌜φ⌝ ↔ T.Proof (↑n : V) ⌜φ⌝ := by
