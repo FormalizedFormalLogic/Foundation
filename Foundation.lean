@@ -61,10 +61,6 @@ public import Foundation.FirstOrder.Bootstrapping.DerivabilityCondition.D3
 public import Foundation.FirstOrder.Bootstrapping.DerivabilityCondition.EquationalTheory
 public import Foundation.FirstOrder.Bootstrapping.DerivabilityCondition.PeanoMinus
 public import Foundation.FirstOrder.Bootstrapping.FixedPoint
-public import Foundation.FirstOrder.Bootstrapping.ProvabilityAbstraction.Basic
-public import Foundation.FirstOrder.Bootstrapping.ProvabilityAbstraction.Height
-public import Foundation.FirstOrder.Bootstrapping.ProvabilityAbstraction.Refutability
-public import Foundation.FirstOrder.Bootstrapping.RosserProvability
 public import Foundation.FirstOrder.Bootstrapping.Syntax
 public import Foundation.FirstOrder.Bootstrapping.Syntax.Formula.Basic
 public import Foundation.FirstOrder.Bootstrapping.Syntax.Formula.Coding
@@ -80,7 +76,6 @@ public import Foundation.FirstOrder.Bootstrapping.Syntax.Term.Coding
 public import Foundation.FirstOrder.Bootstrapping.Syntax.Term.Functions
 public import Foundation.FirstOrder.Bootstrapping.Syntax.Term.Typed
 public import Foundation.FirstOrder.Bootstrapping.Syntax.Theory
-public import Foundation.FirstOrder.Bootstrapping.WitnessComparison
 public import Foundation.FirstOrder.Completeness.Coding
 public import Foundation.FirstOrder.Completeness.Completeness
 public import Foundation.FirstOrder.Completeness.Corollaries
@@ -94,9 +89,14 @@ public import Foundation.FirstOrder.Incompleteness.GödelRosser
 public import Foundation.FirstOrder.Incompleteness.Halting
 public import Foundation.FirstOrder.Incompleteness.Jeroslow
 public import Foundation.FirstOrder.Incompleteness.Löb
+public import Foundation.FirstOrder.Incompleteness.ProvabilityAbstraction.Basic
+public import Foundation.FirstOrder.Incompleteness.ProvabilityAbstraction.Height
+public import Foundation.FirstOrder.Incompleteness.ProvabilityAbstraction.Refutability
 public import Foundation.FirstOrder.Incompleteness.RestrictedProvability
+public import Foundation.FirstOrder.Incompleteness.RosserProvability
 public import Foundation.FirstOrder.Incompleteness.Second
 public import Foundation.FirstOrder.Incompleteness.Tarski
+public import Foundation.FirstOrder.Incompleteness.WitnessComparison
 public import Foundation.FirstOrder.Incompleteness.Yablo
 public import Foundation.FirstOrder.Interpretation
 public import Foundation.FirstOrder.Intuitionistic.Deduction
