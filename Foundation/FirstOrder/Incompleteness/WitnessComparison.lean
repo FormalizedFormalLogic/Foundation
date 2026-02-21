@@ -41,7 +41,7 @@ instance _root_.LO.FirstOrder.Theory.provability_comparison_definable' :
 
 
 noncomputable def _root_.LO.FirstOrder.Theory.provabilityComparisonLE : 𝚺₁.Semisentence 2 := .mkSigma
-  “φ ψ. ∃ b, !T.proof.sigma b φ ∧ ∀ b' ≤ b, ¬!T.proof.pi b' ψ”
+  “φ ψ. ∃ b, !T.proof.sigma b φ ∧ ∀ b' <⁺ b, ¬!T.proof.pi b' ψ”
 
 instance _root_.LO.FirstOrder.Theory.provability_comparison_le_defined :
     𝚺₁-Relation[V] T.ProvabilityComparisonLE via T.provabilityComparisonLE := .mk fun v ↦ by
