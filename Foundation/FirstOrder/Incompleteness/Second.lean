@@ -1,6 +1,6 @@
 module
 
-public import Foundation.FirstOrder.Bootstrapping.Consistency
+public import Foundation.FirstOrder.Incompleteness.Consistency
 public import Foundation.FirstOrder.Incompleteness.RosserProvability
 
 @[expose] public section
