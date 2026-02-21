@@ -150,16 +150,16 @@ section model
 
 variable (T) {V : Type*} [ORingStructure V] [V ⊧ₘ* 𝗜𝚺₁]
 
-def NegativeSuccessor (φ ψ : V) : Prop := T.ProvabilityComparison (neg ℒₒᵣ φ) (neg ℒₒᵣ ψ)
+def NegativeSuccessor (φ ψ : V) : Prop := T.ProvabilityComparisonLT (neg ℒₒᵣ φ) (neg ℒₒᵣ ψ)
 
-lemma NegativeSuccessor.quote_iff_provabilityComparison {φ ψ : Sentence ℒₒᵣ} :
-    NegativeSuccessor (V := V) T ⌜φ⌝ ⌜ψ⌝ ↔ T.ProvabilityComparison (V := V) ⌜∼φ⌝ ⌜∼ψ⌝ := by
+lemma NegativeSuccessor.quote_iff_provabilityComparisonLT {φ ψ : Sentence ℒₒᵣ} :
+    NegativeSuccessor (V := V) T ⌜φ⌝ ⌜ψ⌝ ↔ T.ProvabilityComparisonLT (V := V) ⌜∼φ⌝ ⌜∼ψ⌝ := by
   simp [NegativeSuccessor, Sentence.quote_def, Semiformula.quote_def]
 
 section
 
 def negativeSuccessor : 𝚺₁.Semisentence 2 := .mkSigma
-  “φ ψ. ∃ nφ, ∃ nψ, !(negGraph ℒₒᵣ) nφ φ ∧ !(negGraph ℒₒᵣ) nψ ψ ∧ !T.provabilityComparison nφ nψ”
+  “φ ψ. ∃ nφ, ∃ nψ, !(negGraph ℒₒᵣ) nφ φ ∧ !(negGraph ℒₒᵣ) nψ ψ ∧ !T.provabilityComparisonLT nφ nψ”
 
 instance negativeSuccessor_defined : 𝚺₁-Relation[V] NegativeSuccessor T via (negativeSuccessor T) := .mk fun v ↦ by
   simp [negativeSuccessor, NegativeSuccessor]
@@ -373,9 +373,9 @@ private lemma Solovay.exclusive.comparable {i₁ i₂ : F} {ε₁ ε₂ : List F
       rcases hji₁ε₂ with ⟨η₁, η₂, rfl⟩
       have Θε₂ : ΘChain T V (η₁ ++ j :: i₁ :: η₂) := by simpa using Θε₂
       exact ΘChain.cons_cons_iff'.mp (ΘChain.append_iff.mp Θε₂).2 |>.1
-    have : ∀ k, i₁ ≺ k → T.ProvabilityComparison (V := V) ⌜∼T.solovay j⌝ ⌜∼T.solovay k⌝ := by
-      simpa [NegativeSuccessor.quote_iff_provabilityComparison] using ΘChain.cons_cons_iff.mp this
-    exact (ProvabilityComparison.refl_iff_provable (L := ℒₒᵣ)).mp (this j hij₁)
+    have : ∀ k, i₁ ≺ k → T.ProvabilityComparisonLT (V := V) ⌜∼T.solovay j⌝ ⌜∼T.solovay k⌝ := by
+      simpa [NegativeSuccessor.quote_iff_provabilityComparisonLT] using ΘChain.cons_cons_iff.mp this
+    exact (ProvabilityComparisonLT.refl_iff_provable (L := ℒₒᵣ)).mp (this j hij₁)
   contradiction
 
 /-- Condition 1.-/
@@ -405,15 +405,15 @@ lemma Solovay.exclusive {i₁ i₂ : F} (ne : i₁ ≠ i₂) : T.Solovay V i₁ 
     rcases hj₂ with ⟨_, rfl⟩
     have : ΘChain T V ([j₂] ++ k :: ε) := (ΘChain.append_iff.mp Θε₂).2
     simpa using (ΘChain.append_iff.mp this).1
-  have P₁ : T.ProvabilityComparison (V := V) ⌜∼T.solovay j₁⌝ ⌜∼T.solovay j₂⌝ := by
-    simpa [NegativeSuccessor.quote_iff_provabilityComparison] using
+  have P₁ : T.ProvabilityComparisonLT (V := V) ⌜∼T.solovay j₁⌝ ⌜∼T.solovay j₂⌝ := by
+    simpa [NegativeSuccessor.quote_iff_provabilityComparisonLT] using
       ΘChain.doubleton_iff.mp C₁ j₂
         (cε₂.rel_of_infix _ _ <| List.infix_iff_prefix_suffix.mpr ⟨j₂ :: k :: ε, by simp, hj₂⟩)
-  have P₂ : T.ProvabilityComparison (V := V) ⌜∼T.solovay j₂⌝ ⌜∼T.solovay j₁⌝ := by
-    simpa [NegativeSuccessor.quote_iff_provabilityComparison] using
+  have P₂ : T.ProvabilityComparisonLT (V := V) ⌜∼T.solovay j₂⌝ ⌜∼T.solovay j₁⌝ := by
+    simpa [NegativeSuccessor.quote_iff_provabilityComparisonLT] using
       ΘChain.doubleton_iff.mp C₂ j₁
         (cε₁.rel_of_infix _ _ <| List.infix_iff_prefix_suffix.mpr ⟨j₁ :: k :: ε, by simp, hj₁⟩)
-  have : j₁ = j₂ := by simpa using ProvabilityComparison.antisymm (V := V) P₁ P₂
+  have : j₁ = j₂ := by simpa using ProvabilityComparisonLT.antisymm (V := V) P₁ P₂
   contradiction
 
 /-- Condition 2.-/
@@ -425,9 +425,9 @@ lemma Solovay.refute (ne : r ≠ i) : T.Solovay V i → T.Provable (⌜∼T.solo
   rcases show Θ T V i from h.1 with ⟨ε, hε, cε⟩
   rcases List.ChainI.prec_exists_of_ne hε (Ne.symm ne) with ⟨ε', i', hii', rfl, hε'⟩
   have : ∀ k, i' ≺ k → NegativeSuccessor T ⌜T.solovay i⌝ ⌜T.solovay k⌝ := (ΘChain.cons_cons_iff.mp cε).2
-  have : T.ProvabilityComparison (V := V) ⌜∼T.solovay i⌝ ⌜∼T.solovay i⌝ := by
-    simpa [NegativeSuccessor.quote_iff_provabilityComparison] using this i hii'
-  exact (ProvabilityComparison.refl_iff_provable (T := T)).mp this
+  have : T.ProvabilityComparisonLT (V := V) ⌜∼T.solovay i⌝ ⌜∼T.solovay i⌝ := by
+    simpa [NegativeSuccessor.quote_iff_provabilityComparisonLT] using this i hii'
+  exact (ProvabilityComparisonLT.refl_iff_provable (T := T)).mp this
 
 lemma Θ.disjunction (i : F) : Θ T V i → T.Solovay V i ∨ ∃ j, i ≺ j ∧ T.Solovay V j := by
   have : IsConverseWellFounded F (· ≺ ·) := inferInstance
@@ -436,13 +436,13 @@ lemma Θ.disjunction (i : F) : Θ T V i → T.Solovay V i ∨ ∃ j, i ≺ j ∧
   by_cases hS : T.Solovay V i
   · left; exact hS
   · right
-    have : ∃ j, i ≺ j ∧ ∀ k, i ≺ k → T.ProvabilityComparison (V := V) ⌜∼T.solovay j⌝ ⌜∼T.solovay k⌝ := by
+    have : ∃ j, i ≺ j ∧ ∀ k, i ≺ k → T.ProvabilityComparisonLT (V := V) ⌜∼T.solovay j⌝ ⌜∼T.solovay k⌝ := by
       have : ∃ j, i ≺ j ∧ T.Provable (⌜∼T.solovay j⌝ : V) := by
         have : Θ T V i → ∃ x, i ≺ x ∧ T.Provable (⌜∼T.solovay x⌝ : V) := by
           simpa [Theory.ConsistentWith.quote_iff, Theory.Solovay] using hS
         exact this hΘ
       rcases this with ⟨j', hij', hj'⟩
-      have := ProvabilityComparison.find_minimal_proof_fintype (T := T) (ι := {j : F // i ≺ j}) (i := ⟨j', hij'⟩)
+      have := ProvabilityComparisonLT.find_minimal_proof_fintype (T := T) (ι := {j : F // i ≺ j}) (i := ⟨j', hij'⟩)
         (fun k ↦ ⌜∼T.solovay k.val⌝) (by simpa)
       simpa using this
     rcases this with ⟨j, hij, hj⟩
@@ -451,7 +451,7 @@ lemma Θ.disjunction (i : F) : Θ T V i → T.Solovay V i ∨ ∃ j, i ≺ j ∧
       exact ⟨
         j :: ε,
         hε.cons hij,
-        cε.cons_of hε (by simpa [NegativeSuccessor.quote_iff_provabilityComparison]) hij⟩
+        cε.cons_of hε (by simpa [NegativeSuccessor.quote_iff_provabilityComparisonLT]) hij⟩
     have : T.Solovay V j ∨ ∃ k, j ≺ k ∧ T.Solovay V k := ih j hij this
     rcases this with (hSj | ⟨k, hjk, hSk⟩)
     · exact ⟨j, hij, hSj⟩
