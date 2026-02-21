@@ -3,7 +3,7 @@ module
 public import Foundation.FirstOrder.Bootstrapping.DerivabilityCondition.D1
 public import Foundation.FirstOrder.Bootstrapping.DerivabilityCondition.D2
 public import Foundation.FirstOrder.Bootstrapping.DerivabilityCondition.D3
-public import Foundation.FirstOrder.Bootstrapping.ProvabilityAbstraction.Basic
+public import Foundation.FirstOrder.Incompleteness.ProvabilityAbstraction.Basic
 public import Foundation.FirstOrder.Bootstrapping.FixedPoint
 
 @[expose] public section

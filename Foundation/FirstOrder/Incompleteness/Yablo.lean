@@ -1,6 +1,6 @@
 module
 
-public import Foundation.FirstOrder.Bootstrapping.DerivabilityCondition
+public import Foundation.FirstOrder.Incompleteness.StandardProvability
 
 @[expose] public section
 /-
