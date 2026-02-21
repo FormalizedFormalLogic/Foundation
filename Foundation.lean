@@ -53,8 +53,6 @@ public import Foundation.FirstOrder.Basic.Soundness
 public import Foundation.FirstOrder.Basic.Syntax.Formula
 public import Foundation.FirstOrder.Basic.Syntax.Rew
 public import Foundation.FirstOrder.Basic.Syntax.Theory
-public import Foundation.FirstOrder.Incompleteness.Consistency
-public import Foundation.FirstOrder.Incompleteness.StandardProvability
 public import Foundation.FirstOrder.Bootstrapping.DerivabilityCondition.D1
 public import Foundation.FirstOrder.Bootstrapping.DerivabilityCondition.D2
 public import Foundation.FirstOrder.Bootstrapping.DerivabilityCondition.D3
@@ -82,6 +80,7 @@ public import Foundation.FirstOrder.Completeness.Corollaries
 public import Foundation.FirstOrder.Completeness.SearchTree
 public import Foundation.FirstOrder.Completeness.SubLanguage
 public import Foundation.FirstOrder.Hauptsatz
+public import Foundation.FirstOrder.Incompleteness.Consistency
 public import Foundation.FirstOrder.Incompleteness.Dense
 public import Foundation.FirstOrder.Incompleteness.Examples
 public import Foundation.FirstOrder.Incompleteness.First
@@ -95,6 +94,7 @@ public import Foundation.FirstOrder.Incompleteness.ProvabilityAbstraction.Refuta
 public import Foundation.FirstOrder.Incompleteness.RestrictedProvability
 public import Foundation.FirstOrder.Incompleteness.RosserProvability
 public import Foundation.FirstOrder.Incompleteness.Second
+public import Foundation.FirstOrder.Incompleteness.StandardProvability
 public import Foundation.FirstOrder.Incompleteness.Tarski
 public import Foundation.FirstOrder.Incompleteness.WitnessComparison
 public import Foundation.FirstOrder.Incompleteness.Yablo
