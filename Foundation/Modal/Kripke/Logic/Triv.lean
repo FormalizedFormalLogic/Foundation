@@ -73,7 +73,7 @@ instance : Complete Modal.Triv Kripke.FrameClass.finite_Triv := ⟨by
       . refine ⟨λ _ => (), λ _ => ⟨r, by tauto⟩, ?_, ?_⟩
         . simp only [Function.LeftInverse, Subtype.forall, Subtype.mk.injEq, forall_eq_or_imp, true_and];
           intro x Rrx;
-          exact Frame.equality.mp $ Rrx.unwrap
+          exact Frame.equality.mp $ Rrx;
         . simp [Function.RightInverse, Function.LeftInverse];
       . exact finOneEquiv.symm;
     refl := by simp;

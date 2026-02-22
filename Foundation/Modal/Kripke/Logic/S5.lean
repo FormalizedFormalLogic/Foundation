@@ -37,22 +37,24 @@ protected abbrev FrameClass.S5 : FrameClass := { F | F.IsS5 }
 protected abbrev FrameClass.finite_S5: FrameClass := { F | F.IsFiniteS5 }
 protected abbrev FrameClass.universal : FrameClass := { F | F.IsUniversal }
 
-instance Frame.pointGenerate.isUniversal (F : Frame) (r : F.World) (_ : F.IsS5) : (F↾r).IsUniversal where
+instance Frame.pointGenerate.instIsUniversal {F : Frame} {r : F.World} [F.IsS5] : (F↾r).IsUniversal where
   universal := by
     rintro ⟨x, (rfl | hx)⟩ ⟨y, (rfl | hy)⟩;
     . simp;
-    . exact hy.unwrap;
+    . grind;
     . suffices x ≺ y by simpa;
-      exact Std.Symm.symm _ _ hx.unwrap;
+      exact Std.Symm.symm _ _ hx;
     . suffices x ≺ y by simpa;
-      apply F.eucl hx.unwrap hy.unwrap ;
+      apply F.eucl hx hy;
 
 lemma iff_validOnUniversalFrameClass_validOnReflexiveEuclideanFrameClass : FrameClass.universal ⊧ φ ↔ FrameClass.S5 ⊧ φ := by
   constructor;
   . rintro h F hF V r;
-    apply @Model.pointGenerate.modal_equivalent_at_root _ _ |>.mp;
+    replace hF := Set.mem_setOf_eq.mp hF;
+    apply Model.pointGenerate.modal_equivalent_at_root r |>.mp;
     apply h;
-    apply Frame.pointGenerate.isUniversal F r hF;
+    simp only [Set.mem_setOf_eq];
+    infer_instance;
   . rintro h F F_univ;
     apply h;
     simp_all;

@@ -1,6 +1,6 @@
 module
 
-public import Foundation.Modal.Kripke.Rooted
+public import Foundation.Modal.Kripke.Root
 
 @[expose] public section
 
