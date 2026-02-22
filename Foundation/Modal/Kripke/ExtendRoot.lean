@@ -40,9 +40,9 @@ instance isFinite [F.IsFinite] : (F.extendRoot n).IsFinite := by
 
 instance fintype [Fintype F] : Fintype (F.extendRoot n) := instFintypeSum (Fin n) F
 
-protected abbrev root (F n) : (extendRoot F n).World := .inl ⟨n - 1, by simp⟩
+protected abbrev root (F n) : (extendRoot F n).Root := ⟨.inl ⟨n - 1, by simp⟩, by grind⟩
 
-instance : (F.extendRoot n).IsRooted := ⟨extendRoot.root F n, by grind⟩
+instance : (F.extendRoot n).IsRooted := ⟨extendRoot.root F n⟩
 
 protected abbrev chain (F n) : List (extendRoot F n) := List.finRange n |>.reverse.map (extend ·)
 
@@ -132,9 +132,6 @@ variable {M : Model} {r : M.Root} {x y : M.World} {n : ℕ+} {i : Fin n} {φ}
 -- instance : Coe (M.World) ((M.extendRoot r n).World) := ⟨embed⟩
 
 -- protected abbrev root (M) := Frame.extendRoot.root (M.toFrame) (n := n)
-
-@[simp]
-lemma rooted_original : (Frame.extendRoot.root M.toFrame n) ≺ Frame.extendRoot.embed x := by grind
 
 /-
 instance isFinite [M.IsFinite] : (M.extendRoot r n).IsFinite := Frame.extendRoot.isFinite

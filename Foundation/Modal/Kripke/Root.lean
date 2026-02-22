@@ -126,6 +126,8 @@ instance [F.IsTransitive] : (F↾r).IsTransitive := ⟨by grind⟩
 instance [F.IsAntisymmetric] : (F↾r).IsAntisymmetric := ⟨by grind⟩
 instance [F.IsIrreflexive] : (F↾r).IsIrreflexive := ⟨by grind⟩
 instance [F.IsAsymmetric] : (F↾r).IsAsymmetric := ⟨by grind⟩
+instance [F.IsReflexive] [F.IsTransitive] : (F↾r).IsPreorder where
+instance [F.IsPartialOrder] : (F↾r).IsPartialOrder where
 
 instance [F.IsTransitive] [F.IsPiecewiseConvergent] : (F↾r).IsPiecewiseConvergent := by
   constructor;

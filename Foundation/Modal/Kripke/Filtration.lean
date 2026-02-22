@@ -262,7 +262,7 @@ instance isReflexive [preorder : M.IsPreorder] : (finestFiltrationTransitiveClos
 instance isPreorder [preorder : M.IsPreorder] : (finestFiltrationTransitiveClosureModel M T).IsPreorder where
 instance isEquiv [equiv : M.IsEquivalence] : (finestFiltrationTransitiveClosureModel M T).IsEquivalence where
 
-instance rooted_isPiecewiseStronglyConvergent [preorder : M.IsPreorder] [ps_convergent : M.IsPiecewiseStronglyConvergent] : (finestFiltrationTransitiveClosureModel (M↾r) T).IsPiecewiseStronglyConvergent where
+instance rooted_isPiecewiseStronglyConvergent (r) [preorder : M.IsPreorder] [ps_convergent : M.IsPiecewiseStronglyConvergent] : (finestFiltrationTransitiveClosureModel (M↾r) T).IsPiecewiseStronglyConvergent where
   ps_convergent := by
     rintro X ⟨y, (rfl | Rry)⟩ ⟨z, (rfl | Rrz)⟩ RXY RXZ;
     . simp only [and_self];
@@ -290,7 +290,7 @@ instance rooted_isPiecewiseStronglyConvergent [preorder : M.IsPreorder] [ps_conv
       . exact Relation.TransGen.single $ by tauto;
       . exact Relation.TransGen.single $ by tauto;
 
-instance rooted_isPiecewiseStronglyConnected [preorder : M.IsPreorder] [ps_connected : M.IsPiecewiseStronglyConnected] : (finestFiltrationTransitiveClosureModel (M↾r) T).IsPiecewiseStronglyConnected where
+instance rooted_isPiecewiseStronglyConnected (r) [preorder : M.IsPreorder] [ps_connected : M.IsPiecewiseStronglyConnected] : (finestFiltrationTransitiveClosureModel (M↾r) T).IsPiecewiseStronglyConnected where
   ps_connected := by
     rintro X ⟨y, (rfl | Rry)⟩ ⟨z, (rfl | Rrz)⟩ RXY RXZ;
     . simp only [or_self];
