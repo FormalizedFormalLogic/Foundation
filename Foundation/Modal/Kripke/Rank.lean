@@ -83,14 +83,14 @@ lemma terminal_rel_height (h : x ≺^[rank x] y) : ∀ z, ¬y ≺ z := by
 namespace extendRoot
 
 @[simp]
-lemma height_pos (r : F.Root) : 0 < Frame.rank (Frame.extendRoot.root F 1) := by
+lemma height_pos (r : F.Root) : 0 < Frame.rank (Frame.extendRoot.root F 1).1 := by
   apply lt_fcwHeight ?_ (by simp);
   · exact ↑r.1;
   . grind;
 
-@[simp] lemma height_succ : Frame.rank (Frame.extendRoot.root F 1) = F.rank r + 1 := by
-  let r₁ := Frame.extendRoot.root F 1;
-  let l := rank r₁;
+@[simp] lemma height_succ : Frame.rank (Frame.extendRoot.root F 1).1 = F.rank r + 1 := by
+  let r₁ : (F.extendRoot 1).Root := Frame.extendRoot.root F 1;
+  let l := rank r₁.1;
   suffices l ≤ F.rank r + 1 ∧ F.rank r < l by
     simpa using Nat.eq_iff_le_and_ge.mpr this
   constructor
@@ -102,9 +102,9 @@ lemma height_pos (r : F.Root) : 0 < Frame.rank (Frame.extendRoot.root F 1) := by
     have e : l = (l - 1) + 1 := by
       symm;
       exact Nat.sub_add_cancel $ Frame.extendRoot.height_pos r;
-    have : ∃ j, r₁ ≺^[l] j := exists_rank_terminal r₁
+    have : ∃ j, r₁.1 ≺^[l] j := exists_rank_terminal r₁.1
     rcases this with ⟨j, hj⟩
-    have : ∃ z, r₁ ≺ z ∧ z ≺^[l - 1] j := Rel.Iterate.iff_succ.mp (e ▸ hj);
+    have : ∃ z, r₁.1 ≺ z ∧ z ≺^[l - 1] j := Rel.Iterate.iff_succ.mp (e ▸ hj);
     rcases this with ⟨z, hz, hzj⟩;
     have : ∃ x, j = embed x := eq_inr_of_root_rel r j $ Rel.Iterate.unwrap_of_trans_of_pos (height_pos r) hj;
     rcases this with ⟨j, rfl⟩;
@@ -112,7 +112,7 @@ lemma height_pos (r : F.Root) : 0 < Frame.rank (Frame.extendRoot.root F 1) := by
     · exact ⟨j, embed_rel_iterate_embed_iff_rel.mp hzj⟩
     use j
     exact Rel.Iterate.constant_trans_of_pos lpos Rrz (embed_rel_iterate_embed_iff_rel.mp hzj)
-  · suffices F.rank r + 1 ≤ rank r₁ from this
+  · suffices F.rank r + 1 ≤ rank r₁.1 from this
     apply le_height_iff_relItr.mpr
     rcases exists_rank_terminal r.1 with ⟨j, hj⟩
     exact ⟨j, r, by trivial, embed_rel_iterate_embed_iff_rel.mpr hj⟩
@@ -146,7 +146,7 @@ lemma iff_eq_height_eq_original_root {x : F.extendRoot 1} : Frame.rank x = F.ran
   . rcases x with (a | x);
     . intro h;
       have := h ▸ height_succ (F := F);
-      simp [extendRoot.root] at this
+      simp at this;
     . intro h;
       suffices x = r by simp [this];
       apply Frame.eq_height_root.mp;
@@ -186,7 +186,7 @@ lemma height_pos_of_dia {i : M} (hA : i ⊧ ◇ A) : 0 < M.rank i := by
   apply lt_fcwHeight hj (by simp)
 
 @[simp]
-lemma Model.extendRoot.height₁ : (Frame.rank (Frame.extendRoot.root M.toFrame 1)) = (M.rank r) + 1 := Frame.extendRoot.height_succ
+lemma Model.extendRoot.height₁ : (Frame.rank (Frame.extendRoot.root M.toFrame 1).1) = (M.rank r) + 1 := Frame.extendRoot.height_succ
 
 end
 

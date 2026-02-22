@@ -294,7 +294,6 @@ public import Foundation.Modal.Kripke.LinearFrame
 public import Foundation.Modal.Kripke.Logic.GL.Completeness
 public import Foundation.Modal.Kripke.Logic.GL.MDP
 public import Foundation.Modal.Kripke.Logic.GL.Soundness
-public import Foundation.Modal.Kripke.Logic.GL.Tree
 public import Foundation.Modal.Kripke.Logic.GL.Unnecessitation
 public import Foundation.Modal.Kripke.Logic.GLPoint3
 public import Foundation.Modal.Kripke.Logic.Grz.Completeness
