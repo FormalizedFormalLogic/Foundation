@@ -152,16 +152,14 @@ noncomputable abbrev Formula.dzSubformula (φ : Formula ℕ) := (□⁻¹'φ.sub
 
 namespace Kripke
 
-instance {F : Frame} {r : F} [F.IsFiniteTree r] : F.IsConverseWellFounded := ⟨by
+instance {F : Frame} [F.IsFinite] [F.IsIrreflexive] [F.IsTransitive] : F.IsConverseWellFounded := ⟨by
   apply Finite.converseWellFounded_of_trans_irrefl';
   . infer_instance;
   . intro x y z; apply F.trans;
   . intro x; apply F.irrefl;
 ⟩
 
-variable {M : Kripke.Model} {r} [M.IsRootedBy r]
-
-def tailModel₀ (M : Kripke.Model) {r} [M.IsRootedBy r] (o : ℕ → Prop) : Kripke.Model where
+abbrev tailModel₀ (M : Kripke.Model) (r : M.Root) (o : ℕ → Prop) : Kripke.Model where
   World := Unit ⊕ ℕ ⊕ M.World -- `Unit` means `ω`
   Rel x y :=
     match x, y with
@@ -179,47 +177,17 @@ def tailModel₀ (M : Kripke.Model) {r} [M.IsRootedBy r] (o : ℕ → Prop) : Kr
 
 namespace tailModel₀
 
-variable {o}
+variable {M : Kripke.Model} {r : M.Root} {o}
 
-protected abbrev root {M : Kripke.Model} {r} [M.IsRootedBy r] {o} : tailModel₀ M o := .inl ()
+protected abbrev root (M : Model) (r : M.Root) (o) : (tailModel₀ M r o).Root := ⟨.inl (), by simp⟩
 
-instance : (tailModel₀ M o).IsRootedBy (tailModel₀.root) where
-  root_generates := by
-    intro x h;
-    match x with
-    | .inl _ => simp [tailModel₀.root] at h;
-    | .inr $ _ =>
-      apply Relation.TransGen.single;
-      simp [tailModel₀, tailModel₀.root];
+instance transitive [M.IsTransitive] : (tailModel₀ M r o).IsTransitive := ⟨by grind⟩
 
-instance transitive [M.IsTransitive] : (tailModel₀ M o).IsTransitive where
-  trans x y z := by
-    match x, y, z with
-    | .inl _, _, _ => dsimp [tailModel₀]; aesop;
-    | _, .inl _, _ => simp [tailModel₀];
-    | _, _, .inl _ => simp [tailModel₀];
-    | .inr $ .inl x, .inr $ .inl y, .inr $ .inl z => dsimp [tailModel₀]; omega;
-    | .inr $ .inr x, .inr $ .inr y, .inr $ .inr z => dsimp [tailModel₀]; apply Frame.trans;
-    | .inr $ .inr _, .inr _, .inr $ .inl _ => dsimp [tailModel₀]; aesop;
-    | .inr $ .inl _, .inr $ .inr _, _ => dsimp [tailModel₀]; aesop;
-    | .inr $ .inl _, .inr $ .inl _, .inr $ .inr _ => simp [tailModel₀];
-    | .inr $ .inr _, .inr $ .inl _, .inr $ .inr _ => simp [tailModel₀];
+@[coe] abbrev embed_nat (n : ℕ) : tailModel₀ M r o := .inr $ .inl n
 
-@[coe] abbrev embed_nat (n : ℕ) : tailModel₀ M o := .inr $ .inl n
+@[coe] abbrev embed_original (x : M) : tailModel₀ M r o := .inr $ .inr x
 
-@[simp]
-lemma rel_root_embed_nat [M.IsTransitive] {n : ℕ} : tailModel₀.root (M := M) (o := o) ≺ (tailModel₀.embed_nat n) := by
-  apply Frame.root_genaretes'!;
-  simp [tailModel₀];
-
-@[coe] abbrev embed_original (x : M) : tailModel₀ M o := .inr $ .inr x
-
-@[simp]
-lemma rel_root_embed_original [M.IsTransitive] {x : M} : tailModel₀.root (M := M) (o := o) ≺ (tailModel₀.embed_original x) := by
-  apply Frame.root_genaretes'!;
-  simp [tailModel₀];
-
-instance cwf [M.IsFiniteTree r] : (tailModel₀ M o).IsConverseWellFounded := ⟨by
+instance cwf [M.IsConverseWellFounded] : (tailModel₀ M r o).IsConverseWellFounded := ⟨by
   apply ConverseWellFounded.iff_has_max.mpr;
   intro s hs;
   let s₁ := { x | (Sum.inr $ Sum.inr x) ∈ s };
@@ -227,13 +195,7 @@ instance cwf [M.IsFiniteTree r] : (tailModel₀ M o).IsConverseWellFounded := �
   by_cases hs₁ : s₁.Nonempty;
   . obtain ⟨m, hm₁, hm₂⟩ := ConverseWellFounded.iff_has_max.mp M.cwf s₁ (by simpa);
     use embed_original m;
-    constructor;
-    . exact hm₁;
-    . intro x hx;
-      match x with
-      | .inl _ => simp [tailModel₀];
-      | .inr $ .inl _ => simp [tailModel₀];
-      | .inr $ .inr y => simpa using hm₂ y (by tauto);
+    grind;
   . by_cases hs₂ : s₂.Nonempty;
     . let m := Set.IsWF.min (s := s₂) (Set.IsWF.of_wellFoundedLT _) (by assumption);
       use embed_nat m;
@@ -241,17 +203,17 @@ instance cwf [M.IsFiniteTree r] : (tailModel₀ M o).IsConverseWellFounded := �
       . simpa using Set.IsWF.min_mem (s := s₂) _ _;
       . intro x hx;
         match x with
-        | .inl _ => simp [tailModel₀];
+        | .inl _ => grind;
         | .inr $ .inr x =>
           exfalso;
           apply hs₁;
           use x;
-          simpa [s₁];
+          grind;
         | .inr $ .inl n =>
-          suffices m ≤ n by simpa [tailModel₀];
+          suffices m ≤ n by grind;
           apply Set.IsWF.min_le;
-          simpa [s₂];
-    . use tailModel₀.root;
+          grind;
+    . use tailModel₀.root M r o;
       simp [Set.Nonempty] at hs₁ hs₂;
       constructor;
       . contrapose! hs;
@@ -260,33 +222,25 @@ instance cwf [M.IsFiniteTree r] : (tailModel₀ M o).IsConverseWellFounded := �
       . simp_all [tailModel₀, s₁, s₂];
 ⟩
 
-lemma iff_root_rel_not_root {x : tailModel₀ M o} : tailModel₀.root ≺ x ↔ x ≠ tailModel₀.root := by
-  constructor;
-  . rintro h rfl;
-    simp [Frame.Rel', tailModel₀] at h;
-  . intro h;
-    simp_all [Frame.Rel', tailModel₀];
+lemma iff_root_rel_not_root {x : tailModel₀ M r o} : (tailModel₀.root M r o) ≺ x ↔ x ≠ (tailModel₀.root M r o) := by grind;
 
-protected def pMorphism_original : M →ₚ (tailModel₀ M o) where
+protected def pMorphism_original : M →ₚ (tailModel₀ M r o) where
   toFun := embed_original
-  forth := by simp [tailModel₀];
-  back := by simp [tailModel₀];
-  atomic := by simp [tailModel₀]
+  forth := by grind;
+  back := by grind;
+  atomic := by grind;
 
-lemma modal_equivalent_original {x : M} : ModalEquivalent (M₁ := M) (M₂ := tailModel₀ M o) x (embed_original x) := by
+lemma modal_equivalent_original {x : M} : ModalEquivalent (M₁ := M) (M₂ := tailModel₀ M r o) x (embed_original x) := by
   apply tailModel₀.pMorphism_original.modal_equivalence;
 
-lemma satisfies_box_of_satisfies_box_at_root [M.IsTransitive] (h : (tailModel₀.root (M := M) (o := o)) ⊧ □φ) {x : tailModel₀ M o} : x ⊧ □φ := by
+open Formula.Kripke
+
+lemma satisfies_box_of_satisfies_box_at_root [M.IsTransitive] (h : Satisfies _ (tailModel₀.root M r o).1 (□φ)) {x : tailModel₀ M r o} : Satisfies _ x (□φ) := by
   intro y Rxy;
   apply h;
-  by_cases e : x = tailModel₀.root;
-  . subst e;
-    assumption;
-  . apply Frame.trans ?_ Rxy;
-    apply Frame.root_genaretes'!;
-    assumption;
+  grind;
 
-protected def pMorphism_extendRoot : M.extendRoot n →ₚ (tailModel₀ M o) where
+protected def pMorphism_extendRoot (M r n) : (M.extendRoot r n) →ₚ (tailModel₀ M r o) where
   toFun := λ x =>
     match x with
     | .inl i => embed_nat i
@@ -297,91 +251,64 @@ protected def pMorphism_extendRoot : M.extendRoot n →ₚ (tailModel₀ M o) wh
     case inl.inl => omega;
   back := by
     rintro (x | x) (y | y | y) Rxy;
-    case inl.inr.inl =>
-      simp_all [Frame.Rel', tailModel₀, Model.extendRoot, Frame.extendRoot];
-      use ⟨y, by omega⟩;
-      constructor;
-      . simp;
-      . apply Fin.lt_def.mpr;
-        simp;
-        omega;
+    case inl.inr.inl => use Sum.inl ⟨y, by grind⟩; grind;
     all_goals simp_all [Frame.Rel', tailModel₀, Model.extendRoot, Frame.extendRoot];
-  atomic := by
-    rintro a (w | w) <;> simp [Model.extendRoot, tailModel₀];
+  atomic := by rintro a (w | w) <;> grind;
 
-lemma modal_equivalent_extendRoot_original {x : M} : ModalEquivalent (M₁ := M.extendRoot n) (M₂ := tailModel₀ M o) x (embed_original x) := by
-  apply tailModel₀.pMorphism_extendRoot.modal_equivalence;
+lemma modal_equivalent_extendRoot_original {n : ℕ+} {x : M} : ModalEquivalent (M₁ := M.extendRoot r n) (M₂ := tailModel₀ M r o) x (embed_original x) := by
+  apply tailModel₀.pMorphism_extendRoot M r n |>.modal_equivalence;
 
-lemma modal_equivalent_extendRoot_nat {n : ℕ+} {i : Fin n} : ModalEquivalent (M₁ := M.extendRoot n) (M₂ := tailModel₀ M o) (Sum.inl i) (embed_nat i) := by
-  apply tailModel₀.pMorphism_extendRoot.modal_equivalence;
+lemma modal_equivalent_extendRoot_nat {n : ℕ+} {i : Fin n} : ModalEquivalent (M₁ := M.extendRoot r n) (M₂ := tailModel₀ M r o) (Sum.inl i) (embed_nat i) := by
+  apply tailModel₀.pMorphism_extendRoot M r n |>.modal_equivalence;
 
 open Formula.Kripke in
 lemma of_provable_rflSubformula_original_root [M.IsTransitive]
   {φ : Formula _}
-  (hS : r ⊧ ((□⁻¹'φ.subformulas).image (λ ψ => □ψ ➝ ψ)).conj) :
-  ∀ ψ ∈ φ.subformulas, ∀ i : ℕ, r ⊧ ψ ↔ (tailModel₀.embed_nat i : tailModel₀ M o) ⊧ ψ := by
+  (hS : r.1 ⊧ ((□⁻¹'φ.subformulas).image (λ ψ => □ψ ➝ ψ)).conj) :
+  ∀ ψ ∈ φ.subformulas, ∀ i : ℕ, r.1 ⊧ ψ ↔ Satisfies (tailModel₀ M r o) (embed_nat i) ψ := by
   intro ψ hψ i;
   induction ψ generalizing i with
-  | hatom p => simp [Semantics.Models, tailModel₀, Satisfies];
-  | hfalsum => simp;
-  | himp ψ ξ ihψ ihξ => simp [ihψ (by grind) i, ihξ (by grind) i];
+  | hatom p | hfalsum => simp [Satisfies];
+  | himp ψ ξ ihψ ihξ =>
+    simp [ihψ (by grind) i, ihξ (by grind) i, Satisfies];
   | hbox ψ ihψ =>
     replace ihψ := ihψ (by grind);
     calc
-      _ ↔ (∀ x, r ≺ x → x ⊧ ψ) ∧ r ⊧ ψ := by
-        suffices (∀ y, r ≺ y → y ⊧ ψ) → r ⊧ ψ by simpa [Satisfies];
+      _ ↔ (∀ x, r.1 ≺ x → x ⊧ ψ) ∧ (r.1 ⊧ ψ) := by
+        suffices (∀ y, r.1 ≺ y → y ⊧ ψ) → r.1 ⊧ ψ by simpa [Satisfies];
         apply Satisfies.fconj_def.mp hS (□ψ ➝ ψ) $ by
           simp only [Finset.LO.preboxItr, Function.iterate_one, Finset.mem_image, Finset.mem_preimage];
           use ψ;
-      _ ↔ (∀ x : M, x ⊧ ψ) ∧ r ⊧ ψ := by
-        suffices (∀ x, r ≺ x → x ⊧ ψ) ∧ r ⊧ ψ → (∀ x : M, x ⊧ ψ) by tauto;
-        rintro ⟨h₁, h₂⟩ y;
-        by_cases e : y = r;
-        . subst e; assumption;
-        . apply h₁;
-          apply Frame.root_genaretes'!;
-          assumption;
-      _ ↔ (∀ x : M, x ⊧ ψ) ∧ ∀ j < i, (tailModel₀.embed_nat j : tailModel₀ M o) ⊧ ψ := by
+      _ ↔ (∀ x : M, x ⊧ ψ) ∧ (∀ j < i, Satisfies (tailModel₀ M r o) (embed_nat j) ψ) := by grind;
+      _ ↔ (∀ x, Satisfies (tailModel₀ M r o) (embed_original x) ψ) ∧ (∀ j < i, Satisfies (tailModel₀ M r o) (embed_nat j) ψ) := by
+        apply and_congr_left';
+        simp only [@modal_equivalent_original (M := M) (r := r) (o := o) (φ := ψ)];
         constructor;
-        . rintro ⟨h₁, h₂⟩;
-          constructor;
-          . apply h₁;
-          . intro j _;
-            apply ihψ _ |>.mp h₂;
-        . rintro h;
-          constructor;
-          . intro x; apply h.1;
-          . exact h.1 r;
-      _ ↔ (∀ x, (embed_original x : tailModel₀ M o) ⊧ ψ) ∧ ∀ j < i, (tailModel₀.embed_nat j : tailModel₀ M o) ⊧ ψ := by
-        simp [modal_equivalent_original (M := M) (o := o) (φ := ψ)];
+        . intro h x;
+          apply h;
+        . intro h x;
+          apply h;
       _ ↔ _ := by
         constructor;
-        . rintro ⟨h₁, h₂⟩ (_ | j | y) R;
-          . contradiction;
-          . apply h₂;
-            exact R;
-          . apply h₁;
+        . rintro ⟨h₁, h₂⟩ (_ | j | y) R <;> grind;
         . rintro h;
           constructor;
           . intro x;
             apply h;
-            tauto;
+            grind;
           . intro j hj;
             apply h;
-            simpa [Frame.Rel', tailModel₀];
+            grind;
 
 end tailModel₀
 
 
-def tailModel (M : Kripke.Model) {r} [M.IsRootedBy r] : Kripke.Model := tailModel₀ M (M · r)
+def tailModel (M : Kripke.Model) (r : M.Root) : Kripke.Model := tailModel₀ M r (M · r.1)
 
 namespace tailModel
 
-protected abbrev root {M : Kripke.Model} {r} [M.IsRootedBy r] : tailModel M := tailModel₀.root
-
-instance : (tailModel M).IsRootedBy (tailModel.root) := by
-  dsimp [tailModel];
-  infer_instance;
+protected abbrev root (M : Kripke.Model) (r : M.Root) : (tailModel M r).Root := tailModel₀.root M r _
+instance : (tailModel M r).IsRooted := ⟨tailModel.root M r⟩
 
 end tailModel
 
@@ -398,26 +325,26 @@ open Formula.Kripke
 theorem GL_D_TFAE :
   [
     Modal.D ⊢ φ,
-    ∀ M : Kripke.Model, ∀ r, [M.IsFiniteTree r] → ∀ o, (tailModel₀.root (M := M) (o := o)) ⊧ φ,
-    ∀ M : Kripke.Model, ∀ r, [M.IsFiniteTree r] → r ⊧ φ.dzSubformula.conj ➝ φ,
+    ∀ M : Kripke.Model, [M.IsFinite] → [M.IsTransitive] → [M.IsIrreflexive] → ∀ r, ∀ o, Satisfies _ (tailModel₀.root M r o).1 φ,
+    ∀ M : Kripke.Model, [M.IsFinite] → [M.IsTransitive] → [M.IsIrreflexive] → ∀ r : M.Root, r.1 ⊧ φ.dzSubformula.conj ➝ φ,
     Modal.GL ⊢ φ.dzSubformula.conj ➝ φ,
   ].TFAE := by
     tfae_have 1 → 2 := by
-      intro h M r _ o;
+      intro h M _ _ _ r o;
       induction h using D.rec' with
       | mem_GL h =>
         apply Sound.sound (𝓜 := Kripke.FrameClass.GL) h;
         apply Set.mem_setOf_eq.mpr;
         exact {
-          trans := by intro x y z; exact Frame.trans (F := tailModel₀ M o |>.toFrame),
-          cwf := by exact Frame.cwf (F := tailModel₀ M o |>.toFrame);
+          trans {x y z} := by apply (tailModel₀ M r o).trans,
+          cwf := by apply (tailModel₀ M r o).cwf,
         }
       | axiomP =>
         apply Satisfies.not_def.mpr;
         apply Satisfies.not_box_def.mpr;
         use tailModel₀.embed_original r;
         constructor;
-        . exact tailModel₀.rel_root_embed_original;
+        . grind;
         . tauto;
       | @axiomDz φ ψ =>
         intro h;
@@ -428,7 +355,7 @@ theorem GL_D_TFAE :
         obtain ⟨y, Rry, hy⟩ := Satisfies.not_box_def.mp h.2;
 
         apply Satisfies.not_box_def.mpr;
-        let z : tailModel₀ M o := tailModel₀.embed_nat $
+        let z : tailModel₀ M r o := tailModel₀.embed_nat $
           match x, y with
           | .inr $ .inl x, .inr $ .inl y => (max x y) + 1
           | .inr $ .inr _, .inr $ .inl y => y + 1
@@ -438,19 +365,19 @@ theorem GL_D_TFAE :
           unfold z;
           match x, y with
           | .inr $ .inl _, .inr $ .inl _ => dsimp [tailModel₀]; omega;
-          | .inr $ .inr _, .inr $ .inl _ => simp [tailModel₀, Frame.Rel'];
-          | .inr $ .inl _, .inr $ .inr _ => simp [tailModel₀, Frame.Rel'];
-          | .inr $ .inr _, .inr $ .inr _ => simp [tailModel₀, Frame.Rel'];
+          | .inr $ .inr _, .inr $ .inl _
+          | .inr $ .inl _, .inr $ .inr _
+          | .inr $ .inr _, .inr $ .inr _ => grind;
         have Rzy : z ≺ y := by
           unfold z;
           match x, y with
           | .inr $ .inl _, .inr $ .inl _ => dsimp [tailModel₀]; omega;
-          | .inr $ .inr _, .inr $ .inl _ => simp [tailModel₀, Frame.Rel'];
-          | .inr $ .inl _, .inr $ .inr _ => simp [tailModel₀, Frame.Rel'];
-          | .inr $ .inr _, .inr $ .inr _ => simp [tailModel₀, Frame.Rel'];
+          | .inr $ .inr _, .inr $ .inl _
+          | .inr $ .inl _, .inr $ .inr _
+          | .inr $ .inr _, .inr $ .inr _ => grind;
         use z;
         constructor;
-        . exact tailModel₀.rel_root_embed_nat;
+        . grind;
         . apply Satisfies.or_def.not.mpr;
           push_neg;
           constructor;
@@ -461,17 +388,17 @@ theorem GL_D_TFAE :
       | mdp ihφψ ihφ => exact ihφψ ihφ
     tfae_have 2 → 3 := by
       contrapose!;
-      rintro ⟨M, r, _, h⟩;
+      rintro ⟨M, _, _, _, r, h⟩;
       have h₁ : ∀ X ⊆ (□⁻¹'φ.subformulas), Satisfies M r (□(□'X).disj ➝ (□'X).disj) := by simpa using Satisfies.not_imp_def.mp h |>.1;
       have h₂ := Satisfies.not_imp_def.mp h |>.2;
 
-      let X := (□⁻¹'φ.subformulas).filter (λ ψ => ¬(r ⊧ □ψ));
-      obtain ⟨x, Rrx, hx⟩ : ∃ x, r ≺ x ∧ ∀ ψ ∈ X, ¬x ⊧ □ψ := by
-        have : r ⊧ ∼((□'X).disj) := by
+      let X := (□⁻¹'φ.subformulas).filter (λ ψ => ¬(r.1 ⊧ □ψ));
+      obtain ⟨x, Rrx, hx⟩ : ∃ x, r.1 ≺ x ∧ ∀ ψ ∈ X, ¬x ⊧ □ψ := by
+        have : r.1 ⊧ ∼((□'X).disj) := by
           apply Satisfies.not_def.mpr;
           apply Satisfies.fdisj_def.not.mpr;
           simp [X, Finset.LO.preboxItr, Finset.LO.boxItr];
-        have : r ⊧ ∼□((□'X).disj) := by
+        have : r.1 ⊧ ∼□((□'X).disj) := by
           have := h₁ X $ by simp [X];
           tauto;
         obtain ⟨x, Rrx, hx⟩ := Satisfies.not_box_def.mp this;
@@ -480,33 +407,32 @@ theorem GL_D_TFAE :
         . assumption;
         . simpa [Finset.LO.preboxItr, Finset.LO.boxItr] using Satisfies.fdisj_def.not.mp hx;
 
-      let Mt := tailModel₀ (M↾x) (λ p => M.Val p r);
+      let Mt := tailModel₀ (M↾x) (Frame.pointGenerate.root _ x) (λ p => M.Val p r.1);
+      let rMt : Mt.Root := tailModel₀.root (M↾x) (Frame.pointGenerate.root _ x) (λ p => M.Val p r.1);
 
-      have : ∀ ψ ∈ φ.subformulas, (tailModel₀.root : Mt) ⊧ ψ ↔ r ⊧ ψ := by
+      have : ∀ ψ ∈ φ.subformulas, Satisfies Mt rMt.1 ψ ↔ r.1 ⊧ ψ := by
         intro ψ hψ;
         induction ψ with
-        | hatom p => simp [tailModel₀, tailModel₀.root, Satisfies, Semantics.Models]; -- TODO: extract
-        | hfalsum => simp;
-        | himp φ ψ ihφ ihψ => simp [ihφ (by grind), ihψ (by grind)];
+        | hatom p => simp [Satisfies, Semantics.Models]; tauto;
+        | hfalsum => simp [Satisfies];
+        | himp φ ψ ihφ ihψ => simp [Satisfies, ihφ (by grind), ihψ (by grind)];
         | hbox ψ ihψ =>
           replace ihψ := ihψ (by grind);
           constructor;
           . intro h;
-            have : (tailModel₀.embed_original ⟨x, by tauto⟩ : Mt) ⊧ □ψ := tailModel₀.satisfies_box_of_satisfies_box_at_root h;
+            have : Satisfies Mt (tailModel₀.embed_original ⟨x, by tauto⟩) (□ψ) := tailModel₀.satisfies_box_of_satisfies_box_at_root h;
             have : x ⊧ □ψ :=
-              Model.pointGenerate.modal_equivalent' _ _ |>.mp $
+              Model.pointGenerate.modal_equivalent _ _ |>.mp $
               tailModel₀.modal_equivalent_original |>.mpr $ this;
             contrapose! this;
             apply hx;
             simp_all [X, Finset.LO.preboxItr, Finset.LO.boxItr];
           . intro h w Rrw;
-            have H₁ : ∀ w : M↾x, w ⊧ ψ := by
+            have H₁ : ∀ w : M↾x, Satisfies _ w ψ := by
               intro w;
-              apply Model.pointGenerate.modal_equivalent' x w |>.mpr;
+              apply Model.pointGenerate.modal_equivalent x w |>.mpr;
               apply h;
-              rcases w.2 with (_ | Rrw);
-              . convert Rrx;
-              . apply M.trans Rrx $ Rel.TransGen.unwrap Rrw;
+              grind;
             match w with
             | .inl _ => contradiction;
             | .inr $ .inr w => exact tailModel₀.modal_equivalent_original.mp $ H₁ w;
@@ -516,19 +442,18 @@ theorem GL_D_TFAE :
               . apply Model.pointGenerate.modal_equivalent_at_root x |>.mpr;
                 apply Satisfies.conj_def.mpr;
                 suffices ∀ (ψ : Formula ℕ), □ψ ∈ φ.subformulas → x ⊧ (□ψ ➝ ψ) by simpa [Finset.LO.preboxItr, Finset.LO.boxItr];
-                intro ψ hψ hψ;
+                intro ψ _ hψ;
                 have : ψ ∉ X := by
                   contrapose! hψ;
                   apply hx;
                   assumption;
-                have : r ⊧ (□ψ) := by
-                  simp [X, Finset.LO.preboxItr, Finset.LO.boxItr] at this;
+                have : r.1 ⊧ (□ψ) := by
+                  simp [X, Finset.LO.preboxItr] at this;
                   tauto;
                 apply this;
                 assumption;
-      refine ⟨M↾x, ⟨x, by tauto⟩, ?_, _, this φ (by grind) |>.not.mpr h₂⟩;
-      . exact {}
-    tfae_have 4 ↔ 3 := GL.Kripke.iff_provable_satisfies_FiniteTransitiveTree
+      refine ⟨M↾x, inferInstance, inferInstance, inferInstance, _, _, this φ (by grind) |>.not.mpr h₂⟩;
+    tfae_have 4 ↔ 3 := GL.Kripke.finite_completeness_TFAE.out 0 3;
     tfae_have 4 → 1 := by
       intro h;
       apply (show Modal.D ⊢ φ.dzSubformula.conj ➝ φ by exact sumQuasiNormal.mem₁! h) ⨀ ?_;
@@ -548,19 +473,14 @@ lemma D.unprovable_T : Modal.D ⊬ (Axioms.T (.atom 0)) := by
     Rel := (· < ·),
     Val := λ p i => True,
   }
-  refine ⟨M, 0, ?_, (λ _ => False), ?_⟩;
-  . exact {
-      world_finite := inferInstance,
-      root_generates := by
-        suffices ∀ w : Fin 1, w = 0 by simp [M];
-        trivial;
-    }
+  use M;
+  refine ⟨inferInstance, inferInstance, inferInstance, ⟨0, by grind⟩, λ _ => False, ?_⟩;
   . apply Satisfies.not_imp_def.mpr
     constructor;
     . intro x Rrx;
       match x with
-      | .inr $ .inl x => simp [tailModel₀, Satisfies, M]
-      | .inr $ .inr x => simp [tailModel₀, Satisfies, M]
+      | .inr $ .inl x => simp [Satisfies, M];
+      | .inr $ .inr x => simp [Satisfies, M];
     . tauto;
 
 instance : Modal.D ⪱ Modal.S := by

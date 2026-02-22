@@ -118,7 +118,9 @@ lemma rel_of_origin_rel {hx hy} (Rxy : x ≺ y) : ((F↾r).Rel ⟨x, hx⟩ ⟨y,
 attribute [grind <=] Frame.trans Frame.antisymm
 attribute [grind .] Frame.irrefl
 
-instance : (F↾r).IsRooted := ⟨⟨⟨r, by tauto⟩, by grind⟩⟩
+protected abbrev root (F : Kripke.Frame) (r : F.World) : (F↾r).Root := ⟨⟨r, by tauto⟩, by grind⟩
+
+instance : (F↾r).IsRooted := ⟨pointGenerate.root F r⟩
 
 instance [F.IsFinite] : (F↾r).IsFinite := inferInstance
 instance [F.IsReflexive] : (F↾r).IsReflexive := ⟨by grind⟩
