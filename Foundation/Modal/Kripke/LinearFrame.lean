@@ -1,6 +1,6 @@
 module
 
-public import Foundation.Modal.Kripke.Rooted
+public import Foundation.Modal.Kripke.Root
 
 @[expose] public section
 
@@ -29,12 +29,7 @@ instance : natLT.IsPiecewiseConnected := ⟨by
 
 abbrev min : natLT.World := 0
 
-instance : Frame.IsRootedBy natLT natLT.min where
-  root_generates := by
-    intro x hx;
-    apply Relation.TransGen.single;
-    simp_all [natLT, natLT.min];
-    grind;
+instance : natLT.IsRooted := ⟨natLT.min, by grind⟩
 
 end natLT
 
@@ -55,11 +50,7 @@ instance : Std.Refl natLE := by
 
 abbrev min : natLE.World := 0
 
-instance : Frame.IsRootedBy natLE natLE.min where
-  root_generates := by
-    intro x _;
-    apply Relation.TransGen.single;
-    simp_all [natLE, natLE.min];
+instance : natLE.IsRooted := ⟨0, by grind⟩
 
 end natLE
 

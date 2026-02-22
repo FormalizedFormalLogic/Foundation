@@ -1,6 +1,6 @@
 module
 
-public import Foundation.Modal.Kripke.Rooted
+public import Foundation.Modal.Kripke.Root
 
 @[expose] public section
 
@@ -273,8 +273,7 @@ instance rooted_isPiecewiseStronglyConvergent [preorder : M.IsPreorder] [ps_conv
     . use ⟦⟨z, by tauto⟩⟧;
       constructor;
       . apply Relation.TransGen.single;
-        suffices y ≺ z by tauto;
-        exact Rel.TransGen.unwrap Rrz;
+        tauto;
       . apply Relation.TransGen.single;
         suffices z ≺ z by tauto;
         apply Std.Refl.refl ;
@@ -284,16 +283,9 @@ instance rooted_isPiecewiseStronglyConvergent [preorder : M.IsPreorder] [ps_conv
         suffices y ≺ y by tauto;
         apply Std.Refl.refl;
       . apply Relation.TransGen.single;
-        suffices z ≺ y by tauto;
-        exact Rel.TransGen.unwrap Rry;
-    . replace Rry := Rel.TransGen.unwrap Rry;
-      replace Rrz := Rel.TransGen.unwrap Rrz;
-      obtain ⟨u, Ruy, Ruz⟩ := M.ps_convergent Rry Rrz;
-      use ⟦⟨u, by
-        right;
-        apply Relation.TransGen.single;
-        exact IsTrans.trans _ _ _ Rry Ruy;
-      ⟩⟧;
+        tauto;
+    . obtain ⟨u, Ruy, Ruz⟩ := M.ps_convergent Rry Rrz;
+      use ⟦⟨u, by grind⟩⟧;
       constructor;
       . exact Relation.TransGen.single $ by tauto;
       . exact Relation.TransGen.single $ by tauto;
@@ -308,14 +300,12 @@ instance rooted_isPiecewiseStronglyConnected [preorder : M.IsPreorder] [ps_conne
     . left;
       apply Relation.TransGen.single;
       suffices y ≺ z by tauto;
-      exact Rrz.unwrap;
+      grind;
     . right;
       apply Relation.TransGen.single;
       suffices z ≺ y by tauto;
-      exact Rry.unwrap;
-    . replace Rry := Rry.unwrap;
-      replace Rrz := Rrz.unwrap;
-      rcases M.ps_connected Rry Rrz with (Ryz | Rrw);
+      grind;
+    . rcases M.ps_connected Rry Rrz with (Ryz | Rrw);
       . left;
         apply Relation.TransGen.single;
         tauto;

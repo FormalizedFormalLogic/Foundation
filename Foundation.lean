@@ -340,7 +340,7 @@ public import Foundation.Modal.Kripke.Logic.Ver
 public import Foundation.Modal.Kripke.NNFormula
 public import Foundation.Modal.Kripke.Preservation
 public import Foundation.Modal.Kripke.Rank
-public import Foundation.Modal.Kripke.Rooted
+public import Foundation.Modal.Kripke.Root
 public import Foundation.Modal.Kripke.Terminated
 public import Foundation.Modal.Kripke.Tree
 public import Foundation.Modal.Kripke.Undefinability
