@@ -116,13 +116,13 @@ lemma height_succ : (F.extendRoot 1).height = F.height + 1 := by
     obtain ⟨j, Rrj⟩ : ∃ j, r.1 ≺^[l] j := exists_rank_terminal _;
     obtain ⟨z, Rrz, Rzj⟩ : ∃ z, r.1 ≺ z ∧ z ≺^[l - 1] j := Rel.Iterate.iff_succ.mp (el ▸ Rrj);
     obtain ⟨j, rfl⟩ : ∃ x, j = embed x :=
-      eq_root_or_rel_original_root_of_rel_extendRoot_root₁ j
+      eq_original_of_rel_extendRoot_root₁ j
       $ Rel.Iterate.unwrap_of_trans_of_pos height_pos Rrj;
 
     use j;
     by_cases ez : z = F.root;
     . exact embed_rel_iterate_embed_iff_rel.mp $ ez ▸ Rzj;
-    . obtain ⟨z₀, rfl⟩ := eq_root_or_rel_original_root_of_rel_extendRoot_root₁ z (by grind);
+    . obtain ⟨z₀, rfl⟩ := eq_original_of_rel_extendRoot_root₁ z (by grind);
       exact Rel.Iterate.constant_trans_of_pos lpos (by grind) (embed_rel_iterate_embed_iff_rel.mp Rzj);
 
   · suffices F.height + 1 ≤ rank r.1 from this;

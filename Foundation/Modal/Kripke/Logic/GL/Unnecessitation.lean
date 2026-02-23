@@ -35,7 +35,7 @@ lemma imply_boxdot_plain_of_imply_box_box : Modal.GL ⊢ □φ ➝ □ψ → Mod
     have ⟨hs₁₂, hs₃⟩ := Satisfies.and_def.mp hs;
     have ⟨hs₁, hs₂⟩ := Satisfies.and_def.mp hs₁₂;
     intro x hx;
-    obtain ⟨x₀, rfl⟩ := Frame.extendRoot.eq_root_or_rel_original_root_of_neq_extendRoot_root₁ x (by grind);
+    obtain ⟨x₀, rfl⟩ := Frame.extendRoot.eq_original_of_neq_extendRoot_root₁ x (by grind);
     by_cases e : x₀ = M.root;
     . exact e ▸ hs₁;
     . apply hs₂;

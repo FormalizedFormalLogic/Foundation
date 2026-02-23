@@ -40,13 +40,12 @@ lemma connected' [F.IsConnected] : ∀ x y : F.World, x ≠ y → x ≺ y ∨ y 
 end
 
 
+abbrev IsRoot (F : Frame) (r : F.World) := ∀ x : F.World, x ≠ r → r ≺ x
 
-abbrev Root (F : Frame) := { r : F.World // ∀ x : F.World, x ≠ r → r ≺ x }
+abbrev Root (F : Frame) := { r // F.IsRoot r }
 
-@[grind =>]
-lemma root_rooted (r : F.Root) (x : F.World) (hx : x ≠ r) : r.1 ≺ x := r.2 x hx
 
-/-- Frame `F` is rooted by some root(s) (possible multiple roots). -/
+/-- Frame `F` is rooted by some root(s) (possibly have multiple roots). -/
 abbrev IsRooted (F : Frame) := Inhabited F.Root
 
 /-- Frame `F` is rooted by `F.root`. -/

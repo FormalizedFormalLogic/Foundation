@@ -97,15 +97,20 @@ lemma eq_extend_or_eq_original (x : F.extendRoot n)
 
 section
 
-lemma eq_root_or_rel_original_root_of_rel_extendRoot_root₁ [F.IsIrreflexive] (x : F.extendRoot 1) (h : (extendRoot F 1).root ≺ x)
+lemma eq_root_or_eq_original (x : F.extendRoot 1) : x = (F.extendRoot 1).root ∨ ∃ x₀ : F, x = x₀ := by
+  rcases eq_extend_or_eq_original x with (⟨i, hi, rfl⟩ | ⟨x₀, rfl⟩);
+  . simp [Frame.root, default];
+  . simp;
+
+lemma eq_original_of_rel_extendRoot_root₁ [F.IsIrreflexive] (x : F.extendRoot 1) (h : (extendRoot F 1).root ≺ x)
   : ∃ x₀ : F, x = x₀ := by
   rcases eq_extend_or_eq_original x with (⟨i, hi, rfl⟩ | _);
   . simp [Frame.root, default] at h;
   . simp_all;
 
-lemma eq_root_or_rel_original_root_of_neq_extendRoot_root₁ [F.IsIrreflexive] (x : F.extendRoot 1) (h : x ≠ (extendRoot F 1).root)
+lemma eq_original_of_neq_extendRoot_root₁ [F.IsIrreflexive] (x : F.extendRoot 1) (h : x ≠ (extendRoot F 1).root)
   : ∃ x₀ : F, x = x₀ := by
-  apply eq_root_or_rel_original_root_of_rel_extendRoot_root₁;
+  apply eq_original_of_rel_extendRoot_root₁;
   grind;
 
 end
