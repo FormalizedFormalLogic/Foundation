@@ -132,7 +132,7 @@ jobs:
       - uses: pandoc/actions/setup@v1
 
       - name: Download lean artifacts
-        uses: actions/download-artifact@v5
+        uses: actions/download-artifact@v7
         with:
           name: lean-artifacts
       - name: Copy from artifacts to pages
