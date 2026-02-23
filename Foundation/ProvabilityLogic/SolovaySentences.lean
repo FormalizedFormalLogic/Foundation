@@ -27,7 +27,7 @@ variable {L : Language} [L.DecidableEq] [L.ReferenceableBy L]
          {T₀ T : Theory L} [T₀ ⪯ T] (𝔅 : Provability T₀ T) [𝔅.HBL]
          {A B : Modal.Formula _}
 
-structure SolovaySentences (F : Kripke.Frame) [F.IsRooted] [Fintype F] where
+structure SolovaySentences (F : Kripke.Frame) [F.IsPointRooted] [Fintype F] where
   σ : F → Sentence L
   protected SC1 : ∀ i j, i ≠ j → T₀ ⊢ σ i ➝ ∼σ j
   protected SC2 : ∀ i j, i ≺ j → T₀ ⊢ σ i ➝ 𝔅.dia (σ j)
@@ -40,13 +40,12 @@ variable {𝔅}
 
 namespace SolovaySentences
 
-instance {F : Kripke.Frame} [F.IsRooted] [Fintype F] : CoeFun (SolovaySentences 𝔅 F) (λ _ => F → Sentence L) := ⟨λ σ => σ.σ⟩
+instance {F : Kripke.Frame} [F.IsPointRooted] [Fintype F] : CoeFun (SolovaySentences 𝔅 F) (λ _ => F → Sentence L) := ⟨λ σ => σ.σ⟩
 
-variable {M : Model} [M.IsRooted] [Fintype M] [M.IsIrreflexive] [M.IsTransitive]
+variable {M : Model} [M.IsPointRooted] [Fintype M] [M.IsIrreflexive] [M.IsTransitive]
          (S : SolovaySentences 𝔅 M.toFrame)
 
-noncomputable def realization :
-    Realization 𝔅 := ⟨fun a ↦ ⩖ i ∈ { i : M | i ⊧ (.atom a) }, S i⟩
+noncomputable def realization : Realization 𝔅 := ⟨fun a ↦ ⩖ i ∈ { i : M | i ⊧ (.atom a) }, S i⟩
 
 private lemma mainlemma_aux {i : M} (hri : M.root ≠ i) :
     (i ⊧ A → T₀ ⊢ S i ➝ S.realization A) ∧
@@ -100,9 +99,8 @@ theorem mainlemma (S : SolovaySentences 𝔅 M.toFrame) {i : M} (hri : M.root �
 theorem mainlemma_neg (S : SolovaySentences 𝔅 M.toFrame) {i : M} (hri : M.root ≠ i) :
     i ⊭ A → T₀ ⊢ S i ➝ ∼S.realization A := (mainlemma_aux S hri).2
 
-lemma root_of_iterated_inconsistency [M.IsRooted] : T₀ ⊢ ∼𝔅^[M.height] ⊥ ➝ S M.root := by
-  suffices T₀ ⊢ (⩖ j, S j) ➝ ∼S M.root ➝ 𝔅^[M.height] ⊥ by
-    cl_prover [this, S.SC4]
+lemma root_of_iterated_inconsistency : T₀ ⊢ ∼𝔅^[M.height] ⊥ ➝ S M.root := by
+  suffices T₀ ⊢ (⩖ j, S j) ➝ ∼S M.root ➝ 𝔅^[M.height] ⊥ by cl_prover [this, S.SC4]
   apply Entailment.left_Udisj!_intro
   intro i
   by_cases hir : i = M.root
@@ -115,7 +113,7 @@ lemma root_of_iterated_inconsistency [M.IsRooted] : T₀ ⊢ ∼𝔅^[M.height] 
           <| Frame.rank_lt_whole_height (by grind)
     cl_prover [this];
 
-lemma theory_height [M.IsRooted] [𝔅.WeakKreisel (𝔅^[(M.height).pred] ⊥)] (h : M.root.1 ⊧ ◇(∼A)) (b : T ⊢ S.realization A) : 𝔅.height < M.height := by
+lemma theory_height [𝔅.WeakKreisel (𝔅^[(M.height).pred] ⊥)] (h : M.root.1 ⊧ ◇(∼A)) (b : T ⊢ S.realization A) : 𝔅.height < M.height := by
   apply 𝔅.height_lt_pos_of_boxBot (n := M.height) (by simpa using height_pos_of_dia h)
   have : ∃ i : M, M.root ≺ i ∧ i ⊭ A := Formula.Kripke.Satisfies.dia_def.mp h
   rcases this with ⟨i, hi, hiA⟩

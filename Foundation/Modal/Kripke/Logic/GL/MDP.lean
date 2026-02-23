@@ -49,12 +49,11 @@ instance [F₁.IsTransitive] [F₂.IsTransitive] : (mdpCounterexmpleFrame F₁ F
     | .inl _, .inr (.inr _), .inr (.inr _)
     | .inl _, .inr (.inl _), .inr (.inl _) => grind;
 
-protected abbrev defaultRoot (F₁ F₂) : (mdpCounterexmpleFrame F₁ F₂).Root := ⟨.inl (), by grind⟩
 instance : (mdpCounterexmpleFrame F₁ F₂).IsPointRooted where
-  default := mdpCounterexmpleFrame.defaultRoot F₁ F₂
+  default := ⟨.inl (), by grind⟩
   uniq {r} := by
     by_contra! hC;
-    have : r ≺ (mdpCounterexmpleFrame.defaultRoot F₁ F₂).1 := r.2 _ (by grind);
+    have := r.2 (.inl ()) (by grind);
     grind;
 
 def pMorphism₁ (F₁ F₂) : F₁ →ₚ (mdpCounterexmpleFrame F₁ F₂) where
@@ -96,11 +95,6 @@ abbrev mdpCounterexmpleModel (M₁ M₂ : Model) : Model where
 namespace mdpCounterexmpleModel
 
 variable {M₁ M₂ : Model} -- {r₁ : M₁.World} {r₂ : M₂.World} [tree₁ : M₁.IsFiniteTree r₁] [tree₂ : M₂.IsFiniteTree r₂]
-
--- instance : Coe (M₁.World) (mdpCounterexmpleModel M₁ M₂ r₁ r₂).World := ⟨Sum.inr ∘ Sum.inl⟩
--- instance : Coe (M₂.World) (mdpCounterexmpleModel M₁ M₂ r₁ r₂).World := ⟨Sum.inr ∘ Sum.inr⟩
-
--- abbrev root : (mdpCounterexmpleModel M₁ M₂).World := mdpCounterexmpleFrame.defaultRoot (F₁ := M₁.toFrame) (F₂ := M₂.toFrame) (r₁ := r₁) (r₂ := r₂)
 
 def pMorphism₁ (M₁ M₂) : M₁ →ₚ (mdpCounterexmpleModel M₁ M₂) :=
   Model.PseudoEpimorphism.ofAtomic (mdpCounterexmpleFrame.pMorphism₁ M₁.toFrame M₂.toFrame) $ by

@@ -22,18 +22,18 @@ open Formula.Kripke
 namespace Formula
 
 def trace (φ : Formula ℕ) : Set ℕ := { n |
-  ∃ M : Kripke.Model, ∃ _ : Fintype M, ∃ _ : M.IsTransitive, ∃ _ : M.IsConverseWellFounded, ∃ r, ∃ _ : M.IsRootedBy r,
+  ∃ M : Kripke.Model, ∃ _ : Fintype M, ∃ _ : M.IsTransitive, ∃ _ : M.IsConverseWellFounded, ∃ r, ∃ _ : M.IsPointRooted,
   (M.height = n ∧ r ⊭ φ)
 }
 
 lemma iff_mem_trace {n : ℕ} :
   n ∈ φ.trace ↔
-  ∃ M : Kripke.Model, ∃ _ : Fintype M, ∃ _ : M.IsTransitive, ∃ _ : M.IsConverseWellFounded, ∃ r, ∃ _ : M.IsRootedBy r, M.height = n ∧ r ⊭ φ := by
+  ∃ M : Kripke.Model, ∃ _ : Fintype M, ∃ _ : M.IsTransitive, ∃ _ : M.IsConverseWellFounded, ∃ r, ∃ _ : M.IsPointRooted, M.height = n ∧ r ⊭ φ := by
   simp [Formula.trace];
 
 lemma satisfies_of_not_mem_trace :
   n ∉ φ.trace ↔
-  ∀ M : Kripke.Model, ∀ _ : Fintype M, ∀ _ : M.IsTransitive, ∀ _ : M.IsConverseWellFounded, ∀ r, ∀ _ : M.IsRootedBy r, M.height = n → r ⊧ φ := by
+  ∀ M : Kripke.Model, ∀ _ : Fintype M, ∀ _ : M.IsTransitive, ∀ _ : M.IsConverseWellFounded, ∀ r, ∀ _ : M.IsPointRooted, M.height = n → r ⊧ φ := by
   simp [Formula.trace];
 
 @[grind =]
@@ -60,11 +60,11 @@ open Formula.Kripke
 lemma trace_and : (φ ⋏ ψ).trace = φ.trace ∪ ψ.trace := by
   ext n;
   calc
-    _ ↔ ∃ M : Kripke.Model, ∃ _ : Fintype M, ∃ _ : M.IsTransitive, ∃ _ : M.IsConverseWellFounded, ∃ r, ∃ _ : M.IsRootedBy r, M.height = n ∧ (r ⊭ φ ∨ r ⊭ ψ) := by
+    _ ↔ ∃ M : Kripke.Model, ∃ _ : Fintype M, ∃ _ : M.IsTransitive, ∃ _ : M.IsConverseWellFounded, ∃ r, ∃ _ : M.IsPointRooted, M.height = n ∧ (r ⊭ φ ∨ r ⊭ ψ) := by
       simp [Semantics.NotModels, trace, -not_and, not_and_or]
     _ ↔
-      (∃ M : Kripke.Model, ∃ _ : Fintype M, ∃ _ : M.IsTransitive, ∃ _ : M.IsConverseWellFounded, ∃ r, ∃ _ : M.IsRootedBy r, M.height = n ∧ r ⊭ φ) ∨
-      (∃ M : Kripke.Model, ∃ _ : Fintype M, ∃ _ : M.IsTransitive, ∃ _ : M.IsConverseWellFounded, ∃ r, ∃ _ : M.IsRootedBy r, M.height = n ∧ r ⊭ ψ) := by
+      (∃ M : Kripke.Model, ∃ _ : Fintype M, ∃ _ : M.IsTransitive, ∃ _ : M.IsConverseWellFounded, ∃ r, ∃ _ : M.IsPointRooted, M.height = n ∧ r ⊭ φ) ∨
+      (∃ M : Kripke.Model, ∃ _ : Fintype M, ∃ _ : M.IsTransitive, ∃ _ : M.IsConverseWellFounded, ∃ r, ∃ _ : M.IsPointRooted, M.height = n ∧ r ⊭ ψ) := by
       constructor;
       . rintro ⟨M, _, _, _, r, _, rfl, h⟩;
         cases h with
@@ -247,7 +247,7 @@ instance [M.IsIrreflexive] : (M.boneLengthening a k).IsIrreflexive where
     . apply M.irrefl x;
     . simp [Model.boneLengthening];
 
-instance isRooted [M.IsTransitive] [M.IsRootedBy r] (hra : r ≠ a) : (M.boneLengthening a k).IsRootedBy r where
+instance isRooted [M.IsTransitive] [M.IsPointRooted] (hra : r ≠ a) : (M.boneLengthening a k).IsPointRooted where
   root_generates := by
     rintro (x | i) <;>
     . intro;
@@ -590,7 +590,7 @@ lemma provable_TBBMinus_of_mem_trace
   obtain ⟨A, hA₁, hA₂⟩ := Set.not_subset.mp hS;
   replace hA₁ : L ⊢ A := Logic.iff_provable.mpr hA₁;
   replace hA₂ : Modal.GL ⊬ A.rflSubformula.conj ➝ A := Modal.Logic.iff_provable_rflSubformula_GL_provable_S.not.mpr $ Logic.iff_provable.not.mpr hA₂;
-  obtain ⟨M₁, _, _, _, r₁, _, hM⟩ := Modal.GL.Kripke.iff_unprovable_exists_fintype_rooted_model.mp hA₂;
+  obtain ⟨M₁, _, _, _, r₁, _, hM⟩ := Modal.GL.Kripke.iff_unprovable_exists_fintype_pointRooted_model.mp hA₂;
 
   let M₀ := Model.extendRoot M₁ 1;
   let r₀ : M₀.World := Model.extendRoot.root;

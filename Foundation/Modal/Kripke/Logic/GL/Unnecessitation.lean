@@ -21,17 +21,17 @@ lemma imply_boxdot_plain_of_imply_box_box : Modal.GL ⊢ □φ ➝ □ψ → Mod
 
 
   apply GL.Kripke.iff_unprovable_exists_finite_pointRooted_model.mpr;
-  use (M.extendRoot M.root 1), inferInstance, inferInstance, inferInstance, inferInstance;
+  use (M.extendRoot 1), inferInstance, inferInstance, inferInstance, inferInstance;
 
   have hs : Satisfies M M.root (⊡φ ⋏ ∼ψ) := by simp_all [Satisfies];
-  replace hs := @Model.extendRoot.modal_equivalence_original_world (M := M) (r := M.root) (n := 1) M.root (⊡φ ⋏ ∼ψ) |>.mpr hs;
+  replace hs := Model.extendRoot.modal_equivalence_original_world (n := 1) (x := M.root.1) |>.mpr hs;
   have ⟨hs₁₂, hs₃⟩ := Satisfies.and_def.mp hs;
   have ⟨hs₁, hs₂⟩ := Satisfies.and_def.mp hs₁₂;
 
   apply Satisfies.not_imp_def.mpr;
   constructor;
   . have hs : Satisfies M M.root (⊡φ ⋏ ∼ψ) := by simp_all [Satisfies];
-    replace hs := @Model.extendRoot.modal_equivalence_original_world (M := M) (r := M.root) (n := 1) M.root (⊡φ ⋏ ∼ψ) |>.mpr hs;
+    replace hs := Model.extendRoot.modal_equivalence_original_world (n := 1) (x := M.root.1) |>.mpr hs;
     have ⟨hs₁₂, hs₃⟩ := Satisfies.and_def.mp hs;
     have ⟨hs₁, hs₂⟩ := Satisfies.and_def.mp hs₁₂;
     intro x hx;

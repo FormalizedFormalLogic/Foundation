@@ -127,8 +127,8 @@ lemma rel_of_origin_rel {hx hy} (Rxy : x ≺ y) : ((F↾r).Rel ⟨x, hx⟩ ⟨y,
 attribute [grind <=] Frame.trans Frame.antisymm
 attribute [grind .] Frame.irrefl
 
-protected abbrev defaultRoot (F : Kripke.Frame) (r : F.World) : (F↾r).Root := ⟨⟨r, by tauto⟩, by grind⟩
-instance : (F↾r).IsRooted := ⟨pointGenerate.defaultRoot F r⟩
+instance : (F↾r).IsRooted where
+  default := ⟨⟨r, by tauto⟩, by grind⟩;
 
 instance [F.IsFinite] : (F↾r).IsFinite := inferInstance
 instance [F.IsReflexive] : (F↾r).IsReflexive := ⟨by grind⟩
@@ -166,10 +166,6 @@ instance [F.IsTransitive] [F.IsStronglyConnected] : (F↾r).IsStronglyConnected 
 instance [F.IsTransitive] [F.IsPiecewiseStronglyConnected] [F.IsReflexive] : (F↾r).IsStronglyConnected := (F↾r).instStronglyConnectedOfIsRootedOfReflexive
 
 instance [F.IsIrreflexive] [F.IsTransitive] : (F↾r).IsPointRooted := instPointRooted_of_isRooted_of_isIrreflexive_of_isTransitive
-
-@[deprecated Unique.uniq]
-lemma eq_root_pointGenerate_root [F.IsIrreflexive] [F.IsTransitive] : (F↾r).root = (pointGenerate.defaultRoot F r) := by
-  apply Unique.uniq;
 
 protected abbrev pMorphism (F : Kripke.Frame) [F.IsTransitive] (r : F) : (F↾r) →ₚ F where
   toFun := λ ⟨x, _⟩ => x

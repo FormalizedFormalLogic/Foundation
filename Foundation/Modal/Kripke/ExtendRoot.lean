@@ -40,13 +40,11 @@ instance isFinite [F.IsFinite] : (F.extendRoot n).IsFinite := by
 
 instance fintype [Fintype F] : Fintype (F.extendRoot n) := instFintypeSum (Fin n) F
 
-protected abbrev defaultRoot (F n) : (extendRoot F n).Root := ⟨.inl ⟨n - 1, by simp⟩, by grind⟩
-
 instance : (F.extendRoot n).IsPointRooted where
-  default := extendRoot.defaultRoot F n
+  default := ⟨.inl ⟨n - 1, by simp⟩, by grind⟩
   uniq {r} := by
     by_contra! hC;
-    have : r ≺ (extendRoot.defaultRoot F n).1 := r.2 _ $ (by grind);
+    have := r.2 (.inl ⟨n - 1, by simp⟩) $ (by grind);
     grind;
 
 protected abbrev chain (F n) : List (extendRoot F n) := List.finRange n |>.reverse.map (extend ·)
@@ -115,30 +113,30 @@ end
 end Frame.extendRoot
 
 
-abbrev Model.extendRoot (M : Kripke.Model) (r : M.Root) (n : ℕ+) : Kripke.Model where
+abbrev Model.extendRoot (M : Kripke.Model) [M.IsPointRooted] (n : ℕ+) : Kripke.Model where
   toFrame := M.toFrame.extendRoot n
   Val a x :=
     match x with
-    | .inl _ => M.Val a r
+    | .inl _ => M.Val a M.root.1
     | .inr x => M.Val a x
 
 namespace Model.extendRoot
 
-variable {M : Model} {r : M.Root} {x y : M.World} {n : ℕ+} {i : Fin n} {φ}
+variable {M : Model} [M.IsPointRooted] {x y : M.World} {n : ℕ+} {i : Fin n} {φ}
 
-@[coe] abbrev extend (i : Fin n) : M.extendRoot r n := .inl i
-@[coe] abbrev embed (x : M) : M.extendRoot r n := .inr x
+@[coe] abbrev extend (i : Fin n) : M.extendRoot n := .inl i
+@[coe] abbrev embed (x : M) : M.extendRoot n := .inr x
 
-def pMorphism : M →ₚ M.extendRoot r n := PseudoEpimorphism.ofAtomic Frame.extendRoot.pMorphism $ by grind;
+def pMorphism : M →ₚ M.extendRoot n := PseudoEpimorphism.ofAtomic Frame.extendRoot.pMorphism $ by grind;
 
-lemma modal_equivalence_original_world : (embed x : M.extendRoot r n) ↭ x :=
+lemma modal_equivalence_original_world : (embed x : M.extendRoot n) ↭ x :=
   Model.PseudoEpimorphism.modal_equivalence pMorphism _ |>.symm
 
 @[simp]
-lemma inr_satisfies_iff : Satisfies (M.extendRoot r n) (embed x) φ ↔ x ⊧ φ := modal_equivalence_original_world
+lemma inr_satisfies_iff : Satisfies (M.extendRoot n) (embed x) φ ↔ x ⊧ φ := modal_equivalence_original_world
 
 open Formula.Kripke in
-lemma inl_satisfies_boxdot_iff [M.IsTransitive] : Satisfies (M.extendRoot r n) (extend i) (φᵇ) ↔ r.1 ⊧ φᵇ := by
+lemma inl_satisfies_boxdot_iff [M.IsTransitive] : Satisfies (M.extendRoot n) (extend i) (φᵇ) ↔ M.root.1 ⊧ φᵇ := by
   induction φ generalizing i with
   | hatom φ => rfl;
   | hfalsum => rfl;
@@ -166,7 +164,7 @@ lemma inl_satisfies_boxdot_iff [M.IsTransitive] : Satisfies (M.extendRoot r n) (
         | .inl j => apply ih.mpr h₁;
         | .inr x =>
           apply inr_satisfies_iff.mpr;
-          by_cases erx : r = x;
+          by_cases erx : M.root.1 = x;
           . subst erx;
             exact h₁;
           . apply h₂;
@@ -279,13 +277,13 @@ namespace Model.extendRoot
 
 open Classical
 
-variable {M : Model} {r : M.Root} [M.IsFinite] [IsTrans _ M.Rel] [Std.Irrefl M.Rel] {x y : M.World}
+variable {M : Model} [M.IsPointRooted] [M.IsFinite] [IsTrans _ M.Rel] [Std.Irrefl M.Rel] {x y : M.World}
 
 lemma inr_satisfies_axiomT_set {Γ : Finset (Modal.Formula ℕ)} :
   letI n : ℕ+ := ⟨Γ.card + 1, by omega⟩;
-  ∃ i : Fin n, Satisfies _ (extend i : M.extendRoot r n) (Γ.image (λ γ => □γ ➝ γ)).conj := by
+  ∃ i : Fin n, Satisfies _ (extend i : M.extendRoot n) (Γ.image (λ γ => □γ ➝ γ)).conj := by
   let n : ℕ+ := ⟨Γ.card + 1, by omega⟩;
-  let M' := M.extendRoot r n;
+  let M' := M.extendRoot n;
   have : Finite M'.World := by
     unfold M' Model.extendRoot Frame.extendRoot;
     infer_instance;

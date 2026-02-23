@@ -20,13 +20,12 @@ open Modal.Formula.Kripke
 variable {T : ArithmeticTheory} [T.Δ₁] [𝗜𝚺₁ ⪯ T] {A : Modal.Formula _}
 
 theorem unprovable_realization_exists
-  (M₁ : Model) [Fintype M₁] [M₁.IsConverseWellFounded] [M₁.IsTransitive] [M₁.IsRooted]
+  (M₁ : Model) [Fintype M₁] [M₁.IsConverseWellFounded] [M₁.IsTransitive] [M₁.IsPointRooted]
   (hA : M₁.root.1 ⊭ A) (h : M₁.height < T.height)
   : ∃ f : T.StandardRealization, T ⊬ f A := by
-  let M₀ := M₁.extendRoot M₁.root 1
-  let r₀ : M₀.Root := defaultRoot _ _;
+  let M₀ := M₁.extendRoot 1
+  let r₀ : M₀.Root := M₀.root;
   have hdnA : Satisfies M₀ M₀.root.1 (◇(∼A)) := by
-    rw [Frame.root_uniqueness_of_irrefl_trans (M₀.root) r₀];
     suffices ∃ i, r₀.1 ≺ i ∧ ¬Satisfies _ i A by simpa [Formula.Kripke.Satisfies]
     refine ⟨.inr M₁.root.1, ?_, ?_⟩
     · grind;
@@ -50,7 +49,7 @@ theorem GL.arithmetical_completeness
     contrapose!;
     assumption;
   intro hA
-  obtain ⟨M₁, _, _, _, r₁, hA₁⟩ := GL.Kripke.iff_unprovable_exists_fintype_rooted_model.mp hA;
+  obtain ⟨M₁, _, _, _, _, hA₁⟩ := GL.Kripke.iff_unprovable_exists_fintype_pointRooted_model.mp hA;
   exact unprovable_realization_exists M₁ hA₁ <| by simp [height]
 
 theorem GLPlusBoxBot.arithmetical_completeness_aux
@@ -60,8 +59,8 @@ theorem GLPlusBoxBot.arithmetical_completeness_aux
     contrapose!;
     assumption;
   intro hA
-  obtain ⟨M₁, _, _, _, r₁, _, hA₁⟩ := GL.Kripke.iff_unprovable_exists_fintype_rooted_model.mp hA;
-  have hA₁ : r₁ ⊧ □^[n]⊥ ∧ r₁ ⊭ A := by simpa [Formula.Kripke.Satisfies] using hA₁
+  obtain ⟨M₁, _, _, _, _, hA₁⟩ := GL.Kripke.iff_unprovable_exists_fintype_pointRooted_model.mp hA;
+  have hA₁ : M₁.root.1 ⊧ □^[n]⊥ ∧ M₁.root.1 ⊭ A := by simpa [Formula.Kripke.Satisfies] using hA₁
   have M₁_height : M₁.height < n := height_lt_iff_satisfies_boxbot.mpr hA₁.1
   exact unprovable_realization_exists M₁ hA₁.2 <| lt_of_lt_of_le (by simp [M₁_height]) height
 
