@@ -590,7 +590,7 @@ lemma provable_TBBMinus_of_mem_trace
   obtain ⟨A, hA₁, hA₂⟩ := Set.not_subset.mp hS;
   replace hA₁ : L ⊢ A := Logic.iff_provable.mpr hA₁;
   replace hA₂ : Modal.GL ⊬ A.rflSubformula.conj ➝ A := Modal.Logic.iff_provable_rflSubformula_GL_provable_S.not.mpr $ Logic.iff_provable.not.mpr hA₂;
-  obtain ⟨M₁, _, _, _, r₁, _, hM⟩ := Modal.GL.Kripke.iff_unprovable_exists_fintype_pointRooted_model.mp hA₂;
+  obtain ⟨M₁, _, _, _, r₁, _, hM⟩ := Modal.GL.Kripke.iff_unprovable_exists_fintype_rooted_model.mp hA₂;
 
   let M₀ := Model.extendRoot M₁ 1;
   let r₀ : M₀.World := Model.extendRoot.root;

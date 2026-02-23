@@ -277,16 +277,13 @@ namespace Model.extendRoot
 
 open Classical
 
-variable {M : Model} [M.IsPointRooted] [M.IsFinite] [IsTrans _ M.Rel] [Std.Irrefl M.Rel] {x y : M.World}
+variable {M : Model} [M.IsFinite] [M.IsTransitive] [M.IsIrreflexive] [M.IsRooted] {x y : M.World}
 
 lemma inr_satisfies_axiomT_set {Γ : Finset (Modal.Formula ℕ)} :
   letI n : ℕ+ := ⟨Γ.card + 1, by omega⟩;
   ∃ i : Fin n, Satisfies _ (extend i : M.extendRoot n) (Γ.image (λ γ => □γ ➝ γ)).conj := by
   let n : ℕ+ := ⟨Γ.card + 1, by omega⟩;
   let M' := M.extendRoot n;
-  have : Finite M'.World := by
-    unfold M' Model.extendRoot Frame.extendRoot;
-    infer_instance;
   obtain ⟨x, hx₁, hx₂⟩ := @validates_axiomT_set_in_irrefl_trans_chain (M := M')
     (by infer_instance)
     inferInstance

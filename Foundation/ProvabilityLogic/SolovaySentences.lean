@@ -27,7 +27,7 @@ variable {L : Language} [L.DecidableEq] [L.ReferenceableBy L]
          {T₀ T : Theory L} [T₀ ⪯ T] (𝔅 : Provability T₀ T) [𝔅.HBL]
          {A B : Modal.Formula _}
 
-structure SolovaySentences (F : Kripke.Frame) [F.IsPointRooted] [Fintype F] where
+structure SolovaySentences (F : Kripke.Frame) [F.IsRooted] [Fintype F] where
   σ : F → Sentence L
   protected SC1 : ∀ i j, i ≠ j → T₀ ⊢ σ i ➝ ∼σ j
   protected SC2 : ∀ i j, i ≺ j → T₀ ⊢ σ i ➝ 𝔅.dia (σ j)
@@ -40,9 +40,9 @@ variable {𝔅}
 
 namespace SolovaySentences
 
-instance {F : Kripke.Frame} [F.IsPointRooted] [Fintype F] : CoeFun (SolovaySentences 𝔅 F) (λ _ => F → Sentence L) := ⟨λ σ => σ.σ⟩
+instance {F : Kripke.Frame} [F.IsRooted] [Fintype F] : CoeFun (SolovaySentences 𝔅 F) (λ _ => F → Sentence L) := ⟨λ σ => σ.σ⟩
 
-variable {M : Model} [M.IsPointRooted] [Fintype M] [M.IsIrreflexive] [M.IsTransitive]
+variable {M : Model} [M.IsRooted] [Fintype M] [M.IsIrreflexive] [M.IsTransitive]
          (S : SolovaySentences 𝔅 M.toFrame)
 
 noncomputable def realization : Realization 𝔅 := ⟨fun a ↦ ⩖ i ∈ { i : M | i ⊧ (.atom a) }, S i⟩

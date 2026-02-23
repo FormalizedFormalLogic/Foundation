@@ -15,7 +15,7 @@ variable {φ ψ : Formula ℕ}
 
 def Frame.rank [Fintype F] [F.IsConverseWellFounded] [F.IsTransitive] (i : F) : ℕ := fcwHeight (· ≺ ·) i
 
-def Frame.height (F : Frame) [Fintype F] [F.IsConverseWellFounded] [F.IsTransitive] [F.IsPointRooted] : ℕ := Frame.rank F.root.1
+def Frame.height (F : Frame) [Fintype F] [F.IsConverseWellFounded] [F.IsTransitive] [F.IsRooted] : ℕ := Frame.rank F.root.1
 
 namespace Frame
 
@@ -61,7 +61,7 @@ lemma terminal_rel_height (h : x ≺^[rank x] y) : ∀ z, ¬y ≺ z := by
   exact le_height_iff_relItr.mpr ⟨z, Rel.Iterate.forward.mpr ⟨y, h, Ryz⟩⟩;
 
 
-variable [F.IsPointRooted]
+variable [F.IsRooted]
 
 @[grind <=]
 lemma rank_lt_whole_height {i : F} (hi : F.root ≺ i) : F.rank i < F.height := fcwHeight_gt_of hi
@@ -85,7 +85,7 @@ lemma eq_height_root : Frame.rank x = F.height ↔ x = F.root := by
 
 namespace extendRoot
 
-omit [F.IsPointRooted] in
+omit [F.IsRooted] in
 lemma eq_extendRoot_height_rank_extendRoot_root : (F.extendRoot n).height = Frame.rank (F.extendRoot n).root.1 := by
   dsimp [Frame.height];
 
@@ -133,7 +133,7 @@ lemma height_succ : (F.extendRoot 1).height = F.height + 1 := by
     . grind;
     . exact embed_rel_iterate_embed_iff_rel.mpr hj;
 
-omit [F.IsPointRooted] in
+omit [F.IsRooted] in
 lemma eq_original_height : Frame.rank (x : F.extendRoot 1) = Frame.rank x := by
   apply height_eq_iff_relItr.mpr;
   constructor;
@@ -157,9 +157,9 @@ lemma eq_original_height : Frame.rank (x : F.extendRoot 1) = Frame.rank x := by
 
 lemma eq_original_height_root : (F.extendRoot 1).rank F.root = F.height := eq_original_height
 
-omit [F.IsPointRooted] in
+omit [F.IsRooted] in
 @[grind =]
-lemma iff_eq_height_eq_original_root [F.IsPointRooted] {x : F.extendRoot 1} : Frame.rank x = F.height ↔ x = F.root.1 := by
+lemma iff_eq_height_eq_original_root [F.IsRooted] {x : F.extendRoot 1} : Frame.rank x = F.height ↔ x = F.root.1 := by
   constructor;
   . rcases x with (a | x);
     . intro h;
@@ -180,7 +180,7 @@ namespace pointGenerate
 open Classical in
 instance [Fintype F] : Fintype (F↾x) := by apply Subtype.fintype;
 
-instance [F.IsPointRooted] [F.IsTree] : (F↾x).IsTree := by constructor;
+instance [F.IsRooted] [F.IsTree] : (F↾x).IsTree := by constructor;
 
 axiom eq_original_height (hxy : y = x ∨ x ≺ y) : Frame.rank (F := F↾x) (⟨y, hxy⟩) = Frame.rank y
 
@@ -204,7 +204,7 @@ lemma height_pos_of_dia {i : M} (hA : i ⊧ ◇A) : 0 < M.rank i := by
   apply lt_fcwHeight hj (by simp)
 
 @[simp]
-lemma Model.extendRoot.height₁ [M.IsPointRooted] : (Frame.extendRoot M.toFrame 1).height = (M.height) + 1 := Frame.extendRoot.height_succ
+lemma Model.extendRoot.height₁ [M.IsRooted] : (Frame.extendRoot M.toFrame 1).height = (M.height) + 1 := Frame.extendRoot.height_succ
 
 end
 

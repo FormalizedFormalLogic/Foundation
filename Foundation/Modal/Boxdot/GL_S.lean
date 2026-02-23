@@ -30,8 +30,8 @@ lemma iff_provable_boxdot_GL_provable_boxdot_S : Modal.GL ⊢ φᵇ ↔ Modal.S 
   . apply Entailment.WeakerThan.wk;
     infer_instance;
   . intro h;
-    apply GL.Kripke.fintype_completeness_TFAE.out 2 0 |>.mp;
     replace h := GL.Kripke.finite_completeness_TFAE.out 0 3 |>.mp $ iff_provable_rflSubformula_GL_provable_S.mpr h;
+    apply GL.Kripke.fintype_completeness_TFAE.out 2 0 |>.mp;
 
     intro M _ _ _ _;
 

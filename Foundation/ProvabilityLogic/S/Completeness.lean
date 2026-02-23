@@ -33,7 +33,7 @@ section
 
 omit [ℕ ⊧ₘ* T]
 
-variable {M₁ : Kripke.Model} [Fintype M₁.World] [M₁.IsIrreflexive] [M₁.IsTransitive] [M₁.IsPointRooted] {A : Formula _}
+variable {M₁ : Kripke.Model} [Fintype M₁.World] [M₁.IsIrreflexive] [M₁.IsTransitive] [M₁.IsRooted] {A : Formula _}
 
 lemma refl_mainlemma_aux (hA : ¬M₁.root.1 ⊧ (A.rflSubformula.conj ➝ A)) :
   let M₀ := M₁.extendRoot 1;
@@ -164,7 +164,7 @@ lemma GL_S_TFAE :
     contrapose;
     push_neg;
     intro hA;
-    obtain ⟨M₁, _, _, _,  _, hA⟩ := GL.Kripke.iff_unprovable_exists_fintype_pointRooted_model.mp hA;
+    obtain ⟨M₁, _, _, _,  _, hA⟩ := GL.Kripke.iff_unprovable_exists_fintype_rooted_model.mp hA;
 
     let M₀ := Model.extendRoot M₁ 1;
     have : Fintype M₀.World := Fintype.ofFinite _

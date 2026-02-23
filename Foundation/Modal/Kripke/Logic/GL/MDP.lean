@@ -126,8 +126,8 @@ lemma MDP_Aux {X : Set _} (h : (□'X) *⊢[Modal.GL] □φ₁ ⋎ □φ₂) : (
     by_contra! hC;
     have ⟨h₁, h₂⟩ : (Modal.GL ⊬ ⊡c ➝ φ₁) ∧ (Modal.GL ⊬ ⊡c ➝ φ₂) := hC;
 
-    obtain ⟨M₁, _, _, _, _, hM₁⟩ := GL.Kripke.iff_unprovable_exists_finite_pointRooted_model.mp h₁;
-    obtain ⟨M₂, _, _, _, _, hM₂⟩ := GL.Kripke.iff_unprovable_exists_finite_pointRooted_model.mp h₂;
+    obtain ⟨M₁, _, _, _, _, hM₁⟩ := GL.Kripke.iff_unprovable_exists_finite_rooted_model.mp h₁;
+    obtain ⟨M₂, _, _, _, _, hM₂⟩ := GL.Kripke.iff_unprovable_exists_finite_rooted_model.mp h₂;
 
     let r₁ := M₁.root;
     let r₂ := M₂.root;
@@ -164,7 +164,7 @@ lemma MDP_Aux {X : Set _} (h : (□'X) *⊢[Modal.GL] □φ₁ ⋎ □φ₂) : (
       push_neg;
       exact ⟨hp₁, hp₂⟩;
     have : ¬(Satisfies M₀ r₀ (□c ➝ (□φ₁ ⋎ □φ₂))) := _root_.not_imp.mpr ⟨hc, this⟩;
-    have : Modal.GL ⊬ □c ➝ □φ₁ ⋎ □φ₂ := GL.Kripke.iff_unprovable_exists_finite_pointRooted_model.mpr $ by
+    have : Modal.GL ⊬ □c ➝ □φ₁ ⋎ □φ₂ := GL.Kripke.iff_unprovable_exists_finite_rooted_model.mpr $ by
       use M₀, inferInstance, inferInstance, inferInstance, inferInstance;
       exact this;
     contradiction;
