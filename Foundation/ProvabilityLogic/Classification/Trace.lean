@@ -496,7 +496,7 @@ lemma provable_TBB_of_mem_trace
   replace hA₁ : ∀ f : T.StandardRealization, U ⊢ f A := hPL A |>.mp $ by grind;
 
   let M₀ := M.extendRoot 1;
-  let r₀ : M₀ := Frame.extendRoot.root (n := 1);
+  let r₀ : M₀ := defaultRoot (n := 1);
   have Rr₀ : ∀ {x : M}, r₀ ≺ x := λ {x} => Frame.root_genaretes'! (r := r₀) x (by simp);
 
   let S : SolovaySentences T.standardProvability M₀.toFrame r₀ := SolovaySentences.standard T M₀.toFrame;

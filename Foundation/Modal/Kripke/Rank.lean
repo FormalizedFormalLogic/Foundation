@@ -11,20 +11,20 @@ noncomputable section
 namespace Kripke
 
 variable {φ ψ : Formula ℕ}
-         {F : Frame} [Fintype F] [F.IsConverseWellFounded] [F.IsTransitive] {r : F.Root} {x y i j : F}
+         {F : Frame} [Fintype F] [F.IsConverseWellFounded] [F.IsTransitive] {x y i j : F}
 
 def Frame.rank [Fintype F] [F.IsConverseWellFounded] [F.IsTransitive] (i : F) : ℕ := fcwHeight (· ≺ ·) i
 
--- def Frame.height (r : F.Root) [Fintype F] [F.IsConverseWellFounded] [F.IsTransitive] : ℕ := Frame.rank r.1
+def Frame.height (F : Frame) [Fintype F] [F.IsConverseWellFounded] [F.IsTransitive] [F.IsRooted] : ℕ := Frame.rank F.root.1
 
 namespace Frame
 
 @[grind <=]
-lemma rank_lt_whole_height {i : F} (hi : r ≺ i) : F.rank i < F.rank r := fcwHeight_gt_of hi
+lemma rank_lt_whole_height [F.IsRooted] {i : F} (hi : F.root ≺ i) : F.rank i < F.height := fcwHeight_gt_of hi
 
 @[grind .]
-lemma rank_le_whole_height (i : F) : F.rank i ≤ F.rank r := by
-  by_cases hi : i = r
+lemma rank_le_whole_height  [F.IsRooted] (i : F) : F.rank i ≤ F.height := by
+  by_cases hi : i = F.root
   · subst hi; rfl;
   · apply le_of_lt;
     apply rank_lt_whole_height;
@@ -66,7 +66,7 @@ lemma height_eq_iff_relItr {i : F} :
 
 lemma exists_rank_terminal (i : F) : ∃ j, i ≺^[F.rank i] j := le_height_iff_relItr.mp (by simp)
 
-lemma eq_height_root : Frame.rank x = F.rank r ↔ x = r := by
+lemma eq_height_root [F.IsRooted] : Frame.rank x = F.height ↔ x = F.root := by
   constructor;
   . rintro h;
     contrapose! h;
@@ -82,40 +82,52 @@ lemma terminal_rel_height (h : x ≺^[rank x] y) : ∀ z, ¬y ≺ z := by
 
 namespace extendRoot
 
+lemma eq_extendRoot_height_rank_exxtendRoot_root : (F.extendRoot n).height = Frame.rank (defaultRoot F n).1 := by
+  simp [Frame.height, root_uniqueness_of_irrefl_trans (F.extendRoot n).root (defaultRoot F n)];
+
 @[simp]
-lemma height_pos (r : F.Root) : 0 < Frame.rank (Frame.extendRoot.root F 1).1 := by
+lemma height_pos [F.IsRooted] : 0 < (Frame.extendRoot F n).height := by
+  rw [eq_extendRoot_height_rank_exxtendRoot_root];
   apply lt_fcwHeight ?_ (by simp);
-  · exact ↑r.1;
+  · exact ↑F.root.1;
   . grind;
 
-@[simp] lemma height_succ : Frame.rank (Frame.extendRoot.root F 1).1 = F.rank r + 1 := by
-  let r₁ : (F.extendRoot 1).Root := Frame.extendRoot.root F 1;
-  let l := rank r₁.1;
-  suffices l ≤ F.rank r + 1 ∧ F.rank r < l by
-    simpa using Nat.eq_iff_le_and_ge.mpr this
+@[simp]
+lemma height_succ [F.IsRooted] : (F.extendRoot 1).height = F.height + 1 := by
+  let l := (F.extendRoot 1).height;
+  let r := (Frame.extendRoot F 1).root;
+  suffices l ≤ F.height + 1 ∧ F.height < l by omega;
+
   constructor
-  · suffices l - 1 ≤ F.rank r from Nat.le_add_of_sub_le this
-    apply le_height_iff_relItr.mpr
-    by_cases hl : l - 1 = 0
-    · exact ⟨r, by simp [hl]⟩
-    have lpos : 0 < l - 1 := Nat.zero_lt_of_ne_zero hl
+  · suffices l - 1 ≤ F.height from Nat.le_add_of_sub_le this;
+    apply le_height_iff_relItr.mpr;
+    wlog lpos : 0 < l - 1;
+    . use F.root;
+      simp [(show l - 1 = 0 by omega)];
+
     have e : l = (l - 1) + 1 := by
       symm;
-      exact Nat.sub_add_cancel $ Frame.extendRoot.height_pos r;
-    have : ∃ j, r₁.1 ≺^[l] j := exists_rank_terminal r₁.1
-    rcases this with ⟨j, hj⟩
-    have : ∃ z, r₁.1 ≺ z ∧ z ≺^[l - 1] j := Rel.Iterate.iff_succ.mp (e ▸ hj);
-    rcases this with ⟨z, hz, hzj⟩;
-    have : ∃ x, j = embed x := eq_inr_of_root_rel r j $ Rel.Iterate.unwrap_of_trans_of_pos (height_pos r) hj;
-    rcases this with ⟨j, rfl⟩;
-    rcases not_root_of_from_root'₁ r _ hz with (rfl | ⟨z, rfl, Rrz⟩)
-    · exact ⟨j, embed_rel_iterate_embed_iff_rel.mp hzj⟩
-    use j
-    exact Rel.Iterate.constant_trans_of_pos lpos Rrz (embed_rel_iterate_embed_iff_rel.mp hzj)
-  · suffices F.rank r + 1 ≤ rank r₁.1 from this
-    apply le_height_iff_relItr.mpr
-    rcases exists_rank_terminal r.1 with ⟨j, hj⟩
-    exact ⟨j, r, by trivial, embed_rel_iterate_embed_iff_rel.mpr hj⟩
+      exact Nat.sub_add_cancel $ Frame.extendRoot.height_pos;
+
+    obtain ⟨j, Rrj⟩ : ∃ j, r.1 ≺^[l] j := exists_rank_terminal _;
+    obtain ⟨z, Rrz, Rzj⟩ : ∃ z, r.1 ≺ z ∧ z ≺^[l - 1] j := Rel.Iterate.iff_succ.mp (e ▸ Rrj);
+    obtain ⟨j, rfl⟩ : ∃ x, j = embed x := eq_inr_of_root_rel F.root j
+      $ Rel.Iterate.unwrap_of_trans_of_pos (height_pos (F := F))
+      $ by rwa [root_uniqueness_of_irrefl_trans (defaultRoot F 1) r];
+
+    rcases not_root_of_from_root'₁ F.root z (by grind) with (rfl | ⟨z, rfl, Rrz⟩);
+    . use j;
+      exact embed_rel_iterate_embed_iff_rel.mp Rzj;
+    . use j;
+      exact Rel.Iterate.constant_trans_of_pos lpos (by simpa) (embed_rel_iterate_embed_iff_rel.mp Rzj);
+
+  · suffices F.height + 1 ≤ rank r.1 from this;
+    apply le_height_iff_relItr.mpr;
+    rcases exists_rank_terminal F.root.1 with ⟨j, hj⟩;
+    use j, F.root;
+    constructor;
+    . exact rel_root_extendRoot_root_original;
+    . exact embed_rel_iterate_embed_iff_rel.mpr hj;
 
 lemma eq_original_height : Frame.rank (x : F.extendRoot 1) = Frame.rank x := by
   apply height_eq_iff_relItr.mpr;
@@ -128,7 +140,7 @@ lemma eq_original_height : Frame.rank (x : F.extendRoot 1) = Frame.rank x := by
     . simp;
     . -- TODO: extract no loop lemma (x ≺^[n] i cannot happen where x is original and i is new elements by extension)
       exfalso;
-      have : (extendRoot.root F 1) ≺ (x : F.extendRoot 1) := by grind;
+      have : (defaultRoot F 1) ≺ (x : F.extendRoot 1) := by grind;
       have : (x : F.extendRoot 1) ≺ x :=
         Rel.Iterate.unwrap_of_trans_of_pos (by omega) $
         Rel.Iterate.comp (m := 1) |>.mp ⟨_, Rxy, by simpa⟩;
@@ -138,17 +150,20 @@ lemma eq_original_height : Frame.rank (x : F.extendRoot 1) = Frame.rank x := by
     . have := terminal_rel_height $ extendRoot.embed_rel_iterate_embed_iff_rel.mp Rxy;
       exact extendRoot.embed_rel_embed_iff_rel.not.mpr $ this z;
 
-lemma eq_original_height_root : (F.extendRoot 1).rank r = F.rank r := eq_original_height
+lemma eq_original_height_root [F.IsRooted] : (F.extendRoot 1).rank F.root = F.height := eq_original_height
 
 @[grind =]
-lemma iff_eq_height_eq_original_root {x : F.extendRoot 1} : Frame.rank x = F.rank r ↔ x = r := by
+lemma iff_eq_height_eq_original_root [F.IsRooted] {x : F.extendRoot 1} : Frame.rank x = F.height ↔ x = F.root.1 := by
   constructor;
   . rcases x with (a | x);
     . intro h;
       have := h ▸ height_succ (F := F);
-      simp at this;
+      simp [
+        Frame.height,
+        root_uniqueness_of_irrefl_trans (F.extendRoot 1).root (defaultRoot F 1)
+      ] at this;
     . intro h;
-      suffices x = r by simp [this];
+      suffices x = F.root.1 by simp [this];
       apply Frame.eq_height_root.mp;
       exact h ▸ Frame.extendRoot.eq_original_height.symm;
   . rintro rfl;
@@ -173,20 +188,20 @@ end Frame
 
 section
 
-variable {M : Model} [Fintype M] [M.IsTransitive] [M.IsConverseWellFounded] {r : M.Root}
+variable {M : Model} [Fintype M] [M.IsTransitive] [M.IsConverseWellFounded]
 
 lemma height_lt_iff_satisfies_boxbot {i : M} :
     M.rank i < n ↔ i ⊧ □^[n] ⊥ := by
   simp only [Frame.height_lt_iff_relItr, Formula.Kripke.Satisfies.boxItr_def]
   simp
 
-lemma height_pos_of_dia {i : M} (hA : i ⊧ ◇ A) : 0 < M.rank i := by
+lemma height_pos_of_dia {i : M} (hA : i ⊧ ◇A) : 0 < M.rank i := by
   have : ∃ j, i ≺ j ∧ j ⊧ A := Formula.Kripke.Satisfies.dia_def.mp hA
   rcases this with ⟨j, hj, _⟩
   apply lt_fcwHeight hj (by simp)
 
 @[simp]
-lemma Model.extendRoot.height₁ : (Frame.rank (Frame.extendRoot.root M.toFrame 1).1) = (M.rank r) + 1 := Frame.extendRoot.height_succ
+lemma Model.extendRoot.height₁ [M.IsRooted] : (Frame.extendRoot M.toFrame 1).height = (M.height) + 1 := Frame.extendRoot.height_succ
 
 end
 

@@ -48,8 +48,22 @@ lemma root_rooted (r : F.Root) (x : F.World) (hx : x ≠ r) : r.1 ≺ x := r.2 x
 
 abbrev IsRooted (F : Frame) := Nonempty F.Root
 
-abbrev transRoot (F : Frame) := { r : F.World // ∀ x : F.World, x ≠ r → r ≺^+ x }
 
+section
+
+noncomputable abbrev root (F : Frame) [F.IsRooted] : F.Root := Nonempty.some $ by assumption;
+
+lemma root_uniqueness_of_irrefl_trans [F.IsIrreflexive] [F.IsTransitive] (r₁ r₂ : F.Root) : r₁ = r₂ := by
+  by_contra!;
+  have R21 := r₁.2 r₂.1 (by grind);
+  have R12 := r₂.2 r₁.1 (by grind);
+  exact F.irrefl r₁.1 $ F.trans R21 R12;
+
+end
+
+
+
+abbrev transRoot (F : Frame) := { r : F.World // ∀ x : F.World, x ≠ r → r ≺^+ x }
 
 def transRoot.toRoot {F : Frame} [F.IsTransitive] (r : F.transRoot) : F.Root := ⟨r.1, by
   intro x hx;
@@ -119,7 +133,6 @@ attribute [grind <=] Frame.trans Frame.antisymm
 attribute [grind .] Frame.irrefl
 
 protected abbrev root (F : Kripke.Frame) (r : F.World) : (F↾r).Root := ⟨⟨r, by tauto⟩, by grind⟩
-
 instance : (F↾r).IsRooted := ⟨pointGenerate.root F r⟩
 
 instance [F.IsFinite] : (F↾r).IsFinite := inferInstance
@@ -157,6 +170,8 @@ instance [F.IsTransitive] [F.IsStronglyConnected] : (F↾r).IsStronglyConnected 
   grind [F.ps_connected];
 instance [F.IsTransitive] [F.IsPiecewiseStronglyConnected] [F.IsReflexive] : (F↾r).IsStronglyConnected := (F↾r).instStronglyConnectedOfIsRootedOfReflexive
 
+lemma eq_root_pointGenerate_root [F.IsIrreflexive] [F.IsTransitive] : (F↾r).root = (pointGenerate.root F r) := by
+  exact root_uniqueness_of_irrefl_trans (F↾r).root (pointGenerate.root F r);
 
 protected abbrev pMorphism (F : Kripke.Frame) [F.IsTransitive] (r : F) : (F↾r) →ₚ F where
   toFun := λ ⟨x, _⟩ => x

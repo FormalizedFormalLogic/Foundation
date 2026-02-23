@@ -40,9 +40,9 @@ instance isFinite [F.IsFinite] : (F.extendRoot n).IsFinite := by
 
 instance fintype [Fintype F] : Fintype (F.extendRoot n) := instFintypeSum (Fin n) F
 
-protected abbrev root (F n) : (extendRoot F n).Root := ⟨.inl ⟨n - 1, by simp⟩, by grind⟩
+protected abbrev defaultRoot (F n) : (extendRoot F n).Root := ⟨.inl ⟨n - 1, by simp⟩, by grind⟩
 
-instance : (F.extendRoot n).IsRooted := ⟨extendRoot.root F n⟩
+instance : (F.extendRoot n).IsRooted := ⟨extendRoot.defaultRoot F n⟩
 
 protected abbrev chain (F n) : List (extendRoot F n) := List.finRange n |>.reverse.map (extend ·)
 
@@ -68,40 +68,6 @@ protected abbrev pMorphism : F →ₚ F.extendRoot n where
   forth := by grind;
   back {x y} h := by grind;
 
-lemma not_root_of_from_root (r : F.Root) (x : F.extendRoot n) (h : (extendRoot.root F n) ≺ x) :
-  (∃ i : Fin n, x = extend i) ∨ x = r ∨ r ≺ x := by
-  match x with
-  | .inl i =>
-    left;
-    use i;
-  | .inr x =>
-    by_cases e : x = r;
-    . tauto;
-    . right;
-      right;
-      apply extendRoot.pMorphism.forth;
-      grind;
-
-lemma not_root_of_from_root' (r : F.Root) (x : F.extendRoot n) (h : (extendRoot.root F n) ≺ x) :
-  (∃ i : Fin n, x = extend i) ∨ x = r ∨ ∃ x₀ : F, x = x₀ ∧ r ≺ x₀ := by
-  rcases not_root_of_from_root r x h with (h | h | h)
-  · tauto;
-  · tauto;
-  · right; right;
-    rcases extendRoot.pMorphism.back h with ⟨x₀, rfl, hx₀⟩;
-    exact ⟨x₀, rfl, hx₀⟩
-
-lemma not_root_of_from_root₁ (r : F.Root) [F.IsIrreflexive] (x : F.extendRoot 1) (h : (extendRoot.root F 1) ≺ x) :
-  x = r ∨ embed r ≺ x := by
-  rcases not_root_of_from_root r x h with (⟨i, hi, rfl⟩ | hr | hr) <;> simp_all [extendRoot.root]
-
-lemma not_root_of_from_root'₁ (r : F.Root) [F.IsIrreflexive] (x : F.extendRoot 1) (h : (extendRoot.root F 1) ≺ x) :
-  x = r ∨ ∃ x₀ : F, x = x₀ ∧ r ≺ x₀ := by
-  rcases not_root_of_from_root' r x h with (⟨i, hi, rfl⟩ | hr | hr) <;> simp_all [extendRoot.root]
-
-lemma eq_inr_of_root_rel (r : F.Root) [F.IsIrreflexive] (x : F.extendRoot 1) (h : (extendRoot.root F 1) ≺ x) :
-  ∃ x₀ : F, x = x₀ := by
-  rcases not_root_of_from_root'₁ r x h with (rfl | ⟨x₀, rfl, hx₀⟩) <;> grind;
 
 @[simp]
 lemma embed_rel_embed_iff_rel {i j : F} : embed (n := n) i ≺ embed j ↔ i ≺ j :=
@@ -111,7 +77,54 @@ lemma embed_rel_embed_iff_rel {i j : F} : embed (n := n) i ≺ embed j ↔ i ≺
 lemma embed_rel_iterate_embed_iff_rel {i j : F} : embed (n := n) i ≺^[k] embed j ↔ i ≺^[k] j :=
   extendRoot.pMorphism.toFun_rel_iterate_toFun_iff_of_inj Sum.inr_injective
 
+
+@[simp, grind .]
+lemma eq_defaultRoot_root [F.IsIrreflexive] [F.IsTransitive] : (F.extendRoot n).root = (extendRoot.defaultRoot F n) := by
+  apply root_uniqueness_of_irrefl_trans;
+
+@[simp, grind .]
+lemma rel_defaultRoot_original_root [F.IsRooted] [F.IsTransitive] [F.IsIrreflexive] : (F.extendRoot n).root.1 ≺ F.root.1 := by
+  grind [eq_defaultRoot_root];
+
+@[grind →]
+lemma not_eq_defaultRoot_of_rel_defaultRoot (x : F.extendRoot n) (h : (extendRoot.defaultRoot F n) ≺ x) : x ≠ (extendRoot.defaultRoot F n) := by grind;
+
+@[grind →]
+lemma not_eq_extendRoot_root_of_rel_original_root [F.IsIrreflexive] [F.IsTransitive] (x : F.extendRoot n) (h : (extendRoot F n).root ≺ x) : x ≠ (extendRoot F n).root := by grind;
+
+
+lemma eq_extend_or_eq_original (x : F.extendRoot n)
+  : (∃ i : Fin n, x = extend i) ∨ (∃ x₀ : F, x = x₀) := by
+  match x with
+  | .inl i => left; use i;
+  | .inr x => grind;
+
+
+section
+
+lemma eq_original_of_rel_defaultRoot₁ [F.IsIrreflexive] (x : F.extendRoot 1) (h : (extendRoot.defaultRoot F 1) ≺ x)
+  : ∃ x₀ : F, x = x₀ := by
+  rcases eq_extend_or_eq_original x with (⟨i, hi, rfl⟩ | _) <;> simp_all;
+
+lemma eq_root_or_rel_original_root_of_neq_defaultRoot₁ [F.IsIrreflexive] (x : F.extendRoot 1) (h : x ≠ (extendRoot.defaultRoot F 1))
+  : ∃ x₀ : F, x = x₀ := by
+  apply eq_original_of_rel_defaultRoot₁;
+  grind;
+
+lemma eq_root_or_rel_original_root_of_rel_extendRoot_root₁ [F.IsIrreflexive] (x : F.extendRoot 1) (h : (extendRoot F 1).root ≺ x)
+  : ∃ x₀ : F, x = x₀ := by
+  apply eq_original_of_rel_defaultRoot₁;
+  grind;
+
+lemma eq_root_or_rel_original_root_of_neq_extendRoot_root₁ [F.IsIrreflexive] [F.IsTransitive] (x : F.extendRoot 1) (h : x ≠ (extendRoot F 1).root)
+  : ∃ x₀ : F, x = x₀ := by
+  apply eq_root_or_rel_original_root_of_neq_defaultRoot₁;
+  grind [eq_defaultRoot_root];
+
+end
+
 end Frame.extendRoot
+
 
 abbrev Model.extendRoot (M : Kripke.Model) (r : M.Root) (n : ℕ+) : Kripke.Model where
   toFrame := M.toFrame.extendRoot n
@@ -124,30 +137,8 @@ namespace Model.extendRoot
 
 variable {M : Model} {r : M.Root} {x y : M.World} {n : ℕ+} {i : Fin n} {φ}
 
--- abbrev extend (i : Fin n) : M.extendRoot r n := .inl i
-
 @[coe] abbrev extend (i : Fin n) : M.extendRoot r n := .inl i
 @[coe] abbrev embed (x : M) : M.extendRoot r n := .inr x
-
--- instance : Coe (M.World) ((M.extendRoot r n).World) := ⟨embed⟩
-
--- protected abbrev root (M) := Frame.extendRoot.root (M.toFrame) (n := n)
-
-/-
-instance isFinite [M.IsFinite] : (M.extendRoot r n).IsFinite := Frame.extendRoot.isFinite
-
-instance fintype [Fintype M] : Fintype (M.extendRoot r n) := Frame.extendRoot.fintype
-
-instance isTransitive [M.IsTransitive] : (M.extendRoot n).IsTransitive := Frame.extendRoot.isTransitive
-
-instance isAsymmetric [M.IsAsymmetric] : (M.extendRoot n).IsAsymmetric := Frame.extendRoot.isAsymmetric
-
-instance isRooted [M.IsRootedBy r] : (M.extendRoot n).IsRootedBy extendRoot.root := Frame.extendRoot.instIsRooted
-
-instance isTree [M.IsTree r] : (M.extendRoot n).IsTree extendRoot.root := Frame.extendRoot.isTree
-
-instance isFiniteTree [M.IsFiniteTree r] : (M.extendRoot n).IsFiniteTree extendRoot.root := Frame.extendRoot.isFiniteTree
--/
 
 def pMorphism : M →ₚ M.extendRoot r n := PseudoEpimorphism.ofAtomic Frame.extendRoot.pMorphism $ by grind;
 

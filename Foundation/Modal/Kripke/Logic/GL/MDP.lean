@@ -49,38 +49,8 @@ instance [F₁.IsTransitive] [F₂.IsTransitive] : (mdpCounterexmpleFrame F₁ F
     | .inl _, .inr (.inr _), .inr (.inr _)
     | .inl _, .inr (.inl _), .inr (.inl _) => grind;
 
-
-/-
-instance {F₁ F₂ : Frame} -- {r₁ : outParam F₁.World} {r₂ : outParam F₂.World}
-  -- [tree₁ : F₁.IsFiniteTree r₁] [tree₂ : F₂.IsFiniteTree r₂]
-  : (mdpCounterexmpleFrame F₁ F₂ r₁ r₂).IsFiniteTree (.inl ()) where
-  root_generates := by
-    intro x hx;
-    match x with
-    | .inl x => contradiction;
-    | .inr _ =>
-      apply Relation.TransGen.single;
-      tauto;
-  asymm := by
-    intro x y hxy;
-    match x, y with
-    | .inr (.inl x), .inr (.inl y) => exact tree₁.asymm _ _ hxy;
-    | .inr (.inr x), .inr (.inr y) => apply tree₂.asymm _ _ hxy;
-    | .inl x, .inl y => contradiction;
-    | .inl x, .inr y => simp;
-  trans := by
-    intro x y z hxy hyz;
-    match x, y, z with
-    | .inr (.inl x), .inr (.inl y), .inr (.inl z) => apply tree₁.trans _ _ _ hxy hyz;
-    | .inr (.inr x), .inr (.inr y), .inr (.inr z) => apply tree₂.trans _ _ _ hxy hyz;
-    | .inl _, .inr (.inr _), .inr (.inr _) => simp;
-    | .inl _, .inr (.inl _), .inr (.inl _) => simp;
-
--- TODO: remove?
-instance : (mdpCounterexmpleFrame F₁ F₂ r₁ r₂).IsIrreflexive := ⟨by simp⟩
--/
-
-protected abbrev root (F₁ F₂) : (mdpCounterexmpleFrame F₁ F₂).Root := ⟨.inl (), by grind⟩
+protected abbrev defaultRoot (F₁ F₂) : (mdpCounterexmpleFrame F₁ F₂).Root := ⟨.inl (), by grind⟩
+instance : (mdpCounterexmpleFrame F₁ F₂).IsRooted := ⟨mdpCounterexmpleFrame.defaultRoot F₁ F₂⟩
 
 def pMorphism₁ (F₁ F₂) : F₁ →ₚ (mdpCounterexmpleFrame F₁ F₂) where
   toFun x := .inr (.inl x)
@@ -92,7 +62,7 @@ def pMorphism₂ (F₁ F₂) : F₂ →ₚ (mdpCounterexmpleFrame F₁ F₂) whe
   forth := by intro x y hxy; exact hxy;
   back {x y} h := by match y with | .inr (.inr y) => use y;
 
-lemma through_original_root (r₁ : F₁.Root) (r₂ : F₂.Root) (x : (mdpCounterexmpleFrame F₁ F₂).World) (h : mdpCounterexmpleFrame.root F₁ F₂ ≺ x)
+lemma through_original_root (r₁ : F₁.Root) (r₂ : F₂.Root) (x : (mdpCounterexmpleFrame F₁ F₂).World) (h : mdpCounterexmpleFrame.defaultRoot F₁ F₂ ≺ x)
   : (x = r₁ ∨ (Sum.inr (Sum.inl r₁.1) ≺ x)) ∨ (x = r₂ ∨ (Sum.inr (Sum.inr r₂.1) ≺ x)) := by
   match x with
   | .inl x => grind;
@@ -125,7 +95,7 @@ variable {M₁ M₂ : Model} -- {r₁ : M₁.World} {r₂ : M₂.World} [tree₁
 -- instance : Coe (M₁.World) (mdpCounterexmpleModel M₁ M₂ r₁ r₂).World := ⟨Sum.inr ∘ Sum.inl⟩
 -- instance : Coe (M₂.World) (mdpCounterexmpleModel M₁ M₂ r₁ r₂).World := ⟨Sum.inr ∘ Sum.inr⟩
 
--- abbrev root : (mdpCounterexmpleModel M₁ M₂).World := mdpCounterexmpleFrame.root (F₁ := M₁.toFrame) (F₂ := M₂.toFrame) (r₁ := r₁) (r₂ := r₂)
+-- abbrev root : (mdpCounterexmpleModel M₁ M₂).World := mdpCounterexmpleFrame.defaultRoot (F₁ := M₁.toFrame) (F₂ := M₂.toFrame) (r₁ := r₁) (r₂ := r₂)
 
 def pMorphism₁ (M₁ M₂) : M₁ →ₚ (mdpCounterexmpleModel M₁ M₂) :=
   Model.PseudoEpimorphism.ofAtomic (mdpCounterexmpleFrame.pMorphism₁ M₁.toFrame M₂.toFrame) $ by
@@ -157,14 +127,16 @@ lemma MDP_Aux {X : Set _} (h : (□'X) *⊢[Modal.GL] □φ₁ ⋎ □φ₂) : (
     by_contra! hC;
     have ⟨h₁, h₂⟩ : (Modal.GL ⊬ ⊡c ➝ φ₁) ∧ (Modal.GL ⊬ ⊡c ➝ φ₂) := hC;
 
-    obtain ⟨M₁, _, _, _, r₁, hM₁⟩ := GL.Kripke.iff_unprovable_exists_finite_rooted_model.mp h₁;
-    obtain ⟨M₂, _, _, _, r₂, hM₂⟩ := GL.Kripke.iff_unprovable_exists_finite_rooted_model.mp h₂;
+    obtain ⟨M₁, _, _, _, _, hM₁⟩ := GL.Kripke.iff_unprovable_exists_finite_rooted_model.mp h₁;
+    obtain ⟨M₂, _, _, _, _, hM₂⟩ := GL.Kripke.iff_unprovable_exists_finite_rooted_model.mp h₂;
 
+    let r₁ := M₁.root;
+    let r₂ := M₂.root;
     let M₀ := Kripke.mdpCounterexmpleModel M₁ M₂;
-    let r₀ : M₀.Root := Kripke.mdpCounterexmpleFrame.root _ _;
+    let r₀ : M₀.Root := Kripke.mdpCounterexmpleFrame.defaultRoot _ _;
 
-    replace hM₁ : Satisfies M₀ ↑r₁ (⊡c ⋏ ∼φ₁) := Kripke.mdpCounterexmpleModel.modal_equivalence_original_world₁.mp (Formula.Kripke.Satisfies.not_imp.mp hM₁);
-    replace hM₂ : Satisfies M₀ ↑r₂ (⊡c ⋏ ∼φ₂) := Kripke.mdpCounterexmpleModel.modal_equivalence_original_world₂.mp (Formula.Kripke.Satisfies.not_imp.mp hM₂);
+    replace hM₁ : Satisfies M₀ r₁ (⊡c ⋏ ∼φ₁) := Kripke.mdpCounterexmpleModel.modal_equivalence_original_world₁.mp (Formula.Kripke.Satisfies.not_imp.mp hM₁);
+    replace hM₂ : Satisfies M₀ r₂ (⊡c ⋏ ∼φ₂) := Kripke.mdpCounterexmpleModel.modal_equivalence_original_world₂.mp (Formula.Kripke.Satisfies.not_imp.mp hM₂);
 
     have hc : Satisfies M₀ r₀ (□c) := by
       intro x Rrx;
@@ -194,8 +166,8 @@ lemma MDP_Aux {X : Set _} (h : (□'X) *⊢[Modal.GL] □φ₁ ⋎ □φ₂) : (
       exact ⟨hp₁, hp₂⟩;
     have : ¬(Satisfies M₀ r₀ (□c ➝ (□φ₁ ⋎ □φ₂))) := _root_.not_imp.mpr ⟨hc, this⟩;
     have : Modal.GL ⊬ □c ➝ □φ₁ ⋎ □φ₂ := GL.Kripke.iff_unprovable_exists_finite_rooted_model.mpr $ by
-      use M₀, inferInstance, inferInstance, inferInstance, r₀;
-      exact this;
+      use M₀, inferInstance, inferInstance, inferInstance, inferInstance;
+      rwa [Frame.root_uniqueness_of_irrefl_trans r₀] at this;
     contradiction;
 
   rcases this with (h | h) <;> {
