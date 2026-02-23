@@ -46,18 +46,21 @@ abbrev Root (F : Frame) := { r : F.World // ∀ x : F.World, x ≠ r → r ≺ x
 @[grind =>]
 lemma root_rooted (r : F.Root) (x : F.World) (hx : x ≠ r) : r.1 ≺ x := r.2 x hx
 
-abbrev IsRooted (F : Frame) := Nonempty F.Root
+/-- Frame `F` is rooted by some root(s) (possible multiple roots). -/
+abbrev IsRooted (F : Frame) := Inhabited F.Root
+
+/-- Frame `F` is rooted by `F.root`. -/
+abbrev IsPointRooted (F : Frame) := Unique F.Root
 
 
 section
 
-noncomputable abbrev root (F : Frame) [F.IsRooted] : F.Root := Nonempty.some $ by assumption;
+abbrev root (F : Frame) [F.IsRooted] : F.Root := Inhabited.default
 
-lemma root_uniqueness_of_irrefl_trans [F.IsIrreflexive] [F.IsTransitive] (r₁ r₂ : F.Root) : r₁ = r₂ := by
-  by_contra!;
-  have R21 := r₁.2 r₂.1 (by grind);
-  have R12 := r₂.2 r₁.1 (by grind);
-  exact F.irrefl r₁.1 $ F.trans R21 R12;
+instance instPointRooted_of_isRooted_of_isIrreflexive_of_isTransitive [F.IsIrreflexive] [F.IsTransitive] [F.IsRooted] : F.IsPointRooted where
+  uniq r := by
+    by_contra hr;
+    exact F.irrefl r $ F.trans (r.2 F.root (by grind)) (F.root.2 r.1 (by grind));
 
 end
 
@@ -82,38 +85,30 @@ section
 
 attribute [grind .] Frame.refl
 
-instance instConvergentOfIsRootedOfReflexive [rooted : F.IsRooted] [F.IsReflexive] [F.IsPiecewiseConvergent] : F.IsConvergent := ⟨by
+instance instConvergentOfIsRootedOfReflexive [F.IsRooted] [F.IsReflexive] [F.IsPiecewiseConvergent] : F.IsConvergent := ⟨by
   rintro x y nxy;
-  obtain ⟨r, hr⟩ := rooted;
-  apply F.p_convergent (x := r) <;> grind;
+  apply F.p_convergent (x := F.root) <;> grind;
 ⟩
 
-instance instStronglyConvergentOfIsRootedOfReflexive [rooted : F.IsRooted] [F.IsReflexive] [F.IsPiecewiseStronglyConvergent] : F.IsStronglyConvergent := ⟨by
+instance instStronglyConvergentOfIsRootedOfReflexive [F.IsRooted] [F.IsReflexive] [F.IsPiecewiseStronglyConvergent] : F.IsStronglyConvergent := ⟨by
   rintro x y;
-  obtain ⟨r, hr⟩ := rooted;
-  apply F.ps_convergent (x := r) <;> grind;
+  apply F.ps_convergent (x := F.root) <;> grind;
 ⟩
 
-instance instConnectedOfIsRootedOfReflexive [rooted : F.IsRooted] [F.IsPiecewiseConnected] [F.IsReflexive] : F.IsConnected := ⟨by
+instance instConnectedOfIsRootedOfReflexive [F.IsRooted] [F.IsPiecewiseConnected] [F.IsReflexive] : F.IsConnected := ⟨by
   suffices ∀ x y : F, x ≠ y → x ≺ y ∨ y ≺ x by grind;
   rintro x y nexy;
-  obtain ⟨r, hr⟩ := rooted;
-  apply F.p_connected' (x := r) <;> grind;
+  apply F.p_connected' (x := F.root) <;> grind;
 ⟩
 
-instance instStronglyConnectedOfIsRootedOfReflexive [rooted : F.IsRooted] [F.IsPiecewiseStronglyConnected] [F.IsReflexive] : F.IsStronglyConnected := ⟨by
+instance instStronglyConnectedOfIsRootedOfReflexive [F.IsRooted] [F.IsPiecewiseStronglyConnected] [F.IsReflexive] : F.IsStronglyConnected := ⟨by
   rintro x y;
-  obtain ⟨r, hr⟩ := rooted;
-  apply F.ps_connected (x := r) <;> grind;
+  apply F.ps_connected (x := F.root) <;> grind;
 ⟩
 
 end
 
-instance [rooted : F.IsRooted] : (F^+).IsRooted := ⟨⟨
-  rooted.some,
-  fun x hx ↦ Relation.TransGen.single (by grind)
-⟩⟩
-
+instance [F.IsRooted] : (F^+).IsRooted := ⟨⟨F.root, fun x hx ↦ Relation.TransGen.single (by grind)⟩⟩
 
 
 abbrev pointGenerate (F : Kripke.Frame) (r : F.World) : Kripke.Frame where
@@ -132,8 +127,8 @@ lemma rel_of_origin_rel {hx hy} (Rxy : x ≺ y) : ((F↾r).Rel ⟨x, hx⟩ ⟨y,
 attribute [grind <=] Frame.trans Frame.antisymm
 attribute [grind .] Frame.irrefl
 
-protected abbrev root (F : Kripke.Frame) (r : F.World) : (F↾r).Root := ⟨⟨r, by tauto⟩, by grind⟩
-instance : (F↾r).IsRooted := ⟨pointGenerate.root F r⟩
+protected abbrev defaultRoot (F : Kripke.Frame) (r : F.World) : (F↾r).Root := ⟨⟨r, by tauto⟩, by grind⟩
+instance : (F↾r).IsRooted := ⟨pointGenerate.defaultRoot F r⟩
 
 instance [F.IsFinite] : (F↾r).IsFinite := inferInstance
 instance [F.IsReflexive] : (F↾r).IsReflexive := ⟨by grind⟩
@@ -170,8 +165,11 @@ instance [F.IsTransitive] [F.IsStronglyConnected] : (F↾r).IsStronglyConnected 
   grind [F.ps_connected];
 instance [F.IsTransitive] [F.IsPiecewiseStronglyConnected] [F.IsReflexive] : (F↾r).IsStronglyConnected := (F↾r).instStronglyConnectedOfIsRootedOfReflexive
 
-lemma eq_root_pointGenerate_root [F.IsIrreflexive] [F.IsTransitive] : (F↾r).root = (pointGenerate.root F r) := by
-  exact root_uniqueness_of_irrefl_trans (F↾r).root (pointGenerate.root F r);
+instance [F.IsIrreflexive] [F.IsTransitive] : (F↾r).IsPointRooted := instPointRooted_of_isRooted_of_isIrreflexive_of_isTransitive
+
+@[deprecated Unique.uniq]
+lemma eq_root_pointGenerate_root [F.IsIrreflexive] [F.IsTransitive] : (F↾r).root = (pointGenerate.defaultRoot F r) := by
+  apply Unique.uniq;
 
 protected abbrev pMorphism (F : Kripke.Frame) [F.IsTransitive] (r : F) : (F↾r) →ₚ F where
   toFun := λ ⟨x, _⟩ => x

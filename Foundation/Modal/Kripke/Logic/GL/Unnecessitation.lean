@@ -17,10 +17,10 @@ lemma imply_boxdot_plain_of_imply_box_box : Modal.GL ⊢ □φ ➝ □ψ → Mod
   contrapose;
 
   intro h;
-  obtain ⟨M, _, _, _, _, hs⟩ := GL.Kripke.iff_unprovable_exists_finite_rooted_model.mp h;
+  obtain ⟨M, _, _, _, _, hs⟩ := GL.Kripke.iff_unprovable_exists_finite_pointRooted_model.mp h;
 
 
-  apply GL.Kripke.iff_unprovable_exists_finite_rooted_model.mpr;
+  apply GL.Kripke.iff_unprovable_exists_finite_pointRooted_model.mpr;
   use (M.extendRoot M.root 1), inferInstance, inferInstance, inferInstance, inferInstance;
 
   have hs : Satisfies M M.root (⊡φ ⋏ ∼ψ) := by simp_all [Satisfies];

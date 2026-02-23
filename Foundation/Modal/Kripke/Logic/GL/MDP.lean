@@ -50,7 +50,12 @@ instance [F₁.IsTransitive] [F₂.IsTransitive] : (mdpCounterexmpleFrame F₁ F
     | .inl _, .inr (.inl _), .inr (.inl _) => grind;
 
 protected abbrev defaultRoot (F₁ F₂) : (mdpCounterexmpleFrame F₁ F₂).Root := ⟨.inl (), by grind⟩
-instance : (mdpCounterexmpleFrame F₁ F₂).IsRooted := ⟨mdpCounterexmpleFrame.defaultRoot F₁ F₂⟩
+instance : (mdpCounterexmpleFrame F₁ F₂).IsPointRooted where
+  default := mdpCounterexmpleFrame.defaultRoot F₁ F₂
+  uniq {r} := by
+    by_contra! hC;
+    have : r ≺ (mdpCounterexmpleFrame.defaultRoot F₁ F₂).1 := r.2 _ (by grind);
+    grind;
 
 def pMorphism₁ (F₁ F₂) : F₁ →ₚ (mdpCounterexmpleFrame F₁ F₂) where
   toFun x := .inr (.inl x)
@@ -62,7 +67,7 @@ def pMorphism₂ (F₁ F₂) : F₂ →ₚ (mdpCounterexmpleFrame F₁ F₂) whe
   forth := by intro x y hxy; exact hxy;
   back {x y} h := by match y with | .inr (.inr y) => use y;
 
-lemma through_original_root (r₁ : F₁.Root) (r₂ : F₂.Root) (x : (mdpCounterexmpleFrame F₁ F₂).World) (h : mdpCounterexmpleFrame.defaultRoot F₁ F₂ ≺ x)
+lemma through_original_root (r₁ : F₁.Root) (r₂ : F₂.Root) (x : (mdpCounterexmpleFrame F₁ F₂).World) (h : (mdpCounterexmpleFrame F₁ F₂).root ≺ x)
   : (x = r₁ ∨ (Sum.inr (Sum.inl r₁.1) ≺ x)) ∨ (x = r₂ ∨ (Sum.inr (Sum.inr r₂.1) ≺ x)) := by
   match x with
   | .inl x => grind;
@@ -127,13 +132,13 @@ lemma MDP_Aux {X : Set _} (h : (□'X) *⊢[Modal.GL] □φ₁ ⋎ □φ₂) : (
     by_contra! hC;
     have ⟨h₁, h₂⟩ : (Modal.GL ⊬ ⊡c ➝ φ₁) ∧ (Modal.GL ⊬ ⊡c ➝ φ₂) := hC;
 
-    obtain ⟨M₁, _, _, _, _, hM₁⟩ := GL.Kripke.iff_unprovable_exists_finite_rooted_model.mp h₁;
-    obtain ⟨M₂, _, _, _, _, hM₂⟩ := GL.Kripke.iff_unprovable_exists_finite_rooted_model.mp h₂;
+    obtain ⟨M₁, _, _, _, _, hM₁⟩ := GL.Kripke.iff_unprovable_exists_finite_pointRooted_model.mp h₁;
+    obtain ⟨M₂, _, _, _, _, hM₂⟩ := GL.Kripke.iff_unprovable_exists_finite_pointRooted_model.mp h₂;
 
     let r₁ := M₁.root;
     let r₂ := M₂.root;
     let M₀ := Kripke.mdpCounterexmpleModel M₁ M₂;
-    let r₀ : M₀.Root := Kripke.mdpCounterexmpleFrame.defaultRoot _ _;
+    let r₀ : M₀.Root := M₀.root;
 
     replace hM₁ : Satisfies M₀ r₁ (⊡c ⋏ ∼φ₁) := Kripke.mdpCounterexmpleModel.modal_equivalence_original_world₁.mp (Formula.Kripke.Satisfies.not_imp.mp hM₁);
     replace hM₂ : Satisfies M₀ r₂ (⊡c ⋏ ∼φ₂) := Kripke.mdpCounterexmpleModel.modal_equivalence_original_world₂.mp (Formula.Kripke.Satisfies.not_imp.mp hM₂);
@@ -165,9 +170,9 @@ lemma MDP_Aux {X : Set _} (h : (□'X) *⊢[Modal.GL] □φ₁ ⋎ □φ₂) : (
       push_neg;
       exact ⟨hp₁, hp₂⟩;
     have : ¬(Satisfies M₀ r₀ (□c ➝ (□φ₁ ⋎ □φ₂))) := _root_.not_imp.mpr ⟨hc, this⟩;
-    have : Modal.GL ⊬ □c ➝ □φ₁ ⋎ □φ₂ := GL.Kripke.iff_unprovable_exists_finite_rooted_model.mpr $ by
+    have : Modal.GL ⊬ □c ➝ □φ₁ ⋎ □φ₂ := GL.Kripke.iff_unprovable_exists_finite_pointRooted_model.mpr $ by
       use M₀, inferInstance, inferInstance, inferInstance, inferInstance;
-      rwa [Frame.root_uniqueness_of_irrefl_trans r₀] at this;
+      exact this;
     contradiction;
 
   rcases this with (h | h) <;> {

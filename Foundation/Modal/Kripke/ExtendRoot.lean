@@ -42,7 +42,12 @@ instance fintype [Fintype F] : Fintype (F.extendRoot n) := instFintypeSum (Fin n
 
 protected abbrev defaultRoot (F n) : (extendRoot F n).Root := ⟨.inl ⟨n - 1, by simp⟩, by grind⟩
 
-instance : (F.extendRoot n).IsRooted := ⟨extendRoot.defaultRoot F n⟩
+instance : (F.extendRoot n).IsPointRooted where
+  default := extendRoot.defaultRoot F n
+  uniq {r} := by
+    by_contra! hC;
+    have : r ≺ (extendRoot.defaultRoot F n).1 := r.2 _ $ (by grind);
+    grind;
 
 protected abbrev chain (F n) : List (extendRoot F n) := List.finRange n |>.reverse.map (extend ·)
 
@@ -77,20 +82,12 @@ lemma embed_rel_embed_iff_rel {i j : F} : embed (n := n) i ≺ embed j ↔ i ≺
 lemma embed_rel_iterate_embed_iff_rel {i j : F} : embed (n := n) i ≺^[k] embed j ↔ i ≺^[k] j :=
   extendRoot.pMorphism.toFun_rel_iterate_toFun_iff_of_inj Sum.inr_injective
 
-
-@[simp, grind .]
-lemma eq_defaultRoot_root [F.IsIrreflexive] [F.IsTransitive] : (F.extendRoot n).root = (extendRoot.defaultRoot F n) := by
-  apply root_uniqueness_of_irrefl_trans;
-
-@[simp, grind .]
-lemma rel_defaultRoot_original_root [F.IsRooted] [F.IsTransitive] [F.IsIrreflexive] : (F.extendRoot n).root.1 ≺ F.root.1 := by
-  grind [eq_defaultRoot_root];
+@[simp]
+lemma rel_root_original_root [F.IsRooted] : (F.extendRoot n).root.1 ≺ F.root.1 := by grind;
 
 @[grind →]
-lemma not_eq_defaultRoot_of_rel_defaultRoot (x : F.extendRoot n) (h : (extendRoot.defaultRoot F n) ≺ x) : x ≠ (extendRoot.defaultRoot F n) := by grind;
-
-@[grind →]
-lemma not_eq_extendRoot_root_of_rel_original_root [F.IsIrreflexive] [F.IsTransitive] (x : F.extendRoot n) (h : (extendRoot F n).root ≺ x) : x ≠ (extendRoot F n).root := by grind;
+lemma not_eq_extendRoot_root_of_rel_original_root [F.IsIrreflexive] (x : F.extendRoot n) (h : (extendRoot F n).root ≺ x) : x ≠ (extendRoot F n).root := by
+  grind;
 
 
 lemma eq_extend_or_eq_original (x : F.extendRoot n)
@@ -102,24 +99,16 @@ lemma eq_extend_or_eq_original (x : F.extendRoot n)
 
 section
 
-lemma eq_original_of_rel_defaultRoot₁ [F.IsIrreflexive] (x : F.extendRoot 1) (h : (extendRoot.defaultRoot F 1) ≺ x)
-  : ∃ x₀ : F, x = x₀ := by
-  rcases eq_extend_or_eq_original x with (⟨i, hi, rfl⟩ | _) <;> simp_all;
-
-lemma eq_root_or_rel_original_root_of_neq_defaultRoot₁ [F.IsIrreflexive] (x : F.extendRoot 1) (h : x ≠ (extendRoot.defaultRoot F 1))
-  : ∃ x₀ : F, x = x₀ := by
-  apply eq_original_of_rel_defaultRoot₁;
-  grind;
-
 lemma eq_root_or_rel_original_root_of_rel_extendRoot_root₁ [F.IsIrreflexive] (x : F.extendRoot 1) (h : (extendRoot F 1).root ≺ x)
   : ∃ x₀ : F, x = x₀ := by
-  apply eq_original_of_rel_defaultRoot₁;
-  grind;
+  rcases eq_extend_or_eq_original x with (⟨i, hi, rfl⟩ | _);
+  . simp [Frame.root, default] at h;
+  . simp_all;
 
-lemma eq_root_or_rel_original_root_of_neq_extendRoot_root₁ [F.IsIrreflexive] [F.IsTransitive] (x : F.extendRoot 1) (h : x ≠ (extendRoot F 1).root)
+lemma eq_root_or_rel_original_root_of_neq_extendRoot_root₁ [F.IsIrreflexive] (x : F.extendRoot 1) (h : x ≠ (extendRoot F 1).root)
   : ∃ x₀ : F, x = x₀ := by
-  apply eq_root_or_rel_original_root_of_neq_defaultRoot₁;
-  grind [eq_defaultRoot_root];
+  apply eq_root_or_rel_original_root_of_rel_extendRoot_root₁;
+  grind;
 
 end
 

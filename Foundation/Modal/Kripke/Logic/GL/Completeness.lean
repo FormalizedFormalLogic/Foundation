@@ -217,13 +217,13 @@ instance FFP : Complete Modal.GL Kripke.FrameClass.finite_GL := ⟨by
 theorem finite_completeness_TFAE : [
   Modal.GL ⊢ φ,
   FrameClass.finite_GL ⊧ φ,
-  ∀ F : Kripke.Frame, [F.IsFinite] → [F.IsTransitive] → [F.IsIrreflexive] → [F.IsRooted] → F ⊧ φ,
-  ∀ M : Kripke.Model, [M.IsFinite] → [M.IsTransitive] → [M.IsIrreflexive] → [M.IsRooted] → M.root.1 ⊧ φ,
+  ∀ F : Kripke.Frame, [F.IsFinite] → [F.IsTransitive] → [F.IsIrreflexive] → [F.IsPointRooted] → F ⊧ φ,
+  ∀ M : Kripke.Model, [M.IsFinite] → [M.IsTransitive] → [M.IsIrreflexive] → [M.IsPointRooted] → M.root.1 ⊧ φ,
 ].TFAE := by
   tfae_have 1 → 2 := by apply Sound.sound;
   tfae_have 2 → 1 := by apply Complete.complete;
   tfae_have 2 → 3 := by
-    intro h F _ _ Fcwf ⟨r⟩ _;
+    intro h F _ _ Fcwf ⟨r, hr⟩ _;
     apply h;
     exact {}
   tfae_have 3 → 4 := by
@@ -232,10 +232,10 @@ theorem finite_completeness_TFAE : [
   tfae_have 4 → 2 := by
     rintro H F ⟨_, F_trans, F_irrefl⟩ V x;
     let M : Kripke.Model := ⟨F, V⟩;
-    simpa [Frame.pointGenerate.eq_root_pointGenerate_root] using Model.pointGenerate.pMorphism M x |>.modal_equivalence _ |>.mp $ H (M↾x);
+    simpa [Unique.uniq] using Model.pointGenerate.pMorphism M x |>.modal_equivalence _ |>.mp $ H (M↾x);
   tfae_finish;
 
-lemma iff_unprovable_exists_finite_rooted_model : Modal.GL ⊬ φ ↔ ∃ M : Model, ∃ _ : M.IsFinite, ∃ _ : M.IsTransitive, ∃ _ : M.IsIrreflexive, ∃ _ : M.IsRooted, ¬M.root.1 ⊧ φ := by
+lemma iff_unprovable_exists_finite_pointRooted_model : Modal.GL ⊬ φ ↔ ∃ M : Model, ∃ _ : M.IsFinite, ∃ _ : M.IsTransitive, ∃ _ : M.IsIrreflexive, ∃ _ : M.IsPointRooted, ¬M.root.1 ⊧ φ := by
   apply Iff.not_left;
   apply Iff.trans $ finite_completeness_TFAE (φ := φ) |>.out 0 3;
   push_neg;
@@ -243,11 +243,11 @@ lemma iff_unprovable_exists_finite_rooted_model : Modal.GL ⊬ φ ↔ ∃ M : Mo
 
 theorem fintype_completeness_TFAE : [
   Modal.GL ⊢ φ,
-  ∀ F : Kripke.Frame, [Fintype F] → [F.IsTransitive] → [F.IsIrreflexive] → [F.IsRooted] → F ⊧ φ,
-  ∀ M : Kripke.Model, [Fintype M] → [M.IsTransitive] → [M.IsIrreflexive] → [M.IsRooted] → M.root.1 ⊧ φ,
+  ∀ F : Kripke.Frame, [Fintype F] → [F.IsTransitive] → [F.IsIrreflexive] → [F.IsPointRooted] → F ⊧ φ,
+  ∀ M : Kripke.Model, [Fintype M] → [M.IsTransitive] → [M.IsIrreflexive] → [M.IsPointRooted] → M.root.1 ⊧ φ,
 ].TFAE := by
   tfae_have 1 → 2 := by
-    rintro h F _ _ Fcwf _ _;
+    rintro h F _ _ Fcwf ⟨r, hr⟩ _;
     have := finite_completeness_TFAE.out 0 2 |>.mp h;
     apply this;
   tfae_have 2 → 3 := by
@@ -261,7 +261,7 @@ theorem fintype_completeness_TFAE : [
     apply h;
   tfae_finish;
 
-lemma iff_unprovable_exists_fintype_rooted_model : Modal.GL ⊬ φ ↔ ∃ M : Model, ∃ _ : Fintype M, ∃ _ : M.IsTransitive, ∃ _ : M.IsIrreflexive, ∃ _ : M.IsRooted, ¬M.root.1 ⊧ φ := by
+lemma iff_unprovable_exists_fintype_pointRooted_model : Modal.GL ⊬ φ ↔ ∃ M : Model, ∃ _ : Fintype M, ∃ _ : M.IsTransitive, ∃ _ : M.IsIrreflexive, ∃ _ : M.IsPointRooted, ¬M.root.1 ⊧ φ := by
   apply Iff.not_left;
   apply Iff.trans $ fintype_completeness_TFAE (φ := φ) |>.out 0 2;
   push_neg;
