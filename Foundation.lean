@@ -190,7 +190,7 @@ public import Foundation.InterpretabilityLogic.Veltman.Logic.IL_R_W
 public import Foundation.InterpretabilityLogic.Veltman.Logic.IL_W
 public import Foundation.LinearLogic.FirstOrder.Calculus
 public import Foundation.LinearLogic.FirstOrder.Formula
-public import Foundation.LinearLogic.FirstOrder.LKToLL
+public import Foundation.LinearLogic.FirstOrder.ClassicalEmbedding
 public import Foundation.LinearLogic.FirstOrder.Rew
 public import Foundation.LinearLogic.LogicSymbol
 public import Foundation.LinearLogic.MLL
