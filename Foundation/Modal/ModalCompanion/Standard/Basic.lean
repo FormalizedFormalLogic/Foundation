@@ -1,5 +1,6 @@
 module
 
+public import Foundation.Logic.Embedding
 public import Foundation.Modal.Kripke.Logic.S4
 public import Foundation.Modal.Logic.SumNormal
 public import Foundation.Propositional.Kripke.Hilbert
@@ -25,6 +26,9 @@ class Modal.ModalCompanion (IL : Propositional.Logic ℕ) (ML : Modal.Logic ℕ)
 
 lemma Modal.instModalCompanion (h₁ : ∀ {φ}, IL ⊢ φ → ML ⊢ φᵍ) (h₂ : ∀ {φ}, ML ⊢ φᵍ → IL ⊢ φ) : Modal.ModalCompanion IL ML := ⟨λ {_} => ⟨h₁, h₂⟩⟩
 
+lemma Modal.ModalCompanion.tofaithfullyEmbeddable
+    (IL : Propositional.Logic ℕ) (ML : Modal.Logic ℕ) [Modal.ModalCompanion IL ML] : Entailment.FaithfullyEmbeddable IL ML where
+  prop := ⟨(·ᵍ), fun _ ↦ Modal.ModalCompanion.companion.symm⟩
 
 namespace Propositional.Logic
 

@@ -1,5 +1,6 @@
 module
 
+public import Foundation.Logic.Embedding
 public import Foundation.FirstOrder.Polarity
 public import Foundation.LinearLogic.FirstOrder.Calculus
 
@@ -449,8 +450,11 @@ theorem girard {φ : Sentence L} : 𝐋𝐊 ⊢ φ → 𝐋𝐋 ⊢ φ.Girard :=
   have : 𝐋𝐊₀ ⊢ (φ : SyntacticFormula L) := by simpa using Proof.cast.mp h
   simpa using Derivation.toLL this.get⟩
 
-theorem girard_faithful {φ : Sentence L} : 𝐋𝐊 ⊢ φ ↔ 𝐋𝐋 ⊢ φ.Girard :=
-  ⟨girard, fun h ↦ by simpa using LinearLogic.Proof.forget h⟩
+theorem girard_faithful {φ : Sentence L} : 𝐋𝐋 ⊢ φ.Girard ↔ 𝐋𝐊 ⊢ φ :=
+  ⟨fun h ↦ by simpa using LinearLogic.Proof.forget h, girard⟩
+
+instance : Entailment.FaithfullyEmbeddable (𝐋𝐊 : Theory L) (𝐋𝐋 : LinearLogic.Symbol L) where
+  prop := ⟨Semiformula.Girard, fun _ ↦ girard_faithful⟩
 
 end Proof
 

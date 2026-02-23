@@ -196,6 +196,7 @@ public import Foundation.LinearLogic.MLL
 public import Foundation.Logic.Calculus
 public import Foundation.Logic.Decidability
 public import Foundation.Logic.Disjunctive
+public import Foundation.Logic.Embedding
 public import Foundation.Logic.Entailment
 public import Foundation.Logic.ForcingRelation
 public import Foundation.Logic.LindenbaumAlgebra
