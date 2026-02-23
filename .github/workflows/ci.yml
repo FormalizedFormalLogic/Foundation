@@ -73,7 +73,7 @@ jobs:
           lake exe graph ./import_graph.html
 
       - name: Upload lean artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: lean-artifacts
           path: |
