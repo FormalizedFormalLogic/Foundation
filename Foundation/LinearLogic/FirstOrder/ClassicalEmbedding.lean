@@ -11,13 +11,13 @@ namespace LO.FirstOrder
 
 variable {L : Language}
 
-/-! ## LL to LK -/
+/-! ## $\mathbf{LL}$ to $\mathbf{LK}$ -/
 
 namespace LinearLogic
 
 namespace Semiformula
 
-/-- Forget the linear logic structure and return a classical first-order formula. -/
+/-- Forget the linear structure and return a classical first-order formula. -/
 def forget : Semiformula L ξ n → FirstOrder.Semiformula L ξ n
   |  rel r v => .rel r v
   | nrel r v => .nrel r v
@@ -131,7 +131,7 @@ end Proof
 
 end LinearLogic
 
-/-! ## LK to LL -/
+/-! ## $\mathbf{LK}$ to $\mathbf{LL}$ -/
 
 
 namespace Semiformula
