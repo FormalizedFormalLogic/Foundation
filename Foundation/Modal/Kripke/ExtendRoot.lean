@@ -284,7 +284,7 @@ open Classical
 
 variable {M : Model} [M.IsFinite] [M.IsTransitive] [M.IsIrreflexive] [M.IsRooted] {x y : M.World}
 
-lemma inr_satisfies_axiomT_set {Γ : Finset (Modal.Formula ℕ)} :
+lemma inr_satisfies_conj_axiomT_set {Γ : Finset (Modal.Formula ℕ)} :
   letI n : ℕ+ := ⟨Γ.card + 1, by omega⟩;
   ∃ i : Fin n, Satisfies _ (extend i : M.extendRoot n) (Γ.image (λ γ => □γ ➝ γ)).conj := by
   let n : ℕ+ := ⟨Γ.card + 1, by omega⟩;
@@ -301,6 +301,13 @@ lemma inr_satisfies_axiomT_set {Γ : Finset (Modal.Formula ℕ)} :
   obtain ⟨i, _, rfl⟩ := hx₁;
   use i;
   tauto;
+
+lemma inr_satisfies_forall_axiomT_set {Γ : Finset (Modal.Formula ℕ)} :
+  letI n : ℕ+ := ⟨Γ.card + 1, by omega⟩;
+  ∃ i : Fin n, ∀ γ ∈ Γ, Satisfies _ (extend i : M.extendRoot n) (□γ ➝ γ) := by
+  obtain ⟨i, hi⟩ := inr_satisfies_conj_axiomT_set (Γ := Γ) (M := M);
+  use i;
+  simpa using Satisfies.fconj_def.mp hi;
 
 end Model.extendRoot
 

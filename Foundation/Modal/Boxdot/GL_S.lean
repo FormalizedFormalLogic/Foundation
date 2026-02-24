@@ -30,64 +30,19 @@ lemma iff_provable_boxdot_GL_provable_boxdot_S : Modal.GL ⊢ φᵇ ↔ Modal.S 
   . apply Entailment.WeakerThan.wk;
     infer_instance;
   . intro h;
-    apply GL.Kripke.fintype_completeness_TFAE.out 2 0 |>.mp;
-    replace h := GL.Kripke.finite_completeness_TFAE.out 0 3 |>.mp $ iff_provable_rflSubformula_GL_provable_S.mpr h;
+    replace h := GL.Kripke.finite_completeness_TFAE.out 0 2 |>.mp $ iff_provable_rflSubformula_GL_provable_S.mpr h;
 
+    apply GL.Kripke.fintype_completeness_TFAE.out 2 0 |>.mp;
     intro M _ _ _ _;
 
-    let n : ℕ+ := ⟨(□⁻¹'φᵇ.subformulas).card + 1, by omega⟩;
-
-    obtain ⟨i, hi⟩ := Kripke.Model.extendRoot.inr_satisfies_axiomT_set (M := M) (Γ := □⁻¹'φᵇ.subformulas);
-    replace hi := Satisfies.fconj_def.mp hi;
-
-    apply Model.extendRoot.inl_satisfies_boxdot_iff (n := n) (i := i) |>.mp;
-    apply Model.pointGenerate.modal_equivalent_at_root (M := M.extendRoot n) (r := Sum.inl i) |>.mp;
-    dsimp [Semantics.Models];
-    let D := (@Model.extendRoot M Frame.instPointRooted_of_isRooted_of_isIrreflexive_of_isTransitive n);
-    let W := D.pointGenerate (Sum.inl i);
-    have := @h W (by sorry) (by sorry) (by sorry) (by sorry) (by sorry);
-    dsimp [W, D] at this;
-    convert this;
-    simp [Frame.root];
-    sorry;
-
-    /-
+    obtain ⟨i, hi⟩ := Kripke.Model.extendRoot.inr_satisfies_forall_axiomT_set (M := M) (Γ := □⁻¹'φᵇ.subformulas);
+    apply Model.extendRoot.inl_satisfies_boxdot_iff (i := i) |>.mp;
     apply h;
     apply Satisfies.fconj_def.mpr;
-    intro ψ hψ;
-    have := hi ψ (by grind);
-    apply Satisfies.fconj_def.mp hi;
-    grind;
-
-
-    let W := (M.extendRoot n)↾(Sum.inl i);
-    convert @h _ (by sorry) (by sorry) (by sorry) (inferInstance) $ by
-      apply Satisfies.fconj_def.mpr;
-      intro ψ hψ;
-      have := hi ψ (by grind);
-      sorry;
-    dsimp [W, Frame.root, default];
-
-
-    have := @h ?_ ?_ ?_ ?_ ?_ (by sorry);
-
-
-    let M₁ := M.extendRoot n;
-    have : M₁.IsTransitive := inferInstance;
-
-    let i₁ : M₁.World := Sum.inl i;
-    have : (M₁↾i₁).IsTransitive := inferInstance;
-    have : W.IsRooted := by sorry;
-
-    have := @h (M₁↾i₁) (by sorry) (by sorry) (by sorry) (by sorry);
-    have := @Model.pointGenerate.modal_equivalent_at_root (M₁↾i₁) inferInstance W.root φ;
-
-    apply Model.pointGenerate.modal_equivalent_at_root (r := i₁) |>.mp $ h (M₁↾i₁) _;
-    apply Satisfies.fconj_def.mpr;
-    intro ψ hψ;
-    apply Satisfies.fconj_def.mp hi;
-    grind;
-    -/
+    simp only [Formula.rflSubformula, Finset.mem_image, forall_exists_index, and_imp, forall_apply_eq_imp_iff₂];
+    rintro ψ hψ;
+    apply hi;
+    exact hψ;
 
 end Modal.Logic
 
