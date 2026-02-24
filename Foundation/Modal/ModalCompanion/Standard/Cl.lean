@@ -1,5 +1,6 @@
 module
 
+public import Foundation.Logic.Embedding
 public import Foundation.Modal.ModalCompanion.Standard.Int
 public import Foundation.Modal.Kripke.Logic.S5Grz
 public import Foundation.Modal.Boxdot.Ver_Triv
@@ -138,6 +139,9 @@ section boxdot
 
 theorem embedding_Cl_Ver {φ : Propositional.Formula ℕ} : Propositional.Cl ⊢ φ ↔ Modal.Ver ⊢ φᵍᵇ :=
   Iff.trans ModalCompanion.companion Logic.iff_boxdotTranslated_Ver_Triv.symm
+
+instance : Entailment.FaithfullyEmbeddable Propositional.Cl Modal.Ver where
+  prop := ⟨(·ᵍᵇ), fun _ ↦ embedding_Cl_Ver.symm⟩
 
 end boxdot
 

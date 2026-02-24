@@ -1,5 +1,6 @@
 module
 
+public import Foundation.Logic.Embedding
 public import Foundation.Modal.ModalCompanion.Standard.Int
 public import Foundation.Modal.Boxdot.GLPoint3_GrzPoint3
 public import Foundation.Propositional.Kripke.Logic.LC
@@ -143,6 +144,9 @@ section boxdot
 
 theorem embedding_LC_GLPoint3 {φ : Propositional.Formula ℕ} : Propositional.LC ⊢ φ ↔ Modal.GLPoint3 ⊢ φᵍᵇ :=
   Iff.trans ModalCompanion.companion iff_boxdot_GLPoint3_GrzPoint3.symm
+
+instance : Entailment.FaithfullyEmbeddable Propositional.LC Modal.GLPoint3 where
+  prop := ⟨(·ᵍᵇ), fun _ ↦ embedding_LC_GLPoint3.symm⟩
 
 end boxdot
 
