@@ -65,6 +65,7 @@ instance : Complete Modal.Ver Kripke.FrameClass.finite_Ver := ⟨by
   intro φ hφ;
   apply LO.Complete.complete (𝓢 := Modal.Ver) (𝓜 := FrameClass.Ver);
   intro F hF V r;
+  replace hF := Set.mem_setOf_eq.mp hF;
   apply Model.pointGenerate.modal_equivalent_at_root (r := r) |>.mp;
   apply hφ;
   exact {
@@ -76,7 +77,8 @@ instance : Complete Modal.Ver Kripke.FrameClass.finite_Ver := ⟨by
       . refine ⟨λ _ => (), λ _ => ⟨r, by tauto⟩, ?_, ?_⟩
         . simp only [Function.LeftInverse, Subtype.forall, Subtype.mk.injEq, forall_eq_or_imp, true_and];
           intro x Rrx;
-          induction Rrx <;> simp_all;
+          exfalso;
+          exact hF.isolated Rrx;
         . simp [Function.RightInverse, Function.LeftInverse];
       . exact finOneEquiv.symm;
     isolated := by rintro ⟨x, (rfl | Rrx)⟩ ⟨y, (rfl | Rry)⟩ <;> simp_all;

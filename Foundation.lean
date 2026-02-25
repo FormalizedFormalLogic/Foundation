@@ -105,7 +105,6 @@ public import Foundation.FirstOrder.Intuitionistic.Rew
 public import Foundation.FirstOrder.Kripke.Basic
 public import Foundation.FirstOrder.Kripke.Intuitionistic
 public import Foundation.FirstOrder.Kripke.WeakForcing
-public import Foundation.FirstOrder.NegationTranslation.Girard
 public import Foundation.FirstOrder.NegationTranslation.GoedelGentzen
 public import Foundation.FirstOrder.Order.Le
 public import Foundation.FirstOrder.Polarity
@@ -189,14 +188,15 @@ public import Foundation.InterpretabilityLogic.Veltman.Logic.IL_R
 public import Foundation.InterpretabilityLogic.Veltman.Logic.IL_R_W
 public import Foundation.InterpretabilityLogic.Veltman.Logic.IL_W
 public import Foundation.LinearLogic.FirstOrder.Calculus
+public import Foundation.LinearLogic.FirstOrder.ClassicalEmbedding
 public import Foundation.LinearLogic.FirstOrder.Formula
-public import Foundation.LinearLogic.FirstOrder.LKToLL
 public import Foundation.LinearLogic.FirstOrder.Rew
 public import Foundation.LinearLogic.LogicSymbol
 public import Foundation.LinearLogic.MLL
 public import Foundation.Logic.Calculus
 public import Foundation.Logic.Decidability
 public import Foundation.Logic.Disjunctive
+public import Foundation.Logic.Embedding
 public import Foundation.Logic.Entailment
 public import Foundation.Logic.ForcingRelation
 public import Foundation.Logic.LindenbaumAlgebra
@@ -294,7 +294,6 @@ public import Foundation.Modal.Kripke.LinearFrame
 public import Foundation.Modal.Kripke.Logic.GL.Completeness
 public import Foundation.Modal.Kripke.Logic.GL.MDP
 public import Foundation.Modal.Kripke.Logic.GL.Soundness
-public import Foundation.Modal.Kripke.Logic.GL.Tree
 public import Foundation.Modal.Kripke.Logic.GL.Unnecessitation
 public import Foundation.Modal.Kripke.Logic.GLPoint3
 public import Foundation.Modal.Kripke.Logic.Grz.Completeness
@@ -340,7 +339,7 @@ public import Foundation.Modal.Kripke.Logic.Ver
 public import Foundation.Modal.Kripke.NNFormula
 public import Foundation.Modal.Kripke.Preservation
 public import Foundation.Modal.Kripke.Rank
-public import Foundation.Modal.Kripke.Rooted
+public import Foundation.Modal.Kripke.Root
 public import Foundation.Modal.Kripke.Terminated
 public import Foundation.Modal.Kripke.Tree
 public import Foundation.Modal.Kripke.Undefinability

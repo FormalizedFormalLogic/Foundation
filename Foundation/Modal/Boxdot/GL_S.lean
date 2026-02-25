@@ -6,6 +6,17 @@ public import Foundation.ProvabilityLogic.S.Completeness
 
 namespace LO
 
+namespace Modal.Kripke.Model
+
+variable {M : Kripke.Model} {x : M.World}
+
+instance [M.IsTransitive] : (M↾x).IsTransitive := inferInstance
+
+instance [M.IsTransitive] [M.IsPointRooted] : (M.extendRoot n).IsTransitive := inferInstance
+
+end Modal.Kripke.Model
+
+
 namespace Modal.Logic
 
 open Kripke Formula.Kripke
@@ -19,21 +30,19 @@ lemma iff_provable_boxdot_GL_provable_boxdot_S : Modal.GL ⊢ φᵇ ↔ Modal.S 
   . apply Entailment.WeakerThan.wk;
     infer_instance;
   . intro h;
+    replace h := GL.Kripke.finite_completeness_TFAE.out 0 2 |>.mp $ iff_provable_rflSubformula_GL_provable_S.mpr h;
+
     apply GL.Kripke.fintype_completeness_TFAE.out 2 0 |>.mp;
-    replace h := GL.Kripke.finite_completeness_TFAE.out 0 3 |>.mp $ iff_provable_rflSubformula_GL_provable_S.mpr h;
+    intro M _ _ _ _;
 
-    intro M _ _ _ r _;
-
-    obtain ⟨i, hi⟩ := Kripke.Model.extendRoot.inr_satisfies_axiomT_set (M := M) (Γ := □⁻¹'φᵇ.subformulas);
-    apply Model.extendRoot.inl_satisfies_boxdot_iff (n := ⟨(□⁻¹'φᵇ.subformulas).card + 1, by omega⟩) (i := i) |>.mpr;
-
-    let M₁ := M.extendRoot ⟨(□⁻¹'φᵇ.subformulas).card + 1, by omega⟩;
-    let i₁ : M₁.World := Sum.inl i;
-    apply Model.pointGenerate.modal_equivalent_at_root (r := i₁) |>.mp $ h (M₁↾i₁) _;
+    obtain ⟨i, hi⟩ := Kripke.Model.extendRoot.inr_satisfies_forall_axiomT_set (M := M) (Γ := □⁻¹'φᵇ.subformulas);
+    apply Model.extendRoot.inl_satisfies_boxdot_iff (i := i) |>.mp;
+    apply h;
     apply Satisfies.fconj_def.mpr;
-    intro ψ hψ;
-    apply Satisfies.fconj_def.mp hi;
-    grind;
+    simp only [Formula.rflSubformula, Finset.mem_image, forall_exists_index, and_imp, forall_apply_eq_imp_iff₂];
+    rintro ψ hψ;
+    apply hi;
+    exact hψ;
 
 end Modal.Logic
 

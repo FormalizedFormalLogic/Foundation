@@ -1,6 +1,6 @@
 module
 
-public import Foundation.Modal.Kripke.Rooted
+public import Foundation.Modal.Kripke.Root
 public import Foundation.Vorspiel.List.Chain
 
 @[expose] public section
@@ -13,9 +13,9 @@ section
 
 variable {F : Kripke.Frame} {r : outParam F.World}
 
-@[mk_iff] class Frame.IsTree (F : Kripke.Frame) (r : outParam F.World) extends F.IsRootedBy r, F.IsAsymmetric, F.IsTransitive where
+@[mk_iff] class Frame.IsTree (F : Kripke.Frame) [F.IsRooted] extends F.IsAsymmetric, F.IsTransitive where
 
-@[mk_iff] class Frame.IsFiniteTree (F : Kripke.Frame) (r : outParam F.World) extends F.IsFinite, F.IsTree r where
+@[mk_iff] class Frame.IsFiniteTree (F : Kripke.Frame) [F.IsRooted] extends F.IsFinite where
 
 end
 
@@ -107,20 +107,22 @@ protected def pMorphism (F : Frame) (r : F) : F.mkTreeUnravelling r →ₚ F whe
           convert h;
           exact List.mem_getLast?_eq_getLast hz |>.2;
 
-protected abbrev root : (F.mkTreeUnravelling r).World := ⟨[r], by tauto⟩
+protected abbrev root (F : Kripke.Frame) (r : F.World) : (F.mkTreeUnravelling r).World := ⟨[r], by tauto⟩
 
-instance : (F.mkTreeUnravelling r).IsRootedBy treeUnravelling.root where
-  root_generates := by
-    rintro ⟨_, ⟨l, rfl⟩, l_chain⟩ hn;
-    apply transrel_def.mpr;
-    simp only [ne_eq, List.cons_append, List.nil_append, List.cons.injEq, true_and, existsAndEq];
-    constructor;
-    . by_contra hC;
-      subst hC;
-      simp at hn;
-    . assumption;
+instance : (F.mkTreeUnravelling r).IsTransRooted := by
+  constructor;
+  use treeUnravelling.root F r;
+  rintro ⟨_, ⟨l, rfl⟩, l_chain⟩ hn;
+  apply transrel_def.mpr;
+  simp only [ne_eq, List.cons_append, List.nil_append, List.cons.injEq, true_and, existsAndEq];
+  constructor;
+  . by_contra hC;
+    subst hC;
+    simp at hn;
+  . assumption;
 
 end Frame.treeUnravelling
+
 
 abbrev Frame.mkTransTreeUnravelling (F : Frame) (r : outParam F.World) := (F.mkTreeUnravelling r)^+
 
@@ -148,9 +150,19 @@ lemma rel_def : X ≺ Y ↔ (∃ l ≠ [], Y.1 = X.1 ++ l ∧ (List.IsChain F.Re
 
 abbrev pMorphism (F : Frame) [F.IsTransitive] (r : F) : (F.mkTransTreeUnravelling r) →ₚ F := (treeUnravelling.pMorphism F r).TransitiveClosure
 
-protected abbrev root : (F.mkTransTreeUnravelling r).World := treeUnravelling.root
+protected abbrev root (F : Kripke.Frame) (r : F.World) : (F.mkTransTreeUnravelling r).World := treeUnravelling.root F r
 
-instance instIsRooted : (F.mkTransTreeUnravelling r).IsRootedBy (mkTransTreeUnravelling.root) := inferInstance
+instance : (F.mkTransTreeUnravelling r).IsRooted := by
+  constructor;
+  use mkTransTreeUnravelling.root F r;
+  rintro ⟨_, ⟨l, rfl⟩, l_chain⟩ hn;
+  apply rel_def.mpr;
+  simp only [ne_eq, List.cons_append, List.nil_append, List.cons.injEq, true_and, existsAndEq];
+  constructor;
+  . by_contra hC;
+    subst hC;
+    simp at hn;
+  . assumption;
 
 instance instFinite [DecidableEq F.World] [F.IsFinite] [F.IsTransitive] [F.IsIrreflexive] : Finite (F.mkTransTreeUnravelling r).World := by
   suffices h : Finite { x // List.IsChain F.Rel x } by
@@ -161,13 +173,10 @@ instance instFinite [DecidableEq F.World] [F.IsFinite] [F.IsTransitive] [F.IsIrr
      (by rintro ⟨x, hx⟩ ⟨y, hy⟩; simp_all);
   apply List.chains_finite;
 
-instance instIsTree : (F.mkTransTreeUnravelling r).IsTree (mkTransTreeUnravelling.root) where
-  root_generates := by
-    intro w;
-    exact Frame.mkTransTreeUnravelling.instIsRooted.root_generates w;
+instance instIsTree : (F.mkTransTreeUnravelling r).IsTree where
 
 instance instIsFiniteTree [DecidableEq F.World] [Finite F] [F.IsTransitive] [F.IsIrreflexive]
-  : (F.mkTransTreeUnravelling r).IsFiniteTree (mkTransTreeUnravelling.root) where
+  : (F.mkTransTreeUnravelling r).IsFiniteTree where
 
 end Frame.mkTransTreeUnravelling
 
@@ -188,14 +197,14 @@ def Model.mkTransTreeUnravelling (M : Kripke.Model) (r : M.World) : Kripke.Model
 
 namespace Model.mkTransTreeUnravelling
 
-protected def pMorphism (M : Kripke.Model) (r : M.World) [M.IsTransitive] : M.mkTransTreeUnravelling r →ₚ M :=
+protected abbrev pMorphism (M : Kripke.Model) (r : M.World) [M.IsTransitive] : M.mkTransTreeUnravelling r →ₚ M :=
   PseudoEpimorphism.ofAtomic (Frame.mkTransTreeUnravelling.pMorphism M.toFrame r) $ by rfl;
 
-protected abbrev root {M : Kripke.Model} {r : M.World} : (M.mkTransTreeUnravelling r).World := Frame.mkTransTreeUnravelling.root
+protected abbrev root (M : Kripke.Model) (r : M.World) : (M.mkTransTreeUnravelling r).World := Frame.mkTransTreeUnravelling.root M.toFrame r
 
 protected lemma modal_equivalence_at_root (M : Kripke.Model) (r : M.World) [M.IsTransitive]
-  : ModalEquivalent (M₁ := M.mkTransTreeUnravelling r) (M₂ := M) (mkTransTreeUnravelling.root) r
-  := Model.PseudoEpimorphism.modal_equivalence (Model.mkTransTreeUnravelling.pMorphism M r) (mkTransTreeUnravelling.root)
+  : ModalEquivalent (M₁ := M.mkTransTreeUnravelling r) (M₂ := M) (mkTransTreeUnravelling.root M r) r
+  := Model.mkTransTreeUnravelling.pMorphism M r |>.modal_equivalence (mkTransTreeUnravelling.root M r)
 
 end Model.mkTransTreeUnravelling
 
