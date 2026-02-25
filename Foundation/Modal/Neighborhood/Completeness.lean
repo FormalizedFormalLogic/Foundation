@@ -162,7 +162,7 @@ def toModel (𝓒 : Canonicity 𝓢) : Model where
 lemma box_proofset : 𝓒.toModel.box (proofset 𝓢 φ) = (proofset 𝓢 (□φ)) := by
   ext w;
   apply Iff.trans ?_ (𝓒.def_𝒩 w φ).symm;
-  simp [toModel];
+  grind [toModel];
 
 @[simp]
 lemma boxItr_proofset : 𝓒.toModel.box^[n] (proofset 𝓢 φ) = (proofset 𝓢 (□^[n]φ)) := by
@@ -173,7 +173,7 @@ lemma boxItr_proofset : 𝓒.toModel.box^[n] (proofset 𝓢 φ) = (proofset 𝓢
 @[simp]
 lemma dia_proofset : 𝓒.toModel.dia (proofset 𝓢 φ) = (proofset 𝓢 (◇φ)) := by
   suffices 𝓒.toModel.dia (proofset 𝓢 φ) = (proofset 𝓢 (∼(□(∼φ)))) by tauto;
-  simpa using 𝓒.box_proofset (φ := ∼φ);
+  grind [𝓒.box_proofset (φ := ∼φ)]
 
 @[simp]
 lemma diaItr_proofset : 𝓒.toModel.dia^[n] (proofset 𝓢 φ) = (proofset 𝓢 (◇^[n]φ)) := by
@@ -189,14 +189,14 @@ lemma iff_dia {Γ : 𝓒.toModel} : ◇φ ∈ Γ.1 ↔ Γ ∈ 𝓒.toModel.dia (
   _ ↔ ∼□(∼φ) ∈ Γ.1 := by rfl;
   _ ↔ □(∼φ) ∉ Γ.1 := by apply MaximalConsistentSet.iff_mem_neg;
   _ ↔ (proofset 𝓢 (∼φ)) ∉ (𝓒.𝒩 Γ) := by simpa using iff_box (Γ := Γ) (φ := ∼φ) |>.not;
-  _ ↔ _ := by simp [toModel];
+  _ ↔ _ := by grind [toModel];
 
 @[grind]
 lemma truthlemma : (proofset 𝓢 φ) = (𝓒.toModel φ) := by
   induction φ with
   | hatom => apply 𝓒.def_V _ |>.symm;
-  | hfalsum => simp;
-  | himp φ ψ ihφ ihψ => simp_all [proofset.eq_imp];
+  | hfalsum => grind;
+  | himp φ ψ ihφ ihψ => simp_all [proofset.eq_imp]; grind;
   | hbox φ ihφ =>
     suffices proofset 𝓢 (□φ) = 𝓒.toModel.box (𝓒.toModel.truthset φ) by simpa;
     rw [←ihφ, box_proofset];
@@ -299,7 +299,7 @@ protected lemma iff_mem_dia :
     simpa [Frame.dia];
   rw [relativeBasicCanonicity.iff_mem_box.not, Proofset.IsNonproofset]
   set_option push_neg.use_distrib true in push_neg;
-  tauto;
+  grind [Proofset.IsNonproofset];
 
 end relativeBasicCanonicity
 

@@ -378,11 +378,9 @@ lemma maximal_duality: t₁.1.1 = t₂.1.1 ↔ t₁.1.2 = t₂.1.2 :=
   Tableau.maximal_duality t₁.consistent t₂.consistent t₁.maximal t₂.maximal
 
 lemma equality_of₁ (e₁ : t₁.1.1 = t₂.1.1) : t₁ = t₂ := by
-  have e := Tableau.equality_def.mpr ⟨e₁, (maximal_duality.mp e₁)⟩;
   calc
     t₁ = ⟨t₁.1, t₁.maximal, t₁.consistent⟩ := by rfl;
-    _  = ⟨t₂.1, t₂.maximal, t₂.consistent⟩ := by simp [e];
-    _  = t₂                                := by rfl;
+    _  = ⟨t₂.1, t₂.maximal, t₂.consistent⟩ := by simp [Tableau.equality_def.mpr ⟨e₁, (maximal_duality.mp e₁)⟩];
 
 lemma equality_of₂ (e₂ : t₁.1.2 = t₂.1.2) : t₁ = t₂ := equality_of₁ $ maximal_duality.mpr e₂
 
@@ -544,7 +542,7 @@ lemma iff_mem₁_fconj {Γ : Finset (Formula α)} : Γ.conj ∈ t.1.1 ↔ ↑Γ 
     apply mdp_mem₁_provable ?_ $ iff_mem₁_conj₂ (Γ := Γ.toList) (t := t) |>.mpr $ by
       intro φ hφ;
       apply h;
-      simp_all;
+      simpa using hφ;
     simp;
 
 lemma iff_mem₂_conj₂ {Γ : List _} : ⋀Γ ∈ t.1.2 ↔ (∃ φ ∈ Γ, φ ∈ t.1.2) := by
@@ -677,7 +675,7 @@ lemma iff_mem₂_fdisj {Γ : Finset _} : Γ.disj ∈ t.1.2 ↔ (↑Γ ⊆ t.1.2)
     apply mdp_mem₂_provable ?_ $ iff_mem₂_disj (Γ := Γ.toList) (t := t) |>.mpr $ by
       intro φ hφ;
       apply h;
-      simp_all;
+      simpa using hφ;
     simp;
 
 omit [Encodable α] in

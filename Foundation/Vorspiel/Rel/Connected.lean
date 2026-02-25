@@ -16,8 +16,9 @@ class IsPiecewiseConnected (R : Rel α α) where
 lemma IsPiecewiseConnected.p_connected' {R : Rel α α} [IsPiecewiseConnected R] {x y z : α} (Rxy : R x y) (Rxz : R x z) (hyz : y ≠ z) : R y z ∨ R z y := by
   rcases IsPiecewiseConnected.p_connected Rxy Rxz with (Ryz | rfl | Rzy) <;> tauto;
 
-instance [IsTrichotomous _ R] : IsPiecewiseConnected R :=
-  ⟨fun ⦃_ y z⦄ _ _ ↦ IsTrichotomous.trichotomous y z⟩
+instance [Std.Trichotomous R] : IsPiecewiseConnected R := ⟨fun ⦃_ y z⦄ ↦ by
+  grind [Std.Trichotomous.trichotomous (r := R)];
+⟩
 
 instance [IsRightEuclidean R] : IsPiecewiseConnected R := ⟨by
   intro x y z Rxy Rxz;

@@ -421,17 +421,20 @@ variable {α} [DecidableEq α] {φ ψ : Formula α} {Γ : FormulaSet α}
 lemma of_mem_imp₁ (h : SubformulaClosed Γ) : φ ➝ ψ ∈ Γ → φ ∈ Γ := by
   intro hφψ;
   apply @h _ hφψ;
-  simp [Formula.subformulas];
+  dsimp [Formula.subformulas];
+  grind;
 
 lemma of_mem_imp₂ (h : SubformulaClosed Γ) : φ ➝ ψ ∈ Γ → ψ ∈ Γ := by
   intro hφψ;
   apply @h _ hφψ;
-  simp [Formula.subformulas];
+  dsimp [Formula.subformulas];
+  grind;
 
 lemma of_mem_box (h : SubformulaClosed Γ) : □φ ∈ Γ → φ ∈ Γ := by
   intro hφ;
   apply @h _ hφ;
-  simp [Formula.subformulas];
+  dsimp [Formula.subformulas];
+  grind;
 
 end FormulaSet.SubformulaClosed
 
