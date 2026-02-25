@@ -58,7 +58,7 @@ end
 
 variable {T : Theory L} [T.Δ₁]
 
-namespace ProvabilityComparisonLE
+namespace ProvabilityComparison
 
 variable {φ ψ χ : V}
 
@@ -118,7 +118,7 @@ lemma find_minimal_proof_fintype [Fintype ι] (φ : ι → V) (H : □(φ i)) :
   rcases this with ⟨z, ⟨j, hj⟩, H⟩
   exact ⟨j, fun k ↦ ⟨z, hj, fun w hw ↦ H w hw k⟩⟩
 
-end ProvabilityComparisonLE
+end ProvabilityComparison
 
 end WitnessComparisons
 
