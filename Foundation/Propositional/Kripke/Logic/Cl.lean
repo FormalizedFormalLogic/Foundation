@@ -24,7 +24,7 @@ instance : whitepoint.IsEuclidean := ⟨by tauto⟩
 protected abbrev FrameClass.Cl : FrameClass := { F | F.IsCl }
 protected abbrev FrameClass.finite_Cl : FrameClass := { F | F.IsFiniteCl }
 
-instance [F.IsCl] : F.IsKrieselPutnam := ⟨by
+instance [F.IsCl] : F.IsKreiselPutnam := ⟨by
   rintro x y z ⟨Rxy, Rxz, Ryz, _⟩;
   exfalso;
   apply Ryz;

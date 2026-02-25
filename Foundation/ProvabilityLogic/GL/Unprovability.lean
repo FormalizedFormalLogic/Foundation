@@ -49,7 +49,8 @@ namespace Arithmetic
 open Modal ProvabilityLogic
 open ProvabilityAbstraction
 
-variable {T : ArithmeticTheory} [T.Δ₁] {σ π : Sentence L}
+variable {T : ArithmeticTheory} [T.Δ₁]
+         {σ π : Sentence L}
          {f : T.StandardRealization}
          {A B : Modal.Formula _}
 

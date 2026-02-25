@@ -68,28 +68,28 @@ instance : Quantifier (Semiformula L ξ) where
   all := all
   exs := exs
 
-@[simp] lemma tensor_inj (φ₁ ψ₁ φ₂ ψ₂ : Semiformula L ξ n) :
+@[simp] lemma tensor_inj {φ₁ ψ₁ φ₂ ψ₂ : Semiformula L ξ n} :
     φ₁ ⨂ ψ₁ = φ₂ ⨂ ψ₂ ↔ φ₁ = φ₂ ∧ ψ₁ = ψ₂ := iff_of_eq (by apply tensor.injEq)
 
-@[simp] lemma par_inj (φ₁ ψ₁ φ₂ ψ₂ : Semiformula L ξ n) :
+@[simp] lemma par_inj {φ₁ ψ₁ φ₂ ψ₂ : Semiformula L ξ n} :
     φ₁ ⅋ ψ₁ = φ₂ ⅋ ψ₂ ↔ φ₁ = φ₂ ∧ ψ₁ = ψ₂ := iff_of_eq (by apply par.injEq)
 
-@[simp] lemma with_inj (φ₁ ψ₁ φ₂ ψ₂ : Semiformula L ξ n) :
+@[simp] lemma with_inj {φ₁ ψ₁ φ₂ ψ₂ : Semiformula L ξ n} :
     φ₁ ＆ ψ₁ = φ₂ ＆ ψ₂ ↔ φ₁ = φ₂ ∧ ψ₁ = ψ₂ := iff_of_eq (by apply with.injEq)
 
-@[simp] lemma plus_inj (φ₁ ψ₁ φ₂ ψ₂ : Semiformula L ξ n) :
+@[simp] lemma plus_inj {φ₁ ψ₁ φ₂ ψ₂ : Semiformula L ξ n} :
     φ₁ ⨁ ψ₁ = φ₂ ⨁ ψ₂ ↔ φ₁ = φ₂ ∧ ψ₁ = ψ₂ := iff_of_eq (by apply plus.injEq)
 
-@[simp] lemma bang_inj (φ₁ φ₂ : Semiformula L ξ n) :
+@[simp] lemma bang_inj {φ₁ φ₂ : Semiformula L ξ n} :
     ！φ₁ = ！φ₂ ↔ φ₁ = φ₂ := iff_of_eq (by apply bang.injEq)
 
-@[simp] lemma quant_inj (φ₁ φ₂ : Semiformula L ξ n) :
+@[simp] lemma quant_inj {φ₁ φ₂ : Semiformula L ξ n} :
     ？φ₁ = ？φ₂ ↔ φ₁ = φ₂ := iff_of_eq (by apply quest.injEq)
 
-@[simp] lemma all_inj (φ₁ φ₂ : Semiformula L ξ (n + 1)) :
+@[simp] lemma all_inj {φ₁ φ₂ : Semiformula L ξ (n + 1)} :
     ∀⁰ φ₁ = ∀⁰ φ₂ ↔ φ₁ = φ₂ := iff_of_eq (by apply all.injEq)
 
-@[simp] lemma exs_inj (φ₁ φ₂ : Semiformula L ξ (n + 1)) :
+@[simp] lemma exs_inj {φ₁ φ₂ : Semiformula L ξ (n + 1)} :
     ∃⁰ φ₁ = ∃⁰ φ₂ ↔ φ₁ = φ₂ := iff_of_eq (by apply exs.injEq)
 
 def neg : Semiformula L ξ n → Semiformula L ξ n
@@ -170,6 +170,11 @@ lemma vee_def (φ ψ : Semiformula L ξ n) :  φ ⋎ ψ = φ ⅋ ψ := rfl
 lemma imply_def (φ ψ : Semiformula L ξ n) : φ ➝ ψ = φ ⊸ ψ := rfl
 
 lemma imply_def' (φ ψ : Semiformula L ξ n) : φ ➝ ψ = ∼φ ⅋ ψ := rfl
+
+@[simp] lemma neg_inj {φ ψ : Semiformula L ξ n} : ∼φ = ∼ψ ↔ φ = ψ := by
+  constructor
+  · intro h; rw [←neg_neg φ, ←neg_neg ψ, h]
+  · intro h; rw [h]
 
 instance : LCWQ (Semiformula L ξ) where
   connectives _ := inferInstance
@@ -320,21 +325,119 @@ def complexity : Semiformula L ξ n → ℕ
     (∼φ).complexity = φ.complexity := by
   induction φ using rec' <;> simp [*]
 
-inductive IsBang : Semiformula L ξ n → Prop
-  | intro : IsBang (！φ)
-
-@[simp] lemma IsBang.not_one : ¬IsBang (1 : Semiformula L ξ n) := by intro h; cases h
-@[simp] lemma IsBang.not_falsum : ¬IsBang (⊥ : Semiformula L ξ n) := by intro h; cases h
-@[simp] lemma IsBang.not_tensor (φ ψ : Semiformula L ξ n) : ¬IsBang (φ ⨂ ψ) := by intro h; cases h
-@[simp] lemma IsBang.not_par (φ ψ : Semiformula L ξ n) : ¬IsBang (φ ⅋ ψ) := by intro h; cases h
-@[simp] lemma IsBang.not_verum : ¬IsBang (⊤ : Semiformula L ξ n) := by intro h; cases h
-@[simp] lemma IsBang.not_zero : ¬IsBang (0 : Semiformula L ξ n) := by intro h; cases h
-@[simp] lemma IsBang.not_with (φ ψ : Semiformula L ξ n) : ¬IsBang (φ ＆ ψ) := by intro h; cases h
-@[simp] lemma IsBang.not_plus (φ ψ : Semiformula L ξ n) : ¬IsBang (φ ⨁ ψ) := by intro h; cases h
-@[simp] lemma IsBang.bang (φ : Semiformula L ξ n) : IsBang (！φ) := .intro
-@[simp] lemma IsBang.not_quant (φ : Semiformula L ξ n) : ¬IsBang (？φ) := by intro h; cases h
-@[simp] lemma IsBang.not_all (φ : Semiformula L ξ (n + 1)) : ¬IsBang (∀⁰ φ) := by intro h; cases h
-@[simp] lemma IsBang.not_exs (φ : Semiformula L ξ (n + 1)) : ¬IsBang (∃⁰ φ) := by intro h; cases h
+instance [L.DecidableEq] [DecidableEq ξ] : DecidableEq (Semiformula L ξ n) :=
+  let rec dc {n} : (φ ψ : Semiformula L ξ n) → Decidable (φ = ψ)
+    | .rel (arity := ar₁) R₁ v₁, φ₂ =>
+      match φ₂ with
+      | .rel (arity := ar₂) R₂ v₂ => by
+        by_cases har : ar₁ = ar₂
+        · rcases har
+          exact match decEq R₁ R₂ with
+            |  isTrue h => by simpa [h] using Matrix.decVec _ _ fun i ↦ decEq (v₁ i) (v₂ i)
+            | isFalse h => isFalse (by simp_all)
+        · exact isFalse (by simp_all)
+      | .nrel _ _ | 1 | ⊥ | _ ⨂ _ | _ ⅋ _ | ⊤ | 0 | _ ＆ _ | _ ⨁ _ | ！_ | ？_ | ∀⁰ _ | ∃⁰ _ =>
+        isFalse (by simp_all)
+    | .nrel (arity := ar₁) R₁ v₁, φ₂ =>
+      match φ₂ with
+      | .nrel (arity := ar₂) R₂ v₂ => by
+        by_cases har : ar₁ = ar₂
+        · rcases har
+          exact match decEq R₁ R₂ with
+            |  isTrue h => by simpa [h] using Matrix.decVec _ _ fun i ↦ decEq (v₁ i) (v₂ i)
+            | isFalse h => isFalse (by simp_all)
+        · exact isFalse (by simp_all)
+      | .rel _ _ | 1 | ⊥ | _ ⨂ _ | _ ⅋ _ | ⊤ | 0 | _ ＆ _ | _ ⨁ _ | ！_ | ？_ | ∀⁰ _ | ∃⁰ _ =>
+        isFalse (by simp_all)
+    | 1, φ₂ =>
+      match φ₂ with
+      | 1 => isTrue rfl
+      | .rel _ _ | .nrel _ _ | ⊥ | _ ⨂ _ | _ ⅋ _ | ⊤ | 0 | _ ＆ _ | _ ⨁ _ | ！_ | ？_ | ∀⁰ _ | ∃⁰ _ =>
+        isFalse (by simp_all)
+    | ⊥, φ₂ =>
+      match φ₂ with
+      | ⊥ => isTrue rfl
+      | .rel _ _ | .nrel _ _ | 1 | _ ⨂ _ | _ ⅋ _ | ⊤ | 0 | _ ＆ _ | _ ⨁ _ | ！_ | ？_ | ∀⁰ _ | ∃⁰ _ =>
+        isFalse (by simp_all)
+    | φ₁ ⨂ ψ₁, φ₂ =>
+      match φ₂ with
+      | φ₂ ⨂ ψ₂ =>
+        match dc φ₁ φ₂, dc ψ₁ ψ₂ with
+        |  isTrue h₁,  isTrue h₂ => isTrue (by simp_all)
+        | isFalse h₁,          _ => isFalse (by simp_all)
+        |          _, isFalse h₂ => isFalse (by simp_all)
+      | .rel _ _ | .nrel _ _ | 1 | ⊥ | _ ⅋ _ | ⊤ | 0 | _ ＆ _ | _ ⨁ _ | ！_ | ？_ | ∀⁰ _ | ∃⁰ _ =>
+        isFalse (by simp_all)
+    | φ₁ ⅋ ψ₁, φ₂ =>
+      match φ₂ with
+      | φ₂ ⅋ ψ₂ =>
+        match dc φ₁ φ₂, dc ψ₁ ψ₂ with
+        |  isTrue h₁,  isTrue h₂ => isTrue (by simp_all)
+        | isFalse h₁,          _ => isFalse (by simp_all)
+        |          _, isFalse h₂ => isFalse (by simp_all)
+      | .rel _ _ | .nrel _ _ | 1 | ⊥ | _ ⨂ _ | ⊤ | 0 | _ ＆ _ | _ ⨁ _ | ！_ | ？_ | ∀⁰ _ | ∃⁰ _ =>
+        isFalse (by simp_all)
+    | ⊤, φ₂ =>
+      match φ₂ with
+      | ⊤ => isTrue rfl
+      | .rel _ _ | .nrel _ _ | 1 | ⊥ | _ ⨂ _ | _ ⅋ _ | 0 | _ ＆ _ | _ ⨁ _ | ！_ | ？_ | ∀⁰ _ | ∃⁰ _ =>
+        isFalse (by simp_all)
+    | 0, φ₂ =>
+      match φ₂ with
+      | 0 => isTrue rfl
+      | .rel _ _ | .nrel _ _ | 1 | ⊥ | _ ⨂ _ | _ ⅋ _ | ⊤ | _ ＆ _ | _ ⨁ _ | ！_ | ？_ | ∀⁰ _ | ∃⁰ _ =>
+        isFalse (by simp_all)
+    | φ₁ ＆ ψ₁, φ₂ =>
+      match φ₂ with
+      | φ₂ ＆ ψ₂ =>
+        match dc φ₁ φ₂, dc ψ₁ ψ₂ with
+        |  isTrue h₁,  isTrue h₂ => isTrue (by simp_all)
+        | isFalse h₁,          _ => isFalse (by simp_all)
+        |          _, isFalse h₂ => isFalse (by simp_all)
+      | .rel _ _ | .nrel _ _ | 1 | ⊥ | _ ⨂ _ | _ ⅋ _ | ⊤ | 0 | _ ⨁ _ | ！_ | ？_ | ∀⁰ _ | ∃⁰ _ =>
+        isFalse (by simp_all)
+    | φ₁ ⨁ ψ₁, φ₂ =>
+      match φ₂ with
+      | φ₂ ⨁ ψ₂ =>
+        match dc φ₁ φ₂, dc ψ₁ ψ₂ with
+        |  isTrue h₁,  isTrue h₂ => isTrue (by simp_all)
+        | isFalse h₁,          _ => isFalse (by simp_all)
+        |          _, isFalse h₂ => isFalse (by simp_all)
+      | .rel _ _ | .nrel _ _ | 1 | ⊥ | _ ⨂ _ | _ ⅋ _ | ⊤ | 0 | _ ＆ _ | ！_ | ？_ | ∀⁰ _ | ∃⁰ _ =>
+        isFalse (by simp_all)
+    | ！φ₁, φ₂ =>
+      match φ₂ with
+      | ！φ₂ =>
+        match dc φ₁ φ₂ with
+        |  isTrue h => isTrue (by simp_all)
+        | isFalse h => isFalse (by simp_all)
+      | .rel _ _ | .nrel _ _ | 1 | ⊥ | _ ⨂ _ | _ ⅋ _ | ⊤ | 0 | _ ＆ _ | _ ⨁ _ | ？_ | ∀⁰ _ | ∃⁰ _ =>
+        isFalse (by simp_all)
+    | ？φ₁, φ₂ =>
+      match φ₂ with
+      | ？φ₂ =>
+        match dc φ₁ φ₂ with
+        |  isTrue h => isTrue (by simp_all)
+        | isFalse h => isFalse (by simp_all)
+      | .rel _ _ | .nrel _ _ | 1 | ⊥ | _ ⨂ _ | _ ⅋ _ | ⊤ | 0 | _ ＆ _ | _ ⨁ _ | ！_ | ∀⁰ _ | ∃⁰ _ =>
+        isFalse (by simp_all)
+    | ∀⁰ φ₁, φ₂ =>
+      match φ₂ with
+      | ∀⁰ φ₂ =>
+        match dc φ₁ φ₂ with
+        |  isTrue h => isTrue (by simp_all)
+        | isFalse h => isFalse (by simp_all)
+      | .rel _ _ | .nrel _ _ | 1 | ⊥ | _ ⨂ _ | _ ⅋ _ | ⊤ | 0 | _ ＆ _ | _ ⨁ _ | ！_ | ？_ | ∃⁰ _ =>
+        isFalse (by simp_all)
+    | ∃⁰ φ₁, φ₂ =>
+      match φ₂ with
+      | ∃⁰ φ₂ =>
+        match dc φ₁ φ₂ with
+        |  isTrue h => isTrue (by simp_all)
+        | isFalse h => isFalse (by simp_all)
+      | .rel _ _ | .nrel _ _ | 1 | ⊥ | _ ⨂ _ | _ ⅋ _ | ⊤ | 0 | _ ＆ _ | _ ⨁ _ | ！_ | ？_ | ∀⁰ _ =>
+        isFalse (by simp_all)
+  dc
 
 inductive IsQuest : Semiformula L ξ n → Prop
   | intro : IsQuest (？φ)
@@ -351,6 +454,137 @@ inductive IsQuest : Semiformula L ξ n → Prop
 @[simp] lemma IsQuest.quest (φ : Semiformula L ξ n) : IsQuest (？φ) := .intro
 @[simp] lemma IsQuest.not_all (φ : Semiformula L ξ (n + 1)) : ¬IsQuest (∀⁰ φ) := by intro h; cases h
 @[simp] lemma IsQuest.not_exs (φ : Semiformula L ξ (n + 1)) : ¬IsQuest (∃⁰ φ) := by intro h; cases h
+
+/-! ### Polarity -/
+
+inductive Negative : Semiformula L ξ n → Prop
+  | quest (φ : Semiformula L ξ n) : Negative (？φ)
+  | verum : Negative (⊤ : Semiformula L ξ n)
+  | falsum : Negative (⊥ : Semiformula L ξ n)
+  | par : Negative φ → Negative ψ → Negative (φ ⅋ ψ)
+  | with : Negative φ → Negative ψ → Negative (φ ＆ ψ)
+  | all : Negative φ → Negative (∀⁰ φ)
+
+namespace Negative
+
+attribute [simp] quest verum falsum
+
+@[simp] lemma par_iff {φ ψ : Semiformula L ξ n} :
+    Negative (φ ⅋ ψ) ↔ Negative φ ∧ Negative ψ := by
+  constructor
+  · rintro ⟨h₁, h₂⟩; grind
+  · rintro ⟨h₁, h₂⟩; exact par h₁ h₂
+
+@[simp] lemma with_iff {φ ψ : Semiformula L ξ n} :
+    Negative (φ ＆ ψ) ↔ Negative φ ∧ Negative ψ := by
+  constructor
+  · rintro ⟨h₁, h₂⟩; grind
+  · rintro ⟨h₁, h₂⟩; exact .with h₁ h₂
+
+@[simp] lemma all_iff {φ : Semiformula L ξ (n + 1)} :
+    Negative (∀⁰ φ) ↔ Negative φ := by
+  constructor
+  · rintro ⟨h⟩; assumption
+  · rintro h; exact all h
+
+@[simp] lemma not_rel (R : L.Rel arity) (v : Fin arity → Semiterm L ξ n) : ¬Negative (rel R v) := by rintro ⟨⟩
+
+@[simp] lemma not_nrel (R : L.Rel arity) (v : Fin arity → Semiterm L ξ n) : ¬Negative (nrel R v) := by rintro ⟨⟩
+
+@[simp] lemma not_one : ¬Negative (1 : Semiformula L ξ n) := by rintro ⟨⟩
+
+@[simp] lemma not_zero : ¬Negative (0 : Semiformula L ξ n) := by rintro ⟨⟩
+
+@[simp] lemma not_tensor (φ ψ : Semiformula L ξ n) : ¬Negative (φ ⨂ ψ) := by rintro ⟨⟩
+
+@[simp] lemma not_plus (φ ψ : Semiformula L ξ n) : ¬Negative (φ ⨁ ψ) := by rintro ⟨⟩
+
+@[simp] lemma not_bang (φ : Semiformula L ξ n) : ¬Negative (！φ) := by rintro ⟨⟩
+
+@[simp] lemma not_exs (φ : Semiformula L ξ (n + 1)) : ¬Negative (∃⁰ φ) := by rintro ⟨⟩
+
+instance (φ : Semiformula L ξ n) : Decidable φ.Negative :=
+  let rec dc {n} : (φ : Semiformula L ξ n) → Decidable φ.Negative
+  |       ？φ => isTrue (by simp)
+  |        ⊤ => isTrue (by simp)
+  |        ⊥ => isTrue (by simp)
+  |    φ ⅋ ψ =>
+    match dc φ, dc ψ with
+    |  isTrue h₁,  isTrue h₂ => isTrue (by simp_all)
+    |  isTrue h₁, isFalse h₂ => isFalse (by simp_all)
+    | isFalse h₁,  isTrue h₂ => isFalse (by simp_all)
+    | isFalse h₁, isFalse h₂ => isFalse (by simp_all)
+  | φ ＆ ψ =>
+    match dc φ, dc ψ with
+    |  isTrue h₁,  isTrue h₂ => isTrue (by simp_all)
+    |  isTrue h₁, isFalse h₂ => isFalse (by simp_all)
+    | isFalse h₁,  isTrue h₂ => isFalse (by simp_all)
+    | isFalse h₁, isFalse h₂ => isFalse (by simp_all)
+  | ∀⁰ φ =>
+    match dc φ with
+    | isTrue h => isTrue (by simp_all)
+    | isFalse h => isFalse (by simp_all)
+  | rel _ _ | nrel _ _ | 1 | 0 | φ ⨂ ψ | φ ⨁ ψ | ！φ | ∃⁰ φ => isFalse (by simp)
+  dc φ
+
+end Negative
+
+inductive Positive : Semiformula L ξ n → Prop
+  | ofCourse (φ : Semiformula L ξ n) : Positive (！φ)
+  | zero : Positive (0 : Semiformula L ξ n)
+  | one : Positive (1 : Semiformula L ξ n)
+  | tensor : Positive φ → Positive ψ → Positive (φ ⨂ ψ)
+  | plus : Positive φ → Positive ψ → Positive (φ ⨁ ψ)
+  | exs : Positive φ → Positive (∃⁰ φ)
+
+namespace Positive
+
+attribute [simp] ofCourse zero one
+
+@[simp] lemma tensor_iff {φ ψ : Semiformula L ξ n} :
+    Positive (φ ⨂ ψ) ↔ Positive φ ∧ Positive ψ := by
+  constructor
+  · rintro ⟨h₁, h₂⟩; grind
+  · rintro ⟨h₁, h₂⟩; exact tensor h₁ h₂
+
+@[simp] lemma plus_iff {φ ψ : Semiformula L ξ n} :
+    Positive (φ ⨁ ψ) ↔ Positive φ ∧ Positive ψ := by
+  constructor
+  · rintro ⟨h₁, h₂⟩; grind
+  · rintro ⟨h₁, h₂⟩; exact plus h₁ h₂
+
+@[simp] lemma exs_iff {φ : Semiformula L ξ (n + 1)} :
+    Positive (∃⁰ φ) ↔ Positive φ := by
+  constructor
+  · rintro ⟨h⟩; assumption
+  · rintro h; exact exs h
+
+@[simp] lemma not_rel (R : L.Rel arity) (v : Fin arity → Semiterm L ξ n) : ¬Positive (rel R v) := by rintro ⟨⟩
+
+@[simp] lemma not_nrel (R : L.Rel arity) (v : Fin arity → Semiterm L ξ n) : ¬Positive (nrel R v) := by rintro ⟨⟩
+
+@[simp] lemma not_verum : ¬Positive (⊤ : Semiformula L ξ n) := by rintro ⟨⟩
+
+@[simp] lemma not_falsum : ¬Positive (⊥ : Semiformula L ξ n) := by rintro ⟨⟩
+
+@[simp] lemma not_par (φ ψ : Semiformula L ξ n) : ¬Positive (φ ⅋ ψ) := by rintro ⟨⟩
+
+@[simp] lemma not_with (φ ψ : Semiformula L ξ n) : ¬Positive (φ ＆ ψ) := by rintro ⟨⟩
+
+@[simp] lemma not_quest (φ : Semiformula L ξ n) : ¬Positive (？φ) := by rintro ⟨⟩
+
+@[simp] lemma not_all (φ : Semiformula L ξ (n + 1)) : ¬Positive (∀⁰ φ) := by rintro ⟨⟩
+
+@[simp] lemma neg_positive_iff_negative (φ : Semiformula L ξ n) : Positive (∼φ) ↔ Negative φ := by
+  induction φ using rec' <;> simp [*]
+
+@[simp] lemma neg_negative_iff_positive (φ : Semiformula L ξ n) : Negative (∼φ) ↔ Positive φ := by
+  induction φ using rec' <;> simp [*]
+
+@[simp, grind .] lemma positive_negative_disjoint (φ : Semiformula L ξ n) : ¬Positive φ ∨ ¬Negative φ := by
+  induction φ using rec' <;> simp [*]
+
+end Positive
 
 end Semiformula
 

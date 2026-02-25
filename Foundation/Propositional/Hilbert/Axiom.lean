@@ -1,7 +1,7 @@
 module
 
 public import Foundation.Propositional.Formula.Basic
-public import Foundation.Propositional.Entailment.KrieselPutnam
+public import Foundation.Propositional.Entailment.KreiselPutnam
 public import Foundation.Propositional.Entailment.Scott
 public import Foundation.Propositional.Entailment.Corsi
 
@@ -41,14 +41,14 @@ class HasPeirce (Ax : Axiom α) where
   ne_pq : p ≠ q := by trivial;
   mem_peirce : Axioms.Peirce (.atom p) (.atom q) ∈ Ax := by tauto;
 
-class HasKrieselPutnam (Ax : Axiom α) where
+class HasKreiselPutnam (Ax : Axiom α) where
   p : α
   q : α
   r : α
   ne_pq : p ≠ q := by trivial;
   ne_qr : q ≠ r := by trivial;
   ne_rp : r ≠ p := by trivial;
-  mem_kriesel_putnam : Axioms.KrieselPutnam (.atom p) (.atom q) (.atom r) ∈ Ax := by tauto;
+  mem_kreisel_putnam : Axioms.KreiselPutnam (.atom p) (.atom q) (.atom r) ∈ Ax := by tauto;
 
 class HasScott (Ax : Axiom α) where
   p : α

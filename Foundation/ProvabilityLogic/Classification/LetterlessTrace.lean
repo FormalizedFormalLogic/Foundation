@@ -367,7 +367,7 @@ lemma TBB_regular : (TBB n).Regular T := by
   exfalso;
   have : ¬ℕ ⊧ₘ T.LetterlessStandardRealization (□^[(n + 1)]⊥) := by
     simp only [Box.boxItr_succ, Realization.interpret.def_box, Realization.interpret.def_boxItr, Realization.interpret.def_bot];
-    apply sound_on_model.not.mpr;
+    apply not_imp_not.mpr $ Provability.sound_on;
     apply iIncon_unprovable_of_sigma1_sound;
   apply this;
   exact h;
@@ -397,10 +397,10 @@ namespace Kripke
 open Kripke
 open Formula.Kripke
 
-variable {F : Frame} {r : F} [F.IsTree r] [Fintype F]
+variable {F : Frame} [F.IsPointRooted] [Fintype F]
 
 lemma iff_satisfies_mem_rank_letterlessSpectrum
-  {M : Model} {r : M} [Fintype M] [M.IsTree r] {w : M}
+  {M : Model} [Fintype M] [M.IsIrreflexive] [M.IsTransitive] [M.IsPointRooted] {w : M}
   {φ : Formula ℕ} (φ_closed : φ.Letterless := by grind)
   : w ⊧ φ ↔ Frame.rank w ∈ φ.letterlessSpectrum := by
   induction φ generalizing w with
@@ -426,7 +426,7 @@ lemma iff_satisfies_mem_rank_letterlessSpectrum
   | _ => grind;
 
 lemma iff_satisfies_TBB_ne_rank
-  {M : Model} {r : M} [Fintype M] [M.IsTree r] {w : M} {n : ℕ}
+  {M : Model} [Fintype M] [M.IsIrreflexive] [M.IsTransitive] [M.IsPointRooted] {w : M} {n : ℕ}
   : w ⊧ TBB n ↔ Frame.rank w ≠ n := by
   apply Iff.trans iff_satisfies_mem_rank_letterlessSpectrum;
   simp;
@@ -439,9 +439,18 @@ namespace Frame.finiteLinear
 
 abbrev of (i : Fin (n + 1)) : Frame.finiteLinear n := i
 
-instance : (Frame.finiteLinear n) |>.IsFiniteTree 0 where
-  asymm := by apply Fin.lt_asymm;
-  root_generates := by simp [Frame.finiteLinear, Fin.pos_iff_ne_zero]
+instance : (Frame.finiteLinear n) |>.IsPointRooted where
+  default := ⟨of 0, by grind⟩
+  uniq {r} := by
+    by_contra! hC;
+    have := r.2 0 (by grind);
+    grind;
+
+instance : (Frame.finiteLinear n) |>.IsIrreflexive where
+  irrefl := by simp [Frame.finiteLinear]
+
+instance : (Frame.finiteLinear n) |>.IsTransitive where
+  trans := by simp [Frame.finiteLinear]; grind;
 
 lemma rank_of_eq_sub (i : Fin (n + 1)) : Frame.rank (of i) = n - i := by
   induction i using Fin.reverseInduction
@@ -463,26 +472,31 @@ lemma rank_of_eq_sub (i : Fin (n + 1)) : Frame.rank (of i) = n - i := by
       intro j
       exact id
 
-@[simp] lemma rank_zero : Frame.rank (0 : Frame.finiteLinear n) = n := by simpa using rank_of_eq_sub 0
+@[simp] lemma rank_zero : (Frame.finiteLinear n).height = n := by simpa using rank_of_eq_sub _
 
 end Frame.finiteLinear
 
 lemma letterlessSpectrum_TFAE (_ : φ.Letterless) : [
   n ∈ φ.letterlessSpectrum,
-  ∀ M : Model, ∀ r, [M.IsTree r] → [Fintype M] → ∀ w : M.World, Frame.rank w = n → w ⊧ φ,
-  ∃ M : Model, ∃ r, ∃ _ : M.IsTree r, ∃ _ : Fintype M, ∃ w : M.World, Frame.rank w = n ∧ w ⊧ φ
+  ∀ M : Model, [Fintype M] → [M.IsIrreflexive] → [M.IsTransitive] → [M.IsPointRooted] → ∀ w : M.World, Frame.rank w = n → w ⊧ φ,
+  ∃ M : Model, ∃ _ : Fintype M, ∃ _ : M.IsIrreflexive, ∃ _ : M.IsTransitive, ∃ _ : M.IsPointRooted, ∃ w : M.World, Frame.rank w = n ∧ w ⊧ φ
 ].TFAE := by
   tfae_have 1 → 2 := by
-    intro h M r _ _ w hw;
+    intro h M _ _ _ _ w hw;
     apply iff_satisfies_mem_rank_letterlessSpectrum (by grind) |>.mpr;
     apply hw ▸ h;
   tfae_have 2 → 3 := by
     intro h;
-    refine ⟨⟨Frame.finiteLinear n, λ p i => True⟩, 0, inferInstance, inferInstance, ⟨0, ?_, ?_⟩⟩;
-    . simp;
-    . apply h; simp;
+    let M : Kripke.Model := ⟨Frame.finiteLinear n, λ p i => True⟩;
+    use ⟨Frame.finiteLinear n, λ p i => True⟩;
+    refine ⟨inferInstance, inferInstance, inferInstance, inferInstance, ?_⟩;
+    . use M.root;
+      constructor;
+      . exact Frame.finiteLinear.rank_zero;
+      . apply h;
+        exact Frame.finiteLinear.rank_zero;
   tfae_have 3 → 1 := by
-    rintro ⟨M, r, _, _, w, rfl, hw⟩;
+    rintro ⟨M, _, _, _, _, w, rfl, hw⟩;
     apply iff_satisfies_mem_rank_letterlessSpectrum (by grind) |>.mp hw;
   tfae_finish;
 
@@ -500,15 +514,14 @@ lemma iff_GL_provable_letterlessSpectrum_Univ : Modal.GL ⊢ φ ↔ φ.letterles
   constructor;
   . intro h n;
     apply Kripke.letterlessSpectrum_TFAE (φ := φ) (by grind) |>.out 1 0 |>.mp;
-    intro M r _ _ w _;
-    have := GL.Kripke.tree_completeness_TFAE.out 0 2 |>.mp h;
-    apply @this M.toFrame r $ by constructor;
+    intro M _ _ _ _ _ w;
+    have := GL.Kripke.fintype_completeness_TFAE.out 0 1 |>.mp h;
+    apply @this M.toFrame;
   . intro h;
-    apply GL.Kripke.tree_completeness_TFAE.out 2 0 |>.mp;
-    intro F r _ V w;
-    have : Fintype (⟨F, V⟩ : Kripke.Model).World := Fintype.ofFinite _
-    have := Kripke.letterlessSpectrum_TFAE (φ := φ) (n := Kripke.Frame.rank w) (by grind) |>.out 0 1 |>.mp;
-    apply this (by grind) _ r w rfl;
+    apply GL.Kripke.fintype_completeness_TFAE.out 1 0 |>.mp;
+    intro M _ _ _ _ V x;
+    have := Kripke.letterlessSpectrum_TFAE (φ := φ) (n := Kripke.Frame.rank x) (by grind) |>.out 0 1 |>.mp;
+    apply this (by grind) _ x rfl;
 
 lemma iff_GL_provable_C_subset_letterlessSpectrum : Modal.GL ⊢ (φ ➝ ψ) ↔ φ.letterlessSpectrum hφ ⊆ ψ.letterlessSpectrum hψ := by
   apply Iff.trans $ iff_GL_provable_letterlessSpectrum_Univ (show (φ ➝ ψ).Letterless by grind);

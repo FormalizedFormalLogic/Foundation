@@ -183,17 +183,17 @@ instance [Ax.HasPeirce] : Entailment.HasAxiomPeirce (Hilbert.Standard Ax) where
         else (.atom b))
       $ (HasPeirce.mem_peirce);
 
-instance [Ax.HasKrieselPutnam] : Entailment.HasAxiomKrieselPutnam (Hilbert.Standard Ax) where
-  krieselputnam {φ ψ χ} := by
+instance [Ax.HasKreiselPutnam] : Entailment.HasAxiomKreiselPutnam (Hilbert.Standard Ax) where
+  kreiselputnam {φ ψ χ} := by
     constructor;
-    simpa [HasKrieselPutnam.ne_pq, HasKrieselPutnam.ne_qr, HasKrieselPutnam.ne_rp.symm] using axm
-      (φ := Axioms.KrieselPutnam (.atom (HasKrieselPutnam.p Ax)) (.atom (HasKrieselPutnam.q Ax)) (.atom (HasKrieselPutnam.r Ax)))
+    simpa [HasKreiselPutnam.ne_pq, HasKreiselPutnam.ne_qr, HasKreiselPutnam.ne_rp.symm] using axm
+      (φ := Axioms.KreiselPutnam (.atom (HasKreiselPutnam.p Ax)) (.atom (HasKreiselPutnam.q Ax)) (.atom (HasKreiselPutnam.r Ax)))
       (s := λ b =>
-        if (HasKrieselPutnam.p Ax) = b then φ
-        else if (HasKrieselPutnam.q Ax) = b then ψ
-        else if (HasKrieselPutnam.r Ax) = b then χ
+        if (HasKreiselPutnam.p Ax) = b then φ
+        else if (HasKreiselPutnam.q Ax) = b then ψ
+        else if (HasKreiselPutnam.r Ax) = b then χ
         else (.atom b))
-      $ (HasKrieselPutnam.mem_kriesel_putnam);
+      $ (HasKreiselPutnam.mem_kreisel_putnam);
 
 end
 
@@ -236,13 +236,13 @@ protected abbrev LC := Hilbert.Standard LC.axioms
 instance : Entailment.LC Propositional.LC where
 
 
-protected abbrev KrieselPutnam.axioms : Axiom ℕ := {Axioms.EFQ (.atom 0), Axioms.KrieselPutnam (.atom 0) (.atom 1) (.atom 2)}
-namespace KrieselPutnam.axioms
-instance : KrieselPutnam.axioms.HasEFQ where p := 0;
-instance : KrieselPutnam.axioms.HasKrieselPutnam where p := 0; q := 1; r := 2;
-end KrieselPutnam.axioms
-protected abbrev KrieselPutnam := Hilbert.Standard KrieselPutnam.axioms
-instance : Entailment.KrieselPutnam Propositional.KrieselPutnam where
+protected abbrev KreiselPutnam.axioms : Axiom ℕ := {Axioms.EFQ (.atom 0), Axioms.KreiselPutnam (.atom 0) (.atom 1) (.atom 2)}
+namespace KreiselPutnam.axioms
+instance : KreiselPutnam.axioms.HasEFQ where p := 0;
+instance : KreiselPutnam.axioms.HasKreiselPutnam where p := 0; q := 1; r := 2;
+end KreiselPutnam.axioms
+protected abbrev KreiselPutnam := Hilbert.Standard KreiselPutnam.axioms
+instance : Entailment.KreiselPutnam Propositional.KreiselPutnam where
 
 
 end LO.Propositional

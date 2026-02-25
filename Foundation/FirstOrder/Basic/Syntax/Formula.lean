@@ -507,6 +507,9 @@ lemma lMapAux_neg {n} (φ : Semiformula L₁ ξ n) :
     (∼φ).lMapAux Φ = ∼φ.lMapAux Φ := by
   induction φ using Semiformula.rec' <;> simp [*, lMapAux]
 
+/--
+The map on semiformulas induced by a homomorphism between languages.
+-/
 def lMap (Φ : L₁ →ᵥ L₂) {n} : Semiformula L₁ ξ n →ˡᶜ Semiformula L₂ ξ n where
   toTr := lMapAux Φ
   map_top' := by simp [lMapAux]

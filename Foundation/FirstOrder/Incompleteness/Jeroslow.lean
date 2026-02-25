@@ -1,7 +1,7 @@
 module
 
-public import Foundation.FirstOrder.Bootstrapping.RosserProvability
-public import Foundation.FirstOrder.Bootstrapping.ProvabilityAbstraction.Refutability
+public import Foundation.FirstOrder.Incompleteness.RosserProvability
+public import Foundation.FirstOrder.Incompleteness.ProvabilityAbstraction.Refutability
 
 /-!
 # Jeroslow's Second Incompleteness Theorem

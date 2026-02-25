@@ -1,6 +1,6 @@
 module
 
-public import Foundation.FirstOrder.Bootstrapping.WitnessComparison
+public import Foundation.FirstOrder.Incompleteness.WitnessComparison
 
 @[expose] public section
 /-!

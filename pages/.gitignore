@@ -1,7 +1,8 @@
-_output/book
-_output/zoo/*
-!_output/zoo/.gitkeep
+docs/
 
+index.html
 
-src/assets/import_graph.*
-# src/assets/*_zoo.png
+import_graph.png
+import_graph.pdf
+import_graph.html
+

@@ -1,7 +1,7 @@
 module
 
 public import Foundation.Propositional.Kripke.Completeness
-public import Foundation.Propositional.Entailment.KrieselPutnam
+public import Foundation.Propositional.Entailment.KreiselPutnam
 
 @[expose] public section
 
@@ -12,19 +12,19 @@ open Formula.Kripke
 
 namespace Kripke
 
-protected class Frame.SatisfiesKriselPutnamCondition (F : Frame) where
-  kriesel_putnam :
+protected class Frame.SatisfiesKreiselPutnamCondition (F : Frame) where
+  kreisel_putnam :
     ∀ x y z : F,
     (x ≺ y ∧ x ≺ z ∧ ¬y ≺ z ∧ ¬z ≺ y) →
     (∃ u, x ≺ u ∧ u ≺ y ∧ u ≺ z ∧ (∀ v, u ≺ v → ∃ w, v ≺ w ∧ (y ≺ w ∨ z ≺ w)))
 
-lemma Frame.kriesel_putnam {F : Frame} [F.SatisfiesKriselPutnamCondition] :
+lemma Frame.kreisel_putnam {F : Frame} [F.SatisfiesKreiselPutnamCondition] :
   ∀ x y z : F,
   (x ≺ y ∧ x ≺ z ∧ ¬y ≺ z ∧ ¬z ≺ y) →
   (∃ u, x ≺ u ∧ u ≺ y ∧ u ≺ z ∧ (∀ v, u ≺ v → ∃ w, v ≺ w ∧ (y ≺ w ∨ z ≺ w))) :=
-  SatisfiesKriselPutnamCondition.kriesel_putnam
+  SatisfiesKreiselPutnamCondition.kreisel_putnam
 
-instance : whitepoint.SatisfiesKriselPutnamCondition := ⟨by simp⟩
+instance : whitepoint.SatisfiesKreiselPutnamCondition := ⟨by simp⟩
 
 
 section definability
@@ -33,7 +33,7 @@ variable {F : Kripke.Frame}
 
 open Formula (atom)
 
-lemma validate_axiomKrieselPutnam_of_satisfiesKrieselPutnamCondition [F.SatisfiesKriselPutnamCondition ] : F ⊧ (Axioms.KrieselPutnam (.atom 0) (.atom 1) (.atom 2)) := by
+lemma validate_axiomKreiselPutnam_of_satisfiesKreiselPutnamCondition [F.SatisfiesKreiselPutnamCondition ] : F ⊧ (Axioms.KreiselPutnam (.atom 0) (.atom 1) (.atom 2)) := by
   intro V x y Rxy h₁;
   by_contra hC;
   replace hC := Satisfies.or_def.not.mp hC;
@@ -48,7 +48,7 @@ lemma validate_axiomKrieselPutnam_of_satisfiesKrieselPutnamCondition [F.Satisfie
   push_neg at h₃;
   obtain ⟨z₂, Ryz₂, ⟨hz₂₁, hz₂₂⟩⟩ := h₃;
 
-  obtain ⟨u, Ryu, ⟨Ruz₁, Ruz₂, h⟩⟩ := F.kriesel_putnam y z₁ z₂ ⟨
+  obtain ⟨u, Ryu, ⟨Ruz₁, Ruz₂, h⟩⟩ := F.kreisel_putnam y z₁ z₂ ⟨
     Ryz₁, Ryz₂,
     by
       rcases Satisfies.or_def.mp $ h₁ Ryz₁ hz₁₁ with (h | h);
@@ -91,7 +91,7 @@ open Classical
 
 namespace Canonical
 
-instance [Entailment.HasAxiomKrieselPutnam 𝓢] : (canonicalFrame 𝓢).SatisfiesKriselPutnamCondition := ⟨by
+instance [Entailment.HasAxiomKreiselPutnam 𝓢] : (canonicalFrame 𝓢).SatisfiesKreiselPutnamCondition := ⟨by
   rintro x y z ⟨Rxy, Rxz, nRyz, nRzy⟩;
   let ΓNyz := { φ | ∼φ ∈ (y.1.1 ∩ z.1.1)}.image (∼·);
   obtain ⟨u, hu₁, hu₂⟩ := lindenbaum (𝓢 := 𝓢) (t₀ := ⟨x.1.1 ∪ ΓNyz, y.1.2 ∪ z.1.2⟩) $ by
@@ -108,7 +108,7 @@ instance [Entailment.HasAxiomKrieselPutnam 𝓢] : (canonicalFrame 𝓢).Satisfi
       generalize eδz : Δz.disj = δz at hC;
       replace hC : ↑Γx *⊢[𝓢] ∼(Γ₂.disj) ➝ δy ⋎ δz := C!_trans ?_ $ FConj_DT.mp $ CK!_iff_CC!.mp hC;
       . generalize eγ : Γ₂.disj = γ at hC;
-        replace hC : ↑Γx *⊢[𝓢] (∼γ ➝ δy) ⋎ (∼γ ➝ δz) := krieselputnam'! hC;
+        replace hC : ↑Γx *⊢[𝓢] (∼γ ➝ δy) ⋎ (∼γ ➝ δz) := kreiselputnam'! hC;
         replace hC : ∼γ ➝ δy ∈ x.1.1 ∨ ∼γ ➝ δz ∈ x.1.1 := iff_mem₁_or.mp $ iff_provable_include₁.mp hC x ?_;
         . rcases hC with h | h;
           . apply iff_not_mem₂_mem₁.mpr $ of_mem₁_imp' (Rxy h) ?_

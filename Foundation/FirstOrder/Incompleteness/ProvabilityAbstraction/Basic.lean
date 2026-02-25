@@ -46,47 +46,85 @@ variable
 
 lemma D1 {𝔅 : Provability T₀ T} {σ : Sentence L} : T ⊢ σ → T₀ ⊢ 𝔅 σ := fun h ↦ 𝔅.prov_def h
 
-class Provability.HBL2 [L.ReferenceableBy L₀] {T₀ : Theory L₀} {T : Theory L} (𝔅 : Provability T₀ T) where
+namespace Provability
+
+class HBL2 [L.ReferenceableBy L₀] {T₀ : Theory L₀} {T : Theory L} (𝔅 : Provability T₀ T) where
   D2 {σ τ : Sentence L} : T₀ ⊢ 𝔅 (σ ➝ τ) ➝ 𝔅 σ ➝ 𝔅 τ
-export Provability.HBL2 (D2)
+export HBL2 (D2)
 
-class Provability.HBL3 [L.ReferenceableBy L] {T₀ T : Theory L} (𝔅 : Provability T₀ T) where
+variable [L.ReferenceableBy L] {T₀ T : Theory L} (𝔅 : Provability T₀ T)
+
+class HBL3 where
   D3 {σ : Sentence L} : T₀ ⊢ 𝔅 σ ➝ 𝔅 (𝔅 σ)
-export Provability.HBL3 (D3)
+export HBL3 (D3)
 
-class Provability.HBL [L.ReferenceableBy L] {T₀ T : Theory L} (𝔅 : Provability T₀ T) extends 𝔅.HBL2, 𝔅.HBL3
+class HBL extends 𝔅.HBL2, 𝔅.HBL3
 
-class Provability.Löb [L.ReferenceableBy L] {T₀ T : Theory L} (𝔅 : Provability T₀ T) where
+class Mono [L.ReferenceableBy L₀] {T₀ : Theory L₀} {T : Theory L} (𝔅 : Provability T₀ T) where
+  mono {σ τ : Sentence L} : T ⊢ σ ➝ τ → T₀ ⊢ 𝔅 σ ➝ 𝔅 τ
+
+class Equiv [L.ReferenceableBy L₀] {T₀ : Theory L₀} {T : Theory L} (𝔅 : Provability T₀ T) where
+  equiv {σ τ : Sentence L} : T ⊢ σ ⭤ τ → T₀ ⊢ 𝔅 σ ⭤ 𝔅 τ
+
+class Löb where
   LT {σ : Sentence L} : T ⊢ 𝔅 σ ➝ σ → T ⊢ σ
-export Provability.Löb (LT)
+export Löb (LT)
 
-class Provability.FormalizedLöb [L.ReferenceableBy L] {T₀ T : Theory L} (𝔅 : Provability T₀ T) where
+class FormalizedLöb where
   FLT {σ : Sentence L} : T₀ ⊢ 𝔅 (𝔅 σ ➝ σ) ➝ 𝔅 σ
-export Provability.FormalizedLöb (FLT)
+export FormalizedLöb (FLT)
 
-class Provability.Rosser [L.ReferenceableBy L₀] {T₀ : Theory L₀} {T : Theory L} (𝔅 : Provability T₀ T) where
+class Rosser [L.ReferenceableBy L₀] {T₀ : Theory L₀} {T : Theory L} (𝔅 : Provability T₀ T) where
   Ros {σ : Sentence L} : T ⊢ ∼σ → T₀ ⊢ ∼𝔅 σ
-export Provability.Rosser (Ros)
+export Rosser (Ros)
 
-class Provability.SoundOnModel [L.ReferenceableBy L₀] {T₀ : Theory L₀} {T : Theory L}
-  (𝔅 : Provability T₀ T) (N : outParam Type*) [Nonempty N] [Structure L₀ N] where
-  sound_on_model {σ : Sentence L} : N ⊧ₘ 𝔅 σ ↔ T ⊢ σ
-export Provability.SoundOnModel (sound_on_model)
 
-class Provability.Sound₀ [L.ReferenceableBy L₀] {T₀ : Theory L₀} {T : Theory L}
-  (𝔅 : Provability T₀ T) where
-  sound₀ {σ : Sentence L} : T₀ ⊢ 𝔅 σ → T ⊢ σ
-export Provability.Sound₀ (sound₀)
+/--
+  Abstract version of formalized `Γ`-completeness for provability `𝔅`
 
-class Provability.Sound [L.ReferenceableBy L] {T₀ T : Theory L}
-  (𝔅 : Provability T₀ T) where
-  sound {σ : Sentence L} : T ⊢ 𝔅 σ → T ⊢ σ
-export Provability.Sound (sound)
+  example: `[∀ σ ∈ 𝚺₁, 𝔅.FormalizedCompleteOn σ]` for formalized `𝚺₁`-completeness
+-/
+class FormalizedCompleteOn (𝔅 : Provability T₀ T) (σ) where
+  formalized_complete_on : T ⊢ σ ➝ 𝔅 σ
+export FormalizedCompleteOn (formalized_complete_on)
+attribute [simp, grind .] formalized_complete_on
+
+/--
+  NOTE: Named after [Vis21].
+-/
+class Kreisel [L.ReferenceableBy L] {T₀ T : Theory L} (𝔅 : Provability T₀ T) (σ) where
+  KR : T ⊢ 𝔅 σ → T ⊢ σ
+export Kreisel (KR)
+attribute [simp, grind .] KR
+
+class WeakKreisel [L.ReferenceableBy L] {T₀ T : Theory L} (𝔅 : Provability T₀ T) (σ) where
+  WKR : T₀ ⊢ 𝔅 σ → T ⊢ σ
+export WeakKreisel (WKR)
+attribute [simp, grind .] WKR
+
+
+class SoundOn
+  [L.ReferenceableBy L₀] {T₀ : Theory L₀} {T : Theory L}
+  (𝔅 : Provability T₀ T)
+  (M : outParam Type*) [Nonempty M] [Structure L₀ M]
+  (σ)
+  where
+  sound_on : M ⊧ₘ 𝔅 σ → T ⊢ σ
+export SoundOn (sound_on)
+attribute [simp, grind .] sound_on
+
+
+instance [Nonempty M] [Structure L M] [𝔅.SoundOn M σ] [M ⊧ₘ* T₀] : 𝔅.WeakKreisel σ where
+  WKR h := SoundOn.sound_on $ models_of_provable inferInstance h;
+
+end Provability
+
 
 end
 
 
 open LO.Entailment
+open Provability
 
 section
 
@@ -124,8 +162,6 @@ lemma prov_collect_and [𝔅.HBL2] [L₀.DecidableEq] [L.DecidableEq] : T₀ ⊢
   have h₂ : T₀ ⊢ 𝔅 (τ ➝ σ ⋏ τ) ➝ 𝔅 τ ➝ 𝔅 (σ ⋏ τ) := D2;
   cl_prover [h₁, h₂];
 
-lemma sound_iff₀ [𝔅.Sound₀] : T₀ ⊢ 𝔅 σ ↔ T ⊢ σ := ⟨sound₀, D1⟩
-
 end
 
 section
@@ -155,8 +191,6 @@ lemma prov_distribute_imply' [𝔅.HBL2] (h : T₀ ⊢ σ ➝ τ) : T₀ ⊢ �
 lemma prov_distribute_imply'' [𝔅.HBL2] (h : T ⊢ σ ➝ τ) : T ⊢ 𝔅 σ ➝ 𝔅 τ :=
   WeakerThan.pbl $ prov_distribute_imply h
 
-lemma sound_iff [𝔅.Sound] : T ⊢ 𝔅 σ ↔ T ⊢ σ := ⟨sound, fun h ↦ WeakerThan.pbl (D1 h)⟩
-
 end
 
 
@@ -175,9 +209,6 @@ def gödel [L.ReferenceableBy L] {T₀ T : Theory L} [Diagonalization T₀] (�
 
 lemma gödel_spec : T₀ ⊢ (gödel 𝔅) ⭤ ∼𝔅 (gödel 𝔅) := by simpa [gödel] using diag “x. ¬!𝔅.prov x”;
 
-class GödelSound [L.ReferenceableBy L] {T₀ T : Theory L} (𝔅 : Provability T₀ T) [Diagonalization T₀] where
-  gödel_sound : T ⊢ 𝔅 (gödel 𝔅) → T ⊢ (gödel 𝔅)
-
 section First
 
 variable [L.DecidableEq]
@@ -191,20 +222,19 @@ theorem unprovable_gödel : T ⊬ (gödel 𝔅) := by
   have : ¬Consistent T := not_consistent_iff_inconsistent.mpr <| inconsistent_iff_provable_bot.mpr this;
   contradiction
 
-theorem unrefutable_gödel [GödelSound 𝔅] : T ⊬ ∼(gödel 𝔅) := by
+theorem unrefutable_gödel [𝔅.Kreisel (gödel 𝔅)] : T ⊬ ∼(gödel 𝔅) := by
   intro h₂;
-  have h₁ : T ⊢ (gödel 𝔅) := GödelSound.gödel_sound $ by
-    cl_prover [gödel_spec (T₀ := T₀), h₂];
-  have : T ⊢ ⊥ := (N!_iff_CO!.mp h₂) ⨀ h₁;
+  have h₁ : T ⊢ (gödel 𝔅) := WeakerThan.pbl $ 𝔅.KR $ by cl_prover [gödel_spec (T₀ := T₀), h₂];
+  have : T ⊢ ⊥ := (N!_iff_CO!.mp $ WeakerThan.pbl $ h₂) ⨀ h₁;
   have : ¬Consistent T := not_consistent_iff_inconsistent.mpr <| inconsistent_iff_provable_bot.mpr this
   contradiction;
 
-theorem gödel_independent [GödelSound 𝔅] : Independent T (gödel 𝔅) := by
+theorem gödel_independent [𝔅.Kreisel (gödel 𝔅)] : Independent T (gödel 𝔅) := by
   constructor
   . apply unprovable_gödel
   . apply unrefutable_gödel
 
-theorem first_incompleteness [GödelSound 𝔅] : Incomplete T :=
+theorem first_incompleteness [𝔅.Kreisel (gödel 𝔅)] : Incomplete T :=
   incomplete_def.mpr ⟨(gödel 𝔅), gödel_independent⟩
 
 end First
@@ -242,13 +272,13 @@ theorem con_unprovable [Consistent T] : T ⊬ 𝔅.con := by
   have : T ⊢ 𝐆 := by cl_prover [h, this]
   exact unprovable_gödel this
 
-theorem con_unrefutable [Consistent T] [GödelSound 𝔅] : T ⊬ ∼𝔅.con := by
+theorem con_unrefutable [Consistent T] [𝔅.Kreisel (gödel 𝔅)] : T ⊬ ∼𝔅.con := by
   intro h
   have : T₀ ⊢ 𝐆 ⭤ 𝔅.con := gödel_iff_con
   have : T ⊢ ∼𝐆 := by cl_prover [h, this]
   exact unrefutable_gödel this
 
-theorem con_independent [Consistent T] [GödelSound 𝔅] : Independent T 𝔅.con := by
+theorem con_independent [Consistent T] [𝔅.Kreisel (gödel 𝔅)] : Independent T 𝔅.con := by
   constructor
   . apply con_unprovable
   . apply con_unrefutable
@@ -297,13 +327,13 @@ lemma unprovable_con_via_löb [Consistent T] [L.DecidableEq] [𝔅.Löb] : T ⊬
   contradiction
 -/
 
-lemma formalized_unprovable_not_con [Consistent T] [GödelSound 𝔅] : T ⊬ 𝔅.con ➝ ∼𝔅 (∼𝔅.con) := by
+lemma formalized_unprovable_not_con [Consistent T] [𝔅.Kreisel (gödel 𝔅)] : T ⊬ 𝔅.con ➝ ∼𝔅 (∼𝔅.con) := by
   by_contra hC;
   have : T ⊢ ∼𝔅.con := Löb.LT $ CN!_of_CN!_right hC;
   have : T ⊬ ∼𝔅.con := con_unrefutable;
   contradiction;
 
-lemma formalized_unrefutable_gödel [Consistent T] [GödelSound 𝔅] : T ⊬ 𝔅.con ➝ ∼𝔅 (∼(gödel 𝔅)) := by
+lemma formalized_unrefutable_gödel [Consistent T] [𝔅.Kreisel (gödel 𝔅)] : T ⊬ 𝔅.con ➝ ∼𝔅 (∼(gödel 𝔅)) := by
   by_contra hC;
   have : T ⊬ 𝔅.con ➝ ∼𝔅 (∼𝔅.con) := formalized_unprovable_not_con;
   have : T ⊢ 𝔅.con ➝ ∼𝔅 (∼𝔅.con) := C!_trans hC $ WeakerThan.pbl <| K!_left <| ENN!_of_E!
@@ -336,7 +366,7 @@ theorem rosser_first_incompleteness [L.DecidableEq] (𝔅 : Provability T₀ T) 
 
 omit [Diagonalization T₀] [Consistent T] in
 /-- If `𝔅` satisfies Rosser provability condition, then `𝔅.con` is provable from `T`. -/
-theorem kriesel_remark [𝔅.Rosser] : T ⊢ 𝔅.con := by
+theorem kreisel_remark [𝔅.Rosser] : T ⊢ 𝔅.con := by
   have : T₀ ⊢ ∼𝔅 ⊥ := Ros (N!_iff_CO!.mpr (by simp));
   exact WeakerThan.pbl $ this;
 

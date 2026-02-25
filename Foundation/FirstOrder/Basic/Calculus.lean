@@ -30,11 +30,19 @@ inductive Derivation (𝓢 : Schema L) : Sequent L → Type _
 
 instance : OneSided (Schema L) (SyntacticFormula L) := ⟨Derivation⟩
 
-abbrev Derivation₀ (Γ : Sequent L) : Type _ := (∅ : Schema L) ⟹ Γ
+abbrev Schema.pureLK : Schema L := ∅
 
-abbrev Derivable₀ (Γ : Sequent L) : Prop := (∅ : Schema L) ⟹! Γ
+notation "𝐋𝐊₀" => Schema.pureLK
+
+abbrev Derivation₀ (Γ : Sequent L) : Type _ := 𝐋𝐊₀ ⟹ Γ
+
+abbrev Derivable₀ (Γ : Sequent L) : Prop := 𝐋𝐊₀ ⟹! Γ
 
 prefix:45 "⊢ᵀ " => Derivation₀
+
+abbrev Theory.pureLK : Theory L := ∅
+
+notation "𝐋𝐊" => Theory.pureLK
 
 namespace Derivation
 

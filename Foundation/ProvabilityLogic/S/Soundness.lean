@@ -12,7 +12,7 @@ open FirstOrder
 open FirstOrder.ProvabilityAbstraction
 
 variable {T₀ T : FirstOrder.Theory ℒₒᵣ} [T₀ ⪯ T] [Diagonalization T₀]
-         {𝔅 : Provability T₀ T} [𝔅.HBL] [ℕ ⊧ₘ* T] [𝔅.SoundOnModel ℕ]
+         {𝔅 : Provability T₀ T} [𝔅.HBL] [ℕ ⊧ₘ* T] [∀ σ, 𝔅.SoundOn ℕ σ]
          {A B : Formula ℕ}
 
 theorem S.arithmetical_soundness (h : Modal.S ⊢ A) (f : Realization 𝔅) : ℕ ⊧ₘ f A := by
@@ -22,7 +22,7 @@ theorem S.arithmetical_soundness (h : Modal.S ⊢ A) (f : Realization 𝔅) : �
   | axiomT =>
     simp only [Realization.interpret, Models, LO.Semantics.Imp.models_imply];
     intro h;
-    exact models_of_provable inferInstance (Iff.mp sound_on_model h)
+    exact models_of_provable inferInstance (𝔅.sound_on h)
   | mdp ihAB ihA =>
     simp only [Realization.interpret, Models, LO.Semantics.Imp.models_imply] at ihAB;
     apply ihAB ihA;

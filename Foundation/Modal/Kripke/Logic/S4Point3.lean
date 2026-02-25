@@ -85,7 +85,11 @@ instance : Complete Modal.S4Point3 FrameClass.finite_S4Point3 := ⟨by
   apply Model.pointGenerate.modal_equivalent_at_root (M := M) (r := r) |>.mp;
 
   let FRM := finestFiltrationTransitiveClosureModel RM (φ.subformulas);
-  apply filtration FRM (finestFiltrationTransitiveClosureModel.filterOf (trans := Frame.pointGenerate.isTransitive)) (by simp) |>.mpr;
+  -- TODO: more refactor (auto instantinate)
+  have := finestFiltrationTransitiveClosureModel.rooted_isPiecewiseStronglyConnected r (T := φ.subformulas);
+  have := finestFiltrationTransitiveClosureModel.isReflexive (M := RM) (T := φ.subformulas);
+
+  apply filtration FRM (finestFiltrationTransitiveClosureModel.filterOf) (by simp) |>.mpr;
   apply hφ;
   apply Set.mem_setOf_eq.mpr;
   refine { world_finite := FilterEqvQuotient.finite $ by simp; }

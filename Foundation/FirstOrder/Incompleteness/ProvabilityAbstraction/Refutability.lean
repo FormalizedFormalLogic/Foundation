@@ -1,6 +1,6 @@
 module
 
-public import Foundation.FirstOrder.Bootstrapping.RosserProvability
+public import Foundation.FirstOrder.Incompleteness.RosserProvability
 
 @[expose] public section
 
@@ -56,15 +56,6 @@ lemma jeroslow_def : T₀ ⊢ jeroslow 𝔚 ⭤ 𝔚 (jeroslow 𝔚) := Diagonal
 lemma jeroslow_def' [T₀ ⪯ T] : T ⊢ jeroslow 𝔚 ⭤ 𝔚 (jeroslow 𝔚) := WeakerThan.pbl $ jeroslow_def
 
 
-/-- Abstraction of formalized `𝚺₁`-completeness -/
-class Provability.FormalizedCompleteOn (𝔅 : Provability T₀ T) (σ : Sentence L) where
-  formalized_complete_on : T ⊢ σ ➝ 𝔅 σ
-alias Provability.formalized_complete_on := Provability.FormalizedCompleteOn.formalized_complete_on
-
-class Provability.SoundOn (𝔅 : Provability T₀ T) (σ : Sentence L) where
-  sound_on : T ⊢ 𝔅 σ → T ⊢ σ
-alias Provability.sound_on := Provability.SoundOn.sound_on
-
 class Refutability.SoundOn (𝔚 : Refutability T₀ T) (σ : Sentence L) where
   sound_on : T ⊢ 𝔚 σ → T ⊢ ∼σ
 alias Refutability.sound_on := Refutability.SoundOn.sound_on
@@ -79,7 +70,7 @@ variable
   [Diagonalization T₀]
   {𝔚 : Refutability T₀ T}
 
-lemma unprovable_jeroslow [T₀ ⪯ T] [Consistent T] [Refutability.SoundOn 𝔚 (jeroslow 𝔚)] : T ⊬ jeroslow 𝔚 := by
+lemma unprovable_jeroslow [T₀ ⪯ T] [Consistent T] [𝔚.SoundOn (jeroslow 𝔚)] : T ⊬ jeroslow 𝔚 := by
   by_contra hC;
   apply Entailment.Consistent.not_bot (𝓢 := T);
   . infer_instance;
@@ -115,7 +106,7 @@ variable
 local notation "𝐉" => jeroslow 𝔚
 
 lemma jeroslow_not_safe [𝔅.FormalizedCompleteOn 𝐉] : T ⊢ 𝐉 ➝ (𝔅 𝐉 ⋏ 𝔚 𝐉) := by
-  have h₁ : T ⊢ 𝐉 ➝ 𝔅 𝐉 := Provability.formalized_complete_on;
+  have h₁ : T ⊢ 𝐉 ➝ 𝔅 𝐉 := 𝔅.formalized_complete_on;
   have h₂ : T ⊢ 𝐉 ⭤ 𝔚 𝐉 := jeroslow_def';
   cl_prover [h₁, h₂];
 
@@ -127,14 +118,12 @@ lemma unprovable_flon [consis : Consistent T] [𝔅.FormalizedCompleteOn 𝐉] :
   contrapose! consis;
   replace consis : T ⊢ ∀⁰ safe 𝔅 𝔚 := by simpa [flon] using consis;
   have h₁ : T ⊢ ∼(𝔅 𝐉 ⋏ 𝔚 𝐉) := by simpa [safe] using FirstOrder.Theory.specialize _ _ ⨀ consis;
-  have h₂ : T ⊢ 𝐉 ➝ 𝔅 𝐉 := Provability.formalized_complete_on;
+  have h₂ : T ⊢ ∼𝐉 := (contra! jeroslow_not_safe) ⨀ h₁;
   have h₃ : T ⊢ 𝐉 ⭤ 𝔚 𝐉 := jeroslow_def';
-  have h₄ : T ⊢ ∼(𝔅 𝐉 ⋏ 𝔚 𝐉) ➝ ∼𝐉 := contra! $ by cl_prover [h₂, h₃];
-  have h₅ : T ⊢ ∼𝐉 := h₄ ⨀ h₁;
-  have h₆ : T ⊢ 𝔚 𝐉 := R1' h₅;
-  have h₇ : T ⊢ 𝔚 𝐉 ➝ 𝐉 := by cl_prover [h₃];
-  have h₈ : T ⊢ 𝐉 := h₇ ⨀ h₆;
-  exact not_consistent_iff_inconsistent.mpr <| inconsistent_iff_provable_bot.mpr $ (N!_iff_CO!.mp h₅) ⨀ h₈;
+  have h₄ : T ⊢ 𝔚 𝐉 := R1' h₂;
+  have h₅ : T ⊢ 𝔚 𝐉 ➝ 𝐉 := by cl_prover [h₃];
+  have h₆ : T ⊢ 𝐉 := h₅ ⨀ h₄;
+  exact not_consistent_iff_inconsistent.mpr <| inconsistent_iff_provable_bot.mpr $ (N!_iff_CO!.mp h₂) ⨀ h₆;
 
 end
 

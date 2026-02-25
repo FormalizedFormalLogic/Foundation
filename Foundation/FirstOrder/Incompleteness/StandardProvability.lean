@@ -3,7 +3,7 @@ module
 public import Foundation.FirstOrder.Bootstrapping.DerivabilityCondition.D1
 public import Foundation.FirstOrder.Bootstrapping.DerivabilityCondition.D2
 public import Foundation.FirstOrder.Bootstrapping.DerivabilityCondition.D3
-public import Foundation.FirstOrder.Bootstrapping.ProvabilityAbstraction.Basic
+public import Foundation.FirstOrder.Incompleteness.ProvabilityAbstraction.Basic
 public import Foundation.FirstOrder.Bootstrapping.FixedPoint
 
 @[expose] public section
@@ -45,8 +45,8 @@ instance : T.standardProvability.HBL2 := ⟨provable_D2⟩
 
 lemma standardProvability_def (σ : Sentence L) : T.standardProvability σ = T.provabilityPred σ := rfl
 
-instance [T.Δ₁] : T.standardProvability.SoundOnModel ℕ :=
-  ⟨fun {σ} ↦ by simp [Arithmetic.standardProvability_def, models_iff]⟩
+instance [T.Δ₁] : T.standardProvability.SoundOn ℕ σ :=
+  ⟨fun h ↦ by simpa [Arithmetic.standardProvability_def, models_iff] using h⟩
 
 end
 
@@ -86,11 +86,7 @@ instance [𝗣𝗔⁻ ⪯ T] : T.standardProvability.HBL3 := ⟨provable_D3⟩
 
 instance [𝗣𝗔⁻ ⪯ T] : T.standardProvability.HBL where
 
-instance : T.standardProvability.Sound₀ := ⟨provable_sound⟩
-
-instance [ArithmeticTheory.SoundOnHierarchy T 𝚺 1] : GödelSound T.standardProvability := ⟨fun h ↦ by simpa using provable_sound h⟩
-
-instance [ArithmeticTheory.SoundOnHierarchy T 𝚺 1] : T.standardProvability.Sound := ⟨fun h ↦ provable_sound h⟩
+instance {σ} [ArithmeticTheory.SoundOnHierarchy T 𝚺 1] : T.standardProvability.Kreisel σ := ⟨by simpa using provable_sound⟩
 
 open LO.Entailment in
 /--

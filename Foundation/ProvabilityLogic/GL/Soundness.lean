@@ -2,7 +2,7 @@ module
 
 public import Foundation.ProvabilityLogic.Realization
 public import Foundation.Modal.Logic.GLPlusBoxBot.Basic
-public import Foundation.FirstOrder.Bootstrapping.ProvabilityAbstraction.Height
+public import Foundation.FirstOrder.Incompleteness.ProvabilityAbstraction.Height
 
 @[expose] public section
 namespace LO.ProvabilityLogic
