@@ -36,23 +36,26 @@ instance : Nonempty M.World := M.world_nonempty
 instance : CoeSort (KripkeModel α) (Type*) := ⟨λ M => M.World⟩
 instance : CoeFun (KripkeModel α) (λ M => α → M → Prop) := ⟨fun M => M.Val⟩
 
-abbrev replacingVal (M : KripkeModel α) (V : α → M.World → Prop) : KripkeModel α where
+abbrev replaceVal (M : KripkeModel α) (V : α → M.World → Prop) : KripkeModel α where
   World := M.World
   Rel := M.Rel
   Val := V
 
+@[simp]
+lemma replaceVal_comp {V₁ V₂ : α → M.World → Prop}
+  : (M.replaceVal V₁ |>.replaceVal V₂) = M.replaceVal V₂ := by tauto;
 
 section Forces
 
 @[grind]
-def Forces {M : KripkeModel α} (x : M.World) : Formula α → Prop
+def Forces (M : KripkeModel α) (x : M.World) : Formula α → Prop
   | .atom a  => M a x
   | ⊥  => False
   | φ ➝ ψ => (M.Forces x φ) ➝ (M.Forces x ψ)
   | □φ   => ∀ y, x ≺ y → (M.Forces y φ)
 
 instance : ForcingRelation M.World (Formula α) where
-  Forces := Forces
+  Forces := Forces M
 
 @[grind =] lemma forces_atom : x ⊩ (.atom a) ↔ M a x := by tauto
 @[simp, grind .] lemma forces_falsum : x ⊮ ⊥ := by tauto;
@@ -137,9 +140,12 @@ lemma iff_forces_diaItr_dual : (x ⊩ ◇^[n]φ) ↔ (x ⊩ ∼□^[n](∼φ)) :
 lemma iff_dia_dual : (x ⊩ ◇φ) ↔ (x ⊩ ∼□(∼φ)) := by
   grind [Rel.Iterate.iff_zero, Rel.Iterate.iff_succ];
 
+
+abbrev replaceSubstVal (M : KripkeModel α) (s : Substitution α) : KripkeModel α
+  := M.replaceVal (λ a x => x ⊩ (s a))
+
 lemma iff_forces_replaceSubstVal (s : Substitution α) :
-  letI M' : KripkeModel _ := M.replacingVal (λ a x => x ⊩ (s a));
-  Forces (M := M') x φ ↔ x ⊩ (φ⟦s⟧) := by
+  (M.replaceSubstVal s).Forces x φ ↔ x ⊩ (φ⟦s⟧) := by
   induction φ generalizing x <;> . dsimp [Forces]; grind;
 
 end Forces
@@ -154,7 +160,7 @@ abbrev NotModels (M : KripkeModel α) (φ) := ¬M ⊧ φ
 infix:45 " ⊭ " => NotModels
 
 @[simp, grind .]
-lemma models_verum : M ∀⊩ ⊤ := ForcingRelation.AllForces.verum
+lemma models_verum : M ⊧ ⊤ := ForcingRelation.AllForces.verum
 
 @[simp, grind .]
 lemma models_falsum : M ⊭ ⊥ := by simp [NotModels, Models]
@@ -200,6 +206,7 @@ end KripkeModel
 
 abbrev KripkeModelClass (α) := Set (KripkeModel α)
 
+abbrev KripkeFrame (α) := Set (KripkeModel α)
 
 
 end LO.Modal
