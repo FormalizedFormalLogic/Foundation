@@ -19,7 +19,7 @@ variable {φ ψ : Formula α}
 
 @[grind]
 def canonicalKripkeModel (𝓢 : S) [Entailment.Consistent 𝓢] [Entailment.K 𝓢] : KripkeModel (MaximalConsistentTableau 𝓢) α where
-  rel t₁ t₂ := □⁻¹'t₁.1.1 ⊆ t₂.1.1
+  frame t₁ t₂ := □⁻¹'t₁.1.1 ⊆ t₂.1.1
   val a t := (atom a) ∈ t.1.1
 
 attribute [grind .]

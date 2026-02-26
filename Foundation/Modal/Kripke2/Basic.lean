@@ -13,7 +13,7 @@ namespace LO.Modal
 open Entailment
 
 structure KripkeModel (κ : Type*) [Nonempty κ] (α : Type*) where
-  rel : Rel κ κ
+  frame : Rel κ κ
   val : α → κ → Prop
 
 namespace KripkeModel
@@ -23,20 +23,20 @@ abbrev world (_ : KripkeModel κ α) := κ
 variable {M : KripkeModel κ α} {x y z : M.world} {a : α} {φ ψ χ : Formula α} {n m : ℕ}
 
 
-abbrev rel' : Rel M.world M.world := M.rel
-infix:45 " ≺ " => rel'
+abbrev rel : Rel M.world M.world := M.frame
+infix:45 " ≺ " => rel
 
-abbrev invRel (x y : M.world) := M.rel y x
-infix:45 " ≻ " => invRel
+abbrev relInv (x y : M.world) := M.frame y x
+infix:45 " ≻ " => relInv
 
-abbrev relItr (n : ℕ) : Rel M.world M.world := M.rel.Iterate n
+abbrev relItr (n : ℕ) : Rel M.world M.world := M.frame.Iterate n
 notation x:45 " ≺^[" n:0 "] " y:46 => relItr n x y
 
 -- instance : CoeSort (KripkeModel κ α) (Type*) := ⟨λ M => M.world⟩
 instance : CoeFun (KripkeModel κ α) (λ _ => α → κ → Prop) := ⟨fun M => M.val⟩
 
 abbrev replaceVal (M : KripkeModel κ α) (V : α → M.world → Prop) : KripkeModel κ α where
-  rel := M.rel
+  frame := M.frame
   val := V
 
 @[simp]
