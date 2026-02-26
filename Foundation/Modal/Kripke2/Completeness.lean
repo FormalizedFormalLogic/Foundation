@@ -18,10 +18,9 @@ variable {𝓢 : S} [Entailment.Consistent 𝓢] [Entailment.K 𝓢]
 variable {φ ψ : Formula α}
 
 @[grind]
-def canonicalKripkeModel (𝓢 : S) [Entailment.Consistent 𝓢] [Entailment.K 𝓢] : KripkeModel α where
-  World := MaximalConsistentTableau 𝓢
-  Rel t₁ t₂ := □⁻¹'t₁.1.1 ⊆ t₂.1.1
-  Val a t := (atom a) ∈ t.1.1
+def canonicalKripkeModel (𝓢 : S) [Entailment.Consistent 𝓢] [Entailment.K 𝓢] : KripkeModel (MaximalConsistentTableau 𝓢) α where
+  rel t₁ t₂ := □⁻¹'t₁.1.1 ⊆ t₂.1.1
+  val a t := (atom a) ∈ t.1.1
 
 attribute [grind .]
   MaximalConsistentTableau.not_mem₁_falsum
@@ -34,7 +33,7 @@ attribute [grind =]
 
 namespace canonicalKripkeModel
 
-variable {t : (canonicalKripkeModel 𝓢).World}
+variable {t : (canonicalKripkeModel 𝓢).world}
 
 lemma truthlemma : (φ ∈ t.1.1 ↔ t ⊩ φ) ∧ (φ ∈ t.1.2 ↔ t ⊮ φ) := by
   induction φ generalizing t with

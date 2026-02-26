@@ -1,6 +1,6 @@
 module
 
-public import Foundation.Modal.Hilbert.Normal.Basic
+public import Foundation.Modal.Hilbert.Normal2.Basic
 public import Foundation.Modal.Kripke2.Basic
 
 @[expose] public section
@@ -21,28 +21,23 @@ namespace Hilbert.Normal
 
 open Formula
 
-variable {α : Type u} {β : Type v} {Ax : Axiom α} {φ : Formula α}
+variable {κ α} [Nonempty κ] {Ax : Axiom α} {φ : Formula α}
 
-lemma valid_of_provable (M : KripkeModel.{u, v} α) (hC : ∀ V, (M.replaceVal V) ∀⊩* Ax)
-  : Hilbert.Normal Ax ⊢ φ → (∀ V, (M.replaceVal V) ⊧ φ) := by
+lemma valid_of_provable2 (F : Rel κ κ) (hC : ∀ V, (⟨F, V⟩ : KripkeModel κ α).world ∀⊩* Ax)
+  : Hilbert.Normal Ax ⊢ φ → (∀ V, (⟨F, V⟩ : KripkeModel κ α) ⊧ φ) := by
   intro hφ;
   induction hφ using Hilbert.Normal.rec! with
-  | @axm φ s hφ =>
-    intro V x;
-    apply KripkeModel.iff_forces_replaceSubstVal s |>.mp;
-    suffices (M.replaceVal (fun a x ↦ x ⊩ s a)).Forces x φ by tauto;
-    exact hC (fun a x ↦ x ⊩ s a) φ hφ x;
+  | axm hφ => intro V x; apply hC; assumption;
   | implyK | implyS | ec => grind;
   | mdp ih₁ ih₂ => intro V; exact KripkeModel.models_mdp (ih₁ V) (ih₂ V);
   | nec ih => intro V; exact KripkeModel.models_nec (ih V);
 
-lemma consistent_of_valid_model
-  (M : KripkeModel.{u, v} α) (hV : ∀ V, M.replaceVal V ∀⊩* Ax)
+lemma consistent_of_valid_model' (F : Rel κ κ) (hV : ∀ V, (⟨F, V⟩ : KripkeModel κ α).world ∀⊩* Ax)
   : Entailment.Consistent (Hilbert.Normal Ax) := by
   apply Entailment.Consistent.of_unprovable (φ := ⊥);
   by_contra! h;
-  apply KripkeModel.models_falsum (M := M);
-  apply valid_of_provable (M := M) hV h;
+  apply KripkeModel.models_falsum (M := ⟨F, λ _ _ => True⟩);
+  apply valid_of_provable2 F hV h;
 
 end Hilbert.Normal
 
