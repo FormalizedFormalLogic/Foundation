@@ -382,6 +382,57 @@ noncomputable def restrict (R A : V) : V := R ∩ (A ×ˢ range R)
 /-- Restricting the domain of a relation -/
 notation R:arg " ↾ " A:arg => restrict R A
 
+lemma mem_restrict_iff {R A p : V} :
+    p ∈ (R ↾ A) ↔ p ∈ R ∧ ∃ x ∈ A, ∃ y, p = ⟨x, y⟩ₖ := by
+  constructor
+  · intro hp
+    rcases show p ∈ R ∧ p ∈ A ×ˢ range R by simpa [restrict] using hp with ⟨hpR, hpP⟩
+    rcases show ∃ x ∈ A, ∃ y ∈ range R, p = ⟨x, y⟩ₖ by simpa [mem_prod_iff] using hpP with
+      ⟨x, hxA, y, -, rfl⟩
+    exact ⟨hpR, x, hxA, y, rfl⟩
+  · rintro ⟨hpR, x, hxA, y, rfl⟩
+    have hyR : y ∈ range R := mem_range_of_kpair_mem hpR
+    have hpP : ⟨x, y⟩ₖ ∈ A ×ˢ range R := by simpa [mem_prod_iff] using ⟨hxA, hyR⟩
+    simpa [restrict] using And.intro hpR hpP
+
+def restrict.dfn : Semisentence ℒₛₑₜ 3 :=
+  f“r R A. ∀ p, p ∈ r ↔ p ∈ R ∧ ∃ x ∈ A, ∃ y, p = !kpair.dfn x y”
+
+instance restrict.defined : ℒₛₑₜ-function₂[V] restrict via restrict.dfn :=
+  ⟨fun v ↦ by
+    simp [restrict.dfn, mem_ext_iff (y := (v 1) ↾ (v 2)), mem_restrict_iff]⟩
+
+instance restrict.definable : ℒₛₑₜ-function₂[V] restrict := restrict.defined.to_definable
+
+lemma IsFunction.restrict (f A : V) [hf : IsFunction f] : IsFunction (f ↾ A) := by
+  have hff : f ∈ range f ^ domain f := hf.mem_function
+  have : f ↾ A ∈ range f ^ (domain f ∩ A) := by
+    apply mem_function.intro
+    · intro p hp
+      rcases mem_restrict_iff.mp hp with ⟨hpf, x, hxA, y, rfl⟩
+      have hxd : x ∈ domain f := mem_domain_of_kpair_mem hpf
+      have hyr : y ∈ range f := mem_range_of_kpair_mem hpf
+      simpa [mem_prod_iff] using ⟨⟨hxd, hxA⟩, hyr⟩
+    · intro x hx
+      have ⟨hxd, hxA⟩ := show x ∈ domain f ∧ x ∈ A by simpa using hx
+      rcases exists_unique_of_mem_function hff x hxd with ⟨y, hy, hyu⟩
+      refine ExistsUnique.intro y ?_ ?_
+      · exact mem_restrict_iff.mpr ⟨hy, x, hxA, y, rfl⟩
+      · intro y' hy'
+        have ⟨hy'f, _⟩ := mem_restrict_iff.mp hy'
+        exact hyu y' hy'f
+  exact IsFunction.of_mem this
+
+lemma IsFunction.restrict_eq_self (f A : V) [hf : IsFunction f] (hA : domain f ⊆ A) : f ↾ A = f := by
+  apply subset_antisymm
+  · intro p hp
+    exact (mem_restrict_iff.mp hp).1
+  · intro p hp
+    rcases show ∃ x ∈ domain f, ∃ y ∈ range f, p = ⟨x, y⟩ₖ from by
+        simpa [mem_prod_iff] using subset_prod_of_mem_function hf.mem_function p hp with
+      ⟨x, hxd, y, -, rfl⟩
+    exact mem_restrict_iff.mpr ⟨hp, x, hA x hxd, y, rfl⟩
+
 lemma domain_restrict_eq (R A : V) : domain (R ↾ A) = domain R ∩ A := by
   ext z
   apply Iff.intro <;> intro h
@@ -393,13 +444,126 @@ lemma domain_restrict_eq (R A : V) : domain (R ↾ A) = domain R ∩ A := by
     simp_all only [kpair_mem_iff, true_and, mem_range_iff]
     use z
 
+@[simp] lemma kpair_mem_restrict_iff {R A x y : V} :
+    ⟨x, y⟩ₖ ∈ (R ↾ A) ↔ ⟨x, y⟩ₖ ∈ R ∧ x ∈ A := by
+  simp [mem_restrict_iff]
+
+lemma restrict_restrict_of_subset {R A B : V} (h : B ⊆ A) : (R ↾ A) ↾ B = R ↾ B := by
+  ext p
+  simp only [mem_restrict_iff]
+  constructor
+  · rintro ⟨⟨hpR, x, _, y, rfl⟩, x', hx'B, y', hxy⟩
+    rcases kpair_inj hxy with ⟨rfl, rfl⟩
+    exact ⟨hpR, x, hx'B, y, rfl⟩
+  · rintro ⟨hpR, x, hxB, y, rfl⟩
+    exact ⟨⟨hpR, x, h x hxB, y, rfl⟩, x, hxB, y, rfl⟩
+
 /-- Image of a set under a relation -/
 noncomputable def image (R A : V) : V := range (restrict R A)
 
 /-- Image of a set under a relation -/
 notation R:arg " ” " A:arg => restrict R A
 
+/--
+Graph construction from a function-like relation on a fixed set `X`.
+-/
+lemma replacement_graph_exists_on [V ⊧ₘ* 𝗭𝗙] (X : V) (R : V → V → Prop) (hR : ℒₛₑₜ-relation[V] R)
+    (hfun : ∀ x : V, x ∈ X → ∃! y : V, R x y) :
+    ∃ f : V, IsFunction f ∧ domain f = X ∧
+      ∀ x ∈ X, ∀ y, ⟨x, y⟩ₖ ∈ f ↔ R x y := by
+  let S : V → V → Prop := fun x p ↦ ∃ y : V, R x y ∧ p = ⟨x, y⟩ₖ
+  have hS : ℒₛₑₜ-relation[V] S := by
+    letI : ℒₛₑₜ-relation[V] R := hR
+    change ℒₛₑₜ-relation[V] (fun x p ↦ ∃ y : V, R x y ∧ p = ⟨x, y⟩ₖ)
+    definability
+  have hfunS : ∀ x : V, x ∈ X → ∃! p : V, S x p := by
+    intro x hx
+    rcases hfun x hx with ⟨y, hy, hyu⟩
+    refine ⟨⟨x, y⟩ₖ, ⟨y, hy, rfl⟩, ?_⟩
+    intro p hp
+    rcases hp with ⟨y', hy', hp⟩
+    have : y' = y := hyu y' hy'
+    rcases this
+    simp [hp]
+  rcases replacement_exists_on (X := X) S hS hfunS with ⟨f, hf⟩
+  have hmem : ∀ p : V, p ∈ f ↔ ∃ x ∈ X, ∃ y, R x y ∧ p = ⟨x, y⟩ₖ := by
+    intro p
+    constructor
+    · intro hp
+      rcases (hf p).1 hp with ⟨x, hxX, hpS⟩
+      rcases hpS with ⟨y, hy, rfl⟩
+      exact ⟨x, hxX, y, hy, rfl⟩
+    · rintro ⟨x, hxX, y, hy, rfl⟩
+      exact (hf _).2 ⟨x, hxX, ⟨y, hy, rfl⟩⟩
+  have hgraph : ∀ x ∈ X, ∀ y, ⟨x, y⟩ₖ ∈ f ↔ R x y := by
+    intro x hxX y
+    constructor
+    · intro hxy
+      rcases (hmem _).1 hxy with ⟨x', hx'X, y', hy', hxy'⟩
+      rcases kpair_inj hxy' with ⟨rfl, rfl⟩
+      exact hy'
+    · intro hxy
+      exact (hmem _).2 ⟨x, hxX, y, hxy, rfl⟩
+  have hdomain : domain f = X := by
+    apply subset_antisymm
+    · intro x hx
+      rcases mem_domain_iff.mp hx with ⟨y, hxy⟩
+      rcases (hmem _).1 hxy with ⟨x', hx'X, y', -, hxy'⟩
+      rcases kpair_inj hxy' with ⟨rfl, -⟩
+      exact hx'X
+    · intro x hxX
+      rcases hfun x hxX with ⟨y, hy, -⟩
+      exact mem_domain_iff.mpr ⟨y, (hgraph x hxX y).2 hy⟩
+  have hfunc_mem : f ∈ range f ^ domain f := by
+    apply mem_function.intro
+    · intro p hp
+      rcases (hmem _).1 hp with ⟨x, hxX, y, hy, rfl⟩
+      have hxyf : ⟨x, y⟩ₖ ∈ f := (hgraph x hxX y).2 hy
+      have hxd : x ∈ domain f := mem_domain_of_kpair_mem hxyf
+      have hyr : y ∈ range f := mem_range_of_kpair_mem hxyf
+      simpa [mem_prod_iff] using ⟨hxd, hyr⟩
+    · intro x hx
+      rcases mem_domain_iff.mp hx with ⟨y₀, hxy₀⟩
+      refine ExistsUnique.intro y₀ hxy₀ ?_
+      intro y₁ hxy₁
+      have hxX : x ∈ X := by simpa [hdomain] using hx
+      have hR₀ : R x y₀ := (hgraph x hxX y₀).1 hxy₀
+      have hR₁ : R x y₁ := (hgraph x hxX y₁).1 hxy₁
+      exact (hfun x hxX).unique hR₁ hR₀
+  refine ⟨f, IsFunction.of_mem hfunc_mem, hdomain, hgraph⟩
+
 /-! ### Cardinality comparison -/
+
+@[simp] lemma kpair_mem_sUnion_iff {C x y : V} :
+    ⟨x, y⟩ₖ ∈ ⋃ˢ C ↔ ∃ f ∈ C, ⟨x, y⟩ₖ ∈ f := by
+  simp [mem_sUnion_iff]
+
+lemma IsFunction.sUnion_of_coherent {C : V}
+    (hfunc : ∀ f ∈ C, IsFunction f)
+    (hcoh : ∀ f ∈ C, ∀ g ∈ C, ∀ x y₁ y₂,
+      ⟨x, y₁⟩ₖ ∈ f → ⟨x, y₂⟩ₖ ∈ g → y₁ = y₂) :
+    IsFunction (⋃ˢ C) := by
+  have hmem : ⋃ˢ C ∈ range (⋃ˢ C) ^ domain (⋃ˢ C) := by
+    apply mem_function.intro
+    · intro p hp
+      rcases mem_sUnion_iff.mp hp with ⟨f, hfC, hpf⟩
+      have hff : IsFunction f := hfunc f hfC
+      have hmem : f ∈ range f ^ domain f := IsFunction.mem_function f
+      rcases show ∃ x ∈ domain f, ∃ y ∈ range f, p = ⟨x, y⟩ₖ from by
+          simpa [mem_prod_iff] using subset_prod_of_mem_function hmem p hpf with
+        ⟨x, hxd, y, hyd, rfl⟩
+      have hxyU : ⟨x, y⟩ₖ ∈ ⋃ˢ C := mem_sUnion_iff.mpr ⟨f, hfC, by simpa⟩
+      have hxU : x ∈ domain (⋃ˢ C) := mem_domain_of_kpair_mem hxyU
+      have hyU : y ∈ range (⋃ˢ C) := mem_range_of_kpair_mem hxyU
+      simpa [mem_prod_iff] using And.intro hxU hyU
+    · intro x hx
+      rcases mem_domain_iff.mp hx with ⟨y, hxyU⟩
+      refine ExistsUnique.intro y hxyU ?_
+      intro y' hxy'U
+      rcases mem_sUnion_iff.mp hxyU with ⟨f, hfC, hxyf⟩
+      rcases mem_sUnion_iff.mp hxy'U with ⟨g, hgC, hxyg⟩
+      exact (hcoh f hfC g hgC x y y' hxyf hxyg).symm
+  exact IsFunction.of_mem hmem
 
 def CardLE (X Y : V) : Prop := ∃ f ∈ Y ^ X, Injective f
 

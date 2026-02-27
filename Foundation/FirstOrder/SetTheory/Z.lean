@@ -293,6 +293,90 @@ lemma separation_existsUnique (x : V) (P : V → Prop) (hP : ℒₛₑₜ-predic
   intro u hu
   ext; simp_all
 
+/-! ## Ersatzaxiom -/
+
+section replacement
+
+variable [V ⊧ₘ* 𝗭𝗙]
+
+omit [V ⊧ₘ* 𝗭] in
+lemma replacement_exists_eval (φ : Semiformula ℒₛₑₜ V 2) :
+    (∀ x : V, ∃! y : V, Semiformula.Evalm V ![x, y] id φ) →
+      ∀ X : V, ∃ Y : V, ∀ y : V, y ∈ Y ↔ ∃ x ∈ X, Semiformula.Evalm V ![x, y] id φ := by
+  have : Inhabited V := inhabited_of_nonempty inferInstance
+  let f := φ.enumarateFVar
+  let ψ := (Rew.rewriteMap φ.idxOfFVar) ▹ φ
+  have := by
+    simpa [models_iff, Semiformula.eval_univCl, Axiom.replacementSchema] using
+      ModelsTheory.models V (ZermeloFraenkel.axiom_of_replacement ψ)
+  simpa [ψ, f, Semiformula.eval_rewriteMap, Matrix.constant_eq_singleton, Matrix.comp_vecCons'] using this f
+
+omit [V ⊧ₘ* 𝗭] in
+lemma replacement_exists (R : V → V → Prop) (hR : ℒₛₑₜ-relation[V] R) :
+    (∀ x : V, ∃! y : V, R x y) →
+      ∀ X : V, ∃ Y : V, ∀ y : V, y ∈ Y ↔ ∃ x ∈ X, R x y := by
+  rcases hR with ⟨φ, hφ⟩
+  simpa [hφ.iff] using replacement_exists_eval (V := V) φ
+
+/--
+Restricted replacement: from uniqueness only on `X`, collect exactly the images of elements of `X`.
+-/
+lemma replacement_exists_on (X : V) (R : V → V → Prop) (hR : ℒₛₑₜ-relation[V] R)
+    (hfun : ∀ x : V, x ∈ X → ∃! y : V, R x y) :
+    ∃ Y : V, ∀ y : V, y ∈ Y ↔ ∃ x ∈ X, R x y := by
+  let Rt : V → V → Prop := fun x y ↦ (x ∈ X ∧ R x y) ∨ (x ∉ X ∧ y = ∅)
+  have hRt : ℒₛₑₜ-relation[V] Rt := by
+    classical
+    change ℒₛₑₜ-relation[V] (fun x y ↦ (x ∈ X ∧ R x y) ∨ (x ∉ X ∧ y = ∅))
+    definability
+  have hfunRt : ∀ x : V, ∃! y : V, Rt x y := by
+    intro x
+    by_cases hx : x ∈ X
+    · rcases hfun x hx with ⟨y, hy, hyu⟩
+      refine ⟨y, ?_, ?_⟩
+      · exact Or.inl ⟨hx, hy⟩
+      · intro y' hy'
+        rcases hy' with (⟨_, hy'⟩ | ⟨hx', _⟩)
+        · exact hyu _ hy'
+        · exact absurd hx hx'
+    · refine ⟨∅, ?_, ?_⟩
+      · exact Or.inr ⟨hx, rfl⟩
+      · intro y hy
+        rcases hy with (⟨hx', _⟩ | ⟨_, hy⟩)
+        · exact absurd hx' hx
+        · exact hy
+  rcases replacement_exists Rt hRt hfunRt X with ⟨Y, hY⟩
+  refine ⟨Y, ?_⟩
+  intro y
+  constructor
+  · intro hy
+    rcases (hY y).1 hy with ⟨x, hxX, hxy⟩
+    rcases hxy with (⟨_, hRxy⟩ | ⟨hxnX, _⟩)
+    · exact ⟨x, hxX, hRxy⟩
+    · exact (hxnX hxX).elim
+  · rintro ⟨x, hxX, hRxy⟩
+    exact (hY y).2 ⟨x, hxX, Or.inl ⟨hxX, hRxy⟩⟩
+
+lemma replacement_existsUnique (X : V) (R : V → V → Prop) (hR : ℒₛₑₜ-relation[V] R)
+    (hfun : ∀ x : V, ∃! y : V, R x y) :
+    ∃! Y : V, ∀ y : V, y ∈ Y ↔ ∃ x ∈ X, R x y := by
+  rcases replacement_exists R hR hfun X with ⟨Y, hY⟩
+  refine ⟨Y, hY, ?_⟩
+  intro Y' hY'
+  ext y
+  simp [hY y, hY' y]
+
+noncomputable def repl (X : V) (R : V → V → Prop) (hR : ℒₛₑₜ-relation[V] R)
+    (hfun : ∀ x : V, ∃! y : V, R x y) : V :=
+  Classical.choose! (replacement_existsUnique X R hR hfun)
+
+@[simp] lemma mem_repl_iff {X y : V} {R : V → V → Prop} {hR : ℒₛₑₜ-relation[V] R}
+    {hfun : ∀ x : V, ∃! y : V, R x y} :
+    y ∈ repl X R hR hfun ↔ ∃ x ∈ X, R x y :=
+  Classical.choose!_spec (replacement_existsUnique X R hR hfun) y
+
+end replacement
+
 noncomputable def sep (x : V) (P : V → Prop) (hP : ℒₛₑₜ-predicate P) : V := Classical.choose! (separation_existsUnique x P hP)
 
 @[simp] lemma mem_sep_iff {P : V → Prop} {hP : ℒₛₑₜ-predicate P} {z x : V} :
@@ -416,6 +500,11 @@ lemma inter_assoc (x y z : V) : (x ∩ y) ∩ z = x ∩ (y ∩ z) := by ext; sim
     {x} ∩ y = ∅ := by
   ext; simp only [inter_comm, mem_inter_iff, mem_singleton_iff, not_mem_empty, iff_false, not_and]
   grind
+
+@[simp] lemma inter_eq_right_of_subset {x y : V} (h : y ⊆ x) : x ∩ y = y := by
+  ext z; simp only [mem_inter_iff]; constructor
+  · exact And.right
+  · intro hz; exact ⟨h z hz, hz⟩
 
 /-! ### Set difference -/
 
@@ -755,5 +844,14 @@ lemma mem_asymm₃ {x y z : V} : x ∈ y → y ∈ z → z ∉ x := by
   intro h
   have : x ∈ succ x := mem_succ_self x
   simp [←h] at this
+
+lemma succ_inj {a b : V} (h : succ a = succ b) : a = b := by
+  have ha : a ∈ succ b := h ▸ mem_succ_self a
+  have hb : b ∈ succ a := h ▸ mem_succ_self b
+  rcases mem_succ_iff.mp ha with (rfl | hab)
+  · rfl
+  · rcases mem_succ_iff.mp hb with (rfl | hba)
+    · rfl
+    · exact (mem_asymm hab hba).elim
 
 end LO.FirstOrder.SetTheory
