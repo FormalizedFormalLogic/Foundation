@@ -16,42 +16,42 @@ namespace LO.Modal
 
 open LO.Entailment LO.Modal.Entailment
 
-inductive Hilbert.Normal {α} (Ax : Set (Formula α)) : Logic α
-| axm {φ}       : φ ∈ Ax → Normal Ax φ
-| mdp {φ ψ}     : Normal Ax (φ ➝ ψ) → Normal Ax φ → Normal Ax ψ
-| nec {φ}       : Normal Ax φ → Normal Ax (□φ)
-| implyK φ ψ    : Normal Ax $ Axioms.ImplyK φ ψ
-| implyS φ ψ χ  : Normal Ax $ Axioms.ImplyS φ ψ χ
-| ec φ ψ        : Normal Ax $ Axioms.ElimContra φ ψ
+inductive Hilbert.Normal2 {α} (Ax : Set (Formula α)) : Logic α
+| axm {φ}       : φ ∈ Ax → Normal2 Ax φ
+| mdp {φ ψ}     : Normal2 Ax (φ ➝ ψ) → Normal2 Ax φ → Normal2 Ax ψ
+| nec {φ}       : Normal2 Ax φ → Normal2 Ax (□φ)
+| implyK φ ψ    : Normal2 Ax $ Axioms.ImplyK φ ψ
+| implyS φ ψ χ  : Normal2 Ax $ Axioms.ImplyS φ ψ χ
+| ec φ ψ        : Normal2 Ax $ Axioms.ElimContra φ ψ
 
-namespace Hilbert.Normal
+namespace Hilbert.Normal2
 
 variable {Ax Ax₁ Ax₂ : Axiom α}
 
-instance : Entailment.Łukasiewicz (Hilbert.Normal Ax) where
-  implyK {_ _} := by constructor; apply Hilbert.Normal.implyK;
-  implyS {_ _ _} := by constructor; apply Hilbert.Normal.implyS;
-  elimContra {_ _} := by constructor; apply Hilbert.Normal.ec;
+instance : Entailment.Łukasiewicz (Hilbert.Normal2 Ax) where
+  implyK {_ _} := by constructor; apply Hilbert.Normal2.implyK;
+  implyS {_ _ _} := by constructor; apply Hilbert.Normal2.implyS;
+  elimContra {_ _} := by constructor; apply Hilbert.Normal2.ec;
   mdp h₁ h₂ := by
     constructor;
-    apply Hilbert.Normal.mdp;
+    apply Hilbert.Normal2.mdp;
     . exact h₁.1;
     . exact h₂.1;
 
-instance : Entailment.Necessitation (Hilbert.Normal Ax) where
-  nec h := by constructor; apply Hilbert.Normal.nec; exact h.1;
+instance : Entailment.Necessitation (Hilbert.Normal2 Ax) where
+  nec h := by constructor; apply Hilbert.Normal2.nec; exact h.1;
 
-lemma axm' {φ} : φ ∈ Ax → Hilbert.Normal Ax ⊢ φ := fun h ↦ ⟨⟨axm h⟩⟩
+lemma axm' {φ} : φ ∈ Ax → Hilbert.Normal2 Ax ⊢ φ := fun h ↦ ⟨⟨axm h⟩⟩
 
 protected lemma rec!
-  {motive   : (φ : Formula α) → (Normal Ax ⊢ φ) → Sort}
+  {motive   : (φ : Formula α) → (Normal2 Ax ⊢ φ) → Sort}
   (axm      : ∀ {φ : Formula α}, (h : φ ∈ Ax) → motive φ (axm' h))
-  (mdp      : ∀ {φ ψ : Formula α}, {hφψ : (Normal Ax) ⊢ φ ➝ ψ} → {hφ : (Normal Ax) ⊢ φ} → motive (φ ➝ ψ) hφψ → motive φ hφ → motive ψ (hφψ ⨀ hφ))
-  (nec      : ∀ {φ}, {hφψ : (Normal Ax) ⊢ φ} → motive (φ) hφψ → motive (□φ) (nec! hφψ))
+  (mdp      : ∀ {φ ψ : Formula α}, {hφψ : (Normal2 Ax) ⊢ φ ➝ ψ} → {hφ : (Normal2 Ax) ⊢ φ} → motive (φ ➝ ψ) hφψ → motive φ hφ → motive ψ (hφψ ⨀ hφ))
+  (nec      : ∀ {φ}, {hφψ : (Normal2 Ax) ⊢ φ} → motive (φ) hφψ → motive (□φ) (nec! hφψ))
   (implyK   : ∀ {φ ψ}, motive (Axioms.ImplyK φ ψ) $ by simp)
   (implyS   : ∀ {φ ψ χ}, motive (Axioms.ImplyS φ ψ χ) $ by simp)
   (ec       : ∀ {φ ψ}, motive (Axioms.ElimContra φ ψ) $ by simp)
-  : ∀ {φ}, (d : Normal Ax ⊢ φ) → motive φ d := by
+  : ∀ {φ}, (d : Normal2 Ax ⊢ φ) → motive φ d := by
   rintro φ d;
   replace d := Logic.iff_provable.mp d;
   induction d with
@@ -68,14 +68,24 @@ protected lemma rec!
 open Axiom
 
 
-end Hilbert.Normal
+end Hilbert.Normal2
 
 
 section
 
-open Hilbert.Normal
+open Hilbert.Normal2
 
-protected abbrev K (α) : Logic α := Hilbert.Normal { Axioms.K φ ψ | (φ : Formula α) (ψ : Formula α) }
+protected abbrev K' (α) : Logic α := Hilbert.Normal2 { Axioms.K φ ψ | (φ : Formula α) (ψ : Formula α) }
+instance : Entailment.K (Modal.K' α) where
+  K φ ψ := by constructor; apply Hilbert.Normal2.axm; simp;
+
+protected abbrev KT' (α) : Logic α := Hilbert.Normal2 (
+  { Axioms.K φ ψ | (φ : Formula α) (ψ : Formula α) } ∪
+  { Axioms.T φ   | (φ : Formula α) }
+)
+instance : Entailment.KT (Modal.KT' α) where
+  K φ ψ := by constructor; apply Hilbert.Normal2.axm; simp;
+  T φ   := by constructor; apply Hilbert.Normal2.axm; simp;
 
 end
 
