@@ -4,6 +4,27 @@ public import Foundation.SecondOrder.Syntax.Formula
 
 @[expose] public section
 
+namespace Fin
+
+def retrusion (f : Fin n → Fin m) : Fin (n + 1) → Fin (m + 1) := 0 :> fun i ↦ (f i).succ
+
+@[simp] lemma retrusion_zero (f : Fin n → Fin m) : retrusion f 0 = 0 := rfl
+
+@[simp] lemma retrusion_succ (f : Fin n → Fin m) (i : Fin n) :
+    retrusion f i.succ = (f i).succ := rfl
+
+@[simp] lemma retrusion_comp_succ (f : Fin n → Fin m) :
+    retrusion f ∘ Fin.succ = Fin.succ ∘ f := by ext i; simp
+
+@[simp] lemma retrusion_id : retrusion (id : Fin n → Fin n) = id := by
+  ext i; cases i using Fin.cases <;> simp
+
+@[simp] lemma retrusion_comp_retrusion (f : Fin n → Fin m) (g : Fin m → Fin p) :
+    retrusion g ∘ retrusion f = retrusion (g ∘ f) := by
+  ext i; cases i using Fin.cases <;> simp
+
+end Fin
+
 namespace LO.SecondOrder
 
 open FirstOrder
@@ -45,12 +66,6 @@ instance : Rewriting L ξ₁ (Semiformula L Ξ ξ₁ N) ξ₂ (Semiformula L Ξ 
   app := rew
   app_all (_ _) := rfl
   app_exs (_ _) := rfl
-
-@[coe] abbrev emb [IsEmpty o] (φ : Semiformula L Ξ o N n) : Semiformula L Ξ ξ N n := Rewriting.emb φ
-
-abbrev free₀ (φ : Semistatement L N (n + 1)) : Semistatement L N n := Rewriting.free φ
-
-abbrev shift₀ (φ : Semistatement L N n) : Semistatement L N n := Rewriting.shift φ
 
 lemma rew_rel (ω : Rew L ξ₁ n₁ ξ₂ n₂) {k} (r : L.Rel k) (v : Fin k → Semiterm L ξ₁ n₁) :
     ω ▹ (rel r v : Semiformula L Ξ ξ₁ N n₁) = rel r fun i ↦ ω (v i) := rfl
@@ -105,8 +120,8 @@ def bmapAux (f : Fin N → Fin M) : Semiformula L Ξ ξ N n → Semiformula L Ξ
   |    φ ⋎ ψ => φ.bmapAux f ⋎ ψ.bmapAux f
   |     ∀⁰ φ => ∀⁰ φ.bmapAux f
   |     ∃⁰ φ => ∃⁰ φ.bmapAux f
-  |     ∀¹ φ => ∀¹ φ.bmapAux (0 :> fun x ↦ (f x).succ)
-  |     ∃¹ φ => ∃¹ φ.bmapAux (0 :> fun x ↦ (f x).succ)
+  |     ∀¹ φ => ∀¹ φ.bmapAux (Fin.retrusion f)
+  |     ∃¹ φ => ∃¹ φ.bmapAux (Fin.retrusion f)
 
 lemma bmapAux_neg {f : Fin N → Fin M} (φ : Semiformula L Ξ ξ N n) :
     (∼φ).bmapAux f = ∼(φ.bmapAux f) := by
@@ -150,10 +165,14 @@ variable {f : Fin N → Fin M}
     (∃⁰ φ).bmap f = ∃⁰ (φ.bmap f) := rfl
 
 @[simp] lemma bmap_all₁ (φ : Semiformula L Ξ ξ (N + 1) n) :
-    (∀¹ φ).bmap f = ∀¹ (φ.bmap (0 :> fun x ↦ (f x).succ)) := rfl
+    (∀¹ φ).bmap f = ∀¹ (φ.bmap (Fin.retrusion f)) := rfl
 
 @[simp] lemma bmap_exs₁ (φ : Semiformula L Ξ ξ (N + 1) n) :
-    (∃¹ φ).bmap f = ∃¹ (φ.bmap (0 :> fun x ↦ (f x).succ)) := rfl
+    (∃¹ φ).bmap f = ∃¹ (φ.bmap (Fin.retrusion f)) := rfl
+
+lemma bmap_comp {M N n} (f : Fin N → Fin M) (g : Fin M → Fin P) (φ : Semiformula L Ξ ξ N n) :
+    (φ.bmap f).bmap g = φ.bmap (g ∘ f) := by
+  induction φ using Semiformula.rec' generalizing M P <;> simp [*]
 
 end bmap
 
@@ -206,18 +225,18 @@ local postfix:max "𐞥" => q
 def appAux (Ω : Rew L Ξ₁ N₁ Ξ₂ N₂ ξ) : Semiformula L Ξ₁ ξ N₁ n → Semiformula L Ξ₂ ξ N₂ n
   |  .rel R v => .rel R v
   | .nrel R v => .nrel R v
-  |   t ∈# X => (Ω.bv X)/[t]
-  |   t ∉# X => ∼(Ω.bv X)/[t]
-  |   t ∈& X => (Ω.fv X)/[t]
-  |   t ∉& X => ∼(Ω.fv X)/[t]
-  |        ⊤ => ⊤
-  |        ⊥ => ⊥
-  |    φ ⋏ ψ => Ω.appAux φ ⋏ Ω.appAux ψ
-  |    φ ⋎ ψ => Ω.appAux φ ⋎ Ω.appAux ψ
-  |     ∀⁰ φ => ∀⁰ Ω.appAux φ
-  |     ∃⁰ φ => ∃⁰ Ω.appAux φ
-  |     ∀¹ φ => ∀¹ Ω𐞥.appAux φ
-  |     ∃¹ φ => ∃¹ Ω𐞥.appAux φ
+  |    t ∈# X => (Ω.bv X)/[t]
+  |    t ∉# X => ∼(Ω.bv X)/[t]
+  |    t ∈& X => (Ω.fv X)/[t]
+  |    t ∉& X => ∼(Ω.fv X)/[t]
+  |         ⊤ => ⊤
+  |         ⊥ => ⊥
+  |     φ ⋏ ψ => Ω.appAux φ ⋏ Ω.appAux ψ
+  |     φ ⋎ ψ => Ω.appAux φ ⋎ Ω.appAux ψ
+  |      ∀⁰ φ => ∀⁰ Ω.appAux φ
+  |      ∃⁰ φ => ∃⁰ Ω.appAux φ
+  |      ∀¹ φ => ∀¹ Ω𐞥.appAux φ
+  |      ∃¹ φ => ∃¹ Ω𐞥.appAux φ
 
 lemma appAux_neg (Ω : Rew L Ξ₁ N₁ Ξ₂ N₂ ξ) (φ : Semiformula L Ξ₁ ξ N₁ n) :
     Ω.appAux (∼φ) = ∼Ω.appAux φ := by
@@ -306,18 +325,54 @@ def comp (Ω₂₃ : Rew L Ξ₂ N₂ Ξ₃ N₃ ξ) (Ω₁₂ : Rew L Ξ₁ N�
 @[simp] lemma comp_fv (Ω₂₃ : Rew L Ξ₂ N₂ Ξ₃ N₃ ξ) (Ω₁₂ : Rew L Ξ₁ N₁ Ξ₂ N₂ ξ) (X : Ξ₁) :
     (Ω₂₃.comp Ω₁₂).fv X = Ω₂₃ • Ω₁₂.fv X := rfl
 
-/-
-lemma app_b₁Shift_eq_q_app_b₁Shift (Ω : Rew L Ξ₁ N₁ Ξ₂ N₂ ξ) (φ : Semiformula L Ξ₁ ξ N₁ n) :
-    (Ω • φ).bmap Fin.succ = Ω𐞥 • φ.bmap Fin.succ := by
-  induction φ using Semiformula.rec' generalizing N₂ <;> simp [*, bmap_comm]
+def bLeft (f : Fin N₂ → Fin N₃) (Ω : Rew L Ξ₁ N₁ Ξ₂ N₂ ξ) : Rew L Ξ₁ N₁ Ξ₂ N₃ ξ where
+  bv X := (Ω.bv X).bmap f
+  fv X := (Ω.fv X).bmap f
+
+@[simp] lemma bLeft_bv (f : Fin N₂ → Fin N₃) (Ω : Rew L Ξ₁ N₁ Ξ₂ N₂ ξ) (X : Fin N₁) :
+    (Ω.bLeft f).bv X = (Ω.bv X).bmap f := rfl
+
+@[simp] lemma bLeft_fv (f : Fin N₂ → Fin N₃) (Ω : Rew L Ξ₁ N₁ Ξ₂ N₂ ξ) (X : Ξ₁) :
+    (Ω.bLeft f).fv X = (Ω.fv X).bmap f := rfl
+
+lemma bLeft_q (Ω : Rew L Ξ₁ N₁ Ξ₂ N₂ ξ) (f : Fin N₂ → Fin N₃) :
+    (Ω.bLeft f)𐞥 = Ω𐞥.bLeft (Fin.retrusion f) := by
+  ext X
+  · cases X using Fin.cases <;> simp [q_bv_succ, bLeft_bv, bmap_comp]
+  · simp [q_fv, bLeft_fv, bmap_comp]
+
+lemma app_bmap_eq_bLeft (f : Fin N₂ → Fin N₃) (Ω : Rew L Ξ₁ N₁ Ξ₂ N₂ ξ) (φ : Semiformula L Ξ₁ ξ N₁ n) :
+    (Ω • φ).bmap f = Ω.bLeft f • φ := by
+  induction φ using Semiformula.rec' generalizing N₂ N₃ <;> simp [*, bmap_comm, bLeft_q]
+
+def bRight (f : Fin N₀ → Fin N₁) (Ω : Rew L Ξ₁ N₁ Ξ₂ N₂ ξ) : Rew L Ξ₁ N₀ Ξ₂ N₂ ξ where
+  bv X := Ω.bv (f X)
+  fv X := Ω.fv X
+
+@[simp] lemma bRight_bv (f : Fin N₀ → Fin N₁) (Ω : Rew L Ξ₁ N₁ Ξ₂ N₂ ξ) (X : Fin N₀) :
+    (Ω.bRight f).bv X = Ω.bv (f X) := rfl
+
+@[simp] lemma bRight_fv (f : Fin N₀ → Fin N₁) (Ω : Rew L Ξ₁ N₁ Ξ₂ N₂ ξ) (X : Ξ₁) :
+    (Ω.bRight f).fv X = Ω.fv X := rfl
+
+lemma bRight_q (f : Fin N₀ → Fin N₁) (Ω : Rew L Ξ₁ N₁ Ξ₂ N₂ ξ) :
+    (Ω.bRight f)𐞥 = Ω𐞥.bRight (Fin.retrusion f) := by
+  ext X
+  · cases X using Fin.cases <;> simp [bRight_bv]
+  · simp [bRight_fv]
+
+lemma bmap_app_eq (f : Fin N₀ → Fin N₁) (Ω : Rew L Ξ₁ N₁ Ξ₂ N₂ ξ) (φ : Semiformula L Ξ₁ ξ N₀ n) :
+    Ω • φ.bmap f = Ω.bRight f • φ := by
+  induction φ using Semiformula.rec' generalizing N₁ N₂ <;> simp [*, bRight_q]
+
+@[simp] lemma q_bRight_succ (Ω : Rew L Ξ₁ N₁ Ξ₂ N₂ ξ) :
+    Ω𐞥.bRight Fin.succ = Ω.bLeft Fin.succ := by rfl
 
 @[simp] lemma q_comp_eq (Ω₂₃ : Rew L Ξ₂ N₂ Ξ₃ N₃ ξ) (Ω₁₂ : Rew L Ξ₁ N₁ Ξ₂ N₂ ξ) :
     (Ω₂₃.comp Ω₁₂)𐞥 = Ω₂₃𐞥.comp Ω₁₂𐞥 := by
   ext X
-  · cases X using Fin.cases
-    · simp [comp]
-    · simp [comp]
-  · simp [comp, app_b₁Shift_eq_q_app_b₁Shift]
+  · cases X using Fin.cases <;> simp [comp, app_bmap_eq_bLeft, bmap_app_eq]
+  · simp [comp, app_bmap_eq_bLeft, bmap_app_eq]
 
 lemma app_comp (Ω₂₃ : Rew L Ξ₂ N₂ Ξ₃ N₃ ξ) (Ω₁₂ : Rew L Ξ₁ N₁ Ξ₂ N₂ ξ) (φ : Semiformula L Ξ₁ ξ N₁ n) :
     (Ω₂₃.comp Ω₁₂) • φ = Ω₂₃ • (Ω₁₂ • φ) := by
@@ -329,30 +384,140 @@ lemma app_comp (Ω₂₃ : Rew L Ξ₂ N₂ Ξ₃ N₃ ξ) (Ω₁₂ : Rew L Ξ�
 @[simp] lemma comp_one (Ω : Rew L Ξ₁ N₁ Ξ₂ N₂ ξ) :
     Ω.comp Rew.id = Ω := by ext X <;> simp
 
-def b₁shift : Rew L Ξ N Ξ (N + 1) ξ where
-  bv X := #0 ∈# X.succ
+def free : Rew L ℕ (N + 1) ℕ N ξ where
+  bv := (#0 ∈# ·) <: #0 ∈& 0
+  fv X := #0 ∈& (X + 1)
+
+section free
+
+@[simp] lemma free_bvar_castSucc_eq (X : Fin N) :
+    (free (L := L) (ξ := ξ)).bv (Fin.castSucc X) = #0 ∈# X := by simp [free]
+
+@[simp] lemma free_bvar_last (N : ℕ) :
+    (free (L := L) (ξ := ξ)).bv (Fin.last N) = #0 ∈& 0 := by simp [free]
+
+@[simp] lemma free_fvar (X : ℕ) :
+    (free (L := L) (ξ := ξ) (N := N)).fv X = #0 ∈& (X + 1) := rfl
+
+@[simp] lemma q_free : (free (L := L) (ξ := ξ) (N := N))𐞥 = free := by
+  ext X
+  · cases X using Fin.cases
+    · simp [free]
+    case succ X =>
+      simp
+      cases X using Fin.lastCases <;> simp [-Fin.castSucc_succ, Fin.succ_castSucc]
+  · simp [free]
+
+end free
+
+def rewrite (f : Ξ₁ → Ξ₂) : Rew L Ξ₁ N Ξ₂ N ξ where
+  bv X := #0 ∈# X
+  fv X := #0 ∈& f X
+
+section rewrite
+
+@[simp] lemma rewrite_bv (f : Ξ₁ → Ξ₂) (X : Fin N) :
+    (rewrite (L := L) (ξ := ξ) f).bv X = #0 ∈# X := rfl
+
+@[simp] lemma rewrite_fv (f : Ξ₁ → Ξ₂) (X : Ξ₁) :
+    (rewrite (L := L) (ξ := ξ) (N := N) f).fv X = #0 ∈& f X := rfl
+
+@[simp] lemma q_rewrite (f : Ξ₁ → Ξ₂) :
+    (rewrite (L := L) (ξ := ξ) (N := N) f)𐞥 = rewrite f := by
+  ext X
+  · cases X using Fin.cases <;> simp [rewrite]
+  · simp [rewrite]
+
+end rewrite
+
+def shift : Rew L ℕ N ℕ N ξ := rewrite (· + 1)
+
+section shift
+
+@[simp] lemma shift_bv (X : Fin N) :
+    (shift (L := L) (ξ := ξ)).bv X = #0 ∈# X := rfl
+
+@[simp] lemma shift_fv (X : ℕ) :
+    (shift (L := L) (ξ := ξ) (N := N)).fv X = #0 ∈& (X + 1) := rfl
+
+@[simp] lemma q_shift :
+    (shift (L := L) (ξ := ξ) (N := N))𐞥 = shift := q_rewrite _
+
+end shift
+
+def emb {ο : Type*} [IsEmpty ο] : Rew L ο N Ξ N ξ := rewrite (IsEmpty.elim' inferInstance)
+
+section emb
+
+variable {ο : Type*} [IsEmpty ο]
+
+@[simp] lemma emb_bv (X : Fin N) :
+    (emb (L := L) (ξ := ξ) (Ξ := Ξ) (ο := ο)).bv X = #0 ∈# X := rfl
+
+@[simp] lemma q_emb :
+    (emb (L := L) (ξ := ξ) (Ξ := Ξ) (ο := ο) (N := N))𐞥 = emb := q_rewrite _
+
+end emb
+
+def subst (Φ : Fin N₁ → Semiformula L Ξ₁ ξ N₂ 1) : Rew L Ξ₁ N₁ Ξ₁ N₂ ξ where
+  bv := Φ
   fv X := #0 ∈& X
 
-@[simp] lemma b₁shift_bv (X : Fin N) :
-    (Rew.b₁shift : Rew L Ξ N Ξ (N + 1) ξ).bv X = #0 ∈# X.succ := rfl
+section subst
 
-@[simp] lemma b₁shift_fv (X : Ξ) :
-    (Rew.b₁shift : Rew L Ξ N Ξ (N + 1) ξ).fv X = #0 ∈& X := rfl
+@[simp] lemma subst_bv (Φ : Fin N₁ → Semiformula L Ξ₁ ξ N₂ 1) (X : Fin N₁) :
+    (subst Φ).bv X = Φ X := rfl
 
-@[simp] lemma q_b₁shift :
-    (Rew.b₁shift : Rew L Ξ N Ξ (N + 1) ξ)𐞥 = Rew.b₁shift := by
+@[simp] lemma subst_fv (Φ : Fin N₁ → Semiformula L Ξ₁ ξ N₂ 1) (X : Ξ₁) :
+    (subst Φ).fv X = #0 ∈& X := rfl
+
+lemma q_subst (Φ : Fin N₁ → Semiformula L Ξ₁ ξ N₂ 1) :
+    (subst Φ)𐞥 = subst ((#0 ∈# 0) :> fun X ↦ (Φ X).bmap .succ) := by
   ext X
-  · cases X using Fin.cases <;> simp
-  · simp
+  · cases X using Fin.cases <;> simp [subst]
+  · simp [subst]
 
-@[simp] lemma app_b₁shift (φ : Semiformula L Ξ ξ N n) :
-    Rew.b₁shift • φ = φ.b₁Shift := by
-  induction φ using Semiformula.rec' <;> simp [*]
-
--/
+end subst
 
 end Rew
 
-open Semiformula
+namespace Semistatement
+
+abbrev free₀ (φ : Semistatement L N (n + 1)) : Semistatement L N n := FirstOrder.Rewriting.free φ
+
+abbrev shift₀ (φ : Semistatement L N n) : Semistatement L N n := FirstOrder.Rewriting.shift φ
+
+abbrev free₁ (φ : Semistatement L (N + 1) n) : Semistatement L N n := Rew.free.app φ
+
+abbrev shift₁ (φ : Semistatement L N n) : Semistatement L N n := Rew.shift.app φ
+
+abbrev subst₁ (φ : Semiformula L Ξ₁ ξ N₁ n) (Φ : Fin N₁ → Semiformula L Ξ₁ ξ N₂ 1) :
+    Semiformula L Ξ₁ ξ N₂ n := (Rew.subst Φ).app φ
+
+section Notation
+
+open Lean PrettyPrinter Delaborator
+
+syntax (name := substNotation) term:max "/⟦" term,* "⟧" : term
+
+macro_rules (kind := substNotation)
+  | `($φ:term /⟦$terms:term,*⟧) => `(subst₁ $φ ![$terms,*])
+
+@[app_unexpander subst₁]
+meta def unexpsnderSubst : Unexpander
+  | `($_ $φ:term ![$ts:term,*]) => `($φ /⟦ $ts,* ⟧)
+  | _                           => throw ()
+
+end Notation
+
+end Semistatement
+
+namespace Semisentence
+
+@[coe] abbrev emb (φ : Semisentence L N n) : Semiformula L Ξ ξ N n := Rew.emb.app (FirstOrder.Rewriting.emb φ)
+
+instance : Coe (Semisentence L N n) (Semiformula L Ξ ξ N n) := ⟨emb⟩
+
+end Semisentence
 
 end LO.SecondOrder
