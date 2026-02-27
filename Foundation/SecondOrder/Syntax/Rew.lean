@@ -67,12 +67,6 @@ instance : Rewriting L ξ₁ (Semiformula L Ξ ξ₁ N) ξ₂ (Semiformula L Ξ 
   app_all (_ _) := rfl
   app_exs (_ _) := rfl
 
-@[coe] abbrev emb [IsEmpty o] (φ : Semiformula L Ξ o N n) : Semiformula L Ξ ξ N n := Rewriting.emb φ
-
-abbrev free₀ (φ : Semistatement L N (n + 1)) : Semistatement L N n := Rewriting.free φ
-
-abbrev shift₀ (φ : Semistatement L N n) : Semistatement L N n := Rewriting.shift φ
-
 lemma rew_rel (ω : Rew L ξ₁ n₁ ξ₂ n₂) {k} (r : L.Rel k) (v : Fin k → Semiterm L ξ₁ n₁) :
     ω ▹ (rel r v : Semiformula L Ξ ξ₁ N n₁) = rel r fun i ↦ ω (v i) := rfl
 
@@ -451,6 +445,20 @@ section shift
 
 end shift
 
+def emb {ο : Type*} [IsEmpty ο] : Rew L ο N Ξ N ξ := rewrite (IsEmpty.elim' inferInstance)
+
+section emb
+
+variable {ο : Type*} [IsEmpty ο]
+
+@[simp] lemma emb_bv (X : Fin N) :
+    (emb (L := L) (ξ := ξ) (Ξ := Ξ) (ο := ο)).bv X = #0 ∈# X := rfl
+
+@[simp] lemma q_emb :
+    (emb (L := L) (ξ := ξ) (Ξ := Ξ) (ο := ο) (N := N))𐞥 = emb := q_rewrite _
+
+end emb
+
 def subst (Φ : Fin N₁ → Semiformula L Ξ₁ ξ N₂ 1) : Rew L Ξ₁ N₁ Ξ₁ N₂ ξ where
   bv := Φ
   fv X := #0 ∈& X
@@ -463,13 +471,27 @@ section subst
 @[simp] lemma subst_fv (Φ : Fin N₁ → Semiformula L Ξ₁ ξ N₂ 1) (X : Ξ₁) :
     (subst Φ).fv X = #0 ∈& X := rfl
 
+lemma q_subst (Φ : Fin N₁ → Semiformula L Ξ₁ ξ N₂ 1) :
+    (subst Φ)𐞥 = subst ((#0 ∈# 0) :> fun X ↦ (Φ X).bmap .succ) := by
+  ext X
+  · cases X using Fin.cases <;> simp [subst]
+  · simp [subst]
+
 end subst
 
 end Rew
 
-abbrev free (φ : Semistatement L (N + 1) n) : Semistatement L N n := Rew.free.app φ
+namespace Semistatement
 
-abbrev subst (φ : Semiformula L Ξ₁ ξ N₁ n) (Φ : Fin N₁ → Semiformula L Ξ₁ ξ N₂ 1) :
+abbrev free₀ (φ : Semistatement L N (n + 1)) : Semistatement L N n := FirstOrder.Rewriting.free φ
+
+abbrev shift₀ (φ : Semistatement L N n) : Semistatement L N n := FirstOrder.Rewriting.shift φ
+
+abbrev free₁ (φ : Semistatement L (N + 1) n) : Semistatement L N n := Rew.free.app φ
+
+abbrev shift₁ (φ : Semistatement L N n) : Semistatement L N n := Rew.shift.app φ
+
+abbrev subst₁ (φ : Semiformula L Ξ₁ ξ N₁ n) (Φ : Fin N₁ → Semiformula L Ξ₁ ξ N₂ 1) :
     Semiformula L Ξ₁ ξ N₂ n := (Rew.subst Φ).app φ
 
 section Notation
@@ -479,15 +501,23 @@ open Lean PrettyPrinter Delaborator
 syntax (name := substNotation) term:max "/⟦" term,* "⟧" : term
 
 macro_rules (kind := substNotation)
-  | `($φ:term /⟦$terms:term,*⟧) => `(subst $φ ![$terms,*])
+  | `($φ:term /⟦$terms:term,*⟧) => `(subst₁ $φ ![$terms,*])
 
-@[app_unexpander subst]
+@[app_unexpander subst₁]
 meta def unexpsnderSubst : Unexpander
   | `($_ $φ:term ![$ts:term,*]) => `($φ /⟦ $ts,* ⟧)
   | _                           => throw ()
 
 end Notation
 
-open Semiformula
+end Semistatement
+
+namespace Semisentence
+
+@[coe] abbrev emb (φ : Semisentence L N n) : Semiformula L Ξ ξ N n := Rew.emb.app (FirstOrder.Rewriting.emb φ)
+
+instance : Coe (Semisentence L N n) (Semiformula L Ξ ξ N n) := ⟨emb⟩
+
+end Semisentence
 
 end LO.SecondOrder

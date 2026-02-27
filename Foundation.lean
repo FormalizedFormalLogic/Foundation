@@ -529,6 +529,7 @@ public import Foundation.ProvabilityLogic.Realization
 public import Foundation.ProvabilityLogic.S.Completeness
 public import Foundation.ProvabilityLogic.S.Soundness
 public import Foundation.ProvabilityLogic.SolovaySentences
+public import Foundation.SecondOrder.Derivation
 public import Foundation.SecondOrder.Syntax.Formula
 public import Foundation.SecondOrder.Syntax.Rew
 public import Foundation.Semantics.Algebra.Modal.Basic
