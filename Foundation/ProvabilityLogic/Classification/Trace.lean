@@ -501,7 +501,7 @@ lemma provable_TBB_of_mem_trace
     rintro (a | i);
     . apply C!_trans $ C!_trans (S.SC2 (Sum.inl a) M.root (by grind))
         $ contra!
-        $ prov_distribute_imply'
+        $ T.standardProvability.mono'
         $ CN!_of_CN!_right
         $ S.mainlemma_neg (by simp)
         $ height_lt_iff_satisfies_boxbot.not.mp

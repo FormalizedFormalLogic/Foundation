@@ -21,11 +21,11 @@ lemma indep_distribute [𝔅.HBL2] (h : T ⊢ σ ⭤ π) : T ⊢ 𝔅.indep σ �
   apply CKK!_of_C!_of_C!;
   . apply contra!;
     apply WeakerThan.pbl (𝓢 := T₀);
-    apply prov_distribute_imply;
+    apply 𝔅.mono;
     cl_prover [h];
   . apply contra!;
     apply WeakerThan.pbl (𝓢 := T₀);
-    apply prov_distribute_imply;
+    apply 𝔅.mono;
     cl_prover [h];
 
 lemma indep_iff_distribute_inside [𝔅.HBL2] (h : T ⊢ σ ⭤ π) :
@@ -80,7 +80,7 @@ lemma iff_modalIndep_bewIndep_inside :
     . apply C!_trans (K!_left $ Realization.interpret.iff_provable_neg_inside (L := ℒₒᵣ) (A := □(∼A))) ?_;
       apply contra!;
       apply WeakerThan.pbl (𝓢 := 𝗜𝚺₁);
-      apply prov_distribute_imply;
+      apply T.standardProvability.mono;
       apply K!_right $ Realization.interpret.iff_provable_neg_inside (L := ℒₒᵣ) ;
   . refine C!_trans ?_ (K!_right $ Realization.interpret.iff_provable_and_inside);
     apply CKK!_of_C!_of_C!;
@@ -88,7 +88,7 @@ lemma iff_modalIndep_bewIndep_inside :
     . apply C!_trans ?_ (K!_right $ Realization.interpret.iff_provable_neg_inside (L := ℒₒᵣ) (A := □(∼A)));
       apply contra!;
       apply WeakerThan.pbl (𝓢 := 𝗜𝚺₁);
-      apply prov_distribute_imply;
+      apply T.standardProvability.mono;
       apply K!_left $ Realization.interpret.iff_provable_neg_inside (L := ℒₒᵣ);
 
 lemma iff_modalIndep_bewIndep :

@@ -125,10 +125,17 @@ variable (T)
 
 noncomputable abbrev _root_.LO.FirstOrder.Theory.rosserProvability : Provability 𝗜𝚺₁ T where
   prov := T.rosserProvable
-  prov_def := rosserProvable_D1
+  bew_def := rosserProvable_D1
 
 instance : T.rosserProvability.Rosser := ⟨rosserProvable_rosser⟩
 
 lemma rosserProvability_def (σ : Sentence L) : T.rosserProvability σ = T.rosserPred σ := rfl
+
+instance [T.Δ₁] : T.rosserProvability.SoundOn ℕ := by
+  constructor;
+  intro σ h;
+  apply Bootstrapping.provable_iff_provable.mp
+    $ Bootstrapping.ProvabilityComparison.le_to_provable
+    $ by simpa [models_iff, Provability.pr, Theory.RosserProvable] using h;
 
 end LO.FirstOrder.Arithmetic
