@@ -54,11 +54,13 @@ lemma iff_interpret_boxdot_strongInterpret_inside [𝔅.HBL2] : T ⊢ f (Aᵇ) �
     apply K!_intro;
     . apply CKK!_of_C!_of_C!;
       . cl_prover [ih];
-      . apply prov_distribute_imply'';
+      . apply WeakerThan.pbl (𝓢 := T₀);
+        apply 𝔅.mono;
         cl_prover [ih];
     . apply CKK!_of_C!_of_C!;
       . cl_prover [ih];
-      . apply prov_distribute_imply'';
+      . apply WeakerThan.pbl (𝓢 := T₀);
+        apply 𝔅.mono;
         cl_prover [ih];
 
 lemma iff_interpret_boxdot_strongInterpret [𝔅.HBL2] :
@@ -68,7 +70,7 @@ lemma iff_interpret_boxdot_strongInterpret [𝔅.HBL2] :
   . intro h; exact (K!_right iff_interpret_boxdot_strongInterpret_inside) ⨀ h;
 
 lemma iff_models_interpret_boxdot_strongInterpret
-  {M} [Nonempty M] [Structure L M] [M ⊧ₘ* T] [𝔅.HBL2] [∀ σ, 𝔅.SoundOn M σ] :
+  {M} [Nonempty M] [Structure L M] [M ⊧ₘ* T] [𝔅.HBL2] [𝔅.SoundOn M] :
    M ⊧ₘ f (Aᵇ) ↔ M ⊧ₘ f.strongInterpret A := by
   induction A with
   | hatom φ => simp [Realization.interpret, strongInterpret, Formula.boxdotTranslate];
@@ -94,13 +96,15 @@ lemma iff_models_interpret_boxdot_strongInterpret
       constructor;
       . exact ih.mp h₁;
       . apply models_of_provable (T := T) inferInstance;
-        apply ProvabilityAbstraction.D1_shift;
+        apply WeakerThan.pbl (𝓢 := T₀);
+        apply 𝔅.D1;
         exact iff_interpret_boxdot_strongInterpret.mp $ 𝔅.sound_on h₂;
     . rintro ⟨h₁, h₂⟩;
       constructor;
       . apply ih.mpr h₁;
       . apply models_of_provable (T := T) inferInstance;
-        apply ProvabilityAbstraction.D1_shift;
+        apply WeakerThan.pbl (𝓢 := T₀);
+        apply 𝔅.D1;
         exact iff_interpret_boxdot_strongInterpret.mpr $ 𝔅.sound_on h₂;
 
 end Realization

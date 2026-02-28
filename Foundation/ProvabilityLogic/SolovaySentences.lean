@@ -24,7 +24,7 @@ open Modal.Kripke
 open Modal.Formula.Kripke
 
 variable {L : Language} [L.DecidableEq] [L.ReferenceableBy L]
-         {T₀ T : Theory L} [T₀ ⪯ T] (𝔅 : Provability T₀ T) [𝔅.HBL]
+         {T₀ T : Theory L} [T₀ ⪯ T] (𝔅 : Provability T₀ T) [𝔅.Mono]
          {A B : Modal.Formula _}
 
 structure SolovaySentences (F : Kripke.Frame) [F.IsRooted] [Fintype F] where
@@ -79,7 +79,7 @@ private lemma mainlemma_aux {i : M} (hri : M.root ≠ i) :
     constructor;
     . intro h;
       apply C!_trans $ S.SC3 i $ (by grind);
-      apply prov_distribute_imply';
+      apply 𝔅.mono';
       apply left_Fdisj'!_intro;
       rintro j Rij;
       replace Rij : i ≺ j := by simpa using Rij
@@ -90,7 +90,7 @@ private lemma mainlemma_aux {i : M} (hri : M.root ≠ i) :
       obtain ⟨j, Rij, hA⟩ := this;
       have := CN!_of_CN!_right $ (ihA (by grind)).2 hA
       have : T₀ ⊢ ∼𝔅 (∼S.σ j) ➝ ∼𝔅 (S.realization A) :=
-        contra! $ prov_distribute_imply' $ CN!_of_CN!_right $ (ihA (by grind)).2 hA;
+        contra! $ 𝔅.mono' $ CN!_of_CN!_right $ (ihA (by grind)).2 hA;
       exact C!_trans (S.SC2 i j Rij) this;
 
 theorem mainlemma (S : SolovaySentences 𝔅 M.toFrame) {i : M} (hri : M.root ≠ i) :
@@ -113,15 +113,15 @@ lemma root_of_iterated_inconsistency : T₀ ⊢ ∼𝔅^[M.height] ⊥ ➝ S M.r
           <| Frame.rank_lt_whole_height (by grind)
     cl_prover [this];
 
-lemma theory_height [𝔅.WeakKreisel (𝔅^[(M.height).pred] ⊥)] (h : M.root.1 ⊧ ◇(∼A)) (b : T ⊢ S.realization A) : 𝔅.height < M.height := by
-  apply 𝔅.height_lt_pos_of_boxBot (n := M.height) (by simpa using height_pos_of_dia h)
+lemma theory_height (hSound : ∀ {σ}, T₀ ⊢ 𝔅 σ → T ⊢ σ) (h : M.root.1 ⊧ ◇(∼A)) (b : T ⊢ S.realization A) : 𝔅.height < M.height := by
+  apply 𝔅.height_lt_pos_of_boxBot hSound (n := M.height) (by simpa using height_pos_of_dia h)
   have : ∃ i : M, M.root ≺ i ∧ i ⊭ A := Formula.Kripke.Satisfies.dia_def.mp h
   rcases this with ⟨i, hi, hiA⟩
-  have b₀ : T₀ ⊢ 𝔅 (S.realization A) := D1 b
+  have b₀ : T₀ ⊢ 𝔅 (S.realization A) := 𝔅.D1 b
   have b₁ : T₀ ⊢ ∼(↑𝔅)^[M.height] ⊥ ➝ S M.root := S.root_of_iterated_inconsistency
   have b₂ : T₀ ⊢ S M.root ➝ 𝔅.dia (S i) := S.SC2 M.root i (by grind)
   have b₃ : T₀ ⊢ 𝔅.dia (S i) ➝ ∼𝔅 (S.realization A) := by
-    simpa [Provability.dia] using dia_distribute_imply <| WeakerThan.pbl <| S.mainlemma_neg (by grind) hiA
+    simpa [Provability.dia] using 𝔅.dia_mono <| WeakerThan.pbl <| S.mainlemma_neg (by grind) hiA
   cl_prover [b₀, b₁, b₂, b₃]
 
 end SolovaySentences

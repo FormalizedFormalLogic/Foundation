@@ -16,7 +16,7 @@ open FirstOrder FirstOrder.ProvabilityAbstraction
 open ArithmeticTheory (provabilityLogicOn)
 
 variable {T₀ T : ArithmeticTheory} [T₀ ⪯ T] [Diagonalization T₀]
-         {𝔅 : Provability T₀ T} [𝔅.HBL] [ℕ ⊧ₘ* T] [∀ σ, 𝔅.SoundOn ℕ σ]
+         {𝔅 : Provability T₀ T} [𝔅.HBL] [ℕ ⊧ₘ* T] [𝔅.SoundOn ℕ]
          {A B : Formula ℕ}
 
 open Entailment FiniteContext
@@ -88,7 +88,7 @@ lemma refl_mainlemma_aux (hA : ¬M₁.root.1 ⊧ (A.rflSubformula.conj ➝ A)) :
     constructor;
     . intro h;
       apply C!_of_conseq!;
-      apply D1;
+      apply T.standardProvability.D1;
       apply Entailment.WeakerThan.pbl (𝓢 := 𝗜𝚺₁);
       have : 𝗜𝚺₁ ⊢ ((⩖ j, S j)) ➝ S.realization B := by
         apply left_Fdisj'!_intro;
@@ -120,7 +120,7 @@ lemma refl_mainlemma_aux (hA : ¬M₁.root.1 ⊧ (A.rflSubformula.conj ➝ A)) :
         <| Model.extendRoot.inr_satisfies_iff (n := 1) |>.not.mpr hA;
       have : 𝗜𝚺₁ ⊢ ∼T.standardProvability (∼S (Sum.inr i)) ➝ ∼T.standardProvability (S.realization B) :=
         contra!
-        $ prov_distribute_imply'
+        $ T.standardProvability.mono'
         $ CN!_of_CN!_right $ this;
       refine C!_trans ?_ this;
       apply S.SC2;

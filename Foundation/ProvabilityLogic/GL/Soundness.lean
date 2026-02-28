@@ -22,9 +22,9 @@ lemma GL.arithmetical_soundness (h : Modal.GL ⊢ A) {f : Realization 𝔅} : U 
   induction h using Hilbert.Normal.rec! with
   | axm _ hp =>
     rcases hp with (⟨_, rfl⟩ | ⟨_, rfl⟩)
-    . exact D2_shift;
-    . exact FLT_shift;
-  | nec ihp => exact D1_shift ihp;
+    . exact WeakerThan.pbl $ 𝔅.D2;
+    . exact WeakerThan.pbl $ formalized_löb_theorem;
+  | nec ihp => exact WeakerThan.pbl $ 𝔅.D1 ihp;
   | mdp ihpq ihp => exact ihpq ⨀ ihp;
   | _ => dsimp [Realization.interpret]; cl_prover;
 

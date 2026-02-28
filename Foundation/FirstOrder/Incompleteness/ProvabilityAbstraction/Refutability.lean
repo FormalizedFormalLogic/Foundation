@@ -106,7 +106,7 @@ variable
 local notation "𝐉" => jeroslow 𝔚
 
 lemma jeroslow_not_safe [𝔅.FormalizedCompleteOn 𝐉] : T ⊢ 𝐉 ➝ (𝔅 𝐉 ⋏ 𝔚 𝐉) := by
-  have h₁ : T ⊢ 𝐉 ➝ 𝔅 𝐉 := 𝔅.formalized_complete_on;
+  have h₁ : T ⊢ 𝐉 ➝ 𝔅 𝐉 := Entailment.WeakerThan.pbl $ 𝔅.formalized_complete_on;
   have h₂ : T ⊢ 𝐉 ⭤ 𝔚 𝐉 := jeroslow_def';
   cl_prover [h₁, h₂];
 

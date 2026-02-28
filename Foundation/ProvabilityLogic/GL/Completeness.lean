@@ -37,7 +37,7 @@ theorem unprovable_realization_exists
   have : T.height ≤ M₁.height := by
     apply Order.le_of_lt_add_one
     calc
-      T.standardProvability.height < M₀.height     := S.theory_height hdnA hC
+      T.standardProvability.height < M₀.height     := S.theory_height (T.standardProvability.syntactical_sound ℕ) hdnA hC
       _                            = M₁.height + 1 := by simp [M₀];
   exact not_lt_of_ge this h
 
