@@ -37,7 +37,7 @@ instance : Complete Propositional.Int FrameClass.finite_Int := ⟨by
   let M : Kripke.Model := ⟨F, V⟩;
   let FM := coarsestFiltrationModel M ↑φ.subformulas;
 
-  apply filtration FM (coarsestFiltrationModel.filterOf) (by simp) |>.mpr;
+  apply filtration FM (coarsestFiltrationModel.filterOf) (by grind) |>.mpr;
   apply hφ;
 
   apply Frame.isFinite_iff _ |>.mpr;

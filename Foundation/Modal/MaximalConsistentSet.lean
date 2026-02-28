@@ -232,6 +232,7 @@ lemma intro_union_consistent(h : ∀ {Γ₁ Γ₂ : FormulaFinset _}, (Γ₁.toS
   . intro φ hφ;
     have : φ ∈ T₁ ∪ T₂ := hΔ hφ;
     simp_all [Δ₁, Δ₂];
+    grind;
 
 lemma exists_consistent_maximal_of_consistent (T_consis : Consistent 𝓢 T)
   : ∃ Z, Consistent 𝓢 Z ∧ T ⊆ Z ∧ ∀ U, U *⊬[𝓢] ⊥ → Z ⊆ U → U = Z := by

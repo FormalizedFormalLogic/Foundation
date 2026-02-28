@@ -257,9 +257,9 @@ namespace Formula.subformulas
 
 variable {φ ψ χ : Formula α}
 
-@[simp, grind] lemma mem_self : φ ∈ φ.subformulas := by induction φ <;> simp [subformulas];
+@[simp, grind .] lemma mem_self : φ ∈ φ.subformulas := by induction φ <;> simp [subformulas];
 
-@[grind ⇒]
+@[grind! =>]
 protected lemma mem_imp (h : (ψ ➝ χ) ∈ φ.subformulas) : ψ ∈ φ.subformulas ∧ χ ∈ φ.subformulas := by
   induction φ with
   | himp =>
@@ -269,7 +269,7 @@ protected lemma mem_imp (h : (ψ ➝ χ) ∈ φ.subformulas) : ψ ∈ φ.subform
   | hand => simp_all only [subformulas, Finset.mem_insert, Finset.mem_union]; tauto;
   | _ => simp_all [subformulas];
 
-@[grind ⇒]
+@[grind! =>]
 protected lemma mem_and (h : (ψ ⋏ χ) ∈ φ.subformulas) : ψ ∈ φ.subformulas ∧ χ ∈ φ.subformulas := by
   induction φ with
   | himp => simp_all only [subformulas, Finset.mem_insert, Finset.mem_union]; tauto;
@@ -279,7 +279,7 @@ protected lemma mem_and (h : (ψ ⋏ χ) ∈ φ.subformulas) : ψ ∈ φ.subform
     rcases h with ⟨_⟩ | ⟨⟨_⟩ | ⟨_⟩⟩ <;> simp_all;
   | _ => simp_all [subformulas];
 
-@[grind ⇒]
+@[grind! =>]
 protected lemma mem_or (h : (ψ ⋎ χ) ∈ φ.subformulas) : ψ ∈ φ.subformulas ∧ χ ∈ φ.subformulas := by
   induction φ with
   | himp => simp_all only [subformulas, Finset.mem_insert, Finset.mem_union]; tauto;
@@ -289,7 +289,7 @@ protected lemma mem_or (h : (ψ ⋎ χ) ∈ φ.subformulas) : ψ ∈ φ.subformu
   | hand => simp_all only [subformulas, Finset.mem_insert, Finset.mem_union]; tauto;
   | _ => simp_all [subformulas];
 
-@[grind ⇒]
+@[grind! =>]
 protected lemma mem_neg (h : (∼ψ) ∈ φ.subformulas) : ψ ∈ φ.subformulas ∧ ⊥ ∈ φ.subformulas := by
   rw [neg_def] at h;
   grind;
@@ -368,13 +368,23 @@ namespace FormulaSet.SubformulaClosed
 
 variable {φ ψ χ : Formula α} {T : FormulaSet α} [T.SubformulaClosed]
 
-@[grind ⇒] protected lemma mem_and₁ (h : φ ⋏ ψ ∈ T) : φ ∈ T := by apply closed _ h; simp [Formula.subformulas];
-@[grind ⇒] protected lemma mem_and₂ (h : φ ⋏ ψ ∈ T) : ψ ∈ T := by apply closed _ h; simp [Formula.subformulas];
-@[grind ⇒] protected lemma mem_or₁ (h : φ ⋎ ψ ∈ T) : φ ∈ T := by apply closed _ h; simp [Formula.subformulas];
-@[grind ⇒] protected lemma mem_or₂ (h : φ ⋎ ψ ∈ T) : ψ ∈ T := by apply closed _ h; simp [Formula.subformulas];
-@[grind ⇒] protected lemma mem_imp₁ (h : φ ➝ ψ ∈ T) : φ ∈ T := by apply closed _ h; simp [Formula.subformulas];
-@[grind ⇒] protected lemma mem_imp₂ (h : φ ➝ ψ ∈ T) : ψ ∈ T := by apply closed _ h; simp [Formula.subformulas];
+@[grind ⇒]
+protected lemma mem_and (h : φ ⋏ ψ ∈ T) : φ ∈ T ∧ ψ ∈ T := by
+  constructor <;>
+  . apply closed _ h;
+    grind [Formula.subformulas.mem_and, Formula.subformulas.mem_self]
 
+@[grind ⇒]
+protected lemma mem_or (h : φ ⋎ ψ ∈ T) : φ ∈ T ∧ ψ ∈ T := by
+  constructor <;>
+  . apply closed _ h;
+    grind [Formula.subformulas.mem_or, Formula.subformulas.mem_self]
+
+@[grind ⇒]
+protected lemma mem_imp (h : φ ➝ ψ ∈ T) : φ ∈ T ∧ ψ ∈ T := by
+  constructor <;>
+  . apply closed _ h;
+    grind [Formula.subformulas.mem_imp, Formula.subformulas.mem_self]
 
 instance [DecidableEq α] {φ : Formula α} : SubformulaClosed φ.subformulas.toSet := ⟨by
   simpa using FormulaFinset.SubformulaClosed.subformulaClosed_subformulas (φ := φ) |>.closed;

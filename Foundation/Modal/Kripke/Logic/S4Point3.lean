@@ -89,7 +89,7 @@ instance : Complete Modal.S4Point3 FrameClass.finite_S4Point3 := ⟨by
   have := finestFiltrationTransitiveClosureModel.rooted_isPiecewiseStronglyConnected r (T := φ.subformulas);
   have := finestFiltrationTransitiveClosureModel.isReflexive (M := RM) (T := φ.subformulas);
 
-  apply filtration FRM (finestFiltrationTransitiveClosureModel.filterOf) (by simp) |>.mpr;
+  apply filtration FRM (finestFiltrationTransitiveClosureModel.filterOf) (by grind) |>.mpr;
   apply hφ;
   apply Set.mem_setOf_eq.mpr;
   refine { world_finite := FilterEqvQuotient.finite $ by simp; }

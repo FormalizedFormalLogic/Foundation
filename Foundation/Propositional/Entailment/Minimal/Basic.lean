@@ -737,7 +737,8 @@ lemma iff_provable_context_provable_finiteContext_toList [DecidableEq F] {Δ : F
     apply Context.provable_iff.mpr;
     use Δ.toList;
     constructor;
-    . simp;
+    . simp only [Finset.mem_toList, SetLike.mem_coe];
+      tauto;
     . assumption;
 
 instance minimal [DecidableEq F] (Γ : Context F 𝓢) : Entailment.Minimal Γ where
@@ -1314,6 +1315,7 @@ lemma FConj_DT [DecidableEq F] {Γ : Finset F} : 𝓢 ⊢ Γ.conj ➝ φ ↔ Γ 
     use Γ.toList;
     constructor;
     . simp;
+      tauto;
     . apply FiniteContext.provable_iff.mpr;
       exact C!_trans (by simp) h;
   . intro h;
