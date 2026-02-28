@@ -41,6 +41,20 @@ instance [IsSerial R] : R.IsGeachConvergent 0 0 1 1 := by
   apply _root_.IsSerial.serial
 
 
+instance [R.IsGeachConvergent 0 2 1 0] : IsTrans _ R := by
+  constructor;
+  rintro x y z Rxy Ryz;
+  have := IsGeachConvergent.gconv (R := R) (i := 0) (j := 2) (m := 1) (n := 0) (x := x) (y := x) (z := z) rfl;
+  simp only [Iterate.iff_succ, Iterate.iff_zero, exists_eq_right, exists_eq_right', forall_exists_index, and_imp] at this;
+  apply this y Rxy Ryz;
+instance [IsTrans _ R] : R.IsGeachConvergent 0 2 1 0 := by
+  constructor;
+  rintro x _ z rfl ⟨y, Rxy, Ryz⟩;
+  use z;
+  have := IsTrans.trans _ _ z Rxy (by simpa using Ryz);
+  tauto;
+
+
 end Rel
 
 
@@ -67,6 +81,11 @@ lemma models_axiomGeach_of_isGeachConvergent
 
 lemma models_axiomT_of_reflexive [Std.Refl K] : ∀ V, (⟨K, V⟩ : KripkeModel κ α) ⊧ (Axioms.T φ) := models_axiomGeach_of_isGeachConvergent 0 0 1 0
 lemma models_axiomD_of_serial [IsSerial K] : ∀ V, (⟨K, V⟩ : KripkeModel κ α) ⊧ (Axioms.D φ) := models_axiomGeach_of_isGeachConvergent 0 0 1 1
+lemma models_axiomFour_of_transitive [IsTrans _ K] : ∀ V, (⟨K, V⟩ : KripkeModel κ α) ⊧ (Axioms.Four φ) := models_axiomGeach_of_isGeachConvergent 0 2 1 0
+attribute [grind .]
+  models_axiomT_of_reflexive
+  models_axiomD_of_serial
+  models_axiomFour_of_transitive
 
 
 variable {a : α}
@@ -87,11 +106,15 @@ lemma isGeachConvergent_of_models_axiomGeach
 
 lemma reflexive_of_models_axiomT (h : ∀ V, (⟨K, V⟩ : KripkeModel κ α) ⊧ (Axioms.T (.atom a))) : Std.Refl K := by
   suffices K.IsGeachConvergent 0 0 1 0 by infer_instance;
-  exact isGeachConvergent_of_models_axiomGeach 0 0 1 0 h;
+  exact isGeachConvergent_of_models_axiomGeach _ _ _ _ h;
 
 lemma serial_of_models_axiomD (h : ∀ V, (⟨K, V⟩ : KripkeModel κ α) ⊧ (Axioms.D (.atom a))) : IsSerial K := by
   suffices K.IsGeachConvergent 0 0 1 1 by infer_instance;
-  exact isGeachConvergent_of_models_axiomGeach 0 0 1 1 h;
+  exact isGeachConvergent_of_models_axiomGeach _ _ _ _ h;
+
+lemma transitive_of_models_axiomFour (h : ∀ V, (⟨K, V⟩ : KripkeModel κ α) ⊧ (Axioms.Four (.atom a))) : IsTrans _ K := by
+  suffices K.IsGeachConvergent 0 2 1 0 by infer_instance;
+  apply isGeachConvergent_of_models_axiomGeach _ _ _ _ h;
 
 end KripkeModel
 
@@ -141,6 +164,10 @@ instance instGeachConvergent (i j m n : ℕ) [Entailment.HasAxiomGeach ⟨i, j, 
 
 instance instReflexive [Entailment.HasAxiomT 𝓢] : Std.Refl (canonicalKripkeModel 𝓢).frame := by
   suffices (canonicalKripkeModel 𝓢).frame.IsGeachConvergent 0 0 1 0 by infer_instance;
+  infer_instance;
+
+instance instTransitive [Entailment.HasAxiomFour 𝓢] : IsTrans _ (canonicalKripkeModel 𝓢).frame := by
+  suffices (canonicalKripkeModel 𝓢).frame.IsGeachConvergent 0 2 1 0 by infer_instance;
   infer_instance;
 
 end canonicalKripkeModel

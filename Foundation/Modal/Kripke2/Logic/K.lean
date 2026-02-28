@@ -14,16 +14,20 @@ namespace K
 theorem kripke_sound : Modal.K' _ ⊢ φ → (∀ {κ}, [Nonempty κ] → ∀ F, ∀ V, (⟨F, V⟩ : KripkeModel κ α) ⊧ φ) := by
   intro h κ _ F;
   apply Hilbert.Normal2.valid_of_provable2 F ?_ h;
-  rintro V _ ⟨_, _, rfl⟩;
-  exact KripkeModel.models_axiomK;
+  rintro V x h;
+  rcases (by simpa [Hilbert.Normal2.buildAxioms] using h) with ⟨_, _, rfl⟩;
+  . exact KripkeModel.models_axiomK;
 
 theorem kripke_sound' : Modal.K' _ ⊢ φ → (∀ {κ}, [Nonempty κ] → ∀ M : KripkeModel κ α, M ⊧ φ)
   := fun h _ _ M ↦ kripke_sound h M.frame M.val
 
 instance : Entailment.Consistent (Modal.K' α) := by
-  apply Hilbert.Normal2.consistent_of_valid_model' (κ := Fin 1) (λ _ _ => True);
-  rintro V _ ⟨_, _, rfl⟩;
-  apply KripkeModel.models_axiomK;
+  apply Hilbert.Normal2.consistent_of_valid_model' (κ := Fin 1) (λ (_ : Fin 1) _ => True);
+  rintro V _ h;
+  rcases (by simpa [Hilbert.Normal2.buildAxioms] using h) with ⟨_, _, rfl⟩;
+  . exact KripkeModel.models_axiomK;
+
+instance : Entailment.K (Modal.K' α) where
 
 variable [DecidableEq α] [Encodable α]
 
