@@ -62,7 +62,7 @@ namespace AllForces
 
 @[simp] lemma verum [BasicSemantics W] : W ∀⊩ ⊤ := fun _ ↦ by simp
 
-@[simp] lemma falsum [BasicSemantics W] [Inhabited W] : ¬W ∀⊩ ⊥ := fun h ↦ by simpa using h default
+@[simp] lemma falsum [BasicSemantics W] [Nonempty W] : ¬W ∀⊩ ⊥ := fun h ↦ by simpa using h (Classical.choice inferInstance)
 
 @[simp] lemma and [BasicSemantics W] : W ∀⊩ φ ⋏ ψ ↔ W ∀⊩ φ ∧ W ∀⊩ ψ := by
   simp [AllForces]; grind
@@ -122,7 +122,7 @@ namespace AllForces
 
 @[simp] lemma verum [BasicSemantics ℙ] : ℙ ∀⊩ᶜ ⊤ := fun _ ↦ by simp
 
-@[simp] lemma falsum [BasicSemantics ℙ] [Inhabited ℙ] : ¬ℙ ∀⊩ᶜ ⊥ := fun h ↦ by simpa using h default
+@[simp] lemma falsum [BasicSemantics ℙ] [Nonempty ℙ] : ¬ℙ ∀⊩ᶜ ⊥ := fun h ↦ by simpa using h (Classical.choice inferInstance)
 
 @[simp] lemma and [BasicSemantics ℙ] : ℙ ∀⊩ᶜ φ ⋏ ψ ↔ ℙ ∀⊩ᶜ φ ∧ ℙ ∀⊩ᶜ ψ := by
   simp [AllForces]; grind
