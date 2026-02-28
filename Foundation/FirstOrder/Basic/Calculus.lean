@@ -1,5 +1,5 @@
 module
-public import Foundation.Logic.Calculus
+/- public import Foundation.Logic.Calculus -/
 public import Foundation.FirstOrder.Basic.Syntax.Theory
 public import Mathlib.Data.List.MinMax
 
@@ -28,6 +28,7 @@ inductive Derivation (𝓢 : Schema L) : Sequent L → Type _
 | wk : Derivation 𝓢 Δ → Δ ⊆ Γ → Derivation 𝓢 Γ
 | cut : Derivation 𝓢 (φ :: Γ) → Derivation 𝓢 (∼φ :: Γ) → Derivation 𝓢 Γ
 
+/--/
 instance : OneSided (Schema L) (SyntacticFormula L) := ⟨Derivation⟩
 
 abbrev Schema.pureLK : Schema L := ∅
