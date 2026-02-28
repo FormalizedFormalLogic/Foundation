@@ -349,6 +349,7 @@ public import Foundation.Modal.Kripke2.Basic
 public import Foundation.Modal.Kripke2.Completeness
 public import Foundation.Modal.Kripke2.Hilbert
 public import Foundation.Modal.Kripke2.Logic.K
+public import Foundation.Modal.Kripke2.Logic.K4
 public import Foundation.Modal.Kripke2.Logic.KT
 public import Foundation.Modal.Logic.Basic
 public import Foundation.Modal.Logic.D.Basic

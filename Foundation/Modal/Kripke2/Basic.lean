@@ -166,45 +166,49 @@ end Forces
 
 section Models
 
-def Models (M : KripkeModel κ α) (φ) := M.world ∀⊩ φ
-infix:45 " ⊧ " => Models
+variable {M : KripkeModel κ α} {φ ψ χ : Formula α}
 
-abbrev NotModels (M : KripkeModel κ α) (φ) := ¬M ⊧ φ
-infix:45 " ⊭ " => NotModels
+def Validates (M : KripkeModel κ α) (φ) := M.world ∀⊩ φ
+
+instance : Semantics (KripkeModel κ α) (Formula α) where
+  Models := Validates
+
 
 @[simp, grind .]
-lemma models_verum : M ⊧ ⊤ := ForcingRelation.AllForces.verum
+lemma validates_verum : M ⊧ ⊤ := ForcingRelation.AllForces.verum
 
 @[simp, grind .]
-lemma models_falsum : M ⊭ ⊥ := by simp [NotModels, Models]
+lemma validates_falsum : M ⊭ ⊥ := by
+  have : Inhabited M.world := Inhabited.mk $ Nonempty.some inferInstance;
+  apply ForcingRelation.AllForces.falsum
 
 @[grind =]
-lemma models_and : M ⊧ (φ ⋏ ψ) ↔ M ⊧ φ ∧ M ⊧ ψ := ForcingRelation.AllForces.and
+lemma validates_and : M ⊧ (φ ⋏ ψ) ↔ M ⊧ φ ∧ M ⊧ ψ := ForcingRelation.AllForces.and
 
 @[grind =]
-lemma iff_notModels_exists_world_notForces : M ⊭ φ ↔ ∃ x : M.world, x ⊮ φ := by
-  simp [NotModels, Models];
-alias ⟨exists_world_notForces_of_notModels, notModels_of_exists_world_notForces⟩ := iff_notModels_exists_world_notForces
+lemma iff_notValidates_exists_world_notForces : M ⊭ φ ↔ ∃ x : M.world, x ⊮ φ := by
+  simp [Semantics.Models, Semantics.NotModels, Validates];
+alias ⟨exists_world_notForces_of_notValidates, notValidates_of_exists_world_notForces⟩ := iff_notValidates_exists_world_notForces
 
 @[grind <=]
-lemma models_mdp (hpq : M ⊧ φ ➝ ψ) (hp : M ⊧ φ) : M ⊧ ψ := fun x ↦ hpq x (hp x)
+lemma validates_mdp (hpq : M ⊧ φ ➝ ψ) (hp : M ⊧ φ) : M ⊧ ψ := fun x ↦ hpq x (hp x)
 
 @[grind <=]
-lemma models_nec (hp : M ⊧ φ) : M ⊧ □φ := fun _ y _ ↦ hp y
+lemma validates_nec (hp : M ⊧ φ) : M ⊧ □φ := fun _ y _ ↦ hp y
 
 @[grind <=]
-lemma models_multinec (hp : M ⊧ φ) : M ⊧ □^[n]φ := by induction n <;> grind;
+lemma validates_multinec (hp : M ⊧ φ) : M ⊧ □^[n]φ := by induction n <;> grind;
 
-lemma models_implyK : M ⊧ (Axioms.ImplyK φ ψ) := by intro x; grind;
-lemma models_implyS : M ⊧ (Axioms.ImplyS φ ψ χ) := by intro x; grind;
-lemma models_elimContra : M ⊧ (Axioms.ElimContra φ ψ) := by intro x; grind;
-lemma models_axiomK : M ⊧ (Axioms.K φ ψ) := by tauto;
+lemma validates_implyK : M ⊧ (Axioms.ImplyK φ ψ) := by intro x; grind;
+lemma validates_implyS : M ⊧ (Axioms.ImplyS φ ψ χ) := by intro x; grind;
+lemma validates_elimContra : M ⊧ (Axioms.ElimContra φ ψ) := by intro x; grind;
+lemma validates_axiomK : M ⊧ (Axioms.K φ ψ) := by tauto;
 
 attribute [simp, grind .]
-  models_implyK
-  models_implyS
-  models_elimContra
-  models_axiomK
+  validates_implyK
+  validates_implyS
+  validates_elimContra
+  validates_axiomK
 
 end Models
 

@@ -73,7 +73,7 @@ lemma iff_valid_provable : (canonicalKripkeModel 𝓢) ⊧ φ ↔ 𝓢 ⊢ φ :=
       apply Tableau.iff_consistent_empty_singleton₂.mpr;
       exact h;
     obtain ⟨t, ht⟩ := lindenbaum this;
-    apply notModels_of_exists_world_notForces;
+    apply notValidates_of_exists_world_notForces;
     use t;
     apply truthlemma₂.mp;
     apply ht.2;

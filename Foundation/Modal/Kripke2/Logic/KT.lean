@@ -13,36 +13,46 @@ namespace KT'
 
 instance : Entailment.KT (Modal.KT' α) where
 
-theorem kripke_sound : Modal.KT' _ ⊢ φ → (∀ {κ}, [Nonempty κ] → ∀ K, [Std.Refl K] → ∀ V, (⟨K, V⟩ : KripkeModel κ α) ⊧ φ) := by
-  intro h κ _ F _;
-  apply Hilbert.Normal2.valid_of_provable2 F ?_ h;
-  rintro V _ h;
-  rcases (by simpa [Hilbert.Normal2.buildAxioms] using h) with ((⟨_, _, rfl⟩ | ⟨_, rfl⟩));
-  . apply KripkeModel.models_axiomK;
-  . apply KripkeModel.models_axiomT_of_reflexive
+theorem forall_reflexive_frame_validates_of_provable (h : Modal.KT' α ⊢ φ)
+  : ∀ {κ : Type*}, [Nonempty κ] → ∀ K, [Std.Refl K] → ∀ V, (⟨K, V⟩ : KripkeModel κ α) ⊧ φ := by
+  intro κ _ F _;
+  apply Hilbert.Normal2.valid_of_provable F ?_ h;
+  rintro V;
+  constructor;
+  intro _ hφ;
+  rcases (by simpa [Hilbert.Normal2.buildAxioms] using hφ) with ((⟨_, _, rfl⟩ | ⟨_, rfl⟩)) <;> grind;
 
-theorem kripke_sound' : Modal.KT' _ ⊢ φ → (∀ {κ}, [Nonempty κ] → ∀ M : KripkeModel κ α, [Std.Refl M.rel] → M ⊧ φ)
-  := fun h _ _ M _ ↦ kripke_sound h M.frame M.val
+lemma forall_reflexive_frame_validates_of_provable' (h : Modal.KT' α ⊢ φ)
+  : ∀ {κ : Type*}, [Nonempty κ] → ∀ K, (Reflexive K) → ∀ V, (⟨K, V⟩ : KripkeModel κ α) ⊧ φ
+  := by
+  rintro _ _ F F_reflexive;
+  have : Std.Refl F := by constructor; tauto;
+  exact forall_reflexive_frame_validates_of_provable h F;
+
+theorem forall_reflexive_model_validates_of_provable (h : Modal.KT' α ⊢ φ)
+  : ∀ {κ}, [Nonempty κ] → ∀ M : KripkeModel κ α, [Std.Refl M.rel] → M ⊧ φ
+  := fun M ↦ forall_reflexive_frame_validates_of_provable h M.frame M.val
+
 
 instance : Entailment.Consistent (Modal.KT' α) := by
-  let K : Rel (Fin 1) (Fin 1) := (λ _ _ => True);
-  have : Std.Refl K := by constructor; tauto;
-
-  apply Hilbert.Normal2.consistent_of_valid_model' K;
-  rintro V _ h;
-  rcases (by simpa [Hilbert.Normal2.buildAxioms] using h) with ((⟨_, _, rfl⟩ | ⟨_, rfl⟩));
-  . apply KripkeModel.models_axiomK;
-  . apply KripkeModel.models_axiomT_of_reflexive
+  apply Entailment.Consistent.of_unprovable (φ := ⊥);
+  by_contra! hC;
+  apply KripkeModel.validates_falsum $
+    forall_reflexive_frame_validates_of_provable' hC (λ (_ : Fin 1) _ => True) (by tauto) (λ _ _ => True);
 
 variable [DecidableEq α] [Encodable α]
 
-theorem kripke_complete : (∀ {κ : Type u}, [Nonempty κ] → ∀ M : KripkeModel κ α, [Std.Refl M.rel] → M ⊧ φ) → Modal.KT' _ ⊢ φ
-  := fun h ↦ canonicalKripkeModel.iff_valid_provable.mp $ h _
+theorem provable_of_forall_reflexive_model_validate
+  (h : ∀ {κ : Type u}, [Nonempty κ] → ∀ M : KripkeModel κ α, [Std.Refl M.rel] → M ⊧ φ)
+  : Modal.KT' α ⊢ φ
+  := canonicalKripkeModel.iff_valid_provable.mp $ h _
 
-theorem iff_provable_valid_all_kripkeModel : Modal.KT' α ⊢ φ ↔ (∀ {κ : Type u}, [Nonempty κ] → ∀ M : KripkeModel κ α, [Std.Refl M.rel] → M ⊧ φ) := by
+theorem iff_provable_provable_forall_reflexive_model_validate
+  : Modal.KT' α ⊢ φ ↔ (∀ {κ : Type u}, [Nonempty κ] → ∀ M : KripkeModel κ α, [Std.Refl M.rel] → M ⊧ φ)
+  := by
   constructor;
-  . apply kripke_sound';
-  . apply kripke_complete;
+  . apply forall_reflexive_model_validates_of_provable;
+  . apply provable_of_forall_reflexive_model_validate;
 
 end KT'
 
