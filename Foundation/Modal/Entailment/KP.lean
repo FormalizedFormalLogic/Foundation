@@ -20,7 +20,7 @@ protected def axiomD [HasDiaDuality 𝓢] : 𝓢 ⊢! Axioms.D φ := by
   have : 𝓢 ⊢! □φ ➝ (∼□⊥ ➝ ∼□(∼φ)) := C_trans this CCCNN;
   have : 𝓢 ⊢! □φ ➝ ∼□(∼φ) := C_swap this ⨀ axiomP;
   exact C_trans this (K_right diaDuality);
-instance : HasAxiomD 𝓢 := ⟨fun _ ↦ KP.axiomD⟩
+instance : HasAxiomD 𝓢 := ⟨KP.axiomD⟩
 
 end KP
 

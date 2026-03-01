@@ -110,7 +110,7 @@ inductive buildAxioms.Symbol
   | WeakPoint2
   | WeakPoint3
   | Z
-deriving DecidableEq
+deriving DecidableEq, Repr
 
 def buildAxioms.Symbol.arity : buildAxioms.Symbol → ℕ
   | K
@@ -164,80 +164,143 @@ lemma mem_axiomK (h : .K ∈ l := by decide) : Axioms.K φ ψ ∈ buildAxioms α
   simp only [buildAxioms, Set.mem_union, Set.mem_ite_empty_right, Set.mem_setOf_eq];
   grind;
 
-lemma mem_axiomD (h : .D ∈ l := by decide) : Axioms.D φ ∈ buildAxioms α l := by
-  simp only [buildAxioms, Set.mem_union, Set.mem_ite_empty_right, Set.mem_setOf_eq];
-  grind;
-
-lemma mem_axiomT (h : .T ∈ l := by decide) : Axioms.T φ ∈ buildAxioms α l := by
-  simp only [buildAxioms, Set.mem_union, Set.mem_ite_empty_right, Set.mem_setOf_eq];
-  grind;
-
-lemma mem_axiomB (h : .B ∈ l := by decide) : Axioms.B φ ∈ buildAxioms α l := by
-  simp only [buildAxioms, Set.mem_union, Set.mem_ite_empty_right, Set.mem_setOf_eq];
-  grind;
-
-lemma mem_axiomFour (h : .Four ∈ l := by decide) : Axioms.Four φ ∈ buildAxioms α l := by
-  simp only [buildAxioms, Set.mem_union, Set.mem_ite_empty_right, Set.mem_setOf_eq];
-  grind;
-
-lemma mem_axiomFive (h : .Five ∈ l := by decide) : Axioms.Five φ ∈ buildAxioms α l := by
-  simp only [buildAxioms, Set.mem_union, Set.mem_ite_empty_right, Set.mem_setOf_eq];
-  grind;
-
-lemma mem_axiomPoint2 (h : .Point2 ∈ l := by decide) : Axioms.Point2 φ ∈ buildAxioms α l := by
-  simp only [buildAxioms, Set.mem_union, Set.mem_ite_empty_right, Set.mem_setOf_eq];
-  grind;
-
-lemma mem_axiomPoint3 (h : .Point3 ∈ l := by decide) : Axioms.Point3 φ ψ ∈ buildAxioms α l := by
-  simp only [buildAxioms, Set.mem_union, Set.mem_ite_empty_right, Set.mem_setOf_eq];
-  grind;
-
-lemma mem_axiomGrz (h : .Grz ∈ l := by decide) : Axioms.Grz φ ∈ buildAxioms α l := by
-  simp only [buildAxioms, Set.mem_union, Set.mem_ite_empty_right, Set.mem_setOf_eq];
-  grind;
-
-lemma mem_axiomL (h : .L ∈ l := by decide) : Axioms.L φ ∈ buildAxioms α l := by
-  simp only [buildAxioms, Set.mem_union, Set.mem_ite_empty_right, Set.mem_setOf_eq];
-  grind;
-
-lemma mem_axiomP (h : .P ∈ l := by decide) : Axioms.P ∈ buildAxioms α l := by
-  simp only [buildAxioms, Set.mem_union, Set.mem_ite_empty_right, Set.mem_setOf_eq];
-  grind;
-
-lemma mem_axiomMcK (h : .McK ∈ l := by decide) : Axioms.McK φ ∈ buildAxioms α l := by
-  simp only [buildAxioms, Set.mem_union, Set.mem_ite_empty_right, Set.mem_setOf_eq];
-  grind;
-
-lemma mem_axiomTc (h : .Tc ∈ l := by decide) : Axioms.Tc φ ∈ buildAxioms α l := by
-  simp only [buildAxioms, Set.mem_union, Set.mem_ite_empty_right, Set.mem_setOf_eq];
-  grind;
-
+/-
 attribute [simp, grind <=]
-  mem_axiomK
-  mem_axiomD
-  mem_axiomT
   mem_axiomB
-  mem_axiomFour
+  mem_axiomC4
+  mem_axiomCD
+  mem_axiomD
+  mem_axiomDum
   mem_axiomFive
-  mem_axiomPoint2
-  mem_axiomPoint3
+  mem_axiomFour
   mem_axiomGrz
-  mem_axiomP
+  mem_axiomH
+  mem_axiomHen
+  mem_axiomK
   mem_axiomL
   mem_axiomMcK
+  mem_axiomMk
+  mem_axiomP
+  mem_axiomPoint2
+  mem_axiomPoint3
+  mem_axiomPoint4
+  mem_axiomT
   mem_axiomTc
+  mem_axiomVer
+  mem_axiomWeakPoint2
+  mem_axiomWeakPoint3
+  mem_axiomZ
+-/
 
 end buildAxioms
 
 end
 
-end Hilbert.Normal2
-
-
 section
 
+open Lean Elab Command Term Meta Qq
+open buildAxioms
 
-open Lean in
+local elab "#defineModalLogic" name:ident axioms:term : command => do
+  let logicName := `_root_.LO.Modal |>.append name.getId
+
+  -- let axioms ← axioms.getElems.mapM $ λ stx => pure (Lean.mkIdentFrom stx stx.getId)
+
+  dbg_trace logicName
+  dbg_trace axioms
+
+  elabCommand (←`(protected abbrev $(mkIdent logicName) (α) := Hilbert.Normal2 $ Hilbert.Normal2.buildAxioms α $axioms))
+  -- elabCommand (←`(#eval String.toSlice $axioms))
+
+  /-
+  if axioms.contains (mkIdent `K) then elabCommand (←`(
+    instance {α} : Entailment.HasAxiomK ($(mkIdent logicName) α) := ⟨by intros; constructor; apply Hilbert.Normal2.axm $ mem_axiomK⟩
+  ))
+  -/
+
+  /-
+  if axioms.contains (mkIdent `D) then
+    elabCommand (←`(instance {α} : Entailment.HasAxiomD ($logicName α) where D φ := by constructor; apply Hilbert.Normal2.axm; simp))
+  if axioms.contains (mkIdent `T) then
+    elabCommand (←`(instance {α} : Entailment.HasAxiomT ($logicName α) where T φ := by constructor; apply Hilbert.Normal2.axm; simp))
+  if axioms.contains (mkIdent `B) then
+    elabCommand (←`(instance {α} : Entailment.HasAxiomB ($logicName α) where B φ := by constructor; apply Hilbert.Normal2.axm; simp))
+  if axioms.contains (mkIdent `Four) then
+    elabCommand (←`(instance {α} : Entailment.HasAxiomFour ($logicName α) where Four φ := by constructor; apply Hilbert.Normal2.axm; simp))
+  if axioms.contains (mkIdent `Five) then
+    elabCommand (←`(instance {α} : Entailment.HasAxiomFive ($logicName α) where Five φ := by constructor; apply Hilbert.Normal2.axm; simp))
+  if axioms.contains (mkIdent `Point2) then
+    elabCommand (←`(instance {α} : Entailment.HasAxiomPoint2 ($logicName α) where Point2 φ := by constructor; apply Hilbert.Normal2.axm; simp))
+  if axioms.contains (mkIdent `Point3) then
+    elabCommand (←`(instance {α} : Entailment.HasAxiomPoint3 ($logicName α) where Point3 φ ψ := by constructor; apply Hilbert.Normal2.axm; simp))
+  if axioms.contains (mkIdent `Grz) then
+    elabCommand (←`(instance {α} : Entailment.HasAxiomGrz ($logicName α) where Grz φ := by constructor; apply Hilbert.Normal2.axm; simp))
+  if axioms.contains (mkIdent `L) then
+    elabCommand (←`(instance {α} : Entailment.HasAxiomL ($logicName α) where L φ := by constructor; apply Hilbert.Normal2.axm; simp))
+  if axioms.contains (mkIdent `P) then
+    elabCommand (←`(instance {α} : Entailment.HasAxiomP ($logicName α) where P := by constructor; apply Hilbert.Normal2.axm; simp))
+  if axioms.contains (mkIdent `McK) then
+    elabCommand (←`(instance {α} : Entailment.HasAxiomMcK ($logicName α) where McK φ := by constructor; apply Hilbert.Normal2.axm; simp))
+  -/
+
+
+open Hilbert.Normal2.buildAxioms.Symbol
+
+whatsnew in
+#defineModalLogic Dum         [.K, .T, .Four, .Dum]
+#defineModalLogic DumPoint2   [.K, .T, .Four, .Dum, .Point2]
+#defineModalLogic DumPoint3   [.K, .T, .Four, .Dum, .Point3]
+#defineModalLogic GL          [.K, .L]
+#defineModalLogic GLPoint2    [.K, .L, .WeakPoint2]
+#defineModalLogic GLPoint3    [.K, .L, .WeakPoint3]
+#defineModalLogic Grz         [.K, .Grz]
+#defineModalLogic GrzPoint2   [.K, .Grz, .Point2]
+#defineModalLogic GrzPoint3   [.K, .Grz, .Point3]
+#defineModalLogic K           [.K]
+#defineModalLogic K4          [.K, .Four]
+#defineModalLogic K45         [.K, .Four, .Five]
+#defineModalLogic K4Hen       [.K, .Four, .Hen]
+#defineModalLogic K4McK       [.K, .Four, .McK]
+#defineModalLogic K4Point2    [.K, .Four, .WeakPoint2]
+#defineModalLogic K4Point2Z   [.K, .Four, .WeakPoint2, .Z]
+#defineModalLogic K4Point3    [.K, .Four, .WeakPoint3]
+#defineModalLogic K4Point3Z   [.K, .Four, .WeakPoint3, .Z]
+#defineModalLogic K4Z         [.K, .Four, .Z]
+#defineModalLogic K5          [.K, .Five]
+#defineModalLogic KB          [.K, .B]
+#defineModalLogic KB4         [.K, .B, .Four]
+#defineModalLogic KB5         [.K, .B, .Five]
+#defineModalLogic KD          [.K, .D]
+#defineModalLogic KD4         [.K, .D, .Four]
+#defineModalLogic KD45        [.K, .D, .Four, .Five]
+#defineModalLogic KD4Point3Z  [.K, .D, .Four, .Point3, .Z]
+#defineModalLogic KD5         [.K, .D, .Five]
+#defineModalLogic KDB         [.K, .D, .B]
+#defineModalLogic KHen        [.K, .Hen]
+#defineModalLogic KP          [.K, .P]
+#defineModalLogic KT          [.K, .T]
+#defineModalLogic KT4B        [.K, .T, .Four, .B]
+#defineModalLogic KTB         [.K, .T, .B]
+#defineModalLogic KTc         [.K, .Tc]
+#defineModalLogic KTMk        [.K, .T, .Mk]
+#defineModalLogic N           []
+#defineModalLogic NP          [.P]
+#defineModalLogic S4          [.K, .T, .Four]
+#defineModalLogic S4H         [.K, .T, .Four, .H]
+#defineModalLogic S4McK       [.K, .T, .Four, .McK]
+#defineModalLogic S4Point2    [.K, .T, .Four, .Point2]
+#defineModalLogic S4Point2McK [.K, .T, .Four, .Point2, .McK]
+#defineModalLogic S4Point3    [.K, .T, .Four, .Point3]
+#defineModalLogic S4Point3McK [.K, .T, .Four, .Point3, .McK]
+#defineModalLogic S4Point4    [.K, .T, .Four, .Point4]
+#defineModalLogic S4Point4McK [.K, .T, .Four, .Point4, .McK]
+#defineModalLogic S5          [.K, .T, .Five]
+#defineModalLogic S5Grz       [.K, .T, .Five, .Grz]
+#defineModalLogic Triv        [.K, .T, .Tc]
+#defineModalLogic Ver         [.K, .Ver]
+
+/-
+open Lean
 macro "defineModalLogic" name:ident "[" xs:ident,* "]" : command => do
   let xs ← xs.getElems.mapM $ λ stx => pure (Lean.mkIdentFrom stx stx.getId)
 
@@ -300,6 +363,7 @@ macro "defineModalLogic" name:ident "[" xs:ident,* "]" : command => do
     abbrev $logicName (α : Type*) := Hilbert.Normal2 $ Hilbert.Normal2.buildAxioms α [$[$xs],*]
 
     namespace $logicName
+
 
     $instHasAxiomK
     $instHasAxiomT
@@ -426,8 +490,11 @@ noncomputable instance  [DecidableEq α] [Modal.K4McK' α ⪯ Hilbert.Normal2 Ax
   K _ _ := Entailment.WeakerThan.pbl (𝓢 := Modal.K4McK' α) axiomK! |>.some
   Four _ := Entailment.WeakerThan.pbl (𝓢 := Modal.K4McK' α) axiomFour! |>.some
   McK _ := Entailment.WeakerThan.pbl (𝓢 := Modal.K4McK' α) axiomMcK! |>.some
+-/
 
 end
+
+end Hilbert.Normal2
 
 end LO.Modal
 

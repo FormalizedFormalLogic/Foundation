@@ -24,7 +24,8 @@ instance [Entailment.EM 𝓢] : Entailment.RM 𝓢 := ⟨by
 ⟩
 
 instance [Entailment.E 𝓢] [Entailment.RM 𝓢] : Entailment.EM 𝓢 where
-  M φ ψ := by
+  M := by
+    intro φ ψ;
     apply CK_of_C_of_C;
     . apply rm; exact and₁;
     . apply rm; exact and₂;

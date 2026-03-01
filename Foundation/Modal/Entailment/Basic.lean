@@ -130,19 +130,19 @@ end HasDiaDuality
 
 
 class HasAxiomK [LogicalConnective F] [Box F](𝓢 : S) where
-  K (φ ψ : F) : 𝓢 ⊢! Axioms.K φ ψ
+  K {φ ψ : F} : 𝓢 ⊢! Axioms.K φ ψ
 
 section HasAxiomK
 
 variable [HasAxiomK 𝓢]
 
-def axiomK : 𝓢 ⊢! □(φ ➝ ψ) ➝ □φ ➝ □ψ := HasAxiomK.K _ _
+def axiomK : 𝓢 ⊢! □(φ ➝ ψ) ➝ □φ ➝ □ψ := HasAxiomK.K
 @[simp] lemma axiomK! : 𝓢 ⊢ □(φ ➝ ψ) ➝ □φ ➝ □ψ := ⟨axiomK⟩
 
 variable [Entailment.Minimal 𝓢]
 
-instance (Γ : FiniteContext F 𝓢) : HasAxiomK Γ := ⟨fun _ _ ↦ FiniteContext.of axiomK⟩
-instance (Γ : Context F 𝓢) : HasAxiomK Γ := ⟨fun _ _ ↦ Context.of axiomK⟩
+instance (Γ : FiniteContext F 𝓢) : HasAxiomK Γ := ⟨FiniteContext.of axiomK⟩
+instance (Γ : Context F 𝓢) : HasAxiomK Γ := ⟨Context.of axiomK⟩
 
 def axiomK' (h : 𝓢 ⊢! □(φ ➝ ψ)) : 𝓢 ⊢! □φ ➝ □ψ := axiomK ⨀ h
 @[simp] lemma axiomK'! (h : 𝓢 ⊢ □(φ ➝ ψ)) : 𝓢 ⊢ □φ ➝ □ψ := ⟨axiomK' h.some⟩
@@ -154,19 +154,19 @@ end HasAxiomK
 
 
 class HasAxiomM [LogicalConnective F] [Box F] (𝓢 : S) where
-  M (φ ψ : F) : 𝓢 ⊢! Axioms.M φ ψ
+  M {φ ψ : F} : 𝓢 ⊢! Axioms.M φ ψ
 
 section HasAxiomM
 
 variable [HasAxiomM 𝓢]
 
-def axiomM : 𝓢 ⊢! □(φ ⋏ ψ) ➝ (□φ ⋏ □ψ) := HasAxiomM.M _ _
+def axiomM : 𝓢 ⊢! □(φ ⋏ ψ) ➝ (□φ ⋏ □ψ) := HasAxiomM.M
 @[simp] lemma axiomM! : 𝓢 ⊢ □(φ ⋏ ψ) ➝ (□φ ⋏ □ψ) := ⟨axiomM⟩
 
 variable [Entailment.Minimal 𝓢]
 
-instance (Γ : FiniteContext F 𝓢) : HasAxiomM Γ := ⟨fun _ _ ↦ FiniteContext.of axiomM⟩
-instance (Γ : Context F 𝓢) : HasAxiomM Γ := ⟨fun _ _ ↦ Context.of axiomM⟩
+instance (Γ : FiniteContext F 𝓢) : HasAxiomM Γ := ⟨FiniteContext.of axiomM⟩
+instance (Γ : Context F 𝓢) : HasAxiomM Γ := ⟨Context.of axiomM⟩
 
 def axiomM' (h : 𝓢 ⊢! □(φ ⋏ ψ)) : 𝓢 ⊢! □φ ⋏ □ψ := axiomM ⨀ h
 lemma axiomM'! (h : 𝓢 ⊢ □(φ ⋏ ψ)) : 𝓢 ⊢ □φ ⋏ □ψ := ⟨axiomM' h.some⟩
@@ -175,19 +175,19 @@ end HasAxiomM
 
 
 class HasAxiomC [LogicalConnective F] [Box F] (𝓢 : S) where
-  C (φ ψ : F) : 𝓢 ⊢! Axioms.C φ ψ
+  C {φ ψ : F} : 𝓢 ⊢! Axioms.C φ ψ
 
 section HasAxiomC
 
 variable [HasAxiomC 𝓢]
 
-def axiomC : 𝓢 ⊢! (□φ ⋏ □ψ) ➝ □(φ ⋏ ψ) := HasAxiomC.C _ _
+def axiomC : 𝓢 ⊢! (□φ ⋏ □ψ) ➝ □(φ ⋏ ψ) := HasAxiomC.C
 @[simp] lemma axiomC! : 𝓢 ⊢ (□φ ⋏ □ψ) ➝ □(φ ⋏ ψ) := ⟨axiomC⟩
 
 variable [Entailment.Minimal 𝓢]
 
-instance (Γ : FiniteContext F 𝓢) : HasAxiomC Γ := ⟨fun _ _ ↦ FiniteContext.of axiomC⟩
-instance (Γ : Context F 𝓢) : HasAxiomC Γ := ⟨fun _ _ ↦ Context.of axiomC⟩
+instance (Γ : FiniteContext F 𝓢) : HasAxiomC Γ := ⟨FiniteContext.of axiomC⟩
+instance (Γ : Context F 𝓢) : HasAxiomC Γ := ⟨Context.of axiomC⟩
 
 def axiomC' (h : 𝓢 ⊢! □φ ⋏ □ψ) : 𝓢 ⊢! □(φ ⋏ ψ) := axiomC ⨀ h
 lemma axiomC'! (h : 𝓢 ⊢ □φ ⋏ □ψ) : 𝓢 ⊢ □(φ ⋏ ψ) := ⟨axiomC' h.some⟩
@@ -196,19 +196,19 @@ end HasAxiomC
 
 
 class HasAxiomT (𝓢 : S) where
-  T (φ : F) : 𝓢 ⊢! Axioms.T φ
+  T {φ : F} : 𝓢 ⊢! Axioms.T φ
 
 section HasAxiomT
 
 variable [HasAxiomT 𝓢]
 
-def axiomT : 𝓢 ⊢! □φ ➝ φ := HasAxiomT.T _
+def axiomT : 𝓢 ⊢! □φ ➝ φ := HasAxiomT.T
 @[simp] lemma axiomT! {φ} : 𝓢 ⊢ □φ ➝ φ := ⟨axiomT⟩
 
 variable [Entailment.Minimal 𝓢]
 
-instance (Γ : FiniteContext F 𝓢) : HasAxiomT Γ := ⟨fun _ ↦ FiniteContext.of axiomT⟩
-instance (Γ : Context F 𝓢) : HasAxiomT Γ := ⟨fun _ ↦ Context.of axiomT⟩
+instance (Γ : FiniteContext F 𝓢) : HasAxiomT Γ := ⟨FiniteContext.of axiomT⟩
+instance (Γ : Context F 𝓢) : HasAxiomT Γ := ⟨Context.of axiomT⟩
 
 def axiomT' (h : 𝓢 ⊢! □φ) : 𝓢 ⊢! φ := axiomT ⨀ h
 @[simp] lemma axiomT'! (h : 𝓢 ⊢ □φ) : 𝓢 ⊢ φ := ⟨axiomT' h.some⟩
@@ -217,19 +217,19 @@ end HasAxiomT
 
 
 class HasAxiomDiaTc (𝓢 : S) where
-  diaTc (φ : F) : 𝓢 ⊢! Axioms.DiaTc φ
+  diaTc {φ : F} : 𝓢 ⊢! Axioms.DiaTc φ
 
 section HasAxiomDiaTc
 
 variable [HasAxiomDiaTc 𝓢]
 
-def diaTc : 𝓢 ⊢! φ ➝ ◇φ := HasAxiomDiaTc.diaTc _
+def diaTc : 𝓢 ⊢! φ ➝ ◇φ := HasAxiomDiaTc.diaTc
 @[simp] lemma diaTc! : 𝓢 ⊢ φ ➝ ◇φ := ⟨diaTc⟩
 
 variable [Entailment.Minimal 𝓢]
 
-instance (Γ : FiniteContext F 𝓢) : HasAxiomDiaTc Γ := ⟨fun _ ↦ FiniteContext.of diaTc⟩
-instance (Γ : Context F 𝓢) : HasAxiomDiaTc Γ := ⟨fun _ ↦ Context.of diaTc⟩
+instance (Γ : FiniteContext F 𝓢) : HasAxiomDiaTc Γ := ⟨FiniteContext.of diaTc⟩
+instance (Γ : Context F 𝓢) : HasAxiomDiaTc Γ := ⟨Context.of diaTc⟩
 
 def diaTc' (h : 𝓢 ⊢! φ) : 𝓢 ⊢! ◇φ := diaTc ⨀ h
 lemma diaTc'! (h : 𝓢 ⊢ φ) : 𝓢 ⊢ ◇φ := ⟨diaTc' h.some⟩
@@ -238,19 +238,19 @@ end HasAxiomDiaTc
 
 
 class HasAxiomD [Dia F] (𝓢 : S) where
-  D (φ : F) : 𝓢 ⊢! Axioms.D φ
+  D {φ : F} : 𝓢 ⊢! Axioms.D φ
 
 section HasAxiomD
 
 variable [HasAxiomD 𝓢]
 
-def axiomD : 𝓢 ⊢! □φ ➝ ◇φ := HasAxiomD.D _
+def axiomD : 𝓢 ⊢! □φ ➝ ◇φ := HasAxiomD.D
 @[simp] lemma axiomD! : 𝓢 ⊢ □φ ➝ ◇φ := ⟨axiomD⟩
 
 variable [Entailment.Minimal 𝓢]
 
-instance (Γ : FiniteContext F 𝓢) : HasAxiomD Γ := ⟨fun _ ↦ FiniteContext.of axiomD⟩
-instance (Γ : Context F 𝓢) : HasAxiomD Γ := ⟨fun _ ↦ Context.of axiomD⟩
+instance (Γ : FiniteContext F 𝓢) : HasAxiomD Γ := ⟨FiniteContext.of axiomD⟩
+instance (Γ : Context F 𝓢) : HasAxiomD Γ := ⟨Context.of axiomD⟩
 
 def axiomD' (h : 𝓢 ⊢! □φ) : 𝓢 ⊢! ◇φ := axiomD ⨀ h
 lemma axiomD'! (h : 𝓢 ⊢ □φ) : 𝓢 ⊢ ◇φ := ⟨axiomD' h.some⟩
@@ -295,19 +295,19 @@ end HasAxiomN
 
 
 class HasAxiomB [Dia F] (𝓢 : S) where
-  B (φ : F) : 𝓢 ⊢! Axioms.B φ
+  B {φ : F} : 𝓢 ⊢! Axioms.B φ
 
 section HasAxiomB
 
 variable [HasAxiomB 𝓢]
 
-def axiomB : 𝓢 ⊢! φ ➝ □◇φ := HasAxiomB.B _
+def axiomB : 𝓢 ⊢! φ ➝ □◇φ := HasAxiomB.B
 @[simp] lemma axiomB! : 𝓢 ⊢ φ ➝ □◇φ := ⟨axiomB⟩
 
 variable [Entailment.Minimal 𝓢]
 
-instance (Γ : FiniteContext F 𝓢) : HasAxiomB Γ := ⟨fun _ ↦ FiniteContext.of axiomB⟩
-instance (Γ : Context F 𝓢) : HasAxiomB Γ := ⟨fun _ ↦ Context.of axiomB⟩
+instance (Γ : FiniteContext F 𝓢) : HasAxiomB Γ := ⟨FiniteContext.of axiomB⟩
+instance (Γ : Context F 𝓢) : HasAxiomB Γ := ⟨Context.of axiomB⟩
 
 def axiomB' (h : 𝓢 ⊢! φ) : 𝓢 ⊢! □◇φ := axiomB ⨀ h
 @[simp] lemma axiomB'! (h : 𝓢 ⊢ φ) : 𝓢 ⊢ □◇φ := ⟨axiomB' h.some⟩
@@ -316,19 +316,19 @@ end HasAxiomB
 
 
 class HasAxiomFour (𝓢 : S) where
-  Four (φ : F) : 𝓢 ⊢! Axioms.Four φ
+  Four {φ : F} : 𝓢 ⊢! Axioms.Four φ
 
 section HasAxiomFour
 
 variable [HasAxiomFour 𝓢]
 
-def axiomFour : 𝓢 ⊢! □φ ➝ □□φ := HasAxiomFour.Four _
+def axiomFour : 𝓢 ⊢! □φ ➝ □□φ := HasAxiomFour.Four
 @[simp] lemma axiomFour! : 𝓢 ⊢ □φ ➝ □□φ := ⟨axiomFour⟩
 
 variable [Entailment.Minimal 𝓢]
 
-instance (Γ : FiniteContext F 𝓢) : HasAxiomFour Γ := ⟨fun _ ↦ FiniteContext.of axiomFour⟩
-instance (Γ : Context F 𝓢) : HasAxiomFour Γ := ⟨fun _ ↦ Context.of axiomFour⟩
+instance (Γ : FiniteContext F 𝓢) : HasAxiomFour Γ := ⟨FiniteContext.of axiomFour⟩
+instance (Γ : Context F 𝓢) : HasAxiomFour Γ := ⟨Context.of axiomFour⟩
 
 def axiomFour' (h : 𝓢 ⊢! □φ) : 𝓢 ⊢! □□φ := axiomFour ⨀ h
 def axiomFour'! (h : 𝓢 ⊢ □φ) : 𝓢 ⊢ □□φ := ⟨axiomFour' h.some⟩
@@ -337,7 +337,7 @@ end HasAxiomFour
 
 
 class HasAxiomFourN (n) (𝓢 : S) where
-  FourN (φ : F) : 𝓢 ⊢! Axioms.FourN n φ
+  FourN {φ : F} : 𝓢 ⊢! Axioms.FourN n φ
 
 section
 
@@ -348,188 +348,188 @@ def axiomFourN : 𝓢 ⊢! □^[n]φ ➝ □^[(n + 1)]φ := by apply HasAxiomFou
 
 variable [Entailment.Minimal 𝓢]
 
-instance (Γ : FiniteContext F 𝓢) : HasAxiomFourN n Γ := ⟨fun _ ↦ FiniteContext.of axiomFourN⟩
-instance (Γ : Context F 𝓢) : HasAxiomFourN n Γ := ⟨fun _ ↦ Context.of axiomFourN⟩
+instance (Γ : FiniteContext F 𝓢) : HasAxiomFourN n Γ := ⟨FiniteContext.of axiomFourN⟩
+instance (Γ : Context F 𝓢) : HasAxiomFourN n Γ := ⟨Context.of axiomFourN⟩
 
 end
 
 
 class HasAxiomFive [Dia F] (𝓢 : S) where
-  Five (φ : F) : 𝓢 ⊢! Axioms.Five φ
+  Five {φ : F} : 𝓢 ⊢! Axioms.Five φ
 
 section HasAxiomFive
 
 variable [HasAxiomFive 𝓢]
 
-def axiomFive : 𝓢 ⊢! ◇φ ➝ □◇φ := HasAxiomFive.Five _
+def axiomFive : 𝓢 ⊢! ◇φ ➝ □◇φ := HasAxiomFive.Five
 @[simp] lemma axiomFive! : 𝓢 ⊢ ◇φ ➝ □◇φ := ⟨axiomFive⟩
 
 variable [Entailment.Minimal 𝓢]
 
-instance (Γ : FiniteContext F 𝓢) : HasAxiomFive Γ := ⟨fun _ ↦ FiniteContext.of axiomFive⟩
-instance (Γ : Context F 𝓢) : HasAxiomFive Γ := ⟨fun _ ↦ Context.of axiomFive⟩
+instance (Γ : FiniteContext F 𝓢) : HasAxiomFive Γ := ⟨FiniteContext.of axiomFive⟩
+instance (Γ : Context F 𝓢) : HasAxiomFive Γ := ⟨Context.of axiomFive⟩
 
 end HasAxiomFive
 
 
 class HasAxiomL (𝓢 : S) where
-  L (φ : F) : 𝓢 ⊢! Axioms.L φ
+  L {φ : F} : 𝓢 ⊢! Axioms.L φ
 
 section HasAxiomL
 
 variable [HasAxiomL 𝓢]
 
-def axiomL : 𝓢 ⊢! □(□φ ➝ φ) ➝ □φ := HasAxiomL.L _
+def axiomL : 𝓢 ⊢! □(□φ ➝ φ) ➝ □φ := HasAxiomL.L
 @[simp] lemma axiomL! : 𝓢 ⊢ □(□φ ➝ φ) ➝ □φ := ⟨axiomL⟩
 
 variable [Entailment.Minimal 𝓢]
 
-instance (Γ : FiniteContext F 𝓢) : HasAxiomL Γ := ⟨fun _ ↦ FiniteContext.of axiomL⟩
-instance (Γ : Context F 𝓢) : HasAxiomL Γ := ⟨fun _ ↦ Context.of axiomL⟩
+instance (Γ : FiniteContext F 𝓢) : HasAxiomL Γ := ⟨FiniteContext.of axiomL⟩
+instance (Γ : Context F 𝓢) : HasAxiomL Γ := ⟨Context.of axiomL⟩
 
 end HasAxiomL
 
 
 class HasAxiomPoint2 [Dia F] (𝓢 : S) where
-  Point2 (φ : F) : 𝓢 ⊢! Axioms.Point2 φ
+  Point2 {φ : F} : 𝓢 ⊢! Axioms.Point2 φ
 
 section HasAxiomPoint2
 
 variable [HasAxiomPoint2 𝓢]
 
-def axiomPoint2 : 𝓢 ⊢! ◇□φ ➝ □◇φ := HasAxiomPoint2.Point2 _
+def axiomPoint2 : 𝓢 ⊢! ◇□φ ➝ □◇φ := HasAxiomPoint2.Point2
 @[simp] lemma axiomPoint2! : 𝓢 ⊢ ◇□φ ➝ □◇φ := ⟨axiomPoint2⟩
 
 variable [Entailment.Minimal 𝓢]
 
-instance (Γ : FiniteContext F 𝓢) : HasAxiomPoint2 Γ := ⟨fun _ ↦ FiniteContext.of axiomPoint2⟩
-instance (Γ : Context F 𝓢) : HasAxiomPoint2 Γ := ⟨fun _ ↦ Context.of axiomPoint2⟩
+instance (Γ : FiniteContext F 𝓢) : HasAxiomPoint2 Γ := ⟨FiniteContext.of axiomPoint2⟩
+instance (Γ : Context F 𝓢) : HasAxiomPoint2 Γ := ⟨Context.of axiomPoint2⟩
 
 end HasAxiomPoint2
 
 
 class HasAxiomWeakPoint2 [Dia F] (𝓢 : S) where
-  WeakPoint2 (φ ψ : F) : 𝓢 ⊢! Axioms.WeakPoint2 φ ψ
+  WeakPoint2 {φ ψ : F} : 𝓢 ⊢! Axioms.WeakPoint2 φ ψ
 
 section HasAxiomWeakPoint2
 
 variable [HasAxiomWeakPoint2 𝓢]
 
-def axiomWeakPoint2 : 𝓢 ⊢! ◇(□φ ⋏ ψ) ➝ □(◇φ ⋎ ψ) := HasAxiomWeakPoint2.WeakPoint2 _ _
+def axiomWeakPoint2 : 𝓢 ⊢! ◇(□φ ⋏ ψ) ➝ □(◇φ ⋎ ψ) := HasAxiomWeakPoint2.WeakPoint2
 @[simp] lemma axiomWeakPoint2! : 𝓢 ⊢ ◇(□φ ⋏ ψ) ➝ □(◇φ ⋎ ψ) := ⟨axiomWeakPoint2⟩
 
 variable [Entailment.Minimal 𝓢]
 
-instance (Γ : FiniteContext F 𝓢) : HasAxiomWeakPoint2 Γ := ⟨fun _ _ ↦ FiniteContext.of axiomWeakPoint2⟩
-instance (Γ : Context F 𝓢) : HasAxiomWeakPoint2 Γ := ⟨fun _ _ ↦ Context.of axiomWeakPoint2⟩
+instance (Γ : FiniteContext F 𝓢) : HasAxiomWeakPoint2 Γ := ⟨FiniteContext.of axiomWeakPoint2⟩
+instance (Γ : Context F 𝓢) : HasAxiomWeakPoint2 Γ := ⟨Context.of axiomWeakPoint2⟩
 
 end HasAxiomWeakPoint2
 
 
 class HasAxiomPoint3 (𝓢 : S) where
-  Point3 (φ ψ : F) : 𝓢 ⊢! Axioms.Point3 φ ψ
+  Point3 {φ ψ : F} : 𝓢 ⊢! Axioms.Point3 φ ψ
 
 section HasAxiomPoint3
 
 variable [HasAxiomPoint3 𝓢]
 
-def axiomPoint3 : 𝓢 ⊢! □(□φ ➝ ψ) ⋎ □(□ψ ➝ φ) := HasAxiomPoint3.Point3 _ _
+def axiomPoint3 : 𝓢 ⊢! □(□φ ➝ ψ) ⋎ □(□ψ ➝ φ) := HasAxiomPoint3.Point3
 @[simp] lemma axiomPoint3! : 𝓢 ⊢ □(□φ ➝ ψ) ⋎ □(□ψ ➝ φ) := ⟨axiomPoint3⟩
 
 variable [Entailment.Minimal 𝓢]
 
-instance (Γ : FiniteContext F 𝓢) : HasAxiomPoint3 Γ := ⟨fun _ _ ↦ FiniteContext.of axiomPoint3⟩
-instance (Γ : Context F 𝓢) : HasAxiomPoint3 Γ := ⟨fun _ _ ↦ Context.of axiomPoint3⟩
+instance (Γ : FiniteContext F 𝓢) : HasAxiomPoint3 Γ := ⟨FiniteContext.of axiomPoint3⟩
+instance (Γ : Context F 𝓢) : HasAxiomPoint3 Γ := ⟨Context.of axiomPoint3⟩
 
 end HasAxiomPoint3
 
 
 class HasAxiomWeakPoint3 [Dia F] (𝓢 : S) where
-  WeakPoint3 (φ ψ : F) : 𝓢 ⊢! Axioms.WeakPoint3 φ ψ
+  WeakPoint3 {φ ψ : F} : 𝓢 ⊢! Axioms.WeakPoint3 φ ψ
 
 section HasAxiomWeakPoint3
 
 variable [HasAxiomWeakPoint3 𝓢]
 
-def axiomWeakPoint3 : 𝓢 ⊢! □(⊡φ ➝ ψ) ⋎ □(⊡ψ ➝ φ) := HasAxiomWeakPoint3.WeakPoint3 _ _
+def axiomWeakPoint3 : 𝓢 ⊢! □(⊡φ ➝ ψ) ⋎ □(⊡ψ ➝ φ) := HasAxiomWeakPoint3.WeakPoint3
 @[simp] lemma axiomWeakPoint3! : 𝓢 ⊢ □(⊡φ ➝ ψ) ⋎ □(⊡ψ ➝ φ) := ⟨axiomWeakPoint3⟩
 
 variable [Entailment.Minimal 𝓢]
 
-instance (Γ : FiniteContext F 𝓢) : HasAxiomWeakPoint3 Γ := ⟨fun _ _ ↦ FiniteContext.of axiomWeakPoint3⟩
-instance (Γ : Context F 𝓢) : HasAxiomWeakPoint3 Γ := ⟨fun _ _ ↦ Context.of axiomWeakPoint3⟩
+instance (Γ : FiniteContext F 𝓢) : HasAxiomWeakPoint3 Γ := ⟨FiniteContext.of axiomWeakPoint3⟩
+instance (Γ : Context F 𝓢) : HasAxiomWeakPoint3 Γ := ⟨Context.of axiomWeakPoint3⟩
 
 end HasAxiomWeakPoint3
 
 
 class HasAxiomGrz (𝓢 : S) where
-  Grz (φ : F) : 𝓢 ⊢! Axioms.Grz φ
+  Grz {φ : F} : 𝓢 ⊢! Axioms.Grz φ
 
 section HasAxiomGrz
 
 variable [HasAxiomGrz 𝓢]
 
-def axiomGrz : 𝓢 ⊢! □(□(φ ➝ □φ) ➝ φ) ➝ φ := HasAxiomGrz.Grz _
+def axiomGrz : 𝓢 ⊢! □(□(φ ➝ □φ) ➝ φ) ➝ φ := HasAxiomGrz.Grz
 @[simp] lemma axiomGrz! : 𝓢 ⊢ □(□(φ ➝ □φ) ➝ φ) ➝ φ := ⟨axiomGrz⟩
 
 variable [Entailment.Minimal 𝓢]
 
-instance (Γ : FiniteContext F 𝓢) : HasAxiomGrz Γ := ⟨fun _ ↦ FiniteContext.of axiomGrz⟩
-instance (Γ : Context F 𝓢) : HasAxiomGrz Γ := ⟨fun _ ↦ Context.of axiomGrz⟩
+instance (Γ : FiniteContext F 𝓢) : HasAxiomGrz Γ := ⟨FiniteContext.of axiomGrz⟩
+instance (Γ : Context F 𝓢) : HasAxiomGrz Γ := ⟨Context.of axiomGrz⟩
 
 end HasAxiomGrz
 
 
 class HasAxiomDum (𝓢 : S) where
-  Dum (φ : F) : 𝓢 ⊢! Axioms.Dum φ
+  Dum {φ : F} : 𝓢 ⊢! Axioms.Dum φ
 
 section HasAxiomDum
 
 variable [HasAxiomDum 𝓢]
 
-def axiomDum : 𝓢 ⊢! □(□(φ ➝ □φ) ➝ φ) ➝ (◇□φ ➝ φ) := HasAxiomDum.Dum _
+def axiomDum : 𝓢 ⊢! □(□(φ ➝ □φ) ➝ φ) ➝ (◇□φ ➝ φ) := HasAxiomDum.Dum
 @[simp] lemma axiomDum! : 𝓢 ⊢ □(□(φ ➝ □φ) ➝ φ) ➝ (◇□φ ➝ φ) := ⟨axiomDum⟩
 
 variable [Entailment.Minimal 𝓢]
 
-instance (Γ : FiniteContext F 𝓢) : HasAxiomDum Γ := ⟨fun _ ↦ FiniteContext.of axiomDum⟩
-instance (Γ : Context F 𝓢) : HasAxiomDum Γ := ⟨fun _ ↦ Context.of axiomDum⟩
+instance (Γ : FiniteContext F 𝓢) : HasAxiomDum Γ := ⟨FiniteContext.of axiomDum⟩
+instance (Γ : Context F 𝓢) : HasAxiomDum Γ := ⟨Context.of axiomDum⟩
 
 end HasAxiomDum
 
 
 class HasAxiomTc (𝓢 : S) where
-  Tc (φ : F) : 𝓢 ⊢! Axioms.Tc φ
+  Tc {φ : F} : 𝓢 ⊢! Axioms.Tc φ
 
 section HasAxiomTc
 
 variable [HasAxiomTc 𝓢]
 
-def axiomTc : 𝓢 ⊢! φ ➝ □φ := HasAxiomTc.Tc _
+def axiomTc : 𝓢 ⊢! φ ➝ □φ := HasAxiomTc.Tc
 @[simp] lemma axiomTc! : 𝓢 ⊢ φ ➝ □φ := ⟨axiomTc⟩
 
 variable [Entailment.Minimal 𝓢]
 
-instance (Γ : FiniteContext F 𝓢) : HasAxiomTc Γ := ⟨fun _ ↦ FiniteContext.of axiomTc⟩
-instance (Γ : Context F 𝓢) : HasAxiomTc Γ := ⟨fun _ ↦ Context.of axiomTc⟩
+instance (Γ : FiniteContext F 𝓢) : HasAxiomTc Γ := ⟨FiniteContext.of axiomTc⟩
+instance (Γ : Context F 𝓢) : HasAxiomTc Γ := ⟨Context.of axiomTc⟩
 
 end HasAxiomTc
 
 
 class HasAxiomDiaT (𝓢 : S) where
-  diaT (φ : F) : 𝓢 ⊢! Axioms.DiaT φ
+  diaT {φ : F} : 𝓢 ⊢! Axioms.DiaT φ
 
 section HasAxiomDiaT
 
 variable [HasAxiomDiaT 𝓢]
 
-def diaT : 𝓢 ⊢! ◇φ ➝ φ := HasAxiomDiaT.diaT _
+def diaT : 𝓢 ⊢! ◇φ ➝ φ := HasAxiomDiaT.diaT
 @[simp] lemma diaT! : 𝓢 ⊢ ◇φ ➝ φ := ⟨diaT⟩
 
 variable [Entailment.Minimal 𝓢]
 
-instance (Γ : FiniteContext F 𝓢) : HasAxiomDiaT Γ := ⟨fun _ ↦ FiniteContext.of diaT⟩
-instance (Γ : Context F 𝓢) : HasAxiomDiaT Γ := ⟨fun _ ↦ Context.of diaT⟩
+instance (Γ : FiniteContext F 𝓢) : HasAxiomDiaT Γ := ⟨FiniteContext.of diaT⟩
+instance (Γ : Context F 𝓢) : HasAxiomDiaT Γ := ⟨Context.of diaT⟩
 
 def diaT' (h : 𝓢 ⊢! ◇φ) : 𝓢 ⊢! φ := diaT ⨀ h
 lemma diaT'! (h : 𝓢 ⊢ ◇φ) : 𝓢 ⊢ φ := ⟨diaT' h.some⟩
@@ -538,153 +538,153 @@ end HasAxiomDiaT
 
 
 class HasAxiomVer (𝓢 : S) where
-  Ver (φ : F) : 𝓢 ⊢! Axioms.Ver φ
+  Ver {φ : F} : 𝓢 ⊢! Axioms.Ver φ
 
 section HasAxiomVer
 
 variable [HasAxiomVer 𝓢]
 
-def axiomVer : 𝓢 ⊢! □φ := HasAxiomVer.Ver _
+def axiomVer : 𝓢 ⊢! □φ := HasAxiomVer.Ver
 @[simp] lemma axiomVer! : 𝓢 ⊢ □φ := ⟨axiomVer⟩
 
 variable [Entailment.Minimal 𝓢]
 
-instance (Γ : FiniteContext F 𝓢) : HasAxiomVer Γ := ⟨fun _ ↦ FiniteContext.of axiomVer⟩
-instance (Γ : Context F 𝓢) : HasAxiomVer Γ := ⟨fun _ ↦ Context.of axiomVer⟩
+instance (Γ : FiniteContext F 𝓢) : HasAxiomVer Γ := ⟨FiniteContext.of axiomVer⟩
+instance (Γ : Context F 𝓢) : HasAxiomVer Γ := ⟨Context.of axiomVer⟩
 
 end HasAxiomVer
 
 
 class HasAxiomHen (𝓢 : S) where
-  Hen (φ : F) : 𝓢 ⊢! Axioms.Hen φ
+  Hen {φ : F} : 𝓢 ⊢! Axioms.Hen φ
 
 section HasAxiomHen
 
 variable [HasAxiomHen 𝓢]
 
-def axiomHen : 𝓢 ⊢! □(□φ ⭤ φ) ➝ □φ := HasAxiomHen.Hen _
+def axiomHen : 𝓢 ⊢! □(□φ ⭤ φ) ➝ □φ := HasAxiomHen.Hen
 @[simp] lemma axiomHen! : 𝓢 ⊢ □(□φ ⭤ φ) ➝ □φ := ⟨axiomHen⟩
 
 variable [Entailment.Minimal 𝓢]
 
-instance (Γ : FiniteContext F 𝓢) : HasAxiomHen Γ := ⟨fun _ ↦ FiniteContext.of axiomHen⟩
-instance (Γ : Context F 𝓢) : HasAxiomHen Γ := ⟨fun _ ↦ Context.of axiomHen⟩
+instance (Γ : FiniteContext F 𝓢) : HasAxiomHen Γ := ⟨FiniteContext.of axiomHen⟩
+instance (Γ : Context F 𝓢) : HasAxiomHen Γ := ⟨Context.of axiomHen⟩
 
 end HasAxiomHen
 
 
 class HasAxiomZ (𝓢 : S) where
-  Z (φ : F) : 𝓢 ⊢! Axioms.Z φ
+  Z {φ : F} : 𝓢 ⊢! Axioms.Z φ
 
 section HasAxiomZ
 
 variable [HasAxiomZ 𝓢]
 
-def axiomZ : 𝓢 ⊢! □(□φ ➝ φ) ➝ (◇□φ ➝ □φ) := HasAxiomZ.Z _
+def axiomZ : 𝓢 ⊢! □(□φ ➝ φ) ➝ (◇□φ ➝ □φ) := HasAxiomZ.Z
 @[simp] lemma axiomZ! : 𝓢 ⊢ □(□φ ➝ φ) ➝ (◇□φ ➝ □φ) := ⟨axiomZ⟩
 
 variable [Entailment.Minimal 𝓢]
 
-instance (Γ : FiniteContext F 𝓢) : HasAxiomZ Γ := ⟨fun _ ↦ FiniteContext.of axiomZ⟩
-instance (Γ : Context F 𝓢) : HasAxiomZ Γ := ⟨fun _ ↦ Context.of axiomZ⟩
+instance (Γ : FiniteContext F 𝓢) : HasAxiomZ Γ := ⟨FiniteContext.of axiomZ⟩
+instance (Γ : Context F 𝓢) : HasAxiomZ Γ := ⟨Context.of axiomZ⟩
 
 end HasAxiomZ
 
 
 class HasAxiomMcK (𝓢 : S) where
-  McK (φ : F) : 𝓢 ⊢! Axioms.McK φ
+  McK {φ : F} : 𝓢 ⊢! Axioms.McK φ
 
 section HasAxiomMcK
 
 variable [HasAxiomMcK 𝓢]
 
-def axiomMcK : 𝓢 ⊢! □◇φ ➝ ◇□φ := HasAxiomMcK.McK _
+def axiomMcK : 𝓢 ⊢! □◇φ ➝ ◇□φ := HasAxiomMcK.McK
 @[simp] lemma axiomMcK! : 𝓢 ⊢ □◇φ ➝ ◇□φ := ⟨axiomMcK⟩
 
 variable [Entailment.Minimal 𝓢]
-instance (Γ : FiniteContext F 𝓢) : HasAxiomMcK Γ := ⟨fun _ ↦ FiniteContext.of axiomMcK⟩
-instance (Γ : Context F 𝓢) : HasAxiomMcK Γ := ⟨fun _ ↦ Context.of axiomMcK⟩
+instance (Γ : FiniteContext F 𝓢) : HasAxiomMcK Γ := ⟨FiniteContext.of axiomMcK⟩
+instance (Γ : Context F 𝓢) : HasAxiomMcK Γ := ⟨Context.of axiomMcK⟩
 
 end HasAxiomMcK
 
 
 class HasAxiomMk [LogicalConnective F] [Box F](𝓢 : S) where
-  Mk (φ ψ : F) : 𝓢 ⊢! Axioms.Mk φ ψ
+  Mk {φ ψ : F} : 𝓢 ⊢! Axioms.Mk φ ψ
 
 section HasAxiomMk
 
 variable [HasAxiomMk 𝓢]
 
-def axiomMk : 𝓢 ⊢! □φ ⋏ ψ ➝ ◇(□□φ ⋏ ◇ψ) := HasAxiomMk.Mk _ _
+def axiomMk : 𝓢 ⊢! □φ ⋏ ψ ➝ ◇(□□φ ⋏ ◇ψ) := HasAxiomMk.Mk
 @[simp] lemma axiomMk! : 𝓢 ⊢ □φ ⋏ ψ ➝ ◇(□□φ ⋏ ◇ψ) := ⟨axiomMk⟩
 
 variable [Entailment.Minimal 𝓢]
 
-instance (Γ : FiniteContext F 𝓢) : HasAxiomMk Γ := ⟨fun _ _ ↦ FiniteContext.of axiomMk⟩
-instance (Γ : Context F 𝓢) : HasAxiomMk Γ := ⟨fun _ _ ↦ Context.of axiomMk⟩
+instance (Γ : FiniteContext F 𝓢) : HasAxiomMk Γ := ⟨FiniteContext.of axiomMk⟩
+instance (Γ : Context F 𝓢) : HasAxiomMk Γ := ⟨Context.of axiomMk⟩
 
 end HasAxiomMk
 
 
 class HasAxiomPoint4 [LogicalConnective F] [Box F] (𝓢 : S) where
-  Point4 (φ : F) : 𝓢 ⊢! Axioms.Point4 φ
+  Point4 {φ : F} : 𝓢 ⊢! Axioms.Point4 φ
 
 section HasAxiomPoint4
 
 variable [HasAxiomPoint4 𝓢]
 
-def axiomPoint4 : 𝓢 ⊢! ◇□φ ➝ φ ➝ □φ := HasAxiomPoint4.Point4 _
+def axiomPoint4 : 𝓢 ⊢! ◇□φ ➝ φ ➝ □φ := HasAxiomPoint4.Point4
 @[simp] lemma axiomPoint4! : 𝓢 ⊢ ◇□φ ➝ φ ➝ □φ := ⟨axiomPoint4⟩
 
 variable [Entailment.Minimal 𝓢]
 
-instance (Γ : FiniteContext F 𝓢) : HasAxiomPoint4 Γ := ⟨fun _ ↦ FiniteContext.of axiomPoint4⟩
-instance (Γ : Context F 𝓢) : HasAxiomPoint4 Γ := ⟨fun _ ↦ Context.of axiomPoint4⟩
+instance (Γ : FiniteContext F 𝓢) : HasAxiomPoint4 Γ := ⟨FiniteContext.of axiomPoint4⟩
+instance (Γ : Context F 𝓢) : HasAxiomPoint4 Γ := ⟨Context.of axiomPoint4⟩
 
 end HasAxiomPoint4
 
 
 class HasAxiomH [LogicalConnective F] [Box F] (𝓢 : S) where
-  H1 (φ : F) : 𝓢 ⊢! Axioms.H φ
+  H1 {φ : F} : 𝓢 ⊢! Axioms.H φ
 
 section
 
 variable [HasAxiomH 𝓢]
 
-def axiomH : 𝓢 ⊢! φ ➝ □(◇φ ➝ φ) := HasAxiomH.H1 _
+def axiomH : 𝓢 ⊢! φ ➝ □(◇φ ➝ φ) := HasAxiomH.H1
 @[simp] lemma axiomH! : 𝓢 ⊢ φ ➝ □(◇φ ➝ φ) := ⟨axiomH⟩
 
 variable [Entailment.Minimal 𝓢]
 
-instance (Γ : FiniteContext F 𝓢) : HasAxiomH Γ := ⟨fun _ ↦ FiniteContext.of axiomH⟩
-instance (Γ : Context F 𝓢) : HasAxiomH Γ := ⟨fun _ ↦ Context.of axiomH⟩
+instance (Γ : FiniteContext F 𝓢) : HasAxiomH Γ := ⟨FiniteContext.of axiomH⟩
+instance (Γ : Context F 𝓢) : HasAxiomH Γ := ⟨Context.of axiomH⟩
 
 end
 
 
 class HasAxiomGeach [LogicalConnective F] (g) (𝓢 : S) where
-  Geach (φ : F) : 𝓢 ⊢! Axioms.Geach g φ
+  Geach {φ : F} : 𝓢 ⊢! Axioms.Geach g φ
 
 section HasAxiomGeach
 
-instance [Entailment.HasAxiomT 𝓢]      : Entailment.HasAxiomGeach ⟨0, 0, 1, 0⟩ 𝓢 := ⟨fun _ => axiomT⟩
-instance [Entailment.HasAxiomB 𝓢]      : Entailment.HasAxiomGeach ⟨0, 1, 0, 1⟩ 𝓢 := ⟨fun _ => axiomB⟩
-instance [Entailment.HasAxiomD 𝓢]      : Entailment.HasAxiomGeach ⟨0, 0, 1, 1⟩ 𝓢 := ⟨fun _ => axiomD⟩
-instance [Entailment.HasAxiomFour 𝓢]   : Entailment.HasAxiomGeach ⟨0, 2, 1, 0⟩ 𝓢 := ⟨fun _ => axiomFour⟩
-instance [Entailment.HasAxiomFourN n 𝓢] : HasAxiomGeach ⟨0, n + 1, n, 0⟩ 𝓢 := ⟨fun _ ↦ axiomFourN⟩
-instance [Entailment.HasAxiomFive 𝓢]   : Entailment.HasAxiomGeach ⟨1, 1, 0, 1⟩ 𝓢 := ⟨fun _ => axiomFive⟩
-instance [Entailment.HasAxiomTc 𝓢]     : Entailment.HasAxiomGeach ⟨0, 1, 0, 0⟩ 𝓢 := ⟨fun _ => axiomTc⟩
-instance [Entailment.HasAxiomPoint2 𝓢] : Entailment.HasAxiomGeach ⟨1, 1, 1, 1⟩ 𝓢 := ⟨fun _ => axiomPoint2⟩
+instance [Entailment.HasAxiomT 𝓢]      : Entailment.HasAxiomGeach ⟨0, 0, 1, 0⟩ 𝓢 := ⟨axiomT⟩
+instance [Entailment.HasAxiomB 𝓢]      : Entailment.HasAxiomGeach ⟨0, 1, 0, 1⟩ 𝓢 := ⟨axiomB⟩
+instance [Entailment.HasAxiomD 𝓢]      : Entailment.HasAxiomGeach ⟨0, 0, 1, 1⟩ 𝓢 := ⟨axiomD⟩
+instance [Entailment.HasAxiomFour 𝓢]   : Entailment.HasAxiomGeach ⟨0, 2, 1, 0⟩ 𝓢 := ⟨axiomFour⟩
+instance [Entailment.HasAxiomFourN n 𝓢] : HasAxiomGeach ⟨0, n + 1, n, 0⟩ 𝓢 := ⟨axiomFourN⟩
+instance [Entailment.HasAxiomFive 𝓢]   : Entailment.HasAxiomGeach ⟨1, 1, 0, 1⟩ 𝓢 := ⟨axiomFive⟩
+instance [Entailment.HasAxiomTc 𝓢]     : Entailment.HasAxiomGeach ⟨0, 1, 0, 0⟩ 𝓢 := ⟨axiomTc⟩
+instance [Entailment.HasAxiomPoint2 𝓢] : Entailment.HasAxiomGeach ⟨1, 1, 1, 1⟩ 𝓢 := ⟨axiomPoint2⟩
 
 variable [HasAxiomGeach g 𝓢]
 
-def axiomGeach : 𝓢 ⊢! ◇^[g.i](□^[g.m]φ) ➝ □^[g.j](◇^[g.n]φ) := HasAxiomGeach.Geach _
+def axiomGeach : 𝓢 ⊢! ◇^[g.i](□^[g.m]φ) ➝ □^[g.j](◇^[g.n]φ) := HasAxiomGeach.Geach
 @[simp] lemma axiomGeach! : 𝓢 ⊢ ◇^[g.i](□^[g.m]φ) ➝ □^[g.j](◇^[g.n]φ) := ⟨axiomGeach⟩
 
 variable [Entailment.Minimal 𝓢]
 
-instance (Γ : FiniteContext F 𝓢) : HasAxiomGeach g Γ := ⟨fun _ ↦ FiniteContext.of axiomGeach⟩
-instance (Γ : Context F 𝓢) : HasAxiomGeach g Γ := ⟨fun _ ↦ Context.of axiomGeach⟩
+instance (Γ : FiniteContext F 𝓢) : HasAxiomGeach g Γ := ⟨FiniteContext.of axiomGeach⟩
+instance (Γ : Context F 𝓢) : HasAxiomGeach g Γ := ⟨Context.of axiomGeach⟩
 
 end HasAxiomGeach
 

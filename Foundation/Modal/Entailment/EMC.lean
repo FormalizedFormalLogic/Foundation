@@ -12,7 +12,7 @@ variable {S F : Type*} [BasicModalLogicalConnective F] [DecidableEq F] [Entailme
 variable {𝓢 : S}
 
 instance [Entailment.EMC 𝓢] : Entailment.HasAxiomK 𝓢 where
-  K φ ψ := by
+  K {φ ψ} := by
     haveI h₁ : 𝓢 ⊢! (□(φ ➝ ψ) ⋏ □φ) ➝ □((φ ➝ ψ) ⋏ φ) := axiomC;
     haveI h₂ : 𝓢 ⊢! ((φ ➝ ψ) ⋏ φ) ➝ ψ := C_trans CKK innerMDP
     haveI h₃ : 𝓢 ⊢! □((φ ➝ ψ) ⋏ φ) ➝ □ψ := rm h₂;

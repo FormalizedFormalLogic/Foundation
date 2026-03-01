@@ -107,7 +107,7 @@ def collect_boxItr_and : 𝓢 ⊢! □^[n]φ ⋏ □^[n]ψ ➝ □^[n](φ ⋏ ψ
 def collect_box_and : 𝓢 ⊢! □φ ⋏ □ψ ➝ □(φ ⋏ ψ) := collect_boxItr_and (n := 1)
 @[simp] lemma collect_box_and! : 𝓢 ⊢ □φ ⋏ □ψ ➝ □(φ ⋏ ψ) := ⟨collect_box_and⟩
 
-instance : Entailment.HasAxiomC 𝓢 := ⟨λ _ _ => collect_box_and⟩
+instance : Entailment.HasAxiomC 𝓢 := ⟨collect_box_and⟩
 
 def collect_boxItr_and' (h : 𝓢 ⊢! □^[n]φ ⋏ □^[n]ψ) : 𝓢 ⊢! □^[n](φ ⋏ ψ) := collect_boxItr_and ⨀ h
 lemma collect_boxItr_and'! (h : 𝓢 ⊢ □^[n]φ ⋏ □^[n]ψ) : 𝓢 ⊢ □^[n](φ ⋏ ψ) := ⟨collect_boxItr_and' h.some⟩
@@ -213,7 +213,7 @@ lemma distribute_boxItr_and'! (d : 𝓢 ⊢ □^[n](φ ⋏ ψ)) : 𝓢 ⊢ □^[
 def distribute_box_and' (h : 𝓢 ⊢! □(φ ⋏ ψ)) : 𝓢 ⊢! □φ ⋏ □ψ := distribute_boxItr_and' (n := 1) h
 lemma distribute_box_and'! (d : 𝓢 ⊢ □(φ ⋏ ψ)) : 𝓢 ⊢ □φ ⋏ □ψ := ⟨distribute_box_and' d.some⟩
 
-instance : Entailment.HasAxiomM 𝓢 := ⟨λ _ _ => distribute_box_and⟩
+instance : Entailment.HasAxiomM 𝓢 := ⟨distribute_box_and⟩
 
 
 def boxdotAxiomK : 𝓢 ⊢! ⊡(φ ➝ ψ) ➝ (⊡φ ➝ ⊡ψ) := by
