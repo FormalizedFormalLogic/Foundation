@@ -428,15 +428,6 @@ lemma mem_restrict_iff {R A p : V} :
     have hpP : ⟨x, y⟩ₖ ∈ A ×ˢ range R := by simpa [mem_prod_iff] using ⟨hxA, hyR⟩
     simpa [restrict] using And.intro hpR hpP
 
-def restrict.dfn : Semisentence ℒₛₑₜ 3 :=
-  f“r R A. ∀ p, p ∈ r ↔ p ∈ R ∧ ∃ x ∈ A, ∃ y, p = !kpair.dfn x y”
-
-instance restrict.defined : ℒₛₑₜ-function₂[V] restrict via restrict.dfn :=
-  ⟨fun v ↦ by
-    simp [restrict.dfn, mem_ext_iff (y := (v 1) ↾ (v 2)), mem_restrict_iff]⟩
-
-instance restrict.definable : ℒₛₑₜ-function₂[V] restrict := restrict.defined.to_definable
-
 lemma IsFunction.restrict (f A : V) [hf : IsFunction f] : IsFunction (f ↾ A) := by
   have hff : f ∈ range f ^ domain f := hf.mem_function
   have : f ↾ A ∈ range f ^ (domain f ∩ A) := by
