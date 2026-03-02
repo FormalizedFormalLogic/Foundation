@@ -447,68 +447,25 @@ lemma exists_least_ordinal_of_exists
     have hβle : β ≤ ξo := hβleast ξo (by simpa [ξo] using hξP)
     simpa [Ordinal.le_def, ξo] using hβle
 
-lemma strictIncreasing_relation_no_value_lt_self
-    (R : V → V → Prop)
-    (hRdef : ℒₛₑₜ-relation[V] R)
-    (hRfun : ∀ x : V, ∃! y : V, R x y)
-    (hRstrict : ∀ β γ yβ yγ : V, IsOrdinal β → IsOrdinal γ → β ∈ γ → R β yβ → R γ yγ → yβ ∈ yγ) :
-    ∀ α y : V, IsOrdinal α → R α y → ¬ y ∈ α := by
-  intro α y hα hy
-  by_contra hyα
-  let P : V → Prop := fun ξ ↦ ∃ z : V, R ξ z ∧ z ∈ ξ
-  have hP : ℒₛₑₜ-predicate[V] P := by
-    letI : ℒₛₑₜ-relation[V] R := hRdef
-    unfold P
-    definability
-  rcases exists_least_ordinal_of_exists (P := P) hP ⟨α, hα, ⟨y, hy, hyα⟩⟩ with
-    ⟨α₀, hα₀ord, ⟨y₀, hy₀, hy₀α₀⟩, hleast⟩
-  have hy₀ord : IsOrdinal y₀ := IsOrdinal.of_mem hy₀α₀
-  rcases hRfun y₀ with ⟨z, hz, -⟩
-  have hz_y₀ : z ∈ y₀ := hRstrict y₀ α₀ z y₀ hy₀ord hα₀ord hy₀α₀ hz hy₀
-  have hα₀_sub_y₀ : α₀ ⊆ y₀ := hleast y₀ hy₀ord ⟨z, hz, hz_y₀⟩
-  have : y₀ ∈ y₀ := hα₀_sub_y₀ _ hy₀α₀
-  exact (mem_irrefl y₀) this
-
 lemma strictIncreasing_function_no_value_lt_self
     (F : V → V)
     (hFdef : ℒₛₑₜ-function₁[V] F)
     (hFstrict : ∀ β γ : V, IsOrdinal β → IsOrdinal γ → β ∈ γ → F β ∈ F γ) :
     ∀ α : V, IsOrdinal α → ¬ F α ∈ α := by
-  let R : V → V → Prop := fun x y ↦ y = F x
-  have hRdef : ℒₛₑₜ-relation[V] R := by
-    letI : ℒₛₑₜ-function₁[V] F := hFdef
-    unfold R
-    definability
-  have hRfun : ∀ x : V, ∃! y : V, R x y := by
-    intro x
-    refine ⟨F x, rfl, ?_⟩
-    intro y hy
-    simpa [R] using hy
-  have hRstrict : ∀ β γ yβ yγ : V, IsOrdinal β → IsOrdinal γ → β ∈ γ → R β yβ → R γ yγ → yβ ∈ yγ := by
-    intro β γ yβ yγ hβ hγ hβγ hyβ hyγ
-    rcases hyβ with rfl
-    rcases hyγ with rfl
-    exact hFstrict β γ hβ hγ hβγ
   intro α hα
-  exact strictIncreasing_relation_no_value_lt_self R hRdef hRfun hRstrict α (F α) hα rfl
-
-lemma strictIncreasing_relation_subset_value
-    (R : V → V → Prop)
-    (hRdef : ℒₛₑₜ-relation[V] R)
-    (hRfun : ∀ x : V, ∃! y : V, R x y)
-    (hRstrict : ∀ β γ yβ yγ : V, IsOrdinal β → IsOrdinal γ → β ∈ γ → R β yβ → R γ yγ → yβ ∈ yγ)
-    (hRord : ∀ α y : V, IsOrdinal α → R α y → IsOrdinal y) :
-    ∀ α y : V, IsOrdinal α → R α y → α ⊆ y := by
-  intro α y hα hy
-  have hyord : IsOrdinal y := hRord α y hα hy
-  have hnot : ¬ y ∈ α :=
-    strictIncreasing_relation_no_value_lt_self R hRdef hRfun hRstrict α y hα hy
-  letI : IsOrdinal α := hα
-  letI : IsOrdinal y := hyord
-  rcases IsOrdinal.mem_trichotomy (α := y) (β := α) with (hyα | hEq | hαy)
-  · exact (hnot hyα).elim
-  · simp [hEq]
-  · exact (IsOrdinal.subset_iff (α := α) (β := y)).2 (Or.inr hαy)
+  by_contra hFαα
+  let P : V → Prop := fun ξ ↦ F ξ ∈ ξ
+  have hP : ℒₛₑₜ-predicate[V] P := by
+    letI : ℒₛₑₜ-function₁[V] F := hFdef
+    unfold P
+    definability
+  rcases exists_least_ordinal_of_exists (P := P) hP ⟨α, hα, hFαα⟩ with
+    ⟨α₀, hα₀ord, hFα₀α₀, hleast⟩
+  have hFα₀ord : IsOrdinal (F α₀) := IsOrdinal.of_mem hFα₀α₀
+  have hFFα₀Fα₀ : F (F α₀) ∈ F α₀ := hFstrict (F α₀) α₀ hFα₀ord hα₀ord hFα₀α₀
+  have hα₀_sub_Fα₀ : α₀ ⊆ F α₀ := hleast (F α₀) hFα₀ord hFFα₀Fα₀
+  have : F α₀ ∈ F α₀ := hα₀_sub_Fα₀ _ hFα₀α₀
+  exact (mem_irrefl (F α₀)) this
 
 lemma strictIncreasing_function_subset_value
     (F : V → V)
@@ -516,27 +473,16 @@ lemma strictIncreasing_function_subset_value
     (hFstrict : ∀ β γ : V, IsOrdinal β → IsOrdinal γ → β ∈ γ → F β ∈ F γ)
     (hFord : ∀ α : V, IsOrdinal α → IsOrdinal (F α)) :
     ∀ α : V, IsOrdinal α → α ⊆ F α := by
-  let R : V → V → Prop := fun x y ↦ y = F x
-  have hRdef : ℒₛₑₜ-relation[V] R := by
-    letI : ℒₛₑₜ-function₁[V] F := hFdef
-    unfold R
-    definability
-  have hRfun : ∀ x : V, ∃! y : V, R x y := by
-    intro x
-    refine ⟨F x, rfl, ?_⟩
-    intro y hy
-    simpa [R] using hy
-  have hRstrict : ∀ β γ yβ yγ : V, IsOrdinal β → IsOrdinal γ → β ∈ γ → R β yβ → R γ yγ → yβ ∈ yγ := by
-    intro β γ yβ yγ hβ hγ hβγ hyβ hyγ
-    rcases hyβ with rfl
-    rcases hyγ with rfl
-    exact hFstrict β γ hβ hγ hβγ
-  have hRord : ∀ α y : V, IsOrdinal α → R α y → IsOrdinal y := by
-    intro α y hα hy
-    rcases hy with rfl
-    exact hFord α hα
   intro α hα
-  exact strictIncreasing_relation_subset_value R hRdef hRfun hRstrict hRord α (F α) hα rfl
+  have hFαord : IsOrdinal (F α) := hFord α hα
+  have hnot : ¬ F α ∈ α :=
+    strictIncreasing_function_no_value_lt_self F hFdef hFstrict α hα
+  letI : IsOrdinal α := hα
+  letI : IsOrdinal (F α) := hFαord
+  rcases IsOrdinal.mem_trichotomy (α := F α) (β := α) with (hFαα | hEq | hαFα)
+  · exact (hnot hFαα).elim
+  · simp [hEq]
+  · exact (IsOrdinal.subset_iff (α := α) (β := F α)).2 (Or.inr hαFα)
 
 lemma transfinite_induction (P : V → Prop) (hP : ℒₛₑₜ-predicate P)
     (ih : ∀ α : Ordinal V, (∀ β < α, P β) → P α) : ∀ α : Ordinal V, P α := by

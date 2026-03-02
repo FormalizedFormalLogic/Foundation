@@ -217,6 +217,27 @@ lemma of_mem {f X Y : V} (h : f ∈ Y ^ X) : IsFunction f := ⟨X, Y, h⟩
 
 lemma mem_function (f : V) [hf : IsFunction f] : f ∈ range f ^ domain f := isFunction_iff.mp hf
 
+@[grind ->] lemma ofSubset (f g : V) [hf : IsFunction f] : g ⊆ f → IsFunction g := by
+  intro hgf
+  apply isFunction_iff.mpr
+  apply mem_function.intro
+  · intro p hp
+    have hpf : p ∈ f := hgf _ hp
+    rcases show ∃ x ∈ domain f, ∃ y ∈ range f, p = ⟨x, y⟩ₖ from by
+        simpa [mem_prod_iff] using subset_prod_of_mem_function hf.mem_function _ hpf with
+      ⟨x, -, y, -, rfl⟩
+    have hxg : x ∈ domain g := mem_domain_of_kpair_mem hp
+    have hyg : y ∈ range g := mem_range_of_kpair_mem hp
+    simpa [mem_prod_iff] using And.intro hxg hyg
+  · intro x hx
+    rcases mem_domain_iff.mp hx with ⟨y, hxy⟩
+    refine ExistsUnique.intro y hxy ?_
+    intro y' hxy'
+    have hyf : ⟨x, y⟩ₖ ∈ f := hgf _ hxy
+    have hy'f : ⟨x, y'⟩ₖ ∈ f := hgf _ hxy'
+    have hux : ∃! z, ⟨x, z⟩ₖ ∈ f := exists_unique_of_mem_function hf.mem_function x (mem_domain_of_kpair_mem hyf)
+    exact hux.unique hy'f hyf
+
 lemma unique {f : V} [hf : IsFunction f] {x y₁ y₂} (h₁ : ⟨x, y₁⟩ₖ ∈ f) (h₂ : ⟨x, y₂⟩ₖ ∈ f) : y₁ = y₂ := by
   have : ∃! y, ⟨x, y⟩ₖ ∈ f := exists_unique_of_mem_function (isFunction_iff.mp hf) x (mem_domain_of_kpair_mem h₁)
   exact this.unique h₁ h₂
@@ -404,20 +425,39 @@ lemma value_mem_range {f x : V} {X Y : V} (hf : f ∈ Y ^ X) (hx : x ∈ X) : f 
 
 namespace IsFunction
 
-lemma value_eq_of_kpair_mem (f x y : V) [IsFunction f] (hxy : ⟨x, y⟩ₖ ∈ f) :
-    f ‘ x = y := by
-  ext z
+lemma value_eq_iff_kpair_mem {f x y : V} [IsFunction f] (hx : x ∈ domain f) :
+    f ‘ x = y ↔ ⟨x, y⟩ₖ ∈ f := by
   constructor
-  · intro hz
-    rcases show z ∈ ⋃ˢ range f ∧ ∃ y', z ∈ y' ∧ ⟨x, y'⟩ₖ ∈ f by
-        simpa [value, mem_sep_iff] using hz with
-      ⟨-, y', hzy', hxy'⟩
-    have : y' = y := IsFunction.unique hxy' hxy
-    simpa [this] using hzy'
-  · intro hzy
-    have hyR : y ∈ range f := mem_range_of_kpair_mem hxy
-    have hzU : z ∈ ⋃ˢ range f := mem_sUnion_iff.mpr ⟨y, hyR, hzy⟩
-    exact mem_sep_iff.mpr ⟨hzU, y, hzy, hxy⟩
+  · intro hxy
+    rcases mem_domain_iff.mp hx with ⟨y', hxy'⟩
+    have hval : f ‘ x = y' := by
+      ext z
+      constructor
+      · intro hz
+        rcases show z ∈ ⋃ˢ range f ∧ ∃ w, z ∈ w ∧ ⟨x, w⟩ₖ ∈ f by
+            simpa [value, mem_sep_iff] using hz with
+          ⟨-, w, hzw, hxw⟩
+        have : w = y' := IsFunction.unique hxw hxy'
+        simpa [this] using hzw
+      · intro hzy'
+        have hy'R : y' ∈ range f := mem_range_of_kpair_mem hxy'
+        have hzU : z ∈ ⋃ˢ range f := mem_sUnion_iff.mpr ⟨y', hy'R, hzy'⟩
+        exact mem_sep_iff.mpr ⟨hzU, y', hzy', hxy'⟩
+    rw [hval] at hxy
+    simpa [hxy] using hxy'
+  · intro hxy
+    ext z
+    constructor
+    · intro hz
+      rcases show z ∈ ⋃ˢ range f ∧ ∃ y', z ∈ y' ∧ ⟨x, y'⟩ₖ ∈ f by
+          simpa [value, mem_sep_iff] using hz with
+        ⟨-, y', hzy', hxy'⟩
+      have : y' = y := IsFunction.unique hxy' hxy
+      simpa [this] using hzy'
+    · intro hzy
+      have hyR : y ∈ range f := mem_range_of_kpair_mem hxy
+      have hzU : z ∈ ⋃ˢ range f := mem_sUnion_iff.mpr ⟨y, hyR, hzy⟩
+      exact mem_sep_iff.mpr ⟨hzU, y, hzy, hxy⟩
 
 end IsFunction
 
@@ -447,24 +487,12 @@ lemma mem_restrict_iff {R A p : V} :
     have hpP : ⟨x, y⟩ₖ ∈ A ×ˢ range R := by simpa [mem_prod_iff] using ⟨hxA, hyR⟩
     simpa [restrict] using And.intro hpR hpP
 
+@[simp] lemma restrict_subset (f A : V) : f ↾ A ⊆ f := by
+  intro p hp
+  exact (mem_restrict_iff.mp hp).1
+
 lemma IsFunction.restrict (f A : V) [hf : IsFunction f] : IsFunction (f ↾ A) := by
-  have hff : f ∈ range f ^ domain f := hf.mem_function
-  have : f ↾ A ∈ range f ^ (domain f ∩ A) := by
-    apply mem_function.intro
-    · intro p hp
-      rcases mem_restrict_iff.mp hp with ⟨hpf, x, hxA, y, rfl⟩
-      have hxd : x ∈ domain f := mem_domain_of_kpair_mem hpf
-      have hyr : y ∈ range f := mem_range_of_kpair_mem hpf
-      simpa [mem_prod_iff] using ⟨⟨hxd, hxA⟩, hyr⟩
-    · intro x hx
-      have ⟨hxd, hxA⟩ := show x ∈ domain f ∧ x ∈ A by simpa using hx
-      rcases exists_unique_of_mem_function hff x hxd with ⟨y, hy, hyu⟩
-      refine ExistsUnique.intro y ?_ ?_
-      · exact mem_restrict_iff.mpr ⟨hy, x, hxA, y, rfl⟩
-      · intro y' hy'
-        have ⟨hy'f, _⟩ := mem_restrict_iff.mp hy'
-        exact hyu y' hy'f
-  exact IsFunction.of_mem this
+  exact IsFunction.ofSubset f (f ↾ A) (restrict_subset f A)
 
 lemma IsFunction.restrict_eq_self (f A : V) [hf : IsFunction f] (hA : domain f ⊆ A) : f ↾ A = f := by
   apply subset_antisymm
@@ -537,12 +565,20 @@ instance image.defined : ℒₛₑₜ-function₂[V] image via image.dfn :=
 instance image.definable : ℒₛₑₜ-function₂[V] image := image.defined.to_definable
 
 /--
-Graph construction from a function-like relation on a fixed set `X`.
+Graph construction from a definable unary function on a fixed set `X`.
 -/
-lemma replacement_graph_exists_on [V ⊧ₘ* 𝗭𝗙] (X : V) (R : V → V → Prop) (hR : ℒₛₑₜ-relation[V] R)
-    (hfun : ∀ x : V, x ∈ X → ∃! y : V, R x y) :
+lemma replacement_graph_exists_on_of_definableFunction [V ⊧ₘ* 𝗭𝗙]
+    (X : V) (F : V → V) (hFdef : ℒₛₑₜ-function₁[V] F) :
     ∃ f : V, IsFunction f ∧ domain f = X ∧
-      ∀ x ∈ X, ∀ y, ⟨x, y⟩ₖ ∈ f ↔ R x y := by
+      ∀ x ∈ X, ∀ y, ⟨x, y⟩ₖ ∈ f ↔ y = F x := by
+  let R : V → V → Prop := fun x y ↦ Function.Graph F y x
+  have hR : ℒₛₑₜ-relation[V] R := by
+    letI : ℒₛₑₜ-function₁[V] F := hFdef
+    change ℒₛₑₜ-relation[V] (fun x y ↦ Function.Graph F y x)
+    definability
+  have hfun : ∀ x : V, x ∈ X → ∃! y : V, R x y := by
+    intro x _
+    simpa [R] using functionGraph_functionLike F x
   let S : V → V → Prop := fun x p ↦ ∃ y : V, R x y ∧ p = ⟨x, y⟩ₖ
   have hS : ℒₛₑₜ-relation[V] S := by
     letI : ℒₛₑₜ-relation[V] R := hR
@@ -602,25 +638,7 @@ lemma replacement_graph_exists_on [V ⊧ₘ* 𝗭𝗙] (X : V) (R : V → V → 
       have hR₀ : R x y₀ := (hgraph x hxX y₀).1 hxy₀
       have hR₁ : R x y₁ := (hgraph x hxX y₁).1 hxy₁
       exact (hfun x hxX).unique hR₁ hR₀
-  refine ⟨f, IsFunction.of_mem hfunc_mem, hdomain, hgraph⟩
-
-/--
-Graph construction from a definable unary function on a fixed set `X`.
--/
-lemma replacement_graph_exists_on_of_definableFunction [V ⊧ₘ* 𝗭𝗙]
-    (X : V) (F : V → V) (hFdef : ℒₛₑₜ-function₁[V] F) :
-    ∃ f : V, IsFunction f ∧ domain f = X ∧
-      ∀ x ∈ X, ∀ y, ⟨x, y⟩ₖ ∈ f ↔ y = F x := by
-  let R : V → V → Prop := fun x y ↦ Function.Graph F y x
-  have hR : ℒₛₑₜ-relation[V] R := by
-    letI : ℒₛₑₜ-function₁[V] F := hFdef
-    change ℒₛₑₜ-relation[V] (fun x y ↦ Function.Graph F y x)
-    definability
-  have hfun : ∀ x : V, x ∈ X → ∃! y : V, R x y := by
-    intro x _
-    simpa [R] using functionGraph_functionLike F x
-  rcases replacement_graph_exists_on (X := X) R hR hfun with ⟨f, hf, hdf, hgraph⟩
-  refine ⟨f, hf, hdf, ?_⟩
+  refine ⟨f, IsFunction.of_mem hfunc_mem, hdomain, ?_⟩
   intro x hx y
   simpa [R, Function.Graph] using hgraph x hx y
 
