@@ -1,5 +1,8 @@
 # Contribution
 
+1. Follow the [commit convention](#commit-convention).
+2. Run [import all](#import-all).
+
 ## Commit convention
 
 Follow usual conventional commit for PR title (we always squash merge).
@@ -16,7 +19,7 @@ Choose `<type>` from below (should be one, but like `fix/doc` might be ok).
 - `ci`: Configure GitHub Actions.
 - `chore`: Maintaining other things (ex: version-up).
 
-`scope` is optional, specify like `FirstOrder`, `Modal` if needed.
+`scope` is optional, specify like `FirstOrder`, `Modal/Kripke` if needed.
 
 ## Usual commands
 
@@ -24,6 +27,12 @@ Choose `<type>` from below (should be one, but like `fix/doc` might be ok).
 
 ```shell
 lake build Foundation
+```
+
+### Import all
+
+```shell
+lake exe mk_all --module
 ```
 
 ### References
