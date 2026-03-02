@@ -1,6 +1,6 @@
 module
 
-public import Foundation.FirstOrder.SetTheory.Z
+public import Foundation.FirstOrder.SetTheory.ZF
 
 @[expose] public section
 /-!
@@ -402,6 +402,25 @@ lemma value_mem_range {f x : V} {X Y : V} (hf : f ∈ Y ^ X) (hx : x ∈ X) : f 
     constructor <;> intro h <;> grind
   grind
 
+namespace IsFunction
+
+lemma value_eq_of_kpair_mem (f x y : V) [IsFunction f] (hxy : ⟨x, y⟩ₖ ∈ f) :
+    f ‘ x = y := by
+  ext z
+  constructor
+  · intro hz
+    rcases show z ∈ ⋃ˢ range f ∧ ∃ y', z ∈ y' ∧ ⟨x, y'⟩ₖ ∈ f by
+        simpa [value, mem_sep_iff] using hz with
+      ⟨-, y', hzy', hxy'⟩
+    have : y' = y := IsFunction.unique hxy' hxy
+    simpa [this] using hzy'
+  · intro hzy
+    have hyR : y ∈ range f := mem_range_of_kpair_mem hxy
+    have hzU : z ∈ ⋃ˢ range f := mem_sUnion_iff.mpr ⟨y, hyR, hzy⟩
+    exact mem_sep_iff.mpr ⟨hzU, y, hzy, hxy⟩
+
+end IsFunction
+
 /-- Restricting the domain of a relation -/
 noncomputable def restrict (R A : V) : V := R ∩ (A ×ˢ range R)
 
@@ -472,15 +491,37 @@ lemma domain_restrict_eq (R A : V) : domain (R ↾ A) = domain R ∩ A := by
     ⟨x, y⟩ₖ ∈ (R ↾ A) ↔ ⟨x, y⟩ₖ ∈ R ∧ x ∈ A := by
   simp [mem_restrict_iff]
 
-lemma restrict_restrict_of_subset {R A B : V} (h : B ⊆ A) : (R ↾ A) ↾ B = R ↾ B := by
+lemma restrict_restrict_eq_restrict_inter (R A B : V) : (R ↾ A) ↾ B = R ↾ (A ∩ B) := by
   ext p
-  simp only [mem_restrict_iff]
+  simp only [mem_restrict_iff, mem_inter_iff]
   constructor
-  · rintro ⟨⟨hpR, x, _, y, rfl⟩, x', hx'B, y', hxy⟩
+  · rintro ⟨⟨hpR, x, hxA, y, rfl⟩, x', hx'B, y', hxy⟩
     rcases kpair_inj hxy with ⟨rfl, rfl⟩
-    exact ⟨hpR, x, hx'B, y, rfl⟩
-  · rintro ⟨hpR, x, hxB, y, rfl⟩
-    exact ⟨⟨hpR, x, h x hxB, y, rfl⟩, x, hxB, y, rfl⟩
+    exact ⟨hpR, x, ⟨hxA, hx'B⟩, y, rfl⟩
+  · rintro ⟨hpR, x, hxAB, y, rfl⟩
+    exact ⟨⟨hpR, x, hxAB.1, y, rfl⟩, x, hxAB.2, y, rfl⟩
+
+lemma restrict_restrict_of_subset {R A B : V} (h : B ⊆ A) : (R ↾ A) ↾ B = R ↾ B := by
+  simpa [inter_eq_right_of_subset h] using restrict_restrict_eq_restrict_inter R A B
+
+/--
+Restricting an inserted relation to a set that does not contain the inserted first coordinate
+recovers the original restriction.
+-/
+lemma restrict_insert_kpair_eq_restrict_of_not_mem
+    {f x y A : V} (hxA : x ∉ A) :
+    (insert ⟨x, y⟩ₖ f) ↾ A = f ↾ A := by
+  ext p
+  constructor
+  · intro hp
+    rcases mem_restrict_iff.mp hp with ⟨hp', a, haA, b, rfl⟩
+    rcases show ⟨a, b⟩ₖ = ⟨x, y⟩ₖ ∨ ⟨a, b⟩ₖ ∈ f by simpa using hp' with (hxy | hf)
+    · rcases kpair_inj hxy with ⟨rfl, rfl⟩
+      exact (hxA haA).elim
+    · exact mem_restrict_iff.mpr ⟨hf, a, haA, b, rfl⟩
+  · intro hp
+    rcases mem_restrict_iff.mp hp with ⟨hf, a, haA, b, rfl⟩
+    exact mem_restrict_iff.mpr ⟨by simp [hf], a, haA, b, rfl⟩
 
 /-- Image of a set under a relation -/
 noncomputable def image (R A : V) : V := range (restrict R A)
@@ -562,6 +603,26 @@ lemma replacement_graph_exists_on [V ⊧ₘ* 𝗭𝗙] (X : V) (R : V → V → 
       have hR₁ : R x y₁ := (hgraph x hxX y₁).1 hxy₁
       exact (hfun x hxX).unique hR₁ hR₀
   refine ⟨f, IsFunction.of_mem hfunc_mem, hdomain, hgraph⟩
+
+/--
+Graph construction from a definable unary function on a fixed set `X`.
+-/
+lemma replacement_graph_exists_on_of_definableFunction [V ⊧ₘ* 𝗭𝗙]
+    (X : V) (F : V → V) (hFdef : ℒₛₑₜ-function₁[V] F) :
+    ∃ f : V, IsFunction f ∧ domain f = X ∧
+      ∀ x ∈ X, ∀ y, ⟨x, y⟩ₖ ∈ f ↔ y = F x := by
+  let R : V → V → Prop := fun x y ↦ Function.Graph F y x
+  have hR : ℒₛₑₜ-relation[V] R := by
+    letI : ℒₛₑₜ-function₁[V] F := hFdef
+    change ℒₛₑₜ-relation[V] (fun x y ↦ Function.Graph F y x)
+    definability
+  have hfun : ∀ x : V, x ∈ X → ∃! y : V, R x y := by
+    intro x _
+    simpa [R] using functionGraph_functionLike F x
+  rcases replacement_graph_exists_on (X := X) R hR hfun with ⟨f, hf, hdf, hgraph⟩
+  refine ⟨f, hf, hdf, ?_⟩
+  intro x hx y
+  simpa [R, Function.Graph] using hgraph x hx y
 
 /-! ### Cardinality comparison -/
 
