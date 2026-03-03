@@ -146,7 +146,7 @@ variable (T) {V : Type*} [ORingStructure V] [V ⊧ₘ* 𝗜𝚺₁]
 
 def NegativeSuccessor (φ ψ : V) : Prop := T.ProvabilityComparisonLE (neg ℒₒᵣ φ) (neg ℒₒᵣ ψ)
 
-lemma NegativeSuccessor.quote_iff_provabilityComparisonLE {φ ψ : Sentence ℒₒᵣ} :
+lemma NegativeSuccessor.quote_iff_provabilityComparisonLE {φ ψ : ArithmeticSentence} :
     NegativeSuccessor (V := V) T ⌜φ⌝ ⌜ψ⌝ ↔ T.ProvabilityComparisonLE (V := V) ⌜∼φ⌝ ⌜∼ψ⌝ := by
   simp [NegativeSuccessor, Sentence.quote_def, Semiformula.quote_def]
 
@@ -210,17 +210,17 @@ lemma rew_θAux (w : Fin N → FirstOrder.Semiterm ℒₒᵣ Empty N') (t : F �
     Rew.subst w ▹ θAux T t i = θAux T (fun i ↦ Rew.subst w (t i)) i := by
   simp [Finset.map_udisj, θAux, rew_θChainAux]
 
-def _root_.LO.FirstOrder.Theory.solovay [F.IsIrreflexive] [F.IsTransitive] (i : F) : Sentence ℒₒᵣ := exclusiveMultifixedpoint
+def _root_.LO.FirstOrder.Theory.solovay [F.IsIrreflexive] [F.IsTransitive] (i : F) : ArithmeticSentence := exclusiveMultifixedpoint
   (fun j ↦
     let jj := (Fintype.equivFin F).symm j
     θAux T (fun i ↦ #(Fintype.equivFin F i)) jj ⋏ ⩕ k ∈ { k : F | jj ≺ k }, T.consistentWith/[#(Fintype.equivFin F k)])
   (Fintype.equivFin F i)
 
-def twoPoint (i j : F) : Sentence ℒₒᵣ := twoPointAux T (fun i ↦ ⌜T.solovay i⌝) i j
+def twoPoint (i j : F) : ArithmeticSentence := twoPointAux T (fun i ↦ ⌜T.solovay i⌝) i j
 
-def θChain (ε : List F) : Sentence ℒₒᵣ := θChainAux T (fun i ↦ ⌜T.solovay i⌝) ε
+def θChain (ε : List F) : ArithmeticSentence := θChainAux T (fun i ↦ ⌜T.solovay i⌝) ε
 
-def θ (i : F) : Sentence ℒₒᵣ := θAux T (fun i ↦ ⌜T.solovay i⌝) i
+def θ (i : F) : ArithmeticSentence := θAux T (fun i ↦ ⌜T.solovay i⌝) i
 
 lemma solovay_diag (i : F) :
     𝗜𝚺₁ ⊢ T.solovay i ⭤ θ T i ⋏ ⩕ j ∈ { j : F | i ≺ j }, T.consistentWith/[⌜T.solovay j⌝] := by

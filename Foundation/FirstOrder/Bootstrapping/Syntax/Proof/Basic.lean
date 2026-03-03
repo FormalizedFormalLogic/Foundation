@@ -482,7 +482,7 @@ noncomputable def proof : 𝚫₁.Semisentence 2 := .mkDelta
 noncomputable def provable : 𝚺₁.Semisentence 1 := .mkSigma
   “φ. ∃ d, !T.proof.sigma d φ”
 
-noncomputable abbrev provabilityPred (σ : Sentence L) : Sentence ℒₒᵣ := T.provable.val/[⌜σ⌝]
+noncomputable abbrev provabilityPred (σ : Sentence L) : ArithmeticSentence := T.provable.val/[⌜σ⌝]
 
 noncomputable def provabilityPred' (σ : Sentence L) : 𝚺₁.Sentence := .mkSigma
   “!T.provable !!(⌜σ⌝)”

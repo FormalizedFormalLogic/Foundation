@@ -5,7 +5,7 @@ public import Foundation.FirstOrder.Arithmetic.Basic.Misc
 @[expose] public section
 namespace LO.FirstOrder.Arithmetic
 
-private lemma consequence_of_aux (T : ArithmeticTheory) [𝗘𝗤 ⪯ T] (φ : Sentence ℒₒᵣ)
+private lemma consequence_of_aux (T : ArithmeticTheory) [𝗘𝗤 ⪯ T] (φ : ArithmeticSentence)
     (H : ∀ (M : Type w)
            [ORingStructure M]
            [Structure ℒₒᵣ M]
@@ -72,12 +72,12 @@ lemma standardModel_unique (s : Structure ℒₒᵣ M)
 
 end semantics
 
-lemma consequence_of_models (T : ArithmeticTheory) [𝗘𝗤 ⪯ T] (φ : Sentence ℒₒᵣ) (H : ∀ (M : Type*) [ORingStructure M] [M ⊧ₘ* T], M ⊧ₘ φ) :
+lemma consequence_of_models (T : ArithmeticTheory) [𝗘𝗤 ⪯ T] (φ : ArithmeticSentence) (H : ∀ (M : Type*) [ORingStructure M] [M ⊧ₘ* T], M ⊧ₘ φ) :
     T ⊨ φ := consequence_of_aux T φ fun M _ s _ _ ↦ by
   rcases standardModel_unique M s
   exact H M
 
-lemma provable_of_models (T : ArithmeticTheory) [𝗘𝗤 ⪯ T] (φ : Sentence ℒₒᵣ) (H : ∀ (M : Type*) [ORingStructure M] [M ⊧ₘ* T], M ⊧ₘ φ) :
+lemma provable_of_models (T : ArithmeticTheory) [𝗘𝗤 ⪯ T] (φ : ArithmeticSentence) (H : ∀ (M : Type*) [ORingStructure M] [M ⊧ₘ* T], M ⊧ₘ φ) :
     T ⊢ φ := complete <| consequence_of_models _ _ H
 
 lemma weakerThan_of_models (T S : ArithmeticTheory) [𝗘𝗤 ⪯ S]
@@ -89,12 +89,12 @@ lemma weakerThan_of_models (T S : ArithmeticTheory) [𝗘𝗤 ⪯ S]
 
 end Arithmetic
 
-class ArithmeticTheory.SoundOn (T : ArithmeticTheory) (F : Sentence ℒₒᵣ → Prop) where
+class ArithmeticTheory.SoundOn (T : ArithmeticTheory) (F : ArithmeticSentence → Prop) where
   sound : ∀ {σ}, T ⊢ σ → F σ → ℕ ⊧ₘ σ
 
 namespace ArithmeticTheory
 
-variable (T : ArithmeticTheory) (F : Sentence ℒₒᵣ → Prop)
+variable (T : ArithmeticTheory) (F : ArithmeticSentence → Prop)
 
 instance [ℕ ⊧ₘ* T] : T.SoundOn F := ⟨fun b _ ↦ consequence_iff.mp (sound! b) ℕ inferInstance⟩
 

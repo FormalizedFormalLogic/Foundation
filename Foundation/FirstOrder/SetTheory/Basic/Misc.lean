@@ -75,6 +75,8 @@ end Language
 
 abbrev SetTheory := Theory ℒₛₑₜ
 
+abbrev SetTheorySentence := Sentence ℒₛₑₜ
+
 variable [ToString ξ]
 
 def Semiterm.toStringSet : Semiterm ℒₛₑₜ ξ n → String
@@ -111,7 +113,7 @@ attribute [instance] Structure.Set.mk
 
 namespace SetTheory
 
-private lemma consequence_of_aux (T : SetTheory) [𝗘𝗤 ⪯ T] (φ : Sentence ℒₛₑₜ)
+private lemma consequence_of_aux (T : SetTheory) [𝗘𝗤 ⪯ T] (φ : SetTheorySentence)
     (H : ∀ (M : Type w)
            [SetStructure M]
            [Structure ℒₛₑₜ M]
@@ -211,12 +213,12 @@ end QuotNormalize
 
 end semantics
 
-lemma consequence_of_models (T : SetTheory) [𝗘𝗤 ⪯ T] (φ : Sentence ℒₛₑₜ) (H : ∀ (M : Type*) [SetStructure M] [Nonempty M] [M ⊧ₘ* T], M ⊧ₘ φ) :
+lemma consequence_of_models (T : SetTheory) [𝗘𝗤 ⪯ T] (φ : SetTheorySentence) (H : ∀ (M : Type*) [SetStructure M] [Nonempty M] [M ⊧ₘ* T], M ⊧ₘ φ) :
     T ⊨ φ := consequence_of_aux T φ fun M _ s _ _ ↦ by
   rcases standardStructure_unique M s
   exact H M
 
-lemma provable_of_models (T : SetTheory) [𝗘𝗤 ⪯ T] (φ : Sentence ℒₛₑₜ) (H : ∀ (M : Type*) [SetStructure M] [Nonempty M] [M ⊧ₘ* T], M ⊧ₘ φ) :
+lemma provable_of_models (T : SetTheory) [𝗘𝗤 ⪯ T] (φ : SetTheorySentence) (H : ∀ (M : Type*) [SetStructure M] [Nonempty M] [M ⊧ₘ* T], M ⊧ₘ φ) :
     T ⊢ φ := complete <| consequence_of_models _ _ H
 
 end SetTheory

@@ -14,20 +14,20 @@ namespace Bootstrapping.Arithmetic
 noncomputable def substNumeral (φ x : V) : V := subst ℒₒᵣ ?[numeral x] φ
 
 lemma substNumeral_app_quote (σ π : Semisentence ℒₒᵣ 1) :
-    substNumeral ⌜σ⌝ (⌜π⌝ : V) = ⌜(σ/[⌜π⌝] : Sentence ℒₒᵣ)⌝ := by
+    substNumeral ⌜σ⌝ (⌜π⌝ : V) = ⌜(σ/[⌜π⌝] : ArithmeticSentence)⌝ := by
   simp [substNumeral, Sentence.quote_def, Semiformula.quote_def,
     Rewriting.emb_subst_eq_subst_coe₁]
 
 noncomputable def substNumerals (φ : V) (v : Fin k → V) : V := subst ℒₒᵣ (matrixToVec (fun i ↦ numeral (v i))) φ
 
 lemma substNumerals_app_quote (σ : Semisentence ℒₒᵣ k) (v : Fin k → ℕ) :
-    (substNumerals ⌜σ⌝ (v ·) : V) = ⌜((Rew.subst (fun i ↦ ↑(v i))) ▹ σ : Sentence ℒₒᵣ)⌝ := by
+    (substNumerals ⌜σ⌝ (v ·) : V) = ⌜((Rew.subst (fun i ↦ ↑(v i))) ▹ σ : ArithmeticSentence)⌝ := by
   simp [substNumerals, Sentence.quote_def, Semiformula.quote_def,
     Rewriting.emb_subst_eq_subst_emb]
   rfl
 
 lemma substNumerals_app_quote_quote (σ : Semisentence ℒₒᵣ k) (π : Fin k → Semisentence ℒₒᵣ k) :
-    substNumerals (⌜σ⌝ : V) (fun i ↦ ⌜π i⌝) = ⌜((Rew.subst (fun i ↦ ⌜π i⌝)) ▹ σ : Sentence ℒₒᵣ)⌝ := by
+    substNumerals (⌜σ⌝ : V) (fun i ↦ ⌜π i⌝) = ⌜((Rew.subst (fun i ↦ ⌜π i⌝)) ▹ σ : ArithmeticSentence)⌝ := by
   simpa [Sentence.coe_quote_eq_quote] using substNumerals_app_quote (V := V) σ (fun i ↦ ⌜π i⌝)
 
 noncomputable def substNumeralParams (k : ℕ) (φ x : V) : V := subst ℒₒᵣ (matrixToVec (numeral x :> fun i : Fin k ↦ qqBvar i)) φ
@@ -115,7 +115,7 @@ section Diagonalization
 
 noncomputable def diag (θ : Semisentence ℒₒᵣ 1) : Semisentence ℒₒᵣ 1 := “x. ∀ y, !ssnum y x x → !θ y”
 
-noncomputable def fixedpoint (θ : Semisentence ℒₒᵣ 1) : Sentence ℒₒᵣ := (diag θ)/[⌜diag θ⌝]
+noncomputable def fixedpoint (θ : Semisentence ℒₒᵣ 1) : ArithmeticSentence := (diag θ)/[⌜diag θ⌝]
 
 theorem diagonal (θ : Semisentence ℒₒᵣ 1) :
     T ⊢ fixedpoint θ ⭤ θ/[⌜fixedpoint θ⌝] :=
@@ -143,7 +143,7 @@ noncomputable def multidiag (θ : Semisentence ℒₒᵣ k) : Semisentence ℒ�
     (Matrix.conj fun j : Fin k ↦ (Rew.subst <| #(j.addCast k) :> #(j.addNat k) :> fun l ↦ #(l.addNat k)) ▹ ssnums.val) ➝
     (Rew.subst fun j ↦ #(j.addCast k)) ▹ θ)
 
-noncomputable def multifixedpoint (θ : Fin k → Semisentence ℒₒᵣ k) (i : Fin k) : Sentence ℒₒᵣ := (Rew.subst fun j ↦ ⌜multidiag (θ j)⌝) ▹ (multidiag (θ i))
+noncomputable def multifixedpoint (θ : Fin k → Semisentence ℒₒᵣ k) (i : Fin k) : ArithmeticSentence := (Rew.subst fun j ↦ ⌜multidiag (θ j)⌝) ▹ (multidiag (θ i))
 
 theorem multidiagonal (θ : Fin k → Semisentence ℒₒᵣ k) :
     T ⊢ multifixedpoint θ i ⭤ (Rew.subst fun j ↦ ⌜multifixedpoint θ j⌝) ▹ (θ i) :=
@@ -160,7 +160,7 @@ theorem multidiagonal (θ : Fin k → Semisentence ℒₒᵣ k) :
       _ ↔ V ⊧/(fun i ↦ substNumerals (t i) t) (θ i) := by simp [multidiag, ← funext_iff]
       _ ↔ V ⊧/(fun i ↦ ⌜multifixedpoint θ i⌝) (θ i) := by simp [ht]
 
-noncomputable def exclusiveMultifixedpoint (θ : Fin k → Semisentence ℒₒᵣ k) (i : Fin k) : Sentence ℒₒᵣ :=
+noncomputable def exclusiveMultifixedpoint (θ : Fin k → Semisentence ℒₒᵣ k) (i : Fin k) : ArithmeticSentence :=
   multifixedpoint (fun j ↦ (θ j).padding j) i
 
 @[simp] lemma exclusiveMultifixedpoint_inj_iff (θ : Fin k → Semisentence ℒₒᵣ k) :

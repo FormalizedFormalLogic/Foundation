@@ -29,36 +29,36 @@ def isSucc : Semisentence ℒₛₑₜ 2 := “y x. ∀ z, z ∈ y ↔ z = x ∨
 namespace Axiom
 
 /-- Axiom of empty set. -/
-def empty : Sentence ℒₛₑₜ := “∃ e, ∀ y, y ∉ e”
+def empty : SetTheorySentence := “∃ e, ∀ y, y ∉ e”
 
 /-- Axiom of extentionality. -/
-def extentionality : Sentence ℒₛₑₜ := “∀ x y, x = y ↔ ∀ z, z ∈ x ↔ z ∈ y”
+def extentionality : SetTheorySentence := “∀ x y, x = y ↔ ∀ z, z ∈ x ↔ z ∈ y”
 
 /-- Axiom of pairing. -/
-def pairing : Sentence ℒₛₑₜ := “∀ x y, ∃ z, ∀ w, w ∈ z ↔ w = x ∨ w = y”
+def pairing : SetTheorySentence := “∀ x y, ∃ z, ∀ w, w ∈ z ↔ w = x ∨ w = y”
 
 /-- Axiom of union. -/
-def union : Sentence ℒₛₑₜ := “∀ x, ∃ y, ∀ z, z ∈ y ↔ ∃ w ∈ x, z ∈ w”
+def union : SetTheorySentence := “∀ x, ∃ y, ∀ z, z ∈ y ↔ ∃ w ∈ x, z ∈ w”
 
 /-- Axiom of power set. -/
-def power : Sentence ℒₛₑₜ := “∀ x, ∃ y, ∀ z, z ∈ y ↔ z ⊆ x”
+def power : SetTheorySentence := “∀ x, ∃ y, ∀ z, z ∈ y ↔ z ⊆ x”
 
 /-- Axiom of infinity. -/
-def infinity : Sentence ℒₛₑₜ := “∃ I, (∀ e, !isEmpty e → e ∈ I) ∧ (∀ x ∈ I, ∀ x', !isSucc x' x → x' ∈ I)”
+def infinity : SetTheorySentence := “∃ I, (∀ e, !isEmpty e → e ∈ I) ∧ (∀ x ∈ I, ∀ x', !isSucc x' x → x' ∈ I)”
 
 /-- Axiom of foundation. -/
-def foundation : Sentence ℒₛₑₜ := “∀ x, !isNonempty x → ∃ y ∈ x, ∀ z ∈ x, z ∉ y”
+def foundation : SetTheorySentence := “∀ x, !isNonempty x → ∃ y ∈ x, ∀ z ∈ x, z ∉ y”
 
 /-- Axiom schema of separation (Aussonderungsaxiom). -/
-def separationSchema (φ : SyntacticSemiformula ℒₛₑₜ 1) : Sentence ℒₛₑₜ :=
+def separationSchema (φ : SyntacticSemiformula ℒₛₑₜ 1) : SetTheorySentence :=
   .univCl “∀ x, ∃ y, ∀ z, z ∈ y ↔ z ∈ x ∧ !φ z”
 
 /-- Axiom schema of replacement. -/
-def replacementSchema (φ : SyntacticSemiformula ℒₛₑₜ 2) : Sentence ℒₛₑₜ :=
+def replacementSchema (φ : SyntacticSemiformula ℒₛₑₜ 2) : SetTheorySentence :=
   .univCl “(∀ x, ∃! y, !φ x y) → ∀ X, ∃ Y, ∀ y, y ∈ Y ↔ ∃ x ∈ X, !φ x y”
 
 /-- Axiom of choice. -/
-def choice : Sentence ℒₛₑₜ :=
+def choice : SetTheorySentence :=
   “∀ 𝓧, (∀ X ∈ 𝓧, !isNonempty X) ∧ (∀ X ∈ 𝓧, ∀ Y ∈ 𝓧, (∃ z, z ∈ X ∧ z ∈ Y) → X = Y) → ∃ C, ∀ X ∈ 𝓧, ∃! x, x ∈ C ∧ x ∈ X”
 
 end Axiom
