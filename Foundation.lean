@@ -505,6 +505,14 @@ public import Foundation.Propositional.Kripke2.Logic.F_Ser
 public import Foundation.Propositional.Kripke2.Logic.F_Sym
 public import Foundation.Propositional.Kripke2.Logic.F_Tra1
 public import Foundation.Propositional.Kripke2.Logic.F_Tra1_Hrd
+public import Foundation.Propositional.Kripke3.Axiom.Dummett
+public import Foundation.Propositional.Kripke3.Axiom.KreiselPutnam
+public import Foundation.Propositional.Kripke3.Axiom.LEM
+public import Foundation.Propositional.Kripke3.Axiom.Tra
+public import Foundation.Propositional.Kripke3.Axiom.WLEM
+public import Foundation.Propositional.Kripke3.Basic
+public import Foundation.Propositional.Kripke3.Logic.Int.Completeness
+public import Foundation.Propositional.Kripke3.Logic.Int.DP
 public import Foundation.Propositional.Logic.Basic
 public import Foundation.Propositional.Logic.Letterless_Int_Cl
 public import Foundation.Propositional.Logic.PostComplete
