@@ -258,6 +258,7 @@ public import Foundation.Modal.Hilbert.Axiom
 public import Foundation.Modal.Hilbert.GL_K4Loeb_K4Henkin_K4Hen
 public import Foundation.Modal.Hilbert.NNFormula
 public import Foundation.Modal.Hilbert.Normal.Basic
+public import Foundation.Modal.Hilbert.Normal2.Basic
 public import Foundation.Modal.Hilbert.WithHenkin.Basic
 public import Foundation.Modal.Hilbert.WithLoeb.Basic
 public import Foundation.Modal.Hilbert.WithRE.Basic
@@ -343,6 +344,13 @@ public import Foundation.Modal.Kripke.Root
 public import Foundation.Modal.Kripke.Terminated
 public import Foundation.Modal.Kripke.Tree
 public import Foundation.Modal.Kripke.Undefinability
+public import Foundation.Modal.Kripke2.Axiom.Geach
+public import Foundation.Modal.Kripke2.Basic
+public import Foundation.Modal.Kripke2.Completeness
+public import Foundation.Modal.Kripke2.Hilbert
+public import Foundation.Modal.Kripke2.Logic.K
+public import Foundation.Modal.Kripke2.Logic.K4
+public import Foundation.Modal.Kripke2.Logic.KT
 public import Foundation.Modal.Logic.Basic
 public import Foundation.Modal.Logic.D.Basic
 public import Foundation.Modal.Logic.GL.Independency
