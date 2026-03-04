@@ -6,42 +6,55 @@ public import Foundation.Modal.Neighborhood2.Basic
 
 namespace LO.Modal
 
-namespace NeighborhoodModel
-
 variable {ν : Type*} [Nonempty ν] {α : Type*}
-         {M : NeighborhoodModel ν α}
 
-class IsRegular (M : NeighborhoodModel ν α) : Prop where
-  regular : ∀ X Y : M.Neighborhood, (M.box X) ∩ (M.box Y) ⊆ M.box (X ∩ Y)
+namespace NeighborhoodSystem
+
+variable {N : NeighborhoodSystem ν α}
+
+class IsRegular (N : NeighborhoodSystem ν α) : Prop where
+  regular : ∀ X Y : N.Neighborhood, (N.box X) ∩ (N.box Y) ⊆ N.box (X ∩ Y)
 
 export IsRegular (regular)
 
-variable [M.IsRegular]
+section
+
+variable [N.IsRegular]
 
 open Classical in
-lemma regular_finset_iUnion (s : Finset M.Neighborhood) (hs : s.Nonempty)
-  : (⋂ i ∈ s, M.box i) ⊆ M.box (⋂ i ∈ s, i) := by
+lemma regular_finset_iUnion (s : Finset N.Neighborhood) (hs : s.Nonempty)
+  : (⋂ i ∈ s, N.box i) ⊆ N.box (⋂ i ∈ s, i) := by
   induction s using Finset.induction_on with
   | empty => simp_all only [Finset.not_nonempty_empty];
   | insert i s hi ih =>
     wlog hs : s.Nonempty;
     . simp_all;
     apply Set.Subset.trans;
-    . show ⋂ j ∈ insert i s, M.box j ⊆ M.box i ∩ M.box (⋂ j ∈ s, j);
+    . show ⋂ j ∈ insert i s, N.box j ⊆ N.box i ∩ N.box (⋂ j ∈ s, j);
       simp;
       grind;
     . rw [(show ⋂ j ∈ insert i s, j = i ∩ ⋂ j ∈ s, j by simp)]
-      apply M.regular;
+      apply N.regular;
 
 open Classical in
-lemma regular_finite_iUnion {ι} [Fintype ι] [Nonempty ι] {X : ι → M.Neighborhood}
-  : (⋂ i : ι, M.box (X i)) ⊆ M.box (⋂ i : ι, X i) := by
+lemma regular_finite_iUnion {ι} [Fintype ι] [Nonempty ι] {X : ι → N.Neighborhood}
+  : (⋂ i : ι, N.box (X i)) ⊆ N.box (⋂ i : ι, X i) := by
   simpa using regular_finset_iUnion (Finset.univ.image X) (by simp);
 
 @[simp, grind .]
-lemma validates_axiomC : M ⊧ Axioms.C φ ψ := by grind [regular];
+lemma validates_axiomC : N ⊧ Axioms.C φ ψ := by grind [regular];
 
-end NeighborhoodModel
+end
+
+lemma isRegular_of_validates_axiomC
+  [DecidableEq α] (a b : α) (hab : a ≠ b)
+  (h : N ⊧ Axioms.C (.atom a) (.atom b)) : N.IsRegular := by
+  constructor;
+  rintro X Y w ⟨hwX, hwY⟩;
+  have := h (λ p => if p = a then X else if p = b then Y else ∅) w;
+  grind;
+
+end NeighborhoodSystem
 
 end LO.Modal
 

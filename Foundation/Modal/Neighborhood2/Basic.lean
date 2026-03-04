@@ -11,24 +11,31 @@ namespace LO.Modal
 variable {ν} [Nonempty ν] {α : Type*}
          {n : ℕ} {φ ψ χ : Formula α} {a : α}
 
-structure NeighborhoodModel (ν : Type*) [Nonempty ν] (α : Type*) where
-  filter : ν → Set (Set ν)
-  val : α → Set ν
+structure NeighborhoodSystem (ν : Type*) [Nonempty ν] (α : outParam (Type*)) where
+  system : ν → Set (Set ν)
+
+namespace NeighborhoodSystem
+
+abbrev World (_ : NeighborhoodSystem ν α) := ν
+
+abbrev Neighborhood (N : NeighborhoodSystem ν α) := Set N.World
+
+instance : CoeFun (NeighborhoodSystem ν α) (λ N => N.World → Set N.Neighborhood) := ⟨λ N => N.system⟩
+
+def box (N : NeighborhoodSystem ν α) : N.Neighborhood → N.Neighborhood := λ X => { w | X ∈ N w }
+def dia (N : NeighborhoodSystem ν α) : N.Neighborhood → N.Neighborhood := λ X => (N.box Xᶜ)ᶜ
+
+def mkBox (ν : Type*) [Nonempty ν] (box : Set ν → Set ν) : NeighborhoodSystem ν α := ⟨λ w => { X | w ∈ box X }⟩
+
+end NeighborhoodSystem
+
+
+structure NeighborhoodModel (ν : Type*) [Nonempty ν] (α : outParam (Type*)) extends NeighborhoodSystem ν α where
+  val : α → toNeighborhoodSystem.Neighborhood
 
 namespace NeighborhoodModel
 
 variable {M : NeighborhoodModel ν α}
-
-abbrev World (_ : NeighborhoodModel ν α) := ν
-
-abbrev Neighborhood (M : NeighborhoodModel ν α) := Set M.World
-
-def box (M : NeighborhoodModel ν α) (X : M.Neighborhood) : M.Neighborhood := { w | X ∈ M.filter w }
-def dia (M : NeighborhoodModel ν α) := λ X => (M.box Xᶜ)ᶜ
-
-def mkBox (ν : Type*) [Nonempty ν] (α : Type*) (box : Set ν → Set ν) (val : α → Set ν) : NeighborhoodModel ν α where
-  filter w := { X | w ∈ box X }
-  val := val
 
 def truthset (M : NeighborhoodModel ν α) : Formula α → M.Neighborhood
 | .atom a => M.val a
@@ -78,7 +85,7 @@ lemma def_diaItr {n : ℕ} : M (◇^[n] φ) = M.dia^[n] (M φ) := by
   | zero => simp
   | succ n ih =>
     rw [Function.iterate_succ'];
-    simp only [Dia.diaItr_succ, truthset, ih, Set.union_empty, Function.comp_apply, dia]
+    simp only [Dia.diaItr_succ, truthset, ih, Set.union_empty, Function.comp_apply, NeighborhoodSystem.dia]
 
 @[simp, grind =]
 lemma def_dia : M (◇φ) = M.dia (M φ) := def_diaItr (n := 1)
@@ -129,7 +136,9 @@ attribute [simp, grind =]
   forces_dia
 
 
-instance : Semantics (NeighborhoodModel ν α) (Formula α) := ⟨λ M φ => M.World ∀⊩ φ⟩
+abbrev Validates (M : NeighborhoodModel ν α) (φ : Formula α) : Prop := M.World ∀⊩ φ
+
+instance : Semantics (NeighborhoodModel ν α) (Formula α) := ⟨Validates⟩
 
 lemma iff_validates_forall_forces : M ⊧ φ ↔ ∀ x : M.World, x ⊩ φ := by rfl;
 alias ⟨validates_forall_forces_of_validates, validates_of_forall_forces⟩ := iff_validates_forall_forces
@@ -168,13 +177,36 @@ lemma validates_axiomElimContra : M ⊧ Axioms.ElimContra φ ψ := by
   simp only [iff_validates_eq_truthset_univ, def_truthset_imp, def_truthset_neg];
   tauto_set;
 
+@[grind <=]
 lemma validates_mdp (hφψ : M ⊧ φ ➝ ψ) (hφ : M ⊧ φ) : M ⊧ ψ := by
   simp_all [iff_validates_eq_truthset_univ, def_truthset_imp];
 
+@[grind <=]
 lemma validates_re (hφψ : M ⊧ φ ⭤ ψ) : M ⊧ □φ ⭤ □ψ := by
   simp_all [iff_validates_iff_eq_truthset];
 
 end NeighborhoodModel
+
+
+namespace NeighborhoodSystem
+
+variable {N : NeighborhoodSystem ν α}
+
+def Validates (N : NeighborhoodSystem ν α) (φ : Formula α) : Prop := ∀ V, (NeighborhoodModel.mk N V) ⊧ φ
+instance : Semantics (NeighborhoodSystem ν α) (Formula α) := ⟨Validates⟩
+
+@[simp, grind =]
+lemma iff_validates_forall_model_validates : N ⊧ φ ↔ ∀ V, (NeighborhoodModel.mk N V) ⊧ φ := by rfl;
+alias ⟨validates_forall_model_validates_of_validates, validates_of_forall_model_validates⟩ := iff_validates_forall_model_validates
+
+@[simp, grind .] lemma validates_axiomImplyK : N ⊧ Axioms.ImplyK φ ψ := by grind;
+@[simp, grind .] lemma validates_axiomImplyS : N ⊧ Axioms.ImplyS φ ψ χ := by grind;
+@[simp, grind .] lemma validates_axiomElimContra : N ⊧ Axioms.ElimContra φ ψ := by grind;
+@[grind <=] lemma validates_mdp (hφψ : N ⊧ φ ➝ ψ) (hφ : N ⊧ φ) : N ⊧ ψ := by grind;
+@[grind <=] lemma validates_re (hφψ : N ⊧ φ ⭤ ψ) : N ⊧ □φ ⭤ □ψ := by grind;
+
+end NeighborhoodSystem
+
 
 end LO.Modal
 

@@ -6,35 +6,40 @@ public import Foundation.Modal.Neighborhood2.Basic
 
 namespace LO.Modal
 
-namespace NeighborhoodModel
-
 variable {ν : Type*} [Nonempty ν] {α : Type*}
-         {M : NeighborhoodModel ν α}
 
-class NotContainsEmpty (M : NeighborhoodModel ν α) : Prop where
+namespace NeighborhoodSystem
+
+class NotContainsEmpty (M : NeighborhoodSystem ν α) : Prop where
   not_contains_empty : M.box ∅ = ∅
 
 export NotContainsEmpty (not_contains_empty)
 attribute [simp, grind .] not_contains_empty
 
-variable [M.NotContainsEmpty]
+variable {N : NeighborhoodSystem ν α}
+
+section
+
+variable [NotContainsEmpty N]
 
 @[simp, grind .]
-lemma not_mem_box_empty : x ∉ M.box ∅ := by simp [M.not_contains_empty];
+lemma not_mem_box_empty : x ∉ N.box ∅ := by simp [N.not_contains_empty];
 
 @[simp, grind .]
-lemma mem_dia_univ : x ∈ M.dia Set.univ := by simp [dia]
+lemma mem_dia_univ : x ∈ N.dia Set.univ := by simp [NeighborhoodSystem.dia]
 
 @[simp, grind .]
-lemma validates_axiomP : M ⊧ Axioms.P := by grind;
+lemma validates_axiomP : N ⊧ Axioms.P := by grind;
 
-lemma notContainsEmpty_of_m (h : F ⊧ Axioms.P) : F.NotContainsEmpty := by
+end
+
+lemma notContainsEmpty_of_validates_axiomP (h : N ⊧ Axioms.P) : N.NotContainsEmpty := by
   constructor;
+  apply Set.eq_empty_of_forall_notMem;
   intro x;
-  have := @h (λ _ => ∅) x;
-  simpa [Satisfies] using this;
+  simpa using @h (λ _ => ∅) x;
 
-end NeighborhoodModel
+end NeighborhoodSystem
 
 end LO.Modal
 
