@@ -146,7 +146,7 @@ variable (T) {V : Type*} [ORingStructure V] [V ⊧ₘ* 𝗜𝚺₁]
 
 def NegativeSuccessor (φ ψ : V) : Prop := T.ProvabilityComparisonLE (neg ℒₒᵣ φ) (neg ℒₒᵣ ψ)
 
-lemma NegativeSuccessor.quote_iff_provabilityComparisonLE {φ ψ : Sentence ℒₒᵣ} :
+lemma NegativeSuccessor.quote_iff_provabilityComparisonLE {φ ψ : ArithmeticSentence} :
     NegativeSuccessor (V := V) T ⌜φ⌝ ⌜ψ⌝ ↔ T.ProvabilityComparisonLE (V := V) ⌜∼φ⌝ ⌜∼ψ⌝ := by
   simp [NegativeSuccessor, Sentence.quote_def, Semiformula.quote_def]
 
@@ -180,47 +180,47 @@ instance (i j : F) [F.IsIrreflexive] [F.IsTransitive] : Finite (WChain j i) :=
         exact IsTrans.trans (r := (· ≺ ·)) z y x hyz hxy)
     i j
 
-def twoPointAux (t : F → FirstOrder.Semiterm ℒₒᵣ Empty N) (i j : F) : Semisentence ℒₒᵣ N :=
+def twoPointAux (t : F → FirstOrder.ArithmeticSemiterm Empty N) (i j : F) : ArithmeticSemisentence N :=
   ⩕ k ∈ { k : F | i ≺ k }, (negativeSuccessor T)/[t j, t k]
 
-def θChainAux (t : F → FirstOrder.Semiterm ℒₒᵣ Empty N) : List F → Semisentence ℒₒᵣ N
+def θChainAux (t : F → FirstOrder.ArithmeticSemiterm Empty N) : List F → ArithmeticSemisentence N
   |          [] => ⊥
   |         [_] => ⊤
   | j :: i :: ε => θChainAux t (i :: ε) ⋏ twoPointAux T t i j
 
 omit [F.IsIrreflexive] [F.IsTransitive] [F.IsRooted] in
-lemma rew_twoPointAux (w : Fin N → FirstOrder.Semiterm ℒₒᵣ Empty N') (t : F → FirstOrder.Semiterm ℒₒᵣ Empty N) :
+lemma rew_twoPointAux (w : Fin N → FirstOrder.ArithmeticSemiterm Empty N') (t : F → FirstOrder.ArithmeticSemiterm Empty N) :
     Rew.subst w ▹ twoPointAux T t i j = twoPointAux T (fun i ↦ Rew.subst w (t i)) i j := by
   simp [twoPointAux, Finset.map_conj', Function.comp_def, ←TransitiveRewriting.comp_app,
     Rew.subst_comp_subst, Matrix.comp_vecCons', Matrix.constant_eq_singleton]
 
 omit [F.IsIrreflexive] [F.IsTransitive] [F.IsRooted] in
-lemma rew_θChainAux (w : Fin N → FirstOrder.Semiterm ℒₒᵣ Empty N') (t : F → FirstOrder.Semiterm ℒₒᵣ Empty N) (ε : List F) :
+lemma rew_θChainAux (w : Fin N → FirstOrder.ArithmeticSemiterm Empty N') (t : F → FirstOrder.ArithmeticSemiterm Empty N) (ε : List F) :
     Rew.subst w ▹ θChainAux T t ε = θChainAux T (fun i ↦ Rew.subst w (t i)) ε := by
   match ε with
   |          [] => simp [θChainAux]
   |         [_] => simp [θChainAux]
   | j :: i :: ε => simp [θChainAux, rew_θChainAux w _ (i :: ε), rew_twoPointAux]
 
-def θAux [F.IsIrreflexive] [F.IsTransitive] [F.IsRooted] (t : F → FirstOrder.Semiterm ℒₒᵣ Empty N) (i : F) : Semisentence ℒₒᵣ N :=
+def θAux [F.IsIrreflexive] [F.IsTransitive] [F.IsRooted] (t : F → FirstOrder.ArithmeticSemiterm Empty N) (i : F) : ArithmeticSemisentence N :=
   haveI := Fintype.ofFinite (WChain F.root i);
   ⩖ ε : WChain F.root i, θChainAux T t ε
 
-lemma rew_θAux (w : Fin N → FirstOrder.Semiterm ℒₒᵣ Empty N') (t : F → FirstOrder.Semiterm ℒₒᵣ Empty N) (i : F) :
+lemma rew_θAux (w : Fin N → FirstOrder.ArithmeticSemiterm Empty N') (t : F → FirstOrder.ArithmeticSemiterm Empty N) (i : F) :
     Rew.subst w ▹ θAux T t i = θAux T (fun i ↦ Rew.subst w (t i)) i := by
   simp [Finset.map_udisj, θAux, rew_θChainAux]
 
-def _root_.LO.FirstOrder.Theory.solovay [F.IsIrreflexive] [F.IsTransitive] (i : F) : Sentence ℒₒᵣ := exclusiveMultifixedpoint
+def _root_.LO.FirstOrder.Theory.solovay [F.IsIrreflexive] [F.IsTransitive] (i : F) : ArithmeticSentence := exclusiveMultifixedpoint
   (fun j ↦
     let jj := (Fintype.equivFin F).symm j
     θAux T (fun i ↦ #(Fintype.equivFin F i)) jj ⋏ ⩕ k ∈ { k : F | jj ≺ k }, T.consistentWith/[#(Fintype.equivFin F k)])
   (Fintype.equivFin F i)
 
-def twoPoint (i j : F) : Sentence ℒₒᵣ := twoPointAux T (fun i ↦ ⌜T.solovay i⌝) i j
+def twoPoint (i j : F) : ArithmeticSentence := twoPointAux T (fun i ↦ ⌜T.solovay i⌝) i j
 
-def θChain (ε : List F) : Sentence ℒₒᵣ := θChainAux T (fun i ↦ ⌜T.solovay i⌝) ε
+def θChain (ε : List F) : ArithmeticSentence := θChainAux T (fun i ↦ ⌜T.solovay i⌝) ε
 
-def θ (i : F) : Sentence ℒₒᵣ := θAux T (fun i ↦ ⌜T.solovay i⌝) i
+def θ (i : F) : ArithmeticSentence := θAux T (fun i ↦ ⌜T.solovay i⌝) i
 
 lemma solovay_diag (i : F) :
     𝗜𝚺₁ ⊢ T.solovay i ⭤ θ T i ⋏ ⩕ j ∈ { j : F | i ≺ j }, T.consistentWith/[⌜T.solovay j⌝] := by

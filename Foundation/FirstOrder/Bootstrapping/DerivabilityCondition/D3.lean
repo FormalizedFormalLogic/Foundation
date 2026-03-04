@@ -66,7 +66,7 @@ theorem term_complete {n : ℕ} (t : FirstOrder.ClosedSemiterm ℒₒᵣ n) (w :
 
 open FirstOrder.Arithmetic
 
-theorem bold_sigma_one_complete {n} {φ : Semisentence ℒₒᵣ n} (hp : Hierarchy 𝚺 1 φ) {w} :
+theorem bold_sigma_one_complete {n} {φ : ArithmeticSemisentence n} (hp : Hierarchy 𝚺 1 φ) {w} :
     V ⊧/w φ → T.internalize V ⊢ (toNumVec w ⤔ ⌜φ⌝) := by
   revert w
   apply sigma₁_induction' hp
@@ -142,7 +142,7 @@ theorem bold_sigma_one_complete {n} {φ : Semisentence ℒₒᵣ n} (hp : Hierar
       simpa [Semiformula.substs_substs, Matrix.map_map_comp']
     exact ih hφ
 
-theorem sigma_one_provable_of_models {σ : Sentence ℒₒᵣ} (hσ : Hierarchy 𝚺 1 σ) :
+theorem sigma_one_provable_of_models {σ : ArithmeticSentence} (hσ : Hierarchy 𝚺 1 σ) :
      V ⊧ₘ σ → T.internalize V ⊢ ⌜σ⌝ := by
   intro h
   have : T.internalize V ⊢ (toNumVec ![] ⤔ ⌜σ⌝) :=
@@ -150,12 +150,12 @@ theorem sigma_one_provable_of_models {σ : Sentence ℒₒᵣ} (hσ : Hierarchy 
   simpa using this
 
 /-- Hilbert–Bernays provability condition D3 -/
-theorem sigma_one_complete {σ : Sentence ℒₒᵣ} (hσ : Hierarchy 𝚺 1 σ) :
+theorem sigma_one_complete {σ : ArithmeticSentence} (hσ : Hierarchy 𝚺 1 σ) :
     V ⊧ₘ σ → T.Provable (⌜σ⌝ : V) := fun h ↦ by
   simpa [tprovable_iff_provable]
     using Bootstrapping.Arithmetic.sigma_one_provable_of_models T hσ h
 
-theorem provable_internalize {σ : Sentence ℒₒᵣ} :
+theorem provable_internalize {σ : ArithmeticSentence} :
     T.Provable (⌜σ⌝ : V) → T.Provable (⌜T.provabilityPred σ⌝ : V) := by
   simpa [models_iff] using sigma_one_complete (V := V) (σ := T.provabilityPred σ) T (by simp)
 

@@ -41,17 +41,6 @@ abbrev SyntacticSemiformula (L : Language) (n : ℕ) := Semiformula L ℕ n
 
 abbrev SyntacticFormula (L : Language) := SyntacticSemiformula L 0
 
-abbrev ArithmeticSemiformula (ξ : Type*) (n : ℕ) := Semiformula ℒₒᵣ ξ n
-
-abbrev ArithmeticFormula (ξ : Type*) := Formula ℒₒᵣ ξ
-
-abbrev ArithmeticSemisentence (n : ℕ) := Semisentence ℒₒᵣ n
-
-abbrev ArithmeticSentence := Sentence ℒₒᵣ
-
-abbrev ArithmeticSyntacticSemiformula (n : ℕ) := SyntacticSemiformula ℒₒᵣ n
-
-abbrev ArithmeticSyntacticFormula := SyntacticFormula ℒₒᵣ
 
 namespace Semiformula
 

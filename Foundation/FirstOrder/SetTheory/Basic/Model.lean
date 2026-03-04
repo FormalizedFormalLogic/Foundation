@@ -59,7 +59,7 @@ infix:50 " ⊊ " => SSubset
 
 lemma ssubset_def {x y : V} : x ⊊ y ↔ x ⊆ y ∧ x ≠ y := by rfl
 
-def SSubset.dfn : Semisentence ℒₛₑₜ 2 := “x y. x ⊆ y ∧ x ≠ y”
+def SSubset.dfn : SetTheorySemisentence 2 := “x y. x ⊆ y ∧ x ≠ y”
 
 instance SSubset.defined : ℒₛₑₜ-relation[V] SSubset via SSubset.dfn := ⟨fun v ↦ by simp [ssubset_def, SSubset.dfn]⟩
 
@@ -81,7 +81,7 @@ instance [V ⊧ₘ* 𝗭] [V ⊧ₘ* 𝗔𝗖] : V ⊧ₘ* 𝗭𝗖 := inferInst
 
 instance [V ⊧ₘ* 𝗭𝗙] [V ⊧ₘ* 𝗔𝗖] : V ⊧ₘ* 𝗭𝗙𝗖 := inferInstance
 
-instance : V ⊧ₘ* (𝗘𝗤 : Theory ℒₛₑₜ) := Structure.Eq.models_eqAxiom' ℒₛₑₜ V
+instance : V ⊧ₘ* (𝗘𝗤 : SetTheory) := Structure.Eq.models_eqAxiom' ℒₛₑₜ V
 
 end
 

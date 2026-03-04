@@ -13,7 +13,7 @@ open Mathlib Encodable Semiterm.Operator.GödelNumber
 
 section
 
-lemma term_primrec {k f} : (t : Semiterm ℒₒᵣ ξ k) → Primrec (fun v : List.Vector ℕ k ↦ t.valm ℕ v.get f)
+lemma term_primrec {k f} : (t : ArithmeticSemiterm ξ k) → Primrec (fun v : List.Vector ℕ k ↦ t.valm ℕ v.get f)
   |                         #x => by simpa using Primrec.vector_get.comp .id (.const _)
   |                         &x => by simpa using Primrec.const _
   | .func Language.Zero.zero _ => by simpa using Primrec.const 0
@@ -23,7 +23,7 @@ lemma term_primrec {k f} : (t : Semiterm ℒₒᵣ ξ k) → Primrec (fun v : Li
   |   .func Language.Mul.mul v => by
     simpa [Semiterm.val_func] using Primrec.nat_mul.comp (term_primrec (v 0)) (term_primrec (v 1))
 
-lemma sigma1_re (ε : ξ → ℕ) {k} {φ : Semiformula ℒₒᵣ ξ k} (hp : Hierarchy 𝚺 1 φ) :
+lemma sigma1_re (ε : ξ → ℕ) {k} {φ : ArithmeticSemiformula ξ k} (hp : Hierarchy 𝚺 1 φ) :
     REPred fun v : List.Vector ℕ k ↦ Semiformula.Evalm ℕ v.get ε φ := by
   apply sigma₁_induction' hp
   case hVerum => simp;
@@ -95,7 +95,7 @@ end
 
 open Nat.ArithPart₁
 
-def codeAux {k : ℕ} : Nat.ArithPart₁.Code k → Formula ℒₒᵣ (Fin (k + 1))
+def codeAux {k : ℕ} : Nat.ArithPart₁.Code k → ArithmeticFormula (Fin (k + 1))
   |        Code.zero _ => “&0 = 0”
   |         Code.one _ => “&0 = 1”
   |       Code.add i j => “&0 = &i.succ + &j.succ”
@@ -110,7 +110,7 @@ def codeAux {k : ℕ} : Nat.ArithPart₁.Code k → Formula ℒₒᵣ (Fin (k + 
     (Rew.bind (L := ℒₒᵣ) (ξ₁ := Fin (k + 1 + 1)) ![] (‘0’ :> &0 :> (&·.succ)) ▹ codeAux c) ⋏
     (∀⁰[“z. z < &0”] ∃⁰ “z. z ≠ 0” ⋏ ((Rew.bind (L := ℒₒᵣ) (ξ₁ := Fin (k + 1 + 1)) ![] (#0 :> #1 :> (&·.succ)) ▹ codeAux c)))
 
-def code (c : Code k) : Semisentence ℒₒᵣ (k + 1) := (Rew.bind (L := ℒₒᵣ) (ξ₁ := Fin (k + 1)) ![] (#0 :> (#·.succ))) ▹ (codeAux c)
+def code (c : Code k) : ArithmeticSemisentence (k + 1) := (Rew.bind (L := ℒₒᵣ) (ξ₁ := Fin (k + 1)) ![] (#0 :> (#·.succ))) ▹ (codeAux c)
 
 /-
 section model
@@ -230,7 +230,7 @@ lemma models_code {c : Code k} {f : List.Vector ℕ k →. ℕ} (hc : c.eval f) 
   simpa [code, models_iff, Semiformula.eval_rew, Matrix.empty_eq, Function.comp_def,
     Matrix.comp_vecCons', ←Part.eq_some_iff] using models_codeAux hc y v
 
-noncomputable def codeOfPartrec' {k} (f : List.Vector ℕ k →. ℕ) : Semisentence ℒₒᵣ (k + 1) :=
+noncomputable def codeOfPartrec' {k} (f : List.Vector ℕ k →. ℕ) : ArithmeticSemisentence (k + 1) :=
   code <| Classical.epsilon fun c ↦ ∀ y v, Semiformula.Evalbm ℕ (y :> v) (code c) ↔ y ∈ f (List.Vector.ofFn v)
 
 lemma codeOfPartrec'_spec {k} {f : List.Vector ℕ k →. ℕ} (hf : Nat.Partrec' f) {y : ℕ} {v : Fin k → ℕ} :
@@ -242,7 +242,7 @@ lemma codeOfPartrec'_spec {k} {f : List.Vector ℕ k →. ℕ} (hf : Nat.Partrec
 
 open Classical
 
-noncomputable def codeOfREPred (A : ℕ → Prop) : Semisentence ℒₒᵣ 1 :=
+noncomputable def codeOfREPred (A : ℕ → Prop) : ArithmeticSemisentence 1 :=
   let f : ℕ →. Unit := fun a ↦ Part.assert (A a) fun _ ↦ Part.some ()
   (codeOfPartrec' (fun v ↦ (f (v.get 0)).map fun _ ↦ 0))/[‘0’, #0]
 

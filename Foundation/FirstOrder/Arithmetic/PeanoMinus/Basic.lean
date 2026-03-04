@@ -12,23 +12,23 @@ namespace LO.FirstOrder.Arithmetic
 
 namespace PeanoMinus.Axiom
 
-abbrev       addZero : Sentence ℒₒᵣ := “∀ x, x + 0 = x”
-abbrev      addAssoc : Sentence ℒₒᵣ := “∀ x y z, (x + y) + z = x + (y + z)”
-abbrev       addComm : Sentence ℒₒᵣ := “∀ x y, x + y = y + x”
-abbrev     addEqOfLt : Sentence ℒₒᵣ := “∀ x y, x < y → ∃ z, x + z = y”
-abbrev        zeroLe : Sentence ℒₒᵣ := “∀ x, 0 ≤ x”
-abbrev     zeroLtOne : Sentence ℒₒᵣ := “0 < 1”
-abbrev oneLeOfZeroLt : Sentence ℒₒᵣ := “∀ x, 0 < x → 1 ≤ x”
-abbrev      addLtAdd : Sentence ℒₒᵣ := “∀ x y z, x < y → x + z < y + z”
-abbrev       mulZero : Sentence ℒₒᵣ := “∀ x, x * 0 = 0”
-abbrev        mulOne : Sentence ℒₒᵣ := “∀ x, x * 1 = x”
-abbrev      mulAssoc : Sentence ℒₒᵣ := “∀ x y z, (x * y) * z = x * (y * z)”
-abbrev       mulComm : Sentence ℒₒᵣ := “∀ x y, x * y = y * x”
-abbrev      mulLtMul : Sentence ℒₒᵣ := “∀ x y z, x < y ∧ 0 < z → x * z < y * z”
-abbrev         distr : Sentence ℒₒᵣ := “∀ x y z, x * (y + z) = x * y + x * z”
-abbrev      ltIrrefl : Sentence ℒₒᵣ := “∀ x, x ≮ x”
-abbrev       ltTrans : Sentence ℒₒᵣ := “∀ x y z, x < y ∧ y < z → x < z”
-abbrev         ltTri : Sentence ℒₒᵣ := “∀ x y, x < y ∨ x = y ∨ x > y”
+abbrev       addZero : ArithmeticSentence := “∀ x, x + 0 = x”
+abbrev      addAssoc : ArithmeticSentence := “∀ x y z, (x + y) + z = x + (y + z)”
+abbrev       addComm : ArithmeticSentence := “∀ x y, x + y = y + x”
+abbrev     addEqOfLt : ArithmeticSentence := “∀ x y, x < y → ∃ z, x + z = y”
+abbrev        zeroLe : ArithmeticSentence := “∀ x, 0 ≤ x”
+abbrev     zeroLtOne : ArithmeticSentence := “0 < 1”
+abbrev oneLeOfZeroLt : ArithmeticSentence := “∀ x, 0 < x → 1 ≤ x”
+abbrev      addLtAdd : ArithmeticSentence := “∀ x y z, x < y → x + z < y + z”
+abbrev       mulZero : ArithmeticSentence := “∀ x, x * 0 = 0”
+abbrev        mulOne : ArithmeticSentence := “∀ x, x * 1 = x”
+abbrev      mulAssoc : ArithmeticSentence := “∀ x y z, (x * y) * z = x * (y * z)”
+abbrev       mulComm : ArithmeticSentence := “∀ x y, x * y = y * x”
+abbrev      mulLtMul : ArithmeticSentence := “∀ x y z, x < y ∧ 0 < z → x * z < y * z”
+abbrev         distr : ArithmeticSentence := “∀ x y z, x * (y + z) = x * y + x * z”
+abbrev      ltIrrefl : ArithmeticSentence := “∀ x, x ≮ x”
+abbrev       ltTrans : ArithmeticSentence := “∀ x y z, x < y ∧ y < z → x < z”
+abbrev         ltTri : ArithmeticSentence := “∀ x y, x < y ∨ x = y ∨ x > y”
 
 end PeanoMinus.Axiom
 
@@ -567,11 +567,11 @@ lemma eq_fin_of_lt_nat {n : ℕ} {x : M} (hx : x < (n : M)) : ∃ i : Fin n, x =
   rcases eq_nat_of_lt_nat hx with ⟨x, rfl⟩
   exact ⟨⟨x, by simpa using hx⟩, by simp⟩
 
-@[simp] lemma eval_ballLTSucc' {t : Semiterm ℒₒᵣ ξ n} {φ : Semiformula ℒₒᵣ ξ (n + 1)} :
+@[simp] lemma eval_ballLTSucc' {t : ArithmeticSemiterm ξ n} {φ : ArithmeticSemiformula ξ (n + 1)} :
     Semiformula.Evalm M e ε (φ.ballLTSucc t) ↔ ∀ x ≤ Semiterm.valm M e ε t, Semiformula.Evalm M (x :> e) ε φ := by
   simp [Semiformula.eval_ballLTSucc, lt_succ_iff_le]
 
-@[simp] lemma eval_bexsLTSucc' {t : Semiterm ℒₒᵣ ξ n} {φ : Semiformula ℒₒᵣ ξ (n + 1)} :
+@[simp] lemma eval_bexsLTSucc' {t : ArithmeticSemiterm ξ n} {φ : ArithmeticSemiformula ξ (n + 1)} :
     Semiformula.Evalm M e ε (φ.bexsLTSucc t) ↔ ∃ x ≤ Semiterm.valm M e ε t, Semiformula.Evalm M (x :> e) ε φ := by
   simp [Semiformula.eval_bexsLTSucc, lt_succ_iff_le]
 

@@ -76,19 +76,19 @@ instance : Semiformula.Operator.Mem ℒₒᵣ := ⟨⟨bitDef.val⟩⟩
 lemma operator_mem_def : Semiformula.Operator.Mem.mem.sentence = bitDef.val := by
   simp [Semiformula.Operator.Mem.mem]
 
-def ballIn (t : Semiterm ℒₒᵣ ξ n) (p : Semiformula ℒₒᵣ ξ (n + 1)) : Semiformula ℒₒᵣ ξ n := “∀ x < !!t, x ∈ !!(Rew.bShift t) → !p x ⋯”
+def ballIn (t : ArithmeticSemiterm ξ n) (p : ArithmeticSemiformula ξ (n + 1)) : ArithmeticSemiformula ξ n := “∀ x < !!t, x ∈ !!(Rew.bShift t) → !p x ⋯”
 
-def bexsIn (t : Semiterm ℒₒᵣ ξ n) (p : Semiformula ℒₒᵣ ξ (n + 1)) : Semiformula ℒₒᵣ ξ n := “∃ x < !!t, x ∈ !!(Rew.bShift t) ∧ !p x ⋯”
+def bexsIn (t : ArithmeticSemiterm ξ n) (p : ArithmeticSemiformula ξ (n + 1)) : ArithmeticSemiformula ξ n := “∃ x < !!t, x ∈ !!(Rew.bShift t) ∧ !p x ⋯”
 
-@[simp] lemma Hierarchy.bit {t u : Semiterm ℒₒᵣ μ n} : Hierarchy Γ s “!!t ∈ !!u” := by
+@[simp] lemma Hierarchy.bit {t u : ArithmeticSemiterm μ n} : Hierarchy Γ s “!!t ∈ !!u” := by
   simp [Semiformula.Operator.operator, Matrix.fun_eq_vec_two, operator_mem_def]
 
-@[simp] lemma Hieralchy.ballIn {Γ m} (t : Semiterm ℒₒᵣ ξ n) (p : Semiformula ℒₒᵣ ξ (n + 1)) :
+@[simp] lemma Hieralchy.ballIn {Γ m} (t : ArithmeticSemiterm ξ n) (p : ArithmeticSemiformula ξ (n + 1)) :
     Hierarchy Γ m (ballIn t p) ↔ Hierarchy Γ m p := by
   simp only [Arithmetic.ballIn]
   simp [Semiformula.Operator.operator, operator_mem_def]
 
-@[simp] lemma Hieralchy.bexsIn {Γ m} (t : Semiterm ℒₒᵣ ξ n) (p : Semiformula ℒₒᵣ ξ (n + 1)) :
+@[simp] lemma Hieralchy.bexsIn {Γ m} (t : ArithmeticSemiterm ξ n) (p : ArithmeticSemiformula ξ (n + 1)) :
     Hierarchy Γ m (bexsIn t p) ↔ Hierarchy Γ m p := by
   simp only [Arithmetic.bexsIn]
   simp [Semiformula.Operator.operator, operator_mem_def]
@@ -135,10 +135,10 @@ macro_rules
   | `(⤫formula(lit)[ $binders* | $fbinders* | :⟪$t₁:first_order_term, $t₂:first_order_term, $t₃:first_order_term⟫:∈ $u:first_order_term]) =>
     `(memRel₃Opr.operator ![⤫term(lit)[$binders* | $fbinders* | $u], ⤫term(lit)[$binders* | $fbinders* | $t₁], ⤫term(lit)[$binders* | $fbinders* | $t₂], ⤫term(lit)[$binders* | $fbinders* | $t₃]])
 
-@[simp] lemma Hierarchy.memRel {t₁ t₂ u : Semiterm ℒₒᵣ μ n} : Hierarchy Γ s “!!t₁ ∼[ !!u ] !!t₂” := by
+@[simp] lemma Hierarchy.memRel {t₁ t₂ u : ArithmeticSemiterm μ n} : Hierarchy Γ s “!!t₁ ∼[ !!u ] !!t₂” := by
   simp [Semiformula.Operator.operator, Matrix.fun_eq_vec_two, memRelOpr]
 
-@[simp] lemma Hierarchy.memRel₃ {t₁ t₂ t₃ u : Semiterm ℒₒᵣ μ n} : Hierarchy Γ s “:⟪!!t₁, !!t₂, !!t₃⟫:∈ !!u” := by
+@[simp] lemma Hierarchy.memRel₃ {t₁ t₂ t₃ u : ArithmeticSemiterm μ n} : Hierarchy Γ s “:⟪!!t₁, !!t₂, !!t₃⟫:∈ !!u” := by
   simp [Semiformula.Operator.operator, Matrix.fun_eq_vec_two, memRel₃Opr]
 
 end notations
@@ -149,7 +149,7 @@ section model
 
 scoped instance : Structure.Mem ℒₒᵣ V := ⟨by intro a b; simp [Semiformula.Operator.val, operator_mem_def]⟩
 
-@[simp] lemma eval_ballIn {t : Semiterm ℒₒᵣ ξ n} {p : Semiformula ℒₒᵣ ξ (n + 1)} {e ε} :
+@[simp] lemma eval_ballIn {t : ArithmeticSemiterm ξ n} {p : ArithmeticSemiformula ξ (n + 1)} {e ε} :
     Semiformula.Evalm V e ε (ballIn t p) ↔ ∀ x ∈ t.valm V e ε, Semiformula.Evalm V (x :> e) ε p := by
   suffices
     (∀ x < t.valm V e ε, x ∈ t.valm V e ε → Semiformula.Evalm V (x :> e) ε p) ↔
@@ -158,7 +158,7 @@ scoped instance : Structure.Mem ℒₒᵣ V := ⟨by intro a b; simp [Semiformul
   · intro h x hx; exact h x (lt_of_mem hx) hx
   · intro h x _ hx; exact h x hx
 
-@[simp] lemma eval_bexsIn {t : Semiterm ℒₒᵣ ξ n} {p : Semiformula ℒₒᵣ ξ (n + 1)} {e ε} :
+@[simp] lemma eval_bexsIn {t : ArithmeticSemiterm ξ n} {p : ArithmeticSemiformula ξ (n + 1)} {e ε} :
     Semiformula.Evalm V e ε (bexsIn t p) ↔ ∃ x ∈ t.valm V e ε, Semiformula.Evalm V (x :> e) ε p := by
   suffices
     (∃ x < t.valm V e ε, x ∈ t.valm V e ε ∧ Semiformula.Evalm V (x :> e) ε p) ↔

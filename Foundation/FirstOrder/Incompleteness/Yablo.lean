@@ -25,15 +25,15 @@ namespace LO.FirstOrder.Arithmetic.Bootstrapping.Arithmetic
 
 variable {V : Type*} [ORingStructure V] [V ⊧ₘ* 𝗜𝚺₁]
 
-lemma substNumeral_app_quote_nat_model (σ : Semisentence ℒₒᵣ 1) (n : ℕ) :
-  substNumeral ⌜σ⌝ (n : V) = ⌜(σ/[.numeral n] : Sentence ℒₒᵣ)⌝ := by
+lemma substNumeral_app_quote_nat_model (σ : ArithmeticSemisentence 1) (n : ℕ) :
+  substNumeral ⌜σ⌝ (n : V) = ⌜(σ/[.numeral n] : ArithmeticSentence)⌝ := by
   simp [
     substNumeral, Sentence.quote_def, Semiformula.quote_def,
     Rewriting.emb_subst_eq_subst_coe₁
   ];
 
-lemma substNumeral_app_quote_nat_Nat (σ : Semisentence ℒₒᵣ 1) (n : ℕ) :
-  substNumeral ⌜σ⌝ n = ⌜(σ/[.numeral n] : Sentence ℒₒᵣ)⌝ := by
+lemma substNumeral_app_quote_nat_Nat (σ : ArithmeticSemisentence 1) (n : ℕ) :
+  substNumeral ⌜σ⌝ n = ⌜(σ/[.numeral n] : ArithmeticSentence)⌝ := by
   simp [
     substNumeral, Sentence.quote_def, Semiformula.quote_def,
     Rewriting.emb_subst_eq_subst_coe₁

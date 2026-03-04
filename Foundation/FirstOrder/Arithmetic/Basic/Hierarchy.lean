@@ -415,7 +415,7 @@ end Hierarchy
 
 section LOR
 
-lemma sigma₁_induction {P : (n : ℕ) → Semiformula ℒₒᵣ ξ n → Prop}
+lemma sigma₁_induction {P : (n : ℕ) → ArithmeticSemiformula ξ n → Prop}
     (hVerum : ∀ n, P n ⊤)
     (hFalsum : ∀ n, P n ⊥)
     (hEQ : ∀ n t₁ t₂, P n (.rel Language.Eq.eq ![t₁, t₂]))
@@ -456,7 +456,7 @@ lemma sigma₁_induction {P : (n : ℕ) → Semiformula ℒₒᵣ ξ n → Prop}
     hExs _ _ hp (sigma₁_induction hVerum hFalsum hEQ hNEQ hLT hNLT hAnd hOr hBall hExs _ _ hp)
 
 lemma sigma₁_induction' {n φ} (hp : Hierarchy 𝚺 1 φ)
-    {P : (n : ℕ) → Semiformula ℒₒᵣ ξ n → Prop}
+    {P : (n : ℕ) → ArithmeticSemiformula ξ n → Prop}
     (hVerum : ∀ n, P n ⊤)
     (hFalsum : ∀ n, P n ⊥)
     (hEQ : ∀ n t₁ t₂, P n (.rel Language.Eq.eq ![t₁, t₂]))

@@ -6,10 +6,10 @@ public import Foundation.Meta.ClProver
 @[expose] public section
 namespace LO.FirstOrder.Arithmetic
 
-variable {T : Theory ℒₒᵣ} [𝗜𝚺₁ ⪯ T] [Entailment.Consistent T]
+variable {T : ArithmeticTheory} [𝗜𝚺₁ ⪯ T] [Entailment.Consistent T]
 
 /-- There is no predicate `τ`, s.t. for any sentence `σ`, `σ` is provable in `T` iff `τ/[⌜σ⌝]` is so. -/
-lemma not_exists_tarski_predicate : ¬∃ τ : Semisentence ℒₒᵣ 1, ∀ σ, T ⊢ σ ⭤ τ/[⌜σ⌝] := by
+lemma not_exists_tarski_predicate : ¬∃ τ : ArithmeticSemisentence 1, ∀ σ, T ⊢ σ ⭤ τ/[⌜σ⌝] := by
   rintro ⟨τ, hτ⟩;
   apply Entailment.Consistent.not_bot (𝓢 := T);
   . infer_instance;
@@ -18,7 +18,7 @@ lemma not_exists_tarski_predicate : ¬∃ τ : Semisentence ℒₒᵣ 1, ∀ σ,
     cl_prover [h₁, h₂];
 
 /-- Tarski's Undefinability of Truth Theorem. -/
-theorem undefinability_of_truth : ¬∃ τ : Semisentence ℒₒᵣ 1, ∀ σ : Sentence ℒₒᵣ, ℕ ⊧ₘ σ ↔ ℕ ⊧ₘ τ/[⌜σ⌝] := by
+theorem undefinability_of_truth : ¬∃ τ : ArithmeticSemisentence 1, ∀ σ : ArithmeticSentence, ℕ ⊧ₘ σ ↔ ℕ ⊧ₘ τ/[⌜σ⌝] := by
   have := not_exists_tarski_predicate (T := 𝗧𝗔);
   contrapose! this;
   obtain ⟨τ, hτ⟩ := this;

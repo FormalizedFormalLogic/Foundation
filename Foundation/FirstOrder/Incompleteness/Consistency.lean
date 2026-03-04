@@ -36,7 +36,7 @@ section
 noncomputable def _root_.LO.FirstOrder.Theory.consistent : 𝚷₁.Sentence :=
   .mkPi (∼T.provabilityPred ⊥)
 
-@[simp] lemma consistent.defined : Semiformula.Evalbm V ![] (T.consistent : Sentence ℒₒᵣ) ↔ T.Consistent V := by
+@[simp] lemma consistent.defined : Semiformula.Evalbm V ![] (T.consistent : ArithmeticSentence) ↔ T.Consistent V := by
   simp [Theory.consistent, Theory.Consistent]
 
 noncomputable def _root_.LO.FirstOrder.Theory.consistentWith : 𝚷₁.Semisentence 1 := .mkPi
@@ -47,7 +47,7 @@ instance consistentWith.defined : 𝚷₁-Predicate (T.ConsistentWith : V → Pr
 
 instance consistentWith.definable : 𝚷₁-Predicate (T.ConsistentWith : V → Prop) := (consistentWith.defined T).to_definable
 
-noncomputable abbrev _root_.LO.FirstOrder.Theory.consistentWithPred (σ : Sentence L) : Sentence ℒₒᵣ := T.consistentWith.val/[⌜σ⌝]
+noncomputable abbrev _root_.LO.FirstOrder.Theory.consistentWithPred (σ : Sentence L) : ArithmeticSentence := T.consistentWith.val/[⌜σ⌝]
 
 noncomputable def _root_.LO.FirstOrder.Theory.consistentWithPred' (σ : Sentence L) : 𝚷₁.Sentence := .mkPi
   “!T.consistentWith !!(⌜σ⌝)”

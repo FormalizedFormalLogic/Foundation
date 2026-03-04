@@ -22,7 +22,7 @@ omit [Nonempty V] [V ⊧ₘ* 𝗭] in
 lemma isTransitive_def {x : V} : IsTransitive x ↔ ∀ y ∈ x, y ⊆ x :=
   ⟨fun h ↦ h.transitive, fun h ↦ ⟨h⟩⟩
 
-def IsTransitive.dfn : Semisentence ℒₛₑₜ 1 := “x. ∀ y ∈ x, y ⊆ x”
+def IsTransitive.dfn : SetTheorySemisentence 1 := “x. ∀ y ∈ x, y ⊆ x”
 
 instance IsTransitive.defined : ℒₛₑₜ-predicate[V] IsTransitive via IsTransitive.dfn :=
   ⟨fun v ↦ by simp [IsTransitive.dfn, isTransitive_def]⟩
@@ -111,7 +111,7 @@ lemma isOrdinal_iff {x : V} :
     IsOrdinal x ↔ IsTransitive x ∧ ∀ y ∈ x, ∀ z ∈ x, y ∈ z ∨ y = z ∨ z ∈ y :=
   ⟨fun h ↦ ⟨⟨h.transitive⟩, h.trichotomy⟩, fun h ↦ { transitive := h.1.transitive, trichotomy := h.2 }⟩
 
-def IsOrdinal.dfn : Semisentence ℒₛₑₜ 1 := “x. !IsTransitive.dfn x ∧ ∀ y ∈ x, ∀ z ∈ x, y ∈ z ∨ y = z ∨ z ∈ y”
+def IsOrdinal.dfn : SetTheorySemisentence 1 := “x. !IsTransitive.dfn x ∧ ∀ y ∈ x, ∀ z ∈ x, y ∈ z ∨ y = z ∨ z ∈ y”
 
 instance IsOrdinal.defined : ℒₛₑₜ-predicate[V] IsOrdinal via IsOrdinal.dfn := ⟨fun δ ↦ by simp [isOrdinal_iff, dfn]⟩
 

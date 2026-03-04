@@ -35,13 +35,13 @@ theorem incomplete (T : ArithmeticTheory) [T.Δ₁] [𝗥₀ ⪯ T] [T.SoundOnHi
         IsSemiformula ℒₒᵣ 1 φ ∧ T.Provable (neg ℒₒᵣ <| subst ℒₒᵣ ?[numeral φ] φ) := by
       definability
     exact re_iff_sigma1.mpr this
-  have D_spec (φ : Semisentence ℒₒᵣ 1) : D ⌜φ⌝ ↔ T ⊢ ∼φ/[⌜φ⌝] := by
+  have D_spec (φ : ArithmeticSemisentence 1) : D ⌜φ⌝ ↔ T ⊢ ∼φ/[⌜φ⌝] := by
     simp [D, ←provable_iff_provable, Sentence.quote_def,
       Rewriting.emb_subst_eq_subst_coe₁, Semiformula.quote_def]
-  let δ : Semisentence ℒₒᵣ 1 := codeOfREPred D
+  let δ : ArithmeticSemisentence 1 := codeOfREPred D
   have (n : ℕ) : D n ↔ T ⊢ δ/[↑n] := by
     simpa [Semiformula.coe_subst_eq_subst_coe₁] using re_complete D_re
-  let π : Sentence ℒₒᵣ := δ/[⌜δ⌝]
+  let π : ArithmeticSentence := δ/[⌜δ⌝]
   have : T ⊢ π ↔ T ⊢ ∼π := calc
     T ⊢ π ↔ T ⊢ δ/[⌜δ⌝]  := by rfl
     _     ↔ D ⌜δ⌝        := by simpa using (this ⌜δ⌝).symm
@@ -57,7 +57,7 @@ theorem incomplete (T : ArithmeticTheory) [T.Δ₁] [𝗥₀ ⪯ T] [T.SoundOnHi
 
 theorem exists_true_but_unprovable_sentence
     (T : ArithmeticTheory) [T.Δ₁] [𝗥₀ ⪯ T] [T.SoundOnHierarchy 𝚺 1] :
-    ∃ δ : Sentence ℒₒᵣ, ℕ ⊧ₘ δ ∧ T ⊬ δ := by
+    ∃ δ : ArithmeticSentence, ℕ ⊧ₘ δ ∧ T ⊬ δ := by
   obtain ⟨δ, hδ⟩ := incomplete_def.mp $ Arithmetic.incomplete T;
   by_cases ℕ ⊧ₘ δ
   . exact ⟨δ, by assumption, hδ.1⟩

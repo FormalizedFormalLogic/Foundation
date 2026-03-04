@@ -29,7 +29,7 @@ instance _root_.LO.FirstOrder.Theory.RosserProvable_defined :
 instance _root_.LO.FirstOrder.Theory.rosserProvable_definable :
     𝚺₁-Predicate (T.RosserProvable : V → Prop) := T.RosserProvable_defined.to_definable
 
-noncomputable abbrev _root_.LO.FirstOrder.Theory.rosserPred (σ : Sentence L) : Sentence ℒₒᵣ := T.rosserProvable.val/[⌜σ⌝]
+noncomputable abbrev _root_.LO.FirstOrder.Theory.rosserPred (σ : Sentence L) : ArithmeticSentence := T.rosserProvable.val/[⌜σ⌝]
 
 end
 

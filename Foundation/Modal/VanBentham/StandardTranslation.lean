@@ -25,17 +25,23 @@ def frame : Language where
   Func _ := PEmpty
   Rel := Frame.Rel
 
-notation:max "𝓛𝓕" => frame
+notation:max "ℒₖᵣ" => frame
 
-instance : Language.LT 𝓛𝓕 := ⟨Frame.Rel.lt⟩
+instance : Language.LT ℒₖᵣ := ⟨Frame.Rel.lt⟩
 
 end Language
+
+
+abbrev KripkeFrameSemisentence := Semisentence ℒₖᵣ
+
+abbrev KripkeFrameSentence := Sentence ℒₖᵣ
+
 
 namespace Frame
 
 variable {α : Type*}
 
-def forces (a : ℕ) : Semiformula.Operator 𝓛𝓕 1 := ⟨Semiformula.rel (Language.Frame.Rel.pred a) ![#0]⟩
+def forces (a : ℕ) : Semiformula.Operator ℒₖᵣ 1 := ⟨Semiformula.rel (Language.Frame.Rel.pred a) ![#0]⟩
 
 open Lean PrettyPrinter Delaborator
 
@@ -44,9 +50,9 @@ syntax:45 first_order_term:45 " ⊩ " term :max : first_order_formula
 macro_rules
   | `(⤫formula(lit)[ $binders* | $fbinders* | $t:first_order_term ⊩ $a:term]) => `(Semiformula.Operator.operator (forces $a) ![⤫term(lit)[ $binders* | $fbinders* | $t ]])
 
-def transitive : Sentence 𝓛𝓕 := “∀ x y z, x < y → y < z → x < z”
+def transitive : KripkeFrameSentence := “∀ x y z, x < y → y < z → x < z”
 
-def monotone (a : ℕ) : Sentence 𝓛𝓕 := “∀ x y, x < y → x ⊩ a → y ⊩ a”
+def monotone (a : ℕ) : KripkeFrameSentence := “∀ x y, x < y → x ⊩ a → y ⊩ a”
 
 end Frame
 
@@ -57,7 +63,7 @@ namespace LO.Modal
 
 open NNFormula FirstOrder
 
-def standardTranslation : NNFormula ℕ → FirstOrder.Semisentence 𝓛𝓕 1
+def standardTranslation : NNFormula ℕ → FirstOrder.KripkeFrameSemisentence 1
   | .atom  a => “x. x ⊩ a”
   | .natom a => “x. ¬x ⊩ a”
   | .verum   => “⊤”
@@ -77,7 +83,7 @@ open FirstOrder.Semiformula (Operator)
 
 variable {M : Kripke.Model} {x y : M.World} {φ : NNFormula ℕ} {a : ℕ}
 
-instance {M : Model} : FirstOrder.Structure 𝓛𝓕 M.World where
+instance {M : Model} : FirstOrder.Structure ℒₖᵣ M.World where
   func := fun _ f => PEmpty.elim f
   rel := fun _ r =>
     match r with
@@ -86,7 +92,7 @@ instance {M : Model} : FirstOrder.Structure 𝓛𝓕 M.World where
 
 @[simp] lemma forces_iff_val : (forces a).val ![x] ↔ M.Val a x:= by rfl
 
-@[simp] lemma lt_iff_rel : (@Operator.LT.lt 𝓛𝓕 _).val ![x, y] ↔ x ≺ y := by rfl
+@[simp] lemma lt_iff_rel : (@Operator.LT.lt ℒₖᵣ _).val ![x, y] ↔ x ≺ y := by rfl
 
 /-- BdRV Prop 2.47 (i) -/
 lemma correspondence_satisfies : x ⊧ φ ↔ M ⊧/![x] φ¹ := by
