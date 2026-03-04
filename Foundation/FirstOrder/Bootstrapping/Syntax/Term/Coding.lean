@@ -47,20 +47,20 @@ variable {V}
 
 open Bootstrapping.Arithmetic
 
-@[simp] lemma typed_quote_add (t u : SyntacticArithmeticSemiterm n) :
-    (⌜(‘!!t + !!u’ : SyntacticArithmeticSemiterm n)⌝ : Bootstrapping.Semiterm V ℒₒᵣ n) = ⌜t⌝ + ⌜u⌝ := rfl
+@[simp] lemma typed_quote_add (t u : SyntacticSemiterm ℒₒᵣ n) :
+    (⌜(‘!!t + !!u’ : SyntacticSemiterm ℒₒᵣ n)⌝ : Bootstrapping.Semiterm V ℒₒᵣ n) = ⌜t⌝ + ⌜u⌝ := rfl
 
-@[simp] lemma typed_quote_mul (t u : SyntacticArithmeticSemiterm n) :
-    (⌜(‘!!t * !!u’ : SyntacticArithmeticSemiterm n)⌝ : Bootstrapping.Semiterm V ℒₒᵣ n) = ⌜t⌝ * ⌜u⌝ := rfl
+@[simp] lemma typed_quote_mul (t u : SyntacticSemiterm ℒₒᵣ n) :
+    (⌜(‘!!t * !!u’ : SyntacticSemiterm ℒₒᵣ n)⌝ : Bootstrapping.Semiterm V ℒₒᵣ n) = ⌜t⌝ * ⌜u⌝ := rfl
 
 lemma typed_quote_numeral_eq_numeral_one :
-    (⌜((1 : ℕ) : SyntacticArithmeticSemiterm n)⌝ : Bootstrapping.Semiterm V ℒₒᵣ n) = typedNumeral 1 := by
+    (⌜((1 : ℕ) : SyntacticSemiterm ℒₒᵣ n)⌝ : Bootstrapping.Semiterm V ℒₒᵣ n) = typedNumeral 1 := by
   simp [Bootstrapping.Arithmetic.typedNumeral,
     Bootstrapping.Arithmetic.one, Bootstrapping.Arithmetic.qqFunc_absolute, qqFuncN_eq_qqFunc]
   rfl
 
 @[simp] lemma typed_quote_numeral_eq_numeral (k : ℕ) :
-    (⌜(↑k : SyntacticArithmeticSemiterm n)⌝ : Bootstrapping.Semiterm V ℒₒᵣ n) = typedNumeral ↑k := by
+    (⌜(↑k : SyntacticSemiterm ℒₒᵣ n)⌝ : Bootstrapping.Semiterm V ℒₒᵣ n) = typedNumeral ↑k := by
   match k with
   |         0 =>
     simp [Bootstrapping.Arithmetic.typedNumeral,
@@ -68,8 +68,8 @@ lemma typed_quote_numeral_eq_numeral_one :
     rfl
   |         1 => simp [typed_quote_numeral_eq_numeral_one]
   | k + 1 + 1 =>
-    calc (⌜(↑(k + 1 + 1) : SyntacticArithmeticSemiterm n)⌝ : Bootstrapping.Semiterm V ℒₒᵣ n)
-      _ = ⌜(↑(k + 1) : SyntacticArithmeticSemiterm n)⌝ + ⌜((1 : ℕ) : SyntacticArithmeticSemiterm n)⌝ := rfl
+    calc (⌜(↑(k + 1 + 1) : SyntacticSemiterm ℒₒᵣ n)⌝ : Bootstrapping.Semiterm V ℒₒᵣ n)
+      _ = ⌜(↑(k + 1) : SyntacticSemiterm ℒₒᵣ n)⌝ + ⌜((1 : ℕ) : SyntacticSemiterm ℒₒᵣ n)⌝ := rfl
       _ = typedNumeral ↑(k + 1) + typedNumeral 1 := by simp [typed_quote_numeral_eq_numeral (k + 1), typed_quote_numeral_eq_numeral_one]
       _ = typedNumeral (↑k + 1 + 1)              := by simp
 

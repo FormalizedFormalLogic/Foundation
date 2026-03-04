@@ -122,16 +122,16 @@ noncomputable instance : LCWQIsoGödelQuote (SyntacticSemiformula L) (Bootstrapp
 
 open Bootstrapping.Arithmetic
 
-@[simp] lemma typed_quote_eq (t u : SyntacticArithmeticSemiterm n) :
+@[simp] lemma typed_quote_eq (t u : SyntacticSemiterm ℒₒᵣ n) :
     (⌜(“!!t = !!u” : SyntacticArithmeticSemiformula n)⌝ : Bootstrapping.Semiformula V ℒₒᵣ n) = (⌜t⌝ ≐ ⌜u⌝) := rfl
 
-@[simp] lemma typed_quote_ne (t u : SyntacticArithmeticSemiterm n) :
+@[simp] lemma typed_quote_ne (t u : SyntacticSemiterm ℒₒᵣ n) :
     (⌜(“!!t ≠ !!u” : SyntacticArithmeticSemiformula n)⌝ : Bootstrapping.Semiformula V ℒₒᵣ n) = (⌜t⌝ ≉ ⌜u⌝) := rfl
 
-@[simp] lemma typed_quote_lt (t u : SyntacticArithmeticSemiterm n) :
+@[simp] lemma typed_quote_lt (t u : SyntacticSemiterm ℒₒᵣ n) :
     (⌜(“!!t < !!u” : SyntacticArithmeticSemiformula n)⌝ : Bootstrapping.Semiformula V ℒₒᵣ n) = (⌜t⌝ <' ⌜u⌝) := rfl
 
-@[simp] lemma typed_quote_nlt (t u : SyntacticArithmeticSemiterm n) :
+@[simp] lemma typed_quote_nlt (t u : SyntacticSemiterm ℒₒᵣ n) :
     (⌜(“!!t ≮ !!u” : SyntacticArithmeticSemiformula n)⌝ : Bootstrapping.Semiformula V ℒₒᵣ n) = (⌜t⌝ ≮' ⌜u⌝) := rfl
 
 lemma ne_iff_val_ne (φ ψ : Bootstrapping.Semiformula V L n) : φ ≠ ψ ↔ φ.val ≠ ψ.val := Iff.ne Semiformula.ext_iff
