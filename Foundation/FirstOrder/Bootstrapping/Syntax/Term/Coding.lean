@@ -164,14 +164,14 @@ def empty_typed_quote_def (t : ClosedSemiterm L n) :
 @[simp] lemma empty_typed_quote_func (f : L.Func k) (v : Fin k → ClosedSemiterm L n) :
     (⌜func f v⌝ : Bootstrapping.Semiterm V L n) = Bootstrapping.Semiterm.func f fun i ↦ ⌜v i⌝ := rfl
 
-@[simp] lemma empty_typed_quote_add (t u : ClosedArithmeticSemiterm n) :
-    (⌜(‘!!t + !!u’ : ClosedArithmeticSemiterm n)⌝ : Bootstrapping.Semiterm V ℒₒᵣ n) = ⌜t⌝ + ⌜u⌝ := rfl
+@[simp] lemma empty_typed_quote_add (t u : ClosedSemiterm ℒₒᵣ n) :
+    (⌜(‘!!t + !!u’ : ClosedSemiterm ℒₒᵣ n)⌝ : Bootstrapping.Semiterm V ℒₒᵣ n) = ⌜t⌝ + ⌜u⌝ := rfl
 
-@[simp] lemma empty_typed_quote_mul (t u : ClosedArithmeticSemiterm n) :
-    (⌜(‘!!t * !!u’ : ClosedArithmeticSemiterm n)⌝ : Bootstrapping.Semiterm V ℒₒᵣ n) = ⌜t⌝ * ⌜u⌝ := rfl
+@[simp] lemma empty_typed_quote_mul (t u : ClosedSemiterm ℒₒᵣ n) :
+    (⌜(‘!!t * !!u’ : ClosedSemiterm ℒₒᵣ n)⌝ : Bootstrapping.Semiterm V ℒₒᵣ n) = ⌜t⌝ * ⌜u⌝ := rfl
 
 @[simp] lemma empty_typed_quote_numeral_eq_numeral (k : ℕ) :
-    (⌜(↑k : ClosedArithmeticSemiterm n)⌝ : Bootstrapping.Semiterm V ℒₒᵣ n) = typedNumeral ↑k := by
+    (⌜(↑k : ClosedSemiterm ℒₒᵣ n)⌝ : Bootstrapping.Semiterm V ℒₒᵣ n) = typedNumeral ↑k := by
   simp [empty_typed_quote_def]
 
 noncomputable instance : GödelQuote (ClosedSemiterm L n) V where

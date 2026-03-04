@@ -268,16 +268,16 @@ namespace Sentence
 def typed_quote_def (σ : Semisentence L n) :
     (⌜σ⌝ : Bootstrapping.Semiformula V L n) = ⌜(Rewriting.emb σ : SyntacticSemiformula L n)⌝ := rfl
 
-@[simp] lemma typed_quote_eq (t u : ClosedArithmeticSemiterm n) :
+@[simp] lemma typed_quote_eq (t u : ClosedSemiterm ℒₒᵣ n) :
     (⌜(“!!t = !!u” : ArithmeticSemisentence n)⌝ : Bootstrapping.Semiformula V ℒₒᵣ n) = (⌜t⌝ ≐ ⌜u⌝) := rfl
 
-@[simp] lemma typed_quote_ne (t u : ClosedArithmeticSemiterm n) :
+@[simp] lemma typed_quote_ne (t u : ClosedSemiterm ℒₒᵣ n) :
     (⌜(“!!t ≠ !!u” : ArithmeticSemisentence n)⌝ : Bootstrapping.Semiformula V ℒₒᵣ n) = (⌜t⌝ ≉ ⌜u⌝) := rfl
 
-@[simp] lemma typed_quote_lt (t u : ClosedArithmeticSemiterm n) :
+@[simp] lemma typed_quote_lt (t u : ClosedSemiterm ℒₒᵣ n) :
     (⌜(“!!t < !!u” : ArithmeticSemisentence n)⌝ : Bootstrapping.Semiformula V ℒₒᵣ n) = (⌜t⌝ <' ⌜u⌝) := rfl
 
-@[simp] lemma typed_quote_nlt (t u : ClosedArithmeticSemiterm n) :
+@[simp] lemma typed_quote_nlt (t u : ClosedSemiterm ℒₒᵣ n) :
     (⌜(“!!t ≮ !!u” : ArithmeticSemisentence n)⌝ : Bootstrapping.Semiformula V ℒₒᵣ n) = (⌜t⌝ ≮' ⌜u⌝) := rfl
 
 noncomputable instance : GödelQuote (Semisentence L n) V where

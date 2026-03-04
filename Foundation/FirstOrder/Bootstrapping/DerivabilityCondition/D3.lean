@@ -38,7 +38,7 @@ noncomputable abbrev toNumVec (w : Fin n → V) : SemitermVec V ℒₒᵣ n k :=
 
 variable (T)
 
-theorem term_complete {n : ℕ} (t : FirstOrder.ClosedArithmeticSemiterm n) (w : Fin n → V) :
+theorem term_complete {n : ℕ} (t : FirstOrder.ClosedSemiterm ℒₒᵣ n) (w : Fin n → V) :
     T.internalize V ⊢ (toNumVec w ⤕ ⌜t⌝) ≐  𝕹 (t.valbm V w) :=
   match t with
   |                         #z => by simp
