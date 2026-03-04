@@ -38,6 +38,26 @@ end ORingStructure
 
 namespace FirstOrder
 
+abbrev ArithmeticTheory := Theory ℒₒᵣ
+
+abbrev ArithmeticAxiom := ArithmeticTheory
+
+abbrev ArithmeticSemiterm (ξ : Type*) (n : ℕ) := Semiterm ℒₒᵣ ξ n
+
+abbrev ArithmeticTerm (ξ : Type*) := Term ℒₒᵣ ξ
+
+abbrev ArithmeticSemiformula (ξ : Type*) (n : ℕ) := Semiformula ℒₒᵣ ξ n
+
+abbrev ArithmeticFormula (ξ : Type*) := Formula ℒₒᵣ ξ
+
+abbrev ArithmeticSemisentence (n : ℕ) := Semisentence ℒₒᵣ n
+
+abbrev ArithmeticSentence := Sentence ℒₒᵣ
+
+abbrev ArithmeticSyntacticSemiformula (n : ℕ) := SyntacticSemiformula ℒₒᵣ n
+
+abbrev ArithmeticSyntacticFormula := SyntacticFormula ℒₒᵣ
+
 section ToString
 
 variable {L : Language} [L.ORing]
@@ -56,7 +76,7 @@ instance : Repr (Semiterm ℒₒᵣ ξ n) := ⟨fun t _ ↦ t.toStringORing⟩
 
 instance : ToString (Semiterm ℒₒᵣ ξ n) := ⟨Semiterm.toStringORing⟩
 
-def Semiformula.toStringORing : ∀ {n}, Semiformula ℒₒᵣ ξ n → String
+def Semiformula.toStringORing : ∀ {n}, ArithmeticSemiformula ξ n → String
   | _,                             ⊤ => "\\top"
   | _,                             ⊥ => "\\bot"
   | _,          rel Language.Eq.eq v => (v 0).toStringORing ++ " = " ++ (v 1).toStringORing
@@ -70,9 +90,9 @@ def Semiformula.toStringORing : ∀ {n}, Semiformula ℒₒᵣ ξ n → String
   | n,                          ∀⁰ φ => "(\\forall x_{" ++ toString n ++ "}) " ++ "[" ++ φ.toStringORing ++ "]"
   | n,                          ∃⁰ φ => "(\\exists x_{" ++ toString n ++ "}) " ++ "[" ++ φ.toStringORing ++ "]"
 
-instance : Repr (Semiformula ℒₒᵣ ξ n) := ⟨fun φ _ ↦ φ.toStringORing⟩
+instance : Repr (ArithmeticSemiformula ξ n) := ⟨fun φ _ ↦ φ.toStringORing⟩
 
-instance : ToString (Semiformula ℒₒᵣ ξ n) := ⟨Semiformula.toStringORing⟩
+instance : ToString (ArithmeticSemiformula ξ n) := ⟨Semiformula.toStringORing⟩
 
 end ToString
 
@@ -166,8 +186,6 @@ macro_rules
     `(Semiformula.bexsLTSucc ⤫term(lit)[ $binders* | $fbinders* | $t ] ⤫formula(lit)[ $binders'* | $fbinders* | $φ ])
 
 end BinderNotation
-
-abbrev ArithmeticTheory := Theory ℒₒᵣ
 
 end FirstOrder
 

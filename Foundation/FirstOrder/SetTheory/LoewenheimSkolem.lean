@@ -32,11 +32,11 @@ lemma str_eq : Structure.SkolemHull.str (standardStructure V) s = standardStruct
 @[simp] lemma subset : s ⊆ Hull s := Structure.SkolemHull.subset
 
 lemma closed {v : Fin k → V} (hv : ∀ i, v i ∈ Hull s)
-    {φ : Semisentence ℒₛₑₜ (k + 1)} (H : ∃ z, V ⊧/(z :> v) φ) :
+    {φ : SetTheorySemisentence (k + 1)} (H : ∃ z, V ⊧/(z :> v) φ) :
     ∃ z ∈ Hull s, V ⊧/(z :> v) φ :=
   Structure.SkolemHull.closed hv H
 
-@[simp] lemma hull_models_iff {φ : Semisentence ℒₛₑₜ n} :
+@[simp] lemma hull_models_iff {φ : SetTheorySemisentence n} :
     (Hull s) ⊧/b φ ↔ V ⊧/(b ·) φ := by
   have :
       Semiformula.Evalb (Structure.SkolemHull.str (standardStructure V) s) b φ ↔

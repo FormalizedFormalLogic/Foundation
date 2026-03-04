@@ -7,13 +7,13 @@ namespace LO.FirstOrder.Arithmetic
 
 open PeanoMinus R0
 
-lemma nat_modelsWithParam_iff_models_substs {v : Fin k → ℕ} {φ : Semisentence ℒₒᵣ k} :
+lemma nat_modelsWithParam_iff_models_substs {v : Fin k → ℕ} {φ : ArithmeticSemisentence k} :
     ℕ ⊧/v φ ↔ ℕ ⊧ₘ (φ ⇜ (fun i ↦ Semiterm.Operator.numeral ℒₒᵣ (v i))) := by
   simp [models_iff]
 
 variable (V : Type*) [ORingStructure V] [V ⊧ₘ* 𝗣𝗔⁻]
 
-lemma modelsWithParam_iff_models_substs {v : Fin k → ℕ} {φ : Semisentence ℒₒᵣ k} :
+lemma modelsWithParam_iff_models_substs {v : Fin k → ℕ} {φ : ArithmeticSemisentence k} :
     V ⊧/(v ·) φ ↔ V ⊧ₘ (φ ⇜ (fun i ↦ Semiterm.Operator.numeral ℒₒᵣ (v i))) := by
   simp [models_iff, numeral_eq_natCast]
 
@@ -60,7 +60,7 @@ lemma DefinedFunction.shigmaOne_absolute_func {k} {f : (Fin k → ℕ) → ℕ} 
 
 variable {V}
 
-lemma models_iff_of_Sigma0 {σ : Semisentence ℒₒᵣ n} (hσ : Hierarchy 𝚺 0 σ) {e : Fin n → ℕ} :
+lemma models_iff_of_Sigma0 {σ : ArithmeticSemisentence n} (hσ : Hierarchy 𝚺 0 σ) {e : Fin n → ℕ} :
     V ⊧/(e ·) σ ↔ ℕ ⊧/e σ := by
   by_cases h : ℕ ⊧/e σ <;> simp [h]
   · have : V ⊧/(e ·) σ := by
@@ -84,12 +84,12 @@ variable {T : ArithmeticTheory} [𝗣𝗔⁻ ⪯ T] [T.SoundOnHierarchy 𝚺 1]
 
 noncomputable instance : 𝗥₀ ⪯ T := Entailment.WeakerThan.trans (𝓣 := 𝗣𝗔⁻) inferInstance inferInstance
 
-theorem sigma_one_completeness_iff_param {σ : Semisentence ℒₒᵣ n} (hσ : Hierarchy 𝚺 1 σ) {e : Fin n → ℕ} :
+theorem sigma_one_completeness_iff_param {σ : ArithmeticSemisentence n} (hσ : Hierarchy 𝚺 1 σ) {e : Fin n → ℕ} :
     ℕ ⊧/e σ ↔ T ⊢ (σ ⇜ fun x ↦ Semiterm.Operator.numeral ℒₒᵣ (e x)) := Iff.trans
   (by simp [models_iff, Semiformula.eval_substs])
   (sigma_one_completeness_iff (T := T) (by simp [hσ]))
 
-lemma models_iff_provable_of_Sigma0_param [V ⊧ₘ* T] {σ : Semisentence ℒₒᵣ n} (hσ : Hierarchy 𝚺 0 σ) {e : Fin n → ℕ} :
+lemma models_iff_provable_of_Sigma0_param [V ⊧ₘ* T] {σ : ArithmeticSemisentence n} (hσ : Hierarchy 𝚺 0 σ) {e : Fin n → ℕ} :
     V ⊧/(e ·) σ ↔ T ⊢ (σ ⇜ fun x ↦ Semiterm.Operator.numeral ℒₒᵣ (e x)) := by
   calc
     V ⊧/(e ·) σ ↔ ℕ ⊧/e σ        := by

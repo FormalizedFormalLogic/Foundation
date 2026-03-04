@@ -9,8 +9,8 @@ public import Foundation.FirstOrder.Arithmetic.PeanoMinus.Basic
 
 This file defines the $\Sigma_n / \Pi_n / \Delta_n$ formulas of arithmetic of first-order logic.
 
-- `𝚺-[m].Semiformula ξ n` is a `Semiformula ℒₒᵣ ξ n` which is `𝚺-[m]`.
-- `𝚷-[m].Semiformula ξ n` is a `Semiformula ℒₒᵣ ξ n` which is `𝚷-[m]`.
+- `𝚺-[m].Semiformula ξ n` is a `ArithmeticSemiformula ξ n` which is `𝚺-[m]`.
+- `𝚷-[m].Semiformula ξ n` is a `ArithmeticSemiformula ξ n` which is `𝚷-[m]`.
 - `𝚫-[m].Semiformula ξ n` is a pair of `𝚺-[m].Semiformula ξ n` and `𝚷-[m].Semiformula ξ n`.
 - `ProperOn` : `φ.ProperOn M` iff `φ`'s two element `φ.sigma` and `φ.pi` are equivalent on model `M`.
 
@@ -53,8 +53,8 @@ namespace HierarchySymbol
 variable (ξ : Type*) (n : ℕ)
 
 protected inductive Semiformula : HierarchySymbol → Type _ where
-  | mkSigma {m} (φ : Semiformula ℒₒᵣ ξ n) (hφ : Hierarchy 𝚺 m φ := by simp) : 𝚺-[m].Semiformula
-  | mkPi {m} (φ : Semiformula ℒₒᵣ ξ n) (hφ : Hierarchy 𝚷 m φ := by simp) : 𝚷-[m].Semiformula
+  | mkSigma {m} (φ : ArithmeticSemiformula ξ n) (hφ : Hierarchy 𝚺 m φ := by simp) : 𝚺-[m].Semiformula
+  | mkPi {m} (φ : ArithmeticSemiformula ξ n) (hφ : Hierarchy 𝚷 m φ := by simp) : 𝚷-[m].Semiformula
   | mkDelta {m} : 𝚺-[m].Semiformula → 𝚷-[m].Semiformula → 𝚫-[m].Semiformula
 
 protected abbrev Semisentence (Γ : HierarchySymbol) (n : ℕ) := Γ.Semiformula Empty n
@@ -67,24 +67,24 @@ variable {ξ n}
 
 namespace Semiformula
 
-@[coe] def val {Γ : HierarchySymbol} : Γ.Semiformula ξ n → Semiformula ℒₒᵣ ξ n
+@[coe] def val {Γ : HierarchySymbol} : Γ.Semiformula ξ n → ArithmeticSemiformula ξ n
   | mkSigma φ _ => φ
   | mkPi    φ _ => φ
   | mkDelta φ _ => φ.val
 
-@[simp] lemma val_mkSigma (φ : Semiformula ℒₒᵣ ξ n) (hp : Hierarchy 𝚺 m φ) : (mkSigma φ hp).val = φ := rfl
+@[simp] lemma val_mkSigma (φ : ArithmeticSemiformula ξ n) (hp : Hierarchy 𝚺 m φ) : (mkSigma φ hp).val = φ := rfl
 
-@[simp] lemma val_mkPi (φ : Semiformula ℒₒᵣ ξ n) (hp : Hierarchy 𝚷 m φ) : (mkPi φ hp).val = φ := rfl
+@[simp] lemma val_mkPi (φ : ArithmeticSemiformula ξ n) (hp : Hierarchy 𝚷 m φ) : (mkPi φ hp).val = φ := rfl
 
 @[simp] lemma val_mkDelta (φ : 𝚺-[m].Semiformula ξ n) (ψ : 𝚷-[m].Semiformula ξ n) : (mkDelta φ ψ).val = φ.val := rfl
 
-instance : Coe (𝚺₀.Semisentence n) (Semisentence ℒₒᵣ n) := ⟨Semiformula.val⟩
-instance : Coe (𝚷₀.Semisentence n) (Semisentence ℒₒᵣ n) := ⟨Semiformula.val⟩
-instance : Coe (𝚫₀.Semisentence n) (Semisentence ℒₒᵣ n) := ⟨Semiformula.val⟩
+instance : Coe (𝚺₀.Semisentence n) (ArithmeticSemisentence n) := ⟨Semiformula.val⟩
+instance : Coe (𝚷₀.Semisentence n) (ArithmeticSemisentence n) := ⟨Semiformula.val⟩
+instance : Coe (𝚫₀.Semisentence n) (ArithmeticSemisentence n) := ⟨Semiformula.val⟩
 
-instance : Coe (𝚺₁.Semisentence n) (Semisentence ℒₒᵣ n) := ⟨Semiformula.val⟩
-instance : Coe (𝚷₁.Semisentence n) (Semisentence ℒₒᵣ n) := ⟨Semiformula.val⟩
-instance : Coe (𝚫₁.Semisentence n) (Semisentence ℒₒᵣ n) := ⟨Semiformula.val⟩
+instance : Coe (𝚺₁.Semisentence n) (ArithmeticSemisentence n) := ⟨Semiformula.val⟩
+instance : Coe (𝚷₁.Semisentence n) (ArithmeticSemisentence n) := ⟨Semiformula.val⟩
+instance : Coe (𝚫₁.Semisentence n) (ArithmeticSemisentence n) := ⟨Semiformula.val⟩
 
 @[simp] lemma sigma_prop : (φ : 𝚺-[m].Semiformula ξ n) → Hierarchy 𝚺 m φ.val
   | mkSigma _ h => h
@@ -108,11 +108,11 @@ def pi : 𝚫-[m].Semiformula ξ n → 𝚷-[m].Semiformula ξ n
 
 lemma val_sigma (φ : 𝚫-[m].Semiformula ξ n) : φ.sigma.val = φ.val := by rcases φ; simp
 
-def mkPolarity (φ : Semiformula ℒₒᵣ ξ n) : (Γ : Polarity) → Hierarchy Γ m φ → Γ-[m].Semiformula ξ n
+def mkPolarity (φ : ArithmeticSemiformula ξ n) : (Γ : Polarity) → Hierarchy Γ m φ → Γ-[m].Semiformula ξ n
   | 𝚺, h => mkSigma φ h
   | 𝚷, h => mkPi φ h
 
-@[simp] lemma val_mkPolarity (φ : Semiformula ℒₒᵣ ξ n) {Γ} (h : Hierarchy Γ m φ) : (mkPolarity φ Γ h).val = φ := by cases Γ <;> rfl
+@[simp] lemma val_mkPolarity (φ : ArithmeticSemiformula ξ n) {Γ} (h : Hierarchy Γ m φ) : (mkPolarity φ Γ h).val = φ := by cases Γ <;> rfl
 
 @[simp] lemma hierarchy_sigma (φ : 𝚺-[m].Semiformula ξ n) : Hierarchy 𝚺 m φ.val := φ.sigma_prop
 
@@ -135,7 +135,7 @@ def ProperOn (φ : 𝚫-[m].Semisentence n) : Prop :=
 def ProperWithParamOn (φ : 𝚫-[m].Semiformula M n) : Prop :=
   ∀ (e : Fin n → M), Semiformula.Evalm M e id φ.sigma.val ↔ Semiformula.Evalm M e id φ.pi.val
 
-def ProvablyProperOn (φ : 𝚫-[m].Semisentence n) (T : Theory ℒₒᵣ) : Prop :=
+def ProvablyProperOn (φ : 𝚫-[m].Semisentence n) (T : ArithmeticTheory) : Prop :=
   T ⊢ ∀⁰* “!φ.sigma.val ⋯ ↔ !φ.pi.val ⋯”
 
 variable {M}
@@ -156,14 +156,14 @@ lemma ProperWithParamOn.iff' {φ : 𝚫-[m].Semiformula M n}
     (h : φ.ProperWithParamOn M) (e : Fin n → M) :
     Semiformula.Evalm M e id φ.pi.val ↔ Semiformula.Evalm (L := ℒₒᵣ) M e id φ.val := by simp [←h.iff, val_sigma]
 
-inductive ProvablyProperOn' (T : Theory ℒₒᵣ) : {Γ : HierarchySymbol} → {n : ℕ} → (φ : Γ.Semisentence n) → Prop
+inductive ProvablyProperOn' (T : ArithmeticTheory) : {Γ : HierarchySymbol} → {n : ℕ} → (φ : Γ.Semisentence n) → Prop
   | sigma (φ : 𝚺-[m].Semisentence n) : φ.ProvablyProperOn' T
   | pi (φ : 𝚷-[m].Semisentence n) : φ.ProvablyProperOn' T
   | delta (φ : 𝚫-[m].Semisentence n) : φ.ProvablyProperOn T → φ.ProvablyProperOn' T
 
 section ProvablyProperOn
 
-variable (T : Theory ℒₒᵣ)
+variable (T : ArithmeticTheory)
 
 lemma ProvablyProperOn.ofProperOn [𝗘𝗤 ⪯ T] {φ : 𝚫-[m].Semisentence n}
     (h : ∀ (M : Type w) [ORingStructure M] [M ⊧ₘ* T], φ.ProperOn M) : φ.ProvablyProperOn T := by
@@ -199,7 +199,7 @@ def rew (ω : Rew ℒₒᵣ ξ₁ n₁ ξ₂ n₂) : {Γ : HierarchySymbol} → 
   simpa using h.iff _
 
 @[simp] lemma ProperWithParamOn.rew {φ : 𝚫-[m].Semiformula M n₁}
-    (h : φ.ProperWithParamOn M) (f : Fin n₁ → Semiterm ℒₒᵣ M n₂) : (φ.rew (Rew.subst f)).ProperWithParamOn M := by
+    (h : φ.ProperWithParamOn M) (f : Fin n₁ → ArithmeticSemiterm M n₂) : (φ.rew (Rew.subst f)).ProperWithParamOn M := by
   rcases φ; intro e;
   simp only [Semiformula.rew, sigma_mkDelta, val_rew, Semiformula.eval_rew, pi_mkDelta]
   exact h.iff _
@@ -258,13 +258,13 @@ def negPi (φ : 𝚷-[m].Semiformula ξ n) : 𝚺-[m].Semiformula ξ n := mkSigm
 
 def negDelta (φ : 𝚫-[m].Semiformula ξ n) : 𝚫-[m].Semiformula ξ n := mkDelta (φ.pi.negPi) (φ.sigma.negSigma)
 
-def ball (t : Semiterm ℒₒᵣ ξ n) : {Γ : HierarchySymbol} → Γ.Semiformula ξ (n + 1) → Γ.Semiformula ξ n
+def ball (t : ArithmeticSemiterm ξ n) : {Γ : HierarchySymbol} → Γ.Semiformula ξ (n + 1) → Γ.Semiformula ξ n
   | 𝚺-[m], φ => mkSigma (∀⁰[“#0 < !!(Rew.bShift t)”] φ.val) (by simp)
   | 𝚷-[m], φ => mkPi (∀⁰[“#0 < !!(Rew.bShift t)”] φ.val) (by simp)
   | 𝚫-[m], φ =>
     mkDelta (mkSigma (∀⁰[“#0 < !!(Rew.bShift t)”] φ.sigma.val) (by simp)) (mkPi (∀⁰[“#0 < !!(Rew.bShift t)”] φ.pi.val) (by simp))
 
-def bexs (t : Semiterm ℒₒᵣ ξ n) : {Γ : HierarchySymbol} → Γ.Semiformula ξ (n + 1) → Γ.Semiformula ξ n
+def bexs (t : ArithmeticSemiterm ξ n) : {Γ : HierarchySymbol} → Γ.Semiformula ξ (n + 1) → Γ.Semiformula ξ n
   | 𝚺-[m], φ => mkSigma (∃⁰[“#0 < !!(Rew.bShift t)”] φ.val) (by simp)
   | 𝚷-[m], φ => mkPi (∃⁰[“#0 < !!(Rew.bShift t)”] φ.val) (by simp)
   | 𝚫-[m], φ =>
@@ -334,10 +334,10 @@ lemma val_negDelta {m} (φ : 𝚫-[m].Semiformula ξ n) : (∼φ).val = ∼φ.pi
 
 @[simp] lemma sigma_negPi {m} (φ : 𝚫-[m].Semiformula ξ n) : (∼φ).pi = φ.sigma.negSigma := by simp [Tilde.tilde, negDelta]
 
-@[simp] lemma val_ball (t : Semiterm ℒₒᵣ ξ n) (φ : Γ.Semiformula ξ (n + 1)) : (ball t φ).val = ∀⁰[“#0 < !!(Rew.bShift t)”] φ.val := by
+@[simp] lemma val_ball (t : ArithmeticSemiterm ξ n) (φ : Γ.Semiformula ξ (n + 1)) : (ball t φ).val = ∀⁰[“#0 < !!(Rew.bShift t)”] φ.val := by
   rcases Γ with ⟨Γ, m⟩; rcases Γ <;> simp [ball, val, val_sigma]
 
-@[simp] lemma val_bexs (t : Semiterm ℒₒᵣ ξ n) (φ : Γ.Semiformula ξ (n + 1)) : (bexs t φ).val = ∃⁰[“#0 < !!(Rew.bShift t)”] φ.val := by
+@[simp] lemma val_bexs (t : ArithmeticSemiterm ξ n) (φ : Γ.Semiformula ξ (n + 1)) : (bexs t φ).val = ∃⁰[“#0 < !!(Rew.bShift t)”] φ.val := by
   rcases Γ with ⟨Γ, m⟩; rcases Γ <;> simp [bexs, val, val_sigma]
 
 @[simp] lemma val_exsSigma {m} (φ : 𝚺-[m + 1].Semiformula ξ (n + 1)) : (exs φ).val = ∃⁰ φ.val := rfl

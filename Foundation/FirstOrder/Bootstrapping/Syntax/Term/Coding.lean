@@ -47,20 +47,20 @@ variable {V}
 
 open Bootstrapping.Arithmetic
 
-@[simp] lemma typed_quote_add (t u : SyntacticSemiterm ℒₒᵣ n) :
-    (⌜(‘!!t + !!u’ : SyntacticSemiterm ℒₒᵣ n)⌝ : Bootstrapping.Semiterm V ℒₒᵣ n) = ⌜t⌝ + ⌜u⌝ := rfl
+@[simp] lemma typed_quote_add (t u : SyntacticArithmeticSemiterm n) :
+    (⌜(‘!!t + !!u’ : SyntacticArithmeticSemiterm n)⌝ : Bootstrapping.Semiterm V ℒₒᵣ n) = ⌜t⌝ + ⌜u⌝ := rfl
 
-@[simp] lemma typed_quote_mul (t u : SyntacticSemiterm ℒₒᵣ n) :
-    (⌜(‘!!t * !!u’ : SyntacticSemiterm ℒₒᵣ n)⌝ : Bootstrapping.Semiterm V ℒₒᵣ n) = ⌜t⌝ * ⌜u⌝ := rfl
+@[simp] lemma typed_quote_mul (t u : SyntacticArithmeticSemiterm n) :
+    (⌜(‘!!t * !!u’ : SyntacticArithmeticSemiterm n)⌝ : Bootstrapping.Semiterm V ℒₒᵣ n) = ⌜t⌝ * ⌜u⌝ := rfl
 
 lemma typed_quote_numeral_eq_numeral_one :
-    (⌜((1 : ℕ) : SyntacticSemiterm ℒₒᵣ n)⌝ : Bootstrapping.Semiterm V ℒₒᵣ n) = typedNumeral 1 := by
+    (⌜((1 : ℕ) : SyntacticArithmeticSemiterm n)⌝ : Bootstrapping.Semiterm V ℒₒᵣ n) = typedNumeral 1 := by
   simp [Bootstrapping.Arithmetic.typedNumeral,
     Bootstrapping.Arithmetic.one, Bootstrapping.Arithmetic.qqFunc_absolute, qqFuncN_eq_qqFunc]
   rfl
 
 @[simp] lemma typed_quote_numeral_eq_numeral (k : ℕ) :
-    (⌜(↑k : SyntacticSemiterm ℒₒᵣ n)⌝ : Bootstrapping.Semiterm V ℒₒᵣ n) = typedNumeral ↑k := by
+    (⌜(↑k : SyntacticArithmeticSemiterm n)⌝ : Bootstrapping.Semiterm V ℒₒᵣ n) = typedNumeral ↑k := by
   match k with
   |         0 =>
     simp [Bootstrapping.Arithmetic.typedNumeral,
@@ -68,8 +68,8 @@ lemma typed_quote_numeral_eq_numeral_one :
     rfl
   |         1 => simp [typed_quote_numeral_eq_numeral_one]
   | k + 1 + 1 =>
-    calc (⌜(↑(k + 1 + 1) : SyntacticSemiterm ℒₒᵣ n)⌝ : Bootstrapping.Semiterm V ℒₒᵣ n)
-      _ = ⌜(↑(k + 1) : SyntacticSemiterm ℒₒᵣ n)⌝ + ⌜((1 : ℕ) : SyntacticSemiterm ℒₒᵣ n)⌝ := rfl
+    calc (⌜(↑(k + 1 + 1) : SyntacticArithmeticSemiterm n)⌝ : Bootstrapping.Semiterm V ℒₒᵣ n)
+      _ = ⌜(↑(k + 1) : SyntacticArithmeticSemiterm n)⌝ + ⌜((1 : ℕ) : SyntacticArithmeticSemiterm n)⌝ := rfl
       _ = typedNumeral ↑(k + 1) + typedNumeral 1 := by simp [typed_quote_numeral_eq_numeral (k + 1), typed_quote_numeral_eq_numeral_one]
       _ = typedNumeral (↑k + 1 + 1)              := by simp
 
@@ -164,14 +164,14 @@ def empty_typed_quote_def (t : ClosedSemiterm L n) :
 @[simp] lemma empty_typed_quote_func (f : L.Func k) (v : Fin k → ClosedSemiterm L n) :
     (⌜func f v⌝ : Bootstrapping.Semiterm V L n) = Bootstrapping.Semiterm.func f fun i ↦ ⌜v i⌝ := rfl
 
-@[simp] lemma empty_typed_quote_add (t u : ClosedSemiterm ℒₒᵣ n) :
-    (⌜(‘!!t + !!u’ : ClosedSemiterm ℒₒᵣ n)⌝ : Bootstrapping.Semiterm V ℒₒᵣ n) = ⌜t⌝ + ⌜u⌝ := rfl
+@[simp] lemma empty_typed_quote_add (t u : ClosedArithmeticSemiterm n) :
+    (⌜(‘!!t + !!u’ : ClosedArithmeticSemiterm n)⌝ : Bootstrapping.Semiterm V ℒₒᵣ n) = ⌜t⌝ + ⌜u⌝ := rfl
 
-@[simp] lemma empty_typed_quote_mul (t u : ClosedSemiterm ℒₒᵣ n) :
-    (⌜(‘!!t * !!u’ : ClosedSemiterm ℒₒᵣ n)⌝ : Bootstrapping.Semiterm V ℒₒᵣ n) = ⌜t⌝ * ⌜u⌝ := rfl
+@[simp] lemma empty_typed_quote_mul (t u : ClosedArithmeticSemiterm n) :
+    (⌜(‘!!t * !!u’ : ClosedArithmeticSemiterm n)⌝ : Bootstrapping.Semiterm V ℒₒᵣ n) = ⌜t⌝ * ⌜u⌝ := rfl
 
 @[simp] lemma empty_typed_quote_numeral_eq_numeral (k : ℕ) :
-    (⌜(↑k : ClosedSemiterm ℒₒᵣ n)⌝ : Bootstrapping.Semiterm V ℒₒᵣ n) = typedNumeral ↑k := by
+    (⌜(↑k : ClosedArithmeticSemiterm n)⌝ : Bootstrapping.Semiterm V ℒₒᵣ n) = typedNumeral ↑k := by
   simp [empty_typed_quote_def]
 
 noncomputable instance : GödelQuote (ClosedSemiterm L n) V where
@@ -183,10 +183,10 @@ def empty_quote_eq (t : ClosedSemiterm L n) : (⌜t⌝ : V) = (⌜t⌝ : Bootstr
 
 lemma empty_quote_eq_encode (t : ClosedSemiterm L n) : (⌜t⌝ : V) = ↑(encode t) := by simp [empty_quote_def, quote_eq_encode]
 
-@[simp] lemma coe_quote {ξ n} (t : SyntacticSemiterm L n) : ↑(⌜t⌝ : ℕ) = (⌜t⌝ : Semiterm ℒₒᵣ ξ m) := by
+@[simp] lemma coe_quote {ξ n} (t : SyntacticSemiterm L n) : ↑(⌜t⌝ : ℕ) = (⌜t⌝ : ArithmeticSemiterm ξ m) := by
   simp [gödelNumber'_def, quote_eq_encode]
 
-@[simp] lemma coe_empty_quote {ξ n} (t : ClosedSemiterm L n) : ↑(⌜t⌝ : ℕ) = (⌜t⌝ : Semiterm ℒₒᵣ ξ m) := by
+@[simp] lemma coe_empty_quote {ξ n} (t : ClosedSemiterm L n) : ↑(⌜t⌝ : ℕ) = (⌜t⌝ : ArithmeticSemiterm ξ m) := by
   simp [gödelNumber'_def, empty_quote_eq_encode]
 
 end LO.FirstOrder.Semiterm

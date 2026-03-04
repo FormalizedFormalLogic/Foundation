@@ -55,9 +55,9 @@ notation "𝗣𝗔" => Peano
 
 variable {L}
 
-variable {C C' : Semiformula ℒₒᵣ ℕ 1 → Prop}
+variable {C C' : ArithmeticSemiformula ℕ 1 → Prop}
 
-lemma InductionScheme_subset (h : ∀ {φ : Semiformula ℒₒᵣ ℕ 1},  C φ → C' φ) : InductionScheme ℒₒᵣ C ⊆ InductionScheme ℒₒᵣ C' := by
+lemma InductionScheme_subset (h : ∀ {φ : ArithmeticSemiformula ℕ 1},  C φ → C' φ) : InductionScheme ℒₒᵣ C ⊆ InductionScheme ℒₒᵣ C' := by
   intro _; simp only [InductionScheme, Set.mem_setOf_eq, forall_exists_index, and_imp]; rintro φ hp rfl; exact ⟨φ, h hp, rfl⟩
 
 lemma ISigma_subset_mono {s₁ s₂} (h : s₁ ≤ s₂) : 𝗜𝚺 s₁ ⊆ 𝗜𝚺 s₂ :=
@@ -78,11 +78,11 @@ instance : 𝗜𝚺₀ ⪯ 𝗜𝚺₁ := ISigma_weakerThan_of_le (by decide)
 instance : 𝗜𝚺i ⪯ 𝗣𝗔 :=
   Entailment.WeakerThan.ofSubset <| Set.union_subset_union_right _  <| InductionScheme_subset (by intros; trivial)
 
-lemma mem_InductionScheme_of_mem {φ : Semiformula ℒₒᵣ ℕ 1} (hp : C φ) :
+lemma mem_InductionScheme_of_mem {φ : ArithmeticSemiformula ℕ 1} (hp : C φ) :
     .univCl (succInd φ) ∈ InductionScheme ℒₒᵣ C := by
   simpa [InductionScheme] using ⟨φ, hp, rfl⟩
 
-lemma mem_IOpen_of_qfree {φ : Semiformula ℒₒᵣ ℕ 1} (hp : φ.Open) :
+lemma mem_IOpen_of_qfree {φ : ArithmeticSemiformula ℕ 1} (hp : φ.Open) :
     .univCl (succInd φ) ∈ InductionScheme ℒₒᵣ Semiformula.Open := by
   exact ⟨φ, hp, rfl⟩
 
@@ -100,9 +100,9 @@ variable {V : Type*} [ORingStructure V]
 
 namespace InductionScheme
 
-variable {C : Semiformula ℒₒᵣ ℕ 1 → Prop} [V ⊧ₘ* InductionScheme ℒₒᵣ C]
+variable {C : ArithmeticSemiformula ℕ 1 → Prop} [V ⊧ₘ* InductionScheme ℒₒᵣ C]
 
-private lemma induction_eval {φ : Semiformula ℒₒᵣ ℕ 1} (hp : C φ) (v) :
+private lemma induction_eval {φ : ArithmeticSemiformula ℕ 1} (hp : C φ) (v) :
     Semiformula.Evalm V ![0] v φ →
     (∀ x, Semiformula.Evalm V ![x] v φ → Semiformula.Evalm V ![x + 1] v φ) →
     ∀ x, Semiformula.Evalm V ![x] v φ := by
@@ -114,7 +114,7 @@ private lemma induction_eval {φ : Semiformula ℒₒᵣ ℕ 1} (hp : C φ) (v) 
 
 @[elab_as_elim]
 lemma succ_induction {P : V → Prop}
-    (hP : ∃ e : ℕ → V, ∃ φ : Semiformula ℒₒᵣ ℕ 1, C φ ∧ ∀ x, P x ↔ Semiformula.Evalm V ![x] e φ) :
+    (hP : ∃ e : ℕ → V, ∃ φ : ArithmeticSemiformula ℕ 1, C φ ∧ ∀ x, P x ↔ Semiformula.Evalm V ![x] e φ) :
     P 0 → (∀ x, P x → P (x + 1)) → ∀ x, P x := by
   rcases hP with ⟨e, φ, Cp, hp⟩; simpa [←hp] using induction_eval (V := V) Cp e
 
@@ -185,7 +185,7 @@ private lemma neg_succ_induction {P : V → Prop} (hP : Γ-[m].DefinablePred P)
 
 instance models_InductionScheme_alt : V ⊧ₘ* InductionScheme ℒₒᵣ (Arithmetic.Hierarchy Γ.alt m) := by
   suffices
-      ∀ (φ : Semiformula ℒₒᵣ ℕ 1), Hierarchy Γ.alt m φ →
+      ∀ (φ : ArithmeticSemiformula ℕ 1), Hierarchy Γ.alt m φ →
       ∀ (f : ℕ → V),
         Semiformula.Evalm V ![0] f φ →
         (∀ x, Semiformula.Evalm V ![x] f φ → Semiformula.Evalm V ![x + 1] f φ) →
@@ -349,7 +349,7 @@ def mod_ISigma_of_le {n₁ n₂} (h : n₁ ≤ n₂) [V ⊧ₘ* 𝗜𝚺 n₂] :
 
 end models
 
-lemma models_succInd (φ : Semiformula ℒₒᵣ ℕ 1) : ℕ ⊧ₘ (succInd φ).univCl := by
+lemma models_succInd (φ : ArithmeticSemiformula ℕ 1) : ℕ ⊧ₘ (succInd φ).univCl := by
   suffices
     ∀ f : ℕ → ℕ,
       Semiformula.Evalm ℕ ![0] f φ →

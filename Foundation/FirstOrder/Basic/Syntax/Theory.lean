@@ -71,7 +71,5 @@ end Schema
   simp [Semiformula.univCl]
   tauto
 
-abbrev ArithmeticAxiom := Theory ℒₒᵣ
-
 end LO.FirstOrder
 end

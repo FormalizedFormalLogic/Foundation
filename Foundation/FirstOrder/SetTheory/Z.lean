@@ -98,7 +98,7 @@ noncomputable def doubleton (x y : V) : V := Classical.choose! (pairing_existsUn
 
 @[simp] lemma mem_doubleton_iff {x y z : V} : z ∈ doubleton x y ↔ z = x ∨ z = y := Classical.choose!_spec (pairing_existsUnique x y) z
 
-def doubleton.dfn : Semisentence ℒₛₑₜ 3 := “p x y. ∀ z, z ∈ p ↔ z = x ∨ z = y”
+def doubleton.dfn : SetTheorySemisentence 3 := “p x y. ∀ z, z ∈ p ↔ z = x ∨ z = y”
 
 instance doubleton.defined : ℒₛₑₜ-function₂[V] doubleton via doubleton.dfn :=
   ⟨by intro v; simp [doubleton.dfn, doubleton]⟩
@@ -115,7 +115,7 @@ lemma singleton_def (x : V) : ({x} : V) = doubleton x x := rfl
 
 @[simp] lemma mem_singleton_iff {x z : V} : z ∈ ({x} : V) ↔ z = x := by simp [singleton_def]
 
-def singleton.dfn : Semisentence ℒₛₑₜ 2 := “p x. !doubleton.dfn p x x”
+def singleton.dfn : SetTheorySemisentence 2 := “p x. !doubleton.dfn p x x”
 
 instance singleton.defined : ℒₛₑₜ-function₁[V] Singleton.singleton via singleton.dfn :=
   ⟨by intro v; simp [singleton.dfn]; rfl⟩
@@ -146,7 +146,7 @@ prefix:110 "⋃ˢ " => sUnion
 
 lemma mem_sUnion_iff {x z : V} : z ∈ ⋃ˢ x ↔ ∃ y ∈ x, z ∈ y := Classical.choose!_spec (union_existsUnique x) z
 
-def sUnion.dfn : Semisentence ℒₛₑₜ 2 := “u x. ∀ z, z ∈ u ↔ ∃ w ∈ x, z ∈ w”
+def sUnion.dfn : SetTheorySemisentence 2 := “u x. ∀ z, z ∈ u ↔ ∃ w ∈ x, z ∈ w”
 
 instance sUnion.defined : ℒₛₑₜ-function₁[V] sUnion via sUnion.dfn :=
   ⟨by intro v; simp [sUnion.dfn, mem_sUnion_iff, mem_ext_iff]⟩
@@ -172,7 +172,7 @@ noncomputable scoped instance : Union V := ⟨union⟩
 
 lemma union_def (x y : V) : x ∪ y = ⋃ˢ (doubleton x y) := rfl
 
-def union.dfn : Semisentence ℒₛₑₜ 3 := “u x y. ∀ d, !doubleton.dfn d x y → !sUnion.dfn u d”
+def union.dfn : SetTheorySemisentence 3 := “u x y. ∀ d, !doubleton.dfn d x y → !sUnion.dfn u d”
 
 instance union.defined : ℒₛₑₜ-function₂[V] Union.union via union.dfn :=
   ⟨by intro v; simp [union.dfn, union_def]⟩
@@ -210,7 +210,7 @@ noncomputable scoped instance : Insert V V := ⟨SetTheory.insert⟩
 
 lemma insert_def (x y : V) : insert x y = {x} ∪ y := rfl
 
-def insert.dfn : Semisentence ℒₛₑₜ 3 := “u x y. ∀ s, !singleton.dfn s x → !union.dfn u s y”
+def insert.dfn : SetTheorySemisentence 3 := “u x y. ∀ s, !singleton.dfn s x → !union.dfn u s y”
 
 instance insert.defined : ℒₛₑₜ-function₂[V] insert via insert.dfn :=
   ⟨by intro v; simp [insert.dfn, insert_def]⟩
@@ -259,7 +259,7 @@ prefix:110 "℘ " => power
 
 @[simp] lemma mem_power_iff {x z : V} : z ∈ ℘ x ↔ z ⊆ x := Classical.choose!_spec (power_existsUnique x) z
 
-def power.dfn : Semisentence ℒₛₑₜ 2 := “p x. ∀ z, z ∈ p ↔ z ⊆ x”
+def power.dfn : SetTheorySemisentence 2 := “p x. ∀ z, z ∈ p ↔ z ⊆ x”
 
 instance power.defined : ℒₛₑₜ-function₁[V] power via power.dfn :=
   ⟨by intro v; simp [power.dfn, power]⟩
@@ -276,7 +276,7 @@ instance power.definable : ℒₛₑₜ-function₁[V] power := power.defined.to
 
 /-! ## Aussonderungsaxiom -/
 
-lemma separation_exists_eval (x : V) (φ : Semiformula ℒₛₑₜ V 1) : ∃ y : V, ∀ z : V, z ∈ y ↔ z ∈ x ∧ Semiformula.Evalm V ![z] id φ := by
+lemma separation_exists_eval (x : V) (φ : SetTheorySemiformula V 1) : ∃ y : V, ∀ z : V, z ∈ y ↔ z ∈ x ∧ Semiformula.Evalm V ![z] id φ := by
   have : Inhabited V := inhabited_of_nonempty inferInstance
   let f := φ.enumarateFVar
   let ψ := (Rew.rewriteMap φ.idxOfFVar) ▹ φ
@@ -339,7 +339,7 @@ lemma mem_sInter_iff {x : V} : z ∈ ⋂ˢ x ↔ IsNonempty x ∧ ∀ y ∈ x, z
   simp only [sInter, mem_sep_iff, mem_sUnion_iff, and_congr_left_iff, isNonempty_def]
   grind
 
-def sInter.dfn : Semisentence ℒₛₑₜ 2 := “u x. ∀ z, z ∈ u ↔ !isNonempty x ∧ ∀ y ∈ x, z ∈ y”
+def sInter.dfn : SetTheorySemisentence 2 := “u x. ∀ z, z ∈ u ↔ !isNonempty x ∧ ∀ y ∈ x, z ∈ y”
 
 instance sInter.defined : ℒₛₑₜ-function₁[V] sInter via sInter.dfn :=
   ⟨by intro v; simp [sInter.dfn, mem_ext_iff, mem_sInter_iff]⟩
@@ -379,7 +379,7 @@ lemma inter_def (x y : V) : x ∩ y = ⋂ˢ {x, y} := rfl
 @[simp] lemma mem_inter_iff {x y z : V} : z ∈ x ∩ y ↔ z ∈ x ∧ z ∈ y := by
   simp [inter_def, mem_sInter_iff_of_nonempty]
 
-def inter.dfn : Semisentence ℒₛₑₜ 3 := “u x y. ∀ z, z ∈ u ↔ z ∈ x ∧ z ∈ y”
+def inter.dfn : SetTheorySemisentence 3 := “u x y. ∀ z, z ∈ u ↔ z ∈ x ∧ z ∈ y”
 
 instance inter.defined : ℒₛₑₜ-function₂[V] Inter.inter via inter.dfn := ⟨by intro v; simp [inter.dfn, mem_ext_iff]⟩
 
@@ -427,7 +427,7 @@ lemma sdiff_def (x y : V) : x \ y = {z ∈ x ; z ∉ y} := rfl
 
 @[simp] lemma mem_sdiff_iff {x y z : V} : z ∈ x \ y ↔ z ∈ x ∧ z ∉ y := by simp [sdiff_def]
 
-def sdiff.dfn : Semisentence ℒₛₑₜ 3 := “d x y. ∀ z, z ∈ d ↔ z ∈ x ∧ z ∉ y”
+def sdiff.dfn : SetTheorySemisentence 3 := “d x y. ∀ z, z ∈ d ↔ z ∈ x ∧ z ∉ y”
 
 instance sdiff.defined : ℒₛₑₜ-function₂[V] SDiff.sdiff via sdiff.dfn := ⟨by intro v; simp [sdiff.dfn, mem_ext_iff]⟩
 
@@ -481,7 +481,7 @@ noncomputable def kpair.π₁ (z : V) : V := ⋃ˢ ⋂ˢ z
 
 noncomputable def kpair.π₂ (z : V) : V := ⋃ˢ {x ∈ ⋃ˢ z; x ∈ ⋂ˢ z → ⋃ˢ z = ⋂ˢ z}
 
-def kpair.dfn : Semisentence ℒₛₑₜ 3 :=
+def kpair.dfn : SetTheorySemisentence 3 :=
   “k x y. ∀ x', !singleton.dfn x' x → ∀ z, !doubleton.dfn z x y → !doubleton.dfn k x' z”
 
 instance kpair.defined : ℒₛₑₜ-function₂[V] kpair via kpair.dfn :=
@@ -489,14 +489,14 @@ instance kpair.defined : ℒₛₑₜ-function₂[V] kpair via kpair.dfn :=
 
 instance kpair.definable : ℒₛₑₜ-function₂[V] kpair := kpair.defined.to_definable
 
-def kpair.π₁.dfn : Semisentence ℒₛₑₜ 2 := “p₁ x. ∀ i, !sInter.dfn i x → !sUnion.dfn p₁ i”
+def kpair.π₁.dfn : SetTheorySemisentence 2 := “p₁ x. ∀ i, !sInter.dfn i x → !sUnion.dfn p₁ i”
 
 instance kpair.π₁.defined : ℒₛₑₜ-function₁[V] kpair.π₁ via kpair.π₁.dfn :=
   ⟨by intro v; simp [kpair.π₁.dfn, π₁]⟩
 
 instance kpair.π₁.definable : ℒₛₑₜ-function₁[V] kpair.π₁ := kpair.π₁.defined.to_definable
 
-def kpair.π₂.dfn : Semisentence ℒₛₑₜ 2 :=
+def kpair.π₂.dfn : SetTheorySemisentence 2 :=
   “p₂ x. ∀ u, !sUnion.dfn u x → ∀ i, !sInter.dfn i x → ∀ s, (∀ z, z ∈ s ↔ (z ∈ u ∧ (z ∈ i → u = i))) → !sUnion.dfn p₂ s”
 
 instance kpair.π₂.defined : ℒₛₑₜ-function₁[V] kpair.π₂ via kpair.π₂.dfn :=
@@ -553,7 +553,7 @@ lemma mem_prod_iff {X Y z : V} : z ∈ X ×ˢ Y ↔ ∃ x ∈ X, ∃ y ∈ Y, z 
   rintro x hx y hy rfl
   simp_all [mem_power_iff, subset_def, kpair]
 
-def prod.dfn : Semisentence ℒₛₑₜ 3 := “p X Y. ∀ z, z ∈ p ↔ ∃ x ∈ X, ∃ y ∈ Y, !kpair.dfn z x y”
+def prod.dfn : SetTheorySemisentence 3 := “p X Y. ∀ z, z ∈ p ↔ ∃ x ∈ X, ∃ y ∈ Y, !kpair.dfn z x y”
 
 instance prod.defined : ℒₛₑₜ-function₂[V] prod via prod.dfn :=
   ⟨by intro v; simp [prod.dfn, mem_ext_iff, mem_prod_iff]⟩
@@ -606,7 +606,7 @@ instance succ.definable : ℒₛₑₜ-function₁[V] succ := succ.defined.to_de
 
 def IsInductive (x : V) : Prop := ∅ ∈ x ∧ ∀ y ∈ x, succ y ∈ x
 
-def IsInductive.dfn : Semisentence ℒₛₑₜ 1 :=
+def IsInductive.dfn : SetTheorySemisentence 1 :=
   “x. (∀ e, !isEmpty e → e ∈ x) ∧ (∀ y ∈ x, ∀ y', !succ.dfn y' y → y' ∈ x)”
 
 instance IsInductive.defined : ℒₛₑₜ-predicate[V] IsInductive via IsInductive.dfn :=
@@ -640,7 +640,7 @@ noncomputable def ω : V := Classical.choose! (omega_existsUnique)
 lemma mem_ω_iff_mem_all_inductive {x : V} :
   x ∈ (ω : V) ↔ ∀ I : V, IsInductive I → x ∈ I := Classical.choose!_spec (omega_existsUnique) x
 
-def isω : Semisentence ℒₛₑₜ 1 := “ω. ∀ x, x ∈ ω ↔ ∀ I, !IsInductive.dfn I → x ∈ I”
+def isω : SetTheorySemisentence 1 := “ω. ∀ x, x ∈ ω ↔ ∀ I, !IsInductive.dfn I → x ∈ I”
 
 instance ω.defined : ℒₛₑₜ-function₀[V] ω via isω := ⟨fun v ↦ by simp [isω, ω]⟩
 

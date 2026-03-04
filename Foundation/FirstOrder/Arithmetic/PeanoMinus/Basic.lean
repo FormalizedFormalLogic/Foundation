@@ -567,11 +567,11 @@ lemma eq_fin_of_lt_nat {n : ℕ} {x : M} (hx : x < (n : M)) : ∃ i : Fin n, x =
   rcases eq_nat_of_lt_nat hx with ⟨x, rfl⟩
   exact ⟨⟨x, by simpa using hx⟩, by simp⟩
 
-@[simp] lemma eval_ballLTSucc' {t : Semiterm ℒₒᵣ ξ n} {φ : Semiformula ℒₒᵣ ξ (n + 1)} :
+@[simp] lemma eval_ballLTSucc' {t : ArithmeticSemiterm ξ n} {φ : ArithmeticSemiformula ξ (n + 1)} :
     Semiformula.Evalm M e ε (φ.ballLTSucc t) ↔ ∀ x ≤ Semiterm.valm M e ε t, Semiformula.Evalm M (x :> e) ε φ := by
   simp [Semiformula.eval_ballLTSucc, lt_succ_iff_le]
 
-@[simp] lemma eval_bexsLTSucc' {t : Semiterm ℒₒᵣ ξ n} {φ : Semiformula ℒₒᵣ ξ (n + 1)} :
+@[simp] lemma eval_bexsLTSucc' {t : ArithmeticSemiterm ξ n} {φ : ArithmeticSemiformula ξ (n + 1)} :
     Semiformula.Evalm M e ε (φ.bexsLTSucc t) ↔ ∃ x ≤ Semiterm.valm M e ε t, Semiformula.Evalm M (x :> e) ε φ := by
   simp [Semiformula.eval_bexsLTSucc, lt_succ_iff_le]
 

@@ -11,7 +11,7 @@ reference: Ralf Schindler, "Set Theory, Exploring Independence and Truth" [Sch14
 
 namespace LO.FirstOrder.SetTheory
 
-def isSubsetOf : Semisentence ℒₛₑₜ 2 := “x y. ∀ z ∈ x, z ∈ y”
+def isSubsetOf : SetTheorySemisentence 2 := “x y. ∀ z ∈ x, z ∈ y”
 
 syntax:45 first_order_term:45 " ⊆ " first_order_term:0 : first_order_formula
 
@@ -20,11 +20,11 @@ macro_rules
   | `(⤫formula($type)[ $binders* | $fbinders* | $t:first_order_term ⊆ $u:first_order_term ]) =>
     `(⤫formula($type)[ $binders* | $fbinders* | !isSubsetOf $t:first_order_term $u:first_order_term ])
 
-def isEmpty : Semisentence ℒₛₑₜ 1 := “x. ∀ y, y ∉ x”
+def isEmpty : SetTheorySemisentence 1 := “x. ∀ y, y ∉ x”
 
-def isNonempty : Semisentence ℒₛₑₜ 1 := “x. ∃ y, y ∈ x”
+def isNonempty : SetTheorySemisentence 1 := “x. ∃ y, y ∈ x”
 
-def isSucc : Semisentence ℒₛₑₜ 2 := “y x. ∀ z, z ∈ y ↔ z = x ∨ z ∈ x”
+def isSucc : SetTheorySemisentence 2 := “y x. ∀ z, z ∈ y ↔ z = x ∨ z ∈ x”
 
 namespace Axiom
 
@@ -50,11 +50,11 @@ def infinity : SetTheorySentence := “∃ I, (∀ e, !isEmpty e → e ∈ I) �
 def foundation : SetTheorySentence := “∀ x, !isNonempty x → ∃ y ∈ x, ∀ z ∈ x, z ∉ y”
 
 /-- Axiom schema of separation (Aussonderungsaxiom). -/
-def separationSchema (φ : SyntacticSemiformula ℒₛₑₜ 1) : SetTheorySentence :=
+def separationSchema (φ : SetTheorySyntacticSemiformula 1) : SetTheorySentence :=
   .univCl “∀ x, ∃ y, ∀ z, z ∈ y ↔ z ∈ x ∧ !φ z”
 
 /-- Axiom schema of replacement. -/
-def replacementSchema (φ : SyntacticSemiformula ℒₛₑₜ 2) : SetTheorySentence :=
+def replacementSchema (φ : SetTheorySyntacticSemiformula 2) : SetTheorySentence :=
   .univCl “(∀ x, ∃! y, !φ x y) → ∀ X, ∃ Y, ∀ y, y ∈ Y ↔ ∃ x ∈ X, !φ x y”
 
 /-- Axiom of choice. -/
@@ -66,7 +66,7 @@ end Axiom
 /-! ### Zermelo set theory-/
 
 /-- Zermelo set theory. -/
-inductive Zermelo : Theory ℒₛₑₜ
+inductive Zermelo : SetTheory
   /-- Axiom of equality. -/
   | axiom_of_equality : ∀ φ ∈ 𝗘𝗤, Zermelo φ
   /-- Axiom of empty set. -/
@@ -84,7 +84,7 @@ inductive Zermelo : Theory ℒₛₑₜ
   /-- Axiom of foundation. -/
   | axiom_of_foundation : Zermelo Axiom.foundation
   /-- Axiom schema of separation. -/
-  | axiom_of_separation (φ : SyntacticSemiformula ℒₛₑₜ 1) : Zermelo (Axiom.separationSchema φ)
+  | axiom_of_separation (φ : SetTheorySyntacticSemiformula 1) : Zermelo (Axiom.separationSchema φ)
 
 notation "𝗭" => Zermelo
 
@@ -93,7 +93,7 @@ instance : 𝗘𝗤 ⪯ 𝗭 := Entailment.WeakerThan.ofSubset Zermelo.axiom_of_
 /-! ### Zermelo-Fraenkel set theory -/
 
 /-- Zermelo-Fraenkel set theory. -/
-inductive ZermeloFraenkel : Theory ℒₛₑₜ
+inductive ZermeloFraenkel : SetTheory
   /-- Axiom of equality. -/
   | axiom_of_equality : ∀ φ ∈ 𝗘𝗤, ZermeloFraenkel φ
   /-- Axiom of empty set. -/
@@ -111,9 +111,9 @@ inductive ZermeloFraenkel : Theory ℒₛₑₜ
   /-- Axiom of foundation. -/
   | axiom_of_foundation : ZermeloFraenkel Axiom.foundation
   /-- Axiom schema of separation. -/
-  | axiom_of_separation (φ : SyntacticSemiformula ℒₛₑₜ 1) : ZermeloFraenkel (Axiom.separationSchema φ)
+  | axiom_of_separation (φ : SetTheorySyntacticSemiformula 1) : ZermeloFraenkel (Axiom.separationSchema φ)
   /-- Axiom schema of replacement. -/
-  | axiom_of_replacement (φ : SyntacticSemiformula ℒₛₑₜ 2) : ZermeloFraenkel (Axiom.replacementSchema φ)
+  | axiom_of_replacement (φ : SetTheorySyntacticSemiformula 2) : ZermeloFraenkel (Axiom.replacementSchema φ)
 
 notation "𝗭𝗙" => ZermeloFraenkel
 
@@ -136,12 +136,12 @@ instance : 𝗭 ⪯ 𝗭𝗙 := Entailment.WeakerThan.ofSubset z_subset_zf
 /-! ### Zermelo set theory with axiom of choice -/
 
 /-- AC: Axiom of choice. -/
-def AxiomOfChoice : Theory ℒₛₑₜ := {Axiom.choice}
+def AxiomOfChoice : SetTheory := {Axiom.choice}
 
 notation "𝗔𝗖" => AxiomOfChoice
 
 /-- Zermelo set theory with axiom of choice. -/
-abbrev ZermeloChoice : Theory ℒₛₑₜ := 𝗭 + 𝗔𝗖
+abbrev ZermeloChoice : SetTheory := 𝗭 + 𝗔𝗖
 
 notation "𝗭𝗖" => ZermeloChoice
 
@@ -152,7 +152,7 @@ instance : 𝗘𝗤 ⪯ 𝗭𝗖 := Entailment.WeakerThan.trans (inferInstanceAs
 /-! ### Zermelo-Fraenkel set theory with axiom of choice -/
 
 /-- Zermelo-Fraenkel set theory with axiom of choice. -/
-abbrev ZermeloFraenkelChoice : Theory ℒₛₑₜ := 𝗭𝗙 + 𝗔𝗖
+abbrev ZermeloFraenkelChoice : SetTheory := 𝗭𝗙 + 𝗔𝗖
 
 notation "𝗭𝗙𝗖" => ZermeloFraenkelChoice
 

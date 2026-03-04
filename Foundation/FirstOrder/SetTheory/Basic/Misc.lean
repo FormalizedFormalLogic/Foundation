@@ -73,9 +73,24 @@ end Set
 
 end Language
 
+
 abbrev SetTheory := Theory ℒₛₑₜ
 
+abbrev SetTheorySemiterm (ξ : Type*) (n : ℕ) := Semiterm ℒₛₑₜ ξ n
+
+abbrev SetTheoryTerm (ξ : Type*) := Term ℒₛₑₜ ξ
+
+abbrev SetTheorySemiformula (ξ : Type*) (n : ℕ) := Semiformula ℒₛₑₜ ξ n
+
+abbrev SetTheoryFormula (ξ : Type*) := Formula ℒₛₑₜ ξ
+
 abbrev SetTheorySentence := Sentence ℒₛₑₜ
+
+abbrev SetTheorySemisentence := Semisentence ℒₛₑₜ
+
+abbrev SetTheorySyntacticSemiformula (n : ℕ) := SyntacticSemiformula ℒₛₑₜ n
+
+abbrev SetTheorySyntacticFormula := SyntacticFormula ℒₛₑₜ
 
 variable [ToString ξ]
 
@@ -101,9 +116,9 @@ def Semiformula.toStringSet : ∀ {n}, Semiformula ℒₛₑₜ ξ n → String
   | n,                            ∀⁰ φ => s!"(∀ x{toString n}) [{φ.toStringSet}]"
   | n,                            ∃⁰ φ => s!"(∃ x{toString n}) [{φ.toStringSet}]"
 
-instance : Repr (Semiformula ℒₛₑₜ ξ n) := ⟨fun φ _ ↦ φ.toStringSet⟩
+instance : Repr (SetTheorySemiformula ξ n) := ⟨fun φ _ ↦ φ.toStringSet⟩
 
-instance : ToString (Semiformula ℒₛₑₜ ξ n) := ⟨fun φ ↦ φ.toStringSet⟩
+instance : ToString (SetTheorySemiformula ξ n) := ⟨fun φ ↦ φ.toStringSet⟩
 
 abbrev _root_.LO.SetStructure (V : Type*) := Membership V V
 
@@ -154,12 +169,12 @@ lemma standardStructure_unique (s : Structure ℒₛₑₜ M) [hEq : Structure.E
 /- ### Normalization -/
 
 /-- Normalize model without =-isomorphic. -/
-structure QuotNormalize (M : Type*) [Structure ℒₛₑₜ M] [Nonempty M] [M ⊧ₘ* (𝗘𝗤 : Theory ℒₛₑₜ)] : Type _ where
+structure QuotNormalize (M : Type*) [Structure ℒₛₑₜ M] [Nonempty M] [M ⊧ₘ* (𝗘𝗤 : SetTheory)] : Type _ where
   toQuot : Structure.Model ℒₛₑₜ (Structure.Eq.QuotEq ℒₛₑₜ M)
 
 namespace QuotNormalize
 
-variable {M : Type*} [s : Structure ℒₛₑₜ M] [Nonempty M] [M ⊧ₘ* (𝗘𝗤 : Theory ℒₛₑₜ)]
+variable {M : Type*} [s : Structure ℒₛₑₜ M] [Nonempty M] [M ⊧ₘ* (𝗘𝗤 : SetTheory)]
 
 def equiv : QuotNormalize M ≃ Structure.Model ℒₛₑₜ (Structure.Eq.QuotEq ℒₛₑₜ M) where
   toFun x := x.toQuot

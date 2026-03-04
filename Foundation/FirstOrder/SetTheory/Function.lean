@@ -26,7 +26,7 @@ lemma mem_sUnion_sUnion_of_kpair_mem_left {x y R : V} (h : ⟨x, y⟩ₖ ∈ R) 
 lemma mem_domain_iff {R x : V} : x ∈ domain R ↔ ∃ y, ⟨x, y⟩ₖ ∈ R := by
   simpa [domain] using fun _ ↦  mem_sUnion_sUnion_of_kpair_mem_left
 
-def domain.dfn : Semisentence ℒₛₑₜ 2 := f“d R. ∀ x, x ∈ d ↔ ∃ y, !kpair.dfn x y ∈ R”
+def domain.dfn : SetTheorySemisentence 2 := f“d R. ∀ x, x ∈ d ↔ ∃ y, !kpair.dfn x y ∈ R”
 
 instance domain.defined : ℒₛₑₜ-function₁[V] domain via domain.dfn := ⟨fun v ↦ by simp [dfn, mem_ext_iff (y := domain _), mem_domain_iff]⟩
 
@@ -71,7 +71,7 @@ lemma mem_sUnion_sUnion_of_kpair_mem_right {x y R : V} (h : ⟨x, y⟩ₖ ∈ R)
 lemma mem_range_iff {R y : V} : y ∈ range R ↔ ∃ x, ⟨x, y⟩ₖ ∈ R := by
   simpa [range] using fun _ ↦ mem_sUnion_sUnion_of_kpair_mem_right
 
-def range.dfn : Semisentence ℒₛₑₜ 2 := f“r R. ∀ y, y ∈ r ↔ ∃ x, !kpair.dfn x y ∈ R”
+def range.dfn : SetTheorySemisentence 2 := f“r R. ∀ y, y ∈ r ↔ ∃ x, !kpair.dfn x y ∈ R”
 
 instance range.defined : ℒₛₑₜ-function₁[V] range via range.dfn := ⟨fun v ↦ by simp [dfn, mem_ext_iff (y := range _), mem_range_iff]⟩
 
@@ -117,7 +117,7 @@ lemma function_def {Y X : V} : Y ^ X = function Y X := rfl
 
 lemma mem_function_iff {f Y X : V} : f ∈ Y ^ X ↔ f ⊆ X ×ˢ Y ∧ ∀ x ∈ X, ∃! y, ⟨x, y⟩ₖ ∈ f := by simp [function, function_def]
 
-def function.dfn : Semisentence ℒₛₑₜ 3 := f“F Y X. ∀ f, f ∈ F ↔ f ⊆ !prod.dfn X Y ∧ ∀ x ∈ X, ∃! y, !kpair.dfn x y ∈ f”
+def function.dfn : SetTheorySemisentence 3 := f“F Y X. ∀ f, f ∈ F ↔ f ⊆ !prod.dfn X Y ∧ ∀ x ∈ X, ∃! y, !kpair.dfn x y ∈ f”
 
 instance function.defined : ℒₛₑₜ-function₂[V] (·^·) via function.dfn :=
   ⟨fun v ↦ by simp [function.dfn, mem_ext_iff (y := (v 1)^(v 2)), mem_function_iff]⟩
@@ -198,7 +198,7 @@ class IsFunction (f : V) : Prop where
 
 lemma isFunction_def {f : V} : IsFunction f ↔ ∃ X Y : V, f ∈ Y ^ X := ⟨fun h ↦ h.mem_func, fun h ↦ ⟨h⟩⟩
 
-def IsFunction.dfn : Semisentence ℒₛₑₜ 1 := f“f. ∃ X Y, f ∈ !function.dfn Y X”
+def IsFunction.dfn : SetTheorySemisentence 1 := f“f. ∃ X Y, f ∈ !function.dfn Y X”
 
 instance IsFunction.defined : ℒₛₑₜ-predicate[V] IsFunction via dfn := ⟨fun v ↦ by simp [isFunction_def, dfn]⟩
 
@@ -283,7 +283,7 @@ lemma function_ext {X Y f g : V} (hf : f ∈ Y ^ X) (hg : g ∈ Y ^ X)
 
 def Injective (R : V) : Prop := ∀ x₁ x₂ y, ⟨x₁, y⟩ₖ ∈ R → ⟨x₂, y⟩ₖ ∈ R → x₁ = x₂
 
-def Injective.dfn : Semisentence ℒₛₑₜ 1 := f“f. ∀ x₁ x₂ y, !kpair.dfn x₁ y ∈ f → !kpair.dfn x₂ y ∈ f → x₁ = x₂”
+def Injective.dfn : SetTheorySemisentence 1 := f“f. ∀ x₁ x₂ y, !kpair.dfn x₁ y ∈ f → !kpair.dfn x₂ y ∈ f → x₁ = x₂”
 
 instance Injective.defined : ℒₛₑₜ-predicate[V] Injective via dfn := ⟨fun v ↦ by simp [Injective, dfn]⟩
 
@@ -299,7 +299,7 @@ lemma mem_identity_iff {X p : V} : p ∈ identity X ↔ ∃ x ∈ X, p = ⟨x, x
   rintro x hx rfl
   simp [hx]
 
-def identity.dfn : Semisentence ℒₛₑₜ 2 := f“i X. ∀ p, p ∈ i ↔ ∃ x ∈ X, p = !kpair.dfn x x”
+def identity.dfn : SetTheorySemisentence 2 := f“i X. ∀ p, p ∈ i ↔ ∃ x ∈ X, p = !kpair.dfn x x”
 
 instance identity.defined : ℒₛₑₜ-function₁[V] identity via dfn := ⟨fun v ↦ by simp [dfn, mem_ext_iff (y := identity (v 1)), mem_identity_iff]⟩
 
@@ -382,7 +382,7 @@ noncomputable def value (f x : V) := {z ∈ ⋃ˢ range f ; ∃ y, z ∈ y ∧ �
 /-- If `x` is in `domain f`, then `f ‘ x` is the value of `f` at `x`, else it is `∅`. -/
 scoped notation f:arg " ‘ " x:arg => value f x
 
-def value.dfn : Semisentence ℒₛₑₜ 3 := f“v f x. ∀ z, z ∈ v ↔ z ∈ !sUnion.dfn (!range.dfn f) ∧ ∃ y, z ∈ y ∧ !kpair.dfn x y ∈ f”
+def value.dfn : SetTheorySemisentence 3 := f“v f x. ∀ z, z ∈ v ↔ z ∈ !sUnion.dfn (!range.dfn f) ∧ ∃ y, z ∈ y ∧ !kpair.dfn x y ∈ f”
 
 instance value.defined : ℒₛₑₜ-function₂[V] value via value.dfn :=
   ⟨fun v ↦ by simp [dfn, value]; simp only [mem_ext_iff, mem_sep_iff]⟩
@@ -408,7 +408,7 @@ noncomputable def restrict (R A : V) : V := R ∩ (A ×ˢ range R)
 /-- Restricting the domain of a relation -/
 scoped notation R:arg " ↾ " A:arg => restrict R A
 
-def restrict.dfn : Semisentence ℒₛₑₜ 3 := f“r R A. r = !inter.dfn R (!prod.dfn A (!range.dfn R))”
+def restrict.dfn : SetTheorySemisentence 3 := f“r R A. r = !inter.dfn R (!prod.dfn A (!range.dfn R))”
 
 instance restrict.defined : ℒₛₑₜ-function₂[V] restrict via restrict.dfn :=
   ⟨fun v ↦ by simp [dfn, restrict]⟩
@@ -432,7 +432,7 @@ noncomputable def image (R A : V) : V := range (restrict R A)
 /-- Image of a set under a relation -/
 scoped notation R:arg " “ " A:arg => image R A
 
-def image.dfn : Semisentence ℒₛₑₜ 3 := f“B R A. B = !range.dfn (!restrict.dfn R A)”
+def image.dfn : SetTheorySemisentence 3 := f“B R A. B = !range.dfn (!restrict.dfn R A)”
 
 instance image.defined : ℒₛₑₜ-function₂[V] image via image.dfn :=
   ⟨fun v ↦ by simp [dfn, image]⟩
@@ -461,13 +461,13 @@ def CardLT (X Y : V) : Prop := X ≤# Y ∧ ¬Y ≤# X
 
 infix:50 " <# " => CardLT
 
-def CardLE.dfn : Semisentence ℒₛₑₜ 2 := f“X Y. ∃ f ∈ !function.dfn Y X, !Injective.dfn f”
+def CardLE.dfn : SetTheorySemisentence 2 := f“X Y. ∃ f ∈ !function.dfn Y X, !Injective.dfn f”
 
 instance CardLE.defined : ℒₛₑₜ-relation[V] CardLE via dfn := ⟨fun v ↦ by simp [CardLE, dfn]⟩
 
 instance CardLE.definable : ℒₛₑₜ-relation[V] CardLE := defined.to_definable
 
-def CardLT.dfn : Semisentence ℒₛₑₜ 2 := “X Y. !CardLE.dfn X Y ∧ ¬!CardLE.dfn Y X”
+def CardLT.dfn : SetTheorySemisentence 2 := “X Y. !CardLE.dfn X Y ∧ ¬!CardLE.dfn Y X”
 
 instance CardLT.defined : ℒₛₑₜ-relation[V] CardLT via dfn := ⟨fun v ↦ by simp [CardLT, dfn]⟩
 
@@ -477,7 +477,7 @@ def CardEQ (X Y : V) : Prop := X ≤# Y ∧ Y ≤# X
 
 infix:60 " ≋ " => CardEQ
 
-def CardEQ.dfn : Semisentence ℒₛₑₜ 2 := “X Y. !CardLE.dfn X Y ∧ !CardLE.dfn Y X”
+def CardEQ.dfn : SetTheorySemisentence 2 := “X Y. !CardLE.dfn X Y ∧ !CardLE.dfn Y X”
 
 instance CardEQ.defined : ℒₛₑₜ-relation[V] CardEQ via dfn := ⟨fun v ↦ by simp [CardEQ, dfn]⟩
 

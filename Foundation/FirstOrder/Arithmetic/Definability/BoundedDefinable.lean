@@ -16,7 +16,7 @@ variable {ℌ : HierarchySymbol} {Γ Γ' : SigmaPiDelta}
 variable (ℌ)
 
 class Bounded (f : (Fin k → V) → V) : Prop where
-  bounded : ∃ t : Semiterm ℒₒᵣ V k, ∀ v : Fin k → V, f v ≤ t.valm V v id
+  bounded : ∃ t : ArithmeticSemiterm V k, ∀ v : Fin k → V, f v ≤ t.valm V v id
 
 abbrev Bounded₁ (f : V → V) : Prop := Bounded (k := 1) (fun v ↦ f (v 0))
 
@@ -36,11 +36,11 @@ namespace Bounded
 
 @[simp] lemma const [V ⊧ₘ* 𝗣𝗔⁻] {k} (c : V) : Bounded (fun _ : Fin k → V ↦ c) := ⟨&c, by intro _; simp⟩
 
-@[simp] lemma term_retraction [V ⊧ₘ* 𝗣𝗔⁻] (t : Semiterm ℒₒᵣ V n) (e : Fin n → Fin k) :
+@[simp] lemma term_retraction [V ⊧ₘ* 𝗣𝗔⁻] (t : ArithmeticSemiterm V n) (e : Fin n → Fin k) :
     Bounded fun v : Fin k → V ↦ Semiterm.valm V (fun x ↦ v (e x)) id t :=
   ⟨Rew.subst (fun x ↦ #(e x)) t, by intro _; simp [Semiterm.val_substs]⟩
 
-@[simp] lemma term [V ⊧ₘ* 𝗣𝗔⁻] (t : Semiterm ℒₒᵣ V k) : Bounded fun v : Fin k → V => Semiterm.valm V v id t :=
+@[simp] lemma term [V ⊧ₘ* 𝗣𝗔⁻] (t : ArithmeticSemiterm V k) : Bounded fun v : Fin k → V => Semiterm.valm V v id t :=
   ⟨t, by intro _; simp⟩
 
 lemma retraction {f : (Fin k → V) → V} (hf : Bounded f) (e : Fin k → Fin n) :
@@ -255,10 +255,10 @@ variable [V ⊧ₘ* 𝗣𝗔⁻]
 
 @[simp] lemma const {k} (c : V) : DefinableBoundedFunction (fun _ : Fin k → V ↦ c) := ⟨by simp, by simp⟩
 
-@[simp] lemma term_retraction (t : Semiterm ℒₒᵣ V n) (e : Fin n → Fin k) :
+@[simp] lemma term_retraction (t : ArithmeticSemiterm V n) (e : Fin n → Fin k) :
     DefinableBoundedFunction fun v : Fin k → V ↦ Semiterm.valm V (fun x ↦ v (e x)) id t := ⟨by simp, by simp⟩
 
-@[simp] lemma term (t : Semiterm ℒₒᵣ V k) :
+@[simp] lemma term (t : ArithmeticSemiterm V k) :
   DefinableBoundedFunction fun v : Fin k → V ↦ Semiterm.valm V v id t := ⟨by simp, by simp⟩
 
 end DefinableBoundedFunction
