@@ -63,24 +63,24 @@ attribute [simp, grind =]
   def_truthset_neg
 
 @[simp, grind =]
-lemma def_truthset_iff    : M (φ ⭤ ψ) = (M φ ∩ M ψ) ∪ ((M φ)ᶜ ∩ (M ψ)ᶜ)  := calc
+lemma def_truthset_iff : M (φ ⭤ ψ) = (M φ ∩ M ψ) ∪ ((M φ)ᶜ ∩ (M ψ)ᶜ)  := calc
   M (φ ⭤ ψ) = M (φ ➝ ψ) ∩ M (ψ ➝ φ)               := by simp [LogicalConnective.iff];
   _         = ((M φ)ᶜ ∪ (M ψ)) ∩ ((M ψ)ᶜ ∪ (M φ)) := by simp;
   _         = (M φ ∩ M ψ) ∪ ((M φ)ᶜ ∩ (M ψ)ᶜ)     := by tauto_set;
 
 
 @[simp, grind =]
-lemma def_boxItr {n : ℕ} : M (□^[n] φ) = M.box^[n] (M φ) := by
+lemma def_truthset_boxItr {n : ℕ} : M (□^[n] φ) = M.box^[n] (M φ) := by
   induction n with
   | zero => simp
   | succ n ih => rw [Function.iterate_succ']; simp [ih, truthset]
 
 @[simp, grind =]
-lemma def_box : M (□φ) = M.box (M φ) := def_boxItr (n := 1)
+lemma def_truthset_box : M (□φ) = M.box (M φ) := def_truthset_boxItr (n := 1)
 
 
 @[simp, grind =]
-lemma def_diaItr {n : ℕ} : M (◇^[n] φ) = M.dia^[n] (M φ) := by
+lemma def_truthset_diaItr {n : ℕ} : M (◇^[n] φ) = M.dia^[n] (M φ) := by
   induction n with
   | zero => simp
   | succ n ih =>
@@ -88,7 +88,7 @@ lemma def_diaItr {n : ℕ} : M (◇^[n] φ) = M.dia^[n] (M φ) := by
     simp only [Dia.diaItr_succ, truthset, ih, Set.union_empty, Function.comp_apply, NeighborhoodSystem.dia]
 
 @[simp, grind =]
-lemma def_dia : M (◇φ) = M.dia (M φ) := def_diaItr (n := 1)
+lemma def_truthset_dia : M (◇φ) = M.dia (M φ) := def_truthset_diaItr (n := 1)
 
 
 def Forces (M : NeighborhoodModel ν α) (w : M.World) (φ : Formula α) : Prop := w ∈ M φ
@@ -113,10 +113,10 @@ lemma forces_iff : x ⊩ φ ⭤ ψ ↔ (x ⊩ φ ↔ x ⊩ ψ) := by
   simp [ForcingRelation.Forces, Forces]
   tauto;
 
-lemma forces_boxItr : x ⊩ □^[n] φ ↔ x ∈ M.box^[n] (M φ) := by simp [ForcingRelation.Forces, Forces, def_boxItr]
+lemma forces_boxItr : x ⊩ □^[n] φ ↔ x ∈ M.box^[n] (M φ) := by simp [ForcingRelation.Forces, Forces, def_truthset_boxItr]
 lemma forces_box : x ⊩ □φ ↔ x ∈ M.box (M φ) := forces_boxItr (n := 1)
 
-lemma forces_diaItr : x ⊩ ◇^[n] φ ↔ x ∈ M.dia^[n] (M φ) := by simp [ForcingRelation.Forces, Forces, def_diaItr]
+lemma forces_diaItr : x ⊩ ◇^[n] φ ↔ x ∈ M.dia^[n] (M φ) := by simp [ForcingRelation.Forces, Forces, def_truthset_diaItr]
 lemma forces_dia : x ⊩ ◇φ ↔ x ∈ M.dia (M φ) := forces_diaItr (n := 1)
 
 attribute [simp, grind .]
