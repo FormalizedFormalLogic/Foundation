@@ -410,6 +410,15 @@ public import Foundation.Modal.Neighborhood.Logic.ET5
 public import Foundation.Modal.Neighborhood.Logic.ETB
 public import Foundation.Modal.Neighborhood.Logic.Incomparability.ED_EP
 public import Foundation.Modal.Neighborhood.Supplementation
+public import Foundation.Modal.Neighborhood2.Axiom.C
+public import Foundation.Modal.Neighborhood2.Axiom.M
+public import Foundation.Modal.Neighborhood2.Axiom.N
+public import Foundation.Modal.Neighborhood2.Axiom.P
+public import Foundation.Modal.Neighborhood2.Basic
+public import Foundation.Modal.Neighborhood2.Canonicity
+public import Foundation.Modal.Neighborhood2.Completeness
+public import Foundation.Modal.Neighborhood2.IntersectionClosure
+public import Foundation.Modal.Neighborhood2.Supplementation
 public import Foundation.Modal.PLoN.Basic
 public import Foundation.Modal.PLoN.Completeness
 public import Foundation.Modal.PLoN.Hilbert
