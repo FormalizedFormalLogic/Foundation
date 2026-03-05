@@ -574,7 +574,7 @@ instance : Entailment.StrongCut (Theory L) (Theory L) where
 lemma compact' [L.DecidableEq] {T : Theory L} {φ : Sentence L}
     (b : T ⊢ φ) : ∃ (s : { s : Finset (Sentence L) // ↑s ⊆ T}), (∅ : Theory L) ⊢ s.val.conj ➝ φ := by
   let ⟨s, b⟩ := compact b
-  let bc : ({s.val.conj} : Theory L) ⊢ s.val.conj := Axiomatized.provable_axm _ (by simp)
+  let bc : ({s.val.conj} : Theory L) ⊢ s.val.conj := Axiomatized.provable_refl _ (by simp)
   have : {s.val.conj} ⊢ φ := StrongCut.cut! (fun {ψ} hψ ↦ Entailment.left_Fconj!_intro (by simpa) ⨀ bc) b
   have : (insert s.val.conj ∅ : Theory L) ⊢ φ := by simpa using this
   exact ⟨s, ⟨deduction this.get⟩⟩
