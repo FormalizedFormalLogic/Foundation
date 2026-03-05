@@ -18,16 +18,22 @@ export IsMonotonic (monotonic)
 
 section
 
-variable [N.IsMonotonic]
-
 @[simp, grind <=]
-lemma box_subset_of_subset {X Y : N.Neighborhood} (h : X ⊆ Y) : N.box X ⊆ N.box Y := by
+lemma box_subset_of_subset [N.IsMonotonic] {X Y : N.Neighborhood} (h : X ⊆ Y) : N.box X ⊆ N.box Y := by
   intro x hx;
   have := N.monotonic X Y;
   rw [(show X ∩ Y = X by tauto_set)] at this;
   tauto_set;
 
-lemma validates_axiomM : N ⊧ Axioms.M φ ψ := by grind [monotonic]
+lemma instIsMonotonic_of_box_subset_of_subset (h : ∀ X Y : N.Neighborhood, X ⊆ Y → N.box X ⊆ N.box Y)
+  : N.IsMonotonic := by
+  constructor;
+  intro X Y x hx;
+  constructor;
+  . apply h _ X (by tauto_set) hx;
+  . apply h _ Y (by tauto_set) hx;
+
+lemma validates_axiomM [N.IsMonotonic] : N ⊧ Axioms.M φ ψ := by grind [monotonic]
 
 end
 
