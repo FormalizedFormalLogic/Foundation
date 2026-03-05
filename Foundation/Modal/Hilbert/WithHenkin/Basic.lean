@@ -107,7 +107,7 @@ section
 variable [DecidableEq α]
 
 instance instHasAxiomK [Ax.HasK] : Entailment.HasAxiomK (Hilbert.WithHenkin Ax) where
-  K φ ψ := by
+  K := by
     constructor;
     simpa [HasK.ne_pq] using Hilbert.WithHenkin.axm
       (φ := Axioms.K (.atom (HasK.p Ax)) (.atom (HasK.q Ax)))

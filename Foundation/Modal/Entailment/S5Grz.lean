@@ -25,7 +25,7 @@ protected noncomputable def S5Grz.diaT : 𝓢 ⊢! ◇φ ➝ φ := by
   have : 𝓢 ⊢! □◇φ ➝ φ := C_trans this axiomGrz;
   exact C_trans axiomFive this;
 
-noncomputable instance : HasAxiomDiaT 𝓢 := ⟨fun _ ↦ S5Grz.diaT⟩
+noncomputable instance : HasAxiomDiaT 𝓢 := ⟨S5Grz.diaT⟩
 noncomputable instance : Entailment.KTc' 𝓢 where
 
 end LO.Modal.Entailment

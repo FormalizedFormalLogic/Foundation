@@ -29,7 +29,7 @@ protected def axiomL : 𝓢 ⊢! Axioms.L φ := by
     nth_rw 2 [←e]; apply deduct'; apply deduct;
     exact d₂ ⨀ (d₁ ⨀ ((of d₃) ⨀ (FiniteContext.byAxm)));
   exact loeb this;
-instance : HasAxiomL 𝓢 := ⟨fun _ ↦ K4Loeb.axiomL⟩
+instance : HasAxiomL 𝓢 := ⟨K4Loeb.axiomL⟩
 
 end K4Loeb
 

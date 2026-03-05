@@ -18,7 +18,7 @@ namespace KT'
 
 variable [Entailment.KT' 𝓢]
 
-instance : HasAxiomT 𝓢 := ⟨fun _ ↦ C_trans box_dni (C_of_CNN (C_trans diaTc diaDuality_mp))⟩
+instance : HasAxiomT 𝓢 := ⟨C_trans box_dni (C_of_CNN (C_trans diaTc diaDuality_mp))⟩
 instance : Entailment.KT 𝓢 where
 instance : Entailment.KP 𝓢 where
 instance : Entailment.KD 𝓢 where

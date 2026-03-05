@@ -22,15 +22,15 @@ variable [DecidableEq F]
 
 namespace ET5
 
-instance : Entailment.HasAxiomB 𝓢 := ⟨fun _ ↦ C_trans diaTc axiomFive⟩
+instance : Entailment.HasAxiomB 𝓢 := ⟨C_trans diaTc axiomFive⟩
 
 instance : Entailment.ETB 𝓢 where
 
 instance : Entailment.EN 𝓢 where
 
-instance : Entailment.HasAxiomPoint2 𝓢 := ⟨fun _ ↦ C_trans (C_trans axiomFiveDual! axiomT) axiomB⟩
+instance : Entailment.HasAxiomPoint2 𝓢 := ⟨C_trans (C_trans axiomFiveDual! axiomT) axiomB⟩
 
-instance : Entailment.HasAxiomFour 𝓢 := ⟨fun _ ↦ C_trans (C_trans axiomTDual! axiomFive) (K_left $ re $ K_intro axiomFiveDual! axiomTDual!)⟩
+instance : Entailment.HasAxiomFour 𝓢 := ⟨C_trans (C_trans axiomTDual! axiomFive) (K_left $ re $ K_intro axiomFiveDual! axiomTDual!)⟩
 end ET5
 
 
