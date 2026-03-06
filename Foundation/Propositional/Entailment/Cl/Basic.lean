@@ -190,6 +190,11 @@ instance : HasAxiomPeirce 𝓢 where
     . simp;
     . simp;
 
+instance : HasAxiomEFQ 𝓢 where
+  efq := C_of_CNN (C_of_conseq NO)
+
+instance : Entailment.Int 𝓢 where
+
 end
 
 section
