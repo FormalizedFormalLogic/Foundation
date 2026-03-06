@@ -50,11 +50,11 @@ def infinity : Sentence ℒₛₑₜ := “∃ I, (∀ e, !isEmpty e → e ∈ I
 def foundation : Sentence ℒₛₑₜ := “∀ x, !isNonempty x → ∃ y ∈ x, ∀ z ∈ x, z ∉ y”
 
 /-- Axiom schema of separation (Aussonderungsaxiom). -/
-def separationSchema (φ : SyntacticSemiformula ℒₛₑₜ 1) : Sentence ℒₛₑₜ :=
+def separationSchema (φ : Semiproposition ℒₛₑₜ 1) : Sentence ℒₛₑₜ :=
   .univCl “∀ x, ∃ y, ∀ z, z ∈ y ↔ z ∈ x ∧ !φ z”
 
 /-- Axiom schema of replacement. -/
-def replacementSchema (φ : SyntacticSemiformula ℒₛₑₜ 2) : Sentence ℒₛₑₜ :=
+def replacementSchema (φ : Semiproposition ℒₛₑₜ 2) : Sentence ℒₛₑₜ :=
   .univCl “(∀ x, ∃! y, !φ x y) → ∀ X, ∃ Y, ∀ y, y ∈ Y ↔ ∃ x ∈ X, !φ x y”
 
 /-- Axiom of choice. -/
@@ -84,7 +84,7 @@ inductive Zermelo : Theory ℒₛₑₜ
   /-- Axiom of foundation. -/
   | axiom_of_foundation : Zermelo Axiom.foundation
   /-- Axiom schema of separation. -/
-  | axiom_of_separation (φ : SyntacticSemiformula ℒₛₑₜ 1) : Zermelo (Axiom.separationSchema φ)
+  | axiom_of_separation (φ : Semiproposition ℒₛₑₜ 1) : Zermelo (Axiom.separationSchema φ)
 
 notation "𝗭" => Zermelo
 
@@ -111,9 +111,9 @@ inductive ZermeloFraenkel : Theory ℒₛₑₜ
   /-- Axiom of foundation. -/
   | axiom_of_foundation : ZermeloFraenkel Axiom.foundation
   /-- Axiom schema of separation. -/
-  | axiom_of_separation (φ : SyntacticSemiformula ℒₛₑₜ 1) : ZermeloFraenkel (Axiom.separationSchema φ)
+  | axiom_of_separation (φ : Semiproposition ℒₛₑₜ 1) : ZermeloFraenkel (Axiom.separationSchema φ)
   /-- Axiom schema of replacement. -/
-  | axiom_of_replacement (φ : SyntacticSemiformula ℒₛₑₜ 2) : ZermeloFraenkel (Axiom.replacementSchema φ)
+  | axiom_of_replacement (φ : Semiproposition ℒₛₑₜ 2) : ZermeloFraenkel (Axiom.replacementSchema φ)
 
 notation "𝗭𝗙" => ZermeloFraenkel
 

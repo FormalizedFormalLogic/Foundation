@@ -447,7 +447,7 @@ namespace Proof
 variable [L.DecidableEq]
 
 theorem girard {φ : Sentence L} : 𝐋𝐊 ⊢ φ → 𝐋𝐋 ⊢ φ.Girard := fun h ↦ ⟨by
-  have : 𝐋𝐊₀ ⊢ (φ : SyntacticFormula L) := by simpa using Proof.cast.mp h
+  have : 𝐋𝐊₀ ⊢ (φ : Proposition L) := by simpa using Proof.cast.mp h
   simpa using Derivation.toLL this.get⟩
 
 theorem girard_faithful {φ : Sentence L} : 𝐋𝐋 ⊢ φ.Girard ↔ 𝐋𝐊 ⊢ φ :=

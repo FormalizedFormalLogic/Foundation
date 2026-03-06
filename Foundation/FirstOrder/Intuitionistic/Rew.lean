@@ -31,7 +31,7 @@ instance : Rewriting L ξ (Semiformulaᵢ L ξ) ζ (Semiformulaᵢ L ζ) where
   app_all (_ _) := rfl
   app_exs (_ _) := rfl
 
-instance : Coe (Semisentenceᵢ L n) (SyntacticSemiformulaᵢ L n) := ⟨Rewriting.emb (ξ := ℕ)⟩
+instance : Coe (Semisentenceᵢ L n) (Semipropositionᵢ L n) := ⟨Rewriting.emb (ξ := ℕ)⟩
 
 lemma rew_rel (ω : Rew L ξ₁ n₁ ξ₂ n₂) {k} (r : L.Rel k) (v : Fin k → Semiterm L ξ₁ n₁) :
     ω ▹ rel r v = rel r fun i ↦ ω (v i) := rfl
@@ -76,7 +76,7 @@ instance : TransitiveRewriting L ξ₁ (Semiformulaᵢ L ξ₁) ξ₂ (Semiformu
 instance : InjMapRewriting L ξ (Semiformulaᵢ L ξ) ζ (Semiformulaᵢ L ζ) where
   smul_map_injective := map_inj
 
-instance : LawfulSyntacticRewriting L (SyntacticSemiformulaᵢ L) where
+instance : LawfulSyntacticRewriting L (Semipropositionᵢ L) where
 
 @[simp] lemma complexity_rew (ω : Rew L ξ₁ n₁ ξ₂ n₂) (φ : Semiformulaᵢ L ξ₁ n₁) : (ω ▹ φ).complexity = φ.complexity := by
   induction φ using rec' generalizing n₂ <;> simp [*, rew_rel]

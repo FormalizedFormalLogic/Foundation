@@ -16,20 +16,20 @@ namespace Entailment
 inductive Code (L : Language.{u})
   | axL : {k : ℕ} → (r : L.Rel k) → (v : Fin k → SyntacticTerm L) → Code L
   | verum : Code L
-  | and : SyntacticFormula L → SyntacticFormula L → Code L
-  | or : SyntacticFormula L → SyntacticFormula L → Code L
-  | all : SyntacticSemiformula L 1 → Code L
-  | exs : SyntacticSemiformula L 1 → SyntacticTerm L → Code L
+  | and : Proposition L → Proposition L → Code L
+  | or : Proposition L → Proposition L → Code L
+  | all : Semiproposition L 1 → Code L
+  | exs : Semiproposition L 1 → SyntacticTerm L → Code L
   | id : Sentence L → Code L
 
 def Code.equiv (L : Language.{u}) :
     Code L ≃
     ((k : ℕ) × (L.Rel k) × (Fin k → SyntacticTerm L)) ⊕
     Unit ⊕
-    (SyntacticFormula L × SyntacticFormula L) ⊕
-    (SyntacticFormula L × SyntacticFormula L) ⊕
-    (SyntacticSemiformula L 1) ⊕
-    (SyntacticSemiformula L 1 × SyntacticTerm L) ⊕
+    (Proposition L × Proposition L) ⊕
+    (Proposition L × Proposition L) ⊕
+    (Semiproposition L 1) ⊕
+    (Semiproposition L 1 × SyntacticTerm L) ⊕
     (Sentence L) where
   toFun := fun c =>
     match c with

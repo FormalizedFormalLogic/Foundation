@@ -1,4 +1,5 @@
 module
+
 /- public import Foundation.Logic.Calculus -/
 public import Foundation.FirstOrder.Basic.Syntax.Theory
 public import Mathlib.Data.List.MinMax
@@ -11,7 +12,7 @@ namespace LO
 
 namespace FirstOrder
 
-abbrev Sequent (L : Language) := List (SyntacticFormula L)
+abbrev Sequent (L : Language) := List (Proposition L)
 
 open Semiformula
 
@@ -29,7 +30,7 @@ inductive Derivation (𝓢 : Schema L) : Sequent L → Type _
 | cut : Derivation 𝓢 (φ :: Γ) → Derivation 𝓢 (∼φ :: Γ) → Derivation 𝓢 Γ
 
 /--/
-instance : OneSided (Schema L) (SyntacticFormula L) := ⟨Derivation⟩
+instance : OneSided (Schema L) (Proposition L) := ⟨Derivation⟩
 
 abbrev Schema.pureLK : Schema L := ∅
 
@@ -47,7 +48,7 @@ notation "𝐋𝐊" => Theory.pureLK
 
 namespace Derivation
 
-variable {𝓢 U : Schema L} {Δ Δ₁ Δ₂ Γ : Sequent L} {φ ψ r : SyntacticFormula L}
+variable {𝓢 U : Schema L} {Δ Δ₁ Δ₂ Γ : Sequent L} {φ ψ r : Proposition L}
 
 open Rewriting LawfulSyntacticRewriting
 
@@ -159,10 +160,10 @@ def exs' {φ} (h : ∃⁰ φ ∈ Δ) (t) (d : 𝓢 ⟹ φ/[t] :: Δ) : 𝓢 ⟹ 
 @[simp] lemma ne_step_max' (n m : ℕ) : n ≠ max m n + 1 :=
   ne_of_lt $ Nat.lt_succ_of_le $ by simp
 
-private lemma neg_ne_and {φ ψ : SyntacticFormula L} : ¬∼φ = φ ⋏ ψ :=
+private lemma neg_ne_and {φ ψ : Proposition L} : ¬∼φ = φ ⋏ ψ :=
   ne_of_ne_complexity (by simp)
 
-def em {Δ : Sequent L} : {φ : SyntacticFormula L} → (hpos : φ ∈ Δ) → (hneg : ∼φ ∈ Δ) → 𝓢 ⟹ Δ
+def em {Δ : Sequent L} : {φ : Proposition L} → (hpos : φ ∈ Δ) → (hneg : ∼φ ∈ Δ) → 𝓢 ⟹ Δ
   | ⊤, hpos, hneg => verum' hpos
   | ⊥, hpos, hneg => verum' hneg
   | .rel R v, hpos, hneg => axL' R v hpos hneg
@@ -195,21 +196,21 @@ def em {Δ : Sequent L} : {φ : SyntacticFormula L} → (hpos : φ ∈ Δ) → (
     this.all.wk (by simpa using hneg)
   termination_by φ => φ.complexity
 
-instance : Tait (SyntacticFormula L) (Schema L) where
+instance : Tait (Proposition L) (Schema L) where
   verum := fun _ Δ => verum' (by simp)
   and := fun dp dq => dp.and dq
   or := fun d => d.or
   wk := fun d ss => d.wk ss
   em := fun hp hn => em hp hn
 
-instance : Tait.Cut (SyntacticFormula L) (Schema L) where
+instance : Tait.Cut (Proposition L) (Schema L) where
   cut {_ _ _ dp dn} := cut dp dn
 
 protected def id {φ} (hφ : φ ∈ 𝓢) : 𝓢 ⟹ ∼φ :: Δ → 𝓢 ⟹ Δ := fun b ↦ Tait.cut (Tait.wk (axm hφ) (by simp)) b
 
 def provableOfDerivable {φ} (b : 𝓢 ⟹. φ) : 𝓢 ⊢! φ := b
 
-def specialize {φ : SyntacticSemiformula L 1} (t : SyntacticTerm L) :
+def specialize {φ : Semiproposition L 1} (t : SyntacticTerm L) :
     𝓢 ⟹ (∀⁰ φ) :: Γ → 𝓢 ⟹ φ/[t] :: Γ := fun d ↦
   have : 𝓢 ⟹ ∼φ/[t] :: φ/[t] :: Γ := Tait.em (φ := φ/[t]) (by simp) (by simp)
   have dn : 𝓢 ⟹ ∼(∀⁰ φ) :: φ/[t] :: Γ := by
@@ -219,7 +220,7 @@ def specialize {φ : SyntacticSemiformula L 1} (t : SyntacticTerm L) :
     Derivation.wk d (List.cons_subset_cons _ <| by simp)
   Derivation.cut dp dn
 
-def specializes : {k : ℕ} → {φ : SyntacticSemiformula L k} → {Γ : Sequent L} → (v : Fin k → SyntacticTerm L) →
+def specializes : {k : ℕ} → {φ : Semiproposition L k} → {Γ : Sequent L} → (v : Fin k → SyntacticTerm L) →
     𝓢 ⟹ (∀⁰* φ) :: Γ → 𝓢 ⟹ (φ ⇜ v) :: Γ
   |     0, φ, Γ, _, b => Derivation.cast b (by simp)
   | k + 1, φ, Γ, v, b =>
@@ -229,7 +230,7 @@ def specializes : {k : ℕ} → {φ : SyntacticSemiformula L k} → {Γ : Sequen
       ext x <;> simp [Rew.comp_app]
       cases x using Fin.cases <;> simp)
 
-def instances : {k : ℕ} → {φ : SyntacticSemiformula L k} → {Γ : Sequent L} → {v : Fin k → SyntacticTerm L} →
+def instances : {k : ℕ} → {φ : Semiproposition L k} → {Γ : Sequent L} → {v : Fin k → SyntacticTerm L} →
     𝓢 ⟹ (φ ⇜ v) :: Γ → 𝓢 ⟹ (∃⁰* φ) :: Γ
   |     0, φ, Γ, _, b => Derivation.cast b (by simp)
   | k + 1, φ, Γ, v, b =>
@@ -240,7 +241,7 @@ def instances : {k : ℕ} → {φ : SyntacticSemiformula L k} → {Γ : Sequent 
         cases x using Fin.cases <;> simp
     instances (k := k) (v := (v ·.succ)) (Derivation.cast this (by simp))
 
-def allClosureFixitr {φ : SyntacticFormula L} (dp : 𝓢 ⊢! φ) : (m : ℕ) → 𝓢 ⊢! ∀⁰* Rew.fixitr 0 m ▹ φ
+def allClosureFixitr {φ : Proposition L} (dp : 𝓢 ⊢! φ) : (m : ℕ) → 𝓢 ⊢! ∀⁰* Rew.fixitr 0 m ▹ φ
   | 0     => by simpa
   | m + 1 => by
     simp only [allClosure_fixitr, Nat.reduceAdd]
@@ -300,7 +301,7 @@ def trans (F : U ⊢!* 𝓢) {Γ : Sequent L} : 𝓢 ⟹ Γ → U ⟹ Γ
   | cut d₁ d₂ => cut (trans F d₁) (trans F d₂)
   |     axm h => F h
 
-instance : Tait.Axiomatized (SyntacticFormula L) (Schema L) where
+instance : Tait.Axiomatized (Proposition L) (Schema L) where
   axm {_ _ h} := axm h
   trans {_ _ _ F d} := trans (fun h ↦ F _ h) d
 
@@ -314,13 +315,13 @@ def invClose (b : 𝓢 ⊢! φ.univCl') : 𝓢 ⊢! φ := cut (wk b (by simp)) (
 
 def invClose! (b : 𝓢 ⊢ φ.univCl') : 𝓢 ⊢ φ := ⟨invClose b.get⟩
 
-def compact {Γ : Sequent L} : 𝓢 ⟹ Γ → (s : { s : Finset (SyntacticFormula L) // ↑s ⊆ 𝓢}) × (s : Schema L) ⟹ Γ
+def compact {Γ : Sequent L} : 𝓢 ⟹ Γ → (s : { s : Finset (Proposition L) // ↑s ⊆ 𝓢}) × (s : Schema L) ⟹ Γ
   | axL r v => ⟨⟨∅, by simp⟩, axL r v⟩
   | verum => ⟨⟨∅, by simp⟩, verum⟩
   | and d₁ d₂ =>
     let ⟨s₁, d₁⟩ := compact d₁
     let ⟨s₂, d₂⟩ := compact d₂
-    ⟨⟨(s₁ ∪ s₂ : Finset (SyntacticFormula L)), by simp [s₁.prop, s₂.prop]⟩,
+    ⟨⟨(s₁ ∪ s₂ : Finset (Proposition L)), by simp [s₁.prop, s₂.prop]⟩,
       and (Tait.ofAxiomSubset (by simp) d₁) (Tait.ofAxiomSubset (by simp) d₂)⟩
   | or d =>
     let ⟨s, d⟩ := compact d
@@ -331,7 +332,7 @@ def compact {Γ : Sequent L} : 𝓢 ⟹ Γ → (s : { s : Finset (SyntacticFormu
   | cut d₁ d₂ =>
     let ⟨s₁, d₁⟩ := compact d₁
     let ⟨s₂, d₂⟩ := compact d₂
-    ⟨⟨(s₁ ∪ s₂ : Finset (SyntacticFormula L)), by simp [s₁.prop, s₂.prop]⟩,
+    ⟨⟨(s₁ ∪ s₂ : Finset (Proposition L)), by simp [s₁.prop, s₂.prop]⟩,
       cut (Tait.ofAxiomSubset (by simp) d₁) (Tait.ofAxiomSubset (by simp) d₂)⟩
   | axm (φ := φ) h =>
     ⟨⟨{φ}, by simp [h]⟩, axm (by simp)⟩
@@ -380,7 +381,7 @@ section Hom
 
 variable {L₁ : Language} {L₂ : Language} {𝓢₁ : Schema L₁} {Δ₁ : Sequent L₁}
 
-lemma shifts_image (Φ : L₁ →ᵥ L₂) {Δ : List (SyntacticFormula L₁)} :
+lemma shifts_image (Φ : L₁ →ᵥ L₂) {Δ : List (Proposition L₁)} :
      (Δ.map <| Semiformula.lMap Φ)⁺ = (Δ⁺.map <| Semiformula.lMap Φ) := by
   simp [Rewriting.shifts, Function.comp_def, Semiformula.lMap_shift]
 
@@ -420,8 +421,8 @@ end Hom
 
 omit [L.DecidableEq]
 
-private lemma map_subst_eq_free (φ : SyntacticSemiformula L 1) (h : ¬φ.FVar? m) :
-    (@Rew.rewriteMap L ℕ ℕ 0 (fun x ↦ if x = m then 0 else x + 1)) ▹ (φ/[&m] : SyntacticFormula L) = Rewriting.free φ := by
+private lemma map_subst_eq_free (φ : Semiproposition L 1) (h : ¬φ.FVar? m) :
+    (@Rew.rewriteMap L ℕ ℕ 0 (fun x ↦ if x = m then 0 else x + 1)) ▹ (φ/[&m] : Proposition L) = Rewriting.free φ := by
   simp only [← TransitiveRewriting.comp_app]
   exact Semiformula.rew_eq_of_funEqOn (by simp [Rew.comp_app])
     (fun x hx => by simp [Rew.comp_app, ne_of_mem_of_not_mem hx h])
@@ -432,20 +433,20 @@ private lemma map_rewriteMap_eq_shifts (Δ : Sequent L) (h : ∀ φ ∈ Δ, ¬φ
   intro φ hp; exact rew_eq_of_funEqOn₀
     (by intro x hx; simp [ne_of_mem_of_not_mem hx (h φ hp)])
 
-def genelalizeByNewver {φ : SyntacticSemiformula L 1} (hp : ¬φ.FVar? m) (hΔ : ∀ ψ ∈ Δ, ¬ψ.FVar? m)
+def genelalizeByNewver {φ : Semiproposition L 1} (hp : ¬φ.FVar? m) (hΔ : ∀ ψ ∈ Δ, ¬ψ.FVar? m)
     (d : 𝓢 ⟹ φ/[&m] :: Δ) : 𝓢 ⟹ (∀⁰ φ) :: Δ := by
   have : 𝓢 ⟹ (Rewriting.free φ) :: Δ⁺ :=
     Derivation.cast (Derivation.map d (fun x => if x = m then 0 else x + 1))
     (by simp [map_subst_eq_free φ hp, map_rewriteMap_eq_shifts Δ hΔ])
   exact all this
 
-def exOfInstances (v : List (SyntacticTerm L)) (φ : SyntacticSemiformula L 1)
+def exOfInstances (v : List (SyntacticTerm L)) (φ : Semiproposition L 1)
   (h : 𝓢 ⟹ v.map (φ/[·]) ++ Γ) : 𝓢 ⟹ (∃⁰ φ) :: Γ := by
   induction' v with t v ih generalizing Γ
   · exact weakening h (List.subset_cons_self _ _)
   · exact (ih (Γ := (∃⁰ φ) :: Γ) ((exs t h).wk (by simp))).wk (by simp)
 
-def exOfInstances' (v : List (SyntacticTerm L)) (φ : SyntacticSemiformula L 1)
+def exOfInstances' (v : List (SyntacticTerm L)) (φ : Semiproposition L 1)
   (h : 𝓢 ⟹ (∃⁰ φ) :: v.map (φ/[·]) ++ Γ) : 𝓢 ⟹ (∃⁰ φ) :: Γ :=
   (exOfInstances (Γ := (∃⁰ φ) :: Γ) v φ (h.wk <| by simp)).wk (by simp)
 
@@ -453,13 +454,13 @@ end Derivation
 
 def newVar (Γ : Sequent L) : ℕ := (Γ.map Semiformula.fvSup).foldr max 0
 
-lemma not_fvar?_newVar {φ : SyntacticFormula L} {Γ : Sequent L} (h : φ ∈ Γ) : ¬FVar? φ (newVar Γ) :=
+lemma not_fvar?_newVar {φ : Proposition L} {Γ : Sequent L} (h : φ ∈ Γ) : ¬FVar? φ (newVar Γ) :=
   not_fvar?_of_lt_fvSup φ (by simpa [newVar] using List.le_max_of_le (List.mem_map_of_mem h) (by simp))
 
 namespace Derivation
 
 open Semiformula
-variable {P : SyntacticFormula L → Prop} {𝓢 : Schema L} {Δ : Sequent L}
+variable {P : Proposition L → Prop} {𝓢 : Schema L} {Δ : Sequent L}
 
 def allNvar {φ} (h : ∀⁰ φ ∈ Δ) : 𝓢 ⟹ φ/[&(newVar Δ)] :: Δ → 𝓢 ⟹ Δ := fun b ↦
   let b : 𝓢 ⟹ (∀⁰ φ) :: Δ :=
@@ -634,10 +635,10 @@ def coe_provable_iff_provable_coe {σ : Sentence L} :
 def coe_unprovable_iff_unprovable_coe {σ} :
     (𝓢 : Theory L) ⊬ σ ↔ 𝓢 ⊬ ↑σ := coe_provable_iff_provable_coe.not
 
-def provable_univCl_iff {φ : SyntacticFormula L} :
+def provable_univCl_iff {φ : Proposition L} :
     (𝓢 : Theory L) ⊢ φ.univCl ↔ 𝓢 ⊢ φ := Iff.trans coe_provable_iff_provable_coe (by simp [Schema.close!_iff])
 
-def unprovable_univCl_iff {φ : SyntacticFormula L} :
+def unprovable_univCl_iff {φ : Proposition L} :
     (𝓢 : Theory L) ⊬ φ.univCl ↔ 𝓢 ⊬ φ := provable_univCl_iff.not
 
 instance (𝓢 𝓣 : Schema L) [𝓢 ⪯ 𝓣] : 𝓢.toTheory ⪯ 𝓣.toTheory :=
@@ -657,12 +658,12 @@ namespace Schema
 
 variable {𝓢 : Schema L}
 
-def specialize! (φ : SyntacticSemiformula L 1) (t : SyntacticTerm L) : 𝓢 ⊢! ∀⁰ φ ➝ φ/[t] :=
+def specialize! (φ : Semiproposition L 1) (t : SyntacticTerm L) : 𝓢 ⊢! ∀⁰ φ ➝ φ/[t] :=
   have : 𝓢 ⟹ [(∼φ)/[t], φ/[t]] := Derivation.em (φ := φ/[t]) (by simp) (by simp)
   have : 𝓢 ⟹ [∃⁰ ∼φ, φ/[t]] := this.exs t
   this.or.cast (by simp [Semiformula.imp_eq])
 
-lemma specialize (φ : SyntacticSemiformula L 1) (t : SyntacticTerm L) : 𝓢 ⊢ ∀⁰ φ ➝ φ/[t] := ⟨specialize! φ t⟩
+lemma specialize (φ : Semiproposition L 1) (t : SyntacticTerm L) : 𝓢 ⊢ ∀⁰ φ ➝ φ/[t] := ⟨specialize! φ t⟩
 
 end Schema
 

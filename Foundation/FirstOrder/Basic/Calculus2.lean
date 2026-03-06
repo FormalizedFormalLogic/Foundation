@@ -10,25 +10,25 @@ variable {L : Language} [L.DecidableEq]
 
 section derivation2
 
-inductive Derivation2 (𝓢 : Schema L) : Finset (SyntacticFormula L) → Type _
-| closed (Γ) (φ : SyntacticFormula L) : φ ∈ Γ → ∼φ ∈ Γ → Derivation2 𝓢 Γ
-| axm {Γ} (φ : SyntacticFormula L) : φ ∈ 𝓢 → φ ∈ Γ → Derivation2 𝓢 Γ
+inductive Derivation2 (𝓢 : Schema L) : Finset (Proposition L) → Type _
+| closed (Γ) (φ : Proposition L) : φ ∈ Γ → ∼φ ∈ Γ → Derivation2 𝓢 Γ
+| axm {Γ} (φ : Proposition L) : φ ∈ 𝓢 → φ ∈ Γ → Derivation2 𝓢 Γ
 | verum {Γ} : ⊤ ∈ Γ → Derivation2 𝓢 Γ
-| and {Γ} {φ ψ : SyntacticFormula L} : φ ⋏ ψ ∈ Γ → Derivation2 𝓢 (insert φ Γ) → Derivation2 𝓢 (insert ψ Γ) → Derivation2 𝓢 Γ
-| or {Γ} {φ ψ : SyntacticFormula L} : φ ⋎ ψ ∈ Γ → Derivation2 𝓢 (insert φ (insert ψ Γ)) → Derivation2 𝓢 Γ
-| all {Γ} {φ : SyntacticSemiformula L 1} : ∀⁰ φ ∈ Γ → Derivation2 𝓢 (insert (Rewriting.free φ) (Γ.image Rewriting.shift)) → Derivation2 𝓢 Γ
-| exs {Γ} {φ : SyntacticSemiformula L 1} : ∃⁰ φ ∈ Γ → (t : SyntacticTerm L) → Derivation2 𝓢 (insert (φ/[t]) Γ) → Derivation2 𝓢 Γ
+| and {Γ} {φ ψ : Proposition L} : φ ⋏ ψ ∈ Γ → Derivation2 𝓢 (insert φ Γ) → Derivation2 𝓢 (insert ψ Γ) → Derivation2 𝓢 Γ
+| or {Γ} {φ ψ : Proposition L} : φ ⋎ ψ ∈ Γ → Derivation2 𝓢 (insert φ (insert ψ Γ)) → Derivation2 𝓢 Γ
+| all {Γ} {φ : Semiproposition L 1} : ∀⁰ φ ∈ Γ → Derivation2 𝓢 (insert (Rewriting.free φ) (Γ.image Rewriting.shift)) → Derivation2 𝓢 Γ
+| exs {Γ} {φ : Semiproposition L 1} : ∃⁰ φ ∈ Γ → (t : SyntacticTerm L) → Derivation2 𝓢 (insert (φ/[t]) Γ) → Derivation2 𝓢 Γ
 | wk {Δ Γ} : Derivation2 𝓢 Δ → Δ ⊆ Γ → Derivation2 𝓢 Γ
 | shift {Γ}   : Derivation2 𝓢 Γ → Derivation2 𝓢 (Γ.image Rewriting.shift)
 | cut {Γ φ} : Derivation2 𝓢 (insert φ Γ) → Derivation2 𝓢 (insert (∼φ) Γ) → Derivation2 𝓢 Γ
 
 scoped infix:45 " ⟹₂" => Derivation2
 
-abbrev Derivable2 (𝓢 : Schema L) (Γ : Finset (SyntacticFormula L)) := Nonempty (𝓢 ⟹₂ Γ)
+abbrev Derivable2 (𝓢 : Schema L) (Γ : Finset (Proposition L)) := Nonempty (𝓢 ⟹₂ Γ)
 
 scoped infix:45 " ⟹₂! " => Derivable2
 
-abbrev Derivable2SingleConseq (𝓢 : Schema L) (φ : SyntacticFormula L) : Prop := 𝓢 ⟹₂! {φ}
+abbrev Derivable2SingleConseq (𝓢 : Schema L) (φ : Proposition L) : Prop := 𝓢 ⟹₂! {φ}
 
 scoped infix: 45 " ⊢!₂! " => Derivable2SingleConseq
 
@@ -63,7 +63,7 @@ def Derivation.toDerivation2 (𝓢) {Γ : Sequent L} : 𝓢 ⟹ Γ → 𝓢 ⟹�
       (Derivation2.wk (Derivation.toDerivation2 𝓢 d₁) (by simp))
       (Derivation2.wk (Derivation.toDerivation2 𝓢 d₂) (by simp))
 
-noncomputable def Derivation2.toDerivation {Γ : Finset (SyntacticFormula L)} : 𝓢 ⟹₂ Γ → 𝓢 ⟹ Γ.toList
+noncomputable def Derivation2.toDerivation {Γ : Finset (Proposition L)} : 𝓢 ⟹₂ Γ → 𝓢 ⟹ Γ.toList
   | Derivation2.closed Γ φ hp hn              => Derivation.em (φ := φ) (by simp [hp]) (by simp [hn])
   | Derivation2.axm φ hp h                    => Tait.wk (Derivation.axm hp) (by simp_all)
   | Derivation2.verum h                       => Tait.verum' (by simp [h])
@@ -86,7 +86,7 @@ noncomputable def Derivation2.toDerivation {Γ : Finset (SyntacticFormula L)} : 
       (Tait.wk d.toDerivation <| by intro x; simp)
       (Tait.wk dn.toDerivation <| by intro x; simp)
 
-lemma derivable_iff_derivable2 {Γ : List (SyntacticFormula L)} : 𝓢 ⟹! Γ ↔ 𝓢 ⟹₂! Γ.toFinset := by
+lemma derivable_iff_derivable2 {Γ : List (Proposition L)} : 𝓢 ⟹! Γ ↔ 𝓢 ⟹₂! Γ.toFinset := by
   constructor
   · rintro ⟨d⟩; exact ⟨by simpa using Derivation.toDerivation2 𝓢 d⟩
   · rintro ⟨d⟩; exact ⟨.wk d.toDerivation (by intro x; simp)⟩
