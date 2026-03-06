@@ -167,6 +167,8 @@ lemma provable_iff_inconsistent_adjoin {φ : F} :
     have : 𝓢 ⊢ ∼φ ➝ ⊥ := Deduction.of_insert! (h _)
     refine of_NN! <| N!_iff_CO!.mpr this
 
+instance deductiveExplosion : Entailment.DeductiveExplosion S := inferInstance
+
 end consistency
 
 
@@ -190,8 +192,7 @@ instance : HasAxiomPeirce 𝓢 where
     . simp;
     . simp;
 
-instance : HasAxiomEFQ 𝓢 where
-  efq := C_of_CNN (C_of_conseq NO)
+instance : HasAxiomEFQ 𝓢 := inferInstance
 
 instance : Entailment.Int 𝓢 where
 

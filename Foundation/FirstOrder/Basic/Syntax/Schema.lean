@@ -64,9 +64,11 @@ instance : CompleteLattice (Schema L) where
 
 @[simp] lemma not_mem_bot (φ : Proposition L) : φ ∉ (⊥ : Schema L) := by rintro ⟨⟩
 
-instance : Coe (Proposition L) (Schema L) := ⟨fun φ ↦ ⟨(· = φ)⟩⟩
+@[coe] def ofProposition (φ : Proposition L) : Schema L := ⟨(· = φ)⟩
 
-@[simp] lemma mem_coe (φ ψ : Proposition L) : ψ ∈ (φ : Schema L) ↔ ψ = φ := by simp
+instance : Coe (Proposition L) (Schema L) := ⟨fun φ ↦ ofProposition φ⟩
+
+@[simp] lemma mem_coe (φ ψ : Proposition L) : ψ ∈ (φ : Schema L) ↔ ψ = φ := by rfl
 
 instance : AdjunctiveSet (Proposition L) (Schema L) where
   Subset 𝓢₁ 𝓢₂ := 𝓢₁ ≤ 𝓢₂
@@ -109,7 +111,7 @@ lemma sSup (s : Set (Schema L)) (H : ∀ 𝓢 ∈ s, IsClosed 𝓢) : IsClosed (
     have : IsClosed 𝓢 := H 𝓢 hs
     exact ⟨𝓢, hs, IsClosed.closed _ _ hφ⟩
 
-instance (σ : Sentence L) : IsClosed (σ : Schema L) where
+instance sentence (σ : Sentence L) : IsClosed (σ : Schema L) where
   closed _ φ h := by
     have : φ = σ := by simpa using h
     rcases this

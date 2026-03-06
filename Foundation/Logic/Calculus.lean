@@ -42,12 +42,6 @@ def verum' (h : ⊤ ∈ Γ := by simp) : 𝔇 Γ := wk verum (by simp [h])
 def tensor {φ ψ : F} (dφ : 𝔇 (φ :: Γ)) (dψ : 𝔇 (ψ :: Δ)) : 𝔇 (φ ⋏ ψ :: Γ ++ Δ) :=
   and (wk dφ (by simp)) (wk dψ (by simp))
 
-def wkTail (d : 𝔇 Γ) : 𝔇 (φ :: Γ) := wk d (by simp)
-
-def wkAppendLeft (d : 𝔇 Δ) : 𝔇 (Δ ++ Γ) := wk d (by simp)
-
-def wkAppendRight (d : 𝔇 Γ) : 𝔇 (Δ ++ Γ) := wk d (by simp)
-
 def rotate₁ (d : 𝔇 (φ₂ :: φ₁ :: Γ)) : 𝔇 (φ₁ :: φ₂ :: Γ) := wk d (by simp)
 
 def rotate₂ (d : 𝔇 (φ₃ :: φ₁ :: φ₂ :: Γ)) : 𝔇 (φ₁ :: φ₂ :: φ₃ :: Γ) :=
@@ -60,7 +54,7 @@ def rotate₃ (d : 𝔇 (φ₄ :: φ₁ :: φ₂ :: φ₃ :: Γ)) : 𝔇 (φ₁ 
 alias cut := OneSidedLK.Cut.cut
 
 protected class Entailment (𝔇 : outParam (List F → Type*)) (S : Type*) [Entailment S F] [AdjunctiveSet F S] where
-  equiv {𝓢 : S} : 𝓢 ⊢! φ ≃ (l : {l : List F // ∀ φ ∈ l, φ ∈ 𝓢}) × 𝔇 (φ :: ∼l)
+  equiv {𝓢 : S} {φ} : 𝓢 ⊢! φ ≃ (l : {l : List F // ∀ φ ∈ l, φ ∈ 𝓢}) × 𝔇 (φ :: ∼l)
 
 open Entailment
 
@@ -104,6 +98,14 @@ instance : Entailment.StrongCut S S where
       Entailment.mdp bχ bψ
   have ⟨l, hl⟩ := OneSidedLK.Entailment.equiv b
   bl l l.prop φ hl
+
+instance : Entailment.DeductiveExplosion S where
+  dexp b φ :=
+    have ⟨Γ, b⟩ := OneSidedLK.Entailment.equiv b
+    OneSidedLK.Entailment.equiv.symm
+    ⟨ Γ,
+      have : 𝔇 [∼⊥] := cast verum (by simp)
+      wk (cut b this) (by simp) ⟩
 
 instance (𝓢 : S) : Entailment.Cl 𝓢 where
   negEquiv {φ} := Entailment.cast
