@@ -8,7 +8,9 @@ public import Foundation.Vorspiel.Set.Basic
 
 namespace LO.Propositional
 
+/-
 
+TODO: fix
 
 variable {α : Type*} {T : Theory α} {Γ : Sequent α}
 
@@ -219,3 +221,5 @@ end Propositional
 
 end LO
 end
+
+-/

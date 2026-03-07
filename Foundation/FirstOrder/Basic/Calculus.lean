@@ -36,7 +36,7 @@ end Sequent
 
 /-- Derivation for one-sided $\mathbf{LK}$ -/
 inductive Derivation : Sequent L → Type _
-| protected id (r : L.Rel k) (v) : Derivation [.rel r v, .nrel r v]
+| identity (r : L.Rel k) (v) : Derivation [.rel r v, .nrel r v]
 | cut : Derivation (φ :: Γ) → Derivation (∼φ :: Δ) → Derivation (Γ ++ Δ)
 | wk : Derivation Δ → Δ ⊆ Γ → Derivation Γ
 | verum : Derivation [⊤]
@@ -52,19 +52,19 @@ namespace Derivation
 open Rewriting LawfulSyntacticRewriting
 
 def height {Δ : Sequent L} : ⊢ᴷ Δ → ℕ
-  |   .id _ _ => 0
-  | cut dp dn => (max (height dp) (height dn)).succ
-  |    wk d _ => d.height.succ
-  |     verum => 0
-  |      or d => d.height.succ
-  | and dp dq => (max (height dp) (height dq)).succ
-  |     all d => d.height.succ
-  |     exs d => d.height.succ
+  | identity _ _ => 0
+  |    cut dp dn => max dp.height dn.height + 1
+  |       wk d _ => d.height + 1
+  |        verum => 0
+  |         or d => d.height + 1
+  |    and dp dq => max (height dp) (height dq) + 1
+  |        all d => d.height + 1
+  |        exs d => d.height + 1
 
 section height
 
 @[simp] lemma height_id {k} {r : L.Rel k} {v} :
-  height (Derivation.id r v) = 0 := rfl
+  height (identity r v) = 0 := rfl
 
 @[simp] lemma height_cut {φ} (dp : ⊢ᴷ φ :: Δ) (dn : ⊢ᴷ (∼φ) :: Δ) :
   height (cut dp dn) = (max (height dp) (height dn)).succ := rfl
@@ -93,43 +93,43 @@ def weakening (d : ⊢ᴷ Δ) (h : Δ ⊆ Γ := by simp) : ⊢ᴷ Γ := wk d h
 
 def top (h : ⊤ ∈ Δ := by simp) : ⊢ᴷ Δ := verum.wk (by simp [h])
 
-def id' (r : L.Rel k) (v) (hpos : Semiformula.rel r v ∈ Δ := by simp) (hneg : Semiformula.nrel r v ∈ Δ := by simp) : ⊢ᴷ Δ :=
-  (Derivation.id r v).wk (by simp [hpos, hneg])
+def identity' (r : L.Rel k) (v) (hpos : Semiformula.rel r v ∈ Δ := by simp) (hneg : Semiformula.nrel r v ∈ Δ := by simp) : ⊢ᴷ Δ :=
+  (identity r v).wk (by simp [hpos, hneg])
 
 def tensor {φ ψ} (dφ : ⊢ᴷ φ :: Γ) (dψ : ⊢ᴷ ψ :: Δ) : ⊢ᴷ φ ⋏ ψ :: (Γ ++ Δ) := and dφ.weakening dψ.weakening
 
 def rotate (d : ⊢ᴷ φ :: Γ) : ⊢ᴷ Γ ++ [φ] := d.weakening
 
-def identity : (φ : Proposition L) → ⊢ᴷ [φ, ∼φ]
-  | .rel R v | .nrel R v => id' R v
+def eta : (φ : Proposition L) → ⊢ᴷ [φ, ∼φ]
+  | .rel R v | .nrel R v => identity' R v
   | ⊤ | ⊥ => top
-  | φ ⋏ ψ => ((identity φ).tensor (identity ψ)).rotate.or.rotate
-  | φ ⋎ ψ => ((identity φ).rotate.tensor (identity ψ).rotate).rotate.or
+  | φ ⋏ ψ => ((eta φ).tensor (eta ψ)).rotate.or.rotate
+  | φ ⋎ ψ => ((eta φ).rotate.tensor (eta ψ).rotate).rotate.or
   | ∀⁰ φ =>
-    have : ⊢ᴷ [(∼φ.shift)/[&0], φ.free] := (identity φ.free).rotate.cast
+    have : ⊢ᴷ [(∼φ.shift)/[&0], φ.free] := (eta φ.free).rotate.cast
     have : ⊢ᴷ φ.free :: [∃⁰ ∼φ]⁺ := this.exs.rotate.cast
     this.all
   | ∃⁰ φ =>
-    have : ⊢ᴷ [(φ.shift)/[&0], (∼φ).free] := (identity φ.free).cast
+    have : ⊢ᴷ [(φ.shift)/[&0], (∼φ).free] := (eta φ.free).cast
     have : ⊢ᴷ (∼φ).free :: [∃⁰ φ]⁺ := this.exs.rotate.cast
     this.all.rotate
   termination_by φ => φ.complexity
 
 def close (φ : Proposition L) (hp : φ ∈ Δ := by simp) (hn : ∼φ ∈ Δ := by simp) : ⊢ᴷ Δ :=
-  identity φ |>.weakening (by simp [hp, hn])
+  eta φ |>.weakening (by simp [hp, hn])
 
 instance : OneSidedLK (Derivation (L := L)) where
   verum := verum
   and d₁ d₂ := d₁.and d₂
   or d := d.or
   wk d ss := d.wk ss
-  identity φ := identity φ
+  identity φ := eta φ
 
 instance : OneSidedLK.Cut (Derivation (L := L)) where
   cut dp dn := cut dp dn
 
 def rewrite {Γ} (f : ℕ → SyntacticTerm L) : ⊢ᴷ Γ → ⊢ᴷ Γ.map (Rew.rewrite f ▹ ·)
-  | .id R v => Derivation.id R (Rew.rewrite f ∘ v)
+  | identity R v => identity R (Rew.rewrite f ∘ v)
   | cut (φ := φ) (Γ := Γ) (Δ := Δ) d₁ d₂ =>
     have d₁ : ⊢ᴷ Rew.rewrite f ▹ φ :: Γ.map (app (Rew.rewrite f)) := (d₁.rewrite f).cast
     have d₂ : ⊢ᴷ ∼(Rew.rewrite f ▹ φ) :: Δ.map (app (Rew.rewrite f)) := (d₂.rewrite f).cast
@@ -165,8 +165,8 @@ lemma shifts_image (Φ : L₁ →ᵥ L₂) {Δ : List (Proposition L₁)} :
   simp [Rewriting.shifts, Function.comp_def, Semiformula.lMap_shift]
 
 def lMap (Φ : L₁ →ᵥ L₂) {Γ} : ⊢ᴷ Γ → ⊢ᴷ Γ.map (.lMap Φ)
-  | .id r v =>
-    .cast (Derivation.id (Φ.rel r) (fun i ↦ .lMap Φ (v i)))
+  | identity r v =>
+    .cast (identity (Φ.rel r) (fun i ↦ .lMap Φ (v i)))
     (by simp [Semiformula.lMap_rel, Semiformula.lMap_nrel])
   | cut (Γ := Γ) (Δ := Δ) (φ := φ) d dn =>
     have : ⊢ᴷ (Γ.map (.lMap Φ) ++ Δ.map (.lMap Φ) : Sequent L₂) :=
@@ -327,8 +327,8 @@ def disj₂ {Γ Δ : Sequent L} : ⊢ᴷ Γ ++ Δ → ⊢ᴷ ⋁Γ :: Δ := fun 
     have d₁ : ⊢ᴷ (φ ⋎ ψ) ⋎ Φ :: Δ := this.disj₂
     have d₂ : ⊢ᴷ [(∼φ ⋏ ∼ψ) ⋏ ∼Φ, φ ⋎ ψ ⋎ Φ] :=
       have : ⊢ᴷ [φ, ψ ⋎ Φ, (∼φ ⋏ ∼ψ) ⋏ ∼Φ] :=
-        ((identity φ).rotate.tensor (identity ψ).rotate).tensor
-          (identity Φ).rotate |>.rotate.rotate.or.weakening
+        ((eta φ).rotate.tensor (eta ψ).rotate).tensor
+          (eta Φ).rotate |>.rotate.rotate.or.weakening
       this.or.rotate
     d₂.eCut d₁
   termination_by _ => Γ.length
@@ -370,7 +370,7 @@ lemma iff_context {𝓢 : Schema L} : 𝓢 ⊢ φ ↔ 𝓢 *⊢[𝐋𝐊¹] φ :
     have d : ⊢ᴷ [⋁(∼Γ) ⋎ φ] := d.cast (by simp [Semiformula.imp_eq])
     have : ⊢ᴷ ⋀Γ ⋏ ∼φ :: φ :: ∼Γ :=
       have : ⊢ᴷ ⋀Γ :: ∼Γ := Derivation.conj₂ fun φ h ↦ close φ (by simp) (by simp [h])
-      this.tensor (identity φ).rotate |>.weakening
+      this.tensor (eta φ).rotate |>.weakening
     refine ⟨⟨Γ, h, (d.eCut this).cast⟩⟩
 
 open Classical in
