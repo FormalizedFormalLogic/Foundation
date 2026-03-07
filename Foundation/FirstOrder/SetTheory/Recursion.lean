@@ -11,7 +11,7 @@ namespace IsOrdinal
 variable {α β γ : V}
 /--
 `f` is an attempt of length `α` for the relation `φ`, meaning that the domain of `f` is `α`, and for all `β` < `α`, it holds that `f(β) = y` iff `φ (f ↾ β) y`.
-The "attempt" terminology is due to Hamkins.
+The "attempt" terminology may be due to Paul Taylor.
 -/
 def IsAttempt (φ : V → V → Prop) (α f : V) : Prop :=
   IsOrdinal α ∧ IsFunction f ∧ domain f = α ∧
