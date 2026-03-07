@@ -27,6 +27,9 @@ def newVar (Γ : Sequent L) : ℕ := (Γ.map Semiformula.fvSup).foldr max 0
 lemma not_fvar?_newVar {φ : Proposition L} {Γ : Sequent L} (h : φ ∈ Γ) : ¬FVar? φ Γ.newVar :=
   not_fvar?_of_lt_fvSup φ (by simpa [newVar] using List.le_max_of_le (List.mem_map_of_mem h) (by simp))
 
+@[simp] lemma rew_neg_comm {Γ : Sequent L} (ω : Rew L ℕ 0 ℕ 0) :
+    (∼Γ).map (ω ▹ ·) = ∼Γ.map (ω ▹ ·) := by simp [List.tilde_def]
+
 end Sequent
 
 /-! ## Derivation for one-sided $\mathbf{LK}$ -/
@@ -47,8 +50,6 @@ scoped prefix:45 "⊢ᴷ " => Derivation
 namespace Derivation
 
 open Rewriting LawfulSyntacticRewriting
-
-
 
 def height {Δ : Sequent L} : ⊢ᴷ Δ → ℕ
   |   .id _ _ => 0
@@ -262,10 +263,6 @@ def equiv (𝓢 : Schema L) (φ) :
   toFun b := ⟨⟨b.axioms, b.axioms_mem⟩, b.derivation⟩
   invFun := fun ⟨⟨Γ, hΓ⟩, d⟩ ↦ ⟨Γ, hΓ, d⟩
 
-lemma provable_iff :
-    𝓢 ⊢ φ ↔ ∃ Γ : Sequent L, (∀ ψ ∈ Γ, ψ ∈ 𝓢) ∧ Nonempty (⊢ᴷ φ :: ∼Γ) := by
-  simpa using (equiv 𝓢 φ).nonempty_congr
-
 instance : Entailment.Compact (Schema L) where
   core b := ⟨fun φ ↦ φ ∈ b.axioms⟩
   corePrf b := ⟨b.axioms, by simp, b.derivation⟩
@@ -284,29 +281,96 @@ instance (𝓢 𝓤 : Schema L) : 𝓢 ⪯ 𝓢 ⊔ 𝓤 := weakerThan_of_le (by
 instance (𝓢 𝓤 : Schema L) : 𝓤 ⪯ 𝓢 ⊔ 𝓤 := weakerThan_of_le (by simp)
 
 lemma inconsistent_iff :
-    Entailment.Inconsistent 𝓢 ↔ ∃ Γ : Sequent L, (∀ ψ ∈ Γ, ψ ∈ 𝓢) ∧ Nonempty (⊢ᴷ ∼Γ) := calc
-  _ ↔ 𝓢 ⊢ ⊥ := Entailment.inconsistent_iff_provable_bot
-  _ ↔ ∃ Γ : Sequent L, (∀ ψ ∈ Γ, ψ ∈ 𝓢) ∧ Nonempty (⊢ᴷ ⊥ :: ∼Γ) := by simp [provable_iff]
-  _ ↔ ∃ Γ : Sequent L, (∀ ψ ∈ Γ, ψ ∈ 𝓢) ∧ Nonempty (⊢ᴷ ∼Γ) := by
-    constructor
-    · rintro ⟨Γ, hΓ, ⟨d⟩⟩
-      have : ⊢ᴷ [(∼⊥ : Proposition L)] := Derivation.verum.cast
-      exact ⟨Γ, hΓ, ⟨(Derivation.cut d this).cast⟩⟩
-    · rintro ⟨Γ, hΓ, ⟨d⟩⟩
-      exact ⟨Γ, hΓ, ⟨d.weakening⟩⟩
+    Entailment.Inconsistent 𝓢 ↔ ∃ Γ : Sequent L, (∀ ψ ∈ Γ, ψ ∈ 𝓢) ∧ Nonempty (⊢ᴷ ∼Γ) :=
+  OneSidedLK.inconsistent_iff
+
+def rewrite [𝓢.IsClosed] (b : 𝓢 ⊢! φ) (f : ℕ → SyntacticTerm L) :
+    𝓢 ⊢! Rew.rewrite f ▹ φ where
+  axioms := b.axioms.map (Rew.rewrite f ▹ ·)
+  axioms_mem := by
+    suffices ∀ ψ ∈ b.axioms, Rew.rewrite f ▹ ψ ∈ 𝓢 by simpa
+    intro ψ hψ
+    exact Schema.IsClosed.closed (Rew.rewrite f) _ (b.axioms_mem ψ hψ)
+  derivation := b.derivation.rewrite f |>.cast
 
 end Schema.Proof
 
+namespace Derivation
+
+open Entailment
+
+variable {Γ Δ : Sequent L}
+
+def eCut (d₁ : ⊢ᴷ φ :: Γ) (d₂ : ⊢ᴷ ψ :: Δ) (e : ∼φ = ψ := by simp) : ⊢ᴷ Γ ++ Δ := cut d₁ (d₂.cast (by simp [e]))
+
+def disj₂ {Γ Δ : Sequent L} : ⊢ᴷ (Γ ++ Δ) → ⊢ᴷ ⋁Γ :: Δ := fun d ↦
+  match Γ with
+  |               [] => d.weakening
+  |              [φ] => d
+  |           [φ, ψ] => d.or
+  | φ :: ψ :: χ :: Γ =>
+    let Φ := ⋁(χ :: Γ)
+    have : ⊢ᴷ (φ ⋎ ψ :: χ :: Γ) ++ Δ := d.or
+    have d₁ : ⊢ᴷ (φ ⋎ ψ) ⋎ Φ :: Δ := this.disj₂
+    have d₂ : ⊢ᴷ [(∼φ ⋏ ∼ψ) ⋏ ∼Φ, φ ⋎ ψ ⋎ Φ] :=
+      have : ⊢ᴷ [φ, ψ ⋎ Φ, (∼φ ⋏ ∼ψ) ⋏ ∼Φ] :=
+        ((identity φ).rotate.tensor (identity ψ).rotate).tensor
+          (identity Φ).rotate |>.rotate.rotate.or.weakening
+      this.or.rotate
+    d₂.eCut d₁
+  termination_by _ => Γ.length
+
+def conj₂ {Γ Δ : Sequent L} (d : (φ : Proposition L) → φ ∈ Γ → ⊢ᴷ φ :: Δ) : ⊢ᴷ ⋀Γ :: Δ :=
+  match Γ with
+  |          [] => verum.weakening
+  |         [φ] => d φ (by simp)
+  | φ :: ψ :: Γ =>
+    have : ⊢ᴷ ⋀(ψ :: Γ) :: Δ := conj₂ (Γ := ψ :: Γ) (fun χ h ↦ d χ (by simp_all))
+    (d φ (by simp)).and this
+
+def disjClosure : ⊢ᴷ Γ → 𝐋𝐊¹ ⊢! ⋁Γ := fun d ↦
+  have : ⊢ᴷ Γ ++ [] := d.cast
+  this.disj₂
+
+def disjClosureInv : 𝐋𝐊¹ ⊢! ⋁Γ → ⊢ᴷ Γ := fun d ↦
+  have d₁ : ⊢ᴷ [⋁Γ] := d
+  have d₂ : ⊢ᴷ ⋀(∼Γ) :: Γ := conj₂ fun φ h ↦ close φ (by simp) (by simp_all)
+  d₁.eCut d₂
+
+lemma nonempty_iff_provable_disj : Nonempty (⊢ᴷ Γ) ↔ 𝐋𝐊¹ ⊢ ⋁Γ :=
+  ⟨by rintro ⟨d⟩; exact ⟨d.disjClosure⟩, by rintro ⟨d⟩; exact ⟨d.disjClosureInv⟩⟩
+
+end Derivation
+
+namespace Schema.Proof
+
+variable {𝓢 : Schema L}
+
+open Derivation
+
+lemma iff_context : 𝓢 ⊢ φ ↔ 𝓢 *⊢[𝐋𝐊¹] φ := by
+  constructor
+  · rintro ⟨d⟩
+    have : 𝐋𝐊¹ ⊢! ⋀d.axioms ➝ φ :=
+      have : ⊢ᴷ ∼d.axioms ++ [φ] := d.derivation.weakening
+      this.disj₂.or.cast <| by simp [Semiformula.imp_eq]
+    refine ⟨⟨d.axioms, by simpa using d.axioms_mem, this⟩⟩
+  · rintro ⟨Γ, h, d⟩
+    have d : ⊢ᴷ [⋁(∼Γ) ⋎ φ] := d.cast (by simp [Semiformula.imp_eq])
+    have : ⊢ᴷ ⋀Γ ⋏ ∼φ :: φ :: ∼Γ :=
+      have : ⊢ᴷ ⋀Γ :: ∼Γ := Derivation.conj₂ fun φ h ↦ close φ (by simp) (by simp [h])
+      this.tensor (identity φ).rotate |>.weakening
+    refine ⟨⟨Γ, h, (d.eCut this).cast⟩⟩
+
+end Schema.Proof
 
 /-!
   ### Theory of schemata
 -/
 
-abbrev Theory (L : Language) := Set (Sentence L)
-
 def Schema.theory (𝓢 : Schema L) : Theory L := {σ | 𝓢 ⊢ ↑σ}
 
-@[simp] lemma Schema.mem_theory {𝓢 : Schema L} {σ : Sentence L} :
+@[simp] lemma Schema.mem_theory {𝓢 : Schema L} :
     σ ∈ 𝓢.theory ↔ 𝓢 ⊢ ↑σ := by simp [Schema.theory]
 
 namespace Theory

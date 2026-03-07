@@ -344,14 +344,31 @@ variable [Tilde α]
 
 instance : Tilde (List α) := ⟨fun l ↦ l.map (∼·)⟩
 
+lemma tilde_def (l : List α) : ∼l = l.map (∼·) := rfl
+
 @[simp] lemma tilde_nil : ∼([] : List α) = [] := rfl
 
 @[simp] lemma tilde_cons (a : α) (l : List α) : ∼(a :: l) = ∼a :: ∼l := rfl
 
 @[simp] lemma tilde_append (l k : List α) : ∼(l ++ k) = ∼l ++ ∼k := by
   induction l with
-  | nil => simp [*]
+  |          nil => simp [*]
   | cons a as ih => simp [*, List.cons_append]
+
+@[simp] lemma mem_tilde_iff [NegInvolutive α] {a : α} {l : List α} : a ∈ ∼l ↔ ∼a ∈ l := by
+  induction l with
+  |          nil => simp [*]
+  | cons b bs ih =>
+    suffices a = ∼b ↔ ∼a = b by
+      simp [ih, this]
+    constructor <;> {rintro rfl; simp}
+
+instance [NegInvolutive α] : NegInvolutive (List α) where
+  neg_involutive l := by
+    induction l with
+    |          nil => simp [*]
+    | cons a as ih =>
+      simp [ih, NegInvolutive.neg_involutive a]
 
 end tilde
 
@@ -436,6 +453,34 @@ def disj' (f : ι → α) (l : List ι) : α := (l.map f).disj₂
 @[simp] lemma disj'_cons (f : ι → α) (i j : ι) (is : List ι) : disj' f (i :: j :: is) = f i ⋎ disj' f (j :: is) := rfl
 
 end disjunction
+
+section tilde
+
+variable [LogicalConnective α] [DeMorgan α]
+
+@[simp] lemma tilde_conj (l : List α) : ∼l.disj = (∼l).conj := by
+  match l with
+  |     [] => simp
+  | a :: l => simp [tilde_conj l]
+
+@[simp] lemma tilde_disj (l : List α) : ∼l.conj = (∼l).disj := by
+  match l with
+  |     [] => simp
+  | a :: l => simp [tilde_disj l]
+
+@[simp] lemma tilde_conj₂ (l : List α) : ∼⋁l = ⋀(∼l) := by
+  match l with
+  |          [] => simp
+  |         [a] => simp
+  | a :: b :: l => simp [tilde_conj₂ (b :: l)]
+
+@[simp] lemma tilde_disj₂ (l : List α) : ∼⋀l = ⋁(∼l) := by
+  match l with
+  |          [] => simp
+  |         [a] => simp
+  | a :: b :: l => simp [tilde_disj₂ (b :: l)]
+
+end tilde
 
 section
 

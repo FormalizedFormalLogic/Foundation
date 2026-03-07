@@ -60,6 +60,11 @@ open Entailment
 
 variable {S : Type*} [Entailment S F] [AdjunctiveSet F S] [OneSidedLK.Entailment 𝔇 S]
 
+omit [DeMorgan F] [NegInvolutive F] [OneSidedLK 𝔇] in
+lemma provable_iff {𝓢 : S} :
+    𝓢 ⊢ φ ↔ ∃ Γ : List F, (∀ ψ ∈ Γ, ψ ∈ 𝓢) ∧ Nonempty (𝔇 (φ :: ∼Γ)) := by
+  simpa using OneSidedLK.Entailment.equiv.nonempty_congr
+
 def toProof (𝓢 : S) (d : 𝔇 [φ]) : 𝓢 ⊢! φ := OneSidedLK.Entailment.equiv.symm ⟨⟨[], by simp⟩, d⟩
 
 def ofAxiom {𝓢 : S} (h : φ ∈ 𝓢) : 𝓢 ⊢! φ :=
@@ -74,7 +79,7 @@ instance : Entailment.Axiomatized S where
   prfAxm h := ofAxiom h
   weakening h d := ofAxiomSubset d h
 
-variable [OneSidedLK.Cut 𝔇] [OneSidedLK.Entailment 𝔇 S]
+variable [OneSidedLK.Cut 𝔇]
 
 instance (𝓢 : S) : Entailment.ModusPonens 𝓢 where
   mdp {φ ψ} b₁ b₂ :=
@@ -106,6 +111,18 @@ instance : Entailment.DeductiveExplosion S where
     ⟨ Γ,
       have : 𝔇 [∼⊥] := cast verum (by simp)
       wk (cut b this) (by simp) ⟩
+
+lemma inconsistent_iff {𝓢 : S} :
+    Entailment.Inconsistent 𝓢 ↔ ∃ Γ : List F, (∀ ψ ∈ Γ, ψ ∈ 𝓢) ∧ Nonempty (𝔇 (∼Γ)) := calc
+  _ ↔ 𝓢 ⊢ ⊥ := Entailment.inconsistent_iff_provable_bot
+  _ ↔ ∃ Γ : List F, (∀ ψ ∈ Γ, ψ ∈ 𝓢) ∧ Nonempty (𝔇 (⊥ :: ∼Γ)) := by simp [provable_iff]
+  _ ↔ ∃ Γ : List F, (∀ ψ ∈ Γ, ψ ∈ 𝓢) ∧ Nonempty (𝔇 (∼Γ)) := by
+    constructor
+    · rintro ⟨Γ, hΓ, ⟨d⟩⟩
+      have : 𝔇 [(∼⊥ : F)] := cast verum
+      exact ⟨Γ, hΓ, ⟨cast (cut d this)⟩⟩
+    · rintro ⟨Γ, hΓ, ⟨d⟩⟩
+      exact ⟨Γ, hΓ, ⟨wk d (by simp)⟩⟩
 
 instance (𝓢 : S) : Entailment.Cl 𝓢 where
   negEquiv {φ} := Entailment.cast

@@ -16,6 +16,7 @@ namespace LO.FirstOrder
 structure Schema (L : Language) where
   Mem : Proposition L → Prop
 
+abbrev Theory (L : Language) := Set (Sentence L)
 namespace Schema
 
 variable {L : Language}
@@ -118,6 +119,13 @@ instance sentence (σ : Sentence L) : IsClosed (σ : Schema L) where
     simp
 
 end IsClosed
+
+def uniClosure (𝓢 : Schema L) : Theory L := Set.image Semiformula.univCl {φ | φ ∈ 𝓢}
+
+variable {𝓢 : Schema L}
+
+@[simp] lemma mem_uniClosure :
+    σ ∈ 𝓢.uniClosure ↔ ∃ φ ∈ 𝓢, Semiformula.univCl φ = σ := by simp [uniClosure]
 
 end Schema
 
