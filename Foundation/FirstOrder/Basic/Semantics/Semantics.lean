@@ -413,12 +413,12 @@ section Syntactic
 
 variable (ε : ℕ → M)
 
-@[simp] lemma eval_free (φ : SyntacticSemiformula L (n + 1)) :
+@[simp] lemma eval_free (φ : Semiproposition L (n + 1)) :
     Eval s e (a :>ₙ ε) (@Rew.free L n ▹ φ) ↔ Eval s (e <: a) ε φ := by
   simp only [eval_rew, Function.comp_def, Rew.free_fvar, Semiterm.val_fvar, Nat.cases_succ, Nat.succ_eq_add_one]
   apply iff_of_eq; congr; funext x; cases x using Fin.lastCases <;> simp
 
-@[simp] lemma eval_shift (φ : SyntacticSemiformula L n) :
+@[simp] lemma eval_shift (φ : Semiproposition L n) :
     Eval s e (a :>ₙ ε) (@Rew.shift L n ▹ φ) ↔ Eval s e ε φ := by
   simp [eval_rew, Function.comp_def]
 
@@ -483,7 +483,7 @@ lemma eval_toEmpty [DecidableEq ξ] {n} {φ : Semiformula L ξ n} (hp : φ.freeV
       fun x ↦ eval_toEmpty (φ := φ) (e := (x :> e)) (by simpa using hp)
     simp [this]
 
-@[simp] lemma eval_univCl' {ε} (φ : SyntacticFormula L) :
+@[simp] lemma eval_univCl' {ε} (φ : Proposition L) :
     Evalf s ε φ.univCl' ↔ ∀ f, Evalf s f φ := by
   simp only [univCl', eval_allClosure, eval_rew, Matrix.empty_eq, Function.comp_def]
   constructor
@@ -494,7 +494,7 @@ lemma eval_toEmpty [DecidableEq ξ] {n} {φ : Semiformula L ξ n} (hp : φ.freeV
     refine (eval_iff_of_funEqOn φ ?_).mp (h (fun x ↦ if hx : x < φ.fvSup then f ⟨x, by simp [hx]⟩ else ε 0))
     intro x hx; simp [Rew.fixitr_fvar, lt_fvSup_of_fvar? hx]
 
-@[simp] lemma eval_univCl [Nonempty M] (φ : SyntacticFormula L) :
+@[simp] lemma eval_univCl [Nonempty M] (φ : Proposition L) :
     Evalb s ![] φ.univCl ↔ ∀ f, Evalf s f φ := by
   haveI : Inhabited M := Classical.inhabited_of_nonempty inferInstance
   simp [Semiformula.univCl, ←eval_toEmpty (f := default)]

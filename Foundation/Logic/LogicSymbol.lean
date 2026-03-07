@@ -338,6 +338,40 @@ variable {α : Type*}
 
 variable {φ ψ : α}
 
+section tilde
+
+variable [Tilde α]
+
+instance : Tilde (List α) := ⟨fun l ↦ l.map (∼·)⟩
+
+lemma tilde_def (l : List α) : ∼l = l.map (∼·) := rfl
+
+@[simp] lemma tilde_nil : ∼([] : List α) = [] := rfl
+
+@[simp] lemma tilde_cons (a : α) (l : List α) : ∼(a :: l) = ∼a :: ∼l := rfl
+
+@[simp] lemma tilde_append (l k : List α) : ∼(l ++ k) = ∼l ++ ∼k := by
+  induction l with
+  |          nil => simp [*]
+  | cons a as ih => simp [*, List.cons_append]
+
+@[simp] lemma mem_tilde_iff [NegInvolutive α] {a : α} {l : List α} : a ∈ ∼l ↔ ∼a ∈ l := by
+  induction l with
+  |          nil => simp [*]
+  | cons b bs ih =>
+    suffices a = ∼b ↔ ∼a = b by
+      simp [ih, this]
+    constructor <;> {rintro rfl; simp}
+
+instance [NegInvolutive α] : NegInvolutive (List α) where
+  neg_involutive l := by
+    induction l with
+    |          nil => simp [*]
+    | cons a as ih =>
+      simp [ih, NegInvolutive.neg_involutive a]
+
+end tilde
+
 section conjunction
 
 variable [Top α] [Wedge α]
@@ -420,62 +454,94 @@ def disj' (f : ι → α) (l : List ι) : α := (l.map f).disj₂
 
 end disjunction
 
-variable [LogicalConnective α]
+section tilde
 
-lemma map_conj [LogicalConnective β] [FunLike G α β] [LogicalConnective.HomClass G α β]
-    (f : G) (l : List α) : f l.conj = (l.map f).conj := by
+variable [LogicalConnective α] [DeMorgan α]
+
+@[simp] lemma tilde_conj (l : List α) : ∼l.disj = (∼l).conj := by
+  match l with
+  |     [] => simp
+  | a :: l => simp [tilde_conj l]
+
+@[simp] lemma tilde_disj (l : List α) : ∼l.conj = (∼l).disj := by
+  match l with
+  |     [] => simp
+  | a :: l => simp [tilde_disj l]
+
+@[simp] lemma tilde_conj₂ (l : List α) : ∼⋁l = ⋀(∼l) := by
+  match l with
+  |          [] => simp
+  |         [a] => simp
+  | a :: b :: l => simp [tilde_conj₂ (b :: l)]
+
+@[simp] lemma tilde_disj₂ (l : List α) : ∼⋀l = ⋁(∼l) := by
+  match l with
+  |          [] => simp
+  |         [a] => simp
+  | a :: b :: l => simp [tilde_disj₂ (b :: l)]
+
+end tilde
+
+section
+
+variable [LogicalConnective α] [LogicalConnective β] [FunLike G α β] [LogicalConnective.HomClass G α β]
+
+lemma map_tilde (f : G) (l : List α) : (∼l : List α).map f = ∼(l.map f) := by
   induction l <;> simp [*]
 
-@[simp] lemma map_conj_prop [FunLike G α Prop] [LogicalConnective.HomClass G α Prop]
-    {f : G} {l : List α} : f l.conj ↔ ∀ a ∈ l, f a := by
+lemma map_conj (f : G) (l : List α) : f l.conj = (l.map f).conj := by
   induction l <;> simp [*]
 
-@[simp] lemma map_conj₂_prop [FunLike G α Prop] [LogicalConnective.HomClass G α Prop]
-    {f : G} {l : List α} : f l.conj₂ ↔ ∀ a ∈ l, f a := by
+lemma map_conj₂ (f : G) (l : List α) : f l.conj₂ = (l.map f).conj₂ := by
   induction l using List.induction_with_singleton' <;> simp [*]
 
-lemma map_conj₂ [LogicalConnective β] [FunLike G α β] [LogicalConnective.HomClass G α β]
-    (f : G) (l : List α) : f l.conj₂ = (l.map f).conj₂ := by
+lemma map_conj' (F : G) (l : List ι) (f : ι → α) : F (l.conj' f) = l.conj' (F ∘ f) := by
   induction l using List.induction_with_singleton' <;> simp [*]
 
-lemma map_conj_append_prop [FunLike G α Prop] [LogicalConnective.HomClass G α Prop]
+lemma map_disj (f : G) (l : List α) : f l.disj = (l.map f).disj := by
+  induction l <;> simp [*]
+
+lemma map_disj₂ (f : G) (l : List α) : f l.disj₂ = (l.map f).disj₂ := by
+  induction l using List.induction_with_singleton' <;> simp [*]
+
+lemma map_disj' (F : G) (l : List ι) (f : ι → α) : F (l.disj' f) = l.disj' (F ∘ f) := by
+  induction l using List.induction_with_singleton' <;> simp [*]
+
+end
+
+section
+
+variable [LogicalConnective α] [FunLike G α Prop] [LogicalConnective.HomClass G α Prop]
+
+@[simp] lemma map_conj_prop {f : G} {l : List α} : f l.conj ↔ ∀ a ∈ l, f a := by
+  induction l <;> simp [*]
+
+@[simp] lemma map_conj₂_prop {f : G} {l : List α} : f l.conj₂ ↔ ∀ a ∈ l, f a := by
+  induction l using List.induction_with_singleton' <;> simp [*]
+
+lemma map_conj_append_prop
     (f : G) (l₁ l₂ : List α) : f (l₁ ++ l₂).conj ↔ f (l₁.conj ⋏ l₂.conj) := by
   induction l₁ <;> induction l₂ <;> aesop;
 
-lemma map_conj' [LogicalConnective β] [FunLike G α β] [LogicalConnective.HomClass G α β]
-    (F : G) (l : List ι) (f : ι → α) : F (l.conj' f) = l.conj' (F ∘ f) := by
-  induction l using List.induction_with_singleton' <;> simp [*]
-
-@[simp] lemma map_conj'_prop [FunLike G α Prop] [LogicalConnective.HomClass G α Prop]
+@[simp] lemma map_conj'_prop
     {F : G} {l : List ι} {f : ι → α} : F (l.conj' f) ↔ ∀ i ∈ l, F (f i) := by
   induction l using List.induction_with_singleton' <;> simp [*]
 
-lemma map_disj [LogicalConnective β] [FunLike G α β] [LogicalConnective.HomClass G α β]
-    (f : G) (l : List α) : f l.disj = (l.map f).disj := by
+@[simp] lemma map_disj_prop
+    {f : G} {l : List α} : f l.disj ↔ ∃ a ∈ l, f a := by
   induction l <;> simp [*]
 
-@[simp] lemma map_disj_prop [FunLike F α Prop] [LogicalConnective.HomClass F α Prop]
-    {f : F} {l : List α} : f l.disj ↔ ∃ a ∈ l, f a := by
-  induction l <;> simp [*]
-
-lemma map_disj₂ [LogicalConnective β] [FunLike G α β] [LogicalConnective.HomClass G α β]
-    (f : G) (l : List α) : f l.disj₂ = (l.map f).disj₂ := by
+@[simp] lemma map_disj₂_prop {f : G} {l : List α} : f l.disj₂ ↔ ∃ a ∈ l, f a := by
   induction l using List.induction_with_singleton' <;> simp [*]
 
-@[simp] lemma map_disj₂_prop [FunLike F α Prop] [LogicalConnective.HomClass F α Prop]
-    {f : F} {l : List α} : f l.disj₂ ↔ ∃ a ∈ l, f a := by
-  induction l using List.induction_with_singleton' <;> simp [*]
-
-lemma map_disj_append_prop [FunLike F α Prop] [LogicalConnective.HomClass F α Prop] (f : F) (l₁ l₂ : List α) : f (l₁ ++ l₂).disj ↔ f (l₁.disj ⋎ l₂.disj) := by
+lemma map_disj_append_prop (f : G) (l₁ l₂ : List α) : f (l₁ ++ l₂).disj ↔ f (l₁.disj ⋎ l₂.disj) := by
   induction l₁ <;> induction l₂ <;> aesop;
 
-lemma map_disj' [LogicalConnective β] [FunLike G α β] [LogicalConnective.HomClass G α β]
-    (F : G) (l : List ι) (f : ι → α) : F (l.disj' f) = l.disj' (F ∘ f) := by
-  induction l using List.induction_with_singleton' <;> simp [*]
-
-@[simp] lemma map_disj'_prop [FunLike G α Prop] [LogicalConnective.HomClass G α Prop]
+@[simp] lemma map_disj'_prop
     {F : G} {l : List ι} {f : ι → α} : F (l.disj' f) ↔ ∃ i ∈ l, F (f i) := by
   induction l using List.induction_with_singleton' <;> simp [*]
+
+end
 
 end List
 

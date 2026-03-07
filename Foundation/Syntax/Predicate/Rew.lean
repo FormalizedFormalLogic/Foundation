@@ -572,6 +572,12 @@ lemma shift_comp_subst1 (t : SyntacticSemiterm L n₂) :
   · simp [comp_app]
   · exact IsEmpty.elim e x
 
+@[simp] lemma comp_emb_eq_emb {o : Type v₁} [e : IsEmpty o] {ω : Rew L ξ₁ 0 ξ₂ 0} :
+    ω.comp emb = (emb : Rew L o 0 ξ₂ 0) := by
+  ext x
+  · exact Fin.elim0 x
+  · exact IsEmpty.elim e x
+
 lemma rewrite_comp_free_eq_subst (t : SyntacticTerm L) :
     (rewrite (t :>ₙ Semiterm.fvar)).comp free = subst ![t] := by ext x <;> simp [comp_app]
 
@@ -999,7 +1005,7 @@ end LawfulSyntacticRewriting
 
 namespace Rewriting
 
-variable {ο ξ : Type*} [IsEmpty ο] {O F : ℕ → Type*} [LCWQ O] [LCWQ F]
+variable {ο ξ : Type*} [IsEmpty ο] {O F F₁ F₂ : ℕ → Type*} [LCWQ O] [LCWQ F] [LCWQ F₁] [LCWQ F₂]
 
 open ReflectiveRewriting TransitiveRewriting InjMapRewriting Semiterm
 
@@ -1008,6 +1014,16 @@ lemma emb_injective [Rewriting L ο O ξ F] [InjMapRewriting L ο O ξ F] : Func
 
 @[simp] lemma emb_allClosure [Rewriting L ο O ξ F] {σ : O n} :
     (emb (ξ := ξ) (∀⁰* σ)) = ∀⁰* (emb (ξ := ξ) σ) := by induction n <;> simp [*, allClosure_succ]
+
+@[simp] lemma rew_emb_eq_emb
+    [Rewriting L ξ₁ F₁ ξ₂ F₂] [Rewriting L ο O ξ₁ F₁] [Rewriting L ο O ξ₂ F₂]
+    [TransitiveRewriting L ο O ξ₁ F₁ ξ₂ F₂]
+    (φ : O 0) (ω : Rew L ξ₁ 0 ξ₂ 0) :
+    ω ▹ (emb (ξ := ξ₁) φ) = emb (ξ := ξ₂) φ := by
+  unfold emb
+  rw [←comp_app]
+  congr 2
+  simp
 
 /-- `coe_subst_eq_subst_coe` -/
 lemma emb_subst_eq_subst_emb

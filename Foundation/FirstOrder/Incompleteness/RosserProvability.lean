@@ -35,13 +35,13 @@ end
 
 variable {T}
 
-lemma rosser_quote {φ : SyntacticFormula L} : T.RosserProvable (V := V) ⌜φ⌝ ↔ T.ProvabilityComparisonLE (V := V) ⌜φ⌝ ⌜∼φ⌝ := by
+lemma rosser_quote {φ : Proposition L} : T.RosserProvable (V := V) ⌜φ⌝ ↔ T.ProvabilityComparisonLE (V := V) ⌜φ⌝ ⌜∼φ⌝ := by
   simp [Theory.RosserProvable, Semiformula.quote_def]
 
 lemma rosser_quote₀ {φ : Sentence L} : T.RosserProvable (V := V) ⌜φ⌝ ↔ T.ProvabilityComparisonLE (V := V) ⌜φ⌝ ⌜∼φ⌝ := by
   simpa [Sentence.quote_def] using rosser_quote
 
-lemma rosser_quote_def {φ : SyntacticFormula L} :
+lemma rosser_quote_def {φ : Proposition L} :
     T.RosserProvable (V := V) ⌜φ⌝ ↔ ∃ b : V, T.Proof b ⌜φ⌝ ∧ ∀ b' < b, ¬T.Proof b' ⌜∼φ⌝ := rosser_quote
 
 lemma rosser_quote_def₀ {φ : Sentence L} :

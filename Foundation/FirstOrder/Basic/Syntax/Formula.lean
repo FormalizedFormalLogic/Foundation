@@ -37,9 +37,9 @@ abbrev Sentence (L : Language) := Formula L Empty
 
 abbrev Semisentence (L : Language) (n : ℕ) := Semiformula L Empty n
 
-abbrev SyntacticSemiformula (L : Language) (n : ℕ) := Semiformula L ℕ n
+abbrev Semiproposition (L : Language) (n : ℕ) := Semiformula L ℕ n
 
-abbrev SyntacticFormula (L : Language) := SyntacticSemiformula L 0
+abbrev Proposition (L : Language) := Semiproposition L 0
 
 abbrev ArithmeticSemiformula (ξ : Type*) (n : ℕ) := Semiformula ℒₒᵣ ξ n
 
@@ -49,9 +49,9 @@ abbrev ArithmeticSemisentence (n : ℕ) := Semisentence ℒₒᵣ n
 
 abbrev ArithmeticSentence := Sentence ℒₒᵣ
 
-abbrev ArithmeticSyntacticSemiformula (n : ℕ) := SyntacticSemiformula ℒₒᵣ n
+abbrev ArithmeticSemiproposition (n : ℕ) := Semiproposition ℒₒᵣ n
 
-abbrev ArithmeticSyntacticFormula := SyntacticFormula ℒₒᵣ
+abbrev ArithmeticProposition := Proposition ℒₒᵣ
 
 namespace Semiformula
 
@@ -450,9 +450,9 @@ abbrev FVar? (φ : Semiformula L ξ n) (x : ξ) : Prop := x ∈ φ.freeVariables
 
 @[simp] lemma fvar?_allClosure (x) (φ : Semiformula L ξ n) : (∀⁰* φ).FVar? x ↔ φ.FVar? x := by simp [FVar?]
 
-def fvSup (φ : SyntacticSemiformula L n) : ℕ := (φ.freeVariables.max).recBotCoe 0 .succ
+def fvSup (φ : Semiproposition L n) : ℕ := (φ.freeVariables.max).recBotCoe 0 .succ
 
-lemma lt_fvSup_of_fvar? {φ : SyntacticSemiformula L n} : φ.FVar? m → m < φ.fvSup := by
+lemma lt_fvSup_of_fvar? {φ : Semiproposition L n} : φ.FVar? m → m < φ.fvSup := by
   unfold fvSup FVar?
   intro hm
   have : ∃ s : ℕ, φ.freeVariables.max = s := Finset.max_of_mem hm
@@ -462,10 +462,10 @@ lemma lt_fvSup_of_fvar? {φ : SyntacticSemiformula L n} : φ.FVar? m → m < φ.
     exact WithBot.coe_le_coe.mp this
   simpa [hs, WithBot.recBotCoe] using Nat.lt_add_one_of_le this
 
-lemma not_fvar?_of_lt_fvSup (φ : SyntacticSemiformula L n) (h : φ.fvSup ≤ m) : ¬φ.FVar? m :=
+lemma not_fvar?_of_lt_fvSup (φ : Semiproposition L n) (h : φ.fvSup ≤ m) : ¬φ.FVar? m :=
   fun hm ↦ (lt_self_iff_false _).mp (lt_of_le_of_lt h <| lt_fvSup_of_fvar? hm)
 
-@[simp] lemma not_fvar?_fvSup (φ : SyntacticSemiformula L n) : ¬φ.FVar? φ.fvSup :=
+@[simp] lemma not_fvar?_fvSup (φ : Semiproposition L n) : ¬φ.FVar? φ.fvSup :=
   not_fvar?_of_lt_fvSup φ (by simp)
 
 end FreeVariables

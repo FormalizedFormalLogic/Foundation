@@ -12,7 +12,7 @@ variable {L : Language} [L.Encodable] [L.LORDefinable]
 /-- TODO: define predicate `VariableFree` and make `mem_iff` `∀ φ : Sentence, ℕ ⊧/![⌜φ⌝] ch.val ↔ φ ∈ T` -/
 class _root_.LO.FirstOrder.Theory.Δ₁ (T : Theory L) where
   ch : 𝚫₁.Semisentence 1
-  mem_iff : ∀ φ : SyntacticFormula L, ℕ ⊧/![⌜φ⌝] ch.val ↔ ∃ σ ∈ T, φ = σ
+  mem_iff : ∀ φ : Proposition L, ℕ ⊧/![⌜φ⌝] ch.val ↔ ∃ σ ∈ T, φ = σ
   isDelta1 : ch.ProvablyProperOn 𝗜𝚺₁
 
 abbrev _root_.LO.FirstOrder.Theory.Δ₁ch (T : Theory L) [T.Δ₁] : 𝚫₁.Semisentence 1 := Theory.Δ₁.ch T
@@ -35,7 +35,7 @@ instance Δ₁Class.definable : 𝚫₁-Predicate[V] (· ∈ T.Δ₁Class) := Δ
 
 @[simp] lemma Δ₁Class.proper : T.Δ₁ch.ProperOn V := (Theory.Δ₁.isDelta1 (T := T)).properOn V
 
-@[simp] lemma Δ₁Class.mem_iff_s {φ : SyntacticFormula L} : (⌜φ⌝ : V) ∈ T.Δ₁Class ↔ ∃ σ ∈ T, φ = σ :=
+@[simp] lemma Δ₁Class.mem_iff_s {φ : Proposition L} : (⌜φ⌝ : V) ∈ T.Δ₁Class ↔ ∃ σ ∈ T, φ = σ :=
   have : V ⊧/![⌜φ⌝] T.Δ₁ch.val ↔ ℕ ⊧/![⌜φ⌝] T.Δ₁ch.val := by
     simpa [Semiformula.coe_quote_eq_quote, Matrix.constant_eq_singleton]
       using FirstOrder.Arithmetic.models_iff_of_Delta1 (V := V) (σ := T.Δ₁ch) (by simp) (by simp) (e := ![⌜φ⌝])
@@ -46,7 +46,7 @@ instance Δ₁Class.definable : 𝚫₁-Predicate[V] (· ∈ T.Δ₁Class) := Δ
 
 @[simp] lemma Δ₁Class.mem_iff' {φ : Sentence L} : V ⊧/![⌜φ⌝] T.Δ₁ch.val ↔ φ ∈ T := Δ₁Class.mem_iff
 
-@[simp] lemma Δ₁Class.mem_iff'_s {φ : SyntacticFormula L} : V ⊧/![⌜φ⌝] T.Δ₁ch.val ↔ ∃ σ ∈ T, φ = σ := Δ₁Class.mem_iff_s
+@[simp] lemma Δ₁Class.mem_iff'_s {φ : Proposition L} : V ⊧/![⌜φ⌝] T.Δ₁ch.val ↔ ∃ σ ∈ T, φ = σ := Δ₁Class.mem_iff_s
 
 @[simp] lemma Δ₁Class.mem_iff'' {φ : Sentence L} : ((⌜φ⌝ : Bootstrapping.Formula V L).val : V) ∈ T.Δ₁Class ↔ φ ∈ T :=
   Δ₁Class.mem_iff

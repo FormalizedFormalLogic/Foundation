@@ -158,7 +158,7 @@ def proof_to_tDerivation {σ : Formula V L} : T ⊢! σ → T ⊢!ᵈᵉʳ inser
 lemma tprovable_iff_provable {T : Theory L} [T.Δ₁] {σ : Formula V L} :
     T.internalize V ⊢ σ ↔ T.Provable σ.val := TProvable.iff_provable
 
-lemma tprovable_tquote_iff_provable_quote {T : Theory L} [T.Δ₁] {φ : SyntacticFormula L} :
+lemma tprovable_tquote_iff_provable_quote {T : Theory L} [T.Δ₁] {φ : Proposition L} :
     T.internalize V ⊢ ⌜φ⌝ ↔ T.Provable (⌜φ⌝ : V) := TProvable.iff_provable
 
 lemma tprovable_tquote_iff_provable_quote_sentence {T : Theory L} [T.Δ₁] {σ : Sentence L} :

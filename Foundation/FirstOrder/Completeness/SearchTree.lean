@@ -18,16 +18,16 @@ inductive Redux (T : Theory L) : Code L → Sequent L → Sequent L → Prop
   | axLRefl {Γ : Sequent L} {k} (r : L.Rel k) (v) :
     Semiformula.rel r v ∉ Γ ∨ Semiformula.nrel r v ∉ Γ → Redux T (Code.axL r v) Γ Γ
   | verumRefl {Γ : Sequent L} : ⊤ ∉ Γ → Redux T Code.verum Γ Γ
-  | and₁ {Γ : Sequent L} {φ ψ : SyntacticFormula L} : φ ⋏ ψ ∈ Γ → Redux T (Code.and φ ψ) (φ :: Γ) Γ
-  | and₂ {Γ : Sequent L} {φ ψ : SyntacticFormula L} : φ ⋏ ψ ∈ Γ → Redux T (Code.and φ ψ) (ψ :: Γ) Γ
-  | andRefl {Γ : Sequent L} {φ ψ : SyntacticFormula L} : φ ⋏ ψ ∉ Γ → Redux T (Code.and φ ψ) Γ Γ
-  | or {Γ : Sequent L} {φ ψ : SyntacticFormula L} : φ ⋎ ψ ∈ Γ → Redux T (Code.or φ ψ) (φ :: ψ :: Γ) Γ
-  | orRefl {Γ : Sequent L} {φ ψ : SyntacticFormula L} : φ ⋎ ψ ∉ Γ → Redux T (Code.or φ ψ) Γ Γ
-  | all {Γ : Sequent L} {φ : SyntacticSemiformula L 1} : ∀⁰ φ ∈ Γ → Redux T (Code.all φ) (φ/[&(newVar Γ)] :: Γ) Γ
-  | allRefl {Γ : Sequent L} {φ : SyntacticSemiformula L 1} : ∀⁰ φ ∉ Γ → Redux T (Code.all φ) Γ Γ
-  | exs {Γ : Sequent L} {φ : SyntacticSemiformula L 1} {t : SyntacticTerm L} :
+  | and₁ {Γ : Sequent L} {φ ψ : Proposition L} : φ ⋏ ψ ∈ Γ → Redux T (Code.and φ ψ) (φ :: Γ) Γ
+  | and₂ {Γ : Sequent L} {φ ψ : Proposition L} : φ ⋏ ψ ∈ Γ → Redux T (Code.and φ ψ) (ψ :: Γ) Γ
+  | andRefl {Γ : Sequent L} {φ ψ : Proposition L} : φ ⋏ ψ ∉ Γ → Redux T (Code.and φ ψ) Γ Γ
+  | or {Γ : Sequent L} {φ ψ : Proposition L} : φ ⋎ ψ ∈ Γ → Redux T (Code.or φ ψ) (φ :: ψ :: Γ) Γ
+  | orRefl {Γ : Sequent L} {φ ψ : Proposition L} : φ ⋎ ψ ∉ Γ → Redux T (Code.or φ ψ) Γ Γ
+  | all {Γ : Sequent L} {φ : Semiproposition L 1} : ∀⁰ φ ∈ Γ → Redux T (Code.all φ) (φ/[&(newVar Γ)] :: Γ) Γ
+  | allRefl {Γ : Sequent L} {φ : Semiproposition L 1} : ∀⁰ φ ∉ Γ → Redux T (Code.all φ) Γ Γ
+  | exs {Γ : Sequent L} {φ : Semiproposition L 1} {t : SyntacticTerm L} :
     ∃⁰ φ ∈ Γ → Redux T (Code.exs φ t) (φ/[t] :: Γ) Γ
-  | exsRefl {Γ : Sequent L} {φ : SyntacticSemiformula L 1} {t : SyntacticTerm L} :
+  | exsRefl {Γ : Sequent L} {φ : Semiproposition L 1} {t : SyntacticTerm L} :
     ∃⁰ φ ∉ Γ → Redux T (Code.exs φ t) Γ Γ
   | id {Γ : Sequent L} {σ : Sentence L} (hσ : σ ∈ T) : Redux T (Code.id σ) ((∼σ) :: Γ) Γ
   | idRefl {Γ : Sequent L} {σ : Sentence L} (hσ : σ ∉ T) : Redux T (Code.id σ) Γ Γ
@@ -148,7 +148,7 @@ noncomputable def chainU (T : Theory L) (Γ : Sequent L) : ℕ → SearchTree T 
 
 noncomputable def chain (T : Theory L) (Γ : Sequent L) (s : ℕ) : Sequent L := (chainU T Γ s).seq
 
-def chainSet (T : Theory L) (Γ : Sequent L) : Set (SyntacticFormula L) := ⋃ s, {x | x ∈ chain T Γ s}
+def chainSet (T : Theory L) (Γ : Sequent L) : Set (Proposition L) := ⋃ s, {x | x ∈ chain T Γ s}
 
 local notation "⛓️[" s "]" => chain T Γ s
 
@@ -216,7 +216,7 @@ lemma chainSet_axL (nwf : ¬WellFounded (SearchTree.Lt T Γ)) {k} (r : L.Rel k) 
     rcases this; assumption
   contradiction
 
-lemma chainSet_and (nwf : ¬WellFounded (SearchTree.Lt T Γ)) {φ ψ : SyntacticFormula L} (h : φ ⋏ ψ ∈ ⛓️) :
+lemma chainSet_and (nwf : ¬WellFounded (SearchTree.Lt T Γ)) {φ ψ : Proposition L} (h : φ ⋏ ψ ∈ ⛓️) :
     φ ∈ ⛓️ ∨ ψ ∈ ⛓️ := by
   have : ∃ s, φ ⋏ ψ ∈ ⛓️[s] := by simpa [chainSet] using h
   rcases this with ⟨s, hs⟩
@@ -231,7 +231,7 @@ lemma chainSet_and (nwf : ¬WellFounded (SearchTree.Lt T Γ)) {φ ψ : Syntactic
     have : φ ⋏ ψ ∈ ⛓️[(encode $ Code.and φ ψ).pair s] := chain_monotone nwf (Nat.right_le_pair _ _) hs
     contradiction
 
-lemma chainSet_or (nwf : ¬WellFounded (SearchTree.Lt T Γ)) {φ ψ : SyntacticFormula L} (h : φ ⋎ ψ ∈ ⛓️) :
+lemma chainSet_or (nwf : ¬WellFounded (SearchTree.Lt T Γ)) {φ ψ : Proposition L} (h : φ ⋎ ψ ∈ ⛓️) :
     φ ∈ ⛓️ ∧ ψ ∈ ⛓️ := by
   have : ∃ s, φ ⋎ ψ ∈ ⛓️[s] := by simpa [chainSet] using h
   rcases this with ⟨s, hs⟩
@@ -243,7 +243,7 @@ lemma chainSet_or (nwf : ¬WellFounded (SearchTree.Lt T Γ)) {φ ψ : SyntacticF
   · have : φ ⋎ ψ ∈ ⛓️[(encode $ Code.or φ ψ).pair s] := chain_monotone nwf (Nat.right_le_pair _ _) hs
     contradiction
 
-lemma chainSet_all (nwf : ¬WellFounded (SearchTree.Lt T Γ)) {φ : SyntacticSemiformula L 1} (h : ∀⁰ φ ∈ ⛓️) :
+lemma chainSet_all (nwf : ¬WellFounded (SearchTree.Lt T Γ)) {φ : Semiproposition L 1} (h : ∀⁰ φ ∈ ⛓️) :
     ∃ t, φ/[t] ∈ ⛓️ := by
   have : ∃ s, ∀⁰ φ ∈ ⛓️[s] := by simpa [chainSet] using h
   rcases this with ⟨s, hs⟩
@@ -254,7 +254,7 @@ lemma chainSet_all (nwf : ¬WellFounded (SearchTree.Lt T Γ)) {φ : SyntacticSem
   · have : ∀⁰ φ ∈ ⛓️[(encode $ Code.all φ).pair s] := chain_monotone nwf (Nat.right_le_pair _ _) hs
     contradiction
 
-lemma chainSet_ex (nwf : ¬WellFounded (SearchTree.Lt T Γ)) {φ : SyntacticSemiformula L 1} (h : ∃⁰ φ ∈ ⛓️) :
+lemma chainSet_ex (nwf : ¬WellFounded (SearchTree.Lt T Γ)) {φ : Semiproposition L 1} (h : ∃⁰ φ ∈ ⛓️) :
     ∀ t, φ/[t] ∈ ⛓️ := fun t => by
   have : ∃ s, ∃⁰ φ ∈ ⛓️[s] := by simpa [chainSet] using h
   rcases this with ⟨s, hs⟩
@@ -292,7 +292,7 @@ instance Model.structure (T : Theory L) (Γ : Sequent L) : Structure L (Model T 
     (Model.structure T Γ).rel r v ↔ nrel r v ∈ ⛓️ := of_eq rfl
 
 lemma semanticMainLemma_val (nwf : ¬WellFounded (SearchTree.Lt T Γ)) :
-    (φ : SyntacticFormula L) → φ ∈ ⛓️ → ¬Evalf (Model.structure T Γ) Semiterm.fvar φ
+    (φ : Proposition L) → φ ∈ ⛓️ → ¬Evalf (Model.structure T Γ) Semiterm.fvar φ
   |        ⊤, h => by by_contra; exact chainSet_verum nwf h
   |        ⊥, _ => by simp
   |  rel r v, h => by rcases chainSet_axL nwf r v with (hr | hr); { contradiction }; { simpa [eval_rel] using hr }
@@ -331,7 +331,7 @@ lemma Model.models (nwf : ¬WellFounded (SearchTree.Lt T Γ)) :
     Model T Γ ⊧ₘ* T :=
   ⟨fun φ hφ ↦ by simpa [Semiformula.eval_univCl] using semanticMainLemma_val nwf _ (chainSet_id nwf hφ)⟩
 
-lemma semanticMainLemmaTop (nwf : ¬WellFounded (SearchTree.Lt T Γ)) {φ : SyntacticFormula L} (h : φ ∈ Γ) :
+lemma semanticMainLemmaTop (nwf : ¬WellFounded (SearchTree.Lt T Γ)) {φ : Proposition L} (h : φ ∈ Γ) :
     ¬Evalf (Model.structure T Γ) Semiterm.fvar φ :=
   semanticMainLemma_val nwf φ (Set.mem_iUnion.mpr ⟨0, by simp [chain, chainU, h]⟩)
 
