@@ -242,7 +242,16 @@ abbrev Proof (φ : Proposition L) := ⊢ᴷ [φ]
 instance : Entailment (Proof.Symbol L) (Proposition L) where
   Prf _ := Proof
 
-lemma Proof.def (φ : Proposition L) : (𝐋𝐊¹ ⊢! φ) = (⊢ᴷ [φ]) := rfl
+namespace Proof
+
+lemma def_eq (φ : Proposition L) : (𝐋𝐊¹ ⊢! φ) = (⊢ᴷ [φ]) := rfl
+
+instance : OneSidedLK.EmptyEntailment (Derivation (L := L)) (𝐋𝐊¹ : Proof.Symbol L) where
+  equiv := Equiv.refl _
+
+instance classical : Entailment.Cl (𝐋𝐊¹ : Proof.Symbol L) := inferInstance
+
+end Proof
 
 structure Schema.Proof (𝓢 : Schema L) (φ : Proposition L) where
   axioms : List (Proposition L)
@@ -282,7 +291,7 @@ instance (𝓢 𝓤 : Schema L) : 𝓤 ⪯ 𝓢 ⊔ 𝓤 := weakerThan_of_le (by
 
 lemma inconsistent_iff :
     Entailment.Inconsistent 𝓢 ↔ ∃ Γ : Sequent L, (∀ ψ ∈ Γ, ψ ∈ 𝓢) ∧ Nonempty (⊢ᴷ ∼Γ) :=
-  OneSidedLK.inconsistent_iff
+  OneSidedLK.Entailment.inconsistent_iff
 
 def rewrite [𝓢.IsClosed] (b : 𝓢 ⊢! φ) (f : ℕ → SyntacticTerm L) :
     𝓢 ⊢! Rew.rewrite f ▹ φ where
@@ -292,6 +301,10 @@ def rewrite [𝓢.IsClosed] (b : 𝓢 ⊢! φ) (f : ℕ → SyntacticTerm L) :
     intro ψ hψ
     exact Schema.IsClosed.closed (Rew.rewrite f) _ (b.axioms_mem ψ hψ)
   derivation := b.derivation.rewrite f |>.cast
+
+@[simp] lemma empty_provable_iff_eprovable :
+    (⊥ : Schema L) ⊢ φ ↔ 𝐋𝐊¹ ⊢ φ :=
+  OneSidedLK.Entailment.empty_provable_iff_eprovable 𝐋𝐊¹
 
 end Schema.Proof
 
@@ -303,7 +316,7 @@ variable {Γ Δ : Sequent L}
 
 def eCut (d₁ : ⊢ᴷ φ :: Γ) (d₂ : ⊢ᴷ ψ :: Δ) (e : ∼φ = ψ := by simp) : ⊢ᴷ Γ ++ Δ := cut d₁ (d₂.cast (by simp [e]))
 
-def disj₂ {Γ Δ : Sequent L} : ⊢ᴷ (Γ ++ Δ) → ⊢ᴷ ⋁Γ :: Δ := fun d ↦
+def disj₂ {Γ Δ : Sequent L} : ⊢ᴷ Γ ++ Δ → ⊢ᴷ ⋁Γ :: Δ := fun d ↦
   match Γ with
   |               [] => d.weakening
   |              [φ] => d
@@ -344,11 +357,9 @@ end Derivation
 
 namespace Schema.Proof
 
-variable {𝓢 : Schema L}
+open Entailment Derivation
 
-open Derivation
-
-lemma iff_context : 𝓢 ⊢ φ ↔ 𝓢 *⊢[𝐋𝐊¹] φ := by
+lemma iff_context {𝓢 : Schema L} : 𝓢 ⊢ φ ↔ 𝓢 *⊢[𝐋𝐊¹] φ := by
   constructor
   · rintro ⟨d⟩
     have : 𝐋𝐊¹ ⊢! ⋀d.axioms ➝ φ :=
@@ -362,10 +373,21 @@ lemma iff_context : 𝓢 ⊢ φ ↔ 𝓢 *⊢[𝐋𝐊¹] φ := by
       this.tensor (identity φ).rotate |>.weakening
     refine ⟨⟨Γ, h, (d.eCut this).cast⟩⟩
 
+open Classical in
+
+noncomputable instance : Entailment.Deduction (Schema L) where
+  ofInsert {φ ψ 𝓢 b} :=
+    have : insert φ ↑𝓢 *⊢[𝐋𝐊¹] ψ := iff_context.mp ⟨b⟩
+    have : ↑𝓢 *⊢[𝐋𝐊¹] φ ➝ ψ := Context.deduct! this
+    (iff_context.mpr this).get
+  inv {φ ψ 𝓢 b} :=
+    have : ↑(adjoin φ 𝓢) *⊢[𝐋𝐊¹] ψ := Context.deductInv! (iff_context.mp ⟨b⟩)
+    (iff_context.mpr this).get
+
 end Schema.Proof
 
 /-!
-  ### Theory of schemata
+  ### Theory
 -/
 
 def Schema.theory (𝓢 : Schema L) : Theory L := {σ | 𝓢 ⊢ ↑σ}
