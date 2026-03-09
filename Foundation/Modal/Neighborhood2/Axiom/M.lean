@@ -33,6 +33,7 @@ lemma instIsMonotonic_of_box_subset_of_subset (h : ∀ X Y : N.Neighborhood, X �
   . apply h _ X (by tauto_set) hx;
   . apply h _ Y (by tauto_set) hx;
 
+@[simp, grind .]
 lemma validates_axiomM [N.IsMonotonic] : N ⊧ Axioms.M φ ψ := by grind [monotonic]
 
 end
@@ -42,7 +43,7 @@ lemma isMonotonic_of_validates_axiomM
   (h : N ⊧ Axioms.M (.atom a) (.atom b)) : N.IsMonotonic := by
   constructor;
   rintro X Y x hx;
-  have := @h (λ p => if p = a then X else if p = b then Y else ∅) x;
+  have := @h (λ p => if p = a then X else Y) x;
   grind;
 
 end NeighborhoodSystem

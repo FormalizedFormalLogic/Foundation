@@ -10,8 +10,8 @@ variable {ν : Type*} [Nonempty ν] {α : Type*}
 
 namespace NeighborhoodSystem
 
-class NotContainsEmpty (M : NeighborhoodSystem ν α) : Prop where
-  not_contains_empty : M.box ∅ = ∅
+class NotContainsEmpty (N : NeighborhoodSystem ν α) : Prop where
+  not_contains_empty : N.box ∅ = ∅
 
 export NotContainsEmpty (not_contains_empty)
 attribute [simp, grind .] not_contains_empty

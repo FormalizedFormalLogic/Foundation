@@ -10,8 +10,8 @@ variable {ν : Type*} [Nonempty ν] {α : Type*}
 
 namespace NeighborhoodSystem
 
-class ContainsUnit (M : NeighborhoodSystem ν α) : Prop where
-  contains_unit : M.box Set.univ = Set.univ
+class ContainsUnit (N : NeighborhoodSystem ν α) : Prop where
+  contains_unit : N.box Set.univ = Set.univ
 
 export ContainsUnit (contains_unit)
 attribute [simp, grind .] contains_unit
