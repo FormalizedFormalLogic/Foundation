@@ -33,7 +33,7 @@ abbrev relItr (n : ℕ) : Rel M.world M.world := M.frame.Iterate n
 notation x:45 " ≺^[" n:0 "] " y:46 => relItr n x y
 
 -- instance : CoeSort (KripkeModel κ α) (Type*) := ⟨λ M => M.world⟩
-instance : CoeFun (KripkeModel κ α) (λ _ => α → κ → Prop) := ⟨fun M => M.val⟩
+instance : CoeFun (KripkeModel κ α) (λ M => α → M.world → Prop) := ⟨fun M => M.val⟩
 
 section Forces
 

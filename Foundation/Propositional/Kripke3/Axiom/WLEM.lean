@@ -1,6 +1,7 @@
 module
 
 public import Foundation.Propositional.Kripke3.Basic
+public import Foundation.Propositional.Kripke3.Logic.Int.Completeness
 public import Foundation.Vorspiel.Rel.Convergent
 
 @[expose] public section
@@ -56,5 +57,59 @@ lemma isPiecewiseStronglyConvergent_of_validates_axiomWLEM [Std.Refl K]
 
 end KripkeModel
 
+section
+
+
+variable {S} [Entailment S (Formula ℕ)]
+variable {𝓢 : S} [Entailment.Consistent 𝓢] [Entailment.Int 𝓢]
+
+open Formula.Kripke
+open LO.Entailment
+     LO.Entailment.FiniteContext
+open canonicalKripkeModel
+open SaturatedConsistentTableau
+open Classical
+
+instance [Entailment.HasAxiomWLEM 𝓢] : IsPiecewiseStronglyConvergent (canonicalKripkeModel 𝓢).rel := by
+  constructor;
+  rintro x y z Rxy Rxz;
+  obtain ⟨w, hw⟩ := lindenbaum (𝓢 := 𝓢) $ by
+    show Tableau.Consistent 𝓢 (y.1.1 ∪ z.1.1, ∅);
+    rintro Γ Δ hΓ hΔ h;
+    replace hΓ : (SetLike.coe Γ) ⊆ (↑y.1.1 ∪ ↑z.1.1) := by grind;
+    replace hΔ : Δ = ∅ := by simpa using hΔ;
+    subst hΔ;
+
+    let Θx := { φ ∈ Γ | (φ ∈ y.1.1 ∧ φ ∈ x.1.1) ∨ (φ ∈ z.1.1 ∧ φ ∈ x.1.1) };
+    let Θy := { φ ∈ Γ | φ ∈ y.1.1 ∧ φ ∉ x.1.1 };
+    let Θz := { φ ∈ Γ | φ ∈ z.1.1 ∧ φ ∉ x.1.1 };
+
+    simp only [Finset.disj_empty] at h;
+    replace : [Θx.conj] ⊢[𝓢] ∼∼Θz.conj ➝ ∼Θy.conj := contra! $ FiniteContext.deductInv'! $ by
+      apply FConj_DT.mpr;
+      apply FConj_DT'.mpr;
+      apply FConj_DT'.mpr;
+      apply mdp! $ Context.of! h;
+      apply FConj_DT.mp;
+      apply CFConj_FConj!_of_subset;
+      intro φ hφ;
+      rcases hΓ hφ with h | h <;>
+      . dsimp [Θx, Θy, Θz];
+        grind;
+
+    have h_Θx_x   :   Θx.conj ∈ x.1.1 := iff_mem₁_fconj.mpr $ by intro; grind only [Finset.mem_coe, Finset.mem_filter];
+    have h_Θz_z   :   Θz.conj ∈ z.1.1 := iff_mem₁_fconj.mpr $ by intro; grind only [Finset.mem_coe, Finset.mem_filter];
+    have nh_nΘz_z :  ∼Θz.conj ∉ z.1.1 := not_mem₁_neg_of_mem₁ h_Θz_z;
+    have nh_nΘz_x :  ∼Θz.conj ∉ x.1.1 := Set.notMem_subset Rxz nh_nΘz_z;
+    have h_nnΘz_x : ∼∼Θz.conj ∈ x.1.1 := or_iff_not_imp_left.mp (iff_mem₁_or.mp $ mem₁_of_provable $ wlem!) nh_nΘz_x;
+    have h_nΘy_y  :  ∼Θy.conj ∈ y.1.1 := Rxy $ mdp₁_mem h_nnΘz_x $ mdp_mem₁_provable this h_Θx_x;
+    have nh_nΘy_y :  ∼Θy.conj ∉ y.1.1 := not_mem₁_neg_of_mem₁ $ iff_mem₁_fconj.mpr $ by intro; grind only [Finset.mem_coe, Finset.mem_filter];
+    contradiction;
+  use w;
+  simpa using hw;
+
+end
+
 end LO.Propositional
+
 end
