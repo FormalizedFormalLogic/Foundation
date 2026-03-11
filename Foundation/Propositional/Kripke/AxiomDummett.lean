@@ -102,5 +102,7 @@ end canonicality
 
 end Kripke
 
+
+
 end LO.Propositional
 end

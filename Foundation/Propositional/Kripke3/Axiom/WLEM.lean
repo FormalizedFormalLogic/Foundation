@@ -57,8 +57,8 @@ lemma isPiecewiseStronglyConvergent_of_validates_axiomWLEM [Std.Refl K]
 
 end KripkeModel
 
-section
 
+section
 
 variable {S} [Entailment S (Formula ℕ)]
 variable {𝓢 : S} [Entailment.Consistent 𝓢] [Entailment.Int 𝓢]

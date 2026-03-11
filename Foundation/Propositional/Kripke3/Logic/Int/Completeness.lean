@@ -31,7 +31,20 @@ instance : KripkeModel.Intuitionistic (canonicalKripkeModel 𝓢) where
 
 namespace canonicalKripkeModel
 
-variable {t t₁ t₂ : (canonicalKripkeModel 𝓢).world} {φ ψ : Formula α}
+variable {x y t t₁ t₂ : (canonicalKripkeModel 𝓢).world} {φ ψ : Formula α}
+
+lemma def_rel₁ : x ≺ y ↔ x.1.1 ⊆ y.1.1 := by simp [canonicalKripkeModel];
+
+lemma def_rel₂ : x ≺ y ↔ y.1.2 ⊆ x.1.2 := by
+  constructor;
+  . intro h φ;
+    contrapose!;
+    simp only [iff_not_mem₂_mem₁]
+    apply h;
+  . intro h φ;
+    contrapose!;
+    simp only [iff_not_mem₁_mem₂]
+    apply h;
 
 lemma truthlemma : t ⊩ φ ↔ φ ∈ t.1.1 := by
   induction φ generalizing t with

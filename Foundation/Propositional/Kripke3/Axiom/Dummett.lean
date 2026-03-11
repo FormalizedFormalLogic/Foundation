@@ -2,6 +2,7 @@ module
 
 public import Foundation.Propositional.Kripke3.Basic
 public import Foundation.Vorspiel.Rel.Connected
+public import Foundation.Propositional.Kripke3.Logic.Int.Completeness
 
 @[expose] public section
 
@@ -64,6 +65,32 @@ lemma isPiecewiseStronglyConvergent_of_validates_axiomDummett
     . apply Std.Refl.refl;
 
 end KripkeModel
+
+
+
+section
+
+variable {S} [Entailment S (Formula ℕ)]
+variable {𝓢 : S} [Entailment.Consistent 𝓢] [Entailment.Int 𝓢]
+
+open Formula.Kripke
+open LO.Entailment
+     LO.Entailment.FiniteContext
+open canonicalKripkeModel
+open SaturatedConsistentTableau
+open Classical
+
+instance [Entailment.HasAxiomDummett 𝓢] : IsPiecewiseStronglyConnected (canonicalKripkeModel 𝓢).rel := by
+  constructor;
+  rintro x y z Rxy Rxz;
+  by_contra!;
+  obtain ⟨φ, hφy, hφz⟩ := Set.not_subset.mp this.1;
+  obtain ⟨ψ, hψz, hψy⟩ := Set.not_subset.mp this.2;
+  rcases (show φ ➝ ψ ∈ x.1.1 ∨ ψ ➝ φ ∈ x.1.1 by exact iff_mem₁_or.mp $ mem₁_of_provable dummett!) with (hφψx | hψφx);
+  . exact hψy $ mdp₁_mem hφy (Rxy hφψx);
+  . exact hφz $ mdp₁_mem hψz (Rxz hψφx);
+
+end
 
 end LO.Propositional
 end
