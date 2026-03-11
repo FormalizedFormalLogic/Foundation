@@ -7,22 +7,24 @@ public import Foundation.Propositional.Kripke3.Logic.Int.Completeness
 
 @[expose] public section
 
-class SatisfiesKreiselPutnamCondition (R : Rel α α) where
-  kreisel_putnam :
-    ∀ x y z : α,
-    (R x y ∧ R x z ∧ ¬R y z ∧ ¬R z y) →
-    (∃ u, R x u ∧ R u y ∧ R u z ∧ (∀ v, R u v → ∃ w, R v w ∧ (R y w ∨ R z w)))
-
 namespace LO.Propositional
 
 variable {κ α : Type*} [Nonempty κ]
 
 namespace KripkeModel
 
+class KreiselPutnam (M : KripkeModel κ α) extends M.Intuitionistic where
+  kreisel_putnam :
+    ∀ x y z : M.world,
+    (x ≺ y ∧ x ≺ z ∧ ¬y ≺ z ∧ ¬z ≺ y) →
+    (∃ u, x ≺ u ∧ u ≺ y ∧ u ≺ z ∧ (∀ v, u ≺ v → ∃ w, v ≺ w ∧ (y ≺ w ∨ z ≺ w)))
+
+export KreiselPutnam (kreisel_putnam)
+
 variable {M : KripkeModel κ α} [M.Intuitionistic] {φ ψ χ : Formula α}
 
 lemma validates_axiomKreiselPutnam_of_satisfiesKreiselPutnamCondition
-  [SatisfiesKreiselPutnamCondition M.rel] : M ⊧ (Axioms.KreiselPutnam φ ψ χ) := by
+  [M.KreiselPutnam] : M ⊧ (Axioms.KreiselPutnam φ ψ χ) := by
   intro x y Rxy h₁;
   apply forces_or.mpr;
   by_contra! hC;
@@ -36,7 +38,7 @@ lemma validates_axiomKreiselPutnam_of_satisfiesKreiselPutnamCondition
   push_neg at h₃;
   obtain ⟨z₂, Ryz₂, ⟨hz₂φ, hz₂ψ⟩⟩ := h₃;
 
-  obtain ⟨u, Ryu, ⟨Ruz₁, Ruz₂, h⟩⟩ := SatisfiesKreiselPutnamCondition.kreisel_putnam y z₁ z₂ ⟨
+  obtain ⟨u, Ryu, ⟨Ruz₁, Ruz₂, h⟩⟩ := M.kreisel_putnam y z₁ z₂ ⟨
     Ryz₁, Ryz₂,
     by
       rcases forces_or.mp $ h₁ _ Ryz₁ hz₁φ with (h | h);
@@ -77,7 +79,7 @@ open canonicalKripkeModel
 open SaturatedConsistentTableau
 open Classical
 
-instance [Entailment.HasAxiomKreiselPutnam 𝓢] : SatisfiesKreiselPutnamCondition (canonicalKripkeModel 𝓢).rel := by
+instance [Entailment.HasAxiomKreiselPutnam 𝓢] : (canonicalKripkeModel 𝓢).KreiselPutnam := by
   constructor;
   rintro x y z ⟨Rxy, Rxz, nRyz, nRzy⟩;
   let ΓNyz := { φ | ∼φ ∈ (y.1.1 ∩ z.1.1)}.image (∼·);
