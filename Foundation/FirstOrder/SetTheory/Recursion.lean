@@ -9,6 +9,28 @@ variable {V : Type*} [SetStructure V] [Nonempty V] [V ⊧ₘ* 𝗭]
 namespace IsOrdinal
 
 variable {α β γ : V}
+
+/-! ### Attempt functions -/
+
+/--
+Domain of a union of functions: if each member has domain included in `α`, and every point of `α`
+appears in some member domain, then the union has domain exactly `α`.
+-/
+lemma domain_sUnion_eq_of_domain_subset_and_cover
+    {α C : V} (hsubset : ∀ f ∈ C, IsFunction f ∧ domain f ⊆ α)
+    (hcover : ∀ x ∈ α, ∃ f ∈ C, x ∈ domain f) :
+    domain (⋃ˢ C) = α := by
+  apply subset_antisymm
+  · intro x hxU
+    rcases mem_domain_iff.mp hxU with ⟨y, hxyU⟩
+    rcases mem_sUnion_iff.mp hxyU with ⟨f, hfC, hxyf⟩
+    exact (hsubset f hfC).2 _ (mem_domain_of_kpair_mem hxyf)
+  · intro x hxα
+    rcases hcover x hxα with ⟨f, hfC, hxd⟩
+    rcases mem_domain_iff.mp hxd with ⟨y, hxyf⟩
+    refine mem_domain_iff.mpr ⟨y, ?_⟩
+    exact mem_sUnion_iff.mpr ⟨f, hfC, hxyf⟩
+
 /--
 `f` is an attempt of length `α` for the relation `φ`, meaning that the domain of `f` is `α`, and for all `β` < `α`, it holds that `f(β) = y` iff `φ (f ↾ β) y`.
 The "attempt" terminology may be due to Paul Taylor.
@@ -146,27 +168,27 @@ instance existsAttemptOfFunction_definable
       ![1, 0])
 
 /--
-Choose a recursion-function graph at input `β` if one exists.
+Choose an attempt's output for input `β` if one exists.
 Otherwise, return an arbitrary value.
 -/
-noncomputable def recursionFunctionOrDefault
+noncomputable def attemptOrDefault
     (F : V → V) (β : V) : V := by
   classical
   by_cases hβ : IsOrdinal β ∧ ExistsAttemptOfFunction F β
   · exact Classical.choose hβ.2
   · exact Classical.arbitrary V
 
-lemma recursionFunctionOrDefault_spec_on
+lemma attemptOrDefault_spec_on
     (F : V → V) (β : Ordinal V)
     (hex : ExistsAttemptOfFunctionOn F β) :
-    IsAttemptGraphOn F β (recursionFunctionOrDefault F β.val) := by
+    IsAttemptGraphOn F β (attemptOrDefault F β.val) := by
   have hcond : IsOrdinal β.val ∧ ExistsAttemptOfFunction F β.val := ⟨β.ordinal, hex⟩
-  simp only [recursionFunctionOrDefault, hcond]
+  simp only [attemptOrDefault, hcond]
   exact Classical.choose_spec hex
 
-lemma recursionFunctionOrDefault_eq_iff
+lemma attemptOrDefault_eq_iff
     (F : V → V) (β y : V) :
-    y = recursionFunctionOrDefault F β ↔
+    y = attemptOrDefault F β ↔
       (IsOrdinal β ∧ ExistsAttemptOfFunction F β ∧
         IsAttemptGraph F β y) ∨
       (¬(IsOrdinal β ∧ ExistsAttemptOfFunction F β) ∧
@@ -180,20 +202,20 @@ lemma recursionFunctionOrDefault_eq_iff
         simpa [ExistsAttemptOfFunctionOn, βo] using hcond.2
       left
       refine ⟨hcond.1, hcond.2, ?_⟩
-      simpa [βo] using recursionFunctionOrDefault_spec_on (F := F) βo hexo
-    · right; exact ⟨hcond, by simp [recursionFunctionOrDefault, hcond]⟩
+      simpa [βo] using attemptOrDefault_spec_on (F := F) βo hexo
+    · right; exact ⟨hcond, by simp [attemptOrDefault, hcond]⟩
   · rintro (⟨hord, hex, hrecf⟩ | ⟨hnex, rfl⟩)
     · let βo : Ordinal V := IsOrdinal.toOrdinal β
       have hcond : IsOrdinal β ∧ ExistsAttemptOfFunction F β := ⟨hord, hex⟩
-      simp only [recursionFunctionOrDefault, hcond]
+      simp only [attemptOrDefault, hcond]
       have hspec := Classical.choose_spec hex
       exact isAttemptGraph_unique_on (F := F) (α := βo) (by simpa [βo] using hrecf) (by simpa [βo] using hspec)
-    · simp [recursionFunctionOrDefault, hnex]
+    · simp [attemptOrDefault, hnex]
 
-instance recursionFunctionOrDefault_definable
+instance attemptOrDefault_definable
     (F : V → V)
     (hFdef : ℒₛₑₜ-function₁[V] F) :
-    ℒₛₑₜ-function₁[V] (recursionFunctionOrDefault F) := by
+    ℒₛₑₜ-function₁[V] (attemptOrDefault F) := by
   letI : ℒₛₑₜ-function₁[V] F := hFdef
   have hRdef : ℒₛₑₜ-relation[V] (fun y β ↦
       (IsOrdinal β ∧ ExistsAttemptOfFunction F β ∧
@@ -202,20 +224,20 @@ instance recursionFunctionOrDefault_definable
         y = Classical.arbitrary V)) := by
     unfold ExistsAttemptOfFunction IsAttemptGraph
     definability
-  have hEq : (fun y β ↦ y = recursionFunctionOrDefault F β) =
+  have hEq : (fun y β ↦ y = attemptOrDefault F β) =
       (fun y β ↦ (IsOrdinal β ∧ ExistsAttemptOfFunction F β ∧
         IsAttemptGraph F β y) ∨
       (¬(IsOrdinal β ∧ ExistsAttemptOfFunction F β) ∧
         y = Classical.arbitrary V)) := by
     funext y β
-    exact propext (recursionFunctionOrDefault_eq_iff F β y)
-  show ℒₛₑₜ-relation[V] (fun y β ↦ y = recursionFunctionOrDefault F β)
+    exact propext (attemptOrDefault_eq_iff F β y)
+  show ℒₛₑₜ-relation[V] (fun y β ↦ y = attemptOrDefault F β)
   exact hEq ▸ hRdef
 
-instance recursionFunctionOrDefault_definable_var
+instance attemptOrDefault_definable_var
     (Φ : V → V → V)
     (hΦdef : ℒₛₑₜ-function₂[V] Φ) :
-    ℒₛₑₜ-function₂[V] (fun a β ↦ recursionFunctionOrDefault (Φ a) β) := by
+    ℒₛₑₜ-function₂[V] (fun a β ↦ attemptOrDefault (Φ a) β) := by
   letI : ℒₛₑₜ-function₂[V] Φ := hΦdef
   have hRdef : ℒₛₑₜ-relation₃[V] (fun y a β ↦
       (IsOrdinal β ∧ ExistsAttemptOfFunction (Φ a) β ∧
@@ -224,26 +246,26 @@ instance recursionFunctionOrDefault_definable_var
         y = Classical.arbitrary V)) := by
     unfold ExistsAttemptOfFunction IsAttemptGraph
     definability
-  have hEq : (fun y a β ↦ y = recursionFunctionOrDefault (Φ a) β) =
+  have hEq : (fun y a β ↦ y = attemptOrDefault (Φ a) β) =
       (fun y a β ↦ (IsOrdinal β ∧ ExistsAttemptOfFunction (Φ a) β ∧
         IsAttemptGraph (Φ a) β y) ∨
       (¬(IsOrdinal β ∧ ExistsAttemptOfFunction (Φ a) β) ∧
         y = Classical.arbitrary V)) := by
     funext y a β
-    exact propext (recursionFunctionOrDefault_eq_iff (Φ a) β y)
-  show ℒₛₑₜ-relation₃[V] (fun y a β ↦ y = recursionFunctionOrDefault (Φ a) β)
+    exact propext (attemptOrDefault_eq_iff (Φ a) β y)
+  show ℒₛₑₜ-relation₃[V] (fun y a β ↦ y = attemptOrDefault (Φ a) β)
   exact hEq ▸ hRdef
 
 def AttemptOrDefaultNotDefaultBranch (F : V → V) (β : V) : Prop :=
-  IsAttemptGraph F β (recursionFunctionOrDefault F β)
+  IsAttemptGraph F β (attemptOrDefault F β)
 
-instance recursionFunctionOrDefault_notDefaultBranch_definable
+instance attemptOrDefault_notDefaultBranch_definable
     (F : V → V)
     (hFdef : ℒₛₑₜ-function₁[V] F) :
     ℒₛₑₜ-predicate[V] (AttemptOrDefaultNotDefaultBranch F) := by
   letI : ℒₛₑₜ-function₁[V] F := hFdef
-  letI : ℒₛₑₜ-function₁[V] (recursionFunctionOrDefault F) :=
-    recursionFunctionOrDefault_definable (F := F) hFdef
+  letI : ℒₛₑₜ-function₁[V] (attemptOrDefault F) :=
+    attemptOrDefault_definable (F := F) hFdef
   unfold AttemptOrDefaultNotDefaultBranch IsAttemptGraph
   definability
 
@@ -289,10 +311,11 @@ lemma transfinite_recursion_value_existsUnique_of_function_exists
     exact hφuniq.unique hyg (by simpa [hfg] using hy)
   simpa using this
 
+-- TODO: Move this down to successor/limit recursion section?
 /--
 Successor step for transfinite-recursion functions in existential-stage form.
 -/
-lemma transfinite_recursion_function_exists_succ_on
+lemma attempt_function_exists_succ_on
     (F : V → V) (α : Ordinal V) {f : V} [hf : IsFunction f]
     (hdf : domain f = α.val)
     (hrec : ∀ β ∈ α.val, ∃ z, ⟨β, z⟩ₖ ∈ f ∧ Function.Graph F z (f ↾ β)) :
@@ -356,25 +379,6 @@ lemma transfinite_recursion_function_restrict_eq_of_mem_on
     (hrecf := by simpa using hrecfβ) (hrecg := by simpa using hrecg)
   exact hfg
 
-/--
-Domain of a union of functions: if each member has domain included in `α`, and every point of `α`
-appears in some member domain, then the union has domain exactly `α`.
--/
-lemma domain_sUnion_eq_of_domain_subset_and_cover
-    {α C : V} (hsubset : ∀ f ∈ C, IsFunction f ∧ domain f ⊆ α)
-    (hcover : ∀ x ∈ α, ∃ f ∈ C, x ∈ domain f) :
-    domain (⋃ˢ C) = α := by
-  apply subset_antisymm
-  · intro x hxU
-    rcases mem_domain_iff.mp hxU with ⟨y, hxyU⟩
-    rcases mem_sUnion_iff.mp hxyU with ⟨f, hfC, hxyf⟩
-    exact (hsubset f hfC).2 _ (mem_domain_of_kpair_mem hxyf)
-  · intro x hxα
-    rcases hcover x hxα with ⟨f, hfC, hxd⟩
-    rcases mem_domain_iff.mp hxd with ⟨y, hxyf⟩
-    refine mem_domain_iff.mpr ⟨y, ?_⟩
-    exact mem_sUnion_iff.mpr ⟨f, hfC, hxyf⟩
-
 /-- Any two transfinite-recursion functions agree on overlapping inputs. -/
 lemma transfinite_recursion_function_coherent_on
     (F : V → V)
@@ -409,9 +413,9 @@ lemma transfinite_recursion_function_coherent_on
     exact (IsFunction.unique hxy₂ hxy₁g).symm
 
 /--
-Using replacement, collect all predecessor recursion functions on an ordinal domain.
+Using replacement, collect all predecessor attempt functions on an ordinal domain.
 -/
-lemma replacement_collect_predecessor_recursion_functions_on
+lemma replacement_collect_predecessor_attempt_functions_on
     [V ⊧ₘ* 𝗭𝗙]
     (F : V → V)
     (α : Ordinal V)
@@ -530,7 +534,7 @@ lemma transfinite_recursion_function_exists_on
     ExistsAttemptOfFunctionOn F α := by
   let R : V → V → Prop := fun β f ↦ IsAttemptGraph F β f
   have hP : ℒₛₑₜ-predicate[V] (AttemptOrDefaultNotDefaultBranch F) :=
-    recursionFunctionOrDefault_notDefaultBranch_definable (F := F) hFdef
+    attemptOrDefault_notDefaultBranch_definable (F := F) hFdef
   have hrec : ∀ α : Ordinal V, AttemptOrDefaultNotDefaultBranch F α.val := by
     refine transfinite_induction
       (P := AttemptOrDefaultNotDefaultBranch F)
@@ -539,6 +543,7 @@ lemma transfinite_recursion_function_exists_on
     intro α ih
     have hex : ExistsAttemptOfFunction F α.val := by
       change ∃ f, R α.val f
+      -- TODO: Try proving this without zero/successor/limit splitting
       by_cases hzero : α.val = ∅
       · refine ⟨∅, (inferInstance : IsFunction (∅ : V)), ?_, ?_⟩
         · simp [hzero]
@@ -552,15 +557,15 @@ lemma transfinite_recursion_function_exists_on
           let βo : Ordinal V := IsOrdinal.toOrdinal β
           have hβlt : βo < α := by
             exact Ordinal.lt_def.mpr (by simp [βo, hαβ])
-          have hβrec : R β (recursionFunctionOrDefault F β) := by
+          have hβrec : R β (attemptOrDefault F β) := by
             simpa [R, βo] using ih βo hβlt
-          let f : V := recursionFunctionOrDefault F β
+          let f : V := attemptOrDefault F β
           have hff : IsFunction f := hβrec.1
           have hdf : domain f = β := hβrec.2.1
           have hstage : ∀ γ ∈ β, ∃ z, ⟨γ, z⟩ₖ ∈ f ∧ Function.Graph F z (f ↾ γ) := hβrec.2.2
           letI : IsOrdinal β := hβord
           letI : IsFunction f := hff
-          rcases transfinite_recursion_function_exists_succ_on
+          rcases attempt_function_exists_succ_on
               (F := F) βo (f := f)
               (hdf := by simpa [βo] using hdf)
               (hrec := by simpa [βo] using hstage) with ⟨g, hg⟩
@@ -572,7 +577,7 @@ lemma transfinite_recursion_function_exists_on
             letI : IsOrdinal β := IsOrdinal.of_mem hβα
             let βo : Ordinal V := IsOrdinal.toOrdinal β
             have hβlt : βo < α := Ordinal.lt_def.mpr (by simpa [βo] using hβα)
-            let g : V := recursionFunctionOrDefault F β
+            let g : V := attemptOrDefault F β
             have hg : R β g := by
               simpa [R, βo, g] using ih βo hβlt
             exact ⟨g, by simpa [R, βo] using hg⟩
@@ -590,10 +595,10 @@ lemma transfinite_recursion_function_exists_on
               · exact (hsucc ⟨x, hsx_eq.symm⟩).elim
               · exact hsx_mem
             exact ⟨succ x, hsx_mem, by simp⟩
-          have hRecDef : ℒₛₑₜ-function₁[V] (recursionFunctionOrDefault F) :=
-            recursionFunctionOrDefault_definable (F := F) hFdef
+          have hRecDef : ℒₛₑₜ-function₁[V] (attemptOrDefault F) :=
+            attemptOrDefault_definable (F := F) hFdef
           rcases replacement_graph_exists_on_of_definableFunction
-              (X := α.val) (F := recursionFunctionOrDefault F) hRecDef with
+              (X := α.val) (F := attemptOrDefault F) hRecDef with
             ⟨gfun, hgfunFunc, hgfunDom, hgfunGraph⟩
           let G : V → V := fun β ↦ value gfun β
           have hGdef : ℒₛₑₜ-function₁[V] G := by
@@ -605,7 +610,7 @@ lemma transfinite_recursion_function_exists_on
             letI : IsOrdinal β := IsOrdinal.of_mem hβα
             let βo : Ordinal V := IsOrdinal.toOrdinal β
             have hβlt : βo < α := Ordinal.lt_def.mpr (by simpa [βo] using hβα)
-            let fβ : V := recursionFunctionOrDefault F β
+            let fβ : V := attemptOrDefault F β
             have hfβ : IsAttemptGraph F β fβ := by
               simpa [R, βo, fβ] using ih βo hβlt
             have hβpair : ⟨β, fβ⟩ₖ ∈ gfun := (hgfunGraph β hβα fβ).2 rfl
@@ -614,13 +619,13 @@ lemma transfinite_recursion_function_exists_on
               have hβd : β ∈ domain gfun := mem_domain_of_kpair_mem hβpair
               simpa [G] using (IsFunction.value_eq_iff_kpair_mem (f := gfun) (x := β) (y := fβ) hβd).2 hβpair
             simpa [hGβeq] using hfβ
-          rcases replacement_collect_predecessor_recursion_functions_on
+          rcases replacement_collect_predecessor_attempt_functions_on
               (F := F) α (G := G) hGdef hprevG with ⟨C, hC⟩
           rcases transfinite_recursion_function_exists_sUnion_of_collected_on
               (F := F) α (C := C) hC hprev hcover with ⟨f, hf⟩
           exact ⟨f, hf⟩
-    exact recursionFunctionOrDefault_spec_on (F := F) α hex
-  exact ⟨recursionFunctionOrDefault F α.val, hrec α⟩
+    exact attemptOrDefault_spec_on (F := F) α hex
+  exact ⟨attemptOrDefault F α.val, hrec α⟩
 
 lemma transfinite_recursion_function_exists
     [V ⊧ₘ* 𝗭𝗙]
@@ -633,49 +638,49 @@ lemma transfinite_recursion_function_exists
   simpa [ExistsAttemptOfFunctionOn, αo] using
     transfinite_recursion_function_exists_on (F := F) hFdef αo
 
-lemma recursionFunctionOrDefault_notDefaultBranch_on
+lemma attemptOrDefault_notDefaultBranch_on
     [V ⊧ₘ* 𝗭𝗙]
     (F : V → V)
     (hFdef : ℒₛₑₜ-function₁[V] F)
     (α : Ordinal V) :
     AttemptOrDefaultNotDefaultBranch F α.val := by
-  exact recursionFunctionOrDefault_spec_on (F := F) α
+  exact attemptOrDefault_spec_on (F := F) α
     (transfinite_recursion_function_exists_on (F := F) hFdef α)
 
 /--
-Function-form recursion value based on `recursionFunctionOrDefault`.
+Function-form recursion value based on `attemptOrDefault`.
 -/
 noncomputable def transfiniteRecursionValueFn (F : V → V) (α : V) : V :=
-  F (recursionFunctionOrDefault F α)
+  F (attemptOrDefault F α)
 
-lemma transfiniteRecursionValueFn_eq_apply_recursionFunctionOrDefault
+lemma transfiniteRecursionValueFn_eq_apply_attemptOrDefault
     (F : V → V) (α : V) :
-    F (recursionFunctionOrDefault F α) = transfiniteRecursionValueFn F α := rfl
+    F (attemptOrDefault F α) = transfiniteRecursionValueFn F α := rfl
 
-lemma kpair_mem_recursionFunctionOrDefault_iff_eq_transfiniteRecursionValueFn_of_mem
+lemma kpair_mem_attemptOrDefault_iff_eq_transfiniteRecursionValueFn_of_mem
     [V ⊧ₘ* 𝗭𝗙]
     (F : V → V) (hFdef : ℒₛₑₜ-function₁[V] F)
     {α β y : V} (hα : IsOrdinal α) (hβα : β ∈ α) :
-    ⟨β, y⟩ₖ ∈ recursionFunctionOrDefault F α ↔ y = transfiniteRecursionValueFn F β := by
-  have hrf : IsAttemptGraph F α (recursionFunctionOrDefault F α) :=
+    ⟨β, y⟩ₖ ∈ attemptOrDefault F α ↔ y = transfiniteRecursionValueFn F β := by
+  have hrf : IsAttemptGraph F α (attemptOrDefault F α) :=
     by
       let αo : Ordinal V := IsOrdinal.toOrdinal α
-      simpa [αo] using recursionFunctionOrDefault_notDefaultBranch_on (F := F) hFdef αo
+      simpa [αo] using attemptOrDefault_notDefaultBranch_on (F := F) hFdef αo
   have hβord : IsOrdinal β := IsOrdinal.of_mem hβα
-  have hrg : IsAttemptGraph F β (recursionFunctionOrDefault F β) :=
+  have hrg : IsAttemptGraph F β (attemptOrDefault F β) :=
     by
       let βo : Ordinal V := IsOrdinal.toOrdinal β
-      simpa [βo] using recursionFunctionOrDefault_notDefaultBranch_on (F := F) hFdef βo
+      simpa [βo] using attemptOrDefault_notDefaultBranch_on (F := F) hFdef βo
   letI : IsOrdinal α := hα
   letI : IsOrdinal β := hβord
-  letI : IsFunction (recursionFunctionOrDefault F α) := hrf.1
-  letI : IsFunction (recursionFunctionOrDefault F β) := hrg.1
+  letI : IsFunction (attemptOrDefault F α) := hrf.1
+  letI : IsFunction (attemptOrDefault F β) := hrg.1
   have hrecIff : ∀ γ ∈ α, ∀ z,
-      ⟨γ, z⟩ₖ ∈ recursionFunctionOrDefault F α ↔
-        Function.Graph F z ((recursionFunctionOrDefault F α) ↾ γ) := by
+      ⟨γ, z⟩ₖ ∈ attemptOrDefault F α ↔
+        Function.Graph F z ((attemptOrDefault F α) ↾ γ) := by
     let αo : Ordinal V := IsOrdinal.toOrdinal α
     simpa [αo] using attempt_iff_of_exists_on (F := F) αo (hrec := hrf.2.2)
-  have hRestrEq : (recursionFunctionOrDefault F α) ↾ β = recursionFunctionOrDefault F β := by
+  have hRestrEq : (attemptOrDefault F α) ↾ β = attemptOrDefault F β := by
     let αo : Ordinal V := IsOrdinal.toOrdinal α
     let βo : Ordinal V := IsOrdinal.toOrdinal β
     have hβltα : βo < αo := Ordinal.lt_def.mpr (by simpa [αo, βo] using hβα)
@@ -686,11 +691,11 @@ lemma kpair_mem_recursionFunctionOrDefault_iff_eq_transfiniteRecursionValueFn_of
       (hrecf := by simpa [αo] using hrf.2.2) (hrecg := by simpa [βo] using hrg.2.2)
   constructor
   · intro hβy
-    have hyGraph : Function.Graph F y ((recursionFunctionOrDefault F α) ↾ β) :=
+    have hyGraph : Function.Graph F y ((attemptOrDefault F α) ↾ β) :=
       (hrecIff β hβα y).1 hβy
     simpa [transfiniteRecursionValueFn, Function.Graph, hRestrEq] using hyGraph
   · intro hy
-    have hyGraph : Function.Graph F y ((recursionFunctionOrDefault F α) ↾ β) := by
+    have hyGraph : Function.Graph F y ((attemptOrDefault F α) ↾ β) := by
       simpa [transfiniteRecursionValueFn, Function.Graph, hRestrEq] using hy
     exact (hrecIff β hβα y).2 hyGraph
 
@@ -704,8 +709,8 @@ instance transfiniteRecursionValueFn_definable
     (F : V → V) (hFdef : ℒₛₑₜ-function₁[V] F) :
     ℒₛₑₜ-function₁[V] (transfiniteRecursionValueFn F) := by
   letI : ℒₛₑₜ-function₁[V] F := hFdef
-  letI : ℒₛₑₜ-function₁[V] (recursionFunctionOrDefault F) :=
-    recursionFunctionOrDefault_definable (F := F) hFdef
+  letI : ℒₛₑₜ-function₁[V] (attemptOrDefault F) :=
+    attemptOrDefault_definable (F := F) hFdef
   unfold transfiniteRecursionValueFn
   definability
 
@@ -714,8 +719,8 @@ instance transfiniteRecursionValueFnVar_definable
     ℒₛₑₜ-function₂[V] (transfiniteRecursionValueFnVar Φ) := by
   letI : ℒₛₑₜ-function₂[V] Φ := hΦdef
   have hFdef : ℒₛₑₜ-function₂[V] (fun a α ↦ transfiniteRecursionValueFn (Φ a) α) := by
-    letI : ℒₛₑₜ-function₂[V] (fun a α ↦ recursionFunctionOrDefault (Φ a) α) :=
-      recursionFunctionOrDefault_definable_var (Φ := Φ) hΦdef
+    letI : ℒₛₑₜ-function₂[V] (fun a α ↦ attemptOrDefault (Φ a) α) :=
+      attemptOrDefault_definable_var (Φ := Φ) hΦdef
     definability
   show ℒₛₑₜ-function₂[V] (fun a α ↦ transfiniteRecursionValueFn (Φ a) α)
   exact hFdef
@@ -746,21 +751,21 @@ lemma transfiniteRecursionValueFnReplacementGraph_spec
         (X := α) (F := transfiniteRecursionValueFn F)
         (transfiniteRecursionValueFn_definable (F := F) hFdef))
 
-lemma transfiniteRecursionValueFnReplacementGraph_eq_recursionFunctionOrDefault_on
+lemma transfiniteRecursionValueFnReplacementGraph_eq_attemptOrDefault_on
     [V ⊧ₘ* 𝗭𝗙]
     (F : V → V) (hFdef : ℒₛₑₜ-function₁[V] F)
     (α : Ordinal V) :
     transfiniteRecursionValueFnReplacementGraph F hFdef α.val =
-      recursionFunctionOrDefault F α.val := by
+      attemptOrDefault F α.val := by
   let g : V := transfiniteRecursionValueFnReplacementGraph F hFdef α.val
   have hg : IsFunction g ∧ domain g = α.val ∧
       ∀ β ∈ α.val, ∀ y, ⟨β, y⟩ₖ ∈ g ↔ y = transfiniteRecursionValueFn F β := by
     simpa [g] using transfiniteRecursionValueFnReplacementGraph_spec (F := F) hFdef α.val
-  have hrf : IsAttemptGraph F α.val (recursionFunctionOrDefault F α.val) :=
+  have hrf : IsAttemptGraph F α.val (attemptOrDefault F α.val) :=
     by
-      simpa using recursionFunctionOrDefault_notDefaultBranch_on (F := F) hFdef α
+      simpa using attemptOrDefault_notDefaultBranch_on (F := F) hFdef α
   letI : IsFunction g := hg.1
-  letI : IsFunction (recursionFunctionOrDefault F α.val) := hrf.1
+  letI : IsFunction (attemptOrDefault F α.val) := hrf.1
   apply subset_antisymm
   · intro p hp
     rcases show ∃ x ∈ domain g, ∃ y ∈ range g, p = ⟨x, y⟩ₖ from by
@@ -770,27 +775,27 @@ lemma transfiniteRecursionValueFnReplacementGraph_eq_recursionFunctionOrDefault_
     have hxα : x ∈ α.val := by simpa [hg.2.1] using hxd
     have hyEq : y = transfiniteRecursionValueFn F x := (hg.2.2 x hxα y).1 hp
     exact
-      (kpair_mem_recursionFunctionOrDefault_iff_eq_transfiniteRecursionValueFn_of_mem
+      (kpair_mem_attemptOrDefault_iff_eq_transfiniteRecursionValueFn_of_mem
         (F := F) hFdef α.ordinal hxα).2 hyEq
   · intro p hp
-    rcases show ∃ x ∈ domain (recursionFunctionOrDefault F α.val), ∃ y ∈ range (recursionFunctionOrDefault F α.val),
+    rcases show ∃ x ∈ domain (attemptOrDefault F α.val), ∃ y ∈ range (attemptOrDefault F α.val),
         p = ⟨x, y⟩ₖ from by
         simpa [mem_prod_iff] using
-          subset_prod_of_mem_function (IsFunction.mem_function (recursionFunctionOrDefault F α.val)) p hp with
+          subset_prod_of_mem_function (IsFunction.mem_function (attemptOrDefault F α.val)) p hp with
       ⟨x, hxd, y, -, rfl⟩
     have hxα : x ∈ α.val := by simpa [hrf.2.1] using hxd
     have hyEq : y = transfiniteRecursionValueFn F x :=
-      (kpair_mem_recursionFunctionOrDefault_iff_eq_transfiniteRecursionValueFn_of_mem
+      (kpair_mem_attemptOrDefault_iff_eq_transfiniteRecursionValueFn_of_mem
         (F := F) hFdef α.ordinal hxα).1 hp
     exact (hg.2.2 x hxα y).2 hyEq
 
-lemma transfiniteRecursionValueFnReplacementGraph_eq_recursionFunctionOrDefault_of_ordinal
+lemma transfiniteRecursionValueFnReplacementGraph_eq_attemptOrDefault_of_ordinal
     [V ⊧ₘ* 𝗭𝗙]
     (F : V → V) (hFdef : ℒₛₑₜ-function₁[V] F)
     {α : V} (hα : IsOrdinal α) :
-    transfiniteRecursionValueFnReplacementGraph F hFdef α = recursionFunctionOrDefault F α := by
+    transfiniteRecursionValueFnReplacementGraph F hFdef α = attemptOrDefault F α := by
   let αo : Ordinal V := IsOrdinal.toOrdinal α
-  simpa [αo] using transfiniteRecursionValueFnReplacementGraph_eq_recursionFunctionOrDefault_on
+  simpa [αo] using transfiniteRecursionValueFnReplacementGraph_eq_attemptOrDefault_on
     (F := F) hFdef αo
 
 lemma transfiniteRecursionValueFn_eq_apply_replacementGraph_of_ordinal
@@ -798,9 +803,9 @@ lemma transfiniteRecursionValueFn_eq_apply_replacementGraph_of_ordinal
     (F : V → V) (hFdef : ℒₛₑₜ-function₁[V] F)
     {α : V} (hα : IsOrdinal α) :
     F (transfiniteRecursionValueFnReplacementGraph F hFdef α) = transfiniteRecursionValueFn F α := by
-  rw [transfiniteRecursionValueFnReplacementGraph_eq_recursionFunctionOrDefault_of_ordinal
+  rw [transfiniteRecursionValueFnReplacementGraph_eq_attemptOrDefault_of_ordinal
     (F := F) hFdef hα]
-  exact transfiniteRecursionValueFn_eq_apply_recursionFunctionOrDefault F α
+  exact transfiniteRecursionValueFn_eq_apply_attemptOrDefault F α
 
 lemma transfiniteRecursionValueFn_eq_apply_replacementGraph_on
     [V ⊧ₘ* 𝗭𝗙]
@@ -808,9 +813,9 @@ lemma transfiniteRecursionValueFn_eq_apply_replacementGraph_on
     (α : Ordinal V) :
     F (transfiniteRecursionValueFnReplacementGraph F hFdef α.val) =
       transfiniteRecursionValueFn F α.val := by
-  rw [transfiniteRecursionValueFnReplacementGraph_eq_recursionFunctionOrDefault_on
+  rw [transfiniteRecursionValueFnReplacementGraph_eq_attemptOrDefault_on
     (F := F) hFdef α]
-  exact transfiniteRecursionValueFn_eq_apply_recursionFunctionOrDefault F α.val
+  exact transfiniteRecursionValueFn_eq_apply_attemptOrDefault F α.val
 
 lemma isTransfiniteRecursionValueOfFunction_iff_eq_transfiniteRecursionValueFn
     [V ⊧ₘ* 𝗭𝗙]
@@ -819,18 +824,18 @@ lemma isTransfiniteRecursionValueOfFunction_iff_eq_transfiniteRecursionValueFn
     IsTransfiniteRecursionValueOfFunction F α y ↔ y = transfiniteRecursionValueFn F α := by
   constructor
   · rintro ⟨f, hf, hyf⟩
-    have hrf : IsAttemptGraph F α (recursionFunctionOrDefault F α) :=
+    have hrf : IsAttemptGraph F α (attemptOrDefault F α) :=
       by
         let αo : Ordinal V := IsOrdinal.toOrdinal α
-        simpa [αo] using recursionFunctionOrDefault_notDefaultBranch_on (F := F) hFdef αo
-    have hEq : recursionFunctionOrDefault F α = f := by
+        simpa [αo] using attemptOrDefault_notDefaultBranch_on (F := F) hFdef αo
+    have hEq : attemptOrDefault F α = f := by
       let αo : Ordinal V := IsOrdinal.toOrdinal α
       exact isAttemptGraph_unique_on (F := F) (α := αo) (by simpa [αo] using hrf) (by simpa [αo] using hf)
     simpa [transfiniteRecursionValueFn, Function.Graph, hEq] using hyf
   · intro hy
-    refine ⟨recursionFunctionOrDefault F α, ?_, ?_⟩
+    refine ⟨attemptOrDefault F α, ?_, ?_⟩
     · let αo : Ordinal V := IsOrdinal.toOrdinal α
-      simpa [αo] using recursionFunctionOrDefault_notDefaultBranch_on (F := F) hFdef αo
+      simpa [αo] using attemptOrDefault_notDefaultBranch_on (F := F) hFdef αo
     · simpa [transfiniteRecursionValueFn, Function.Graph] using hy
 
 lemma transfinite_recursion_value_existsUnique_eq_transfiniteRecursionValueFn_of_definableFunction_on
@@ -840,6 +845,8 @@ lemma transfinite_recursion_value_existsUnique_eq_transfiniteRecursionValueFn_of
   refine ⟨transfiniteRecursionValueFn F α.val, rfl, ?_⟩
   · intro y hy
     exact hy
+
+/-! ### Base/successor/limit transfinite recursion -/
 
 /--
 Specialized transfinite-recursion rule:
@@ -1415,11 +1422,11 @@ lemma succLimitRecursion_strictIncreasing_fn
         transfiniteRecursionValueFn (SuccLimitRecursionStep a₀ F) γ := by
   let G : V → V := SuccLimitRecursionStep a₀ F
   have hGdef : ℒₛₑₜ-function₁[V] G := succLimitRecursionStep_definable a₀ F hFdef
-  let f : V := recursionFunctionOrDefault G α
+  let f : V := attemptOrDefault G α
   let αo : Ordinal V := IsOrdinal.toOrdinal α
   have hfRecGraph : IsAttemptGraph G α f :=
     by
-      simpa [αo] using recursionFunctionOrDefault_notDefaultBranch_on (F := G) hGdef αo
+      simpa [αo] using attemptOrDefault_notDefaultBranch_on (F := G) hGdef αo
   -- Convert the function-graph recursion for `G` into the specialized rule recursion.
   have hrec : IsAttempt (SuccLimitRecursionRule a₀ F) α f := by
     letI : IsFunction f := hfRecGraph.1
@@ -1450,10 +1457,10 @@ lemma succLimitRecursion_strictIncreasing_fn
   intro β γ hβγ hγα
   have hβα : β ∈ α := hα.toIsTransitive.transitive _ hγα _ hβγ
   have hβpair : ⟨β, transfiniteRecursionValueFn G β⟩ₖ ∈ f := by
-    exact (kpair_mem_recursionFunctionOrDefault_iff_eq_transfiniteRecursionValueFn_of_mem
+    exact (kpair_mem_attemptOrDefault_iff_eq_transfiniteRecursionValueFn_of_mem
       (F := G) hGdef hα hβα).2 rfl
   have hγpair : ⟨γ, transfiniteRecursionValueFn G γ⟩ₖ ∈ f := by
-    exact (kpair_mem_recursionFunctionOrDefault_iff_eq_transfiniteRecursionValueFn_of_mem
+    exact (kpair_mem_attemptOrDefault_iff_eq_transfiniteRecursionValueFn_of_mem
       (F := G) hGdef hα hγα).2 rfl
   simpa [G] using hStrictGraph.2 β γ
     (transfiniteRecursionValueFn G β) (transfiniteRecursionValueFn G γ) hβγ hβpair hγpair
@@ -1473,11 +1480,11 @@ lemma succLimitRecursion_stageValue_isOrdinal_fn
       IsOrdinal (transfiniteRecursionValueFn (SuccLimitRecursionStep a₀ F) β) := by
   let G : V → V := SuccLimitRecursionStep a₀ F
   have hGdef : ℒₛₑₜ-function₁[V] G := succLimitRecursionStep_definable a₀ F hFdef
-  let f : V := recursionFunctionOrDefault G α
+  let f : V := attemptOrDefault G α
   let αo : Ordinal V := IsOrdinal.toOrdinal α
   have hfRecGraph : IsAttemptGraph G α f :=
     by
-      simpa [αo] using recursionFunctionOrDefault_notDefaultBranch_on (F := G) hGdef αo
+      simpa [αo] using attemptOrDefault_notDefaultBranch_on (F := G) hGdef αo
   -- Same conversion bridge as in the strict-increase theorem.
   have hrec : IsAttempt (SuccLimitRecursionRule a₀ F) α f := by
     letI : IsFunction f := hfRecGraph.1
@@ -1508,7 +1515,7 @@ lemma succLimitRecursion_stageValue_isOrdinal_fn
     succLimitRecursion_stageValue_isOrdinal a₀ F ha₀ hFord hrec
   intro β hβα
   have hβpair : ⟨β, transfiniteRecursionValueFn G β⟩ₖ ∈ f := by
-    exact (kpair_mem_recursionFunctionOrDefault_iff_eq_transfiniteRecursionValueFn_of_mem
+    exact (kpair_mem_attemptOrDefault_iff_eq_transfiniteRecursionValueFn_of_mem
       (F := G) hGdef hα hβα).2 rfl
   simpa [G] using hValOrdGraph β (transfiniteRecursionValueFn G β) hβα hβpair
 
@@ -1538,11 +1545,11 @@ lemma succLimitRecursion_exists_max_stage_le_fn
         transfiniteRecursionValueFn (SuccLimitRecursionStep a₀ F) γ ⊆ ξ → γ ⊆ δ := by
   let G : V → V := SuccLimitRecursionStep a₀ F
   have hGdef : ℒₛₑₜ-function₁[V] G := succLimitRecursionStep_definable a₀ F hFdef
-  let f : V := recursionFunctionOrDefault G α
+  let f : V := attemptOrDefault G α
   let αo : Ordinal V := IsOrdinal.toOrdinal α
   have hfRecGraph : IsAttemptGraph G α f :=
     by
-      simpa [αo] using recursionFunctionOrDefault_notDefaultBranch_on (F := G) hGdef αo
+      simpa [αo] using attemptOrDefault_notDefaultBranch_on (F := G) hGdef αo
   -- Build graph-level hypotheses from function-level hypotheses via pair/value correspondence.
   have hstrictGraph : IsStrictIncreasingOrdinalGraph f := by
     refine ⟨hfRecGraph.1, ?_⟩
@@ -1551,25 +1558,25 @@ lemma succLimitRecursion_exists_max_stage_le_fn
     have hβα : β ∈ α := hα.toIsTransitive.transitive _ hγα _ hβγ
     have hx :
         x = transfiniteRecursionValueFn G β := by
-      exact (kpair_mem_recursionFunctionOrDefault_iff_eq_transfiniteRecursionValueFn_of_mem
+      exact (kpair_mem_attemptOrDefault_iff_eq_transfiniteRecursionValueFn_of_mem
         (F := G) hGdef hα hβα).1 hβx
     have hy :
         y = transfiniteRecursionValueFn G γ := by
-      exact (kpair_mem_recursionFunctionOrDefault_iff_eq_transfiniteRecursionValueFn_of_mem
+      exact (kpair_mem_attemptOrDefault_iff_eq_transfiniteRecursionValueFn_of_mem
         (F := G) hGdef hα hγα).1 hγy
     simpa [G, hx, hy] using hstrict β γ hβγ hγα
   have hValOrdGraph :
       ∀ β y, β ∈ α → ⟨β, y⟩ₖ ∈ f → IsOrdinal y := by
     intro β y hβα hβy
     have hy : y = transfiniteRecursionValueFn G β :=
-      (kpair_mem_recursionFunctionOrDefault_iff_eq_transfiniteRecursionValueFn_of_mem
+      (kpair_mem_attemptOrDefault_iff_eq_transfiniteRecursionValueFn_of_mem
         (F := G) hGdef hα hβα).1 hβy
     simpa [G, hy] using hValOrd β hβα
   have hselfGraph :
       ∀ β y, β ∈ α → ⟨β, y⟩ₖ ∈ f → β ⊆ y := by
     intro β y hβα hβy
     have hy : y = transfiniteRecursionValueFn G β :=
-      (kpair_mem_recursionFunctionOrDefault_iff_eq_transfiniteRecursionValueFn_of_mem
+      (kpair_mem_attemptOrDefault_iff_eq_transfiniteRecursionValueFn_of_mem
         (F := G) hGdef hα hβα).1 hβy
     simpa [G, hy] using hself β hβα
   -- Convert `IsAttemptGraph` to specialized recursion-function form.
@@ -1603,13 +1610,13 @@ lemma succLimitRecursion_exists_max_stage_le_fn
     ⟨δ, yδ, hδα, hδyδ, hyδle, hmax⟩
   have hyδ :
       yδ = transfiniteRecursionValueFn G δ :=
-    (kpair_mem_recursionFunctionOrDefault_iff_eq_transfiniteRecursionValueFn_of_mem
+    (kpair_mem_attemptOrDefault_iff_eq_transfiniteRecursionValueFn_of_mem
       (F := G) hGdef hα hδα).1 hδyδ
   refine ⟨δ, hδα, ?_, ?_⟩
   · simpa [G, hyδ] using hyδle
   · intro γ hγα hγle
     have hγpair : ⟨γ, transfiniteRecursionValueFn G γ⟩ₖ ∈ f := by
-      exact (kpair_mem_recursionFunctionOrDefault_iff_eq_transfiniteRecursionValueFn_of_mem
+      exact (kpair_mem_attemptOrDefault_iff_eq_transfiniteRecursionValueFn_of_mem
         (F := G) hGdef hα hγα).2 rfl
     exact hmax γ (transfiniteRecursionValueFn G γ) hγα hγpair (by simpa [G] using hγle)
 
@@ -1684,20 +1691,20 @@ instance ordinalAddValue_definable_left (b : V) :
     ordinalAddValue a 0 = a := by
   simp only [ordinalAddValue]
   -- transfiniteRecursionValueFn (SuccLimitRecursionStep a OrdinalAddSuccStep) 0
-  -- = (SuccLimitRecursionStep a OrdinalAddSuccStep) (recursionFunctionOrDefault ... 0)
+  -- = (SuccLimitRecursionStep a OrdinalAddSuccStep) (attemptOrDefault ... 0)
   -- The recursion function at 0 is ∅, so SuccLimitRecursionStep on ∅ = a₀ = a.
   unfold transfiniteRecursionValueFn
   have hSdef : ℒₛₑₜ-function₁[V] (SuccLimitRecursionStep a OrdinalAddSuccStep) :=
     ordinalAddSuccStep_definable_step
   let αo : Ordinal V := IsOrdinal.toOrdinal (0 : V)
   have hrf : IsAttemptGraph (SuccLimitRecursionStep a OrdinalAddSuccStep) 0
-      (recursionFunctionOrDefault (SuccLimitRecursionStep a OrdinalAddSuccStep) 0) :=
+      (attemptOrDefault (SuccLimitRecursionStep a OrdinalAddSuccStep) 0) :=
     by
-      simpa [αo] using recursionFunctionOrDefault_notDefaultBranch_on
+      simpa [αo] using attemptOrDefault_notDefaultBranch_on
         (F := SuccLimitRecursionStep a OrdinalAddSuccStep) hSdef αo
-  have hdom : domain (recursionFunctionOrDefault
+  have hdom : domain (attemptOrDefault
       (SuccLimitRecursionStep a OrdinalAddSuccStep) 0) = (0 : V) := hrf.2.1
-  have hdomEmpty : domain (recursionFunctionOrDefault
+  have hdomEmpty : domain (attemptOrDefault
       (SuccLimitRecursionStep a OrdinalAddSuccStep) 0) = (∅ : V) := by
     simpa [zero_def] using hdom
   simp [SuccLimitRecursionStep, hdomEmpty]
@@ -1842,13 +1849,13 @@ lemma ordinalAddValue_exists_right_eq_of_subset
     ∃ δ : Ordinal V, ordinalAddValue a δ.val = γ := by
   let G : V → V := SuccLimitRecursionStep a OrdinalAddSuccStep
   have hGdef : ℒₛₑₜ-function₁[V] G := succLimitRecursionStep_definable a OrdinalAddSuccStep ordinalAddSuccStep_definable
-  let f : V := recursionFunctionOrDefault G (succ (succ γ))
+  let f : V := attemptOrDefault G (succ (succ γ))
   let α := succ (succ γ)
   have hα : IsOrdinal α := IsOrdinal.succ
   let αo : Ordinal V := IsOrdinal.toOrdinal α
   have hfRecGraph : IsAttemptGraph G α f :=
     by
-      simpa [αo] using recursionFunctionOrDefault_notDefaultBranch_on (F := G) hGdef αo
+      simpa [αo] using attemptOrDefault_notDefaultBranch_on (F := G) hGdef αo
   -- Convert the function-graph recursion for `G` into the specialized rule recursion.
   have hrec : IsAttempt (SuccLimitRecursionRule a OrdinalAddSuccStep) α f := by
     letI : IsFunction f := hfRecGraph.1
@@ -1899,7 +1906,7 @@ lemma ordinalAddValue_exists_right_eq_of_subset
     have hβord : IsOrdinal β := IsOrdinal.of_mem hβα
     have hyord : IsOrdinal y := hValOrd β y hβα hβy
     have hy : y = transfiniteRecursionValueFn G β :=
-      (kpair_mem_recursionFunctionOrDefault_iff_eq_transfiniteRecursionValueFn_of_mem
+      (kpair_mem_attemptOrDefault_iff_eq_transfiniteRecursionValueFn_of_mem
         (F := G) hGdef hα hβα).1 hβy
     have hyeqAdd : y = ordinalAddValue a β := by simpa [G, ordinalAddValue] using hy
     have hnot : ¬ y ∈ β := by
@@ -1925,7 +1932,7 @@ lemma ordinalAddValue_exists_right_eq_of_subset
     ⟨δ, yδ, hδα, hδyδ, hyδeqγ, hmax⟩
   have hδord : IsOrdinal δ := IsOrdinal.of_mem hδα
   have hyδ : yδ = transfiniteRecursionValueFn G δ :=
-    (kpair_mem_recursionFunctionOrDefault_iff_eq_transfiniteRecursionValueFn_of_mem
+    (kpair_mem_attemptOrDefault_iff_eq_transfiniteRecursionValueFn_of_mem
       (F := G) hGdef hα hδα).1 hδyδ
   have hyδeqAdd : yδ = ordinalAddValue a δ := by simpa [G, ordinalAddValue] using hyδ
   refine ⟨⟨δ, hδord⟩, ?_⟩
@@ -2038,13 +2045,13 @@ instance ordinalMulValue_definable_varInit :
     ordinalMulSuccStep_definable_step a
   let αo : Ordinal V := IsOrdinal.toOrdinal (0 : V)
   have hrf : IsAttemptGraph (SuccLimitRecursionStep (0 : V) (OrdinalMulSuccStep a)) 0
-      (recursionFunctionOrDefault (SuccLimitRecursionStep (0 : V) (OrdinalMulSuccStep a)) 0) :=
+      (attemptOrDefault (SuccLimitRecursionStep (0 : V) (OrdinalMulSuccStep a)) 0) :=
     by
-      simpa [αo] using recursionFunctionOrDefault_notDefaultBranch_on
+      simpa [αo] using attemptOrDefault_notDefaultBranch_on
         (F := SuccLimitRecursionStep (0 : V) (OrdinalMulSuccStep a)) hSdef αo
-  have hdom : domain (recursionFunctionOrDefault
+  have hdom : domain (attemptOrDefault
       (SuccLimitRecursionStep (0 : V) (OrdinalMulSuccStep a)) 0) = (0 : V) := hrf.2.1
-  have hdomEmpty : domain (recursionFunctionOrDefault
+  have hdomEmpty : domain (attemptOrDefault
       (SuccLimitRecursionStep (0 : V) (OrdinalMulSuccStep a)) 0) = (∅ : V) := by
     simpa [zero_def] using hdom
   simp [SuccLimitRecursionStep, hdomEmpty]
@@ -2075,13 +2082,13 @@ lemma ordinalMulValue_exists_right_mul_add_eq_of_pos
       ρ.val ∈ a := by
   let G : V → V := SuccLimitRecursionStep (0 : V) (OrdinalMulSuccStep a)
   have hGdef : ℒₛₑₜ-function₁[V] G := ordinalMulSuccStep_definable_step a
-  let f : V := recursionFunctionOrDefault G (succ (succ γ))
+  let f : V := attemptOrDefault G (succ (succ γ))
   let α := succ (succ γ)
   have hα : IsOrdinal α := IsOrdinal.succ
   let αo : Ordinal V := IsOrdinal.toOrdinal α
   have hfRecGraph : IsAttemptGraph G α f :=
     by
-      simpa [αo] using recursionFunctionOrDefault_notDefaultBranch_on (F := G) hGdef αo
+      simpa [αo] using attemptOrDefault_notDefaultBranch_on (F := G) hGdef αo
   have hrec : IsAttempt
       (SuccLimitRecursionRule (0 : V) (OrdinalMulSuccStep a)) α f := by
     letI : IsFunction f := hfRecGraph.1
@@ -2128,7 +2135,7 @@ lemma ordinalMulValue_exists_right_mul_add_eq_of_pos
     have hyord : IsOrdinal y := hValOrd β y hβα hβy
     have hyeqMul : y = ordinalMulValue a β := by
       simpa [G, ordinalMulValue] using
-        (kpair_mem_recursionFunctionOrDefault_iff_eq_transfiniteRecursionValueFn_of_mem
+        (kpair_mem_attemptOrDefault_iff_eq_transfiniteRecursionValueFn_of_mem
           (F := G) hGdef hα hβα).1 hβy
     have hnot : ¬ y ∈ β := by
       intro hyβ
@@ -2158,7 +2165,7 @@ lemma ordinalMulValue_exists_right_mul_add_eq_of_pos
   by_cases hρlt : ρ.val ∈ a
   · have hyδeqMul : yδ = ordinalMulValue a δ := by
       simpa [G, ordinalMulValue] using
-        (kpair_mem_recursionFunctionOrDefault_iff_eq_transfiniteRecursionValueFn_of_mem
+        (kpair_mem_attemptOrDefault_iff_eq_transfiniteRecursionValueFn_of_mem
           (F := G) hGdef hα hδα).1 hδyδ
     refine ⟨⟨δ, hδord⟩, ρ, ?_, hρlt⟩
     simpa [hyδeqMul] using hρeq
