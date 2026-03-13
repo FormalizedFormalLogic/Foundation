@@ -56,71 +56,35 @@ lemma attempt_iff_of_exists_on (F : V → V) (α : Ordinal V) {f : V} [IsFunctio
     have hyz : y = z := huniq.unique hyF hzF
     simpa [hyz] using hβz
 
+lemma attempt_function_coherent (F : V → V) (α : Ordinal V) {f g : V} [IsFunction f] [IsFunction g] (_ : domain f = α.val) (_ : domain g = α.val)
+    (hrecf : ∀ β ∈ α.val, ∀ y, ⟨β, y⟩ₖ ∈ f ↔ Function.Graph F y (f ↾ β))
+    (hrecg : ∀ β ∈ α.val, ∀ y, ⟨β, y⟩ₖ ∈ g ↔ Function.Graph F y (g ↾ β)) :
+    ∀ β : Ordinal V, β.val ⊆ α.val → f ↾ β.val = g ↾ β.val := by
+  refine transfinite_induction (P := fun x ↦ x ⊆ α.val → f ↾ x = g ↾ x) (by definability) ?_
+  intro β ihβ hβα
+  apply mem_ext_iff.mpr
+  simp only [mem_restrict_iff, and_congr_left_iff, forall_exists_index, and_imp]
+  intro p x hxβ y rfl
+  have : IsOrdinal x := IsOrdinal.of_mem hxβ
+  let ξ : Ordinal V := IsOrdinal.toOrdinal x
+  have hxα : x ∈ α.val := hβα x hxβ
+  have hξα : ξ.val ⊆ α.val := by
+    exact subset_trans (β.ordinal.toIsTransitive.transitive x hxβ) hβα
+  have hfξgξ : f ↾ ξ = g ↾ ξ := by
+    exact ihβ ξ (by aesop) (by aesop)
+  simp_all only [toOrdinal_val, ξ]
+
 lemma attempt_function_unique_on (F : V → V) (α : Ordinal V) {f g : V} [hf : IsFunction f] [hg : IsFunction g] (hdf : domain f = α.val) (hdg : domain g = α.val)
     (hrecf : ∀ β ∈ α.val, ∀ y, ⟨β, y⟩ₖ ∈ f ↔ Function.Graph F y (f ↾ β))
     (hrecg : ∀ β ∈ α.val, ∀ y, ⟨β, y⟩ₖ ∈ g ↔ Function.Graph F y (g ↾ β)) :
     f = g := by
   have hrestr :
       ∀ β : Ordinal V, β.val ⊆ α.val → f ↾ β.val = g ↾ β.val := by
-    refine transfinite_induction (P := fun x ↦ x ⊆ α.val → f ↾ x = g ↾ x) (by definability) ?_
-    intro β ihβ hβα
-    apply subset_antisymm
-    · intro p hp
-      rcases mem_restrict_iff.mp hp with ⟨hpf, x, hxβ, y, rfl⟩
-      have hxα : x ∈ α.val := hβα x hxβ
-      have hfxgx : f ↾ x = g ↾ x := by
-        have : IsOrdinal x := IsOrdinal.of_mem hxβ
-        let ξ : Ordinal V := IsOrdinal.toOrdinal x
-        have hξβ : ξ < β := Ordinal.lt_def.mpr <| by simpa [ξ] using hxβ
-        have hξα : ξ.val ⊆ α.val := by
-          exact subset_trans (β.ordinal.toIsTransitive.transitive x hxβ) hβα
-        simpa [ξ] using ihβ ξ hξβ hξα
-      have hφ : Function.Graph F y (g ↾ x) := by
-        have : Function.Graph F y (f ↾ x) := (hrecf x hxα y).1 hpf
-        simpa [hfxgx] using this
-      have hpg : ⟨x, y⟩ₖ ∈ g := (hrecg x hxα y).2 hφ
-      exact mem_restrict_iff.mpr ⟨hpg, x, hxβ, y, rfl⟩
-    · intro p hp
-      rcases mem_restrict_iff.mp hp with ⟨hpg, x, hxβ, y, rfl⟩
-      have hxα : x ∈ α.val := hβα x hxβ
-      have hfxgx : f ↾ x = g ↾ x := by
-        have : IsOrdinal x := IsOrdinal.of_mem hxβ
-        let ξ : Ordinal V := IsOrdinal.toOrdinal x
-        have hξβ : ξ < β := Ordinal.lt_def.mpr <| by simpa [ξ] using hxβ
-        have hξα : ξ.val ⊆ α.val := by
-          exact subset_trans (β.ordinal.toIsTransitive.transitive x hxβ) hβα
-        simpa [ξ] using ihβ ξ hξβ hξα
-      have hφ : Function.Graph F y (f ↾ x) := by
-        have : Function.Graph F y (g ↾ x) := (hrecg x hxα y).1 hpg
-        simpa [hfxgx] using this
-      have hpf : ⟨x, y⟩ₖ ∈ f := (hrecf x hxα y).2 hφ
-      exact mem_restrict_iff.mpr ⟨hpf, x, hxβ, y, rfl⟩
-  have hαfg : f ↾ α.val = g ↾ α.val := by
-    simpa using hrestr α (subset_refl α.val)
-  have hfα : f ↾ α.val = f := by
-    apply subset_antisymm
-    · intro p hp
-      exact (mem_restrict_iff.mp hp).1
-    · intro p hp
-      rcases show ∃ x ∈ domain f, ∃ y ∈ range f, p = ⟨x, y⟩ₖ from by
-          simpa [mem_prod_iff] using subset_prod_of_mem_function (IsFunction.mem_function f) p hp with
-        ⟨x, hxd, y, -, rfl⟩
-      have hxα : x ∈ α.val := by simpa [hdf] using hxd
-      exact mem_restrict_iff.mpr ⟨hp, x, hxα, y, rfl⟩
-  have hgα : g ↾ α.val = g := by
-    apply subset_antisymm
-    · intro p hp
-      exact (mem_restrict_iff.mp hp).1
-    · intro p hp
-      rcases show ∃ x ∈ domain g, ∃ y ∈ range g, p = ⟨x, y⟩ₖ from by
-          simpa [mem_prod_iff] using subset_prod_of_mem_function (IsFunction.mem_function g) p hp with
-        ⟨x, hxd, y, -, rfl⟩
-      have hxα : x ∈ α.val := by simpa [hdg] using hxd
-      exact mem_restrict_iff.mpr ⟨hp, x, hxα, y, rfl⟩
-  calc
-    f = f ↾ α.val := hfα.symm
-    _ = g ↾ α.val := hαfg
-    _ = g := hgα
+    apply attempt_function_coherent <;> assumption
+  have hαfg : f ↾ α.val = g ↾ α.val := hrestr α (subset_refl α.val)
+  have hfα : f ↾ α.val = f := IsFunction.restrict_eq_self f α.val (subset_of_eq hdf)
+  have hgα : g ↾ α.val = g := IsFunction.restrict_eq_self g α.val (subset_of_eq hdg)
+  simp_all
 
 /--
 If two functions with the same ordinal domain satisfy the same recursive clause at each stage,
