@@ -67,7 +67,7 @@ lemma Model.nonempty_univ_world {M : Model} : Set.Nonempty (Set.univ (α := M.Wo
 def Model.truthset (M : Model) : Formula ℕ → Set M.World
 | .atom n => M.Val n
 | ⊥       => ∅
-| φ ➝ ψ  => (truthset M φ)ᶜ ∪ truthset M ψ
+| φ 🡒 ψ  => (truthset M φ)ᶜ ∪ truthset M ψ
 | □φ      => M.box (truthset M φ)
 
 namespace Model.truthset
@@ -79,12 +79,12 @@ instance : CoeFun Model (λ M => Formula ℕ → Set M.World) := ⟨λ M => trut
 @[simp, grind =] lemma eq_atom : M (.atom n) = M.Val n := rfl
 @[simp, grind =] lemma eq_bot  : M ⊥ = ∅ := rfl
 @[simp, grind =] lemma eq_top  : M ⊤ = Set.univ := by simp [truthset]
-@[simp, grind =] lemma eq_imp  : M (φ ➝ ψ) = (M φ)ᶜ ∪ (M ψ) := rfl
+@[simp, grind =] lemma eq_imp  : M (φ 🡒 ψ) = (M φ)ᶜ ∪ (M ψ) := rfl
 @[simp, grind =] lemma eq_or   : M (φ ⋎ ψ) = (M φ) ∪ (M ψ) := by simp [truthset];
 @[simp, grind =] lemma eq_and  : M (φ ⋏ ψ) = (M φ) ∩ (M ψ) := by simp [truthset];
 @[simp, grind =] lemma eq_neg  : M (∼φ) = (M φ)ᶜ := by simp [truthset]
-@[simp, grind =] lemma eq_iff  : M (φ ⭤ ψ) = (M φ ∩ M ψ) ∪ ((M φ)ᶜ ∩ (M ψ)ᶜ) := calc
-  M (φ ⭤ ψ) = M (φ ➝ ψ) ∩ (M (ψ ➝ φ))             := by simp [LogicalConnective.iff];
+@[simp, grind =] lemma eq_iff  : M (φ 🡘 ψ) = (M φ ∩ M ψ) ∪ ((M φ)ᶜ ∩ (M ψ)ᶜ) := calc
+  M (φ 🡘 ψ) = M (φ 🡒 ψ) ∩ (M (ψ 🡒 φ))             := by simp [LogicalConnective.iff];
   _         = ((M φ)ᶜ ∪ (M ψ)) ∩ ((M ψ)ᶜ ∪ (M φ)) := by simp;
   _         = (M φ ∩ M ψ) ∪ ((M φ)ᶜ ∩ (M ψ)ᶜ)     := by tauto_set;
 
@@ -128,7 +128,7 @@ variable {M : Model} {x : M.World} {φ ψ ξ : Formula ℕ}
 @[grind .] lemma def_top : x ⊧ ⊤ := by simp [Semantics.Models, Satisfies];
 @[grind .] lemma def_bot : ¬x ⊧ ⊥ := by simp [Semantics.Models, Satisfies];
 @[grind =] lemma def_neg : x ⊧ ∼φ ↔ ¬x ⊧ φ := by simp [Semantics.Models, Satisfies];
-@[grind =] lemma def_imp : x ⊧ φ ➝ ψ ↔ (x ⊧ φ → x ⊧ ψ) := by simp [Semantics.Models, Satisfies]; tauto;
+@[grind =] lemma def_imp : x ⊧ φ 🡒 ψ ↔ (x ⊧ φ → x ⊧ ψ) := by simp [Semantics.Models, Satisfies]; tauto;
 @[grind =] lemma def_and : x ⊧ φ ⋏ ψ ↔ (x ⊧ φ ∧ x ⊧ ψ) := by simp [Semantics.Models, Satisfies];
 @[grind =] lemma def_or  : x ⊧ φ ⋎ ψ ↔ (x ⊧ φ ∨ x ⊧ ψ) := by simp [Semantics.Models, Satisfies];
 
@@ -151,7 +151,7 @@ protected instance : Semantics.Tarski (M.World) where
 @[simp] protected lemma implyK : x ⊧ Axioms.ImplyK φ ψ := by grind
 @[simp] protected lemma implyS : x ⊧ Axioms.ImplyS φ ψ ξ := by grind
 @[simp] protected lemma elimContra : x ⊧ Axioms.ElimContra φ ψ := by grind
-protected lemma mdp (hφψ : x ⊧ φ ➝ ψ) (hψ : x ⊧ φ) : x ⊧ ψ := by grind
+protected lemma mdp (hφψ : x ⊧ φ 🡒 ψ) (hψ : x ⊧ φ) : x ⊧ ψ := by grind
 
 lemma dia_dual : x ⊧ ◇φ ↔ x ⊧ ∼□(∼φ) := by simp [Semantics.Models, Satisfies];
 lemma box_dual : x ⊧ □φ ↔ x ⊧ ∼◇(∼φ) := by simp [Semantics.Models, Satisfies];
@@ -190,7 +190,7 @@ instance : Semantics.Bot Model where
 instance : Semantics.Top Model where
   models_verum M := by simp;
 
-lemma valid_iff : M ⊧ φ ⭤ ψ ↔ (M φ = M ψ) := by
+lemma valid_iff : M ⊧ φ 🡘 ψ ↔ (M φ = M ψ) := by
   constructor;
   . intro h;
     ext x;
@@ -206,13 +206,13 @@ lemma valid_iff : M ⊧ φ ⭤ ψ ↔ (M φ = M ψ) := by
 
 @[simp] protected lemma elimContra : M ⊧ Axioms.ElimContra φ ψ := λ _ ↦ Satisfies.elimContra
 
-protected lemma mdp (hφψ : M ⊧ φ ➝ ψ) (hψ : M ⊧ φ) : M ⊧ ψ := by
+protected lemma mdp (hφψ : M ⊧ φ 🡒 ψ) (hψ : M ⊧ φ) : M ⊧ ψ := by
   intro x;
   apply Satisfies.mdp;
   . exact hφψ x;
   . exact hψ x;
 
-protected lemma re (hφ : M ⊧ φ ⭤ ψ) : M ⊧ □φ ⭤ □ψ := by
+protected lemma re (hφ : M ⊧ φ 🡘 ψ) : M ⊧ □φ 🡘 □ψ := by
   rw [valid_iff] at ⊢ hφ;
   ext x;
   simp_all;
@@ -235,13 +235,13 @@ instance : Semantics.Bot Frame where
 instance : Semantics.Top Frame where
   models_verum F := by intro; simp;
 
-protected lemma mdp (hφψ : F ⊧ φ ➝ ψ) (hφ : F ⊧ φ) : F ⊧ ψ := by
+protected lemma mdp (hφψ : F ⊧ φ 🡒 ψ) (hφ : F ⊧ φ) : F ⊧ ψ := by
   intro V;
   apply ValidOnModel.mdp;
   . exact hφψ V;
   . exact hφ V;
 
-protected lemma re (hφ : F ⊧ φ ⭤ ψ) : F ⊧ □φ ⭤ □ψ := by
+protected lemma re (hφ : F ⊧ φ 🡘 ψ) : F ⊧ □φ 🡘 □ψ := by
   intro V;
   apply ValidOnModel.re;
   exact hφ V;

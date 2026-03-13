@@ -19,15 +19,15 @@ variable (φ ψ χ : F)
 
 protected alias PCon₁ := LO.Axioms.Dummett
 
-protected abbrev PCon₂ := (φ ➝ ψ) ➝ ((φ ➝ ψ) ➝ φ)
+protected abbrev PCon₂ := (φ 🡒 ψ) 🡒 ((φ 🡒 ψ) 🡒 φ)
 
-protected abbrev PCon₃ := (φ ➝ ψ) ➝ ((φ ➝ ψ) ➝ ψ)
+protected abbrev PCon₃ := (φ 🡒 ψ) 🡒 ((φ 🡒 ψ) 🡒 ψ)
 
-protected abbrev PCon₄ := (φ ➝ ψ ⋎ χ) ➝ (φ ➝ ψ) ⋎ (φ ➝ χ)
+protected abbrev PCon₄ := (φ 🡒 ψ ⋎ χ) 🡒 (φ 🡒 ψ) ⋎ (φ 🡒 χ)
 
-protected abbrev PCon₅ := (φ ⋏ ψ ⋎ χ) ➝ (φ ➝ χ) ⋎ (φ ➝ ψ)
+protected abbrev PCon₅ := (φ ⋏ ψ ⋎ χ) 🡒 (φ 🡒 χ) ⋎ (φ 🡒 ψ)
 
-protected abbrev PCon₆ := ((φ ➝ ψ) ➝ ψ) ⋏ ((ψ ➝ φ) ➝ φ) ➝ (φ ⋎ ψ)
+protected abbrev PCon₆ := ((φ 🡒 ψ) 🡒 ψ) ⋏ ((ψ 🡒 φ) 🡒 φ) 🡒 (φ ⋎ ψ)
 
 end Axioms
 

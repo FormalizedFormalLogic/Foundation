@@ -98,7 +98,7 @@ instance [Entailment.HasAxiomWeakPoint3 𝓢] : (canonicalFrame 𝓢).IsPiecewis
     obtain ⟨ψ₂, hψ₂z, hψ₂y⟩ := exists₂₁_of_ne neyz;
     let ψ := ψ₁ ⋎ ψ₂;
 
-    apply x.neither (φ := □(⊡φ ➝ ψ) ⋎ □(⊡ψ ➝ φ));
+    apply x.neither (φ := □(⊡φ 🡒 ψ) ⋎ □(⊡ψ 🡒 φ));
     constructor;
     . exact iff_provable_mem₁.mp axiomWeakPoint3! x;
     . apply iff_mem₂_or.mpr;

@@ -30,7 +30,7 @@ theorem provable_D1 {σ} : T ⊢ σ → 𝗜𝚺₁ ⊢ □σ := fun h ↦
   provable_of_models _ _ fun (V : Type) _ _ ↦ by simpa [models_iff] using internalize_provability (V := V) h
 
 /-- The derivability condition D2. -/
-theorem provable_D2 {σ π} : 𝗜𝚺₁ ⊢ □(σ ➝ π) ➝ □σ ➝ □π :=
+theorem provable_D2 {σ π} : 𝗜𝚺₁ ⊢ □(σ 🡒 π) 🡒 □σ 🡒 □π :=
   provable_of_models _ _ fun (V : Type) _ _ ↦ by simpa [models_iff] using modus_ponens_sentence T
 
 variable (T)
@@ -57,19 +57,19 @@ variable {T U : ArithmeticTheory} [T.Δ₁]
 local prefix:90 "□" => T.provabilityPred
 
 lemma provable_sigma_one_complete [𝗣𝗔⁻ ⪯ T] {σ : Sentence ℒₒᵣ} (hσ : Hierarchy 𝚺 1 σ) :
-    𝗜𝚺₁ ⊢ σ ➝ □σ :=
+    𝗜𝚺₁ ⊢ σ 🡒 □σ :=
   provable_of_models _ _ fun (V : Type) _ _ ↦ by
     simpa [models_iff] using Bootstrapping.Arithmetic.sigma_one_complete (T := T) (V := V) hσ
 
 /-- The derivability condition D3. -/
 theorem provable_D3 [𝗣𝗔⁻ ⪯ T] {σ : Sentence ℒₒᵣ} :
-    𝗜𝚺₁ ⊢ □σ ➝ □□σ := provable_sigma_one_complete (by simp)
+    𝗜𝚺₁ ⊢ □σ 🡒 □□σ := provable_sigma_one_complete (by simp)
 
 open LO.Entailment LO.Entailment.FiniteContext
 
 lemma provable_D2_context [𝗜𝚺₁ ⪯ U] {Γ σ π} (hσπ : Γ ⊢[U] □(σ ➝ π)) (hσ : Γ ⊢[U] □σ) :
     Γ ⊢[U] □π := FiniteContext.of'! (weakening inferInstance provable_D2) ⨀! hσπ ⨀! hσ
-
+🡒
 lemma provable_D3_context [𝗣𝗔⁻ ⪯ T] [𝗜𝚺₁ ⪯ U] {Γ σ} (hσπ : Γ ⊢[U] □σ) :
   Γ ⊢[U] □□σ := FiniteContext.of'! (weakening inferInstance provable_D3) ⨀! hσπ
 
@@ -91,10 +91,10 @@ open LO.Entailment in
   If `π` is equivalent to some 𝚺₁ sentence `σ`,
   then `π ➝ □π` is provable in `T` (note: not `𝗜𝚺₁`, compare `provable_sigma_one_complete`)
 -/
-lemma provable_sigma_one_complete_of_E {σ π} [𝗜𝚺₁ ⪯ T]
-  (hσ : Hierarchy 𝚺 1 σ) (hσπ : 𝗜𝚺₁ ⊢ σ ⭤ π) : 𝗜𝚺₁ ⊢ π ➝ □π := by
+lemma prov🡒ble_sigma_one_complete_of_E {σ π} [𝗜𝚺₁ ⪯ T]
+  (hσ : Hierarchy 𝚺 1 σ) (hσπ : 𝗜𝚺₁ ⊢ σ 🡘 π) : 𝗜𝚺₁ ⊢ π ➝ □π := by
   apply C!_replace ?_ ?_ $ provable_sigma_one_complete (T := T) $ hσ;
-  . cl_prover [hσπ];
+  . cl_prover [hσπ];🡒
   . apply T.standardProvability.mono';
     cl_prover [hσπ];
 

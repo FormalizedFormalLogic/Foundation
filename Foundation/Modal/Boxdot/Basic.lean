@@ -15,7 +15,7 @@ variable {φ : Formula α} {Ax Ax₁ Ax₂ : Axiom α}
 def Formula.boxdotTranslate : Formula α → Formula α
   | atom a => .atom a
   | ⊥ => ⊥
-  | φ ➝ ψ => (boxdotTranslate φ) ➝ (boxdotTranslate ψ)
+  | φ 🡒 ψ => (boxdotTranslate φ) 🡒 (boxdotTranslate ψ)
   | □φ => ⊡(boxdotTranslate φ)
 postfix:90 "ᵇ" => Formula.boxdotTranslate
 

@@ -219,7 +219,7 @@ lemma eq_exs_iff {φ : Semiformula L ξ₁ n₁} {ψ : Semiformula L ξ₂ (n₂
   cases φ using Semiformula.rec' <;> simp [rew_rel, rew_nrel]
 
 @[simp] lemma eq_neg_iff {φ : Semiformula L ξ₁ n₁} {ψ₁ ψ₂ : Semiformula L ξ₂ n₂} :
-    ω ▹ φ = ψ₁ ➝ ψ₂ ↔ ∃ φ₁ φ₂ : Semiformula L ξ₁ n₁, ω ▹ φ₁ = ψ₁ ∧ ω ▹ φ₂ = ψ₂ ∧ φ = φ₁ ➝ φ₂ := by
+    ω ▹ φ = ψ₁ 🡒 ψ₂ ↔ ∃ φ₁ φ₂ : Semiformula L ξ₁ n₁, ω ▹ φ₁ = ψ₁ ∧ ω ▹ φ₂ = ψ₂ ∧ φ = φ₁ 🡒 φ₂ := by
   simp only [imp_eq, eq_or_iff, exists_and_left]; constructor
   · rintro ⟨φ₁, hp₁, ψ₂, rfl, rfl⟩; exact ⟨∼φ₁, by simp [hp₁]⟩
   · rintro ⟨φ₁, rfl, φ₂, rfl, rfl⟩; exact ⟨∼φ₁, by simp, φ₂, by simp⟩

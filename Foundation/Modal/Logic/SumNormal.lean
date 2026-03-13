@@ -16,7 +16,7 @@ namespace Logic
 inductive sumNormal (L₁ L₂ : Logic α) : Logic α
   | mem₁ {φ}    : L₁ ⊢ φ → sumNormal L₁ L₂ φ
   | mem₂ {φ}    : L₂ ⊢ φ → sumNormal L₁ L₂ φ
-  | mdp  {φ ψ}  : sumNormal L₁ L₂ (φ ➝ ψ) → sumNormal L₁ L₂ φ → sumNormal L₁ L₂ ψ
+  | mdp  {φ ψ}  : sumNormal L₁ L₂ (φ 🡒 ψ) → sumNormal L₁ L₂ φ → sumNormal L₁ L₂ ψ
   | subst {φ s} : sumNormal L₁ L₂ φ → sumNormal L₁ L₂ (φ⟦s⟧)
   | nec {φ}     : sumNormal L₁ L₂ φ → sumNormal L₁ L₂ (□φ)
 
@@ -56,8 +56,8 @@ lemma rec!
   (mem₁  : ∀ {φ}, (h : L₁ ⊢ φ) → motive φ (mem₁! h))
   (mem₂  : ∀ {φ}, (h : L₂ ⊢ φ) → motive φ (mem₂! h))
   (mdp   : ∀ {φ ψ : Formula α},
-           {hφψ : (sumNormal L₁ L₂) ⊢ φ ➝ ψ} → {hφ : (sumNormal L₁ L₂) ⊢ φ} →
-          motive (φ ➝ ψ) hφψ → motive φ hφ → motive ψ (hφψ ⨀ hφ)
+           {hφψ : (sumNormal L₁ L₂) ⊢ φ 🡒 ψ} → {hφ : (sumNormal L₁ L₂) ⊢ φ} →
+          motive (φ 🡒 ψ) hφψ → motive φ hφ → motive ψ (hφψ ⨀ hφ)
   )
   (nec   : ∀ {φ}, {hφ : (sumNormal L₁ L₂) ⊢ φ} → (motive φ hφ) → motive (□φ) (Entailment.nec! hφ))
   (subst : ∀ {φ s}, {hφ : (sumNormal L₁ L₂) ⊢ φ} → (motive φ hφ) → motive (φ⟦s⟧) (Logic.subst _ hφ))

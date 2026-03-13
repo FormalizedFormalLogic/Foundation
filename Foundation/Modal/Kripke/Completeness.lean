@@ -177,7 +177,7 @@ lemma def_multirel_boxItr_satisfies : x ≺^[n] y ↔ (∀ {φ}, x ⊧ □^[n]φ
       obtain ⟨t, ht⟩ := lindenbaum (𝓢 := 𝓢) (t₀ := ⟨{ φ | x ⊧ □φ }, □^[n]'{ φ | ¬y ⊧ φ }⟩) $ by
         intro Γ Δ hΓ hΔ;
         by_contra! hC;
-        have : 𝓢 ⊢ □Γ.conj ➝ □Δ.disj := imply_box_distribute'! hC;
+        have : 𝓢 ⊢ □Γ.conj 🡒 □Δ.disj := imply_box_distribute'! hC;
         have : □Δ.disj ∈ x.1.1 := mdp_mem₁_provable this $ by
           apply truthlemma₁.mpr;
           intro y Rxy;

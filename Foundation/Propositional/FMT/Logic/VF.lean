@@ -47,7 +47,7 @@ instance FMT.complete : Complete Propositional.VF FrameClass.VF := by
   apply h;
   tauto;
 
-lemma unprovable_top_dntop : Propositional.VF ⊬ ⊤ ⭤ ∼∼⊤ := by
+lemma unprovable_top_dntop : Propositional.VF ⊬ ⊤ 🡘 ∼∼⊤ := by
   apply Sound.not_provable_of_countermodel (𝓜 := FMT.FrameClass.VF);
   apply FMT.not_validOnFrameClass_of_exists_model_world;
   let M : FMT.Model := {
@@ -80,7 +80,7 @@ instance : Propositional.VF ⪱ Propositional.WF := by
   . apply weakerThan_WF_VF_of_provable_axioms
     simp [Entailment.ProvableSet]
   . apply Entailment.not_weakerThan_iff.mpr;
-    use (⊤ ➝ #0 ⋏ #1) ⭤ (⊤ ➝ #1 ⋏ #0);
+    use (⊤ 🡒 #0 ⋏ #1) 🡘 (⊤ 🡒 #1 ⋏ #0);
     constructor;
     . exact ruleE equivId $ andIR K_comm K_comm
     . apply Sound.not_provable_of_countermodel (𝓜 := FMT.FrameClass.VF);
@@ -89,8 +89,8 @@ instance : Propositional.VF ⪱ Propositional.WF := by
         World := Fin 3,
         Rel φ x y :=
           match φ with
-          | ⊤ ➝ #1 ⋏ #0 => x ≤ y
-          | ⊤ ➝ #0 ⋏ #1 => x ≠ 1
+          | ⊤ 🡒 #1 ⋏ #0 => x ≤ y
+          | ⊤ 🡒 #0 ⋏ #1 => x ≠ 1
           | _       => True
         ,
         root := 0,

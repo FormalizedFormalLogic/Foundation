@@ -268,7 +268,7 @@ instance [Entailment.HasAxiomGeach g 𝓢] : (canonicalFrame 𝓢).IsGeachConver
       assumption;
     generalize Γ.conj = γ at hγ hC;
     generalize Δ.disj = δ at hδ hC;
-    have : 𝓢 ⊢ □^[g.m]γ ➝ □^[g.m]δ := imply_boxItr_distribute'! hC;
+    have : 𝓢 ⊢ □^[g.m]γ 🡒 □^[g.m]δ := imply_boxItr_distribute'! hC;
     have : □^[g.m]δ ∈ y.1.1 := mdp_mem₁_provable this hγ;
     have : ◇^[g.i](□^[g.m]δ) ∈ x.1.1 := def_multirel_diaItr_mem₁.mp Rxy this;
     have : □^[g.j](◇^[g.n]δ) ∈ x.1.1 := mdp_mem₁_provable axiomGeach! this;

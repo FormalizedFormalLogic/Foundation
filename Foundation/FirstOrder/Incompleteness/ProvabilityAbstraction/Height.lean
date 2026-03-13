@@ -21,9 +21,9 @@ noncomputable def Provability.height (𝔅 : Provability T₀ T) : ENat := ENat.
 lemma neg_iterated_prov (φ : Sentence L) : ∼(𝔅^[n] φ) = 𝔅.dia^[n] (∼φ) := by
   induction n generalizing φ <;> simp [Provability.dia, *]
 
-lemma boxBot_monotone [T₀ ⪯ T] [𝔅.HBL] : n ≤ m → T ⊢ 𝔅^[n] ⊥ ➝ 𝔅^[m] ⊥ := by
+lemma boxBot_monotone [T₀ ⪯ T] [𝔅.HBL] : n ≤ m → T ⊢ 𝔅^[n] ⊥ 🡒 𝔅^[m] ⊥ := by
   revert m
-  suffices ∀ k, T ⊢ 𝔅^[n] ⊥ ➝ 𝔅^[n + k] ⊥ by
+  suffices ∀ k, T ⊢ 𝔅^[n] ⊥ 🡒 𝔅^[n + k] ⊥ by
     intro m hnm
     simpa [Nat.add_sub_of_le hnm] using this (m - n)
   intro k
@@ -31,11 +31,11 @@ lemma boxBot_monotone [T₀ ⪯ T] [𝔅.HBL] : n ≤ m → T ⊢ 𝔅^[n] ⊥ �
   case zero => simp
   case succ k ih =>
     simp only [← add_assoc, Function.iterate_succ_apply']
-    have b₀ : T ⊢ 𝔅^[n] ⊥ ➝ 𝔅 (𝔅^[n] ⊥) := by
+    have b₀ : T ⊢ 𝔅^[n] ⊥ 🡒 𝔅 (𝔅^[n] ⊥) := by
       match n with
       | 0 => simp;
       | n + 1 =>
-        have : T ⊢ 𝔅 ((𝔅)^[n] ⊥) ➝ 𝔅 (𝔅 ((𝔅)^[n] ⊥)) := Entailment.WeakerThan.pbl $ 𝔅.D3;
+        have : T ⊢ 𝔅 ((𝔅)^[n] 🡒) ➝ 𝔅 (𝔅 ((𝔅)^[n] ⊥)) := Entailment.WeakerThan.pbl $ 𝔅.D3;
         simpa only [Function.iterate_succ_apply'] using this
     have b₁ : T ⊢ 𝔅 (𝔅^[n] ⊥) ➝ 𝔅 (𝔅^[n + k] ⊥) := Entailment.WeakerThan.pbl $ 𝔅.mono ih;
     cl_prover [b₀, b₁]

@@ -20,12 +20,12 @@ protected inductive Hilbert.VF (Ax : Axiom α) : Logic α
 | protected distributeAndOr {φ ψ χ} : Hilbert.VF Ax $ Axioms.DistributeAndOr φ ψ χ
 | protected impId {φ}               : Hilbert.VF Ax $ Axioms.ImpId φ
 | protected efq {φ}                 : Hilbert.VF Ax $ Axioms.EFQ φ
-| protected mdp {φ ψ}               : Hilbert.VF Ax (φ ➝ ψ) → Hilbert.VF Ax φ → Hilbert.VF Ax ψ
-| protected af {φ ψ}                : Hilbert.VF Ax φ → Hilbert.VF Ax (ψ ➝ φ)
+| protected mdp {φ ψ}               : Hilbert.VF Ax (φ 🡒 ψ) → Hilbert.VF Ax φ → Hilbert.VF Ax ψ
+| protected af {φ ψ}                : Hilbert.VF Ax φ → Hilbert.VF Ax (ψ 🡒 φ)
 | protected andIR {φ ψ}             : Hilbert.VF Ax φ → Hilbert.VF Ax ψ → Hilbert.VF Ax (φ ⋏ ψ)
-| protected ruleC {φ ψ χ}           : Hilbert.VF Ax (φ ➝ ψ) → Hilbert.VF Ax (φ ➝ χ) → Hilbert.VF Ax (φ ➝ (ψ ⋏ χ))
-| protected ruleD {φ ψ χ}           : Hilbert.VF Ax (φ ➝ χ) → Hilbert.VF Ax (ψ ➝ χ) → Hilbert.VF Ax (φ ⋎ ψ ➝ χ)
-| protected ruleI {φ ψ χ}           : Hilbert.VF Ax (φ ➝ ψ) → Hilbert.VF Ax (ψ ➝ χ) → Hilbert.VF Ax (φ ➝ χ)
+| protected ruleC {φ ψ χ}           : Hilbert.VF Ax (φ 🡒 ψ) → Hilbert.VF Ax (φ 🡒 χ) → Hilbert.VF Ax (φ 🡒 (ψ ⋏ χ))
+| protected ruleD {φ ψ χ}           : Hilbert.VF Ax (φ 🡒 χ) → Hilbert.VF Ax (ψ 🡒 χ) → Hilbert.VF Ax (φ ⋎ ψ 🡒 χ)
+| protected ruleI {φ ψ χ}           : Hilbert.VF Ax (φ 🡒 ψ) → Hilbert.VF Ax (ψ 🡒 χ) → Hilbert.VF Ax (φ 🡒 χ)
 
 namespace Hilbert.VF
 
@@ -57,11 +57,11 @@ instance : Entailment.VF (Hilbert.VF Ax) where
 protected lemma rec!
   {motive    : (φ : Formula α) → (Hilbert.VF Ax ⊢ φ) → Sort}
   (axm       : ∀ {φ}, (h : φ ∈ Ax) → motive (φ) (VF.axm'! h))
-  (mdp       : ∀ {φ ψ}, {hφψ : (Hilbert.VF Ax) ⊢ φ ➝ ψ} → {hφ : (Hilbert.VF Ax) ⊢ φ} → (motive (φ ➝ ψ) hφψ) → (motive φ hφ) → (motive ψ (hφψ ⨀ hφ)))
-  (af        : ∀ {φ ψ}, {hφ : (Hilbert.VF Ax) ⊢ φ} → (motive φ hφ) → (motive (ψ ➝ φ) (af hφ)))
-  (ruleC     : ∀ {φ ψ χ}, {h₁ : (Hilbert.VF Ax) ⊢ φ ➝ ψ} → {h₂ : (Hilbert.VF Ax) ⊢ φ ➝ χ} → (motive (φ ➝ ψ) h₁) → (motive (φ ➝ χ) h₂) → (motive (φ ➝ (ψ ⋏ χ)) (ruleC h₁ h₂)))
-  (ruleD     : ∀ {φ ψ χ}, {h₁ : (Hilbert.VF Ax) ⊢ φ ➝ χ} → {h₂ : (Hilbert.VF Ax) ⊢ ψ ➝ χ} → (motive (φ ➝ χ) h₁) → (motive (ψ ➝ χ) h₂) → (motive (φ ⋎ ψ ➝ χ) (ruleD h₁ h₂)))
-  (ruleI     : ∀ {φ ψ χ}, {h₁ : (Hilbert.VF Ax) ⊢ φ ➝ ψ} → {h₂ : (Hilbert.VF Ax) ⊢ ψ ➝ χ} → (motive (φ ➝ ψ) h₁) → (motive (ψ ➝ χ) h₂) → (motive (φ ➝ χ) (ruleI h₁ h₂)))
+  (mdp       : ∀ {φ ψ}, {hφψ : (Hilbert.VF Ax) ⊢ φ 🡒 ψ} → {hφ : (Hilbert.VF Ax) ⊢ φ} → (motive (φ 🡒 ψ) hφψ) → (motive φ hφ) → (motive ψ (hφψ ⨀ hφ)))
+  (af        : ∀ {φ ψ}, {hφ : (Hilbert.VF Ax) ⊢ φ} → (motive φ hφ) → (motive (ψ 🡒 φ) (af hφ)))
+  (ruleC     : ∀ {φ ψ χ}, {h₁ : (Hilbert.VF Ax) ⊢ φ 🡒 ψ} → {h₂ : (Hilbert.VF Ax) ⊢ φ 🡒 χ} → (motive (φ 🡒 ψ) h₁) → (motive (φ 🡒 χ) h₂) → (motive (φ 🡒 (ψ ⋏ χ)) (ruleC h₁ h₂)))
+  (ruleD     : ∀ {φ ψ χ}, {h₁ : (Hilbert.VF Ax) ⊢ φ 🡒 χ} → {h₂ : (Hilbert.VF Ax) ⊢ ψ 🡒 χ} → (motive (φ 🡒 χ) h₁) → (motive (ψ 🡒 χ) h₂) → (motive (φ ⋎ ψ 🡒 χ) (ruleD h₁ h₂)))
+  (ruleI     : ∀ {φ ψ χ}, {h₁ : (Hilbert.VF Ax) ⊢ φ 🡒 ψ} → {h₂ : (Hilbert.VF Ax) ⊢ ψ 🡒 χ} → (motive (φ 🡒 ψ) h₁) → (motive (ψ 🡒 χ) h₂) → (motive (φ 🡒 χ) (ruleI h₁ h₂)))
   (impId     : ∀ {φ}, (motive (Axioms.ImpId φ) impId))
   (andElimL  : ∀ {φ ψ}, (motive (Axioms.AndElim₁ φ ψ) andElimL))
   (andElimR  : ∀ {φ ψ}, (motive (Axioms.AndElim₂ φ ψ) andElimR))

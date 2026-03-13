@@ -24,9 +24,9 @@ namespace HintikkaPair
 
 variable {H : HintikkaPair φ}
 
-def Consistent (L : Logic ℕ) (H : HintikkaPair φ) : Prop := L ⊬ Finset.conj' H.1 (·.1) ➝ (⩖ x ∈ H.2, ↑x)
-lemma iff_consistent : H.Consistent L ↔ ¬(L ⊢ Finset.conj' H.1 (·.1) ➝ (⩖ x ∈ H.2, ↑x)) := by simp [Consistent];
-lemma iff_not_consistent : ¬(H.Consistent L) ↔ L ⊢ Finset.conj' H.1 (·.1) ➝ (⩖ x ∈ H.2, ↑x) := by simp [Consistent];
+def Consistent (L : Logic ℕ) (H : HintikkaPair φ) : Prop := L ⊬ Finset.conj' H.1 (·.1) 🡒 (⩖ x ∈ H.2, ↑x)
+lemma iff_consistent : H.Consistent L ↔ ¬(L ⊢ Finset.conj' H.1 (·.1) 🡒 (⩖ x ∈ H.2, ↑x)) := by simp [Consistent];
+lemma iff_not_consistent : ¬(H.Consistent L) ↔ L ⊢ Finset.conj' H.1 (·.1) 🡒 (⩖ x ∈ H.2, ↑x) := by simp [Consistent];
 
 @[grind]
 def Saturated (H : HintikkaPair φ) := H.1 ∪ H.2 = Finset.univ
@@ -61,18 +61,18 @@ lemma either_consistent_insert
   let Δ₀ : Formula ℕ := ⩖ δ ∈ H.2, ↑δ;
   let Δ₁ : Formula ℕ := ⩖ δ ∈ (H.insert₂ ψ).2, ↑δ;
 
-  replace h₁ : L ⊢ Γ₁ ➝ Δ₀ := iff_not_consistent.mp h₁;
-  replace h₂ : L ⊢ Γ₀ ➝ Δ₁ := iff_not_consistent.mp h₂;
-  show L ⊢ Γ₀ ➝ Δ₀;
+  replace h₁ : L ⊢ Γ₁ 🡒 Δ₀ := iff_not_consistent.mp h₁;
+  replace h₂ : L ⊢ Γ₀ 🡒 Δ₁ := iff_not_consistent.mp h₂;
+  show L ⊢ Γ₀ 🡒 Δ₀;
 
   apply ruleI ?_ $ ruleD impId h₁;
-  show L ⊢ Γ₀ ➝ Δ₀ ⋎ Γ₁;
+  show L ⊢ Γ₀ 🡒 Δ₀ ⋎ Γ₁;
 
   apply ruleI $ ruleC h₂ orIntroR;
-  show L ⊢ Δ₁ ⋏ (Δ₀ ⋎ Γ₀) ➝ Δ₀ ⋎ Γ₁;
+  show L ⊢ Δ₁ ⋏ (Δ₀ ⋎ Γ₀) 🡒 Δ₀ ⋎ Γ₁;
 
   apply C_replace_both;
-  . show L ⊢ (Δ₀ ⋎ ↑ψ) ⋏ (Δ₀ ⋎ Γ₀) ➝ Δ₀ ⋎ ↑ψ ⋏ Γ₀;
+  . show L ⊢ (Δ₀ ⋎ ↑ψ) ⋏ (Δ₀ ⋎ Γ₀) 🡒 Δ₀ ⋎ ↑ψ ⋏ Γ₀;
     exact collectOrAnd;
   . apply ruleC ?_ andElimR;
     apply ruleI andElimL;
@@ -205,7 +205,7 @@ lemma not_mem_both : ¬(ψ ∈ H.1.1 ∧ ψ ∈ H.1.2) := by
   obtain ⟨h₁, h₂⟩ := hC;
   apply H.consistent;
   apply C_replace_both;
-  . show L ⊢ ψ.1 ➝ ψ.1;
+  . show L ⊢ ψ.1 🡒 ψ.1;
     exact impId;
   . apply mem_fconj';
     grind;
@@ -228,7 +228,7 @@ lemma iff_mem₂_not_mem₁ : ψ ∈ H.1.2 ↔ ψ ∉ H.1.1 := by
 
 
 
-lemma imp_closed (hSψ : ψ ∈ φ.subformulas) (hSχ : χ ∈ φ.subformulas) : L ⊢ ψ ➝ χ → ⟨ψ, hSψ⟩ ∈ H.1.1 → ⟨χ, hSχ⟩ ∈ H.1.1 := by
+lemma imp_closed (hSψ : ψ ∈ φ.subformulas) (hSχ : χ ∈ φ.subformulas) : L ⊢ ψ 🡒 χ → ⟨ψ, hSψ⟩ ∈ H.1.1 → ⟨χ, hSχ⟩ ∈ H.1.1 := by
   rintro h₁ hφ;
   by_contra hψ;
   replace hψ := iff_mem₂_not_mem₁.mpr hψ;
@@ -268,7 +268,7 @@ lemma iff_mem_and (hSub : ψ ⋏ χ ∈ φ.subformulas) : ⟨ψ ⋏ χ, hSub⟩ 
     replace hψχ := iff_mem₂_not_mem₁.mpr hψχ;
     apply H.consistent;
     apply C_replace_both;
-    . show L ⊢ ψ ⋏ χ ➝ ψ ⋏ χ;
+    . show L ⊢ ψ ⋏ χ 🡒 ψ ⋏ χ;
       exact impId;
     . apply ruleC <;>
       . apply mem_fconj';
@@ -285,7 +285,7 @@ lemma iff_mem_or (hSub : ψ ⋎ χ ∈ φ.subformulas) : ⟨ψ ⋎ χ, hSub⟩ �
     replace hψ := iff_mem₂_not_mem₁.mpr hψ;
     apply H.consistent;
     apply C_replace_both;
-    . show L ⊢ ψ ⋎ χ ➝ ψ ⋎ χ;
+    . show L ⊢ ψ ⋎ χ 🡒 ψ ⋎ χ;
       exact impId;
     . apply mem_fconj';
       grind;
@@ -309,7 +309,7 @@ open Classical in
 noncomputable def HintikkaModel (L : Logic ℕ) [Entailment.VF L] [Entailment.Consistent L] [Entailment.Disjunctive L] (φ : Formula ℕ) : FMT.Model :=
   letI H₀ : HintikkaPair φ := ⟨
     ∅,
-    Finset.univ.filter (λ ⟨δ, hδ⟩ => ∃ χ ξ, δ = χ.1 ➝ ξ.1 ∧ ∃ H : ConsistentSaturatedHintikkaPair L φ, χ ∈ H.1.1 ∧ ξ ∈ H.1.2 )
+    Finset.univ.filter (λ ⟨δ, hδ⟩ => ∃ χ ξ, δ = χ.1 🡒 ξ.1 ∧ ∃ H : ConsistentSaturatedHintikkaPair L φ, χ ∈ H.1.1 ∧ ξ ∈ H.1.2 )
   ⟩;
   haveI hH₀ := ConsistentSaturatedHintikkaPair.lindenbaum (φ := φ) (L := L) H₀ $ by
     apply HintikkaPair.iff_consistent.mpr;
@@ -319,11 +319,11 @@ noncomputable def HintikkaModel (L : Logic ℕ) [Entailment.VF L] [Entailment.Co
       apply DP_fdisj;
       apply Entailment.mdp! hC;
       simp [H₀];
-    obtain ⟨χ, ξ, e, Γ, hΓχ, hΓξ⟩ : ∃ χ ξ : SubformulaOf φ, δ = χ.1 ➝ ξ.1 ∧ ∃ H : ConsistentSaturatedHintikkaPair L φ, χ ∈ H.1.1 ∧ ξ ∈ H.1.2  := by
+    obtain ⟨χ, ξ, e, Γ, hΓχ, hΓξ⟩ : ∃ χ ξ : SubformulaOf φ, δ = χ.1 🡒 ξ.1 ∧ ∃ H : ConsistentSaturatedHintikkaPair L φ, χ ∈ H.1.1 ∧ ξ ∈ H.1.2  := by
       simpa [H₀] using hδ₁;
     apply Γ.consistent;
     apply C_replace_both;
-    . show L ⊢ χ.1 ➝ ξ.1;
+    . show L ⊢ χ.1 🡒 ξ.1;
       exact e ▸ hδ₂;
     . apply mem_fconj';
       use χ;
@@ -333,16 +333,16 @@ noncomputable def HintikkaModel (L : Logic ℕ) [Entailment.VF L] [Entailment.Co
     World := ConsistentSaturatedHintikkaPair L φ
     Rel ψ H I :=
       match ψ with
-      | χ ➝ ξ =>
-        ∀ (h : χ ➝ ξ ∈ φ.subformulas),
-          ⟨χ ➝ ξ, h⟩ ∈ H.1.2 ∨
+      | χ 🡒 ξ =>
+        ∀ (h : χ 🡒 ξ ∈ φ.subformulas),
+          ⟨χ 🡒 ξ, h⟩ ∈ H.1.2 ∨
           ⟨χ, Formula.subformulas.mem_imp h |>.1⟩ ∈ I.1.2 ∨
           ⟨ξ, Formula.subformulas.mem_imp h |>.2⟩ ∈ I.1.1
       | _ => True
     root := hH₀.choose
     rooted {ψ I} := by
       match ψ with
-      | χ ➝ ξ =>
+      | χ 🡒 ξ =>
         simp only;
         rintro _;
         let χ' : SubformulaOf φ := ⟨χ, by grind⟩;
@@ -352,7 +352,7 @@ noncomputable def HintikkaModel (L : Logic ℕ) [Entailment.VF L] [Entailment.Co
           exact h I;
         . left;
           apply hH₀.choose_spec |>.2;
-          suffices ∃ χ' ξ', χ ➝ ξ = χ'.1 ➝ ξ'.1 ∧ ∃ I : ConsistentSaturatedHintikkaPair L φ, χ' ∈ I.1.1 ∧ ξ' ∈ I.1.2 by
+          suffices ∃ χ' ξ', χ 🡒 ξ = χ'.1 🡒 ξ'.1 ∧ ∃ I : ConsistentSaturatedHintikkaPair L φ, χ' ∈ I.1.1 ∧ ξ' ∈ I.1.2 by
             simpa only [H₀, Finset.univ_eq_attach, Finset.mem_filter, Finset.mem_attach, true_and] using this;
           push_neg at h;
           obtain ⟨I, hI₁, hI₂⟩ := h;
@@ -384,14 +384,14 @@ lemma HintikkaModel.truthlemma {H : HintikkaModel L φ} (hsub : ψ ∈ φ.subfor
       intro h;
       apply Forces.not_def_imp.mpr;
       obtain ⟨I, hI₁, hI₂⟩ := ConsistentSaturatedHintikkaPair.lindenbaum (φ := φ) (L := L) ({⟨χ, by grind⟩}, {⟨ξ, by grind⟩}) $ by
-        suffices L ⊬ χ ➝ ξ by simpa [HintikkaPair.Consistent];
+        suffices L ⊬ χ 🡒 ξ by simpa [HintikkaPair.Consistent];
         by_contra! hC;
         apply H.consistent;
         apply af;
         apply ?_ ⨀ hC;
         apply mem_fdisj';
         replace h := ConsistentSaturatedHintikkaPair.iff_mem₂_not_mem₁.mpr h;
-        use ⟨χ ➝ ξ, by tauto⟩;
+        use ⟨χ 🡒 ξ, by tauto⟩;
       use I;
       refine ⟨?_, ?_, ?_⟩;
       . dsimp [HintikkaModel]
@@ -409,7 +409,7 @@ theorem provable_of_validOnHintikkaModel : (HintikkaModel L φ) ⊧ φ → L ⊢
   intro h;
   apply ValidOnModel.not_of_exists_world;
   obtain ⟨H, _, hH₂⟩ := ConsistentSaturatedHintikkaPair.lindenbaum (φ := φ) (L := L)  ⟨∅, {⟨φ, by grind⟩}⟩ $ by
-    suffices ¬L ⊢ ⊤ ➝ φ by simpa [HintikkaPair.Consistent];
+    suffices ¬L ⊢ ⊤ 🡒 φ by simpa [HintikkaPair.Consistent];
     contrapose! h;
     exact h ⨀ Entailment.verum!;
   use H;

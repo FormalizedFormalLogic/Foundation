@@ -23,7 +23,7 @@ theorem iff_provable_dn_Int_Cl : Propositional.Int ⊢ ∼∼φ ↔ Propositiona
     induction d with
     | axm s hp =>
       rcases hp with (rfl | rfl);
-      . suffices Propositional.Int ⊢ ∼∼(⊥ ➝ s 0) by simpa;
+      . suffices Propositional.Int ⊢ ∼∼(⊥ 🡒 s 0) by simpa;
         int_prover;
       . suffices Propositional.Int ⊢ ∼∼(s 0 ⋎ ∼s 0) by simpa;
         int_prover;

@@ -18,7 +18,7 @@ open Modal.Kripke
 open Modal.Formula.Kripke
 
 @[simp]
-lemma S4.CCLL_CCL : Modal.S4 ⊢ □(□φ ➝ □ψ) ➝ □(□φ ➝ ψ) := by
+lemma S4.CCLL_CCL : Modal.S4 ⊢ □(□φ 🡒 □ψ) 🡒 □(□φ 🡒 ψ) := by
   apply Complete.complete (𝓜 := FrameClass.S4);
   rintro F ⟨_, _⟩ V x h₁ y Rxy h₂;
   apply @h₁ y Rxy h₂;
@@ -29,7 +29,7 @@ instance : Entailment.HasAxiomPoint3 (smallestMC Propositional.LC) where
     constructor;
     apply Modal.Logic.iff_provable.mp;
     apply Modal.Logic.subst (L := (smallestMC Propositional.LC)) (φ := Modal.Axioms.Point3 (.atom 0) (.atom 1)) (s := λ a => match a with | 0 => φ | 1 => ψ | _ => .atom a);
-    have : (smallestMC Propositional.LC) ⊢ □(□.atom 0 ➝ □.atom 1) ⋎ □(□.atom 1 ➝ □.atom 0) := by
+    have : (smallestMC Propositional.LC) ⊢ □(□.atom 0 🡒 □.atom 1) ⋎ □(□.atom 1 🡒 □.atom 0) := by
       apply Logic.sumNormal.mem₂!;
       use Axioms.Dummett (.atom 0) (.atom 1);
       constructor;
@@ -43,15 +43,15 @@ instance : Entailment.HasAxiomPoint3 (smallestMC Propositional.LC) where
 
 namespace S4Point3
 
-lemma gödelTranslated_axiomDummett : Modal.S4Point3 ⊢ □(□ψᵍ ➝ χᵍ) ➝ □(ψᵍ ➝ χᵍ) := by
+lemma gödelTranslated_axiomDummett : Modal.S4Point3 ⊢ □(□ψᵍ 🡒 χᵍ) 🡒 □(ψᵍ 🡒 χᵍ) := by
   apply axiomK'!;
   apply nec!;
   apply C!_swap;
   apply deduct'!;
   apply deduct!;
-  have h₁ : [□ψᵍ ➝ χᵍ, ψᵍ] ⊢[Modal.S4Point3] ψᵍ ➝ □ψᵍ := of'! $ gödelTranslated_axiomTc;
-  have h₂ : [□ψᵍ ➝ χᵍ, ψᵍ] ⊢[Modal.S4Point3] ψᵍ := by_axm!;
-  have h₃ : [□ψᵍ ➝ χᵍ, ψᵍ] ⊢[Modal.S4Point3] □ψᵍ ➝ χᵍ := by_axm!;
+  have h₁ : [□ψᵍ 🡒 χᵍ, ψᵍ] ⊢[Modal.S4Point3] ψᵍ 🡒 □ψᵍ := of'! $ gödelTranslated_axiomTc;
+  have h₂ : [□ψᵍ 🡒 χᵍ, ψᵍ] ⊢[Modal.S4Point3] ψᵍ := by_axm!;
+  have h₃ : [□ψᵍ 🡒 χᵍ, ψᵍ] ⊢[Modal.S4Point3] □ψᵍ 🡒 χᵍ := by_axm!;
   exact h₃ ⨀ (h₁ ⨀ h₂);
 
 instance : Modal.S4Point3 ≊ Propositional.LC.smallestMC := by

@@ -18,7 +18,7 @@ def trivTranslate : Formula α → Formula α
   | .atom a => atom a
   | □φ => φ.trivTranslate
   | ⊥ => ⊥
-  | φ ➝ ψ => (φ.trivTranslate) ➝ (ψ.trivTranslate)
+  | φ 🡒 ψ => (φ.trivTranslate) 🡒 (ψ.trivTranslate)
 postfix:75 "ᵀ" => trivTranslate
 
 namespace trivTranslate
@@ -39,7 +39,7 @@ def verTranslate : Formula α → Formula α
   | atom a => atom a
   | □_ => ⊤
   | ⊥ => ⊥
-  | φ ➝ ψ => (φ.verTranslate) ➝ (ψ.verTranslate)
+  | φ 🡒 ψ => (φ.verTranslate) 🡒 (ψ.verTranslate)
 postfix:75 "ⱽ" => verTranslate
 
 namespace verTranslate
@@ -76,7 +76,7 @@ lemma Hilbert.Normal.provable_of_classical_provable {Ax : Axiom ℕ} {φ : Propo
 
 namespace Triv
 
-lemma iff_trivTranslated : Modal.Triv ⊢ φ ⭤ φᵀ := by
+lemma iff_trivTranslated : Modal.Triv ⊢ φ 🡘 φᵀ := by
   induction φ with
   | hbox φ ih =>
     apply E!_intro;
@@ -100,7 +100,7 @@ lemma iff_provable_Cl : Modal.Triv ⊢ φ ↔ Propositional.Cl ⊢ φᵀ.toPropF
       dsimp [trivTranslate, Formula.toPropFormula];
       cl_prover;
   . intro h;
-    have d₁ : Modal.Triv ⊢ φᵀ ➝ φ := K!_right iff_trivTranslated;
+    have d₁ : Modal.Triv ⊢ φᵀ 🡒 φ := K!_right iff_trivTranslated;
     have d₂ : Modal.Triv ⊢ φᵀ := by simpa only [trivTranslate.toIP] using Hilbert.Normal.provable_of_classical_provable h;
     exact d₁ ⨀ d₂;
 
@@ -112,7 +112,7 @@ end Triv
 
 namespace Ver
 
-lemma iff_verTranslated : Modal.Ver ⊢ φ ⭤ φⱽ := by
+lemma iff_verTranslated : Modal.Ver ⊢ φ 🡘 φⱽ := by
   induction φ with
   | hbox =>
     apply E!_intro;
@@ -135,7 +135,7 @@ lemma iff_provable_Cl : Modal.Ver ⊢ φ ↔ Propositional.Cl ⊢ φⱽ.toPropFo
       dsimp [verTranslate, Formula.toPropFormula];
       cl_prover;
   . intro h;
-    have d₁ : Modal.Ver ⊢ φⱽ ➝ φ := K!_right iff_verTranslated;
+    have d₁ : Modal.Ver ⊢ φⱽ 🡒 φ := K!_right iff_verTranslated;
     have d₂ : Modal.Ver ⊢ φⱽ := by simpa using Hilbert.Normal.provable_of_classical_provable h;
     exact d₁ ⨀ d₂;
 

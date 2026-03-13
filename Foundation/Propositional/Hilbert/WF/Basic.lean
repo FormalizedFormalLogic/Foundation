@@ -23,13 +23,13 @@ protected inductive Hilbert.WF (Ax : Axiom α) : Logic α
 | protected distributeAndOr {φ ψ χ} : Hilbert.WF Ax $ Axioms.DistributeAndOr φ ψ χ
 | protected impId {φ}               : Hilbert.WF Ax $ Axioms.ImpId φ
 | protected efq {φ}                 : Hilbert.WF Ax $ Axioms.EFQ φ
-| protected mdp {φ ψ}               : Hilbert.WF Ax (φ ➝ ψ) → Hilbert.WF Ax φ → Hilbert.WF Ax ψ
-| protected af {φ ψ}                : Hilbert.WF Ax φ → Hilbert.WF Ax (ψ ➝ φ)
+| protected mdp {φ ψ}               : Hilbert.WF Ax (φ 🡒 ψ) → Hilbert.WF Ax φ → Hilbert.WF Ax ψ
+| protected af {φ ψ}                : Hilbert.WF Ax φ → Hilbert.WF Ax (ψ 🡒 φ)
 | protected andIR {φ ψ}             : Hilbert.WF Ax φ → Hilbert.WF Ax ψ → Hilbert.WF Ax (φ ⋏ ψ)
-| protected ruleC {φ ψ χ}           : Hilbert.WF Ax (φ ➝ ψ) → Hilbert.WF Ax (φ ➝ χ) → Hilbert.WF Ax (φ ➝ (ψ ⋏ χ))
-| protected ruleD {φ ψ χ}           : Hilbert.WF Ax (φ ➝ χ) → Hilbert.WF Ax (ψ ➝ χ) → Hilbert.WF Ax (φ ⋎ ψ ➝ χ)
-| protected ruleI {φ ψ χ}           : Hilbert.WF Ax (φ ➝ ψ) → Hilbert.WF Ax (ψ ➝ χ) → Hilbert.WF Ax (φ ➝ χ)
-| protected ruleE {φ ψ χ ξ}         : Hilbert.WF Ax (φ ⭤ ψ) → Hilbert.WF Ax (χ ⭤ ξ) → Hilbert.WF Ax ((φ ➝ χ) ⭤ (ψ ➝ ξ))
+| protected ruleC {φ ψ χ}           : Hilbert.WF Ax (φ 🡒 ψ) → Hilbert.WF Ax (φ 🡒 χ) → Hilbert.WF Ax (φ 🡒 (ψ ⋏ χ))
+| protected ruleD {φ ψ χ}           : Hilbert.WF Ax (φ 🡒 χ) → Hilbert.WF Ax (ψ 🡒 χ) → Hilbert.WF Ax (φ ⋎ ψ 🡒 χ)
+| protected ruleI {φ ψ χ}           : Hilbert.WF Ax (φ 🡒 ψ) → Hilbert.WF Ax (ψ 🡒 χ) → Hilbert.WF Ax (φ 🡒 χ)
+| protected ruleE {φ ψ χ ξ}         : Hilbert.WF Ax (φ 🡘 ψ) → Hilbert.WF Ax (χ 🡘 ξ) → Hilbert.WF Ax ((φ 🡒 χ) 🡘 (ψ 🡒 ξ))
 
 namespace Hilbert.WF
 
@@ -62,13 +62,13 @@ instance : Entailment.WF (Hilbert.WF Ax) where
 protected lemma rec!
   {motive    : (φ : Formula α) → (Hilbert.WF Ax ⊢ φ) → Sort}
   (axm       : ∀ {φ}, (h : φ ∈ Ax) → motive (φ) (WF.axm'! h))
-  (mdp       : ∀ {φ ψ}, {hφψ : (Hilbert.WF Ax) ⊢ φ ➝ ψ} → {hφ : (Hilbert.WF Ax) ⊢ φ} → (motive (φ ➝ ψ) hφψ) → (motive φ hφ) → (motive ψ (hφψ ⨀ hφ)))
-  (af        : ∀ {φ ψ}, {hφ : (Hilbert.WF Ax) ⊢ φ} → (motive φ hφ) → (motive (ψ ➝ φ) (af hφ)))
+  (mdp       : ∀ {φ ψ}, {hφψ : (Hilbert.WF Ax) ⊢ φ 🡒 ψ} → {hφ : (Hilbert.WF Ax) ⊢ φ} → (motive (φ 🡒 ψ) hφψ) → (motive φ hφ) → (motive ψ (hφψ ⨀ hφ)))
+  (af        : ∀ {φ ψ}, {hφ : (Hilbert.WF Ax) ⊢ φ} → (motive φ hφ) → (motive (ψ 🡒 φ) (af hφ)))
   (andIR     : ∀ {φ ψ}, {hφ : (Hilbert.WF Ax) ⊢ φ} → {hψ : (Hilbert.WF Ax) ⊢ ψ} → (motive φ hφ) → (motive ψ hψ) → (motive (φ ⋏ ψ) (andIR hφ hψ)))
-  (ruleC     : ∀ {φ ψ χ}, {h₁ : (Hilbert.WF Ax) ⊢ φ ➝ ψ} → {h₂ : (Hilbert.WF Ax) ⊢ φ ➝ χ} → (motive (φ ➝ ψ) h₁) → (motive (φ ➝ χ) h₂) → (motive (φ ➝ (ψ ⋏ χ)) (ruleC h₁ h₂)))
-  (ruleD     : ∀ {φ ψ χ}, {h₁ : (Hilbert.WF Ax) ⊢ φ ➝ χ} → {h₂ : (Hilbert.WF Ax) ⊢ ψ ➝ χ} → (motive (φ ➝ χ) h₁) → (motive (ψ ➝ χ) h₂) → (motive (φ ⋎ ψ ➝ χ) (ruleD h₁ h₂)))
-  (ruleI     : ∀ {φ ψ χ}, {h₁ : (Hilbert.WF Ax) ⊢ φ ➝ ψ} → {h₂ : (Hilbert.WF Ax) ⊢ ψ ➝ χ} → (motive (φ ➝ ψ) h₁) → (motive (ψ ➝ χ) h₂) → (motive (φ ➝ χ) (ruleI h₁ h₂)))
-  (ruleE     : ∀ {φ ψ χ ξ}, {h₁ : (Hilbert.WF Ax) ⊢ φ ⭤ ψ} → {h₂ : (Hilbert.WF Ax) ⊢ χ ⭤ ξ} → (motive (φ ⭤ ψ) h₁) → (motive (χ ⭤ ξ) h₂) → (motive ((φ ➝ χ) ⭤ (ψ ➝ ξ)) (ruleE h₁ h₂)))
+  (ruleC     : ∀ {φ ψ χ}, {h₁ : (Hilbert.WF Ax) ⊢ φ 🡒 ψ} → {h₂ : (Hilbert.WF Ax) ⊢ φ 🡒 χ} → (motive (φ 🡒 ψ) h₁) → (motive (φ 🡒 χ) h₂) → (motive (φ 🡒 (ψ ⋏ χ)) (ruleC h₁ h₂)))
+  (ruleD     : ∀ {φ ψ χ}, {h₁ : (Hilbert.WF Ax) ⊢ φ 🡒 χ} → {h₂ : (Hilbert.WF Ax) ⊢ ψ 🡒 χ} → (motive (φ 🡒 χ) h₁) → (motive (ψ 🡒 χ) h₂) → (motive (φ ⋎ ψ 🡒 χ) (ruleD h₁ h₂)))
+  (ruleI     : ∀ {φ ψ χ}, {h₁ : (Hilbert.WF Ax) ⊢ φ 🡒 ψ} → {h₂ : (Hilbert.WF Ax) ⊢ ψ 🡒 χ} → (motive (φ 🡒 ψ) h₁) → (motive (ψ 🡒 χ) h₂) → (motive (φ 🡒 χ) (ruleI h₁ h₂)))
+  (ruleE     : ∀ {φ ψ χ ξ}, {h₁ : (Hilbert.WF Ax) ⊢ φ 🡘 ψ} → {h₂ : (Hilbert.WF Ax) ⊢ χ 🡘 ξ} → (motive (φ 🡘 ψ) h₁) → (motive (χ 🡘 ξ) h₂) → (motive ((φ 🡒 χ) 🡘 (ψ 🡒 ξ)) (ruleE h₁ h₂)))
   (impId     : ∀ {φ}, (motive (Axioms.ImpId φ) impId))
   (andElimL  : ∀ {φ ψ}, (motive (Axioms.AndElim₁ φ ψ) andElimL))
   (andElimR  : ∀ {φ ψ}, (motive (Axioms.AndElim₂ φ ψ) andElimR))

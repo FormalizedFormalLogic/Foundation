@@ -19,7 +19,7 @@ prefix:75 "∼" => Tilde.tilde
 class Arrow (α : Type*) where
   arrow : α → α → α
 
-infixr:60 " ➝ " => Arrow.arrow
+infixr:60 " 🡒 " => Arrow.arrow
 
 class Wedge (α : Type*) where
   wedge : α → α → α

@@ -16,10 +16,10 @@ open
 
 protected inductive Hilbert.Minimal {α} (Ax : Axiom α) : Logic α
 | protected axm {φ} (s : Substitution _) : φ ∈ Ax → Hilbert.Minimal Ax (φ⟦s⟧)
-| protected mdp {φ ψ}     : Hilbert.Minimal Ax (φ ➝ ψ) → Hilbert.Minimal Ax φ → Hilbert.Minimal Ax ψ
+| protected mdp {φ ψ}     : Hilbert.Minimal Ax (φ 🡒 ψ) → Hilbert.Minimal Ax φ → Hilbert.Minimal Ax ψ
 | protected nec {φ}       : Hilbert.Minimal Ax φ → Hilbert.Minimal Ax (□φ)
-| protected R1 {φ ψ χ}    : Hilbert.Minimal Ax (φ ➝ ψ) → Hilbert.Minimal Ax (χ ▷ φ ➝ χ ▷ ψ)
-| protected R2 {φ ψ χ}    : Hilbert.Minimal Ax (φ ➝ ψ) → Hilbert.Minimal Ax (ψ ▷ χ ➝ φ ▷ χ)
+| protected R1 {φ ψ χ}    : Hilbert.Minimal Ax (φ 🡒 ψ) → Hilbert.Minimal Ax (χ ▷ φ 🡒 χ ▷ ψ)
+| protected R2 {φ ψ χ}    : Hilbert.Minimal Ax (φ 🡒 ψ) → Hilbert.Minimal Ax (ψ ▷ χ 🡒 φ ▷ χ)
 | protected implyK φ ψ    : Hilbert.Minimal Ax $ Axioms.ImplyK φ ψ
 | protected implyS φ ψ χ  : Hilbert.Minimal Ax $ Axioms.ImplyS φ ψ χ
 | protected ec φ ψ        : Hilbert.Minimal Ax $ Axioms.ElimContra φ ψ
@@ -83,10 +83,10 @@ instance : Logic.Substitution (Hilbert.Minimal Ax) where
 protected lemma rec!
   {motive   : (φ : Formula α) → (Hilbert.Minimal Ax ⊢ φ) → Sort}
   (axm      : ∀ {φ : Formula α} (s), (h : φ ∈ Ax) → motive (φ⟦s⟧) (by grind))
-  (mdp      : ∀ {φ ψ : Formula α}, {hφψ : (Hilbert.Minimal Ax) ⊢ φ ➝ ψ} → {hφ : (Hilbert.Minimal Ax) ⊢ φ} → motive (φ ➝ ψ) hφψ → motive φ hφ → motive ψ (hφψ ⨀ hφ))
+  (mdp      : ∀ {φ ψ : Formula α}, {hφψ : (Hilbert.Minimal Ax) ⊢ φ 🡒 ψ} → {hφ : (Hilbert.Minimal Ax) ⊢ φ} → motive (φ 🡒 ψ) hφψ → motive φ hφ → motive ψ (hφψ ⨀ hφ))
   (nec      : ∀ {φ}, {hφψ : (Hilbert.Minimal Ax) ⊢ φ} → motive (φ) hφψ → motive (□φ) (nec! hφψ))
-  (R1       : ∀ {φ ψ χ}, {hφψ : (Hilbert.Minimal Ax) ⊢ φ ➝ ψ} → motive (φ ➝ ψ) hφψ → motive (χ ▷ φ ➝ χ ▷ ψ) (by grind))
-  (R2       : ∀ {φ ψ χ}, {hφψ : (Hilbert.Minimal Ax) ⊢ φ ➝ ψ} → motive (φ ➝ ψ) hφψ → motive (ψ ▷ χ ➝ φ ▷ χ) (by grind))
+  (R1       : ∀ {φ ψ χ}, {hφψ : (Hilbert.Minimal Ax) ⊢ φ 🡒 ψ} → motive (φ 🡒 ψ) hφψ → motive (χ ▷ φ 🡒 χ ▷ ψ) (by grind))
+  (R2       : ∀ {φ ψ χ}, {hφψ : (Hilbert.Minimal Ax) ⊢ φ 🡒 ψ} → motive (φ 🡒 ψ) hφψ → motive (ψ ▷ χ 🡒 φ ▷ χ) (by grind))
   (implyK   : ∀ {φ ψ}, motive (Axioms.ImplyK φ ψ) $ by simp)
   (implyS   : ∀ {φ ψ χ}, motive (Axioms.ImplyS φ ψ χ) $ by simp)
   (ec       : ∀ {φ ψ}, motive (Axioms.ElimContra φ ψ) $ by simp)

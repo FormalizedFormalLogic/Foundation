@@ -17,7 +17,7 @@ def hVal {ℍ : Type*} [HeytingAlgebra ℍ] (v : α → ℍ) : Formula α → �
   | ⊥      => ⊥
   | φ ⋏ ψ  => φ.hVal v ⊓ ψ.hVal v
   | φ ⋎ ψ  => φ.hVal v ⊔ ψ.hVal v
-  | φ ➝ ψ  => φ.hVal v ⇨ ψ.hVal v
+  | φ 🡒 ψ  => φ.hVal v ⇨ ψ.hVal v
 
 variable {ℍ : Type*} [HeytingAlgebra ℍ] (v : α → ℍ)
 
@@ -29,7 +29,7 @@ variable {ℍ : Type*} [HeytingAlgebra ℍ] (v : α → ℍ)
 
 @[simp] lemma hVal_or (φ ψ : Formula α) : (φ ⋎ ψ).hVal v = φ.hVal v ⊔ ψ.hVal v := rfl
 
-@[simp] lemma hVal_imp (φ ψ : Formula α) : (φ ➝ ψ).hVal v = φ.hVal v ⇨ ψ.hVal v := rfl
+@[simp] lemma hVal_imp (φ ψ : Formula α) : (φ 🡒 ψ).hVal v = φ.hVal v ⇨ ψ.hVal v := rfl
 
 @[simp] lemma hVal_verum : (⊤ : Formula α).hVal v = ⊤ := by simp [Formula.top_def];
 
@@ -63,9 +63,9 @@ scoped [LO.Propositional] infix:45 " ⊧ₕ " => LO.Propositional.HeytingSemanti
 
 @[simp] lemma hVal_or (φ ψ : Formula α) : (ℍ ⊧ₕ φ ⋎ ψ) = (ℍ ⊧ₕ φ) ⊔ (ℍ ⊧ₕ ψ) := rfl
 
-@[simp] lemma hVal_imply (φ ψ : Formula α) : (ℍ ⊧ₕ φ ➝ ψ) = (ℍ ⊧ₕ φ) ⇨ (ℍ ⊧ₕ ψ) := rfl
+@[simp] lemma hVal_imply (φ ψ : Formula α) : (ℍ ⊧ₕ φ 🡒 ψ) = (ℍ ⊧ₕ φ) ⇨ (ℍ ⊧ₕ ψ) := rfl
 
-@[simp] lemma hVal_iff (φ ψ : Formula α) : (ℍ ⊧ₕ φ ⭤ ψ) = bihimp (ℍ ⊧ₕ φ) (ℍ ⊧ₕ ψ) := by simp [LogicalConnective.iff, bihimp, inf_comm]
+@[simp] lemma hVal_iff (φ ψ : Formula α) : (ℍ ⊧ₕ φ 🡘 ψ) = bihimp (ℍ ⊧ₕ φ) (ℍ ⊧ₕ ψ) := by simp [LogicalConnective.iff, bihimp, inf_comm]
 
 @[simp] lemma hVal_verum : (ℍ ⊧ₕ ⊤) = ⊤ := by simp [Formula.top_def];
 
@@ -83,10 +83,10 @@ instance : Semantics.Bot (HeytingSemantics α) := ⟨fun ℍ ↦ by simp [Semant
 
 instance : Semantics.And (HeytingSemantics α) := ⟨fun {ℍ φ ψ} ↦ by simp [val_def]⟩
 
-@[simp] lemma val_imply {φ ψ : Formula α} : ℍ ⊧ φ ➝ ψ ↔ (ℍ ⊧ₕ φ) ≤ (ℍ ⊧ₕ ψ) := by
+@[simp] lemma val_imply {φ ψ : Formula α} : ℍ ⊧ φ 🡒 ψ ↔ (ℍ ⊧ₕ φ) ≤ (ℍ ⊧ₕ ψ) := by
   simp [val_def]; rfl
 
-@[simp] lemma val_iff {φ ψ : Formula α} : ℍ ⊧ φ ⭤ ψ ↔ (ℍ ⊧ₕ φ) = (ℍ ⊧ₕ ψ) := by
+@[simp] lemma val_iff {φ ψ : Formula α} : ℍ ⊧ φ 🡘 ψ ↔ (ℍ ⊧ₕ φ) = (ℍ ⊧ₕ ψ) := by
   simp [LogicalConnective.iff, antisymm_iff]
 
 lemma val_not (φ : Formula α) : ℍ ⊧ ∼φ ↔ (ℍ ⊧ₕ φ) = ⊥ := by
