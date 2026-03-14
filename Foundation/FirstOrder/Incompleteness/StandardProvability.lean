@@ -91,10 +91,10 @@ open LO.Entailment in
   If `π` is equivalent to some 𝚺₁ sentence `σ`,
   then `π 🡒 □π` is provable in `T` (note: not `𝗜𝚺₁`, compare `provable_sigma_one_complete`)
 -/
-lemma prov🡒ble_sigma_one_complete_of_E {σ π} [𝗜𝚺₁ ⪯ T]
+lemma provable_sigma_one_complete_of_E {σ π} [𝗜𝚺₁ ⪯ T]
   (hσ : Hierarchy 𝚺 1 σ) (hσπ : 𝗜𝚺₁ ⊢ σ 🡘 π) : 𝗜𝚺₁ ⊢ π 🡒 □π := by
   apply C!_replace ?_ ?_ $ provable_sigma_one_complete (T := T) $ hσ;
-  . cl_prover [hσπ];🡒
+  . cl_prover [hσπ];
   . apply T.standardProvability.mono';
     cl_prover [hσπ];
 

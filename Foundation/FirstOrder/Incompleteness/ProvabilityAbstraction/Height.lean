@@ -35,7 +35,7 @@ lemma boxBot_monotone [T₀ ⪯ T] [𝔅.HBL] : n ≤ m → T ⊢ 𝔅^[n] ⊥ �
       match n with
       | 0 => simp;
       | n + 1 =>
-        have : T ⊢ 𝔅 ((𝔅)^[n] 🡒) 🡒 𝔅 (𝔅 ((𝔅)^[n] ⊥)) := Entailment.WeakerThan.pbl $ 𝔅.D3;
+        have : T ⊢ 𝔅 ((𝔅)^[n] ⊥) 🡒 𝔅 (𝔅 ((𝔅)^[n] ⊥)) := Entailment.WeakerThan.pbl $ 𝔅.D3;
         simpa only [Function.iterate_succ_apply'] using this
     have b₁ : T ⊢ 𝔅 (𝔅^[n] ⊥) 🡒 𝔅 (𝔅^[n + k] ⊥) := Entailment.WeakerThan.pbl $ 𝔅.mono ih;
     cl_prover [b₀, b₁]

@@ -49,13 +49,13 @@ variable
   {L₀ L : Language} [L.ReferenceableBy L₀]
   {T₀ : Theory L₀} {T : Theory L}
 
-lemma D1 {𝔅 : Provability T₀ T} {σ :🡒Sent🡒nce L}🡒: T ⊢ σ → T₀ ⊢ 𝔅 σ := fun h ↦ 𝔅.bew_def h
+lemma D1 {𝔅 : Provability T₀ T} {σ : Sentence L} : T ⊢ σ → T₀ ⊢ 𝔅 σ := fun h ↦ 𝔅.bew_def h
 
 class HBL2 [L.ReferenceableBy L₀] {T₀ : Theory L₀} {T : Theory L} (𝔅 : Provability T₀ T) where
   D2 {σ τ : Sentence L} : T₀ ⊢ 𝔅 (σ 🡒 τ) 🡒 𝔅 σ 🡒 𝔅 τ
 export HBL2 (D2)
 
-variable [L.ReferenceableBy L] {T₀🡒T : Theory L} (𝔅 : Provability T₀ T)
+variable [L.ReferenceableBy L] {T₀ T : Theory L} (𝔅 : Provability T₀ T)
 
 class HBL3 where
   D3 {σ : Sentence L} : T₀ ⊢ 𝔅 σ 🡒 𝔅 (𝔅 σ)
@@ -67,11 +67,11 @@ class Mono [L.ReferenceableBy L₀] {T₀ : Theory L₀} {T : Theory L} (𝔅 : 
   mono {σ τ : Sentence L} : T ⊢ σ 🡒 τ → T₀ ⊢ 𝔅 σ 🡒 𝔅 τ
 export Mono (mono)
 
-class Ext [L.ReferenceableBy L₀] 🡒T₀ : Theory L₀} {T : Theory L} (𝔅 : Provability T₀ T) where
+class Ext [L.ReferenceableBy L₀] {T₀ : Theory L₀} {T : Theory L} (𝔅 : Provability T₀ T) where
   ext {σ τ : Sentence L} : T ⊢ σ 🡘 τ → T₀ ⊢ 𝔅 σ 🡘 𝔅 τ
 export Ext (ext)
 
-class Rosser [L.ReferenceableBy L₀] {T₀🡒: Th🡒ory L₀} {T : Theory L} (𝔅 : Provability T₀ T) where
+class Rosser [L.ReferenceableBy L₀] {T₀ : Theory L₀} {T : Theory L} (𝔅 : Provability T₀ T) where
   Ros {σ : Sentence L} : T ⊢ ∼σ → T₀ ⊢ ∼𝔅 σ
 export Rosser (Ros)
 
@@ -85,7 +85,7 @@ class FormalizedCompleteOn (𝔅 : Provability T₀ T) (σ) where
   formalized_complete_on : T₀ ⊢ σ 🡒 𝔅 σ
 export FormalizedCompleteOn (formalized_complete_on)
 attribute [simp, grind .] formalized_complete_on
-🡒
+
 instance [∀ σ, 𝔅.FormalizedCompleteOn (𝔅 σ)] : 𝔅.HBL3 := ⟨by simp⟩
 
 /--
@@ -150,9 +150,9 @@ end
 
 section
 
-variable🡒
-  [L.ReferenceableBy L] {T₀ 🡒 : Theory L} [T₀ ⪯ T]
-  {𝔅 : Provability T₀ T}🡒
+variable
+  [L.ReferenceableBy L] {T₀ T : Theory L} [T₀ ⪯ T]
+  {𝔅 : Provability T₀ T}
   {σ τ : Sentence L}
 
 lemma mono' [𝔅.Mono] (h : T₀ ⊢ σ 🡒 τ) : T₀ ⊢ 𝔅 σ 🡒 𝔅 τ := 𝔅.mono $ WeakerThan.pbl h
@@ -176,10 +176,10 @@ open LO.Entailment Diagonalization Provability
 
 variable
   [L.ReferenceableBy L]
-  {T₀ T : Theory L} [Diagonalization 🡒₀] {🡒 : Pr🡒vability T₀ T}
+  {T₀ T : Theory L} [Diagonalization T₀] {𝔅 : Provability T₀ T}
 
 def gödel [L.ReferenceableBy L] {T₀ T : Theory L} [Diagonalization T₀] (𝔅 : Provability T₀ T) : Sentence L :=
-  fixedpoint T₀ “x. ¬!𝔅.prov x”🡒
+  fixedpoint T₀ “x. ¬!𝔅.prov x”
 
 lemma gödel_spec : T₀ ⊢ (gödel 𝔅) 🡘 ∼𝔅 (gödel 𝔅) := by simpa [gödel] using diag “x. ¬!𝔅.prov x”;
 
@@ -245,23 +245,23 @@ theorem con_unprovable [Consistent T] : T ⊬ 𝔅.con := by
   have : T ⊢ 𝐆 := by cl_prover [h, this]
   exact unprovable_gödel this
 
-theorem con_unrefutable [Consistent T] [𝔅.Kreisel] : T ⊬ ∼𝔅.con := by🡒
+theorem con_unrefutable [Consistent T] [𝔅.Kreisel] : T ⊬ ∼𝔅.con := by
   intro h
   have : T ⊢ 𝐆 🡘 𝔅.con := WeakerThan.pbl $ gödel_iff_con;
   have : T ⊢ ∼𝐆 := by cl_prover [h, this]
   exact unrefutable_gödel this
 
 theorem con_independent [Consistent T] [𝔅.Kreisel] : Independent T 𝔅.con := by
-  constructor🡒
-  . apply con_unprovab🡒e
-  . apply con_unrefutab🡒e
+  constructor
+  . apply con_unprovable
+  . apply con_unrefutable
 
 end Second
 
 
 section Löb
 
-def kreisel [Diagonaliza🡒ion T₀] (𝔅 : Provability T₀ T) (σ : Sentence L) : Sentence L := fixedpoint T₀ “x. !𝔅.prov x → !σ”
+def kreisel [Diagonalization T₀] (𝔅 : Provability T₀ T) (σ : Sentence L) : Sentence L := fixedpoint T₀ “x. !𝔅.prov x → !σ”
 
 variable {σ : Sentence L}
 
@@ -292,29 +292,29 @@ theorem formalized_löb_theorem : T₀ ⊢ 𝔅 (𝔅 σ 🡒 σ) 🡒 𝔅 σ :
 
 lemma formalized_unprovable_not_con [Consistent T] [𝔅.Kreisel] : T ⊬ 𝔅.con 🡒 ∼𝔅 (∼𝔅.con) := by
   by_contra hC;
-  have : T ⊢ ∼𝔅.con := löb_theorem $ CN!_of_C🡒!_right hC;
+  have : T ⊢ ∼𝔅.con := löb_theorem $ CN!_of_CN!_right hC;
   have : T ⊬ ∼𝔅.con := con_unrefutable;
   contradiction;
 
 lemma formalized_unrefutable_gödel [Consistent T] [𝔅.Kreisel] : T ⊬ 𝔅.con 🡒 ∼𝔅 (∼(gödel 𝔅)) := by
   by_contra hC;
   have : T ⊬ 𝔅.con 🡒 ∼𝔅 (∼𝔅.con) := formalized_unprovable_not_con;
-  have : T ⊢ 𝔅.con 🡒 ∼𝔅 (∼𝔅.con) := C!_trans hC🡒
+  have : T ⊢ 𝔅.con 🡒 ∼𝔅 (∼𝔅.con) := C!_trans hC
     $ WeakerThan.pbl
     $ K!_left $ ENN!_of_E!
     $ 𝔅.ext
     $ ENN!_of_E!
-    $ WeakerThan.pbl gödel_iff_con🡒
-  contradiction;🡒
+    $ WeakerThan.pbl gödel_iff_con
+  contradiction;
 
 end Löb
 
 
 section Rosser
 
-variable {T₀ T : Theory L} 🡒Diagonalization T₀] [T₀ ⪯ T] [Consistent T] {𝔅 : Provability T₀ T}
+variable {T₀ T : Theory L} [Diagonalization T₀] [T₀ ⪯ T] [Consistent T] {𝔅 : Provability T₀ T}
 
-local notation "𝐑"🡒=> g🡒del 𝔅
+local notation "𝐑" => gödel 𝔅
 
 theorem unrefutable_rosser [𝔅.Rosser] : T ⊬ ∼𝐑 := by
   intro hnρ;
@@ -333,9 +333,9 @@ theorem rosser_first_incompleteness [L.DecidableEq] (𝔅 : Provability T₀ T) 
 
 omit [Diagonalization T₀] [Consistent T] in
 /-- If `𝔅` satisfies Rosser provability condition, then `𝔅.con` is provable from `T`. -/
-theorem kreisel_remark [𝔅.Rosser] : T ⊢ 𝔅.con := by🡒
+theorem kreisel_remark [𝔅.Rosser] : T ⊢ 𝔅.con := by
   have : T₀ ⊢ ∼𝔅 ⊥ := Ros (N!_iff_CO!.mpr (by simp));
-  exact WeakerThan.p🡒l $ this;
+  exact WeakerThan.pbl $ this;
 
 end Rosser
 
