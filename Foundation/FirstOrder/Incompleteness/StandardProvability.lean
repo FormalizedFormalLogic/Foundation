@@ -67,9 +67,9 @@ theorem provable_D3 [𝗣𝗔⁻ ⪯ T] {σ : Sentence ℒₒᵣ} :
 
 open LO.Entailment LO.Entailment.FiniteContext
 
-lemma provable_D2_context [𝗜𝚺₁ ⪯ U] {Γ σ π} (hσπ : Γ ⊢[U] □(σ ➝ π)) (hσ : Γ ⊢[U] □σ) :
+lemma provable_D2_context [𝗜𝚺₁ ⪯ U] {Γ σ π} (hσπ : Γ ⊢[U] □(σ 🡒 π)) (hσ : Γ ⊢[U] □σ) :
     Γ ⊢[U] □π := FiniteContext.of'! (weakening inferInstance provable_D2) ⨀! hσπ ⨀! hσ
-🡒
+
 lemma provable_D3_context [𝗣𝗔⁻ ⪯ T] [𝗜𝚺₁ ⪯ U] {Γ σ} (hσπ : Γ ⊢[U] □σ) :
   Γ ⊢[U] □□σ := FiniteContext.of'! (weakening inferInstance provable_D3) ⨀! hσπ
 
@@ -89,10 +89,10 @@ instance [T.SoundOnHierarchy 𝚺 1] : T.standardProvability.Kreisel := ⟨fun h
 open LO.Entailment in
 /--
   If `π` is equivalent to some 𝚺₁ sentence `σ`,
-  then `π ➝ □π` is provable in `T` (note: not `𝗜𝚺₁`, compare `provable_sigma_one_complete`)
+  then `π 🡒 □π` is provable in `T` (note: not `𝗜𝚺₁`, compare `provable_sigma_one_complete`)
 -/
 lemma prov🡒ble_sigma_one_complete_of_E {σ π} [𝗜𝚺₁ ⪯ T]
-  (hσ : Hierarchy 𝚺 1 σ) (hσπ : 𝗜𝚺₁ ⊢ σ 🡘 π) : 𝗜𝚺₁ ⊢ π ➝ □π := by
+  (hσ : Hierarchy 𝚺 1 σ) (hσπ : 𝗜𝚺₁ ⊢ σ 🡘 π) : 𝗜𝚺₁ ⊢ π 🡒 □π := by
   apply C!_replace ?_ ?_ $ provable_sigma_one_complete (T := T) $ hσ;
   . cl_prover [hσπ];🡒
   . apply T.standardProvability.mono';
