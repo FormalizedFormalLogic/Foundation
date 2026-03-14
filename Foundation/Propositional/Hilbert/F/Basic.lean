@@ -24,8 +24,8 @@ protected inductive Hilbert.F (Ax : Axiom α) : Logic α
 | protected axiomI {φ ψ χ}          : Hilbert.F Ax $ Axioms.I φ ψ χ
 | protected impId {φ}               : Hilbert.F Ax $ Axioms.ImpId φ
 | protected efq {φ}                 : Hilbert.F Ax $ Axioms.EFQ φ
-| protected mdp {φ ψ}               : Hilbert.F Ax (φ ➝ ψ) → Hilbert.F Ax φ → Hilbert.F Ax ψ
-| protected af {φ ψ}                : Hilbert.F Ax φ → Hilbert.F Ax (ψ ➝ φ)
+| protected mdp {φ ψ}               : Hilbert.F Ax (φ 🡒 ψ) → Hilbert.F Ax φ → Hilbert.F Ax ψ
+| protected af {φ ψ}                : Hilbert.F Ax φ → Hilbert.F Ax (ψ 🡒 φ)
 | protected andIR {φ ψ}             : Hilbert.F Ax φ → Hilbert.F Ax ψ → Hilbert.F Ax (φ ⋏ ψ)
 
 namespace Hilbert.F
@@ -58,8 +58,8 @@ instance : Entailment.F (Hilbert.F Ax) where
 protected lemma rec!
   {motive   : (φ : Formula α) → (Hilbert.F Ax ⊢ φ) → Sort}
   (axm      : ∀ {φ : Formula α}, (h : φ ∈ Ax) → motive (φ) (F.axm'! h))
-  (mdp      : ∀ {φ ψ : Formula α}, {hφψ : (Hilbert.F Ax) ⊢ φ ➝ ψ} → {hφ : (Hilbert.F Ax) ⊢ φ} → (motive (φ ➝ ψ) hφψ) → (motive φ hφ) → (motive ψ (hφψ ⨀ hφ)))
-  (af       : ∀ {φ ψ : Formula α}, {hφ : (Hilbert.F Ax) ⊢ φ} → (motive φ hφ) → (motive (ψ ➝ φ) (af hφ)))
+  (mdp      : ∀ {φ ψ : Formula α}, {hφψ : (Hilbert.F Ax) ⊢ φ 🡒 ψ} → {hφ : (Hilbert.F Ax) ⊢ φ} → (motive (φ 🡒 ψ) hφψ) → (motive φ hφ) → (motive ψ (hφψ ⨀ hφ)))
+  (af       : ∀ {φ ψ : Formula α}, {hφ : (Hilbert.F Ax) ⊢ φ} → (motive φ hφ) → (motive (ψ 🡒 φ) (af hφ)))
   (andIR    : ∀ {φ ψ : Formula α}, {hφ : (Hilbert.F Ax) ⊢ φ} → {hψ : (Hilbert.F Ax) ⊢ ψ} → (motive φ hφ) → (motive ψ hψ) → (motive (φ ⋏ ψ) (andIR hφ hψ)))
   (impId    : ∀ {φ : Formula α}, (motive (Axioms.ImpId φ) impId))
   (andElimL : ∀ {φ ψ : Formula α}, (motive (Axioms.AndElim₁ φ ψ) andElimL))

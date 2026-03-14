@@ -19,7 +19,7 @@ variable [Entailment.ILMinus_M 𝓢]
 instance : HasAxiomKM1 𝓢 := ⟨by
   intro φ ψ;
   apply C_trans $ axiomM! (χ := ∼ψ);
-  apply C_trans $ show 𝓢 ⊢! ((φ ⋏ □(∼ψ)) ▷ (◇ψ ⋏ □(∼ψ))) ➝ ((φ ⋏ □(∼ψ)) ▷ ⊥) by
+  apply C_trans $ show 𝓢 ⊢! ((φ ⋏ □(∼ψ)) ▷ (◇ψ ⋏ □(∼ψ))) 🡒 ((φ ⋏ □(∼ψ)) ▷ ⊥) by
     apply R1!;
     apply replace_CK_left IMNLN!;
     apply left_K_symm;

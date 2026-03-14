@@ -136,7 +136,7 @@ theorem filtration {x : M.World} {φ : Formula ℕ} (hs : φ ∈ T := by grind) 
       obtain ⟨y, ey⟩ := Quotient.exists_rep (cast (filterOf.def_world) Y);
       have : y ⊧ ψ → Y ⊧ ψ := by simpa [ey] using ihψ (x := y) (by grind) |>.mp;
       apply this;
-      apply filterOf.def_rel_back ?_ (φ := φ ➝ ψ) hs hφψ;
+      apply filterOf.def_rel_back ?_ (φ := φ 🡒 ψ) hs hφψ;
       . apply _root_.refl;
       . apply ihφ (by grind) |>.mpr;
         simpa [ey] using hφ;

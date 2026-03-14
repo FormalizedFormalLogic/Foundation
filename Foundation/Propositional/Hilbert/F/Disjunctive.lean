@@ -91,7 +91,7 @@ instance Hilbert.F.instAczelSlashable (hs : ∀ {φ}, φ ∈ Ax → ∕ₐ[(Hilb
 @[grind .] lemma slashable_axiomRfl [Entailment.HasAxiomRfl (Hilbert.F Ax)] : ∕ₐ[(Hilbert.F Ax)] ((Axioms.Rfl φ ψ)) := by grind
 
 @[grind .]
-lemma slashable_propvar_axiomHrd (h : ∀ a, Hilbert.F Ax ⊢ #a ➝ ⊤ ➝ #a) : ∕ₐ[(Hilbert.F Ax)] (Axioms.Hrd #a) := by
+lemma slashable_propvar_axiomHrd (h : ∀ a, Hilbert.F Ax ⊢ #a 🡒 ⊤ 🡒 #a) : ∕ₐ[(Hilbert.F Ax)] (Axioms.Hrd #a) := by
   constructor;
   . apply h;
   . intro h;

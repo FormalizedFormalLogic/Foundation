@@ -51,7 +51,7 @@ lemma algebraic_satisfies (F : Kripke.Frame) (V : ℕ → F⁺) (x : F.World) : 
   | himp φ ψ ihφ ihψ => simp [Satisfies, ihφ x, ihψ x]; tauto;
   | hbox φ ihφ => simp [Satisfies, ihφ, Frame.mem_def_box];
 
-lemma algebraic_validOnFrame_imp : F ⊧ φ ➝ ψ ↔ (∀ V : ℕ → F⁺, (V ⊩ φ) ≤ (V ⊩ ψ)) := by
+lemma algebraic_validOnFrame_imp : F ⊧ φ 🡒 ψ ↔ (∀ V : ℕ → F⁺, (V ⊩ φ) ≤ (V ⊩ ψ)) := by
   constructor;
   . intro H V x h;
     have := @H V x;
@@ -61,7 +61,7 @@ lemma algebraic_validOnFrame_imp : F ⊧ φ ➝ ψ ↔ (∀ V : ℕ → F⁺, (V
     have := @H V x;
     grind;
 
-lemma algebraic_validOnFrame_iff : F ⊧ φ ⭤ ψ ↔ (∀ V : ℕ → F⁺, (V ⊩ φ) = (V ⊩ ψ)) := by
+lemma algebraic_validOnFrame_iff : F ⊧ φ 🡘 ψ ↔ (∀ V : ℕ → F⁺, (V ⊩ φ) = (V ⊩ ψ)) := by
   constructor;
   . intro H V;
     apply le_antisymm;

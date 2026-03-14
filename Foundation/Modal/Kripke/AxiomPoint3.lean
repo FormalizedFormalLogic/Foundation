@@ -80,7 +80,7 @@ instance [Entailment.HasAxiomPoint3 𝓢] : (canonicalFrame 𝓢).IsPiecewiseStr
     rcases hC with ⟨nRyz, nRzy⟩;
     obtain ⟨φ, hφy, hφz⟩ := Set.not_subset.mp nRyz;
     obtain ⟨ψ, hψz, hψy⟩ := Set.not_subset.mp nRzy;
-    apply x.neither (φ := □(□φ ➝ ψ) ⋎ □(□ψ ➝ φ));
+    apply x.neither (φ := □(□φ 🡒 ψ) ⋎ □(□ψ 🡒 φ));
     constructor;
     . exact iff_provable_mem₁.mp axiomPoint3! x;
     . apply iff_mem₂_or.mpr;

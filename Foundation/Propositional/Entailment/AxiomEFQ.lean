@@ -8,7 +8,7 @@ namespace LO.Axioms
 variable {F : Type*} [LogicalConnective F]
 variable (φ ψ χ : F)
 
-protected abbrev EFQ := ⊥ ➝ φ
+protected abbrev EFQ := ⊥ 🡒 φ
 
 end LO.Axioms
 
@@ -23,7 +23,7 @@ class HasAxiomEFQ (𝓢 : S)  where
   efq {φ : F} : 𝓢 ⊢! Axioms.EFQ φ
 export HasAxiomEFQ (efq)
 
-@[simp] lemma efq! [Entailment.HasAxiomEFQ 𝓢] : 𝓢 ⊢ ⊥ ➝ φ := ⟨efq⟩
+@[simp] lemma efq! [Entailment.HasAxiomEFQ 𝓢] : 𝓢 ⊢ ⊥ 🡒 φ := ⟨efq⟩
 
 def of_O [ModusPonens 𝓢] [Entailment.HasAxiomEFQ 𝓢] (b : 𝓢 ⊢! ⊥) : 𝓢 ⊢! φ := efq ⨀ b
 @[grind ⇒] lemma of_O! [ModusPonens 𝓢]  [Entailment.HasAxiomEFQ 𝓢] (h : 𝓢 ⊢ ⊥) : 𝓢 ⊢ φ := ⟨of_O h.some⟩

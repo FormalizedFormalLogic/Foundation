@@ -18,7 +18,7 @@ def Propositional.Formula.gödelTranslate : Propositional.Formula α → Modal.F
   | ⊥ => ⊥
   | φ ⋏ ψ => (gödelTranslate φ) ⋏ (gödelTranslate ψ)
   | φ ⋎ ψ => (gödelTranslate φ) ⋎ (gödelTranslate ψ)
-  | φ ➝ ψ => □((gödelTranslate φ) ➝ (gödelTranslate ψ))
+  | φ 🡒 ψ => □((gödelTranslate φ) 🡒 (gödelTranslate ψ))
 postfix:90 "ᵍ" => Propositional.Formula.gödelTranslate
 
 class Modal.ModalCompanion (IL : Propositional.Logic ℕ) (ML : Modal.Logic ℕ) where
@@ -50,7 +50,7 @@ instance : Modal.Entailment.S4 IL.smallestMC where
     apply Modal.Logic.sumNormal.mem₁!;
     simp;
 
-lemma smallestMC.mdp_S4 (hφψ : Modal.S4 ⊢ φ ➝ ψ) (hφ : IL.smallestMC ⊢ φ) : IL.smallestMC ⊢ ψ := by
+lemma smallestMC.mdp_S4 (hφψ : Modal.S4 ⊢ φ 🡒 ψ) (hφ : IL.smallestMC ⊢ φ) : IL.smallestMC ⊢ ψ := by
   exact (Modal.Logic.sumNormal.mem₁! hφψ) ⨀ hφ;
 
 abbrev largestMC (IL : Propositional.Logic ℕ) : Modal.Logic ℕ := Modal.Logic.sumNormal IL.smallestMC ({ Modal.Axioms.Grz (.atom 0) })
@@ -191,34 +191,34 @@ variable {𝓜𝓢 : MS}  [Entailment.S4 𝓜𝓢]
 variable {φ ψ χ : Propositional.Formula ℕ}
 
 @[simp]
-lemma gödelTranslated_efq : 𝓜𝓢 ⊢ (⊥ ➝ φ)ᵍ := by
+lemma gödelTranslated_efq : 𝓜𝓢 ⊢ (⊥ 🡒 φ)ᵍ := by
   apply nec!;
   simp [gödelTranslate];
 
-lemma gödelTranslated_axiomTc : 𝓜𝓢 ⊢ φᵍ ➝ □φᵍ := by
+lemma gödelTranslated_axiomTc : 𝓜𝓢 ⊢ φᵍ 🡒 □φᵍ := by
   induction φ using Propositional.Formula.rec' with
   | hfalsum => simp only [gödelTranslate, efq!];
   | hand φ ψ ihp ihq => exact C!_trans (CKK!_of_C!_of_C! ihp ihq) collect_box_and!
   | hor φ ψ ihp ihq => exact C!_trans (left_A!_intro (right_A!_intro_left ihp) (right_A!_intro_right ihq)) collect_box_or!
   | _ => simp only [gödelTranslate, axiomFour!];
 
-lemma gödelTranslated_implyS : 𝓜𝓢 ⊢ (φ ➝ ψ ➝ φ)ᵍ := by
+lemma gödelTranslated_implyS : 𝓜𝓢 ⊢ (φ 🡒 ψ 🡒 φ)ᵍ := by
   exact nec! $ C!_trans gödelTranslated_axiomTc $ axiomK'! $ nec! $ implyK!;
 
-lemma gödelTranslated_implyK : 𝓜𝓢 ⊢ ((φ ➝ ψ ➝ χ) ➝ (φ ➝ ψ) ➝ φ ➝ χ)ᵍ := by
+lemma gödelTranslated_implyK : 𝓜𝓢 ⊢ ((φ 🡒 ψ 🡒 χ) 🡒 (φ 🡒 ψ) 🡒 φ 🡒 χ)ᵍ := by
   apply nec! $ C!_trans (C!_trans (axiomK'! $ nec! ?b) axiomFour!) $ axiomK'! $ nec! $ C!_trans (axiomK'! $ nec! implyS!) axiomK!;
   apply provable_iff_provable.mpr;
   apply deduct_iff.mpr;
   apply deduct_iff.mpr;
-  have : [φᵍ, φᵍ ➝ □(ψᵍ ➝ χᵍ)] ⊢[𝓜𝓢] φᵍ := by_axm!;
-  have : [φᵍ, φᵍ ➝ □(ψᵍ ➝ χᵍ)] ⊢[𝓜𝓢] (φᵍ ➝ □(ψᵍ ➝ χᵍ)) := by_axm!;
-  have : [φᵍ, φᵍ ➝ □(ψᵍ ➝ χᵍ)] ⊢[𝓜𝓢] □(ψᵍ ➝ χᵍ) := (by assumption) ⨀ (by assumption);
+  have : [φᵍ, φᵍ 🡒 □(ψᵍ 🡒 χᵍ)] ⊢[𝓜𝓢] φᵍ := by_axm!;
+  have : [φᵍ, φᵍ 🡒 □(ψᵍ 🡒 χᵍ)] ⊢[𝓜𝓢] (φᵍ 🡒 □(ψᵍ 🡒 χᵍ)) := by_axm!;
+  have : [φᵍ, φᵍ 🡒 □(ψᵍ 🡒 χᵍ)] ⊢[𝓜𝓢] □(ψᵍ 🡒 χᵍ) := (by assumption) ⨀ (by assumption);
   exact axiomT'! this;
 
-lemma gödelTranslated_AndIntro : 𝓜𝓢 ⊢ (φ ➝ ψ ➝ φ ⋏ ψ)ᵍ := by
+lemma gödelTranslated_AndIntro : 𝓜𝓢 ⊢ (φ 🡒 ψ 🡒 φ ⋏ ψ)ᵍ := by
   exact nec! $ C!_trans gödelTranslated_axiomTc $ axiomK'! $ nec! $ and₃!
 
-lemma gödelTranslated_OrElim : 𝓜𝓢 ⊢ (((φ ➝ χ) ➝ (ψ ➝ χ) ➝ (φ ⋎ ψ ➝ χ)))ᵍ := by
+lemma gödelTranslated_OrElim : 𝓜𝓢 ⊢ (((φ 🡒 χ) 🡒 (ψ 🡒 χ) 🡒 (φ ⋎ ψ 🡒 χ)))ᵍ := by
   exact nec! $ C!_trans axiomFour! $ axiomK'! $ nec! $ C!_trans (axiomK'! $ nec! $ or₃!) axiomK!;
 
 lemma provable_gödelTranslated_of_provable

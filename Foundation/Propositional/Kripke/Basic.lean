@@ -76,7 +76,7 @@ def Satisfies (M : Kripke.Model) (w : M.World) : Formula ℕ → Prop
   | ⊥      => False
   | φ ⋏ ψ  => Satisfies M w φ ∧ Satisfies M w ψ
   | φ ⋎ ψ  => Satisfies M w φ ∨ Satisfies M w ψ
-  | φ ➝ ψ => ∀ {w' : M.World}, (w ≺ w') → (Satisfies M w' φ → Satisfies M w' ψ)
+  | φ 🡒 ψ => ∀ {w' : M.World}, (w ≺ w') → (Satisfies M w' φ → Satisfies M w' ψ)
 
 namespace Satisfies
 
@@ -96,7 +96,7 @@ variable {M : Kripke.Model} {w w' : M.World} {a : ℕ} {φ ψ χ : Formula ℕ}
 
 @[simp] lemma or_def   : w ⊧ φ ⋎ ψ ↔ w ⊧ φ ∨ w ⊧ ψ := by simp [Satisfies];
 
-@[simp] lemma imp_def  : w ⊧ φ ➝ ψ ↔ ∀ {w' : M.World}, (w ≺ w') → (w' ⊧ φ → w' ⊧ ψ) := by simp [Satisfies, imp_iff_not_or];
+@[simp] lemma imp_def  : w ⊧ φ 🡒 ψ ↔ ∀ {w' : M.World}, (w ≺ w') → (w' ⊧ φ → w' ⊧ ψ) := by simp [Satisfies, imp_iff_not_or];
 
 @[simp] lemma neg_def  : w ⊧ ∼φ ↔ ∀ {w' : M.World}, (w ≺ w') → ¬(w' ⊧ φ) := by simp [Satisfies];
 
@@ -128,7 +128,7 @@ lemma formula_hereditary_not (hw : w ≺ w') : ¬w' ⊧ φ → ¬w ⊧ φ := by
   contrapose!;
   exact formula_hereditary hw;
 
-lemma negEquiv : w ⊧ ∼φ ↔ w ⊧ φ ➝ ⊥ := by simp_all [Satisfies];
+lemma negEquiv : w ⊧ ∼φ ↔ w ⊧ φ 🡒 ⊥ := by simp_all [Satisfies];
 
 lemma iff_subst_self {F : Frame} {V : Valuation F} {x : F.World} (s) :
   letI U : Kripke.Valuation F := ⟨
@@ -198,36 +198,36 @@ lemma iff_not_exists_world {M : Kripke.Model} : (¬M ⊧ φ) ↔ (∃ x : M.Worl
 
 alias ⟨exists_world_of_not, not_of_exists_world⟩ := iff_not_exists_world
 
-protected lemma andElim₁ : M ⊧ φ ⋏ ψ ➝ φ := by simp_all [ValidOnModel, Satisfies];
+protected lemma andElim₁ : M ⊧ φ ⋏ ψ 🡒 φ := by simp_all [ValidOnModel, Satisfies];
 
-protected lemma andElim₂ : M ⊧ φ ⋏ ψ ➝ ψ := by simp_all [ValidOnModel, Satisfies];
+protected lemma andElim₂ : M ⊧ φ ⋏ ψ 🡒 ψ := by simp_all [ValidOnModel, Satisfies];
 
-protected lemma andInst₃ : M ⊧ φ ➝ ψ ➝ φ ⋏ ψ := by
+protected lemma andInst₃ : M ⊧ φ 🡒 ψ 🡒 φ ⋏ ψ := by
   intro x y _ hp z Ryz hq;
   replace hp : Satisfies M z φ := formula_hereditary Ryz hp;
   exact ⟨hp, hq⟩;
 
-protected lemma orInst₁ : M ⊧ φ ➝ φ ⋎ ψ := by simp_all [ValidOnModel, Satisfies];
+protected lemma orInst₁ : M ⊧ φ 🡒 φ ⋎ ψ := by simp_all [ValidOnModel, Satisfies];
 
-protected lemma orInst₂ : M ⊧ ψ ➝ φ ⋎ ψ := by simp_all [ValidOnModel, Satisfies];
+protected lemma orInst₂ : M ⊧ ψ 🡒 φ ⋎ ψ := by simp_all [ValidOnModel, Satisfies];
 
-protected lemma orElim : M ⊧ (φ ➝ χ) ➝ (ψ ➝ χ) ➝ (φ ⋎ ψ ➝ χ) := by
+protected lemma orElim : M ⊧ (φ 🡒 χ) 🡒 (ψ 🡒 χ) 🡒 (φ ⋎ ψ 🡒 χ) := by
   intro w₁ w₂ _ hpr w₃ hw₂₃ hqr w₄ hw₃₄ hpq;
   cases hpq with
   | inl hp => exact hpr (M.trans hw₂₃ hw₃₄) hp;
   | inr hq => exact hqr hw₃₄ hq;
 
-protected lemma implyK : M ⊧ φ ➝ ψ ➝ φ := by
+protected lemma implyK : M ⊧ φ 🡒 ψ 🡒 φ := by
   intro x y _ hp z Ryz _;
   exact formula_hereditary Ryz hp;
 
-protected lemma implyS : M ⊧ (φ ➝ ψ ➝ χ) ➝ (φ ➝ ψ) ➝ φ ➝ χ := by
+protected lemma implyS : M ⊧ (φ 🡒 ψ 🡒 χ) 🡒 (φ 🡒 ψ) 🡒 φ 🡒 χ := by
   intro x y _ hpqr z Ryz hpq w Rzw hp;
   have Ryw : y ≺ w := M.trans Ryz Rzw;
   have Rww : w ≺ w := M.refl;
   exact hpqr Ryw hp Rww (hpq Rzw hp);
 
-protected lemma mdp (hpq : M ⊧ φ ➝ ψ) (hp : M ⊧ φ) : M ⊧ ψ := by
+protected lemma mdp (hpq : M ⊧ φ 🡒 ψ) (hp : M ⊧ φ) : M ⊧ ψ := by
   intro w;
   exact hpq w M.refl $ hp w;
 
@@ -280,23 +280,23 @@ protected lemma subst (h : F ⊧ φ) : F ⊧ φ⟦s⟧ := by
   apply Satisfies.iff_subst_self s |>.not.mpr hx;
   apply h;
 
-protected lemma andElim₁ : F ⊧ φ ⋏ ψ ➝ φ := fun _ => ValidOnModel.andElim₁
+protected lemma andElim₁ : F ⊧ φ ⋏ ψ 🡒 φ := fun _ => ValidOnModel.andElim₁
 
-protected lemma andElim₂ : F ⊧ φ ⋏ ψ ➝ ψ := fun _ => ValidOnModel.andElim₂
+protected lemma andElim₂ : F ⊧ φ ⋏ ψ 🡒 ψ := fun _ => ValidOnModel.andElim₂
 
-protected lemma andInst₃ : F ⊧ φ ➝ ψ ➝ φ ⋏ ψ := fun _ => ValidOnModel.andInst₃
+protected lemma andInst₃ : F ⊧ φ 🡒 ψ 🡒 φ ⋏ ψ := fun _ => ValidOnModel.andInst₃
 
-protected lemma orInst₁ : F ⊧ φ ➝ φ ⋎ ψ := fun _ => ValidOnModel.orInst₁
+protected lemma orInst₁ : F ⊧ φ 🡒 φ ⋎ ψ := fun _ => ValidOnModel.orInst₁
 
-protected lemma orInst₂ : F ⊧ ψ ➝ φ ⋎ ψ := fun _ => ValidOnModel.orInst₂
+protected lemma orInst₂ : F ⊧ ψ 🡒 φ ⋎ ψ := fun _ => ValidOnModel.orInst₂
 
-protected lemma orElim : F ⊧ (φ ➝ χ) ➝ (ψ ➝ χ) ➝ (φ ⋎ ψ ➝ χ) := fun _ => ValidOnModel.orElim
+protected lemma orElim : F ⊧ (φ 🡒 χ) 🡒 (ψ 🡒 χ) 🡒 (φ ⋎ ψ 🡒 χ) := fun _ => ValidOnModel.orElim
 
-protected lemma implyK : F ⊧ φ ➝ ψ ➝ φ := fun _ => ValidOnModel.implyK
+protected lemma implyK : F ⊧ φ 🡒 ψ 🡒 φ := fun _ => ValidOnModel.implyK
 
-protected lemma implyS : F ⊧ (φ ➝ ψ ➝ χ) ➝ (φ ➝ ψ) ➝ φ ➝ χ := fun _ => ValidOnModel.implyS
+protected lemma implyS : F ⊧ (φ 🡒 ψ 🡒 χ) 🡒 (φ 🡒 ψ) 🡒 φ 🡒 χ := fun _ => ValidOnModel.implyS
 
-protected lemma mdp (hpq : F ⊧ φ ➝ ψ) (hp : F ⊧ φ) : F ⊧ ψ := fun V x => ValidOnModel.mdp (hpq V) (hp V) x
+protected lemma mdp (hpq : F ⊧ φ 🡒 ψ) (hp : F ⊧ φ) : F ⊧ ψ := fun V x => ValidOnModel.mdp (hpq V) (hp V) x
 
 protected lemma efq : F ⊧ Axioms.EFQ φ := fun _ => ValidOnModel.efq
 

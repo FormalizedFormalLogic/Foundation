@@ -103,7 +103,7 @@ instance [Entailment.HasAxiomWLEM 𝓢] : (canonicalFrame 𝓢).IsPiecewiseStron
       tauto;
     exact Rxy this;
 
-  have : 𝓢 ⊢ (Θx.conj ⋏ Θy.conj ⋏ Θz.conj) ➝ ⊥ := by
+  have : 𝓢 ⊢ (Θx.conj ⋏ Θy.conj ⋏ Θz.conj) 🡒 ⊥ := by
     apply C!_trans ?_ h;
     apply CK!_iff_CC!.mpr;
     apply FConj_DT.mpr;
@@ -125,10 +125,10 @@ instance [Entailment.HasAxiomWLEM 𝓢] : (canonicalFrame 𝓢).IsPiecewiseStron
         tauto;
       simp [Θx, Θy, Θz];
       tauto;
-  have : 𝓢 ⊢ Θx.conj ➝ Θy.conj ➝ ∼Θz.conj := CK!_iff_CC!.mp $
+  have : 𝓢 ⊢ Θx.conj 🡒 Θy.conj 🡒 ∼Θz.conj := CK!_iff_CC!.mp $
     (C!_trans (CK!_iff_CC!.mp $ C!_trans (K!_left K!_assoc) this) (K!_right $ neg_equiv!));
-  replace : [Θx.conj] ⊢[𝓢] Θy.conj ➝ ∼Θz.conj := FiniteContext.deductInv'! this;
-  replace : [Θx.conj] ⊢[𝓢] ∼∼Θz.conj ➝ ∼Θy.conj := contra! this;
+  replace : [Θx.conj] ⊢[𝓢] Θy.conj 🡒 ∼Θz.conj := FiniteContext.deductInv'! this;
+  replace : [Θx.conj] ⊢[𝓢] ∼∼Θz.conj 🡒 ∼Θy.conj := contra! this;
 
   have mem_Θx_x : Θx.conj ∈ x.1.1 := iff_mem₁_fconj.mpr $ by
     intro φ;

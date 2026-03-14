@@ -63,16 +63,16 @@ lemma neg_right (Γ Δ φ) (h : (Γ ++ [φ]) ⟹ Δ) : Γ ⟹ ∼φ :: Δ :=
 lemma neg_left (Γ Δ φ) (h : Γ ⟹ Δ ++ [φ]) : (∼φ :: Γ) ⟹ Δ :=
   TwoSided.neg_left (weakening h)
 
-lemma imply_right (Γ Δ φ ψ) (h : (Γ ++ [φ]) ⟹ Δ ++ [ψ]) : Γ ⟹ (φ ➝ ψ) :: Δ :=
+lemma imply_right (Γ Δ φ ψ) (h : (Γ ++ [φ]) ⟹ Δ ++ [ψ]) : Γ ⟹ (φ 🡒 ψ) :: Δ :=
   TwoSided.imply_right_cl (weakening h)
 
-lemma imply_left (Γ Δ φ ψ) (hφ : Γ ⟹ Δ ++ [φ]) (hψ : (Γ ++ [ψ]) ⟹ Δ) : ((φ ➝ ψ) :: Γ) ⟹ Δ :=
+lemma imply_left (Γ Δ φ ψ) (hφ : Γ ⟹ Δ ++ [φ]) (hψ : (Γ ++ [ψ]) ⟹ Δ) : ((φ 🡒 ψ) :: Γ) ⟹ Δ :=
   TwoSided.imply_left (weakening hφ) (weakening hψ)
 
-lemma iff_right (Γ Δ φ ψ) (hr : (Γ ++ [φ]) ⟹ Δ ++ [ψ]) (hl : (Γ ++ [ψ]) ⟹ Δ ++ [φ]) : Γ ⟹ (φ ⭤ ψ) :: Δ :=
+lemma iff_right (Γ Δ φ ψ) (hr : (Γ ++ [φ]) ⟹ Δ ++ [ψ]) (hl : (Γ ++ [ψ]) ⟹ Δ ++ [φ]) : Γ ⟹ (φ 🡘 ψ) :: Δ :=
   TwoSided.iff_right_cl (weakening hr) (weakening hl)
 
-lemma iff_left (Γ Δ φ ψ) (hr : Γ ⟹ Δ ++ [φ, ψ]) (hl : (Γ ++ [φ, ψ]) ⟹ Δ) : ((φ ⭤ ψ) :: Γ) ⟹ Δ :=
+lemma iff_left (Γ Δ φ ψ) (hr : Γ ⟹ Δ ++ [φ, ψ]) (hl : (Γ ++ [φ, ψ]) ⟹ Δ) : ((φ 🡘 ψ) :: Γ) ⟹ Δ :=
   TwoSided.iff_left (weakening hr) (weakening hl)
 
 end Theorems
@@ -303,7 +303,7 @@ def prover (k : ℕ) (b : Bool) (Γ Δ : Sequent) : M Expr := do
         | ∼φ => do
           let e ← prover k true (Γ ++ [φ]) Δ
           negRight Γ Δ φ e
-        | φ ➝ ψ => do
+        | φ 🡒 ψ => do
           let e ← prover k true (Γ ++ [φ]) (Δ ++ [ψ])
           implyRight Γ Δ φ ψ e
         | .iff φ ψ => do
@@ -337,7 +337,7 @@ def prover (k : ℕ) (b : Bool) (Γ Δ : Sequent) : M Expr := do
         | ∼φ => do
           let e ← prover k false Γ (Δ ++ [φ])
           negLeft Γ Δ φ e
-        | φ ➝ ψ => do
+        | φ 🡒 ψ => do
           let e₁ ← prover k false Γ (Δ ++ [φ])
           let e₂ ← prover k false (Γ ++ [ψ]) Δ
           implyLeft Γ Δ φ ψ e₁ e₂

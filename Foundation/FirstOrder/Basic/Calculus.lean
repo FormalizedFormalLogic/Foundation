@@ -475,11 +475,11 @@ instance {𝓢 U : Schema L} : 𝓢 ⪯ 𝓢 ∪ U := Entailment.Axiomatized.wea
 
 instance {𝓢 U : Schema L} : U ⪯ 𝓢 ∪ U := Entailment.Axiomatized.weakerThanOfSubset (by simp)
 
-def deduction [L.DecidableEq] {𝓢 : Schema L} {φ ψ} (b : insert φ 𝓢 ⊢! ψ) : 𝓢 ⊢! φ.univCl' ➝ ψ :=
+def deduction [L.DecidableEq] {𝓢 : Schema L} {φ ψ} (b : insert φ 𝓢 ⊢! ψ) : 𝓢 ⊢! φ.univCl' 🡒 ψ :=
   have : 𝓢 ⟹ [∼φ.univCl', ψ] := Derivation.deduction b
   (Tait.or this).cast (by simp; rfl)
 
-theorem deduction! [L.DecidableEq] {𝓢 : Schema L} {φ ψ} (b : insert φ 𝓢 ⊢ ψ) : 𝓢 ⊢ φ.univCl' ➝ ψ :=
+theorem deduction! [L.DecidableEq] {𝓢 : Schema L} {φ ψ} (b : insert φ 𝓢 ⊢ ψ) : 𝓢 ⊢ φ.univCl' 🡒 ψ :=
   ⟨deduction b.get⟩
 
 lemma close!_iff [L.DecidableEq] {𝓢 : Schema L} {φ} : 𝓢 ⊢ φ.univCl' ↔ 𝓢 ⊢ φ := by
@@ -515,14 +515,14 @@ instance : Axiomatized (Theory L) where
   prfAxm {T} σ h := ofSyntacticProof <| Axiomatized.prfAxm (by simpa using h)
   weakening {σ T B} h b := ofSyntacticProof <| Axiomatized.weakening (by simpa using h) b
 
-def deduction [L.DecidableEq] {T : Theory L} {σ τ} (b : insert σ T ⊢! τ) : T ⊢! σ ➝ τ :=
+def deduction [L.DecidableEq] {T : Theory L} {σ τ} (b : insert σ T ⊢! τ) : T ⊢! σ 🡒 τ :=
   have : insert ↑σ T.toSchema ⊢! ↑τ := by simpa using toSyntacticProof b
   (Schema.deduction this).cast (by simp)
 
 instance [L.DecidableEq] : Entailment.Deduction (Theory L) where
   ofInsert := Theory.deduction
   inv {σ τ T} b :=
-    have : adjoin σ T ⊢! σ ➝ τ := Axiomatized.weakening (by simp) b
+    have : adjoin σ T ⊢! σ 🡒 τ := Axiomatized.weakening (by simp) b
     this ⨀ (Axiomatized.adjoin _ _)
 
 def compact! [L.DecidableEq] {T : Theory L} {φ : Sentence L} :
@@ -571,7 +571,7 @@ instance : Entailment.StrongCut (Theory L) (Theory L) where
       (toSyntacticProof d)
 
 lemma compact' [L.DecidableEq] {T : Theory L} {φ : Sentence L}
-    (b : T ⊢ φ) : ∃ (s : { s : Finset (Sentence L) // ↑s ⊆ T}), (∅ : Theory L) ⊢ s.val.conj ➝ φ := by
+    (b : T ⊢ φ) : ∃ (s : { s : Finset (Sentence L) // ↑s ⊆ T}), (∅ : Theory L) ⊢ s.val.conj 🡒 φ := by
   let ⟨s, b⟩ := compact b
   let bc : ({s.val.conj} : Theory L) ⊢ s.val.conj := Axiomatized.provable_axm _ (by simp)
   have : {s.val.conj} ⊢ φ := StrongCut.cut! (fun {ψ} hψ ↦ Entailment.left_Fconj!_intro (by simpa) ⨀ bc) b
@@ -656,12 +656,12 @@ namespace Schema
 
 variable {𝓢 : Schema L}
 
-def specialize! (φ : SyntacticSemiformula L 1) (t : SyntacticTerm L) : 𝓢 ⊢! ∀⁰ φ ➝ φ/[t] :=
+def specialize! (φ : SyntacticSemiformula L 1) (t : SyntacticTerm L) : 𝓢 ⊢! ∀⁰ φ 🡒 φ/[t] :=
   have : 𝓢 ⟹ [(∼φ)/[t], φ/[t]] := Derivation.em (φ := φ/[t]) (by simp) (by simp)
   have : 𝓢 ⟹ [∃⁰ ∼φ, φ/[t]] := this.exs t
   this.or.cast (by simp [Semiformula.imp_eq])
 
-lemma specialize (φ : SyntacticSemiformula L 1) (t : SyntacticTerm L) : 𝓢 ⊢ ∀⁰ φ ➝ φ/[t] := ⟨specialize! φ t⟩
+lemma specialize (φ : SyntacticSemiformula L 1) (t : SyntacticTerm L) : 𝓢 ⊢ ∀⁰ φ 🡒 φ/[t] := ⟨specialize! φ t⟩
 
 end Schema
 
@@ -669,10 +669,10 @@ namespace Theory
 
 variable {T : Theory L}
 
-def specialize! (φ : Semisentence L 1) (t) : T ⊢! ∀⁰ φ ➝ φ/[t] := ofSyntacticProof <| by
+def specialize! (φ : Semisentence L 1) (t) : T ⊢! ∀⁰ φ 🡒 φ/[t] := ofSyntacticProof <| by
   simpa [Semiformula.coe_subst_eq_subst_coe₁] using (Schema.specialize! (𝓢 := T) φ (t : SyntacticTerm L))
 
-lemma specialize (φ : Semisentence L 1) (t) : T ⊢ ∀⁰ φ ➝ φ/[t] := ⟨specialize! φ t⟩
+lemma specialize (φ : Semisentence L 1) (t) : T ⊢ ∀⁰ φ 🡒 φ/[t] := ⟨specialize! φ t⟩
 
 end Theory
 

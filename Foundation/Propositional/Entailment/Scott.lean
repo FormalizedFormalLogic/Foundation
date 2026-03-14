@@ -8,7 +8,7 @@ namespace LO.Axioms
 variable {F : Type*} [LogicalConnective F]
 variable (φ ψ χ : F)
 
-protected abbrev Scott := ((∼∼φ ➝ φ) ➝ (φ ⋎ ∼φ)) ➝ ∼φ ⋎ ∼∼φ
+protected abbrev Scott := ((∼∼φ 🡒 φ) 🡒 (φ ⋎ ∼φ)) 🡒 ∼φ ⋎ ∼∼φ
 
 end LO.Axioms
 

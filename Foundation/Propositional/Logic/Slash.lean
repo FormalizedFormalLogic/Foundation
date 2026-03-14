@@ -21,7 +21,7 @@ def AczelSlash (L : Logic α) : Formula α → Prop
   | ⊥ => False
   | φ ⋎ ψ => AczelSlash L φ ∨ AczelSlash L ψ
   | φ ⋏ ψ => AczelSlash L φ ∧ AczelSlash L ψ
-  | φ ➝ ψ => L ⊢ (φ ➝ ψ) ∧ (AczelSlash L φ → AczelSlash L ψ)
+  | φ 🡒 ψ => L ⊢ (φ 🡒 ψ) ∧ (AczelSlash L φ → AczelSlash L ψ)
 notation:50 "∕ₐ[" L "] " φ:max => AczelSlash L φ
 
 namespace AczelSlash
@@ -38,11 +38,11 @@ lemma def_top [Entailment.HasImpId L] : ∕ₐ[L] ⊤ := by
 
 @[grind =] lemma def_or  : ∕ₐ[L] (φ ⋎ ψ) ↔ ∕ₐ[L] φ ∨ ∕ₐ[L] ψ := by simp [AczelSlash];
 @[grind =] lemma def_and : ∕ₐ[L] (φ ⋏ ψ) ↔ ∕ₐ[L] φ ∧ ∕ₐ[L] ψ := by simp [AczelSlash];
-@[grind =] lemma def_imp : ∕ₐ[L] (φ ➝ ψ) ↔ L ⊢ (φ ➝ ψ) ∧ (∕ₐ[L] φ → ∕ₐ[L] ψ) := by simp [AczelSlash];
+@[grind =] lemma def_imp : ∕ₐ[L] (φ 🡒 ψ) ↔ L ⊢ (φ 🡒 ψ) ∧ (∕ₐ[L] φ → ∕ₐ[L] ψ) := by simp [AczelSlash];
 @[grind =] lemma def_neg : ∕ₐ[L] (∼φ) ↔ L ⊢ ∼φ ∧ ¬∕ₐ[L] φ := by simp [Formula.neg_def, def_imp];
 
 @[grind <=]
-lemma mdp : ∕ₐ[L] (φ ➝ ψ) → ∕ₐ[L] φ → ∕ₐ[L] ψ := by
+lemma mdp : ∕ₐ[L] (φ 🡒 ψ) → ∕ₐ[L] φ → ∕ₐ[L] ψ := by
   rintro ⟨hφψ₁, hφψ₂⟩ hφ;
   apply hφψ₂ hφ;
 

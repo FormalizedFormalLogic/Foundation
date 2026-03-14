@@ -11,7 +11,7 @@ variable {α : Type*}
 def Formula.toInterpretabilityLogicFormula : Modal.Formula α → InterpretabilityLogic.Formula α
   | .atom a  => .atom a
   | ⊥       => ⊥
-  | φ ➝ ψ => (φ.toInterpretabilityLogicFormula) ➝ (ψ.toInterpretabilityLogicFormula)
+  | φ 🡒 ψ => (φ.toInterpretabilityLogicFormula) 🡒 (ψ.toInterpretabilityLogicFormula)
   | □φ   => □(φ.toInterpretabilityLogicFormula)
 instance : Coe (Modal.Formula α) (InterpretabilityLogic.Formula α) := ⟨Formula.toInterpretabilityLogicFormula⟩
 

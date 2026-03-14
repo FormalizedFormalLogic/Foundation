@@ -34,7 +34,7 @@ instance : Entailment.ET 𝓢 where
 instance : Entailment.KD 𝓢 where
 
 omit [DecidableEq F] in
-@[simp] lemma reduce_box_in_CAnt! : 𝓢 ⊢ □^[(i + n)]φ ➝ □^[i]φ := by
+@[simp] lemma reduce_box_in_CAnt! : 𝓢 ⊢ □^[(i + n)]φ 🡒 □^[i]φ := by
   induction n with
   | zero => simp;
   | succ n ih =>

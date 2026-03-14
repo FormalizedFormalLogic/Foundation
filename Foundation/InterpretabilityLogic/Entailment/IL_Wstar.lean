@@ -19,13 +19,13 @@ instance : Entailment.HasAxiomW 𝓢 := by
   constructor;
   intro φ ψ;
   apply rhdTrans_dhyp! (χ := ψ ⋏ □⊤) ?_ ?_;
-  . show 𝓢 ⊢! φ ▷ ψ ➝ φ ▷ (ψ ⋏ □⊤);
+  . show 𝓢 ⊢! φ ▷ ψ 🡒 φ ▷ (ψ ⋏ □⊤);
     apply R1!;
     apply deduct';
     apply K_intro;
     . apply FiniteContext.byAxm; simp;
     . apply axiomN;
-  . show 𝓢 ⊢! φ ▷ ψ ➝ (ψ ⋏ □⊤) ▷ (ψ ⋏ □(∼φ));
+  . show 𝓢 ⊢! φ ▷ ψ 🡒 (ψ ⋏ □⊤) ▷ (ψ ⋏ □(∼φ));
     apply C_trans axiomWstar!;
     apply R1!;
     apply deduct';
@@ -37,12 +37,12 @@ instance : Entailment.HasAxiomW 𝓢 := by
 instance : Entailment.HasAxiomM₀ 𝓢 := by
   constructor;
   intro φ ψ χ;
-  apply C_trans $ show 𝓢 ⊢! (φ ▷ ψ) ➝ (φ ▷ (ψ ⋎ ◇φ)) by
+  apply C_trans $ show 𝓢 ⊢! (φ ▷ ψ) 🡒 (φ ▷ (ψ ⋎ ◇φ)) by
     apply R1!;
     apply or₁;
   apply C_trans $ axiomWstar! (χ := χ);
 
-  have : 𝓢 ⊢! ((ψ ⋎ ◇φ) ⋏ □χ) ▷ (ψ ⋏ □χ) ➝ (◇φ ⋏ □χ) ▷ (ψ ⋏ □χ) := axiomJ2! ⨀ (rhdOfLC! $ nec $ CKK_of_C or₂);
+  have : 𝓢 ⊢! ((ψ ⋎ ◇φ) ⋏ □χ) ▷ (ψ ⋏ □χ) 🡒 (◇φ ⋏ □χ) ▷ (ψ ⋏ □χ) := axiomJ2! ⨀ (rhdOfLC! $ nec $ CKK_of_C or₂);
   apply C_trans ?_ this;
   apply R1!;
   apply deduct';

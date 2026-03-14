@@ -12,7 +12,7 @@ namespace Axioms
 variable {F : Type*} [LogicalConnective F]
 variable (φ ψ χ ξ : F)
 
-protected abbrev PSCon := ((χ ⋏ (φ ➝ ψ)) ➝ ξ) ⋎ ((φ ⋏ (χ ➝ ξ)) ➝ ψ)
+protected abbrev PSCon := ((χ ⋏ (φ 🡒 ψ)) 🡒 ξ) ⋎ ((φ ⋏ (χ 🡒 ξ)) 🡒 ψ)
 
 end Axioms
 

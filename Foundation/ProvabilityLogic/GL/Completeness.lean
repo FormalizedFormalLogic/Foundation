@@ -54,8 +54,8 @@ theorem GL.arithmetical_completeness
 
 theorem GLPlusBoxBot.arithmetical_completeness_aux
   {n : ℕ} (height : n ≤ T.height)
-  : (∀ f : T.StandardRealization, T ⊢ f A) → Modal.GL ⊢ □^[n] ⊥ ➝ A := by
-  suffices ¬Modal.GL ⊢ □^[n]⊥ ➝ A → ∃ f : T.StandardRealization, T ⊬ f A by
+  : (∀ f : T.StandardRealization, T ⊢ f A) → Modal.GL ⊢ □^[n] ⊥ 🡒 A := by
+  suffices ¬Modal.GL ⊢ □^[n]⊥ 🡒 A → ∃ f : T.StandardRealization, T ⊬ f A by
     contrapose!;
     assumption;
   intro hA

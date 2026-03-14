@@ -8,7 +8,7 @@ namespace LO.Axioms
 variable {F : Type*} [LogicalConnective F]
 variable (φ ψ χ : F)
 
-protected abbrev Dummett := (φ ➝ ψ) ⋎ (ψ ➝ φ)
+protected abbrev Dummett := (φ 🡒 ψ) ⋎ (ψ 🡒 φ)
 
 end LO.Axioms
 
@@ -56,22 +56,22 @@ open FiniteContext
 
 instance : HasAxiomWLEM 𝓢 where
   wlem {φ} := by
-    haveI : 𝓢 ⊢! (φ ➝ ∼φ) ⋎ (∼φ ➝ φ) := dummett;
+    haveI : 𝓢 ⊢! (φ 🡒 ∼φ) ⋎ (∼φ 🡒 φ) := dummett;
     apply of_C_of_C_of_A ?_ ?_ this;
     . apply deduct';
       apply A_intro_left;
       apply N_of_CO;
       apply deduct;
-      haveI d₁ : [φ, φ ➝ ∼φ] ⊢[𝓢]! φ := FiniteContext.byAxm;
-      haveI d₂ : [φ, φ ➝ ∼φ] ⊢[𝓢]! φ ➝ ∼φ := FiniteContext.byAxm;
+      haveI d₁ : [φ, φ 🡒 ∼φ] ⊢[𝓢]! φ := FiniteContext.byAxm;
+      haveI d₂ : [φ, φ 🡒 ∼φ] ⊢[𝓢]! φ 🡒 ∼φ := FiniteContext.byAxm;
       have := CO_of_N $ d₂ ⨀ d₁;
       exact this ⨀ d₁;
     . apply deduct';
       apply A_intro_right;
       apply N_of_CO;
       apply deduct;
-      haveI d₁ : [∼φ, ∼φ ➝ φ] ⊢[𝓢]! ∼φ := FiniteContext.byAxm;
-      haveI d₂ : [∼φ, ∼φ ➝ φ] ⊢[𝓢]! ∼φ ➝ φ := FiniteContext.byAxm;
+      haveI d₁ : [∼φ, ∼φ 🡒 φ] ⊢[𝓢]! ∼φ := FiniteContext.byAxm;
+      haveI d₂ : [∼φ, ∼φ 🡒 φ] ⊢[𝓢]! ∼φ 🡒 φ := FiniteContext.byAxm;
       haveI := d₂ ⨀ d₁;
       exact (CO_of_N d₁) ⨀ this;
 

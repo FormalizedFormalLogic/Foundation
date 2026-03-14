@@ -29,7 +29,7 @@ lemma KD_subset_of_not_subset_Ver.lemma₁ (hL : L ⊢ φ) (hV : Modal.Ver ⊬ �
   obtain ⟨ψ, ⟨Γ, rfl⟩, h⟩ := Hilbert.NNFormula.exists_CNF φ;
   generalize eγ : (⋀Γ.unattach).toFormula = γ at h;
 
-  have : L ⊢ φ.toNNFormula.toFormula ⭤ γ := WeakerThan.pbl h;
+  have : L ⊢ φ.toNNFormula.toFormula 🡘 γ := WeakerThan.pbl h;
 
   have hγL : γ ∈ L := by sorry;
   have hγV : γ ∉ Modal.Ver := by sorry;
@@ -42,7 +42,7 @@ lemma KD_subset_of_not_subset_Ver.lemma₁ (hL : L ⊢ φ) (hV : Modal.Ver ⊬ �
     have : Modal.Ver ⊢ □ξ.toFormula := by simp;
     sorry;
 
-  have : ∃ Γ: List (Formula ℕ), L ⊢ φ ⭤ ⋀Γ := by sorry;
+  have : ∃ Γ: List (Formula ℕ), L ⊢ φ 🡘 ⋀Γ := by sorry;
   sorry;
 
 lemma KD_subset_of_not_subset_Ver (hV : ¬L ⪯ Modal.Ver) : Modal.KD ⪯ L := by
@@ -99,8 +99,8 @@ lemma KD_provability_of_classical_satisfiability (hl : φ.Letterless) :
       replace hψ := ihψ (by grind) |>.2 hψ;
       -- TODO: need golf
       apply FiniteContext.deduct'!;
-      replace hφ : [φ ➝ ψ] ⊢[Modal.KD] φ := FiniteContext.of'! hφ;
-      replace hψ : [φ ➝ ψ] ⊢[Modal.KD] ∼ψ := FiniteContext.of'! hψ;
+      replace hφ : [φ 🡒 ψ] ⊢[Modal.KD] φ := FiniteContext.of'! hφ;
+      replace hψ : [φ 🡒 ψ] ⊢[Modal.KD] ∼ψ := FiniteContext.of'! hψ;
       exact hψ ⨀ (FiniteContext.by_axm! ⨀ hφ);
   | hbox φ ihφ =>
     constructor;

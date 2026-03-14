@@ -55,7 +55,7 @@ def gödelWeakTranslate : Propositional.Formula α → Modal.Formula α
   | ⊥ => ⊥
   | φ ⋏ ψ => (φ.gödelWeakTranslate) ⋏ (ψ.gödelWeakTranslate)
   | φ ⋎ ψ => (φ.gödelWeakTranslate) ⋎ (ψ.gödelWeakTranslate)
-  | φ ➝ ψ => □((φ.gödelWeakTranslate) ➝ (ψ.gödelWeakTranslate))
+  | φ 🡒 ψ => □((φ.gödelWeakTranslate) 🡒 (ψ.gödelWeakTranslate))
 postfix:90 "ᶜ" => Propositional.Formula.gödelWeakTranslate
 
 @[grind .]
@@ -70,15 +70,15 @@ lemma gödelWeakTranslate.injective : Function.Injective (gödelWeakTranslate (�
   | φ₁ ⋎ φ₂, ψ₁ ⋎ ψ₂ =>
     obtain ⟨h₁, h₂⟩ := Modal.Formula.inj_or.mp h;
     simp [gödelWeakTranslate.injective h₁, gödelWeakTranslate.injective h₂];
-  | φ₁ ➝ φ₂, ψ₁ ➝ ψ₂ =>
+  | φ₁ 🡒 φ₂, ψ₁ 🡒 ψ₂ =>
     dsimp [gödelWeakTranslate] at h;
     obtain ⟨h₁, h₂⟩ := Modal.Formula.inj_imp.mp $ Modal.Formula.inj_box.mp h;
     simp [gödelWeakTranslate.injective h₁, gödelWeakTranslate.injective h₂];
-  | #a, ⊥ | #a, φ₁ ⋏ φ₂ | #a, φ₁ ⋎ φ₂ | #a, φ₁ ➝ φ₂
-  | ⊥, #a | ⊥, φ₁ ⋏ φ₂ | ⊥, φ₁ ⋎ φ₂ | ⊥, φ₁ ➝ φ₂
+  | #a, ⊥ | #a, φ₁ ⋏ φ₂ | #a, φ₁ ⋎ φ₂ | #a, φ₁ 🡒 φ₂
+  | ⊥, #a | ⊥, φ₁ ⋏ φ₂ | ⊥, φ₁ ⋎ φ₂ | ⊥, φ₁ 🡒 φ₂
   | φ₁ ⋏ φ₂, #a | φ₁ ⋏ φ₂, ⊥
   | φ₁ ⋎ φ₂, #a | φ₁ ⋎ φ₂, ⊥
-  | φ₁ ➝ φ₂, #a | φ₁ ➝ φ₂, ⊥ => contradiction;
+  | φ₁ 🡒 φ₂, #a | φ₁ 🡒 φ₂, ⊥ => contradiction;
   | φ₁ ⋏ φ₂, ψ₁ ⋎ ψ₂ => exfalso; apply Modal.Formula.neq_and_or h;
   | φ₁ ⋎ φ₂, ψ₁ ⋏ ψ₂ => exfalso; apply Modal.Formula.neq_or_and h;
 
@@ -94,7 +94,7 @@ protected abbrev provable_gödelWeakTranslated_of_provable_VF.lemma.translate (M
   World := Unit ⊕ M.World
   Rel φ x y :=
     match x, y, φ with
-    | .inr x, .inr y, φ ➝ ψ => M.Rel (φᶜ ➝ ψᶜ) x y
+    | .inr x, .inr y, φ 🡒 ψ => M.Rel (φᶜ 🡒 ψᶜ) x y
     | .inr _, .inl (), _ => False
     | _, _, _ => True
   root := .inl ()
@@ -134,7 +134,7 @@ protected abbrev provable_VF_of_provable_gödelWeakTranslated.lemma.translate (M
   World := M.World
   Rel φ x y :=
     match φ with
-    | ψ ➝ χ => ∃ ψ' χ', ψ'ᶜ = ψ ∧ χ'ᶜ = χ ∧ M.Rel' (ψ' ➝ χ') x y
+    | ψ 🡒 χ => ∃ ψ' χ', ψ'ᶜ = ψ ∧ χ'ᶜ = χ ∧ M.Rel' (ψ' 🡒 χ') x y
     | _     => True
   Valuation x a := M.Val a x
 

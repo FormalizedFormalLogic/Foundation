@@ -167,9 +167,9 @@ lemma wedge_def (φ ψ : Semiformula L ξ n) : φ ⋏ ψ = φ ＆ ψ := rfl
 
 lemma vee_def (φ ψ : Semiformula L ξ n) :  φ ⋎ ψ = φ ⅋ ψ := rfl
 
-lemma imply_def (φ ψ : Semiformula L ξ n) : φ ➝ ψ = φ ⊸ ψ := rfl
+lemma imply_def (φ ψ : Semiformula L ξ n) : φ 🡒 ψ = φ ⊸ ψ := rfl
 
-lemma imply_def' (φ ψ : Semiformula L ξ n) : φ ➝ ψ = ∼φ ⅋ ψ := rfl
+lemma imply_def' (φ ψ : Semiformula L ξ n) : φ 🡒 ψ = ∼φ ⅋ ψ := rfl
 
 @[simp] lemma neg_inj {φ ψ : Semiformula L ξ n} : ∼φ = ∼ψ ↔ φ = ψ := by
   constructor

@@ -18,7 +18,7 @@ structure DirectTranslation {L₁ : Language} [L₁.Eq] (T : Theory L₁) [𝗘�
   domain_nonempty :
     T ⊢ ∃⁰ domain
   func_defined {k} (f : L₂.Func k) :
-    T ⊢ ∀⁰* ((Matrix.conj fun i ↦ domain/[#i]) ➝ ∃⁰! (domain/[#0] ⋏ func f))
+    T ⊢ ∀⁰* ((Matrix.conj fun i ↦ domain/[#i]) 🡒 ∃⁰! (domain/[#0] ⋏ func f))
   preserve_eq :
     T ⊢ “∀ x y, !domain x → !domain y → (!(rel Language.Eq.eq) x y ↔ x = y)”
 
@@ -47,7 +47,7 @@ def varEqual : Semiterm L₂ ξ n → Semiformula L₁ ξ (n + 1)
       (Matrix.conj fun i ↦
         Rew.emb ▹ π.domain/[#(i.addCast (n + 1))] ⋏
         Rew.subst (#(i.addCast (n + 1)) :> fun j ↦ #((j.addNat 1).addNat k)) ▹ varEqual (v i))
-      ➝ (Rew.embSubsts (#((0 : Fin (n + 1)).addNat k) :> fun i ↦ #(i.addCast (n + 1))) ▹ π.func f)
+      🡒 (Rew.embSubsts (#((0 : Fin (n + 1)).addNat k) :> fun i ↦ #(i.addCast (n + 1))) ▹ π.func f)
     )
 
 def translateRel {k} (r : L₂.Rel k) (v : Fin k → Semiterm L₂ ξ n) : Semiformula L₁ ξ n :=
@@ -55,7 +55,7 @@ def translateRel {k} (r : L₂.Rel k) (v : Fin k → Semiterm L₂ ξ n) : Semif
     (Matrix.conj fun i ↦
       Rew.emb ▹ π.domain/[#(i.addCast n)] ⋏
       Rew.subst (#(i.addCast n) :> fun j ↦ #(j.addNat k)) ▹ π.varEqual (v i))
-    ➝ (Rew.embSubsts (fun i ↦ #(i.addCast n)) ▹ π.rel r)
+    🡒 (Rew.embSubsts (fun i ↦ #(i.addCast n)) ▹ π.rel r)
   )
 
 def translateAux {n} : Semiformula L₂ ξ n → Semiformula L₁ ξ n

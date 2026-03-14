@@ -65,7 +65,7 @@ instance : Modal.K ⪯ Modal.GLPoint3 := Hilbert.Normal.weakerThan_of_subset_axi
 
 open LO.Entailment Modal.Entailment in
 open Formula.Kripke in
-private lemma complete.lemma₁ : Modal.GLPoint3 ⊢ ∼□φ ➝ ◇(□φ ⋏ ∼φ) := by
+private lemma complete.lemma₁ : Modal.GLPoint3 ⊢ ∼□φ 🡒 ◇(□φ ⋏ ∼φ) := by
   apply CN!_of_CN!_left;
   apply C!_trans ?_ axiomL!;
   apply WeakerThan.pbl (𝓢 := Modal.K);
@@ -156,7 +156,7 @@ private lemma complete.filteredModel.truthlemma : ∀ x : (complete.filteredMode
   | hatom => simp [Satisfies, filteredModel];
   | hfalsum => simp [Satisfies];
   | himp ψ ξ ihψ ihξ =>
-    suffices ψ ∈ x.1.1.1 → ξ ∈ x.1.1.1 ↔ ψ ➝ ξ ∈ x.1.1.1 by simpa [Satisfies, (ihψ x (by grind)), (ihξ x (by grind))];
+    suffices ψ ∈ x.1.1.1 → ξ ∈ x.1.1.1 ↔ ψ 🡒 ξ ∈ x.1.1.1 by simpa [Satisfies, (ihψ x (by grind)), (ihξ x (by grind))];
     grind;
   | hbox ψ ihψ =>
     constructor;

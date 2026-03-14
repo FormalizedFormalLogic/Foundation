@@ -18,7 +18,7 @@ open Propositional.ClassicalSemantics (Valuation)
 def val (v : Valuation α) : Formula α → Prop
   | atom a  => v a
   | ⊥       => False
-  | φ ➝ ψ   => val v φ → val v ψ
+  | φ 🡒 ψ   => val v φ → val v ψ
   | φ ⋏ ψ   => val v φ ∧ val v ψ
   | φ ⋎ ψ   => val v φ ∨ val v ψ
 
@@ -142,7 +142,7 @@ lemma or_tautology_of : φ.Tautology ∨ ψ.Tautology → (φ ⋎ ψ).Tautology 
   . right; exact hψ v;
 
 @[grind <=]
-lemma imp_tautology_of : (ψ.Tautology) → (φ ➝ ψ).Tautology := by
+lemma imp_tautology_of : (ψ.Tautology) → (φ 🡒 ψ).Tautology := by
   intro hψ v h;
   apply hψ;
 alias tautology_afortiori := imp_tautology_of

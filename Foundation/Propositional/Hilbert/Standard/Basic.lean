@@ -13,16 +13,16 @@ variable {α : Type*} {Ax Ax₁ Ax₂ : Axiom α} {φ ψ χ : Formula α}
 
 inductive Hilbert.Standard (Ax : Axiom α) : Logic α
 | axm {φ} (s : Substitution _) : φ ∈ Ax → Hilbert.Standard Ax (φ⟦s⟧)
-| mdp {φ ψ}                    : Hilbert.Standard Ax (φ ➝ ψ) → Hilbert.Standard Ax φ → Hilbert.Standard Ax ψ
+| mdp {φ ψ}                    : Hilbert.Standard Ax (φ 🡒 ψ) → Hilbert.Standard Ax φ → Hilbert.Standard Ax ψ
 | verum                        : Hilbert.Standard Ax $ ⊤
-| implyS φ ψ                   : Hilbert.Standard Ax $ φ ➝ ψ ➝ φ
-| implyK φ ψ χ                 : Hilbert.Standard Ax $ (φ ➝ ψ ➝ χ) ➝ (φ ➝ ψ) ➝ φ ➝ χ
-| andElimL φ ψ                 : Hilbert.Standard Ax $ φ ⋏ ψ ➝ φ
-| andElimR φ ψ                 : Hilbert.Standard Ax $ φ ⋏ ψ ➝ ψ
-| andIntro φ ψ                 : Hilbert.Standard Ax $ φ ➝ ψ ➝ φ ⋏ ψ
-| orIntroL φ ψ                 : Hilbert.Standard Ax $ φ ➝ φ ⋎ ψ
-| orIntroR φ ψ                 : Hilbert.Standard Ax $ ψ ➝ φ ⋎ ψ
-| orElim φ ψ χ                 : Hilbert.Standard Ax $ (φ ➝ χ) ➝ (ψ ➝ χ) ➝ (φ ⋎ ψ ➝ χ)
+| implyS φ ψ                   : Hilbert.Standard Ax $ φ 🡒 ψ 🡒 φ
+| implyK φ ψ χ                 : Hilbert.Standard Ax $ (φ 🡒 ψ 🡒 χ) 🡒 (φ 🡒 ψ) 🡒 φ 🡒 χ
+| andElimL φ ψ                 : Hilbert.Standard Ax $ φ ⋏ ψ 🡒 φ
+| andElimR φ ψ                 : Hilbert.Standard Ax $ φ ⋏ ψ 🡒 ψ
+| andIntro φ ψ                 : Hilbert.Standard Ax $ φ 🡒 ψ 🡒 φ ⋏ ψ
+| orIntroL φ ψ                 : Hilbert.Standard Ax $ φ 🡒 φ ⋎ ψ
+| orIntroR φ ψ                 : Hilbert.Standard Ax $ ψ 🡒 φ ⋎ ψ
+| orElim φ ψ χ                 : Hilbert.Standard Ax $ (φ 🡒 χ) 🡒 (ψ 🡒 χ) 🡒 (φ ⋎ ψ 🡒 χ)
 
 
 namespace Hilbert.Standard
@@ -69,16 +69,16 @@ instance : Entailment.Minimal (Hilbert.Standard Ax) where
 protected lemma rec!
   {motive   : (φ : Formula α) → (Hilbert.Standard Ax ⊢ φ) → Sort}
   (axm      : ∀ {φ : Formula α} (s), (h : φ ∈ Ax) → motive (φ⟦s⟧) (by grind))
-  (mdp      : ∀ {φ ψ : Formula α}, {hpq : (Hilbert.Standard Ax) ⊢ φ ➝ ψ} → {hp : (Hilbert.Standard Ax) ⊢ φ} → (motive (φ ➝ ψ) hpq) → (motive φ hp) → (motive ψ (hpq ⨀ hp)))
+  (mdp      : ∀ {φ ψ : Formula α}, {hpq : (Hilbert.Standard Ax) ⊢ φ 🡒 ψ} → {hp : (Hilbert.Standard Ax) ⊢ φ} → (motive (φ 🡒 ψ) hpq) → (motive φ hp) → (motive ψ (hpq ⨀ hp)))
   (verum    : motive ⊤ $ by simp)
   (implyS   : ∀ {φ ψ},   motive (Axioms.ImplyK φ ψ) $ by simp)
   (implyK   : ∀ {φ ψ χ}, motive (Axioms.ImplyS φ ψ χ) $ by simp)
-  (andElimL : ∀ {φ ψ},   motive (φ ⋏ ψ ➝ φ) $ by simp)
-  (andElimR : ∀ {φ ψ},   motive (φ ⋏ ψ ➝ ψ) $ by simp)
-  (andIntro : ∀ {φ ψ},   motive (φ ➝ ψ ➝ φ ⋏ ψ) $ by simp)
-  (orIntroL : ∀ {φ ψ},   motive (φ ➝ φ ⋎ ψ) $ by simp)
-  (orIntroR : ∀ {φ ψ},   motive (ψ ➝ φ ⋎ ψ) $ by simp)
-  (orElim   : ∀ {φ ψ χ}, motive ((φ ➝ χ) ➝ (ψ ➝ χ) ➝ φ ⋎ ψ ➝ χ) $ by simp)
+  (andElimL : ∀ {φ ψ},   motive (φ ⋏ ψ 🡒 φ) $ by simp)
+  (andElimR : ∀ {φ ψ},   motive (φ ⋏ ψ 🡒 ψ) $ by simp)
+  (andIntro : ∀ {φ ψ},   motive (φ 🡒 ψ 🡒 φ ⋏ ψ) $ by simp)
+  (orIntroL : ∀ {φ ψ},   motive (φ 🡒 φ ⋎ ψ) $ by simp)
+  (orIntroR : ∀ {φ ψ},   motive (ψ 🡒 φ ⋎ ψ) $ by simp)
+  (orElim   : ∀ {φ ψ χ}, motive ((φ 🡒 χ) 🡒 (ψ 🡒 χ) 🡒 φ ⋎ ψ 🡒 χ) $ by simp)
   : ∀ {φ}, (d : Hilbert.Standard Ax ⊢ φ) → motive φ d := by
   rintro φ d;
   replace d := Logic.iff_provable.mp d;

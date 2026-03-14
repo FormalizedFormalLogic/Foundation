@@ -66,7 +66,7 @@ instance [Entailment.F L] [Entailment.HasAxiomTra1 L] [Entailment.Disjunctive L]
   trans := by
     rintro T U V RTU RUV φ ψ hφψ hφ;
     apply RUV (RTU ?_ (show ⊤ ∈ U.theory by simp)) hφ;
-    apply T.imp_closed (φ := φ ➝ ψ);
+    apply T.imp_closed (φ := φ 🡒 ψ);
     . exact Entailment.Corsi.axiomTra1;
     . simpa;
 

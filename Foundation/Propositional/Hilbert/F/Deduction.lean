@@ -15,7 +15,7 @@ variable {α : Type*} {Ax : Axiom α} {Γ : Set (Formula α)} {φ ψ : Formula �
 inductive Deduction (Ax : Axiom α) (Γ : Set (Formula α)) : Formula α → Prop
 | protected ctx {φ}     : φ ∈ Γ → Deduction Ax Γ φ
 | protected thm {φ}     : Hilbert.F Ax ⊢ φ → Deduction Ax Γ φ
-| protected mp {φ ψ}    : Hilbert.F Ax ⊢ (φ ➝ ψ) → Deduction Ax Γ φ → Deduction Ax Γ ψ
+| protected mp {φ ψ}    : Hilbert.F Ax ⊢ (φ 🡒 ψ) → Deduction Ax Γ φ → Deduction Ax Γ ψ
 | protected andIR {φ ψ} : Deduction Ax Γ φ → Deduction Ax Γ ψ → Deduction Ax Γ (φ ⋏ ψ)
 
 @[grind ⇒] lemma deducible_of_provable (hφ : (Hilbert.F Ax) ⊢ φ) : Deduction Ax Γ φ := by apply Deduction.thm hφ;
@@ -35,7 +35,7 @@ lemma deduction_subset (h : Γ₁ ⊆ Γ₂) : Deduction Ax Γ₁ φ → Deducti
   | mp => apply Deduction.mp <;> assumption;
   | andIR => apply Deduction.andIR <;> assumption;
 
-theorem WeakDT : (Deduction Ax {ψ} φ) ↔ (Hilbert.F Ax) ⊢ ψ ➝ φ := by
+theorem WeakDT : (Deduction Ax {ψ} φ) ↔ (Hilbert.F Ax) ⊢ ψ 🡒 φ := by
   constructor;
   . intro h; induction h <;> grind;
   . intro h;
@@ -57,7 +57,7 @@ lemma deduct_conj {Γ : List (Formula α)} : Deduction Ax (Γ.toFinset) Γ.conj�
       . simp;
       . exact ih;
 
-lemma DT_list {Γ : List (Formula α)} : (Deduction Ax Γ.toFinset φ) ↔ (Hilbert.F Ax) ⊢ Γ.conj₂ ➝ φ := by
+lemma DT_list {Γ : List (Formula α)} : (Deduction Ax Γ.toFinset φ) ↔ (Hilbert.F Ax) ⊢ Γ.conj₂ 🡒 φ := by
   constructor;
   . intro h;
     induction h with
@@ -78,7 +78,7 @@ lemma DT_list {Γ : List (Formula α)} : (Deduction Ax Γ.toFinset φ) ↔ (Hilb
     | hcons ψ Γ hΓ ih =>
       sorry;
 
-lemma DT_finset {Γ : Finset (Formula α)} : (Deduction Ax Γ φ) ↔ (Hilbert.F Ax) ⊢ Γ.conj ➝ φ := by simpa using DT_list (Γ := Γ.toList);
+lemma DT_finset {Γ : Finset (Formula α)} : (Deduction Ax Γ φ) ↔ (Hilbert.F Ax) ⊢ Γ.conj 🡒 φ := by simpa using DT_list (Γ := Γ.toList);
 
 lemma DT_set {Γ : Set (Formula α)} : (Deduction Ax Γ φ) ↔ ∃ Δ : Finset (Formula α), ↑Δ ⊆ Γ ∧ Deduction Ax Δ φ := by
   constructor;
