@@ -2,6 +2,7 @@ module
 
 public import Foundation.Propositional.Kripke.AxiomWLEM
 public import Foundation.Propositional.Kripke.Hilbert.KreiselPutnam
+public import Foundation.Propositional.Kripke.Rooted
 
 @[expose] public section
 
@@ -30,6 +31,67 @@ instance : Canonical (Hilbert.KC : Hilbert ℕ) ({ F : Frame | F.IsPiecewiseStro
   infer_instance;
 
 instance : Complete (Hilbert.KC : Hilbert ℕ) ({ F : Frame | F.IsPiecewiseStronglyConvergent }) := inferInstance
+
+open finestFiltrationTransitiveClosureModel Relation in
+instance : Complete (Hilbert.KC : Hilbert ℕ) ({ F : Frame | Finite F ∧ F.IsPiecewiseStronglyConvergent }) := by
+  constructor;
+  intro φ hφ;
+  apply Complete.complete (𝓜 := ({ F : Frame | F.IsPiecewiseStronglyConvergent }));
+  rintro F F_conn V r;
+  replace F_conn := Set.mem_setOf_eq.mp F_conn;
+  let M : Kripke.Model := ⟨F, V⟩;
+  let RM := M↾r;
+
+  apply Model.pointGenerate.modal_equivalent_at_root (M := M) (r := r) |>.mp;
+
+  let FRM := finestFiltrationTransitiveClosureModel RM (φ.subformulas);
+  apply filtration FRM finestFiltrationTransitiveClosureModel.filterOf (by simp) |>.mpr;
+  apply hφ;
+  apply Set.mem_setOf_eq.mpr;
+  refine ⟨?_, ⟨?_⟩⟩;
+  . apply FilterEqvQuotient.finite;
+    simp;
+  . rintro X ⟨y, (rfl | Rry)⟩ ⟨z, (rfl | Rrz)⟩ RXY RXZ;
+    . simp only [exists_and_left, and_self];
+      let Z : RM.World := ⟨z, by tauto⟩;
+      use ⟦Z⟧;
+      apply Relation.TransGen.single;
+      use Z;
+      constructor;
+      . tauto;
+      . use Z;
+        constructor;
+        . tauto;
+        . apply F.refl;
+    . let Y : RM.World := ⟨y, by tauto⟩;
+      let Z : RM.World := ⟨z, by tauto⟩;
+      use ⟦Z⟧;
+      constructor;
+      . apply TransGen.single;
+        use Y, Z;
+        tauto;
+      . apply Frame.refl;
+    . let Y : RM.World := ⟨y, by tauto⟩;
+      let Z : RM.World := ⟨z, by tauto⟩;
+      use ⟦Y⟧;
+      constructor;
+      . apply Frame.refl;
+      . apply TransGen.single;
+        use Z, Y;
+        tauto;
+    . obtain ⟨u, Ryu, Rzu⟩ := F.ps_convergent Rry Rrz;
+      have : r ≺ u := F.trans Rry Ryu;
+      let Y : RM.World := ⟨y, by tauto⟩;
+      let Z : RM.World := ⟨z, by tauto⟩;
+      let U : RM.World := ⟨u, by tauto⟩;
+      use ⟦U⟧;
+      constructor;
+      . apply TransGen.single;
+        use Y, U;
+        tauto;
+      . apply TransGen.single;
+        use Z, U;
+        tauto;
 
 end KC
 

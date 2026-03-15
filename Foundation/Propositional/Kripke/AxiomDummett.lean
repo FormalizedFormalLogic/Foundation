@@ -19,7 +19,7 @@ section definability
 
 variable {F : Kripke.Frame}
 
-lemma validate_axiomDummett_of_isPiecewiseStronglyConnected [F.IsPiecewiseStronglyConnected] : F ⊧ (Axioms.Dummett (.atom 0) (.atom 1)) := by
+lemma validate_axiomDummett_of_isPiecewiseStronglyConnected [F.IsPiecewiseStronglyConnected] : F ⊧ (Axioms.Dummett φ ψ) := by
   have := F.ps_connected;
   revert this;
   contrapose!;
