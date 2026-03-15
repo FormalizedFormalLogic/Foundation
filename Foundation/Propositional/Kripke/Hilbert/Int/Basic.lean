@@ -18,13 +18,13 @@ instance : (Set.univ : FrameClass) ⊧* (Hilbert.Int : Hilbert ℕ) := by
   rintro φ ⟨_, rfl⟩ F;
   grind;
 
-instance : Sound Hilbert.Int (Set.univ : FrameClass) := inferInstance
+instance soundKripke : Sound Hilbert.Int (Set.univ : FrameClass) := inferInstance
 
 instance : Entailment.Consistent (Hilbert.Int : Hilbert ℕ) := consistent_of_nonempty_frameClass Set.univ (by simp)
 
 instance : Canonical (Hilbert.Int : Hilbert ℕ) (Set.univ : FrameClass) := by tauto;
 
-instance : Complete (Hilbert.Int : Hilbert ℕ) (Set.univ : FrameClass) := inferInstance
+instance completeKripke : Complete (Hilbert.Int : Hilbert ℕ) (Set.univ : FrameClass) := inferInstance
 
 instance : Complete (Hilbert.Int : Hilbert ℕ) ({ F : Frame | Finite F }) := by
   constructor;
