@@ -514,6 +514,8 @@ abbrev Satisfiable (T : Theory L) : Prop := Semantics.Satisfiable (SmallStruc L)
 
 variable {M}
 
+lemma struc_models_iff_models {s : Struc L} : s ⊧ σ ↔ s.Dom↓[L] ⊧ σ := by rfl
+
 lemma models_iff : M↓[L] ⊧ σ ↔ M ⊧/![] σ := by rfl
 
 lemma models_iff_proposition {φ : Proposition L} : M↓[L] ⊧ φ.univCl ↔ ∀ f : ℕ → M, φ.Evalf f := by
