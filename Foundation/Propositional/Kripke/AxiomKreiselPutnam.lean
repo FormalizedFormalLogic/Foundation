@@ -33,7 +33,8 @@ variable {F : Kripke.Frame}
 
 open Formula (atom)
 
-lemma validate_axiomKreiselPutnam_of_satisfiesKreiselPutnamCondition [F.SatisfiesKreiselPutnamCondition ] : F ⊧ (Axioms.KreiselPutnam (.atom 0) (.atom 1) (.atom 2)) := by
+@[simp, grind .]
+lemma validate_axiomKreiselPutnam_of_satisfiesKreiselPutnamCondition [F.SatisfiesKreiselPutnamCondition ] : F ⊧ (Axioms.KreiselPutnam φ ψ χ) := by
   intro V x y Rxy h₁;
   by_contra hC;
   replace hC := Satisfies.or_def.not.mp hC;
@@ -61,7 +62,7 @@ lemma validate_axiomKreiselPutnam_of_satisfiesKreiselPutnamCondition [F.Satisfie
       . exfalso; exact hz₂₂ h;
   ⟩;
 
-  have : ¬Satisfies ⟨F, V⟩ u (∼(.atom 0)) := by
+  have : ¬Satisfies ⟨F, V⟩ u (∼φ) := by
     by_contra hC;
     rcases Satisfies.or_def.mp $ h₁ Ryu hC with (h | h);
     . apply hz₁₂; exact Satisfies.formula_hereditary Ruz₁ h;
@@ -71,8 +72,8 @@ lemma validate_axiomKreiselPutnam_of_satisfiesKreiselPutnamCondition [F.Satisfie
   obtain ⟨v, Ruv, hv⟩ := this;
 
   obtain ⟨w, Rvw, (Rz₁w | Rz₂w)⟩ := h v Ruv;
-  . exact Satisfies.not_of_neg (Satisfies.formula_hereditary (φ := (∼(.atom 0))) Rz₁w hz₁₁) $ Satisfies.formula_hereditary Rvw hv;
-  . exact Satisfies.not_of_neg (Satisfies.formula_hereditary (φ := (∼(.atom 0))) Rz₂w hz₂₁) $ Satisfies.formula_hereditary Rvw hv;
+  . exact Satisfies.not_of_neg (Satisfies.formula_hereditary (φ := (∼φ)) Rz₁w hz₁₁) $ Satisfies.formula_hereditary Rvw hv;
+  . exact Satisfies.not_of_neg (Satisfies.formula_hereditary (φ := (∼φ)) Rz₂w hz₂₁) $ Satisfies.formula_hereditary Rvw hv;
 
 end definability
 

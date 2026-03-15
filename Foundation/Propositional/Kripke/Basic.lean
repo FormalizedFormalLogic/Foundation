@@ -1,14 +1,12 @@
 module
 
-public import Foundation.Propositional.Logic.Basic
+public import Foundation.Propositional.Formula.Basic
+public import Foundation.Propositional.Entailment.Cl.Basic
 public import Foundation.Vorspiel.Rel.Basic
 
 @[expose] public section
 
 namespace LO.Propositional
-
-open Entailment
-
 namespace Kripke
 
 structure Frame where
@@ -300,6 +298,17 @@ protected lemma mdp (hpq : F ⊧ φ 🡒 ψ) (hp : F ⊧ φ) : F ⊧ ψ := fun V
 
 protected lemma efq : F ⊧ Axioms.EFQ φ := fun _ => ValidOnModel.efq
 
+attribute [simp, grind .]
+  ValidOnFrame.andElim₁
+  ValidOnFrame.andElim₂
+  ValidOnFrame.andInst₃
+  ValidOnFrame.orInst₁
+  ValidOnFrame.orInst₂
+  ValidOnFrame.orElim
+  ValidOnFrame.implyK
+  ValidOnFrame.implyS
+  ValidOnFrame.efq
+
 end ValidOnFrame
 
 end Formula.Kripke
@@ -376,12 +385,6 @@ lemma finite_all.validates_AxiomEFQ : FrameClass.finite_all.ValidatesFormula (Ax
   exact Formula.Kripke.ValidOnFrame.efq;
 
 end FrameClass
-
-end
-
-section
-
-abbrev FrameClass.logic (C : FrameClass) : Logic ℕ := { φ | C ⊧ φ }
 
 end
 
