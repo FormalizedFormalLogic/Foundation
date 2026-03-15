@@ -114,6 +114,23 @@ def Subst {H : Hilbert α} (s) : H ⊢! φ → H ⊢! φ⟦s⟧
 
 lemma subst {H : Hilbert α} (s) : H ⊢ φ → H ⊢ φ⟦s⟧ := λ ⟨hφ⟩ => ⟨Subst s hφ⟩
 
+def ofProofSchema (h : H₂ ⊢!* H₁.schema) : H₁ ⊢! φ → H₂ ⊢! φ
+  | axm h₁ => h h₁
+  | mdp h₁ h₂ => mdp (ofProofSchema h h₁) (ofProofSchema h h₂)
+  | verum => verum
+  | implyS => implyS
+  | implyK => implyK
+  | andElimL => andElimL
+  | andElimR => andElimR
+  | andIntro => andIntro
+  | orIntroL => orIntroL
+  | orIntroR => orIntroR
+  | orElim => orElim
+
+lemma of_proof_schema (h : H₂ ⊢* H₁.schema) : H₁ ⊢ φ → H₂ ⊢ φ := λ ⟨hφ⟩ => ⟨ofProofSchema (h · |>.get) hφ⟩
+
+lemma weakerThan_of_provable_schema (h : H₂ ⊢* H₁.schema) : H₁ ⪯ H₂ := Entailment.weakerThan_iff.mpr $ of_proof_schema h
+
 section
 
 instance : Entailment.Int (Hilbert.Int : Hilbert α) where
@@ -133,6 +150,8 @@ instance : Entailment.KreiselPutnam (Hilbert.KreiselPutnam : Hilbert α) where
 
 instance : Entailment.HasAxiomEFQ (Hilbert.Cl : Hilbert α) := ⟨axm $ by tauto⟩
 instance : Entailment.HasAxiomLEM (Hilbert.Cl : Hilbert α) := ⟨axm $ by tauto⟩
+instance : Entailment.Int (Hilbert.Cl : Hilbert α) where
+instance [DecidableEq α] : Entailment.Cl (Hilbert.Cl : Hilbert α) where
 
 end
 

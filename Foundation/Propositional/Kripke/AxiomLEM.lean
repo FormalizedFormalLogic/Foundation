@@ -21,7 +21,7 @@ section definability
 
 variable {F : Kripke.Frame}
 
-lemma validate_axiomLEM_of_isSymmetric [F.IsSymmetric] : F ⊧ (Axioms.LEM (.atom 0)) := by
+lemma validate_axiomLEM_of_isSymmetric [F.IsSymmetric] : F ⊧ (Axioms.LEM φ) := by
   have := F.symm;
   revert this;
   contrapose!;
@@ -42,7 +42,7 @@ lemma validate_axiomLEM_of_isSymmetric [F.IsSymmetric] : F ⊧ (Axioms.LEM (.ato
   . by_contra Ryx;
     exact h₁ $ Satisfies.formula_hereditary Ryx hy;
 
-lemma validate_axiomLEM_of_isEuclidean [F.IsEuclidean] : F ⊧ (Axioms.LEM (.atom 0)) := validate_axiomLEM_of_isSymmetric
+lemma validate_axiomLEM_of_isEuclidean [F.IsEuclidean] : F ⊧ (Axioms.LEM φ) := validate_axiomLEM_of_isSymmetric
 
 lemma isEuclidean_of_validate_axiomLEM (h : F ⊧ (Axioms.LEM (.atom 0))) : F.IsEuclidean := ⟨by
   rintro x y z Rxy Rxz;
