@@ -24,9 +24,9 @@ instance : Entailment.Consistent (Hilbert.Int : Hilbert ℕ) := consistent_of_no
 
 instance : Canonical (Hilbert.Int : Hilbert ℕ) (Set.univ : FrameClass) := by tauto;
 
-instance completeKripke : Complete (Hilbert.Int : Hilbert ℕ) (Set.univ : FrameClass) := inferInstance
+instance instKripkeComplete : Complete (Hilbert.Int : Hilbert ℕ) (Set.univ : FrameClass) := inferInstance
 
-instance : Complete (Hilbert.Int : Hilbert ℕ) ({ F : Frame | Finite F }) := by
+instance instKripkeCompleteFinite : Complete (Hilbert.Int : Hilbert ℕ) ({ F : Frame | Finite F }) := by
   constructor;
   intro φ hφ;
   apply Complete.complete (𝓜 := (Set.univ : FrameClass));

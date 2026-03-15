@@ -2,7 +2,7 @@ module
 
 public import Foundation.Modal.ModalCompanion.Standard.Int
 public import Foundation.Modal.Kripke.Logic.GrzPoint2
-public import Foundation.Propositional.Kripke.Logic.KC
+-- public import Foundation.Propositional.Kripke.Logic.KC
 
 @[expose] public section
 

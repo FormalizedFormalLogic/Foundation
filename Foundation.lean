@@ -460,6 +460,7 @@ public import Foundation.Propositional.Hilbert.F.Basic
 public import Foundation.Propositional.Hilbert.F.Deduction
 public import Foundation.Propositional.Hilbert.F.Disjunctive
 public import Foundation.Propositional.Hilbert.F_WF
+public import Foundation.Propositional.Hilbert.Minimal.Basic
 public import Foundation.Propositional.Hilbert.Standard
 public import Foundation.Propositional.Hilbert.Standard.Basic
 public import Foundation.Propositional.Hilbert.Standard.Glivenko
@@ -476,12 +477,13 @@ public import Foundation.Propositional.Kripke.AxiomWLEM
 public import Foundation.Propositional.Kripke.Basic
 public import Foundation.Propositional.Kripke.Completeness
 public import Foundation.Propositional.Kripke.Filtration
-public import Foundation.Propositional.Kripke.Hilbert
-public import Foundation.Propositional.Kripke.Logic.Cl
-public import Foundation.Propositional.Kripke.Logic.Int
-public import Foundation.Propositional.Kripke.Logic.KC
-public import Foundation.Propositional.Kripke.Logic.KreiselPutnam
-public import Foundation.Propositional.Kripke.Logic.LC
+public import Foundation.Propositional.Kripke.Hilbert.Basic
+public import Foundation.Propositional.Kripke.Hilbert.Cl
+public import Foundation.Propositional.Kripke.Hilbert.Int.Basic
+public import Foundation.Propositional.Kripke.Hilbert.Int.DP
+public import Foundation.Propositional.Kripke.Hilbert.KC
+public import Foundation.Propositional.Kripke.Hilbert.KreiselPutnam
+public import Foundation.Propositional.Kripke.Hilbert.LC
 public import Foundation.Propositional.Kripke.Preservation
 public import Foundation.Propositional.Kripke.Rooted
 public import Foundation.Propositional.Kripke2.AxiomCorfl

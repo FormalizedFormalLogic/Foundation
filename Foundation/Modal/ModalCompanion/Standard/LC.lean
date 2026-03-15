@@ -3,7 +3,7 @@ module
 public import Foundation.Logic.Embedding
 public import Foundation.Modal.ModalCompanion.Standard.Int
 public import Foundation.Modal.Boxdot.GLPoint3_GrzPoint3
-public import Foundation.Propositional.Kripke.Logic.LC
+-- public import Foundation.Propositional.Kripke.Logic.LC
 
 @[expose] public section
 
