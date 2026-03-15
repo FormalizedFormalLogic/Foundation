@@ -523,11 +523,6 @@ lemma lMap_fix (φ : Semiproposition L₁ n) : lMap Φ (@Rew.fix L₁ n ▹ φ) 
 lemma lMap_emb {ο : Type _} [IsEmpty ο] (φ : Semiformula L₁ ο n) :
     (lMap Φ (Rewriting.emb φ : Semiformula L₁ ξ n)) = Rewriting.emb (lMap Φ φ) := lMap_bind _ _ _
 
-lemma lMap_toS (φ : Semiformula L₁ (Fin n) 0) :
-    lMap Φ (@Rew.toS L₁ n ▹ φ) = @Rew.toS L₂ n ▹ lMap Φ φ := by
-  rw [Rew.eq_bind Rew.toS, lMap_bind]
-  simp [Function.comp_def, Matrix.empty_eq]; congr
-
 lemma lMap_rewriteMap (φ : Semiformula L₁ ξ₁ n) (f : ξ₁ → ξ₂) :
     lMap Φ (Rew.rewriteMap (L := L₁) (n := n) f ▹ φ) = (Rew.rewriteMap (L := L₂) (n := n) f) ▹ (lMap Φ φ) := by
   simp [Rew.rewriteMap, lMap_rewrite, Function.comp_def]

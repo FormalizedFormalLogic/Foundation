@@ -37,19 +37,18 @@ def cast (b : 𝔇 Γ) (h : Γ = Δ := by simp) : 𝔇 Δ := h ▸ b
 
 def close (φ : F) (hp : φ ∈ Γ := by simp) (hn : ∼φ ∈ Γ := by simp) : 𝔇 Γ := wk (identity φ) (by simp_all)
 
-def verum' (h : ⊤ ∈ Γ := by simp) : 𝔇 Γ := wk verum (by simp [h])
+def top (h : ⊤ ∈ Γ := by simp) : 𝔇 Γ := wk verum (by simp [h])
 
 def tensor {φ ψ : F} (dφ : 𝔇 (φ :: Γ)) (dψ : 𝔇 (ψ :: Δ)) : 𝔇 (φ ⋏ ψ :: Γ ++ Δ) :=
   and (wk dφ (by simp)) (wk dψ (by simp))
 
-def rotate₁ (d : 𝔇 (φ₂ :: φ₁ :: Γ)) : 𝔇 (φ₁ :: φ₂ :: Γ) := wk d (by simp)
+def swap₁ (d : 𝔇 (φ₂ :: φ₁ :: Γ)) : 𝔇 (φ₁ :: φ₂ :: Γ) := wk d (by simp)
 
-def rotate₂ (d : 𝔇 (φ₃ :: φ₁ :: φ₂ :: Γ)) : 𝔇 (φ₁ :: φ₂ :: φ₃ :: Γ) :=
-  wk d (by simpa using List.subset_cons_of_subset _ (List.subset_cons_of_subset _ <| by simp))
+def swap₂ (d : 𝔇 (φ₃ :: φ₁ :: φ₂ :: Γ)) : 𝔇 (φ₁ :: φ₂ :: φ₃ :: Γ) :=
+  wk d (by grind)
 
-def rotate₃ (d : 𝔇 (φ₄ :: φ₁ :: φ₂ :: φ₃ :: Γ)) : 𝔇 (φ₁ :: φ₂ :: φ₃ :: φ₄ :: Γ) :=
-  wk d (by simpa using
-    List.subset_cons_of_subset _ (List.subset_cons_of_subset _ <| List.subset_cons_of_subset _ <| by simp))
+def swap₃ (d : 𝔇 (φ₄ :: φ₁ :: φ₂ :: φ₃ :: Γ)) : 𝔇 (φ₁ :: φ₂ :: φ₃ :: φ₄ :: Γ) :=
+  wk d (by grind)
 
 alias cut := OneSidedLK.Cut.cut
 
@@ -81,17 +80,17 @@ instance : Entailment.ModusPonens 𝓔 where
 instance : Entailment.Cl 𝓔 where
   negEquiv {φ} := Entailment.cast
     (show 𝓔 ⊢! (φ ⋎ ∼φ ⋎ ⊥) ⋏ (φ ⋏ ⊤ ⋎ ∼φ) from
-      equiv.symm <| and (or <| rotate₁ <| or <| close φ) (or <| and (identity φ) verum'))
+      equiv.symm <| and (or <| swap₁ <| or <| close φ) (or <| and (identity φ) top))
     (by simp [Axioms.NegEquiv, DeMorgan.imply, LogicalConnective.iff])
   verum := equiv.symm <| verum
   implyK {φ ψ} :=
-    have : 𝓔 ⊢! ∼φ ⋎ ∼ψ ⋎ φ := equiv.symm <| or <| rotate₁ <| or <| close φ
+    have : 𝓔 ⊢! ∼φ ⋎ ∼ψ ⋎ φ := equiv.symm <| or <| swap₁ <| or <| close φ
     Entailment.cast this (by simp [DeMorgan.imply])
   implyS {φ ψ χ} :=
     have : 𝓔 ⊢! φ ⋏ ψ ⋏ ∼χ ⋎ φ ⋏ ∼ψ ⋎ ∼φ ⋎ χ :=
-      equiv.symm <| or <| rotate₁ <| or <| rotate₁ <| or <| rotate₃ <| and
+      equiv.symm <| or <| swap₁ <| or <| swap₁ <| or <| swap₃ <| and
         (close φ)
-        (and (rotate₃ <| and (close φ) (close ψ)) (close χ))
+        (and (swap₃ <| and (close φ) (close ψ)) (close χ))
     Entailment.cast this (by simp [DeMorgan.imply])
   and₁ {φ ψ} :=
     have : 𝓔 ⊢! (∼φ ⋎ ∼ψ) ⋎ φ :=  equiv.symm <|or <| or <| close φ
@@ -100,19 +99,19 @@ instance : Entailment.Cl 𝓔 where
     have : 𝓔 ⊢! (∼φ ⋎ ∼ψ) ⋎ ψ := equiv.symm <| or <| or <| close ψ
     Entailment.cast this (by simp [DeMorgan.imply])
   and₃ {φ ψ} :=
-    have : 𝓔 ⊢! ∼φ ⋎ ∼ψ ⋎ φ ⋏ ψ := equiv.symm <| or <| rotate₁ <| or <| rotate₁ <| and (close φ) (close ψ)
+    have : 𝓔 ⊢! ∼φ ⋎ ∼ψ ⋎ φ ⋏ ψ := equiv.symm <| or <| swap₁ <| or <| swap₁ <| and (close φ) (close ψ)
     Entailment.cast this (by simp [DeMorgan.imply])
   or₁ {φ ψ} :=
-    have : 𝓔 ⊢! ∼φ ⋎ φ ⋎ ψ := equiv.symm <| or <| rotate₁ <| or <| close φ
+    have : 𝓔 ⊢! ∼φ ⋎ φ ⋎ ψ := equiv.symm <| or <| swap₁ <| or <| close φ
     Entailment.cast this (by simp [DeMorgan.imply])
   or₂ {φ ψ} :=
-    have : 𝓔 ⊢! ∼ψ ⋎ φ ⋎ ψ := equiv.symm <| or <| rotate₁ <| or <| close ψ
+    have : 𝓔 ⊢! ∼ψ ⋎ φ ⋎ ψ := equiv.symm <| or <| swap₁ <| or <| close ψ
     Entailment.cast this (by simp [DeMorgan.imply])
   or₃ {φ ψ χ} :=
     have : 𝓔 ⊢! φ ⋏ ∼χ ⋎ ψ ⋏ ∼ χ ⋎ ∼φ ⋏ ∼ψ ⋎ χ :=
-      equiv.symm <| or <| rotate₁ <| or <| rotate₁ <| or <| and
-        (rotate₃ <| and (close φ) (close χ))
-        (rotate₂ <| and (close ψ) (close χ))
+      equiv.symm <| or <| swap₁ <| or <| swap₁ <| or <| and
+        (swap₃ <| and (close φ) (close χ))
+        (swap₂ <| and (close ψ) (close χ))
     Entailment.cast this (by simp [DeMorgan.imply])
   dne {φ} :=
     have : 𝓔 ⊢! ∼φ ⋎ φ := equiv.symm <| or <| close φ
@@ -164,7 +163,7 @@ instance : Entailment.StrongCut S S where
     |     [] => equiv.symm ⟨⟨[], by simp⟩, d⟩
     | ψ :: l =>
       have bχ : T ⊢! ψ ➝ χ :=
-        Entailment.cast (bl l (by simp at hl; grind) (∼ψ ⋎ χ) (OneSidedLK.or <| OneSidedLK.rotate₁ d))
+        Entailment.cast (bl l (by simp at hl; grind) (∼ψ ⋎ χ) (OneSidedLK.or <| OneSidedLK.swap₁ d))
         (by simp [DeMorgan.imply])
       have bψ : T ⊢! ψ := bs (show ψ ∈ U by simp at hl; grind)
       Entailment.mdp bχ bψ
@@ -194,17 +193,17 @@ lemma inconsistent_iff {𝓢 : S} :
 instance (𝓢 : S) : Entailment.Cl 𝓢 where
   negEquiv {φ} := Entailment.cast
     (show 𝓢 ⊢! (φ ⋎ ∼φ ⋎ ⊥) ⋏ (φ ⋏ ⊤ ⋎ ∼φ) from
-      toProof _ <| and (or <| rotate₁ <| or <| close φ) (or <| and (identity φ) verum'))
+      toProof _ <| and (or <| swap₁ <| or <| close φ) (or <| and (identity φ) top))
     (by simp [Axioms.NegEquiv, DeMorgan.imply, LogicalConnective.iff])
   verum := toProof _ <| verum
   implyK {φ ψ} :=
-    have : 𝓢 ⊢! ∼φ ⋎ ∼ψ ⋎ φ := toProof _ <| or <| rotate₁ <| or <| close φ
+    have : 𝓢 ⊢! ∼φ ⋎ ∼ψ ⋎ φ := toProof _ <| or <| swap₁ <| or <| close φ
     Entailment.cast this (by simp [DeMorgan.imply])
   implyS {φ ψ χ} :=
     have : 𝓢 ⊢! φ ⋏ ψ ⋏ ∼χ ⋎ φ ⋏ ∼ψ ⋎ ∼φ ⋎ χ :=
-      toProof _ <| or <| rotate₁ <| or <| rotate₁ <| or <| rotate₃ <| and
+      toProof _ <| or <| swap₁ <| or <| swap₁ <| or <| swap₃ <| and
         (close φ)
-        (and (rotate₃ <| and (close φ) (close ψ)) (close χ))
+        (and (swap₃ <| and (close φ) (close ψ)) (close χ))
     Entailment.cast this (by simp [DeMorgan.imply])
   and₁ {φ ψ} :=
     have : 𝓢 ⊢! (∼φ ⋎ ∼ψ) ⋎ φ :=  toProof _ <|or <| or <| close φ
@@ -213,19 +212,19 @@ instance (𝓢 : S) : Entailment.Cl 𝓢 where
     have : 𝓢 ⊢! (∼φ ⋎ ∼ψ) ⋎ ψ := toProof _ <| or <| or <| close ψ
     Entailment.cast this (by simp [DeMorgan.imply])
   and₃ {φ ψ} :=
-    have : 𝓢 ⊢! ∼φ ⋎ ∼ψ ⋎ φ ⋏ ψ := toProof _ <| or <| rotate₁ <| or <| rotate₁ <| and (close φ) (close ψ)
+    have : 𝓢 ⊢! ∼φ ⋎ ∼ψ ⋎ φ ⋏ ψ := toProof _ <| or <| swap₁ <| or <| swap₁ <| and (close φ) (close ψ)
     Entailment.cast this (by simp [DeMorgan.imply])
   or₁ {φ ψ} :=
-    have : 𝓢 ⊢! ∼φ ⋎ φ ⋎ ψ := toProof _ <| or <| rotate₁ <| or <| close φ
+    have : 𝓢 ⊢! ∼φ ⋎ φ ⋎ ψ := toProof _ <| or <| swap₁ <| or <| close φ
     Entailment.cast this (by simp [DeMorgan.imply])
   or₂ {φ ψ} :=
-    have : 𝓢 ⊢! ∼ψ ⋎ φ ⋎ ψ := toProof _ <| or <| rotate₁ <| or <| close ψ
+    have : 𝓢 ⊢! ∼ψ ⋎ φ ⋎ ψ := toProof _ <| or <| swap₁ <| or <| close ψ
     Entailment.cast this (by simp [DeMorgan.imply])
   or₃ {φ ψ χ} :=
     have : 𝓢 ⊢! φ ⋏ ∼χ ⋎ ψ ⋏ ∼ χ ⋎ ∼φ ⋏ ∼ψ ⋎ χ :=
-      toProof _ <| or <| rotate₁ <| or <| rotate₁ <| or <| and
-        (rotate₃ <| and (close φ) (close χ))
-        (rotate₂ <| and (close ψ) (close χ))
+      toProof _ <| or <| swap₁ <| or <| swap₁ <| or <| and
+        (swap₃ <| and (close φ) (close χ))
+        (swap₂ <| and (close ψ) (close χ))
     Entailment.cast this (by simp [DeMorgan.imply])
   dne {φ} :=
     have : 𝓢 ⊢! ∼φ ⋎ φ := toProof _ <| or <| close φ

@@ -120,12 +120,26 @@ instance sentence (σ : Sentence L) : IsClosed (σ : Schema L) where
 
 end IsClosed
 
-def uniClosure (𝓢 : Schema L) : Theory L := Set.image Semiformula.univCl {φ | φ ∈ 𝓢}
+@[coe] def uniClosure (𝓢 : Schema L) : Theory L := Set.image Semiformula.univCl {φ | φ ∈ 𝓢}
+
+instance : Coe (Schema L) (Theory L) := ⟨uniClosure⟩
 
 variable {𝓢 : Schema L}
 
 @[simp] lemma mem_uniClosure :
-    σ ∈ 𝓢.uniClosure ↔ ∃ φ ∈ 𝓢, Semiformula.univCl φ = σ := by simp [uniClosure]
+    σ ∈ (𝓢 : Theory L) ↔ ∃ φ ∈ 𝓢, Semiformula.univCl φ = σ := by simp [uniClosure]
+
+@[simp] lemma coe_sup (𝓢₁ 𝓢₂ : Schema L) : ((𝓢₁ ⊔ 𝓢₂ : Schema L) : Theory L) = (𝓢₁ : Theory L) ∪ (𝓢₂ : Theory L) := by
+  ext σ; simp [uniClosure]; grind
+
+@[simp] lemma coe_sSup (s : Set (Schema L)) : ((sSup s : Schema L) : Theory L) = ⋃ 𝓢 ∈ s, (𝓢 : Theory L) := by
+  ext σ; simp [uniClosure, sSup]; grind
+
+@[simp] lemma coe_coe_proposition (φ : Proposition L) : ((φ : Schema L) : Theory L) = {φ.univCl} := by
+  ext σ; simp [uniClosure]
+
+@[grind <-] lemma coe_subset_coe_iff_le {𝓢₁ 𝓢₂ : Schema L} (h : 𝓢₁ ≤ 𝓢₂) : (𝓢₁ : Theory L) ⊆ (𝓢₂ : Theory L) :=
+  Set.image_mono h
 
 end Schema
 
