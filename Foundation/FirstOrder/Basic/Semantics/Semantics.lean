@@ -18,10 +18,12 @@ namespace FirstOrder
 
 variable {L : Language.{u}}
 
+/-- A first-order `L`-structure associates domain `M` with interpretations of function and relation symbols. -/
 @[ext] class Structure (L : Language.{u}) (M : Type w) where
   func : ⦃k : ℕ⦄ → L.Func k → (Fin k → M) → M
   rel : ⦃k : ℕ⦄ → L.Rel k → (Fin k → M) → Prop
 
+/-- An auxiliary structure that corresponds to a first-order `L`-structure with a nonempty domain. -/
 structure Struc (L : Language) where
   Dom : Type*
   nonempty : Nonempty Dom
@@ -38,8 +40,8 @@ instance [n : Nonempty M] : Nonempty (Structure L M) := by
   exact ⟨{ func := fun _ _ _ ↦ x, rel := fun _ _ _ ↦ True }⟩
 
 protected def lMap (φ : L₁ →ᵥ L₂) {M : Type w} (S : Structure L₂ M) : Structure L₁ M where
-  func := fun _ f => S.func (φ.func f)
-  rel := fun _ r => S.rel (φ.rel r)
+  func  _ f := S.func (φ.func f)
+  rel _ r := S.rel (φ.rel r)
 
 variable (φ : L₁ →ᵥ L₂) {M : Type w} (s₂ : Structure L₂ M)
 
@@ -616,13 +618,11 @@ variable (M) [Nonempty M] [Structure L M]
 
 variable {M}
 
-lemma of_ss {T U : Theory L} (h : M↓[L] ⊧* U) (ss : T ⊆ U) : M↓[L] ⊧* T :=
+lemma models_of_ss {T U : Theory L} (h : M↓[L] ⊧* U) (ss : T ⊆ U) : M↓[L] ⊧* T :=
   Semantics.ModelsSet.of_subset h ss
 
-variable {𝓢 : Schema L}
-
-@[simp] lemma schema_sup_iff {𝓢₁ 𝓢₂ : Schema L} :
-    M↓[L] ⊧* 𝓢₁ ∪ 𝓢₂ ↔ M↓[L] ⊧* 𝓢₁ ∧ M↓[L] ⊧* ↑𝓢₂ := by simp []
+lemma models_of_le {𝓢₁ 𝓢₂ : Schema L} (h : M↓[L] ⊧* 𝓢₂) (le : 𝓢₁ ≤ 𝓢₂) : M↓[L] ⊧* 𝓢₁ :=
+  Semantics.ModelsSet.of_subset h (Schema.coe_subset_coe_of_le le)
 
 instance models_schema_sup (𝓢₁ 𝓢₂ : Schema L) [M↓[L] ⊧* 𝓢₁] [M↓[L] ⊧* 𝓢₂] : M↓[L] ⊧* 𝓢₁ ⊔ 𝓢₂ := by
   simp only [Set.sup_eq_union, Semantics.ModelsSet.union_iff]
@@ -651,4 +651,5 @@ end Structure
 end FirstOrder
 
 end LO
+
 end

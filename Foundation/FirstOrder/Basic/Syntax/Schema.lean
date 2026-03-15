@@ -138,7 +138,7 @@ variable {𝓢 : Schema L}
 @[simp] lemma coe_coe_proposition (φ : Proposition L) : ((φ : Schema L) : Theory L) = {φ.univCl} := by
   ext σ; simp [uniClosure]
 
-@[grind <-] lemma coe_subset_coe_iff_le {𝓢₁ 𝓢₂ : Schema L} (h : 𝓢₁ ≤ 𝓢₂) : (𝓢₁ : Theory L) ⊆ (𝓢₂ : Theory L) :=
+@[grind <-] lemma coe_subset_coe_of_le {𝓢₁ 𝓢₂ : Schema L} (h : 𝓢₁ ≤ 𝓢₂) : (𝓢₁ : Theory L) ⊆ (𝓢₂ : Theory L) :=
   Set.image_mono h
 
 end Schema
