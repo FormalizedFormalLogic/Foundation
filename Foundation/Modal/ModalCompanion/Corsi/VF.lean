@@ -3,7 +3,7 @@ module
 public import Foundation.Modal.PLoN.Logic.N
 public import Foundation.Modal.Logic.SumNormal
 public import Foundation.Propositional.FMT.Logic
-public import Foundation.Propositional.Kripke.Logic.Cl
+-- public import Foundation.Propositional.Kripke.Logic.Cl
 
 @[expose] public section
 

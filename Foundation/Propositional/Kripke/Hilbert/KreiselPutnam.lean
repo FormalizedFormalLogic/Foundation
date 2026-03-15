@@ -1,46 +1,41 @@
 module
 
 public import Foundation.Propositional.Kripke.AxiomKreiselPutnam
-public import Foundation.Propositional.Kripke.Logic.Int
+public import Foundation.Propositional.Kripke.Hilbert.Int.Basic
 
 @[expose] public section
 
-namespace LO.Propositional
+namespace LO.Propositional.Hilbert
 
 open Kripke
-open Modal.Kripke
 open Formula.Kripke
-
-@[reducible] protected alias Kripke.Frame.IsKreiselPutnam := Frame.SatisfiesKreiselPutnamCondition
-protected abbrev Kripke.FrameClass.KreiselPutnam : FrameClass := { F | F.SatisfiesKreiselPutnamCondition }
-
 
 namespace KreiselPutnam
 
-instance : Sound Propositional.KreiselPutnam FrameClass.KreiselPutnam := instSound_of_validates_axioms $ by
-    apply FrameClass.Validates.withAxiomEFQ;
-    rintro F hF _ rfl;
-    replace hF := Set.mem_setOf_eq.mp hF;
-    apply validate_axiomKreiselPutnam_of_satisfiesKreiselPutnamCondition
+instance : ({ F : Frame | F.SatisfiesKreiselPutnamCondition }) ⊧* (Hilbert.KreiselPutnam : Hilbert ℕ) := by
+  constructor;
+  rintro φ (⟨_, rfl⟩ | ⟨_, _, _, rfl⟩) F hF <;>
+  replace hF := Set.mem_setOf_eq.mp hF;
+  . grind;
+  . exact validate_axiomKreiselPutnam_of_satisfiesKreiselPutnamCondition;
 
-instance : Entailment.Consistent Propositional.KreiselPutnam := consistent_of_sound_frameclass FrameClass.KreiselPutnam $ by
+instance : Entailment.Consistent (Hilbert.KreiselPutnam : Hilbert ℕ) := consistent_of_nonempty_frameClass ({ F : Frame | F.SatisfiesKreiselPutnamCondition }) $ by
   use whitepoint;
   apply Set.mem_setOf_eq.mpr;
-  infer_instance
+  infer_instance;
 
-instance : Canonical Propositional.KreiselPutnam FrameClass.KreiselPutnam := ⟨by
+instance : Canonical (Hilbert.KreiselPutnam : Hilbert ℕ) ({ F : Frame | F.SatisfiesKreiselPutnamCondition }) := by
+  constructor;
   apply Set.mem_setOf_eq.mpr;
   infer_instance;
-⟩
 
-instance : Complete Propositional.KreiselPutnam FrameClass.KreiselPutnam := inferInstance
+instance : Complete (Hilbert.KreiselPutnam : Hilbert ℕ) ({ F : Frame | F.SatisfiesKreiselPutnamCondition }) := inferInstance
 
 end KreiselPutnam
 
-
-instance : Propositional.Int ⪱ Propositional.KreiselPutnam := by
+instance : (Hilbert.Int : Hilbert ℕ) ⪱ Hilbert.KreiselPutnam := by
   constructor;
-  . apply Hilbert.Standard.weakerThan_of_subset_axioms $ by simp;
+  . apply weakerThan_of_le; simp;
   . apply Entailment.not_weakerThan_iff.mpr;
     use Axioms.KreiselPutnam (.atom 0) (.atom 1) (.atom 2);
     constructor;
@@ -109,5 +104,6 @@ instance : Propositional.Int ⪱ Propositional.KreiselPutnam := by
               . tauto;
               . simp [Semantics.Models, Satisfies, M, Frame.Rel'];
 
-end LO.Propositional
+end LO.Propositional.Hilbert
+
 end

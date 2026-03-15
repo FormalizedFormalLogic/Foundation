@@ -4,7 +4,7 @@ public import Foundation.Logic.Embedding
 public import Foundation.Modal.ModalCompanion.Standard.Int
 public import Foundation.Modal.Kripke.Logic.S5Grz
 public import Foundation.Modal.Boxdot.Ver_Triv
-public import Foundation.Propositional.Kripke.Logic.Cl
+-- public import Foundation.Propositional.Kripke.Logic.Cl
 
 @[expose] public section
 

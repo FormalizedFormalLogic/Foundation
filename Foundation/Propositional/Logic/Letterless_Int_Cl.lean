@@ -3,7 +3,7 @@ module
 public import Foundation.Modal.Kripke.Logic.S5Grz
 public import Foundation.Modal.Maximal.Makinson
 public import Foundation.Modal.ModalCompanion.Standard.Int
-public import Foundation.Propositional.Kripke.Logic.Cl
+-- public import Foundation.Propositional.Kripke.Logic.Cl
 
 @[expose] public section
 
