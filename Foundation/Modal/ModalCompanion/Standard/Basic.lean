@@ -180,6 +180,27 @@ attribute [grind <=] gödelTranslated_mdp
 @[simp, grind .]
 lemma gödelTranslated_efq : 𝓢 ⊢ (Axioms.EFQ φ)ᵍ := nec! efq!
 
+lemma gödelTranslated_persistency {M : Modal.Kripke.Model} [M.IsTransitive] {x y : M} {φ : Propositional.Formula ℕ} : x ⊧ φᵍ → x ≺ y → y ⊧ φᵍ := by
+  induction φ using Propositional.Formula.rec' with
+  | hatom a =>
+    intro h Rxy z Ryz;
+    apply h z $ M.trans Rxy Ryz;
+  | hfalsum => tauto;
+  | hand φ ψ ihφ ihψ =>
+    simp only [gödelTranslate, Modal.Formula.Kripke.Satisfies.and_def];
+    rintro ⟨hφ, hψ⟩ Rxy;
+    constructor;
+    . apply ihφ hφ Rxy;
+    . apply ihψ hψ Rxy;
+  | hor φ ψ ihφ ihψ =>
+    simp only [gödelTranslate, Modal.Formula.Kripke.Satisfies.or_def];
+    rintro (hφ | hψ) Rxy;
+    . left; apply ihφ hφ Rxy;
+    . right; apply ihψ hψ Rxy;
+  | himp φ ψ ihφ ihψ =>
+    intro h Rxy z Ryz hφ;
+    apply h z (M.trans Rxy Ryz) hφ;
+
 end Modal
 
 

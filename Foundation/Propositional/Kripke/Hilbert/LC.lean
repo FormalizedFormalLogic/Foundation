@@ -30,10 +30,10 @@ instance : Canonical (Hilbert.LC : Hilbert ℕ) ({ F : Frame | F.IsPiecewiseStro
   apply Set.mem_setOf_eq.mpr;
   infer_instance;
 
-instance : Complete (Hilbert.LC : Hilbert ℕ) ({ F : Frame | F.IsPiecewiseStronglyConnected }) := inferInstance
+instance instKripkeComplete : Complete (Hilbert.LC : Hilbert ℕ) ({ F : Frame | F.IsPiecewiseStronglyConnected }) := inferInstance
 
 open finestFiltrationTransitiveClosureModel Relation in
-instance : Complete (Hilbert.LC : Hilbert ℕ) ({ F : Frame | Finite F ∧ F.IsPiecewiseStronglyConnected }) := by
+instance instKripkeCompleteFinite : Complete (Hilbert.LC : Hilbert ℕ) ({ F : Frame | Finite F ∧ F.IsPiecewiseStronglyConnected }) := by
   constructor;
   intro φ hφ;
   apply Complete.complete (𝓜 := ({ F : Frame | F.IsPiecewiseStronglyConnected }));
