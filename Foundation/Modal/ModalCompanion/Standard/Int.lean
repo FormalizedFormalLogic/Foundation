@@ -4,6 +4,7 @@ public import Foundation.Logic.Embedding
 public import Foundation.Modal.Boxdot.GL_Grz
 public import Foundation.Modal.ModalCompanion.Standard.Basic
 public import Foundation.Propositional.Kripke.Hilbert.Int.Basic
+public import Foundation.Propositional.Hilbert.Minimal.Glivenko
 
 @[expose] public section
 
@@ -58,24 +59,16 @@ instance : Entailment.FaithfullyEmbeddable Propositional.Int Modal.GL where
 end Propositional.Int
 
 
-/-
 namespace Propositional.Cl
 
 lemma iff_mem_S4_dia : φ ∈ Propositional.Cl ↔ Modal.S4 ⊢ ◇φᵍ := by
   constructor;
   . intro h;
-    suffices Modal.S4 ⊢ □◇φᵍ by exact axiomT'! this;
-    have := glivenko.mpr h;
-    have : Modal.S4 ⊢ (∼∼φ)ᵍ := ModalCompanion.companion.mp $ glivenko.mpr h;
-    cl_prover [this];
+    exact unnec! $ Propositional.Int.modalCompanion_S4.mp $ Hilbert.glivenko.mpr h;
   . intro h;
-    apply glivenko.mp;
-    suffices Modal.S4 ⊢ (∼∼φ)ᵍ by exact ModalCompanion.companion.mpr this;
-    replace h : Modal.S4 ⊢ □◇φᵍ := nec! h;
-    cl_prover [h];
+    exact Hilbert.glivenko.mp $ Propositional.Int.modalCompanion_S4.mpr $ nec! h;
 
 end Propositional.Cl
--/
 
 end LO
 

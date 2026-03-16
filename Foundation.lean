@@ -361,7 +361,6 @@ public import Foundation.Modal.MaximalConsistentSet
 public import Foundation.Modal.ModalCompanion
 public import Foundation.Modal.ModalCompanion.Corsi
 public import Foundation.Modal.ModalCompanion.Corsi.VF
-public import Foundation.Modal.ModalCompanion.Standard
 public import Foundation.Modal.ModalCompanion.Standard.Basic
 public import Foundation.Modal.ModalCompanion.Standard.Cl
 public import Foundation.Modal.ModalCompanion.Standard.Int
@@ -461,6 +460,7 @@ public import Foundation.Propositional.Hilbert.F.Deduction
 public import Foundation.Propositional.Hilbert.F.Disjunctive
 public import Foundation.Propositional.Hilbert.F_WF
 public import Foundation.Propositional.Hilbert.Minimal.Basic
+public import Foundation.Propositional.Hilbert.Minimal.Glivenko
 public import Foundation.Propositional.Hilbert.Standard
 public import Foundation.Propositional.Hilbert.Standard.Basic
 public import Foundation.Propositional.Hilbert.Standard.Glivenko
