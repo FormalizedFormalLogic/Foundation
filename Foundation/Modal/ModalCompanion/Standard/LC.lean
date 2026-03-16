@@ -1,7 +1,7 @@
 module
 
 public import Foundation.Logic.Embedding
-public import Foundation.Modal.Boxdot.GL_Grz
+public import Foundation.Modal.Boxdot.GLPoint3_GrzPoint3
 public import Foundation.Modal.Kripke.Logic.GrzPoint3
 public import Foundation.Modal.ModalCompanion.Standard.Basic
 public import Foundation.Propositional.Kripke.Hilbert.LC
@@ -68,6 +68,9 @@ theorem modalCompanion_GrzPoint3 : ModalCompanion Propositional.LC Modal.GrzPoin
     . grind;
     . apply Set.mem_setOf_eq.mpr;
       exact {};
+
+theorem boxdotModalCompanion_LC : ∀ φ, φ ∈ Propositional.LC ↔ Modal.GLPoint3 ⊢ φᵍᵇ :=
+  λ _ => Iff.trans modalCompanion_GrzPoint3 $ Modal.iff_boxdot_GLPoint3_GrzPoint3.symm
 
 end Propositional.LC
 

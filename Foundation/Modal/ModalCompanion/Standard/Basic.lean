@@ -24,8 +24,7 @@ def Formula.gödelTranslate : Propositional.Formula α → Modal.Formula α
   | φ 🡒 ψ => □((gödelTranslate φ) 🡒 (gödelTranslate ψ))
 postfix:90 "ᵍ" => Propositional.Formula.gödelTranslate
 
-structure ModalCompanion (IL : Propositional.Logic α) (ML : Modal.Logic α) : Prop where
-  companion : ∀ {φ}, φ ∈ IL ↔ ML ⊢ φᵍ
+def ModalCompanion (IL : Propositional.Logic α) (ML : Modal.Logic α) : Prop := ∀ {φ}, φ ∈ IL ↔ ML ⊢ φᵍ
 
 /-
 lemma Modal.ModalCompanion.tofaithfullyEmbeddable
@@ -86,7 +85,6 @@ theorem modalCompanion_via_kripkeSemantics
   (complete : ∀ {φ}, (∀ F : Propositional.Kripke.Frame, P F → F ⊧ φ) → φ ∈ L)
   (sound    : ∀ {φ}, φ ∈ ML → (∀ F : Modal.Kripke.Frame, IsPartialOrder _ F → P F → F ⊧ φ))
   : ModalCompanion L ML := by
-  constructor;
   intro φ;
   constructor;
   . apply hLML;

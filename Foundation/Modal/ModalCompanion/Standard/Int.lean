@@ -47,6 +47,14 @@ theorem modalCompanion_Grz : ModalCompanion Propositional.Int Modal.Grz := by
     . apply Set.mem_setOf_eq.mpr;
       exact {};
 
+theorem boxdotModalCompanion_GL : ∀ φ, φ ∈ Propositional.Int ↔ Modal.GL ⊢ φᵍᵇ :=
+  λ _ => Iff.trans modalCompanion_Grz $ Modal.iff_provable_boxdot_GL_provable_Grz.symm
+
+/-
+instance : Entailment.FaithfullyEmbeddable Propositional.Int Modal.GL where
+  prop := ⟨(·ᵍᵇ), fun _ ↦ embedding_Int_GL.symm⟩
+-/
+
 end Propositional.Int
 
 
@@ -70,16 +78,5 @@ end Propositional.Cl
 -/
 
 end LO
-
-/-
-/--
-  Chagrov & Zakharyaschev 1997, Theorem 3.89
--/
-theorem embedding_Int_GL : Propositional.Int ⊢ φ ↔ Modal.GL ⊢ φᵍᵇ:=
-  Iff.trans ModalCompanion.companion iff_provable_boxdot_GL_provable_Grz.symm
-
-instance : Entailment.FaithfullyEmbeddable Propositional.Int Modal.GL where
-  prop := ⟨(·ᵍᵇ), fun _ ↦ embedding_Int_GL.symm⟩
--/
 
 end

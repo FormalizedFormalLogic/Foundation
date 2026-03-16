@@ -31,10 +31,10 @@ instance : Canonical (Hilbert.Cl : Hilbert ℕ) ({ F : Frame | F.IsEuclidean }) 
   apply Set.mem_setOf_eq.mpr;
   infer_instance;
 
-instance : Complete (Hilbert.Cl : Hilbert ℕ) ({ F : Frame | F.IsEuclidean }) := inferInstance
+instance instKripkeComplete : Complete (Hilbert.Cl : Hilbert ℕ) ({ F : Frame | F.IsEuclidean }) := inferInstance
 
 open finestFiltrationTransitiveClosureModel Relation in
-instance : Complete (Hilbert.Cl : Hilbert ℕ) ({ F : Frame | Finite F ∧ F.IsSymmetric }) := by
+instance instKripkeCompleteFinite : Complete (Hilbert.Cl : Hilbert ℕ) ({ F : Frame | Finite F ∧ F.IsSymmetric }) := by
   constructor;
   intro φ hφ;
   apply Complete.complete (𝓜 := ({ F : Frame | F.IsEuclidean }));
