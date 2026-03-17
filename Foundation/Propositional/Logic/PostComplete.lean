@@ -2,12 +2,11 @@ module
 
 public import Foundation.Propositional.Boolean.Hilbert
 public import Foundation.Propositional.Boolean.ZeroSubst
+public import Foundation.Propositional.Logic.Superintuitionistic
 
 @[expose] public section
 
 namespace LO.Propositional
-
--- abbrev Ext (L : Logic ℕ) := { L' : Logic ℕ // L'.Superintuitionistic }
 
 variable {α} [DecidableEq α] [Encodable α]
 

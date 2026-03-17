@@ -1,8 +1,11 @@
 module
 
 public import Foundation.Propositional.Entailment.Int.DNE_of_LEM
-public import Foundation.Propositional.Hilbert.Axiom
-
+public import Foundation.Propositional.Logic.Basic
+public import Foundation.Propositional.Formula.Basic
+public import Foundation.Propositional.Entailment.KreiselPutnam
+public import Foundation.Propositional.Entailment.Scott
+public import Foundation.Propositional.Entailment.Corsi
 
 @[expose] public section
 
@@ -81,6 +84,9 @@ instance : Entailment.Minimal H where
 
 variable {H} {H₁ H₂ : Hilbert α}
 
+alias ofSchema := HilbertProof.axm
+@[grind <=] lemma of_schema (h : φ ∈ H) : H ⊢ φ := ⟨ofSchema h⟩
+
 def ofLE (h : H₁ ≤ H₂) : H₁ ⊢! φ → H₂ ⊢! φ
   | axm h₁ => axm $ h h₁
   | mdp h₁ h₂ => mdp (ofLE h h₁) (ofLE h h₂)
@@ -158,28 +164,6 @@ end
 end Hilbert
 
 
-@[ext]
-structure Logic (α) where
-  logic : Set (Formula α)
-  subst : ∀ s, ∀ φ ∈ logic, φ⟦s⟧ ∈ logic
-  mdp : ∀ {φ ψ}, φ 🡒 ψ ∈ logic → φ ∈ logic → ψ ∈ logic
-
-namespace Logic
-
-instance : SetLike (Logic α) (Formula α) where
-  coe := logic
-  coe_injective' _ _ := Logic.ext
-
-class Trivial (L : Logic α) : Prop where
-  eq_univ : L.logic = Set.univ
-
-
-
-end Logic
-
-abbrev Trivial : Logic α := ⟨Set.univ, by tauto, by tauto⟩
-
-
 namespace Hilbert
 
 abbrev logic (H : Hilbert α) : Logic α where
@@ -205,38 +189,6 @@ protected abbrev KC            : Logic α := Hilbert.KC.logic
 protected abbrev LC            : Logic α := Hilbert.LC.logic
 protected abbrev KreiselPutnam : Logic α := Hilbert.KreiselPutnam.logic
 protected abbrev Cl            : Logic α := Hilbert.Cl.logic
-
-structure Logic.ExtensionOf (L : Logic α) extends Logic α where
-  subset_L : ∀ {φ}, φ ∈ L → φ ∈ logic
-
-
-abbrev SuperintuitionisticLogic (α) := Logic.ExtensionOf (Propositional.Int : Logic α)
-
-
-namespace SuperintuitionisticLogic
-
-variable {L : SuperintuitionisticLogic α} {φ ψ : Formula α}
-
-lemma subset_Int (h : φ ∈ Propositional.Int) : φ ∈ L.logic := L.subset_L h
-
-lemma trivial_of_mem_bot (h : ⊥ ∈ L.toLogic) : ∀ {φ}, φ ∈ L.toLogic := L.mdp (L.subset_Int Entailment.efq!) h
-instance (h : ⊥ ∈ L.toLogic) : L.Trivial := ⟨Set.eq_univ_iff_forall.mpr $ @trivial_of_mem_bot α L h⟩
-
-class Consistent (L : SuperintuitionisticLogic α) : Prop where
-  not_mem_bot : ⊥ ∉ L.logic
-export Consistent (not_mem_bot)
-attribute [simp, grind .] not_mem_bot
-
-lemma ssubset_univ [L.Consistent] : L.logic ⊂ Propositional.Trivial.logic := by
-  apply Set.ssubset_iff_exists.mpr;
-  constructor;
-  . tauto;
-  . use ⊥;
-    grind;
-
-end SuperintuitionisticLogic
-
-
 
 end LO.Propositional
 

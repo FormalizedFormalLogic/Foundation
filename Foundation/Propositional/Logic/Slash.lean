@@ -17,29 +17,31 @@ section
 -/
 @[grind]
 def AczelSlash (L : Logic α) : Formula α → Prop
-  | #a => L ⊢ #a
+  | #a => #a ∈ L
   | ⊥ => False
   | φ ⋎ ψ => AczelSlash L φ ∨ AczelSlash L ψ
   | φ ⋏ ψ => AczelSlash L φ ∧ AczelSlash L ψ
-  | φ 🡒 ψ => L ⊢ (φ 🡒 ψ) ∧ (AczelSlash L φ → AczelSlash L ψ)
+  | φ 🡒 ψ => (φ 🡒 ψ) ∈ L ∧ (AczelSlash L φ → AczelSlash L ψ)
 notation:50 "∕ₐ[" L "] " φ:max => AczelSlash L φ
 
 namespace AczelSlash
 
-@[grind =] lemma def_atom {a : α} : ∕ₐ[L] (#a) ↔ L ⊢ #a := by simp [AczelSlash];
-@[simp, grind .] lemma def_bot : ¬(∕ₐ[L] ⊥) := by simp [AczelSlash];
+@[grind =] lemma def_atom {a : α} : ∕ₐ[L] (#a) ↔ #a ∈ L := by grind;
+@[simp, grind .] lemma def_bot : ¬(∕ₐ[L] ⊥) := by tauto;
 
+/-
 @[simp, grind .]
 lemma def_top [Entailment.HasImpId L] : ∕ₐ[L] ⊤ := by
   rw [Formula.top_def];
   constructor;
   . exact Entailment.Corsi.impId;
   . tauto;
+-/
 
 @[grind =] lemma def_or  : ∕ₐ[L] (φ ⋎ ψ) ↔ ∕ₐ[L] φ ∨ ∕ₐ[L] ψ := by simp [AczelSlash];
 @[grind =] lemma def_and : ∕ₐ[L] (φ ⋏ ψ) ↔ ∕ₐ[L] φ ∧ ∕ₐ[L] ψ := by simp [AczelSlash];
-@[grind =] lemma def_imp : ∕ₐ[L] (φ 🡒 ψ) ↔ L ⊢ (φ 🡒 ψ) ∧ (∕ₐ[L] φ → ∕ₐ[L] ψ) := by simp [AczelSlash];
-@[grind =] lemma def_neg : ∕ₐ[L] (∼φ) ↔ L ⊢ ∼φ ∧ ¬∕ₐ[L] φ := by simp [Formula.neg_def, def_imp];
+@[grind =] lemma def_imp : ∕ₐ[L] (φ 🡒 ψ) ↔ (φ 🡒 ψ) ∈ L ∧ (∕ₐ[L] φ → ∕ₐ[L] ψ) := by simp [AczelSlash];
+@[grind =] lemma def_neg : ∕ₐ[L] (∼φ) ↔ ∼φ ∈ L ∧ ¬∕ₐ[L] φ := by simp [Formula.neg_def, def_imp];
 
 @[grind <=]
 lemma mdp : ∕ₐ[L] (φ 🡒 ψ) → ∕ₐ[L] φ → ∕ₐ[L] ψ := by
@@ -49,16 +51,20 @@ lemma mdp : ∕ₐ[L] (φ 🡒 ψ) → ∕ₐ[L] φ → ∕ₐ[L] ψ := by
 end AczelSlash
 
 
+class Logic.Disjunctive (L : Logic α) where
+  disjunctive : ∀ {φ ψ}, φ ⋎ ψ ∈ L → φ ∈ L ∨ ψ ∈ L
+
+
 class Logic.AczelSlashable (L : Logic α) where
-  iff_ks_provable : ∀ {φ : Formula α}, ∕ₐ[L] φ ↔ L ⊢ φ
+  iff_ks_provable : ∀ {φ : Formula α}, ∕ₐ[L] φ ↔ φ ∈ L
 export Logic.AczelSlashable (iff_ks_provable)
 
-theorem disjunctive_of_AczelSlashable [L.AczelSlashable] (hA : L ⊢ φ ⋎ ψ) : L ⊢ φ ∨ L ⊢ ψ := by
+theorem disjunctive_of_AczelSlashable [L.AczelSlashable] (hA : φ ⋎ ψ ∈ L) : φ ∈ L ∨ ψ ∈ L := by
   rcases iff_ks_provable.mpr hA with hφ | hψ;
-  . left; apply iff_ks_provable.mp hφ;
+  . left;  apply iff_ks_provable.mp hφ;
   . right; apply iff_ks_provable.mp hψ;
 
-instance instDisjunctive_of_AczelSlashable [L.AczelSlashable] : Entailment.Disjunctive L := ⟨disjunctive_of_AczelSlashable⟩
+instance instDisjunctive_of_AczelSlashable [L.AczelSlashable] : L.Disjunctive := ⟨disjunctive_of_AczelSlashable⟩
 
 end
 

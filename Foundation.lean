@@ -460,9 +460,6 @@ public import Foundation.Propositional.Hilbert.F.Disjunctive
 public import Foundation.Propositional.Hilbert.F_WF
 public import Foundation.Propositional.Hilbert.Minimal.Basic
 public import Foundation.Propositional.Hilbert.Minimal.Glivenko
-public import Foundation.Propositional.Hilbert.Standard
-public import Foundation.Propositional.Hilbert.Standard.Basic
-public import Foundation.Propositional.Hilbert.Standard.Glivenko
 public import Foundation.Propositional.Hilbert.VF
 public import Foundation.Propositional.Hilbert.VF.Basic
 public import Foundation.Propositional.Hilbert.VF.Disjunctive
@@ -510,6 +507,7 @@ public import Foundation.Propositional.Logic.Basic
 public import Foundation.Propositional.Logic.Letterless_Int_Cl
 public import Foundation.Propositional.Logic.PostComplete
 public import Foundation.Propositional.Logic.Slash
+public import Foundation.Propositional.Logic.Superintuitionistic
 public import Foundation.Propositional.Neighborhood.NB.Basic
 public import Foundation.Propositional.Neighborhood.NB.Hilbert
 public import Foundation.Propositional.Neighborhood.NB.Logic

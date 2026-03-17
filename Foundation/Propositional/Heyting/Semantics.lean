@@ -1,6 +1,6 @@
 module
 
-public import Foundation.Propositional.Hilbert.Standard.Basic
+public import Foundation.Propositional.Hilbert.Minimal.Basic
 public import Foundation.Logic.LindenbaumAlgebra
 public import Foundation.Vorspiel.Order
 
@@ -97,62 +97,63 @@ lemma val_not (φ : Formula α) : ℍ ⊧ ∼φ ↔ (ℍ ⊧ₕ φ) = ⊥ := by
 @[simp] lemma val_or (φ ψ : Formula α) : ℍ ⊧ φ ⋎ ψ ↔ (ℍ ⊧ₕ φ) ⊔ (ℍ ⊧ₕ ψ) = ⊤ := by
   simp [val_def]; rfl
 
-def mod (Ax : Axiom α) : Set (HeytingSemantics α) := Semantics.models (HeytingSemantics α) Ax.instances
+def mod (H : Hilbert α) : Set (HeytingSemantics α) := Semantics.models (HeytingSemantics α) H
 
-variable {Ax : Axiom α}
+variable {H : Hilbert α}
 
 lemma mod_models_iff {φ : Formula α} :
-    mod.{_,w} Ax ⊧ φ ↔ ∀ ℍ : HeytingSemantics.{_,w} α, ℍ ⊧* Ax.instances → ℍ ⊧ φ := by
+    mod.{_,w} H ⊧ φ ↔ ∀ ℍ : HeytingSemantics.{_,w} α, ℍ ⊧* H → ℍ ⊧ φ := by
   simp [mod, Semantics.models, Semantics.set_models_iff]
 
-lemma sound {φ : Formula α} (d : (Hilbert.Standard Ax) ⊢ φ) : mod (Hilbert.Standard Ax) ⊧ φ := by
+lemma sound {φ : Formula α} : H ⊢ φ → mod H ⊧ φ := by
+  rintro ⟨d⟩;
   apply mod_models_iff.mpr;
   intro ℍ hℍ;
   induction d with
-  | @axm φ s hφ =>
-    apply hℍ.models_set
-    use φ;
-    grind;
+  | axm hφ => apply hℍ.models_set; assumption;
   | @mdp φ ψ _ _ ihpq ihp =>
     have : (ℍ ⊧ₕ φ) ≤ (ℍ ⊧ₕ ψ) := by simpa using ihpq
     simpa [val_def'.mp ihp] using this
   | _ => simp [himp_himp_inf_himp_inf_le, himp_inf_himp_inf_sup_le]
 
-instance : Sound (Hilbert.Standard Ax) (mod (Hilbert.Standard Ax)) := ⟨sound⟩
+instance : Sound H (mod H) := ⟨sound⟩
 
 section
 
 open Entailment.LindenbaumAlgebra
 
-variable [DecidableEq α] {Ax : Axiom α} [Ax.HasEFQ] [Entailment.Consistent (Hilbert.Standard Ax)]
+variable [DecidableEq α] {H : Hilbert α} [Entailment.Consistent H] [Entailment.Int H]
 
-def lindenbaum (Ax : Axiom α) [Ax.HasEFQ] [Entailment.Consistent (Hilbert.Standard Ax)] : HeytingSemantics α where
-  Algebra := Entailment.LindenbaumAlgebra (Hilbert.Standard Ax)
+def lindenbaum (H : Hilbert α) [Entailment.Consistent H] [Entailment.Int H] : HeytingSemantics α where
+  Algebra := Entailment.LindenbaumAlgebra H
   valAtom a := ⟦.atom a⟧
+  heyting := Entailment.LindenbaumAlgebra.heyting _
 
-lemma lindenbaum_val_eq : (lindenbaum Ax ⊧ₕ φ) = ⟦φ⟧ := by
+lemma lindenbaum_val_eq : (lindenbaum H ⊧ₕ φ) = ⟦φ⟧ := by
   induction φ with
   | hand φ ψ ihp ihq => simp only [hVal_and, ihp, ihq]; rw [inf_def];
   | hor _ _ ihp ihq => simp only [hVal_or, ihp, ihq]; rw [sup_def];
   | himp _ _ ihp ihq => simp only [hVal_imply, ihp, ihq]; rw [himp_def];
   | _ => rfl
 
-lemma lindenbaum_complete_iff {φ : Formula α} : lindenbaum Ax ⊧ φ ↔ (Hilbert.Standard Ax) ⊢ φ := by
+lemma lindenbaum_complete_iff {φ : Formula α} : lindenbaum H ⊧ φ ↔ H ⊢ φ := by
   simp [val_def', lindenbaum_val_eq, provable_iff_eq_top]
 
-instance : Sound (Hilbert.Standard Ax) (lindenbaum Ax) := ⟨lindenbaum_complete_iff.mpr⟩
+instance : Sound H (lindenbaum H) := ⟨lindenbaum_complete_iff.mpr⟩
 
-instance : Complete (Hilbert.Standard Ax) (lindenbaum Ax) := ⟨lindenbaum_complete_iff.mp⟩
+instance : Complete H (lindenbaum H) := ⟨lindenbaum_complete_iff.mp⟩
 
 end
 
-lemma complete [DecidableEq α] [Ax.HasEFQ] {φ : Formula α} (h : mod.{_,u} Ax ⊧ φ) : (Hilbert.Standard Ax) ⊢ φ := by
-  wlog Con : Entailment.Consistent (Hilbert.Standard Ax)
+lemma complete [DecidableEq α] [Entailment.Int H] {φ : Formula α} (h : mod.{_,u} H ⊧ φ) : H ⊢ φ := by
+  wlog Con : Entailment.Consistent H
   . exact Entailment.not_consistent_iff_inconsistent.mp Con φ
-  exact lindenbaum_complete_iff.mp <|
-    mod_models_iff.mp h (lindenbaum Ax) ⟨fun ψ hψ ↦ lindenbaum_complete_iff.mpr <| by grind⟩
+  exact lindenbaum_complete_iff.mp <| mod_models_iff.mp h (lindenbaum H) $ by
+    constructor;
+    intro ψ hψ;
+    exact lindenbaum_complete_iff.mpr $ Hilbert.of_schema hψ;
 
-instance [DecidableEq α] [Ax.HasEFQ] : Complete (Hilbert.Standard Ax) (mod.{_,u} Ax) := ⟨complete⟩
+instance [DecidableEq α] [Entailment.Int H] : Complete H (mod.{_,u} H) := ⟨complete⟩
 
 end HeytingSemantics
 
