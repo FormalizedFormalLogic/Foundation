@@ -3,17 +3,18 @@ module
 public import Foundation.Propositional.Hilbert.VF.Basic
 public import Foundation.Propositional.Logic.Slash
 
+
 @[expose] public section
 
 namespace LO.Propositional
 
-variable {H : HilbertVF α} {φ ψ χ : Formula α}
+variable {Ax : Axiom ℕ} {φ ψ χ : Formula ℕ} {s : Substitution ℕ}
 
 open Entailment.Corsi
 
-namespace HilbertVF
+namespace Hilbert.VF
 
-instance inst_logic_aczelSlashable (hs : ∀ {φ}, φ ∈ H → ∕ₐ[H.logic] φ) : H.logic.AczelSlashable where
+instance instAczelSlashable (hs : ∀ {φ}, φ ∈ Ax → ∕ₐ[(Hilbert.VF Ax)] φ) : (Hilbert.VF Ax).AczelSlashable where
   iff_ks_provable {φ} := by
     constructor;
     . intro h;
@@ -27,8 +28,7 @@ instance inst_logic_aczelSlashable (hs : ∀ {φ}, φ ∈ H → ∕ₐ[H.logic] 
       | hand φ ψ ihφ ihψ => exact andIR (ihφ h.1) (ihψ h.2);
       | himp φ ψ ihφ ihψ => exact h.1;
     . intro h;
-      replace h := HilbertVF.provable_of_mem_logic h;
-      induction h with
+      induction h using VF.rec! with
       | orIntroL =>
         constructor;
         . exact orIntroL;
@@ -56,7 +56,8 @@ instance inst_logic_aczelSlashable (hs : ∀ {φ}, φ ∈ H → ∕ₐ[H.logic] 
       | mdp ihφψ ihφ => apply ihφψ.2 ihφ;
       | af ihφ =>
         constructor;
-        . apply af; assumption;
+        . apply af;
+          assumption;
         . tauto;
       | efq =>
         constructor;
@@ -69,25 +70,24 @@ instance inst_logic_aczelSlashable (hs : ∀ {φ}, φ ∈ H → ∕ₐ[H.logic] 
       | ruleC ih₁ ih₂ =>
         constructor;
         . apply ruleC <;> assumption;
-        . rintro h; constructor <;> grind;
+        . rintro h;
+          constructor <;> grind;
       | ruleI ih₁ ih₂ =>
         constructor;
         . apply ruleI <;> assumption;
         . grind;
       | axm => apply hs; assumption;
 
-end HilbertVF
+@[grind .] lemma slashable_axiomSer [Entailment.HasAxiomSer (Hilbert.VF Ax)] : ∕ₐ[(Hilbert.VF Ax)] ((Axioms.Ser)) := by grind
+
+end Hilbert.VF
 
 
-instance VF.AczelSlashable : Propositional.VF.AczelSlashable := HilbertVF.inst_logic_aczelSlashable $ by
-  tauto;
-instance VF.Disjunctive : Propositional.VF.Disjunctive := inferInstance
+instance VF.AczelSlashable : Propositional.VF.AczelSlashable := Hilbert.VF.instAczelSlashable $ by tauto;
+instance VF.Disjunctive : Entailment.Disjunctive Propositional.VF := inferInstance
 
-attribute [grind .] Entailment.verum!
-
-instance VF_Ser.AczelSlashable : Propositional.VF_Ser.AczelSlashable := HilbertVF.inst_logic_aczelSlashable $ by
-  rintro φ ⟨rfl⟩; grind;
-instance VF_Ser.Disjunctive : Propositional.VF_Ser.Disjunctive := inferInstance
+instance VF_Ser.AczelSlashable : Propositional.VF_Ser.AczelSlashable := Hilbert.VF.instAczelSlashable $ by grind;
+instance VF_Ser.Disjunctive : Entailment.Disjunctive Propositional.VF_Ser := inferInstance
 
 end LO.Propositional
 end

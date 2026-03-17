@@ -65,7 +65,6 @@ lemma and_inj : φ₁ ⋏ φ₂ = ψ₁ ⋏ ψ₂ ↔ φ₁ = ψ₁ ∧ φ₂ = 
 lemma or_inj : φ₁ ⋎ φ₂ = ψ₁ ⋎ ψ₂ ↔ φ₁ = ψ₁ ∧ φ₂ = ψ₂ := by simp [Vee.vee]
 lemma imp_inj : φ₁ 🡒 φ₂ = ψ₁ 🡒 ψ₂ ↔ φ₁ = ψ₁ ∧ φ₂ = ψ₂ := by simp [Arrow.arrow]
 lemma neg_inj : ∼φ = ∼ψ ↔ φ = ψ := by simp [Tilde.tilde]
-attribute [simp, grind =] and_inj or_inj imp_inj neg_inj
 
 lemma neg_def : ∼φ = φ 🡒 ⊥ := rfl
 lemma top_def : (⊤ : Formula α) = ⊥ 🡒 ⊥ := rfl
@@ -133,8 +132,8 @@ def hasDecEq : (φ ψ : Formula α) → Decidable (φ = ψ)
       | isTrue hp =>
         match hasDecEq ψ ψ' with
         | isTrue hq  => isTrue (hp ▸ hq ▸ rfl)
-        | isFalse hq => isFalse (by simp [hp, hq])
-      | isFalse hp => isFalse (by simp [hp])
+        | isFalse hq => isFalse (by simp [hp, hq, imp_inj])
+      | isFalse hp => isFalse (by simp [hp, imp_inj])
   | φ ⋏ ψ, χ => by
     cases χ using cases' <;> try { simp; exact isFalse not_false }
     case hand φ' ψ' =>
@@ -142,8 +141,8 @@ def hasDecEq : (φ ψ : Formula α) → Decidable (φ = ψ)
       | isTrue hp =>
         match hasDecEq ψ ψ' with
         | isTrue hq  => isTrue (hp ▸ hq ▸ rfl)
-        | isFalse hq => isFalse (by simp [hp, hq])
-      | isFalse hp => isFalse (by simp [hp])
+        | isFalse hq => isFalse (by simp [hp, hq, and_inj])
+      | isFalse hp => isFalse (by simp [hp, and_inj])
   | φ ⋎ ψ, χ => by
     cases χ using cases' <;> try { simp; exact isFalse not_false }
     case hor φ' ψ' =>
@@ -151,8 +150,8 @@ def hasDecEq : (φ ψ : Formula α) → Decidable (φ = ψ)
       | isTrue hp =>
         match hasDecEq ψ ψ' with
         | isTrue hq  => isTrue (hp ▸ hq ▸ rfl)
-        | isFalse hq => isFalse (by simp [hp, hq])
-      | isFalse hp => isFalse (by simp [hp])
+        | isFalse hq => isFalse (by simp [hp, hq, or_inj])
+      | isFalse hp => isFalse (by simp [hp, or_inj])
 
 instance : DecidableEq (Formula α) := hasDecEq
 
@@ -275,7 +274,7 @@ protected lemma mem_and (h : (ψ ⋏ χ) ∈ φ.subformulas) : ψ ∈ φ.subform
   | himp => simp_all only [subformulas, Finset.mem_insert, Finset.mem_union]; tauto;
   | hor => simp_all only [subformulas, Finset.mem_insert, Finset.mem_union]; tauto;
   | hand =>
-    simp_all only [subformulas, Finset.mem_insert, Finset.mem_union];
+    simp_all only [subformulas, Finset.mem_insert, Finset.mem_union, and_inj];
     rcases h with ⟨_⟩ | ⟨⟨_⟩ | ⟨_⟩⟩ <;> simp_all;
   | _ => simp_all [subformulas];
 
@@ -284,7 +283,7 @@ protected lemma mem_or (h : (ψ ⋎ χ) ∈ φ.subformulas) : ψ ∈ φ.subformu
   induction φ with
   | himp => simp_all only [subformulas, Finset.mem_insert, Finset.mem_union]; tauto;
   | hor =>
-    simp_all only [subformulas, Finset.mem_insert, Finset.mem_union];
+    simp_all only [subformulas, Finset.mem_insert, Finset.mem_union, or_inj];
     rcases h with ⟨_⟩ | ⟨⟨_⟩ | ⟨_⟩⟩ <;> simp_all;
   | hand => simp_all only [subformulas, Finset.mem_insert, Finset.mem_union]; tauto;
   | _ => simp_all [subformulas];
@@ -420,7 +419,7 @@ lemma subst_and : (φ ⋏ ψ)⟦s⟧ = φ⟦s⟧ ⋏ ψ⟦s⟧ := rfl
 lemma subst_or : (φ ⋎ ψ)⟦s⟧ = φ⟦s⟧ ⋎ ψ⟦s⟧ := rfl
 lemma subst_iff : (φ 🡘 ψ)⟦s⟧ = (φ⟦s⟧ 🡘 ψ⟦s⟧) := rfl
 
-attribute [simp, grind =]
+attribute [simp, grind =>]
   subst_atom
   subst_bot
   subst_top

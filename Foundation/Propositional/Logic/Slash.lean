@@ -29,19 +29,14 @@ namespace AczelSlash
 @[grind =] lemma def_atom {a : α} : ∕ₐ[L] (#a) ↔ #a ∈ L := by grind;
 @[simp, grind .] lemma def_bot : ¬(∕ₐ[L] ⊥) := by tauto;
 
-/-
-@[simp, grind .]
-lemma def_top [Entailment.HasImpId L] : ∕ₐ[L] ⊤ := by
-  rw [Formula.top_def];
-  constructor;
-  . exact Entailment.Corsi.impId;
-  . tauto;
--/
 
 @[grind =] lemma def_or  : ∕ₐ[L] (φ ⋎ ψ) ↔ ∕ₐ[L] φ ∨ ∕ₐ[L] ψ := by simp [AczelSlash];
 @[grind =] lemma def_and : ∕ₐ[L] (φ ⋏ ψ) ↔ ∕ₐ[L] φ ∧ ∕ₐ[L] ψ := by simp [AczelSlash];
 @[grind =] lemma def_imp : ∕ₐ[L] (φ 🡒 ψ) ↔ (φ 🡒 ψ) ∈ L ∧ (∕ₐ[L] φ → ∕ₐ[L] ψ) := by simp [AczelSlash];
 @[grind =] lemma def_neg : ∕ₐ[L] (∼φ) ↔ ∼φ ∈ L ∧ ¬∕ₐ[L] φ := by simp [Formula.neg_def, def_imp];
+
+@[simp, grind =]
+lemma def_top : ∕ₐ[L] ⊤ ↔ ⊤ ∈ L := by grind [Formula.top_def];
 
 @[grind <=]
 lemma mdp : ∕ₐ[L] (φ 🡒 ψ) → ∕ₐ[L] φ → ∕ₐ[L] ψ := by
