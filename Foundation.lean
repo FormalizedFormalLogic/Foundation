@@ -358,7 +358,6 @@ public import Foundation.Modal.Maximal.Basic
 public import Foundation.Modal.Maximal.Makinson
 public import Foundation.Modal.Maximal.Unprovability
 public import Foundation.Modal.MaximalConsistentSet
-public import Foundation.Modal.ModalCompanion
 public import Foundation.Modal.ModalCompanion.Corsi
 public import Foundation.Modal.ModalCompanion.Corsi.VF
 public import Foundation.Modal.ModalCompanion.Standard.Basic
@@ -416,11 +415,11 @@ public import Foundation.Modal.PLoN.Logic
 public import Foundation.Modal.PLoN.Logic.N
 public import Foundation.Modal.Tableau
 public import Foundation.Modal.VanBentham.StandardTranslation
-public import Foundation.Propositional.ClassicalSemantics.Basic
-public import Foundation.Propositional.ClassicalSemantics.Hilbert
-public import Foundation.Propositional.ClassicalSemantics.NNFormula
-public import Foundation.Propositional.ClassicalSemantics.Tait
-public import Foundation.Propositional.ClassicalSemantics.ZeroSubst
+public import Foundation.Propositional.Boolean.Basic
+public import Foundation.Propositional.Boolean.Hilbert
+public import Foundation.Propositional.Boolean.NNFormula
+public import Foundation.Propositional.Boolean.Tait
+public import Foundation.Propositional.Boolean.ZeroSubst
 public import Foundation.Propositional.ConsistentTableau
 public import Foundation.Propositional.Decidable
 public import Foundation.Propositional.Dialectica.Basic

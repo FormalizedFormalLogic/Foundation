@@ -1,6 +1,6 @@
 module
 
-public import Foundation.Propositional.ClassicalSemantics.Basic
+public import Foundation.Propositional.Boolean.Basic
 public import Foundation.Propositional.Formula.NNFormula
 
 @[expose] public section
@@ -9,7 +9,7 @@ namespace LO.Propositional
 
 variable {α : Type*}
 
-open ClassicalSemantics (Valuation)
+open Boolean (Valuation)
 
 
 namespace NNFormula

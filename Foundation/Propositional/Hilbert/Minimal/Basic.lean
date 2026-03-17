@@ -173,6 +173,8 @@ instance : SetLike (Logic α) (Formula α) where
 class Trivial (L : Logic α) : Prop where
   eq_univ : L.logic = Set.univ
 
+
+
 end Logic
 
 abbrev Trivial : Logic α := ⟨Set.univ, by tauto, by tauto⟩
@@ -208,21 +210,22 @@ structure Logic.ExtensionOf (L : Logic α) extends Logic α where
   subset_L : ∀ {φ}, φ ∈ L → φ ∈ logic
 
 
-abbrev SuperIntuitionisticLogic (α) := Logic.ExtensionOf (Propositional.Int : Logic α)
+abbrev SuperintuitionisticLogic (α) := Logic.ExtensionOf (Propositional.Int : Logic α)
 
 
-namespace SuperIntuitionisticLogic
+namespace SuperintuitionisticLogic
 
-variable {L : SuperIntuitionisticLogic α} {φ ψ : Formula α}
+variable {L : SuperintuitionisticLogic α} {φ ψ : Formula α}
 
 lemma subset_Int (h : φ ∈ Propositional.Int) : φ ∈ L.logic := L.subset_L h
 
 lemma trivial_of_mem_bot (h : ⊥ ∈ L.toLogic) : ∀ {φ}, φ ∈ L.toLogic := L.mdp (L.subset_Int Entailment.efq!) h
 instance (h : ⊥ ∈ L.toLogic) : L.Trivial := ⟨Set.eq_univ_iff_forall.mpr $ @trivial_of_mem_bot α L h⟩
 
-class Consistent (L : SuperIntuitionisticLogic α) : Prop where
+class Consistent (L : SuperintuitionisticLogic α) : Prop where
   not_mem_bot : ⊥ ∉ L.logic
-attribute [simp, grind .] Consistent.not_mem_bot
+export Consistent (not_mem_bot)
+attribute [simp, grind .] not_mem_bot
 
 lemma ssubset_univ [L.Consistent] : L.logic ⊂ Propositional.Trivial.logic := by
   apply Set.ssubset_iff_exists.mpr;
@@ -231,7 +234,7 @@ lemma ssubset_univ [L.Consistent] : L.logic ⊂ Propositional.Trivial.logic := b
   . use ⊥;
     grind;
 
-end SuperIntuitionisticLogic
+end SuperintuitionisticLogic
 
 
 

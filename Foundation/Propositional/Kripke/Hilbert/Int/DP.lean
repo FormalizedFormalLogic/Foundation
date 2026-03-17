@@ -91,8 +91,8 @@ theorem disjunctive : Hilbert.Int ⊢ φ ⋎ ψ → Hilbert.Int ⊢ φ ∨ Hilbe
   contrapose!;
   rintro ⟨hnφ, hnψ⟩;
 
-  obtain ⟨M₁, w₁, hM₁, hφ⟩ := iff_not_validOnFrameClass_exists_model_world.mp $ completeKripke.exists_countermodel_of_not_provable hnφ;
-  obtain ⟨M₂, w₂, hM₂, hψ⟩ := iff_not_validOnFrameClass_exists_model_world.mp $ completeKripke.exists_countermodel_of_not_provable hnψ;
+  obtain ⟨M₁, w₁, hM₁, hφ⟩ := iff_not_validOnFrameClass_exists_model_world.mp $ instKripkeComplete.exists_countermodel_of_not_provable hnφ;
+  obtain ⟨M₂, w₂, hM₂, hψ⟩ := iff_not_validOnFrameClass_exists_model_world.mp $ instKripkeComplete.exists_countermodel_of_not_provable hnψ;
 
   apply soundKripke.not_provable_of_countermodel;
   apply not_validOnFrameClass_of_exists_model_world;

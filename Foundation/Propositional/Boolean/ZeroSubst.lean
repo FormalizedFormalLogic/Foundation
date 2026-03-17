@@ -1,17 +1,17 @@
 module
 
-public import Foundation.Propositional.ClassicalSemantics.Basic
+public import Foundation.Propositional.Boolean.Basic
 
 @[expose] public section
 
-namespace LO.Propositional.ClassicalSemantics
+namespace LO.Propositional.Boolean
 
-variable {v : ClassicalSemantics.Valuation α} {φ ψ : Formula α}
+variable {v : Boolean.Valuation α} {φ ψ : Formula α}
 
 open Classical
 open Semantics (Valid)
 open Formula (atom)
-open Formula.ClassicalSemantics
+open Formula.Boolean
 
 open Classical in
 noncomputable def vfSubst (v : Valuation α) : ZeroSubstitution α := ⟨
@@ -19,9 +19,9 @@ noncomputable def vfSubst (v : Valuation α) : ZeroSubstitution α := ⟨
     by intro a; simp [Formula.subst_atom]; split <;> tauto;
 ⟩
 
-theorem exists_neg_zeroSubst_of_not_tautology (h : ¬φ.Tautology)
-  : ∃ s : ZeroSubstitution α, Formula.Tautology (∼(φ⟦s.1⟧)) := by
-  unfold Formula.Tautology Valid at h;
+theorem exists_neg_zeroSubst_of_not_tautology (h : ¬φ.IsTautology)
+  : ∃ s : ZeroSubstitution α, Formula.IsTautology (∼(φ⟦s.1⟧)) := by
+  unfold Formula.IsTautology Valid at h;
   push_neg at h;
   obtain ⟨v, hv⟩ := h;
   use vfSubst v;
@@ -33,13 +33,13 @@ theorem exists_neg_zeroSubst_of_not_tautology (h : ¬φ.Tautology)
     simp [vfSubst];
     split <;> tauto;
 
-lemma tautology_of_forall_zeroSubst : (∀ s : ZeroSubstitution α, ¬(∼(φ⟦s.1⟧)).Tautology) → φ.Tautology := by
+lemma tautology_of_forall_zeroSubst : (∀ s : ZeroSubstitution α, ¬(∼(φ⟦s.1⟧)).IsTautology) → φ.IsTautology := by
   contrapose!;
   apply exists_neg_zeroSubst_of_not_tautology;
 
 set_option push_neg.use_distrib true in
-lemma vfSubst_tautology : v ⊧ φ ↔ (φ⟦(vfSubst v)⟧.Tautology) := by
-  simp only [Formula.Tautology, Valid, Formula.subst_atom];
+lemma vfSubst_tautology : v ⊧ φ ↔ (φ⟦(vfSubst v)⟧.IsTautology) := by
+  simp only [Formula.IsTautology, Valid, Formula.subst_atom];
   induction φ with
   | hatom a =>
     dsimp [vfSubst];
@@ -105,5 +105,5 @@ lemma vfSubst_tautology : v ⊧ φ ↔ (φ⟦(vfSubst v)⟧.Tautology) := by
         apply equiv_of_letterless ?_ v w |>.mp $ h v |>.2;
         grind;
 
-end LO.Propositional.ClassicalSemantics
+end LO.Propositional.Boolean
 end

@@ -1,6 +1,6 @@
 module
 
-public import Foundation.Propositional.ClassicalSemantics.Hilbert
+public import Foundation.Propositional.Boolean.Hilbert
 public import Foundation.Modal.Hilbert.Normal.Basic
 
 @[expose] public section
@@ -34,6 +34,7 @@ lemma toIP : φᵀ.toPropFormula = φᵀ := by
 
 end trivTranslate
 
+
 @[grind]
 def verTranslate : Formula α → Formula α
   | atom a => atom a
@@ -66,11 +67,11 @@ open Formula (trivTranslate verTranslate)
 
 variable {φ : Modal.Formula ℕ}
 
-lemma Hilbert.Normal.provable_of_classical_provable {Ax : Axiom ℕ} {φ : Propositional.Formula ℕ} : Propositional.Cl ⊢ φ → (Hilbert.Normal Ax ⊢ φ.toModalFormula) := by
-  intro h;
-  induction h using Propositional.Hilbert.Standard.rec! with
-  | axm _ h => rcases h with (rfl | rfl) <;> simp;
-  | mdp ihφψ ihφ => exact ihφψ ⨀ ihφ;
+lemma Hilbert.Normal.provable_of_classical_provable {Ax : Axiom ℕ} {φ : Propositional.Formula ℕ} : φ ∈ Propositional.Cl → (Hilbert.Normal Ax ⊢ φ.toModalFormula) := by
+  rintro ⟨h⟩;
+  induction h with
+  | axm h => rcases h with (⟨_, rfl⟩ | ⟨_, rfl⟩) <;> simp;
+  | mdp _ _ ihφψ ihφ => exact ihφψ ⨀ ihφ;
   | _ => dsimp [Propositional.Formula.toModalFormula]; simp;
 
 
@@ -86,26 +87,23 @@ lemma iff_trivTranslated : Modal.Triv ⊢ φ 🡘 φᵀ := by
   | _ => apply E!_id
 
 @[grind =]
-lemma iff_provable_Cl : Modal.Triv ⊢ φ ↔ Propositional.Cl ⊢ φᵀ.toPropFormula := by
+lemma iff_provable_Cl : Modal.Triv ⊢ φ ↔ φᵀ.toPropFormula ∈ Propositional.Cl := by
+  rw [←Propositional.Hilbert.iff_mem_logic_provable];
   constructor;
   . intro h;
     induction h using Hilbert.Normal.rec! with
     | axm s a =>
       rcases a with (rfl | rfl | rfl) <;> simp [trivTranslate, Formula.toPropFormula];
-    | mdp ih₁ ih₂ =>
-      dsimp [trivTranslate] at ih₁ ih₂;
-      exact ih₁ ⨀ ih₂;
+    | mdp ih₁ ih₂ => exact ih₁ ⨀ ih₂;
     | nec ih => exact ih;
-    | _ =>
-      dsimp [trivTranslate, Formula.toPropFormula];
-      cl_prover;
+    | _ => dsimp [trivTranslate, Formula.toPropFormula]; cl_prover;
   . intro h;
     have d₁ : Modal.Triv ⊢ φᵀ 🡒 φ := K!_right iff_trivTranslated;
-    have d₂ : Modal.Triv ⊢ φᵀ := by simpa only [trivTranslate.toIP] using Hilbert.Normal.provable_of_classical_provable h;
+    have d₂ : Modal.Triv ⊢ φᵀ := by simpa using Hilbert.Normal.provable_of_classical_provable h;
     exact d₁ ⨀ d₂;
 
 @[grind =]
-lemma iff_tautology : Modal.Triv ⊢ φ ↔ φᵀ.toPropFormula.Tautology := by grind;
+lemma iff_tautology : Modal.Triv ⊢ φ ↔ φᵀ.toPropFormula.IsTautology := by grind;
 
 end Triv
 
@@ -122,25 +120,22 @@ lemma iff_verTranslated : Modal.Ver ⊢ φ 🡘 φⱽ := by
   | _ => apply E!_id
 
 @[grind =]
-lemma iff_provable_Cl : Modal.Ver ⊢ φ ↔ Propositional.Cl ⊢ φⱽ.toPropFormula := by
+lemma iff_provable_Cl : Modal.Ver ⊢ φ ↔ φⱽ.toPropFormula ∈ Propositional.Cl := by
+  rw [←Propositional.Hilbert.iff_mem_logic_provable];
   constructor;
   . intro h;
     induction h using Hilbert.Normal.rec! with
     | axm s a =>
       rcases a with (rfl | rfl | rfl) <;> simp [verTranslate, Formula.toPropFormula];
-    | mdp ih₁ ih₂ =>
-      dsimp [verTranslate] at ih₁ ih₂;
-      exact ih₁ ⨀ ih₂;
-    | _ =>
-      dsimp [verTranslate, Formula.toPropFormula];
-      cl_prover;
+    | mdp ih₁ ih₂ => exact ih₁ ⨀ ih₂;
+    | _ => dsimp [verTranslate, Formula.toPropFormula]; cl_prover;
   . intro h;
     have d₁ : Modal.Ver ⊢ φⱽ 🡒 φ := K!_right iff_verTranslated;
     have d₂ : Modal.Ver ⊢ φⱽ := by simpa using Hilbert.Normal.provable_of_classical_provable h;
     exact d₁ ⨀ d₂;
 
 @[grind =]
-lemma iff_tautology : Modal.Ver ⊢ φ ↔ φⱽ.toPropFormula.Tautology := by grind;
+lemma iff_tautology : Modal.Ver ⊢ φ ↔ φⱽ.toPropFormula.IsTautology := by grind;
 
 end Ver
 

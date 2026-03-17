@@ -1,6 +1,6 @@
 module
 
-public import Foundation.Propositional.ClassicalSemantics.NNFormula
+public import Foundation.Propositional.Boolean.NNFormula
 public import Foundation.Propositional.Tait.Calculus
 public import Foundation.Vorspiel.Set.Basic
 
@@ -12,7 +12,7 @@ namespace LO.Propositional
 
 variable {α : Type*} {T : Theory α} {Γ : Sequent α}
 
-open ClassicalSemantics (Valuation)
+open Boolean (Valuation)
 namespace Derivation
 
 theorem sound : T ⟹ Γ → T ⊨[Valuation α] Γ.disj := by
@@ -51,7 +51,7 @@ end Derivation
 lemma soundness {T : Theory α} {φ} : T ⊢ φ → T ⊨[Valuation α] φ := by
   rintro ⟨b⟩ v hv; simpa using Derivation.sound b hv
 
-namespace ClassicalSemantics
+namespace Boolean
 
 instance (T : Theory α) : Sound T (Semantics.models (Valuation α) T)  := ⟨soundness⟩
 
@@ -202,10 +202,10 @@ instance (T : Theory α) : Complete T (Semantics.models (Valuation α) T)  where
 
 end complete
 
-end ClassicalSemantics
+end Boolean
 
 theorem Derivation.complete : T ⊨[Valuation α] Γ.disj → T ⟹! Γ := fun h ↦
-  Tait.derivable_iff_provable_disj.mpr (ClassicalSemantics.completeness! h)
+  Tait.derivable_iff_provable_disj.mpr (Boolean.completeness! h)
 
 theorem Derivation.complete_iff : T ⟹! Γ ↔ T ⊨[Valuation α] Γ.disj := ⟨sound!, complete⟩
 
