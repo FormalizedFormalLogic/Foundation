@@ -181,8 +181,8 @@ lemma iff_mem_logic_provable : H ⊢ φ ↔ φ ∈ H.logic := ⟨mem_logic_of_pr
 
 end HilbertVF
 
-protected abbrev VF : Logic ℕ := HilbertVF.VF.logic
-protected abbrev VF_Ser : Logic ℕ := HilbertVF.VF_Ser.logic
+protected abbrev VF     : Logic α := HilbertVF.VF.logic
+protected abbrev VF_Ser : Logic α := HilbertVF.VF_Ser.logic
 
 end LO.Propositional
 

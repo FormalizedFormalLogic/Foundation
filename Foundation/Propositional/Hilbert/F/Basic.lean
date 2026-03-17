@@ -224,15 +224,15 @@ lemma iff_mem_logic_provable : H ⊢ φ ↔ φ ∈ H.logic := ⟨mem_logic_of_pr
 end HilbertF
 
 
-protected abbrev F              : Logic ℕ := HilbertF.F.logic
-protected abbrev F_Ser          : Logic ℕ := HilbertF.F_Ser.logic
-protected abbrev F_Rfl          : Logic ℕ := HilbertF.F_Rfl.logic
-protected abbrev F_Sym          : Logic ℕ := HilbertF.F_Sym.logic
-protected abbrev F_Rfl_Sym      : Logic ℕ := HilbertF.F_Rfl_Sym.logic
-protected abbrev F_Tra1         : Logic ℕ := HilbertF.F_Tra1.logic
-protected abbrev F_Rfl_Tra1     : Logic ℕ := HilbertF.F_Rfl_Tra1.logic
-protected abbrev F_Tra1_Hrd     : Logic ℕ := HilbertF.F_Tra1_Hrd.logic
-protected abbrev F_Rfl_Tra1_Hrd : Logic ℕ := HilbertF.F_Rfl_Tra1_Hrd.logic
+protected abbrev F              : Logic α := HilbertF.F.logic
+protected abbrev F_Ser          : Logic α := HilbertF.F_Ser.logic
+protected abbrev F_Rfl          : Logic α := HilbertF.F_Rfl.logic
+protected abbrev F_Sym          : Logic α := HilbertF.F_Sym.logic
+protected abbrev F_Rfl_Sym      : Logic α := HilbertF.F_Rfl_Sym.logic
+protected abbrev F_Tra1         : Logic α := HilbertF.F_Tra1.logic
+protected abbrev F_Rfl_Tra1     : Logic α := HilbertF.F_Rfl_Tra1.logic
+protected abbrev F_Tra1_Hrd     : Logic α := HilbertF.F_Tra1_Hrd.logic
+protected abbrev F_Rfl_Tra1_Hrd : Logic α := HilbertF.F_Rfl_Tra1_Hrd.logic
 
 end LO.Propositional
 
