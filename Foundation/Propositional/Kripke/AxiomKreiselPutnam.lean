@@ -100,7 +100,7 @@ instance [Entailment.HasAxiomKreiselPutnam 𝓢] : (canonicalFrame 𝓢).Satisfi
     by_contra hC;
     let Γx := { φ ∈ Γ | φ ∈ x.1.1};
     let Γ₁ := { φ ∈ Γ | φ ∈ ΓNyz };
-    let Γ₂ := Γ₁.preimage (∼·) $ by simp [Set.InjOn];
+    let Γ₂ := Γ₁.preimage (∼·) $ by simp [Set.InjOn, Formula.neg_inj];
     let Δy := { φ ∈ Δ | φ ∈ y.1.2};
     let Δz := { φ ∈ Δ | φ ∈ z.1.2};
     replace hC : 𝓢 ⊢ (Γx ∪ Γ₁).conj 🡒 (Δy ∪ Δz).disj := C!_replace ?_ ?_ hC;
@@ -159,7 +159,7 @@ instance [Entailment.HasAxiomKreiselPutnam 𝓢] : (canonicalFrame 𝓢).Satisfi
         rintro _ hψ ψ hψ₁ hψ₂ rfl;
         apply C!_trans CNFdisjFconj!;
         apply left_Fconj!_intro;
-        suffices ∼ψ ∈ Γ ∧ ∼ψ ∈ y.1.1 ∧ ∼ψ ∈ z.1.1 by simpa [Γ₁, Γ₂] using this;
+        suffices ∼ψ ∈ Γ ∧ ∼ψ ∈ y.1.1 ∧ ∼ψ ∈ z.1.1 by simpa [Γ₁, Γ₂, Formula.neg_inj] using this;
         tauto;
     . apply CFConj_FConj!_of_subset;
       intro φ hφ;
@@ -190,7 +190,7 @@ instance [Entailment.HasAxiomKreiselPutnam 𝓢] : (canonicalFrame 𝓢).Satisfi
       obtain ⟨Γ, Δ, hΓ, hΔ, hΓΔ⟩ := this;
       simp only [Set.subset_empty_iff, Finset.coe_eq_empty] at hΔ;
       subst hΔ;
-      simp only [Finset.disj_empty, Decidable.not_not] at hΓΔ;
+      simp only [Finset.disj_empty] at hΓΔ;
       use ({ φ ∈ Γ | φ ∈ v.1.1}).conj;
       constructor;
       . apply iff_mem₁_fconj.mpr;
@@ -217,7 +217,7 @@ instance [Entailment.HasAxiomKreiselPutnam 𝓢] : (canonicalFrame 𝓢).Satisfi
       obtain ⟨Γ, Δ, hΓ, hΔ, hΓΔ⟩ := this;
       simp only [Set.subset_empty_iff, Finset.coe_eq_empty] at hΔ;
       subst hΔ;
-      simp only [Finset.disj_empty, Decidable.not_not] at hΓΔ;
+      simp only [Finset.disj_empty] at hΓΔ;
       use ({ φ ∈ Γ | φ ∈ v.1.1}).conj;
       constructor;
       . apply iff_mem₁_fconj.mpr;
