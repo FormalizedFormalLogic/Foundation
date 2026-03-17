@@ -28,54 +28,9 @@ lemma disjunctive_of_schema_aczelSlash (hs : ∀ {φ}, φ ∈ H → ∕ₐ[H] φ
     | hand φ ψ ihφ ihψ => exact andIR (ihφ h.1) (ihψ h.2);
     | himp φ ψ ihφ ihψ => exact h.1;
   . intro h;
-    replace h := HilbertVF.provable_of_mem_logic h;
     induction h with
-    | orIntroL =>
-      constructor;
-      . exact orIntroL;
-      . tauto;
-    | orIntroR =>
-      constructor;
-      . exact orIntroR;
-      . tauto;
-    | andElimL =>
-      constructor;
-      . exact andElimL;
-      . rintro ⟨_, _⟩; assumption;
-    | andElimR =>
-      constructor;
-      . exact andElimR;
-      . rintro ⟨_, _⟩; assumption;
-    | impId =>
-      constructor;
-      . exact impId;
-      . tauto;
-    | distributeAndOr =>
-      constructor;
-      . exact distributeAndOr;
-      . rintro ⟨hφ, (hψ | hψ)⟩ <;> tauto;
-    | mdp ihφψ ihφ => apply ihφψ.2 ihφ;
-    | af ihφ =>
-      constructor;
-      . apply af; assumption;
-      . tauto;
-    | efq =>
-      constructor;
-      . exact efq;
-      . tauto;
-    | ruleD ih₁ ih₂ =>
-      constructor;
-      . apply ruleD <;> assumption;
-      . rintro (h | h) <;> grind;
-    | ruleC ih₁ ih₂ =>
-      constructor;
-      . apply ruleC <;> assumption;
-      . rintro h; constructor <;> grind;
-    | ruleI ih₁ ih₂ =>
-      constructor;
-      . apply ruleI <;> assumption;
-      . grind;
-    | axm => apply hs; assumption;
+    | ruleI => grind [C_trans]
+    | _ => grind;
 
 attribute [grind .] Entailment.verum!
 

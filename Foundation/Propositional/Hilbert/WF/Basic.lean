@@ -1,7 +1,6 @@
 module
 
-public import Foundation.Propositional.Entailment.Int.DNE_of_LEM
-public import Foundation.Propositional.Hilbert.Axiom
+public import Foundation.Propositional.Entailment.Corsi
 public import Foundation.Propositional.Logic.Basic
 
 @[expose] public section
@@ -136,6 +135,27 @@ lemma of_proof_schema (h : H₂ ⊢* H₁.schema) : H₁ ⊢ φ → H₂ ⊢ φ 
 
 lemma weakerThan_of_provable_schema (h : H₂ ⊢* H₁.schema) : H₁ ⪯ H₂ :=
   Entailment.weakerThan_iff.mpr $ of_proof_schema h
+
+open Entailment.Corsi in
+@[induction_eliminator]
+protected lemma rec_provable
+  {H : HilbertWF α}
+  {motive  : (φ : Formula α) → (H ⊢ φ) → Prop}
+  (axm       : ∀ {φ}, (h : φ ∈ H) → motive (φ) (of_schema h))
+  (mdp       : ∀ {φ ψ}, {hφψ : H ⊢ φ 🡒 ψ} → {hφ : H ⊢ φ} → (motive (φ 🡒 ψ) hφψ) → (motive φ hφ) → (motive ψ (hφψ ⨀ hφ)))
+  (af        : ∀ {φ ψ}, {hφ : H ⊢ φ} → (motive φ hφ) → (motive (ψ 🡒 φ) (af hφ)))
+  (ruleC     : ∀ {φ ψ χ}, {h₁ : H ⊢ φ 🡒 ψ} → {h₂ : H ⊢ φ 🡒 χ} → (motive (φ 🡒 ψ) h₁) → (motive (φ 🡒 χ) h₂) → (motive (φ 🡒 (ψ ⋏ χ)) (ruleC h₁ h₂)))
+  (ruleD     : ∀ {φ ψ χ}, {h₁ : H ⊢ φ 🡒 χ} → {h₂ : H ⊢ ψ 🡒 χ} → (motive (φ 🡒 χ) h₁) → (motive (ψ 🡒 χ) h₂) → (motive (φ ⋎ ψ 🡒 χ) (ruleD h₁ h₂)))
+  (ruleI     : ∀ {φ ψ χ}, {h₁ : H ⊢ φ 🡒 ψ} → {h₂ : H ⊢ ψ 🡒 χ} → (motive (φ 🡒 ψ) h₁) → (motive (ψ 🡒 χ) h₂) → (motive (φ 🡒 χ) (ruleI h₁ h₂)))
+  (ruleE     : ∀ {φ ψ χ ξ}, {h₁ : H ⊢ φ 🡘 ψ} → {h₂ : H ⊢ χ 🡘 ξ} → (motive (φ 🡘 ψ) h₁) → (motive (χ 🡘 ξ) h₂) → (motive ((φ 🡒 χ) 🡘 (ψ 🡒 ξ)) (ruleE h₁ h₂)))
+  (distributeAndOr : ∀ {φ ψ χ : Formula α}, (motive (Axioms.DistributeAndOr φ ψ χ) distributeAndOr))
+  (impId     : ∀ {φ}, (motive (Axioms.ImpId φ) impId))
+  (andElimL  : ∀ {φ ψ}, (motive (Axioms.AndElim₁ φ ψ) andElimL))
+  (andElimR  : ∀ {φ ψ}, (motive (Axioms.AndElim₂ φ ψ) andElimR))
+  (orIntroL  : ∀ {φ ψ}, (motive (Axioms.OrInst₁ φ ψ) orIntroL))
+  (orIntroR  : ∀ {φ ψ}, (motive (Axioms.OrInst₂ φ ψ) orIntroR))
+  (efq       : ∀ {φ}, (motive (Axioms.EFQ φ) efq))
+  : ∀ {φ}, (d : H ⊢ φ) → motive φ d := by rintro φ ⟨d⟩; induction d <;> grind;
 
 section
 

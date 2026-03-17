@@ -1,7 +1,6 @@
 module
 
-public import Foundation.Propositional.Entailment.Int.DNE_of_LEM
-public import Foundation.Propositional.Hilbert.Axiom
+public import Foundation.Propositional.Entailment.Corsi
 public import Foundation.Propositional.Logic.Basic
 
 @[expose] public section
@@ -34,16 +33,20 @@ protected def F_Rfl_Tra1 : HilbertF α := ⟨
   { Axioms.Rfl φ ψ | (φ) (ψ) } ∪
   { Axioms.Tra1 φ ψ χ | (φ) (ψ) (χ) },
   by rintro φ (_ | _) <;> grind⟩
+
+/-
 protected def F_Tra1_Hrd : HilbertF α := ⟨
   { Axioms.Tra1 φ ψ χ | (φ) (ψ) (χ) } ∪
   { Axioms.Hrd φ | (φ) },
-  by rintro φ (_ | _) <;> grind⟩
+  by rintro φ (_ | _) <;> grind
+⟩
 protected def F_Rfl_Tra1_Hrd : HilbertF α := ⟨
   { Axioms.Rfl φ ψ | (φ) (ψ) } ∪
   { Axioms.Tra1 φ ψ χ | (φ) (ψ) (χ) } ∪
   { Axioms.Hrd φ | (φ) },
   by rintro φ ((_ | _) | _) <;> grind;
 ⟩
+-/
 
 @[simp, grind .] lemma F_le_F_Ser : (HilbertF.F : HilbertF α) ≤ HilbertF.F_Ser := by tauto
 @[simp, grind .] lemma F_le_F_Rfl : (HilbertF.F : HilbertF α) ≤ HilbertF.F_Rfl := by tauto
@@ -163,6 +166,27 @@ lemma of_proof_schema (h : H₂ ⊢* H₁.schema) : H₁ ⊢ φ → H₂ ⊢ φ 
 lemma weakerThan_of_provable_schema (h : H₂ ⊢* H₁.schema) : H₁ ⪯ H₂ :=
   Entailment.weakerThan_iff.mpr $ of_proof_schema h
 
+open Entailment.Corsi in
+@[induction_eliminator]
+protected lemma rec_provable
+  {H : HilbertF α}
+  {motive  : (φ : Formula α) → (H ⊢ φ) → Prop}
+  (axm       : ∀ {φ}, (h : φ ∈ H) → motive (φ) (of_schema h))
+  (mdp       : ∀ {φ ψ}, {hφψ : H ⊢ φ 🡒 ψ} → {hφ : H ⊢ φ} → (motive (φ 🡒 ψ) hφψ) → (motive φ hφ) → (motive ψ (hφψ ⨀ hφ)))
+  (af        : ∀ {φ ψ}, {hφ : H ⊢ φ} → (motive φ hφ) → (motive (ψ 🡒 φ) (af hφ)))
+  (andIR     : ∀ {φ ψ}, {hφ : H ⊢ φ} → {hψ : H ⊢ ψ} → (motive φ hφ) → (motive ψ hψ) → (motive (φ ⋏ ψ) (andIR hφ hψ)))
+  (distributeAndOr : ∀ {φ ψ χ : Formula α}, (motive (Axioms.DistributeAndOr φ ψ χ) distributeAndOr))
+  (impId     : ∀ {φ}, (motive (Axioms.ImpId φ) impId))
+  (andElimL  : ∀ {φ ψ}, (motive (Axioms.AndElim₁ φ ψ) andElimL))
+  (andElimR  : ∀ {φ ψ}, (motive (Axioms.AndElim₂ φ ψ) andElimR))
+  (orIntroL  : ∀ {φ ψ}, (motive (Axioms.OrInst₁ φ ψ) orIntroL))
+  (orIntroR  : ∀ {φ ψ}, (motive (Axioms.OrInst₂ φ ψ) orIntroR))
+  (axiomC     : ∀ {φ ψ χ}, (motive (Axioms.C φ ψ χ) axiomC))
+  (axiomD     : ∀ {φ ψ χ}, (motive (Axioms.D φ ψ χ) axiomD))
+  (axiomI     : ∀ {φ ψ χ}, (motive (Axioms.I φ ψ χ) axiomI))
+  (efq       : ∀ {φ}, (motive (Axioms.EFQ φ) efq))
+  : ∀ {φ}, (d : H ⊢ φ) → motive φ d := by rintro φ ⟨d⟩; induction d <;> grind;
+
 section
 
 instance : Entailment.HasAxiomSer (HilbertF.F_Ser : HilbertF α) where
@@ -187,6 +211,7 @@ instance : Entailment.HasAxiomRfl (HilbertF.F_Rfl_Tra1 : HilbertF α) where
 instance : Entailment.HasAxiomTra1 (HilbertF.F_Rfl_Tra1 : HilbertF α) where
   axiomTra1! {φ ψ χ} := axm $ by right; simp;
 
+/-
 instance : Entailment.HasAxiomTra1 (HilbertF.F_Tra1_Hrd : HilbertF α) where
   axiomTra1! {φ ψ χ} := axm $ by left; simp;
 instance : Entailment.HasAxiomHrd (HilbertF.F_Tra1_Hrd : HilbertF α) where
@@ -198,6 +223,7 @@ instance : Entailment.HasAxiomTra1 (HilbertF.F_Rfl_Tra1_Hrd : HilbertF α) where
   axiomTra1! {φ ψ χ} := axm $ by left; right; simp;
 instance : Entailment.HasAxiomHrd (HilbertF.F_Rfl_Tra1_Hrd : HilbertF α) where
   axiomHrd! {φ} := axm $ by right; simp;
+-/
 
 end
 
@@ -231,8 +257,10 @@ protected abbrev F_Sym          : Logic α := HilbertF.F_Sym.logic
 protected abbrev F_Rfl_Sym      : Logic α := HilbertF.F_Rfl_Sym.logic
 protected abbrev F_Tra1         : Logic α := HilbertF.F_Tra1.logic
 protected abbrev F_Rfl_Tra1     : Logic α := HilbertF.F_Rfl_Tra1.logic
+/-
 protected abbrev F_Tra1_Hrd     : Logic α := HilbertF.F_Tra1_Hrd.logic
 protected abbrev F_Rfl_Tra1_Hrd : Logic α := HilbertF.F_Rfl_Tra1_Hrd.logic
+-/
 
 end LO.Propositional
 
