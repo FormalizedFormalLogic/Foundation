@@ -1,6 +1,6 @@
 module
 
-public import Foundation.Propositional.FMT.Logic.VF
+public import Foundation.Propositional.FMT.Hilbert.VF
 
 @[expose] public section
 
@@ -33,26 +33,32 @@ lemma valid_axiomO_f (h : F ⊧ ∼⊤) : F ⊧ ∼∼⊤ := by
   haveI := isDNFSerial_of_valid_axiomSer h;
   apply valid_axiomSer_of_isDNFSerial;
 
+section
+
+variable {S} [Entailment S (Formula ℕ)]
+         {𝓢 : S}
+
 open ConsistentSaturatedHintikkaPair in
 open Formula.FMT in
-instance isDNFSerial_HintikkaModel {L}
-  [Entailment.VF L] [Entailment.Disjunctive L] [Entailment.Consistent L]
-  [Entailment.HasAxiomSer L]
-  : (HintikkaModel L φ).toFrame.IsNTSerial where
-  nt_serial := by
-    intro x;
-    use x;
-    intro hs;
-    left;
-    apply iff_mem₂_not_mem₁.mpr;
-    by_contra hC;
-    apply no_bot (H := x);
-    apply imp_closed hs ?_ Entailment.Corsi.axiomSer;
-    . grind;
-    . grind;
+instance isDNFSerial_HintikkaModel
+  [Entailment.VF 𝓢] [Entailment.Disjunctive 𝓢] [Entailment.Consistent 𝓢]
+  [Entailment.HasAxiomSer 𝓢]
+  : (HintikkaModel 𝓢 φ).toFrame.IsNTSerial := by
+  constructor;
+  intro x;
+  use x;
+  intro hs;
+  left;
+  apply iff_mem₂_not_mem₁.mpr;
+  by_contra hC;
+  apply no_bot (H := x);
+  apply imp_closed hs ?_ Entailment.Corsi.axiomSer;
+  . grind;
+  . grind;
+
+end
 
 end FMT
-
 
 end LO.Propositional
 end

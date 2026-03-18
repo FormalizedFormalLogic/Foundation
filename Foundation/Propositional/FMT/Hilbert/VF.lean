@@ -1,7 +1,7 @@
 module
 
 public import Foundation.Propositional.FMT.Completeness
-
+public import Foundation.Propositional.Hilbert.VF.Disjunctive
 
 @[expose] public section
 
@@ -12,8 +12,6 @@ open FMT
 
 namespace FMT
 
-protected abbrev FrameClass.VF : FMT.FrameClass := Set.univ
-
 abbrev trivialFrame : FMT.Frame where
   World := Unit
   Rel := λ _ _ _ => True
@@ -23,32 +21,29 @@ abbrev trivialFrame : FMT.Frame where
 end FMT
 
 
-namespace VF
+namespace HilbertVF.VF
 
-open Hilbert.VF.FMT
+open HilbertVF.FMT
+open Formula.FMT
 
-instance FMT.sound : Sound Propositional.VF FrameClass.VF := by
+instance soundFMT : Sound HilbertVF.VF (Set.univ : FMT.FrameClass) := by
   apply instFrameClassSound;
   constructor;
   tauto;
 
-
-open Formula.FMT
-
-instance : Entailment.Consistent Propositional.VF := consistent_of_sound_frameclass FrameClass.VF $ by
+instance : Entailment.Consistent (HilbertVF.VF : HilbertVF ℕ) := consistent_of_sound_frameclass (Set.univ : FMT.FrameClass) $ by
   use FMT.trivialFrame;
-  apply Set.mem_setOf_eq.mpr;
   simp;
 
-instance FMT.complete : Complete Propositional.VF FrameClass.VF := by
+instance completeFMT : Complete (HilbertVF.VF : HilbertVF ℕ) (Set.univ : FMT.FrameClass) := by
   constructor;
   intro φ h;
   apply FMT.provable_of_validOnHintikkaModel;
   apply h;
   tauto;
 
-lemma unprovable_top_dntop : Propositional.VF ⊬ ⊤ 🡘 ∼∼⊤ := by
-  apply Sound.not_provable_of_countermodel (𝓜 := FMT.FrameClass.VF);
+lemma unprovable_top_dntop : (HilbertVF.VF : HilbertVF ℕ) ⊬ ⊤ 🡘 ∼∼⊤ := by
+  apply soundFMT.not_provable_of_countermodel;
   apply FMT.not_validOnFrameClass_of_exists_model_world;
   let M : FMT.Model := {
     World := Fin 3,
@@ -62,28 +57,26 @@ lemma unprovable_top_dntop : Propositional.VF ⊬ ⊤ 🡘 ∼∼⊤ := by
     rooted := by grind
     Val _ _ := True
   };
-  use M, 0
+  use M, 0;
   constructor;
   . tauto;
   . suffices ∃ x y : M, x ≺[∼∼⊤] y ∧ ∀ (x : M), ¬y ≺[∼⊤] x by simpa [M] using this;
     use 1, 2;
     grind;
 
-open Formula.FMT
-
-end VF
+end HilbertVF.VF
 
 open Formula.FMT in
 open Entailment.Corsi in
-instance : Propositional.VF ⪱ Propositional.WF := by
+instance : (HilbertVF.VF : HilbertVF ℕ) ⪱ HilbertWF.WF := by
   constructor;
   . apply weakerThan_WF_VF_of_provable_axioms
-    simp [Entailment.ProvableSet]
+    tauto;
   . apply Entailment.not_weakerThan_iff.mpr;
     use (⊤ 🡒 #0 ⋏ #1) 🡘 (⊤ 🡒 #1 ⋏ #0);
     constructor;
     . exact ruleE equivId $ andIR K_comm K_comm
-    . apply Sound.not_provable_of_countermodel (𝓜 := FMT.FrameClass.VF);
+    . apply HilbertVF.VF.soundFMT.not_provable_of_countermodel;
       apply FMT.not_validOnFrameClass_of_exists_model_world;
       use {
         World := Fin 3,
@@ -101,7 +94,6 @@ instance : Propositional.VF ⪱ Propositional.WF := by
       . tauto;
       . simp;
         grind;
-
 
 end LO.Propositional
 end

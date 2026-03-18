@@ -2,8 +2,7 @@ module
 
 public import Foundation.Modal.PLoN.Logic.N
 public import Foundation.Modal.Logic.SumNormal
-public import Foundation.Propositional.FMT.Logic
--- public import Foundation.Propositional.Kripke.Logic.Cl
+public import Foundation.Propositional.FMT.Hilbert.VF
 
 @[expose] public section
 
@@ -118,10 +117,10 @@ lemma provable_gödelWeakTranslated_of_provable_VF.lemma {M : PLoN.Model} {w : M
   | _ => dsimp [Formula.PLoN.Forces]; grind;
 
 open provable_gödelWeakTranslated_of_provable_VF in
-lemma provable_gödelWeakTranslated_of_provable_VF : Propositional.VF ⊢ φ → Modal.N ⊢ φᶜ := by
+lemma provable_gödelWeakTranslated_of_provable_VF : φ ∈ Propositional.VF → Modal.N ⊢ φᶜ := by
   contrapose!;
   intro h;
-  apply Propositional.VF.FMT.sound.not_provable_of_countermodel;
+  apply HilbertVF.VF.soundFMT.not_provable_of_countermodel;
   apply Propositional.FMT.not_validOnFrameClass_of_exists_model_world;
   obtain ⟨M, w, _, hφ⟩ := Modal.PLoN.exists_model_world_of_not_validOnFrameClass $ Modal.N.PLoN.complete.exists_countermodel_of_not_provable h;
   use lemma.translate M, .inr w;
@@ -162,10 +161,10 @@ lemma provable_VF_of_provable_gödelWeakTranslated.lemma {M : FMT.Model} {w : M.
   | _ => dsimp [Formula.PLoN.Forces]; grind;
 
 open provable_VF_of_provable_gödelWeakTranslated in
-lemma provable_VF_Ser_of_provable_gödelWeakTranslated : Modal.NP ⊢ φᶜ → Propositional.VF ⊢ φ := by
+lemma provable_VF_Ser_of_provable_gödelWeakTranslated : Modal.NP ⊢ φᶜ → φ ∈ Propositional.VF := by
   contrapose!;
   intro h;
-  obtain ⟨M, x, _, H⟩ := Propositional.FMT.exists_model_world_of_not_validOnFrameClass $ Propositional.VF.FMT.complete.exists_countermodel_of_not_provable h;
+  obtain ⟨M, x, _, H⟩ := Propositional.FMT.exists_model_world_of_not_validOnFrameClass $ HilbertVF.VF.completeFMT.exists_countermodel_of_not_provable h;
   apply Modal.NP.PLoN.sound.not_provable_of_countermodel;
   apply Modal.PLoN.not_validOnFrameClass_of_exists_model_world;
   use lemma.translate M, x;
@@ -174,7 +173,7 @@ lemma provable_VF_Ser_of_provable_gödelWeakTranslated : Modal.NP ⊢ φᶜ → 
   . apply lemma.not.mpr H;
 
 lemma VF_modal_companion_TFAE : [
-  Propositional.VF ⊢ φ,
+  φ ∈ Propositional.VF,
   Modal.N ⊢ φᶜ,
   Modal.NP ⊢ φᶜ
 ].TFAE := by

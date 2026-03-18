@@ -442,13 +442,12 @@ public import Foundation.Propositional.Entailment.KreiselPutnam
 public import Foundation.Propositional.Entailment.LC
 public import Foundation.Propositional.Entailment.Minimal.Basic
 public import Foundation.Propositional.Entailment.Scott
-public import Foundation.Propositional.FMT.AxiomSer
+public import Foundation.Propositional.FMT.Axiom.Ser
 public import Foundation.Propositional.FMT.Basic
 public import Foundation.Propositional.FMT.Completeness
-public import Foundation.Propositional.FMT.Hilbert
-public import Foundation.Propositional.FMT.Logic
-public import Foundation.Propositional.FMT.Logic.VF
-public import Foundation.Propositional.FMT.Logic.VF_Ser
+public import Foundation.Propositional.FMT.Hilbert.Basic
+public import Foundation.Propositional.FMT.Hilbert.VF
+public import Foundation.Propositional.FMT.Hilbert.VF_Ser
 public import Foundation.Propositional.Formula.Basic
 public import Foundation.Propositional.Formula.NNFormula
 public import Foundation.Propositional.Heyting.Semantics
