@@ -587,6 +587,47 @@ end Complete
 
 end
 
+namespace Entailment
+
+variable (S : Type*) {F : Type*} [Entailment S F]
+
+structure Pullback (f : G → F) : Type _ where
+  forget : S
+
+variable {S}
+
+abbrev pullback (𝓢 : S) (f : G → F) : Pullback S f := ⟨𝓢⟩
+
+instance (f : G → F) : Entailment (Pullback S f) G where
+  Prf := fun 𝓢 φ ↦ 𝓢.forget ⊢! f φ
+
+namespace Pullback
+
+section basics
+
+variable {f : G → F}
+
+omit [Entailment S F] in
+@[simp] lemma pullback_forget (𝓢 : S) : (pullback 𝓢 f).forget = 𝓢 := rfl
+
+@[simp] lemma provable_iff {𝓢 : S} {φ : G} : pullback 𝓢 f ⊢ φ ↔ 𝓢 ⊢ f φ := by rfl
+
+@[simp] lemma unprovable_iff {𝓢 : S} {φ : G} : pullback 𝓢 f ⊬ φ ↔ 𝓢 ⊬ f φ := by rfl
+
+@[simp] lemma provableSet_iff {𝓢 : S} {s : Set G} : pullback 𝓢 f ⊢* s ↔ 𝓢 ⊢* f '' s := by
+  simp [ProvableSet]
+
+@[simp] lemma theory_eq (𝓢 : S) : theory (pullback 𝓢 f) = f ⁻¹' theory 𝓢 := rfl
+
+lemma weakerThan (𝓢 𝓣 : S) (h : 𝓢 ⪯ 𝓣) : pullback 𝓢 f ⪯ pullback 𝓣 f := by
+  simp_all [Entailment.weakerThan_iff, provable_iff]
+
+end basics
+
+end Pullback
+
+end Entailment
+
 end LO
 
 end

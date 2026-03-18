@@ -98,7 +98,7 @@ instance : NegInvolutive Prop where
 class HomClass (F : Type*) (α β : outParam Type*) [LogicalConnective α] [LogicalConnective β] [FunLike F α β] where
   map_top : ∀ (f : F), f ⊤ = ⊤
   map_bot : ∀ (f : F), f ⊥ = ⊥
-  map_neg : ∀ (f : F) (φ : α), f (∼ φ) = ∼f φ
+  map_neg : ∀ (f : F) (φ : α), f (∼φ) = ∼f φ
   map_imply : ∀ (f : F) (φ ψ : α), f (φ ➝ ψ) = f φ ➝ f ψ
   map_and : ∀ (f : F) (φ ψ : α), f (φ ⋏ ψ) = f φ ⋏ f ψ
   map_or  : ∀ (f : F) (φ ψ : α), f (φ ⋎ ψ) = f φ ⋎ f ψ
