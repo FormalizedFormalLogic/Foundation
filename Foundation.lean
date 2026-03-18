@@ -503,9 +503,8 @@ public import Foundation.Propositional.Logic.Letterless_Int_Cl
 public import Foundation.Propositional.Logic.PostComplete
 public import Foundation.Propositional.Logic.Superintuitionistic
 public import Foundation.Propositional.Neighborhood.NB.Basic
-public import Foundation.Propositional.Neighborhood.NB.Hilbert
-public import Foundation.Propositional.Neighborhood.NB.Logic
-public import Foundation.Propositional.Neighborhood.NB.Logic.WF
+public import Foundation.Propositional.Neighborhood.NB.Hilbert.Basic
+public import Foundation.Propositional.Neighborhood.NB.Hilbert.WF
 public import Foundation.Propositional.Slash
 public import Foundation.Propositional.Tait.Calculus
 public import Foundation.Propositional.Translation

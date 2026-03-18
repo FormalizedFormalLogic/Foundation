@@ -1,6 +1,6 @@
 module
 
-public import Foundation.Propositional.Neighborhood.NB.Hilbert
+public import Foundation.Propositional.Neighborhood.NB.Hilbert.Basic
 public import Foundation.Propositional.Hilbert.F_WF
 
 
@@ -29,23 +29,23 @@ abbrev trivialFrame : NBNeighborhood.Frame where
 end NBNeighborhood
 
 
-namespace WF
+namespace HilbertWF.WF
 
-open Hilbert.WF.NBNeighborhood
+open HilbertWF.NBNeighborhood
 
-instance NBNeighborhood.sound : Sound Propositional.WF FrameClass.WF := by
+instance soundNBNeighborhood : Sound (HilbertWF.WF : HilbertWF ℕ) (Set.univ : NBNeighborhood.FrameClass) := by
   apply instFrameClassSound;
   constructor;
   tauto;
 
-instance : Entailment.Consistent Propositional.WF := consistent_of_sound_frameclass FrameClass.WF $ by
+instance : Entailment.Consistent (HilbertWF.WF : HilbertWF ℕ) := consistent_of_sound_frameclass FrameClass.WF $ by
   use NBNeighborhood.trivialFrame;
   apply Set.mem_setOf_eq.mpr;
   simp;
 
-open Formula.NBNeighborhood
+open Formula
 
-lemma unprovable_AxiomC : Propositional.WF ⊬ Axioms.C #0 #1 #2 := by
+lemma unprovable_AxiomC : HilbertWF.WF ⊬ Axioms.C #0 #1 #2 := by
   apply Sound.not_provable_of_countermodel (𝓜 := NBNeighborhood.FrameClass.WF);
   apply NBNeighborhood.not_validOnFrameClass_of_exists_model_world;
   use {
@@ -75,7 +75,7 @@ lemma unprovable_AxiomC : Propositional.WF ⊬ Axioms.C #0 #1 #2 := by
   }, 0;
   constructor;
   . tauto;
-  . apply Forces.not_def_imp.mpr;
+  . apply Formula.NBNeighborhood.Forces.not_def_imp.mpr;
     apply Set.not_subset_iff_exists_mem_notMem.mpr;
     use 1;
     constructor;
@@ -83,7 +83,7 @@ lemma unprovable_AxiomC : Propositional.WF ⊬ Axioms.C #0 #1 #2 := by
     . rintro (_ | _ | _) <;>
       . simp_all;
 
-lemma unprovable_axiomD : Propositional.WF ⊬ Axioms.D #0 #1 #2 := by
+lemma unprovable_axiomD : HilbertWF.WF ⊬ Axioms.D #0 #1 #2 := by
   apply Sound.not_provable_of_countermodel (𝓜 := NBNeighborhood.FrameClass.WF);
   apply NBNeighborhood.not_validOnFrameClass_of_exists_model_world;
   use {
@@ -113,7 +113,7 @@ lemma unprovable_axiomD : Propositional.WF ⊬ Axioms.D #0 #1 #2 := by
   }, 0;
   constructor;
   . tauto;
-  . apply Forces.not_def_imp.mpr;
+  . apply Formula.NBNeighborhood.Forces.not_def_imp.mpr;
     apply Set.not_subset_iff_exists_mem_notMem.mpr;
     use 1;
     constructor;
@@ -126,7 +126,7 @@ lemma unprovable_axiomD : Propositional.WF ⊬ Axioms.D #0 #1 #2 := by
         . simpa;
       grind;
 
-lemma unprovable_AxiomI : Propositional.WF ⊬ Axioms.I #0 #1 #2 := by
+lemma unprovable_AxiomI : HilbertWF.WF ⊬ Axioms.I #0 #1 #2 := by
   apply Sound.not_provable_of_countermodel (𝓜 := NBNeighborhood.FrameClass.WF);
   apply NBNeighborhood.not_validOnFrameClass_of_exists_model_world;
   use {
@@ -156,7 +156,7 @@ lemma unprovable_AxiomI : Propositional.WF ⊬ Axioms.I #0 #1 #2 := by
   }, 0;
   constructor;
   . tauto;
-  . apply Forces.not_def_imp.mpr;
+  . apply Formula.NBNeighborhood.Forces.not_def_imp.mpr;
     apply Set.not_subset_iff_exists_mem_notMem.mpr;
     use 1;
     constructor;
@@ -164,20 +164,19 @@ lemma unprovable_AxiomI : Propositional.WF ⊬ Axioms.I #0 #1 #2 := by
     . suffices ({0, 1} : Set (Fin 2)) ≠ {0} by apply not_or.mpr; simp_all;
       grind;
 
-end WF
+end HilbertWF.WF
 
 
-
-instance : Propositional.WF ⪱ Propositional.F := by
+instance : (HilbertWF.WF : HilbertWF ℕ) ⪱ HilbertF.F := by
   constructor;
   . apply weakerThan_WF_Corsi_of_provable_axioms;
-    simp [Entailment.ProvableSet]
+    tauto;
   . apply Entailment.not_weakerThan_iff.mpr;
     use Axioms.C #0 #1 #2;
     constructor;
     . simp;
-    . apply WF.unprovable_AxiomC;
-
+    . apply HilbertWF.WF.unprovable_AxiomC;
 
 end LO.Propositional
+
 end

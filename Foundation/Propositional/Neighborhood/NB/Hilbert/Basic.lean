@@ -1,24 +1,24 @@
 module
 
-public import Foundation.Propositional.Hilbert.F.Basic
-public import Foundation.Propositional.Kripke2.Basic
+public import Foundation.Propositional.Hilbert.WF.Basic
+public import Foundation.Propositional.Neighborhood.NB.Basic
 
 @[expose] public section
 
 namespace LO.Propositional
 
-open Kripke2
+open NBNeighborhood
 open Formula
-open Formula.Kripke2
+open Formula.NBNeighborhood
 
-namespace Hilbert.F.Kripke2
+namespace HilbertWF.NBNeighborhood
 
-variable {H H₁ H₂ : HilbertF ℕ} {φ : Formula ℕ}
+variable {H H₁ H₂ : HilbertWF ℕ} {Γ : Set (Formula ℕ)} {φ : Formula ℕ}
 
 
 section FrameClass
 
-variable {C C₁ C₂ : Kripke2.FrameClass}
+variable {C C₁ C₂ : NBNeighborhood.FrameClass}
 
 lemma soundness_frameclass (hV : C ⊧* H) : H ⊢ φ → C ⊧ φ := by
   intro hφ F hF;
@@ -28,7 +28,7 @@ lemma soundness_frameclass (hV : C ⊧* H) : H ⊢ φ → C ⊧ φ := by
 
 instance instFrameClassSound (hV : C ⊧* H) : Sound H C := ⟨fun {_} => soundness_frameclass hV⟩
 
-lemma consistent_of_sound_frameclass (C : Kripke2.FrameClass) (hC : Set.Nonempty C) [sound : Sound H C] : Entailment.Consistent H := by
+lemma consistent_of_sound_frameclass (C : NBNeighborhood.FrameClass) (hC : Set.Nonempty C) [sound : Sound H C] : Entailment.Consistent H := by
   apply Entailment.Consistent.of_unprovable (φ := ⊥);
   apply not_imp_not.mpr sound.sound;
   apply Semantics.set_models_iff.not.mpr;
@@ -37,7 +37,7 @@ lemma consistent_of_sound_frameclass (C : Kripke2.FrameClass) (hC : Set.Nonempty
   use F;
   grind;
 
-lemma weakerThan_of_subset_frameClass (C₁ C₂ : Kripke2.FrameClass) (hC : C₂ ⊆ C₁) [Sound H₁ C₁] [Complete H₂ C₂] : H₁ ⪯ H₂ := by
+lemma weakerThan_of_subset_frameClass (C₁ C₂ : NBNeighborhood.FrameClass) (hC : C₂ ⊆ C₁) [Sound H₁ C₁] [Complete H₂ C₂] : H₁ ⪯ H₂ := by
   apply Entailment.weakerThan_iff.mpr;
   intro φ hφ;
   apply Complete.complete (𝓜 := C₂);
@@ -50,7 +50,7 @@ end FrameClass
 
 section ModelClass
 
-variable {C C₁ C₂ : Kripke2.ModelClass}
+variable {C C₁ C₂ : NBNeighborhood.ModelClass}
 
 lemma soundness_modelclass (hV : C ⊧* H) : H ⊢ φ → C ⊧ φ := by
   intro hφ M hM;
@@ -60,7 +60,7 @@ lemma soundness_modelclass (hV : C ⊧* H) : H ⊢ φ → C ⊧ φ := by
 
 instance instModelClassSound (hV : C ⊧* H) : Sound H C := ⟨fun {_} => soundness_modelclass hV⟩
 
-lemma consistent_of_sound_modelclass (C : Kripke2.ModelClass) (hC : Set.Nonempty C) [sound : Sound H C] : Entailment.Consistent H := by
+lemma consistent_of_sound_modelclass (C : NBNeighborhood.ModelClass) (hC : Set.Nonempty C) [sound : Sound H C] : Entailment.Consistent H := by
   apply Entailment.Consistent.of_unprovable (φ := ⊥);
   apply not_imp_not.mpr sound.sound;
   apply Semantics.set_models_iff.not.mpr;
@@ -72,7 +72,7 @@ lemma consistent_of_sound_modelclass (C : Kripke2.ModelClass) (hC : Set.Nonempty
 end ModelClass
 
 
-end Hilbert.F.Kripke2
+end HilbertWF.NBNeighborhood
 
 
 end LO.Propositional
