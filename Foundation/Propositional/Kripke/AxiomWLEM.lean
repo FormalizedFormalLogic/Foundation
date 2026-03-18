@@ -21,7 +21,8 @@ section definability
 
 variable {F : Kripke.Frame}
 
-lemma validate_axiomWLEM_of_isPiecewiseStronglyConvergent [F.IsPiecewiseStronglyConvergent] : F ⊧ (Axioms.WLEM (.atom 0)) := by
+@[simp, grind .]
+lemma validate_axiomWLEM_of_isPiecewiseStronglyConvergent [F.IsPiecewiseStronglyConvergent] : F ⊧ (Axioms.WLEM φ) := by
   have := F.ps_convergent;
   revert this;
   contrapose!;

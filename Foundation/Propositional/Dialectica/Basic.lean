@@ -1,6 +1,6 @@
 module
 
-public import Foundation.Propositional.Hilbert.Standard.Basic
+public import Foundation.Propositional.Hilbert.Minimal.Basic
 
 @[expose] public section
 

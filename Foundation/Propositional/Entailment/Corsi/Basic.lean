@@ -142,6 +142,7 @@ alias efq := Entailment.efq!
 attribute [simp, grind .]
   orIntroL orIntroR
   andElimL andElimR
+  efq
 
 alias A_intro_left := Entailment.A!_intro_left
 alias A_intro_right := Entailment.A!_intro_right
