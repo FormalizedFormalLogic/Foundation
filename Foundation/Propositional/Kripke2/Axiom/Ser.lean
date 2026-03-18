@@ -1,6 +1,6 @@
 module
 
-public import Foundation.Propositional.Kripke2.FTheory
+public import Foundation.Propositional.Kripke2.Basic
 public import Foundation.Vorspiel.Rel.Serial
 
 @[expose] public section
@@ -36,16 +36,6 @@ lemma isSerial_of_valid_axiomSer (h : F ⊧ Axioms.Ser) : F.IsSerial := by
   constructor;
   intro x;
   simpa [Satisfies] using @h (λ v a => True) F.root x F.rooted;
-
-instance [Entailment.F L] [Entailment.HasAxiomSer L] [Entailment.Disjunctive L] : Frame.IsSerial (canonicalModel L).toFrame where
-  serial := by
-    rintro T;
-    obtain ⟨U, _, _, _⟩ := FTheory.lindenbaum (T := T.toFTheory) $ show ∼⊤ ∉ T.theory by
-      by_contra hC;
-      apply T.no_bot;
-      apply T.imp_closed ?_ hC;
-      exact Entailment.Corsi.axiomSer;
-    use U;
 
 end Kripke2
 

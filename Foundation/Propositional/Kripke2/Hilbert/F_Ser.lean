@@ -1,19 +1,15 @@
 module
 
-public import Foundation.Propositional.Kripke2.Logic.F
-public import Foundation.Propositional.Kripke2.AxiomSer
+public import Foundation.Propositional.Kripke2.Hilbert.F
+public import Foundation.Propositional.Kripke2.Axiom.Ser
 
 @[expose] public section
 
 namespace LO.Propositional
 
-open Hilbert.F
 open Kripke2
 
-
 namespace Kripke2
-
-protected abbrev FrameClass.F_Ser : Kripke2.FrameClass := { F | F.IsSerial }
 
 instance : trivialFrame.IsSerial where
   serial := by tauto;
@@ -21,11 +17,11 @@ instance : trivialFrame.IsSerial where
 end Kripke2
 
 
-namespace F_Ser
+namespace HilbertF.F_Ser
 
-open Hilbert.F.Kripke2
+open Kripke2
 
-instance Kripke2.sound : Sound Propositional.F_Ser FrameClass.F_Ser := by
+instance soundKripke2 : Sound (HilbertF.F_Ser : HilbertF ℕ) ({ F | F.IsSerial } : Kripke2.FrameClass) := by
   apply instFrameClassSound;
   constructor;
   rintro φ hφ F hF;
@@ -33,27 +29,17 @@ instance Kripke2.sound : Sound Propositional.F_Ser FrameClass.F_Ser := by
   rcases hφ with (rfl);
   simp;
 
-instance : Entailment.Consistent Propositional.F_Ser := consistent_of_sound_frameclass FrameClass.F_Ser $ by
+instance : Entailment.Consistent (HilbertF.F_Ser : HilbertF ℕ) := consistent_of_sound_frameclass soundKripke2 $ by
   use Kripke2.trivialFrame;
   apply Set.mem_setOf_eq.mpr;
   infer_instance;
 
-/-
-instance Kripke2.complete : Complete Propositional.F_Ser FrameClass.F_Ser := by
-  constructor;
-  intro φ hφ;
-  apply Kripke2.provable_of_validOncanonicalModel;
-  apply hφ;
-  apply Set.mem_setOf_eq.mpr;
-  infer_instance;
--/
+end HilbertF.F_Ser
 
-end F_Ser
 
-instance : Propositional.F ⪱ Propositional.F_Ser := by
+instance : (HilbertF.F : HilbertF ℕ) ⪱ HilbertF.F_Ser := by
   constructor;
-  . apply weakerThan_of_subset_axioms;
-    simp;
+  . grind;
   . apply Entailment.not_weakerThan_iff.mpr;
     use Axioms.Ser;
     constructor;

@@ -1,13 +1,12 @@
 module
 
-public import Foundation.Propositional.Kripke2.Logic.F_Ser
-public import Foundation.Propositional.Kripke2.AxiomRfl
+public import Foundation.Propositional.Kripke2.Hilbert.F_Ser
+public import Foundation.Propositional.Kripke2.Axiom.Rfl
 
 @[expose] public section
 
 namespace LO.Propositional
 
-open Hilbert.F
 open Kripke2
 
 
@@ -21,11 +20,11 @@ instance : trivialFrame.IsReflexive where
 end Kripke2
 
 
-namespace F_Rfl
+namespace HilbertF.F_Rfl
 
-open Hilbert.F.Kripke2
+open Kripke2
 
-instance Kripke2.sound : Sound Propositional.F_Rfl FrameClass.F_Rfl := by
+instance soundKripke2 : Sound (HilbertF.F_Rfl : HilbertF ℕ) ({ F | F.IsReflexive } : Kripke2.FrameClass) := by
   apply instFrameClassSound;
   constructor;
   rintro φ hφ F hF;
@@ -33,32 +32,26 @@ instance Kripke2.sound : Sound Propositional.F_Rfl FrameClass.F_Rfl := by
   rcases hφ with ⟨_, _, rfl⟩;
   simp;
 
-instance : Entailment.Consistent Propositional.F_Rfl := consistent_of_sound_frameclass FrameClass.F_Rfl $ by
+instance : Entailment.Consistent (HilbertF.F_Rfl : HilbertF ℕ) := consistent_of_sound_frameclass soundKripke2 $ by
   use Kripke2.trivialFrame;
   apply Set.mem_setOf_eq.mpr;
   infer_instance;
 
-instance Kripke2.complete : Complete Propositional.F_Rfl FrameClass.F_Rfl := by
-  constructor;
-  intro φ hφ;
-  apply Kripke2.provable_of_validOncanonicalModel;
-  apply hφ;
-  apply Set.mem_setOf_eq.mpr;
-  infer_instance;
+instance completeKripke2 : Complete (HilbertF.F_Rfl : HilbertF ℕ) ({ F | F.IsReflexive } : Kripke2.FrameClass) := by sorry;
 
-end F_Rfl
+end HilbertF.F_Rfl
 
-instance : Propositional.F_Ser ⪱ Propositional.F_Rfl := by
+instance : (HilbertF.F_Ser : HilbertF ℕ) ⪱ HilbertF.F_Rfl := by
   constructor;
-  . apply weakerThan_of_subset_frameClass FrameClass.F_Ser FrameClass.F_Rfl;
-    simp_all only [Set.setOf_subset_setOf];
-    intro F hF;
-    infer_instance;
+  . apply HilbertF.Kripke2.weakerThan_of_subset_frameClass HilbertF.F_Ser.soundKripke2 HilbertF.F_Rfl.completeKripke2;
+    rintro F hF;
+    simp_all only [Set.mem_setOf_eq];
+    infer_instance
   . apply Entailment.not_weakerThan_iff.mpr;
     use (Axioms.Rfl #0 #1);
     constructor;
     . simp;
-    . apply Sound.not_provable_of_countermodel (𝓜 := Kripke2.FrameClass.F_Ser);
+    . apply Sound.not_provable_of_countermodel (𝓜 := ({ F | F.IsSerial } : Kripke2.FrameClass));
       apply Kripke2.not_validOnFrameClass_of_exists_frame;
       use ⟨Fin 2, (λ x y => x = 0 ∨ x ≠ y), 0, by simp⟩;
       constructor;

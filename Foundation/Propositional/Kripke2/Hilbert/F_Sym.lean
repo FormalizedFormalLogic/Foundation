@@ -1,19 +1,15 @@
 module
 
-public import Foundation.Propositional.Kripke2.Logic.F_Ser
-public import Foundation.Propositional.Kripke2.AxiomSym
+public import Foundation.Propositional.Kripke2.Hilbert.F_Ser
+public import Foundation.Propositional.Kripke2.Axiom.Sym
 
 @[expose] public section
 
 namespace LO.Propositional
 
-open Hilbert.F
 open Kripke2
 
-
 namespace Kripke2
-
-protected abbrev FrameClass.F_Sym : Kripke2.FrameClass := { F | F.IsSymmetric }
 
 instance : trivialFrame.IsSymmetric where
   symm := by simp
@@ -21,11 +17,11 @@ instance : trivialFrame.IsSymmetric where
 end Kripke2
 
 
-namespace F_Sym
+namespace HilbertF.F_Sym
 
-open Hilbert.F.Kripke2
+open Kripke2
 
-instance Kripke2.sound : Sound Propositional.F_Sym FrameClass.F_Sym := by
+instance soundKripke2 : Sound (HilbertF.F_Sym : HilbertF ℕ) ({ F | F.IsSymmetric } : Kripke2.FrameClass) := by
   apply instFrameClassSound;
   constructor;
   rintro φ hφ F hF;
@@ -33,17 +29,16 @@ instance Kripke2.sound : Sound Propositional.F_Sym FrameClass.F_Sym := by
   rcases hφ with ⟨_, _, rfl⟩;
   simp;
 
-instance : Entailment.Consistent Propositional.F_Sym := consistent_of_sound_frameclass FrameClass.F_Sym $ by
+instance : Entailment.Consistent (HilbertF.F_Sym : HilbertF ℕ) := consistent_of_sound_frameclass soundKripke2 $ by
   use Kripke2.trivialFrame;
   apply Set.mem_setOf_eq.mpr;
   infer_instance;
 
-end F_Sym
+end HilbertF.F_Sym
 
-instance : Propositional.F ⪱ Propositional.F_Sym := by
+instance : (HilbertF.F : HilbertF ℕ) ⪱ HilbertF.F_Sym := by
   constructor;
-  . apply weakerThan_of_subset_axioms;
-    simp;
+  . grind;
   . apply Entailment.not_weakerThan_iff.mpr;
     use (Axioms.Sym #0 #1);
     constructor;

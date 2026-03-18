@@ -1,7 +1,6 @@
 module
 
-public import Foundation.Propositional.Kripke2.Hilbert
-public import Foundation.Propositional.Kripke2.FTheory
+public import Foundation.Propositional.Kripke2.Hilbert.Basic
 public import Foundation.Propositional.Hilbert.F.Disjunctive
 
 @[expose] public section
@@ -24,30 +23,23 @@ abbrev trivialFrame : Kripke2.Frame where
 end Kripke2
 
 
-namespace F
+namespace HilbertF.F
 
-open Hilbert.F.Kripke2
+open Kripke2
 
-instance Kripke2.sound : Sound Propositional.F FrameClass.F := by
+instance soundKripke2 : Sound (HilbertF.F : HilbertF ℕ) (Set.univ : Kripke2.FrameClass) := by
   apply instFrameClassSound;
   constructor;
   tauto;
 
-instance : Entailment.Consistent Propositional.F := consistent_of_sound_frameclass FrameClass.F $ by
+instance : Entailment.Consistent (HilbertF.F : HilbertF ℕ) := consistent_of_sound_frameclass soundKripke2 $ by
   use Kripke2.trivialFrame;
   apply Set.mem_setOf_eq.mpr;
   simp;
 
-instance Kripke2.complete : Complete Propositional.F FrameClass.F := by
-  constructor;
-  intro φ hφ;
-  apply Kripke2.provable_of_validOncanonicalModel;
-  apply hφ;
-  tauto;
-
 open Formula.Kripke2 in
-lemma unprovable_noncontradiction : (Propositional.F ⊬ ∼((.atom 0) ⋏ ∼(.atom 0))) := by
-  apply Sound.not_provable_of_countermodel (𝓜 := Kripke2.FrameClass.F);
+lemma unprovable_noncontradiction : (HilbertF.F ⊬ ∼((.atom 0) ⋏ ∼(.atom 0))) := by
+  apply soundKripke2.not_provable_of_countermodel;
   apply Kripke2.not_validOnFrameClass_of_exists_frame;
   use ⟨Fin 2, (λ x y => x = 0), 0, by omega⟩;
   constructor;
@@ -56,9 +48,7 @@ lemma unprovable_noncontradiction : (Propositional.F ⊬ ∼((.atom 0) ⋏ ∼(.
     use (λ _ _ => True), 0;
     simp [Satisfies, Frame.Rel'];
 
-end F
-
-
+end HilbertF.F
 
 end LO.Propositional
 end

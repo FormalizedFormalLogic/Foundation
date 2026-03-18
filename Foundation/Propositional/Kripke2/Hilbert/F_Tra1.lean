@@ -1,13 +1,12 @@
 module
 
-public import Foundation.Propositional.Kripke2.Logic.F_Ser
-public import Foundation.Propositional.Kripke2.AxiomTra
+public import Foundation.Propositional.Kripke2.Hilbert.F_Ser
+public import Foundation.Propositional.Kripke2.Axiom.Tra
 
 @[expose] public section
 
 namespace LO.Propositional
 
-open Hilbert.F
 open Kripke2
 
 
@@ -21,11 +20,11 @@ instance : trivialFrame.IsTransitive where
 end Kripke2
 
 
-namespace F_Tra1
+namespace HilbertF.F_Tra1
 
-open Hilbert.F.Kripke2
+open Kripke2
 
-instance Kripke2.sound : Sound Propositional.F_Tra1 FrameClass.F_Tra1 := by
+instance soundKripke2 : Sound (HilbertF.F_Tra1 : HilbertF ℕ) ({ F | F.IsTransitive } : Kripke2.FrameClass) := by
   apply instFrameClassSound;
   constructor;
   rintro φ hφ F hF;
@@ -33,7 +32,7 @@ instance Kripke2.sound : Sound Propositional.F_Tra1 FrameClass.F_Tra1 := by
   rcases hφ with ⟨_, _, _, rfl⟩;
   simp;
 
-instance : Entailment.Consistent Propositional.F_Tra1 := consistent_of_sound_frameclass FrameClass.F_Tra1 $ by
+instance : Entailment.Consistent (HilbertF.F_Tra1 : HilbertF ℕ) := consistent_of_sound_frameclass soundKripke2 $ by
   use Kripke2.trivialFrame;
   apply Set.mem_setOf_eq.mpr;
   infer_instance;
@@ -48,12 +47,11 @@ instance Kripke2.complete : Complete Propositional.F_Tra1 FrameClass.F_Tra1 := b
   infer_instance;
 -/
 
-end F_Tra1
+end HilbertF.F_Tra1
 
-instance : Propositional.F ⪱ Propositional.F_Tra1 := by
+instance : (HilbertF.F : HilbertF ℕ) ⪱ HilbertF.F_Tra1 := by
   constructor;
-  . apply weakerThan_of_subset_axioms;
-    simp;
+  . grind;
   . apply Entailment.not_weakerThan_iff.mpr;
     use (Axioms.Tra1 #0 #1 #2);
     constructor;

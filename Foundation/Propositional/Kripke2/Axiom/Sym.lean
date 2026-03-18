@@ -1,6 +1,6 @@
 module
 
-public import Foundation.Propositional.Kripke2.AxiomSer
+public import Foundation.Propositional.Kripke2.Axiom.Ser
 
 @[expose] public section
 

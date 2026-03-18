@@ -1,7 +1,6 @@
 module
 
-public import Foundation.Propositional.Kripke2.FTheory
-
+public import Foundation.Propositional.Kripke2.Axiom.Ser
 
 @[expose] public section
 
@@ -61,14 +60,6 @@ lemma TFAE_IsTransitive : [
   tfae_have 2 → 1 := IsTransitive_of_valid_axiomTra₁
   tfae_have 3 → 1 := IsTransitive_of_valid_axiomTra₂
   tfae_finish;
-
-instance [Entailment.F L] [Entailment.HasAxiomTra1 L] [Entailment.Disjunctive L] : Frame.IsTransitive (canonicalModel L).toFrame where
-  trans := by
-    rintro T U V RTU RUV φ ψ hφψ hφ;
-    apply RUV (RTU ?_ (show ⊤ ∈ U.theory by simp)) hφ;
-    apply T.imp_closed (φ := φ 🡒 ψ);
-    . exact Entailment.Corsi.axiomTra1;
-    . simpa;
 
 end Kripke2
 

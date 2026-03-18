@@ -11,7 +11,7 @@ open Kripke2
 open Formula
 open Formula.Kripke2
 
-namespace Hilbert.F.Kripke2
+namespace HilbertF.Kripke2
 
 variable {H H₁ H₂ : HilbertF ℕ} {φ : Formula ℕ}
 
@@ -28,7 +28,7 @@ lemma soundness_frameclass (hV : C ⊧* H) : H ⊢ φ → C ⊧ φ := by
 
 instance instFrameClassSound (hV : C ⊧* H) : Sound H C := ⟨fun {_} => soundness_frameclass hV⟩
 
-lemma consistent_of_sound_frameclass (C : Kripke2.FrameClass) (hC : Set.Nonempty C) [sound : Sound H C] : Entailment.Consistent H := by
+lemma consistent_of_sound_frameclass (sound : Sound H C) (hC : Set.Nonempty C) : Entailment.Consistent H := by
   apply Entailment.Consistent.of_unprovable (φ := ⊥);
   apply not_imp_not.mpr sound.sound;
   apply Semantics.set_models_iff.not.mpr;
@@ -37,12 +37,12 @@ lemma consistent_of_sound_frameclass (C : Kripke2.FrameClass) (hC : Set.Nonempty
   use F;
   grind;
 
-lemma weakerThan_of_subset_frameClass (C₁ C₂ : Kripke2.FrameClass) (hC : C₂ ⊆ C₁) [Sound H₁ C₁] [Complete H₂ C₂] : H₁ ⪯ H₂ := by
+lemma weakerThan_of_subset_frameClass (sound : Sound H₁ C₁) (complete : Complete H₂ C₂) (hC : C₂ ⊆ C₁) : H₁ ⪯ H₂ := by
   apply Entailment.weakerThan_iff.mpr;
   intro φ hφ;
-  apply Complete.complete (𝓜 := C₂);
+  apply complete.complete;
   intro F hF;
-  apply Sound.sound (𝓢 := H₁) (𝓜 := C₁) hφ;
+  apply sound.sound hφ;
   apply hC hF;
 
 end FrameClass
@@ -60,7 +60,7 @@ lemma soundness_modelclass (hV : C ⊧* H) : H ⊢ φ → C ⊧ φ := by
 
 instance instModelClassSound (hV : C ⊧* H) : Sound H C := ⟨fun {_} => soundness_modelclass hV⟩
 
-lemma consistent_of_sound_modelclass (C : Kripke2.ModelClass) (hC : Set.Nonempty C) [sound : Sound H C] : Entailment.Consistent H := by
+lemma consistent_of_sound_modelclass (sound : Sound H C) (hC : Set.Nonempty C) : Entailment.Consistent H := by
   apply Entailment.Consistent.of_unprovable (φ := ⊥);
   apply not_imp_not.mpr sound.sound;
   apply Semantics.set_models_iff.not.mpr;
@@ -72,7 +72,7 @@ lemma consistent_of_sound_modelclass (C : Kripke2.ModelClass) (hC : Set.Nonempty
 end ModelClass
 
 
-end Hilbert.F.Kripke2
+end HilbertF.Kripke2
 
 
 end LO.Propositional
