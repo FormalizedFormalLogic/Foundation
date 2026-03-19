@@ -38,7 +38,7 @@ def toStr [ToString α] : Litform α → String
   |      ∼φ => "(¬" ++ toStr φ ++ ")"
   |   φ ⋏ ψ => "(" ++ toStr φ ++ " ∧ " ++ toStr ψ ++ ")"
   |   φ ⋎ ψ => "(" ++ toStr φ ++ " ∨ "  ++ toStr ψ ++ ")"
-  |   φ ➝ ψ => "(" ++ toStr φ ++ " → "  ++ toStr ψ ++ ")"
+  |   φ 🡒 ψ => "(" ++ toStr φ ++ " → "  ++ toStr ψ ++ ")"
   | iff φ ψ => "(" ++ toStr φ ++ " ↔ "  ++ toStr ψ ++ ")"
 
 instance [ToString α] : ToString (Litform α) := ⟨toStr⟩
@@ -51,7 +51,7 @@ def format [Repr α] : Litform α → Format
   |      ∼φ => s!"(¬{format φ})"
   |   φ ⋏ ψ => s!"({format φ} ∧ {format ψ})"
   |   φ ⋎ ψ => s!"({format φ} ∨ {format ψ})"
-  |   φ ➝ ψ => s!"({format φ} → {format ψ})"
+  |   φ 🡒 ψ => s!"({format φ} → {format ψ})"
   | iff φ ψ => s!"({format φ} ↔ {format ψ})"
 
 instance [Repr α] : Repr (Litform α) := ⟨fun t _ ↦ format t⟩
@@ -71,8 +71,8 @@ abbrev toExpr : Lit → Q($F)
   |   φ ⋏ ψ => q($(toExpr φ) ⋏ $(toExpr ψ))
   |   φ ⋎ ψ => q($(toExpr φ) ⋎ $(toExpr ψ))
   |      ∼φ => q(∼$(toExpr φ))
-  |   φ ➝ ψ => q($(toExpr φ) ➝ $(toExpr ψ))
-  | iff φ ψ => q($(toExpr φ) ⭤ $(toExpr ψ))
+  |   φ 🡒 ψ => q($(toExpr φ) 🡒 $(toExpr ψ))
+  | iff φ ψ => q($(toExpr φ) 🡘 $(toExpr ψ))
 
 partial def summands {α : Q(Type $u)} (inst : Q(Add $α)) :
     Q($α) → MetaM (List Q($α))
@@ -84,8 +84,8 @@ partial def denote : Q($F) → MetaM Lit
   |       ~q(⊥) => return ⊥
   | ~q($φ ⋏ $ψ) => return (←denote φ) ⋏ (←denote ψ)
   | ~q($φ ⋎ $ψ) => return (←denote φ) ⋎ (←denote ψ)
-  | ~q($φ ➝ $ψ) => return (←denote φ) ➝ (←denote ψ)
-  | ~q($φ ⭤ $ψ) => return iff (←denote φ) (←denote ψ)
+  | ~q($φ 🡒 $ψ) => return (←denote φ) 🡒 (←denote ψ)
+  | ~q($φ 🡘 $ψ) => return iff (←denote φ) (←denote ψ)
   |     ~q(∼$φ) => return ∼(←denote φ)
   |      ~q($e) => return atom e
 
@@ -96,7 +96,7 @@ partial def denote : Q($F) → MetaM Lit
   |   φ ⋏ ψ => max φ.complexity ψ.complexity + 1
   |   φ ⋎ ψ => max φ.complexity ψ.complexity + 1
   |      ∼φ => φ.complexity + 1
-  |   φ ➝ ψ => max φ.complexity ψ.complexity + 1
+  |   φ 🡒 ψ => max φ.complexity ψ.complexity + 1
   | iff φ ψ => max φ.complexity ψ.complexity + 1
 
 end Litform
@@ -110,7 +110,7 @@ def DEq : Lit → Lit → MetaM Bool
   |         ∼φ,         ∼ψ => return (← DEq φ ψ)
   |    φ₁ ⋏ ψ₁,    φ₂ ⋏ ψ₂ => return (← DEq φ₁ φ₂) && (← DEq ψ₁ ψ₂)
   |    φ₁ ⋎ ψ₁,    φ₂ ⋎ ψ₂ => return (← DEq φ₁ φ₂) && (← DEq ψ₁ ψ₂)
-  |    φ₁ ➝ ψ₁,    φ₂ ➝ ψ₂ => return (← DEq φ₁ φ₂) && (← DEq ψ₁ ψ₂)
+  |    φ₁ 🡒 ψ₁,    φ₂ 🡒 ψ₂ => return (← DEq φ₁ φ₂) && (← DEq ψ₁ ψ₂)
   | .iff φ₁ ψ₁, .iff φ₂ ψ₂ => return (← DEq φ₁ φ₂) && (← DEq ψ₁ ψ₂)
   |          _,          _ => return false
 

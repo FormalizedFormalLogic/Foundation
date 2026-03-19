@@ -67,7 +67,7 @@ def Forces {M : outParam (FMT.Model)} (x : M.World) : Formula ℕ → Prop
   | ⊥      => False
   | φ ⋏ ψ  => Forces x φ ∧ Forces x ψ
   | φ ⋎ ψ  => Forces x φ ∨ Forces x ψ
-  | φ ➝ ψ => ∀ {y}, x ≺[φ ➝ ψ] y → (Forces y φ → Forces y ψ)
+  | φ 🡒 ψ => ∀ {y}, x ≺[φ 🡒 ψ] y → (Forces y φ → Forces y ψ)
 infix:45 " ⊩ " => Forces
 
 @[simp, grind .] abbrev NotForces {M : outParam (FMT.Model)} (x : M.World) (φ : Formula ℕ) : Prop := ¬(x ⊩ φ)
@@ -87,18 +87,18 @@ variable {M : FMT.Model} {x y : M.World} {a : ℕ} {φ ψ χ : Formula ℕ}
 @[grind =] protected lemma def_or  : x ⊩ φ ⋎ ψ ↔ x ⊩ φ ∨ x ⊩ ψ := by simp;
 @[grind =] protected lemma not_def_or : x ⊮ φ ⋎ ψ ↔ x ⊮ φ ∧ x ⊮ ψ := by grind;
 
-@[grind =] protected lemma def_imp  : x ⊩ φ ➝ ψ ↔ ∀ {y}, x ≺[φ ➝ ψ] y → (y ⊩ φ → y ⊩ ψ) := by simp;
-@[grind =] protected lemma not_def_imp : x ⊮ φ ➝ ψ ↔ ∃ y, x ≺[φ ➝ ψ] y ∧ (y ⊩ φ ∧ y ⊮ ψ) := by grind;
+@[grind =] protected lemma def_imp  : x ⊩ φ 🡒 ψ ↔ ∀ {y}, x ≺[φ 🡒 ψ] y → (y ⊩ φ → y ⊩ ψ) := by simp;
+@[grind =] protected lemma not_def_imp : x ⊮ φ 🡒 ψ ↔ ∃ y, x ≺[φ 🡒 ψ] y ∧ (y ⊩ φ ∧ y ⊮ ψ) := by grind;
 
 @[grind =] protected lemma def_neg  : x ⊩ ∼φ ↔ ∀ {y}, x ≺[∼φ] y → y ⊮ φ := by
   apply Iff.trans Forces.def_imp;
   tauto;
 @[grind =] protected lemma not_def_neg : x ⊮ ∼φ ↔ ∃ y, x ≺[∼φ] y ∧ y ⊩ φ := by grind;
 
-@[grind =] protected lemma def_iff : x ⊩ φ ⭤ ψ ↔ ((∀ {y}, x ≺[φ ➝ ψ] y → y ⊩ φ → y ⊩ ψ) ∧ (∀ {y}, x ≺[ψ ➝ φ] y → y ⊩ ψ → y ⊩ φ)) := by
+@[grind =] protected lemma def_iff : x ⊩ φ 🡘 ψ ↔ ((∀ {y}, x ≺[φ 🡒 ψ] y → y ⊩ φ → y ⊩ ψ) ∧ (∀ {y}, x ≺[ψ 🡒 φ] y → y ⊩ ψ → y ⊩ φ)) := by
   apply Iff.trans Forces.def_and;
   grind;
-@[grind =] protected lemma not_def_iff : x ⊮ φ ⭤ ψ ↔ (∃ y, x ≺[φ ➝ ψ] y ∧ (y ⊩ φ ∧ y ⊮ ψ)) ∨ (∃ y, x ≺[ψ ➝ φ] y ∧ (y ⊩ ψ ∧ y ⊮ φ)) := by grind;
+@[grind =] protected lemma not_def_iff : x ⊮ φ 🡘 ψ ↔ (∃ y, x ≺[φ 🡒 ψ] y ∧ (y ⊩ φ ∧ y ⊮ ψ)) ∨ (∃ y, x ≺[ψ 🡒 φ] y ∧ (y ⊩ ψ ∧ y ⊮ φ)) := by grind;
 
 end Forces
 
@@ -136,12 +136,12 @@ attribute [simp high, grind .]
   valid_impId
   valid_efq
 
-@[grind =>] lemma valid_mdp (h₁ : M ⊧ φ ➝ ψ) (h₂ : M ⊧ φ) : M ⊧ ψ := by grind;
-lemma valid_AF (h : M ⊧ φ) : M ⊧ ψ ➝ φ := by grind;
+@[grind =>] lemma valid_mdp (h₁ : M ⊧ φ 🡒 ψ) (h₂ : M ⊧ φ) : M ⊧ ψ := by grind;
+lemma valid_AF (h : M ⊧ φ) : M ⊧ ψ 🡒 φ := by grind;
 lemma valid_AR (h₁ : M ⊧ φ) (h₂ : M ⊧ ψ) : M ⊧ φ ⋏ ψ := by grind;
-lemma valid_RuleD (h₁ : M ⊧ φ ➝ χ) (h₂ : M ⊧ ψ ➝ χ) : M ⊧ φ ⋎ ψ ➝ χ := by grind;
-lemma valid_RuleC (h₁ : M ⊧ φ ➝ ψ) (h₂ : M ⊧ φ ➝ χ) : M ⊧ φ ➝ (ψ ⋏ χ) := by grind;
-lemma valid_RuleI (h₁ : M ⊧ φ ➝ ψ) (h₂ : M ⊧ ψ ➝ χ) : M ⊧ φ ➝ χ := by grind;
+lemma valid_RuleD (h₁ : M ⊧ φ 🡒 χ) (h₂ : M ⊧ ψ 🡒 χ) : M ⊧ φ ⋎ ψ 🡒 χ := by grind;
+lemma valid_RuleC (h₁ : M ⊧ φ 🡒 ψ) (h₂ : M ⊧ φ 🡒 χ) : M ⊧ φ 🡒 (ψ ⋏ χ) := by grind;
+lemma valid_RuleI (h₁ : M ⊧ φ 🡒 ψ) (h₂ : M ⊧ ψ 🡒 χ) : M ⊧ φ 🡒 χ := by grind;
 
 attribute [grind <=]
   valid_AF
@@ -156,20 +156,20 @@ lemma invalid_RuleE :
     World := Fin 2,
     Rel φ x y :=
       match φ with
-      | #0 ➝ #1 => True
-      | #2 ➝ #3 => True
+      | #0 🡒 #1 => True
+      | #2 🡒 #3 => True
       | _ => True,
     root := 0,
     rooted {φ} := by
       match φ with
-      | #0 ➝ #1 => tauto;
-      | #2 ➝ #3 => tauto;
+      | #0 🡒 #1 => tauto;
+      | #2 🡒 #3 => tauto;
       | _ => sorry,
     Val := fun x a => match x with
       | 0 => true
       | 1 => a = 0
   };
-  M ⊧ #0 ⭤ #1 → M ⊧ #2 ⭤ #3 → M ⊭ (#0 ➝ #2) ⭤ (#1 ➝ #3) := by
+  M ⊧ #0 🡘 #1 → M ⊧ #2 🡘 #3 → M ⊭ (#0 🡒 #2) 🡘 (#1 🡒 #3) := by
   intro H₁ H₂;
   apply iff_not_models.mpr;
   sorry;

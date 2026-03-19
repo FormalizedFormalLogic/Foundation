@@ -9,7 +9,7 @@ namespace LO.Axioms
 variable {F : Type*} [LogicalConnective F]
 variable (φ ψ χ : F)
 
-protected abbrev DNE := ∼∼φ ➝ φ
+protected abbrev DNE := ∼∼φ 🡒 φ
 
 end LO.Axioms
 
@@ -23,7 +23,7 @@ class HasAxiomDNE (𝓢 : S)  where
   dne {φ : F} : 𝓢 ⊢! Axioms.DNE φ
 export HasAxiomDNE (dne)
 
-@[simp] lemma dne! [HasAxiomDNE 𝓢] : 𝓢 ⊢ ∼∼φ ➝ φ  := ⟨dne⟩
+@[simp] lemma dne! [HasAxiomDNE 𝓢] : 𝓢 ⊢ ∼∼φ 🡒 φ  := ⟨dne⟩
 
 def of_NN [ModusPonens 𝓢] [HasAxiomDNE 𝓢] (b : 𝓢 ⊢! ∼∼φ) : 𝓢 ⊢! φ := dne ⨀ b
 @[grind ⇒] lemma of_NN! [ModusPonens 𝓢] [HasAxiomDNE 𝓢] (h : 𝓢 ⊢ ∼∼φ) : 𝓢 ⊢ φ := ⟨of_NN h.some⟩

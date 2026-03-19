@@ -15,7 +15,7 @@ instance [HasAxiomLEM 𝓢] : HasAxiomDNE 𝓢 where
     apply deduct';
     exact of_C_of_C_of_A C_id (by
       apply deduct;
-      have nnp : [∼φ, ∼∼φ] ⊢[𝓢]! ∼φ ➝ ⊥ := CO_of_N $ FiniteContext.byAxm;
+      have nnp : [∼φ, ∼∼φ] ⊢[𝓢]! ∼φ 🡒 ⊥ := CO_of_N $ FiniteContext.byAxm;
       have np : [∼φ, ∼∼φ] ⊢[𝓢]! ∼φ := FiniteContext.byAxm;
       exact of_O $ nnp ⨀ np;
     ) $ of lem;

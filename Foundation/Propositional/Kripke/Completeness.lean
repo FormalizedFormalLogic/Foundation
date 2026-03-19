@@ -72,7 +72,7 @@ variable {t : (Kripke.canonicalModel 𝓢).World}
 private lemma truthlemma.himp
   (ihp : ∀ {t : (Kripke.canonicalModel 𝓢).World}, t ⊧ φ ↔ φ ∈ t.1.1)
   (ihq : ∀ {t : (Kripke.canonicalModel 𝓢).World}, t ⊧ ψ ↔ ψ ∈ t.1.1)
-  : t ⊧ φ ➝ ψ ↔ φ ➝ ψ ∈ t.1.1 := by
+  : t ⊧ φ 🡒 ψ ↔ φ 🡒 ψ ∈ t.1.1 := by
   constructor;
   . contrapose;
     intro h;
@@ -80,7 +80,7 @@ private lemma truthlemma.himp
     obtain ⟨t', ⟨h, _⟩⟩ := lindenbaum (𝓢 := 𝓢) (t₀ := (insert φ t.1.1, {ψ})) $ by
       intro Γ Δ hΓ hΔ;
       by_contra hC;
-      apply t.consistent (Γ := Γ.erase φ) (Δ := {φ ➝ ψ}) ?_ ?_;
+      apply t.consistent (Γ := Γ.erase φ) (Δ := {φ 🡒 ψ}) ?_ ?_;
       . simp only [Finset.disj_singleton];
         apply FConj_DT.mpr;
         apply Context.deduct!
@@ -112,11 +112,11 @@ private lemma truthlemma.himp
     have hpq := htt' h;
     apply ihq.mpr;
     apply iff_not_mem₂_mem₁.mp;
-    apply not_mem₂ (Γ := {φ, φ ➝ ψ});
+    apply not_mem₂ (Γ := {φ, φ 🡒 ψ});
     . simp only [Finset.coe_insert, Finset.coe_singleton];
       apply Set.doubleton_subset.mpr;
       tauto;
-    . suffices 𝓢 ⊢ Finset.conj {φ, φ ➝ ψ} ➝ Finset.disj {ψ} by simpa;
+    . suffices 𝓢 ⊢ Finset.conj {φ, φ 🡒 ψ} 🡒 Finset.disj {ψ} by simpa;
       apply CFConj_CDisj!_of_innerMDP (φ := φ) (ψ := ψ) <;> simp;
 
 lemma truthlemma : t ⊧ φ ↔ φ ∈ t.1.1 := by

@@ -59,7 +59,7 @@ def Satisfies (M : Kripke2.Model) (x : M.World) : Formula ℕ → Prop
   | ⊥      => False
   | φ ⋏ ψ  => Satisfies M x φ ∧ Satisfies M x ψ
   | φ ⋎ ψ  => Satisfies M x φ ∨ Satisfies M x ψ
-  | φ ➝ ψ => ∀ {y : M.World}, x ≺ y → (Satisfies M y φ → Satisfies M y ψ)
+  | φ 🡒 ψ => ∀ {y : M.World}, x ≺ y → (Satisfies M y φ → Satisfies M y ψ)
 
 namespace Satisfies
 
@@ -83,8 +83,8 @@ variable {M : Kripke2.Model} {x y : M.World} {a : ℕ} {φ ψ χ : Formula ℕ}
   dsimp [Semantics.NotModels];
   grind;
 
-@[grind =] protected lemma def_imp  : x ⊧ φ ➝ ψ ↔ ∀ {y : M.World}, (x ≺ y) → (y ⊧ φ → y ⊧ ψ) := by simp [Satisfies];
-@[grind =] protected lemma not_def_imp : x ⊭ φ ➝ ψ ↔ ∃ y : M.World, (x ≺ y) ∧ (y ⊧ φ) ∧ (y ⊭ ψ) := by
+@[grind =] protected lemma def_imp  : x ⊧ φ 🡒 ψ ↔ ∀ {y : M.World}, (x ≺ y) → (y ⊧ φ → y ⊧ ψ) := by simp [Satisfies];
+@[grind =] protected lemma not_def_imp : x ⊭ φ 🡒 ψ ↔ ∃ y : M.World, (x ≺ y) ∧ (y ⊧ φ) ∧ (y ⊭ ψ) := by
   dsimp [Semantics.NotModels];
   grind;
 
@@ -276,7 +276,7 @@ attribute [simp high, grind .]
   valid_efq
 
 @[grind ⇒]
-lemma valid_afortiori (h : M ⊧ φ) : M ⊧ ψ ➝ φ := by
+lemma valid_afortiori (h : M ⊧ φ) : M ⊧ ψ 🡒 φ := by
   rintro x y Rxy _;
   apply h;
 
@@ -288,7 +288,7 @@ lemma valid_conjunction_rule (h₁ : M ⊧ φ) (h₂ : M ⊧ ψ) : M ⊧ φ ⋏ 
   . apply h₂;
 
 @[grind ⇒]
-lemma valid_modusponens (h₁ : M ⊧ φ ➝ ψ) (h₂ : M ⊧ φ) : M ⊧ ψ := by
+lemma valid_modusponens (h₁ : M ⊧ φ 🡒 ψ) (h₂ : M ⊧ φ) : M ⊧ ψ := by
   rintro x;
   apply h₁;
   . apply M.rooted;
@@ -296,7 +296,7 @@ lemma valid_modusponens (h₁ : M ⊧ φ ➝ ψ) (h₂ : M ⊧ φ) : M ⊧ ψ :=
 
 lemma invalid_implyS :
   let F : Frame := ⟨Fin 3, (λ x y => x = 0 ∨ (x = 1 ∧ y = 2)), 0, by omega⟩
-  F ⊭ (atom 0) ➝ (atom 1) ➝ (atom 0) := by
+  F ⊭ (atom 0) 🡒 (atom 1) 🡒 (atom 0) := by
   intro F;
   apply ValidOnFrame.iff_not_exists_valuation_world.mpr;
   use (λ a x => match a with | 0 => x = 1 | 1 => x = 0 ∨ x = 2 | _ => False), 0;

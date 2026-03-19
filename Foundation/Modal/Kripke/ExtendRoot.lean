@@ -186,7 +186,7 @@ variable {A : Formula _}
 variable {l : List M.World} {n : ℕ+}
 
 lemma atmost_one_validates_axiomT_in_irrefl_trans_isChain (l_chain : List.IsChain (· ≺ ·) l) :
-    (∀ x ∈ l, x ⊧ □A ➝ A) ∨ (∃! x ∈ l, ¬x ⊧ □A ➝ A) := by
+    (∀ x ∈ l, x ⊧ □A 🡒 A) ∨ (∃! x ∈ l, ¬x ⊧ □A 🡒 A) := by
   apply or_iff_not_imp_left.mpr;
   push_neg;
   rintro ⟨x, x_l, hx⟩;
@@ -205,7 +205,7 @@ lemma atmost_one_validates_axiomT_in_irrefl_trans_isChain (l_chain : List.IsChai
 lemma atmost_one_validates_axiomT_in_irrefl_trans_chain
     (l_chain : List.IsChain (· ≺ ·) l) :
     haveI : Fintype M.World := Fintype.ofFinite _;
-    Finset.card { x | x ∈ l ∧ ¬x ⊧ (□A ➝ A) } ≤ 1 := by
+    Finset.card { x | x ∈ l ∧ ¬x ⊧ (□A 🡒 A) } ≤ 1 := by
   apply Nat.le_one_iff_eq_zero_or_eq_one.mpr;
   rcases atmost_one_validates_axiomT_in_irrefl_trans_isChain (l_chain := l_chain) (A := A) with h | h;
   . left;
@@ -220,13 +220,13 @@ lemma validates_axiomT_set_in_irrefl_trans_chain
     (Γ : Finset (Modal.Formula ℕ))
     (l_length : l.length = Γ.card + 1)
     (l_chain : List.IsChain (· ≺ ·) l) :
-    ∃ x ∈ l, x ⊧ (Γ.image (λ γ => □γ ➝ γ)).conj := by
+    ∃ x ∈ l, x ⊧ (Γ.image (λ γ => □γ 🡒 γ)).conj := by
   haveI : Fintype M.World := Fintype.ofFinite _;
-  let t₁ : Finset M.World := { x | x ∈ l ∧ ∃ A ∈ Γ, ¬x ⊧ (□A ➝ A) };
+  let t₁ : Finset M.World := { x | x ∈ l ∧ ∃ A ∈ Γ, ¬x ⊧ (□A 🡒 A) };
   let t₂ : Finset M.World := l.toFinset;
   have : t₁.card ≤ Γ.card :=
     calc
-      _ = (Finset.biUnion Γ (λ A => { x | x ∈ l ∧ ¬x ⊧ (□A ➝ A) })).card := by
+      _ = (Finset.biUnion Γ (λ A => { x | x ∈ l ∧ ¬x ⊧ (□A 🡒 A) })).card := by
         apply Finset.eq_card_of_eq;
         ext x;
         constructor;
@@ -243,7 +243,7 @@ lemma validates_axiomT_set_in_irrefl_trans_chain
           obtain ⟨_, _, _⟩ := Finset.mem_filter.mp hA;
           apply Finset.mem_filter.mpr;
           tauto;
-      _ ≤ ∑ a ∈ Γ, Finset.card { x | x ∈ l ∧ ¬x ⊧ □a ➝ a } := Finset.card_biUnion_le
+      _ ≤ ∑ a ∈ Γ, Finset.card { x | x ∈ l ∧ ¬x ⊧ □a 🡒 a } := Finset.card_biUnion_le
       _ ≤ Γ.card * 1 := by
         apply Finset.sum_le_card;
         intro A hA;
@@ -286,7 +286,7 @@ variable {M : Model} [M.IsFinite] [M.IsTransitive] [M.IsIrreflexive] [M.IsRooted
 
 lemma inr_satisfies_conj_axiomT_set {Γ : Finset (Modal.Formula ℕ)} :
   letI n : ℕ+ := ⟨Γ.card + 1, by omega⟩;
-  ∃ i : Fin n, Satisfies _ (extend i : M.extendRoot n) (Γ.image (λ γ => □γ ➝ γ)).conj := by
+  ∃ i : Fin n, Satisfies _ (extend i : M.extendRoot n) (Γ.image (λ γ => □γ 🡒 γ)).conj := by
   let n : ℕ+ := ⟨Γ.card + 1, by omega⟩;
   let M' := M.extendRoot n;
   obtain ⟨x, hx₁, hx₂⟩ := @validates_axiomT_set_in_irrefl_trans_chain (M := M')
@@ -304,7 +304,7 @@ lemma inr_satisfies_conj_axiomT_set {Γ : Finset (Modal.Formula ℕ)} :
 
 lemma inr_satisfies_forall_axiomT_set {Γ : Finset (Modal.Formula ℕ)} :
   letI n : ℕ+ := ⟨Γ.card + 1, by omega⟩;
-  ∃ i : Fin n, ∀ γ ∈ Γ, Satisfies _ (extend i : M.extendRoot n) (□γ ➝ γ) := by
+  ∃ i : Fin n, ∀ γ ∈ Γ, Satisfies _ (extend i : M.extendRoot n) (□γ 🡒 γ) := by
   obtain ⟨i, hi⟩ := inr_satisfies_conj_axiomT_set (Γ := Γ) (M := M);
   use i;
   simpa using Satisfies.fconj_def.mp hi;

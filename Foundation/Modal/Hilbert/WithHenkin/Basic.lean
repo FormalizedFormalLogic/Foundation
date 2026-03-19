@@ -13,9 +13,9 @@ open LO.Entailment LO.Modal.Entailment
 
 inductive Hilbert.WithHenkin {α} (Ax : Axiom α) : Logic α
 | axm {φ} (s : Substitution _) : φ ∈ Ax → WithHenkin Ax (φ⟦s⟧)
-| mdp {φ ψ}     : WithHenkin Ax (φ ➝ ψ) → WithHenkin Ax φ → WithHenkin Ax ψ
+| mdp {φ ψ}     : WithHenkin Ax (φ 🡒 ψ) → WithHenkin Ax φ → WithHenkin Ax ψ
 | nec {φ}       : WithHenkin Ax φ → WithHenkin Ax (□φ)
-| henkin {φ}    : WithHenkin Ax (□φ ⭤ φ) → WithHenkin Ax φ
+| henkin {φ}    : WithHenkin Ax (□φ 🡘 φ) → WithHenkin Ax φ
 | implyK φ ψ    : WithHenkin Ax $ Axioms.ImplyK φ ψ
 | implyS φ ψ χ  : WithHenkin Ax $ Axioms.ImplyS φ ψ χ
 | ec φ ψ        : WithHenkin Ax $ Axioms.ElimContra φ ψ
@@ -61,9 +61,9 @@ instance : Logic.Substitution (Hilbert.WithHenkin Ax) where
 protected lemma rec!
   {motive   : (φ : Formula α) → (WithHenkin Ax ⊢ φ) → Sort}
   (axm      : ∀ {φ : Formula α} (s), (h : φ ∈ Ax) → motive (φ⟦s⟧) (by grind))
-  (mdp      : ∀ {φ ψ : Formula α}, {hφψ : (WithHenkin Ax) ⊢ φ ➝ ψ} → {hφ : (WithHenkin Ax) ⊢ φ} → motive (φ ➝ ψ) hφψ → motive φ hφ → motive ψ (hφψ ⨀ hφ))
+  (mdp      : ∀ {φ ψ : Formula α}, {hφψ : (WithHenkin Ax) ⊢ φ 🡒 ψ} → {hφ : (WithHenkin Ax) ⊢ φ} → motive (φ 🡒 ψ) hφψ → motive φ hφ → motive ψ (hφψ ⨀ hφ))
   (nec      : ∀ {φ}, {hφψ : (WithHenkin Ax) ⊢ φ} → motive (φ) hφψ → motive (□φ) (nec! hφψ))
-  (henkin   : ∀ {φ}, {hφψ : (WithHenkin Ax) ⊢ □φ ⭤ φ} → motive (□φ ⭤ φ) hφψ → motive (φ) (henkin! hφψ))
+  (henkin   : ∀ {φ}, {hφψ : (WithHenkin Ax) ⊢ □φ 🡘 φ} → motive (□φ 🡘 φ) hφψ → motive (φ) (henkin! hφψ))
   (implyK   : ∀ {φ ψ}, motive (Axioms.ImplyK φ ψ) $ by simp)
   (implyS   : ∀ {φ ψ χ}, motive (Axioms.ImplyS φ ψ χ) $ by simp)
   (ec       : ∀ {φ ψ}, motive (Axioms.ElimContra φ ψ) $ by simp)

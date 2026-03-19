@@ -1,123 +1,189 @@
 module
 
-public import Foundation.Propositional.Hilbert.Axiom
+public import Foundation.Propositional.Entailment.Corsi
 public import Foundation.Propositional.Logic.Basic
 
 @[expose] public section
 
 namespace LO.Propositional
 
-open Entailment.Corsi
+variable {α : Type*}
 
-variable {α : Type*} {Ax Ax₁ Ax₂ : Axiom α} {φ ψ χ : Formula _}
+structure HilbertVF (α) where
+  schema : Set (Formula α)
+  schema_closed : ∀ φ ∈ schema, ∀ s, φ⟦s⟧ ∈ schema
 
-protected inductive Hilbert.VF (Ax : Axiom α) : Logic α
-| protected axm {φ}                 : φ ∈ Ax → Hilbert.VF Ax φ
-| protected andElimL {φ ψ}          : Hilbert.VF Ax $ Axioms.AndElim₁ φ ψ
-| protected andElimR {φ ψ}          : Hilbert.VF Ax $ Axioms.AndElim₂ φ ψ
-| protected orIntroL {φ ψ}          : Hilbert.VF Ax $ Axioms.OrInst₁ φ ψ
-| protected orIntroR {φ ψ}          : Hilbert.VF Ax $ Axioms.OrInst₂ φ ψ
-| protected distributeAndOr {φ ψ χ} : Hilbert.VF Ax $ Axioms.DistributeAndOr φ ψ χ
-| protected impId {φ}               : Hilbert.VF Ax $ Axioms.ImpId φ
-| protected efq {φ}                 : Hilbert.VF Ax $ Axioms.EFQ φ
-| protected mdp {φ ψ}               : Hilbert.VF Ax (φ ➝ ψ) → Hilbert.VF Ax φ → Hilbert.VF Ax ψ
-| protected af {φ ψ}                : Hilbert.VF Ax φ → Hilbert.VF Ax (ψ ➝ φ)
-| protected andIR {φ ψ}             : Hilbert.VF Ax φ → Hilbert.VF Ax ψ → Hilbert.VF Ax (φ ⋏ ψ)
-| protected ruleC {φ ψ χ}           : Hilbert.VF Ax (φ ➝ ψ) → Hilbert.VF Ax (φ ➝ χ) → Hilbert.VF Ax (φ ➝ (ψ ⋏ χ))
-| protected ruleD {φ ψ χ}           : Hilbert.VF Ax (φ ➝ χ) → Hilbert.VF Ax (ψ ➝ χ) → Hilbert.VF Ax (φ ⋎ ψ ➝ χ)
-| protected ruleI {φ ψ χ}           : Hilbert.VF Ax (φ ➝ ψ) → Hilbert.VF Ax (ψ ➝ χ) → Hilbert.VF Ax (φ ➝ χ)
+namespace HilbertVF
 
-namespace Hilbert.VF
+instance : SetLike (HilbertVF α) (Formula α) where
+  coe := HilbertVF.schema
+  coe_injective' := by intro ⟨A, hA⟩ ⟨B, hB⟩ h; simpa
 
-@[grind ⇒]
-protected lemma axm' (h : φ ∈ Ax) : φ ∈ Hilbert.VF Ax := by apply VF.axm h;
+protected def VF : HilbertVF α := ⟨∅, by grind⟩
+protected def VF_Ser : HilbertVF α := ⟨{ Axioms.Ser }, by grind⟩
 
-@[grind ⇒]
-protected lemma axm'! (h : φ ∈ Ax) : Hilbert.VF Ax ⊢ φ := by
-  apply Logic.iff_provable.mpr;
-  apply VF.axm h;
+end HilbertVF
 
-instance : Entailment.VF (Hilbert.VF Ax) where
-  and₁ := ⟨VF.andElimL⟩
-  and₂ := ⟨VF.andElimR⟩
-  or₁  := ⟨VF.orIntroL⟩
-  or₂  := ⟨VF.orIntroR⟩
-  distributeAndOr! := ⟨VF.distributeAndOr⟩
-  impId! := ⟨VF.impId⟩
-  verum := ⟨VF.impId⟩
-  mdp hφψ hφ := ⟨VF.mdp hφψ.1 hφ.1⟩
-  efq := ⟨VF.efq⟩
-  af! hφ := ⟨VF.af hφ.1⟩
-  andIR! hφ hψ := ⟨VF.andIR hφ.1 hψ.1⟩
-  ruleC! h₁ h₂ := ⟨VF.ruleC h₁.1 h₂.1⟩
-  ruleD! h₁ h₂ := ⟨VF.ruleD h₁.1 h₂.1⟩
-  ruleI! h₁ h₂ := ⟨VF.ruleI h₁.1 h₂.1⟩
 
+inductive HilbertVFProof (Λ : HilbertVF α) : Formula α → Type _
+| axm {φ}                 : φ ∈ Λ → HilbertVFProof Λ φ
+| andElimL {φ ψ}          : HilbertVFProof Λ $ Axioms.AndElim₁ φ ψ
+| andElimR {φ ψ}          : HilbertVFProof Λ $ Axioms.AndElim₂ φ ψ
+| orIntroL {φ ψ}          : HilbertVFProof Λ $ Axioms.OrInst₁ φ ψ
+| orIntroR {φ ψ}          : HilbertVFProof Λ $ Axioms.OrInst₂ φ ψ
+| distributeAndOr {φ ψ χ} : HilbertVFProof Λ $ Axioms.DistributeAndOr φ ψ χ
+| impId {φ}               : HilbertVFProof Λ $ Axioms.ImpId φ
+| efq {φ}                 : HilbertVFProof Λ $ Axioms.EFQ φ
+| mdp {φ ψ}               : HilbertVFProof Λ (φ 🡒 ψ) → HilbertVFProof Λ φ → HilbertVFProof Λ ψ
+| af {φ ψ}                : HilbertVFProof Λ φ → HilbertVFProof Λ (ψ 🡒 φ)
+| andIR {φ ψ}             : HilbertVFProof Λ φ → HilbertVFProof Λ ψ → HilbertVFProof Λ (φ ⋏ ψ)
+| ruleC {φ ψ χ}           : HilbertVFProof Λ (φ 🡒 ψ) → HilbertVFProof Λ (φ 🡒 χ) → HilbertVFProof Λ (φ 🡒 (ψ ⋏ χ))
+| ruleD {φ ψ χ}           : HilbertVFProof Λ (φ 🡒 χ) → HilbertVFProof Λ (ψ 🡒 χ) → HilbertVFProof Λ (φ ⋎ ψ 🡒 χ)
+| ruleI {φ ψ χ}           : HilbertVFProof Λ (φ 🡒 ψ) → HilbertVFProof Λ (ψ 🡒 χ) → HilbertVFProof Λ (φ 🡒 χ)
+
+instance : Entailment (HilbertVF α) (Formula α) := ⟨HilbertVFProof⟩
+
+namespace HilbertVF
+
+open HilbertVFProof
+
+variable (H : HilbertVF α)
+
+instance : Entailment.VF H where
+  and₁             := andElimL
+  and₂             := andElimR
+  or₁              := orIntroL
+  or₂              := orIntroR
+  distributeAndOr! := distributeAndOr
+  impId!           := impId
+  verum            := impId
+  efq              := efq
+  mdp              := mdp
+  af!              := af
+  andIR!           := andIR
+  ruleC!           := ruleC
+  ruleD!           := ruleD
+  ruleI!           := ruleI
+
+variable {H} {H₁ H₂ : HilbertVF α}
+
+alias ofSchema := HilbertVFProof.axm
+@[grind <=] lemma of_schema (h : φ ∈ H) : H ⊢ φ := ⟨ofSchema h⟩
+
+def ofLE (h : H₁ ≤ H₂) : H₁ ⊢! φ → H₂ ⊢! φ
+  | axm h₁          => axm $ h h₁
+  | mdp h₁ h₂       => mdp (ofLE h h₁) (ofLE h h₂)
+  | andElimL        => andElimL
+  | andElimR        => andElimR
+  | orIntroL        => orIntroL
+  | orIntroR        => orIntroR
+  | distributeAndOr => distributeAndOr
+  | efq             => efq
+  | impId           => impId
+  | af h₁           => af (ofLE h h₁)
+  | andIR h₁ h₂     => andIR (ofLE h h₁) (ofLE h h₂)
+  | ruleC h₁ h₂     => ruleC (ofLE h h₁) (ofLE h h₂)
+  | ruleD h₁ h₂     => ruleD (ofLE h h₁) (ofLE h h₂)
+  | ruleI h₁ h₂     => ruleI (ofLE h h₁) (ofLE h h₂)
+
+lemma of_le (h : H₁ ≤ H₂) : H₁ ⊢ φ → H₂ ⊢ φ := λ ⟨hφ⟩ => ⟨ofLE h hφ⟩
+
+@[grind <=]
+lemma weakerThan_of_le (h : H₁ ≤ H₂) : H₁ ⪯ H₂ := Entailment.weakerThan_iff.mpr $ of_le h
+
+def Subst {H : HilbertVF α} (s) : H ⊢! φ → H ⊢! φ⟦s⟧
+  | axm h₁          => axm $ H.schema_closed _ h₁ s
+  | mdp h₁ h₂       => mdp (Subst s h₁) (Subst s h₂)
+  | andElimL        => andElimL
+  | andElimR        => andElimR
+  | orIntroL        => orIntroL
+  | orIntroR        => orIntroR
+  | distributeAndOr => distributeAndOr
+  | efq             => efq
+  | impId           => impId
+  | af h₁           => af (Subst s h₁)
+  | andIR h₁ h₂     => andIR (Subst s h₁) (Subst s h₂)
+  | ruleC h₁ h₂     => ruleC (Subst s h₁) (Subst s h₂)
+  | ruleD h₁ h₂     => ruleD (Subst s h₁) (Subst s h₂)
+  | ruleI h₁ h₂     => ruleI (Subst s h₁) (Subst s h₂)
+
+lemma subst {H : HilbertVF α} (s) : H ⊢ φ → H ⊢ φ⟦s⟧ := λ ⟨hφ⟩ => ⟨Subst s hφ⟩
+
+def ofProofSchema (h : H₂ ⊢!* H₁.schema) : H₁ ⊢! φ → H₂ ⊢! φ
+  | axm h₁          => h h₁
+  | mdp h₁ h₂       => mdp (ofProofSchema h h₁) (ofProofSchema h h₂)
+  | andElimL        => andElimL
+  | andElimR        => andElimR
+  | orIntroL        => orIntroL
+  | orIntroR        => orIntroR
+  | distributeAndOr => distributeAndOr
+  | impId           => impId
+  | efq             => efq
+  | af h₁           => af (ofProofSchema h h₁)
+  | andIR h₁ h₂     => andIR (ofProofSchema h h₁) (ofProofSchema h h₂)
+  | ruleC h₁ h₂     => ruleC (ofProofSchema h h₁) (ofProofSchema h h₂)
+  | ruleD h₁ h₂     => ruleD (ofProofSchema h h₁) (ofProofSchema h h₂)
+  | ruleI h₁ h₂     => ruleI (ofProofSchema h h₁) (ofProofSchema h h₂)
+
+lemma of_proof_schema (h : H₂ ⊢* H₁.schema) : H₁ ⊢ φ → H₂ ⊢ φ :=
+  λ ⟨hφ⟩ => ⟨ofProofSchema (h · |>.get) hφ⟩
+
+lemma weakerThan_of_provable_schema (h : H₂ ⊢* H₁.schema) : H₁ ⪯ H₂ :=
+  Entailment.weakerThan_iff.mpr $ of_proof_schema h
+
+
+open Entailment.Corsi in
 @[induction_eliminator]
-protected lemma rec!
-  {motive    : (φ : Formula α) → (Hilbert.VF Ax ⊢ φ) → Sort}
-  (axm       : ∀ {φ}, (h : φ ∈ Ax) → motive (φ) (VF.axm'! h))
-  (mdp       : ∀ {φ ψ}, {hφψ : (Hilbert.VF Ax) ⊢ φ ➝ ψ} → {hφ : (Hilbert.VF Ax) ⊢ φ} → (motive (φ ➝ ψ) hφψ) → (motive φ hφ) → (motive ψ (hφψ ⨀ hφ)))
-  (af        : ∀ {φ ψ}, {hφ : (Hilbert.VF Ax) ⊢ φ} → (motive φ hφ) → (motive (ψ ➝ φ) (af hφ)))
-  (ruleC     : ∀ {φ ψ χ}, {h₁ : (Hilbert.VF Ax) ⊢ φ ➝ ψ} → {h₂ : (Hilbert.VF Ax) ⊢ φ ➝ χ} → (motive (φ ➝ ψ) h₁) → (motive (φ ➝ χ) h₂) → (motive (φ ➝ (ψ ⋏ χ)) (ruleC h₁ h₂)))
-  (ruleD     : ∀ {φ ψ χ}, {h₁ : (Hilbert.VF Ax) ⊢ φ ➝ χ} → {h₂ : (Hilbert.VF Ax) ⊢ ψ ➝ χ} → (motive (φ ➝ χ) h₁) → (motive (ψ ➝ χ) h₂) → (motive (φ ⋎ ψ ➝ χ) (ruleD h₁ h₂)))
-  (ruleI     : ∀ {φ ψ χ}, {h₁ : (Hilbert.VF Ax) ⊢ φ ➝ ψ} → {h₂ : (Hilbert.VF Ax) ⊢ ψ ➝ χ} → (motive (φ ➝ ψ) h₁) → (motive (ψ ➝ χ) h₂) → (motive (φ ➝ χ) (ruleI h₁ h₂)))
+protected lemma rec_provable
+  {H : HilbertVF α}
+  {motive  : (φ : Formula α) → (H ⊢ φ) → Prop}
+  (axm       : ∀ {φ}, (h : φ ∈ H) → motive (φ) (of_schema h))
+  (mdp       : ∀ {φ ψ}, {hφψ : H ⊢ φ 🡒 ψ} → {hφ : H ⊢ φ} → (motive (φ 🡒 ψ) hφψ) → (motive φ hφ) → (motive ψ (hφψ ⨀ hφ)))
+  (af        : ∀ {φ ψ}, {hφ : H ⊢ φ} → (motive φ hφ) → (motive (ψ 🡒 φ) (af hφ)))
+  (ruleC     : ∀ {φ ψ χ}, {h₁ : H ⊢ φ 🡒 ψ} → {h₂ : H ⊢ φ 🡒 χ} → (motive (φ 🡒 ψ) h₁) → (motive (φ 🡒 χ) h₂) → (motive (φ 🡒 (ψ ⋏ χ)) (ruleC h₁ h₂)))
+  (ruleD     : ∀ {φ ψ χ}, {h₁ : H ⊢ φ 🡒 χ} → {h₂ : H ⊢ ψ 🡒 χ} → (motive (φ 🡒 χ) h₁) → (motive (ψ 🡒 χ) h₂) → (motive (φ ⋎ ψ 🡒 χ) (ruleD h₁ h₂)))
+  (ruleI     : ∀ {φ ψ χ}, {h₁ : H ⊢ φ 🡒 ψ} → {h₂ : H ⊢ ψ 🡒 χ} → (motive (φ 🡒 ψ) h₁) → (motive (ψ 🡒 χ) h₂) → (motive (φ 🡒 χ) (ruleI h₁ h₂)))
+  (distributeAndOr : ∀ {φ ψ χ : Formula α}, (motive (Axioms.DistributeAndOr φ ψ χ) distributeAndOr))
   (impId     : ∀ {φ}, (motive (Axioms.ImpId φ) impId))
   (andElimL  : ∀ {φ ψ}, (motive (Axioms.AndElim₁ φ ψ) andElimL))
   (andElimR  : ∀ {φ ψ}, (motive (Axioms.AndElim₂ φ ψ) andElimR))
   (orIntroL  : ∀ {φ ψ}, (motive (Axioms.OrInst₁ φ ψ) orIntroL))
   (orIntroR  : ∀ {φ ψ}, (motive (Axioms.OrInst₂ φ ψ) orIntroR))
   (efq       : ∀ {φ}, (motive (Axioms.EFQ φ) efq))
-  (distributeAndOr : ∀ {φ ψ χ : Formula α}, (motive (Axioms.DistributeAndOr φ ψ χ) distributeAndOr))
-  : ∀ {φ}, (d : Hilbert.VF Ax ⊢ φ) → motive φ d := by
-  rintro φ d;
-  replace d := Logic.iff_provable.mp d;
-  induction d with
-  | axm h => apply axm h;
-  | mdp hφψ hφ ihφψ ihφ => apply mdp (ihφψ (Logic.iff_provable.mpr hφψ)) (ihφ (Logic.iff_provable.mpr hφ));
-  | af hφ ihφ => apply af $ ihφ (Logic.iff_provable.mpr hφ);
-  | ruleC h₁ h₂ ih₁ ih₂ => apply ruleC (ih₁ (Logic.iff_provable.mpr h₁)) (ih₂ (Logic.iff_provable.mpr h₂));
-  | ruleD h₁ h₂ ih₁ ih₂ => apply ruleD (ih₁ (Logic.iff_provable.mpr h₁)) (ih₂ (Logic.iff_provable.mpr h₂));
-  | ruleI h₁ h₂ ih₁ ih₂ => apply ruleI (ih₁ (Logic.iff_provable.mpr h₁)) (ih₂ (Logic.iff_provable.mpr h₂));
-  | andIR h₁ h₂ ih₁ ih₂ => grind
-  | _ => grind;
+  : ∀ {φ}, (d : H ⊢ φ) → motive φ d := by rintro φ ⟨d⟩; induction d <;> grind;
+
+section
+
+instance : Entailment.HasAxiomSer (HilbertVF.VF_Ser : HilbertVF α) where
+  axiomSer! := axm $ by tauto;
+
+end
+
+abbrev logic (H : HilbertVF α) : Logic α where
+  logic := Entailment.theory H
+  subst s {_} := HilbertVF.subst s
+  mdp := Entailment.mdp!
+
+end HilbertVF
 
 
-lemma weakerThan_of_provable_axioms (hs : (Hilbert.VF Ax₂) ⊢* Ax₁) : (Hilbert.VF Ax₁) ⪯ (Hilbert.VF Ax₂) := by
-  apply Entailment.weakerThan_iff.mpr;
-  intro φ h;
-  induction h using Hilbert.VF.rec! with
-  | axm h => apply hs; assumption;
-  | mdp ih₁ ih₂ => exact ih₁ ⨀ ih₂;
-  | af ih => exact af ih;
-  | ruleC ih₁ ih₂ => exact ruleC ih₁ ih₂;
-  | ruleD ih₁ ih₂ => exact ruleD ih₁ ih₂;
-  | ruleI ih₁ ih₂ => exact ruleI ih₁ ih₂;
-  | _ =>
-      first
-      | apply impId;
-      | apply andElimL;
-      | apply andElimR;
-      | apply orIntroL;
-      | apply orIntroR;
-      | apply distributeAndOr;
-      | apply efq;
+namespace HilbertVF
 
-lemma weakerThan_of_subset_axioms (h : Ax₁ ⊆ Ax₂) : (Hilbert.VF Ax₁) ⪯ (Hilbert.VF Ax₂) := by
-  apply weakerThan_of_provable_axioms;
-  intro φ hφ;
-  apply Hilbert.VF.axm'!;
-  grind;
+variable {H : HilbertVF α}
 
-end Hilbert.VF
+lemma mem_logic_of_proof (h : H ⊢! φ) : φ ∈ H.logic := ⟨h⟩
 
-protected abbrev VF : Logic ℕ := Hilbert.VF ∅
-instance : Entailment.VF Propositional.VF where
+lemma mem_logic_of_provable (h : H ⊢ φ) : φ ∈ H.logic := mem_logic_of_proof h.get
+lemma provable_of_mem_logic (h : φ ∈ H.logic) : H ⊢ φ := h
 
-protected abbrev VF_Ser : Logic ℕ := Hilbert.VF { Axioms.Ser }
-instance : Entailment.VF Propositional.VF_Ser where
-instance : Entailment.HasAxiomSer Propositional.VF_Ser where
-  axiomSer! := ⟨by apply Hilbert.VF.axm'; simp⟩
+@[grind =]
+lemma iff_mem_logic_provable : H ⊢ φ ↔ φ ∈ H.logic := ⟨mem_logic_of_provable, provable_of_mem_logic⟩
+
+end HilbertVF
+
+protected abbrev VF     : Logic α := HilbertVF.VF.logic
+protected abbrev VF_Ser : Logic α := HilbertVF.VF_Ser.logic
 
 end LO.Propositional
+
 end

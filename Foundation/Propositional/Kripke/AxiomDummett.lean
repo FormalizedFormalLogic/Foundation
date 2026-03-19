@@ -19,7 +19,7 @@ section definability
 
 variable {F : Kripke.Frame}
 
-lemma validate_axiomDummett_of_isPiecewiseStronglyConnected [F.IsPiecewiseStronglyConnected] : F ⊧ (Axioms.Dummett (.atom 0) (.atom 1)) := by
+lemma validate_axiomDummett_of_isPiecewiseStronglyConnected [F.IsPiecewiseStronglyConnected] : F ⊧ (Axioms.Dummett φ ψ) := by
   have := F.ps_connected;
   revert this;
   contrapose!;
@@ -86,14 +86,14 @@ instance [Entailment.HasAxiomDummett 𝓢] : (canonicalFrame 𝓢).IsPiecewiseSt
   intro nRyz;
   obtain ⟨φ, hyp, nhzp⟩ := Set.not_subset.mp nRyz;
   intro ψ hqz;
-  have : ψ ➝ φ ∉ x.1.1 := by
+  have : ψ 🡒 φ ∉ x.1.1 := by
     by_contra hqpx;
-    have hqpz : ψ ➝ φ ∈ z.1.1 := by aesop;
+    have hqpz : ψ 🡒 φ ∈ z.1.1 := by aesop;
     have : φ ∈ z.1.1 := mdp₁_mem hqz hqpz;
     contradiction;
-  have := iff_mem₁_or.mp $ mem₁_of_provable (t := x) (φ := (φ ➝ ψ) ⋎ (ψ ➝ φ)) dummett!;
-  have hpqx : φ ➝ ψ ∈ x.1.1 := by aesop;
-  have hpqy : φ ➝ ψ ∈ y.1.1 := Rxy hpqx;
+  have := iff_mem₁_or.mp $ mem₁_of_provable (t := x) (φ := (φ 🡒 ψ) ⋎ (ψ 🡒 φ)) dummett!;
+  have hpqx : φ 🡒 ψ ∈ x.1.1 := by aesop;
+  have hpqy : φ 🡒 ψ ∈ y.1.1 := Rxy hpqx;
   have : ψ ∈ y.1.1 := mdp₁_mem hyp hpqy;
   exact this;
 ⟩

@@ -37,8 +37,8 @@ lemma dense_of_finite_extend_incomplete
     (h : φ < ψ) : ∃ ξ : LindenbaumAlgebra 𝓢, φ < ξ ∧ ξ < ψ := by
   obtain ⟨φ, rfl⟩ := Quotient.exists_rep φ;
   obtain ⟨ψ, rfl⟩ := Quotient.exists_rep ψ;
-  have h₁ : 𝓢 ⊢ φ ➝ ψ := le_def _ |>.mp $ le_of_lt h;
-  have h₂ : 𝓢 ⊬  ψ ➝ φ := le_def _ |>.not.mp $ not_le_of_gt h;
+  have h₁ : 𝓢 ⊢ φ 🡒 ψ := le_def _ |>.mp $ le_of_lt h;
+  have h₂ : 𝓢 ⊬  ψ 🡒 φ := le_def _ |>.not.mp $ not_le_of_gt h;
   obtain ⟨ρ, hρ⟩ := incomplete_def.mp $ @hE (∼φ ⋏ ψ) $ by
     apply consistent_iff_exists_unprovable.mpr;
     use ⊥;

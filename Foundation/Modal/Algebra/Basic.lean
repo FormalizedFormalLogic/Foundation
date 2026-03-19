@@ -35,7 +35,7 @@ instance [DecidableEq F] : Dia (LindenbaumAlgebra 𝓢) where
 
 instance [DecidableEq F] : ModalAlgebra (LindenbaumAlgebra 𝓢) where
   box_top := by
-    suffices 𝓢 ⊢ □⊤ ⭤ ⊤ by
+    suffices 𝓢 ⊢ □⊤ 🡘 ⊤ by
       apply Quotient.eq.mpr;
       simpa;
     apply E!_intro;
@@ -45,7 +45,7 @@ instance [DecidableEq F] : ModalAlgebra (LindenbaumAlgebra 𝓢) where
   box_meet φ ψ := by
     induction' φ using Quotient.ind with φ
     induction' ψ using Quotient.ind with ψ
-    suffices 𝓢 ⊢ □(φ ⋏ ψ) ⭤ □φ ⋏ □ψ by
+    suffices 𝓢 ⊢ □(φ ⋏ ψ) 🡘 □φ ⋏ □ψ by
       apply Quotient.eq.mpr;
       simpa;
     apply E!_intro;
@@ -54,7 +54,7 @@ instance [DecidableEq F] : ModalAlgebra (LindenbaumAlgebra 𝓢) where
   dual_dia := by
     intro φ;
     induction' φ using Quotient.ind with φ;
-    suffices 𝓢 ⊢ ◇φ ⭤ ∼□(∼φ) by
+    suffices 𝓢 ⊢ ◇φ 🡘 ∼□(∼φ) by
       apply Quotient.eq.mpr;
       simpa only
     exact dia_duality!;
@@ -71,7 +71,7 @@ namespace Formula
 def value [Bot H] [HImp H] [Box H] (V : α → H) : Formula α → H
   | atom a => V a
   | ⊥      => ⊥
-  | φ ➝ ψ  => φ.value V ⇨ ψ.value V
+  | φ 🡒 ψ  => φ.value V ⇨ ψ.value V
   | □φ     => □(φ.value V)
 
 infix:45 " ⊩ " => value
@@ -80,7 +80,7 @@ variable [ModalAlgebra H] {V : α → H} {φ ψ : Formula α}
 
 @[simp, grind .] lemma eq_value_verum : (V ⊩ ⊤) = ⊤ := by simp [value];
 @[simp, grind .] lemma eq_value_falsum : (V ⊩ ⊥) = ⊥ := by simp [value];
-@[simp, grind =] lemma eq_value_imp : (V ⊩ φ ➝ ψ) = (V ⊩ φ) ⇨ (V ⊩ ψ) := by simp [value];
+@[simp, grind =] lemma eq_value_imp : (V ⊩ φ 🡒 ψ) = (V ⊩ φ) ⇨ (V ⊩ ψ) := by simp [value];
 @[simp, grind =] lemma eq_value_and : (V ⊩ φ ⋏ ψ) = (V ⊩ φ) ⊓ (V ⊩ ψ) := by simp [value];
 @[simp, grind =] lemma eq_value_or  : (V ⊩ φ ⋎ ψ) = (V ⊩ φ) ⊔ (V ⊩ ψ) := by simp [value, himp_eq, sup_comm];
 @[simp, grind =] lemma eq_value_neg : (V ⊩ ∼φ) = (V ⊩ φ)ᶜ := by simp [value];
@@ -112,7 +112,7 @@ instance : Semantics.Bot (AlgebraicSemantics α) := ⟨by simp⟩
 instance : Semantics.And (AlgebraicSemantics α) := ⟨by simp⟩
 
 @[grind =]
-lemma val_imp : A ⊧ φ ➝ ψ ↔ (A ⊩ φ) ≤ (A ⊩ ψ) := by simp;
+lemma val_imp : A ⊧ φ 🡒 ψ ↔ (A ⊩ φ) ≤ (A ⊩ ψ) := by simp;
 
 @[grind <-]
 lemma nec (h : A ⊧ φ) : A ⊧ □φ := by
@@ -120,7 +120,7 @@ lemma nec (h : A ⊧ φ) : A ⊧ □φ := by
   simp [h, ModalAlgebra.box_top];
 
 @[grind →]
-lemma mdp (hφψ : A ⊧ φ ➝ ψ) (hφ : A ⊧ φ) : A ⊧ ψ := by
+lemma mdp (hφψ : A ⊧ φ 🡒 ψ) (hφ : A ⊧ φ) : A ⊧ ψ := by
   simp only [def_val, Formula.eq_value_imp, himp_eq_top_iff] at hφψ hφ ⊢;
   rw [eq_top_iff] at hφ ⊢;
   trans (A ⊩ φ);
