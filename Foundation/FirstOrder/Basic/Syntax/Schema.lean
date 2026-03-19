@@ -17,6 +17,7 @@ structure Schema (L : Language) where
   Mem : Proposition L → Prop
 
 abbrev Theory (L : Language) := Set (Sentence L)
+
 namespace Schema
 
 variable {L : Language}

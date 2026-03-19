@@ -241,13 +241,13 @@ lemma inconsistent_iff_theory_eq {𝓢 : S} :
     Inconsistent 𝓢 ↔ theory 𝓢 = Set.univ := by
   simp [Inconsistent, Set.ext_iff, theory]
 
-lemma not_inconsistent_iff_consistent {𝓢 : S} :
+@[simp] lemma not_inconsistent_iff_consistent {𝓢 : S} :
     ¬Inconsistent 𝓢 ↔ Consistent 𝓢 :=
   ⟨fun h ↦ ⟨h⟩, by rintro ⟨h⟩; exact h⟩
 
 alias ⟨_, Consistent.not_inc⟩ := not_inconsistent_iff_consistent
 
-lemma not_consistent_iff_inconsistent {𝓢 : S} :
+@[simp] lemma not_consistent_iff_inconsistent {𝓢 : S} :
     ¬Consistent 𝓢 ↔ Inconsistent 𝓢 := by simp [←not_inconsistent_iff_consistent]
 
 alias ⟨_, Inconsistent.not_con⟩ := not_consistent_iff_inconsistent
@@ -620,7 +620,13 @@ omit [Entailment S F] in
 @[simp] lemma theory_eq (𝓢 : S) : theory (pullback 𝓢 f) = f ⁻¹' theory 𝓢 := rfl
 
 lemma weakerThan (𝓢 𝓣 : S) (h : 𝓢 ⪯ 𝓣) : pullback 𝓢 f ⪯ pullback 𝓣 f := by
-  simp_all [Entailment.weakerThan_iff, provable_iff]
+  simp_all [Entailment.weakerThan_iff]
+
+lemma inconsistent {𝓢 : S} : Inconsistent 𝓢 → Inconsistent (pullback 𝓢 f) := by
+  simp_all [Inconsistent]
+
+lemma consistent {𝓢 : S} : Consistent (pullback 𝓢 f) → Consistent 𝓢 := by
+  contrapose; simpa using inconsistent
 
 end basics
 
