@@ -86,7 +86,7 @@ instance [Entailment.HasAxiomDummett 𝓢] : IsPiecewiseStronglyConnected (canon
   by_contra!;
   obtain ⟨φ, hφy, hφz⟩ := Set.not_subset.mp this.1;
   obtain ⟨ψ, hψz, hψy⟩ := Set.not_subset.mp this.2;
-  rcases (show φ ➝ ψ ∈ x.1.1 ∨ ψ ➝ φ ∈ x.1.1 by exact iff_mem₁_or.mp $ mem₁_of_provable dummett!) with (hφψx | hψφx);
+  rcases (show φ 🡒 ψ ∈ x.1.1 ∨ ψ 🡒 φ ∈ x.1.1 by exact iff_mem₁_or.mp $ mem₁_of_provable dummett!) with (hφψx | hψφx);
   . exact hψy $ mdp₁_mem hφy (Rxy hφψx);
   . exact hφz $ mdp₁_mem hψz (Rxz hψφx);
 

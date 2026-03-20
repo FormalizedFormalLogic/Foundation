@@ -85,7 +85,7 @@ instance [Entailment.HasAxiomWLEM 𝓢] : IsPiecewiseStronglyConvergent (canonic
     let Θz := { φ ∈ Γ | φ ∈ z.1.1 ∧ φ ∉ x.1.1 };
 
     simp only [Finset.disj_empty] at h;
-    replace : [Θx.conj] ⊢[𝓢] ∼∼Θz.conj ➝ ∼Θy.conj := contra! $ FiniteContext.deductInv'! $ by
+    replace : [Θx.conj] ⊢[𝓢] ∼∼Θz.conj 🡒 ∼Θy.conj := contra! $ FiniteContext.deductInv'! $ by
       apply FConj_DT.mpr;
       apply FConj_DT'.mpr;
       apply FConj_DT'.mpr;

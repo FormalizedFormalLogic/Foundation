@@ -60,7 +60,7 @@ lemma truthlemma : t ⊩ φ ↔ φ ∈ t.1.1 := by
       obtain ⟨t', ⟨h, _⟩⟩ := lindenbaum (𝓢 := 𝓢) (t₀ := (insert φ t.1.1, {ψ})) $ by
         intro Γ Δ hΓ hΔ;
         by_contra hC;
-        apply t.consistent (Γ := Γ.erase φ) (Δ := {φ ➝ ψ}) ?_ ?_;
+        apply t.consistent (Γ := Γ.erase φ) (Δ := {φ 🡒 ψ}) ?_ ?_;
         . simp only [Finset.disj_singleton];
           apply FConj_DT.mpr;
           apply Context.deduct!
@@ -91,11 +91,11 @@ lemma truthlemma : t ⊩ φ ↔ φ ∈ t.1.1 := by
       have hpq := htt' h;
       apply ihq.mpr;
       apply iff_not_mem₂_mem₁.mp;
-      apply not_mem₂ (Γ := {φ, φ ➝ ψ});
+      apply not_mem₂ (Γ := {φ, φ 🡒 ψ});
       . simp only [Finset.coe_insert, Finset.coe_singleton];
         apply Set.doubleton_subset.mpr;
         tauto;
-      . suffices 𝓢 ⊢ Finset.conj {φ, φ ➝ ψ} ➝ Finset.disj {ψ} by simpa;
+      . suffices 𝓢 ⊢ Finset.conj {φ, φ 🡒 ψ} 🡒 Finset.disj {ψ} by simpa;
         apply Entailment.CFConj_CDisj!_of_innerMDP (φ := φ) (ψ := ψ) <;> simp;
 
 lemma iff_validates_provable : (canonicalKripkeModel 𝓢) ⊧ φ ↔ 𝓢 ⊢ φ := by

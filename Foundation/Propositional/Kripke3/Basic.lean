@@ -44,7 +44,7 @@ def Forces (M : KripkeModel κ α) (x : M.world) : Formula α → Prop
   | ⊥      => False
   | φ ⋏ ψ  => Forces M x φ ∧ Forces M x ψ
   | φ ⋎ ψ  => Forces M x φ ∨ Forces M x ψ
-  | φ ➝ ψ => ∀ y : M.world, x ≺ y → (Forces M y φ → Forces M y ψ)
+  | φ 🡒 ψ => ∀ y : M.world, x ≺ y → (Forces M y φ → Forces M y ψ)
 
 instance : ForcingRelation M.world (Formula α) where
   Forces := Forces M
@@ -54,7 +54,7 @@ instance : ForcingRelation M.world (Formula α) where
 @[simp, grind .] lemma forces_verum : x ⊩ ⊤ := by tauto;
 @[grind =] lemma forces_and : x ⊩ φ ⋏ ψ ↔ x ⊩ φ ∧ x ⊩ ψ := by rfl;
 @[grind =] lemma forces_or : x ⊩ φ ⋎ ψ ↔ x ⊩ φ ∨ x ⊩ ψ := by rfl;
-@[grind =] lemma forces_imp : x ⊩ φ ➝ ψ ↔ ∀ y : M.world, x ≺ y → (y ⊩ φ → y ⊩ ψ) := by rfl;
+@[grind =] lemma forces_imp : x ⊩ φ 🡒 ψ ↔ ∀ y : M.world, x ≺ y → (y ⊩ φ → y ⊩ ψ) := by rfl;
 
 @[grind =]
 lemma forces_neg : x ⊩ ∼φ ↔ ∀ y, x ≺ y → (y ⊮ φ) := by
@@ -187,7 +187,7 @@ attribute [grind .]
 lemma validates_ruleC (hφ : M ⊧ φ) (hψ : M ⊧ ψ) : M ⊧ φ ⋏ ψ := fun x ↦ ⟨hφ x, hψ x⟩
 
 @[grind <=]
-lemma validates_afortiori (h : M ⊧ φ) : M ⊧ ψ ➝ φ := fun _ y _ _ ↦ h y
+lemma validates_afortiori (h : M ⊧ φ) : M ⊧ ψ 🡒 φ := fun _ y _ _ ↦ h y
 
 end Models
 
@@ -208,7 +208,7 @@ lemma formula_persistency [Persistent M] [IsTrans _ M.rel] {x y : M.world} {φ :
   | _ => grind;
 
 @[grind .]
-lemma validates_implyK [Persistent M] [IsTrans _ M.rel] : M ⊧ φ ➝ ψ ➝ φ := by
+lemma validates_implyK [Persistent M] [IsTrans _ M.rel] : M ⊧ φ 🡒 ψ 🡒 φ := by
   intro x y Rxy hφ z Ryz hψ;
   apply formula_persistency hφ Ryz;
 
@@ -219,7 +219,7 @@ lemma validates_implyS [IsTrans _ M.rel] [Std.Refl M.rel] : M ⊧ Axioms.ImplyS 
   have Rww : w ≺ w := Std.Refl.refl _;
   exact hφψχ _ Ryw hφ _ Rww (hφψ _ Rzw hφ);
 
-lemma validates_mdp_of_reflexive [Std.Refl M.rel] (hφψ : M ⊧ φ ➝ ψ) (hφ : M ⊧ φ) : M ⊧ ψ := by
+lemma validates_mdp_of_reflexive [Std.Refl M.rel] (hφψ : M ⊧ φ 🡒 ψ) (hφ : M ⊧ φ) : M ⊧ ψ := by
   intro x;
   apply hφψ x;
   . apply Std.Refl.refl;
@@ -228,9 +228,6 @@ lemma validates_mdp_of_reflexive [Std.Refl M.rel] (hφψ : M ⊧ φ ➝ ψ) (hφ
 class Intuitionistic (M : KripkeModel κ α) extends Std.Refl M.rel, IsTrans _ M.rel, Persistent M
 
 end
-
-
-def logic (M : KripkeModel κ α) : Logic α := { φ | M ⊧ φ }
 
 end KripkeModel
 
