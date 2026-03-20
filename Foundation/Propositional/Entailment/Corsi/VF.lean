@@ -124,7 +124,6 @@ lemma ruleC_fconj' {Γ : Finset ι} (Φ : ι → F) (h : ∀ i ∈ Γ, 𝓢 ⊢ 
   simpa;
 
 
-
 lemma mem_lconj₂ {Γ : List F} (h : φ ∈ Γ) : 𝓢 ⊢ ⋀Γ 🡒 φ := by
   induction Γ using List.induction_with_singleton with
   | hcons ψ Δ he ih =>
@@ -191,6 +190,10 @@ lemma mem_ldisj₂ {Γ : List F} (h : ψ ∈ Γ) : 𝓢 ⊢ ψ 🡒 Γ.disj₂ :
       exact orIntroR;
   | _ => simp_all;
 
+lemma mem_fdisj {Γ : Finset F} (h : ψ ∈ Γ) : 𝓢 ⊢ ψ 🡒 Γ.disj := by
+  apply mem_ldisj₂;
+  simpa using h;
+
 lemma mem_fdisj' {Γ : Finset ι} (Φ : ι → F) (hΦ : ∃ i ∈ Γ, Φ i = ψ) : 𝓢 ⊢ ψ 🡒 ⩖ i ∈ Γ, Φ i := by
   apply mem_ldisj₂;
   simpa;
@@ -211,6 +214,26 @@ lemma ruleD_fdisj' {Γ : Finset ι} (Φ : ι → F) (h : ∀ i ∈ Γ, 𝓢 ⊢ 
   apply ruleD_ldisj₂;
   simpa;
 
+
+lemma CLDisj₂Disj₂_of_provable {Γ : List F} (h : ∀ γ ∈ Γ, 𝓢 ⊢ γ 🡒 δ) : 𝓢 ⊢ Γ.disj₂ 🡒 δ := by
+  induction Γ using List.induction_with_singleton with
+  | hnil => simp only [List.disj₂_nil, Entailment.efq!];
+  | hsingle φ => apply h; simp;
+  | hcons ψ Δ he ih =>
+    simp only [List.disj₂_cons_nonempty he];
+    simp only [List.mem_cons, forall_eq_or_imp] at h;
+    apply ruleD;
+    . apply h.1;
+    . apply ih h.2;
+
+lemma CLDisj₂Disj₂_of_subset {Γ Δ : List F} (h : ∀ φ, φ ∈ Γ → φ ∈ Δ) : 𝓢 ⊢ Γ.disj₂ 🡒 Δ.disj₂ := by
+  apply CLDisj₂Disj₂_of_provable;
+  intro γ hγ;
+  apply mem_ldisj₂ $ h _ hγ;
+
+lemma CFDisjFDisj_of_subset {Γ Δ : Finset F} (h : Γ ⊆ Δ) : 𝓢 ⊢ Γ.disj 🡒 Δ.disj := by
+  apply CLDisj₂Disj₂_of_subset;
+  simpa;
 
 
 variable [Entailment.Disjunctive 𝓢] [Entailment.Consistent 𝓢]
