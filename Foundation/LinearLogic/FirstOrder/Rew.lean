@@ -42,13 +42,13 @@ instance : Rewriting L ξ (Semiformula L ξ) ζ (Semiformula L ζ) where
   app_all (_ _) := rfl
   app_exs (_ _) := rfl
 
-instance : Coe (Semisentence L n) (Semistatement L n) := ⟨Rewriting.emb (ξ := ℕ)⟩
+instance : Coe (Semisentence L n) (Semiproposition L n) := ⟨Rewriting.emb (ξ := ℕ)⟩
 
 @[coe] abbrev emb [IsEmpty o] (φ : Semiformula L o n) : Semiformula L ξ n := Rewriting.emb φ
 
-abbrev free (φ : Semistatement L (n + 1)) : Semistatement L n := Rewriting.free φ
+abbrev free (φ : Semiproposition L (n + 1)) : Semiproposition L n := Rewriting.free φ
 
-abbrev shift (φ : Semistatement L n) : Semistatement L n := Rewriting.shift φ
+abbrev shift (φ : Semiproposition L n) : Semiproposition L n := Rewriting.shift φ
 
 lemma rew_rel (ω : Rew L ξ₁ n₁ ξ₂ n₂) {k} (r : L.Rel k) (v : Fin k → Semiterm L ξ₁ n₁) :
     ω ▹ rel r v = rel r fun i ↦ ω (v i) := rfl
@@ -155,7 +155,7 @@ instance : TransitiveRewriting L ξ₁ (Semiformula L ξ₁) ξ₂ (Semiformula 
 instance : InjMapRewriting L ξ (Semiformula L ξ) ζ (Semiformula L ζ) where
   smul_map_injective := map_inj
 
-instance : LawfulSyntacticRewriting L (Semistatement L) where
+instance : LawfulSyntacticRewriting L (Semiproposition L) where
 
 @[simp] lemma complexity_rew (ω : Rew L ξ₁ n₁ ξ₂ n₂) (φ : Semiformula L ξ₁ n₁) : (ω ▹ φ).complexity = φ.complexity := by
   induction φ using rec' generalizing n₂ <;> simp [*, rew_rel, rew_nrel]

@@ -11,7 +11,7 @@ namespace LO.FirstOrder.LinearLogic
 
 variable {L : Language}
 
-abbrev Sequent (L : Language) := List (Statement L)
+abbrev Sequent (L : Language) := List (Proposition L)
 
 def Sequent.IsQuest (Γ : Sequent L) : Prop := ∀ φ ∈ Γ, φ.IsQuest
 
@@ -23,7 +23,7 @@ namespace IsQuest
 
 @[simp] lemma nil : Sequent.IsQuest ([] : Sequent L) := by simp [Sequent.IsQuest]
 
-@[simp] lemma cons (φ : Statement L) (Γ : Sequent L) :
+@[simp] lemma cons (φ : Proposition L) (Γ : Sequent L) :
     Sequent.IsQuest (φ :: Γ) ↔ φ.IsQuest ∧ Sequent.IsQuest Γ := by simp [Sequent.IsQuest]
 
 end IsQuest
@@ -32,7 +32,7 @@ namespace Negative
 
 @[simp] lemma nil : Sequent.Negative ([] : Sequent L) := by simp [Sequent.Negative]
 
-@[simp] lemma cons (φ : Statement L) (Γ : Sequent L) :
+@[simp] lemma cons (φ : Proposition L) (Γ : Sequent L) :
     Sequent.Negative (φ :: Γ) ↔ φ.Negative ∧ Sequent.Negative Γ := by simp [Sequent.Negative]
 
 end Negative
@@ -45,7 +45,7 @@ lemma quest_def (Γ : Sequent L) : ？Γ = Γ.map (？·) := rfl
 
 @[simp] lemma quest_nil : ？([] : Sequent L) = [] := rfl
 
-@[simp] lemma quest_cons (φ : Statement L) (Γ : Sequent L) :
+@[simp] lemma quest_cons (φ : Proposition L) (Γ : Sequent L) :
     ？(φ :: Γ) = ？φ :: ？Γ := rfl
 
 @[simp] lemma quest_append (Γ Δ : Sequent L) :
@@ -66,25 +66,25 @@ inductive Derivation : Sequent L → Type _ where
   | par : Derivation (φ :: ψ :: Γ) → Derivation (φ ⅋ ψ :: Γ)
   | verum (Γ) : Derivation (⊤ :: Γ)
   | with : Derivation (φ :: Γ) → Derivation (ψ :: Γ) → Derivation (φ ＆ ψ :: Γ)
-  | plusLeft : Derivation (ψ :: Γ) → (φ : Statement L) → Derivation (φ ⨁ ψ :: Γ)
-  | plusRight : Derivation (φ :: Γ) → (ψ : Statement L) → Derivation (φ ⨁ ψ :: Γ)
+  | plusLeft : Derivation (ψ :: Γ) → (φ : Proposition L) → Derivation (φ ⨁ ψ :: Γ)
+  | plusRight : Derivation (φ :: Γ) → (ψ : Proposition L) → Derivation (φ ⨁ ψ :: Γ)
   | ofCourse : Derivation (φ :: Γ) → Sequent.IsQuest Γ → Derivation (！φ :: Γ)
-  | weakening : Derivation Γ → (φ : Statement L) → Derivation (？φ :: Γ)
+  | weakening : Derivation Γ → (φ : Proposition L) → Derivation (？φ :: Γ)
   | dereliction : Derivation (φ :: Γ) → Derivation (？φ :: Γ)
   | contraction : Derivation (？φ :: ？φ :: Γ) → Derivation (？φ :: Γ)
   | all : Derivation (φ.free :: Γ⁺) → Derivation ((∀⁰ φ) :: Γ)
   | exs (t) : Derivation (φ/[t] :: Γ) → Derivation ((∃⁰ φ) :: Γ)
 
-abbrev Statement.Proof (φ : Statement L) : Type _ := Derivation [φ]
+abbrev Proposition.Proof (φ : Proposition L) : Type _ := Derivation [φ]
 
-abbrev Sentence.Proof (σ : Sentence L) : Type _ := Derivation [(σ : Statement L)]
+abbrev Sentence.Proof (σ : Sentence L) : Type _ := Derivation [(σ : Proposition L)]
 
 inductive SymbolFV (L : Language) where
   | symbol : SymbolFV L
 
 notation "𝐋𝐋₀" => SymbolFV.symbol
 
-instance : Entailment (SymbolFV L) (Statement L) := ⟨fun _ ↦ Statement.Proof⟩
+instance : Entailment (SymbolFV L) (Proposition L) := ⟨fun _ ↦ Proposition.Proof⟩
 
 inductive Symbol (L : Language) where
   | symbol : Symbol L
@@ -128,7 +128,7 @@ def height {Γ : Sequent L} : ⊢ᴸ Γ → ℕ
 
 section height
 
-@[simp] lemma height_id (φ : Statement L) :
+@[simp] lemma height_id (φ : Proposition L) :
     (identity φ).height = 0 := rfl
 
 @[simp] lemma height_cut (d₁ : ⊢ᴸ φ :: Γ) (d₂ : ⊢ᴸ ∼φ :: Δ) :
@@ -173,10 +173,10 @@ section height
 @[simp] lemma height_contraction (d : ⊢ᴸ ？φ :: ？φ :: Γ) :
     d.contraction.height = d.height + 1 := rfl
 
-@[simp] lemma height_all {φ : Semistatement L 1} (d : ⊢ᴸ φ.free :: Γ⁺) :
+@[simp] lemma height_all {φ : Semiproposition L 1} (d : ⊢ᴸ φ.free :: Γ⁺) :
     d.all.height = d.height + 1 := rfl
 
-@[simp] lemma height_exs {φ : Semistatement L 1} {t} (d : ⊢ᴸ φ/[t] :: Γ) :
+@[simp] lemma height_exs {φ : Semiproposition L 1} {t} (d : ⊢ᴸ φ/[t] :: Γ) :
     (d.exs t).height = d.height + 1 := rfl
 
 @[simp] lemma height_cast (d : ⊢ᴸ Γ) (e : Γ = Δ) :
@@ -184,7 +184,7 @@ section height
 
 end height
 
-def eta : (φ : Statement L) → ⊢ᴸ [φ, ∼φ]
+def eta : (φ : Proposition L) → ⊢ᴸ [φ, ∼φ]
   |  .rel r v => identity _
   | .nrel r v => identity _
   |         1 => one.falsum.rotate
@@ -207,13 +207,13 @@ def eta : (φ : Statement L) → ⊢ᴸ [φ, ∼φ]
     this.all.rotate
   termination_by φ => φ.complexity
 
-def expComm (φ ψ : Statement L) : ⊢ᴸ [！∼φ ⨂ ！∼ψ, ？(φ ⨁ ψ)] :=
+def expComm (φ ψ : Proposition L) : ⊢ᴸ [！∼φ ⨂ ！∼ψ, ？(φ ⨁ ψ)] :=
   have dφ : ⊢ᴸ [！∼φ, ？(φ ⨁ ψ)] := ((identity φ).plusRight ψ).dereliction.rotate.ofCourse (by simp)
   have dψ : ⊢ᴸ [！∼ψ, ？(φ ⨁ ψ)] := ((identity ψ).plusLeft φ).dereliction.rotate.ofCourse (by simp)
   have : ⊢ᴸ [！∼φ ⨂ ！∼ψ, ？(φ ⨁ ψ), ？(φ ⨁ ψ)] := dφ.tensor dψ
   this.rotate.contraction.rotate
 
-def ofNegative : (ν : Statement L) → ν.Negative → ⊢ᴸ [∼？ν, ν]
+def ofNegative : (ν : Proposition L) → ν.Negative → ⊢ᴸ [∼？ν, ν]
   |    ？φ, h => (identity (？φ)).rotate.ofCourse (by simp)
   |     ⊥, h => (one.ofCourse (by simp)).falsum.rotate
   |     ⊤, h => (verum [！0]).rotate
@@ -242,10 +242,10 @@ def ofNegative : (ν : Statement L) → ν.Negative → ⊢ᴸ [∼？ν, ν]
 def removeQuest (h : ν.Negative) (d : ⊢ᴸ ？ν :: Γ) : ⊢ᴸ ν :: Γ :=
   (d.cut (ofNegative ν h)).invRotate
 
-def negativeWeakening {ν : Statement L} (h : ν.Negative) (d : ⊢ᴸ Γ) :
+def negativeWeakening {ν : Proposition L} (h : ν.Negative) (d : ⊢ᴸ Γ) :
     ⊢ᴸ ν :: Γ := ((d.weakening ν).cut (ofNegative ν h)).invRotate
 
-def negativeContraction {ν : Statement L} (h : ν.Negative) (d : ⊢ᴸ ν :: ν :: Γ) :
+def negativeContraction {ν : Proposition L} (h : ν.Negative) (d : ⊢ᴸ ν :: ν :: Γ) :
     ⊢ᴸ ν :: Γ :=
   have : ⊢ᴸ ？ν :: ？ν :: Γ := d.dereliction.rotate.dereliction.exchange (by simp)
   have : ⊢ᴸ ？ν :: Γ := this.contraction
