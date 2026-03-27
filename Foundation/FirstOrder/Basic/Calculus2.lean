@@ -4,23 +4,25 @@ public import Foundation.FirstOrder.Basic.Calculus
 
 /-! # Alternative definition of proof -/
 
+/-
+
 namespace LO.FirstOrder
 
 variable {L : Language} [L.DecidableEq]
 
 section derivation2
 
-inductive Derivation2 (𝓢 : Schema L) : Finset (Proposition L) → Type _
-| closed (Γ) (φ : Proposition L) : φ ∈ Γ → ∼φ ∈ Γ → Derivation2 𝓢 Γ
-| axm {Γ} (φ : Proposition L) : φ ∈ 𝓢 → φ ∈ Γ → Derivation2 𝓢 Γ
-| verum {Γ} : ⊤ ∈ Γ → Derivation2 𝓢 Γ
-| and {Γ} {φ ψ : Proposition L} : φ ⋏ ψ ∈ Γ → Derivation2 𝓢 (insert φ Γ) → Derivation2 𝓢 (insert ψ Γ) → Derivation2 𝓢 Γ
-| or {Γ} {φ ψ : Proposition L} : φ ⋎ ψ ∈ Γ → Derivation2 𝓢 (insert φ (insert ψ Γ)) → Derivation2 𝓢 Γ
-| all {Γ} {φ : Semiproposition L 1} : ∀⁰ φ ∈ Γ → Derivation2 𝓢 (insert (Rewriting.free φ) (Γ.image Rewriting.shift)) → Derivation2 𝓢 Γ
-| exs {Γ} {φ : Semiproposition L 1} : ∃⁰ φ ∈ Γ → (t : SyntacticTerm L) → Derivation2 𝓢 (insert (φ/[t]) Γ) → Derivation2 𝓢 Γ
-| wk {Δ Γ} : Derivation2 𝓢 Δ → Δ ⊆ Γ → Derivation2 𝓢 Γ
-| shift {Γ}   : Derivation2 𝓢 Γ → Derivation2 𝓢 (Γ.image Rewriting.shift)
-| cut {Γ φ} : Derivation2 𝓢 (insert φ Γ) → Derivation2 𝓢 (insert (∼φ) Γ) → Derivation2 𝓢 Γ
+inductive Derivation2 : Finset (Proposition L) → Type _
+| wk {Δ Γ} : Derivation2 Δ → Δ ⊆ Γ → Derivation2 Γ
+| shift {Γ}   : Derivation2 Γ → Derivation2 (Γ.image Rewriting.shift)
+| identity (Γ) (φ : Proposition L) : φ ∈ Γ → ∼φ ∈ Γ → Derivation2 Γ
+| cut {Γ φ} : Derivation2 (insert φ Γ) → Derivation2 (insert (∼φ) Δ) → Derivation2 (Γ ∪ Δ)
+| verum {Γ} : ⊤ ∈ Γ → Derivation2 Γ
+| and {Γ} {φ ψ : Proposition L} : φ ⋏ ψ ∈ Γ → Derivation2 (insert φ Γ) → Derivation2 (insert ψ Γ) → Derivation2 Γ
+| or {Γ} {φ ψ : Proposition L} : φ ⋎ ψ ∈ Γ → Derivation2 (insert φ (insert ψ Γ)) → Derivation2 Γ
+| all {Γ} {φ : Semiproposition L 1} : ∀⁰ φ ∈ Γ → Derivation2 (insert (Rewriting.free φ) (Γ.image Rewriting.shift)) → Derivation2 Γ
+| exs {Γ} {φ : Semiproposition L 1} : ∃⁰ φ ∈ Γ → (t : SyntacticTerm L) → Derivation2 (insert (φ/[t]) Γ) → Derivation2 Γ
+
 
 scoped infix:45 " ⟹₂" => Derivation2
 
@@ -96,3 +98,4 @@ def provable_iff_derivable2 {φ} : 𝓢 ⊢ φ ↔ 𝓢 ⊢!₂! φ := derivable
 end derivation2
 
 end LO.FirstOrder
+-/

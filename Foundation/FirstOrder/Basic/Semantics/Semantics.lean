@@ -523,7 +523,7 @@ lemma models_iff_proposition {φ : Proposition L} : M↓[L] ⊧ φ.univCl ↔ �
 
 lemma models_theory_iff : M↓[L] ⊧* T ↔ (∀ {φ}, φ ∈ T → M↓[L] ⊧ φ) := Semantics.modelsSet_iff
 
-lemma models_schema_iff {𝓢 : Schema L} : M↓[L] ⊧* 𝓢 ↔ (∀ {φ : Proposition L}, φ ∈ 𝓢 → ∀ f : ℕ → M, φ.Evalf f) := by
+lemma models_schema_iff {𝔖 : Schema L} : M↓[L] ⊧* 𝔖 ↔ (∀ {φ : Proposition L}, φ ∈ 𝔖 → ∀ f : ℕ → M, φ.Evalf f) := by
   simp [models_theory_iff, models_iff]
 
 lemma models_of_mem {T : Theory L} [M↓[L] ⊧* T] {φ} (h : φ ∈ T) : M↓[L] ⊧ φ := Semantics.ModelsSet.models _ h
