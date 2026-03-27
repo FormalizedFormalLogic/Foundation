@@ -519,31 +519,11 @@ def lMap (Φ : L₁ →ᵥ L₂) {n} : Semiformula L₁ ξ n →ˡᶜ Semiformul
   map_neg' := by simp [lMapAux_neg]
   map_imply' := by simp [Semiformula.imp_eq, lMapAux_neg, ←Semiformula.neg_eq, lMapAux]
 
-lemma lMap_rel {k} (r : L₁.Rel k) (v : Fin k → Semiterm L₁ ξ n) :
-    lMap Φ (rel r v) = rel (Φ.rel r) (fun i => (v i).lMap Φ) := rfl
+@[simp] lemma lMap_rel {k} (r : L₁.Rel k) (v : Fin k → Semiterm L₁ ξ n) :
+    lMap Φ (rel r v) = rel (Φ.rel r) (Semiterm.lMap Φ ∘ v) := rfl
 
-@[simp] lemma lMap_rel₀ (r : L₁.Rel 0) (v : Fin 0 → Semiterm L₁ ξ n) :
-    lMap Φ (rel r v) = rel (Φ.rel r) ![] := by simp [lMap_rel, Matrix.empty_eq]
-
-@[simp] lemma lMap_rel₁ (r : L₁.Rel 1) (t : Semiterm L₁ ξ n) :
-    lMap Φ (rel r ![t]) = rel (Φ.rel r) ![t.lMap Φ] := by simp [lMap_rel, Matrix.constant_eq_singleton]
-
-@[simp] lemma lMap_rel₂ (r : L₁.Rel 2) (t₁ t₂ : Semiterm L₁ ξ n) :
-    lMap Φ (rel r ![t₁, t₂]) = rel (Φ.rel r) ![t₁.lMap Φ, t₂.lMap Φ] := by
-  simp [lMap_rel, Matrix.fun_eq_vec_two]
-
-lemma lMap_nrel {k} (r : L₁.Rel k) (v : Fin k → Semiterm L₁ ξ n) :
-    lMap Φ (nrel r v) = nrel (Φ.rel r) (fun i => (v i).lMap Φ) := rfl
-
-@[simp] lemma lMap_nrel₀ (r : L₁.Rel 0) (v : Fin 0 → Semiterm L₁ ξ n) :
-    lMap Φ (nrel r v) = nrel (Φ.rel r) ![] := by simp [lMap_nrel, Matrix.empty_eq]
-
-@[simp] lemma lMap_nrel₁ (r : L₁.Rel 1) (t : Semiterm L₁ ξ n) :
-    lMap Φ (nrel r ![t]) = nrel (Φ.rel r) ![t.lMap Φ] := by simp [lMap_nrel, Matrix.constant_eq_singleton]
-
-@[simp] lemma lMap_nrel₂ (r : L₁.Rel 2) (t₁ t₂ : Semiterm L₁ ξ n) :
-    lMap Φ (nrel r ![t₁, t₂]) = nrel (Φ.rel r) ![t₁.lMap Φ, t₂.lMap Φ] := by
-  simp [lMap_nrel, Matrix.fun_eq_vec_two]
+@[simp] lemma lMap_nrel {k} (r : L₁.Rel k) (v : Fin k → Semiterm L₁ ξ n) :
+    lMap Φ (nrel r v) = nrel (Φ.rel r) (Semiterm.lMap Φ ∘ v) := rfl
 
 @[simp] lemma lMap_all (φ : Semiformula L₁ ξ (n + 1)) :
     lMap Φ (∀⁰ φ) = ∀⁰ lMap Φ φ := rfl

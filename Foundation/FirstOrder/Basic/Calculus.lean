@@ -167,7 +167,7 @@ lemma shifts_image (Φ : L₁ →ᵥ L₂) {Δ : List (Proposition L₁)} :
 def lMap (Φ : L₁ →ᵥ L₂) {Γ} : ⊢ᴷ Γ → ⊢ᴷ Γ.map (.lMap Φ)
   | identity r v =>
     .cast (identity (Φ.rel r) (fun i ↦ .lMap Φ (v i)))
-    (by simp [Semiformula.lMap_rel, Semiformula.lMap_nrel])
+    (by simp [Function.comp_def])
   | cut (Γ := Γ) (Δ := Δ) (φ := φ) d dn =>
     have : ⊢ᴷ (Γ.map (.lMap Φ) ++ Δ.map (.lMap Φ) : Sequent L₂) :=
       cut (φ := .lMap Φ φ) (Derivation.cast (lMap Φ d) (by simp)) (Derivation.cast (lMap Φ dn) (by simp))
@@ -398,17 +398,6 @@ def Schema.theory (𝔖 : Schema L) : Theory L := {σ | 𝔖 ⊢ ↑σ}
 
 @[simp] lemma Schema.mem_theory {𝔖 : Schema L} :
     σ ∈ 𝔖.theory ↔ 𝔖 ⊢ ↑σ := by simp [Schema.theory]
-
-namespace Theory
-
-instance : Entailment (Theory L) (Sentence L) where
-  Prf T σ := PLift (σ ∈ T)
-
-@[simp] lemma provable_iff (σ : Sentence L) (T : Theory L) :
-    T ⊢ σ ↔ σ ∈ T :=
-  ⟨fun h ↦ PLift.down h.some, fun h ↦ ⟨⟨h⟩⟩⟩
-
-end Theory
 
 end FirstOrder
 

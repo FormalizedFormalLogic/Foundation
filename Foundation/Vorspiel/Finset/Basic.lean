@@ -73,6 +73,15 @@ lemma sup_univ_cast {α : Type _} [SemilatticeSup α] [OrderBot α] {n} (f : Fin
 
 end
 
+lemma biUnion_eq_empty [DecidableEq β] {s : Finset α} {f : α → Finset β} :
+    s.biUnion f = ∅ ↔ ∀ i ∈ s, f i = ∅ := by
+  constructor
+  · intro h a ha; ext b
+    have := by simpa using congrFun (congrArg Membership.mem h) b
+    simpa using this a ha
+  · intro h; ext b
+    suffices ∀ x ∈ s, b ∉ f x by simpa
+    intro a ha; simpa using congrFun (congrArg Membership.mem (h a ha)) b
 
 end Finset
 

@@ -97,10 +97,10 @@ instance sound (𝔖 : Schema L) :
   ⟨Schema.sound_sentence⟩
 
 lemma models_of_subtheory {𝔖 𝔗 : Schema L} [𝔖 ⪯ 𝔗] {M : Type*} [Structure L M] [Nonempty M] : M↓[L] ⊧* 𝔗 → M↓[L] ⊧* 𝔖 :=
-  fun hM ↦ ⟨ fun {σ} hσ ↦ by
+  fun hM ↦ ⟨fun {σ} hσ ↦ by
     rcases show ∃ φ ∈ 𝔖, univCl φ = σ by simpa using hσ with ⟨φ, hφ, rfl⟩
     have : 𝔗 ⊢ φ := (inferInstanceAs (𝔖 ⪯ 𝔗)).pbl (Entailment.by_axm hφ)
-    exact Schema.sound_proposition' this hM ⟩
+    exact Schema.sound_proposition' this hM⟩
 
 lemma consistent_of_satisfiable (h : Semantics.Satisfiable (Struc.{v, u} L) 𝔖) : Entailment.Consistent 𝔖 :=
   Entailment.Pullback.consistent <| Sound.consistent_of_satisfiable (𝓢 := Entailment.pullback 𝔖 ((↑·) : Sentence L → Proposition L)) h
