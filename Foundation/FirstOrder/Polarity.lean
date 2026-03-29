@@ -102,6 +102,6 @@ lemma Positive.eq_true {n} {φ : Semiformula L ξ n} (h : φ.Positive) : φ.pola
 lemma Negative.eq_false {n} {φ : Semiformula L ξ n} (h : φ.Negative) : φ.polarity = false := h
 
 @[simp] lemma polarity_rew (ω : Rew L ξ₁ n₁ ξ₂ n₂) (φ : Semiformula L ξ₁ n₁) : (ω ▹ φ).polarity = φ.polarity := by
-  induction φ using rec' <;> simp [polarity, *, Semiformula.rew_rel, Semiformula.rew_nrel]
+  induction φ using rec' <;> simp [polarity, *]
 
 end LO.FirstOrder.Semiformula

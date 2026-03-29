@@ -827,6 +827,13 @@ def shifts [Rewriting L ℕ F ℕ F] (Γ : List (F n)) : List (F n) := Γ.map Re
 
 scoped[LO.FirstOrder] postfix:max "⁺" => FirstOrder.Rewriting.shifts
 
+@[simp] lemma shifts_nil [Rewriting L ℕ F ℕ F] : ([] : List (F n))⁺ = [] := by rfl
+
+@[simp] lemma shifts_cons [Rewriting L ℕ F ℕ F] (φ : F n) (Γ : List (F n)) : (φ :: Γ)⁺ = shift φ :: Γ⁺ := by simp [shifts]
+
+@[simp] lemma shifts_neg [Rewriting L ℕ F ℕ F] (Γ : List (F n)) : (∼Γ)⁺ = ∼(Γ⁺) := by
+  simp [shifts, List.tilde_def]
+
 @[coe] abbrev emb {ο ξ} [IsEmpty ο] {O F : ℕ → Type*} [LCWQ O] [LCWQ F] [Rewriting L ο O ξ F] (φ : O n) : F n := @Rew.emb L ο _ ξ n ▹ φ
 
 end Rewriting

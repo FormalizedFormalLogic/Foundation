@@ -23,7 +23,7 @@ inductive Redux (T : Theory L) : Code L → Sequent L → Sequent L → Prop
   | andRefl {Γ : Sequent L} {φ ψ : Proposition L} : φ ⋏ ψ ∉ Γ → Redux T (Code.and φ ψ) Γ Γ
   | or {Γ : Sequent L} {φ ψ : Proposition L} : φ ⋎ ψ ∈ Γ → Redux T (Code.or φ ψ) (φ :: ψ :: Γ) Γ
   | orRefl {Γ : Sequent L} {φ ψ : Proposition L} : φ ⋎ ψ ∉ Γ → Redux T (Code.or φ ψ) Γ Γ
-  | all {Γ : Sequent L} {φ : Semiproposition L 1} : ∀⁰ φ ∈ Γ → Redux T (Code.all φ) (φ/[&(newVar Γ)] :: Γ) Γ
+  | all {Γ : Sequent L} {φ : Semiproposition L 1} : ∀⁰ φ ∈ Γ → Redux T (Code.all φ) (φ/[&Γ.newVar] :: Γ) Γ
   | allRefl {Γ : Sequent L} {φ : Semiproposition L 1} : ∀⁰ φ ∉ Γ → Redux T (Code.all φ) Γ Γ
   | exs {Γ : Sequent L} {φ : Semiproposition L 1} {t : SyntacticTerm L} :
     ∃⁰ φ ∈ Γ → Redux T (Code.exs φ t) (φ/[t] :: Γ) Γ
@@ -34,6 +34,7 @@ inductive Redux (T : Theory L) : Code L → Sequent L → Sequent L → Prop
 
 local notation:25 Δ₁" ≺[" c:25 "] " Δ₂:80 => Redux T c Δ₁ Δ₂
 
+/--/
 lemma Redux.antimonotone {c : Code L} {Δ₂ Δ₁ : Sequent L} (h : Δ₂ ≺[c] Δ₁) : Δ₁ ⊆ Δ₂ := by
   cases h <;> simp [List.subset_cons_of_subset _ (List.subset_cons_self _ _)]
 

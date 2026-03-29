@@ -30,6 +30,8 @@ lemma not_fvar?_newVar {φ : Proposition L} {Γ : Sequent L} (h : φ ∈ Γ) : �
 @[simp] lemma rew_neg_comm {Γ : Sequent L} (ω : Rew L ℕ 0 ℕ 0) :
     (∼Γ).map (ω ▹ ·) = ∼Γ.map (ω ▹ ·) := by simp [List.tilde_def]
 
+def IsClosed (Γ : Sequent L) : Prop := ∃ φ ∈ Γ, ∼φ ∈ Γ
+
 end Sequent
 
 /-! ## Derivation for one-sided $\mathbf{LK}$ -/
@@ -117,6 +119,10 @@ def eta : (φ : Proposition L) → ⊢ᴷ [φ, ∼φ]
 
 def close (φ : Proposition L) (hp : φ ∈ Δ := by simp) (hn : ∼φ ∈ Δ := by simp) : ⊢ᴷ Δ :=
   eta φ |>.weakening (by simp [hp, hn])
+
+lemma of_isClosed {Γ : Sequent L} (h : Γ.IsClosed) : Nonempty (⊢ᴷ Γ) := by
+  rcases h with ⟨φ, hp, hn⟩
+  exact ⟨close φ hp hn⟩
 
 instance : OneSidedLK (Derivation (L := L)) where
   verum := verum

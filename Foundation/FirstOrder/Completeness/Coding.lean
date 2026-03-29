@@ -34,21 +34,21 @@ def Code.equiv (L : Language.{u}) :
   toFun := fun c =>
     match c with
     | (Code.axL r v) => Sum.inl ⟨_, r, v⟩
-    | Code.verum     => Sum.inr $ Sum.inl ()
+    | Code.verum => Sum.inr $ Sum.inl ()
     | (Code.and φ ψ) => Sum.inr $ Sum.inr $ Sum.inl (φ, ψ)
-    | (Code.or φ ψ)  => Sum.inr $ Sum.inr $ Sum.inr $ Sum.inl (φ, ψ)
-    | (Code.all φ)   => Sum.inr $ Sum.inr $ Sum.inr $ Sum.inr $ Sum.inl φ
-    | (Code.exs φ t)  => Sum.inr $ Sum.inr $ Sum.inr $ Sum.inr $ Sum.inr $ Sum.inl (φ, t)
-    | (Code.id σ)    => Sum.inr $ Sum.inr $ Sum.inr $ Sum.inr $ Sum.inr $ Sum.inr σ
+    | (Code.or φ ψ) => Sum.inr $ Sum.inr $ Sum.inr $ Sum.inl (φ, ψ)
+    | (Code.all φ) => Sum.inr $ Sum.inr $ Sum.inr $ Sum.inr $ Sum.inl φ
+    | (Code.exs φ t) => Sum.inr $ Sum.inr $ Sum.inr $ Sum.inr $ Sum.inr $ Sum.inl (φ, t)
+    | (Code.id σ) => Sum.inr $ Sum.inr $ Sum.inr $ Sum.inr $ Sum.inr $ Sum.inr σ
   invFun := fun x =>
     match x with
-    | (Sum.inl ⟨_, r, v⟩)                                                => Code.axL r v
-    | (Sum.inr $ Sum.inl ())                                             => Code.verum
-    | (Sum.inr $ Sum.inr $ Sum.inl (φ, ψ))                               => Code.and φ ψ
-    | (Sum.inr $ Sum.inr $ Sum.inr $ Sum.inl (φ, ψ))                     => Code.or φ ψ
-    | (Sum.inr $ Sum.inr $ Sum.inr $ Sum.inr $ Sum.inl φ)                => Code.all φ
+    | (Sum.inl ⟨_, r, v⟩) => Code.axL r v
+    | (Sum.inr $ Sum.inl ()) => Code.verum
+    | (Sum.inr $ Sum.inr $ Sum.inl (φ, ψ)) => Code.and φ ψ
+    | (Sum.inr $ Sum.inr $ Sum.inr $ Sum.inl (φ, ψ)) => Code.or φ ψ
+    | (Sum.inr $ Sum.inr $ Sum.inr $ Sum.inr $ Sum.inl φ) => Code.all φ
     | (Sum.inr $ Sum.inr $ Sum.inr $ Sum.inr $ Sum.inr $ Sum.inl (φ, t)) => Code.exs φ t
-    | (Sum.inr $ Sum.inr $ Sum.inr $ Sum.inr $ Sum.inr $ Sum.inr σ)      => Code.id σ
+    | (Sum.inr $ Sum.inr $ Sum.inr $ Sum.inr $ Sum.inr $ Sum.inr σ) => Code.id σ
   left_inv := fun c => by cases c <;> simp
   right_inv := fun x => by
     rcases x with (⟨_, _, _⟩ | ⟨⟩ | ⟨_, _⟩ | ⟨_, _⟩ | _ | ⟨_, _⟩ | _) <;> simp
