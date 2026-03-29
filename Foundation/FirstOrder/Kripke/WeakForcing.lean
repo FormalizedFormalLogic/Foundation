@@ -280,11 +280,22 @@ instance : WeakForcingRelation.ClassicalKripke ℙ (· ≥ ·) where
   monotone := monotone
   generic := generic
 
-lemma sound {T : Theory L} (b : T ⊢ φ) : ℙ ∀⊩ᶜ* T → ℙ ∀⊩ᶜ φ := fun H ↦
+lemma sound : 𝐋𝐊¹ ⊢ φ → ∀ p : ℙ, ∀ fv, (∀ i, p ⊩↓ fv i) → p ⊩ᶜ[![] | fv] φ := fun b p fv Hfv ↦ by
+  have : 𝗜𝗻𝘁¹ ⊢ φᴺ := Proof.gödel_gentzen b
+  exact Forces.sound p fv Hfv this
+
+lemma sound₀ {φ : Sentence L} : 𝐋𝐊¹ ⊢ (φ : Proposition L) → ℙ ∀⊩ᶜ φ := fun b p ↦ by {
+  have := sound b p
+ }
+
+
+
+lemma sound : 𝐋𝐊¹ ⊢ φ → ℙ ∀⊩ᶜ φ.univCl := fun H ↦
   Forces₀.sound (W := ℙ) (gödel_gentzen b (Λ := 𝗜𝗻𝘁¹)) fun φ hφ ↦ (by
     rcases show ∃ ψ ∈ T, ψᴺ = φ by simpa [Theory.ToTheoryᵢ] using hφ with ⟨ψ, hψ, rfl⟩
     exact H ψ hψ)
 
+/--/
 end WeaklyForces₀
 
 end KripkeModel

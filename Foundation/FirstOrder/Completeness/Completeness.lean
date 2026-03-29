@@ -1,94 +1,61 @@
 module
 
-public import Foundation.FirstOrder.Completeness.SearchTree
-public import Foundation.FirstOrder.Completeness.SubLanguage
 public import Foundation.FirstOrder.Ultraproduct
+public import Foundation.Vorspiel.List.ChainI
+public import Mathlib.Data.Finset.Lattice.Lemmas
 
 @[expose] public section
-namespace LO
+namespace LO.FirstOrder
 
-namespace FirstOrder
+namespace Completeness
 
-open Classical Semiformula Completeness
+variable (L : Language)
 
-variable {L : Language.{u}} {T : Theory L}
+abbrev Clause := Finset (Proposition L)
 
-section Encodable
+variable {L}
 
-variable [L.Encodable]
+namespace Clause
 
-noncomputable def Derivation.completeness_of_encodable
-  {Γ : Sequent L} (h : ∀ M [Nonempty M] [Structure L M], M ⊧ₘ* T → ∃ φ ∈ Γ, ∀ f, Semiformula.Evalfm M f φ) : (T : Schema L) ⟹ Γ := by
-  have : WellFounded (SearchTree.Lt T Γ) := by
-    by_contra nwf
-    have : ∃ φ ∈ Γ, ∀ f, Semiformula.Evalfm (Model T Γ) f φ := h _ (Model.models nwf)
-    rcases this with ⟨φ, hp, h⟩
-    have : Evalf (Model.structure T Γ) (&·) φ := h (&·)
-    have : ¬Evalf (Model.structure T Γ) (&·) φ := by simpa using semanticMainLemmaTop nwf (φ := φ) hp
-    contradiction
-  exact syntacticMainLemmaTop this
+def IsClosed (C : Clause L) : Prop := ∃ φ ∈ C, ∼φ ∈ C
 
-lemma completeness_of_encodable {φ : Sentence L} :
-    T ⊨ φ → T ⊢ φ := fun h ↦
-  ⟨Derivation.completeness_of_encodable (T := T) (Γ := [φ])
-    fun _ _ _ hM ↦ ⟨φ, List.mem_of_mem_head? rfl, fun _ ↦ by simpa using h hM⟩⟩
+def shift (C : Clause L) : Clause L := C.map ⟨Semiformula.shift, LawfulSyntacticRewriting.shift_injective⟩
 
-instance : Complete T (Semantics.models (SmallStruc L) T):= ⟨completeness_of_encodable⟩
+inductive IsBoundary (C : Clause L) : Proposition L → Prop
+| rel (R : L.Rel k) (v) : IsBoundary C (.rel R v)
+| nrel (R : L.Rel k) (v) : IsBoundary C (.nrel R v)
+| verum : IsBoundary C ⊤
+| falsum : IsBoundary C ⊥
+| and {φ ψ} : φ ∉ C → ψ ∉ C → IsBoundary C (φ ⋏ ψ)
+| or {φ ψ} : φ ∉ C ∨ ψ ∉ C → IsBoundary C (φ ⋎ ψ)
 
-end Encodable
+
+def rank (C : Clause L) : ℕ := C.fold (λ φ r => max φ.rank r) 0
+
+end Clause
 
 open Classical
 
-theorem complete {φ : Sentence L} :
-    T ⊨ φ → T ⊢ φ := fun h ↦ by
-  have : ∃ u : Finset (Sentence L), ↑u ⊆ insert (∼φ) T ∧ ¬Satisfiable (u : Theory L) := by
-    simpa using compact.not.mp (consequence_iff_unsatisfiable.mp h)
-  rcases this with ⟨u, ssu, hu⟩
-  haveI : ∀ k, Encodable ((languageFinset u).Func k) := fun _ ↦ Fintype.toEncodable _
-  haveI : ∀ k, Encodable ((languageFinset u).Rel k) := fun _ ↦ Fintype.toEncodable _
-  let u' : Finset (Sentence (languageFinset u)) := Finset.imageOfFinset u (fun _ hp ↦ toSubLanguageFinsetSelf hp)
-  have image_u' : u'.image (Semiformula.lMap L.ofSubLanguage) = u := by
-    ext τ
-    simp only [Finset.mem_image, Finset.mem_imageOfFinset_iff, u']
-    exact ⟨by rintro ⟨a, ⟨τ, hτ, rfl⟩, rfl⟩; simp [hτ],
-      by intro hτ; exact ⟨toSubLanguageFinsetSelf hτ, ⟨τ, hτ, rfl⟩, Semiformula.lMap_toSubLanguageFinsetSelf hτ⟩⟩
-  have : ¬Satisfiable (u' : Theory (languageFinset u)) := by
-    intro h
-    have : Satisfiable (u : Theory L) := by
-      rw [←image_u']
-      simpa using (satisfiable_lMap L.ofSubLanguage (fun k ↦ Subtype.val_injective) (fun _ ↦ Subtype.val_injective) h)
-    contradiction
-  have : Entailment.Inconsistent (u' : Theory (languageFinset u)) := Complete.inconsistent_of_unsatisfiable this
-  have : Entailment.Inconsistent (u : Theory L) := by rw [←image_u']; simpa using Theory.inconsistent_lMap L.ofSubLanguage this
-  have : Entailment.Inconsistent (insert (∼φ) T) := this.of_supset ssu
-  exact Entailment.provable_iff_inconsistent_adjoin.mpr this
+inductive Search : Clause L → Clause L → Prop
+| and_left {C : Clause L} : ¬C.IsClosed → φ ⋏ ψ ∈ C → Search (insert φ C) C
+| and_right {C : Clause L} : ¬C.IsClosed → φ ⋏ ψ ∈ C → Search (insert ψ C) C
+| or {C : Clause L} : ¬C.IsClosed → φ ⋎ ψ ∈ C → Search (insert φ (insert ψ C)) C
+| all {C : Clause L} : ¬C.IsClosed → ∀⁰ φ ∈ C → Search (insert φ.free C.shift) C
+| exs {C : Clause L} : ¬C.IsClosed → ∃⁰ φ ∈ C → (t : SyntacticTerm L) → Search (insert (φ/[t]) C) C
 
-theorem complete_iff : T ⊨ φ ↔ T ⊢ φ :=
-  ⟨fun h ↦ complete h, sound!⟩
+structure SearchPath (C : Clause L) where
+  path : List (Clause L)
+  last : Clause L
+  chain : path.ChainI Search last C
 
-instance (T : Theory L) : Complete T (Semantics.models (SmallStruc L) T) := ⟨complete⟩
+namespace SearchPath
 
-lemma satisfiable_of_consistent' (h : Entailment.Consistent T) : Semantics.Satisfiable (SmallStruc L) T :=
-  Complete.satisfiable_of_consistent h
+variable {C : Clause L}
 
-lemma satisfiable_of_consistent (h : Entailment.Consistent T) : Semantics.Satisfiable (Struc.{max u w} L) T := by
-  let ⟨M, _, _, h⟩ := satisfiable_iff.mp (satisfiable_of_consistent' h)
-  exact satisfiable_iff.mpr ⟨ULift.{w} M, inferInstance, inferInstance, ((uLift_elementaryEquiv L M).modelsTheory).mpr h⟩
+instance : LE (SearchPath C) where
+  le π τ := π.path <+: τ.path
 
-lemma satisfiable_iff_consistent' : Semantics.Satisfiable (Struc.{max u w} L) T ↔ Entailment.Consistent T :=
-  ⟨consistent_of_satisfiable, satisfiable_of_consistent.{u, w}⟩
+end SearchPath
 
-lemma satisfiable_iff_consistent : Satisfiable T ↔ Entailment.Consistent T := satisfiable_iff_consistent'.{u, u}
 
-lemma satisfiable_iff_satisfiable : Semantics.Satisfiable (Struc.{max u w} L) T ↔ Satisfiable T := by
-  simp [satisfiable_iff_consistent'.{u, w}, satisfiable_iff_consistent]
-
-lemma consequence_iff_consequence : T ⊨[Struc.{max u w} L] φ ↔ T ⊨ φ := by
-  simp [consequence_iff_unsatisfiable, satisfiable_iff_satisfiable.{u, w}]
-
-theorem complete' {φ : Sentence L} :
-    T ⊨[Struc.{max u w} L] φ → T ⊢ φ := fun h ↦ complete <| consequence_iff_consequence.{u, w}.mp h
-
-instance (T : Theory L) : Complete T (Semantics.models (Struc.{max u w} L) T) := ⟨complete'.{u, w}⟩
-
-end FirstOrder
+end LO.FirstOrder.Completeness

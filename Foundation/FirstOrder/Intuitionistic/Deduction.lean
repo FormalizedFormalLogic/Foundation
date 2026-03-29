@@ -99,7 +99,7 @@ variable {Λ}
 instance : Entailment.Int (𝗜𝗻𝘁¹ : Hilbertᵢ L) where
   efq := eaxm <| by simp [Hilbertᵢ.Intuitionistic]
 
-protected def cast {φ ψ} (b : Λ ⊢! φ) (e : φ = ψ) : Λ ⊢! ψ := e ▸ b
+protected def cast {φ ψ} (b : Λ ⊢! φ) (e : φ = ψ := by simp) : Λ ⊢! ψ := e ▸ b
 
 def depth {φ} : Λ ⊢! φ → ℕ
   | mdp b d => max (depth b) (depth d) + 1
@@ -146,15 +146,15 @@ def allImplyAllOfAllImply (φ ψ) : Λ ⊢! ∀⁰ (φ ➝ ψ) ➝ ∀⁰ φ ➝
   apply deduct
   apply geNOverFiniteContext
   have b₁ : [∀⁰ shift φ, ∀⁰ (shift φ ➝ shift ψ)] ⊢[Λ]! free φ ➝ free ψ :=
-    Entailment.cast (by simp) (specializeOverContext (nthAxm 1) &0)
+    Entailment.cast (specializeOverContext (nthAxm 1) &0)
   have b₂ : [∀⁰ shift φ, ∀⁰ (shift φ ➝ shift ψ)] ⊢[Λ]! free φ :=
-    Entailment.cast (by simp) (specializeOverContext (nthAxm 0) &0)
+    Entailment.cast (specializeOverContext (nthAxm 0) &0)
   have : [∀⁰ φ, ∀⁰ (φ ➝ ψ)]⁺ ⊢[Λ]! free ψ := cast (by simp) (b₁ ⨀ b₂)
   exact this
 
 def allIffAllOfIff {φ ψ} (b : Λ ⊢! free φ ⭤ free ψ) : Λ ⊢! ∀⁰ φ ⭤ ∀⁰ ψ := Entailment.K_intro
-  (allImplyAllOfAllImply φ ψ ⨀ gen (Entailment.cast (by simp) (Entailment.K_left b)))
-  (allImplyAllOfAllImply ψ φ ⨀ gen (Entailment.cast (by simp) (Entailment.K_right b)))
+  (allImplyAllOfAllImply φ ψ ⨀ gen (Entailment.cast (Entailment.K_left b)))
+  (allImplyAllOfAllImply ψ φ ⨀ gen (Entailment.cast (Entailment.K_right b)))
 
 def dneOfNegative [L.DecidableEq] : {φ : Propositionᵢ L} → φ.IsNegative → Λ ⊢! ∼∼φ ➝ φ
   | ⊥,     _ => Entailment.CNNOO
@@ -176,9 +176,9 @@ def dneOfNegative [L.DecidableEq] : {φ : Propositionᵢ L} → φ.IsNegative �
     have ihφ : Λ ⊢! ∼∼(free φ) ➝ free φ := dneOfNegative (by simp [by simpa using h])
     have : [∀⁰ shift φ, ∼(free φ), ∼∼(∀⁰ shift φ)] ⊢[Λ]! ⊥ :=
       have : [∀⁰ shift φ, ∼(free φ), ∼∼(∀⁰ shift φ)] ⊢[Λ]! ∀⁰ shift φ := byAxm₀
-      byAxm₁ ⨀ Entailment.cast (by simp) (specializeOverContext this &0)
+      byAxm₁ ⨀ Entailment.cast (specializeOverContext this &0)
     have : [∼∼(∀⁰ shift φ)] ⊢[Λ]! free φ := of ihφ ⨀ deduct (byAxm₁ ⨀ deduct this)
-    implyAll (Entailment.cast (by simp) (deduct' this))
+    implyAll (Entailment.cast (deduct' this))
   termination_by φ _ => φ.complexity
 
 def ofDNOfNegative [L.DecidableEq] {φ : Propositionᵢ L} {Γ} (b : Γ ⊢[Λ]! ∼∼φ) (h : φ.IsNegative) : Γ ⊢[Λ]! φ :=
@@ -198,7 +198,7 @@ def efqOfNegative : {φ : Propositionᵢ L} → φ.IsNegative → Λ ⊢! ⊥ �
     Entailment.C_trans ihψ Entailment.implyK
   | ∀⁰ φ,  h =>
     have ihφ : Λ ⊢! ⊥ ➝ free φ := efqOfNegative (by simp [by simpa using h])
-    implyAll <| Entailment.cast (by simp) ihφ
+    implyAll <| Entailment.cast ihφ
   termination_by φ _ => φ.complexity
 
 def iffnegOfNegIff [L.DecidableEq] {φ ψ : Propositionᵢ L} (h : φ.IsNegative) (b : Λ ⊢! ∼φ ⭤ ψ) : Λ ⊢! φ ⭤ ∼ψ :=
