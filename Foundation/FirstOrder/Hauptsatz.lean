@@ -15,65 +15,63 @@ variable {L : Language.{u}}
 
 namespace Derivation
 
-inductive IsCutFree : {Γ : Sequent L} → ⊢ᵀ Γ → Prop
-| axL (r : L.Rel k) (v) : IsCutFree (axL r v)
+inductive IsCutFree : {Γ : Sequent L} → ⊢ᴷ Γ → Prop
+| axL (r : L.Rel k) (v) : IsCutFree (identity r v)
 | verum : IsCutFree verum
-| or {d : ⊢ᵀ φ :: ψ :: Γ} : IsCutFree d → IsCutFree d.or
-| and {dφ : ⊢ᵀ φ :: Γ} {dψ : ⊢ᵀ ψ :: Γ} : IsCutFree dφ → IsCutFree dψ → IsCutFree (dφ.and dψ)
-| all {d : ⊢ᵀ Rewriting.free φ :: Γ⁺} : IsCutFree d → IsCutFree d.all
-| exs (t) {d : ⊢ᵀ φ/[t] :: Γ} : IsCutFree d → IsCutFree d.exs
-| wk  {d : ⊢ᵀ Δ} (ss : Δ ⊆ Γ) : IsCutFree d → IsCutFree (d.wk ss)
+| or {d : ⊢ᴷ φ :: ψ :: Γ} : IsCutFree d → IsCutFree d.or
+| and {dφ : ⊢ᴷ φ :: Γ} {dψ : ⊢ᴷ ψ :: Γ} : IsCutFree dφ → IsCutFree dψ → IsCutFree (dφ.and dψ)
+| all {d : ⊢ᴷ Rewriting.free φ :: Γ⁺} : IsCutFree d → IsCutFree d.all
+| exs (t) {d : ⊢ᴷ φ/[t] :: Γ} : IsCutFree d → IsCutFree d.exs
+| wk  {d : ⊢ᴷ Δ} (ss : Δ ⊆ Γ) : IsCutFree d → IsCutFree (d.wk ss)
 
 attribute [simp] IsCutFree.axL IsCutFree.verum
 
 variable {Γ Δ : Sequent L}
 
-@[simp] lemma isCutFree_or_iff {d : ⊢ᵀ φ :: ψ :: Γ} :
+@[simp] lemma isCutFree_or_iff {d : ⊢ᴷ φ :: ψ :: Γ} :
     IsCutFree d.or ↔ IsCutFree d := ⟨by rintro ⟨⟩; assumption, .or⟩
 
-@[simp] lemma isCutFree_and_iff {dφ : ⊢ᵀ φ :: Γ} {dψ : ⊢ᵀ ψ :: Γ} :
+@[simp] lemma isCutFree_and_iff {dφ : ⊢ᴷ φ :: Γ} {dψ : ⊢ᴷ ψ :: Γ} :
     IsCutFree (dφ.and dψ) ↔ IsCutFree dφ ∧ IsCutFree dψ :=
   ⟨by rintro ⟨⟩; constructor <;> assumption, by intro ⟨hφ, hψ⟩; exact hφ.and hψ⟩
 
-@[simp] lemma isCutFree_all_iff {d : ⊢ᵀ Rewriting.free φ :: Γ⁺} :
+@[simp] lemma isCutFree_all_iff {d : ⊢ᴷ Rewriting.free φ :: Γ⁺} :
     IsCutFree d.all ↔ IsCutFree d := ⟨by rintro ⟨⟩; assumption, .all⟩
 
-@[simp] lemma isCutFree_exs_iff {d : ⊢ᵀ φ/[t] :: Γ} :
+@[simp] lemma isCutFree_exs_iff {d : ⊢ᴷ φ/[t] :: Γ} :
     IsCutFree d.exs ↔ IsCutFree d := ⟨by rintro ⟨⟩; assumption, .exs t⟩
 
-@[simp] lemma isCutFree_wk_iff {d : ⊢ᵀ Δ} {ss : Δ ⊆ Γ} :
+@[simp] lemma isCutFree_wk_iff {d : ⊢ᴷ Δ} {ss : Δ ⊆ Γ} :
     IsCutFree (d.wk ss) ↔ IsCutFree d := ⟨by rintro ⟨⟩; assumption, .wk _⟩
 
-@[simp] lemma IsCutFree.cast {d : ⊢ᵀ Γ} {e : Γ = Δ} :
+@[simp] lemma IsCutFree.cast {d : ⊢ᴷ Γ} {e : Γ = Δ} :
     IsCutFree (.cast d e) ↔ IsCutFree d := by rcases e; rfl
 
-@[simp] lemma IsCutFree.not_cut (dp : ⊢ᵀ φ :: Γ) (dn : ⊢ᵀ ∼φ :: Γ) : ¬IsCutFree (dp.cut dn) := by rintro ⟨⟩
+@[simp] lemma IsCutFree.not_cut (dp : ⊢ᴷ φ :: Γ) (dn : ⊢ᴷ ∼φ :: Δ) : ¬IsCutFree (dp.cut dn) := by
+  intro h
+  refine h.rec
+    (motive := fun {_} d _ =>
+      match d with
+      | .cut _ _ => False
+      | _ => True)
+    ?_ ?_ ?_ ?_ ?_ ?_ ?_
+  all_goals simp
 
-@[simp] lemma isCutFree_rewrite_iff_isCutFree {f : ℕ → SyntacticTerm L} {d : ⊢ᵀ Γ} :
-    IsCutFree (rewrite d f) ↔ IsCutFree d := by
-  induction d generalizing f
-  case axm => contradiction
-  case _ => simp [rewrite, *]
-  case _ => simp [rewrite, *]
-  case _ => simp [rewrite, *]
-  case _ => simp [rewrite, *]
-  case _ => simp [rewrite, *]
-  case _ => simp [rewrite, *]
-  case _ => simp [rewrite, *]
-  case _ => simp [rewrite, *]
+@[simp] lemma isCutFree_rewrite_iff_isCutFree {f : ℕ → SyntacticTerm L} {d : ⊢ᴷ Γ} :
+    IsCutFree (rewrite f d) ↔ IsCutFree d := by
+  induction d generalizing f <;> simp [rewrite, *]
 
-@[simp] lemma isCutFree_map_iff_isCutFree {f : ℕ → ℕ} {d : ⊢ᵀ Γ} :
+@[simp] lemma isCutFree_map_iff_isCutFree {f : ℕ → ℕ} {d : ⊢ᴷ Γ} :
     IsCutFree (Derivation.map d f) ↔ IsCutFree d := isCutFree_rewrite_iff_isCutFree
 
 @[simp] lemma IsCutFree.genelalizeByNewver_isCutFree {φ : Semiproposition L 1} (hp : ¬φ.FVar? m) (hΔ : ∀ ψ ∈ Δ, ¬ψ.FVar? m)
-    (d : ⊢ᵀ φ/[&m] :: Δ) : IsCutFree (genelalizeByNewver hp hΔ d) ↔ IsCutFree d := by simp [genelalizeByNewver]
+    (d : ⊢ᴷ φ/[&m] :: Δ) : IsCutFree (genelalizeByNewver hp hΔ d) ↔ IsCutFree d := by simp [genelalizeByNewver]
 
 end Derivation
 
 inductive PositiveDerivationFrom (Ξ : Sequent L) : Sequent L → Type _
-| verum : PositiveDerivationFrom Ξ [⊤]
 | or : PositiveDerivationFrom Ξ (φ :: ψ :: Γ) → PositiveDerivationFrom Ξ (φ ⋎ ψ :: Γ)
-| exs (t) : PositiveDerivationFrom Ξ (φ/[t] :: Γ) → PositiveDerivationFrom Ξ ((∃⁰ φ) :: Γ)
+| exs : PositiveDerivationFrom Ξ (φ/[t] :: Γ) → PositiveDerivationFrom Ξ ((∃⁰ φ) :: Γ)
 | wk : PositiveDerivationFrom Ξ Δ → Δ ⊆ Γ → PositiveDerivationFrom Ξ Γ
 | protected id : PositiveDerivationFrom Ξ Ξ
 
@@ -86,18 +84,16 @@ variable {Ξ Γ Δ : Sequent L}
 def ofSubset (ss : Ξ ⊆ Γ) : Ξ ⟶⁺ Γ := wk .id ss
 
 def trans {Ξ Γ Δ : Sequent L} : Ξ ⟶⁺ Γ → Γ ⟶⁺ Δ → Ξ ⟶⁺ Δ
-  | _,   verum => verum
   | b,    or d => or (b.trans d)
-  | b, exs t d => exs t (b.trans d)
+  | b,   exs d => exs (b.trans d)
   | b,  wk d h => wk (b.trans d) h
   | b,     .id => b
 
 def cons {Ξ Γ : Sequent L} (φ) : Ξ ⟶⁺ Γ → φ :: Ξ ⟶⁺ φ :: Γ
-  | verum => wk verum (List.subset_cons_self _ _)
   | or (Γ := Γ) (φ := ψ) (ψ := χ) d =>
     have : φ :: Ξ ⟶⁺ ψ :: χ :: φ :: Γ := wk (cons φ d) (by simp; tauto)
     wk (or this) (by simp)
-  | exs (Ξ := Ξ) (Γ := Γ) (φ := ψ) t d =>
+  | exs (Ξ := Ξ) (Γ := Γ) (φ := ψ) (t := t) d =>
     have : φ :: Ξ ⟶⁺ ψ/[t] :: φ :: Γ := wk (cons φ d) (by simp)
     wk this.exs (by simp)
   | wk d h => wk (d.cons φ) (by simp [h])
@@ -108,20 +104,18 @@ def append {Ξ Γ : Sequent L} : (Δ : Sequent L) → Ξ ⟶⁺ Γ → Δ ++ Ξ 
   | φ :: Δ, d => (d.append Δ).cons φ
 
 def add {Γ Δ Ξ Θ : Sequent L} : Γ ⟶⁺ Δ → Ξ ⟶⁺ Θ → Γ ++ Ξ ⟶⁺ Δ ++ Θ
-  |   verum, d => wk verum (by simp)
   |    or d, b => or (d.add b)
-  | exs t d, b => exs t (d.add b)
+  |   exs d, b => exs (d.add b)
   |  wk d h, b => wk (d.add b) (by simp [h])
   |     .id, b => b.append Γ
 
-def graft {Ξ Γ : Sequent L} (b : ⊢ᵀ Ξ) : Ξ ⟶⁺ Γ → ⊢ᵀ Γ
-  |  .verum => .verum
+def graft {Ξ Γ : Sequent L} (b : ⊢ᴷ Ξ) : Ξ ⟶⁺ Γ → ⊢ᴷ Γ
   |    or d => .or (d.graft b)
-  | exs t d => .exs t (d.graft b)
+  |   exs d => .exs (d.graft b)
   |  wk d h => .wk (d.graft b) h
   |     .id => b
 
-lemma graft_isCutFree_of_isCutFree {b : ⊢ᵀ Ξ} {d : Ξ ⟶⁺ Γ} (hb : Derivation.IsCutFree b) : Derivation.IsCutFree (d.graft b) := by
+lemma graft_isCutFree_of_isCutFree {b : ⊢ᴷ Ξ} {d : Ξ ⟶⁺ Γ} (hb : Derivation.IsCutFree b) : Derivation.IsCutFree (d.graft b) := by
   induction d <;> simp [graft, *]
 
 end PositiveDerivationFrom
@@ -157,7 +151,7 @@ def K_left {p : ℙ} (φ ψ : Proposition L) : φ ⋏ ψ :: p ≼ φ :: p := tra
 
 def K_right {p : ℙ} (φ ψ : Proposition L) : φ ⋏ ψ :: p ≼ ψ :: p := trans (and φ ψ) (ofSubset <| by simp)
 
-def all {p : ℙ} (φ : Semiproposition L 1) (t) : (∀⁰ φ) :: p ≼ φ/[t] :: p := ⟨.exs t (by simpa [← Semiformula.neg_eq] using .id)⟩
+def all {p : ℙ} (φ : Semiproposition L 1) (t) : (∀⁰ φ) :: p ≼ φ/[t] :: p := ⟨.exs (t := t) (by simpa [← Semiformula.neg_eq] using .id)⟩
 
 def minLeLeft (p q : ℙ) : p ⊓ q ≼ p := ofSubset (by simp [inf_def])
 
@@ -172,8 +166,8 @@ def leMinRightOfLe (s : q ≼ p) : q ≼ p ⊓ q := leMinOfle s (.refl q)
 end StrongerThan
 
 def Forces (p : ℙ) : Propositionᵢ L → Type u
-  |        ⊥ => { b : ⊢ᵀ ∼p // Derivation.IsCutFree b }
-  | .rel R v => { b : ⊢ᵀ .rel R v :: ∼p // Derivation.IsCutFree b }
+  |        ⊥ => { b : ⊢ᴷ ∼p // Derivation.IsCutFree b }
+  | .rel R v => { b : ⊢ᴷ .rel R v :: ∼p // Derivation.IsCutFree b }
   |    φ ⋏ ψ => Forces p φ × Forces p ψ
   |    φ ⋎ ψ => Forces p φ ⊕ Forces p ψ
   |    φ ➝ ψ => (q : ℙ) → q ≼ p → Forces q φ → Forces q ψ
@@ -189,9 +183,9 @@ scoped prefix:45 "⊩ " => allForces
 
 namespace Forces
 
-def falsumEquiv : p ⊩ ⊥ ≃ { b : ⊢ᵀ ∼p // Derivation.IsCutFree b} := by unfold Forces; exact .refl _
+def falsumEquiv : p ⊩ ⊥ ≃ { b : ⊢ᴷ ∼p // Derivation.IsCutFree b} := by unfold Forces; exact .refl _
 
-def relEquiv {k} {R : L.Rel k} {v} : p ⊩ .rel R v ≃ { b : ⊢ᵀ .rel R v :: ∼p // Derivation.IsCutFree b } := by
+def relEquiv {k} {R : L.Rel k} {v} : p ⊩ .rel R v ≃ { b : ⊢ᴷ .rel R v :: ∼p // Derivation.IsCutFree b } := by
   unfold Forces; exact .refl _
 
 def andEquiv {φ ψ : Propositionᵢ L} : p ⊩ φ ⋏ ψ ≃ (p ⊩ φ) × (p ⊩ ψ) := by
@@ -326,7 +320,7 @@ def ofMinimalProof {φ : Propositionᵢ L} : 𝗠𝗶𝗻¹ ⊢! φ → ⊩ φ
   termination_by b => HilbertProofᵢ.depth b
 
 def relRefl {k} (R : L.Rel k) (v : Fin k → SyntacticTerm L) : [.rel R v] ⊩ rel R v :=
-  relEquiv.symm ⟨Derivation.axL _ _, by simp⟩
+  relEquiv.symm ⟨Derivation.identity _ _, by simp⟩
 
 protected def refl.or (ihφ : [φ] ⊩ φᴺ) (ihψ : [ψ] ⊩ ψᴺ) : [φ ⋎ ψ] ⊩ (φ ⋎ ψ)ᴺ :=
   implyOf fun q dq ↦
@@ -337,22 +331,22 @@ protected def refl.or (ihφ : [φ] ⊩ φᴺ) (ihψ : [ψ] ⊩ ψᴺ) : [φ ⋎ 
     let bψ : [ψ] ⊓ q ⊩ ⊥ := dψ.implyEquiv ([ψ] ⊓ q) (.minLeRight _ _) (ihψ.monotone (.minLeLeft _ _))
     let ⟨bbφ, hbbφ⟩ := bφ.falsumEquiv
     let ⟨bbψ, hbbψ⟩ := bψ.falsumEquiv
-    let band : ⊢ᵀ ∼φ ⋏ ∼ψ :: ∼q := Derivation.and
+    let band : ⊢ᴷ ∼φ ⋏ ∼ψ :: ∼q := Derivation.and
       (Derivation.cast bbφ (by simp [inf_def])) (Derivation.cast bbψ (by simp [inf_def]))
     falsumEquiv.symm ⟨Derivation.cast band (by simp [inf_def]), by simp [band, hbbφ, hbbψ]⟩
 
 protected def refl.exs (d : ∀ x, [φ/[&x]] ⊩ (φ/[&x])ᴺ) : [∃⁰ φ] ⊩ (∃⁰ φ)ᴺ :=
   implyOf fun q f ↦
-    let x := newVar ((∀⁰ ∼φ) :: ∼q)
+    let x := Sequent.newVar ((∀⁰ ∼φ) :: ∼q)
     let ih : [φ/[&x]] ⊩ φᴺ/[&x] := cast (d x) (by simp [Semiformula.subst_doubleNegation])
     let b : [φ/[&x]] ⊓ q ⊩ ⊥ :=
       (f.allEquiv &x).implyEquiv ([φ/[&x]] ⊓ q) (StrongerThan.minLeRight _ _) (ih.monotone (StrongerThan.minLeLeft _ _))
     let ⟨b, hb⟩ := b.falsumEquiv
-    let ba : ⊢ᵀ (∀⁰ ∼φ) :: ∼q :=
+    let ba : ⊢ᴷ (∀⁰ ∼φ) :: ∼q :=
       Derivation.genelalizeByNewver (m := x)
-        (by have : ¬Semiformula.FVar? (∀⁰ ∼φ) x := not_fvar?_newVar (by simp)
+        (by have : ¬Semiformula.FVar? (∀⁰ ∼φ) x := Sequent.not_fvar?_newVar (by simp)
             simpa using this)
-        (fun ψ hψ ↦ not_fvar?_newVar (List.mem_cons_of_mem (∀⁰ ∼φ) hψ))
+        (fun ψ hψ ↦ Sequent.not_fvar?_newVar (List.mem_cons_of_mem (∀⁰ ∼φ) hψ))
         (Derivation.cast b (by simp [inf_def]))
     falsumEquiv.symm ⟨ba, by simp [ba, hb]⟩
 
@@ -388,14 +382,14 @@ def conj' : {Γ : Sequent L} → (b : (φ : Proposition L) → φ ∈ Γ → p �
 
 end Forces
 
-def main [L.DecidableEq] {Γ : Sequent L} : ⊢ᵀ Γ → {d : ⊢ᵀ Γ // Derivation.IsCutFree d} := fun d ↦
+def main [L.DecidableEq] {Γ : Sequent L} : ⊢ᴷ Γ → {d : ⊢ᴷ Γ // Derivation.IsCutFree d} := fun d ↦
   let d : 𝗠𝗶𝗻¹ ⊢! ⋀(∼Γ)ᴺ ➝ ⊥ := Entailment.FiniteContext.toDef (Derivation.gödelGentzen d)
   let ff : ∼Γ ⊩ ⋀(∼Γ)ᴺ ➝ ⊥ := Forces.ofMinimalProof d (∼Γ)
   let fc : ∼Γ ⊩ ⋀(∼Γ)ᴺ := Forces.conj' fun φ hφ ↦
     (Forces.refl φ).monotone (StrongerThan.ofSubset <| List.cons_subset.mpr ⟨hφ, by simp⟩)
   let b : ∼Γ ⊩ ⊥ := ff.modusPonens fc
   let ⟨b, hb⟩ := b.falsumEquiv
-  ⟨Derivation.cast b (Sequent.neg_neg_eq Γ), by simp [hb]⟩
+  ⟨Derivation.cast b (by simp), by simp [hb]⟩
 
 end Hauptsatz
 

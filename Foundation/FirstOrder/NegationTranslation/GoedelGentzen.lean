@@ -191,10 +191,10 @@ end Derivation
 
 open Classical
 
-theorem Proof.gödel_gentzen {φ : Proposition L} : 𝐋𝐊¹ ⊢ φ → 𝗠𝗶𝗻¹ ⊢ φᴺ := by
+theorem Proof.gödel_gentzen {φ : Proposition L} {Λ : Hilbertᵢ L} : 𝐋𝐊¹ ⊢ φ → Λ ⊢ φᴺ := by
   rintro ⟨d⟩
-  have : 𝗠𝗶𝗻¹ ⊢ ∼(∼φ)ᴺ := ⟨Derivation.gödelGentzen d (Λ := 𝗠𝗶𝗻¹)⟩
-  exact Entailment.K!_left (Derivation.neg_doubleNegation' φ (Λ := 𝗠𝗶𝗻¹)) ⨀ this
+  have : Λ ⊢ ∼(∼φ)ᴺ := ⟨Derivation.gödelGentzen d⟩
+  exact Entailment.K!_left (Derivation.neg_doubleNegation' φ) ⨀ this
 
 
 end LO.FirstOrder
