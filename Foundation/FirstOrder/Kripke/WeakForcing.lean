@@ -11,7 +11,7 @@ Main reference: Jeremy Avigad, "Forcing in proof theory" [Avi04]
 
 namespace LO.FirstOrder
 
-variable {L : Language} [L.Relational]
+variable {L : Language.{u}} [L.Relational]
 
 namespace KripkeModel
 
@@ -58,6 +58,10 @@ lemma rew {bv : Fin n₂ → Name} {fv : ξ₂ → Name} {ω : Rew L ξ₁ n₁ 
     p ⊩ᶜ[bv|fv] (ω ▹ φ) ↔
     p ⊩ᶜ[fun x ↦ (ω #x).relationalVal bv fv|fun x ↦ (ω &x).relationalVal bv fv] φ := by
   simp [WeaklyForces, ←Semiformula.rew_doubleNegation, Forces.rew]
+
+@[simp] lemma emb {bv : Fin n → Name} {fv : ξ → Name} {φ : Semiformula L Empty n} :
+    p ⊩ᶜ[bv|fv] (Rew.emb ▹ φ) ↔
+    p ⊩ᶜ[bv|Empty.elim] φ := by simp [rew, Empty.eq_elim]
 
 @[simp] lemma ex {φ : Semiformula L ξ (n + 1)} :
     p ⊩ᶜ[bv|fv] ∃⁰ φ ↔ ∀ q ≤ p, ∃ r ≤ q, ∃ x : r, r ⊩ᶜ[↑x :> bv|fv] φ := by
@@ -284,18 +288,9 @@ lemma sound : 𝐋𝐊¹ ⊢ φ → ∀ p : ℙ, ∀ fv, (∀ i, p ⊩↓ fv i) 
   have : 𝗜𝗻𝘁¹ ⊢ φᴺ := Proof.gödel_gentzen b
   exact Forces.sound p fv Hfv this
 
-lemma sound₀ {φ : Sentence L} : 𝐋𝐊¹ ⊢ (φ : Proposition L) → ℙ ∀⊩ᶜ φ := fun b p ↦ by {
-  have := sound b p
- }
+lemma sound₀ {σ : Sentence L} : 𝐋𝐊¹ ⊢ (σ : Proposition L) → ℙ ∀⊩ᶜ σ := fun b p ↦ by
+  simpa using sound b p (fun _ ↦ (Classical.ofNonempty : p).val) fun _ ↦ by simp
 
-
-
-lemma sound : 𝐋𝐊¹ ⊢ φ → ℙ ∀⊩ᶜ φ.univCl := fun H ↦
-  Forces₀.sound (W := ℙ) (gödel_gentzen b (Λ := 𝗜𝗻𝘁¹)) fun φ hφ ↦ (by
-    rcases show ∃ ψ ∈ T, ψᴺ = φ by simpa [Theory.ToTheoryᵢ] using hφ with ⟨ψ, hψ, rfl⟩
-    exact H ψ hψ)
-
-/--/
 end WeaklyForces₀
 
 end KripkeModel
@@ -307,7 +302,7 @@ namespace ForcingNotion
 
 variable (ℙ : ForcingNotion L)
 
-abbrev Condition := ℙ.World
+@[coe] abbrev Condition := ℙ.World
 
 abbrev Name := ℙ.Carrier
 
@@ -329,9 +324,11 @@ instance : Semantics (ForcingNotion L) (Sentence L) := ⟨fun ℙ φ ↦ ℙ ∀
 
 lemma models_def : ℙ ⊧ φ ↔ ℙ ∀⊩ᶜ φ := by rfl
 
-lemma sound {T : Theory L} (b : T ⊢ φ) : ℙ ⊧* T → ℙ ⊧ φ := fun H ↦
-  WeaklyForces₀.sound (ℙ := ℙ) b fun _ hφ ↦ H.models_set hφ
+lemma sound {σ : Sentence L} : 𝐋𝐊¹ ⊢ (σ : Proposition L) → ℙ ⊧ σ :=
+  WeaklyForces₀.sound₀
 
-instance (T : Theory L) : Sound T (Semantics.models (ForcingNotion L) T) := ⟨fun b _ H ↦ sound b H⟩
+instance (ℙ : ForcingNotion L) :
+    Sound (Entailment.pullback (𝐋𝐊¹ : Proof.Symbol L) ((↑·) : Sentence L → Proposition L)) ℙ :=
+  ⟨fun {_} ↦ sound⟩
 
 end ForcingNotion

@@ -39,6 +39,10 @@ namespace KripkeModel
 
 lemma domain_nonempty' (p : W) : ∃ x, p ⊩↓ x := domain_nonempty p
 
+instance (p : W) : Nonempty p := by
+  rcases domain_nonempty p with ⟨x, _⟩
+  exact ⟨x, by assumption⟩
+
 lemma domain_monotone {p : W} : p ⊩↓ x → ∀ q ≤ p, q ⊩↓ x := fun hx _ h ↦
   domain_antimonotone h hx
 
