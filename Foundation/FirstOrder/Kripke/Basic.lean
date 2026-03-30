@@ -123,6 +123,10 @@ end Filter
 
 end filter
 
+variable (W)
+
+
+
 end KripkeModel
 
 end LO.FirstOrder
