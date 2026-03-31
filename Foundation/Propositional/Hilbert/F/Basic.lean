@@ -48,14 +48,14 @@ protected def F_Rfl_Tra1_Hrd : HilbertF α := ⟨
 ⟩
 -/
 
-@[simp, grind .] lemma F_le_F_Ser : (HilbertF.F : HilbertF α) ≤ HilbertF.F_Ser := by tauto
-@[simp, grind .] lemma F_le_F_Rfl : (HilbertF.F : HilbertF α) ≤ HilbertF.F_Rfl := by tauto
-@[simp, grind .] lemma F_le_F_Sym : (HilbertF.F : HilbertF α) ≤ HilbertF.F_Sym := by tauto
-@[simp, grind .] lemma F_le_F_Tra1 : (HilbertF.F : HilbertF α) ≤ HilbertF.F_Tra1 := by tauto
-@[simp, grind .] lemma F_Rfl_le_F_Rfl_Sym : (HilbertF.F_Rfl : HilbertF α) ≤ HilbertF.F_Rfl_Sym  := by tauto
-@[simp, grind .] lemma F_Sym_le_F_Rfl_Sym : (HilbertF.F_Sym : HilbertF α) ≤ HilbertF.F_Rfl_Sym  := by tauto
-@[simp, grind .] lemma F_Rfl_le_F_Rfl_Tra1 : (HilbertF.F_Rfl : HilbertF α) ≤ HilbertF.F_Rfl_Tra1 := by tauto
-@[simp, grind .] lemma F_Tra1_le_F_Rfl_Tra1 : (HilbertF.F_Tra1 : HilbertF α) ≤ HilbertF.F_Rfl_Tra1 := by tauto
+@[simp, grind .] lemma F_le_F_Ser : (HilbertF.F : HilbertF α).schema ⊆ HilbertF.F_Ser.schema := by tauto
+@[simp, grind .] lemma F_le_F_Rfl : (HilbertF.F : HilbertF α).schema ⊆ HilbertF.F_Rfl.schema := by tauto
+@[simp, grind .] lemma F_le_F_Sym : (HilbertF.F : HilbertF α).schema ⊆ HilbertF.F_Sym.schema := by tauto
+@[simp, grind .] lemma F_le_F_Tra1 : (HilbertF.F : HilbertF α).schema ⊆ HilbertF.F_Tra1.schema := by tauto
+@[simp, grind .] lemma F_Rfl_le_F_Rfl_Sym : (HilbertF.F_Rfl : HilbertF α).schema ⊆ HilbertF.F_Rfl_Sym.schema  := by tauto
+@[simp, grind .] lemma F_Sym_le_F_Rfl_Sym : (HilbertF.F_Sym : HilbertF α).schema ⊆ HilbertF.F_Rfl_Sym.schema  := by tauto
+@[simp, grind .] lemma F_Rfl_le_F_Rfl_Tra1 : (HilbertF.F_Rfl : HilbertF α).schema ⊆ HilbertF.F_Rfl_Tra1.schema := by tauto
+@[simp, grind .] lemma F_Tra1_le_F_Rfl_Tra1 : (HilbertF.F_Tra1 : HilbertF α).schema ⊆ HilbertF.F_Rfl_Tra1.schema := by tauto
 
 end HilbertF
 

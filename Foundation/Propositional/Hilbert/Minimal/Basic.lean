@@ -41,10 +41,10 @@ protected def Cl : Hilbert α := ⟨
   by rintro φ (_ | _) <;> grind;
 ⟩
 
-@[simp, grind .] lemma Int_le_KC : (Hilbert.Int : Hilbert α) ≤ Hilbert.KC := by tauto;
-@[simp, grind .] lemma Int_le_LC : (Hilbert.Int : Hilbert α) ≤ Hilbert.LC := by tauto;
-@[simp, grind .] lemma Int_le_KreiselPutnam : (Hilbert.Int : Hilbert α) ≤ Hilbert.KreiselPutnam := by tauto;
-@[simp, grind .] lemma Int_le_Cl : (Hilbert.Int : Hilbert α) ≤ Hilbert.Cl := by tauto;
+@[simp, grind .] lemma Int_le_KC : (Hilbert.Int : Hilbert α).schema ⊆ Hilbert.KC.schema := by tauto;
+@[simp, grind .] lemma Int_le_LC : (Hilbert.Int : Hilbert α).schema ⊆ Hilbert.LC.schema := by tauto;
+@[simp, grind .] lemma Int_le_KreiselPutnam : (Hilbert.Int : Hilbert α).schema ⊆ Hilbert.KreiselPutnam.schema := by tauto;
+@[simp, grind .] lemma Int_le_Cl : (Hilbert.Int : Hilbert α).schema ⊆ Hilbert.Cl.schema := by tauto;
 
 end Hilbert
 

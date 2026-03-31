@@ -285,7 +285,7 @@ lemma exists_list_lindenbaum_index₁ {Γ : List _} (hΓ : ↑Γ.toFinset ⊆ �
     . intro ψ hq;
       exact subset₁_lindenbaum_indexed_of_lt (by simp) $ hm ψ hq;
 
-lemma exists_finset_lindenbaum_index₁ {Γ : Finset _} (hΓ : ↑Γ ⊆ ⋃ i, t[i].1): ∃ m, ∀ φ ∈ Γ, φ ∈ t[m].1 := by
+lemma exists_finset_lindenbaum_index₁ {Γ : Finset _} (hΓ : (SetLike.coe Γ) ⊆ ⋃ i, t[i].1): ∃ m, ∀ φ ∈ Γ, φ ∈ t[m].1 := by
   obtain ⟨m, hΓ⟩ := exists_list_lindenbaum_index₁ (Γ := Γ.toList) (t := t) (by simpa);
   use m;
   intro φ hφ;
@@ -308,7 +308,7 @@ lemma exists_list_lindenbaum_index₂ {Δ : List _} (hΔ : ↑Δ.toFinset ⊆ �
     . intro ψ hq;
       exact subset₂_lindenbaum_indexed_of_lt (by simp) $ hn ψ hq;
 
-lemma exists_finset_lindenbaum_index₂ {Δ : Finset _} (hΓ : ↑Δ ⊆ ⋃ i, t[i].2) : ∃ n, ∀ φ ∈ Δ, φ ∈ t[n].2 := by
+lemma exists_finset_lindenbaum_index₂ {Δ : Finset _} (hΓ : (SetLike.coe Δ) ⊆ ⋃ i, t[i].2) : ∃ n, ∀ φ ∈ Δ, φ ∈ t[n].2 := by
   obtain ⟨m, hΔ⟩ := exists_list_lindenbaum_index₂ (Δ := Δ.toList) (𝓢 := 𝓢) (t := t) (by simpa);
   use m;
   intro φ hφ;
