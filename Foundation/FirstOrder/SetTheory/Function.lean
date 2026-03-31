@@ -376,11 +376,44 @@ lemma compose_injective {R S : V} (hR : Injective R) (hS : Injective S) : Inject
   rcases this
   exact hR x₁ x₂ y₁ hx₁y₁ hx₂y₂
 
+/- This definition of value is adapted from NM's contribution to Metamath: https://us.metamath.org/mpeuni/fv3.html -/
+noncomputable def value (f x : V) := {z ∈ ⋃ˢ range f ; ∃ y, z ∈ y ∧ ⟨x, y⟩ₖ ∈ f}
+
+/-- If `x` is in `domain f`, then `f ‘ x` is the value of `f` at `x`, else it is `∅`. -/
+scoped notation f:arg " ‘ " x:arg => value f x
+
+def value.dfn : Semisentence ℒₛₑₜ 3 := f“v f x. ∀ z, z ∈ v ↔ z ∈ !sUnion.dfn (!range.dfn f) ∧ ∃ y, z ∈ y ∧ !kpair.dfn x y ∈ f”
+
+instance value.defined : ℒₛₑₜ-function₂[V] value via value.dfn :=
+  ⟨fun v ↦ by simp [dfn, value]; simp only [mem_ext_iff, mem_sep_iff]⟩
+
+instance value.definable : ℒₛₑₜ-function₂[V] value := value.defined.to_definable
+
+lemma value_mem_range {f x : V} {X Y : V} (hf : f ∈ Y ^ X) (hx : x ∈ X) : f ‘ x ∈ range f := by
+  simp_all only [mem_function_iff, value, mem_range_iff]
+  obtain ⟨hfleft, hfright⟩ := hf
+  specialize hfright x hx
+  obtain ⟨y, hy⟩ := ExistsUnique.exists hfright
+  have h1 {w : V} : ⟨x, w⟩ₖ ∈ f → w = y := by
+    intro h; exact hfright.unique h hy
+  have h2 : y = {z ∈ ⋃ˢ range f ; ∃ y, z ∈ y ∧ ⟨x, y⟩ₖ ∈ f} := by
+    ext z
+    simp only [mem_sep_iff, mem_sUnion_iff, mem_range_iff]
+    constructor <;> intro h <;> grind
+  grind
+
 /-- Restricting the domain of a relation -/
 noncomputable def restrict (R A : V) : V := R ∩ (A ×ˢ range R)
 
 /-- Restricting the domain of a relation -/
-notation R:arg " ↾ " A:arg => restrict R A
+scoped notation R:arg " ↾ " A:arg => restrict R A
+
+def restrict.dfn : Semisentence ℒₛₑₜ 3 := f“r R A. r = !inter.dfn R (!prod.dfn A (!range.dfn R))”
+
+instance restrict.defined : ℒₛₑₜ-function₂[V] restrict via restrict.dfn :=
+  ⟨fun v ↦ by simp [dfn, restrict]⟩
+
+instance restrict.definable : ℒₛₑₜ-function₂[V] restrict := restrict.defined.to_definable
 
 lemma domain_restrict_eq (R A : V) : domain (R ↾ A) = domain R ∩ A := by
   ext z
@@ -397,7 +430,14 @@ lemma domain_restrict_eq (R A : V) : domain (R ↾ A) = domain R ∩ A := by
 noncomputable def image (R A : V) : V := range (restrict R A)
 
 /-- Image of a set under a relation -/
-notation R:arg " ” " A:arg => restrict R A
+scoped notation R:arg " “ " A:arg => image R A
+
+def image.dfn : Semisentence ℒₛₑₜ 3 := f“B R A. B = !range.dfn (!restrict.dfn R A)”
+
+instance image.defined : ℒₛₑₜ-function₂[V] image via image.dfn :=
+  ⟨fun v ↦ by simp [dfn, image]⟩
+
+instance image.definable : ℒₛₑₜ-function₂[V] image := image.defined.to_definable
 
 /-! ### Cardinality comparison -/
 

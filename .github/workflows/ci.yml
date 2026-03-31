@@ -21,6 +21,7 @@ jobs:
   build:
     name: Build project
     runs-on: ubuntu-latest
+    needs: mk-all-check
     steps:
       - uses: actions/checkout@v6
       - name: Setup elan
@@ -73,7 +74,7 @@ jobs:
           lake exe graph ./import_graph.html
 
       - name: Upload lean artifacts
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: lean-artifacts
           path: |
@@ -132,7 +133,7 @@ jobs:
       - uses: pandoc/actions/setup@v1
 
       - name: Download lean artifacts
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v8
         with:
           name: lean-artifacts
       - name: Copy from artifacts to pages
@@ -157,5 +158,5 @@ jobs:
       - uses: actions/upload-pages-artifact@v4
         with:
           path: pages
-      - uses: actions/deploy-pages@v4
+      - uses: actions/deploy-pages@v5
         id: deployment

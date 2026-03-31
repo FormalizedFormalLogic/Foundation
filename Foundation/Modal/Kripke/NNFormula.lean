@@ -95,7 +95,7 @@ protected lemma neg_def : x ⊧ ∼φ ↔ ¬x ⊧ φ := by
       exact h y Rxy;
   | _ => simp [Satisfies.iff_models, Satisfies];
 
-protected lemma imp_def : x ⊧ φ ➝ ψ ↔ x ⊧ φ → x ⊧ ψ := by
+protected lemma imp_def : x ⊧ φ 🡒 ψ ↔ x ⊧ φ → x ⊧ ψ := by
   simp [Satisfies.or_def, Satisfies.neg_def];
   tauto;
 

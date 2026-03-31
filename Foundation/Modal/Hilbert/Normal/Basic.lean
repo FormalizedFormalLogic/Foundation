@@ -18,7 +18,7 @@ open LO.Entailment LO.Modal.Entailment
 
 inductive Hilbert.Normal {α} (Ax : Axiom α) : Logic α
 | axm {φ} (s : Substitution _) : φ ∈ Ax → Normal Ax (φ⟦s⟧)
-| mdp {φ ψ}     : Normal Ax (φ ➝ ψ) → Normal Ax φ → Normal Ax ψ
+| mdp {φ ψ}     : Normal Ax (φ 🡒 ψ) → Normal Ax φ → Normal Ax ψ
 | nec {φ}       : Normal Ax φ → Normal Ax (□φ)
 | implyK φ ψ    : Normal Ax $ Axioms.ImplyK φ ψ
 | implyS φ ψ χ  : Normal Ax $ Axioms.ImplyS φ ψ χ
@@ -66,7 +66,7 @@ instance : Logic.Substitution (Hilbert.Normal Ax) where
 protected lemma rec!
   {motive   : (φ : Formula α) → (Normal Ax ⊢ φ) → Sort}
   (axm      : ∀ {φ : Formula α} (s), (h : φ ∈ Ax) → motive (φ⟦s⟧) (by grind))
-  (mdp      : ∀ {φ ψ : Formula α}, {hφψ : (Normal Ax) ⊢ φ ➝ ψ} → {hφ : (Normal Ax) ⊢ φ} → motive (φ ➝ ψ) hφψ → motive φ hφ → motive ψ (hφψ ⨀ hφ))
+  (mdp      : ∀ {φ ψ : Formula α}, {hφψ : (Normal Ax) ⊢ φ 🡒 ψ} → {hφ : (Normal Ax) ⊢ φ} → motive (φ 🡒 ψ) hφψ → motive φ hφ → motive ψ (hφψ ⨀ hφ))
   (nec      : ∀ {φ}, {hφψ : (Normal Ax) ⊢ φ} → motive (φ) hφψ → motive (□φ) (nec! hφψ))
   (implyK   : ∀ {φ ψ}, motive (Axioms.ImplyK φ ψ) $ by simp)
   (implyS   : ∀ {φ ψ χ}, motive (Axioms.ImplyS φ ψ χ) $ by simp)

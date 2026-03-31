@@ -241,15 +241,15 @@ instance [NegInvolutive F] [Cut F K] : Entailment.Cl 𝓚 where
 
 lemma wkCut [Cut F K] (hp : 𝓚 ⟹! φ :: Δ) (hn : 𝓚 ⟹! ∼φ :: Δ) : 𝓚 ⟹! Δ := ⟨cut hp.get hn.get⟩
 
-def modusPonens [NegInvolutive F] [Cut F K] (b : 𝓚 ⊢! φ ➝ ψ) : 𝓚 ⟹ φ :: Γ → 𝓚 ⟹ ψ :: Γ := fun d ↦
+def modusPonens [NegInvolutive F] [Cut F K] (b : 𝓚 ⊢! φ 🡒 ψ) : 𝓚 ⟹ φ :: Γ → 𝓚 ⟹ ψ :: Γ := fun d ↦
   cut (φ := φ)
     (wk d <| by simp) <|
-    cut (φ := φ ➝ ψ)
+    cut (φ := φ 🡒 ψ)
       (wk b <| by simp) <|
       have : 𝓚 ⟹ φ ⋏ ∼ψ :: ∼φ :: ψ :: Γ := and (em' φ) (em' ψ)
       ofEq this <| by simp [DeMorgan.imply]
 
-def modusPonens! [NegInvolutive F] [Cut F K] (b : 𝓚 ⊢ φ ➝ ψ) : 𝓚 ⟹! φ :: Γ → 𝓚 ⟹! ψ :: Γ := fun d ↦ ⟨modusPonens b.get d.get⟩
+def modusPonens! [NegInvolutive F] [Cut F K] (b : 𝓚 ⊢ φ 🡒 ψ) : 𝓚 ⟹! φ :: Γ → 𝓚 ⟹! ψ :: Γ := fun d ↦ ⟨modusPonens b.get d.get⟩
 
 def cutFalsum [Cut F K] (d : 𝓚 ⟹ ⊥ :: Γ) : 𝓚 ⟹ Γ := Tait.cut (φ := ⊥) (Tait.wk d <| by simp) (ofEq (verum _ Γ) <| by simp)
 

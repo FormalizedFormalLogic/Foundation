@@ -30,14 +30,14 @@ theorem provable_D1 {σ} : T ⊢ σ → 𝗜𝚺₁ ⊢ □σ := fun h ↦
   provable_of_models _ _ fun (V : Type) _ _ ↦ by simpa [models_iff] using internalize_provability (V := V) h
 
 /-- The derivability condition D2. -/
-theorem provable_D2 {σ π} : 𝗜𝚺₁ ⊢ □(σ ➝ π) ➝ □σ ➝ □π :=
+theorem provable_D2 {σ π} : 𝗜𝚺₁ ⊢ □(σ 🡒 π) 🡒 □σ 🡒 □π :=
   provable_of_models _ _ fun (V : Type) _ _ ↦ by simpa [models_iff] using modus_ponens_sentence T
 
 variable (T)
 
 noncomputable abbrev _root_.LO.FirstOrder.Theory.standardProvability : Provability 𝗜𝚺₁ T where
   prov := T.provable
-  prov_def := provable_D1
+  bew_def := provable_D1
 
 variable {T}
 
@@ -45,31 +45,29 @@ instance : T.standardProvability.HBL2 := ⟨provable_D2⟩
 
 lemma standardProvability_def (σ : Sentence L) : T.standardProvability σ = T.provabilityPred σ := rfl
 
-instance [T.Δ₁] : T.standardProvability.SoundOn ℕ σ :=
+instance [T.Δ₁] : T.standardProvability.SoundOn ℕ :=
   ⟨fun h ↦ by simpa [Arithmetic.standardProvability_def, models_iff] using h⟩
 
 end
 
 section arithmetic
 
-variable {T : Theory ℒₒᵣ} [T.Δ₁]
+variable {T U : ArithmeticTheory} [T.Δ₁]
 
 local prefix:90 "□" => T.provabilityPred
 
 lemma provable_sigma_one_complete [𝗣𝗔⁻ ⪯ T] {σ : Sentence ℒₒᵣ} (hσ : Hierarchy 𝚺 1 σ) :
-    𝗜𝚺₁ ⊢ σ ➝ □σ :=
+    𝗜𝚺₁ ⊢ σ 🡒 □σ :=
   provable_of_models _ _ fun (V : Type) _ _ ↦ by
     simpa [models_iff] using Bootstrapping.Arithmetic.sigma_one_complete (T := T) (V := V) hσ
 
 /-- The derivability condition D3. -/
 theorem provable_D3 [𝗣𝗔⁻ ⪯ T] {σ : Sentence ℒₒᵣ} :
-    𝗜𝚺₁ ⊢ □σ ➝ □□σ := provable_sigma_one_complete (by simp)
+    𝗜𝚺₁ ⊢ □σ 🡒 □□σ := provable_sigma_one_complete (by simp)
 
 open LO.Entailment LO.Entailment.FiniteContext
 
-variable {U : ArithmeticTheory}
-
-lemma provable_D2_context [𝗜𝚺₁ ⪯ U] {Γ σ π} (hσπ : Γ ⊢[U] □(σ ➝ π)) (hσ : Γ ⊢[U] □σ) :
+lemma provable_D2_context [𝗜𝚺₁ ⪯ U] {Γ σ π} (hσπ : Γ ⊢[U] □(σ 🡒 π)) (hσ : Γ ⊢[U] □σ) :
     Γ ⊢[U] □π := FiniteContext.of'! (weakening inferInstance provable_D2) ⨀! hσπ ⨀! hσ
 
 lemma provable_D3_context [𝗣𝗔⁻ ⪯ T] [𝗜𝚺₁ ⪯ U] {Γ σ} (hσπ : Γ ⊢[U] □σ) :
@@ -86,20 +84,18 @@ instance [𝗣𝗔⁻ ⪯ T] : T.standardProvability.HBL3 := ⟨provable_D3⟩
 
 instance [𝗣𝗔⁻ ⪯ T] : T.standardProvability.HBL where
 
-instance {σ} [ArithmeticTheory.SoundOnHierarchy T 𝚺 1] : T.standardProvability.Kreisel σ := ⟨by simpa using provable_sound⟩
+instance [T.SoundOnHierarchy 𝚺 1] : T.standardProvability.Kreisel := ⟨fun h ↦ provable_sound h⟩
 
 open LO.Entailment in
 /--
   If `π` is equivalent to some 𝚺₁ sentence `σ`,
-  then `π ➝ □π` is provable in `T` (note: not `𝗜𝚺₁`, compare `provable_sigma_one_complete`)
+  then `π 🡒 □π` is provable in `T` (note: not `𝗜𝚺₁`, compare `provable_sigma_one_complete`)
 -/
 lemma provable_sigma_one_complete_of_E {σ π} [𝗜𝚺₁ ⪯ T]
-  (hσ : Hierarchy 𝚺 1 σ) (hσπ : T ⊢ σ ⭤ π) : T ⊢ π ➝ □π := by
-  apply C!_trans (ψ := σ) ?_ $ C!_trans (ψ := □σ) ?_ ?_;
+  (hσ : Hierarchy 𝚺 1 σ) (hσπ : 𝗜𝚺₁ ⊢ σ 🡘 π) : 𝗜𝚺₁ ⊢ π 🡒 □π := by
+  apply C!_replace ?_ ?_ $ provable_sigma_one_complete (T := T) $ hσ;
   . cl_prover [hσπ];
-  . apply WeakerThan.pbl $ provable_sigma_one_complete hσ;
-  . apply WeakerThan.pbl (𝓢 := 𝗜𝚺₁);
-    apply ProvabilityAbstraction.prov_distribute_imply (𝔅 := T.standardProvability);
+  . apply T.standardProvability.mono';
     cl_prover [hσπ];
 
 end arithmetic

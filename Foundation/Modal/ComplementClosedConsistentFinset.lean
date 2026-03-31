@@ -70,7 +70,7 @@ lemma intro_union_consistent (h : ∀ {Γ₁ Γ₂ : FormulaFinset _}, (Γ₁ �
 
 /-
 lemma intro_triunion_consistent
-  (h : ∀ {Γ₁ Γ₂ Γ₃ : List (Formula α)}, (∀ φ ∈ Γ₁, φ ∈ P₁) ∧ (∀ φ ∈ Γ₂, φ ∈ P₂) ∧ (∀ φ ∈ Γ₃, φ ∈ P₃) → 𝓢 ⊬ ⋀Γ₁ ⋏ ⋀Γ₂ ⋏ ⋀Γ₃ ➝ ⊥)
+  (h : ∀ {Γ₁ Γ₂ Γ₃ : List (Formula α)}, (∀ φ ∈ Γ₁, φ ∈ P₁) ∧ (∀ φ ∈ Γ₂, φ ∈ P₂) ∧ (∀ φ ∈ Γ₃, φ ∈ P₃) → 𝓢 ⊬ ⋀Γ₁ ⋏ ⋀Γ₂ ⋏ ⋀Γ₃ 🡒 ⊥)
   : FormulaFinset.Consistent 𝓢 (P₁ ∪ P₂ ∪ P₃) := by
   rw [←iff_theory_consistent_formulae_consistent];
   convert FormulaSet.intro_triunion_consistent h;
@@ -293,7 +293,7 @@ lemma iff_not_mem_compl (hq_sub : ψ ∈ Ψ := by grind) : (ψ ∈ X) ↔ (-ψ �
       simpa;
     | himp ψ χ h =>
       simp only [Formula.complement.imp_def₁ h] at hnq;
-      have : ↑X *⊢[𝓢] ∼(ψ ➝ χ) := Context.by_axm! hnq;
+      have : ↑X *⊢[𝓢] ∼(ψ 🡒 χ) := Context.by_axm! hnq;
       have : ↑X *⊢[𝓢] ⊥ := this ⨀ hq;
       simpa;
   . intro h; exact mem_of_not_mem_compl (by assumption) h;
@@ -301,10 +301,10 @@ lemma iff_not_mem_compl (hq_sub : ψ ∈ Ψ := by grind) : (ψ ∈ X) ↔ (-ψ �
 lemma iff_mem_compl (hq_sub : ψ ∈ Ψ := by grind) : (ψ ∉ X) ↔ (-ψ ∈ X) := by simpa using iff_not_mem_compl hq_sub |>.not;
 
 lemma iff_mem_imp
-  (hsub_qr : (ψ ➝ χ) ∈ Ψ := by grind)
+  (hsub_qr : (ψ 🡒 χ) ∈ Ψ := by grind)
   (hsub_q : ψ ∈ Ψ := by grind)
   (hsub_r : χ ∈ Ψ := by grind)
-  : ((ψ ➝ χ) ∈ X) ↔ (ψ ∈ X) → (-χ ∉ X) := by
+  : ((ψ 🡒 χ) ∈ X) ↔ (ψ ∈ X) → (-χ ∉ X) := by
   constructor;
   . intro hqr hq;
     apply iff_not_mem_compl hsub_r |>.mp;
@@ -329,10 +329,10 @@ lemma iff_mem_imp
       exact C!_of_conseq! $ membership_iff (by assumption) |>.mp $ iff_not_mem_compl (by assumption) |>.mpr hr;
 
 lemma iff_not_mem_imp
-  (hsub_qr : (ψ ➝ χ) ∈ Ψ := by grind)
+  (hsub_qr : (ψ 🡒 χ) ∈ Ψ := by grind)
   (hsub_q : ψ ∈ Ψ := by grind)
   (hsub_r : χ ∈ Ψ := by grind)
-  : ((ψ ➝ χ) ∉ X) ↔ (ψ ∈ X) ∧ (-χ ∈ X) := by
+  : ((ψ 🡒 χ) ∉ X) ↔ (ψ ∈ X) ∧ (-χ ∈ X) := by
   simpa using iff_mem_imp hsub_qr hsub_q hsub_r |>.not;
 
 instance : Finite (ComplementClosedConsistentFinset 𝓢 Ψ) := by

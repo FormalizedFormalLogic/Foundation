@@ -13,9 +13,9 @@ open LO.Entailment LO.Modal.Entailment
 
 inductive Hilbert.WithLoeb {α} (Ax : Axiom α) : Logic α
 | axm {φ} (s : Substitution _) : φ ∈ Ax → WithLoeb Ax (φ⟦s⟧)
-| mdp {φ ψ}     : WithLoeb Ax (φ ➝ ψ) → WithLoeb Ax φ → WithLoeb Ax ψ
+| mdp {φ ψ}     : WithLoeb Ax (φ 🡒 ψ) → WithLoeb Ax φ → WithLoeb Ax ψ
 | nec {φ}       : WithLoeb Ax φ → WithLoeb Ax (□φ)
-| loeb {φ}      : WithLoeb Ax (□φ ➝ φ) → WithLoeb Ax φ
+| loeb {φ}      : WithLoeb Ax (□φ 🡒 φ) → WithLoeb Ax φ
 | implyK φ ψ    : WithLoeb Ax $ Axioms.ImplyK φ ψ
 | implyS φ ψ χ  : WithLoeb Ax $ Axioms.ImplyS φ ψ χ
 | ec φ ψ        : WithLoeb Ax $ Axioms.ElimContra φ ψ
@@ -61,9 +61,9 @@ instance : Logic.Substitution (Hilbert.WithLoeb Ax) where
 protected lemma rec!
   {motive   : (φ : Formula α) → (WithLoeb Ax ⊢ φ) → Sort}
   (axm      : ∀ {φ : Formula α} (s), (h : φ ∈ Ax) → motive (φ⟦s⟧) (by grind))
-  (mdp      : ∀ {φ ψ : Formula α}, {hφψ : (WithLoeb Ax) ⊢ φ ➝ ψ} → {hφ : (WithLoeb Ax) ⊢ φ} → motive (φ ➝ ψ) hφψ → motive φ hφ → motive ψ (hφψ ⨀ hφ))
+  (mdp      : ∀ {φ ψ : Formula α}, {hφψ : (WithLoeb Ax) ⊢ φ 🡒 ψ} → {hφ : (WithLoeb Ax) ⊢ φ} → motive (φ 🡒 ψ) hφψ → motive φ hφ → motive ψ (hφψ ⨀ hφ))
   (nec      : ∀ {φ}, {hφψ : (WithLoeb Ax) ⊢ φ} → motive (φ) hφψ → motive (□φ) (nec! hφψ))
-  (loeb     : ∀ {φ}, {hφψ : (WithLoeb Ax) ⊢ □φ ➝ φ} → motive (□φ ➝ φ) hφψ → motive (φ) (loeb! hφψ))
+  (loeb     : ∀ {φ}, {hφψ : (WithLoeb Ax) ⊢ □φ 🡒 φ} → motive (□φ 🡒 φ) hφψ → motive (φ) (loeb! hφψ))
   (implyK   : ∀ {φ ψ}, motive (Axioms.ImplyK φ ψ) $ by simp)
   (implyS   : ∀ {φ ψ χ}, motive (Axioms.ImplyS φ ψ χ) $ by simp)
   (ec       : ∀ {φ ψ}, motive (Axioms.ElimContra φ ψ) $ by simp)

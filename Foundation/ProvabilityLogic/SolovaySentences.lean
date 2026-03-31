@@ -24,14 +24,14 @@ open Modal.Kripke
 open Modal.Formula.Kripke
 
 variable {L : Language} [L.DecidableEq] [L.ReferenceableBy L]
-         {T₀ T : Theory L} [T₀ ⪯ T] (𝔅 : Provability T₀ T) [𝔅.HBL]
+         {T₀ T : Theory L} [T₀ ⪯ T] (𝔅 : Provability T₀ T) [𝔅.Mono]
          {A B : Modal.Formula _}
 
 structure SolovaySentences (F : Kripke.Frame) [F.IsRooted] [Fintype F] where
   σ : F → Sentence L
-  protected SC1 : ∀ i j, i ≠ j → T₀ ⊢ σ i ➝ ∼σ j
-  protected SC2 : ∀ i j, i ≺ j → T₀ ⊢ σ i ➝ 𝔅.dia (σ j)
-  protected SC3 : ∀ i : F.World, F.root ≠ i → T₀ ⊢ σ i ➝ 𝔅 (⩖ j ∈ { j : F | i ≺ j }, σ j)
+  protected SC1 : ∀ i j, i ≠ j → T₀ ⊢ σ i 🡒 ∼σ j
+  protected SC2 : ∀ i j, i ≺ j → T₀ ⊢ σ i 🡒 𝔅.dia (σ j)
+  protected SC3 : ∀ i : F.World, F.root ≠ i → T₀ ⊢ σ i 🡒 𝔅 (⩖ j ∈ { j : F | i ≺ j }, σ j)
   protected SC4 : T₀ ⊢ ⩖ j, σ j
 
 attribute [coe] SolovaySentences.σ
@@ -48,8 +48,8 @@ variable {M : Model} [M.IsRooted] [Fintype M] [M.IsIrreflexive] [M.IsTransitive]
 noncomputable def realization : Realization 𝔅 := ⟨fun a ↦ ⩖ i ∈ { i : M | i ⊧ (.atom a) }, S i⟩
 
 private lemma mainlemma_aux {i : M} (hri : M.root ≠ i) :
-    (i ⊧ A → T₀ ⊢ S i ➝ S.realization A) ∧
-    (i ⊭ A → T₀ ⊢ S i ➝ ∼S.realization A) := by
+    (i ⊧ A → T₀ ⊢ S i 🡒 S.realization A) ∧
+    (i ⊭ A → T₀ ⊢ S i 🡒 ∼S.realization A) := by
   induction A generalizing i with
   | hfalsum => simp [Realization.interpret, Semantics.Models, Satisfies];
   | hatom a =>
@@ -79,7 +79,7 @@ private lemma mainlemma_aux {i : M} (hri : M.root ≠ i) :
     constructor;
     . intro h;
       apply C!_trans $ S.SC3 i $ (by grind);
-      apply prov_distribute_imply';
+      apply 𝔅.mono';
       apply left_Fdisj'!_intro;
       rintro j Rij;
       replace Rij : i ≺ j := by simpa using Rij
@@ -89,39 +89,39 @@ private lemma mainlemma_aux {i : M} (hri : M.root ≠ i) :
       push_neg at this;
       obtain ⟨j, Rij, hA⟩ := this;
       have := CN!_of_CN!_right $ (ihA (by grind)).2 hA
-      have : T₀ ⊢ ∼𝔅 (∼S.σ j) ➝ ∼𝔅 (S.realization A) :=
-        contra! $ prov_distribute_imply' $ CN!_of_CN!_right $ (ihA (by grind)).2 hA;
+      have : T₀ ⊢ ∼𝔅 (∼S.σ j) 🡒 ∼𝔅 (S.realization A) :=
+        contra! $ 𝔅.mono' $ CN!_of_CN!_right $ (ihA (by grind)).2 hA;
       exact C!_trans (S.SC2 i j Rij) this;
 
 theorem mainlemma (S : SolovaySentences 𝔅 M.toFrame) {i : M} (hri : M.root ≠ i) :
-    i ⊧ A → T₀ ⊢ S i ➝ S.realization A := (mainlemma_aux S hri).1
+    i ⊧ A → T₀ ⊢ S i 🡒 S.realization A := (mainlemma_aux S hri).1
 
 theorem mainlemma_neg (S : SolovaySentences 𝔅 M.toFrame) {i : M} (hri : M.root ≠ i) :
-    i ⊭ A → T₀ ⊢ S i ➝ ∼S.realization A := (mainlemma_aux S hri).2
+    i ⊭ A → T₀ ⊢ S i 🡒 ∼S.realization A := (mainlemma_aux S hri).2
 
-lemma root_of_iterated_inconsistency : T₀ ⊢ ∼𝔅^[M.height] ⊥ ➝ S M.root := by
-  suffices T₀ ⊢ (⩖ j, S j) ➝ ∼S M.root ➝ 𝔅^[M.height] ⊥ by cl_prover [this, S.SC4]
+lemma root_of_iterated_inconsistency : T₀ ⊢ ∼𝔅^[M.height] ⊥ 🡒 S M.root := by
+  suffices T₀ ⊢ (⩖ j, S j) 🡒 ∼S M.root 🡒 𝔅^[M.height] ⊥ by cl_prover [this, S.SC4]
   apply Entailment.left_Udisj!_intro
   intro i
   by_cases hir : i = M.root
   · rcases hir
     cl_prover
-  · have : T₀ ⊢ S.σ i ➝ (↑𝔅)^[M.height] ⊥ := by
+  · have : T₀ ⊢ S.σ i 🡒 (↑𝔅)^[M.height] ⊥ := by
       simpa using
         S.mainlemma (by grind) (A := □^[M.height] ⊥)
           <| height_lt_iff_satisfies_boxbot.mp
           <| Frame.rank_lt_whole_height (by grind)
     cl_prover [this];
 
-lemma theory_height [𝔅.WeakKreisel (𝔅^[(M.height).pred] ⊥)] (h : M.root.1 ⊧ ◇(∼A)) (b : T ⊢ S.realization A) : 𝔅.height < M.height := by
-  apply 𝔅.height_lt_pos_of_boxBot (n := M.height) (by simpa using height_pos_of_dia h)
+lemma theory_height (hSound : ∀ {σ}, T₀ ⊢ 𝔅 σ → T ⊢ σ) (h : M.root.1 ⊧ ◇(∼A)) (b : T ⊢ S.realization A) : 𝔅.height < M.height := by
+  apply 𝔅.height_lt_pos_of_boxBot hSound (n := M.height) (by simpa using height_pos_of_dia h)
   have : ∃ i : M, M.root ≺ i ∧ i ⊭ A := Formula.Kripke.Satisfies.dia_def.mp h
   rcases this with ⟨i, hi, hiA⟩
-  have b₀ : T₀ ⊢ 𝔅 (S.realization A) := D1 b
-  have b₁ : T₀ ⊢ ∼(↑𝔅)^[M.height] ⊥ ➝ S M.root := S.root_of_iterated_inconsistency
-  have b₂ : T₀ ⊢ S M.root ➝ 𝔅.dia (S i) := S.SC2 M.root i (by grind)
-  have b₃ : T₀ ⊢ 𝔅.dia (S i) ➝ ∼𝔅 (S.realization A) := by
-    simpa [Provability.dia] using dia_distribute_imply <| WeakerThan.pbl <| S.mainlemma_neg (by grind) hiA
+  have b₀ : T₀ ⊢ 𝔅 (S.realization A) := 𝔅.D1 b
+  have b₁ : T₀ ⊢ ∼(↑𝔅)^[M.height] ⊥ 🡒 S M.root := S.root_of_iterated_inconsistency
+  have b₂ : T₀ ⊢ S M.root 🡒 𝔅.dia (S i) := S.SC2 M.root i (by grind)
+  have b₃ : T₀ ⊢ 𝔅.dia (S i) 🡒 ∼𝔅 (S.realization A) := by
+    simpa [Provability.dia] using 𝔅.dia_mono <| WeakerThan.pbl <| S.mainlemma_neg (by grind) hiA
   cl_prover [b₀, b₁, b₂, b₃]
 
 end SolovaySentences
@@ -144,16 +144,16 @@ section model
 
 variable (T) {V : Type*} [ORingStructure V] [V ⊧ₘ* 𝗜𝚺₁]
 
-def NegativeSuccessor (φ ψ : V) : Prop := T.ProvabilityComparison (neg ℒₒᵣ φ) (neg ℒₒᵣ ψ)
+def NegativeSuccessor (φ ψ : V) : Prop := T.ProvabilityComparisonLE (neg ℒₒᵣ φ) (neg ℒₒᵣ ψ)
 
-lemma NegativeSuccessor.quote_iff_provabilityComparison {φ ψ : Sentence ℒₒᵣ} :
-    NegativeSuccessor (V := V) T ⌜φ⌝ ⌜ψ⌝ ↔ T.ProvabilityComparison (V := V) ⌜∼φ⌝ ⌜∼ψ⌝ := by
+lemma NegativeSuccessor.quote_iff_provabilityComparisonLE {φ ψ : Sentence ℒₒᵣ} :
+    NegativeSuccessor (V := V) T ⌜φ⌝ ⌜ψ⌝ ↔ T.ProvabilityComparisonLE (V := V) ⌜∼φ⌝ ⌜∼ψ⌝ := by
   simp [NegativeSuccessor, Sentence.quote_def, Semiformula.quote_def]
 
 section
 
 def negativeSuccessor : 𝚺₁.Semisentence 2 := .mkSigma
-  “φ ψ. ∃ nφ, ∃ nψ, !(negGraph ℒₒᵣ) nφ φ ∧ !(negGraph ℒₒᵣ) nψ ψ ∧ !T.provabilityComparison nφ nψ”
+  “φ ψ. ∃ nφ, ∃ nψ, !(negGraph ℒₒᵣ) nφ φ ∧ !(negGraph ℒₒᵣ) nψ ψ ∧ !T.provabilityComparisonLE nφ nψ”
 
 instance negativeSuccessor_defined : 𝚺₁-Relation[V] NegativeSuccessor T via (negativeSuccessor T) := .mk fun v ↦ by
   simp [negativeSuccessor, NegativeSuccessor]
@@ -223,8 +223,8 @@ def θChain (ε : List F) : Sentence ℒₒᵣ := θChainAux T (fun i ↦ ⌜T.s
 def θ (i : F) : Sentence ℒₒᵣ := θAux T (fun i ↦ ⌜T.solovay i⌝) i
 
 lemma solovay_diag (i : F) :
-    𝗜𝚺₁ ⊢ T.solovay i ⭤ θ T i ⋏ ⩕ j ∈ { j : F | i ≺ j }, T.consistentWith/[⌜T.solovay j⌝] := by
-  have : 𝗜𝚺₁ ⊢ T.solovay i ⭤
+    𝗜𝚺₁ ⊢ T.solovay i 🡘 θ T i ⋏ ⩕ j ∈ { j : F | i ≺ j }, T.consistentWith/[⌜T.solovay j⌝] := by
+  have : 𝗜𝚺₁ ⊢ T.solovay i 🡘
       (Rew.subst fun j ↦ ⌜T.solovay ((Fintype.equivFin F).symm j)⌝) ▹
         (θAux T (fun i ↦ #(Fintype.equivFin F i)) i ⋏ ⩕ k ∈ { k : F | i ≺ k }, T.consistentWith/[#(Fintype.equivFin F k)]) := by
     simpa [Theory.solovay, Matrix.comp_vecCons', Matrix.constant_eq_singleton] using
@@ -367,9 +367,9 @@ private lemma Solovay.exclusive.comparable {i₁ i₂ : F} {ε₁ ε₂ : List F
       rcases hji₁ε₂ with ⟨η₁, η₂, rfl⟩
       have Θε₂ : ΘChain T V (η₁ ++ j :: i₁ :: η₂) := by simpa using Θε₂
       exact ΘChain.cons_cons_iff'.mp (ΘChain.append_iff.mp Θε₂).2 |>.1
-    have : ∀ k, i₁ ≺ k → T.ProvabilityComparison (V := V) ⌜∼T.solovay j⌝ ⌜∼T.solovay k⌝ := by
-      simpa [NegativeSuccessor.quote_iff_provabilityComparison] using ΘChain.cons_cons_iff.mp this
-    exact (ProvabilityComparison.refl_iff_provable (L := ℒₒᵣ)).mp (this j hij₁)
+    have : ∀ k, i₁ ≺ k → T.ProvabilityComparisonLE (V := V) ⌜∼T.solovay j⌝ ⌜∼T.solovay k⌝ := by
+      simpa [NegativeSuccessor.quote_iff_provabilityComparisonLE] using ΘChain.cons_cons_iff.mp this
+    exact (ProvabilityComparison.iff_le_refl_provable (L := ℒₒᵣ)).mp (this j hij₁)
   contradiction
 
 /-- Condition 1.-/
@@ -399,15 +399,15 @@ lemma Solovay.exclusive {i₁ i₂ : F} (ne : i₁ ≠ i₂) : T.Solovay V i₁ 
     rcases hj₂ with ⟨_, rfl⟩
     have : ΘChain T V ([j₂] ++ k :: ε) := (ΘChain.append_iff.mp Θε₂).2
     simpa using (ΘChain.append_iff.mp this).1
-  have P₁ : T.ProvabilityComparison (V := V) ⌜∼T.solovay j₁⌝ ⌜∼T.solovay j₂⌝ := by
-    simpa [NegativeSuccessor.quote_iff_provabilityComparison] using
+  have P₁ : T.ProvabilityComparisonLE (V := V) ⌜∼T.solovay j₁⌝ ⌜∼T.solovay j₂⌝ := by
+    simpa [NegativeSuccessor.quote_iff_provabilityComparisonLE] using
       ΘChain.doubleton_iff.mp C₁ j₂
         (cε₂.rel_of_infix _ _ <| List.infix_iff_prefix_suffix.mpr ⟨j₂ :: k :: ε, by simp, hj₂⟩)
-  have P₂ : T.ProvabilityComparison (V := V) ⌜∼T.solovay j₂⌝ ⌜∼T.solovay j₁⌝ := by
-    simpa [NegativeSuccessor.quote_iff_provabilityComparison] using
+  have P₂ : T.ProvabilityComparisonLE (V := V) ⌜∼T.solovay j₂⌝ ⌜∼T.solovay j₁⌝ := by
+    simpa [NegativeSuccessor.quote_iff_provabilityComparisonLE] using
       ΘChain.doubleton_iff.mp C₂ j₁
         (cε₁.rel_of_infix _ _ <| List.infix_iff_prefix_suffix.mpr ⟨j₁ :: k :: ε, by simp, hj₁⟩)
-  have : j₁ = j₂ := by simpa using ProvabilityComparison.antisymm (V := V) P₁ P₂
+  have : j₁ = j₂ := by simpa using ProvabilityComparison.le_antisymm (V := V) P₁ P₂
   contradiction
 
 /-- Condition 2.-/
@@ -419,9 +419,9 @@ lemma Solovay.refute (ne : F.root.1 ≠ i) : T.Solovay V i → T.Provable (⌜�
   rcases show Θ T V i from h.1 with ⟨ε, hε, cε⟩
   rcases List.ChainI.prec_exists_of_ne hε (Ne.symm ne) with ⟨ε', i', hii', rfl, hε'⟩
   have : ∀ k, i' ≺ k → NegativeSuccessor T ⌜T.solovay i⌝ ⌜T.solovay k⌝ := (ΘChain.cons_cons_iff.mp cε).2
-  have : T.ProvabilityComparison (V := V) ⌜∼T.solovay i⌝ ⌜∼T.solovay i⌝ := by
-    simpa [NegativeSuccessor.quote_iff_provabilityComparison] using this i hii'
-  exact (ProvabilityComparison.refl_iff_provable (T := T)).mp this
+  have : T.ProvabilityComparisonLE (V := V) ⌜∼T.solovay i⌝ ⌜∼T.solovay i⌝ := by
+    simpa [NegativeSuccessor.quote_iff_provabilityComparisonLE] using this i hii'
+  exact (ProvabilityComparison.iff_le_refl_provable (T := T)).mp this
 
 lemma Θ.disjunction (i : F) : Θ T V i → T.Solovay V i ∨ ∃ j, i ≺ j ∧ T.Solovay V j := by
   have : IsConverseWellFounded F (· ≺ ·) := inferInstance
@@ -430,7 +430,7 @@ lemma Θ.disjunction (i : F) : Θ T V i → T.Solovay V i ∨ ∃ j, i ≺ j ∧
   by_cases hS : T.Solovay V i
   · left; exact hS
   · right
-    have : ∃ j, i ≺ j ∧ ∀ k, i ≺ k → T.ProvabilityComparison (V := V) ⌜∼T.solovay j⌝ ⌜∼T.solovay k⌝ := by
+    have : ∃ j, i ≺ j ∧ ∀ k, i ≺ k → T.ProvabilityComparisonLE (V := V) ⌜∼T.solovay j⌝ ⌜∼T.solovay k⌝ := by
       have : ∃ j, i ≺ j ∧ T.Provable (⌜∼T.solovay j⌝ : V) := by
         have : Θ T V i → ∃ x, i ≺ x ∧ T.Provable (⌜∼T.solovay x⌝ : V) := by
           simpa [Theory.ConsistentWith.quote_iff, Theory.Solovay] using hS
@@ -445,7 +445,7 @@ lemma Θ.disjunction (i : F) : Θ T V i → T.Solovay V i ∨ ∃ j, i ≺ j ∧
       exact ⟨
         j :: ε,
         hε.cons hij,
-        cε.cons_of hε (by simpa [NegativeSuccessor.quote_iff_provabilityComparison]) hij⟩
+        cε.cons_of hε (by simpa [NegativeSuccessor.quote_iff_provabilityComparisonLE]) hij⟩
     have : T.Solovay V j ∨ ∃ k, j ≺ k ∧ T.Solovay V k := ih j hij this
     rcases this with (hSj | ⟨k, hjk, hSk⟩)
     · exact ⟨j, hij, hSj⟩
@@ -461,9 +461,9 @@ lemma disjunctive : ∃ i : F, T.Solovay V i := by
 lemma Solovay.box_disjunction [𝗜𝚺₁ ⪯ T] {i : F} (ne : F.root.1 ≠ i) :
     T.Solovay V i → T.Provable (⌜⩖ j ∈ {j : F | i ≺ j}, T.solovay j⌝ : V) := by
   intro hS
-  have TP : T.internalize V ⊢ ⌜θ T i ➝ T.solovay i ⋎ ⩖ j ∈ {j : F | i ≺ j}, T.solovay j⌝ :=
+  have TP : T.internalize V ⊢ ⌜θ T i 🡒 T.solovay i ⋎ ⩖ j ∈ {j : F | i ≺ j}, T.solovay j⌝ :=
     internal_provable_of_outer_provable <| by
-      have : 𝗜𝚺₁ ⊢ θ T i ➝ T.solovay i ⋎ ⩖ j ∈ {j : F | i ≺ j}, T.solovay j :=
+      have : 𝗜𝚺₁ ⊢ θ T i 🡒 T.solovay i ⋎ ⩖ j ∈ {j : F | i ≺ j}, T.solovay j :=
         provable_of_models _ _ fun (V : Type) _ _ ↦ by
           simpa [models_iff] using Θ.disjunction i
       exact Entailment.WeakerThan.pbl this
@@ -483,9 +483,9 @@ lemma solovay_root_sound [𝗜𝚺₁ ⪯ T] [T.SoundOn (Hierarchy 𝚷 2)] : T.
     have Bi : T ⊢ ∼T.solovay i := (provable_iff_provable (T := T)).mp (Solovay.refute hi H)
     have : ¬T.Solovay ℕ i := by
       set π := θ T i ⋏ ⩕ j ∈ { j : F | i ≺ j }, T.consistentWith/[⌜T.solovay j⌝]
-      have sπ : 𝗜𝚺₁ ⊢ T.solovay i ⭤ π := solovay_diag T i
+      have sπ : 𝗜𝚺₁ ⊢ T.solovay i 🡘 π := solovay_diag T i
       have : T ⊢ ∼π := by
-        have : T ⊢ T.solovay i ⭤ π := Entailment.WeakerThan.wk (inferInstanceAs (𝗜𝚺₁ ⪯ T)) sπ
+        have : T ⊢ T.solovay i 🡘 π := Entailment.WeakerThan.wk (inferInstanceAs (𝗜𝚺₁ ⪯ T)) sπ
         exact Entailment.K!_left (Entailment.ENN!_of_E! this) ⨀ Bi
       have : ¬ℕ ⊧/![] π := by
         simpa [models_iff] using

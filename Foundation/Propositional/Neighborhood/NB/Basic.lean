@@ -60,17 +60,17 @@ def truthset (M : Model) : Formula ℕ → 𝒫 M.𝓧
   | ⊥      => ⟨∅, by tauto⟩
   | φ ⋏ ψ  => ⟨truthset M φ ∩ truthset M ψ, M.𝓧_closed_inter⟩
   | φ ⋎ ψ  => ⟨truthset M φ ∪ truthset M ψ, M.𝓧_closed_union⟩
-  | φ ➝ ψ  => ⟨{ w | (truthset M φ, truthset M ψ) ∈ M.NB w }, M.𝓧_closed_imp⟩
+  | φ 🡒 ψ  => ⟨{ w | (truthset M φ, truthset M ψ) ∈ M.NB w }, M.𝓧_closed_imp⟩
 instance : CoeFun (Model) (λ M => Formula ℕ → 𝒫 M.𝓧) := ⟨truthset⟩
 
 @[simp, grind =] lemma truthset_atom {a : ℕ} : M (.atom a) = M.Val a := rfl
 @[simp, grind =] lemma truthset_bot : M ⊥ = ⟨∅, by tauto⟩ := rfl
 @[simp, grind =] lemma truthset_and : M (φ ⋏ ψ) = ⟨M φ ∩ M ψ, M.𝓧_closed_inter⟩ := rfl
 @[simp, grind =] lemma truthset_or : M (φ ⋎ ψ) = ⟨M φ ∪ M ψ, M.𝓧_closed_union⟩ := rfl
-@[simp, grind =] lemma truthset_imp : M (φ ➝ ψ) = ⟨{ w | (M φ, M ψ) ∈ M.NB w }, M.𝓧_closed_imp⟩ := rfl
+@[simp, grind =] lemma truthset_imp : M (φ 🡒 ψ) = ⟨{ w | (M φ, M ψ) ∈ M.NB w }, M.𝓧_closed_imp⟩ := rfl
 @[simp, grind .] lemma truthset_top : (M ⊤).1 = Set.univ := by simp [truthset, M.NB_spec];
 @[simp, grind =] lemma truthset_neg : M (∼φ) = ⟨{ w | (M φ, ∅) ∈ M.NB w }, M.𝓧_closed_imp⟩ := by grind;
-@[simp, grind =] lemma truthset_iff : M (φ ⭤ ψ) = ⟨{ w | (M φ, M ψ) ∈ M.NB w ∧ (M ψ, M φ) ∈ M.NB w }, @M.𝓧_closed_inter (M (φ ➝ ψ)) (M (ψ ➝ φ))⟩ := by grind;
+@[simp, grind =] lemma truthset_iff : M (φ 🡘 ψ) = ⟨{ w | (M φ, M ψ) ∈ M.NB w ∧ (M ψ, M φ) ∈ M.NB w }, @M.𝓧_closed_inter (M (φ 🡒 ψ)) (M (ψ 🡒 φ))⟩ := by grind;
 
 end Model
 
@@ -103,16 +103,16 @@ variable {M : NBNeighborhood.Model} {x y : M.World} {a : ℕ} {φ ψ χ : Formul
 @[grind =] protected lemma def_or  : x ⊩ φ ⋎ ψ ↔ x ⊩ φ ∨ x ⊩ ψ := by simp;
 @[grind =] protected lemma not_def_or : x ⊮ φ ⋎ ψ ↔ x ⊮ φ ∧ x ⊮ ψ := by grind;
 
-@[grind =] protected lemma def_imp  : x ⊩ φ ➝ ψ ↔ (M φ, M ψ) ∈ M.NB x := by simp;
-@[grind =] protected lemma not_def_imp : x ⊮ φ ➝ ψ ↔ (M φ, M ψ) ∉ M.NB x := by simp;
+@[grind =] protected lemma def_imp  : x ⊩ φ 🡒 ψ ↔ (M φ, M ψ) ∈ M.NB x := by simp;
+@[grind =] protected lemma not_def_imp : x ⊮ φ 🡒 ψ ↔ (M φ, M ψ) ∉ M.NB x := by simp;
 
 @[grind =] protected lemma def_neg  : x ⊩ ∼φ ↔ (M φ, ∅) ∈ M.NB x := by simp;
 @[grind =] protected lemma not_def_neg : x ⊮ ∼φ ↔ (M φ, ∅) ∉ M.NB x := by simp;
 
-@[grind =] protected lemma def_iff : x ⊩ φ ⭤ ψ ↔ ((M φ, M ψ) ∈ M.NB x ∧ (M ψ, M φ) ∈ M.NB x) := by
+@[grind =] protected lemma def_iff : x ⊩ φ 🡘 ψ ↔ ((M φ, M ψ) ∈ M.NB x ∧ (M ψ, M φ) ∈ M.NB x) := by
   apply Iff.trans Forces.def_and
   grind;
-@[grind =] protected lemma not_def_iff : x ⊮ φ ⭤ ψ ↔ ((M φ, M ψ) ∉ M.NB x ∨ (M ψ, M φ) ∉ M.NB x) := by grind
+@[grind =] protected lemma not_def_iff : x ⊮ φ 🡘 ψ ↔ ((M φ, M ψ) ∉ M.NB x ∨ (M ψ, M φ) ∉ M.NB x) := by grind
 
 end Forces
 
@@ -132,7 +132,7 @@ instance : Semantics.Top (NBNeighborhood.Model) := ⟨by simp⟩
 instance : Semantics.Bot (NBNeighborhood.Model) := ⟨by simp⟩
 
 @[grind =>] lemma forces_at_root (h : M ⊧ φ) : M.r ⊩ φ := h M.r
-@[grind =>] lemma subset_truthset_of_valid (h : M ⊧ φ ➝ ψ) : (M φ).1 ⊆ (M ψ).1 := by grind;
+@[grind =>] lemma subset_truthset_of_valid (h : M ⊧ φ 🡒 ψ) : (M φ).1 ⊆ (M ψ).1 := by grind;
 
 lemma valid_andElim₁ : M ⊧ Axioms.AndElim₁ φ ψ := by grind;
 lemma valid_andElim₂ : M ⊧ Axioms.AndElim₂ φ ψ := by grind;
@@ -149,12 +149,12 @@ attribute [simp high, grind .]
   valid_impId
   valid_efq
 
-@[grind =>] lemma valid_mdp (h₁ : M ⊧ φ ➝ ψ) (h₂ : M ⊧ φ) : M ⊧ ψ := by grind;
-lemma valid_AF (h : M ⊧ φ) : M ⊧ ψ ➝ φ := by grind;
+@[grind =>] lemma valid_mdp (h₁ : M ⊧ φ 🡒 ψ) (h₂ : M ⊧ φ) : M ⊧ ψ := by grind;
+lemma valid_AF (h : M ⊧ φ) : M ⊧ ψ 🡒 φ := by grind;
 lemma valid_AR (h₁ : M ⊧ φ) (h₂ : M ⊧ ψ) : M ⊧ φ ⋏ ψ := by grind;
-lemma valid_RuleD (h₁ : M ⊧ φ ➝ χ) (h₂ : M ⊧ ψ ➝ χ) : M ⊧ φ ⋎ ψ ➝ χ := by grind;
-lemma valid_RuleC (h₁ : M ⊧ φ ➝ ψ) (h₂ : M ⊧ φ ➝ χ) : M ⊧ φ ➝ (ψ ⋏ χ) := by grind;
-lemma valid_RuleI (h₁ : M ⊧ φ ➝ ψ) (h₂ : M ⊧ ψ ➝ χ) : M ⊧ φ ➝ χ := by grind;
+lemma valid_RuleD (h₁ : M ⊧ φ 🡒 χ) (h₂ : M ⊧ ψ 🡒 χ) : M ⊧ φ ⋎ ψ 🡒 χ := by grind;
+lemma valid_RuleC (h₁ : M ⊧ φ 🡒 ψ) (h₂ : M ⊧ φ 🡒 χ) : M ⊧ φ 🡒 (ψ ⋏ χ) := by grind;
+lemma valid_RuleI (h₁ : M ⊧ φ 🡒 ψ) (h₂ : M ⊧ ψ 🡒 χ) : M ⊧ φ 🡒 χ := by grind;
 
 attribute [grind <=]
   valid_AF
@@ -167,7 +167,7 @@ attribute [grind <=]
 @[grind =>] lemma valid_andElimR (h : M ⊧ φ ⋏ ψ) : M ⊧ ψ := by grind;
 
 @[grind =>]
-lemma eq_truthset_of_valid (h : M ⊧ φ ⭤ ψ) : (M φ).1 = (M ψ).1 := by
+lemma eq_truthset_of_valid (h : M ⊧ φ 🡘 ψ) : (M φ).1 = (M ψ).1 := by
   apply Set.Subset.antisymm;
   . apply subset_truthset_of_valid;
     apply valid_andElimL h;
@@ -175,7 +175,7 @@ lemma eq_truthset_of_valid (h : M ⊧ φ ⭤ ψ) : (M φ).1 = (M ψ).1 := by
     apply valid_andElimR h;
 
 @[grind <=]
-lemma valid_RuleE (h₁ : M ⊧ φ ⭤ ψ) (h₂ : M ⊧ χ ⭤ ξ) : M ⊧ (φ ➝ χ) ⭤ (ψ ➝ ξ) := by
+lemma valid_RuleE (h₁ : M ⊧ φ 🡘 ψ) (h₂ : M ⊧ χ 🡘 ξ) : M ⊧ (φ 🡒 χ) 🡘 (ψ 🡒 ξ) := by
   replace h₁ := eq_truthset_of_valid h₁;
   replace h₂ := eq_truthset_of_valid h₂;
   grind;

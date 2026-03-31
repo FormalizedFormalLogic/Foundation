@@ -34,7 +34,7 @@ instance «IL(P)_⊢_R» : Entailment.HasAxiomR 𝓢 where
     apply axiomJ5!;
 
 
-def RIIPRC : 𝓢 ⊢! φ ▷ ψ ➝ □(◇φ ➝ ◇ψ) := by
+def RIIPRC : 𝓢 ⊢! φ ▷ ψ 🡒 □(◇φ 🡒 ◇ψ) := by
   apply deduct';
   refine of (box_regularity $ axiomJ4!) ⨀ axiomP!;
 
@@ -52,7 +52,7 @@ instance «IL(P)_⊢_W» : Entailment.HasAxiomW 𝓢 where
       apply A_symm;
       apply A_replace_right lem INLNM!;
     apply rhdTrans! $ show [φ ▷ ψ] ⊢[𝓢]! (ψ ⋏ ◇φ) ▷ ◇ψ by
-      suffices 𝓢 ⊢! □(ψ ⋏ ◇φ ➝ ◇ψ) ➝ (ψ ⋏ ◇φ) ▷ ◇ψ by
+      suffices 𝓢 ⊢! □(ψ ⋏ ◇φ 🡒 ◇ψ) 🡒 (ψ ⋏ ◇φ) ▷ ◇ψ by
         apply C_trans ?_ this;
         apply C_trans axiomP!;
         apply box_regularity;

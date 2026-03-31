@@ -26,9 +26,9 @@ def inst_Łukasiewiicz_of_isProvabilityLogic (hPL : L.IsProvabilityLogic T U) : 
   mdp := by
     rintro A B ⟨hA⟩ ⟨hB⟩;
     constructor;
-    simp only [←Modal.Logic.iff_provable, hPL A, hPL B, hPL (A ➝ B)] at hA hB ⊢;
+    simp only [←Modal.Logic.iff_provable, hPL A, hPL B, hPL (A 🡒 B)] at hA hB ⊢;
     intro f;
-    replace hA : U ⊢ f A ➝ f B := hA f;
+    replace hA : U ⊢ f A 🡒 f B := hA f;
     replace hB : U ⊢ f A := hB f;
     cl_prover [hA, hB];
   implyK {_ _} := by

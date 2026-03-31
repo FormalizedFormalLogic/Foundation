@@ -789,13 +789,13 @@ lemma ball_lt {Γ} {P : (Fin k → V) → V → Prop} {f : (Fin k → V) → V}
     ⟨ .mkSigma (∃⁰ (bf.val ⋏ (∀⁰[“#0 < #1”] φ.val ⇜ (#0 :> (#·.succ.succ))))) (by simp),
       by intro v; simp [hbf.df.iff, hp.df.iff] ⟩
   | 𝚷 => exact
-    ⟨ .mkPi (∀⁰ (bf.val ➝ (∀⁰[“#0 < #1”] φ.val ⇜ (#0 :> (#·.succ.succ))))) (by simp),
+    ⟨ .mkPi (∀⁰ (bf.val 🡒 (∀⁰[“#0 < #1”] φ.val ⇜ (#0 :> (#·.succ.succ))))) (by simp),
       by intro v; simp [hbf.df.iff, hp.df.iff] ⟩
   | 𝚫 =>
     exact .of_sigma_of_pi
       ⟨ .mkSigma (∃⁰ (bf.val ⋏ (∀⁰[“#0 < #1”] φ.sigma.val ⇜ (#0 :> (#·.succ.succ))))) (by simp),
           by intro v; simp [hbf.df.iff, hp.df.iff, HierarchySymbol.Semiformula.val_sigma] ⟩
-      ⟨ .mkPi (∀⁰ (bf.val ➝ (∀⁰[“#0 < #1”] φ.pi.val ⇜ (#0 :> (#·.succ.succ))))) (by simp),
+      ⟨ .mkPi (∀⁰ (bf.val 🡒 (∀⁰[“#0 < #1”] φ.pi.val ⇜ (#0 :> (#·.succ.succ))))) (by simp),
         by intro v; simp [hbf.df.iff, hp.df.iff, hp.proper.iff'] ⟩
 
 lemma bexs_lt {Γ} {P : (Fin k → V) → V → Prop} {f : (Fin k → V) → V}
@@ -808,13 +808,13 @@ lemma bexs_lt {Γ} {P : (Fin k → V) → V → Prop} {f : (Fin k → V) → V}
     ⟨ .mkSigma (∃⁰ (bf.val ⋏ (∃⁰[“#0 < #1”] φ.val ⇜ (#0 :> (#·.succ.succ))))) (by simp),
       by intro v; simp [hbf.df.iff, hp.df.iff] ⟩
   | 𝚷 => exact
-    ⟨ .mkPi (∀⁰ (bf.val ➝ (∃⁰[“#0 < #1”] φ.val ⇜ (#0 :> (#·.succ.succ))))) (by simp),
+    ⟨ .mkPi (∀⁰ (bf.val 🡒 (∃⁰[“#0 < #1”] φ.val ⇜ (#0 :> (#·.succ.succ))))) (by simp),
       by intro v; simp [hbf.df.iff, hp.df.iff] ⟩
   | 𝚫 =>
     exact .of_sigma_of_pi
       ⟨ .mkSigma (∃⁰ (bf.val ⋏ (∃⁰[“#0 < #1”] φ.sigma.val ⇜ (#0 :> (#·.succ.succ))))) (by simp),
           by intro v; simp [hbf.df.iff, hp.df.iff, HierarchySymbol.Semiformula.val_sigma] ⟩
-      ⟨ .mkPi (∀⁰ (bf.val ➝ (∃⁰[“#0 < #1”] φ.pi.val ⇜ (#0 :> (#·.succ.succ))))) (by simp),
+      ⟨ .mkPi (∀⁰ (bf.val 🡒 (∃⁰[“#0 < #1”] φ.pi.val ⇜ (#0 :> (#·.succ.succ))))) (by simp),
         by intro v; simp [hbf.df.iff, hp.df.iff, hp.proper.iff'] ⟩
 
 lemma ball_le [V ⊧ₘ* 𝗣𝗔⁻] {Γ} {P : (Fin k → V) → V → Prop} {f : (Fin k → V) → V}

@@ -12,7 +12,7 @@ namespace Entailment
 
 variable (𝓢 : S)
 
-def ProvablyEquivalent (φ ψ : F) : Prop := 𝓢 ⊢ φ ⭤ ψ
+def ProvablyEquivalent (φ ψ : F) : Prop := 𝓢 ⊢ φ 🡘 ψ
 
 local infix:45 " ≡ " => ProvablyEquivalent 𝓢
 
@@ -42,9 +42,9 @@ variable [Entailment.Minimal 𝓢]
 lemma of_eq_of {φ ψ : F} : (⟦φ⟧ : LindenbaumAlgebra 𝓢) = ⟦ψ⟧ ↔ φ ≡ ψ := Quotient.eq (r := ProvablyEquivalent.setoid 𝓢)
 
 instance [DecidableEq F] : LE (LindenbaumAlgebra 𝓢) :=
-  ⟨Quotient.lift₂ (fun φ ψ ↦ 𝓢 ⊢ φ ➝ ψ) fun φ₁ ψ₁ φ₂ ψ₂ hp hq ↦ by simp only [C!_repalce hp hq]⟩
+  ⟨Quotient.lift₂ (fun φ ψ ↦ 𝓢 ⊢ φ 🡒 ψ) fun φ₁ ψ₁ φ₂ ψ₂ hp hq ↦ by simp only [C!_repalce hp hq]⟩
 
-lemma le_def [DecidableEq F] {φ ψ : F} : (⟦φ⟧ : LindenbaumAlgebra 𝓢) ≤ ⟦ψ⟧ ↔ 𝓢 ⊢ φ ➝ ψ := iff_of_eq rfl
+lemma le_def [DecidableEq F] {φ ψ : F} : (⟦φ⟧ : LindenbaumAlgebra 𝓢) ≤ ⟦ψ⟧ ↔ 𝓢 ⊢ φ 🡒 ψ := iff_of_eq rfl
 
 instance : Top (LindenbaumAlgebra 𝓢) := ⟨⟦⊤⟧⟩
 
@@ -56,7 +56,7 @@ instance [DecidableEq F] : Min (LindenbaumAlgebra 𝓢) := ⟨Quotient.lift₂ (
 instance [DecidableEq F] : Max (LindenbaumAlgebra 𝓢) := ⟨Quotient.lift₂ (fun φ ψ ↦ ⟦φ ⋎ ψ⟧) fun φ₁ ψ₁ φ₂ ψ₂ hp hq ↦ by
   simpa only [Quotient.eq] using EAA!_of_E!_of_E! hp hq⟩
 
-instance [DecidableEq F] : HImp (LindenbaumAlgebra 𝓢) := ⟨Quotient.lift₂ (fun φ ψ ↦ ⟦φ ➝ ψ⟧) fun φ₁ ψ₁ φ₂ ψ₂ hp hq ↦ by
+instance [DecidableEq F] : HImp (LindenbaumAlgebra 𝓢) := ⟨Quotient.lift₂ (fun φ ψ ↦ ⟦φ 🡒 ψ⟧) fun φ₁ ψ₁ φ₂ ψ₂ hp hq ↦ by
   simpa only [Quotient.eq] using ECC!_of_E!_of_E! hp hq⟩
 
 instance [DecidableEq F] : Compl (LindenbaumAlgebra 𝓢) := ⟨Quotient.lift (fun φ ↦ ⟦∼φ⟧) fun φ₁ φ₂ hp ↦ by
@@ -70,7 +70,7 @@ lemma inf_def [DecidableEq F] (φ ψ : F) : (⟦φ⟧ : LindenbaumAlgebra 𝓢) 
 
 lemma sup_def [DecidableEq F] (φ ψ : F) : (⟦φ⟧ : LindenbaumAlgebra 𝓢) ⊔ ⟦ψ⟧ = ⟦φ ⋎ ψ⟧ := rfl
 
-lemma himp_def [DecidableEq F] (φ ψ : F) : (⟦φ⟧ : LindenbaumAlgebra 𝓢) ⇨ ⟦ψ⟧ = ⟦φ ➝ ψ⟧ := rfl
+lemma himp_def [DecidableEq F] (φ ψ : F) : (⟦φ⟧ : LindenbaumAlgebra 𝓢) ⇨ ⟦ψ⟧ = ⟦φ 🡒 ψ⟧ := rfl
 
 lemma compl_def [DecidableEq F] (φ : F) : (⟦φ⟧ : LindenbaumAlgebra 𝓢)ᶜ = ⟦∼φ⟧ := rfl
 

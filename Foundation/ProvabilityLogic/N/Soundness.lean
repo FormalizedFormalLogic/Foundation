@@ -20,7 +20,7 @@ variable {L : FirstOrder.Language} [L.ReferenceableBy L]
 lemma N.arithmetical_soundness (h : Modal.N ⊢ A) {f : Realization 𝔅} : U ⊢ f A := by
   induction h using Hilbert.Normal.rec! with
   | axm _ hp => simp at hp;
-  | nec ihp => exact D1_shift ihp;
+  | nec ihp => exact WeakerThan.pbl $ 𝔅.D1 ihp;
   | mdp ihpq ihp => exact ihpq ⨀ ihp;
   | _ => simp only [Realization.interpret]; cl_prover;
 

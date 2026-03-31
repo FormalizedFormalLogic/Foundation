@@ -26,8 +26,8 @@ instance [F.IsFinite] [F.IsTransitive] [F.IsAntisymmetric] : F.IsWeaklyConverseW
 lemma validate_AxiomGrz_of_refl_trans_wcwf [F.IsReflexive] [F.IsTransitive] [F.IsWeaklyConverseWellFounded] : F ⊧ (Axioms.Grz (.atom 0)) := by
   intro V;
   let M : Model := ⟨F, V⟩;
-  let X := { x | Satisfies M x (□(□((.atom 0) ➝ □(.atom 0)) ➝ (.atom 0))) ∧ ¬(Satisfies M x (.atom 0)) };
-  let Y := { x | Satisfies M x (□(□((.atom 0) ➝ □(.atom 0)) ➝ (.atom 0))) ∧ ¬(Satisfies M x (□(.atom 0))) ∧ (Satisfies ⟨F, V⟩ x (.atom 0)) };
+  let X := { x | Satisfies M x (□(□((.atom 0) 🡒 □(.atom 0)) 🡒 (.atom 0))) ∧ ¬(Satisfies M x (.atom 0)) };
+  let Y := { x | Satisfies M x (□(□((.atom 0) 🡒 □(.atom 0)) 🡒 (.atom 0))) ∧ ¬(Satisfies M x (□(.atom 0))) ∧ (Satisfies ⟨F, V⟩ x (.atom 0)) };
   have : (X ∩ Y) = ∅ := by aesop;
 
   suffices ∀ x ∈ X ∪ Y, ∃ y ∈ X ∪ Y, (IrreflGen F.Rel) x y by
@@ -45,8 +45,8 @@ lemma validate_AxiomGrz_of_refl_trans_wcwf [F.IsReflexive] [F.IsTransitive] [F.I
     simpa [X] using this;
 
   rintro w (⟨hw₁, hw₂⟩ | ⟨hw₁, hw₂, hw₃⟩);
-  . have : Satisfies M w (□((.atom 0) ➝ □(.atom 0)) ➝ (.atom 0)) := hw₁ w (Std.Refl.refl w);
-    have : ¬Satisfies M w (□(atom 0 ➝ □atom 0)) := not_imp_not.mpr this hw₂;
+  . have : Satisfies M w (□((.atom 0) 🡒 □(.atom 0)) 🡒 (.atom 0)) := hw₁ w (Std.Refl.refl w);
+    have : ¬Satisfies M w (□(atom 0 🡒 □atom 0)) := not_imp_not.mpr this hw₂;
     obtain ⟨x, Rwx, hx, ⟨y, Rxy, hy⟩⟩ := by simpa [Satisfies] using this;
     use x;
     constructor;
@@ -78,11 +78,11 @@ lemma validate_AxiomGrz_of_refl_trans_wcwf [F.IsReflexive] [F.IsTransitive] [F.I
 
 lemma validate_AxiomGrz_of_finite_strict_preorder [F.IsFinite] [F.IsPartialOrder] : F ⊧ (Axioms.Grz (.atom 0)) := validate_AxiomGrz_of_refl_trans_wcwf
 
-lemma validate_AxiomT_AxiomFour_of_validate_Grz (h : F ⊧ Axioms.Grz (.atom 0)) : F ⊧ □(.atom 0) ➝ ((.atom 0) ⋏ □□(.atom 0)) := by
-  let ψ : Formula _ := (.atom 0) ⋏ (□(.atom 0) ➝ □□(.atom 0));
+lemma validate_AxiomT_AxiomFour_of_validate_Grz (h : F ⊧ Axioms.Grz (.atom 0)) : F ⊧ □(.atom 0) 🡒 ((.atom 0) ⋏ □□(.atom 0)) := by
+  let ψ : Formula _ := (.atom 0) ⋏ (□(.atom 0) 🡒 □□(.atom 0));
   intro V x;
   simp only [Axioms.Grz, ValidOnFrame.models_iff, ValidOnFrame, ValidOnModel.iff_models, ValidOnModel] at h;
-  suffices Satisfies { toFrame := F, Val := V } x (□(.atom 0) ➝ ψ) by
+  suffices Satisfies { toFrame := F, Val := V } x (□(.atom 0) 🡒 ψ) by
     intro h₁;
     have h₂ := Satisfies.and_def.mp $ this h₁;
     apply Satisfies.and_def.mpr;
@@ -90,8 +90,8 @@ lemma validate_AxiomT_AxiomFour_of_validate_Grz (h : F ⊧ Axioms.Grz (.atom 0))
     . exact h₂.1;
     . exact h₂.2 h₁;
   intro h₁;
-  have h₂ : Satisfies ⟨F, V⟩ x (□(atom 0) ➝ □(□(ψ ➝ □ψ) ➝ ψ)) := (Sound.sound (𝓢 := Modal.K) (𝓜 := FrameClass.K) lemma_Grz₁!) (by trivial) V x;
-  have h₃ : Satisfies ⟨F, V⟩ x (□(□(ψ ➝ □ψ) ➝ ψ) ➝ ψ) := Satisfies.iff_subst_self (s := λ a => if a = 0 then ψ else a) |>.mp $ h _ _;
+  have h₂ : Satisfies ⟨F, V⟩ x (□(atom 0) 🡒 □(□(ψ 🡒 □ψ) 🡒 ψ)) := (Sound.sound (𝓢 := Modal.K) (𝓜 := FrameClass.K) lemma_Grz₁!) (by trivial) V x;
+  have h₃ : Satisfies ⟨F, V⟩ x (□(□(ψ 🡒 □ψ) 🡒 ψ) 🡒 ψ) := Satisfies.iff_subst_self (s := λ a => if a = 0 then ψ else a) |>.mp $ h _ _;
   exact h₃ $ h₂ $ h₁;
 
 lemma validate_AxiomT_of_validate_AxiomGrz (h : F ⊧ Axioms.Grz (.atom 0)) : F ⊧ (Axioms.T (.atom 0)) := by
@@ -128,7 +128,7 @@ lemma WCWF_of_validate_AxiomGrz (h : F ⊧ Axioms.Grz (.atom 0)) : F.IsWeaklyCon
     . use (λ _ v => ∀ i, v ≠ f (2 * i)), (f 0);
       apply Classical.not_imp.mpr
       constructor;
-      . suffices Satisfies ⟨F, _⟩ (f 0) (□(∼(.atom 0) ➝ ∼(□((.atom 0) ➝ □(.atom 0))))) by
+      . suffices Satisfies ⟨F, _⟩ (f 0) (□(∼(.atom 0) 🡒 ∼(□((.atom 0) 🡒 □(.atom 0))))) by
           intro x hx;
           exact not_imp_not.mp $ this _ hx;
         suffices ∀ y, f 0 ≺ y → ∀ j, y = f (2 * j) → ∃ x, y ≺ x ∧ (∀ i, ¬x = f (2 * i)) ∧ ∃ z, x ≺ z ∧ ∃ x, z = f (2 * x) by
@@ -156,7 +156,7 @@ lemma WCWF_of_validate_AxiomGrz (h : F ⊧ Axioms.Grz (.atom 0)) : F.IsWeaklyCon
       use V, (f j);
       apply Classical.not_imp.mpr;
       constructor;
-      . have : Satisfies ⟨F, V⟩ (f (j + 1)) (∼((.atom 0) ➝ □(.atom 0))) := by
+      . have : Satisfies ⟨F, V⟩ (f (j + 1)) (∼((.atom 0) 🡒 □(.atom 0))) := by
           suffices f (j + 1) ≠ f j ∧ f (j + 1) ≺ f j by simp_all [Satisfies, V];
           constructor;
           . exact Ne.symm $ (hf j).2;

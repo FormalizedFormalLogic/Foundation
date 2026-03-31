@@ -103,7 +103,7 @@ instance [Entailment.K 𝓢] [Entailment.HasAxiomPoint4 𝓢] : (canonicalFrame 
   obtain ⟨φ, hφ₁, hφ₂⟩ := exists₁₂_of_ne nexy;
   apply def_rel_box_mem₁.mpr;
   intro ψ hψ;
-  have : (φ ⋎ ψ) ➝ □(φ ⋎ ψ) ∈ x.1.1 := mdp_mem₁_provable axiomPoint4! $ def_rel_dia_mem₁.mp Rxz $ mdp_mem₁_provable (by
+  have : (φ ⋎ ψ) 🡒 □(φ ⋎ ψ) ∈ x.1.1 := mdp_mem₁_provable axiomPoint4! $ def_rel_dia_mem₁.mp Rxz $ mdp_mem₁_provable (by
     apply imply_box_distribute'!;
     simp;
   ) hψ;

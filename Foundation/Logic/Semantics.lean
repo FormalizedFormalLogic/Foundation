@@ -58,9 +58,9 @@ protected class And where
 protected class Or where
   models_or {𝓜 : M} {φ ψ : F} : 𝓜 ⊧ φ ⋎ ψ ↔ 𝓜 ⊧ φ ∨ 𝓜 ⊧ ψ
 
-/-- Tarski's truth definition for `➝`. -/
+/-- Tarski's truth definition for `🡒`. -/
 protected class Imp where
-  models_imply {𝓜 : M} {φ ψ : F} : 𝓜 ⊧ φ ➝ ψ ↔ (𝓜 ⊧ φ → 𝓜 ⊧ ψ)
+  models_imply {𝓜 : M} {φ ψ : F} : 𝓜 ⊧ φ 🡒 ψ ↔ (𝓜 ⊧ φ → 𝓜 ⊧ ψ)
 
 /-- Tarski's truth definition for `∼`. -/
 protected class Not where
@@ -91,7 +91,7 @@ variable [Tarski M]
 variable {𝓜 : M}
 
 @[simp] lemma models_iff {φ ψ : F} :
-    𝓜 ⊧ φ ⭤ ψ ↔ (𝓜 ⊧ φ ↔ 𝓜 ⊧ ψ) := by
+    𝓜 ⊧ φ 🡘 ψ ↔ (𝓜 ⊧ φ ↔ 𝓜 ⊧ ψ) := by
   simp [LogicalConnective.iff, iff_iff_implies_and_implies]
 
 @[simp] lemma models_list_conj {l : List F} :

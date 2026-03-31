@@ -59,7 +59,7 @@ lemma eq_bot : ‖⊥‖ = ∅ := by simp [proofset];
 
 lemma eq_neg : ‖∼φ‖ = ‖φ‖ᶜ := by simp [proofset]; tauto;
 
-lemma eq_imp : ‖φ ➝ ψ‖ = (‖φ‖ᶜ ∪ ‖ψ‖) := by
+lemma eq_imp : ‖φ 🡒 ψ‖ = (‖φ‖ᶜ ∪ ‖ψ‖) := by
   ext;
   simp [proofset];
   tauto;
@@ -91,7 +91,7 @@ lemma iff_provable_eq_univ : 𝓢 ⊢ φ ↔ ‖φ‖ = Set.univ := by
     tauto;
 
 @[grind]
-lemma imp_subset : 𝓢 ⊢ φ ➝ ψ ↔ ‖φ‖ ⊆ ‖ψ‖ := by
+lemma imp_subset : 𝓢 ⊢ φ 🡒 ψ ↔ ‖φ‖ ⊆ ‖ψ‖ := by
   constructor;
   . intro h Γ;
     apply iff_mem_imp.mp $ iff_forall_mem_provable.mpr h Γ;
@@ -101,7 +101,7 @@ lemma imp_subset : 𝓢 ⊢ φ ➝ ψ ↔ ‖φ‖ ⊆ ‖ψ‖ := by
     apply iff_mem_imp.mpr $ @h Γ;
 
 @[grind]
-lemma iff_subset : 𝓢 ⊢ φ ⭤ ψ ↔ ‖φ‖ = ‖ψ‖ := by
+lemma iff_subset : 𝓢 ⊢ φ 🡘 ψ ↔ ‖φ‖ = ‖ψ‖ := by
   constructor;
   . intro h;
     apply Set.eq_of_subset_of_subset <;>
@@ -122,7 +122,7 @@ lemma eq_boxed_of_eq [Entailment.E 𝓢] : ‖φ‖ = ‖ψ‖ → ‖□φ‖ =
 
 @[grind]
 lemma box_subset_of_subset [Entailment.EM 𝓢] : ‖φ‖ ⊆ ‖ψ‖ → ‖□φ‖ ⊆ ‖□ψ‖ := by
-  suffices 𝓢 ⊢ φ ➝ ψ → 𝓢 ⊢ □φ ➝ □ψ by simpa [imp_subset];
+  suffices 𝓢 ⊢ φ 🡒 ψ → 𝓢 ⊢ □φ 🡒 □ψ by simpa [imp_subset];
   apply Entailment.rm!;
 
 end proofset

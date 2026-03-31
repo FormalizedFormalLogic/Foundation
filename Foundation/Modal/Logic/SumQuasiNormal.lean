@@ -13,7 +13,7 @@ variable {L L₁ L₂ : Logic α} {φ ψ : Formula α} {s : Substitution α}
 inductive sumQuasiNormal (L₁ L₂ : Logic α) : Logic α
   | mem₁ {φ}    : L₁ ⊢ φ → sumQuasiNormal L₁ L₂ φ
   | mem₂ {φ}    : L₂ ⊢ φ → sumQuasiNormal L₁ L₂ φ
-  | mdp  {φ ψ}  : sumQuasiNormal L₁ L₂ (φ ➝ ψ) → sumQuasiNormal L₁ L₂ φ → sumQuasiNormal L₁ L₂ ψ
+  | mdp  {φ ψ}  : sumQuasiNormal L₁ L₂ (φ 🡒 ψ) → sumQuasiNormal L₁ L₂ φ → sumQuasiNormal L₁ L₂ ψ
   | subst {φ s} : sumQuasiNormal L₁ L₂ φ → sumQuasiNormal L₁ L₂ (φ⟦s⟧)
 
 namespace sumQuasiNormal
@@ -46,8 +46,8 @@ lemma rec!
   (mem₁  : ∀ {φ}, (h : L₁ ⊢ φ) → motive φ (mem₁! h))
   (mem₂  : ∀ {φ}, (h : L₂ ⊢ φ) → motive φ (mem₂! h))
   (mdp   : ∀ {φ ψ : Formula α},
-           {hφψ : (sumQuasiNormal L₁ L₂) ⊢ φ ➝ ψ} → {hφ : (sumQuasiNormal L₁ L₂) ⊢ φ} →
-          motive (φ ➝ ψ) hφψ → motive φ hφ → motive ψ (hφψ ⨀ hφ)
+           {hφψ : (sumQuasiNormal L₁ L₂) ⊢ φ 🡒 ψ} → {hφ : (sumQuasiNormal L₁ L₂) ⊢ φ} →
+          motive (φ 🡒 ψ) hφψ → motive φ hφ → motive ψ (hφψ ⨀ hφ)
   )
   (subst : ∀ {φ s}, {hφ : (sumQuasiNormal L₁ L₂) ⊢ φ} → (motive φ hφ) → motive (φ⟦s⟧) (Logic.subst _ hφ))
   : ∀ {φ}, (h : sumQuasiNormal L₁ L₂ ⊢ φ) → motive φ h := by
@@ -134,7 +134,7 @@ variable [Entailment.Cl L₁]
 
 open LO.Entailment
 
-lemma provable_of_finite_provable [DecidableEq α] : (∃ X : Finset _, (X.toSet ⊆ L₂) ∧ L₁ ⊢ X.conj ➝ φ) → sumQuasiNormal L₁ L₂ ⊢ φ := by
+lemma provable_of_finite_provable [DecidableEq α] : (∃ X : Finset _, (X.toSet ⊆ L₂) ∧ L₁ ⊢ X.conj 🡒 φ) → sumQuasiNormal L₁ L₂ ⊢ φ := by
   rintro ⟨X, hX₂, hφ⟩;
   apply (WeakerThan.pbl (𝓣 := sumQuasiNormal L₁ L₂) hφ) ⨀ ?_;
   apply FConj!_iff_forall_provable.mpr;
@@ -144,7 +144,7 @@ lemma provable_of_finite_provable [DecidableEq α] : (∃ X : Finset _, (X.toSet
   apply hX₂ hχ;
 
 lemma finite_provable_of_provable [DecidableEq α] [L₁.Substitution] (h : ∀ ξ ∈ L₂, ∀ s : Substitution _, ξ⟦s⟧ ∈ L₂) :
-  sumQuasiNormal L₁ L₂ ⊢ φ → ∃ X : Finset _, (↑X ⊆ L₂) ∧ L₁ ⊢ X.conj ➝ φ := by
+  sumQuasiNormal L₁ L₂ ⊢ φ → ∃ X : Finset _, (↑X ⊆ L₂) ∧ L₁ ⊢ X.conj 🡒 φ := by
   intro h;
   induction h using sumQuasiNormal.rec! with
   | mem₁ h =>
@@ -163,7 +163,7 @@ lemma finite_provable_of_provable [DecidableEq α] [L₁.Substitution] (h : ∀ 
     use X₁ ∪ X₂;
     constructor;
     . simp_all;
-    . suffices L₁ ⊢ (X₁.conj ⋏ X₂.conj) ➝ ψ by exact C!_trans CFconjUnionKFconj! this;
+    . suffices L₁ ⊢ (X₁.conj ⋏ X₂.conj) 🡒 ψ by exact C!_trans CFconjUnionKFconj! this;
       cl_prover [hφψ, hφ];
   | @subst _ s _ ihφ =>
     obtain ⟨X, hX, hφ⟩ := ihφ;
@@ -178,10 +178,10 @@ lemma finite_provable_of_provable [DecidableEq α] [L₁.Substitution] (h : ∀ 
       exact fconj_subst;
 
 lemma iff_provable_finite_provable [DecidableEq α] [L₁.Substitution] (h : ∀ ξ ∈ L₂, ∀ s : Substitution _, ξ⟦s⟧ ∈ L₂)  :
-  sumQuasiNormal L₁ L₂ ⊢ φ ↔ ∃ X : Finset _, (↑X ⊆ L₂) ∧ L₁ ⊢ X.conj ➝ φ := ⟨finite_provable_of_provable h, provable_of_finite_provable⟩
+  sumQuasiNormal L₁ L₂ ⊢ φ ↔ ∃ X : Finset _, (↑X ⊆ L₂) ∧ L₁ ⊢ X.conj 🡒 φ := ⟨finite_provable_of_provable h, provable_of_finite_provable⟩
 
 lemma iff_provable_finite_provable_letterless [DecidableEq α] [L₁.Substitution] (L₂_letterless : FormulaSet.Letterless L₂)
-  : sumQuasiNormal L₁ L₂ ⊢ φ ↔ ∃ X : Finset _, (↑X ⊆ L₂) ∧ L₁ ⊢ X.conj ➝ φ := by
+  : sumQuasiNormal L₁ L₂ ⊢ φ ↔ ∃ X : Finset _, (↑X ⊆ L₂) ∧ L₁ ⊢ X.conj 🡒 φ := by
   apply iff_provable_finite_provable;
   grind;
 
@@ -237,7 +237,7 @@ end sumQuasiNormal
 inductive sumQuasiNormal' (L₁ L₂ : Logic α) : Logic α
 | mem₁ {φ} (s : Substitution _) : L₁ ⊢ φ → sumQuasiNormal' L₁ L₂ (φ⟦s⟧)
 | mem₂ {φ} (s : Substitution _) : L₂ ⊢ φ → sumQuasiNormal' L₁ L₂ (φ⟦s⟧)
-| mdp {φ ψ : Formula α} : sumQuasiNormal' L₁ L₂ (φ ➝ ψ) → sumQuasiNormal' L₁ L₂ φ → sumQuasiNormal' L₁ L₂ ψ
+| mdp {φ ψ : Formula α} : sumQuasiNormal' L₁ L₂ (φ 🡒 ψ) → sumQuasiNormal' L₁ L₂ φ → sumQuasiNormal' L₁ L₂ ψ
 
 namespace sumQuasiNormal'
 
@@ -267,8 +267,8 @@ lemma rec!
   (mem₁  : ∀ {φ}, ∀ s, (h : L₁ ⊢ φ) → motive (φ⟦s⟧) (mem₁! h))
   (mem₂  : ∀ {φ}, ∀ s, (h : L₂ ⊢ φ) → motive (φ⟦s⟧) (mem₂! h))
   (mdp   : ∀ {φ ψ : Formula α},
-           {hφψ : (sumQuasiNormal' L₁ L₂) ⊢ (φ ➝ ψ)} → {hφ : (sumQuasiNormal' L₁ L₂) ⊢ φ} →
-          motive (φ ➝ ψ) hφψ → motive φ hφ → motive ψ (hφψ ⨀ hφ)
+           {hφψ : (sumQuasiNormal' L₁ L₂) ⊢ (φ 🡒 ψ)} → {hφ : (sumQuasiNormal' L₁ L₂) ⊢ φ} →
+          motive (φ 🡒 ψ) hφψ → motive φ hφ → motive ψ (hφψ ⨀ hφ)
   )
   : ∀ {φ}, (h : sumQuasiNormal' L₁ L₂ ⊢ φ) → motive φ h := by
   intro φ hφ;
@@ -315,8 +315,8 @@ lemma sumQuasiNormal.rec!_omitSubst
   (mem₁  : ∀ {φ}, ∀ s, (h : L₁ ⊢ φ) → motive (φ⟦s⟧) (Logic.subst s $ mem₁! h))
   (mem₂  : ∀ {φ}, ∀ s, (h : L₂ ⊢ φ) → motive (φ⟦s⟧) (Logic.subst s $ mem₂! h))
   (mdp   : ∀ {φ ψ : Formula α},
-           {hφψ : (sumQuasiNormal L₁ L₂) ⊢ (φ ➝ ψ)} → {hφ : (sumQuasiNormal L₁ L₂) ⊢ φ} →
-           motive (φ ➝ ψ) hφψ → motive φ hφ → motive ψ (hφψ ⨀ hφ)
+           {hφψ : (sumQuasiNormal L₁ L₂) ⊢ (φ 🡒 ψ)} → {hφ : (sumQuasiNormal L₁ L₂) ⊢ φ} →
+           motive (φ 🡒 ψ) hφψ → motive φ hφ → motive ψ (hφψ ⨀ hφ)
   )
   : ∀ {φ}, (h : sumQuasiNormal L₁ L₂ ⊢ φ) → motive φ h := by
   intro φ hφ;
@@ -334,8 +334,8 @@ lemma sumQuasiNormal.rec!_omitSubst₁ (hL₁ : L₁.Substitution)
   (mem₁  : ∀ {φ}, (h : L₁ ⊢ φ) → motive φ (mem₁! h))
   (mem₂  : ∀ {φ}, ∀ s, (h : L₂ ⊢ φ) → motive (φ⟦s⟧) (Logic.subst s $ mem₂! h))
   (mdp   : ∀ {φ ψ : Formula α},
-           {hφψ : (sumQuasiNormal L₁ L₂) ⊢ (φ ➝ ψ)} → {hφ : (sumQuasiNormal L₁ L₂) ⊢ φ} →
-           motive (φ ➝ ψ) hφψ → motive φ hφ → motive ψ (hφψ ⨀ hφ)
+           {hφψ : (sumQuasiNormal L₁ L₂) ⊢ (φ 🡒 ψ)} → {hφ : (sumQuasiNormal L₁ L₂) ⊢ φ} →
+           motive (φ 🡒 ψ) hφψ → motive φ hφ → motive ψ (hφψ ⨀ hφ)
   )
   : ∀ {φ}, (h : sumQuasiNormal L₁ L₂ ⊢ φ) → motive φ h := by
   apply sumQuasiNormal.rec!_omitSubst;
@@ -350,8 +350,8 @@ lemma sumQuasiNormal.rec!_omitSubst₂ (hL₂ : L₂.Substitution)
   (mem₁  : ∀ {φ}, ∀ s, (h : L₁ ⊢ φ) → motive (φ⟦s⟧) (Logic.subst s $ mem₁! h))
   (mem₂  : ∀ {φ}, (h : L₂ ⊢ φ) → motive φ (mem₂! h))
   (mdp   : ∀ {φ ψ : Formula α},
-           {hφψ : (sumQuasiNormal L₁ L₂) ⊢ (φ ➝ ψ)} → {hφ : (sumQuasiNormal L₁ L₂) ⊢ φ} →
-           motive (φ ➝ ψ) hφψ → motive φ hφ → motive ψ (hφψ ⨀ hφ)
+           {hφψ : (sumQuasiNormal L₁ L₂) ⊢ (φ 🡒 ψ)} → {hφ : (sumQuasiNormal L₁ L₂) ⊢ φ} →
+           motive (φ 🡒 ψ) hφψ → motive φ hφ → motive ψ (hφψ ⨀ hφ)
   )
   : ∀ {φ}, (h : sumQuasiNormal L₁ L₂ ⊢ φ) → motive φ h := by
   simp_all only [Logic.sumQuasiNormal.symm (L₁ := L₁) (L₂ := L₂)]
@@ -362,8 +362,8 @@ lemma sumQuasiNormal.rec!_omitSubst_strong (hL₁ : L₁.Substitution) (hL₂ : 
   (mem₁  : ∀ {φ}, (h : L₁ ⊢ φ) → motive φ (mem₁! h))
   (mem₂  : ∀ {φ}, (h : L₂ ⊢ φ) → motive φ (mem₂! h))
   (mdp   : ∀ {φ ψ : Formula α},
-           {hφψ : (sumQuasiNormal L₁ L₂) ⊢ (φ ➝ ψ)} → {hφ : (sumQuasiNormal L₁ L₂) ⊢ φ} →
-           motive (φ ➝ ψ) hφψ → motive φ hφ → motive ψ (hφψ ⨀ hφ)
+           {hφψ : (sumQuasiNormal L₁ L₂) ⊢ (φ 🡒 ψ)} → {hφ : (sumQuasiNormal L₁ L₂) ⊢ φ} →
+           motive (φ 🡒 ψ) hφψ → motive φ hφ → motive ψ (hφψ ⨀ hφ)
   )
   : ∀ {φ}, (h : sumQuasiNormal L₁ L₂ ⊢ φ) → motive φ h := by
   apply sumQuasiNormal.rec!_omitSubst;
@@ -376,8 +376,8 @@ lemma sumQuasiNormal.rec_letterless_expansion [L₁.Substitution] (X : FormulaSe
   (mem₁  : ∀ {φ}, (h : L₁ ⊢ φ) → motive φ (mem₁! h))
   (mem₂  : ∀ {φ}, (h : φ ∈ X) → motive φ (mem₂! $ Logic.iff_provable.mpr h))
   (mdp   : ∀ {φ ψ : Formula α},
-           {hφψ : (L₁.sumQuasiNormal X) ⊢ (φ ➝ ψ)} → {hφ : (L₁.sumQuasiNormal X) ⊢ φ} →
-           motive (φ ➝ ψ) hφψ → motive φ hφ → motive ψ (hφψ ⨀ hφ)
+           {hφψ : (L₁.sumQuasiNormal X) ⊢ (φ 🡒 ψ)} → {hφ : (L₁.sumQuasiNormal X) ⊢ φ} →
+           motive (φ 🡒 ψ) hφψ → motive φ hφ → motive ψ (hφψ ⨀ hφ)
   )
   : ∀ {φ}, (h : L₁.sumQuasiNormal X ⊢ φ) → motive φ h := by
   apply rec!_omitSubst_strong;

@@ -80,7 +80,7 @@ lemma trace_lconj₂ {s : List (Formula ℕ)} : (s.conj₂).trace = ⋃ φ ∈ s
 
 lemma trace_fconj {s : Finset (Formula ℕ)} : s.conj.trace = ⋃ φ ∈ s, φ.trace := by simp [Finset.conj, Formula.trace_lconj₂];
 
-lemma subset_trace_of_provable_imp_GL (h : Modal.GL ⊢ φ ➝ ψ) : ψ.trace ⊆ φ.trace := by
+lemma subset_trace_of_provable_imp_GL (h : Modal.GL ⊢ φ 🡒 ψ) : ψ.trace ⊆ φ.trace := by
   intro n hn;
   obtain ⟨M, _, _, _, _, rfl, hr⟩ := iff_mem_trace.mp hn;
   apply iff_mem_trace.mpr;
@@ -311,7 +311,7 @@ lemma mainlemma_aux
         . right; exact Raj;
         . simp [Frame.Rel', Model.boneLengthening] at Raj;
       . intro h;
-        have : Satisfies _ (a : M.boneLengthening a k) ψ := Satisfies.fconj_def.mp (equivalence (by tauto) _ |>.mp hrfl) (□ψ ➝ ψ) ?_ h;
+        have : Satisfies _ (a : M.boneLengthening a k) ψ := Satisfies.fconj_def.mp (equivalence (by tauto) _ |>.mp hrfl) (□ψ 🡒 ψ) ?_ h;
         . rintro (y | j) Ri;
           . rcases Ri with rfl | Ray;
             . assumption;
@@ -347,7 +347,7 @@ end Model.boneLengthening
 
 end Kripke
 
-axiom GL.formalized_validates_axiomT_set_in_irrefl_trans_chain : Modal.GL ⊢ ∼□^[(φ.rflSubformula.card + 1)]⊥ ➝ ◇φ.rflSubformula.conj
+axiom GL.formalized_validates_axiomT_set_in_irrefl_trans_chain : Modal.GL ⊢ ∼□^[(φ.rflSubformula.card + 1)]⊥ 🡒 ◇φ.rflSubformula.conj
 
 @[grind .]
 lemma Formula.trace.finite_or_cofinite : φ.trace.Finite ∨ φ.trace.Cofinite := by
@@ -361,8 +361,8 @@ lemma Formula.trace.finite_or_cofinite : φ.trace.Finite ∨ φ.trace.Cofinite :
     rw [←Frame.height];
     omega;
 
-  have := GL.Kripke.fintype_completeness_TFAE (φ := ∼□^[(φ.rflSubformula.card + 1)]⊥ ➝ ◇φ.rflSubformula.conj) |>.out 0 2 |>.mp GL.formalized_validates_axiomT_set_in_irrefl_trans_chain;
-  have H₂ : M.root.1 ⊧ ∼□^[(φ.rflSubformula.card + 1)]⊥ ➝ ◇φ.rflSubformula.conj := this M;
+  have := GL.Kripke.fintype_completeness_TFAE (φ := ∼□^[(φ.rflSubformula.card + 1)]⊥ 🡒 ◇φ.rflSubformula.conj) |>.out 0 2 |>.mp GL.formalized_validates_axiomT_set_in_irrefl_trans_chain;
+  have H₂ : M.root.1 ⊧ ∼□^[(φ.rflSubformula.card + 1)]⊥ 🡒 ◇φ.rflSubformula.conj := this M;
   obtain ⟨a, Rrx, hx⟩ := Satisfies.dia_def.mp $ H₂ H₁;
   replace Rrx : M.root.1 ≠ a := by rintro rfl; apply M.irrefl _ Rrx;
 
@@ -457,7 +457,7 @@ lemma eq_GLβMinusOmega : Modal.GLβMinus Set.univ = Set.univ := by
   use {∼⊤};
   constructor;
   . simp;
-  . suffices Modal.GL ⊢ ∼⊤ ➝ φ by simpa;
+  . suffices Modal.GL ⊢ ∼⊤ 🡒 φ by simpa;
     cl_prover;
 
 end Modal
@@ -485,7 +485,7 @@ lemma provable_TBB_of_mem_trace
   let M₀ := M.extendRoot 1;
 
   let S := SolovaySentences.standard T M₀.toFrame;
-  have : M₀ ⊧ A ➝ (Modal.TBB M.height) := by
+  have : M₀ ⊧ A 🡒 (Modal.TBB M.height) := by
     rintro x hA;
     rcases Nat.lt_trichotomy (Frame.rank x) M.height with h | h | h;
     . intro _;
@@ -497,11 +497,11 @@ lemma provable_TBB_of_mem_trace
     . apply iff_satisfies_mem_rank_letterlessSpectrum (by grind) |>.mpr;
       simp;
       omega;
-  have : ∀ i : M₀.World, 𝗜𝚺₁ ⊢ S i ➝ S.realization (A ➝ (Modal.TBB M.height)) := by
+  have : ∀ i : M₀.World, 𝗜𝚺₁ ⊢ S i 🡒 S.realization (A 🡒 (Modal.TBB M.height)) := by
     rintro (a | i);
     . apply C!_trans $ C!_trans (S.SC2 (Sum.inl a) M.root (by grind))
         $ contra!
-        $ prov_distribute_imply'
+        $ T.standardProvability.mono'
         $ CN!_of_CN!_right
         $ S.mainlemma_neg (by simp)
         $ height_lt_iff_satisfies_boxbot.not.mp
@@ -512,10 +512,10 @@ lemma provable_TBB_of_mem_trace
       cl_prover;
     . apply S.mainlemma (by simp);
       apply this;
-  have : 𝗜𝚺₁ ⊢ (⩖ j, S j) ➝ S.realization (A ➝ (Modal.TBB M.height)) := left_Udisj!_intro _ this
-  have : 𝗜𝚺₁ ⊢ S.realization (A ➝ (Modal.TBB M.height)) := by cl_prover [this, S.SC4];
+  have : 𝗜𝚺₁ ⊢ (⩖ j, S j) 🡒 S.realization (A 🡒 (Modal.TBB M.height)) := left_Udisj!_intro _ this
+  have : 𝗜𝚺₁ ⊢ S.realization (A 🡒 (Modal.TBB M.height)) := by cl_prover [this, S.SC4];
   have : U ⊢ S.realization (Modal.TBB M.height) := by
-    have : U ⊢ S.realization A ➝ S.realization (Modal.TBB M.height) := WeakerThan.pbl this;
+    have : U ⊢ S.realization A 🡒 S.realization (Modal.TBB M.height) := WeakerThan.pbl this;
     cl_prover [this, hA₁ S.realization];
   apply hPL _ |>.mpr;
   grind only [
@@ -572,7 +572,7 @@ lemma provable_TBBMinus_of_mem_trace
 
   obtain ⟨A, hA₁, hA₂⟩ := Set.not_subset.mp hS;
   replace hA₁ : L ⊢ A := Logic.iff_provable.mpr hA₁;
-  replace hA₂ : Modal.GL ⊬ A.rflSubformula.conj ➝ A := Modal.Logic.iff_provable_rflSubformula_GL_provable_S.not.mpr $ Logic.iff_provable.not.mpr hA₂;
+  replace hA₂ : Modal.GL ⊬ A.rflSubformula.conj 🡒 A := Modal.Logic.iff_provable_rflSubformula_GL_provable_S.not.mpr $ Logic.iff_provable.not.mpr hA₂;
   obtain ⟨M₁, _, _, _, _, hM⟩ := Modal.GL.Kripke.iff_unprovable_exists_fintype_rooted_model.mp hA₂;
 
   let M₀ := Model.extendRoot M₁ 1;
@@ -599,15 +599,15 @@ lemma provable_TBBMinus_of_mem_trace
   . show U ⊢ S.realization (∼⩕ n ∈ Tr, TBB n);
     apply Entailment.mdp! (φ := S.realization B) ?_ $ hPL _ |>.mp hB S.realization;
     . apply WeakerThan.pbl (𝓢 := 𝗜𝚺₁);
-      show 𝗜𝚺₁ ⊢ (S.realization B ➝ S.realization (∼⩕ n ∈ Tr, TBB n));
+      show 𝗜𝚺₁ ⊢ (S.realization B 🡒 S.realization (∼⩕ n ∈ Tr, TBB n));
       apply ?_ ⨀ S.SC4;
       apply left_Udisj!_intro _;
       intro i;
       rcases Frame.extendRoot.eq_root_or_eq_original i with (rfl | ⟨i, rfl⟩);
-      . have H₁ : 𝗜𝚺₁ ⊢ S M₀.root ➝ ∼S.realization A := SolovaySentences.rfl_mainlemma_neg hM A (by grind) $ Satisfies.not_imp_def.mp hM |>.2;
-        have H₂ : 𝗜𝚺₁ ⊢ S.realization B ⭤ S.realization A ⋏ S.realization (⩕ n ∈ R, TBB n) := Realization.interpret.iff_provable_and_inside;
+      . have H₁ : 𝗜𝚺₁ ⊢ S M₀.root 🡒 ∼S.realization A := SolovaySentences.rfl_mainlemma_neg hM A (by grind) $ Satisfies.not_imp_def.mp hM |>.2;
+        have H₂ : 𝗜𝚺₁ ⊢ S.realization B 🡘 S.realization A ⋏ S.realization (⩕ n ∈ R, TBB n) := Realization.interpret.iff_provable_and_inside;
         cl_prover [H₁, H₂];
-      . suffices 𝗜𝚺₁ ⊢ S i ➝ S.realization (B ➝ (∼⩕ n ∈ Tr, TBB n)) by simpa;
+      . suffices 𝗜𝚺₁ ⊢ S i 🡒 S.realization (B 🡒 (∼⩕ n ∈ Tr, TBB n)) by simpa;
         apply SolovaySentences.mainlemma (S := S) (T := T) (i := i);
         . simp;
         . intro h;

@@ -82,12 +82,12 @@ lemma truthlemma_lemma2
   apply hψ₂;
   have := Context.deduct! $ Context.weakening! (Γ := Γ₁ ∪ Γ₂) (Δ := insert (-ψ) (insert (□ψ) Γ₁)) ?_ hC;
   . replace : (insert (□ψ) Γ₁) *⊢[Modal.GL] ψ := of_imply_complement_bot this;
-    replace : ↑Γ₁ *⊢[Modal.GL] □ψ ➝ ψ:= Context.deduct! this;
-    replace : ↑(□'Γ₁) *⊢[Modal.GL] □(□ψ ➝ ψ) := by simpa using Context.nec! this;
+    replace : ↑Γ₁ *⊢[Modal.GL] □ψ 🡒 ψ:= Context.deduct! this;
+    replace : ↑(□'Γ₁) *⊢[Modal.GL] □(□ψ 🡒 ψ) := by simpa using Context.nec! this;
     replace : ↑(□'Γ₁) *⊢[Modal.GL] □ψ := axiomL! ⨀ this;
     replace : ↑(□'□⁻¹'X.1 ∪ □^[2]'□⁻¹'X.1) *⊢[Modal.GL] □ψ := Context.weakening! ?_ this;
-    . replace : ↑(□'□⁻¹'X.1) *⊢[Modal.GL] ((□^[2]'□⁻¹'X.1).conj) ➝ □ψ := FConj_DT'.mpr this;
-      replace : ↑(□'□⁻¹'X.1) *⊢[Modal.GL] (□'□⁻¹'X.1).conj ➝ □ψ := C!_trans ?_ this;
+    . replace : ↑(□'□⁻¹'X.1) *⊢[Modal.GL] ((□^[2]'□⁻¹'X.1).conj) 🡒 □ψ := FConj_DT'.mpr this;
+      replace : ↑(□'□⁻¹'X.1) *⊢[Modal.GL] (□'□⁻¹'X.1).conj 🡒 □ψ := C!_trans ?_ this;
       . replace : ↑(□'□⁻¹'X.1 ∪ □'□⁻¹'↑X) *⊢[Modal.GL] □ψ := FConj_DT'.mp this;
         have : X *⊢[Modal.GL] □ψ := Context.weakening! (by grind) this;
         exact membership_iff hψ₁ |>.mpr this;
