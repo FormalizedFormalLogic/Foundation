@@ -87,7 +87,7 @@ variable {H} {H₁ H₂ : Hilbert α}
 alias ofSchema := HilbertProof.axm
 @[grind <=] lemma of_schema (h : φ ∈ H) : H ⊢ φ := ⟨ofSchema h⟩
 
-def ofLE (h : H₁ ≤ H₂) : H₁ ⊢! φ → H₂ ⊢! φ
+def ofLE (h : H₁.schema ⊆ H₂.schema) : H₁ ⊢! φ → H₂ ⊢! φ
   | axm h₁ => axm $ h h₁
   | mdp h₁ h₂ => mdp (ofLE h h₁) (ofLE h h₂)
   | verum => verum
@@ -100,10 +100,10 @@ def ofLE (h : H₁ ≤ H₂) : H₁ ⊢! φ → H₂ ⊢! φ
   | orIntroR => orIntroR
   | orElim => orElim
 
-lemma of_le (h : H₁ ≤ H₂) : H₁ ⊢ φ → H₂ ⊢ φ := λ ⟨hφ⟩ => ⟨ofLE h hφ⟩
+lemma of_le (h : H₁.schema ⊆ H₂.schema) : H₁ ⊢ φ → H₂ ⊢ φ := λ ⟨hφ⟩ => ⟨ofLE h hφ⟩
 
 @[grind <=]
-lemma weakerThan_of_le (h : H₁ ≤ H₂) : H₁ ⪯ H₂ := Entailment.weakerThan_iff.mpr $ of_le h
+lemma weakerThan_of_le (h : H₁.schema ⊆ H₂.schema) : H₁ ⪯ H₂ := Entailment.weakerThan_iff.mpr $ of_le h
 
 def Subst {H : Hilbert α} (s) : H ⊢! φ → H ⊢! φ⟦s⟧
   | axm h₁ => axm $ H.schema_closed φ h₁ s

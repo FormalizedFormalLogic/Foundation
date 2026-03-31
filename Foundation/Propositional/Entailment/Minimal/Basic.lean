@@ -1315,7 +1315,6 @@ lemma FConj_DT [DecidableEq F] {Γ : Finset F} : 𝓢 ⊢ Γ.conj 🡒 φ ↔ Γ
     use Γ.toList;
     constructor;
     . simp;
-      tauto;
     . apply FiniteContext.provable_iff.mpr;
       exact C!_trans (by simp) h;
   . intro h;

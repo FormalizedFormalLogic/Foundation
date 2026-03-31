@@ -163,8 +163,7 @@ lemma modelsSet_iff {𝓜 : M} {T : Set F} : 𝓜 ⊧* T ↔ ∀ ⦃φ⦄, φ �
 
 lemma not_satisfiable_finset [LogicalConnective F] [Tarski M] [DecidableEq F] (t : Finset F) :
   ¬Satisfiable M (t : Set F) ↔ Valid M (t.image (∼·)).disj := by
-  simp [Satisfiable, modelsSet_iff, Valid]
-  tauto;
+  simp [Satisfiable, modelsSet_iff, Valid];
 
 lemma satisfiableSet_iff_models_nonempty {T : Set F} :
     Satisfiable M T ↔ (models M T).Nonempty :=
@@ -239,11 +238,14 @@ lemma set_models_iff {s : Set M} : s ⊧ φ ↔ ∀ 𝓜 ∈ s, 𝓜 ⊧ φ := i
 
 instance [LogicalConnective F] [Semantics.Top M] : Semantics.Top (Set M) := ⟨fun s ↦ by simp [set_models_iff]⟩
 
-lemma set_meaningful_iff_nonempty [LogicalConnective F] [∀ 𝓜 : M, Meaningful 𝓜] {s : Set M} : Meaningful s ↔ s.Nonempty :=
-  ⟨by rintro ⟨φ, hf⟩; by_contra A; rcases Set.not_nonempty_iff_eq_empty.mp A; simp [NotModels] at hf,
-   by rintro ⟨𝓜, h𝓜⟩
-      rcases Meaningful.exists_unmodels (self := inferInstanceAs (Meaningful 𝓜)) with ⟨φ, hf⟩
-      exact ⟨φ, by simpa [NotModels, set_models_iff] using ⟨𝓜, h𝓜, hf⟩⟩⟩
+lemma set_meaningful_iff_nonempty [LogicalConnective F] [∀ 𝓜 : M, Meaningful 𝓜] {s : Set M} : Meaningful s ↔ s.Nonempty := by
+  constructor;
+  . rintro ⟨φ, hf⟩;
+    by_contra A;
+    rcases Set.not_nonempty_iff_eq_empty.mp A; simp [NotModels] at hf;
+  . rintro ⟨𝓜, h𝓜⟩;
+    rcases Meaningful.exists_unmodels (self := by tauto) with ⟨φ, hf⟩;
+    exact ⟨φ, by simpa [NotModels, set_models_iff] using ⟨𝓜, h𝓜, hf⟩⟩
 
 lemma meaningful_iff_satisfiableSet [LogicalConnective F] [∀ 𝓜 : M, Meaningful 𝓜] : Satisfiable M T ↔ Meaningful (models M T) := by
   simp [set_meaningful_iff_nonempty, satisfiableSet_iff_models_nonempty]

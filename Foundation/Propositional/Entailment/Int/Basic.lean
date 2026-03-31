@@ -113,7 +113,6 @@ def left_Disj'_intro (l : List ι) (ψ : ι → F) (b : ∀ i ∈ l, 𝓢 ⊢! �
 lemma left_Disj'!_intro (l : List ι) (ψ : ι → F) (b : ∀ i ∈ l, 𝓢 ⊢ ψ i 🡒 φ) : 𝓢 ⊢ l.disj' ψ 🡒 φ :=
   ⟨left_Disj'_intro l ψ fun i hi ↦ (b i hi).get⟩
 
-omit [DecidableEq F] in
 lemma left_Fdisj!_intro (s : Finset F) (b : (ψ : F) → ψ ∈ s → 𝓢 ⊢ ψ 🡒 φ) : 𝓢 ⊢ s.disj 🡒 φ :=
   left_Disj₂!_intro _ fun ψ h ↦ b ψ (by simpa using h)
 
