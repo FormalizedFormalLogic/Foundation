@@ -37,7 +37,7 @@ lemma tautology_of_forall_zeroSubst : (∀ s : ZeroSubstitution α, ¬(∼(φ⟦
   contrapose!;
   apply exists_neg_zeroSubst_of_not_tautology;
 
-set_option push Not.use_distrib true in
+set_option push_neg.use_distrib true in
 lemma vfSubst_tautology : v ⊧ φ ↔ (φ⟦(vfSubst v)⟧.IsTautology) := by
   simp only [Formula.IsTautology, Valid, Formula.subst_atom];
   induction φ with

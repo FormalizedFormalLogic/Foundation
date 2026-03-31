@@ -279,7 +279,7 @@ lemma exists_list_lindenbaum_index₁ {Γ : List _} (hΓ : ↑Γ.toFinset ⊆ �
     . intro ψ hq;
       exact lindenbaum_next_indexed_subset₁_of_lt (by simp) $ hm ψ hq;
 
-lemma exists_finset_lindenbaum_index₁ {Γ : Finset _} (hΓ : ↑Γ ⊆ ⋃ i, t[i].1): ∃ m, ∀ φ ∈ Γ, φ ∈ t[m].1 := by
+lemma exists_finset_lindenbaum_index₁ {Γ : Finset _} (hΓ : (SetLike.coe Γ) ⊆ ⋃ i, t[i].1): ∃ m, ∀ φ ∈ Γ, φ ∈ t[m].1 := by
   obtain ⟨m, hΓ⟩ := exists_list_lindenbaum_index₁ (Γ := Γ.toList) (t := t) (by simpa);
   use m;
   intro φ hφ;
@@ -302,7 +302,7 @@ lemma exists_list_lindenbaum_index₂ {Δ : List _} (hΔ : ↑Δ.toFinset ⊆ �
     . intro ψ hq;
       exact lindenbaum_next_indexed_subset₂_of_lt (by simp) $ hn ψ hq;
 
-lemma exists_finset_lindenbaum_index₂ {Δ : Finset _} (hΓ : ↑Δ ⊆ ⋃ i, t[i].2) : ∃ n, ∀ φ ∈ Δ, φ ∈ t[n].2 := by
+lemma exists_finset_lindenbaum_index₂ {Δ : Finset _} (hΓ : (SetLike.coe Δ) ⊆ ⋃ i, t[i].2) : ∃ n, ∀ φ ∈ Δ, φ ∈ t[n].2 := by
   obtain ⟨m, hΔ⟩ := exists_list_lindenbaum_index₂ (Δ := Δ.toList) (𝓢 := 𝓢) (t := t) (by simpa);
   use m;
   intro φ hφ;
@@ -373,7 +373,6 @@ lemma equality_of₁ (e₁ : t₁.1.1 = t₂.1.1) : t₁ = t₂ := by
   calc
     t₁ = ⟨t₁.1, t₁.saturated, t₁.consistent⟩ := by rfl;
     _  = ⟨t₂.1, t₂.saturated, t₂.consistent⟩ := by simp [e];
-    _  = t₂                                  := by rfl;
 
 lemma equality_of₂ (e₂ : t₁.1.2 = t₂.1.2) : t₁ = t₂ := equality_of₁ $ saturated_duality.mpr e₂
 

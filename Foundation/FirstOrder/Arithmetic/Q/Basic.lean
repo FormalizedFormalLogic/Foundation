@@ -123,7 +123,7 @@ lemma succ_inj_zero {a : M} : a + 1 = 1 → a = 0 := by
   apply succ_inj;
 
 lemma eq_zero_of_eq_add_zero {a b : M} (h : a + b = 0) : a = 0 ∧ b = 0 := by
-  set_option push Not.use_distrib true in contrapose! h;
+  set_option push_neg.use_distrib true in contrapose! h;
   rcases h with ha | hb;
   . obtain ⟨c, rfl⟩ := exists_succ_of_ne_zero (M := M) ha;
     by_cases hb0 : b = 0;

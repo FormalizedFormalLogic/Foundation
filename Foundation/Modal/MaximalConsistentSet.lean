@@ -225,14 +225,8 @@ lemma intro_union_consistent(h : ∀ {Γ₁ Γ₂ : FormulaFinset _}, (Γ₁.toS
   let Δ₁ := (Δ.filter (· ∈ T₁));
   let Δ₂ := (Δ.filter (· ∈ T₂));
   apply not_imp_not.mpr $ Context.weakening! (𝓢 := 𝓢) (Γ := Δ) (Δ := Δ₁ ∪ Δ₂) (φ := ⊥) ?_;
-  . have := @h Δ₁ Δ₂ ?_ ?_;
-    . simpa using this;
-    . intro φ; simp [Δ₁];
-    . intro φ; simp [Δ₂];
-  . intro φ hφ;
-    have : φ ∈ T₁ ∪ T₂ := hΔ hφ;
-    simp_all [Δ₁, Δ₂];
-    grind;
+  . grind;
+  . grind;
 
 lemma exists_consistent_maximal_of_consistent (T_consis : Consistent 𝓢 T)
   : ∃ Z, Consistent 𝓢 Z ∧ T ⊆ Z ∧ ∀ U, U *⊬[𝓢] ⊥ → Z ⊆ U → U = Z := by

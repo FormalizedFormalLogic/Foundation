@@ -19,14 +19,14 @@ variable {F S : Type*} [BasicModalLogicalConnective F] [Entailment S F]
 instance [DecidableEq F] : Box (LindenbaumAlgebra 𝓢) where
   box := Quotient.lift (fun φ ↦ ⟦□φ⟧) $ by
     intro φ ψ h;
-    simp only [ProvablyEquivalent.setoid, ProvablyEquivalent, Quotient.eq];
+    apply Quotient.eq.mpr;
     apply box_congruence!;
     assumption;
 
 instance [DecidableEq F] : Dia (LindenbaumAlgebra 𝓢) where
   dia := Quotient.lift (fun φ ↦ ⟦◇φ⟧) $ by
     intro φ ψ h;
-    simp only [ProvablyEquivalent.setoid, ProvablyEquivalent, Quotient.eq];
+    apply Quotient.eq.mpr;
     apply dia_iff!;
     assumption;
 
