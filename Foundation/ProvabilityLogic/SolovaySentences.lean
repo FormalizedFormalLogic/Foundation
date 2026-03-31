@@ -86,7 +86,7 @@ private lemma mainlemma_aux {i : M} (hri : M.root ≠ i) :
       exact (ihA (by grind)).1 (h j Rij)
     . intro h;
       have := Satisfies.box_def.not.mp h;
-      push_neg at this;
+      push Not at this;
       obtain ⟨j, Rij, hA⟩ := this;
       have := CN!_of_CN!_right $ (ihA (by grind)).2 hA
       have : T₀ ⊢ ∼𝔅 (∼S.σ j) 🡒 ∼𝔅 (S.realization A) :=

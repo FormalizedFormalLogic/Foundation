@@ -26,23 +26,23 @@ lemma validate_axiomDummett_of_isPiecewiseStronglyConnected [F.IsPiecewiseStrong
   intro h;
   obtain ⟨V, x, h⟩ := ValidOnFrame.exists_valuation_world_of_not h;
   unfold Satisfies at h;
-  push_neg at h;
+  push Not at h;
 
   rcases h with ⟨h₁, h₂⟩;
 
   replace h₁ := Satisfies.imp_def.not.mp h₁;
-  push_neg at h₁;
+  push Not at h₁;
   obtain ⟨y, Rxy, ⟨hy0, nhy1⟩⟩ := h₁;
 
   replace h₂ := Satisfies.imp_def.not.mp h₂;
-  push_neg at h₂;
+  push Not at h₂;
   obtain ⟨z, Rxz, ⟨hz1, nhz0⟩⟩ := h₂;
 
   use x, y, z;
   refine ⟨Rxy, Rxz, ?_⟩;
   . by_contra hC;
     replace hC := not_and_or.mp hC;
-    push_neg at hC;
+    push Not at hC;
     rcases hC with (Ryz | Rzy);
     . exact nhz0 $ Satisfies.formula_hereditary Ryz hy0;
     . exact nhy1 $ Satisfies.formula_hereditary Rzy hz1;

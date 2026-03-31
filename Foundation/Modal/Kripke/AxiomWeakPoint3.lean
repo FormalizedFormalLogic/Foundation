@@ -43,7 +43,7 @@ lemma validate_WeakPoint3_of_weakConnected [F.IsPiecewiseConnected] : F ⊧ (Axi
     (∀ (y : F.World), x ≺ y → V 1 y → (∀ (x : F.World), y ≺ x → V 1 x) → V 0 y)
     by simpa [Semantics.Models, Satisfies];
   by_contra hC;
-  push_neg at hC;
+  push Not at hC;
   obtain ⟨⟨y, Rxy, hy0, hz, nhy1⟩, ⟨z, Rxz, hz1, hy, nhz0⟩⟩ := hC;
   have nyz : y ≠ z := by
     by_contra hC;

@@ -192,19 +192,19 @@ variable {C : FrameClass} {φ ψ χ : Formula ℕ}
 
 lemma iff_not_validOnFrameClass_exists_frame : C ⊭ φ ↔ ∃ F ∈ C, ¬F ⊧ φ := by
   apply not_iff_not.mp;
-  push_neg;
+  push Not;
   tauto;
 alias ⟨exists_frame_of_not_validOnFrameClass, not_validOnFrameClass_of_exists_frame⟩ := iff_not_validOnFrameClass_exists_frame
 
 lemma iff_not_validOnFrameClass_exists_model : C ⊭ φ ↔ ∃ M : Kripke2.Model, M.toFrame ∈ C ∧ M ⊭ φ := by
   apply not_iff_not.mp;
-  push_neg;
+  push Not;
   tauto;
 alias ⟨exists_model_of_not_validOnFrameClass, not_validOnFrameClass_of_exists_model⟩ := iff_not_validOnFrameClass_exists_model
 
 lemma iff_not_validOnFrameClass_exists_model_world : C ⊭ φ ↔ ∃ M : Kripke2.Model, ∃ x : M, M.toFrame ∈ C ∧ x ⊭ φ := by
   apply not_iff_not.mp;
-  push_neg;
+  push Not;
   tauto;
 alias ⟨exists_model_world_of_not_validOnFrameClass, not_validOnFrameClass_of_exists_model_world⟩ := iff_not_validOnFrameClass_exists_model_world
 
@@ -216,13 +216,13 @@ variable {C : ModelClass} {φ ψ χ : Formula ℕ}
 
 lemma iff_not_validOnModelClass_exists_model : C ⊭ φ ↔ ∃ M ∈ C, ¬M ⊧ φ := by
   apply not_iff_not.mp;
-  push_neg;
+  push Not;
   tauto;
 alias ⟨exists_model_of_not_validOnModelClass, not_validOnModelClass_of_exists_model⟩ := iff_not_validOnModelClass_exists_model
 
 lemma iff_not_validOnModelClass_exists_model_world : C ⊭ φ ↔ ∃ M : Kripke2.Model, ∃ x : M, M ∈ C ∧ x ⊭ φ := by
   apply not_iff_not.mp;
-  push_neg;
+  push Not;
   tauto;
 alias ⟨exists_model_world_of_not_validOnModelClass, not_validOnModelClass_of_exists_model_world⟩ := iff_not_validOnModelClass_exists_model_world
 

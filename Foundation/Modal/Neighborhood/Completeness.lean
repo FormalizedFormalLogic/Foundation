@@ -27,7 +27,7 @@ def Proofset.IsNonproofset {𝓢 : S} (P : Proofset 𝓢) := ∀ φ, P ≠ proof
 omit [DecidableEq α] [Entailment.Cl 𝓢] in
 lemma iff_not_isNonProofset_exists : ¬P.IsNonproofset ↔ ∃ φ, P = proofset 𝓢 φ := by
   dsimp [Proofset.IsNonproofset];
-  push_neg;
+  push Not;
   tauto;
 
 omit [DecidableEq α] [Entailment.Cl 𝓢] in
@@ -251,7 +251,7 @@ lemma iff_mem_dia_forall_fml {X} {Γ : (basicCanonicity 𝓢).toModel}
   : Γ ∈ (basicCanonicity 𝓢).toModel.dia X ↔ ∀ φ, Xᶜ ≠ proofset 𝓢 φ ∨ Γ ∉ proofset 𝓢 (□φ)
   := by
     apply Iff.trans (iff_mem_box_exists_fml.not);
-    set_option push_neg.use_distrib true in push_neg;
+    set_option push Not.use_distrib true in push Not;
     rfl;
 
 end basicCanonicity
@@ -298,7 +298,7 @@ protected lemma iff_mem_dia :
   suffices A ∉ ((relativeBasicCanonicity 𝓢 P).toModel.box Xᶜ) ↔ A ∉ (basicCanonicity 𝓢).toModel.box Xᶜ ∧ ((¬Xᶜ.IsNonproofset) ∨ Xᶜ ∉ P A) by
     simpa [Frame.dia];
   rw [relativeBasicCanonicity.iff_mem_box.not, Proofset.IsNonproofset]
-  set_option push_neg.use_distrib true in push_neg;
+  set_option push Not.use_distrib true in push Not;
   grind [Proofset.IsNonproofset];
 
 end relativeBasicCanonicity

@@ -41,7 +41,7 @@ lemma eq_trace_trace_of_letterless {φ : Formula ℕ} (φ_letterless : φ.Letter
   ext n;
   apply Iff.trans ?_ (Kripke.letterlessSpectrum_TFAE φ_letterless (n := n) |>.out 1 0 |>.not);
   rw [iff_mem_trace];
-  push_neg;
+  push Not;
   constructor;
   . rintro ⟨M, _, _, _, _, _⟩;
     refine ⟨M, inferInstance, inferInstance, inferInstance, inferInstance, M.root, by tauto, by tauto⟩;

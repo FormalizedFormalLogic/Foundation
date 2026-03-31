@@ -54,7 +54,7 @@ lemma consistent_of_sound_frameclass
   apply Entailment.Consistent.of_unprovable (φ := ⊥);
   apply not_imp_not.mpr sound.sound;
   apply Semantics.set_models_iff.not.mpr;
-  push_neg;
+  push Not;
   use C_nonempty.choose;
   constructor;
   . exact C_nonempty.choose_spec

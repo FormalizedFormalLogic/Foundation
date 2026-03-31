@@ -30,7 +30,7 @@ lemma axiomMcK_DiaCDiaBox! : Modal.K ⊢ (□◇φ 🡒 ◇□φ) 🡘 ◇(◇φ
       . assumption;
       . tauto;
     . have := Satisfies.box_def.not.mp hx;
-      push_neg at this;
+      push Not at this;
       obtain ⟨y, Rxy, hy⟩ := this;
       use y;
       constructor;

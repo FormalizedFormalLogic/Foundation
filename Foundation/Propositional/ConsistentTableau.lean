@@ -107,7 +107,7 @@ variable {t : Tableau α}
 
 lemma consistent_either (hCon : t.Consistent 𝓢) (φ : Formula α) : Tableau.Consistent 𝓢 ((insert φ t.1), t.2) ∨ Tableau.Consistent 𝓢 (t.1, (insert φ t.2)) := by
   by_contra hC;
-  push_neg at hC;
+  push Not at hC;
   have ⟨hC₁, hC₂⟩ := hC;
 
   obtain ⟨Γ₁, Δ₁, hΓ₁, hΔ₁, h₁⟩ := iff_not_consistent_insert₁.mp hC₁;
@@ -505,7 +505,7 @@ lemma iff_mem₁_fconj [DecidableEq α] {Γ : Finset (Formula α)} : Γ.conj ∈
 
 private lemma of_mem₁_or [DecidableEq α] : φ ⋎ ψ ∈ t.1.1 → (φ ∈ t.1.1 ∨ ψ ∈ t.1.1) := by
   intro h;
-  by_contra hC; push_neg at hC;
+  by_contra hC; push Not at hC;
   apply t.consistent (Γ := {φ ⋎ ψ}) (Δ := {φ, ψ}) (by simp_all) ?_;
   . apply CFConj_CDisj!_of_A (φ := φ) (ψ := ψ) <;> simp;
   . simp only [Finset.coe_insert, Finset.coe_singleton];
@@ -535,7 +535,7 @@ lemma iff_mem₂_or [DecidableEq α] : φ ⋎ ψ ∈ t.1.2 ↔ φ ∈ t.1.2 ∧ 
   constructor;
   . apply of_mem₂_or;
   . contrapose;
-    push_neg;
+    push Not;
     intro hφψ hφ;
     rcases iff_mem₁_or.mp $ iff_not_mem₂_mem₁.mp hφψ with (hφ | hψ);
     . have := iff_not_mem₂_mem₁.mpr hφ; contradiction;
@@ -563,7 +563,7 @@ lemma iff_mem₂_fdisj [DecidableEq α] {Γ : Finset (Formula α)} : Γ.disj ∈
 lemma of_mem₁_imp [DecidableEq α] : φ 🡒 ψ ∈ t.1.1 → (φ ∈ t.1.2 ∨ ψ ∈ t.1.1) := by
   intro h;
   by_contra hC;
-  push_neg at hC;
+  push Not at hC;
   exact hC.2 $ mdp_mem₁ h $ iff_not_mem₂_mem₁.mp hC.1
 
 lemma of_mem₁_imp' [DecidableEq α] : φ 🡒 ψ ∈ t.1.1 → (φ ∈ t.1.1 → ψ ∈ t.1.1) := by
@@ -599,7 +599,7 @@ lemma iff_mem₁_imp [DecidableEq α] [Encodable α] [Entailment.Cl 𝓢] : φ �
   constructor;
   . apply of_mem₁_imp;
   . contrapose;
-    push_neg;
+    push Not;
     intro hφψ;
     rcases of_mem₂_imp $ iff_not_mem₁_mem₂.mp hφψ with ⟨hφ, hψ⟩;
     constructor;
@@ -610,7 +610,7 @@ lemma iff_mem₂_imp [DecidableEq α] [Encodable α] [Entailment.Cl 𝓢] : φ �
   constructor;
   . apply of_mem₂_imp;
   . contrapose;
-    push_neg;
+    push Not;
     intro hφψ hφ;
     rcases of_mem₁_imp $ iff_not_mem₂_mem₁.mp hφψ with (hφ | hψ);
     . have := iff_not_mem₁_mem₂.mpr hφ; contradiction;

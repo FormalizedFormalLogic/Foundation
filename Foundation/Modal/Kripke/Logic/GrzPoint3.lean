@@ -65,7 +65,7 @@ instance : Complete Modal.GrzPoint3 FrameClass.finite_GrzPoint3 :=
     apply or_iff_not_imp_left.mpr;
     intro nRyz;
     rcases (not_and_or.mp nRyz) with (nRyz | nRyz);
-    . push_neg at nRyz;
+    . push Not at nRyz;
       obtain ⟨ψ, hψ, ⟨hψy, hψz⟩⟩ := nRyz;
       constructor;
       . intro ξ hξ₁ hξ₂;
@@ -81,7 +81,7 @@ instance : Complete Modal.GrzPoint3 FrameClass.finite_GrzPoint3 :=
           sorry;
         . intro ξ hξ hξy;
           sorry;
-    . push_neg at nRyz;
+    . push Not at nRyz;
       replace ⟨nRyz₁, nRyz₂⟩ := nRyz;
       constructor;
       . sorry;
@@ -124,25 +124,25 @@ instance : Modal.GrzPoint2 ⪱ Modal.GrzPoint3 := by
             tauto;
         }
       . apply Satisfies.or_def.not.mpr
-        push_neg;
+        push Not;
         constructor;
         . apply Satisfies.box_def.not.mpr;
-          push_neg;
+          push Not;
           use 1;
           constructor;
           . tauto;
           . apply Satisfies.imp_def₂.not.mpr;
-            push_neg;
+            push Not;
             constructor;
             . tauto;
             . simp [M, Semantics.Models, Satisfies, Frame.Rel', F];
         . apply Satisfies.box_def.not.mpr;
-          push_neg;
+          push Not;
           use 2;
           constructor;
           . tauto;
           . apply Satisfies.imp_def₂.not.mpr;
-            push_neg;
+            push Not;
             constructor;
             . tauto;
             . simp [M, Semantics.Models, Satisfies, Frame.Rel', F];

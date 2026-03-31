@@ -115,7 +115,7 @@ lemma GLPoint3OplusBoxBot.strictlyWeakerThan_GLPoint3 {n : ℕ} : (Modal.GLPoint
       . apply Set.mem_setOf_eq.mpr;
         exact {}
       . apply Satisfies.boxItr_def.not.mpr;
-        push_neg;
+        push Not;
         use ⟨n, by omega⟩;
         constructor;
         . apply Rel.Iterate.fin_lt_stepping_stones <;> simp;

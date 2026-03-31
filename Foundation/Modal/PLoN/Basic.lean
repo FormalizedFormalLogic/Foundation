@@ -121,7 +121,7 @@ instance : Semantics.Bot (PLoN.Model) := ⟨by grind⟩
 @[grind <=] protected lemma mdp (h₁ : M ⊧ φ 🡒 ψ) (h₂ : M ⊧ φ) : M ⊧ ψ := fun x ↦ h₁ x (h₂ x)
 
 protected lemma re : ¬∀ M : Model, ∀ φ ψ, M ⊧ φ 🡘 ψ → M ⊧ □φ 🡘 □ψ := by
-  push_neg;
+  push Not;
   let M : Model := {
     World := Fin 2,
     Rel ξ x y := if ξ = (.atom 1) then True else False,
@@ -174,20 +174,20 @@ variable {C : PLoN.FrameClass}
 
 lemma iff_not_validOnFrameClass_exists_frame : (C ⊭ φ) ↔ (∃ F ∈ C, F ⊭ φ) := by
   apply not_iff_not.mp;
-  push_neg;
+  push Not;
   tauto;
 alias ⟨exists_frame_of_not_validOnFrameClass, not_validOnFrameClass_of_exists_frame⟩ := iff_not_validOnFrameClass_exists_frame
 
 
 lemma iff_not_validOnFrameClass_exists_model : (C ⊭ φ) ↔ (∃ M : PLoN.Model, M.toFrame ∈ C ∧ M ⊭ φ) := by
   apply not_iff_not.mp;
-  push_neg;
+  push Not;
   tauto;
 alias ⟨exists_model_of_not_validOnFrameClass, not_validOnFrameClass_of_exists_model⟩ := iff_not_validOnFrameClass_exists_model
 
 lemma iff_not_validOnFrameClass_exists_model_world : (C ⊭ φ) ↔ (∃ M : PLoN.Model, ∃ w : M.World, M.toFrame ∈ C ∧ w ⊮ φ) := by
   apply not_iff_not.mp;
-  push_neg;
+  push Not;
   tauto;
 alias ⟨exists_model_world_of_not_validOnFrameClass, not_validOnFrameClass_of_exists_model_world⟩ := iff_not_validOnFrameClass_exists_model_world
 

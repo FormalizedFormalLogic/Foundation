@@ -298,7 +298,7 @@ lemma diaItr_dual : x ⊧ ◇^[n]φ ↔ x ⊧ ∼□^[n](∼φ) := by
       obtain ⟨y, Rxy, hy⟩ := Satisfies.dia_def.mp h;
       suffices ¬x ⊧ (□□^[n](∼φ)) by simpa;
       apply Satisfies.box_def.not.mpr;
-      push_neg;
+      push Not;
       use y;
       constructor;
       . exact Rxy;
@@ -310,7 +310,7 @@ lemma diaItr_dual : x ⊧ ◇^[n]φ ↔ x ⊧ ∼□^[n](∼φ) := by
       suffices x ⊧ ◇◇^[n]φ by simpa;
       apply Satisfies.dia_def.mpr;
       have := Satisfies.box_def.not.mp h;
-      push_neg at this;
+      push Not at this;
       obtain ⟨y, Rxy, hy⟩ := this;
       use y;
       constructor;
@@ -392,7 +392,7 @@ instance : Semantics.Top (Kripke.Model) where
 
 lemma iff_not_exists_world {M : Kripke.Model} : (¬M ⊧ φ) ↔ (∃ x : M.World, ¬x ⊧ φ) := by
   apply not_iff_not.mp;
-  push_neg;
+  push Not;
   tauto;
 
 alias ⟨exists_world_of_not, not_of_exists_world⟩ := iff_not_exists_world
@@ -514,25 +514,25 @@ variable {C : FrameClass} {φ ψ χ : Formula ℕ}
 
 lemma iff_not_validOnFrameClass_exists_frame : (¬C ⊧ φ) ↔ (∃ F ∈ C, ¬F ⊧ φ) := by
   apply not_iff_not.mp;
-  push_neg;
+  push Not;
   tauto;
 alias ⟨exists_frame_of_not_validOnFrameClass, not_validOnFrameClass_of_exists_frame⟩ := iff_not_validOnFrameClass_exists_frame
 
 lemma iff_not_validOnFrameClass_exists_model : (¬C ⊧ φ) ↔ (∃ M : Kripke.Model, M.toFrame ∈ C ∧ ¬M ⊧ φ) := by
   apply not_iff_not.mp;
-  push_neg;
+  push Not;
   tauto;
 alias ⟨exists_model_of_not_validOnFrameClass, not_validOnFrameClass_of_exists_model⟩ := iff_not_validOnFrameClass_exists_model
 
 lemma iff_not_validOnFrameClass_exists_model_world : (¬C ⊧ φ) ↔ (∃ M : Kripke.Model, ∃ x : M.World, M.toFrame ∈ C ∧ ¬(x ⊧ φ)) := by
   apply not_iff_not.mp;
-  push_neg;
+  push Not;
   tauto;
 alias ⟨exists_model_world_of_not_validOnFrameClass, not_validOnFrameClass_of_exists_model_world⟩ := iff_not_validOnFrameClass_exists_model_world
 
 lemma iff_not_validOnFrameClass_exists_valuation_world : (¬C ⊧ φ) ↔ (∃ F ∈ C, ∃ V, ∃ x, ¬(Formula.Kripke.Satisfies ⟨F, V⟩ x φ)) := by
   apply not_iff_not.mp;
-  push_neg;
+  push Not;
   tauto;
 alias ⟨exists_valuation_world_of_not_validOnFrameClass, not_validOnFrameClass_of_exists_valuation_world⟩ := iff_not_validOnFrameClass_exists_valuation_world
 

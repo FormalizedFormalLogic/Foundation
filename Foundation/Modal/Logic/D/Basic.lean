@@ -365,7 +365,7 @@ theorem GL_D_TFAE :
         intro h;
         contrapose! h;
         replace h := Satisfies.or_def.not.mp h;
-        push_neg at h;
+        push Not at h;
         obtain ⟨x, Rrx, hx⟩ := Satisfies.not_box_def.mp h.1;
         obtain ⟨y, Rry, hy⟩ := Satisfies.not_box_def.mp h.2;
 
@@ -394,7 +394,7 @@ theorem GL_D_TFAE :
         constructor;
         . grind;
         . apply Satisfies.or_def.not.mpr;
-          push_neg;
+          push Not;
           constructor;
           . apply Satisfies.not_box_def.mpr;
             use x;
@@ -479,7 +479,7 @@ lemma iff_provable_D_provable_GL : Modal.D ⊢ φ ↔ Modal.GL ⊢ φ.dzSubformu
 
 lemma D.unprovable_T : Modal.D ⊬ (Axioms.T (.atom 0)) := by
   apply GL_D_TFAE |>.out 0 1 |>.not.mpr;
-  push_neg;
+  push Not;
   let M : Kripke.Model := {
     World := Fin 1,
     Rel := (· < ·),

@@ -177,7 +177,7 @@ lemma invalid_RuleE :
 
 lemma iff_not_exists_world : M ⊭ φ ↔ ∃ x : M.World, x ⊮ φ := by
   apply not_iff_not.mp;
-  push_neg;
+  push Not;
   tauto;
 alias ⟨exists_world_of_not, not_of_exists_world⟩ := iff_not_exists_world
 
@@ -216,19 +216,19 @@ variable {FC : FrameClass} {φ ψ χ : Formula ℕ}
 
 lemma iff_not_validOnFrameClass_exists_frame : FC ⊭ φ ↔ ∃ F ∈ FC, ¬F ⊧ φ := by
   apply not_iff_not.mp;
-  push_neg;
+  push Not;
   tauto;
 alias ⟨exists_frame_of_not_validOnFrameClass, not_validOnFrameClass_of_exists_frame⟩ := iff_not_validOnFrameClass_exists_frame
 
 lemma iff_not_validOnFrameClass_exists_model : FC ⊭ φ ↔ ∃ M : FMT.Model, M.toFrame ∈ FC ∧ M ⊭ φ := by
   apply not_iff_not.mp;
-  push_neg;
+  push Not;
   tauto;
 alias ⟨exists_model_of_not_validOnFrameClass, not_validOnFrameClass_of_exists_model⟩ := iff_not_validOnFrameClass_exists_model
 
 lemma iff_not_validOnFrameClass_exists_model_world : FC ⊭ φ ↔ ∃ M : FMT.Model, ∃ x : M, M.toFrame ∈ FC ∧ x ⊮ φ := by
   apply not_iff_not.mp;
-  push_neg;
+  push Not;
   tauto;
 alias ⟨exists_model_world_of_not_validOnFrameClass, not_validOnFrameClass_of_exists_model_world⟩ := iff_not_validOnFrameClass_exists_model_world
 
@@ -241,13 +241,13 @@ variable {MC : ModelClass} {φ ψ χ : Formula ℕ}
 
 lemma iff_not_validOnModelClass_exists_model : MC ⊭ φ ↔ ∃ M ∈ MC, ¬M ⊧ φ := by
   apply not_iff_not.mp;
-  push_neg;
+  push Not;
   tauto;
 alias ⟨exists_model_of_not_validOnModelClass, not_validOnModelClass_of_exists_model⟩ := iff_not_validOnModelClass_exists_model
 
 lemma iff_not_validOnModelClass_exists_model_world : MC ⊭ φ ↔ ∃ M : FMT.Model, ∃ x : M, M ∈ MC ∧ x ⊮ φ := by
   apply not_iff_not.mp;
-  push_neg;
+  push Not;
   tauto;
 alias ⟨exists_model_world_of_not_validOnModelClass, not_validOnModelClass_of_exists_model_world⟩ := iff_not_validOnModelClass_exists_model_world
 

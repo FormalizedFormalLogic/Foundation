@@ -97,7 +97,7 @@ private lemma truthlemma.himp
       . simpa;
     have ⟨_, _⟩ := Set.insert_subset_iff.mp h;
     apply Satisfies.imp_def.not.mpr;
-    push_neg;
+    push Not;
     use t';
     constructor;
     . assumption;

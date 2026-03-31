@@ -122,15 +122,15 @@ instance : Modal.S4Point2 ⪱ Modal.S4Point3 := by
           ps_convergent := by intro x y z Rxy Rxz; use 3; omega
         };
       . apply Kripke.Satisfies.or_def.not.mpr;
-        push_neg;
+        push Not;
         constructor;
         . apply Kripke.Satisfies.box_def.not.mpr;
-          push_neg;
+          push Not;
           use 1;
           simp [Satisfies, Semantics.Models, M];
           constructor <;> grind;
         . apply Kripke.Satisfies.box_def.not.mpr;
-          push_neg;
+          push Not;
           use 2;
           simp [Satisfies, Semantics.Models, M];
           constructor <;> grind;

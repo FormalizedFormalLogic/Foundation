@@ -125,8 +125,8 @@ lemma iff_consistent_insert₁
 lemma iff_inconsistent_insert₁ : Tableau.Inconsistent 𝓢 ((insert φ T), U) ↔ ∃ Γ Δ : Finset (Formula α), (↑Γ ⊆ T) ∧ (↑Δ ⊆ U) ∧ 𝓢 ⊢ φ ⋏ Γ.conj 🡒 Δ.disj := by
   unfold Tableau.Inconsistent;
   constructor;
-  . contrapose; push_neg; apply iff_consistent_insert₁.mpr;
-  . contrapose; push_neg; apply iff_consistent_insert₁.mp;
+  . contrapose; push Not; apply iff_consistent_insert₁.mpr;
+  . contrapose; push Not; apply iff_consistent_insert₁.mp;
 
 lemma iff_consistent_insert₂ : Tableau.Consistent 𝓢 (T, (insert φ U)) ↔ ∀ {Γ Δ : Finset (Formula α)}, (↑Γ ⊆ T) → (↑Δ ⊆ U) → 𝓢 ⊬ Γ.conj 🡒 φ ⋎ Δ.disj := by
   constructor;
@@ -149,8 +149,8 @@ lemma iff_consistent_insert₂ : Tableau.Consistent 𝓢 (T, (insert φ U)) ↔ 
 lemma iff_not_consistent_insert₂ : Tableau.Inconsistent 𝓢 (T, (insert φ U)) ↔ ∃ Γ Δ : Finset (Formula α), (↑Γ ⊆ T) ∧ (↑Δ ⊆ U) ∧ 𝓢 ⊢ Γ.conj 🡒 φ ⋎ Δ.disj := by
   unfold Tableau.Inconsistent;
   constructor;
-  . contrapose; push_neg; apply iff_consistent_insert₂.mpr;
-  . contrapose; push_neg; apply iff_consistent_insert₂.mp;
+  . contrapose; push Not; apply iff_consistent_insert₂.mpr;
+  . contrapose; push Not; apply iff_consistent_insert₂.mp;
 
 lemma iff_consistent_empty_singleton₂ : Tableau.Consistent 𝓢 (∅, {φ}) ↔ 𝓢 ⊬ φ := by
   convert iff_consistent_insert₂ (𝓢 := 𝓢) (T := ∅) (U := ∅) (φ := φ);
@@ -174,7 +174,7 @@ lemma iff_inconsistent_singleton₂ : Tableau.Inconsistent 𝓢 (∅, {φ}) ↔ 
 
 lemma either_expand_consistent_of_consistent (hCon : t.Consistent 𝓢) (φ : Formula α) : Tableau.Consistent 𝓢 ((insert φ t.1), t.2) ∨ Tableau.Consistent 𝓢 (t.1, (insert φ t.2)) := by
   by_contra hC;
-  push_neg at hC;
+  push Not at hC;
   have ⟨hC₁, hC₂⟩ := hC;
 
   obtain ⟨Γ₁, Δ₁, hΓ₁, hΔ₁, h₁⟩ := iff_inconsistent_insert₁.mp hC₁;
@@ -370,7 +370,7 @@ lemma disjoint : t.1.Disjoint := t.1.disjoint_of_consistent $ t.consistent
 @[grind] lemma iff_not_mem₂_mem₁ : φ ∉ t.1.2 ↔ φ ∈ t.1.1 := Tableau.iff_not_mem₂_mem₁ t.consistent t.maximal
 
 lemma neither : ¬(φ ∈ t.1.1 ∧ φ ∈ t.1.2) := by
-  push_neg;
+  push Not;
   intro h;
   exact iff_not_mem₂_mem₁.mpr h;
 
@@ -493,7 +493,7 @@ private lemma of_mem₂_and : φ ⋏ ψ ∈ t.1.2 → (φ ∈ t.1.2 ∨ ψ ∈ t
   contrapose;
   intro hφψ;
   apply iff_not_mem₂_mem₁.mpr;
-  push_neg at hφψ;
+  push Not at hφψ;
   have hφ := iff_not_mem₂_mem₁.mp hφψ.1;
   have hψ := iff_not_mem₂_mem₁.mp hφψ.2;
   exact mdp_mem₁ (mdp_mem₁_provable and₃! hφ) hψ;
@@ -503,7 +503,7 @@ lemma iff_mem₁_and : φ ⋏ ψ ∈ t.1.1 ↔ (φ ∈ t.1.1 ∧ ψ ∈ t.1.1) :
   constructor;
   . apply of_mem₁_and;
   . contrapose;
-    push_neg;
+    push Not;
     intro hφψ hφ;
     rcases of_mem₂_and $ iff_not_mem₁_mem₂.mp hφψ with (hφ | hψ);
     . have := iff_not_mem₁_mem₂.mpr hφ; contradiction;
@@ -514,7 +514,7 @@ lemma iff_mem₂_and : φ ⋏ ψ ∈ t.1.2 ↔ (φ ∈ t.1.2 ∨ ψ ∈ t.1.2) :
   constructor;
   . apply of_mem₂_and;
   . contrapose;
-    push_neg;
+    push Not;
     intro hφψ;
     rcases of_mem₁_and $ iff_not_mem₂_mem₁.mp hφψ with ⟨hφ, hψ⟩;
     constructor <;> { apply iff_not_mem₂_mem₁.mpr; assumption; };
@@ -608,7 +608,7 @@ lemma iff_mem₁_or : φ ⋎ ψ ∈ t.1.1 ↔ (φ ∈ t.1.1 ∨ ψ ∈ t.1.1) :=
   constructor;
   . apply of_mem₁_or;
   . contrapose;
-    push_neg;
+    push Not;
     intro hφψ;
     rcases of_mem₂_or $ iff_not_mem₁_mem₂.mp hφψ with ⟨hφ, hψ⟩;
     constructor <;> { apply iff_not_mem₁_mem₂.mpr; assumption; };
@@ -618,7 +618,7 @@ lemma iff_mem₂_or : φ ⋎ ψ ∈ t.1.2 ↔ (φ ∈ t.1.2 ∧ ψ ∈ t.1.2) :=
   constructor;
   . apply of_mem₂_or;
   . contrapose;
-    push_neg;
+    push Not;
     intro hφψ hφ;
     rcases of_mem₁_or $ iff_not_mem₂_mem₁.mp hφψ with (hφ | hψ);
     . have := iff_not_mem₂_mem₁.mpr hφ; contradiction;
@@ -682,7 +682,7 @@ omit [Encodable α] in
 private lemma of_mem₁_imp : φ 🡒 ψ ∈ t.1.1 → (φ ∈ t.1.2 ∨ ψ ∈ t.1.1) := by
   intro h;
   by_contra hC;
-  push_neg at hC;
+  push Not at hC;
   exact hC.2 $ mdp_mem₁ h $ iff_not_mem₂_mem₁.mp hC.1
 
 private lemma of_mem₂_imp : φ 🡒 ψ ∈ t.1.2 → (φ ∈ t.1.1 ∧ ψ ∈ t.1.2) := by
@@ -704,7 +704,7 @@ lemma iff_mem₁_imp : φ 🡒 ψ ∈ t.1.1 ↔ (φ ∈ t.1.2 ∨ ψ ∈ t.1.1) 
   constructor;
   . apply of_mem₁_imp;
   . contrapose;
-    push_neg;
+    push Not;
     intro hφψ;
     rcases of_mem₂_imp $ iff_not_mem₁_mem₂.mp hφψ with ⟨hφ, hψ⟩;
     constructor;
@@ -720,7 +720,7 @@ lemma iff_mem₂_imp : φ 🡒 ψ ∈ t.1.2 ↔ (φ ∈ t.1.1 ∧ ψ ∈ t.1.2) 
   constructor;
   . apply of_mem₂_imp;
   . contrapose;
-    push_neg;
+    push Not;
     intro hφψ hφ;
     rcases of_mem₁_imp $ iff_not_mem₂_mem₁.mp hφψ with (hφ | hψ);
     . have := iff_not_mem₁_mem₂.mpr hφ; contradiction;
@@ -794,7 +794,7 @@ lemma iff_mem₁_boxItr : (□^[n]φ ∈ t.1.1) ↔ (∀ {t' : MaximalConsistent
   constructor;
   . apply of_mem₁_boxItr;
   . contrapose;
-    push_neg;
+    push Not;
     intro hφ;
     obtain ⟨t', ht'₁, ht'₂⟩ := of_mem₂_boxItr $ iff_not_mem₁_mem₂.mp hφ;
     use t';
@@ -808,7 +808,7 @@ lemma iff_mem₂_boxItr : (□^[n]φ ∈ t.1.2) ↔ (∃ t' : MaximalConsistentT
   constructor;
   . apply of_mem₂_boxItr;
   . contrapose;
-    push_neg;
+    push Not;
     intro hφ t' ht';
     exact iff_not_mem₂_mem₁.mpr $ of_mem₁_boxItr (iff_not_mem₂_mem₁.mp hφ) ht';
 

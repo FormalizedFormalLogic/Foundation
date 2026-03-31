@@ -642,7 +642,7 @@ lemma Formula.iff_regular_letterlessTrace_finite : φ.Regular T ↔ φ.letterles
       simpa [Formula.letterlessTrace] using this;
     apply iff_regular_of_provable_E ?_ ?_ (GL_letterlessSpectrum_TBB_normalization (by assumption) this) |>.not.mpr;
     . apply Formula.Regular.def_neg.not.mpr;
-      push_neg;
+      push Not;
       exact TBB_conj'_regular;
     . assumption;
     . convert @TBBMinus_letterless' φ.letterlessTrace $ by simpa [Formula.letterlessTrace, Set.Cofinite]

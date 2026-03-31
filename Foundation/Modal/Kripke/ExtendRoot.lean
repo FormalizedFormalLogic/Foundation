@@ -188,7 +188,7 @@ variable {l : List M.World} {n : ℕ+}
 lemma atmost_one_validates_axiomT_in_irrefl_trans_isChain (l_chain : List.IsChain (· ≺ ·) l) :
     (∀ x ∈ l, x ⊧ □A 🡒 A) ∨ (∃! x ∈ l, ¬x ⊧ □A 🡒 A) := by
   apply or_iff_not_imp_left.mpr;
-  push_neg;
+  push Not;
   rintro ⟨x, x_l, hx⟩;
   use x;
   constructor;
@@ -264,7 +264,7 @@ lemma validates_axiomT_set_in_irrefl_trans_chain
   obtain ⟨x, hx₂, nhx₁⟩ := Finset.exists_of_ssubset this;
   replace hx₂ := List.mem_toFinset.mp hx₂;
   replace hx₁ := Finset.mem_filter.not.mp nhx₁;
-  push_neg at hx₁;
+  push Not at hx₁;
   use x;
   constructor;
   . assumption;

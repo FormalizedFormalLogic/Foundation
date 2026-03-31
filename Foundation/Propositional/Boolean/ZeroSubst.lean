@@ -22,7 +22,7 @@ noncomputable def vfSubst (v : Valuation α) : ZeroSubstitution α := ⟨
 theorem exists_neg_zeroSubst_of_not_tautology (h : ¬φ.IsTautology)
   : ∃ s : ZeroSubstitution α, Formula.IsTautology (∼(φ⟦s.1⟧)) := by
   unfold Formula.IsTautology Valid at h;
-  push_neg at h;
+  push Not at h;
   obtain ⟨v, hv⟩ := h;
   use vfSubst v;
   intro u;
@@ -37,7 +37,7 @@ lemma tautology_of_forall_zeroSubst : (∀ s : ZeroSubstitution α, ¬(∼(φ⟦
   contrapose!;
   apply exists_neg_zeroSubst_of_not_tautology;
 
-set_option push_neg.use_distrib true in
+set_option push Not.use_distrib true in
 lemma vfSubst_tautology : v ⊧ φ ↔ (φ⟦(vfSubst v)⟧.IsTautology) := by
   simp only [Formula.IsTautology, Valid, Formula.subst_atom];
   induction φ with

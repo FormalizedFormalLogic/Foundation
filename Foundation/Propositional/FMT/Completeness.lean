@@ -351,7 +351,7 @@ noncomputable def HintikkaModel (𝓢 : S) [Entailment.VF 𝓢] [Entailment.Cons
           apply hH₀.choose_spec |>.2;
           suffices ∃ χ' ξ', χ 🡒 ξ = χ'.1 🡒 ξ'.1 ∧ ∃ I : ConsistentSaturatedHintikkaPair 𝓢 φ, χ' ∈ I.1.1 ∧ ξ' ∈ I.1.2 by
             simpa [H₀] using this;
-          push_neg at h;
+          push Not at h;
           obtain ⟨I, hI₁, hI₂⟩ := h;
           use χ', ξ';
           refine ⟨?_, I, ?_, ?_⟩;

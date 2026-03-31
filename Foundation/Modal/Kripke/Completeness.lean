@@ -64,14 +64,14 @@ lemma truthlemma : ((φ ∈ t.1.1) ↔ t ⊧ φ) ∧ ((φ ∈ t.1.2) ↔ ¬t ⊧
       . intro hφψ;
         rcases iff_mem₂_imp.mp hφψ with ⟨hφ, hψ⟩;
         apply Satisfies.imp_def₂.not.mpr;
-        push_neg;
+        push Not;
         constructor;
         . exact ihφ.1.mp hφ;
         . exact ihψ.2.mp hψ;
       . intro hφψ;
         apply iff_mem₂_imp.mpr;
         replace hφψ := Satisfies.imp_def₂.not.mp hφψ;
-        push_neg at hφψ;
+        push Not at hφψ;
         rcases hφψ with ⟨hφ, hψ⟩;
         constructor;
         . exact ihφ.1.mpr hφ;
@@ -90,7 +90,7 @@ lemma truthlemma : ((φ ∈ t.1.1) ↔ t ⊧ φ) ∧ ((φ ∈ t.1.2) ↔ ¬t ⊧
     . constructor;
       . intro h;
         apply Satisfies.box_def.not.mpr;
-        push_neg;
+        push Not;
         obtain ⟨t', Rtt', ht'⟩ := iff_mem₂_box.mp h;
         use t';
         constructor;
@@ -99,7 +99,7 @@ lemma truthlemma : ((φ ∈ t.1.1) ↔ t ⊧ φ) ∧ ((φ ∈ t.1.2) ↔ ¬t ⊧
       . intro h;
         apply iff_mem₂_box.mpr;
         replace h := Satisfies.box_def.not.mp h;
-        push_neg at h;
+        push Not at h;
         obtain ⟨t', Rtt', ht'⟩ := h;
         use t';
         constructor;

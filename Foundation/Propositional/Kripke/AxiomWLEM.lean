@@ -29,15 +29,15 @@ lemma validate_axiomWLEM_of_isPiecewiseStronglyConvergent [F.IsPiecewiseStrongly
   intro h;
   obtain ⟨V, x, h⟩ := ValidOnFrame.exists_valuation_world_of_not h;
   unfold Satisfies at h;
-  push_neg at h;
+  push Not at h;
   rcases h with ⟨h₁, h₂⟩;
 
   replace h₁ := Satisfies.neg_def.not.mp h₁;
-  push_neg at h₁;
+  push Not at h₁;
   obtain ⟨y, Rxy, hy⟩ := h₁;
 
   replace h₂ := Satisfies.neg_def.not.mp h₂;
-  push_neg at h₂;
+  push Not at h₂;
   obtain ⟨z, Rxz, hz⟩ := h₂;
 
   use x, y, z;
