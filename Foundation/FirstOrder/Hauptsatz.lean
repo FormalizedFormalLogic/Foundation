@@ -1,6 +1,8 @@
 module
 
 public import Foundation.FirstOrder.NegationTranslation.GoedelGentzen
+public import Foundation.Logic.ForcingRelation
+public import Foundation.Vorspiel.Order.Preorder
 
 @[expose] public section
 /-!
@@ -163,6 +165,14 @@ def leMinOfle (srp : r ≼ p) (srq : r ≼ q) : r ≼ p ⊓ q := ⟨
 
 def leMinRightOfLe (s : q ≼ p) : q ≼ p ⊓ q := leMinOfle s (.refl q)
 
+instance : LE ℙ := ⟨fun q p ↦ Nonempty (q ≼ p)⟩
+
+instance : Preorder ℙ where
+  le_refl p := ⟨StrongerThan.refl p⟩
+  le_trans p q r := by
+    rintro ⟨hqp⟩ ⟨hrq⟩
+    exact ⟨StrongerThan.trans hqp hrq⟩
+
 end StrongerThan
 
 def Forces (p : ℙ) : Propositionᵢ L → Type u
@@ -175,13 +185,15 @@ def Forces (p : ℙ) : Propositionᵢ L → Type u
   |     ∃⁰ φ => (t : SyntacticTerm L) × Forces p (φ/[t])
   termination_by φ => φ.complexity
 
-scoped infix:45 " ⊩ " => Forces
 
-abbrev allForces (φ : Propositionᵢ L) := (p : ℙ) → p ⊩ φ
+abbrev allForces (φ : Propositionᵢ L) := (p : ℙ) → Forces p φ
+
+namespace Forces
+
+scoped infix:45 " ⊩ " => Forces
 
 scoped prefix:45 "⊩ " => allForces
 
-namespace Forces
 
 def falsumEquiv : p ⊩ ⊥ ≃ { b : ⊢ᴷ ∼p // Derivation.IsCutFree b} := by unfold Forces; exact .refl _
 
@@ -260,15 +272,15 @@ open LawfulSyntacticRewriting
 def modusPonens {φ ψ : Propositionᵢ L} (f : p ⊩ φ ➝ ψ) (g : p ⊩ φ) : p ⊩ ψ :=
   f.implyEquiv p (StrongerThan.refl p) g
 
-def ofMinimalProof {φ : Propositionᵢ L} : 𝗠𝗶𝗻¹ ⊢! φ → ⊩ φ
+def sound {φ : Propositionᵢ L} : 𝗠𝗶𝗻¹ ⊢! φ → ⊩ φ
   | .mdp (φ := ψ) b d => fun p ↦
-    let b : p ⊩ ψ ➝ φ := ofMinimalProof b p
-    let d : p ⊩ ψ := ofMinimalProof d p
+    let b : p ⊩ ψ ➝ φ := sound b p
+    let d : p ⊩ ψ := sound d p
     b.implyEquiv p (StrongerThan.refl p) d
   | .gen (φ := φ) b => fun p ↦ allEquiv.symm fun t ↦
     let d : 𝗠𝗶𝗻¹ ⊢! φ/[t] :=
       HilbertProofᵢ.cast (HilbertProofᵢ.rewrite (t :>ₙ fun x ↦ &x) b) (by simp [rewrite_free_eq_subst])
-    ofMinimalProof d p
+    sound d p
   | .verum => fun p ↦ implyEquiv.symm fun q sqp bφ ↦ bφ
   | .implyK φ ψ => fun p ↦ implyEquiv.symm fun q sqp bφ ↦ implyEquiv.symm fun r srq bψ ↦ bφ.monotone srq
   | .implyS φ ψ χ => fun p ↦
@@ -384,12 +396,142 @@ end Forces
 
 def main [L.DecidableEq] {Γ : Sequent L} : ⊢ᴷ Γ → {d : ⊢ᴷ Γ // Derivation.IsCutFree d} := fun d ↦
   let d : 𝗠𝗶𝗻¹ ⊢! ⋀(∼Γ)ᴺ ➝ ⊥ := Entailment.FiniteContext.toDef (Derivation.gödelGentzen d)
-  let ff : ∼Γ ⊩ ⋀(∼Γ)ᴺ ➝ ⊥ := Forces.ofMinimalProof d (∼Γ)
-  let fc : ∼Γ ⊩ ⋀(∼Γ)ᴺ := Forces.conj' fun φ hφ ↦
+  let ff : Forces (∼Γ) (⋀(∼Γ)ᴺ ➝ ⊥) := Forces.sound d (∼Γ)
+  let fc : Forces (∼Γ) (⋀(∼Γ)ᴺ) := Forces.conj' fun φ hφ ↦
     (Forces.refl φ).monotone (StrongerThan.ofSubset <| List.cons_subset.mpr ⟨hφ, by simp⟩)
-  let b : ∼Γ ⊩ ⊥ := ff.modusPonens fc
+  let b : Forces (∼Γ) ⊥ := ff.modusPonens fc
   let ⟨b, hb⟩ := b.falsumEquiv
   ⟨Derivation.cast b (by simp), by simp [hb]⟩
+
+abbrev IsForced (p : ℙ) (φ : Propositionᵢ L) := Nonempty (Forces p φ)
+
+instance : ForcingRelation ℙ (Propositionᵢ L) where
+  Forces := IsForced
+
+namespace IsForced
+
+open Classical
+
+@[simp] lemma rel {p : ℙ} {k} {R : L.Rel k} {v} : p ⊩ .rel R v ↔ Nonempty (⊢ᴷ .rel R v :: ∼p) := by
+  constructor
+  · rintro ⟨b⟩
+    have ⟨d, hd⟩ := b.relEquiv
+    exact ⟨d⟩
+  · rintro ⟨d⟩
+    let ⟨b, hb⟩ := main d
+    exact ⟨Forces.relEquiv.symm ⟨b, hb⟩⟩
+
+@[simp] lemma fal {p : ℙ} : p ⊩ ∀⁰ φ ↔ ∀ t, p ⊩ φ/[t] := by
+  constructor
+  · rintro ⟨b⟩ t
+    exact ⟨b.allEquiv t⟩
+  · rintro h
+    exact ⟨Forces.allEquiv.symm fun t ↦ (h t).some⟩
+
+@[simp] lemma and {p : ℙ} {φ ψ : Propositionᵢ L} : p ⊩ φ ⋏ ψ ↔ p ⊩ φ ∧ p ⊩ ψ := by
+  constructor
+  · rintro ⟨b⟩
+    have ⟨bφ, bψ⟩ := b.andEquiv
+    exact ⟨⟨bφ⟩, ⟨bψ⟩⟩
+  · rintro ⟨⟨bφ⟩, ⟨bψ⟩⟩
+    exact ⟨Forces.andEquiv.symm ⟨bφ, bψ⟩⟩
+
+@[simp] lemma or {p : ℙ} {φ ψ : Propositionᵢ L} : p ⊩ φ ⋎ ψ ↔ p ⊩ φ ∨ p ⊩ ψ := by
+  constructor
+  · rintro ⟨b⟩
+    have b' := b.orEquiv
+    exact b'.rec (fun bφ ↦ .inl ⟨bφ⟩) (fun bψ ↦ .inr ⟨bψ⟩)
+  · rintro (⟨⟨hφ⟩⟩ | ⟨⟨hψ⟩⟩)
+    · exact ⟨Forces.orEquiv.symm <| .inl hφ⟩
+    · exact ⟨Forces.orEquiv.symm <| .inr hψ⟩
+
+lemma imply {p : ℙ} {φ ψ : Propositionᵢ L} : p ⊩ φ ➝ ψ ↔ (∀ q ≤ p, q ⊩ φ → q ⊩ ψ) := by
+  constructor
+  · rintro ⟨b⟩ q ⟨sqp⟩ ⟨bφ⟩
+    exact ⟨b.implyEquiv _ sqp bφ⟩
+  · rintro h
+    refine ⟨Forces.implyEquiv.symm fun q sqp hφ ↦ (h q ⟨sqp⟩ ⟨hφ⟩).some⟩
+
+@[simp] lemma exs {p : ℙ} : p ⊩ ∃⁰ φ ↔ ∃ t, p ⊩ φ/[t] := by
+  constructor
+  · rintro ⟨b⟩
+    have ⟨t, f⟩ := b.exsEquiv
+    exact ⟨t, ⟨f⟩⟩
+  · rintro ⟨t, h⟩
+    exact ⟨Forces.exsEquiv.symm ⟨t, h.some⟩⟩
+
+lemma falsum {p : ℙ} : p ⊩ ⊥ ↔ Nonempty (⊢ᴷ ∼p) := by
+  constructor
+  · rintro ⟨b⟩
+    have ⟨d, hd⟩ := b.falsumEquiv
+    exact ⟨d⟩
+  · rintro ⟨d⟩
+    let ⟨b, hb⟩ := main d
+    exact ⟨Forces.falsumEquiv.symm ⟨b, hb⟩⟩
+
+lemma neg {p : ℙ} {φ : Propositionᵢ L} : p ⊩ ∼φ ↔ (∀ q ≤ p, q ⊩ φ → q ⊩ ⊥) := by
+  simp [Semiformulaᵢ.neg_def, imply]
+
+lemma monotone {p q : ℙ} (hqp : q ≤ p) {φ : Propositionᵢ L} (hφ : p ⊩ φ) : q ⊩ φ :=
+  ⟨Forces.monotone hqp.some hφ.some⟩
+
+instance : ForcingRelation.PreIntKripke ℙ (· ≥ ·) where
+  verum _ := ⟨Forces.implyEquiv.symm fun _ _ d ↦ d⟩
+  and _ := and
+  or _ := or
+  imply _ := imply
+  monotone hφ _ hpq := hφ.monotone hpq
+
+lemma sound_minimal {φ : Propositionᵢ L} : 𝗠𝗶𝗻¹ ⊢ φ → ℙ ∀⊩ φ := by
+  rintro ⟨d⟩ p; exact ⟨Forces.sound d p⟩
+
+lemma dn_neg_iff {φ : Proposition L} {p : ℙ} : p ⊩ (∼φ)ᴺ ↔ p ⊩ ∼(φᴺ) := by
+  have := by simpa using (sound_minimal (Derivation.neg_doubleNegation φ) p)
+  exact (this p (by simp)).symm
+
+protected lemma refl (φ : Proposition L) : [φ] ⊩ φᴺ := ⟨Forces.refl φ⟩
+
+lemma complete {φ : Proposition L} : ℙ ∀⊩ φᴺ ↔ 𝐋𝐊¹ ⊢ φ := by
+  constructor
+  · intro h
+    have hn : [∼φ] ⊩ ∼(φᴺ) := by simpa [dn_neg_iff] using (IsForced.refl (∼φ))
+    have hp : [∼φ] ⊩ φᴺ := h [∼φ]
+    have : 𝐋𝐊¹ ⊢ φ := by simpa using falsum.mp <| neg.mp hn [∼φ] (by simp) hp
+    exact this
+  · intro b
+    exact sound_minimal <| Provable.gödel_gentzen b
+
+end IsForced
+
+def hValue (φ : Propositionᵢ L) : LowerSet ℙ where
+  carrier := { p | p ⊩ φ }
+  lower' := fun _ _ hqp hp ↦ IsForced.monotone hqp hp
+
+scoped prefix:max "♯" => hValue
+
+@[simp] lemma mem_hValue {p : ℙ} {φ : Propositionᵢ L} : p ∈ ♯φ ↔ p ⊩ φ := by simp [hValue]
+
+@[simp] lemma hValue_and_eq_inf {φ ψ : Propositionᵢ L} : ♯(φ ⋏ ψ) = (♯φ ⊓ ♯ψ) := by
+  ext p; simp [hValue]
+
+@[simp] lemma hValue_or_eq_sup {φ ψ : Propositionᵢ L} : ♯(φ ⋎ ψ) = (♯φ ⊔ ♯ψ) := by
+  ext p; simp only [hValue, ForcingRelation.BasicSemantics.or, LowerSet.coe_mk, Set.mem_setOf_eq,
+    LowerSet.coe_sup, Set.mem_union]
+
+@[simp] lemma hValue_fal_eq_Inf {φ : Semipropositionᵢ L 1} : ♯(∀⁰ φ) = ⨅ t, ♯(φ/[t]) := by
+  ext p; simp [hValue,]
+
+@[simp] lemma hValue_exs_eq_Sup {φ : Semipropositionᵢ L 1} : ♯(∃⁰ φ) = ⨆ t, ♯(φ/[t]) := by
+  ext p; simp [hValue,]
+
+@[simp] lemma hValue_imply_eq_himp {φ ψ : Propositionᵢ L} : ♯(φ ➝ ψ) = (♯φ ⇨ ♯ψ) := by
+  ext p; simp [IsForced.imply, LowerSet.mem_himp_iff]
+
+lemma hValue_falsum : p ∈ ♯(⊥ : Propositionᵢ L) ↔ Nonempty (⊢ᴷ ∼p) := by
+  simp [hValue, IsForced.falsum]
+
+@[simp] lemma hValue_neg_eq_himp_bot (φ : Propositionᵢ L) : ♯(∼φ) = (♯φ ⇨ ♯⊥) := by
+  simp [Semiformulaᵢ.neg_def]
 
 end Hauptsatz
 

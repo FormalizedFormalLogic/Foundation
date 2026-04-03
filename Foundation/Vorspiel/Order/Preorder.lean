@@ -79,8 +79,16 @@ lemma mem_dual_iff {u : LowerSet α} : x ∈ uᶜ ↔ ∀ y ∈ u, x ⟂ y := by
 lemma coe_dual (u : LowerSet α) : uᶜ = {x | ∀ y ∈ u, x ⟂ y} := by
   ext x; simp [mem_dual_iff]
 
-lemma sSup_dual (𝒮 : Set (LowerSet α)) : (sSup 𝒮)ᶜ = sInf (Compl.compl '' 𝒮) := by
-  ext; simp [coe_dual]; grind
+lemma mem_himp_iff {u v : LowerSet α} : x ∈ u ⇨ v ↔ ∀ y ≤ x, y ∈ u → y ∈ v := by
+  suffices (∃ s, s ⊓ u ≤ v ∧ x ∈ s) ↔ ∀ y ≤ x, y ∈ u → y ∈ v by simpa [HImp.himp]
+  constructor
+  · rintro ⟨s, hs, hxs⟩ y hyx hyu
+    have : y ∈ s := s.lower hyx hxs
+    have : y ∈ s ⊓ u := ⟨this, hyu⟩
+    exact hs this
+  · intro h
+    refine ⟨LowerSet.Iic x, ?_, by simp⟩
+    intro y; simp; grind
 
 variable (α)
 

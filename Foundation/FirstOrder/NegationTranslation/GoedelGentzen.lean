@@ -191,10 +191,9 @@ end Derivation
 
 open Classical
 
-theorem Proof.gödel_gentzen {φ : Proposition L} {Λ : Hilbertᵢ L} : 𝐋𝐊¹ ⊢ φ → Λ ⊢ φᴺ := by
+theorem Provable.gödel_gentzen {φ : Proposition L} {Λ : Hilbertᵢ L} : 𝐋𝐊¹ ⊢ φ → Λ ⊢ φᴺ := by
   rintro ⟨d⟩
   have : Λ ⊢ ∼(∼φ)ᴺ := ⟨Derivation.gödelGentzen d⟩
   exact Entailment.K!_left (Derivation.neg_doubleNegation' φ) ⨀ this
-
 
 end LO.FirstOrder
