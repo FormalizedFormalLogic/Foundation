@@ -564,10 +564,10 @@ lemma lMap_nrel {k} (r : L₁.Rel k) (v : Fin k → Semiterm L₁ ξ n) :
     lMap Φ (∃⁰* φ) = ∃⁰* lMap Φ φ := by induction n <;> simp [*, exsClosure_succ]
 
 @[simp] lemma lMap_allItr {k} (φ : Semiformula L₁ ξ (n + k)) :
-    lMap Φ (∀⁰^[k] φ) = ∀⁰^[k] lMap Φ φ := by induction k <;> simp [*, allItr_succ]; rfl
+    lMap Φ (∀⁰^[k] φ) = ∀⁰^[k] lMap Φ φ := by induction k <;> simp [*, allItr_succ];
 
 @[simp] lemma lMap_exsItr {k} (φ : Semiformula L₁ ξ (n + k)) :
-    lMap Φ (∃⁰^[k] φ) = ∃⁰^[k] lMap Φ φ := by induction k <;> simp [*, exsItr_succ]; rfl
+    lMap Φ (∃⁰^[k] φ) = ∃⁰^[k] lMap Φ φ := by induction k <;> simp [*, exsItr_succ];
 
 @[simp] lemma freeVariables_lMap [DecidableEq ξ] (Φ : L₁ →ᵥ L₂) (φ : Semiformula L₁ ξ n) :
     (Semiformula.lMap Φ φ).freeVariables = φ.freeVariables := by

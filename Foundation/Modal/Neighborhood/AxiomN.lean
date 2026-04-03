@@ -18,8 +18,8 @@ lemma Frame.contains_unit [Frame.ContainsUnit F] : F.box Set.univ = Set.univ := 
 
 @[simp]
 lemma Frame.univ_mem [Frame.ContainsUnit F] (x) : Set.univ ∈ F.𝒩 x := by
-  haveI := @F.contains_unit.symm.subset;
-  simpa using @this x;
+  apply F.contains_unit.symm.subset;
+  simp;
 
 instance : Frame.simple_blackhole.ContainsUnit := ⟨by ext x; simp⟩
 
@@ -45,17 +45,21 @@ open proofset
 instance [Entailment.HasAxiomN 𝓢] : (basicCanonicity 𝓢).toModel.ContainsUnit := by
   constructor;
   ext x;
-  simp only [basicCanonicity, Canonicity.toModel, Frame.box, Set.mem_setOf_eq, Set.mem_univ, iff_true];
+  simp only [Set.mem_setOf_eq, Set.mem_univ, iff_true];
   use ⊤;
-  simp [MaximalConsistentSet.mem_of_prove]
+  constructor;
+  . simp [mem_of_prove];
+  . grind;
 
 instance [Entailment.HasAxiomN 𝓢] : (relativeBasicCanonicity 𝓢 P).toModel.ContainsUnit := by
   constructor;
   ext x;
-  suffices Set.univ ∈ (relativeBasicCanonicity 𝓢 P).toModel.𝒩 x by simpa;
+  simp only [Set.mem_setOf_eq, Set.mem_univ, iff_true];
   left;
   use ⊤;
-  simp [MaximalConsistentSet.mem_of_prove]
+  constructor;
+  . simp [mem_of_prove];
+  . grind;
 
 end
 

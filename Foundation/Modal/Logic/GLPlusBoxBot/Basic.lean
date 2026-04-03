@@ -44,8 +44,7 @@ lemma iff_provable_GLPlusBoxBot_provable_GL {n : ℕ} {φ} : Modal.GLPlusBoxBot 
     replace h : Modal.GLPlusBoxBot n ⊢ (□^[n]⊥) 🡒 φ := sumQuasiNormal.mem₁! h;
     exact h ⨀ (by simp);
 
-@[simp] lemma eq_GLPlusBoxBot_omega_GL : (Modal.GLPlusBoxBot ⊤) = Modal.GL := by simp [Modal.GLPlusBoxBot];
-
+@[simp, grind =_] lemma eq_GLPlusBoxBot_omega_GL : (Modal.GLPlusBoxBot ⊤) = Modal.GL := by grind;
 
 section
 

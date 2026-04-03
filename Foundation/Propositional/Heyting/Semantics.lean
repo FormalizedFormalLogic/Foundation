@@ -131,13 +131,13 @@ def lindenbaum (H : Hilbert α) [Entailment.Consistent H] [Entailment.Int H] : H
 
 lemma lindenbaum_val_eq : (lindenbaum H ⊧ₕ φ) = ⟦φ⟧ := by
   induction φ with
-  | hand φ ψ ihp ihq => simp only [hVal_and, ihp, ihq]; rw [inf_def];
-  | hor _ _ ihp ihq => simp only [hVal_or, ihp, ihq]; rw [sup_def];
-  | himp _ _ ihp ihq => simp only [hVal_imply, ihp, ihq]; rw [himp_def];
+  | hand φ ψ ihp ihq => simp_all [hVal_and]; rfl;
+  | hor _ _ ihp ihq => simp_all [hVal_or]; tauto;
+  | himp _ _ ihp ihq => simp_all [hVal_imply]; tauto;
   | _ => rfl
 
 lemma lindenbaum_complete_iff {φ : Formula α} : lindenbaum H ⊧ φ ↔ H ⊢ φ := by
-  simp [val_def', lindenbaum_val_eq, provable_iff_eq_top]
+  grind [val_def', lindenbaum_val_eq, provable_iff_eq_top]
 
 instance : Sound H (lindenbaum H) := ⟨lindenbaum_complete_iff.mpr⟩
 

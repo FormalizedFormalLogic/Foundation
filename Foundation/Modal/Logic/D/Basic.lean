@@ -274,7 +274,7 @@ lemma modal_equivalent_extendRoot_nat {n : ℕ+} {i : Fin n} : ModalEquivalent (
 open Formula.Kripke in
 lemma of_provable_rflSubformula_original_root [M.IsTransitive]
   {φ : Formula _}
-  (hS : M.root.1 ⊧ ((□⁻¹'φ.subformulas).image (λ ψ => □ψ 🡒 ψ)).conj) :
+  (hS : M.root.1 ⊧ (Finset.image (λ ψ => □ψ 🡒 ψ) (□⁻¹'φ.subformulas)).conj) :
   ∀ ψ ∈ φ.subformulas, ∀ i : ℕ, M.root.1 ⊧ ψ ↔ Satisfies (M.tailModel₀ o) (embed_nat i) ψ := by
   intro ψ hψ i;
   induction ψ generalizing i with
