@@ -3,6 +3,7 @@ module
 public import Mathlib.Topology.Order.UpperLowerSetTopology
 public import Mathlib.Topology.Sets.Opens
 public import Mathlib.Order.Heyting.Regular
+public import Foundation.Vorspiel.Order.Regular
 
 @[expose] public section
 
@@ -91,14 +92,7 @@ namespace Regular
 
 instance : BooleanAlgebra (Regular α) := inferInstance
 
-/-
-instance : CompleteBooleanAlgebra (Regular α) where
-  sSup s := ⟨sSup (Subtype.val '' s), by {
-    suffices (sSup (Subtype.val '' s))ᶜᶜ = (sSup (Subtype.val '' s)) by simpa
-    simp [sSup_dual]
-
-   }⟩
--/
+instance : CompleteBooleanAlgebra (Regular α) := inferInstance
 
 end Regular
 
