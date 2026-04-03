@@ -482,6 +482,10 @@ instance : ForcingRelation.PreIntKripke ℙ (· ≥ ·) where
   imply _ := imply
   monotone hφ _ hpq := hφ.monotone hpq
 
+lemma efq {p : ℙ} (h : p ⊩ ⊥) (φ : Propositionᵢ L) : p ⊩ φ := by
+  have : p ⊩ ⊥ ➝ φ := ⟨Forces.efq φ p⟩
+  exact imply.mp this p (by simp) h
+
 lemma sound_minimal {φ : Propositionᵢ L} : 𝗠𝗶𝗻¹ ⊢ φ → ℙ ∀⊩ φ := by
   rintro ⟨d⟩ p; exact ⟨Forces.sound d p⟩
 
@@ -515,8 +519,7 @@ scoped prefix:max "♯" => hValue
   ext p; simp [hValue]
 
 @[simp] lemma hValue_or_eq_sup {φ ψ : Propositionᵢ L} : ♯(φ ⋎ ψ) = (♯φ ⊔ ♯ψ) := by
-  ext p; simp only [hValue, ForcingRelation.BasicSemantics.or, LowerSet.coe_mk, Set.mem_setOf_eq,
-    LowerSet.coe_sup, Set.mem_union]
+  ext p; simp [hValue]
 
 @[simp] lemma hValue_fal_eq_Inf {φ : Semipropositionᵢ L 1} : ♯(∀⁰ φ) = ⨅ t, ♯(φ/[t]) := by
   ext p; simp [hValue,]
@@ -532,6 +535,17 @@ lemma hValue_falsum : p ∈ ♯(⊥ : Propositionᵢ L) ↔ Nonempty (⊢ᴷ ∼
 
 @[simp] lemma hValue_neg_eq_himp_bot (φ : Propositionᵢ L) : ♯(∼φ) = (♯φ ⇨ ♯⊥) := by
   simp [Semiformulaᵢ.neg_def]
+
+@[simp] lemma hValue_falsum_le (φ : Propositionᵢ L) : ♯⊥ ≤ ♯φ := fun _ h ↦ IsForced.efq h φ
+
+lemma eq_top_iff_provable {φ : Proposition L} : ♯φᴺ = ⊤ ↔ 𝐋𝐊¹ ⊢ φ := calc
+  ♯φᴺ = ⊤ ↔ ⊤ ≤ ♯φᴺ := by simp only [top_le_iff]
+  _       ↔ ℙ ∀⊩ φᴺ := by simp [SetLike.le_def]
+  _       ↔ 𝐋𝐊¹ ⊢ φ := IsForced.complete
+
+lemma lt_top_iff_provable {φ : Proposition L} : ♯φᴺ < ⊤ ↔ 𝐋𝐊¹ ⊬ φ := by
+  simp [Entailment.Unprovable, ←eq_top_iff_provable, lt_top_iff_ne_top]
+
 
 end Hauptsatz
 
