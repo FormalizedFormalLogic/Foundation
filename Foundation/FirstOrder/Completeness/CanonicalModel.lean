@@ -6,7 +6,7 @@ public import Foundation.Vorspiel.Order.Preorder
 
 @[expose] public section
 /-!
-# Algebraic proofs of cut elimination
+# Canonical model of classical first-order logic
 
 Main reference: Jeremy Avigad, Algebraic proofs of cut elimination [Avi01]
  -/
