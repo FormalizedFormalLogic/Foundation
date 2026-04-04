@@ -271,13 +271,13 @@ noncomputable def modusPonens (dpq : T ⊢!ᵈᵉʳ insert (φ 🡒 ψ) Γ) (dp 
 
 def ofEq (d : T ⊢!ᵈᵉʳ Γ) (h : Γ = Δ) : T ⊢!ᵈᵉʳ Δ := h ▸ d
 
-def rotate₁ (d : T ⊢!ᵈᵉʳ p₀ ⫽ p₁ ⫽ Γ) : T ⊢!ᵈᵉʳ p₁ ⫽ p₀ ⫽ Γ :=
+noncomputable def rotate₁ (d : T ⊢!ᵈᵉʳ p₀ ⫽ p₁ ⫽ Γ) : T ⊢!ᵈᵉʳ p₁ ⫽ p₀ ⫽ Γ :=
   ofEq d (by ext x; simp; tauto)
 
-def rotate₂ (d : T ⊢!ᵈᵉʳ p₀ ⫽ p₁ ⫽ p₂ ⫽ Γ) : T ⊢!ᵈᵉʳ p₂ ⫽ p₁ ⫽ p₀ ⫽ Γ :=
+noncomputable def rotate₂ (d : T ⊢!ᵈᵉʳ p₀ ⫽ p₁ ⫽ p₂ ⫽ Γ) : T ⊢!ᵈᵉʳ p₂ ⫽ p₁ ⫽ p₀ ⫽ Γ :=
   ofEq d (by ext x; simp; tauto)
 
-def rotate₃ (d : T ⊢!ᵈᵉʳ p₀ ⫽ p₁ ⫽ p₂ ⫽ p₃ ⫽ Γ) : T ⊢!ᵈᵉʳ p₃ ⫽ p₁ ⫽ p₂ ⫽ p₀ ⫽ Γ :=
+noncomputable def rotate₃ (d : T ⊢!ᵈᵉʳ p₀ ⫽ p₁ ⫽ p₂ ⫽ p₃ ⫽ Γ) : T ⊢!ᵈᵉʳ p₃ ⫽ p₁ ⫽ p₂ ⫽ p₀ ⫽ Γ :=
   ofEq d (by ext x; simp; tauto)
 
 noncomputable def orInv (d : T ⊢!ᵈᵉʳ φ ⋎ ψ ⫽ Γ) : T ⊢!ᵈᵉʳ φ ⫽ ψ ⫽ Γ := by

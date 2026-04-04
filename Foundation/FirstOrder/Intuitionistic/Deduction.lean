@@ -24,6 +24,11 @@ instance : SetLike (Hilbertᵢ L) (SyntacticFormulaᵢ L) where
   coe := Hilbertᵢ.axiomSet
   coe_injective' := by rintro ⟨T, _⟩ ⟨U, _⟩; simp
 
+instance : LE (Hilbertᵢ L) where
+  le Λ₁ Λ₂ := (Λ₁ : Set (SyntacticFormulaᵢ L)) ⊆ (Λ₂ : Set (SyntacticFormulaᵢ L))
+
+instance : IsConcreteLE (Hilbertᵢ L) (SyntacticFormulaᵢ L) := ⟨by intros; rfl⟩
+
 @[simp] lemma mem_mk (s : Set (SyntacticFormulaᵢ L)) (h) : φ ∈ Hilbertᵢ.mk s h ↔ φ ∈ s := by rfl
 
 def Minimal : Hilbertᵢ L := ⟨∅, by simp⟩
@@ -234,6 +239,7 @@ def rewrite (f : ℕ → SyntacticTerm L) : Λ ⊢! φ → Λ ⊢! Rew.rewrite f
     (ex₂ (Rew.rewrite (⇑Rew.bShift ∘ f) ▹ φ) (Rew.rewrite f ▹ ψ))
     (by simp [Rew.q_rewrite, rewrite_subst_nil])
 
+set_option backward.isDefEq.respectTransparency false in
 @[simp] lemma depth_rewrite (f : ℕ → SyntacticTerm L) (b : Λ ⊢! φ) : ‖rewrite f b‖ = ‖b‖ := by
   induction b generalizing f <;> simp [rewrite, *]
 

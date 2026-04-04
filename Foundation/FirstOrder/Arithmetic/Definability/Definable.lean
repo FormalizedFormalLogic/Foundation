@@ -403,6 +403,7 @@ lemma not (h : Γ.alt-[m].Definable P) :
 lemma impDelta (hp : 𝚫-[m].Definable P) (hq : 𝚫-[m].Definable Q) :
     𝚫-[m].Definable fun x ↦ P x → Q x := (hp.notDelta.or hq).of_iff (by intro x; simp [imp_iff_not_or])
 
+set_option backward.isDefEq.respectTransparency false in
 lemma imp (h₁ : Γ.alt-[m].Definable P) (h₂ : Γ-[m].Definable Q) :
     Γ-[m].Definable (fun v ↦ P v → Q v) := by
   match Γ with

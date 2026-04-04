@@ -189,9 +189,10 @@ lemma rel_iff {k} (r : L₂.Rel k) (v : Fin k → π.Model M) :
 
 @[simp] lemma eq_iff' {a b : π.Model M} :
     M ⊧/![a, b] (π.rel Language.Eq.eq) ↔ a = b := by
+  have : M ⊧ₘ* T := inferInstance
   have : ∀ x y, π.Dom x → π.Dom y → (M ⊧/![x, y] (π.rel Language.Eq.eq) ↔ x = y) := by
     simpa [models_iff, Matrix.comp_vecCons', Matrix.constant_eq_singleton, ←dom_iff]
-      using models_of_provable (inferInstanceAs (M ⊧ₘ* T)) π.preserve_eq
+      using models_of_provable this π.preserve_eq
   simpa using this a b
 
 @[simp] lemma eq_iff (v : Fin 2 → π.Model M) :
@@ -406,12 +407,13 @@ lemma of_provability {σ : Sentence L₂} (h : U ⊢ σ) : T ⊢ π.translate σ
 
 end
 
-def ofWeakerThan {L : Language} [L.Eq] (T U : Theory L) [𝗘𝗤 ⪯ T] [U ⪯ T] : U ⊲ T where
+abbrev ofWeakerThan {L : Language} [L.Eq] (T U : Theory L) [𝗘𝗤 ⪯ T] [U ⪯ T] : U ⊲ T where
   trln := DirectTranslation.id T
   interpret_theory φ hφ := complete <| EQ.provOf.{_,0} _ fun M _ _ _ hT ↦
+    have : U ⪯ T := inferInstance
     Model.translate_iff.mpr <| by
       suffices M ⊧/ ![] φ by simpa [models_iff, Empty.eq_elim, Matrix.empty_eq]
-      have : T ⊢ φ := Entailment.weakerThan_iff.mp (inferInstanceAs (U ⪯ T)) (Entailment.by_axm _ (by simp [hφ]))
+      have : T ⊢ φ := Entailment.weakerThan_iff.mp this (Entailment.by_axm _ (by simp [hφ]))
       exact models_of_provable hT this
 
 protected instance refl {L : Language} [L.Eq] (T : Theory L) [𝗘𝗤 ⪯ T] : T ⊳ T := ofWeakerThan T T
@@ -552,7 +554,7 @@ instance compDirectTranslation_Model_equiv :
 
 end semantics
 
-protected def comp (τ : T₂ ⊳ T₃) (π : T₁ ⊳ T₂) : T₁ ⊳ T₃ where
+protected abbrev comp (τ : T₂ ⊳ T₃) (π : T₁ ⊳ T₂) : T₁ ⊳ T₃ where
   trln := compDirectTranslation τ.trln π
   interpret_theory φ hφ := complete <| EQ.provOf.{_,0} _ fun M _ _ _ hT ↦ by
     apply models_iff.mpr
@@ -571,9 +573,9 @@ variable {L₁ L₂ L₃ : Language} [L₁.Eq] [L₂.Eq] [L₃.Eq] {T₁ : Theor
 
 protected instance refl (T : Theory L₁) [𝗘𝗤 ⪯ T] : T ⋈ T := ⟨DirectInterpretation.refl T, DirectInterpretation.refl T⟩
 
-protected def symm (π : T₁ ⋈ T₂) : T₂ ⋈ T₁ := ⟨π.l, π.r⟩
+protected abbrev symm (π : T₁ ⋈ T₂) : T₂ ⋈ T₁ := ⟨π.l, π.r⟩
 
-protected def trans (π : T₁ ⋈ T₂) (τ : T₂ ⋈ T₃) : T₁ ⋈ T₃ := ⟨τ.r.comp π.r, π.l.comp τ.l⟩
+protected abbrev trans (π : T₁ ⋈ T₂) (τ : T₂ ⋈ T₃) : T₁ ⋈ T₃ := ⟨τ.r.comp π.r, π.l.comp τ.l⟩
 
 end MutualDirectInterpretation
 

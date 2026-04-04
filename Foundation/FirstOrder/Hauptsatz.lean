@@ -49,6 +49,7 @@ variable {Γ Δ : Sequent L}
 
 @[simp] lemma IsCutFree.not_cut (dp : ⊢ᵀ φ :: Γ) (dn : ⊢ᵀ ∼φ :: Γ) : ¬IsCutFree (dp.cut dn) := by rintro ⟨⟩
 
+set_option backward.isDefEq.respectTransparency false in
 @[simp] lemma isCutFree_rewrite_iff_isCutFree {f : ℕ → SyntacticTerm L} {d : ⊢ᵀ Γ} :
     IsCutFree (rewrite d f) ↔ IsCutFree d := by
   induction d generalizing f
@@ -65,6 +66,7 @@ variable {Γ Δ : Sequent L}
 @[simp] lemma isCutFree_map_iff_isCutFree {f : ℕ → ℕ} {d : ⊢ᵀ Γ} :
     IsCutFree (Derivation.map d f) ↔ IsCutFree d := isCutFree_rewrite_iff_isCutFree
 
+set_option backward.isDefEq.respectTransparency false in
 @[simp] lemma IsCutFree.genelalizeByNewver_isCutFree {φ : SyntacticSemiformula L 1} (hp : ¬φ.FVar? m) (hΔ : ∀ ψ ∈ Δ, ¬ψ.FVar? m)
     (d : ⊢ᵀ φ/[&m] :: Δ) : IsCutFree (genelalizeByNewver hp hΔ d) ↔ IsCutFree d := by simp [genelalizeByNewver]
 
@@ -341,6 +343,7 @@ protected def refl.or (ihφ : [φ] ⊩ φᴺ) (ihψ : [ψ] ⊩ ψᴺ) : [φ ⋎ 
       (Derivation.cast bbφ (by simp [inf_def])) (Derivation.cast bbψ (by simp [inf_def]))
     falsumEquiv.symm ⟨Derivation.cast band (by simp [inf_def]), by simp [band, hbbφ, hbbψ]⟩
 
+set_option backward.isDefEq.respectTransparency false in
 protected def refl.exs (d : ∀ x, [φ/[&x]] ⊩ (φ/[&x])ᴺ) : [∃⁰ φ] ⊩ (∃⁰ φ)ᴺ :=
   implyOf fun q f ↦
     let x := newVar ((∀⁰ ∼φ) :: ∼q)
@@ -356,6 +359,7 @@ protected def refl.exs (d : ∀ x, [φ/[&x]] ⊩ (φ/[&x])ᴺ) : [∃⁰ φ] ⊩
         (Derivation.cast b (by simp [inf_def]))
     falsumEquiv.symm ⟨ba, by simp [ba, hb]⟩
 
+set_option backward.isDefEq.respectTransparency false in
 protected def refl : (φ : SyntacticFormula L) → [φ] ⊩ φᴺ
   |         ⊤ => implyEquiv.symm fun q sqp dφ ↦ dφ
   |         ⊥ => falsumEquiv.symm ⟨Derivation.verum, by simp⟩

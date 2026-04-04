@@ -71,7 +71,7 @@ instance add (dT : T.Δ₁) (dU : U.Δ₁) : (T + U).Δ₁ where
     grind
   isDelta1 := ProvablyProperOn.ofProperOn.{0} _ fun V _ _ ↦ ProperOn.or (by simp) (by simp)
 
-def ofEq (dT : T.Δ₁) (h : T = U) : U.Δ₁ where
+abbrev ofEq (dT : T.Δ₁) (h : T = U) : U.Δ₁ where
   ch := dT.ch
   mem_iff := by rcases h; exact dT.mem_iff
   isDelta1 := by rcases h; exact dT.isDelta1
@@ -98,7 +98,7 @@ instance empty : Theory.Δ₁ (∅ : Theory L) where
   mem_iff {ψ} := by simp
   isDelta1 := ProvablyProperOn.ofProperOn.{0} _ fun V _ _ ↦ by simp
 
-def singleton (φ : Sentence L) : Theory.Δ₁ {φ} where
+abbrev singleton (φ : Sentence L) : Theory.Δ₁ {φ} where
   ch := .ofZero (.mkSigma “x. x = ↑(Encodable.encode φ)”) _
   mem_iff {ψ} := by simp [Semiformula.quote_eq_encode]
   isDelta1 := ProvablyProperOn.ofProperOn.{0} _ fun V _ _ ↦ by simp
@@ -107,12 +107,12 @@ def singleton (φ : Sentence L) : Theory.Δ₁ {φ} where
     letI := Δ₁.singleton φ
     ({φ} : Theory L).Δ₁ch.val = “x. x = ↑(Encodable.encode φ)” := by rfl
 
-def ofList (l : List (Sentence L)) : Δ₁ {φ | φ ∈ l} :=
+abbrev ofList (l : List (Sentence L)) : Δ₁ {φ | φ ∈ l} :=
   match l with
   |     [] => empty.ofEq (by ext; simp)
   | φ :: l => ((singleton φ).add (ofList l)).ofEq (by ext; simp [Theory.add_def])
 
-noncomputable def ofFinite (T : Theory L) (h : Set.Finite T) : T.Δ₁ := (ofList h.toFinset.toList).ofEq (by ext; simp)
+noncomputable abbrev ofFinite (T : Theory L) (h : Set.Finite T) : T.Δ₁ := (ofList h.toFinset.toList).ofEq (by ext; simp)
 
 instance [T.Δ₁] [U.Δ₁] : (T + U).Δ₁ := add inferInstance inferInstance
 

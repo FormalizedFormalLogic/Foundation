@@ -98,7 +98,7 @@ variable (F : Filter W)
 instance : CoeOut F.Model C := ⟨fun x ↦ x.val⟩
 
 lemma finite_colimit [Fintype ι] (p : ι → W) (hp : ∀ i, p i ∈ F) : ∃ q ∈ F, ∀ i, q ≤ p i :=
-  DirectedOn.fintype_colimit transitive_ge (Order.PFilter.nonempty F) F.directed p hp
+  DirectedOn.fintype_colimit isTrans_ge (Order.PFilter.nonempty F) F.directed p hp
 
 lemma finite_colimit_domain [Fintype ι] (v : ι → F.Model) :
     ∃ q ∈ F, ∀ i, q ⊩↓ ↑(v i) := by

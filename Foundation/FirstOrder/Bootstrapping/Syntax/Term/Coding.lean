@@ -195,6 +195,7 @@ namespace LO.FirstOrder.Arithmetic.Bootstrapping
 
 open Encodable FirstOrder
 
+set_option backward.isDefEq.respectTransparency false in
 lemma mem_iff_mem_bitIndices {x s : ℕ} : x ∈ s ↔ x ∈ s.bitIndices := by
   induction s using Nat.binaryRec generalizing x
   case zero => simp

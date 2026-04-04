@@ -476,8 +476,9 @@ lemma Solovay.box_disjunction [𝗜𝚺₁ ⪯ T] {i : F} (ne : F.root.1 ≠ i) 
 
 end model
 
-lemma solovay_root_sound [𝗜𝚺₁ ⪯ T] [T.SoundOn (Hierarchy 𝚷 2)] : T.Solovay ℕ F.root.1 := by
-  haveI : 𝗥₀ ⪯ T := Entailment.WeakerThan.trans inferInstance (inferInstanceAs (𝗜𝚺₁ ⪯ T))
+lemma solovay_root_sound [𝗜𝚺₁ ⪯ T] [sound : T.SoundOn (Hierarchy 𝚷 2)] : T.Solovay ℕ F.root.1 := by
+  have : 𝗜𝚺₁ ⪯ T := inferInstance
+  haveI : 𝗥₀ ⪯ T := Entailment.WeakerThan.trans inferInstance this
   have NS : ∀ i, F.root.1 ≠ i → ¬T.Solovay ℕ i := by
     intro i hi H
     have Bi : T ⊢ ∼T.solovay i := (provable_iff_provable (T := T)).mp (Solovay.refute hi H)
@@ -489,7 +490,7 @@ lemma solovay_root_sound [𝗜𝚺₁ ⪯ T] [T.SoundOn (Hierarchy 𝚷 2)] : T.
         exact Entailment.K!_left (Entailment.ENN!_of_E! this) ⨀ Bi
       have : ¬ℕ ⊧/![] π := by
         simpa [models_iff] using
-          (inferInstanceAs (T.SoundOn (Hierarchy 𝚷 2))).sound
+          sound.sound
             (σ := ∼π)
             this
             (by simp [π,
@@ -506,7 +507,8 @@ lemma solovay_root_sound [𝗜𝚺₁ ⪯ T] [T.SoundOn (Hierarchy 𝚷 2)] : T.
     contradiction
 
 lemma solovay_unprovable [𝗜𝚺₁ ⪯ T] [T.SoundOn (Hierarchy 𝚷 2)] {i : F} (h : F.root.1 ≠ i) : T ⊬ ∼T.solovay i := by
-  haveI : 𝗥₀ ⪯ T := Entailment.WeakerThan.trans inferInstance (inferInstanceAs (𝗜𝚺₁ ⪯ T))
+  have : 𝗜𝚺₁ ⪯ T := inferInstance
+  haveI : 𝗥₀ ⪯ T := Entailment.WeakerThan.trans inferInstance this
   have : ∼T.Provable ⌜∼T.solovay i⌝ := Solovay.consistent (by grind) solovay_root_sound;
   simpa [Theory.ConsistentWith.quote_iff, provable_iff_provable] using this
 

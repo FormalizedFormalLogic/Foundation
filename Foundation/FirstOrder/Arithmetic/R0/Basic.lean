@@ -136,7 +136,8 @@ lemma bold_sigma_one_completeness' {n} {σ : Semisentence ℒₒᵣ n} (hσ : Hi
   simpa [Empty.eq_elim] using bold_sigma_one_completeness (M := M) (φ := σ) hσ (f := Empty.elim) (e := e) h
 
 instance consistent : Entailment.Consistent 𝗥₀ :=
-  Sound.consistent_of_satisfiable ⟨_, inferInstanceAs (ℕ ⊧ₘ* 𝗥₀)⟩
+  let : ℕ ⊧ₘ* 𝗥₀ := inferInstance
+  Sound.consistent_of_satisfiable ⟨_, this⟩
 
 end model
 

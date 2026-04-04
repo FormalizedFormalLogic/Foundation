@@ -147,7 +147,9 @@ notation "𝗭𝗖" => ZermeloChoice
 
 instance : 𝗭 ⪯ 𝗭𝗖 := inferInstance
 
-instance : 𝗘𝗤 ⪯ 𝗭𝗖 := Entailment.WeakerThan.trans (inferInstanceAs (𝗘𝗤 ⪯ 𝗭)) inferInstance
+instance : 𝗘𝗤 ⪯ 𝗭𝗖 :=
+  let : 𝗘𝗤 ⪯ 𝗭 := inferInstance
+  Entailment.WeakerThan.trans this inferInstance
 
 /-! ### Zermelo-Fraenkel set theory with axiom of choice -/
 
@@ -158,7 +160,9 @@ notation "𝗭𝗙𝗖" => ZermeloFraenkelChoice
 
 instance : 𝗭𝗙 ⪯ 𝗭𝗙𝗖 := inferInstance
 
-instance : 𝗘𝗤 ⪯ 𝗭𝗙𝗖 := Entailment.WeakerThan.trans (inferInstanceAs (𝗘𝗤 ⪯ 𝗭𝗙)) inferInstance
+instance : 𝗘𝗤 ⪯ 𝗭𝗙𝗖 :=
+  let : 𝗘𝗤 ⪯ 𝗭𝗙 := inferInstance
+  Entailment.WeakerThan.trans this inferInstance
 
 lemma zc_subset_zfc : 𝗭𝗖 ⊆ 𝗭𝗙𝗖 := Set.union_subset_union_left _ z_subset_zf
 

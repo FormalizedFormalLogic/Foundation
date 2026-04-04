@@ -155,7 +155,8 @@ lemma GL_S_TFAE :
     simp
   tfae_have 2 → 3 := by
     intro h f;
-    have : 𝗥₀ ⪯ T := WeakerThan.trans (inferInstanceAs (𝗥₀ ⪯ 𝗜𝚺₁)) inferInstance
+    have : 𝗥₀ ⪯ 𝗜𝚺₁ := inferInstance
+    have : 𝗥₀ ⪯ T := WeakerThan.trans this inferInstance
     apply S.arithmetical_soundness;
     exact h;
   tfae_have 3 → 1 := by

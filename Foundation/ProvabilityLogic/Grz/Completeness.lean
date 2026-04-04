@@ -129,7 +129,8 @@ theorem Grz.arithmetical_completeness_model_iff
     (∀ f : T.StandardRealization, ℕ ⊧ₘ f.strongInterpret A) ↔ Modal.Grz ⊢ A := by
   apply Iff.trans ?_ Modal.Logic.iff_provable_Grz_provable_boxdot_S;
   apply Iff.trans ?_ (S.arithmetical_completeness_iff (T := T)).symm;
-  have : 𝗥₀ ⪯ T := WeakerThan.trans (inferInstanceAs (𝗥₀ ⪯ 𝗜𝚺₁)) inferInstance
+  have : 𝗥₀ ⪯ 𝗜𝚺₁ := inferInstance
+  have : 𝗥₀ ⪯ T := WeakerThan.trans this inferInstance
   constructor;
   . intro h f; exact Realization.iff_models_interpret_boxdot_strongInterpret (L := ℒₒᵣ) |>.mpr $ h f;
   . intro h f; exact Realization.iff_models_interpret_boxdot_strongInterpret (L := ℒₒᵣ) |>.mp $ h f;
