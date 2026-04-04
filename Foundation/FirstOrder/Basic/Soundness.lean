@@ -63,6 +63,10 @@ lemma sound {M : Type*} [s : Structure L M] [Nonempty M] (f : ℕ → M) {Γ : S
       · exact ⟨ψ, by simp [hn], hq⟩
     · exact ⟨ψ, by simp [h], hq⟩
 
+@[simp] lemma nil_empty : IsEmpty (⊢ᴷ ([] : Sequent L)) := by
+  refine ⟨fun b ↦ ?_⟩
+  simpa using sound (fun _ ↦ ()) b
+
 end Derivation
 
 theorem Provable.sound {M : Type*} [s : Structure L M] [Nonempty M] {φ : Proposition L} (f : ℕ → M) :

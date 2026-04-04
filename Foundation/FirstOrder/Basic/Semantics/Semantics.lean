@@ -39,6 +39,10 @@ instance [n : Nonempty M] : Nonempty (Structure L M) := by
   rcases n with ⟨x⟩
   exact ⟨{ func := fun _ _ _ ↦ x, rel := fun _ _ _ ↦ True }⟩
 
+instance unit : Structure L Unit where
+  func := fun _ _ _ ↦ ()
+  rel := fun _ _ _ ↦ True
+
 protected def lMap (φ : L₁ →ᵥ L₂) {M : Type w} (S : Structure L₂ M) : Structure L₁ M where
   func  _ f := S.func (φ.func f)
   rel _ r := S.rel (φ.rel r)
