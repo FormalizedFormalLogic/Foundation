@@ -39,8 +39,8 @@ open LO.Entailment LO.Modal.Entailment in
 lemma GLPoint3OplusBoxBot.axiomNVer {n : ℕ} : Modal.GLPoint3OplusBoxBot n ⊢ (□^[n]φ) :=
   Modal.Entailment.boxItr_axiomK'! (multinec! (by cl_prover)) ⨀ GLPoint3OplusBoxBot.boxbot
 
-@[simp] lemma eq_GLPoint3OplusBoxBot_omega_GLPoint3 : (Modal.GLPoint3OplusBoxBot ⊤) = Modal.GLPoint3 := by simp [Modal.GLPoint3OplusBoxBot];
-
+@[simp]
+lemma eq_GLPoint3OplusBoxBot_omega_GLPoint3 : (Modal.GLPoint3OplusBoxBot ⊤) = Modal.GLPoint3 := by rfl;
 
 section
 
@@ -115,7 +115,7 @@ lemma GLPoint3OplusBoxBot.strictlyWeakerThan_GLPoint3 {n : ℕ} : (Modal.GLPoint
       . apply Set.mem_setOf_eq.mpr;
         exact {}
       . apply Satisfies.boxItr_def.not.mpr;
-        push_neg;
+        push Not;
         use ⟨n, by omega⟩;
         constructor;
         . apply Rel.Iterate.fin_lt_stepping_stones <;> simp;

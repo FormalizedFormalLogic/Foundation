@@ -70,7 +70,7 @@ variable {H} {H₁ H₂ : HilbertVF α}
 alias ofSchema := HilbertVFProof.axm
 @[grind <=] lemma of_schema (h : φ ∈ H) : H ⊢ φ := ⟨ofSchema h⟩
 
-def ofLE (h : H₁ ≤ H₂) : H₁ ⊢! φ → H₂ ⊢! φ
+def ofLE (h : H₁.schema ≤ H₂.schema) : H₁ ⊢! φ → H₂ ⊢! φ
   | axm h₁          => axm $ h h₁
   | mdp h₁ h₂       => mdp (ofLE h h₁) (ofLE h h₂)
   | andElimL        => andElimL
@@ -86,10 +86,10 @@ def ofLE (h : H₁ ≤ H₂) : H₁ ⊢! φ → H₂ ⊢! φ
   | ruleD h₁ h₂     => ruleD (ofLE h h₁) (ofLE h h₂)
   | ruleI h₁ h₂     => ruleI (ofLE h h₁) (ofLE h h₂)
 
-lemma of_le (h : H₁ ≤ H₂) : H₁ ⊢ φ → H₂ ⊢ φ := λ ⟨hφ⟩ => ⟨ofLE h hφ⟩
+lemma of_le (h : H₁.schema ≤ H₂.schema) : H₁ ⊢ φ → H₂ ⊢ φ := λ ⟨hφ⟩ => ⟨ofLE h hφ⟩
 
 @[grind <=]
-lemma weakerThan_of_le (h : H₁ ≤ H₂) : H₁ ⪯ H₂ := Entailment.weakerThan_iff.mpr $ of_le h
+lemma weakerThan_of_le (h : H₁.schema ≤ H₂.schema) : H₁ ⪯ H₂ := Entailment.weakerThan_iff.mpr $ of_le h
 
 def Subst {H : HilbertVF α} (s) : H ⊢! φ → H ⊢! φ⟦s⟧
   | axm h₁          => axm $ H.schema_closed _ h₁ s

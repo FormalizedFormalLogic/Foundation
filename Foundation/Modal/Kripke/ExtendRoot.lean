@@ -99,13 +99,13 @@ section
 
 lemma eq_root_or_eq_original (x : F.extendRoot 1) : x = (F.extendRoot 1).root ∨ ∃ x₀ : F, x = x₀ := by
   rcases eq_extend_or_eq_original x with (⟨i, hi, rfl⟩ | ⟨x₀, rfl⟩);
-  . simp [Frame.root, default];
+  . simp [Frame.root, default]; grind;
   . simp;
 
 lemma eq_original_of_rel_extendRoot_root₁ [F.IsIrreflexive] (x : F.extendRoot 1) (h : (extendRoot F 1).root ≺ x)
   : ∃ x₀ : F, x = x₀ := by
   rcases eq_extend_or_eq_original x with (⟨i, hi, rfl⟩ | _);
-  . simp [Frame.root, default] at h;
+  . simp [Frame.root, default] at h; grind;
   . simp_all;
 
 lemma eq_original_of_neq_extendRoot_root₁ [F.IsIrreflexive] (x : F.extendRoot 1) (h : x ≠ (extendRoot F 1).root)
@@ -188,7 +188,7 @@ variable {l : List M.World} {n : ℕ+}
 lemma atmost_one_validates_axiomT_in_irrefl_trans_isChain (l_chain : List.IsChain (· ≺ ·) l) :
     (∀ x ∈ l, x ⊧ □A 🡒 A) ∨ (∃! x ∈ l, ¬x ⊧ □A 🡒 A) := by
   apply or_iff_not_imp_left.mpr;
-  push_neg;
+  push Not;
   rintro ⟨x, x_l, hx⟩;
   use x;
   constructor;
@@ -264,7 +264,7 @@ lemma validates_axiomT_set_in_irrefl_trans_chain
   obtain ⟨x, hx₂, nhx₁⟩ := Finset.exists_of_ssubset this;
   replace hx₂ := List.mem_toFinset.mp hx₂;
   replace hx₁ := Finset.mem_filter.not.mp nhx₁;
-  push_neg at hx₁;
+  push Not at hx₁;
   use x;
   constructor;
   . assumption;

@@ -41,7 +41,7 @@ lemma imply_boxdot_plain_of_imply_box_box : Modal.GL ⊢ □φ 🡒 □ψ → Mo
     . apply hs₂;
       grind;
   . apply Satisfies.box_def.not.mpr;
-    push_neg;
+    push Not;
     use (Sum.inr M.root);
     constructor;
     . grind;

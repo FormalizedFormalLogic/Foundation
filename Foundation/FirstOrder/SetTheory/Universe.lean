@@ -80,8 +80,8 @@ def Universe : Type (u + 1) := QPF.Fix UniverseFunctor
 namespace Universe
 
 /-- constructor of name -/
-noncomputable def mk (s : Set Universe.{u}) [Small s] : Universe.{u} :=
-  QPF.Fix.mk ⟨s, inferInstance⟩
+noncomputable def mk (s : Set Universe.{u}) [small : Small.{u} s] : Universe.{u} :=
+  QPF.Fix.mk ⟨s, small⟩
 
 /-- destructor of name -/
 noncomputable def dest (x : Universe) : UniverseFunctor Universe := QPF.Fix.dest x
@@ -105,8 +105,8 @@ instance coe_small' (x : Universe.{u}) : Small.{u} (x : Type _) := x.dest.small
 
 @[simp] lemma mk_coe (x : Universe.{u}) : mk (↑x : Set Universe.{u}) = x := QPF.Fix.mk_dest _
 
-@[simp] lemma coe_mk (s : Set Universe.{u}) [Small.{u} s] : ↑(mk s) = s :=
-  UniverseFunctor.ext_iff.mp <| QPF.Fix.dest_mk (F := UniverseFunctor) ⟨s, inferInstance⟩
+@[simp] lemma coe_mk (s : Set Universe.{u}) [small : Small.{u} s] : ↑(mk s) = s :=
+  UniverseFunctor.ext_iff.mp <| QPF.Fix.dest_mk (F := UniverseFunctor) ⟨s, small⟩
 
 @[simp] lemma mem_mk {x} {s : Set Universe.{u}} [Small s] :
     x ∈ mk s ↔ x ∈ s := by simp [mem_def']
@@ -127,9 +127,9 @@ instance coe_small' (x : Universe.{u}) : Small.{u} (x : Type _) := x.dest.small
 noncomputable def rec (g : (s : Set α) → [Small.{u} s] → α) : Universe → α :=
   QPF.Fix.rec (F := UniverseFunctor) fun p ↦ g p.set
 
-lemma rec_mk (g : (s : Set α) → [Small.{u} s] → α) (s : Set Universe.{u}) [Small.{u} s] :
+lemma rec_mk (g : (s : Set α) → [Small.{u} s] → α) (s : Set Universe.{u}) [small : Small.{u} s] :
     rec g (mk s) = g (rec g '' s) := by
-  simpa using QPF.Fix.rec_eq (F := UniverseFunctor) (fun p ↦ g p.set) ⟨s, inferInstance⟩
+  simpa using QPF.Fix.rec_eq (F := UniverseFunctor) (fun p ↦ g p.set) ⟨s, small⟩
 
 @[elab_as_elim]
 theorem ind
@@ -140,9 +140,10 @@ theorem ind
 
 lemma wellFounded : WellFounded (α := Universe.{u}) (· ∈ ·) := ⟨ind fun x ih ↦ Acc.intro x ih⟩
 
+
 lemma minimal_exists_of_isNonempty {x : Universe.{u}} (hx : IsNonempty x) : ∃ y ∈ x, ∀ z ∈ x, z ∉ y := by
   let z := WellFounded.min wellFounded x (by simp [hx])
-  exact ⟨z, WellFounded.min_mem wellFounded x _, fun w hw ↦ WellFounded.not_lt_min wellFounded x _ hw⟩
+  exact ⟨z, WellFounded.min_mem wellFounded x _, fun w hw ↦ WellFounded.not_lt_min wellFounded x hw⟩
 
 noncomputable def empty : Universe := .mk {}
 

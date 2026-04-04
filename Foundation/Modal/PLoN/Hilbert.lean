@@ -36,7 +36,7 @@ lemma consistent_of_nonempty_frameClass (C : PLoN.FrameClass) (hC : Set.Nonempty
   apply Entailment.Consistent.of_unprovable (φ := ⊥);
   apply not_imp_not.mpr sound.sound;
   apply Semantics.set_models_iff.not.mpr;
-  push_neg;
+  push Not;
   obtain ⟨F, hF⟩ := hC;
   use F;
   grind;

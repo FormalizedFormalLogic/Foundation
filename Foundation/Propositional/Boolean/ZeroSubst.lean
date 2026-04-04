@@ -22,7 +22,7 @@ noncomputable def vfSubst (v : Valuation α) : ZeroSubstitution α := ⟨
 theorem exists_neg_zeroSubst_of_not_tautology (h : ¬φ.IsTautology)
   : ∃ s : ZeroSubstitution α, Formula.IsTautology (∼(φ⟦s.1⟧)) := by
   unfold Formula.IsTautology Valid at h;
-  push_neg at h;
+  push Not at h;
   obtain ⟨v, hv⟩ := h;
   use vfSubst v;
   intro u;

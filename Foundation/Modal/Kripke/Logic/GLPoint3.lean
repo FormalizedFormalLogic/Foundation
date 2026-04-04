@@ -74,7 +74,7 @@ private lemma complete.lemma₁ : Modal.GLPoint3 ⊢ ∼□φ 🡒 ◇(□φ ⋏
   intro F _ V x h₁ y Rxy h₂;
   have := (Satisfies.not_dia_def.mp h₁) y Rxy;
   have := Satisfies.and_def.not.mp this;
-  push_neg at this;
+  push Not at this;
   have := this h₂;
   simpa using Satisfies.not_def.not.mp this;
 

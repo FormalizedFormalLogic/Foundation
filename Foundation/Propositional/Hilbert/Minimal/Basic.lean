@@ -41,10 +41,10 @@ protected def Cl : Hilbert α := ⟨
   by rintro φ (_ | _) <;> grind;
 ⟩
 
-@[simp, grind .] lemma Int_le_KC : (Hilbert.Int : Hilbert α) ≤ Hilbert.KC := by tauto;
-@[simp, grind .] lemma Int_le_LC : (Hilbert.Int : Hilbert α) ≤ Hilbert.LC := by tauto;
-@[simp, grind .] lemma Int_le_KreiselPutnam : (Hilbert.Int : Hilbert α) ≤ Hilbert.KreiselPutnam := by tauto;
-@[simp, grind .] lemma Int_le_Cl : (Hilbert.Int : Hilbert α) ≤ Hilbert.Cl := by tauto;
+@[simp, grind .] lemma Int_le_KC : (Hilbert.Int : Hilbert α).schema ⊆ Hilbert.KC.schema := by tauto;
+@[simp, grind .] lemma Int_le_LC : (Hilbert.Int : Hilbert α).schema ⊆ Hilbert.LC.schema := by tauto;
+@[simp, grind .] lemma Int_le_KreiselPutnam : (Hilbert.Int : Hilbert α).schema ⊆ Hilbert.KreiselPutnam.schema := by tauto;
+@[simp, grind .] lemma Int_le_Cl : (Hilbert.Int : Hilbert α).schema ⊆ Hilbert.Cl.schema := by tauto;
 
 end Hilbert
 
@@ -87,7 +87,7 @@ variable {H} {H₁ H₂ : Hilbert α}
 alias ofSchema := HilbertProof.axm
 @[grind <=] lemma of_schema (h : φ ∈ H) : H ⊢ φ := ⟨ofSchema h⟩
 
-def ofLE (h : H₁ ≤ H₂) : H₁ ⊢! φ → H₂ ⊢! φ
+def ofLE (h : H₁.schema ⊆ H₂.schema) : H₁ ⊢! φ → H₂ ⊢! φ
   | axm h₁ => axm $ h h₁
   | mdp h₁ h₂ => mdp (ofLE h h₁) (ofLE h h₂)
   | verum => verum
@@ -100,10 +100,10 @@ def ofLE (h : H₁ ≤ H₂) : H₁ ⊢! φ → H₂ ⊢! φ
   | orIntroR => orIntroR
   | orElim => orElim
 
-lemma of_le (h : H₁ ≤ H₂) : H₁ ⊢ φ → H₂ ⊢ φ := λ ⟨hφ⟩ => ⟨ofLE h hφ⟩
+lemma of_le (h : H₁.schema ⊆ H₂.schema) : H₁ ⊢ φ → H₂ ⊢ φ := λ ⟨hφ⟩ => ⟨ofLE h hφ⟩
 
 @[grind <=]
-lemma weakerThan_of_le (h : H₁ ≤ H₂) : H₁ ⪯ H₂ := Entailment.weakerThan_iff.mpr $ of_le h
+lemma weakerThan_of_le (h : H₁.schema ⊆ H₂.schema) : H₁ ⪯ H₂ := Entailment.weakerThan_iff.mpr $ of_le h
 
 def Subst {H : Hilbert α} (s) : H ⊢! φ → H ⊢! φ⟦s⟧
   | axm h₁ => axm $ H.schema_closed φ h₁ s

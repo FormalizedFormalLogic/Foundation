@@ -146,14 +146,14 @@ lemma MDP_Aux {X : Set _} (h : (□'X) *⊢[Modal.GL] □φ₁ ⋎ □φ₂) : (
       . exact (Satisfies.and_def.mp $ (Satisfies.and_def.mp hM₂).1).2 _ Rrx;
     have hp₁ : ¬(Satisfies M₀ r₀ (□φ₁)) := by
       dsimp [Satisfies];
-      push_neg;
+      push Not;
       use (↑r₁);
       constructor;
       . tauto;
       . exact (Satisfies.and_def.mp hM₁).2;
     have hp₂ : ¬(Satisfies M₀ r₀ (□φ₂)) := by
       dsimp [Satisfies];
-      push_neg;
+      push Not;
       use (↑r₂);
       constructor;
       . tauto;
@@ -161,7 +161,7 @@ lemma MDP_Aux {X : Set _} (h : (□'X) *⊢[Modal.GL] □φ₁ ⋎ □φ₂) : (
     have : ¬(Satisfies M₀ r₀ (□φ₁ ⋎ □φ₂)) := by
       apply Satisfies.not_def.mpr;
       apply Satisfies.or_def.not.mpr;
-      push_neg;
+      push Not;
       exact ⟨hp₁, hp₂⟩;
     have : ¬(Satisfies M₀ r₀ (□c 🡒 (□φ₁ ⋎ □φ₂))) := _root_.not_imp.mpr ⟨hc, this⟩;
     have : Modal.GL ⊬ □c 🡒 □φ₁ ⋎ □φ₂ := GL.Kripke.iff_unprovable_exists_finite_rooted_model.mpr $ by

@@ -69,7 +69,7 @@ protected lemma neg_def : x ⊧ ∼φ ↔ ¬x ⊧ φ := by
       . right; exact ihψ.mpr h₂;
   | hBox φ ihφ =>
     simp only [ModalDeMorgan.neg_box, Satisfies.box_def];
-    push_neg;
+    push Not;
     constructor;
     . intro h;
       obtain ⟨y, Rxy, hy⟩ := h;

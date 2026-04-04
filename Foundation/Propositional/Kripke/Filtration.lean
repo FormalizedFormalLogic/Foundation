@@ -243,7 +243,7 @@ abbrev finestFiltrationTransitiveClosureFrame (M : Model) (T : FormulaSet ℕ) [
       rintro x y Rxy Ryx;
       obtain ⟨x, rfl⟩ := Quotient.exists_rep x;
       obtain ⟨y, rfl⟩ := Quotient.exists_rep y;
-      simp only [Quotient.eq, FilterEqvSetoid, filterEquiv];
+      apply Quotient.eq.mpr;
       intro φ hφ;
       constructor;
       . obtain ⟨n, hn⟩ := Rel.TransGen.exists_iterate.mp Rxy;

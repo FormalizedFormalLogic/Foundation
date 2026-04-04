@@ -22,7 +22,7 @@ def IsProvabilityLogic (L : Modal.Logic ℕ) (T U : ArithmeticTheory) [T.Δ₁] 
 variable {T U : ArithmeticTheory} [T.Δ₁] {L : Modal.Logic ℕ}
 
 /-- `L` is Łukasiewicz if `L` is provability logic. -/
-def inst_Łukasiewiicz_of_isProvabilityLogic (hPL : L.IsProvabilityLogic T U) : Entailment.Łukasiewicz L where
+abbrev inst_Łukasiewiicz_of_isProvabilityLogic (hPL : L.IsProvabilityLogic T U) : Entailment.Łukasiewicz L where
   mdp := by
     rintro A B ⟨hA⟩ ⟨hB⟩;
     constructor;
@@ -49,7 +49,7 @@ def inst_Łukasiewiicz_of_isProvabilityLogic (hPL : L.IsProvabilityLogic T U) : 
     dsimp [ProvabilityLogic.Realization.interpret];
     cl_prover;
 
-def inst_Cl_of_isProvabilityLogic (hPL : L.IsProvabilityLogic T U) : Entailment.Cl L := by
+abbrev inst_Cl_of_isProvabilityLogic (hPL : L.IsProvabilityLogic T U) : Entailment.Cl L := by
   have := inst_Łukasiewiicz_of_isProvabilityLogic hPL;
   infer_instance;
 

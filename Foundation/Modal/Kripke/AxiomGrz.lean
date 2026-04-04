@@ -41,7 +41,7 @@ lemma validate_AxiomGrz_of_refl_trans_wcwf [F.IsReflexive] [F.IsTransitive] [F.I
     -- TODO: need more refactor
     have := Set.not_nonempty_iff_eq_empty.mpr this;
     have := Set.nonempty_def.not.mp this;
-    push_neg at this;
+    push Not at this;
     simpa [X] using this;
 
   rintro w (⟨hw₁, hw₂⟩ | ⟨hw₁, hw₂, hw₃⟩);
@@ -120,7 +120,7 @@ lemma WCWF_of_validate_AxiomGrz (h : F ⊧ Axioms.Grz (.atom 0)) : F.IsWeaklyCon
     intro hWCWF;
 
     replace hWCWF := ConverseWellFounded.iff_has_max.not.mp hWCWF;
-    push_neg at hWCWF;
+    push Not at hWCWF;
     obtain ⟨f, hf⟩ := dependent_choice hWCWF; clear hWCWF;
     simp only [IrreflGen, ne_eq] at hf;
     apply ValidOnFrame.not_of_exists_valuation_world;
@@ -150,7 +150,7 @@ lemma WCWF_of_validate_AxiomGrz (h : F ⊧ Axioms.Grz (.atom 0)) : F.IsWeaklyCon
           rfl;
       . suffices ∃ x, f 0 = f (2 * x) by simpa [Satisfies];
         use 0;
-    . push_neg at H;
+    . push Not at H;
       obtain ⟨j, k, ljk, ejk⟩ := H;
       let V : Valuation F := (λ _ v => v ≠ f j);
       use V, (f j);

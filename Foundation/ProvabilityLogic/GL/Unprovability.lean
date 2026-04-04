@@ -56,7 +56,7 @@ variable {T : ArithmeticTheory} [T.Δ₁]
 
 example [𝗜𝚺₁ ⪯ T] (height : T.height = ⊤) : T ⊬ T.standardProvability.con := by
   have h := ProvabilityLogic.GL.arithmetical_completeness_iff height (T := T) |>.not.mpr $ GL.unprovable_notbox (φ := ⊥);
-  push_neg at h;
+  push Not at h;
   obtain ⟨f, h⟩ := h;
   exact Realization.interpret.iff_provable_neg (f := f) |>.not.mp h;
 
@@ -118,7 +118,7 @@ lemma unprovable_independency_of_consistency (height : T.height = ⊤) :
       iff_modalConsis_bewConsis_inside;
     exact Iff.trans H₁ H₂ |>.not.mp this;
   have h := GL.arithmetical_completeness_iff height |>.not.mpr $ GL.unprovable_independency (φ := ∼□⊥);
-  push_neg at h;
+  push Not at h;
   obtain ⟨f, h⟩ := h;
   congr;
 
@@ -143,7 +143,7 @@ lemma unrefutable_independency_of_consistency (height : T.height = ⊤):
       . intro H; exact K!_right H₂ ⨀ H;
     apply Iff.trans H₁ H₂ |>.not.mp this;
   have h := GL.arithmetical_completeness_iff height |>.not.mpr $ GL.unprovable_not_independency_of_consistency;
-  push_neg at h;
+  push Not at h;
   obtain ⟨f, h⟩ := h;
   replace h := Realization.interpret.iff_provable_neg (L := ℒₒᵣ) |>.not.mp h;
   congr;

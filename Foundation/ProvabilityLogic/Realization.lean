@@ -186,15 +186,15 @@ lemma iff_provable_lconj₂ {l : List (Formula _)} : U ⊢ f (l.conj₂) ↔ ∀
   | _ => simp [Realization.interpret];
 
 @[simp, grind =]
-lemma iff_provable_lconj' {l : List (Formula _)} : U ⊢ f (l.conj' ι) ↔ (∀ A ∈ l, U ⊢ f (ι A)) := by
+lemma iff_provable_lconj' {l : List (Formula ℕ)} : U ⊢ f (l.conj' ι) ↔ (∀ A ∈ l, U ⊢ f (ι A)) := by
   simp [List.conj']
 
 @[simp, grind =]
-lemma iff_provable_fconj {s : Finset (Formula _)} : U ⊢ f (s.conj) ↔ ∀ A ∈ s, U ⊢ f A := by
+lemma iff_provable_fconj {s : Finset (Formula ℕ)} : U ⊢ f (s.conj) ↔ ∀ A ∈ s, U ⊢ f A := by
   simp [Finset.conj]
 
 @[simp, grind =]
-lemma iff_provable_fconj' {s : Finset (Formula _)} : U ⊢ f (s.conj' ι) ↔ (∀ A ∈ s, U ⊢ f (ι A)) := by
+lemma iff_provable_fconj' {s : Finset (Formula ℕ)} : U ⊢ f (s.conj' ι) ↔ (∀ A ∈ s, U ⊢ f (ι A)) := by
   simp [Finset.conj']
 
 @[grind .]

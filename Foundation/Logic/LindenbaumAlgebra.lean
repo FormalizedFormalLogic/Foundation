@@ -136,9 +136,9 @@ instance [DecidableEq F] : GeneralizedHeytingAlgebra (LindenbaumAlgebra 𝓢) wh
 
 variable {𝓢}
 
-lemma provable_iff_eq_top {φ : F} : 𝓢 ⊢ φ ↔ (⟦φ⟧ : LindenbaumAlgebra 𝓢) = ⊤ := by
-  simp [top_def, provable_iff_provablyEquivalent_verum, Quotient.eq];
-  simp [ProvablyEquivalent, ProvablyEquivalent.setoid]
+lemma provable_iff_eq_top {φ : F} : 𝓢 ⊢ φ ↔ (⟦φ⟧ : LindenbaumAlgebra 𝓢) = ⊤ := calc
+  _ ↔ ProvablyEquivalent 𝓢 φ ⊤ := by rw [provable_iff_provablyEquivalent_verum]
+  _ ↔ _ := by rw [top_def, Quotient.eq]; rfl;
 
 lemma inconsistent_iff_trivial : Inconsistent 𝓢 ↔ (∀ φ : LindenbaumAlgebra 𝓢, φ = ⊤) := by
   simp only [Inconsistent, provable_iff_eq_top]

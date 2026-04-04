@@ -44,7 +44,7 @@ lemma refl_mainlemma_aux (hA : ¬M₁.root.1 ⊧ (A.rflSubformula.conj 🡒 A)) 
   intro M₀ S B B_sub;
 
   replace hA := Formula.Kripke.Satisfies.imp_def.not.mp hA;
-  push_neg at hA;
+  push Not at hA;
   obtain ⟨hA₁, hA₂⟩ := hA;
   replace hA₁ : ∀ φ ∈ A.rflSubformula, M₁.root.1 ⊧ φ := by
     intro φ hφ;
@@ -65,7 +65,7 @@ lemma refl_mainlemma_aux (hA : ¬M₁.root.1 ⊧ (A.rflSubformula.conj 🡒 A)) 
       . exact C!_trans (ihC.1 hB) implyK!;
     . intro h;
       have := Satisfies.imp_def.not.mp h;
-      push_neg at this;
+      push Not at this;
       obtain ⟨hA, hB⟩ := this;
       have h₁ := ihB.1 hA;
       have h₂ := ihC.2 hB;
@@ -114,7 +114,7 @@ lemma refl_mainlemma_aux (hA : ¬M₁.root.1 ⊧ (A.rflSubformula.conj 🡒 A)) 
       exact this ⨀ b
     . intro h;
       have := Satisfies.box_def.not.mp h;
-      push_neg at this;
+      push Not at this;
       obtain ⟨i, Rij, hA⟩ := this;
       have : 𝗜𝚺₁ ⊢ S (Sum.inr i) 🡒 ∼S.realization B := S.mainlemma_neg (A := B) (i := i) (by simp)
         <| Model.extendRoot.inr_satisfies_iff (n := 1) |>.not.mpr hA;
@@ -155,14 +155,15 @@ lemma GL_S_TFAE :
     simp
   tfae_have 2 → 3 := by
     intro h f;
-    have : 𝗥₀ ⪯ T := WeakerThan.trans (inferInstanceAs (𝗥₀ ⪯ 𝗜𝚺₁)) inferInstance
+    have : 𝗥₀ ⪯ 𝗜𝚺₁ := inferInstance
+    have : 𝗥₀ ⪯ T := WeakerThan.trans this inferInstance
     apply S.arithmetical_soundness;
     exact h;
   tfae_have 3 → 1 := by
     have : ℕ ⊧ₘ* 𝗜𝚺₁ := models_of_subtheory (U := 𝗜𝚺₁) (T := T) (M := ℕ) inferInstance;
 
     contrapose;
-    push_neg;
+    push Not;
     intro hA;
     obtain ⟨M₁, _, _, _,  _, hA⟩ := GL.Kripke.iff_unprovable_exists_fintype_rooted_model.mp hA;
 

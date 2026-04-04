@@ -79,7 +79,7 @@ instance : InterpretabilityLogic.IL_R_W ⪱ InterpretabilityLogic.IL_P := by
               use a;
               grind;
             . dsimp [Irreflexive, Frame.RS, Relation.Comp];
-              push_neg;
+              push Not;
               grind;
           S_R := by grind;
         }

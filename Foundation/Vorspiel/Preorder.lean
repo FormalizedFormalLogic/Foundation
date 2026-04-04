@@ -8,7 +8,7 @@ public import Mathlib.Data.Set.Countable
 
 namespace Nat
 
-lemma monotone_of_succ_monotone {r : ℕ → ℕ → Prop} (rfx : Reflexive r) (tr : Transitive r)
+lemma monotone_of_succ_monotone {r : ℕ → ℕ → Prop} (rfx : Reflexive r) (tr : IsTrans ℕ r)
     (succ : ∀ n, r n (n + 1)) : n ≤ m → r n m := by
   revert n m
   suffices ∀ n d, r n (n + d) by
@@ -19,7 +19,7 @@ lemma monotone_of_succ_monotone {r : ℕ → ℕ → Prop} (rfx : Reflexive r) (
   induction d
   case zero => simp [rfx n]
   case succ d ih =>
-    simpa using tr ih (succ (n + d))
+    simpa using tr.trans _ _ _ ih (succ (n + d))
 
 end Nat
 
@@ -27,7 +27,7 @@ namespace DirectedOn
 
 variable {α : Type*} {r : α → α → Prop}
 
-private lemma vector_le (tr : Transitive r) {s : Set α} (hs : s.Nonempty) (h : DirectedOn r s) (v : Fin n → α) (hv : ∀ i, v i ∈ s) :
+private lemma vector_le (tr : IsTrans α r) {s : Set α} (hs : s.Nonempty) (h : DirectedOn r s) (v : Fin n → α) (hv : ∀ i, v i ∈ s) :
     ∃ z ∈ s, ∀ i, r (v i) z :=
   match n with
   | 0     => by
@@ -42,9 +42,9 @@ private lemma vector_le (tr : Transitive r) {s : Set α} (hs : s.Nonempty) (h : 
     cases i using Fin.cases
     case zero => assumption
     case succ i =>
-      exact tr (hr i) hrxz
+      exact tr.trans _ _ _ (hr i) hrxz
 
-lemma fintype_colimit [Fintype ι] (tr : Transitive r)
+lemma fintype_colimit [Fintype ι] (tr : IsTrans α r)
     {s : Set α} (hs : s.Nonempty) (h : DirectedOn r s) (v : ι → α) (hv : ∀ i, v i ∈ s) :
     ∃ z ∈ s, ∀ i, r (v i) z := by
   let f : Fin (Fintype.card ι) → α := fun x ↦ v ((Fintype.equivFin ι).symm x)
@@ -115,7 +115,7 @@ theorem countable_generic [Inhabited α] (𝓓 : Set (DenseSet α)) (ctb : Set.C
   have hs : ∀ i j, i ≤ j → s i ≥ s j := fun i j hij ↦
     Nat.monotone_of_succ_monotone (r := fun i j ↦ s i ≥ s j)
       (fun _ ↦ le_refl _)
-      (fun _ _ _ ↦ ge_trans)
+      ⟨fun _ _ _ ↦ ge_trans⟩
       (by simp [s]) hij
   refine ⟨ofDescendingChain s hs, ⟨?_⟩⟩
   intro d hd

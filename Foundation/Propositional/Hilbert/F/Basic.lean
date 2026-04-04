@@ -48,14 +48,14 @@ protected def F_Rfl_Tra1_Hrd : HilbertF α := ⟨
 ⟩
 -/
 
-@[simp, grind .] lemma F_le_F_Ser : (HilbertF.F : HilbertF α) ≤ HilbertF.F_Ser := by tauto
-@[simp, grind .] lemma F_le_F_Rfl : (HilbertF.F : HilbertF α) ≤ HilbertF.F_Rfl := by tauto
-@[simp, grind .] lemma F_le_F_Sym : (HilbertF.F : HilbertF α) ≤ HilbertF.F_Sym := by tauto
-@[simp, grind .] lemma F_le_F_Tra1 : (HilbertF.F : HilbertF α) ≤ HilbertF.F_Tra1 := by tauto
-@[simp, grind .] lemma F_Rfl_le_F_Rfl_Sym : (HilbertF.F_Rfl : HilbertF α) ≤ HilbertF.F_Rfl_Sym  := by tauto
-@[simp, grind .] lemma F_Sym_le_F_Rfl_Sym : (HilbertF.F_Sym : HilbertF α) ≤ HilbertF.F_Rfl_Sym  := by tauto
-@[simp, grind .] lemma F_Rfl_le_F_Rfl_Tra1 : (HilbertF.F_Rfl : HilbertF α) ≤ HilbertF.F_Rfl_Tra1 := by tauto
-@[simp, grind .] lemma F_Tra1_le_F_Rfl_Tra1 : (HilbertF.F_Tra1 : HilbertF α) ≤ HilbertF.F_Rfl_Tra1 := by tauto
+@[simp, grind .] lemma F_le_F_Ser : (HilbertF.F : HilbertF α).schema ⊆ HilbertF.F_Ser.schema := by tauto
+@[simp, grind .] lemma F_le_F_Rfl : (HilbertF.F : HilbertF α).schema ⊆ HilbertF.F_Rfl.schema := by tauto
+@[simp, grind .] lemma F_le_F_Sym : (HilbertF.F : HilbertF α).schema ⊆ HilbertF.F_Sym.schema := by tauto
+@[simp, grind .] lemma F_le_F_Tra1 : (HilbertF.F : HilbertF α).schema ⊆ HilbertF.F_Tra1.schema := by tauto
+@[simp, grind .] lemma F_Rfl_le_F_Rfl_Sym : (HilbertF.F_Rfl : HilbertF α).schema ⊆ HilbertF.F_Rfl_Sym.schema  := by tauto
+@[simp, grind .] lemma F_Sym_le_F_Rfl_Sym : (HilbertF.F_Sym : HilbertF α).schema ⊆ HilbertF.F_Rfl_Sym.schema  := by tauto
+@[simp, grind .] lemma F_Rfl_le_F_Rfl_Tra1 : (HilbertF.F_Rfl : HilbertF α).schema ⊆ HilbertF.F_Rfl_Tra1.schema := by tauto
+@[simp, grind .] lemma F_Tra1_le_F_Rfl_Tra1 : (HilbertF.F_Tra1 : HilbertF α).schema ⊆ HilbertF.F_Rfl_Tra1.schema := by tauto
 
 end HilbertF
 
@@ -105,7 +105,7 @@ variable {H} {H₁ H₂ : HilbertF α}
 alias ofSchema := HilbertFProof.axm
 @[grind <=] lemma of_schema (h : φ ∈ H) : H ⊢ φ := ⟨ofSchema h⟩
 
-def ofLE (h : H₁ ≤ H₂) : H₁ ⊢! φ → H₂ ⊢! φ
+def ofLE (h : H₁.schema ⊆ H₂.schema) : H₁ ⊢! φ → H₂ ⊢! φ
   | axm h₁          => axm $ h h₁
   | mdp h₁ h₂       => mdp (ofLE h h₁) (ofLE h h₂)
   | andElimL         => andElimL
@@ -121,10 +121,10 @@ def ofLE (h : H₁ ≤ H₂) : H₁ ⊢! φ → H₂ ⊢! φ
   | af h₁            => af (ofLE h h₁)
   | andIR h₁ h₂     => andIR (ofLE h h₁) (ofLE h h₂)
 
-lemma of_le (h : H₁ ≤ H₂) : H₁ ⊢ φ → H₂ ⊢ φ := λ ⟨hφ⟩ => ⟨ofLE h hφ⟩
+lemma of_le (h : H₁.schema ⊆ H₂.schema) : H₁ ⊢ φ → H₂ ⊢ φ := λ ⟨hφ⟩ => ⟨ofLE h hφ⟩
 
 @[grind <=]
-lemma weakerThan_of_le (h : H₁ ≤ H₂) : H₁ ⪯ H₂ := Entailment.weakerThan_iff.mpr $ of_le h
+lemma weakerThan_of_le (h : H₁.schema ⊆ H₂.schema) : H₁ ⪯ H₂ := Entailment.weakerThan_iff.mpr $ of_le h
 
 def Subst {H : HilbertF α} (s) : H ⊢! φ → H ⊢! φ⟦s⟧
   | axm h₁           => axm $ H.schema_closed _ h₁ s

@@ -123,7 +123,7 @@ open cresswellFrame cresswellModel
 
 lemma cresswellModel.not_valid_axiomFour : ¬(Satisfies cresswellModel 2♯ (Axioms.Four (atom 0))) := by
   apply Satisfies.imp_def.not.mpr;
-  push_neg;
+  push Not;
   constructor;
   . intro x;
     match x with
@@ -133,12 +133,12 @@ lemma cresswellModel.not_valid_axiomFour : ¬(Satisfies cresswellModel 2♯ (Axi
       omega;
     | n♭ => simp [Satisfies];
   . apply Satisfies.box_def.not.mpr
-    push_neg;
+    push Not;
     use 1♯;
     constructor;
     . omega;
     . apply Satisfies.box_def.not.mpr;
-      push_neg;
+      push Not;
       use 0♯;
       constructor;
       . omega;
@@ -233,7 +233,7 @@ lemma either_finite_cofinite : (‖φ‖.Finite) ∨ (‖φ‖ᶜ.Finite) := by
       . apply Set.toFinite
       . intro x hx;
         replace := Satisfies.box_def.not.mp hx;
-        push_neg at this;
+        push Not at this;
         obtain ⟨y, Rxy, _⟩ := this;
         match x, y with
         | m♯, k♯ =>
@@ -245,7 +245,7 @@ lemma either_finite_cofinite : (‖φ‖.Finite) ∨ (‖φ‖ᶜ.Finite) := by
         | _♯, k♭ => have := h k; contradiction;
         | _♭, k♭ => have := h k; contradiction;
     . left;
-      push_neg at h;
+      push Not at h;
       obtain ⟨n, hn⟩ := h;
       apply @Set.Finite.subset (s := (·♭) '' Set.Icc 0 n);
       . apply Set.toFinite
@@ -291,21 +291,21 @@ lemma cresswellModel.valid_axiomHen : cresswellModel ⊧ □(□φ 🡘 φ) 🡒
       . apply Satisfies.imp_def₂.mpr;
         left;
         apply Satisfies.box_def.not.mpr;
-        push_neg;
+        push Not;
         use (n + 1)♯;
         constructor;
         . omega;
         . have : Satisfies cresswellModel (n + 1)♯ φ := hn_max (n + 1) (by omega);
           have : ¬Satisfies cresswellModel (n + 1)♯ (□φ) := by
             apply Satisfies.box_def.not.mpr;
-            push_neg;
+            push Not;
             use n♯;
             constructor;
             . omega;
             . apply hn;
           apply Satisfies.iff_def.not.mpr;
           tauto;
-  . push_neg at h;
+  . push Not at h;
     obtain ⟨n, hn, hn_max⟩ := truthset.exists_min_flat h;
     have hn₁ : Satisfies cresswellModel n♭ (□φ) := by
       intro x Rnx;
@@ -313,14 +313,14 @@ lemma cresswellModel.valid_axiomHen : cresswellModel ⊧ □(□φ 🡘 φ) 🡒
       exact hn_max m hnm;
     have hn₂ : ¬Satisfies cresswellModel n♭ (□φ 🡘 φ) := by
       apply Satisfies.iff_def.not.mpr;
-      push_neg;
+      push Not;
       tauto;
     match x with
     | m♯ =>
       apply Satisfies.imp_def₂.mpr;
       left;
       apply Satisfies.box_def.not.mpr;
-      push_neg;
+      push Not;
       use n♭;
       constructor;
       . exact sharp_to_flat;

@@ -105,7 +105,7 @@ theorem provable_of_tautology : (φ.IsTautology) → (Hilbert.Cl ⊢ φ) := by
       subst hΔ;
       exact (by simpa using hC) ⨀ verum!;
   dsimp [Formula.IsTautology, Valid];
-  push_neg;
+  push Not;
   use (canonicalVal T);
   apply truthlemma.not.mpr;
   apply iff_not_mem₁_mem₂.mpr;

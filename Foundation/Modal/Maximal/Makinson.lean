@@ -93,7 +93,7 @@ lemma KD_provability_of_classical_satisfiability (hl : φ.Letterless) :
       . exact C!_of_conseq! $ ihψ (by grind) |>.1 hψ;
     . intro h;
       simp only [trivTranslate, toPropFormula, Semantics.Models, Formula.Boolean.val] at h;
-      push_neg at h;
+      push Not at h;
       rcases h with ⟨hφ, hψ⟩;
       replace hφ := ihφ (by grind) |>.1 hφ;
       replace hψ := ihψ (by grind) |>.2 hψ;

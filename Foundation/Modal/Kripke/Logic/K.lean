@@ -46,7 +46,7 @@ instance Kripke.finite_complete : Complete Modal.K (FrameClass.finite_K) := ⟨b
   intro F _ V x;
   let M : Kripke.Model := ⟨F, V⟩;
   let FM := coarsestFiltrationModel M ↑φ.subformulas;
-  apply filtration FM (coarsestFiltrationModel.filterOf) (by simp) |>.mpr;
+  apply filtration FM (coarsestFiltrationModel.filterOf) (by grind) |>.mpr;
   apply hp;
   apply Frame.isFinite_iff _ |>.mpr
   apply FilterEqvQuotient.finite;

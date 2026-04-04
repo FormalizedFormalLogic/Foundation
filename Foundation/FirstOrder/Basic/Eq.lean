@@ -225,6 +225,7 @@ lemma elementaryEquiv : QuotEq L M ≡ₑ[L] M := ⟨models_iff⟩
 
 variable {L M}
 
+set_option backward.isDefEq.respectTransparency false in
 lemma rel_eq (a b : QuotEq L M) : (@Semiformula.Operator.Eq.eq L _).val (M := QuotEq L M) ![a, b] ↔ a = b := by
   induction' a using Quotient.ind with a
   induction' b using Quotient.ind with b

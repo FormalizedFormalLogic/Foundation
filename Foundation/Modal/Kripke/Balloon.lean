@@ -80,10 +80,10 @@ lemma balooon_validates_axiomZ
     by_cases hxT : x ∈ e;
     . right; left;
       apply Satisfies.dia_def.not.mpr;
-      push_neg;
+      push Not;
       intro z Rxz;
       apply Satisfies.box_def.not.mpr;
-      push_neg;
+      push Not;
       use y;
       constructor;
       . have hzT : z ∈ e := in_envelope_of_in_envelope hxT Rxz;
@@ -93,12 +93,12 @@ lemma balooon_validates_axiomZ
       . assumption;
     . left;
       apply Satisfies.box_def.not.mpr;
-      push_neg;
+      push Not;
       use y;
       constructor;
       . assumption;
       . apply Satisfies.imp_def₂.not.mpr
-        push_neg;
+        push Not;
         tauto;
 
 end LO.Modal.Kripke

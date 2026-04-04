@@ -38,15 +38,15 @@ lemma validate_axiomKreiselPutnam_of_satisfiesKreiselPutnamCondition [F.Satisfie
   intro V x y Rxy h₁;
   by_contra hC;
   replace hC := Satisfies.or_def.not.mp hC;
-  push_neg at hC;
+  push Not at hC;
   obtain ⟨h₂, h₃⟩ := hC;
 
   replace h₂ := Satisfies.imp_def.not.mp h₂;
-  push_neg at h₂;
+  push Not at h₂;
   obtain ⟨z₁, Ryz₁, ⟨hz₁₁, hz₁₂⟩⟩ := h₂;
 
   replace h₃ := Satisfies.imp_def.not.mp h₃;
-  push_neg at h₃;
+  push Not at h₃;
   obtain ⟨z₂, Ryz₂, ⟨hz₂₁, hz₂₂⟩⟩ := h₃;
 
   obtain ⟨u, Ryu, ⟨Ruz₁, Ruz₂, h⟩⟩ := F.kreisel_putnam y z₁ z₂ ⟨
@@ -68,7 +68,7 @@ lemma validate_axiomKreiselPutnam_of_satisfiesKreiselPutnamCondition [F.Satisfie
     . apply hz₁₂; exact Satisfies.formula_hereditary Ruz₁ h;
     . apply hz₂₂; exact Satisfies.formula_hereditary Ruz₂ h;
   replace this := Satisfies.neg_def.not.mp this;
-  push_neg at this;
+  push Not at this;
   obtain ⟨v, Ruv, hv⟩ := this;
 
   obtain ⟨w, Rvw, (Rz₁w | Rz₂w)⟩ := h v Ruv;
@@ -186,7 +186,7 @@ instance [Entailment.HasAxiomKreiselPutnam 𝓢] : (canonicalFrame 𝓢).Satisfi
         . exact Set.union_subset_iff.mp (Tableau.subset_def.mp ht |>.1) |>.1;
         . exact Set.union_subset_iff.mp (Tableau.subset_def.mp ht |>.1) |>.2;
       dsimp [Tableau.Inconsistent, Tableau.Consistent] at this;
-      push_neg at this;
+      push Not at this;
       obtain ⟨Γ, Δ, hΓ, hΔ, hΓΔ⟩ := this;
       simp only [Set.subset_empty_iff, Finset.coe_eq_empty] at hΔ;
       subst hΔ;
@@ -213,7 +213,7 @@ instance [Entailment.HasAxiomKreiselPutnam 𝓢] : (canonicalFrame 𝓢).Satisfi
         . exact Set.union_subset_iff.mp (Tableau.subset_def.mp ht |>.1) |>.1;
         . exact Set.union_subset_iff.mp (Tableau.subset_def.mp ht |>.1) |>.2;
       dsimp [Tableau.Inconsistent, Tableau.Consistent] at this;
-      push_neg at this;
+      push Not at this;
       obtain ⟨Γ, Δ, hΓ, hΔ, hΓΔ⟩ := this;
       simp only [Set.subset_empty_iff, Finset.coe_eq_empty] at hΔ;
       subst hΔ;

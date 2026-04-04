@@ -101,7 +101,7 @@ theorem disjunctive : Hilbert.Int ⊢ φ ⋎ ψ → Hilbert.Int ⊢ φ ∨ Hilbe
   constructor;
   . tauto;
   . apply Formula.Kripke.Satisfies.or_def.not.mpr;
-    push_neg;
+    push Not;
     constructor;
     . apply not_imp_not.mpr $ @Satisfies.formula_hereditary (M := M) (w := Sum.inl ()) (w' := Sum.inr $ Sum.inl w₁) φ ?_;
       . exact satisfies_left_on_counterexampleDPModel.not.mp hφ;

@@ -36,7 +36,9 @@ variable (T : ArithmeticTheory) [Theory.Δ₁ T] [𝗣𝗔⁻ ⪯ T]
 
 open Entailment Entailment.FiniteContext Semiformula
 
-instance : 𝗘𝗤 ⪯ T := WeakerThan.trans inferInstance (inferInstanceAs (𝗣𝗔⁻ ⪯ T))
+instance : 𝗘𝗤 ⪯ T :=
+  have : 𝗣𝗔⁻ ⪯ T := inferInstance
+  WeakerThan.trans inferInstance this
 
 lemma term_add_assoc (t₁ t₂ t₃ : Term V ℒₒᵣ) :
     T.internalize V ⊢ t₁ + (t₂ + t₃) ≐ (t₁ + t₂) + t₃ := by

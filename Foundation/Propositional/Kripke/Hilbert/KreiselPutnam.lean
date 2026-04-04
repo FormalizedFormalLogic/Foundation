@@ -69,7 +69,7 @@ instance : (Hilbert.Int : Hilbert ℕ) ⪱ Hilbert.KreiselPutnam := by
       constructor;
       . tauto;
       . apply Satisfies.imp_def.not.mpr;
-        push_neg;
+        push Not;
         use 1;
         constructor;
         . tauto;
@@ -80,7 +80,7 @@ instance : (Hilbert.Int : Hilbert ℕ) ⪱ Hilbert.KreiselPutnam := by
             | 1 =>
               suffices ¬Satisfies M 1 (∼.atom 0) by tauto
               apply Satisfies.neg_def.not.mpr;
-              push_neg;
+              push Not;
               use 2;
               constructor;
               . tauto;
@@ -89,16 +89,16 @@ instance : (Hilbert.Int : Hilbert ℕ) ⪱ Hilbert.KreiselPutnam := by
             | 3 => tauto;
             | 4 => tauto;
           . apply Satisfies.or_def.not.mpr;
-            push_neg;
+            push Not;
             constructor;
             . apply Satisfies.imp_def.not.mpr;
-              push_neg;
+              push Not;
               use 4;
               constructor;
               . tauto;
               . simp [Semantics.Models, Satisfies, M, Frame.Rel'];
             . apply Satisfies.imp_def.not.mpr;
-              push_neg;
+              push Not;
               use 3;
               constructor;
               . tauto;

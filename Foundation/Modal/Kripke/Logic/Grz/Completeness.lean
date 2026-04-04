@@ -173,7 +173,7 @@ lemma truthlemma {X : (miniCanonicalModel 𝓢 φ).World} (q_sub : ψ ∈ φ.sub
         exact iff_not_mem_imp (ψ := ψ) (χ := χ) |>.mp h |>.1;
       . apply ihr (by grind) |>.not.mpr;
         exact iff_not_mem_compl (by grind) |>.not.mpr $ by
-          push_neg;
+          push Not;
           exact iff_not_mem_imp (ψ := ψ) (χ := χ) |>.mp h |>.2;
     . contrapose;
       intro h;
@@ -192,7 +192,7 @@ lemma truthlemma {X : (miniCanonicalModel 𝓢 φ).World} (q_sub : ψ ∈ φ.sub
       . intro h;
         obtain ⟨Y, hY⟩ := lindenbaum (𝓢 := 𝓢) (truthlemma_lemma1 q_sub) (truthlemma_lemma2 q_sub h);
         simp only [Finset.union_subset_iff] at hY;
-        simp only [Satisfies]; push_neg;
+        simp only [Satisfies]; push Not;
         use Y;
         constructor;
         . constructor;
@@ -201,7 +201,7 @@ lemma truthlemma {X : (miniCanonicalModel 𝓢 φ).World} (q_sub : ψ ∈ φ.sub
             apply Finset.LO.mem_box_prebox_of_mem_of_mem_box;
             simpa;
           . apply imp_iff_not_or (b := X = Y) |>.mpr;
-            left; push_neg;
+            left; push Not;
             use (ψ 🡒 □ψ);
             refine ⟨?_, ?_, ?_⟩;
             . simp [Formula.subformulasGrz, Finset.LO.preboxItr];
@@ -217,11 +217,11 @@ lemma truthlemma {X : (miniCanonicalModel 𝓢 φ).World} (q_sub : ψ ∈ φ.sub
               contradiction;
         . apply ih (by grind) |>.not.mpr;
           apply iff_not_mem_compl (by grind) |>.not.mpr;
-          push_neg;
+          push Not;
           apply hY.2;
           simp;
       . intro _;
-        simp only [Satisfies]; push_neg;
+        simp only [Satisfies]; push Not;
         use X;
         constructor;
         . apply Frame.refl;
@@ -240,7 +240,7 @@ lemma complete_of_mem_miniCanonicalFrame
   contrapose;
   intro h;
   apply Semantics.set_models_iff.not.mpr;
-  push_neg;
+  push Not;
   use (miniCanonicalFrame 𝓢 φ);
   constructor;
   . apply hC;
@@ -255,7 +255,7 @@ lemma complete_of_mem_miniCanonicalFrame
     use (miniCanonicalModel _ φ).Val, X;
     apply truthlemma (by grind) |>.not.mpr;
     exact iff_not_mem_compl (by grind) |>.not.mpr $ by
-      push_neg;
+      push Not;
       apply hX₁;
       tauto;
 ⟩

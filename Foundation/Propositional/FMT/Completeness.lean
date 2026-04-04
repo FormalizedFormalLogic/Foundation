@@ -166,7 +166,7 @@ noncomputable def sat (𝓢 : S) (H : HintikkaPair φ) : HintikkaPair φ := enum
 
 lemma sat_saturated : (sat 𝓢 H).Saturated := by
   ext ψ;
-  simp only [Finset.univ_eq_attach, Finset.mem_union, Finset.mem_attach, iff_true];
+  simp only [Finset.mem_union, Finset.mem_univ, iff_true];
   apply enum_of_mem;
   simp;
 
@@ -350,8 +350,8 @@ noncomputable def HintikkaModel (𝓢 : S) [Entailment.VF 𝓢] [Entailment.Cons
         . left;
           apply hH₀.choose_spec |>.2;
           suffices ∃ χ' ξ', χ 🡒 ξ = χ'.1 🡒 ξ'.1 ∧ ∃ I : ConsistentSaturatedHintikkaPair 𝓢 φ, χ' ∈ I.1.1 ∧ ξ' ∈ I.1.2 by
-            simpa only [H₀, Finset.univ_eq_attach, Finset.mem_filter, Finset.mem_attach, true_and] using this;
-          push_neg at h;
+            simpa [H₀] using this;
+          push Not at h;
           obtain ⟨I, hI₁, hI₂⟩ := h;
           use χ', ξ';
           refine ⟨?_, I, ?_, ?_⟩;

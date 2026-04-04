@@ -267,7 +267,7 @@ structure IntKripke (L : Language) [L.Relational] where
   Domain : World → Set Carrier
   domain_nonempty : ∀ w, ∃ x, x ∈ Domain w
   domain_antimonotone : w ≥ v → Domain w ⊆ Domain v
-  Rel (w : World) {k : ℕ} (R : L.Rel k) : (Fin k → Name) → Prop
+  Rel (w : World) {k : ℕ} (R : L.Rel k) : (Fin k → Carrier) → Prop
   rel_monotone : Rel w R t → ∀ v ≤ w, Rel v R t
 
 namespace IntKripke

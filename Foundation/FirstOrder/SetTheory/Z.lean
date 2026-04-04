@@ -37,7 +37,7 @@ lemma SSubset.iff {x y : V} : x ⊊ y ↔ x ⊆ y ∧ ∃ z ∈ y, z ∉ x := by
   · rintro ⟨ss, eq⟩
     refine ⟨ss, ?_⟩
     contrapose eq
-    push_neg at *
+    push Not at *
     apply subset_antisymm ss eq
   · rintro ⟨ss, ⟨z, hzy, hzx⟩⟩
     refine ⟨ss, ?_⟩
