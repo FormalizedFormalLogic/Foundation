@@ -3,7 +3,7 @@ module
 public import Foundation.FirstOrder.Basic
 public import Foundation.Syntax.Predicate.Relational
 public import Foundation.Logic.ForcingRelation
-public import Foundation.Vorspiel.Preorder
+public import Foundation.Vorspiel.Order.Dense
 
 @[expose] public section
 namespace LO.FirstOrder

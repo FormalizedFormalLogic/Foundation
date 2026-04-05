@@ -512,9 +512,12 @@ public import Foundation.Vorspiel.Nat.Basic
 public import Foundation.Vorspiel.Nat.Matrix
 public import Foundation.Vorspiel.NotationClass
 public import Foundation.Vorspiel.Option
-public import Foundation.Vorspiel.Order
+public import Foundation.Vorspiel.Order.Dense
+public import Foundation.Vorspiel.Order.Heyting
+public import Foundation.Vorspiel.Order.Ideal
+public import Foundation.Vorspiel.Order.LowerSet
+public import Foundation.Vorspiel.Order.Regular
 public import Foundation.Vorspiel.Part
-public import Foundation.Vorspiel.Preorder
 public import Foundation.Vorspiel.Quotient
 public import Foundation.Vorspiel.Rel.Basic
 public import Foundation.Vorspiel.Rel.CWF

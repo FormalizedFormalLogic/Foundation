@@ -2,7 +2,7 @@ module
 
 public import Foundation.Modal.Kripke.Logic.K
 public import Foundation.Semantics.Algebra.Modal.Basic
-public import Foundation.Vorspiel.Order
+public import Foundation.Vorspiel.Order.Heyting
 
 @[expose] public section
 
