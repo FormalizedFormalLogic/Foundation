@@ -29,7 +29,7 @@ class NegInvolutive (F : Type*) [Tilde F] where
 class DeMorgan (F : Type*) [LogicalConnective F] where
   verum : ∼(⊤ : F) = ⊥
   falsum : ∼(⊥ : F) = ⊤
-  imply (φ ψ : F) : (φ ➝ ψ) = ∼φ ⋎ ψ
+  imply (φ ψ : F) : (φ 🡒 ψ) = ∼φ ⋎ ψ
   and (φ ψ : F) : ∼(φ ⋏ ψ) = ∼φ ⋎ ∼ψ
   or (φ ψ : F) : ∼(φ ⋎ ψ) = ∼φ ⋏ ∼ψ
 
@@ -37,17 +37,17 @@ alias DeMorgan.neg := NegInvolutive.neg_involutive
 
 attribute [simp] NegInvolutive.neg_involutive DeMorgan.verum DeMorgan.falsum DeMorgan.and DeMorgan.or
 
-/-- Introducing `∼φ` as an abbreviation of `φ ➝ ⊥`. -/
+/-- Introducing `∼φ` as an abbreviation of `φ 🡒 ⊥`. -/
 class NegAbbrev (F : Type*) [Tilde F] [Arrow F] [Bot F] where
-  protected neg {φ : F} : ∼φ = φ ➝ ⊥
+  protected neg {φ : F} : ∼φ = φ 🡒 ⊥
 
 attribute [grind =] NegAbbrev.neg
 
 /-- Introducing `∼φ`, `φ ⋎ ψ`, `φ ⋏ ψ`, `⊤` as abbreviation. -/
 class ŁukasiewiczAbbrev (F : Type*) [LogicalConnective F] extends NegAbbrev F where
   protected top : ⊤ = ∼(⊥ : F)
-  protected or {φ ψ : F} : φ ⋎ ψ = ∼φ ➝ ψ
-  protected and {φ ψ : F} : φ ⋏ ψ = ∼(φ ➝ ∼ψ)
+  protected or {φ ψ : F} : φ ⋎ ψ = ∼φ 🡒 ψ
+  protected and {φ ψ : F} : φ ⋏ ψ = ∼(φ 🡒 ∼ψ)
 
 attribute [grind =] ŁukasiewiczAbbrev.and ŁukasiewiczAbbrev.or ŁukasiewiczAbbrev.top
 
@@ -56,9 +56,9 @@ namespace LogicalConnective
 section
 variable {α : Type*} [LogicalConnective α]
 
-@[match_pattern] def iff (a b : α) := (a ➝ b) ⋏ (b ➝ a)
+@[match_pattern] def iff (a b : α) := (a 🡒 b) ⋏ (b 🡒 a)
 
-infix:61 " ⭤ " => LogicalConnective.iff
+infix:61 " 🡘 " => LogicalConnective.iff
 
 end
 
@@ -77,13 +77,13 @@ instance PropLogicSymbols : LogicalConnective Prop where
 
 @[simp] lemma Prop.neg_eq (φ : Prop) : ∼φ = ¬φ := rfl
 
-@[simp] lemma Prop.arrow_eq (φ ψ : Prop) : (φ ➝ ψ) = (φ → ψ) := rfl
+@[simp] lemma Prop.arrow_eq (φ ψ : Prop) : (φ 🡒 ψ) = (φ → ψ) := rfl
 
 @[simp] lemma Prop.and_eq (φ ψ : Prop) : (φ ⋏ ψ) = (φ ∧ ψ) := rfl
 
 @[simp] lemma Prop.or_eq (φ ψ : Prop) : (φ ⋎ ψ) = (φ ∨ ψ) := rfl
 
-@[simp] lemma Prop.iff_eq (φ ψ : Prop) : (φ ⭤ ψ) = (φ ↔ ψ) := by simp [LogicalConnective.iff, iff_iff_implies_and_implies]
+@[simp] lemma Prop.iff_eq (φ ψ : Prop) : (φ 🡘 ψ) = (φ ↔ ψ) := by simp [LogicalConnective.iff, iff_iff_implies_and_implies]
 
 instance : DeMorgan Prop where
   verum := by simp
@@ -99,7 +99,7 @@ class HomClass (F : Type*) (α β : outParam Type*) [LogicalConnective α] [Logi
   map_top : ∀ (f : F), f ⊤ = ⊤
   map_bot : ∀ (f : F), f ⊥ = ⊥
   map_neg : ∀ (f : F) (φ : α), f (∼φ) = ∼f φ
-  map_imply : ∀ (f : F) (φ ψ : α), f (φ ➝ ψ) = f φ ➝ f ψ
+  map_imply : ∀ (f : F) (φ ψ : α), f (φ 🡒 ψ) = f φ 🡒 f ψ
   map_and : ∀ (f : F) (φ ψ : α), f (φ ⋏ ψ) = f φ ⋏ f ψ
   map_or  : ∀ (f : F) (φ ψ : α), f (φ ⋎ ψ) = f φ ⋎ f ψ
 
@@ -113,7 +113,7 @@ variable (f : F) (a b : α)
 
 instance : CoeFun F (fun _ => α → β) := ⟨DFunLike.coe⟩
 
-@[simp] lemma map_iff : f (a ⭤ b) = f a ⭤ f b := by simp [LogicalConnective.iff]
+@[simp] lemma map_iff : f (a 🡘 b) = f a 🡘 f b := by simp [LogicalConnective.iff]
 
 end HomClass
 
@@ -124,7 +124,7 @@ structure Hom where
   map_top' : toTr ⊤ = ⊤
   map_bot' : toTr ⊥ = ⊥
   map_neg' : ∀ φ, toTr (∼φ) = ∼toTr φ
-  map_imply' : ∀ φ ψ, toTr (φ ➝ ψ) = toTr φ ➝ toTr ψ
+  map_imply' : ∀ φ ψ, toTr (φ 🡒 ψ) = toTr φ 🡒 toTr ψ
   map_and' : ∀ φ ψ, toTr (φ ⋏ ψ) = toTr φ ⋏ toTr ψ
   map_or'  : ∀ φ ψ, toTr (φ ⋎ ψ) = toTr φ ⋎ toTr ψ
 
@@ -185,7 +185,7 @@ class AndOrClosed {F} [LogicalConnective F] (C : F → Prop) where
 
 class Closed {F} [LogicalConnective F] (C : F → Prop) extends AndOrClosed C where
   not {f : F} : C f → C (∼f)
-  imply {f g : F} : C f → C g → C (f ➝ g)
+  imply {f g : F} : C f → C g → C (f 🡒 g)
 
 attribute [simp] AndOrClosed.verum AndOrClosed.falsum
 
@@ -198,7 +198,7 @@ class Tilde.Subclosed [Tilde F] (C : F → Prop) where
   tilde_closed : C (∼φ) → C φ
 
 class Arrow.Subclosed [Arrow F] (C : F → Prop) where
-  arrow_closed : C (φ ➝ ψ) → C φ ∧ C ψ
+  arrow_closed : C (φ 🡒 ψ) → C φ ∧ C ψ
 
 class Wedge.Subclosed [Wedge F] (C : F → Prop) where
   wedge_closed : C (φ ⋏ ψ) → C φ ∧ C ψ

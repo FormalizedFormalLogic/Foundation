@@ -462,8 +462,8 @@ end
 variable (S)
 
 class Deduction [Adjoin F S] where
-  ofInsert {φ ψ : F} {𝓢 : S} : adjoin φ 𝓢 ⊢! ψ → 𝓢 ⊢! φ ➝ ψ
-  inv {φ ψ : F} {𝓢 : S} : 𝓢 ⊢! φ ➝ ψ → adjoin φ 𝓢 ⊢! ψ
+  ofInsert {φ ψ : F} {𝓢 : S} : adjoin φ 𝓢 ⊢! ψ → 𝓢 ⊢! φ 🡒 ψ
+  inv {φ ψ : F} {𝓢 : S} : 𝓢 ⊢! φ 🡒 ψ → adjoin φ 𝓢 ⊢! ψ
 
 variable {S}
 
@@ -473,15 +473,15 @@ variable [Adjoin F S] [Deduction S] {𝓢 : S} {φ ψ : F}
 
 alias deduction := Deduction.ofInsert
 
-lemma Deduction.of_insert! (h : adjoin φ 𝓢 ⊢ ψ) : 𝓢 ⊢ φ ➝ ψ := by
+lemma Deduction.of_insert! (h : adjoin φ 𝓢 ⊢ ψ) : 𝓢 ⊢ φ 🡒 ψ := by
   rcases h with ⟨b⟩; exact ⟨Deduction.ofInsert b⟩
 
 alias deduction! := Deduction.of_insert!
 
-lemma Deduction.inv! (h : 𝓢 ⊢ φ ➝ ψ) : adjoin φ 𝓢 ⊢ ψ := by
+lemma Deduction.inv! (h : 𝓢 ⊢ φ 🡒 ψ) : adjoin φ 𝓢 ⊢ ψ := by
   rcases h with ⟨b⟩; exact ⟨Deduction.inv b⟩
 
-lemma deduction_iff : adjoin φ 𝓢 ⊢ ψ ↔ 𝓢 ⊢ φ ➝ ψ := ⟨deduction!, Deduction.inv!⟩
+lemma deduction_iff : adjoin φ 𝓢 ⊢ ψ ↔ 𝓢 ⊢ φ 🡒 ψ := ⟨deduction!, Deduction.inv!⟩
 
 end deduction
 

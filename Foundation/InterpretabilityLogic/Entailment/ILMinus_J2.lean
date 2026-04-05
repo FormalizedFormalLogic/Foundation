@@ -21,7 +21,7 @@ variable [Entailment.ILMinus_J2 𝓢]
 
 instance : HasAxiomJ4' 𝓢 := ⟨fun {_ _} ↦ axiomJ2!⟩
 
-def rhdTrans_dhyp! (h₁ : 𝓢 ⊢! ψ ➝ φ ▷ χ) (h₂ : 𝓢 ⊢! ψ ➝ χ ▷ ξ) : 𝓢 ⊢! ψ ➝ φ ▷ ξ := by
+def rhdTrans_dhyp! (h₁ : 𝓢 ⊢! ψ 🡒 φ ▷ χ) (h₂ : 𝓢 ⊢! ψ 🡒 χ ▷ ξ) : 𝓢 ⊢! ψ 🡒 φ ▷ ξ := by
   apply deduct';
   exact (of $ axiomJ2!) ⨀ (deductInv' h₁) ⨀ (deductInv' h₂);
 
@@ -51,9 +51,9 @@ instance : HasAxiomJ2Plus 𝓢 := ⟨by
   intro A B C;
   dsimp only [Axioms.J2Plus];
   apply deduct';
-  have H₁ : [A ▷ (B ⋎ C), A ▷ (B ⋎ C) ➝ B ▷ C] ⊢[𝓢]! ((B ⋎ C) ⋏ ∼C) ▷ C := deductInv $ deductInv' $ CCC_of_C_right $ R2! $ CK_of_CC $ left_A_intro implyK CCN;
-  have H₂ : [A ▷ (B ⋎ C), A ▷ (B ⋎ C) ➝ B ▷ C] ⊢[𝓢]! ((B ⋎ C) ⋏ ∼C) ▷ C ➝ A ▷ C := weakening (by simp) $ deductInv' axiomJ2Plus'!;
-  have : [A ▷ (B ⋎ C)] ⊢[𝓢]! (A ▷ (B ⋎ C) ➝ B ▷ C) ➝ A ▷ C := deduct $ weakening (by simp) $ H₂ ⨀ H₁;
+  have H₁ : [A ▷ (B ⋎ C), A ▷ (B ⋎ C) 🡒 B ▷ C] ⊢[𝓢]! ((B ⋎ C) ⋏ ∼C) ▷ C := deductInv $ deductInv' $ CCC_of_C_right $ R2! $ CK_of_CC $ left_A_intro implyK CCN;
+  have H₂ : [A ▷ (B ⋎ C), A ▷ (B ⋎ C) 🡒 B ▷ C] ⊢[𝓢]! ((B ⋎ C) ⋏ ∼C) ▷ C 🡒 A ▷ C := weakening (by simp) $ deductInv' axiomJ2Plus'!;
+  have : [A ▷ (B ⋎ C)] ⊢[𝓢]! (A ▷ (B ⋎ C) 🡒 B ▷ C) 🡒 A ▷ C := deduct $ weakening (by simp) $ H₂ ⨀ H₁;
   apply C_trans implyK this;
 ⟩
 

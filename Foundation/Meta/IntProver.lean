@@ -78,11 +78,11 @@ lemma neg_right {T Γ Δ φ} :
   Valid.neg_right' <| rotate <| rotate h
 
 lemma imply_right {T Γ Δ φ ψ} :
-    Valid 𝓢 (T ++ [Γ ++ [φ] ⟶ [ψ]] ++ [Γ ⟶ Δ]) → Valid 𝓢 ((Γ ⟶ (φ ➝ ψ) :: Δ) :: T) := fun h ↦
+    Valid 𝓢 (T ++ [Γ ++ [φ] ⟶ [ψ]] ++ [Γ ⟶ Δ]) → Valid 𝓢 ((Γ ⟶ (φ 🡒 ψ) :: Δ) :: T) := fun h ↦
   Valid.imply_right' <| rotate <| rotate h
 
 lemma iff_right {T Γ Δ φ ψ} :
-    Valid 𝓢 (T ++ [Γ ⟶ Δ ++ [φ ➝ ψ]]) → Valid 𝓢 (T ++ [Γ ⟶ Δ ++ [ψ ➝ φ]]) → Valid 𝓢 ((Γ ⟶ (φ ⭤ ψ) :: Δ) :: T) := fun h₁ h₂ ↦
+    Valid 𝓢 (T ++ [Γ ⟶ Δ ++ [φ 🡒 ψ]]) → Valid 𝓢 (T ++ [Γ ⟶ Δ ++ [ψ 🡒 φ]]) → Valid 𝓢 ((Γ ⟶ (φ 🡘 ψ) :: Δ) :: T) := fun h₁ h₂ ↦
   Valid.and_right (rotate h₁) (rotate h₂)
 
 
@@ -110,11 +110,11 @@ lemma neg_left {T Γ Δ φ} :
   Valid.neg_left
 
 lemma imply_left {T Γ Δ φ ψ} :
-    Valid 𝓢 ((Γ ++ [φ ➝ ψ] ⟶ Δ ++ [φ]) :: T) → Valid 𝓢 ((Γ ++ [ψ] ⟶ Δ) :: T) → Valid 𝓢 (((φ ➝ ψ) :: Γ ⟶ Δ) :: T) :=
+    Valid 𝓢 ((Γ ++ [φ 🡒 ψ] ⟶ Δ ++ [φ]) :: T) → Valid 𝓢 ((Γ ++ [ψ] ⟶ Δ) :: T) → Valid 𝓢 (((φ 🡒 ψ) :: Γ ⟶ Δ) :: T) :=
   Valid.imply_left
 
 lemma iff_left {T Γ Δ φ ψ} :
-    Valid 𝓢 ((Γ ++ [φ ➝ ψ, ψ ➝ φ] ⟶ Δ) :: T) → Valid 𝓢 (((φ ⭤ ψ) :: Γ ⟶ Δ) :: T) :=
+    Valid 𝓢 ((Γ ++ [φ 🡒 ψ, ψ 🡒 φ] ⟶ Δ) :: T) → Valid 𝓢 (((φ 🡘 ψ) :: Γ ⟶ Δ) :: T) :=
   Valid.and_left
 
 end Theorems
@@ -417,12 +417,12 @@ def prover (k : ℕ) (b : Bool) (T : Tableaux) : M Expr := do
           | ∼φ => do
             let e ← prover k true ((Γ ++ [∼φ] ⟶ Δ ++ [φ]) :: T)
             negLeft T Γ Δ φ e
-          | φ ➝ ψ => do
-            let e₁ ← prover k true ((Γ ++ [φ ➝ ψ] ⟶ Δ ++ [φ]) :: T)
+          | φ 🡒 ψ => do
+            let e₁ ← prover k true ((Γ ++ [φ 🡒 ψ] ⟶ Δ ++ [φ]) :: T)
             let e₂ ← prover k true ((Γ ++ [ψ] ⟶ Δ) :: T)
             implyLeft T Γ Δ φ ψ e₁ e₂
           | .iff φ ψ => do
-            let e ← prover k true ((Γ ++ [φ ➝ ψ, ψ ➝ φ] ⟶ Δ) :: T)
+            let e ← prover k true ((Γ ++ [φ 🡒 ψ, ψ 🡒 φ] ⟶ Δ) :: T)
             iffLeft T Γ Δ φ ψ e
   | k + 1,  true =>
     match T with
@@ -466,12 +466,12 @@ def prover (k : ℕ) (b : Bool) (T : Tableaux) : M Expr := do
           | ∼φ => do
             let e ← prover k false (T ++ [Γ ++ [φ] ⟶ []] ++ [Γ ⟶ Δ])
             negRight T Γ Δ φ e
-          | φ ➝ ψ => do
+          | φ 🡒 ψ => do
             let e ← prover k false (T ++ [Γ ++ [φ] ⟶ [ψ]] ++ [Γ ⟶ Δ])
             implyRight T Γ Δ φ ψ e
           | .iff φ ψ => do
-            let e₁ ← prover k false (T ++ [Γ ⟶ Δ ++ [φ ➝ ψ]])
-            let e₂ ← prover k false (T ++ [Γ ⟶ Δ ++ [ψ ➝ φ]])
+            let e₁ ← prover k false (T ++ [Γ ⟶ Δ ++ [φ 🡒 ψ]])
+            let e₂ ← prover k false (T ++ [Γ ⟶ Δ ++ [ψ 🡒 φ]])
             iffRight T Γ Δ φ ψ e₁ e₂
 
 structure HypInfo where

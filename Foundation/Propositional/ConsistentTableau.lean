@@ -21,7 +21,7 @@ namespace Tableau
 
 variable {φ ψ: Formula α} {T U : FormulaSet α} {t u : Tableau α}
 
-abbrev Consistent (𝓢 : S) (t : Tableau α) := ∀ {Γ Δ : Finset (Formula α)}, (↑Γ ⊆ t.1) → (↑Δ ⊆ t.2) → 𝓢 ⊬ (Γ.conj) ➝ (Δ.disj)
+abbrev Consistent (𝓢 : S) (t : Tableau α) := ∀ {Γ Δ : Finset (Formula α)}, (↑Γ ⊆ t.1) → (↑Δ ⊆ t.2) → 𝓢 ⊬ (Γ.conj) 🡒 (Δ.disj)
 
 abbrev Inconsistent (𝓢 : S) (t : Tableau α) := ¬Consistent 𝓢 t
 
@@ -33,10 +33,10 @@ instance : HasSubset (Tableau α) := ⟨λ t₁ t₂ => t₁.1 ⊆ t₂.1 ∧ t�
   . intro h; cases h; simp;
   . rintro ⟨h₁, h₂⟩; cases t₁; cases t₂; simp_all;
 
-lemma not_mem₂ (hCon : t.Consistent 𝓢) {Γ : Finset (Formula α)} (hΓ : ∀ φ ∈ Γ, φ ∈ t.1) (h : 𝓢 ⊢ Γ.conj ➝ ψ) : ψ ∉ t.2 := by
+lemma not_mem₂ (hCon : t.Consistent 𝓢) {Γ : Finset (Formula α)} (hΓ : ∀ φ ∈ Γ, φ ∈ t.1) (h : 𝓢 ⊢ Γ.conj 🡒 ψ) : ψ ∉ t.2 := by
   by_contra hC;
-  have : 𝓢 ⊢ Γ.conj ➝ (Finset.disj {ψ}) := by simpa;
-  have : 𝓢 ⊬ Γ.conj ➝ (Finset.disj {ψ}) := hCon (by aesop) (by aesop);
+  have : 𝓢 ⊢ Γ.conj 🡒 (Finset.disj {ψ}) := by simpa;
+  have : 𝓢 ⊬ Γ.conj 🡒 (Finset.disj {ψ}) := hCon (by aesop) (by aesop);
   contradiction;
 
 section
@@ -47,17 +47,17 @@ lemma disjoint_of_consistent (hCon : t.Consistent 𝓢) : Disjoint t.1 t.2 := by
   by_contra h;
   obtain ⟨T, hp₁, hp₂, hp⟩ := by simpa [Disjoint] using h;
   obtain ⟨φ, hp⟩ := Set.nonempty_def.mp $ Set.nonempty_iff_ne_empty.mpr hp;
-  have : 𝓢 ⊬ (Finset.conj {φ}) ➝ (Finset.disj {φ}) := hCon
+  have : 𝓢 ⊬ (Finset.conj {φ}) 🡒 (Finset.disj {φ}) := hCon
     (by simp_all only [Finset.coe_singleton, Set.singleton_subset_iff]; apply hp₁; assumption)
     (by simp_all only [Finset.coe_singleton, Set.singleton_subset_iff]; apply hp₂; assumption);
-  replace this : 𝓢 ⊬ φ ➝ φ := by simpa using this;
-  have : 𝓢 ⊢ φ ➝ φ := C!_id;
+  replace this : 𝓢 ⊬ φ 🡒 φ := by simpa using this;
+  have : 𝓢 ⊢ φ 🡒 φ := C!_id;
   contradiction;
 
 variable [DecidableEq α]
 
 lemma iff_consistent_insert₁
-  : Tableau.Consistent 𝓢 ((insert φ T), U) ↔ ∀ {Γ Δ : Finset (Formula α)}, (↑Γ ⊆ T) → (↑Δ ⊆ U) → 𝓢 ⊬ φ ⋏ Γ.conj ➝ Δ.disj := by
+  : Tableau.Consistent 𝓢 ((insert φ T), U) ↔ ∀ {Γ Δ : Finset (Formula α)}, (↑Γ ⊆ T) → (↑Δ ⊆ U) → 𝓢 ⊬ φ ⋏ Γ.conj 🡒 Δ.disj := by
   constructor;
   . intro h Γ Δ hΓ hΔ;
     by_contra hC;
@@ -73,12 +73,12 @@ lemma iff_consistent_insert₁
     refine C!_trans ?_ hC;
     . exact C!_trans CKFConjinsertFConj! $ CFConj_FConj!_of_subset $ Finset.insert_erase_subset φ Γ
 
-lemma iff_not_consistent_insert₁ : ¬Tableau.Consistent 𝓢 ((insert φ T), U) ↔ ∃ Γ Δ : Finset (Formula α), (↑Γ ⊆ T) ∧ (↑Δ ⊆ U) ∧ 𝓢 ⊢ φ ⋏ Γ.conj ➝ Δ.disj := by
+lemma iff_not_consistent_insert₁ : ¬Tableau.Consistent 𝓢 ((insert φ T), U) ↔ ∃ Γ Δ : Finset (Formula α), (↑Γ ⊆ T) ∧ (↑Δ ⊆ U) ∧ 𝓢 ⊢ φ ⋏ Γ.conj 🡒 Δ.disj := by
   constructor;
   . contrapose!; apply iff_consistent_insert₁.mpr;
   . contrapose!; apply iff_consistent_insert₁.mp;
 
-lemma iff_consistent_insert₂ : Tableau.Consistent 𝓢 (T, (insert φ U)) ↔ ∀ {Γ Δ : Finset (Formula α)}, (↑Γ ⊆ T) → (↑Δ ⊆ U) → 𝓢 ⊬ Γ.conj ➝ φ ⋎ Δ.disj := by
+lemma iff_consistent_insert₂ : Tableau.Consistent 𝓢 (T, (insert φ U)) ↔ ∀ {Γ Δ : Finset (Formula α)}, (↑Γ ⊆ T) → (↑Δ ⊆ U) → 𝓢 ⊬ Γ.conj 🡒 φ ⋎ Δ.disj := by
   constructor;
   . intro h Γ Δ hΓ hΔ;
     by_contra hC;
@@ -96,7 +96,7 @@ lemma iff_consistent_insert₂ : Tableau.Consistent 𝓢 (T, (insert φ U)) ↔ 
       simp only [Finset.mem_toList, Finset.mem_insert, Finset.mem_erase, ne_eq];
       tauto;
 
-lemma iff_not_consistent_insert₂ : ¬Tableau.Consistent 𝓢 (T, (insert φ U)) ↔ ∃ Γ Δ : Finset (Formula α), (↑Γ ⊆ T) ∧ (↑Δ ⊆ U) ∧ 𝓢 ⊢ Γ.conj ➝ φ ⋎ Δ.disj := by
+lemma iff_not_consistent_insert₂ : ¬Tableau.Consistent 𝓢 (T, (insert φ U)) ↔ ∃ Γ Δ : Finset (Formula α), (↑Γ ⊆ T) ∧ (↑Δ ⊆ U) ∧ 𝓢 ⊢ Γ.conj 🡒 φ ⋎ Δ.disj := by
   constructor;
   . contrapose!; apply iff_consistent_insert₂.mpr;
   . contrapose!; apply iff_consistent_insert₂.mp;
@@ -107,7 +107,7 @@ variable {t : Tableau α}
 
 lemma consistent_either (hCon : t.Consistent 𝓢) (φ : Formula α) : Tableau.Consistent 𝓢 ((insert φ t.1), t.2) ∨ Tableau.Consistent 𝓢 (t.1, (insert φ t.2)) := by
   by_contra hC;
-  push_neg at hC;
+  push Not at hC;
   have ⟨hC₁, hC₂⟩ := hC;
 
   obtain ⟨Γ₁, Δ₁, hΓ₁, hΔ₁, h₁⟩ := iff_not_consistent_insert₁.mp hC₁;
@@ -119,7 +119,7 @@ lemma consistent_either (hCon : t.Consistent 𝓢) (φ : Formula α) : Tableau.C
   . simp only [Finset.coe_union, Set.union_subset_iff]; tauto;
   . simp only [Finset.coe_union, Set.union_subset_iff]; tauto;
 
-  -- have : 𝓢 ⊢ ⋀(Γ₁ ++ Γ₂) ➝ ⋁(Δ₁ ++ Δ₂) := C!_trans (K!_left EConj₂AppendKConj₂Conj₂!) $ C!_trans (cut! h₁ h₂) (K!_right EDisj₂AppendADisj₂Disj₂!);
+  -- have : 𝓢 ⊢ ⋀(Γ₁ ++ Γ₂) 🡒 ⋁(Δ₁ ++ Δ₂) := C!_trans (K!_left EConj₂AppendKConj₂Conj₂!) $ C!_trans (cut! h₁ h₂) (K!_right EDisj₂AppendADisj₂Disj₂!);
 
 end Consistent
 
@@ -279,7 +279,7 @@ lemma exists_list_lindenbaum_index₁ {Γ : List _} (hΓ : ↑Γ.toFinset ⊆ �
     . intro ψ hq;
       exact lindenbaum_next_indexed_subset₁_of_lt (by simp) $ hm ψ hq;
 
-lemma exists_finset_lindenbaum_index₁ {Γ : Finset _} (hΓ : ↑Γ ⊆ ⋃ i, t[i].1): ∃ m, ∀ φ ∈ Γ, φ ∈ t[m].1 := by
+lemma exists_finset_lindenbaum_index₁ {Γ : Finset _} (hΓ : (SetLike.coe Γ) ⊆ ⋃ i, t[i].1): ∃ m, ∀ φ ∈ Γ, φ ∈ t[m].1 := by
   obtain ⟨m, hΓ⟩ := exists_list_lindenbaum_index₁ (Γ := Γ.toList) (t := t) (by simpa);
   use m;
   intro φ hφ;
@@ -302,7 +302,7 @@ lemma exists_list_lindenbaum_index₂ {Δ : List _} (hΔ : ↑Δ.toFinset ⊆ �
     . intro ψ hq;
       exact lindenbaum_next_indexed_subset₂_of_lt (by simp) $ hn ψ hq;
 
-lemma exists_finset_lindenbaum_index₂ {Δ : Finset _} (hΓ : ↑Δ ⊆ ⋃ i, t[i].2) : ∃ n, ∀ φ ∈ Δ, φ ∈ t[n].2 := by
+lemma exists_finset_lindenbaum_index₂ {Δ : Finset _} (hΓ : (SetLike.coe Δ) ⊆ ⋃ i, t[i].2) : ∃ n, ∀ φ ∈ Δ, φ ∈ t[n].2 := by
   obtain ⟨m, hΔ⟩ := exists_list_lindenbaum_index₂ (Δ := Δ.toList) (𝓢 := 𝓢) (t := t) (by simpa);
   use m;
   intro φ hφ;
@@ -356,7 +356,7 @@ instance [Entailment.Consistent 𝓢] [Entailment.Int 𝓢] [DecidableEq α] [En
 
 variable {t t₁ t₂ : SaturatedConsistentTableau 𝓢}
 
-lemma not_mem₂ {Γ : Finset (Formula α)} (hΓ : ↑Γ ⊆ t.1.1) (h : 𝓢 ⊢ Γ.conj ➝ ψ) : ψ ∉ t.1.2 := t.1.not_mem₂ t.consistent hΓ h
+lemma not_mem₂ {Γ : Finset (Formula α)} (hΓ : ↑Γ ⊆ t.1.1) (h : 𝓢 ⊢ Γ.conj 🡒 ψ) : ψ ∉ t.1.2 := t.1.not_mem₂ t.consistent hΓ h
 
 variable [Entailment.Int 𝓢]
 
@@ -373,7 +373,6 @@ lemma equality_of₁ (e₁ : t₁.1.1 = t₂.1.1) : t₁ = t₂ := by
   calc
     t₁ = ⟨t₁.1, t₁.saturated, t₁.consistent⟩ := by rfl;
     _  = ⟨t₂.1, t₂.saturated, t₂.consistent⟩ := by simp [e];
-    _  = t₂                                  := by rfl;
 
 lemma equality_of₂ (e₂ : t₁.1.2 = t₂.1.2) : t₁ = t₂ := equality_of₁ $ saturated_duality.mpr e₂
 
@@ -427,13 +426,13 @@ end
 
 section Saturated
 
-lemma mdp_mem₁_provable (h : 𝓢 ⊢ φ ➝ ψ) (hp₁ : φ ∈ t.1.1) : ψ ∈ t.1.1 := by
+lemma mdp_mem₁_provable (h : 𝓢 ⊢ φ 🡒 ψ) (hp₁ : φ ∈ t.1.1) : ψ ∈ t.1.1 := by
   apply iff_not_mem₂_mem₁.mp;
   by_contra hq₂;
   apply by simpa using t.consistent (Γ := {φ}) (Δ := {ψ}) (by simpa) (by simpa);
   exact h;
 
-lemma mdp_mem₂_provable (h : 𝓢 ⊢ φ ➝ ψ) (hp₁ : ψ ∈ t.1.2) : φ ∈ t.1.2 := by
+lemma mdp_mem₂_provable (h : 𝓢 ⊢ φ 🡒 ψ) (hp₁ : ψ ∈ t.1.2) : φ ∈ t.1.2 := by
   by_contra hq₂;
   have := iff_not_mem₂_mem₁.mpr $ mdp_mem₁_provable h $ iff_not_mem₂_mem₁.mp hq₂;
   contradiction;
@@ -446,7 +445,7 @@ lemma mdp_mem₂_provable (h : 𝓢 ⊢ φ ➝ ψ) (hp₁ : ψ ∈ t.1.2) : φ �
 
 @[simp] lemma not_mem₁_falsum : ⊥ ∉ t.1.1 := by
   by_contra hC;
-  have : 𝓢 ⊬ ⊥ ➝ ⊥ := by simpa using t.consistent (Γ := {⊥}) (Δ := ∅) (by simpa) (by simp);
+  have : 𝓢 ⊬ ⊥ 🡒 ⊥ := by simpa using t.consistent (Γ := {⊥}) (Δ := ∅) (by simpa) (by simp);
   apply this;
   simp;
 
@@ -456,10 +455,10 @@ lemma mem₁_of_provable : 𝓢 ⊢ φ → φ ∈ t.1.1 := by
   intro h;
   exact mdp_mem₁_provable (C!_of_conseq! h) mem₁_verum;
 
-lemma mdp_mem₁ [DecidableEq α] (h : φ ➝ ψ ∈ t.1.1) (hp : φ ∈ t.1.1) : ψ ∈ t.1.1 := by
+lemma mdp_mem₁ [DecidableEq α] (h : φ 🡒 ψ ∈ t.1.1) (hp : φ ∈ t.1.1) : ψ ∈ t.1.1 := by
   apply iff_not_mem₂_mem₁.mp;
   by_contra hC;
-  apply t.consistent (Γ := {φ, φ ➝ ψ}) (Δ := {ψ}) ?_ (by simpa);
+  apply t.consistent (Γ := {φ, φ 🡒 ψ}) (Δ := {ψ}) ?_ (by simpa);
   . apply CFConj_CDisj!_of_innerMDP (φ := φ) (ψ := ψ) <;> simp;
   . simp only [Finset.coe_insert, Finset.coe_singleton];
     apply Set.doubleton_subset.mpr;
@@ -505,7 +504,7 @@ lemma iff_mem₁_fconj [DecidableEq α] {Γ : Finset (Formula α)} : Γ.conj ∈
 
 private lemma of_mem₁_or [DecidableEq α] : φ ⋎ ψ ∈ t.1.1 → (φ ∈ t.1.1 ∨ ψ ∈ t.1.1) := by
   intro h;
-  by_contra hC; push_neg at hC;
+  by_contra hC; push Not at hC;
   apply t.consistent (Γ := {φ ⋎ ψ}) (Δ := {φ, ψ}) (by simp_all) ?_;
   . apply CFConj_CDisj!_of_A (φ := φ) (ψ := ψ) <;> simp;
   . simp only [Finset.coe_insert, Finset.coe_singleton];
@@ -535,7 +534,7 @@ lemma iff_mem₂_or [DecidableEq α] : φ ⋎ ψ ∈ t.1.2 ↔ φ ∈ t.1.2 ∧ 
   constructor;
   . apply of_mem₂_or;
   . contrapose;
-    push_neg;
+    push Not;
     intro hφψ hφ;
     rcases iff_mem₁_or.mp $ iff_not_mem₂_mem₁.mp hφψ with (hφ | hψ);
     . have := iff_not_mem₂_mem₁.mpr hφ; contradiction;
@@ -560,13 +559,13 @@ lemma iff_mem₂_fdisj [DecidableEq α] {Γ : Finset (Formula α)} : Γ.disj ∈
   simp_all only [Finset.mem_toList];
   rfl;
 
-lemma of_mem₁_imp [DecidableEq α] : φ ➝ ψ ∈ t.1.1 → (φ ∈ t.1.2 ∨ ψ ∈ t.1.1) := by
+lemma of_mem₁_imp [DecidableEq α] : φ 🡒 ψ ∈ t.1.1 → (φ ∈ t.1.2 ∨ ψ ∈ t.1.1) := by
   intro h;
   by_contra hC;
-  push_neg at hC;
+  push Not at hC;
   exact hC.2 $ mdp_mem₁ h $ iff_not_mem₂_mem₁.mp hC.1
 
-lemma of_mem₁_imp' [DecidableEq α] : φ ➝ ψ ∈ t.1.1 → (φ ∈ t.1.1 → ψ ∈ t.1.1) := by
+lemma of_mem₁_imp' [DecidableEq α] : φ 🡒 ψ ∈ t.1.1 → (φ ∈ t.1.1 → ψ ∈ t.1.1) := by
   intro h h₁;
   apply or_iff_not_imp_left.mp $ of_mem₁_imp h;
   apply iff_not_mem₂_mem₁.mpr h₁;
@@ -581,36 +580,36 @@ lemma of_mem₁_neg' [DecidableEq α] (h : ∼φ ∈ t.1.1) : φ ∉ t.1.1 := by
   apply iff_not_mem₁_mem₂.mpr;
   apply of_mem₁_neg h;
 
-private lemma of_mem₂_imp [DecidableEq α] [Encodable α] [Entailment.Cl 𝓢] : φ ➝ ψ ∈ t.1.2 → (φ ∈ t.1.1 ∧ ψ ∈ t.1.2) := by
+private lemma of_mem₂_imp [DecidableEq α] [Encodable α] [Entailment.Cl 𝓢] : φ 🡒 ψ ∈ t.1.2 → (φ ∈ t.1.1 ∧ ψ ∈ t.1.2) := by
   intro h;
   by_contra hC;
   replace hC := not_and_or.mp hC;
   rcases hC with (hφ | hψ);
-  . have : φ ⋎ (φ ➝ ψ) ∈ t.1.1 := iff_provable_mem₁.mp (A!_replace_right lem! CNC!) t;
+  . have : φ ⋎ (φ 🡒 ψ) ∈ t.1.1 := iff_provable_mem₁.mp (A!_replace_right lem! CNC!) t;
     rcases iff_mem₁_or.mp this with (_ | _);
     . contradiction;
     . have := iff_not_mem₁_mem₂.mpr h;
       contradiction;
-  . have : ψ ➝ (φ ➝ ψ) ∈ t.1.1 := iff_provable_mem₁.mp implyK! t;
-    have : φ ➝ ψ ∉ t.1.2 := iff_not_mem₂_mem₁.mpr $ mdp_mem₁ this (iff_not_mem₂_mem₁.mp hψ);
+  . have : ψ 🡒 (φ 🡒 ψ) ∈ t.1.1 := iff_provable_mem₁.mp implyK! t;
+    have : φ 🡒 ψ ∉ t.1.2 := iff_not_mem₂_mem₁.mpr $ mdp_mem₁ this (iff_not_mem₂_mem₁.mp hψ);
     contradiction;
 
-lemma iff_mem₁_imp [DecidableEq α] [Encodable α] [Entailment.Cl 𝓢] : φ ➝ ψ ∈ t.1.1 ↔ (φ ∈ t.1.2 ∨ ψ ∈ t.1.1) := by
+lemma iff_mem₁_imp [DecidableEq α] [Encodable α] [Entailment.Cl 𝓢] : φ 🡒 ψ ∈ t.1.1 ↔ (φ ∈ t.1.2 ∨ ψ ∈ t.1.1) := by
   constructor;
   . apply of_mem₁_imp;
   . contrapose;
-    push_neg;
+    push Not;
     intro hφψ;
     rcases of_mem₂_imp $ iff_not_mem₁_mem₂.mp hφψ with ⟨hφ, hψ⟩;
     constructor;
     . exact iff_not_mem₂_mem₁.mpr hφ;
     . exact iff_not_mem₁_mem₂.mpr hψ;
 
-lemma iff_mem₂_imp [DecidableEq α] [Encodable α] [Entailment.Cl 𝓢] : φ ➝ ψ ∈ t.1.2 ↔ (φ ∈ t.1.1 ∧ ψ ∈ t.1.2) := by
+lemma iff_mem₂_imp [DecidableEq α] [Encodable α] [Entailment.Cl 𝓢] : φ 🡒 ψ ∈ t.1.2 ↔ (φ ∈ t.1.1 ∧ ψ ∈ t.1.2) := by
   constructor;
   . apply of_mem₂_imp;
   . contrapose;
-    push_neg;
+    push Not;
     intro hφψ hφ;
     rcases of_mem₁_imp $ iff_not_mem₂_mem₁.mp hφψ with (hφ | hψ);
     . have := iff_not_mem₁_mem₂.mpr hφ; contradiction;
@@ -628,10 +627,10 @@ lemma mem₂_neg_of_mem₁ [DecidableEq α] : φ ∈ t.1.1 → ∼φ ∈ t.1.2 :
   intro h;
   exact iff_not_mem₁_mem₂ (φ := ∼φ) (t := t) |>.mp $ not_mem₁_neg_of_mem₁ h;
 
-lemma mdp₁_mem [DecidableEq α] (hp : φ ∈ t.1.1) (h : φ ➝ ψ ∈ t.1.1) : ψ ∈ t.1.1 := by
+lemma mdp₁_mem [DecidableEq α] (hp : φ ∈ t.1.1) (h : φ 🡒 ψ ∈ t.1.1) : ψ ∈ t.1.1 := by
   apply iff_not_mem₂_mem₁.mp;
   by_contra hC;
-  apply t.consistent (Γ := {φ, φ ➝ ψ}) (Δ := {ψ}) ?_ (by simpa);
+  apply t.consistent (Γ := {φ, φ 🡒 ψ}) (Δ := {ψ}) ?_ (by simpa);
   . apply CFConj_CDisj!_of_innerMDP (φ := φ) (ψ := ψ) <;> simp;
   . simp only [Finset.coe_insert, Finset.coe_singleton];
     apply Set.doubleton_subset.mpr;

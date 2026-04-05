@@ -80,7 +80,7 @@ namespace Formula.Kripke
 def Satisfies (M : Kripke.Model) (x : M.World) : Formula ℕ → Prop
   | atom a  => M a x
   | ⊥  => False
-  | φ ➝ ψ => (Satisfies M x φ) ➝ (Satisfies M x ψ)
+  | φ 🡒 ψ => (Satisfies M x φ) 🡒 (Satisfies M x ψ)
   | □φ   => ∀ y, x ≺ y → (Satisfies M y φ)
 
 namespace Satisfies
@@ -95,10 +95,10 @@ variable {M : Kripke.Model} {x : M.World} {φ ψ : Formula ℕ}
 
 protected lemma bot_def : ¬x ⊧ ⊥ := by simp [Satisfies];
 
-protected lemma imp_def : x ⊧ φ ➝ ψ ↔ (x ⊧ φ) → (x ⊧ ψ) := by tauto;
-protected lemma not_imp_def : ¬(x ⊧ φ ➝ ψ) ↔ (x ⊧ φ) ∧ ¬(x ⊧ ψ) := by constructor <;> . contrapose!; tauto;
+protected lemma imp_def : x ⊧ φ 🡒 ψ ↔ (x ⊧ φ) → (x ⊧ ψ) := by tauto;
+protected lemma not_imp_def : ¬(x ⊧ φ 🡒 ψ) ↔ (x ⊧ φ) ∧ ¬(x ⊧ ψ) := by constructor <;> . contrapose!; tauto;
 
-protected lemma imp_def₂ : x ⊧ φ ➝ ψ ↔ ¬x ⊧ φ ∨ x ⊧ ψ := by tauto;
+protected lemma imp_def₂ : x ⊧ φ 🡒 ψ ↔ ¬x ⊧ φ ∨ x ⊧ ψ := by tauto;
 
 protected lemma or_def : x ⊧ φ ⋎ ψ ↔ x ⊧ φ ∨ x ⊧ ψ := by simp [Satisfies]; tauto;
 
@@ -122,7 +122,7 @@ protected instance : Semantics.Tarski (M.World) where
   models_or := Satisfies.or_def;
   models_and := Satisfies.and_def;
 
-lemma iff_def : x ⊧ φ ⭤ ψ ↔ (x ⊧ φ ↔ x ⊧ ψ) := by simp;
+lemma iff_def : x ⊧ φ 🡘 ψ ↔ (x ⊧ φ ↔ x ⊧ ψ) := by simp;
 
 @[simp] lemma negneg_def : x ⊧ ∼∼φ ↔ x ⊧ φ := by simp [Semantics.NotModels];
 
@@ -220,9 +220,9 @@ lemma fdisj'_def {ι : α → Formula ℕ} : x ⊧ (⩖ i ∈ X, ι i) ↔ ∃ i
 
 lemma not_fdisj'_def {ι : α → Formula ℕ} : ¬(x ⊧ (⩖ i ∈ X, ι i)) ↔ ∀ i ∈ X, ¬(x ⊧ ι i) := by simp;
 
-lemma trans (hpq : x ⊧ φ ➝ ψ) (hqr : x ⊧ ψ ➝ χ) : x ⊧ φ ➝ χ := by simp_all;
+lemma trans (hpq : x ⊧ φ 🡒 ψ) (hqr : x ⊧ ψ 🡒 χ) : x ⊧ φ 🡒 χ := by simp_all;
 
-lemma mdp (hpq : x ⊧ φ ➝ ψ) (hp : x ⊧ φ) : x ⊧ ψ := by simp_all;
+lemma mdp (hpq : x ⊧ φ 🡒 ψ) (hp : x ⊧ φ) : x ⊧ ψ := by simp_all;
 
 lemma intro_neg_semiequiv (h : x ⊧ φ → x ⊧ ψ) : x ⊧ ∼ψ → x ⊧ ∼φ := by
   contrapose;
@@ -298,7 +298,7 @@ lemma diaItr_dual : x ⊧ ◇^[n]φ ↔ x ⊧ ∼□^[n](∼φ) := by
       obtain ⟨y, Rxy, hy⟩ := Satisfies.dia_def.mp h;
       suffices ¬x ⊧ (□□^[n](∼φ)) by simpa;
       apply Satisfies.box_def.not.mpr;
-      push_neg;
+      push Not;
       use y;
       constructor;
       . exact Rxy;
@@ -310,7 +310,7 @@ lemma diaItr_dual : x ⊧ ◇^[n]φ ↔ x ⊧ ∼□^[n](∼φ) := by
       suffices x ⊧ ◇◇^[n]φ by simpa;
       apply Satisfies.dia_def.mpr;
       have := Satisfies.box_def.not.mp h;
-      push_neg at this;
+      push Not at this;
       obtain ⟨y, Rxy, hy⟩ := this;
       use y;
       constructor;
@@ -339,7 +339,7 @@ lemma boxItr_dual : x ⊧ □^[n]φ ↔ x ⊧ ∼◇^[n](∼φ) := by
     apply boxItr_dn.not.mpr;
     exact h;
 
-lemma not_imp : ¬(x ⊧ φ ➝ ψ) ↔ x ⊧ φ ⋏ ∼ψ := by simp [Semantics.NotModels];
+lemma not_imp : ¬(x ⊧ φ 🡒 ψ) ↔ x ⊧ φ ⋏ ∼ψ := by simp [Semantics.NotModels];
 
 lemma iff_subst_self {x : F.World} (s : Substitution ℕ) :
   letI U : Kripke.Valuation F := λ a w => Satisfies ⟨F, V⟩ w ((atom a)⟦s⟧);
@@ -392,12 +392,12 @@ instance : Semantics.Top (Kripke.Model) where
 
 lemma iff_not_exists_world {M : Kripke.Model} : (¬M ⊧ φ) ↔ (∃ x : M.World, ¬x ⊧ φ) := by
   apply not_iff_not.mp;
-  push_neg;
+  push Not;
   tauto;
 
 alias ⟨exists_world_of_not, not_of_exists_world⟩ := iff_not_exists_world
 
-protected lemma mdp (hpq : M ⊧ φ ➝ ψ) (hp : M ⊧ φ) : M ⊧ ψ := by
+protected lemma mdp (hpq : M ⊧ φ 🡒 ψ) (hp : M ⊧ φ) : M ⊧ ψ := by
   intro x;
   exact (Satisfies.imp_def.mp $ hpq x) (hp x);
 
@@ -471,7 +471,7 @@ lemma iff_not_exists_model_world :  (¬F ⊧ φ) ↔ (∃ M : Kripke.Model, ∃ 
 
 alias ⟨exists_model_world_of_not, not_of_exists_model_world⟩ := iff_not_exists_model_world
 
-protected lemma mdp (hpq : F ⊧ φ ➝ ψ) (hp : F ⊧ φ) : F ⊧ ψ := by
+protected lemma mdp (hpq : F ⊧ φ 🡒 ψ) (hp : F ⊧ φ) : F ⊧ ψ := by
   intro V x;
   exact (hpq V x) (hp V x);
 
@@ -514,25 +514,25 @@ variable {C : FrameClass} {φ ψ χ : Formula ℕ}
 
 lemma iff_not_validOnFrameClass_exists_frame : (¬C ⊧ φ) ↔ (∃ F ∈ C, ¬F ⊧ φ) := by
   apply not_iff_not.mp;
-  push_neg;
+  push Not;
   tauto;
 alias ⟨exists_frame_of_not_validOnFrameClass, not_validOnFrameClass_of_exists_frame⟩ := iff_not_validOnFrameClass_exists_frame
 
 lemma iff_not_validOnFrameClass_exists_model : (¬C ⊧ φ) ↔ (∃ M : Kripke.Model, M.toFrame ∈ C ∧ ¬M ⊧ φ) := by
   apply not_iff_not.mp;
-  push_neg;
+  push Not;
   tauto;
 alias ⟨exists_model_of_not_validOnFrameClass, not_validOnFrameClass_of_exists_model⟩ := iff_not_validOnFrameClass_exists_model
 
 lemma iff_not_validOnFrameClass_exists_model_world : (¬C ⊧ φ) ↔ (∃ M : Kripke.Model, ∃ x : M.World, M.toFrame ∈ C ∧ ¬(x ⊧ φ)) := by
   apply not_iff_not.mp;
-  push_neg;
+  push Not;
   tauto;
 alias ⟨exists_model_world_of_not_validOnFrameClass, not_validOnFrameClass_of_exists_model_world⟩ := iff_not_validOnFrameClass_exists_model_world
 
 lemma iff_not_validOnFrameClass_exists_valuation_world : (¬C ⊧ φ) ↔ (∃ F ∈ C, ∃ V, ∃ x, ¬(Formula.Kripke.Satisfies ⟨F, V⟩ x φ)) := by
   apply not_iff_not.mp;
-  push_neg;
+  push Not;
   tauto;
 alias ⟨exists_valuation_world_of_not_validOnFrameClass, not_validOnFrameClass_of_exists_valuation_world⟩ := iff_not_validOnFrameClass_exists_valuation_world
 

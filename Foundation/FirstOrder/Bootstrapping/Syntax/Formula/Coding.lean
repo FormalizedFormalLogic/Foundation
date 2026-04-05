@@ -14,7 +14,7 @@ class LCWQIsoGödelQuote (α β : ℕ → Type*) [LCWQ α] [LCWQ β] where
   bot : ⌜(⊥ : α n)⌝ = (⊥ : β n)
   and (φ ψ : α n) : (⌜φ ⋏ ψ⌝ : β n) = ⌜φ⌝ ⋏ ⌜ψ⌝
   or (φ ψ : α n) : (⌜φ ⋎ ψ⌝ : β n) = ⌜φ⌝ ⋎ ⌜ψ⌝
-  imply (φ ψ : α n) : (⌜φ ➝ ψ⌝ : β n) = ⌜φ⌝ ➝ ⌜ψ⌝
+  imply (φ ψ : α n) : (⌜φ 🡒 ψ⌝ : β n) = ⌜φ⌝ 🡒 ⌜ψ⌝
   neg (φ : α n) : (⌜∼φ⌝ : β n) = ∼⌜φ⌝
   all (φ : α (n + 1)) : (⌜∀⁰ φ⌝ : β n) = ∀⁰ ⌜φ⌝
   exs (φ : α (n + 1)) : (⌜∃⁰ φ⌝ : β n) = ∃⁰ ⌜φ⌝
@@ -27,7 +27,7 @@ variable {α β : ℕ → Type*} [LCWQ α] [LCWQ β] [LCWQIsoGödelQuote α β]
 
 instance (n : ℕ) : GödelQuote (α n) (β n) := gq n
 
-@[simp] lemma iff (φ ψ : α n) : (⌜φ ⭤ ψ⌝ : β n) = ⌜φ⌝ ⭤ ⌜ψ⌝ := by simp [LogicalConnective.iff]
+@[simp] lemma iff (φ ψ : α n) : (⌜φ 🡘 ψ⌝ : β n) = ⌜φ⌝ 🡘 ⌜ψ⌝ := by simp [LogicalConnective.iff]
 
 @[simp] lemma ball (φ : α (n + 1)) (ψ : α (n + 1)) :
     (⌜∀⁰[φ] ψ⌝ : β n)  = ∀⁰[⌜φ⌝] ⌜ψ⌝ := by simp [LO.FirstOrder.ball]

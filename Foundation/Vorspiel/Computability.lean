@@ -1,28 +1,10 @@
 module
 
 public import Mathlib.Computability.Halting
+public import Foundation.Vorspiel.Part
 
 @[expose]
 public section
-
-
-namespace Part
-
-@[simp] lemma mem_vector_mOfFn : ∀ {n : ℕ} {w : List.Vector α n} {v : Fin n →. α},
-    w ∈ List.Vector.mOfFn v ↔ ∀ i, w.get i ∈ v i
-  |     0, _, _ => by simp [List.Vector.mOfFn, List.Vector.eq_nil]
-  | n + 1, w, v => by
-    suffices (∃ a ∈ v 0, ∃ u, (∀ (i : Fin n), u.get i ∈ v i.succ) ∧ w = a ::ᵥ u) ↔ ∀ (i : Fin (n + 1)), w.get i ∈ v i by
-      simpa [List.Vector.mOfFn, @mem_vector_mOfFn _ n]
-    constructor
-    · rintro ⟨a, ha, v, hv, rfl⟩ i; cases i using Fin.cases <;> simp [ha, hv]
-    · intro h; exact ⟨w.head, by simpa using h 0, w.tail, fun i => by simpa using h i.succ, by simp⟩
-
-lemma unit_dom_iff (x : Part Unit) : x.Dom ↔ () ∈ x := by simp [dom_iff_mem, show ∀ x : Unit, x = () by intro x; rfl]
-
-end Part
-
-
 
 namespace Nat.Partrec
 
@@ -84,7 +66,6 @@ lemma projection {f : ℕ →. ℕ} (hf : Nat.Partrec f) (unif : ∀ {m n₁ n�
 
 end Nat.Partrec
 
-
 namespace Partrec
 
 variable {α β γ : Type*} [Primcodable α] [Primcodable β] [Primcodable γ]
@@ -122,7 +103,6 @@ lemma projection {f : α → β →. γ} (hf : Partrec₂ f) (unif : ∀ {a b₁
     exact ⟨Encodable.encode c, H.mpr ⟨a, b, rfl, c, habc, rfl⟩, by simp⟩
 
 end Partrec
-
 
 namespace REPred
 
@@ -164,7 +144,6 @@ protected lemma comp {f : α → β} (hf : Computable f) {p : β → Prop} (hp :
   exact REPred.iff'.mpr ⟨_, pp.comp hf, by intro x; simp⟩
 
 end REPred
-
 
 namespace ComputablePred
 

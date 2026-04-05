@@ -60,7 +60,7 @@ namespace Formula.Veltman
 def Satisfies (M : Veltman.Model) (x : M.World) : Formula ℕ → Prop
   | atom a  => M a x
   | ⊥  => False
-  | φ ➝ ψ => (Satisfies M x φ) ➝ (Satisfies M x ψ)
+  | φ 🡒 ψ => (Satisfies M x φ) 🡒 (Satisfies M x ψ)
   | □φ   => ∀ y, x ≺ y → (Satisfies M y φ)
   | φ ▷ ψ => ∀ y, x ≺ y → Satisfies M y φ → (∃ z, y ≺[x] z ∧ Satisfies M z ψ)
 
@@ -77,10 +77,10 @@ variable {M : Veltman.Model} {x : M.World} {φ ψ : Formula ℕ}
 
 protected lemma bot_def : ¬x ⊧ ⊥ := by simp [Satisfies];
 
-protected lemma imp_def : x ⊧ φ ➝ ψ ↔ (x ⊧ φ) → (x ⊧ ψ) := by tauto;
-protected lemma not_imp_def : ¬(x ⊧ φ ➝ ψ) ↔ (x ⊧ φ) ∧ ¬(x ⊧ ψ) := by constructor <;> . contrapose!; tauto;
+protected lemma imp_def : x ⊧ φ 🡒 ψ ↔ (x ⊧ φ) → (x ⊧ ψ) := by tauto;
+protected lemma not_imp_def : ¬(x ⊧ φ 🡒 ψ) ↔ (x ⊧ φ) ∧ ¬(x ⊧ ψ) := by constructor <;> . contrapose!; tauto;
 
-protected lemma imp_def₂ : x ⊧ φ ➝ ψ ↔ ¬x ⊧ φ ∨ x ⊧ ψ := by tauto;
+protected lemma imp_def₂ : x ⊧ φ 🡒 ψ ↔ ¬x ⊧ φ ∨ x ⊧ ψ := by tauto;
 
 protected lemma or_def : x ⊧ φ ⋎ ψ ↔ x ⊧ φ ∨ x ⊧ ψ := by simp [Satisfies]; tauto;
 
@@ -108,11 +108,11 @@ protected instance : Semantics.Tarski (M.World) where
   models_or := Satisfies.or_def;
   models_and := Satisfies.and_def;
 
-lemma iff_def : x ⊧ φ ⭤ ψ ↔ (x ⊧ φ ↔ x ⊧ ψ) := by simp;
+lemma iff_def : x ⊧ φ 🡘 ψ ↔ (x ⊧ φ ↔ x ⊧ ψ) := by simp;
 
-lemma trans (hpq : x ⊧ φ ➝ ψ) (hqr : x ⊧ ψ ➝ χ) : x ⊧ φ ➝ χ := by simp_all;
+lemma trans (hpq : x ⊧ φ 🡒 ψ) (hqr : x ⊧ ψ 🡒 χ) : x ⊧ φ 🡒 χ := by simp_all;
 
-lemma mdp (hpq : x ⊧ φ ➝ ψ) (hp : x ⊧ φ) : x ⊧ ψ := by simp_all;
+lemma mdp (hpq : x ⊧ φ 🡒 ψ) (hp : x ⊧ φ) : x ⊧ ψ := by simp_all;
 
 lemma iff_subst_self {x : F.World} (s : Substitution ℕ) :
   letI U : Veltman.Valuation F := λ a w => Satisfies ⟨F, V⟩ w ((atom a)⟦s⟧);
@@ -214,7 +214,7 @@ instance : Semantics.Top (Veltman.Model) where
 
 lemma iff_not_exists_world {M : Veltman.Model} : (¬M ⊧ φ) ↔ (∃ x : M.World, ¬x ⊧ φ) := by
   apply not_iff_not.mp;
-  push_neg;
+  push Not;
   tauto;
 
 alias ⟨exists_world_of_not, not_of_exists_world⟩ := iff_not_exists_world
@@ -225,7 +225,7 @@ lemma kripkeLift {φ : Modal.Formula _} : M ⊧ ↑φ ↔ M.toKripkeModel ⊧ φ
   . intro h x; apply Satisfies.kripkeLift.mp; apply h;
   . intro h x; exact (Satisfies.kripkeLift.mpr $ h x);
 
-protected lemma mdp (hpq : M ⊧ φ ➝ ψ) (hp : M ⊧ φ) : M ⊧ ψ := by
+protected lemma mdp (hpq : M ⊧ φ 🡒 ψ) (hp : M ⊧ φ) : M ⊧ ψ := by
   intro x;
   exact (Satisfies.imp_def.mp $ hpq x) (hp x);
 
@@ -324,25 +324,25 @@ variable {C : Veltman.FrameClass} {φ ψ χ : Formula ℕ}
 
 lemma iff_not_validOnFrameClass_exists_frame : (¬C ⊧ φ) ↔ (∃ F ∈ C, ¬F ⊧ φ) := by
   apply not_iff_not.mp;
-  push_neg;
+  push Not;
   tauto;
 alias ⟨exists_frame_of_not_validOnFrameClass, not_validOnFrameClass_of_exists_frame⟩ := iff_not_validOnFrameClass_exists_frame
 
 lemma iff_not_validOnFrameClass_exists_model : (¬C ⊧ φ) ↔ (∃ M : Veltman.Model, M.toVeltmanFrame ∈ C ∧ ¬M ⊧ φ) := by
   apply not_iff_not.mp;
-  push_neg;
+  push Not;
   tauto;
 alias ⟨exists_model_of_not_validOnFrameClass, not_validOnFrameClass_of_exists_model⟩ := iff_not_validOnFrameClass_exists_model
 
 lemma iff_not_validOnFrameClass_exists_model_world : (¬C ⊧ φ) ↔ (∃ M : Veltman.Model, ∃ x : M.World, M.toVeltmanFrame ∈ C ∧ ¬(x ⊧ φ)) := by
   apply not_iff_not.mp;
-  push_neg;
+  push Not;
   tauto;
 alias ⟨exists_model_world_of_not_validOnFrameClass, not_validOnFrameClass_of_exists_model_world⟩ := iff_not_validOnFrameClass_exists_model_world
 
 lemma iff_not_validOnFrameClass_exists_valuation_world : (¬C ⊧ φ) ↔ (∃ F ∈ C, ∃ V, ∃ x, ¬(Formula.Veltman.Satisfies ⟨F, V⟩ x φ)) := by
   apply not_iff_not.mp;
-  push_neg;
+  push Not;
   tauto;
 alias ⟨exists_valuation_world_of_not_validOnFrameClass, not_validOnFrameClass_of_exists_valuation_world⟩ := iff_not_validOnFrameClass_exists_valuation_world
 
@@ -367,7 +367,7 @@ lemma validate_elimContra : F ⊧ (Axioms.ElimContra φ ψ) := by
   tauto;
 
 @[grind ⇒]
-lemma validate_mdp (hpq : F ⊧ φ ➝ ψ) (hp : F ⊧ φ) : F ⊧ ψ := by
+lemma validate_mdp (hpq : F ⊧ φ 🡒 ψ) (hp : F ⊧ φ) : F ⊧ ψ := by
   intro V x;
   exact (hpq V x) (hp V x);
 
@@ -392,7 +392,7 @@ lemma validate_axiomL : F ⊧ (Modal.Axioms.L φ) :=
   ValidOnFrame.subst (s := λ _ => φ) $ ValidOnFrame.kripkeLift.mpr $ Modal.Kripke.validate_AxiomL_of_trans_cwf (φ := (.atom 0))
 
 @[grind ⇒]
-lemma validate_R1 (h : F ⊧ φ ➝ ψ) : F ⊧ χ ▷ φ ➝ χ ▷ ψ := by
+lemma validate_R1 (h : F ⊧ φ 🡒 ψ) : F ⊧ χ ▷ φ 🡒 χ ▷ ψ := by
   rintro V x h₁ y Rxy h₂;
   obtain ⟨z, _, _⟩ := h₁ y Rxy h₂;
   use z;
@@ -402,7 +402,7 @@ lemma validate_R1 (h : F ⊧ φ ➝ ψ) : F ⊧ χ ▷ φ ➝ χ ▷ ψ := by
     assumption;
 
 @[grind ⇒]
-lemma validate_R2 (h : F ⊧ φ ➝ ψ) : F ⊧ ψ ▷ χ ➝ φ ▷ χ := by
+lemma validate_R2 (h : F ⊧ φ 🡒 ψ) : F ⊧ ψ ▷ χ 🡒 φ ▷ χ := by
   rintro V x h₁ y Rxy h₂;
   obtain ⟨z, Sxyz, hzχ⟩ := h₁ y Rxy $ by
     apply h;

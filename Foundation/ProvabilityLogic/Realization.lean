@@ -29,7 +29,7 @@ variable {𝔅 : Provability T₀ T} {f f₁ f₂ : Realization 𝔅} {A : Formu
   | .atom a => f.val a
   |      □φ => 𝔅 (f.interpret φ)
   |       ⊥ => ⊥
-  |   φ ➝ ψ => (f.interpret φ) ➝ (f.interpret ψ)
+  |   φ 🡒 ψ => (f.interpret φ) 🡒 (f.interpret ψ)
 
 instance : CoeFun (Realization 𝔅) (fun _ ↦ Formula ℕ → FirstOrder.Sentence L) := ⟨interpret⟩
 
@@ -59,7 +59,7 @@ section
 
 @[simp, grind =] lemma def_atom : f (.atom a) = f.val a := rfl
 
-@[simp, grind =] lemma def_imp : f (A ➝ B) = (f A) ➝ (f B) := rfl
+@[simp, grind =] lemma def_imp : f (A 🡒 B) = (f A) 🡒 (f B) := rfl
 
 @[simp, grind =] lemma def_bot : f ⊥ = ⊥ := rfl
 
@@ -82,10 +82,10 @@ omit [DecidableEq (Sentence L)] in
 lemma iff_provable_atom : U ⊢ f (.atom a) ↔ U ⊢ f.val a := by simp;
 
 @[grind .]
-lemma iff_provable_imp_inside : U ⊢ f (A ➝ B) ⭤ (f A) ➝ (f B) := by simp only [def_imp]; cl_prover;
+lemma iff_provable_imp_inside : U ⊢ f (A 🡒 B) 🡘 (f A) 🡒 (f B) := by simp only [def_imp]; cl_prover;
 
 @[grind =]
-lemma iff_provable_imp : U ⊢ f (A ➝ B) ↔ U ⊢ (f A) ➝ (f B) := by
+lemma iff_provable_imp : U ⊢ f (A 🡒 B) ↔ U ⊢ (f A) 🡒 (f B) := by
   have := iff_provable_imp_inside (U := U) (f := f) (A := A) (B := B);
   constructor <;> . intro h; cl_prover [h, this];
 
@@ -97,7 +97,7 @@ lemma iff_provable_bot : U ⊢ f ⊥ ↔ U ⊢ ⊥ := by simp [Realization.inter
 
 omit [DecidableEq (Sentence L)] in
 @[grind .]
-lemma iff_provable_box_inside : U ⊢ f (□A) ⭤ 𝔅 (f A) := by simp;
+lemma iff_provable_box_inside : U ⊢ f (□A) 🡘 𝔅 (f A) := by simp;
 
 @[grind =]
 lemma iff_provable_box : U ⊢ f (□A) ↔ U ⊢ 𝔅 (f A) := by
@@ -106,7 +106,7 @@ lemma iff_provable_box : U ⊢ f (□A) ↔ U ⊢ 𝔅 (f A) := by
 
 omit [DecidableEq (Sentence L)] in
 @[grind .]
-lemma iff_provable_boxItr_inside {n : ℕ} : U ⊢ f (□^[n] A) ⭤ 𝔅^[n] (f A) := by simp;
+lemma iff_provable_boxItr_inside {n : ℕ} : U ⊢ f (□^[n] A) 🡘 𝔅^[n] (f A) := by simp;
 
 @[simp, grind =]
 lemma iff_provable_boxItr {n : ℕ} : U ⊢ f (□^[n] A) ↔ U ⊢ 𝔅^[n] (f A) := by
@@ -114,7 +114,7 @@ lemma iff_provable_boxItr {n : ℕ} : U ⊢ f (□^[n] A) ↔ U ⊢ 𝔅^[n] (f 
   constructor <;> . intro h; cl_prover [h, this];
 
 @[grind .]
-lemma iff_provable_neg_inside : U ⊢ f (∼A) ⭤ ∼(f A) := by
+lemma iff_provable_neg_inside : U ⊢ f (∼A) 🡘 ∼(f A) := by
   dsimp [Realization.interpret];
   cl_prover;
 
@@ -124,7 +124,7 @@ lemma iff_provable_neg : U ⊢ f (∼A) ↔ U ⊢ ∼(f A) := by
   constructor <;> . intro h; cl_prover [h, this];
 
 @[grind .]
-lemma iff_provable_or_inside : U ⊢ f (A ⋎ B) ⭤ (f A) ⋎ (f B) := by
+lemma iff_provable_or_inside : U ⊢ f (A ⋎ B) 🡘 (f A) ⋎ (f B) := by
   dsimp [Realization.interpret];
   cl_prover;
 
@@ -135,7 +135,7 @@ lemma iff_provable_or : U ⊢ f (A ⋎ B) ↔ U ⊢ (f A) ⋎ (f B) := by
 
 
 @[grind .]
-lemma iff_provable_and_inside : U ⊢ f (A ⋏ B) ⭤ (f A) ⋏ (f B) := by
+lemma iff_provable_and_inside : U ⊢ f (A ⋏ B) 🡘 (f A) ⋏ (f B) := by
   dsimp [Realization.interpret];
   cl_prover;
 
@@ -154,7 +154,7 @@ lemma iff_provable_and : U ⊢ f (A ⋏ B) ↔ U ⊢ (f A) ∧ U ⊢ (f B) := by
     apply iff_provable_and'.mpr;
     cl_prover [hA, hB];
 
-lemma iff_provable_lconj_inside {Γ : List _} : U ⊢ f (⋀Γ) ⭤ ⋀(Γ.map f) := by
+lemma iff_provable_lconj_inside {Γ : List _} : U ⊢ f (⋀Γ) 🡘 ⋀(Γ.map f) := by
   induction Γ using List.induction_with_singleton with
   | hcons A Γ h ih =>
     simp only [
@@ -166,7 +166,7 @@ lemma iff_provable_lconj_inside {Γ : List _} : U ⊢ f (⋀Γ) ⭤ ⋀(Γ.map f
   | hnil => simp only [List.conj₂_nil, interpret, List.map_nil]; cl_prover;
   | hsingle => simp;
 
-lemma iff_provable_fconj_inside : T ⊢ f Γ.conj ⭤ (Finset.image f Γ).conj := by
+lemma iff_provable_fconj_inside : T ⊢ f Γ.conj 🡘 (Finset.image f Γ).conj := by
   apply E!_trans $ iff_provable_lconj_inside;
   apply E!_intro;
   . apply Entailment.CConj₂Conj₂!_of_subset; simp;
@@ -186,19 +186,19 @@ lemma iff_provable_lconj₂ {l : List (Formula _)} : U ⊢ f (l.conj₂) ↔ ∀
   | _ => simp [Realization.interpret];
 
 @[simp, grind =]
-lemma iff_provable_lconj' {l : List (Formula _)} : U ⊢ f (l.conj' ι) ↔ (∀ A ∈ l, U ⊢ f (ι A)) := by
+lemma iff_provable_lconj' {l : List (Formula ℕ)} : U ⊢ f (l.conj' ι) ↔ (∀ A ∈ l, U ⊢ f (ι A)) := by
   simp [List.conj']
 
 @[simp, grind =]
-lemma iff_provable_fconj {s : Finset (Formula _)} : U ⊢ f (s.conj) ↔ ∀ A ∈ s, U ⊢ f A := by
+lemma iff_provable_fconj {s : Finset (Formula ℕ)} : U ⊢ f (s.conj) ↔ ∀ A ∈ s, U ⊢ f A := by
   simp [Finset.conj]
 
 @[simp, grind =]
-lemma iff_provable_fconj' {s : Finset (Formula _)} : U ⊢ f (s.conj' ι) ↔ (∀ A ∈ s, U ⊢ f (ι A)) := by
+lemma iff_provable_fconj' {s : Finset (Formula ℕ)} : U ⊢ f (s.conj' ι) ↔ (∀ A ∈ s, U ⊢ f (ι A)) := by
   simp [Finset.conj']
 
 @[grind .]
-lemma iff_provable_boxdot_inside : U ⊢ f (⊡A) ⭤ (f A) ⋏ 𝔅 (f A) := by
+lemma iff_provable_boxdot_inside : U ⊢ f (⊡A) 🡘 (f A) ⋏ 𝔅 (f A) := by
   apply E!_trans iff_provable_and_inside;
   cl_prover;
 
@@ -222,7 +222,7 @@ variable {M} [Nonempty M] [Structure L M]
 lemma iff_models₀_neg : M ⊧ₘ f (∼A) ↔ ¬(M ⊧ₘ (f A)) := by simp [Realization.interpret];
 
 @[simp, grind ⇒]
-lemma iff_models₀_imp : M ⊧ₘ f (A ➝ B) ↔ (M ⊧ₘ (f A) → M ⊧ₘ (f B)) := by simp [Realization.interpret];
+lemma iff_models₀_imp : M ⊧ₘ f (A 🡒 B) ↔ (M ⊧ₘ (f A) → M ⊧ₘ (f B)) := by simp [Realization.interpret];
 
 @[simp, grind ⇒]
 lemma iff_models₀_and : M ⊧ₘ f (A ⋏ B) ↔ M ⊧ₘ (f A) ∧ M ⊧ₘ (f B) := by simp [Realization.interpret];

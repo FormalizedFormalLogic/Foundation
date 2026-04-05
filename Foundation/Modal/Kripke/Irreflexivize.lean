@@ -41,7 +41,7 @@ instance [F.IsPiecewiseStronglyConnected] : (F^≠).IsPiecewiseConnected := ⟨b
 
 instance [F.IsStronglyConnected] : (F^≠).IsConnected := ⟨by
   rintro x y;
-  rcases F.s_connected (x := x) (y := y) with (Rxy | Ryx) <;> tauto;
+  rcases F.s_connected (x := x) (y := y) with (Rxy | Ryx) <;> grind [Rel.IrreflGen];
 ⟩
 
 end IrreflGen

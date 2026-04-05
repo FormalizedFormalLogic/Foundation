@@ -8,7 +8,7 @@ namespace LO.Axioms
 variable {F : Type*} [LogicalConnective F]
 variable (φ ψ χ : F)
 
-protected abbrev KreiselPutnam :=  (∼φ ➝ ψ ⋎ χ) ➝ (∼φ ➝ ψ) ⋎ (∼φ ➝ χ)
+protected abbrev KreiselPutnam :=  (∼φ 🡒 ψ ⋎ χ) 🡒 (∼φ 🡒 ψ) ⋎ (∼φ 🡒 χ)
 
 end LO.Axioms
 
@@ -28,8 +28,8 @@ section
 
 variable [ModusPonens 𝓢] [HasAxiomKreiselPutnam 𝓢]
 
-def kreiselputnam' (h : 𝓢 ⊢! (∼φ ➝ ψ ⋎ χ)) : 𝓢 ⊢! (∼φ ➝ ψ) ⋎ (∼φ ➝ χ) := kreiselputnam ⨀ h
-lemma kreiselputnam'! (h : 𝓢 ⊢ (∼φ ➝ ψ ⋎ χ)) : 𝓢 ⊢ (∼φ ➝ ψ) ⋎ (∼φ ➝ χ) := ⟨kreiselputnam' h.some⟩
+def kreiselputnam' (h : 𝓢 ⊢! (∼φ 🡒 ψ ⋎ χ)) : 𝓢 ⊢! (∼φ 🡒 ψ) ⋎ (∼φ 🡒 χ) := kreiselputnam ⨀ h
+lemma kreiselputnam'! (h : 𝓢 ⊢ (∼φ 🡒 ψ ⋎ χ)) : 𝓢 ⊢ (∼φ 🡒 ψ) ⋎ (∼φ 🡒 χ) := ⟨kreiselputnam' h.some⟩
 
 end
 

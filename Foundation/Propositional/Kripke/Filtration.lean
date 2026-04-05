@@ -136,7 +136,7 @@ theorem filtration {x : M.World} {φ : Formula ℕ} (hs : φ ∈ T := by grind) 
       obtain ⟨y, ey⟩ := Quotient.exists_rep (cast (filterOf.def_world) Y);
       have : y ⊧ ψ → Y ⊧ ψ := by simpa [ey] using ihψ (x := y) (by grind) |>.mp;
       apply this;
-      apply filterOf.def_rel_back ?_ (φ := φ ➝ ψ) hs hφψ;
+      apply filterOf.def_rel_back ?_ (φ := φ 🡒 ψ) hs hφψ;
       . apply _root_.refl;
       . apply ihφ (by grind) |>.mpr;
         simpa [ey] using hφ;
@@ -243,7 +243,7 @@ abbrev finestFiltrationTransitiveClosureFrame (M : Model) (T : FormulaSet ℕ) [
       rintro x y Rxy Ryx;
       obtain ⟨x, rfl⟩ := Quotient.exists_rep x;
       obtain ⟨y, rfl⟩ := Quotient.exists_rep y;
-      simp only [Quotient.eq, FilterEqvSetoid, filterEquiv];
+      apply Quotient.eq.mpr;
       intro φ hφ;
       constructor;
       . obtain ⟨n, hn⟩ := Rel.TransGen.exists_iterate.mp Rxy;

@@ -34,9 +34,9 @@ abbrev Semisentence (L : Language) (n N : ℕ) := Semiformula L Empty Empty n N
 
 abbrev Sentence (L : Language) := Semiformula L Empty Empty 0 0
 
-abbrev Semistatement (L : Language) (n N : ℕ) := Semiformula L ℕ ℕ n N
+abbrev Semiproposition (L : Language) (n N : ℕ) := Semiformula L ℕ ℕ n N
 
-abbrev Statement (L : Language) := Semiformula L ℕ ℕ 0 0
+abbrev Proposition (L : Language) := Semiformula L ℕ ℕ 0 0
 
 namespace Semiformula
 

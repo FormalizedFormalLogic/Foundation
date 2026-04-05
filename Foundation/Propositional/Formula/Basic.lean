@@ -54,7 +54,7 @@ def toStr : Formula α → String
   | ∼φ      => "\\lnot " ++ toStr φ
   | φ ⋏ ψ   => "\\left(" ++ toStr φ ++ " \\land " ++ toStr ψ ++ "\\right)"
   | φ ⋎ ψ   => "\\left(" ++ toStr φ ++ " \\lor "  ++ toStr ψ ++ "\\right)"
-  | φ ➝ ψ   => "\\left(" ++ toStr φ ++ " \\rightarrow " ++ toStr ψ ++ "\\right)"
+  | φ 🡒 ψ   => "\\left(" ++ toStr φ ++ " \\rightarrow " ++ toStr ψ ++ "\\right)"
 
 instance : Repr (Formula α) := ⟨fun t _ => toStr t⟩
 instance : ToString (Formula α) := ⟨toStr⟩
@@ -63,26 +63,25 @@ end ToString
 
 lemma and_inj : φ₁ ⋏ φ₂ = ψ₁ ⋏ ψ₂ ↔ φ₁ = ψ₁ ∧ φ₂ = ψ₂ := by simp [Wedge.wedge]
 lemma or_inj : φ₁ ⋎ φ₂ = ψ₁ ⋎ ψ₂ ↔ φ₁ = ψ₁ ∧ φ₂ = ψ₂ := by simp [Vee.vee]
-lemma imp_inj : φ₁ ➝ φ₂ = ψ₁ ➝ ψ₂ ↔ φ₁ = ψ₁ ∧ φ₂ = ψ₂ := by simp [Arrow.arrow]
+lemma imp_inj : φ₁ 🡒 φ₂ = ψ₁ 🡒 ψ₂ ↔ φ₁ = ψ₁ ∧ φ₂ = ψ₂ := by simp [Arrow.arrow]
 lemma neg_inj : ∼φ = ∼ψ ↔ φ = ψ := by simp [Tilde.tilde]
-attribute [simp, grind =] and_inj or_inj imp_inj neg_inj
 
-lemma neg_def : ∼φ = φ ➝ ⊥ := rfl
-lemma top_def : (⊤ : Formula α) = ⊥ ➝ ⊥ := rfl
-lemma iff_def (φ ψ : Formula α) : φ ⭤ ψ = (φ ➝ ψ) ⋏ (ψ ➝ φ) := by rfl
+lemma neg_def : ∼φ = φ 🡒 ⊥ := rfl
+lemma top_def : (⊤ : Formula α) = ⊥ 🡒 ⊥ := rfl
+lemma iff_def (φ ψ : Formula α) : φ 🡘 ψ = (φ 🡒 ψ) ⋏ (ψ 🡒 φ) := by rfl
 
 
 @[grind]
 def complexity : Formula α → ℕ
 | atom _  => 0
 | ⊥       => 0
-| φ ➝ ψ  => max φ.complexity ψ.complexity + 1
+| φ 🡒 ψ  => max φ.complexity ψ.complexity + 1
 | φ ⋏ ψ   => max φ.complexity ψ.complexity + 1
 | φ ⋎ ψ   => max φ.complexity ψ.complexity + 1
 
 @[simp, grind =] lemma complexity_bot : (⊥ : Formula α).complexity = 0 := rfl
 @[simp, grind =] lemma complexity_atom : (atom a).complexity = 0 := rfl
-@[simp, grind =] lemma complexity_imp : complexity (φ ➝ ψ) = max φ.complexity ψ.complexity + 1 := rfl
+@[simp, grind =] lemma complexity_imp : complexity (φ 🡒 ψ) = max φ.complexity ψ.complexity + 1 := rfl
 @[simp, grind =] lemma complexity_and : complexity (φ ⋏ ψ) = max φ.complexity ψ.complexity + 1 := rfl
 @[simp, grind =] lemma complexity_or : complexity (φ ⋎ ψ) = max φ.complexity ψ.complexity + 1 := rfl
 
@@ -91,13 +90,13 @@ def complexity : Formula α → ℕ
 def cases' {C : Formula α → Sort w}
     (hfalsum : C ⊥)
     (hatom   : ∀ a : α, C (atom a))
-    (himp    : ∀ (φ ψ : Formula α), C (φ ➝ ψ))
+    (himp    : ∀ (φ ψ : Formula α), C (φ 🡒 ψ))
     (hand    : ∀ (φ ψ : Formula α), C (φ ⋏ ψ))
     (hor     : ∀ (φ ψ : Formula α), C (φ ⋎ ψ))
     : (φ : Formula α) → C φ
   | ⊥       => hfalsum
   | atom a  => hatom a
-  | φ ➝ ψ   => himp φ ψ
+  | φ 🡒 ψ   => himp φ ψ
   | φ ⋏ ψ   => hand φ ψ
   | φ ⋎ ψ   => hor φ ψ
 
@@ -105,13 +104,13 @@ def cases' {C : Formula α → Sort w}
 def rec' {C : Formula α → Sort w}
   (hfalsum : C ⊥)
   (hatom   : ∀ a : α, C (atom a))
-  (himp    : ∀ (φ ψ : Formula α), C φ → C ψ → C (φ ➝ ψ))
+  (himp    : ∀ (φ ψ : Formula α), C φ → C ψ → C (φ 🡒 ψ))
   (hand    : ∀ (φ ψ : Formula α), C φ → C ψ → C (φ ⋏ ψ))
   (hor     : ∀ (φ ψ : Formula α), C φ → C ψ → C (φ ⋎ ψ))
   : (φ : Formula α) → C φ
   | ⊥       => hfalsum
   | atom a  => hatom a
-  | φ ➝ ψ  => himp φ ψ (rec' hfalsum hatom himp hand hor φ) (rec' hfalsum hatom himp hand hor ψ)
+  | φ 🡒 ψ  => himp φ ψ (rec' hfalsum hatom himp hand hor φ) (rec' hfalsum hatom himp hand hor ψ)
   | φ ⋏ ψ   => hand φ ψ (rec' hfalsum hatom himp hand hor φ) (rec' hfalsum hatom himp hand hor ψ)
   | φ ⋎ ψ   => hor φ ψ (rec' hfalsum hatom himp hand hor φ) (rec' hfalsum hatom himp hand hor ψ)
 
@@ -126,15 +125,15 @@ def hasDecEq : (φ ψ : Formula α) → Decidable (φ = ψ)
   | atom a, ψ => by
     cases ψ using cases' <;> try { simp; exact isFalse not_false }
     simp; exact decEq _ _
-  | φ ➝ ψ, χ => by
+  | φ 🡒 ψ, χ => by
     cases χ using cases' <;> try { simp; exact isFalse not_false }
     case himp φ' ψ' =>
       exact match hasDecEq φ φ' with
       | isTrue hp =>
         match hasDecEq ψ ψ' with
         | isTrue hq  => isTrue (hp ▸ hq ▸ rfl)
-        | isFalse hq => isFalse (by simp [hp, hq])
-      | isFalse hp => isFalse (by simp [hp])
+        | isFalse hq => isFalse (by simp [hp, hq, imp_inj])
+      | isFalse hp => isFalse (by simp [hp, imp_inj])
   | φ ⋏ ψ, χ => by
     cases χ using cases' <;> try { simp; exact isFalse not_false }
     case hand φ' ψ' =>
@@ -142,8 +141,8 @@ def hasDecEq : (φ ψ : Formula α) → Decidable (φ = ψ)
       | isTrue hp =>
         match hasDecEq ψ ψ' with
         | isTrue hq  => isTrue (hp ▸ hq ▸ rfl)
-        | isFalse hq => isFalse (by simp [hp, hq])
-      | isFalse hp => isFalse (by simp [hp])
+        | isFalse hq => isFalse (by simp [hp, hq, and_inj])
+      | isFalse hp => isFalse (by simp [hp, and_inj])
   | φ ⋎ ψ, χ => by
     cases χ using cases' <;> try { simp; exact isFalse not_false }
     case hor φ' ψ' =>
@@ -151,8 +150,8 @@ def hasDecEq : (φ ψ : Formula α) → Decidable (φ = ψ)
       | isTrue hp =>
         match hasDecEq ψ ψ' with
         | isTrue hq  => isTrue (hp ▸ hq ▸ rfl)
-        | isFalse hq => isFalse (by simp [hp, hq])
-      | isFalse hp => isFalse (by simp [hp])
+        | isFalse hq => isFalse (by simp [hp, hq, or_inj])
+      | isFalse hp => isFalse (by simp [hp, or_inj])
 
 instance : DecidableEq (Formula α) := hasDecEq
 
@@ -166,7 +165,7 @@ open Encodable
 def toNat : Formula α → ℕ
   | ⊥       => (Nat.pair 0 0) + 1
   | atom a  => (Nat.pair 1 <| encode a) + 1
-  | φ ➝ ψ   => (Nat.pair 2 <| φ.toNat.pair ψ.toNat) + 1
+  | φ 🡒 ψ   => (Nat.pair 2 <| φ.toNat.pair ψ.toNat) + 1
   | φ ⋏ ψ   => (Nat.pair 3 <| φ.toNat.pair ψ.toNat) + 1
   | φ ⋎ ψ   => (Nat.pair 4 <| φ.toNat.pair ψ.toNat) + 1
 
@@ -184,7 +183,7 @@ def ofNat : ℕ → Option (Formula α)
       do
         let φ <- ofNat c.unpair.1
         let ψ <- ofNat c.unpair.2
-        return φ ➝ ψ
+        return φ 🡒 ψ
     | 3 =>
       have : c.unpair.1 < e + 1 := Nat.lt_succ_iff.mpr $ le_trans (Nat.unpair_left_le _) $ Nat.unpair_right_le _
       have : c.unpair.2 < e + 1 := Nat.lt_succ_iff.mpr $ le_trans (Nat.unpair_right_le _) $ Nat.unpair_right_le _
@@ -204,7 +203,7 @@ def ofNat : ℕ → Option (Formula α)
 lemma ofNat_toNat : ∀ (φ : Formula α), ofNat (toNat φ) = some φ
   | atom a  => by simp [toNat, ofNat, Nat.unpair_pair, encodek];
   | ⊥       => by simp [toNat, ofNat]
-  | φ ➝ ψ   => by simp [toNat, ofNat, ofNat_toNat φ, ofNat_toNat ψ]
+  | φ 🡒 ψ   => by simp [toNat, ofNat, ofNat_toNat φ, ofNat_toNat ψ]
   | φ ⋏ ψ   => by simp [toNat, ofNat, ofNat_toNat φ, ofNat_toNat ψ]
   | φ ⋎ ψ   => by simp [toNat, ofNat, ofNat_toNat φ, ofNat_toNat ψ]
 
@@ -222,7 +221,7 @@ section Letterless
 def Letterless : Formula α → Prop
   | .atom _ => False
   | ⊥ => True
-  | φ ➝ ψ => (φ.Letterless) ∧ (ψ.Letterless)
+  | φ 🡒 ψ => (φ.Letterless) ∧ (ψ.Letterless)
   | φ ⋏ ψ => (φ.Letterless) ∧ (ψ.Letterless)
   | φ ⋎ ψ => (φ.Letterless) ∧ (ψ.Letterless)
 
@@ -231,7 +230,7 @@ attribute [grind =] NegAbbrev.neg
 @[grind .] lemma not_letterless_atom {a : α} : ¬(Formula.Letterless (.atom a)) := by grind;
 @[grind .] lemma letterless_falsum : (⊥ : Formula α).Letterless := by simp [Letterless];
 @[grind .] lemma letterless_verum : (⊤ : Formula α).Letterless := by simp [Letterless];
-@[grind =] lemma letterless_imp {φ ψ : Formula α} : (φ ➝ ψ).Letterless ↔ φ.Letterless ∧ ψ.Letterless := by simp [Letterless];
+@[grind =] lemma letterless_imp {φ ψ : Formula α} : (φ 🡒 ψ).Letterless ↔ φ.Letterless ∧ ψ.Letterless := by simp [Letterless];
 @[grind =] lemma letterless_and : (φ ⋏ ψ).Letterless ↔ φ.Letterless ∧ ψ.Letterless := by simp [Letterless];
 @[grind =] lemma letterless_or : (φ ⋎ ψ).Letterless ↔ φ.Letterless ∧ ψ.Letterless := by simp [Letterless];
 @[grind =] lemma letterless_neg : (∼φ).Letterless ↔ φ.Letterless ∧ (⊥ : Formula α).Letterless := by grind;
@@ -249,7 +248,7 @@ variable [DecidableEq α]
 def Formula.subformulas : Formula α → Finset (Formula α)
   | ⊥      => {⊥}
   | atom a => {atom a}
-  | φ ➝ ψ  => insert (φ ➝ ψ) (φ.subformulas ∪ ψ.subformulas)
+  | φ 🡒 ψ  => insert (φ 🡒 ψ) (φ.subformulas ∪ ψ.subformulas)
   | φ ⋏ ψ  => insert (φ ⋏ ψ) (φ.subformulas ∪ ψ.subformulas)
   | φ ⋎ ψ  => insert (φ ⋎ ψ) (φ.subformulas ∪ ψ.subformulas)
 
@@ -257,10 +256,10 @@ namespace Formula.subformulas
 
 variable {φ ψ χ : Formula α}
 
-@[simp, grind] lemma mem_self : φ ∈ φ.subformulas := by induction φ <;> simp [subformulas];
+@[simp, grind .] lemma mem_self : φ ∈ φ.subformulas := by induction φ <;> simp [subformulas];
 
 @[grind ⇒]
-protected lemma mem_imp (h : (ψ ➝ χ) ∈ φ.subformulas) : ψ ∈ φ.subformulas ∧ χ ∈ φ.subformulas := by
+protected lemma mem_imp (h : (ψ 🡒 χ) ∈ φ.subformulas) : ψ ∈ φ.subformulas ∧ χ ∈ φ.subformulas := by
   induction φ with
   | himp =>
     simp_all only [subformulas, Finset.mem_insert, imp_inj, Finset.mem_union];
@@ -269,40 +268,40 @@ protected lemma mem_imp (h : (ψ ➝ χ) ∈ φ.subformulas) : ψ ∈ φ.subform
   | hand => simp_all only [subformulas, Finset.mem_insert, Finset.mem_union]; tauto;
   | _ => simp_all [subformulas];
 
-@[grind ⇒]
+@[grind! =>]
 protected lemma mem_and (h : (ψ ⋏ χ) ∈ φ.subformulas) : ψ ∈ φ.subformulas ∧ χ ∈ φ.subformulas := by
   induction φ with
   | himp => simp_all only [subformulas, Finset.mem_insert, Finset.mem_union]; tauto;
   | hor => simp_all only [subformulas, Finset.mem_insert, Finset.mem_union]; tauto;
   | hand =>
-    simp_all only [subformulas, Finset.mem_insert, Finset.mem_union];
+    simp_all only [subformulas, Finset.mem_insert, Finset.mem_union, and_inj];
     rcases h with ⟨_⟩ | ⟨⟨_⟩ | ⟨_⟩⟩ <;> simp_all;
   | _ => simp_all [subformulas];
 
-@[grind ⇒]
+@[grind! =>]
 protected lemma mem_or (h : (ψ ⋎ χ) ∈ φ.subformulas) : ψ ∈ φ.subformulas ∧ χ ∈ φ.subformulas := by
   induction φ with
   | himp => simp_all only [subformulas, Finset.mem_insert, Finset.mem_union]; tauto;
   | hor =>
-    simp_all only [subformulas, Finset.mem_insert, Finset.mem_union];
+    simp_all only [subformulas, Finset.mem_insert, Finset.mem_union, or_inj];
     rcases h with ⟨_⟩ | ⟨⟨_⟩ | ⟨_⟩⟩ <;> simp_all;
   | hand => simp_all only [subformulas, Finset.mem_insert, Finset.mem_union]; tauto;
   | _ => simp_all [subformulas];
 
-@[grind ⇒]
+@[grind! =>]
 protected lemma mem_neg (h : (∼ψ) ∈ φ.subformulas) : ψ ∈ φ.subformulas ∧ ⊥ ∈ φ.subformulas := by
   rw [neg_def] at h;
   grind;
 
 example {_ : φ ∈ φ.subformulas} : φ ∈ φ.subformulas := by grind;
-example {_ : ψ ➝ χ ∈ φ.subformulas} : ψ ∈ φ.subformulas := by grind
-example {_ : ψ ➝ χ ∈ φ.subformulas} : χ ∈ φ.subformulas := by grind
+example {_ : ψ 🡒 χ ∈ φ.subformulas} : ψ ∈ φ.subformulas := by grind
+example {_ : ψ 🡒 χ ∈ φ.subformulas} : χ ∈ φ.subformulas := by grind
 example {_ : ∼ψ ∈ φ.subformulas} : ψ ∈ φ.subformulas := by grind;
 example {_ : ∼ψ ∈ φ.subformulas} : ⊥ ∈ φ.subformulas := by grind;
 example {_ : ψ ⋏ χ ∈ φ.subformulas} : ψ ∈ φ.subformulas := by grind
 example {_ : ψ ⋎ χ ∈ φ.subformulas} : ψ ∈ φ.subformulas := by grind
-example {_ : ψ ➝ χ ∈ φ.subformulas} : χ ∈ φ.subformulas := by grind
-example {_ : ψ ⋏ (ψ ⋎ (χ ➝ ξ)) ∈ φ.subformulas} : χ ∈ φ.subformulas := by grind;
+example {_ : ψ 🡒 χ ∈ φ.subformulas} : χ ∈ φ.subformulas := by grind
+example {_ : ψ ⋏ (ψ ⋎ (χ 🡒 ξ)) ∈ φ.subformulas} : χ ∈ φ.subformulas := by grind;
 
 end Formula.subformulas
 
@@ -318,8 +317,8 @@ variable {φ ψ χ : Formula α} {Γ : FormulaFinset α} [Γ.SubformulaClosed]
 @[grind ⇒] lemma mem_and₂ (h : φ ⋏ ψ ∈ Γ) : ψ ∈ Γ := by apply SubformulaClosed.closed _ h; simp [Formula.subformulas];
 @[grind ⇒] lemma mem_or₁ (h : φ ⋎ ψ ∈ Γ) : φ ∈ Γ := by apply SubformulaClosed.closed _ h; simp [Formula.subformulas];
 @[grind ⇒] lemma mem_or₂ (h : φ ⋎ ψ ∈ Γ) : ψ ∈ Γ := by apply SubformulaClosed.closed _ h; simp [Formula.subformulas];
-@[grind ⇒] lemma mem_imp₁ (h : φ ➝ ψ ∈ Γ) : φ ∈ Γ := by apply SubformulaClosed.closed _ h; simp [Formula.subformulas];
-@[grind ⇒] lemma mem_imp₂ (h : φ ➝ ψ ∈ Γ) : ψ ∈ Γ := by apply SubformulaClosed.closed _ h; simp [Formula.subformulas];
+@[grind ⇒] lemma mem_imp₁ (h : φ 🡒 ψ ∈ Γ) : φ ∈ Γ := by apply SubformulaClosed.closed _ h; simp [Formula.subformulas];
+@[grind ⇒] lemma mem_imp₂ (h : φ 🡒 ψ ∈ Γ) : ψ ∈ Γ := by apply SubformulaClosed.closed _ h; simp [Formula.subformulas];
 
 instance subformulaClosed_subformulas [DecidableEq α] {φ : Formula α} : SubformulaClosed (φ.subformulas) := ⟨by
   induction φ with
@@ -372,9 +371,8 @@ variable {φ ψ χ : Formula α} {T : FormulaSet α} [T.SubformulaClosed]
 @[grind ⇒] protected lemma mem_and₂ (h : φ ⋏ ψ ∈ T) : ψ ∈ T := by apply closed _ h; simp [Formula.subformulas];
 @[grind ⇒] protected lemma mem_or₁ (h : φ ⋎ ψ ∈ T) : φ ∈ T := by apply closed _ h; simp [Formula.subformulas];
 @[grind ⇒] protected lemma mem_or₂ (h : φ ⋎ ψ ∈ T) : ψ ∈ T := by apply closed _ h; simp [Formula.subformulas];
-@[grind ⇒] protected lemma mem_imp₁ (h : φ ➝ ψ ∈ T) : φ ∈ T := by apply closed _ h; simp [Formula.subformulas];
-@[grind ⇒] protected lemma mem_imp₂ (h : φ ➝ ψ ∈ T) : ψ ∈ T := by apply closed _ h; simp [Formula.subformulas];
-
+@[grind ⇒] protected lemma mem_imp₁ (h : φ 🡒 ψ ∈ T) : φ ∈ T := by apply closed _ h; simp [Formula.subformulas];
+@[grind ⇒] protected lemma mem_imp₂ (h : φ 🡒 ψ ∈ T) : ψ ∈ T := by apply closed _ h; simp [Formula.subformulas];
 
 instance [DecidableEq α] {φ : Formula α} : SubformulaClosed φ.subformulas.toSet := ⟨by
   simpa using FormulaFinset.SubformulaClosed.subformulaClosed_subformulas (φ := φ) |>.closed;
@@ -384,8 +382,8 @@ example {_ : φ ⋏ ψ ∈ T} : φ ∈ T := by grind
 example {_ : φ ⋏ ψ ∈ T} : ψ ∈ T := by grind
 example {_ : φ ⋎ ψ ∈ T} : φ ∈ T := by grind
 example {_ : φ ⋎ ψ ∈ T} : ψ ∈ T := by grind
-example {_ : φ ➝ ψ ∈ T} : φ ∈ T := by grind
-example {_ : φ ➝ ψ ∈ T} : ψ ∈ T := by grind
+example {_ : φ 🡒 ψ ∈ T} : φ ∈ T := by grind
+example {_ : φ 🡒 ψ ∈ T} : ψ ∈ T := by grind
 
 end FormulaSet.SubformulaClosed
 
@@ -407,20 +405,20 @@ def subst (s : Substitution α) : Formula α → Formula α
   | ⊥       => ⊥
   | φ ⋏ ψ   => φ.subst s ⋏ ψ.subst s
   | φ ⋎ ψ   => φ.subst s ⋎ ψ.subst s
-  | φ ➝ ψ   => φ.subst s ➝ ψ.subst s
+  | φ 🡒 ψ   => φ.subst s 🡒 ψ.subst s
 
 notation:80 φ "⟦" s "⟧" => Formula.subst s φ
 
 lemma subst_atom {a} : (#a)⟦s⟧ = s a := rfl
 lemma subst_bot : ⊥⟦s⟧ = ⊥ := rfl
 lemma subst_top : ⊤⟦s⟧ = ⊤ := rfl
-lemma subst_imp : (φ ➝ ψ)⟦s⟧ = φ⟦s⟧ ➝ ψ⟦s⟧ := rfl
+lemma subst_imp : (φ 🡒 ψ)⟦s⟧ = φ⟦s⟧ 🡒 ψ⟦s⟧ := rfl
 lemma subst_neg : (∼φ)⟦s⟧ = ∼(φ⟦s⟧) := rfl
 lemma subst_and : (φ ⋏ ψ)⟦s⟧ = φ⟦s⟧ ⋏ ψ⟦s⟧ := rfl
 lemma subst_or : (φ ⋎ ψ)⟦s⟧ = φ⟦s⟧ ⋎ ψ⟦s⟧ := rfl
-lemma subst_iff : (φ ⭤ ψ)⟦s⟧ = (φ⟦s⟧ ⭤ ψ⟦s⟧) := rfl
+lemma subst_iff : (φ 🡘 ψ)⟦s⟧ = (φ⟦s⟧ 🡘 ψ⟦s⟧) := rfl
 
-attribute [simp, grind =]
+attribute [simp, grind =>]
   subst_atom
   subst_bot
   subst_top

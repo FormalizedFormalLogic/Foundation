@@ -138,11 +138,11 @@ end ToString
 
 lemma neg_eq (φ : Semiformula L ξ n) : ∼φ = neg φ := rfl
 
-lemma imp_eq (φ ψ : Semiformula L ξ n) : φ ➝ ψ = ∼φ ⋎ ψ := rfl
+lemma imp_eq (φ ψ : Semiformula L ξ n) : φ 🡒 ψ = ∼φ ⋎ ψ := rfl
 
-lemma iff_eq (φ ψ : Semiformula L ξ n) : φ ⭤ ψ = (∼φ ⋎ ψ) ⋏ (∼ψ ⋎ φ) := rfl
+lemma iff_eq (φ ψ : Semiformula L ξ n) : φ 🡘 ψ = (∼φ ⋎ ψ) ⋏ (∼ψ ⋎ φ) := rfl
 
-lemma ball_eq (φ ψ : Semiformula L ξ (n + 1)) : (∀⁰[φ] ψ) = ∀⁰ (φ ➝ ψ) := rfl
+lemma ball_eq (φ ψ : Semiformula L ξ (n + 1)) : (∀⁰[φ] ψ) = ∀⁰ (φ 🡒 ψ) := rfl
 
 lemma bexs_eq (φ ψ : Semiformula L ξ (n + 1)) : (∃⁰[φ] ψ) = ∃⁰ (φ ⋏ ψ) := rfl
 
@@ -173,7 +173,7 @@ lemma bexs_eq (φ ψ : Semiformula L ξ (n + 1)) : (∃⁰[φ] ψ) = ∃⁰ (φ 
   induction k <;> simp [*, exsItr_succ]
 
 @[simp] lemma imp_inj {φ₁ φ₂ ψ₁ ψ₂ : Semiformula L ξ n} :
-    φ₁ ➝ φ₂ = ψ₁ ➝ ψ₂ ↔ φ₁ = ψ₁ ∧ φ₂ = ψ₂ := by simp [imp_eq]
+    φ₁ 🡒 φ₂ = ψ₁ 🡒 ψ₂ ↔ φ₁ = ψ₁ ∧ φ₂ = ψ₂ := by simp [imp_eq]
 
 abbrev rel! (L : Language) (k) (r : L.Rel k) (v : Fin k → Semiterm L ξ n) := rel r v
 
@@ -344,10 +344,10 @@ def qr {n} : Semiformula L ξ n → ℕ
 @[simp] lemma qr_neg (φ : Semiformula L ξ n) : (∼φ).qr = φ.qr := by
   induction' φ using rec' <;> simp [*]
 
-@[simp] lemma qr_imply (φ ψ : Semiformula L ξ n) : (φ ➝ ψ).qr = max φ.qr ψ.qr :=
+@[simp] lemma qr_imply (φ ψ : Semiformula L ξ n) : (φ 🡒 ψ).qr = max φ.qr ψ.qr :=
   by simp [imp_eq]
 
-@[simp] lemma qr_iff (φ ψ : Semiformula L ξ n) : (φ ⭤ ψ).qr = max φ.qr ψ.qr :=
+@[simp] lemma qr_iff (φ ψ : Semiformula L ξ n) : (φ 🡘 ψ).qr = max φ.qr ψ.qr :=
   by simp [iff_eq, total_of]
 
 end qr
@@ -377,10 +377,10 @@ def Open (φ : Semiformula L ξ n) : Prop := φ.qr = 0
 @[simp] lemma open_neg {φ : Semiformula L ξ n} : (∼φ).Open ↔ φ.Open := by
   simp [Open]
 
-@[simp] lemma open_imply {φ ψ : Semiformula L ξ n} : (φ ➝ ψ).Open ↔ φ.Open ∧ ψ.Open :=
+@[simp] lemma open_imply {φ ψ : Semiformula L ξ n} : (φ 🡒 ψ).Open ↔ φ.Open ∧ ψ.Open :=
   by simp [Open]
 
-@[simp] lemma open_iff {φ ψ : Semiformula L ξ n} : (φ ⭤ ψ).Open ↔ φ.Open ∧ ψ.Open :=
+@[simp] lemma open_iff {φ ψ : Semiformula L ξ n} : (φ 🡘 ψ).Open ↔ φ.Open ∧ ψ.Open :=
   by simp [Open]
 
 end Open
@@ -420,7 +420,7 @@ lemma freeVariables_nrel {k} (r : L.Rel k) (v : Fin k → Semiterm L ξ n) : (nr
 @[simp] lemma freeVariables_not (φ : Semiformula L ξ n) : (∼φ).freeVariables = φ.freeVariables := by
   induction φ using rec' <;> simp [*, freeVariables_rel, freeVariables_nrel]
 
-@[simp] lemma freeVariables_imp (φ ψ : Semiformula L ξ n) : (φ ➝ ψ).freeVariables = φ.freeVariables ∪ ψ.freeVariables := by simp [imp_eq]
+@[simp] lemma freeVariables_imp (φ ψ : Semiformula L ξ n) : (φ 🡒 ψ).freeVariables = φ.freeVariables ∪ ψ.freeVariables := by simp [imp_eq]
 
 @[simp] lemma freeVariables_allClosure (φ : Semiformula L ξ n) : (∀⁰* φ).freeVariables = φ.freeVariables := by
   induction n <;> simp [allClosure, *]
@@ -544,10 +544,10 @@ def lMap (Φ : L₁ →ᵥ L₂) {n} : Semiformula L₁ ξ n →ˡᶜ Semiformul
     lMap Φ (∃⁰* φ) = ∃⁰* lMap Φ φ := by induction n <;> simp [*, exsClosure_succ]
 
 @[simp] lemma lMap_allItr {k} (φ : Semiformula L₁ ξ (n + k)) :
-    lMap Φ (∀⁰^[k] φ) = ∀⁰^[k] lMap Φ φ := by induction k <;> simp [*, allItr_succ]; rfl
+    lMap Φ (∀⁰^[k] φ) = ∀⁰^[k] lMap Φ φ := by induction k <;> simp [*, allItr_succ];
 
 @[simp] lemma lMap_exsItr {k} (φ : Semiformula L₁ ξ (n + k)) :
-    lMap Φ (∃⁰^[k] φ) = ∃⁰^[k] lMap Φ φ := by induction k <;> simp [*, exsItr_succ]; rfl
+    lMap Φ (∃⁰^[k] φ) = ∃⁰^[k] lMap Φ φ := by induction k <;> simp [*, exsItr_succ];
 
 @[simp] lemma freeVariables_lMap [DecidableEq ξ] (Φ : L₁ →ᵥ L₂) (φ : Semiformula L₁ ξ n) :
     (Semiformula.lMap Φ φ).freeVariables = φ.freeVariables := by

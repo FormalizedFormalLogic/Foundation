@@ -24,14 +24,14 @@ open Modal.Kripke
 open Modal.Formula.Kripke
 
 variable {L : Language} [L.DecidableEq] [L.ReferenceableBy L]
-         {T₀ T : Theory L} [T₀ ⪯ T] (𝔅 : Provability T₀ T) [𝔅.HBL]
+         {T₀ T : Theory L} [T₀ ⪯ T] (𝔅 : Provability T₀ T) [𝔅.Mono]
          {A B : Modal.Formula _}
 
 structure SolovaySentences (F : Kripke.Frame) [F.IsRooted] [Fintype F] where
   σ : F → Sentence L
-  protected SC1 : ∀ i j, i ≠ j → T₀ ⊢ σ i ➝ ∼σ j
-  protected SC2 : ∀ i j, i ≺ j → T₀ ⊢ σ i ➝ 𝔅.dia (σ j)
-  protected SC3 : ∀ i : F.World, F.root ≠ i → T₀ ⊢ σ i ➝ 𝔅 (⩖ j ∈ { j : F | i ≺ j }, σ j)
+  protected SC1 : ∀ i j, i ≠ j → T₀ ⊢ σ i 🡒 ∼σ j
+  protected SC2 : ∀ i j, i ≺ j → T₀ ⊢ σ i 🡒 𝔅.dia (σ j)
+  protected SC3 : ∀ i : F.World, F.root ≠ i → T₀ ⊢ σ i 🡒 𝔅 (⩖ j ∈ { j : F | i ≺ j }, σ j)
   protected SC4 : T₀ ⊢ ⩖ j, σ j
 
 attribute [coe] SolovaySentences.σ
@@ -48,8 +48,8 @@ variable {M : Model} [M.IsRooted] [Fintype M] [M.IsIrreflexive] [M.IsTransitive]
 noncomputable def realization : Realization 𝔅 := ⟨fun a ↦ ⩖ i ∈ { i : M | i ⊧ (.atom a) }, S i⟩
 
 private lemma mainlemma_aux {i : M} (hri : M.root ≠ i) :
-    (i ⊧ A → T₀ ⊢ S i ➝ S.realization A) ∧
-    (i ⊭ A → T₀ ⊢ S i ➝ ∼S.realization A) := by
+    (i ⊧ A → T₀ ⊢ S i 🡒 S.realization A) ∧
+    (i ⊭ A → T₀ ⊢ S i 🡒 ∼S.realization A) := by
   induction A generalizing i with
   | hfalsum => simp [Realization.interpret, Semantics.Models, Satisfies];
   | hatom a =>
@@ -79,49 +79,49 @@ private lemma mainlemma_aux {i : M} (hri : M.root ≠ i) :
     constructor;
     . intro h;
       apply C!_trans $ S.SC3 i $ (by grind);
-      apply prov_distribute_imply';
+      apply 𝔅.mono';
       apply left_Fdisj'!_intro;
       rintro j Rij;
       replace Rij : i ≺ j := by simpa using Rij
       exact (ihA (by grind)).1 (h j Rij)
     . intro h;
       have := Satisfies.box_def.not.mp h;
-      push_neg at this;
+      push Not at this;
       obtain ⟨j, Rij, hA⟩ := this;
       have := CN!_of_CN!_right $ (ihA (by grind)).2 hA
-      have : T₀ ⊢ ∼𝔅 (∼S.σ j) ➝ ∼𝔅 (S.realization A) :=
-        contra! $ prov_distribute_imply' $ CN!_of_CN!_right $ (ihA (by grind)).2 hA;
+      have : T₀ ⊢ ∼𝔅 (∼S.σ j) 🡒 ∼𝔅 (S.realization A) :=
+        contra! $ 𝔅.mono' $ CN!_of_CN!_right $ (ihA (by grind)).2 hA;
       exact C!_trans (S.SC2 i j Rij) this;
 
 theorem mainlemma (S : SolovaySentences 𝔅 M.toFrame) {i : M} (hri : M.root ≠ i) :
-    i ⊧ A → T₀ ⊢ S i ➝ S.realization A := (mainlemma_aux S hri).1
+    i ⊧ A → T₀ ⊢ S i 🡒 S.realization A := (mainlemma_aux S hri).1
 
 theorem mainlemma_neg (S : SolovaySentences 𝔅 M.toFrame) {i : M} (hri : M.root ≠ i) :
-    i ⊭ A → T₀ ⊢ S i ➝ ∼S.realization A := (mainlemma_aux S hri).2
+    i ⊭ A → T₀ ⊢ S i 🡒 ∼S.realization A := (mainlemma_aux S hri).2
 
-lemma root_of_iterated_inconsistency : T₀ ⊢ ∼𝔅^[M.height] ⊥ ➝ S M.root := by
-  suffices T₀ ⊢ (⩖ j, S j) ➝ ∼S M.root ➝ 𝔅^[M.height] ⊥ by cl_prover [this, S.SC4]
+lemma root_of_iterated_inconsistency : T₀ ⊢ ∼𝔅^[M.height] ⊥ 🡒 S M.root := by
+  suffices T₀ ⊢ (⩖ j, S j) 🡒 ∼S M.root 🡒 𝔅^[M.height] ⊥ by cl_prover [this, S.SC4]
   apply Entailment.left_Udisj!_intro
   intro i
   by_cases hir : i = M.root
   · rcases hir
     cl_prover
-  · have : T₀ ⊢ S.σ i ➝ (↑𝔅)^[M.height] ⊥ := by
+  · have : T₀ ⊢ S.σ i 🡒 (↑𝔅)^[M.height] ⊥ := by
       simpa using
         S.mainlemma (by grind) (A := □^[M.height] ⊥)
           <| height_lt_iff_satisfies_boxbot.mp
           <| Frame.rank_lt_whole_height (by grind)
     cl_prover [this];
 
-lemma theory_height [𝔅.WeakKreisel (𝔅^[(M.height).pred] ⊥)] (h : M.root.1 ⊧ ◇(∼A)) (b : T ⊢ S.realization A) : 𝔅.height < M.height := by
-  apply 𝔅.height_lt_pos_of_boxBot (n := M.height) (by simpa using height_pos_of_dia h)
+lemma theory_height (hSound : ∀ {σ}, T₀ ⊢ 𝔅 σ → T ⊢ σ) (h : M.root.1 ⊧ ◇(∼A)) (b : T ⊢ S.realization A) : 𝔅.height < M.height := by
+  apply 𝔅.height_lt_pos_of_boxBot hSound (n := M.height) (by simpa using height_pos_of_dia h)
   have : ∃ i : M, M.root ≺ i ∧ i ⊭ A := Formula.Kripke.Satisfies.dia_def.mp h
   rcases this with ⟨i, hi, hiA⟩
-  have b₀ : T₀ ⊢ 𝔅 (S.realization A) := D1 b
-  have b₁ : T₀ ⊢ ∼(↑𝔅)^[M.height] ⊥ ➝ S M.root := S.root_of_iterated_inconsistency
-  have b₂ : T₀ ⊢ S M.root ➝ 𝔅.dia (S i) := S.SC2 M.root i (by grind)
-  have b₃ : T₀ ⊢ 𝔅.dia (S i) ➝ ∼𝔅 (S.realization A) := by
-    simpa [Provability.dia] using dia_distribute_imply <| WeakerThan.pbl <| S.mainlemma_neg (by grind) hiA
+  have b₀ : T₀ ⊢ 𝔅 (S.realization A) := 𝔅.D1 b
+  have b₁ : T₀ ⊢ ∼(↑𝔅)^[M.height] ⊥ 🡒 S M.root := S.root_of_iterated_inconsistency
+  have b₂ : T₀ ⊢ S M.root 🡒 𝔅.dia (S i) := S.SC2 M.root i (by grind)
+  have b₃ : T₀ ⊢ 𝔅.dia (S i) 🡒 ∼𝔅 (S.realization A) := by
+    simpa [Provability.dia] using 𝔅.dia_mono <| WeakerThan.pbl <| S.mainlemma_neg (by grind) hiA
   cl_prover [b₀, b₁, b₂, b₃]
 
 end SolovaySentences
@@ -223,8 +223,8 @@ def θChain (ε : List F) : Sentence ℒₒᵣ := θChainAux T (fun i ↦ ⌜T.s
 def θ (i : F) : Sentence ℒₒᵣ := θAux T (fun i ↦ ⌜T.solovay i⌝) i
 
 lemma solovay_diag (i : F) :
-    𝗜𝚺₁ ⊢ T.solovay i ⭤ θ T i ⋏ ⩕ j ∈ { j : F | i ≺ j }, T.consistentWith/[⌜T.solovay j⌝] := by
-  have : 𝗜𝚺₁ ⊢ T.solovay i ⭤
+    𝗜𝚺₁ ⊢ T.solovay i 🡘 θ T i ⋏ ⩕ j ∈ { j : F | i ≺ j }, T.consistentWith/[⌜T.solovay j⌝] := by
+  have : 𝗜𝚺₁ ⊢ T.solovay i 🡘
       (Rew.subst fun j ↦ ⌜T.solovay ((Fintype.equivFin F).symm j)⌝) ▹
         (θAux T (fun i ↦ #(Fintype.equivFin F i)) i ⋏ ⩕ k ∈ { k : F | i ≺ k }, T.consistentWith/[#(Fintype.equivFin F k)]) := by
     simpa [Theory.solovay, Matrix.comp_vecCons', Matrix.constant_eq_singleton] using
@@ -461,9 +461,9 @@ lemma disjunctive : ∃ i : F, T.Solovay V i := by
 lemma Solovay.box_disjunction [𝗜𝚺₁ ⪯ T] {i : F} (ne : F.root.1 ≠ i) :
     T.Solovay V i → T.Provable (⌜⩖ j ∈ {j : F | i ≺ j}, T.solovay j⌝ : V) := by
   intro hS
-  have TP : T.internalize V ⊢ ⌜θ T i ➝ T.solovay i ⋎ ⩖ j ∈ {j : F | i ≺ j}, T.solovay j⌝ :=
+  have TP : T.internalize V ⊢ ⌜θ T i 🡒 T.solovay i ⋎ ⩖ j ∈ {j : F | i ≺ j}, T.solovay j⌝ :=
     internal_provable_of_outer_provable <| by
-      have : 𝗜𝚺₁ ⊢ θ T i ➝ T.solovay i ⋎ ⩖ j ∈ {j : F | i ≺ j}, T.solovay j :=
+      have : 𝗜𝚺₁ ⊢ θ T i 🡒 T.solovay i ⋎ ⩖ j ∈ {j : F | i ≺ j}, T.solovay j :=
         provable_of_models _ _ fun (V : Type) _ _ ↦ by
           simpa [models_iff] using Θ.disjunction i
       exact Entailment.WeakerThan.pbl this
@@ -476,20 +476,21 @@ lemma Solovay.box_disjunction [𝗜𝚺₁ ⪯ T] {i : F} (ne : F.root.1 ≠ i) 
 
 end model
 
-lemma solovay_root_sound [𝗜𝚺₁ ⪯ T] [T.SoundOn (Hierarchy 𝚷 2)] : T.Solovay ℕ F.root.1 := by
-  haveI : 𝗥₀ ⪯ T := Entailment.WeakerThan.trans inferInstance (inferInstanceAs (𝗜𝚺₁ ⪯ T))
+lemma solovay_root_sound [𝗜𝚺₁ ⪯ T] [sound : T.SoundOn (Hierarchy 𝚷 2)] : T.Solovay ℕ F.root.1 := by
+  have : 𝗜𝚺₁ ⪯ T := inferInstance
+  haveI : 𝗥₀ ⪯ T := Entailment.WeakerThan.trans inferInstance this
   have NS : ∀ i, F.root.1 ≠ i → ¬T.Solovay ℕ i := by
     intro i hi H
     have Bi : T ⊢ ∼T.solovay i := (provable_iff_provable (T := T)).mp (Solovay.refute hi H)
     have : ¬T.Solovay ℕ i := by
       set π := θ T i ⋏ ⩕ j ∈ { j : F | i ≺ j }, T.consistentWith/[⌜T.solovay j⌝]
-      have sπ : 𝗜𝚺₁ ⊢ T.solovay i ⭤ π := solovay_diag T i
+      have sπ : 𝗜𝚺₁ ⊢ T.solovay i 🡘 π := solovay_diag T i
       have : T ⊢ ∼π := by
-        have : T ⊢ T.solovay i ⭤ π := Entailment.WeakerThan.wk (inferInstanceAs (𝗜𝚺₁ ⪯ T)) sπ
+        have : T ⊢ T.solovay i 🡘 π := Entailment.WeakerThan.wk (inferInstanceAs (𝗜𝚺₁ ⪯ T)) sπ
         exact Entailment.K!_left (Entailment.ENN!_of_E! this) ⨀ Bi
       have : ¬ℕ ⊧/![] π := by
         simpa [models_iff] using
-          (inferInstanceAs (T.SoundOn (Hierarchy 𝚷 2))).sound
+          sound.sound
             (σ := ∼π)
             this
             (by simp [π,
@@ -506,7 +507,8 @@ lemma solovay_root_sound [𝗜𝚺₁ ⪯ T] [T.SoundOn (Hierarchy 𝚷 2)] : T.
     contradiction
 
 lemma solovay_unprovable [𝗜𝚺₁ ⪯ T] [T.SoundOn (Hierarchy 𝚷 2)] {i : F} (h : F.root.1 ≠ i) : T ⊬ ∼T.solovay i := by
-  haveI : 𝗥₀ ⪯ T := Entailment.WeakerThan.trans inferInstance (inferInstanceAs (𝗜𝚺₁ ⪯ T))
+  have : 𝗜𝚺₁ ⪯ T := inferInstance
+  haveI : 𝗥₀ ⪯ T := Entailment.WeakerThan.trans inferInstance this
   have : ∼T.Provable ⌜∼T.solovay i⌝ := Solovay.consistent (by grind) solovay_root_sound;
   simpa [Theory.ConsistentWith.quote_iff, provable_iff_provable] using this
 

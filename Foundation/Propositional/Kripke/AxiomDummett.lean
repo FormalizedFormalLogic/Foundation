@@ -19,30 +19,30 @@ section definability
 
 variable {F : Kripke.Frame}
 
-lemma validate_axiomDummett_of_isPiecewiseStronglyConnected [F.IsPiecewiseStronglyConnected] : F ⊧ (Axioms.Dummett (.atom 0) (.atom 1)) := by
+lemma validate_axiomDummett_of_isPiecewiseStronglyConnected [F.IsPiecewiseStronglyConnected] : F ⊧ (Axioms.Dummett φ ψ) := by
   have := F.ps_connected;
   revert this;
   contrapose!;
   intro h;
   obtain ⟨V, x, h⟩ := ValidOnFrame.exists_valuation_world_of_not h;
   unfold Satisfies at h;
-  push_neg at h;
+  push Not at h;
 
   rcases h with ⟨h₁, h₂⟩;
 
   replace h₁ := Satisfies.imp_def.not.mp h₁;
-  push_neg at h₁;
+  push Not at h₁;
   obtain ⟨y, Rxy, ⟨hy0, nhy1⟩⟩ := h₁;
 
   replace h₂ := Satisfies.imp_def.not.mp h₂;
-  push_neg at h₂;
+  push Not at h₂;
   obtain ⟨z, Rxz, ⟨hz1, nhz0⟩⟩ := h₂;
 
   use x, y, z;
   refine ⟨Rxy, Rxz, ?_⟩;
   . by_contra hC;
     replace hC := not_and_or.mp hC;
-    push_neg at hC;
+    push Not at hC;
     rcases hC with (Ryz | Rzy);
     . exact nhz0 $ Satisfies.formula_hereditary Ryz hy0;
     . exact nhy1 $ Satisfies.formula_hereditary Rzy hz1;
@@ -86,14 +86,14 @@ instance [Entailment.HasAxiomDummett 𝓢] : (canonicalFrame 𝓢).IsPiecewiseSt
   intro nRyz;
   obtain ⟨φ, hyp, nhzp⟩ := Set.not_subset.mp nRyz;
   intro ψ hqz;
-  have : ψ ➝ φ ∉ x.1.1 := by
+  have : ψ 🡒 φ ∉ x.1.1 := by
     by_contra hqpx;
-    have hqpz : ψ ➝ φ ∈ z.1.1 := by aesop;
+    have hqpz : ψ 🡒 φ ∈ z.1.1 := by aesop;
     have : φ ∈ z.1.1 := mdp₁_mem hqz hqpz;
     contradiction;
-  have := iff_mem₁_or.mp $ mem₁_of_provable (t := x) (φ := (φ ➝ ψ) ⋎ (ψ ➝ φ)) dummett!;
-  have hpqx : φ ➝ ψ ∈ x.1.1 := by aesop;
-  have hpqy : φ ➝ ψ ∈ y.1.1 := Rxy hpqx;
+  have := iff_mem₁_or.mp $ mem₁_of_provable (t := x) (φ := (φ 🡒 ψ) ⋎ (ψ 🡒 φ)) dummett!;
+  have hpqx : φ 🡒 ψ ∈ x.1.1 := by aesop;
+  have hpqy : φ 🡒 ψ ∈ y.1.1 := Rxy hpqx;
   have : ψ ∈ y.1.1 := mdp₁_mem hyp hpqy;
   exact this;
 ⟩

@@ -1,265 +1,267 @@
 module
 
-public import Foundation.Propositional.Entailment.Int.DNE_of_LEM
-public import Foundation.Propositional.Hilbert.Axiom
+public import Foundation.Propositional.Entailment.Corsi
 public import Foundation.Propositional.Logic.Basic
 
 @[expose] public section
 
 namespace LO.Propositional
 
-open Entailment.Corsi
+variable {α : Type*}
 
-variable {α : Type*} {Ax Ax₁ Ax₂ : Axiom α} {φ ψ χ : Formula _}
+structure HilbertF (α) where
+  schema : Set (Formula α)
+  schema_closed : ∀ φ ∈ schema, ∀ s, φ⟦s⟧ ∈ schema
 
-protected inductive Hilbert.F (Ax : Axiom α) : Logic α
-| protected axm {φ}                 : φ ∈ Ax → Hilbert.F Ax φ
-| protected andElimL {φ ψ}          : Hilbert.F Ax $ Axioms.AndElim₁ φ ψ
-| protected andElimR {φ ψ}          : Hilbert.F Ax $ Axioms.AndElim₂ φ ψ
-| protected orIntroL {φ ψ}          : Hilbert.F Ax $ Axioms.OrInst₁ φ ψ
-| protected orIntroR {φ ψ}          : Hilbert.F Ax $ Axioms.OrInst₂ φ ψ
-| protected distributeAndOr {φ ψ χ} : Hilbert.F Ax $ Axioms.DistributeAndOr φ ψ χ
-| protected axiomC {φ ψ χ}          : Hilbert.F Ax $ Axioms.C φ ψ χ
-| protected axiomD {φ ψ χ}          : Hilbert.F Ax $ Axioms.D φ ψ χ
-| protected axiomI {φ ψ χ}          : Hilbert.F Ax $ Axioms.I φ ψ χ
-| protected impId {φ}               : Hilbert.F Ax $ Axioms.ImpId φ
-| protected efq {φ}                 : Hilbert.F Ax $ Axioms.EFQ φ
-| protected mdp {φ ψ}               : Hilbert.F Ax (φ ➝ ψ) → Hilbert.F Ax φ → Hilbert.F Ax ψ
-| protected af {φ ψ}                : Hilbert.F Ax φ → Hilbert.F Ax (ψ ➝ φ)
-| protected andIR {φ ψ}             : Hilbert.F Ax φ → Hilbert.F Ax ψ → Hilbert.F Ax (φ ⋏ ψ)
+namespace HilbertF
 
-namespace Hilbert.F
+instance : SetLike (HilbertF α) (Formula α) where
+  coe := HilbertF.schema
+  coe_injective' := by intro ⟨A, hA⟩ ⟨B, hB⟩ h; simpa
 
-@[grind ⇒]
-protected lemma axm' (h : φ ∈ Ax) : φ ∈ Hilbert.F Ax := by apply F.axm h;
-
-@[grind ⇒]
-protected lemma axm'! (h : φ ∈ Ax) : Hilbert.F Ax ⊢ φ := by
-  apply Logic.iff_provable.mpr;
-  apply F.axm h;
-
-instance : Entailment.F (Hilbert.F Ax) where
-  and₁ := ⟨F.andElimL⟩
-  and₂ := ⟨F.andElimR⟩
-  or₁  := ⟨F.orIntroL⟩
-  or₂  := ⟨F.orIntroR⟩
-  distributeAndOr! := ⟨F.distributeAndOr⟩
-  axiomC! := ⟨F.axiomC⟩
-  axiomD! := ⟨F.axiomD⟩
-  axiomI! := ⟨F.axiomI⟩
-  impId! := ⟨F.impId⟩
-  verum := ⟨F.impId⟩
-  efq := ⟨F.efq⟩
-  mdp hφψ hφ := ⟨F.mdp hφψ.1 hφ.1⟩
-  af! hφ := ⟨F.af hφ.1⟩
-  andIR! h₁ h₂ := ⟨F.andIR h₁.1 h₂.1⟩
-
-@[induction_eliminator]
-protected lemma rec!
-  {motive   : (φ : Formula α) → (Hilbert.F Ax ⊢ φ) → Sort}
-  (axm      : ∀ {φ : Formula α}, (h : φ ∈ Ax) → motive (φ) (F.axm'! h))
-  (mdp      : ∀ {φ ψ : Formula α}, {hφψ : (Hilbert.F Ax) ⊢ φ ➝ ψ} → {hφ : (Hilbert.F Ax) ⊢ φ} → (motive (φ ➝ ψ) hφψ) → (motive φ hφ) → (motive ψ (hφψ ⨀ hφ)))
-  (af       : ∀ {φ ψ : Formula α}, {hφ : (Hilbert.F Ax) ⊢ φ} → (motive φ hφ) → (motive (ψ ➝ φ) (af hφ)))
-  (andIR    : ∀ {φ ψ : Formula α}, {hφ : (Hilbert.F Ax) ⊢ φ} → {hψ : (Hilbert.F Ax) ⊢ ψ} → (motive φ hφ) → (motive ψ hψ) → (motive (φ ⋏ ψ) (andIR hφ hψ)))
-  (impId    : ∀ {φ : Formula α}, (motive (Axioms.ImpId φ) impId))
-  (andElimL : ∀ {φ ψ : Formula α}, (motive (Axioms.AndElim₁ φ ψ) andElimL))
-  (andElimR : ∀ {φ ψ : Formula α}, (motive (Axioms.AndElim₂ φ ψ) andElimR))
-  (orIntroL  : ∀ {φ ψ : Formula α}, (motive (Axioms.OrInst₁ φ ψ) orIntroL))
-  (orIntroR  : ∀ {φ ψ : Formula α}, (motive (Axioms.OrInst₂ φ ψ) orIntroR))
-  (distributeAndOr : ∀ {φ ψ χ : Formula α}, (motive (Axioms.DistributeAndOr φ ψ χ) distributeAndOr))
-  (axiomC   : ∀ {φ ψ χ : Formula α}, (motive (Axioms.C φ ψ χ) axiomC))
-  (axiomD   : ∀ {φ ψ χ : Formula α}, (motive (Axioms.D φ ψ χ) axiomD))
-  (axiomI   : ∀ {φ ψ χ : Formula α}, (motive (Axioms.I φ ψ χ) axiomI))
-  (efq      : ∀ {φ : Formula α}, (motive (Axioms.EFQ φ) efq))
-  : ∀ {φ}, (d : Hilbert.F Ax ⊢ φ) → motive φ d := by
-  rintro φ d;
-  replace d := Logic.iff_provable.mp d;
-  induction d with
-  | axm h => apply axm h;
-  | mdp hφψ hφ ihφψ ihφ => apply mdp (ihφψ (Logic.iff_provable.mpr hφψ)) (ihφ (Logic.iff_provable.mpr hφ));
-  | af hφ ihφ => apply af $ ihφ (Logic.iff_provable.mpr hφ);
-  | andIR hφ hψ ihφ ihψ => apply andIR (ihφ (Logic.iff_provable.mpr hφ)) (ihψ (Logic.iff_provable.mpr hψ));
-  | _ => grind;
+protected def F : HilbertF α := ⟨∅, by grind⟩
+protected def F_Ser : HilbertF α := ⟨{ Axioms.Ser }, by grind⟩
+protected def F_Rfl : HilbertF α := ⟨{ Axioms.Rfl φ ψ | (φ) (ψ) }, by grind⟩
+protected def F_Sym : HilbertF α := ⟨{ Axioms.Sym φ ψ | (φ) (ψ) }, by grind⟩
+protected def F_Rfl_Sym : HilbertF α := ⟨
+  { Axioms.Rfl φ ψ | (φ) (ψ) } ∪
+  { Axioms.Sym φ ψ | (φ) (ψ) },
+  by rintro φ (_ | _) <;> grind;
+⟩
+protected def F_Tra1 : HilbertF α := ⟨{ Axioms.Tra1 φ ψ χ | (φ) (ψ) (χ) }, by grind⟩
+protected def F_Rfl_Tra1 : HilbertF α := ⟨
+  { Axioms.Rfl φ ψ | (φ) (ψ) } ∪
+  { Axioms.Tra1 φ ψ χ | (φ) (ψ) (χ) },
+  by rintro φ (_ | _) <;> grind⟩
 
 /-
-instance : Logic.Substitution (Hilbert.F Ax) where
-  subst s h := by
-    induction h using Hilbert.F.rec! with
-    | axm s' h => simpa [Formula.subst_comp] using F.axm! (s' ∘ s) h;
-    | mdp ih₁ ih₂ => exact ih₁ ⨀ ih₂;
-    | af ih => exact af ih;
-    | andIR ih₁ ih₂ => exact andIR ih₁ ih₂;
-    | _ =>
-      first
-      | apply impId;
-      | apply andElimL;
-      | apply andElimR;
-      | apply orIntroL;
-      | apply orIntroR;
-      | apply distributeAndOr;
-      | apply axiomC;
-      | apply axiomD;
-      | apply axiomI;
+protected def F_Tra1_Hrd : HilbertF α := ⟨
+  { Axioms.Tra1 φ ψ χ | (φ) (ψ) (χ) } ∪
+  { Axioms.Hrd φ | (φ) },
+  by rintro φ (_ | _) <;> grind
+⟩
+protected def F_Rfl_Tra1_Hrd : HilbertF α := ⟨
+  { Axioms.Rfl φ ψ | (φ) (ψ) } ∪
+  { Axioms.Tra1 φ ψ χ | (φ) (ψ) (χ) } ∪
+  { Axioms.Hrd φ | (φ) },
+  by rintro φ ((_ | _) | _) <;> grind;
+⟩
 -/
 
-lemma weakerThan_of_provable_axioms (hs : (Hilbert.F Ax₂) ⊢* Ax₁) : (Hilbert.F Ax₁) ⪯ (Hilbert.F Ax₂) := by
-  apply Entailment.weakerThan_iff.mpr;
-  intro φ h;
-  induction h using Hilbert.F.rec! with
-  | axm h => apply hs; assumption;
-  | mdp ih₁ ih₂ => exact ih₁ ⨀ ih₂;
-  | af ih => exact af ih;
-  | andIR ih₁ ih₂ => exact andIR ih₁ ih₂;
-  | _ =>
-      first
-      | apply impId;
-      | apply andElimL;
-      | apply andElimR;
-      | apply orIntroL;
-      | apply orIntroR;
-      | apply distributeAndOr;
-      | apply axiomC;
-      | apply axiomD;
-      | apply axiomI;
-      | apply efq;
+@[simp, grind .] lemma F_le_F_Ser : (HilbertF.F : HilbertF α).schema ⊆ HilbertF.F_Ser.schema := by tauto
+@[simp, grind .] lemma F_le_F_Rfl : (HilbertF.F : HilbertF α).schema ⊆ HilbertF.F_Rfl.schema := by tauto
+@[simp, grind .] lemma F_le_F_Sym : (HilbertF.F : HilbertF α).schema ⊆ HilbertF.F_Sym.schema := by tauto
+@[simp, grind .] lemma F_le_F_Tra1 : (HilbertF.F : HilbertF α).schema ⊆ HilbertF.F_Tra1.schema := by tauto
+@[simp, grind .] lemma F_Rfl_le_F_Rfl_Sym : (HilbertF.F_Rfl : HilbertF α).schema ⊆ HilbertF.F_Rfl_Sym.schema  := by tauto
+@[simp, grind .] lemma F_Sym_le_F_Rfl_Sym : (HilbertF.F_Sym : HilbertF α).schema ⊆ HilbertF.F_Rfl_Sym.schema  := by tauto
+@[simp, grind .] lemma F_Rfl_le_F_Rfl_Tra1 : (HilbertF.F_Rfl : HilbertF α).schema ⊆ HilbertF.F_Rfl_Tra1.schema := by tauto
+@[simp, grind .] lemma F_Tra1_le_F_Rfl_Tra1 : (HilbertF.F_Tra1 : HilbertF α).schema ⊆ HilbertF.F_Rfl_Tra1.schema := by tauto
+
+end HilbertF
+
+
+inductive HilbertFProof (Λ : HilbertF α) : Formula α → Type _
+| axm {φ}                 : φ ∈ Λ → HilbertFProof Λ φ
+| andElimL {φ ψ}          : HilbertFProof Λ $ Axioms.AndElim₁ φ ψ
+| andElimR {φ ψ}          : HilbertFProof Λ $ Axioms.AndElim₂ φ ψ
+| orIntroL {φ ψ}          : HilbertFProof Λ $ Axioms.OrInst₁ φ ψ
+| orIntroR {φ ψ}          : HilbertFProof Λ $ Axioms.OrInst₂ φ ψ
+| distributeAndOr {φ ψ χ} : HilbertFProof Λ $ Axioms.DistributeAndOr φ ψ χ
+| axiomC {φ ψ χ}          : HilbertFProof Λ $ Axioms.C φ ψ χ
+| axiomD {φ ψ χ}          : HilbertFProof Λ $ Axioms.D φ ψ χ
+| axiomI {φ ψ χ}          : HilbertFProof Λ $ Axioms.I φ ψ χ
+| impId {φ}               : HilbertFProof Λ $ Axioms.ImpId φ
+| efq {φ}                 : HilbertFProof Λ $ Axioms.EFQ φ
+| mdp {φ ψ}               : HilbertFProof Λ (φ 🡒 ψ) → HilbertFProof Λ φ → HilbertFProof Λ ψ
+| af {φ ψ}                : HilbertFProof Λ φ → HilbertFProof Λ (ψ 🡒 φ)
+| andIR {φ ψ}             : HilbertFProof Λ φ → HilbertFProof Λ ψ → HilbertFProof Λ (φ ⋏ ψ)
+
+instance : Entailment (HilbertF α) (Formula α) := ⟨HilbertFProof⟩
+
+namespace HilbertF
+
+open HilbertFProof
+
+variable (H : HilbertF α)
+
+instance : Entailment.F H where
+  and₁              := andElimL
+  and₂              := andElimR
+  or₁               := orIntroL
+  or₂               := orIntroR
+  distributeAndOr!  := distributeAndOr
+  axiomC!           := axiomC
+  axiomD!           := axiomD
+  axiomI!           := axiomI
+  impId!            := impId
+  verum             := impId
+  efq               := efq
+  mdp               := mdp
+  af!               := af
+  andIR!            := andIR
+
+variable {H} {H₁ H₂ : HilbertF α}
+
+alias ofSchema := HilbertFProof.axm
+@[grind <=] lemma of_schema (h : φ ∈ H) : H ⊢ φ := ⟨ofSchema h⟩
+
+def ofLE (h : H₁.schema ⊆ H₂.schema) : H₁ ⊢! φ → H₂ ⊢! φ
+  | axm h₁          => axm $ h h₁
+  | mdp h₁ h₂       => mdp (ofLE h h₁) (ofLE h h₂)
+  | andElimL         => andElimL
+  | andElimR         => andElimR
+  | orIntroL         => orIntroL
+  | orIntroR         => orIntroR
+  | distributeAndOr  => distributeAndOr
+  | axiomC           => axiomC
+  | axiomD           => axiomD
+  | axiomI           => axiomI
+  | impId            => impId
+  | efq              => efq
+  | af h₁            => af (ofLE h h₁)
+  | andIR h₁ h₂     => andIR (ofLE h h₁) (ofLE h h₂)
+
+lemma of_le (h : H₁.schema ⊆ H₂.schema) : H₁ ⊢ φ → H₂ ⊢ φ := λ ⟨hφ⟩ => ⟨ofLE h hφ⟩
 
 @[grind <=]
-lemma weakerThan_of_subset_axioms (h : Ax₁ ⊆ Ax₂) : (Hilbert.F Ax₁) ⪯ (Hilbert.F Ax₂) := by
-  apply weakerThan_of_provable_axioms;
-  intro φ hφ;
-  apply Hilbert.F.axm'!;
-  grind;
+lemma weakerThan_of_le (h : H₁.schema ⊆ H₂.schema) : H₁ ⪯ H₂ := Entailment.weakerThan_iff.mpr $ of_le h
+
+def Subst {H : HilbertF α} (s) : H ⊢! φ → H ⊢! φ⟦s⟧
+  | axm h₁           => axm $ H.schema_closed _ h₁ s
+  | mdp h₁ h₂        => mdp (Subst s h₁) (Subst s h₂)
+  | andElimL         => andElimL
+  | andElimR         => andElimR
+  | orIntroL         => orIntroL
+  | orIntroR         => orIntroR
+  | distributeAndOr  => distributeAndOr
+  | axiomC           => axiomC
+  | axiomD           => axiomD
+  | axiomI           => axiomI
+  | impId            => impId
+  | efq              => efq
+  | af h₁            => af (Subst s h₁)
+  | andIR h₁ h₂      => andIR (Subst s h₁) (Subst s h₂)
+
+lemma subst {H : HilbertF α} (s) : H ⊢ φ → H ⊢ φ⟦s⟧ := λ ⟨hφ⟩ => ⟨Subst s hφ⟩
+
+def ofProofSchema (h : H₂ ⊢!* H₁.schema) : H₁ ⊢! φ → H₂ ⊢! φ
+  | axm h₁          => h h₁
+  | mdp h₁ h₂       => mdp (ofProofSchema h h₁) (ofProofSchema h h₂)
+  | andElimL         => andElimL
+  | andElimR         => andElimR
+  | orIntroL         => orIntroL
+  | orIntroR         => orIntroR
+  | distributeAndOr  => distributeAndOr
+  | axiomC           => axiomC
+  | axiomD           => axiomD
+  | axiomI           => axiomI
+  | impId            => impId
+  | efq              => efq
+  | af h₁            => af (ofProofSchema h h₁)
+  | andIR h₁ h₂     => andIR (ofProofSchema h h₁) (ofProofSchema h h₂)
+
+lemma of_proof_schema (h : H₂ ⊢* H₁.schema) : H₁ ⊢ φ → H₂ ⊢ φ :=
+  λ ⟨hφ⟩ => ⟨ofProofSchema (h · |>.get) hφ⟩
+
+lemma weakerThan_of_provable_schema (h : H₂ ⊢* H₁.schema) : H₁ ⪯ H₂ :=
+  Entailment.weakerThan_iff.mpr $ of_proof_schema h
+
+open Entailment.Corsi in
+@[induction_eliminator]
+protected lemma rec_provable
+  {H : HilbertF α}
+  {motive  : (φ : Formula α) → (H ⊢ φ) → Prop}
+  (axm       : ∀ {φ}, (h : φ ∈ H) → motive (φ) (of_schema h))
+  (mdp       : ∀ {φ ψ}, {hφψ : H ⊢ φ 🡒 ψ} → {hφ : H ⊢ φ} → (motive (φ 🡒 ψ) hφψ) → (motive φ hφ) → (motive ψ (hφψ ⨀ hφ)))
+  (af        : ∀ {φ ψ}, {hφ : H ⊢ φ} → (motive φ hφ) → (motive (ψ 🡒 φ) (af hφ)))
+  (andIR     : ∀ {φ ψ}, {hφ : H ⊢ φ} → {hψ : H ⊢ ψ} → (motive φ hφ) → (motive ψ hψ) → (motive (φ ⋏ ψ) (andIR hφ hψ)))
+  (distributeAndOr : ∀ {φ ψ χ : Formula α}, (motive (Axioms.DistributeAndOr φ ψ χ) distributeAndOr))
+  (impId     : ∀ {φ}, (motive (Axioms.ImpId φ) impId))
+  (andElimL  : ∀ {φ ψ}, (motive (Axioms.AndElim₁ φ ψ) andElimL))
+  (andElimR  : ∀ {φ ψ}, (motive (Axioms.AndElim₂ φ ψ) andElimR))
+  (orIntroL  : ∀ {φ ψ}, (motive (Axioms.OrInst₁ φ ψ) orIntroL))
+  (orIntroR  : ∀ {φ ψ}, (motive (Axioms.OrInst₂ φ ψ) orIntroR))
+  (axiomC     : ∀ {φ ψ χ}, (motive (Axioms.C φ ψ χ) axiomC))
+  (axiomD     : ∀ {φ ψ χ}, (motive (Axioms.D φ ψ χ) axiomD))
+  (axiomI     : ∀ {φ ψ χ}, (motive (Axioms.I φ ψ χ) axiomI))
+  (efq       : ∀ {φ}, (motive (Axioms.EFQ φ) efq))
+  : ∀ {φ}, (d : H ⊢ φ) → motive φ d := by rintro φ ⟨d⟩; induction d <;> grind;
 
 section
 
-variable [DecidableEq α]
-open Axiom
+instance : Entailment.HasAxiomSer (HilbertF.F_Ser : HilbertF α) where
+  axiomSer! := axm $ by tauto;
+
+instance : Entailment.HasAxiomRfl (HilbertF.F_Rfl : HilbertF α) where
+  axiomRfl! {φ ψ} := axm $ by tauto;
+
+instance : Entailment.HasAxiomSym (HilbertF.F_Sym : HilbertF α) where
+  axiomSym! {φ ψ} := axm $ by tauto;
+
+instance : Entailment.HasAxiomRfl (HilbertF.F_Rfl_Sym : HilbertF α) where
+  axiomRfl! {φ ψ} := axm $ by left; tauto;
+instance : Entailment.HasAxiomSym (HilbertF.F_Rfl_Sym : HilbertF α) where
+  axiomSym! {φ ψ} := axm $ by right; tauto;
+
+instance : Entailment.HasAxiomTra1 (HilbertF.F_Tra1 : HilbertF α) where
+  axiomTra1! {φ ψ χ} := axm $ by use φ, ψ, χ;
+
+instance : Entailment.HasAxiomRfl (HilbertF.F_Rfl_Tra1 : HilbertF α) where
+  axiomRfl! {φ ψ} := axm $ by left; tauto;
+instance : Entailment.HasAxiomTra1 (HilbertF.F_Rfl_Tra1 : HilbertF α) where
+  axiomTra1! {φ ψ χ} := axm $ by right; simp;
 
 /-
-instance [Ax.HasAxiomRfl] : Entailment.HasAxiomRfl (Hilbert.F Ax) where
-  axiomRfl! {φ ψ} := ⟨by
-    simpa using Hilbert.F.axm
-      (φ := Axioms.Rfl (.atom (HasAxiomRfl.p Ax)) (.atom (HasAxiomRfl.q Ax)))
-      (s := λ b =>
-        if (HasAxiomRfl.p Ax) = b then φ
-        else if (HasAxiomRfl.q Ax) = b then ψ
-        else (.atom b))
-      $ (HasAxiomRfl.mem_rfl);
-  ⟩
+instance : Entailment.HasAxiomTra1 (HilbertF.F_Tra1_Hrd : HilbertF α) where
+  axiomTra1! {φ ψ χ} := axm $ by left; simp;
+instance : Entailment.HasAxiomHrd (HilbertF.F_Tra1_Hrd : HilbertF α) where
+  axiomHrd! {φ} := axm $ by tauto;
 
-instance [Ax.HasAxiomSer] : Entailment.HasAxiomSer (Hilbert.F Ax) where
-  axiomSer! := ⟨by simpa using Hilbert.F.axm' $ HasAxiomSer.mem_ser⟩
-
-instance [Ax.HasAxiomSym] : Entailment.HasAxiomSym (Hilbert.F Ax) where
-  axiomSym! {φ ψ} := ⟨by
-    simpa using Hilbert.F.axm
-      (φ := Axioms.Sym (.atom (HasAxiomSym.p Ax)) (.atom (HasAxiomSym.q Ax)))
-      (s := λ b =>
-        if (HasAxiomSym.p Ax) = b then φ
-        else if (HasAxiomSym.q Ax) = b then ψ
-        else (.atom b))
-      $ (HasAxiomSym.mem_sym);
-  ⟩
-
-instance [Ax.HasAxiomTra1] : Entailment.HasAxiomTra1 (Hilbert.F Ax) where
-  axiomTra1! {φ ψ χ} := ⟨by
-    simpa using Hilbert.F.axm
-      (φ := Axioms.Tra1 (#(HasAxiomTra1.p Ax)) (#(HasAxiomTra1.q Ax)) (#(HasAxiomTra1.r Ax)))
-      (s := λ b =>
-        if (HasAxiomTra1.p Ax) = b then φ
-        else if (HasAxiomTra1.q Ax) = b then ψ
-        else if (HasAxiomTra1.r Ax) = b then χ
-        else (.atom b)
-      )
-      $ (HasAxiomTra1.mem_tra1);
-  ⟩
-
-instance [Ax.HasAxiomHrd] : Entailment.HasAxiomHrd (Hilbert.F Ax) where
-  axiomHrd! {φ} := ⟨by
-    simpa using Hilbert.F.axm
-      (φ := Axioms.Hrd (.atom (HasAxiomHrd.p Ax)))
-      (s := λ b =>
-        if (HasAxiomHrd.p Ax) = b then φ
-        else (.atom b))
-      $ (HasAxiomHrd.mem_hrd);
-  ⟩
+instance : Entailment.HasAxiomRfl (HilbertF.F_Rfl_Tra1_Hrd : HilbertF α) where
+  axiomRfl! {φ ψ} := axm $ by left; left; simp;
+instance : Entailment.HasAxiomTra1 (HilbertF.F_Rfl_Tra1_Hrd : HilbertF α) where
+  axiomTra1! {φ ψ χ} := axm $ by left; right; simp;
+instance : Entailment.HasAxiomHrd (HilbertF.F_Rfl_Tra1_Hrd : HilbertF α) where
+  axiomHrd! {φ} := axm $ by right; simp;
 -/
 
 end
 
-end Hilbert.F
+abbrev logic (H : HilbertF α) : Logic α where
+  logic := Entailment.theory H
+  subst s {_} := HilbertF.subst s
+  mdp := Entailment.mdp!
+
+end HilbertF
 
 
+namespace HilbertF
 
-protected abbrev F : Logic ℕ := Hilbert.F ∅
-instance : Entailment.F Propositional.F where
+variable {H : HilbertF α}
 
+lemma mem_logic_of_proof (h : H ⊢! φ) : φ ∈ H.logic := ⟨h⟩
 
-protected abbrev F_Ser : Logic ℕ := Hilbert.F { Axioms.Ser }
-instance : Entailment.F Propositional.F_Ser where
-instance : Entailment.HasAxiomSer Propositional.F_Ser where
-  axiomSer! := ⟨by apply Hilbert.F.axm'; simp⟩
+lemma mem_logic_of_provable (h : H ⊢ φ) : φ ∈ H.logic := mem_logic_of_proof h.get
+lemma provable_of_mem_logic (h : φ ∈ H.logic) : H ⊢ φ := h
 
+@[grind =]
+lemma iff_mem_logic_provable : H ⊢ φ ↔ φ ∈ H.logic := ⟨mem_logic_of_provable, provable_of_mem_logic⟩
 
-protected abbrev F_Rfl : Logic ℕ := Hilbert.F { Axioms.Rfl φ ψ | (φ) (ψ) }
-instance : Entailment.F Propositional.F_Rfl where
-instance : Entailment.HasAxiomRfl Propositional.F_Rfl where
-  axiomRfl! {φ ψ} := ⟨by apply Hilbert.F.axm'; simp⟩
+end HilbertF
 
 
-protected abbrev F_Sym : Logic ℕ := Hilbert.F { Axioms.Sym φ ψ | (φ) (ψ) }
-instance : Entailment.F Propositional.F_Sym where
-instance : Entailment.HasAxiomSym Propositional.F_Sym where
-  axiomSym! {φ ψ} := ⟨by apply Hilbert.F.axm'; simp⟩
-
-
-protected abbrev F_Rfl_Sym : Logic ℕ := Hilbert.F (
-  { Axioms.Rfl φ ψ | (φ) (ψ) } ∪
-  { Axioms.Sym φ ψ | (φ) (ψ) }
-)
-instance : Entailment.F Propositional.F_Rfl_Sym where
-instance : Entailment.HasAxiomRfl Propositional.F_Rfl_Sym where
-  axiomRfl! {_ _} := ⟨by apply Hilbert.F.axm'; simp⟩
-instance : Entailment.HasAxiomSym Propositional.F_Rfl_Sym where
-  axiomSym! {_ _} := ⟨by apply Hilbert.F.axm'; simp⟩
-
-
-protected abbrev F_Tra1 : Logic ℕ := Hilbert.F { Axioms.Tra1 φ ψ χ | (φ) (ψ) (χ) }
-instance : Entailment.F Propositional.F_Tra1 where
-instance : Entailment.HasAxiomTra1 Propositional.F_Tra1 where
-  axiomTra1! {_ _ _} := ⟨by apply Hilbert.F.axm'; simp⟩
-
-
-protected abbrev F_Rfl_Tra1 : Logic ℕ := Hilbert.F (
-  { Axioms.Rfl φ ψ | (φ) (ψ) } ∪
-  { Axioms.Tra1 φ ψ χ | (φ) (ψ) (χ) }
-)
-instance : Entailment.F Propositional.F_Rfl_Tra1 where
-instance : Entailment.HasAxiomRfl Propositional.F_Rfl_Tra1 where
-  axiomRfl! {_ _} := ⟨by apply Hilbert.F.axm'; simp⟩
-instance : Entailment.HasAxiomTra1 Propositional.F_Rfl_Tra1 where
-  axiomTra1! {_ _ _} := ⟨by apply Hilbert.F.axm'; simp⟩
-
-
-protected abbrev F_Tra1_Hrd : Logic ℕ := Hilbert.F (
-  { Axioms.Tra1 φ ψ χ | (φ) (ψ) (χ) } ∪
-  { Axioms.Hrd #a | (a : ℕ) }
-)
-instance : Entailment.F Propositional.F_Tra1_Hrd where
-instance : Entailment.HasAxiomTra1 Propositional.F_Tra1_Hrd where
-  axiomTra1! {φ ψ χ} := ⟨by apply Hilbert.F.axm'; simp⟩
-
-
-protected abbrev F_Rfl_Tra1_Hrd := Hilbert.F (
-  { Axioms.Rfl φ ψ | (φ) (ψ) } ∪
-  { Axioms.Tra1 φ ψ χ | (φ) (ψ) (χ) } ∪
-  { Axioms.Hrd #a | (a : ℕ) }
-)
-instance : Entailment.F Propositional.F_Rfl_Tra1_Hrd where
-instance : Entailment.HasAxiomRfl Propositional.F_Rfl_Tra1_Hrd where
-  axiomRfl! {_ _} := ⟨by apply Hilbert.F.axm'; simp⟩
-instance : Entailment.HasAxiomTra1 Propositional.F_Rfl_Tra1_Hrd where
-  axiomTra1! {_ _ _} := ⟨by apply Hilbert.F.axm'; simp⟩
+protected abbrev F              : Logic α := HilbertF.F.logic
+protected abbrev F_Ser          : Logic α := HilbertF.F_Ser.logic
+protected abbrev F_Rfl          : Logic α := HilbertF.F_Rfl.logic
+protected abbrev F_Sym          : Logic α := HilbertF.F_Sym.logic
+protected abbrev F_Rfl_Sym      : Logic α := HilbertF.F_Rfl_Sym.logic
+protected abbrev F_Tra1         : Logic α := HilbertF.F_Tra1.logic
+protected abbrev F_Rfl_Tra1     : Logic α := HilbertF.F_Rfl_Tra1.logic
+/-
+protected abbrev F_Tra1_Hrd     : Logic α := HilbertF.F_Tra1_Hrd.logic
+protected abbrev F_Rfl_Tra1_Hrd : Logic α := HilbertF.F_Rfl_Tra1_Hrd.logic
+-/
 
 end LO.Propositional
+
 end

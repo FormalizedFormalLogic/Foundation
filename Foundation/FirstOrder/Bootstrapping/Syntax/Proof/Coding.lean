@@ -185,6 +185,7 @@ noncomputable instance (Γ : Finset (Proposition L)) : GödelQuote (T ⟹₂ Γ)
 
 lemma quote_def (d : (T : Schema L) ⟹₂ Γ) : (⌜d⌝ : V) = (⌜d⌝ : T.internalize V ⊢!ᵈᵉʳ ⌜Γ⌝).val := rfl
 
+set_option backward.isDefEq.respectTransparency false in
 lemma coe_typedQuote_val_eq (d : (T : Schema L) ⟹₂ Γ) : ↑(d.typedQuote ℕ).val = (d.typedQuote V).val :=
   match d with
   |   closed Δ φ h hn => by

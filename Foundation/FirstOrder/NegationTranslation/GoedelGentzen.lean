@@ -36,7 +36,7 @@ scoped[LO.FirstOrder] postfix:max "ᴺ" => Semiformula.doubleNegation
 
 @[simp] lemma doubleNegation_ex (φ : Semiformula L ξ (n + 1)) : (∃⁰ φ)ᴺ = ∼(∀⁰ ∼φᴺ) := rfl
 
-lemma doubleNegation_imply (φ ψ : Semiformula L ξ n) : (φ ➝ ψ)ᴺ = ∼(∼(∼φ)ᴺ ⋏ ∼ψᴺ) := by simp [imp_eq]
+lemma doubleNegation_imply (φ ψ : Semiformula L ξ n) : (φ 🡒 ψ)ᴺ = ∼(∼(∼φ)ᴺ ⋏ ∼ψᴺ) := by simp [imp_eq]
 
 @[simp] lemma doubleNegation_isNegative (φ : Semiformula L ξ n) : φᴺ.IsNegative := by
   induction φ using rec' <;> simp [*]
@@ -100,16 +100,16 @@ def negDoubleNegation : (φ : Proposition L) → Λ ⊢! ∼φᴺ ⭤ (∼φ)ᴺ
   | ⊤ => Entailment.ENNOO
   | ⊥ => Entailment.E_Id (φ := ∼⊥)
   | φ ⋏ ψ =>
-    have ihφ : Λ ⊢! ∼φᴺ ⭤ (∼φ)ᴺ := negDoubleNegation φ
-    have ihψ : Λ ⊢! ∼ψᴺ ⭤ (∼ψ)ᴺ := negDoubleNegation ψ
-    have : Λ ⊢! φᴺ ⋏ ψᴺ ⭤ ∼(∼φ)ᴺ ⋏ ∼(∼ψ)ᴺ :=
+    have ihφ : Λ ⊢! ∼φᴺ 🡘 (∼φ)ᴺ := negDoubleNegation φ
+    have ihψ : Λ ⊢! ∼ψᴺ 🡘 (∼ψ)ᴺ := negDoubleNegation ψ
+    have : Λ ⊢! φᴺ ⋏ ψᴺ 🡘 ∼(∼φ)ᴺ ⋏ ∼(∼ψ)ᴺ :=
       Entailment.EKK_of_E_of_E (iffnegOfNegIff (by simp) ihφ) (iffnegOfNegIff (by simp) ihψ)
     Entailment.ENN_of_E this
   | φ ⋎ ψ =>
-    have ihφ : Λ ⊢! ∼φᴺ ⭤ (∼φ)ᴺ := negDoubleNegation φ
-    have ihψ : Λ ⊢! ∼ψᴺ ⭤ (∼ψ)ᴺ := negDoubleNegation ψ
-    have : Λ ⊢! ∼φᴺ ⋏ ∼ψᴺ ⭤ (∼φ)ᴺ ⋏ (∼ψ)ᴺ := Entailment.EKK_of_E_of_E ihφ ihψ
-    have : Λ ⊢! ∼∼(∼φᴺ ⋏ ∼ψᴺ) ⭤ (∼φ)ᴺ ⋏ (∼ψ)ᴺ := Entailment.E_trans (DN_of_isNegative (by simp)) this
+    have ihφ : Λ ⊢! ∼φᴺ 🡘 (∼φ)ᴺ := negDoubleNegation φ
+    have ihψ : Λ ⊢! ∼ψᴺ 🡘 (∼ψ)ᴺ := negDoubleNegation ψ
+    have : Λ ⊢! ∼φᴺ ⋏ ∼ψᴺ 🡘 (∼φ)ᴺ ⋏ (∼ψ)ᴺ := Entailment.EKK_of_E_of_E ihφ ihψ
+    have : Λ ⊢! ∼∼(∼φᴺ ⋏ ∼ψᴺ) 🡘 (∼φ)ᴺ ⋏ (∼ψ)ᴺ := Entailment.E_trans (DN_of_isNegative (by simp)) this
     this
   | ∀⁰ φ =>
     have ihφ : Λ ⊢! ∼(free φ)ᴺ ⭤ (∼(free φ))ᴺ := negDoubleNegation (free φ)
@@ -138,7 +138,7 @@ lemma imply_doubleNegation (φ ψ : Proposition L) : Λ ⊢ (φᴺ ➝ ψᴺ) �
   apply Entailment.E!_intro
   · apply FiniteContext.deduct'!
     apply FiniteContext.deduct!
-    let Γ := [∼(∼φ)ᴺ ⋏ ∼ψᴺ, φᴺ ➝ ψᴺ]
+    let Γ := [∼(∼φ)ᴺ ⋏ ∼ψᴺ, φᴺ 🡒 ψᴺ]
     have : Γ ⊢[Λ] φᴺ := of'! (K!_left hφ₀) ⨀ (K!_left by_axm₀!)
     have : Γ ⊢[Λ] ψᴺ := by_axm₁! ⨀ this
     exact K!_right by_axm₀! ⨀ this
@@ -161,7 +161,7 @@ def gödelGentzen {Γ : Sequent L} : ⊢ᴷ Γ → (∼Γ)ᴺ ⊢[Λ]! ⊥
     have : (∼Γ)ᴺ ⊢[Λ]! ∼(∼φ)ᴺ ⋏ ∼(∼ψ)ᴺ := Entailment.K_intro (deduct ihφ) (deduct ihψ)
     deductInv (Entailment.dni' this)
   | or (Γ := Γ) (φ := φ) (ψ := ψ) d =>
-    have : (∼Γ)ᴺ ⊢[Λ]! (∼ψ)ᴺ ➝ (∼φ)ᴺ ➝ ⊥ := deduct <| deduct  <| gödelGentzen d
+    have : (∼Γ)ᴺ ⊢[Λ]! (∼ψ)ᴺ 🡒 (∼φ)ᴺ 🡒 ⊥ := deduct <| deduct  <| gödelGentzen d
     have : ((∼φ)ᴺ ⋏ (∼ψ)ᴺ :: (∼Γ)ᴺ) ⊢[Λ]! ⊥ :=
       Entailment.FiniteContext.weakening (by simp) this ⨀ (Entailment.K_right (nthAxm 0)) ⨀ (Entailment.K_left (nthAxm 0))
     this

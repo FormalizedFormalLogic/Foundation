@@ -125,7 +125,7 @@ end Derivation
 namespace Proof
 
 theorem forget {φ : Sentence L} : 𝐋𝐋 ⊢ φ → 𝐋𝐊 ⊢ φ.forget := fun h ↦ by
-  have : 𝐋𝐋₀ ⊢ (φ : Statement L) := h
+  have : 𝐋𝐋₀ ⊢ (φ : Proposition L) := h
   exact FirstOrder.Proof.cast.mpr ⟨by simpa using Derivation.forget this.get⟩
 
 end Proof

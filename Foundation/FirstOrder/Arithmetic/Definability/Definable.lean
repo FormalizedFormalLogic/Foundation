@@ -403,6 +403,7 @@ lemma not (h : Γ.alt-[m].Definable P) :
 lemma impDelta (hp : 𝚫-[m].Definable P) (hq : 𝚫-[m].Definable Q) :
     𝚫-[m].Definable fun x ↦ P x → Q x := (hp.notDelta.or hq).of_iff (by intro x; simp [imp_iff_not_or])
 
+set_option backward.isDefEq.respectTransparency false in
 lemma imp (h₁ : Γ.alt-[m].Definable P) (h₂ : Γ-[m].Definable Q) :
     Γ-[m].Definable (fun v ↦ P v → Q v) := by
   match Γ with
@@ -789,13 +790,13 @@ lemma ball_lt {Γ} {P : (Fin k → V) → V → Prop} {f : (Fin k → V) → V}
     ⟨ .mkSigma (∃⁰ (bf.val ⋏ (∀⁰[“#0 < #1”] φ.val ⇜ (#0 :> (#·.succ.succ))))) (by simp),
       by intro v; simp [hbf.df.iff, hp.df.iff] ⟩
   | 𝚷 => exact
-    ⟨ .mkPi (∀⁰ (bf.val ➝ (∀⁰[“#0 < #1”] φ.val ⇜ (#0 :> (#·.succ.succ))))) (by simp),
+    ⟨ .mkPi (∀⁰ (bf.val 🡒 (∀⁰[“#0 < #1”] φ.val ⇜ (#0 :> (#·.succ.succ))))) (by simp),
       by intro v; simp [hbf.df.iff, hp.df.iff] ⟩
   | 𝚫 =>
     exact .of_sigma_of_pi
       ⟨ .mkSigma (∃⁰ (bf.val ⋏ (∀⁰[“#0 < #1”] φ.sigma.val ⇜ (#0 :> (#·.succ.succ))))) (by simp),
           by intro v; simp [hbf.df.iff, hp.df.iff, HierarchySymbol.Semiformula.val_sigma] ⟩
-      ⟨ .mkPi (∀⁰ (bf.val ➝ (∀⁰[“#0 < #1”] φ.pi.val ⇜ (#0 :> (#·.succ.succ))))) (by simp),
+      ⟨ .mkPi (∀⁰ (bf.val 🡒 (∀⁰[“#0 < #1”] φ.pi.val ⇜ (#0 :> (#·.succ.succ))))) (by simp),
         by intro v; simp [hbf.df.iff, hp.df.iff, hp.proper.iff'] ⟩
 
 lemma bexs_lt {Γ} {P : (Fin k → V) → V → Prop} {f : (Fin k → V) → V}
@@ -808,13 +809,13 @@ lemma bexs_lt {Γ} {P : (Fin k → V) → V → Prop} {f : (Fin k → V) → V}
     ⟨ .mkSigma (∃⁰ (bf.val ⋏ (∃⁰[“#0 < #1”] φ.val ⇜ (#0 :> (#·.succ.succ))))) (by simp),
       by intro v; simp [hbf.df.iff, hp.df.iff] ⟩
   | 𝚷 => exact
-    ⟨ .mkPi (∀⁰ (bf.val ➝ (∃⁰[“#0 < #1”] φ.val ⇜ (#0 :> (#·.succ.succ))))) (by simp),
+    ⟨ .mkPi (∀⁰ (bf.val 🡒 (∃⁰[“#0 < #1”] φ.val ⇜ (#0 :> (#·.succ.succ))))) (by simp),
       by intro v; simp [hbf.df.iff, hp.df.iff] ⟩
   | 𝚫 =>
     exact .of_sigma_of_pi
       ⟨ .mkSigma (∃⁰ (bf.val ⋏ (∃⁰[“#0 < #1”] φ.sigma.val ⇜ (#0 :> (#·.succ.succ))))) (by simp),
           by intro v; simp [hbf.df.iff, hp.df.iff, HierarchySymbol.Semiformula.val_sigma] ⟩
-      ⟨ .mkPi (∀⁰ (bf.val ➝ (∃⁰[“#0 < #1”] φ.pi.val ⇜ (#0 :> (#·.succ.succ))))) (by simp),
+      ⟨ .mkPi (∀⁰ (bf.val 🡒 (∃⁰[“#0 < #1”] φ.pi.val ⇜ (#0 :> (#·.succ.succ))))) (by simp),
         by intro v; simp [hbf.df.iff, hp.df.iff, hp.proper.iff'] ⟩
 
 lemma ball_le [V ⊧ₘ* 𝗣𝗔⁻] {Γ} {P : (Fin k → V) → V → Prop} {f : (Fin k → V) → V}

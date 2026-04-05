@@ -12,7 +12,7 @@ open FirstOrder
 open FirstOrder.ProvabilityAbstraction
 
 variable {T₀ T : FirstOrder.Theory ℒₒᵣ} [T₀ ⪯ T] [Diagonalization T₀]
-         {𝔅 : Provability T₀ T} [𝔅.HBL] [ℕ ⊧ₘ* T] [∀ σ, 𝔅.SoundOn ℕ σ]
+         {𝔅 : Provability T₀ T} [𝔅.HBL] [ℕ ⊧ₘ* T] [𝔅.SoundOn ℕ]
          {A B : Formula ℕ}
 
 theorem S.arithmetical_soundness (h : Modal.S ⊢ A) (f : Realization 𝔅) : ℕ ⊧ₘ f A := by

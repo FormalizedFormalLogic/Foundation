@@ -37,7 +37,7 @@ def funcExt {k} (f : L.Func k) (v w : Fin k → Term L ℕ) : Proposition L :=
   simp [funcExt, Function.comp_def]
 
 def relExt {k} (r : L.Rel k) (v w : Fin k → Term L ℕ) : Proposition L :=
-  (Matrix.conj fun i ↦ op(=).operator ![v i, w i]) ➝ Semiformula.rel r v ➝ Semiformula.rel r w
+  (Matrix.conj fun i ↦ op(=).operator ![v i, w i]) 🡒 Semiformula.rel r v 🡒 Semiformula.rel r w
 
 @[simp] lemma rew_relExt (ω : Rew L ℕ 0 ℕ 0) {k} (r : L.Rel k) (v w : Fin k → Term L ℕ) :
     ω ▹ relExt r v w = relExt r (ω ∘ v) (ω ∘ w) := by
@@ -54,11 +54,11 @@ attribute [simp] EqSchema.refl EqSchema.symm EqSchema.trans EqSchema.funcExt EqS
 
 variable (L)
 
-abbrev eqSchema : Schema L := ⟨EqSchema⟩
+abbrev eqSchema : Schema L := {φ | EqSchema φ}
 
 notation "𝗘𝗤" => eqSchema
 
-instance : Schema.IsClosed (𝗘𝗤 L) := ⟨by rintro ω _ (_ | _ | _ | _ | _) <;> simp⟩
+instance : Schema.IsClosed (𝗘𝗤 L) := ⟨by rintro ω _ (_ | _ | _ | _ | _) <;> simp [eqSchema]⟩
 
 end Eq
 
@@ -69,11 +69,11 @@ namespace Eq
 variable (L) (M : Type*) [Nonempty M] [Structure L M]
 
 @[simp] instance models_eqSchema [Structure.Eq L M] :
-    M↓[L] ⊧* 𝗘𝗤 L := ⟨by
+    M↓[L] ⊧* ↑↑(𝗘𝗤 L) := ⟨by
   intro σ h
   have : ∃ φ, Eq.EqSchema φ ∧ Semiformula.univCl φ = σ := by simpa using h
   rcases this with ⟨φ, (_ | _ | _ | _ | _), rfl⟩ <;> simp [models_iff, Eq.funcExt, Eq.relExt]
-  · grind
+  · simp at h; grind
   · grind
   · simp [Function.comp_def]; grind
   · simp [Function.comp_def]; grind⟩
@@ -195,6 +195,7 @@ lemma elementaryEquiv : QuotEq L M ≡ₑ[L] M := ⟨models_iff⟩
 
 variable {L M}
 
+set_option backward.isDefEq.respectTransparency false in
 lemma rel_eq (a b : QuotEq L M) : op(=)[L].val ![a, b] ↔ a = b := by
   induction' a using Quotient.ind with a
   induction' b using Quotient.ind with b

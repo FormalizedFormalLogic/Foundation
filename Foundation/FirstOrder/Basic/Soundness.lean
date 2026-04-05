@@ -75,7 +75,7 @@ theorem Provable.sound {M : Type*} [s : Structure L M] [Nonempty M] {φ : Propos
 variable {𝔖 : Schema L}
 
 theorem Schema.sound_proposition {M : Type*} [s : Structure L M] [Nonempty M] :
-    𝔖 ⊢ φ → M↓[L] ⊧* 𝔖 → ∀ f : ℕ → M, φ.Evalf f := fun b H f ↦ by
+    𝔖 ⊢ φ → M↓[L] ⊧* ↑↑𝔖 → ∀ f : ℕ → M, φ.Evalf f := fun b H f ↦ by
   rcases Schema.provable_iff.mp b with ⟨Γ, hΓ, ⟨b⟩⟩
   have : φ.Evalf f ∨ ∃ ψ, ∼ψ ∈ Γ ∧ ψ.Evalf f := by simpa using b.sound f
   rcases this with (h | ⟨ψ, hψ, h⟩)
@@ -100,23 +100,24 @@ instance sound (𝔖 : Schema L) :
     Sound (Entailment.pullback 𝔖 ((↑·) : Sentence L → Proposition L)) (Semantics.models (Struc.{v, u} L) 𝔖) :=
   ⟨Schema.sound_sentence⟩
 
-lemma models_of_subtheory {𝔖 𝔗 : Schema L} [𝔖 ⪯ 𝔗] {M : Type*} [Structure L M] [Nonempty M] : M↓[L] ⊧* 𝔗 → M↓[L] ⊧* 𝔖 :=
+lemma models_of_subtheory {𝔖 𝔗 : Schema L} [𝔖 ⪯ 𝔗] {M : Type*} [Structure L M] [Nonempty M] : M↓[L] ⊧* ↑↑𝔗 → M↓[L] ⊧* ↑↑𝔖 :=
   fun hM ↦ ⟨fun {σ} hσ ↦ by
     rcases show ∃ φ ∈ 𝔖, univCl φ = σ by simpa using hσ with ⟨φ, hφ, rfl⟩
-    have : 𝔗 ⊢ φ := (inferInstanceAs (𝔖 ⪯ 𝔗)).pbl (Entailment.by_axm hφ)
+    have : 𝔖 ⪯ 𝔗 := inferInstance
+    have : 𝔗 ⊢ φ := this.pbl (Entailment.by_axm hφ)
     exact Schema.sound_proposition' this hM⟩
 
-lemma consistent_of_satisfiable (h : Semantics.Satisfiable (Struc.{v, u} L) 𝔖) : Entailment.Consistent 𝔖 :=
+lemma consistent_of_satisfiable (h : Semantics.Satisfiable (Struc.{v, u} L) ↑↑𝔖) : Entailment.Consistent 𝔖 :=
   Entailment.Pullback.consistent <| Sound.consistent_of_satisfiable (𝓢 := Entailment.pullback 𝔖 ((↑·) : Sentence L → Proposition L)) h
 
-lemma consistent_of_model (𝔖 : Schema L) (M : Type*) [Structure L M] [Nonempty M] [hM : M↓[L] ⊧* 𝔖] :
+lemma consistent_of_model (𝔖 : Schema L) (M : Type*) [Structure L M] [Nonempty M] [hM : M↓[L] ⊧* ↑↑𝔖] :
     Entailment.Consistent 𝔖 := consistent_of_satisfiable ⟨M↓[L], hM⟩
 
-lemma unprovable_of_countermodel {M : Type*} [Structure L M] [Nonempty M] [hM : M↓[L] ⊧* 𝔖] {σ} : M↓[L] ⊭ σ → 𝔖 ⊬ ↑σ := by
+lemma unprovable_of_countermodel {M : Type*} [Structure L M] [Nonempty M] [hM : M↓[L] ⊧* ↑↑𝔖] {σ} : M↓[L] ⊭ σ → 𝔖 ⊬ ↑σ := by
   contrapose!; intro h
   exact Schema.sound_sentence h hM
 
-lemma models_of_provable {M : Type*} [Nonempty M] [Structure L M] (hT : M↓[L] ⊧* 𝔖) {σ : Sentence L} (h : 𝔖 ⊢ ↑σ) :
+lemma models_of_provable {M : Type*} [Nonempty M] [Structure L M] (hT : M↓[L] ⊧* ↑↑𝔖) {σ : Sentence L} (h : 𝔖 ⊢ ↑σ) :
     M↓[L] ⊧ σ := consequence_iff.mp (Schema.sound_sentence h) M inferInstance
 
 end sound

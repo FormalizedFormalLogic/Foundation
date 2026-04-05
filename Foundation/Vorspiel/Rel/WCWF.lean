@@ -47,7 +47,7 @@ lemma antisymm_of_weaklyConverseWellFounded : WeaklyConverseWellFounded rel → 
   contrapose!;
   rintro ⟨x, y, Rxy, Ryz, hxy⟩;
   apply ConverseWellFounded.iff_has_max.not.mpr;
-  push_neg;
+  push Not;
   use {x, y};
   constructor;
   . simp;

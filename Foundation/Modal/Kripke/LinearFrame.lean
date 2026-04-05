@@ -115,7 +115,7 @@ lemma natLT_validates_AxiomZ : natLT ⊧ (Axioms.Z (.atom 0)) := by
         ({ u | ¬Satisfies ⟨natLT, V⟩ u (.atom 0) })
         (by
           replace hy := Satisfies.box_def.not.mp hy;
-          push_neg at hy;
+          push Not at hy;
           obtain ⟨u, lt_yu, hu⟩ := hy;
           refine ⟨⟨u, ?_⟩, ?_⟩;
           . apply Finset.mem_Ioc.mpr;
@@ -128,7 +128,7 @@ lemma natLT_validates_AxiomZ : natLT ⊧ (Axioms.Z (.atom 0)) := by
       have ⟨lt_yu, le_uz⟩ := Finset.mem_Ioc.mp u_ioc;
       have := not_imp_not.mpr (hx₁ u (lt_trans lt_xy lt_yu)) hu₁;
       replace this := Satisfies.box_def.not.mp this;
-      push_neg at this;
+      push Not at this;
       obtain ⟨v, lt_uv, hv⟩ := this;
       have := hu ⟨v, ?_⟩ hv;
       . contradiction;
@@ -136,7 +136,7 @@ lemma natLT_validates_AxiomZ : natLT ⊧ (Axioms.Z (.atom 0)) := by
         apply hv;
         apply hz;
         replace hC := Finset.mem_Ioc.not.mp hC;
-        push_neg at hC;
+        push Not at hC;
         apply hC;
         exact lt_trans lt_yu lt_uv;
   . apply hx₁ <;> assumption;
@@ -156,20 +156,20 @@ lemma natLE_validates_AxiomDum : natLE ⊧ (Axioms.Dum (.atom 0)) := by
         ({ u | ¬Satisfies ⟨natLT, V⟩ u (.atom 0) })
         (by
           replace hx₃ := Satisfies.box_def.not.mp hx₃;
-          push_neg at hx₃;
+          push Not at hx₃;
           obtain ⟨u, lt_xu, hu⟩ := hx₃;
           replace lt_xu : x < u := by
             rcases (lt_or_eq_of_le lt_xu) with h | rfl;
             . assumption;
             . exfalso;
               replace hu := Satisfies.imp_def₂.not.mp hu;
-              push_neg at hu;
+              push Not at hu;
               exact hx $ hu.1;
           replace hu := Satisfies.imp_def₂.not.mp hu;
-          push_neg at hu;
+          push Not at hu;
           obtain ⟨hu₁, hu₂⟩ := hu;
           replace hu₂ := Satisfies.box_def.not.mp hu₂;
-          push_neg at hu₂;
+          push Not at hu₂;
           obtain ⟨v, lt_uv, hv⟩ := hu₂;
           replace lt_uv : u < v := by
             rcases (lt_or_eq_of_le lt_uv) with h | rfl;
@@ -190,20 +190,20 @@ lemma natLE_validates_AxiomDum : natLE ⊧ (Axioms.Dum (.atom 0)) := by
       have hu₂ := hx₁ u (le_of_lt lt_xu);
       have := not_imp_not.mpr hu₂ hu₁;
       replace this := Satisfies.box_def.not.mp this;
-      push_neg at this;
+      push Not at this;
       obtain ⟨v, lt_uv, hv⟩ := this;
       replace lt_uv : u < v := by
         rcases (lt_or_eq_of_le lt_uv) with h | rfl;
         . assumption;
         . exfalso;
           replace hv := Satisfies.imp_def₂.not.mp hv;
-          push_neg at hv;
+          push Not at hv;
           exact hu₁ hv.1;
       replace hv := Satisfies.imp_def₂.not.mp hv;
-      push_neg at hv;
+      push Not at hv;
       obtain ⟨hv₁, hv₂⟩ := hv;
       replace hv₂ := Satisfies.box_def.not.mp hv₂;
-      push_neg at hv₂;
+      push Not at hv₂;
       obtain ⟨w, lt_vw, hw⟩ := hv₂;
       replace lt_vw : v < w := by
         rcases (lt_or_eq_of_le lt_vw) with h | rfl;

@@ -54,7 +54,7 @@ lemma box_at_terminal {x : F.World} (hx : x ∈ F.terminals) (h : Satisfies ⟨F
 
 lemma dia_at_terminal {x : F.World} (hx : x ∈ F.terminals) (h : ¬Satisfies ⟨F, V⟩ x φ) : ¬Satisfies ⟨F, V⟩ x (◇φ) := by
   apply Satisfies.dia_def.not.mpr;
-  push_neg;
+  push Not;
   intro y Rxy;
   have := hx Rxy;
   subst this;
@@ -74,7 +74,7 @@ instance : Modal.Grz ⪯ Modal.GrzPoint2 := Hilbert.Normal.weakerThan_of_subset_
 lemma GrzPoint2_of_Grz (h : (φ.atoms.image (λ a => Axioms.Point2 (.atom a))).toSet *⊢[Modal.Grz] φ) : Modal.GrzPoint2 ⊢ φ := by
   obtain ⟨Γ, hΓ₁, hΓ₂⟩ := Context.provable_iff.mp h;
   simp only [Finset.coe_image, Set.mem_image, Finset.mem_coe] at hΓ₁;
-  replace hΓ₂ : Modal.GrzPoint2 ⊢ ⋀Γ ➝ φ := WeakerThan.pbl $ FiniteContext.provable_iff.mp hΓ₂;
+  replace hΓ₂ : Modal.GrzPoint2 ⊢ ⋀Γ 🡒 φ := WeakerThan.pbl $ FiniteContext.provable_iff.mp hΓ₂;
   exact hΓ₂ ⨀ by
     apply Conj₂!_intro;
     intro γ hγ;
@@ -83,7 +83,7 @@ lemma GrzPoint2_of_Grz (h : (φ.atoms.image (λ a => Axioms.Point2 (.atom a))).t
 
 lemma not_Grz_of_not_GrzPoint2 (h : Modal.GrzPoint2 ⊬ φ) : (φ.atoms.image (λ a => Axioms.Point2 (.atom a))).toList ⊬[Modal.Grz] φ := by
   have := Context.provable_iff.not.mp $ not_imp_not.mpr GrzPoint2_of_Grz h;
-  push_neg at this;
+  push Not at this;
   convert this ((φ.atoms.image (λ a => Axioms.Point2 (.atom a))).toList) $ by simp;
 
 end
@@ -123,7 +123,7 @@ instance : Complete Modal.GrzPoint2 FrameClass.finite_GrzPoint2 := ⟨by
   contrapose;
   intro hφ;
 
-  replace hφ : Modal.Grz ⊬ ⋀((φ.atoms.image (λ a => Axioms.Point2 (atom a))).toList) ➝ φ := not_Grz_of_not_GrzPoint2 hφ;
+  replace hφ : Modal.Grz ⊬ ⋀((φ.atoms.image (λ a => Axioms.Point2 (atom a))).toList) 🡒 φ := not_Grz_of_not_GrzPoint2 hφ;
   generalize eΓ : (φ.atoms.image (λ a => Axioms.Point2 (atom a))).toList = Γ at hφ;
   obtain ⟨M, r, hM, hΓφ⟩ := exists_model_world_of_not_validOnFrameClass $ not_imp_not.mpr (Complete.complete (𝓢 := Modal.Grz) (𝓜 := FrameClass.finite_Grz)) hφ;
   replace hM := Set.mem_setOf_eq.mp hM;
@@ -134,7 +134,7 @@ instance : Complete Modal.GrzPoint2 FrameClass.finite_GrzPoint2 := ⟨by
   have : RM.IsPartialOrder := inferInstance;
 
   replace hΓφ : ¬(Satisfies RM r'.1 (⋀Γ) → Satisfies RM r'.1 φ) := Satisfies.imp_def.not.mp $ Model.pointGenerate.modal_equivalent_at_root (r := r) |>.not.mpr hΓφ;
-  push_neg at hΓφ;
+  push Not at hΓφ;
   obtain ⟨hΓ, hφ⟩ := hΓφ;
 
   let M' : Kripke.Model := {
@@ -167,7 +167,7 @@ instance : Complete Modal.GrzPoint2 FrameClass.finite_GrzPoint2 := ⟨by
       have : ¬Satisfies _ t' (◇atom a) := Kripke.Satisfies.dia_at_terminal t'_terminal hy';
       have : ¬Satisfies _ r'.1 (□(◇atom a)) := by
         apply Satisfies.box_def.not.mpr;
-        push_neg;
+        push Not;
         use t';
         constructor;
         . grind;
@@ -180,7 +180,7 @@ instance : Complete Modal.GrzPoint2 FrameClass.finite_GrzPoint2 := ⟨by
           use a;
         . assumption;
       have := Satisfies.dia_def.not.mp this;
-      push_neg at this;
+      push Not at this;
       have : ¬Satisfies _ t (□atom a) := this t (by grind);
       have : Satisfies _ t (□atom a) := Kripke.Satisfies.box_at_terminal t_terminal hy;
       contradiction;
@@ -271,7 +271,7 @@ instance : Modal.Grz ⪱ Modal.GrzPoint2 := by
           antisymm := by simp [M]; omega;
         };
       . apply Satisfies.imp_def₂.not.mpr;
-        push_neg;
+        push Not;
         constructor;
         . apply Satisfies.dia_def.mpr;
           use 1;
@@ -281,12 +281,12 @@ instance : Modal.Grz ⪱ Modal.GrzPoint2 := by
             simp [Satisfies, M];
             grind;
         . apply Satisfies.box_def.not.mpr;
-          push_neg;
+          push Not;
           use 2;
           constructor;
           . omega;
           . apply Satisfies.dia_def.not.mpr;
-            push_neg;
+            push Not;
             simp [M, Semantics.Models, Satisfies, Frame.Rel'];
 
 instance : Modal.S4Point2McK ⪱ Modal.GrzPoint2 := by

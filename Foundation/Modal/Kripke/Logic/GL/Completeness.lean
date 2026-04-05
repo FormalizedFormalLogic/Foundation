@@ -82,12 +82,12 @@ lemma truthlemma_lemma2
   apply hψ₂;
   have := Context.deduct! $ Context.weakening! (Γ := Γ₁ ∪ Γ₂) (Δ := insert (-ψ) (insert (□ψ) Γ₁)) ?_ hC;
   . replace : (insert (□ψ) Γ₁) *⊢[Modal.GL] ψ := of_imply_complement_bot this;
-    replace : ↑Γ₁ *⊢[Modal.GL] □ψ ➝ ψ:= Context.deduct! this;
-    replace : ↑(□'Γ₁) *⊢[Modal.GL] □(□ψ ➝ ψ) := by simpa using Context.nec! this;
+    replace : ↑Γ₁ *⊢[Modal.GL] □ψ 🡒 ψ:= Context.deduct! this;
+    replace : ↑(□'Γ₁) *⊢[Modal.GL] □(□ψ 🡒 ψ) := by simpa using Context.nec! this;
     replace : ↑(□'Γ₁) *⊢[Modal.GL] □ψ := axiomL! ⨀ this;
     replace : ↑(□'□⁻¹'X.1 ∪ □^[2]'□⁻¹'X.1) *⊢[Modal.GL] □ψ := Context.weakening! ?_ this;
-    . replace : ↑(□'□⁻¹'X.1) *⊢[Modal.GL] ((□^[2]'□⁻¹'X.1).conj) ➝ □ψ := FConj_DT'.mpr this;
-      replace : ↑(□'□⁻¹'X.1) *⊢[Modal.GL] (□'□⁻¹'X.1).conj ➝ □ψ := C!_trans ?_ this;
+    . replace : ↑(□'□⁻¹'X.1) *⊢[Modal.GL] ((□^[2]'□⁻¹'X.1).conj) 🡒 □ψ := FConj_DT'.mpr this;
+      replace : ↑(□'□⁻¹'X.1) *⊢[Modal.GL] (□'□⁻¹'X.1).conj 🡒 □ψ := C!_trans ?_ this;
       . replace : ↑(□'□⁻¹'X.1 ∪ □'□⁻¹'↑X) *⊢[Modal.GL] □ψ := FConj_DT'.mp this;
         have : X *⊢[Modal.GL] □ψ := Context.weakening! (by grind) this;
         exact membership_iff hψ₁ |>.mpr this;
@@ -128,19 +128,19 @@ lemma truthlemma {X : (miniCanonicalModel φ).World} (q_sub : ψ ∈ φ.subformu
     . contrapose;
       intro h;
       apply Satisfies.imp_def.not.mpr;
-      push_neg;
+      push Not;
       constructor;
       . apply ihq ?_ |>.mpr;
         apply iff_not_mem_imp ?_ ?_ ?_ |>.mp h |>.1;
         all_goals grind;
       . apply ihr ?_ |>.not.mpr;
         apply iff_not_mem_compl ?_ |>.not.mpr;
-        push_neg;
+        push Not;
         apply iff_not_mem_imp ?_ ?_ ?_ |>.mp h |>.2;
         all_goals grind;
     . contrapose!;
       intro h;
-      replace h := Satisfies.imp_def.not.mp h; push_neg at h;
+      replace h := Satisfies.imp_def.not.mp h; push Not at h;
       obtain ⟨hq, hr⟩ := h;
       replace hq : ψ ∈ X := ihq ?_ |>.mp hq;
       replace hr : χ ∉ X := ihr ?_ |>.not.mp hr;
@@ -175,7 +175,7 @@ lemma truthlemma {X : (miniCanonicalModel φ).World} (q_sub : ψ ∈ φ.subformu
             simp;
       . apply ih ?_ |>.not.mpr;
         . apply iff_not_mem_compl (by grind) |>.not.mpr;
-          push_neg;
+          push Not;
           apply hY₁.2;
           simp;
         . grind;
@@ -189,7 +189,7 @@ instance FFP : Complete Modal.GL Kripke.FrameClass.finite_GL := ⟨by
   contrapose;
   intro h;
   apply Semantics.set_models_iff.not.mpr;
-  push_neg;
+  push Not;
   use (miniCanonicalFrame φ);
   constructor;
   . apply Set.mem_setOf_eq.mpr;
@@ -208,7 +208,7 @@ instance FFP : Complete Modal.GL Kripke.FrameClass.finite_GL := ⟨by
     . tauto;
     . apply truthlemma ?_ |>.not.mpr;
       apply iff_not_mem_compl ?_ |>.not.mpr
-      . push_neg;
+      . push Not;
         apply hX₁;
         tauto;
       all_goals grind;
@@ -238,7 +238,7 @@ theorem finite_completeness_TFAE : [
 lemma iff_unprovable_exists_finite_rooted_model : Modal.GL ⊬ φ ↔ ∃ M : Model, ∃ _ : M.IsFinite, ∃ _ : M.IsTransitive, ∃ _ : M.IsIrreflexive, ∃ _ : M.IsRooted, ¬M.root.1 ⊧ φ := by
   apply Iff.not_left;
   apply Iff.trans $ finite_completeness_TFAE (φ := φ) |>.out 0 3;
-  push_neg;
+  push Not;
   tauto;
 
 theorem fintype_completeness_TFAE : [
@@ -264,7 +264,7 @@ theorem fintype_completeness_TFAE : [
 lemma iff_unprovable_exists_fintype_rooted_model : Modal.GL ⊬ φ ↔ ∃ M : Model, ∃ _ : Fintype M, ∃ _ : M.IsTransitive, ∃ _ : M.IsIrreflexive, ∃ _ : M.IsRooted, ¬M.root.1 ⊧ φ := by
   apply Iff.not_left;
   apply Iff.trans $ fintype_completeness_TFAE (φ := φ) |>.out 0 2;
-  push_neg;
+  push Not;
   tauto;
 
 end GL.Kripke

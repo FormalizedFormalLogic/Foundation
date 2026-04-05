@@ -21,7 +21,7 @@ def toModalFormula (φ : Formula α) (_ : φ.RhdFree := by grind) : Modal.Formul
   match φ with
   | atom a  => .atom a
   | ⊥       => ⊥
-  | imp φ ψ => (φ.toModalFormula) ➝ (ψ.toModalFormula)
+  | imp φ ψ => (φ.toModalFormula) 🡒 (ψ.toModalFormula)
   | box φ   => □(φ.toModalFormula)
 
 end LO.InterpretabilityLogic.Formula

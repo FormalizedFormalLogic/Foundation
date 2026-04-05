@@ -219,8 +219,8 @@ lemma modelsTheory [h : M₁ ≡ₑ[L] M₂] {T : Theory L} :
 
 variable (M₁ M₂)
 
-lemma modelsTheory' [M₁ ≡ₑ[L] M₂] (T : Theory L) [M₂↓[L] ⊧* T] :
-    M₁↓[L] ⊧* T := modelsTheory.mpr (inferInstanceAs (M₂↓[L] ⊧* T))
+lemma modelsTheory' [M₁ ≡ₑ[L] M₂] (T : Theory L) [h : M₂↓[L] ⊧* T] :
+    M₁↓[L] ⊧* T := modelsTheory.mpr h
 
 variable {M₁ M₂}
 
