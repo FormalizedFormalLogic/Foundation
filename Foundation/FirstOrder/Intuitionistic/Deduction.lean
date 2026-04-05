@@ -14,6 +14,8 @@ open Semiformulaᵢ
 
 variable {L : Language.{u}} {T : Theory L}
 
+abbrev Schemaᵢ (L : Language) := Set (Propositionᵢ L)
+
 structure Hilbertᵢ (L : Language) where
   axiomSet : Set (Propositionᵢ L)
   rewrite_closed {φ : Propositionᵢ L} : φ ∈ axiomSet → ∀ f : ℕ → SyntacticTerm L, Rew.rewrite f ▹ φ ∈ axiomSet

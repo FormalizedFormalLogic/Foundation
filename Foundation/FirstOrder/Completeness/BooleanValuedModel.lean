@@ -73,7 +73,7 @@ lemma hValue_ext {φ ψ : Propositionᵢ L} : (∀ p : ℂ, p.val ⊩ φ ↔ p.v
 @[simp] lemma hValue_falsum : ♯(⊥ : Propositionᵢ L) = ⊥ := by
   ext p; simp [hValue, IsForced.falsum, p.prop]
 
-@[simp] lemma hValue_imply_eq_himp {φ ψ : Propositionᵢ L} : ♯(φ ➝ ψ) = (♯φ ⇨ ♯ψ) := by
+@[simp] lemma hValue_imply_eq_himp {φ ψ : Propositionᵢ L} : ♯(φ 🡒 ψ) = (♯φ ⇨ ♯ψ) := by
   ext p
   suffices (∀ q ≤ p.val, q ⊩ φ → q ⊩ ψ) ↔ ∀ q ≤ p, q.val ⊩ φ → q.val ⊩ ψ by
     simpa [IsForced.imply, LowerSet.mem_himp_iff]
@@ -88,6 +88,7 @@ lemma hValue_ext {φ ψ : Propositionᵢ L} : (∀ p : ℂ, p.val ⊩ φ ↔ p.v
 @[simp] lemma hValue_neg_eq_himp_bot (φ : Propositionᵢ L) : ♯(∼φ) = (♯φ)ᶜ := by
   simp [Semiformulaᵢ.neg_def]
 
+set_option backward.isDefEq.respectTransparency false in
 lemma hValue_eq_top_iff_provable {φ : Proposition L} : ♯φᴺ = ⊤ ↔ 𝐋𝐊¹ ⊢ φ := calc
   ♯φᴺ = ⊤ ↔ ⊤ ≤ ♯φᴺ := by simp only [top_le_iff]
   _       ↔ (∀ p : ℂ, p.val ⊩ φᴺ) := by simp [SetLike.le_def]

@@ -451,7 +451,7 @@ open Classical
     · exact ⟨Forces.orEquiv.symm <| .inl hφ⟩
     · exact ⟨Forces.orEquiv.symm <| .inr hψ⟩
 
-lemma imply {p : ℙ} {φ ψ : Propositionᵢ L} : p ⊩ φ ➝ ψ ↔ (∀ q ≤ p, q ⊩ φ → q ⊩ ψ) := by
+lemma imply {p : ℙ} {φ ψ : Propositionᵢ L} : p ⊩ φ 🡒 ψ ↔ (∀ q ≤ p, q ⊩ φ → q ⊩ ψ) := by
   constructor
   · rintro ⟨b⟩ q ⟨sqp⟩ ⟨bφ⟩
     exact ⟨b.implyEquiv _ sqp bφ⟩
@@ -489,7 +489,7 @@ instance : ForcingRelation.PreIntKripke ℙ (· ≥ ·) where
   monotone hφ _ hpq := hφ.monotone hpq
 
 lemma efq {p : ℙ} (h : p ⊩ ⊥) (φ : Propositionᵢ L) : p ⊩ φ := by
-  have : p ⊩ ⊥ ➝ φ := ⟨Forces.efq φ p⟩
+  have : p ⊩ ⊥ 🡒 φ := ⟨Forces.efq φ p⟩
   exact imply.mp this p (by simp) h
 
 lemma sound_minimal {φ : Propositionᵢ L} : 𝗠𝗶𝗻¹ ⊢ φ → ℙ ∀⊩ φ := by
@@ -553,7 +553,7 @@ scoped prefix:max "♯" => hValue
 @[simp] lemma hValue_falsum : ♯(⊥ : Propositionᵢ L) = ⊥ := by
   ext p; simp [hValue, IsForced.falsum, p.prop]
 
-@[simp] lemma hValue_imply_eq_himp {φ ψ : Propositionᵢ L} : ♯(φ ➝ ψ) = (♯φ ⇨ ♯ψ) := by
+@[simp] lemma hValue_imply_eq_himp {φ ψ : Propositionᵢ L} : ♯(φ 🡒 ψ) = (♯φ ⇨ ♯ψ) := by
   ext p
   suffices (∀ q ≤ p.val, q ⊩ φ → q ⊩ ψ) ↔ ∀ q ≤ p, q.val ⊩ φ → q.val ⊩ ψ by
     simpa [IsForced.imply, LowerSet.mem_himp_iff]
