@@ -25,12 +25,12 @@ namespace Eq
 
 protected abbrev refl (t : Term L ℕ) : Proposition L := op(=).operator ![t, t]
 
-protected abbrev symm (t u : Term L ℕ) : Proposition L := op(=).operator ![t, u] ➝ op(=).operator ![u, t]
+protected abbrev symm (t u : Term L ℕ) : Proposition L := op(=).operator ![t, u] 🡒 op(=).operator ![u, t]
 
-protected abbrev trans (t u v : Term L ℕ) : Proposition L := op(=).operator ![t, u] ➝ op(=).operator ![u, v] ➝ op(=).operator ![t, v]
+protected abbrev trans (t u v : Term L ℕ) : Proposition L := op(=).operator ![t, u] 🡒 op(=).operator ![u, v] 🡒 op(=).operator ![t, v]
 
 def funcExt {k} (f : L.Func k) (v w : Fin k → Term L ℕ) : Proposition L :=
-  (Matrix.conj fun i ↦ op(=).operator ![v i, w i]) ➝ op(=).operator ![Semiterm.func f v, Semiterm.func f w]
+  (Matrix.conj fun i ↦ op(=).operator ![v i, w i]) 🡒 op(=).operator ![Semiterm.func f v, Semiterm.func f w]
 
 @[simp] lemma rew_funcExt (ω : Rew L ℕ 0 ℕ 0) {k} (f : L.Func k) (v w : Fin k → Term L ℕ) :
     ω ▹ funcExt f v w = funcExt f (ω ∘ v) (ω ∘ w) := by
@@ -73,7 +73,7 @@ variable (L) (M : Type*) [Nonempty M] [Structure L M]
   intro σ h
   have : ∃ φ, Eq.EqSchema φ ∧ Semiformula.univCl φ = σ := by simpa using h
   rcases this with ⟨φ, (_ | _ | _ | _ | _), rfl⟩ <;> simp [models_iff, Eq.funcExt, Eq.relExt]
-  · simp at h; grind
+  · grind
   · grind
   · simp [Function.comp_def]; grind
   · simp [Function.comp_def]; grind⟩
@@ -84,7 +84,7 @@ def eqv (a b : M) : Prop := (@Semiformula.Operator.Eq.eq L _).val ![a, b]
 
 variable {L}
 
-variable [H : M↓[L] ⊧* 𝗘𝗤 L]
+variable [H : M↓[L] ⊧* ↑↑(𝗘𝗤 L)]
 
 open Semiterm Theory Semiformula
 
@@ -212,40 +212,40 @@ end Eq
 end Structure
 
 lemma consequence_iff_eq {𝔖 : Schema L} [𝗘𝗤 L ⪯ 𝔖] {σ : Sentence L} :
-    𝔖 ⊨[Struc.{v, u} L] σ ↔ (∀ (M : Type v) [Nonempty M] [Structure L M] [Structure.Eq L M], M↓[L] ⊧* 𝔖 → M↓[L] ⊧ σ) := by
+    ↑↑𝔖 ⊨[Struc.{v, u} L] σ ↔ (∀ (M : Type v) [Nonempty M] [Structure L M] [Structure.Eq L M], M↓[L] ⊧* ↑↑𝔖 → M↓[L] ⊧ σ) := by
   simp only [consequence_iff, Nonempty.forall]
   constructor
   · intro h M x s _ hM; exact h M x hM
   · intro h M x s hM
     have : Nonempty M := ⟨x⟩
-    have H : M↓[L] ⊧* 𝗘𝗤 L := models_of_subtheory hM
+    have H : M↓[L] ⊧* ↑↑(𝗘𝗤 L) := models_of_subtheory hM
     have e : Structure.Eq.QuotEq L M ≡ₑ[L] M := Structure.Eq.QuotEq.elementaryEquiv L M
     exact e.models.mp <| h (Structure.Eq.QuotEq L M) ⟦x⟧ (e.modelsTheory.mpr hM)
 
 lemma consequence_iff_eq' {𝔖 : Schema L} [𝗘𝗤 L ⪯ 𝔖] {σ : Sentence L} :
-    𝔖 ⊨[Struc.{v, u} L] σ ↔ (∀ (M : Type v) [Nonempty M] [Structure L M] [Structure.Eq L M] [M↓[L] ⊧* 𝔖], M↓[L] ⊧ σ) := by
+    ↑↑𝔖 ⊨[Struc.{v, u} L] σ ↔ (∀ (M : Type v) [Nonempty M] [Structure L M] [Structure.Eq L M] [M↓[L] ⊧* ↑↑𝔖], M↓[L] ⊧ σ) := by
   rw [consequence_iff_eq]
 
 lemma satisfiable_iff_eq {𝔖 : Schema L} [𝗘𝗤 L ⪯ 𝔖] :
-    Semantics.Satisfiable (Struc.{v, u} L) 𝔖 ↔ (∃ (M : Type v) (_ : Nonempty M) (_ : Structure L M) (_ : Structure.Eq L M), M↓[L] ⊧* 𝔖) := by
+    Semantics.Satisfiable (Struc.{v, u} L) ↑↑𝔖 ↔ (∃ (M : Type v) (_ : Nonempty M) (_ : Structure L M) (_ : Structure.Eq L M), M↓[L] ⊧* ↑↑𝔖) := by
   simp only [satisfiable_iff, Nonempty.exists, exists_prop]
   constructor
   · intro ⟨M, x, s, hM⟩;
     have : Nonempty M := ⟨x⟩
-    have H : M↓[L] ⊧* 𝗘𝗤 L := models_of_subtheory hM
+    have H : M↓[L] ⊧* ↑↑(𝗘𝗤 L) := models_of_subtheory hM
     have e : Structure.Eq.QuotEq L M ≡ₑ[L] M := Structure.Eq.QuotEq.elementaryEquiv L M
     exact ⟨Structure.Eq.QuotEq L M, ⟦x⟧, inferInstance, inferInstance, e.modelsTheory.mpr hM⟩
   · intro ⟨M, i, s, _, hM⟩; exact ⟨M, i, s, hM⟩
 
-instance {𝔖 : Schema L} [𝗘𝗤 L ⪯ 𝔖] (sat : Semantics.Satisfiable (Struc.{v, u} L) 𝔖) :
-    (ModelOfSat sat)↓[L] ⊧* 𝗘𝗤 L := models_of_subtheory (ModelOfSat.models sat)
+instance {𝔖 : Schema L} [𝗘𝗤 L ⪯ 𝔖] (sat : Semantics.Satisfiable (Struc.{v, u} L) ↑↑𝔖) :
+    (ModelOfSat sat)↓[L] ⊧* ↑↑(𝗘𝗤 L) := models_of_subtheory (ModelOfSat.models sat)
 
-def ModelOfSatEq {𝔖 : Schema L} [𝗘𝗤 L ⪯ 𝔖] (sat : Semantics.Satisfiable (Struc.{v, u} L) 𝔖) : Type _ :=
+def ModelOfSatEq {𝔖 : Schema L} [𝗘𝗤 L ⪯ 𝔖] (sat : Semantics.Satisfiable (Struc.{v, u} L) ↑↑𝔖) : Type _ :=
   Structure.Eq.QuotEq L (ModelOfSat sat)
 
 namespace ModelOfSatEq
 
-variable {𝔖 : Schema L} [𝗘𝗤 L ⪯ 𝔖] (sat : Semantics.Satisfiable (Struc.{v, u} L) 𝔖)
+variable {𝔖 : Schema L} [𝗘𝗤 L ⪯ 𝔖] (sat : Semantics.Satisfiable (Struc.{v, u} L) ↑↑𝔖)
 
 noncomputable instance : Nonempty (ModelOfSatEq sat) := Structure.Eq.QuotEq.inhabited
 
@@ -253,11 +253,11 @@ noncomputable instance struc : Structure L (ModelOfSatEq sat) := Structure.Eq.Qu
 
 noncomputable instance : Structure.Eq L (ModelOfSatEq sat) := Structure.Eq.QuotEq.structureEq
 
-lemma models : (ModelOfSatEq sat)↓[L] ⊧* 𝔖 :=
+lemma models : (ModelOfSatEq sat)↓[L] ⊧* ↑↑𝔖 :=
   have e : ModelOfSatEq sat ≡ₑ[L] ModelOfSat sat := Structure.Eq.QuotEq.elementaryEquiv L (ModelOfSat sat)
   e.modelsTheory.mpr (ModelOfSat.models _)
 
-instance mod : (ModelOfSatEq sat)↓[L] ⊧* 𝔖 := models sat
+instance mod : (ModelOfSatEq sat)↓[L] ⊧* ↑↑𝔖 := models sat
 
 open Semiterm Semiformula
 

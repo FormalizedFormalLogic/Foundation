@@ -24,6 +24,12 @@ instance : SetLike (Hilbertᵢ L) (Propositionᵢ L) where
   coe := Hilbertᵢ.axiomSet
   coe_injective' := by rintro ⟨T, _⟩ ⟨U, _⟩; simp
 
+
+instance : LE (Hilbertᵢ L) where
+  le Λ₁ Λ₂ := (Λ₁ : Set (Propositionᵢ L)) ⊆ (Λ₂ : Set (Propositionᵢ L))
+
+instance : IsConcreteLE (Hilbertᵢ L) (Propositionᵢ L) := ⟨by intros; rfl⟩
+
 @[simp] lemma mem_mk (s : Set (Propositionᵢ L)) (h) : φ ∈ Hilbertᵢ.mk s h ↔ φ ∈ s := by rfl
 
 def Minimal : Hilbertᵢ L := ⟨∅, by simp⟩
@@ -145,18 +151,18 @@ def allImplyAllOfAllImply (φ ψ) : Λ ⊢! ∀⁰ (φ 🡒 ψ) 🡒 ∀⁰ φ �
   apply deduct'
   apply deduct
   apply geNOverFiniteContext
-  have b₁ : [∀⁰ shift φ, ∀⁰ (shift φ ➝ shift ψ)] ⊢[Λ]! free φ ➝ free ψ :=
+  have b₁ : [∀⁰ shift φ, ∀⁰ (shift φ 🡒 shift ψ)] ⊢[Λ]! free φ 🡒 free ψ :=
     Entailment.cast (specializeOverContext (nthAxm 1) &0)
-  have b₂ : [∀⁰ shift φ, ∀⁰ (shift φ ➝ shift ψ)] ⊢[Λ]! free φ :=
+  have b₂ : [∀⁰ shift φ, ∀⁰ (shift φ 🡒 shift ψ)] ⊢[Λ]! free φ :=
     Entailment.cast (specializeOverContext (nthAxm 0) &0)
-  have : [∀⁰ φ, ∀⁰ (φ ➝ ψ)]⁺ ⊢[Λ]! free ψ := cast (by simp) (b₁ ⨀ b₂)
+  have : [∀⁰ φ, ∀⁰ (φ 🡒 ψ)]⁺ ⊢[Λ]! free ψ := cast (by simp) (b₁ ⨀ b₂)
   exact this
 
-def allIffAllOfIff {φ ψ} (b : Λ ⊢! free φ ⭤ free ψ) : Λ ⊢! ∀⁰ φ ⭤ ∀⁰ ψ := Entailment.K_intro
+def allIffAllOfIff {φ ψ} (b : Λ ⊢! free φ 🡘 free ψ) : Λ ⊢! ∀⁰ φ 🡘 ∀⁰ ψ := Entailment.K_intro
   (allImplyAllOfAllImply φ ψ ⨀ gen (Entailment.cast (Entailment.K_left b)))
   (allImplyAllOfAllImply ψ φ ⨀ gen (Entailment.cast (Entailment.K_right b)))
 
-def dneOfNegative [L.DecidableEq] : {φ : Propositionᵢ L} → φ.IsNegative → Λ ⊢! ∼∼φ ➝ φ
+def dneOfNegative [L.DecidableEq] : {φ : Propositionᵢ L} → φ.IsNegative → Λ ⊢! ∼∼φ 🡒 φ
   | ⊥,     _ => Entailment.CNNOO
   | φ ⋏ ψ, h =>
     have ihφ : Λ ⊢! ∼∼φ 🡒 φ := dneOfNegative (by simp [by simpa using h])
@@ -184,10 +190,10 @@ def dneOfNegative [L.DecidableEq] : {φ : Propositionᵢ L} → φ.IsNegative �
 def ofDNOfNegative [L.DecidableEq] {φ : Propositionᵢ L} {Γ} (b : Γ ⊢[Λ]! ∼∼φ) (h : φ.IsNegative) : Γ ⊢[Λ]! φ :=
   Entailment.C_trans (toDef b) (dneOfNegative h)
 
-def DN_of_isNegative [L.DecidableEq] {φ : Propositionᵢ L} (h : φ.IsNegative) : Λ ⊢! ∼∼φ ⭤ φ :=
+def DN_of_isNegative [L.DecidableEq] {φ : Propositionᵢ L} (h : φ.IsNegative) : Λ ⊢! ∼∼φ 🡘 φ :=
   Entailment.K_intro (dneOfNegative h) Entailment.dni
 
-def efqOfNegative : {φ : Propositionᵢ L} → φ.IsNegative → Λ ⊢! ⊥ ➝ φ
+def efqOfNegative : {φ : Propositionᵢ L} → φ.IsNegative → Λ ⊢! ⊥ 🡒 φ
   | ⊥,     _ => Entailment.C_id
   | φ ⋏ ψ, h =>
     have ihφ : Λ ⊢! ⊥ 🡒 φ := efqOfNegative (by simp [by simpa using h])
@@ -197,11 +203,11 @@ def efqOfNegative : {φ : Propositionᵢ L} → φ.IsNegative → Λ ⊢! ⊥ �
     have ihψ : Λ ⊢! ⊥ 🡒 ψ := efqOfNegative (by simp [by simpa using h])
     Entailment.C_trans ihψ Entailment.implyK
   | ∀⁰ φ,  h =>
-    have ihφ : Λ ⊢! ⊥ ➝ free φ := efqOfNegative (by simp [by simpa using h])
+    have ihφ : Λ ⊢! ⊥ 🡒 free φ := efqOfNegative (by simp [by simpa using h])
     implyAll <| Entailment.cast ihφ
   termination_by φ _ => φ.complexity
 
-def iffnegOfNegIff [L.DecidableEq] {φ ψ : Propositionᵢ L} (h : φ.IsNegative) (b : Λ ⊢! ∼φ ⭤ ψ) : Λ ⊢! φ ⭤ ∼ψ :=
+def iffnegOfNegIff [L.DecidableEq] {φ ψ : Propositionᵢ L} (h : φ.IsNegative) (b : Λ ⊢! ∼φ 🡘 ψ) : Λ ⊢! φ 🡘 ∼ψ :=
   Entailment.E_trans (Entailment.E_symm <| DN_of_isNegative h) (Entailment.ENN_of_E b)
 
 def rewrite (f : ℕ → SyntacticTerm L) : Λ ⊢! φ → Λ ⊢! Rew.rewrite f ▹ φ

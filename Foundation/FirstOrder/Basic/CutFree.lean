@@ -57,6 +57,7 @@ variable {Γ Δ : Sequent L}
     ?_ ?_ ?_ ?_ ?_ ?_ ?_
   all_goals simp
 
+set_option backward.isDefEq.respectTransparency false in
 @[simp] lemma isCutFree_rewrite_iff_isCutFree {f : ℕ → SyntacticTerm L} {d : ⊢ᴷ Γ} :
     IsCutFree (rewrite f d) ↔ IsCutFree d := by
   induction d generalizing f <;> simp [rewrite, *]
@@ -64,6 +65,7 @@ variable {Γ Δ : Sequent L}
 @[simp] lemma isCutFree_map_iff_isCutFree {f : ℕ → ℕ} {d : ⊢ᴷ Γ} :
     IsCutFree (Derivation.map d f) ↔ IsCutFree d := isCutFree_rewrite_iff_isCutFree
 
+set_option backward.isDefEq.respectTransparency false in
 @[simp] lemma IsCutFree.genelalizeByNewver_isCutFree {φ : Semiproposition L 1} (hp : ¬φ.FVar? m) (hΔ : ∀ ψ ∈ Δ, ¬ψ.FVar? m)
     (d : ⊢ᴷ φ/[&m] :: Δ) : IsCutFree (genelalizeByNewver hp hΔ d) ↔ IsCutFree d := by simp [genelalizeByNewver]
 

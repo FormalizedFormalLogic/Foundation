@@ -94,7 +94,7 @@ variable {L : Language} [L.DecidableEq] {T : Theory L} {Λ : Hilbertᵢ L}
 
 open Rewriting LO.Entailment Entailment.FiniteContext HilbertProofᵢ
 
-def negDoubleNegation : (φ : Proposition L) → Λ ⊢! ∼φᴺ ⭤ (∼φ)ᴺ
+def negDoubleNegation : (φ : Proposition L) → Λ ⊢! ∼φᴺ 🡘 (∼φ)ᴺ
   | .rel r v => Entailment.tneIff (φ := Semiformulaᵢ.rel r v)
   | .nrel r v => Entailment.E_Id (φ := ∼∼(Semiformulaᵢ.rel r v))
   | ⊤ => Entailment.ENNOO
@@ -112,29 +112,29 @@ def negDoubleNegation : (φ : Proposition L) → Λ ⊢! ∼φᴺ ⭤ (∼φ)ᴺ
     have : Λ ⊢! ∼∼(∼φᴺ ⋏ ∼ψᴺ) 🡘 (∼φ)ᴺ ⋏ (∼ψ)ᴺ := Entailment.E_trans (DN_of_isNegative (by simp)) this
     this
   | ∀⁰ φ =>
-    have ihφ : Λ ⊢! ∼(free φ)ᴺ ⭤ (∼(free φ))ᴺ := negDoubleNegation (free φ)
-    have : Λ ⊢! (free φ)ᴺ ⭤ (∼(∼(free φ))ᴺ) := iffnegOfNegIff (by simp) ihφ
-    have : Λ ⊢! ∀⁰ φᴺ ⭤ ∀⁰ ∼(∼φ)ᴺ :=
+    have ihφ : Λ ⊢! ∼(free φ)ᴺ 🡘 (∼(free φ))ᴺ := negDoubleNegation (free φ)
+    have : Λ ⊢! (free φ)ᴺ 🡘 (∼(∼(free φ))ᴺ) := iffnegOfNegIff (by simp) ihφ
+    have : Λ ⊢! ∀⁰ φᴺ 🡘 ∀⁰ ∼(∼φ)ᴺ :=
       allIffAllOfIff <| Entailment.cast this (by simp [Semiformula.rew_doubleNegation])
     Entailment.ENN_of_E this
   | ∃⁰ φ =>
-    have ihφ : Λ ⊢! ∼(free φ)ᴺ ⭤ (∼(free φ))ᴺ := negDoubleNegation (free φ)
-    have : Λ ⊢! ∀⁰ ∼φᴺ ⭤ ∀⁰ (∼φ)ᴺ :=
+    have ihφ : Λ ⊢! ∼(free φ)ᴺ 🡘 (∼(free φ))ᴺ := negDoubleNegation (free φ)
+    have : Λ ⊢! ∀⁰ ∼φᴺ 🡘 ∀⁰ (∼φ)ᴺ :=
       allIffAllOfIff <| Entailment.cast ihφ (by simp [Semiformula.rew_doubleNegation])
-    have : Λ ⊢! ∼∼(∀⁰ ∼φᴺ) ⭤ ∀⁰ (∼φ)ᴺ := Entailment.E_trans (DN_of_isNegative (by simp)) this
+    have : Λ ⊢! ∼∼(∀⁰ ∼φᴺ) 🡘 ∀⁰ (∼φ)ᴺ := Entailment.E_trans (DN_of_isNegative (by simp)) this
     this
   termination_by φ => φ.complexity
 
-lemma neg_doubleNegation (φ : Proposition L) : Λ ⊢ ∼φᴺ ⭤ (∼φ)ᴺ := ⟨negDoubleNegation φ⟩
+lemma neg_doubleNegation (φ : Proposition L) : Λ ⊢ ∼φᴺ 🡘 (∼φ)ᴺ := ⟨negDoubleNegation φ⟩
 
-lemma neg_doubleNegation' (φ : Proposition L) : Λ ⊢ ∼(∼φ)ᴺ ⭤ φᴺ := by simpa using neg_doubleNegation (∼φ)
+lemma neg_doubleNegation' (φ : Proposition L) : Λ ⊢ ∼(∼φ)ᴺ 🡘 φᴺ := by simpa using neg_doubleNegation (∼φ)
 
 open FiniteContext
 
-lemma imply_doubleNegation (φ ψ : Proposition L) : Λ ⊢ (φᴺ ➝ ψᴺ) ⭤ (φ ➝ ψ)ᴺ := by
-  suffices Λ ⊢ (φᴺ ➝ ψᴺ) ⭤ ∼(∼(∼φ)ᴺ ⋏ ∼ψᴺ) by simpa [Semiformula.doubleNegation_imply]
-  have hφ₀ : Λ ⊢ ∼(∼φ)ᴺ ⭤ φᴺ := by simpa using neg_doubleNegation (∼φ)
-  have hψ : Λ ⊢ ∼∼ψᴺ ⭤ ψᴺ := ⟨DN_of_isNegative (by simp)⟩
+lemma imply_doubleNegation (φ ψ : Proposition L) : Λ ⊢ (φᴺ 🡒 ψᴺ) 🡘 (φ 🡒 ψ)ᴺ := by
+  suffices Λ ⊢ (φᴺ 🡒 ψᴺ) 🡘 ∼(∼(∼φ)ᴺ ⋏ ∼ψᴺ) by simpa [Semiformula.doubleNegation_imply]
+  have hφ₀ : Λ ⊢ ∼(∼φ)ᴺ 🡘 φᴺ := by simpa using neg_doubleNegation (∼φ)
+  have hψ : Λ ⊢ ∼∼ψᴺ 🡘 ψᴺ := ⟨DN_of_isNegative (by simp)⟩
   apply Entailment.E!_intro
   · apply FiniteContext.deduct'!
     apply FiniteContext.deduct!

@@ -279,7 +279,7 @@ def equiv (𝔖 : Schema L) (φ) :
   invFun := fun ⟨⟨Γ, hΓ⟩, d⟩ ↦ ⟨Γ, hΓ, d⟩
 
 instance : Entailment.Compact (Schema L) where
-  core b := ⟨fun φ ↦ φ ∈ b.axioms⟩
+  core b := {φ | φ ∈ b.axioms}
   corePrf b := ⟨b.axioms, by simp, b.derivation⟩
   core_finite b := by simp [AdjunctiveSet.Finite, AdjunctiveSet.set]
   core_subset b := by simpa [AdjunctiveSet.subset_iff] using b.axioms_mem
@@ -372,7 +372,7 @@ open Entailment Derivation
 lemma iff_context {𝔖 : Schema L} : 𝔖 ⊢ φ ↔ 𝔖 *⊢[𝐋𝐊¹] φ := by
   constructor
   · rintro ⟨d⟩
-    have : 𝐋𝐊¹ ⊢! ⋀d.axioms ➝ φ :=
+    have : 𝐋𝐊¹ ⊢! ⋀d.axioms 🡒 φ :=
       have : ⊢ᴷ ∼d.axioms ++ [φ] := d.derivation.weakening
       this.disj₂.or.cast <| by simp [Semiformula.imp_eq]
     refine ⟨⟨d.axioms, by simpa using d.axioms_mem, this⟩⟩
@@ -388,7 +388,7 @@ open Classical in
 noncomputable instance : Entailment.Deduction (Schema L) where
   ofInsert {φ ψ 𝔖 b} :=
     have : insert φ ↑𝔖 *⊢[𝐋𝐊¹] ψ := iff_context.mp ⟨b⟩
-    have : ↑𝔖 *⊢[𝐋𝐊¹] φ ➝ ψ := Context.deduct! this
+    have : ↑𝔖 *⊢[𝐋𝐊¹] φ 🡒 ψ := Context.deduct! this
     (iff_context.mpr this).get
   inv {φ ψ 𝔖 b} :=
     have : ↑(adjoin φ 𝔖) *⊢[𝐋𝐊¹] ψ := Context.deductInv! (iff_context.mp ⟨b⟩)

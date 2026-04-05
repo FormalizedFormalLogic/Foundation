@@ -72,7 +72,7 @@ instance : Entailment.ModusPonens 𝓔 where
   mdp {φ ψ} b₁ b₂ :=
     let b₁ := equiv b₁
     let b₂ := equiv b₂
-    have : 𝔇 [∼(φ ➝ ψ), ∼φ, ψ] := cast (tensor (𝔇 := 𝔇) (identity φ) (identity (∼ψ))) (by simp [DeMorgan.imply])
+    have : 𝔇 [∼(φ 🡒 ψ), ∼φ, ψ] := cast (tensor (𝔇 := 𝔇) (identity φ) (identity (∼ψ))) (by simp [DeMorgan.imply])
     have : 𝔇 [∼φ, ψ] := wk (cut b₁ this) (by simp)
     have : 𝔇 [ψ] := wk (cut b₂ this) (by simp)
     equiv.symm <| cast this
@@ -151,7 +151,7 @@ instance (𝓢 : S) : Entailment.ModusPonens 𝓢 where
   mdp {φ ψ} b₁ b₂ :=
     let ⟨Γ₁, b₁⟩ := equiv b₁
     let ⟨Γ₂, b₂⟩ := equiv b₂
-    have : 𝔇 [∼(φ ➝ ψ), ∼φ, ψ] := cast (tensor (𝔇 := 𝔇) (identity φ) (identity (∼ψ))) (by simp [DeMorgan.imply])
+    have : 𝔇 [∼(φ 🡒 ψ), ∼φ, ψ] := cast (tensor (𝔇 := 𝔇) (identity φ) (identity (∼ψ))) (by simp [DeMorgan.imply])
     have : 𝔇 (∼φ :: ψ :: ∼↑Γ₁) := wk (cut b₁ this) (by simp)
     have : 𝔇 (ψ :: ∼↑Γ₁ ++ ∼↑Γ₂) := wk (cut b₂ this) (by simp)
     equiv.symm ⟨⟨Γ₁ ++ Γ₂, by simp; grind⟩, cast this⟩
@@ -162,7 +162,7 @@ instance : Entailment.StrongCut S S where
     match l with
     |     [] => equiv.symm ⟨⟨[], by simp⟩, d⟩
     | ψ :: l =>
-      have bχ : T ⊢! ψ ➝ χ :=
+      have bχ : T ⊢! ψ 🡒 χ :=
         Entailment.cast (bl l (by simp at hl; grind) (∼ψ ⋎ χ) (OneSidedLK.or <| OneSidedLK.swap₁ d))
         (by simp [DeMorgan.imply])
       have bψ : T ⊢! ψ := bs (show ψ ∈ U by simp at hl; grind)

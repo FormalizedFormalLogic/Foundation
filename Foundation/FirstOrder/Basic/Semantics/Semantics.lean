@@ -43,7 +43,7 @@ instance unit : Structure L Unit where
   func := fun _ _ _ ↦ ()
   rel := fun _ _ _ ↦ True
 
-protected def lMap (φ : L₁ →ᵥ L₂) {M : Type w} (S : Structure L₂ M) : Structure L₁ M where
+protected abbrev lMap (φ : L₁ →ᵥ L₂) {M : Type w} (S : Structure L₂ M) : Structure L₁ M where
   func  _ f := S.func (φ.func f)
   rel _ r := S.rel (φ.rel r)
 
@@ -53,7 +53,7 @@ variable (φ : L₁ →ᵥ L₂) {M : Type w} (s₂ : Structure L₂ M)
 
 @[simp] lemma lMap_rel {k} {r : L₁.Rel k} {v : Fin k → M} : (s₂.lMap φ).rel r v ↔ s₂.rel (φ.rel r) v := of_eq rfl
 
-def ofEquiv {M : Type w} [Structure L M] {N : Type w'} (Θ : M ≃ N) : Structure L N where
+abbrev ofEquiv {M : Type w} [Structure L M] {N : Type w'} (Θ : M ≃ N) : Structure L N where
   func := fun _ f v ↦ Θ (func f (Θ.symm ∘ v))
   rel  := fun _ r v ↦ rel r (Θ.symm ∘ v)
 
@@ -527,7 +527,7 @@ lemma models_iff_proposition {φ : Proposition L} : M↓[L] ⊧ φ.univCl ↔ �
 
 lemma models_theory_iff : M↓[L] ⊧* T ↔ (∀ {φ}, φ ∈ T → M↓[L] ⊧ φ) := Semantics.modelsSet_iff
 
-lemma models_schema_iff {𝔖 : Schema L} : M↓[L] ⊧* 𝔖 ↔ (∀ {φ : Proposition L}, φ ∈ 𝔖 → ∀ f : ℕ → M, φ.Evalf f) := by
+lemma models_schema_iff {𝔖 : Schema L} : M↓[L] ⊧* (𝔖 : Theory L) ↔ (∀ {φ : Proposition L}, φ ∈ 𝔖 → ∀ f : ℕ → M, φ.Evalf f) := by
   simp [models_theory_iff, models_iff]
 
 lemma models_of_mem {T : Theory L} [M↓[L] ⊧* T] {φ} (h : φ ∈ T) : M↓[L] ⊧ φ := Semantics.ModelsSet.models _ h
@@ -627,16 +627,16 @@ variable {M}
 lemma models_of_ss {T U : Theory L} (h : M↓[L] ⊧* U) (ss : T ⊆ U) : M↓[L] ⊧* T :=
   Semantics.ModelsSet.of_subset h ss
 
-lemma models_of_le {𝓢₁ 𝓢₂ : Schema L} (h : M↓[L] ⊧* 𝓢₂) (le : 𝓢₁ ≤ 𝓢₂) : M↓[L] ⊧* 𝓢₁ :=
+lemma models_of_le {𝔖₁ 𝔖₂ : Schema L} (h : M↓[L] ⊧* ↑↑𝔖₂) (le : 𝔖₁ ≤ 𝔖₂) : M↓[L] ⊧* ↑↑𝔖₁ :=
   Semantics.ModelsSet.of_subset h (Schema.coe_subset_coe_of_le le)
 
-instance models_schema_sup (𝓢₁ 𝓢₂ : Schema L) [M↓[L] ⊧* 𝓢₁] [M↓[L] ⊧* 𝓢₂] : M↓[L] ⊧* 𝓢₁ ⊔ 𝓢₂ := by
-  simp only [Set.sup_eq_union, Semantics.ModelsSet.union_iff]
+instance models_schema_sup (𝔖₁ 𝔖₂ : Schema L) [M↓[L] ⊧* ↑↑𝔖₁] [M↓[L] ⊧* ↑↑𝔖₂] : M↓[L] ⊧* ↑↑(𝔖₁ ∪ 𝔖₂) := by
+  simp only [Schema.coe_sup, Semantics.ModelsSet.union_iff]
   constructor
   · infer_instance
   · infer_instance
 
-lemma modelsUnivCl_of_mem_schema {𝔖 : Schema L} [h : M↓[L] ⊧* 𝔖] (hf : φ ∈ 𝔖) : M↓[L] ⊧ φ.univCl :=
+lemma modelsUnivCl_of_mem_schema {𝔖 : Schema L} [h : M↓[L] ⊧* ↑↑𝔖] (hf : φ ∈ 𝔖) : M↓[L] ⊧ φ.univCl :=
   h.models _ <| by simp; grind
 
 end schema

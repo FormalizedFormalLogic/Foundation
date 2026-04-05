@@ -222,7 +222,7 @@ abbrev gödelNumber' (a : α) : Semiterm L ξ n := const (gödelNumber a)
 
 instance : GödelQuote α (Semiterm L ξ n) := ⟨gödelNumber'⟩
 
-def ofEncodable [Operator.Zero L] [Operator.One L] [Operator.Add L] {α : Type*} [Encodable α] : GödelNumber L α := ⟨Operator.encode L⟩
+abbrev ofEncodable [Operator.Zero L] [Operator.One L] [Operator.Add L] {α : Type*} [Encodable α] : GödelNumber L α := ⟨Operator.encode L⟩
 
 end GödelNumber
 
@@ -379,19 +379,19 @@ lemma LE.def_of_Eq_of_LT [Operator.Eq L] [Operator.LT L] :
 
 lemma lt_def [L.LT] (t u : Semiterm L ξ n) :
     LT.lt.operator ![t, u] = Semiformula.rel Language.LT.lt ![t, u] := by
-  simp [operator, LT.sentence_eq, Matrix.fun_eq_vec_two']
+  simp [operator, LT.sentence_eq, Matrix.fun_eq_vec_two]
 
 lemma eq_def [L.Eq] (t u : Semiterm L ξ n) :
     Eq.eq.operator ![t, u] = Semiformula.rel Language.Eq.eq ![t, u] := by
-  simp [operator, Eq.sentence_eq, Matrix.fun_eq_vec_two']
+  simp [operator, Eq.sentence_eq, Matrix.fun_eq_vec_two]
 
 lemma mem_def [L.Mem] (t u : Semiterm L ξ n) :
     Mem.mem.operator ![t, u] = Semiformula.rel Language.Mem.mem ![t, u] := by
-  simp [operator, Mem.sentence_eq, Matrix.fun_eq_vec_two']
+  simp [operator, Mem.sentence_eq, Matrix.fun_eq_vec_two]
 
 lemma le_def [L.Eq] [L.LT] (t u : Semiterm L ξ n) :
     LE.le.operator ![t, u] = Semiformula.rel Language.Eq.eq ![t, u] ⋎ Semiformula.rel Language.LT.lt ![t, u] := by
-  simp [operator, Eq.sentence_eq, LT.sentence_eq, LE.sentence_eq, Matrix.fun_eq_vec_two']
+  simp [operator, Eq.sentence_eq, LT.sentence_eq, LE.sentence_eq, Matrix.fun_eq_vec_two]
 
 variable {L : Language}
 
