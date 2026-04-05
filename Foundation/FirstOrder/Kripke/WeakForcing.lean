@@ -378,7 +378,7 @@ def add {Γ Δ Ξ Θ : Sequent L} : Γ ⟶⁺ Δ → Ξ ⟶⁺ Θ → Γ ++ Ξ �
   |  wk d h, b => wk (d.add b) (by simp [h])
   |     .id, b => b.append Γ
 
-def graft {Ξ Γ : Sequent L} (b : ⊢ᴷ Ξ) : Ξ ⟶⁺ Γ → ⊢ᴷ Γ
+def graft {Ξ Γ : Sequent L} (b : ⊢ᴸᴷ¹ Ξ) : Ξ ⟶⁺ Γ → ⊢ᴸᴷ¹ Γ
   |    or d => .or (d.graft b)
   |   exs d => .exs (d.graft b)
   |  wk d h => .wk (d.graft b) h
@@ -388,7 +388,7 @@ end PositiveDerivationFrom
 
 variable (L)
 
-abbrev ConsistentSequent := {Γ : Sequent L // IsEmpty (⊢ᴷ ∼Γ)}
+abbrev ConsistentSequent := {Γ : Sequent L // IsEmpty (⊢ᴸᴷ¹ ∼Γ)}
 
 variable {L}
 

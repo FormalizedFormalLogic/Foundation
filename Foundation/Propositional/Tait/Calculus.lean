@@ -17,13 +17,13 @@ inductive Derivation : Sequent α → Type _
 | or : Derivation (φ :: ψ :: Γ) → Derivation (φ ⋎ ψ :: Γ)
 | and : Derivation (φ :: Γ) → Derivation (ψ :: Γ) → Derivation (φ ⋏ ψ :: Γ)
 
-scoped prefix:45 "⊢ᴷ " => Derivation
+prefix:45 "⊢ᴸᴷ⁰ " => Derivation
 
 namespace Derivation
 
 variable {T U : Theory α} {Δ Δ₁ Δ₂ Γ : Sequent α}
 
-def height {Δ : Sequent α} : ⊢ᴷ Δ → ℕ
+def height {Δ : Sequent α} : ⊢ᴸᴷ⁰ Δ → ℕ
   |identity _ => 0
   | cut dp dn => max dp.height dn.height + 1
   |    wk d _ => d.height + 1
@@ -31,29 +31,29 @@ def height {Δ : Sequent α} : ⊢ᴷ Δ → ℕ
   |      or d => d.height + 1
   | and dp dq => max (height dp) (height dq) + 1
 
-protected def cast (d : ⊢ᴷ Δ) (e : Δ = Γ) : ⊢ᴷ Γ := cast (by simp [e]) d
+protected def cast (d : ⊢ᴸᴷ⁰ Δ) (e : Δ = Γ) : ⊢ᴸᴷ⁰ Γ := cast (by simp [e]) d
 
-@[simp] lemma height_cast (d : ⊢ᴷ Δ) (e : Δ = Γ) : height (Derivation.cast d e) = height d := by
+@[simp] lemma height_cast (d : ⊢ᴸᴷ⁰ Δ) (e : Δ = Γ) : height (Derivation.cast d e) = height d := by
   rcases e with rfl; simp [Derivation.cast]
 
-def weakening (d : ⊢ᴷ Δ) (h : Δ ⊆ Γ := by simp) : ⊢ᴷ Γ := wk d h
+def weakening (d : ⊢ᴸᴷ⁰ Δ) (h : Δ ⊆ Γ := by simp) : ⊢ᴸᴷ⁰ Γ := wk d h
 
-def top (h : ⊤ ∈ Δ := by simp) : ⊢ᴷ Δ := verum.wk (by simp [h])
+def top (h : ⊤ ∈ Δ := by simp) : ⊢ᴸᴷ⁰ Δ := verum.wk (by simp [h])
 
-def identity' (a : α) (hpos : .atom a ∈ Δ := by simp) (hneg : .natom a ∈ Δ := by simp) : ⊢ᴷ Δ :=
+def identity' (a : α) (hpos : .atom a ∈ Δ := by simp) (hneg : .natom a ∈ Δ := by simp) : ⊢ᴸᴷ⁰ Δ :=
   (identity a).wk (by simp [hpos, hneg])
 
-def tensor {φ ψ} (dφ : ⊢ᴷ φ :: Γ) (dψ : ⊢ᴷ ψ :: Δ) : ⊢ᴷ φ ⋏ ψ :: (Γ ++ Δ) := and dφ.weakening dψ.weakening
+def tensor {φ ψ} (dφ : ⊢ᴸᴷ⁰ φ :: Γ) (dψ : ⊢ᴸᴷ⁰ ψ :: Δ) : ⊢ᴸᴷ⁰ φ ⋏ ψ :: (Γ ++ Δ) := and dφ.weakening dψ.weakening
 
-def rotate (d : ⊢ᴷ φ :: Γ) : ⊢ᴷ Γ ++ [φ] := d.weakening
+def rotate (d : ⊢ᴸᴷ⁰ φ :: Γ) : ⊢ᴸᴷ⁰ Γ ++ [φ] := d.weakening
 
-def eta : (φ : NNFormula α) → ⊢ᴷ [φ, ∼φ]
+def eta : (φ : NNFormula α) → ⊢ᴸᴷ⁰ [φ, ∼φ]
   | .atom a | .natom a => identity' a
   | ⊤ | ⊥ => top
   | φ ⋏ ψ => ((eta φ).tensor (eta ψ)).rotate.or.rotate
   | φ ⋎ ψ => ((eta φ).rotate.tensor (eta ψ).rotate).rotate.or
 
-def close (φ : NNFormula α) (hp : φ ∈ Δ := by simp) (hn : ∼φ ∈ Δ := by simp) : ⊢ᴷ Δ :=
+def close (φ : NNFormula α) (hp : φ ∈ Δ := by simp) (hn : ∼φ ∈ Δ := by simp) : ⊢ᴸᴷ⁰ Δ :=
   eta φ |>.weakening (by simp [hp, hn])
 
 instance : OneSidedLK (Derivation (α := α)) where
@@ -75,14 +75,14 @@ inductive Proof.Symbol (α : Type*) : Type
 
 notation "𝐋𝐊⁰" => Proof.Symbol.symbol
 
-abbrev Proof (φ : NNFormula α) := ⊢ᴷ [φ]
+abbrev Proof (φ : NNFormula α) := ⊢ᴸᴷ⁰ [φ]
 
 instance : Entailment (Proof.Symbol α) (NNFormula α) where
   Prf _ := Proof
 
 namespace Proof
 
-lemma def_eq (φ : NNFormula α) : (𝐋𝐊⁰ ⊢! φ) = (⊢ᴷ [φ]) := rfl
+lemma def_eq (φ : NNFormula α) : (𝐋𝐊⁰ ⊢! φ) = (⊢ᴸᴷ⁰ [φ]) := rfl
 
 instance : OneSidedLK.EmptyEntailment (Derivation (α := α)) (𝐋𝐊⁰ : Proof.Symbol α) where
   equiv := Equiv.refl _

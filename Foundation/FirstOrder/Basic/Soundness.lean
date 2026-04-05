@@ -17,7 +17,7 @@ variable {L : Language}
 namespace Derivation
 
 lemma sound {M : Type*} [s : Structure L M] [Nonempty M] (f : ℕ → M) {Γ : Sequent L} :
-    ⊢ᴷ Γ → ∃ φ ∈ Γ, φ.Evalf f
+    ⊢ᴸᴷ¹ Γ → ∃ φ ∈ Γ, φ.Evalf f
   | identity r v => by
     by_cases h : s.rel r (Semiterm.val ![] f ∘ v)
     · exact ⟨rel r v, by simp, h⟩
@@ -63,7 +63,7 @@ lemma sound {M : Type*} [s : Structure L M] [Nonempty M] (f : ℕ → M) {Γ : S
       · exact ⟨ψ, by simp [hn], hq⟩
     · exact ⟨ψ, by simp [h], hq⟩
 
-@[simp] lemma nil_empty : IsEmpty (⊢ᴷ ([] : Sequent L)) := by
+@[simp] lemma nil_empty : IsEmpty (⊢ᴸᴷ¹ ([] : Sequent L)) := by
   refine ⟨fun b ↦ ?_⟩
   simpa using sound (fun _ ↦ ()) b
 
