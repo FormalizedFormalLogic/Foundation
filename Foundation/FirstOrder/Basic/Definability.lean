@@ -17,19 +17,19 @@ namespace LO.FirstOrder
 variable {L : Language} {M : Type*} [Structure L M]
 
 abbrev IsDefinedBy (R : (Fin k → M) → Prop) (φ : Semisentence L k) : Prop :=
-  ∀ v, Semiformula.Evalb M v φ ↔ R v
+  ∀ v, Semiformula.Evalb v φ ↔ R v
 
 class Defined (R : outParam ((Fin k → M) → Prop)) (φ : Semisentence L k) : Prop where
   iff : IsDefinedBy R φ
 
 abbrev IsDefinedByWithParam (R : (Fin k → M) → Prop) (φ : Semiformula L M k) : Prop :=
-  ∀ v, Semiformula.Eval v id φ ↔ R v
+  ∀ v, φ.Eval v id ↔ R v
 
 @[simp] lemma Defined.eval_iff {R : (Fin k → M) → Prop} {φ : Semisentence L k} [h : Defined R φ] (v) :
-    Semiformula.Evalb M v φ ↔ R v := h.iff v
+    φ.Evalb v ↔ R v := h.iff v
 
 lemma IsDefinedByWithParam.iff {R : (Fin k → M) → Prop} {φ : Semiformula L M k} (h : IsDefinedByWithParam R φ) (v) :
-    Semiformula.Eval v id φ ↔ R v := h v
+    φ.Eval v id ↔ R v := h v
 
 abbrev DefinedFunction (f : (Fin k → M) → M) (φ : Semisentence L (k + 1)) : Prop :=
   Defined (fun v ↦ v 0 = f (v ·.succ)) φ

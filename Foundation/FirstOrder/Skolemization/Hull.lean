@@ -26,13 +26,13 @@ variable (L : Language.{u})
 variable (M : Type v) [Nonempty M] [𝓼 : Structure L M]
 
 noncomputable instance skolem : Structure L.skolemFunction₁ M where
-  func _ φ v := Classical.epsilon fun z ↦ φ.Evalb M (z :> v)
+  func _ φ v := Classical.epsilon fun z ↦ φ.Evalb (z :> v)
   rel _ r _ := PEmpty.elim r
 
 variable {L M}
 
 @[simp] lemma val_skolem_func (φ : Semisentence L (k + 1)) :
-    (skolem L M).func φ.skolem₁ v = Classical.epsilon fun z ↦ φ.Evalb M (z :> v) := rfl
+    (skolem L M).func φ.skolem₁ v = Classical.epsilon fun z ↦ φ.Evalb (z :> v) := rfl
 
 variable (L)
 
@@ -63,12 +63,12 @@ lemma subset : s ⊆ SkolemHull L s := fun x hx ↦ by
   simp [this]
 
 lemma closed {v : Fin k → M} (hv : ∀ i, v i ∈ SkolemHull L s)
-    {φ : Semisentence L (k + 1)} (H : ∃ z, M ⊧/(z :> v) φ) :
-    ∃ z ∈ SkolemHull L s, M ⊧/(z :> v) φ := by
+    {φ : Semisentence L (k + 1)} (H : ∃ z, φ.Evalb (z :> v)) :
+    ∃ z ∈ SkolemHull L s, φ.Evalb (z :> v) := by
   choose u hu using fun i ↦ mem_iff.mp (hv i)
   let t : Term L.skolemFunction₁ s := .func φ.skolem₁ u
   refine ⟨t.val ![] (↑), by simp, ?_⟩
-  suffices M ⊧/((Classical.epsilon fun z ↦ M ⊧/(z :> v) φ) :> v) φ by
+  suffices φ.Evalb ((Classical.epsilon fun z ↦ φ.Evalb (z :> v)) :> v) by
     simpa [t, Semiterm.val_func, Function.comp_def, hu]
   exact Classical.epsilon_spec H
 
@@ -76,7 +76,7 @@ variable [L.Eq] [Structure.Eq L M]
 
 lemma closed_func {v : Fin k → M} (hv : ∀ i, v i ∈ SkolemHull L s)
     {f : L.Func k} : Structure.func f v ∈ SkolemHull L s := by
-  have : ∃ z ∈ SkolemHull L s, M ⊧/(z :> v) “#0 = !!(Semiterm.func f fun i ↦ #i.succ)” :=
+  have : ∃ z ∈ SkolemHull L s, “#0 = !!(Semiterm.func f fun i ↦ #i.succ)”.Evalb (z :> v) :=
     closed hv (φ := “#0 = !!(Semiterm.func f fun i ↦ #i.succ)”)
       (by simp [Semiterm.val_func]; simp [Function.comp_def])
   rcases this with ⟨z, hz, e⟩
@@ -90,7 +90,7 @@ instance (priority := 50) str : Structure L (SkolemHull L s) where
   rel k R v := Structure.rel R fun i ↦ (v i : M)
 
 instance set_nonempty : (SkolemHull L s).Nonempty := by
-  have : ∃ z, M ⊧/![z] (⊤ : Semisentence L 1) := by simp
+  have : ∃ z : M, (⊤ : Semisentence L 1).Evalb ![z] := by simp
   have : ∃ z, z ∈ SkolemHull L s := by
     simpa using closed (s := s) (by simp) this
   exact this
@@ -114,14 +114,14 @@ variable {𝓼 s}
   | .func F v => by simp [Semiterm.val_func, str_val, Function.comp_def]
 
 @[simp] lemma str_eval {φ : Semisentence L n} :
-    (SkolemHull L s) ⊧/b φ ↔ M ⊧/(b ·) φ :=
+    φ.Evalb (M := SkolemHull L s) b ↔ φ.Evalb (M := M) (b ·) :=
   match φ with
   | .rel R v | .nrel R v => by simp [Semiformula.eval_rel, Semiformula.eval_nrel, Empty.eq_elim, Function.comp_def]
   | ⊤ | ⊥ => by simp
   | φ ⋏ ψ | φ ⋎ ψ => by simp [str_eval (φ := φ), str_eval (φ := ψ)]
   | ∀⁰ φ => by
     suffices
-        (∃ x ∈ SkolemHull L s, (∼φ).Evalb M (x :> (b ·))) ↔ (∃ x, (∼φ).Evalb M (x :> (b ·))) by
+        (∃ x ∈ SkolemHull L s, (∼φ).Evalb (x :> (b ·))) ↔ (∃ x : M, (∼φ).Evalb (x :> (b ·))) by
       apply not_iff_not.mp
       simpa [str_eval (φ := φ), Matrix.comp_vecCons']
     constructor
@@ -131,7 +131,7 @@ variable {𝓼 s}
       exact closed (s := s) (by simp) h
   | ∃⁰ φ => by
     suffices
-        (∃ x ∈ SkolemHull L s, φ.Evalb M (x :> (b ·))) ↔ (∃ x, φ.Evalb M (x :> (b ·))) by
+        (∃ x ∈ SkolemHull L s, φ.Evalb (x :> (b ·))) ↔ (∃ x : M, φ.Evalb (x :> (b ·))) by
       simpa [str_eval (φ := φ), Matrix.comp_vecCons']
     constructor
     · rintro ⟨x, _, H⟩

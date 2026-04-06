@@ -380,7 +380,8 @@ section
 
 variable {G T : Type*} [Entailment T G] [LogicalConnective G] {𝓣 : T}
 
-def Minimal.ofEquiv (𝓢 : S) [Entailment.Minimal 𝓢] (𝓣 : T) (f : G →ˡᶜ F) (e : (φ : G) → 𝓢 ⊢! f φ ≃ 𝓣 ⊢! φ) : Entailment.Minimal 𝓣 where
+abbrev Minimal.ofEquiv (𝓢 : S) [Entailment.Minimal 𝓢] (𝓣 : T)
+    (f : G →ˡᶜ F) (e : (φ : G) → 𝓢 ⊢! f φ ≃ 𝓣 ⊢! φ) : Entailment.Minimal 𝓣 where
   mdp {φ ψ dpq dp} := (e ψ) (
     let d : 𝓢 ⊢! f φ 🡒 f ψ := by simpa using (e (φ 🡒 ψ)).symm dpq
     d ⨀ ((e φ).symm dp))
@@ -661,7 +662,7 @@ section minimal
 variable [Entailment.Minimal 𝓢]
 
 instance [DecidableEq F] : Axiomatized (Context F 𝓢) where
-  prfAxm := fun {Γ φ} hp ↦ ⟨[φ], by simpa using hp, byAxm (by simp [AdjunctiveSet.set])⟩
+  prfAxm := fun {Γ φ} hp ↦ ⟨[φ], by simpa using hp, byAxm (by simp)⟩
   weakening := fun h b ↦ ⟨b.ctx, fun φ hp ↦ AdjunctiveSet.subset_iff.mp h φ (b.subset φ hp), b.prf⟩
 
 def byAxm [DecidableEq F] {Γ : Set F} {φ : F} (h : φ ∈ Γ) : Γ *⊢[𝓢]! φ := Axiomatized.prfAxm (by simpa)
@@ -684,7 +685,8 @@ def deduct [DecidableEq F] {φ ψ : F} {Γ : Set F} : (insert φ Γ) *⊢[𝓢]!
         (by simp [List.subset_def, List.mem_filter]; grind)
         b
     ⟨ Δ.filter (· ≠ φ), by
-      intro ψ; simp [List.mem_filter]
+      intro ψ
+      suffices ψ ∈ Δ → ψ ≠ φ → ψ ∈ Γ by simpa [List.mem_filter]
       intro hq ne
       rcases h ψ hq
       · contradiction
@@ -693,7 +695,7 @@ def deduct [DecidableEq F] {φ ψ : F} {Γ : Set F} : (insert φ Γ) *⊢[𝓢]!
 lemma deduct! [DecidableEq F] (h : (insert φ Γ) *⊢[𝓢] ψ) : Γ *⊢[𝓢] φ 🡒 ψ := ⟨Context.deduct h.some⟩
 
 def deductInv {φ ψ : F} {Γ : Set F} : Γ *⊢[𝓢]! φ 🡒 ψ → (insert φ Γ) *⊢[𝓢]! ψ
-  | ⟨Δ, h, b⟩ => ⟨φ :: Δ, by simp; intro χ hr; exact Or.inr (h χ hr), FiniteContext.deductInv b⟩
+  | ⟨Δ, h, b⟩ => ⟨φ :: Δ, by simpa using fun χ hr ↦ Or.inr (h χ hr), FiniteContext.deductInv b⟩
 lemma deductInv! [DecidableEq F] (h : Γ *⊢[𝓢] φ 🡒 ψ) : (insert φ Γ) *⊢[𝓢] ψ := ⟨Context.deductInv h.some⟩
 
 instance deduction [DecidableEq F] : Deduction (Context F 𝓢) where
@@ -709,7 +711,8 @@ lemma of! (b : 𝓢 ⊢ φ) : Γ *⊢[𝓢] φ := ⟨Context.of b.some⟩
 
 def mdp [DecidableEq F] {Γ : Set F} (bpq : Γ *⊢[𝓢]! φ 🡒 ψ) (bp : Γ *⊢[𝓢]! φ) : Γ *⊢[𝓢]! ψ :=
   ⟨ bpq.ctx ++ bp.ctx, by
-    simp; rintro χ (hr | hr)
+    simp only [List.mem_append, mem_coe_iff]
+    rintro χ (hr | hr)
     · exact bpq.subset χ hr
     · exact bp.subset χ hr,
     FiniteContext.mdp' bpq.prf bp.prf ⟩

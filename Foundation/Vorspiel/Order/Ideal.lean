@@ -17,6 +17,21 @@ lemma sSup_def (s : Set (Ideal P)) : sSup s = sInf (upperBounds s) := rfl
 
 lemma iSup_def (I : ι → Ideal P) : ⨆ i, I i = sInf (upperBounds (Set.range I)) := rfl
 
+@[simp] lemma mem_bot {x : P} : x ∈ (⊥ : Ideal P) ↔ x = ⊥ := le_bot_iff
+
+theorem mem_finsup_principal [DecidableEq ι] {s : Finset ι} {f : ι → P} :
+    x ∈ s.sup (principal ∘ f) ↔ x ≤ s.sup f := by
+  induction s using Finset.induction generalizing x
+  · simp
+  case insert i s hi ih =>
+    suffices (∃ y ≤ f i, ∃ z ≤ s.sup f, x ≤ y ⊔ z) ↔ x ≤ f i ⊔ s.sup f by
+      simpa [ih]
+    constructor
+    · rintro ⟨y, hy, z, hz, h⟩
+      refine le_trans h (sup_le_sup hy hz)
+    · intro h
+      exact ⟨f i, le_refl _, s.sup f, le_refl _, h⟩
+
 lemma mem_iSup_iff [DecidableEq ι] {I : ι → Ideal P} {x : P} :
     x ∈ ⨆ i, I i ↔ ∃ u : Finset ι, x ∈ u.sup I := by
   revert x

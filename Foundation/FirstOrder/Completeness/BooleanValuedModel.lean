@@ -3,6 +3,7 @@ module
 public import Foundation.Vorspiel.Order.LowerSet
 public import Foundation.Vorspiel.Order.Ideal
 public import Foundation.Vorspiel.Order.Heyting
+public import Foundation.Vorspiel.Order.Lattice
 public import Foundation.FirstOrder.Completeness.CanonicalModel
 public import Mathlib.Order.PFilter
 
@@ -19,6 +20,8 @@ namespace LO.FirstOrder.Derivation
 variable {L : Language}
 
 namespace Canonical
+
+open Classical
 
 variable (L)
 
@@ -126,7 +129,21 @@ scoped prefix:max "♭" => bValue
 
 @[simp] lemma coe_bValue (φ : Proposition L) : (♭φ : ℍ) = ♯φᴺ := rfl
 
+@[simp] lemma bValue_falsum : ♭(⊥ : Proposition L) = ⊥ := Heyting.Regular.coe_inj.mp <| by simp
+
+@[simp] lemma bValue_verum : ♭(⊤ : Proposition L) = ⊤ := Heyting.Regular.coe_inj.mp <| by simp
+
 @[simp] lemma bValue_and_eq_inf : ♭(φ ⋏ ψ) = ♭φ ⊓ ♭ψ := Heyting.Regular.coe_inj.mp <| by simp
+
+@[simp] lemma bValue_lConj_eq_inf (Γ : List (Proposition L)) : ♭(⋀Γ) = Γ.toFinset.inf bValue :=
+  match Γ with
+  |          [] => by simp
+  |         [φ] => by simp
+  | φ :: ψ :: Γ => by
+    simp [bValue_lConj_eq_inf (ψ :: Γ),]; rfl
+
+@[simp] lemma bValue_fConj_eq_inf (Γ : Finset (Proposition L)) : ♭(Γ.conj) = Γ.inf bValue := by
+  simp [Finset.conj]
 
 @[simp] lemma bValue_or_eq_sup : ♭(φ ⋎ ψ) = ♭φ ⊔ ♭ψ := Heyting.Regular.coe_inj.mp <| by simp
 
@@ -136,10 +153,11 @@ scoped prefix:max "♭" => bValue
 @[simp] lemma bValue_exs_eq_Sup : ♭(∃⁰ φ) = ⨆ t, ♭(φ/[t]) := Heyting.Regular.coe_inj.mp <| by
   simp [Semiformula.subst_doubleNegation, compl_iSup']
 
-@[simp] lemma bValue_neg_eq_himp : ♭(∼φ) = (♭φ)ᶜ := Heyting.Regular.coe_inj.mp <| by
+@[simp] lemma bValue_neg_eq_compl : ♭(∼φ) = (♭φ)ᶜ := Heyting.Regular.coe_inj.mp <| by
   simp [hValue_dn_neg]
 
-@[simp] lemma bValue_falsum : ♭(⊥ : Proposition L) = ⊥ := Heyting.Regular.coe_inj.mp <| by simp
+@[simp] lemma bValue_imply_eq_himp : ♭(φ 🡒 ψ) = (♭φ ⇨ ♭ψ) := by
+  simp [Semiformula.imp_eq, BooleanAlgebra.himp_eq]; grind
 
 lemma bValue_eq_top_iff_provable : ♭φ = ⊤ ↔ 𝐋𝐊¹ ⊢ φ := calc
   ♭φ = ⊤ ↔ ♯φᴺ = ⊤ := by rw [←Heyting.Regular.coe_inj]; simp
@@ -148,15 +166,47 @@ lemma bValue_eq_top_iff_provable : ♭φ = ⊤ ↔ 𝐋𝐊¹ ⊢ φ := calc
 lemma bValue_lt_top_iff_provable : ♭φ < ⊤ ↔ 𝐋𝐊¹ ⊬ φ := by
   simp [Entailment.Unprovable, ←bValue_eq_top_iff_provable, lt_top_iff_ne_top]
 
+open Order OrderDual
+
 /-- Filter induced by a schema -/
 def _root_.LO.FirstOrder.Schema.filter (𝔖 : Schema L) : Order.PFilter 𝔹 :=
-  ⟨⨆ φ ∈ 𝔖, Order.Ideal.principal ♭φ⟩
+  ⟨⨆ φ : 𝔖, Ideal.principal (toDual ♭φ)⟩
+
+open Classical
 
 @[simp] lemma mem_filter_iff {𝔖 : Schema L} {x} :
-    x ∈ 𝔖.filter ↔ ∃ u : Finset (Proposition L), (∀ φ ∈ u, φ ∈ 𝔖) ∧ ⨅ φ ∈ u, ♭φ ≤ x := by sorry
+    x ∈ 𝔖.filter ↔ ∃ Γ : Finset (Proposition L), ↑Γ ⊆ 𝔖 ∧ Γ.inf bValue ≤ x := calc
+  x ∈ 𝔖.filter ↔ toDual x ∈ ⨆ φ : 𝔖, Ideal.principal (P := 𝔹ᵒᵈ) (toDual ♭φ) := Order.PFilter.mem_mk _ _
+  _            ↔ ∃ Γ : Finset 𝔖, toDual x ∈ Γ.sup (Ideal.principal ∘ toDual ∘ bValue ∘ Subtype.val) := by rw [Ideal.mem_iSup_iff]; rfl
+  _            ↔ ∃ Γ : Finset 𝔖, toDual x ≤ Γ.sup (toDual ∘ bValue ∘ Subtype.val) := by simp [Ideal.mem_finsup_principal]
+  _            ↔ ∃ Γ : Finset 𝔖, Γ.inf (bValue ∘ Subtype.val) ≤ x := exists_congr fun Γ ↦ by simp [OrderDual.toDual_le, Function.comp_def]
+  _            ↔ ∃ Γ : Finset (Proposition L), ↑Γ ⊆ 𝔖 ∧ Γ.inf bValue ≤ x := by
+    constructor
+    · rintro ⟨Γ, hΓ⟩
+      exact ⟨Γ.map (Function.Embedding.subtype _), fun x ↦ by simp; tauto, by simpa [Function.comp_def]⟩
+    · rintro ⟨Γ, hΓ⟩
+      refine ⟨Γ.subtype _, ?_⟩
+      rw [Finset.subtype_inf_val_of]
+      · exact hΓ.2
+      · intro i hi; exact hΓ.1 hi
 
 lemma bValue_mem_filter_iff_provable {𝔖 : Schema L} {φ : Proposition L} :
-    ♭φ ∈ 𝔖.filter ↔ 𝔖 ⊢ φ := by sorry
+    ♭φ ∈ 𝔖.filter ↔ 𝔖 ⊢ φ := calc
+  ♭φ ∈ 𝔖.filter ↔ ∃ Γ : Finset (Proposition L), ↑Γ ⊆ 𝔖 ∧ Γ.inf bValue ≤ ♭φ := mem_filter_iff
+  _             ↔ ∃ Γ : List (Proposition L), ↑Γ.toFinset ⊆ 𝔖 ∧ Γ.toFinset.inf bValue ≤ ♭φ := by
+    constructor
+    · rintro ⟨Γ, hΓ⟩
+      exact ⟨Γ.toList, by simpa using hΓ⟩
+    · rintro ⟨Γ, hΓ⟩
+      exact ⟨Γ.toFinset, by simpa using hΓ⟩
+  _             ↔ ∃ Γ : List (Proposition L), ↑Γ.toFinset ⊆ 𝔖 ∧ 𝐋𝐊¹ ⊢ ⋀Γ 🡒 φ := by simp [←bValue_eq_top_iff_provable]
+  _             ↔ 𝔖 *⊢[𝐋𝐊¹] φ := by
+    constructor
+    · rintro ⟨Γ, hΓ, ⟨b⟩⟩
+      exact ⟨Γ, fun ψ hψ ↦ hΓ (by simpa using hψ), b⟩
+    · intro ⟨b⟩
+      exact ⟨b.ctx, fun ψ ↦ by simpa using b.subset ψ, ⟨b.prf⟩⟩
+  _             ↔ 𝔖 ⊢ φ := Schema.iff_context.symm
 
 end Canonical
 

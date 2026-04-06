@@ -78,7 +78,7 @@ section ofFunc
 
 variable (F : ℕ → Type*) {M : Type*} (fF : {k : ℕ} → (f : F k) → (Fin k → M) → M)
 
-def ofFunc : Structure (Language.ofFunc F) M where
+abbrev ofFunc : Structure (Language.ofFunc F) M where
   func := fun _ f v => fF f v
   rel  := fun _ r _ => r.elim
 
