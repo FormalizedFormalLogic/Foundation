@@ -376,6 +376,36 @@ protected noncomputable def succ (α : Ordinal V) : Ordinal V where
 
 protected noncomputable def ω : Ordinal V := IsOrdinal.toOrdinal ω
 
+lemma zero_or_succ_or_limit
+    (α : Ordinal V) :
+    α.val = ∅
+    ∨ (∃ β : Ordinal V, succ β.val = α)
+    ∨ ∀ x ∈ α.val, ∃ β ∈ α.val, x ∈ β := by
+  by_cases hzero : α.val = ∅
+  · simp [hzero]
+  · right
+    by_cases hsucc : ∃ β : Ordinal V, succ β.val = α.val
+    · simp [hsucc]
+    · right
+      intro x hxα
+      have : IsOrdinal x := IsOrdinal.of_mem hxα
+      have : IsOrdinal (succ x) := IsOrdinal.succ
+      let xo : Ordinal V := IsOrdinal.toOrdinal x
+      use succ xo
+      rw [(by simp_all [xo] : x = xo.val)] at *
+      simp only [mem_succ_self, and_true]
+      push_neg at hsucc
+      specialize hsucc xo
+      have htri := IsOrdinal.mem_trichotomy (succ xo.val) α.val
+      simp only [hsucc, false_or] at htri
+      have hαx : α.val ∉ succ xo.val := by
+        by_contra
+        apply mem_succ_iff.mp at this
+        rcases this with hαeqxo | hαmemxo
+        · exact mem_irrefl α.val (hαeqxo ▸ hxα)
+        · exact mem_asymm hαmemxo hxα
+      simpa only [hαx, or_false] using htri
+
 noncomputable def minimal (α : Ordinal V) (P : V → Prop) (hP : ℒₛₑₜ-predicate P := by definability) : Ordinal V where
   val := ⋂ˢ {x ∈ ↑α ; P x}
   ordinal := IsOrdinal.sInter fun ξ hξ ↦

@@ -116,3 +116,5 @@ noncomputable def repl (X : V) (R : V → V → Prop) (hR : ℒₛₑₜ-relatio
     {hfun : ∀ x : V, ∃! y : V, R x y} :
     y ∈ repl X R hR hfun ↔ ∃ x ∈ X, R x y :=
   Classical.choose!_spec (replacement_existsUnique X R hR hfun) y
+
+end LO.FirstOrder.SetTheory
