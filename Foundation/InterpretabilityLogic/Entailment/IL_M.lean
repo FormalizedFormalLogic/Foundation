@@ -30,11 +30,11 @@ local prefix:80 "♯" => λ φ => φ ⋏ □(∼φ)
 def Rhd_AM : 𝓢 ⊢! φ ▷ ♭φ := rhdOfLC! $ nec or₁
 def AM_Rhd : 𝓢 ⊢! ♭φ ▷ φ := axiomJ3! ⨀ axiomJ1'! ⨀ axiomJ5!
 
-def C_flat_flat₂ : 𝓢 ⊢! ♭φ ➝ ♭♭φ := or₁
+def C_flat_flat₂ : 𝓢 ⊢! ♭φ 🡒 ♭♭φ := or₁
 def Rhd_flat_flat₂ : 𝓢 ⊢! ♭φ ▷ ♭♭φ := rhdOfLC! $ nec C_flat_flat₂
 
-def C_flat_flatsharp : 𝓢 ⊢! ♭φ ➝ ♭♯φ := by
-  show 𝓢 ⊢! φ ⋎ ◇φ ➝ φ ⋏ □(∼φ) ⋎ ◇(φ ⋏ □(∼φ));
+def C_flat_flatsharp : 𝓢 ⊢! ♭φ 🡒 ♭♯φ := by
+  show 𝓢 ⊢! φ ⋎ ◇φ 🡒 φ ⋏ □(∼φ) ⋎ ◇(φ ⋏ □(∼φ));
   apply left_A_intro;
   . apply deduct';
     apply A_cases ?_ ?_ $ lem (φ := □(∼φ));
@@ -57,7 +57,7 @@ def C_flat_flatsharp : 𝓢 ⊢! ♭φ ➝ ♭♯φ := by
 def Rhd_flat_flatsharp : 𝓢 ⊢! ♭φ ▷ ♭♯φ := rhdOfLC! $ nec C_flat_flatsharp
 
 
-def C_sharpflat_sharp : 𝓢 ⊢! ♯♭φ ➝ ♯φ := by
+def C_sharpflat_sharp : 𝓢 ⊢! ♯♭φ 🡒 ♯φ := by
   show [φ ⋎ ◇φ, □(∼(φ ⋎ ◇φ))] ⊢[𝓢]! φ ⋏ □(∼φ);
 
   have : [φ ⋎ ◇φ, □(∼(φ ⋎ ◇φ))] ⊢[𝓢]! ∼◇φ := by

@@ -490,7 +490,7 @@ scoped instance : CovariantClass M M (· + ·) (· ≤ ·) := ⟨by intro; simp�
 scoped instance : CovariantClass M M (Function.swap (· * ·)) (· ≤ ·) := ⟨by intro; exact mul_le_mul_right⟩
 
 @[simp] lemma one_lt_mul_self_iff {a : M} : 1 < a * a ↔ 1 < a :=
-  ⟨(fun h ↦ by push_neg at h ⊢; exact mul_le_one' h h).mtr, fun h ↦ one_lt_mul'' h h⟩
+  ⟨(fun h ↦ by push Not at h ⊢; exact mul_le_one' h h).mtr, fun h ↦ one_lt_mul'' h h⟩
 
 @[simp] lemma opos_lt_sq_pos_iff {a : M} : 0 < a^2 ↔ 0 < a := by simp [sq, pos_iff_ne_zero]
 

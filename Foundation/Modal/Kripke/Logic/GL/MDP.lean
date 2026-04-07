@@ -118,13 +118,13 @@ end Kripke
 lemma MDP_Aux {X : Set _} (h : (□'X) *⊢[Modal.GL] □φ₁ ⋎ □φ₂) : (□'X) *⊢[Modal.GL] □φ₁ ∨ (□'X) *⊢[Modal.GL] □φ₂ := by
   obtain ⟨Δ, sΓ, hΓ⟩ := Context.provable_iff_boxed.mp h;
 
-  have : Modal.GL ⊢ ⋀(□'Δ) ➝ (□φ₁ ⋎ □φ₂) := FiniteContext.provable_iff.mp hΓ;
-  have : Modal.GL ⊢ □⋀Δ ➝ (□φ₁ ⋎ □φ₂) := C!_trans (by simp) this;
+  have : Modal.GL ⊢ ⋀(□'Δ) 🡒 (□φ₁ ⋎ □φ₂) := FiniteContext.provable_iff.mp hΓ;
+  have : Modal.GL ⊢ □⋀Δ 🡒 (□φ₁ ⋎ □φ₂) := C!_trans (by simp) this;
   generalize e : ⋀Δ = c at this;
 
-  have : (Modal.GL ⊢ ⊡c ➝ φ₁) ∨ (Modal.GL ⊢ ⊡c ➝ φ₂) := by
+  have : (Modal.GL ⊢ ⊡c 🡒 φ₁) ∨ (Modal.GL ⊢ ⊡c 🡒 φ₂) := by
     by_contra! hC;
-    have ⟨h₁, h₂⟩ : (Modal.GL ⊬ ⊡c ➝ φ₁) ∧ (Modal.GL ⊬ ⊡c ➝ φ₂) := hC;
+    have ⟨h₁, h₂⟩ : (Modal.GL ⊬ ⊡c 🡒 φ₁) ∧ (Modal.GL ⊬ ⊡c 🡒 φ₂) := hC;
 
     obtain ⟨M₁, _, _, _, _, hM₁⟩ := GL.Kripke.iff_unprovable_exists_finite_rooted_model.mp h₁;
     obtain ⟨M₂, _, _, _, _, hM₂⟩ := GL.Kripke.iff_unprovable_exists_finite_rooted_model.mp h₂;
@@ -146,14 +146,14 @@ lemma MDP_Aux {X : Set _} (h : (□'X) *⊢[Modal.GL] □φ₁ ⋎ □φ₂) : (
       . exact (Satisfies.and_def.mp $ (Satisfies.and_def.mp hM₂).1).2 _ Rrx;
     have hp₁ : ¬(Satisfies M₀ r₀ (□φ₁)) := by
       dsimp [Satisfies];
-      push_neg;
+      push Not;
       use (↑r₁);
       constructor;
       . tauto;
       . exact (Satisfies.and_def.mp hM₁).2;
     have hp₂ : ¬(Satisfies M₀ r₀ (□φ₂)) := by
       dsimp [Satisfies];
-      push_neg;
+      push Not;
       use (↑r₂);
       constructor;
       . tauto;
@@ -161,10 +161,10 @@ lemma MDP_Aux {X : Set _} (h : (□'X) *⊢[Modal.GL] □φ₁ ⋎ □φ₂) : (
     have : ¬(Satisfies M₀ r₀ (□φ₁ ⋎ □φ₂)) := by
       apply Satisfies.not_def.mpr;
       apply Satisfies.or_def.not.mpr;
-      push_neg;
+      push Not;
       exact ⟨hp₁, hp₂⟩;
-    have : ¬(Satisfies M₀ r₀ (□c ➝ (□φ₁ ⋎ □φ₂))) := _root_.not_imp.mpr ⟨hc, this⟩;
-    have : Modal.GL ⊬ □c ➝ □φ₁ ⋎ □φ₂ := GL.Kripke.iff_unprovable_exists_finite_rooted_model.mpr $ by
+    have : ¬(Satisfies M₀ r₀ (□c 🡒 (□φ₁ ⋎ □φ₂))) := _root_.not_imp.mpr ⟨hc, this⟩;
+    have : Modal.GL ⊬ □c 🡒 □φ₁ ⋎ □φ₂ := GL.Kripke.iff_unprovable_exists_finite_rooted_model.mpr $ by
       use M₀, inferInstance, inferInstance, inferInstance, inferInstance;
       exact this;
     contradiction;

@@ -76,9 +76,9 @@ end ToString
 
 lemma neg_eq (φ : NNFormula α) : ∼φ = neg φ := rfl
 
-lemma imp_eq (φ ψ : NNFormula α) : φ ➝ ψ = ∼φ ⋎ ψ := rfl
+lemma imp_eq (φ ψ : NNFormula α) : φ 🡒 ψ = ∼φ ⋎ ψ := rfl
 
-lemma iff_eq (φ ψ : NNFormula α) : φ ⭤ ψ = (∼φ ⋎ ψ) ⋏ (∼ψ ⋎ φ) := rfl
+lemma iff_eq (φ ψ : NNFormula α) : φ 🡘 ψ = (∼φ ⋎ ψ) ⋏ (∼ψ ⋎ φ) := rfl
 
 @[simp] lemma and_inj (φ₁ ψ₁ φ₂ ψ₂ : NNFormula α) : φ₁ ⋏ φ₂ = ψ₁ ⋏ ψ₂ ↔ φ₁ = ψ₁ ∧ φ₂ = ψ₂ :=
 by simp [Wedge.wedge]

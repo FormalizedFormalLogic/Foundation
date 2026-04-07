@@ -152,7 +152,7 @@ lemma zero_mul_one : (0 : M) * 1 = 0 := calc
 @[simp]
 lemma not_le_zero {a : M} : ¬a < 0 := by
   apply Arithmetic.lt_def.not.mpr;
-  push_neg;
+  push Not;
   intro b;
   calc
     a + (b + 1) = (a + b) + 1 := Arithmetic.add_succ _ _

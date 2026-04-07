@@ -34,7 +34,7 @@ lemma provable_boxdotTranslated_GLPoint3_of_GrzPoint3 : Modal.GrzPoint3 ⊢ φ �
     replace hF := Set.mem_setOf_eq.mp hF;
     apply Satisfies.or_def.mpr;
     by_contra hC;
-    push_neg at hC;
+    push Not at hC;
     obtain ⟨hC₁, hC₂⟩ := hC;
     replace hC₁ := not_and_or.mp $ Satisfies.and_def.not.mp hC₁;
     replace hC₂ := not_and_or.mp $ Satisfies.and_def.not.mp hC₂;
@@ -42,34 +42,34 @@ lemma provable_boxdotTranslated_GLPoint3_of_GrzPoint3 : Modal.GrzPoint3 ⊢ φ �
     rcases hC₂ with (hC₂ | hC₂)
     . replace hC₁ := Satisfies.imp_def₂.not.mp hC₁;
       replace hC₂ := Satisfies.imp_def₂.not.mp hC₂;
-      push_neg at hC₁ hC₂;
+      push Not at hC₁ hC₂;
       tauto;
     . replace hC₁ := Satisfies.imp_def₂.not.mp hC₁;
       replace hC₂ := Satisfies.box_def.not.mp hC₂;
-      push_neg at hC₁ hC₂;
+      push Not at hC₁ hC₂;
       obtain ⟨hC₁₁, hC₁₂⟩ := hC₁;
       obtain ⟨hC₁₁₁, hC₁₂₁⟩ := Satisfies.and_def.mp hC₁₁
       obtain ⟨y, Rxy, hC₂⟩ := hC₂;
       replace hC₂ := Satisfies.imp_def₂.not.mp hC₂;
-      push_neg at hC₂;
+      push Not at hC₂;
       exact hC₂.2 $ hC₁₂₁ y Rxy;
     . replace hC₁ := Satisfies.box_def.not.mp hC₁;
       replace hC₂ := Satisfies.imp_def₂.not.mp hC₂;
-      push_neg at hC₁ hC₂;
+      push Not at hC₁ hC₂;
       obtain ⟨y, Rxy, hC₁⟩ := hC₁;
       replace hC₁ := Satisfies.imp_def₂.not.mp hC₁;
-      push_neg at hC₁;
+      push Not at hC₁;
       obtain ⟨hC₂₁, hC₂₂⟩ := hC₂;
       obtain ⟨hC₂₁₁, hC₂₂₁⟩ := Satisfies.and_def.mp hC₂₁
       exact hC₁.2 $ hC₂₂₁ y Rxy;
     . replace hC₁ := Satisfies.box_def.not.mp hC₁;
       replace hC₂ := Satisfies.box_def.not.mp hC₂;
-      push_neg at hC₁ hC₂;
+      push Not at hC₁ hC₂;
       obtain ⟨y, Rxy, hC₁⟩ := hC₁;
       obtain ⟨z, Rxz, hC₂⟩ := hC₂;
       replace hC₁ := Satisfies.imp_def₂.not.mp hC₁;
       replace hC₂ := Satisfies.imp_def₂.not.mp hC₂;
-      push_neg at hC₁ hC₂;
+      push Not at hC₁ hC₂;
       obtain ⟨hC₁₁, hC₁₂⟩ := hC₁;
       obtain ⟨hC₁₁₁, hC₁₁₂⟩ := Satisfies.and_def.mp hC₁₁
       obtain ⟨hC₂₁, hC₂₂⟩ := hC₂;

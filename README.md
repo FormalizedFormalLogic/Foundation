@@ -42,8 +42,8 @@ Main results of this repository. More detailed explanations are provided in the 
 
 [prop]: ./Foundation/Propositional
 [prop:classical_tait]: ./Foundation/Propositional/Tait/Calculus.lean
-[prop:classical_tait_complete]: ./Foundation/Propositional/ClassicalSemantics/Tait.lean
-[prop:classical_complete]: ./Foundation/Propositional/ClassicalSemantics/Tait.lean
+[prop:classical_tait_complete]: ./Foundation/Propositional/Boolean/Tait.lean
+[prop:classical_complete]: ./Foundation/Propositional/Boolean/Tait.lean
 [prop:kripke]: ./Foundation/Propositional/Kripke
 [prop:int_disjunctive]: ./Foundation/Propositional/Kripke/Logic/Int.lean
 [prop:sublogics]: ./Foundation/Propositional/Logic/Sublogic.lean

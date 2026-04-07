@@ -139,16 +139,16 @@ section
 
 variable [DecidableEq α] [Entailment.Cl L]
 
-lemma lconj_subst {X : List (Formula α)} {s : Substitution α} : L ⊢ (X.map (·⟦s⟧)).conj₂ ➝ X.conj₂⟦s⟧ := by
+lemma lconj_subst {X : List (Formula α)} {s : Substitution α} : L ⊢ (X.map (·⟦s⟧)).conj₂ 🡒 X.conj₂⟦s⟧ := by
   induction X using List.induction_with_singleton with
   | hnil => simp;
   | hsingle => simp;
   | hcons φ X hφ ih =>
-    suffices L ⊢ φ⟦s⟧ ⋏ ⋀(X.map (·⟦s⟧)) ➝ φ⟦s⟧ ⋏ (⋀X)⟦s⟧ by
+    suffices L ⊢ φ⟦s⟧ ⋏ ⋀(X.map (·⟦s⟧)) 🡒 φ⟦s⟧ ⋏ (⋀X)⟦s⟧ by
       simpa [List.conj₂_cons_nonempty hφ, List.conj₂_cons_nonempty (show X.map (·⟦s⟧) ≠ [] by simpa)];
     cl_prover [ih];
 
-lemma fconj_subst {X : Finset (Formula α)} {s : Substitution α} : L ⊢ (X.image (·⟦s⟧)).conj ➝ X.conj⟦s⟧ := by
+lemma fconj_subst {X : Finset (Formula α)} {s : Substitution α} : L ⊢ (X.image (·⟦s⟧)).conj 🡒 X.conj⟦s⟧ := by
   apply C!_trans ?_ $ lconj_subst (L := L) (X := X.toList) (s := s);
   apply right_Conj₂!_intro;
   intro φ hφ;

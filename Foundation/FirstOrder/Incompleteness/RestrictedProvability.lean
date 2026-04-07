@@ -47,11 +47,11 @@ variable {V : Type} [ORingStructure V] [V ⊧ₘ* 𝗜𝚺₁]
 variable {T U : ArithmeticTheory} [T.Δ₁] -- [𝗜𝚺₁ ⪯ T] [𝗜𝚺₁ ⪯ U]
 variable {e : ℕ}
 
-lemma def_restrictedGödel [𝗜𝚺₁ ⪯ U] : U ⊢ T.restrictedGödel e ⭤ (∼T.restrictedProvable e)/[⌜T.restrictedGödel e⌝] := diagonal _
+lemma def_restrictedGödel [𝗜𝚺₁ ⪯ U] : U ⊢ T.restrictedGödel e 🡘 (∼T.restrictedProvable e)/[⌜T.restrictedGödel e⌝] := diagonal _
 
-private lemma def_restrictedGödel' [𝗜𝚺₁ ⪯ U] : U ⊢ T.restrictedGödel' e ⭤ (∼T.restrictedProvable e)/[⌜T.restrictedGödel e⌝] := by simp;
+private lemma def_restrictedGödel' [𝗜𝚺₁ ⪯ U] : U ⊢ T.restrictedGödel' e 🡘 (∼T.restrictedProvable e)/[⌜T.restrictedGödel e⌝] := by simp;
 
-private lemma provable_E_restrictedGödel_restrictedGödel' [𝗜𝚺₁ ⪯ U] : U ⊢ T.restrictedGödel e ⭤ T.restrictedGödel' e := by
+private lemma provable_E_restrictedGödel_restrictedGödel' [𝗜𝚺₁ ⪯ U] : U ⊢ T.restrictedGödel e 🡘 T.restrictedGödel' e := by
   apply Entailment.E!_trans;
   . exact def_restrictedGödel;
   . exact Entailment.E!_symm $ def_restrictedGödel';

@@ -58,54 +58,54 @@ end Unnecessitation
 
 
 class LoebRule [LogicalConnective F] (𝓢 : S) where
-  loeb {φ : F} : 𝓢 ⊢! □φ ➝ φ → 𝓢 ⊢! φ
+  loeb {φ : F} : 𝓢 ⊢! □φ 🡒 φ → 𝓢 ⊢! φ
 
 section LoebRule
 
 variable [LoebRule 𝓢]
 
 alias loeb := LoebRule.loeb
-lemma loeb! : 𝓢 ⊢ □φ ➝ φ → 𝓢 ⊢ φ := by rintro ⟨hp⟩; exact ⟨loeb hp⟩
+lemma loeb! : 𝓢 ⊢ □φ 🡒 φ → 𝓢 ⊢ φ := by rintro ⟨hp⟩; exact ⟨loeb hp⟩
 
 end LoebRule
 
 
 
 class HenkinRule [LogicalConnective F] (𝓢 : S) where
-  henkin {φ : F} : 𝓢 ⊢! □φ ⭤ φ → 𝓢 ⊢! φ
+  henkin {φ : F} : 𝓢 ⊢! □φ 🡘 φ → 𝓢 ⊢! φ
 
 section HenkinRule
 
 variable [HenkinRule 𝓢]
 
 alias henkin := HenkinRule.henkin
-lemma henkin! : 𝓢 ⊢ □φ ⭤ φ → 𝓢 ⊢ φ := by rintro ⟨hp⟩; exact ⟨henkin hp⟩
+lemma henkin! : 𝓢 ⊢ □φ 🡘 φ → 𝓢 ⊢ φ := by rintro ⟨hp⟩; exact ⟨henkin hp⟩
 
 end HenkinRule
 
 
 class RM [LogicalConnective F] (𝓢 : S) where
-  rm {φ ψ : F} : 𝓢 ⊢! φ ➝ ψ → 𝓢 ⊢! □φ ➝ □ψ
+  rm {φ ψ : F} : 𝓢 ⊢! φ 🡒 ψ → 𝓢 ⊢! □φ 🡒 □ψ
 
 section RM
 
 variable [RM 𝓢]
 
 alias rm := RM.rm
-lemma rm! : 𝓢 ⊢ φ ➝ ψ → 𝓢 ⊢ □φ ➝ □ψ := by rintro ⟨hp⟩; exact ⟨rm hp⟩
+lemma rm! : 𝓢 ⊢ φ 🡒 ψ → 𝓢 ⊢ □φ 🡒 □ψ := by rintro ⟨hp⟩; exact ⟨rm hp⟩
 
 end RM
 
 
 class RE [LogicalConnective F] (𝓢 : S) where
-  re {φ ψ : F} : 𝓢 ⊢! φ ⭤ ψ → 𝓢 ⊢! □φ ⭤ □ψ
+  re {φ ψ : F} : 𝓢 ⊢! φ 🡘 ψ → 𝓢 ⊢! □φ 🡘 □ψ
 
 section RE
 
 variable [RE 𝓢]
 
 alias re := RE.re
-lemma re! : 𝓢 ⊢ φ ⭤ ψ → 𝓢 ⊢ □φ ⭤ □ψ := by rintro ⟨hp⟩; exact ⟨re hp⟩
+lemma re! : 𝓢 ⊢ φ 🡘 ψ → 𝓢 ⊢ □φ 🡘 □ψ := by rintro ⟨hp⟩; exact ⟨re hp⟩
 
 end RE
 
@@ -123,8 +123,8 @@ section HasDiaDuality
 
 variable [HasDiaDuality 𝓢]
 
-def diaDuality : 𝓢 ⊢! ◇φ ⭤ ∼(□(∼φ)) := HasDiaDuality.dia_dual _
-@[simp] lemma dia_duality! : 𝓢 ⊢ ◇φ ⭤ ∼(□(∼φ)) := ⟨diaDuality⟩
+def diaDuality : 𝓢 ⊢! ◇φ 🡘 ∼(□(∼φ)) := HasDiaDuality.dia_dual _
+@[simp] lemma dia_duality! : 𝓢 ⊢ ◇φ 🡘 ∼(□(∼φ)) := ⟨diaDuality⟩
 
 end HasDiaDuality
 
@@ -136,19 +136,19 @@ section HasAxiomK
 
 variable [HasAxiomK 𝓢]
 
-def axiomK : 𝓢 ⊢! □(φ ➝ ψ) ➝ □φ ➝ □ψ := HasAxiomK.K _ _
-@[simp] lemma axiomK! : 𝓢 ⊢ □(φ ➝ ψ) ➝ □φ ➝ □ψ := ⟨axiomK⟩
+def axiomK : 𝓢 ⊢! □(φ 🡒 ψ) 🡒 □φ 🡒 □ψ := HasAxiomK.K _ _
+@[simp] lemma axiomK! : 𝓢 ⊢ □(φ 🡒 ψ) 🡒 □φ 🡒 □ψ := ⟨axiomK⟩
 
 variable [Entailment.Minimal 𝓢]
 
 instance (Γ : FiniteContext F 𝓢) : HasAxiomK Γ := ⟨fun _ _ ↦ FiniteContext.of axiomK⟩
 instance (Γ : Context F 𝓢) : HasAxiomK Γ := ⟨fun _ _ ↦ Context.of axiomK⟩
 
-def axiomK' (h : 𝓢 ⊢! □(φ ➝ ψ)) : 𝓢 ⊢! □φ ➝ □ψ := axiomK ⨀ h
-@[simp] lemma axiomK'! (h : 𝓢 ⊢ □(φ ➝ ψ)) : 𝓢 ⊢ □φ ➝ □ψ := ⟨axiomK' h.some⟩
+def axiomK' (h : 𝓢 ⊢! □(φ 🡒 ψ)) : 𝓢 ⊢! □φ 🡒 □ψ := axiomK ⨀ h
+@[simp] lemma axiomK'! (h : 𝓢 ⊢ □(φ 🡒 ψ)) : 𝓢 ⊢ □φ 🡒 □ψ := ⟨axiomK' h.some⟩
 
-def axiomK'' (h₁ : 𝓢 ⊢! □(φ ➝ ψ)) (h₂ : 𝓢 ⊢! □φ) : 𝓢 ⊢! □ψ := axiomK' h₁ ⨀ h₂
-@[simp] lemma axiomK''! (h₁ : 𝓢 ⊢ □(φ ➝ ψ)) (h₂ : 𝓢 ⊢ □φ) : 𝓢 ⊢ □ψ := ⟨axiomK'' h₁.some h₂.some⟩
+def axiomK'' (h₁ : 𝓢 ⊢! □(φ 🡒 ψ)) (h₂ : 𝓢 ⊢! □φ) : 𝓢 ⊢! □ψ := axiomK' h₁ ⨀ h₂
+@[simp] lemma axiomK''! (h₁ : 𝓢 ⊢ □(φ 🡒 ψ)) (h₂ : 𝓢 ⊢ □φ) : 𝓢 ⊢ □ψ := ⟨axiomK'' h₁.some h₂.some⟩
 
 end HasAxiomK
 
@@ -160,8 +160,8 @@ section HasAxiomM
 
 variable [HasAxiomM 𝓢]
 
-def axiomM : 𝓢 ⊢! □(φ ⋏ ψ) ➝ (□φ ⋏ □ψ) := HasAxiomM.M _ _
-@[simp] lemma axiomM! : 𝓢 ⊢ □(φ ⋏ ψ) ➝ (□φ ⋏ □ψ) := ⟨axiomM⟩
+def axiomM : 𝓢 ⊢! □(φ ⋏ ψ) 🡒 (□φ ⋏ □ψ) := HasAxiomM.M _ _
+@[simp] lemma axiomM! : 𝓢 ⊢ □(φ ⋏ ψ) 🡒 (□φ ⋏ □ψ) := ⟨axiomM⟩
 
 variable [Entailment.Minimal 𝓢]
 
@@ -181,8 +181,8 @@ section HasAxiomC
 
 variable [HasAxiomC 𝓢]
 
-def axiomC : 𝓢 ⊢! (□φ ⋏ □ψ) ➝ □(φ ⋏ ψ) := HasAxiomC.C _ _
-@[simp] lemma axiomC! : 𝓢 ⊢ (□φ ⋏ □ψ) ➝ □(φ ⋏ ψ) := ⟨axiomC⟩
+def axiomC : 𝓢 ⊢! (□φ ⋏ □ψ) 🡒 □(φ ⋏ ψ) := HasAxiomC.C _ _
+@[simp] lemma axiomC! : 𝓢 ⊢ (□φ ⋏ □ψ) 🡒 □(φ ⋏ ψ) := ⟨axiomC⟩
 
 variable [Entailment.Minimal 𝓢]
 
@@ -202,8 +202,8 @@ section HasAxiomT
 
 variable [HasAxiomT 𝓢]
 
-def axiomT : 𝓢 ⊢! □φ ➝ φ := HasAxiomT.T _
-@[simp] lemma axiomT! {φ} : 𝓢 ⊢ □φ ➝ φ := ⟨axiomT⟩
+def axiomT : 𝓢 ⊢! □φ 🡒 φ := HasAxiomT.T _
+@[simp] lemma axiomT! {φ} : 𝓢 ⊢ □φ 🡒 φ := ⟨axiomT⟩
 
 variable [Entailment.Minimal 𝓢]
 
@@ -223,8 +223,8 @@ section HasAxiomDiaTc
 
 variable [HasAxiomDiaTc 𝓢]
 
-def diaTc : 𝓢 ⊢! φ ➝ ◇φ := HasAxiomDiaTc.diaTc _
-@[simp] lemma diaTc! : 𝓢 ⊢ φ ➝ ◇φ := ⟨diaTc⟩
+def diaTc : 𝓢 ⊢! φ 🡒 ◇φ := HasAxiomDiaTc.diaTc _
+@[simp] lemma diaTc! : 𝓢 ⊢ φ 🡒 ◇φ := ⟨diaTc⟩
 
 variable [Entailment.Minimal 𝓢]
 
@@ -244,8 +244,8 @@ section HasAxiomD
 
 variable [HasAxiomD 𝓢]
 
-def axiomD : 𝓢 ⊢! □φ ➝ ◇φ := HasAxiomD.D _
-@[simp] lemma axiomD! : 𝓢 ⊢ □φ ➝ ◇φ := ⟨axiomD⟩
+def axiomD : 𝓢 ⊢! □φ 🡒 ◇φ := HasAxiomD.D _
+@[simp] lemma axiomD! : 𝓢 ⊢ □φ 🡒 ◇φ := ⟨axiomD⟩
 
 variable [Entailment.Minimal 𝓢]
 
@@ -301,8 +301,8 @@ section HasAxiomB
 
 variable [HasAxiomB 𝓢]
 
-def axiomB : 𝓢 ⊢! φ ➝ □◇φ := HasAxiomB.B _
-@[simp] lemma axiomB! : 𝓢 ⊢ φ ➝ □◇φ := ⟨axiomB⟩
+def axiomB : 𝓢 ⊢! φ 🡒 □◇φ := HasAxiomB.B _
+@[simp] lemma axiomB! : 𝓢 ⊢ φ 🡒 □◇φ := ⟨axiomB⟩
 
 variable [Entailment.Minimal 𝓢]
 
@@ -322,8 +322,8 @@ section HasAxiomFour
 
 variable [HasAxiomFour 𝓢]
 
-def axiomFour : 𝓢 ⊢! □φ ➝ □□φ := HasAxiomFour.Four _
-@[simp] lemma axiomFour! : 𝓢 ⊢ □φ ➝ □□φ := ⟨axiomFour⟩
+def axiomFour : 𝓢 ⊢! □φ 🡒 □□φ := HasAxiomFour.Four _
+@[simp] lemma axiomFour! : 𝓢 ⊢ □φ 🡒 □□φ := ⟨axiomFour⟩
 
 variable [Entailment.Minimal 𝓢]
 
@@ -343,8 +343,8 @@ section
 
 variable [HasAxiomFourN n 𝓢]
 
-def axiomFourN : 𝓢 ⊢! □^[n]φ ➝ □^[(n + 1)]φ := by apply HasAxiomFourN.FourN
-@[simp] lemma axiomFourN! : 𝓢 ⊢  □^[n]φ ➝ □^[(n + 1)]φ := ⟨axiomFourN⟩
+def axiomFourN : 𝓢 ⊢! □^[n]φ 🡒 □^[(n + 1)]φ := by apply HasAxiomFourN.FourN
+@[simp] lemma axiomFourN! : 𝓢 ⊢  □^[n]φ 🡒 □^[(n + 1)]φ := ⟨axiomFourN⟩
 
 variable [Entailment.Minimal 𝓢]
 
@@ -361,8 +361,8 @@ section HasAxiomFive
 
 variable [HasAxiomFive 𝓢]
 
-def axiomFive : 𝓢 ⊢! ◇φ ➝ □◇φ := HasAxiomFive.Five _
-@[simp] lemma axiomFive! : 𝓢 ⊢ ◇φ ➝ □◇φ := ⟨axiomFive⟩
+def axiomFive : 𝓢 ⊢! ◇φ 🡒 □◇φ := HasAxiomFive.Five _
+@[simp] lemma axiomFive! : 𝓢 ⊢ ◇φ 🡒 □◇φ := ⟨axiomFive⟩
 
 variable [Entailment.Minimal 𝓢]
 
@@ -379,8 +379,8 @@ section HasAxiomL
 
 variable [HasAxiomL 𝓢]
 
-def axiomL : 𝓢 ⊢! □(□φ ➝ φ) ➝ □φ := HasAxiomL.L _
-@[simp] lemma axiomL! : 𝓢 ⊢ □(□φ ➝ φ) ➝ □φ := ⟨axiomL⟩
+def axiomL : 𝓢 ⊢! □(□φ 🡒 φ) 🡒 □φ := HasAxiomL.L _
+@[simp] lemma axiomL! : 𝓢 ⊢ □(□φ 🡒 φ) 🡒 □φ := ⟨axiomL⟩
 
 variable [Entailment.Minimal 𝓢]
 
@@ -397,8 +397,8 @@ section HasAxiomPoint2
 
 variable [HasAxiomPoint2 𝓢]
 
-def axiomPoint2 : 𝓢 ⊢! ◇□φ ➝ □◇φ := HasAxiomPoint2.Point2 _
-@[simp] lemma axiomPoint2! : 𝓢 ⊢ ◇□φ ➝ □◇φ := ⟨axiomPoint2⟩
+def axiomPoint2 : 𝓢 ⊢! ◇□φ 🡒 □◇φ := HasAxiomPoint2.Point2 _
+@[simp] lemma axiomPoint2! : 𝓢 ⊢ ◇□φ 🡒 □◇φ := ⟨axiomPoint2⟩
 
 variable [Entailment.Minimal 𝓢]
 
@@ -415,8 +415,8 @@ section HasAxiomWeakPoint2
 
 variable [HasAxiomWeakPoint2 𝓢]
 
-def axiomWeakPoint2 : 𝓢 ⊢! ◇(□φ ⋏ ψ) ➝ □(◇φ ⋎ ψ) := HasAxiomWeakPoint2.WeakPoint2 _ _
-@[simp] lemma axiomWeakPoint2! : 𝓢 ⊢ ◇(□φ ⋏ ψ) ➝ □(◇φ ⋎ ψ) := ⟨axiomWeakPoint2⟩
+def axiomWeakPoint2 : 𝓢 ⊢! ◇(□φ ⋏ ψ) 🡒 □(◇φ ⋎ ψ) := HasAxiomWeakPoint2.WeakPoint2 _ _
+@[simp] lemma axiomWeakPoint2! : 𝓢 ⊢ ◇(□φ ⋏ ψ) 🡒 □(◇φ ⋎ ψ) := ⟨axiomWeakPoint2⟩
 
 variable [Entailment.Minimal 𝓢]
 
@@ -433,8 +433,8 @@ section HasAxiomPoint3
 
 variable [HasAxiomPoint3 𝓢]
 
-def axiomPoint3 : 𝓢 ⊢! □(□φ ➝ ψ) ⋎ □(□ψ ➝ φ) := HasAxiomPoint3.Point3 _ _
-@[simp] lemma axiomPoint3! : 𝓢 ⊢ □(□φ ➝ ψ) ⋎ □(□ψ ➝ φ) := ⟨axiomPoint3⟩
+def axiomPoint3 : 𝓢 ⊢! □(□φ 🡒 ψ) ⋎ □(□ψ 🡒 φ) := HasAxiomPoint3.Point3 _ _
+@[simp] lemma axiomPoint3! : 𝓢 ⊢ □(□φ 🡒 ψ) ⋎ □(□ψ 🡒 φ) := ⟨axiomPoint3⟩
 
 variable [Entailment.Minimal 𝓢]
 
@@ -451,8 +451,8 @@ section HasAxiomWeakPoint3
 
 variable [HasAxiomWeakPoint3 𝓢]
 
-def axiomWeakPoint3 : 𝓢 ⊢! □(⊡φ ➝ ψ) ⋎ □(⊡ψ ➝ φ) := HasAxiomWeakPoint3.WeakPoint3 _ _
-@[simp] lemma axiomWeakPoint3! : 𝓢 ⊢ □(⊡φ ➝ ψ) ⋎ □(⊡ψ ➝ φ) := ⟨axiomWeakPoint3⟩
+def axiomWeakPoint3 : 𝓢 ⊢! □(⊡φ 🡒 ψ) ⋎ □(⊡ψ 🡒 φ) := HasAxiomWeakPoint3.WeakPoint3 _ _
+@[simp] lemma axiomWeakPoint3! : 𝓢 ⊢ □(⊡φ 🡒 ψ) ⋎ □(⊡ψ 🡒 φ) := ⟨axiomWeakPoint3⟩
 
 variable [Entailment.Minimal 𝓢]
 
@@ -469,8 +469,8 @@ section HasAxiomGrz
 
 variable [HasAxiomGrz 𝓢]
 
-def axiomGrz : 𝓢 ⊢! □(□(φ ➝ □φ) ➝ φ) ➝ φ := HasAxiomGrz.Grz _
-@[simp] lemma axiomGrz! : 𝓢 ⊢ □(□(φ ➝ □φ) ➝ φ) ➝ φ := ⟨axiomGrz⟩
+def axiomGrz : 𝓢 ⊢! □(□(φ 🡒 □φ) 🡒 φ) 🡒 φ := HasAxiomGrz.Grz _
+@[simp] lemma axiomGrz! : 𝓢 ⊢ □(□(φ 🡒 □φ) 🡒 φ) 🡒 φ := ⟨axiomGrz⟩
 
 variable [Entailment.Minimal 𝓢]
 
@@ -487,8 +487,8 @@ section HasAxiomDum
 
 variable [HasAxiomDum 𝓢]
 
-def axiomDum : 𝓢 ⊢! □(□(φ ➝ □φ) ➝ φ) ➝ (◇□φ ➝ φ) := HasAxiomDum.Dum _
-@[simp] lemma axiomDum! : 𝓢 ⊢ □(□(φ ➝ □φ) ➝ φ) ➝ (◇□φ ➝ φ) := ⟨axiomDum⟩
+def axiomDum : 𝓢 ⊢! □(□(φ 🡒 □φ) 🡒 φ) 🡒 (◇□φ 🡒 φ) := HasAxiomDum.Dum _
+@[simp] lemma axiomDum! : 𝓢 ⊢ □(□(φ 🡒 □φ) 🡒 φ) 🡒 (◇□φ 🡒 φ) := ⟨axiomDum⟩
 
 variable [Entailment.Minimal 𝓢]
 
@@ -505,8 +505,8 @@ section HasAxiomTc
 
 variable [HasAxiomTc 𝓢]
 
-def axiomTc : 𝓢 ⊢! φ ➝ □φ := HasAxiomTc.Tc _
-@[simp] lemma axiomTc! : 𝓢 ⊢ φ ➝ □φ := ⟨axiomTc⟩
+def axiomTc : 𝓢 ⊢! φ 🡒 □φ := HasAxiomTc.Tc _
+@[simp] lemma axiomTc! : 𝓢 ⊢ φ 🡒 □φ := ⟨axiomTc⟩
 
 variable [Entailment.Minimal 𝓢]
 
@@ -523,8 +523,8 @@ section HasAxiomDiaT
 
 variable [HasAxiomDiaT 𝓢]
 
-def diaT : 𝓢 ⊢! ◇φ ➝ φ := HasAxiomDiaT.diaT _
-@[simp] lemma diaT! : 𝓢 ⊢ ◇φ ➝ φ := ⟨diaT⟩
+def diaT : 𝓢 ⊢! ◇φ 🡒 φ := HasAxiomDiaT.diaT _
+@[simp] lemma diaT! : 𝓢 ⊢ ◇φ 🡒 φ := ⟨diaT⟩
 
 variable [Entailment.Minimal 𝓢]
 
@@ -562,8 +562,8 @@ section HasAxiomHen
 
 variable [HasAxiomHen 𝓢]
 
-def axiomHen : 𝓢 ⊢! □(□φ ⭤ φ) ➝ □φ := HasAxiomHen.Hen _
-@[simp] lemma axiomHen! : 𝓢 ⊢ □(□φ ⭤ φ) ➝ □φ := ⟨axiomHen⟩
+def axiomHen : 𝓢 ⊢! □(□φ 🡘 φ) 🡒 □φ := HasAxiomHen.Hen _
+@[simp] lemma axiomHen! : 𝓢 ⊢ □(□φ 🡘 φ) 🡒 □φ := ⟨axiomHen⟩
 
 variable [Entailment.Minimal 𝓢]
 
@@ -580,8 +580,8 @@ section HasAxiomZ
 
 variable [HasAxiomZ 𝓢]
 
-def axiomZ : 𝓢 ⊢! □(□φ ➝ φ) ➝ (◇□φ ➝ □φ) := HasAxiomZ.Z _
-@[simp] lemma axiomZ! : 𝓢 ⊢ □(□φ ➝ φ) ➝ (◇□φ ➝ □φ) := ⟨axiomZ⟩
+def axiomZ : 𝓢 ⊢! □(□φ 🡒 φ) 🡒 (◇□φ 🡒 □φ) := HasAxiomZ.Z _
+@[simp] lemma axiomZ! : 𝓢 ⊢ □(□φ 🡒 φ) 🡒 (◇□φ 🡒 □φ) := ⟨axiomZ⟩
 
 variable [Entailment.Minimal 𝓢]
 
@@ -598,8 +598,8 @@ section HasAxiomMcK
 
 variable [HasAxiomMcK 𝓢]
 
-def axiomMcK : 𝓢 ⊢! □◇φ ➝ ◇□φ := HasAxiomMcK.McK _
-@[simp] lemma axiomMcK! : 𝓢 ⊢ □◇φ ➝ ◇□φ := ⟨axiomMcK⟩
+def axiomMcK : 𝓢 ⊢! □◇φ 🡒 ◇□φ := HasAxiomMcK.McK _
+@[simp] lemma axiomMcK! : 𝓢 ⊢ □◇φ 🡒 ◇□φ := ⟨axiomMcK⟩
 
 variable [Entailment.Minimal 𝓢]
 instance (Γ : FiniteContext F 𝓢) : HasAxiomMcK Γ := ⟨fun _ ↦ FiniteContext.of axiomMcK⟩
@@ -615,8 +615,8 @@ section HasAxiomMk
 
 variable [HasAxiomMk 𝓢]
 
-def axiomMk : 𝓢 ⊢! □φ ⋏ ψ ➝ ◇(□□φ ⋏ ◇ψ) := HasAxiomMk.Mk _ _
-@[simp] lemma axiomMk! : 𝓢 ⊢ □φ ⋏ ψ ➝ ◇(□□φ ⋏ ◇ψ) := ⟨axiomMk⟩
+def axiomMk : 𝓢 ⊢! □φ ⋏ ψ 🡒 ◇(□□φ ⋏ ◇ψ) := HasAxiomMk.Mk _ _
+@[simp] lemma axiomMk! : 𝓢 ⊢ □φ ⋏ ψ 🡒 ◇(□□φ ⋏ ◇ψ) := ⟨axiomMk⟩
 
 variable [Entailment.Minimal 𝓢]
 
@@ -633,8 +633,8 @@ section HasAxiomPoint4
 
 variable [HasAxiomPoint4 𝓢]
 
-def axiomPoint4 : 𝓢 ⊢! ◇□φ ➝ φ ➝ □φ := HasAxiomPoint4.Point4 _
-@[simp] lemma axiomPoint4! : 𝓢 ⊢ ◇□φ ➝ φ ➝ □φ := ⟨axiomPoint4⟩
+def axiomPoint4 : 𝓢 ⊢! ◇□φ 🡒 φ 🡒 □φ := HasAxiomPoint4.Point4 _
+@[simp] lemma axiomPoint4! : 𝓢 ⊢ ◇□φ 🡒 φ 🡒 □φ := ⟨axiomPoint4⟩
 
 variable [Entailment.Minimal 𝓢]
 
@@ -651,8 +651,8 @@ section
 
 variable [HasAxiomH 𝓢]
 
-def axiomH : 𝓢 ⊢! φ ➝ □(◇φ ➝ φ) := HasAxiomH.H1 _
-@[simp] lemma axiomH! : 𝓢 ⊢ φ ➝ □(◇φ ➝ φ) := ⟨axiomH⟩
+def axiomH : 𝓢 ⊢! φ 🡒 □(◇φ 🡒 φ) := HasAxiomH.H1 _
+@[simp] lemma axiomH! : 𝓢 ⊢ φ 🡒 □(◇φ 🡒 φ) := ⟨axiomH⟩
 
 variable [Entailment.Minimal 𝓢]
 
@@ -678,8 +678,8 @@ instance [Entailment.HasAxiomPoint2 𝓢] : Entailment.HasAxiomGeach ⟨1, 1, 1,
 
 variable [HasAxiomGeach g 𝓢]
 
-def axiomGeach : 𝓢 ⊢! ◇^[g.i](□^[g.m]φ) ➝ □^[g.j](◇^[g.n]φ) := HasAxiomGeach.Geach _
-@[simp] lemma axiomGeach! : 𝓢 ⊢ ◇^[g.i](□^[g.m]φ) ➝ □^[g.j](◇^[g.n]φ) := ⟨axiomGeach⟩
+def axiomGeach : 𝓢 ⊢! ◇^[g.i](□^[g.m]φ) 🡒 □^[g.j](◇^[g.n]φ) := HasAxiomGeach.Geach _
+@[simp] lemma axiomGeach! : 𝓢 ⊢ ◇^[g.i](□^[g.m]φ) 🡒 □^[g.j](◇^[g.n]φ) := ⟨axiomGeach⟩
 
 variable [Entailment.Minimal 𝓢]
 

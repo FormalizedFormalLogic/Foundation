@@ -64,14 +64,14 @@ lemma truthlemma : ((φ ∈ t.1.1) ↔ t ⊧ φ) ∧ ((φ ∈ t.1.2) ↔ ¬t ⊧
       . intro hφψ;
         rcases iff_mem₂_imp.mp hφψ with ⟨hφ, hψ⟩;
         apply Satisfies.imp_def₂.not.mpr;
-        push_neg;
+        push Not;
         constructor;
         . exact ihφ.1.mp hφ;
         . exact ihψ.2.mp hψ;
       . intro hφψ;
         apply iff_mem₂_imp.mpr;
         replace hφψ := Satisfies.imp_def₂.not.mp hφψ;
-        push_neg at hφψ;
+        push Not at hφψ;
         rcases hφψ with ⟨hφ, hψ⟩;
         constructor;
         . exact ihφ.1.mpr hφ;
@@ -90,7 +90,7 @@ lemma truthlemma : ((φ ∈ t.1.1) ↔ t ⊧ φ) ∧ ((φ ∈ t.1.2) ↔ ¬t ⊧
     . constructor;
       . intro h;
         apply Satisfies.box_def.not.mpr;
-        push_neg;
+        push Not;
         obtain ⟨t', Rtt', ht'⟩ := iff_mem₂_box.mp h;
         use t';
         constructor;
@@ -99,7 +99,7 @@ lemma truthlemma : ((φ ∈ t.1.1) ↔ t ⊧ φ) ∧ ((φ ∈ t.1.2) ↔ ¬t ⊧
       . intro h;
         apply iff_mem₂_box.mpr;
         replace h := Satisfies.box_def.not.mp h;
-        push_neg at h;
+        push Not at h;
         obtain ⟨t', Rtt', ht'⟩ := h;
         use t';
         constructor;
@@ -177,7 +177,7 @@ lemma def_multirel_boxItr_satisfies : x ≺^[n] y ↔ (∀ {φ}, x ⊧ □^[n]φ
       obtain ⟨t, ht⟩ := lindenbaum (𝓢 := 𝓢) (t₀ := ⟨{ φ | x ⊧ □φ }, □^[n]'{ φ | ¬y ⊧ φ }⟩) $ by
         intro Γ Δ hΓ hΔ;
         by_contra! hC;
-        have : 𝓢 ⊢ □Γ.conj ➝ □Δ.disj := imply_box_distribute'! hC;
+        have : 𝓢 ⊢ □Γ.conj 🡒 □Δ.disj := imply_box_distribute'! hC;
         have : □Δ.disj ∈ x.1.1 := mdp_mem₁_provable this $ by
           apply truthlemma₁.mpr;
           intro y Rxy;

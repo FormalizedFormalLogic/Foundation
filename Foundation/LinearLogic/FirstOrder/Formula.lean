@@ -40,9 +40,9 @@ abbrev Semisentence (L : Language) (n : ℕ) := Semiformula L Empty n
 
 abbrev Sentence (L : Language) := Semiformula L Empty 0
 
-abbrev Semistatement (L : Language) (n : ℕ) := Semiformula L ℕ n
+abbrev Semiproposition (L : Language) (n : ℕ) := Semiformula L ℕ n
 
-abbrev Statement (L : Language) := Formula L ℕ
+abbrev Proposition (L : Language) := Formula L ℕ
 
 namespace Semiformula
 
@@ -167,9 +167,9 @@ lemma wedge_def (φ ψ : Semiformula L ξ n) : φ ⋏ ψ = φ ＆ ψ := rfl
 
 lemma vee_def (φ ψ : Semiformula L ξ n) :  φ ⋎ ψ = φ ⅋ ψ := rfl
 
-lemma imply_def (φ ψ : Semiformula L ξ n) : φ ➝ ψ = φ ⊸ ψ := rfl
+lemma imply_def (φ ψ : Semiformula L ξ n) : φ 🡒 ψ = φ ⊸ ψ := rfl
 
-lemma imply_def' (φ ψ : Semiformula L ξ n) : φ ➝ ψ = ∼φ ⅋ ψ := rfl
+lemma imply_def' (φ ψ : Semiformula L ξ n) : φ 🡒 ψ = ∼φ ⅋ ψ := rfl
 
 @[simp] lemma neg_inj {φ ψ : Semiformula L ξ n} : ∼φ = ∼ψ ↔ φ = ψ := by
   constructor

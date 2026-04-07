@@ -20,7 +20,7 @@ variable {F : Kripke.Frame} {a : ℕ} {φ : Formula ℕ}
 
 lemma valid_atomic_axiomHen_of_valid_atomic_axiomL : F ⊧ (Axioms.L (atom a)) → F ⊧ (Axioms.Hen (atom a)) := by
   intro h V x hx;
-  have : Satisfies ⟨F, V⟩ x (□(□a ➝ a)) := by
+  have : Satisfies ⟨F, V⟩ x (□(□a 🡒 a)) := by
     intro y Rxy;
     exact (Satisfies.and_def.mp $ @hx y Rxy) |>.1;
   exact @h V x this;
@@ -30,7 +30,7 @@ lemma valid_atomic_axiomL_of_valid_atomic_axiomHen : F ⊧ Axioms.Hen (atom a) �
 
   let V' : Valuation F := λ a w => ∀ n : ℕ, Satisfies ⟨F, V⟩ w (□^[n] a);
 
-  have h₁ : Satisfies ⟨F, V'⟩ x (□(□a ⭤ a)) := by
+  have h₁ : Satisfies ⟨F, V'⟩ x (□(□a 🡘 a)) := by
     intro y Rxy;
     have : Satisfies ⟨F, V'⟩ y a ↔ Satisfies ⟨F, V'⟩ y (□a) := calc
       _ ↔ ∀ n, Satisfies ⟨F, V⟩ y (□^[n] a) := by simp [Satisfies, V'];
@@ -38,7 +38,7 @@ lemma valid_atomic_axiomL_of_valid_atomic_axiomHen : F ⊧ Axioms.Hen (atom a) �
         constructor;
         . intro h n; apply h;
         . intro h n;
-          have h₁ : Satisfies ⟨F, V⟩ y (□□^[n](atom a) ➝ □^[n](atom a)) := by
+          have h₁ : Satisfies ⟨F, V⟩ y (□□^[n](atom a) 🡒 □^[n](atom a)) := by
             induction n with
             | zero => apply @hx y Rxy;
             | succ n => intro _; apply h;
@@ -123,7 +123,7 @@ open cresswellFrame cresswellModel
 
 lemma cresswellModel.not_valid_axiomFour : ¬(Satisfies cresswellModel 2♯ (Axioms.Four (atom 0))) := by
   apply Satisfies.imp_def.not.mpr;
-  push_neg;
+  push Not;
   constructor;
   . intro x;
     match x with
@@ -133,12 +133,12 @@ lemma cresswellModel.not_valid_axiomFour : ¬(Satisfies cresswellModel 2♯ (Axi
       omega;
     | n♭ => simp [Satisfies];
   . apply Satisfies.box_def.not.mpr
-    push_neg;
+    push Not;
     use 1♯;
     constructor;
     . omega;
     . apply Satisfies.box_def.not.mpr;
-      push_neg;
+      push Not;
       use 0♯;
       constructor;
       . omega;
@@ -203,7 +203,7 @@ lemma either_finite_cofinite : (‖φ‖.Finite) ∨ (‖φ‖ᶜ.Finite) := by
   | hatom a => simp [truthset, Satisfies];
   | hfalsum => simp [truthset, Satisfies];
   | himp φ ψ ihφ ihψ =>
-    rw [(show ‖φ ➝ ψ‖ = ‖φ‖ᶜ ∪ ‖ψ‖ by tauto_set), Set.compl_union, compl_compl];
+    rw [(show ‖φ 🡒 ψ‖ = ‖φ‖ᶜ ∪ ‖ψ‖ by tauto_set), Set.compl_union, compl_compl];
     rcases ihφ with (_ | _) <;> rcases ihψ with (_ | _);
     . right; apply Set.Finite.inter_of_left; assumption;
     . right; apply Set.Finite.inter_of_left; assumption;
@@ -233,7 +233,7 @@ lemma either_finite_cofinite : (‖φ‖.Finite) ∨ (‖φ‖ᶜ.Finite) := by
       . apply Set.toFinite
       . intro x hx;
         replace := Satisfies.box_def.not.mp hx;
-        push_neg at this;
+        push Not at this;
         obtain ⟨y, Rxy, _⟩ := this;
         match x, y with
         | m♯, k♯ =>
@@ -245,7 +245,7 @@ lemma either_finite_cofinite : (‖φ‖.Finite) ∨ (‖φ‖ᶜ.Finite) := by
         | _♯, k♭ => have := h k; contradiction;
         | _♭, k♭ => have := h k; contradiction;
     . left;
-      push_neg at h;
+      push Not at h;
       obtain ⟨n, hn⟩ := h;
       apply @Set.Finite.subset (s := (·♭) '' Set.Icc 0 n);
       . apply Set.toFinite
@@ -262,7 +262,7 @@ lemma either_finite_cofinite : (‖φ‖.Finite) ∨ (‖φ‖ᶜ.Finite) := by
 end cresswellModel.truthset
 
 open Classical in
-lemma cresswellModel.valid_axiomHen : cresswellModel ⊧ □(□φ ⭤ φ) ➝ □φ := by
+lemma cresswellModel.valid_axiomHen : cresswellModel ⊧ □(□φ 🡘 φ) 🡒 □φ := by
   rintro x;
   by_cases h : ∀ n, n♭ ∈ ‖φ‖;
   . have tsφc_fin : ‖φ‖ᶜ.Finite := or_iff_not_imp_left.mp truthset.either_finite_cofinite $ truthset.infinite_of_all_flat h;
@@ -291,36 +291,36 @@ lemma cresswellModel.valid_axiomHen : cresswellModel ⊧ □(□φ ⭤ φ) ➝ �
       . apply Satisfies.imp_def₂.mpr;
         left;
         apply Satisfies.box_def.not.mpr;
-        push_neg;
+        push Not;
         use (n + 1)♯;
         constructor;
         . omega;
         . have : Satisfies cresswellModel (n + 1)♯ φ := hn_max (n + 1) (by omega);
           have : ¬Satisfies cresswellModel (n + 1)♯ (□φ) := by
             apply Satisfies.box_def.not.mpr;
-            push_neg;
+            push Not;
             use n♯;
             constructor;
             . omega;
             . apply hn;
           apply Satisfies.iff_def.not.mpr;
           tauto;
-  . push_neg at h;
+  . push Not at h;
     obtain ⟨n, hn, hn_max⟩ := truthset.exists_min_flat h;
     have hn₁ : Satisfies cresswellModel n♭ (□φ) := by
       intro x Rnx;
       obtain ⟨m, ⟨rfl, hnm⟩⟩ := exists_flat_of_from_flat Rnx;
       exact hn_max m hnm;
-    have hn₂ : ¬Satisfies cresswellModel n♭ (□φ ⭤ φ) := by
+    have hn₂ : ¬Satisfies cresswellModel n♭ (□φ 🡘 φ) := by
       apply Satisfies.iff_def.not.mpr;
-      push_neg;
+      push Not;
       tauto;
     match x with
     | m♯ =>
       apply Satisfies.imp_def₂.mpr;
       left;
       apply Satisfies.box_def.not.mpr;
-      push_neg;
+      push Not;
       use n♭;
       constructor;
       . exact sharp_to_flat;

@@ -19,7 +19,7 @@ lemma provable_boxdotTranslated_K4_of_provable_S4 : Modal.S4 ⊢ φ → Modal.K4
     . exact boxdot_axiomT!;
     . exact boxdot_axiomFour!
 
-lemma provable_S4_iff_boxdotTranslated : Modal.S4 ⊢ φ ⭤ φᵇ := by
+lemma provable_S4_iff_boxdotTranslated : Modal.S4 ⊢ φ 🡘 φᵇ := by
   induction φ with
   | hbox φ ihp => exact E!_trans (box_iff! ihp) iff_box_boxdot!;
   | himp φ ψ ihp ihq => exact ECC!_of_E!_of_E! ihp ihq;

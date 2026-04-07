@@ -47,7 +47,7 @@ instance : Complete Modal.KTB FrameClass.finite_KTB := ⟨by
   replace hF := Set.mem_setOf_eq.mp hF;
   let M : Kripke.Model := ⟨F, V⟩;
   let FM := finestFiltrationModel M φ.subformulas;
-  apply filtration FM (finestFiltrationModel.filterOf) (by simp) |>.mpr;
+  apply filtration FM (finestFiltrationModel.filterOf) (by grind) |>.mpr;
   apply hp;
   apply Set.mem_setOf_eq.mpr;
   refine {

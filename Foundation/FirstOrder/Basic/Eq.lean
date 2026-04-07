@@ -37,14 +37,14 @@ variable {L}
 
 abbrev Eq.funcExt {k} (f : L.Func k) : Sentence L :=
   let σ : Semisentence L (k + k) :=
-    (Matrix.conj fun i : Fin k ↦ “#(i.addCast k) = #(i.addNat k)”) ➝
+    (Matrix.conj fun i : Fin k ↦ “#(i.addCast k) = #(i.addNat k)”) 🡒
       op(=).operator ![Semiterm.func f (fun i ↦ #(i.addCast k)), Semiterm.func f (fun i ↦ #(i.addNat k))]
   ∀⁰* σ
 
 abbrev Eq.relExt {k} (r : L.Rel k) : Sentence L :=
   let σ : Semisentence L (k + k) :=
-    (Matrix.conj fun i : Fin k ↦ “#(i.addCast k) = #(i.addNat k)”) ➝
-      Semiformula.rel r (fun i ↦ #(i.addCast k)) ➝ Semiformula.rel r (fun i ↦ #(i.addNat k))
+    (Matrix.conj fun i : Fin k ↦ “#(i.addCast k) = #(i.addNat k)”) 🡒
+      Semiformula.rel r (fun i ↦ #(i.addCast k)) 🡒 Semiformula.rel r (fun i ↦ #(i.addNat k))
   ∀⁰* σ
 
 inductive eqAxiom : Theory L
@@ -225,6 +225,7 @@ lemma elementaryEquiv : QuotEq L M ≡ₑ[L] M := ⟨models_iff⟩
 
 variable {L M}
 
+set_option backward.isDefEq.respectTransparency false in
 lemma rel_eq (a b : QuotEq L M) : (@Semiformula.Operator.Eq.eq L _).val (M := QuotEq L M) ![a, b] ↔ a = b := by
   induction' a using Quotient.ind with a
   induction' b using Quotient.ind with b

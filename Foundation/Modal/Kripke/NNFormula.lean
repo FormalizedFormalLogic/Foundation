@@ -69,7 +69,7 @@ protected lemma neg_def : x ⊧ ∼φ ↔ ¬x ⊧ φ := by
       . right; exact ihψ.mpr h₂;
   | hBox φ ihφ =>
     simp only [ModalDeMorgan.neg_box, Satisfies.box_def];
-    push_neg;
+    push Not;
     constructor;
     . intro h;
       obtain ⟨y, Rxy, hy⟩ := h;
@@ -95,7 +95,7 @@ protected lemma neg_def : x ⊧ ∼φ ↔ ¬x ⊧ φ := by
       exact h y Rxy;
   | _ => simp [Satisfies.iff_models, Satisfies];
 
-protected lemma imp_def : x ⊧ φ ➝ ψ ↔ x ⊧ φ → x ⊧ ψ := by
+protected lemma imp_def : x ⊧ φ 🡒 ψ ↔ x ⊧ φ → x ⊧ ψ := by
   simp [Satisfies.or_def, Satisfies.neg_def];
   tauto;
 

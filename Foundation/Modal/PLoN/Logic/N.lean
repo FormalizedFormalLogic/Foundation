@@ -46,7 +46,7 @@ instance : Modal.N ⪱ Modal.EN := by
     | nec ihφ => apply Entailment.nec! ihφ;
     | _ => simp;
   . apply Entailment.not_weakerThan_iff.mpr;
-    use □(.atom 0) ⭤ □(∼∼.atom 0);
+    use □(.atom 0) 🡘 □(∼∼.atom 0);
     constructor;
     . apply re!;
       cl_prover;
@@ -74,7 +74,7 @@ instance : Modal.N ⪱ Modal.K := by
       use {
         World := Fin 2,
         Rel := λ ξ x y =>
-          if ξ = (.atom 0) ➝ (.atom 1) then False
+          if ξ = (.atom 0) 🡒 (.atom 1) then False
           else x < y
         Valuation :=
           λ a w =>

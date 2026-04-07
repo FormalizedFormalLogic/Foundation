@@ -128,7 +128,7 @@ instance : Modal.K ⪱ Modal.K4n n := by
           intro y R0y;
           simp [Semantics.Models, Satisfies, M, counterframe.iff_rel_from.mp R0y];
         . apply Satisfies.boxItr_def.not.mpr;
-          push_neg;
+          push Not;
           use ⟨(n + 1), by omega⟩;
           constructor;
           . apply counterframe.iff_rel_from.mpr; simp;
@@ -139,7 +139,7 @@ lemma succ_strictlyWeakerThan : Modal.K4n (n + 1) ⪱ Modal.K4n n := by
   . apply Hilbert.Normal.weakerThan_of_provable_axioms;
     rintro φ (rfl | rfl);
     . simp;
-    . suffices Modal.K4n n ⊢ □□^[n](.atom 0) ➝ □□^[(n + 1)](.atom 0) by simpa [Axioms.FourN];
+    . suffices Modal.K4n n ⊢ □□^[n](.atom 0) 🡒 □□^[(n + 1)](.atom 0) by simpa [Axioms.FourN];
       apply imply_box_distribute'!;
       exact axiomFourN!;
   . apply Entailment.not_weakerThan_iff.mpr;
@@ -162,7 +162,7 @@ lemma succ_strictlyWeakerThan : Modal.K4n (n + 1) ⪱ Modal.K4n n := by
           rintro rfl;
           simp at R0y;
         . apply Satisfies.boxItr_def.not.mpr;
-          push_neg;
+          push Not;
           use counterframe.last;
           constructor;
           . apply counterframe.iff_rel_from_zero.mpr;

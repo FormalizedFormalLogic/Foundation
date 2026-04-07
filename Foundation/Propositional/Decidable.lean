@@ -1,6 +1,6 @@
 module
 
-public import Foundation.Propositional.ClassicalSemantics.Tait
+public import Foundation.Propositional.Boolean.Tait
 public import Mathlib.Algebra.Order.BigOperators.Group.List
 
 @[expose] public section

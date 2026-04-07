@@ -82,9 +82,9 @@ theorem smallSound! : T ⊢ σ → T ⊨ σ := sound!
 
 instance (T : Theory L) : Sound T (Semantics.models (Struc.{v, u} L) T) := ⟨sound!⟩
 
-lemma models_of_subtheory {T U : Theory L} [U ⪯ T] {M : Type*} [Structure L M] [Nonempty M] (hM : M ⊧ₘ* T) : M ⊧ₘ* U :=
+lemma models_of_subtheory {T U : Theory L} [le : U ⪯ T] {M : Type*} [Structure L M] [Nonempty M] (hM : M ⊧ₘ* T) : M ⊧ₘ* U :=
   ⟨ fun {φ} hp ↦ by
-    have : T ⊢ φ := (inferInstanceAs (U ⪯ T)).pbl (Entailment.by_axm _ hp)
+    have : T ⊢ φ := le.pbl (Entailment.by_axm _ hp)
     exact sound! this hM ⟩
 
 lemma consistent_of_satisfiable (h : Semantics.Satisfiable (Struc.{v, u} L) T) : Entailment.Consistent T :=

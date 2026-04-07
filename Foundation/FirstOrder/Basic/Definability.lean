@@ -219,7 +219,7 @@ lemma of_iff {P Q : (Fin k → M) → Prop} (H : L.Definable Q) (h : ∀ x, P x 
     L.Definable fun v : Fin k → M ↦ R v → S v := by
   rcases hR with ⟨φ, hR⟩
   rcases hS with ⟨ψ, hS⟩
-  exact ⟨φ ➝ ψ, by intro _; simp [hR.iff, hS.iff]⟩
+  exact ⟨φ 🡒 ψ, by intro _; simp [hR.iff, hS.iff]⟩
 
 @[grind .] lemma not {R : (Fin k → M) → Prop} (hR : L.Definable R) :
     L.Definable fun v : Fin k → M ↦ ¬R v := by
@@ -230,7 +230,7 @@ lemma of_iff {P Q : (Fin k → M) → Prop} (H : L.Definable Q) (h : ∀ x, P x 
     L.Definable fun v : Fin k → M ↦ R v ↔ S v := by
   rcases hR with ⟨φ, hR⟩
   rcases hS with ⟨ψ, hS⟩
-  exact ⟨φ ⭤ ψ, by intro _; simp [hR.iff, hS.iff]⟩
+  exact ⟨φ 🡘 ψ, by intro _; simp [hR.iff, hS.iff]⟩
 
 lemma all {R : (Fin k → M) → M → Prop} (hR : L.Definable fun w ↦ R (w ·.succ) (w 0)) :
     L.Definable fun v : Fin k → M ↦ ∀ x, R v x := by

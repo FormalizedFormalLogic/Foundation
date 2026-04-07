@@ -224,7 +224,7 @@ lemma degenerate_iff_exists_unique_irrefl_point : C.degenerate ↔ (∃! x, x �
     . rintro x ⟨hx₁, hx₂⟩;
       by_contra nexc;
       have := not_more_than_two_of_degenerate h;
-      push_neg at this;
+      push Not at this;
       replace this := this c x (by tauto) (by tauto);
       contradiction;
   . rintro ⟨x, ⟨hx₁, hx₂⟩, hx₃⟩;
@@ -284,7 +284,7 @@ lemma either_simple_or_proper_of_non_degenerate (h : ¬C.degenerate) : C.simple 
       rcases hy₁ with rfl | ⟨Rxy, Ryx⟩;
       . tauto;
       . apply not_imp_comm.mp (ex y) ?_ |>.symm;
-        push_neg;
+        push Not;
         dsimp [clusterEquiv];
         tauto;
 

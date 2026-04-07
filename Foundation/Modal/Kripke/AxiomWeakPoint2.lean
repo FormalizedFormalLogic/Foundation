@@ -89,8 +89,8 @@ instance [Entailment.HasAxiomWeakPoint2 𝓢] : (canonicalFrame 𝓢).IsPiecewis
       generalize Δ.disj = δ₁ at hδ hC;
       obtain ⟨δ₂, hδ₂₁, hδ₂₂⟩ := exists₁₂_of_ne eyz;
 
-      have : 𝓢 ⊢ □γ₁ ➝ □δ₁ := imply_box_distribute'! hC;
-      have : 𝓢 ⊢ □γ₁ ⋏ δ₂ ➝ □δ₁ ⋏ δ₂ := CKK!_of_C! this;
+      have : 𝓢 ⊢ □γ₁ 🡒 □δ₁ := imply_box_distribute'! hC;
+      have : 𝓢 ⊢ □γ₁ ⋏ δ₂ 🡒 □δ₁ ⋏ δ₂ := CKK!_of_C! this;
       have : □δ₁ ⋏ δ₂ ∈ y.1.1 := mdp_mem₁_provable this $ by
         apply iff_mem₁_and.mpr; constructor <;> assumption;
       have : ◇(□δ₁ ⋏ δ₂) ∈ x.1.1 := def_rel_dia_mem₁.mp Rxy this;

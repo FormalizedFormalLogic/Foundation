@@ -199,14 +199,14 @@ theorem eq_inter_αPL_GLβMinus_of_isProvabilityLogic_of_cofinite_trace
     obtain ⟨Γ, hΓ, h₁⟩ := sumQuasiNormal.iff_provable_finite_provable_letterless TBBSet_letterless |>.mp h₁;
     obtain ⟨Δ, hΔ, h₂⟩ := sumQuasiNormal.iff_provable_finite_provable_letterless TBBMinus_letterless |>.mp h₂;
     apply of_C!_of_C!_of_A! (φ := (⩕ n ∈ hCf.toFinset, TBB n)) ?_ ?_ lem!;
-    . show L ⊢ (⩕ n ∈ hCf.toFinset, TBB n) ➝ A;
+    . show L ⊢ (⩕ n ∈ hCf.toFinset, TBB n) 🡒 A;
       apply Entailment.C!_trans ?_ h₁;
       apply right_Fconj!_intro;
       intro B hB;
       obtain ⟨n, hn, rfl⟩ := hΓ hB;
       apply left_Fconj'!_intro;
       simpa using hn;
-    . show L ⊢ (∼⩕ n ∈ hCf.toFinset, TBB n) ➝ A;
+    . show L ⊢ (∼⩕ n ∈ hCf.toFinset, TBB n) 🡒 A;
       rw [(show (∼⩕ n ∈ hCf.toFinset, TBB n) = Finset.conj {∼⩕ n ∈ hCf.toFinset, TBB n} by simp)];
       apply Entailment.C!_trans (CFConj_FConj!_of_subset ?_) $ Modal.Logic.provable_GL_of_isProvabilityLogic hPL h₂;
       intro δ hδ;

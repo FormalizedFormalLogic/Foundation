@@ -71,11 +71,11 @@ private noncomputable abbrev jeroslow' (T : ArithmeticTheory) [T.Δ₁] : Arithm
 
 private lemma jeroslow'_sigmaOne : Hierarchy 𝚺 1 (T.jeroslow') := by definability;
 
-lemma def_jeroslow [𝗜𝚺₁ ⪯ U] : U ⊢ T.jeroslow ⭤ (T.refutable)/[⌜T.jeroslow⌝] := diagonal _
+lemma def_jeroslow [𝗜𝚺₁ ⪯ U] : U ⊢ T.jeroslow 🡘 (T.refutable)/[⌜T.jeroslow⌝] := diagonal _
 
-private lemma def_jeroslow' [𝗜𝚺₁ ⪯ U] : U ⊢ T.jeroslow' ⭤ (T.refutable)/[⌜T.jeroslow⌝] := by simp;
+private lemma def_jeroslow' [𝗜𝚺₁ ⪯ U] : U ⊢ T.jeroslow' 🡘 (T.refutable)/[⌜T.jeroslow⌝] := by simp;
 
-private lemma provable_E_jeroslow_jeroslow' [𝗜𝚺₁ ⪯ U] : U ⊢ T.jeroslow ⭤ T.jeroslow' := Entailment.E!_trans def_jeroslow def_jeroslow'
+private lemma provable_E_jeroslow_jeroslow' [𝗜𝚺₁ ⪯ U] : U ⊢ T.jeroslow 🡘 T.jeroslow' := Entailment.E!_trans def_jeroslow def_jeroslow'
 
 private lemma iff_provable_jeroslow_provable_jeroslow' [𝗜𝚺₁ ⪯ U] : U ⊢ (T.jeroslow) ↔ U ⊢ (T.jeroslow') := by
   apply Entailment.iff_of_E! provable_E_jeroslow_jeroslow';

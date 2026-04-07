@@ -16,9 +16,13 @@ section IOpen
 
 variable [V ⊧ₘ* 𝗜𝗢𝗽𝗲𝗻]
 
-instance : V ⊧ₘ* 𝗣𝗔⁻ := models_of_subtheory <| inferInstanceAs (V ⊧ₘ* 𝗜𝗢𝗽𝗲𝗻)
+instance : V ⊧ₘ* 𝗣𝗔⁻ :=
+  have : V ⊧ₘ* 𝗜𝗢𝗽𝗲𝗻 := inferInstance
+  models_of_subtheory this
 
-instance : V ⊧ₘ* InductionScheme ℒₒᵣ Semiformula.Open := models_of_subtheory <| inferInstanceAs (V ⊧ₘ* 𝗜𝗢𝗽𝗲𝗻)
+instance : V ⊧ₘ* InductionScheme ℒₒᵣ Semiformula.Open :=
+  have : V ⊧ₘ* 𝗜𝗢𝗽𝗲𝗻 := inferInstance
+  models_of_subtheory this
 
 @[elab_as_elim]
 lemma succ_induction {P : V → Prop}
@@ -768,7 +772,8 @@ end IOpen
 lemma polynomial_induction [V ⊧ₘ* 𝗣𝗔⁻] (Γ m) [V ⊧ₘ* 𝗜𝗡𝗗 Γ m]
     {P : V → Prop} (hP : Γ-[m]-Predicate P)
     (zero : P 0) (even : ∀ x > 0, P x → P (2 * x)) (odd : ∀ x, P x → P (2 * x + 1)) : ∀ x, P x := by
-  haveI : V ⊧ₘ* 𝗜𝗢𝗽𝗲𝗻 := models_of_subtheory <| inferInstanceAs (V ⊧ₘ* 𝗜𝗡𝗗 Γ m)
+  have : V ⊧ₘ* 𝗜𝗡𝗗 Γ m := inferInstance
+  have : V ⊧ₘ* 𝗜𝗢𝗽𝗲𝗻 := models_of_subtheory this
   intro x; induction x using InductionOnHierarchy.order_induction
   · exact Γ
   · exact m

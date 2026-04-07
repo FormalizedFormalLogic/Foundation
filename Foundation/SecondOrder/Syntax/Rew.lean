@@ -481,15 +481,15 @@ end subst
 
 end Rew
 
-namespace Semistatement
+namespace Semiproposition
 
-abbrev free₀ (φ : Semistatement L N (n + 1)) : Semistatement L N n := FirstOrder.Rewriting.free φ
+abbrev free₀ (φ : Semiproposition L N (n + 1)) : Semiproposition L N n := FirstOrder.Rewriting.free φ
 
-abbrev shift₀ (φ : Semistatement L N n) : Semistatement L N n := FirstOrder.Rewriting.shift φ
+abbrev shift₀ (φ : Semiproposition L N n) : Semiproposition L N n := FirstOrder.Rewriting.shift φ
 
-abbrev free₁ (φ : Semistatement L (N + 1) n) : Semistatement L N n := Rew.free.app φ
+abbrev free₁ (φ : Semiproposition L (N + 1) n) : Semiproposition L N n := Rew.free.app φ
 
-abbrev shift₁ (φ : Semistatement L N n) : Semistatement L N n := Rew.shift.app φ
+abbrev shift₁ (φ : Semiproposition L N n) : Semiproposition L N n := Rew.shift.app φ
 
 abbrev subst₁ (φ : Semiformula L Ξ₁ ξ N₁ n) (Φ : Fin N₁ → Semiformula L Ξ₁ ξ N₂ 1) :
     Semiformula L Ξ₁ ξ N₂ n := (Rew.subst Φ).app φ
@@ -510,7 +510,7 @@ meta def unexpsnderSubst : Unexpander
 
 end Notation
 
-end Semistatement
+end Semiproposition
 
 namespace Semisentence
 

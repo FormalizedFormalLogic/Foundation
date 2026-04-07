@@ -775,6 +775,7 @@ lemma exp_even (a : V) : Exp.exp (2 * a) = (Exp.exp a)^2 :=
 @[simp] lemma exp_monotone_le {a b : V} : Exp.exp a ≤ Exp.exp b ↔ a ≤ b :=
   Iff.symm <| Exponential.monotone_le_iff (exponential_exp a) (exponential_exp b)
 
+set_option backward.isDefEq.respectTransparency false in
 lemma nat_cast_exp (n : ℕ) : (Exp.exp n : ℕ) = Exp.exp (n : V) := by
   induction' n with n ih
   · simp

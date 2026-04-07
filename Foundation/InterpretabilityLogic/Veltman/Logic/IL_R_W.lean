@@ -81,7 +81,7 @@ instance : InterpretabilityLogic.IL_M₀_W ⪱ InterpretabilityLogic.IL_R_W := b
             . dsimp [Frame.SRel', F] at *;
               omega;
           . dsimp [Irreflexive, Frame.RS, Relation.Comp];
-            push_neg;
+            push Not;
             grind;
       }
       use F;

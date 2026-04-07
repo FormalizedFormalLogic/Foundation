@@ -10,7 +10,7 @@ namespace LO.Propositional
 def Formula.toNNFormula : Formula α → NNFormula α
   | .atom a => .atom a
   | ⊥ => ⊥
-  | φ ➝ ψ => (φ.toNNFormula) ➝ (ψ.toNNFormula)
+  | φ 🡒 ψ => (φ.toNNFormula) 🡒 (ψ.toNNFormula)
   | φ ⋏ ψ => (φ.toNNFormula) ⋏ (ψ.toNNFormula)
   | φ ⋎ ψ => (φ.toNNFormula) ⋎ (ψ.toNNFormula)
 
@@ -24,7 +24,7 @@ instance : Coe (Formula α) (NNFormula α) := ⟨Formula.toNNFormula⟩
 
 @[simp] lemma def_atom : (.atom a)ᵗ = .atom a := by rfl
 
-@[simp] lemma def_imp : (φ ➝ ψ)ᵗ = φᵗ ➝ ψᵗ := by rfl
+@[simp] lemma def_imp : (φ 🡒 ψ)ᵗ = φᵗ 🡒 ψᵗ := by rfl
 
 @[simp] lemma def_and : (φ ⋏ ψ)ᵗ = φᵗ ⋏ ψᵗ := by rfl
 

@@ -11,8 +11,8 @@ open FiniteContext
 
 variable {S F : Type*} [BasicModalLogicalConnective F] [Entailment S F] {𝓢 : S} [Entailment.Minimal 𝓢]
 
-def C_of (h : 𝓢 ⊢! φ) : 𝓢 ⊢! ψ ➝ φ := deduct' $ of h
-@[grind] lemma C_of! : 𝓢 ⊢ φ → 𝓢 ⊢ ψ ➝ φ := λ ⟨h⟩ => ⟨C_of h⟩
+def C_of (h : 𝓢 ⊢! φ) : 𝓢 ⊢! ψ 🡒 φ := deduct' $ of h
+@[grind] lemma C_of! : 𝓢 ⊢ φ → 𝓢 ⊢ ψ 🡒 φ := λ ⟨h⟩ => ⟨C_of h⟩
 
 end LO.Entailment
 

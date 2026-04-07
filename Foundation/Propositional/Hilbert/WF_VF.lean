@@ -1,32 +1,21 @@
 module
 
-public import Foundation.Propositional.Hilbert.WF
-public import Foundation.Propositional.Hilbert.VF
+public import Foundation.Propositional.Hilbert.WF.Basic
+public import Foundation.Propositional.Hilbert.VF.Basic
 
 @[expose] public section
 
 namespace LO.Propositional
 
-open Entailment.Corsi
-
-variable [DecidableEq α] {Ax₁ Ax₂ : Axiom α}
-
-def weakerThan_WF_VF_of_provable_axioms (h : (Hilbert.WF Ax₂) ⊢* Ax₁) : (Hilbert.VF Ax₁) ⪯ (Hilbert.WF Ax₂) := by
-  apply Logic.weakerThan_of_provable;
+lemma weakerThan_WF_VF_of_provable_axioms {Hw : HilbertWF α} {Hv : HilbertVF α}
+  (h : Hw ⊢* Hv) : Hv ⪯ Hw := by
+  apply Entailment.weakerThan_iff.mpr;
   intro φ hφ;
-  induction hφ using Hilbert.VF.rec! with
-  | axm => apply h; grind;
+  induction hφ with
+  | axm => apply h; assumption;
   | mdp ihφψ ihφ => exact ihφψ ⨀ ihφ;
-  | _ =>
-    first
-    | apply impId;
-    | apply andElimL;
-    | apply andElimR;
-    | apply orIntroL;
-    | apply orIntroR;
-    | apply distributeAndOr;
-    | apply efq;
-    | grind;
+  | _ => grind;
 
 end LO.Propositional
+
 end

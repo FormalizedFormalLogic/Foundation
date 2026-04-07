@@ -25,10 +25,10 @@ instance : HasAxiomJ6 𝓢 := ⟨by
   . apply C_trans axiomJ4!;
     apply C_trans CCCNN;
     apply deduct';
-    haveI H₁ : [∼◇⊥ ➝ ∼◇(∼φ)] ⊢[𝓢]! ∼◇⊥ ➝ ∼◇(∼φ) := FiniteContext.byAxm $ by simp;
-    haveI H₂ : [∼◇⊥ ➝ ∼◇(∼φ)] ⊢[𝓢]! ∼◇⊥ := of $ NMO!
-    haveI H₃ : [∼◇⊥ ➝ ∼◇(∼φ)] ⊢[𝓢]! ∼◇(∼φ) := H₁ ⨀ H₂;
-    haveI H₄ : [∼◇⊥ ➝ ∼◇(∼φ)] ⊢[𝓢]! ∼◇(∼φ) ➝ □φ := of INMNL!;
+    haveI H₁ : [∼◇⊥ 🡒 ∼◇(∼φ)] ⊢[𝓢]! ∼◇⊥ 🡒 ∼◇(∼φ) := FiniteContext.byAxm $ by simp;
+    haveI H₂ : [∼◇⊥ 🡒 ∼◇(∼φ)] ⊢[𝓢]! ∼◇⊥ := of $ NMO!
+    haveI H₃ : [∼◇⊥ 🡒 ∼◇(∼φ)] ⊢[𝓢]! ∼◇(∼φ) := H₁ ⨀ H₂;
+    haveI H₄ : [∼◇⊥ 🡒 ∼◇(∼φ)] ⊢[𝓢]! ∼◇(∼φ) 🡒 □φ := of INMNL!;
     apply H₄ ⨀ H₃;
 ⟩
 
@@ -36,7 +36,7 @@ instance : HasAxiomJ4Plus 𝓢 := ⟨λ {_ _ _} ↦ C_trans axiomJ1! (C_swap axi
 
 instance : HasRule1 𝓢 := ⟨λ {_ _ _} hφ ↦ axiomJ4Plus! ⨀ nec hφ⟩
 
-def CLCCRhdRhd! : 𝓢 ⊢! □(φ ➝ ψ) ➝ (ψ ▷ χ ➝ φ ▷ χ) := C_trans axiomJ1! axiomJ2!
+def CLCCRhdRhd! : 𝓢 ⊢! □(φ 🡒 ψ) 🡒 (ψ ▷ χ 🡒 φ ▷ χ) := C_trans axiomJ1! axiomJ2!
 
 instance : HasRule2 𝓢 := ⟨λ {_ _ _} hφ ↦ CLCCRhdRhd! ⨀ nec hφ⟩
 

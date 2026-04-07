@@ -49,15 +49,15 @@ lemma or_eq : or φ ψ = φ ⋎ ψ := rfl
 
 lemma and_eq : and φ ψ = φ ⋏ ψ := rfl
 
-lemma imp_eq : imp φ ψ = φ ➝ ψ := rfl
+lemma imp_eq : imp φ ψ = φ 🡒 ψ := rfl
 
 lemma box_eq : box φ = □φ := rfl
 
 lemma dia_eq : dia φ = ◇φ := rfl
 
-@[simp] lemma imp_eq' : φ ➝ ψ = ∼φ ⋎ ψ := rfl
+@[simp] lemma imp_eq' : φ 🡒 ψ = ∼φ ⋎ ψ := rfl
 
-@[simp] lemma iff_eq : φ ⭤ ψ = (φ ➝ ψ) ⋏ (ψ ➝ φ) := rfl
+@[simp] lemma iff_eq : φ 🡘 ψ = (φ 🡒 ψ) ⋏ (ψ 🡒 φ) := rfl
 
 lemma falsum_eq : (falsum : NNFormula α) = ⊥ := rfl
 
@@ -67,7 +67,7 @@ lemma verum_eq : (verum : NNFormula α) = ⊤ := rfl
 
 @[simp] lemma or_inj (φ₁ ψ₁ φ₂ ψ₂ : Formula α) : φ₁ ⋎ φ₂ = ψ₁ ⋎ ψ₂ ↔ φ₁ = ψ₁ ∧ φ₂ = ψ₂ := by simp [Vee.vee]
 
-@[simp] lemma imp_inj (φ₁ ψ₁ φ₂ ψ₂ : Formula α) : φ₁ ➝ φ₂ = ψ₁ ➝ ψ₂ ↔ φ₁ = ψ₁ ∧ φ₂ = ψ₂ := by simp [Arrow.arrow]
+@[simp] lemma imp_inj (φ₁ ψ₁ φ₂ ψ₂ : Formula α) : φ₁ 🡒 φ₂ = ψ₁ 🡒 ψ₂ ↔ φ₁ = ψ₁ ∧ φ₂ = ψ₂ := by simp [Arrow.arrow]
 
 @[simp] lemma neg_inj (φ ψ : Formula α) : ∼φ = ∼ψ ↔ φ = ψ := by simp [NegAbbrev.neg];
 
@@ -357,7 +357,7 @@ namespace Formula
 def toNNFormula : Formula α → NNFormula α
   | atom a  => NNFormula.atom a
   | ⊥       => NNFormula.falsum
-  | φ ➝ ψ   => φ.toNNFormula.neg ⋎ ψ.toNNFormula
+  | φ 🡒 ψ   => φ.toNNFormula.neg ⋎ ψ.toNNFormula
   | □φ      => □φ.toNNFormula
 instance : Coe (Formula α) (NNFormula α) := ⟨toNNFormula⟩
 

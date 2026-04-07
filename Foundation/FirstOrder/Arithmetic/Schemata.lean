@@ -66,9 +66,13 @@ lemma ISigma_subset_mono {s₁ s₂} (h : s₁ ≤ s₂) : 𝗜𝚺 s₁ ⊆ �
 lemma ISigma_weakerThan_of_le {s₁ s₂} (h : s₁ ≤ s₂) : 𝗜𝚺 s₁ ⪯ 𝗜𝚺 s₂ :=
   Entailment.WeakerThan.ofSubset (ISigma_subset_mono h)
 
-instance : 𝗘𝗤 ⪯ 𝗜𝗡𝗗 Γ n := Entailment.WeakerThan.trans (inferInstanceAs (𝗘𝗤 ⪯ 𝗣𝗔⁻)) inferInstance
+instance : 𝗘𝗤 ⪯ 𝗜𝗡𝗗 Γ n :=
+  have : 𝗘𝗤 ⪯ 𝗣𝗔⁻ := inferInstance
+  Entailment.WeakerThan.trans this inferInstance
 
-instance : 𝗘𝗤 ⪯ 𝗜𝗢𝗽𝗲𝗻 := Entailment.WeakerThan.trans (inferInstanceAs (𝗘𝗤 ⪯ 𝗣𝗔⁻)) inferInstance
+instance : 𝗘𝗤 ⪯ 𝗜𝗢𝗽𝗲𝗻 :=
+  have : 𝗘𝗤 ⪯ 𝗣𝗔⁻ := inferInstance
+  Entailment.WeakerThan.trans this inferInstance
 
 instance : 𝗜𝗢𝗽𝗲𝗻 ⪯ 𝗜𝗡𝗗 Γ n :=
   Entailment.WeakerThan.ofSubset <| Set.union_subset_union_right _  <| InductionScheme_subset Arithmetic.Hierarchy.of_open
@@ -126,11 +130,14 @@ section
 
 variable (Γ : Polarity) (m : ℕ) [V ⊧ₘ* 𝗜𝗡𝗗 Γ m]
 
-instance : V ⊧ₘ* InductionScheme ℒₒᵣ (Hierarchy Γ m) := models_of_subtheory <| inferInstanceAs (V ⊧ₘ* 𝗜𝗡𝗗 Γ m)
+instance : V ⊧ₘ* InductionScheme ℒₒᵣ (Hierarchy Γ m) :=
+  have : V ⊧ₘ* 𝗜𝗡𝗗 Γ m := inferInstance
+  models_of_subtheory this
 
 lemma succ_induction {P : V → Prop} (hP : Γ-[m].DefinablePred P)
     (zero : P 0) (succ : ∀ x, P x → P (x + 1)) : ∀ x, P x :=
-  haveI : V ⊧ₘ* 𝗣𝗔⁻ := models_of_subtheory <| inferInstanceAs (V ⊧ₘ* 𝗜𝗡𝗗 Γ m)
+  have : V ⊧ₘ* 𝗜𝗡𝗗 Γ m := inferInstance
+  have : V ⊧ₘ* 𝗣𝗔⁻ := models_of_subtheory this
   InductionScheme.succ_induction (P := P) (C := Hierarchy Γ m) (by
     rcases hP with ⟨φ, hp⟩
     haveI : Inhabited V := Classical.inhabited_of_nonempty'
@@ -140,7 +147,8 @@ lemma succ_induction {P : V → Prop} (hP : Γ-[m].DefinablePred P)
 
 lemma order_induction {P : V → Prop} (hP : Γ-[m].DefinablePred P)
     (ind : ∀ x, (∀ y < x, P y) → P x) : ∀ x, P x := by
-  haveI : V ⊧ₘ* 𝗣𝗔⁻ := models_of_subtheory <| inferInstanceAs (V ⊧ₘ* 𝗜𝗡𝗗 Γ m)
+  have : V ⊧ₘ* 𝗜𝗡𝗗 Γ m := inferInstance
+  have : V ⊧ₘ* 𝗣𝗔⁻ := models_of_subtheory this
   suffices ∀ x, ∀ y < x, P y by
     intro x; exact this (x + 1) x (by simp only [lt_add_iff_pos_right, lt_one_iff_eq_zero])
   intro x; induction x using succ_induction
@@ -158,7 +166,8 @@ lemma order_induction {P : V → Prop} (hP : Γ-[m].DefinablePred P)
 
 private lemma neg_succ_induction {P : V → Prop} (hP : Γ-[m].DefinablePred P)
     (nzero : ¬P 0) (nsucc : ∀ x, ¬P x → ¬P (x + 1)) : ∀ x, ¬P x := by
-  haveI : V ⊧ₘ* 𝗣𝗔⁻ := models_of_subtheory <| inferInstanceAs (V ⊧ₘ* 𝗜𝗡𝗗 Γ m)
+  have : V ⊧ₘ* 𝗜𝗡𝗗 Γ m := inferInstance
+  have : V ⊧ₘ* 𝗣𝗔⁻ := models_of_subtheory this
   by_contra A
   have : ∃ x, P x := by simpa using A
   rcases this with ⟨a, ha⟩
@@ -202,12 +211,14 @@ instance models_InductionScheme_alt : V ⊧ₘ* InductionScheme ℒₒᵣ (Arith
       (by intro x; simp [←Matrix.fun_eq_vec_one, Semiformula.eval_rewriteMap]))
 
 instance models_alt : V ⊧ₘ* 𝗜𝗡𝗗 Γ.alt m := by
-  haveI : V ⊧ₘ* 𝗣𝗔⁻ := models_of_subtheory <| inferInstanceAs (V ⊧ₘ* 𝗜𝗡𝗗 Γ m)
+  have : V ⊧ₘ* 𝗜𝗡𝗗 Γ m := inferInstance
+  have : V ⊧ₘ* 𝗣𝗔⁻ := models_of_subtheory this
   simp only [InductionOnHierarchy, ModelsTheory.add_iff]; constructor <;> infer_instance
 
 lemma least_number {P : V → Prop} (hP : Γ-[m].DefinablePred P)
     {x} (h : P x) : ∃ y, P y ∧ ∀ z < y, ¬P z := by
-  haveI : V ⊧ₘ* 𝗣𝗔⁻ := models_of_subtheory <| inferInstanceAs (V ⊧ₘ* 𝗜𝗡𝗗 Γ m)
+  have : V ⊧ₘ* 𝗜𝗡𝗗 Γ m := inferInstance
+  have : V ⊧ₘ* 𝗣𝗔⁻ := models_of_subtheory this
   by_contra A
   have A : ∀ z, P z → ∃ w < z, P w := by simpa using A
   have : ∀ z, ∀ w < z, ¬P w := by
@@ -338,13 +349,17 @@ lemma ISigma0.least_number [V ⊧ₘ* 𝗜𝚺₀] {P : V → Prop} (hP : 𝚺�
     (ind : ∀ x, (∀ y < x, P y) → P x) : ∀ x, P x :=
   InductionOnHierarchy.order_induction_sigma Γ 1 hP ind
 
-instance [V ⊧ₘ* 𝗜𝗢𝗽𝗲𝗻] : V ⊧ₘ* 𝗣𝗔⁻ := models_of_subtheory <| inferInstanceAs (V ⊧ₘ* 𝗜𝗢𝗽𝗲𝗻)
+instance [V ⊧ₘ* 𝗜𝗢𝗽𝗲𝗻] : V ⊧ₘ* 𝗣𝗔⁻ :=
+  have : V ⊧ₘ* 𝗜𝗢𝗽𝗲𝗻 := inferInstance
+  models_of_subtheory this
 
-instance [V ⊧ₘ* 𝗜𝚺₀] : V ⊧ₘ* 𝗜𝗢𝗽𝗲𝗻 := models_of_subtheory <| inferInstanceAs (V ⊧ₘ* 𝗜𝚺₀)
+instance [V ⊧ₘ* 𝗜𝚺₀] : V ⊧ₘ* 𝗜𝗢𝗽𝗲𝗻 :=
+  have : V ⊧ₘ* 𝗜𝚺₀ := inferInstance
+  models_of_subtheory this
 
 instance [V ⊧ₘ* 𝗜𝚺₁] : V ⊧ₘ* 𝗜𝚺₀ := inferInstance
 
-def mod_ISigma_of_le {n₁ n₂} (h : n₁ ≤ n₂) [V ⊧ₘ* 𝗜𝚺 n₂] : V ⊧ₘ* 𝗜𝚺 n₁ :=
+abbrev mod_ISigma_of_le {n₁ n₂} (h : n₁ ≤ n₂) [V ⊧ₘ* 𝗜𝚺 n₂] : V ⊧ₘ* 𝗜𝚺 n₁ :=
   ModelsTheory.of_ss inferInstance (ISigma_subset_mono h)
 
 end models
@@ -381,15 +396,19 @@ instance : Entailment.Consistent 𝗣𝗔 := 𝗣𝗔.consistent_of_sound (Eq �
 instance : 𝗣𝗔 ⪯ 𝗧𝗔 := inferInstance
 
 instance (T : ArithmeticTheory) [𝗣𝗔⁻ ⪯ T] : 𝗥₀ ⪯ T :=
-  Entailment.WeakerThan.trans (inferInstanceAs (𝗥₀ ⪯ 𝗣𝗔⁻)) inferInstance
+  have : 𝗥₀ ⪯ 𝗣𝗔⁻ := inferInstance
+  Entailment.WeakerThan.trans this inferInstance
 
 instance (T : ArithmeticTheory) [𝗜𝚺₀ ⪯ T] : 𝗣𝗔⁻ ⪯ T :=
-  Entailment.WeakerThan.trans (inferInstanceAs (𝗣𝗔⁻ ⪯ 𝗜𝚺₀)) inferInstance
+  have : 𝗣𝗔⁻ ⪯ 𝗜𝚺₀ := inferInstance
+  Entailment.WeakerThan.trans this inferInstance
 
 instance (T : ArithmeticTheory) [𝗜𝚺₁ ⪯ T] : 𝗣𝗔⁻ ⪯ T :=
-  Entailment.WeakerThan.trans (inferInstanceAs (𝗣𝗔⁻ ⪯ 𝗜𝚺₁)) inferInstance
+  have : 𝗣𝗔⁻ ⪯ 𝗜𝚺₁ := inferInstance
+  Entailment.WeakerThan.trans this inferInstance
 
 instance (T : ArithmeticTheory) [𝗣𝗔 ⪯ T] : 𝗣𝗔⁻ ⪯ T :=
-  Entailment.WeakerThan.trans (inferInstanceAs (𝗣𝗔⁻ ⪯ 𝗣𝗔)) inferInstance
+  have : 𝗣𝗔⁻ ⪯ 𝗣𝗔 := inferInstance
+  Entailment.WeakerThan.trans this inferInstance
 
 end LO.FirstOrder.Arithmetic

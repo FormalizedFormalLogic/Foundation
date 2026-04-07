@@ -19,7 +19,7 @@ def Forces {n} (w : W) (bv : Fin n → C) (fv : ξ → C) : Semiformulaᵢ L ξ 
   |        ⊥ => False
   |    φ ⋏ ψ => Forces w bv fv φ ∧ Forces w bv fv ψ
   |    φ ⋎ ψ => Forces w bv fv φ ∨ Forces w bv fv ψ
-  |    φ ➝ ψ => ∀ v ≤ w, Forces v bv fv φ → Forces v bv fv ψ
+  |    φ 🡒 ψ => ∀ v ≤ w, Forces v bv fv φ → Forces v bv fv ψ
   |     ∀⁰ φ => ∀ v ≤ w, ∀ x : v, Forces v (x.val :> bv) fv φ
   |     ∃⁰ φ => ∃ x : w, Forces w (x.val :> bv) fv φ
 
@@ -47,13 +47,13 @@ variable {w v bv fv}
 @[simp] lemma or {φ ψ : Semiformulaᵢ L ξ n} : w ⊩[bv|fv] φ ⋎ ψ ↔ w ⊩[bv|fv] φ ∨ w ⊩[bv|fv] ψ := by rfl
 
 @[simp] lemma imply {φ ψ : Semiformulaᵢ L ξ n} :
-    w ⊩[bv|fv] φ ➝ ψ ↔ ∀ v ≤ w, Forces v bv fv φ → Forces v bv fv ψ := by rfl
+    w ⊩[bv|fv] φ 🡒 ψ ↔ ∀ v ≤ w, Forces v bv fv φ → Forces v bv fv ψ := by rfl
 
 @[simp] lemma not {φ : Semiformulaᵢ L ξ n} :
     w ⊩[bv|fv] ∼φ ↔ ∀ v ≤ w, ¬Forces v bv fv φ := by rfl
 
 @[simp] lemma iff {φ ψ : Semiformulaᵢ L ξ n} :
-    w ⊩[bv|fv] φ ⭤ ψ ↔ ∀ v ≤ w, Forces v bv fv φ ↔ Forces v bv fv ψ := by
+    w ⊩[bv|fv] φ 🡘 ψ ↔ ∀ v ≤ w, Forces v bv fv φ ↔ Forces v bv fv ψ := by
   simp [LogicalConnective.iff]; grind
 
 @[simp] lemma all {φ : Semiformulaᵢ L ξ (n + 1)} :
@@ -132,7 +132,7 @@ lemma monotone
     rintro (hl | hr) v h
     · left; exact hl.monotone _ h
     · right; exact hr.monotone _ h
-  |    φ ➝ ψ => fun Hw v' h v hvv' Hv ↦
+  |    φ 🡒 ψ => fun Hw v' h v hvv' Hv ↦
     Hw v (le_trans hvv' h) Hv
   |     ∀⁰ φ => fun Hw w h v' hvv' x ↦ Hw v' (le_trans hvv' h) x
   |     ∃⁰ φ => by
@@ -245,7 +245,7 @@ lemma sound {T : Theoryᵢ L 𝗜𝗻𝘁¹} (b : T ⊢ φ) : W ∀⊩* T → W 
   rcases domain_nonempty' w with ⟨x, hx⟩
   have : (Rewriting.emb '' T.theory) *⊢[𝗜𝗻𝘁¹] ↑φ := b
   rcases Entailment.Context.provable_iff.mp this with ⟨Γ, HΓ, b⟩
-  have : w ⊩[![]|fun _ ↦ x] ⋀Γ ➝ ↑φ := Forces.sound (L := L) w (fun _ ↦ x) (by simpa using hx) b
+  have : w ⊩[![]|fun _ ↦ x] ⋀Γ 🡒 ↑φ := Forces.sound (L := L) w (fun _ ↦ x) (by simpa using hx) b
   have : w ⊩[![]|fun _ : ℕ ↦ x] ↑φ := by
     apply this w (by rfl)
     suffices ∀ φ ∈ Γ, w ⊩[![]|fun _ ↦ x] φ by simpa
@@ -267,7 +267,7 @@ structure IntKripke (L : Language) [L.Relational] where
   Domain : World → Set Carrier
   domain_nonempty : ∀ w, ∃ x, x ∈ Domain w
   domain_antimonotone : w ≥ v → Domain w ⊆ Domain v
-  Rel (w : World) {k : ℕ} (R : L.Rel k) : (Fin k → Name) → Prop
+  Rel (w : World) {k : ℕ} (R : L.Rel k) : (Fin k → Carrier) → Prop
   rel_monotone : Rel w R t → ∀ v ≤ w, Rel v R t
 
 namespace IntKripke

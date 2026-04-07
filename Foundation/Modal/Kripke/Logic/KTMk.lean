@@ -92,7 +92,7 @@ lemma validate_axiomFour_of_model_finitely {M : Kripke.Model} (hM : M ⊧* Modal
         match c with
         | 0 => contradiction;
         | n + 1 =>
-          suffices Modal.KTMk ⊢ □^[((i + 2) + n)]φ ➝ □^[(i + 2)]φ by
+          suffices Modal.KTMk ⊢ □^[((i + 2) + n)]φ 🡒 □^[(i + 2)]φ by
             apply Logic.iff_provable.mp;
             rwa [show (i + (n + 1) + 1) = (i + 2 + n) by omega];
           apply reduce_box_in_CAnt!;
@@ -104,7 +104,7 @@ lemma validate_axiomFour_of_model_finitely {M : Kripke.Model} (hM : M ⊧* Modal
           . apply List.getLast_eq_getElem;
           . simp [m, hl_len];
       . intro h;
-        have : l[m] ⊧ □^[(m + 1)]φ ⋏ ∼□^[(m + 2)]φ ➝ ◇(□^[(m + 2)]φ ⋏ ◇(∼□^[(m + 2)]φ)) := by
+        have : l[m] ⊧ □^[(m + 1)]φ ⋏ ∼□^[(m + 2)]φ 🡒 ◇(□^[(m + 2)]φ ⋏ ◇(∼□^[(m + 2)]φ)) := by
           apply hM.models;
           apply Logic.iff_provable.mp;
           simp;

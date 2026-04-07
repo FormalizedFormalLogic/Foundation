@@ -21,22 +21,23 @@ section definability
 
 variable {F : Kripke.Frame}
 
-lemma validate_axiomWLEM_of_isPiecewiseStronglyConvergent [F.IsPiecewiseStronglyConvergent] : F ⊧ (Axioms.WLEM (.atom 0)) := by
+@[simp, grind .]
+lemma validate_axiomWLEM_of_isPiecewiseStronglyConvergent [F.IsPiecewiseStronglyConvergent] : F ⊧ (Axioms.WLEM φ) := by
   have := F.ps_convergent;
   revert this;
   contrapose!;
   intro h;
   obtain ⟨V, x, h⟩ := ValidOnFrame.exists_valuation_world_of_not h;
   unfold Satisfies at h;
-  push_neg at h;
+  push Not at h;
   rcases h with ⟨h₁, h₂⟩;
 
   replace h₁ := Satisfies.neg_def.not.mp h₁;
-  push_neg at h₁;
+  push Not at h₁;
   obtain ⟨y, Rxy, hy⟩ := h₁;
 
   replace h₂ := Satisfies.neg_def.not.mp h₂;
-  push_neg at h₂;
+  push Not at h₂;
   obtain ⟨z, Rxz, hz⟩ := h₂;
 
   use x, y, z;
@@ -103,7 +104,7 @@ instance [Entailment.HasAxiomWLEM 𝓢] : (canonicalFrame 𝓢).IsPiecewiseStron
       tauto;
     exact Rxy this;
 
-  have : 𝓢 ⊢ (Θx.conj ⋏ Θy.conj ⋏ Θz.conj) ➝ ⊥ := by
+  have : 𝓢 ⊢ (Θx.conj ⋏ Θy.conj ⋏ Θz.conj) 🡒 ⊥ := by
     apply C!_trans ?_ h;
     apply CK!_iff_CC!.mpr;
     apply FConj_DT.mpr;
@@ -125,10 +126,10 @@ instance [Entailment.HasAxiomWLEM 𝓢] : (canonicalFrame 𝓢).IsPiecewiseStron
         tauto;
       simp [Θx, Θy, Θz];
       tauto;
-  have : 𝓢 ⊢ Θx.conj ➝ Θy.conj ➝ ∼Θz.conj := CK!_iff_CC!.mp $
+  have : 𝓢 ⊢ Θx.conj 🡒 Θy.conj 🡒 ∼Θz.conj := CK!_iff_CC!.mp $
     (C!_trans (CK!_iff_CC!.mp $ C!_trans (K!_left K!_assoc) this) (K!_right $ neg_equiv!));
-  replace : [Θx.conj] ⊢[𝓢] Θy.conj ➝ ∼Θz.conj := FiniteContext.deductInv'! this;
-  replace : [Θx.conj] ⊢[𝓢] ∼∼Θz.conj ➝ ∼Θy.conj := contra! this;
+  replace : [Θx.conj] ⊢[𝓢] Θy.conj 🡒 ∼Θz.conj := FiniteContext.deductInv'! this;
+  replace : [Θx.conj] ⊢[𝓢] ∼∼Θz.conj 🡒 ∼Θy.conj := contra! this;
 
   have mem_Θx_x : Θx.conj ∈ x.1.1 := iff_mem₁_fconj.mpr $ by
     intro φ;

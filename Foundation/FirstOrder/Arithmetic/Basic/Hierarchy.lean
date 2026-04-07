@@ -164,7 +164,7 @@ lemma neg {φ : Semiformula L ξ n} : Hierarchy Γ s φ → Hierarchy Γ.alt s (
 @[simp] lemma neg_iff {φ : Semiformula L ξ n} : Hierarchy Γ s (∼φ) ↔ Hierarchy Γ.alt s φ :=
   ⟨fun h => by simpa using neg h, fun h => by simpa using neg h⟩
 
-@[simp] lemma imp_iff {φ ψ : Semiformula L ξ n} : Hierarchy Γ s (φ ➝ ψ) ↔ (Hierarchy Γ.alt s φ ∧ Hierarchy Γ s ψ) := by simp [Semiformula.imp_eq]
+@[simp] lemma imp_iff {φ ψ : Semiformula L ξ n} : Hierarchy Γ s (φ 🡒 ψ) ↔ (Hierarchy Γ.alt s φ ∧ Hierarchy Γ s ψ) := by simp [Semiformula.imp_eq]
 
 set_option linter.flexible false in
 @[simp] lemma ball_iff {Γ s n} {φ : Semiformula L ξ (n + 1)} {t : Semiterm L ξ (n + 1)} (ht : t.Positive) :
@@ -336,11 +336,11 @@ lemma of_open {φ : Semiformula L ξ n} : φ.Open → Hierarchy Γ s φ := by
 variable {L : Language} [L.ORing]
 
 lemma iff_iff {φ ψ : Semiformula L ξ n} :
-    Hierarchy b s (φ ⭤ ψ) ↔ (Hierarchy b s φ ∧ Hierarchy b.alt s φ ∧ Hierarchy b s ψ ∧ Hierarchy b.alt s ψ) := by
+    Hierarchy b s (φ 🡘 ψ) ↔ (Hierarchy b s φ ∧ Hierarchy b.alt s φ ∧ Hierarchy b s ψ ∧ Hierarchy b.alt s ψ) := by
   simp [Semiformula.iff_eq]; tauto
 
 @[simp] lemma iff_iff₀ {φ ψ : Semiformula L ξ n} :
-    Hierarchy b 0 (φ ⭤ ψ) ↔ (Hierarchy b 0 φ ∧ Hierarchy b 0 ψ) := by
+    Hierarchy b 0 (φ 🡘 ψ) ↔ (Hierarchy b 0 φ ∧ Hierarchy b 0 ψ) := by
   simp [Semiformula.iff_eq]; tauto
 
 @[simp] lemma matrix_conj_iff {b s n} {φ : Fin m → Semiformula L ξ n} :

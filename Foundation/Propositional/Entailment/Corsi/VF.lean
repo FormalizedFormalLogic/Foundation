@@ -50,45 +50,45 @@ lemma not_bot [Entailment.Consistent 𝓢] : 𝓢 ⊬ ⊥ := by
   exact efq ⨀ hφ;
 
 
-lemma CA_replace_both (h₁ : 𝓢 ⊢ φ ➝ φ') (h₂ : 𝓢 ⊢ ψ ➝ ψ') : 𝓢 ⊢ φ ⋎ ψ ➝ φ' ⋎ ψ' := by
+lemma CA_replace_both (h₁ : 𝓢 ⊢ φ 🡒 φ') (h₂ : 𝓢 ⊢ ψ 🡒 ψ') : 𝓢 ⊢ φ ⋎ ψ 🡒 φ' ⋎ ψ' := by
   apply ruleD;
   . apply C_trans h₁; simp;
   . apply C_trans h₂; simp;
 
-lemma CA_replace_left (h : 𝓢 ⊢ φ' ➝ φ) : 𝓢 ⊢ φ' ⋎ ψ ➝ φ ⋎ ψ := by
+lemma CA_replace_left (h : 𝓢 ⊢ φ' 🡒 φ) : 𝓢 ⊢ φ' ⋎ ψ 🡒 φ ⋎ ψ := by
   apply CA_replace_both;
   . assumption;
   . simp;
 
-lemma CA_replace_right (h : 𝓢 ⊢ ψ ➝ ψ') : 𝓢 ⊢ φ ⋎ ψ ➝ φ ⋎ ψ' := by
+lemma CA_replace_right (h : 𝓢 ⊢ ψ 🡒 ψ') : 𝓢 ⊢ φ ⋎ ψ 🡒 φ ⋎ ψ' := by
   apply CA_replace_both;
   . simp;
   . assumption;
 
 
-lemma C_replace_both (h : 𝓢 ⊢ φ ➝ ψ) (h₁ : 𝓢 ⊢ φ' ➝ φ) (h₂ : 𝓢 ⊢ ψ ➝ ψ') : 𝓢 ⊢ φ' ➝ ψ' := by
+lemma C_replace_both (h : 𝓢 ⊢ φ 🡒 ψ) (h₁ : 𝓢 ⊢ φ' 🡒 φ) (h₂ : 𝓢 ⊢ ψ 🡒 ψ') : 𝓢 ⊢ φ' 🡒 ψ' := by
   apply C_trans h₁;
   apply C_trans ?_ h₂;
   apply h;
 
 @[grind <=]
-lemma CKK_right_replace (h : 𝓢 ⊢ ψ ➝ ψ') : 𝓢 ⊢ φ ⋏ ψ ➝ φ ⋏ ψ' := by
+lemma CKK_right_replace (h : 𝓢 ⊢ ψ 🡒 ψ') : 𝓢 ⊢ φ ⋏ ψ 🡒 φ ⋏ ψ' := by
   apply ruleC;
   . simp;
   . apply C_trans ?_ h;
     simp;
 
 
-lemma insert_LConj {Γ : List F} : 𝓢 ⊢ φ ⋏ Γ.conj₂ ➝ (φ :: Γ).conj₂ := by
+lemma insert_LConj {Γ : List F} : 𝓢 ⊢ φ ⋏ Γ.conj₂ 🡒 (φ :: Γ).conj₂ := by
   match Γ with
   | [] => simp [List.conj₂];
   | γ :: Γ => apply ruleC andElimL andElimR;
 
 @[simp, grind .]
-lemma conjconj {Γ : Finset F} : 𝓢 ⊢ (Γ.conj) ➝ Γ.toList.conj₂ := by simp [Finset.conj];
+lemma conjconj {Γ : Finset F} : 𝓢 ⊢ (Γ.conj) 🡒 Γ.toList.conj₂ := by simp [Finset.conj];
 
 
-lemma LConj₂Conj₂_of_provable {Δ : List F} (h : ∀ δ ∈ Δ, 𝓢 ⊢ γ ➝ δ) : 𝓢 ⊢ γ ➝ Δ.conj₂ := by
+lemma LConj₂Conj₂_of_provable {Δ : List F} (h : ∀ δ ∈ Δ, 𝓢 ⊢ γ 🡒 δ) : 𝓢 ⊢ γ 🡒 Δ.conj₂ := by
   induction Δ using List.induction_with_singleton with
   | hnil => apply af; simp;
   | hsingle φ =>
@@ -102,7 +102,7 @@ lemma LConj₂Conj₂_of_provable {Δ : List F} (h : ∀ δ ∈ Δ, 𝓢 ⊢ γ 
     . apply ih h.2;
 
 
-lemma ruleC_lconj₂ {Γ : List F} (h : ∀ γ ∈ Γ, 𝓢 ⊢ φ ➝ γ) : 𝓢 ⊢ φ ➝ Γ.conj₂ := by
+lemma ruleC_lconj₂ {Γ : List F} (h : ∀ γ ∈ Γ, 𝓢 ⊢ φ 🡒 γ) : 𝓢 ⊢ φ 🡒 Γ.conj₂ := by
   induction Γ using List.induction_with_singleton with
   | hnil => apply af; simp;
   | hsingle ψ => apply h; simp;
@@ -113,19 +113,19 @@ lemma ruleC_lconj₂ {Γ : List F} (h : ∀ γ ∈ Γ, 𝓢 ⊢ φ ➝ γ) : �
     . apply h.1;
     . apply ih h.2;
 
-lemma ruleC_fconj {Γ : Finset F} (h : ∀ γ ∈ Γ, 𝓢 ⊢ φ ➝ γ) : 𝓢 ⊢ φ ➝ Γ.conj := by
+lemma ruleC_fconj {Γ : Finset F} (h : ∀ γ ∈ Γ, 𝓢 ⊢ φ 🡒 γ) : 𝓢 ⊢ φ 🡒 Γ.conj := by
   apply ruleC_lconj₂;
   intro γ hγ;
   apply h γ;
   simpa using hγ;
 
-lemma ruleC_fconj' {Γ : Finset ι} (Φ : ι → F) (h : ∀ i ∈ Γ, 𝓢 ⊢ φ ➝ Φ i) : 𝓢 ⊢ φ ➝ (⩕ i ∈ Γ, Φ i) := by
+lemma ruleC_fconj' {Γ : Finset ι} (Φ : ι → F) (h : ∀ i ∈ Γ, 𝓢 ⊢ φ 🡒 Φ i) : 𝓢 ⊢ φ 🡒 (⩕ i ∈ Γ, Φ i) := by
   apply ruleC_lconj₂;
   simpa;
 
 
 
-lemma mem_lconj₂ {Γ : List F} (h : φ ∈ Γ) : 𝓢 ⊢ ⋀Γ ➝ φ := by
+lemma mem_lconj₂ {Γ : List F} (h : φ ∈ Γ) : 𝓢 ⊢ ⋀Γ 🡒 φ := by
   induction Γ using List.induction_with_singleton with
   | hcons ψ Δ he ih =>
     simp [List.conj₂_cons_nonempty he];
@@ -136,43 +136,43 @@ lemma mem_lconj₂ {Γ : List F} (h : φ ∈ Γ) : 𝓢 ⊢ ⋀Γ ➝ φ := by
       simp;
   | _ => simp_all;
 
-lemma mem_fconj {Γ : Finset F} (h : φ ∈ Γ) : 𝓢 ⊢ Γ.conj ➝ φ := by
+lemma mem_fconj {Γ : Finset F} (h : φ ∈ Γ) : 𝓢 ⊢ Γ.conj 🡒 φ := by
   apply mem_lconj₂;
   simpa using h;
 
-lemma mem_fconj' {Γ : Finset ι} (Φ : ι → F) (hΦ : ∃ i ∈ Γ, Φ i = ψ) : 𝓢 ⊢ (⩕ i ∈ Γ, Φ i) ➝ ψ := by
+lemma mem_fconj' {Γ : Finset ι} (Φ : ι → F) (hΦ : ∃ i ∈ Γ, Φ i = ψ) : 𝓢 ⊢ (⩕ i ∈ Γ, Φ i) 🡒 ψ := by
   apply mem_lconj₂;
   simpa;
 
 
-lemma LConj₂Conj₂_of_subset {Γ Δ : List F} (h : ∀ φ, φ ∈ Δ → φ ∈ Γ) : 𝓢 ⊢ Γ.conj₂ ➝ Δ.conj₂ := by
+lemma LConj₂Conj₂_of_subset {Γ Δ : List F} (h : ∀ φ, φ ∈ Δ → φ ∈ Γ) : 𝓢 ⊢ Γ.conj₂ 🡒 Δ.conj₂ := by
   apply LConj₂Conj₂_of_provable;
   intro δ hδ;
   apply mem_lconj₂ $ h δ hδ;
 
-lemma CFConjFConj_of_subset {Γ Δ : Finset F} (h : Δ ⊆ Γ) : 𝓢 ⊢ Γ.conj ➝ Δ.conj := by
+lemma CFConjFConj_of_subset {Γ Δ : Finset F} (h : Δ ⊆ Γ) : 𝓢 ⊢ Γ.conj 🡒 Δ.conj := by
   apply LConj₂Conj₂_of_subset;
   simpa;
 
 variable [DecidableEq F] in
-lemma FConj₂_of_LConj {Γ : List F} : 𝓢 ⊢ Γ.conj₂ ➝ Γ.toFinset.conj := by
+lemma FConj₂_of_LConj {Γ : List F} : 𝓢 ⊢ Γ.conj₂ 🡒 Γ.toFinset.conj := by
   apply LConj₂Conj₂_of_provable;
   intro γ hγ;
   apply mem_lconj₂;
   simpa using hγ;
 
 variable [DecidableEq F] in
-lemma insert_FConj {Γ : Finset F} : 𝓢 ⊢ φ ⋏ Γ.conj ➝ (insert φ Γ).conj := by
+lemma insert_FConj {Γ : Finset F} : 𝓢 ⊢ φ ⋏ Γ.conj 🡒 (insert φ Γ).conj := by
   apply C_replace_both $ insert_LConj;
-  . show 𝓢 ⊢ φ ⋏ Γ.conj ➝ φ ⋏ ⋀Γ.toList;
+  . show 𝓢 ⊢ φ ⋏ Γ.conj 🡒 φ ⋏ ⋀Γ.toList;
     apply CKK_right_replace;
     simp;
-  . show 𝓢 ⊢ ⋀(φ :: Γ.toList) ➝ (insert φ Γ).conj;
+  . show 𝓢 ⊢ ⋀(φ :: Γ.toList) 🡒 (insert φ Γ).conj;
     apply C_trans FConj₂_of_LConj;
     rw [show (φ :: Γ.toList).toFinset = insert φ Γ by simp];
     exact impId;
 
-lemma CFConjFConj_of_provable {Δ : Finset F} (h : ∀ δ ∈ Δ, 𝓢 ⊢ γ ➝ δ) : 𝓢 ⊢ γ ➝ Δ.conj := by
+lemma CFConjFConj_of_provable {Δ : Finset F} (h : ∀ δ ∈ Δ, 𝓢 ⊢ γ 🡒 δ) : 𝓢 ⊢ γ 🡒 Δ.conj := by
   apply LConj₂Conj₂_of_provable;
   intro δ hδ;
   apply C_trans impId $ h δ ?_;
@@ -180,7 +180,7 @@ lemma CFConjFConj_of_provable {Δ : Finset F} (h : ∀ δ ∈ Δ, 𝓢 ⊢ γ �
 
 
 
-lemma mem_ldisj₂ {Γ : List F} (h : ψ ∈ Γ) : 𝓢 ⊢ ψ ➝ Γ.disj₂ := by
+lemma mem_ldisj₂ {Γ : List F} (h : ψ ∈ Γ) : 𝓢 ⊢ ψ 🡒 Γ.disj₂ := by
   induction Γ using List.induction_with_singleton with
   | hcons ψ Δ he ih =>
     simp only [List.disj₂_cons_nonempty he];
@@ -191,12 +191,12 @@ lemma mem_ldisj₂ {Γ : List F} (h : ψ ∈ Γ) : 𝓢 ⊢ ψ ➝ Γ.disj₂ :=
       exact orIntroR;
   | _ => simp_all;
 
-lemma mem_fdisj' {Γ : Finset ι} (Φ : ι → F) (hΦ : ∃ i ∈ Γ, Φ i = ψ) : 𝓢 ⊢ ψ ➝ ⩖ i ∈ Γ, Φ i := by
+lemma mem_fdisj' {Γ : Finset ι} (Φ : ι → F) (hΦ : ∃ i ∈ Γ, Φ i = ψ) : 𝓢 ⊢ ψ 🡒 ⩖ i ∈ Γ, Φ i := by
   apply mem_ldisj₂;
   simpa;
 
 
-lemma ruleD_ldisj₂ {Γ : List F} (h : ∀ γ ∈ Γ, 𝓢 ⊢ γ ➝ φ) : 𝓢 ⊢ Γ.disj₂ ➝ φ := by
+lemma ruleD_ldisj₂ {Γ : List F} (h : ∀ γ ∈ Γ, 𝓢 ⊢ γ 🡒 φ) : 𝓢 ⊢ Γ.disj₂ 🡒 φ := by
   induction Γ using List.induction_with_singleton with
   | hnil => apply efq;
   | hsingle ψ => apply h; simp;
@@ -207,7 +207,7 @@ lemma ruleD_ldisj₂ {Γ : List F} (h : ∀ γ ∈ Γ, 𝓢 ⊢ γ ➝ φ) : �
     . apply h.1;
     . apply ih h.2;
 
-lemma ruleD_fdisj' {Γ : Finset ι} (Φ : ι → F) (h : ∀ i ∈ Γ, 𝓢 ⊢ Φ i ➝ φ) : 𝓢 ⊢ (⩖ i ∈ Γ, Φ i) ➝ φ := by
+lemma ruleD_fdisj' {Γ : Finset ι} (Φ : ι → F) (h : ∀ i ∈ Γ, 𝓢 ⊢ Φ i 🡒 φ) : 𝓢 ⊢ (⩖ i ∈ Γ, Φ i) 🡒 φ := by
   apply ruleD_ldisj₂;
   simpa;
 

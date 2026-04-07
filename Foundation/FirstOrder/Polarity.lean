@@ -42,7 +42,7 @@ def polarity {n} : Semiformula L ξ n → Bool
 @[simp] lemma polarity_neg {n} (φ : Semiformula L ξ n) : (∼φ).polarity = !φ.polarity := by
   induction φ using rec' <;> simp [polarity, *]
 
-@[simp] lemma polarity_imply {n} (φ ψ : Semiformula L ξ n) : (φ ➝ ψ).polarity = (!φ.polarity && ψ.polarity) := by
+@[simp] lemma polarity_imply {n} (φ ψ : Semiformula L ξ n) : (φ 🡒 ψ).polarity = (!φ.polarity && ψ.polarity) := by
   simp [imp_eq]
 
 abbrev Positive (φ : Semiformula L ξ n) : Prop := φ.polarity = true

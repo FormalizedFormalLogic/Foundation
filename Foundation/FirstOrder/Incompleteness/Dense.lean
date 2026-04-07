@@ -37,8 +37,8 @@ lemma dense_of_finite_extend_incomplete
     (h : φ < ψ) : ∃ ξ : LindenbaumAlgebra 𝓢, φ < ξ ∧ ξ < ψ := by
   obtain ⟨φ, rfl⟩ := Quotient.exists_rep φ;
   obtain ⟨ψ, rfl⟩ := Quotient.exists_rep ψ;
-  have h₁ : 𝓢 ⊢ φ ➝ ψ := le_def _ |>.mp $ le_of_lt h;
-  have h₂ : 𝓢 ⊬  ψ ➝ φ := le_def _ |>.not.mp $ not_le_of_gt h;
+  have h₁ : 𝓢 ⊢ φ 🡒 ψ := le_def _ |>.mp $ le_of_lt h;
+  have h₂ : 𝓢 ⊬  ψ 🡒 φ := le_def _ |>.not.mp $ not_le_of_gt h;
   obtain ⟨ρ, hρ⟩ := incomplete_def.mp $ @hE (∼φ ⋏ ψ) $ by
     apply consistent_iff_exists_unprovable.mpr;
     use ⊥;
@@ -71,7 +71,8 @@ lemma FirstOrder.Arithmetic.dense (T : Theory ℒₒᵣ) [𝗜𝚺₁ ⪯ T] [T.
     φ < ψ → ∃ ξ, φ < ξ ∧ ξ < ψ := fun h ↦ by
   refine LindenbaumAlgebra.dense_of_finite_extend_incomplete T ?_ h
   intro σ con
-  have : 𝗜𝚺₁ ⪯ insert σ T := WeakerThan.trans (inferInstanceAs (𝗜𝚺₁ ⪯ T)) (Axiomatized.le_of_subset (by simp))
+  have : 𝗜𝚺₁ ⪯ T := inferInstance
+  have : 𝗜𝚺₁ ⪯ insert σ T := WeakerThan.trans this (Axiomatized.le_of_subset (by simp))
   simpa using Arithmetic.incomplete' (insert σ T)
 
 instance (T : Theory ℒₒᵣ) [𝗜𝚺₁ ⪯ T] [T.Δ₁] : DenselyOrdered (LindenbaumAlgebra T) where

@@ -227,7 +227,7 @@ lemma generic_iff_not' {φ : Semiformula L ξ n} :
     ¬p ⊩ᶜ[bv|fv] φ ↔ ∃ q ≤ p, q ⊩ᶜ[bv|fv] ∼φ := by simpa using generic_iff.not
 
 @[simp] lemma imply {φ ψ : Semiformula L ξ n} :
-    p ⊩ᶜ[bv|fv] φ ➝ ψ ↔ ∀ q ≤ p, q ⊩ᶜ[bv|fv] φ → q ⊩ᶜ[bv|fv] ψ := by
+    p ⊩ᶜ[bv|fv] φ 🡒 ψ ↔ ∀ q ≤ p, q ⊩ᶜ[bv|fv] φ → q ⊩ᶜ[bv|fv] ψ := by
   suffices
     (∀ q ≤ p, ∃ r ≤ q, (∀ q ≤ r, ¬q ⊩ᶜ[bv|fv] φ) ∨ r ⊩ᶜ[bv|fv] ψ) ↔
     (∀ q ≤ p, q ⊩ᶜ[bv|fv] φ → q ⊩ᶜ[bv|fv] ψ) by simpa [DeMorgan.imply]
@@ -246,7 +246,7 @@ lemma generic_iff_not' {φ : Semiformula L ξ n} :
     · exact ⟨q, by rfl, Or.inr H⟩
 
 @[simp] lemma iff {φ ψ : Semiformula L ξ n} :
-    p ⊩ᶜ[bv|fv] φ ⭤ ψ ↔ ∀ q ≤ p, q ⊩ᶜ[bv|fv] φ ↔ q ⊩ᶜ[bv|fv] ψ := by
+    p ⊩ᶜ[bv|fv] φ 🡘 ψ ↔ ∀ q ≤ p, q ⊩ᶜ[bv|fv] φ ↔ q ⊩ᶜ[bv|fv] ψ := by
   simp [LogicalConnective.iff]; grind
 
 end WeaklyForces

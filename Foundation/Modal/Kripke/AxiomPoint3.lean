@@ -41,7 +41,7 @@ lemma validate_axiomPoint3_of_isPiecewiseStronglyConnected [F.IsPiecewiseStrongl
     (∀ y, x ≺ y → (∀ z, y ≺ z → V 1 z) → V 0 y)
     by simpa [Semantics.Models, Satisfies];
   by_contra hC;
-  push_neg at hC;
+  push Not at hC;
   obtain ⟨⟨y, Rxy, hp, hnq⟩, ⟨z, Rxz, hq, hnp⟩⟩ := hC;
   rcases IsPiecewiseStronglyConnected.ps_connected Rxy Rxz with (Ryz | Rzy);
   . have := hp z Ryz; contradiction;
@@ -76,11 +76,11 @@ instance [Entailment.HasAxiomPoint3 𝓢] : (canonicalFrame 𝓢).IsPiecewiseStr
   ps_connected := by
     rintro x y z Rxy Rxz;
     by_contra hC;
-    push_neg at hC;
+    push Not at hC;
     rcases hC with ⟨nRyz, nRzy⟩;
     obtain ⟨φ, hφy, hφz⟩ := Set.not_subset.mp nRyz;
     obtain ⟨ψ, hψz, hψy⟩ := Set.not_subset.mp nRzy;
-    apply x.neither (φ := □(□φ ➝ ψ) ⋎ □(□ψ ➝ φ));
+    apply x.neither (φ := □(□φ 🡒 ψ) ⋎ □(□ψ 🡒 φ));
     constructor;
     . exact iff_provable_mem₁.mp axiomPoint3! x;
     . apply iff_mem₂_or.mpr;

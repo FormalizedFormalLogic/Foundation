@@ -48,7 +48,7 @@ instance : Complete Modal.S4 FrameClass.finite_S4 := ⟨by
   replace hF := Set.mem_setOf_eq.mp hF;
   let M : Kripke.Model := ⟨F, V⟩;
   let FM := finestFiltrationTransitiveClosureModel M φ.subformulas;
-  apply filtration FM filterOf (by simp) |>.mpr;
+  apply filtration FM filterOf (by grind) |>.mpr;
   apply hp;
   refine {
     world_finite := by apply FilterEqvQuotient.finite $ by simp;

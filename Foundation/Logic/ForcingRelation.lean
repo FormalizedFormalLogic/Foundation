@@ -37,7 +37,7 @@ class BasicSemantics where
 
 class IntKripke (R : outParam (W → W → Prop)) extends BasicSemantics W where
   not (w : W) : w ⊩ ∼φ ↔ (∀ v, R w v → ¬v ⊩ φ)
-  imply (w : W) : w ⊩ φ ➝ ψ ↔ (∀ v, R w v → v ⊩ φ → v ⊩ ψ)
+  imply (w : W) : w ⊩ φ 🡒 ψ ↔ (∀ v, R w v → v ⊩ φ → v ⊩ ψ)
   monotone {w : W} : w ⊩ φ → ∀ v, R w v → v ⊩ φ
 
 variable {W}
@@ -96,7 +96,7 @@ class BasicSemantics where
 class ClassicalKripke (R : outParam (ℙ → ℙ → Prop)) extends BasicSemantics ℙ where
   or (p : ℙ) : p ⊩ᶜ φ ⋎ ψ ↔ ∀ q, R p q → ∃ x, R q x ∧ (x ⊩ᶜ φ ∨ x ⊩ᶜ ψ)
   not (p : ℙ) : p ⊩ᶜ ∼φ ↔ (∀ q, R p q → ¬q ⊩ᶜ φ)
-  imply (p : ℙ) : p ⊩ᶜ φ ➝ ψ ↔ (∀ q, R p q → q ⊩ᶜ φ → q ⊩ᶜ ψ)
+  imply (p : ℙ) : p ⊩ᶜ φ 🡒 ψ ↔ (∀ q, R p q → q ⊩ᶜ φ → q ⊩ᶜ ψ)
   monotone {p : ℙ} : p ⊩ᶜ φ → ∀ q, R p q → q ⊩ᶜ φ
   generic {p : ℙ} : (∀ q, R p q → ∃ r, R q r ∧ r ⊩ᶜ φ) → p ⊩ᶜ φ
 

@@ -30,17 +30,17 @@ lemma def_consistent [Entailment.Minimal 𝓢] : Consistent 𝓢 T ↔ ∀ Γ : 
   constructor;
   . intro h Γ hΓ;
     have := Context.provable_iff_finset.not.mp h;
-    push_neg at this;
+    push Not at this;
     exact this Γ (by tauto);
   . intro h;
     apply Context.provable_iff_finset.not.mpr;
-    push_neg;
+    push Not;
     simpa using h;
 
 lemma def_inconsistent [Entailment.Minimal 𝓢] : Inconsistent 𝓢 T ↔ ∃ (Γ : FormulaFinset _), (Γ.toSet ⊆ T) ∧ Γ *⊢[𝓢] ⊥ := by
   unfold Inconsistent;
   apply not_iff_not.mp;
-  push_neg;
+  push Not;
   exact def_consistent;
 
 lemma union_consistent [Entailment.Minimal 𝓢] : Consistent 𝓢 (T₁ ∪ T₂) → (Consistent 𝓢 T₁) ∧ (Consistent 𝓢 T₂) := by
@@ -82,7 +82,7 @@ lemma not_mem_neg_of_mem (T_consis : Consistent 𝓢 T) (h : φ ∈ T) : ∼φ �
     apply Set.doubleton_subset.mpr;
     tauto;
 
-lemma iff_insert_consistent : Consistent 𝓢 (insert φ T) ↔ ∀ {Γ : FormulaFinset α}, (↑Γ ⊆ T) → Γ *⊬[𝓢] φ ➝ ⊥ := by
+lemma iff_insert_consistent : Consistent 𝓢 (insert φ T) ↔ ∀ {Γ : FormulaFinset α}, (↑Γ ⊆ T) → Γ *⊬[𝓢] φ 🡒 ⊥ := by
   constructor;
   . intro h Γ hΓ;
     have := def_consistent.mp h (insert φ Γ) ?_;
@@ -105,10 +105,10 @@ lemma iff_insert_consistent : Consistent 𝓢 (insert φ T) ↔ ∀ {Γ : Formul
       simp;
     . simp_all;
 
-lemma iff_insert_inconsistent : Inconsistent 𝓢 (insert φ T) ↔ ∃ Γ : FormulaFinset _, (Γ.toSet ⊆ T) ∧ Γ *⊢[𝓢] φ ➝ ⊥ := by
+lemma iff_insert_inconsistent : Inconsistent 𝓢 (insert φ T) ↔ ∃ Γ : FormulaFinset _, (Γ.toSet ⊆ T) ∧ Γ *⊢[𝓢] φ 🡒 ⊥ := by
   unfold Inconsistent;
   apply not_iff_not.mp;
-  push_neg;
+  push Not;
   exact iff_insert_consistent;
 
 lemma provable_iff_insert_neg_not_consistent : Inconsistent 𝓢 (insert (∼φ) T) ↔ T *⊢[𝓢] φ := by
@@ -197,13 +197,13 @@ lemma not_singleton_consistent [Entailment.Necessitation 𝓢] (T_consis : Consi
     simp [hΓ];
   . by_contra! hC;
     apply def_consistent.mp T_consis (Γ := {∼(□φ)}) $ by simpa;
-    have : 𝓢 ⊢ ∼φ ➝ ⊥ := by
+    have : 𝓢 ⊢ ∼φ 🡒 ⊥ := by
       apply Context.provable_iff_provable.mpr;
       apply Context.deduct!;
       simpa [hΓ] using hC;
     have : 𝓢 ⊢ φ := by cl_prover [this];
     have : 𝓢 ⊢ □φ := nec! this;
-    have : 𝓢 ⊢ ∼□φ ➝ ⊥ := by cl_prover [this];
+    have : 𝓢 ⊢ ∼□φ 🡒 ⊥ := by cl_prover [this];
     simpa using Context.deductInv! $ Context.provable_iff_provable.mp this;
 
 lemma either_consistent (T_consis : Consistent 𝓢 T) (φ) : Consistent 𝓢 (insert φ T) ∨ Consistent 𝓢 (insert (∼φ) T) := by
@@ -212,8 +212,8 @@ lemma either_consistent (T_consis : Consistent 𝓢 T) (φ) : Consistent 𝓢 (i
   obtain ⟨Γ, hΓ₁, hΓ₂⟩ := iff_insert_inconsistent.mp $ by simpa using hC₁;
   obtain ⟨Δ, hΔ₁, hΔ₂⟩ := iff_insert_inconsistent.mp $ by simpa using hC₂;
   apply def_consistent.mp T_consis (Γ := Γ ∪ Δ) ?_;
-  . replace hΓ₂ : ↑(Γ ∪ Δ) *⊢[𝓢] φ ➝ ⊥ := Context.weakening! (by simp) hΓ₂;
-    replace hΔ₂ : ↑(Γ ∪ Δ) *⊢[𝓢] ∼φ ➝ ⊥ := Context.weakening! (by simp) hΔ₂;
+  . replace hΓ₂ : ↑(Γ ∪ Δ) *⊢[𝓢] φ 🡒 ⊥ := Context.weakening! (by simp) hΓ₂;
+    replace hΔ₂ : ↑(Γ ∪ Δ) *⊢[𝓢] ∼φ 🡒 ⊥ := Context.weakening! (by simp) hΔ₂;
     exact of_C!_of_C!_of_A! hΓ₂ hΔ₂ (by simp);
   . simp_all;
 
@@ -225,13 +225,8 @@ lemma intro_union_consistent(h : ∀ {Γ₁ Γ₂ : FormulaFinset _}, (Γ₁.toS
   let Δ₁ := (Δ.filter (· ∈ T₁));
   let Δ₂ := (Δ.filter (· ∈ T₂));
   apply not_imp_not.mpr $ Context.weakening! (𝓢 := 𝓢) (Γ := Δ) (Δ := Δ₁ ∪ Δ₂) (φ := ⊥) ?_;
-  . have := @h Δ₁ Δ₂ ?_ ?_;
-    . simpa using this;
-    . intro φ; simp [Δ₁];
-    . intro φ; simp [Δ₂];
-  . intro φ hφ;
-    have : φ ∈ T₁ ∪ T₂ := hΔ hφ;
-    simp_all [Δ₁, Δ₂];
+  . grind;
+  . grind;
 
 lemma exists_consistent_maximal_of_consistent (T_consis : Consistent 𝓢 T)
   : ∃ Z, Consistent 𝓢 Z ∧ T ⊆ Z ∧ ∀ U, U *⊬[𝓢] ⊥ → Z ⊆ U → U = Z := by
@@ -307,7 +302,7 @@ instance [Entailment.Consistent 𝓢] : Nonempty (MaximalConsistentSet 𝓢) := 
 
 lemma either_mem (Ω : MaximalConsistentSet 𝓢) (φ) : φ ∈ Ω ∨ ∼φ ∈ Ω := by
   by_contra hC;
-  push_neg at hC;
+  push Not at hC;
   rcases either_consistent (𝓢 := 𝓢) (Ω.consistent) φ;
   . have := Ω.maximal (Set.ssubset_insert hC.1); contradiction;
   . have := Ω.maximal (Set.ssubset_insert hC.2); contradiction;
@@ -343,7 +338,7 @@ lemma iff_mem_neg : (∼φ ∈ Ω) ↔ (φ ∉ Ω) := by
     have : Consistent 𝓢 (insert (∼φ) Ω.1) := by
       haveI := provable_iff_insert_neg_not_consistent.not.mpr $ membership_iff.not.mp hp;
       unfold FormulaSet.Inconsistent at this;
-      push_neg at this;
+      push Not at this;
       exact this;
     have := not_imp_not.mpr (@maximal (Ω := Ω) (U := insert (∼φ) Ω.1)) (by simpa);
     have : insert (∼φ) Ω.1 ⊆ Ω.1 := by simpa [Set.ssubset_def] using this;
@@ -369,7 +364,7 @@ lemma mem_of_prove (h : 𝓢 ⊢ φ) : φ ∈ Ω := by apply iff_forall_mem_prov
 lemma iff_mem_negneg : (∼∼φ ∈ Ω) ↔ (φ ∈ Ω) := by simp;
 
 @[simp, grind]
-lemma iff_mem_imp : ((φ ➝ ψ) ∈ Ω) ↔ (φ ∈ Ω) → (ψ ∈ Ω) := by
+lemma iff_mem_imp : ((φ 🡒 ψ) ∈ Ω) ↔ (φ ∈ Ω) → (ψ ∈ Ω) := by
   constructor;
   . intro hpq hp;
     replace dpq := membership_iff.mp hpq;
@@ -386,9 +381,9 @@ lemma iff_mem_imp : ((φ ➝ ψ) ∈ Ω) ↔ (φ ∈ Ω) → (ψ ∈ Ω) := by
       apply membership_iff.mpr;
       exact implyK! ⨀ (membership_iff.mp h)
 
-lemma mdp (hφψ : φ ➝ ψ ∈ Ω) (hψ : φ ∈ Ω) : ψ ∈ Ω := iff_mem_imp.mp hφψ hψ
+lemma mdp (hφψ : φ 🡒 ψ ∈ Ω) (hψ : φ ∈ Ω) : ψ ∈ Ω := iff_mem_imp.mp hφψ hψ
 
-lemma mdp_provable (hφψ : 𝓢 ⊢ φ ➝ ψ) (hψ : φ ∈ Ω) : ψ ∈ Ω := mdp (mem_of_prove hφψ) hψ
+lemma mdp_provable (hφψ : 𝓢 ⊢ φ 🡒 ψ) (hψ : φ ∈ Ω) : ψ ∈ Ω := mdp (mem_of_prove hφψ) hψ
 
 @[simp]
 lemma iff_mem_and : ((φ ⋏ ψ) ∈ Ω) ↔ (φ ∈ Ω) ∧ (ψ ∈ Ω) := by
@@ -408,7 +403,7 @@ lemma iff_mem_or : ((φ ⋎ ψ) ∈ Ω) ↔ (φ ∈ Ω) ∨ (ψ ∈ Ω) := by
   . intro hpq;
     replace hpq := membership_iff.mp hpq;
     by_contra hC;
-    push_neg at hC;
+    push Not at hC;
     have ⟨hp, hq⟩ := hC;
     replace hp := membership_iff.mp $ iff_mem_neg.mpr hp;
     replace hq := membership_iff.mp $ iff_mem_neg.mpr hq;
@@ -421,7 +416,7 @@ lemma iff_mem_or : ((φ ⋎ ψ) ∈ Ω) ↔ (φ ∈ Ω) ∨ (ψ ∈ Ω) := by
     . apply membership_iff.mpr;
       exact A!_intro_right (membership_iff.mp hq);
 
-lemma iff_congr : (Ω.1 *⊢[𝓢] (φ ⭤ ψ)) → ((φ ∈ Ω) ↔ (ψ ∈ Ω)) := by
+lemma iff_congr : (Ω.1 *⊢[𝓢] (φ 🡘 ψ)) → ((φ ∈ Ω) ↔ (ψ ∈ Ω)) := by
   intro hpq;
   constructor;
   . intro hp; exact iff_mem_imp.mp (membership_iff.mpr $ K!_left hpq) hp;
@@ -465,11 +460,11 @@ lemma iff_mem_boxItr : (□^[n]φ ∈ Ω) ↔ (∀ {Ω' : MaximalConsistentSet �
       apply unprovable_iff_insert_neg_consistent.mpr;
       by_contra hC;
       obtain ⟨Γ, hΓ₁, hΓ₂⟩ := Context.provable_iff.mp hC;
-      have : 𝓢 ⊢ □^[n]⋀Γ ➝ □^[n]φ := imply_boxItr_distribute'! hΓ₂;
-      have : 𝓢 ⊬ □^[n]⋀Γ ➝ □^[n]φ := by
+      have : 𝓢 ⊢ □^[n]⋀Γ 🡒 □^[n]φ := imply_boxItr_distribute'! hΓ₂;
+      have : 𝓢 ⊬ □^[n]⋀Γ 🡒 □^[n]φ := by
         have := Context.provable_iff.not.mp $ membership_iff.not.mp hp;
-        push_neg at this;
-        have : 𝓢 ⊬ ⋀((□^[n]'Γ)) ➝ □^[n]φ := FiniteContext.provable_iff.not.mp $ this (□^[n]'Γ) (by
+        push Not at this;
+        have : 𝓢 ⊬ ⋀((□^[n]'Γ)) 🡒 □^[n]φ := FiniteContext.provable_iff.not.mp $ this (□^[n]'Γ) (by
           intro ψ hq;
           obtain ⟨χ, hr₁, rfl⟩ := List.LO.exists_of_mem_boxItr hq;
           simpa using hΓ₁ χ hr₁;
@@ -542,7 +537,7 @@ lemma iff_mem_diaItr : (◇^[n]φ ∈ Ω) ↔ (∃ Ω' : MaximalConsistentSet �
     have := mem_diaItr_dual.mp h;
     have := iff_mem_neg.mp this;
     have := iff_mem_boxItr.not.mp this;
-    push_neg at this;
+    push Not at this;
     obtain ⟨Ω', h₁, h₂⟩ := this;
     use Ω';
     constructor;
@@ -552,7 +547,7 @@ lemma iff_mem_diaItr : (◇^[n]φ ∈ Ω) ↔ (∃ Ω' : MaximalConsistentSet �
     apply mem_diaItr_dual.mpr;
     apply iff_mem_neg.mpr;
     apply iff_mem_boxItr.not.mpr;
-    push_neg;
+    push Not;
     use Ω';
     constructor;
     . exact h₁;

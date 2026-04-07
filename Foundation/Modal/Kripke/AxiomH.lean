@@ -109,7 +109,7 @@ instance [Entailment.HasAxiomH 𝓢] : (canonicalFrame 𝓢).IsDetourFree := ⟨
     apply neither ⟨this, iff_mem₂_or.mpr $ ?_⟩;
     tauto;
 
-  have : □(◇(φ ⋎ ψ) ➝ φ ⋎ ψ) ∈ x.1.1 := mdp_mem₁_provable axiomH! $ by
+  have : □(◇(φ ⋎ ψ) 🡒 φ ⋎ ψ) ∈ x.1.1 := mdp_mem₁_provable axiomH! $ by
     apply iff_mem₁_or.mpr;
     tauto;
   apply iff_mem₁_imp'.mp $ def_rel_box_mem₁.mp Rxu this;

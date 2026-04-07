@@ -16,8 +16,8 @@ open LO.Entailment LO.Modal.Entailment
 
 inductive Hilbert.WithRE {α} (Ax : Axiom α) : Logic α
 | axm {φ} (s : Substitution _) : φ ∈ Ax → WithRE Ax (φ⟦s⟧)
-| mdp {φ ψ}     : WithRE Ax (φ ➝ ψ) → WithRE Ax φ → WithRE Ax ψ
-| re {φ ψ}      : WithRE Ax (φ ⭤ ψ) → WithRE Ax (□φ ⭤ □ψ)
+| mdp {φ ψ}     : WithRE Ax (φ 🡒 ψ) → WithRE Ax φ → WithRE Ax ψ
+| re {φ ψ}      : WithRE Ax (φ 🡘 ψ) → WithRE Ax (□φ 🡘 □ψ)
 | implyK φ ψ    : WithRE Ax $ Axioms.ImplyK φ ψ
 | implyS φ ψ χ  : WithRE Ax $ Axioms.ImplyS φ ψ χ
 | ec φ ψ        : WithRE Ax $ Axioms.ElimContra φ ψ
@@ -59,8 +59,8 @@ instance : Logic.Substitution (Hilbert.WithRE Ax) where
 protected lemma rec!
   {motive   : (φ : Formula α) → (WithRE Ax ⊢ φ) → Sort}
   (axm      : ∀ {φ : Formula α} (s), (h : φ ∈ Ax) → motive (φ⟦s⟧) (by grind))
-  (mdp      : ∀ {φ ψ : Formula α}, {hφψ : (WithRE Ax) ⊢ φ ➝ ψ} → {hφ : (WithRE Ax) ⊢ φ} → motive (φ ➝ ψ) hφψ → motive φ hφ → motive ψ (hφψ ⨀ hφ))
-  (re       : ∀ {φ ψ}, {hφψ : (WithRE Ax) ⊢ φ ⭤ ψ} → motive (φ ⭤ ψ) hφψ → motive (□φ ⭤ □ψ) (re! hφψ))
+  (mdp      : ∀ {φ ψ : Formula α}, {hφψ : (WithRE Ax) ⊢ φ 🡒 ψ} → {hφ : (WithRE Ax) ⊢ φ} → motive (φ 🡒 ψ) hφψ → motive φ hφ → motive ψ (hφψ ⨀ hφ))
+  (re       : ∀ {φ ψ}, {hφψ : (WithRE Ax) ⊢ φ 🡘 ψ} → motive (φ 🡘 ψ) hφψ → motive (□φ 🡘 □ψ) (re! hφψ))
   (implyK   : ∀ {φ ψ}, motive (Axioms.ImplyK φ ψ) $ by simp)
   (implyS   : ∀ {φ ψ χ}, motive (Axioms.ImplyS φ ψ χ) $ by simp)
   (ec       : ∀ {φ ψ}, motive (Axioms.ElimContra φ ψ) $ by simp)

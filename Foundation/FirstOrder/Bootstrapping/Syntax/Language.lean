@@ -191,9 +191,9 @@ lemma coe_addIndex_eq : (addIndex : V) = 0 := rfl
 
 lemma coe_mulIndex_eq : (mulIndex : V) = 1 := by simp [mulIndex]; rfl
 
-@[instance] abbrev gödelQuoteFuncLOR (k) : GödelQuote ((ℒₒᵣ).Func k) V := gödelQuoteFunc k
+@[reducible] instance gödelQuoteFuncLOR (k) : GödelQuote ((ℒₒᵣ).Func k) V := gödelQuoteFunc k
 
-@[instance] abbrev gödelQuoteRelLOR (k) : GödelQuote ((ℒₒᵣ).Rel k) V := gödelQuoteRel k
+@[reducible] instance gödelQuoteRelLOR (k) : GödelQuote ((ℒₒᵣ).Rel k) V := gödelQuoteRel k
 
 lemma isFunc_iff_LOR {k f : V} :
     (ℒₒᵣ).IsFunc k f ↔

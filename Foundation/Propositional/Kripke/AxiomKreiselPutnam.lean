@@ -33,19 +33,20 @@ variable {F : Kripke.Frame}
 
 open Formula (atom)
 
-lemma validate_axiomKreiselPutnam_of_satisfiesKreiselPutnamCondition [F.SatisfiesKreiselPutnamCondition ] : F ⊧ (Axioms.KreiselPutnam (.atom 0) (.atom 1) (.atom 2)) := by
+@[simp, grind .]
+lemma validate_axiomKreiselPutnam_of_satisfiesKreiselPutnamCondition [F.SatisfiesKreiselPutnamCondition ] : F ⊧ (Axioms.KreiselPutnam φ ψ χ) := by
   intro V x y Rxy h₁;
   by_contra hC;
   replace hC := Satisfies.or_def.not.mp hC;
-  push_neg at hC;
+  push Not at hC;
   obtain ⟨h₂, h₃⟩ := hC;
 
   replace h₂ := Satisfies.imp_def.not.mp h₂;
-  push_neg at h₂;
+  push Not at h₂;
   obtain ⟨z₁, Ryz₁, ⟨hz₁₁, hz₁₂⟩⟩ := h₂;
 
   replace h₃ := Satisfies.imp_def.not.mp h₃;
-  push_neg at h₃;
+  push Not at h₃;
   obtain ⟨z₂, Ryz₂, ⟨hz₂₁, hz₂₂⟩⟩ := h₃;
 
   obtain ⟨u, Ryu, ⟨Ruz₁, Ruz₂, h⟩⟩ := F.kreisel_putnam y z₁ z₂ ⟨
@@ -61,18 +62,18 @@ lemma validate_axiomKreiselPutnam_of_satisfiesKreiselPutnamCondition [F.Satisfie
       . exfalso; exact hz₂₂ h;
   ⟩;
 
-  have : ¬Satisfies ⟨F, V⟩ u (∼(.atom 0)) := by
+  have : ¬Satisfies ⟨F, V⟩ u (∼φ) := by
     by_contra hC;
     rcases Satisfies.or_def.mp $ h₁ Ryu hC with (h | h);
     . apply hz₁₂; exact Satisfies.formula_hereditary Ruz₁ h;
     . apply hz₂₂; exact Satisfies.formula_hereditary Ruz₂ h;
   replace this := Satisfies.neg_def.not.mp this;
-  push_neg at this;
+  push Not at this;
   obtain ⟨v, Ruv, hv⟩ := this;
 
   obtain ⟨w, Rvw, (Rz₁w | Rz₂w)⟩ := h v Ruv;
-  . exact Satisfies.not_of_neg (Satisfies.formula_hereditary (φ := (∼(.atom 0))) Rz₁w hz₁₁) $ Satisfies.formula_hereditary Rvw hv;
-  . exact Satisfies.not_of_neg (Satisfies.formula_hereditary (φ := (∼(.atom 0))) Rz₂w hz₂₁) $ Satisfies.formula_hereditary Rvw hv;
+  . exact Satisfies.not_of_neg (Satisfies.formula_hereditary (φ := (∼φ)) Rz₁w hz₁₁) $ Satisfies.formula_hereditary Rvw hv;
+  . exact Satisfies.not_of_neg (Satisfies.formula_hereditary (φ := (∼φ)) Rz₂w hz₂₁) $ Satisfies.formula_hereditary Rvw hv;
 
 end definability
 
@@ -99,17 +100,17 @@ instance [Entailment.HasAxiomKreiselPutnam 𝓢] : (canonicalFrame 𝓢).Satisfi
     by_contra hC;
     let Γx := { φ ∈ Γ | φ ∈ x.1.1};
     let Γ₁ := { φ ∈ Γ | φ ∈ ΓNyz };
-    let Γ₂ := Γ₁.preimage (∼·) $ by simp [Set.InjOn];
+    let Γ₂ := Γ₁.preimage (∼·) $ by simp [Set.InjOn, Formula.neg_inj];
     let Δy := { φ ∈ Δ | φ ∈ y.1.2};
     let Δz := { φ ∈ Δ | φ ∈ z.1.2};
-    replace hC : 𝓢 ⊢ (Γx ∪ Γ₁).conj ➝ (Δy ∪ Δz).disj := C!_replace ?_ ?_ hC;
-    . replace hC : 𝓢 ⊢ Γx.conj ⋏ Γ₁.conj ➝ Δy.disj ⋎ Δz.disj := C!_replace CKFconjFconjUnion! CFdisjUnionAFdisj hC;
+    replace hC : 𝓢 ⊢ (Γx ∪ Γ₁).conj 🡒 (Δy ∪ Δz).disj := C!_replace ?_ ?_ hC;
+    . replace hC : 𝓢 ⊢ Γx.conj ⋏ Γ₁.conj 🡒 Δy.disj ⋎ Δz.disj := C!_replace CKFconjFconjUnion! CFdisjUnionAFdisj hC;
       generalize eδy : Δy.disj = δy at hC;
       generalize eδz : Δz.disj = δz at hC;
-      replace hC : ↑Γx *⊢[𝓢] ∼(Γ₂.disj) ➝ δy ⋎ δz := C!_trans ?_ $ FConj_DT.mp $ CK!_iff_CC!.mp hC;
+      replace hC : ↑Γx *⊢[𝓢] ∼(Γ₂.disj) 🡒 δy ⋎ δz := C!_trans ?_ $ FConj_DT.mp $ CK!_iff_CC!.mp hC;
       . generalize eγ : Γ₂.disj = γ at hC;
-        replace hC : ↑Γx *⊢[𝓢] (∼γ ➝ δy) ⋎ (∼γ ➝ δz) := kreiselputnam'! hC;
-        replace hC : ∼γ ➝ δy ∈ x.1.1 ∨ ∼γ ➝ δz ∈ x.1.1 := iff_mem₁_or.mp $ iff_provable_include₁.mp hC x ?_;
+        replace hC : ↑Γx *⊢[𝓢] (∼γ 🡒 δy) ⋎ (∼γ 🡒 δz) := kreiselputnam'! hC;
+        replace hC : ∼γ 🡒 δy ∈ x.1.1 ∨ ∼γ 🡒 δz ∈ x.1.1 := iff_mem₁_or.mp $ iff_provable_include₁.mp hC x ?_;
         . rcases hC with h | h;
           . apply iff_not_mem₂_mem₁.mpr $ of_mem₁_imp' (Rxy h) ?_
             . subst eδy;
@@ -158,7 +159,7 @@ instance [Entailment.HasAxiomKreiselPutnam 𝓢] : (canonicalFrame 𝓢).Satisfi
         rintro _ hψ ψ hψ₁ hψ₂ rfl;
         apply C!_trans CNFdisjFconj!;
         apply left_Fconj!_intro;
-        suffices ∼ψ ∈ Γ ∧ ∼ψ ∈ y.1.1 ∧ ∼ψ ∈ z.1.1 by simpa [Γ₁, Γ₂] using this;
+        suffices ∼ψ ∈ Γ ∧ ∼ψ ∈ y.1.1 ∧ ∼ψ ∈ z.1.1 by simpa [Γ₁, Γ₂, Formula.neg_inj] using this;
         tauto;
     . apply CFConj_FConj!_of_subset;
       intro φ hφ;
@@ -185,11 +186,11 @@ instance [Entailment.HasAxiomKreiselPutnam 𝓢] : (canonicalFrame 𝓢).Satisfi
         . exact Set.union_subset_iff.mp (Tableau.subset_def.mp ht |>.1) |>.1;
         . exact Set.union_subset_iff.mp (Tableau.subset_def.mp ht |>.1) |>.2;
       dsimp [Tableau.Inconsistent, Tableau.Consistent] at this;
-      push_neg at this;
+      push Not at this;
       obtain ⟨Γ, Δ, hΓ, hΔ, hΓΔ⟩ := this;
       simp only [Set.subset_empty_iff, Finset.coe_eq_empty] at hΔ;
       subst hΔ;
-      simp only [Finset.disj_empty, Decidable.not_not] at hΓΔ;
+      simp only [Finset.disj_empty] at hΓΔ;
       use ({ φ ∈ Γ | φ ∈ v.1.1}).conj;
       constructor;
       . apply iff_mem₁_fconj.mpr;
@@ -212,11 +213,11 @@ instance [Entailment.HasAxiomKreiselPutnam 𝓢] : (canonicalFrame 𝓢).Satisfi
         . exact Set.union_subset_iff.mp (Tableau.subset_def.mp ht |>.1) |>.1;
         . exact Set.union_subset_iff.mp (Tableau.subset_def.mp ht |>.1) |>.2;
       dsimp [Tableau.Inconsistent, Tableau.Consistent] at this;
-      push_neg at this;
+      push Not at this;
       obtain ⟨Γ, Δ, hΓ, hΔ, hΓΔ⟩ := this;
       simp only [Set.subset_empty_iff, Finset.coe_eq_empty] at hΔ;
       subst hΔ;
-      simp only [Finset.disj_empty, Decidable.not_not] at hΓΔ;
+      simp only [Finset.disj_empty] at hΓΔ;
       use ({ φ ∈ Γ | φ ∈ v.1.1}).conj;
       constructor;
       . apply iff_mem₁_fconj.mpr;

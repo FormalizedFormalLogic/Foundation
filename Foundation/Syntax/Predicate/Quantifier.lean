@@ -172,7 +172,7 @@ section quantifier
 
 variable {α : ℕ → Type*}
 
-def ball [UnivQuantifier α] [Arrow (α (n + 1))] (φ : α (n + 1)) (ψ : α (n + 1)) : α n := ∀⁰ (φ ➝ ψ)
+def ball [UnivQuantifier α] [Arrow (α (n + 1))] (φ : α (n + 1)) (ψ : α (n + 1)) : α n := ∀⁰ (φ 🡒 ψ)
 
 def bexs [ExsQuantifier α] [Wedge (α (n + 1))] (φ : α (n + 1)) (ψ : α (n + 1)) : α n := ∃⁰ (φ ⋏ ψ)
 
@@ -271,7 +271,7 @@ section quantifier
 
 variable {α : ℕ → ℕ → Type*}
 
-def ball [UnivQuantifier α] [Arrow (α (m + 1) n)] (φ : α (m + 1) n) (ψ : α (m + 1) n) : α m n := ∀¹ (φ ➝ ψ)
+def ball [UnivQuantifier α] [Arrow (α (m + 1) n)] (φ : α (m + 1) n) (ψ : α (m + 1) n) : α m n := ∀¹ (φ 🡒 ψ)
 
 def bexs [ExsQuantifier α] [Wedge (α (m + 1) n)] (φ : α (m + 1) n) (ψ : α (m + 1) n) : α m n := ∃¹ (φ ⋏ ψ)
 

@@ -16,7 +16,7 @@ open
 
 inductive Hilbert.Basic {α} (Ax : Axiom α) : Logic α
 | protected axm {φ} (s : Substitution _) : φ ∈ Ax → Hilbert.Basic Ax (φ⟦s⟧)
-| protected mdp {φ ψ}     : Hilbert.Basic Ax (φ ➝ ψ) → Hilbert.Basic Ax φ → Hilbert.Basic Ax ψ
+| protected mdp {φ ψ}     : Hilbert.Basic Ax (φ 🡒 ψ) → Hilbert.Basic Ax φ → Hilbert.Basic Ax ψ
 | protected nec {φ}       : Hilbert.Basic Ax φ → Hilbert.Basic Ax (□φ)
 | protected implyK φ ψ    : Hilbert.Basic Ax $ Axioms.ImplyK φ ψ
 | protected implyS φ ψ χ  : Hilbert.Basic Ax $ Axioms.ImplyS φ ψ χ
@@ -65,7 +65,7 @@ instance : Logic.Substitution (Hilbert.Basic Ax) where
 protected lemma rec!
   {motive   : (φ : Formula α) → (Hilbert.Basic Ax ⊢ φ) → Sort}
   (axm      : ∀ {φ : Formula α} (s), (h : φ ∈ Ax) → motive (φ⟦s⟧) (by grind))
-  (mdp      : ∀ {φ ψ : Formula α}, {hφψ : (Hilbert.Basic Ax) ⊢ φ ➝ ψ} → {hφ : (Hilbert.Basic Ax) ⊢ φ} → motive (φ ➝ ψ) hφψ → motive φ hφ → motive ψ (hφψ ⨀ hφ))
+  (mdp      : ∀ {φ ψ : Formula α}, {hφψ : (Hilbert.Basic Ax) ⊢ φ 🡒 ψ} → {hφ : (Hilbert.Basic Ax) ⊢ φ} → motive (φ 🡒 ψ) hφψ → motive φ hφ → motive ψ (hφψ ⨀ hφ))
   (nec      : ∀ {φ}, {hφψ : (Hilbert.Basic Ax) ⊢ φ} → motive (φ) hφψ → motive (□φ) (nec! hφψ))
   (implyK   : ∀ {φ ψ}, motive (Axioms.ImplyK φ ψ) $ by simp)
   (implyS   : ∀ {φ ψ χ}, motive (Axioms.ImplyS φ ψ χ) $ by simp)

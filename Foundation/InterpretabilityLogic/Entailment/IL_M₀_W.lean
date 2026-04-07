@@ -40,7 +40,7 @@ instance : HasAxiomWstar 𝓢 := by
       apply K_intro₃ <;>
       . apply FiniteContext.byAxm;
         simp;
-  have H₂ : 𝓢 ⊢! (φ ▷ ψ) ➝ (ψ ⋏ □χ ⋏ ◇φ) ▷ (ψ ⋏ □χ ⋏ □(∼φ)) := by
+  have H₂ : 𝓢 ⊢! (φ ▷ ψ) 🡒 (ψ ⋏ □χ ⋏ ◇φ) ▷ (ψ ⋏ □χ ⋏ □(∼φ)) := by
     apply C_trans $ C_trans axiomW! $ axiomM₀! (χ := χ);
     apply CRhdRhd!_of_C!_C!;
     . apply deduct';

@@ -31,7 +31,7 @@ instance : Entailment.IL_R 𝓢 where
 instance : HasAxiomW 𝓢 where
   axiomW! {φ ψ} := by
     dsimp [Axioms.W];
-    have H₁ : 𝓢 ⊢! (φ ▷ ψ) ➝ ◇φ ▷ (ψ ⋏ □(∼φ)) := by
+    have H₁ : 𝓢 ⊢! (φ ▷ ψ) 🡒 ◇φ ▷ (ψ ⋏ □(∼φ)) := by
       apply C_trans $ axiomRstar! (χ := ⊤);
       apply CRhdRhd!_of_C!_C!;
       . apply C_trans IMNLN!;
@@ -40,9 +40,9 @@ instance : HasAxiomW 𝓢 where
         apply CRhdRhd!_of_C!_C! dne CNTO;
       . suffices [ψ, □⊤, □(∼φ)] ⊢[𝓢]! ψ ⋏ □(∼φ) by tauto;
         apply K_intro <;> . apply FiniteContext.byAxm; simp;
-    have H₂ : 𝓢 ⊢! (φ ▷ ψ) ➝ ((ψ ⋏ □(∼φ)) ⋎ ◇φ) ▷ (ψ ⋏ □(∼φ)) := by
+    have H₂ : 𝓢 ⊢! (φ ▷ ψ) 🡒 ((ψ ⋏ □(∼φ)) ⋎ ◇φ) ▷ (ψ ⋏ □(∼φ)) := by
       apply (of axiomJ3!) ⨀ axiomJ1'! ⨀ (deductInv' H₁);
-    have H₃ : 𝓢 ⊢! (φ ▷ ψ) ➝ φ ▷ ((ψ ⋏ □(∼φ)) ⋎ ◇φ) := by
+    have H₃ : 𝓢 ⊢! (φ ▷ ψ) 🡒 φ ▷ ((ψ ⋏ □(∼φ)) ⋎ ◇φ) := by
       apply R1!;
       apply deduct';
       apply A_cases ?_ ?_ $ lem (φ := □(∼φ));

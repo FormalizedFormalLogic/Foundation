@@ -76,8 +76,8 @@ instance [Entailment.HasAxiomT 𝓢] [Entailment.HasAxiomMk 𝓢] : (canonicalFr
         rcases hΔ h with h₁ | h₂ <;> tauto;
       . tauto;
     rw [eΔ] at hC;
-    have : 𝓢 ⊢ Γ.conj ➝ Δ₁.disj ⋎ Δ₂.disj := C!_trans hC CFdisjUnionAFdisj;
-    have : 𝓢 ⊢ □Γ.prebox.conj ➝ Δ₁.disj ⋎ Δ₂.disj := C!_trans (by
+    have : 𝓢 ⊢ Γ.conj 🡒 Δ₁.disj ⋎ Δ₂.disj := C!_trans hC CFdisjUnionAFdisj;
+    have : 𝓢 ⊢ □Γ.prebox.conj 🡒 Δ₁.disj ⋎ Δ₂.disj := C!_trans (by
       apply right_Fconj!_intro;
       intro φ hφ;
       have := hΓ hφ;

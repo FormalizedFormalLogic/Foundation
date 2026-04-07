@@ -1,6 +1,6 @@
 module
 
-public import Foundation.Propositional.Hilbert.Standard.Basic
+public import Foundation.Propositional.Hilbert.Minimal.Basic
 
 @[expose] public section
 
@@ -28,8 +28,8 @@ abbrev Argument : Player → Formula α → Type
   | 𝒜,   φ ⋏ ψ => Argument 𝒜 φ ⊕ Argument 𝒜 ψ
   | ℰ,   φ ⋎ ψ => Argument ℰ φ ⊕ Argument ℰ ψ
   | 𝒜,   φ ⋎ ψ => Argument 𝒜 φ × Argument 𝒜 ψ
-  | ℰ,   φ ➝ ψ => (Argument ℰ φ → Argument ℰ ψ) × (Argument ℰ φ → Argument 𝒜 ψ → Argument 𝒜 φ)
-  | 𝒜,   φ ➝ ψ => Argument ℰ φ × Argument 𝒜 ψ
+  | ℰ,   φ 🡒 ψ => (Argument ℰ φ → Argument ℰ ψ) × (Argument ℰ φ → Argument 𝒜 ψ → Argument 𝒜 φ)
+  | 𝒜,   φ 🡒 ψ => Argument ℰ φ × Argument 𝒜 ψ
 
 abbrev Witness (φ : Formula α) := Argument ℰ φ
 
@@ -42,7 +42,7 @@ abbrev Realizable (V : α → Prop) : (φ : Formula α) → Witness φ → Count
   |   _ ⋏ ψ, ⟨_, θ₂⟩,  .inr π₂ => Realizable V ψ θ₂ π₂
   |   φ ⋎ _, .inl θ₁, ⟨π₁,  _⟩ => Realizable V φ θ₁ π₁
   |   _ ⋎ ψ, .inr θ₂, ⟨ _, π₂⟩ => Realizable V ψ θ₂ π₂
-  |   φ ➝ ψ,  ⟨f, g⟩, ⟨ θ,  π⟩ => Realizable V φ θ (g θ π) → Realizable V ψ (f θ) π
+  |   φ 🡒 ψ,  ⟨f, g⟩, ⟨ θ,  π⟩ => Realizable V φ θ (g θ π) → Realizable V ψ (f θ) π
 
 scoped notation:80 "⟦" w " | " c "⟧⊩[" V "] " φ:46 => Realizable V φ w c
 
@@ -76,7 +76,7 @@ namespace Realizable
     ⟦.inr θ | π⟧⊩[V] φ ⋎ ψ ↔ ⟦θ | π.2⟧⊩[V] ψ := Eq.to_iff rfl
 
 @[simp] lemma imply {φ ψ : Formula α} {V f π} :
-    ⟦f | π⟧⊩[V] φ ➝ ψ ↔ (⟦π.1 | f.2 π.1 π.2⟧⊩[V] φ → ⟦f.1 π.1 | π.2⟧⊩[V] ψ) := Eq.to_iff rfl
+    ⟦f | π⟧⊩[V] φ 🡒 ψ ↔ (⟦π.1 | f.2 π.1 π.2⟧⊩[V] φ → ⟦f.1 π.1 | π.2⟧⊩[V] ψ) := Eq.to_iff rfl
 
 @[simp] lemma verum {w c V} : ⟦w | c⟧⊩[V] (⊤ : Formula α) := by simp [Realizable]
 
@@ -84,7 +84,7 @@ namespace Realizable
 
 end Realizable
 
-protected lemma Valid.refl (φ : Formula α) : ⊩ φ ➝ φ := ⟨⟨id, fun _ π ↦ π⟩, by rintro V ⟨θ, π⟩; simp⟩
+protected lemma Valid.refl (φ : Formula α) : ⊩ φ 🡒 φ := ⟨⟨id, fun _ π ↦ π⟩, by rintro V ⟨θ, π⟩; simp⟩
 
 lemma NotValid.em (a : α) : ⊮ atom a ⋎ ∼atom a := by
   rintro (⟨⟨⟩⟩ | ⟨f⟩)

@@ -210,6 +210,7 @@ protected lemma nil {n} : @Vec n 0 (fun _ => nil) := fun i => i.elim0
 protected lemma cons {n m f g} (hf : @Arithmetic₁ n f) (hg : @Vec n m g) :
     Vec (fun v => f v ::ᵥ g v) := fun i => Fin.cases (by simp [*]) (fun i => by simp [hg i]) i
 
+set_option backward.isDefEq.respectTransparency false in
 lemma tail {n f} (hf : @Arithmetic₁ n f) : @Arithmetic₁ n.succ fun v => f v.tail :=
   (hf.comp _ fun i => @proj _ i.succ).of_eq fun v => by
     rw [←ofFn_get v.tail]; congr; funext i; simp
@@ -362,6 +363,7 @@ lemma unpair₂ {n} (i : Fin n) : Arithmetic₁ (fun v => (v.get i).unpair.2) :=
     simp only [isLtNat_pos_iff, unpair]
     by_cases v.get i - (v.get i).sqrt * (v.get i).sqrt < sqrt (v.get i) <;> simp [*]
 
+set_option backward.isDefEq.respectTransparency false in
 lemma dvd (i j : Fin n) : Arithmetic₁ (fun v => isDvdNat (v.get i) (v.get j)) := by
   have hr : @Arithmetic₁ (n + 1) (fun v =>
     (isEqNat (v.head * (v.get i.succ)) (v.get j.succ)).or (isLtNat (v.get j.succ) v.head)) :=
@@ -426,6 +428,7 @@ lemma beta (i j : Fin n) : Arithmetic₁ (fun v => Nat.beta (v.get i) (v.get j))
   (rem 0 1).comp₂ _ ((unpair₁ 0).comp₁ (·.unpair.1) (proj i))
     ((succ 0).comp₁ _ $ (mul 0 1).comp₂ _ (succ j) ((unpair₂ 0).comp₁ (·.unpair.2) (proj i)))
 
+set_option backward.isDefEq.respectTransparency false in
 lemma ball {φ : List.Vector ℕ n → ℕ → ℕ} (hp : @Arithmetic₁ (n + 1) (fun v => φ v.tail v.head)) (i) :
     Arithmetic₁ (fun v => ball (v.get i) (φ v)) := by
   let F : List.Vector ℕ (n + 1) → ℕ := fun v => (φ v.tail v.head).inv.or (isLeNat (v.get i.succ) v.head)
@@ -480,6 +483,7 @@ lemma beta_eq_rec (f : List.Vector ℕ n → ℕ) (g : List.Vector ℕ (n + 2) �
   · simp [h0]
   · grind
 
+set_option backward.isDefEq.respectTransparency false in
 lemma prec {n f g} (hf : @Arithmetic₁ n f) (hg : @Arithmetic₁ (n + 2) g) :
     @Arithmetic₁ (n + 1) (fun v => v.head.rec (f v.tail) fun y IH => g (y ::ᵥ IH ::ᵥ v.tail)) := by
   let F : List.Vector ℕ (n + 2) → ℕ := fun v =>

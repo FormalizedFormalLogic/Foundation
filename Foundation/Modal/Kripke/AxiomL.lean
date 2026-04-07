@@ -52,7 +52,7 @@ lemma isTransitive_of_validate_axiomL (h : F ⊧ (Axioms.L (.atom 0))) : F.IsTra
     apply ValidOnFrame.not_of_exists_valuation_world;
     use (λ _ w => w ≠ v ∧ w ≠ u), w;
     apply Satisfies.imp_def.not.mpr;
-    push_neg;
+    push Not;
     constructor;
     . intro x Rwx hx;
       by_cases exv : x = v;
@@ -65,7 +65,7 @@ lemma isTransitive_of_validate_axiomL (h : F ⊧ (Axioms.L (.atom 0))) : F.IsTra
           subst x;
           contradiction;
     . apply Satisfies.box_def.not.mpr;
-      push_neg;
+      push Not;
       use v;
       constructor;
       . assumption;
@@ -80,7 +80,7 @@ lemma isConverseWellFounded_of_validate_axiomL (h : F ⊧ (Axioms.L (.atom 0))) 
     apply ValidOnFrame.not_of_exists_valuation_world;
     use (λ _ w => w ∉ X), x;
     apply Satisfies.imp_def.not.mpr;
-    push_neg;
+    push Not;
     constructor;
     . intro y Rxy;
       by_cases hys : y ∈ X
@@ -93,7 +93,7 @@ lemma isConverseWellFounded_of_validate_axiomL (h : F ⊧ (Axioms.L (.atom 0))) 
         simpa;
     . obtain ⟨y, _, _⟩ := hX₂ x (by assumption);
       apply Satisfies.box_def.not.mpr;
-      push_neg;
+      push Not;
       use y;
       constructor;
       . assumption;

@@ -29,14 +29,14 @@ instance {i j m n} [Entailment.HasAxiomGeach ⟨i, j, m, n⟩ 𝓢] : Entailment
       apply multire;
       apply multiDiaDuality;
 
-def axiomTDual! [HasAxiomT 𝓢] : 𝓢 ⊢! φ ➝ ◇φ := axiomGeach (g := ⟨0, 0, 0, 1⟩)
-@[simp] lemma axiomTDual [HasAxiomT 𝓢] : 𝓢 ⊢ φ ➝ ◇φ := ⟨axiomTDual!⟩
+def axiomTDual! [HasAxiomT 𝓢] : 𝓢 ⊢! φ 🡒 ◇φ := axiomGeach (g := ⟨0, 0, 0, 1⟩)
+@[simp] lemma axiomTDual [HasAxiomT 𝓢] : 𝓢 ⊢ φ 🡒 ◇φ := ⟨axiomTDual!⟩
 
-def axiomFourDual! [HasAxiomFour 𝓢] : 𝓢 ⊢! ◇◇φ ➝ ◇φ := axiomGeach (g := ⟨2, 0, 0, 1⟩)
-@[simp] lemma axiomFourDual [HasAxiomFour 𝓢] : 𝓢 ⊢ ◇◇φ ➝ ◇φ := ⟨axiomFourDual!⟩
+def axiomFourDual! [HasAxiomFour 𝓢] : 𝓢 ⊢! ◇◇φ 🡒 ◇φ := axiomGeach (g := ⟨2, 0, 0, 1⟩)
+@[simp] lemma axiomFourDual [HasAxiomFour 𝓢] : 𝓢 ⊢ ◇◇φ 🡒 ◇φ := ⟨axiomFourDual!⟩
 
-def axiomFiveDual! [HasAxiomFive 𝓢] : 𝓢 ⊢! ◇□φ ➝ □φ := axiomGeach (g := ⟨1, 1, 1, 0⟩)
-@[simp] lemma axiomFiveDual [HasAxiomFive 𝓢] : 𝓢 ⊢ ◇□φ ➝ □φ := ⟨axiomFiveDual!⟩
+def axiomFiveDual! [HasAxiomFive 𝓢] : 𝓢 ⊢! ◇□φ 🡒 □φ := axiomGeach (g := ⟨1, 1, 1, 0⟩)
+@[simp] lemma axiomFiveDual [HasAxiomFive 𝓢] : 𝓢 ⊢ ◇□φ 🡒 □φ := ⟨axiomFiveDual!⟩
 
 end LO.Modal.Entailment
 end

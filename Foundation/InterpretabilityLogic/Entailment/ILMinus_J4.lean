@@ -42,8 +42,8 @@ variable [Entailment.ILMinus_J4Plus 𝓢]
 
 instance : HasAxiomJ4' 𝓢 := ⟨by
   intro φ ψ;
-  have : 𝓢 ⊢! (∼∼ψ ▷ ⊥) ➝ □(ψ ➝ ⊥) := C_trans CRhdNOL! $ box_regularity $ K_left negEquiv;
-  have : 𝓢 ⊢! (ψ ▷ ⊥) ➝ □(ψ ➝ ⊥) := C_trans (R2! dne) this;
+  have : 𝓢 ⊢! (∼∼ψ ▷ ⊥) 🡒 □(ψ 🡒 ⊥) := C_trans CRhdNOL! $ box_regularity $ K_left negEquiv;
+  have : 𝓢 ⊢! (ψ ▷ ⊥) 🡒 □(ψ 🡒 ⊥) := C_trans (R2! dne) this;
   apply C_swap $ C_trans this $ axiomJ4Plus!;
 ⟩
 
@@ -63,9 +63,9 @@ variable [Entailment.ILMinus_J4Plus' 𝓢]
 
 instance : HasAxiomJ4Plus'' 𝓢 := ⟨by
   intro A B C;
-  apply C_trans (show 𝓢 ⊢! □A ➝ (C ▷ (A ➝ A ⋏ B) ➝ C ▷ (A ⋏ B)) by exact axiomJ4Plus'!);
+  apply C_trans (show 𝓢 ⊢! □A 🡒 (C ▷ (A 🡒 A ⋏ B) 🡒 C ▷ (A ⋏ B)) by exact axiomJ4Plus'!);
   apply deduct';
-  apply C_trans (show [C ▷ (A ➝ A ⋏ B) ➝ C ▷ (A ⋏ B)] ⊢[𝓢]! C ▷ B ➝ C ▷ (A ➝ A ⋏ B) by exact of $ R1! $ C_swap $ and₃);
+  apply C_trans (show [C ▷ (A 🡒 A ⋏ B) 🡒 C ▷ (A ⋏ B)] ⊢[𝓢]! C ▷ B 🡒 C ▷ (A 🡒 A ⋏ B) by exact of $ R1! $ C_swap $ and₃);
   apply FiniteContext.byAxm;
   simp;
 ⟩
@@ -81,8 +81,8 @@ variable [Entailment.ILMinus_J4Plus'' 𝓢]
 
 instance : HasAxiomJ4Plus 𝓢 := ⟨by
   intro φ ψ χ;
-  have H₁ : 𝓢 ⊢! □(φ ➝ ψ) ➝ χ ▷ φ ➝ χ ▷ ((φ ➝ ψ) ⋏ φ) := axiomJ4Plus''!;
-  have H₂ : 𝓢 ⊢! χ ▷ ((φ ➝ ψ) ⋏ φ) ➝ χ ▷ ψ := R1! $ C_trans CKK $ innerMDP;
+  have H₁ : 𝓢 ⊢! □(φ 🡒 ψ) 🡒 χ ▷ φ 🡒 χ ▷ ((φ 🡒 ψ) ⋏ φ) := axiomJ4Plus''!;
+  have H₂ : 𝓢 ⊢! χ ▷ ((φ 🡒 ψ) ⋏ φ) 🡒 χ ▷ ψ := R1! $ C_trans CKK $ innerMDP;
   exact CC!_of_CC!_of_C! H₁ H₂;
 ⟩
 

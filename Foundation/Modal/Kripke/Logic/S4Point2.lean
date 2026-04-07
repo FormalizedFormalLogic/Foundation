@@ -74,7 +74,7 @@ instance : Complete Modal.S4Point2 FrameClass.finite_S4Point2 := ⟨by
   -- TODO: more refactor (auto instantinate)
   have := finestFiltrationTransitiveClosureModel.rooted_isPiecewiseStronglyConvergent r (T := φ.subformulas);
   have := finestFiltrationTransitiveClosureModel.isReflexive (M := RM) (T := φ.subformulas);
-  apply filtration FRM (finestFiltrationTransitiveClosureModel.filterOf) (by simp) |>.mpr;
+  apply filtration FRM (finestFiltrationTransitiveClosureModel.filterOf) (by grind) |>.mpr;
   apply hφ;
   apply Set.mem_setOf_eq.mpr;
   exact {

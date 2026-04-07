@@ -230,7 +230,8 @@ variable {α : Type*}
 lemma get_mk_eq_get {n} (l : List α) (h : l.length = n) (i : Fin n) : List.Vector.get (⟨l, h⟩ : List.Vector α n) i = l.get (i.cast h.symm) := rfl
 
 lemma get_one {α : Type*} {n} (v : Vector α (n + 2)) : v.get 1 = v.tail.head := by
-  rw [←Vector.get_zero, Vector.get_tail_succ]; rfl
+  have : v.tail.get ⟨0, by omega⟩ = v.get 1 := Vector.get_tail_succ v 0;
+  simp [←this];
 
 lemma ofFn_vecCons (a : α) (v : Fin n → α) :
     ofFn (a :> v) = a ::ᵥ ofFn v := by

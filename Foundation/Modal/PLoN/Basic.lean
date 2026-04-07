@@ -59,7 +59,7 @@ namespace Formula.PLoN
 def Forces {M : PLoN.Model} (w : M.World) : Formula ℕ → Prop
   | atom a  => M.Valuation w a
   | falsum  => False
-  | φ ➝ ψ => (Forces w φ) → (Forces w ψ)
+  | φ 🡒 ψ => (Forces w φ) → (Forces w ψ)
   | □φ   => ∀ {w'}, w ≺[φ] w' → (Forces w' φ)
 infix:45 " ⊩ " => Forces
 
@@ -74,8 +74,8 @@ variable {M : PLoN.Model} {x : M.World}
 @[grind .] protected lemma bot_def : x ⊮ ⊥ := by simp [Forces];
 @[grind .] protected lemma top_def : x ⊩ ⊤ := by simp [Forces];
 
-@[grind =] protected lemma imp_def : x ⊩ φ ➝ ψ ↔ (x ⊩ φ) → (x ⊩ ψ) := by tauto;
-@[grind =] protected lemma not_def_imp : x ⊮ φ ➝ ψ ↔ (x ⊩ φ ∧ x ⊮ ψ) := by grind
+@[grind =] protected lemma imp_def : x ⊩ φ 🡒 ψ ↔ (x ⊩ φ) → (x ⊩ ψ) := by tauto;
+@[grind =] protected lemma not_def_imp : x ⊮ φ 🡒 ψ ↔ (x ⊩ φ ∧ x ⊮ ψ) := by grind
 
 @[grind =] protected lemma or_def : x ⊩ φ ⋎ ψ ↔ x ⊩ φ ∨ x ⊩ ψ := by dsimp [Forces]; grind;
 @[grind =] protected lemma not_def_or : x ⊮ φ ⋎ ψ ↔ x ⊮ φ ∧ x ⊮ ψ := by dsimp [Forces]; grind;
@@ -87,8 +87,8 @@ variable {M : PLoN.Model} {x : M.World}
 @[grind =] protected lemma not_def_neg : x ⊮ ∼φ ↔ x ⊩ φ := by dsimp [Forces]; grind;
 
 
-@[grind =] protected lemma def_iff : x ⊩ φ ⭤ ψ ↔ ((x ⊩ φ) ↔ (x ⊩ ψ)) := by dsimp [LogicalConnective.iff]; grind;
-@[grind =] protected lemma not_def_iff : x ⊮ φ ⭤ ψ ↔ ((x ⊩ φ) ∧ x ⊮ ψ) ∨ (x ⊮ φ ∧ (x ⊩ ψ)) := by grind;
+@[grind =] protected lemma def_iff : x ⊩ φ 🡘 ψ ↔ ((x ⊩ φ) ↔ (x ⊩ ψ)) := by dsimp [LogicalConnective.iff]; grind;
+@[grind =] protected lemma not_def_iff : x ⊮ φ 🡘 ψ ↔ ((x ⊩ φ) ∧ x ⊮ ψ) ∨ (x ⊮ φ ∧ (x ⊩ ψ)) := by grind;
 
 @[grind =] lemma box_def : x ⊩ □φ ↔ ∀ y, x ≺[φ] y → y ⊩ φ := by simp [PLoN.Forces];
 @[grind =] lemma not_box_def : x ⊮ □φ ↔ ∃ y, x ≺[φ] y ∧ y ⊮ φ := by grind;
@@ -118,10 +118,10 @@ instance : Semantics.Bot (PLoN.Model) := ⟨by grind⟩
 @[grind .] protected lemma implyS : M ⊧ (Axioms.ImplyS φ ψ χ) := by grind;
 @[grind .] protected lemma elimContra : M ⊧ (Axioms.ElimContra φ ψ) := by grind;
 @[grind <=] protected lemma nec (h : M ⊧ φ) : M ⊧ □φ := by grind;
-@[grind <=] protected lemma mdp (h₁ : M ⊧ φ ➝ ψ) (h₂ : M ⊧ φ) : M ⊧ ψ := fun x ↦ h₁ x (h₂ x)
+@[grind <=] protected lemma mdp (h₁ : M ⊧ φ 🡒 ψ) (h₂ : M ⊧ φ) : M ⊧ ψ := fun x ↦ h₁ x (h₂ x)
 
-protected lemma re : ¬∀ M : Model, ∀ φ ψ, M ⊧ φ ⭤ ψ → M ⊧ □φ ⭤ □ψ := by
-  push_neg;
+protected lemma re : ¬∀ M : Model, ∀ φ ψ, M ⊧ φ 🡘 ψ → M ⊧ □φ 🡘 □ψ := by
+  push Not;
   let M : Model := {
     World := Fin 2,
     Rel ξ x y := if ξ = (.atom 1) then True else False,
@@ -174,20 +174,20 @@ variable {C : PLoN.FrameClass}
 
 lemma iff_not_validOnFrameClass_exists_frame : (C ⊭ φ) ↔ (∃ F ∈ C, F ⊭ φ) := by
   apply not_iff_not.mp;
-  push_neg;
+  push Not;
   tauto;
 alias ⟨exists_frame_of_not_validOnFrameClass, not_validOnFrameClass_of_exists_frame⟩ := iff_not_validOnFrameClass_exists_frame
 
 
 lemma iff_not_validOnFrameClass_exists_model : (C ⊭ φ) ↔ (∃ M : PLoN.Model, M.toFrame ∈ C ∧ M ⊭ φ) := by
   apply not_iff_not.mp;
-  push_neg;
+  push Not;
   tauto;
 alias ⟨exists_model_of_not_validOnFrameClass, not_validOnFrameClass_of_exists_model⟩ := iff_not_validOnFrameClass_exists_model
 
 lemma iff_not_validOnFrameClass_exists_model_world : (C ⊭ φ) ↔ (∃ M : PLoN.Model, ∃ w : M.World, M.toFrame ∈ C ∧ w ⊮ φ) := by
   apply not_iff_not.mp;
-  push_neg;
+  push Not;
   tauto;
 alias ⟨exists_model_world_of_not_validOnFrameClass, not_validOnFrameClass_of_exists_model_world⟩ := iff_not_validOnFrameClass_exists_model_world
 

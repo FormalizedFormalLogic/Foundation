@@ -118,7 +118,7 @@ noncomputable def diag (θ : Semisentence ℒₒᵣ 1) : Semisentence ℒₒᵣ 
 noncomputable def fixedpoint (θ : Semisentence ℒₒᵣ 1) : Sentence ℒₒᵣ := (diag θ)/[⌜diag θ⌝]
 
 theorem diagonal (θ : Semisentence ℒₒᵣ 1) :
-    T ⊢ fixedpoint θ ⭤ θ/[⌜fixedpoint θ⌝] :=
+    T ⊢ fixedpoint θ 🡘 θ/[⌜fixedpoint θ⌝] :=
   haveI : 𝗘𝗤 ⪯ T := Entailment.WeakerThan.trans (𝓣 := 𝗜𝚺₁) inferInstance inferInstance
   provable_of_models _ _ fun (V : Type) _ _ ↦ by
     haveI : V ⊧ₘ* 𝗜𝚺₁ := ModelsTheory.of_provably_subtheory V 𝗜𝚺₁ T inferInstance
@@ -140,13 +140,13 @@ section Multidiagonalization
 /-- $\mathrm{diag}_i(\vec{x}) := (\forall \vec{y})\left[ \left(\bigwedge_j \mathrm{ssnums}(y_j, x_j, \vec{x})\right) \to \theta_i(\vec{y}) \right]$ -/
 noncomputable def multidiag (θ : Semisentence ℒₒᵣ k) : Semisentence ℒₒᵣ k :=
   ∀⁰^[k] (
-    (Matrix.conj fun j : Fin k ↦ (Rew.subst <| #(j.addCast k) :> #(j.addNat k) :> fun l ↦ #(l.addNat k)) ▹ ssnums.val) ➝
+    (Matrix.conj fun j : Fin k ↦ (Rew.subst <| #(j.addCast k) :> #(j.addNat k) :> fun l ↦ #(l.addNat k)) ▹ ssnums.val) 🡒
     (Rew.subst fun j ↦ #(j.addCast k)) ▹ θ)
 
 noncomputable def multifixedpoint (θ : Fin k → Semisentence ℒₒᵣ k) (i : Fin k) : Sentence ℒₒᵣ := (Rew.subst fun j ↦ ⌜multidiag (θ j)⌝) ▹ (multidiag (θ i))
 
 theorem multidiagonal (θ : Fin k → Semisentence ℒₒᵣ k) :
-    T ⊢ multifixedpoint θ i ⭤ (Rew.subst fun j ↦ ⌜multifixedpoint θ j⌝) ▹ (θ i) :=
+    T ⊢ multifixedpoint θ i 🡘 (Rew.subst fun j ↦ ⌜multifixedpoint θ j⌝) ▹ (θ i) :=
   haveI : 𝗘𝗤 ⪯ T := Entailment.WeakerThan.trans (𝓣 := 𝗜𝚺₁) inferInstance inferInstance
   provable_of_models _ _ fun (V : Type) _ _ ↦ by
     haveI : V ⊧ₘ* 𝗜𝚺₁ := ModelsTheory.of_provably_subtheory V 𝗜𝚺₁ T inferInstance
@@ -173,8 +173,8 @@ noncomputable def exclusiveMultifixedpoint (θ : Fin k → Semisentence ℒₒ�
   · rintro rfl; rfl
 
 theorem exclusiveMultidiagonal (θ : Fin k → Semisentence ℒₒᵣ k) :
-    T ⊢ exclusiveMultifixedpoint θ i ⭤ (Rew.subst fun j ↦ ⌜exclusiveMultifixedpoint θ j⌝) ▹ θ i := by
-  have : T ⊢ exclusiveMultifixedpoint θ i ⭤ ((Rew.subst fun j ↦ ⌜exclusiveMultifixedpoint θ j⌝) ▹ θ i).padding ↑i := by
+    T ⊢ exclusiveMultifixedpoint θ i 🡘 (Rew.subst fun j ↦ ⌜exclusiveMultifixedpoint θ j⌝) ▹ θ i := by
+  have : T ⊢ exclusiveMultifixedpoint θ i 🡘 ((Rew.subst fun j ↦ ⌜exclusiveMultifixedpoint θ j⌝) ▹ θ i).padding ↑i := by
     simpa using multidiagonal (T := T) (fun j ↦ (θ j).padding j) (i := i)
   exact Entailment.E!_trans this (Entailment.padding_iff _ _)
 
@@ -196,7 +196,7 @@ noncomputable def parameterizedFixedpoint (θ : Semisentence ℒₒᵣ (k + 1)) 
     (Rew.subst (⌜parameterizedDiag θ⌝ :> fun j ↦ #j)) ▹ parameterizedDiag θ
 
 theorem parameterized_diagonal (θ : Semisentence ℒₒᵣ (k + 1)) :
-    T ⊢ ∀⁰* (parameterizedFixedpoint θ ⭤ “!θ !!(⌜parameterizedFixedpoint θ⌝) ⋯”) :=
+    T ⊢ ∀⁰* (parameterizedFixedpoint θ 🡘 “!θ !!(⌜parameterizedFixedpoint θ⌝) ⋯”) :=
   haveI : 𝗘𝗤 ⪯ T := Entailment.WeakerThan.trans (𝓣 := 𝗜𝚺₁) inferInstance inferInstance
   provable_of_models _ _ fun (V : Type) _ _ ↦ by
     haveI : V ⊧ₘ* 𝗜𝚺₁ := ModelsTheory.of_provably_subtheory V 𝗜𝚺₁ T inferInstance
@@ -215,7 +215,7 @@ theorem parameterized_diagonal (θ : Semisentence ℒₒᵣ (k + 1)) :
       _ ↔ V ⊧/(⌜parameterizedFixedpoint θ⌝ :> params) θ := by simp [ht]
 
 theorem parameterized_diagonal₁ (θ : Semisentence ℒₒᵣ 2) :
-    T ⊢ ∀⁰ (parameterizedFixedpoint θ ⭤ θ/[⌜parameterizedFixedpoint θ⌝, #0]) := by
+    T ⊢ ∀⁰ (parameterizedFixedpoint θ 🡘 θ/[⌜parameterizedFixedpoint θ⌝, #0]) := by
   simpa [allClosure, BinderNotation.finSuccItr, Matrix.fun_eq_vec_one] using
     parameterized_diagonal (T := T) θ
 

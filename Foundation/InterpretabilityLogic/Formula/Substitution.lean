@@ -14,7 +14,7 @@ abbrev Substitution (α) := α → Formula α
 def Formula.subst (s : Substitution α) : Formula α → Formula α
   | atom a => s a
   | ⊥      => ⊥
-  | φ ➝ ψ  => (φ.subst s) ➝ (ψ.subst s)
+  | φ 🡒 ψ  => (φ.subst s) 🡒 (ψ.subst s)
   | □φ     => □(φ.subst s)
   | φ ▷ ψ  => (φ.subst s) ▷ (ψ.subst s)
 
@@ -28,8 +28,8 @@ lemma subst_atom {a : α} : (.atom a)⟦s⟧ = s a := rfl
 lemma subst_falsum : ⊥⟦s⟧ = ⊥ := rfl
 lemma subst_verum : ⊤⟦s⟧ = ⊤ := rfl
 lemma subst_neg : (∼φ)⟦s⟧ = ∼(φ⟦s⟧) := rfl
-lemma subst_imp : (φ ➝ ψ)⟦s⟧ = (φ⟦s⟧) ➝ (ψ⟦s⟧) := rfl
-lemma subst_iff : (φ ⭤ ψ)⟦s⟧ = (φ⟦s⟧) ⭤ (ψ⟦s⟧) := rfl
+lemma subst_imp : (φ 🡒 ψ)⟦s⟧ = (φ⟦s⟧) 🡒 (ψ⟦s⟧) := rfl
+lemma subst_iff : (φ 🡘 ψ)⟦s⟧ = (φ⟦s⟧) 🡘 (ψ⟦s⟧) := rfl
 lemma subst_and : (φ ⋏ ψ)⟦s⟧ = (φ⟦s⟧) ⋏ (ψ⟦s⟧) := rfl
 lemma subst_or : (φ ⋎ ψ)⟦s⟧ = (φ⟦s⟧) ⋎ (ψ⟦s⟧) := rfl
 lemma subst_box : (□φ)⟦s⟧ = □(φ⟦s⟧) := rfl

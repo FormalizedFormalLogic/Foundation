@@ -12,17 +12,17 @@ namespace Formula
 variable {α : Type u} [DecidableEq α]
 variable {φ ψ χ : Formula ℕ}
 
-@[grind] noncomputable abbrev subformulasGrz (φ : Formula α) := φ.subformulas ∪ ((□⁻¹'φ.subformulas).image (λ ψ => □(ψ ➝ □ψ)))
+@[grind] noncomputable abbrev subformulasGrz (φ : Formula α) := φ.subformulas ∪ ((□⁻¹'φ.subformulas).image (λ ψ => □(ψ 🡒 □ψ)))
 
 namespace subformulasGrz
 
 @[simp, grind .] lemma mem_self : φ ∈ φ.subformulasGrz := by simp [subformulasGrz, subformulas.mem_self]
 
 @[grind ⇒] protected lemma mem_of_mem_subformula (h : ψ ∈ φ.subformulas) : ψ ∈ φ.subformulasGrz := by grind;
-@[grind ⇒] lemma mem_boximpbox (h : ψ ∈ (□⁻¹'φ.subformulas)) : □(ψ ➝ □ψ) ∈ φ.subformulasGrz := by grind;
+@[grind ⇒] lemma mem_boximpbox (h : ψ ∈ (□⁻¹'φ.subformulas)) : □(ψ 🡒 □ψ) ∈ φ.subformulasGrz := by grind;
 
 @[grind ⇒]
-protected lemma mem_imp (h : (ψ ➝ χ) ∈ φ.subformulasGrz) : ψ ∈ φ.subformulasGrz ∧ χ ∈ φ.subformulasGrz := by
+protected lemma mem_imp (h : (ψ 🡒 χ) ∈ φ.subformulasGrz) : ψ ∈ φ.subformulasGrz ∧ χ ∈ φ.subformulasGrz := by
   simp_all only [
     Finset.mem_union, Finset.mem_image, Finset.mem_preimage, Function.iterate_one,
     reduceCtorEq, and_false, exists_const, or_false
@@ -30,8 +30,8 @@ protected lemma mem_imp (h : (ψ ➝ χ) ∈ φ.subformulasGrz) : ψ ∈ φ.subf
   grind;
 
 example {_ : φ ∈ φ.subformulasGrz} : φ ∈ φ.subformulasGrz := by grind;
-example {_ : ψ ➝ χ ∈ φ.subformulasGrz} : ψ ∈ φ.subformulasGrz := by grind
-example {_ : ψ ➝ χ ∈ φ.subformulasGrz} : χ ∈ φ.subformulasGrz := by grind
+example {_ : ψ 🡒 χ ∈ φ.subformulasGrz} : ψ ∈ φ.subformulasGrz := by grind
+example {_ : ψ 🡒 χ ∈ φ.subformulasGrz} : χ ∈ φ.subformulasGrz := by grind
 
 end subformulasGrz
 
@@ -90,11 +90,11 @@ abbrev miniCanonicalModel (𝓢 : S) [Entailment.Grz 𝓢] [Entailment.Consisten
 omit [Consistent 𝓢] [Entailment.Grz 𝓢] in
 lemma truthlemma_lemma1
   {X : ComplementClosedConsistentFinset 𝓢 (φ.subformulasGrz)} (hq : □ψ ∈ φ.subformulas)
-  : ((□'□⁻¹'X.1) ∪ {□(ψ ➝ □ψ), -ψ}) ⊆ (φ.subformulasGrz)⁻ := by
+  : ((□'□⁻¹'X.1) ∪ {□(ψ 🡒 □ψ), -ψ}) ⊆ (φ.subformulasGrz)⁻ := by
   simp only [FormulaFinset.complementary];
   intro χ hr;
   apply Finset.mem_union.mpr;
-  replace hr : χ = □(ψ ➝ □ψ) ∨ χ = -ψ ∨ (∃ a, □a ∈ X ∧ □a = χ)  := by
+  replace hr : χ = □(ψ 🡒 □ψ) ∨ χ = -ψ ∨ (∃ a, □a ∈ X ∧ □a = χ)  := by
     simpa [Finset.mem_union, Finset.LO.preboxItr, Finset.LO.boxItr] using hr;
   rcases hr with (rfl | rfl | ⟨χ, hr, rfl⟩);
   . left;
@@ -114,16 +114,16 @@ lemma truthlemma_lemma2
   {X : ComplementClosedConsistentFinset 𝓢 (φ.subformulasGrz)}
   (hψ₁ : □ψ ∈ φ.subformulas)
   (hψ₂ : □ψ ∉ X)
-  : FormulaFinset.Consistent 𝓢 ((□'□⁻¹'X.1) ∪ {□(ψ ➝ □ψ), -ψ}) := by
+  : FormulaFinset.Consistent 𝓢 ((□'□⁻¹'X.1) ∪ {□(ψ 🡒 □ψ), -ψ}) := by
     apply FormulaFinset.intro_union_consistent;
     rintro Γ₁ Γ₂ hΓ₁ hΓ₂;
     by_contra! hC;
     apply hψ₂;
-    have    : insert (-ψ) (insert (□(ψ ➝ □ψ)) ↑Γ₁) *⊢[𝓢] ⊥ := Context.weakening! ?h₁ hC;
-    replace : (insert (□(ψ ➝ □ψ)) ↑Γ₁) *⊢[𝓢] -ψ ➝ ⊥ := Context.deduct! this;
-    replace : (insert (□(ψ ➝ □ψ)) ↑Γ₁) *⊢[𝓢] ψ := of_imply_complement_bot this;
-    replace : ↑Γ₁ *⊢[𝓢] □(ψ ➝ □ψ) ➝ ψ := Context.deduct! this;
-    replace : (□'↑Γ₁) *⊢[𝓢] □(□(ψ ➝ □ψ) ➝ ψ) := Context.nec! this;
+    have    : insert (-ψ) (insert (□(ψ 🡒 □ψ)) ↑Γ₁) *⊢[𝓢] ⊥ := Context.weakening! ?h₁ hC;
+    replace : (insert (□(ψ 🡒 □ψ)) ↑Γ₁) *⊢[𝓢] -ψ 🡒 ⊥ := Context.deduct! this;
+    replace : (insert (□(ψ 🡒 □ψ)) ↑Γ₁) *⊢[𝓢] ψ := of_imply_complement_bot this;
+    replace : ↑Γ₁ *⊢[𝓢] □(ψ 🡒 □ψ) 🡒 ψ := Context.deduct! this;
+    replace : (□'↑Γ₁) *⊢[𝓢] □(□(ψ 🡒 □ψ) 🡒 ψ) := Context.nec! this;
     replace : (□'↑Γ₁) *⊢[𝓢] ψ := axiomGrz! ⨀ this;
     replace : (□'□'↑Γ₁) *⊢[𝓢] □ψ := Context.nec! this;
     replace : (□'↑Γ₁) *⊢[𝓢] □ψ := Context.boxbox_in_context_to_box this;
@@ -152,7 +152,7 @@ lemma truthlemma_lemma2
       tauto;
 
 omit [Consistent 𝓢] in
-lemma truthlemma_lemma3 : 𝓢 ⊢ (φ ⋏ □(φ ➝ □φ)) ➝ □φ := by
+lemma truthlemma_lemma3 : 𝓢 ⊢ (φ ⋏ □(φ 🡒 □φ)) 🡒 □φ := by
   refine C!_trans ?_ $ inner_mdp! (𝓢 := 𝓢) (φ := φ) (ψ := □φ);
   apply CKK!_of_C!';
   exact axiomT!;
@@ -173,7 +173,7 @@ lemma truthlemma {X : (miniCanonicalModel 𝓢 φ).World} (q_sub : ψ ∈ φ.sub
         exact iff_not_mem_imp (ψ := ψ) (χ := χ) |>.mp h |>.1;
       . apply ihr (by grind) |>.not.mpr;
         exact iff_not_mem_compl (by grind) |>.not.mpr $ by
-          push_neg;
+          push Not;
           exact iff_not_mem_imp (ψ := ψ) (χ := χ) |>.mp h |>.2;
     . contrapose;
       intro h;
@@ -192,7 +192,7 @@ lemma truthlemma {X : (miniCanonicalModel 𝓢 φ).World} (q_sub : ψ ∈ φ.sub
       . intro h;
         obtain ⟨Y, hY⟩ := lindenbaum (𝓢 := 𝓢) (truthlemma_lemma1 q_sub) (truthlemma_lemma2 q_sub h);
         simp only [Finset.union_subset_iff] at hY;
-        simp only [Satisfies]; push_neg;
+        simp only [Satisfies]; push Not;
         use Y;
         constructor;
         . constructor;
@@ -201,8 +201,8 @@ lemma truthlemma {X : (miniCanonicalModel 𝓢 φ).World} (q_sub : ψ ∈ φ.sub
             apply Finset.LO.mem_box_prebox_of_mem_of_mem_box;
             simpa;
           . apply imp_iff_not_or (b := X = Y) |>.mpr;
-            left; push_neg;
-            use (ψ ➝ □ψ);
+            left; push Not;
+            use (ψ 🡒 □ψ);
             refine ⟨?_, ?_, ?_⟩;
             . simp [Formula.subformulasGrz, Finset.LO.preboxItr];
               grind;
@@ -210,25 +210,25 @@ lemma truthlemma {X : (miniCanonicalModel 𝓢 φ).World} (q_sub : ψ ∈ φ.sub
               simp;
             . by_contra hC;
               have : ↑X *⊢[𝓢] ψ := membership_iff (by grind) |>.mp w;
-              have : ↑X *⊢[𝓢] □(ψ ➝ □ψ) := membership_iff (by simp [Finset.LO.preboxItr]; grind) |>.mp hC;
-              have : ↑X *⊢[𝓢] (ψ ⋏ □(ψ ➝ □ψ)) ➝ □ψ := Context.of! $ truthlemma_lemma3;
+              have : ↑X *⊢[𝓢] □(ψ 🡒 □ψ) := membership_iff (by simp [Finset.LO.preboxItr]; grind) |>.mp hC;
+              have : ↑X *⊢[𝓢] (ψ ⋏ □(ψ 🡒 □ψ)) 🡒 □ψ := Context.of! $ truthlemma_lemma3;
               have : ↑X *⊢[𝓢] □ψ := this ⨀ K!_intro (by assumption) (by assumption);
               have : □ψ ∈ X := membership_iff (by grind) |>.mpr this;
               contradiction;
         . apply ih (by grind) |>.not.mpr;
           apply iff_not_mem_compl (by grind) |>.not.mpr;
-          push_neg;
+          push Not;
           apply hY.2;
           simp;
       . intro _;
-        simp only [Satisfies]; push_neg;
+        simp only [Satisfies]; push Not;
         use X;
         constructor;
         . apply Frame.refl;
         . exact ih (by grind) |>.not.mpr w;
     . intro h Y RXY;
       apply ih (by grind) |>.mpr;
-      have : ↑Y *⊢[𝓢] □ψ ➝ ψ := Context.of! $ axiomT!;
+      have : ↑Y *⊢[𝓢] □ψ 🡒 ψ := Context.of! $ axiomT!;
       have : ↑Y *⊢[𝓢] ψ := this ⨀ (membership_iff (by grind) |>.mp (RXY.1 ψ (by simp [Finset.LO.preboxItr]; grind) h));
       exact membership_iff (by grind) |>.mpr this;
 
@@ -240,7 +240,7 @@ lemma complete_of_mem_miniCanonicalFrame
   contrapose;
   intro h;
   apply Semantics.set_models_iff.not.mpr;
-  push_neg;
+  push Not;
   use (miniCanonicalFrame 𝓢 φ);
   constructor;
   . apply hC;
@@ -255,7 +255,7 @@ lemma complete_of_mem_miniCanonicalFrame
     use (miniCanonicalModel _ φ).Val, X;
     apply truthlemma (by grind) |>.not.mpr;
     exact iff_not_mem_compl (by grind) |>.not.mpr $ by
-      push_neg;
+      push Not;
       apply hX₁;
       tauto;
 ⟩

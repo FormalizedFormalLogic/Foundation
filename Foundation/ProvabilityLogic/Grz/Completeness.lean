@@ -20,9 +20,9 @@ variable {F : Type*} [LogicalConnective F] [DecidableEq F]
          {𝓢 : S} [Entailment.Cl 𝓢]
          {φ ψ χ ξ : F}
 
-lemma CCCCOOK! : 𝓢 ⊢ ((φ ➝ (ψ ➝ ⊥)) ➝ ⊥) ➝ (φ ⋏ ψ) := by cl_prover
+lemma CCCCOOK! : 𝓢 ⊢ ((φ 🡒 (ψ 🡒 ⊥)) 🡒 ⊥) 🡒 (φ ⋏ ψ) := by cl_prover
 
-lemma CKCCCOO! : 𝓢 ⊢ (φ ⋏ ψ) ➝ ((φ ➝ ψ ➝ ⊥) ➝ ⊥) := by cl_prover;
+lemma CKCCCOO! : 𝓢 ⊢ (φ ⋏ ψ) 🡒 ((φ 🡒 ψ 🡒 ⊥) 🡒 ⊥) := by cl_prover;
 
 end Entailment
 
@@ -41,10 +41,10 @@ variable {𝔅 : Provability T₀ T} {f : Realization 𝔅} {A B : Modal.Formula
 def strongInterpret (f : Realization 𝔅) : Formula ℕ → Sentence L
   | .atom a => f a
   | ⊥ => ⊥
-  | φ ➝ ψ => (f.strongInterpret φ) ➝ (f.strongInterpret ψ)
+  | φ 🡒 ψ => (f.strongInterpret φ) 🡒 (f.strongInterpret ψ)
   | □φ => (f.strongInterpret φ) ⋏ 𝔅 (f.strongInterpret φ)
 
-lemma iff_interpret_boxdot_strongInterpret_inside [𝔅.HBL2] : T ⊢ f (Aᵇ) ⭤ f.strongInterpret A := by
+lemma iff_interpret_boxdot_strongInterpret_inside [𝔅.HBL2] : T ⊢ f (Aᵇ) 🡘 f.strongInterpret A := by
   induction A with
   | hatom φ => simp [Realization.interpret, strongInterpret, Formula.boxdotTranslate];
   | hfalsum => simp [strongInterpret, Formula.boxdotTranslate];
@@ -129,7 +129,8 @@ theorem Grz.arithmetical_completeness_model_iff
     (∀ f : T.StandardRealization, ℕ ⊧ₘ f.strongInterpret A) ↔ Modal.Grz ⊢ A := by
   apply Iff.trans ?_ Modal.Logic.iff_provable_Grz_provable_boxdot_S;
   apply Iff.trans ?_ (S.arithmetical_completeness_iff (T := T)).symm;
-  have : 𝗥₀ ⪯ T := WeakerThan.trans (inferInstanceAs (𝗥₀ ⪯ 𝗜𝚺₁)) inferInstance
+  have : 𝗥₀ ⪯ 𝗜𝚺₁ := inferInstance
+  have : 𝗥₀ ⪯ T := WeakerThan.trans this inferInstance
   constructor;
   . intro h f; exact Realization.iff_models_interpret_boxdot_strongInterpret (L := ℒₒᵣ) |>.mpr $ h f;
   . intro h f; exact Realization.iff_models_interpret_boxdot_strongInterpret (L := ℒₒᵣ) |>.mp $ h f;

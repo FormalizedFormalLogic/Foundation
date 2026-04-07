@@ -166,7 +166,7 @@ lemma iff_eq_height_eq_original_root [F.IsRooted] {x : F.extendRoot 1} : Frame.r
       have := h ▸ height_succ (F := F);
       simp [Frame.height, Frame.root, default] at this;
     . intro h;
-      suffices x = F.root.1 by simp [this];
+      suffices x = F.root.1 by simp [this]; grind;
       apply Frame.eq_height_root.mp;
       exact h ▸ Frame.extendRoot.eq_original_height.symm;
   . rintro rfl;

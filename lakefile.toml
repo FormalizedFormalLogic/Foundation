@@ -8,13 +8,13 @@ weak.linter.refine = true
 weak.linter.oldObtain = true
 weak.linter.style.multiGoal = true
 
-[[require]]
-scope = "leanprover-community"
-name = "mathlib"
+[[lean_lib]]
+name = "Foundation"
 
 [[require]]
 scope = "leanprover"
 name = "doc-gen4"
 
-[[lean_lib]]
-name = "Foundation"
+[[require]]
+scope = "leanprover-community"
+name = "mathlib"

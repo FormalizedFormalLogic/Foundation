@@ -50,7 +50,7 @@ instance : Complete Modal.KT4B FrameClass.finite_KT4B := ⟨by
   replace F_equiv := Set.mem_setOf_eq.mp F_equiv;
   let M : Kripke.Model := ⟨F, V⟩;
   let FM := finestFiltrationTransitiveClosureModel M φ.subformulas;
-  apply filtration FM (finestFiltrationTransitiveClosureModel.filterOf) (by simp) |>.mpr;
+  apply filtration FM (finestFiltrationTransitiveClosureModel.filterOf) (by grind) |>.mpr;
   apply hp;
   apply Set.mem_setOf_eq.mpr;
   exact {

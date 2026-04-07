@@ -59,17 +59,17 @@ instance : DiaByBox (Formula α) := ⟨rfl⟩
 lemma eq_falsum : (falsum : Formula α) = ⊥ := rfl
 lemma eq_or  : or φ ψ = φ ⋎ ψ := rfl
 lemma eq_and : and φ ψ = φ ⋏ ψ := rfl
-lemma eq_imp : imp φ ψ = φ ➝ ψ := rfl
+lemma eq_imp : imp φ ψ = φ 🡒 ψ := rfl
 lemma eq_rhd : rhd φ ψ = φ ▷ ψ := rfl
 lemma eq_neg : neg φ = ∼φ := rfl
 lemma eq_box : box φ = □φ := rfl
 lemma eq_dia : dia φ = ◇φ := rfl
-lemma eq_iff : φ ⭤ ψ = (φ ➝ ψ) ⋏ (ψ ➝ φ) := rfl
+lemma eq_iff : φ 🡘 ψ = (φ 🡒 ψ) ⋏ (ψ 🡒 φ) := rfl
 
 
 lemma inj_and : φ₁ ⋏ φ₂ = ψ₁ ⋏ ψ₂ ↔ φ₁ = ψ₁ ∧ φ₂ = ψ₂ := by simp [Wedge.wedge]
 lemma inj_or  : φ₁ ⋎ φ₂ = ψ₁ ⋎ ψ₂ ↔ φ₁ = ψ₁ ∧ φ₂ = ψ₂ := by simp [Vee.vee]
-lemma inj_imp : φ₁ ➝ φ₂ = ψ₁ ➝ ψ₂ ↔ φ₁ = ψ₁ ∧ φ₂ = ψ₂ := by simp [Arrow.arrow]
+lemma inj_imp : φ₁ 🡒 φ₂ = ψ₁ 🡒 ψ₂ ↔ φ₁ = ψ₁ ∧ φ₂ = ψ₂ := by simp [Arrow.arrow]
 lemma inj_rhd : φ₁ ▷ φ₂ = ψ₁ ▷ ψ₂ ↔ φ₁ = ψ₁ ∧ φ₂ = ψ₂ := by simp [Rhd.rhd];
 lemma inj_neg : ∼φ = ∼ψ ↔ φ = ψ := by simp [Tilde.tilde];
 lemma inj_box : □φ = □ψ ↔ φ = ψ := by simp [Box.box]
@@ -77,7 +77,7 @@ lemma inj_dia : ◇φ = ◇ψ ↔ φ = ψ := by simp [Dia.dia]
 attribute [simp, grind =] inj_and inj_or inj_imp inj_neg inj_box inj_dia inj_rhd
 
 @[simp, grind =]
-lemma inj_iff : (φ₁ ⭤ φ₂) = (ψ₁ ⭤ ψ₂) ↔ φ₁ = ψ₁ ∧ φ₂ = ψ₂ := by simp [LogicalConnective.iff]; grind;
+lemma inj_iff : (φ₁ 🡘 φ₂) = (ψ₁ 🡘 ψ₂) ↔ φ₁ = ψ₁ ∧ φ₂ = ψ₂ := by simp [LogicalConnective.iff]; grind;
 
 
 section ToString
@@ -90,7 +90,7 @@ def toStr : Formula α → String
   | atom a  => "{" ++ toString a ++ "}"
   | □φ      => "\\Box " ++ toStr φ
   -- | ◇φ      => "\\Diamond " ++ toStr φ
-  | φ ➝ ψ   => "\\left(" ++ toStr φ ++ " \\to " ++ toStr ψ ++ "\\right)"
+  | φ 🡒 ψ   => "\\left(" ++ toStr φ ++ " \\to " ++ toStr ψ ++ "\\right)"
   | φ ▷ ψ   => "\\left(" ++ toStr φ ++ " \\rhd " ++ toStr ψ ++ "\\right)"
   -- | φ ⋏ ψ   => "\\left(" ++ toStr φ ++ " \\land " ++ toStr ψ ++ "\\right)"
   -- | φ ⋎ ψ   => "\\left(" ++ toStr φ ++ " \\lor "   ++ toStr ψ ++ "\\right)"
@@ -105,27 +105,27 @@ end ToString
 def cases' {C : Formula α → Sort w}
     (hfalsum : C ⊥)
     (hatom   : ∀ a : α, C (atom a))
-    (himp     : ∀ (φ ψ), C (φ ➝ ψ))
+    (himp     : ∀ (φ ψ), C (φ 🡒 ψ))
     (hbox    : ∀ (φ), C (□φ))
     (hrhd    : ∀ (φ ψ), C (φ ▷ ψ))
     : (φ : Formula α) → C φ
   | ⊥       => hfalsum
   | atom a  => hatom a
   | □φ      => hbox φ
-  | φ ➝ ψ   => himp φ ψ
+  | φ 🡒 ψ   => himp φ ψ
   | φ ▷ ψ   => hrhd φ ψ
 
 @[induction_eliminator]
 def rec' {C : Formula α → Sort w}
   (hfalsum : C ⊥)
   (hatom   : ∀ a : α, C (atom a))
-  (himp    : ∀ (φ ψ), C φ → C ψ → C (φ ➝ ψ))
+  (himp    : ∀ (φ ψ), C φ → C ψ → C (φ 🡒 ψ))
   (hbox    : ∀ (φ), C φ → C (□φ))
   (hrhd    : ∀ (φ ψ), C φ → C ψ → C (φ ▷ ψ))
   : (φ : Formula α) → C φ
   | ⊥      => hfalsum
   | atom a => hatom a
-  | φ ➝ ψ  => himp φ ψ (rec' hfalsum hatom himp hbox hrhd φ) (rec' hfalsum hatom himp hbox hrhd ψ)
+  | φ 🡒 ψ  => himp φ ψ (rec' hfalsum hatom himp hbox hrhd φ) (rec' hfalsum hatom himp hbox hrhd ψ)
   | □φ     => hbox φ (rec' hfalsum hatom himp hbox hrhd φ)
   | φ ▷ ψ  => hrhd φ ψ (rec' hfalsum hatom himp hbox hrhd φ) (rec' hfalsum hatom himp hbox hrhd ψ)
 
@@ -140,7 +140,7 @@ def hasDecEq : (φ ψ : Formula α) → Decidable (φ = ψ)
   | atom a, ψ => by
     cases ψ <;> try { simp; exact isFalse not_false }
     simp; exact decEq _ _;
-  | φ ➝ ψ, χ => by
+  | φ 🡒 ψ, χ => by
     cases χ using cases'
     case himp φ' ψ' =>
       exact match hasDecEq φ φ' with

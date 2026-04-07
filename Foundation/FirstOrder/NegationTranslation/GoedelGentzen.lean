@@ -50,7 +50,7 @@ scoped[LO.FirstOrder] postfix:max "ᴺ" => Semiformula.doubleNegation
 
 @[simp] lemma doubleNegation_ex (φ : Semiformula L ξ (n + 1)) : (∃⁰ φ)ᴺ = ∼(∀⁰ ∼φᴺ) := rfl
 
-lemma doubleNegation_imply (φ ψ : Semiformula L ξ n) : (φ ➝ ψ)ᴺ = ∼(∼(∼φ)ᴺ ⋏ ∼ψᴺ) := by simp [imp_eq]
+lemma doubleNegation_imply (φ ψ : Semiformula L ξ n) : (φ 🡒 ψ)ᴺ = ∼(∼(∼φ)ᴺ ⋏ ∼ψᴺ) := by simp [imp_eq]
 
 @[simp] lemma doubleNegation_isNegative (φ : Semiformula L ξ n) : φᴺ.IsNegative := by
   induction φ using rec' <;> simp [*]
@@ -92,51 +92,51 @@ variable {L : Language} [L.DecidableEq] {T : Theory L} {Λ : Hilbertᵢ L}
 
 open Rewriting LO.Entailment Entailment.FiniteContext HilbertProofᵢ
 
-def negDoubleNegation : (φ : SyntacticFormula L) → Λ ⊢! ∼φᴺ ⭤ (∼φ)ᴺ
+def negDoubleNegation : (φ : SyntacticFormula L) → Λ ⊢! ∼φᴺ 🡘 (∼φ)ᴺ
   | .rel r v => Entailment.tneIff (φ := Semiformulaᵢ.rel r v)
   | .nrel r v => Entailment.E_Id (φ := ∼∼(Semiformulaᵢ.rel r v))
   | ⊤ => Entailment.ENNOO
   | ⊥ => Entailment.E_Id (φ := ∼⊥)
   | φ ⋏ ψ =>
-    have ihφ : Λ ⊢! ∼φᴺ ⭤ (∼φ)ᴺ := negDoubleNegation φ
-    have ihψ : Λ ⊢! ∼ψᴺ ⭤ (∼ψ)ᴺ := negDoubleNegation ψ
-    have : Λ ⊢! φᴺ ⋏ ψᴺ ⭤ ∼(∼φ)ᴺ ⋏ ∼(∼ψ)ᴺ :=
+    have ihφ : Λ ⊢! ∼φᴺ 🡘 (∼φ)ᴺ := negDoubleNegation φ
+    have ihψ : Λ ⊢! ∼ψᴺ 🡘 (∼ψ)ᴺ := negDoubleNegation ψ
+    have : Λ ⊢! φᴺ ⋏ ψᴺ 🡘 ∼(∼φ)ᴺ ⋏ ∼(∼ψ)ᴺ :=
       Entailment.EKK_of_E_of_E (iffnegOfNegIff (by simp) ihφ) (iffnegOfNegIff (by simp) ihψ)
     Entailment.ENN_of_E this
   | φ ⋎ ψ =>
-    have ihφ : Λ ⊢! ∼φᴺ ⭤ (∼φ)ᴺ := negDoubleNegation φ
-    have ihψ : Λ ⊢! ∼ψᴺ ⭤ (∼ψ)ᴺ := negDoubleNegation ψ
-    have : Λ ⊢! ∼φᴺ ⋏ ∼ψᴺ ⭤ (∼φ)ᴺ ⋏ (∼ψ)ᴺ := Entailment.EKK_of_E_of_E ihφ ihψ
-    have : Λ ⊢! ∼∼(∼φᴺ ⋏ ∼ψᴺ) ⭤ (∼φ)ᴺ ⋏ (∼ψ)ᴺ := Entailment.E_trans (DN_of_isNegative (by simp)) this
+    have ihφ : Λ ⊢! ∼φᴺ 🡘 (∼φ)ᴺ := negDoubleNegation φ
+    have ihψ : Λ ⊢! ∼ψᴺ 🡘 (∼ψ)ᴺ := negDoubleNegation ψ
+    have : Λ ⊢! ∼φᴺ ⋏ ∼ψᴺ 🡘 (∼φ)ᴺ ⋏ (∼ψ)ᴺ := Entailment.EKK_of_E_of_E ihφ ihψ
+    have : Λ ⊢! ∼∼(∼φᴺ ⋏ ∼ψᴺ) 🡘 (∼φ)ᴺ ⋏ (∼ψ)ᴺ := Entailment.E_trans (DN_of_isNegative (by simp)) this
     this
   | ∀⁰ φ =>
-    have ihφ : Λ ⊢! ∼(free φ)ᴺ ⭤ (∼(free φ))ᴺ := negDoubleNegation (free φ)
-    have : Λ ⊢! (free φ)ᴺ ⭤ (∼(∼(free φ))ᴺ) := iffnegOfNegIff (by simp) ihφ
-    have : Λ ⊢! ∀⁰ φᴺ ⭤ ∀⁰ ∼(∼φ)ᴺ :=
+    have ihφ : Λ ⊢! ∼(free φ)ᴺ 🡘 (∼(free φ))ᴺ := negDoubleNegation (free φ)
+    have : Λ ⊢! (free φ)ᴺ 🡘 (∼(∼(free φ))ᴺ) := iffnegOfNegIff (by simp) ihφ
+    have : Λ ⊢! ∀⁰ φᴺ 🡘 ∀⁰ ∼(∼φ)ᴺ :=
       allIffAllOfIff <| Entailment.cast (by simp [Semiformula.rew_doubleNegation]) this
     Entailment.ENN_of_E this
   | ∃⁰ φ =>
-    have ihφ : Λ ⊢! ∼(free φ)ᴺ ⭤ (∼(free φ))ᴺ := negDoubleNegation (free φ)
-    have : Λ ⊢! ∀⁰ ∼φᴺ ⭤ ∀⁰ (∼φ)ᴺ :=
+    have ihφ : Λ ⊢! ∼(free φ)ᴺ 🡘 (∼(free φ))ᴺ := negDoubleNegation (free φ)
+    have : Λ ⊢! ∀⁰ ∼φᴺ 🡘 ∀⁰ (∼φ)ᴺ :=
       allIffAllOfIff <| Entailment.cast (by simp [Semiformula.rew_doubleNegation]) ihφ
-    have : Λ ⊢! ∼∼(∀⁰ ∼φᴺ) ⭤ ∀⁰ (∼φ)ᴺ := Entailment.E_trans (DN_of_isNegative (by simp)) this
+    have : Λ ⊢! ∼∼(∀⁰ ∼φᴺ) 🡘 ∀⁰ (∼φ)ᴺ := Entailment.E_trans (DN_of_isNegative (by simp)) this
     this
   termination_by φ => φ.complexity
 
-lemma neg_doubleNegation (φ : SyntacticFormula L) : Λ ⊢ ∼φᴺ ⭤ (∼φ)ᴺ := ⟨negDoubleNegation φ⟩
+lemma neg_doubleNegation (φ : SyntacticFormula L) : Λ ⊢ ∼φᴺ 🡘 (∼φ)ᴺ := ⟨negDoubleNegation φ⟩
 
-lemma neg_doubleNegation' (φ : SyntacticFormula L) : Λ ⊢ ∼(∼φ)ᴺ ⭤ φᴺ := by simpa using neg_doubleNegation (∼φ)
+lemma neg_doubleNegation' (φ : SyntacticFormula L) : Λ ⊢ ∼(∼φ)ᴺ 🡘 φᴺ := by simpa using neg_doubleNegation (∼φ)
 
 open FiniteContext
 
-lemma imply_doubleNegation (φ ψ : SyntacticFormula L) : Λ ⊢ (φᴺ ➝ ψᴺ) ⭤ (φ ➝ ψ)ᴺ := by
-  suffices Λ ⊢ (φᴺ ➝ ψᴺ) ⭤ ∼(∼(∼φ)ᴺ ⋏ ∼ψᴺ) by simpa [Semiformula.doubleNegation_imply]
-  have hφ₀ : Λ ⊢ ∼(∼φ)ᴺ ⭤ φᴺ := by simpa using neg_doubleNegation (∼φ)
-  have hψ : Λ ⊢ ∼∼ψᴺ ⭤ ψᴺ := ⟨DN_of_isNegative (by simp)⟩
+lemma imply_doubleNegation (φ ψ : SyntacticFormula L) : Λ ⊢ (φᴺ 🡒 ψᴺ) 🡘 (φ 🡒 ψ)ᴺ := by
+  suffices Λ ⊢ (φᴺ 🡒 ψᴺ) 🡘 ∼(∼(∼φ)ᴺ ⋏ ∼ψᴺ) by simpa [Semiformula.doubleNegation_imply]
+  have hφ₀ : Λ ⊢ ∼(∼φ)ᴺ 🡘 φᴺ := by simpa using neg_doubleNegation (∼φ)
+  have hψ : Λ ⊢ ∼∼ψᴺ 🡘 ψᴺ := ⟨DN_of_isNegative (by simp)⟩
   apply Entailment.E!_intro
   · apply FiniteContext.deduct'!
     apply FiniteContext.deduct!
-    let Γ := [∼(∼φ)ᴺ ⋏ ∼ψᴺ, φᴺ ➝ ψᴺ]
+    let Γ := [∼(∼φ)ᴺ ⋏ ∼ψᴺ, φᴺ 🡒 ψᴺ]
     have : Γ ⊢[Λ] φᴺ := of'! (K!_left hφ₀) ⨀ (K!_left by_axm₀!)
     have : Γ ⊢[Λ] ψᴺ := by_axm₁! ⨀ this
     exact K!_right by_axm₀! ⨀ this
@@ -159,7 +159,7 @@ def gödelGentzen {Γ : Sequent L} : ⊢ᵀ Γ → (∼Γ)ᴺ ⊢[Λ]! ⊥
     have : (∼Γ)ᴺ ⊢[Λ]! ∼(∼φ)ᴺ ⋏ ∼(∼ψ)ᴺ := Entailment.K_intro (deduct ihφ) (deduct ihψ)
     deductInv (Entailment.dni' this)
   | or (Γ := Γ) (φ := φ) (ψ := ψ) d =>
-    have : (∼Γ)ᴺ ⊢[Λ]! (∼ψ)ᴺ ➝ (∼φ)ᴺ ➝ ⊥ := deduct <| deduct  <| gödelGentzen d
+    have : (∼Γ)ᴺ ⊢[Λ]! (∼ψ)ᴺ 🡒 (∼φ)ᴺ 🡒 ⊥ := deduct <| deduct  <| gödelGentzen d
     have : ((∼φ)ᴺ ⋏ (∼ψ)ᴺ :: (∼Γ)ᴺ) ⊢[Λ]! ⊥ :=
       Entailment.FiniteContext.weakening (by simp) this ⨀ (Entailment.K_right (nthAxm 0)) ⨀ (Entailment.K_left (nthAxm 0))
     this
@@ -190,13 +190,13 @@ open Classical LO.Entailment
 theorem gödel_gentzen {T : Theory L} {φ} : T ⊢ φ → T.ToTheoryᵢ Λ ⊢ φᴺ := by
   intro h
   let ⟨⟨s, hs⟩, b⟩ := Theory.compact' h
-  have h : (∅ : Schema L) ⊢ ↑s.conj ➝ ↑φ := by simpa using provable_def.mp b
-  let ψ : SyntacticFormula L := ↑s.conj ➝ ↑φ
+  have h : (∅ : Schema L) ⊢ ↑s.conj 🡒 ↑φ := by simpa using provable_def.mp b
+  let ψ : SyntacticFormula L := ↑s.conj 🡒 ↑φ
   have h₁ : Λ ⊢ ∼(∼ψ)ᴺ := by
     simpa using Entailment.FiniteContext.provable_iff.mp ⟨Derivation.gödelGentzen h.get⟩
-  have h₂ : Λ ⊢ ∼(∼ψ)ᴺ ⭤ ψᴺ := by simpa using Derivation.neg_doubleNegation (∼ψ)
+  have h₂ : Λ ⊢ ∼(∼ψ)ᴺ 🡘 ψᴺ := by simpa using Derivation.neg_doubleNegation (∼ψ)
   have : Λ ⊢ ψᴺ := K!_left h₂ ⨀ h₁
-  have H : Λ ⊢ (↑s.conj : SyntacticFormula L)ᴺ ➝ ↑φᴺ :=
+  have H : Λ ⊢ (↑s.conj : SyntacticFormula L)ᴺ 🡒 ↑φᴺ :=
     by simpa [Semiformula.emb_doubleNegation] using (K!_right (Derivation.imply_doubleNegation _ _)) ⨀ this
   let U : Set (SyntacticFormulaᵢ L) := (Rewriting.emb '' (T.ToTheoryᵢ Λ).theory)
   suffices

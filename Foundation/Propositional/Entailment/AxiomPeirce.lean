@@ -8,7 +8,7 @@ namespace LO.Axioms
 variable {F : Type*} [LogicalConnective F]
 variable (φ ψ χ : F)
 
-protected abbrev Peirce := ((φ ➝ ψ) ➝ φ) ➝ φ
+protected abbrev Peirce := ((φ 🡒 ψ) 🡒 φ) 🡒 φ
 
 end LO.Axioms
 
@@ -22,7 +22,7 @@ class HasAxiomPeirce (𝓢 : S)  where
   peirce {φ ψ : F} : 𝓢 ⊢! Axioms.Peirce φ ψ
 export HasAxiomPeirce (peirce)
 
-@[simp] lemma peirce! [HasAxiomPeirce 𝓢] : 𝓢 ⊢ ((φ ➝ ψ) ➝ φ) ➝ φ := ⟨peirce⟩
+@[simp] lemma peirce! [HasAxiomPeirce 𝓢] : 𝓢 ⊢ ((φ 🡒 ψ) 🡒 φ) 🡒 φ := ⟨peirce⟩
 
 
 section

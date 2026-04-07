@@ -13,7 +13,7 @@ open Formula.Kripke
 open Relation
 
 open Model in
-lemma imply_boxdot_plain_of_imply_box_box : Modal.GL ⊢ □φ ➝ □ψ → Modal.GL ⊢ ⊡φ ➝ ψ := by
+lemma imply_boxdot_plain_of_imply_box_box : Modal.GL ⊢ □φ 🡒 □ψ → Modal.GL ⊢ ⊡φ 🡒 ψ := by
   contrapose;
 
   intro h;
@@ -41,7 +41,7 @@ lemma imply_boxdot_plain_of_imply_box_box : Modal.GL ⊢ □φ ➝ □ψ → Mod
     . apply hs₂;
       grind;
   . apply Satisfies.box_def.not.mpr;
-    push_neg;
+    push Not;
     use (Sum.inr M.root);
     constructor;
     . grind;
@@ -49,8 +49,8 @@ lemma imply_boxdot_plain_of_imply_box_box : Modal.GL ⊢ □φ ➝ □ψ → Mod
 
 theorem unnecessitation! : Modal.GL ⊢ □φ → Modal.GL ⊢ φ := by
   intro h;
-  have : Modal.GL ⊢ □⊤ ➝ □φ := C!_of_conseq! (ψ := □⊤) h;
-  have : Modal.GL ⊢ ⊡⊤ ➝ φ := imply_boxdot_plain_of_imply_box_box this;
+  have : Modal.GL ⊢ □⊤ 🡒 □φ := C!_of_conseq! (ψ := □⊤) h;
+  have : Modal.GL ⊢ ⊡⊤ 🡒 φ := imply_boxdot_plain_of_imply_box_box this;
   exact this ⨀ boxdotverum!;
 
 noncomputable instance : Entailment.Unnecessitation Modal.GL := ⟨λ h => unnecessitation! ⟨h⟩ |>.some⟩

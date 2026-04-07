@@ -48,9 +48,9 @@ instance : RuleI 𝓢 where
 
 instance : RuleRestall 𝓢 where
   restall! {φ ψ χ ξ} h₁ h₂ := by
-    apply ruleI! (ψ := (φ ➝ χ) ⋏ (χ ➝ ξ)) ?_ axiomI!;
+    apply ruleI! (ψ := (φ 🡒 χ) ⋏ (χ 🡒 ξ)) ?_ axiomI!;
     apply ruleC!;
-    . apply ruleI! (ψ := (φ ➝ ψ) ⋏ (ψ ➝ χ)) ?_ axiomI!;
+    . apply ruleI! (ψ := (φ 🡒 ψ) ⋏ (ψ 🡒 χ)) ?_ axiomI!;
       apply ruleC!;
       . apply af! h₁;
       . apply impId!;

@@ -28,8 +28,8 @@ lemma strongly_convergent [F.IsStronglyConvergent] : ∀ x y : F.World, ∃ u, x
 protected abbrev IsStronglyConnected (F : Frame) := _root_.Std.Total F.Rel
 lemma s_connected [F.IsStronglyConnected] : ∀ {x y : F.World}, x ≺ y ∨ y ≺ x := by apply Std.Total.total
 
-protected abbrev IsConnected (F : Frame) := _root_.IsTrichotomous _ F.Rel
-lemma connected [F.IsConnected] : ∀ x y : F.World, x ≺ y ∨ x = y ∨ y ≺ x := by apply IsTrichotomous.trichotomous
+protected abbrev IsConnected (F : Frame) := Std.Trichotomous F.Rel
+lemma connected [F.IsConnected] : ∀ x y : F.World, x ≺ y ∨ x = y ∨ y ≺ x := by grind [Std.Trichotomous.trichotomous (r := F.Rel)]
 lemma connected' [F.IsConnected] : ∀ x y : F.World, x ≠ y → x ≺ y ∨ y ≺ x := by
   rintro x y nexy;
   rcases F.connected x y with (Rxy | rfl | Ryx);

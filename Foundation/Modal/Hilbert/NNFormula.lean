@@ -15,7 +15,7 @@ open
   LO.Entailment.FiniteContext
   LO.Modal.Entailment
 
-lemma iff_neg {φ : NNFormula _} : Modal.K ⊢ ∼(φ.toFormula) ⭤ (∼φ).toFormula := by
+lemma iff_neg {φ : NNFormula _} : Modal.K ⊢ ∼(φ.toFormula) 🡘 (∼φ).toFormula := by
   induction φ using NNFormula.rec' with
   | hAtom a => simp;
   | hNatom a => apply K!_intro <;> simp;
@@ -70,17 +70,17 @@ lemma iff_neg {φ : NNFormula _} : Modal.K ⊢ ∼(φ.toFormula) ⭤ (∼φ).toF
       apply nec!;
       exact K!_right ih;
 
-lemma exists_iff {φ} : ∃ ψ : NNFormula _, Modal.K ⊢ φ ⭤ ψ.toFormula := by
+lemma exists_iff {φ} : ∃ ψ : NNFormula _, Modal.K ⊢ φ 🡘 ψ.toFormula := by
   induction φ with
   | hatom a => use (.atom a); simp;
   | hfalsum => use ⊥; simp;
   | himp φ ψ ihφ ihψ =>
     obtain ⟨φ', hφ'⟩ := ihφ;
     obtain ⟨ψ', hψ'⟩ := ihψ;
-    use φ' ➝ ψ';
+    use φ' 🡒 ψ';
     apply K!_intro;
     . apply deduct'!;
-      apply A!_replace $ AN!_of_C! (show [φ ➝ ψ] ⊢[Modal.K] φ ➝ ψ by simp;);
+      apply A!_replace $ AN!_of_C! (show [φ 🡒 ψ] ⊢[Modal.K] φ 🡒 ψ by simp;);
       . apply of'!;
         exact C!_trans (contra! $ (K!_right $ hφ')) $ K!_left iff_neg
       . exact of'! $ K!_left hψ';
@@ -100,7 +100,7 @@ lemma exists_of_provable {φ} (h : Modal.K ⊢ φ) : ∃ ψ : NNFormula _, Modal
 
 /-
 lemma exists_CNFPart_list {φ : NNFormula _} (φ_CNFP : φ.isModalCNFPart)
-  : ∃ Γ : List { φ : NNFormula ℕ // φ.isPrebox ∨ φ.isPredia ∨ φ.degree = 0 }, Modal.K ⊢ φ.toFormula ⭤ ⋁(Γ.map (·.1)) := by
+  : ∃ Γ : List { φ : NNFormula ℕ // φ.isPrebox ∨ φ.isPredia ∨ φ.degree = 0 }, Modal.K ⊢ φ.toFormula 🡘 ⋁(Γ.map (·.1)) := by
   induction φ using NNFormula.rec' with
   | hAtom a => use [⟨(NNFormula.atom a), by tauto⟩]; simp;
   | hNatom a => use [⟨(NNFormula.natom a), by tauto⟩]; simp;
@@ -138,7 +138,7 @@ lemma exists_CNFPart_list {φ : NNFormula _} (φ_CNFP : φ.isModalCNFPart)
       . simpa using K!_right hΔ;
 
 lemma exists_CNFPart_list {φ : NNFormula _} (φ_CNFP : φ.isModalCNFPart)
-  : ∃ Γ : List { φ : NNFormula ℕ // φ.isPrebox ∨ φ.isPredia ∨ φ.degree = 0 }, Modal.K ⊢ φ.toFormula ⭤ ⋁(Γ.map (·.1)) := by
+  : ∃ Γ : List { φ : NNFormula ℕ // φ.isPrebox ∨ φ.isPredia ∨ φ.degree = 0 }, Modal.K ⊢ φ.toFormula 🡘 ⋁(Γ.map (·.1)) := by
   induction φ using NNFormula.rec' with
   | hAtom a => use [⟨(NNFormula.atom a), by tauto⟩]; simp;
   | hNatom a => use [⟨(NNFormula.natom a), by tauto⟩]; simp;
@@ -168,7 +168,7 @@ lemma exists_CNFPart_list {φ : NNFormula _} (φ_CNFP : φ.isModalCNFPart)
 
 /-
 lemma exists_CNF_list {φ : NNFormula _} (φ_CNF : φ.isModalCNF)
-  : ∃ Γ : List { φ : NNFormula ℕ // φ.isModalCNFPart }, Modal.K ⊢ (φ.toFormula ⭤ ⋀(Γ.map (·.1))) := by
+  : ∃ Γ : List { φ : NNFormula ℕ // φ.isModalCNFPart }, Modal.K ⊢ (φ.toFormula 🡘 ⋀(Γ.map (·.1))) := by
   induction φ using NNFormula.rec' with
   | hAtom a => use [⟨(NNFormula.atom a), by tauto⟩]; simp;
   | hNatom a => use [⟨(NNFormula.natom a), by tauto⟩]; simp;
@@ -189,8 +189,8 @@ lemma exists_CNF_list {φ : NNFormula _} (φ_CNF : φ.isModalCNF)
 
 
 theorem exists_CNF_DNF {φ : NNFormula _}
-  : (∃ ψ : NNFormula _, ψ.isModalCNF ∧ Modal.K ⊢ φ.toFormula ⭤ ψ.toFormula) ∧
-    (∃ ξ : NNFormula _, ξ.isModalDNF ∧ Modal.K ⊢ φ.toFormula ⭤ ξ.toFormula)
+  : (∃ ψ : NNFormula _, ψ.isModalCNF ∧ Modal.K ⊢ φ.toFormula 🡘 ψ.toFormula) ∧
+    (∃ ξ : NNFormula _, ξ.isModalDNF ∧ Modal.K ⊢ φ.toFormula 🡘 ξ.toFormula)
   := by
   induction φ using NNFormula.rec' with
   | hAtom a => constructor <;> { use (.atom a); simp; };
@@ -234,11 +234,11 @@ theorem exists_CNF_DNF {φ : NNFormula _}
 -/
 
 lemma exists_CNF (φ : NNFormula _)
-  : ∃ ψ : NNFormula _, ψ.isModalCNF ∧ Modal.K ⊢ φ.toFormula ⭤ ψ.toFormula
+  : ∃ ψ : NNFormula _, ψ.isModalCNF ∧ Modal.K ⊢ φ.toFormula 🡘 ψ.toFormula
   := by sorry; -- exists_CNF_DNF.1
 
 lemma exists_DNF (φ : NNFormula _)
-  : ∃ ψ : NNFormula _, ψ.isModalDNF ∧ Modal.K ⊢ φ.toFormula ⭤ ψ.toFormula
+  : ∃ ψ : NNFormula _, ψ.isModalDNF ∧ Modal.K ⊢ φ.toFormula 🡘 ψ.toFormula
   := by sorry; -- exists_CNF_DNF.2
 
 end NNFormula
