@@ -217,6 +217,14 @@ lemma of_mem {f X Y : V} (h : f ∈ Y ^ X) : IsFunction f := ⟨X, Y, h⟩
 
 lemma mem_function (f : V) [hf : IsFunction f] : f ∈ range f ^ domain f := isFunction_iff.mp hf
 
+lemma mem_eq_kpair {f : V} [hf : IsFunction f] {p : V} (hpf : p ∈ f) : ∃ x y, p = ⟨x, y⟩ₖ := by
+  rcases hf with ⟨X, Y, hfXY⟩
+  have hsubset := (mem_function_iff.mp hfXY).1
+  apply hsubset at hpf
+  simp only [mem_prod_iff] at hpf
+  rcases hpf with ⟨x, hxX, y, hyY, hpxy⟩
+  exact ⟨x, y, hpxy⟩
+
 @[grind ->] lemma ofSubset (f g : V) [hf : IsFunction f] : g ⊆ f → IsFunction g := by
   intro hgf
   apply isFunction_iff.mpr
@@ -642,7 +650,7 @@ lemma replacement_graph_exists_on_of_definableFunction [V ⊧ₘ* 𝗭𝗙]
   intro x hx y
   simpa [R, Function.Graph] using hgraph x hx y
 
-/-! ### Cardinality comparison -/
+/-! ### Unions of functions -/
 
 @[simp] lemma kpair_mem_sUnion_iff {C x y : V} :
     ⟨x, y⟩ₖ ∈ ⋃ˢ C ↔ ∃ f ∈ C, ⟨x, y⟩ₖ ∈ f := by
@@ -674,6 +682,8 @@ lemma IsFunction.sUnion_of_coherent {C : V}
       rcases mem_sUnion_iff.mp hxy'U with ⟨g, hgC, hxyg⟩
       exact (hcoh f hfC g hgC x y y' hxyf hxyg).symm
   exact IsFunction.of_mem hmem
+
+/-! ### Cardinality comparison -/
 
 def CardLE (X Y : V) : Prop := ∃ f ∈ Y ^ X, Injective f
 
