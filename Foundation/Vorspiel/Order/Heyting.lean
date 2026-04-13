@@ -40,3 +40,11 @@ lemma himp_inf_himp_inf_sup_le (a b c : α) : (a ⇨ c) ⊓ (b ⇨ c) ⊓ (a ⊔
   simpa only [GeneralizedHeytingAlgebra.le_himp_iff, inf_comm (a ⊔ b)] using this
 
 end HeytingAlgebra
+
+namespace CompleteBooleanAlgebra
+
+variable {α : Type*} [CompleteBooleanAlgebra α]
+
+
+
+end CompleteBooleanAlgebra
