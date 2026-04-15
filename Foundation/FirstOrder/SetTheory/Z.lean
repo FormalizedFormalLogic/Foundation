@@ -417,6 +417,11 @@ lemma inter_assoc (x y z : V) : (x ∩ y) ∩ z = x ∩ (y ∩ z) := by ext; sim
   ext; simp only [inter_comm, mem_inter_iff, mem_singleton_iff, not_mem_empty, iff_false, not_and]
   grind
 
+@[simp] lemma inter_eq_right_of_subset {x y : V} (h : y ⊆ x) : x ∩ y = y := by
+  ext z; simp only [mem_inter_iff]; constructor
+  · exact And.right
+  · intro hz; exact ⟨h z hz, hz⟩
+
 /-! ### Set difference -/
 
 noncomputable def sdiff (x y : V) : V := {z ∈ x ; z ∉ y}
@@ -755,5 +760,14 @@ lemma mem_asymm₃ {x y z : V} : x ∈ y → y ∈ z → z ∉ x := by
   intro h
   have : x ∈ succ x := mem_succ_self x
   simp [←h] at this
+
+lemma succ_inj {a b : V} (h : succ a = succ b) : a = b := by
+  have ha : a ∈ succ b := h ▸ mem_succ_self a
+  have hb : b ∈ succ a := h ▸ mem_succ_self b
+  rcases mem_succ_iff.mp ha with (rfl | hab)
+  · rfl
+  · rcases mem_succ_iff.mp hb with (rfl | hba)
+    · rfl
+    · exact (mem_asymm hab hba).elim
 
 end LO.FirstOrder.SetTheory
