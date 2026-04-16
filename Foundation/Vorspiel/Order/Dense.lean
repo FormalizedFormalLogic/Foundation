@@ -99,30 +99,32 @@ def ofDescendingChain (s : ℕ → α) (hs : ∀ i j, i ≤ j → s i ≥ s j) :
 @[simp] lemma mem_descendingChain_iff (s : ℕ → α) (hs : ∀ i j, i ≤ j → s i ≥ s j) :
     x ∈ ofDescendingChain s hs ↔ ∃ i, s i ≤ x := by rfl
 
-class Generic (F : PFilter α) (𝓓 : Set (DenseSet α)) where
-  generic : ∀ d ∈ 𝓓, ∃ a ∈ F, a ∈ d
+class IsGeneric (F : PFilter α) (𝓓 : Set (DenseSet α)) where
+  isGeneric : ∀ d ∈ 𝓓, ∃ a ∈ F, a ∈ d
 
-@[simp] instance Generic.empty (F : PFilter α) : F.Generic ∅ := ⟨by simp⟩
+@[simp] instance IsGeneric.empty (F : PFilter α) : F.IsGeneric ∅ := ⟨by simp⟩
 
-theorem countable_generic [Inhabited α] (𝓓 : Set (DenseSet α)) (ctb : Set.Countable 𝓓) :
-    ∃ G, Generic G 𝓓 := by
+theorem countable_isGeneric (𝓓 : Set (DenseSet α)) (ctb : Set.Countable 𝓓) (a : α) :
+    ∃ G : PFilter α, G.IsGeneric 𝓓 ∧ a ∈ G := by
   by_cases emp : 𝓓.Nonempty
-  case neg => exact ⟨default, by simp [Set.not_nonempty_iff_eq_empty.mp emp]⟩
+  case neg => exact ⟨principal a, by simp [Set.not_nonempty_iff_eq_empty.mp emp]⟩
   have : ∃ D : ℕ → 𝓓, Function.Surjective D := ctb.exists_surjective emp
   rcases this with ⟨D, hD⟩
-  let s (n : ℕ) : α := n.rec default fun i ↦ (D i).val.choose
+  let s (n : ℕ) : α := n.rec a fun i ↦ (D i).val.choose
   have hs : ∀ i j, i ≤ j → s i ≥ s j := fun i j hij ↦
     Nat.monotone_of_succ_monotone (r := fun i j ↦ s i ≥ s j)
       (fun _ ↦ le_refl _)
       ⟨fun _ _ _ ↦ ge_trans⟩
       (by simp [s]) hij
-  refine ⟨ofDescendingChain s hs, ⟨?_⟩⟩
-  intro d hd
-  rcases show ∃ i, D i = ⟨d, hd⟩ from hD ⟨d, hd⟩ with ⟨i, hi⟩
-  refine ⟨s (i + 1), ?_, ?_⟩
-  · simp only [mem_descendingChain_iff]
-    exact ⟨i + 1, by rfl⟩
-  · simp [s, hi]
+  refine ⟨ofDescendingChain s hs, ⟨?_⟩, ?_⟩
+  · intro d hd
+    rcases show ∃ i, D i = ⟨d, hd⟩ from hD ⟨d, hd⟩ with ⟨i, hi⟩
+    refine ⟨s (i + 1), ?_, ?_⟩
+    · simp only [mem_descendingChain_iff]
+      exact ⟨i + 1, by rfl⟩
+    · simp [s, hi]
+  · suffices ∃ i, s i ≤ a by simpa
+    refine ⟨0, by simp [s]⟩
 
 end Order.PFilter
 
