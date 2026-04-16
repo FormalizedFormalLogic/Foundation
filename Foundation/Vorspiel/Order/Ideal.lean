@@ -179,31 +179,6 @@ lemma compl_mem_F_iff_mem_I :
 
 end booleanAlgebra
 
-section completeBooleanAlgebra
+end PrimePair
 
-variable [CompleteBooleanAlgebra P] {IF : PrimePair P}
-
-lemma iSup_mem_iff {f : ι → P} :
-    ⨆ i, f i ∈ IF.I ↔ ∀ i, f i ∈ IF.I := by
-  constructor
-  · intro h i
-    exact IF.I.lower (le_iSup f i) h
-  · intro h
-    by_contra! hf
-    
-
-lemma iInf_mem_iff {f : ι → P} :
-    ⨅ i, f i ∈ IF.I ↔ ∃ i, f i ∈ IF.I := by
-  constructor
-  · intro h
-    by_contra! hf
-
-
-end completeBooleanAlgebra
-
-end Ideal.IsPrime
-
-
-
-
-end Order
+end Order.Ideal

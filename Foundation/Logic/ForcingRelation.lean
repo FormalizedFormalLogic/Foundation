@@ -37,10 +37,8 @@ class BasicSemantics where
 class Monotone (R : outParam (W → W → Prop)) where
   monotone {w : W} : w ⊩ φ → ∀ v, R w v → v ⊩ φ
 
-class PreIntKripke (R : outParam (W → W → Prop)) extends BasicSemantics W, Monotone W R where
+class IntKripke (R : outParam (W → W → Prop)) extends BasicSemantics W, Monotone W R where
   imply (w : W) : w ⊩ φ 🡒 ψ ↔ (∀ v, R w v → v ⊩ φ → v ⊩ ψ)
-
-class IntKripke (R : outParam (W → W → Prop)) extends BasicSemantics W, PreIntKripke W R where
   falsum (w : W) : ¬w ⊩ ⊥
   not (w : W) : w ⊩ ∼φ ↔ (∀ v, R w v → ¬v ⊩ φ)
 
@@ -52,12 +50,12 @@ attribute [simp, grind .]
   IntKripke.falsum
 
 attribute [grind .]
-  PreIntKripke.imply
+  IntKripke.imply
   IntKripke.not
 
 @[simp, grind =]
-lemma iff (R : W → W → Prop) [PreIntKripke W R] : w ⊩ (φ 🡘 ψ) ↔ (∀ v, R w v → (v ⊩ φ ↔ v ⊩ ψ)) := by
-  simp [LogicalConnective.iff, PreIntKripke.imply]; grind
+lemma iff (R : W → W → Prop) [IntKripke W R] : w ⊩ (φ 🡘 ψ) ↔ (∀ v, R w v → (v ⊩ φ ↔ v ⊩ ψ)) := by
+  simp [LogicalConnective.iff, IntKripke.imply]; grind
 
 variable (W)
 
