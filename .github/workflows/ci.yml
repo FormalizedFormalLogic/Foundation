@@ -155,7 +155,7 @@ jobs:
            --metadata title="FormalizedFormalLogic/Foundation" \
            --output pages/index.html
 
-      - uses: actions/upload-pages-artifact@v4
+      - uses: actions/upload-pages-artifact@v5
         with:
           path: pages
       - uses: actions/deploy-pages@v5
