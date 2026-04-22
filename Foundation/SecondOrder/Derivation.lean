@@ -54,15 +54,15 @@ inductive Derivation : Sequent L → Type _
 | all₁ {φ : Semiproposition L 1 0} : Derivation (φ.free₁ :: Sequent.shift₁ Γ) → Derivation ((∀¹ φ) :: Γ)
 | exs₁ {φ : Semiproposition L 1 0} : Derivation (φ/⟦ψ⟧ :: Γ) → Derivation ((∃¹ φ) :: Γ)
 
-scoped prefix:45 "⊢ᴷ " => Derivation
+scoped prefix:45 "⊢ᴸᴷ¹ " => Derivation
 
 namespace Derivation
 
-def cast {Γ Δ : Sequent L} (d : ⊢ᴷ Γ) (h : Γ = Δ) : ⊢ᴷ Δ := h ▸ d
+def cast {Γ Δ : Sequent L} (d : ⊢ᴸᴷ¹ Γ) (h : Γ = Δ) : ⊢ᴸᴷ¹ Δ := h ▸ d
 
 end Derivation
 
-abbrev Proof (φ : Sentence L) := ⊢ᴷ [(φ : Proposition L)]
+abbrev Proof (φ : Sentence L) := ⊢ᴸᴷ¹ [(φ : Proposition L)]
 
 inductive Proof.Symbol (L : Language) : Type
 | symbol

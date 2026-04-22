@@ -69,7 +69,6 @@ def standardTranslation : NNFormula ℕ → FirstOrder.Semisentence 𝓛𝓕 1
 
 postfix:max "¹" => standardTranslation
 
-
 namespace Kripke.FirstOrder
 
 open FirstOrder.Frame (forces)
@@ -89,23 +88,19 @@ instance {M : Model} : FirstOrder.Structure 𝓛𝓕 M.World where
 @[simp] lemma lt_iff_rel : (@Operator.LT.lt 𝓛𝓕 _).val ![x, y] ↔ x ≺ y := by rfl
 
 /-- BdRV Prop 2.47 (i) -/
-lemma correspondence_satisfies : x ⊧ φ ↔ M ⊧/![x] φ¹ := by
+lemma correspondence_satisfies : x ⊧ φ ↔ φ¹.Evalb ![x] := by
   induction φ using NNFormula.rec' generalizing x with
   | hBox φ ihφ =>
-    suffices x ⊧ □φ ↔ ∀ y, x ≺ y → M ⊧/![y] (φ¹) by
-      simp [standardTranslation];
-      convert this;
-      simp;
+    suffices x ⊧ □φ ↔ ∀ y, x ≺ y → (φ¹).Evalb ![y] by
+      simpa [standardTranslation]
     constructor;
     . intro h y Rxy;
       exact ihφ.mp $ h y Rxy;
     . intro h y Rxy;
       exact ihφ.mpr $ h y Rxy;
   | hDia φ ihφ =>
-    suffices x ⊧ ◇φ ↔ ∃ y, x ≺ y ∧ M ⊧/![y] (φ¹) by
-      simp [standardTranslation];
-      convert this;
-      simp;
+    suffices x ⊧ ◇φ ↔ ∃ y, x ≺ y ∧ (φ¹).Evalb ![y] by
+      simpa [standardTranslation]
     constructor;
     . rintro ⟨y, Rxy, hy⟩;
       use y;
@@ -120,8 +115,8 @@ lemma correspondence_satisfies : x ⊧ φ ↔ M ⊧/![x] φ¹ := by
   | _ => simp_all [standardTranslation];
 
 /-- BdRV Prop 2.47 (ii) -/
-lemma correspondence_validOnModel : M ⊧ φ ↔ M ⊧ₘ ∀⁰ φ¹ := by
-  suffices M ⊧ φ ↔ ∀ x : M.World, M ⊧/![x] φ¹ by simpa [FirstOrder.models_iff];
+lemma correspondence_validOnModel : M ⊧ φ ↔ M↓[𝓛𝓕] ⊧ ∀⁰ φ¹ := by
+  suffices M ⊧ φ ↔ ∀ x : M.World, (φ¹).Evalb ![x] by simpa [FirstOrder.models_iff];
   constructor;
   . intro h x; apply correspondence_satisfies.mp $ h x;
   . intro h x; exact correspondence_satisfies.mpr $ h x;

@@ -55,7 +55,7 @@ infix:45 " ⊢ " => Provable
 infix:45 " ⊬ " => Unprovable
 
 /-- Proofs of set of formulae. -/
-def PrfSet (s : Set F) : Type _ := {φ : F} → φ ∈ s → 𝓢 ⊢! φ
+def PrfSet (s : Set F) : Type _ := ⦃φ : F⦄ → φ ∈ s → 𝓢 ⊢! φ
 
 /-- Proposition for existance of proofs of set of formulae. -/
 def ProvableSet (s : Set F) : Prop := ∀ {φ}, φ ∈ s → 𝓢 ⊢ φ
@@ -69,9 +69,9 @@ def theory : Set F := {φ | 𝓢 ⊢ φ}
 
 end
 
-def cast {𝓢 : S} {φ ψ : F} (e : φ = ψ) (b : 𝓢 ⊢! φ) : 𝓢 ⊢! ψ := e ▸ b
+def cast {𝓢 : S} {φ ψ : F} (b : 𝓢 ⊢! φ) (e : φ = ψ := by simp) : 𝓢 ⊢! ψ := e ▸ b
 
-@[grind ⇒] lemma cast! {𝓢 : S} {φ ψ : F} (e : φ = ψ) (b : 𝓢 ⊢ φ) : 𝓢 ⊢ ψ := ⟨cast e b.some⟩
+@[grind ⇒] lemma cast! {𝓢 : S} {φ ψ : F} (b : 𝓢 ⊢ φ) (e : φ = ψ := by simp) : 𝓢 ⊢ ψ := ⟨cast b.some e⟩
 
 lemma unprovable_iff_isEmpty {𝓢 : S} {φ : F} :
     𝓢 ⊬ φ ↔ IsEmpty (𝓢 ⊢! φ) := by simp [Provable, Unprovable]
@@ -171,11 +171,11 @@ lemma Equiv.iff : 𝓢 ≊ 𝓣 ↔ (∀ φ, 𝓢 ⊢ φ ↔ 𝓣 ⊢ φ) :=
 
 @[instance, simp, refl] protected lemma Equiv.refl (𝓢 : S) : 𝓢 ≊ 𝓢 := ⟨rfl⟩
 
-@[symm, grind] lemma Equiv.symm : 𝓢 ≊ 𝓣 → 𝓣 ≊ 𝓢 := fun e ↦ ⟨Eq.symm e.eq⟩
+@[symm, grind .] lemma Equiv.symm : 𝓢 ≊ 𝓣 → 𝓣 ≊ 𝓢 := fun e ↦ ⟨Eq.symm e.eq⟩
 
 @[trans] lemma Equiv.trans : 𝓢 ≊ 𝓣 → 𝓣 ≊ 𝓤 → 𝓢 ≊ 𝓤 := fun e₁ e₂ ↦ ⟨Eq.trans e₁.eq e₂.eq⟩
 
-@[grind]
+@[grind =]
 lemma Equiv.antisymm_iff : 𝓢 ≊ 𝓣 ↔ 𝓢 ⪯ 𝓣 ∧ 𝓣 ⪯ 𝓢 := by
   constructor
   · intro e
@@ -185,7 +185,7 @@ lemma Equiv.antisymm_iff : 𝓢 ≊ 𝓣 ↔ 𝓢 ⪯ 𝓣 ∧ 𝓣 ⪯ 𝓢 := 
 
 alias ⟨_, Equiv.antisymm⟩ := Equiv.antisymm_iff
 
-@[grind] lemma Equiv.le : 𝓢 ≊ 𝓣 → 𝓢 ⪯ 𝓣 := fun e ↦ ⟨by rw [e.eq]⟩
+@[grind ->] lemma Equiv.le : 𝓢 ≊ 𝓣 → 𝓢 ⪯ 𝓣 := fun e ↦ ⟨by rw [e.eq]⟩
 
 instance : Trans (α := S) (β := T) (γ := U) (· ≊ ·) (· ≊ ·) (· ≊ ·) where
   trans := Equiv.trans
@@ -205,7 +205,7 @@ instance : Trans (α := S) (β := T) (γ := U) (· ≊ ·) (· ⪱ ·) (· ⪱ �
 instance : Trans (α := S) (β := T) (γ := U) (· ⪱ ·) (· ≊ ·) (· ⪱ ·) where
   trans h₁ h₂ := swt_of_swt_of_wt h₁ h₂.le
 
-@[grind]
+@[grind =]
 lemma iff_strictlyWeakerThan_weakerThan_not_equiv : 𝓢 ⪱ 𝓣 ↔ 𝓢 ⪯ 𝓣 ∧ ¬(𝓢 ≊ 𝓣) := by
   constructor
   · rintro ⟨_, _⟩; grind;
@@ -241,13 +241,13 @@ lemma inconsistent_iff_theory_eq {𝓢 : S} :
     Inconsistent 𝓢 ↔ theory 𝓢 = Set.univ := by
   simp [Inconsistent, Set.ext_iff, theory]
 
-lemma not_inconsistent_iff_consistent {𝓢 : S} :
+@[simp] lemma not_inconsistent_iff_consistent {𝓢 : S} :
     ¬Inconsistent 𝓢 ↔ Consistent 𝓢 :=
   ⟨fun h ↦ ⟨h⟩, by rintro ⟨h⟩; exact h⟩
 
 alias ⟨_, Consistent.not_inc⟩ := not_inconsistent_iff_consistent
 
-lemma not_consistent_iff_inconsistent {𝓢 : S} :
+@[simp] lemma not_consistent_iff_inconsistent {𝓢 : S} :
     ¬Consistent 𝓢 ↔ Inconsistent 𝓢 := by simp [←not_inconsistent_iff_consistent]
 
 alias ⟨_, Inconsistent.not_con⟩ := not_consistent_iff_inconsistent
@@ -343,7 +343,6 @@ class Axiomatized [AdjunctiveSet F S] where
   prfAxm {𝓢 : S} : 𝓢 ⊢!* AdjunctiveSet.set 𝓢
   weakening {𝓢 𝓣 : S} : 𝓢 ⊆ 𝓣 → 𝓢 ⊢! φ → 𝓣 ⊢! φ
 
-alias byAxm := Axiomatized.prfAxm
 alias wk := Axiomatized.weakening
 
 class StrongCut [AdjunctiveSet F T] where
@@ -357,13 +356,17 @@ namespace Axiomatized
 
 variable [AdjunctiveSet F S] [Axiomatized S] {𝓢 𝓣 : S}
 
-@[simp] lemma provable_axm (𝓢 : S) : 𝓢 ⊢* AdjunctiveSet.set 𝓢 := fun hf ↦ ⟨prfAxm hf⟩
+def byAxm {𝓢 : S} (h : φ ∈ 𝓢) : 𝓢 ⊢! φ := prfAxm (by simp [h])
 
-lemma axm_subset (𝓢 : S) : AdjunctiveSet.set 𝓢 ⊆ theory 𝓢 := fun _ hp ↦ provable_axm 𝓢 hp
+lemma by_axm {𝓢 : S} (h : φ ∈ 𝓢) : 𝓢 ⊢ φ := ⟨byAxm h⟩
+
+@[simp] lemma provable_refl (𝓢 : S) : 𝓢 ⊢* AdjunctiveSet.set 𝓢 := fun hf ↦ ⟨prfAxm hf⟩
+
+lemma axm_subset (𝓢 : S) : AdjunctiveSet.set 𝓢 ⊆ theory 𝓢 := fun _ hp ↦ provable_refl 𝓢 hp
 
 protected def adjoin (φ : F) (𝓢 : S) : adjoin φ 𝓢 ⊢! φ := prfAxm (by simp)
 
-@[simp] def adjoin! (φ : F) (𝓢 : S) : adjoin φ 𝓢 ⊢ φ := provable_axm _ (by simp)
+@[simp] def adjoin! (φ : F) (𝓢 : S) : adjoin φ 𝓢 ⊢ φ := provable_refl _ (by simp)
 
 lemma le_of_subset (h : 𝓢 ⊆ 𝓣) : 𝓢 ⪯ 𝓣 := ⟨by rintro φ ⟨b⟩; exact ⟨weakening h b⟩⟩
 
@@ -377,7 +380,8 @@ def to_adjoin {𝓢 : S} : 𝓢 ⊢ ψ → adjoin φ 𝓢 ⊢ ψ := fun b ↦ we
 
 end Axiomatized
 
-alias by_axm := Axiomatized.provable_axm
+alias byAxm := Axiomatized.byAxm
+alias by_axm := Axiomatized.by_axm
 alias wk! := Axiomatized.weakening!
 
 section axiomatized
@@ -413,10 +417,10 @@ def WeakerThan.ofSubset [AdjunctiveSet F S] [Axiomatized S] {𝓢 𝓣 : S} (h :
 variable (S)
 
 class Compact [AdjunctiveSet F S] where
-  Γ {𝓢 : S} {φ : F} : 𝓢 ⊢! φ → S
-  ΓPrf {𝓢 : S} {φ : F} (b : 𝓢 ⊢! φ) : Γ b ⊢! φ
-  Γ_subset {𝓢 : S} {φ : F} (b : 𝓢 ⊢! φ) : Γ b ⊆ 𝓢
-  Γ_finite {𝓢 : S} {φ : F} (b : 𝓢 ⊢! φ) : AdjunctiveSet.Finite (Γ b)
+  core {𝓢 : S} {φ : F} : 𝓢 ⊢! φ → S
+  corePrf {𝓢 : S} {φ : F} (b : 𝓢 ⊢! φ) : core b ⊢! φ
+  core_subset {𝓢 : S} {φ : F} (b : 𝓢 ⊢! φ) : core b ⊆ 𝓢
+  core_finite {𝓢 : S} {φ : F} (b : 𝓢 ⊢! φ) : AdjunctiveSet.Finite (core b)
 
 variable {S}
 
@@ -426,7 +430,7 @@ variable [AdjunctiveSet F S] [Compact S]
 
 lemma finite_provable {𝓢 : S} (h : 𝓢 ⊢ φ) : ∃ 𝓕 : S, 𝓕 ⊆ 𝓢 ∧ AdjunctiveSet.Finite 𝓕 ∧ 𝓕 ⊢ φ := by
   rcases h with ⟨b⟩
-  exact ⟨Γ b, Γ_subset b, Γ_finite b, ⟨ΓPrf b⟩⟩
+  exact ⟨core b, core_subset b, core_finite b, ⟨corePrf b⟩⟩
 
 end Compact
 
@@ -582,6 +586,53 @@ end
 end Complete
 
 end
+
+namespace Entailment
+
+variable (S : Type*) {F : Type*} [Entailment S F]
+
+structure Pullback (f : G → F) : Type _ where
+  forget : S
+
+variable {S}
+
+abbrev pullback (𝓢 : S) (f : G → F) : Pullback S f := ⟨𝓢⟩
+
+instance (f : G → F) : Entailment (Pullback S f) G where
+  Prf := fun 𝓢 φ ↦ 𝓢.forget ⊢! f φ
+
+namespace Pullback
+
+section basics
+
+variable {f : G → F}
+
+omit [Entailment S F] in
+@[simp] lemma pullback_forget (𝓢 : S) : (pullback 𝓢 f).forget = 𝓢 := rfl
+
+@[simp] lemma provable_iff {𝓢 : S} {φ : G} : pullback 𝓢 f ⊢ φ ↔ 𝓢 ⊢ f φ := by rfl
+
+@[simp] lemma unprovable_iff {𝓢 : S} {φ : G} : pullback 𝓢 f ⊬ φ ↔ 𝓢 ⊬ f φ := by rfl
+
+@[simp] lemma provableSet_iff {𝓢 : S} {s : Set G} : pullback 𝓢 f ⊢* s ↔ 𝓢 ⊢* f '' s := by
+  simp [ProvableSet]
+
+@[simp] lemma theory_eq (𝓢 : S) : theory (pullback 𝓢 f) = f ⁻¹' theory 𝓢 := rfl
+
+lemma weakerThan (𝓢 𝓣 : S) (h : 𝓢 ⪯ 𝓣) : pullback 𝓢 f ⪯ pullback 𝓣 f := by
+  simp_all [Entailment.weakerThan_iff]
+
+lemma inconsistent {𝓢 : S} : Inconsistent 𝓢 → Inconsistent (pullback 𝓢 f) := by
+  simp_all [Inconsistent]
+
+lemma consistent {𝓢 : S} : Consistent (pullback 𝓢 f) → Consistent 𝓢 := by
+  contrapose; simpa using inconsistent
+
+end basics
+
+end Pullback
+
+end Entailment
 
 end LO
 

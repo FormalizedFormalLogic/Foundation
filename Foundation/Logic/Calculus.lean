@@ -8,9 +8,7 @@ public import Foundation.Propositional.Entailment.Cl.Basic
 This file defines a characterization of Tait style calculus and Gentzen style calculus.
 
 ## Main Definitions
-* `LO.Tait`
-* `LO.Gentzen`
-
+- `LO.OneSidedLK`
 -/
 
 @[expose]
@@ -18,269 +16,239 @@ public section
 
 namespace LO
 
-class OneSided (K : Type*) (F : outParam Type*) where
-  Derivation : K → List F → Type*
+/-! ## One-sided $\mathbf{LK}$ -/
 
-infix:45 " ⟹ " => OneSided.Derivation
+class OneSidedLK {F : Type*} [LogicalConnective F] [DeMorgan F] [NegInvolutive F] (𝔇 : List F → Type*) where
+  identity (φ) : 𝔇 [φ, ∼φ]
+  wk : 𝔇 Δ → Δ ⊆ Γ → 𝔇 Γ
+  verum : 𝔇 [⊤]
+  and : 𝔇 (φ :: Γ) → 𝔇 (ψ :: Γ) → 𝔇 (φ ⋏ ψ :: Γ)
+  or : 𝔇 (φ :: ψ :: Γ) → 𝔇 (φ ⋎ ψ :: Γ)
 
-abbrev OneSided.Derivation₁ [OneSided K F] (𝓚 : K) (φ : F) : Type _ := 𝓚 ⟹ [φ]
+class OneSidedLK.Cut
+    {F : Type*} [LogicalConnective F] [DeMorgan F] [NegInvolutive F] (𝔇 : List F → Type*) extends OneSidedLK 𝔇 where
+  cut : 𝔇 (φ :: Γ) → 𝔇 (∼φ :: Δ) → 𝔇 (Γ ++ Δ)
 
-infix:45 " ⟹. " => OneSided.Derivation₁
+namespace OneSidedLK
 
-abbrev OneSided.Derivable [OneSided K F] (𝓚 : K) (Δ : List F) : Prop := Nonempty (𝓚 ⟹ Δ)
+variable {F : Type*} [LogicalConnective F] [DeMorgan F] [NegInvolutive F] {𝔇 : List F → Type*} [OneSidedLK 𝔇]
 
-infix:45 " ⟹! " => OneSided.Derivable
+def cast (b : 𝔇 Γ) (h : Γ = Δ := by simp) : 𝔇 Δ := h ▸ b
 
-abbrev OneSided.Derivable₁ [OneSided K F] (𝓚 : K) (φ : F) : Prop := Nonempty (𝓚 ⟹. φ)
+def close (φ : F) (hp : φ ∈ Γ := by simp) (hn : ∼φ ∈ Γ := by simp) : 𝔇 Γ := wk (identity φ) (by simp_all)
 
-infix:45 " ⟹!. " => OneSided.Derivable₁
+def top (h : ⊤ ∈ Γ := by simp) : 𝔇 Γ := wk verum (by simp [h])
 
-noncomputable def OneSided.Derivable.get [OneSided K F] (𝓚 : K) (Δ : List F) (h : 𝓚 ⟹! Δ) : 𝓚 ⟹ Δ :=
-  Classical.choice h
+def tensor {φ ψ : F} (dφ : 𝔇 (φ :: Γ)) (dψ : 𝔇 (ψ :: Δ)) : 𝔇 (φ ⋏ ψ :: Γ ++ Δ) :=
+  and (wk dφ (by simp)) (wk dψ (by simp))
 
-class Tait (F K : Type*) [LogicalConnective F] [DeMorgan F] [AdjunctiveSet F K] extends OneSided K F where
-  verum (𝓚 : K) (Δ : List F)         : 𝓚 ⟹ ⊤ :: Δ
-  and {𝓚 : K} {φ ψ : F} {Δ : List F} : 𝓚 ⟹ φ :: Δ → 𝓚 ⟹ ψ :: Δ → 𝓚 ⟹ φ ⋏ ψ :: Δ
-  or {𝓚 : K} {φ ψ : F} {Δ : List F}  : 𝓚 ⟹ φ :: ψ :: Δ → 𝓚 ⟹ φ ⋎ ψ :: Δ
-  wk {𝓚 : K} {Δ Δ' : List F}         : 𝓚 ⟹ Δ → Δ ⊆ Δ' → 𝓚 ⟹ Δ'
-  em {𝓚 : K} {φ} {Δ : List F}        : φ ∈ Δ → ∼φ ∈ Δ → 𝓚 ⟹ Δ
+def swap₁ (d : 𝔇 (φ₂ :: φ₁ :: Γ)) : 𝔇 (φ₁ :: φ₂ :: Γ) := wk d (by simp)
 
-class Tait.Cut (F K : Type*) [LogicalConnective F] [DeMorgan F] [AdjunctiveSet F K] [Tait F K] where
-  cut {𝓚 : K} {Δ : List F} {φ} : 𝓚 ⟹ φ :: Δ → 𝓚 ⟹ ∼φ :: Δ → 𝓚 ⟹ Δ
+def swap₂ (d : 𝔇 (φ₃ :: φ₁ :: φ₂ :: Γ)) : 𝔇 (φ₁ :: φ₂ :: φ₃ :: Γ) :=
+  wk d (by grind)
 
-class Tait.Axiomatized (F K : Type*) [LogicalConnective F] [DeMorgan F] [AdjunctiveSet F K] [Tait F K] where
-  axm {𝓚 : K} {φ} : φ ∈ 𝓚 → 𝓚 ⟹. φ
-  trans {𝓚 𝓛 : K} {Γ} : ((ψ : F) → ψ ∈ 𝓚 → 𝓛 ⟹. ψ) → 𝓚 ⟹ Γ → 𝓛 ⟹ Γ
+def swap₃ (d : 𝔇 (φ₄ :: φ₁ :: φ₂ :: φ₃ :: Γ)) : 𝔇 (φ₁ :: φ₂ :: φ₃ :: φ₄ :: Γ) :=
+  wk d (by grind)
 
-variable {F S K : Type*} [LogicalConnective F] [AdjunctiveSet F K]
-
-namespace OneSided
-
-variable [OneSided K F] {𝓚 : K} {Γ Δ : List F}
-
-protected abbrev cast (d : 𝓚 ⟹ Δ) (e : Δ = Γ) : 𝓚 ⟹ Γ := cast (congrArg _ e) d
-
-end OneSided
-
-namespace Tait
+alias cut := OneSidedLK.Cut.cut
 
 open Entailment
 
-variable [DeMorgan F] [Tait F K]
+class EmptyEntailment (𝔇 : outParam (List F → Type*)) {E : Type*} [Entailment E F] (𝓔 : E) where
+  equiv {φ} : 𝓔 ⊢! φ ≃ 𝔇 [φ]
 
-variable {𝓚 : K} {Γ Δ : List F} {φ ψ φ₁ φ₂ φ₃ φ₄ : F}
+namespace EmptyEntailment
 
-def ofEq (b : 𝓚 ⟹ Γ) (h : Γ = Δ) : 𝓚 ⟹ Δ := h ▸ b
+variable {E : Type*} [Entailment E F] (𝓔 : E) [EmptyEntailment 𝔇 𝓔]
 
-lemma of_eq (b : 𝓚 ⟹! Γ) (h : Γ = Δ) : 𝓚 ⟹! Δ := h ▸ b
+omit [LogicalConnective F] [DeMorgan F] [NegInvolutive F] [OneSidedLK 𝔇] in
+lemma provable_iff :
+    𝓔 ⊢ φ ↔ Nonempty (𝔇 [φ]) := by
+  simpa using OneSidedLK.EmptyEntailment.equiv.nonempty_congr
 
-def em' (φ : F) (hp : φ ∈ Γ := by simp) (hn : ∼φ ∈ Γ := by simp) : 𝓚 ⟹ Γ := em hp hn
+variable [OneSidedLK.Cut 𝔇]
 
-def verum' (h : ⊤ ∈ Γ := by simp) : 𝓚 ⟹ Γ := wk (verum 𝓚 Γ) (by simp [h])
+instance : Entailment.ModusPonens 𝓔 where
+  mdp {φ ψ} b₁ b₂ :=
+    let b₁ := equiv b₁
+    let b₂ := equiv b₂
+    have : 𝔇 [∼(φ 🡒 ψ), ∼φ, ψ] := cast (tensor (𝔇 := 𝔇) (identity φ) (identity (∼ψ))) (by simp [DeMorgan.imply])
+    have : 𝔇 [∼φ, ψ] := wk (cut b₁ this) (by simp)
+    have : 𝔇 [ψ] := wk (cut b₂ this) (by simp)
+    equiv.symm <| cast this
 
-lemma verum! (𝓚 : K) (Γ : List F) : 𝓚 ⟹! ⊤ :: Γ := ⟨verum _ _⟩
-
-lemma verum'! (h : ⊤ ∈ Γ) : 𝓚 ⟹! Γ := ⟨verum' h⟩
-
-lemma and! (hp : 𝓚 ⟹! φ :: Γ) (hq : 𝓚 ⟹! ψ :: Γ) : 𝓚 ⟹! φ ⋏ ψ :: Γ := ⟨and hp.get hq.get⟩
-
-lemma or! (h : 𝓚 ⟹! φ :: ψ :: Γ) : 𝓚 ⟹! φ ⋎ ψ :: Γ := ⟨or h.get⟩
-
-lemma wk! (h : 𝓚 ⟹! Γ) (ss : Γ ⊆ Δ := by simp) : 𝓚 ⟹! Δ := ⟨wk h.get ss⟩
-
-lemma em! (hp : φ ∈ Γ) (hn : ∼φ ∈ Γ) : 𝓚 ⟹! Γ := ⟨em hp hn⟩
-
-def close (φ : F) (hp : φ ∈ Γ := by simp) (hn : ∼φ ∈ Γ := by simp) : 𝓚 ⟹ Γ := em hp hn
-
-lemma close! (φ : F) (hp : φ ∈ Γ := by simp) (hn : ∼φ ∈ Γ := by simp) : 𝓚 ⟹! Γ := em! hp hn
-
-def and' {φ ψ : F} (h : φ ⋏ ψ ∈ Γ) (dp : 𝓚 ⟹ φ :: Γ) (dq : 𝓚 ⟹ ψ :: Γ) : 𝓚 ⟹ Γ :=
-  wk (and dp dq) (by simp [h])
-
-def or' {φ ψ : F} (h : φ ⋎ ψ ∈ Γ) (dpq : 𝓚 ⟹ φ :: ψ :: Γ) : 𝓚 ⟹ Γ :=
-  wk (or dpq) (by simp [h])
-
-def wkTail (d : 𝓚 ⟹ Γ) : 𝓚 ⟹ φ :: Γ := wk d (by simp)
-
-def wkAppendLeft (d : 𝓚 ⟹ Δ) : 𝓚 ⟹ Δ ++ Γ := wk d (by simp)
-
-def wkAppendRight (d : 𝓚 ⟹ Γ) : 𝓚 ⟹ Δ ++ Γ := wk d (by simp)
-
-def rotate₁ (d : 𝓚 ⟹ φ₂ :: φ₁ :: Γ) : 𝓚 ⟹ φ₁ :: φ₂ :: Γ := wk d (by simp)
-
-def rotate₂ (d : 𝓚 ⟹ φ₃ :: φ₁ :: φ₂ :: Γ) : 𝓚 ⟹ φ₁ :: φ₂ :: φ₃ :: Γ :=
-  wk d (by simpa using List.subset_cons_of_subset _ (List.subset_cons_of_subset _ <| by simp))
-
-def rotate₃ (d : 𝓚 ⟹ φ₄ :: φ₁ :: φ₂ :: φ₃ :: Γ) : 𝓚 ⟹ φ₁ :: φ₂ :: φ₃ :: φ₄ :: Γ :=
-  wk d (by simpa using
-    List.subset_cons_of_subset _ (List.subset_cons_of_subset _ <| List.subset_cons_of_subset _ <| by simp))
-
-variable {𝓚 𝓛 : K} {Γ : List F}
-
-alias cut := Tait.Cut.cut
-
-alias axm := Tait.Axiomatized.axm
-
-lemma cut! [Cut F K] (hp : 𝓚 ⟹! φ :: Δ) (hn : 𝓚 ⟹! ∼φ :: Δ) : 𝓚 ⟹! Δ := ⟨cut hp.get hn.get⟩
-
-lemma root! [Tait.Axiomatized F K] {φ} (h : φ ∈ 𝓚) : 𝓚 ⟹!. φ := ⟨axm h⟩
-
-def byAxm [Tait.Axiomatized F K] (φ) (h : φ ∈ 𝓚) (hΓ : φ ∈ Γ := by simp) : 𝓚 ⟹ Γ := wk (axm h) (by simp_all)
-
-lemma byAxm! [Tait.Axiomatized F K] (φ) (h : φ ∈ 𝓚) (hΓ : φ ∈ Γ := by simp) : 𝓚 ⟹! Γ := ⟨byAxm φ h hΓ⟩
-
-def ofAxiomSubset [Tait.Axiomatized F K] (h : 𝓚 ⊆ 𝓛) : 𝓚 ⟹ Γ → 𝓛 ⟹ Γ :=
-  Tait.Axiomatized.trans fun _ hq ↦ Tait.Axiomatized.axm (AdjunctiveSet.subset_iff.mp h _ hq)
-
-lemma of_axiom_subset [Tait.Axiomatized F K] (h : 𝓚 ⊆ 𝓛) : 𝓚 ⟹! Γ → 𝓛 ⟹! Γ := fun b ↦ ⟨ofAxiomSubset h b.get⟩
-
-instance system : Entailment K F := ⟨(· ⟹. ·)⟩
-
-instance [Tait.Axiomatized F K] : Entailment.Axiomatized K where
-  prfAxm := fun hf ↦ Tait.Axiomatized.axm <| hf
-  weakening := Tait.ofAxiomSubset
-
-lemma provable_bot_iff_derivable_nil [Cut F K] : 𝓚 ⟹! [] ↔ 𝓚 ⊢ ⊥ :=
-  ⟨fun b ↦ wk! b (by simp), fun b ↦ cut! b (by simpa using verum! _ _)⟩
-
-lemma waekerThan_of_subset [Tait.Axiomatized F K] (h : 𝓚 ⊆ 𝓛) : 𝓚 ⪯ 𝓛 := ⟨fun _ ↦ Entailment.Axiomatized.weakening! h⟩
-
-instance [Tait.Axiomatized F K] : Entailment.StrongCut K K where
-  cut {_ _ _ bs b} := Tait.Axiomatized.trans (fun _ hq ↦ bs hq) b
-
-instance [Cut F K] : DeductiveExplosion K where
-  dexp {𝓚 b φ} := wk (Tait.Cut.cut b (by simpa using verum _ _)) (by simp)
-
-/-
-instance : Entailment.Deduction K where
-  ofInsert {φ ψ 𝓚 b} := by {  }
-  inv {φ ψ 𝓚 b} :=
-    let h : cons φ 𝓚 ⟹ [∼φ ⋎ ψ, ψ] :=
-      wk (show cons φ 𝓚 ⟹ [∼φ ⋎ ψ] from ofEq (ofAxiomSubset (by simp) b) (by simp [DeMorgan.imply])) (by simp)
-    let n : cons φ 𝓚 ⟹ [∼(∼φ ⋎ ψ), ψ] :=
-      let hp : cons φ 𝓚 ⟹ [φ, ψ] := wk (show cons φ 𝓚 ⊢! φ from byAxm (by simp)) (by simp)
-      let hq : cons φ 𝓚 ⟹ [∼ψ, ψ] := em (φ := ψ) (by simp) (by simp)
-      ofEq (and hp hq) (by simp)
-    cut h n
--/
-
-lemma inconsistent_iff_provable [Cut F K] :
-    Inconsistent 𝓚 ↔ 𝓚 ⟹! [] :=
-  ⟨fun b ↦ ⟨cut (inconsistent_iff_provable_bot.mp b).get (by simpa using verum _ _)⟩,
-   fun h ↦ inconsistent_iff_provable_bot.mpr (wk! h (by simp))⟩
-
-lemma consistent_iff_unprovable [Tait.Axiomatized F K] [Cut F K] :
-    Consistent 𝓚 ↔ IsEmpty (𝓚 ⟹ []) :=
-  not_iff_not.mp <| by simp [not_consistent_iff_inconsistent, inconsistent_iff_provable]
-
-/-
-lemma provable_iff_inconsistent {φ} :
-    𝓚 ⊢ φ ↔ Inconsistent (cons (∼φ) 𝓚) := by
-  simp [inconsistent_iff_provable, deduction_iff, DeMorgan.imply]
-  constructor
-  · intro h; exact cut! (of_axiom_subset (by simp) h) (root! <| by simp)
-  · rintro ⟨b⟩
-    exact ⟨by simpa using Tait.Axiomatized.proofOfContra b⟩
-
-lemma refutable_iff_inconsistent {φ} :
-    𝓚 ⊢ ∼φ ↔ Inconsistent (cons φ 𝓚) := by simpa using provable_iff_inconsistent (𝓚 := 𝓚) (φ := ∼φ)
-
-lemma consistent_insert_iff_not_refutable {φ}  :
-    Entailment.Consistent (cons φ 𝓚) ↔ 𝓚 ⊬ ∼φ := by
-  simp [Entailment.Unprovable, refutable_iff_inconsistent, Entailment.not_inconsistent_iff_consistent]
-
-lemma inconsistent_of_provable_and_refutable {φ} (bp : 𝓚 ⊢ φ) (br : 𝓚 ⊢ ∼φ) : Inconsistent 𝓚 :=
-  inconsistent_iff_provable.mpr <| cut! bp br
--/
-
-instance [NegInvolutive F] [Cut F K] : Entailment.Cl 𝓚 where
-  mdp {φ ψ dpq dp} :=
-    let dpq : 𝓚 ⟹ [∼φ ⋎ ψ, ψ] := wk dpq (by simp [DeMorgan.imply])
-    let dnq : 𝓚 ⟹ [∼(∼φ ⋎ ψ), ψ] :=
-      let d : 𝓚 ⟹ [φ ⋏ ∼ψ, ψ] := and (wk dp <| by simp) (close ψ)
-      ofEq d (by simp)
-    cut dpq dnq
-  negEquiv {φ} := ofEq
-    (show 𝓚 ⊢! (φ ⋎ ∼φ ⋎ ⊥) ⋏ (φ ⋏ ⊤ ⋎ ∼φ) from
-      and (or <| rotate₁ <| or <| close φ) (or <| and (close φ) verum'))
+instance : Entailment.Cl 𝓔 where
+  negEquiv {φ} := Entailment.cast
+    (show 𝓔 ⊢! (φ ⋎ ∼φ ⋎ ⊥) ⋏ (φ ⋏ ⊤ ⋎ ∼φ) from
+      equiv.symm <| and (or <| swap₁ <| or <| close φ) (or <| and (identity φ) top))
     (by simp [Axioms.NegEquiv, DeMorgan.imply, LogicalConnective.iff])
-  verum := verum _ _
+  verum := equiv.symm <| verum
   implyK {φ ψ} :=
-    have : 𝓚 ⊢! ∼φ ⋎ ∼ψ ⋎ φ := or <| rotate₁ <| or <| close φ
-    ofEq this (by simp [DeMorgan.imply])
+    have : 𝓔 ⊢! ∼φ ⋎ ∼ψ ⋎ φ := equiv.symm <| or <| swap₁ <| or <| close φ
+    Entailment.cast this (by simp [DeMorgan.imply])
   implyS {φ ψ χ} :=
-    have : 𝓚 ⊢! φ ⋏ ψ ⋏ ∼χ ⋎ φ ⋏ ∼ψ ⋎ ∼φ ⋎ χ :=
-      or <| rotate₁ <| or <| rotate₁ <| or <| rotate₃ <| and
+    have : 𝓔 ⊢! φ ⋏ ψ ⋏ ∼χ ⋎ φ ⋏ ∼ψ ⋎ ∼φ ⋎ χ :=
+      equiv.symm <| or <| swap₁ <| or <| swap₁ <| or <| swap₃ <| and
         (close φ)
-        (and (rotate₃ <| and (close φ) (close ψ)) (close χ))
-    ofEq this (by simp [DeMorgan.imply])
+        (and (swap₃ <| and (close φ) (close ψ)) (close χ))
+    Entailment.cast this (by simp [DeMorgan.imply])
   and₁ {φ ψ} :=
-    have : 𝓚 ⊢! (∼φ ⋎ ∼ψ) ⋎ φ := or <| or <| close φ
-    ofEq this (by simp [DeMorgan.imply])
+    have : 𝓔 ⊢! (∼φ ⋎ ∼ψ) ⋎ φ :=  equiv.symm <|or <| or <| close φ
+    Entailment.cast this (by simp [DeMorgan.imply])
   and₂ {φ ψ} :=
-    have : 𝓚 ⊢! (∼φ ⋎ ∼ψ) ⋎ ψ := or <| or <| close ψ
-    ofEq this (by simp [DeMorgan.imply])
+    have : 𝓔 ⊢! (∼φ ⋎ ∼ψ) ⋎ ψ := equiv.symm <| or <| or <| close ψ
+    Entailment.cast this (by simp [DeMorgan.imply])
   and₃ {φ ψ} :=
-    have : 𝓚 ⊢! ∼φ ⋎ ∼ψ ⋎ φ ⋏ ψ := or <| rotate₁ <| or <| rotate₁ <| and (close φ) (close ψ)
-    ofEq this (by simp [DeMorgan.imply])
+    have : 𝓔 ⊢! ∼φ ⋎ ∼ψ ⋎ φ ⋏ ψ := equiv.symm <| or <| swap₁ <| or <| swap₁ <| and (close φ) (close ψ)
+    Entailment.cast this (by simp [DeMorgan.imply])
   or₁ {φ ψ} :=
-    have : 𝓚 ⊢! ∼φ ⋎ φ ⋎ ψ := or <| rotate₁ <| or <| close φ
-    ofEq this (by simp [DeMorgan.imply])
+    have : 𝓔 ⊢! ∼φ ⋎ φ ⋎ ψ := equiv.symm <| or <| swap₁ <| or <| close φ
+    Entailment.cast this (by simp [DeMorgan.imply])
   or₂ {φ ψ} :=
-    have : 𝓚 ⊢! ∼ψ ⋎ φ ⋎ ψ := or <| rotate₁ <| or <| close ψ
-    ofEq this (by simp [DeMorgan.imply])
+    have : 𝓔 ⊢! ∼ψ ⋎ φ ⋎ ψ := equiv.symm <| or <| swap₁ <| or <| close ψ
+    Entailment.cast this (by simp [DeMorgan.imply])
   or₃ {φ ψ χ} :=
-    have : 𝓚 ⊢! φ ⋏ ∼χ ⋎ ψ ⋏ ∼ χ ⋎ ∼φ ⋏ ∼ψ ⋎ χ :=
-      or <| rotate₁ <| or <| rotate₁ <| or <| and
-        (rotate₃ <| and (close φ) (close χ))
-        (rotate₂ <| and (close ψ) (close χ))
-    ofEq this (by simp [DeMorgan.imply])
+    have : 𝓔 ⊢! φ ⋏ ∼χ ⋎ ψ ⋏ ∼ χ ⋎ ∼φ ⋏ ∼ψ ⋎ χ :=
+      equiv.symm <| or <| swap₁ <| or <| swap₁ <| or <| and
+        (swap₃ <| and (close φ) (close χ))
+        (swap₂ <| and (close ψ) (close χ))
+    Entailment.cast this (by simp [DeMorgan.imply])
   dne {φ} :=
-    have : 𝓚 ⊢! ∼φ ⋎ φ := or <| close φ
-    ofEq this (by simp [DeMorgan.imply])
+    have : 𝓔 ⊢! ∼φ ⋎ φ := equiv.symm <| or <| close φ
+    Entailment.cast this (by simp [DeMorgan.imply])
 
-lemma wkCut [Cut F K] (hp : 𝓚 ⟹! φ :: Δ) (hn : 𝓚 ⟹! ∼φ :: Δ) : 𝓚 ⟹! Δ := ⟨cut hp.get hn.get⟩
+end EmptyEntailment
 
-def modusPonens [NegInvolutive F] [Cut F K] (b : 𝓚 ⊢! φ 🡒 ψ) : 𝓚 ⟹ φ :: Γ → 𝓚 ⟹ ψ :: Γ := fun d ↦
-  cut (φ := φ)
-    (wk d <| by simp) <|
-    cut (φ := φ 🡒 ψ)
-      (wk b <| by simp) <|
-      have : 𝓚 ⟹ φ ⋏ ∼ψ :: ∼φ :: ψ :: Γ := and (em' φ) (em' ψ)
-      ofEq this <| by simp [DeMorgan.imply]
+protected class Entailment (𝔇 : outParam (List F → Type*)) (S : Type*) [Entailment S F] [AdjunctiveSet F S] where
+  equiv {𝓢 : S} {φ} : 𝓢 ⊢! φ ≃ (l : {l : List F // ∀ φ ∈ l, φ ∈ 𝓢}) × 𝔇 (φ :: ∼l)
 
-def modusPonens! [NegInvolutive F] [Cut F K] (b : 𝓚 ⊢ φ 🡒 ψ) : 𝓚 ⟹! φ :: Γ → 𝓚 ⟹! ψ :: Γ := fun d ↦ ⟨modusPonens b.get d.get⟩
+namespace Entailment
 
-def cutFalsum [Cut F K] (d : 𝓚 ⟹ ⊥ :: Γ) : 𝓚 ⟹ Γ := Tait.cut (φ := ⊥) (Tait.wk d <| by simp) (ofEq (verum _ Γ) <| by simp)
+variable {S : Type*} [Entailment S F] [AdjunctiveSet F S] [OneSidedLK.Entailment 𝔇 S]
 
-def orReversion [Cut F K] (d : 𝓚 ⟹ φ ⋎ ψ :: Γ) : 𝓚 ⟹ φ :: ψ :: Γ :=
-  Tait.cut (φ := φ ⋎ ψ)
-    (wk d <| List.cons_subset_cons _ <| by simp)
-    ( have : 𝓚 ⟹ ∼φ ⋏ ∼ψ :: φ :: ψ :: Γ := and (em' φ) (em' ψ)
-      ofEq this (by simp) )
+omit [DeMorgan F] [NegInvolutive F] [OneSidedLK 𝔇] in
+lemma provable_iff {𝓢 : S} :
+    𝓢 ⊢ φ ↔ ∃ Γ : List F, (∀ ψ ∈ Γ, ψ ∈ 𝓢) ∧ Nonempty (𝔇 (φ :: ∼Γ)) := by
+  simpa using equiv.nonempty_congr
 
-def disjConsOfAppend {Γ Δ} (d : 𝓚 ⟹ Γ ++ Δ) : 𝓚 ⟹ Γ.disj :: Δ :=
-  match Γ with
-  |     [] => wk d (by simp)
-  | φ :: Γ => or <|
-    have : 𝓚 ⟹ Γ ++ φ :: Δ := wk d <| by simp
-    wk (disjConsOfAppend this) (by simp)
+def toProof (𝓢 : S) (d : 𝔇 [φ]) : 𝓢 ⊢! φ := equiv.symm ⟨⟨[], by simp⟩, d⟩
 
-def proofOfDerivation (d : 𝓚 ⟹ Γ) : 𝓚 ⊢! Γ.disj := disjConsOfAppend (Γ := Γ) (Δ := []) (ofEq d (by simp))
+def ofAxiom {𝓢 : S} (h : φ ∈ 𝓢) : 𝓢 ⊢! φ :=
+  equiv.symm ⟨⟨[φ], by simp_all⟩, identity φ⟩
 
-def AppendOfDisjCons [Cut F K] {Γ Δ} (d : 𝓚 ⟹ Γ.disj :: Δ) : 𝓚 ⟹ Γ ++ Δ :=
-  match Γ with
-  |     [] => ofEq (cutFalsum d) (by simp)
-  | φ :: Γ =>
-    have : 𝓚 ⟹ Γ.disj :: φ :: Δ := wk (orReversion d) (by simp)
-    wk (AppendOfDisjCons this) (by simp)
+def ofAxiomSubset {𝓢 𝓤 : S} : 𝓢 ⊢! φ → 𝓢 ⊆ 𝓤 → 𝓤 ⊢! φ := fun b h ↦
+  have ⟨l, d⟩ := equiv b
+  equiv.symm
+    ⟨⟨l, fun φ hφ ↦ AdjunctiveSet.subset_iff.mp h _ (l.prop φ hφ)⟩, d⟩
 
-def derivationOfProof [Cut F K] (d : 𝓚 ⊢! Γ.disj) : 𝓚 ⟹ Γ := ofEq (AppendOfDisjCons d) (by simp)
+instance : Entailment.Axiomatized S where
+  prfAxm h := ofAxiom h
+  weakening h d := ofAxiomSubset d h
 
-lemma derivable_iff_provable_disj [Cut F K] : 𝓚 ⟹! Γ ↔ 𝓚 ⊢ Γ.disj :=
-  ⟨fun h ↦ ⟨proofOfDerivation h.get⟩, fun h ↦ ⟨derivationOfProof h.get⟩⟩
+variable [OneSidedLK.Cut 𝔇]
 
-end Tait
+instance (𝓢 : S) : Entailment.ModusPonens 𝓢 where
+  mdp {φ ψ} b₁ b₂ :=
+    let ⟨Γ₁, b₁⟩ := equiv b₁
+    let ⟨Γ₂, b₂⟩ := equiv b₂
+    have : 𝔇 [∼(φ 🡒 ψ), ∼φ, ψ] := cast (tensor (𝔇 := 𝔇) (identity φ) (identity (∼ψ))) (by simp [DeMorgan.imply])
+    have : 𝔇 (∼φ :: ψ :: ∼↑Γ₁) := wk (cut b₁ this) (by simp)
+    have : 𝔇 (ψ :: ∼↑Γ₁ ++ ∼↑Γ₂) := wk (cut b₂ this) (by simp)
+    equiv.symm ⟨⟨Γ₁ ++ Γ₂, by simp; grind⟩, cast this⟩
+
+instance : Entailment.StrongCut S S where
+  cut {T U φ bs b} :=
+  let rec bl (l : List F) (hl : ∀ ψ ∈ l, ψ ∈ U) (χ) (d : 𝔇 (χ :: ∼l)) : T ⊢! χ :=
+    match l with
+    |     [] => equiv.symm ⟨⟨[], by simp⟩, d⟩
+    | ψ :: l =>
+      have bχ : T ⊢! ψ 🡒 χ :=
+        Entailment.cast (bl l (by simp at hl; grind) (∼ψ ⋎ χ) (OneSidedLK.or <| OneSidedLK.swap₁ d))
+        (by simp [DeMorgan.imply])
+      have bψ : T ⊢! ψ := bs (show ψ ∈ U by simp at hl; grind)
+      Entailment.mdp bχ bψ
+  have ⟨l, hl⟩ := equiv b
+  bl l l.prop φ hl
+
+instance : Entailment.DeductiveExplosion S where
+  dexp b φ :=
+    have ⟨Γ, b⟩ := equiv b
+    equiv.symm
+    ⟨ Γ,
+      have : 𝔇 [∼⊥] := cast verum (by simp)
+      wk (cut b this) (by simp) ⟩
+
+lemma inconsistent_iff {𝓢 : S} :
+    Entailment.Inconsistent 𝓢 ↔ ∃ Γ : List F, (∀ ψ ∈ Γ, ψ ∈ 𝓢) ∧ Nonempty (𝔇 (∼Γ)) := calc
+  _ ↔ 𝓢 ⊢ ⊥ := Entailment.inconsistent_iff_provable_bot
+  _ ↔ ∃ Γ : List F, (∀ ψ ∈ Γ, ψ ∈ 𝓢) ∧ Nonempty (𝔇 (⊥ :: ∼Γ)) := by simp [provable_iff]
+  _ ↔ ∃ Γ : List F, (∀ ψ ∈ Γ, ψ ∈ 𝓢) ∧ Nonempty (𝔇 (∼Γ)) := by
+    constructor
+    · rintro ⟨Γ, hΓ, ⟨d⟩⟩
+      have : 𝔇 [(∼⊥ : F)] := cast verum
+      exact ⟨Γ, hΓ, ⟨cast (cut d this)⟩⟩
+    · rintro ⟨Γ, hΓ, ⟨d⟩⟩
+      exact ⟨Γ, hΓ, ⟨wk d (by simp)⟩⟩
+
+instance (𝓢 : S) : Entailment.Cl 𝓢 where
+  negEquiv {φ} := Entailment.cast
+    (show 𝓢 ⊢! (φ ⋎ ∼φ ⋎ ⊥) ⋏ (φ ⋏ ⊤ ⋎ ∼φ) from
+      toProof _ <| and (or <| swap₁ <| or <| close φ) (or <| and (identity φ) top))
+    (by simp [Axioms.NegEquiv, DeMorgan.imply, LogicalConnective.iff])
+  verum := toProof _ <| verum
+  implyK {φ ψ} :=
+    have : 𝓢 ⊢! ∼φ ⋎ ∼ψ ⋎ φ := toProof _ <| or <| swap₁ <| or <| close φ
+    Entailment.cast this (by simp [DeMorgan.imply])
+  implyS {φ ψ χ} :=
+    have : 𝓢 ⊢! φ ⋏ ψ ⋏ ∼χ ⋎ φ ⋏ ∼ψ ⋎ ∼φ ⋎ χ :=
+      toProof _ <| or <| swap₁ <| or <| swap₁ <| or <| swap₃ <| and
+        (close φ)
+        (and (swap₃ <| and (close φ) (close ψ)) (close χ))
+    Entailment.cast this (by simp [DeMorgan.imply])
+  and₁ {φ ψ} :=
+    have : 𝓢 ⊢! (∼φ ⋎ ∼ψ) ⋎ φ :=  toProof _ <|or <| or <| close φ
+    Entailment.cast this (by simp [DeMorgan.imply])
+  and₂ {φ ψ} :=
+    have : 𝓢 ⊢! (∼φ ⋎ ∼ψ) ⋎ ψ := toProof _ <| or <| or <| close ψ
+    Entailment.cast this (by simp [DeMorgan.imply])
+  and₃ {φ ψ} :=
+    have : 𝓢 ⊢! ∼φ ⋎ ∼ψ ⋎ φ ⋏ ψ := toProof _ <| or <| swap₁ <| or <| swap₁ <| and (close φ) (close ψ)
+    Entailment.cast this (by simp [DeMorgan.imply])
+  or₁ {φ ψ} :=
+    have : 𝓢 ⊢! ∼φ ⋎ φ ⋎ ψ := toProof _ <| or <| swap₁ <| or <| close φ
+    Entailment.cast this (by simp [DeMorgan.imply])
+  or₂ {φ ψ} :=
+    have : 𝓢 ⊢! ∼ψ ⋎ φ ⋎ ψ := toProof _ <| or <| swap₁ <| or <| close ψ
+    Entailment.cast this (by simp [DeMorgan.imply])
+  or₃ {φ ψ χ} :=
+    have : 𝓢 ⊢! φ ⋏ ∼χ ⋎ ψ ⋏ ∼ χ ⋎ ∼φ ⋏ ∼ψ ⋎ χ :=
+      toProof _ <| or <| swap₁ <| or <| swap₁ <| or <| and
+        (swap₃ <| and (close φ) (close χ))
+        (swap₂ <| and (close ψ) (close χ))
+    Entailment.cast this (by simp [DeMorgan.imply])
+  dne {φ} :=
+    have : 𝓢 ⊢! ∼φ ⋎ φ := toProof _ <| or <| close φ
+    Entailment.cast this (by simp [DeMorgan.imply])
+
+variable {E : Type*} [Entailment E F]
+
+omit [DeMorgan F] [OneSidedLK 𝔇] [Cut 𝔇] in
+lemma empty_provable_iff_eprovable (𝓔 : E) [EmptyEntailment 𝔇 𝓔] :
+    (∅ : S) ⊢ φ ↔ 𝓔 ⊢ φ := by
+  constructor
+  · rintro ⟨d⟩
+    let ⟨l, d⟩ := equiv d
+    have : 𝓔 ⊢! φ := EmptyEntailment.equiv.symm <| cast d <| by
+      have : ∀ φ, φ ∉ (l : List F) := by simpa using l.prop
+      simp [List.eq_nil_iff_forall_not_mem]; grind
+    exact ⟨this⟩
+  · rintro ⟨b⟩
+    have : 𝔇 [φ] := EmptyEntailment.equiv b
+    exact ⟨equiv.symm ⟨⟨[], by simp⟩, this⟩⟩
+
+end Entailment
+
+end OneSidedLK
 
 end LO
 

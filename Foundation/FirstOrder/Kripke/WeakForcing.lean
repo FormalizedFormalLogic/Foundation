@@ -11,7 +11,7 @@ Main reference: Jeremy Avigad, "Forcing in proof theory" [Avi04]
 
 namespace LO.FirstOrder
 
-variable {L : Language} [L.Relational]
+variable {L : Language.{u}} [L.Relational]
 
 namespace KripkeModel
 
@@ -58,6 +58,10 @@ lemma rew {bv : Fin n₂ → Name} {fv : ξ₂ → Name} {ω : Rew L ξ₁ n₁ 
     p ⊩ᶜ[bv|fv] (ω ▹ φ) ↔
     p ⊩ᶜ[fun x ↦ (ω #x).relationalVal bv fv|fun x ↦ (ω &x).relationalVal bv fv] φ := by
   simp [WeaklyForces, ←Semiformula.rew_doubleNegation, Forces.rew]
+
+@[simp] lemma emb {bv : Fin n → Name} {fv : ξ → Name} {φ : Semiformula L Empty n} :
+    p ⊩ᶜ[bv|fv] (Rew.emb ▹ φ) ↔
+    p ⊩ᶜ[bv|Empty.elim] φ := by simp [rew, Empty.eq_elim]
 
 @[simp] lemma ex {φ : Semiformula L ξ (n + 1)} :
     p ⊩ᶜ[bv|fv] ∃⁰ φ ↔ ∀ q ≤ p, ∃ r ≤ q, ∃ x : r, r ⊩ᶜ[↑x :> bv|fv] φ := by
@@ -280,10 +284,12 @@ instance : WeakForcingRelation.ClassicalKripke ℙ (· ≥ ·) where
   monotone := monotone
   generic := generic
 
-lemma sound {T : Theory L} (b : T ⊢ φ) : ℙ ∀⊩ᶜ* T → ℙ ∀⊩ᶜ φ := fun H ↦
-  Forces₀.sound (W := ℙ) (gödel_gentzen b (Λ := 𝗜𝗻𝘁¹)) fun φ hφ ↦ (by
-    rcases show ∃ ψ ∈ T, ψᴺ = φ by simpa [Theory.ToTheoryᵢ] using hφ with ⟨ψ, hψ, rfl⟩
-    exact H ψ hψ)
+lemma sound : 𝐋𝐊¹ ⊢ φ → ∀ p : ℙ, ∀ fv, (∀ i, p ⊩↓ fv i) → p ⊩ᶜ[![] | fv] φ := fun b p fv Hfv ↦ by
+  have : 𝗜𝗻𝘁¹ ⊢ φᴺ := Proof.gödel_gentzen b
+  exact Forces.sound p fv Hfv this
+
+lemma sound₀ {σ : Sentence L} : 𝐋𝐊¹ ⊢ (σ : Proposition L) → ℙ ∀⊩ᶜ σ := fun b p ↦ by
+  simpa using sound b p (fun _ ↦ (Classical.ofNonempty : p).val) fun _ ↦ by simp
 
 end WeaklyForces₀
 
@@ -296,7 +302,7 @@ namespace ForcingNotion
 
 variable (ℙ : ForcingNotion L)
 
-abbrev Condition := ℙ.World
+@[coe] abbrev Condition := ℙ.World
 
 abbrev Name := ℙ.Carrier
 
@@ -318,9 +324,84 @@ instance : Semantics (ForcingNotion L) (Sentence L) := ⟨fun ℙ φ ↦ ℙ ∀
 
 lemma models_def : ℙ ⊧ φ ↔ ℙ ∀⊩ᶜ φ := by rfl
 
-lemma sound {T : Theory L} (b : T ⊢ φ) : ℙ ⊧* T → ℙ ⊧ φ := fun H ↦
-  WeaklyForces₀.sound (ℙ := ℙ) b fun _ hφ ↦ H.models_set hφ
+lemma sound {σ : Sentence L} : 𝐋𝐊¹ ⊢ (σ : Proposition L) → ℙ ⊧ σ :=
+  WeaklyForces₀.sound₀
 
-instance (T : Theory L) : Sound T (Semantics.models (ForcingNotion L) T) := ⟨fun b _ H ↦ sound b H⟩
+instance (ℙ : ForcingNotion L) :
+    Sound (Entailment.pullback (𝐋𝐊¹ : Proof.Symbol L) ((↑·) : Sentence L → Proposition L)) ℙ :=
+  ⟨fun {_} ↦ sound⟩
 
 end ForcingNotion
+
+/-! ## Completeness -/
+
+section completeness
+
+
+inductive PositiveDerivationFrom (Ξ : Sequent L) : Sequent L → Type _
+| or : PositiveDerivationFrom Ξ (φ :: ψ :: Γ) → PositiveDerivationFrom Ξ (φ ⋎ ψ :: Γ)
+| exs : PositiveDerivationFrom Ξ (φ/[t] :: Γ) → PositiveDerivationFrom Ξ ((∃⁰ φ) :: Γ)
+| wk : PositiveDerivationFrom Ξ Δ → Δ ⊆ Γ → PositiveDerivationFrom Ξ Γ
+| protected id : PositiveDerivationFrom Ξ Ξ
+
+infix:45 " ⟶⁺ " => PositiveDerivationFrom
+
+namespace PositiveDerivationFrom
+
+variable {Ξ Γ Δ : Sequent L}
+
+def ofSubset (ss : Ξ ⊆ Γ) : Ξ ⟶⁺ Γ := wk .id ss
+
+def trans {Ξ Γ Δ : Sequent L} : Ξ ⟶⁺ Γ → Γ ⟶⁺ Δ → Ξ ⟶⁺ Δ
+  | b,    or d => or (b.trans d)
+  | b,   exs d => exs (b.trans d)
+  | b,  wk d h => wk (b.trans d) h
+  | b,     .id => b
+
+def cons {Ξ Γ : Sequent L} (φ) : Ξ ⟶⁺ Γ → φ :: Ξ ⟶⁺ φ :: Γ
+  | or (Γ := Γ) (φ := ψ) (ψ := χ) d =>
+    have : φ :: Ξ ⟶⁺ ψ :: χ :: φ :: Γ := wk (cons φ d) (by simp; tauto)
+    wk (or this) (by simp)
+  | exs (Ξ := Ξ) (Γ := Γ) (φ := ψ) (t := t) d =>
+    have : φ :: Ξ ⟶⁺ ψ/[t] :: φ :: Γ := wk (cons φ d) (by simp)
+    wk this.exs (by simp)
+  | wk d h => wk (d.cons φ) (by simp [h])
+  | .id => .id
+
+def append {Ξ Γ : Sequent L} : (Δ : Sequent L) → Ξ ⟶⁺ Γ → Δ ++ Ξ ⟶⁺ Δ ++ Γ
+  | [],     d => d
+  | φ :: Δ, d => (d.append Δ).cons φ
+
+def add {Γ Δ Ξ Θ : Sequent L} : Γ ⟶⁺ Δ → Ξ ⟶⁺ Θ → Γ ++ Ξ ⟶⁺ Δ ++ Θ
+  |    or d, b => or (d.add b)
+  |   exs d, b => exs (d.add b)
+  |  wk d h, b => wk (d.add b) (by simp [h])
+  |     .id, b => b.append Γ
+
+def graft {Ξ Γ : Sequent L} (b : ⊢ᴸᴷ¹ Ξ) : Ξ ⟶⁺ Γ → ⊢ᴸᴷ¹ Γ
+  |    or d => .or (d.graft b)
+  |   exs d => .exs (d.graft b)
+  |  wk d h => .wk (d.graft b) h
+  |     .id => b
+
+end PositiveDerivationFrom
+
+variable (L)
+
+abbrev ConsistentSequent := {Γ : Sequent L // IsEmpty (⊢ᴸᴷ¹ ∼Γ)}
+
+variable {L}
+
+instance : Preorder (ConsistentSequent L) where
+  le := fun Γ Δ ↦ Nonempty (PositiveDerivationFrom (∼Δ.val) (∼Γ.val))
+  le_refl Γ := ⟨PositiveDerivationFrom.id⟩
+  le_trans Γ Δ Ξ := by
+    rintro ⟨bΔ⟩ ⟨bΞ⟩
+    exact ⟨PositiveDerivationFrom.trans bΞ bΔ⟩
+
+insta
+
+
+end completeness
+
+end LO.FirstOrder

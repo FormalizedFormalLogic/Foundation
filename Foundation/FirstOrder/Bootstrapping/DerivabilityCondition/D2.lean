@@ -18,7 +18,7 @@ variable {L : Language} [L.Encodable] [L.LORDefinable]
 variable (T : Theory L) [T.Δ₁]
 
 /-- Hilbert–Bernays provability condition D2 -/
-theorem modus_ponens {φ ψ : SyntacticFormula L} (hφψ : T.Provable (⌜φ 🡒 ψ⌝ : V)) (hφ : T.Provable (⌜φ⌝ : V)) :
+theorem modus_ponens {φ ψ : Proposition L} (hφψ : T.Provable (⌜φ 🡒 ψ⌝ : V)) (hφ : T.Provable (⌜φ⌝ : V)) :
     T.Provable (⌜ψ⌝ : V) := by
   apply (tprovable_tquote_iff_provable_quote (L := L)).mp
   have hφψ : Theory.internalize V T ⊢ ⌜φ⌝ 🡒 ⌜ψ⌝ := by simpa using (tprovable_tquote_iff_provable_quote (L := L)).mpr hφψ

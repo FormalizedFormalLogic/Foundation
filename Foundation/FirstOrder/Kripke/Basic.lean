@@ -3,7 +3,7 @@ module
 public import Foundation.FirstOrder.Basic
 public import Foundation.Syntax.Predicate.Relational
 public import Foundation.Logic.ForcingRelation
-public import Foundation.Vorspiel.Preorder
+public import Foundation.Vorspiel.Order.Dense
 
 @[expose] public section
 namespace LO.FirstOrder
@@ -39,6 +39,10 @@ namespace KripkeModel
 
 lemma domain_nonempty' (p : W) : ∃ x, p ⊩↓ x := domain_nonempty p
 
+instance (p : W) : Nonempty p := by
+  rcases domain_nonempty p with ⟨x, _⟩
+  exact ⟨x, by assumption⟩
+
 lemma domain_monotone {p : W} : p ⊩↓ x → ∀ q ≤ p, q ⊩↓ x := fun hx _ h ↦
   domain_antimonotone h hx
 
@@ -47,34 +51,6 @@ lemma domain_monotone {p : W} : p ⊩↓ x → ∀ q ≤ p, q ⊩↓ x := fun hx
 @[simp] lemma forcingExists_of_constantDomain [ConstantDomain W] (w : W) (x : C) : w ⊩↓ x := by
   suffices x ∈ Domain w from this; simp
 
-section point_model
-
-instance domain (w : W) : Structure L w where
-  func _ f _ := IsEmpty.elim' inferInstance f
-  rel _ R v := Rel w R fun i ↦ ↑(v i)
-
-set_option linter.unusedVariables false in
-def Point [KripkeModel L W C] (w : W) := C
-
-instance domain' (w : W) : Structure L (Point w) where
-  func _ f _ := IsEmpty.elim' inferInstance f
-  rel _ R v := Rel w R v
-
-variable {w : W}
-
-@[simp] lemma domain_models_rel {R : L.Rel k} {v : Fin k → w} :
-    (domain w).rel R v ↔ Rel w R fun i ↦ ↑(v i) := by rfl
-
-@[simp] lemma domain'_models_rel {R : L.Rel k} {v : Fin k → Point w} :
-    (domain' w).rel R v ↔ Rel w R fun i ↦ ↑(v i) := by rfl
-
-@[simp] lemma domain_val (t : Semiterm L ξ n) : t.val (domain w) bv fv = t.relationalVal bv fv := by
-  rcases Semiterm.bvar_or_fvar_of_relational t with (⟨x, rfl⟩ | ⟨x, rfl⟩) <;> simp
-
-@[simp] lemma domain'_val (t : Semiterm L ξ n) : t.val (domain' w) bv fv = t.relationalVal bv fv := by
-  rcases Semiterm.bvar_or_fvar_of_relational t with (⟨x, rfl⟩ | ⟨x, rfl⟩) <;> simp
-
-end point_model
 
 section filter
 
@@ -118,6 +94,10 @@ instance Str : Structure L F.Model where
 end Filter
 
 end filter
+
+variable (W)
+
+
 
 end KripkeModel
 

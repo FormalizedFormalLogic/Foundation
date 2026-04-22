@@ -58,7 +58,7 @@ lemma mdp! [ModusPonens 𝓢] : 𝓢 ⊢ φ 🡒 ψ → 𝓢 ⊢ φ → 𝓢 ⊢
   rintro ⟨hpq⟩ ⟨hp⟩;
   exact ⟨hpq ⨀ hp⟩
 infixl:90 "⨀" => mdp!
-infixl:90 "⨀!" => mdp!
+infixl:90 "⨀!" => mdp
 
 
 
@@ -111,13 +111,13 @@ export HasAxiomAndElim (and₁ and₂)
 @[simp] lemma and₁! [HasAxiomAndElim 𝓢] : 𝓢 ⊢ φ ⋏ ψ 🡒 φ := ⟨and₁⟩
 
 def K_left [ModusPonens 𝓢] [HasAxiomAndElim 𝓢] (d : 𝓢 ⊢! φ ⋏ ψ) : 𝓢 ⊢! φ := and₁ ⨀ d
-@[grind] lemma K!_left [ModusPonens 𝓢] [HasAxiomAndElim 𝓢] (d : 𝓢 ⊢ φ ⋏ ψ) : 𝓢 ⊢ φ := ⟨K_left d.some⟩
+@[grind ->] lemma K!_left [ModusPonens 𝓢] [HasAxiomAndElim 𝓢] (d : 𝓢 ⊢ φ ⋏ ψ) : 𝓢 ⊢ φ := ⟨K_left d.some⟩
 
 
 @[simp] lemma and₂! [HasAxiomAndElim 𝓢] : 𝓢 ⊢ φ ⋏ ψ 🡒 ψ := ⟨and₂⟩
 
 def K_right [ModusPonens 𝓢] [HasAxiomAndElim 𝓢] (d : 𝓢 ⊢! φ ⋏ ψ) : 𝓢 ⊢! ψ := and₂ ⨀ d
-@[grind] lemma K!_right [ModusPonens 𝓢] [HasAxiomAndElim 𝓢] (d : 𝓢 ⊢ φ ⋏ ψ) : 𝓢 ⊢ ψ := ⟨K_right d.some⟩
+@[grind ->] lemma K!_right [ModusPonens 𝓢] [HasAxiomAndElim 𝓢] (d : 𝓢 ⊢ φ ⋏ ψ) : 𝓢 ⊢ ψ := ⟨K_right d.some⟩
 
 
 class HasAxiomAndInst (𝓢 : S) where
@@ -127,7 +127,7 @@ export HasAxiomAndInst (and₃)
 @[simp] lemma and₃! [HasAxiomAndInst 𝓢] : 𝓢 ⊢ φ 🡒 ψ 🡒 φ ⋏ ψ := ⟨and₃⟩
 
 def K_intro [ModusPonens 𝓢] [HasAxiomAndInst 𝓢] (d₁ : 𝓢 ⊢! φ) (d₂: 𝓢 ⊢! ψ) : 𝓢 ⊢! φ ⋏ ψ := and₃ ⨀ d₁ ⨀ d₂
-@[grind] lemma K!_intro  [ModusPonens 𝓢] [HasAxiomAndInst 𝓢] (d₁ : 𝓢 ⊢ φ) (d₂: 𝓢 ⊢ ψ) : 𝓢 ⊢ φ ⋏ ψ := ⟨K_intro d₁.some d₂.some⟩
+@[grind <-] lemma K!_intro  [ModusPonens 𝓢] [HasAxiomAndInst 𝓢] (d₁ : 𝓢 ⊢ φ) (d₂: 𝓢 ⊢ ψ) : 𝓢 ⊢ φ ⋏ ψ := ⟨K_intro d₁.some d₂.some⟩
 
 
 class HasAxiomOrInst (𝓢 : S) where
@@ -138,12 +138,12 @@ export HasAxiomOrInst (or₁ or₂)
 @[simp] lemma or₁! [HasAxiomOrInst 𝓢] : 𝓢 ⊢ φ 🡒 φ ⋎ ψ := ⟨or₁⟩
 
 def A_intro_left [HasAxiomOrInst 𝓢] [ModusPonens 𝓢] (d : 𝓢 ⊢! φ) : 𝓢 ⊢! φ ⋎ ψ := or₁ ⨀ d
-@[grind] lemma A!_intro_left [HasAxiomOrInst 𝓢] [ModusPonens 𝓢] (d : 𝓢 ⊢ φ) : 𝓢 ⊢ φ ⋎ ψ := ⟨A_intro_left d.some⟩
+@[grind .] lemma A!_intro_left [HasAxiomOrInst 𝓢] [ModusPonens 𝓢] (d : 𝓢 ⊢ φ) : 𝓢 ⊢ φ ⋎ ψ := ⟨A_intro_left d.some⟩
 
 @[simp] lemma or₂! [HasAxiomOrInst 𝓢] : 𝓢 ⊢ ψ 🡒 φ ⋎ ψ := ⟨or₂⟩
 
 def A_intro_right [HasAxiomOrInst 𝓢] [ModusPonens 𝓢] (d : 𝓢 ⊢! ψ) : 𝓢 ⊢! φ ⋎ ψ := or₂ ⨀ d
-@[grind] lemma A!_intro_right [HasAxiomOrInst 𝓢] [ModusPonens 𝓢] (d : 𝓢 ⊢ ψ) : 𝓢 ⊢ φ ⋎ ψ := ⟨A_intro_right d.some⟩
+@[grind .] lemma A!_intro_right [HasAxiomOrInst 𝓢] [ModusPonens 𝓢] (d : 𝓢 ⊢ ψ) : 𝓢 ⊢ φ ⋎ ψ := ⟨A_intro_right d.some⟩
 
 
 class HasAxiomOrElim (𝓢 : S) where
@@ -182,7 +182,7 @@ variable {𝓢 : S} [ModusPonens 𝓢] {φ ψ χ : F}
 
 def CO_of_N [HasAxiomAndElim 𝓢] [NegationEquiv 𝓢] : 𝓢 ⊢! ∼φ → 𝓢 ⊢! φ 🡒 ⊥ := λ h => (K_left negEquiv) ⨀ h
 def N_of_CO [HasAxiomAndElim 𝓢] [NegationEquiv 𝓢] : 𝓢 ⊢! φ 🡒 ⊥ → 𝓢 ⊢! ∼φ := λ h => (K_right negEquiv) ⨀ h
-@[grind] lemma N!_iff_CO! [HasAxiomAndElim 𝓢] [NegationEquiv 𝓢] : 𝓢 ⊢ ∼φ ↔ 𝓢 ⊢ φ 🡒 ⊥ := ⟨λ ⟨h⟩ => ⟨CO_of_N h⟩, λ ⟨h⟩ => ⟨N_of_CO h⟩⟩
+@[grind =] lemma N!_iff_CO! [HasAxiomAndElim 𝓢] [NegationEquiv 𝓢] : 𝓢 ⊢ ∼φ ↔ 𝓢 ⊢ φ 🡒 ⊥ := ⟨λ ⟨h⟩ => ⟨CO_of_N h⟩, λ ⟨h⟩ => ⟨N_of_CO h⟩⟩
 
 
 def E_intro [HasAxiomAndInst 𝓢] (b₁ : 𝓢 ⊢! φ 🡒 ψ) (b₂ : 𝓢 ⊢! ψ 🡒 φ) : 𝓢 ⊢! φ 🡘 ψ := K_intro b₁ b₂
@@ -291,7 +291,8 @@ def ECKCC [HasAxiomAndInst 𝓢] [HasAxiomAndElim 𝓢] [HasAxiomImplyK 𝓢] [H
 def CC_of_CK [HasAxiomAndInst 𝓢] [HasAxiomAndElim 𝓢] [HasAxiomImplyK 𝓢] [HasAxiomImplyS 𝓢] (d : 𝓢 ⊢! φ ⋏ ψ 🡒 χ) : 𝓢 ⊢! φ 🡒 ψ 🡒 χ := (K_left $ ECKCC) ⨀ d
 def CK_of_CC [HasAxiomAndInst 𝓢] [HasAxiomAndElim 𝓢] [HasAxiomImplyK 𝓢] [HasAxiomImplyS 𝓢] (d : 𝓢 ⊢! φ 🡒 ψ 🡒 χ) : 𝓢 ⊢! φ ⋏ ψ 🡒 χ := (K_right $ ECKCC) ⨀ d
 
-@[grind] lemma CK!_iff_CC! [HasAxiomAndInst 𝓢] [HasAxiomAndElim 𝓢] [HasAxiomImplyK 𝓢] [HasAxiomImplyS 𝓢]: (𝓢 ⊢ φ ⋏ ψ 🡒 χ) ↔ (𝓢 ⊢ φ 🡒 ψ 🡒 χ) := iff_of_E! ECKCC!
+@[grind =] lemma CK!_iff_CC! [HasAxiomAndInst 𝓢] [HasAxiomAndElim 𝓢] [HasAxiomImplyK 𝓢] [HasAxiomImplyS 𝓢] :
+    (𝓢 ⊢ φ ⋏ ψ 🡒 χ) ↔ (𝓢 ⊢ φ 🡒 ψ 🡒 χ) := iff_of_E! ECKCC!
 
 def CV [HasAxiomVerum 𝓢] [HasAxiomImplyK 𝓢] : 𝓢 ⊢! φ 🡒 ⊤ := C_of_conseq verum
 @[simp] lemma CV! [HasAxiomImplyK 𝓢] [HasAxiomVerum 𝓢] : 𝓢 ⊢ φ 🡒 ⊤ := ⟨CV⟩
@@ -353,8 +354,7 @@ def CConjConj [DecidableEq F] (h : Δ ⊆ Γ) : 𝓢 ⊢! Γ.conj 🡒 Δ.conj :
 
 def left_Conj₂_intro [DecidableEq F] {Γ : List F} {φ : F} (h : φ ∈ Γ) : 𝓢 ⊢! ⋀Γ 🡒 φ :=
   have : Γ.idxOf φ < Γ.length := List.idxOf_lt_length_of_mem h
-  have : Γ[Γ.idxOf φ] = φ := List.getElem_idxOf this
-  cast (by rw [this]) <| conj₂Nth Γ (Γ.idxOf φ) (by assumption)
+  cast <| conj₂Nth Γ (Γ.idxOf φ) (by assumption)
 lemma left_Conj₂!_intro [DecidableEq F] (h : φ ∈ Γ) : 𝓢 ⊢ ⋀Γ 🡒 φ := ⟨left_Conj₂_intro h⟩
 
 def Conj₂_intro (Γ : List F) (b : (φ : F) → φ ∈ Γ → 𝓢 ⊢! φ) : 𝓢 ⊢! ⋀Γ :=
@@ -380,7 +380,8 @@ section
 
 variable {G T : Type*} [Entailment T G] [LogicalConnective G] {𝓣 : T}
 
-def Minimal.ofEquiv (𝓢 : S) [Entailment.Minimal 𝓢] (𝓣 : T) (f : G →ˡᶜ F) (e : (φ : G) → 𝓢 ⊢! f φ ≃ 𝓣 ⊢! φ) : Entailment.Minimal 𝓣 where
+abbrev Minimal.ofEquiv (𝓢 : S) [Entailment.Minimal 𝓢] (𝓣 : T)
+    (f : G →ˡᶜ F) (e : (φ : G) → 𝓢 ⊢! f φ ≃ 𝓣 ⊢! φ) : Entailment.Minimal 𝓣 where
   mdp {φ ψ dpq dp} := (e ψ) (
     let d : 𝓢 ⊢! f φ 🡒 f ψ := by simpa using (e (φ 🡒 ψ)).symm dpq
     d ⨀ ((e φ).symm dp))
@@ -482,17 +483,17 @@ instance [DecidableEq F] : Axiomatized (FiniteContext F 𝓢) where
   weakening := fun H b ↦ C_trans (CConj₂Conj₂ H) b
 
 instance : Compact (FiniteContext F 𝓢) where
-  Γ := fun {Γ} _ _ ↦ Γ
-  ΓPrf := id
-  Γ_subset := by simp
-  Γ_finite := by rintro ⟨Γ⟩; simp [AdjunctiveSet.Finite, AdjunctiveSet.set]
+  core := fun {Γ} _ _ ↦ Γ
+  corePrf := id
+  core_subset := by simp
+  core_finite := by rintro ⟨Γ⟩; simp [AdjunctiveSet.Finite, AdjunctiveSet.set]
 
 def nthAxm {Γ} (n : ℕ) (h : n < Γ.length := by simp) : Γ ⊢[𝓢]! Γ[n] := conj₂Nth Γ n h
 lemma nth_axm! {Γ} (n : ℕ) (h : n < Γ.length := by simp) : Γ ⊢[𝓢] Γ[n] := ⟨nthAxm n h⟩
 
 def byAxm [DecidableEq F] {φ} (h : φ ∈ Γ := by simp) : Γ ⊢[𝓢]! φ := Axiomatized.prfAxm (by simpa)
 
-lemma by_axm! [DecidableEq F] {φ} (h : φ ∈ Γ := by simp) : Γ ⊢[𝓢] φ := Axiomatized.provable_axm _ (by simpa)
+lemma by_axm! [DecidableEq F] {φ} (h : φ ∈ Γ := by simp) : Γ ⊢[𝓢] φ := Axiomatized.provable_refl _ (by simpa)
 
 def weakening [DecidableEq F] (h : Γ ⊆ Δ) {φ} : Γ ⊢[𝓢]! φ → Δ ⊢[𝓢]! φ := Axiomatized.weakening (by simpa)
 
@@ -661,18 +662,18 @@ section minimal
 variable [Entailment.Minimal 𝓢]
 
 instance [DecidableEq F] : Axiomatized (Context F 𝓢) where
-  prfAxm := fun {Γ φ} hp ↦ ⟨[φ], by simpa using hp, byAxm (by simp [AdjunctiveSet.set])⟩
+  prfAxm := fun {Γ φ} hp ↦ ⟨[φ], by simpa using hp, byAxm (by simp)⟩
   weakening := fun h b ↦ ⟨b.ctx, fun φ hp ↦ AdjunctiveSet.subset_iff.mp h φ (b.subset φ hp), b.prf⟩
 
 def byAxm [DecidableEq F] {Γ : Set F} {φ : F} (h : φ ∈ Γ) : Γ *⊢[𝓢]! φ := Axiomatized.prfAxm (by simpa)
 
-lemma by_axm [DecidableEq F] {Γ : Set F} {φ : F} (h : φ ∈ Γ) : Γ *⊢[𝓢] φ := Axiomatized.provable_axm _ (by simpa)
+lemma by_axm [DecidableEq F] {Γ : Set F} {φ : F} (h : φ ∈ Γ) : Γ *⊢[𝓢] φ := Axiomatized.provable_refl _ (by simpa)
 
 instance : Compact (Context F 𝓢) where
-  Γ := fun b ↦ AdjunctiveSet.set b.ctx
-  ΓPrf := fun b ↦ ⟨b.ctx, by simp [AdjunctiveSet.set], b.prf⟩
-  Γ_subset := by rintro ⟨Γ⟩ φ b; exact b.subset
-  Γ_finite := by rintro ⟨Γ⟩; simp [AdjunctiveSet.Finite, AdjunctiveSet.set]
+  core := fun b ↦ AdjunctiveSet.set b.ctx
+  corePrf := fun b ↦ ⟨b.ctx, by simp [AdjunctiveSet.set], b.prf⟩
+  core_subset := by rintro ⟨Γ⟩ φ b; exact b.subset
+  core_finite := by rintro ⟨Γ⟩; simp [AdjunctiveSet.Finite, AdjunctiveSet.set]
 
 -- lemma provable_iff' [DecidableEq F] {φ : F} : Γ *⊢[𝓢] φ ↔ ∃ Δ : Finset F, (↑Δ ⊆ Γ) ∧ Δ *⊢[𝓢] φ
 
@@ -681,10 +682,11 @@ def deduct [DecidableEq F] {φ ψ : F} {Γ : Set F} : (insert φ Γ) *⊢[𝓢]!
     have h : ∀ ψ ∈ Δ, ψ = φ ∨ ψ ∈ Γ := by simpa using h
     let b' : (φ :: Δ.filter (· ≠ φ)) ⊢[𝓢]! ψ :=
       FiniteContext.weakening
-        (by simp [List.subset_def, List.mem_filter]; rintro χ hr; simp [hr]; tauto)
+        (by simp [List.subset_def, List.mem_filter]; grind)
         b
     ⟨ Δ.filter (· ≠ φ), by
-      intro ψ; simp [List.mem_filter]
+      intro ψ
+      suffices ψ ∈ Δ → ψ ≠ φ → ψ ∈ Γ by simpa [List.mem_filter]
       intro hq ne
       rcases h ψ hq
       · contradiction
@@ -693,7 +695,7 @@ def deduct [DecidableEq F] {φ ψ : F} {Γ : Set F} : (insert φ Γ) *⊢[𝓢]!
 lemma deduct! [DecidableEq F] (h : (insert φ Γ) *⊢[𝓢] ψ) : Γ *⊢[𝓢] φ 🡒 ψ := ⟨Context.deduct h.some⟩
 
 def deductInv {φ ψ : F} {Γ : Set F} : Γ *⊢[𝓢]! φ 🡒 ψ → (insert φ Γ) *⊢[𝓢]! ψ
-  | ⟨Δ, h, b⟩ => ⟨φ :: Δ, by simp; intro χ hr; exact Or.inr (h χ hr), FiniteContext.deductInv b⟩
+  | ⟨Δ, h, b⟩ => ⟨φ :: Δ, by simpa using fun χ hr ↦ Or.inr (h χ hr), FiniteContext.deductInv b⟩
 lemma deductInv! [DecidableEq F] (h : Γ *⊢[𝓢] φ 🡒 ψ) : (insert φ Γ) *⊢[𝓢] ψ := ⟨Context.deductInv h.some⟩
 
 instance deduction [DecidableEq F] : Deduction (Context F 𝓢) where
@@ -709,12 +711,13 @@ lemma of! (b : 𝓢 ⊢ φ) : Γ *⊢[𝓢] φ := ⟨Context.of b.some⟩
 
 def mdp [DecidableEq F] {Γ : Set F} (bpq : Γ *⊢[𝓢]! φ 🡒 ψ) (bp : Γ *⊢[𝓢]! φ) : Γ *⊢[𝓢]! ψ :=
   ⟨ bpq.ctx ++ bp.ctx, by
-    simp; rintro χ (hr | hr)
+    simp only [List.mem_append, mem_coe_iff]
+    rintro χ (hr | hr)
     · exact bpq.subset χ hr
     · exact bp.subset χ hr,
     FiniteContext.mdp' bpq.prf bp.prf ⟩
 
-lemma by_axm! [DecidableEq F] (h : φ ∈ Γ) : Γ *⊢[𝓢] φ := Entailment.by_axm _ (by simpa)
+lemma by_axm! [DecidableEq F] (h : φ ∈ Γ) : Γ *⊢[𝓢] φ := Entailment.by_axm (by simpa)
 
 def emptyPrf {φ : F} : ∅ *⊢[𝓢]! φ → 𝓢 ⊢! φ := by
   rintro ⟨Γ, hΓ, h⟩;
@@ -1387,7 +1390,7 @@ def right_Disj_intro [DecidableEq F] (Γ : List F) (h : φ ∈ Γ) : 𝓢 ⊢! �
   match Γ with
   |     [] => by simp at h
   | ψ :: Γ =>
-    if e : φ = ψ then cast (by simp [e]) (or₁ : 𝓢 ⊢! φ 🡒 φ ⋎ Γ.disj)
+    if e : φ = ψ then cast (or₁ : 𝓢 ⊢! φ 🡒 φ ⋎ Γ.disj) (by simp [e])
     else
       have : φ ∈ Γ := by simpa [e] using h
       C_trans (right_Disj_intro Γ this) or₂
@@ -1402,14 +1405,14 @@ def right_Disj₂_intro [DecidableEq F] (Γ : List F) (h : φ ∈ Γ) : 𝓢 ⊢
   |     [] => by simp at h
   |    [ψ] => (show ⋁[ψ] = φ by simp_all) ▸ C_id
   | ψ :: χ :: Γ =>
-    if e : φ = ψ then cast (by simp [e]) (or₁ : 𝓢 ⊢! φ 🡒 φ ⋎ ⋁(χ :: Γ))
+    if e : φ = ψ then cast (or₁ : 𝓢 ⊢! φ 🡒 φ ⋎ ⋁(χ :: Γ)) (by simp [e])
     else
       have : φ ∈ χ :: Γ := by simpa [e] using h
       C_trans (right_Disj₂_intro _ this) or₂
 def right_Disj₂!_intro [DecidableEq F] (Γ : List F) (h : φ ∈ Γ) : 𝓢 ⊢ φ 🡒 ⋁Γ := ⟨right_Disj₂_intro Γ h⟩
 
 def right_Disj'_intro [DecidableEq F] (φ : ι → F) (l : List ι) (h : i ∈ l) : 𝓢 ⊢! φ i 🡒 l.disj' φ :=
-  right_Disj₂_intro (l.map φ) (by simp; exact ⟨i, h, rfl⟩)
+  right_Disj₂_intro (l.map φ) (by simpa using ⟨i, h, rfl⟩)
 lemma right_Disj'!_intro [DecidableEq F] (φ : ι → F) (l : List ι) (h : i ∈ l) : 𝓢 ⊢ φ i 🡒 l.disj' φ := ⟨right_Disj'_intro φ l h⟩
 
 lemma right_Fdisj!_intro [DecidableEq F] (s : Finset F) (h : φ ∈ s) : 𝓢 ⊢ φ 🡒 s.disj := right_Disj₂!_intro _ (by simp [h])
@@ -1472,7 +1475,7 @@ end
 
 namespace Context
 
-lemma provable_iff_finset [DecidableEq F] {Γ : Set F} {φ : F} : Γ *⊢[𝓢] φ ↔ ∃ Δ : Finset F, (Δ.toSet ⊆ Γ) ∧ Δ *⊢[𝓢] φ := by
+lemma provable_iff_finset [DecidableEq F] {Γ : Set F} {φ : F} : Γ *⊢[𝓢] φ ↔ ∃ Δ : Finset F, (↑Δ ⊆ Γ) ∧ Δ *⊢[𝓢] φ := by
   apply Iff.trans Context.provable_iff;
   constructor;
   . rintro ⟨Δ, hΔ₁, hΔ₂⟩;

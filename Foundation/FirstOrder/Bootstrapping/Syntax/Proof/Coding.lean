@@ -18,22 +18,22 @@ namespace Derivation2
 
 variable (V)
 
-def cast [L.DecidableEq] {T : Theory L} {Γ Δ : Finset (SyntacticFormula L)} (d : T ⟹₂ Γ) (h : Γ = Δ) : T ⟹₂ Δ := h ▸ d
+def cast [L.DecidableEq] {T : Theory L} {Γ Δ : Finset (Proposition L)} (d : T ⟹₂ Γ) (h : Γ = Δ) : T ⟹₂ Δ := h ▸ d
 
-noncomputable def Sequent.quote (Γ : Finset (SyntacticFormula L)) : V := ∑ φ ∈ Γ, Exp.exp (⌜φ⌝ : V)
+noncomputable def Sequent.quote (Γ : Finset (Proposition L)) : V := ∑ φ ∈ Γ, Exp.exp (⌜φ⌝ : V)
 
-noncomputable instance : GödelQuote (Finset (SyntacticFormula L)) V := ⟨Sequent.quote V⟩
+noncomputable instance : GödelQuote (Finset (Proposition L)) V := ⟨Sequent.quote V⟩
 
 omit [L.DecidableEq] in
-lemma Sequent.quote_def (Γ : Finset (SyntacticFormula L)) : ⌜Γ⌝ = ∑ φ ∈ Γ, Exp.exp (⌜φ⌝ : V) := rfl
+lemma Sequent.quote_def (Γ : Finset (Proposition L)) : ⌜Γ⌝ = ∑ φ ∈ Γ, Exp.exp (⌜φ⌝ : V) := rfl
 
 variable {V}
 
 omit [L.DecidableEq] in
-@[simp] lemma Sequent.quote_empty : (⌜(∅ : Finset (SyntacticFormula L))⌝ : V) = ∅ := by
+@[simp] lemma Sequent.quote_empty : (⌜(∅ : Finset (Proposition L))⌝ : V) = ∅ := by
   simp [Sequent.quote_def, emptyset_def]
 
-@[simp] lemma Sequent.mem_quote_iff {Γ : Finset (SyntacticFormula L)} {φ} : ⌜φ⌝ ∈ (⌜Γ⌝ : V) ↔ φ ∈ Γ := by
+@[simp] lemma Sequent.mem_quote_iff {Γ : Finset (Proposition L)} {φ} : ⌜φ⌝ ∈ (⌜Γ⌝ : V) ↔ φ ∈ Γ := by
   induction Γ using Finset.induction generalizing φ
   case empty => simp [Sequent.quote_def]
   case insert a Γ ha ih =>
@@ -45,22 +45,22 @@ omit [L.DecidableEq] in
     rw [this]
     simp [←ih]
 
-lemma Sequent.quote_inj {Γ Δ : Finset (SyntacticFormula L)} : (⌜Γ⌝ : V) = ⌜Δ⌝ → Γ = Δ := fun h ↦ by
+lemma Sequent.quote_inj {Γ Δ : Finset (Proposition L)} : (⌜Γ⌝ : V) = ⌜Δ⌝ → Γ = Δ := fun h ↦ by
   ext φ; rw [←Sequent.mem_quote_iff (V := V), h]; simp
 
 omit [L.DecidableEq] in
-@[simp] lemma Sequent.quote_singleton [L.DecidableEq] (φ : SyntacticFormula L) :
-    (⌜({φ} : Finset (SyntacticFormula L))⌝ : V) = {⌜φ⌝} := by simp [Sequent.quote_def]; rfl
+@[simp] lemma Sequent.quote_singleton [L.DecidableEq] (φ : Proposition L) :
+    (⌜({φ} : Finset (Proposition L))⌝ : V) = {⌜φ⌝} := by simp [Sequent.quote_def]; rfl
 
 omit [L.DecidableEq] in
-@[simp] lemma Sequent.quote_insert [L.DecidableEq] (Γ : Finset (SyntacticFormula L)) (φ) : (⌜(insert φ Γ)⌝ : V) = insert ⌜φ⌝ ⌜Γ⌝ := by
+@[simp] lemma Sequent.quote_insert [L.DecidableEq] (Γ : Finset (Proposition L)) (φ) : (⌜(insert φ Γ)⌝ : V) = insert ⌜φ⌝ ⌜Γ⌝ := by
   by_cases hp : φ ∈ Γ
   · simp [Sequent.mem_quote_iff, hp, insert_eq_self_of_mem]
   · have : (⌜insert φ Γ⌝ : V) = Exp.exp ⌜φ⌝ + ⌜Γ⌝ := by simp [Sequent.quote_def, hp]
     simp [Sequent.mem_quote_iff, this, insert_eq, bitInsert, hp, add_comm]
 
 omit [L.DecidableEq] in
-lemma Sequent.mem_quote [L.DecidableEq] {Γ : Finset (SyntacticFormula L)} (hx : x ∈ (⌜Γ⌝ : V)) : ∃ φ ∈ Γ, x = ⌜φ⌝ := by
+lemma Sequent.mem_quote [L.DecidableEq] {Γ : Finset (Proposition L)} (hx : x ∈ (⌜Γ⌝ : V)) : ∃ φ ∈ Γ, x = ⌜φ⌝ := by
   induction Γ using Finset.induction
   case empty => simp at hx
   case insert a Γ _ ih =>
@@ -70,18 +70,18 @@ lemma Sequent.mem_quote [L.DecidableEq] {Γ : Finset (SyntacticFormula L)} (hx :
     · rcases ih hx with ⟨p, hx, rfl⟩
       exact ⟨p, by simp [*]⟩
 
-lemma Sequent.mem_quote_iff' {Γ : Finset (SyntacticFormula L)} : x ∈ (⌜Γ⌝ : V) ↔ (∃ φ ∈ Γ, x = ⌜φ⌝) := by
+lemma Sequent.mem_quote_iff' {Γ : Finset (Proposition L)} : x ∈ (⌜Γ⌝ : V) ↔ (∃ φ ∈ Γ, x = ⌜φ⌝) := by
   constructor
   · intro h; exact Sequent.mem_quote h
   · rintro ⟨p, hp, rfl⟩; simp [Sequent.mem_quote_iff, hp]
 
-@[simp] lemma Sequent.quote_subset_quote {Γ Δ : Finset (SyntacticFormula L)} :
+@[simp] lemma Sequent.quote_subset_quote {Γ Δ : Finset (Proposition L)} :
     (⌜Γ⌝ : V) ⊆ ⌜Δ⌝ ↔ Γ ⊆ Δ :=
   ⟨fun h _ hp ↦
     Sequent.mem_quote_iff.mp <| h <| Sequent.mem_quote_iff.mpr hp,
     fun h x hx ↦ by rcases Sequent.mem_quote hx with ⟨φ, hφ, rfl⟩; simp [h hφ]⟩
 
-lemma setShift_quote (Γ : Finset (SyntacticFormula L)) :
+lemma setShift_quote (Γ : Finset (Proposition L)) :
     setShift L (⌜Γ⌝ : V) = ⌜Finset.image Rewriting.shift Γ⌝ := by
   apply mem_ext
   intro x; simp only [mem_setShift_iff]
@@ -95,50 +95,50 @@ lemma setShift_quote (Γ : Finset (SyntacticFormula L)) :
     rcases by simpa using hp' with ⟨p, hp, rfl⟩
     exact ⟨⌜p⌝, by simpa [Sequent.mem_quote_iff] using hp, by simp [Semiformula.quote_def]⟩
 
-@[simp] lemma formulaSet_quote_finset (Γ : Finset (SyntacticFormula L)) : IsFormulaSet L (⌜Γ⌝ : V) := by
+@[simp] lemma formulaSet_quote_finset (Γ : Finset (Proposition L)) : IsFormulaSet L (⌜Γ⌝ : V) := by
   intro x hx
   rcases Derivation2.Sequent.mem_quote hx with ⟨p, _, rfl⟩;
   simp [Semiformula.quote_def]
 
-noncomputable instance : GödelQuote (Finset (SyntacticFormula L)) (Bootstrapping.Sequent V L) := ⟨fun Γ ↦ ⟨⌜Γ⌝, by simp⟩⟩
+noncomputable instance : GödelQuote (Finset (Proposition L)) (Bootstrapping.Sequent V L) := ⟨fun Γ ↦ ⟨⌜Γ⌝, by simp⟩⟩
 
-@[simp] lemma Sequent.typed_quote_val (Γ : Finset (SyntacticFormula L)) : (⌜Γ⌝ : Bootstrapping.Sequent V L).val = ⌜Γ⌝ := rfl
+@[simp] lemma Sequent.typed_quote_val (Γ : Finset (Proposition L)) : (⌜Γ⌝ : Bootstrapping.Sequent V L).val = ⌜Γ⌝ := rfl
 
-@[simp] lemma Sequent.quote_mem_quote {φ : SyntacticFormula L} {Γ : Finset (SyntacticFormula L)} :
+@[simp] lemma Sequent.quote_mem_quote {φ : Proposition L} {Γ : Finset (Proposition L)} :
     ⌜φ⌝ ∈ (⌜Γ⌝ : Bootstrapping.Sequent V L) ↔ φ ∈ Γ := by simp [Bootstrapping.Sequent.mem_iff, ←Semiformula.quote_def]
 
-@[simp] lemma Sequent.typed_quote_insert (Γ : Finset (SyntacticFormula L)) (φ) : (⌜insert φ Γ⌝ : Bootstrapping.Sequent V L) = insert ⌜φ⌝ ⌜Γ⌝ := by
+@[simp] lemma Sequent.typed_quote_insert (Γ : Finset (Proposition L)) (φ) : (⌜insert φ Γ⌝ : Bootstrapping.Sequent V L) = insert ⌜φ⌝ ⌜Γ⌝ := by
   ext; simp [Bootstrapping.Sequent.mem_iff, Semiformula.quote_def]
 
-@[simp] lemma Sequent.typed_quote_empty : (⌜(∅ : Finset (SyntacticFormula L))⌝ : Bootstrapping.Sequent V L) = ∅ := rfl
+@[simp] lemma Sequent.typed_quote_empty : (⌜(∅ : Finset (Proposition L))⌝ : Bootstrapping.Sequent V L) = ∅ := rfl
 
-@[simp] lemma Sequent.typed_quote_singleton (φ : SyntacticFormula L) :
-    (⌜({φ} : Finset (SyntacticFormula L))⌝ : Bootstrapping.Sequent V L) = {⌜φ⌝} := by
-  rw [show ({φ} : Finset (SyntacticFormula L)) = insert φ ∅ by simp]
+@[simp] lemma Sequent.typed_quote_singleton (φ : Proposition L) :
+    (⌜({φ} : Finset (Proposition L))⌝ : Bootstrapping.Sequent V L) = {⌜φ⌝} := by
+  rw [show ({φ} : Finset (Proposition L)) = insert φ ∅ by simp]
   rw [Sequent.typed_quote_insert];
   simp [Sequent.insert_empty_eq_singleton]
 
-@[simp] lemma setShift_typed_quote (Γ : Finset (SyntacticFormula L)) :
+@[simp] lemma setShift_typed_quote (Γ : Finset (Proposition L)) :
     (⌜Finset.image Rewriting.shift Γ⌝ : Bootstrapping.Sequent V L) = (⌜Γ⌝ : Bootstrapping.Sequent V L).shift := by
   apply Sequent.ext'
   simp [←setShift_quote]; rfl
 
-lemma Sequent.typed_quote_inj {Γ Δ : Finset (SyntacticFormula L)} : (⌜Γ⌝ : Bootstrapping.Sequent V L) = ⌜Δ⌝ → Γ = Δ := fun h ↦ by
+lemma Sequent.typed_quote_inj {Γ Δ : Finset (Proposition L)} : (⌜Γ⌝ : Bootstrapping.Sequent V L) = ⌜Δ⌝ → Γ = Δ := fun h ↦ by
   have : (⌜Γ⌝ : V) = ⌜Δ⌝ := by simpa using congr_arg Sequent.val h
   exact quote_inj this
 
-lemma Sequent.coe_eq (Γ : Finset (SyntacticFormula L)) : (↑(⌜Γ⌝ : ℕ) : V) = ⌜Γ⌝ := by
+lemma Sequent.coe_eq (Γ : Finset (Proposition L)) : (↑(⌜Γ⌝ : ℕ) : V) = ⌜Γ⌝ := by
   induction Γ using Finset.induction
   · simp
   case insert φ s h ih =>
     simp [insert_absolute, ih, Semiformula.coe_quote_eq_quote]
 
-@[simp] lemma Sequent.typed_quote_subset_typed_quote {Γ Δ : Finset (SyntacticFormula L)} :
+@[simp] lemma Sequent.typed_quote_subset_typed_quote {Γ Δ : Finset (Proposition L)} :
     (⌜Γ⌝ : Bootstrapping.Sequent V L) ⊆ ⌜Δ⌝ ↔ Γ ⊆ Δ := Sequent.quote_subset_quote
 
-lemma isFormulaSet_sound {s : ℕ} : IsFormulaSet L s → ∃ S : Finset (SyntacticFormula L), ⌜S⌝ = s := by
+lemma isFormulaSet_sound {s : ℕ} : IsFormulaSet L s → ∃ S : Finset (Proposition L), ⌜S⌝ = s := by
   intro h
-  have : ∀ x, ∃ φ : SyntacticFormula L, x ∈ s → ⌜φ⌝ = x := by
+  have : ∀ x, ∃ φ : Proposition L, x ∈ s → ⌜φ⌝ = x := by
     intro x;
     by_cases hx : x ∈ s
     · simpa [hx] using (h x hx).sound
@@ -158,7 +158,7 @@ lemma isFormulaSet_sound {s : ℕ} : IsFormulaSet L s → ∃ S : Finset (Syntac
 
 variable (V)
 
-noncomputable def typedQuote {Γ : Finset (SyntacticFormula L)} : T ⟹₂ Γ → T.internalize V ⊢!ᵈᵉʳ ⌜Γ⌝
+noncomputable def typedQuote {Γ : Finset (Proposition L)} : T ⟹₂ Γ → T.internalize V ⊢!ᵈᵉʳ ⌜Γ⌝
   |   closed Δ φ h hn => TDerivation.em ⌜φ⌝ (by simpa) (by simpa using Sequent.quote_mem_quote.mpr hn)
   |       axm φ hT _ => TDerivation.byAxm ⌜φ⌝ (by
     have : ∃ σ ∈ T, ↑σ = φ := by simpa [Theory.toSchema] using hT
@@ -179,9 +179,9 @@ noncomputable def typedQuote {Γ : Finset (SyntacticFormula L)} : T ⟹₂ Γ �
   | cut (φ := φ) d dn =>
     TDerivation.cut (φ := ⌜φ⌝) (d.typedQuote.cast (by simp)) (dn.typedQuote.cast (by simp))
 
-noncomputable instance (Γ : Finset (SyntacticFormula L)) : GödelQuote (T ⟹₂ Γ) (T.internalize V ⊢!ᵈᵉʳ ⌜Γ⌝) := ⟨typedQuote V⟩
+noncomputable instance (Γ : Finset (Proposition L)) : GödelQuote (T ⟹₂ Γ) (T.internalize V ⊢!ᵈᵉʳ ⌜Γ⌝) := ⟨typedQuote V⟩
 
-noncomputable instance (Γ : Finset (SyntacticFormula L)) : GödelQuote (T ⟹₂ Γ) V := ⟨fun d ↦ (⌜d⌝ : T.internalize V ⊢!ᵈᵉʳ ⌜Γ⌝).val⟩
+noncomputable instance (Γ : Finset (Proposition L)) : GödelQuote (T ⟹₂ Γ) V := ⟨fun d ↦ (⌜d⌝ : T.internalize V ⊢!ᵈᵉʳ ⌜Γ⌝).val⟩
 
 lemma quote_def (d : (T : Schema L) ⟹₂ Γ) : (⌜d⌝ : V) = (⌜d⌝ : T.internalize V ⊢!ᵈᵉʳ ⌜Γ⌝).val := rfl
 
@@ -322,7 +322,7 @@ lemma Derivation.sound {d : ℕ} (h : T.Derivation d) : ∃ Γ, ⌜Γ⌝ = fstId
     rcases this with ⟨σ, hσ, rfl⟩
     refine ⟨Derivation2.axm σ (by simp [hσ]) hφ⟩
 
-lemma Provable.sound2 {φ : SyntacticFormula L} (h : T.Provable (⌜φ⌝ : ℕ)) : T ⊢!₂! φ := by
+lemma Provable.sound2 {φ : Proposition L} (h : T.Provable (⌜φ⌝ : ℕ)) : T ⊢!₂! φ := by
   rcases h with ⟨d, hp, hd⟩
   rcases hd.sound with ⟨Γ, e, b⟩
   have : Γ = {φ} := Sequent.quote_inj (V := ℕ) <| by simp [e, hp]

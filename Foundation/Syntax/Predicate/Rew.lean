@@ -26,7 +26,7 @@ namespace FirstOrder
 
 structure Rew (L : Language) (ξ₁ : Type*) (n₁ : ℕ) (ξ₂ : Type*) (n₂ : ℕ) where
   toFun : Semiterm L ξ₁ n₁ → Semiterm L ξ₂ n₂
-  func' : ∀ {k} (f : L.Func k) (v : Fin k → Semiterm L ξ₁ n₁), toFun (Semiterm.func f v) = Semiterm.func f (fun i => toFun (v i))
+  func'' (f : L.Func k) (v : Fin k → Semiterm L ξ₁ n₁) : toFun (Semiterm.func f v) = Semiterm.func f fun i ↦ toFun (v i)
 
 abbrev SyntacticRew (L : Language) (n₁ n₂ : ℕ) := Rew L ℕ n₁ ℕ n₂
 
@@ -42,46 +42,27 @@ instance : FunLike (Rew L ξ₁ n₁ ξ₂ n₂) (Semiterm L ξ₁ n₁) (Semite
 
 instance : CoeFun (Rew L ξ₁ n₁ ξ₂ n₂) (fun _ => Semiterm L ξ₁ n₁ → Semiterm L ξ₂ n₂) := DFunLike.hasCoeToFun
 
-protected lemma func {k} (f : L.Func k) (v : Fin k → Semiterm L ξ₁ n₁) :
-    ω (func f v) = func f (fun i => ω (v i)) := ω.func' f v
+@[simp] protected lemma func {k} (f : L.Func k) (v : Fin k → Semiterm L ξ₁ n₁) :
+    ω (func f v) = func f (ω ∘ v) := ω.func'' f v
 
-lemma func'' {k} (f : L.Func k) (v : Fin k → Semiterm L ξ₁ n₁) :
-    ω (func f v) = func f (ω ∘ v) := ω.func' f v
-
-@[simp] lemma func0 (f : L.Func 0) (v : Fin 0 → Semiterm L ξ₁ n₁) :
-    ω (func f v) = func f ![] := by simp [Rew.func, Matrix.empty_eq]
-
-@[simp] lemma func1 (f : L.Func 1) (t : Semiterm L ξ₁ n₁) :
-    ω (func f ![t]) = func f ![ω t] := by simp [Matrix.constant_eq_singleton, Rew.func]
-
-@[simp] lemma func2 (f : L.Func 2) (t₁ t₂ : Semiterm L ξ₁ n₁) :
-    ω (func f ![t₁, t₂]) = func f ![ω t₁, ω t₂] := by
-  simp only [Rew.func, func.injEq, heq_eq_eq, true_and]
-  funext i
-  induction i using Fin.induction <;> simp
-
-@[simp] lemma func3 (f : L.Func 3) (t₁ t₂ t₃ : Semiterm L ξ₁ n₁) :
-    ω (func f ![t₁, t₂, t₃]) = func f ![ω t₁, ω t₂, ω t₃] := by
-  simp only [Rew.func, func.injEq, heq_eq_eq, true_and]
-  funext i; induction' i using Fin.induction with i
-  · simp
-  · induction' i using Fin.induction with i <;> simp
+lemma func' {k} (f : L.Func k) (v : Fin k → Semiterm L ξ₁ n₁) :
+    ω (func f v) = func f fun i ↦ ω (v i) := ω.func'' f v
 
 @[ext] lemma ext (ω₁ ω₂ : Rew L ξ₁ n₁ ξ₂ n₂) (hb : ∀ x, ω₁ #x = ω₂ #x) (hf : ∀ x, ω₁ &x = ω₂ &x) : ω₁ = ω₂ := by
   apply DFunLike.ext ω₁ ω₂; intro t
-  induction t <;> simp [*, ω₁.func, ω₂.func]
+  induction t <;> simp [*, ω₁.func, ω₂.func, Function.comp_def]
 
 lemma ext' {ω₁ ω₂ : Rew L ξ₁ n₁ ξ₂ n₂} (h : ω₁ = ω₂) (t) : ω₁ t = ω₂ t := by simp [h]
 
 protected def id : Rew L ξ n ξ n where
   toFun := id
-  func' := fun _ _ => rfl
+  func'' := fun _ _ => rfl
 
 @[simp] lemma id_app (t : Semiterm L ξ n) : Rew.id t = t := rfl
 
 protected def comp (ω₂ : Rew L ξ₂ n₂ ξ₃ n₃) (ω₁ : Rew L ξ₁ n₁ ξ₂ n₂) : Rew L ξ₁ n₁ ξ₃ n₃ where
   toFun := fun t => ω₂ (ω₁ t)
-  func' := fun f v => by simp [func'']; rfl
+  func'' := fun f v => by simp; rfl
 
 lemma comp_app (ω₂ : Rew L ξ₂ n₂ ξ₃ n₃) (ω₁ : Rew L ξ₁ n₁ ξ₂ n₂) (t : Semiterm L ξ₁ n₁) :
     (ω₂.comp ω₁) t = ω₂ (ω₁ t) := rfl
@@ -97,7 +78,7 @@ def bindAux (b : Fin n₁ → Semiterm L ξ₂ n₂) (e : ξ₁ → Semiterm L �
 
 def bind (b : Fin n₁ → Semiterm L ξ₂ n₂) (e : ξ₁ → Semiterm L ξ₂ n₂) : Rew L ξ₁ n₁ ξ₂ n₂ where
   toFun := bindAux b e
-  func' := fun _ _ => rfl
+  func'' := fun _ _ => rfl
 
 def rewrite (f : ξ₁ → Semiterm L ξ₂ n) : Rew L ξ₁ n ξ₂ n := bind Semiterm.bvar f
 
@@ -126,10 +107,6 @@ def cast {n n' : ℕ} (h : n = n') : Rew L ξ n ξ n' :=
 
 def castLE {n n' : ℕ} (h : n ≤ n') : Rew L ξ n ξ n' :=
   map (Fin.castLE h) id
-
-def toS : Rew L (Fin n) 0 Empty n := Rew.bind ![] (#·)
-
-def toF : Rew L Empty n (Fin n) 0 := Rew.bind (&·) Empty.elim
 
 def embSubsts (v : Fin k → Semiterm L ξ n) : Rew L Empty k ξ n := Rew.bind v Empty.elim
 
@@ -339,12 +316,6 @@ section castLE
 
 end castLE
 
-section toS
-
-@[simp] lemma toS_fvar {n} (x : Fin n) : toS (&x : Term L (Fin n)) = #x := rfl
-
-end toS
-
 section embSubsts
 
 variable {k} (w : Fin k → Semiterm L ξ n)
@@ -457,10 +428,6 @@ lemma q_rewrite (f : ξ₁ → Semiterm L ξ₂ n) :
     (castLE h : Rew L ξ n ξ n').q = castLE (Nat.add_le_add_right h 1) := by
   ext x <;> simp; cases x using Fin.cases <;> simp
 
-lemma q_toS :
-    (toS : Rew L (Fin n) 0 Empty n).q = bind ![#0] (#·.succ) := by
-  ext x <;> simp
-
 @[simp] lemma qpow_castLE {n n'} (h : n ≤ n') :
     (castLE h : Rew L ξ n ξ n').qpow k = castLE (Nat.add_le_add_right h k) := by
   induction k <;> simp [*]
@@ -570,6 +537,12 @@ lemma shift_comp_subst1 (t : SyntacticSemiterm L n₂) :
     shift.comp emb = (emb : Rew L o n ℕ n) := by
   ext x
   · simp [comp_app]
+  · exact IsEmpty.elim e x
+
+@[simp] lemma comp_emb_eq_emb {o : Type v₁} [e : IsEmpty o] {ω : Rew L ξ₁ 0 ξ₂ 0} :
+    ω.comp emb = (emb : Rew L o 0 ξ₂ 0) := by
+  ext x
+  · exact Fin.elim0 x
   · exact IsEmpty.elim e x
 
 lemma rewrite_comp_free_eq_subst (t : SyntacticTerm L) :
@@ -742,7 +715,7 @@ open Rew
 
 lemma lMap_bind (b : Fin n₁ → Semiterm L₁ ξ₂ n₂) (e : ξ₁ → Semiterm L₁ ξ₂ n₂) (t) :
     lMap Φ (bind b e t) = bind (lMap Φ ∘ b) (lMap Φ ∘ e) (t.lMap Φ) := by
-  induction t <;> simp [*, lMap_func, Rew.func]
+  induction t <;> simp [*, -lMap_func, lMap_func', -Rew.func, Rew.func']
 
 lemma lMap_map (b : Fin n₁ → Fin n₂) (e : ξ₁ → ξ₂) (t) :
     (map b e t).lMap Φ = map b e (t.lMap Φ) := by
@@ -795,7 +768,7 @@ def toEmpty [DecidableEq ξ] {n : ℕ} : (t : Semiterm L ξ n) → t.freeVariabl
     func f fun i ↦ toEmpty (v i) (this i)
 
 @[simp] lemma emb_toEmpty [DecidableEq ξ] (t : Semiterm L ξ n) (ht : t.freeVariables = ∅) : Rew.emb (t.toEmpty ht) = t := by
-  induction t <;> try simp [toEmpty, Rew.func, *]
+  induction t <;> try simp [toEmpty, Rew.func, *, Function.comp_def]
   case fvar => simp at ht
 
 @[simp] lemma toEmpty_emb [DecidableEq ξ] (t : ClosedSemiterm L n) :
@@ -851,6 +824,13 @@ abbrev fix [Rewriting L ℕ F ℕ F] (φ : F n) : F (n + 1) := @Rew.fix L n ▹ 
 def shifts [Rewriting L ℕ F ℕ F] (Γ : List (F n)) : List (F n) := Γ.map Rewriting.shift
 
 scoped[LO.FirstOrder] postfix:max "⁺" => FirstOrder.Rewriting.shifts
+
+@[simp] lemma shifts_nil [Rewriting L ℕ F ℕ F] : ([] : List (F n))⁺ = [] := by rfl
+
+@[simp] lemma shifts_cons [Rewriting L ℕ F ℕ F] (φ : F n) (Γ : List (F n)) : (φ :: Γ)⁺ = shift φ :: Γ⁺ := by simp [shifts]
+
+@[simp] lemma shifts_neg [Rewriting L ℕ F ℕ F] (Γ : List (F n)) : (∼Γ)⁺ = ∼(Γ⁺) := by
+  simp [shifts, List.tilde_def]
 
 @[coe] abbrev emb {ο ξ} [IsEmpty ο] {O F : ℕ → Type*} [LCWQ O] [LCWQ F] [Rewriting L ο O ξ F] (φ : O n) : F n := @Rew.emb L ο _ ξ n ▹ φ
 
@@ -997,7 +977,7 @@ end LawfulSyntacticRewriting
 
 namespace Rewriting
 
-variable {ο ξ : Type*} [IsEmpty ο] {O F : ℕ → Type*} [LCWQ O] [LCWQ F]
+variable {ο ξ : Type*} [IsEmpty ο] {O F F₁ F₂ : ℕ → Type*} [LCWQ O] [LCWQ F] [LCWQ F₁] [LCWQ F₂]
 
 open ReflectiveRewriting TransitiveRewriting InjMapRewriting Semiterm
 
@@ -1006,6 +986,16 @@ lemma emb_injective [Rewriting L ο O ξ F] [InjMapRewriting L ο O ξ F] : Func
 
 @[simp] lemma emb_allClosure [Rewriting L ο O ξ F] {σ : O n} :
     (emb (ξ := ξ) (∀⁰* σ)) = ∀⁰* (emb (ξ := ξ) σ) := by induction n <;> simp [*, allClosure_succ]
+
+@[simp] lemma rew_emb_eq_emb
+    [Rewriting L ξ₁ F₁ ξ₂ F₂] [Rewriting L ο O ξ₁ F₁] [Rewriting L ο O ξ₂ F₂]
+    [TransitiveRewriting L ο O ξ₁ F₁ ξ₂ F₂]
+    (φ : O 0) (ω : Rew L ξ₁ 0 ξ₂ 0) :
+    ω ▹ (emb (ξ := ξ₁) φ) = emb (ξ := ξ₂) φ := by
+  unfold emb
+  rw [←comp_app]
+  congr 2
+  simp
 
 /-- `coe_subst_eq_subst_coe` -/
 lemma emb_subst_eq_subst_emb
