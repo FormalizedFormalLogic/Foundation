@@ -4,6 +4,7 @@ public import Mathlib.Topology.Order.UpperLowerSetTopology
 public import Mathlib.Topology.Sets.Opens
 public import Mathlib.Order.Heyting.Regular
 public import Foundation.Vorspiel.Order.Regular
+public import Foundation.Vorspiel.Order.Dense
 
 @[expose] public section
 
@@ -11,42 +12,7 @@ variable {α : Type*} [Preorder α]
 
 namespace LowerSet
 
-def IsCompatiblePair (a b : α) : Prop := ∃ c, c ≤ a ∧ c ≤ b
-
-infix:50 " ‖ " => IsCompatiblePair
-
-@[simp, refl] protected lemma IsCompatiblePair.refl (a : α) : a ‖ a := ⟨a, by simp⟩
-
-@[symm] protected lemma IsCompatiblePair.symm_iff {a b : α} : a ‖ b ↔ b ‖ a := by
-  constructor
-  · rintro ⟨c, hca, hcb⟩; exact ⟨c, hcb, hca⟩
-  · rintro ⟨c, hcb, hca⟩; exact ⟨c, hca, hcb⟩
-
-alias ⟨IsCompatiblePair.symm, _⟩ := IsCompatiblePair.symm_iff
-
-def IsIncompatiblePair (a b : α) : Prop := ¬(a ‖ b)
-
-infix:50 " ⟂ " => IsIncompatiblePair
-
-lemma isIncompatiblePair_iff {a b : α} : a ⟂ b ↔ ∀ c ≤ a, ¬c ≤ b := by
-  simp [IsIncompatiblePair, IsCompatiblePair]
-
-@[simp] lemma IsIncompatiblePair.antirefl (a : α) : ¬(a ⟂ a) := by simp [IsIncompatiblePair]
-
-lemma IsIncompatiblePair.symm_iff {a b : α} : a ⟂ b ↔ b ⟂ a := by
-  contrapose; simpa [IsIncompatiblePair] using IsCompatiblePair.symm_iff
-
-alias ⟨IsIncompatiblePair.symm, _⟩ := IsIncompatiblePair.symm_iff
-
-lemma IsIncompatiblePair.lower {a a' b b' : α} (h : a ⟂ b) (ha'a : a' ≤ a) (hb'b : b' ≤ b) : a' ⟂ b' := by
-  rintro ⟨c, hca, hcb⟩
-  exact h ⟨c, le_trans hca ha'a, le_trans hcb hb'b⟩
-
-@[simp, grind =] lemma not_isCompatiblePair_iff_isIncompatiblePair {a b : α} : ¬(a ‖ b) ↔ a ⟂ b := by
-  rfl
-
-@[simp, grind =] lemma not_isIncompatiblePair_iff_isCompatiblePair {a b : α} : ¬(a ⟂ b) ↔ a ‖ b := by
-  simp [IsIncompatiblePair, IsCompatiblePair]
+open Order
 
 instance : HeytingAlgebra (LowerSet α) := inferInstance
 
