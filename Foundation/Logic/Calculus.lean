@@ -119,6 +119,25 @@ instance : Entailment.Cl 𝓔 where
 
 end EmptyEntailment
 
+abbrev Pullback (𝔇 : List F → Type*) {G : Type*} [LogicalConnective G] (f : G →ˡᶜ F) : List G → Type _ := fun Γ ↦ 𝔇 (Γ.map f)
+
+namespace Pullback
+
+variable {G : Type*} [LogicalConnective G] [DeMorgan G] [NegInvolutive G] {f : G →ˡᶜ F}
+
+def cast (d : 𝔇 Δ) (h : Δ = Γ.map f := by simp) : Pullback 𝔇 f Γ := by
+  unfold Pullback
+  exact h ▸ d
+
+instance [OneSidedLK 𝔇] : OneSidedLK (Pullback 𝔇 f) where
+  identity φ := cast <| identity (f φ)
+  wk {Δ Γ} d h := cast (wk d (List.map_subset f h) : 𝔇 (Γ.map f)) (by simp)
+  verum := cast verum
+  and d₁ d₂ := cast <| and d₁ d₂
+  or d := cast <| or d
+
+end Pullback
+
 protected class Entailment (𝔇 : outParam (List F → Type*)) (S : Type*) [Entailment S F] [AdjunctiveSet F S] where
   equiv {𝓢 : S} {φ} : 𝓢 ⊢! φ ≃ (l : {l : List F // ∀ φ ∈ l, φ ∈ 𝓢}) × 𝔇 (φ :: ∼l)
 
