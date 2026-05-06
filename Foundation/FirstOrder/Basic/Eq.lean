@@ -234,7 +234,7 @@ lemma elementaryEquiv : QuotEq L M ≡ₑ[L] M := ⟨models_iff⟩
 variable {L M}
 
 set_option backward.isDefEq.respectTransparency false in
-lemma rel_eq (a b : QuotEq L M) : (@Semiformula.Operator.Eq.eq L _).val (M := QuotEq L M) ![a, b] ↔ a = b := by
+lemma rel_eq (a b : QuotEq L M) : op(=)[L].val (M := QuotEq L M) ![a, b] ↔ a = b := by
   induction' a using Quotient.ind with a
   induction' b using Quotient.ind with b
   rw [of_eq_of]; simp [eqv, Semiformula.Operator.val];
@@ -308,24 +308,24 @@ noncomputable instance [Operator.One L] : One (ModelOfSatEq sat) := ⟨(@Operato
 instance [Operator.One L] : Structure.One L (ModelOfSatEq sat) := ⟨rfl⟩
 
 noncomputable instance [Operator.Add L] : Add (ModelOfSatEq sat) :=
-  ⟨fun x y => (@Operator.Add.add L _).val ![x, y]⟩
+  ⟨fun x y ↦ (@Operator.Add.add L _).val ![x, y]⟩
 
-instance [Operator.Add L] : Structure.Add L (ModelOfSatEq sat) := ⟨fun _ _ => rfl⟩
+instance [Operator.Add L] : Structure.Add L (ModelOfSatEq sat) := ⟨fun _ _ ↦ rfl⟩
 
 noncomputable instance [Operator.Mul L] : Mul (ModelOfSatEq sat) :=
-  ⟨fun x y => (@Operator.Mul.mul L _).val ![x, y]⟩
+  ⟨fun x y ↦ (@Operator.Mul.mul L _).val ![x, y]⟩
 
-instance [Operator.Mul L] : Structure.Mul L (ModelOfSatEq sat) := ⟨fun _ _ => rfl⟩
+instance [Operator.Mul L] : Structure.Mul L (ModelOfSatEq sat) := ⟨fun _ _ ↦ rfl⟩
 
 instance [Operator.LT L] : LT (ModelOfSatEq sat) :=
-  ⟨fun x y => (@Operator.LT.lt L _).val ![x, y]⟩
+  ⟨fun x y ↦ (@Operator.LT.lt L _).val ![x, y]⟩
 
-instance [Operator.LT L] : Structure.LT L (ModelOfSatEq sat) := ⟨fun _ _ => iff_of_eq rfl⟩
+instance [Operator.LT L] : Structure.LT L (ModelOfSatEq sat) := ⟨fun _ _ ↦ iff_of_eq rfl⟩
 
 instance [Operator.Mem L] : Membership (ModelOfSatEq sat) (ModelOfSatEq sat) :=
-  ⟨fun x y => (@Operator.Mem.mem L _).val ![y, x]⟩
+  ⟨fun x y ↦ (@Operator.Mem.mem L _).val ![y, x]⟩
 
-instance [Operator.Mem L] : Structure.Mem L (ModelOfSatEq sat) := ⟨fun _ _ => iff_of_eq rfl⟩
+instance [Operator.Mem L] : Structure.Mem L (ModelOfSatEq sat) := ⟨fun _ _ ↦ iff_of_eq rfl⟩
 
 end ModelOfSatEq
 

@@ -2,7 +2,6 @@ module
 
 public import Foundation.FirstOrder.Basic.Syntax.Formula
 public import Foundation.FirstOrder.Basic.Syntax.Rew
-public import Foundation.FirstOrder.Basic.Syntax.Schema
 public import Foundation.FirstOrder.Basic.Semantics.Semantics
 public import Foundation.FirstOrder.Basic.Semantics.Elementary
 public import Foundation.FirstOrder.Basic.Operator
