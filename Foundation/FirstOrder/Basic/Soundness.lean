@@ -5,11 +5,8 @@ public import Foundation.FirstOrder.Basic.Calculus
 
 /-! # Soundness theorem for first-order classical logic -/
 
-namespace LO
+namespace LO.FirstOrder
 
-namespace FirstOrder
-
-section sound
 open Semiformula
 
 variable {L : Language}
@@ -69,16 +66,17 @@ lemma sound {M : Type*} [s : Structure L M] [Nonempty M] (f : ℕ → M) {Γ : S
 
 end Derivation
 
-theorem Provable.sound {M : Type*} [s : Structure L M] [Nonempty M] {φ : Proposition L} (f : ℕ → M) :
+theorem LK.Proof.sound {M : Type*} [s : Structure L M] [Nonempty M] {φ : Proposition L} (f : ℕ → M) :
     𝐋𝐊¹ ⊢ φ → φ.Evalf f := fun b ↦ by simpa using Derivation.sound f b.get
 
-variable {T : Theory L}
+variable {T U : Theory L}
 
-theorem Theory.Proof.sound_proposition {M : Type*} [s : Structure L M] [Nonempty M] :
+namespace Theory.Proof
+
+theorem sound_proposition {M : Type*} [s : Structure L M] [Nonempty M] :
     T ⊢ φ → M↓[L] ⊧* T → φ.Realize M := fun b H ↦ by
-  rcases Theory.Proof.provable_iff.mp b with ⟨Γ, hΓ, ⟨b⟩⟩
-  have : Inhabited M := Classical.inhabited_of_nonempty inferInstance
-  let f : ℕ → M := fun _ ↦ default
+  rcases provable_iff.mp b with ⟨Γ, hΓ, ⟨b⟩⟩
+  let f : ℕ → M := fun _ ↦ Nonempty.some inferInstance
   have : φ.Realize M ∨ ∃ ψ, ∼ψ ∈ Sequent.embed Γ ∧ ψ.Evalf f := by simpa using b.sound f
   rcases this with (h | ⟨ψ, hψ, h⟩)
   · assumption
@@ -92,35 +90,43 @@ theorem Theory.Proof.sound_proposition {M : Type*} [s : Structure L M] [Nonempty
       simpa [models_iff] using H.models _ (hΓ _ hχ)
     contradiction
 
-theorem Theory.Proof.sound {φ : Sentence L} :
+/-- Soundness theorem for first-order logic. -/
+theorem sound {φ : Sentence L} :
     T ⊢ φ → T ⊨[Struc.{v, u} L] φ := fun b s hS ↦ by
   simpa [struc_models_iff_models (s := s), models_iff]
-    using Theory.Proof.sound_proposition b hS
+    using sound_proposition b hS
 
-theorem Theory.Proof.sound_small : T ⊢ φ → T ⊨ φ := Theory.Proof.sound
+theorem sound_small : T ⊢ φ → T ⊨ φ := sound
 
-instance sound (T : Theory L) : Sound T (Semantics.models (Struc.{v, u} L) T) := ⟨Theory.Proof.sound⟩
-
-lemma models_of_subtheory {T U : Theory L} [T ⪯ U] {M : Type*} [Structure L M] [Nonempty M] : M↓[L] ⊧* U → M↓[L] ⊧* T :=
-  fun hM ↦ ⟨fun {φ} hφ ↦ by
-    have : T ⪯ U := inferInstance
-    have : U ⊢ φ := this.pbl (Entailment.by_axm hφ)
-    exact Theory.Proof.sound this hM⟩
+instance (T : Theory L) : Sound T (Semantics.models (Struc.{v, u} L) T) := ⟨Theory.Proof.sound⟩
 
 lemma consistent_of_satisfiable (h : Semantics.Satisfiable (Struc.{v, u} L) T) : Entailment.Consistent T :=
   Sound.consistent_of_satisfiable h
 
-lemma consistent_of_model (T : Theory L) (M : Type*) [Structure L M] [Nonempty M] [hM : M↓[L] ⊧* T] :
-    Entailment.Consistent T := consistent_of_satisfiable ⟨M↓[L], hM⟩
+end Theory.Proof
 
-lemma unprovable_of_countermodel {M : Type*} [Structure L M] [Nonempty M] [hM : M↓[L] ⊧* T] {φ} : M↓[L] ⊭ φ → T ⊬ φ := by
+section model
+
+variable (T) (M : Type*) [Nonempty M] [Structure L M]
+
+lemma consistent_of_model [hM : M↓[L] ⊧* T] :
+    Entailment.Consistent T := Theory.Proof.consistent_of_satisfiable ⟨M↓[L], hM⟩
+
+variable {M}
+
+lemma unprovable_of_countermodel [hM : M↓[L] ⊧* T] {φ} : M↓[L] ⊭ φ → T ⊬ φ := by
   contrapose!; intro h
   exact Theory.Proof.sound h hM
 
-lemma models_of_provable {M : Type*} [Nonempty M] [Structure L M] (hT : M↓[L] ⊧* ↑↑T) {φ : Sentence L} (h : T ⊢ φ) :
+variable {T}
+
+lemma models_of_provable (hT : M↓[L] ⊧* T) {φ : Sentence L} (h : T ⊢ φ) :
     M↓[L] ⊧ φ := consequence_iff.mp (Theory.Proof.sound h) M inferInstance
 
-end sound
+lemma models_of_subtheory [T ⪯ U] : M↓[L] ⊧* U → M↓[L] ⊧* T :=
+  fun hM ↦ ⟨fun _ hφ ↦ Theory.Proof.sound (Entailment.WeakerThan.pbl (Entailment.by_axm hφ)) hM⟩
+
+end model
 
 end FirstOrder
 
