@@ -84,7 +84,7 @@ namespace Proof
 
 lemma def_eq (φ : NNFormula α) : (𝐋𝐊⁰ ⊢! φ) = (⊢ᴸᴷ⁰ [φ]) := rfl
 
-instance : OneSidedLK.EmptyEntailment (Derivation (α := α)) (𝐋𝐊⁰ : Proof.Symbol α) where
+instance : OneSidedLK.PrincipalEntailment (Derivation (α := α)) (𝐋𝐊⁰ : Proof.Symbol α) where
   equiv := Equiv.refl _
 
 instance classical : Entailment.Cl (𝐋𝐊⁰ : Proof.Symbol α) := inferInstance

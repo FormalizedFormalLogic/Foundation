@@ -582,6 +582,10 @@ end enumarateFVar
 
 end Semiformula
 
+abbrev Theory (L : Language) := Set (Sentence L)
+
+abbrev ArithmeticTheory := Theory ℒₒᵣ
+
 end LO.FirstOrder
 
 end

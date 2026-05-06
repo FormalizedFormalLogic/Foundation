@@ -372,7 +372,7 @@ lemma le_of_subset (h : 𝓢 ⊆ 𝓣) : 𝓢 ⪯ 𝓣 := ⟨by rintro φ ⟨b�
 
 lemma weakening! (h : 𝓢 ⊆ 𝓣 := by simp) {φ} : 𝓢 ⊢ φ → 𝓣 ⊢ φ := by rintro ⟨b⟩; exact ⟨weakening h b⟩
 
-def weakerThanOfSubset (h : 𝓢 ⊆ 𝓣) : 𝓢 ⪯ 𝓣 := ⟨fun _ ↦ weakening! h⟩
+abbrev weakerThanOfSubset (h : 𝓢 ⊆ 𝓣) : 𝓢 ⪯ 𝓣 := ⟨fun _ ↦ weakening! h⟩
 
 def toAdjoin {𝓢 : S} : 𝓢 ⊢! ψ → adjoin φ 𝓢 ⊢! ψ := fun b ↦ wk (by simp) b
 
@@ -407,10 +407,10 @@ lemma cut! {𝓢 : S} {𝓣 : T} {φ : F} (H : 𝓢 ⊢* AdjunctiveSet.set 𝓣)
 
 end StrongCut
 
-noncomputable def WeakerThan.ofAxm! [AdjunctiveSet F S] [StrongCut S S] {𝓢₁ 𝓢₂ : S} (B : 𝓢₂ ⊢* AdjunctiveSet.set 𝓢₁) :
+noncomputable abbrev WeakerThan.ofAxm! [AdjunctiveSet F S] [StrongCut S S] {𝓢₁ 𝓢₂ : S} (B : 𝓢₂ ⊢* AdjunctiveSet.set 𝓢₁) :
     𝓢₁ ⪯ 𝓢₂ := ⟨fun _ b ↦ StrongCut.cut! B b⟩
 
-def WeakerThan.ofSubset [AdjunctiveSet F S] [Axiomatized S] {𝓢 𝓣 : S} (h : 𝓢 ⊆ 𝓣) : 𝓢 ⪯ 𝓣 := ⟨fun _ ↦ wk! h⟩
+abbrev WeakerThan.ofSubset [AdjunctiveSet F S] [Axiomatized S] {𝓢 𝓣 : S} (h : 𝓢 ⊆ 𝓣) : 𝓢 ⪯ 𝓣 := ⟨fun _ ↦ wk! h⟩
 
 /-! ### Compactness -/
 

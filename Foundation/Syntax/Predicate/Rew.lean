@@ -815,11 +815,11 @@ abbrev subst [Rewriting L ξ F ξ F] (φ : F n₁) (w : Fin n₁ → Semiterm L 
 
 infix:90 " ⇜ " => LO.FirstOrder.Rewriting.subst
 
-abbrev shift [Rewriting L ℕ F ℕ F] (φ : F n) : F n := @Rew.shift L n ▹ φ
+abbrev shift [Rewriting L ℕ F ℕ F] : F n →ˡᶜ F n := app Rew.shift
 
-abbrev free [Rewriting L ℕ F ℕ F] (φ : F (n + 1)) : F n := @Rew.free L n ▹ φ
+abbrev free [Rewriting L ℕ F ℕ F] : F (n + 1) →ˡᶜ F n := app Rew.free
 
-abbrev fix [Rewriting L ℕ F ℕ F] (φ : F n) : F (n + 1) := @Rew.fix L n ▹ φ
+abbrev fix [Rewriting L ℕ F ℕ F] : F n →ˡᶜ F (n + 1) := app Rew.fix
 
 def shifts [Rewriting L ℕ F ℕ F] (Γ : List (F n)) : List (F n) := Γ.map Rewriting.shift
 
@@ -832,7 +832,7 @@ scoped[LO.FirstOrder] postfix:max "⁺" => FirstOrder.Rewriting.shifts
 @[simp] lemma shifts_neg [Rewriting L ℕ F ℕ F] (Γ : List (F n)) : (∼Γ)⁺ = ∼(Γ⁺) := by
   simp [shifts, List.tilde_def]
 
-@[coe] abbrev emb {ο ξ} [IsEmpty ο] {O F : ℕ → Type*} [LCWQ O] [LCWQ F] [Rewriting L ο O ξ F] (φ : O n) : F n := @Rew.emb L ο _ ξ n ▹ φ
+abbrev emb {ο ξ} [IsEmpty ο] {O F : ℕ → Type*} [LCWQ O] [LCWQ F] [Rewriting L ο O ξ F] : O n →ˡᶜ F n := app (Rew.emb (ξ := ξ))
 
 end Rewriting
 

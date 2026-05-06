@@ -3,7 +3,7 @@ module
 /- public import Foundation.Logic.Calculus -/
 public import Foundation.Logic.Calculus
 public import Foundation.Propositional.Entailment.AxiomEFQ
-public import Foundation.FirstOrder.Basic.Syntax.Schema
+public import Foundation.FirstOrder.Basic.Syntax.Rew
 public import Mathlib.Data.List.MinMax
 
 /-! # One-sided sequent calculus for first-order classical logic -/
@@ -27,10 +27,21 @@ def newVar (Γ : Sequent L) : ℕ := (Γ.map Semiformula.fvSup).foldr max 0
 lemma not_fvar?_newVar {φ : Proposition L} {Γ : Sequent L} (h : φ ∈ Γ) : ¬FVar? φ Γ.newVar :=
   not_fvar?_of_lt_fvSup φ (by simpa [newVar] using List.le_max_of_le (List.mem_map_of_mem h) (by simp))
 
-@[simp] lemma rew_neg_comm {Γ : Sequent L} (ω : Rew L ℕ 0 ℕ 0) :
-    (∼Γ).map (ω ▹ ·) = ∼Γ.map (ω ▹ ·) := by simp [List.tilde_def]
+@[simp] lemma lcHom_comm {Γ : List (Formula L ξ)} (f : Formula L ξ →ˡᶜ Proposition L) :
+    (∼Γ).map f = ∼Γ.map f := by simp [List.tilde_def]
 
 def IsClosed (Γ : Sequent L) : Prop := ∃ φ ∈ Γ, ∼φ ∈ Γ
+
+def embed (Γ : List (Sentence L)) : Sequent L := List.map Rewriting.emb Γ
+
+@[simp] lemma embed_nil : embed ([] : List (Sentence L)) = [] := rfl
+
+@[simp] lemma embed_cons {φ : Sentence L} {Γ : List (Sentence L)} :
+    embed (φ :: Γ) = (↑φ :: embed Γ) := rfl
+
+@[simp] lemma embed_shift (Γ : List (Sentence L)) :
+    (embed Γ)⁺ = embed Γ := by
+  simp [embed, Rewriting.shifts]
 
 end Sequent
 
@@ -164,7 +175,7 @@ protected def shift {Δ : Sequent L} (d : ⊢ᴸᴷ¹ Δ) : ⊢ᴸᴷ¹ Δ⁺ :=
 
 section Hom
 
-variable {L₁ : Language} {L₂ : Language} {𝔖₁ : Schema L₁} {Δ₁ : Sequent L₁}
+variable {L₁ : Language} {L₂ : Language} {Δ₁ : Sequent L₁}
 
 lemma shifts_image (Φ : L₁ →ᵥ L₂) {Δ : List (Proposition L₁)} :
      (Δ.map <| Semiformula.lMap Φ)⁺ = (Δ⁺.map <| Semiformula.lMap Φ) := by
@@ -238,172 +249,120 @@ end Derivation
 
 /-! ## Classical proof system -/
 
-inductive Proof.Symbol (L : Language)
+inductive LK.Symbol (L : Language)
   | symbol
 
-notation "𝐋𝐊¹" => Proof.Symbol.symbol
+notation "𝐋𝐊¹" => LK.Symbol.symbol
 
-abbrev Proof (φ : Proposition L) := ⊢ᴸᴷ¹ [φ]
+notation "𝐋𝐊¹[" L "]" => LK.Symbol.symbol (L := L)
 
-instance : Entailment (Proof.Symbol L) (Proposition L) where
-  Prf _ := Proof
+abbrev LK (φ : Proposition L) := ⊢ᴸᴷ¹ [φ]
 
-namespace Proof
+instance : Entailment (LK.Symbol L) (Proposition L) where
+  Prf _ := LK
+
+namespace LK
 
 lemma def_eq (φ : Proposition L) : (𝐋𝐊¹ ⊢! φ) = (⊢ᴸᴷ¹ [φ]) := rfl
 
-instance : OneSidedLK.EmptyEntailment (Derivation (L := L)) (𝐋𝐊¹ : Proof.Symbol L) where
+lemma provable_def (φ : Proposition L) : 𝐋𝐊¹ ⊢ φ ↔ Nonempty (⊢ᴸᴷ¹ [φ]) := by rfl
+
+lemma unprovable_def (φ : Proposition L) : 𝐋𝐊¹ ⊬ φ ↔ IsEmpty (⊢ᴸᴷ¹ [φ]) := by
+  unfold Entailment.Unprovable; simp [provable_def]
+
+instance : OneSidedLK.PrincipalEntailment (Derivation (L := L)) (𝐋𝐊¹ : LK.Symbol L) where
   equiv := Equiv.refl _
 
-instance classical : Entailment.Cl (𝐋𝐊¹ : Proof.Symbol L) := inferInstance
+instance classical : Entailment.Cl (𝐋𝐊¹ : LK.Symbol L) := inferInstance
 
-end Proof
+lemma all (φ : Semiproposition L 1) : 𝐋𝐊¹ ⊢ φ.free → 𝐋𝐊¹ ⊢ ∀⁰ φ := fun h ↦ ⟨Derivation.all h.get⟩
 
-structure Schema.Proof (𝔖 : Schema L) (φ : Proposition L) where
-  axioms : List (Proposition L)
-  axioms_mem : ∀ ψ ∈ axioms, ψ ∈ 𝔖
-  derivation : ⊢ᴸᴷ¹ φ :: ∼axioms
+lemma allClosure_fixitr {φ : Proposition L} (dp : 𝐋𝐊¹ ⊢ φ) : (m : ℕ) → 𝐋𝐊¹ ⊢ ∀⁰* Rew.fixitr 0 m ▹ φ
+  |     0 => by simpa
+  | m + 1 => by
+    simp only [LawfulSyntacticRewriting.allClosure_fixitr]
+    apply all; simpa using allClosure_fixitr dp m
 
-namespace Schema
+lemma univCl' {φ : Proposition L} (b : 𝐋𝐊¹ ⊢ φ) : 𝐋𝐊¹ ⊢ φ.univCl' := allClosure_fixitr b φ.fvSup
 
-instance : Entailment (Schema L) (Proposition L) where
-  Prf := Schema.Proof
+end LK
 
-variable {𝔖 : Schema L}
+structure Theory.LK (T : Theory L) (σ : Sentence L) where
+  axioms : List (Sentence L)
+  axioms_mem : ∀ ψ ∈ axioms, ψ ∈ T
+  derivation : OneSidedLK.Pullback Derivation Rewriting.emb (σ :: ∼axioms)
 
-attribute [simp] Proof.axioms_mem
+namespace Theory
 
-def equiv (𝔖 : Schema L) (φ) :
-    (𝔖 ⊢! φ) ≃ (Γ : {Γ : Sequent L // ∀ ψ ∈ Γ, ψ ∈ 𝔖}) × ⊢ᴸᴷ¹ φ :: ∼Γ where
-  toFun b := ⟨⟨b.axioms, b.axioms_mem⟩, b.derivation⟩
-  invFun := fun ⟨⟨Γ, hΓ⟩, d⟩ ↦ ⟨Γ, hΓ, d⟩
+instance : Entailment (Theory L) (Sentence L) where
+  Prf := Theory.LK
 
-instance : Entailment.Compact (Schema L) where
+variable {T : Theory L}
+
+attribute [simp] LK.axioms_mem
+
+instance : Entailment.Compact (Theory L) where
   core b := {φ | φ ∈ b.axioms}
   corePrf b := ⟨b.axioms, by simp, b.derivation⟩
   core_finite b := by simp [AdjunctiveSet.Finite, AdjunctiveSet.set]
   core_subset b := by simpa [AdjunctiveSet.subset_iff] using b.axioms_mem
 
-instance : OneSidedLK.Entailment (Derivation (L := L)) (Schema L) where
-  equiv {𝔖 φ} := equiv 𝔖 φ
+instance : OneSidedLK.ContextualEntailment (OneSidedLK.Pullback Derivation Rewriting.emb) (Theory L) where
+  equiv {T φ} :=
+  { toFun b := ⟨⟨b.axioms, b.axioms_mem⟩, b.derivation⟩
+    invFun := fun ⟨⟨Γ, hΓ⟩, d⟩ ↦ ⟨Γ, hΓ, d⟩ }
 
-instance : Entailment.Cl 𝔖 := inferInstance
+instance : Entailment.Cl T := OneSidedLK.ContextualEntailment.cl T
 
-lemma weakerThan_of_le {𝔖 𝔘 : Schema L} (h : 𝔖 ≤ 𝔘) : 𝔖 ⪯ 𝔘 := Entailment.Axiomatized.weakerThanOfSubset h
+lemma weakerThan_of_le {T U : Theory L} (h : T ⊆ U) : T ⪯ U := Entailment.Axiomatized.weakerThanOfSubset h
 
-instance (𝔖 𝔘 : Schema L) : 𝔖 ⪯ 𝔖 ⊔ 𝔘 := weakerThan_of_le (by simp)
+instance (T U : Theory L) : T ⪯ T ∪ U := weakerThan_of_le (by simp)
 
-instance (𝔖 𝔘 : Schema L) : 𝔘 ⪯ 𝔖 ⊔ 𝔘 := weakerThan_of_le (by simp)
+instance (T U : Theory L) : U ⪯ T ∪ U := weakerThan_of_le (by simp)
 
 lemma provable_iff :
-    𝔖 ⊢ φ ↔ ∃ Γ : Sequent L, (∀ ψ ∈ Γ, ψ ∈ 𝔖) ∧ Nonempty (⊢ᴸᴷ¹ φ :: ∼Γ) :=
-  OneSidedLK.Entailment.provable_iff
+    T ⊢ φ ↔ ∃ Γ : List (Sentence L), (∀ ψ ∈ Γ, ψ ∈ T) ∧ Nonempty (⊢ᴸᴷ¹ φ :: ∼Sequent.embed Γ) := by
+  simpa using OneSidedLK.ContextualEntailment.provable_iff (𝓢 := T) (φ := φ)
 
 lemma inconsistent_iff :
-    Entailment.Inconsistent 𝔖 ↔ ∃ Γ : Sequent L, (∀ ψ ∈ Γ, ψ ∈ 𝔖) ∧ Nonempty (⊢ᴸᴷ¹ ∼Γ) :=
-  OneSidedLK.Entailment.inconsistent_iff
-
-def rewrite [𝔖.IsClosed] (b : 𝔖 ⊢! φ) (f : ℕ → SyntacticTerm L) :
-    𝔖 ⊢! Rew.rewrite f ▹ φ where
-  axioms := b.axioms.map (Rew.rewrite f ▹ ·)
-  axioms_mem := by
-    suffices ∀ ψ ∈ b.axioms, Rew.rewrite f ▹ ψ ∈ 𝔖 by simpa
-    intro ψ hψ
-    exact Schema.IsClosed.closed (Rew.rewrite f) _ (b.axioms_mem ψ hψ)
-  derivation := b.derivation.rewrite f |>.cast
-
-@[simp] lemma empty_provable_iff_eprovable :
-    (⊥ : Schema L) ⊢ φ ↔ 𝐋𝐊¹ ⊢ φ :=
-  OneSidedLK.Entailment.empty_provable_iff_eprovable 𝐋𝐊¹
-
-end Schema
-
-namespace Derivation
-
-open Entailment
-
-variable {Γ Δ : Sequent L}
-
-def eCut (d₁ : ⊢ᴸᴷ¹ φ :: Γ) (d₂ : ⊢ᴸᴷ¹ ψ :: Δ) (e : ∼φ = ψ := by simp) : ⊢ᴸᴷ¹ Γ ++ Δ := cut d₁ (d₂.cast (by simp [e]))
-
-def disj₂ {Γ Δ : Sequent L} : ⊢ᴸᴷ¹ Γ ++ Δ → ⊢ᴸᴷ¹ ⋁Γ :: Δ := fun d ↦
-  match Γ with
-  |               [] => d.weakening
-  |              [φ] => d
-  |           [φ, ψ] => d.or
-  | φ :: ψ :: χ :: Γ =>
-    let Φ := ⋁(χ :: Γ)
-    have : ⊢ᴸᴷ¹ (φ ⋎ ψ :: χ :: Γ) ++ Δ := d.or
-    have d₁ : ⊢ᴸᴷ¹ (φ ⋎ ψ) ⋎ Φ :: Δ := this.disj₂
-    have d₂ : ⊢ᴸᴷ¹ [(∼φ ⋏ ∼ψ) ⋏ ∼Φ, φ ⋎ ψ ⋎ Φ] :=
-      have : ⊢ᴸᴷ¹ [φ, ψ ⋎ Φ, (∼φ ⋏ ∼ψ) ⋏ ∼Φ] :=
-        ((eta φ).rotate.tensor (eta ψ).rotate).tensor
-          (eta Φ).rotate |>.rotate.rotate.or.weakening
-      this.or.rotate
-    d₂.eCut d₁
-  termination_by _ => Γ.length
-
-def conj₂ {Γ Δ : Sequent L} (d : (φ : Proposition L) → φ ∈ Γ → ⊢ᴸᴷ¹ φ :: Δ) : ⊢ᴸᴷ¹ ⋀Γ :: Δ :=
-  match Γ with
-  |          [] => verum.weakening
-  |         [φ] => d φ (by simp)
-  | φ :: ψ :: Γ =>
-    have : ⊢ᴸᴷ¹ ⋀(ψ :: Γ) :: Δ := conj₂ (Γ := ψ :: Γ) (fun χ h ↦ d χ (by simp_all))
-    (d φ (by simp)).and this
-
-def disjClosure : ⊢ᴸᴷ¹ Γ → 𝐋𝐊¹ ⊢! ⋁Γ := fun d ↦
-  have : ⊢ᴸᴷ¹ Γ ++ [] := d.cast
-  this.disj₂
-
-def disjClosureInv : 𝐋𝐊¹ ⊢! ⋁Γ → ⊢ᴸᴷ¹ Γ := fun d ↦
-  have d₁ : ⊢ᴸᴷ¹ [⋁Γ] := d
-  have d₂ : ⊢ᴸᴷ¹ ⋀(∼Γ) :: Γ := conj₂ fun φ h ↦ close φ (by simp) (by simp_all)
-  d₁.eCut d₂
-
-lemma nonempty_iff_provable_disj : Nonempty (⊢ᴸᴷ¹ Γ) ↔ 𝐋𝐊¹ ⊢ ⋁Γ :=
-  ⟨by rintro ⟨d⟩; exact ⟨d.disjClosure⟩, by rintro ⟨d⟩; exact ⟨d.disjClosureInv⟩⟩
-
-end Derivation
-
-namespace Schema
+    Entailment.Inconsistent T ↔ ∃ Γ : List (Sentence L), (∀ ψ ∈ Γ, ψ ∈ T) ∧ Nonempty (⊢ᴸᴷ¹ ∼Sequent.embed Γ) := by
+  simpa using OneSidedLK.ContextualEntailment.inconsistent_iff (𝓢 := T)
 
 open Entailment Derivation
 
-lemma iff_context {𝔖 : Schema L} : 𝔖 ⊢ φ ↔ 𝔖 *⊢[𝐋𝐊¹] φ := by
-  constructor
-  · rintro ⟨d⟩
-    have : 𝐋𝐊¹ ⊢! ⋀d.axioms 🡒 φ :=
-      have : ⊢ᴸᴷ¹ ∼d.axioms ++ [φ] := d.derivation.weakening
-      this.disj₂.or.cast <| by simp [Semiformula.imp_eq]
-    refine ⟨⟨d.axioms, by simpa using d.axioms_mem, this⟩⟩
-  · rintro ⟨Γ, h, d⟩
-    have d : ⊢ᴸᴷ¹ [⋁(∼Γ) ⋎ φ] := d.cast (by simp [Semiformula.imp_eq])
-    have : ⊢ᴸᴷ¹ ⋀Γ ⋏ ∼φ :: φ :: ∼Γ :=
-      have : ⊢ᴸᴷ¹ ⋀Γ :: ∼Γ := Derivation.conj₂ fun φ h ↦ close φ (by simp) (by simp [h])
-      this.tensor (eta φ).rotate |>.weakening
-    refine ⟨⟨Γ, h, (d.eCut this).cast⟩⟩
+@[simp] lemma empty_provable_iff_eprovable :
+    (∅ : Theory L) ⊢ φ ↔ 𝐋𝐊¹ ⊢ (φ : Proposition L) := by
+  simpa using OneSidedLK.ContextualEntailment.empty_provable_iff_eprovable
+    (S := Theory L)
+    (𝓟 := pullback 𝐋𝐊¹[L] (Rewriting.emb : Sentence L → Proposition L))
+    (φ := φ)
+
+lemma iff_context {T : Theory L} :
+    T ⊢ φ ↔ T *⊢[pullback 𝐋𝐊¹[L] (Rewriting.emb : _ → Proposition L)] φ :=
+  OneSidedLK.ContextualEntailment.iff_context
+
+end Theory
+
+namespace Theory
+
+open Entailment Derivation
+
+lemma of_LK_provable {T : Theory L} {φ : Sentence L} : 𝐋𝐊¹ ⊢ (φ : Proposition L) → T ⊢ φ := fun h ↦
+  have : pullback 𝐋𝐊¹[L] (Rewriting.emb : Sentence L → Proposition L) ⊢ φ := h
+  OneSidedLK.ContextualEntailment.of_principal_provable this
 
 open Classical in
+noncomputable instance : Entailment.Deduction (Theory L) :=
+  OneSidedLK.ContextualEntailment.deduction (pullback 𝐋𝐊¹[L] (Rewriting.emb : Sentence L → Proposition L))
 
-noncomputable instance : Entailment.Deduction (Schema L) where
-  ofInsert {φ ψ 𝔖 b} :=
-    have : insert φ ↑𝔖 *⊢[𝐋𝐊¹] ψ := iff_context.mp ⟨b⟩
-    have : ↑𝔖 *⊢[𝐋𝐊¹] φ 🡒 ψ := Context.deduct! this
-    (iff_context.mpr this).get
-  inv {φ ψ 𝔖 b} :=
-    have : ↑(adjoin φ 𝔖) *⊢[𝐋𝐊¹] ψ := Context.deductInv! (iff_context.mp ⟨b⟩)
-    (iff_context.mpr this).get
+end Theory
 
-end Schema
+/-! ### Theory -/
 
-/-!
-  ### Theory
--/
+def Theory.theory (T : Theory L) : Theory L := {σ | T ⊢ ↑σ}
 
-def Schema.theory (𝔖 : Schema L) : Theory L := {σ | 𝔖 ⊢ ↑σ}
-
-@[simp] lemma Schema.mem_theory {𝔖 : Schema L} :
-    σ ∈ 𝔖.theory ↔ 𝔖 ⊢ ↑σ := by simp [Schema.theory]
+@[simp] lemma Theory.mem_theory {T : Theory L} :
+    σ ∈ T.theory ↔ T ⊢ ↑σ := by simp [Theory.theory]
 
 end FirstOrder
 

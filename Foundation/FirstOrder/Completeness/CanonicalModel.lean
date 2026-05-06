@@ -373,6 +373,8 @@ instance : OrderTop ℙ⁻ where
     rintro ⟨Γ, hΓ⟩
     exact ⟨StrongerThan.ofSubset <| List.nil_subset Γ⟩
 
+def ofUnprovable (φ : Proposition L) (h : 𝐋𝐊¹ ⊬ ∼φ) : ℙ⁻ := ⟨[φ], by simpa [LK.unprovable_def] using h⟩
+
 end ConsistentSequent
 
 abbrev IsForced (p : ℙ⁻) (φ : Propositionᵢ L) := Nonempty (Forces p.val φ)
@@ -511,6 +513,9 @@ lemma complete {φ : Proposition L} : ℙ⁻ ∀⊩ᶜ φ ↔ 𝐋𝐊¹ ⊢ φ 
     contradiction
   · intro b
     exact sound_minimal <| Provable.gödel_gentzen b
+
+protected lemma refl (φ : Proposition L) (h : 𝐋𝐊¹ ⊬ ∼φ) :
+    ConsistentSequent.ofUnprovable φ h ⊩ᶜ φ := ⟨Forces.refl φ⟩
 
 end IsWeaklyForced
 
