@@ -72,53 +72,53 @@ end Derivation
 theorem Provable.sound {M : Type*} [s : Structure L M] [Nonempty M] {φ : Proposition L} (f : ℕ → M) :
     𝐋𝐊¹ ⊢ φ → φ.Evalf f := fun b ↦ by simpa using Derivation.sound f b.get
 
-variable {𝔖 : Schema L}
+variable {T : Theory L}
 
-theorem Schema.sound_proposition {M : Type*} [s : Structure L M] [Nonempty M] :
-    𝔖 ⊢ φ → M↓[L] ⊧* ↑↑𝔖 → ∀ f : ℕ → M, φ.Evalf f := fun b H f ↦ by
-  rcases Schema.provable_iff.mp b with ⟨Γ, hΓ, ⟨b⟩⟩
-  have : φ.Evalf f ∨ ∃ ψ, ∼ψ ∈ Γ ∧ ψ.Evalf f := by simpa using b.sound f
+theorem Theory.Proof.sound_proposition {M : Type*} [s : Structure L M] [Nonempty M] :
+    T ⊢ φ → M↓[L] ⊧* T → φ.Realize M := fun b H ↦ by
+  rcases Theory.Proof.provable_iff.mp b with ⟨Γ, hΓ, ⟨b⟩⟩
+  have : Inhabited M := Classical.inhabited_of_nonempty inferInstance
+  let f : ℕ → M := fun _ ↦ default
+  have : φ.Realize M ∨ ∃ ψ, ∼ψ ∈ Sequent.embed Γ ∧ ψ.Evalf f := by simpa using b.sound f
   rcases this with (h | ⟨ψ, hψ, h⟩)
   · assumption
-  · have : ¬ψ.Evalf f := by
-      have := by simpa [models_iff] using H.models _ (φ := (∼ψ).univCl) (by grind only [Schema.mem_uniClosure])
-      exact this f
+  · have : ∃ χ, ∼χ ∈ Γ ∧ ↑χ = ψ := by
+      have : ∃ χ ∈ Γ, χ = ∼ψ := by simpa [Sequent.embed] using hψ
+      rcases this with ⟨χ, hχ, e⟩
+      refine ⟨∼χ, by simpa using hχ, by simp [e]⟩
+    rcases this with ⟨χ, hχ, rfl⟩
+    have : χ.Realize M := by simpa using h
+    have : ¬χ.Realize M := by
+      simpa [models_iff] using H.models _ (hΓ _ hχ)
     contradiction
 
-theorem Schema.sound_proposition' :
-    𝔖 ⊢ φ → (𝔖 : Theory L) ⊨[Struc.{v, u} L] φ.univCl := fun b s hS ↦ by
+theorem Theory.Proof.sound {φ : Sentence L} :
+    T ⊢ φ → T ⊨[Struc.{v, u} L] φ := fun b s hS ↦ by
   simpa [struc_models_iff_models (s := s), models_iff]
-    using Schema.sound_proposition b hS
+    using Theory.Proof.sound_proposition b hS
 
-theorem Schema.sound_sentence {σ : Sentence L} :
-    𝔖 ⊢ ↑σ → (𝔖 : Theory L) ⊨[Struc.{v, u} L] σ := fun b ↦ by
-  simpa using Schema.sound_proposition' b
+theorem Theory.Proof.sound_small : T ⊢ φ → T ⊨ φ := Theory.Proof.sound
 
-theorem Schema.smallSound_sentence {σ : Sentence L} : 𝔖 ⊢ ↑σ → (𝔖 : Theory L) ⊨ σ := Schema.sound_sentence
+instance sound (T : Theory L) : Sound T (Semantics.models (Struc.{v, u} L) T) := ⟨Theory.Proof.sound⟩
 
-instance sound (𝔖 : Schema L) :
-    Sound (Entailment.pullback 𝔖 ((↑·) : Sentence L → Proposition L)) (Semantics.models (Struc.{v, u} L) 𝔖) :=
-  ⟨Schema.sound_sentence⟩
+lemma models_of_subtheory {T U : Theory L} [T ⪯ U] {M : Type*} [Structure L M] [Nonempty M] : M↓[L] ⊧* U → M↓[L] ⊧* T :=
+  fun hM ↦ ⟨fun {φ} hφ ↦ by
+    have : T ⪯ U := inferInstance
+    have : U ⊢ φ := this.pbl (Entailment.by_axm hφ)
+    exact Theory.Proof.sound this hM⟩
 
-lemma models_of_subtheory {𝔖 𝔗 : Schema L} [𝔖 ⪯ 𝔗] {M : Type*} [Structure L M] [Nonempty M] : M↓[L] ⊧* ↑↑𝔗 → M↓[L] ⊧* ↑↑𝔖 :=
-  fun hM ↦ ⟨fun {σ} hσ ↦ by
-    rcases show ∃ φ ∈ 𝔖, univCl φ = σ by simpa using hσ with ⟨φ, hφ, rfl⟩
-    have : 𝔖 ⪯ 𝔗 := inferInstance
-    have : 𝔗 ⊢ φ := this.pbl (Entailment.by_axm hφ)
-    exact Schema.sound_proposition' this hM⟩
+lemma consistent_of_satisfiable (h : Semantics.Satisfiable (Struc.{v, u} L) T) : Entailment.Consistent T :=
+  Sound.consistent_of_satisfiable h
 
-lemma consistent_of_satisfiable (h : Semantics.Satisfiable (Struc.{v, u} L) ↑↑𝔖) : Entailment.Consistent 𝔖 :=
-  Entailment.Pullback.consistent <| Sound.consistent_of_satisfiable (𝓢 := Entailment.pullback 𝔖 ((↑·) : Sentence L → Proposition L)) h
+lemma consistent_of_model (T : Theory L) (M : Type*) [Structure L M] [Nonempty M] [hM : M↓[L] ⊧* T] :
+    Entailment.Consistent T := consistent_of_satisfiable ⟨M↓[L], hM⟩
 
-lemma consistent_of_model (𝔖 : Schema L) (M : Type*) [Structure L M] [Nonempty M] [hM : M↓[L] ⊧* ↑↑𝔖] :
-    Entailment.Consistent 𝔖 := consistent_of_satisfiable ⟨M↓[L], hM⟩
-
-lemma unprovable_of_countermodel {M : Type*} [Structure L M] [Nonempty M] [hM : M↓[L] ⊧* ↑↑𝔖] {σ} : M↓[L] ⊭ σ → 𝔖 ⊬ ↑σ := by
+lemma unprovable_of_countermodel {M : Type*} [Structure L M] [Nonempty M] [hM : M↓[L] ⊧* T] {φ} : M↓[L] ⊭ φ → T ⊬ φ := by
   contrapose!; intro h
-  exact Schema.sound_sentence h hM
+  exact Theory.Proof.sound h hM
 
-lemma models_of_provable {M : Type*} [Nonempty M] [Structure L M] (hT : M↓[L] ⊧* ↑↑𝔖) {σ : Sentence L} (h : 𝔖 ⊢ ↑σ) :
-    M↓[L] ⊧ σ := consequence_iff.mp (Schema.sound_sentence h) M inferInstance
+lemma models_of_provable {M : Type*} [Nonempty M] [Structure L M] (hT : M↓[L] ⊧* ↑↑T) {φ : Sentence L} (h : T ⊢ φ) :
+    M↓[L] ⊧ φ := consequence_iff.mp (Theory.Proof.sound h) M inferInstance
 
 end sound
 

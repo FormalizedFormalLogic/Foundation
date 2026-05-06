@@ -249,19 +249,19 @@ end Derivation
 
 /-! ## Classical proof system -/
 
-inductive LK.Symbol (L : Language)
+inductive LK (L : Language)
   | symbol
 
-notation "𝐋𝐊¹" => LK.Symbol.symbol
+notation "𝐋𝐊¹" => LK.symbol
 
-notation "𝐋𝐊¹[" L "]" => LK.Symbol.symbol (L := L)
+notation "𝐋𝐊¹[" L "]" => LK.symbol (L := L)
 
-abbrev LK (φ : Proposition L) := ⊢ᴸᴷ¹ [φ]
+abbrev LK.Proof (φ : Proposition L) := ⊢ᴸᴷ¹ [φ]
 
-instance : Entailment (LK.Symbol L) (Proposition L) where
-  Prf _ := LK
+instance : Entailment (LK L) (Proposition L) where
+  Prf _ := LK.Proof
 
-namespace LK
+namespace LK.Proof
 
 lemma def_eq (φ : Proposition L) : (𝐋𝐊¹ ⊢! φ) = (⊢ᴸᴷ¹ [φ]) := rfl
 
@@ -270,10 +270,10 @@ lemma provable_def (φ : Proposition L) : 𝐋𝐊¹ ⊢ φ ↔ Nonempty (⊢ᴸ
 lemma unprovable_def (φ : Proposition L) : 𝐋𝐊¹ ⊬ φ ↔ IsEmpty (⊢ᴸᴷ¹ [φ]) := by
   unfold Entailment.Unprovable; simp [provable_def]
 
-instance : OneSidedLK.PrincipalEntailment (Derivation (L := L)) (𝐋𝐊¹ : LK.Symbol L) where
+instance : OneSidedLK.PrincipalEntailment (Derivation (L := L)) (𝐋𝐊¹ : LK L) where
   equiv := Equiv.refl _
 
-instance classical : Entailment.Cl (𝐋𝐊¹ : LK.Symbol L) := inferInstance
+instance classical : Entailment.Cl (𝐋𝐊¹ : LK L) := inferInstance
 
 lemma all (φ : Semiproposition L 1) : 𝐋𝐊¹ ⊢ φ.free → 𝐋𝐊¹ ⊢ ∀⁰ φ := fun h ↦ ⟨Derivation.all h.get⟩
 
@@ -285,21 +285,21 @@ lemma allClosure_fixitr {φ : Proposition L} (dp : 𝐋𝐊¹ ⊢ φ) : (m : ℕ
 
 lemma univCl' {φ : Proposition L} (b : 𝐋𝐊¹ ⊢ φ) : 𝐋𝐊¹ ⊢ φ.univCl' := allClosure_fixitr b φ.fvSup
 
-end LK
+end LK.Proof
 
-structure Theory.LK (T : Theory L) (σ : Sentence L) where
+structure Theory.Proof (T : Theory L) (σ : Sentence L) where
   axioms : List (Sentence L)
   axioms_mem : ∀ ψ ∈ axioms, ψ ∈ T
   derivation : OneSidedLK.Pullback Derivation Rewriting.emb (σ :: ∼axioms)
 
-namespace Theory
+namespace Theory.Proof
 
 instance : Entailment (Theory L) (Sentence L) where
-  Prf := Theory.LK
+  Prf := Theory.Proof
 
 variable {T : Theory L}
 
-attribute [simp] LK.axioms_mem
+attribute [simp] Theory.Proof.axioms_mem
 
 instance : Entailment.Compact (Theory L) where
   core b := {φ | φ ∈ b.axioms}
@@ -313,6 +313,8 @@ instance : OneSidedLK.ContextualEntailment (OneSidedLK.Pullback Derivation Rewri
     invFun := fun ⟨⟨Γ, hΓ⟩, d⟩ ↦ ⟨Γ, hΓ, d⟩ }
 
 instance : Entailment.Cl T := OneSidedLK.ContextualEntailment.cl T
+
+instance : Entailment.Axiomatized (Theory L) := inferInstance
 
 lemma weakerThan_of_le {T U : Theory L} (h : T ⊆ U) : T ⪯ U := Entailment.Axiomatized.weakerThanOfSubset h
 
@@ -334,14 +336,14 @@ open Entailment Derivation
     (∅ : Theory L) ⊢ φ ↔ 𝐋𝐊¹ ⊢ (φ : Proposition L) := by
   simpa using OneSidedLK.ContextualEntailment.empty_provable_iff_eprovable
     (S := Theory L)
-    (𝓟 := pullback 𝐋𝐊¹[L] (Rewriting.emb : Sentence L → Proposition L))
+    (𝓟 := pullback (𝐋𝐊¹[L]) (Rewriting.emb : Sentence L → Proposition L))
     (φ := φ)
 
 lemma iff_context {T : Theory L} :
     T ⊢ φ ↔ T *⊢[pullback 𝐋𝐊¹[L] (Rewriting.emb : _ → Proposition L)] φ :=
   OneSidedLK.ContextualEntailment.iff_context
 
-end Theory
+end Theory.Proof
 
 namespace Theory
 
@@ -359,10 +361,10 @@ end Theory
 
 /-! ### Theory -/
 
-def Theory.theory (T : Theory L) : Theory L := {σ | T ⊢ ↑σ}
+def Theory.theory (T : Theory L) : Theory L := {σ | T ⊢ σ}
 
 @[simp] lemma Theory.mem_theory {T : Theory L} :
-    σ ∈ T.theory ↔ T ⊢ ↑σ := by simp [Theory.theory]
+    σ ∈ T.theory ↔ T ⊢ σ := by simp [Theory.theory]
 
 end FirstOrder
 

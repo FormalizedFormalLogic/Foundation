@@ -1,6 +1,6 @@
 module
 
-public import Foundation.FirstOrder.Basic.Syntax.Schema
+public import Foundation.FirstOrder.Basic.Syntax.Rew
 public import Foundation.Vorspiel.IsEmpty
 public import Foundation.Vorspiel.Empty
 
@@ -238,7 +238,7 @@ abbrev Evalf [s : Structure L M] (f : ξ → M) : Formula L ξ →ˡᶜ Prop := 
 abbrev Evalb [s : Structure L M] (b : Fin n → M) :
     Semiformula L Empty n →ˡᶜ Prop := Eval b Empty.elim
 
-abbrev Eval₀ (M : Type*) [s : Structure L M] :
+abbrev Realize (M : Type*) [s : Structure L M] :
     Sentence L →ˡᶜ Prop := Eval (s := s) ![] Empty.elim
 
 abbrev Models (s : Structure L M) : Formula L M →ˡᶜ Prop := Eval ![] id
@@ -447,7 +447,7 @@ lemma eval_toEmpty [DecidableEq ξ] {n} {φ : Semiformula L ξ n} (hp : φ.freeV
     intro x hx; simp [Rew.fixitr_fvar, lt_fvSup_of_fvar? hx]
 
 @[simp] lemma eval_univCl [Nonempty M] (φ : Proposition L) :
-    Eval₀ M φ.univCl ↔ ∀ f : ℕ → M, Evalf f φ := by
+    Realize M φ.univCl ↔ ∀ f : ℕ → M, Evalf f φ := by
   haveI : Inhabited M := Classical.inhabited_of_nonempty inferInstance
   simp [Semiformula.univCl, ←eval_toEmpty (f := default)]
 
@@ -491,7 +491,7 @@ end
 end Structure
 
 instance : Semantics (Struc L) (Sentence L) where
-  Models := fun str ↦ Semiformula.Eval₀ str.Dom
+  Models := fun str ↦ Semiformula.Realize str.Dom
 
 instance : Semantics.Tarski (Struc L) where
   models_verum := by simp [Semantics.Models]
@@ -521,15 +521,12 @@ variable {M}
 
 lemma struc_models_iff_models {s : Struc L} : s ⊧ σ ↔ s.Dom↓[L] ⊧ σ := by rfl
 
-lemma models_iff : M↓[L] ⊧ σ ↔ σ.Eval₀ M := by rfl
+lemma models_iff : M↓[L] ⊧ σ ↔ σ.Realize M := by rfl
 
 lemma models_iff_proposition {φ : Proposition L} : M↓[L] ⊧ φ.univCl ↔ ∀ f : ℕ → M, φ.Evalf f := by
   simp [models_iff]
 
-lemma models_theory_iff : M↓[L] ⊧* T ↔ (∀ {φ}, φ ∈ T → M↓[L] ⊧ φ) := Semantics.modelsSet_iff
-
-lemma models_schema_iff {𝔖 : Schema L} : M↓[L] ⊧* (𝔖 : Theory L) ↔ (∀ {φ : Proposition L}, φ ∈ 𝔖 → ∀ f : ℕ → M, φ.Evalf f) := by
-  simp [models_theory_iff, models_iff]
+lemma models_theory_iff : M↓[L] ⊧* T ↔ ∀ φ ∈ T, M↓[L] ⊧ φ := Semantics.modelsSet_iff
 
 lemma models_of_mem {T : Theory L} [M↓[L] ⊧* T] {φ} (h : φ ∈ T) : M↓[L] ⊧ φ := Semantics.ModelsSet.models _ h
 
@@ -592,7 +589,7 @@ lemma consequence_iff_unsatisfiable {σ : Sentence L} :
     intro hT; simpa using models_iff.mp (h hT)
   · intro h; apply consequence_iff.mpr
     intro M _ s hT
-    have : σ.Eval₀ M := by
+    have : σ.Realize M := by
       have := by simpa only [Semantics.ModelsSet.insert_iff, not_and', models_iff] using unsatisfiable_iff.mp h M inferInstance s
       simpa using this hT
     apply models_iff.mpr (by simpa using this)
@@ -619,7 +616,7 @@ end lMap
 
 end Semiformula
 
-section schema
+section theory
 
 variable (M) [Nonempty M] [Structure L M]
 
@@ -628,19 +625,19 @@ variable {M}
 lemma models_of_ss {T U : Theory L} (h : M↓[L] ⊧* U) (ss : T ⊆ U) : M↓[L] ⊧* T :=
   Semantics.ModelsSet.of_subset h ss
 
-lemma models_of_le {𝔖₁ 𝔖₂ : Schema L} (h : M↓[L] ⊧* ↑↑𝔖₂) (le : 𝔖₁ ≤ 𝔖₂) : M↓[L] ⊧* ↑↑𝔖₁ :=
-  Semantics.ModelsSet.of_subset h (Schema.coe_subset_coe_of_le le)
+lemma models_of_le {T₁ T₂ : Theory L} (h : M↓[L] ⊧* T₂) (le : T₁ ⊆ T₂) : M↓[L] ⊧* T₁ :=
+  Semantics.ModelsSet.of_subset h le
 
-instance models_schema_sup (𝔖₁ 𝔖₂ : Schema L) [M↓[L] ⊧* ↑↑𝔖₁] [M↓[L] ⊧* ↑↑𝔖₂] : M↓[L] ⊧* ↑↑(𝔖₁ ∪ 𝔖₂) := by
-  simp only [Schema.coe_sup, Semantics.ModelsSet.union_iff]
+instance models_theory_sup (T₁ T₂ : Theory L) [M↓[L] ⊧* T₁] [M↓[L] ⊧* T₂] : M↓[L] ⊧* T₁ ∪ T₂ := by
+  simp only [Semantics.ModelsSet.union_iff]
   constructor
   · infer_instance
   · infer_instance
 
-lemma modelsUnivCl_of_mem_schema {𝔖 : Schema L} [h : M↓[L] ⊧* ↑↑𝔖] (hf : φ ∈ 𝔖) : M↓[L] ⊧ φ.univCl :=
-  h.models _ <| by simp; grind
+lemma models_of_mem_theory {T : Theory L} [h : M↓[L] ⊧* T] (hf : φ ∈ T) : M↓[L] ⊧ φ :=
+  h.models _ hf
 
-end schema
+end theory
 
 namespace Structure
 
