@@ -17,19 +17,19 @@ namespace LO.FirstOrder
 variable {L : Language} {M : Type*} [Structure L M]
 
 abbrev IsDefinedBy (R : (Fin k → M) → Prop) (φ : Semisentence L k) : Prop :=
-  ∀ v, Semiformula.Evalbm M v φ ↔ R v
+  ∀ v, Semiformula.Evalb v φ ↔ R v
 
 class Defined (R : outParam ((Fin k → M) → Prop)) (φ : Semisentence L k) : Prop where
   iff : IsDefinedBy R φ
 
 abbrev IsDefinedByWithParam (R : (Fin k → M) → Prop) (φ : Semiformula L M k) : Prop :=
-  ∀ v, Semiformula.Evalm M v id φ ↔ R v
+  ∀ v, φ.Eval v id ↔ R v
 
 @[simp] lemma Defined.eval_iff {R : (Fin k → M) → Prop} {φ : Semisentence L k} [h : Defined R φ] (v) :
-    Semiformula.Evalbm M v φ ↔ R v := h.iff v
+    φ.Evalb v ↔ R v := h.iff v
 
 lemma IsDefinedByWithParam.iff {R : (Fin k → M) → Prop} {φ : Semiformula L M k} (h : IsDefinedByWithParam R φ) (v) :
-    Semiformula.Evalm M v id φ ↔ R v := h v
+    φ.Eval v id ↔ R v := h v
 
 abbrev DefinedFunction (f : (Fin k → M) → M) (φ : Semisentence L (k + 1)) : Prop :=
   Defined (fun v ↦ v 0 = f (v ·.succ)) φ
@@ -271,7 +271,7 @@ lemma fintype_exs [Fintype ι] {P : ι → (Fin k → M) → Prop}
 lemma retraction (h : L.Definable P) {n} (f : Fin k → Fin n) :
     L.Definable fun v ↦ P (fun i ↦ v (f i)) := by
   rcases h with ⟨φ, hφ⟩
-  exact ⟨(Rew.subst fun i ↦ #(f i)) ▹ φ, fun v ↦ by simp [←hφ.iff]⟩
+  exact ⟨(Rew.subst fun i ↦ #(f i)) ▹ φ, fun v ↦ by simp [←hφ.iff, Function.comp_def]⟩
 
 lemma exsVec {k l} {P : (Fin k → M) → (Fin l → M) → Prop}
     (h : L.Definable fun w : Fin (k + l) → M ↦ P (fun i ↦ w (i.castAdd l)) (fun j ↦ w (j.natAdd k))) :

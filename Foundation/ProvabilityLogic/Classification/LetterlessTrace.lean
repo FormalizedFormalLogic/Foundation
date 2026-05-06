@@ -996,7 +996,7 @@ lemma compact_add_right (h : (T + U) ⊢ φ) : ∃ (s : { s : Finset (Sentence L
   apply Entailment.mdp! $ Axiomatized.weakening! (λ _ => by simp) this;
   apply Entailment.FConj!_iff_forall_provable.mpr;
   intro ψ hψ;
-  apply Axiomatized.provable_axm;
+  apply Axiomatized.provable_refl;
   grind;
 
 lemma compact_add_left (h : (T + U) ⊢ φ) : ∃ (s : { s : Finset (Sentence L) // ↑s ⊆ T }), U ⊢ s.1.conj 🡒 φ := by
@@ -1045,7 +1045,7 @@ theorem letterless_provabilityLogic
     apply Entailment.mdp! $ WeakerThan.pbl H;
     apply Realization.interpret.iff_provable_fconj.mpr;
     intro B hB;
-    apply Axiomatized.provable_axm;
+    apply Axiomatized.provable_refl;
     right;
     use B;
     tauto;
