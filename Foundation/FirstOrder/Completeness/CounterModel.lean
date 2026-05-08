@@ -180,41 +180,23 @@ lemma refl (φ : Proposition L) (h : 𝐋𝐊¹ ⊬ ∼φ) :
     φ.Evalf (s := termModelOf (ConsistentSequent.ofUnprovable φ h)) (&·) :=
   (forcing_lemma φ).mpr ⟨ConsistentSequent.ofUnprovable φ h, by simp, by simpa using IsWeaklyForced.refl φ h⟩
 
-lemma satisfiable_of_irrefutable (σ : Sentence L) (h : Entailment.pullback 𝐋𝐊¹[L] ((↑·) : Sentence L → Proposition L) ⊬ ∼σ) :
+lemma satisfiable_of_irrefutable_of_countable (σ : Sentence L) (h : 𝐋𝐊¹ ⊬ ∼(σ : Proposition L)) :
     Satisfiable {σ} :=
   ⟨⟨_, inferInstance, termModelOf (ConsistentSequent.ofUnprovable σ (by simpa using h))⟩, by
   simpa [models_iff] using refl (↑σ : Proposition L) (by simpa using h)⟩
 
 open LO.Entailment
 
-theorem satisfiable_of_consistent (𝔖 : Schema L) (consistent : Entailment.Consistent 𝔖) :
-    Satisfiable (↑𝔖 : Theory L) := compact.mpr fun u hu ↦ by {
-  have : ∃ s : Finset (Proposition L), ↑s ⊆ 𝔖 ∧ s.image Semiformula.univCl = u :=
-    Finset.subset_set_image_iff.mp hu
-  rcases this with ⟨s, hs𝔖, rfl⟩
-  simp
-  }
-
-
-/--/
-theorem satisfiable_of_consistent (𝔖 : Schema L) (consistent : Entailment.Consistent 𝔖) :
-    Satisfiable (↑𝔖 : Theory L) := compact.mpr fun u hu ↦ by {
-  have : ∃ s : Finset (Proposition L), ↑s ⊆ 𝔖 ∧ s.image Semiformula.univCl = u :=
-    Finset.subset_set_image_iff.mp hu
-  rcases this with ⟨s, hs𝔖, rfl⟩
-  let φ := ⋀s.toList
-  have : 𝔖 ⊢ φ := by
-    refine Schema.iff_context.mpr <|
-      Context.provable_iff.mpr
-        ⟨s.toList, fun ψ hψ ↦ hs𝔖 (by simpa using hψ), FiniteContext.provable_iff.mpr Entailment.C!_id⟩
-  have ub : 𝐋𝐊¹ ⊬ ∼φ := fun h ↦
-    have : 𝔖 ⊢ ⊥ := neg_mdp (Schema.provable_of_LK h) (by assumption)
+/-- The completeness theorem for countable languages. -/
+theorem satisfiable_of_consistent_of_countable (T : Theory L) (consistent : Entailment.Consistent T) :
+    Satisfiable T := compact.mpr fun u hu ↦ by
+  let σ := ⋀u.toList
+  have : T ⊢ σ := Conj₂!_intro fun φ hφ ↦ by_axm <| hu (by simpa using hφ)
+  have : 𝐋𝐊¹ ⊬ ∼(σ : Proposition L) := fun h ↦
+    have : T ⊢ ∼σ := Theory.Proof.of_LK_provable (φ := ∼σ) (by simpa using h)
+    have : T ⊢ ⊥ := neg_mdp this (by assumption)
     consistent_iff_unprovable_bot.mp consistent this
-  let str : Structure L 𝔗 := termModelOf (ConsistentSequent.ofUnprovable φ ub)
-  refine ⟨⟨_, inferInstance, str⟩, ?_⟩
-  have : ∀ φ : Proposition L, φ ∈ s → φ.Evalf (M := 𝔗) (&·) := by simpa [φ] using Canonical.refl φ ub
-  simp [models_iff]
-
-     }
+  have : Satisfiable {σ} := satisfiable_of_irrefutable_of_countable σ this
+  simpa [σ] using this
 
 end LO.FirstOrder.Derivation.Canonical

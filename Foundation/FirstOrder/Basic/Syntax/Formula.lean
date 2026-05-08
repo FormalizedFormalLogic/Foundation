@@ -586,6 +586,12 @@ abbrev Theory (L : Language) := Set (Sentence L)
 
 abbrev ArithmeticTheory := Theory ℒₒᵣ
 
+namespace Theory
+
+def lMap (Φ : L₁ →ᵥ L₂) (T : Theory L₁) : Theory L₂ := Semiformula.lMap Φ '' T
+
+end Theory
+
 end LO.FirstOrder
 
 end

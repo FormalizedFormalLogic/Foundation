@@ -343,10 +343,6 @@ lemma iff_context {T : Theory L} :
     T ⊢ φ ↔ T *⊢[pullback 𝐋𝐊¹[L] (Rewriting.emb : _ → Proposition L)] φ :=
   OneSidedLK.ContextualEntailment.iff_context
 
-end Theory.Proof
-
-namespace Theory
-
 open Entailment Derivation
 
 lemma of_LK_provable {T : Theory L} {φ : Sentence L} : 𝐋𝐊¹ ⊢ (φ : Proposition L) → T ⊢ φ := fun h ↦
@@ -357,7 +353,7 @@ open Classical in
 noncomputable instance : Entailment.Deduction (Theory L) :=
   OneSidedLK.ContextualEntailment.deduction (pullback 𝐋𝐊¹[L] (Rewriting.emb : Sentence L → Proposition L))
 
-end Theory
+end Theory.Proof
 
 /-! ### Theory -/
 

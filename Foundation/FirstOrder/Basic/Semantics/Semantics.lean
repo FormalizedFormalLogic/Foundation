@@ -616,6 +616,14 @@ end lMap
 
 end Semiformula
 
+lemma lMap_models_lMap {L₁ L₂ : Language.{u}} {Φ : L₁ →ᵥ L₂} {T : Theory L₁} {σ : Sentence L₁}
+    (h : T ⊨[Struc.{v, u} L₁] σ) :
+    T.lMap Φ ⊨[Struc.{v, u} L₂] Semiformula.lMap Φ σ := by
+  intro s hM
+  have : (s.struc.lMap Φ).toStruc ⊧ σ :=
+    h ⟨fun _ hq ↦ Semiformula.models_lMap.mp <| hM.models _ (Set.mem_image_of_mem _ hq)⟩
+  exact Semiformula.models_lMap.mpr this
+
 section theory
 
 variable (M) [Nonempty M] [Structure L M]

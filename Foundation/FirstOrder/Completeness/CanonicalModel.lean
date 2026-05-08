@@ -373,7 +373,7 @@ instance : OrderTop ℙ⁻ where
     rintro ⟨Γ, hΓ⟩
     exact ⟨StrongerThan.ofSubset <| List.nil_subset Γ⟩
 
-def ofUnprovable (φ : Proposition L) (h : 𝐋𝐊¹ ⊬ ∼φ) : ℙ⁻ := ⟨[φ], by simpa [LK.unprovable_def] using h⟩
+def ofUnprovable (φ : Proposition L) (h : 𝐋𝐊¹ ⊬ ∼φ) : ℙ⁻ := ⟨[φ], by simpa [LK.Proof.unprovable_def] using h⟩
 
 end ConsistentSequent
 
