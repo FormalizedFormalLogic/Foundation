@@ -285,6 +285,12 @@ lemma allClosure_fixitr {φ : Proposition L} (dp : 𝐋𝐊¹ ⊢ φ) : (m : ℕ
 
 lemma univCl' {φ : Proposition L} (b : 𝐋𝐊¹ ⊢ φ) : 𝐋𝐊¹ ⊢ φ.univCl' := allClosure_fixitr b φ.fvSup
 
+lemma lMap (Φ : L₁ →ᵥ L₂) {φ : Proposition L₁} : 𝐋𝐊¹ ⊢ φ → 𝐋𝐊¹ ⊢ φ.lMap Φ := by
+  rintro ⟨d⟩
+  have : ⊢ᴸᴷ¹ [φ] := d
+  have : ⊢ᴸᴷ¹ [.lMap Φ φ] := this.lMap Φ
+  exact ⟨this⟩
+
 end LK.Proof
 
 structure Theory.Proof (T : Theory L) (σ : Sentence L) where

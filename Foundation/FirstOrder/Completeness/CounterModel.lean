@@ -1,6 +1,7 @@
 module
 
 public import Foundation.FirstOrder.Completeness.CanonicalModel
+public import Foundation.FirstOrder.Completeness.CountableSublanguage
 public import Foundation.FirstOrder.Ultraproduct
 public import Foundation.Vorspiel.Order.Dense
 public import Mathlib.Logic.Equiv.List
@@ -12,18 +13,18 @@ namespace LO.FirstOrder.Derivation.Canonical
 
 open Order
 
-variable {L : Language}
+variable {K : Language}
 
-local notation "ℙ" => Sequent L
-local notation "ℙ⁻" => ConsistentSequent L
+local notation "ℙ" => Sequent K
+local notation "ℙ⁻" => ConsistentSequent K
 
-instance [L.Encodable] [L.DecidableEq] : Encodable (Sequent L) := List.encodable
+instance [K.Encodable] [K.DecidableEq] : Encodable (Sequent K) := List.encodable
 
 open Classical in
-noncomputable instance [L.Encodable] : Encodable ℙ⁻ := Subtype.encodable
+noncomputable instance [K.Encodable] : Encodable ℙ⁻ := Subtype.encodable
 
 open Classical
-def decidablePoints (φ : Proposition L) : DenseSet ℙ⁻ where
+def decidablePoints (φ : Proposition K) : DenseSet ℙ⁻ where
   set := {p | p ⊩ᶜ φ ∨ p ⊩ᶜ ∼φ}
   is_dense := by
     intro p
@@ -31,10 +32,10 @@ def decidablePoints (φ : Proposition L) : DenseSet ℙ⁻ where
     have : ∀ q ≤ p, ∃ r ≤ q, r ⊩ᶜ φ ∨ r ⊩ᶜ ∼φ := by simpa using this
     simpa using this p (by rfl)
 
-@[simp] lemma mem_decidablePoints_def (p : ℙ⁻) (φ : Proposition L) :
+@[simp] lemma mem_decidablePoints_def (p : ℙ⁻) (φ : Proposition K) :
     p ∈ decidablePoints φ ↔ p ⊩ᶜ φ ∨ p ⊩ᶜ ∼φ := by rfl
 
-def henkinPoints (φ : Semiproposition L 1) : DenseSet ℙ⁻ where
+def henkinPoints (φ : Semiproposition K 1) : DenseSet ℙ⁻ where
   set := {p | ∀ q ≤ p, q ⊩ᶜ ∃⁰ φ → ∃ t, q ⊩ᶜ φ/[t]}
   is_dense := by
     intro p
@@ -51,12 +52,12 @@ def henkinPoints (φ : Semiproposition L 1) : DenseSet ℙ⁻ where
       have : ¬s ⊩ᶜ φ/[u] := h u s (le_trans hsr hrq)
       contradiction
 
-@[simp] lemma mem_henkinPoints_def (p : ℙ⁻) (φ : Semiproposition L 1) :
+@[simp] lemma mem_henkinPoints_def (p : ℙ⁻) (φ : Semiproposition K 1) :
     p ∈ henkinPoints φ ↔ ∀ q ≤ p, q ⊩ᶜ ∃⁰ φ → ∃ t, q ⊩ᶜ φ/[t] := by rfl
 
 abbrev denseSets : Set (DenseSet ℙ⁻) := Set.range decidablePoints ∪ Set.range henkinPoints
 
-variable [L.Encodable]
+variable [K.Encodable]
 
 theorem exists_genericFilter (p : ℙ⁻) :
     ∃ G : PFilter ℙ⁻, G.IsGeneric denseSets ∧ p ∈ G :=
@@ -71,11 +72,11 @@ instance genericFilter_isGeneric (p : ℙ⁻) : (genericFilter p).IsGeneric dens
 @[simp] lemma mem_genericFilter (p : ℙ⁻) : p ∈ genericFilter p :=
   Classical.choose_spec (exists_genericFilter p) |>.2
 
-def GenericForces (p : ℙ⁻) (φ : Proposition L) : Prop := ∃ q ∈ genericFilter p, q ⊩ᶜ φ
+def GenericForces (p : ℙ⁻) (φ : Proposition K) : Prop := ∃ q ∈ genericFilter p, q ⊩ᶜ φ
 
 local infix: 60 " ⊫ " => GenericForces
 
-lemma GenericForces.em (p : ℙ⁻) (φ : Proposition L) : p ⊫ φ ∨ p ⊫ ∼φ := by
+lemma GenericForces.em (p : ℙ⁻) (φ : Proposition K) : p ⊫ φ ∨ p ⊫ ∼φ := by
   have : ∃ q ∈ genericFilter p, q ∈ decidablePoints φ :=
     (genericFilter_isGeneric p).isGeneric (decidablePoints φ) (by simp)
   rcases this with ⟨q, hqG, hq⟩
@@ -84,7 +85,7 @@ lemma GenericForces.em (p : ℙ⁻) (φ : Proposition L) : p ⊫ φ ∨ p ⊫ �
   · left; refine ⟨q, hqG, em⟩
   · right; refine ⟨q, hqG, em⟩
 
-@[simp] lemma GenericForces.neg {p : ℙ⁻} {φ : Proposition L} : p ⊫ ∼φ ↔ ¬p ⊫ φ := by
+@[simp] lemma GenericForces.neg {p : ℙ⁻} {φ : Proposition K} : p ⊫ ∼φ ↔ ¬p ⊫ φ := by
   suffices p ⊫ ∼φ → p ⊫ φ → False by
     have := GenericForces.em p φ
     grind
@@ -105,7 +106,7 @@ lemma GenericForces.em (p : ℙ⁻) (φ : Proposition L) : p ⊫ φ ∨ p ⊫ �
   p ⊫ .nrel R v ↔ p ⊫ ∼(.rel R v) := by simp
   _         ↔ ¬p ⊫ .rel R v := by rw [GenericForces.neg]
 
-lemma GenericForces.henkin {p : ℙ⁻} {φ : Semiproposition L 1} : p ⊫ ∃⁰ φ → ∃ t, p ⊫ φ/[t] := by
+lemma GenericForces.henkin {p : ℙ⁻} {φ : Semiproposition K 1} : p ⊫ ∃⁰ φ → ∃ t, p ⊫ φ/[t] := by
   have : ∃ q ∈ genericFilter p, ∀ r ≤ q, r ⊩ᶜ ∃⁰ φ → ∃ t, r ⊩ᶜ φ/[t] :=
     (genericFilter_isGeneric p).isGeneric (henkinPoints φ) (by simp)
   rcases this with ⟨q, hqG, H⟩
@@ -129,7 +130,7 @@ lemma GenericForces.henkin {p : ℙ⁻} {φ : Semiproposition L 1} : p ⊫ ∃�
   _         ↔ ¬p ⊫ ∃⁰ ∼φ := by rw [GenericForces.neg]
   _         ↔ ∀ t, p ⊫ φ/[t] := by simp [GenericForces.exs]
 
-@[simp] lemma GenericForces.and {p : ℙ⁻} {φ ψ : Proposition L} : p ⊫ φ ⋏ ψ ↔ p ⊫ φ ∧ p ⊫ ψ := by
+@[simp] lemma GenericForces.and {p : ℙ⁻} {φ ψ : Proposition K} : p ⊫ φ ⋏ ψ ↔ p ⊫ φ ∧ p ⊫ ψ := by
   constructor
   · rintro ⟨q, hqG, hq⟩
     have : q ⊩ᶜ φ ∧ q ⊩ᶜ ψ := by simpa using hq
@@ -142,30 +143,30 @@ lemma GenericForces.henkin {p : ℙ⁻} {φ : Semiproposition L 1} : p ⊫ ∃�
     have : r ⊩ᶜ ψ := h₂.monotone hr₂
     simp_all
 
-@[simp] lemma GenericForces.or {p : ℙ⁻} {φ ψ : Proposition L} : p ⊫ φ ⋎ ψ ↔ p ⊫ φ ∨ p ⊫ ψ := calc
+@[simp] lemma GenericForces.or {p : ℙ⁻} {φ ψ : Proposition K} : p ⊫ φ ⋎ ψ ↔ p ⊫ φ ∨ p ⊫ ψ := calc
   p ⊫ φ ⋎ ψ ↔ p ⊫ ∼(∼φ ⋏ ∼ψ) := by simp
   _         ↔ ¬p ⊫ ∼φ ⋏ ∼ψ := by rw [GenericForces.neg]
   _         ↔ p ⊫ φ ∨ p ⊫ ψ := by simp; tauto
 
-local notation "𝔗" => Term L ℕ
+local notation "𝔗" => Term K ℕ
 
-abbrev termModelOf (p : ℙ⁻) : Structure L 𝔗 where
+abbrev termModelOf (p : ℙ⁻) : Structure K 𝔗 where
   func _ f v := .func f v
   rel _ R v := p ⊫ .rel R v
 
-@[simp] lemma termModel_func_def (f : L.Func k) (v : Fin k → 𝔗) :
+@[simp] lemma termModel_func_def (f : K.Func k) (v : Fin k → 𝔗) :
     (termModelOf p).func f v = Semiterm.func f v := rfl
 
-@[simp] lemma termModel_rel_def (R : L.Rel k) (v) :
+@[simp] lemma termModel_rel_def (R : K.Rel k) (v) :
     (termModelOf p).rel R v ↔ p ⊫ .rel R v := by rfl
 
-@[simp] lemma termModel_val_eq (t : Semiterm L ξ n) (fv : ξ → 𝔗) (bv : Fin n → 𝔗) :
+@[simp] lemma termModel_val_eq (t : Semiterm K ξ n) (fv : ξ → 𝔗) (bv : Fin n → 𝔗) :
     t.val (s := termModelOf p) bv fv = Rew.bind bv fv t := by
   induction t <;> simp [*, Function.comp_def]
 
-lemma forcing_lemma (φ : Semiformula L ξ n) {fv : ξ → 𝔗} {bv : Fin n → 𝔗} :
+lemma forcing_lemma (φ : Semiformula K ξ n) {fv : ξ → 𝔗} {bv : Fin n → 𝔗} :
     φ.Eval (s := termModelOf p) bv fv ↔ p ⊫ Rew.bind bv fv ▹ φ :=
-  have e (t : 𝔗) (φ : Semiformula L ξ (n + 1)) : ((Rew.bind bv fv).q ▹ φ)/[t] = Rew.bind (t :> bv) fv ▹ φ := by
+  have e (t : 𝔗) (φ : Semiformula K ξ (n + 1)) : ((Rew.bind bv fv).q ▹ φ)/[t] = Rew.bind (t :> bv) fv ▹ φ := by
     unfold Rewriting.subst; rw [←TransitiveRewriting.comp_app]
     congr; ext x
     · cases x using Fin.cases <;> simp [Rew.comp_app]
@@ -176,19 +177,32 @@ lemma forcing_lemma (φ : Semiformula L ξ n) {fv : ξ → 𝔗} {bv : Fin n →
   | φ ⋏ ψ | φ ⋎ ψ => by simp [forcing_lemma φ, forcing_lemma ψ]
   | ∀⁰ φ | ∃⁰ φ => by simp [e, forcing_lemma φ]
 
-lemma refl (φ : Proposition L) (h : 𝐋𝐊¹ ⊬ ∼φ) :
+lemma refl (φ : Proposition K) (h : 𝐋𝐊¹ ⊬ ∼φ) :
     φ.Evalf (s := termModelOf (ConsistentSequent.ofUnprovable φ h)) (&·) :=
   (forcing_lemma φ).mpr ⟨ConsistentSequent.ofUnprovable φ h, by simp, by simpa using IsWeaklyForced.refl φ h⟩
 
-lemma satisfiable_of_irrefutable_of_countable (σ : Sentence L) (h : 𝐋𝐊¹ ⊬ ∼(σ : Proposition L)) :
+lemma satisfiable_of_irrefutable_of_countable (σ : Sentence K) (h : 𝐋𝐊¹ ⊬ ∼(σ : Proposition K)) :
     Satisfiable {σ} :=
   ⟨⟨_, inferInstance, termModelOf (ConsistentSequent.ofUnprovable σ (by simpa using h))⟩, by
-  simpa [models_iff] using refl (↑σ : Proposition L) (by simpa using h)⟩
+  simpa [models_iff] using refl (↑σ : Proposition K) (by simpa using h)⟩
 
 open LO.Entailment
 
-/-- The completeness theorem for countable languages. -/
-theorem satisfiable_of_consistent_of_countable (T : Theory L) (consistent : Entailment.Consistent T) :
+variable {L : Language}
+
+lemma satisfiable_of_irrefutable (σ : Sentence L) (h : 𝐋𝐊¹ ⊬ ∼(σ : Proposition L)) :
+    Satisfiable {σ} := by
+  let K := σ.sublanguage
+  let π : Sentence K := σ.toSubLanguageSelf
+  have : 𝐋𝐊¹ ⊬ ∼(π : Proposition K) := fun h ↦ by
+    have : 𝐋𝐊¹ ⊢ ∼(σ : Proposition L) := by
+      simpa [Semiformula.lMap_emb, π] using LK.Proof.lMap L.unsub h
+    contradiction
+  have : Satisfiable {π} := satisfiable_of_irrefutable_of_countable π this
+  simpa [Theory.lMap, π] using satisfiable_lMap L.unsub this
+
+/-- Completeness theorem (I) -/
+theorem satisfiable_of_consistent {T : Theory L} (consistent : Entailment.Consistent T) :
     Satisfiable T := compact.mpr fun u hu ↦ by
   let σ := ⋀u.toList
   have : T ⊢ σ := Conj₂!_intro fun φ hφ ↦ by_axm <| hu (by simpa using hφ)
@@ -196,7 +210,17 @@ theorem satisfiable_of_consistent_of_countable (T : Theory L) (consistent : Enta
     have : T ⊢ ∼σ := Theory.Proof.of_LK_provable (φ := ∼σ) (by simpa using h)
     have : T ⊢ ⊥ := neg_mdp this (by assumption)
     consistent_iff_unprovable_bot.mp consistent this
-  have : Satisfiable {σ} := satisfiable_of_irrefutable_of_countable σ this
+  have : Satisfiable {σ} := satisfiable_of_irrefutable σ this
   simpa [σ] using this
+
+theorem completeness (T : Theory L) : T ⊨ φ → T ⊢ φ := by
+  contrapose!
+  intro h
+  have : Consistent (insert (∼φ) T) := by sorry
+  have : Satisfiable (insert (∼φ) T) := satisfiable_of_consistent this
+  rcases this with ⟨⟨M, i, s⟩, hM⟩
+  simp [consequence_iff]
+  simp at hM
+  refine ⟨M, i.some, s, hM.2, hM.1⟩
 
 end LO.FirstOrder.Derivation.Canonical

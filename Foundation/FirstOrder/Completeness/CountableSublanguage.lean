@@ -1,6 +1,7 @@
 module
 
 public import Foundation.FirstOrder.Basic
+public import Mathlib.Logic.Equiv.List
 
 @[expose] public section
 namespace LO
@@ -24,15 +25,15 @@ variable (L)
 
 variable {pf : (k : ℕ) → L.Func k → Prop} {pr : (k : ℕ) → L.Rel k → Prop}
 
-def ofSublanguage : sublanguage L pf pr →ᵥ L where
+def unsub : sublanguage L pf pr →ᵥ L where
   func := Subtype.val
   rel  := Subtype.val
 
-@[simp] lemma ofSublanguage_onFunc :
-    L.ofSublanguage.func φ = φ.val := rfl
+@[simp] lemma unsub_onFunc :
+    L.unsub.func φ = φ.val := rfl
 
-@[simp] lemma ofSublanguage_onRel :
-    L.ofSublanguage.rel φ = φ.val := rfl
+@[simp] lemma unsub_onRel :
+    L.unsub.rel φ = φ.val := rfl
 
 end sublanguage
 
@@ -55,17 +56,17 @@ lemma lang_func_ss {k} (f : L.Func k) (v : Fin k → Semiterm L ξ n) (i) :
     (v i).symbols ⊆ (func f v).symbols := by
   intros x; simp [symbols]; grind
 
-def toSublanguage' (pf : ∀ k, L.Func k → Prop) (pr : ∀ k, L.Rel k → Prop) : ∀ t : Semiterm L ξ n,
+def toSublanguage (pf : ∀ k, L.Func k → Prop) (pr : ∀ k, L.Rel k → Prop) : ∀ t : Semiterm L ξ n,
     (∀ k f, ⟨k, f⟩ ∈ t.symbols → pf k f) → Semiterm (sublanguage L pf pr) ξ n
   |                    #x, _ => #x
   |                    &x, _ => &x
   | func (arity := k) f v, h => func ⟨f, h k f (by simp)⟩
-      (fun i ↦ toSublanguage' pf pr (v i) (fun k' f' h' => h k' f' (lang_func_ss f v i h')))
+      (fun i ↦ toSublanguage pf pr (v i) (fun k' f' h' => h k' f' (lang_func_ss f v i h')))
 
-@[simp] lemma lMap_toSubLanguage' (pf : ∀ k, L.Func k → Prop) (pr : ∀ k, L.Rel k → Prop)
+@[simp] lemma lMap_toSublanguage (pf : ∀ k, L.Func k → Prop) (pr : ∀ k, L.Rel k → Prop)
   (t : Semiterm L ξ n) (h : ∀ k f, ⟨k, f⟩ ∈ t.symbols → pf k f) :
-    (t.toSublanguage' pf pr h).lMap L.ofSublanguage = t := by
-  induction t <;> simp [*, toSublanguage', Function.comp_def]
+    (t.toSublanguage pf pr h).lMap L.unsub = t := by
+  induction t <;> simp [*, toSublanguage, Function.comp_def]
 
 end Semiterm
 
@@ -99,56 +100,56 @@ lemma functionSymbols_rel_ss {k} (r : L.Rel k) (v : Fin k → Semiterm L ξ n) (
   simp only [functionSymbols, Finset.mem_biUnion, Finset.mem_univ, true_and]
   intros h; exact ⟨i, h⟩
 
-def toSublanguage' (pf : ∀ k, L.Func k → Prop) (pr : ∀ k, L.Rel k → Prop) {n} :
+def toSublanguage (pf : ∀ k, L.Func k → Prop) (pr : ∀ k, L.Rel k → Prop) {n} :
     (φ : Semiformula L ξ n) →
     (∀ k f, ⟨k, f⟩ ∈ φ.functionSymbols → pf k f) →
     (∀ k r, ⟨k, r⟩ ∈ φ.relationSymbols → pr k r) →
     Semiformula (L.sublanguage pf pr) ξ n
   |  rel r v, hf, hr =>
       rel ⟨r, hr _ r (by simp [relationSymbols])⟩
-        fun i ↦ (v i).toSublanguage' pf pr fun k f h ↦ hf k f (functionSymbols_rel_ss r v i h)
+        fun i ↦ (v i).toSublanguage pf pr fun k f h ↦ hf k f (functionSymbols_rel_ss r v i h)
   | nrel r v, hf, hr =>
       nrel ⟨r, hr _ r (by simp [relationSymbols])⟩
-        fun i ↦ (v i).toSublanguage' pf pr fun k f h ↦ hf k f (functionSymbols_rel_ss r v i h)
+        fun i ↦ (v i).toSublanguage pf pr fun k f h ↦ hf k f (functionSymbols_rel_ss r v i h)
   |        ⊤,  _,  _ => ⊤
   |        ⊥,  _,  _ => ⊥
   |    φ ⋏ ψ,  hf, hr =>
-      toSublanguage' pf pr φ (fun k f h ↦ hf k f (Finset.mem_union_left _ h)) (fun k r h ↦ hr k r (Finset.mem_union_left _ h)) ⋏
-      toSublanguage' pf pr ψ (fun k f h ↦ hf k f (Finset.mem_union_right _ h)) (fun k r h ↦ hr k r (Finset.mem_union_right _ h))
+      toSublanguage pf pr φ (fun k f h ↦ hf k f (Finset.mem_union_left _ h)) (fun k r h ↦ hr k r (Finset.mem_union_left _ h)) ⋏
+      toSublanguage pf pr ψ (fun k f h ↦ hf k f (Finset.mem_union_right _ h)) (fun k r h ↦ hr k r (Finset.mem_union_right _ h))
   |    φ ⋎ ψ, hf, hr =>
-      toSublanguage' pf pr φ (fun k f h ↦ hf k f (Finset.mem_union_left _ h)) (fun k r h ↦ hr k r (Finset.mem_union_left _ h)) ⋎
-      toSublanguage' pf pr ψ (fun k f h ↦ hf k f (Finset.mem_union_right _ h)) (fun k r h ↦ hr k r (Finset.mem_union_right _ h))
-  |     ∀⁰ φ, hf, hr => ∀⁰ toSublanguage' pf pr φ hf hr
-  |     ∃⁰ φ, hf, hr => ∃⁰ toSublanguage' pf pr φ hf hr
+      toSublanguage pf pr φ (fun k f h ↦ hf k f (Finset.mem_union_left _ h)) (fun k r h ↦ hr k r (Finset.mem_union_left _ h)) ⋎
+      toSublanguage pf pr ψ (fun k f h ↦ hf k f (Finset.mem_union_right _ h)) (fun k r h ↦ hr k r (Finset.mem_union_right _ h))
+  |     ∀⁰ φ, hf, hr => ∀⁰ toSublanguage pf pr φ hf hr
+  |     ∃⁰ φ, hf, hr => ∃⁰ toSublanguage pf pr φ hf hr
 
-@[simp] lemma lMap_toSubLanguage'
+@[simp] lemma lMap_toSublanguage
   (pf : ∀ k, L.Func k → Prop) (pr : ∀ k, L.Rel k → Prop) {n} (φ : Semiformula L ξ n)
   (hf : ∀ k f, ⟨k, f⟩ ∈ φ.functionSymbols → pf k f) (hr : ∀ k r, ⟨k, r⟩ ∈ φ.relationSymbols → pr k r) :
-    lMap L.ofSublanguage (φ.toSublanguage' pf pr hf hr) = φ := by
-  induction φ using rec' <;> simp [*, toSublanguage', lMap_rel, lMap_nrel, Function.comp_def]
+    lMap L.unsub (φ.toSublanguage pf pr hf hr) = φ := by
+  induction φ using rec' <;> simp [*, toSublanguage, lMap_rel, lMap_nrel, Function.comp_def]
 
-noncomputable def languageFuncIndexed (φ : Semiformula L ξ n) (k) : Finset (L.Func k) :=
-  Finset.preimage (functionSymbols φ) (Sigma.mk k) (Set.injOn_of_injective sigma_mk_injective)
-
-noncomputable def languageRelIndexed (φ : Semiformula L ξ n) (k) : Finset (L.Rel k) :=
-  Finset.preimage (relationSymbols φ) (Sigma.mk k) (Set.injOn_of_injective sigma_mk_injective)
+variable (φ : Semiformula L ξ n)
 
 /-- A language consists of the function and relation symbols appearing in a given finite set of formulas. -/
-abbrev languageFinset (Γ : Finset (Semiformula L ξ n)) : Language :=
-  Language.sublanguage L (fun k f ↦ ∃ φ ∈ Γ, ⟨k, f⟩ ∈ functionSymbols φ) (fun k r ↦ ∃ φ ∈ Γ, ⟨k, r⟩ ∈ relationSymbols φ)
+abbrev sublanguage : Language :=
+  Language.sublanguage L (fun k f ↦ ⟨k, f⟩ ∈ φ.functionSymbols) (fun k r ↦ ⟨k, r⟩ ∈ φ.relationSymbols)
 
-noncomputable instance (Γ : Finset (Semiformula L ξ n)) (k) : Fintype ((languageFinset Γ).Func k) :=
-  Fintype.subtype (Γ.biUnion (languageFuncIndexed · k)) (by simp [languageFuncIndexed])
+noncomputable instance (k) : Fintype (φ.sublanguage.Func k) :=
+  Fintype.subtype (φ.functionSymbols.preimage (⟨k, ·⟩) (Set.injOn_of_injective sigma_mk_injective)) (by simp)
 
-noncomputable instance (Γ : Finset (Semiformula L ξ n)) (k) : Fintype ((languageFinset Γ).Rel k) :=
-  Fintype.subtype (Γ.biUnion (languageRelIndexed · k)) (by simp [languageRelIndexed])
+noncomputable instance (k) : Fintype (φ.sublanguage.Rel k) :=
+  Fintype.subtype (φ.relationSymbols.preimage (⟨k, ·⟩) (Set.injOn_of_injective sigma_mk_injective)) (by simp)
 
-def toSubLanguageFinsetSelf {Γ : Finset (Semiformula L ξ n)} {φ} (h : φ ∈ Γ) : Semiformula (languageFinset Γ) ξ n :=
-  φ.toSublanguage' _ _ (fun _ _ hf ↦ ⟨φ, h, hf⟩) (fun _ _ hr ↦ ⟨φ, h, hr⟩)
+noncomputable instance : φ.sublanguage.Encodable where
+  func _ := Fintype.toEncodable _
+  rel  _ := Fintype.toEncodable _
 
-@[simp] lemma lMap_toSubLanguageFinsetSelf {Γ : Finset (Semiformula L ξ n)} {φ} (h : φ ∈ Γ) :
-    lMap L.ofSublanguage (toSubLanguageFinsetSelf h) = φ :=
-  lMap_toSubLanguage' _ _ _ _ _
+def toSubLanguageSelf (φ : Semiformula L ξ n) : Semiformula φ.sublanguage ξ n :=
+  φ.toSublanguage _ _ (fun _ _ ↦ id) (fun _ _ ↦ id)
+
+@[simp] lemma lMap_toSubLanguage {φ : Semiformula L ξ n} :
+    φ.toSubLanguageSelf.lMap L.unsub = φ :=
+  lMap_toSublanguage _ _ _ _ _
 
 end Semiformula
 
@@ -160,8 +161,8 @@ class Hom.Injective (Φ : L₁ →ᵥ L₂) : Prop where
   func : ∀ k, Function.Injective (Φ.func : L₁.Func k → L₂.Func k)
   rel  : ∀ k, Function.Injective (Φ.rel  : L₁.Rel k → L₂.Rel k)
 
-instance ofSublanguage_injective (pf : ∀ k, L.Func k → Prop) (pr : ∀ k, L.Rel k → Prop) :
-    (L.ofSublanguage : L.sublanguage pf pr →ᵥ L).Injective :=
+instance unsub_injective (pf : ∀ k, L.Func k → Prop) (pr : ∀ k, L.Rel k → Prop) :
+    (L.unsub : L.sublanguage pf pr →ᵥ L).Injective :=
   ⟨fun _ ↦ Subtype.val_injective, fun _ ↦ Subtype.val_injective⟩
 
 end Language
@@ -170,17 +171,17 @@ namespace Structure
 
 /-
 instance sublanguageStructure {pf : ∀ k, L.Func k → Prop} {pr : ∀ k, L.Rel k → Prop}
-  {M : Type w} (s : Structure L M) : Structure (Language.sublanguage L pf pr) M :=
-  s.lMap (Language.ofSublanguage L)
+  {M : Type*} (s : Structure L M) : Structure (Language.sublanguage L pf pr) M :=
+  s.lMap (Language.unsub L)
 -/
 
-noncomputable abbrev extendStructure (Φ : L₁ →ᵥ L₂) {M : Type w} [Nonempty M] (s : Structure L₁ M) : Structure L₂ M where
+noncomputable abbrev extendStructure (Φ : L₁ →ᵥ L₂) {M : Type*} [Nonempty M] (s : Structure L₁ M) : Structure L₂ M where
   func {k} f₂ v := Classical.epsilon (∃ f₁ : L₁.Func k, Φ.func f₁ = f₂ ∧ · = s.func f₁ v)
   rel {k} r₂ v := ∃ r₁ : L₁.Rel k, Φ.rel r₁ = r₂ ∧ s.rel r₁ v
 
 namespace extendStructure
 
-variable {M : Type u} [Nonempty M] (s₁ : Structure L₁ M)
+variable {M : Type*} [Nonempty M] (s₁ : Structure L₁ M)
 
 protected lemma func
     (Φ : L₁ →ᵥ L₂) [hΦ : Φ.Injective]
@@ -200,10 +201,10 @@ lemma val_lMap
     (Φ : L₁ →ᵥ L₂) [Φ.Injective]
     (bv : Fin n → M) (fv : ξ → M)
     (t : Semiterm L₁ ξ n) :
-    (t.lMap Φ).val (s := s₁.extendStructure Φ) bv fv = t.val (s := s₁) bv fv := by
+    (t.lMap Φ).val (s := s₁.extendStructure Φ) bv fv = t.val bv fv := by
   induction t
   case func k f v ih =>
-    simpa [ih, Function.comp_def] using extendStructure.func s₁ Φ f fun i ↦ (v i).val (s := s₁) bv fv
+    simpa [ih, Function.comp_def] using extendStructure.func s₁ Φ f fun i ↦ (v i).val bv fv
   case _ => simp [*]
   case _ => simp [*]
 
@@ -212,15 +213,15 @@ open Semiformula
 lemma eval_lMap (Φ : L₁ →ᵥ L₂) [Φ.Injective]
     (bv : Fin n → M) (fv : ξ → M)
     {φ : Semiformula L₁ ξ n} :
-    (lMap Φ φ).Eval (s := s₁.extendStructure Φ) bv fv ↔ φ.Eval (s := s₁) bv fv := by
+    (lMap Φ φ).Eval (s := s₁.extendStructure Φ) bv fv ↔ φ.Eval bv fv := by
   induction φ using Semiformula.rec'
   case hrel k r v =>
     simp only [Semiformula.lMap_rel, eval_rel, val_lMap s₁ Φ bv fv, Function.comp_def]
-    exact extendStructure.rel s₁ Φ r (fun i ↦ (v i).val (s := s₁) bv fv)
+    exact extendStructure.rel s₁ Φ r (fun i ↦ (v i).val bv fv)
   case hnrel k r v =>
     simp only [lMap_nrel, eval_nrel, val_lMap s₁ Φ bv fv, Function.comp_def]
     simpa [not_iff_not] using
-      extendStructure.rel s₁ Φ r (fun i ↦ (v i).val (s := s₁) bv fv)
+      extendStructure.rel s₁ Φ r (fun i ↦ (v i).val bv fv)
   case _ => simp [*]
   case _ => simp [*]
   case _ => simp [*]
