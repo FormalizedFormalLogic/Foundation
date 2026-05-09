@@ -169,12 +169,6 @@ end Language
 
 namespace Structure
 
-/-
-instance sublanguageStructure {pf : ∀ k, L.Func k → Prop} {pr : ∀ k, L.Rel k → Prop}
-  {M : Type*} (s : Structure L M) : Structure (Language.sublanguage L pf pr) M :=
-  s.lMap (Language.unsub L)
--/
-
 noncomputable abbrev extendStructure (Φ : L₁ →ᵥ L₂) {M : Type*} [Nonempty M] (s : Structure L₁ M) : Structure L₂ M where
   func {k} f₂ v := Classical.epsilon (∃ f₁ : L₁.Func k, Φ.func f₁ = f₂ ∧ · = s.func f₁ v)
   rel {k} r₂ v := ∃ r₁ : L₁.Rel k, Φ.rel r₁ = r₂ ∧ s.rel r₁ v

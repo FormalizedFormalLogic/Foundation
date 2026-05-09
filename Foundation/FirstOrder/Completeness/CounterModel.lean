@@ -11,6 +11,8 @@ public import Mathlib.Logic.Encodable.Basic
 
 @[expose] public section
 
+/-! ### Generic filters -/
+
 namespace LO.FirstOrder.Derivation.Canonical
 
 open Order
@@ -185,17 +187,11 @@ lemma refl (φ : Proposition K) (h : 𝐋𝐊¹ ⊬ ∼φ) :
 
 end Derivation.Canonical
 
+/-! ### Completeness theorem -/
+
 namespace LK
 
 open Classical Derivation.Canonical
-
-open LO.Entailment
-
-lemma satisfiable_of_irrefutable_of_countable {K : Language} [K.Encodable]
-    (σ : Sentence K) (h : 𝐋𝐊¹ ⊬ ∼(σ : Proposition K)) :
-    Satisfiable {σ} :=
-  ⟨⟨_, inferInstance, termModelOf (ConsistentSequent.ofUnprovable σ (by simpa using h))⟩, by
-  simpa [models_iff] using refl (↑σ : Proposition K) (by simpa using h)⟩
 
 variable {L : Language}
 
@@ -207,7 +203,9 @@ lemma satisfiable_of_irrefutable (σ : Sentence L) (h : 𝐋𝐊¹ ⊬ ∼(σ : 
     have : 𝐋𝐊¹ ⊢ ∼(σ : Proposition L) := by
       simpa [Semiformula.lMap_emb, π] using LK.Proof.lMap L.unsub h
     contradiction
-  have : Satisfiable {π} := satisfiable_of_irrefutable_of_countable π this
+  have : Satisfiable {π} :=
+    ⟨⟨_, inferInstance, termModelOf (ConsistentSequent.ofUnprovable π (by simpa using this))⟩, by
+      simpa [models_iff] using refl (π : Proposition K) (by simpa using this)⟩
   simpa [Theory.lMap, π] using satisfiable_lMap L.unsub this
 
 end LK
@@ -254,7 +252,7 @@ theorem Proof.small_complete : T ⊨ φ → T ⊢ φ := Proof.complete
 
 theorem Proof.complete_iff : T ⊨ φ ↔ T ⊢ φ := ⟨fun h ↦ Proof.complete h, Proof.sound⟩
 
-instance Proof.isComplete (T : Theory L) : Complete T (Semantics.models (SmallStruc L) T) := ⟨Proof.complete⟩
+instance Proof.isComplete (T : Theory L) : Complete T (Semantics.models (Struc.{max u w} L) T) := ⟨Proof.complete⟩
 
 lemma satisfiable_iff_satisfiable : Semantics.Satisfiable (Struc.{max u w} L) T ↔ Satisfiable T := by
   simp [satisfiable_iff_consistent.{u, w}, satisfiable_iff_consistent.{u, u}]
@@ -263,5 +261,36 @@ lemma consequence_iff_consequence : T ⊨[Struc.{max u w} L] φ ↔ T ⊨ φ := 
   simp [consequence_iff_unsatisfiable, satisfiable_iff_satisfiable.{u, w}]
 
 end Theory
+
+/-! ### Corollaries -/
+
+namespace ModelsTheory
+
+variable {L : Language.{u}} (M : Type w) [Nonempty M] [Structure L M] (T U V : Theory L)
+
+lemma of_provably_subtheory [le : T ⪯ U] (h : M↓[L] ⊧* U) : M↓[L] ⊧* T := ⟨fun φ hφ ↦
+  have : U ⊢ φ := le.pbl (Entailment.by_axm hφ)
+  consequence_iff'.{u, w}.mp (Theory.Proof.sound this) M⟩
+
+lemma of_add_left [M↓[L] ⊧* T ∪ U] : M↓[L] ⊧* T := models_of_ss inferInstance (show T ⊆ T ∪ U from by simp)
+
+lemma of_add_right [M↓[L] ⊧* T ∪ U] : M↓[L] ⊧* U := models_of_ss inferInstance (show U ⊆ T ∪ U from by simp)
+
+end ModelsTheory
+
+variable {L : Language.{u}} [L.Eq] {T : Theory L} [𝗘𝗤 L ⪯ T]
+
+lemma Theory.Proof.complete_on_eq_models
+    (φ : Sentence L)
+    (H : ∀ (M : Type u)
+      [Nonempty M]
+      [Structure L M] [Structure.Eq L M]
+      [M↓[L] ⊧* T],
+      M↓[L] ⊧ φ) :
+    T ⊢ φ :=
+  have : T ⊨ φ := Theory.consequence_iff_consequence.mp <| consequence_iff_eq.mpr fun M _ _ _ hT ↦
+    letI : (Structure.Model L M)↓[L] ⊧* T := Structure.ElementaryEquiv.modelsTheory.mp hT
+    Structure.ElementaryEquiv.models.mpr (H (Structure.Model L M))
+  Theory.Proof.complete this
 
 end LO.FirstOrder
