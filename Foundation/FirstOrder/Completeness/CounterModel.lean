@@ -7,6 +7,8 @@ public import Foundation.Vorspiel.Order.Dense
 public import Mathlib.Logic.Equiv.List
 public import Mathlib.Logic.Encodable.Basic
 
+/-! # Completeness theorem -/
+
 @[expose] public section
 
 namespace LO.FirstOrder.Derivation.Canonical
@@ -181,12 +183,19 @@ lemma refl (φ : Proposition K) (h : 𝐋𝐊¹ ⊬ ∼φ) :
     φ.Evalf (s := termModelOf (ConsistentSequent.ofUnprovable φ h)) (&·) :=
   (forcing_lemma φ).mpr ⟨ConsistentSequent.ofUnprovable φ h, by simp, by simpa using IsWeaklyForced.refl φ h⟩
 
-lemma satisfiable_of_irrefutable_of_countable (σ : Sentence K) (h : 𝐋𝐊¹ ⊬ ∼(σ : Proposition K)) :
+end Derivation.Canonical
+
+namespace LK
+
+open Classical Derivation.Canonical
+
+open LO.Entailment
+
+lemma satisfiable_of_irrefutable_of_countable {K : Language} [K.Encodable]
+    (σ : Sentence K) (h : 𝐋𝐊¹ ⊬ ∼(σ : Proposition K)) :
     Satisfiable {σ} :=
   ⟨⟨_, inferInstance, termModelOf (ConsistentSequent.ofUnprovable σ (by simpa using h))⟩, by
   simpa [models_iff] using refl (↑σ : Proposition K) (by simpa using h)⟩
-
-open LO.Entailment
 
 variable {L : Language}
 
@@ -201,26 +210,58 @@ lemma satisfiable_of_irrefutable (σ : Sentence L) (h : 𝐋𝐊¹ ⊬ ∼(σ : 
   have : Satisfiable {π} := satisfiable_of_irrefutable_of_countable π this
   simpa [Theory.lMap, π] using satisfiable_lMap L.unsub this
 
+end LK
+
+namespace Theory
+
+open Classical LO.Entailment
+
+variable {L : Language.{u}} {T : Theory L}
+
 /-- Completeness theorem (I) -/
-theorem satisfiable_of_consistent {T : Theory L} (consistent : Entailment.Consistent T) :
-    Satisfiable T := compact.mpr fun u hu ↦ by
+theorem small_satisfiable_of_consistent :
+    Consistent T → Satisfiable T := fun consistent ↦ compact.mpr fun u hu ↦ by
   let σ := ⋀u.toList
   have : T ⊢ σ := Conj₂!_intro fun φ hφ ↦ by_axm <| hu (by simpa using hφ)
   have : 𝐋𝐊¹ ⊬ ∼(σ : Proposition L) := fun h ↦
     have : T ⊢ ∼σ := Theory.Proof.of_LK_provable (φ := ∼σ) (by simpa using h)
     have : T ⊢ ⊥ := neg_mdp this (by assumption)
     consistent_iff_unprovable_bot.mp consistent this
-  have : Satisfiable {σ} := satisfiable_of_irrefutable σ this
+  have : Satisfiable {σ} := LK.satisfiable_of_irrefutable σ this
   simpa [σ] using this
 
-theorem completeness (T : Theory L) : T ⊨ φ → T ⊢ φ := by
+lemma satisfiable_iff_consistent :
+    Semantics.Satisfiable (Struc.{max u w} L) T ↔ Consistent T := by
+  constructor
+  · exact consistent_of_satisfiable
+  · intro h
+    let ⟨M, _, _, h⟩ := satisfiable_iff.mp (small_satisfiable_of_consistent h)
+    exact satisfiable_iff.mpr
+      ⟨ULift.{w} M, inferInstance, inferInstance, ((uLift_elementaryEquiv L M).modelsTheory).mpr h⟩
+
+theorem Proof.complete :
+    T ⊨[Struc.{max u w} L] φ → T ⊢ φ := by
   contrapose!
   intro h
-  have : Consistent (insert (∼φ) T) := by sorry
-  have : Satisfiable (insert (∼φ) T) := satisfiable_of_consistent this
+  have : Consistent (insert (∼φ) T) := unprovable_iff_consistent_adjoin.mp h
+  have : Semantics.Satisfiable (Struc.{max u w} L) (insert (∼φ) T) := satisfiable_iff_consistent.mpr this
   rcases this with ⟨⟨M, i, s⟩, hM⟩
-  simp [consequence_iff]
-  simp at hM
-  refine ⟨M, i.some, s, hM.2, hM.1⟩
+  have : ¬M↓[L] ⊧ φ ∧ M↓[L] ⊧* T := by simpa using hM
+  simpa [consequence_iff] using ⟨M, i.some, s, this.2, this.1⟩
 
-end LO.FirstOrder.Derivation.Canonical
+/-- Completeness theorem (II) -/
+theorem Proof.small_complete : T ⊨ φ → T ⊢ φ := Proof.complete
+
+theorem Proof.complete_iff : T ⊨ φ ↔ T ⊢ φ := ⟨fun h ↦ Proof.complete h, Proof.sound⟩
+
+instance Proof.isComplete (T : Theory L) : Complete T (Semantics.models (SmallStruc L) T) := ⟨Proof.complete⟩
+
+lemma satisfiable_iff_satisfiable : Semantics.Satisfiable (Struc.{max u w} L) T ↔ Satisfiable T := by
+  simp [satisfiable_iff_consistent.{u, w}, satisfiable_iff_consistent.{u, u}]
+
+lemma consequence_iff_consequence : T ⊨[Struc.{max u w} L] φ ↔ T ⊨ φ := by
+  simp [consequence_iff_unsatisfiable, satisfiable_iff_satisfiable.{u, w}]
+
+end Theory
+
+end LO.FirstOrder

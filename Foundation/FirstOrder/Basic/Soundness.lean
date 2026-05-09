@@ -71,11 +71,11 @@ theorem LK.Proof.sound {M : Type*} [s : Structure L M] [Nonempty M] {φ : Propos
 
 variable {T U : Theory L}
 
-namespace Theory.Proof
+namespace Theory
 
-theorem sound_proposition {M : Type*} [s : Structure L M] [Nonempty M] :
+theorem Proof.sound_proposition {M : Type*} [s : Structure L M] [Nonempty M] :
     T ⊢ φ → M↓[L] ⊧* T → φ.Realize M := fun b H ↦ by
-  rcases provable_iff.mp b with ⟨Γ, hΓ, ⟨b⟩⟩
+  rcases Proof.provable_iff.mp b with ⟨Γ, hΓ, ⟨b⟩⟩
   let f : ℕ → M := fun _ ↦ Nonempty.some inferInstance
   have : φ.Realize M ∨ ∃ ψ, ∼ψ ∈ Sequent.embed Γ ∧ ψ.Evalf f := by simpa using b.sound f
   rcases this with (h | ⟨ψ, hψ, h⟩)
@@ -91,26 +91,26 @@ theorem sound_proposition {M : Type*} [s : Structure L M] [Nonempty M] :
     contradiction
 
 /-- Soundness theorem for first-order logic. -/
-theorem sound {φ : Sentence L} :
+theorem Proof.sound {φ : Sentence L} :
     T ⊢ φ → T ⊨[Struc.{v, u} L] φ := fun b s hS ↦ by
   simpa [struc_models_iff_models (s := s), models_iff]
-    using sound_proposition b hS
+    using Proof.sound_proposition b hS
 
-theorem sound_small : T ⊢ φ → T ⊨ φ := sound
+theorem Proof.sound_small : T ⊢ φ → T ⊨ φ := Proof.sound
 
 instance (T : Theory L) : Sound T (Semantics.models (Struc.{v, u} L) T) := ⟨Theory.Proof.sound⟩
 
 lemma consistent_of_satisfiable (h : Semantics.Satisfiable (Struc.{v, u} L) T) : Entailment.Consistent T :=
   Sound.consistent_of_satisfiable h
 
-end Theory.Proof
+end Theory
 
 section model
 
 variable (T) (M : Type*) [Nonempty M] [Structure L M]
 
 lemma consistent_of_model [hM : M↓[L] ⊧* T] :
-    Entailment.Consistent T := Theory.Proof.consistent_of_satisfiable ⟨M↓[L], hM⟩
+    Entailment.Consistent T := Theory.consistent_of_satisfiable ⟨M↓[L], hM⟩
 
 variable {M}
 
