@@ -237,6 +237,7 @@ lemma satisfiable_iff_consistent :
     exact satisfiable_iff.mpr
       ⟨ULift.{w} M, inferInstance, inferInstance, ((uLift_elementaryEquiv L M).modelsTheory).mpr h⟩
 
+/-- Completeness theorem (II) -/
 theorem Proof.complete :
     T ⊨[Struc.{max u w} L] φ → T ⊢ φ := by
   contrapose!
@@ -247,7 +248,6 @@ theorem Proof.complete :
   have : ¬M↓[L] ⊧ φ ∧ M↓[L] ⊧* T := by simpa using hM
   simpa [consequence_iff] using ⟨M, i.some, s, this.2, this.1⟩
 
-/-- Completeness theorem (II) -/
 theorem Proof.small_complete : T ⊨ φ → T ⊢ φ := Proof.complete
 
 theorem Proof.complete_iff : T ⊨ φ ↔ T ⊢ φ := ⟨fun h ↦ Proof.complete h, Proof.sound⟩
@@ -282,7 +282,7 @@ variable {L : Language.{u}} [L.Eq] {T : Theory L} [𝗘𝗤 L ⪯ T]
 
 lemma Theory.Proof.complete_on_eq_models
     (φ : Sentence L)
-    (H : ∀ (M : Type u)
+    (H : ∀ (M : Type (max u v))
       [Nonempty M]
       [Structure L M] [Structure.Eq L M]
       [M↓[L] ⊧* T],

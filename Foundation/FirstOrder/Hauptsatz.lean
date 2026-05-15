@@ -1,87 +1,28 @@
 module
 
 public import Foundation.FirstOrder.NegationTranslation.GoedelGentzen
-public import Foundation.Logic.ForcingRelation
-public import Foundation.Vorspiel.Order.Preorder
 
 @[expose] public section
+
 /-!
-# Algebraic proofs of cut elimination
+# Hauptsatz of classical first-order logic
 
 Main reference: Jeremy Avigad, Algebraic proofs of cut elimination [Avi01]
  -/
 
-namespace LO.FirstOrder
+namespace LO.FirstOrder.Derivation
 
-variable {L : Language.{u}}
+variable {L : Language}
 
-namespace Derivation
+inductive Positive (Ξ : Sequent L) : Sequent L → Type _
+| or : Positive Ξ (φ :: ψ :: Γ) → Positive Ξ (φ ⋎ ψ :: Γ)
+| exs : Positive Ξ (φ/[t] :: Γ) → Positive Ξ ((∃⁰ φ) :: Γ)
+| wk : Positive Ξ Δ → Δ ⊆ Γ → Positive Ξ Γ
+| protected id : Positive Ξ Ξ
 
-inductive IsCutFree : {Γ : Sequent L} → ⊢ᴸᴷ¹ Γ → Prop
-| axL (r : L.Rel k) (v) : IsCutFree (identity r v)
-| verum : IsCutFree verum
-| or {d : ⊢ᴸᴷ¹ φ :: ψ :: Γ} : IsCutFree d → IsCutFree d.or
-| and {dφ : ⊢ᴸᴷ¹ φ :: Γ} {dψ : ⊢ᴸᴷ¹ ψ :: Γ} : IsCutFree dφ → IsCutFree dψ → IsCutFree (dφ.and dψ)
-| all {d : ⊢ᴸᴷ¹ Rewriting.free φ :: Γ⁺} : IsCutFree d → IsCutFree d.all
-| exs (t) {d : ⊢ᴸᴷ¹ φ/[t] :: Γ} : IsCutFree d → IsCutFree d.exs
-| wk  {d : ⊢ᴸᴷ¹ Δ} (ss : Δ ⊆ Γ) : IsCutFree d → IsCutFree (d.wk ss)
+infix:45 " ⟶⁺ " => Positive
 
-attribute [simp] IsCutFree.axL IsCutFree.verum
-
-variable {Γ Δ : Sequent L}
-
-@[simp] lemma isCutFree_or_iff {d : ⊢ᴸᴷ¹ φ :: ψ :: Γ} :
-    IsCutFree d.or ↔ IsCutFree d := ⟨by rintro ⟨⟩; assumption, .or⟩
-
-@[simp] lemma isCutFree_and_iff {dφ : ⊢ᴸᴷ¹ φ :: Γ} {dψ : ⊢ᴸᴷ¹ ψ :: Γ} :
-    IsCutFree (dφ.and dψ) ↔ IsCutFree dφ ∧ IsCutFree dψ :=
-  ⟨by rintro ⟨⟩; constructor <;> assumption, by intro ⟨hφ, hψ⟩; exact hφ.and hψ⟩
-
-@[simp] lemma isCutFree_all_iff {d : ⊢ᴸᴷ¹ Rewriting.free φ :: Γ⁺} :
-    IsCutFree d.all ↔ IsCutFree d := ⟨by rintro ⟨⟩; assumption, .all⟩
-
-@[simp] lemma isCutFree_exs_iff {d : ⊢ᴸᴷ¹ φ/[t] :: Γ} :
-    IsCutFree d.exs ↔ IsCutFree d := ⟨by rintro ⟨⟩; assumption, .exs t⟩
-
-@[simp] lemma isCutFree_wk_iff {d : ⊢ᴸᴷ¹ Δ} {ss : Δ ⊆ Γ} :
-    IsCutFree (d.wk ss) ↔ IsCutFree d := ⟨by rintro ⟨⟩; assumption, .wk _⟩
-
-@[simp] lemma IsCutFree.cast {d : ⊢ᴸᴷ¹ Γ} {e : Γ = Δ} :
-    IsCutFree (.cast d e) ↔ IsCutFree d := by rcases e; rfl
-
-@[simp] lemma IsCutFree.not_cut (dp : ⊢ᴸᴷ¹ φ :: Γ) (dn : ⊢ᴸᴷ¹ ∼φ :: Δ) : ¬IsCutFree (dp.cut dn) := by
-  intro h
-  refine h.rec
-    (motive := fun {_} d _ =>
-      match d with
-      | .cut _ _ => False
-      | _ => True)
-    ?_ ?_ ?_ ?_ ?_ ?_ ?_
-  all_goals simp
-
-set_option backward.isDefEq.respectTransparency false in
-@[simp] lemma isCutFree_rewrite_iff_isCutFree {f : ℕ → SyntacticTerm L} {d : ⊢ᴸᴷ¹ Γ} :
-    IsCutFree (rewrite f d) ↔ IsCutFree d := by
-  induction d generalizing f <;> simp [rewrite, *]
-
-@[simp] lemma isCutFree_map_iff_isCutFree {f : ℕ → ℕ} {d : ⊢ᴸᴷ¹ Γ} :
-    IsCutFree (Derivation.map d f) ↔ IsCutFree d := isCutFree_rewrite_iff_isCutFree
-
-set_option backward.isDefEq.respectTransparency false in
-@[simp] lemma IsCutFree.genelalizeByNewver_isCutFree {φ : Semiproposition L 1} (hp : ¬φ.FVar? m) (hΔ : ∀ ψ ∈ Δ, ¬ψ.FVar? m)
-    (d : ⊢ᴸᴷ¹ φ/[&m] :: Δ) : IsCutFree (genelalizeByNewver hp hΔ d) ↔ IsCutFree d := by simp [genelalizeByNewver]
-
-end Derivation
-
-inductive PositiveDerivationFrom (Ξ : Sequent L) : Sequent L → Type _
-| or : PositiveDerivationFrom Ξ (φ :: ψ :: Γ) → PositiveDerivationFrom Ξ (φ ⋎ ψ :: Γ)
-| exs : PositiveDerivationFrom Ξ (φ/[t] :: Γ) → PositiveDerivationFrom Ξ ((∃⁰ φ) :: Γ)
-| wk : PositiveDerivationFrom Ξ Δ → Δ ⊆ Γ → PositiveDerivationFrom Ξ Γ
-| protected id : PositiveDerivationFrom Ξ Ξ
-
-infix:45 " ⟶⁺ " => PositiveDerivationFrom
-
-namespace PositiveDerivationFrom
+namespace Positive
 
 variable {Ξ Γ Δ : Sequent L}
 
@@ -122,9 +63,9 @@ def graft {Ξ Γ : Sequent L} (b : ⊢ᴸᴷ¹ Ξ) : Ξ ⟶⁺ Γ → ⊢ᴸᴷ�
 lemma graft_isCutFree_of_isCutFree {b : ⊢ᴸᴷ¹ Ξ} {d : Ξ ⟶⁺ Γ} (hb : Derivation.IsCutFree b) : Derivation.IsCutFree (d.graft b) := by
   induction d <;> simp [graft, *]
 
-end PositiveDerivationFrom
+end Positive
 
-namespace Hauptsatz
+namespace Canonical
 
 open Semiformulaᵢ
 
@@ -229,10 +170,10 @@ def cast {p : ℙ} (f : p ⊩ φ) (s : φ = ψ) : p ⊩ ψ := s ▸ f
 def monotone {q p : ℙ} (s : q ≼ p) : {φ : Propositionᵢ L} → p ⊩ φ → q ⊩ φ
   | ⊥, b =>
     let ⟨d, hd⟩ := b.falsumEquiv
-    falsumEquiv.symm ⟨s.val.graft d, PositiveDerivationFrom.graft_isCutFree_of_isCutFree hd⟩
+    falsumEquiv.symm ⟨s.val.graft d, Positive.graft_isCutFree_of_isCutFree hd⟩
   | .rel R v, b =>
     let ⟨d, hd⟩ := b.relEquiv
-    relEquiv.symm ⟨s.val.cons (.rel R v) |>.graft d, PositiveDerivationFrom.graft_isCutFree_of_isCutFree hd⟩
+    relEquiv.symm ⟨s.val.cons (.rel R v) |>.graft d, Positive.graft_isCutFree_of_isCutFree hd⟩
   | φ ⋏ ψ, b => andEquiv.symm ⟨monotone s b.andEquiv.1, monotone s b.andEquiv.2⟩
   | φ ⋎ ψ, b => orEquiv.symm <| b.orEquiv.rec (fun b ↦ .inl <| b.monotone s) (fun b ↦ .inr <| b.monotone s)
   | φ 🡒 ψ, b => implyEquiv.symm fun r srq bφ ↦ b.implyEquiv r (srq.trans s) bφ
@@ -390,7 +331,8 @@ def conj' : {Γ : Sequent L} → (b : (φ : Proposition L) → φ ∈ Γ → p �
 
 end Forces
 
-def main [L.DecidableEq] {Γ : Sequent L} : ⊢ᴸᴷ¹ Γ → {d : ⊢ᴸᴷ¹ Γ // Derivation.IsCutFree d} := fun d ↦
+/-- Cut elimination theorem of $\mathbf{LK}$. -/
+def hauptsatz [L.DecidableEq] {Γ : Sequent L} : ⊢ᴸᴷ¹ Γ → {d : ⊢ᴸᴷ¹ Γ // Derivation.IsCutFree d} := fun d ↦
   let d : 𝗠𝗶𝗻¹ ⊢! ⋀(∼Γ)ᴺ 🡒 ⊥ := Entailment.FiniteContext.toDef (Derivation.gödelGentzen d)
   let ff : Forces (∼Γ) (⋀(∼Γ)ᴺ 🡒 ⊥) := Forces.sound d (∼Γ)
   let fc : Forces (∼Γ) (⋀(∼Γ)ᴺ) := Forces.conj' fun φ hφ ↦
@@ -399,193 +341,4 @@ def main [L.DecidableEq] {Γ : Sequent L} : ⊢ᴸᴷ¹ Γ → {d : ⊢ᴸᴷ¹ 
   let ⟨b, hb⟩ := b.falsumEquiv
   ⟨Derivation.cast b (by simp), by simp [hb]⟩
 
-
-
-instance : LE ℙ := ⟨fun q p ↦ Nonempty (q ≼ p)⟩
-
-instance : Preorder ℙ where
-  le_refl p := ⟨StrongerThan.refl p⟩
-  le_trans p q r := by
-    rintro ⟨hqp⟩ ⟨hrq⟩
-    exact ⟨StrongerThan.trans hqp hrq⟩
-
-abbrev IsForced (p : ℙ) (φ : Propositionᵢ L) := Nonempty (Forces p φ)
-
-instance : ForcingRelation ℙ (Propositionᵢ L) where
-  Forces := IsForced
-
-namespace IsForced
-
-open Classical
-
-@[simp] lemma rel {p : ℙ} {k} {R : L.Rel k} {v} : p ⊩ .rel R v ↔ Nonempty (⊢ᴸᴷ¹ .rel R v :: ∼p) := by
-  constructor
-  · rintro ⟨b⟩
-    have ⟨d, hd⟩ := b.relEquiv
-    exact ⟨d⟩
-  · rintro ⟨d⟩
-    let ⟨b, hb⟩ := main d
-    exact ⟨Forces.relEquiv.symm ⟨b, hb⟩⟩
-
-@[simp] lemma fal {p : ℙ} : p ⊩ ∀⁰ φ ↔ ∀ t, p ⊩ φ/[t] := by
-  constructor
-  · rintro ⟨b⟩ t
-    exact ⟨b.allEquiv t⟩
-  · rintro h
-    exact ⟨Forces.allEquiv.symm fun t ↦ (h t).some⟩
-
-@[simp] lemma and {p : ℙ} {φ ψ : Propositionᵢ L} : p ⊩ φ ⋏ ψ ↔ p ⊩ φ ∧ p ⊩ ψ := by
-  constructor
-  · rintro ⟨b⟩
-    have ⟨bφ, bψ⟩ := b.andEquiv
-    exact ⟨⟨bφ⟩, ⟨bψ⟩⟩
-  · rintro ⟨⟨bφ⟩, ⟨bψ⟩⟩
-    exact ⟨Forces.andEquiv.symm ⟨bφ, bψ⟩⟩
-
-@[simp] lemma or {p : ℙ} {φ ψ : Propositionᵢ L} : p ⊩ φ ⋎ ψ ↔ p ⊩ φ ∨ p ⊩ ψ := by
-  constructor
-  · rintro ⟨b⟩
-    have b' := b.orEquiv
-    exact b'.rec (fun bφ ↦ .inl ⟨bφ⟩) (fun bψ ↦ .inr ⟨bψ⟩)
-  · rintro (⟨⟨hφ⟩⟩ | ⟨⟨hψ⟩⟩)
-    · exact ⟨Forces.orEquiv.symm <| .inl hφ⟩
-    · exact ⟨Forces.orEquiv.symm <| .inr hψ⟩
-
-lemma imply {p : ℙ} {φ ψ : Propositionᵢ L} : p ⊩ φ 🡒 ψ ↔ (∀ q ≤ p, q ⊩ φ → q ⊩ ψ) := by
-  constructor
-  · rintro ⟨b⟩ q ⟨sqp⟩ ⟨bφ⟩
-    exact ⟨b.implyEquiv _ sqp bφ⟩
-  · rintro h
-    refine ⟨Forces.implyEquiv.symm fun q sqp hφ ↦ (h q ⟨sqp⟩ ⟨hφ⟩).some⟩
-
-@[simp] lemma exs {p : ℙ} : p ⊩ ∃⁰ φ ↔ ∃ t, p ⊩ φ/[t] := by
-  constructor
-  · rintro ⟨b⟩
-    have ⟨t, f⟩ := b.exsEquiv
-    exact ⟨t, ⟨f⟩⟩
-  · rintro ⟨t, h⟩
-    exact ⟨Forces.exsEquiv.symm ⟨t, h.some⟩⟩
-
-lemma falsum {p : ℙ} : p ⊩ ⊥ ↔ Nonempty (⊢ᴸᴷ¹ ∼p) := by
-  constructor
-  · rintro ⟨b⟩
-    have ⟨d, hd⟩ := b.falsumEquiv
-    exact ⟨d⟩
-  · rintro ⟨d⟩
-    let ⟨b, hb⟩ := main d
-    exact ⟨Forces.falsumEquiv.symm ⟨b, hb⟩⟩
-
-lemma neg {p : ℙ} {φ : Propositionᵢ L} : p ⊩ ∼φ ↔ (∀ q ≤ p, q ⊩ φ → q ⊩ ⊥) := by
-  simp [Semiformulaᵢ.neg_def, imply]
-
-lemma monotone {p q : ℙ} (hqp : q ≤ p) {φ : Propositionᵢ L} (hφ : p ⊩ φ) : q ⊩ φ :=
-  ⟨Forces.monotone hqp.some hφ.some⟩
-
-instance : ForcingRelation.PreIntKripke ℙ (· ≥ ·) where
-  verum _ := ⟨Forces.implyEquiv.symm fun _ _ d ↦ d⟩
-  and _ := and
-  or _ := or
-  imply _ := imply
-  monotone hφ _ hpq := hφ.monotone hpq
-
-lemma efq {p : ℙ} (h : p ⊩ ⊥) (φ : Propositionᵢ L) : p ⊩ φ := by
-  have : p ⊩ ⊥ 🡒 φ := ⟨Forces.efq φ p⟩
-  exact imply.mp this p (by simp) h
-
-lemma sound_minimal {φ : Propositionᵢ L} : 𝗠𝗶𝗻¹ ⊢ φ → ℙ ∀⊩ φ := by
-  rintro ⟨d⟩ p; exact ⟨Forces.sound d p⟩
-
-lemma dn_neg_iff {φ : Proposition L} {p : ℙ} : p ⊩ (∼φ)ᴺ ↔ p ⊩ ∼(φᴺ) := by
-  have := by simpa using (sound_minimal (Derivation.neg_doubleNegation φ) p)
-  exact (this p (by simp)).symm
-
-protected lemma refl (φ : Proposition L) : [φ] ⊩ φᴺ := ⟨Forces.refl φ⟩
-
-lemma complete {φ : Proposition L} : ℙ ∀⊩ φᴺ ↔ 𝐋𝐊¹ ⊢ φ := by
-  constructor
-  · intro h
-    have hn : [∼φ] ⊩ ∼(φᴺ) := by simpa [dn_neg_iff] using (IsForced.refl (∼φ))
-    have hp : [∼φ] ⊩ φᴺ := h [∼φ]
-    have : 𝐋𝐊¹ ⊢ φ := by simpa using falsum.mp <| neg.mp hn [∼φ] (by simp) hp
-    exact this
-  · intro b
-    exact sound_minimal <| Provable.gödel_gentzen b
-
-end IsForced
-
-variable (L)
-
-def ConsistentSequent := {Γ : Sequent L // IsEmpty (⊢ᴸᴷ¹ ∼Γ)}
-
-local notation "ℂ" => ConsistentSequent L
-
-variable {L}
-
-namespace ConsistentSequent
-
-instance : Preorder ℂ where
-  le q p := q.val ≤ p.val
-  le_refl p := by simp
-  le_trans p q r := le_trans
-
-end ConsistentSequent
-
-def hValue (φ : Propositionᵢ L) : LowerSet ℂ where
-  carrier := { p | p.val ⊩ φ }
-  lower' := fun _ _ hqp hp ↦ IsForced.monotone hqp hp
-
-scoped prefix:max "♯" => hValue
-
-@[simp] lemma mem_hValue {p : ℂ} {φ : Propositionᵢ L} : p ∈ ♯φ ↔ p.val ⊩ φ := by simp [hValue]
-
-@[simp] lemma hValue_and_eq_inf {φ ψ : Propositionᵢ L} : ♯(φ ⋏ ψ) = (♯φ ⊓ ♯ψ) := by
-  ext p; simp [hValue]
-
-@[simp] lemma hValue_or_eq_sup {φ ψ : Propositionᵢ L} : ♯(φ ⋎ ψ) = (♯φ ⊔ ♯ψ) := by
-  ext p; simp [hValue]
-
-@[simp] lemma hValue_fal_eq_Inf {φ : Semipropositionᵢ L 1} : ♯(∀⁰ φ) = ⨅ t, ♯(φ/[t]) := by
-  ext p; simp [hValue,]
-
-@[simp] lemma hValue_exs_eq_Sup {φ : Semipropositionᵢ L 1} : ♯(∃⁰ φ) = ⨆ t, ♯(φ/[t]) := by
-  ext p; simp [hValue,]
-
-@[simp] lemma hValue_falsum : ♯(⊥ : Propositionᵢ L) = ⊥ := by
-  ext p; simp [hValue, IsForced.falsum, p.prop]
-
-@[simp] lemma hValue_imply_eq_himp {φ ψ : Propositionᵢ L} : ♯(φ 🡒 ψ) = (♯φ ⇨ ♯ψ) := by
-  ext p
-  suffices (∀ q ≤ p.val, q ⊩ φ → q ⊩ ψ) ↔ ∀ q ≤ p, q.val ⊩ φ → q.val ⊩ ψ by
-    simpa [IsForced.imply, LowerSet.mem_himp_iff]
-  constructor
-  · intro h q hqp hqφ
-    exact h q.val hqp hqφ
-  · intro h q hqp hqφ
-    by_cases! hq : IsEmpty (⊢ᴸᴷ¹ ∼q)
-    · exact h ⟨q, hq⟩ hqp hqφ
-    · exact IsForced.efq (p := q) (by simp [IsForced.falsum, hq]) ψ
-
-@[simp] lemma hValue_neg_eq_himp_bot (φ : Propositionᵢ L) : ♯(∼φ) = (♯φ)ᶜ := by
-  simp [Semiformulaᵢ.neg_def]
-
-lemma eq_top_iff_provable {φ : Proposition L} : ♯φᴺ = ⊤ ↔ 𝐋𝐊¹ ⊢ φ := calc
-  ♯φᴺ = ⊤ ↔ ⊤ ≤ ♯φᴺ := by simp only [top_le_iff]
-  _       ↔ (∀ p : ℂ, p.val ⊩ φᴺ) := by simp [SetLike.le_def]
-  _       ↔ ℙ ∀⊩ φᴺ := by
-    constructor
-    · intro h p
-      by_cases! hp : IsEmpty (⊢ᴸᴷ¹ ∼p)
-      · exact h ⟨p, hp⟩
-      · exact IsForced.efq (p := p) (by simp [IsForced.falsum, hp]) φᴺ
-    · intro h p; exact h p.val
-  _       ↔ 𝐋𝐊¹ ⊢ φ := IsForced.complete
-
-lemma lt_top_iff_provable {φ : Proposition L} : ♯φᴺ < ⊤ ↔ 𝐋𝐊¹ ⊬ φ := by
-  simp [Entailment.Unprovable, ←eq_top_iff_provable, lt_top_iff_ne_top]
-
-
-end Hauptsatz
-
-alias hauptsatz := Hauptsatz.main
-
-end LO.FirstOrder
+end Canonical
