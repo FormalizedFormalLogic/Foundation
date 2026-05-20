@@ -18,41 +18,41 @@ namespace LO
 
 /-! ## One-sided $\mathbf{LK}$ -/
 
-class OneSidedLK {F : Type*} [LogicalConnective F] [DeMorgan F] [NegInvolutive F] (𝔇 : List F → Type*) where
+class OneSidedLK {F : Type*} [LogicalConnective F] [DeMorgan F] [TildeInvolutive F] (𝔇 : List F → Type*) where
   identity (φ) : 𝔇 [φ, ∼φ]
-  wk : 𝔇 Δ → Δ ⊆ Γ → 𝔇 Γ
+  contraction : 𝔇 Δ → Δ ⊆ Γ → 𝔇 Γ
   verum : 𝔇 [⊤]
   and : 𝔇 (φ :: Γ) → 𝔇 (ψ :: Γ) → 𝔇 (φ ⋏ ψ :: Γ)
   or : 𝔇 (φ :: ψ :: Γ) → 𝔇 (φ ⋎ ψ :: Γ)
 
 class OneSidedLK.Cut
-    {F : Type*} [LogicalConnective F] [DeMorgan F] [NegInvolutive F] (𝔇 : List F → Type*) extends OneSidedLK 𝔇 where
+    {F : Type*} [LogicalConnective F] [DeMorgan F] [TildeInvolutive F] (𝔇 : List F → Type*) extends OneSidedLK 𝔇 where
   cut : 𝔇 (φ :: Γ) → 𝔇 (∼φ :: Δ) → 𝔇 (Γ ++ Δ)
 
 namespace OneSidedLK
 
-variable {F : Type*} [LogicalConnective F] [DeMorgan F] [NegInvolutive F] {𝔇 : List F → Type*} [OneSidedLK 𝔇]
+variable {F : Type*} [LogicalConnective F] [DeMorgan F] [TildeInvolutive F] {𝔇 : List F → Type*} [OneSidedLK 𝔇]
 
 def cast (b : 𝔇 Γ) (h : Γ = Δ := by simp) : 𝔇 Δ := h ▸ b
 
-def weakening (d : 𝔇 Γ) (h : Γ ⊆ Δ := by simp) : 𝔇 Δ := wk d (by simp [h])
+def contra (d : 𝔇 Γ) (h : Γ ⊆ Δ := by simp) : 𝔇 Δ := contraction d (by simp [h])
 
-def rotate (d : 𝔇 (φ :: Γ)) : 𝔇 (Γ ++ [φ]) := weakening d
+def rotate (d : 𝔇 (φ :: Γ)) : 𝔇 (Γ ++ [φ]) := contra d
 
-def close (φ : F) (hp : φ ∈ Γ := by simp) (hn : ∼φ ∈ Γ := by simp) : 𝔇 Γ := wk (identity φ) (by simp_all)
+def close (φ : F) (hp : φ ∈ Γ := by simp) (hn : ∼φ ∈ Γ := by simp) : 𝔇 Γ := contraction (identity φ) (by simp_all)
 
-def top (h : ⊤ ∈ Γ := by simp) : 𝔇 Γ := wk verum (by simp [h])
+def top (h : ⊤ ∈ Γ := by simp) : 𝔇 Γ := contraction verum (by simp [h])
 
 def tensor {φ ψ : F} (dφ : 𝔇 (φ :: Γ)) (dψ : 𝔇 (ψ :: Δ)) : 𝔇 (φ ⋏ ψ :: Γ ++ Δ) :=
-  and (wk dφ (by simp)) (wk dψ (by simp))
+  and (contraction dφ (by simp)) (contraction dψ (by simp))
 
-def swap₁ (d : 𝔇 (φ₂ :: φ₁ :: Γ)) : 𝔇 (φ₁ :: φ₂ :: Γ) := wk d (by simp)
+def swap₁ (d : 𝔇 (φ₂ :: φ₁ :: Γ)) : 𝔇 (φ₁ :: φ₂ :: Γ) := contraction d (by simp)
 
 def swap₂ (d : 𝔇 (φ₃ :: φ₁ :: φ₂ :: Γ)) : 𝔇 (φ₁ :: φ₂ :: φ₃ :: Γ) :=
-  wk d (by grind)
+  contraction d (by grind)
 
 def swap₃ (d : 𝔇 (φ₄ :: φ₁ :: φ₂ :: φ₃ :: Γ)) : 𝔇 (φ₁ :: φ₂ :: φ₃ :: φ₄ :: Γ) :=
-  wk d (by grind)
+  contraction d (by grind)
 
 alias cut := OneSidedLK.Cut.cut
 
@@ -60,7 +60,7 @@ def eCut [Cut 𝔇] (d₁ : 𝔇 (φ :: Γ)) (d₂ : 𝔇 (ψ :: Δ)) (e : ∼φ
 
 def disj₂ {Γ Δ : List F} [Cut 𝔇] : 𝔇 (Γ ++ Δ) → 𝔇 (⋁Γ :: Δ) := fun d ↦
   match Γ with
-  |               [] => weakening d
+  |               [] => contra d
   |              [φ] => d
   |           [φ, ψ] => or d
   | φ :: ψ :: χ :: Γ => by
@@ -69,7 +69,7 @@ def disj₂ {Γ Δ : List F} [Cut 𝔇] : 𝔇 (Γ ++ Δ) → 𝔇 (⋁Γ :: Δ)
     have d₁ : 𝔇 ((φ ⋎ ψ) ⋎ Φ :: Δ) := disj₂ this
     have d₂ : 𝔇 [(∼φ ⋏ ∼ψ) ⋏ ∼Φ, φ ⋎ ψ ⋎ Φ] :=
       have : 𝔇 [φ, ψ ⋎ Φ, (∼φ ⋏ ∼ψ) ⋏ ∼Φ] :=
-        weakening <| or <| rotate <| rotate <|
+        contra <| or <| rotate <| rotate <|
           tensor (tensor (rotate (identity (𝔇 := 𝔇) φ)) (rotate (identity  ψ))) (rotate (identity Φ))
       rotate <| or <| this
     exact eCut d₂ d₁
@@ -77,7 +77,7 @@ def disj₂ {Γ Δ : List F} [Cut 𝔇] : 𝔇 (Γ ++ Δ) → 𝔇 (⋁Γ :: Δ)
 
 def conj₂ {Γ Δ : List F} (d : (φ : F) → φ ∈ Γ → 𝔇 (φ :: Δ)) : 𝔇 (⋀Γ :: Δ) :=
   match Γ with
-  |          [] => weakening verum
+  |          [] => contra verum
   |         [φ] => d φ (by simp)
   | φ :: ψ :: Γ =>
     have : 𝔇 (⋀(ψ :: Γ) :: Δ) := conj₂ (Γ := ψ :: Γ) (fun χ h ↦ d χ (by simp_all))
@@ -93,7 +93,7 @@ namespace PrincipalEntailment
 
 variable {P : Type*} [Entailment P F] {𝓟 : P} [PrincipalEntailment 𝔇 𝓟]
 
-omit [LogicalConnective F] [DeMorgan F] [NegInvolutive F] [OneSidedLK 𝔇] in
+omit [LogicalConnective F] [DeMorgan F] [TildeInvolutive F] [OneSidedLK 𝔇] in
 lemma provable_iff :
     𝓟 ⊢ φ ↔ Nonempty (𝔇 [φ]) := by
   simpa using OneSidedLK.PrincipalEntailment.equiv.nonempty_congr
@@ -105,8 +105,8 @@ instance : Entailment.ModusPonens 𝓟 where
     let b₁ := equiv b₁
     let b₂ := equiv b₂
     have : 𝔇 [∼(φ 🡒 ψ), ∼φ, ψ] := cast (tensor (𝔇 := 𝔇) (identity φ) (identity (∼ψ))) (by simp [DeMorgan.imply])
-    have : 𝔇 [∼φ, ψ] := wk (cut b₁ this) (by simp)
-    have : 𝔇 [ψ] := wk (cut b₂ this) (by simp)
+    have : 𝔇 [∼φ, ψ] := contraction (cut b₁ this) (by simp)
+    have : 𝔇 [ψ] := contraction (cut b₂ this) (by simp)
     equiv.symm <| cast this
 
 instance : Entailment.Cl 𝓟 where
@@ -167,7 +167,7 @@ abbrev Pullback (𝔇 : List F → Type*) {G : Type*} [LogicalConnective G] (f :
 
 namespace Pullback
 
-variable {G : Type*} [LogicalConnective G] [DeMorgan G] [NegInvolutive G] {f : G →ˡᶜ F}
+variable {G : Type*} [LogicalConnective G] [DeMorgan G] [TildeInvolutive G] {f : G →ˡᶜ F}
 
 def cast (d : 𝔇 Δ) (h : Δ = Γ.map f := by simp) : Pullback 𝔇 f Γ := by
   unfold Pullback
@@ -177,7 +177,7 @@ def uncast (d : Pullback 𝔇 f Γ) (h : Δ = Γ.map f := by simp) : 𝔇 Δ := 
 
 instance oneSidedLK [OneSidedLK 𝔇] : OneSidedLK (Pullback 𝔇 f) where
   identity φ := cast <| identity (f φ)
-  wk {Δ Γ} d h := cast (wk d (List.map_subset f h) : 𝔇 (Γ.map f)) (by simp)
+  contraction {Δ Γ} d h := cast (contraction d (List.map_subset f h) : 𝔇 (Γ.map f)) (by simp)
   verum := cast verum
   and d₁ d₂ := cast <| and d₁ d₂
   or d := cast <| or d
@@ -192,10 +192,10 @@ instance {P : Type*} [Entailment P F] (𝓟 : P) [PrincipalEntailment 𝔇 𝓟]
     PrincipalEntailment (Pullback 𝔇 f) (Entailment.pullback 𝓟 f) where
   equiv {φ} := PrincipalEntailment.equiv (φ := f φ)
 
-omit [DeMorgan F] [NegInvolutive F] [OneSidedLK 𝔇] [DeMorgan G] [NegInvolutive G] in
+omit [DeMorgan F] [TildeInvolutive F] [OneSidedLK 𝔇] [DeMorgan G] [TildeInvolutive G] in
 @[simp] lemma nonempty_iff {Γ} : Nonempty (Pullback 𝔇 f Γ) ↔ Nonempty (𝔇 (Γ.map f)) := by simp [Pullback]
 
-omit [DeMorgan F] [NegInvolutive F] [OneSidedLK 𝔇] [DeMorgan G] [NegInvolutive G] in
+omit [DeMorgan F] [TildeInvolutive F] [OneSidedLK 𝔇] [DeMorgan G] [TildeInvolutive G] in
 @[simp] lemma isEmpty_iff {Γ} : IsEmpty (Pullback 𝔇 f Γ) ↔ IsEmpty (𝔇 (Γ.map f)) := by simp [Pullback]
 
 end Pullback
@@ -208,7 +208,7 @@ namespace ContextualEntailment
 
 variable {S : Type*} [Entailment S F] [AdjunctiveSet F S] [ContextualEntailment 𝔇 S]
 
-omit [DeMorgan F] [NegInvolutive F] [OneSidedLK 𝔇] in
+omit [DeMorgan F] [TildeInvolutive F] [OneSidedLK 𝔇] in
 lemma provable_iff {𝓢 : S} :
     𝓢 ⊢ φ ↔ ∃ Γ : List F, (∀ ψ ∈ Γ, ψ ∈ 𝓢) ∧ Nonempty (𝔇 (φ :: ∼Γ)) := by
   simpa using equiv.nonempty_congr
@@ -234,8 +234,8 @@ instance (𝓢 : S) : Entailment.ModusPonens 𝓢 where
     let ⟨Γ₁, b₁⟩ := equiv b₁
     let ⟨Γ₂, b₂⟩ := equiv b₂
     have : 𝔇 [∼(φ 🡒 ψ), ∼φ, ψ] := cast (tensor (𝔇 := 𝔇) (identity φ) (identity (∼ψ))) (by simp [DeMorgan.imply])
-    have : 𝔇 (∼φ :: ψ :: ∼↑Γ₁) := wk (cut b₁ this) (by simp)
-    have : 𝔇 (ψ :: ∼↑Γ₁ ++ ∼↑Γ₂) := wk (cut b₂ this) (by simp)
+    have : 𝔇 (∼φ :: ψ :: ∼↑Γ₁) := contraction (cut b₁ this) (by simp)
+    have : 𝔇 (ψ :: ∼↑Γ₁ ++ ∼↑Γ₂) := contraction (cut b₂ this) (by simp)
     equiv.symm ⟨⟨Γ₁ ++ Γ₂, by simp; grind⟩, cast this⟩
 
 instance : Entailment.StrongCut S S where
@@ -258,7 +258,7 @@ instance : Entailment.DeductiveExplosion S where
     equiv.symm
     ⟨ Γ,
       have : 𝔇 [∼⊥] := cast verum (by simp)
-      wk (cut b this) (by simp) ⟩
+      contraction (cut b this) (by simp) ⟩
 
 lemma inconsistent_iff {𝓢 : S} :
     Entailment.Inconsistent 𝓢 ↔ ∃ Γ : List F, (∀ ψ ∈ Γ, ψ ∈ 𝓢) ∧ Nonempty (𝔇 (∼Γ)) := calc
@@ -270,7 +270,7 @@ lemma inconsistent_iff {𝓢 : S} :
       have : 𝔇 [(∼⊥ : F)] := cast verum
       exact ⟨Γ, hΓ, ⟨cast (cut d this)⟩⟩
     · rintro ⟨Γ, hΓ, ⟨d⟩⟩
-      exact ⟨Γ, hΓ, ⟨wk d (by simp)⟩⟩
+      exact ⟨Γ, hΓ, ⟨contraction d (by simp)⟩⟩
 
 instance cl (𝓢 : S) : Entailment.Cl 𝓢 where
   negEquiv {φ} := Entailment.cast
@@ -334,7 +334,7 @@ lemma iff_context {𝓢 : S} {𝓟 : P} [PrincipalEntailment 𝔇 𝓟] :
   · rintro h
     have ⟨Γ, hΓ, ⟨d⟩⟩ := provable_iff.mp h
     have : 𝓟 ⊢ ⋀Γ 🡒 φ := by
-      have : 𝔇 (∼Γ ++ [φ]) := weakening d
+      have : 𝔇 (∼Γ ++ [φ]) := contra d
       have : Nonempty (𝔇 [⋀Γ 🡒 φ]) := by simpa [DeMorgan.imply] using Nonempty.intro (or <| disj₂ this)
       exact PrincipalEntailment.provable_iff.mpr this
     refine ⟨⟨Γ, by simpa using hΓ, this.some⟩⟩
@@ -343,7 +343,7 @@ lemma iff_context {𝓢 : S} {𝓟 : P} [PrincipalEntailment 𝔇 𝓟] :
     have d : 𝔇 [⋁(∼Γ) ⋎ φ] := cast (PrincipalEntailment.equiv this) (by simp [DeMorgan.imply])
     have : 𝔇 (⋀Γ ⋏ ∼φ :: φ :: ∼Γ) :=
       have : 𝔇 (⋀Γ :: ∼Γ) := conj₂ fun φ h ↦ close φ (by simp) (by simp [h])
-      weakening <| tensor this (rotate <| identity φ)
+      contra <| tensor this (rotate <| identity φ)
     have : 𝔇 (φ :: ∼Γ) := eCut d this
     refine provable_iff.mpr ⟨Γ, h, ⟨this⟩⟩
 

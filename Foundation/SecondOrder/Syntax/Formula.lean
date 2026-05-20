@@ -138,7 +138,7 @@ lemma neg_neg (φ : Semiformula L Ξ ξ N n) : ∼∼φ = φ :=
   |     ∀¹ φ => by simp [neg_neg φ]
   |     ∃¹ φ => by simp [neg_neg φ]
 
-instance : NegInvolutive (Semiformula L Ξ ξ N n) := ⟨neg_neg⟩
+instance : TildeInvolutive (Semiformula L Ξ ξ N n) := ⟨neg_neg⟩
 
 @[simp] lemma and_inj {φ₁ φ₂ ψ₁ ψ₂ : Semiformula L Ξ ξ N n} :
     φ₁ ⋏ φ₂ = ψ₁ ⋏ ψ₂ ↔ φ₁ = ψ₁ ∧ φ₂ = ψ₂ := iff_of_eq (by apply and.injEq)

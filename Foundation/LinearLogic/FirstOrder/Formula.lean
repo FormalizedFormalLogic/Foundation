@@ -155,7 +155,7 @@ lemma neg_neg {n} (φ : Semiformula L ξ n) : ∼∼φ = φ := by
   |     ∀⁰ φ => simp [neg_neg φ]
   |     ∃⁰ φ => simp [neg_neg φ]
 
-instance : NegInvolutive (Semiformula L ξ n) := ⟨neg_neg⟩
+instance : TildeInvolutive (Semiformula L ξ n) := ⟨neg_neg⟩
 
 /-- Usual logical connectives are defined to align with `⊤` and `⊥` -/
 instance : LogicalConnective (Semiformula L ξ n) where
