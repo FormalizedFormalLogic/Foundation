@@ -58,29 +58,29 @@ end RobinsonQ
 variable {M : Type*} [ORingStructure M] [M ⊧ₘ* 𝗤]
 
 @[simp] protected lemma succ_ne_zero : ∀ a : M, a + 1 ≠ 0 := by
-  simpa [models_iff] using ModelsTheory.models M RobinsonQ.succNeZero
+  simpa [models_iff] using Theory.models M RobinsonQ.succNeZero
 
 lemma succ_inj {a b : M} : a + 1 = b + 1 → a = b := by
-  have := by simpa [models_iff] using ModelsTheory.models M RobinsonQ.succInj
+  have := by simpa [models_iff] using Theory.models M RobinsonQ.succInj
   exact this a b
 
 @[simp] protected lemma add_zero {a : M} : a + 0 = a := by
-  have := by simpa [models_iff] using ModelsTheory.models M RobinsonQ.addZero
+  have := by simpa [models_iff] using Theory.models M RobinsonQ.addZero
   exact this a
 
 protected lemma add_succ (a b : M) : a + (b + 1) = a + b + 1 := by
-  have := by simpa [models_iff] using ModelsTheory.models M RobinsonQ.addSucc
+  have := by simpa [models_iff] using Theory.models M RobinsonQ.addSucc
   exact this a b
 
 @[simp] protected lemma mul_zero (a : M) : a * 0 = 0 := by
-  have := by simpa [models_iff] using ModelsTheory.models M RobinsonQ.mulZero
+  have := by simpa [models_iff] using Theory.models M RobinsonQ.mulZero
   exact this a
 
 protected lemma mul_succ : ∀ a b : M, a * (b + 1) = a * b + a := by
-  simpa [models_iff] using ModelsTheory.models M RobinsonQ.mulSucc
+  simpa [models_iff] using Theory.models M RobinsonQ.mulSucc
 
 lemma zero_or_succ (a : M) : a = 0 ∨ ∃ b : M, a = b + 1 := by
-  have := by simpa [models_iff] using ModelsTheory.models M RobinsonQ.zeroOrSucc
+  have := by simpa [models_iff] using Theory.models M RobinsonQ.zeroOrSucc
   exact this a
 
 lemma exists_succ_of_ne_zero {a : M} (ha : a ≠ 0) : ∃ b : M, a = b + 1 := by
@@ -92,7 +92,7 @@ lemma exists_succ_of_ne_zero' {a : M} (ha : a ≠ 0) : ∃ b : M, b + 1 = a := b
   use b;
 
 protected lemma lt_def {a b : M} : a < b ↔ ∃ c : M, a + (c + 1) = b := by
-  have := by simpa [models_iff] using ModelsTheory.models M RobinsonQ.ltDef
+  have := by simpa [models_iff] using Theory.models M RobinsonQ.ltDef
   exact this a b
 
 @[simp]

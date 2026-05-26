@@ -523,6 +523,8 @@ lemma struc_models_iff_models {s : Struc L} : s ⊧ σ ↔ s.Dom↓[L] ⊧ σ :=
 
 lemma models_iff : M↓[L] ⊧ σ ↔ σ.Realize M := by rfl
 
+lemma notModels_iff : M↓[L] ⊭ σ ↔ ¬σ.Realize M := by rfl
+
 lemma models_iff_proposition {φ : Proposition L} : M↓[L] ⊧ φ.univCl ↔ ∀ f : ℕ → M, φ.Evalf f := by
   simp [models_iff]
 

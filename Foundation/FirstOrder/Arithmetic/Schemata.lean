@@ -111,7 +111,7 @@ private lemma induction_eval {φ : Semiformula ℒₒᵣ ℕ 1} (hp : C φ) (v) 
     (∀ x, Semiformula.Evalm V ![x] v φ → Semiformula.Evalm V ![x + 1] v φ) →
     ∀ x, Semiformula.Evalm V ![x] v φ := by
   have : V ⊧ₘ .univCl (succInd φ) :=
-    ModelsTheory.models (T := InductionScheme _ C) V (by simpa using mem_InductionScheme_of_mem hp)
+    Theory.models (T := InductionScheme _ C) V (by simpa using mem_InductionScheme_of_mem hp)
   revert v
   simpa [models_iff, Semiformula.eval_univCl, succInd, Semiformula.eval_substs,
     Semiformula.eval_rew_q Rew.toS, Function.comp, Matrix.constant_eq_singleton] using this

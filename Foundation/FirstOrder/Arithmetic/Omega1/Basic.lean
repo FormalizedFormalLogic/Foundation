@@ -41,7 +41,7 @@ instance : V ⊧ₘ* 𝗜𝚺₀ := ModelsTheory.of_add_left V 𝗜𝚺₀ 𝝮�
 instance : V ⊧ₘ* 𝝮₁ := ModelsTheory.of_add_right V 𝗜𝚺₀ 𝝮₁
 
 lemma exists_exponential_sq_length (x : V) : ∃ y, Exponential (‖x‖^2) y :=
-  models_Omega1_iff.mp (ModelsTheory.models V Omega1.omega) x
+  models_Omega1_iff.mp (Theory.models V Omega1.omega) x
 
 lemma exists_unique_exponential_sq_length (x : V) : ∃! y, Exponential (‖x‖^2) y := by
   rcases exists_exponential_sq_length x with ⟨y, h⟩

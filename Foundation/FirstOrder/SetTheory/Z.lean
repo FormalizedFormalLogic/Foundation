@@ -18,7 +18,7 @@ variable {V : Type*} [SetStructure V] [Nonempty V] [V ⊧ₘ* 𝗭]
 /-! ## Axiom of extentionality -/
 
 lemma mem_ext_iff {x y : V} : x = y ↔ ∀ z, z ∈ x ↔ z ∈ y  := by
-  have := by simpa [models_iff, Axiom.extentionality] using ModelsTheory.models V Zermelo.axiom_of_extentionality
+  have := by simpa [models_iff, Axiom.extentionality] using Theory.models V Zermelo.axiom_of_extentionality
   exact this x y
 
 alias ⟨_, mem_ext⟩ := mem_ext_iff
@@ -51,7 +51,7 @@ lemma SSubset.of_subset_of_not_mem_of_mem {x y z : V} (ss : x ⊆ y) (hzx : z �
 
 /-! ## Axiom of empty set -/
 
-lemma empty_exists : ∃ e : V, IsEmpty e := by simpa [models_iff] using ModelsTheory.models V Zermelo.axiom_of_empty_set
+lemma empty_exists : ∃ e : V, IsEmpty e := by simpa [models_iff] using Theory.models V Zermelo.axiom_of_empty_set
 
 lemma empty_existsUnique : ∃! e : V, IsEmpty e := by
   rcases empty_exists (V := V) with ⟨e, he⟩
@@ -86,7 +86,7 @@ lemma eq_empty_or_isNonempty (x : V) : x = ∅ ∨ IsNonempty x := by
 /-! ## Axiom of pairing -/
 
 lemma pairing_exists : ∀ x y : V, ∃ z : V, ∀ w, w ∈ z ↔ w = x ∨ w = y := by
-  simpa [models_iff, Axiom.pairing] using ModelsTheory.models V Zermelo.axiom_of_pairing
+  simpa [models_iff, Axiom.pairing] using Theory.models V Zermelo.axiom_of_pairing
 
 lemma pairing_existsUnique (x y : V) : ∃! z : V, ∀ w, w ∈ z ↔ w = x ∨ w = y := by
   rcases pairing_exists x y with ⟨p, hp⟩
@@ -132,7 +132,7 @@ instance singleton.definable : ℒₛₑₜ-function₁[V] Singleton.singleton :
 /-! ## Axiom of union -/
 
 lemma union_exists : ∀ x : V, ∃ y : V, ∀ z, z ∈ y ↔ ∃ w ∈ x, z ∈ w := by
-  simpa [models_iff, Axiom.union] using ModelsTheory.models V Zermelo.axiom_of_union
+  simpa [models_iff, Axiom.union] using Theory.models V Zermelo.axiom_of_union
 
 lemma union_existsUnique (x : V) : ∃! y : V, ∀ z, z ∈ y ↔ ∃ w ∈ x, z ∈ w := by
   rcases union_exists x with ⟨u, hu⟩
@@ -245,7 +245,7 @@ lemma pair_eq_doubleton (x y : V) : {x, y} = doubleton x y := by ext; simp
 /-! ## Axiom of power set -/
 
 lemma power_exists : ∀ x : V, ∃ y : V, ∀ z, z ∈ y ↔ z ⊆ x := by
-  simpa [models_iff, Axiom.power] using ModelsTheory.models V Zermelo.axiom_of_power_set
+  simpa [models_iff, Axiom.power] using Theory.models V Zermelo.axiom_of_power_set
 
 lemma power_existsUnique (x : V) : ∃! y : V, ∀ z, z ∈ y ↔ z ⊆ x := by
   rcases power_exists x with ⟨p, hp⟩
@@ -280,7 +280,7 @@ lemma separation_exists_eval (x : V) (φ : Semiformula ℒₛₑₜ V 1) : ∃ y
   have : Inhabited V := inhabited_of_nonempty inferInstance
   let f := φ.enumarateFVar
   let ψ := (Rew.rewriteMap φ.idxOfFVar) ▹ φ
-  have := by simpa [models_iff, Semiformula.eval_univCl, Axiom.separationSchema] using ModelsTheory.models V (Zermelo.axiom_of_separation ψ)
+  have := by simpa [models_iff, Semiformula.eval_univCl, Axiom.separationSchema] using Theory.models V (Zermelo.axiom_of_separation ψ)
   simpa [ψ, f, Semiformula.eval_rewriteMap, Matrix.constant_eq_singleton] using this f x
 
 lemma separation_exists (x : V) (P : V → Prop) (hP : ℒₛₑₜ-predicate P) : ∃ y : V, ∀ z : V, z ∈ y ↔ z ∈ x ∧ P z := by
@@ -619,7 +619,7 @@ lemma IsInductive.zero {I : V} (hI : IsInductive I) : ∅ ∈ I := hI.1
 lemma IsInductive.succ {I : V} (hI : IsInductive I) {x : V} (hx : x ∈ I) : succ x ∈ I := hI.2 x hx
 
 lemma isInductive_exists : ∃ I : V, IsInductive I := by
-  simpa [models_iff, Axiom.infinity] using ModelsTheory.models V Zermelo.axiom_of_infinity
+  simpa [models_iff, Axiom.infinity] using Theory.models V Zermelo.axiom_of_infinity
 
 lemma omega_existsUnique : ∃! ω : V, ∀ x, x ∈ ω ↔ ∀ I : V, IsInductive I → x ∈ I := by
   rcases isInductive_exists (V := V) with ⟨I, hI⟩
@@ -729,7 +729,7 @@ lemma naturalNumber_induction (P : V → Prop) (hP : ℒₛₑₜ-predicate P)
 /-! ## Axiom of foundation -/
 
 lemma foundation : ∀ x : V, [IsNonempty x] → ∃ y ∈ x, ∀ z ∈ x, z ∉ y := by
-  simpa [models_iff, Axiom.foundation] using ModelsTheory.models V Zermelo.axiom_of_foundation
+  simpa [models_iff, Axiom.foundation] using Theory.models V Zermelo.axiom_of_foundation
 
 lemma foundation' (x : V) [IsNonempty x] : ∃ y ∈ x, x ∩ y = ∅ := by
   rcases foundation x with ⟨y, hyx, H⟩
