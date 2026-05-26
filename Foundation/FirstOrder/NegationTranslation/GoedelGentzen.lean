@@ -182,7 +182,7 @@ def gödelGentzen {Γ : Sequent L} : ⊢ᴸᴷ¹ Γ → (∼Γ)ᴺ ⊢[Λ]! ⊥
       FiniteContext.weakening (by simp) <| Entailment.C_trans (of <| Entailment.K_left (negDoubleNegation φ)) (deduct ihp)
     have b₂ : (∼(Γ ++ Δ))ᴺ ⊢[Λ]! ∼φᴺ := FiniteContext.weakening (by simp) <| deduct ihn
     b₁ ⨀ b₂
-  | wk (Γ := Γ) (Δ := Δ) d h =>
+  | contraction (Γ := Γ) (Δ := Δ) d h =>
     FiniteContext.weakening
       (List.map_subset _ <| List.map_subset _ h)
       (gödelGentzen d)

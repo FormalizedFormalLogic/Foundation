@@ -22,7 +22,7 @@ inductive IsCutFree : {Γ : Sequent L} → ⊢ᴸᴷ¹ Γ → Prop
 | and {dφ : ⊢ᴸᴷ¹ φ :: Γ} {dψ : ⊢ᴸᴷ¹ ψ :: Γ} : IsCutFree dφ → IsCutFree dψ → IsCutFree (dφ.and dψ)
 | all {d : ⊢ᴸᴷ¹ Rewriting.free φ :: Γ⁺} : IsCutFree d → IsCutFree d.all
 | exs (t) {d : ⊢ᴸᴷ¹ φ/[t] :: Γ} : IsCutFree d → IsCutFree d.exs
-| wk  {d : ⊢ᴸᴷ¹ Δ} (ss : Δ ⊆ Γ) : IsCutFree d → IsCutFree (d.wk ss)
+| contraction  {d : ⊢ᴸᴷ¹ Δ} (ss : Δ ⊆ Γ) : IsCutFree d → IsCutFree (d.contraction ss)
 
 attribute [simp] IsCutFree.identity IsCutFree.verum
 
@@ -41,8 +41,8 @@ variable {Γ Δ : Sequent L}
 @[simp] lemma isCutFree_exs_iff {d : ⊢ᴸᴷ¹ φ/[t] :: Γ} :
     IsCutFree d.exs ↔ IsCutFree d := ⟨by rintro ⟨⟩; assumption, .exs t⟩
 
-@[simp] lemma isCutFree_wk_iff {d : ⊢ᴸᴷ¹ Δ} {ss : Δ ⊆ Γ} :
-    IsCutFree (d.wk ss) ↔ IsCutFree d := ⟨by rintro ⟨⟩; assumption, .wk _⟩
+@[simp] lemma isCutFree_contraction_iff {d : ⊢ᴸᴷ¹ Δ} {ss : Δ ⊆ Γ} :
+    IsCutFree (d.contraction ss) ↔ IsCutFree d := ⟨by rintro ⟨⟩; assumption, .contraction _⟩
 
 @[simp] lemma IsCutFree.cast {d : ⊢ᴸᴷ¹ Γ} {e : Γ = Δ} :
     IsCutFree (.cast d e) ↔ IsCutFree d := by rcases e; rfl

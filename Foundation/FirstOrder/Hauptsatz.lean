@@ -17,7 +17,7 @@ variable {L : Language}
 inductive Positive (Ξ : Sequent L) : Sequent L → Type _
 | or : Positive Ξ (φ :: ψ :: Γ) → Positive Ξ (φ ⋎ ψ :: Γ)
 | exs : Positive Ξ (φ/[t] :: Γ) → Positive Ξ ((∃⁰ φ) :: Γ)
-| wk : Positive Ξ Δ → Δ ⊆ Γ → Positive Ξ Γ
+| contraction : Positive Ξ Δ → Δ ⊆ Γ → Positive Ξ Γ
 | protected id : Positive Ξ Ξ
 
 infix:45 " ⟶⁺ " => Positive
@@ -26,22 +26,22 @@ namespace Positive
 
 variable {Ξ Γ Δ : Sequent L}
 
-def ofSubset (ss : Ξ ⊆ Γ) : Ξ ⟶⁺ Γ := wk .id ss
+def ofSubset (ss : Ξ ⊆ Γ) : Ξ ⟶⁺ Γ := contraction .id ss
 
 def trans {Ξ Γ Δ : Sequent L} : Ξ ⟶⁺ Γ → Γ ⟶⁺ Δ → Ξ ⟶⁺ Δ
   | b,    or d => or (b.trans d)
   | b,   exs d => exs (b.trans d)
-  | b,  wk d h => wk (b.trans d) h
+  | b,  contraction d h => contraction (b.trans d) h
   | b,     .id => b
 
 def cons {Ξ Γ : Sequent L} (φ) : Ξ ⟶⁺ Γ → φ :: Ξ ⟶⁺ φ :: Γ
   | or (Γ := Γ) (φ := ψ) (ψ := χ) d =>
-    have : φ :: Ξ ⟶⁺ ψ :: χ :: φ :: Γ := wk (cons φ d) (by simp; tauto)
-    wk (or this) (by simp)
+    have : φ :: Ξ ⟶⁺ ψ :: χ :: φ :: Γ := contraction (cons φ d) (by simp; tauto)
+    contraction (or this) (by simp)
   | exs (Ξ := Ξ) (Γ := Γ) (φ := ψ) (t := t) d =>
-    have : φ :: Ξ ⟶⁺ ψ/[t] :: φ :: Γ := wk (cons φ d) (by simp)
-    wk this.exs (by simp)
-  | wk d h => wk (d.cons φ) (by simp [h])
+    have : φ :: Ξ ⟶⁺ ψ/[t] :: φ :: Γ := contraction (cons φ d) (by simp)
+    contraction this.exs (by simp)
+  | contraction d h => contraction (d.cons φ) (by simp [h])
   | .id => .id
 
 def append {Ξ Γ : Sequent L} : (Δ : Sequent L) → Ξ ⟶⁺ Γ → Δ ++ Ξ ⟶⁺ Δ ++ Γ
@@ -51,13 +51,13 @@ def append {Ξ Γ : Sequent L} : (Δ : Sequent L) → Ξ ⟶⁺ Γ → Δ ++ Ξ 
 def add {Γ Δ Ξ Θ : Sequent L} : Γ ⟶⁺ Δ → Ξ ⟶⁺ Θ → Γ ++ Ξ ⟶⁺ Δ ++ Θ
   |    or d, b => or (d.add b)
   |   exs d, b => exs (d.add b)
-  |  wk d h, b => wk (d.add b) (by simp [h])
+  |  contraction d h, b => contraction (d.add b) (by simp [h])
   |     .id, b => b.append Γ
 
 def graft {Ξ Γ : Sequent L} (b : ⊢ᴸᴷ¹ Ξ) : Ξ ⟶⁺ Γ → ⊢ᴸᴷ¹ Γ
   |    or d => .or (d.graft b)
   |   exs d => .exs (d.graft b)
-  |  wk d h => .wk (d.graft b) h
+  |  contraction d h => .contraction (d.graft b) h
   |     .id => b
 
 lemma graft_isCutFree_of_isCutFree {b : ⊢ᴸᴷ¹ Ξ} {d : Ξ ⟶⁺ Γ} (hb : Derivation.IsCutFree b) : Derivation.IsCutFree (d.graft b) := by
@@ -103,7 +103,7 @@ def minLeLeft (p q : ℙ) : p ⊓ q ≼ p := ofSubset (by simp [inf_def])
 def minLeRight (p q : ℙ) : p ⊓ q ≼ q := ofSubset (by simp [inf_def])
 
 def leMinOfle (srp : r ≼ p) (srq : r ≼ q) : r ≼ p ⊓ q := ⟨
-  let d : ∼p ++ ∼q ⟶⁺ ∼r := .wk (srp.val.add srq.val) (by simp)
+  let d : ∼p ++ ∼q ⟶⁺ ∼r := .contraction (srp.val.add srq.val) (by simp)
   neg_inf_p_eq _ _ ▸ d⟩
 
 def leMinRightOfLe (s : q ≼ p) : q ≼ p ⊓ q := leMinOfle s (.refl q)
@@ -187,7 +187,7 @@ def explosion {p : ℙ} (b : p ⊩ ⊥) : (φ : Propositionᵢ L) → p ⊩ φ
   | ⊥ => b
   | .rel R v =>
     let ⟨d, hd⟩ := b.falsumEquiv
-    relEquiv.symm ⟨.wk d (by simp), by simp [hd]⟩
+    relEquiv.symm ⟨.contraction d (by simp), by simp [hd]⟩
   | φ ⋏ ψ => andEquiv.symm ⟨b.explosion φ, b.explosion ψ⟩
   | φ ⋎ ψ => orEquiv.symm <| .inl <| b.explosion φ
   | φ 🡒 ψ => implyEquiv.symm fun q sqp dφ ↦ (b.monotone sqp).explosion ψ

@@ -47,7 +47,7 @@ lemma sound {M : Type*} [s : Structure L M] [Nonempty M] (f : ℕ → M) {Γ : S
     rcases this with (hp | ⟨ψ, hq, hhq⟩)
     · exact ⟨∃⁰ φ, by simp, t.val ![] f, hp⟩
     · exact ⟨ψ, by simp [hq], hhq⟩
-  | wk (Δ := Δ) (Γ := Γ) d ss => by
+  | contraction (Δ := Δ) (Γ := Γ) d ss => by
     have : ∃ φ ∈ Δ, Evalf f φ := sound f d
     rcases this with ⟨φ, hp, h⟩
     exact ⟨φ, ss hp, h⟩
