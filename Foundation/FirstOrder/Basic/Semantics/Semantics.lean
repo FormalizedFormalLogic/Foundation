@@ -238,6 +238,8 @@ abbrev Evalf [s : Structure L M] (f : ξ → M) : Formula L ξ →ˡᶜ Prop := 
 abbrev Evalb [s : Structure L M] (b : Fin n → M) :
     Semiformula L Empty n →ˡᶜ Prop := Eval b Empty.elim
 
+notation:max M:90 " ⊧/" e:max => @Evalb _ M _ _ e
+
 abbrev Realize (M : Type*) [s : Structure L M] :
     Sentence L →ˡᶜ Prop := Eval (s := s) ![] Empty.elim
 
@@ -364,7 +366,7 @@ lemma eval_bShift' (φ : Semiformula L ξ n) :
   simp [IsEmpty.eq_elim]
 
 @[simp] lemma eval_embSubsts {ξ} {f : ξ → M} {k} (w : Fin k → Semiterm L ξ n) (σ : Semisentence L k) :
-    Eval b f ((@Rew.embSubsts L ξ n k w) ▹ σ) ↔ σ.Evalb (Semiterm.val b f ∘ w) := by
+    Eval b f ((@Rew.embSubsts L ξ n k w) ▹ σ) ↔ M ⊧/(Semiterm.val b f ∘ w) σ := by
   simp [eval_rew, Function.comp_def, Empty.eq_elim]
 
 section Syntactic

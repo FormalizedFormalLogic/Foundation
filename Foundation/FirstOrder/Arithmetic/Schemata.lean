@@ -287,7 +287,7 @@ instance [V ⊧ₘ* 𝗜𝗡𝗗 𝚷 m] : V ⊧ₘ* 𝗜𝗡𝗗 Γ m := by
   · infer_instance
 
 lemma mod_ISigma_of_le {n₁ n₂} (h : n₁ ≤ n₂) [V ⊧ₘ* 𝗜𝚺 n₂] : V ⊧ₘ* 𝗜𝚺 n₁ :=
-  ModelsTheory.of_ss inferInstance (ISigma_subset_mono h)
+  models_of_ss inferInstance (ISigma_subset_mono h)
 
 instance [V ⊧ₘ* 𝗜𝚺₁] : V ⊧ₘ* 𝗜𝚺₀ := mod_ISigma_of_le (show 0 ≤ 1 from by simp)
 
@@ -360,7 +360,7 @@ instance [V ⊧ₘ* 𝗜𝚺₀] : V ⊧ₘ* 𝗜𝗢𝗽𝗲𝗻 :=
 instance [V ⊧ₘ* 𝗜𝚺₁] : V ⊧ₘ* 𝗜𝚺₀ := inferInstance
 
 abbrev mod_ISigma_of_le {n₁ n₂} (h : n₁ ≤ n₂) [V ⊧ₘ* 𝗜𝚺 n₂] : V ⊧ₘ* 𝗜𝚺 n₁ :=
-  ModelsTheory.of_ss inferInstance (ISigma_subset_mono h)
+  models_of_ss inferInstance (ISigma_subset_mono h)
 
 end models
 

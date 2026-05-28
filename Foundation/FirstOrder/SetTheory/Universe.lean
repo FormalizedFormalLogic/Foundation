@@ -227,7 +227,7 @@ instance models_zf : Universe.{u} ⊧ₘ* 𝗭𝗙 where
     rcases hφ
     case axiom_of_equality h =>
       have : Universe.{u} ⊧ₘ* (𝗘𝗤 : Theory ℒₛₑₜ) := inferInstance
-      simpa [models_iff] using modelsTheory_iff.mp this h
+      simpa [models_iff] using models_theory_iff.mp this h
     case axiom_of_empty_set =>
       suffices ∃ x, ∀ y, y ∉ x by simpa [models_iff, Axiom.empty]
       exact ⟨empty, by simp⟩
@@ -311,7 +311,7 @@ instance models_ac : Universe.{u} ⊧ₘ* 𝗔𝗖 where
 
 instance models_zfc : Universe.{u} ⊧ₘ* 𝗭𝗙𝗖 := inferInstance
 
-instance models_z : Universe.{u} ⊧ₘ* 𝗭 := ModelsTheory.of_ss inferInstance z_subset_zf
+instance models_z : Universe.{u} ⊧ₘ* 𝗭 := models_of_ss inferInstance z_subset_zf
 
 instance models_zc : Universe.{u} ⊧ₘ* 𝗭𝗖 := inferInstance
 

@@ -397,7 +397,7 @@ abbrev Model (M : Type*) [Structure L₁ M] : Type _ := π.trln.Model M
 open Classical in
 instance model_models_theory {M : Type v} [Nonempty M] [Structure L₁ M] [Structure.Eq L₁ M] (hT : M ⊧ₘ* T) :
     π.Model M ⊧ₘ* U :=
-  modelsTheory_iff.mpr fun {σ} hσ ↦
+  models_theory_iff.mpr fun {σ} hσ ↦
     Model.translate_iff.mp <| consequence_iff'.mp (sound! (π.interpret_theory σ hσ)) M
 
 open Classical in
@@ -413,7 +413,7 @@ abbrev ofWeakerThan {L : Language} [L.Eq] (T U : Theory L) [𝗘𝗤 ⪯ T] [U �
     have : U ⪯ T := inferInstance
     Model.translate_iff.mpr <| by
       suffices M ⊧/ ![] φ by simpa [models_iff, Empty.eq_elim, Matrix.empty_eq]
-      have : T ⊢ φ := Entailment.weakerThan_iff.mp this (Entailment.by_axm _ (by simp [hφ]))
+      have : T ⊢ φ := Entailment.weakerThan_iff.mp this (Entailment.by_axm (by simp [hφ]))
       exact models_of_provable hT this
 
 protected instance refl {L : Language} [L.Eq] (T : Theory L) [𝗘𝗤 ⪯ T] : T ⊳ T := ofWeakerThan T T
@@ -561,7 +561,7 @@ protected abbrev comp (τ : T₂ ⊳ T₃) (π : T₁ ⊳ T₂) : T₁ ⊳ T₃ 
     suffices τ.Model (π.Model M) ⊧ₘ φ by
       apply Model.translate_iff.mpr <| (compDirectTranslation_Model_equiv τ.trln π).models.mpr this
     have : τ.Model (π.Model M) ⊧ₘ* T₃ := inferInstance
-    exact modelsTheory_iff.mp this hφ
+    exact models_theory_iff.mp this hφ
 
 end composition
 

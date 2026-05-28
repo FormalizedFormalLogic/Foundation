@@ -13,7 +13,7 @@ noncomputable section
 namespace LO.FirstOrder.Arithmetic
 
 inductive RobinsonQ : ArithmeticTheory
-  | equal : ∀ φ ∈ 𝗘𝗤, RobinsonQ φ
+  | equal : ∀ φ ∈ 𝗘𝗤 ℒₒᵣ, RobinsonQ φ
   | succNeZero : RobinsonQ “∀ a, a + 1 ≠ 0”
   | succInj : RobinsonQ “∀ a b, a + 1 = b + 1 → a = b”
   | zeroOrSucc : RobinsonQ “∀ a, a = 0 ∨ ∃ b, a = b + 1”
@@ -29,7 +29,7 @@ namespace RobinsonQ
 
 open ORingStructure
 
-@[simp] instance : ℕ ⊧ₘ* 𝗤 := ⟨by
+@[simp] instance : ℕ↓[ℒₒᵣ] ⊧* 𝗤 := ⟨by
   intro σ h
   cases h
   case ltDef =>
@@ -46,41 +46,41 @@ open ORingStructure
     simp [models_iff]
     omega;
   case equal h =>
-    suffices ℕ ⊧/![] σ by simpa [models_iff]
-    have : ℕ ⊧ₘ* (𝗘𝗤 : ArithmeticTheory) := inferInstance
-    exact modelsTheory_iff.mp this h
+    suffices σ.Evalb ![] by simpa [models_iff]
+    have : ℕ↓[ℒₒᵣ] ⊧* (𝗘𝗤 ℒₒᵣ : ArithmeticTheory) := inferInstance
+    exact models_theory_iff.mp this _ h
   repeat case _ => simp [models_iff, add_assoc, mul_add]⟩
 
-instance : 𝗘𝗤 ⪯ 𝗤 := Entailment.WeakerThan.ofSubset <| fun φ hp ↦ equal φ hp
+instance : 𝗘𝗤 ℒₒᵣ ⪯ 𝗤 := Entailment.WeakerThan.ofSubset <| fun φ hp ↦ equal φ hp
 
 end RobinsonQ
 
-variable {M : Type*} [ORingStructure M] [M ⊧ₘ* 𝗤]
+variable {M : Type*} [ORingStructure M] [M↓[ℒₒᵣ] ⊧* 𝗤]
 
 @[simp] protected lemma succ_ne_zero : ∀ a : M, a + 1 ≠ 0 := by
-  simpa [models_iff] using Theory.models M RobinsonQ.succNeZero
+  simpa [models_iff] using Theory.models M _ RobinsonQ.succNeZero
 
 lemma succ_inj {a b : M} : a + 1 = b + 1 → a = b := by
-  have := by simpa [models_iff] using Theory.models M RobinsonQ.succInj
+  have := by simpa [models_iff] using Theory.models M _ RobinsonQ.succInj
   exact this a b
 
 @[simp] protected lemma add_zero {a : M} : a + 0 = a := by
-  have := by simpa [models_iff] using Theory.models M RobinsonQ.addZero
+  have := by simpa [models_iff] using Theory.models M _ RobinsonQ.addZero
   exact this a
 
 protected lemma add_succ (a b : M) : a + (b + 1) = a + b + 1 := by
-  have := by simpa [models_iff] using Theory.models M RobinsonQ.addSucc
+  have := by simpa [models_iff] using Theory.models M _ RobinsonQ.addSucc
   exact this a b
 
 @[simp] protected lemma mul_zero (a : M) : a * 0 = 0 := by
-  have := by simpa [models_iff] using Theory.models M RobinsonQ.mulZero
+  have := by simpa [models_iff] using Theory.models M _ RobinsonQ.mulZero
   exact this a
 
 protected lemma mul_succ : ∀ a b : M, a * (b + 1) = a * b + a := by
-  simpa [models_iff] using Theory.models M RobinsonQ.mulSucc
+  simpa [models_iff] using Theory.models M _ RobinsonQ.mulSucc
 
 lemma zero_or_succ (a : M) : a = 0 ∨ ∃ b : M, a = b + 1 := by
-  have := by simpa [models_iff] using Theory.models M RobinsonQ.zeroOrSucc
+  have := by simpa [models_iff] using Theory.models M _ RobinsonQ.zeroOrSucc
   exact this a
 
 lemma exists_succ_of_ne_zero {a : M} (ha : a ≠ 0) : ∃ b : M, a = b + 1 := by
@@ -92,7 +92,7 @@ lemma exists_succ_of_ne_zero' {a : M} (ha : a ≠ 0) : ∃ b : M, b + 1 = a := b
   use b;
 
 protected lemma lt_def {a b : M} : a < b ↔ ∃ c : M, a + (c + 1) = b := by
-  have := by simpa [models_iff] using Theory.models M RobinsonQ.ltDef
+  have := by simpa [models_iff] using Theory.models M _ RobinsonQ.ltDef
   exact this a b
 
 @[simp]
@@ -303,12 +303,12 @@ lemma iff_lt_numeral_exists_numeral {n : ℕ} {x : M} : x < numeral n ↔ ∃ m 
 
 namespace R0
 
-instance : M ⊧ₘ* 𝗥₀ := modelsTheory_iff.mpr <| by
+instance : M↓[ℒₒᵣ] ⊧* 𝗥₀ := models_theory_iff.mpr <| by
   intro φ h
   rcases h
   case equal h =>
-    have : M ⊧ₘ* (𝗘𝗤 : ArithmeticTheory) := inferInstance
-    exact modelsTheory_iff.mp this h
+    have : M↓[ℒₒᵣ] ⊧* (𝗘𝗤 ℒₒᵣ : ArithmeticTheory) := inferInstance
+    exact models_theory_iff.mp this _ h
   case Ω₁ n m => simp [models_iff, numeral_add]
   case Ω₂ n m => simp [models_iff, numeral_mul]
   case Ω₃ n m h => simp [models_iff, numeral_ne_of_ne h];
@@ -322,6 +322,6 @@ instance : 𝗥₀ ⪯ 𝗤 := weakerThan_of_models.{0} _ _ fun _ _ _ ↦ inferI
 
 instance : 𝗥₀ ⪱ 𝗤 :=
   Entailment.StrictlyWeakerThan.of_unprovable_provable
-    R0.unprovable_addZero (Entailment.by_axm _ RobinsonQ.addZero)
+    R0.unprovable_addZero (Entailment.by_axm RobinsonQ.addZero)
 
 end LO.FirstOrder.Arithmetic
