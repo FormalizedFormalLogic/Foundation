@@ -25,23 +25,23 @@ noncomputable section
 
 variable {V : Type*} [ORingStructure V]
 
-lemma models_Omega1_iff [V ⊧ₘ* 𝗜𝚺₀] : V ⊧ₘ Omega1.omega1 ↔ ∀ x : V, ∃ y, Exponential (‖x‖^2) y := by
+lemma models_Omega1_iff [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₀] : V↓[ℒₒᵣ] ⊧ Omega1.omega1 ↔ ∀ x : V, ∃ y, Exponential (‖x‖^2) y := by
   simp [models_iff, Omega1.omega1, sq]
 
-lemma omega1_of_ISigma1 [V ⊧ₘ* 𝗜𝚺₁] : V ⊧ₘ Omega1.omega1 := models_Omega1_iff.mpr (fun x ↦ Exponential.range_exists (‖x‖^2))
+lemma omega1_of_ISigma1 [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] : V↓[ℒₒᵣ] ⊧ Omega1.omega1 := models_Omega1_iff.mpr (fun x ↦ Exponential.range_exists (‖x‖^2))
 
-instance [V ⊧ₘ* 𝗜𝚺₁] : V ⊧ₘ* 𝗜𝚺₀ + 𝝮₁ :=
-  ModelsTheory.add_iff.mpr
+instance [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] : V↓[ℒₒᵣ] ⊧* 𝗜𝚺₀ ∪ 𝝮₁ :=
+  Semantics.ModelsSet.union_iff.mpr
     ⟨inferInstance, ⟨by intro _; simp only [Theory.OmegaOne.mem_iff]; rintro rfl; exact omega1_of_ISigma1⟩⟩
 
-variable [V ⊧ₘ* 𝗜𝚺₀ + 𝝮₁]
+variable [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₀ ∪ 𝝮₁]
 
-instance : V ⊧ₘ* 𝗜𝚺₀ := ModelsTheory.of_add_left V 𝗜𝚺₀ 𝝮₁
+instance : V↓[ℒₒᵣ] ⊧* 𝗜𝚺₀ := ModelsTheory.of_add_left V 𝗜𝚺₀ 𝝮₁
 
-instance : V ⊧ₘ* 𝝮₁ := ModelsTheory.of_add_right V 𝗜𝚺₀ 𝝮₁
+instance : V↓[ℒₒᵣ] ⊧* 𝝮₁ := ModelsTheory.of_add_right V 𝗜𝚺₀ 𝝮₁
 
 lemma exists_exponential_sq_length (x : V) : ∃ y, Exponential (‖x‖^2) y :=
-  models_Omega1_iff.mp (Theory.models V Omega1.omega) x
+  models_Omega1_iff.mp (Theory.models _ _ Omega1.omega) x
 
 lemma exists_unique_exponential_sq_length (x : V) : ∃! y, Exponential (‖x‖^2) y := by
   rcases exists_exponential_sq_length x with ⟨y, h⟩
@@ -127,10 +127,10 @@ lemma smash_two_mul_le_sq_smash (a b : V) : a ⨳ (2 * b) ≤ (a ⨳ b) ^ 2 := b
 
 end
 
-instance : 𝗜𝚺₀ ⪯ 𝗜𝚺₀ + 𝝮₁ := inferInstance
+instance : 𝗜𝚺₀ ⪯ 𝗜𝚺₀ ∪ 𝝮₁ := inferInstance
 
-instance : 𝗜𝚺₀ + 𝝮₁ ⪯ 𝗜𝚺₁ := weakerThan_of_models.{0} _ _ fun _ _ _ ↦ inferInstance
+instance : 𝗜𝚺₀ ∪ 𝝮₁ ⪯ 𝗜𝚺₁ := weakerThan_of_models.{0} _ _ fun _ _ _ ↦ inferInstance
 
-instance : ℕ ⊧ₘ* 𝗜𝚺₀ + 𝝮₁ := inferInstance
+instance : ℕ↓[ℒₒᵣ] ⊧* 𝗜𝚺₀ ∪ 𝝮₁ := inferInstance
 
 end LO.FirstOrder.Arithmetic

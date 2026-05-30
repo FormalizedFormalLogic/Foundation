@@ -12,7 +12,7 @@ namespace LO.FirstOrder.Arithmetic.Bootstrapping
 
 open Classical Entailment
 
-variable {V : Type*} [ORingStructure V] [V ⊧ₘ* 𝗜𝚺₁]
+variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 
 namespace Arithmetic
 

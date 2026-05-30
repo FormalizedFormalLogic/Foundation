@@ -19,7 +19,7 @@ variable {V : Type*} [ORingStructure V]
 
 section ISigma0
 
-variable [V ⊧ₘ* 𝗜𝚺₀]
+variable [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₀]
 
 noncomputable def ext (u z : V) : V := z / u % u
 
@@ -91,7 +91,7 @@ def Exponential.Seqₛ.def : 𝚺₀.Semisentence 3 := .mkSigma
         (∃ ext_u_Y <⁺ Y, !extDef ext_u_Y u Y ∧ !extDef (2 * ext_u_Y²) u² Y) ) ”
 
 instance Exponential.Seqₛ.defined : 𝚺₀-Relation₃[V] Exponential.Seqₛ via Exponential.Seqₛ.def := .mk fun v ↦ by
-  simp [Exponential.Seqₛ.iff, Exponential.Seqₛ.def, sq, numeral_eq_natCast]
+  simp [Exponential.Seqₛ.iff, Exponential.Seqₛ.def, sq]
 
 lemma Exponential.graph_iff (x y : V) :
     Exponential x y ↔
@@ -115,7 +115,7 @@ def _root_.LO.FirstOrder.Arithmetic.exponentialDef : 𝚺₀.Semisentence 2 := .
 
 /-- The graph of the exponential function can be defined by the $\Delta_0$-formula. -/
 instance Exponential.defined : 𝚺₀-Relation[V] Exponential via exponentialDef := .mk fun v ↦ by
-  simp [Exponential.graph_iff, exponentialDef, pow_four, sq, numeral_eq_natCast]
+  simp [Exponential.graph_iff, exponentialDef, pow_four, sq]
 
 /-- The graph of the exponential function can be defined by the $\Delta_0$-formula. -/
 instance exponential_definable : 𝚺₀-Relation (Exponential : V → V → Prop) := Exponential.defined.to_definable
@@ -712,7 +712,7 @@ end ISigma0
 
 section ISigma1
 
-variable [V ⊧ₘ* 𝗜𝚺₁]
+variable [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 
 namespace Exponential
 

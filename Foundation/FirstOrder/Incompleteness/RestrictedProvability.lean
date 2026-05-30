@@ -16,7 +16,7 @@ open PeanoMinus ISigma0 ISigma1 Bootstrapping Derivation
 
 namespace Theory
 
-variable {V : Type*} [ORingStructure V] [V ⊧ₘ* 𝗜𝚺₁]
+variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 variable {L : Language} [L.Encodable] [L.LORDefinable]
 
 variable {T U : Theory L} [T.Δ₁] [U.Δ₁]
@@ -43,7 +43,7 @@ end Theory
 
 namespace Arithmetic
 
-variable {V : Type} [ORingStructure V] [V ⊧ₘ* 𝗜𝚺₁]
+variable {V : Type} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 variable {T U : ArithmeticTheory} [T.Δ₁] -- [𝗜𝚺₁ ⪯ T] [𝗜𝚺₁ ⪯ U]
 variable {e : ℕ}
 

@@ -11,7 +11,7 @@ $\mathrm{PPow2}(n)$ is a property that holds iff $n = 2^{2^i}$ for some $i$.
 
 namespace LO.FirstOrder.Arithmetic
 
-variable {V : Type*} [ORingStructure V] [V ⊧ₘ* 𝗜𝚺₀]
+variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₀]
 
 def SPPow2 (m : V) : Prop := ¬LenBit 1 m ∧ LenBit 2 m ∧ ∀ i ≤ m, Pow2 i → 2 < i → (LenBit i m ↔ (√i)^2 = i ∧ LenBit (√i) m)
 
@@ -22,7 +22,7 @@ def _root_.LO.FirstOrder.Arithmetic.sppow2Def : 𝚺₀.Semisentence 1 :=
   ”
 
 instance sppow2_defined : 𝚺₀-Predicate[V] SPPow2 via sppow2Def := .mk fun v ↦ by
-  simp [SPPow2, sppow2Def, sq, numeral_eq_natCast]
+  simp [SPPow2, sppow2Def, sq]
 
 def PPow2 (i : V) : Prop := Pow2 i ∧ ∃ m < 2 * i, SPPow2 m ∧ LenBit i m
 
@@ -30,7 +30,7 @@ def _root_.LO.FirstOrder.Arithmetic.ppow2Def : 𝚺₀.Semisentence 1 :=
   .mkSigma “i. !pow2Def i ∧ ∃ m < 2 * i, !sppow2Def m ∧ !lenbitDef i m”
 
 instance ppow2_defined : 𝚺₀-Predicate (PPow2 : V → Prop) via ppow2Def := .mk fun v ↦ by
-  simp [PPow2, ppow2Def, numeral_eq_natCast]
+  simp [PPow2, ppow2Def]
 
 instance ppow2_definable : 𝚺₀-Predicate (PPow2 : V → Prop) := ppow2_defined.to_definable
 

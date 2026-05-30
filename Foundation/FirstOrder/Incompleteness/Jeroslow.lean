@@ -33,7 +33,7 @@ section
 variable [L.Encodable] [L.LORDefinable]
          {T : Theory L} [T.Δ₁]
 
-def Refutable {V : Type*} [ORingStructure V] [V ⊧ₘ* 𝗜𝚺₁] (T : Theory L) [T.Δ₁] (φ : V) : Prop
+def Refutable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] (T : Theory L) [T.Δ₁] (φ : V) : Prop
   := T.Provable (neg L φ)
 
 noncomputable def refutable (T : Theory L) [T.Δ₁] : 𝚺₁.Semisentence 1
@@ -41,7 +41,7 @@ noncomputable def refutable (T : Theory L) [T.Δ₁] : 𝚺₁.Semisentence 1
 
 section
 
-variable {V : Type*} [ORingStructure V] [V ⊧ₘ* 𝗜𝚺₁]
+variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 
 lemma Refutable.quote_iff {σ : Sentence L} : T.Refutable (⌜σ⌝ : V) ↔ T.Provable (⌜∼σ⌝ : V) := by
   simp [Theory.Refutable, Sentence.quote_def, Semiformula.quote_def]

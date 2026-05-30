@@ -23,7 +23,7 @@ end LO.FirstOrder.Arithmetic
 
 namespace LO.FirstOrder.Arithmetic.Bootstrapping.Arithmetic
 
-variable {V : Type*} [ORingStructure V] [V ⊧ₘ* 𝗜𝚺₁]
+variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 
 lemma substNumeral_app_quote_nat_model (σ : Semisentence ℒₒᵣ 1) (n : ℕ) :
   substNumeral ⌜σ⌝ (n : V) = ⌜(σ/[.numeral n] : Sentence ℒₒᵣ)⌝ := by
@@ -47,7 +47,7 @@ open FirstOrder Arithmetic Bootstrapping Bootstrapping.Arithmetic
 
 namespace Theory
 
-variable {V} [ORingStructure V] [V ⊧ₘ* 𝗜𝚺₁] {T U : ArithmeticTheory} [T.Δ₁]
+variable {V} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] {T U : ArithmeticTheory} [T.Δ₁]
 
 def YabloSystem (T : ArithmeticTheory) [T.Δ₁] (φ n : V) : Prop := ∀ m, n < m → ¬T.Provable (substNumeral φ m)
 
@@ -74,7 +74,7 @@ open Theory
 -- Lemmata
 section
 
-variable {V : Type} [ORingStructure V] [V ⊧ₘ* 𝗜𝚺₁]
+variable {V : Type} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 variable {U : ArithmeticTheory} [𝗜𝚺₁ ⪯ U]
 
 lemma yablo_diagonal : U ⊢ ∀⁰ (T.yablo 🡘 (T.yabloSystem)/[⌜T.yablo⌝, #0]) := parameterized_diagonal₁ _
@@ -92,7 +92,7 @@ lemma iff_yablo_provable (n : ℕ) : U ⊢ T.yabloPred n ↔ U ⊢ “∀ m, ↑
     constructor <;> . intro h; cl_prover [h, this];
   apply provable_of_models.{0};
   intro V _ _;
-  haveI : V ⊧ₘ* 𝗜𝚺₁ := ModelsTheory.of_provably_subtheory V 𝗜𝚺₁ U inferInstance;
+  haveI : V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁ := ModelsTheory.of_provably_subtheory V 𝗜𝚺₁ U inferInstance;
   haveI : V ⊧/![ORingStructure.numeral n] (T.yablo) ↔ T.YabloSystem ⌜T.yablo⌝ (ORingStructure.numeral n) := yablo_diagonal_modeled _;
   simpa [models_iff, Matrix.constant_eq_singleton, Matrix.comp_vecCons'] using this;
 
@@ -101,14 +101,14 @@ lemma iff_neg_yablo_provable (n : ℕ) : U ⊢ ∼(T.yabloPred n) ↔ U ⊢ “�
     constructor <;> . intro h; cl_prover [h, this];
   apply provable_of_models.{0};
   intro V _ _;
-  haveI : V ⊧ₘ* 𝗜𝚺₁ := ModelsTheory.of_provably_subtheory V 𝗜𝚺₁ U inferInstance;
+  haveI : V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁ := ModelsTheory.of_provably_subtheory V 𝗜𝚺₁ U inferInstance;
   haveI : ¬V ⊧/![ORingStructure.numeral n] (T.yablo) ↔ ∃ m, ORingStructure.numeral n < m ∧ Provable T (substNumeral ⌜T.yablo⌝ m) := yablo_diagonal_neg_modeled _;
   simpa [models_iff, Matrix.constant_eq_singleton, Matrix.comp_vecCons'] using this;
 
 lemma provable_greater_yablo {n m : ℕ} (hnm : n < m) : U ⊢ T.yabloPred n 🡒 T.yabloPred m := by
   apply provable_of_models.{0};
   intro V _ _;
-  haveI : V ⊧ₘ* 𝗜𝚺₁ := ModelsTheory.of_provably_subtheory V 𝗜𝚺₁ U inferInstance;
+  haveI : V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁ := ModelsTheory.of_provably_subtheory V 𝗜𝚺₁ U inferInstance;
   suffices
     (∀ m, ORingStructure.numeral n < m → ¬Provable T (substNumeral ⌜yablo T⌝ m)) →
     (∀ k, ORingStructure.numeral m < k → ¬Provable T (substNumeral ⌜yablo T⌝ k))
@@ -132,7 +132,7 @@ theorem yablo_unprovable [Entailment.Consistent T] : T ⊬ (T.yabloPred n) := by
   have H₂ : T ⊢ ∼T.provabilityPred (T.yabloPred (n + 1)) := by
     apply provable_of_models.{0};
     intro V _ _;
-    haveI : V ⊧ₘ* 𝗜𝚺₁ := ModelsTheory.of_provably_subtheory V 𝗜𝚺₁ T inferInstance;
+    haveI : V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁ := ModelsTheory.of_provably_subtheory V 𝗜𝚺₁ T inferInstance;
     suffices ¬T.Provable (substNumeral ⌜T.yablo⌝ (n + 1 : V)) by
       simpa [provabilityPred, models_iff, ←substNumeral_app_quote_nat_model];
     have : ∀ (x : V), ORingStructure.numeral n < x → ¬T.Provable (substNumeral ⌜T.yablo⌝ x) := by

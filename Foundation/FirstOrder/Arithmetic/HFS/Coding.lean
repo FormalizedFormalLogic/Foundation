@@ -5,7 +5,7 @@ public import Foundation.FirstOrder.Arithmetic.HFS.Vec
 @[expose] public section
 namespace LO.FirstOrder.Arithmetic
 
-variable {V : Type*} [ORingStructure V] [V ⊧ₘ* 𝗜𝚺₁]
+variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 
 noncomputable def finsetArithmetizeAux : List V → V
   |      [] => ∅

@@ -11,7 +11,7 @@ namespace LO.FirstOrder.Arithmetic.Bootstrapping
 
 open Classical FirstOrder
 
-variable {V : Type*} [ORingStructure V] [V ⊧ₘ* 𝗜𝚺₁]
+variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 
 variable {L : Language} [L.Encodable] [L.LORDefinable]
 
