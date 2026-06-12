@@ -40,11 +40,11 @@ lemma isFunc_def (k f : V) : L.IsFunc k f ↔ V ⊧/![k, f] L.isFunc.val := by r
 
 lemma isRel_def (k R : V) : L.IsRel k R ↔ V ⊧/![k, R] L.isRel.val := by rfl
 
-@[simp] lemma eval_func (v) :
-    Semiformula.Evalbm V v L.isFunc.val ↔ L.IsFunc (v 0) (v 1) := by simp [Language.IsFunc, ← Matrix.fun_eq_vec_two]
+@[simp] lemma eval_func (v : Fin 2 → V) :
+    L.isFunc.val.Evalb v ↔ L.IsFunc (v 0) (v 1) := by simp [Language.IsFunc, ← Matrix.fun_eq_vec_two]
 
-@[simp] lemma eval_rel_iff (v) :
-    Semiformula.Evalbm V v L.isRel.val ↔ L.IsRel (v 0) (v 1) := by simp [Language.IsRel, ← Matrix.fun_eq_vec_two]
+@[simp] lemma eval_rel_iff (v : Fin 2 → V) :
+    L.isRel.val.Evalb v ↔ L.IsRel (v 0) (v 1) := by simp [Language.IsRel, ← Matrix.fun_eq_vec_two]
 
 instance _root_.LO.FirstOrder.Language.IsFunc.defined : 𝚺₀-Relation (L.IsFunc (V := V)) via L.isFunc := .mk fun v ↦ by simp
 

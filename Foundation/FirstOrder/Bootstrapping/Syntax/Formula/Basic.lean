@@ -759,8 +759,8 @@ variable (c β)
 lemma graph_defined : 𝚺₁-Relation₃ c.Graph L via β.graph L := .mk fun v ↦ by
   simp [Blueprint.graph, (c.construction L).fixpoint_defined.iff, Matrix.empty_eq]; rfl
 
-@[simp] lemma eval_graphDef (v) :
-    Semiformula.Evalbm V v (β.graph L).val ↔ c.Graph L (v 0) (v 1) (v 2) := (graph_defined β c).iff
+@[simp] lemma eval_graphDef (v : Fin 3 → V) :
+    (β.graph L).val.Evalb v ↔ c.Graph L (v 0) (v 1) (v 2) := (graph_defined β c).iff
 
 instance graph_definable : 𝚺-[0 + 1]-Relation₃ c.Graph L := c.graph_defined.to_definable
 
