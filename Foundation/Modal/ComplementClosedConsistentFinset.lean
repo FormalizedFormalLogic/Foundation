@@ -63,7 +63,7 @@ lemma unprovable_iff_singleton_compl_consistent : FormulaFinset.Consistent 𝓢 
 @[grind =]
 lemma provable_iff_singleton_compl_inconsistent : (FormulaFinset.Inconsistent 𝓢 ({-φ})) ↔ 𝓢 ⊢ φ := by grind;
 
-lemma intro_union_consistent (h : ∀ {Γ₁ Γ₂ : FormulaFinset _}, (Γ₁ ⊆ P₁) → (Γ₂ ⊆ P₂) → (Γ₁ ∪ Γ₂) *⊬[𝓢] ⊥)
+lemma intro_union_consistent (h : ∀ {Γ₁ Γ₂ : FormulaFinset α}, (Γ₁ ⊆ P₁) → (Γ₂ ⊆ P₂) → (↑(Γ₁ ∪ Γ₂) : FormulaSet _) *⊬[𝓢] ⊥)
   : FormulaFinset.Consistent 𝓢 (P₁ ∪ P₂) := by
   apply iff_theory_consistent_formulae_consistent.mp;
   simpa using FormulaSet.intro_union_consistent h;
@@ -317,14 +317,14 @@ lemma iff_mem_imp
       replace hq := mem_compl_of_not_mem hsub_q hq;
       induction ψ using Formula.cases_neg with
       | hfalsum => exact efq!;
-      | hatom a => exact C_of_N $ Context.by_axm! (by simpa using hq);
-      | hbox ψ => exact C_of_N $ Context.by_axm! (by simpa using hq);
+      | hatom a => exact C_of_N $ Context.by_axm! (by exact hq);
+      | hbox ψ => exact C_of_N $ Context.by_axm! (by exact hq);
       | hneg ψ =>
         simp only [Formula.complement.neg_def] at hq;
         exact CN!_of_! $ Context.by_axm! hq;
       | himp ψ χ h =>
         simp only [Formula.complement.imp_def₁ h] at hq;
-        exact C_of_N $ Context.by_axm! (by simpa using hq);
+        exact C_of_N $ Context.by_axm! (by exact hq);
     . apply membership_iff (by assumption) |>.mpr;
       exact C!_of_conseq! $ membership_iff (by assumption) |>.mp $ iff_not_mem_compl (by assumption) |>.mpr hr;
 

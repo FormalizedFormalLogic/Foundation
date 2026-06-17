@@ -56,7 +56,7 @@ lemma truthlemma_lemma1
   : ((□⁻¹'X.1 ∪ □'□⁻¹'X.1) ∪ {□ψ, -ψ}) ⊆ φ.subformulas⁻ := by
   intro χ hr;
   replace hr : χ = □ψ ∨ χ = -ψ ∨ □χ ∈ X ∨ ∃ a, □a ∈ X ∧ □a = χ := by
-    simpa [Finset.LO.preboxItr, Finset.LO.boxItr] using hr;
+    simpa [Finset.LO.preboxItr, Finset.LO.boxItr] using! hr;
   rcases hr with (rfl | rfl | hp | ⟨χ, hr, rfl⟩);
   . apply Finset.mem_union.mpr;
     tauto;
@@ -80,6 +80,7 @@ lemma truthlemma_lemma2
   rintro Γ₁ Γ₂ hΓ₁ hΓ₂;
   by_contra hC;
   apply hψ₂;
+  rw [Finset.coe_union] at hC;
   have := Context.deduct! $ Context.weakening! (Γ := Γ₁ ∪ Γ₂) (Δ := insert (-ψ) (insert (□ψ) Γ₁)) ?_ hC;
   . replace : (insert (□ψ) Γ₁) *⊢[Modal.GL] ψ := of_imply_complement_bot this;
     replace : ↑Γ₁ *⊢[Modal.GL] □ψ 🡒 ψ:= Context.deduct! this;
@@ -232,7 +233,7 @@ theorem finite_completeness_TFAE : [
   tfae_have 4 → 2 := by
     rintro H F ⟨_, F_trans, F_irrefl⟩ V x;
     let M : Kripke.Model := ⟨F, V⟩;
-    simpa [Unique.uniq] using Model.pointGenerate.pMorphism M x |>.modal_equivalence _ |>.mp $ H (M↾x);
+    simpa [Unique.uniq] using! Model.pointGenerate.pMorphism M x |>.modal_equivalence _ |>.mp $ H (M↾x);
   tfae_finish;
 
 lemma iff_unprovable_exists_finite_rooted_model : Modal.GL ⊬ φ ↔ ∃ M : Model, ∃ _ : M.IsFinite, ∃ _ : M.IsTransitive, ∃ _ : M.IsIrreflexive, ∃ _ : M.IsRooted, ¬M.root.1 ⊧ φ := by

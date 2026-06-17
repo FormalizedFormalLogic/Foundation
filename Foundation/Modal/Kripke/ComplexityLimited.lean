@@ -33,7 +33,7 @@ lemma iff_satisfy_complexityLimitedModel_aux
     obtain ⟨n, hn, hx⟩ := hx;
     simp [Formula.complexity] at hn;
     have : n + 1 ≤ φ.complexity - ψ.complexity := by
-      have : ψ.complexity + 1 ≤ φ.complexity := by simpa using subformulas.complexity_lower hq;
+      have : ψ.complexity + 1 ≤ φ.complexity := by have h := subformulas.complexity_lower hq; simp [Formula.complexity] at h; exact h;
       omega;
     constructor;
     . rintro h ⟨y, hy⟩ Rxy;

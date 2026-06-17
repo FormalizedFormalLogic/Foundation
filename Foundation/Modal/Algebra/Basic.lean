@@ -167,7 +167,7 @@ lemma lindenbaum_val_eq {φ} : (lindenbaum Ax ⊩ φ) = ⟦φ⟧ := by
     apply Entailment.LindenbaumAlgebra.box_def;
 
 lemma lindenbaum_complete_iff {φ : Formula α} : lindenbaum Ax ⊧ φ ↔ (Hilbert.Normal Ax) ⊢ φ := by
-  grind [lindenbaum_val_eq, Entailment.LindenbaumAlgebra.provable_iff_eq_top];
+  simp [lindenbaum_val_eq, Entailment.LindenbaumAlgebra.provable_iff_eq_top]; tauto;
 
 instance : Sound (Hilbert.Normal Ax) (lindenbaum Ax) := ⟨lindenbaum_complete_iff.mpr⟩
 instance : Complete (Hilbert.Normal Ax) (lindenbaum Ax) := ⟨lindenbaum_complete_iff.mp⟩

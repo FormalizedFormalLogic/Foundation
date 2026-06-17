@@ -176,10 +176,7 @@ abbrev tailModel₀ (M : Kripke.Model) [M.IsPointRooted] (o : ℕ → Prop) : Kr
     | .inr $ .inr _, .inr $ .inl _ => False
     | .inr $ .inr x, .inr $ .inr y => x ≺ y
   Val p x :=
-    match x with
-    | .inl _        => o p
-    | .inr $ .inl _ => M.Val p M.root.1
-    | .inr $ .inr x => M.Val p x
+    Sum.elim (fun _ => o p) (Sum.elim (fun _ => M.Val p M.root.1) (fun x => M.Val p x)) x
 
 namespace tailModel₀
 
@@ -211,7 +208,7 @@ instance instCWF [M.IsConverseWellFounded] : (M.tailModel₀ o).IsConverseWellFo
     . let m := Set.IsWF.min (s := s₂) (Set.IsWF.of_wellFoundedLT _) (by assumption);
       use embed_nat m;
       constructor;
-      . simpa using Set.IsWF.min_mem (s := s₂) _ _;
+      . simpa using! Set.IsWF.min_mem (s := s₂) _ _;
       . intro x hx;
         match x with
         | .inl _ => grind;
@@ -278,7 +275,7 @@ lemma of_provable_rflSubformula_original_root [M.IsTransitive]
   ∀ ψ ∈ φ.subformulas, ∀ i : ℕ, M.root.1 ⊧ ψ ↔ Satisfies (M.tailModel₀ o) (embed_nat i) ψ := by
   intro ψ hψ i;
   induction ψ generalizing i with
-  | hatom p | hfalsum => simp [Satisfies];
+  | hatom p | hfalsum => simp only [Satisfies]; rfl;
   | himp ψ ξ ihψ ihξ =>
     simp [ihψ (by grind) i, ihξ (by grind) i, Satisfies];
   | hbox ψ ihψ =>
@@ -359,7 +356,7 @@ theorem GL_D_TFAE :
         apply Satisfies.not_box_def.mpr;
         use tailModel₀.embed_original M.root;
         constructor;
-        . grind;
+        . trivial;
         . tauto;
       | @axiomDz φ ψ =>
         intro h;
@@ -392,7 +389,7 @@ theorem GL_D_TFAE :
           | .inr $ .inr _, .inr $ .inr _ => grind;
         use z;
         constructor;
-        . grind;
+        . trivial;
         . apply Satisfies.or_def.not.mpr;
           push Not;
           constructor;
@@ -423,10 +420,10 @@ theorem GL_D_TFAE :
         . simpa [Finset.LO.preboxItr, Finset.LO.boxItr] using Satisfies.fdisj_def.not.mp hx;
 
       refine ⟨(M↾x), inferInstance, inferInstance, inferInstance, inferInstance, (M.Val · M.root), ?_⟩;
-      exact (show ∀ ψ ∈ φ.subformulas, Satisfies _ _ ψ ↔ Satisfies M M.root ψ by
+      refine (show ∀ ψ ∈ φ.subformulas, Satisfies _ _ ψ ↔ Satisfies M M.root ψ from ?_) φ (by grind) |>.not.mpr h₂;
         intro ψ hψ;
         induction ψ with
-        | hatom p | hfalsum => simp [Satisfies];
+        | hatom p | hfalsum => simp only [Satisfies]; try dsimp [Frame.root, default]; try rfl;
         | himp φ ψ ihφ ihψ => simp [Satisfies, ihφ (by grind), ihψ (by grind)];
         | hbox ψ ihψ =>
           replace ihψ := ihψ (by grind);
@@ -464,7 +461,6 @@ theorem GL_D_TFAE :
                   tauto;
                 apply this;
                 assumption;
-      ) φ (show φ ∈ φ.subformulas by grind) |>.not.mpr $ h₂;
     tfae_have 4 ↔ 3 := GL.Kripke.finite_completeness_TFAE.out 0 3;
     tfae_have 4 → 1 := by
       intro h;

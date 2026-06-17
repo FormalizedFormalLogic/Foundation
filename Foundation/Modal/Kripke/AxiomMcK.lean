@@ -188,7 +188,7 @@ instance [Modal.K4McK ⪯ (Hilbert.Normal Ax)] : (canonicalFrame (Hilbert.Normal
     replace hC := FConj_DT.mp hC;
 
     let Γ' := insert (◇⊤ 🡒 □⊤) Γ;
-    replace hC : Γ'.toSet *⊢[(Hilbert.Normal Ax)] ⊥ := Context.weakening! (by simp [Γ']) hC;
+    replace hC : (↑Γ' : Set _) *⊢[(Hilbert.Normal Ax)] ⊥ := Context.weakening! (by simp [Γ']) hC;
 
     let Γ'₁ := { φ ∈ Γ' | φ ∈ □⁻¹'x.1.1 };
     let Γ'₂ := { φ ∈ Γ' | ∃ ψ, ◇ψ 🡒 □ψ = φ };
@@ -201,7 +201,7 @@ instance [Modal.K4McK ⪯ (Hilbert.Normal Ax)] : (canonicalFrame (Hilbert.Normal
       . simp only [ne_eq, Finset.eq_empty_iff_forall_notMem, Finset.mem_preimage, Finset.mem_insert, not_or, not_forall, not_and, Decidable.not_not, Γ'];
         use ⊤;
         grind;
-    . replace hC : (Γ'₁ ∪ Γ'₂).toSet *⊢[(Hilbert.Normal Ax)] ⊥ := by
+    . replace hC : (↑(Γ'₁ ∪ Γ'₂) : Set _) *⊢[(Hilbert.Normal Ax)] ⊥ := by
         convert hC;
         ext φ;
         simp only [Set.mem_preimage, Function.iterate_one, Finset.mem_union, Finset.mem_filter, Finset.mem_insert, Γ'₁, Γ', Γ'₂];

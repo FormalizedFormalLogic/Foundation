@@ -99,7 +99,7 @@ instance : Modal.S4 ⪱ Modal.S4Point2 := by
       constructor;
       . simp only [Set.mem_setOf_eq]; refine { refl := by omega, trans := by omega; };
       . suffices ∃ x, (0 : M.World) ≺ x ∧ (∀ y, x ≺ y → y = 1) ∧ ∃ x, (0 : M.World) ≺ x ∧ ¬x ≺ 1 by
-          simpa [M, Semantics.Models, Satisfies];
+          obtain ⟨x, hx, hx2⟩ := this; simp_all [M, Semantics.Models, Satisfies];
         use 1;
         refine ⟨by omega, ?_, ?_⟩;
         . intro y;

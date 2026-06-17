@@ -412,7 +412,7 @@ lemma subset_of_mem (hψ : ψ ∈ φ.subformulas) : (ψ.subformulas ⊆ φ.subfo
 end Formula.subformulas
 
 
-def FormulaSet.SubformulaClosed [DecidableEq α] (Γ : FormulaSet α) : Prop := ∀ φ ∈ Γ, φ.subformulas.toSet ⊆ Γ
+def FormulaSet.SubformulaClosed [DecidableEq α] (Γ : FormulaSet α) : Prop := ∀ φ ∈ Γ, (↑φ.subformulas : Set (Formula α)) ⊆ Γ
 
 namespace FormulaSet.SubformulaClosed
 
@@ -453,7 +453,7 @@ lemma of_mem_box : □φ ∈ Γ → φ ∈ Γ := SubformulaClosed.of_mem_box IsS
 end FormulaSet.IsSubformulaClosed
 
 
-instance {φ : Formula α} [DecidableEq α] : FormulaSet.IsSubformulaClosed (φ.subformulas.toSet) where
+instance {φ : Formula α} [DecidableEq α] : FormulaSet.IsSubformulaClosed (↑φ.subformulas : Set (Formula α)) where
   closed := fun _ hψ ↦ Formula.subformulas.subset_of_mem hψ
 
 
@@ -545,7 +545,7 @@ lemma le_max_atoms_of_mem_atoms {a : ℕ} (ha : a ∈ φ.atoms) : a ≤ φ.atoms
   induction φ with
   | hfalsum => simp [atoms] at ha;
   | hatom b => simp [atoms] at ha ⊢; omega;
-  | hbox φ ihφ => apply ihφ; simpa using ha;
+  | hbox φ ihφ => apply ihφ; simpa [atoms] using ha;
   | himp φ ψ ihφ ihψ =>
     rcases (show a ∈ φ.atoms ∨ a ∈ ψ.atoms by simpa [atoms] using ha) with (hφ | hψ);
     . by_cases hψ : ψ.atoms.Nonempty;

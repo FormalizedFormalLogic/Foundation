@@ -42,7 +42,7 @@ lemma validate_AxiomGrz_of_refl_trans_wcwf [F.IsReflexive] [F.IsTransitive] [F.I
     have := Set.not_nonempty_iff_eq_empty.mpr this;
     have := Set.nonempty_def.not.mp this;
     push Not at this;
-    simpa [X] using this;
+    simpa [X] using! this;
 
   rintro w (⟨hw₁, hw₂⟩ | ⟨hw₁, hw₂, hw₃⟩);
   . have : Satisfies M w (□((.atom 0) 🡒 □(.atom 0)) 🡒 (.atom 0)) := hw₁ w (Std.Refl.refl w);

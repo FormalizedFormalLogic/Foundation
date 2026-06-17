@@ -95,7 +95,7 @@ lemma truthlemma_lemma1
   intro χ hr;
   apply Finset.mem_union.mpr;
   replace hr : χ = □(ψ 🡒 □ψ) ∨ χ = -ψ ∨ (∃ a, □a ∈ X ∧ □a = χ)  := by
-    simpa [Finset.mem_union, Finset.LO.preboxItr, Finset.LO.boxItr] using hr;
+    simpa [Finset.mem_union, Finset.LO.preboxItr, Finset.LO.boxItr] using! hr;
   rcases hr with (rfl | rfl | ⟨χ, hr, rfl⟩);
   . left;
     simp [Finset.LO.preboxItr];
@@ -133,7 +133,7 @@ lemma truthlemma_lemma2
     exact membership_iff (by grind) |>.mpr this;
     case h₁ =>
       intro ξ;
-      simp only [Set.mem_union, Finset.mem_coe, Set.mem_insert_iff];
+      simp only [Finset.coe_union, Set.mem_union, Finset.mem_coe, Set.mem_insert_iff];
       rintro (hξ₁ | hξ₂);
       . have := hΓ₁ hξ₁; tauto;
       . have := hΓ₂ hξ₂;

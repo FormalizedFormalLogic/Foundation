@@ -68,7 +68,7 @@ instance : Modal.S4McK ⪱ Modal.S4Point2McK := by
             | 2 => use 2; tauto;
         }
       . suffices ∃ x, (0 : M.World) ≺ x ∧ (∀ y, x ≺ y → y = 1) ∧ ∃ x, (0 : M.World) ≺ x ∧ ¬x ≺ 1 by
-          simpa [M, Semantics.Models, Satisfies];
+          obtain ⟨x, hx, hx2⟩ := this; simp_all [M, Semantics.Models, Satisfies];
         use 1;
         refine ⟨?_, ?_, ?_⟩;
         . grind;

@@ -197,7 +197,6 @@ instance : Modal.KT ⪱ Modal.KTMk := by
       . exact { refl := by omega; }
       . suffices ∀ (x : Fin 3), 0 = x ∨ 1 = x → (∀ y, x = y ∨ x + 1 = y → ∀ z, y = z ∨ y + 1 = z → z ≠ 2) → x ≠ 0 ∧ x + 1 ≠ 0 by
           simp [Frame.Rel', Satisfies, Semantics.Models];
-          grind;
         rintro x (rfl | rfl);
         . intro h;
           exfalso;

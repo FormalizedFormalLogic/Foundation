@@ -28,7 +28,8 @@ variable {Ax Ax₁ Ax₂ : Axiom α}
   apply Logic.iff_provable.mpr;
   apply axm s h;
 
-@[grind] lemma axm'! {φ} (h : φ ∈ Ax) : WithLoeb Ax ⊢ φ := by simpa using axm! .id h;
+@[grind] lemma axm'! {φ} (h : φ ∈ Ax) : WithLoeb Ax ⊢ φ := by
+  have h2 := axm! (Ax := Ax) .id h; rw [Formula.subst.def_id] at h2; exact h2;
 
 instance : Entailment.Łukasiewicz (Hilbert.WithLoeb Ax) where
   implyK {_ _} := by constructor; apply Hilbert.WithLoeb.implyK;
@@ -50,7 +51,7 @@ instance : Logic.Substitution (Hilbert.WithLoeb Ax) where
   subst {φ} s h := by
     rw [Logic.iff_provable] at h ⊢;
     induction h with
-    | @axm _ s' ih => simpa using axm (s := s' ∘ s) ih;
+    | @axm _ s' ih => have h2 := axm (s := s' ∘ s) ih; rw [Formula.subst.def_comp] at h2; exact h2;
     | mdp hφψ hφ ihφψ ihφ => apply mdp ihφψ ihφ;
     | nec hφ ihφ => apply nec ihφ;
     | loeb hφψ ihφψ => apply loeb ihφψ;
@@ -109,18 +110,22 @@ variable [DecidableEq α]
 instance instHasAxiomK [Ax.HasK] : Entailment.HasAxiomK (Hilbert.WithLoeb Ax) where
   K φ ψ := by
     constructor;
-    simpa [HasK.ne_pq] using Hilbert.WithLoeb.axm
+    have h := Hilbert.WithLoeb.axm (Ax := Ax)
       (φ := Axioms.K (.atom (HasK.p Ax)) (.atom (HasK.q Ax)))
       (s := λ b => if (HasK.p Ax) = b then φ else if (HasK.q Ax) = b then ψ else (.atom b))
       (by exact HasK.mem_K);
+    simp [HasK.ne_pq] at h;
+    exact h
 
 instance instHasAxiomFour [Ax.HasFour] : Entailment.HasAxiomFour (Hilbert.WithLoeb Ax) where
   Four φ := by
     constructor;
-    simpa using Hilbert.WithLoeb.axm
+    have h := Hilbert.WithLoeb.axm (Ax := Ax)
       (φ := Axioms.Four (.atom (HasFour.p Ax)))
       (s := λ b => if (HasFour.p Ax) = b then φ else (.atom b))
       (by exact HasFour.mem_Four);
+    simp at h;
+    exact h
 
 end
 
