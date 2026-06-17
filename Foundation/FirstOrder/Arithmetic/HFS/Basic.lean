@@ -579,6 +579,60 @@ theorem sigma₁_replacement₂ {f : V → V → V} (hf : 𝚺₁-Function₂ f)
       · rintro ⟨x₁, h₁, x₂, h₂, rfl⟩; exact ⟨⟪x₁, x₂⟫, by simp [h₁, h₂]⟩)).mp
     (sigma₁_replacement this (s₁ ×ʰᶠ s₂))
 
+/-! ### Image of HFS -/
+
+noncomputable def hfsImage (f : V → V) [𝚺₁-Function₁ f] (s : V) : V := Classical.choose! (sigma₁_replacement (f := f) inferInstance s)
+
+
+variable {L}
+
+section hfsImage
+
+variable {f : V → V} [𝚺₁-Function₁ f]
+
+lemma mem_hfsImage_iff {s y : V} : y ∈ hfsImage f s ↔ ∃ x ∈ s, y = f x :=
+  Classical.choose!_spec (sigma₁_replacement (f := f) inferInstance s) y
+
+lemma app_mem_hfsImage {p s : V} (h : p ∈ s) : f p ∈ hfsImage f s :=
+  mem_hfsImage_iff.mpr ⟨p, h, rfl⟩
+
+@[simp] lemma mem_hfsImage_union {s t : V} : hfsImage f (s ∪ t) = hfsImage f s ∪ hfsImage f t := mem_ext <| by
+  simp only [mem_hfsImage_iff, mem_cup_iff]; grind
+
+@[simp] lemma mem_hfsImage_insert {x s : V} : hfsImage f (insert x s) = insert (f x) (hfsImage f s) := mem_ext <| by
+  simp [mem_hfsImage_iff]
+
+@[simp] lemma hfsImage_empty : hfsImage f (∅ : V) = ∅ := mem_ext <| by simp [mem_hfsImage_iff]
+
+section
+
+private lemma hfsImage_graph (t s : V) :
+    t = hfsImage f s ↔ (∀ y ∈ t, ∃ x ∈ s, y = f x) ∧ (∀ x ∈ s, f x ∈ t) := by
+  constructor
+  · rintro rfl
+    constructor
+    · intro y hy; exact mem_hfsImage_iff.mp hy
+    · intro x hx; exact mem_hfsImage_iff.mpr ⟨x, hx, rfl⟩
+  · rintro ⟨h₁, h₂⟩
+    apply mem_ext; intro y; constructor
+    · intro hy; exact mem_hfsImage_iff.mpr (h₁ y hy)
+    · intro hy
+      rcases mem_hfsImage_iff.mp hy with ⟨x, hx, rfl⟩
+      exact h₂ x hx
+
+noncomputable def hfsImage.graph (f : V → V) (δ : 𝚺₁.Semisentence 2) [𝚺₁-Function₁ f via δ] : 𝚺₁.Semisentence 2 := .mkSigma
+  “t s. (∀ y ∈' t, ∃ x ∈' s, !δ y x) ∧ (∀ x ∈' s, ∃ y, !δ y x ∧ y ∈ t)”
+
+instance hfsImage.defined (f : V → V) {δ : 𝚺₁.Semisentence 2} [𝚺₁-Function₁ f] (h : 𝚺₁-Function₁ f via δ) :
+    𝚺₁-Function₁[V] (hfsImage f) via (hfsImage.graph f δ) := .mk fun v ↦ by simp [hfsImage.graph, hfsImage_graph]
+
+instance hfsImage.definable (f : V → V) {δ : 𝚺₁.Semisentence 2} [𝚺₁-Function₁ f] (h : 𝚺₁-Function₁ f via δ) :
+    𝚺₁-Function₁[V] hfsImage f := (hfsImage.defined f h).to_definable
+
+end
+
+end hfsImage
+
 section fstIdx
 
 noncomputable def fstIdx (p : V) : V := π₁ (p - 1)
