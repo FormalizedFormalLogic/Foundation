@@ -82,7 +82,7 @@ lemma refl_mainlemma_aux (hA : ¬M₁.root.1 ⊧ (A.rflSubformula.conj 🡒 A)) 
       apply S.SC1;
       by_contra hC; subst hC;
       apply h;
-      simpa using hi;
+      simpa using! hi;
   | hbox B ihB =>
     simp only [Realization.interpret];
     constructor;
@@ -124,7 +124,7 @@ lemma refl_mainlemma_aux (hA : ¬M₁.root.1 ⊧ (A.rflSubformula.conj 🡒 A)) 
         $ CN!_of_CN!_right $ this;
       refine C!_trans ?_ this;
       apply S.SC2;
-      grind;
+      tauto;
 
 lemma rfl_mainlemma (hA : ¬M₁.root.1 ⊧ (A.rflSubformula.conj 🡒 A)) :
   letI M₀ := M₁.extendRoot 1

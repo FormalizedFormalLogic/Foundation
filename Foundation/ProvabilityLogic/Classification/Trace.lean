@@ -248,10 +248,10 @@ instance [M.IsIrreflexive] : (M.boneLengthening a k).IsIrreflexive where
     . apply M.irrefl x;
     . simp;
 
-instance instRooted [M.IsTransitive] [M.IsRooted] (ha : a ≠ M.root) : (M.boneLengthening a k).IsRooted where
+def instRooted [M.IsTransitive] [M.IsRooted] (ha : a ≠ M.root) : (M.boneLengthening a k).IsRooted where
   default := ⟨Sum.inl M.root.1, by rintro (x | i) <;> grind⟩;
 
-instance isTree [M.IsAsymmetric] (hra : r ≠ a) : (M.boneLengthening a k).IsAsymmetric where
+def isTree [M.IsAsymmetric] (hra : r ≠ a) : (M.boneLengthening a k).IsAsymmetric where
   asymm := by
     rintro (x | i) (y | j) Rxy;
     . apply M.asymm Rxy;
@@ -438,9 +438,9 @@ lemma subset_GLβMinus_of_trace_cofinite (hL : L.trace.Cofinite) : L ⊆ Modal.G
     . replace hr : ∀ (n : ℕ), ∀ x ∈ L, n ∈ x.trace → ¬M.height = n := by
         rintro n ξ hξ₁ hξ₂ rfl;
         obtain ⟨m, hm₁, hm₂⟩ : ∃ m, m ∈ Tφ ∧ M.root.1 ⊭ TBB m := Satisfies.not_fconj'_def.mp $ Satisfies.not_def.mp $ by
-          simpa only [Finset.conj_singleton] using hr;
+          simpa only [Finset.conj_singleton] using! hr;
         replace hm₁ : ∀ i ∈ L, m ∉ i.trace := by simpa [Tφ] using hm₁;
-        replace hm₂ : M.height = m := by simpa using iff_satisfies_TBB_ne_rank.not.mp hm₂;
+        replace hm₂ : M.height = m := by simpa using! iff_satisfies_TBB_ne_rank.not.mp hm₂;
         apply hm₁ ξ;
         . assumption;
         . grind;
@@ -518,12 +518,13 @@ lemma provable_TBB_of_mem_trace
     have : U ⊢ S.realization A 🡒 S.realization (Modal.TBB M.height) := WeakerThan.pbl this;
     cl_prover [this, hA₁ S.realization];
   apply hPL _ |>.mpr;
-  grind only [
+  intro f;
+  simpa only [
     Realization.interpret.def_imp,
     Realization.interpret.def_boxItr,
     Realization.interpret.def_box,
     Realization.interpret.def_bot
-  ];
+  ] using this;
 
 
 /--

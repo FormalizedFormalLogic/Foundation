@@ -126,7 +126,7 @@ namespace Proof
 
 theorem forget {φ : Sentence L} : 𝐋𝐋 ⊢ φ → 𝐋𝐊 ⊢ φ.forget := fun h ↦ by
   have : 𝐋𝐋₀ ⊢ (φ : Proposition L) := h
-  exact FirstOrder.Proof.cast.mpr ⟨by simpa using Derivation.forget this.get⟩
+  exact FirstOrder.Proof.cast.mpr ⟨by have hd := Derivation.forget this.get; simp at hd ⊢; exact hd⟩
 
 end Proof
 
@@ -448,7 +448,7 @@ variable [L.DecidableEq]
 
 theorem girard {φ : Sentence L} : 𝐋𝐊 ⊢ φ → 𝐋𝐋 ⊢ φ.Girard := fun h ↦ ⟨by
   have : 𝐋𝐊₀ ⊢ (φ : SyntacticFormula L) := by simpa using Proof.cast.mp h
-  simpa using Derivation.toLL this.get⟩
+  have hd := Derivation.toLL this.get; simp at hd; exact hd⟩
 
 theorem girard_faithful {φ : Sentence L} : 𝐋𝐋 ⊢ φ.Girard ↔ 𝐋𝐊 ⊢ φ :=
   ⟨fun h ↦ by simpa using LinearLogic.Proof.forget h, girard⟩

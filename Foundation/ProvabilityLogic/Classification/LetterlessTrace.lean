@@ -280,7 +280,7 @@ def FormulaSet.letterlessTrace (X : Modal.FormulaSet ℕ) (_ : X.Letterless := b
 namespace FormulaSet
 
 lemma exists_singular_of_singular (hX_singular : X.Singular T) : ∃ φ ∈ X, φ.Singular T := by
-  simpa [FormulaSet.Singular, FormulaSet.Regular] using hX_singular;
+  simpa [FormulaSet.Singular, FormulaSet.Regular] using! hX_singular;
 
 -- variable (Xll : X.Letterless := by grind) (Yll : Y.Letterless := by grind)
 
@@ -472,7 +472,7 @@ lemma rank_of_eq_sub (i : Fin (n + 1)) : Frame.rank (of i) = n - i := by
       intro j
       exact id
 
-@[simp] lemma rank_zero : (Frame.finiteLinear n).height = n := by simpa using rank_of_eq_sub _
+@[simp] lemma rank_zero : (Frame.finiteLinear n).height = n := by simpa using! rank_of_eq_sub _
 
 end Frame.finiteLinear
 
@@ -712,7 +712,7 @@ lemma GL.iff_provable_closed_sumQuasiNormal_subset_letterlessSpectrum (hSR : X.S
         use Y;
         constructor;
         . rw [Formula.letterlessSpectrum.def_fconj];
-          . grind;
+          . simp_all;
           . grind;
         . assumption;
     _ ↔ (⋂ ψ ∈ X, ψ.letterlessSpectrum) ⊆ φ.letterlessSpectrum := by
@@ -997,7 +997,7 @@ lemma compact_add_right (h : (T + U) ⊢ φ) : ∃ (s : { s : Finset (Sentence L
   apply Entailment.FConj!_iff_forall_provable.mpr;
   intro ψ hψ;
   apply Axiomatized.provable_axm;
-  grind;
+  simp only [sT, Finset.mem_filter] at hψ; exact hψ.2;
 
 lemma compact_add_left (h : (T + U) ⊢ φ) : ∃ (s : { s : Finset (Sentence L) // ↑s ⊆ T }), U ⊢ s.1.conj 🡒 φ := by
   rw [show (T + U = U + T) by simp [add_def, Set.union_comm]] at h
