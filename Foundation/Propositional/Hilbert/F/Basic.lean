@@ -17,7 +17,7 @@ namespace HilbertF
 
 instance : SetLike (HilbertF α) (Formula α) where
   coe := HilbertF.schema
-  coe_injective' := by intro ⟨A, hA⟩ ⟨B, hB⟩ h; simpa
+  coe_injective := by intro ⟨A, hA⟩ ⟨B, hB⟩ h; simpa
 
 protected def F : HilbertF α := ⟨∅, by grind⟩
 protected def F_Ser : HilbertF α := ⟨{ Axioms.Ser }, by grind⟩

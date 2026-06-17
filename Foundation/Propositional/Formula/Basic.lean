@@ -374,7 +374,7 @@ variable {φ ψ χ : Formula α} {T : FormulaSet α} [T.SubformulaClosed]
 @[grind ⇒] protected lemma mem_imp₁ (h : φ 🡒 ψ ∈ T) : φ ∈ T := by apply closed _ h; simp [Formula.subformulas];
 @[grind ⇒] protected lemma mem_imp₂ (h : φ 🡒 ψ ∈ T) : ψ ∈ T := by apply closed _ h; simp [Formula.subformulas];
 
-instance [DecidableEq α] {φ : Formula α} : SubformulaClosed φ.subformulas.toSet := ⟨by
+instance [DecidableEq α] {φ : Formula α} : SubformulaClosed (↑φ.subformulas : Set (Formula α)) := ⟨by
   simpa using FormulaFinset.SubformulaClosed.subformulaClosed_subformulas (φ := φ) |>.closed;
 ⟩
 

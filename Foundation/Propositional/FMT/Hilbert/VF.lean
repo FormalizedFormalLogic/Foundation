@@ -93,7 +93,7 @@ instance : (HilbertVF.VF : HilbertVF ℕ) ⪱ HilbertWF.WF := by
       constructor;
       . tauto;
       . simp;
-        grind;
+        intro h; exfalso; have := @h 1 (by intro y hy; exact absurd rfl hy); exact this (y := 2) (by decide : (1:Fin 3) ≤ 2) rfl;
 
 end LO.Propositional
 end

@@ -17,7 +17,7 @@ namespace HilbertWF
 
 instance : SetLike (HilbertWF α) (Formula α) where
   coe := HilbertWF.schema
-  coe_injective' := by intro ⟨A, hA⟩ ⟨B, hB⟩ h; simpa
+  coe_injective := by intro ⟨A, hA⟩ ⟨B, hB⟩ h; simpa
 
 protected def WF : HilbertWF α := ⟨∅, by grind⟩
 

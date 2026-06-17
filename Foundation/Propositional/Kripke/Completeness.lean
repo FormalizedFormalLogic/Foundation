@@ -84,7 +84,7 @@ private lemma truthlemma.himp
       . simp only [Finset.disj_singleton];
         apply FConj_DT.mpr;
         apply Context.deduct!
-        replace hC := Context.weakening! (Δ := insert φ Γ.toSet) (by simp) $ FConj_DT.mp hC;
+        replace hC := Context.weakening! (Δ := insert φ (↑Γ : Set (Formula ℕ))) (by simp) $ FConj_DT.mp hC;
         rcases Set.subset_singleton_iff_eq.mp hΔ with (hΔ | hΔ);
         . simp only [Finset.coe_eq_empty] at hΔ;
           subst hΔ;

@@ -260,11 +260,11 @@ lemma Sequent.weight_lt_weight_of_mem_reduction {h : ¬Γ.IsAtomic} : Δ ∈ Γ.
   |        ⊤ => simp [Sequent.reduction_verum H]
   |        ⊥ =>
     suffices weight (List.remove ⊥ Γ) < Γ.weight by simp [Sequent.reduction_falsum H]; rintro rfl; exact this
-    have : ⊥ ∈ Γ := by simpa [*] using Sequent.chooseNonAtomic_mem h
+    have : ⊥ ∈ Γ := by have h2 := Sequent.chooseNonAtomic_mem h; simp [*] at h2; exact h2
     calc weight (List.remove ⊥ Γ) ≤ Γ.weight - NNFormula.weight ⊥ := Sequent.weight_remove_le_of_mem this
     _                             < Γ.weight                      := Nat.sub_lt_of_pos_le (by simp) (weight_le_weight_of_mem this)
   |    φ ⋏ ψ =>
-    have : φ ⋏ ψ ∈ Γ := by simpa [*] using Sequent.chooseNonAtomic_mem h
+    have : φ ⋏ ψ ∈ Γ := by have h2 := Sequent.chooseNonAtomic_mem h; simp [*] at h2; exact h2
     suffices
       weight (List.remove (φ ⋏ ψ) Γ ++ [φ]) < Γ.weight ∧
       weight (List.remove (φ ⋏ ψ) Γ ++ [ψ]) < Γ.weight by
@@ -287,7 +287,7 @@ lemma Sequent.weight_lt_weight_of_mem_reduction {h : ¬Γ.IsAtomic} : Δ ∈ Γ.
         _                                     < Γ.weight                                  :=
           Nat.sub_lt_left_of_lt_add (Nat.le_add_right_of_le (weight_le_weight_of_mem this)) (by simp; omega)
   |    φ ⋎ ψ =>
-    have : φ ⋎ ψ ∈ Γ := by simpa [*] using Sequent.chooseNonAtomic_mem h
+    have : φ ⋎ ψ ∈ Γ := by have h2 := Sequent.chooseNonAtomic_mem h; simp [*] at h2; exact h2
     suffices weight (List.remove (φ ⋎ ψ) Γ ++ [φ, ψ]) < Γ.weight by simp [Sequent.reduction_or H]; rintro rfl; exact this
     calc weight (List.remove (φ ⋎ ψ) Γ ++ [φ, ψ]) = weight (List.remove (φ ⋎ ψ) Γ) + (φ.weight + ψ.weight) := by simp
     _                                             ≤ Γ.weight - (φ ⋎ ψ).weight + (φ.weight + ψ.weight)      :=
@@ -302,7 +302,7 @@ def Derivation.ofReduction {Γ : Sequent α} {hΓ : ¬Γ.IsAtomic}
     match H : Γ.chooseNonAtomic hΓ with
     |  .atom a => by have := Γ.chooseNonAtomic_property hΓ; simp_all
     | .natom a => by have := Γ.chooseNonAtomic_property hΓ; simp_all
-    |        ⊤ => verum' (by simpa [H] using Sequent.chooseNonAtomic_mem hΓ)
+    |        ⊤ => verum' (by have h2 := Sequent.chooseNonAtomic_mem hΓ; simp only [H] at h2; exact h2)
     |        ⊥ =>
       have : T ⟹ Γ.remove ⊥ := d (Γ.remove ⊥) (by simp [Sequent.reduction_falsum H])
       this.wk (by simp)
@@ -311,11 +311,11 @@ def Derivation.ofReduction {Γ : Sequent α} {hΓ : ¬Γ.IsAtomic}
       have dφ : T ⟹ φ :: Γ.remove (φ ⋏ ψ) := this.wk (by simp)
       have : T ⟹ (Γ.remove (φ ⋏ ψ)).concat ψ := d _ (by simp [Sequent.reduction_and H])
       have dψ : T ⟹ ψ :: Γ.remove (φ ⋏ ψ) := this.wk (by simp)
-      dφ.and dψ |>.wk (by simpa [H] using Sequent.chooseNonAtomic_mem hΓ)
+      dφ.and dψ |>.wk (List.cons_subset.mpr ⟨by have h2 := Sequent.chooseNonAtomic_mem hΓ; rw [H] at h2; exact h2, by simp⟩)
     |    φ ⋎ ψ =>
       have : T ⟹ ((Γ.remove (φ ⋎ ψ)).concat φ).concat ψ := d _ (by simp [Sequent.reduction_or H])
       have : T ⟹ φ :: ψ :: Γ.remove (φ ⋎ ψ) := this.wk <| by simp
-      this.or |>.wk (by simpa [H] using Sequent.chooseNonAtomic_mem hΓ)
+      this.or |>.wk (List.cons_subset.mpr ⟨by have h2 := Sequent.chooseNonAtomic_mem hΓ; rw [H] at h2; exact h2, by simp⟩)
 
 lemma Derivation.toReduction {Γ : Sequent α} (hΓ : ¬Γ.IsAtomic)
     (d : T ⟹! Γ) : Derivations! T (Γ.reduction hΓ) := by

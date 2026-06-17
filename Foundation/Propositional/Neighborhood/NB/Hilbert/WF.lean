@@ -122,7 +122,7 @@ lemma unprovable_axiomD : HilbertWF.WF ⊬ Axioms.D #0 #1 #2 := by
         apply not_or.mpr;
         constructor;
         . dsimp;
-          grind;
+          simp_all;
         . simpa;
       grind;
 

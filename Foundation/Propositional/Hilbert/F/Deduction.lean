@@ -13,10 +13,10 @@ attribute [grind <=] Entailment.mdp!
 variable {α : Type*} {H : HilbertF α} {Γ : Set (Formula α)} {φ ψ : Formula α}
 
 inductive Deduction (H : HilbertF α) (Γ : Set (Formula α)) : Formula α → Prop
-| protected ctx {φ}     : φ ∈ Γ → Deduction H Γ φ
-| protected thm {φ}     : H ⊢ φ → Deduction H Γ φ
-| protected mp {φ ψ}    : H ⊢ (φ 🡒 ψ) → Deduction H Γ φ → Deduction H Γ ψ
-| protected andIR {φ ψ} : Deduction H Γ φ → Deduction H Γ ψ → Deduction H Γ (φ ⋏ ψ)
+| protected ctx {φ : Formula α}     : φ ∈ Γ → Deduction H Γ φ
+| protected thm {φ : Formula α}     : H ⊢ φ → Deduction H Γ φ
+| protected mp {φ ψ : Formula α}    : H ⊢ (φ 🡒 ψ) → Deduction H Γ φ → Deduction H Γ ψ
+| protected andIR {φ ψ : Formula α} : Deduction H Γ φ → Deduction H Γ ψ → Deduction H Γ (φ ⋏ ψ)
 
 @[grind ⇒] lemma deducible_of_provable (hφ : H ⊢ φ) : Deduction H Γ φ := by apply Deduction.thm hφ;
 
@@ -78,7 +78,8 @@ lemma DT_list {Γ : List (Formula α)} : (Deduction H Γ.toFinset φ) ↔ H ⊢ 
     | hcons ψ Γ hΓ ih =>
       sorry;
 
-lemma DT_finset {Γ : Finset (Formula α)} : (Deduction H Γ φ) ↔ (H ⊢ Γ.conj 🡒 φ) := by simpa using DT_list (Γ := Γ.toList);
+lemma DT_finset {Γ : Finset (Formula α)} : (Deduction H Γ φ) ↔ (H ⊢ Γ.conj 🡒 φ) := by
+  have h := DT_list (H := H) (φ := φ) (Γ := Γ.toList); simp at h; exact h;
 
 lemma DT_set {Γ : Set (Formula α)} : (Deduction H Γ φ) ↔ ∃ Δ : Finset (Formula α), ↑Δ ⊆ Γ ∧ Deduction H Δ φ := by
   constructor;

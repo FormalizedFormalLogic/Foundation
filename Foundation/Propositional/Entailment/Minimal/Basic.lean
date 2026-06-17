@@ -1472,7 +1472,7 @@ end
 
 namespace Context
 
-lemma provable_iff_finset [DecidableEq F] {Γ : Set F} {φ : F} : Γ *⊢[𝓢] φ ↔ ∃ Δ : Finset F, (Δ.toSet ⊆ Γ) ∧ Δ *⊢[𝓢] φ := by
+lemma provable_iff_finset [DecidableEq F] {Γ : Set F} {φ : F} : Γ *⊢[𝓢] φ ↔ ∃ Δ : Finset F, ((↑Δ : Set F) ⊆ Γ) ∧ Δ *⊢[𝓢] φ := by
   apply Iff.trans Context.provable_iff;
   constructor;
   . rintro ⟨Δ, hΔ₁, hΔ₂⟩;

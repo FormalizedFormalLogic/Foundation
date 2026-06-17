@@ -21,7 +21,7 @@ namespace Hilbert
 
 instance : SetLike (Hilbert α) (Formula α) where
   coe := Hilbert.schema
-  coe_injective' := by intro ⟨A, hA⟩ ⟨B, hB⟩ h; simpa;
+  coe_injective := by intro ⟨A, hA⟩ ⟨B, hB⟩ h; simpa;
 
 protected def Min : Hilbert α := ⟨∅, by tauto⟩
 protected def Int : Hilbert α := ⟨{ Axioms.EFQ φ | φ }, by grind⟩
