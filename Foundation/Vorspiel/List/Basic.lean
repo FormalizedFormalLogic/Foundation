@@ -75,7 +75,7 @@ lemma sup_ofFn (f : Fin n → α) : (ofFn f).sup = Finset.sup Finset.univ f := b
   · have h₁ : (Finset.univ : Finset (Fin (n + 1))) = insert 0 ((Finset.univ : Finset (Fin n)).image Fin.succ) := by
       ext i; simp
     have h₂ : Finset.sup Finset.univ (fun i ↦ f (Fin.succ i)) = Finset.sup {0}ᶜ f := by
-      simpa [Function.comp] using Eq.symm <| Finset.sup_image (Finset.univ : Finset (Fin n)) Fin.succ f
+      simpa [Function.comp_def] using Eq.symm <| Finset.sup_image (Finset.univ : Finset (Fin n)) Fin.succ f
     calc
       (ofFn f).sup = (f 0 ⊔ Finset.univ.sup fun i : Fin _ ↦ f i.succ) := by simp [ih]
       _            = f 0 ⊔ Finset.sup {0}ᶜ f                          := by rw [h₂]

@@ -2,6 +2,7 @@ module
 
 public import Foundation.Vorspiel.List.Basic
 public import Mathlib.Computability.Halting
+public import Mathlib.Computability.PartrecBasis
 public import Mathlib.Logic.Godel.GodelBetaFunction
 
 @[expose] public section
@@ -163,7 +164,7 @@ lemma comp₁ (f : ℕ →. ℕ) (hf : @ArithPart₁ 1 fun v => f (v.get 0)) {n 
 
 lemma comp₂ (f : ℕ → ℕ →. ℕ) (hf : @ArithPart₁ 2 fun v => f (v.get 0) (v.get 1)) {n g h} (hg : @Arithmetic₁ n g) (hh : @Arithmetic₁ n h) :
     @ArithPart₁ n fun v => f (g v) (h v) :=
-  (hf.comp ![g, h] (fun i => i.cases hg (fun i => by simpa using hh))).of_eq
+  (hf.comp ![g, h] (fun i => i.cases hg (fun i => by simpa [Arithmetic₁] using hh))).of_eq
     (by intro i
         have : (fun j ↦ (![↑g, h] : Fin 2 → List.Vector ℕ n →. ℕ) j i) = (fun j => pure (![g i, h i] j)) := by
           funext j; cases j using Fin.cases <;> simp

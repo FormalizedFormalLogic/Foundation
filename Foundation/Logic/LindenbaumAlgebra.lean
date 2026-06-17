@@ -51,16 +51,16 @@ instance : Top (LindenbaumAlgebra 𝓢) := ⟨⟦⊤⟧⟩
 instance : Bot (LindenbaumAlgebra 𝓢) := ⟨⟦⊥⟧⟩
 
 instance [DecidableEq F] : Min (LindenbaumAlgebra 𝓢) := ⟨Quotient.lift₂ (fun φ ψ ↦ ⟦φ ⋏ ψ⟧) fun φ₁ ψ₁ φ₂ ψ₂ hp hq ↦ by
-  simpa only [Quotient.eq] using EKK!_of_E!_of_E! hp hq⟩
+  exact Quotient.sound (EKK!_of_E!_of_E! hp hq)⟩
 
 instance [DecidableEq F] : Max (LindenbaumAlgebra 𝓢) := ⟨Quotient.lift₂ (fun φ ψ ↦ ⟦φ ⋎ ψ⟧) fun φ₁ ψ₁ φ₂ ψ₂ hp hq ↦ by
-  simpa only [Quotient.eq] using EAA!_of_E!_of_E! hp hq⟩
+  exact Quotient.sound (EAA!_of_E!_of_E! hp hq)⟩
 
 instance [DecidableEq F] : HImp (LindenbaumAlgebra 𝓢) := ⟨Quotient.lift₂ (fun φ ψ ↦ ⟦φ 🡒 ψ⟧) fun φ₁ ψ₁ φ₂ ψ₂ hp hq ↦ by
-  simpa only [Quotient.eq] using ECC!_of_E!_of_E! hp hq⟩
+  exact Quotient.sound (ECC!_of_E!_of_E! hp hq)⟩
 
 instance [DecidableEq F] : Compl (LindenbaumAlgebra 𝓢) := ⟨Quotient.lift (fun φ ↦ ⟦∼φ⟧) fun φ₁ φ₂ hp ↦ by
-  simpa only [Quotient.eq] using ENN!_of_E! hp⟩
+  exact Quotient.sound (ENN!_of_E! hp)⟩
 
 lemma top_def : (⊤ : LindenbaumAlgebra 𝓢) = ⟦⊤⟧ := rfl
 

@@ -135,10 +135,10 @@ variable {α β γ}
 
 instance : FunLike (α →ˡᶜ β) α β where
   coe := toTr
-  coe_injective' := by
+  coe_injective := by
     intro f g h; rcases f; rcases g; simpa using h
 
-instance : CoeFun (α →ˡᶜ β) (fun _ => α → β) := DFunLike.hasCoeToFun
+instance : CoeFun (α →ˡᶜ β) (fun _ => α → β) := DFunLike.toCoeFun
 
 @[ext] lemma ext (f g : α →ˡᶜ β) (h : ∀ x, f x = g x) : f = g := DFunLike.ext f g h
 
