@@ -63,7 +63,7 @@ namespace Δ₁
 
 open Arithmetic.HierarchySymbol.Semiformula LO.FirstOrder.Theory
 
-instance add (dT : T.Δ₁) (dU : U.Δ₁) : (T + U).Δ₁ where
+def add (dT : T.Δ₁) (dU : U.Δ₁) : (T + U).Δ₁ where
   ch := T.Δ₁ch ⋎ U.Δ₁ch
   mem_iff {φ} := by
     simp only [Nat.succ_eq_add_one, Nat.reduceAdd, val_or, LogicalConnective.HomClass.map_or,

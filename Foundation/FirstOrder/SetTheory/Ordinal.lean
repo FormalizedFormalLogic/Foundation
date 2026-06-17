@@ -150,7 +150,7 @@ protected instance succ [h : IsOrdinal α] : IsOrdinal (succ α) where
       · simp_all
       · exact h.trichotomy β₁ h₁ β₂ h₂
 
-protected instance nat : α ∈ (ω : V) → IsOrdinal (α : V) := by
+protected lemma nat : α ∈ (ω : V) → IsOrdinal (α : V) := by
   apply naturalNumber_induction
   · definability
   case zero => simp [zero_def]

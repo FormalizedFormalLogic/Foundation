@@ -22,7 +22,7 @@ namespace Hilbertᵢ
 
 instance : SetLike (Hilbertᵢ L) (SyntacticFormulaᵢ L) where
   coe := Hilbertᵢ.axiomSet
-  coe_injective' := by rintro ⟨T, _⟩ ⟨U, _⟩; simp
+  coe_injective := by rintro ⟨T, _⟩ ⟨U, _⟩; simp
 
 instance : LE (Hilbertᵢ L) where
   le Λ₁ Λ₂ := (Λ₁ : Set (SyntacticFormulaᵢ L)) ⊆ (Λ₂ : Set (SyntacticFormulaᵢ L))
@@ -137,7 +137,7 @@ scoped notation "‖" d "‖" => depth d
 def specialize {φ} (b : Λ ⊢! ∀⁰ φ) (t) : Λ ⊢! φ/[t] := all₁ φ t ⨀ b
 
 def implyAll {φ ψ} (b : Λ ⊢! shift φ 🡒 free ψ) : Λ ⊢! φ 🡒 ∀⁰ ψ :=
-  have : Λ ⊢! ∀⁰ (φ/[] 🡒 ψ) := gen <| by simpa using b
+  have : Λ ⊢! ∀⁰ (φ/[] 🡒 ψ) := gen <| by simp; exact b
   all₂ φ ψ ⨀ this
 
 def geNOverFiniteContext {Γ φ} (b : Γ⁺ ⊢[Λ]! free φ) : Γ ⊢[Λ]! ∀⁰ φ :=
@@ -282,7 +282,7 @@ variable {𝓗 : Hilbertᵢ L} {T : Theoryᵢ L 𝓗}
 
 instance : SetLike (Theoryᵢ L 𝓗) (Sentenceᵢ L) where
   coe := theory
-  coe_injective' _ _ := Theoryᵢ.ext
+  coe_injective _ _ := Theoryᵢ.ext
 
 lemma mem_def : φ ∈ T ↔ φ ∈ T.theory := by rfl
 

@@ -154,7 +154,7 @@ end Semiformula
 namespace Structure
 
 instance subLanguageStructure {pf : ∀ k, L.Func k → Prop} {pr : ∀ k, L.Rel k → Prop}
-  {M : Type w} (s : Structure L M) : Structure (Language.subLanguage L pf pr) M :=
+  {M : Type w} [s : Structure L M] : Structure (Language.subLanguage L pf pr) M :=
   s.lMap (Language.ofSubLanguage L)
 
 noncomputable def extendStructure (Φ : L₁ →ᵥ L₂) {M : Type w} [Nonempty M] (s : Structure L₁ M) : Structure L₂ M where

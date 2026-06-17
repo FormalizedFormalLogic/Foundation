@@ -152,7 +152,7 @@ theorem sigma_one_provable_of_models {σ : Sentence ℒₒᵣ} (hσ : Hierarchy 
 /-- Hilbert–Bernays provability condition D3 -/
 theorem sigma_one_complete {σ : Sentence ℒₒᵣ} (hσ : Hierarchy 𝚺 1 σ) :
     V ⊧ₘ σ → T.Provable (⌜σ⌝ : V) := fun h ↦ by
-  simpa [tprovable_iff_provable]
+  simpa [tprovable_iff_provable, Sentence.quote_eq]
     using Bootstrapping.Arithmetic.sigma_one_provable_of_models T hσ h
 
 theorem provable_internalize {σ : Sentence ℒₒᵣ} :

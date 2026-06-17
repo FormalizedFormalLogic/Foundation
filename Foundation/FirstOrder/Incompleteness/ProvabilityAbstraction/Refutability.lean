@@ -117,7 +117,9 @@ lemma jeroslow_not_safe [𝔅.FormalizedCompleteOn 𝐉] : T ⊢ 𝐉 🡒 (𝔅
 lemma unprovable_flon [consis : Consistent T] [𝔅.FormalizedCompleteOn 𝐉] : T ⊬ flon 𝔅 𝔚 := by
   contrapose! consis;
   replace consis : T ⊢ ∀⁰ safe 𝔅 𝔚 := by simpa [flon] using consis;
-  have h₁ : T ⊢ ∼(𝔅 𝐉 ⋏ 𝔚 𝐉) := by simpa [safe] using FirstOrder.Theory.specialize _ _ ⨀ consis;
+  have h₁ : T ⊢ ∼(𝔅 𝐉 ⋏ 𝔚 𝐉) := by
+    have h := FirstOrder.Theory.specialize (safe 𝔅 𝔚) ⌜𝐉⌝ ⨀ consis
+    simp [safe] at h; exact h;
   have h₂ : T ⊢ ∼𝐉 := (contra! jeroslow_not_safe) ⨀ h₁;
   have h₃ : T ⊢ 𝐉 🡘 𝔚 𝐉 := jeroslow_def';
   have h₄ : T ⊢ 𝔚 𝐉 := R1' h₂;

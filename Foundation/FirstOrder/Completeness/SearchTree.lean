@@ -176,7 +176,10 @@ lemma chainU_val_fst_eq (nwf : ¬WellFounded (SearchTree.Lt T Γ)) (s : ℕ) : (
     simpa [ih] using SearchTree.rank_of_lt (chainU_spec nwf s)
 
 lemma chain_spec (nwf : ¬WellFounded (SearchTree.Lt T Γ)) (s) : ⛓️[s + 1] ≺⟨s⟩ ⛓️[s] :=
-  by simpa [chainU_val_fst_eq nwf s] using SearchTree.seq_of_lt (chainU_spec nwf s)
+  by
+    have := SearchTree.seq_of_lt (chainU_spec nwf s)
+    simp only [chainU_val_fst_eq nwf s] at this
+    exact this
 
 lemma chain_monotone (nwf : ¬WellFounded (SearchTree.Lt T Γ)) {s u : ℕ} (h : s ≤ u) : ⛓️[s] ⊆ ⛓️[u] := by
   suffices ∀ d, ⛓️[s] ⊆ ⛓️[s + d] by
@@ -329,7 +332,9 @@ lemma semanticMainLemma_val (nwf : ¬WellFounded (SearchTree.Lt T Γ)) :
 
 lemma Model.models (nwf : ¬WellFounded (SearchTree.Lt T Γ)) :
     Model T Γ ⊧ₘ* T :=
-  ⟨fun φ hφ ↦ by simpa [Semiformula.eval_univCl] using semanticMainLemma_val nwf _ (chainSet_id nwf hφ)⟩
+  ⟨fun φ hφ ↦ by
+    show Semiformula.Eval («structure» T Γ) ![] Empty.elim φ
+    simpa [Semiformula.eval_univCl] using semanticMainLemma_val nwf _ (chainSet_id nwf hφ)⟩
 
 lemma semanticMainLemmaTop (nwf : ¬WellFounded (SearchTree.Lt T Γ)) {φ : SyntacticFormula L} (h : φ ∈ Γ) :
     ¬Evalf (Model.structure T Γ) Semiterm.fvar φ :=

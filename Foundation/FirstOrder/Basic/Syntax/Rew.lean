@@ -315,7 +315,7 @@ lemma fvar?_rew [DecidableEq ξ₁] [DecidableEq ξ₂]
       · exact .inl h
       · exact .inr ⟨z, by simp [hi], hz⟩
   case hall n φ ihp =>
-    have : (Rew.bind (#0 :> fun i ↦ Rew.bShift (ω #i)) (fun z ↦ Rew.bShift (ω &z)) ▹ φ).FVar? x := by simpa [Rew.q_bind] using h
+    have : (Rew.bind (#0 :> fun i ↦ Rew.bShift (ω #i)) (fun z ↦ Rew.bShift (ω &z)) ▹ φ).FVar? x := by simpa [Rew.q, Function.comp_def] using h
     rcases ihp this with (⟨z, hz⟩ | ⟨z, hz⟩)
     · cases z using Fin.cases
       case zero => simp at hz
@@ -325,7 +325,7 @@ lemma fvar?_rew [DecidableEq ξ₁] [DecidableEq ξ₂]
     · have : φ.FVar? z ∧ (ω &z).FVar? x := by simpa using hz
       exact .inr ⟨z, this⟩
   case hexs n φ ihp =>
-    have : (Rew.bind (#0 :> fun i ↦ Rew.bShift (ω #i)) (fun z ↦ Rew.bShift (ω &z)) ▹ φ).FVar? x := by simpa [Rew.q_bind] using h
+    have : (Rew.bind (#0 :> fun i ↦ Rew.bShift (ω #i)) (fun z ↦ Rew.bShift (ω &z)) ▹ φ).FVar? x := by simpa [Rew.q, Function.comp_def] using h
     rcases ihp this with (⟨z, hz⟩ | ⟨z, hz⟩)
     · cases z using Fin.cases
       case zero => simp at hz

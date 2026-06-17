@@ -71,12 +71,14 @@ lemma eval_Uprod [(i : I) → Nonempty (A i)] {φ : Semiformula L ξ n} :
   case hrel k r v =>
     simp [eval_rel, Semiterm.val_Uprod]
   case hnrel k r v =>
-    simpa [*, eval_nrel, Semiterm.val_Uprod]
-    using Ultrafilter.compl_mem_iff_notMem.symm
+    simp [*, eval_nrel, Semiterm.val_Uprod]
+    exact Ultrafilter.compl_mem_iff_notMem.symm
   case hand =>
-    simpa [*, -Filter.inter_mem_iff] using Filter.inter_mem_iff.symm
+    simp [*, -Filter.inter_mem_iff]
+    exact Filter.inter_mem_iff.symm
   case hor φ ψ ihp ihq =>
-    simpa [*, -Ultrafilter.union_mem_iff] using Ultrafilter.union_mem_iff.symm
+    simp [*, -Ultrafilter.union_mem_iff]
+    exact Ultrafilter.union_mem_iff.symm
   case hall φ _ =>
     suffices
       (∀ x : Uprod A 𝓤, {i | (Eval (s i) (fun j ↦ ((x :> e) j).val i) fun x ↦ (ε x).val i) φ} ∈ 𝓤) ↔

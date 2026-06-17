@@ -150,11 +150,11 @@ lemma isFormulaSet_sound {s : ℕ} : IsFormulaSet L s → ∃ S : Finset (Syntac
     constructor
     · intro h
       rcases Derivation2.Sequent.mem_quote h with ⟨p, hp, rfl⟩
-      rcases by simpa using hp with ⟨x, hx, rfl⟩
+      rcases by simpa [-Nat.mem_bitIndices] using hp with ⟨x, hx, rfl⟩
       simpa [hps x (mem_iff_mem_bitIndices.mpr hx)] using mem_iff_mem_bitIndices.mpr hx
     · intro h
       rw [←hps x h]
-      simpa [Derivation2.Sequent.mem_quote_iff, ←mem_iff_mem_bitIndices] using ⟨x, h, rfl⟩⟩
+      simpa [Derivation2.Sequent.mem_quote_iff, ←mem_iff_mem_bitIndices, -Nat.mem_bitIndices] using ⟨x, h, rfl⟩⟩
 
 variable (V)
 
@@ -233,12 +233,15 @@ lemma quote_proof_def {φ : Sentence L} (b : T ⊢! φ) : (⌜b⌝ : V) = ⌜Der
 @[simp] lemma derivation_of_quote_derivation {Γ : Sequent L} (b : (T : Schema L) ⟹ Γ) : T.DerivationOf (⌜b⌝ : V) ⌜Γ.toFinset⌝ := by
   let x := Derivation2.typedQuote V (Derivation.toDerivation2 (T : Schema L) b)
   suffices T.DerivationOf x.val ⌜List.toFinset Γ⌝ from this
-  simpa using x.derivationOf
+  exact x.derivationOf
 
 @[simp] lemma proof_of_quote_proof {φ : Sentence L} (b : T ⊢! φ) : T.Proof (⌜b⌝ : V) ⌜φ⌝ := by
   let x := Derivation2.typedQuote V (Derivation.toDerivation2 (T : Schema L) b)
   suffices T.Proof x.val ⌜φ⌝ from this
-  simpa using x.derivationOf
+  have h := x.derivationOf
+  simp only [Theory.Proof] at h ⊢
+  simp [Sentence.quote_def, Semiformula.quote_def] at h ⊢
+  exact h
 
 lemma coe_quote_proof_eq (d : T ⊢! φ) : (↑(⌜d⌝ : ℕ) : V) = ⌜d⌝ := by
   simp [quote_proof_def, Derivation2.coe_quote_eq]
@@ -330,7 +333,7 @@ lemma Provable.sound2 {φ : SyntacticFormula L} (h : T.Provable (⌜φ⌝ : ℕ)
   exact b
 
 lemma Provable.sound {φ : Sentence L} (h : T.Provable (⌜φ⌝ : ℕ)) : T ⊢ φ :=
-  provable_iff_derivable2.mpr <| Theory.Provable.sound2 (by simpa using h)
+  provable_iff_derivable2.mpr <| Theory.Provable.sound2 (by simpa [Sentence.quote_def] using h)
 
 end Theory
 

@@ -75,7 +75,7 @@ lemma add_tsub_self_of_le (h : b ≤ a) : b + (a - b) = a := by symm; exact sub_
 @[simp] lemma zero_sub (a : V) : 0 - a = 0 := sub_spec_of_le (by simp)
 
 @[simp] lemma sub_zero (a : V) : a - 0 = a := by
-  simpa using sub_add_self_of_le (show 0 ≤ a from zero_le a)
+  simpa using sub_add_self_of_le (show 0 ≤ a from Arithmetic.zero_le a)
 
 lemma sub_remove_left (e : a = b + c) : a - c = b := by simp [e]
 

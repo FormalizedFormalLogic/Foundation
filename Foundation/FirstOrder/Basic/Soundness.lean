@@ -21,7 +21,7 @@ lemma sound (M : Type*) [s : Structure L M] [Nonempty M] [M ⊧ₘ* T] (ε : ℕ
   | axm (φ := φ) h => ⟨φ, by simp, by
       have : ∃ σ ∈ T, ↑σ = φ := by simpa [Theory.toSchema] using h
       rcases this with ⟨σ, hσ, rfl⟩
-      simpa using Theory.models M T hσ⟩
+      simpa [models_iff] using Theory.models M T hσ⟩
   | axL r v => by
     by_cases h : s.rel r (Semiterm.valm M ![] ε ∘ v)
     · exact ⟨rel r v, by simp, h⟩
@@ -72,6 +72,7 @@ end Derivation
 theorem sound : T ⊢! σ → T ⊨[Struc.{v, u} L] σ := fun b s hT ↦ by
   have : s.Dom ⊧ₘ* T := hT
   have : Inhabited s.Dom := Classical.inhabited_of_nonempty s.nonempty
+  show Semiformula.Evalbm s.Dom ![] σ
   simpa using Derivation.sound s.Dom default b
 
 theorem sound! : T ⊢ σ → T ⊨[Struc.{v, u} L] σ := fun ⟨b⟩ ↦ sound b

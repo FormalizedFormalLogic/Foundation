@@ -251,8 +251,8 @@ lemma sound {T : Theoryᵢ L 𝗜𝗻𝘁¹} (b : T ⊢ φ) : W ∀⊩* T → W 
     suffices ∀ φ ∈ Γ, w ⊩[![]|fun _ ↦ x] φ by simpa
     intro φ hφ
     rcases show ∃ x ∈ T.theory, ↑x = φ by simpa using HΓ φ hφ with ⟨φ, hφ', rfl⟩
-    simpa using H _ hφ' w
-  simpa using this
+    simp only [Forces.forces_emb]; exact H _ hφ' w
+  simp only [Forces.forces_emb] at this; exact this
 
 end Forces₀
 

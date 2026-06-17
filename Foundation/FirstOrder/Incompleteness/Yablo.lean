@@ -94,7 +94,7 @@ lemma iff_yablo_provable (n : ℕ) : U ⊢ T.yabloPred n ↔ U ⊢ “∀ m, ↑
   intro V _ _;
   haveI : V ⊧ₘ* 𝗜𝚺₁ := ModelsTheory.of_provably_subtheory V 𝗜𝚺₁ U inferInstance;
   haveI : V ⊧/![ORingStructure.numeral n] (T.yablo) ↔ T.YabloSystem ⌜T.yablo⌝ (ORingStructure.numeral n) := yablo_diagonal_modeled _;
-  simpa [models_iff, Matrix.constant_eq_singleton, Matrix.comp_vecCons'] using this;
+  simpa [models_iff, Matrix.constant_eq_singleton, Matrix.comp_vecCons', YabloSystem] using this;
 
 lemma iff_neg_yablo_provable (n : ℕ) : U ⊢ ∼(T.yabloPred n) ↔ U ⊢ “∃ m, ↑n < m ∧ ∃ nσ, !ssnum nσ ⌜T.yablo⌝ m ∧ !T.provable (nσ)” := by
   suffices U ⊢ ∼T.yablo/[n] 🡘 “∃ m, ↑n < m ∧ ∃ nσ, !ssnum nσ ⌜T.yablo⌝ m ∧ !T.provable (nσ)” by

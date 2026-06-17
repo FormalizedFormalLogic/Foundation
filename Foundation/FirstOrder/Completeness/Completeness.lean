@@ -31,7 +31,7 @@ noncomputable def Derivation.completeness_of_encodable
 lemma completeness_of_encodable {φ : Sentence L} :
     T ⊨ φ → T ⊢ φ := fun h ↦
   ⟨Derivation.completeness_of_encodable (T := T) (Γ := [φ])
-    fun _ _ _ hM ↦ ⟨φ, List.mem_of_mem_head? rfl, fun _ ↦ by simpa using h hM⟩⟩
+    fun _ _ _ hM ↦ ⟨φ, List.mem_of_mem_head? rfl, fun _ ↦ by simp only [Semiformula.eval_emb]; exact h hM⟩⟩
 
 instance : Complete T (Semantics.models (SmallStruc L) T):= ⟨completeness_of_encodable⟩
 
@@ -59,7 +59,8 @@ theorem complete {φ : Sentence L} :
       simpa using (satisfiable_lMap L.ofSubLanguage (fun k ↦ Subtype.val_injective) (fun _ ↦ Subtype.val_injective) h)
     contradiction
   have : Entailment.Inconsistent (u' : Theory (languageFinset u)) := Complete.inconsistent_of_unsatisfiable this
-  have : Entailment.Inconsistent (u : Theory L) := by rw [←image_u']; simpa using Theory.inconsistent_lMap L.ofSubLanguage this
+  have : Entailment.Inconsistent (u : Theory L) := by
+    rw [←image_u']; simp only [Finset.coe_image]; exact Theory.inconsistent_lMap L.ofSubLanguage this
   have : Entailment.Inconsistent (insert (∼φ) T) := this.of_supset ssu
   exact Entailment.provable_iff_inconsistent_adjoin.mpr this
 

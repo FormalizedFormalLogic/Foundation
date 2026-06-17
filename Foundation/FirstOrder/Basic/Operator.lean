@@ -644,17 +644,17 @@ variable {L}
 
 @[simp] lemma add_eq_of_lang [L.Add] [Add M] [Structure.Add L M] {v : Fin 2 → M} :
     Structure.func (L := L) Language.Add.add v = v 0 + v 1 := by
-  simpa [val_func, ←Matrix.fun_eq_vec_two] using
+  simpa [Semiterm.Operator.val, Semiterm.Operator.Add.add, val_func, ←Matrix.fun_eq_vec_two] using
     Structure.Add.add (L := L) (v 0) (v 1)
 
 @[simp] lemma mul_eq_of_lang [L.Mul] [Mul M] [Structure.Mul L M] {v : Fin 2 → M} :
     Structure.func (L := L) Language.Mul.mul v = v 0 * v 1 := by
-  simpa [val_func, ←Matrix.fun_eq_vec_two] using
+  simpa [Semiterm.Operator.val, Semiterm.Operator.Mul.mul, val_func, ←Matrix.fun_eq_vec_two] using
     Structure.Mul.mul (L := L) (v 0) (v 1)
 
 @[simp] lemma exp_eq_of_lang [L.Exp] [Exp M] [Structure.Exp L M] {v : Fin 1 → M} :
     Structure.func (L := L) Language.Exp.exp v = LO.Exp.exp (v 0) := by
-  simpa [val_func, ←Matrix.fun_eq_vec_one] using
+  simpa [Semiterm.Operator.val, Semiterm.Operator.Exp.exp, val_func, Matrix.constant_eq_singleton, ←Matrix.fun_eq_vec_one] using
     Structure.Exp.exp (L := L) (v 0)
 
 lemma le_iff_of_eq_of_lt [Operator.Eq L] [Operator.LT L] [LT M] [Structure.Eq L M] [Structure.LT L M] {a b : M} :
@@ -663,17 +663,17 @@ lemma le_iff_of_eq_of_lt [Operator.Eq L] [Operator.LT L] [LT M] [Structure.Eq L 
 
 @[simp] lemma eq_lang [L.Eq] [Structure.Eq L M] {v : Fin 2 → M} :
     Structure.rel (L := L) Language.Eq.eq v ↔ v 0 = v 1 := by
-  simpa [Semiformula.Operator.Eq.sentence_eq, eval_rel, ←Matrix.fun_eq_vec_two] using
+  simpa [Semiformula.Operator.val, Semiformula.Operator.Eq.sentence_eq, eval_rel, ←Matrix.fun_eq_vec_two] using
     Structure.Eq.eq (L := L) (v 0) (v 1)
 
 @[simp] lemma lt_lang [L.LT] [LT M] [Structure.LT L M] {v : Fin 2 → M} :
     Structure.rel (L := L) Language.LT.lt v ↔ v 0 < v 1 := by
-  simpa [Semiformula.Operator.LT.sentence_eq, eval_rel, ←Matrix.fun_eq_vec_two] using
+  simpa [Semiformula.Operator.val, Semiformula.Operator.LT.sentence_eq, eval_rel, ←Matrix.fun_eq_vec_two] using
     Structure.LT.lt (L := L) (v 0) (v 1)
 
 @[simp] lemma mem_lang [L.Mem] [Membership M M] [Structure.Mem L M] {v : Fin 2 → M} :
     Structure.rel (L := L) Language.Mem.mem v ↔ v 0 ∈ v 1 := by
-  simpa [Semiformula.Operator.Mem.sentence_eq, eval_rel, ←Matrix.fun_eq_vec_two] using
+  simpa [Semiformula.Operator.val, Semiformula.Operator.Mem.sentence_eq, eval_rel, ←Matrix.fun_eq_vec_two] using
     Structure.Mem.mem (L := L) (v 0) (v 1)
 
 lemma operator_val_ofEquiv_iff (φ : M ≃ N) {k : ℕ} {o : Semiformula.Operator L k} {v : Fin k → N} :

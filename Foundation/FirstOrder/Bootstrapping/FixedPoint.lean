@@ -175,7 +175,7 @@ noncomputable def exclusiveMultifixedpoint (θ : Fin k → Semisentence ℒₒ�
 theorem exclusiveMultidiagonal (θ : Fin k → Semisentence ℒₒᵣ k) :
     T ⊢ exclusiveMultifixedpoint θ i 🡘 (Rew.subst fun j ↦ ⌜exclusiveMultifixedpoint θ j⌝) ▹ θ i := by
   have : T ⊢ exclusiveMultifixedpoint θ i 🡘 ((Rew.subst fun j ↦ ⌜exclusiveMultifixedpoint θ j⌝) ▹ θ i).padding ↑i := by
-    simpa using multidiagonal (T := T) (fun j ↦ (θ j).padding j) (i := i)
+    simpa [exclusiveMultifixedpoint] using multidiagonal (T := T) (fun j ↦ (θ j).padding j) (i := i)
   exact Entailment.E!_trans this (Entailment.padding_iff _ _)
 
 lemma multifixedpoint_pi {θ : Fin k → Semisentence ℒₒᵣ k} (h : ∀ i, Hierarchy 𝚷 (m + 1) (θ i)) :

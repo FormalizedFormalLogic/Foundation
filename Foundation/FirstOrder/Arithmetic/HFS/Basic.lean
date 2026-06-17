@@ -64,7 +64,7 @@ lemma sUnion_lt_of_pos {a : V} (ha : 0 < a) : ⋃ʰᶠ a < a :=
     exact lt_of_lt_of_le (lt_of_mem hi) (le_log_of_mem hx)
 
 @[simp] lemma sUnion_le (a : V) : ⋃ʰᶠ a ≤ a := by
-  rcases zero_le a with (rfl | pos)
+  rcases Arithmetic.zero_le a with (rfl | pos)
   · simp [←emptyset_def]
   · exact le_of_lt (sUnion_lt_of_pos pos)
 

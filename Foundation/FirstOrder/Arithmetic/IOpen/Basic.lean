@@ -124,14 +124,14 @@ lemma div_mul_add (a b : V) {r} (hr : r < b) : (a * b + r) / b = a :=
 lemma div_mul_add' (a b : V) {r} (hr : r < b) : (b * a + r) / b = a := by simpa [mul_comm] using div_mul_add a b hr
 
 @[simp] lemma zero_div (a : V) : 0 / a = 0 := by
-  rcases zero_le a with (rfl | pos)
+  rcases Arithmetic.zero_le a with (rfl | pos)
   · simp
   · exact div_eq_of (by simp) (by simpa)
 
 lemma div_mul (a b c : V) : a / (b * c) = a / b / c := by
-  rcases zero_le b with (rfl | hb)
+  rcases Arithmetic.zero_le b with (rfl | hb)
   · simp
-  rcases zero_le c with (rfl | hc)
+  rcases Arithmetic.zero_le c with (rfl | hc)
   · simp
   exact div_eq_of
     (by calc
@@ -142,14 +142,14 @@ lemma div_mul (a b c : V) : a / (b * c) = a / b / c := by
           _ ≤ b * c * (a / b / c + 1) := by simpa [mul_assoc] using mul_le_mul_left (lt_iff_succ_le.mp <| lt_mul_div_succ (a / b) hc))
 
 @[simp] lemma mul_div_le (a b : V) : b * (a / b) ≤ a := by
-  have : 0 ≤ b := by exact zero_le b
+  have : 0 ≤ b := by exact Arithmetic.zero_le b
   rcases this with (rfl | pos)
   · simp
   · rcases eq_mul_div_add_of_pos a pos with ⟨v, _, e⟩
     simpa [← e] using show b * (a / b) ≤ b * (a / b) + v from le_self_add
 
 @[simp] lemma div_le (a b : V) : a / b ≤ a := by
-  have : 0 ≤ b := zero_le b
+  have : 0 ≤ b := Arithmetic.zero_le b
   rcases this with (rfl | pos)
   · simp
   · have : 1 * (a / b) ≤ b * (a / b) := mul_le_mul_of_nonneg_right (le_iff_lt_succ.mpr (by simp [pos])) (by simp)
@@ -192,7 +192,7 @@ lemma div_mul_add_self' (a c : V) {b} (pos : 0 < b) : (b * a + c) / b = a + c / 
   simpa using div_mul_add 0 b h
 
 @[simp] lemma div_sq (a : V) : a^2 / a = a := by
-  rcases zero_le a with (rfl | pos)
+  rcases Arithmetic.zero_le a with (rfl | pos)
   · simp
   · simp [sq, pos]
 
@@ -208,14 +208,14 @@ lemma div_mul_add_self' (a c : V) {b} (pos : 0 < b) : (b * a + c) / b = a + c / 
   simpa using div_add_mul_self a 1 pos
 
 lemma mul_div_self_of_dvd {a b : V} : a * (b / a) = b ↔ a ∣ b := by
-  rcases zero_le a with (rfl | pos)
+  rcases Arithmetic.zero_le a with (rfl | pos)
   · simp [eq_comm]
   · constructor
     · intro e; rw [←e]; simp
     · rintro ⟨r, rfl⟩; simp [pos]
 
 lemma div_lt_of_pos_of_one_lt {a b : V} (ha : 0 < a) (hb : 1 < b) : a / b < a := by
-  rcases zero_le (a / b) with (e | lt)
+  rcases Arithmetic.zero_le (a / b) with (e | lt)
   · simp [←e, ha]
   · exact lt_of_lt_of_le (lt_mul_of_one_lt_left lt hb) (mul_div_le a b)
 
@@ -224,7 +224,7 @@ lemma le_two_mul_div_two_add_one (a : V) : a ≤ 2 * (a / 2) + 1 := by
   exact le_iff_lt_succ.mpr (by simpa [add_assoc, one_add_one_eq_two, mul_add] using this)
 
 lemma div_monotone {a b : V} (h : a ≤ b) (c : V) : a / c ≤ b / c := by
-  rcases zero_le c with (rfl | pos)
+  rcases Arithmetic.zero_le c with (rfl | pos)
   · simp
   by_contra A
   have : b / c + 1 ≤ a / c := succ_le_iff_lt.mpr (by simpa using A)
@@ -280,7 +280,7 @@ lemma div_add_mod (a b : V) : b * (a / b) + (a % b) = a :=
 @[simp] lemma zero_mod (a : V) : 0 % a = 0 := by simp [mod_def]
 
 @[simp] lemma mod_self (a : V) : a % a = 0 := by
-  rcases zero_le a with (rfl | h)
+  rcases Arithmetic.zero_le a with (rfl | h)
   · simp
   · simp [mod_def, h]
 
@@ -300,7 +300,7 @@ lemma mod_mul_add_of_lt (a b : V) {r} (hr : r < b) : (a * b + r) % b = r := by
   simp [mul_comm b a, pos]
 
 @[simp] lemma mod_mul_self_left (a b : V) : (a * b) % b = 0 := by
-  rcases zero_le b with (rfl | h)
+  rcases Arithmetic.zero_le b with (rfl | h)
   · simp
   · simpa using mod_mul_add_of_lt a b h
 
@@ -349,7 +349,7 @@ lemma mod_mul {a b m : V} (pos : 0 < m) : (a * b) % m = ((a % m) * (b % m)) % m 
   _           = ((a % m) * (b % m)) % m                               := by simp [add_mul, mul_add, pos, mul_left_comm _ m, add_assoc, mul_assoc]
 
 @[simp] lemma mod_div (a b : V) : a % b / b = 0 := by
-  rcases zero_le b with (rfl | pos)
+  rcases Arithmetic.zero_le b with (rfl | pos)
   · simp
   · exact div_eq_zero_of_lt b (by simp [pos])
 
@@ -780,7 +780,7 @@ lemma polynomial_induction [V ⊧ₘ* 𝗣𝗔⁻] (Γ m) [V ⊧ₘ* 𝗜𝗡�
   · exact hP
   case inst => exact inferInstance
   case ind x IH =>
-    rcases zero_le x with (rfl | pos)
+    rcases Arithmetic.zero_le x with (rfl | pos)
     · exact zero
     · have : x / 2 < x := div_lt_of_pos_of_one_lt pos one_lt_two
       rcases even_or_odd' x with (hx | hx)
