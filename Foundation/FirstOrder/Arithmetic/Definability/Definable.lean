@@ -874,4 +874,36 @@ attribute [aesop 11 (rule_sets := [Definability]) safe]
   Definable.all
   Definable.exs
 
+/-! ### Auxiliary lemmata for aesop  -/
+
+section
+
+variable (P : (Fin k → V) → Prop) (f : (Fin k → V) → V)
+
+instance [𝚺₁.Definable P] : 𝚺-[0+1].Definable P := inferInstance
+
+instance [𝚷₁.Definable P] : 𝚷-[0+1].Definable P := inferInstance
+
+instance [𝚫₁.Definable P] : 𝚫-[0+1].Definable P := inferInstance
+
+instance [𝚺₁.DefinableFunction f] : 𝚺-[0+1].DefinableFunction f := inferInstance
+
+instance [𝚷₁.DefinableFunction f] : 𝚷-[0+1].DefinableFunction f := inferInstance
+
+instance [𝚫₁.DefinableFunction f] : 𝚫-[0+1].DefinableFunction f := inferInstance
+
+instance [𝚺-[2].Definable P] : 𝚺-[0+1+1].Definable P := inferInstance
+
+instance [𝚷-[2].Definable P] : 𝚷-[0+1+1].Definable P := inferInstance
+
+instance [𝚫-[2].Definable P] : 𝚫-[0+1+1].Definable P := inferInstance
+
+instance [𝚺-[2].DefinableFunction f] : 𝚺-[0+1+1].DefinableFunction f := inferInstance
+
+instance [𝚷-[2].DefinableFunction f] : 𝚷-[0+1+1].DefinableFunction f := inferInstance
+
+instance [𝚫-[2].DefinableFunction f] : 𝚫-[0+1+1].DefinableFunction f := inferInstance
+
+end
+
 end LO.FirstOrder.Arithmetic.HierarchySymbol

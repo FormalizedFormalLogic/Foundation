@@ -620,14 +620,14 @@ private lemma hfsImage_graph (t s : V) :
       rcases mem_hfsImage_iff.mp hy with ⟨x, hx, rfl⟩
       exact h₂ x hx
 
-noncomputable def hfsImage.graph (f : V → V) (δ : 𝚺₁.Semisentence 2) [𝚺₁-Function₁ f via δ] : 𝚺₁.Semisentence 2 := .mkSigma
+noncomputable def hfsImage.graph (δ : 𝚺₁.Semisentence 2) : 𝚺₁.Semisentence 2 := .mkSigma
   “t s. (∀ y ∈' t, ∃ x ∈' s, !δ y x) ∧ (∀ x ∈' s, ∃ y, !δ y x ∧ y ∈ t)”
 
-instance hfsImage.defined (f : V → V) {δ : 𝚺₁.Semisentence 2} [𝚺₁-Function₁ f] (h : 𝚺₁-Function₁ f via δ) :
-    𝚺₁-Function₁[V] (hfsImage f) via (hfsImage.graph f δ) := .mk fun v ↦ by simp [hfsImage.graph, hfsImage_graph]
+abbrev hfsImage.defined (f : V → V) [𝚺₁-Function₁ f] (δ : 𝚺₁.Semisentence 2) [𝚺₁-Function₁ f via δ] :
+    𝚺₁-Function₁[V] (hfsImage f) via (hfsImage.graph δ) := .mk fun v ↦ by simp [hfsImage.graph, hfsImage_graph]
 
-instance hfsImage.definable (f : V → V) {δ : 𝚺₁.Semisentence 2} [𝚺₁-Function₁ f] (h : 𝚺₁-Function₁ f via δ) :
-    𝚺₁-Function₁[V] hfsImage f := (hfsImage.defined f h).to_definable
+abbrev hfsImage.definable (f : V → V) [𝚺₁-Function₁ f] (δ : 𝚺₁.Semisentence 2) [𝚺₁-Function₁ f via δ] :
+    𝚺₁-Function₁[V] hfsImage f := (hfsImage.defined f δ).to_definable
 
 end
 
