@@ -268,7 +268,7 @@ instance cutRule_defined : 𝚺₀-Function₄ (cutRule : V → V → V → V �
 
 end
 
-/-! ## Internal derivation -/
+/-! ## Internal isDerivation -/
 
 namespace IsDerivation
 
@@ -444,10 +444,10 @@ open PeanoMinus ISigma0 ISigma1 Bootstrapping IsDerivation
 
 variable (L)
 
-/-- Internal derivation -/
+/-- Internal isDerivation -/
 def IsDerivation : V → Prop := (construction L).Fixpoint ![]
 
-/- Internal derivation of sequent `s` -/
+/- Internal isDerivation of sequent `s` -/
 def IsDerivationOf (d s : V) : Prop := fstIdx d = s ∧ IsDerivation L d
 
 /-- Internal derivability -/
@@ -461,19 +461,19 @@ def IProof (d φ : V) : Prop := IsDerivationOf L d {φ}
 @[deprecated IProvable]
 def IProvable (φ : V) : Prop := ∃ d, IProof L d φ
 
-noncomputable def derivation : 𝚫₁.Semisentence 1 := (blueprint L).fixpointDefΔ₁
+noncomputable def isDerivation : 𝚫₁.Semisentence 1 := (blueprint L).fixpointDefΔ₁
 
-noncomputable def derivationOf : 𝚫₁.Semisentence 2 := .mkDelta
-  (.mkSigma “d s. !fstIdxDef s d ∧ !(derivation L).sigma d”)
-  (.mkPi “d s. !fstIdxDef s d ∧ !(derivation L).pi d”)
+noncomputable def isDerivationOf : 𝚫₁.Semisentence 2 := .mkDelta
+  (.mkSigma “d s. !fstIdxDef s d ∧ !(isDerivation L).sigma d”)
+  (.mkPi “d s. !fstIdxDef s d ∧ !(isDerivation L).pi d”)
 
 noncomputable def derivable : 𝚺₁.Semisentence 1 := .mkSigma
-  “Γ. ∃ d, !(derivationOf L).sigma d Γ”
+  “Γ. ∃ d, !(isDerivationOf L).sigma d Γ”
 
 @[deprecated iproof]
 noncomputable def iproof : 𝚫₁.Semisentence 2 := .mkDelta
-  (.mkSigma “d φ. ∃ s, !insertDef s φ 0 ∧ !(derivationOf L).sigma d s”)
-  (.mkPi “d φ. ∀ s, !insertDef s φ 0 → !(derivationOf L).pi d s”)
+  (.mkSigma “d φ. ∃ s, !insertDef s φ 0 ∧ !(isDerivationOf L).sigma d s”)
+  (.mkPi “d φ. ∀ s, !insertDef s φ 0 → !(isDerivationOf L).pi d s”)
 
 noncomputable def iprovable : 𝚺₁.Semisentence 1 := .mkSigma
   “φ. ∃ d, !(iproof L).sigma d φ”
@@ -491,14 +491,14 @@ variable {L}
 
 section
 
-instance IsDerivation.defined : 𝚫₁-Predicate[V] (IsDerivation L) via derivation L := (construction L).fixpoint_definedΔ₁
+instance IsDerivation.defined : 𝚫₁-Predicate[V] (IsDerivation L) via isDerivation L := (construction L).fixpoint_definedΔ₁
 
 instance IsDerivation.definable : 𝚫₁-Predicate[V] (IsDerivation L) := IsDerivation.defined.to_definable
 
 instance IsDerivation.definable' : Γ-[m + 1]-Predicate[V] (IsDerivation L) := IsDerivation.definable.of_deltaOne
 
-instance IsDerivationOf.defined : 𝚫₁-Relation[V] (IsDerivationOf L) via derivationOf L := .mk
-  ⟨by intro v; simp [derivationOf], by intro v; simp [derivationOf, eq_comm (b := fstIdx (v 0))]; rfl⟩
+instance IsDerivationOf.defined : 𝚫₁-Relation[V] (IsDerivationOf L) via isDerivationOf L := .mk
+  ⟨by intro v; simp [isDerivationOf], by intro v; simp [isDerivationOf, eq_comm (b := fstIdx (v 0))]; rfl⟩
 
 instance IsDerivationOf.definable : 𝚫₁-Relation[V] IsDerivationOf L := IsDerivationOf.defined.to_definable
 
@@ -531,7 +531,7 @@ instance Provable.definable' : 𝚺-[0 + 1]-Predicate[V] T.Provable := Provable.
 
 end
 
-/-! ### Induction and recursion of derivation -/
+/-! ### Induction and recursion of isDerivation -/
 
 namespace IsDerivation
 
@@ -795,17 +795,33 @@ end Derivable
 
 variable (T : Theory L) [T.Δ₁]
 
-def IsProof (d φ : V) : Prop := ∃ s, (∀ x ∈ s, neg L x ∈ T.Δ₁Class) ∧ IsDerivationOf L d (insert φ s)
+def IsProof (d φ : V) : Prop := (∀ x ∈ pi₁ d, x ∈ T.Δ₁Class) ∧ IsDerivationOf L (pi₂ d) (insert φ (setNeg L (pi₁ d)))
 
 def Provable (φ : V) : Prop := ∃ d, IsProof T d φ
 
 variable {T}
 
-lemma provable_iff_derivable {φ : V} : Provable T φ ↔ ∃ s : V, (∀ x ∈ s, neg L x ∈ T.Δ₁Class) ∧ Derivable L (insert φ s) := by
-  simp [Provable, IsProof, Derivable]; grind
+lemma provable_iff_derivable {φ : V} : Provable T φ ↔ ∃ s : V, (∀ x ∈ s, x ∈ T.Δ₁Class) ∧ Derivable L (insert φ (setNeg L s)) := by
+  simp [Provable, IsProof, Derivable];
+  sorry
+
 
 alias ⟨Provable.toDerivable, Derivable.toProvable⟩ := provable_iff_derivable
 
+noncomputable def isProof : 𝚫₁.Semisentence 2 := .mkDelta
+  (.mkSigma “p φ. ∃ s d, (∀ x ∈' s, !T.Δ₁ch.sigma x) ∧ ∃ ns, !(setNegGraph L) ns s ∧ ∃ ins, !insertDef ins φ ns ∧ !(isDerivationOf L).sigma d ins”)
+  “⊤”
+
+noncomputable def isProof : 𝚺₁.Semisentence 2 := .mkSigma
+  “d φ. ∃ s, (∀ x ∈' s, !T.Δ₁ch.sigma x) ∧ ∃ ns, !(setNegGraph L) ns s ∧ ∃ ins, !insertDef ins φ ns ∧ !(isDerivationOf L).sigma d ins”
+/--/
+instance IsProof.defined : 𝚺₁-Relation[V] (IsProof T) via isDerivation L := (construction L).fixpoint_definedΔ₁
+
+instance IsDerivation.definable : 𝚫₁-Predicate[V] (IsDerivation L) := IsDerivation.defined.to_definable
+
+instance IsDerivation.definable' : Γ-[m + 1]-Predicate[V] (IsDerivation L) := IsDerivation.definable.of_deltaOne
+
+/--/
 namespace Provable
 
 
@@ -815,8 +831,10 @@ namespace Provable
 lemma conj (ps : V)
     (ds : ∀ i < len ps, Provable T ps.[i]) : Provable T (^⋀ ps) :=
   Derivable.toProvable <| by {
-    have : ∀ i ∈ under (len ps), ∃ s : V, (∀ x ∈ s, neg L x ∈ T.Δ₁Class) ∧ Derivable L (insert ps.[i] s) := by simpa [provable_iff_derivable] using ds
-    have := sigmaOne_skolem (by definability) this
+    have : ∀ i ∈ under (len ps), ∃ s : V, (∀ x ∈ s, x ∈ T.Δ₁Class) ∧ Derivable L (insert ps.[i] (setNeg L s)) := by simpa [provable_iff_derivable] using ds
+    let ⟨f, hf, fdom, H⟩ := sigmaOne_skolem (by definability) this
+
+
 
 
 
