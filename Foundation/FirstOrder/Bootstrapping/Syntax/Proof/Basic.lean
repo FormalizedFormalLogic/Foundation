@@ -131,6 +131,9 @@ lemma IsFormulaSet.setNeg {s : V} (h : IsFormulaSet L s) : IsFormulaSet L (setNe
 
 lemma neg_mem_setNeg {p s : V} (h : p ∈ s) : neg L p ∈ setNeg L s := app_mem_hfsImage h
 
+lemma setNeg_subset_of_subset {s t : V} (h : s ⊆ t) : setNeg L s ⊆ setNeg L t :=
+  hfsImage_subset_of_subset h
+
 @[simp] lemma IsFormulaSet.setNeg_iff {s : V} :
     IsFormulaSet L (Bootstrapping.setNeg L s) ↔ IsFormulaSet L s :=
   ⟨by intro h p hp; simpa using h (neg L p) (neg_mem_setNeg hp), IsFormulaSet.setNeg⟩
@@ -802,52 +805,105 @@ def Provable (φ : V) : Prop := ∃ d, IsProof T d φ
 variable {T}
 
 lemma provable_iff_derivable {φ : V} : Provable T φ ↔ ∃ s : V, (∀ x ∈ s, x ∈ T.Δ₁Class) ∧ Derivable L (insert φ (setNeg L s)) := by
-  simp [Provable, IsProof, Derivable];
-  sorry
+  constructor
+  · rintro ⟨d, hT, hd⟩
+    exact ⟨pi₁ d, hT, pi₂ d, hd⟩
+  · rintro ⟨s, hT, d, hd⟩
+    exact ⟨⟪s, d⟫, by simpa [IsProof] using And.intro hT hd⟩
 
 
 alias ⟨Provable.toDerivable, Derivable.toProvable⟩ := provable_iff_derivable
 
+variable (T)
+
 noncomputable def isProof : 𝚫₁.Semisentence 2 := .mkDelta
-  (.mkSigma “p φ. ∃ s d, (∀ x ∈' s, !T.Δ₁ch.sigma x) ∧ ∃ ns, !(setNegGraph L) ns s ∧ ∃ ins, !insertDef ins φ ns ∧ !(isDerivationOf L).sigma d ins”)
-  “⊤”
+  (.mkSigma “p φ.
+    ∃ s d, !pairDef p s d ∧ (∀ x ∈' s, !T.Δ₁ch.sigma x) ∧
+    ∃ ns, !(setNegGraph L) ns s ∧
+    ∃ ins, !insertDef ins φ ns ∧ !(isDerivationOf L).sigma d ins”)
+  (.mkPi “p φ.
+    ∀ s d, !pairDef p s d → (∀ x ∈' s, !T.Δ₁ch.pi x) ∧
+    ∀ ns, !(setNegGraph L) ns s →
+    ∀ ins, !insertDef ins φ ns → !(isDerivationOf L).pi d ins”)
 
-noncomputable def isProof : 𝚺₁.Semisentence 2 := .mkSigma
-  “d φ. ∃ s, (∀ x ∈' s, !T.Δ₁ch.sigma x) ∧ ∃ ns, !(setNegGraph L) ns s ∧ ∃ ins, !insertDef ins φ ns ∧ !(isDerivationOf L).sigma d ins”
-/--/
-instance IsProof.defined : 𝚺₁-Relation[V] (IsProof T) via isDerivation L := (construction L).fixpoint_definedΔ₁
+set_option linter.flexible false in instance IsProof.defined : 𝚫₁-Relation[V] (IsProof T) via isProof T := ⟨fun x ↦ by
+  simp [isProof];
+  constructor
+  · intro ⟨x, y, e, h⟩ x y e2
+    simp [e] at e2
+    rcases e2 with ⟨rfl, rfl⟩
+    simpa
+  · intro h
+    refine ⟨pi₁ (x 0), pi₂ (x 0), by simp, ?_⟩
+    grind,
+  .of_vec_two fun x y ↦ by
+    simp [isProof]
+    constructor
+    · rintro ⟨x, y, rfl, h⟩
+      simpa [IsProof]
+    · rintro h
+      refine ⟨pi₁ x, pi₂ x, by simp, by simpa [IsProof]⟩⟩
 
-instance IsDerivation.definable : 𝚫₁-Predicate[V] (IsDerivation L) := IsDerivation.defined.to_definable
+instance IsProof.definable : 𝚫₁-Relation[V] (IsProof T) := (IsProof.defined T).to_definable
 
-instance IsDerivation.definable' : Γ-[m + 1]-Predicate[V] (IsDerivation L) := IsDerivation.definable.of_deltaOne
+instance IsProof.definable' : Γ-[m + 1]-Relation[V] (IsProof T) := (IsProof.definable T).of_deltaOne
 
-/--/
+noncomputable def provable : 𝚺₁.Semisentence 1 := .mkSigma “φ. ∃ d, !(isProof T).sigma d φ”
+
+instance Provable.defined : 𝚺₁-Predicate[V] (Provable T) via provable T := .mk fun v ↦ by simp [provable, Provable]
+
+instance Provable.definable : 𝚺₁-Predicate[V] (Provable T) := (Provable.defined T).to_definable
+
+instance Provable.definable' : 𝚺-[0 + 1]-Predicate[V] (Provable T) := Provable.definable T
+
 namespace Provable
 
-
-
-
-
-lemma conj (ps : V)
-    (ds : ∀ i < len ps, Provable T ps.[i]) : Provable T (^⋀ ps) :=
-  Derivable.toProvable <| by {
-    have : ∀ i ∈ under (len ps), ∃ s : V, (∀ x ∈ s, x ∈ T.Δ₁Class) ∧ Derivable L (insert ps.[i] (setNeg L s)) := by simpa [provable_iff_derivable] using ds
+lemma exists_common_axiom_set {ps : V} (ds : ∀ i < len ps, Provable T ps.[i]) :
+    ∃ s : V, (∀ x ∈ s, x ∈ T.Δ₁Class) ∧ IsFormulaSet L (setNeg L s) ∧
+      ∀ i < len ps, Derivable L (insert ps.[i] (setNeg L s)) := by
+    have : ∀ i ∈ under (len ps), ∃ s : V, (∀ x ∈ s, x ∈ T.Δ₁Class) ∧ Derivable L (insert ps.[i] (setNeg L s)) := by
+      simpa [provable_iff_derivable] using ds
     let ⟨f, hf, fdom, H⟩ := sigmaOne_skolem (by definability) this
-
-
-
-
-
-   }
+    let s := ⋃ʰᶠ range f
+    have hs : IsFormulaSet L (setNeg L s) := by
+      intro φ hφ
+      rcases mem_setNeg_iff.mp hφ with ⟨p, hp, rfl⟩
+      have : ∃ s_i, (∃ i, ⟪i, s_i⟫ ∈ f) ∧ p ∈ s_i := by simpa [s, mem_range_iff] using hp
+      rcases this with ⟨s_i, ⟨i, hi⟩, hp⟩
+      exact (H i s_i hi).2.isFormulaSet (neg L p) (by simp [neg_mem_setNeg hp])
+    refine ⟨s, ?_, hs, ?_⟩
+    · intro φ hφ
+      have : ∃ s_i, (∃ i, ⟪i, s_i⟫ ∈ f) ∧ φ ∈ s_i := by simpa [s, mem_range_iff] using hφ
+      rcases this with ⟨s_i, ⟨i, hi⟩, hφ⟩
+      exact (H i s_i hi).1 φ hφ
+    · intro i hi
+      have hidom : i ∈ domain f := by simpa [fdom] using hi
+      rcases mem_domain_iff.mp hidom with ⟨s_i, hi⟩
+      refine Derivable.wk ?_ ?_ (H i s_i hi).2
+      · intro φ hφ
+        simp only [mem_bitInsert_iff] at hφ
+        rcases hφ with rfl | hφ
+        · exact (H i s_i hi).2.isFormulaSet ps.[i] (by simp)
+        · exact hs φ hφ
+      · intro φ
+        simp only [mem_bitInsert_iff]
+        rintro (rfl | hφ)
+        · simp
+        · right
+          exact setNeg_subset_of_subset (by intro p hp; exact mem_sUnion_iff.mpr ⟨s_i, mem_range_iff.mpr ⟨i, hi⟩, hp⟩) hφ
 
 lemma conj (ps : V)
-    (ds : ∀ i < len ps, Provable T ps.[i]) : Provable T (^⋀ ps) :=
-  Derivable.toProvable <| Derivable.conj _ (by simp) fun i hi ↦ (ds i hi).toDerivable
+    (ds : ∀ i < len ps, Provable T ps.[i]) : Provable T (^⋀ ps) := by
+  rcases exists_common_axiom_set (T := T) (ps := ps) ds with ⟨s, hT, hs, hds⟩
+  exact Derivable.toProvable ⟨s, hT, Derivable.conj ps hs hds⟩
 
 lemma disj (ps : V) {i} (hps : ∀ i < len ps, IsFormula L ps.[i])
     (hi : i < len ps) (d : Provable T ps.[i]) : Provable T (^⋁ ps) :=
-  Derivable.toProvable <| Derivable.disj _ _ hps hi d.toDerivable
+  let ⟨s, hT, d⟩ := d.toDerivable
+  Derivable.toProvable ⟨s, hT, Derivable.disj _ _ hps hi d⟩
 
 end Provable
 
-end LO.FirstOrder.Theory
+end FirstOrder.Arithmetic.Bootstrapping
+
+end LO

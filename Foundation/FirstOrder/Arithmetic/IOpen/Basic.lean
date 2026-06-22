@@ -551,7 +551,7 @@ prefix: 80 "π₁" => pi₁
 
 prefix: 80 "π₂" => pi₂
 
-@[simp] lemma pair_unpair (a : V) : ⟪π₁ a, π₂ a⟫ = a := by
+@[simp, grind =] lemma pair_unpair (a : V) : ⟪π₁ a, π₂ a⟫ = a := by
   simp only [pi₁, unpair, pi₂]
   split_ifs with h
   · simp [pair, h]
@@ -563,7 +563,7 @@ prefix: 80 "π₂" => pi₂
       _                                 = √a * √a + (a - √a * √a)             := by simp [add_tsub_self_of_le this]
       _                                 = a                                   := add_tsub_self_of_le (by simp)
 
-@[simp] lemma unpair_pair (a b : V) : unpair ⟪a, b⟫ = (a, b) := by
+@[simp, grind =] lemma unpair_pair (a b : V) : unpair ⟪a, b⟫ = (a, b) := by
   simp only [pair]; split_ifs with h
   · have : √(b * b + a) = b := sqrt_eq_of_le_of_le (by simp) (by simpa using le_trans (le_of_lt h) (by simp))
     simp [unpair, this, show ¬b ≤ a from by simpa using h]
@@ -571,9 +571,9 @@ prefix: 80 "π₂" => pi₂
       sqrt_eq_of_le_of_le (by simp) (by simp [two_mul, show b ≤ a from by simpa using h])
     simp [unpair, this, add_assoc]
 
-@[simp] lemma pi₁_pair (a b : V) : π₁ ⟪a, b⟫ = a := by simp [pi₁]
+@[simp, grind =] lemma pi₁_pair (a b : V) : π₁ ⟪a, b⟫ = a := by simp [pi₁]
 
-@[simp] lemma pi₂_pair (a b : V) : π₂ ⟪a, b⟫ = b := by simp [pi₂]
+@[simp, grind =] lemma pi₂_pair (a b : V) : π₂ ⟪a, b⟫ = b := by simp [pi₂]
 
 noncomputable def pairEquiv : V × V ≃ V := ⟨Function.uncurry pair, unpair, fun ⟨a, b⟩ => unpair_pair a b, pair_unpair⟩
 
@@ -670,7 +670,7 @@ lemma pair_lt_pair {a₁ a₂ b₁ b₂ : V} (ha : a₁ < a₂) (hb : b₁ < b�
   · simp [←add_assoc, add_right_comm _ a]; simp [add_right_comm _ (b * b)]
   · simp [←add_assoc, add_right_comm _ b]; simp [add_right_comm _ a]; simp [add_assoc]
 
-@[simp] lemma pair_ext_iff {a₁ a₂ b₁ b₂ : V} : ⟪a₁, b₁⟫ = ⟪a₂, b₂⟫ ↔ a₁ = a₂ ∧ b₁ = b₂ :=
+@[simp, grind =>] lemma pair_ext_iff {a₁ a₂ b₁ b₂ : V} : ⟪a₁, b₁⟫ = ⟪a₂, b₂⟫ ↔ a₁ = a₂ ∧ b₁ = b₂ :=
   ⟨fun e ↦ ⟨by simpa using congr_arg (π₁ ·) e, by simpa using congr_arg (π₂ ·) e⟩, by rintro ⟨rfl, rfl⟩; simp⟩
 
 section

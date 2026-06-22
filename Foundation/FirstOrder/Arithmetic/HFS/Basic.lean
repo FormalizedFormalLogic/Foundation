@@ -596,6 +596,11 @@ lemma mem_hfsImage_iff {s y : V} : y ∈ hfsImage f s ↔ ∃ x ∈ s, y = f x :
 lemma app_mem_hfsImage {p s : V} (h : p ∈ s) : f p ∈ hfsImage f s :=
   mem_hfsImage_iff.mpr ⟨p, h, rfl⟩
 
+lemma hfsImage_subset_of_subset {s t : V} (h : s ⊆ t) : hfsImage f s ⊆ hfsImage f t := by
+  intro y hy
+  rcases mem_hfsImage_iff.mp hy with ⟨x, hx, rfl⟩
+  exact app_mem_hfsImage (h hx)
+
 @[simp] lemma mem_hfsImage_union {s t : V} : hfsImage f (s ∪ t) = hfsImage f s ∪ hfsImage f t := mem_ext <| by
   simp only [mem_hfsImage_iff, mem_cup_iff]; grind
 

@@ -175,6 +175,19 @@ notation L "-function₄[" N "] " f => DefinableFunction₄ (M := N) L f
 
 end Language
 
+namespace IsDefinedBy
+
+lemma of_vec_one {R : (Fin 1 → M) → Prop} {φ : Semisentence L 1} (h : ∀ x, Semiformula.Evalb ![x] φ ↔ R ![x]) : IsDefinedBy R φ := by
+  intro v; simpa [←Matrix.fun_eq_vec_one] using h (v 0)
+
+lemma of_vec_two {R : (Fin 2 → M) → Prop} {φ : Semisentence L 2} (h : ∀ x y, Semiformula.Evalb ![x, y] φ ↔ R ![x, y]) : IsDefinedBy R φ := by
+  intro v; simpa [←Matrix.fun_eq_vec_two] using h (v 0) (v 1)
+
+lemma of_vec_three {R : (Fin 3 → M) → Prop} {φ : Semisentence L 3} (h : ∀ x y z, Semiformula.Evalb ![x, y, z] φ ↔ R ![x, y, z]) : IsDefinedBy R φ := by
+  intro v; simpa [←Matrix.fun_eq_vec_three] using h (v 0) (v 1) (v 2)
+
+end IsDefinedBy
+
 namespace Defined
 
 lemma to_definable {R : (Fin k → M) → Prop} {φ : Semisentence L k} (hR : Defined R φ) : L.Definable R :=
