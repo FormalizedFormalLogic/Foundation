@@ -21,26 +21,26 @@ section
 
 variable (T : Theory L) [T.Δ₁] (V)
 
-def _root_.LO.FirstOrder.Theory.Consistent : Prop := ¬T.Provable (⌜(⊥ : Sentence L)⌝ : V)
+def _root_.LO.FirstOrder.Theory.Consistent : Prop := ¬Provable T (⌜(⊥ : Sentence L)⌝ : V)
 
 variable {V}
 
-def _root_.LO.FirstOrder.Theory.ConsistentWith (φ : V) : Prop := ¬T.Provable (neg L φ)
+def _root_.LO.FirstOrder.Theory.ConsistentWith (φ : V) : Prop := ¬Provable T (neg L φ)
 
 lemma _root_.LO.FirstOrder.Theory.ConsistentWith.quote_iff {σ : Sentence L} :
-    T.ConsistentWith (⌜σ⌝ : V) ↔ ¬T.Provable (⌜∼σ⌝ : V) := by
+    T.ConsistentWith (⌜σ⌝ : V) ↔ ¬Provable T (⌜∼σ⌝ : V) := by
   simp [Theory.ConsistentWith, Sentence.quote_def, Semiformula.quote_def]
 
 section
 
 noncomputable def _root_.LO.FirstOrder.Theory.consistent : 𝚷₁.Sentence :=
-  .mkPi (∼T.provabilityPred ⊥)
+  .mkPi (∼provabilityPred T ⊥)
 
-@[simp] lemma consistent.defined : Semiformula.Evalbm V ![] (T.consistent : Sentence ℒₒᵣ) ↔ T.Consistent V := by
+@[simp] lemma consistent.defined : _root_.LO.FirstOrder.Semiformula.Evalb (M := V) ![] (T.consistent : Sentence ℒₒᵣ) ↔ T.Consistent V := by
   simp [Theory.consistent, Theory.Consistent]
 
 noncomputable def _root_.LO.FirstOrder.Theory.consistentWith : 𝚷₁.Semisentence 1 := .mkPi
-  “φ. ∀ nφ, !(negGraph L) nφ φ → ¬!T.provable nφ”
+  “φ. ∀ nφ, !(negGraph L) nφ φ → ¬!(provable T) nφ”
 
 instance consistentWith.defined : 𝚷₁-Predicate (T.ConsistentWith : V → Prop) via T.consistentWith := .mk fun v ↦ by
   simp [Theory.ConsistentWith, Theory.consistentWith]
@@ -85,7 +85,7 @@ open Entailment
 
 variable (T : ArithmeticTheory) [𝗜𝚺₁ ⪯ T] [T.Δ₁]
 
-instance [ℕ ⊧ₘ* T] : ℕ ⊧ₘ* T + T.Con := by
+instance [ℕ↓[ℒₒᵣ] ⊧* T] : ℕ↓[ℒₒᵣ] ⊧* (T ∪ T.Con) := by
   have : 𝗥₀ ⪯ 𝗜𝚺₁ := inferInstance
   have : 𝗥₀ ⪯ T := Entailment.WeakerThan.trans this inferInstance
   have : Entailment.Consistent T := ArithmeticTheory.consistent_of_sound T (Eq ⊥) rfl

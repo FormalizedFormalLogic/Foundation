@@ -359,6 +359,18 @@ lemma of_LK_provable {T : Theory L} {φ : Sentence L} : 𝐋𝐊¹ ⊢ (φ : Pro
   have : pullback 𝐋𝐊¹[L] (Rewriting.emb : Sentence L → Proposition L) ⊢ φ := h
   OneSidedLK.ContextualEntailment.of_principal_provable this
 
+lemma specialize {T : Theory L} (φ : Semisentence L 1) (t : ClosedTerm L) :
+    T ⊢ ∀⁰ φ 🡒 Semiformula.subst φ ![t] := by
+  apply of_LK_provable
+  refine ⟨?_⟩
+  let φt : Sentence L := Semiformula.subst φ ![t]
+  have d : ⊢ᴸᴷ¹ [∼(φt : Proposition L), φt] := (Derivation.eta (φt : Proposition L)).rotate.cast (by simp)
+  have d₀ : ⊢ᴸᴷ¹ [(∼(φ : Semiproposition L 1))/[Rew.emb t], (φt : Proposition L)] := by
+    simpa [φt, Semiformula.coe_subst_eq_subst_coe₁] using d
+  have d' : ⊢ᴸᴷ¹ [∃⁰ ∼(φ : Semiproposition L 1), (φt : Proposition L)] :=
+    Derivation.exs (φ := ∼(φ : Semiproposition L 1)) (Γ := [(φt : Proposition L)]) (t := Rew.emb t) d₀
+  exact d'.or.cast (by simp [Semiformula.imp_eq, φt])
+
 open Classical in
 noncomputable instance : Entailment.Deduction (Theory L) :=
   OneSidedLK.ContextualEntailment.deduction (pullback 𝐋𝐊¹[L] (Rewriting.emb : Sentence L → Proposition L))
