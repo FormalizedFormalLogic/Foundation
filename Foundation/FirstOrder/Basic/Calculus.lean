@@ -39,6 +39,10 @@ def embed (Γ : List (Sentence L)) : Sequent L := List.map Rewriting.emb Γ
 @[simp] lemma embed_cons {φ : Sentence L} {Γ : List (Sentence L)} :
     embed (φ :: Γ) = (↑φ :: embed Γ) := rfl
 
+@[simp] lemma embed_append (Γ Δ : List (Sentence L)) :
+    embed (Γ ++ Δ) = embed Γ ++ embed Δ := by
+  simp [embed]
+
 @[simp] lemma embed_shift (Γ : List (Sentence L)) :
     (embed Γ)⁺ = embed Γ := by
   simp [embed, Rewriting.shifts]

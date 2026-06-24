@@ -34,15 +34,9 @@ scoped infix: 45 " ⊢!₂! " => Derivable2SingleConseq
 
 variable {T : Theory L}
 
-omit [L.DecidableEq] in
-@[simp] lemma Sequent.embed_append (A B : List (Sentence L)) :
-    Sequent.embed (A ++ B) = Sequent.embed A ++ Sequent.embed B := by
-  simp [Sequent.embed]
-
 lemma shifts_toFinset_eq_image_shift (Γ : Sequent L) :
     (Rewriting.shifts Γ).toFinset = Γ.toFinset.image Rewriting.shift := by ext φ; simp [Rewriting.shifts]
 
-set_option linter.flexible false in
 def Derivation.toDerivation2 (T) {Γ : Sequent L} : ⊢ᴸᴷ¹ Γ → T ⟹₂ Γ.toFinset
   | Derivation.identity R v => Derivation2.closed _ (Semiformula.rel R v) (by simp) (by simp)
   | Derivation.verum => Derivation2.verum (by simp)
@@ -57,10 +51,7 @@ def Derivation.toDerivation2 (T) {Γ : Sequent L} : ⊢ᴸᴷ¹ Γ → T ⟹₂ 
   | Derivation.all (Γ := Γ) (φ := φ) dp =>
     Derivation2.all (φ := φ) (by simp)
       (Derivation2.wk (Derivation.toDerivation2 T dp)
-        (by
-          intro x hx
-          simp [shifts_toFinset_eq_image_shift] at hx ⊢
-          grind))
+        (by simp [shifts_toFinset_eq_image_shift]))
   | Derivation.exs (Γ := Γ) (φ := φ) (t := t) dp =>
     Derivation2.exs (φ := φ) (by simp) t
       (Derivation2.wk (Derivation.toDerivation2 T dp) (by simp))
@@ -68,24 +59,25 @@ def Derivation.toDerivation2 (T) {Γ : Sequent L} : ⊢ᴸᴷ¹ Γ → T ⟹₂ 
     Derivation2.wk (Derivation.toDerivation2 T d) (List.toFinset_mono h)
   | Derivation.cut (Γ := Γ) (Δ := Δ) (φ := φ) d₁ d₂ =>
     Derivation2.cut (φ := φ)
-      (Derivation2.wk (Derivation.toDerivation2 T d₁) (by intro x hx; simp at hx ⊢; grind))
-      (Derivation2.wk (Derivation.toDerivation2 T d₂) (by intro x hx; simp at hx ⊢; grind))
+      (Derivation2.wk (Derivation.toDerivation2 T d₁) (List.subset_def.mpr <| by simp_all))
+      (Derivation2.wk (Derivation.toDerivation2 T d₂) (List.subset_def.mpr <| by simp_all))
 
 namespace Derivation2
 
 noncomputable def cast {Γ Δ : Finset (Proposition L)} (d : T ⟹₂ Γ) (h : Γ = Δ := by simp) : T ⟹₂ Δ := by
   rcases h; exact d
 
-noncomputable def contra {Γ Δ : Finset (Proposition L)} (d : T ⟹₂ Δ) (h : Δ ⊆ Γ := by simp) : T ⟹₂ Γ :=
-  d.wk h
+omit [L.DecidableEq] in
+private lemma exists_shift_mem_embed_of_mem {A : List (Sentence L)} {φ : Proposition L}
+    (h : φ ∈ Sequent.embed A) : ∃ ψ ∈ Sequent.embed A, Rewriting.shift ψ = φ := by
+  simp [Sequent.embed] at h ⊢
+  grind
 
 omit [L.DecidableEq] in
-lemma mem_theory_append {A B : List (Sentence L)} (hA : ∀ ψ ∈ A, ψ ∈ T) (hB : ∀ ψ ∈ B, ψ ∈ T) :
-    ∀ ψ ∈ A ++ B, ψ ∈ T := by
-  intro ψ hψ
-  rcases List.mem_append.mp hψ with hψ | hψ
-  · exact hA ψ hψ
-  · exact hB ψ hψ
+private lemma mem_embed_of_exists_shift_mem {A : List (Sentence L)} {φ : Proposition L}
+    (h : ∃ ψ ∈ Sequent.embed A, Rewriting.shift ψ = φ) : φ ∈ Sequent.embed A := by
+  simp [Sequent.embed] at h ⊢
+  grind
 
 @[reducible] noncomputable def cutMany : (A : List (Sentence L)) → (∀ ψ ∈ A, ψ ∈ T) →
     T ⟹₂! (insert (φ : Proposition L) (∼Sequent.embed A).toFinset) → T ⟹₂! {φ}
@@ -99,111 +91,70 @@ lemma mem_theory_append {A B : List (Sentence L)} (hA : ∀ ψ ∈ A, ψ ∈ T) 
       have c : T ⟹₂ insert φ (∼Sequent.embed A).toFinset := by
         refine Derivation2.cast (Derivation2.cut ax dn) ?_
         ext x; simp
-      cutMany A (by intro θ hθ; exact hA θ (by simp [hθ])) ⟨c⟩
+      cutMany A (by simp_all) ⟨c⟩
 
-set_option linter.flexible false in
 noncomputable def toProof : {Γ : Finset (Proposition L)} → T ⟹₂ Γ →
     ∃ A : List (Sentence L), (∀ ψ ∈ A, ψ ∈ T) ∧ Nonempty (⊢ᴸᴷ¹ Γ.toList ++ ∼Sequent.embed A)
   | Γ, closed _ φ hp hn =>
-      ⟨[], by simp, ⟨(Derivation.eta φ).contra (by intro x hx; simp at hx ⊢; grind)⟩⟩
+      ⟨[], by simp, ⟨(Derivation.eta φ).contra <| List.subset_def.mpr (by simp_all)⟩⟩
   | Γ, axm φ hT hΓ =>
-      ⟨[φ], by simp [hT], ⟨(Derivation.eta (φ : Proposition L)).contra (by intro x hx; simp at hx ⊢; grind)⟩⟩
+      ⟨[φ], by simp [hT], ⟨(Derivation.eta (φ : Proposition L)).contra <| List.subset_def.mpr (by simp_all)⟩⟩
   | Γ, verum h =>
-      ⟨[], by simp, ⟨Derivation.verum.contra (by intro x hx; simp at hx ⊢; grind)⟩⟩
+      ⟨[], by simp, ⟨Derivation.verum.contra <| List.subset_def.mpr (by simp_all)⟩⟩
   | Γ, and (φ := φ) (ψ := ψ) h dφ dψ => by
       rcases toProof dφ with ⟨A, hA, ⟨bφ⟩⟩
       rcases toProof dψ with ⟨B, hB, ⟨bψ⟩⟩
-      refine ⟨A ++ B, mem_theory_append hA hB, ⟨?_⟩⟩
+      refine ⟨A ++ B, by simp; grind, ⟨?_⟩⟩
       have bφ' : ⊢ᴸᴷ¹ φ :: Γ.toList ++ ∼Sequent.embed (A ++ B) :=
-        bφ.contra (by intro x hx; simp at hx ⊢; grind)
+        bφ.contra <| List.subset_def.mpr (by simp_all [Sequent.embed_append]; grind)
       have bψ' : ⊢ᴸᴷ¹ ψ :: Γ.toList ++ ∼Sequent.embed (A ++ B) :=
-        bψ.contra (by intro x hx; simp at hx ⊢; grind)
-      exact (Derivation.and bφ' bψ').contra (by intro x hx; simp at hx ⊢; grind)
+        bψ.contra <| List.subset_def.mpr (by simp_all [Sequent.embed_append]; grind)
+      exact (Derivation.and bφ' bψ').contra <| List.subset_def.mpr (by simp_all)
   | Γ, or (φ := φ) (ψ := ψ) h d => by
       rcases toProof d with ⟨A, hA, ⟨b⟩⟩
       refine ⟨A, hA, ⟨?_⟩⟩
       have b' : ⊢ᴸᴷ¹ φ :: ψ :: Γ.toList ++ ∼Sequent.embed A :=
-        b.contra (by intro x hx; simp at hx ⊢; grind)
-      exact (Derivation.or b').contra (by intro x hx; simp at hx ⊢; grind)
+        b.contra <| List.subset_def.mpr (by simp_all; grind)
+      exact (Derivation.or b').contra <| List.subset_def.mpr (by simp_all)
   | Γ, all (φ := φ) h d => by
       rcases toProof d with ⟨A, hA, ⟨b⟩⟩
       refine ⟨A, hA, ⟨?_⟩⟩
       have b' : ⊢ᴸᴷ¹ Rewriting.free φ :: (Γ.toList ++ ∼Sequent.embed A)⁺ :=
-        b.contra (by
-          intro x hx
-          suffices x = Rewriting.free φ ∨ (∃ a ∈ Γ, Rewriting.shift a = x) ∨
-              ∃ a ∈ Sequent.embed A, Rewriting.shift a = ∼x by
-            simpa [Rewriting.shifts] using this
-          have hx' : (x = Rewriting.free φ ∨ ∃ a ∈ Γ, Rewriting.shift a = x) ∨
-              ∼x ∈ Sequent.embed A := by
-            simpa [Rewriting.shifts] using hx
-          rcases hx' with (rfl | hx) | hx
-          · exact Or.inl rfl
-          · exact Or.inr <| Or.inl hx
-          · rw [Sequent.embed] at hx
-            rcases List.mem_map.mp hx with ⟨θ, hθ, hθx⟩
-            exact Or.inr <| Or.inr ⟨Rewriting.emb θ,
-              by rw [Sequent.embed]; exact List.mem_map.mpr ⟨θ, hθ, rfl⟩,
-              by rw [←hθx]; simp⟩)
-      exact (Derivation.all b').contra (by intro x hx; simp at hx ⊢; grind)
+        b.contra <| List.subset_def.mpr (by simp_all [Rewriting.shifts]; grind [exists_shift_mem_embed_of_mem])
+      exact (Derivation.all b').contra <| List.subset_def.mpr (by simp_all)
   | Γ, exs (φ := φ) h t d => by
       rcases toProof d with ⟨A, hA, ⟨b⟩⟩
       refine ⟨A, hA, ⟨?_⟩⟩
       have b' : ⊢ᴸᴷ¹ φ/[t] :: Γ.toList ++ ∼Sequent.embed A :=
-        b.contra (by intro x hx; simp at hx ⊢; grind)
-      exact (Derivation.exs (t := t) b').contra (by intro x hx; simp at hx ⊢; grind)
+        b.contra <| List.subset_def.mpr (by simp_all; grind)
+      exact (Derivation.exs (t := t) b').contra <| List.subset_def.mpr (by simp_all)
   | Γ, wk d h => by
       rcases toProof d with ⟨A, hA, ⟨b⟩⟩
-      refine ⟨A, hA, ⟨b.contra ?_⟩⟩
-      intro x hx
-      simp at hx ⊢
-      grind
+      refine ⟨A, hA, ⟨b.contra <| List.subset_def.mpr (by simp_all; grind)⟩⟩
   | _, shift (Γ := Γ) d => by
       rcases toProof d with ⟨A, hA, ⟨b⟩⟩
       refine ⟨A, hA, ⟨?_⟩⟩
-      exact b.shift.contra (by
-        intro x hx
-        suffices (∃ a ∈ Γ, Rewriting.shift a = x) ∨ ∼x ∈ Sequent.embed A by
-          simpa [Rewriting.shifts] using this
-        have hx' : (∃ a ∈ Γ, Rewriting.shift a = x) ∨
-            ∃ a ∈ Sequent.embed A, Rewriting.shift a = ∼x := by
-          simpa [Rewriting.shifts] using hx
-        rcases hx' with hx | ⟨a, ha, hax⟩
-        · exact Or.inl hx
-        · right
-          rw [Sequent.embed] at ha
-          rcases List.mem_map.mp ha with ⟨θ, hθ, rfl⟩
-          rw [←hax]
-          rw [Sequent.embed]
-          exact List.mem_map.mpr ⟨θ, hθ, by simp⟩)
+      exact b.shift.contra <| List.subset_def.mpr (by simp_all [Rewriting.shifts]; grind [mem_embed_of_exists_shift_mem])
   | Γ, cut (φ := φ) d dn => by
       rcases toProof d with ⟨A, hA, ⟨b⟩⟩
       rcases toProof dn with ⟨B, hB, ⟨bn⟩⟩
-      refine ⟨A ++ B, mem_theory_append hA hB, ⟨?_⟩⟩
+      refine ⟨A ++ B, by simp; grind, ⟨?_⟩⟩
       have b' : ⊢ᴸᴷ¹ φ :: Γ.toList ++ ∼Sequent.embed (A ++ B) :=
-        b.contra (by intro x hx; simp at hx ⊢; grind)
+        b.contra <| List.subset_def.mpr (by simp_all [Sequent.embed_append]; grind)
       have bn' : ⊢ᴸᴷ¹ ∼φ :: Γ.toList ++ ∼Sequent.embed (A ++ B) :=
-        bn.contra (by intro x hx; simp at hx ⊢; grind)
+        bn.contra <| List.subset_def.mpr (by simp_all [Sequent.embed_append]; grind)
       exact (Derivation.cut
-        b' bn').contra (by intro x hx; simp at hx ⊢; grind)
+        b' bn').contra <| List.subset_def.mpr (by simp_all; grind)
 
 end Derivation2
 
-set_option linter.flexible false in
 lemma provable_iff_derivable2 {φ : Sentence L} : T ⊢ φ ↔ T ⊢!₂! (φ : Proposition L) := by
   constructor
   · rintro ⟨A, hA, d⟩
-    exact Derivation2.cutMany A hA ⟨Derivation2.cast (Derivation.toDerivation2 T d) (by ext x; simp [Sequent.embed])⟩
+    exact Derivation2.cutMany A hA ⟨Derivation2.cast (Derivation.toDerivation2 T d) (by simp [Sequent.embed])⟩
   · rintro ⟨d⟩
     rcases d.toProof with ⟨A, hA, ⟨b⟩⟩
-    exact ⟨A, hA, b.contra (by
-      intro x hx
-      simp at hx ⊢
-      rcases hx with rfl | hx
-      · exact Or.inl rfl
-      · right
-        rw [Sequent.embed] at hx
-        exact List.mem_map.mp hx)⟩
+    exact ⟨A, hA, b.contra <| List.subset_def.mpr (by simp [Sequent.embed])⟩
 
 end derivation2
 
