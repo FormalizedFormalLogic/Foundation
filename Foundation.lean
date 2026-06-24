@@ -53,7 +53,6 @@ public import Foundation.FirstOrder.Basic.Semantics.Semantics
 public import Foundation.FirstOrder.Basic.Soundness
 public import Foundation.FirstOrder.Basic.Syntax.Formula
 public import Foundation.FirstOrder.Basic.Syntax.Rew
-public import Foundation.FirstOrder.Basic.Syntax.Schema
 -- public import Foundation.FirstOrder.Bootstrapping.DerivabilityCondition.D1
 -- public import Foundation.FirstOrder.Bootstrapping.DerivabilityCondition.D2
 -- public import Foundation.FirstOrder.Bootstrapping.DerivabilityCondition.D3
@@ -75,8 +74,9 @@ public import Foundation.FirstOrder.Basic.Syntax.Schema
 -- public import Foundation.FirstOrder.Bootstrapping.Syntax.Term.Functions
 -- public import Foundation.FirstOrder.Bootstrapping.Syntax.Term.Typed
 -- public import Foundation.FirstOrder.Bootstrapping.Syntax.Theory
-public import Foundation.FirstOrder.Completeness.BooleanValuedModel
 public import Foundation.FirstOrder.Completeness.CanonicalModel
+public import Foundation.FirstOrder.Completeness.CountableSublanguage
+public import Foundation.FirstOrder.Completeness.CounterModel
 -- public import Foundation.FirstOrder.Hauptsatz
 -- public import Foundation.FirstOrder.Incompleteness.Consistency
 -- public import Foundation.FirstOrder.Incompleteness.Dense
@@ -116,7 +116,7 @@ public import Foundation.FirstOrder.Polarity
 -- public import Foundation.FirstOrder.SetTheory.TransitiveModel
 -- public import Foundation.FirstOrder.SetTheory.Universe
 -- public import Foundation.FirstOrder.SetTheory.Z
-public import Foundation.FirstOrder.Skolemization.Hull
+-- public import Foundation.FirstOrder.Skolemization.Hull
 public import Foundation.FirstOrder.Ultraproduct
 public import Foundation.Init
 public import Foundation.InterpretabilityLogic.Axioms
@@ -375,7 +375,7 @@ public import Foundation.Modal.VanBentham.StandardTranslation
 public import Foundation.Propositional.Boolean.Basic
 public import Foundation.Propositional.Boolean.Hilbert
 public import Foundation.Propositional.Boolean.NNFormula
-public import Foundation.Propositional.Boolean.Tait
+-- public import Foundation.Propositional.Boolean.Tait
 public import Foundation.Propositional.Boolean.ZeroSubst
 public import Foundation.Propositional.ConsistentTableau
 public import Foundation.Propositional.Dialectica.Basic
@@ -458,7 +458,7 @@ public import Foundation.Propositional.Neighborhood.NB.Basic
 public import Foundation.Propositional.Neighborhood.NB.Hilbert.Basic
 public import Foundation.Propositional.Neighborhood.NB.Hilbert.WF
 public import Foundation.Propositional.Slash
-public import Foundation.Propositional.Tait.Calculus
+-- public import Foundation.Propositional.Tait.Calculus
 public import Foundation.Propositional.Translation
 -- public import Foundation.ProvabilityLogic.Arithmetic
 -- public import Foundation.ProvabilityLogic.Classification.LetterlessTrace

@@ -9,7 +9,7 @@ public import Foundation.FirstOrder.Incompleteness.WitnessComparison
 
 namespace LO.FirstOrder.Arithmetic.Bootstrapping
 
-variable {V : Type*} [ORingStructure V] [V ⊧ₘ* 𝗜𝚺₁]
+variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 
 variable {L : Language} [L.Encodable] [L.LORDefinable]
 
@@ -42,20 +42,20 @@ lemma rosser_quote₀ {φ : Sentence L} : T.RosserProvable (V := V) ⌜φ⌝ ↔
   simpa [Sentence.quote_def] using rosser_quote
 
 lemma rosser_quote_def {φ : Proposition L} :
-    T.RosserProvable (V := V) ⌜φ⌝ ↔ ∃ b : V, T.Proof b ⌜φ⌝ ∧ ∀ b' < b, ¬T.Proof b' ⌜∼φ⌝ := rosser_quote
+    T.RosserProvable (V := V) ⌜φ⌝ ↔ ∃ b : V, Proof T b ⌜φ⌝ ∧ ∀ b' < b, ¬Proof T b' ⌜∼φ⌝ := rosser_quote
 
 lemma rosser_quote_def₀ {φ : Sentence L} :
-    T.RosserProvable (V := V) ⌜φ⌝ ↔ ∃ b : V, T.Proof b ⌜φ⌝ ∧ ∀ b' < b, ¬T.Proof b' ⌜∼φ⌝ := by simpa [Sentence.quote_def] using rosser_quote
+    T.RosserProvable (V := V) ⌜φ⌝ ↔ ∃ b : V, Proof T b ⌜φ⌝ ∧ ∀ b' < b, ¬Proof T b' ⌜∼φ⌝ := by simpa [Sentence.quote_def] using rosser_quote
 
-def RosserProvable.to_provable {φ : V} : T.RosserProvable φ → T.Provable φ := ProvabilityComparison.le_to_provable
+def RosserProvable.to_provable {φ : V} : T.RosserProvable φ → Provable T φ := ProvabilityComparison.le_to_provable
 
-lemma provable_of_standard_proof {n : ℕ} {φ : Sentence L} : T.Proof (n : V) ⌜φ⌝ → T ⊢ φ := fun h ↦ by
-  have : T.Proof n ⌜φ⌝ ↔ T.Proof (↑n : V) ⌜φ⌝ := by
+lemma provable_of_standard_proof {n : ℕ} {φ : Sentence L} : Proof T (n : V) ⌜φ⌝ → T ⊢ φ := fun h ↦ by
+  have : Proof T n ⌜φ⌝ ↔ Proof T (↑n : V) ⌜φ⌝ := by
     simpa [Sentence.coe_quote_eq_quote] using
-      Defined.shigmaOne_absolute V (φ := T.proof)
-        (R := fun v ↦ T.Proof (v 0) (v 1)) (R' := fun v ↦ T.Proof (v 0) (v 1))
-        Theory.Proof.defined Theory.Proof.defined ![n, ⌜φ⌝]
-  have : T.Provable (⌜φ⌝ : ℕ) := ⟨n, this.mpr h⟩
+      Defined.shigmaOne_absolute V (φ := proof T)
+        (R := fun v ↦ Proof T (v 0) (v 1)) (R' := fun v ↦ Proof T (v 0) (v 1))
+        Proof.defined Proof.defined ![n, ⌜φ⌝]
+  have : Provable T (⌜φ⌝ : ℕ) := ⟨n, this.mpr h⟩
   exact provable_iff_provable.mp this
 
 open Classical
@@ -63,7 +63,7 @@ open Classical
 def rosser_internalize [Entailment.Consistent T] {φ : Sentence L} : T ⊢ φ → T.RosserProvable (⌜φ⌝ : V) := by
   intro h
   let n : ℕ := ⌜h.get⌝
-  have hn : T.Proof (↑n : V) ⌜φ⌝ := by simp [n, coe_quote_proof_eq]
+  have hn : Proof T (↑n : V) ⌜φ⌝ := by simp [n, coe_quote_proof_eq]
   refine rosser_quote_def₀.mpr ⟨n, hn, ?_⟩
   intro b hb Hb
   rcases eq_nat_of_lt_nat hb with ⟨b, rfl⟩
@@ -79,7 +79,7 @@ open Classical in
 def not_rosserProvable [Entailment.Consistent T] {φ : Sentence L} : T ⊢ ∼φ → ¬T.RosserProvable (⌜φ⌝ : V) := by
   rintro h r
   let n : ℕ := ⌜h.get⌝
-  have hn : T.Proof (↑n : V) ⌜∼φ⌝ := by simp [n, coe_quote_proof_eq]
+  have hn : Proof T (↑n : V) ⌜∼φ⌝ := by simp [n, coe_quote_proof_eq]
   rcases rosser_quote₀.mp r with ⟨b, hb, Hb⟩
   have : b ≤ n := by grind;
   rcases eq_nat_of_le_nat this with ⟨b, rfl⟩
@@ -106,11 +106,11 @@ variable {T : Theory L} [T.Δ₁] [Entailment.Consistent T]
 local prefix:90 "𝗥" => T.rosserPred
 
 theorem rosserProvable_D1 {σ} : T ⊢ σ → 𝗜𝚺₁ ⊢ 𝗥σ := fun h ↦
-  provable_of_models _ _ fun (V : Type) _ _ ↦ by
+  complete 𝗜𝚺₁ _ fun (V : Type) _ _ ↦ by
     simpa [models_iff] using rosser_internalize_sentence h
 
 theorem rosserProvable_rosser {σ} : T ⊢ ∼σ → 𝗜𝚺₁ ⊢ ∼𝗥σ := fun h ↦
-  provable_of_models _ _ fun (V : Type) _ _ ↦ by
+  complete 𝗜𝚺₁ _ fun (V : Type) _ _ ↦ by
     simpa [models_iff] using not_rosserProvable_sentence h
 
 end

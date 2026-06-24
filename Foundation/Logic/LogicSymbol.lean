@@ -23,7 +23,7 @@ namespace LO
 class LogicalConnective (α : Type*)
   extends Top α, Bot α, Tilde α, Arrow α, Wedge α, Vee α
 
-class NegInvolutive (F : Type*) [Tilde F] where
+class TildeInvolutive (F : Type*) [Tilde F] where
   neg_involutive (φ : F) : ∼∼φ = φ
 
 class DeMorgan (F : Type*) [LogicalConnective F] where
@@ -33,9 +33,10 @@ class DeMorgan (F : Type*) [LogicalConnective F] where
   and (φ ψ : F) : ∼(φ ⋏ ψ) = ∼φ ⋎ ∼ψ
   or (φ ψ : F) : ∼(φ ⋎ ψ) = ∼φ ⋏ ∼ψ
 
-alias DeMorgan.neg := NegInvolutive.neg_involutive
+alias DeMorgan.neg := TildeInvolutive.neg_involutive
 
-attribute [simp] NegInvolutive.neg_involutive DeMorgan.verum DeMorgan.falsum DeMorgan.and DeMorgan.or
+attribute [simp, grind =] TildeInvolutive.neg_involutive
+attribute [simp, grind =] DeMorgan.verum DeMorgan.falsum DeMorgan.and DeMorgan.or
 
 /-- Introducing `∼φ` as an abbreviation of `φ 🡒 ⊥`. -/
 class NegAbbrev (F : Type*) [Tilde F] [Arrow F] [Bot F] where
@@ -50,6 +51,20 @@ class ŁukasiewiczAbbrev (F : Type*) [LogicalConnective F] extends NegAbbrev F w
   protected and {φ ψ : F} : φ ⋏ ψ = ∼(φ 🡒 ∼ψ)
 
 attribute [grind =] ŁukasiewiczAbbrev.and ŁukasiewiczAbbrev.or ŁukasiewiczAbbrev.top
+
+section tilde
+
+variable {α : Type*} [Tilde α] [TildeInvolutive α]
+
+@[simp] lemma TildeInvolutive.tilde_injective : Function.Injective (Tilde.tilde : α → α) := by
+  intro φ ψ h
+  simpa using congr_arg (∼·) h
+
+def Tilde.invol : α ↪ α := ⟨Tilde.tilde, TildeInvolutive.tilde_injective⟩
+
+@[simp] lemma Tilde.invol_app (φ : α) : Tilde.invol φ = ∼φ := rfl
+
+end tilde
 
 namespace LogicalConnective
 
@@ -92,7 +107,7 @@ instance : DeMorgan Prop where
   and := fun _ _ => by simp [-not_and, not_and_or]
   or := fun _ _ => by simp [not_or]
 
-instance : NegInvolutive Prop where
+instance : TildeInvolutive Prop where
   neg_involutive := fun _ => by simp
 
 class HomClass (F : Type*) (α β : outParam Type*) [LogicalConnective α] [LogicalConnective β] [FunLike F α β] where
@@ -103,7 +118,7 @@ class HomClass (F : Type*) (α β : outParam Type*) [LogicalConnective α] [Logi
   map_and : ∀ (f : F) (φ ψ : α), f (φ ⋏ ψ) = f φ ⋏ f ψ
   map_or  : ∀ (f : F) (φ ψ : α), f (φ ⋎ ψ) = f φ ⋎ f ψ
 
-attribute [simp] HomClass.map_top HomClass.map_bot HomClass.map_neg HomClass.map_imply HomClass.map_and HomClass.map_or
+attribute [simp, grind =] HomClass.map_top HomClass.map_bot HomClass.map_neg HomClass.map_imply HomClass.map_and HomClass.map_or
 
 namespace HomClass
 
@@ -355,7 +370,7 @@ lemma tilde_def (l : List α) : ∼l = l.map (∼·) := rfl
   |          nil => simp [*]
   | cons a as ih => simp [*, List.cons_append]
 
-@[simp] lemma mem_tilde_iff [NegInvolutive α] {a : α} {l : List α} : a ∈ ∼l ↔ ∼a ∈ l := by
+@[simp] lemma mem_tilde_iff [TildeInvolutive α] {a : α} {l : List α} : a ∈ ∼l ↔ ∼a ∈ l := by
   induction l with
   |          nil => simp [*]
   | cons b bs ih =>
@@ -363,12 +378,12 @@ lemma tilde_def (l : List α) : ∼l = l.map (∼·) := rfl
       simp [ih, this]
     constructor <;> {rintro rfl; simp}
 
-instance [NegInvolutive α] : NegInvolutive (List α) where
+instance [TildeInvolutive α] : TildeInvolutive (List α) where
   neg_involutive l := by
     induction l with
     |          nil => simp [*]
     | cons a as ih =>
-      simp [ih, NegInvolutive.neg_involutive a]
+      simp [ih, TildeInvolutive.neg_involutive a]
 
 end tilde
 
@@ -550,6 +565,30 @@ namespace Finset
 open Classical
 
 variable {α : Type*}
+
+section tilde
+
+variable [Tilde α] [TildeInvolutive α]
+
+instance : Tilde (Finset α) := ⟨fun l ↦ l.map Tilde.invol⟩
+
+lemma tilde_def (s : Finset α) : ∼s = s.map Tilde.invol := rfl
+
+@[simp] lemma mem_tilde_iff {a : α} {s : Finset α} : a ∈ ∼s ↔ ∼a ∈ s := by
+  simp [tilde_def]; grind
+
+instance : TildeInvolutive (Finset α) where
+  neg_involutive s := by ext a; simp
+
+@[simp] lemma tilde_empty : ∼(∅ : Finset α) = ∅ := rfl
+
+@[simp] lemma tilde_insert (a : α) (s : Finset α) : ∼(insert a s) = insert (∼a) (∼s) := by
+  simp [tilde_def]
+
+@[simp] lemma tilde_union (s t : Finset α) : ∼(s ∪ t) = ∼s ∪ ∼t := by
+  simp [tilde_def, Finset.map_union]
+
+end tilde
 
 noncomputable def conj [Top α] [Wedge α] (s : Finset α) : α := s.toList.conj₂
 

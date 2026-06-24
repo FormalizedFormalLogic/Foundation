@@ -697,7 +697,7 @@ variable [DecidableEq F]
 variable {φ ψ χ : F} {Γ Δ : List F}
 variable {𝓢 : S}
 
-instance [Entailment.Minimal 𝓢] [ModalDeMorgan F] [NegInvolutive F] [HasAxiomDNE 𝓢] : HasDiaDuality 𝓢 := ⟨by
+instance [Entailment.Minimal 𝓢] [ModalDeMorgan F] [TildeInvolutive F] [HasAxiomDNE 𝓢] : HasDiaDuality 𝓢 := ⟨by
   intro φ;
   rw [Axioms.DiaDuality, ModalDeMorgan.neg_box, DeMorgan.neg];
   exact E_Id;

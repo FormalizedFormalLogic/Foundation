@@ -10,7 +10,7 @@ public import Foundation.FirstOrder.Bootstrapping.Syntax.Formula.Iteration
 
 namespace LO.FirstOrder.Arithmetic.Bootstrapping
 
-variable {V : Type*} [ORingStructure V] [V ⊧ₘ* 𝗜𝚺₁]
+variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 
 variable {L : Language} [L.Encodable] [L.LORDefinable]
 
@@ -133,7 +133,7 @@ instance : DeMorgan (Semiformula V L n) where
   or _ _ := by ext; simp
   imply _ _ := by ext; simp; rfl
 
-instance : NegInvolutive (Semiformula V L n) where
+instance : TildeInvolutive (Semiformula V L n) where
   neg_involutive _ := by ext; simp
 
 @[simp] lemma neg_all (φ : Semiformula V L (n + 1)) : ∼(∀⁰ φ) = ∃⁰ (∼φ) := by ext; simp

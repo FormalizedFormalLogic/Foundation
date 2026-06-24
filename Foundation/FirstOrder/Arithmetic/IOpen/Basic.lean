@@ -14,33 +14,33 @@ variable {V : Type*} [ORingStructure V]
 
 section IOpen
 
-variable [V ⊧ₘ* 𝗜𝗢𝗽𝗲𝗻]
+variable [V↓[ℒₒᵣ] ⊧* 𝗜𝗢𝗽𝗲𝗻]
 
-instance : V ⊧ₘ* 𝗣𝗔⁻ :=
-  have : V ⊧ₘ* 𝗜𝗢𝗽𝗲𝗻 := inferInstance
+instance : V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ :=
+  have : V↓[ℒₒᵣ] ⊧* 𝗜𝗢𝗽𝗲𝗻 := inferInstance
   models_of_subtheory this
 
-instance : V ⊧ₘ* InductionScheme ℒₒᵣ Semiformula.Open :=
-  have : V ⊧ₘ* 𝗜𝗢𝗽𝗲𝗻 := inferInstance
+instance : V↓[ℒₒᵣ] ⊧* InductionScheme ℒₒᵣ Semiformula.Open :=
+  have : V↓[ℒₒᵣ] ⊧* 𝗜𝗢𝗽𝗲𝗻 := inferInstance
   models_of_subtheory this
 
 @[elab_as_elim]
 lemma succ_induction {P : V → Prop}
-    (hP : ∃ p : Semiformula ℒₒᵣ V 1, p.Open ∧ ∀ x, P x ↔ Semiformula.Evalm V ![x] id p)
+    (hP : ∃ φ : Semiformula ℒₒᵣ V 1, φ.Open ∧ ∀ x, P x ↔ φ.Eval ![x] id)
     (zero : P 0) (succ : ∀ x, P x → P (x + 1)) : ∀ x, P x :=
   InductionScheme.succ_induction (C := Semiformula.Open) (by
-    rcases hP with ⟨p, hp, hhp⟩
+    rcases hP with ⟨φ, hp, hhp⟩
     haveI : Inhabited V := Classical.inhabited_of_nonempty'
-    refine ⟨p.enumarateFVar, Rew.rewriteMap p.idxOfFVar ▹ p, by simp [hp], ?_⟩
+    refine ⟨φ.enumarateFVar, Rew.rewriteMap φ.idxOfFVar ▹ φ, by simp [hp], ?_⟩
     intro x
     simp only [hhp, Nat.succ_eq_add_one, Nat.reduceAdd, Semiformula.eval_rewriteMap]
-    exact Semiformula.eval_iff_of_funEqOn p (by
+    exact Semiformula.eval_iff_of_funEqOn φ (by
       intro z hz
       simp [Semiformula.enumarateFVar_idxOfFVar (Semiformula.mem_fvarList_iff_fvar?.mpr hz)]))
     zero succ
 
 lemma least_number {P : V → Prop}
-    (hP : ∃ p : Semiformula ℒₒᵣ V 1, p.Open ∧ ∀ x, P x ↔ Semiformula.Evalm V ![x] id p)
+    (hP : ∃ φ : Semiformula ℒₒᵣ V 1, φ.Open ∧ ∀ x, P x ↔ φ.Eval ![x] id)
     (zero : P 0) {a} (counterex : ¬P a) : ∃ x, P x ∧ ¬P (x + 1) := by
   by_contra A
   have : ∀ x, P x := by
@@ -551,7 +551,7 @@ prefix: 80 "π₁" => pi₁
 
 prefix: 80 "π₂" => pi₂
 
-@[simp] lemma pair_unpair (a : V) : ⟪π₁ a, π₂ a⟫ = a := by
+@[simp, grind =] lemma pair_unpair (a : V) : ⟪π₁ a, π₂ a⟫ = a := by
   simp only [pi₁, unpair, pi₂]
   split_ifs with h
   · simp [pair, h]
@@ -563,7 +563,7 @@ prefix: 80 "π₂" => pi₂
       _                                 = √a * √a + (a - √a * √a)             := by simp [add_tsub_self_of_le this]
       _                                 = a                                   := add_tsub_self_of_le (by simp)
 
-@[simp] lemma unpair_pair (a b : V) : unpair ⟪a, b⟫ = (a, b) := by
+@[simp, grind =] lemma unpair_pair (a b : V) : unpair ⟪a, b⟫ = (a, b) := by
   simp only [pair]; split_ifs with h
   · have : √(b * b + a) = b := sqrt_eq_of_le_of_le (by simp) (by simpa using le_trans (le_of_lt h) (by simp))
     simp [unpair, this, show ¬b ≤ a from by simpa using h]
@@ -571,9 +571,9 @@ prefix: 80 "π₂" => pi₂
       sqrt_eq_of_le_of_le (by simp) (by simp [two_mul, show b ≤ a from by simpa using h])
     simp [unpair, this, add_assoc]
 
-@[simp] lemma pi₁_pair (a b : V) : π₁ ⟪a, b⟫ = a := by simp [pi₁]
+@[simp, grind =] lemma pi₁_pair (a b : V) : π₁ ⟪a, b⟫ = a := by simp [pi₁]
 
-@[simp] lemma pi₂_pair (a b : V) : π₂ ⟪a, b⟫ = b := by simp [pi₂]
+@[simp, grind =] lemma pi₂_pair (a b : V) : π₂ ⟪a, b⟫ = b := by simp [pi₂]
 
 noncomputable def pairEquiv : V × V ≃ V := ⟨Function.uncurry pair, unpair, fun ⟨a, b⟩ => unpair_pair a b, pair_unpair⟩
 
@@ -670,7 +670,7 @@ lemma pair_lt_pair {a₁ a₂ b₁ b₂ : V} (ha : a₁ < a₂) (hb : b₁ < b�
   · simp [←add_assoc, add_right_comm _ a]; simp [add_right_comm _ (b * b)]
   · simp [←add_assoc, add_right_comm _ b]; simp [add_right_comm _ a]; simp [add_assoc]
 
-@[simp] lemma pair_ext_iff {a₁ a₂ b₁ b₂ : V} : ⟪a₁, b₁⟫ = ⟪a₂, b₂⟫ ↔ a₁ = a₂ ∧ b₁ = b₂ :=
+@[simp, grind =>] lemma pair_ext_iff {a₁ a₂ b₁ b₂ : V} : ⟪a₁, b₁⟫ = ⟪a₂, b₂⟫ ↔ a₁ = a₂ ∧ b₁ = b₂ :=
   ⟨fun e ↦ ⟨by simpa using congr_arg (π₁ ·) e, by simpa using congr_arg (π₂ ·) e⟩, by rintro ⟨rfl, rfl⟩; simp⟩
 
 section
@@ -769,11 +769,11 @@ end IOpen
 /-! ### Polynomial induction -/
 
 @[elab_as_elim]
-lemma polynomial_induction [V ⊧ₘ* 𝗣𝗔⁻] (Γ m) [V ⊧ₘ* 𝗜𝗡𝗗 Γ m]
+lemma polynomial_induction [V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻] (Γ m) [V↓[ℒₒᵣ] ⊧* 𝗜𝗡𝗗 Γ m]
     {P : V → Prop} (hP : Γ-[m]-Predicate P)
     (zero : P 0) (even : ∀ x > 0, P x → P (2 * x)) (odd : ∀ x, P x → P (2 * x + 1)) : ∀ x, P x := by
-  have : V ⊧ₘ* 𝗜𝗡𝗗 Γ m := inferInstance
-  have : V ⊧ₘ* 𝗜𝗢𝗽𝗲𝗻 := models_of_subtheory this
+  have : V↓[ℒₒᵣ] ⊧* 𝗜𝗡𝗗 Γ m := inferInstance
+  have : V↓[ℒₒᵣ] ⊧* 𝗜𝗢𝗽𝗲𝗻 := models_of_subtheory this
   intro x; induction x using InductionOnHierarchy.order_induction
   · exact Γ
   · exact m
@@ -787,15 +787,15 @@ lemma polynomial_induction [V ⊧ₘ* 𝗣𝗔⁻] (Γ m) [V ⊧ₘ* 𝗜𝗡�
       · simpa [←hx] using even (x / 2) (by by_contra A; simp at A; simp [show x = 0 from by simpa [A] using hx] at pos) (IH (x / 2) this)
       · simpa [←hx] using odd (x / 2) (IH (x / 2) this)
 
-@[elab_as_elim] lemma sigma0_polynomial_induction [V ⊧ₘ* 𝗜𝚺₀] {P : V → Prop} (hP : 𝚺₀-Predicate P)
+@[elab_as_elim] lemma sigma0_polynomial_induction [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₀] {P : V → Prop} (hP : 𝚺₀-Predicate P)
     (zero : P 0) (even : ∀ x > 0, P x → P (2 * x)) (odd : ∀ x, P x → P (2 * x + 1)) : ∀ x, P x :=
   polynomial_induction 𝚺 0 (P := P) hP zero even odd
 
-@[elab_as_elim] lemma sigma1_polynomial_induction [V ⊧ₘ* 𝗜𝚺₁] {P : V → Prop} (hP : 𝚺₁-Predicate P)
+@[elab_as_elim] lemma sigma1_polynomial_induction [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] {P : V → Prop} (hP : 𝚺₁-Predicate P)
     (zero : P 0) (even : ∀ x > 0, P x → P (2 * x)) (odd : ∀ x, P x → P (2 * x + 1)) : ∀ x, P x :=
   polynomial_induction 𝚺 1 (P := P) hP zero even odd
 
-@[elab_as_elim] lemma pi1_polynomial_induction [V ⊧ₘ* 𝗜𝚺₁] {P : V → Prop} (hP : 𝚷₁-Predicate P)
+@[elab_as_elim] lemma pi1_polynomial_induction [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] {P : V → Prop} (hP : 𝚷₁-Predicate P)
     (zero : P 0) (even : ∀ x > 0, P x → P (2 * x)) (odd : ∀ x, P x → P (2 * x + 1)) : ∀ x, P x :=
   polynomial_induction 𝚷 1 (P := P) hP zero even odd
 

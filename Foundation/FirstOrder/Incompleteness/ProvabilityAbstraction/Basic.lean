@@ -101,14 +101,17 @@ class SoundOn
   [L.ReferenceableBy L₀] {T₀ : Theory L₀} {T : Theory L}
   (𝔅 : Provability T₀ T) (M : outParam Type*) [Nonempty M] [Structure L₀ M]
   where
-  sound_on {σ} : M ⊧ₘ 𝔅 σ → T ⊢ σ
+  sound_on {σ : Sentence L} : M↓[L₀] ⊧ (𝔅 σ : Sentence L₀) → T ⊢ σ
 export SoundOn (sound_on)
 attribute [simp, grind .] sound_on
 
-lemma syntactical_sound (M) [Nonempty M] [Structure L M] [SoundOn 𝔅 M] [M ⊧ₘ* T₀] : ∀ {σ}, T₀ ⊢ 𝔅 σ → T ⊢ σ := by
+omit [L.ReferenceableBy L₀] in
+lemma syntactical_sound {T₀ T : Theory L} {𝔅 : Provability T₀ T}
+    (M : Type*) [Nonempty M] [Structure L M] [SoundOn 𝔅 M] [M↓[L] ⊧* T₀] :
+    ∀ {σ : Sentence L}, T₀ ⊢ 𝔅 σ → T ⊢ σ := by
   intro σ h;
   apply 𝔅.sound_on;
-  apply models_of_provable (T := T₀);
+  apply models_of_provable (L := L) (T := T₀);
   . infer_instance;
   . exact h;
 

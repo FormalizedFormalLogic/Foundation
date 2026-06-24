@@ -142,7 +142,7 @@ variable {F : Kripke.Frame} [Fintype F] [F.IsIrreflexive] [F.IsTransitive] [F.Is
 
 section model
 
-variable (T) {V : Type*} [ORingStructure V] [V ⊧ₘ* 𝗜𝚺₁]
+variable (T) {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 
 def NegativeSuccessor (φ ψ : V) : Prop := T.ProvabilityComparisonLE (neg ℒₒᵣ φ) (neg ℒₒᵣ ψ)
 
@@ -254,7 +254,7 @@ section model
 
 variable (T)
 
-variable {V : Type*} [ORingStructure V] [V ⊧ₘ* 𝗜𝚺₁]
+variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 
 open Modal ProvabilityLogic Kripke
 

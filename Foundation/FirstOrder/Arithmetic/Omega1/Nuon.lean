@@ -5,7 +5,7 @@ public import Foundation.FirstOrder.Arithmetic.Omega1.Basic
 @[expose] public section
 namespace LO.FirstOrder.Arithmetic
 
-variable {V : Type*} [ORingStructure V] [V ⊧ₘ* 𝗜𝚺₀ + 𝝮₁]
+variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₀ ∪ 𝝮₁]
 
 namespace Nuon
 
@@ -73,7 +73,7 @@ def extDef : 𝚺₀.Semisentence 4 := .mkSigma
 
 @[simp] lemma cons_app_nine {n : ℕ} (a : α) (s : Fin n.succ.succ.succ.succ.succ.succ.succ.succ.succ → α) : (a :> s) 9 = s 8 := rfl
 
-instance ext_defined : 𝚺₀-Function₃ (ext : V → V → V → V) via extDef := .mk fun v ↦ by simp [extDef, ext_graph, numeral_eq_natCast]
+instance ext_defined : 𝚺₀-Function₃ (ext : V → V → V → V) via extDef := .mk fun v ↦ by simp [extDef, ext_graph]
 
 instance ext_Definable : 𝚺₀-Function₃ (ext : V → V → V → V) := ext_defined.to_definable
 
@@ -491,7 +491,7 @@ def isSegmentDef : 𝚺₀.Semisentence 5 := .mkSigma
 
 set_option linter.flexible false in
 instance isSegmentDef_defined : 𝚺₀.Defined (V := V) (λ v ↦ IsSegment (v 0) (v 1) (v 2) (v 3) (v 4)) isSegmentDef := .mk fun v ↦ by
-  simp [IsSegment, isSegmentDef, numeral_eq_natCast]
+  simp [IsSegment, isSegmentDef]
   apply forall₂_congr; intro x _
   constructor
   · rintro ⟨_, h⟩; exact h.symm
@@ -511,12 +511,12 @@ def isSeriesDef : 𝚺₀.Semisentence 6 := .mkSigma
       ∃ y <⁺ T, !extDef y L T (l + 1) ∧
         !segmentDef U L A (lI * l) lI x y”
 
-omit [V ⊧ₘ* 𝗜𝚺₀ + 𝝮₁] in
+omit [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₀ ∪ 𝝮₁] in
 lemma bexs_eq_le_iff {p : V → Prop} {b : V} :
     (∃ a ≤ z, a = b ∧ p a) ↔ (b ≤ z ∧ p b) :=
   ⟨by rintro ⟨a, hp, rfl, hr⟩; exact ⟨hp, hr⟩, by rintro ⟨hp, hr⟩; exact ⟨b, hp, rfl, hr⟩⟩
 
-omit [V ⊧ₘ* 𝗜𝚺₀ + 𝝮₁] in
+omit [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₀ ∪ 𝝮₁] in
 lemma bexs_eq_lt_iff {p : V → Prop} {b : V} :
     (∃ a < z, a = b ∧ p a) ↔ (b < z ∧ p b) :=
   ⟨by rintro ⟨a, hp, rfl, hr⟩; exact ⟨hp, hr⟩, by rintro ⟨hp, hr⟩; exact ⟨b, hp, rfl, hr⟩⟩
@@ -556,7 +556,7 @@ def nuonAuxDef : 𝚺₀.Semisentence 3 := .mkSigma
       !seriesSegmentDef ((2 * A + 1) ^' 128) g (lg ²) A k n”
 
 instance nuonAux_defined : 𝚺₀-Relation₃ (NuonAux : V → V → V → Prop) via nuonAuxDef := .mk fun v ↦ by
-  simp [NuonAux, polyU, polyI, polyL, nuonAuxDef, numeral_eq_natCast]
+  simp [NuonAux, polyU, polyI, polyL, nuonAuxDef]
 
 instance nuonAux_definable : 𝚺₀-Relation₃ (NuonAux : V → V → V → Prop) := nuonAux_defined.to_definable
 

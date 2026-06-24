@@ -13,7 +13,7 @@ variable {V : Type*} [ORingStructure V]
 
 section ISigma0
 
-variable [V ⊧ₘ* 𝗜𝚺₀]
+variable [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₀]
 
 lemma log_exists_unique_pos {y : V} (hy : 0 < y) : ∃! x, x < y ∧ ∃ y' ≤ y, Exponential x y' ∧ y < 2 * y' := by
   have : ∃ x < y, ∃ y' ≤ y, Exponential x y' ∧ y < 2 * y' := by
@@ -71,7 +71,7 @@ lemma log_graph {x y : V} : x = log y ↔ (y = 0 → x = 0) ∧ (0 < y → x < y
 def _root_.LO.FirstOrder.Arithmetic.logDef : 𝚺₀.Semisentence 2 := .mkSigma
   “x y. (y = 0 → x = 0) ∧ (0 < y → x < y ∧ ∃ y' <⁺ y, !exponentialDef x y' ∧ y < 2 * y')”
 
-instance log_defined : 𝚺₀-Function₁[V] log via logDef := .mk fun v ↦ by simp [logDef, log_graph, numeral_eq_natCast]
+instance log_defined : 𝚺₀-Function₁[V] log via logDef := .mk fun v ↦ by simp [logDef, log_graph]
 
 instance log_definable : 𝚺₀-Function₁ (log : V → V) := log_defined.to_definable
 
@@ -406,7 +406,7 @@ lemma fbit_eq_zero_of_le {a i : V} (hi : ‖a‖ ≤ i) : fbit a i = 0 := by sim
 def _root_.LO.FirstOrder.Arithmetic.fbitDef : 𝚺₀.Semisentence 3 := .mkSigma
   “b a i. ∃ x <⁺ a, !bexpDef x a i ∧ ∃ y <⁺ a, !divDef y a x ∧ !remDef b y 2”
 
-instance fbit_defined : 𝚺₀-Function₂[V] fbit via fbitDef := .mk fun v ↦ by simp [fbitDef, fbit, numeral_eq_natCast]
+instance fbit_defined : 𝚺₀-Function₂[V] fbit via fbitDef := .mk fun v ↦ by simp [fbitDef, fbit]
 
 instance fbit_definable : 𝚺₀-Function₂[V] fbit := fbit_defined.to_definable
 
@@ -432,7 +432,7 @@ end ISigma0
 
 section ISigma1
 
-variable [V ⊧ₘ* 𝗜𝚺₁]
+variable [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 
 @[simp] lemma log_exponential (a : V) : log (Exp.exp a) = a := (exponential_exp a).log_eq_of_exp
 

@@ -1,5 +1,6 @@
 module
 
+public import Foundation.FirstOrder.Arithmetic.Basic.Model
 public import Foundation.FirstOrder.Bootstrapping.Syntax
 
 @[expose] public section
@@ -7,7 +8,7 @@ open Classical
 
 namespace LO.FirstOrder.Arithmetic
 
-variable {V : Type*} [ORingStructure V] [V ⊧ₘ* 𝗜𝚺₁]
+variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 
 namespace Bootstrapping.Arithmetic
 
@@ -119,9 +120,9 @@ noncomputable def fixedpoint (θ : Semisentence ℒₒᵣ 1) : Sentence ℒₒ�
 
 theorem diagonal (θ : Semisentence ℒₒᵣ 1) :
     T ⊢ fixedpoint θ 🡘 θ/[⌜fixedpoint θ⌝] :=
-  haveI : 𝗘𝗤 ⪯ T := Entailment.WeakerThan.trans (𝓣 := 𝗜𝚺₁) inferInstance inferInstance
-  provable_of_models _ _ fun (V : Type) _ _ ↦ by
-    haveI : V ⊧ₘ* 𝗜𝚺₁ := ModelsTheory.of_provably_subtheory V 𝗜𝚺₁ T inferInstance
+  haveI : 𝗘𝗤 _ ⪯ T := Entailment.WeakerThan.trans (𝓣 := 𝗜𝚺₁) inferInstance inferInstance
+  complete.{0} T _ fun (V : Type) _ _ ↦ by
+    haveI : V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁ := ModelsTheory.of_provably_subtheory V 𝗜𝚺₁ T inferInstance
     suffices V ⊧/![] (fixedpoint θ) ↔ V ⊧/![⌜fixedpoint θ⌝] θ by
       simpa [models_iff, Matrix.constant_eq_singleton]
     let t : V := ⌜diag θ⌝
@@ -129,8 +130,8 @@ theorem diagonal (θ : Semisentence ℒₒᵣ 1) :
       simp [t, fixedpoint, substNumeral_app_quote]
     calc
       V ⊧/![] (fixedpoint θ)
-    _ ↔ V ⊧/![t] (diag θ)         := by simp [fixedpoint, Matrix.constant_eq_singleton, t]
-    _ ↔ V ⊧/![substNumeral t t] θ := by simp [diag, Matrix.constant_eq_singleton]
+    _ ↔ V ⊧/![t] (diag θ)         := by simp [fixedpoint, t]
+    _ ↔ V ⊧/![substNumeral t t] θ := by simp [diag]
     _ ↔ V ⊧/![⌜fixedpoint θ⌝] θ   := by simp [ht]
 
 end Diagonalization
@@ -147,17 +148,18 @@ noncomputable def multifixedpoint (θ : Fin k → Semisentence ℒₒᵣ k) (i :
 
 theorem multidiagonal (θ : Fin k → Semisentence ℒₒᵣ k) :
     T ⊢ multifixedpoint θ i 🡘 (Rew.subst fun j ↦ ⌜multifixedpoint θ j⌝) ▹ (θ i) :=
-  haveI : 𝗘𝗤 ⪯ T := Entailment.WeakerThan.trans (𝓣 := 𝗜𝚺₁) inferInstance inferInstance
-  provable_of_models _ _ fun (V : Type) _ _ ↦ by
-    haveI : V ⊧ₘ* 𝗜𝚺₁ := ModelsTheory.of_provably_subtheory V 𝗜𝚺₁ T inferInstance
-    suffices V ⊧/![] (multifixedpoint θ i) ↔ V ⊧/(fun i ↦ ⌜multifixedpoint θ i⌝) (θ i) by simpa [models_iff]
+  haveI : 𝗘𝗤 _ ⪯ T := Entailment.WeakerThan.trans (𝓣 := 𝗜𝚺₁) inferInstance inferInstance
+  complete.{0} T _ fun (V : Type) _ _ ↦ by
+    haveI : V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁ := ModelsTheory.of_provably_subtheory V 𝗜𝚺₁ T inferInstance
+    suffices V ⊧/![] (multifixedpoint θ i) ↔ V ⊧/(fun i ↦ ⌜multifixedpoint θ i⌝) (θ i) by
+      simpa [models_iff, Function.comp_def, Matrix.empty_eq]
     let t : Fin k → V := fun i ↦ ⌜multidiag (θ i)⌝
     have ht : ∀ i, substNumerals (t i) t = ⌜multifixedpoint θ i⌝ := by
       intro i; simp [t, multifixedpoint, substNumerals_app_quote_quote]
     calc
       V ⊧/![] (multifixedpoint θ i)
-        ↔ V ⊧/t (multidiag (θ i))                   := by simp [t, multifixedpoint]
-      _ ↔ V ⊧/(fun i ↦ substNumerals (t i) t) (θ i) := by simp [multidiag, ← funext_iff]
+        ↔ V ⊧/t (multidiag (θ i))                   := by simp [t, multifixedpoint, Function.comp_def]
+      _ ↔ V ⊧/(fun i ↦ substNumerals (t i) t) (θ i) := by simp [multidiag, ← funext_iff, Function.comp_def]
       _ ↔ V ⊧/(fun i ↦ ⌜multifixedpoint θ i⌝) (θ i) := by simp [ht]
 
 noncomputable def exclusiveMultifixedpoint (θ : Fin k → Semisentence ℒₒᵣ k) (i : Fin k) : Sentence ℒₒᵣ :=
@@ -197,21 +199,21 @@ noncomputable def parameterizedFixedpoint (θ : Semisentence ℒₒᵣ (k + 1)) 
 
 theorem parameterized_diagonal (θ : Semisentence ℒₒᵣ (k + 1)) :
     T ⊢ ∀⁰* (parameterizedFixedpoint θ 🡘 “!θ !!(⌜parameterizedFixedpoint θ⌝) ⋯”) :=
-  haveI : 𝗘𝗤 ⪯ T := Entailment.WeakerThan.trans (𝓣 := 𝗜𝚺₁) inferInstance inferInstance
-  provable_of_models _ _ fun (V : Type) _ _ ↦ by
-    haveI : V ⊧ₘ* 𝗜𝚺₁ := ModelsTheory.of_provably_subtheory V 𝗜𝚺₁ T inferInstance
+  haveI : 𝗘𝗤 _ ⪯ T := Entailment.WeakerThan.trans (𝓣 := 𝗜𝚺₁) inferInstance inferInstance
+  complete.{0} T _ fun (V : Type) _ _ ↦ by
+    haveI : V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁ := ModelsTheory.of_provably_subtheory V 𝗜𝚺₁ T inferInstance
     suffices
         ∀ params : Fin k → V,
           V ⊧/params (parameterizedFixedpoint θ) ↔ V ⊧/(⌜parameterizedFixedpoint θ⌝ :> params) θ by
-      simpa [models_iff, Matrix.comp_vecCons', BinderNotation.finSuccItr]
+      simpa [models_iff, Matrix.comp_vecCons', BinderNotation.finSuccItr, Function.comp_def, Matrix.empty_eq]
     intro params
     let t : V := ⌜parameterizedDiag θ⌝
     have ht : substNumeralParams k t t = ⌜parameterizedFixedpoint θ⌝ := by
       simp [t, substNumeralParams_app_quote, parameterizedFixedpoint]
     calc
       V ⊧/params (parameterizedFixedpoint θ)
-        ↔ V ⊧/(t :> params) (parameterizedDiag θ)       := by simp [parameterizedFixedpoint, Matrix.comp_vecCons', t]
-      _ ↔ V ⊧/(substNumeralParams k t t :> params) θ    := by simp [parameterizedDiag, Matrix.comp_vecCons', BinderNotation.finSuccItr]
+        ↔ V ⊧/(t :> params) (parameterizedDiag θ)       := by simp [parameterizedFixedpoint, Matrix.comp_vecCons', t, Function.comp_def]
+      _ ↔ V ⊧/(substNumeralParams k t t :> params) θ    := by simp [parameterizedDiag, Matrix.comp_vecCons', BinderNotation.finSuccItr, Function.comp_def]
       _ ↔ V ⊧/(⌜parameterizedFixedpoint θ⌝ :> params) θ := by simp [ht]
 
 theorem parameterized_diagonal₁ (θ : Semisentence ℒₒᵣ 2) :

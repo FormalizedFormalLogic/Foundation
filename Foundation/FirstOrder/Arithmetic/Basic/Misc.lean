@@ -135,14 +135,12 @@ def bexsLTSucc (t : Semiterm L ξ n) (φ : Semiformula L ξ (n + 1)) : Semiformu
 
 variable {M : Type*} {s : Structure L M} [LT M] [One M] [Add M] [Structure.LT L M] [Structure.One L M] [Structure.Add L M]
 
-variable {t : Semiterm L ξ n} {φ : Semiformula L ξ (n + 1)}
-
-lemma eval_ballLTSucc {e ε} :
-    Eval s e ε (φ.ballLTSucc t) ↔ ∀ x < t.val s e ε + 1, Eval s (x :> e) ε φ := by
+lemma eval_ballLTSucc {φ : Semiformula L ξ (n + 1)} {t : Semiterm L ξ n} {fv bv} :
+    (φ.ballLTSucc t).Eval (M := M) fv bv ↔ ∀ x < t.val (M := M) fv bv + 1, φ.Eval (M := M) (x :> fv) bv := by
   simp [ballLTSucc, Semiterm.Operator.numeral]
 
-lemma eval_bexsLTSucc {e ε} :
-    Eval s e ε (φ.bexsLTSucc t) ↔ ∃ x < t.val s e ε + 1, Eval s (x :> e) ε φ := by
+lemma eval_bexsLTSucc {φ : Semiformula L ξ (n + 1)} {t : Semiterm L ξ n} {fv bv} :
+    (φ.bexsLTSucc t).Eval (M := M) fv bv ↔ ∃ x < t.val (M := M) fv bv + 1, φ.Eval (M := M) (x :> fv) bv := by
   simp [bexsLTSucc, Semiterm.Operator.numeral]
 
 end Semiformula
@@ -166,8 +164,6 @@ macro_rules
     `(Semiformula.bexsLTSucc ⤫term(lit)[ $binders* | $fbinders* | $t ] ⤫formula(lit)[ $binders'* | $fbinders* | $φ ])
 
 end BinderNotation
-
-abbrev ArithmeticTheory := Theory ℒₒᵣ
 
 end FirstOrder
 

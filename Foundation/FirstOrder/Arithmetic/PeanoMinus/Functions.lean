@@ -14,7 +14,7 @@ This file provides functions and relations defined in $\mathsf{PA^-}
 
 namespace LO.FirstOrder.Arithmetic
 
-variable {V : Type*} [ORingStructure V] [V ⊧ₘ* 𝗣𝗔⁻]
+variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻]
 
 variable {a b c : V}
 
@@ -230,8 +230,8 @@ def IsPrime (a : V) : Prop := 1 < a ∧ ∀ b ≤ a, b ∣ a → b = 1 ∨ b = a
 def _root_.LO.FirstOrder.Arithmetic.isPrime : 𝚺₀.Semisentence 1 :=
   .mkSigma “x. 1 < x ∧ ∀ y <⁺ x, !dvd.val y x → y = 1 ∨ y = x”
 
-instance isPrime_defined : 𝚺₀-Predicate (λ a : V ↦ IsPrime a) via isPrime := .mk fun v ↦ by
-  simp [Semiformula.eval_substs, Matrix.comp_vecCons', Matrix.constant_eq_singleton, IsPrime, isPrime]
+instance isPrime_defined : 𝚺₀-Predicate (fun a : V ↦ IsPrime a) via isPrime := .mk fun v ↦ by
+  simp [Semiformula.eval_substs, IsPrime, isPrime]
 
 end Prime
 

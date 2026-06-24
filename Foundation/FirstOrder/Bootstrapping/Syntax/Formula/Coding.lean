@@ -41,7 +41,7 @@ end LO
 
 namespace LO
 
-variable {V : Type*} [ORingStructure V] [V ⊧ₘ* 𝗜𝚺₁]
+variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 
 variable {L : Language} [L.Encodable] [L.LORDefinable]
 
@@ -92,8 +92,8 @@ noncomputable instance : LCWQIsoGödelQuote (Semiproposition L) (Bootstrapping.S
 @[simp] lemma typed_quote_shift (φ : Semiproposition L n) :
     (⌜Rewriting.shift φ⌝ : Bootstrapping.Semiformula V L n) = Bootstrapping.Semiformula.shift ⌜φ⌝ := by
   induction φ using Semiformula.rec'
-  case hrel => simp [rew_rel, *]; rfl
-  case hnrel => simp [rew_nrel, *]; rfl
+  case hrel => simp [*]; rfl
+  case hnrel => simp [*]; rfl
   case hverum => simp
   case hfalsum => simp
   case hand => simp [*]
@@ -104,8 +104,8 @@ noncomputable instance : LCWQIsoGödelQuote (Semiproposition L) (Bootstrapping.S
 @[simp] lemma typed_quote_substs {n m} (w : Fin n → SyntacticSemiterm L m) (φ : Semiproposition L n) :
     (⌜φ ⇜ w⌝ : Bootstrapping.Semiformula V L m) = Bootstrapping.Semiformula.subst (fun i ↦ ⌜w i⌝) ⌜φ⌝ := by
   induction φ using Semiformula.rec' generalizing m
-  case hrel => simp [rew_rel, *]; rfl
-  case hnrel => simp [rew_nrel, *]; rfl
+  case hrel => simp [*]; rfl
+  case hnrel => simp [*]; rfl
   case hverum => simp
   case hfalsum => simp
   case hand => simp [*]
@@ -298,8 +298,8 @@ lemma quote_eq_encode (σ : Semisentence L n) : (⌜σ⌝ : V) = ↑(encode σ) 
 lemma coe_quote_eq_quote (σ : Semisentence L n) : (↑(⌜σ⌝ : ℕ) : V) = ⌜σ⌝ := by
   simp [quote_eq_encode]
 
-@[simp] lemma val_quote {ξ n e ε} (σ : Semisentence L n) :
-    Semiterm.valm V e ε (⌜σ⌝ : Semiterm ℒₒᵣ ξ m) = ⌜σ⌝ := by
+@[simp] lemma val_quote {bv : Fin m → V} {fv : ξ → V} (σ : Semisentence L n) :
+    (⌜σ⌝ : Semiterm ℒₒᵣ ξ m).val bv fv = ⌜σ⌝ := by
   simp [gödelNumber'_def, quote_eq_encode, numeral_eq_natCast]
 
 @[simp] lemma coe_quote {ξ n} (σ : Semisentence L n) : ↑(⌜σ⌝ : ℕ) = (⌜σ⌝ : Semiterm ℒₒᵣ ξ m) := by

@@ -11,7 +11,7 @@ public import Foundation.FirstOrder.Bootstrapping.Syntax.Term.Functions
 
 namespace LO.FirstOrder.Arithmetic
 
-variable {V : Type*} [ORingStructure V] [V ⊧ₘ* 𝗜𝚺₁]
+variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 
 noncomputable def matrixToVec (v : Fin k → V) : V := Matrix.foldr (fun t w ↦ t ∷ w) 0 v
 

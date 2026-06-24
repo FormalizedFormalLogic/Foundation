@@ -28,11 +28,11 @@ theorem inconsistent_independent [ArithmeticTheory.SoundOnHierarchy T 𝚺 1] : 
 instance [Consistent T] : T ⪱ T + T.Con :=
   StrictlyWeakerThan.of_unprovable_provable (φ := ↑T.consistent)
     (consistent_unprovable T)
-    (Entailment.by_axm _ (by simp [Theory.add_def]))
+    (Entailment.by_axm (by simp [Theory.add_def]))
 
 instance [ArithmeticTheory.SoundOnHierarchy T 𝚺 1] : T ⪱ T + T.Incon :=
   StrictlyWeakerThan.of_unprovable_provable (φ := ∼↑T.consistent)
     (inconsistent_unprovable T)
-    (Entailment.by_axm _ (by simp [Theory.add_def]))
+    (Entailment.by_axm (by simp [Theory.add_def]))
 
 end LO.FirstOrder.Arithmetic
