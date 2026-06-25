@@ -215,26 +215,26 @@ section model
 
 variable {M} [Nonempty M] [Structure L M]
 
-@[simp, grind .] lemma models₀_top : M ⊧ₘ f ⊤ := by simp [Realization.interpret];
-@[simp, grind .] lemma models₀_bot : ¬M ⊧ₘ f ⊥ := by simp [Realization.interpret];
+@[simp, grind .] lemma models₀_top : M↓[L] ⊧ f ⊤ := by simp [Realization.interpret];
+@[simp, grind .] lemma models₀_bot : ¬M↓[L] ⊧ f ⊥ := by simp [Realization.interpret];
 
 @[simp, grind ⇒]
-lemma iff_models₀_neg : M ⊧ₘ f (∼A) ↔ ¬(M ⊧ₘ (f A)) := by simp [Realization.interpret];
+lemma iff_models₀_neg : M↓[L] ⊧ f (∼A) ↔ ¬(M↓[L] ⊧ (f A)) := by simp [Realization.interpret];
 
 @[simp, grind ⇒]
-lemma iff_models₀_imp : M ⊧ₘ f (A 🡒 B) ↔ (M ⊧ₘ (f A) → M ⊧ₘ (f B)) := by simp [Realization.interpret];
+lemma iff_models₀_imp : M↓[L] ⊧ f (A 🡒 B) ↔ (M↓[L] ⊧ (f A) → M↓[L] ⊧ (f B)) := by simp [Realization.interpret];
 
 @[simp, grind ⇒]
-lemma iff_models₀_and : M ⊧ₘ f (A ⋏ B) ↔ M ⊧ₘ (f A) ∧ M ⊧ₘ (f B) := by simp [Realization.interpret];
+lemma iff_models₀_and : M↓[L] ⊧ f (A ⋏ B) ↔ M↓[L] ⊧ (f A) ∧ M↓[L] ⊧ (f B) := by simp [Realization.interpret];
 
 @[simp, grind ⇒]
-lemma iff_models₀_or : M ⊧ₘ f (A ⋎ B) ↔ M ⊧ₘ (f A) ∨ M ⊧ₘ (f B) := by simp [Realization.interpret]; tauto;
+lemma iff_models₀_or : M↓[L] ⊧ f (A ⋎ B) ↔ M↓[L] ⊧ (f A) ∨ M↓[L] ⊧ (f B) := by simp [Realization.interpret]; tauto;
 
 @[simp, grind ⇒]
-lemma iff_models₀_box : M ⊧ₘ f (□A) ↔ M ⊧ₘ 𝔅 (f A) := by simp [Realization.interpret];
+lemma iff_models₀_box : M↓[L] ⊧ f (□A) ↔ M↓[L] ⊧ 𝔅 (f A) := by simp [Realization.interpret];
 
 @[simp, grind ⇒]
-lemma iff_models₀_boxItr {n : ℕ} : M ⊧ₘ f (□^[n] A) ↔ M ⊧ₘ 𝔅^[n] (f A) := by simp;
+lemma iff_models₀_boxItr {n : ℕ} : M↓[L] ⊧ f (□^[n] A) ↔ M↓[L] ⊧ 𝔅^[n] (f A) := by simp;
 
 end model
 

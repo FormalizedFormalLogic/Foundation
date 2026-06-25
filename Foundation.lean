@@ -81,43 +81,43 @@ public import Foundation.FirstOrder.Completeness.CounterModel
 public import Foundation.FirstOrder.Hauptsatz
 public import Foundation.FirstOrder.Incompleteness.Consistency
 public import Foundation.FirstOrder.Incompleteness.Dense
--- public import Foundation.FirstOrder.Incompleteness.Examples
+public import Foundation.FirstOrder.Incompleteness.Examples
 public import Foundation.FirstOrder.Incompleteness.First
 public import Foundation.FirstOrder.Incompleteness.GödelRosser
--- public import Foundation.FirstOrder.Incompleteness.Halting
+public import Foundation.FirstOrder.Incompleteness.Halting
 public import Foundation.FirstOrder.Incompleteness.Jeroslow
 public import Foundation.FirstOrder.Incompleteness.Löb
 public import Foundation.FirstOrder.Incompleteness.ProvabilityAbstraction.Basic
--- public import Foundation.FirstOrder.Incompleteness.ProvabilityAbstraction.Height
+public import Foundation.FirstOrder.Incompleteness.ProvabilityAbstraction.Height
 public import Foundation.FirstOrder.Incompleteness.ProvabilityAbstraction.Refutability
 public import Foundation.FirstOrder.Incompleteness.RestrictedProvability
 public import Foundation.FirstOrder.Incompleteness.RosserProvability
--- public import Foundation.FirstOrder.Incompleteness.Second
+public import Foundation.FirstOrder.Incompleteness.Second
 public import Foundation.FirstOrder.Incompleteness.StandardProvability
 public import Foundation.FirstOrder.Incompleteness.Tarski
 public import Foundation.FirstOrder.Incompleteness.WitnessComparison
 public import Foundation.FirstOrder.Incompleteness.Yablo
--- public import Foundation.FirstOrder.Interpretation
+public import Foundation.FirstOrder.Interpretation
 public import Foundation.FirstOrder.Intuitionistic.Deduction
 public import Foundation.FirstOrder.Intuitionistic.Formula
 public import Foundation.FirstOrder.Intuitionistic.Rew
 public import Foundation.FirstOrder.Kripke.Basic
 public import Foundation.FirstOrder.Kripke.Intuitionistic
--- public import Foundation.FirstOrder.Kripke.WeakForcing
+public import Foundation.FirstOrder.Kripke.WeakForcing
 public import Foundation.FirstOrder.NegationTranslation.GoedelGentzen
 public import Foundation.FirstOrder.Order.Le
 public import Foundation.FirstOrder.Polarity
--- public import Foundation.FirstOrder.SetTheory.Basic
--- public import Foundation.FirstOrder.SetTheory.Basic.Axioms
--- public import Foundation.FirstOrder.SetTheory.Basic.Misc
--- public import Foundation.FirstOrder.SetTheory.Basic.Model
--- public import Foundation.FirstOrder.SetTheory.Function
--- public import Foundation.FirstOrder.SetTheory.LoewenheimSkolem
--- public import Foundation.FirstOrder.SetTheory.Ordinal
--- public import Foundation.FirstOrder.SetTheory.TransitiveModel
--- public import Foundation.FirstOrder.SetTheory.Universe
--- public import Foundation.FirstOrder.SetTheory.Z
--- public import Foundation.FirstOrder.Skolemization.Hull
+public import Foundation.FirstOrder.SetTheory.Basic
+public import Foundation.FirstOrder.SetTheory.Basic.Axioms
+public import Foundation.FirstOrder.SetTheory.Basic.Misc
+public import Foundation.FirstOrder.SetTheory.Basic.Model
+public import Foundation.FirstOrder.SetTheory.Function
+public import Foundation.FirstOrder.SetTheory.LoewenheimSkolem
+public import Foundation.FirstOrder.SetTheory.Ordinal
+public import Foundation.FirstOrder.SetTheory.TransitiveModel
+public import Foundation.FirstOrder.SetTheory.Universe
+public import Foundation.FirstOrder.SetTheory.Z
+public import Foundation.FirstOrder.Skolemization.Hull
 public import Foundation.FirstOrder.Ultraproduct
 public import Foundation.Init
 public import Foundation.InterpretabilityLogic.Axioms
@@ -187,7 +187,7 @@ public import Foundation.InterpretabilityLogic.Veltman.Logic.IL_R
 public import Foundation.InterpretabilityLogic.Veltman.Logic.IL_R_W
 public import Foundation.InterpretabilityLogic.Veltman.Logic.IL_W
 public import Foundation.LinearLogic.FirstOrder.Calculus
--- public import Foundation.LinearLogic.FirstOrder.ClassicalEmbedding
+public import Foundation.LinearLogic.FirstOrder.ClassicalEmbedding
 public import Foundation.LinearLogic.FirstOrder.Formula
 public import Foundation.LinearLogic.FirstOrder.Rew
 public import Foundation.LinearLogic.LogicSymbol
@@ -212,8 +212,8 @@ public import Foundation.Modal.Axioms
 public import Foundation.Modal.Boxdot.Basic
 public import Foundation.Modal.Boxdot.GLPoint3_GrzPoint3
 public import Foundation.Modal.Boxdot.GL_Grz
--- public import Foundation.Modal.Boxdot.GL_S
--- public import Foundation.Modal.Boxdot.Grz_S
+public import Foundation.Modal.Boxdot.GL_S
+public import Foundation.Modal.Boxdot.Grz_S
 public import Foundation.Modal.Boxdot.Jerabek
 public import Foundation.Modal.Boxdot.K4_S4
 public import Foundation.Modal.Boxdot.Ver_Triv
@@ -349,7 +349,7 @@ public import Foundation.Modal.Logic.GLPlusBoxBot.Basic
 public import Foundation.Modal.Logic.GLPoint3OplusBoxBot.Basic
 public import Foundation.Modal.Logic.Global
 public import Foundation.Modal.Logic.S.Basic
--- public import Foundation.Modal.Logic.S.Consistent
+public import Foundation.Modal.Logic.S.Consistent
 public import Foundation.Modal.Logic.SumNormal
 public import Foundation.Modal.Logic.SumQuasiNormal
 public import Foundation.Modal.LogicSymbol
@@ -376,7 +376,7 @@ public import Foundation.Modal.VanBentham.StandardTranslation
 public import Foundation.Propositional.Boolean.Basic
 public import Foundation.Propositional.Boolean.Hilbert
 public import Foundation.Propositional.Boolean.NNFormula
--- public import Foundation.Propositional.Boolean.Tait
+public import Foundation.Propositional.Boolean.Tait
 public import Foundation.Propositional.Boolean.ZeroSubst
 public import Foundation.Propositional.ConsistentTableau
 public import Foundation.Propositional.Dialectica.Basic
@@ -459,26 +459,26 @@ public import Foundation.Propositional.Neighborhood.NB.Basic
 public import Foundation.Propositional.Neighborhood.NB.Hilbert.Basic
 public import Foundation.Propositional.Neighborhood.NB.Hilbert.WF
 public import Foundation.Propositional.Slash
--- public import Foundation.Propositional.Tait.Calculus
+public import Foundation.Propositional.Tait.Calculus
 public import Foundation.Propositional.Translation
--- public import Foundation.ProvabilityLogic.Arithmetic
--- public import Foundation.ProvabilityLogic.Classification.LetterlessTrace
--- public import Foundation.ProvabilityLogic.Classification.Result
--- public import Foundation.ProvabilityLogic.Classification.Trace
--- public import Foundation.ProvabilityLogic.GL.Completeness
--- public import Foundation.ProvabilityLogic.GL.Soundness
--- public import Foundation.ProvabilityLogic.GL.Uniform
--- public import Foundation.ProvabilityLogic.GL.Unprovability
--- public import Foundation.ProvabilityLogic.Grz.Completeness
--- public import Foundation.ProvabilityLogic.N.Soundness
--- public import Foundation.ProvabilityLogic.Realization
--- public import Foundation.ProvabilityLogic.S.Completeness
--- public import Foundation.ProvabilityLogic.S.Soundness
--- public import Foundation.ProvabilityLogic.SolovaySentences
+public import Foundation.ProvabilityLogic.Arithmetic
+public import Foundation.ProvabilityLogic.Classification.LetterlessTrace
+public import Foundation.ProvabilityLogic.Classification.Result
+public import Foundation.ProvabilityLogic.Classification.Trace
+public import Foundation.ProvabilityLogic.GL.Completeness
+public import Foundation.ProvabilityLogic.GL.Soundness
+public import Foundation.ProvabilityLogic.GL.Uniform
+public import Foundation.ProvabilityLogic.GL.Unprovability
+public import Foundation.ProvabilityLogic.Grz.Completeness
+public import Foundation.ProvabilityLogic.N.Soundness
+public import Foundation.ProvabilityLogic.Realization
+public import Foundation.ProvabilityLogic.S.Completeness
+public import Foundation.ProvabilityLogic.S.Soundness
+public import Foundation.ProvabilityLogic.SolovaySentences
 public import Foundation.SecondOrder.Derivation
--- public import Foundation.SecondOrder.Semantics
--- public import Foundation.SecondOrder.Syntax.Formula
--- public import Foundation.SecondOrder.Syntax.Rew
+public import Foundation.SecondOrder.Semantics
+public import Foundation.SecondOrder.Syntax.Formula
+public import Foundation.SecondOrder.Syntax.Rew
 public import Foundation.Semantics.Algebra.Modal.Basic
 public import Foundation.Semantics.Algebra.Modal.Magari
 public import Foundation.Semantics.CoherenceSpace.Basic
