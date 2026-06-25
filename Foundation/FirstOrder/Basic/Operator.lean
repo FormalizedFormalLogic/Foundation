@@ -407,7 +407,7 @@ variable {L : Language}
 end Operator
 
 def Operator.val {M : Type w} [s : Structure L M] {k} (v : Fin k → M) (o : Operator L k) : Prop :=
-  Semiformula.Eval v Empty.elim o.sentence
+  o.sentence.Eval v Empty.elim
 
 section
 

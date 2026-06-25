@@ -454,7 +454,7 @@ lemma eval_toEmpty [DecidableEq ξ] {n} {φ : Semiformula L ξ n} (hp : φ.freeV
   simp [Semiformula.univCl, ←eval_toEmpty (f := default)]
 
 @[simp] lemma eval_enumarateFVar_idxOfFVar_eq_id [DecidableEq M] [Inhabited M] (φ : Semiformula L M n) (v) :
-    Semiformula.Eval v (fun x ↦ φ.enumarateFVar (φ.idxOfFVar x)) φ ↔ Semiformula.Eval v id φ :=
+    φ.Eval v (fun x ↦ φ.enumarateFVar (φ.idxOfFVar x)) ↔ φ.Eval v id :=
   Semiformula.eval_iff_of_funEqOn _ <| by
     intro x hx; simp [Semiformula.enumarateFVar_idxOfFVar (Semiformula.mem_fvarList_iff_fvar?.mpr hx)]
 

@@ -123,13 +123,13 @@ variable {L₁ L₂ M}
   induction t <;> simp [Language.Hom.func_add₂, Function.comp_def, *]
 
 @[simp] lemma eval_lMap_add₁ {n} (φ : Semiformula L₁ μ n) (e : Fin n → M) (f : μ → M) :
-    Semiformula.Eval (s := add L₁ L₂ M) e f (Semiformula.lMap (Language.Hom.add₁ L₁ L₂) φ)
-    ↔ Semiformula.Eval (s := str₁) e f φ := by
+    (Semiformula.lMap (Language.Hom.add₁ L₁ L₂) φ).Eval (s := add L₁ L₂ M) e f
+    ↔ φ.Eval (s := str₁) e f := by
   induction φ using Semiformula.rec' <;> simp [*, Language.Hom.rel_add₁, Function.comp_def]
 
 @[simp] lemma eval_lMap_add₂ {n} (φ : Semiformula L₂ μ n) (e : Fin n → M) (f : μ → M) :
-    Semiformula.Eval (s := add L₁ L₂ M) e f (Semiformula.lMap (Language.Hom.add₂ L₁ L₂) φ)
-    ↔ Semiformula.Eval (s := str₂) e f φ := by
+    (Semiformula.lMap (Language.Hom.add₂ L₁ L₂) φ).Eval (s := add L₁ L₂ M) e f
+    ↔ φ.Eval (s := str₂) e f := by
   induction φ using Semiformula.rec' <;> simp [*, Language.Hom.rel_add₂, Function.comp_def]
 
 end add
@@ -151,8 +151,8 @@ instance sigma : Structure (Language.sigma L) M where
   induction t <;> simp [*, Language.Hom.func_sigma, Function.comp_def]
 
 @[simp] lemma eval_lMap_sigma {n} (φ : Semiformula (L i) μ n) (e : Fin n → M) (f : μ → M) :
-    Semiformula.Eval (s := sigma L M) e f (Semiformula.lMap (Language.Hom.sigma L i) φ)
-    ↔ Semiformula.Eval (s := str i) e f φ := by
+    (Semiformula.lMap (Language.Hom.sigma L i) φ).Eval (s := sigma L M) e f
+    ↔ φ.Eval (s := str i) e f := by
   induction φ using Semiformula.rec' <;> simp [*, Language.Hom.rel_sigma, Function.comp_def]
 
 end sigma
@@ -178,7 +178,7 @@ lemma Semiterm.val_uLift {e : Fin n → ULift.{v'} M} {f : ξ → ULift.{v'} M} 
   induction t <;> simp [*, Function.comp_def]
 
 lemma Semiformula.eval_uLift {e : Fin n → ULift.{v'} M} {f : ξ → ULift.{v'} M} {φ : Semiformula L ξ n} :
-    Semiformula.Eval e f φ ↔ Semiformula.Eval (ULift.down ∘ e) (ULift.down ∘ f) φ := by
+    φ.Eval e f ↔ φ.Eval (ULift.down ∘ e) (ULift.down ∘ f) := by
   induction φ using Semiformula.rec' <;>
     simp [*, Semiterm.val_uLift, Matrix.comp_vecCons', Function.comp_def]
 

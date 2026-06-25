@@ -36,7 +36,7 @@ section
 noncomputable def _root_.LO.FirstOrder.Theory.consistent : 𝚷₁.Sentence :=
   .mkPi (∼provabilityPred T ⊥)
 
-@[simp] lemma consistent.defined : _root_.LO.FirstOrder.Semiformula.Evalb (M := V) ![] (T.consistent : Sentence ℒₒᵣ) ↔ T.Consistent V := by
+@[simp] lemma consistent.defined : (T.consistent : Sentence ℒₒᵣ).Evalb (M := V) ![] ↔ T.Consistent V := by
   simp [Theory.consistent, Theory.Consistent]
 
 noncomputable def _root_.LO.FirstOrder.Theory.consistentWith : 𝚷₁.Semisentence 1 := .mkPi

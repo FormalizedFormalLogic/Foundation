@@ -39,7 +39,7 @@ lemma closed {v : Fin k → V} (hv : ∀ i, v i ∈ Hull s)
 @[simp] lemma hull_models_iff {φ : Semisentence ℒₛₑₜ n} :
     (Hull s) ⊧/b φ ↔ V ⊧/(b ·) φ := by
   have :
-      Semiformula.Evalb (Structure.SkolemHull.str (standardStructure V) s) b φ ↔
+      φ.Evalb (s := Structure.SkolemHull.str (standardStructure V) s) b ↔
       V ⊧/(b ·) φ :=
     Structure.SkolemHull.str_eval (𝓼 := standardStructure V) (φ := φ) (b := b)
   rw [str_eq] at this

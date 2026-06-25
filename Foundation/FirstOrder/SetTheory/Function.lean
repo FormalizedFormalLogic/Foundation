@@ -9,7 +9,7 @@ public import Foundation.FirstOrder.SetTheory.Z
 
 namespace LO.FirstOrder.SetTheory
 
-variable {V : Type*} [SetStructure V] [Nonempty V] [V ⊧ₘ* 𝗭]
+variable {V : Type*} [SetStructure V] [Nonempty V] [V↓[ℒₛₑₜ] ⊧* 𝗭]
 
 /-! ### Relations -/
 

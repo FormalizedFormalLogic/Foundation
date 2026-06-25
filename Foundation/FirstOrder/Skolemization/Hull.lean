@@ -144,8 +144,8 @@ instance (priority := 50) elementaryEquiv : (SkolemHull L s) ≡ₑ[L] M where
   models {φ} := by simp [models_iff, Matrix.empty_eq]
 
 instance (priority := 50) eq : Structure.Eq L (SkolemHull L s) := ⟨fun x y ↦ by
-  simp [Operator.val, Matrix.comp_vecCons', Matrix.constant_eq_singleton]
-  simpa [-Eq.eq, Subtype.ext_iff] using Structure.Eq.eq (L := L) x.val y.val⟩
+  rw [Subtype.ext_iff]
+  simpa [Operator.val, Matrix.fun_eq_vec_two] using Structure.Eq.eq (L := L) (M := M) x.val y.val⟩
 
 section mem
 
@@ -156,8 +156,7 @@ instance (priority := 50) membership :
 
 instance (priority := 50) mem [Operator.Mem L] [Membership M M] [Structure.Mem L M] :
     Structure.Mem L (SkolemHull L s) := ⟨fun x y ↦ by
-  simp [Operator.val, Matrix.comp_vecCons', Matrix.constant_eq_singleton]
-  simpa [-Mem.mem, Subtype.ext_iff] using Structure.Mem.mem (L := L) x.val y.val⟩
+  simpa [Operator.val, Matrix.fun_eq_vec_two] using Structure.Mem.mem (L := L) (M := M) x.val y.val⟩
 
 end mem
 
