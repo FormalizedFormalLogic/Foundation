@@ -213,8 +213,6 @@ public import Foundation.Modal.Axioms
 public import Foundation.Modal.Boxdot.Basic
 public import Foundation.Modal.Boxdot.GLPoint3_GrzPoint3
 public import Foundation.Modal.Boxdot.GL_Grz
-public import Foundation.Modal.Boxdot.GL_S
-public import Foundation.Modal.Boxdot.Grz_S
 public import Foundation.Modal.Boxdot.Jerabek
 public import Foundation.Modal.Boxdot.K4_S4
 public import Foundation.Modal.Boxdot.Ver_Triv
@@ -350,7 +348,6 @@ public import Foundation.Modal.Logic.GLPlusBoxBot.Basic
 public import Foundation.Modal.Logic.GLPoint3OplusBoxBot.Basic
 public import Foundation.Modal.Logic.Global
 public import Foundation.Modal.Logic.S.Basic
-public import Foundation.Modal.Logic.S.Consistent
 public import Foundation.Modal.Logic.SumNormal
 public import Foundation.Modal.Logic.SumQuasiNormal
 public import Foundation.Modal.LogicSymbol
@@ -463,20 +460,6 @@ public import Foundation.Propositional.Neighborhood.NB.Hilbert.WF
 public import Foundation.Propositional.Slash
 public import Foundation.Propositional.Tait.Calculus
 public import Foundation.Propositional.Translation
-public import Foundation.ProvabilityLogic.Arithmetic
-public import Foundation.ProvabilityLogic.Classification.LetterlessTrace
-public import Foundation.ProvabilityLogic.Classification.Result
-public import Foundation.ProvabilityLogic.Classification.Trace
-public import Foundation.ProvabilityLogic.GL.Completeness
-public import Foundation.ProvabilityLogic.GL.Soundness
-public import Foundation.ProvabilityLogic.GL.Uniform
-public import Foundation.ProvabilityLogic.GL.Unprovability
-public import Foundation.ProvabilityLogic.Grz.Completeness
-public import Foundation.ProvabilityLogic.N.Soundness
-public import Foundation.ProvabilityLogic.Realization
-public import Foundation.ProvabilityLogic.S.Completeness
-public import Foundation.ProvabilityLogic.S.Soundness
-public import Foundation.ProvabilityLogic.SolovaySentences
 public import Foundation.SecondOrder.Derivation
 public import Foundation.SecondOrder.Semantics
 public import Foundation.SecondOrder.Syntax.Formula
