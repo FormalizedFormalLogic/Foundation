@@ -153,9 +153,10 @@ end
 
 section consistency
 
+omit [Entailment.Cl 𝓢]
+
 variable [AdjunctiveSet F S] [Axiomatized S] [Deduction S] [∀ 𝓢 : S, Entailment.Cl 𝓢]
 
-omit [Entailment.Cl 𝓢] in
 lemma provable_iff_inconsistent_adjoin {φ : F} :
     𝓢 ⊢ φ ↔ Inconsistent (adjoin (∼φ) 𝓢) := by
   constructor
@@ -166,6 +167,12 @@ lemma provable_iff_inconsistent_adjoin {φ : F} :
   · intro h
     have : 𝓢 ⊢ ∼φ 🡒 ⊥ := Deduction.of_insert! (h _)
     refine of_NN! <| N!_iff_CO!.mpr this
+
+lemma unprovable_iff_consistent_adjoin {φ : F} :
+    𝓢 ⊬ φ ↔ Consistent (adjoin (∼φ) 𝓢) := by
+  simpa using provable_iff_inconsistent_adjoin.not
+
+instance deductiveExplosion : Entailment.DeductiveExplosion S := inferInstance
 
 end consistency
 
@@ -189,6 +196,10 @@ instance : HasAxiomPeirce 𝓢 where
     apply efq_of_mem_either (φ := φ);
     . simp;
     . simp;
+
+instance : HasAxiomEFQ 𝓢 := inferInstance
+
+instance : Entailment.Int 𝓢 where
 
 end
 

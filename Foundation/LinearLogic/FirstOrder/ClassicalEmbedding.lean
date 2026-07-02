@@ -66,7 +66,8 @@ def forget : Semiformula L ξ n → FirstOrder.Semiformula L ξ n
 
 @[simp] lemma forget_rew (ω : Rew L ξ₁ n₁ ξ₂ n₂) (φ : Semiformula L ξ₁ n₁) :
     (ω ▹ φ).forget = ω ▹ φ.forget := by
-  induction φ using rec' generalizing n₂ <;> simp [*, rew_rel, rew_nrel, FirstOrder.Semiformula.rew_rel, FirstOrder.Semiformula.rew_nrel]
+  induction φ using rec' generalizing n₂ <;>
+    simp [*, rew_rel, rew_nrel, FirstOrder.Semiformula.rew_rel, FirstOrder.Semiformula.rew_nrel, Function.comp_def]
 
 end Semiformula
 
@@ -82,41 +83,41 @@ end Sequent
 
 namespace Derivation
 
-def forget {Γ : Sequent L} : ⊢ᴸ Γ → ⊢ᵀ Γ.forget
-  | .identity φ => FirstOrder.Derivation.em (φ := φ.forget) (by simp) (by simp)
+def forget {Γ : Sequent L} : ⊢ᴸ Γ → ⊢ᴸᴷ¹ Γ.forget
+  | .identity φ => FirstOrder.Derivation.close φ.forget (by simp) (by simp)
   | cut (φ := φ) (Γ := Γ) (Δ := Δ) d₁ d₂ =>
-    have dp : ⊢ᵀ φ.forget :: Sequent.forget (Γ ++ Δ) := d₁.forget.wk (by simp)
-    have dn : ⊢ᵀ ∼φ.forget :: Sequent.forget (Γ ++ Δ) := d₂.forget.wk (by simp)
-    dp.cut dn
-  | exchange d h => d.forget.wk (by have := h.subset; grind)
+    have dp : ⊢ᴸᴷ¹ φ.forget :: Sequent.forget Γ := d₁.forget.cast (by simp)
+    have dn : ⊢ᴸᴷ¹ ∼φ.forget :: Sequent.forget Δ := d₂.forget.cast (by simp)
+    (dp.cut dn).cast (by simp)
+  | exchange d h => d.forget.contra (by have := h.subset; grind)
   | one => .verum
-  | falsum d => d.forget.wk <| by simp
+  | falsum d => d.forget.contra <| by simp
   | par (Γ := Γ) (φ := φ) (ψ := ψ) d =>
-    have : ⊢ᵀ φ.forget :: ψ.forget :: Sequent.forget Γ := d.forget.cast (by simp)
+    have : ⊢ᴸᴷ¹ φ.forget :: ψ.forget :: Sequent.forget Γ := d.forget.cast (by simp)
     this.or
   | tensor (Γ := Γ) (Δ := Δ) (φ := φ) (ψ := ψ) d₁ d₂ =>
-    have dφ : ⊢ᵀ φ.forget :: Sequent.forget (Γ ++ Δ) := d₁.forget.wk (by simp)
-    have dψ : ⊢ᵀ ψ.forget :: Sequent.forget (Γ ++ Δ) := d₂.forget.wk (by simp)
+    have dφ : ⊢ᴸᴷ¹ φ.forget :: Sequent.forget (Γ ++ Δ) := d₁.forget.contra (by simp)
+    have dψ : ⊢ᴸᴷ¹ ψ.forget :: Sequent.forget (Γ ++ Δ) := d₂.forget.contra (by simp)
     dφ.and dψ
-  | verum _ => .verum' <| by simp
+  | verum _ => .top <| by simp
   | .with (Γ := Γ) (φ := φ) (ψ := ψ) d₁ d₂ =>
-    have dφ : ⊢ᵀ φ.forget :: Sequent.forget Γ := d₁.forget.cast (by simp)
-    have dψ : ⊢ᵀ ψ.forget :: Sequent.forget Γ := d₂.forget.cast (by simp)
+    have dφ : ⊢ᴸᴷ¹ φ.forget :: Sequent.forget Γ := d₁.forget.cast (by simp)
+    have dψ : ⊢ᴸᴷ¹ ψ.forget :: Sequent.forget Γ := d₂.forget.cast (by simp)
     dφ.and dψ
   | plusRight (Γ := Γ) (φ := φ) (ψ := ψ) d =>
-    have : ⊢ᵀ φ.forget :: ψ.forget :: Sequent.forget Γ := d.forget.wk (by simp)
+    have : ⊢ᴸᴷ¹ φ.forget :: ψ.forget :: Sequent.forget Γ := d.forget.contra (by simp)
     this.or
   | plusLeft (Γ := Γ) (φ := φ) (ψ := ψ) d =>
-    have : ⊢ᵀ φ.forget :: ψ.forget :: Sequent.forget Γ := d.forget.wk (by simp)
+    have : ⊢ᴸᴷ¹ φ.forget :: ψ.forget :: Sequent.forget Γ := d.forget.contra (by simp)
     this.or
   | all (Γ := Γ) (φ := φ) d =>
-    have : ⊢ᵀ φ.forget.free :: (Sequent.forget Γ)⁺ := d.forget.cast (by simp)
+    have : ⊢ᴸᴷ¹ φ.forget.free :: (Sequent.forget Γ)⁺ := d.forget.cast (by simp)
     this.all
   | exs (Γ := Γ) (φ := φ) t d =>
-    have : ⊢ᵀ φ.forget/[t] :: Sequent.forget Γ := d.forget.cast (by simp)
+    have : ⊢ᴸᴷ¹ φ.forget/[t] :: Sequent.forget Γ := d.forget.cast (by simp)
     this.exs
-  | weakening (Γ := Γ) (φ := φ) d => d.forget.wk (by simp)
-  | contraction (Γ := Γ) (φ := φ) d => d.forget.wk (by simp)
+  | weakening (Γ := Γ) (φ := φ) d => d.forget.contra (by simp)
+  | contraction (Γ := Γ) (φ := φ) d => d.forget.contra (by simp)
   | dereliction (Γ := Γ) (φ := φ) d =>  d.forget.cast (by simp)
   | ofCourse d _ => d.forget.cast (by simp)
 
@@ -124,9 +125,8 @@ end Derivation
 
 namespace Proof
 
-theorem forget {φ : Sentence L} : 𝐋𝐋 ⊢ φ → 𝐋𝐊 ⊢ φ.forget := fun h ↦ by
-  have : 𝐋𝐋₀ ⊢ (φ : Proposition L) := h
-  exact FirstOrder.Proof.cast.mpr ⟨by simpa using Derivation.forget this.get⟩
+theorem forget {φ : Proposition L} : 𝐋𝐋₀ ⊢ φ → 𝐋𝐊¹ ⊢ φ.forget := fun h ↦
+  ⟨by simpa using Derivation.forget h.get⟩
 
 end Proof
 
@@ -356,24 +356,24 @@ local postfix:max "†" => Semiformula.girard
 local postfix:max "‡" => Semiformula.Girard
 local postfix:max "‡" => Sequent.Girard
 
-def toLL {Γ : Sequent L} : ⊢ᵀ Γ → ⊢ᴸ Γ‡
-  | .axL R v =>
+def toLL {Γ : Sequent L} : ⊢ᴸᴷ¹ Γ → ⊢ᴸ Γ‡
+  | .identity R v =>
     have : ⊢ᴸ [？！.rel R v, ？.nrel R v] :=
       LinearLogic.Derivation.identity (！.rel R v) |>.dereliction
     this
-  | .cut (φ := φ) d₁ d₂ =>
+  | .cut (φ := φ) (Γ := Γ₁) (Δ := Δ₁) d₁ d₂ =>
     match h : φ.polarity with
     |  true =>
-      have b₁ : ⊢ᴸ ？φ† :: Γ‡ := d₁.toLL.cast (by simp [Semiformula.Girard, h])
-      have : ⊢ᴸ ∼φ† :: Γ‡ := d₂.toLL.cast (by simp [Semiformula.Girard, h])
-      have b₂ : ⊢ᴸ ∼？φ† :: Γ‡ := this.negativeOfCourse <| by simp
-      (b₁.cut b₂).negativeWk (by simp) (by simp)
+      have b₁ : ⊢ᴸ ？φ† :: Γ₁‡ := d₁.toLL.cast (by simp [Semiformula.Girard, h])
+      have : ⊢ᴸ ∼φ† :: Δ₁‡ := d₂.toLL.cast (by simp [Semiformula.Girard, h])
+      have b₂ : ⊢ᴸ ∼？φ† :: Δ₁‡ := this.negativeOfCourse <| by simp
+      (b₁.cut b₂).cast (by simp)
     | false =>
-      have b₂ : ⊢ᴸ ∼！φ† :: Γ‡ := d₂.toLL.cast (by simp [Semiformula.Girard, h])
-      have : ⊢ᴸ φ† :: Γ‡ := d₁.toLL.cast (by simp [Semiformula.Girard, h])
-      have b₁ : ⊢ᴸ ！φ† :: Γ‡ := this.negativeOfCourse <| by simp
-      (b₁.cut b₂).negativeWk (by simp) (by simp)
-  | .wk d h => d.toLL.negativeWk (List.map_subset Semiformula.Girard h) (by simp)
+      have b₂ : ⊢ᴸ ∼！φ† :: Δ₁‡ := d₂.toLL.cast (by simp [Semiformula.Girard, h])
+      have : ⊢ᴸ φ† :: Γ₁‡ := d₁.toLL.cast (by simp [Semiformula.Girard, h])
+      have b₁ : ⊢ᴸ ！φ† :: Γ₁‡ := this.negativeOfCourse <| by simp
+      (b₁.cut b₂).cast (by simp)
+  | .contraction d h => d.toLL.negativeWk (List.map_subset Semiformula.Girard h) (by simp)
   | .verum => LinearLogic.Derivation.one.dereliction
   | .and (Γ := Γ) (φ := φ) (ψ := ψ) d₁ d₂ =>
     match h₁ : φ.polarity, h₂ : ψ.polarity with
@@ -428,7 +428,7 @@ def toLL {Γ : Sequent L} : ⊢ᵀ Γ → ⊢ᴸ Γ‡
     | false =>
       have : ⊢ᴸ φ†.free :: (Γ‡)⁺ := d.toLL.cast (by simp [Semiformula.Girard, h])
       this.all.cast (by simp [Semiformula.Girard, Semiformula.girard, h])
-  | .exs (Γ := Γ) (φ := φ) t d =>
+  | .exs (Γ := Γ) (φ := φ) (t := t) d =>
     match h : φ.polarity with
     |  true =>
       have d : ⊢ᴸ (？φ†)/[t] :: Γ‡ := d.toLL.cast (by simp [Semiformula.Girard, h])
@@ -446,14 +446,13 @@ namespace Proof
 
 variable [L.DecidableEq]
 
-theorem girard {φ : Sentence L} : 𝐋𝐊 ⊢ φ → 𝐋𝐋 ⊢ φ.Girard := fun h ↦ ⟨by
-  have : 𝐋𝐊₀ ⊢ (φ : SyntacticFormula L) := by simpa using Proof.cast.mp h
-  simpa using Derivation.toLL this.get⟩
+theorem girard {φ : Proposition L} : 𝐋𝐊¹ ⊢ φ → 𝐋𝐋₀ ⊢ φ.Girard := fun h ↦
+  ⟨by simpa using Derivation.toLL h.get⟩
 
-theorem girard_faithful {φ : Sentence L} : 𝐋𝐋 ⊢ φ.Girard ↔ 𝐋𝐊 ⊢ φ :=
+theorem girard_faithful {φ : Proposition L} : 𝐋𝐋₀ ⊢ φ.Girard ↔ 𝐋𝐊¹ ⊢ φ :=
   ⟨fun h ↦ by simpa using LinearLogic.Proof.forget h, girard⟩
 
-instance : Entailment.FaithfullyEmbeddable (𝐋𝐊 : Theory L) (𝐋𝐋 : LinearLogic.Symbol L) where
+instance : Entailment.FaithfullyEmbeddable (𝐋𝐊¹ : LK L) (𝐋𝐋₀ : LinearLogic.SymbolFV L) where
   prop := ⟨Semiformula.Girard, fun _ ↦ girard_faithful⟩
 
 end Proof

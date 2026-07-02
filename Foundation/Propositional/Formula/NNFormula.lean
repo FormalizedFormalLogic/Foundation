@@ -93,7 +93,7 @@ instance : DeMorgan (NNFormula α) where
   or := by simp
   imply := by simp [imp_eq]
 
-instance : NegInvolutive (NNFormula α) where
+instance : TildeInvolutive (NNFormula α) where
   neg_involutive := by simp
 
 def complexity : NNFormula α → ℕ

@@ -77,11 +77,11 @@ section
 
 variable [Nonempty V]
 
-instance [V ⊧ₘ* 𝗭] [V ⊧ₘ* 𝗔𝗖] : V ⊧ₘ* 𝗭𝗖 := inferInstance
+instance [V↓[ℒₛₑₜ] ⊧* 𝗭] [V↓[ℒₛₑₜ] ⊧* 𝗔𝗖] : V↓[ℒₛₑₜ] ⊧* 𝗭𝗖 := inferInstance
 
-instance [V ⊧ₘ* 𝗭𝗙] [V ⊧ₘ* 𝗔𝗖] : V ⊧ₘ* 𝗭𝗙𝗖 := inferInstance
+instance [V↓[ℒₛₑₜ] ⊧* 𝗭𝗙] [V↓[ℒₛₑₜ] ⊧* 𝗔𝗖] : V↓[ℒₛₑₜ] ⊧* 𝗭𝗙𝗖 := inferInstance
 
-instance : V ⊧ₘ* (𝗘𝗤 : Theory ℒₛₑₜ) := Structure.Eq.models_eqAxiom' ℒₛₑₜ V
+instance : V↓[ℒₛₑₜ] ⊧* (𝗘𝗤 _ : Theory ℒₛₑₜ) := Structure.Eq.models_eqAxiom' ℒₛₑₜ V
 
 end
 

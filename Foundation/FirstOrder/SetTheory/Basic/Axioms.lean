@@ -50,11 +50,11 @@ def infinity : Sentence ℒₛₑₜ := “∃ I, (∀ e, !isEmpty e → e ∈ I
 def foundation : Sentence ℒₛₑₜ := “∀ x, !isNonempty x → ∃ y ∈ x, ∀ z ∈ x, z ∉ y”
 
 /-- Axiom schema of separation (Aussonderungsaxiom). -/
-def separationSchema (φ : SyntacticSemiformula ℒₛₑₜ 1) : Sentence ℒₛₑₜ :=
+def separationSchema (φ : Semiproposition ℒₛₑₜ 1) : Sentence ℒₛₑₜ :=
   .univCl “∀ x, ∃ y, ∀ z, z ∈ y ↔ z ∈ x ∧ !φ z”
 
 /-- Axiom schema of replacement. -/
-def replacementSchema (φ : SyntacticSemiformula ℒₛₑₜ 2) : Sentence ℒₛₑₜ :=
+def replacementSchema (φ : Semiproposition ℒₛₑₜ 2) : Sentence ℒₛₑₜ :=
   .univCl “(∀ x, ∃! y, !φ x y) → ∀ X, ∃ Y, ∀ y, y ∈ Y ↔ ∃ x ∈ X, !φ x y”
 
 /-- Axiom of choice. -/
@@ -68,7 +68,7 @@ end Axiom
 /-- Zermelo set theory. -/
 inductive Zermelo : Theory ℒₛₑₜ
   /-- Axiom of equality. -/
-  | axiom_of_equality : ∀ φ ∈ 𝗘𝗤, Zermelo φ
+  | axiom_of_equality : ∀ φ ∈ 𝗘𝗤 ℒₛₑₜ, Zermelo φ
   /-- Axiom of empty set. -/
   | axiom_of_empty_set : Zermelo Axiom.empty
   /-- Axiom of extentionality. -/
@@ -84,18 +84,18 @@ inductive Zermelo : Theory ℒₛₑₜ
   /-- Axiom of foundation. -/
   | axiom_of_foundation : Zermelo Axiom.foundation
   /-- Axiom schema of separation. -/
-  | axiom_of_separation (φ : SyntacticSemiformula ℒₛₑₜ 1) : Zermelo (Axiom.separationSchema φ)
+  | axiom_of_separation (φ : Semiproposition ℒₛₑₜ 1) : Zermelo (Axiom.separationSchema φ)
 
 notation "𝗭" => Zermelo
 
-instance : 𝗘𝗤 ⪯ 𝗭 := Entailment.WeakerThan.ofSubset Zermelo.axiom_of_equality
+instance : 𝗘𝗤 _ ⪯ 𝗭 := Entailment.WeakerThan.ofSubset Zermelo.axiom_of_equality
 
 /-! ### Zermelo-Fraenkel set theory -/
 
 /-- Zermelo-Fraenkel set theory. -/
 inductive ZermeloFraenkel : Theory ℒₛₑₜ
   /-- Axiom of equality. -/
-  | axiom_of_equality : ∀ φ ∈ 𝗘𝗤, ZermeloFraenkel φ
+  | axiom_of_equality : ∀ φ ∈ 𝗘𝗤 ℒₛₑₜ, ZermeloFraenkel φ
   /-- Axiom of empty set. -/
   | axiom_of_empty_set : ZermeloFraenkel Axiom.empty
   /-- Axiom of extentionality. -/
@@ -111,13 +111,13 @@ inductive ZermeloFraenkel : Theory ℒₛₑₜ
   /-- Axiom of foundation. -/
   | axiom_of_foundation : ZermeloFraenkel Axiom.foundation
   /-- Axiom schema of separation. -/
-  | axiom_of_separation (φ : SyntacticSemiformula ℒₛₑₜ 1) : ZermeloFraenkel (Axiom.separationSchema φ)
+  | axiom_of_separation (φ : Semiproposition ℒₛₑₜ 1) : ZermeloFraenkel (Axiom.separationSchema φ)
   /-- Axiom schema of replacement. -/
-  | axiom_of_replacement (φ : SyntacticSemiformula ℒₛₑₜ 2) : ZermeloFraenkel (Axiom.replacementSchema φ)
+  | axiom_of_replacement (φ : Semiproposition ℒₛₑₜ 2) : ZermeloFraenkel (Axiom.replacementSchema φ)
 
 notation "𝗭𝗙" => ZermeloFraenkel
 
-instance : 𝗘𝗤 ⪯ 𝗭𝗙 := Entailment.WeakerThan.ofSubset ZermeloFraenkel.axiom_of_equality
+instance : 𝗘𝗤 _ ⪯ 𝗭𝗙 := Entailment.WeakerThan.ofSubset ZermeloFraenkel.axiom_of_equality
 
 lemma z_subset_zf : 𝗭 ⊆ 𝗭𝗙 := by
   rintro φ ⟨h⟩
@@ -141,27 +141,27 @@ def AxiomOfChoice : Theory ℒₛₑₜ := {Axiom.choice}
 notation "𝗔𝗖" => AxiomOfChoice
 
 /-- Zermelo set theory with axiom of choice. -/
-abbrev ZermeloChoice : Theory ℒₛₑₜ := 𝗭 + 𝗔𝗖
+abbrev ZermeloChoice : Theory ℒₛₑₜ := 𝗭 ∪ 𝗔𝗖
 
 notation "𝗭𝗖" => ZermeloChoice
 
 instance : 𝗭 ⪯ 𝗭𝗖 := inferInstance
 
-instance : 𝗘𝗤 ⪯ 𝗭𝗖 :=
-  let : 𝗘𝗤 ⪯ 𝗭 := inferInstance
+instance : 𝗘𝗤 _ ⪯ 𝗭𝗖 :=
+  let : 𝗘𝗤 _ ⪯ 𝗭 := inferInstance
   Entailment.WeakerThan.trans this inferInstance
 
 /-! ### Zermelo-Fraenkel set theory with axiom of choice -/
 
 /-- Zermelo-Fraenkel set theory with axiom of choice. -/
-abbrev ZermeloFraenkelChoice : Theory ℒₛₑₜ := 𝗭𝗙 + 𝗔𝗖
+abbrev ZermeloFraenkelChoice : Theory ℒₛₑₜ := 𝗭𝗙 ∪ 𝗔𝗖
 
 notation "𝗭𝗙𝗖" => ZermeloFraenkelChoice
 
 instance : 𝗭𝗙 ⪯ 𝗭𝗙𝗖 := inferInstance
 
-instance : 𝗘𝗤 ⪯ 𝗭𝗙𝗖 :=
-  let : 𝗘𝗤 ⪯ 𝗭𝗙 := inferInstance
+instance : 𝗘𝗤 _ ⪯ 𝗭𝗙𝗖 :=
+  let : 𝗘𝗤 _ ⪯ 𝗭𝗙 := inferInstance
   Entailment.WeakerThan.trans this inferInstance
 
 lemma zc_subset_zfc : 𝗭𝗖 ⊆ 𝗭𝗙𝗖 := Set.union_subset_union_left _ z_subset_zf

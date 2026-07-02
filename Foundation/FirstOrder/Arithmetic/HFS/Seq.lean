@@ -11,7 +11,7 @@ public import Foundation.FirstOrder.Arithmetic.HFS.Basic
 
 namespace LO.FirstOrder.Arithmetic
 
-variable {V : Type*} [ORingStructure V] [V ⊧ₘ* 𝗜𝚺₁]
+variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 
 def Seq (s : V) : Prop := IsMapping s ∧ ∃ l, domain s = under l
 

@@ -16,7 +16,7 @@ variable {ℌ : HierarchySymbol} {Γ Γ' : SigmaPiDelta}
 variable (ℌ)
 
 class Bounded (f : (Fin k → V) → V) : Prop where
-  bounded : ∃ t : Semiterm ℒₒᵣ V k, ∀ v : Fin k → V, f v ≤ t.valm V v id
+  bounded : ∃ t : Semiterm ℒₒᵣ V k, ∀ v : Fin k → V, f v ≤ t.val v id
 
 abbrev Bounded₁ (f : V → V) : Prop := Bounded (k := 1) (fun v ↦ f (v 0))
 
@@ -32,23 +32,23 @@ variable {ℌ}
 
 namespace Bounded
 
-@[simp] lemma var [V ⊧ₘ* 𝗣𝗔⁻] {k} (i : Fin k) : Bounded fun v : Fin k → V ↦ v i := ⟨#i, by intro _; simp⟩
+@[simp] lemma var [V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻] {k} (i : Fin k) : Bounded fun v : Fin k → V ↦ v i := ⟨#i, by intro _; simp⟩
 
-@[simp] lemma const [V ⊧ₘ* 𝗣𝗔⁻] {k} (c : V) : Bounded (fun _ : Fin k → V ↦ c) := ⟨&c, by intro _; simp⟩
+@[simp] lemma const [V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻] {k} (c : V) : Bounded (fun _ : Fin k → V ↦ c) := ⟨&c, by intro _; simp⟩
 
-@[simp] lemma term_retraction [V ⊧ₘ* 𝗣𝗔⁻] (t : Semiterm ℒₒᵣ V n) (e : Fin n → Fin k) :
-    Bounded fun v : Fin k → V ↦ Semiterm.valm V (fun x ↦ v (e x)) id t :=
-  ⟨Rew.subst (fun x ↦ #(e x)) t, by intro _; simp [Semiterm.val_substs]⟩
+@[simp] lemma term_retraction [V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻] (t : Semiterm ℒₒᵣ V n) (e : Fin n → Fin k) :
+    Bounded fun v : Fin k → V ↦ t.val (fun x ↦ v (e x)) id :=
+  ⟨Rew.subst (fun x ↦ #(e x)) t, by intro _; simp [Semiterm.val_substs, Function.comp_def]⟩
 
-@[simp] lemma term [V ⊧ₘ* 𝗣𝗔⁻] (t : Semiterm ℒₒᵣ V k) : Bounded fun v : Fin k → V => Semiterm.valm V v id t :=
+@[simp] lemma term [V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻] (t : Semiterm ℒₒᵣ V k) : Bounded fun v : Fin k → V => t.val v id :=
   ⟨t, by intro _; simp⟩
 
 lemma retraction {f : (Fin k → V) → V} (hf : Bounded f) (e : Fin k → Fin n) :
     Bounded fun v ↦ f (fun i ↦ v (e i)) := by
   rcases hf with ⟨t, ht⟩
-  exact ⟨Rew.subst (fun x ↦ #(e x)) t, by intro; simp [Semiterm.val_substs, ht]⟩
+  exact ⟨Rew.subst (fun x ↦ #(e x)) t, by intro _; simp [Semiterm.val_substs, Function.comp_def, ht]⟩
 
-lemma comp [V ⊧ₘ* 𝗣𝗔⁻] {k} {f : (Fin l → V) → V} {g : Fin l → (Fin k → V) → V} (hf : Bounded f) (hg : ∀ i, Bounded (g i)) :
+lemma comp [V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻] {k} {f : (Fin l → V) → V} {g : Fin l → (Fin k → V) → V} (hf : Bounded f) (hg : ∀ i, Bounded (g i)) :
     Bounded (fun v ↦ f (g · v)) where
   bounded := by
     rcases hf.bounded with ⟨tf, htf⟩
@@ -60,14 +60,14 @@ lemma comp [V ⊧ₘ* 𝗣𝗔⁻] {k} {f : (Fin l → V) → V} {g : Fin l → 
 
 end Bounded
 
-lemma Bounded₁.comp [V ⊧ₘ* 𝗣𝗔⁻] {f : V → V} {k} {g : (Fin k → V) → V} (hf : Bounded₁ f) (hg : Bounded g) :
+lemma Bounded₁.comp [V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻] {f : V → V} {k} {g : (Fin k → V) → V} (hf : Bounded₁ f) (hg : Bounded g) :
     Bounded (fun v ↦ f (g v)) := Bounded.comp hf (l := 1) (fun _ ↦ hg)
 
-lemma Bounded₂.comp [V ⊧ₘ* 𝗣𝗔⁻] {f : V → V → V} {k} {g₁ g₂ : (Fin k → V) → V}
+lemma Bounded₂.comp [V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻] {f : V → V → V} {k} {g₁ g₂ : (Fin k → V) → V}
     (hf : Bounded₂ f) (hg₁ : Bounded g₁) (hg₂ : Bounded g₂) :
     Bounded (fun v ↦ f (g₁ v) (g₂ v)) := Bounded.comp hf (g := ![g₁, g₂]) (fun i ↦ by cases i using Fin.cases <;> simp [*])
 
-lemma Bounded₃.comp [V ⊧ₘ* 𝗣𝗔⁻] {f : V → V → V → V} {k} {g₁ g₂ g₃ : (Fin k → V) → V}
+lemma Bounded₃.comp [V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻] {f : V → V → V → V} {k} {g₁ g₂ g₃ : (Fin k → V) → V}
     (hf : Bounded₃ f) (hg₁ : Bounded g₁) (hg₂ : Bounded g₂) (hg₃ : Bounded g₃) :
     Bounded (fun v ↦ f (g₁ v) (g₂ v) (g₃ v)) := Bounded.comp hf (g := ![g₁, g₂, g₃])
       (fun i ↦ by
@@ -76,7 +76,7 @@ lemma Bounded₃.comp [V ⊧ₘ* 𝗣𝗔⁻] {f : V → V → V → V} {k} {g�
 
 namespace Bounded₂
 
-variable [V ⊧ₘ* 𝗣𝗔⁻]
+variable [V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻]
 
 instance add : Bounded₂ ((· + ·) : V → V → V) where
   bounded := ⟨‘x y. x + y’, by intro _; simp⟩
@@ -137,7 +137,7 @@ end DefinableBoundedFunction
 
 namespace HierarchySymbol.Definable
 
-variable [V ⊧ₘ* 𝗣𝗔⁻]
+variable [V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻]
 
 variable  {P Q : (Fin k → V) → Prop}
 
@@ -145,10 +145,10 @@ lemma ball_blt {P : (Fin k → V) → V → Prop} {f : (Fin k → V) → V}
     (hf : DefinableBoundedFunction f) (h : ℌ.Definable fun w ↦ P (w ·.succ) (w 0)) :
     ℌ.Definable fun v ↦ ∀ x < f v, P v x := by
   rcases hf.bounded with ⟨bf, hbf⟩
-  have : ℌ.Definable fun v ↦ ∃ x ≤ Semiterm.valm V v id bf, x = f v ∧ ∀ y < x, P v y := by
+  have : ℌ.Definable fun v ↦ ∃ x ≤ bf.val v id, x = f v ∧ ∀ y < x, P v y := by
     apply bexs'; apply and
     · exact hf.definable
-    · suffices ℌ.Definable fun x ↦ ∀ y < Semiterm.valm (L := ℒₒᵣ) V x id (#0), P (fun x_1 ↦ x x_1.succ) y by simpa
+    · suffices ℌ.Definable fun x ↦ ∀ y < (#0).val (L := ℒₒᵣ) x id, P (fun x_1 ↦ x x_1.succ) y by simpa
       apply ball ?_ #0
       simpa using h.retraction (0 :> (·.succ.succ))
   exact this.of_iff <| fun v ↦ ⟨fun h ↦ ⟨f v, hbf v, rfl, h⟩, by rintro ⟨y, hy, rfl, h⟩; exact h⟩
@@ -157,10 +157,10 @@ lemma bexs_blt {P : (Fin k → V) → V → Prop} {f : (Fin k → V) → V}
     (hf : DefinableBoundedFunction f) (h : ℌ.Definable fun w ↦ P (w ·.succ) (w 0)) :
     ℌ.Definable fun v ↦ ∃ x < f v, P v x := by
   rcases hf.bounded with ⟨bf, hbf⟩
-  have : ℌ.Definable fun v ↦ ∃ x ≤ Semiterm.valm V v id bf, x = f v ∧ ∃ y < x, P v y := by
+  have : ℌ.Definable fun v ↦ ∃ x ≤ bf.val v id, x = f v ∧ ∃ y < x, P v y := by
     apply bexs'; apply and
     · exact hf.definable
-    · suffices ℌ.Definable fun x ↦ ∃ y < Semiterm.valm (L := ℒₒᵣ) V x id (#0), P (fun x_1 ↦ x x_1.succ) y by simpa
+    · suffices ℌ.Definable fun x ↦ ∃ y < (#0).val (L := ℒₒᵣ) x id, P (fun x_1 ↦ x x_1.succ) y by simpa
       apply bexs ?_ #0
       simpa using h.retraction (0 :> (·.succ.succ))
   exact this.of_iff <| fun v ↦ ⟨fun h ↦ ⟨f v, hbf v, rfl, h⟩, by rintro ⟨y, hy, rfl, h⟩; exact h⟩
@@ -169,10 +169,10 @@ lemma ball_ble {P : (Fin k → V) → V → Prop} {f : (Fin k → V) → V}
     (hf : DefinableBoundedFunction f) (h : ℌ.Definable fun w ↦ P (w ·.succ) (w 0)) :
     ℌ.Definable fun v ↦ ∀ x ≤ f v, P v x := by
   rcases hf.bounded with ⟨bf, hbf⟩
-  have : ℌ.Definable fun v ↦ ∃ x ≤ Semiterm.valm V v id bf, x = f v ∧ ∀ y ≤ x, P v y := by
+  have : ℌ.Definable fun v ↦ ∃ x ≤ bf.val v id, x = f v ∧ ∀ y ≤ x, P v y := by
     apply bexs'; apply and
     · exact hf.definable
-    · suffices ℌ.Definable fun x ↦ ∀ y ≤ Semiterm.valm (L := ℒₒᵣ) V x id (#0), P (fun x_1 ↦ x x_1.succ) y by simpa
+    · suffices ℌ.Definable fun x ↦ ∀ y ≤ (#0).val (L := ℒₒᵣ) x id, P (fun x_1 ↦ x x_1.succ) y by simpa
       apply ball' ?_ #0
       simpa using h.retraction (0 :> (·.succ.succ))
   exact this.of_iff <| fun v ↦ ⟨fun h ↦ ⟨f v, hbf v, rfl, h⟩, by rintro ⟨y, hy, rfl, h⟩; exact h⟩
@@ -181,10 +181,10 @@ lemma bexs_ble {P : (Fin k → V) → V → Prop} {f : (Fin k → V) → V}
     (hf : DefinableBoundedFunction f) (h : ℌ.Definable fun w ↦ P (w ·.succ) (w 0)) :
     ℌ.Definable fun v ↦ ∃ x ≤ f v, P v x := by
   rcases hf.bounded with ⟨bf, hbf⟩
-  have : ℌ.Definable fun v ↦ ∃ x ≤ Semiterm.valm V v id bf, x = f v ∧ ∃ y ≤ x, P v y := by
+  have : ℌ.Definable fun v ↦ ∃ x ≤ bf.val v id, x = f v ∧ ∃ y ≤ x, P v y := by
     apply bexs'; apply and
     · exact hf.definable
-    · suffices ℌ.Definable fun x ↦ ∃ y ≤ Semiterm.valm (L := ℒₒᵣ) V x id (#0), P (fun x_1 ↦ x x_1.succ) y by simpa
+    · suffices ℌ.Definable fun x ↦ ∃ y ≤ (#0).val (L := ℒₒᵣ) x id, P (fun x_1 ↦ x x_1.succ) y by simpa
       apply bexs' ?_ #0
       simpa using h.retraction (0 :> (·.succ.succ))
   exact this.of_iff <| fun v ↦ ⟨fun h ↦ ⟨f v, hbf v, rfl, h⟩, by rintro ⟨y, hy, rfl, h⟩; exact h⟩
@@ -249,17 +249,17 @@ lemma of_iff {f g : (Fin k → V) → V} (H : DefinableBoundedFunction f) (h : �
   have : f = g := by funext v; simp [h]
   rcases this; exact H
 
-variable [V ⊧ₘ* 𝗣𝗔⁻]
+variable [V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻]
 
 @[simp] lemma var {k} (i : Fin k) : DefinableBoundedFunction (fun v : Fin k → V ↦ v i) := ⟨by simp, by simp⟩
 
 @[simp] lemma const {k} (c : V) : DefinableBoundedFunction (fun _ : Fin k → V ↦ c) := ⟨by simp, by simp⟩
 
 @[simp] lemma term_retraction (t : Semiterm ℒₒᵣ V n) (e : Fin n → Fin k) :
-    DefinableBoundedFunction fun v : Fin k → V ↦ Semiterm.valm V (fun x ↦ v (e x)) id t := ⟨by simp, by simp⟩
+    DefinableBoundedFunction fun v : Fin k → V ↦ t.val (fun x ↦ v (e x)) id := ⟨by simp, by simp⟩
 
 @[simp] lemma term (t : Semiterm ℒₒᵣ V k) :
-  DefinableBoundedFunction fun v : Fin k → V ↦ Semiterm.valm V v id t := ⟨by simp, by simp⟩
+  DefinableBoundedFunction fun v : Fin k → V ↦ t.val v id := ⟨by simp, by simp⟩
 
 end DefinableBoundedFunction
 
@@ -267,7 +267,7 @@ namespace HierarchySymbol.Definable
 
 open DefinableBoundedFunction
 
-variable [V ⊧ₘ* 𝗣𝗔⁻]
+variable [V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻]
 
 lemma bcomp₁ {k} {P : V → Prop} {f : (Fin k → V) → V} [hP : ℌ.DefinablePred P] (hf : DefinableBoundedFunction f) :
     ℌ.Definable fun v ↦ P (f v) :=
@@ -313,7 +313,7 @@ lemma bcomp₄_zero {k} {R : V → V → V → V → Prop} {f₁ f₂ f₃ f₄ 
 
 end HierarchySymbol.Definable
 
-variable [V ⊧ₘ* 𝗣𝗔⁻]
+variable [V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻]
 
 lemma HierarchySymbol.DefinableFunction.bcomp {k} {F : (Fin l → V) → V} {f : Fin l → (Fin k → V) → V}
     (hF : ℌ.DefinableFunction F) (hf : ∀ i, DefinableBoundedFunction (f i)) :

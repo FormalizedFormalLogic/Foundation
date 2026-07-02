@@ -11,7 +11,7 @@ public import Foundation.FirstOrder.Arithmetic.HFS.Fixpoint
 
 namespace LO.FirstOrder.Arithmetic
 
-variable {V : Type*} [ORingStructure V] [V ⊧ₘ* 𝗜𝚺₁]
+variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 
 section adjoin
 
@@ -501,8 +501,8 @@ lemma result_defined : 𝚺₁.DefinedFunction (fun v ↦ c.result (v ·.succ) (
   · intro h; symm; simpa using c.result_eq_of_graph _ h
   · intro h; rw [h]; exact c.result_graph _ _
 
-@[simp] lemma eval_resultDef (v) :
-    Semiformula.Evalbm V v β.resultDef.val ↔ v 0 = c.result (v ·.succ.succ) (v 1) := c.result_defined.iff
+@[simp] lemma eval_resultDef (v : Fin (arity + 2) → V) :
+    β.resultDef.val.Evalb v ↔ v 0 = c.result (v ·.succ.succ) (v 1) := c.result_defined.iff
 
 instance result_definable : 𝚺₁.DefinableFunction (fun v ↦ c.result (v ·.succ) (v 0)) :=
   c.result_defined.to_definable

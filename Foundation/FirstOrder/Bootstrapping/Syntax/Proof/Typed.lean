@@ -11,7 +11,7 @@ namespace LO
 
 open FirstOrder Arithmetic
 
-variable {V : Type*} [ORingStructure V] [V ⊧ₘ* 𝗜𝚺₁]
+variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 
 variable {L : Language} [L.Encodable] [L.LORDefinable]
 
@@ -117,12 +117,12 @@ def _root_.LO.FirstOrder.Theory.internalize (T : Theory L) [T.Δ₁] : InternalT
 
 variable {V}
 
-omit [ORingStructure V] [V ⊧ₘ* 𝗜𝚺₁] in
+omit [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] in
 @[simp] lemma internalize_theory (T : Theory L) [T.Δ₁] : (T.internalize V).theory = T := rfl
 
 structure TDerivation (T : InternalTheory V L) (Γ : Sequent V L) where
   val : V
-  derivationOf : T.theory.DerivationOf val Γ.val
+  derivationOf : DerivationOf T.theory val Γ.val
 
 attribute [simp] TDerivation.derivationOf
 
@@ -136,33 +136,33 @@ instance : HasSubset (InternalTheory V L) := ⟨fun T U ↦ T.theory.Δ₁Class 
 
 variable {T U : InternalTheory V L}
 
-noncomputable def _root_.LO.FirstOrder.Theory.Derivable.toTDerivation (Γ : Sequent V L) (h : T.theory.Derivable Γ.val) : T ⊢!ᵈᵉʳ Γ := by
+noncomputable def _root_.LO.FirstOrder.Arithmetic.Bootstrapping.Derivable.toTDerivation (Γ : Sequent V L) (h : Derivable T.theory Γ.val) : T ⊢!ᵈᵉʳ Γ := by
   choose a ha using h; choose d hd using ha.2
   exact ⟨a, ha.1, d, hd⟩
 
-lemma TDerivation.toDerivable {Γ : (Sequent V L)} (d : T ⊢!ᵈᵉʳ Γ) : T.theory.Derivable Γ.val :=
+lemma TDerivation.toDerivable {Γ : (Sequent V L)} (d : T ⊢!ᵈᵉʳ Γ) : Derivable T.theory Γ.val :=
   ⟨d.val, d.derivationOf⟩
 
 lemma TProvable.iff_provable {σ : Formula V L} :
-    T ⊢ σ ↔ T.theory.Provable σ.val := by
+    T ⊢ σ ↔ Provable T.theory σ.val := by
   constructor
   · intro b
     simpa [←singleton_eq_insert] using TDerivation.toDerivable b.get
   · intro h
-    exact ⟨Theory.Derivable.toTDerivation _ <| by simpa [←singleton_eq_insert] using h⟩
+    exact ⟨Derivable.toTDerivation _ <| by simpa [←singleton_eq_insert] using h⟩
 
-alias ⟨toProvable, _root_.LO.FirstOrder.Theory.Provable.toTProvable⟩ := TProvable.iff_provable
+alias ⟨toProvable, _root_.LO.FirstOrder.Arithmetic.Bootstrapping.Provable.toTProvable⟩ := TProvable.iff_provable
 
 def proof_to_tDerivation {σ : Formula V L} : T ⊢! σ → T ⊢!ᵈᵉʳ insert σ ∅ := fun x ↦ x
 
 lemma tprovable_iff_provable {T : Theory L} [T.Δ₁] {σ : Formula V L} :
-    T.internalize V ⊢ σ ↔ T.Provable σ.val := TProvable.iff_provable
+    T.internalize V ⊢ σ ↔ Provable T σ.val := TProvable.iff_provable
 
-lemma tprovable_tquote_iff_provable_quote {T : Theory L} [T.Δ₁] {φ : SyntacticFormula L} :
-    T.internalize V ⊢ ⌜φ⌝ ↔ T.Provable (⌜φ⌝ : V) := TProvable.iff_provable
+lemma tprovable_tquote_iff_provable_quote {T : Theory L} [T.Δ₁] {φ : Proposition L} :
+    T.internalize V ⊢ ⌜φ⌝ ↔ Provable T (⌜φ⌝ : V) := TProvable.iff_provable
 
 lemma tprovable_tquote_iff_provable_quote_sentence {T : Theory L} [T.Δ₁] {σ : Sentence L} :
-    T.internalize V ⊢ ⌜σ⌝ ↔ T.Provable (⌜σ⌝ : V) := TProvable.iff_provable
+    T.internalize V ⊢ ⌜σ⌝ ↔ Provable T (⌜σ⌝ : V) := TProvable.iff_provable
 
 def TDerivation.toTProof {φ} (d : T ⊢!ᵈᵉʳ insert φ ∅) : T ⊢! φ := d
 
@@ -181,78 +181,78 @@ protected noncomputable def cast {Γ Δ : Bootstrapping.Sequent V L} (e : Γ = �
     (TDerivation.cast e d).val = d.val := by rcases e; simp [TDerivation.cast]
 
 noncomputable def byAxm (φ) (h : φ ∈' T.theory) (hΓ : φ ∈ Γ) : T ⊢!ᵈᵉʳ Γ :=
-  ⟨Bootstrapping.axm Γ.val φ.val, by simp, Theory.Derivation.axm (by simp) (by simpa) h⟩
+  ⟨Bootstrapping.axm Γ.val φ.val, by simp, Derivation.axm (by simp) (by simpa) h⟩
 
 @[simp] lemma byAxm_val (φ) (h : φ ∈' T.theory) (hΓ : φ ∈ Γ) :
     (byAxm φ h hΓ).val = Bootstrapping.axm Γ.val φ.val := rfl
 
 noncomputable def em (φ) (h : φ ∈ Γ := by simp) (hn : ∼φ ∈ Γ := by simp) : T ⊢!ᵈᵉʳ Γ :=
-  ⟨axL Γ.val φ.val, by simp, Theory.Derivation.axL (by simp) h hn⟩
+  ⟨axL Γ.val φ.val, by simp, Derivation.axL (by simp) h hn⟩
 
 @[simp] lemma em_val (φ) (h : φ ∈ Γ) (hn : ∼φ ∈ Γ) :
     (em φ h hn : T ⊢!ᵈᵉʳ Γ).val = Bootstrapping.axL Γ.val φ.val := rfl
 
 noncomputable def verum (h : ⊤ ∈ Γ := by simp) : T ⊢!ᵈᵉʳ Γ :=
-  ⟨verumIntro Γ.val, by simp, Theory.Derivation.verumIntro (by simp) h⟩
+  ⟨verumIntro Γ.val, by simp, Derivation.verumIntro (by simp) h⟩
 
 @[simp] lemma verum_val (h : ⊤ ∈ Γ) :
     (verum h : T ⊢!ᵈᵉʳ Γ).val = Bootstrapping.verumIntro Γ.val := rfl
 
 noncomputable def and' (H : φ ⋏ ψ ∈ Γ) (dp : T ⊢!ᵈᵉʳ insert φ Γ) (dq : T ⊢!ᵈᵉʳ insert ψ Γ) : T ⊢!ᵈᵉʳ Γ :=
   ⟨andIntro Γ.val φ.val ψ.val dp.val dq.val, by simp,
-    Theory.Derivation.andIntro (by simpa) (by simpa using dp.derivationOf) (by simpa using dq.derivationOf)⟩
+    Derivation.andIntro (by simpa) (by simpa using dp.derivationOf) (by simpa using dq.derivationOf)⟩
 
 @[simp] lemma and'_val  (H : φ ⋏ ψ ∈ Γ) (dp : T ⊢!ᵈᵉʳ insert φ Γ) (dq : T ⊢!ᵈᵉʳ insert ψ Γ) :
     (and' H dp dq : T ⊢!ᵈᵉʳ Γ).val = andIntro Γ.val φ.val ψ.val dp.val dq.val := rfl
 
 noncomputable def or' (H : φ ⋎ ψ ∈ Γ) (dpq : T ⊢!ᵈᵉʳ insert φ (insert ψ Γ)) : T ⊢!ᵈᵉʳ Γ :=
-  ⟨orIntro Γ.val φ.val ψ.val dpq.val, by simp, Theory.Derivation.orIntro (by simpa) (by simpa using dpq.derivationOf)⟩
+  ⟨orIntro Γ.val φ.val ψ.val dpq.val, by simp, Derivation.orIntro (by simpa) (by simpa using dpq.derivationOf)⟩
 
 @[simp] lemma or'_val (H : φ ⋎ ψ ∈ Γ) (dpq : T ⊢!ᵈᵉʳ insert φ (insert ψ Γ)) :
     (or' H dpq : T ⊢!ᵈᵉʳ Γ).val = orIntro Γ.val φ.val ψ.val dpq.val := rfl
 
 noncomputable def all' {φ : Semiformula V L 1} (H : ∀⁰ φ ∈ Γ) (dp : T ⊢!ᵈᵉʳ insert φ.free Γ.shift) : T ⊢!ᵈᵉʳ Γ :=
-  ⟨allIntro Γ.val φ.val dp.val, by simp, Theory.Derivation.allIntro (by simpa) (by simpa using dp.derivationOf)⟩
+  ⟨allIntro Γ.val φ.val dp.val, by simp, Derivation.allIntro (by simpa) (by simpa using dp.derivationOf)⟩
 
 @[simp] lemma all'_val {φ : Semiformula V L 1} (H : ∀⁰ φ ∈ Γ) (dp : T ⊢!ᵈᵉʳ insert φ.free Γ.shift) :
     (all' H dp : T ⊢!ᵈᵉʳ Γ).val = allIntro Γ.val φ.val dp.val := rfl
 
 noncomputable def exs' {φ : Semiformula V L 1} (H : ∃⁰ φ ∈ Γ) (t : Term V L) (dp : T ⊢!ᵈᵉʳ insert (φ.subst ![t]) Γ) : T ⊢!ᵈᵉʳ Γ :=
-  ⟨exsIntro Γ.val φ.val t.val dp.val, by simp, Theory.Derivation.exsIntro (by simpa) (by simp) (by simpa using dp.derivationOf)⟩
+  ⟨exsIntro Γ.val φ.val t.val dp.val, by simp, Derivation.exsIntro (by simpa) (by simp) (by simpa using dp.derivationOf)⟩
 
 @[simp] lemma exs'_val {φ : Semiformula V L 1} (H : ∃⁰ φ ∈ Γ) (t : Term V L) (dp : T ⊢!ᵈᵉʳ insert (φ.subst ![t]) Γ) :
     (exs' H t dp : T ⊢!ᵈᵉʳ Γ).val = exsIntro Γ.val φ.val t.val dp.val := rfl
 
 noncomputable def wk (d : T ⊢!ᵈᵉʳ Δ) (h : Δ ⊆ Γ) : T ⊢!ᵈᵉʳ Γ :=
-  ⟨wkRule Γ.val d.val, by simp, Theory.Derivation.wkRule (s' := Δ.val) (by simp) (by simpa) (by simp)⟩
+  ⟨wkRule Γ.val d.val, by simp, Derivation.wkRule (s' := Δ.val) (by simp) (by simpa) (by simp)⟩
 
 @[simp] lemma wk_val (d : T ⊢!ᵈᵉʳ Δ) (h : Δ ⊆ Γ) : (wk d h).val = wkRule Γ.val d.val := rfl
 
 noncomputable def shift (d : T ⊢!ᵈᵉʳ Γ) : T ⊢!ᵈᵉʳ Γ.shift :=
-  ⟨shiftRule Γ.shift.val d.val, by simp, Theory.Derivation.shiftRule (by simp)⟩
+  ⟨shiftRule Γ.shift.val d.val, by simp, Derivation.shiftRule (by simp)⟩
 
 @[simp] lemma shift_val (d : T ⊢!ᵈᵉʳ Γ) : (shift d).val = shiftRule Γ.shift.val d.val := rfl
 
 noncomputable def cut (d₁ : T ⊢!ᵈᵉʳ insert φ Γ) (d₂ : T ⊢!ᵈᵉʳ insert (∼φ) Γ) : T ⊢!ᵈᵉʳ Γ :=
-  ⟨cutRule Γ.val φ.val d₁.val d₂.val, by simp, Theory.Derivation.cutRule (by simpa using d₁.derivationOf) (by simpa using d₂.derivationOf)⟩
+  ⟨cutRule Γ.val φ.val d₁.val d₂.val, by simp, Derivation.cutRule (by simpa using d₁.derivationOf) (by simpa using d₂.derivationOf)⟩
 
 @[simp] lemma cut_val  (d₁ : T ⊢!ᵈᵉʳ insert φ Γ) (d₂ : T ⊢!ᵈᵉʳ insert (∼φ) Γ) :
     (cut d₁ d₂).val = cutRule Γ.val φ.val d₁.val d₂.val := rfl
 
 noncomputable def and (dp : T ⊢!ᵈᵉʳ insert φ Γ) (dq : T ⊢!ᵈᵉʳ insert ψ Γ) : T ⊢!ᵈᵉʳ insert (φ ⋏ ψ) Γ :=
-  Theory.Derivable.toTDerivation _
-    <| by simpa using Theory.Derivable.and (by simpa using dp.toDerivable) (by simpa using dq.toDerivable)
+  Derivable.toTDerivation _
+    <| by simpa using Derivable.and (by simpa using dp.toDerivable) (by simpa using dq.toDerivable)
 
 noncomputable def or (dpq : T ⊢!ᵈᵉʳ insert φ (insert ψ Γ)) : T ⊢!ᵈᵉʳ insert (φ ⋎ ψ) Γ :=
-  Theory.Derivable.toTDerivation _ <| by simpa using Theory.Derivable.or (by simpa using dpq.toDerivable)
+  Derivable.toTDerivation _ <| by simpa using Derivable.or (by simpa using dpq.toDerivable)
 
 noncomputable def all {φ : Semiformula V L 1} (dp : T ⊢!ᵈᵉʳ insert φ.free Γ.shift) : T ⊢!ᵈᵉʳ insert (∀⁰ φ) Γ :=
-  Theory.Derivable.toTDerivation _ <| by
-    simpa using Theory.Derivable.all (by simp) (by simpa using dp.toDerivable)
+  Derivable.toTDerivation _ <| by
+    simpa using Derivable.all (by simp) (by simpa using dp.toDerivable)
 
 noncomputable def exs {φ : Semiformula V L 1} (t : Term V L) (dp : T ⊢!ᵈᵉʳ insert (φ.subst ![t]) Γ) : T ⊢!ᵈᵉʳ insert (∃⁰ φ) Γ :=
-  Theory.Derivable.toTDerivation _ <| by
-    simpa using Theory.Derivable.exs (by simp) t.isSemiterm (by simpa using dp.toDerivable)
+  Derivable.toTDerivation _ <| by
+    simpa using Derivable.exs (by simp) t.isSemiterm (by simpa using dp.toDerivable)
 
 def ofSubset (h : T ⊆ U) (d : T ⊢!ᵈᵉʳ Γ) : U ⊢!ᵈᵉʳ Γ where
   val := d.val
@@ -536,14 +536,14 @@ variable (A : InternalTheory V ℒₒᵣ)
 
 open Bootstrapping.Arithmetic
 
-open Entailment Theory.Derivation
+open Entailment
 
 lemma substItrDisj_right {i z : V}
     (w : TermVec V ℒₒᵣ m) (φ : Semiformula V ℒₒᵣ (m + 1)) (hi : i < z) :
-    A ⊢ φ.subst (𝕹 i :> w) 🡒 φ.substItrDisj w z := Theory.Provable.toTProvable <| Theory.Derivable.toProvable <| by
-  apply Theory.Derivable.or
-  apply Theory.Derivable.exchange
-  apply Theory.Derivable.disj (L := ℒₒᵣ) (i := z - (i + 1)) _
+    A ⊢ φ.subst (𝕹 i :> w) 🡒 φ.substItrDisj w z := Provable.toTProvable <| Derivable.toProvable <| by
+  apply Derivable.or
+  apply Derivable.exchange
+  apply Derivable.disj (L := ℒₒᵣ) (i := z - (i + 1)) _
   · intro i hi
     have hi : i < z := by simpa using hi
     rw [substItr_nth _ _ _ hi]
@@ -554,7 +554,7 @@ lemma substItrDisj_right {i z : V}
     have : z - (z - (i + 1) + 1) = i := sub_succ_lt_selfs hi
     simp only [this, Nat.succ_eq_add_one, Semiformula.val_substs, SemitermVec.val_succ,
       Matrix.head_cons, Matrix.tail_cons]
-    apply Theory.Derivable.em (L := ℒₒᵣ) (p := subst ℒₒᵣ (numeral i ∷ SemitermVec.val w) φ.val)
+    apply Derivable.em (L := ℒₒᵣ) (p := subst ℒₒᵣ (numeral i ∷ SemitermVec.val w) φ.val)
     · simpa using φ.isSemiformula_succ.subst (w.isSemitermVec.adjoin (numeral_semiterm 0 i))
     · simp
     · simp
@@ -566,15 +566,15 @@ lemma substItrDisj_right_intro {ψ} {i z : V} {w : TermVec V ℒₒᵣ m} {φ : 
 
 lemma substItrConj_right_intro {ψ} {w : TermVec V ℒₒᵣ m} {φ : Semiformula V ℒₒᵣ (m + 1)} {z : V}
     (h : ∀ i < z, A ⊢ ψ 🡒 φ.subst (𝕹 i :> w)) :
-    A ⊢ ψ 🡒 φ.substItrConj w z := Theory.Provable.toTProvable <| Theory.Derivable.toProvable <| by
-  apply Theory.Derivable.or
-  apply Theory.Derivable.exchange
-  apply Theory.Derivable.conj
+    A ⊢ ψ 🡒 φ.substItrConj w z := Provable.toTProvable <| Derivable.toProvable <| by
+  apply Derivable.or
+  apply Derivable.exchange
+  apply Derivable.conj
   · simp
   · intro i hi
     have hi : i < z := by simpa using hi
     rw [substItr_nth _ _ _ hi]
-    apply Theory.Derivable.exchange
+    apply Derivable.exchange
     suffices A ⊢!ᵈᵉʳ (∼ψ ⫽ φ.subst (𝕹 (z - (i + 1)) :> w) ⫽ ∅) by
       simpa using this.toDerivable
     have : A ⊢ ∼ψ ⋎ Semiformula.subst (typedNumeral (z - (i + 1)) :> w) φ := h (z - (i + 1)) (by simp [pos_of_gt hi])

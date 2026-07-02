@@ -42,6 +42,7 @@ public import Foundation.FirstOrder.Basic.BinderNotation
 public import Foundation.FirstOrder.Basic.Calculus
 public import Foundation.FirstOrder.Basic.Calculus2
 public import Foundation.FirstOrder.Basic.Coding
+public import Foundation.FirstOrder.Basic.CutFree
 public import Foundation.FirstOrder.Basic.Definability
 public import Foundation.FirstOrder.Basic.Eq
 public import Foundation.FirstOrder.Basic.Model
@@ -52,7 +53,6 @@ public import Foundation.FirstOrder.Basic.Semantics.Semantics
 public import Foundation.FirstOrder.Basic.Soundness
 public import Foundation.FirstOrder.Basic.Syntax.Formula
 public import Foundation.FirstOrder.Basic.Syntax.Rew
-public import Foundation.FirstOrder.Basic.Syntax.Theory
 public import Foundation.FirstOrder.Bootstrapping.DerivabilityCondition.D1
 public import Foundation.FirstOrder.Bootstrapping.DerivabilityCondition.D2
 public import Foundation.FirstOrder.Bootstrapping.DerivabilityCondition.D3
@@ -74,11 +74,10 @@ public import Foundation.FirstOrder.Bootstrapping.Syntax.Term.Coding
 public import Foundation.FirstOrder.Bootstrapping.Syntax.Term.Functions
 public import Foundation.FirstOrder.Bootstrapping.Syntax.Term.Typed
 public import Foundation.FirstOrder.Bootstrapping.Syntax.Theory
-public import Foundation.FirstOrder.Completeness.Coding
-public import Foundation.FirstOrder.Completeness.Completeness
-public import Foundation.FirstOrder.Completeness.Corollaries
-public import Foundation.FirstOrder.Completeness.SearchTree
-public import Foundation.FirstOrder.Completeness.SubLanguage
+public import Foundation.FirstOrder.Completeness
+public import Foundation.FirstOrder.Completeness.CanonicalModel
+public import Foundation.FirstOrder.Completeness.CountableSublanguage
+public import Foundation.FirstOrder.Completeness.CounterModel
 public import Foundation.FirstOrder.Hauptsatz
 public import Foundation.FirstOrder.Incompleteness.Consistency
 public import Foundation.FirstOrder.Incompleteness.Dense
@@ -377,7 +376,6 @@ public import Foundation.Propositional.Boolean.NNFormula
 public import Foundation.Propositional.Boolean.Tait
 public import Foundation.Propositional.Boolean.ZeroSubst
 public import Foundation.Propositional.ConsistentTableau
-public import Foundation.Propositional.Decidable
 public import Foundation.Propositional.Dialectica.Basic
 public import Foundation.Propositional.Entailment.AxiomDNE
 public import Foundation.Propositional.Entailment.AxiomEFQ
@@ -498,9 +496,13 @@ public import Foundation.Vorspiel.Nat.Basic
 public import Foundation.Vorspiel.Nat.Matrix
 public import Foundation.Vorspiel.NotationClass
 public import Foundation.Vorspiel.Option
-public import Foundation.Vorspiel.Order
+public import Foundation.Vorspiel.Order.Dense
+public import Foundation.Vorspiel.Order.Heyting
+public import Foundation.Vorspiel.Order.Ideal
+public import Foundation.Vorspiel.Order.Lattice
+public import Foundation.Vorspiel.Order.LowerSet
+public import Foundation.Vorspiel.Order.Regular
 public import Foundation.Vorspiel.Part
-public import Foundation.Vorspiel.Preorder
 public import Foundation.Vorspiel.Quotient
 public import Foundation.Vorspiel.Rel.Basic
 public import Foundation.Vorspiel.Rel.CWF

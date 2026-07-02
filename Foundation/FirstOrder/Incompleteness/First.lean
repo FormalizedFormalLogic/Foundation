@@ -17,7 +17,7 @@ lemma re_iff_sigma1 {P : ℕ → Prop} : REPred P ↔ 𝚺₁-Predicate P := by
     intro v
     simpa [←Matrix.fun_eq_vec_one] using codeOfREPred_spec h (x := v 0)
   · rintro ⟨φ, hφ⟩
-    have : REPred fun x ↦ (Semiformula.Evalm ℕ (x ::ᵥ List.Vector.nil).get id) _ :=
+    have : REPred fun x ↦ (Semiformula.Eval (x ::ᵥ List.Vector.nil).get id) _ :=
       (sigma1_re id (φ.sigma_prop)).comp
         (Primrec.to_comp <| Primrec.vector_cons.comp .id <| .const _)
     exact this.of_eq <| by intro x; simpa [List.Vector.cons_get, Matrix.empty_eq] using hφ ![x]
@@ -29,10 +29,10 @@ theorem incomplete (T : ArithmeticTheory) [T.Δ₁] [𝗥₀ ⪯ T] [T.SoundOnHi
     Incomplete T := by
   have con : Consistent T := inferInstance
   let D : ℕ → Prop := fun φ : ℕ ↦
-    IsSemiformula ℒₒᵣ 1 φ ∧ T.Provable (neg ℒₒᵣ <| subst ℒₒᵣ ?[numeral φ] φ)
+    IsSemiformula ℒₒᵣ 1 φ ∧ Provable T (neg ℒₒᵣ <| subst ℒₒᵣ ?[numeral φ] φ)
   have D_re : REPred D := by
     have : 𝚺₁-Predicate fun φ : ℕ ↦
-        IsSemiformula ℒₒᵣ 1 φ ∧ T.Provable (neg ℒₒᵣ <| subst ℒₒᵣ ?[numeral φ] φ) := by
+        IsSemiformula ℒₒᵣ 1 φ ∧ Provable T (neg ℒₒᵣ <| subst ℒₒᵣ ?[numeral φ] φ) := by
       definability
     exact re_iff_sigma1.mpr this
   have D_spec (φ : Semisentence ℒₒᵣ 1) : D ⌜φ⌝ ↔ T ⊢ ∼φ/[⌜φ⌝] := by
@@ -57,13 +57,13 @@ theorem incomplete (T : ArithmeticTheory) [T.Δ₁] [𝗥₀ ⪯ T] [T.SoundOnHi
 
 theorem exists_true_but_unprovable_sentence
     (T : ArithmeticTheory) [T.Δ₁] [𝗥₀ ⪯ T] [T.SoundOnHierarchy 𝚺 1] :
-    ∃ δ : Sentence ℒₒᵣ, ℕ ⊧ₘ δ ∧ T ⊬ δ := by
+    ∃ δ : Sentence ℒₒᵣ, ℕ↓[ℒₒᵣ] ⊧ δ ∧ T ⊬ δ := by
   obtain ⟨δ, hδ⟩ := incomplete_def.mp $ Arithmetic.incomplete T;
-  by_cases ℕ ⊧ₘ δ
+  by_cases ℕ↓[ℒₒᵣ] ⊧ δ
   . exact ⟨δ, by assumption, hδ.1⟩
   . exact ⟨∼δ, by simpa, hδ.2⟩
 
-instance {T : ArithmeticTheory} [ℕ ⊧ₘ* T] [T.Δ₁] [𝗥₀ ⪯ T] [T.SoundOnHierarchy 𝚺 1] : T ⪱ 𝗧𝗔 := by
+instance {T : ArithmeticTheory} [ℕ↓[ℒₒᵣ] ⊧* T] [T.Δ₁] [𝗥₀ ⪯ T] [T.SoundOnHierarchy 𝚺 1] : T ⪱ 𝗧𝗔 := by
   constructor;
   . infer_instance
   . obtain ⟨δ, δTrue, δUnprov⟩ := exists_true_but_unprovable_sentence T;

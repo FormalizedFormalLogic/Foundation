@@ -31,20 +31,31 @@ variable (W)
 
 class BasicSemantics where
   verum (w : W) : w ⊩ ⊤
-  falsum (w : W) : ¬w ⊩ ⊥
   and (w : W) : w ⊩ φ ⋏ ψ ↔ w ⊩ φ ∧ w ⊩ ψ
   or (w : W) : w ⊩ φ ⋎ ψ ↔ w ⊩ φ ∨ w ⊩ ψ
 
-class IntKripke (R : outParam (W → W → Prop)) extends BasicSemantics W where
-  not (w : W) : w ⊩ ∼φ ↔ (∀ v, R w v → ¬v ⊩ φ)
-  imply (w : W) : w ⊩ φ 🡒 ψ ↔ (∀ v, R w v → v ⊩ φ → v ⊩ ψ)
+class Monotone (R : outParam (W → W → Prop)) where
   monotone {w : W} : w ⊩ φ → ∀ v, R w v → v ⊩ φ
+
+class IntKripke (R : outParam (W → W → Prop)) extends BasicSemantics W, Monotone W R where
+  imply (w : W) : w ⊩ φ 🡒 ψ ↔ (∀ v, R w v → v ⊩ φ → v ⊩ ψ)
+  falsum (w : W) : ¬w ⊩ ⊥
+  not (w : W) : w ⊩ ∼φ ↔ (∀ v, R w v → ¬v ⊩ φ)
 
 variable {W}
 
-attribute [simp, grind]
-  BasicSemantics.verum BasicSemantics.falsum BasicSemantics.and
-  BasicSemantics.or IntKripke.imply IntKripke.not
+attribute [simp, grind .]
+  BasicSemantics.verum BasicSemantics.and
+  BasicSemantics.or
+  IntKripke.falsum
+
+attribute [grind .]
+  IntKripke.imply
+  IntKripke.not
+
+@[simp, grind =]
+lemma iff (R : W → W → Prop) [IntKripke W R] : w ⊩ (φ 🡘 ψ) ↔ (∀ v, R w v → (v ⊩ φ ↔ v ⊩ ψ)) := by
+  simp [LogicalConnective.iff, IntKripke.imply]; grind
 
 variable (W)
 
@@ -61,8 +72,6 @@ variable {W}
 namespace AllForces
 
 @[simp] lemma verum [BasicSemantics W] : W ∀⊩ ⊤ := fun _ ↦ by simp
-
-@[simp] lemma falsum [BasicSemantics W] [Nonempty W] : ¬W ∀⊩ ⊥ := fun h ↦ by simpa using h (Classical.choice inferInstance)
 
 @[simp] lemma and [BasicSemantics W] : W ∀⊩ φ ⋏ ψ ↔ W ∀⊩ φ ∧ W ∀⊩ ψ := by
   simp [AllForces]; grind
@@ -102,7 +111,7 @@ class ClassicalKripke (R : outParam (ℙ → ℙ → Prop)) extends BasicSemanti
 
 variable {ℙ}
 
-attribute [simp, grind]
+attribute [simp, grind .]
   BasicSemantics.verum BasicSemantics.falsum BasicSemantics.and
   ClassicalKripke.or ClassicalKripke.imply ClassicalKripke.not
 

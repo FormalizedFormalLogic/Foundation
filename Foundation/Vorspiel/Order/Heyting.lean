@@ -1,41 +1,18 @@
 module
 
-public import Mathlib.Tactic.Cases
-public import Mathlib.Tactic.TautoSet
-public import Mathlib.Algebra.GroupWithZero.Nat
-public import Mathlib.Algebra.Order.Group.Nat
+public import Mathlib.Order.Heyting.Regular
+public import Mathlib.Order.CompleteBooleanAlgebra
 
-@[expose]
 public section
 
-section
+section frame
 
-variable {α : Sort u} (r : α → α → Prop)
+variable {α : Type*} [Order.Frame α]
 
-local infix:50 " ≺ " => r
+theorem compl_iSup' {a : ι → α} : (⨆ i, a i)ᶜ = ⨅ i, (a i)ᶜ := by
+  simpa using iSup_himp_eq (f := a) (a := ⊥)
 
-def IsInfiniteDescendingChain (c : ℕ → α) : Prop := ∀ i, c (i + 1) ≺ c i
-
-noncomputable def descendingChain (z : α) : ℕ → α
-  | 0       => z
-  | (i + 1) => @Classical.epsilon α ⟨z⟩ (fun y => y ≺ descendingChain z i ∧ ¬Acc r y)
-
-lemma not_acc_iff {x : α} : ¬Acc r x ↔ ∃ y, y ≺ x ∧ ¬Acc r y :=
-  ⟨by contrapose; simp; exact Acc.intro x, by contrapose; simp; rintro ⟨h⟩; assumption⟩
-
-@[simp] lemma descending_chain_zero (z : α) : descendingChain r z 0 = z := rfl
-
-lemma isInfiniteDescendingChain_of_non_acc (z : α) (hz : ¬Acc r z) :
-    IsInfiniteDescendingChain r (descendingChain r z) := by
-  have : ∀ i, (i ≠ 0 → descendingChain r z i ≺ descendingChain r z i.pred) ∧ ¬Acc r (descendingChain r z i) := by
-    intro i; induction' i with i ih
-    · simpa using hz
-    · simp [descendingChain]
-      have : ∃ y, y ≺ (descendingChain r z i) ∧ ¬Acc r y := (not_acc_iff r).mp ih.2
-      exact Classical.epsilon_spec this
-  intro i; simpa using (this (i + 1)).1
-
-end
+end frame
 
 section HeytingAlgebra
 
@@ -64,4 +41,10 @@ lemma himp_inf_himp_inf_sup_le (a b c : α) : (a ⇨ c) ⊓ (b ⇨ c) ⊓ (a ⊔
 
 end HeytingAlgebra
 
-end
+namespace CompleteBooleanAlgebra
+
+variable {α : Type*} [CompleteBooleanAlgebra α]
+
+
+
+end CompleteBooleanAlgebra

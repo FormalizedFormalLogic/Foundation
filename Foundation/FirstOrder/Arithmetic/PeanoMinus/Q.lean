@@ -137,12 +137,12 @@ lemma exists_add_one_eq_self : ∃ x : OmegaAddOne, x + 1 = x :=
 end OmegaAddOne
 
 set_option linter.flexible false in
-instance : OmegaAddOne ⊧ₘ* 𝗤 := ⟨by
+instance : OmegaAddOne↓[ℒₒᵣ] ⊧* 𝗤 := ⟨by
   intro σ h;
   rcases h;
   case equal h =>
-    have : OmegaAddOne ⊧ₘ* (𝗘𝗤 : ArithmeticTheory) := inferInstance
-    exact modelsTheory_iff.mp this h
+    have : OmegaAddOne↓[ℒₒᵣ] ⊧* 𝗘𝗤 ℒₒᵣ := inferInstance
+    exact models_theory_iff.mp this _ h
   case succInj =>
     suffices ∀ a b : OmegaAddOne, a + 1 = b + 1 → a = b by simpa [models_iff];
     intro _; apply OmegaAddOne.succ_inj;
@@ -152,12 +152,11 @@ instance : OmegaAddOne ⊧ₘ* 𝗤 := ⟨by
 end Countermodel
 
 lemma RobinsonQ.unprovable_neSucc : 𝗤 ⊬ “∀ x, x + 1 ≠ x” :=
-  unprovable_of_countermodel (M := Countermodel.OmegaAddOne) <| by
-    simpa [models_iff] using Countermodel.OmegaAddOne.exists_add_one_eq_self
+  unprovable_of_countermodel (M := Countermodel.OmegaAddOne) 𝗤 <| by
+    simpa [notModels_iff] using Countermodel.OmegaAddOne.exists_add_one_eq_self
 
-instance : 𝗤 ⪱ 𝗣𝗔⁻ := Entailment.StrictlyWeakerThan.of_unprovable_provable RobinsonQ.unprovable_neSucc $ by
-  apply provable_of_models.{0};
-  intro _ _ _;
-  simp [models_iff];
+instance : 𝗤 ⪱ 𝗣𝗔⁻ :=
+  Entailment.StrictlyWeakerThan.of_unprovable_provable RobinsonQ.unprovable_neSucc
+    <| complete.{0} _ _ fun _ _ _ ↦ by simp [models_iff]
 
 end LO.FirstOrder.Arithmetic

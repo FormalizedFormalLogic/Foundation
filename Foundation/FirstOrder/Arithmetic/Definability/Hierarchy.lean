@@ -130,10 +130,10 @@ variable {M : Type*} [ORingStructure M]
 variable (M)
 
 def ProperOn (φ : 𝚫-[m].Semisentence n) : Prop :=
-  ∀ (e : Fin n → M), Semiformula.Evalbm M e φ.sigma.val ↔ Semiformula.Evalbm M e φ.pi.val
+  ∀ (e : Fin n → M), φ.sigma.val.Evalb e ↔ φ.pi.val.Evalb e
 
 def ProperWithParamOn (φ : 𝚫-[m].Semiformula M n) : Prop :=
-  ∀ (e : Fin n → M), Semiformula.Evalm M e id φ.sigma.val ↔ Semiformula.Evalm M e id φ.pi.val
+  ∀ (e : Fin n → M), φ.sigma.val.Eval e id ↔ φ.pi.val.Eval e id
 
 def ProvablyProperOn (φ : 𝚫-[m].Semisentence n) (T : Theory ℒₒᵣ) : Prop :=
   T ⊢ ∀⁰* “!φ.sigma.val ⋯ ↔ !φ.pi.val ⋯”
@@ -142,19 +142,19 @@ variable {M}
 
 lemma ProperOn.iff {φ : 𝚫-[m].Semisentence n}
     (h : φ.ProperOn M) (e : Fin n → M) :
-    Semiformula.Evalbm M e φ.sigma.val ↔ Semiformula.Evalbm M e φ.pi.val := h e
+    φ.sigma.val.Evalb e ↔ φ.pi.val.Evalb e := h e
 
 lemma ProperWithParamOn.iff {φ : 𝚫-[m].Semiformula M n}
     (h : φ.ProperWithParamOn M) (e : Fin n → M) :
-    Semiformula.Evalm M e id φ.sigma.val ↔ Semiformula.Evalm (L := ℒₒᵣ) M e id φ.pi.val := h e
+    φ.sigma.val.Eval e id ↔ φ.pi.val.Eval e id := h e
 
 lemma ProperOn.iff' {φ : 𝚫-[m].Semisentence n}
     (h : φ.ProperOn M) (e : Fin n → M) :
-    Semiformula.Evalbm M e φ.pi.val ↔ Semiformula.Evalbm M e φ.val := by simp [←h.iff, val_sigma]
+    φ.pi.val.Evalb e ↔ φ.val.Evalb e := by simp [←h.iff, val_sigma]
 
 lemma ProperWithParamOn.iff' {φ : 𝚫-[m].Semiformula M n}
     (h : φ.ProperWithParamOn M) (e : Fin n → M) :
-    Semiformula.Evalm M e id φ.pi.val ↔ Semiformula.Evalm (L := ℒₒᵣ) M e id φ.val := by simp [←h.iff, val_sigma]
+    φ.pi.val.Eval e id ↔ φ.val.Eval e id := by simp [←h.iff, val_sigma]
 
 inductive ProvablyProperOn' (T : Theory ℒₒᵣ) : {Γ : HierarchySymbol} → {n : ℕ} → (φ : Γ.Semisentence n) → Prop
   | sigma (φ : 𝚺-[m].Semisentence n) : φ.ProvablyProperOn' T
@@ -165,9 +165,9 @@ section ProvablyProperOn
 
 variable (T : Theory ℒₒᵣ)
 
-lemma ProvablyProperOn.ofProperOn [𝗘𝗤 ⪯ T] {φ : 𝚫-[m].Semisentence n}
-    (h : ∀ (M : Type w) [ORingStructure M] [M ⊧ₘ* T], φ.ProperOn M) : φ.ProvablyProperOn T := by
-  apply FirstOrder.Arithmetic.provable_of_models.{w} T _ ?_
+lemma ProvablyProperOn.ofProperOn [𝗘𝗤 ℒₒᵣ ⪯ T] {φ : 𝚫-[m].Semisentence n}
+    (h : ∀ (M : Type w) [ORingStructure M] [M↓[ℒₒᵣ] ⊧* T], φ.ProperOn M) : φ.ProvablyProperOn T := by
+  apply FirstOrder.Arithmetic.complete.{w} T _ ?_
   intro M _ _
   simpa [models_iff] using (h M).iff
 
@@ -175,9 +175,9 @@ variable {T}
 
 lemma ProvablyProperOn.properOn
     {φ : 𝚫-[m].Semisentence n} (h : φ.ProvablyProperOn T)
-    (M : Type w) [ORingStructure M] [M ⊧ₘ* T] : φ.ProperOn M := by
+    (M : Type w) [ORingStructure M] [M↓[ℒₒᵣ] ⊧* T] : φ.ProperOn M := by
   intro v
-  have := by simpa [models_iff] using consequence_iff.mp (sound! h) M inferInstance
+  have := by simpa [models_iff] using consequence_iff.mp (Theory.Proof.sound h) M inferInstance
   exact this v
 
 end ProvablyProperOn
@@ -357,8 +357,8 @@ lemma ProperOn.or {φ ψ : 𝚫-[m].Semisentence k} (hp : φ.ProperOn M) (hq : �
 lemma ProperOn.neg {φ : 𝚫-[m].Semisentence k} (hp : φ.ProperOn M) : (∼φ).ProperOn M := by
   intro e; simp [hp.iff]
 
-lemma ProperOn.eval_neg {φ : 𝚫-[m].Semisentence k} (hp : φ.ProperOn M) (e) :
-    Semiformula.Evalbm M e (∼φ).val ↔ ¬Semiformula.Evalbm M e φ.val := by
+lemma ProperOn.eval_neg {φ : 𝚫-[m].Semisentence k} (hp : φ.ProperOn M) (e : Fin k → M) :
+    (∼φ).val.Evalb e ↔ ¬φ.val.Evalb e := by
   simp [←val_sigma, hp.iff]
 
 lemma ProperOn.ball {t} {φ : 𝚫-[m + 1].Semisentence (k + 1)} (hp : φ.ProperOn M) : (ball t φ).ProperOn M := by
@@ -382,8 +382,8 @@ lemma ProperWithParamOn.or {φ ψ : 𝚫-[m].Semiformula M k}
 lemma ProperWithParamOn.neg {φ : 𝚫-[m].Semiformula M k} (hp : φ.ProperWithParamOn M) : (∼φ).ProperWithParamOn M := by
   intro e; simp [hp.iff]
 
-lemma ProperWithParamOn.eval_neg {φ : 𝚫-[m].Semiformula M k} (hp : φ.ProperWithParamOn M) (e) :
-    Semiformula.Evalm M e id (∼φ).val ↔ ¬Semiformula.Evalm M e id φ.val := by
+lemma ProperWithParamOn.eval_neg {φ : 𝚫-[m].Semiformula M k} (hp : φ.ProperWithParamOn M) (e : Fin k → M) :
+    (∼φ).val.Eval e id ↔ ¬φ.val.Eval e id := by
   simp [←val_sigma, hp.iff]
 
 lemma ProperWithParamOn.ball {t} {φ : 𝚫-[m].Semiformula M (k + 1)}
@@ -396,7 +396,7 @@ lemma ProperWithParamOn.bexs {t} {φ : 𝚫-[m].Semiformula M (k + 1)}
 
 def graphDelta (φ : 𝚺-[m].Semiformula ξ (k + 1)) : 𝚫-[m].Semiformula ξ (k + 1) :=
   match m with
-  | 0     => φ.ofZero _
+  |     0 => φ.ofZero _
   | m + 1 => mkDelta φ (mkPi “x. ∀ y, !φ.val y ⋯ → y = x”)
 
 @[simp] lemma graphDelta_val (φ : 𝚺-[m].Semiformula ξ (k + 1)) : φ.graphDelta.val = φ.val := by cases m <;> simp [graphDelta]

@@ -15,7 +15,7 @@ variable {V : Type*} [ORingStructure V]
 
 section IOpen
 
-variable [V ⊧ₘ* 𝗜𝗢𝗽𝗲𝗻]
+variable [V↓[ℒₒᵣ] ⊧* 𝗜𝗢𝗽𝗲𝗻]
 
 def Pow2 (a : V) : Prop := 0 < a ∧ ∀ r ≤ a, 1 < r → r ∣ a → 2 ∣ r
 
@@ -23,8 +23,7 @@ def _root_.LO.FirstOrder.Arithmetic.pow2Def : 𝚺₀.Semisentence 1 :=
   .mkSigma “a. 0 < a ∧ ∀ r <⁺ a, 1 < r → r ∣ a → 2 ∣ r”
 
 instance pow2_defined : 𝚺₀-Predicate (Pow2 : V → Prop) via pow2Def := .mk fun v ↦ by
-  simp [Semiformula.eval_substs, Matrix.comp_vecCons', Matrix.constant_eq_singleton,
-    Pow2, pow2Def, le_iff_lt_succ, numeral_eq_natCast]
+  simp [Semiformula.eval_substs, Pow2, pow2Def, le_iff_lt_succ]
 
 instance pow2_definable : 𝚺₀-Predicate (Pow2 : V → Prop) := pow2_defined.to_definable
 
@@ -116,7 +115,7 @@ def _root_.LO.FirstOrder.Arithmetic.lenbitDef : 𝚺₀.Semisentence 2 :=
   .mkSigma “i a. ∃ z <⁺ a, !divDef.val z a i ∧ ¬2 ∣ z”
 
 instance lenbit_defined : 𝚺₀-Relation (LenBit : V → V → Prop) via lenbitDef := .mk fun v ↦ by
-  simp [lenbitDef, LenBit, numeral_eq_natCast]
+  simp [lenbitDef, LenBit]
 
 instance lenbit_definable : 𝚺₀-Relation (LenBit : V → V → Prop) := lenbit_defined.to_definable
 
@@ -194,7 +193,7 @@ end IOpen
 
 section ISigma0
 
-variable [V ⊧ₘ* 𝗜𝚺₀]
+variable [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₀]
 
 namespace Pow2
 

@@ -103,7 +103,7 @@ instance : ModalDeMorgan (NNFormula α) where
   neg_dia := by tauto;
   neg_box := by tauto;
 
-instance : NegInvolutive (NNFormula α) where
+instance : TildeInvolutive (NNFormula α) where
   neg_involutive := by grind;
 
 section toString

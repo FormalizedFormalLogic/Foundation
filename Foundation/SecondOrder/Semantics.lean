@@ -36,12 +36,12 @@ variable {M : Type w} [𝓈 : Structure L M]
 def EvalAux
     (𝕊 : Set (Set M))
     (F : Ξ → Set M) (f : ξ → M) (E : Fin N → Set M) (e : Fin n → M) : Semiformula L Ξ ξ N n → Prop
-  |  rel R v => 𝓈.rel R (Semiterm.val 𝓈 e f ∘ v)
-  | nrel R v => ¬𝓈.rel R (Semiterm.val 𝓈 e f ∘ v)
-  |   t ∈& X => t.val 𝓈 e f ∈ F X
-  |   t ∉& X => t.val 𝓈 e f ∉ F X
-  |   t ∈# X => t.val 𝓈 e f ∈ E X
-  |   t ∉# X => t.val 𝓈 e f ∉ E X
+  |  rel R v => 𝓈.rel R (Semiterm.val e f ∘ v)
+  | nrel R v => ¬𝓈.rel R (Semiterm.val e f ∘ v)
+  |   t ∈& X => t.val e f ∈ F X
+  |   t ∉& X => t.val e f ∉ F X
+  |   t ∈# X => t.val e f ∈ E X
+  |   t ∉# X => t.val e f ∉ E X
   |        ⊤ => True
   |        ⊥ => False
   |    φ ⋏ ψ => φ.EvalAux 𝕊 F f E e ∧ ψ.EvalAux 𝕊 F f E e
@@ -67,22 +67,22 @@ def Eval (𝕊 : Set (Set M)) (F : Ξ → Set M) (f : ξ → M) (E : Fin N → S
   map_imply' := by simp [EvalAux_neg, EvalAux, imp_iff_not_or]
 
 @[simp] lemma eval_rel {k} {R : L.Rel k} {v} :
-    (rel R v).Eval 𝕊 F f E e ↔ 𝓈.rel R (Semiterm.val 𝓈 e f ∘ v) := by rfl
+    (rel R v).Eval 𝕊 F f E e ↔ 𝓈.rel R (Semiterm.val e f ∘ v) := by rfl
 
 @[simp] lemma eval_nrel {k} {R : L.Rel k} {v} :
-    (nrel R v).Eval 𝕊 F f E e ↔ ¬𝓈.rel R (Semiterm.val 𝓈 e f ∘ v) := by rfl
+    (nrel R v).Eval 𝕊 F f E e ↔ ¬𝓈.rel R (Semiterm.val e f ∘ v) := by rfl
 
-@[simp] lemma eval_fvar {X : Ξ} {t} :
-    (t ∈& X).Eval 𝕊 F f E e ↔ t.val 𝓈 e f ∈ F X := by rfl
+@[simp] lemma eval_fvar {X : Ξ} {t : Semiterm L ξ n} :
+    (t ∈& X).Eval 𝕊 F f E e ↔ t.val e f ∈ F X := by rfl
 
-@[simp] lemma eval_nfvar {X : Ξ} {t} :
-    (t ∉& X).Eval 𝕊 F f E e ↔ t.val 𝓈 e f ∉ F X := by rfl
+@[simp] lemma eval_nfvar {X : Ξ} {t : Semiterm L ξ n} :
+    (t ∉& X).Eval 𝕊 F f E e ↔ t.val e f ∉ F X := by rfl
 
-@[simp] lemma eval_bvar {X : Fin N} {t} :
-    (t ∈# X).Eval 𝕊 F f E e ↔ t.val 𝓈 e f ∈ E X := by rfl
+@[simp] lemma eval_bvar {X : Fin N} {t : Semiterm L ξ n} :
+    (t ∈# X).Eval 𝕊 F f E e ↔ t.val e f ∈ E X := by rfl
 
-@[simp] lemma eval_nbvar {X : Fin N} {t} :
-    (t ∉# X).Eval 𝕊 F f E e ↔ t.val 𝓈 e f ∉ E X := by rfl
+@[simp] lemma eval_nbvar {X : Fin N} {t : Semiterm L ξ n} :
+    (t ∉# X).Eval 𝕊 F f E e ↔ t.val e f ∉ E X := by rfl
 
 @[simp] lemma eval_fal₀ {φ : Semiformula L Ξ ξ N (n + 1)} :
     (∀⁰ φ).Eval 𝕊 F f E e ↔ ∀ x, φ.Eval 𝕊 F f E (x :> e) := by rfl
