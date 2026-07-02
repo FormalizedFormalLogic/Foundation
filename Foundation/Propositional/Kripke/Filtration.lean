@@ -329,7 +329,7 @@ instance finestFiltrationTransitiveClosureModel.filterOf : FilterOf (finestFiltr
       obtain ⟨u, rfl⟩ := Quotient.exists_rep U;
       intro φ hφ hx;
       refine @ih u ?_ φ hφ ?_;
-      . simpa using RUY;
+      . exact RUY;
       . have : v ⊧ φ := FilterEqvQuotient.iff_of_eq exv _ hφ |>.mp hx;
         have : w ⊧ φ := formula_hereditary Rvw this;
         exact FilterEqvQuotient.iff_of_eq euw _ hφ |>.mpr this;

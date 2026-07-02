@@ -59,7 +59,7 @@ variable {L M M₁ M₂ M₃}
 
 instance : FunLike (M₁ →ₛ[L] M₂) M₁ M₂ where
   coe := fun φ => φ.toFun
-  coe_injective' := fun φ ψ h => by
+  coe_injective := fun φ ψ h => by
     rcases φ; rcases ψ
     simp only [Hom.mk.injEq] at h ⊢
     ext; exact congr_fun h _
@@ -91,7 +91,7 @@ end HomClass
 
 instance : FunLike (M₁ ↪ₛ[L] M₂) M₁ M₂ where
   coe := fun φ => φ.toFun
-  coe_injective' := fun φ ψ h => by
+  coe_injective := fun φ ψ h => by
     rcases φ; rcases ψ; simp only [Embedding.mk.injEq] at h ⊢; ext; exact congr_fun h _
 
 instance : EmbeddingClass (M₁ ↪ₛ[L] M₂) L M₁ M₂ where
@@ -120,7 +120,7 @@ end EmbeddingClass
 
 instance : FunLike (M₁ ≃ₛ[L] M₂) M₁ M₂ where
   coe := fun φ => φ.toFun
-  coe_injective' := fun φ ψ h => by
+  coe_injective := fun φ ψ h => by
     rcases φ; rcases ψ; simp only [Iso.mk.injEq] at h ⊢; ext; exact congr_fun h _
 
 instance : IsoClass (M₁ ≃ₛ[L] M₂) L M₁ M₂ where
@@ -255,9 +255,9 @@ lemma eval_iff_of_equiv {f₁ f₂ b₁ b₂}
     φ.Eval b₁ f₁ ↔ φ.Eval b₂ f₂ :=
   match φ with
   | .rel R v => by
-    simpa using hrel R fun i ↦ val_eq_of_equiv I hf hb hfunc (v i)
+    simpa [Function.comp_def] using hrel R fun i ↦ val_eq_of_equiv I hf hb hfunc (v i)
   | .nrel R v => by
-    simpa using not_congr <| hrel R fun i ↦ val_eq_of_equiv I hf hb hfunc (v i)
+    simpa [Function.comp_def] using not_congr <| hrel R fun i ↦ val_eq_of_equiv I hf hb hfunc (v i)
   | ⊤ => by simp
   | ⊥ => by simp
   | φ ⋏ ψ => by

@@ -122,9 +122,9 @@ lemma unprovable_axiomD : HilbertWF.WF ⊬ Axioms.D #0 #1 #2 := by
         apply not_or.mpr;
         constructor;
         . dsimp;
-          grind;
+          simp_all [Set.subset_def];
         . simpa;
-      grind;
+      simp [Set.ext_iff];
 
 lemma unprovable_AxiomI : HilbertWF.WF ⊬ Axioms.I #0 #1 #2 := by
   apply Sound.not_provable_of_countermodel (𝓜 := NBNeighborhood.FrameClass.WF);

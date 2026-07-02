@@ -68,7 +68,18 @@ instance : Modal.S4McK ⪱ Modal.S4Point2McK := by
             | 2 => use 2; tauto;
         }
       . suffices ∃ x, (0 : M.World) ≺ x ∧ (∀ y, x ≺ y → y = 1) ∧ ∃ x, (0 : M.World) ≺ x ∧ ¬x ≺ 1 by
-          simpa [M, Semantics.Models, Satisfies];
+          obtain ⟨x, h0x, hbox, y, h0y, hy1⟩ := this;
+          apply Satisfies.imp_def.not.mpr;
+          push Not;
+          refine ⟨?_, ?_⟩;
+          · exact Satisfies.dia_def.mpr ⟨x, h0x, Satisfies.box_def.mpr (fun z hxz => hbox z hxz)⟩;
+          · apply Satisfies.box_def.not.mpr;
+            push Not;
+            refine ⟨y, h0y, ?_⟩;
+            apply Satisfies.dia_def.not.mpr;
+            push Not;
+            intro w hyw hw;
+            exact hy1 (hw ▸ hyw);
         use 1;
         refine ⟨?_, ?_, ?_⟩;
         . grind;

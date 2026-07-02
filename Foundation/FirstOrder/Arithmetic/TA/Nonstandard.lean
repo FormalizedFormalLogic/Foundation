@@ -89,7 +89,7 @@ lemma star_unbounded (n : ℕ) : n < ⋆ := by
       <| Set.mem_iUnion_of_mem (n + 1)
       <| Set.mem_union_right _
       <| Set.mem_range_self (Fin.last n)
-  simpa [models_iff, numeral_eq_natCast] using this
+  simpa [models_iff, numeral_eq_natCast] using! this
 
 end Nonstandard
 

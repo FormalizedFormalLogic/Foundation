@@ -153,7 +153,7 @@ theorem sigma_one_provable_of_models {σ : Sentence ℒₒᵣ} (hσ : Hierarchy 
 theorem sigma_one_complete {σ : Sentence ℒₒᵣ} (hσ : Hierarchy 𝚺 1 σ) :
     V↓[ℒₒᵣ] ⊧ σ → Provable T (⌜σ⌝ : V) := fun h ↦ by
   simpa [tprovable_iff_provable]
-    using Bootstrapping.Arithmetic.sigma_one_provable_of_models T hσ h
+    using! Bootstrapping.Arithmetic.sigma_one_provable_of_models T hσ h
 
 theorem provable_internalize {σ : Sentence ℒₒᵣ} :
     Provable T (⌜σ⌝ : V) → Provable T (⌜provabilityPred T σ⌝ : V) := by

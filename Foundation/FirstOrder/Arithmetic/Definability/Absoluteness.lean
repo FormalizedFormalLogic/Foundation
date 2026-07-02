@@ -30,7 +30,7 @@ lemma Defined.shigmaZero_absolute {k} {R : (Fin k → ℕ) → Prop} {R' : (Fin 
 lemma DefinedFunction.shigmaZero_absolute_func {k} {f : (Fin k → ℕ) → ℕ} {f' : (Fin k → V) → V} {φ : 𝚺₀.Semisentence (k + 1)}
     (hf : 𝚺₀.DefinedFunction f φ) (hf' : 𝚺₀.DefinedFunction f' φ) (v : Fin k → ℕ) :
     (f v : V) = f' (Nat.cast ∘ v) := by
-  simpa using Defined.shigmaZero_absolute V hf hf' (f v :> v)
+  simpa [Function.comp_def] using Defined.shigmaZero_absolute V hf hf' (f v :> v)
 
 lemma sigmaOne_upward_absolute {k} (φ : 𝚺₁.Semisentence k) (v : Fin k → ℕ) :
     φ.val.Evalb v → φ.val.Evalb (M := V) (Nat.cast ∘ v) := by
@@ -56,7 +56,7 @@ lemma Defined.shigmaOne_absolute {k} {R : (Fin k → ℕ) → Prop} {R' : (Fin k
 lemma DefinedFunction.shigmaOne_absolute_func {k} {f : (Fin k → ℕ) → ℕ} {f' : (Fin k → V) → V} {φ : 𝚺₁.Semisentence (k + 1)}
     (hf : 𝚺₁.DefinedFunction f φ) (hf' : 𝚺₁.DefinedFunction f' φ) (v : Fin k → ℕ) :
     (f v : V) = f' (Nat.cast ∘ v) := by
-  simpa using Defined.shigmaOne_absolute V hf.graph_delta hf'.graph_delta (f v :> v)
+  simpa [Function.comp_def] using Defined.shigmaOne_absolute V hf.graph_delta hf'.graph_delta (f v :> v)
 
 variable {V}
 

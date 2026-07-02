@@ -125,8 +125,8 @@ lemma subset_of_weakerThan [L₁ ⪯ L₂] : L₁ ⊆ L₂ := by
   suffices L₁ ⊢ φ → L₂ ⊢ φ by grind;
   exact Entailment.WeakerThan.pbl;
 
-instance [L₁ ≊ L₂] : L₁ ⪯ L₂ := Equiv.le inferInstance
-instance [L₁ ≊ L₂] : L₂ ⪯ L₁ := Equiv.le $ .symm inferInstance
+instance [L₁ ≊ L₂] : L₁ ⪯ L₂ := Entailment.Equiv.le inferInstance
+instance [L₁ ≊ L₂] : L₂ ⪯ L₁ := Entailment.Equiv.le $ .symm inferInstance
 
 @[simp, grind .]
 lemma eq_of_equiv [L₁ ≊ L₂] : L₁ = L₂ := Set.Subset.antisymm subset_of_weakerThan subset_of_weakerThan

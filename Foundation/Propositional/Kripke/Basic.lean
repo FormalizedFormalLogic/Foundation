@@ -371,8 +371,10 @@ lemma all.validates_AxiomEFQ : FrameClass.all.ValidatesFormula (Axioms.EFQ (.ato
   exact Formula.Kripke.ValidOnFrame.efq;
 
 lemma Validates.withAxiomEFQ (hV : C.Validates Γ) : C.Validates (insert (Axioms.EFQ (.atom 0)) Γ) := by
-  convert Validates.inter_of all.validates_AxiomEFQ hV;
-  tauto_set;
+  intro F hF φ hφ;
+  rcases hφ with rfl | hφ;
+  · exact Formula.Kripke.ValidOnFrame.efq;
+  · exact hV F hF φ hφ;
 
 protected abbrev finite_all : FrameClass := { F | F.IsFinite }
 

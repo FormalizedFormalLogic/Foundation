@@ -1,4 +1,4 @@
-module  -- shake: keep-all
+module  -- shake: keep-all --deprecated_module: ignore
 
 public import Foundation.FirstOrder.Arithmetic.Basic
 public import Foundation.FirstOrder.Arithmetic.Basic.Hierarchy

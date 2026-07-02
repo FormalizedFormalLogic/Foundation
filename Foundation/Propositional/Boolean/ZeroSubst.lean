@@ -62,14 +62,14 @@ lemma vfSubst_tautology : v ⊧ φ ↔ (φ⟦(vfSubst v)⟧.IsTautology) := by
       apply ihφ.mpr;
       intro u;
       apply equiv_of_letterless ?_ u w |>.mpr hφ;
-      grind;
+      exact Formula.letterless_zeroSubst;
     . intro h hφ;
       apply ihψ.mpr;
       intro w;
       apply equiv_of_letterless ?_ v w |>.mp;
       . apply h;
         apply ihφ.mp hφ;
-      grind;
+      exact Formula.letterless_zeroSubst;
   | hor φ ψ ihφ ihψ =>
     constructor;
     . rintro (h | h) w;
@@ -81,12 +81,12 @@ lemma vfSubst_tautology : v ⊧ φ ↔ (φ⟦(vfSubst v)⟧.IsTautology) := by
         apply ihφ.mpr;
         intro w;
         apply equiv_of_letterless ?_ v w |>.mp hφ;
-        grind;
+        exact Formula.letterless_zeroSubst;
       . right;
         apply ihψ.mpr;
         intro w;
         apply equiv_of_letterless ?_ v w |>.mp hψ;
-        grind;
+        exact Formula.letterless_zeroSubst;
   | hand φ ψ ihφ ihψ =>
     constructor;
     . rintro ⟨hφ, hψ⟩ w;
@@ -99,11 +99,11 @@ lemma vfSubst_tautology : v ⊧ φ ↔ (φ⟦(vfSubst v)⟧.IsTautology) := by
       . apply ihφ.mpr;
         intro w;
         apply equiv_of_letterless ?_ v w |>.mp $ h v |>.1;
-        grind;
+        exact Formula.letterless_zeroSubst;
       . apply ihψ.mpr;
         intro w;
         apply equiv_of_letterless ?_ v w |>.mp $ h v |>.2;
-        grind;
+        exact Formula.letterless_zeroSubst;
 
 end LO.Propositional.Boolean
 end

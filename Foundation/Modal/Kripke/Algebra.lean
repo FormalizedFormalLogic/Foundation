@@ -48,7 +48,7 @@ lemma algebraic_satisfies (F : Kripke.Frame) (V : ℕ → F⁺) (x : F.World) : 
   induction φ generalizing x with
   | hatom a => simp [Satisfies, Formula.value]; tauto;
   | hfalsum => simp [Satisfies];
-  | himp φ ψ ihφ ihψ => simp [Satisfies, ihφ x, ihψ x]; tauto;
+  | himp φ ψ ihφ ihψ => simp [Satisfies, ihφ x, ihψ x];
   | hbox φ ihφ => simp [Satisfies, ihφ, Frame.mem_def_box];
 
 lemma algebraic_validOnFrame_imp : F ⊧ φ 🡒 ψ ↔ (∀ V : ℕ → F⁺, (V ⊩ φ) ≤ (V ⊩ ψ)) := by

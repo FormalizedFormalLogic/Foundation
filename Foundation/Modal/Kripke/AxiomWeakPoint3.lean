@@ -87,13 +87,13 @@ instance [Entailment.HasAxiomWeakPoint3 𝓢] : (canonicalFrame 𝓢).IsPiecewis
     rcases hC with ⟨nRyz, neyz, nRzy⟩;
 
     obtain ⟨φ₁, hφ₁y, hφ₁z⟩ := Set.not_subset.mp nRyz;
-    replace hφ₁y : □φ₁ ∈ y.1.1 := by simpa using hφ₁y;
+    replace hφ₁y : □φ₁ ∈ y.1.1 := hφ₁y;
     replace hφ₁z : φ₁ ∈ z.1.2 := iff_not_mem₁_mem₂.mp hφ₁z;
     obtain ⟨φ₂, hφ₂y, hφ₂z⟩ := exists₁₂_of_ne neyz;
     let φ := φ₁ ⋎ φ₂;
 
     obtain ⟨ψ₁, hψz, hψy⟩ := Set.not_subset.mp nRzy;
-    replace hψ₁z : □ψ₁ ∈ z.1.1 := by simpa using hψz;
+    replace hψ₁z : □ψ₁ ∈ z.1.1 := hψz;
     replace hψ₁y : ψ₁ ∈ y.1.2 := iff_not_mem₁_mem₂.mp hψy;
     obtain ⟨ψ₂, hψ₂z, hψ₂y⟩ := exists₂₁_of_ne neyz;
     let ψ := ψ₁ ⋎ ψ₂;

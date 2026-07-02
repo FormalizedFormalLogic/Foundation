@@ -154,7 +154,7 @@ instance (k) : Encodable (oRing.Func k) where
 
 instance Func1IsEmpty : IsEmpty (oRing.Func 1) := ⟨by rintro ⟨⟩⟩
 
-instance FuncGe3IsEmpty : ∀ k ≥ 3, IsEmpty (oRing.Func k)
+lemma FuncGe3IsEmpty : ∀ k ≥ 3, IsEmpty (oRing.Func k)
   | 0       => by simp
   | 1       => by simp [show ¬3 ≤ 1 from of_decide_eq_false rfl]
   | 2       => by simp [show ¬3 ≤ 2 from of_decide_eq_false rfl]

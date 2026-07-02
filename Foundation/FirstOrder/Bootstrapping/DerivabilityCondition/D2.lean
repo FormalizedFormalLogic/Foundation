@@ -28,7 +28,7 @@ theorem modus_ponens {φ ψ : Proposition L} (hφψ : Provable T (⌜φ 🡒 ψ�
 theorem modus_ponens_sentence {σ τ : Sentence L} (hστ : Provable T (⌜σ 🡒 τ⌝ : V)) (hσ : Provable T (⌜σ⌝ : V)) :
     Provable T (⌜τ⌝ : V) := by
   apply (tprovable_tquote_iff_provable_quote (L := L)).mp
-  have hστ : Theory.internalize V T ⊢ ⌜σ⌝ 🡒 ⌜τ⌝ := by simpa using (tprovable_tquote_iff_provable_quote (L := L)).mpr hστ
+  have hστ : Theory.internalize V T ⊢ ⌜σ⌝ 🡒 ⌜τ⌝ := by simpa using! (tprovable_tquote_iff_provable_quote (L := L)).mpr hστ
   have hσ : Theory.internalize V T ⊢ ⌜σ⌝ := (tprovable_tquote_iff_provable_quote (L := L)).mpr hσ
   exact hστ ⨀ hσ
 

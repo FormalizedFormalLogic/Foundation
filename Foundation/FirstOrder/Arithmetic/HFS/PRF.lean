@@ -140,7 +140,7 @@ lemma CSeq.exists (l : V) : ∃ s, c.CSeq v s ∧ l + 1 = lh s := by
   · apply HierarchySymbol.Definable.exs
     apply HierarchySymbol.Definable.and
     · exact ⟨p.cseqDef.rew (Rew.embSubsts <| #0 :> fun i ↦ &(v i)), by
-         intro w; simpa [Matrix.comp_vecCons''] using c.cseq_defined_iff (w 0 :> v)⟩
+         intro w; simpa [Matrix.comp_vecCons''] using! c.cseq_defined_iff (w 0 :> v)⟩
     · definability
   case zero =>
     exact ⟨!⟦c.zero v⟧, CSeq.initial, by simp⟩

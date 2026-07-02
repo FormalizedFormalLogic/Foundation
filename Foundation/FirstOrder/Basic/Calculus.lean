@@ -25,7 +25,7 @@ open Semiformula
 def newVar (Γ : Sequent L) : ℕ := (Γ.map Semiformula.fvSup).foldr max 0
 
 lemma not_fvar?_newVar {φ : Proposition L} {Γ : Sequent L} (h : φ ∈ Γ) : ¬FVar? φ Γ.newVar :=
-  not_fvar?_of_lt_fvSup φ (by simpa [newVar] using List.le_max_of_le (List.mem_map_of_mem h) (by simp))
+  not_fvar?_of_lt_fvSup φ (by simp only [newVar]; exact List.le_max_of_le (List.mem_map_of_mem h) (by simp))
 
 @[simp] lemma lcHom_comm {Γ : List (Formula L ξ)} (f : Formula L ξ →ˡᶜ Proposition L) :
     (∼Γ).map f = ∼Γ.map f := by simp [List.tilde_def]
@@ -334,11 +334,11 @@ instance (T U : Theory L) : U ⪯ T ∪ U := weakerThan_of_le (by simp)
 
 lemma provable_iff :
     T ⊢ φ ↔ ∃ Γ : List (Sentence L), (∀ ψ ∈ Γ, ψ ∈ T) ∧ Nonempty (⊢ᴸᴷ¹ φ :: ∼Sequent.embed Γ) := by
-  simpa using OneSidedLK.ContextualEntailment.provable_iff (𝓢 := T) (φ := φ)
+  simpa using! OneSidedLK.ContextualEntailment.provable_iff (𝓢 := T) (φ := φ)
 
 lemma inconsistent_iff :
     Entailment.Inconsistent T ↔ ∃ Γ : List (Sentence L), (∀ ψ ∈ Γ, ψ ∈ T) ∧ Nonempty (⊢ᴸᴷ¹ ∼Sequent.embed Γ) := by
-  simpa using OneSidedLK.ContextualEntailment.inconsistent_iff (𝓢 := T)
+  simpa using! OneSidedLK.ContextualEntailment.inconsistent_iff (𝓢 := T)
 
 open Entailment Derivation
 

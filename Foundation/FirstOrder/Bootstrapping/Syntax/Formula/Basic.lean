@@ -1156,7 +1156,7 @@ variable {L}
 section
 
 instance bv.defined : 𝚺₁-Function₁ bv (V := V) L via bvGraph L := .mk fun v ↦ by
-  simpa [bvGraph, Matrix.comp_vecCons', Matrix.constant_eq_singleton] using (BV.construction L).result_defined.defined ![v 0, 0, v 1]
+  simpa [bvGraph, Matrix.comp_vecCons', Matrix.constant_eq_singleton] using! (BV.construction L).result_defined.defined ![v 0, 0, v 1]
 
 instance bv.definable : 𝚺₁-Function₁ bv (V := V) L := bv.defined.to_definable
 

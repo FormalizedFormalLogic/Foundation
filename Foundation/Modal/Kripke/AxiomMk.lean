@@ -35,7 +35,7 @@ lemma validate_axiomMk_of_satisfiesMakinsonCondition [F.SatisfiesMakinsonConditi
   . assumption;
   . apply Satisfies.and_def.mpr;
     constructor;
-    . suffices Satisfies ⟨F, V⟩ y (□^[2](.atom 0)) by simpa using this;
+    . suffices Satisfies ⟨F, V⟩ y (□^[2](.atom 0)) by exact this;
       apply Satisfies.boxItr_def.mpr
       intro z Ryz;
       apply hx₁;

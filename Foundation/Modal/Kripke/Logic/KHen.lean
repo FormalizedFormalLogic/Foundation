@@ -106,7 +106,7 @@ lemma flat_to_flat : n♭ ≺ m♭ ↔ n > m := by simp [Frame.Rel'];
 lemma exists_flat_of_from_flat (h : n♭ ≺ x) : ∃ m, x = ⟨m, 1⟩ ∧ n > m := by
   match x with
   | ⟨m, 0⟩ => aesop;
-  | ⟨m, 1⟩ => use m;
+  | ⟨m, 1⟩ => exact ⟨m, rfl, flat_to_flat.mp h⟩;
 
 end cresswellFrame
 
@@ -130,18 +130,19 @@ lemma cresswellModel.not_valid_axiomFour : ¬(Satisfies cresswellModel 2♯ (Axi
     | n♯ =>
       intro h2n;
       suffices n ≠ 0 by simp [Satisfies]; grind
+      have := sharp_to_sharp.mp h2n;
       omega;
     | n♭ => simp [Satisfies];
   . apply Satisfies.box_def.not.mpr
     push Not;
     use 1♯;
     constructor;
-    . omega;
+    . exact sharp_to_sharp.mpr (by omega);
     . apply Satisfies.box_def.not.mpr;
       push Not;
       use 0♯;
       constructor;
-      . omega;
+      . exact sharp_to_sharp.mpr (by omega);
       . tauto;
 
 
@@ -287,21 +288,21 @@ lemma cresswellModel.valid_axiomHen : cresswellModel ⊧ □(□φ 🡘 φ) 🡒
         rintro y Rny;
         match y with
         | _♭ => apply h;
-        | _♯ => apply hn_max; omega;
+        | _♯ => apply hn_max; have := sharp_to_sharp.mp Rny; omega;
       . apply Satisfies.imp_def₂.mpr;
         left;
         apply Satisfies.box_def.not.mpr;
         push Not;
         use (n + 1)♯;
         constructor;
-        . omega;
+        . exact sharp_to_sharp.mpr (by omega);
         . have : Satisfies cresswellModel (n + 1)♯ φ := hn_max (n + 1) (by omega);
           have : ¬Satisfies cresswellModel (n + 1)♯ (□φ) := by
             apply Satisfies.box_def.not.mpr;
             push Not;
             use n♯;
             constructor;
-            . omega;
+            . exact sharp_to_sharp.mpr (by omega);
             . apply hn;
           apply Satisfies.iff_def.not.mpr;
           tauto;

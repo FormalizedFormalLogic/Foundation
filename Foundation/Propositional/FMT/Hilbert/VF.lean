@@ -92,8 +92,18 @@ instance : (HilbertVF.VF : HilbertVF ℕ) ⪱ HilbertWF.WF := by
       }, 0;
       constructor;
       . tauto;
-      . simp;
-        grind;
+      . apply Forces.not_def_iff.mpr;
+        refine Or.inl ⟨1, trivial, ?_, ?_⟩;
+        · -- 1 ⊩ ⊤ 🡒 #0 ⋏ #1  (vacuous: 1 ≺[·] · reduces to 1 ≠ 1)
+          apply Forces.def_imp.mpr;
+          intro z hz;
+          exact absurd rfl hz;
+        · -- 1 ⊮ ⊤ 🡒 #1 ⋏ #0  (witnessed at world 2, where #1 fails)
+          intro hψ;
+          have h2 := Forces.def_imp.mp hψ (y := 2) (show (1 : Fin 3) ≤ 2 by decide) Forces.def_top;
+          have ha := (Forces.def_and.mp h2).1;
+          rw [Forces.def_atom] at ha;
+          simp at ha;
 
 end LO.Propositional
 end

@@ -219,7 +219,7 @@ lemma case_iff {t : V} :
     (∃ z, t = ^#z) ∨
     (∃ x, t = ^&x) ∨
     (∃ k f v : V, L.IsFunc k f ∧ IsUTermVec L k v ∧ t = ^func k f v) := by
-  simpa [construction, Phi, IsUTermVec, and_assoc] using (construction L).case
+  simpa [construction, Phi, IsUTermVec, and_assoc] using! (construction L).case
 
 alias ⟨case, mk⟩ := case_iff
 

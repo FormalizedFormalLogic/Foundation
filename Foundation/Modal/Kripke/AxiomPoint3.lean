@@ -91,7 +91,7 @@ instance [Entailment.HasAxiomPoint3 𝓢] : (canonicalFrame 𝓢).IsPiecewiseStr
         . exact Rxy;
         . apply iff_mem₂_imp.mpr;
           constructor;
-          . simpa using hφy;
+          . exact hφy;
           . exact iff_not_mem₁_mem₂.mp hψy;
       . apply iff_mem₂_box.mpr;
         use z;
@@ -99,7 +99,7 @@ instance [Entailment.HasAxiomPoint3 𝓢] : (canonicalFrame 𝓢).IsPiecewiseStr
         . exact Rxz;
         . apply iff_mem₂_imp.mpr;
           constructor;
-          . simpa using hψz;
+          . exact hψz;
           . exact iff_not_mem₁_mem₂.mp hφz;
 
 end canonicality

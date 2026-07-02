@@ -126,7 +126,7 @@ end Derivation
 namespace Proof
 
 theorem forget {φ : Proposition L} : 𝐋𝐋₀ ⊢ φ → 𝐋𝐊¹ ⊢ φ.forget := fun h ↦
-  ⟨by simpa using Derivation.forget h.get⟩
+  ⟨by simpa using! Derivation.forget h.get⟩
 
 end Proof
 
@@ -447,7 +447,7 @@ namespace Proof
 variable [L.DecidableEq]
 
 theorem girard {φ : Proposition L} : 𝐋𝐊¹ ⊢ φ → 𝐋𝐋₀ ⊢ φ.Girard := fun h ↦
-  ⟨by simpa using Derivation.toLL h.get⟩
+  ⟨by simpa using! Derivation.toLL h.get⟩
 
 theorem girard_faithful {φ : Proposition L} : 𝐋𝐋₀ ⊢ φ.Girard ↔ 𝐋𝐊¹ ⊢ φ :=
   ⟨fun h ↦ by simpa using LinearLogic.Proof.forget h, girard⟩

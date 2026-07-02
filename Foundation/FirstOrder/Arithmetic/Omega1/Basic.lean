@@ -93,7 +93,7 @@ lemma smash_comm (a b : V) : a ⨳ b = b ⨳ a := (exponential_smash a b).uniq (
   exact lt_exponential_length this
 
 @[simp] lemma lt_smash_one_righs (a : V) : a ⨳ 1 ≤ 2 * a + 1 := by
-  rcases zero_le a with (rfl | pos)
+  rcases Arithmetic.zero_le a with (rfl | pos)
   · simp
   · exact (le_iff_lt_length_of_exp (exponential_smash a 1)).mpr (by
       suffices ‖a‖ < ‖a * 2 + 1‖ by simpa [mul_comm 2 a]
@@ -120,7 +120,7 @@ lemma smash_two_mul (a : V) {b} (pos : 0 < b) : a ⨳ (2 * b) = (a ⨳ b) * (a �
   exact h₁.uniq h₂
 
 lemma smash_two_mul_le_sq_smash (a b : V) : a ⨳ (2 * b) ≤ (a ⨳ b) ^ 2 := by
-  rcases zero_le b with (rfl | pos)
+  rcases Arithmetic.zero_le b with (rfl | pos)
   · simp
   · simpa [smash_two_mul a pos, sq]
     using smash_monotone (by rfl) (pos_iff_one_le.mp pos)
