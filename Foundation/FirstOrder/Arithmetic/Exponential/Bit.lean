@@ -186,10 +186,10 @@ end model
 section model
 
 lemma mem_iff_mul_exp_add_exp_add {i a : V} : i ∈ a ↔ ∃ k, ∃ r < Exp.exp i, a = k * Exp.exp (i + 1) + Exp.exp i + r := by
-  simpa [mem_iff_bit, exp_succ] using lenbit_iff_add_mul (exp_pow2 i) (a := a)
+  simpa [mem_iff_bit, exp_succ] using! lenbit_iff_add_mul (exp_pow2 i) (a := a)
 
 lemma not_mem_iff_mul_exp_add {i a : V} : i ∉ a ↔ ∃ k, ∃ r < Exp.exp i, a = k * Exp.exp (i + 1) + r := by
-  simpa [mem_iff_bit, exp_succ] using not_lenbit_iff_add_mul (exp_pow2 i) (a := a)
+  simpa [mem_iff_bit, exp_succ] using! not_lenbit_iff_add_mul (exp_pow2 i) (a := a)
 
 section empty
 
@@ -239,13 +239,13 @@ instance : LawfulSingleton V V where
     i ∈ insert j a ↔ i = j ∨ i ∈ a := by
   by_cases h : j ∈ a <;> simp [h, insert_eq, bitInsert]
   · by_cases e : i = j <;> simp [h, e]
-  · simpa [exp_inj.eq_iff] using
+  · simpa [exp_inj.eq_iff] using!
       lenbit_add_pow2_iff_of_not_lenbit (exp_pow2 i) (exp_pow2 j) h
 
 @[simp] lemma mem_bitRemove_iff {i j a : V} :
     i ∈ bitRemove j a ↔ i ≠ j ∧ i ∈ a := by
   by_cases h : j ∈ a
-  · simpa [h, bitRemove, exp_inj.eq_iff] using
+  · simpa [h, bitRemove, exp_inj.eq_iff] using!
       lenbit_sub_pow2_iff_of_lenbit (exp_pow2 i) (exp_pow2 j) h
   · simp only [bitRemove, h, ↓reduceIte, ne_eq, iff_and_self]
     rintro _ rfl; contradiction
@@ -442,7 +442,7 @@ lemma nonempty_of_pos {a : V} (h : 0 < a) : ∃ i, i ∈ a := by
   simp [this] at h
 
 lemma eq_empty_or_nonempty (a : V) : a = ∅ ∨ ∃ i, i ∈ a := by
-  rcases zero_le a with (rfl | pos)
+  rcases Arithmetic.zero_le a with (rfl | pos)
   · simp [emptyset_def]
   · right; exact nonempty_of_pos pos
 
@@ -457,7 +457,7 @@ lemma isempty_iff {s : V} : s = ∅ ↔ ∀ x, x ∉ s := by
 @[simp] lemma empty_subset (s : V) : ∅ ⊆ s := by intro x; simp
 
 lemma lt_of_lt_log {a b : V} (pos : 0 < b) (h : ∀ i ∈ a, i < log b) : a < b := by
-  rcases zero_le a with (rfl | apos)
+  rcases Arithmetic.zero_le a with (rfl | apos)
   · exact pos
   by_contra A
   exact not_lt_of_ge (log_monotone <| show b ≤ a by simpa using A) (h (log a) (log_mem_of_pos apos))

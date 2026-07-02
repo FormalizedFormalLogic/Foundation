@@ -22,12 +22,12 @@ lemma incomplete_of_REPred_not_ComputablePred_Nat' {P : ℕ → Prop} (hRE : REP
     apply ComputablePred.computable_iff_re_compl_re.mpr;
     constructor;
     . assumption;
-    . suffices REPred fun a : ℕ ↦ T ⊬ φ/[a] by simpa [hP] using this;
+    . suffices REPred fun a : ℕ ↦ T ⊬ φ/[a] by simpa [hP] using! this;
       have : 𝚺₁-Predicate fun b : ℕ ↦ Bootstrapping.Provable T (Bootstrapping.neg ℒₒᵣ <| Bootstrapping.subst ℒₒᵣ ?[Bootstrapping.Arithmetic.numeral b] ⌜φ⌝) := by clear hP; definability;
       apply REPred.of_eq (re_iff_sigma1.mpr this);
       intro a;
       push Not at h;
-      apply Iff.trans ?_ $ show T ⊢ ∼φ/[a] ↔ ¬T ⊢ φ/[a] by simpa [hP] using h a |>.symm;
+      apply Iff.trans ?_ $ show T ⊢ ∼φ/[a] ↔ ¬T ⊢ φ/[a] by simpa [hP] using! h a |>.symm;
       constructor;
       . rintro hP
         apply Bootstrapping.Provable.sound
@@ -39,11 +39,11 @@ lemma incomplete_of_REPred_not_ComputablePred_Nat' {P : ℕ → Prop} (hRE : REP
   rcases hd with (⟨hd₁, hd₂⟩ | ⟨hd₁, hd₂⟩);
   . use d;
     constructor;
-    . simpa [hP] using hd₁;
+    . simpa [hP] using! hd₁;
     . simpa;
   . exfalso;
     apply Entailment.Consistent.not_bot (𝓢 := T) inferInstance;
-    replace hd₁ : T ⊢ φ/[d] := by simpa [hP] using hd₁;
+    replace hd₁ : T ⊢ φ/[d] := by simpa [hP] using! hd₁;
     cl_prover [hd₁, hd₂];
 
 /--

@@ -205,14 +205,14 @@ variable {n : V}
 section
 
 instance termShift.defined : 𝚺₁-Function₁ termShift (V := V) L via termShiftGraph L := .mk fun v ↦ by
-  simpa [termShiftGraph, termShift] using construction.result_defined.defined v
+  simpa [termShiftGraph, termShift] using! construction.result_defined.defined v
 
 instance termShift.definable : 𝚺₁-Function₁ termShift (V := V) L := termShift.defined.to_definable
 
 instance termShift.definable' : Γ-[i + 1]-Function₁ termShift (V := V) L := termShift.definable.of_sigmaOne
 
 instance termShiftVec.defined : 𝚺₁-Function₂ termShiftVec (V := V) L via termShiftVecGraph L := .mk fun v ↦ by
-  simpa [termShiftVecGraph, termShiftVec] using construction.resultVec_defined.defined v
+  simpa [termShiftVecGraph, termShiftVec] using! construction.resultVec_defined.defined v
 
 instance termShiftVec.definable : 𝚺₁-Function₂ termShiftVec (V := V) L := termShiftVec.defined.to_definable
 
@@ -338,14 +338,14 @@ variable {L}
 section
 
 instance termBShift.defined : 𝚺₁-Function₁ termBShift (V := V) L via termBShiftGraph L := .mk fun v ↦ by
-  simpa using construction.result_defined.defined v
+  simpa using! construction.result_defined.defined v
 
 instance termBShift.definable : 𝚺₁-Function₁ termBShift (V := V) L := termBShift.defined.to_definable
 
 instance termBShift.definable' : Γ-[i + 1]-Function₁ termBShift (V := V) L := termBShift.definable.of_sigmaOne
 
 instance termBShiftVec.defined : 𝚺₁-Function₂ termBShiftVec (V := V) L via termBShiftVecGraph L := .mk fun v ↦ by
-  simpa using construction.resultVec_defined.defined v
+  simpa using! construction.resultVec_defined.defined v
 
 instance termBShiftVec.definable : 𝚺₁-Function₂ termBShiftVec (V := V) L := termBShiftVec.defined.to_definable
 
@@ -658,16 +658,16 @@ instance : Γ-[m + 1]-Function₂ (qqMul : V → V → V) := .of_sigmaOne qqMul_
 end
 
 @[simp] lemma lt_qqAdd_left (x y : V) : x < x ^+ y := by
-  simpa using nth_lt_qqFunc_of_lt (i := 0) (k := 2) (f := (addIndex : V)) (v := ?[x, y]) (by simp)
+  simpa using! nth_lt_qqFunc_of_lt (i := 0) (k := 2) (f := (addIndex : V)) (v := ?[x, y]) (by simp)
 
 @[simp] lemma lt_qqAdd_right (x y : V) : y < x ^+ y := by
-  simpa using nth_lt_qqFunc_of_lt (i := 1) (k := 2) (f := (addIndex : V)) (v := ?[x, y]) (by simp)
+  simpa using! nth_lt_qqFunc_of_lt (i := 1) (k := 2) (f := (addIndex : V)) (v := ?[x, y]) (by simp)
 
 @[simp] lemma lt_qqMul_left (x y : V) : x < x ^* y := by
-  simpa using nth_lt_qqFunc_of_lt (i := 0) (k := 2) (f := (mulIndex : V)) (v := ?[x, y]) (by simp)
+  simpa using! nth_lt_qqFunc_of_lt (i := 0) (k := 2) (f := (mulIndex : V)) (v := ?[x, y]) (by simp)
 
 @[simp] lemma lt_qqMul_right (x y : V) : y < x ^* y := by
-  simpa using nth_lt_qqFunc_of_lt (i := 1) (k := 2) (f := (mulIndex : V)) (v := ?[x, y]) (by simp)
+  simpa using! nth_lt_qqFunc_of_lt (i := 1) (k := 2) (f := (mulIndex : V)) (v := ?[x, y]) (by simp)
 
 set_option backward.isDefEq.respectTransparency false in
 lemma qqFunc_absolute (k f v : ℕ) : ((^func k f v : ℕ) : V) = ^func (k : V) (f : V) (v : V) := by simp [qqFunc, nat_cast_pair]

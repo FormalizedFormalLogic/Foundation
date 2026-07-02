@@ -94,7 +94,7 @@ lemma height_pos : 0 < (Frame.extendRoot F n).height := by
   rw [eq_extendRoot_height_rank_extendRoot_root];
   apply lt_fcwHeight ?_ (by simp);
   · exact ↑F.root.1;
-  . grind;
+  . simp only [Frame.Rel', Frame.root, default];
 
 @[simp]
 lemma height_succ : (F.extendRoot 1).height = F.height + 1 := by
@@ -130,7 +130,7 @@ lemma height_succ : (F.extendRoot 1).height = F.height + 1 := by
     rcases exists_rank_terminal F.root.1 with ⟨j, hj⟩;
     use j, F.root;
     constructor;
-    . grind;
+    . exact Frame.extendRoot.rel_root_original_root;
     . exact embed_rel_iterate_embed_iff_rel.mpr hj;
 
 omit [F.IsRooted] in
@@ -145,7 +145,8 @@ lemma eq_original_height : Frame.rank (x : F.extendRoot 1) = Frame.rank x := by
     . simp;
     . -- TODO: extract no loop lemma (x ≺^[n] i cannot happen where x is original and i is new elements by extension)
       exfalso;
-      have : (F.extendRoot 1).root ≺ (x : F.extendRoot 1) := by grind;
+      have : (F.extendRoot 1).root ≺ (x : F.extendRoot 1) := by
+        simp only [Frame.Rel', Frame.root, default];
       have : (x : F.extendRoot 1) ≺ x :=
         Rel.Iterate.unwrap_of_trans_of_pos (by omega) $
         Rel.Iterate.comp (m := 1) |>.mp ⟨_, Rxy, by simpa⟩;
@@ -166,7 +167,7 @@ lemma iff_eq_height_eq_original_root [F.IsRooted] {x : F.extendRoot 1} : Frame.r
       have := h ▸ height_succ (F := F);
       simp [Frame.height, Frame.root, default] at this;
     . intro h;
-      suffices x = F.root.1 by simp [this]; grind;
+      suffices x = F.root.1 by subst this; rfl;
       apply Frame.eq_height_root.mp;
       exact h ▸ Frame.extendRoot.eq_original_height.symm;
   . rintro rfl;

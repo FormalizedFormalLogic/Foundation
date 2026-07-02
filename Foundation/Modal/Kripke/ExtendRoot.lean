@@ -81,7 +81,8 @@ lemma embed_rel_iterate_embed_iff_rel {i j : F} : embed (n := n) i ≺^[k] embed
   extendRoot.pMorphism.toFun_rel_iterate_toFun_iff_of_inj Sum.inr_injective
 
 @[simp]
-lemma rel_root_original_root [F.IsRooted] : (F.extendRoot n).root.1 ≺ F.root.1 := by grind;
+lemma rel_root_original_root [F.IsRooted] : (F.extendRoot n).root.1 ≺ F.root.1 := by
+  simp only [Frame.root, default, Frame.Rel'];
 
 @[grind →]
 lemma not_eq_extendRoot_root_of_rel_original_root [F.IsIrreflexive] (x : F.extendRoot n) (h : (extendRoot F n).root ≺ x) : x ≠ (extendRoot F n).root := by
@@ -99,7 +100,7 @@ section
 
 lemma eq_root_or_eq_original (x : F.extendRoot 1) : x = (F.extendRoot 1).root ∨ ∃ x₀ : F, x = x₀ := by
   rcases eq_extend_or_eq_original x with (⟨i, hi, rfl⟩ | ⟨x₀, rfl⟩);
-  . simp [Frame.root, default]; grind;
+  . left; simp [Frame.root, default, extend];
   . simp;
 
 lemma eq_original_of_rel_extendRoot_root₁ [F.IsIrreflexive] (x : F.extendRoot 1) (h : (extendRoot F 1).root ≺ x)
@@ -307,7 +308,9 @@ lemma inr_satisfies_forall_axiomT_set {Γ : Finset (Modal.Formula ℕ)} :
   ∃ i : Fin n, ∀ γ ∈ Γ, Satisfies _ (extend i : M.extendRoot n) (□γ 🡒 γ) := by
   obtain ⟨i, hi⟩ := inr_satisfies_conj_axiomT_set (Γ := Γ) (M := M);
   use i;
-  simpa using Satisfies.fconj_def.mp hi;
+  have h := Satisfies.fconj_def.mp hi;
+  simp only [Finset.forall_mem_image] at h;
+  exact h;
 
 end Model.extendRoot
 

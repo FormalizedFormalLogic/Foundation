@@ -289,7 +289,7 @@ lemma sound : 𝐋𝐊¹ ⊢ φ → ∀ p : ℙ, ∀ fv, (∀ i, p ⊩↓ fv i) 
   exact Forces.sound p fv Hfv this
 
 lemma sound₀ {σ : Sentence L} : 𝐋𝐊¹ ⊢ (σ : Proposition L) → ℙ ∀⊩ᶜ σ := fun b p ↦ by
-  simpa using sound b p (fun _ ↦ (Classical.ofNonempty : p).val) fun _ ↦ by simp
+  simpa using! sound b p (fun _ ↦ (Classical.ofNonempty : p).val) fun _ ↦ by simp
 
 end WeaklyForces₀
 

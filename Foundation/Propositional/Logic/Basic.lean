@@ -20,7 +20,7 @@ namespace Logic
 
 instance : SetLike (Logic α) (Formula α) where
   coe := logic
-  coe_injective' _ _ := Logic.ext
+  coe_injective _ _ := Logic.ext
 
 class IsTrivial (L : Logic α) : Prop where
   eq_univ : L.logic = Set.univ

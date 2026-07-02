@@ -118,17 +118,17 @@ open Semiterm Theory Semiformula
 lemma eqv_refl (a : M) : eqv L a a := by
   have : M↓[L] ⊧ “∀ x, x = x” := H.models _ (Theory.eqAxiom.refl (L := L))
   have : ∀ x : M, op(=)[L].val ![x, x] := by simpa [models_iff] using this
-  simpa using this a
+  exact this a
 
 lemma eqv_symm {a b : M} : eqv L a b → eqv L b a := by
   have : M↓[L] ⊧ “∀ x y, x = y → y = x” := H.models _ (Theory.eqAxiom.symm (L := L))
   have : ∀ x y : M, op(=)[L].val ![x, y] → op(=)[L].val ![y, x] := by simpa [models_iff] using this
-  simpa using this a b
+  exact this a b
 
 lemma eqv_trans {a b c : M} : eqv L a b → eqv L b c → eqv L a c := by
   have : M↓[L] ⊧ “∀ x y z, x = y → y = z → x = z” := H.models _ (Theory.eqAxiom.trans (L := L))
   have : ∀ x y z : M, op(=)[L].val ![x, y] → op(=)[L].val ![y, z] → op(=)[L].val ![x, z] := by simpa [models_iff] using this
-  simpa using this a b c
+  exact this a b c
 
 lemma eqv_funcExt {k} (f : L.Func k) {v w : Fin k → M} (h : ∀ i, eqv L (v i) (w i)) :
     eqv L (func f v) (func f w) := by
@@ -137,9 +137,9 @@ lemma eqv_funcExt {k} (f : L.Func k) {v w : Fin k → M} (h : ∀ i, eqv L (v i)
       ∀ m : Fin (k + k) → M,
       (∀ (i : Fin k), op(=)[L].val ![m (Fin.addCast k i), m (i.addNat k)]) →
         op(=)[L].val ![func f fun i ↦ m (Fin.addCast k i), func f fun i ↦ m (i.addNat k)] := by
-    simpa [models_iff, Semiterm.val_func] using this
-  have := this (Matrix.vecAppend rfl v w) (fun i ↦ by simpa [Matrix.vecAppend_eq_ite] using h i)
-  simpa [Semiterm.val_func, Matrix.vecAppend_eq_ite] using this
+    simpa [models_iff, Semiterm.val_func] using! this
+  have := this (Matrix.vecAppend rfl v w) (fun i ↦ by simpa [Matrix.vecAppend_eq_ite, eqv] using h i)
+  simpa [Semiterm.val_func, Matrix.vecAppend_eq_ite, eqv] using this
 
 lemma eqv_relExt_aux {k} (r : L.Rel k) {v w : Fin k → M} (h : ∀ i, eqv L (v i) (w i)) :
     rel r v → rel r w := by
@@ -148,9 +148,9 @@ lemma eqv_relExt_aux {k} (r : L.Rel k) {v w : Fin k → M} (h : ∀ i, eqv L (v 
       ∀ m : Fin (k + k) → M,
       (∀ (i : Fin k), op(=)[L].val ![m (Fin.addCast k i), m (i.addNat k)]) →
         (rel r fun i ↦ m (Fin.addCast k i)) → rel r fun i ↦ m (i.addNat k) := by
-    simpa [models_iff, Semiterm.val_func] using this
-  have := this (Matrix.vecAppend rfl v w) (fun i ↦ by simpa [Matrix.vecAppend_eq_ite] using h i)
-  simpa [Semiterm.val_func, Matrix.vecAppend_eq_ite] using this
+    simpa [models_iff, Semiterm.val_func, eval_rel] using! this
+  have := this (Matrix.vecAppend rfl v w) (fun i ↦ by simpa [Matrix.vecAppend_eq_ite, eqv] using h i)
+  simpa [Semiterm.val_func, Matrix.vecAppend_eq_ite, eqv] using this
 
 lemma eqv_relExt {k} (r : L.Rel k) {v w : Fin k → M} (h : ∀ i, eqv L (v i) (w i)) :
     rel r v ↔ rel r w := by
@@ -202,16 +202,17 @@ lemma eval_mk {bv fv} {φ : Semiformula L ξ n} :
   induction φ using Semiformula.rec'
   case hall n φ ih =>
     constructor
-    · intro h a; exact (ih (bv := a :> bv)).mp (by simpa [Matrix.comp_vecCons] using h ⟦a⟧)
+    · intro h a; exact (ih (bv := a :> bv)).mp (by simp only [Matrix.comp_vecCons]; exact h ⟦a⟧)
     · intro h a;
       induction' a using Quotient.ind with a
-      simpa [Matrix.comp_vecCons] using ih.mpr (h a)
+      have h2 := ih.mpr (h a); simp only [Matrix.comp_vecCons] at h2; exact h2
   case hexs n φ ih =>
     constructor
     · intro ⟨a, h⟩
       induction' a using Quotient.ind with a
-      exact ⟨a, (ih (bv := a :> bv)).mp (by simpa [Matrix.comp_vecCons] using h)⟩
-    · intro ⟨a, h⟩; exact ⟨⟦a⟧, by simpa [Matrix.comp_vecCons] using ih.mpr h⟩
+      exact ⟨a, (ih (bv := a :> bv)).mp (by simp only [Matrix.comp_vecCons]; exact h)⟩
+    · intro ⟨a, h⟩; refine ⟨⟦a⟧, ?_⟩
+      have h2 := ih.mpr h; simp only [Matrix.comp_vecCons] at h2; exact h2
   case _ => simp [*]
   case _ => simp [*]
   case _ => simp [*, val_mk, rel_mk, Function.comp_def]
@@ -221,11 +222,12 @@ lemma eval_mk {bv fv} {φ : Semiformula L ξ n} :
 
 lemma evalf_mk {fv} {φ : Formula L ξ} :
     φ.Evalf (M := QuotEq L M) (⟦fv ·⟧) ↔ φ.Evalf fv := by
-  simpa [Matrix.empty_eq] using eval_mk (bv := ![]) (fv := fv) (φ := φ)
+  have h := eval_mk (bv := ![]) (fv := fv) (φ := φ)
+  simp only [Matrix.empty_eq] at h; exact h
 
 lemma models_iff {σ : Sentence L} : (QuotEq L M)↓[L] ⊧ σ ↔ M↓[L] ⊧ σ := by
-  simpa [Empty.eq_elim, Matrix.empty_eq] using
-    eval_mk (M := M) (ξ := Empty) (φ := σ) (bv := ![]) (fv := Empty.elim)
+  have h := eval_mk (M := M) (ξ := Empty) (φ := σ) (bv := ![]) (fv := Empty.elim)
+  simp only [Empty.eq_elim, Matrix.empty_eq] at h; exact h
 
 variable (L M)
 

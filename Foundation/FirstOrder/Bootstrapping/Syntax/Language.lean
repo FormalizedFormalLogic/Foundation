@@ -141,9 +141,9 @@ instance : (ℒₒᵣ).LORDefinable where
   func := .mkSigma “k f. (k = 0 ∧ f = 0) ∨ (k = 0 ∧ f = 1) ∨ (k = 2 ∧ f = 0) ∨ (k = 2 ∧ f = 1)”
   rel  := .mkSigma “k r. (k = 2 ∧ r = 0) ∨ (k = 2 ∧ r = 1)”
   func_iff {k c} := by
-    simpa [models_iff] using Language.ORing.of_mem_range_encode_func
+    simpa [models_iff] using! Language.ORing.of_mem_range_encode_func
   rel_iff {k c} := by
-    simpa [models_iff] using Language.ORing.of_mem_range_encode_rel
+    simpa [models_iff] using! Language.ORing.of_mem_range_encode_rel
 
 namespace Arithmetic
 
@@ -162,22 +162,22 @@ def eqIndex : ℕ := Encodable.encode (Language.Eq.eq : (ℒₒᵣ : FirstOrder.
 def ltIndex : ℕ := Encodable.encode (Language.LT.lt : (ℒₒᵣ : FirstOrder.Language).Rel 2)
 
 @[simp] lemma LOR_func_zeroIndex : (ℒₒᵣ).IsFunc 0 (zeroIndex : V) := by
-  simpa using codeIn_func_quote (V := V) (L := ℒₒᵣ) Language.Zero.zero
+  simpa using! codeIn_func_quote (V := V) (L := ℒₒᵣ) Language.Zero.zero
 
 @[simp] lemma LOR_func_oneIndex : (ℒₒᵣ).IsFunc 0 (oneIndex : V) := by
-  simpa using codeIn_func_quote (V := V) (L := ℒₒᵣ) Language.One.one
+  simpa using! codeIn_func_quote (V := V) (L := ℒₒᵣ) Language.One.one
 
 @[simp] lemma LOR_func_addIndex : (ℒₒᵣ).IsFunc 2 (addIndex : V) := by
-  simpa using codeIn_func_quote (V := V) (L := ℒₒᵣ) Language.Add.add
+  simpa using! codeIn_func_quote (V := V) (L := ℒₒᵣ) Language.Add.add
 
 @[simp] lemma LOR_func_mulIndex : (ℒₒᵣ).IsFunc 2 (mulIndex : V) := by
-  simpa using codeIn_func_quote (V := V) (L := ℒₒᵣ) Language.Mul.mul
+  simpa using! codeIn_func_quote (V := V) (L := ℒₒᵣ) Language.Mul.mul
 
 @[simp] lemma LOR_rel_eqIndex : (ℒₒᵣ).IsRel 2 (eqIndex : V) := by
-  simpa using codeIn_rel_quote (V := V) (L := ℒₒᵣ) Language.Eq.eq
+  simpa using! codeIn_rel_quote (V := V) (L := ℒₒᵣ) Language.Eq.eq
 
 @[simp] lemma LOR_rel_ltIndex : (ℒₒᵣ).IsRel 2 (ltIndex : V) := by
-  simpa using codeIn_rel_quote (V := V) (L := ℒₒᵣ) Language.LT.lt
+  simpa using! codeIn_rel_quote (V := V) (L := ℒₒᵣ) Language.LT.lt
 
 lemma func_def_LOR : (ℒₒᵣ).isFunc = .mkSigma “k f. (k = 0 ∧ f = 0) ∨ (k = 0 ∧ f = 1) ∨ (k = 2 ∧ f = 0) ∨ (k = 2 ∧ f = 1)” := rfl
 

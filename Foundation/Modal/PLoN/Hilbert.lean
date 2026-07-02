@@ -30,7 +30,7 @@ lemma soundness_frameclass (hV : C ⊧* Ax.instances) : Hilbert.Normal Ax ⊢ φ
     apply ValidOnModel.mdp (ihpq V) (ihp V);
   | _ => grind;
 
-instance instFrameClassSound (hV : C ⊧* Ax.instances) : Sound (Hilbert.Normal Ax) C := ⟨fun {_} => soundness_frameclass hV⟩
+def instFrameClassSound (hV : C ⊧* Ax.instances) : Sound (Hilbert.Normal Ax) C := ⟨fun {_} => soundness_frameclass hV⟩
 
 lemma consistent_of_nonempty_frameClass (C : PLoN.FrameClass) (hC : Set.Nonempty C) [sound : Sound (Hilbert.Normal Ax) C] : Entailment.Consistent (Hilbert.Normal Ax) := by
   apply Entailment.Consistent.of_unprovable (φ := ⊥);

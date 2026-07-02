@@ -44,7 +44,7 @@ lemma imply_boxdot_plain_of_imply_box_box : Modal.GL ⊢ □φ 🡒 □ψ → Mo
     push Not;
     use (Sum.inr M.root);
     constructor;
-    . grind;
+    . simp only [Frame.Rel', Frame.root, default];
     . assumption;
 
 theorem unnecessitation! : Modal.GL ⊢ □φ → Modal.GL ⊢ φ := by

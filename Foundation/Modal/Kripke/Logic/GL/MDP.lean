@@ -69,7 +69,7 @@ def pMorphism₂ (F₁ F₂) : F₂ →ₚ (mdpCounterexmpleFrame F₁ F₂) whe
 lemma through_original_root (r₁ : F₁.Root) (r₂ : F₂.Root) (x : (mdpCounterexmpleFrame F₁ F₂).World) (h : (mdpCounterexmpleFrame F₁ F₂).root ≺ x)
   : (x = r₁ ∨ (Sum.inr (Sum.inl r₁.1) ≺ x)) ∨ (x = r₂ ∨ (Sum.inr (Sum.inr r₂.1) ≺ x)) := by
   match x with
-  | .inl x => grind;
+  | .inl x => simp only [Frame.Rel', Frame.root, default] at h;
   | .inr (.inl x) =>
     by_cases e : x = r₁;
     . subst e; left; tauto;

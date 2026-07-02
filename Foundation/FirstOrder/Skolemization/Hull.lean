@@ -80,7 +80,7 @@ lemma closed_func {v : Fin k → M} (hv : ∀ i, v i ∈ SkolemHull L s)
     closed hv (φ := “#0 = !!(Semiterm.func f fun i ↦ #i.succ)”)
       (by simp [Semiterm.val_func]; simp [Function.comp_def])
   rcases this with ⟨z, hz, e⟩
-  have : z = func f v := by simpa [Semiterm.val_func] using e
+  have : z = func f v := by simpa [Semiterm.val_func] using! e
   rcases this; assumption
 
 variable (𝓼 s)
@@ -89,7 +89,7 @@ instance (priority := 50) str : Structure L (SkolemHull L s) where
   func k f v := ⟨func f fun i ↦ (v i : M), closed_func (by simp)⟩
   rel k R v := Structure.rel R fun i ↦ (v i : M)
 
-instance set_nonempty : (SkolemHull L s).Nonempty := by
+lemma set_nonempty : (SkolemHull L s).Nonempty := by
   have : ∃ z : M, (⊤ : Semisentence L 1).Evalb ![z] := by simp
   have : ∃ z, z ∈ SkolemHull L s := by
     simpa using closed (s := s) (by simp) this
@@ -156,7 +156,7 @@ instance (priority := 50) membership :
 
 instance (priority := 50) mem [Operator.Mem L] [Membership M M] [Structure.Mem L M] :
     Structure.Mem L (SkolemHull L s) := ⟨fun x y ↦ by
-  simpa [Operator.val, Matrix.fun_eq_vec_two] using Structure.Mem.mem (L := L) (M := M) x.val y.val⟩
+  simpa [Operator.val, Matrix.fun_eq_vec_two] using! Structure.Mem.mem (L := L) (M := M) x.val y.val⟩
 
 end mem
 
@@ -168,12 +168,12 @@ open Cardinal
 
 variable [L.Encodable] {s : Set M}
 
-instance set_countable (hs : s.Countable) : (SkolemHull L s).Countable := by
+lemma set_countable (hs : s.Countable) : (SkolemHull L s).Countable := by
   have : Countable s := hs
   have : Countable (Term L.skolemFunction₁ s) := Semiterm.countable
   exact Set.countable_range _
 
-instance countable (hs : s.Countable) : Countable (SkolemHull L s) := set_countable hs
+lemma countable (hs : s.Countable) : Countable (SkolemHull L s) := set_countable hs
 
 instance countable₀ : Countable (SkolemHull₀ L M) := set_countable (by simp)
 

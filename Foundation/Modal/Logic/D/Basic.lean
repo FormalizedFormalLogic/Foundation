@@ -161,25 +161,36 @@ instance {F : Frame} [F.IsFinite] [F.IsIrreflexive] [F.IsTransitive] : F.IsConve
 
 namespace Model
 
+/-- Accessibility for `tailModel₀`, factored out so the `tailModel₀` structure literal carries no
+    inline `match` (v4.31's equation-theorem generator chokes on the auto-generated World matcher when
+    the discriminant's structure literal embeds a `match`). `@[simp, grind]` keeps the old inline-match
+    reducibility for the `grind`/`simp`/`omega` proofs below. The row-2 pattern is narrowed from
+    `.inl _, _` to `.inl _, .inr _` to remove the overlap with row 1 (same semantics: `(.inl, .inl)`
+    still hits row 1 → False), also needed for v4.31's equation generator. -/
+@[simp, grind] def tailRel₀ (M : Kripke.Model) [M.IsPointRooted] :
+    (Unit ⊕ ℕ ⊕ M.World) → (Unit ⊕ ℕ ⊕ M.World) → Prop
+  | _            , .inl _        => False -- ¬(x ≺ ω)
+  | .inl        _, .inr _        => True  -- ω ≺ x where x is not ω
+  | .inr $ .inl x, .inr $ .inl y => x > y -- x ≺ y ↔ x > y where x, y ∈ ω
+  | .inr $ .inl _, .inr $ .inr _ => True
+  | .inr $ .inr _, .inr $ .inl _ => False
+  | .inr $ .inr x, .inr $ .inr y => x ≺ y
+
+/-- Valuation for `tailModel₀`, factored out for the same reason as `tailRel₀`. -/
+@[simp, grind] def tailVal₀ (M : Kripke.Model) [M.IsPointRooted] (o : ℕ → Prop) :
+    ℕ → (Unit ⊕ ℕ ⊕ M.World) → Prop
+  | p, .inl _        => o p
+  | p, .inr $ .inl _ => M.Val p M.root.1
+  | p, .inr $ .inr x => M.Val p x
+
 /--
   `ω`-extend root model.
   Valuation on `n ∈ ω` is same on `M.root` and on point `ω` is by `o`.
 -/
 abbrev tailModel₀ (M : Kripke.Model) [M.IsPointRooted] (o : ℕ → Prop) : Kripke.Model where
   World := Unit ⊕ ℕ ⊕ M.World -- `Unit` means `ω`
-  Rel x y :=
-    match x, y with
-    | _            , .inl _        => False -- ¬(x ≺ ω)
-    | .inl        _, _             => True  -- ω ≺ x where x is not ω
-    | .inr $ .inl x, .inr $ .inl y => x > y -- x ≺ y ↔ x > y where x, y ∈ ω
-    | .inr $ .inl _, .inr $ .inr _ => True
-    | .inr $ .inr _, .inr $ .inl _ => False
-    | .inr $ .inr x, .inr $ .inr y => x ≺ y
-  Val p x :=
-    match x with
-    | .inl _        => o p
-    | .inr $ .inl _ => M.Val p M.root.1
-    | .inr $ .inr x => M.Val p x
+  Rel := M.tailRel₀
+  Val := M.tailVal₀ o
 
 namespace tailModel₀
 
@@ -191,6 +202,8 @@ instance instPontRooted : (M.tailModel₀ o).IsPointRooted where
     by_contra! hC;
     have := r'.2 (.inl ()) (by grind);
     simp [Frame.Rel'] at this;
+
+@[simp] lemma root_eq : (↑(M.tailModel₀ o).root : (M.tailModel₀ o).World) = Sum.inl () := rfl
 
 instance instTransitive [M.IsTransitive] : (M.tailModel₀ o).IsTransitive := ⟨by grind⟩
 
@@ -211,7 +224,7 @@ instance instCWF [M.IsConverseWellFounded] : (M.tailModel₀ o).IsConverseWellFo
     . let m := Set.IsWF.min (s := s₂) (Set.IsWF.of_wellFoundedLT _) (by assumption);
       use embed_nat m;
       constructor;
-      . simpa using Set.IsWF.min_mem (s := s₂) _ _;
+      . exact Set.IsWF.min_mem (Set.IsWF.of_wellFoundedLT s₂) hs₂;
       . intro x hx;
         match x with
         | .inl _ => grind;
@@ -257,7 +270,8 @@ protected def pMorphism_extendRoot (M : Model) [M.IsPointRooted] (n) : (M.extend
     | .inr x => embed_original x
   forth := by
     rintro (x | x) (y | y) Rxy <;>
-    simp_all only [Model.extendRoot, Frame.extendRoot, tailModel₀];
+    simp_all only [Model.extendRoot, Frame.extendRoot, tailModel₀, tailRel₀, tailVal₀,
+      Frame.Rel', embed_nat, embed_original];
     case inl.inl => omega;
   back := by
     rintro (x | x) (y | y | y) Rxy;
@@ -359,7 +373,7 @@ theorem GL_D_TFAE :
         apply Satisfies.not_box_def.mpr;
         use tailModel₀.embed_original M.root;
         constructor;
-        . grind;
+        . exact trivial;
         . tauto;
       | @axiomDz φ ψ =>
         intro h;
@@ -379,20 +393,20 @@ theorem GL_D_TFAE :
         have Rzx : z ≺ x := by
           unfold z;
           match x, y with
-          | .inr $ .inl _, .inr $ .inl _ => dsimp [tailModel₀]; omega;
+          | .inr $ .inl _, .inr $ .inl _ => simp only [Frame.Rel', tailModel₀, tailRel₀]; omega;
           | .inr $ .inr _, .inr $ .inl _
           | .inr $ .inl _, .inr $ .inr _
           | .inr $ .inr _, .inr $ .inr _ => grind;
         have Rzy : z ≺ y := by
           unfold z;
           match x, y with
-          | .inr $ .inl _, .inr $ .inl _ => dsimp [tailModel₀]; omega;
+          | .inr $ .inl _, .inr $ .inl _ => simp only [Frame.Rel', tailModel₀, tailRel₀]; omega;
           | .inr $ .inr _, .inr $ .inl _
           | .inr $ .inl _, .inr $ .inr _
           | .inr $ .inr _, .inr $ .inr _ => grind;
         use z;
         constructor;
-        . grind;
+        . exact trivial;
         . apply Satisfies.or_def.not.mpr;
           push Not;
           constructor;
@@ -426,7 +440,7 @@ theorem GL_D_TFAE :
       exact (show ∀ ψ ∈ φ.subformulas, Satisfies _ _ ψ ↔ Satisfies M M.root ψ by
         intro ψ hψ;
         induction ψ with
-        | hatom p | hfalsum => simp [Satisfies];
+        | hatom p | hfalsum => exact Iff.rfl;
         | himp φ ψ ihφ ihψ => simp [Satisfies, ihφ (by grind), ihψ (by grind)];
         | hbox ψ ihψ =>
           replace ihψ := ihψ (by grind);

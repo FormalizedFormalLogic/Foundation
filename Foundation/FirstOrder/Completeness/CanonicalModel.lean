@@ -180,10 +180,10 @@ lemma complete {φ : Proposition L} : ℙ⁻ ∀⊩ᶜ φ ↔ 𝐋𝐊¹ ⊢ φ 
   constructor
   · intro h
     by_contra b
-    let p : ℙ⁻ := ⟨[∼φ], ⟨fun bφ ↦ b ⟨by simpa using bφ⟩⟩⟩
+    let p : ℙ⁻ := ⟨[∼φ], ⟨fun bφ ↦ b ⟨by simpa using! bφ⟩⟩⟩
     have hp : p ⊩ φᴺ := h p
     have hn : p ⊩ᶜ ∼φ := ⟨Forces.refl (∼φ)⟩
-    have : ∀ q ≤ p, ¬q ⊩ φᴺ := by simpa [not] using hn
+    have : ∀ q ≤ p, ¬q ⊩ φᴺ := by simpa [not] using! hn
     have : ¬p ⊩ φᴺ := this p (by simp)
     contradiction
   · intro b

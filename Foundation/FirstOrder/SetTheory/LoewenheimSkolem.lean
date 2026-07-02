@@ -45,14 +45,14 @@ lemma closed {v : Fin k → V} (hv : ∀ i, v i ∈ Hull s)
   rw [str_eq] at this
   exact this
 
-instance set_nonempty : (Hull s).Nonempty := Structure.SkolemHull.set_nonempty _ _
+lemma set_nonempty : (Hull s).Nonempty := Structure.SkolemHull.set_nonempty _ _
 
 instance nonempty : Nonempty (Hull s) := Structure.SkolemHull.nonempty _ _
 
 instance elementaryEquiv : (Hull s) ≡ₑ[ℒₛₑₜ] V  where
   models {φ} := by simp [models_iff, Matrix.empty_eq]
 
-instance set_countable [hs : Countable s] : (Hull s).Countable := Structure.SkolemHull.set_countable hs
+lemma set_countable [hs : Countable s] : (Hull s).Countable := Structure.SkolemHull.set_countable hs
 
 instance countable [hs : Countable s] : Countable (Hull s) := Structure.SkolemHull.set_countable hs
 

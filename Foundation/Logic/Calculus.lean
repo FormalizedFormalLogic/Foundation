@@ -96,7 +96,7 @@ variable {P : Type*} [Entailment P F] {𝓟 : P} [PrincipalEntailment 𝔇 𝓟]
 omit [LogicalConnective F] [DeMorgan F] [TildeInvolutive F] [OneSidedLK 𝔇] in
 lemma provable_iff :
     𝓟 ⊢ φ ↔ Nonempty (𝔇 [φ]) := by
-  simpa using OneSidedLK.PrincipalEntailment.equiv.nonempty_congr
+  simpa using! OneSidedLK.PrincipalEntailment.equiv.nonempty_congr
 
 variable [OneSidedLK.Cut 𝔇] (𝓟)
 
@@ -211,7 +211,7 @@ variable {S : Type*} [Entailment S F] [AdjunctiveSet F S] [ContextualEntailment 
 omit [DeMorgan F] [TildeInvolutive F] [OneSidedLK 𝔇] in
 lemma provable_iff {𝓢 : S} :
     𝓢 ⊢ φ ↔ ∃ Γ : List F, (∀ ψ ∈ Γ, ψ ∈ 𝓢) ∧ Nonempty (𝔇 (φ :: ∼Γ)) := by
-  simpa using equiv.nonempty_congr
+  simpa using! equiv.nonempty_congr
 
 def toProof (𝓢 : S) (d : 𝔇 [φ]) : 𝓢 ⊢! φ := equiv.symm ⟨⟨[], by simp⟩, d⟩
 
