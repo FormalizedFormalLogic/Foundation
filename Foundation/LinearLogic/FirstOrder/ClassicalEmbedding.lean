@@ -125,9 +125,8 @@ end Derivation
 
 namespace Proof
 
-theorem forget {φ : Sentence L} : 𝐋𝐋 ⊢ φ → (∅ : Theory L) ⊢ φ.forget := fun h ↦ by
-  have : 𝐋𝐋₀ ⊢ (φ : Proposition L) := h
-  exact Theory.Proof.empty_provable_iff_eprovable.mpr ⟨by simpa using Derivation.forget this.get⟩
+theorem forget {φ : Proposition L} : 𝐋𝐋₀ ⊢ φ → 𝐋𝐊¹ ⊢ φ.forget := fun h ↦
+  ⟨by simpa using Derivation.forget h.get⟩
 
 end Proof
 
@@ -447,14 +446,13 @@ namespace Proof
 
 variable [L.DecidableEq]
 
-theorem girard {φ : Sentence L} : (∅ : Theory L) ⊢ φ → 𝐋𝐋 ⊢ φ.Girard := fun h ↦ ⟨by
-  have : 𝐋𝐊¹ ⊢ (φ : Proposition L) := by simpa using Theory.Proof.empty_provable_iff_eprovable.mp h
-  simpa using Derivation.toLL this.get⟩
+theorem girard {φ : Proposition L} : 𝐋𝐊¹ ⊢ φ → 𝐋𝐋₀ ⊢ φ.Girard := fun h ↦
+  ⟨by simpa using Derivation.toLL h.get⟩
 
-theorem girard_faithful {φ : Sentence L} : 𝐋𝐋 ⊢ φ.Girard ↔ (∅ : Theory L) ⊢ φ :=
+theorem girard_faithful {φ : Proposition L} : 𝐋𝐋₀ ⊢ φ.Girard ↔ 𝐋𝐊¹ ⊢ φ :=
   ⟨fun h ↦ by simpa using LinearLogic.Proof.forget h, girard⟩
 
-instance : Entailment.FaithfullyEmbeddable (∅ : Theory L) (𝐋𝐋 : LinearLogic.Symbol L) where
+instance : Entailment.FaithfullyEmbeddable (𝐋𝐊¹ : LK L) (𝐋𝐋₀ : LinearLogic.SymbolFV L) where
   prop := ⟨Semiformula.Girard, fun _ ↦ girard_faithful⟩
 
 end Proof
