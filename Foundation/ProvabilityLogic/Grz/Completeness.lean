@@ -70,8 +70,8 @@ lemma iff_interpret_boxdot_strongInterpret [𝔅.HBL2] :
   . intro h; exact (K!_right iff_interpret_boxdot_strongInterpret_inside) ⨀ h;
 
 lemma iff_models_interpret_boxdot_strongInterpret
-  {M} [Nonempty M] [Structure L M] [M ⊧ₘ* T] [𝔅.HBL2] [𝔅.SoundOn M] :
-   M ⊧ₘ f (Aᵇ) ↔ M ⊧ₘ f.strongInterpret A := by
+  {M} [Nonempty M] [Structure L M] [M↓[L] ⊧* T] [𝔅.HBL2] [𝔅.SoundOn M] :
+   M↓[L] ⊧ f (Aᵇ) ↔ M↓[L] ⊧ f.strongInterpret A := by
   induction A with
   | hatom φ => simp [Realization.interpret, strongInterpret, Formula.boxdotTranslate];
   | hfalsum => simp [strongInterpret, Formula.boxdotTranslate];
@@ -89,7 +89,7 @@ lemma iff_models_interpret_boxdot_strongInterpret
       apply ihA.mp;
       exact hA;
   | hbox A ih =>
-    suffices (M ⊧ₘ f (Aᵇ)) ∧ (M ⊧ₘ 𝔅 (f (Aᵇ))) ↔ M ⊧ₘ f.strongInterpret A ∧ M ⊧ₘ 𝔅 (f.strongInterpret A) by
+    suffices (M↓[L] ⊧ f (Aᵇ)) ∧ (M↓[L] ⊧ 𝔅 (f (Aᵇ))) ↔ M↓[L] ⊧ f.strongInterpret A ∧ M↓[L] ⊧ 𝔅 (f.strongInterpret A) by
       simpa [Formula.boxdotTranslate, interpret, strongInterpret] using this;
     constructor;
     . rintro ⟨h₁, h₂⟩;
@@ -125,8 +125,8 @@ theorem Grz.arithmetical_completeness_iff
     exact Realization.iff_interpret_boxdot_strongInterpret (L := ℒₒᵣ) |>.mp $ this f;
 
 theorem Grz.arithmetical_completeness_model_iff
-    {T : ArithmeticTheory} [T.Δ₁] [𝗜𝚺₁ ⪯ T] [ℕ ⊧ₘ* T] :
-    (∀ f : T.StandardRealization, ℕ ⊧ₘ f.strongInterpret A) ↔ Modal.Grz ⊢ A := by
+    {T : ArithmeticTheory} [T.Δ₁] [𝗜𝚺₁ ⪯ T] [ℕ↓[ℒₒᵣ] ⊧* T] :
+    (∀ f : T.StandardRealization, ℕ↓[ℒₒᵣ] ⊧ f.strongInterpret A) ↔ Modal.Grz ⊢ A := by
   apply Iff.trans ?_ Modal.Logic.iff_provable_Grz_provable_boxdot_S;
   apply Iff.trans ?_ (S.arithmetical_completeness_iff (T := T)).symm;
   have : 𝗥₀ ⪯ 𝗜𝚺₁ := inferInstance
