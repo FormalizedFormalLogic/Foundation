@@ -30,7 +30,7 @@ def liftVec : ∀ {n} (f : (Fin n → α) → β),
 lemma liftVec_mk {n} (f : (Fin n → α) → β) (h) (v : Fin n → α) :
     liftVec f h (Quotient.mk s ∘ v) = f v := by
   induction' n with n ih <;> simp [liftVec, empty_eq]
-  simpa using ih (fun v' => f (vecHead v :> v'))
+  simpa using! ih (fun v' => f (vecHead v :> v'))
     (fun v₁ v₂ hv => h (vecHead v :> v₁) (vecHead v :> v₂) (Fin.cases (refl _) hv)) (vecTail v)
 
 @[simp] lemma liftVec_mk₁ (f : (Fin 1 → α) → β) (h) (a : α) :

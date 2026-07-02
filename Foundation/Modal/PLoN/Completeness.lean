@@ -60,7 +60,7 @@ lemma truthlemma : ∀ {X : (canonicalModel 𝓢).World}, X ⊩ φ ↔ (φ ∈ X
       have : □φ ∉ X := iff_mem_neg.mp RXY.1;
       contradiction;
 
-instance instComplete_of_mem_canonicalFrame {C : PLoN.FrameClass} (h : (canonicalFrame 𝓢) ∈ C) : Complete 𝓢 C := by
+def instComplete_of_mem_canonicalFrame {C : PLoN.FrameClass} (h : (canonicalFrame 𝓢) ∈ C) : Complete 𝓢 C := by
   constructor;
   intro φ;
   contrapose!;

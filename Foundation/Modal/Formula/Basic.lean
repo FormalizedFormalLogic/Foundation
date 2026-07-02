@@ -545,7 +545,7 @@ lemma le_max_atoms_of_mem_atoms {a : ℕ} (ha : a ∈ φ.atoms) : a ≤ φ.atoms
   induction φ with
   | hfalsum => simp [atoms] at ha;
   | hatom b => simp [atoms] at ha ⊢; omega;
-  | hbox φ ihφ => apply ihφ; simpa using ha;
+  | hbox φ ihφ => apply ihφ; simpa [atoms] using ha;
   | himp φ ψ ihφ ihψ =>
     rcases (show a ∈ φ.atoms ∨ a ∈ ψ.atoms by simpa [atoms] using ha) with (hφ | hψ);
     . by_cases hψ : ψ.atoms.Nonempty;

@@ -372,7 +372,7 @@ lemma iff_mem_imp : ((φ 🡒 ψ) ∈ Ω) ↔ (φ ∈ Ω) → (ψ ∈ Ω) := by
     apply membership_iff.mpr;
     exact dpq ⨀ dp;
   . intro h;
-    replace h : φ ∉ Ω.1 ∨ ψ ∈ Ω := or_iff_not_imp_left.mpr (by simpa using h);
+    replace h : φ ∉ Ω.1 ∨ ψ ∈ Ω := or_iff_not_imp_left.mpr (fun hn => h (not_not.mp hn));
     cases h with
     | inl h =>
       apply membership_iff.mpr;
@@ -467,7 +467,7 @@ lemma iff_mem_boxItr : (□^[n]φ ∈ Ω) ↔ (∀ {Ω' : MaximalConsistentSet �
         have : 𝓢 ⊬ ⋀((□^[n]'Γ)) 🡒 □^[n]φ := FiniteContext.provable_iff.not.mp $ this (□^[n]'Γ) (by
           intro ψ hq;
           obtain ⟨χ, hr₁, rfl⟩ := List.LO.exists_of_mem_boxItr hq;
-          simpa using hΓ₁ χ hr₁;
+          exact Set.LO.iff_mem_preboxItr.mp (hΓ₁ χ hr₁);
         );
         contrapose! this;
         exact C!_trans collect_boxItr_conj! this;

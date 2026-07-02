@@ -184,7 +184,7 @@ variable
 def gödel [L.ReferenceableBy L] {T₀ T : Theory L} [Diagonalization T₀] (𝔅 : Provability T₀ T) : Sentence L :=
   fixedpoint T₀ “x. ¬!𝔅.prov x”
 
-lemma gödel_spec : T₀ ⊢ (gödel 𝔅) 🡘 ∼𝔅 (gödel 𝔅) := by simpa [gödel] using diag “x. ¬!𝔅.prov x”;
+lemma gödel_spec : T₀ ⊢ (gödel 𝔅) 🡘 ∼𝔅 (gödel 𝔅) := by simpa [gödel, Provability.pr] using diag “x. ¬!𝔅.prov x”;
 
 section First
 
@@ -271,7 +271,7 @@ variable {σ : Sentence L}
 local notation "𝐊" => kreisel 𝔅
 
 lemma kreisel_spec : T₀ ⊢ (𝐊 σ) 🡘 (𝔅 (𝐊 σ) 🡒 σ) := by
-  simpa [kreisel, Rew.subst_comp_subst, ←TransitiveRewriting.comp_app] using diag “x. !𝔅.prov x → !σ”;
+  simpa [kreisel, Provability.pr, Rew.subst_comp_subst, ←TransitiveRewriting.comp_app] using diag “x. !𝔅.prov x → !σ”;
 
 private lemma kreisel_specAux₂ : T₀ ⊢ (𝔅 (𝐊 σ) 🡒 σ) 🡒 (𝐊 σ) := K!_right kreisel_spec
 

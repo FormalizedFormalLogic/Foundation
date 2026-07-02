@@ -179,13 +179,17 @@ lemma add_eq_of_lt : ∀ x y : M, x < y → ∃ z, x + z = y := by
   simpa [models_iff] using Theory.models M _ PeanoMinus.addEqOfLt
 
 @[simp] protected lemma zero_le : ∀ x : M, 0 ≤ x := by
-  simpa [models_iff, Structure.le_iff_of_eq_of_lt] using Theory.models M _ PeanoMinus.zeroLe
+  have h := Theory.models M _ PeanoMinus.zeroLe
+  simp only [models_iff] at h
+  exact h
 
 lemma zero_lt_one : (0 : M) < 1 := by
   simpa [models_iff] using Theory.models M _ PeanoMinus.zeroLtOne
 
 lemma one_le_of_zero_lt : ∀ x : M, 0 < x → 1 ≤ x := by
-  simpa [models_iff, Structure.le_iff_of_eq_of_lt] using Theory.models M _ PeanoMinus.oneLeOfZeroLt
+  have h := Theory.models M _ PeanoMinus.oneLeOfZeroLt
+  simp [models_iff] at h
+  exact h
 
 lemma add_lt_add : ∀ x y z : M, x < y → x + z < y + z := by
   simpa [models_iff] using Theory.models M _ PeanoMinus.addLtAdd
@@ -452,7 +456,7 @@ lemma two_pow_two_eq_four : 2 ^ 2 = (4 : M) := by
 lemma two_pos : (0 : M) < 2 := by exact _root_.two_pos
 
 @[simp] lemma le_mul_self (a : M) : a ≤ a * a := by
-  have : 0 ≤ a := by exact zero_le a
+  have : 0 ≤ a := Arithmetic.zero_le a
   rcases this with (rfl | pos) <;> simp [*, ←pos_iff_one_le]
 
 @[simp] lemma le_sq (a : M) : a ≤ a ^ 2 := by simp [sq]
@@ -509,7 +513,7 @@ lemma lt_square_of_lt {a : M} (pos : 1 < a) : a < a^2 := by
 lemma two_mul_le_sq {i : M} (h : 2 ≤ i) : 2 * i ≤ i ^ 2 := by simpa [sq] using mul_le_mul_right h
 
 lemma two_mul_le_sq_add_one (i : M) : 2 * i ≤ i ^ 2 + 1 := by
-  rcases zero_le i with (rfl | pos)
+  rcases Arithmetic.zero_le i with (rfl | pos)
   · simp
   · rcases pos_iff_one_le.mp pos with (rfl | lt)
     · simp [one_add_one_eq_two]

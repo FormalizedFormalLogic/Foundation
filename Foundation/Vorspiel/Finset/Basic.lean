@@ -66,7 +66,7 @@ lemma erase_union [DecidableEq α] {a : α} {s t : Finset α} :
 
 @[simp] lemma sup_univ_equiv {α α'} [DecidableEq α] [Fintype α] [Fintype α'] [SemilatticeSup β] [OrderBot β] (f : α → β) (e : α' ≃ α) :
     Finset.sup Finset.univ (fun i => f (e i)) = Finset.sup Finset.univ f := by
-  simpa [Function.comp] using Eq.symm <| Finset.sup_image Finset.univ e f
+  simpa [Function.comp] using! Eq.symm <| Finset.sup_image Finset.univ e f
 
 lemma sup_univ_cast {α : Type _} [SemilatticeSup α] [OrderBot α] {n} (f : Fin n → α) (n') {h : n' = n} :
     Finset.sup Finset.univ (fun (i : Fin n') => f (i.cast h)) = Finset.sup Finset.univ f := by rcases h with rfl; simp

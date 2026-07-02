@@ -55,8 +55,8 @@ lemma comp [V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻] {k} {f : (Fin l → V) → V} {g :
     choose tg htg using fun i ↦ (hg i).bounded
     exact ⟨Rew.subst tg tf, by
       intro v
-      simpa [Semiterm.val_substs]
-        using le_trans (htf (g · v)) (Structure.Monotone.term_monotone tf (fun i ↦ htg i v) (by simp))⟩
+      simpa [Semiterm.val_substs, Function.comp_def]
+        using! le_trans (htf (g · v)) (Structure.Monotone.term_monotone tf (fun i ↦ htg i v) (by simp))⟩
 
 end Bounded
 

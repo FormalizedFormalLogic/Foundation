@@ -288,7 +288,8 @@ lemma iff_lt_numeral_exists_numeral {n : ℕ} {x : M} : x < numeral n ↔ ∃ m 
         constructor;
         . omega;
         . apply succ_inj;
-          simpa using ha;
+          have ha' : (x : M) + 1 = numeral (n + 2) := by simpa using ha
+          rw [ha', numeral_add_one];
       . obtain ⟨m, hm, rfl⟩ := iff_lt_numeral_exists_numeral (x := x) (n := n + 1) |>.mp $ by
           have ha : x + a = numeral (n + 1) := succ_inj $ by rwa [Arithmetic.add_succ] at ha;
           rw [←ha];

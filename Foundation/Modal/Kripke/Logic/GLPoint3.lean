@@ -76,7 +76,7 @@ private lemma complete.lemma₁ : Modal.GLPoint3 ⊢ ∼□φ 🡒 ◇(□φ ⋏
   have := Satisfies.and_def.not.mp this;
   push Not at this;
   have := this h₂;
-  simpa using Satisfies.not_def.not.mp this;
+  exact not_not.mp (Satisfies.not_def.not.mp this);
 
 private lemma complete.lemma₂ {v : (canonicalModel Modal.GLPoint3).World } (h : ∼□φ ∈ v.1.1) :
   ∃! u, v ≺ u ∧ □φ ∈ u.1.1 ∧ φ ∈ u.1.2 := by
@@ -201,7 +201,7 @@ private lemma complete.filteredModel.truthlemma : ∀ x : (complete.filteredMode
     . intro h y Rxy;
       apply ihψ y (by grind) |>.mpr;
       apply Rxy;
-      simpa using h;
+      exact h;
 
 open Classical in
 open complete in

@@ -169,7 +169,7 @@ lemma ProvablyProperOn.ofProperOn [𝗘𝗤 ℒₒᵣ ⪯ T] {φ : 𝚫-[m].Semi
     (h : ∀ (M : Type w) [ORingStructure M] [M↓[ℒₒᵣ] ⊧* T], φ.ProperOn M) : φ.ProvablyProperOn T := by
   apply FirstOrder.Arithmetic.complete.{w} T _ ?_
   intro M _ _
-  simpa [models_iff] using (h M).iff
+  simpa [models_iff] using! (h M).iff
 
 variable {T}
 

@@ -38,9 +38,9 @@ variable (ω : Rew L ξ₁ n₁ ξ₂ n₂)
 
 instance : FunLike (Rew L ξ₁ n₁ ξ₂ n₂) (Semiterm L ξ₁ n₁) (Semiterm L ξ₂ n₂) where
   coe := fun f => f.toFun
-  coe_injective' := fun f g h => by rcases f; rcases g; simpa using h
+  coe_injective := fun f g h => by rcases f; rcases g; simpa using h
 
-instance : CoeFun (Rew L ξ₁ n₁ ξ₂ n₂) (fun _ => Semiterm L ξ₁ n₁ → Semiterm L ξ₂ n₂) := DFunLike.hasCoeToFun
+instance : CoeFun (Rew L ξ₁ n₁ ξ₂ n₂) (fun _ => Semiterm L ξ₁ n₁ → Semiterm L ξ₂ n₂) := DFunLike.toCoeFun
 
 @[simp] protected lemma func {k} (f : L.Func k) (v : Fin k → Semiterm L ξ₁ n₁) :
     ω (func f v) = func f (ω ∘ v) := ω.func'' f v
@@ -169,7 +169,7 @@ lemma map_inj {b : Fin n₁ → Fin n₂} {e : ξ₁ → ξ₂} (hb : Function.I
     have : f = g := by simp [Rew.func] at h; simp_all
     rcases this
     have : v = w := by
-      have : (fun i ↦ (map b e) (v i)) = (fun i ↦ (map b e) (w i)) := by simpa [Rew.func] using h
+      have : (fun i ↦ (map b e) (v i)) = (fun i ↦ (map b e) (w i)) := by simpa [Rew.func, Function.comp_def] using h
       funext i; exact map_inj hb he (congrFun this i)
     simp_all
 
@@ -624,7 +624,7 @@ lemma fixitr_succ (m) :
   induction m
   · simp [*]
   case succ m ih =>
-    simpa [ih] using comp_app fix (fixitr (L := L) n m) #x
+    rw [fixitr_succ, comp_app, ih]; simp [Fin.castSucc_castAdd]
 
 lemma fixitr_fvar (n m) (x : ℕ) :
     fixitr n m (&x : SyntacticSemiterm L n) = if h : x < m then #(Fin.natAdd n ⟨x, h⟩) else &(x - m) := by

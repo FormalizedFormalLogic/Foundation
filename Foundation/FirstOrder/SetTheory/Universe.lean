@@ -31,7 +31,7 @@ variable {α : Type (u + 1)}
 
 instance : SetLike (UniverseFunctor α) α where
   coe := set
-  coe_injective' _ _ := UniverseFunctor.ext
+  coe_injective _ _ := UniverseFunctor.ext
 
 instance (s : UniverseFunctor α) : Small.{u} s.set := s.small
 
@@ -90,7 +90,7 @@ noncomputable def mkFun {ι : Type u} (f : ι → Universe.{u}) : Universe.{u} :
 
 instance : SetLike Universe.{u} Universe.{u} where
   coe x := x.dest.set
-  coe_injective' x y e := by
+  coe_injective x y e := by
     have h (x : Universe.{u}) : mk x.dest.set = x := QPF.Fix.mk_dest _
     have : mk x.dest.set = mk y.dest.set := by simp_all
     simpa [h] using this
@@ -129,14 +129,14 @@ noncomputable def rec (g : (s : Set α) → [Small.{u} s] → α) : Universe →
 
 lemma rec_mk (g : (s : Set α) → [Small.{u} s] → α) (s : Set Universe.{u}) [small : Small.{u} s] :
     rec g (mk s) = g (rec g '' s) := by
-  simpa using QPF.Fix.rec_eq (F := UniverseFunctor) (fun p ↦ g p.set) ⟨s, small⟩
+  exact QPF.Fix.rec_eq (F := UniverseFunctor) (fun p ↦ g p.set) ⟨s, small⟩
 
 @[elab_as_elim]
 theorem ind
     {P : Universe.{u} → Prop}
     (ind : ∀ x, (∀ y ∈ x, P y) → P x)
     (x : Universe) : P x :=
-  QPF.Fix.ind P (fun s hs ↦ ind (mk s.set) (by simpa using hs)) x
+  QPF.Fix.ind P (fun s hs ↦ ind (mk s.set) (by simpa using! hs)) x
 
 lemma wellFounded : WellFounded (α := Universe.{u}) (· ∈ ·) := ⟨ind fun x ih ↦ Acc.intro x ih⟩
 

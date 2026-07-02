@@ -29,7 +29,8 @@ lemma validate_AxiomL_of_trans_cwf [F.IsTransitive] [F.IsConverseWellFounded] : 
   obtain ⟨m, ⟨⟨Rwm, hm⟩, hm₂⟩⟩ := F.cwf.has_min ({ x | w ≺ x ∧ ¬(Satisfies ⟨F, V⟩ x φ) }) $ by
     use x;
     tauto;
-  replace hm₂ : ∀ x, w ≺ x → ¬Satisfies ⟨F, V⟩ x φ → ¬m ≺ x := by simpa using hm₂;
+  replace hm₂ : ∀ x, w ≺ x → ¬Satisfies ⟨F, V⟩ x φ → ¬m ≺ x := by
+    intro x hwx hns; exact hm₂ x ⟨hwx, hns⟩;
   apply Satisfies.not_box_def.mpr;
   use m;
   constructor;

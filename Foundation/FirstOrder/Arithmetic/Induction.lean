@@ -39,7 +39,7 @@ theorem bounded_all_sigma1_order_induction {f : V → V → V} (hf : 𝚺₁-Fun
     rcases sigma₁_replacement₂ hf (under (x + 1)) (under (y + 1)) |>.exists with ⟨m, hm⟩
     exact ⟨m, fun x' hx' y' hy' ↦
       le_of_lt <| lt_of_mem <| hm (f x' y') |>.mpr
-        ⟨x', by simpa [lt_succ_iff_le] using hx', y', by simpa [lt_succ_iff_le] using hy', rfl⟩⟩
+        ⟨x', by simpa [lt_succ_iff_le] using! hx', y', by simpa [lt_succ_iff_le] using! hy', rfl⟩⟩
   intro x y
   have : ∀ k ≤ x, ∃ W, Seq W ∧ k + 1 = lh W ∧
       ⟪0, y⟫ ∈ W ∧

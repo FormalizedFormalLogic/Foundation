@@ -61,7 +61,7 @@ def Frame.twice.PMorphism (F : Frame) : F×2 →ₚ F where
   toFun := Prod.fst
   forth := by
     rintro ⟨x, _⟩ ⟨y, _⟩ h;
-    simpa using h;
+    exact h;
   back := by
     intro ⟨x, i⟩ y Rxy;
     use ⟨y, true⟩;

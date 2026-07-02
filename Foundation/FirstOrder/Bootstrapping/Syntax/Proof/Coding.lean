@@ -149,28 +149,29 @@ lemma isFormulaSet_sound {s : ℕ} : IsFormulaSet L s → ∃ S : Finset (Propos
     · intro h
       rcases Derivation2.Sequent.mem_quote h with ⟨p, hp, rfl⟩
       rcases by simpa using hp with ⟨x, hx, rfl⟩
-      simpa [hps x (mem_iff_mem_bitIndices.mpr hx)] using mem_iff_mem_bitIndices.mpr hx
+      have hxs : x ∈ s := mem_iff_mem_bitIndices.mpr (Nat.mem_bitIndices.mpr hx)
+      simpa [hps x hxs] using hxs
     · intro h
       rw [←hps x h]
-      simpa [Derivation2.Sequent.mem_quote_iff, ←mem_iff_mem_bitIndices] using ⟨x, h, rfl⟩⟩
+      simpa [Derivation2.Sequent.mem_quote_iff] using ⟨x, Nat.mem_bitIndices.mp (mem_iff_mem_bitIndices.mp h), rfl⟩⟩
 
 variable (V)
 
 noncomputable def typedQuote {Γ : Finset (Proposition L)} : T ⟹₂ Γ → T.internalize V ⊢!ᵈᵉʳ ⌜Γ⌝
-  |   closed Δ φ h hn => TDerivation.em ⌜φ⌝ (by simpa) (by simpa using Sequent.quote_mem_quote.mpr hn)
+  |   closed Δ φ h hn => TDerivation.em ⌜φ⌝ (by simpa) (by simpa using! Sequent.quote_mem_quote.mpr hn)
   |       axm φ hT hΓ => TDerivation.byAxm ⌜φ⌝ (by
     simp only [tmem, internalize_theory]
     exact (Δ₁Class.mem_iff'' (T := T) (φ := φ)).mpr hT) (by
-      simpa using Sequent.quote_mem_quote.mpr hΓ)
-  |           verum h => TDerivation.verum (by simpa using Sequent.quote_mem_quote.mpr h)
+      simpa using! Sequent.quote_mem_quote.mpr hΓ)
+  |           verum h => TDerivation.verum (by simpa using! Sequent.quote_mem_quote.mpr h)
   |       and (φ := φ) (ψ := ψ) h bp bq =>
-    TDerivation.and' (show ⌜φ⌝ ⋏ ⌜ψ⌝ ∈ ⌜Γ⌝ by simpa using Sequent.quote_mem_quote.mpr h) (bp.typedQuote.cast (by simp)) (bq.typedQuote.cast (by simp))
+    TDerivation.and' (show ⌜φ⌝ ⋏ ⌜ψ⌝ ∈ ⌜Γ⌝ by simpa using! Sequent.quote_mem_quote.mpr h) (bp.typedQuote.cast (by simp)) (bq.typedQuote.cast (by simp))
   |            or (φ := φ) (ψ := ψ) h b =>
-    TDerivation.or' (show ⌜φ⌝ ⋎ ⌜ψ⌝ ∈ ⌜Γ⌝ by simpa using Sequent.quote_mem_quote.mpr h) <| b.typedQuote.cast (by simp)
+    TDerivation.or' (show ⌜φ⌝ ⋎ ⌜ψ⌝ ∈ ⌜Γ⌝ by simpa using! Sequent.quote_mem_quote.mpr h) <| b.typedQuote.cast (by simp)
   |           all (φ := φ) h d =>
-    TDerivation.all' (show ∀⁰ ⌜φ⌝ ∈ ⌜Γ⌝ by simpa using Sequent.quote_mem_quote.mpr h) <| d.typedQuote.cast (by simp)
+    TDerivation.all' (show ∀⁰ ⌜φ⌝ ∈ ⌜Γ⌝ by simpa using! Sequent.quote_mem_quote.mpr h) <| d.typedQuote.cast (by simp)
   |          exs (φ := φ) h t d =>
-    TDerivation.exs' (show ∃⁰ ⌜φ⌝ ∈ ⌜Γ⌝ by simpa using Sequent.quote_mem_quote.mpr h) ⌜t⌝ <| d.typedQuote.cast (by simp [Matrix.constant_eq_singleton])
+    TDerivation.exs' (show ∃⁰ ⌜φ⌝ ∈ ⌜Γ⌝ by simpa using! Sequent.quote_mem_quote.mpr h) ⌜t⌝ <| d.typedQuote.cast (by simp [Matrix.constant_eq_singleton])
   |           wk d ss => TDerivation.wk d.typedQuote (by simpa)
   |           shift d => (TDerivation.shift d.typedQuote).cast (by simp)
   | cut (φ := φ) d dn =>
@@ -188,7 +189,7 @@ lemma coe_typedQuote_val_eq (d : T ⟹₂ Γ) : ↑(d.typedQuote ℕ).val = (d.t
   |   closed Δ φ h hn => by
     simp [typedQuote, axL, nat_cast_pair, Sequent.coe_eq, Semiformula.coe_quote_eq_quote']
   |       axm φ hT _ => by
-    simpa [typedQuote, Bootstrapping.axm, nat_cast_pair, Sequent.coe_eq] using Sentence.coe_quote_eq_quote (V := V) φ
+    simpa [typedQuote, Bootstrapping.axm, nat_cast_pair, Sequent.coe_eq] using! Sentence.coe_quote_eq_quote (V := V) φ
   |           verum h => by
     simp [typedQuote, Bootstrapping.verumIntro, nat_cast_pair, Sequent.coe_eq]
   |       and h b₁ b₂ => by
@@ -237,7 +238,7 @@ lemma quote_proof_def {φ : Sentence L} (b : T ⊢! φ) : (⌜b⌝ : V) = ⌜b.t
 @[simp] lemma proof_of_quote_proof {φ : Sentence L} (b : T ⊢! φ) : Proof T (⌜b⌝ : V) ⌜φ⌝ := by
   let x := Derivation2.typedQuote V b.toProof2
   suffices Proof T x.val ⌜φ⌝ from this
-  simpa using x.derivationOf
+  simpa using! x.derivationOf
 
 lemma coe_quote_proof_eq (d : T ⊢! φ) : (↑(⌜d⌝ : ℕ) : V) = ⌜d⌝ := by
   simp [quote_proof_def, Derivation2.coe_quote_eq]
@@ -333,7 +334,7 @@ noncomputable def Provable.sound2 {φ : Proposition L} (h : Provable T (⌜φ⌝
   exact Derivation2.cast (Classical.choice b) hΓ
 
 lemma Provable.sound {φ : Sentence L} (h : Provable T (⌜φ⌝ : ℕ)) : T ⊢ φ :=
-  provable_iff_derivable2.mpr ⟨Provable.sound2 (by simpa using h)⟩
+  provable_iff_derivable2.mpr ⟨Provable.sound2 (by simpa using! h)⟩
 
 end Arithmetic.Bootstrapping
 

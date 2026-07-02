@@ -95,7 +95,7 @@ lemma truthlemma_lemma1
   intro χ hr;
   apply Finset.mem_union.mpr;
   replace hr : χ = □(ψ 🡒 □ψ) ∨ χ = -ψ ∨ (∃ a, □a ∈ X ∧ □a = χ)  := by
-    simpa [Finset.mem_union, Finset.LO.preboxItr, Finset.LO.boxItr] using hr;
+    have h := hr; simp [Finset.mem_union, Finset.LO.preboxItr, Finset.LO.boxItr] at h; exact h;
   rcases hr with (rfl | rfl | ⟨χ, hr, rfl⟩);
   . left;
     simp [Finset.LO.preboxItr];

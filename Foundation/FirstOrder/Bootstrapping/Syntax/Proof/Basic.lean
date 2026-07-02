@@ -830,9 +830,9 @@ end Derivable
 lemma internal_provable_iff_internal_derivable {φ : V} : Provable T φ ↔ Derivable T (insert φ ∅ : V) := by
   constructor
   · rintro ⟨b, hb⟩
-    exact ⟨b, by simpa using hb⟩
+    exact ⟨b, by simpa using! hb⟩
   · rintro ⟨b, hb⟩
-    exact ⟨b, by simpa using hb⟩
+    exact ⟨b, by simpa using! hb⟩
 
 alias ⟨Provable.toDerivable, Derivable.toProvable⟩ := internal_provable_iff_internal_derivable
 

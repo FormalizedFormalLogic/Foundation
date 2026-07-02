@@ -26,7 +26,7 @@ lemma soundness_frameclass (hV : C ⊧* H) : H ⊢ φ → C ⊧ φ := by
   | axm hi => apply hV.models <;> assumption;
   | _ => grind;
 
-instance instFrameClassSound (hV : C ⊧* H) : Sound H C := ⟨fun {_} => soundness_frameclass hV⟩
+def instFrameClassSound (hV : C ⊧* H) : Sound H C := ⟨fun {_} => soundness_frameclass hV⟩
 
 lemma consistent_of_sound_frameclass (sound : Sound H C) (hC : Set.Nonempty C) : Entailment.Consistent H := by
   apply Entailment.Consistent.of_unprovable (φ := ⊥);
@@ -58,7 +58,7 @@ lemma soundness_modelclass (hV : C ⊧* H) : H ⊢ φ → C ⊧ φ := by
   | axm hi => apply hV.models <;> assumption;
   | _ => grind
 
-instance instModelClassSound (hV : C ⊧* H) : Sound H C := ⟨fun {_} => soundness_modelclass hV⟩
+def instModelClassSound (hV : C ⊧* H) : Sound H C := ⟨fun {_} => soundness_modelclass hV⟩
 
 lemma consistent_of_sound_modelclass (sound : Sound H C) (hC : Set.Nonempty C) : Entailment.Consistent H := by
   apply Entailment.Consistent.of_unprovable (φ := ⊥);

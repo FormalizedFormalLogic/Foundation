@@ -22,7 +22,7 @@ variable {n : ℕ}
     suffices v 0 :> v ∘ Fin.succ = v by
       simp only [vecToNat, foldr_succ, natToVec, unpair_pair, Option.map_eq_some_iff]
       use vecTail v
-      simpa using ih (vecTail v)
+      simpa using! ih (vecTail v)
     exact funext (fun i ↦ i.cases (by simp) (by simp))
 
 lemma lt_of_eq_natToVec {e : ℕ} {v : Fin n → ℕ} (h : e.natToVec n = some v) (i : Fin n) : v i < e := by

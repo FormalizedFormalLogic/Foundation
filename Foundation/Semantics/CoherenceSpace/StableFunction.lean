@@ -39,7 +39,7 @@ variable {α β γ δ : Type*} [CoherenceSpace α] [CoherenceSpace β] [Coherenc
 
 instance : FunLike (α →ₛ β) (Point α) (Point β) where
   coe := toFun
-  coe_injective' _ _ := StableFunction.ext
+  coe_injective _ _ := StableFunction.ext
 
 lemma monotone {f : α →ₛ β} {a b : Point α} : a ≤ b → f a ≤ f b := f.monotone'
 
