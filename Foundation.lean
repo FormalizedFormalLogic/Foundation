@@ -462,9 +462,6 @@ public import Foundation.Propositional.Slash
 public import Foundation.Propositional.Tait.Calculus
 public import Foundation.Propositional.Translation
 public import Foundation.ProvabilityLogic.Arithmetic
-public import Foundation.ProvabilityLogic.Classification.LetterlessTrace
-public import Foundation.ProvabilityLogic.Classification.Result
-public import Foundation.ProvabilityLogic.Classification.Trace
 public import Foundation.ProvabilityLogic.GL.Completeness
 public import Foundation.ProvabilityLogic.GL.Soundness
 public import Foundation.ProvabilityLogic.GL.Uniform
