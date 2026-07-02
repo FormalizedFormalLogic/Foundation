@@ -60,7 +60,7 @@ instance : OneSidedLK (Derivation (α := α)) where
   verum := verum
   and d₁ d₂ := d₁.and d₂
   or d := d.or
-  wk d ss := d.wk ss
+  contraction d ss := d.wk ss
   identity φ := eta φ
 
 instance : OneSidedLK.Cut (Derivation (α := α)) where
