@@ -54,22 +54,12 @@ lemma not_mem_of_rel (IR : Std.Irrefl R) (TR : IsTrans α R) {a b x : α} {l : L
   |      [] => simp
   | a' :: l =>
     rintro (_ | _)
-    case singleton =>
-      simp
-      intro hR
-      rintro rfl
-      letI := IR
-      exact Std.Irrefl.irrefl _ hR
+    case singleton => simp; intro hR; rintro rfl; exact IR.irrefl _ hR
     case cons a' Raa' h =>
     intro Rxa
-    have : x ≠ a := by
-      rintro rfl
-      letI := IR
-      exact Std.Irrefl.irrefl _ Rxa
+    have : x ≠ a := by rintro rfl; exact IR.irrefl _ Rxa
     have : x ∉ l :=
-      have : R x a' := by
-        letI := TR
-        exact IsTrans.trans _ _ _ Rxa Raa'
+      have : R x a' := TR.trans _ _ _ Rxa Raa'
       not_mem_of_rel IR TR h this
     simp_all
 
