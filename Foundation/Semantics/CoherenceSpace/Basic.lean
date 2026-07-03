@@ -17,8 +17,8 @@ namespace LO
 class CoherenceSpace (α : Type*) where
   /-- A coherence relation -/
   Coherence : α → α → Prop
-  reflexive : ∀ x, Coherence x x
-  symmetric : ∀ ⦃x y⦄, Coherence x y → Coherence y x
+  reflexive : Std.Refl Coherence
+  symmetric : Std.Symm Coherence
 
 namespace CoherenceSpace
 
@@ -26,13 +26,13 @@ infix:40 " ⁐ " => Coherence
 
 variable {α : Type*} [CoherenceSpace α]
 
-instance : Std.Refl (α := α) Coherence := ⟨reflexive⟩
+instance : Std.Refl (α := α) Coherence := reflexive
 
-instance : Std.Symm (α := α) Coherence := ⟨symmetric⟩
+instance : Std.Symm (α := α) Coherence := symmetric
 
-@[simp, refl, grind .] protected lemma Coherence.refl (x : α) : x ⁐ x := reflexive x
+@[simp, refl, grind .] protected lemma Coherence.refl (x : α) : x ⁐ x := reflexive.refl x
 
-lemma Coherence.symm {x y : α} : x ⁐ y → y ⁐ x := fun h ↦ symmetric h
+lemma Coherence.symm {x y : α} : x ⁐ y → y ⁐ x := symmetric.symm x y
 
 @[grind =] lemma Coherence.symm_iff {x y : α} : x ⁐ y ↔ y ⁐ x := ⟨symm, symm⟩
 
@@ -170,13 +170,13 @@ namespace CoherenceSpace
 
 instance : Bot (CoherenceSpace α) := ⟨{
   Coherence := Eq
-  reflexive := refl
-  symmetric _ _ := symm }⟩
+  reflexive := ⟨refl⟩
+  symmetric := ⟨fun _ _ => symm⟩ }⟩
 
 instance : Top (CoherenceSpace α) := ⟨{
   Coherence _ _ := True
-  reflexive _ := by trivial
-  symmetric _ _ _ := by trivial }⟩
+  reflexive := ⟨fun _ => by trivial⟩
+  symmetric := ⟨fun _ _ _ => by trivial⟩ }⟩
 
 inductive Top
 
@@ -221,12 +221,12 @@ inductive Coherence : αᗮ → αᗮ → Prop
 
 instance : CoherenceSpace αᗮ where
   Coherence p q := Coherence p q
-  reflexive p := by
+  reflexive := ⟨fun p => by
     rcases p with ⟨a⟩
-    exact Coherence.mk (by simp)
-  symmetric p q := by
+    exact Coherence.mk (by simp)⟩
+  symmetric := ⟨fun p q => by
     rintro ⟨h⟩
-    exact Coherence.mk (symm h)
+    exact Coherence.mk (symm h)⟩
 
 lemma coherence_def (p q : αᗮ) : p ⁐ q ↔ Coherence p q := by rfl
 
@@ -265,12 +265,12 @@ inductive Coherence : Tensor α β → Tensor α β → Prop
 
 instance : CoherenceSpace (Tensor α β) where
   Coherence p q := Coherence p q
-  reflexive p := by
+  reflexive := ⟨fun p => by
     rcases p with ⟨a, b⟩
-    exact Coherence.pair (by rfl) (by rfl)
-  symmetric p q := by
+    exact Coherence.pair (by rfl) (by rfl)⟩
+  symmetric := ⟨fun p q => by
     rintro ⟨ha, hb⟩
-    exact Coherence.pair (symm ha) (symm hb)
+    exact Coherence.pair (symm ha) (symm hb)⟩
 
 lemma coherence_def (p q : Tensor α β) : p ⁐ q ↔ Coherence p q := by rfl
 
@@ -301,12 +301,12 @@ inductive Coherence : Par α β → Par α β → Prop
 
 instance : CoherenceSpace (Par α β) where
   Coherence p q := Coherence p q
-  reflexive p := Coherence.refl _
-  symmetric p q := by
+  reflexive := ⟨fun p => Coherence.refl _⟩
+  symmetric := ⟨fun p q => by
     rintro (h | h | h)
     · exact Coherence.refl _
     · exact Coherence.left (symm h)
-    · exact Coherence.right (symm h)
+    · exact Coherence.right (symm h)⟩
 
 lemma coherence_def (p q : Par α β) : p ⁐ q ↔ Coherence p q := by rfl
 
@@ -339,11 +339,11 @@ inductive ArrowParCoherence : (f g : (i : ι) → ρ i) → Prop
 
 instance arrowPar : CoherenceSpace ((i : ι) → ρ i) where
   Coherence f g := ArrowParCoherence f g
-  reflexive f := ArrowParCoherence.refl f
-  symmetric f g := by
+  reflexive := ⟨fun f => ArrowParCoherence.refl f⟩
+  symmetric := ⟨fun f g => by
     rintro (h | ⟨_, h⟩)
     · exact ArrowParCoherence.refl _
-    · exact ArrowParCoherence.pointwise _ (symm h)
+    · exact ArrowParCoherence.pointwise _ (symm h)⟩
 
 lemma arrowPar_coherence_def (f g : (i : ι) → ρ i) : f ⁐ g ↔ ArrowParCoherence f g := by rfl
 
@@ -398,16 +398,16 @@ inductive Coherence : With α β → With α β → Prop
 /-- An additive conjunction of coherence spaces is also a coherence space -/
 instance : CoherenceSpace (With α β) where
   Coherence p q := Coherence p q
-  reflexive p := by
+  reflexive := ⟨fun p => by
     rcases p
     · exact Coherence.inl (by rfl)
-    · exact Coherence.inr (by rfl)
-  symmetric p q := by
+    · exact Coherence.inr (by rfl)⟩
+  symmetric := ⟨fun p q => by
     rintro (h | h | _ | _)
     · exact Coherence.inl (symm h)
     · exact Coherence.inr (symm h)
     · exact Coherence.inr_inl _ _
-    · exact Coherence.inl_inr _ _
+    · exact Coherence.inl_inr _ _⟩
 
 lemma coherence_def (p q : With α β) : p ⁐ q ↔ Coherence p q := by rfl
 
@@ -426,13 +426,13 @@ inductive Coherence : BigWith ρ → BigWith ρ → Prop
 
 instance : CoherenceSpace (BigWith ρ) where
   Coherence p q := p.Coherence q
-  reflexive p := by
+  reflexive := ⟨fun p => by
     rcases p with ⟨a⟩
-    exact Coherence.mk (by rfl)
-  symmetric p q := by
+    exact Coherence.mk (by rfl)⟩
+  symmetric := ⟨fun p q => by
     rintro (h | ⟨_, _, h⟩)
     · exact Coherence.mk (symm h)
-    · exact Coherence.of_ne _ _ (Ne.symm h)
+    · exact Coherence.of_ne _ _ (Ne.symm h)⟩
 
 lemma coherence_def (p q : BigWith ρ) : p ⁐ q ↔ Coherence p q := by rfl
 
@@ -454,14 +454,14 @@ inductive Coherence : Plus α β → Plus α β → Prop
 /-- An additive conjunction of coherence spaces is also a coherence space -/
 instance : CoherenceSpace (Plus α β) where
   Coherence p q := Coherence p q
-  reflexive p := by
+  reflexive := ⟨fun p => by
     rcases p
     · exact Coherence.inl (by rfl)
-    · exact Coherence.inr (by rfl)
-  symmetric p q := by
+    · exact Coherence.inr (by rfl)⟩
+  symmetric := ⟨fun p q => by
     rintro (h | h)
     · exact Coherence.inl (symm h)
-    · exact Coherence.inr (symm h)
+    · exact Coherence.inr (symm h)⟩
 
 lemma coherence_def (p q : Plus α β) : p ⁐ q ↔ Coherence p q := by rfl
 
@@ -479,12 +479,12 @@ inductive Coherence : BigPlus ρ → BigPlus ρ → Prop
 
 instance : CoherenceSpace (BigPlus ρ) where
   Coherence p q := p.Coherence q
-  reflexive p := by
+  reflexive := ⟨fun p => by
     rcases p with ⟨a⟩
-    exact Coherence.mk (by rfl)
-  symmetric p q := by
+    exact Coherence.mk (by rfl)⟩
+  symmetric := ⟨fun p q => by
     rintro ⟨h⟩
-    exact Coherence.mk (symm h)
+    exact Coherence.mk (symm h)⟩
 
 lemma coherence_def (p q : BigPlus ρ) : p ⁐ q ↔ Coherence p q := by rfl
 
