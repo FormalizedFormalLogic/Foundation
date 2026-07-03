@@ -88,7 +88,7 @@ private lemma truthlemma.himp
         rcases Set.subset_singleton_iff_eq.mp hΔ with (hΔ | hΔ);
         . simp only [Finset.coe_eq_empty] at hΔ;
           subst hΔ;
-          simp only [Finset.disj_empty, Finset.coe_erase, Set.insert_diff_singleton] at hC ⊢;
+          simp only [Finset.disj_empty, Finset.coe_erase, Set.insert_sdiff_singleton] at hC ⊢;
           exact of_O! hC;
         . simp only [Finset.coe_eq_singleton] at hΔ;
           subst hΔ;
