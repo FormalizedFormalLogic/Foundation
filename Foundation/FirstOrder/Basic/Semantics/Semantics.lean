@@ -278,25 +278,25 @@ lemma eval_nrel' {r : L.Rel k} {v} :
     Eval b f (∀⁰* φ) ↔ ∀ e', Eval e' f φ :=
   match k with
   |     0 => by simp [eq_finZeroElim]
-  | k + 1 => by simpa [allClosure_succ, eval_allClosure (k := k), Matrix.forall_iff] using forall_comm
+  | k + 1 => by simpa [allClosure_succ, eval_allClosure (k := k), Matrix.vecForall_iff] using forall_comm
 
 @[simp] lemma eval_exsClosure {b} {φ : Semiformula L ξ k} :
     Eval b f (∃⁰* φ) ↔ ∃ e', Eval e' f φ :=
   match k with
   |     0 => by simp [eq_finZeroElim]
-  | k + 1 => by simpa [exsClosure_succ, eval_exsClosure (k := k), Matrix.exists_iff] using exists_comm
+  | k + 1 => by simpa [exsClosure_succ, eval_exsClosure (k := k), Matrix.vecExists_iff] using exists_comm
 
 @[simp] lemma eval_allItr {b} {φ : Semiformula L ξ (n + k)} :
     Eval b f (∀⁰^[k] φ) ↔ ∀ e', Eval (Matrix.appendr e' b) f φ :=
   match k with
   |     0 => by simp [Matrix.empty_eq]
-  | k + 1 => by simpa [allItr_succ, eval_allItr (k := k), Matrix.forall_iff] using forall_comm
+  | k + 1 => by simpa [allItr_succ, eval_allItr (k := k), Matrix.vecForall_iff] using forall_comm
 
 @[simp] lemma eval_exsItr {b} {φ : Semiformula L ξ (n + k)} :
     Eval b f (∃⁰^[k] φ) ↔ ∃ e', Eval (Matrix.appendr e' b) f φ :=
   match k with
   |     0 => by simp [Matrix.empty_eq]
-  | k + 1 => by simpa [exsItr_succ, eval_exsItr (k := k), Matrix.exists_iff] using exists_comm
+  | k + 1 => by simpa [exsItr_succ, eval_exsItr (k := k), Matrix.vecExists_iff] using exists_comm
 
 section rew
 

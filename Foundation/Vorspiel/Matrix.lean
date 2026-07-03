@@ -232,11 +232,15 @@ def appendr {n m} (v : Fin n → α) (w : Fin m → α) : Fin (m + n) → α := 
 
 @[simp] lemma appendr_cons {m n} (x : α) (v : Fin n → α) (w : Fin m → α) : appendr (x :> v) w = x :> appendr v w := by funext i; simp [appendr]
 
-lemma forall_iff {n : ℕ} (φ : (Fin (n + 1) → α) → Prop) :
+-- Renamed from `Matrix.forall_iff` to `Matrix.vecForall_iff` to avoid clashing with
+-- Mathlib's `Matrix.forall_iff` (Mathlib.Data.Matrix.Reflection), which otherwise makes
+-- Foundation unimportable alongside that module.
+lemma vecForall_iff {n : ℕ} (φ : (Fin (n + 1) → α) → Prop) :
     (∀ v, φ v) ↔ (∀ a, ∀ v, φ (a :> v)) :=
   ⟨fun h a v ↦ h (a :> v), fun h v ↦ by simpa [eq_vecCons v] using h (v 0) (v ∘ Fin.succ)⟩
 
-lemma exists_iff {n : ℕ} (φ : (Fin (n + 1) → α) → Prop) :
+-- Renamed from `Matrix.exists_iff` to `Matrix.vecExists_iff`; see `vecForall_iff` above.
+lemma vecExists_iff {n : ℕ} (φ : (Fin (n + 1) → α) → Prop) :
     (∃ v, φ v) ↔ (∃ a, ∃ v, φ (a :> v)) :=
   ⟨by rintro ⟨v, hv⟩; exact ⟨v 0, v ∘ Fin.succ, by simpa [eq_vecCons] using hv⟩,
    by rintro ⟨a, v, hv⟩; exact ⟨_, hv⟩⟩
