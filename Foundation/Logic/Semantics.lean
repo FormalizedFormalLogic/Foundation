@@ -336,7 +336,7 @@ lemma conseq_compact [LogicalConnective F] [Semantics.Tarski M] [DecidableEq F] 
   constructor
   · intro ⟨u, ss, hu⟩
     refine ⟨Finset.erase u (∼φ), by simp [ss],?_⟩
-    simp only [Finset.coe_erase, Set.insert_diff_singleton]
+    simp only [Finset.coe_erase, Set.insert_sdiff_singleton]
     intro h; exact hu (Semantics.Satisfiable.of_subset h (by simp))
   · intro ⟨u, ss, hu⟩
     exact ⟨insert (∼φ) u,

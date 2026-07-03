@@ -17,8 +17,8 @@ namespace LO
 class CoherenceSpace (α : Type*) where
   /-- A coherence relation -/
   Coherence : α → α → Prop
-  reflexive : Reflexive Coherence
-  symmetric : Symmetric Coherence
+  reflexive : ∀ x, Coherence x x
+  symmetric : ∀ x y, Coherence x y → Coherence y x
 
 namespace CoherenceSpace
 
@@ -28,11 +28,11 @@ variable {α : Type*} [CoherenceSpace α]
 
 instance : Std.Refl (α := α) Coherence := ⟨reflexive⟩
 
-instance : Std.Symm (α := α) Coherence := ⟨symmetric⟩
+instance : Std.Symm (α := α) Coherence := ⟨fun x y ↦ symmetric x y⟩
 
 @[simp, refl, grind .] protected lemma Coherence.refl (x : α) : x ⁐ x := reflexive x
 
-lemma Coherence.symm {x y : α} : x ⁐ y → y ⁐ x := fun h ↦ symmetric h
+lemma Coherence.symm {x y : α} : x ⁐ y → y ⁐ x := fun h ↦ symmetric x y h
 
 @[grind =] lemma Coherence.symm_iff {x y : α} : x ⁐ y ↔ y ⁐ x := ⟨symm, symm⟩
 
