@@ -514,7 +514,6 @@ lemma IsUTermVec.termBShiftVec {k v : V} (hv : IsUTermVec L k v) :
   ⟨(len_termBShiftVec hv).symm, fun i hi => by
     rw [nth_termBShiftVec hv hi]; exact (hv.nth hi).termBShift⟩
 
-set_option maxHeartbeats 2000000 in
 /-- `termBShift` shifts the bound-variable depth up by exactly one (on well-formed terms): so `t` is
 a level-`m` term iff `termBShift t` is level-`(m+1)`. The `←`-direction recovers the lowered arity,
 which is how the bounded-`∀` bound (a `termBShift`-image) is recognized as a `bShift` of a real term
@@ -713,32 +712,29 @@ alias ⟨IsSigma1.case, IsSigma1.mk⟩ := IsSigma1.case_iff
 @[simp] lemma IsSigma1.nrel {k r v : V} : IsSigma1 (^nrel k r v) :=
   IsSigma1.mk (Or.inr (Or.inr (Or.inr (Or.inl ⟨k, r, v, rfl⟩))))
 
-set_option maxHeartbeats 1000000 in
 @[simp] lemma IsSigma1.and_iff {p q : V} : IsSigma1 (p ^⋏ q) ↔ IsSigma1 p ∧ IsSigma1 q := by
   constructor
   · intro h
     rcases h.case with (h | h | ⟨_,_,_,h⟩ | ⟨_,_,_,h⟩ | ⟨p₁,p₂,hp,hq,h⟩ | ⟨_,_,_,_,h⟩ | ⟨_,_,h⟩ | ⟨u,q',_,_,h⟩) <;>
-      simp [qqRel, qqNRel, qqVerum, qqFalsum, qqAnd, qqOr, qqExs, qqAll, qqBall, Arithmetic.qqNLT] at h
+      simp [qqRel, qqNRel, qqVerum, qqFalsum, qqAnd, qqOr, qqExs, qqAll, qqBall] at h
     · obtain ⟨rfl, rfl⟩ := h; exact ⟨hp, hq⟩
   · rintro ⟨hp, hq⟩
     exact IsSigma1.mk (Or.inr (Or.inr (Or.inr (Or.inr (Or.inl ⟨p, q, hp, hq, rfl⟩)))))
 
-set_option maxHeartbeats 1000000 in
 @[simp] lemma IsSigma1.or_iff {p q : V} : IsSigma1 (p ^⋎ q) ↔ IsSigma1 p ∧ IsSigma1 q := by
   constructor
   · intro h
     rcases h.case with (h | h | ⟨_,_,_,h⟩ | ⟨_,_,_,h⟩ | ⟨_,_,_,_,h⟩ | ⟨p₁,p₂,hp,hq,h⟩ | ⟨_,_,h⟩ | ⟨u,q',_,_,h⟩) <;>
-      simp [qqRel, qqNRel, qqVerum, qqFalsum, qqAnd, qqOr, qqExs, qqAll, qqBall, Arithmetic.qqNLT] at h
+      simp [qqRel, qqNRel, qqVerum, qqFalsum, qqAnd, qqOr, qqExs, qqAll, qqBall] at h
     · obtain ⟨rfl, rfl⟩ := h; exact ⟨hp, hq⟩
   · rintro ⟨hp, hq⟩
     exact IsSigma1.mk (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inl ⟨p, q, hp, hq, rfl⟩))))))
 
-set_option maxHeartbeats 1000000 in
 @[simp] lemma IsSigma1.ex_iff {p : V} : IsSigma1 (^∃ p) ↔ IsSigma1 p := by
   constructor
   · intro h
     rcases h.case with (h | h | ⟨_,_,_,h⟩ | ⟨_,_,_,h⟩ | ⟨_,_,_,_,h⟩ | ⟨_,_,_,_,h⟩ | ⟨p₁,hp,h⟩ | ⟨u,q',_,_,h⟩) <;>
-      simp [qqRel, qqNRel, qqVerum, qqFalsum, qqAnd, qqOr, qqExs, qqAll, qqBall, Arithmetic.qqNLT] at h
+      simp [qqRel, qqNRel, qqVerum, qqFalsum, qqAnd, qqOr, qqExs, qqAll, qqBall] at h
     · obtain rfl := h; exact hp
   · rintro hp
     exact IsSigma1.mk (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inl ⟨p, hp, rfl⟩)))))))
@@ -1168,7 +1164,6 @@ lemma isSigma1_of_hierarchy {n : ℕ} {ψ : _root_.LO.FirstOrder.Semiformula ℒ
     simp [Semiterm.quote_def]
   · intro n φ hφ ihφ; simpa [Semiformula.quote_ex] using ihφ
 
-set_option maxHeartbeats 4000000 in
 open Bootstrapping in
 /-- `(⟹)` A `𝚺₁`-recognized code is the code of a `𝚺₁` formula. Meta-induction on the formula:
 atoms are `𝚺₁` unconditionally; `∧/∨/∃` recurse; the `^∀` case is forced into the bounded shape by
