@@ -49,31 +49,21 @@ lemma cons_cons_iff :
   · rintro ⟨rfl, hR, hC⟩
     exact hC.cons hR
 
-lemma not_mem_of_rel (IR : Std.Irrefl R) (TR : IsTrans α R) {a b x : α} {l : List α} : ChainI R a b l → R x a → x ∉ l := by
+lemma not_mem_of_rel (IR : Irreflexive R) (TR : Transitive R) {a b x : α} {l : List α} : ChainI R a b l → R x a → x ∉ l := by
   match l with
   |      [] => simp
   | a' :: l =>
     rintro (_ | _)
-    case singleton =>
-      simp
-      intro hR
-      rintro rfl
-      letI := IR
-      exact Std.Irrefl.irrefl _ hR
+    case singleton => simp; intro hR; rintro rfl; exact IR _ hR
     case cons a' Raa' h =>
     intro Rxa
-    have : x ≠ a := by
-      rintro rfl
-      letI := IR
-      exact Std.Irrefl.irrefl _ Rxa
+    have : x ≠ a := by rintro rfl; exact IR _ Rxa
     have : x ∉ l :=
-      have : R x a' := by
-        letI := TR
-        exact IsTrans.trans _ _ _ Rxa Raa'
+      have : R x a' := TR Rxa Raa'
       not_mem_of_rel IR TR h this
     simp_all
 
-lemma nodup (IR : Std.Irrefl R) (TR : IsTrans α R) {a b l} : ChainI R a b l → l.Nodup :=
+lemma nodup (IR : Irreflexive R) (TR : Transitive R) {a b l} : ChainI R a b l → l.Nodup :=
   match l with
   |      [] => by simp
   | a' :: l => by
@@ -84,7 +74,7 @@ lemma nodup (IR : Std.Irrefl R) (TR : IsTrans α R) {a b l} : ChainI R a b l →
       have notin :a ∉ l := not_mem_of_rel IR TR h Raa'
       simp_all
 
-lemma finite_of_irreflexive_of_transitive [Finite α] (IR : Std.Irrefl R) (TR : IsTrans α R) (a b : α) :
+lemma finite_of_irreflexive_of_transitive [Finite α] (IR : Irreflexive R) (TR : Transitive R) (a b : α) :
     Finite {l : List α // l.ChainI R a b} := by
   haveI : Fintype α := Fintype.ofFinite α
   let f : {l : List α // l.ChainI R a b} → {l : List α // l.Nodup} := fun l ↦ ⟨l, l.prop.nodup IR TR⟩

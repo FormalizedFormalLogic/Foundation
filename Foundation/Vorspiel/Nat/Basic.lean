@@ -1,7 +1,7 @@
 module
 
 public import Mathlib.Data.Nat.Bits
-public import Mathlib.Order.Lattice.Nat
+public import Mathlib.Data.Nat.Lattice
 public import Mathlib.Data.Nat.Pairing
 public import Mathlib.Tactic.Cases
 
