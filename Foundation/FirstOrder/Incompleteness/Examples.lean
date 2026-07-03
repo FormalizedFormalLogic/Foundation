@@ -2,21 +2,18 @@ module
 
 public import Foundation.FirstOrder.Incompleteness.First
 public import Foundation.FirstOrder.Incompleteness.Second
+public import Foundation.FirstOrder.Incompleteness.InductionSchemeDelta1
 
 @[expose] public section
 /-!
 # $\Delta_1$-definability of theories
 
-*TODO: Prove `𝗜𝚺₁` and `𝗣𝗔` are $\Delta_1$-definable.*
+`𝗜𝚺₁` and `𝗣𝗔` are $\Delta_1$-definable; the proofs are in
+`Foundation.FirstOrder.Incompleteness.InductionSchemeDelta1`
+(instances `ISigma1_delta1Definable`, `PA_delta1Definable`).
 -/
 
 namespace LO.FirstOrder.Arithmetic
-
-axiom ISigma1_delta1Definable : 𝗜𝚺₁.Δ₁
-
-axiom PA_delta1Definable : 𝗣𝗔.Δ₁
-
-attribute [instance] ISigma1_delta1Definable PA_delta1Definable
 
 instance : 𝗜𝚺₁ ⪱ 𝗜𝚺₁ ∪ 𝗜𝚺₁.Con := inferInstance
 
