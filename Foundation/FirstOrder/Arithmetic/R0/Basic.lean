@@ -83,7 +83,7 @@ lemma val_numeral {n ξ} (bv : Fin n → ℕ) (fv : ξ → ℕ) (t : Semiterm �
   |   .func Language.Add.add v => by simp [Semiterm.val_func, val_numeral _ _ (v 0), val_numeral _ _ (v 1), numeral_add_numeral]
   |   .func Language.Mul.mul v => by simp [Semiterm.val_func, val_numeral _ _ (v 0), val_numeral _ _ (v 1), numeral_mul_numeral]
 
-lemma bold_sigma_one_completeness {n} {φ : Semiformula ℒₒᵣ ξ n} (hp : Hierarchy 𝚺 1 φ) {bv : Fin n → ℕ} {fv : ξ → ℕ} :
+lemma bold_sigma_one_completeness {n} {φ : ArithmeticSemiformula ξ n} (hp : Hierarchy 𝚺 1 φ) {bv : Fin n → ℕ} {fv : ξ → ℕ} :
     φ.Eval bv fv → φ.Eval (M := M) (numeral ∘ bv) (numeral ∘ fv) := by
   revert bv
   apply sigma₁_induction' hp
@@ -128,7 +128,7 @@ lemma nat_extention_piOne {σ : ArithmeticSentence} (hσ : Hierarchy 𝚷 1 σ) 
 
 variable {M}
 
-lemma bold_sigma_one_completeness' {n} {σ : Semisentence ℒₒᵣ n} (hσ : Hierarchy 𝚺 1 σ) {bv} :
+lemma bold_sigma_one_completeness' {n} {σ : ArithmeticSemisentence n} (hσ : Hierarchy 𝚺 1 σ) {bv} :
     σ.Evalb (M := ℕ) bv → σ.Evalb (M := M) (numeral ∘ bv) := fun h ↦ by
   simpa [Empty.eq_elim] using bold_sigma_one_completeness (M := M) (φ := σ) hσ (fv := Empty.elim) (bv := bv) h
 

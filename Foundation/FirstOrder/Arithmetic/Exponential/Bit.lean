@@ -76,19 +76,19 @@ instance : Semiformula.Operator.Mem ℒₒᵣ := ⟨⟨bitDef.val⟩⟩
 lemma operator_mem_def : Semiformula.Operator.Mem.mem.sentence = bitDef.val := by
   simp [Semiformula.Operator.Mem.mem]
 
-def ballIn (t : Semiterm ℒₒᵣ ξ n) (p : Semiformula ℒₒᵣ ξ (n + 1)) : Semiformula ℒₒᵣ ξ n := “∀ x < !!t, x ∈ !!(Rew.bShift t) → !p x ⋯”
+def ballIn (t : Semiterm ℒₒᵣ ξ n) (p : ArithmeticSemiformula ξ (n + 1)) : ArithmeticSemiformula ξ n := “∀ x < !!t, x ∈ !!(Rew.bShift t) → !p x ⋯”
 
-def bexsIn (t : Semiterm ℒₒᵣ ξ n) (p : Semiformula ℒₒᵣ ξ (n + 1)) : Semiformula ℒₒᵣ ξ n := “∃ x < !!t, x ∈ !!(Rew.bShift t) ∧ !p x ⋯”
+def bexsIn (t : Semiterm ℒₒᵣ ξ n) (p : ArithmeticSemiformula ξ (n + 1)) : ArithmeticSemiformula ξ n := “∃ x < !!t, x ∈ !!(Rew.bShift t) ∧ !p x ⋯”
 
 @[simp] lemma Hierarchy.bit {t u : Semiterm ℒₒᵣ μ n} : Hierarchy Γ s “!!t ∈ !!u” := by
   simp [Semiformula.Operator.operator, Matrix.fun_eq_vec_two, operator_mem_def]
 
-@[simp] lemma Hieralchy.ballIn {Γ m} (t : Semiterm ℒₒᵣ ξ n) (p : Semiformula ℒₒᵣ ξ (n + 1)) :
+@[simp] lemma Hieralchy.ballIn {Γ m} (t : Semiterm ℒₒᵣ ξ n) (p : ArithmeticSemiformula ξ (n + 1)) :
     Hierarchy Γ m (ballIn t p) ↔ Hierarchy Γ m p := by
   simp only [Arithmetic.ballIn]
   simp [Semiformula.Operator.operator, operator_mem_def]
 
-@[simp] lemma Hieralchy.bexsIn {Γ m} (t : Semiterm ℒₒᵣ ξ n) (p : Semiformula ℒₒᵣ ξ (n + 1)) :
+@[simp] lemma Hieralchy.bexsIn {Γ m} (t : Semiterm ℒₒᵣ ξ n) (p : ArithmeticSemiformula ξ (n + 1)) :
     Hierarchy Γ m (bexsIn t p) ↔ Hierarchy Γ m p := by
   simp only [Arithmetic.bexsIn]
   simp [Semiformula.Operator.operator, operator_mem_def]
@@ -149,7 +149,7 @@ section model
 
 scoped instance : Structure.Mem ℒₒᵣ V := ⟨by intro a b; simp [Semiformula.Operator.val, operator_mem_def]⟩
 
-@[simp] lemma eval_ballIn {t : Semiterm ℒₒᵣ ξ n} {φ : Semiformula ℒₒᵣ ξ (n + 1)} {bv : Fin n → V} {fv : ξ → V} :
+@[simp] lemma eval_ballIn {t : Semiterm ℒₒᵣ ξ n} {φ : ArithmeticSemiformula ξ (n + 1)} {bv : Fin n → V} {fv : ξ → V} :
     (ballIn t φ).Eval (M := V) bv fv ↔ ∀ x ∈ t.val bv fv, φ.Eval (x :> bv) fv := by
   suffices
     (∀ x < t.val bv fv, x ∈ t.val bv fv → φ.Eval (x :> bv) fv) ↔
@@ -158,7 +158,7 @@ scoped instance : Structure.Mem ℒₒᵣ V := ⟨by intro a b; simp [Semiformul
   · intro h x hx; exact h x (lt_of_mem hx) hx
   · intro h x _ hx; exact h x hx
 
-@[simp] lemma eval_bexsIn {t : Semiterm ℒₒᵣ ξ n} {φ : Semiformula ℒₒᵣ ξ (n + 1)} {bv : Fin n → V} {fv : ξ → V} :
+@[simp] lemma eval_bexsIn {t : Semiterm ℒₒᵣ ξ n} {φ : ArithmeticSemiformula ξ (n + 1)} {bv : Fin n → V} {fv : ξ → V} :
     (bexsIn t φ).Eval (M := V) bv fv ↔ ∃ x ∈ t.val bv fv, φ.Eval (x :> bv) fv := by
   suffices
     (∃ x < t.val bv fv, x ∈ t.val bv fv ∧ φ.Eval (x :> bv) fv) ↔

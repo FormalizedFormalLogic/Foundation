@@ -13,7 +13,7 @@ namespace LO.FirstOrder.Arithmetic
 /-- ∀ x, ∃ y, 2^{|x|^2} = y-/
 def _root_.LO.Omega1.omega1 : ArithmeticSentence := “∀ x, ∃ y, ∃ l <⁺ x, !lengthDef l x ∧ !exponentialDef (l * l) y”
 
-inductive _root_.LO.Omega1 : Theory ℒₒᵣ where
+inductive _root_.LO.Omega1 : ArithmeticTheory where
   | omega : Omega1 Omega1.omega1
 
 notation "𝝮₁" => Omega1

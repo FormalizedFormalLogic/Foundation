@@ -294,7 +294,7 @@ namespace Definable
 lemma mk' {ℌ : HierarchySymbol} (φ : ℌ.Semiformula V k) (H : IsDefinedByWithParam P φ) : ℌ.Definable P := ⟨φ, H⟩
 
 lemma mkPolarity {Γ : Polarity}
-    (φ : Semiformula ℒₒᵣ V k) (hp : Hierarchy Γ m φ) (hP : ∀ v, P v ↔ φ.Eval v id) : Γ-[m].Definable P :=
+    (φ : ArithmeticSemiformula V k) (hp : Hierarchy Γ m φ) (hP : ∀ v, P v ↔ φ.Eval v id) : Γ-[m].Definable P :=
   match Γ with
   | 𝚺 => ⟨.mkSigma φ hp, by intro v; simp [hP]⟩
   | 𝚷 => ⟨.mkPi φ hp, by intro v; simp [hP]⟩

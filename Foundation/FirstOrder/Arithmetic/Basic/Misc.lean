@@ -56,7 +56,7 @@ instance : Repr (Semiterm ℒₒᵣ ξ n) := ⟨fun t _ ↦ t.toStringORing⟩
 
 instance : ToString (Semiterm ℒₒᵣ ξ n) := ⟨Semiterm.toStringORing⟩
 
-def Semiformula.toStringORing : ∀ {n}, Semiformula ℒₒᵣ ξ n → String
+def Semiformula.toStringORing : ∀ {n}, ArithmeticSemiformula ξ n → String
   | _,                             ⊤ => "\\top"
   | _,                             ⊥ => "\\bot"
   | _,          rel Language.Eq.eq v => (v 0).toStringORing ++ " = " ++ (v 1).toStringORing
@@ -70,9 +70,9 @@ def Semiformula.toStringORing : ∀ {n}, Semiformula ℒₒᵣ ξ n → String
   | n,                          ∀⁰ φ => "(\\forall x_{" ++ toString n ++ "}) " ++ "[" ++ φ.toStringORing ++ "]"
   | n,                          ∃⁰ φ => "(\\exists x_{" ++ toString n ++ "}) " ++ "[" ++ φ.toStringORing ++ "]"
 
-instance : Repr (Semiformula ℒₒᵣ ξ n) := ⟨fun φ _ ↦ φ.toStringORing⟩
+instance : Repr (ArithmeticSemiformula ξ n) := ⟨fun φ _ ↦ φ.toStringORing⟩
 
-instance : ToString (Semiformula ℒₒᵣ ξ n) := ⟨Semiformula.toStringORing⟩
+instance : ToString (ArithmeticSemiformula ξ n) := ⟨Semiformula.toStringORing⟩
 
 end ToString
 

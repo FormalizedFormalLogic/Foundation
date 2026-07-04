@@ -66,7 +66,7 @@ theorem term_complete {n : ℕ} (t : FirstOrder.ClosedSemiterm ℒₒᵣ n) (w :
 
 open FirstOrder.Arithmetic
 
-theorem bold_sigma_one_complete {n} {φ : Semisentence ℒₒᵣ n} (hp : Hierarchy 𝚺 1 φ) {w} :
+theorem bold_sigma_one_complete {n} {φ : ArithmeticSemisentence n} (hp : Hierarchy 𝚺 1 φ) {w} :
     V ⊧/w φ → T.internalize V ⊢ (toNumVec w ⤔ ⌜φ⌝) := by
   revert w
   apply sigma₁_induction' hp

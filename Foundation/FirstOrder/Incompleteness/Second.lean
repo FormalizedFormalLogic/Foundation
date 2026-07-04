@@ -12,7 +12,7 @@ namespace LO.FirstOrder.Arithmetic
 
 open LO.Entailment ProvabilityAbstraction
 
-variable (T : Theory ℒₒᵣ) [T.Δ₁] [𝗜𝚺₁ ⪯ T]
+variable (T : ArithmeticTheory) [T.Δ₁] [𝗜𝚺₁ ⪯ T]
 
 /-- Gödel's second incompleteness theorem -/
 theorem consistent_unprovable [Consistent T] : T ⊬ ↑T.consistent :=
