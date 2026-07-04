@@ -81,7 +81,22 @@ lemma _root_.REPred.iff_decoded_pred {α : Type*} [Primcodable α] {A : α → P
 -/
 lemma _root_.ComputablePred.iff_decoded_pred {α : Type*} [Primcodable α] {A : α → Prop} :
     ComputablePred A ↔ ComputablePred fun n : ℕ ↦ (Encodable.decode (α := α) n).elim False A := by
-  sorry
+  constructor
+  · intro hA
+    refine computablePred_iff_computable_decide.mpr ?_
+    have hcomp := Computable.option_casesOn (o := fun n : ℕ => Encodable.decode (α := α) n)
+      (f := fun _ => false) (g := fun _ a => decide (A a))
+      Computable.decode (Computable.const false) (hA.decide.comp Computable.snd)
+    refine hcomp.of_eq fun n => ?_
+    rcases h : Encodable.decode (α := α) n with _ | a <;> simp
+  · intro hg
+    have hdec : Computable fun a : α =>
+        decide ((Encodable.decode (α := α) (Encodable.encode a)).elim False A) :=
+      hg.decide.comp Computable.encode
+    refine ComputablePred.of_eq
+      (p := fun a => (Encodable.decode (α := α) (Encodable.encode a)).elim False A)
+      (computablePred_iff_computable_decide.mpr hdec) fun a => ?_
+    simp [Encodable.encodek]
 
 /--
   If an r.e. but not recursive predicate `P` on a `Primcodable` type exists, then incompleteness follows.
