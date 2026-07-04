@@ -56,24 +56,49 @@ lemma incomplete_of_REPred_not_ComputablePred_Nat
   use φ/[⌜a⌝];
   constructor <;> assumption;
 
-/-
-lemma _root_.REPred.iff_decoded_pred {A : α → Prop} [Primcodable α] : REPred A ↔ REPred λ n : ℕ ↦ match Encodable.decode n with | some a => A a | none => False := by
-  sorry;
-
-lemma _root_.ComputablePred.iff_decoded_pred {A : α → Prop} [h : Primcodable α] : ComputablePred A ↔ ComputablePred λ n : ℕ ↦ match Encodable.decode n with | some a => A a | none => False := by
-  sorry;
-
-lemma incomplete_of_REPred_not_ComputablePred₂ {P : α → Prop} [h : Primcodable α] (hRE : REPred P) (hC : ¬ComputablePred P) : ¬Entailment.Complete (T : Axiom ℒₒᵣ) := by
-  apply incomplete_of_REPred_not_ComputablePred (P := λ n : ℕ ↦ match h.decode n with | some a => P a | none => False);
-  . exact REPred.iff_decoded_pred.mp hRE;
-  . exact ComputablePred.iff_decoded_pred.not.mp hC;
+/--
+  Recursive enumerability of a predicate on a `Primcodable` type is equivalent to
+  the recursive enumerability of the corresponding predicate on `ℕ` obtained by decoding.
+-/
+lemma _root_.REPred.iff_decoded_pred {α : Type*} [Primcodable α] {A : α → Prop} :
+    REPred A ↔ REPred fun n : ℕ ↦ (Encodable.decode (α := α) n).elim False A := by
+  constructor
+  · intro hA
+    have hbind : Partrec fun n : ℕ =>
+        (Encodable.decode (α := α) n : Part α).bind
+          fun a => Part.assert (A a) fun _ => Part.some () :=
+      (Computable.ofOption Computable.decode).bind (hA.comp Computable.snd).to₂
+    refine (Partrec.dom_re hbind).of_eq fun n => ?_
+    rcases h : Encodable.decode (α := α) n with _ | a <;> simp [Part.assert]
+  · intro hg
+    refine REPred.of_eq (p := fun a => (Encodable.decode (α := α) (Encodable.encode a)).elim False A)
+      (hg.comp Computable.encode) fun a => ?_
+    simp [Encodable.encodek]
 
 /--
-  Halting problem is r.e. but not recursive, so Gödel's first incompleteness theorem follows.
+  Computability of a predicate on a `Primcodable` type is equivalent to
+  the computability of the corresponding predicate on `ℕ` obtained by decoding.
 -/
-theorem incomplete_of_halting_problem : ¬Entailment.Complete (T : Axiom ℒₒᵣ) := incomplete_of_REPred_not_ComputablePred₂
-  (ComputablePred.halting_problem_re 0)
-  (ComputablePred.halting_problem _)
+lemma _root_.ComputablePred.iff_decoded_pred {α : Type*} [Primcodable α] {A : α → Prop} :
+    ComputablePred A ↔ ComputablePred fun n : ℕ ↦ (Encodable.decode (α := α) n).elim False A := by
+  sorry
+
+/--
+  If an r.e. but not recursive predicate `P` on a `Primcodable` type exists, then incompleteness follows.
 -/
+lemma incomplete_of_REPred_not_ComputablePred {α : Type*} [Primcodable α] {P : α → Prop}
+    (hRE : REPred P) (hC : ¬ComputablePred P) : Entailment.Incomplete T := by
+  apply incomplete_of_REPred_not_ComputablePred_Nat T
+    (P := fun n : ℕ ↦ (Encodable.decode (α := α) n).elim False P)
+  · exact REPred.iff_decoded_pred.mp hRE
+  · exact ComputablePred.iff_decoded_pred.not.mp hC
+
+/--
+  The halting problem is r.e. but not recursive, so Gödel's first incompleteness theorem follows.
+-/
+theorem incomplete_of_halting_problem : Entailment.Incomplete T :=
+  incomplete_of_REPred_not_ComputablePred T
+    (ComputablePred.halting_problem_re 0)
+    (ComputablePred.halting_problem 0)
 
 end LO.FirstOrder.Arithmetic
