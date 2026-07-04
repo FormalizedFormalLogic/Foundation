@@ -123,16 +123,16 @@ noncomputable instance : LCWQIsoGödelQuote (Semiproposition L) (Bootstrapping.S
 open Bootstrapping.Arithmetic
 
 @[simp] lemma typed_quote_eq (t u : SyntacticSemiterm ℒₒᵣ n) :
-    (⌜(“!!t = !!u” : Semiproposition ℒₒᵣ n)⌝ : Bootstrapping.Semiformula V ℒₒᵣ n) = (⌜t⌝ ≐ ⌜u⌝) := rfl
+    (⌜(“!!t = !!u” : ArithmeticSemiproposition n)⌝ : Bootstrapping.Semiformula V ℒₒᵣ n) = (⌜t⌝ ≐ ⌜u⌝) := rfl
 
 @[simp] lemma typed_quote_ne (t u : SyntacticSemiterm ℒₒᵣ n) :
-    (⌜(“!!t ≠ !!u” : Semiproposition ℒₒᵣ n)⌝ : Bootstrapping.Semiformula V ℒₒᵣ n) = (⌜t⌝ ≉ ⌜u⌝) := rfl
+    (⌜(“!!t ≠ !!u” : ArithmeticSemiproposition n)⌝ : Bootstrapping.Semiformula V ℒₒᵣ n) = (⌜t⌝ ≉ ⌜u⌝) := rfl
 
 @[simp] lemma typed_quote_lt (t u : SyntacticSemiterm ℒₒᵣ n) :
-    (⌜(“!!t < !!u” : Semiproposition ℒₒᵣ n)⌝ : Bootstrapping.Semiformula V ℒₒᵣ n) = (⌜t⌝ <' ⌜u⌝) := rfl
+    (⌜(“!!t < !!u” : ArithmeticSemiproposition n)⌝ : Bootstrapping.Semiformula V ℒₒᵣ n) = (⌜t⌝ <' ⌜u⌝) := rfl
 
 @[simp] lemma typed_quote_nlt (t u : SyntacticSemiterm ℒₒᵣ n) :
-    (⌜(“!!t ≮ !!u” : Semiproposition ℒₒᵣ n)⌝ : Bootstrapping.Semiformula V ℒₒᵣ n) = (⌜t⌝ ≮' ⌜u⌝) := rfl
+    (⌜(“!!t ≮ !!u” : ArithmeticSemiproposition n)⌝ : Bootstrapping.Semiformula V ℒₒᵣ n) = (⌜t⌝ ≮' ⌜u⌝) := rfl
 
 lemma ne_iff_val_ne (φ ψ : Bootstrapping.Semiformula V L n) : φ ≠ ψ ↔ φ.val ≠ ψ.val := Iff.ne Semiformula.ext_iff
 
@@ -254,11 +254,11 @@ noncomputable instance : LCWQIsoGödelQuote (Semisentence L) (Bootstrapping.Semi
   all _ := by simp
   exs _ := by simp
 
-@[simp] lemma coe_quote {ξ n} (φ : Semiproposition L n) : ↑(⌜φ⌝ : ℕ) = (⌜φ⌝ : Semiterm ℒₒᵣ ξ m) := by
+@[simp] lemma coe_quote {ξ n} (φ : Semiproposition L n) : ↑(⌜φ⌝ : ℕ) = (⌜φ⌝ : ArithmeticSemiterm ξ m) := by
   simp [gödelNumber'_def, Semiformula.quote_eq_encode]
 
 @[simp] lemma quote_quote_eq_numeral (φ : Semiproposition L n) :
-    (⌜(⌜φ⌝ : Semiterm ℒₒᵣ ℕ m)⌝ : Bootstrapping.Semiterm V ℒₒᵣ m) = Bootstrapping.Arithmetic.typedNumeral ⌜φ⌝ := by
+    (⌜(⌜φ⌝ : ArithmeticSemiterm ℕ m)⌝ : Bootstrapping.Semiterm V ℒₒᵣ m) = Bootstrapping.Arithmetic.typedNumeral ⌜φ⌝ := by
   simp [←coe_quote, coe_quote_eq_quote]
 
 end Semiformula
@@ -269,16 +269,16 @@ def typed_quote_def (σ : Semisentence L n) :
     (⌜σ⌝ : Bootstrapping.Semiformula V L n) = ⌜(Rewriting.emb σ : Semiproposition L n)⌝ := rfl
 
 @[simp] lemma typed_quote_eq (t u : ClosedSemiterm ℒₒᵣ n) :
-    (⌜(“!!t = !!u” : Semisentence ℒₒᵣ n)⌝ : Bootstrapping.Semiformula V ℒₒᵣ n) = (⌜t⌝ ≐ ⌜u⌝) := rfl
+    (⌜(“!!t = !!u” : ArithmeticSemisentence n)⌝ : Bootstrapping.Semiformula V ℒₒᵣ n) = (⌜t⌝ ≐ ⌜u⌝) := rfl
 
 @[simp] lemma typed_quote_ne (t u : ClosedSemiterm ℒₒᵣ n) :
-    (⌜(“!!t ≠ !!u” : Semisentence ℒₒᵣ n)⌝ : Bootstrapping.Semiformula V ℒₒᵣ n) = (⌜t⌝ ≉ ⌜u⌝) := rfl
+    (⌜(“!!t ≠ !!u” : ArithmeticSemisentence n)⌝ : Bootstrapping.Semiformula V ℒₒᵣ n) = (⌜t⌝ ≉ ⌜u⌝) := rfl
 
 @[simp] lemma typed_quote_lt (t u : ClosedSemiterm ℒₒᵣ n) :
-    (⌜(“!!t < !!u” : Semisentence ℒₒᵣ n)⌝ : Bootstrapping.Semiformula V ℒₒᵣ n) = (⌜t⌝ <' ⌜u⌝) := rfl
+    (⌜(“!!t < !!u” : ArithmeticSemisentence n)⌝ : Bootstrapping.Semiformula V ℒₒᵣ n) = (⌜t⌝ <' ⌜u⌝) := rfl
 
 @[simp] lemma typed_quote_nlt (t u : ClosedSemiterm ℒₒᵣ n) :
-    (⌜(“!!t ≮ !!u” : Semisentence ℒₒᵣ n)⌝ : Bootstrapping.Semiformula V ℒₒᵣ n) = (⌜t⌝ ≮' ⌜u⌝) := rfl
+    (⌜(“!!t ≮ !!u” : ArithmeticSemisentence n)⌝ : Bootstrapping.Semiformula V ℒₒᵣ n) = (⌜t⌝ ≮' ⌜u⌝) := rfl
 
 noncomputable instance : GödelQuote (Semisentence L n) V where
   quote σ := ⌜(Rewriting.emb σ : Semiproposition L n)⌝
@@ -299,14 +299,14 @@ lemma coe_quote_eq_quote (σ : Semisentence L n) : (↑(⌜σ⌝ : ℕ) : V) = �
   simp [quote_eq_encode]
 
 @[simp] lemma val_quote {bv : Fin m → V} {fv : ξ → V} (σ : Semisentence L n) :
-    (⌜σ⌝ : Semiterm ℒₒᵣ ξ m).val bv fv = ⌜σ⌝ := by
+    (⌜σ⌝ : ArithmeticSemiterm ξ m).val bv fv = ⌜σ⌝ := by
   simp [gödelNumber'_def, quote_eq_encode, numeral_eq_natCast]
 
-@[simp] lemma coe_quote {ξ n} (σ : Semisentence L n) : ↑(⌜σ⌝ : ℕ) = (⌜σ⌝ : Semiterm ℒₒᵣ ξ m) := by
+@[simp] lemma coe_quote {ξ n} (σ : Semisentence L n) : ↑(⌜σ⌝ : ℕ) = (⌜σ⌝ : ArithmeticSemiterm ξ m) := by
   simp [gödelNumber'_def, quote_eq_encode]
 
 @[simp] lemma quote_quote_eq_numeral (σ : Semisentence L n) :
-    (⌜(⌜σ⌝ : Semiterm ℒₒᵣ ℕ m)⌝ : Bootstrapping.Semiterm V ℒₒᵣ m) = Bootstrapping.Arithmetic.typedNumeral ⌜σ⌝ := by
+    (⌜(⌜σ⌝ : ArithmeticSemiterm ℕ m)⌝ : Bootstrapping.Semiterm V ℒₒᵣ m) = Bootstrapping.Arithmetic.typedNumeral ⌜σ⌝ := by
   simp [←coe_quote, coe_quote_eq_quote]
 
 @[simp] lemma quote_inj_iff {σ₁ σ₂ : Semisentence L n} :
