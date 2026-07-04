@@ -38,13 +38,31 @@ end ORingStructure
 
 namespace FirstOrder
 
+abbrev ArithmeticTheory := Theory ℒₒᵣ
+
+abbrev ArithmeticSemiterm (ξ : Type*) (n : ℕ) := Semiterm ℒₒᵣ ξ n
+
+abbrev ArithmeticTerm (ξ : Type*) := Term ℒₒᵣ ξ
+
+abbrev ArithmeticSemiformula (ξ : Type*) (n : ℕ) := Semiformula ℒₒᵣ ξ n
+
+abbrev ArithmeticFormula (ξ : Type*) := Formula ℒₒᵣ ξ
+
+abbrev ArithmeticSemisentence (n : ℕ) := Semisentence ℒₒᵣ n
+
+abbrev ArithmeticSentence := Sentence ℒₒᵣ
+
+abbrev ArithmeticSemiproposition (n : ℕ) := Semiproposition ℒₒᵣ n
+
+abbrev ArithmeticProposition := Proposition ℒₒᵣ
+
 section ToString
 
 variable {L : Language} [L.ORing]
 
 variable [ToString ξ]
 
-def Semiterm.toStringORing : Semiterm ℒₒᵣ ξ n → String
+def Semiterm.toStringORing : ArithmeticSemiterm ξ n → String
   |                        #x => "x_{" ++ toString (n - 1 - (x : ℕ)) ++ "}"
   |                        &x => "a_{" ++ toString x ++ "}"
   | func Language.Zero.zero _ => "0"
@@ -52,9 +70,9 @@ def Semiterm.toStringORing : Semiterm ℒₒᵣ ξ n → String
   |   func Language.Add.add v => "(" ++ toStringORing (v 0) ++ " + " ++ toStringORing (v 1) ++ ")"
   |   func Language.Mul.mul v => "(" ++ toStringORing (v 0) ++ " \\cdot " ++ toStringORing (v 1) ++ ")"
 
-instance : Repr (Semiterm ℒₒᵣ ξ n) := ⟨fun t _ ↦ t.toStringORing⟩
+instance : Repr (ArithmeticSemiterm ξ n) := ⟨fun t _ ↦ t.toStringORing⟩
 
-instance : ToString (Semiterm ℒₒᵣ ξ n) := ⟨Semiterm.toStringORing⟩
+instance : ToString (ArithmeticSemiterm ξ n) := ⟨Semiterm.toStringORing⟩
 
 def Semiformula.toStringORing : ∀ {n}, ArithmeticSemiformula ξ n → String
   | _,                             ⊤ => "\\top"
@@ -89,10 +107,10 @@ lemma gödelNumber_def (a : α) :
   gödelNumber a = Semiterm.Operator.encode ℒₒᵣ a := rfl
 
 lemma gödelNumber'_def (a : α) :
-  (⌜a⌝ : Semiterm ℒₒᵣ ξ n) = Semiterm.Operator.encode ℒₒᵣ a := rfl
+  (⌜a⌝ : ArithmeticSemiterm ξ n) = Semiterm.Operator.encode ℒₒᵣ a := rfl
 
 lemma gödelNumber'_eq_coe_encode (a : α) :
-  (⌜a⌝ : Semiterm ℒₒᵣ ξ n) = ↑(Encodable.encode a) := rfl
+  (⌜a⌝ : ArithmeticSemiterm ξ n) = ↑(Encodable.encode a) := rfl
 
 @[simp] lemma encode_encode_eq (a : α) :
     (gödelNumber (encode a) : Semiterm.Const ℒₒᵣ) = gödelNumber a := by simp [Semiterm.Operator.encode, gödelNumber_def]

@@ -41,18 +41,6 @@ abbrev Semiproposition (L : Language) (n : ℕ) := Semiformula L ℕ n
 
 abbrev Proposition (L : Language) := Semiproposition L 0
 
-abbrev ArithmeticSemiformula (ξ : Type*) (n : ℕ) := Semiformula ℒₒᵣ ξ n
-
-abbrev ArithmeticFormula (ξ : Type*) := Formula ℒₒᵣ ξ
-
-abbrev ArithmeticSemisentence (n : ℕ) := Semisentence ℒₒᵣ n
-
-abbrev ArithmeticSentence := Sentence ℒₒᵣ
-
-abbrev ArithmeticSemiproposition (n : ℕ) := Semiproposition ℒₒᵣ n
-
-abbrev ArithmeticProposition := Proposition ℒₒᵣ
-
 namespace Semiformula
 
 variable
@@ -583,8 +571,6 @@ end enumarateFVar
 end Semiformula
 
 abbrev Theory (L : Language) := Set (Sentence L)
-
-abbrev ArithmeticTheory := Theory ℒₒᵣ
 
 namespace Theory
 

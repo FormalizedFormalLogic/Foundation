@@ -199,7 +199,7 @@ def rew (ω : Rew ℒₒᵣ ξ₁ n₁ ξ₂ n₂) : {Γ : HierarchySymbol} → 
   simpa using h.iff _
 
 @[simp] lemma ProperWithParamOn.rew {φ : 𝚫-[m].Semiformula M n₁}
-    (h : φ.ProperWithParamOn M) (f : Fin n₁ → Semiterm ℒₒᵣ M n₂) : (φ.rew (Rew.subst f)).ProperWithParamOn M := by
+    (h : φ.ProperWithParamOn M) (f : Fin n₁ → ArithmeticSemiterm M n₂) : (φ.rew (Rew.subst f)).ProperWithParamOn M := by
   rcases φ; intro e;
   simp only [Semiformula.rew, sigma_mkDelta, val_rew, Semiformula.eval_rew, pi_mkDelta]
   exact h.iff _
@@ -258,13 +258,13 @@ def negPi (φ : 𝚷-[m].Semiformula ξ n) : 𝚺-[m].Semiformula ξ n := mkSigm
 
 def negDelta (φ : 𝚫-[m].Semiformula ξ n) : 𝚫-[m].Semiformula ξ n := mkDelta (φ.pi.negPi) (φ.sigma.negSigma)
 
-def ball (t : Semiterm ℒₒᵣ ξ n) : {Γ : HierarchySymbol} → Γ.Semiformula ξ (n + 1) → Γ.Semiformula ξ n
+def ball (t : ArithmeticSemiterm ξ n) : {Γ : HierarchySymbol} → Γ.Semiformula ξ (n + 1) → Γ.Semiformula ξ n
   | 𝚺-[m], φ => mkSigma (∀⁰[“#0 < !!(Rew.bShift t)”] φ.val) (by simp)
   | 𝚷-[m], φ => mkPi (∀⁰[“#0 < !!(Rew.bShift t)”] φ.val) (by simp)
   | 𝚫-[m], φ =>
     mkDelta (mkSigma (∀⁰[“#0 < !!(Rew.bShift t)”] φ.sigma.val) (by simp)) (mkPi (∀⁰[“#0 < !!(Rew.bShift t)”] φ.pi.val) (by simp))
 
-def bexs (t : Semiterm ℒₒᵣ ξ n) : {Γ : HierarchySymbol} → Γ.Semiformula ξ (n + 1) → Γ.Semiformula ξ n
+def bexs (t : ArithmeticSemiterm ξ n) : {Γ : HierarchySymbol} → Γ.Semiformula ξ (n + 1) → Γ.Semiformula ξ n
   | 𝚺-[m], φ => mkSigma (∃⁰[“#0 < !!(Rew.bShift t)”] φ.val) (by simp)
   | 𝚷-[m], φ => mkPi (∃⁰[“#0 < !!(Rew.bShift t)”] φ.val) (by simp)
   | 𝚫-[m], φ =>
@@ -334,10 +334,10 @@ lemma val_negDelta {m} (φ : 𝚫-[m].Semiformula ξ n) : (∼φ).val = ∼φ.pi
 
 @[simp] lemma sigma_negPi {m} (φ : 𝚫-[m].Semiformula ξ n) : (∼φ).pi = φ.sigma.negSigma := by simp [Tilde.tilde, negDelta]
 
-@[simp] lemma val_ball (t : Semiterm ℒₒᵣ ξ n) (φ : Γ.Semiformula ξ (n + 1)) : (ball t φ).val = ∀⁰[“#0 < !!(Rew.bShift t)”] φ.val := by
+@[simp] lemma val_ball (t : ArithmeticSemiterm ξ n) (φ : Γ.Semiformula ξ (n + 1)) : (ball t φ).val = ∀⁰[“#0 < !!(Rew.bShift t)”] φ.val := by
   rcases Γ with ⟨Γ, m⟩; rcases Γ <;> simp [ball, val, val_sigma]
 
-@[simp] lemma val_bexs (t : Semiterm ℒₒᵣ ξ n) (φ : Γ.Semiformula ξ (n + 1)) : (bexs t φ).val = ∃⁰[“#0 < !!(Rew.bShift t)”] φ.val := by
+@[simp] lemma val_bexs (t : ArithmeticSemiterm ξ n) (φ : Γ.Semiformula ξ (n + 1)) : (bexs t φ).val = ∃⁰[“#0 < !!(Rew.bShift t)”] φ.val := by
   rcases Γ with ⟨Γ, m⟩; rcases Γ <;> simp [bexs, val, val_sigma]
 
 @[simp] lemma val_exsSigma {m} (φ : 𝚺-[m + 1].Semiformula ξ (n + 1)) : (exs φ).val = ∃⁰ φ.val := rfl

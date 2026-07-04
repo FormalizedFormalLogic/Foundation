@@ -782,26 +782,26 @@ variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 /-- `succInd φ`, simplified (the `∀ x, !φ x` instances are the identity substitution `φ ⇜ ![#0]`). -/
 lemma succInd_eq (φ : _root_.LO.FirstOrder.ArithmeticSemiformula ℕ 1) :
     succInd φ =
-      ((φ ⇜ (![‘0’] : Fin 1 → Semiterm ℒₒᵣ ℕ 0))
-        🡒 ((∀⁰ (φ 🡒 (φ ⇜ (![‘#0 + 1’] : Fin 1 → Semiterm ℒₒᵣ ℕ 1)))) 🡒 ∀⁰ φ)) := by
+      ((φ ⇜ (![‘0’] : Fin 1 → ArithmeticSemiterm ℕ 0))
+        🡒 ((∀⁰ (φ 🡒 (φ ⇜ (![‘#0 + 1’] : Fin 1 → ArithmeticSemiterm ℕ 1)))) 🡒 ∀⁰ φ)) := by
   unfold succInd; simp
 
 /-- The typed Gödel code of the induction axiom body, built from the typed code `⌜φ⌝` purely with
 the existing typed constructors (`subst`, `🡒`, `∀⁰`). -/
 lemma typed_quote_succInd (φ : _root_.LO.FirstOrder.ArithmeticSemiformula ℕ 1) :
     (⌜succInd φ⌝ : Bootstrapping.Semiformula V ℒₒᵣ 0) =
-      (⌜φ ⇜ (![‘0’] : Fin 1 → Semiterm ℒₒᵣ ℕ 0)⌝)
-        🡒 ((∀⁰ (⌜φ⌝ 🡒 ⌜φ ⇜ (![‘#0 + 1’] : Fin 1 → Semiterm ℒₒᵣ ℕ 1)⌝)) 🡒 ∀⁰ ⌜φ⌝) := by
+      (⌜φ ⇜ (![‘0’] : Fin 1 → ArithmeticSemiterm ℕ 0)⌝)
+        🡒 ((∀⁰ (⌜φ⌝ 🡒 ⌜φ ⇜ (![‘#0 + 1’] : Fin 1 → ArithmeticSemiterm ℕ 1)⌝)) 🡒 ∀⁰ ⌜φ⌝) := by
   unfold succInd
-  rw [show φ ⇜ (![#0] : Fin 1 → Semiterm ℒₒᵣ ℕ 1) = φ from by simp]
+  rw [show φ ⇜ (![#0] : Fin 1 → ArithmeticSemiterm ℕ 1) = φ from by simp]
   simp
 
 /-- The typed `succInd` shape as a function of the (typed) core code `K = ⌜ψ⌝`. The recognizer
 checks `subst (fvarVec m) b = (indBody K).val` to recover the core `K` and verify the body has
 the induction-axiom shape. -/
 noncomputable def indBody (K : Bootstrapping.Semiformula V ℒₒᵣ 1) : Bootstrapping.Semiformula V ℒₒᵣ 0 :=
-  (K.subst ![⌜(‘0’ : Semiterm ℒₒᵣ ℕ 0)⌝])
-    🡒 ((∀⁰ (K 🡒 K.subst ![⌜(‘#0 + 1’ : Semiterm ℒₒᵣ ℕ 1)⌝])) 🡒 ∀⁰ K)
+  (K.subst ![⌜(‘0’ : ArithmeticSemiterm ℕ 0)⌝])
+    🡒 ((∀⁰ (K 🡒 K.subst ![⌜(‘#0 + 1’ : ArithmeticSemiterm ℕ 1)⌝])) 🡒 ∀⁰ K)
 
 /-- `indBody ⌜ψ⌝ = ⌜succInd ψ⌝`: the typed reconstruction matches the actual code. -/
 lemma indBody_quote (φ : _root_.LO.FirstOrder.ArithmeticSemiformula ℕ 1) :
@@ -815,11 +815,11 @@ target of the eventual `𝚺₁`-graph for the `ch` assembly. -/
 noncomputable def indBodyVal (k : V) : V :=
   Bootstrapping.imp ℒₒᵣ
     (Bootstrapping.subst ℒₒᵣ
-      (Bootstrapping.SemitermVec.val (![⌜(‘0’ : Semiterm ℒₒᵣ ℕ 0)⌝] : Bootstrapping.SemitermVec V ℒₒᵣ 1 0)) k)
+      (Bootstrapping.SemitermVec.val (![⌜(‘0’ : ArithmeticSemiterm ℕ 0)⌝] : Bootstrapping.SemitermVec V ℒₒᵣ 1 0)) k)
     (Bootstrapping.imp ℒₒᵣ
       (Bootstrapping.qqAll (Bootstrapping.imp ℒₒᵣ k
         (Bootstrapping.subst ℒₒᵣ
-          (Bootstrapping.SemitermVec.val (![⌜(‘#0 + 1’ : Semiterm ℒₒᵣ ℕ 1)⌝] : Bootstrapping.SemitermVec V ℒₒᵣ 1 1)) k)))
+          (Bootstrapping.SemitermVec.val (![⌜(‘#0 + 1’ : ArithmeticSemiterm ℕ 1)⌝] : Bootstrapping.SemitermVec V ℒₒᵣ 1 1)) k)))
       (Bootstrapping.qqAll k))
 
 /-- `indBodyVal K.val = (indBody K).val`: the raw function computes the typed `indBody`. -/
@@ -856,22 +856,22 @@ vectors `![⌜‘0’⌝]` and `![⌜‘#0+1’⌝]`; their absoluteness (`↑co
 
 /-- Standard `ℕ`-code of the substitution vector `![⌜‘0’⌝]` (the `ψ(0)` instance). -/
 def indSubstConst0 : ℕ :=
-  Matrix.vecToNat fun i : Fin 1 ↦ Encodable.encode ((![(‘0’ : Semiterm ℒₒᵣ ℕ 0)]) i)
+  Matrix.vecToNat fun i : Fin 1 ↦ Encodable.encode ((![(‘0’ : ArithmeticSemiterm ℕ 0)]) i)
 
 /-- Standard `ℕ`-code of the substitution vector `![⌜‘#0+1’⌝]` (the `ψ(x+1)` instance). -/
 def indSubstConst1 : ℕ :=
-  Matrix.vecToNat fun i : Fin 1 ↦ Encodable.encode ((![(‘#0 + 1’ : Semiterm ℒₒᵣ ℕ 1)]) i)
+  Matrix.vecToNat fun i : Fin 1 ↦ Encodable.encode ((![(‘#0 + 1’ : ArithmeticSemiterm ℕ 1)]) i)
 
 lemma val_indSubstConst0 :
     (↑indSubstConst0 : V)
-      = Bootstrapping.SemitermVec.val (![⌜(‘0’ : Semiterm ℒₒᵣ ℕ 0)⌝] : Bootstrapping.SemitermVec V ℒₒᵣ 1 0) := by
-  rw [indSubstConst0, ← LO.FirstOrder.Semiterm.quote_eq_encode' (V := V) (![(‘0’ : Semiterm ℒₒᵣ ℕ 0)])]
+      = Bootstrapping.SemitermVec.val (![⌜(‘0’ : ArithmeticSemiterm ℕ 0)⌝] : Bootstrapping.SemitermVec V ℒₒᵣ 1 0) := by
+  rw [indSubstConst0, ← LO.FirstOrder.Semiterm.quote_eq_encode' (V := V) (![(‘0’ : ArithmeticSemiterm ℕ 0)])]
   congr 1; funext i; simp [Matrix.cons_val_fin_one]
 
 lemma val_indSubstConst1 :
     (↑indSubstConst1 : V)
-      = Bootstrapping.SemitermVec.val (![⌜(‘#0 + 1’ : Semiterm ℒₒᵣ ℕ 1)⌝] : Bootstrapping.SemitermVec V ℒₒᵣ 1 1) := by
-  rw [indSubstConst1, ← LO.FirstOrder.Semiterm.quote_eq_encode' (V := V) (![(‘#0 + 1’ : Semiterm ℒₒᵣ ℕ 1)])]
+      = Bootstrapping.SemitermVec.val (![⌜(‘#0 + 1’ : ArithmeticSemiterm ℕ 1)⌝] : Bootstrapping.SemitermVec V ℒₒᵣ 1 1) := by
+  rw [indSubstConst1, ← LO.FirstOrder.Semiterm.quote_eq_encode' (V := V) (![(‘#0 + 1’ : ArithmeticSemiterm ℕ 1)])]
   congr 1; funext i; simp [Matrix.cons_val_fin_one]
 
 /-- Concrete `𝚺₁`-graph of `indBodyVal`, a chain of the `subst`/`imp`/`qqAll` graphs. -/

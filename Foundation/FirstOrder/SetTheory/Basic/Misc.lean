@@ -75,6 +75,10 @@ end Language
 
 abbrev SetTheory := Theory ℒₛₑₜ
 
+abbrev SetTheorySemiterm (ξ : Type*) (n : ℕ) := Semiterm ℒₛₑₜ ξ n
+
+abbrev SetTheoryTerm (ξ : Type*) := Term ℒₛₑₜ ξ
+
 abbrev SetTheorySemiformula (ξ : Type*) (n : ℕ) := Semiformula ℒₛₑₜ ξ n
 
 abbrev SetTheoryFormula (ξ : Type*) := Formula ℒₛₑₜ ξ
@@ -89,13 +93,13 @@ abbrev SetTheoryProposition := Proposition ℒₛₑₜ
 
 variable [ToString ξ]
 
-def Semiterm.toStringSet : Semiterm ℒₛₑₜ ξ n → String
+def Semiterm.toStringSet : SetTheorySemiterm ξ n → String
   | #x => "x_{" ++ toString (n - 1 - (x : ℕ)) ++ "}"
   | &x => "a_{" ++ toString x ++ "}"
 
-instance : Repr (Semiterm ℒₛₑₜ ξ n) := ⟨fun t _ ↦ t.toStringSet⟩
+instance : Repr (SetTheorySemiterm ξ n) := ⟨fun t _ ↦ t.toStringSet⟩
 
-instance : ToString (Semiterm ℒₛₑₜ ξ n) := ⟨fun t ↦ t.toStringSet⟩
+instance : ToString (SetTheorySemiterm ξ n) := ⟨fun t ↦ t.toStringSet⟩
 
 def Semiformula.toStringSet : ∀ {n}, SetTheorySemiformula ξ n → String
   | _,                               ⊤ => "⊤"

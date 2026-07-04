@@ -13,7 +13,7 @@ open Mathlib Encodable Semiterm.Operator.GödelNumber
 
 section
 
-lemma term_primrec {k f} : (t : Semiterm ℒₒᵣ ξ k) → Primrec (fun v : List.Vector ℕ k ↦ t.val v.get f)
+lemma term_primrec {k f} : (t : ArithmeticSemiterm ξ k) → Primrec (fun v : List.Vector ℕ k ↦ t.val v.get f)
   |                         #x => by simpa using Primrec.vector_get.comp .id (.const _)
   |                         &x => by simpa using Primrec.const _
   | .func Language.Zero.zero _ => by simpa using Primrec.const 0

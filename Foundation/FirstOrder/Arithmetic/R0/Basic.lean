@@ -73,7 +73,7 @@ lemma lt_numeral_iff {x : M} {n : ℕ} : x < numeral n ↔ ∃ i : Fin n, x = nu
 
 open Hierarchy
 
-lemma val_numeral {n ξ} (bv : Fin n → ℕ) (fv : ξ → ℕ) (t : Semiterm ℒₒᵣ ξ n) :
+lemma val_numeral {n ξ} (bv : Fin n → ℕ) (fv : ξ → ℕ) (t : ArithmeticSemiterm ξ n) :
     t.val (M := M) (numeral ∘ bv) (numeral ∘ fv) = numeral (t.val bv fv) :=
   match t with
   |                         #_ => by simp
