@@ -14,7 +14,7 @@ namespace TA
 instance : ℕ↓[ℒₒᵣ] ⊧* 𝗧𝗔 :=
   models_theory_iff.mpr fun {φ} ↦ by simp
 
-lemma provable_iff {φ : Sentence ℒₒᵣ} :
+lemma provable_iff {φ : ArithmeticSentence} :
     𝗧𝗔 ⊢ φ ↔ ℕ↓[ℒₒᵣ] ⊧ φ :=
   ⟨fun h ↦ consequence_iff'.mp (Theory.Proof.sound h) ℕ, fun h ↦ Entailment.by_axm h⟩
 

@@ -41,7 +41,7 @@ theorem incomplete (T : ArithmeticTheory) [T.Δ₁] [𝗥₀ ⪯ T] [T.SoundOnHi
   let δ : Semisentence ℒₒᵣ 1 := codeOfREPred D
   have (n : ℕ) : D n ↔ T ⊢ δ/[↑n] := by
     simpa [Semiformula.coe_subst_eq_subst_coe₁] using re_complete D_re
-  let π : Sentence ℒₒᵣ := δ/[⌜δ⌝]
+  let π : ArithmeticSentence := δ/[⌜δ⌝]
   have : T ⊢ π ↔ T ⊢ ∼π := calc
     T ⊢ π ↔ T ⊢ δ/[⌜δ⌝]  := by rfl
     _     ↔ D ⌜δ⌝        := by simpa using (this ⌜δ⌝).symm
@@ -57,7 +57,7 @@ theorem incomplete (T : ArithmeticTheory) [T.Δ₁] [𝗥₀ ⪯ T] [T.SoundOnHi
 
 theorem exists_true_but_unprovable_sentence
     (T : ArithmeticTheory) [T.Δ₁] [𝗥₀ ⪯ T] [T.SoundOnHierarchy 𝚺 1] :
-    ∃ δ : Sentence ℒₒᵣ, ℕ↓[ℒₒᵣ] ⊧ δ ∧ T ⊬ δ := by
+    ∃ δ : ArithmeticSentence, ℕ↓[ℒₒᵣ] ⊧ δ ∧ T ⊬ δ := by
   obtain ⟨δ, hδ⟩ := incomplete_def.mp $ Arithmetic.incomplete T;
   by_cases ℕ↓[ℒₒᵣ] ⊧ δ
   . exact ⟨δ, by assumption, hδ.1⟩
