@@ -47,6 +47,7 @@ public import Foundation.FirstOrder.Basic.Definability
 public import Foundation.FirstOrder.Basic.Eq
 public import Foundation.FirstOrder.Basic.Model
 public import Foundation.FirstOrder.Basic.Operator
+public import Foundation.FirstOrder.Basic.OperatorHierarchy
 public import Foundation.FirstOrder.Basic.Padding
 public import Foundation.FirstOrder.Basic.Semantics.Elementary
 public import Foundation.FirstOrder.Basic.Semantics.Semantics
@@ -110,6 +111,7 @@ public import Foundation.FirstOrder.Order.Le
 public import Foundation.FirstOrder.Polarity
 public import Foundation.FirstOrder.SetTheory.Basic
 public import Foundation.FirstOrder.SetTheory.Basic.Axioms
+public import Foundation.FirstOrder.SetTheory.Basic.Hierarchy
 public import Foundation.FirstOrder.SetTheory.Basic.Misc
 public import Foundation.FirstOrder.SetTheory.Basic.Model
 public import Foundation.FirstOrder.SetTheory.Function
