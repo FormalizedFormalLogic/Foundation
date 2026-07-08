@@ -1,22 +1,18 @@
 module  -- shake: keep-all --deprecated_module: ignore
 
-public import Foundation.FirstOrder.Arithmetic.Basic
 public import Foundation.FirstOrder.Arithmetic.Basic.Hierarchy
 public import Foundation.FirstOrder.Arithmetic.Basic.Misc
 public import Foundation.FirstOrder.Arithmetic.Basic.Model
 public import Foundation.FirstOrder.Arithmetic.Basic.Monotone
-public import Foundation.FirstOrder.Arithmetic.Definability
 public import Foundation.FirstOrder.Arithmetic.Definability.Absoluteness
 public import Foundation.FirstOrder.Arithmetic.Definability.BoundedDefinable
 public import Foundation.FirstOrder.Arithmetic.Definability.Definable
 public import Foundation.FirstOrder.Arithmetic.Definability.Hierarchy
-public import Foundation.FirstOrder.Arithmetic.Exponential
 public import Foundation.FirstOrder.Arithmetic.Exponential.Bit
 public import Foundation.FirstOrder.Arithmetic.Exponential.Exp
 public import Foundation.FirstOrder.Arithmetic.Exponential.Log
 public import Foundation.FirstOrder.Arithmetic.Exponential.PPow2
 public import Foundation.FirstOrder.Arithmetic.Exponential.Pow2
-public import Foundation.FirstOrder.Arithmetic.HFS
 public import Foundation.FirstOrder.Arithmetic.HFS.Basic
 public import Foundation.FirstOrder.Arithmetic.HFS.Coding
 public import Foundation.FirstOrder.Arithmetic.HFS.Fixpoint
@@ -36,7 +32,6 @@ public import Foundation.FirstOrder.Arithmetic.R0.Representation
 public import Foundation.FirstOrder.Arithmetic.Schemata
 public import Foundation.FirstOrder.Arithmetic.TA.Basic
 public import Foundation.FirstOrder.Arithmetic.TA.Nonstandard
-public import Foundation.FirstOrder.Basic
 public import Foundation.FirstOrder.Basic.AesopInit
 public import Foundation.FirstOrder.Basic.BinderNotation
 public import Foundation.FirstOrder.Basic.Calculus
@@ -59,7 +54,6 @@ public import Foundation.FirstOrder.Bootstrapping.DerivabilityCondition.D3
 public import Foundation.FirstOrder.Bootstrapping.DerivabilityCondition.EquationalTheory
 public import Foundation.FirstOrder.Bootstrapping.DerivabilityCondition.PeanoMinus
 public import Foundation.FirstOrder.Bootstrapping.FixedPoint
-public import Foundation.FirstOrder.Bootstrapping.Syntax
 public import Foundation.FirstOrder.Bootstrapping.Syntax.Formula.Basic
 public import Foundation.FirstOrder.Bootstrapping.Syntax.Formula.Coding
 public import Foundation.FirstOrder.Bootstrapping.Syntax.Formula.Functions
@@ -74,7 +68,6 @@ public import Foundation.FirstOrder.Bootstrapping.Syntax.Term.Coding
 public import Foundation.FirstOrder.Bootstrapping.Syntax.Term.Functions
 public import Foundation.FirstOrder.Bootstrapping.Syntax.Term.Typed
 public import Foundation.FirstOrder.Bootstrapping.Syntax.Theory
-public import Foundation.FirstOrder.Completeness
 public import Foundation.FirstOrder.Completeness.CanonicalModel
 public import Foundation.FirstOrder.Completeness.CountableSublanguage
 public import Foundation.FirstOrder.Completeness.CounterModel
@@ -108,7 +101,6 @@ public import Foundation.FirstOrder.Kripke.WeakForcing
 public import Foundation.FirstOrder.NegationTranslation.GoedelGentzen
 public import Foundation.FirstOrder.Order.Le
 public import Foundation.FirstOrder.Polarity
-public import Foundation.FirstOrder.SetTheory.Basic
 public import Foundation.FirstOrder.SetTheory.Basic.Axioms
 public import Foundation.FirstOrder.SetTheory.Basic.Misc
 public import Foundation.FirstOrder.SetTheory.Basic.Model

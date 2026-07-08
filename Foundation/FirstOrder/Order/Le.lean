@@ -1,6 +1,8 @@
 module
 
-public import Foundation.FirstOrder.Completeness
+public import Foundation.FirstOrder.Completeness.CanonicalModel
+public import Foundation.FirstOrder.Completeness.CountableSublanguage
+public import Foundation.FirstOrder.Completeness.CounterModel
 
 @[expose] public section
 namespace LO
