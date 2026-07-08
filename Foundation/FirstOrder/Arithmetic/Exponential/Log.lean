@@ -13,7 +13,7 @@ variable {V : Type*} [ORingStructure V]
 
 section ISigma0
 
-variable [V ⊧ₘ* 𝗜𝚺₀]
+variable [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₀]
 
 lemma log_exists_unique_pos {y : V} (hy : 0 < y) : ∃! x, x < y ∧ ∃ y' ≤ y, Exponential x y' ∧ y < 2 * y' := by
   have : ∃ x < y, ∃ y' ≤ y, Exponential x y' ∧ y < 2 * y' := by
@@ -25,7 +25,7 @@ lemma log_exists_unique_pos {y : V} (hy : 0 < y) : ∃! x, x < y ∧ ∃ y' ≤ 
       exact ⟨x + 1, lt_of_lt_of_le (by simp [hxy]) (succ_le_double_of_pos (pos_of_gt hxy)),
         2 * y', by simpa using gey, Exponential.exponential_succ_mul_two.mpr H, by simpa using lty⟩
     case odd y IH =>
-      rcases (zero_le y : 0 ≤ y) with (rfl | pos)
+      rcases (Arithmetic.zero_le y : 0 ≤ y) with (rfl | pos)
       · simp
       · rcases (IH pos : ∃ x < y, ∃ y' ≤ y, Exponential x y' ∧ y < 2 * y') with ⟨x, hxy, y', gey, H, lty⟩
         exact ⟨x + 1, by simpa using lt_of_lt_of_le hxy (by simp),
@@ -62,7 +62,7 @@ lemma log_lt_self_of_pos {y : V} (pos : 0 < y) : log y < y :=
   ((Classical.choose!_spec (log_exists_unique y)).2 pos).1
 
 @[simp] lemma log_le_self (a : V) : log a ≤ a := by
-  rcases zero_le a with (rfl | pos)
+  rcases Arithmetic.zero_le a with (rfl | pos)
   · simp
   · exact le_of_lt <| log_lt_self_of_pos pos
 
@@ -71,7 +71,7 @@ lemma log_graph {x y : V} : x = log y ↔ (y = 0 → x = 0) ∧ (0 < y → x < y
 def _root_.LO.FirstOrder.Arithmetic.logDef : 𝚺₀.Semisentence 2 := .mkSigma
   “x y. (y = 0 → x = 0) ∧ (0 < y → x < y ∧ ∃ y' <⁺ y, !exponentialDef x y' ∧ y < 2 * y')”
 
-instance log_defined : 𝚺₀-Function₁[V] log via logDef := .mk fun v ↦ by simp [logDef, log_graph, numeral_eq_natCast]
+instance log_defined : 𝚺₀-Function₁[V] log via logDef := .mk fun v ↦ by simp [logDef, log_graph]
 
 instance log_definable : 𝚺₀-Function₁ (log : V → V) := log_defined.to_definable
 
@@ -121,9 +121,9 @@ lemma log_mul_pow2 {a p : V} (pos : 0 < a) (pp : Pow2 p) : log (a * p) = log a +
   simpa using log_mul_pow2_add_of_lt pos pp pp.pos
 
 lemma log_monotone {a b : V} (h : a ≤ b) : log a ≤ log b := by
-  rcases zero_le a with (rfl | posa)
+  rcases Arithmetic.zero_le a with (rfl | posa)
   · simp
-  rcases zero_le b with (rfl | posb)
+  rcases Arithmetic.zero_le b with (rfl | posb)
   · have := lt_of_lt_of_le posa h; simp_all
   rcases log_pos posa with ⟨a', ha', Ha, _⟩
   rcases log_pos posb with ⟨b', _, Hb, hb⟩
@@ -147,12 +147,12 @@ lemma length_eq_binaryLength (a : V) : ‖a‖ = if 0 < a then log a + 1 else 0 
 lemma length_of_pos {a : V} (pos : 0 < a) : ‖a‖ = log a + 1 := by simp [length_eq_binaryLength, pos]
 
 @[simp] lemma length_le (a : V) : ‖a‖ ≤ a := by
-  rcases zero_le a with (rfl | pos)
+  rcases Arithmetic.zero_le a with (rfl | pos)
   · simp
   · simp [pos, length_of_pos, ←lt_iff_succ_le, log_lt_self_of_pos]
 
 lemma length_graph {i a : V} : i = ‖a‖ ↔ (0 < a → ∃ k ≤ a, k = log a ∧ i = k + 1) ∧ (a = 0 → i = 0) := by
-  rcases zero_le a with (rfl | pos)
+  rcases Arithmetic.zero_le a with (rfl | pos)
   · simp
   · simp [length_of_pos, pos, pos_iff_ne_zero.mp pos]
 
@@ -174,7 +174,7 @@ lemma length_two_mul_of_pos {a : V} (pos : 0 < a) : ‖2 * a‖ = ‖a‖ + 1 :=
   simp [pos, length_of_pos, log_two_mul_of_pos]
 
 lemma length_two_mul_add_one (a : V) : ‖2 * a + 1‖ = ‖a‖ + 1 := by
-  rcases zero_le a with (rfl | pos)
+  rcases Arithmetic.zero_le a with (rfl | pos)
   · simp
   · simp [pos, length_of_pos, log_two_mul_add_one_of_pos]
 
@@ -185,7 +185,7 @@ lemma length_mul_pow2 {a p : V} (pos : 0 < a) (pp : Pow2 p) : ‖a * p‖ = ‖a
   simp [length_of_pos, pos, pp.pos, log_mul_pow2 pos pp, add_right_comm (log a) (log p) 1]
 
 lemma length_monotone {a b : V} (h : a ≤ b) : ‖a‖ ≤ ‖b‖ := by
-  rcases zero_le a with (rfl | posa)
+  rcases Arithmetic.zero_le a with (rfl | posa)
   · simp
   · simpa [length_of_pos posa, length_of_pos (lt_of_lt_of_le posa h)]
     using log_monotone h
@@ -208,13 +208,13 @@ lemma exponential_log_le_self {a b : V} (pos : 0 < a) (h : Exponential (log a) b
   assumption
 
 lemma lt_exponential_log_self {a b : V} (h : Exponential (log a) b) : a < 2 * b := by
-  rcases zero_le a with (rfl | pos)
+  rcases Arithmetic.zero_le a with (rfl | pos)
   · simp at h; simp [h]
   rcases log_pos pos with ⟨_, _, H, _⟩; rcases H.uniq h
   assumption
 
 lemma lt_exp_len_self {a b : V} (h : Exponential ‖a‖ b) : a < b := by
-  rcases zero_le a with (rfl | pos)
+  rcases Arithmetic.zero_le a with (rfl | pos)
   · simp at h; simp [h]
   have : Exponential (log a + 1) b := by simpa [length_of_pos pos] using h
   rcases Exponential.exponential_succ.mp this with ⟨b, rfl, H⟩
@@ -225,7 +225,7 @@ lemma le_iff_le_log_of_exp {x y a : V} (H : Exponential x y) (pos : 0 < a) : y �
    fun h ↦ by rcases log_pos pos with ⟨a', ha', Haa', _⟩; exact le_trans (Exponential.monotone_le H Haa' h) ha'⟩
 
 lemma le_iff_lt_length_of_exp {x y a : V} (H : Exponential x y) : y ≤ a ↔ x < ‖a‖ := by
-  rcases zero_le a with (rfl | pos)
+  rcases Arithmetic.zero_le a with (rfl | pos)
   · simpa using pos_iff_ne_zero.mp H.range_pos
   simp [le_iff_le_log_of_exp H pos, length_of_pos pos, ←le_iff_lt_succ]
 
@@ -242,7 +242,7 @@ lemma Exponential.le_log {x y : V} (H : Exponential x y) : x ≤ log y := (le_if
 lemma Exponential.lt_length {x y : V} (H : Exponential x y) : x < ‖y‖ := (le_iff_lt_length_of_exp H).mp (by rfl)
 
 lemma lt_exponential_length {a b : V} (h : Exponential ‖a‖ b) : a < b := by
-  rcases zero_le a with (rfl | pos)
+  rcases Arithmetic.zero_le a with (rfl | pos)
   · simp at h; simp [h]
   have : Exponential (log a + 1) b := by simpa [length_of_pos pos] using h
   rcases Exponential.exponential_succ.mp this with ⟨b, rfl, H⟩
@@ -261,7 +261,7 @@ lemma sq_len_le_three_mul (a : V) : ‖a‖ ^ 2 ≤ 3 * a := by
       _           ≤ 3 * a + 2 * a + a     := by simp [←pos_iff_one_le, pos]
       _           = 3 * (2 * a)           := by simp_all only [←two_add_one_eq_three, two_mul, add_mul, add_assoc, one_mul]
   case odd a IH =>
-    rcases zero_le a with (rfl | pos)
+    rcases Arithmetic.zero_le a with (rfl | pos)
     · simp [←two_add_one_eq_three]
     calc
       ‖2 * a + 1‖ ^ 2 = (‖a‖ + 1) ^ 2         := by rw [length_two_mul_add_one a]
@@ -380,7 +380,7 @@ lemma bexp_two_mul {a a' x : V} (hx : 2 * x < ‖a‖) (hx' : x < ‖a'‖) :
   bexp_eq_of_exp hx (exp_bexp_of_lt hx').bit_zero
 
 lemma bexp_two_mul_succ {a i : V} : bexp (2 * a) (i + 1) = 2 * bexp a i := by
-  rcases zero_le a with (rfl | pos)
+  rcases Arithmetic.zero_le a with (rfl | pos)
   · simp
   rcases show i ≥ ‖a‖ ∨ i < ‖a‖ from le_or_gt ‖a‖ i with (h | h)
   · simp [bexp_eq_zero_of_le, h, show ‖2 * a‖ ≤ i + 1 from by simp [length_two_mul_of_pos pos, h]]
@@ -406,7 +406,7 @@ lemma fbit_eq_zero_of_le {a i : V} (hi : ‖a‖ ≤ i) : fbit a i = 0 := by sim
 def _root_.LO.FirstOrder.Arithmetic.fbitDef : 𝚺₀.Semisentence 3 := .mkSigma
   “b a i. ∃ x <⁺ a, !bexpDef x a i ∧ ∃ y <⁺ a, !divDef y a x ∧ !remDef b y 2”
 
-instance fbit_defined : 𝚺₀-Function₂[V] fbit via fbitDef := .mk fun v ↦ by simp [fbitDef, fbit, numeral_eq_natCast]
+instance fbit_defined : 𝚺₀-Function₂[V] fbit via fbitDef := .mk fun v ↦ by simp [fbitDef, fbit]
 
 instance fbit_definable : 𝚺₀-Function₂[V] fbit := fbit_defined.to_definable
 
@@ -421,7 +421,7 @@ instance : Bounded₂ (fbit : V → V → V) := ⟨‘1’, λ _ ↦ by simp⟩
   simp [fbit, bexp_two_mul_add_one_succ, Arithmetic.div_mul]
 
 @[simp] lemma fbit_two_mul_zero_eq_zero (a : V) : fbit (2 * a) 0 = 0 := by
-  rcases zero_le a with (rfl | pos)
+  rcases Arithmetic.zero_le a with (rfl | pos)
   · simp
   · have : bexp (2 * a) 0 = 1 := bexp_eq_of_exp (by simp [pos]) (by simp)
     simp [fbit, this]
@@ -432,7 +432,7 @@ end ISigma0
 
 section ISigma1
 
-variable [V ⊧ₘ* 𝗜𝚺₁]
+variable [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 
 @[simp] lemma log_exponential (a : V) : log (Exp.exp a) = a := (exponential_exp a).log_eq_of_exp
 

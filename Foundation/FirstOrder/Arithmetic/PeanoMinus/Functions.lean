@@ -14,7 +14,7 @@ This file provides functions and relations defined in $\mathsf{PA^-}
 
 namespace LO.FirstOrder.Arithmetic
 
-variable {V : Type*} [ORingStructure V] [V ⊧ₘ* 𝗣𝗔⁻]
+variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻]
 
 variable {a b c : V}
 
@@ -75,7 +75,7 @@ lemma add_tsub_self_of_le (h : b ≤ a) : b + (a - b) = a := by symm; exact sub_
 @[simp] lemma zero_sub (a : V) : 0 - a = 0 := sub_spec_of_le (by simp)
 
 @[simp] lemma sub_zero (a : V) : a - 0 = a := by
-  simpa using sub_add_self_of_le (show 0 ≤ a from zero_le a)
+  simpa using sub_add_self_of_le (show 0 ≤ a from Arithmetic.zero_le a)
 
 lemma sub_remove_left (e : a = b + c) : a - c = b := by simp [e]
 
@@ -230,8 +230,8 @@ def IsPrime (a : V) : Prop := 1 < a ∧ ∀ b ≤ a, b ∣ a → b = 1 ∨ b = a
 def _root_.LO.FirstOrder.Arithmetic.isPrime : 𝚺₀.Semisentence 1 :=
   .mkSigma “x. 1 < x ∧ ∀ y <⁺ x, !dvd.val y x → y = 1 ∨ y = x”
 
-instance isPrime_defined : 𝚺₀-Predicate (λ a : V ↦ IsPrime a) via isPrime := .mk fun v ↦ by
-  simp [Semiformula.eval_substs, Matrix.comp_vecCons', Matrix.constant_eq_singleton, IsPrime, isPrime]
+instance isPrime_defined : 𝚺₀-Predicate (fun a : V ↦ IsPrime a) via isPrime := .mk fun v ↦ by
+  simp [Semiformula.eval_substs, IsPrime, isPrime]
 
 end Prime
 

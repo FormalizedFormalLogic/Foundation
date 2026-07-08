@@ -17,7 +17,7 @@ namespace HilbertWF
 
 instance : SetLike (HilbertWF α) (Formula α) where
   coe := HilbertWF.schema
-  coe_injective' := by intro ⟨A, hA⟩ ⟨B, hB⟩ h; simpa
+  coe_injective := by intro ⟨A, hA⟩ ⟨B, hB⟩ h; simpa
 
 protected def WF : HilbertWF α := ⟨∅, by grind⟩
 
@@ -131,7 +131,7 @@ def ofProofSchema (h : H₂ ⊢!* H₁.schema) : H₁ ⊢! φ → H₂ ⊢! φ
   | ruleE h₁ h₂     => ruleE (ofProofSchema h h₁) (ofProofSchema h h₂)
 
 lemma of_proof_schema (h : H₂ ⊢* H₁.schema) : H₁ ⊢ φ → H₂ ⊢ φ :=
-  λ ⟨hφ⟩ => ⟨ofProofSchema (h · |>.get) hφ⟩
+  λ ⟨hφ⟩ => ⟨ofProofSchema (fun _ hφ ↦ (h hφ).get) hφ⟩
 
 lemma weakerThan_of_provable_schema (h : H₂ ⊢* H₁.schema) : H₁ ⪯ H₂ :=
   Entailment.weakerThan_iff.mpr $ of_proof_schema h

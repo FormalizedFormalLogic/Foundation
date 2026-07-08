@@ -85,7 +85,7 @@ instance [Entailment.HasAxiomWLEM 𝓢] : (canonicalFrame 𝓢).IsPiecewiseStron
   suffices Tableau.Consistent 𝓢 (y.1.1 ∪ z.1.1, ∅) by
     obtain ⟨w, hw⟩ := lindenbaum (𝓢 := 𝓢) this;
     use w;
-    simpa using hw;
+    simpa [canonicalFrame.rel₁] using hw;
 
   intro Γ Δ;
   intro hΓ hΔ h;

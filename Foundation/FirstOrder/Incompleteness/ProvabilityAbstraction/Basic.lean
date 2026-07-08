@@ -101,14 +101,17 @@ class SoundOn
   [L.ReferenceableBy L₀] {T₀ : Theory L₀} {T : Theory L}
   (𝔅 : Provability T₀ T) (M : outParam Type*) [Nonempty M] [Structure L₀ M]
   where
-  sound_on {σ} : M ⊧ₘ 𝔅 σ → T ⊢ σ
+  sound_on {σ : Sentence L} : M↓[L₀] ⊧ (𝔅 σ : Sentence L₀) → T ⊢ σ
 export SoundOn (sound_on)
 attribute [simp, grind .] sound_on
 
-lemma syntactical_sound (M) [Nonempty M] [Structure L M] [SoundOn 𝔅 M] [M ⊧ₘ* T₀] : ∀ {σ}, T₀ ⊢ 𝔅 σ → T ⊢ σ := by
+omit [L.ReferenceableBy L₀] in
+lemma syntactical_sound {T₀ T : Theory L} {𝔅 : Provability T₀ T}
+    (M : Type*) [Nonempty M] [Structure L M] [SoundOn 𝔅 M] [M↓[L] ⊧* T₀] :
+    ∀ {σ : Sentence L}, T₀ ⊢ 𝔅 σ → T ⊢ σ := by
   intro σ h;
   apply 𝔅.sound_on;
-  apply models_of_provable (T := T₀);
+  apply models_of_provable (L := L) (T := T₀);
   . infer_instance;
   . exact h;
 
@@ -181,7 +184,7 @@ variable
 def gödel [L.ReferenceableBy L] {T₀ T : Theory L} [Diagonalization T₀] (𝔅 : Provability T₀ T) : Sentence L :=
   fixedpoint T₀ “x. ¬!𝔅.prov x”
 
-lemma gödel_spec : T₀ ⊢ (gödel 𝔅) 🡘 ∼𝔅 (gödel 𝔅) := by simpa [gödel] using diag “x. ¬!𝔅.prov x”;
+lemma gödel_spec : T₀ ⊢ (gödel 𝔅) 🡘 ∼𝔅 (gödel 𝔅) := by simpa [gödel, Provability.pr] using diag “x. ¬!𝔅.prov x”;
 
 section First
 
@@ -268,7 +271,7 @@ variable {σ : Sentence L}
 local notation "𝐊" => kreisel 𝔅
 
 lemma kreisel_spec : T₀ ⊢ (𝐊 σ) 🡘 (𝔅 (𝐊 σ) 🡒 σ) := by
-  simpa [kreisel, Rew.subst_comp_subst, ←TransitiveRewriting.comp_app] using diag “x. !𝔅.prov x → !σ”;
+  simpa [kreisel, Provability.pr, Rew.subst_comp_subst, ←TransitiveRewriting.comp_app] using diag “x. !𝔅.prov x → !σ”;
 
 private lemma kreisel_specAux₂ : T₀ ⊢ (𝔅 (𝐊 σ) 🡒 σ) 🡒 (𝐊 σ) := K!_right kreisel_spec
 

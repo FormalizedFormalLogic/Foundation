@@ -14,7 +14,7 @@ variable {V : Type*} [ORingStructure V]
 
 section
 
-variable [V ⊧ₘ* 𝗜𝚺₁]
+variable [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 
 section model
 
@@ -76,19 +76,19 @@ instance : Semiformula.Operator.Mem ℒₒᵣ := ⟨⟨bitDef.val⟩⟩
 lemma operator_mem_def : Semiformula.Operator.Mem.mem.sentence = bitDef.val := by
   simp [Semiformula.Operator.Mem.mem]
 
-def ballIn (t : Semiterm ℒₒᵣ ξ n) (p : Semiformula ℒₒᵣ ξ (n + 1)) : Semiformula ℒₒᵣ ξ n := “∀ x < !!t, x ∈ !!(Rew.bShift t) → !p x ⋯”
+def ballIn (t : ArithmeticSemiterm ξ n) (p : ArithmeticSemiformula ξ (n + 1)) : ArithmeticSemiformula ξ n := “∀ x < !!t, x ∈ !!(Rew.bShift t) → !p x ⋯”
 
-def bexsIn (t : Semiterm ℒₒᵣ ξ n) (p : Semiformula ℒₒᵣ ξ (n + 1)) : Semiformula ℒₒᵣ ξ n := “∃ x < !!t, x ∈ !!(Rew.bShift t) ∧ !p x ⋯”
+def bexsIn (t : ArithmeticSemiterm ξ n) (p : ArithmeticSemiformula ξ (n + 1)) : ArithmeticSemiformula ξ n := “∃ x < !!t, x ∈ !!(Rew.bShift t) ∧ !p x ⋯”
 
-@[simp] lemma Hierarchy.bit {t u : Semiterm ℒₒᵣ μ n} : Hierarchy Γ s “!!t ∈ !!u” := by
+@[simp] lemma Hierarchy.bit {t u : ArithmeticSemiterm μ n} : Hierarchy Γ s “!!t ∈ !!u” := by
   simp [Semiformula.Operator.operator, Matrix.fun_eq_vec_two, operator_mem_def]
 
-@[simp] lemma Hieralchy.ballIn {Γ m} (t : Semiterm ℒₒᵣ ξ n) (p : Semiformula ℒₒᵣ ξ (n + 1)) :
+@[simp] lemma Hieralchy.ballIn {Γ m} (t : ArithmeticSemiterm ξ n) (p : ArithmeticSemiformula ξ (n + 1)) :
     Hierarchy Γ m (ballIn t p) ↔ Hierarchy Γ m p := by
   simp only [Arithmetic.ballIn]
   simp [Semiformula.Operator.operator, operator_mem_def]
 
-@[simp] lemma Hieralchy.bexsIn {Γ m} (t : Semiterm ℒₒᵣ ξ n) (p : Semiformula ℒₒᵣ ξ (n + 1)) :
+@[simp] lemma Hieralchy.bexsIn {Γ m} (t : ArithmeticSemiterm ξ n) (p : ArithmeticSemiformula ξ (n + 1)) :
     Hierarchy Γ m (bexsIn t p) ↔ Hierarchy Γ m p := by
   simp only [Arithmetic.bexsIn]
   simp [Semiformula.Operator.operator, operator_mem_def]
@@ -135,10 +135,10 @@ macro_rules
   | `(⤫formula(lit)[ $binders* | $fbinders* | :⟪$t₁:first_order_term, $t₂:first_order_term, $t₃:first_order_term⟫:∈ $u:first_order_term]) =>
     `(memRel₃Opr.operator ![⤫term(lit)[$binders* | $fbinders* | $u], ⤫term(lit)[$binders* | $fbinders* | $t₁], ⤫term(lit)[$binders* | $fbinders* | $t₂], ⤫term(lit)[$binders* | $fbinders* | $t₃]])
 
-@[simp] lemma Hierarchy.memRel {t₁ t₂ u : Semiterm ℒₒᵣ μ n} : Hierarchy Γ s “!!t₁ ∼[ !!u ] !!t₂” := by
+@[simp] lemma Hierarchy.memRel {t₁ t₂ u : ArithmeticSemiterm μ n} : Hierarchy Γ s “!!t₁ ∼[ !!u ] !!t₂” := by
   simp [Semiformula.Operator.operator, Matrix.fun_eq_vec_two, memRelOpr]
 
-@[simp] lemma Hierarchy.memRel₃ {t₁ t₂ t₃ u : Semiterm ℒₒᵣ μ n} : Hierarchy Γ s “:⟪!!t₁, !!t₂, !!t₃⟫:∈ !!u” := by
+@[simp] lemma Hierarchy.memRel₃ {t₁ t₂ t₃ u : ArithmeticSemiterm μ n} : Hierarchy Γ s “:⟪!!t₁, !!t₂, !!t₃⟫:∈ !!u” := by
   simp [Semiformula.Operator.operator, Matrix.fun_eq_vec_two, memRel₃Opr]
 
 end notations
@@ -149,20 +149,20 @@ section model
 
 scoped instance : Structure.Mem ℒₒᵣ V := ⟨by intro a b; simp [Semiformula.Operator.val, operator_mem_def]⟩
 
-@[simp] lemma eval_ballIn {t : Semiterm ℒₒᵣ ξ n} {p : Semiformula ℒₒᵣ ξ (n + 1)} {e ε} :
-    Semiformula.Evalm V e ε (ballIn t p) ↔ ∀ x ∈ t.valm V e ε, Semiformula.Evalm V (x :> e) ε p := by
+@[simp] lemma eval_ballIn {t : ArithmeticSemiterm ξ n} {φ : ArithmeticSemiformula ξ (n + 1)} {bv : Fin n → V} {fv : ξ → V} :
+    (ballIn t φ).Eval (M := V) bv fv ↔ ∀ x ∈ t.val bv fv, φ.Eval (x :> bv) fv := by
   suffices
-    (∀ x < t.valm V e ε, x ∈ t.valm V e ε → Semiformula.Evalm V (x :> e) ε p) ↔
-    ∀ x ∈ t.valm V e ε, Semiformula.Evalm V (x :> e) ε p by simpa [ballIn]
+    (∀ x < t.val bv fv, x ∈ t.val bv fv → φ.Eval (x :> bv) fv) ↔
+    ∀ x ∈ t.val bv fv, φ.Eval (x :> bv) fv by simpa [ballIn]
   constructor
   · intro h x hx; exact h x (lt_of_mem hx) hx
   · intro h x _ hx; exact h x hx
 
-@[simp] lemma eval_bexsIn {t : Semiterm ℒₒᵣ ξ n} {p : Semiformula ℒₒᵣ ξ (n + 1)} {e ε} :
-    Semiformula.Evalm V e ε (bexsIn t p) ↔ ∃ x ∈ t.valm V e ε, Semiformula.Evalm V (x :> e) ε p := by
+@[simp] lemma eval_bexsIn {t : ArithmeticSemiterm ξ n} {φ : ArithmeticSemiformula ξ (n + 1)} {bv : Fin n → V} {fv : ξ → V} :
+    (bexsIn t φ).Eval (M := V) bv fv ↔ ∃ x ∈ t.val bv fv, φ.Eval (x :> bv) fv := by
   suffices
-    (∃ x < t.valm V e ε, x ∈ t.valm V e ε ∧ Semiformula.Evalm V (x :> e) ε p) ↔
-    ∃ x ∈ t.valm V e ε, Semiformula.Evalm V (x :> e) ε p by simpa [bexsIn]
+    (∃ x < t.val bv fv, x ∈ t.val bv fv ∧ φ.Eval (x :> bv) fv) ↔
+    ∃ x ∈ t.val bv fv, φ.Eval (x :> bv) fv by simpa [bexsIn]
   constructor
   · rintro ⟨x, _, hx, h⟩; exact ⟨x, hx, h⟩
   · rintro ⟨x, hx, h⟩; exact ⟨x, lt_of_mem hx, hx, h⟩
@@ -186,16 +186,16 @@ end model
 section model
 
 lemma mem_iff_mul_exp_add_exp_add {i a : V} : i ∈ a ↔ ∃ k, ∃ r < Exp.exp i, a = k * Exp.exp (i + 1) + Exp.exp i + r := by
-  simpa [mem_iff_bit, exp_succ] using lenbit_iff_add_mul (exp_pow2 i) (a := a)
+  simpa [mem_iff_bit, exp_succ] using! lenbit_iff_add_mul (exp_pow2 i) (a := a)
 
 lemma not_mem_iff_mul_exp_add {i a : V} : i ∉ a ↔ ∃ k, ∃ r < Exp.exp i, a = k * Exp.exp (i + 1) + r := by
-  simpa [mem_iff_bit, exp_succ] using not_lenbit_iff_add_mul (exp_pow2 i) (a := a)
+  simpa [mem_iff_bit, exp_succ] using! not_lenbit_iff_add_mul (exp_pow2 i) (a := a)
 
 section empty
 
 scoped instance : EmptyCollection V := ⟨0⟩
 
-omit [V ⊧ₘ* 𝗜𝚺₁] in
+omit [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] in
 lemma emptyset_def : (∅ : V) = 0 := rfl
 
 @[simp] lemma not_mem_empty (i : V) : i ∉ (∅ : V) := by simp [emptyset_def, mem_iff_bit, Bit]
@@ -239,13 +239,13 @@ instance : LawfulSingleton V V where
     i ∈ insert j a ↔ i = j ∨ i ∈ a := by
   by_cases h : j ∈ a <;> simp [h, insert_eq, bitInsert]
   · by_cases e : i = j <;> simp [h, e]
-  · simpa [exp_inj.eq_iff] using
+  · simpa [exp_inj.eq_iff] using!
       lenbit_add_pow2_iff_of_not_lenbit (exp_pow2 i) (exp_pow2 j) h
 
 @[simp] lemma mem_bitRemove_iff {i j a : V} :
     i ∈ bitRemove j a ↔ i ≠ j ∧ i ∈ a := by
   by_cases h : j ∈ a
-  · simpa [h, bitRemove, exp_inj.eq_iff] using
+  · simpa [h, bitRemove, exp_inj.eq_iff] using!
       lenbit_sub_pow2_iff_of_lenbit (exp_pow2 i) (exp_pow2 j) h
   · simp only [bitRemove, h, ↓reduceIte, ne_eq, iff_and_self]
     rintro _ rfl; contradiction
@@ -442,7 +442,7 @@ lemma nonempty_of_pos {a : V} (h : 0 < a) : ∃ i, i ∈ a := by
   simp [this] at h
 
 lemma eq_empty_or_nonempty (a : V) : a = ∅ ∨ ∃ i, i ∈ a := by
-  rcases zero_le a with (rfl | pos)
+  rcases Arithmetic.zero_le a with (rfl | pos)
   · simp [emptyset_def]
   · right; exact nonempty_of_pos pos
 
@@ -457,7 +457,7 @@ lemma isempty_iff {s : V} : s = ∅ ↔ ∀ x, x ∉ s := by
 @[simp] lemma empty_subset (s : V) : ∅ ⊆ s := by intro x; simp
 
 lemma lt_of_lt_log {a b : V} (pos : 0 < b) (h : ∀ i ∈ a, i < log b) : a < b := by
-  rcases zero_le a with (rfl | apos)
+  rcases Arithmetic.zero_le a with (rfl | apos)
   · exact pos
   by_contra A
   exact not_lt_of_ge (log_monotone <| show b ≤ a by simpa using A) (h (log a) (log_mem_of_pos apos))
@@ -489,12 +489,12 @@ end
 
 section
 
-variable {m : ℕ} [Fact (1 ≤ m)] [V ⊧ₘ* 𝗜𝗡𝗗 𝚺 m]
+variable {m : ℕ} [Fact (1 ≤ m)] [V↓[ℒₒᵣ] ⊧* 𝗜𝗡𝗗 𝚺 m]
 
 lemma finset_comprehension_aux (Γ : Polarity) {P : V → Prop} (hP : Γ-[m]-Predicate P) (a : V) :
-  haveI : V ⊧ₘ* 𝗜𝚺₁ := mod_ISigma_of_le (show 1 ≤ m from Fact.out)
+  haveI : V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁ := mod_ISigma_of_le (show 1 ≤ m from Fact.out)
   ∃ s < Exp.exp a, ∀ i < a, i ∈ s ↔ P i := by
-  haveI : V ⊧ₘ* 𝗜𝚺₁ := mod_ISigma_of_le (show 1 ≤ m from Fact.out)
+  haveI : V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁ := mod_ISigma_of_le (show 1 ≤ m from Fact.out)
   have : ∃ s < Exp.exp a, ∀ i < a, P i → i ∈ s :=
     ⟨under a, pred_lt_self_of_pos (by simp), fun i hi _ ↦ by simpa [mem_under_iff] using hi⟩
   rcases this with ⟨s, hsn, hs⟩
@@ -521,7 +521,7 @@ lemma finset_comprehension_aux (Γ : Polarity) {P : V → Prop} (hP : Γ-[m]-Pre
   exact ⟨t, lt_of_le_of_lt t_le_s hsn, fun i hi ↦ ⟨this i hi, ht i hi⟩⟩
 
 theorem finset_comprehension {Γ} {P : V → Prop} (hP : Γ-[m]-Predicate P) (a : V) :
-    haveI : V ⊧ₘ* 𝗜𝚺₁ := mod_ISigma_of_le (show 1 ≤ m from Fact.out)
+    haveI : V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁ := mod_ISigma_of_le (show 1 ≤ m from Fact.out)
     ∃ s < Exp.exp a, ∀ i < a, i ∈ s ↔ P i :=
   match Γ with
   | 𝚺 => finset_comprehension_aux 𝚺 hP a
@@ -529,9 +529,9 @@ theorem finset_comprehension {Γ} {P : V → Prop} (hP : Γ-[m]-Predicate P) (a 
   | 𝚫 => finset_comprehension_aux 𝚺 hP.of_delta a
 
 theorem finset_comprehension_exists_unique {P : V → Prop} (hP : Γ-[m]-Predicate P) (a : V) :
-    haveI : V ⊧ₘ* 𝗜𝚺₁ := mod_ISigma_of_le (show 1 ≤ m from Fact.out)
+    haveI : V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁ := mod_ISigma_of_le (show 1 ≤ m from Fact.out)
     ∃! s, s < Exp.exp a ∧ ∀ i < a, i ∈ s ↔ P i := by
-  haveI : V ⊧ₘ* 𝗜𝚺₁ := mod_ISigma_of_le (show 1 ≤ m from Fact.out)
+  haveI : V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁ := mod_ISigma_of_le (show 1 ≤ m from Fact.out)
   rcases finset_comprehension hP a with ⟨s, hs, Hs⟩
   exact ExistsUnique.intro s ⟨hs, Hs⟩ (by
     intro t ⟨ht, Ht⟩
@@ -550,7 +550,7 @@ end
 
 section
 
-variable [V ⊧ₘ* 𝗜𝚺₁]
+variable [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 
 instance : Fact (1 ≤ 1) := ⟨by rfl⟩
 

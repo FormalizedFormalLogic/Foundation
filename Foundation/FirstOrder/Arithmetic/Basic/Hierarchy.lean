@@ -256,7 +256,7 @@ lemma sigma_of_sigma_ex {φ : Semiformula L ξ (n + 1)} : Hierarchy 𝚺 s (∃�
 
 set_option linter.flexible false in
 lemma rew (ω : Rew L ξ₁ n₁ ξ₂ n₂) {φ : Semiformula L ξ₁ n₁} : Hierarchy Γ s φ → Hierarchy Γ s (ω ▹ φ) := by
-  intro h; induction h generalizing n₂ <;> try simp [*, Semiformula.rew_rel, Semiformula.rew_nrel]
+  intro h; induction h generalizing n₂ <;> try simp [*]
   case sigma ih => exact (ih _).accum _
   case pi ih => exact (ih _).accum _
   case dummy_pi ih => exact (ih _).dummy_pi
@@ -315,7 +315,7 @@ set_option linter.flexible false in
 
 lemma exsClosure : {n : ℕ} → {φ : Semiformula L ξ n} → Hierarchy 𝚺 (s + 1) φ → Hierarchy 𝚺 (s + 1) (exsClosure φ)
   | 0, _, hp => hp
-  | n + 1, φ, hp => by simpa using exsClosure (hp.exs)
+  | n + 1, φ, hp => exsClosure (φ := ∃⁰ φ) hp.exs
 
 instance : LogicalConnective.AndOrClosed (Hierarchy Γ s : Semiformula L ξ k → Prop) where
   verum := verum _ _ _
@@ -415,7 +415,7 @@ end Hierarchy
 
 section LOR
 
-lemma sigma₁_induction {P : (n : ℕ) → Semiformula ℒₒᵣ ξ n → Prop}
+lemma sigma₁_induction {P : (n : ℕ) → ArithmeticSemiformula ξ n → Prop}
     (hVerum : ∀ n, P n ⊤)
     (hFalsum : ∀ n, P n ⊥)
     (hEQ : ∀ n t₁ t₂, P n (.rel Language.Eq.eq ![t₁, t₂]))
@@ -456,7 +456,7 @@ lemma sigma₁_induction {P : (n : ℕ) → Semiformula ℒₒᵣ ξ n → Prop}
     hExs _ _ hp (sigma₁_induction hVerum hFalsum hEQ hNEQ hLT hNLT hAnd hOr hBall hExs _ _ hp)
 
 lemma sigma₁_induction' {n φ} (hp : Hierarchy 𝚺 1 φ)
-    {P : (n : ℕ) → Semiformula ℒₒᵣ ξ n → Prop}
+    {P : (n : ℕ) → ArithmeticSemiformula ξ n → Prop}
     (hVerum : ∀ n, P n ⊤)
     (hFalsum : ∀ n, P n ⊥)
     (hEQ : ∀ n t₁ t₂, P n (.rel Language.Eq.eq ![t₁, t₂]))
@@ -476,7 +476,7 @@ end Arithmetic
 abbrev ArithmeticTheory.SoundOnHierarchy (T : ArithmeticTheory) (Γ : Polarity) (k : ℕ) := T.SoundOn (Arithmetic.Hierarchy Γ k)
 
 lemma ArithmeticTheory.soundOnHierarchy (T : ArithmeticTheory) (Γ : Polarity) (k : ℕ) [T.SoundOnHierarchy Γ k] :
-    T ⊢ σ → Arithmetic.Hierarchy Γ k σ → ℕ ⊧ₘ σ := SoundOn.sound
+    T ⊢ σ → Arithmetic.Hierarchy Γ k σ → ℕ↓[ℒₒᵣ] ⊧ σ := SoundOn.sound
 
 instance (T : ArithmeticTheory) [T.SoundOnHierarchy 𝚺 1] : Entailment.Consistent T :=
   T.consistent_of_sound (Arithmetic.Hierarchy 𝚺 1) (by simp)

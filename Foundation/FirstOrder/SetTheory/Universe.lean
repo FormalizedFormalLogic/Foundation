@@ -31,7 +31,7 @@ variable {α : Type (u + 1)}
 
 instance : SetLike (UniverseFunctor α) α where
   coe := set
-  coe_injective' _ _ := UniverseFunctor.ext
+  coe_injective _ _ := UniverseFunctor.ext
 
 instance (s : UniverseFunctor α) : Small.{u} s.set := s.small
 
@@ -90,7 +90,7 @@ noncomputable def mkFun {ι : Type u} (f : ι → Universe.{u}) : Universe.{u} :
 
 instance : SetLike Universe.{u} Universe.{u} where
   coe x := x.dest.set
-  coe_injective' x y e := by
+  coe_injective x y e := by
     have h (x : Universe.{u}) : mk x.dest.set = x := QPF.Fix.mk_dest _
     have : mk x.dest.set = mk y.dest.set := by simp_all
     simpa [h] using this
@@ -129,14 +129,14 @@ noncomputable def rec (g : (s : Set α) → [Small.{u} s] → α) : Universe →
 
 lemma rec_mk (g : (s : Set α) → [Small.{u} s] → α) (s : Set Universe.{u}) [small : Small.{u} s] :
     rec g (mk s) = g (rec g '' s) := by
-  simpa using QPF.Fix.rec_eq (F := UniverseFunctor) (fun p ↦ g p.set) ⟨s, small⟩
+  exact QPF.Fix.rec_eq (F := UniverseFunctor) (fun p ↦ g p.set) ⟨s, small⟩
 
 @[elab_as_elim]
 theorem ind
     {P : Universe.{u} → Prop}
     (ind : ∀ x, (∀ y ∈ x, P y) → P x)
     (x : Universe) : P x :=
-  QPF.Fix.ind P (fun s hs ↦ ind (mk s.set) (by simpa using hs)) x
+  QPF.Fix.ind P (fun s hs ↦ ind (mk s.set) (by simpa using! hs)) x
 
 lemma wellFounded : WellFounded (α := Universe.{u}) (· ∈ ·) := ⟨ind fun x ih ↦ Acc.intro x ih⟩
 
@@ -222,12 +222,12 @@ noncomputable def powerset (x : Universe.{u}) : Universe.{u} :=
     refine ⟨equivShrink _ ⟨z, by simpa⟩, ?_⟩
     simp [Universe.ext_iff]; tauto
 
-instance models_zf : Universe.{u} ⊧ₘ* 𝗭𝗙 where
-  models_set φ hφ := by
+instance models_zf : Universe.{u}↓[ℒₛₑₜ] ⊧* 𝗭𝗙 := ⟨by
+    intro φ hφ
     rcases hφ
     case axiom_of_equality h =>
-      have : Universe.{u} ⊧ₘ* (𝗘𝗤 : Theory ℒₛₑₜ) := inferInstance
-      simpa [models_iff] using modelsTheory_iff.mp this h
+      have : Universe.{u}↓[ℒₛₑₜ] ⊧* (𝗘𝗤 _ : SetTheory) := inferInstance
+      simpa [models_iff] using models_theory_iff.mp this _ h
     case axiom_of_empty_set =>
       suffices ∃ x, ∀ y, y ∉ x by simpa [models_iff, Axiom.empty]
       exact ⟨empty, by simp⟩
@@ -270,7 +270,7 @@ instance models_zf : Universe.{u} ⊧ₘ* 𝗭𝗙 where
       exact minimal_exists_of_isNonempty hx
     case axiom_of_separation φ =>
       let P (f : ℕ → Universe.{u}) (x : Universe.{u}) : Prop :=
-        Semiformula.Eval (standardStructure Universe.{u}) ![x] f φ
+        φ.Eval (s := standardStructure Universe.{u}) ![x] f
       suffices
           ∀ (f : ℕ → Universe.{u}) (x : Universe.{u}),
           ∃ y, ∀ z : Universe.{u}, z ∈ y ↔ z ∈ x ∧ P f z by
@@ -280,7 +280,7 @@ instance models_zf : Universe.{u} ⊧ₘ* 𝗭𝗙 where
       intro z; simp
     case axiom_of_replacement φ =>
       let R (f : ℕ → Universe.{u}) (x y : Universe.{u}) : Prop :=
-        Semiformula.Eval (standardStructure Universe.{u}) ![x, y] f φ
+        φ.Eval (s := standardStructure Universe.{u}) ![x, y] f
       suffices
           ∀ f : ℕ → Universe.{u},
           (∀ x, ∃! y, R f x y) →
@@ -291,10 +291,10 @@ instance models_zf : Universe.{u} ⊧ₘ* 𝗭𝗙 where
       choose F hF using this
       have (x y : Universe) : R f x y ↔ F x = y :=
         ⟨fun hxy ↦ (h x).unique (hF x) hxy, by rintro rfl; exact hF x⟩
-      refine ⟨X.image F, fun _ ↦ by simp [this]⟩
+      refine ⟨X.image F, fun _ ↦ by simp [this]⟩⟩
 
-instance models_ac : Universe.{u} ⊧ₘ* 𝗔𝗖 where
-  models_set φ hφ := by
+instance models_ac : Universe.{u}↓[ℒₛₑₜ] ⊧* 𝗔𝗖 := ⟨by
+    intro φ hφ
     rcases hφ
     suffices
         ∀ 𝓧 : Universe.{u},
@@ -306,14 +306,14 @@ instance models_ac : Universe.{u} ⊧ₘ* 𝗔𝗖 where
     refine ⟨𝓧.choice, ?_⟩
     intro X hX
     exact 𝓧.choice_existsUnique
-      (by intro h; rcases nonempty empty h; simp_all) pairwise_disjoint hX
+      (by intro h; rcases nonempty empty h; simp_all) pairwise_disjoint hX⟩
 
 
-instance models_zfc : Universe.{u} ⊧ₘ* 𝗭𝗙𝗖 := inferInstance
+instance models_zfc : Universe.{u}↓[ℒₛₑₜ] ⊧* 𝗭𝗙𝗖 := inferInstance
 
-instance models_z : Universe.{u} ⊧ₘ* 𝗭 := ModelsTheory.of_ss inferInstance z_subset_zf
+instance models_z : Universe.{u}↓[ℒₛₑₜ] ⊧* 𝗭 := models_of_ss inferInstance z_subset_zf
 
-instance models_zc : Universe.{u} ⊧ₘ* 𝗭𝗖 := inferInstance
+instance models_zc : Universe.{u}↓[ℒₛₑₜ] ⊧* 𝗭𝗖 := inferInstance
 
 end Universe
 

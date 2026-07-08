@@ -1,5 +1,6 @@
 module
 
+public import Foundation.Vorspiel.Finset.Basic
 public import Foundation.Syntax.Predicate.Rew
 public import Foundation.FirstOrder.Basic.Syntax.Formula
 
@@ -18,20 +19,6 @@ term/formula morphisms such as Rewritings, substitutions, and embs are handled b
 Rewritings `LO.FirstOrder.Rew` is naturally converted to formula Rewritings by `LO.FirstOrder.Rew.hom`.
 
 -/
-
-namespace Finset
-
-lemma biUnion_eq_empty [DecidableEq β] {s : Finset α} {f : α → Finset β} :
-    s.biUnion f = ∅ ↔ ∀ i ∈ s, f i = ∅ := by
-  constructor
-  · intro h a ha; ext b
-    have := by simpa using congrFun (congrArg Membership.mem h) b
-    simpa using this a ha
-  · intro h; ext b
-    suffices ∀ x ∈ s, b ∉ f x by simpa
-    intro a ha; simpa using congrFun (congrArg Membership.mem (h a ha)) b
-
-end Finset
 
 namespace LO
 
@@ -73,45 +60,43 @@ abbrev subst (φ : Semiformula L ξ n) (v : Fin n → Semiterm L ξ m) : Semifor
 
 @[coe] abbrev emb [IsEmpty o] (φ : Semiformula L o n) : Semiformula L ξ n := Rewriting.emb φ
 
-abbrev free (φ : SyntacticSemiformula L (n + 1)) : SyntacticSemiformula L n := Rewriting.free φ
+abbrev free (φ : Semiproposition L (n + 1)) : Semiproposition L n := Rewriting.free φ
 
-abbrev shift (φ : SyntacticSemiformula L n) : SyntacticSemiformula L n := Rewriting.shift φ
+abbrev shift (φ : Semiproposition L n) : Semiproposition L n := Rewriting.shift φ
 
 lemma rew_rel (ω : Rew L ξ₁ n₁ ξ₂ n₂) {k} (r : L.Rel k) (v : Fin k → Semiterm L ξ₁ n₁) : ω ▹ rel r v = rel r fun i ↦ ω (v i) := rfl
 
 lemma rew_nrel (ω : Rew L ξ₁ n₁ ξ₂ n₂) {k} (r : L.Rel k) (v : Fin k → Semiterm L ξ₁ n₁) : ω ▹ nrel r v = nrel r fun i ↦ ω (v i) := rfl
 
-lemma rew_rel' (ω : Rew L ξ₁ n₁ ξ₂ n₂) {k} {r : L.Rel k} {v : Fin k → Semiterm L ξ₁ n₁} :
+@[simp] lemma rew_rel_eq_comp (ω : Rew L ξ₁ n₁ ξ₂ n₂) {k} {r : L.Rel k} {v : Fin k → Semiterm L ξ₁ n₁} :
     ω ▹ rel r v = rel r (ω ∘ v) := rfl
 
-lemma nrel' (ω : Rew L ξ₁ n₁ ξ₂ n₂) {k} {r : L.Rel k} {v : Fin k → Semiterm L ξ₁ n₁} :
+@[simp] lemma rew_nrel_eq_comp (ω : Rew L ξ₁ n₁ ξ₂ n₂) {k} {r : L.Rel k} {v : Fin k → Semiterm L ξ₁ n₁} :
     ω ▹ nrel r v = nrel r (ω ∘ v) := rfl
 
 @[simp] lemma rew_rel0 (ω : Rew L ξ₁ n₁ ξ₂ n₂) {r : L.Rel 0} {v : Fin 0 → Semiterm L ξ₁ n₁} :
-    ω ▹ rel r v = rel r ![] := by simp [rew_rel, Matrix.empty_eq]
+    ω ▹ rel r v = rel r ![] := by simp [Matrix.empty_eq]
 
 @[simp] lemma rew_rel1 (ω : Rew L ξ₁ n₁ ξ₂ n₂) {r : L.Rel 1} {t : Semiterm L ξ₁ n₁} :
-    ω ▹ rel r ![t] = rel r ![ω t] := by simp [rew_rel, Matrix.constant_eq_singleton]
+    ω ▹ rel r ![t] = rel r ![ω t] := by simp
 
 @[simp] lemma rew_rel2 (ω : Rew L ξ₁ n₁ ξ₂ n₂) {r : L.Rel 2} {t₁ t₂ : Semiterm L ξ₁ n₁} :
-    ω ▹ rel r ![t₁, t₂] = rel r ![ω t₁, ω t₂] := by simp [rew_rel, Matrix.constant_eq_singleton, Matrix.comp_vecCons']
+    ω ▹ rel r ![t₁, t₂] = rel r ![ω t₁, ω t₂] := by simp
 
 @[simp] lemma rew_rel3 (ω : Rew L ξ₁ n₁ ξ₂ n₂) {r : L.Rel 3} {t₁ t₂ t₃ : Semiterm L ξ₁ n₁} :
-    ω ▹ rel r ![t₁, t₂, t₃] = rel r ![ω t₁, ω t₂, ω t₃] := by
-  simp [rew_rel, Matrix.constant_eq_singleton, Matrix.comp_vecCons']
+    ω ▹ rel r ![t₁, t₂, t₃] = rel r ![ω t₁, ω t₂, ω t₃] := by simp
 
 @[simp] lemma rew_nrel0 (ω : Rew L ξ₁ n₁ ξ₂ n₂) {r : L.Rel 0} {v : Fin 0 → Semiterm L ξ₁ n₁} :
-    ω ▹ nrel r v = nrel r ![] := by simp [rew_nrel, Matrix.empty_eq]
+    ω ▹ nrel r v = nrel r ![] := by simp [Matrix.empty_eq]
 
 @[simp] lemma rew_nrel1 (ω : Rew L ξ₁ n₁ ξ₂ n₂) {r : L.Rel 1} {t : Semiterm L ξ₁ n₁} :
-    ω ▹ nrel r ![t] = nrel r ![ω t] := by simp [rew_nrel, Matrix.constant_eq_singleton]
+    ω ▹ nrel r ![t] = nrel r ![ω t] := by simp
 
 @[simp] lemma rew_nrel2 (ω : Rew L ξ₁ n₁ ξ₂ n₂) {r : L.Rel 2} {t₁ t₂ : Semiterm L ξ₁ n₁} :
-    ω ▹ nrel r ![t₁, t₂] = nrel r ![ω t₁, ω t₂] := by simp [rew_nrel, Matrix.constant_eq_singleton, Matrix.comp_vecCons']
+    ω ▹ nrel r ![t₁, t₂] = nrel r ![ω t₁, ω t₂] := by simp
 
 @[simp] lemma rew_nrel3 (ω : Rew L ξ₁ n₁ ξ₂ n₂) {r : L.Rel 3} {t₁ t₂ t₃ : Semiterm L ξ₁ n₁} :
-    ω ▹ nrel r ![t₁, t₂, t₃] = nrel r ![ω t₁, ω t₂, ω t₃] := by
-  simp [rew_nrel, Matrix.constant_eq_singleton, Matrix.comp_vecCons']
+    ω ▹ nrel r ![t₁, t₂, t₃] = nrel r ![ω t₁, ω t₂, ω t₃] := by simp
 
 private lemma map_inj {b : Fin n₁ → Fin n₂} {f : ξ₁ → ξ₂}
     (hb : Function.Injective b) (hf : Function.Injective f) :
@@ -122,67 +107,67 @@ private lemma map_inj {b : Fin n₁ → Fin n₂} {f : ξ₁ → ξ₂}
       simp only [rew_rel, rel.injEq, and_imp]
       rintro rfl; simp only [heq_eq_eq, true_and]; rintro rfl h; simp only [true_and]
       funext i; exact Rew.map_inj hb hf (congr_fun h i)
-    | nrel _ _ | ⊤ | ⊥ | _ ⋏ _ | _ ⋎ _ | ∀⁰ _ | ∃⁰ _ => by simp [rew_rel, rew_nrel]
+    | nrel _ _ | ⊤ | ⊥ | _ ⋏ _ | _ ⋎ _ | ∀⁰ _ | ∃⁰ _ => by simp
   | nrel r v => fun φ ↦
     match φ with
     | nrel s w => by
       simp only [rew_nrel, nrel.injEq, and_imp]
       rintro rfl; simp only [heq_eq_eq, true_and]; rintro rfl h; simp only [true_and]
       funext i; exact Rew.map_inj hb hf (congr_fun h i)
-     | rel _ _ | ⊤ | ⊥ | _ ⋏ _ | _ ⋎ _ | ∀⁰ _ | ∃⁰ _ => by simp [rew_rel, rew_nrel]
-  | ⊤ => by intro φ; cases φ using cases' <;> simp [rew_rel, rew_nrel]
-  | ⊥ => by intro φ; cases φ using cases' <;> simp [rew_rel, rew_nrel]
+     | rel _ _ | ⊤ | ⊥ | _ ⋏ _ | _ ⋎ _ | ∀⁰ _ | ∃⁰ _ => by simp
+  | ⊤ => by intro φ; cases φ using cases' <;> simp
+  | ⊥ => by intro φ; cases φ using cases' <;> simp
   | φ ⋏ ψ => fun χ ↦
     match χ with
     | _ ⋏ _ => by
       simp only [LogicalConnective.HomClass.map_and, and_inj, and_imp]
       intro hp hq; exact ⟨map_inj hb hf hp, map_inj hb hf hq⟩
-    | rel _ _ | nrel _ _ | ⊤ | ⊥ | _ ⋎ _ | ∀⁰ _ | ∃⁰ _ => by simp [rew_rel, rew_nrel]
+    | rel _ _ | nrel _ _ | ⊤ | ⊥ | _ ⋎ _ | ∀⁰ _ | ∃⁰ _ => by simp
   | φ ⋎ ψ => fun χ ↦
     match χ with
     | _ ⋎ _ => by
       simp only [LogicalConnective.HomClass.map_or, or_inj, and_imp]
       intro hp hq; exact ⟨map_inj hb hf hp, map_inj hb hf hq⟩
-    | rel _ _ | nrel _ _ | ⊤ | ⊥ | _ ⋏ _ | ∀⁰ _ | ∃⁰ _ => by simp [rew_rel, rew_nrel]
+    | rel _ _ | nrel _ _ | ⊤ | ⊥ | _ ⋏ _ | ∀⁰ _ | ∃⁰ _ => by simp
   | ∀⁰ φ => fun ψ ↦
     match ψ with
     | ∀⁰ _ => by
       simp only [Rewriting.app_all, Rew.q_map, Nat.succ_eq_add_one, all_inj]
       exact fun h ↦ map_inj (b := 0 :> Fin.succ ∘ b)
         (Matrix.injective_vecCons ((Fin.succ_injective _).comp hb) (fun _ ↦ (Fin.succ_ne_zero _).symm)) hf h
-    | rel _ _ | nrel _ _ | ⊤ | ⊥ | _ ⋏ _ | _ ⋎ _ | ∃⁰ _ => by simp [rew_rel, rew_nrel]
+    | rel _ _ | nrel _ _ | ⊤ | ⊥ | _ ⋏ _ | _ ⋎ _ | ∃⁰ _ => by simp
   | ∃⁰ φ => fun ψ ↦
     match ψ with
     | ∃⁰ _ => by
       simp only [Rewriting.app_exs, Rew.q_map, Nat.succ_eq_add_one, exs_inj]
       exact fun h ↦ map_inj (b := 0 :> Fin.succ ∘ b)
         (Matrix.injective_vecCons ((Fin.succ_injective _).comp hb) (fun _ ↦ (Fin.succ_ne_zero _).symm)) hf h
-    | rel _ _ | nrel _ _ | ⊤ | ⊥ | _ ⋏ _ | _ ⋎ _ | ∀⁰ _ => by simp [rew_rel, rew_nrel]
+    | rel _ _ | nrel _ _ | ⊤ | ⊥ | _ ⋏ _ | _ ⋎ _ | ∀⁰ _ => by simp
 
 instance : ReflectiveRewriting L ξ (Semiformula L ξ) where
-  id_app (φ) := by induction φ using rec' <;> simp [rew_rel, rew_nrel, *]
+  id_app (φ) := by induction φ using rec' <;> simp [*, Function.comp_def]
 
 instance : TransitiveRewriting L ξ₁ (Semiformula L ξ₁) ξ₂ (Semiformula L ξ₂) ξ₃ (Semiformula L ξ₃) where
   comp_app {n₁ n₂ n₃ ω₁₂ ω₂₃ φ} := by
-    induction φ using rec' generalizing n₂ n₃ <;> simp [rew_rel, rew_nrel, Rew.comp_app, Rew.q_comp, *]
+    induction φ using rec' generalizing n₂ n₃ <;> simp [Rew.comp_app, Rew.q_comp, *, Function.comp_def]
 
 instance : InjMapRewriting L ξ (Semiformula L ξ) ζ (Semiformula L ζ) where
   smul_map_injective := map_inj
 
-instance : LawfulSyntacticRewriting L (SyntacticSemiformula L) where
+instance : LawfulSyntacticRewriting L (Semiproposition L) where
 
 @[simp] lemma complexity_rew (ω : Rew L ξ₁ n₁ ξ₂ n₂) (φ : Semiformula L ξ₁ n₁) : (ω ▹ φ).complexity = φ.complexity := by
-  induction φ using Semiformula.rec' generalizing n₂ <;> simp [*, rew_rel, rew_nrel]
+  induction φ using Semiformula.rec' generalizing n₂ <;> simp [*]
 
 section
 
 variable (ω : Rew L ξ₁ n₁ ξ₂ n₂)
 
 @[simp] lemma eq_top_iff {φ : Semiformula L ξ₁ n₁} : ω ▹ φ = (⊤ : Semiformula L ξ₂ n₂) ↔ φ = ⊤ := by
-  cases φ using Semiformula.rec' <;> simp [rew_rel, rew_nrel]
+  cases φ using Semiformula.rec' <;> simp
 
 @[simp] lemma eq_bot_iff {φ : Semiformula L ξ₁ n₁} : ω ▹ φ = (⊥ : Semiformula L ξ₂ n₂) ↔ φ = ⊥ := by
-  cases φ using Semiformula.rec' <;> simp [rew_rel, rew_nrel]
+  cases φ using Semiformula.rec' <;> simp
 
 lemma eq_rel_iff {φ : Semiformula L ξ₁ n₁} {k} {r : L.Rel k} {v} :
     ω ▹ φ = Semiformula.rel r v ↔ ∃ v', ω ∘ v' = v ∧ φ = Semiformula.rel r v' := by
@@ -191,7 +176,7 @@ lemma eq_rel_iff {φ : Semiformula L ξ₁ n₁} {k} {r : L.Rel k} {v} :
     simp only [rew_rel, rel.injEq]
     by_cases hk : k' = k <;> simp [hk]; rcases hk with rfl; simp
     by_cases hr : r' = r <;> simp [hr, funext_iff]
-  | nrel _ _ | ⊤ | ⊥ | _ ⋏ _ | _ ⋎ _ | ∀⁰ _ | ∃⁰ _ => simp [rew_nrel]
+  | nrel _ _ | ⊤ | ⊥ | _ ⋏ _ | _ ⋎ _ | ∀⁰ _ | ∃⁰ _ => simp
 
 lemma eq_nrel_iff {φ : Semiformula L ξ₁ n₁} {k} {r : L.Rel k} {v} :
     ω ▹ φ = Semiformula.nrel r v ↔ ∃ v', ω ∘ v' = v ∧ φ = Semiformula.nrel r v' := by
@@ -200,23 +185,23 @@ lemma eq_nrel_iff {φ : Semiformula L ξ₁ n₁} {k} {r : L.Rel k} {v} :
     simp only [rew_nrel]
     by_cases hk : k' = k <;> simp [hk]; rcases hk with rfl; simp
     by_cases hr : r' = r <;> simp [hr, funext_iff]
-  | rel _ _ | ⊤ | ⊥ | _ ⋏ _ | _ ⋎ _ | ∀⁰ _ | ∃⁰ _ => simp [rew_rel]
+  | rel _ _ | ⊤ | ⊥ | _ ⋏ _ | _ ⋎ _ | ∀⁰ _ | ∃⁰ _ => simp
 
 @[simp] lemma eq_and_iff {φ : Semiformula L ξ₁ n₁} {ψ₁ ψ₂ : Semiformula L ξ₂ n₂} :
     ω ▹ φ = ψ₁ ⋏ ψ₂ ↔ ∃ φ₁ φ₂ : Semiformula L ξ₁ n₁, ω ▹ φ₁ = ψ₁ ∧ ω ▹ φ₂ = ψ₂ ∧ φ = φ₁ ⋏ φ₂ := by
-  cases φ using Semiformula.rec' <;> simp [rew_rel, rew_nrel]
+  cases φ using Semiformula.rec' <;> simp
 
 @[simp] lemma eq_or_iff {φ : Semiformula L ξ₁ n₁} {ψ₁ ψ₂ : Semiformula L ξ₂ n₂} :
     ω ▹ φ = ψ₁ ⋎ ψ₂ ↔ ∃ φ₁ φ₂ : Semiformula L ξ₁ n₁, ω ▹ φ₁ = ψ₁ ∧ ω ▹ φ₂ = ψ₂ ∧ φ = φ₁ ⋎ φ₂ := by
-  cases φ using Semiformula.rec' <;> simp [rew_rel, rew_nrel]
+  cases φ using Semiformula.rec' <;> simp
 
 lemma eq_all_iff {φ : Semiformula L ξ₁ n₁} {ψ : Semiformula L ξ₂ (n₂ + 1)} :
     ω ▹ φ = ∀⁰ ψ ↔ ∃ φ' : Semiformula L ξ₁ (n₁ + 1), ω.q ▹ φ' = ψ ∧ φ = ∀⁰ φ' := by
-  cases φ using Semiformula.rec' <;> simp [rew_rel, rew_nrel]
+  cases φ using Semiformula.rec' <;> simp
 
 lemma eq_exs_iff {φ : Semiformula L ξ₁ n₁} {ψ : Semiformula L ξ₂ (n₂ + 1)} :
     ω ▹ φ = ∃⁰ ψ ↔ ∃ φ' : Semiformula L ξ₁ (n₁ + 1), ω.q ▹ φ' = ψ ∧ φ = ∃⁰ φ' := by
-  cases φ using Semiformula.rec' <;> simp [rew_rel, rew_nrel]
+  cases φ using Semiformula.rec' <;> simp
 
 @[simp] lemma eq_neg_iff {φ : Semiformula L ξ₁ n₁} {ψ₁ ψ₂ : Semiformula L ξ₂ n₂} :
     ω ▹ φ = ψ₁ 🡒 ψ₂ ↔ ∃ φ₁ φ₂ : Semiformula L ξ₁ n₁, ω ▹ φ₁ = ψ₁ ∧ ω ▹ φ₂ = ψ₂ ∧ φ = φ₁ 🡒 φ₂ := by
@@ -238,9 +223,9 @@ lemma eq_bexs_iff {φ : Semiformula L ξ₁ n₁} {ψ₁ ψ₂ : Semiformula L �
 
 end
 
-instance : Coe (Semisentence L n) (SyntacticSemiformula L n) := ⟨Rewriting.emb (ξ := ℕ)⟩
+instance : Coe (Semisentence L n) (Semiproposition L n) := ⟨Rewriting.emb (ξ := ℕ)⟩
 
-@[simp] lemma coe_inj (σ π : Semisentence L n) : (σ : SyntacticSemiformula L n) = π ↔ σ = π := Rewriting.emb_injective.eq_iff
+@[simp] lemma coe_inj (σ π : Semisentence L n) : (σ : Semiproposition L n) = π ↔ σ = π := Rewriting.emb_injective.eq_iff
 
 lemma coe_rel [IsEmpty ο] {k : ℕ} (R : L.Rel k) (v : Fin k → Semiterm L ο n) :
     (Rewriting.emb (rel R v) : Semiformula L ξ n) = (rel R fun i ↦ Rew.emb (v i)) := by rfl
@@ -249,24 +234,24 @@ lemma coe_nrel [IsEmpty ο] {k : ℕ} (R : L.Rel k) (v : Fin k → Semiterm L ο
     (Rewriting.emb (nrel R v) : Semiformula L ξ n) = (nrel R fun i ↦ Rew.emb (v i)) := by rfl
 
 lemma coe_subst_eq_subst_coe (φ : Semisentence L k) (v : Fin k → ClosedSemiterm L n) :
-    (↑(φ ⇜ v) : SyntacticSemiformula L n) = (↑φ : SyntacticSemiformula L k)⇜(fun i ↦ (↑(v i) : Semiterm L ℕ n)) :=
+    (↑(φ ⇜ v) : Semiproposition L n) = (↑φ : Semiproposition L k)⇜(fun i ↦ (↑(v i) : Semiterm L ℕ n)) :=
   Rewriting.emb_subst_eq_subst_emb φ v
 
 lemma coe_subst_eq_subst_coe₁ (φ : Semisentence L 1) (t : ClosedSemiterm L n) :
-    (↑(φ/[t]) : SyntacticSemiformula L n) = (↑φ : SyntacticSemiformula L 1)/[(↑t : Semiterm L ℕ n)] :=
+    (↑(φ/[t]) : Semiproposition L n) = (↑φ : Semiproposition L 1)/[(↑t : Semiterm L ℕ n)] :=
   Rewriting.emb_subst_eq_subst_coe₁ φ t
 
 @[elab_as_elim]
-def formulaRec {C : SyntacticFormula L → Sort _}
+def formulaRec {C : Proposition L → Sort _}
   (verum : C ⊤)
   (falsum : C ⊥)
   (rel : ∀ {l : ℕ} (r : L.Rel l) (v : Fin l → SyntacticTerm L), C (rel r v))
   (nrel : ∀ {l : ℕ} (r : L.Rel l) (v : Fin l → SyntacticTerm L), C (nrel r v))
-  (and : ∀ (φ ψ : SyntacticFormula L), C φ → C ψ → C (φ ⋏ ψ))
-  (or : ∀ (φ ψ : SyntacticFormula L), C φ → C ψ → C (φ ⋎ ψ))
-  (all : ∀ (φ : SyntacticSemiformula L 1), C (Rewriting.free φ) → C (∀⁰ φ))
-  (ex : ∀ (φ : SyntacticSemiformula L 1), C (Rewriting.free φ) → C (∃⁰ φ)) :
-    ∀ (φ : SyntacticFormula L), C φ
+  (and : ∀ (φ ψ : Proposition L), C φ → C ψ → C (φ ⋏ ψ))
+  (or : ∀ (φ ψ : Proposition L), C φ → C ψ → C (φ ⋎ ψ))
+  (all : ∀ (φ : Semiproposition L 1), C (Rewriting.free φ) → C (∀⁰ φ))
+  (ex : ∀ (φ : Semiproposition L 1), C (Rewriting.free φ) → C (∃⁰ φ)) :
+    ∀ (φ : Proposition L), C φ
   | ⊤ => verum
   | ⊥ => falsum
   | .rel r v => rel r v
@@ -315,7 +300,7 @@ lemma fvar?_rew [DecidableEq ξ₁] [DecidableEq ξ₂]
       · exact .inl h
       · exact .inr ⟨z, by simp [hi], hz⟩
   case hall n φ ihp =>
-    have : (Rew.bind (#0 :> fun i ↦ Rew.bShift (ω #i)) (fun z ↦ Rew.bShift (ω &z)) ▹ φ).FVar? x := by simpa [Rew.q_bind] using h
+    have : (Rew.bind (#0 :> fun i ↦ Rew.bShift (ω #i)) (fun z ↦ Rew.bShift (ω &z)) ▹ φ).FVar? x := h
     rcases ihp this with (⟨z, hz⟩ | ⟨z, hz⟩)
     · cases z using Fin.cases
       case zero => simp at hz
@@ -325,7 +310,7 @@ lemma fvar?_rew [DecidableEq ξ₁] [DecidableEq ξ₂]
     · have : φ.FVar? z ∧ (ω &z).FVar? x := by simpa using hz
       exact .inr ⟨z, this⟩
   case hexs n φ ihp =>
-    have : (Rew.bind (#0 :> fun i ↦ Rew.bShift (ω #i)) (fun z ↦ Rew.bShift (ω &z)) ▹ φ).FVar? x := by simpa [Rew.q_bind] using h
+    have : (Rew.bind (#0 :> fun i ↦ Rew.bShift (ω #i)) (fun z ↦ Rew.bShift (ω &z)) ▹ φ).FVar? x := h
     rcases ihp this with (⟨z, hz⟩ | ⟨z, hz⟩)
     · cases z using Fin.cases
       case zero => simp at hz
@@ -390,9 +375,9 @@ lemma rew_eq_self_of [DecidableEq ξ] {ω : Rew L ξ n ξ n} {φ : Semiformula L
 section univCl
 
 @[simp] lemma fvSup_sentence (σ : Semisentence L n) : (Rewriting.emb σ).fvSup = 0 := by
-    induction σ using rec' <;> simp [fvSup]
+    induction σ using rec' <;> simp [fvSup, -rew_rel_eq_comp, -rew_nrel_eq_comp]
 
-private lemma not_fvar?_fixitr_fvSup (φ : SyntacticFormula L) : ¬(Rew.fixitr 0 φ.fvSup ▹ φ).FVar? x := by
+private lemma not_fvar?_fixitr_fvSup (φ : Proposition L) : ¬(Rew.fixitr 0 φ.fvSup ▹ φ).FVar? x := by
   rw [Rew.eq_bind (Rew.fixitr 0 φ.fvSup)]
   simp only [Function.comp_def, Rew.fixitr_bvar, Rew.fixitr_fvar, Fin.natAdd_mk, zero_add]
   intro h
@@ -401,7 +386,7 @@ private lemma not_fvar?_fixitr_fvSup (φ : SyntacticFormula L) : ¬(Rew.fixitr 0
   · have : z < φ.fvSup := lt_fvSup_of_fvar? hz
     simp [this] at hx
 
-@[simp] lemma subst_comp_fixitr_eq_map (φ : SyntacticFormula L) (f : ℕ → SyntacticTerm L) :
+@[simp] lemma subst_comp_fixitr_eq_map (φ : Proposition L) (f : ℕ → SyntacticTerm L) :
     (Rew.fixitr 0 φ.fvSup ▹ φ)⇜(fun x ↦ f x) = Rew.rewrite f ▹ φ := by
   unfold Rewriting.subst; rw [← TransitiveRewriting.comp_app]
   apply rew_eq_of_funEqOn
@@ -409,7 +394,7 @@ private lemma not_fvar?_fixitr_fvSup (φ : SyntacticFormula L) : ¬(Rew.fixitr 0
   · intro x hx
     simp [Rew.comp_app, Rew.fixitr_fvar, Semiformula.lt_fvSup_of_fvar? hx]
 
-@[simp] lemma subst_comp_fixitr (φ : SyntacticFormula L) :
+@[simp] lemma subst_comp_fixitr (φ : Proposition L) :
     (Rew.fixitr 0 φ.fvSup ▹ φ)⇜(fun x ↦ (&x : SyntacticTerm L)) = φ := by
   unfold Rewriting.subst; rw [← TransitiveRewriting.comp_app]
   apply rew_eq_self_of
@@ -417,24 +402,24 @@ private lemma not_fvar?_fixitr_fvSup (φ : SyntacticFormula L) : ¬(Rew.fixitr 0
   · intro x hx
     simp [Rew.comp_app, Rew.fixitr_fvar, Semiformula.lt_fvSup_of_fvar? hx]
 
-def univCl' (φ : SyntacticFormula L) : SyntacticFormula L := ∀⁰* (@Rew.fixitr L 0 φ.fvSup ▹ φ)
+def univCl' (φ : Proposition L) : Proposition L := ∀⁰* (@Rew.fixitr L 0 φ.fvSup ▹ φ)
 
-@[simp] lemma rew_univCl' (φ : SyntacticFormula L) (ω : SyntacticRew L 0 0) :
+@[simp] lemma rew_univCl' (φ : Proposition L) (ω : SyntacticRew L 0 0) :
     ω ▹ φ.univCl' = φ.univCl' := rew_eq_self_of (by simp) (by simp [univCl', not_fvar?_fixitr_fvSup])
 
-lemma univCl'_eq_self_of (φ : SyntacticFormula L) (h : φ.freeVariables = ∅) : φ.univCl' = φ := by
+lemma univCl'_eq_self_of (φ : Proposition L) (h : φ.freeVariables = ∅) : φ.univCl' = φ := by
   have : φ.fvSup = 0 := by simp [fvSup, h]
   simp only [univCl']; rw [this]; simp
 
 @[simp] lemma senetnce_univCl'_eq_self (σ : Sentence L) :
-    (σ : SyntacticFormula L).univCl' = σ := univCl'_eq_self_of _ (by simp)
+    (σ : Proposition L).univCl' = σ := univCl'_eq_self_of _ (by simp)
 
-@[simp] lemma fvarList_univCl' (φ : SyntacticFormula L) : φ.univCl'.freeVariables = ∅ := by
+@[simp] lemma fvarList_univCl' (φ : Proposition L) : φ.univCl'.freeVariables = ∅ := by
   ext x
   suffices x ∉ φ.univCl'.freeVariables by simpa
   simpa [univCl'] using not_fvar?_fixitr_fvSup φ
 
-@[simp] lemma univCl'_univCl'_eq_univCl' (φ : SyntacticFormula L) :
+@[simp] lemma univCl'_univCl'_eq_univCl' (φ : Proposition L) :
     φ.univCl'.univCl' = φ.univCl' :=
   univCl'_eq_self_of φ.univCl' (by simp)
 
@@ -455,10 +440,10 @@ def toEmpty [DecidableEq ξ] {n : ℕ} : (φ : Semiformula L ξ n) → φ.freeVa
   |     ∃⁰ φ, h => ∃⁰ φ.toEmpty (by simpa using h)
 
 @[simp] lemma emb_toEmpty [DecidableEq ξ] (φ : Semiformula L ξ n) (hp : φ.freeVariables = ∅) : Rewriting.emb (φ.toEmpty hp) = φ := by
-  induction φ using rec' <;> simp [toEmpty, rew_rel, rew_nrel, *]
+  induction φ using rec' <;> simp [toEmpty, Function.comp_def, *]
 
 @[simp] lemma toEmpty_emb [DecidableEq ξ] (φ : Semisentence L n) : (Rewriting.emb φ : Semiformula L ξ n).toEmpty (by simp) = φ := by
-  induction φ using rec' <;> simp [toEmpty, rew_rel, rew_nrel, *]
+  induction φ using rec' <;> simp [toEmpty, *]
 
 @[simp] lemma toEmpty_verum [DecidableEq ξ] : (⊤ : Semiformula L ξ n).toEmpty (by simp) = ⊤ := rfl
 
@@ -475,11 +460,11 @@ def toEmpty [DecidableEq ξ] {n : ℕ} : (φ : Semiformula L ξ n) → φ.freeVa
 @[simp] lemma toEmpty_ex [DecidableEq ξ] (φ : Semiformula L ξ (n + 1)) (h) : (∃⁰ φ).toEmpty h = ∃⁰ (φ.toEmpty (by simpa using h)) := rfl
 
 /-- An universal closure of formula -/
-def univCl (φ : SyntacticFormula L) : Sentence L := φ.univCl'.toEmpty (by simp)
+def univCl (φ : Proposition L) : Sentence L := φ.univCl'.toEmpty (by simp)
 
-@[simp] lemma coe_univCl_eq_univCl' (φ : SyntacticFormula L) : (φ.univCl : SyntacticFormula L) = φ.univCl' := by simp [univCl]
+@[simp] lemma coe_univCl_eq_univCl' (φ : Proposition L) : (φ.univCl : Proposition L) = φ.univCl' := by simp [univCl]
 
-@[simp] lemma univCl_coe_sentence (σ : Sentence L) : univCl (↑σ : SyntacticFormula L) = σ := by
+@[simp] lemma univCl_coe_sentence (σ : Sentence L) : univCl (↑σ : Proposition L) = σ := by
   unfold univCl
   refine (Semiformula.coe_inj _ _).mp ?_
   rw [emb_toEmpty]
@@ -501,7 +486,7 @@ variable {L : Language.{u}} {L₁ : Language.{u₁}} {L₂ : Language.{u₂}} {L
 lemma lMap_bind (b : Fin n₁ → Semiterm L₁ ξ₂ n₂) (e : ξ₁ → Semiterm L₁ ξ₂ n₂) (φ : Semiformula L₁ ξ₁ n₁) :
     lMap Φ (Rew.bind b e ▹ φ) = Rew.bind (Semiterm.lMap Φ ∘ b) (Semiterm.lMap Φ ∘ e) ▹ (lMap Φ φ) := by
   induction φ using rec' generalizing ξ₂ n₂ <;>
-  simp [*, rew_rel, rew_nrel, lMap_rel, lMap_nrel, Semiterm.lMap_bind, Rew.q_bind, Matrix.comp_vecCons', Semiterm.lMap_bShift, Function.comp_def]
+  simp [*, lMap_rel, lMap_nrel, Semiterm.lMap_bind, Rew.q_bind, Matrix.comp_vecCons', Semiterm.lMap_bShift, Function.comp_def]
 
 lemma lMap_map (b : Fin n₁ → Fin n₂) (e : ξ₁ → ξ₂) (φ : Semiformula L₁ ξ₁ n₁) :
     lMap Φ (Rew.map (L := L₁) b e ▹ φ) = Rew.map (L := L₂) b e ▹ lMap Φ φ := lMap_bind _ _ _
@@ -513,22 +498,17 @@ lemma lMap_rewrite (f : ξ₁ → Semiterm L₁ ξ₂ n) (φ : Semiformula L₁ 
 lemma lMap_subst (w : Fin k → Semiterm L₁ ξ n) (φ : Semiformula L₁ ξ k) :
     lMap Φ (φ ⇜ w) = (lMap Φ φ)⇜(Semiterm.lMap Φ ∘ w) := lMap_bind _ _ _
 
-lemma lMap_shift (φ : SyntacticSemiformula L₁ n) : lMap Φ (@Rew.shift L₁ n ▹ φ) = @Rew.shift L₂ n ▹ lMap Φ φ := lMap_bind _ _ _
+lemma lMap_shift (φ : Semiproposition L₁ n) : lMap Φ (@Rew.shift L₁ n ▹ φ) = @Rew.shift L₂ n ▹ lMap Φ φ := lMap_bind _ _ _
 
-lemma lMap_free (φ : SyntacticSemiformula L₁ (n + 1)) : lMap Φ (@Rew.free L₁ n ▹ φ) = @Rew.free L₂ n ▹ lMap Φ φ := by
+lemma lMap_free (φ : Semiproposition L₁ (n + 1)) : lMap Φ (@Rew.free L₁ n ▹ φ) = @Rew.free L₂ n ▹ lMap Φ φ := by
   simp [Rew.free, lMap_bind, Function.comp_def, Matrix.comp_vecConsLast]
 
-lemma lMap_fix (φ : SyntacticSemiformula L₁ n) : lMap Φ (@Rew.fix L₁ n ▹ φ) = @Rew.fix L₂ n ▹ lMap Φ φ := by
+lemma lMap_fix (φ : Semiproposition L₁ n) : lMap Φ (@Rew.fix L₁ n ▹ φ) = @Rew.fix L₂ n ▹ lMap Φ φ := by
   simp only [Rew.fix, lMap_bind, Function.comp_def, Semiterm.lMap_bvar]
   congr; { funext x; cases x <;> simp }
 
 lemma lMap_emb {ο : Type _} [IsEmpty ο] (φ : Semiformula L₁ ο n) :
     (lMap Φ (Rewriting.emb φ : Semiformula L₁ ξ n)) = Rewriting.emb (lMap Φ φ) := lMap_bind _ _ _
-
-lemma lMap_toS (φ : Semiformula L₁ (Fin n) 0) :
-    lMap Φ (@Rew.toS L₁ n ▹ φ) = @Rew.toS L₂ n ▹ lMap Φ φ := by
-  rw [Rew.eq_bind Rew.toS, lMap_bind]
-  simp [Function.comp_def, Matrix.empty_eq]; congr
 
 lemma lMap_rewriteMap (φ : Semiformula L₁ ξ₁ n) (f : ξ₁ → ξ₂) :
     lMap Φ (Rew.rewriteMap (L := L₁) (n := n) f ▹ φ) = (Rew.rewriteMap (L := L₂) (n := n) f) ▹ (lMap Φ φ) := by
@@ -537,7 +517,7 @@ lemma lMap_rewriteMap (φ : Semiformula L₁ ξ₁ n) (f : ξ₁ → ξ₂) :
 end lMap
 
 @[simp] lemma rew_open_iff {ω : Rew L ξ₁ n₁ ξ₂ n₂} {φ : Semiformula L ξ₁ n₁} : (ω ▹ φ).Open ↔ φ.Open := by
-  induction φ using Semiformula.rec' <;> simp [rew_rel, rew_nrel, *]
+  induction φ using Semiformula.rec' <;> simp [*]
 
 end Semiformula
 

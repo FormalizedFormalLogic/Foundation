@@ -98,7 +98,7 @@ lemma rew {bv : Fin n₂ → C} {fv : ξ₂ → C} {ω : Rew L ξ₁ n₁ ξ₂ 
       funext i; cases i using Fin.cases <;> simp
     simp [ih, this]
 
-@[simp] lemma free {v : W} {fv : ℕ → C} {φ : SyntacticSemiformulaᵢ L (n + 1)} :
+@[simp] lemma free {v : W} {fv : ℕ → C} {φ : Semipropositionᵢ L (n + 1)} :
     v ⊩[bv|↑x :>ₙ fv] Rewriting.free φ ↔ v ⊩[bv <: x|fv] φ := by
   have : (fun i ↦ Semiterm.relationalVal (L := L) bv (x :>ₙ fv) (Rew.free #i)) = (bv <: x) := by
     ext i; cases i using Fin.lastCases <;> simp
@@ -251,8 +251,8 @@ lemma sound {T : Theoryᵢ L 𝗜𝗻𝘁¹} (b : T ⊢ φ) : W ∀⊩* T → W 
     suffices ∀ φ ∈ Γ, w ⊩[![]|fun _ ↦ x] φ by simpa
     intro φ hφ
     rcases show ∃ x ∈ T.theory, ↑x = φ by simpa using HΓ φ hφ with ⟨φ, hφ', rfl⟩
-    simpa using H _ hφ' w
-  simpa using this
+    simp only [Forces.forces_emb]; exact H _ hφ' w
+  simp only [Forces.forces_emb] at this; exact this
 
 end Forces₀
 

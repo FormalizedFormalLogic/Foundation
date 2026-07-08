@@ -42,13 +42,15 @@ open LO.Entailment LO.Entailment.FiniteContext LO.Modal.Entailment
 variable {L : Logic α} {X Y : Set (Formula α)} {φ ψ : Formula α}
 
 instance : Entailment.Łukasiewicz (F := Formula α) (S := Logic α × Set (Formula α)) (L, X) where
-  mdp ihφψ ihφ := by simpa using GlobalConsequence.mdp ihφψ ihφ;
+  mdp ihφψ ihφ := by
+    have h := GlobalConsequence.mdp ihφψ ihφ;
+    rw [Set.union_self] at h; exact h;
   implyK := GlobalConsequence.implyK X
   implyS := GlobalConsequence.implyS X
   elimContra := GlobalConsequence.ec X
 
 instance : Entailment.Necessitation (F := Formula α) (S := Logic α × Set (Formula α)) (L, X) where
-  nec ihφ := by simpa using GlobalConsequence.nec ihφ
+  nec ihφ := by exact GlobalConsequence.nec ihφ
 
 instance [L.IsNormal] : Entailment.K (F := Formula α) (S := Logic α × Set (Formula α)) (L, X) where
   K _ _ := by

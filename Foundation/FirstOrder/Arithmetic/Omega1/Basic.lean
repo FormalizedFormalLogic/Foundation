@@ -11,9 +11,9 @@ public import Foundation.FirstOrder.Arithmetic.Exponential
 namespace LO.FirstOrder.Arithmetic
 
 /-- ∀ x, ∃ y, 2^{|x|^2} = y-/
-def _root_.LO.Omega1.omega1 : Sentence ℒₒᵣ := “∀ x, ∃ y, ∃ l <⁺ x, !lengthDef l x ∧ !exponentialDef (l * l) y”
+def _root_.LO.Omega1.omega1 : ArithmeticSentence := “∀ x, ∃ y, ∃ l <⁺ x, !lengthDef l x ∧ !exponentialDef (l * l) y”
 
-inductive _root_.LO.Omega1 : Theory ℒₒᵣ where
+inductive _root_.LO.Omega1 : ArithmeticTheory where
   | omega : Omega1 Omega1.omega1
 
 notation "𝝮₁" => Omega1
@@ -25,23 +25,23 @@ noncomputable section
 
 variable {V : Type*} [ORingStructure V]
 
-lemma models_Omega1_iff [V ⊧ₘ* 𝗜𝚺₀] : V ⊧ₘ Omega1.omega1 ↔ ∀ x : V, ∃ y, Exponential (‖x‖^2) y := by
+lemma models_Omega1_iff [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₀] : V↓[ℒₒᵣ] ⊧ Omega1.omega1 ↔ ∀ x : V, ∃ y, Exponential (‖x‖^2) y := by
   simp [models_iff, Omega1.omega1, sq]
 
-lemma omega1_of_ISigma1 [V ⊧ₘ* 𝗜𝚺₁] : V ⊧ₘ Omega1.omega1 := models_Omega1_iff.mpr (fun x ↦ Exponential.range_exists (‖x‖^2))
+lemma omega1_of_ISigma1 [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] : V↓[ℒₒᵣ] ⊧ Omega1.omega1 := models_Omega1_iff.mpr (fun x ↦ Exponential.range_exists (‖x‖^2))
 
-instance [V ⊧ₘ* 𝗜𝚺₁] : V ⊧ₘ* 𝗜𝚺₀ + 𝝮₁ :=
-  ModelsTheory.add_iff.mpr
+instance [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] : V↓[ℒₒᵣ] ⊧* 𝗜𝚺₀ ∪ 𝝮₁ :=
+  Semantics.ModelsSet.union_iff.mpr
     ⟨inferInstance, ⟨by intro _; simp only [Theory.OmegaOne.mem_iff]; rintro rfl; exact omega1_of_ISigma1⟩⟩
 
-variable [V ⊧ₘ* 𝗜𝚺₀ + 𝝮₁]
+variable [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₀ ∪ 𝝮₁]
 
-instance : V ⊧ₘ* 𝗜𝚺₀ := ModelsTheory.of_add_left V 𝗜𝚺₀ 𝝮₁
+instance : V↓[ℒₒᵣ] ⊧* 𝗜𝚺₀ := ModelsTheory.of_add_left V 𝗜𝚺₀ 𝝮₁
 
-instance : V ⊧ₘ* 𝝮₁ := ModelsTheory.of_add_right V 𝗜𝚺₀ 𝝮₁
+instance : V↓[ℒₒᵣ] ⊧* 𝝮₁ := ModelsTheory.of_add_right V 𝗜𝚺₀ 𝝮₁
 
 lemma exists_exponential_sq_length (x : V) : ∃ y, Exponential (‖x‖^2) y :=
-  models_Omega1_iff.mp (ModelsTheory.models V Omega1.omega) x
+  models_Omega1_iff.mp (Theory.models _ _ Omega1.omega) x
 
 lemma exists_unique_exponential_sq_length (x : V) : ∃! y, Exponential (‖x‖^2) y := by
   rcases exists_exponential_sq_length x with ⟨y, h⟩
@@ -93,7 +93,7 @@ lemma smash_comm (a b : V) : a ⨳ b = b ⨳ a := (exponential_smash a b).uniq (
   exact lt_exponential_length this
 
 @[simp] lemma lt_smash_one_righs (a : V) : a ⨳ 1 ≤ 2 * a + 1 := by
-  rcases zero_le a with (rfl | pos)
+  rcases Arithmetic.zero_le a with (rfl | pos)
   · simp
   · exact (le_iff_lt_length_of_exp (exponential_smash a 1)).mpr (by
       suffices ‖a‖ < ‖a * 2 + 1‖ by simpa [mul_comm 2 a]
@@ -120,17 +120,17 @@ lemma smash_two_mul (a : V) {b} (pos : 0 < b) : a ⨳ (2 * b) = (a ⨳ b) * (a �
   exact h₁.uniq h₂
 
 lemma smash_two_mul_le_sq_smash (a b : V) : a ⨳ (2 * b) ≤ (a ⨳ b) ^ 2 := by
-  rcases zero_le b with (rfl | pos)
+  rcases Arithmetic.zero_le b with (rfl | pos)
   · simp
   · simpa [smash_two_mul a pos, sq]
     using smash_monotone (by rfl) (pos_iff_one_le.mp pos)
 
 end
 
-instance : 𝗜𝚺₀ ⪯ 𝗜𝚺₀ + 𝝮₁ := inferInstance
+instance : 𝗜𝚺₀ ⪯ 𝗜𝚺₀ ∪ 𝝮₁ := inferInstance
 
-instance : 𝗜𝚺₀ + 𝝮₁ ⪯ 𝗜𝚺₁ := weakerThan_of_models.{0} _ _ fun _ _ _ ↦ inferInstance
+instance : 𝗜𝚺₀ ∪ 𝝮₁ ⪯ 𝗜𝚺₁ := weakerThan_of_models.{0} _ _ fun _ _ _ ↦ inferInstance
 
-instance : ℕ ⊧ₘ* 𝗜𝚺₀ + 𝝮₁ := inferInstance
+instance : ℕ↓[ℒₒᵣ] ⊧* 𝗜𝚺₀ ∪ 𝝮₁ := inferInstance
 
 end LO.FirstOrder.Arithmetic

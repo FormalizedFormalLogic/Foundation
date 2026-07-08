@@ -30,9 +30,9 @@ abbrev Sentenceᵢ (L : Language) := Formulaᵢ L Empty
 
 abbrev Semisentenceᵢ (L : Language) (n : ℕ) := Semiformulaᵢ L Empty n
 
-abbrev SyntacticSemiformulaᵢ (L : Language) (n : ℕ) := Semiformulaᵢ L ℕ n
+abbrev Semipropositionᵢ (L : Language) (n : ℕ) := Semiformulaᵢ L ℕ n
 
-abbrev SyntacticFormulaᵢ (L : Language) := SyntacticSemiformulaᵢ L 0
+abbrev Propositionᵢ (L : Language) := Semipropositionᵢ L 0
 
 variable {L : Language}
 

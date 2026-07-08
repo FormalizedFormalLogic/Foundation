@@ -7,6 +7,12 @@ public import Foundation.Vorspiel.Matrix
 @[expose]
 public section
 
+/-- Compatibility shim: mathlib v4.31 removed the named `Finset.toSet` that used to back the
+`Finset → Set` coercion (the coercion is now an inline lambda). Re-introduce the name as a
+reducible alias for the coercion so existing `.toSet` call-sites keep elaborating and the
+`Finset.coe_*` simp lemmas continue to fire through it. -/
+@[reducible] def _root_.Finset.toSet {α : Type*} (s : Finset α) : Set α := (s : Set α)
+
 namespace List
 
 variable {l : List α}
@@ -75,7 +81,7 @@ lemma sup_ofFn (f : Fin n → α) : (ofFn f).sup = Finset.sup Finset.univ f := b
   · have h₁ : (Finset.univ : Finset (Fin (n + 1))) = insert 0 ((Finset.univ : Finset (Fin n)).image Fin.succ) := by
       ext i; simp
     have h₂ : Finset.sup Finset.univ (fun i ↦ f (Fin.succ i)) = Finset.sup {0}ᶜ f := by
-      simpa [Function.comp] using Eq.symm <| Finset.sup_image (Finset.univ : Finset (Fin n)) Fin.succ f
+      simpa [Function.comp] using! Eq.symm <| Finset.sup_image (Finset.univ : Finset (Fin n)) Fin.succ f
     calc
       (ofFn f).sup = (f 0 ⊔ Finset.univ.sup fun i : Fin _ ↦ f i.succ) := by simp [ih]
       _            = f 0 ⊔ Finset.sup {0}ᶜ f                          := by rw [h₂]

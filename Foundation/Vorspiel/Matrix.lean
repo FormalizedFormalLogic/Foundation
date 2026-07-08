@@ -128,6 +128,8 @@ lemma comp_vecCons₂' (g : β → γ) (f : α → β) (a : α) (s : Fin n → �
 
 @[simp] lemma comp₃ (a₁ a₂ a₃ : α) : f ∘ ![a₁, a₂, a₃] = ![f a₁, f a₂, f a₃] := by simp [comp_vecCons'']
 
+@[simp] lemma comp₄ (a₁ a₂ a₃ a₄ : α) : f ∘ ![a₁, a₂, a₃, a₄] = ![f a₁, f a₂, f a₃, f a₄] := by simp [comp_vecCons'']
+
 lemma comp_vecConsLast (f : α → β) (a : α) (s : Fin n → α) : (fun x => f $ (s <: a) x) = f ∘ s <: f a :=
 funext (fun i => Fin.lastCases (by simp) (by simp) i)
 
@@ -144,24 +146,27 @@ lemma vecConsLast_vecEmpty {s : Fin 0 → α} (a : α) : s <: a = ![a] :=
     · rw [this, rightConcat_last, cons_val_fin_one]
     have := i.isLt; contradiction )
 
-lemma constant_eq_singleton {a : α} : (fun _ => a) = ![a] := by funext x; simp
+lemma constant_eq_singleton {a : α} : (fun _ ↦ a) = ![a] := by funext x; simp
 
-lemma fun_eq_vec_one {v : Fin 1 → α} : v = ![v 0] := by funext x; simp
+lemma fun_eq_vec_one (v : Fin 1 → α) : v = ![v 0] := by funext x; simp
 
-lemma constant_eq_vec₂ {a : α} : (fun _ => a) = ![a, a] := by
+lemma constant_eq_vec₂ {a : α} : (fun _ ↦ a) = ![a, a] := by
   funext x; cases x using Fin.cases <;> simp
 
-lemma fun_eq_vec_two {v : Fin 2 → α} : v = ![v 0, v 1] := by
+lemma fun_eq_vec_two (v : Fin 2 → α) : v = ![v 0, v 1] := by
   funext x;
   cases x using Fin.cases <;> simp
 
-lemma fun_eq_vec_three {v : Fin 3 → α} : v = ![v 0, v 1, v 2] := by
+lemma fun_eq_vec_three (v : Fin 3 → α) : v = ![v 0, v 1, v 2] := by
   funext x
   repeat cases' x using Fin.cases with x <;> simp
 
-lemma fun_eq_vec_four {v : Fin 4 → α} : v = ![v 0, v 1, v 2, v 3] := by
+lemma fun_eq_vec_four (v : Fin 4 → α) : v = ![v 0, v 1, v 2, v 3] := by
   funext x
   repeat cases' x using Fin.cases with x <;> simp
+
+lemma fun_eq_vec_four' (f : α → β) (v : Fin 4 → α) : f ∘ v = ![f (v 0), f (v 1), f (v 2), f (v 3)] := by
+  rw [fun_eq_vec_four v]; simp
 
 lemma injective_vecCons {f : Fin n → α} (h : Function.Injective f) {a} (ha : ∀ i, a ≠ f i) : Function.Injective (a :> f) := by
   have : ∀ i, f i ≠ a := fun i => (ha i).symm

@@ -5,7 +5,7 @@ public import Foundation.FirstOrder.Bootstrapping.Syntax.Language
 @[expose] public section
 namespace LO.FirstOrder.Arithmetic.Bootstrapping
 
-variable {V : Type*} [ORingStructure V] [V ⊧ₘ* 𝗜𝚺₁]
+variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 
 variable {L : Language} [L.Encodable] [L.LORDefinable]
 
@@ -219,7 +219,7 @@ lemma case_iff {t : V} :
     (∃ z, t = ^#z) ∨
     (∃ x, t = ^&x) ∨
     (∃ k f v : V, L.IsFunc k f ∧ IsUTermVec L k v ∧ t = ^func k f v) := by
-  simpa [construction, Phi, IsUTermVec, and_assoc] using (construction L).case
+  simpa [construction, Phi, IsUTermVec, and_assoc] using! (construction L).case
 
 alias ⟨case, mk⟩ := case_iff
 
@@ -408,8 +408,8 @@ variable (c)
 lemma graph_defined : 𝚺₁.Defined (fun v ↦ c.Graph L (v ·.succ.succ) (v 0) (v 1)) (β.graph L) := .mk fun v ↦ by
   simp [Blueprint.graph, (c.construction L).fixpoint_defined.iff, Graph]
 
-@[simp] lemma eval_graphDef (v) :
-    Semiformula.Evalbm V v (β.graph L).val ↔ c.Graph L (v ·.succ.succ) (v 0) (v 1) := (graph_defined c).iff
+@[simp] lemma eval_graphDef (v : Fin (arity + 2) → V) :
+    (β.graph L).val.Evalb v ↔ c.Graph L (v ·.succ.succ) (v 0) (v 1) := (graph_defined c).iff
 
 instance graph_definable : 𝚺₁.Definable fun v ↦ c.Graph L (v ·.succ.succ) (v 0) (v 1) :=
   (graph_defined c).to_definable
@@ -587,8 +587,8 @@ lemma result_defined : 𝚺₁.DefinedFunction (fun v ↦ c.result L (v ·.succ)
   simp [Blueprint.result, HierarchySymbol.Semiformula.val_sigma, IsUTerm.defined.proper.iff',
     c.eval_graphDef, result, Classical.choose!_eq_iff_right]
 
-@[simp] lemma result_graphDef (v) :
-    Semiformula.Evalbm V v (β.result L).val ↔ v 0 = c.result L (v ·.succ.succ) (v 1) := (result_defined c).iff
+@[simp] lemma result_graphDef (v : Fin (arity + 2) → V) :
+    (β.result L).val.Evalb v ↔ v 0 = c.result L (v ·.succ.succ) (v 1) := (result_defined c).iff
 
 private lemma resultVec_graph {w' k w} :
     w' = c.resultVec L param k w ↔
@@ -602,8 +602,7 @@ lemma resultVec_defined : 𝚺₁.DefinedFunction (fun v ↦ c.resultVec L (v ·
     c.eval_graphDef] using c.resultVec_graph
 
 lemma eval_resultVec (v : Fin (arity + 3) → V) :
-    Semiformula.Evalbm V v (β.resultVec L).val ↔
-    v 0 = c.resultVec L (v ·.succ.succ.succ) (v 1) (v 2) := c.resultVec_defined.iff
+    (β.resultVec L).val.Evalb v ↔ v 0 = c.resultVec L (v ·.succ.succ.succ) (v 1) (v 2) := c.resultVec_defined.iff
 
 end
 

@@ -31,7 +31,8 @@ variable {Ax Ax₁ Ax₂ : Axiom α}
 @[grind <=]
 lemma axm' {φ} (h : φ ∈ Ax) : Normal Ax ⊢ φ := by
   apply Logic.iff_provable.mpr;
-  simpa using axm (s := .id) h;
+  have hax := axm (s := .id) h;
+  simp at hax; exact hax;
 
 @[grind <=] lemma axm! {φ} (s : Substitution _) (h : φ ∈ Ax) : Normal Ax ⊢ φ⟦s⟧ := by
   apply Logic.iff_provable.mpr;
@@ -56,7 +57,9 @@ instance : Logic.Substitution (Hilbert.Normal Ax) where
   subst {φ} s h := by
     rw [Logic.iff_provable] at h ⊢;
     induction h with
-    | @axm _ s' ih => simpa using axm (s := s' ∘ s) ih;
+    | @axm _ s' ih =>
+        have hax := axm (s := s' ∘ s) ih;
+        simp at hax; exact hax;
     | mdp hφψ hφ ihφψ ihφ => apply mdp ihφψ ihφ;
     | nec hφ ihφ => apply nec ihφ;
     | implyK φ ψ => apply implyK;
@@ -112,192 +115,216 @@ variable [DecidableEq α]
 instance [Ax.HasK] : Entailment.HasAxiomK (Hilbert.Normal Ax) where
   K φ ψ := by
     constructor;
-    simpa [HasK.ne_pq] using Hilbert.Normal.axm
+    have hax := Hilbert.Normal.axm
       (φ := Axioms.K (.atom (HasK.p Ax)) (.atom (HasK.q Ax)))
       (s := λ b => if (HasK.p Ax) = b then φ else if (HasK.q Ax) = b then ψ else (.atom b))
       (HasK.mem_K);
+    simp [HasK.ne_pq] at hax; exact hax;
 instance [Ax.HasK] : Logic.IsNormal (Hilbert.Normal Ax) where
 
 instance [Ax.HasT] : Entailment.HasAxiomT (Hilbert.Normal Ax) where
   T φ := by
     constructor;
-    simpa using Hilbert.Normal.axm
+    have hax := Hilbert.Normal.axm
       (φ := Axioms.T (.atom (HasT.p Ax)))
       (s := λ b => if (HasT.p Ax) = b then φ else (.atom b))
       (HasT.mem_T);
+    simp at hax; exact hax;
 
 instance [Ax.HasD] : Entailment.HasAxiomD (Hilbert.Normal Ax) where
   D φ := by
     constructor;
-    simpa using Hilbert.Normal.axm
+    have hax := Hilbert.Normal.axm
       (φ := Axioms.D (.atom (HasD.p Ax)))
       (s := λ b => if (HasD.p Ax) = b then φ else (.atom b))
       HasD.mem_D;
+    simp at hax; exact hax;
 
 instance [Ax.HasP] : Entailment.HasAxiomP (Hilbert.Normal Ax) where
   P := by
     constructor;
-    simpa using Hilbert.Normal.axm (s := .id) HasP.mem_P
+    have hax := Hilbert.Normal.axm (s := .id) (show _ ∈ Ax from HasP.mem_P)
+    simp at hax; exact hax;
 
 instance [Ax.HasB] : Entailment.HasAxiomB (Hilbert.Normal Ax) where
   B φ := by
     constructor;
-    simpa using Hilbert.Normal.axm
+    have hax := Hilbert.Normal.axm
       (φ := Axioms.B (.atom (HasB.p Ax)))
       (s := λ b => if (HasB.p Ax) = b then φ else (.atom b))
       (HasB.mem_B);
+    simp at hax; exact hax;
 
 instance [Ax.HasFour] : Entailment.HasAxiomFour (Hilbert.Normal Ax) where
   Four φ := by
     constructor;
-    simpa using Hilbert.Normal.axm
+    have hax := Hilbert.Normal.axm
       (φ := Axioms.Four (.atom (HasFour.p Ax)))
       (s := λ b => if (HasFour.p Ax) = b then φ else (.atom b))
       (HasFour.mem_Four);
+    simp at hax; exact hax;
 
 instance [Ax.HasFourN n] : Entailment.HasAxiomFourN n (Hilbert.Normal Ax) where
   FourN φ := by
     constructor;
-    simpa [Axioms.FourN] using Hilbert.Normal.axm
+    have hax := Hilbert.Normal.axm
       (φ := Axioms.FourN n (.atom (HasFourN.p n Ax)))
       (s := λ b => if (HasFourN.p n Ax) = b then φ else (.atom b))
       (HasFourN.mem_FourN);
+    simp [Axioms.FourN] at hax ⊢; exact hax;
 
 instance [Ax.HasFive] : Entailment.HasAxiomFive (Hilbert.Normal Ax) where
   Five φ := by
     constructor;
-    simpa using Hilbert.Normal.axm
+    have hax := Hilbert.Normal.axm
       (φ := Axioms.Five (.atom (HasFive.p Ax)))
       (s := λ b => if (HasFive.p Ax) = b then φ else (.atom b))
       (HasFive.mem_Five);
+    simp at hax; exact hax;
 
 instance [Ax.HasL] : Entailment.HasAxiomL (Hilbert.Normal Ax) where
   L φ := by
     constructor;
-    simpa using Hilbert.Normal.axm
+    have hax := Hilbert.Normal.axm
       (φ := Axioms.L (.atom (HasL.p Ax)))
       (s := λ b => if (HasL.p Ax) = b then φ else (.atom b))
       (HasL.mem_L);
+    simp at hax; exact hax;
 
 instance [Ax.HasZ] : Entailment.HasAxiomZ (Hilbert.Normal Ax) where
   Z φ := by
     constructor;
-    simpa using Hilbert.Normal.axm
+    have hax := Hilbert.Normal.axm
       (φ := Axioms.Z (.atom (HasZ.p Ax)))
       (s := λ b => if (HasZ.p Ax) = b then φ else (.atom b))
       (HasZ.mem_Z);
+    simp at hax; exact hax;
 
 instance [Ax.HasHen] : Entailment.HasAxiomHen (Hilbert.Normal Ax) where
   Hen φ := by
     constructor;
-    simpa using Hilbert.Normal.axm
+    have hax := Hilbert.Normal.axm
       (φ := Axioms.Hen (.atom (HasHen.p Ax)))
       (s := λ b => if (HasHen.p Ax) = b then φ else (.atom b))
       (HasHen.mem_Hen);
+    simp at hax; exact hax;
 
 instance [Ax.HasPoint2] : Entailment.HasAxiomPoint2 (Hilbert.Normal Ax) where
   Point2 φ := by
     constructor;
-    simpa using Hilbert.Normal.axm
+    have hax := Hilbert.Normal.axm
       (φ := Axioms.Point2 (.atom (HasPoint2.p Ax)))
       (s := λ b => if (HasPoint2.p Ax) = b then φ else (.atom b))
       (HasPoint2.mem_Point2);
+    simp at hax; exact hax;
 
 instance [Ax.HasWeakPoint2] : Entailment.HasAxiomWeakPoint2 (Hilbert.Normal Ax) where
   WeakPoint2 φ ψ := by
     constructor;
-    simpa [HasWeakPoint2.ne_pq] using Hilbert.Normal.axm
+    have hax := Hilbert.Normal.axm
       (φ := Axioms.WeakPoint2 (.atom (HasWeakPoint2.p Ax)) (.atom (HasWeakPoint2.q Ax)))
       (s := λ b => if (HasWeakPoint2.p Ax) = b then φ else if (HasWeakPoint2.q Ax) = b then ψ else (.atom b))
       (HasWeakPoint2.mem_WeakPoint2);
+    simp [HasWeakPoint2.ne_pq] at hax; exact hax;
 
 instance [Ax.HasPoint3] : Entailment.HasAxiomPoint3 (Hilbert.Normal Ax) where
   Point3 φ ψ := by
     constructor;
-    simpa [HasPoint3.ne_pq] using Hilbert.Normal.axm
+    have hax := Hilbert.Normal.axm
       (φ := Axioms.Point3 (.atom (HasPoint3.p Ax)) (.atom (HasPoint3.q Ax)))
       (s := λ b => if (HasPoint3.p Ax) = b then φ else if (HasPoint3.q Ax) = b then ψ else (.atom b))
       (HasPoint3.mem_Point3);
+    simp [HasPoint3.ne_pq] at hax; exact hax;
 
 instance [Ax.HasWeakPoint3] : Entailment.HasAxiomWeakPoint3 (Hilbert.Normal Ax) where
   WeakPoint3 φ ψ := by
     constructor;
-    simpa [HasWeakPoint3.ne_pq] using Hilbert.Normal.axm
+    have hax := Hilbert.Normal.axm
       (φ := Axioms.WeakPoint3 (.atom (HasWeakPoint3.p Ax)) (.atom (HasWeakPoint3.q Ax)))
       (s := λ b => if (HasWeakPoint3.p Ax) = b then φ else if (HasWeakPoint3.q Ax) = b then ψ else (.atom b))
       (HasWeakPoint3.mem_WeakPoint3);
+    simp [HasWeakPoint3.ne_pq] at hax; exact hax;
 
 instance [Ax.HasPoint4] : Entailment.HasAxiomPoint4 (Hilbert.Normal Ax) where
   Point4 φ := by
     constructor;
-    simpa using Hilbert.Normal.axm
+    have hax := Hilbert.Normal.axm
       (φ := Axioms.Point4 (.atom (HasPoint4.p Ax)))
       (s := λ b => if (HasPoint4.p Ax) = b then φ else (.atom b))
       (HasPoint4.mem_Point4);
+    simp at hax; exact hax;
 
 instance [Ax.HasGrz] : Entailment.HasAxiomGrz (Hilbert.Normal Ax) where
   Grz φ := by
     constructor;
-    simpa using Hilbert.Normal.axm
+    have hax := Hilbert.Normal.axm
       (φ := Axioms.Grz (.atom (HasGrz.p Ax)))
       (s := λ b => if (HasGrz.p Ax) = b then φ else (.atom b))
       (HasGrz.mem_Grz);
+    simp at hax; exact hax;
 
 instance [Ax.HasDum] : Entailment.HasAxiomDum (Hilbert.Normal Ax) where
   Dum φ := by
     constructor;
-    simpa using Hilbert.Normal.axm
+    have hax := Hilbert.Normal.axm
       (φ := Axioms.Dum (.atom (HasDum.p Ax)))
       (s := λ b => if (HasDum.p Ax) = b then φ  else (.atom b))
       (HasDum.mem_Dum);
+    simp at hax; exact hax;
 
 instance [Ax.HasTc] : Entailment.HasAxiomTc (Hilbert.Normal Ax) where
   Tc φ := by
     constructor;
-    simpa using Hilbert.Normal.axm
+    have hax := Hilbert.Normal.axm
       (φ := Axioms.Tc (.atom (HasTc.p Ax)))
       (s := λ b => if (HasTc.p Ax) = b then φ else (.atom b))
       (HasTc.mem_Tc);
+    simp at hax; exact hax;
 
 instance [Ax.HasVer] : Entailment.HasAxiomVer (Hilbert.Normal Ax) where
   Ver φ := by
     constructor;
-    simpa using Hilbert.Normal.axm
+    have hax := Hilbert.Normal.axm
       (φ := Axioms.Ver (.atom (HasVer.p Ax)))
       (s := λ b => if (HasVer.p Ax) = b then φ else (.atom b))
       (HasVer.mem_Ver);
+    simp at hax; exact hax;
 
 instance [Ax.HasMcK] : Entailment.HasAxiomMcK (Hilbert.Normal Ax) where
   McK φ := by
     constructor;
-    simpa using Hilbert.Normal.axm
+    have hax := Hilbert.Normal.axm
       (φ := Axioms.McK (.atom (HasMcK.p Ax)))
       (s := λ b => if (HasMcK.p Ax) = b then φ else (.atom b))
       (HasMcK.mem_McK);
+    simp at hax; exact hax;
 
 instance [Ax.HasMk] : Entailment.HasAxiomMk (Hilbert.Normal Ax) where
   Mk φ ψ := by
     constructor;
-    simpa [HasMk.ne_pq] using Hilbert.Normal.axm
+    have hax := Hilbert.Normal.axm
       (φ := Axioms.Mk (.atom (HasMk.p Ax)) (.atom (HasMk.q Ax)))
       (s := λ b => if (HasMk.p Ax) = b then φ else if (HasMk.q Ax) = b then ψ else (.atom b))
       (HasMk.mem_Mk);
+    simp [HasMk.ne_pq] at hax; exact hax;
 
 instance [Ax.HasH1] : Entailment.HasAxiomH (Hilbert.Normal Ax) where
   H1 φ := by
     constructor;
-    simpa using Hilbert.Normal.axm
+    have hax := Hilbert.Normal.axm
       (φ := Axioms.H (.atom (HasH1.p Ax)))
       (s := λ b => if (HasH1.p Ax) = b then φ else (.atom b))
       (HasH1.mem_H1);
+    simp at hax; exact hax;
 
 instance [Ax.HasGeach g] : Entailment.HasAxiomGeach g (Hilbert.Normal Ax) where
   Geach φ := by
     constructor;
-    simpa using Hilbert.Normal.axm
+    have hax := Hilbert.Normal.axm
       (φ := Axioms.Geach g (.atom (HasGeach.p g Ax)))
       (s := λ b => if (HasGeach.p g Ax) = b then φ else (.atom b))
       (HasGeach.mem_Geach);
+    simp at hax; exact hax;
 
 end
 

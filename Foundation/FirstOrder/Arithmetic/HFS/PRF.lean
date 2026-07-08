@@ -11,7 +11,7 @@ public import Foundation.FirstOrder.Arithmetic.HFS.Seq
 
 namespace LO.FirstOrder.Arithmetic
 
-variable {V : Type*} [ORingStructure V] [V ⊧ₘ* 𝗜𝚺₁]
+variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 
 namespace PR
 
@@ -68,8 +68,8 @@ private lemma cseq_iff (s : V) : c.CSeq v s ↔
 lemma cseq_defined : 𝚺₁.Defined (fun v ↦ c.CSeq (v ·.succ) (v 0) : (Fin (k + 1) → V) → Prop) p.cseqDef := .mk fun v ↦ by
   simp [Blueprint.cseqDef, cseq_iff, c.zero_defined.iff, c.succ_defined.iff]
 
-@[simp] lemma cseq_defined_iff (v) :
-    Semiformula.Evalbm V v p.cseqDef.val ↔ c.CSeq (v ·.succ) (v 0) := c.cseq_defined.iff
+@[simp] lemma cseq_defined_iff (v : Fin (k + 1) → V) :
+    p.cseqDef.val.Evalb v ↔ c.CSeq (v ·.succ) (v 0) := c.cseq_defined.iff
 
 variable {c v}
 
@@ -140,7 +140,7 @@ lemma CSeq.exists (l : V) : ∃ s, c.CSeq v s ∧ l + 1 = lh s := by
   · apply HierarchySymbol.Definable.exs
     apply HierarchySymbol.Definable.and
     · exact ⟨p.cseqDef.rew (Rew.embSubsts <| #0 :> fun i ↦ &(v i)), by
-        intro w; simpa [Matrix.comp_vecCons'] using c.cseq_defined_iff (w 0 :> v)⟩
+         intro w; simpa [Matrix.comp_vecCons''] using! c.cseq_defined_iff (w 0 :> v)⟩
     · definability
   case zero =>
     exact ⟨!⟦c.zero v⟧, CSeq.initial, by simp⟩
@@ -194,8 +194,8 @@ lemma result_defined : 𝚺₁.DefinedFunction (fun v ↦ c.result (v ·.succ) (
 lemma result_defined_delta : 𝚫₁.DefinedFunction (fun v ↦ c.result (v ·.succ) (v 0) : (Fin (k + 1) → V) → V) p.resultDeltaDef :=
   c.result_defined.graph_delta
 
-@[simp] lemma result_defined_iff (v) :
-    Semiformula.Evalbm V v p.resultDef.val ↔ v 0 = c.result (v ·.succ.succ) (v 1) := c.result_defined.iff
+@[simp] lemma result_defined_iff (v : Fin (k + 2) → V) :
+    p.resultDef.val.Evalb v ↔ v 0 = c.result (v ·.succ.succ) (v 1) := c.result_defined.iff
 
 instance result_definable : 𝚺₁.DefinableFunction (fun v ↦ c.result (v ·.succ) (v 0) : (Fin (k + 1) → V) → V) :=
   c.result_defined.to_definable

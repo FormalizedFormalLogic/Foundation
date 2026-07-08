@@ -191,8 +191,11 @@ def lMap (Φ : L₁ →ᵥ L₂) : Semiterm L₁ ξ n → Semiterm L₂ ξ n
 
 @[simp] lemma lMap_fvar (x : ξ) : (&x : Semiterm L₁ ξ n).lMap Φ = &x := rfl
 
-lemma lMap_func {k} (f : L₁.Func k) (v : Fin k → Semiterm L₁ ξ n) :
-    (func f v).lMap Φ = func (Φ.func f) (fun i ↦ lMap Φ (v i)) := rfl
+@[simp] lemma lMap_func {k} (f : L₁.Func k) (v : Fin k → Semiterm L₁ ξ n) :
+    (func f v).lMap Φ = func (Φ.func f) (lMap Φ ∘ v) := rfl
+
+lemma lMap_func' {k} (f : L₁.Func k) (v : Fin k → Semiterm L₁ ξ n) :
+    (func f v).lMap Φ = func (Φ.func f) fun i ↦ lMap Φ (v i) := rfl
 
 @[simp] lemma lMap_positive (t : Semiterm L₁ ξ (n + 1)) : (t.lMap Φ).Positive ↔ t.Positive := by
   induction t <;> simp [lMap_func, *]

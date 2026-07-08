@@ -38,13 +38,31 @@ end ORingStructure
 
 namespace FirstOrder
 
+abbrev ArithmeticTheory := Theory ℒₒᵣ
+
+abbrev ArithmeticSemiterm (ξ : Type*) (n : ℕ) := Semiterm ℒₒᵣ ξ n
+
+abbrev ArithmeticTerm (ξ : Type*) := Term ℒₒᵣ ξ
+
+abbrev ArithmeticSemiformula (ξ : Type*) (n : ℕ) := Semiformula ℒₒᵣ ξ n
+
+abbrev ArithmeticFormula (ξ : Type*) := Formula ℒₒᵣ ξ
+
+abbrev ArithmeticSemisentence (n : ℕ) := Semisentence ℒₒᵣ n
+
+abbrev ArithmeticSentence := Sentence ℒₒᵣ
+
+abbrev ArithmeticSemiproposition (n : ℕ) := Semiproposition ℒₒᵣ n
+
+abbrev ArithmeticProposition := Proposition ℒₒᵣ
+
 section ToString
 
 variable {L : Language} [L.ORing]
 
 variable [ToString ξ]
 
-def Semiterm.toStringORing : Semiterm ℒₒᵣ ξ n → String
+def Semiterm.toStringORing : ArithmeticSemiterm ξ n → String
   |                        #x => "x_{" ++ toString (n - 1 - (x : ℕ)) ++ "}"
   |                        &x => "a_{" ++ toString x ++ "}"
   | func Language.Zero.zero _ => "0"
@@ -52,11 +70,11 @@ def Semiterm.toStringORing : Semiterm ℒₒᵣ ξ n → String
   |   func Language.Add.add v => "(" ++ toStringORing (v 0) ++ " + " ++ toStringORing (v 1) ++ ")"
   |   func Language.Mul.mul v => "(" ++ toStringORing (v 0) ++ " \\cdot " ++ toStringORing (v 1) ++ ")"
 
-instance : Repr (Semiterm ℒₒᵣ ξ n) := ⟨fun t _ ↦ t.toStringORing⟩
+instance : Repr (ArithmeticSemiterm ξ n) := ⟨fun t _ ↦ t.toStringORing⟩
 
-instance : ToString (Semiterm ℒₒᵣ ξ n) := ⟨Semiterm.toStringORing⟩
+instance : ToString (ArithmeticSemiterm ξ n) := ⟨Semiterm.toStringORing⟩
 
-def Semiformula.toStringORing : ∀ {n}, Semiformula ℒₒᵣ ξ n → String
+def Semiformula.toStringORing : ∀ {n}, ArithmeticSemiformula ξ n → String
   | _,                             ⊤ => "\\top"
   | _,                             ⊥ => "\\bot"
   | _,          rel Language.Eq.eq v => (v 0).toStringORing ++ " = " ++ (v 1).toStringORing
@@ -70,9 +88,9 @@ def Semiformula.toStringORing : ∀ {n}, Semiformula ℒₒᵣ ξ n → String
   | n,                          ∀⁰ φ => "(\\forall x_{" ++ toString n ++ "}) " ++ "[" ++ φ.toStringORing ++ "]"
   | n,                          ∃⁰ φ => "(\\exists x_{" ++ toString n ++ "}) " ++ "[" ++ φ.toStringORing ++ "]"
 
-instance : Repr (Semiformula ℒₒᵣ ξ n) := ⟨fun φ _ ↦ φ.toStringORing⟩
+instance : Repr (ArithmeticSemiformula ξ n) := ⟨fun φ _ ↦ φ.toStringORing⟩
 
-instance : ToString (Semiformula ℒₒᵣ ξ n) := ⟨Semiformula.toStringORing⟩
+instance : ToString (ArithmeticSemiformula ξ n) := ⟨Semiformula.toStringORing⟩
 
 end ToString
 
@@ -89,10 +107,10 @@ lemma gödelNumber_def (a : α) :
   gödelNumber a = Semiterm.Operator.encode ℒₒᵣ a := rfl
 
 lemma gödelNumber'_def (a : α) :
-  (⌜a⌝ : Semiterm ℒₒᵣ ξ n) = Semiterm.Operator.encode ℒₒᵣ a := rfl
+  (⌜a⌝ : ArithmeticSemiterm ξ n) = Semiterm.Operator.encode ℒₒᵣ a := rfl
 
 lemma gödelNumber'_eq_coe_encode (a : α) :
-  (⌜a⌝ : Semiterm ℒₒᵣ ξ n) = ↑(Encodable.encode a) := rfl
+  (⌜a⌝ : ArithmeticSemiterm ξ n) = ↑(Encodable.encode a) := rfl
 
 @[simp] lemma encode_encode_eq (a : α) :
     (gödelNumber (encode a) : Semiterm.Const ℒₒᵣ) = gödelNumber a := by simp [Semiterm.Operator.encode, gödelNumber_def]
@@ -135,14 +153,12 @@ def bexsLTSucc (t : Semiterm L ξ n) (φ : Semiformula L ξ (n + 1)) : Semiformu
 
 variable {M : Type*} {s : Structure L M} [LT M] [One M] [Add M] [Structure.LT L M] [Structure.One L M] [Structure.Add L M]
 
-variable {t : Semiterm L ξ n} {φ : Semiformula L ξ (n + 1)}
-
-lemma eval_ballLTSucc {e ε} :
-    Eval s e ε (φ.ballLTSucc t) ↔ ∀ x < t.val s e ε + 1, Eval s (x :> e) ε φ := by
+lemma eval_ballLTSucc {φ : Semiformula L ξ (n + 1)} {t : Semiterm L ξ n} {fv bv} :
+    (φ.ballLTSucc t).Eval (M := M) fv bv ↔ ∀ x < t.val (M := M) fv bv + 1, φ.Eval (M := M) (x :> fv) bv := by
   simp [ballLTSucc, Semiterm.Operator.numeral]
 
-lemma eval_bexsLTSucc {e ε} :
-    Eval s e ε (φ.bexsLTSucc t) ↔ ∃ x < t.val s e ε + 1, Eval s (x :> e) ε φ := by
+lemma eval_bexsLTSucc {φ : Semiformula L ξ (n + 1)} {t : Semiterm L ξ n} {fv bv} :
+    (φ.bexsLTSucc t).Eval (M := M) fv bv ↔ ∃ x < t.val (M := M) fv bv + 1, φ.Eval (M := M) (x :> fv) bv := by
   simp [bexsLTSucc, Semiterm.Operator.numeral]
 
 end Semiformula
@@ -166,8 +182,6 @@ macro_rules
     `(Semiformula.bexsLTSucc ⤫term(lit)[ $binders* | $fbinders* | $t ] ⤫formula(lit)[ $binders'* | $fbinders* | $φ ])
 
 end BinderNotation
-
-abbrev ArithmeticTheory := Theory ℒₒᵣ
 
 end FirstOrder
 

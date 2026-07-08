@@ -2,7 +2,7 @@ module
 
 public import Foundation.Propositional.Hilbert.Minimal.Basic
 public import Foundation.Logic.LindenbaumAlgebra
-public import Foundation.Vorspiel.Order
+public import Foundation.Vorspiel.Order.Heyting
 
 @[expose] public section
 
@@ -79,7 +79,7 @@ lemma val_def' {ℍ : HeytingSemantics α} {φ : Formula α} : ℍ ⊧ φ ↔ (�
 
 instance : Semantics.Top (HeytingSemantics α) := ⟨fun ℍ ↦ by simp [val_def]⟩
 
-instance : Semantics.Bot (HeytingSemantics α) := ⟨fun ℍ ↦ by simp [Semantics.NotModels, val_def]⟩
+instance : Semantics.Bot (HeytingSemantics α) := ⟨fun ℍ ↦ by simp [val_def]⟩
 
 instance : Semantics.And (HeytingSemantics α) := ⟨fun {ℍ φ ψ} ↦ by simp [val_def]⟩
 
@@ -113,7 +113,7 @@ lemma sound {φ : Formula α} : H ⊢ φ → mod H ⊧ φ := by
   | axm hφ => apply hℍ.models_set; assumption;
   | @mdp φ ψ _ _ ihpq ihp =>
     have : (ℍ ⊧ₕ φ) ≤ (ℍ ⊧ₕ ψ) := by simpa using ihpq
-    simpa [val_def'.mp ihp] using this
+    apply val_def'.mpr; simpa [val_def'.mp ihp] using this
   | _ => simp [himp_himp_inf_himp_inf_le, himp_inf_himp_inf_sup_le]
 
 instance : Sound H (mod H) := ⟨sound⟩
@@ -137,7 +137,8 @@ lemma lindenbaum_val_eq : (lindenbaum H ⊧ₕ φ) = ⟦φ⟧ := by
   | _ => rfl
 
 lemma lindenbaum_complete_iff {φ : Formula α} : lindenbaum H ⊧ φ ↔ H ⊢ φ := by
-  grind [val_def', lindenbaum_val_eq, provable_iff_eq_top]
+  rw [val_def', lindenbaum_val_eq]
+  exact provable_iff_eq_top.symm
 
 instance : Sound H (lindenbaum H) := ⟨lindenbaum_complete_iff.mpr⟩
 

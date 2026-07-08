@@ -2,7 +2,7 @@ module
 
 public import Foundation.Modal.Kripke.Logic.K
 public import Foundation.Semantics.Algebra.Modal.Basic
-public import Foundation.Vorspiel.Order
+public import Foundation.Vorspiel.Order.Heyting
 
 @[expose] public section
 
@@ -167,7 +167,8 @@ lemma lindenbaum_val_eq {φ} : (lindenbaum Ax ⊩ φ) = ⟦φ⟧ := by
     apply Entailment.LindenbaumAlgebra.box_def;
 
 lemma lindenbaum_complete_iff {φ : Formula α} : lindenbaum Ax ⊧ φ ↔ (Hilbert.Normal Ax) ⊢ φ := by
-  grind [lindenbaum_val_eq, Entailment.LindenbaumAlgebra.provable_iff_eq_top];
+  rw [def_val, lindenbaum_val_eq];
+  exact Entailment.LindenbaumAlgebra.provable_iff_eq_top.symm;
 
 instance : Sound (Hilbert.Normal Ax) (lindenbaum Ax) := ⟨lindenbaum_complete_iff.mpr⟩
 instance : Complete (Hilbert.Normal Ax) (lindenbaum Ax) := ⟨lindenbaum_complete_iff.mp⟩

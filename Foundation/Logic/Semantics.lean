@@ -162,8 +162,16 @@ lemma modelsSet_iff {𝓜 : M} {T : Set F} : 𝓜 ⊧* T ↔ ∀ ⦃φ⦄, φ �
 @[simp] lemma theory_satisfiable (𝓜 : M) : Satisfiable M (theory 𝓜) := ⟨𝓜, by simp⟩
 
 lemma not_satisfiable_finset [LogicalConnective F] [Tarski M] [DecidableEq F] (t : Finset F) :
-  ¬Satisfiable M (t : Set F) ↔ Valid M (t.image (∼·)).disj := by
+    ¬Satisfiable M (t : Set F) ↔ Valid M (t.image (∼·)).disj := by
   simp [Satisfiable, modelsSet_iff, Valid];
+
+@[simp] lemma satisfiable_conj₂ [LogicalConnective F] [Tarski M] [DecidableEq F] (l : List F) :
+    Satisfiable M {⋀l} ↔ Satisfiable M {φ | φ ∈ l} := by
+  simp [Satisfiable, modelsSet_iff]
+
+@[simp] lemma satisfiable_fconj [LogicalConnective F] [Tarski M] [DecidableEq F] (s : Finset F) :
+    Satisfiable M {s.conj} ↔ Satisfiable M {φ | φ ∈ s} := by
+  simp [Satisfiable, modelsSet_iff]
 
 lemma satisfiableSet_iff_models_nonempty {T : Set F} :
     Satisfiable M T ↔ (models M T).Nonempty :=
@@ -328,7 +336,7 @@ lemma conseq_compact [LogicalConnective F] [Semantics.Tarski M] [DecidableEq F] 
   constructor
   · intro ⟨u, ss, hu⟩
     refine ⟨Finset.erase u (∼φ), by simp [ss],?_⟩
-    simp only [Finset.coe_erase, Set.insert_diff_singleton]
+    simp only [Finset.coe_erase, Set.insert_sdiff_singleton]
     intro h; exact hu (Semantics.Satisfiable.of_subset h (by simp))
   · intro ⟨u, ss, hu⟩
     exact ⟨insert (∼φ) u,

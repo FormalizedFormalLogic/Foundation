@@ -15,7 +15,7 @@ variable {V : Type*} [ORingStructure V]
 
 section IOpen
 
-variable [V ⊧ₘ* 𝗜𝗢𝗽𝗲𝗻]
+variable [V↓[ℒₒᵣ] ⊧* 𝗜𝗢𝗽𝗲𝗻]
 
 def Pow2 (a : V) : Prop := 0 < a ∧ ∀ r ≤ a, 1 < r → r ∣ a → 2 ∣ r
 
@@ -23,8 +23,7 @@ def _root_.LO.FirstOrder.Arithmetic.pow2Def : 𝚺₀.Semisentence 1 :=
   .mkSigma “a. 0 < a ∧ ∀ r <⁺ a, 1 < r → r ∣ a → 2 ∣ r”
 
 instance pow2_defined : 𝚺₀-Predicate (Pow2 : V → Prop) via pow2Def := .mk fun v ↦ by
-  simp [Semiformula.eval_substs, Matrix.comp_vecCons', Matrix.constant_eq_singleton,
-    Pow2, pow2Def, le_iff_lt_succ, numeral_eq_natCast]
+  simp [Semiformula.eval_substs, Pow2, pow2Def, le_iff_lt_succ]
 
 instance pow2_definable : 𝚺₀-Predicate (Pow2 : V → Prop) := pow2_defined.to_definable
 
@@ -116,7 +115,7 @@ def _root_.LO.FirstOrder.Arithmetic.lenbitDef : 𝚺₀.Semisentence 2 :=
   .mkSigma “i a. ∃ z <⁺ a, !divDef.val z a i ∧ ¬2 ∣ z”
 
 instance lenbit_defined : 𝚺₀-Relation (LenBit : V → V → Prop) via lenbitDef := .mk fun v ↦ by
-  simp [lenbitDef, LenBit, numeral_eq_natCast]
+  simp [lenbitDef, LenBit]
 
 instance lenbit_definable : 𝚺₀-Relation (LenBit : V → V → Prop) := lenbit_defined.to_definable
 
@@ -142,7 +141,7 @@ lemma not_lenbit_iff_rem {i a : V} : ¬LenBit i a ↔ (a / i) % 2 = 0 := by
 @[simp] lemma LenBit.self {a : V} (pos : 0 < a) : LenBit a a := by simp [LenBit.iff_rem, pos]
 
 lemma LenBit.mod {i a k : V} (h : 2 * i ∣ k) : LenBit i (a % k) ↔ LenBit i a := by
-  have : 0 ≤ i := zero_le i
+  have : 0 ≤ i := Arithmetic.zero_le i
   rcases (eq_or_lt_of_le this) with (rfl | pos)
   · simp
   rcases h with ⟨k', hk'⟩
@@ -159,7 +158,7 @@ lemma LenBit.mod {i a k : V} (h : 2 * i ∣ k) : LenBit i (a % k) ↔ LenBit i a
 @[simp] lemma LenBit.mod_two_mul_self {a i : V} : LenBit i (a % (2 * i)) ↔ LenBit i a := LenBit.mod (by simp)
 
 lemma LenBit.add {i a b : V} (h : 2 * i ∣ b) : LenBit i (a + b) ↔ LenBit i a := by
-  have : 0 ≤ i := zero_le i
+  have : 0 ≤ i := Arithmetic.zero_le i
   rcases (eq_or_lt_of_le this) with (rfl | pos)
   · simp
   rcases h with ⟨b', hb'⟩
@@ -194,7 +193,7 @@ end IOpen
 
 section ISigma0
 
-variable [V ⊧ₘ* 𝗜𝚺₀]
+variable [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₀]
 
 namespace Pow2
 
@@ -308,7 +307,7 @@ lemma four_le {i : V} (hi : Pow2 i) (lt : 2 < i) : 4 ≤ i := by
 
 lemma mul_add_lt_of_mul_lt_of_pos {a b p q : V} (hp : Pow2 p) (hq : Pow2 q)
     (h : a * p < q) (hb : b < p) (hbq : b < q) : a * p + b < q := by
-  rcases zero_le a with (rfl | pos)
+  rcases Arithmetic.zero_le a with (rfl | pos)
   · simp [hbq]
   have : p ∣ q :=
     dvd_of_le hp hq (le_of_lt <| lt_of_le_of_lt (le_mul_of_pos_left pos) h)

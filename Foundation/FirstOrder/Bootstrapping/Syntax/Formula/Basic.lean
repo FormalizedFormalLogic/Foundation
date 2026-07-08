@@ -6,7 +6,7 @@ public import Foundation.FirstOrder.Arithmetic.Induction
 @[expose] public section
 namespace LO.FirstOrder.Arithmetic.Bootstrapping
 
-variable {V : Type*} [ORingStructure V] [V ⊧ₘ* 𝗜𝚺₁]
+variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 
 variable {L : Language} [L.Encodable] [L.LORDefinable]
 
@@ -759,8 +759,8 @@ variable (c β)
 lemma graph_defined : 𝚺₁-Relation₃ c.Graph L via β.graph L := .mk fun v ↦ by
   simp [Blueprint.graph, (c.construction L).fixpoint_defined.iff, Matrix.empty_eq]; rfl
 
-@[simp] lemma eval_graphDef (v) :
-    Semiformula.Evalbm V v (β.graph L).val ↔ c.Graph L (v 0) (v 1) (v 2) := (graph_defined β c).iff
+@[simp] lemma eval_graphDef (v : Fin 3 → V) :
+    (β.graph L).val.Evalb v ↔ c.Graph L (v 0) (v 1) (v 2) := (graph_defined β c).iff
 
 instance graph_definable : 𝚺-[0 + 1]-Relation₃ c.Graph L := c.graph_defined.to_definable
 
@@ -1156,7 +1156,7 @@ variable {L}
 section
 
 instance bv.defined : 𝚺₁-Function₁ bv (V := V) L via bvGraph L := .mk fun v ↦ by
-  simpa [bvGraph, Matrix.comp_vecCons', Matrix.constant_eq_singleton] using (BV.construction L).result_defined.defined ![v 0, 0, v 1]
+  simpa [bvGraph, Matrix.comp_vecCons', Matrix.constant_eq_singleton] using! (BV.construction L).result_defined.defined ![v 0, 0, v 1]
 
 instance bv.definable : 𝚺₁-Function₁ bv (V := V) L := bv.defined.to_definable
 

@@ -16,15 +16,15 @@ open PeanoMinus ISigma0 ISigma1 Bootstrapping Derivation
 
 namespace Theory
 
-variable {V : Type*} [ORingStructure V] [V ⊧ₘ* 𝗜𝚺₁]
+variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 variable {L : Language} [L.Encodable] [L.LORDefinable]
 
 variable {T U : Theory L} [T.Δ₁] [U.Δ₁]
 
 /-- Provability with restriction of proof size -/
-def RestrictedProvable (e : ℕ) (T : Theory L) [T.Δ₁] (φ : V) := ∃ d < Exp.exp (ORingStructure.numeral e), T.Proof d φ
+def RestrictedProvable (e : ℕ) (T : Theory L) [T.Δ₁] (φ : V) := ∃ d < Exp.exp (ORingStructure.numeral e), Arithmetic.Bootstrapping.Proof T d φ
 
-noncomputable def restrictedProvable (e : ℕ) : 𝚷₁.Semisentence 1 := .mkPi “φ. ∀ E, !expDef E !e → ∃ d < E, !T.proof.pi d φ”
+noncomputable def restrictedProvable (e : ℕ) : 𝚷₁.Semisentence 1 := .mkPi “φ. ∀ E, !expDef E !e → ∃ d < E, !(proof T).pi d φ”
 
 noncomputable abbrev restrictedProvabilityPred (e : ℕ) (σ : Sentence L) : ArithmeticSentence := (T.restrictedProvable e).val/[⌜σ⌝]
 
@@ -43,7 +43,7 @@ end Theory
 
 namespace Arithmetic
 
-variable {V : Type} [ORingStructure V] [V ⊧ₘ* 𝗜𝚺₁]
+variable {V : Type} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 variable {T U : ArithmeticTheory} [T.Δ₁] -- [𝗜𝚺₁ ⪯ T] [𝗜𝚺₁ ⪯ U]
 variable {e : ℕ}
 
@@ -59,22 +59,22 @@ private lemma provable_E_restrictedGödel_restrictedGödel' [𝗜𝚺₁ ⪯ U] 
 private lemma iff_provable_restrictedGödel_provable_restrictedGödel' [𝗜𝚺₁ ⪯ U] : U ⊢ (T.restrictedGödel e) ↔ U ⊢ (T.restrictedGödel' e) := by
   apply Entailment.iff_of_E! provable_E_restrictedGödel_restrictedGödel';
 
-private lemma iff_true_restrictedGödel_true_restrictedGödel' : ℕ ⊧ₘ (T.restrictedGödel e) ↔ ℕ ⊧ₘ (T.restrictedGödel' e) := by
+private lemma iff_true_restrictedGödel_true_restrictedGödel' : ℕ↓[ℒₒᵣ] ⊧ (T.restrictedGödel e) ↔ ℕ↓[ℒₒᵣ] ⊧ (T.restrictedGödel' e) := by
   apply Semantics.models_iff.mp;
   apply models_of_provable (T := 𝗜𝚺₁) inferInstance;
   apply provable_E_restrictedGödel_restrictedGödel';
 
-lemma models_restrictedGödel : V ⊧ₘ T.restrictedGödel e ↔ ∀ x : V, x < Exp.exp (ORingStructure.numeral e) → ¬T.Proof x (⌜T.restrictedGödel e⌝) := by
+lemma models_restrictedGödel : V↓[ℒₒᵣ] ⊧ T.restrictedGödel e ↔ ∀ x : V, x < Exp.exp (ORingStructure.numeral e) → ¬Arithmetic.Bootstrapping.Proof T x (⌜T.restrictedGödel e⌝) := by
   apply Iff.trans $ Semantics.models_iff.mp $ models_of_provable (T := 𝗜𝚺₁) inferInstance $ def_restrictedGödel;
   simp [models_iff, Theory.RestrictedProvable]
 
-private lemma models_neg_restrictedGödel : ¬V ⊧ₘ T.restrictedGödel e ↔ ∃ x : V, x < Exp.exp (ORingStructure.numeral e) ∧ T.Proof x (⌜T.restrictedGödel e⌝) := by
+private lemma models_neg_restrictedGödel : ¬V↓[ℒₒᵣ] ⊧ T.restrictedGödel e ↔ ∃ x : V, x < Exp.exp (ORingStructure.numeral e) ∧ Arithmetic.Bootstrapping.Proof T x (⌜T.restrictedGödel e⌝) := by
   simpa using models_restrictedGödel.not;
 
 variable [𝗜𝚺₁ ⪯ T] [T.SoundOnHierarchy 𝚺 1]
 
 /- Gödel sentence by restricted provability is true. -/
-theorem true_restrictedGödel : ℕ ⊧ₘ T.restrictedGödel e := by
+theorem true_restrictedGödel : ℕ↓[ℒₒᵣ] ⊧ T.restrictedGödel e := by
   by_contra hC;
   obtain ⟨e, _, he⟩ := models_neg_restrictedGödel (e := e) |>.mp hC;
   apply hC;

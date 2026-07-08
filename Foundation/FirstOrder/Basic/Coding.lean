@@ -189,8 +189,7 @@ lemma encode_ex (φ : Semiformula L ξ (n + 1)) : encode (∃⁰ φ) = (Nat.pair
 @[simp] lemma encode_emb (σ : Semisentence L n) :
     encode (Rewriting.emb σ : Semiformula L ξ n) = encode σ := by
   induction σ using rec' <;>
-    simp [coe_rel, coe_nrel,
-      encode_rel, encode_nrel, encode_verum, encode_falsum, encode_and, encode_or, encode_all, encode_ex,
+    simp [encode_rel, encode_nrel, encode_verum, encode_falsum, encode_and, encode_or, encode_all, encode_ex,
       ← encode_eq_toNat, *]
 
 @[simp] lemma encode_inj_sentence {σ : Semisentence L n} {φ : Semiformula L ξ n} :

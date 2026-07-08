@@ -317,14 +317,14 @@ lemma iff_mem_imp
       replace hq := mem_compl_of_not_mem hsub_q hq;
       induction ψ using Formula.cases_neg with
       | hfalsum => exact efq!;
-      | hatom a => exact C_of_N $ Context.by_axm! (by simpa using hq);
-      | hbox ψ => exact C_of_N $ Context.by_axm! (by simpa using hq);
+      | hatom a => exact C_of_N $ Context.by_axm! hq;
+      | hbox ψ => exact C_of_N $ Context.by_axm! hq;
       | hneg ψ =>
         simp only [Formula.complement.neg_def] at hq;
         exact CN!_of_! $ Context.by_axm! hq;
       | himp ψ χ h =>
         simp only [Formula.complement.imp_def₁ h] at hq;
-        exact C_of_N $ Context.by_axm! (by simpa using hq);
+        exact C_of_N $ Context.by_axm! hq;
     . apply membership_iff (by assumption) |>.mpr;
       exact C!_of_conseq! $ membership_iff (by assumption) |>.mp $ iff_not_mem_compl (by assumption) |>.mpr hr;
 

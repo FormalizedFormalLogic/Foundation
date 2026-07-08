@@ -50,7 +50,10 @@ instance : Logic.Substitution (Hilbert.WithHenkin Ax) where
   subst {φ} s h := by
     rw [Logic.iff_provable] at h ⊢;
     induction h with
-    | @axm _ s' ih => simpa using axm (s := s' ∘ s) ih;
+    | @axm _ s' ih =>
+        have h := axm (s := s' ∘ s) ih
+        rw [Formula.subst.def_comp] at h
+        exact h
     | mdp hφψ hφ ihφψ ihφ => apply mdp ihφψ ihφ;
     | nec hφ ihφ => apply nec ihφ;
     | henkin hφψ ihφψ => apply henkin ihφψ;
@@ -109,18 +112,22 @@ variable [DecidableEq α]
 instance instHasAxiomK [Ax.HasK] : Entailment.HasAxiomK (Hilbert.WithHenkin Ax) where
   K φ ψ := by
     constructor;
-    simpa [HasK.ne_pq] using Hilbert.WithHenkin.axm
+    have h := Hilbert.WithHenkin.axm
       (φ := Axioms.K (.atom (HasK.p Ax)) (.atom (HasK.q Ax)))
       (s := λ b => if (HasK.p Ax) = b then φ else if (HasK.q Ax) = b then ψ else (.atom b))
-      (by exact HasK.mem_K);
+      (show _ ∈ Ax from HasK.mem_K);
+    simp [HasK.ne_pq] at h;
+    exact h;
 
 instance instHasAxiomFour [Ax.HasFour] : Entailment.HasAxiomFour (Hilbert.WithHenkin Ax) where
   Four φ := by
     constructor;
-    simpa using Hilbert.WithHenkin.axm
+    have h := Hilbert.WithHenkin.axm
       (φ := Axioms.Four (.atom (HasFour.p Ax)))
       (s := λ b => if (HasFour.p Ax) = b then φ else (.atom b))
-      (by exact HasFour.mem_Four);
+      (show _ ∈ Ax from HasFour.mem_Four);
+    simp at h;
+    exact h;
 
 end
 

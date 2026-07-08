@@ -14,33 +14,33 @@ variable {V : Type*} [ORingStructure V]
 
 section IOpen
 
-variable [V ⊧ₘ* 𝗜𝗢𝗽𝗲𝗻]
+variable [V↓[ℒₒᵣ] ⊧* 𝗜𝗢𝗽𝗲𝗻]
 
-instance : V ⊧ₘ* 𝗣𝗔⁻ :=
-  have : V ⊧ₘ* 𝗜𝗢𝗽𝗲𝗻 := inferInstance
+instance : V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ :=
+  have : V↓[ℒₒᵣ] ⊧* 𝗜𝗢𝗽𝗲𝗻 := inferInstance
   models_of_subtheory this
 
-instance : V ⊧ₘ* InductionScheme ℒₒᵣ Semiformula.Open :=
-  have : V ⊧ₘ* 𝗜𝗢𝗽𝗲𝗻 := inferInstance
+instance : V↓[ℒₒᵣ] ⊧* InductionScheme ℒₒᵣ Semiformula.Open :=
+  have : V↓[ℒₒᵣ] ⊧* 𝗜𝗢𝗽𝗲𝗻 := inferInstance
   models_of_subtheory this
 
 @[elab_as_elim]
 lemma succ_induction {P : V → Prop}
-    (hP : ∃ p : Semiformula ℒₒᵣ V 1, p.Open ∧ ∀ x, P x ↔ Semiformula.Evalm V ![x] id p)
+    (hP : ∃ φ : ArithmeticSemiformula V 1, φ.Open ∧ ∀ x, P x ↔ φ.Eval ![x] id)
     (zero : P 0) (succ : ∀ x, P x → P (x + 1)) : ∀ x, P x :=
   InductionScheme.succ_induction (C := Semiformula.Open) (by
-    rcases hP with ⟨p, hp, hhp⟩
+    rcases hP with ⟨φ, hp, hhp⟩
     haveI : Inhabited V := Classical.inhabited_of_nonempty'
-    refine ⟨p.enumarateFVar, Rew.rewriteMap p.idxOfFVar ▹ p, by simp [hp], ?_⟩
+    refine ⟨φ.enumarateFVar, Rew.rewriteMap φ.idxOfFVar ▹ φ, by simp [hp], ?_⟩
     intro x
     simp only [hhp, Nat.succ_eq_add_one, Nat.reduceAdd, Semiformula.eval_rewriteMap]
-    exact Semiformula.eval_iff_of_funEqOn p (by
+    exact Semiformula.eval_iff_of_funEqOn φ (by
       intro z hz
       simp [Semiformula.enumarateFVar_idxOfFVar (Semiformula.mem_fvarList_iff_fvar?.mpr hz)]))
     zero succ
 
 lemma least_number {P : V → Prop}
-    (hP : ∃ p : Semiformula ℒₒᵣ V 1, p.Open ∧ ∀ x, P x ↔ Semiformula.Evalm V ![x] id p)
+    (hP : ∃ φ : ArithmeticSemiformula V 1, φ.Open ∧ ∀ x, P x ↔ φ.Eval ![x] id)
     (zero : P 0) {a} (counterex : ¬P a) : ∃ x, P x ∧ ¬P (x + 1) := by
   by_contra A
   have : ∀ x, P x := by
@@ -124,14 +124,14 @@ lemma div_mul_add (a b : V) {r} (hr : r < b) : (a * b + r) / b = a :=
 lemma div_mul_add' (a b : V) {r} (hr : r < b) : (b * a + r) / b = a := by simpa [mul_comm] using div_mul_add a b hr
 
 @[simp] lemma zero_div (a : V) : 0 / a = 0 := by
-  rcases zero_le a with (rfl | pos)
+  rcases Arithmetic.zero_le a with (rfl | pos)
   · simp
   · exact div_eq_of (by simp) (by simpa)
 
 lemma div_mul (a b c : V) : a / (b * c) = a / b / c := by
-  rcases zero_le b with (rfl | hb)
+  rcases Arithmetic.zero_le b with (rfl | hb)
   · simp
-  rcases zero_le c with (rfl | hc)
+  rcases Arithmetic.zero_le c with (rfl | hc)
   · simp
   exact div_eq_of
     (by calc
@@ -142,14 +142,14 @@ lemma div_mul (a b c : V) : a / (b * c) = a / b / c := by
           _ ≤ b * c * (a / b / c + 1) := by simpa [mul_assoc] using mul_le_mul_left (lt_iff_succ_le.mp <| lt_mul_div_succ (a / b) hc))
 
 @[simp] lemma mul_div_le (a b : V) : b * (a / b) ≤ a := by
-  have : 0 ≤ b := by exact zero_le b
+  have : 0 ≤ b := by exact Arithmetic.zero_le b
   rcases this with (rfl | pos)
   · simp
   · rcases eq_mul_div_add_of_pos a pos with ⟨v, _, e⟩
     simpa [← e] using show b * (a / b) ≤ b * (a / b) + v from le_self_add
 
 @[simp] lemma div_le (a b : V) : a / b ≤ a := by
-  have : 0 ≤ b := zero_le b
+  have : 0 ≤ b := Arithmetic.zero_le b
   rcases this with (rfl | pos)
   · simp
   · have : 1 * (a / b) ≤ b * (a / b) := mul_le_mul_of_nonneg_right (le_iff_lt_succ.mpr (by simp [pos])) (by simp)
@@ -192,7 +192,7 @@ lemma div_mul_add_self' (a c : V) {b} (pos : 0 < b) : (b * a + c) / b = a + c / 
   simpa using div_mul_add 0 b h
 
 @[simp] lemma div_sq (a : V) : a^2 / a = a := by
-  rcases zero_le a with (rfl | pos)
+  rcases Arithmetic.zero_le a with (rfl | pos)
   · simp
   · simp [sq, pos]
 
@@ -208,14 +208,14 @@ lemma div_mul_add_self' (a c : V) {b} (pos : 0 < b) : (b * a + c) / b = a + c / 
   simpa using div_add_mul_self a 1 pos
 
 lemma mul_div_self_of_dvd {a b : V} : a * (b / a) = b ↔ a ∣ b := by
-  rcases zero_le a with (rfl | pos)
+  rcases Arithmetic.zero_le a with (rfl | pos)
   · simp [eq_comm]
   · constructor
     · intro e; rw [←e]; simp
     · rintro ⟨r, rfl⟩; simp [pos]
 
 lemma div_lt_of_pos_of_one_lt {a b : V} (ha : 0 < a) (hb : 1 < b) : a / b < a := by
-  rcases zero_le (a / b) with (e | lt)
+  rcases Arithmetic.zero_le (a / b) with (e | lt)
   · simp [←e, ha]
   · exact lt_of_lt_of_le (lt_mul_of_one_lt_left lt hb) (mul_div_le a b)
 
@@ -224,7 +224,7 @@ lemma le_two_mul_div_two_add_one (a : V) : a ≤ 2 * (a / 2) + 1 := by
   exact le_iff_lt_succ.mpr (by simpa [add_assoc, one_add_one_eq_two, mul_add] using this)
 
 lemma div_monotone {a b : V} (h : a ≤ b) (c : V) : a / c ≤ b / c := by
-  rcases zero_le c with (rfl | pos)
+  rcases Arithmetic.zero_le c with (rfl | pos)
   · simp
   by_contra A
   have : b / c + 1 ≤ a / c := succ_le_iff_lt.mpr (by simpa using A)
@@ -280,7 +280,7 @@ lemma div_add_mod (a b : V) : b * (a / b) + (a % b) = a :=
 @[simp] lemma zero_mod (a : V) : 0 % a = 0 := by simp [mod_def]
 
 @[simp] lemma mod_self (a : V) : a % a = 0 := by
-  rcases zero_le a with (rfl | h)
+  rcases Arithmetic.zero_le a with (rfl | h)
   · simp
   · simp [mod_def, h]
 
@@ -300,7 +300,7 @@ lemma mod_mul_add_of_lt (a b : V) {r} (hr : r < b) : (a * b + r) % b = r := by
   simp [mul_comm b a, pos]
 
 @[simp] lemma mod_mul_self_left (a b : V) : (a * b) % b = 0 := by
-  rcases zero_le b with (rfl | h)
+  rcases Arithmetic.zero_le b with (rfl | h)
   · simp
   · simpa using mod_mul_add_of_lt a b h
 
@@ -349,7 +349,7 @@ lemma mod_mul {a b m : V} (pos : 0 < m) : (a * b) % m = ((a % m) * (b % m)) % m 
   _           = ((a % m) * (b % m)) % m                               := by simp [add_mul, mul_add, pos, mul_left_comm _ m, add_assoc, mul_assoc]
 
 @[simp] lemma mod_div (a b : V) : a % b / b = 0 := by
-  rcases zero_le b with (rfl | pos)
+  rcases Arithmetic.zero_le b with (rfl | pos)
   · simp
   · exact div_eq_zero_of_lt b (by simp [pos])
 
@@ -551,7 +551,7 @@ prefix: 80 "π₁" => pi₁
 
 prefix: 80 "π₂" => pi₂
 
-@[simp] lemma pair_unpair (a : V) : ⟪π₁ a, π₂ a⟫ = a := by
+@[simp, grind =] lemma pair_unpair (a : V) : ⟪π₁ a, π₂ a⟫ = a := by
   simp only [pi₁, unpair, pi₂]
   split_ifs with h
   · simp [pair, h]
@@ -563,7 +563,7 @@ prefix: 80 "π₂" => pi₂
       _                                 = √a * √a + (a - √a * √a)             := by simp [add_tsub_self_of_le this]
       _                                 = a                                   := add_tsub_self_of_le (by simp)
 
-@[simp] lemma unpair_pair (a b : V) : unpair ⟪a, b⟫ = (a, b) := by
+@[simp, grind =] lemma unpair_pair (a b : V) : unpair ⟪a, b⟫ = (a, b) := by
   simp only [pair]; split_ifs with h
   · have : √(b * b + a) = b := sqrt_eq_of_le_of_le (by simp) (by simpa using le_trans (le_of_lt h) (by simp))
     simp [unpair, this, show ¬b ≤ a from by simpa using h]
@@ -571,9 +571,9 @@ prefix: 80 "π₂" => pi₂
       sqrt_eq_of_le_of_le (by simp) (by simp [two_mul, show b ≤ a from by simpa using h])
     simp [unpair, this, add_assoc]
 
-@[simp] lemma pi₁_pair (a b : V) : π₁ ⟪a, b⟫ = a := by simp [pi₁]
+@[simp, grind =] lemma pi₁_pair (a b : V) : π₁ ⟪a, b⟫ = a := by simp [pi₁]
 
-@[simp] lemma pi₂_pair (a b : V) : π₂ ⟪a, b⟫ = b := by simp [pi₂]
+@[simp, grind =] lemma pi₂_pair (a b : V) : π₂ ⟪a, b⟫ = b := by simp [pi₂]
 
 noncomputable def pairEquiv : V × V ≃ V := ⟨Function.uncurry pair, unpair, fun ⟨a, b⟩ => unpair_pair a b, pair_unpair⟩
 
@@ -670,7 +670,7 @@ lemma pair_lt_pair {a₁ a₂ b₁ b₂ : V} (ha : a₁ < a₂) (hb : b₁ < b�
   · simp [←add_assoc, add_right_comm _ a]; simp [add_right_comm _ (b * b)]
   · simp [←add_assoc, add_right_comm _ b]; simp [add_right_comm _ a]; simp [add_assoc]
 
-@[simp] lemma pair_ext_iff {a₁ a₂ b₁ b₂ : V} : ⟪a₁, b₁⟫ = ⟪a₂, b₂⟫ ↔ a₁ = a₂ ∧ b₁ = b₂ :=
+@[simp, grind =>] lemma pair_ext_iff {a₁ a₂ b₁ b₂ : V} : ⟪a₁, b₁⟫ = ⟪a₂, b₂⟫ ↔ a₁ = a₂ ∧ b₁ = b₂ :=
   ⟨fun e ↦ ⟨by simpa using congr_arg (π₁ ·) e, by simpa using congr_arg (π₂ ·) e⟩, by rintro ⟨rfl, rfl⟩; simp⟩
 
 section
@@ -769,33 +769,33 @@ end IOpen
 /-! ### Polynomial induction -/
 
 @[elab_as_elim]
-lemma polynomial_induction [V ⊧ₘ* 𝗣𝗔⁻] (Γ m) [V ⊧ₘ* 𝗜𝗡𝗗 Γ m]
+lemma polynomial_induction [V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻] (Γ m) [V↓[ℒₒᵣ] ⊧* 𝗜𝗡𝗗 Γ m]
     {P : V → Prop} (hP : Γ-[m]-Predicate P)
     (zero : P 0) (even : ∀ x > 0, P x → P (2 * x)) (odd : ∀ x, P x → P (2 * x + 1)) : ∀ x, P x := by
-  have : V ⊧ₘ* 𝗜𝗡𝗗 Γ m := inferInstance
-  have : V ⊧ₘ* 𝗜𝗢𝗽𝗲𝗻 := models_of_subtheory this
+  have : V↓[ℒₒᵣ] ⊧* 𝗜𝗡𝗗 Γ m := inferInstance
+  have : V↓[ℒₒᵣ] ⊧* 𝗜𝗢𝗽𝗲𝗻 := models_of_subtheory this
   intro x; induction x using InductionOnHierarchy.order_induction
   · exact Γ
   · exact m
   · exact hP
   case inst => exact inferInstance
   case ind x IH =>
-    rcases zero_le x with (rfl | pos)
+    rcases Arithmetic.zero_le x with (rfl | pos)
     · exact zero
     · have : x / 2 < x := div_lt_of_pos_of_one_lt pos one_lt_two
       rcases even_or_odd' x with (hx | hx)
       · simpa [←hx] using even (x / 2) (by by_contra A; simp at A; simp [show x = 0 from by simpa [A] using hx] at pos) (IH (x / 2) this)
       · simpa [←hx] using odd (x / 2) (IH (x / 2) this)
 
-@[elab_as_elim] lemma sigma0_polynomial_induction [V ⊧ₘ* 𝗜𝚺₀] {P : V → Prop} (hP : 𝚺₀-Predicate P)
+@[elab_as_elim] lemma sigma0_polynomial_induction [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₀] {P : V → Prop} (hP : 𝚺₀-Predicate P)
     (zero : P 0) (even : ∀ x > 0, P x → P (2 * x)) (odd : ∀ x, P x → P (2 * x + 1)) : ∀ x, P x :=
   polynomial_induction 𝚺 0 (P := P) hP zero even odd
 
-@[elab_as_elim] lemma sigma1_polynomial_induction [V ⊧ₘ* 𝗜𝚺₁] {P : V → Prop} (hP : 𝚺₁-Predicate P)
+@[elab_as_elim] lemma sigma1_polynomial_induction [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] {P : V → Prop} (hP : 𝚺₁-Predicate P)
     (zero : P 0) (even : ∀ x > 0, P x → P (2 * x)) (odd : ∀ x, P x → P (2 * x + 1)) : ∀ x, P x :=
   polynomial_induction 𝚺 1 (P := P) hP zero even odd
 
-@[elab_as_elim] lemma pi1_polynomial_induction [V ⊧ₘ* 𝗜𝚺₁] {P : V → Prop} (hP : 𝚷₁-Predicate P)
+@[elab_as_elim] lemma pi1_polynomial_induction [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] {P : V → Prop} (hP : 𝚷₁-Predicate P)
     (zero : P 0) (even : ∀ x > 0, P x → P (2 * x)) (odd : ∀ x, P x → P (2 * x + 1)) : ∀ x, P x :=
   polynomial_induction 𝚷 1 (P := P) hP zero even odd
 

@@ -11,18 +11,18 @@ reference: Ralf Schindler, "Set Theory, Exploring Independence and Truth" [Sch14
 
 namespace LO.FirstOrder.SetTheory
 
-variable {V : Type*} [SetStructure V] [Nonempty V] [V ⊧ₘ* 𝗭]
+variable {V : Type*} [SetStructure V] [Nonempty V] [V↓[ℒₛₑₜ] ⊧* 𝗭]
 
 /-! ### Transitive set -/
 
 class IsTransitive (x : V) : Prop where
   transitive : ∀ y ∈ x, y ⊆ x
 
-omit [Nonempty V] [V ⊧ₘ* 𝗭] in
+omit [Nonempty V] [V↓[ℒₛₑₜ] ⊧* 𝗭] in
 lemma isTransitive_def {x : V} : IsTransitive x ↔ ∀ y ∈ x, y ⊆ x :=
   ⟨fun h ↦ h.transitive, fun h ↦ ⟨h⟩⟩
 
-def IsTransitive.dfn : Semisentence ℒₛₑₜ 1 := “x. ∀ y ∈ x, y ⊆ x”
+def IsTransitive.dfn : SetTheorySemisentence 1 := “x. ∀ y ∈ x, y ⊆ x”
 
 instance IsTransitive.defined : ℒₛₑₜ-predicate[V] IsTransitive via IsTransitive.dfn :=
   ⟨fun v ↦ by simp [IsTransitive.dfn, isTransitive_def]⟩
@@ -31,7 +31,7 @@ instance IsTransitive.definable : ℒₛₑₜ-predicate[V] IsTransitive := IsTr
 
 namespace IsTransitive
 
-omit [Nonempty V] [V ⊧ₘ* 𝗭] in
+omit [Nonempty V] [V↓[ℒₛₑₜ] ⊧* 𝗭] in
 lemma mem_trans {x y z : V} (H : IsTransitive z) (hxy : x ∈ y) (hyz : y ∈ z) : x ∈ z := H.transitive y hyz x hxy
 
 @[simp] protected instance empty : IsTransitive (∅ : V) := ⟨fun x ↦ by simp⟩
@@ -106,12 +106,12 @@ end IsTransitive
 class IsOrdinal (x : V) : Prop extends IsTransitive x where
   trichotomy : ∀ y ∈ x, ∀ z ∈ x, y ∈ z ∨ y = z ∨ z ∈ y
 
-omit [Nonempty V] [V ⊧ₘ* 𝗭] in
+omit [Nonempty V] [V↓[ℒₛₑₜ] ⊧* 𝗭] in
 lemma isOrdinal_iff {x : V} :
     IsOrdinal x ↔ IsTransitive x ∧ ∀ y ∈ x, ∀ z ∈ x, y ∈ z ∨ y = z ∨ z ∈ y :=
   ⟨fun h ↦ ⟨⟨h.transitive⟩, h.trichotomy⟩, fun h ↦ { transitive := h.1.transitive, trichotomy := h.2 }⟩
 
-def IsOrdinal.dfn : Semisentence ℒₛₑₜ 1 := “x. !IsTransitive.dfn x ∧ ∀ y ∈ x, ∀ z ∈ x, y ∈ z ∨ y = z ∨ z ∈ y”
+def IsOrdinal.dfn : SetTheorySemisentence 1 := “x. !IsTransitive.dfn x ∧ ∀ y ∈ x, ∀ z ∈ x, y ∈ z ∨ y = z ∨ z ∈ y”
 
 instance IsOrdinal.defined : ℒₛₑₜ-predicate[V] IsOrdinal via IsOrdinal.dfn := ⟨fun δ ↦ by simp [isOrdinal_iff, dfn]⟩
 
@@ -150,7 +150,7 @@ protected instance succ [h : IsOrdinal α] : IsOrdinal (succ α) where
       · simp_all
       · exact h.trichotomy β₁ h₁ β₂ h₂
 
-protected instance nat : α ∈ (ω : V) → IsOrdinal (α : V) := by
+protected lemma nat : α ∈ (ω : V) → IsOrdinal (α : V) := by
   apply naturalNumber_induction
   · definability
   case zero => simp [zero_def]
@@ -326,10 +326,10 @@ instance : Coe (Ordinal V) V := ⟨Ordinal.val⟩
 
 @[coe] def IsOrdinal.toOrdinal (α : V) [IsOrdinal α] : Ordinal V := ⟨α, inferInstance⟩
 
-omit [Nonempty V] [V ⊧ₘ* 𝗭] in
+omit [Nonempty V] [V↓[ℒₛₑₜ] ⊧* 𝗭] in
 @[simp] lemma IsOrdinal.toOrdinal_val (α : V) [IsOrdinal α] : (IsOrdinal.toOrdinal α).val = α := rfl
 
-omit [Nonempty V] [V ⊧ₘ* 𝗭] in
+omit [Nonempty V] [V↓[ℒₛₑₜ] ⊧* 𝗭] in
 @[simp] lemma Ordinal.val_toOrdinal (α : Ordinal V) : IsOrdinal.toOrdinal α.val = α := rfl
 
 namespace Ordinal
@@ -340,10 +340,10 @@ instance : LT (Ordinal V) := ⟨fun α β ↦ α.val ∈ β.val⟩
 
 instance : LE (Ordinal V) := ⟨fun α β ↦ α.val ⊆ β.val⟩
 
-omit [Nonempty V] [V ⊧ₘ* 𝗭] in
+omit [Nonempty V] [V↓[ℒₛₑₜ] ⊧* 𝗭] in
 lemma lt_def : α < β ↔ α.val ∈ β.val := by rfl
 
-omit [Nonempty V] [V ⊧ₘ* 𝗭] in
+omit [Nonempty V] [V↓[ℒₛₑₜ] ⊧* 𝗭] in
 lemma le_def : α ≤ β ↔ α.val ⊆ β.val := by rfl
 
 instance : IsOrdinal α.val := α.ordinal

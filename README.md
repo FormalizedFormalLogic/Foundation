@@ -33,9 +33,6 @@ Main results of this repository. More detailed explanations are provided in the 
   - [Modal Logic Zoo](#modal-logic-zoo)
 - `ProvabilityLogic`: [Provability Logic][provability_logic]
   - [Solovay's Arithmetical Completeness Theorem for GL][provability_logic:GL_arith_complete]
-- `InterpretabilityLogic`: [Interpretability Logic][interpretability_logic]
-  - [Veltman Semantics][interpretability_logic:veltman]
-  - [Interpretability Logic Zoo](#interpretability-logic-zoo)
 - `Meta`: Proof automation.
 - `Logic`: Fundamental tools for various logics.
 - `Vospiel`: Supplemental definitions and theorems for mathlib.
@@ -66,9 +63,6 @@ Main results of this repository. More detailed explanations are provided in the 
 [modal:boxdot_conjecture]: ./Foundation/Modal/Boxdot/
 [provability_logic]: ./Foundation/ProvabilityLogic/
 [provability_logic:GL_arith_complete]: ./Foundation/ProvabilityLogic/GL/Completeness.lean
-[interpretability_logic]: ./Foundation/InterpretabilityLogic/
-[interpretability_logic:veltman]: ./Foundation/InterpretabilityLogic/Veltman/
-[interpretability_logic:verbugge]: ./Foundation/InterpretabilityLogic/Verbrugge/
 
 ## Documents
 
@@ -103,10 +97,6 @@ Automatically generated[^1] diagrams "Zoo", illustrate the Lean4-verified interr
 ### Modal Logic Zoo
 
 ![Modal Logic Zoo](https://formalizedformallogic.github.io/Zoo/modal.png)
-
-### Interpretability Logic Zoo
-
-![Interpretability Logic Zoo](https://formalizedformallogic.github.io/Zoo/interpretability_logic.png)
 
 ## Contributing
 

@@ -49,7 +49,7 @@ instance : Logic.Substitution (Hilbert.WithRE Ax) where
   subst {φ} s h := by
     rw [Logic.iff_provable] at h ⊢;
     induction h with
-    | @axm _ s' ih => simpa using axm (s := s' ∘ s) ih;
+    | @axm _ s' ih => show WithRE Ax _; simpa using axm (s := s' ∘ s) ih;
     | mdp hφψ hφ ihφψ ihφ => apply mdp ihφψ ihφ;
     | re hφψ ihφψ => apply re; assumption;
     | implyK φ ψ => apply implyK;
@@ -106,18 +106,20 @@ variable [DecidableEq α]
 instance instHasAxiomM [Ax.HasM] : Entailment.HasAxiomM (Hilbert.WithRE Ax) where
   M φ ψ := by
     constructor;
-    simpa [HasM.ne_pq] using Hilbert.WithRE.axm
+    have h := Hilbert.WithRE.axm
       (φ := Axioms.M (.atom (HasM.p Ax)) (.atom (HasM.q Ax)))
       (s := λ b => if (HasM.p Ax) = b then φ else if (HasM.q Ax) = b then ψ else (.atom b))
-      (by exact HasM.mem_m);
+      (show _ ∈ Ax from HasM.mem_m);
+    simp [HasM.ne_pq] at h; exact h;
 
 instance instHasAxiomC [Ax.HasC] : Entailment.HasAxiomC (Hilbert.WithRE Ax) where
   C φ ψ := by
     constructor;
-    simpa [HasC.ne_pq] using Hilbert.WithRE.axm
+    have h := Hilbert.WithRE.axm
       (φ := Axioms.C (.atom (HasC.p Ax)) (.atom (HasC.q Ax)))
       (s := λ b => if (HasC.p Ax) = b then φ else if (HasC.q Ax) = b then ψ else (.atom b))
-      (by exact HasC.mem_c);
+      (show _ ∈ Ax from HasC.mem_c);
+    simp [HasC.ne_pq] at h; exact h;
 
 instance instHasAxiomN [Ax.HasN] : Entailment.HasAxiomN (Hilbert.WithRE Ax) where
   N := by constructor; apply Hilbert.WithRE.axm (φ := Axioms.N) (s := .id) (by exact HasN.mem_n);
@@ -125,53 +127,62 @@ instance instHasAxiomN [Ax.HasN] : Entailment.HasAxiomN (Hilbert.WithRE Ax) wher
 instance instHasAxiomK [Ax.HasK] : Entailment.HasAxiomK (Hilbert.WithRE Ax) where
   K φ ψ := by
     constructor;
-    simpa [HasK.ne_pq] using Hilbert.WithRE.axm
+    have h := Hilbert.WithRE.axm
       (φ := Axioms.K (.atom (HasK.p Ax)) (.atom (HasK.q Ax)))
       (s := λ b => if (HasK.p Ax) = b then φ else if (HasK.q Ax) = b then ψ else (.atom b))
-      (by exact HasK.mem_K);
+      (show _ ∈ Ax from HasK.mem_K);
+    simp [HasK.ne_pq] at h; exact h;
 
 instance instHasAxiomT [Ax.HasT] : Entailment.HasAxiomT (Hilbert.WithRE Ax) where
   T φ := by
     constructor;
-    simpa using Hilbert.WithRE.axm
+    have h := Hilbert.WithRE.axm
       (φ := Axioms.T (.atom (HasT.p Ax)))
       (s := λ b => if (HasT.p Ax) = b then φ else (.atom b))
-      (by exact HasT.mem_T);
+      (show _ ∈ Ax from HasT.mem_T);
+    simp at h; exact h;
 
 instance instHasAxiomD [Ax.HasD] : Entailment.HasAxiomD (Hilbert.WithRE Ax) where
   D φ := by
     constructor;
-    simpa using Hilbert.WithRE.axm
+    have h := Hilbert.WithRE.axm
       (φ := Axioms.D (.atom (HasD.p Ax)))
       (s := λ b => if (HasD.p Ax) = b then φ else (.atom b))
-      (by exact HasD.mem_D);
+      (show _ ∈ Ax from HasD.mem_D);
+    simp at h; exact h;
 
 instance instHasAxiomP [Ax.HasP] : Entailment.HasAxiomP (Hilbert.WithRE Ax) where
-  P := by constructor; simpa using Hilbert.WithRE.axm (φ := Axioms.P) (s := .id) (by exact HasP.mem_P);
+  P := by
+    constructor
+    have h := Hilbert.WithRE.axm (φ := Axioms.P) (s := .id) (show _ ∈ Ax from HasP.mem_P);
+    simp at h; exact h;
 
 instance instHasAxiomFour [Ax.HasFour] : Entailment.HasAxiomFour (Hilbert.WithRE Ax) where
   Four φ := by
     constructor;
-    simpa using Hilbert.WithRE.axm
+    have h := Hilbert.WithRE.axm
       (φ := Axioms.Four (.atom (HasFour.p Ax)))
       (s := λ b => if (HasFour.p Ax) = b then φ else (.atom b))
-      (by exact HasFour.mem_Four);
+      (show _ ∈ Ax from HasFour.mem_Four);
+    simp at h; exact h;
 
 instance [Ax.HasB] : Entailment.HasAxiomB (Hilbert.WithRE Ax) where
   B φ := by
     constructor;
-    simpa using Hilbert.WithRE.axm
+    have h := Hilbert.WithRE.axm
       (φ := Axioms.B (.atom (HasB.p Ax)))
       (s := λ b => if (HasB.p Ax) = b then φ else (.atom b))
-      (by exact HasB.mem_B);
+      (show _ ∈ Ax from HasB.mem_B);
+    simp at h; exact h;
 
 instance [Ax.HasFive] : Entailment.HasAxiomFive (Hilbert.WithRE Ax) where
   Five φ := by
     constructor;
-    simpa using Hilbert.WithRE.axm
+    have h := Hilbert.WithRE.axm
       (φ := Axioms.Five (.atom (HasFive.p Ax)))
       (s := λ b => if (HasFive.p Ax) = b then φ else (.atom b))
-      (by exact HasFive.mem_Five);
+      (show _ ∈ Ax from HasFive.mem_Five);
+    simp at h; exact h;
 
 end
 

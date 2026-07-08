@@ -17,8 +17,8 @@ namespace LO
 class CoherenceSpace (α : Type*) where
   /-- A coherence relation -/
   Coherence : α → α → Prop
-  reflexive : Reflexive Coherence
-  symmetric : Symmetric Coherence
+  reflexive : ∀ x, Coherence x x
+  symmetric : ∀ ⦃x y⦄, Coherence x y → Coherence y x
 
 namespace CoherenceSpace
 

@@ -66,13 +66,22 @@ lemma erase_union [DecidableEq α] {a : α} {s t : Finset α} :
 
 @[simp] lemma sup_univ_equiv {α α'} [DecidableEq α] [Fintype α] [Fintype α'] [SemilatticeSup β] [OrderBot β] (f : α → β) (e : α' ≃ α) :
     Finset.sup Finset.univ (fun i => f (e i)) = Finset.sup Finset.univ f := by
-  simpa [Function.comp] using Eq.symm <| Finset.sup_image Finset.univ e f
+  simpa [Function.comp] using! Eq.symm <| Finset.sup_image Finset.univ e f
 
 lemma sup_univ_cast {α : Type _} [SemilatticeSup α] [OrderBot α] {n} (f : Fin n → α) (n') {h : n' = n} :
     Finset.sup Finset.univ (fun (i : Fin n') => f (i.cast h)) = Finset.sup Finset.univ f := by rcases h with rfl; simp
 
 end
 
+lemma biUnion_eq_empty [DecidableEq β] {s : Finset α} {f : α → Finset β} :
+    s.biUnion f = ∅ ↔ ∀ i ∈ s, f i = ∅ := by
+  constructor
+  · intro h a ha; ext b
+    have := by simpa using congrFun (congrArg Membership.mem h) b
+    simpa using this a ha
+  · intro h; ext b
+    suffices ∀ x ∈ s, b ∉ f x by simpa
+    intro a ha; simpa using congrFun (congrArg Membership.mem (h a ha)) b
 
 end Finset
 

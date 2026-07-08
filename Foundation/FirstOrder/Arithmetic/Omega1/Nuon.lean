@@ -5,13 +5,13 @@ public import Foundation.FirstOrder.Arithmetic.Omega1.Basic
 @[expose] public section
 namespace LO.FirstOrder.Arithmetic
 
-variable {V : Type*} [ORingStructure V] [V ⊧ₘ* 𝗜𝚺₀ + 𝝮₁]
+variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₀ ∪ 𝝮₁]
 
 namespace Nuon
 
 @[simp] lemma llen_lt_len_smash_len (K : V) : ‖‖K‖‖ < ‖K ⨳ ‖K‖‖ := by
   suffices ‖‖K‖‖ ≤ ‖K‖ * ‖‖K‖‖ by simpa [length_smash, lt_succ_iff_le]
-  rcases zero_le ‖K‖ with (hK | pos)
+  rcases Arithmetic.zero_le ‖K‖ with (hK | pos)
   · simp [←hK]
   · exact le_mul_of_pos_left pos
 
@@ -73,7 +73,7 @@ def extDef : 𝚺₀.Semisentence 4 := .mkSigma
 
 @[simp] lemma cons_app_nine {n : ℕ} (a : α) (s : Fin n.succ.succ.succ.succ.succ.succ.succ.succ.succ → α) : (a :> s) 9 = s 8 := rfl
 
-instance ext_defined : 𝚺₀-Function₃ (ext : V → V → V → V) via extDef := .mk fun v ↦ by simp [extDef, ext_graph, numeral_eq_natCast]
+instance ext_defined : 𝚺₀-Function₃ (ext : V → V → V → V) via extDef := .mk fun v ↦ by simp [extDef, ext_graph]
 
 instance ext_Definable : 𝚺₀-Function₃ (ext : V → V → V → V) := ext_defined.to_definable
 
@@ -82,7 +82,7 @@ instance : Bounded₃ (ext : V → V → V → V) := ⟨#1, λ _ ↦ by simp⟩
 @[simp] lemma ext_zero (L i : V) : 0{L}[i] = 0 := by simp [ext]
 
 lemma ext_zero_eq_self_of_le {L S : V} (h : ‖S‖ ≤ ‖L‖) : S{L}[0] = S := by
-  rcases zero_le S with (rfl | pos)
+  rcases Arithmetic.zero_le S with (rfl | pos)
   · simp [ext]
   · simp [ext]
     have : bexp S 0 = 1 := (exp_bexp_of_lt (show 0 < ‖S‖ from by simp [pos])).zero_uniq
@@ -109,7 +109,7 @@ lemma ext_eq_smash_of_le {L S i : V} (h : i ≤ ‖I‖) : S / bexp (I ⨳ L) (i
 
 lemma ext_add₁_pow2 {L i S₁ S₂ p : V} (pp : Pow2 p) (h : (i + 1) * ‖L‖ < ‖p‖) :
     (S₁ + S₂ * p){L}[i] = S₁{L}[i] := by
-  rcases zero_le S₂ with (rfl | pos₂)
+  rcases Arithmetic.zero_le S₂ with (rfl | pos₂)
   · simp
   have lt_len : i * ‖L‖ < ‖S₁ + S₂ * p‖ := calc
         i * ‖L‖ ≤ (i + 1) * ‖L‖ := mul_le_mul_right (by simp)
@@ -156,7 +156,7 @@ lemma len_append (I L S : V) {i X} (hi : i ≤ ‖I‖) (hX : 0 < X) : ‖append
   _                  = ‖X‖ + i * ‖L‖                                             := by simp [log_bexp (mul_len_lt_len_smash hi)]
 
 lemma append_lt_smash (I L S : V) {i X} (hi : i < ‖I‖) (hX : ‖X‖ ≤ ‖L‖) : append I L S i X < I ⨳ L := by
-  rcases zero_le X with (rfl | pos)
+  rcases Arithmetic.zero_le X with (rfl | pos)
   · simpa [append_nil]
       using lt_of_lt_of_le (mod_lt _ (bexp_pos $ mul_len_lt_len_smash $ le_of_lt hi)) (by simp)
   · suffices ‖X‖ + i * ‖L‖ ≤ ‖I‖ * ‖L‖ by simpa [lt_smash_iff, len_append I L S (le_of_lt hi) pos]
@@ -348,7 +348,7 @@ lemma Series.succ (hU : (I ⨳ L)^2 ≤ U) (hIL : ‖‖I‖^2‖ ≤ ‖L‖)
     hTlast ⟩
 
 lemma div_mod_succ (a b : V) : ((a + 1) / b = a / b + 1 ∧ (a + 1) % b = 0 ∧ a % b + 1 = b) ∨ ((a + 1) / b = a / b ∧ (a + 1) % b = a % b + 1) := by
-  rcases zero_le b with (rfl | pos)
+  rcases Arithmetic.zero_le b with (rfl | pos)
   · simp
   have : a % b + 1 ≤ b := lt_iff_succ_le.mp <| mod_lt a (by simp [pos])
   rcases this with (hb | ltb)
@@ -491,7 +491,7 @@ def isSegmentDef : 𝚺₀.Semisentence 5 := .mkSigma
 
 set_option linter.flexible false in
 instance isSegmentDef_defined : 𝚺₀.Defined (V := V) (λ v ↦ IsSegment (v 0) (v 1) (v 2) (v 3) (v 4)) isSegmentDef := .mk fun v ↦ by
-  simp [IsSegment, isSegmentDef, numeral_eq_natCast]
+  simp [IsSegment, isSegmentDef]
   apply forall₂_congr; intro x _
   constructor
   · rintro ⟨_, h⟩; exact h.symm
@@ -511,12 +511,12 @@ def isSeriesDef : 𝚺₀.Semisentence 6 := .mkSigma
       ∃ y <⁺ T, !extDef y L T (l + 1) ∧
         !segmentDef U L A (lI * l) lI x y”
 
-omit [V ⊧ₘ* 𝗜𝚺₀ + 𝝮₁] in
+omit [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₀ ∪ 𝝮₁] in
 lemma bexs_eq_le_iff {p : V → Prop} {b : V} :
     (∃ a ≤ z, a = b ∧ p a) ↔ (b ≤ z ∧ p b) :=
   ⟨by rintro ⟨a, hp, rfl, hr⟩; exact ⟨hp, hr⟩, by rintro ⟨hp, hr⟩; exact ⟨b, hp, rfl, hr⟩⟩
 
-omit [V ⊧ₘ* 𝗜𝚺₀ + 𝝮₁] in
+omit [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₀ ∪ 𝝮₁] in
 lemma bexs_eq_lt_iff {p : V → Prop} {b : V} :
     (∃ a < z, a = b ∧ p a) ↔ (b < z ∧ p b) :=
   ⟨by rintro ⟨a, hp, rfl, hr⟩; exact ⟨hp, hr⟩, by rintro ⟨hp, hr⟩; exact ⟨b, hp, rfl, hr⟩⟩
@@ -556,7 +556,7 @@ def nuonAuxDef : 𝚺₀.Semisentence 3 := .mkSigma
       !seriesSegmentDef ((2 * A + 1) ^' 128) g (lg ²) A k n”
 
 instance nuonAux_defined : 𝚺₀-Relation₃ (NuonAux : V → V → V → Prop) via nuonAuxDef := .mk fun v ↦ by
-  simp [NuonAux, polyU, polyI, polyL, nuonAuxDef, numeral_eq_natCast]
+  simp [NuonAux, polyU, polyI, polyL, nuonAuxDef]
 
 instance nuonAux_definable : 𝚺₀-Relation₃ (NuonAux : V → V → V → Prop) := nuonAux_defined.to_definable
 
@@ -573,7 +573,7 @@ lemma NuonAux.le {A k n : V} (H : NuonAux A k n) : n ≤ k := SeriesSegment.le H
 lemma NuonAux.uniq {A k n₁ n₂ : V} (H₁ : NuonAux A k n₁) (H₂ : NuonAux A k n₂) : n₁ = n₂ := SeriesSegment.uniq H₁ H₂
 
 lemma NuonAux.succ {A k : V} (H : NuonAux A k n) (hk : k ≤ ‖A‖) : NuonAux A (k + 1) (n + fbit A k) := by
-  rcases zero_le A with (rfl | pos)
+  rcases Arithmetic.zero_le A with (rfl | pos)
   · rcases show n = 0 from H.uniq (NuonAux.zero k); simp
   exact SeriesSegment.succ (sq_polyI_smash_polyL_polybounded pos) (by simp [polyL]) (lt_of_le_of_lt hk $ polyI_le pos) H
 
@@ -652,7 +652,7 @@ lemma Nuon.nuon_eq {a b : V} (h : Nuon a b) : nuon a = b := (nuon_nuon a).uniq h
 lemma Nuon.nuon_eq_iff {a b : V} : b = nuon a ↔ Nuon a b := Classical.choose!_eq_iff_right (Nuon.exists_unique a)
 
 lemma nuon_bit0 (a : V) : nuon (2 * a) = nuon a := by
-  rcases zero_le a with (rfl | pos)
+  rcases Arithmetic.zero_le a with (rfl | pos)
   · simp
   · have : Nuon (2 * a) (nuon a) := by simpa [Nuon, length_two_mul_of_pos pos] using (nuon_nuon a).two_mul (by simp)
     exact this.nuon_eq

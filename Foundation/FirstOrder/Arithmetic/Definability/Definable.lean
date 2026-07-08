@@ -186,13 +186,14 @@ lemma df {R : (Fin k → V) → Prop} {φ : ℌ.Semisentence k} (h : Defined R �
 @[simp] lemma proper {R : (Fin k → V) → Prop} {m} {φ : 𝚫-[m].Semisentence k} [h : Defined R φ] : φ.ProperOn V := h.defined.1
 
 @[simp] lemma iff {R : (Fin k → V) → Prop} {φ : ℌ.Semisentence k} [h : Defined R φ] :
-    Semiformula.Evalbm V v φ.val ↔ R v := h.df _
+    φ.val.Evalb v ↔ R v := h.df _
 
 @[simp] lemma iff_delta_pi {R : (Fin k → V) → Prop} {φ : (𝚫-[m]).Semisentence k} [h : Defined R φ] :
-    Semiformula.Evalbm V v φ.pi.val ↔ R v := by simp [h.proper.iff']
+    φ.pi.val.Evalb v ↔ R v := by
+  simp [h.proper.iff']
 
 @[simp] lemma iff_delta_sigma {R : (Fin k → V) → Prop} {φ : (𝚫-[m]).Semisentence k} [h : Defined R φ] :
-    Semiformula.Evalbm V v φ.sigma.val ↔ R v := by simp [h.proper.iff]
+    φ.sigma.val.Evalb v ↔ R v := by simp [h.proper.iff]
 
 lemma of_zero {R : (Fin k → V) → Prop} {φ : 𝚺₀.Semisentence k} (h : Defined R φ) : Defined R (φ.ofZero ℌ) := Defined.mk <|
   match ℌ with
@@ -244,7 +245,7 @@ lemma df {R : (Fin k → V) → Prop} {φ : ℌ.Semiformula V k} (h : IsDefinedB
   | 𝚫-[_] => h.2
 
 lemma iff {R : (Fin k → V) → Prop} {φ : ℌ.Semiformula V k} (h : IsDefinedByWithParam R φ) {v} :
-    Semiformula.Evalm V v id φ.val ↔ R v := h.df _
+    φ.val.Eval v id ↔ R v := h.df _
 
 lemma proper {R : (Fin k → V) → Prop} {m} {φ : 𝚫-[m].Semiformula V k} (h : IsDefinedByWithParam R φ) : φ.ProperWithParamOn V := h.1
 
@@ -258,7 +259,7 @@ namespace DefinableRel
 @[simp] instance lt : ℌ.DefinableRel (LT.lt : V → V → Prop) :=
   Defined.to_definable₀ (φ := .mkSigma “#0 < #1”) ⟨by intro _; simp⟩
 
-@[simp] instance le [V ⊧ₘ* 𝗣𝗔⁻] : ℌ.DefinableRel (LE.le : V → V → Prop) :=
+@[simp] instance le [V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻] : ℌ.DefinableRel (LE.le : V → V → Prop) :=
   Defined.to_definable₀ (φ := .mkSigma “#0 ≤ #1”) ⟨by intro _; simp⟩
 
 end DefinableRel
@@ -277,13 +278,13 @@ namespace DefinableFunction₂
 @[simp] instance hMul : ℌ.DefinableFunction₂ (HMul.hMul : V → V → V) :=
   Defined.to_definable₀ (φ := .mkSigma “#0 = #1 * #2”) ⟨by intro _; simp⟩
 
-@[simp] protected instance sq [V ⊧ₘ* 𝗣𝗔⁻] : ℌ.DefinableFunction₁ fun x : V ↦ x^2 :=
+@[simp] protected instance sq [V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻] : ℌ.DefinableFunction₁ fun x : V ↦ x^2 :=
   Defined.to_definable₀ (φ := .mkSigma “#0 = #1 * #1”) ⟨by intro _; simp [sq]⟩
 
-@[simp] instance pow3 [V ⊧ₘ* 𝗣𝗔⁻] : ℌ.DefinableFunction₁ fun x : V ↦ x^3 :=
+@[simp] instance pow3 [V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻] : ℌ.DefinableFunction₁ fun x : V ↦ x^3 :=
   Defined.to_definable₀ (φ := .mkSigma “#0 = #1 * #1 * #1”) ⟨by intro _; simp [Arithmetic.pow_three]⟩
 
-@[simp] instance pow4 [V ⊧ₘ* 𝗣𝗔⁻] : ℌ.DefinableFunction₁ fun x : V ↦ x^4 :=
+@[simp] instance pow4 [V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻] : ℌ.DefinableFunction₁ fun x : V ↦ x^4 :=
   Defined.to_definable₀ (φ := .mkSigma “#0 = #1 * #1 * #1 * #1”) ⟨by intro _; simp [pow_four]⟩
 
 end DefinableFunction₂
@@ -293,7 +294,7 @@ namespace Definable
 lemma mk' {ℌ : HierarchySymbol} (φ : ℌ.Semiformula V k) (H : IsDefinedByWithParam P φ) : ℌ.Definable P := ⟨φ, H⟩
 
 lemma mkPolarity {Γ : Polarity}
-    (φ : Semiformula ℒₒᵣ V k) (hp : Hierarchy Γ m φ) (hP : ∀ v, P v ↔ Semiformula.Evalm V v id φ) : Γ-[m].Definable P :=
+    (φ : ArithmeticSemiformula V k) (hp : Hierarchy Γ m φ) (hP : ∀ v, P v ↔ φ.Eval v id) : Γ-[m].Definable P :=
   match Γ with
   | 𝚺 => ⟨.mkSigma φ hp, by intro v; simp [hP]⟩
   | 𝚷 => ⟨.mkPi φ hp, by intro v; simp [hP]⟩
@@ -344,16 +345,16 @@ lemma retraction (h : ℌ.Definable P) (f : Fin k → Fin l) :
   rcases h with ⟨φ, h⟩
   apply Definable.mk' (φ.rew <| Rew.subst fun x ↦ #(f x))
   match ℌ with
-  | 𝚺-[_] | 𝚷-[_] => intro; simp [h.iff]
-  | 𝚫-[_] => exact ⟨h.proper.rew _, by intro; simp [h.iff]⟩
+  | 𝚺-[_] | 𝚷-[_] => intro; simp [h.iff, Function.comp_def]
+  | 𝚫-[_] => exact ⟨h.proper.rew _, by intro; simp [h.iff, Function.comp_def]⟩
 
-lemma retractiont (h : ℌ.Definable P) (f : Fin k → Semiterm ℒₒᵣ V n) :
-    ℌ.Definable fun v ↦ P (fun i ↦ Semiterm.valm V v id (f i)) := by
+lemma retractiont (h : ℌ.Definable P) (f : Fin k → ArithmeticSemiterm V n) :
+    ℌ.Definable fun v ↦ P (fun i ↦ (f i).val v id) := by
   rcases h with ⟨φ, h⟩
   exact ⟨φ.rew (Rew.subst f),
   match ℌ with
-  | 𝚺-[_] | 𝚷-[_] => by intro; simp [h.df.iff]
-  | 𝚫-[_] => ⟨h.proper.rew _, by intro; simp [h.df.iff]⟩⟩
+  | 𝚺-[_] | 𝚷-[_] => by intro; simp [h.df.iff, Function.comp_def]
+  | 𝚫-[_] => ⟨h.proper.rew _, by intro; simp [h.df.iff, Function.comp_def]⟩⟩
 
 @[simp] instance const {P : Prop} : ℌ.Definable (fun _ : Fin k → V ↦ P) := by
   by_cases hP : P
@@ -419,29 +420,29 @@ lemma biconditional (h₁ : 𝚫-[m].Definable P) (h₂ : 𝚫-[m].Definable Q) 
     Γ-[m].Definable (fun v ↦ P v ↔ Q v) :=
   .of_delta <| ((h₁.impDelta h₂).and (h₂.impDelta h₁)).of_iff <| by intro v; simp [iff_iff_implies_and_implies]
 
-lemma ball {P : (Fin k → V) → V → Prop} (h : ℌ.Definable fun w ↦ P (w ·.succ) (w 0)) (t : Semiterm ℒₒᵣ V k) :
-    ℌ.Definable fun v ↦ ∀ x < t.valm V v id, P v x := by
+lemma ball {P : (Fin k → V) → V → Prop} (h : ℌ.Definable fun w ↦ P (w ·.succ) (w 0)) (t : ArithmeticSemiterm V k) :
+    ℌ.Definable fun v ↦ ∀ x < t.val v id, P v x := by
   rcases h with ⟨φ, h⟩
   match ℌ with
   | 𝚺-[m] => exact ⟨HierarchySymbol.Semiformula.ball t φ, by intro v; simp [h.iff]⟩
   | 𝚷-[m] => exact ⟨HierarchySymbol.Semiformula.ball t φ, by intro v; simp [h.iff]⟩
   | 𝚫-[m] => exact ⟨HierarchySymbol.Semiformula.ball t φ, ⟨h.proper.ball, by intro v; simp [h.iff]⟩⟩
 
-lemma bexs {P : (Fin k → V) → V → Prop} (h : ℌ.Definable fun w ↦ P (w ·.succ) (w 0)) (t : Semiterm ℒₒᵣ V k) :
-    ℌ.Definable fun v ↦ ∃ x < t.valm V v id, P v x := by
+lemma bexs {P : (Fin k → V) → V → Prop} (h : ℌ.Definable fun w ↦ P (w ·.succ) (w 0)) (t : ArithmeticSemiterm V k) :
+    ℌ.Definable fun v ↦ ∃ x < t.val v id, P v x := by
   rcases h with ⟨φ, h⟩
   match ℌ with
   | 𝚺-[m] => exact ⟨HierarchySymbol.Semiformula.bexs t φ, by intro v; simp [h.iff]⟩
   | 𝚷-[m] => exact ⟨HierarchySymbol.Semiformula.bexs t φ, by intro v; simp [h.iff]⟩
   | 𝚫-[m] => exact ⟨HierarchySymbol.Semiformula.bexs t φ, ⟨h.proper.bexs, by intro v; simp [h.iff]⟩⟩
 
-lemma ball' [V ⊧ₘ* 𝗣𝗔⁻] {P : (Fin k → V) → V → Prop} (h : ℌ.Definable fun w ↦ P (w ·.succ) (w 0)) (t : Semiterm ℒₒᵣ V k) :
-    ℌ.Definable fun v ↦ ∀ x ≤ t.valm V v id, P v x := by
+lemma ball' [V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻] {P : (Fin k → V) → V → Prop} (h : ℌ.Definable fun w ↦ P (w ·.succ) (w 0)) (t : ArithmeticSemiterm V k) :
+    ℌ.Definable fun v ↦ ∀ x ≤ t.val v id, P v x := by
   apply (ball h ‘!!t + 1’).of_iff
   intro v; simp [lt_succ_iff_le]
 
-lemma bexs' [V ⊧ₘ* 𝗣𝗔⁻] {P : (Fin k → V) → V → Prop} (h : ℌ.Definable fun w ↦ P (w ·.succ) (w 0)) (t : Semiterm ℒₒᵣ V k) :
-    ℌ.Definable fun v ↦ ∃ x ≤ t.valm V v id, P v x := by
+lemma bexs' [V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻] {P : (Fin k → V) → V → Prop} (h : ℌ.Definable fun w ↦ P (w ·.succ) (w 0)) (t : ArithmeticSemiterm V k) :
+    ℌ.Definable fun v ↦ ∃ x ≤ t.val v id, P v x := by
   apply (bexs h ‘!!t + 1’).of_iff
   intro v; simp [lt_succ_iff_le]
 
@@ -704,14 +705,15 @@ lemma of_sigmaOne
 @[simp] lemma const {k} (c : V) : ℌ.DefinableFunction (fun _ : Fin k → V ↦ c) :=
   .of_zero (Γ' := 𝚺) ⟨.mkSigma “x. #0 = &c”, by intro v; simp⟩
 
-@[simp] lemma term_retraction (t : Semiterm ℒₒᵣ V n) (e : Fin n → Fin k) :
-    ℌ.DefinableFunction fun v : Fin k → V ↦ Semiterm.valm V (fun x ↦ v (e x)) id t :=
+@[simp] lemma term_retraction (t : ArithmeticSemiterm V n) (e : Fin n → Fin k) :
+    ℌ.DefinableFunction fun v : Fin k → V ↦ t.val (fun x ↦ v (e x)) id :=
   .of_zero (Γ' := 𝚺)
-    ⟨.mkSigma “x. x = !!(Rew.subst (fun x ↦ #(e x).succ) t)”, by intro v; simp [Semiterm.val_substs]⟩
+    ⟨.mkSigma “x. x = !!(Rew.subst (fun x ↦ #(e x).succ) t)”, fun v ↦ by
+    simp [Semiterm.val_substs, Function.comp_def]⟩
 
-@[simp] lemma term (t : Semiterm ℒₒᵣ V k) :
-    ℌ.DefinableFunction fun v : Fin k → V ↦ Semiterm.valm V v id t :=
-  .of_zero (Γ' := 𝚺) ⟨.mkSigma “x. x = !!(Rew.bShift t)”, by intro v; simp [Semiterm.val_bShift']⟩
+@[simp] lemma term (t : ArithmeticSemiterm V k) :
+    ℌ.DefinableFunction fun v : Fin k → V ↦ t.val v id :=
+  .of_zero (Γ' := 𝚺) ⟨.mkSigma “x. x = !!(Rew.bShift t)”, fun v ↦ by simp [Semiterm.val_bShift']⟩
 
 lemma of_eq (g) (h : ∀ v, f v = g v) (H : ℌ.DefinableFunction f) : ℌ.DefinableFunction g := by
   rwa [show g = f from by funext v; simp [h]]
@@ -722,8 +724,8 @@ lemma retraction {n} (hf : ℌ.DefinableFunction f) (e : Fin k → Fin n) :
     Definable.retraction hf (0 :> fun i ↦ (e i).succ)
   this.of_iff (by intro x; simp)
 
-lemma retractiont {n} (hf : ℌ.DefinableFunction f) (t : Fin k → Semiterm ℒₒᵣ V n) :
-    ℌ.DefinableFunction fun v ↦ f (fun i ↦ Semiterm.valm V v id (t i)) :=
+lemma retractiont {n} (hf : ℌ.DefinableFunction f) (t : Fin k → ArithmeticSemiterm V n) :
+    ℌ.DefinableFunction fun v ↦ f (fun i ↦ (t i).val v id) :=
   have := Definable.retractiont (n := n + 1) hf (#0 :> fun i ↦ Rew.bShift (t i))
   this.of_iff (by intro x; simp [Semiterm.val_bShift'])
 
@@ -818,13 +820,13 @@ lemma bexs_lt {Γ} {P : (Fin k → V) → V → Prop} {f : (Fin k → V) → V}
       ⟨ .mkPi (∀⁰ (bf.val 🡒 (∃⁰[“#0 < #1”] φ.pi.val ⇜ (#0 :> (#·.succ.succ))))) (by simp),
         by intro v; simp [hbf.df.iff, hp.df.iff, hp.proper.iff'] ⟩
 
-lemma ball_le [V ⊧ₘ* 𝗣𝗔⁻] {Γ} {P : (Fin k → V) → V → Prop} {f : (Fin k → V) → V}
+lemma ball_le [V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻] {Γ} {P : (Fin k → V) → V → Prop} {f : (Fin k → V) → V}
     (hf : 𝚺-[m + 1].DefinableFunction f) (h : Γ-[m + 1].Definable (fun w ↦ P (w ·.succ) (w 0))) :
     Γ-[m + 1].Definable (fun v ↦ ∀ x ≤ f v, P v x) := by
   have : Γ-[m + 1].Definable (fun v ↦ ∀ x < f v + 1, P v x) := ball_lt (DefinableFunction₂.comp hf (by simp)) h
   exact this.of_iff <| by intro v; simp [lt_succ_iff_le]
 
-lemma bexs_le [V ⊧ₘ* 𝗣𝗔⁻] {Γ} {P : (Fin k → V) → V → Prop} {f : (Fin k → V) → V}
+lemma bexs_le [V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻] {Γ} {P : (Fin k → V) → V → Prop} {f : (Fin k → V) → V}
     (hf : 𝚺-[m + 1].DefinableFunction f) (h : Γ-[m + 1].Definable (fun w ↦ P (w ·.succ) (w 0))) :
     Γ-[m + 1].Definable (fun v ↦ ∃ x ≤ f v, P v x) := by
   have : Γ-[m + 1].Definable (fun v ↦ ∃ x < f v + 1, P v x) := bexs_lt (DefinableFunction₂.comp hf (by simp)) h
@@ -834,7 +836,7 @@ lemma ball_lt' {Γ} {P : (Fin k → V) → V → Prop} {f : (Fin k → V) → V}
     (hf : 𝚺-[m + 1].DefinableFunction f) (h : Γ-[m + 1].Definable (fun w ↦ P (w ·.succ) (w 0))) :
     Γ-[m + 1].Definable (fun v ↦ ∀ {x}, x < f v → P v x) := ball_lt hf h
 
-lemma ball_le' [V ⊧ₘ* 𝗣𝗔⁻] {Γ} {P : (Fin k → V) → V → Prop} {f : (Fin k → V) → V}
+lemma ball_le' [V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻] {Γ} {P : (Fin k → V) → V → Prop} {f : (Fin k → V) → V}
     (hf : 𝚺-[m + 1].DefinableFunction f) (h : Γ-[m + 1].Definable (fun w ↦ P (w ·.succ) (w 0))) :
     Γ-[m + 1].Definable (fun v ↦ ∀ {x}, x ≤ f v → P v x) := ball_le hf h
 
@@ -871,5 +873,37 @@ attribute [aesop 11 (rule_sets := [Definability]) safe]
   Definable.or
   Definable.all
   Definable.exs
+
+/-! ### Auxiliary lemmata for aesop  -/
+
+section
+
+variable (P : (Fin k → V) → Prop) (f : (Fin k → V) → V)
+
+instance [𝚺₁.Definable P] : 𝚺-[0+1].Definable P := inferInstance
+
+instance [𝚷₁.Definable P] : 𝚷-[0+1].Definable P := inferInstance
+
+instance [𝚫₁.Definable P] : 𝚫-[0+1].Definable P := inferInstance
+
+instance [𝚺₁.DefinableFunction f] : 𝚺-[0+1].DefinableFunction f := inferInstance
+
+instance [𝚷₁.DefinableFunction f] : 𝚷-[0+1].DefinableFunction f := inferInstance
+
+instance [𝚫₁.DefinableFunction f] : 𝚫-[0+1].DefinableFunction f := inferInstance
+
+instance [𝚺-[2].Definable P] : 𝚺-[0+1+1].Definable P := inferInstance
+
+instance [𝚷-[2].Definable P] : 𝚷-[0+1+1].Definable P := inferInstance
+
+instance [𝚫-[2].Definable P] : 𝚫-[0+1+1].Definable P := inferInstance
+
+instance [𝚺-[2].DefinableFunction f] : 𝚺-[0+1+1].DefinableFunction f := inferInstance
+
+instance [𝚷-[2].DefinableFunction f] : 𝚷-[0+1+1].DefinableFunction f := inferInstance
+
+instance [𝚫-[2].DefinableFunction f] : 𝚫-[0+1+1].DefinableFunction f := inferInstance
+
+end
 
 end LO.FirstOrder.Arithmetic.HierarchySymbol
