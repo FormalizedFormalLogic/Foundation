@@ -4,8 +4,6 @@ public import Foundation.FirstOrder.Completeness.CanonicalModel
 public import Foundation.FirstOrder.Completeness.CountableSublanguage
 public import Foundation.FirstOrder.Ultraproduct
 public import Foundation.Vorspiel.Order.Dense
-public import Mathlib.Logic.Equiv.List
-public import Mathlib.Logic.Encodable.Basic
 
 /-! # Completeness theorem -/
 

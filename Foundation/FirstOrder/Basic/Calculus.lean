@@ -2,7 +2,6 @@ module
 
 /- public import Foundation.Logic.Calculus -/
 public import Foundation.Logic.Calculus
-public import Foundation.Propositional.Entailment.AxiomEFQ
 public import Foundation.FirstOrder.Basic.Syntax.Rew
 public import Mathlib.Data.List.MinMax
 

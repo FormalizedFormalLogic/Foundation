@@ -1,7 +1,6 @@
 module
 
 public import Foundation.FirstOrder.Arithmetic.Exponential.PPow2
-public import Mathlib.Algebra.Order.Ring.Basic
 
 @[expose] public section
 /-!
