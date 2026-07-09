@@ -13,15 +13,15 @@ namespace Kripke
 variable {φ ψ : Formula ℕ}
          {F : Frame} [Fintype F] [F.IsConverseWellFounded] [F.IsTransitive] {x y i j : F}
 
-def Frame.rank [Fintype F] [F.IsConverseWellFounded] [F.IsTransitive] (i : F) : ℕ := fcwHeight (· ≺ ·) i
+def Frame.rank [Fintype F] [F.IsConverseWellFounded] [F.IsTransitive] (i : F) : ℕ := cwfHeight (· ≺ ·) i
 
 def Frame.height (F : Frame) [Fintype F] [F.IsConverseWellFounded] [F.IsTransitive] [F.IsRooted] : ℕ := Frame.rank F.root.1
 
 namespace Frame
 
-lemma rank_lt_of_rel (hij : i ≺ j) : F.rank i > Frame.rank j := fcwHeight_gt_of hij
+lemma rank_lt_of_rel (hij : i ≺ j) : F.rank i > Frame.rank j := cwfHeight_gt_of hij
 
-lemma exists_of_lt_height (hn : n < F.rank i) : ∃ j : F, i ≺ j ∧ Frame.rank j = n := fcwHeight_lt hn
+lemma exists_of_lt_height (hn : n < F.rank i) : ∃ j : F, i ≺ j ∧ Frame.rank j = n := cwfHeight_lt hn
 
 lemma height_lt_iff_relItr {i : F} :
     F.rank i < n ↔ ∀ j, ¬i ≺^[n] j  := by
@@ -37,8 +37,8 @@ lemma height_lt_iff_relItr {i : F} :
         _ ↔ ∀ k j, i ≺ j → ¬j ≺^[n] k    := by grind
         _ ↔ ∀ j, ¬i ≺^[n + 1] j  := by simp
     constructor
-    · exact fun h j hij ↦ lt_of_lt_of_le (fcwHeight_gt_of hij) h
-    · exact fcwHeight_le
+    · exact fun h j hij ↦ lt_of_lt_of_le (cwfHeight_gt_of hij) h
+    · exact cwfHeight_le
 
 lemma le_height_iff_relItr {i : F} :
     n ≤ F.rank i ↔ ∃ j, i ≺^[n] j := calc
@@ -64,7 +64,7 @@ lemma terminal_rel_height (h : x ≺^[rank x] y) : ∀ z, ¬y ≺ z := by
 variable [F.IsRooted]
 
 @[grind <=]
-lemma rank_lt_whole_height {i : F} (hi : F.root ≺ i) : F.rank i < F.height := fcwHeight_gt_of hi
+lemma rank_lt_whole_height {i : F} (hi : F.root ≺ i) : F.rank i < F.height := cwfHeight_gt_of hi
 
 @[grind .]
 lemma rank_le_whole_height (i : F) : F.rank i ≤ F.height := by
@@ -92,7 +92,7 @@ lemma eq_extendRoot_height_rank_extendRoot_root : (F.extendRoot n).height = Fram
 @[simp]
 lemma height_pos : 0 < (Frame.extendRoot F n).height := by
   rw [eq_extendRoot_height_rank_extendRoot_root];
-  apply lt_fcwHeight ?_ (by simp);
+  apply lt_cwfHeight ?_ (by simp);
   · exact ↑F.root.1;
   . simp only [Frame.Rel', Frame.root, default];
 
@@ -202,7 +202,7 @@ lemma height_lt_iff_satisfies_boxbot {i : M} :
 lemma height_pos_of_dia {i : M} (hA : i ⊧ ◇A) : 0 < M.rank i := by
   have : ∃ j, i ≺ j ∧ j ⊧ A := Formula.Kripke.Satisfies.dia_def.mp hA
   rcases this with ⟨j, hj, _⟩
-  apply lt_fcwHeight hj (by simp)
+  apply lt_cwfHeight hj (by simp)
 
 @[simp]
 lemma Model.extendRoot.height₁ [M.IsRooted] : (Frame.extendRoot M.toFrame 1).height = (M.height) + 1 := Frame.extendRoot.height_succ
