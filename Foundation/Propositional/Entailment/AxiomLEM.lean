@@ -27,7 +27,7 @@ export HasAxiomLEM (lem)
 
 section
 
-variable [LogicalConnective F] [Entailment S F] [Entailment.Minimal 𝓢]
+variable [Entailment.Minimal 𝓢]
 
 namespace FiniteContext
 

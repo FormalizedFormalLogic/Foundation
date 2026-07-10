@@ -580,6 +580,7 @@ lemma of_mem₁_neg' [DecidableEq α] (h : ∼φ ∈ t.1.1) : φ ∉ t.1.1 := by
   apply iff_not_mem₁_mem₂.mpr;
   apply of_mem₁_neg h;
 
+omit [Entailment.Int 𝓢] in
 private lemma of_mem₂_imp [DecidableEq α] [Encodable α] [Entailment.Cl 𝓢] : φ 🡒 ψ ∈ t.1.2 → (φ ∈ t.1.1 ∧ ψ ∈ t.1.2) := by
   intro h;
   by_contra hC;
@@ -594,6 +595,7 @@ private lemma of_mem₂_imp [DecidableEq α] [Encodable α] [Entailment.Cl 𝓢]
     have : φ 🡒 ψ ∉ t.1.2 := iff_not_mem₂_mem₁.mpr $ mdp_mem₁ this (iff_not_mem₂_mem₁.mp hψ);
     contradiction;
 
+omit [Entailment.Int 𝓢] in
 lemma iff_mem₁_imp [DecidableEq α] [Encodable α] [Entailment.Cl 𝓢] : φ 🡒 ψ ∈ t.1.1 ↔ (φ ∈ t.1.2 ∨ ψ ∈ t.1.1) := by
   constructor;
   . apply of_mem₁_imp;
@@ -605,6 +607,7 @@ lemma iff_mem₁_imp [DecidableEq α] [Encodable α] [Entailment.Cl 𝓢] : φ �
     . exact iff_not_mem₂_mem₁.mpr hφ;
     . exact iff_not_mem₁_mem₂.mpr hψ;
 
+omit [Entailment.Int 𝓢] in
 lemma iff_mem₂_imp [DecidableEq α] [Encodable α] [Entailment.Cl 𝓢] : φ 🡒 ψ ∈ t.1.2 ↔ (φ ∈ t.1.1 ∧ ψ ∈ t.1.2) := by
   constructor;
   . apply of_mem₂_imp;

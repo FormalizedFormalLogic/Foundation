@@ -31,27 +31,27 @@ class OneSidedLK.Cut
 
 namespace OneSidedLK
 
-variable {F : Type*} [LogicalConnective F] [DeMorgan F] [TildeInvolutive F] {𝔇 : List F → Type*} [OneSidedLK 𝔇]
+variable {F : Type*} [LogicalConnective F] [DeMorgan F] [TildeInvolutive F] {𝔇 : List F → Type*}
 
 def cast (b : 𝔇 Γ) (h : Γ = Δ := by simp) : 𝔇 Δ := h ▸ b
 
-def contra (d : 𝔇 Γ) (h : Γ ⊆ Δ := by simp) : 𝔇 Δ := contraction d (by simp [h])
+def contra [OneSidedLK 𝔇] (d : 𝔇 Γ) (h : Γ ⊆ Δ := by simp) : 𝔇 Δ := contraction d (by simp [h])
 
-def rotate (d : 𝔇 (φ :: Γ)) : 𝔇 (Γ ++ [φ]) := contra d
+def rotate [OneSidedLK 𝔇] (d : 𝔇 (φ :: Γ)) : 𝔇 (Γ ++ [φ]) := contra d
 
-def close (φ : F) (hp : φ ∈ Γ := by simp) (hn : ∼φ ∈ Γ := by simp) : 𝔇 Γ := contraction (identity φ) (by simp_all)
+def close [OneSidedLK 𝔇] (φ : F) (hp : φ ∈ Γ := by simp) (hn : ∼φ ∈ Γ := by simp) : 𝔇 Γ := contraction (identity φ) (by simp_all)
 
-def top (h : ⊤ ∈ Γ := by simp) : 𝔇 Γ := contraction verum (by simp [h])
+def top [OneSidedLK 𝔇] (h : ⊤ ∈ Γ := by simp) : 𝔇 Γ := contraction verum (by simp [h])
 
-def tensor {φ ψ : F} (dφ : 𝔇 (φ :: Γ)) (dψ : 𝔇 (ψ :: Δ)) : 𝔇 (φ ⋏ ψ :: Γ ++ Δ) :=
+def tensor [OneSidedLK 𝔇] {φ ψ : F} (dφ : 𝔇 (φ :: Γ)) (dψ : 𝔇 (ψ :: Δ)) : 𝔇 (φ ⋏ ψ :: Γ ++ Δ) :=
   and (contraction dφ (by simp)) (contraction dψ (by simp))
 
-def swap₁ (d : 𝔇 (φ₂ :: φ₁ :: Γ)) : 𝔇 (φ₁ :: φ₂ :: Γ) := contraction d (by simp)
+def swap₁ [OneSidedLK 𝔇] (d : 𝔇 (φ₂ :: φ₁ :: Γ)) : 𝔇 (φ₁ :: φ₂ :: Γ) := contraction d (by simp)
 
-def swap₂ (d : 𝔇 (φ₃ :: φ₁ :: φ₂ :: Γ)) : 𝔇 (φ₁ :: φ₂ :: φ₃ :: Γ) :=
+def swap₂ [OneSidedLK 𝔇] (d : 𝔇 (φ₃ :: φ₁ :: φ₂ :: Γ)) : 𝔇 (φ₁ :: φ₂ :: φ₃ :: Γ) :=
   contraction d (by grind)
 
-def swap₃ (d : 𝔇 (φ₄ :: φ₁ :: φ₂ :: φ₃ :: Γ)) : 𝔇 (φ₁ :: φ₂ :: φ₃ :: φ₄ :: Γ) :=
+def swap₃ [OneSidedLK 𝔇] (d : 𝔇 (φ₄ :: φ₁ :: φ₂ :: φ₃ :: Γ)) : 𝔇 (φ₁ :: φ₂ :: φ₃ :: φ₄ :: Γ) :=
   contraction d (by grind)
 
 alias cut := OneSidedLK.Cut.cut
@@ -75,7 +75,7 @@ def disj₂ {Γ Δ : List F} [Cut 𝔇] : 𝔇 (Γ ++ Δ) → 𝔇 (⋁Γ :: Δ)
     exact eCut d₂ d₁
   termination_by _ => Γ.length
 
-def conj₂ {Γ Δ : List F} (d : (φ : F) → φ ∈ Γ → 𝔇 (φ :: Δ)) : 𝔇 (⋀Γ :: Δ) :=
+def conj₂ [OneSidedLK 𝔇] {Γ Δ : List F} (d : (φ : F) → φ ∈ Γ → 𝔇 (φ :: Δ)) : 𝔇 (⋀Γ :: Δ) :=
   match Γ with
   |          [] => contra verum
   |         [φ] => d φ (by simp)
@@ -93,7 +93,7 @@ namespace PrincipalEntailment
 
 variable {P : Type*} [Entailment P F] {𝓟 : P} [PrincipalEntailment 𝔇 𝓟]
 
-omit [LogicalConnective F] [DeMorgan F] [TildeInvolutive F] [OneSidedLK 𝔇] in
+omit [LogicalConnective F] [DeMorgan F] [TildeInvolutive F] in
 lemma provable_iff :
     𝓟 ⊢ φ ↔ Nonempty (𝔇 [φ]) := by
   simpa using! OneSidedLK.PrincipalEntailment.equiv.nonempty_congr
@@ -192,10 +192,10 @@ instance {P : Type*} [Entailment P F] (𝓟 : P) [PrincipalEntailment 𝔇 𝓟]
     PrincipalEntailment (Pullback 𝔇 f) (Entailment.pullback 𝓟 f) where
   equiv {φ} := PrincipalEntailment.equiv (φ := f φ)
 
-omit [DeMorgan F] [TildeInvolutive F] [OneSidedLK 𝔇] [DeMorgan G] [TildeInvolutive G] in
+omit [DeMorgan F] [TildeInvolutive F] [DeMorgan G] [TildeInvolutive G] in
 @[simp] lemma nonempty_iff {Γ} : Nonempty (Pullback 𝔇 f Γ) ↔ Nonempty (𝔇 (Γ.map f)) := by simp [Pullback]
 
-omit [DeMorgan F] [TildeInvolutive F] [OneSidedLK 𝔇] [DeMorgan G] [TildeInvolutive G] in
+omit [DeMorgan F] [TildeInvolutive F] [DeMorgan G] [TildeInvolutive G] in
 @[simp] lemma isEmpty_iff {Γ} : IsEmpty (Pullback 𝔇 f Γ) ↔ IsEmpty (𝔇 (Γ.map f)) := by simp [Pullback]
 
 end Pullback
@@ -208,14 +208,14 @@ namespace ContextualEntailment
 
 variable {S : Type*} [Entailment S F] [AdjunctiveSet F S] [ContextualEntailment 𝔇 S]
 
-omit [DeMorgan F] [TildeInvolutive F] [OneSidedLK 𝔇] in
+omit [DeMorgan F] [TildeInvolutive F] in
 lemma provable_iff {𝓢 : S} :
     𝓢 ⊢ φ ↔ ∃ Γ : List F, (∀ ψ ∈ Γ, ψ ∈ 𝓢) ∧ Nonempty (𝔇 (φ :: ∼Γ)) := by
   simpa using! equiv.nonempty_congr
 
 def toProof (𝓢 : S) (d : 𝔇 [φ]) : 𝓢 ⊢! φ := equiv.symm ⟨⟨[], by simp⟩, d⟩
 
-def ofAxiom {𝓢 : S} (h : φ ∈ 𝓢) : 𝓢 ⊢! φ :=
+def ofAxiom [OneSidedLK 𝔇] {𝓢 : S} (h : φ ∈ 𝓢) : 𝓢 ⊢! φ :=
   equiv.symm ⟨⟨[φ], by simp_all⟩, identity φ⟩
 
 def ofAxiomSubset {𝓢 𝓤 : S} : 𝓢 ⊢! φ → 𝓢 ⊆ 𝓤 → 𝓤 ⊢! φ := fun b h ↦
@@ -223,7 +223,7 @@ def ofAxiomSubset {𝓢 𝓤 : S} : 𝓢 ⊢! φ → 𝓢 ⊆ 𝓤 → 𝓤 ⊢!
   equiv.symm
     ⟨⟨l, fun φ hφ ↦ AdjunctiveSet.subset_iff.mp h _ (l.prop φ hφ)⟩, d⟩
 
-instance : Entailment.Axiomatized S where
+instance [OneSidedLK 𝔇] : Entailment.Axiomatized S where
   prfAxm h := ofAxiom h
   weakening h d := ofAxiomSubset d h
 
@@ -314,7 +314,7 @@ instance cl (𝓢 : S) : Entailment.Cl 𝓢 where
 
 variable {P : Type*} [Entailment P F]
 
-omit [DeMorgan F] [OneSidedLK 𝔇] [Cut 𝔇] in
+omit [DeMorgan F] [Cut 𝔇] in
 lemma empty_provable_iff_eprovable {𝓟 : P} [PrincipalEntailment 𝔇 𝓟] :
     (∅ : S) ⊢ φ ↔ 𝓟 ⊢ φ := by
   constructor

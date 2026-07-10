@@ -145,7 +145,7 @@ instance : SetLike (ClosedSubset L M) M := ⟨ClosedSubset.domain, fun _ _ ↦ C
 omit [Nonempty M]
 lemma closed {k} (f : L.Func k) {v : Fin k → M} (hv : ∀ i, v i ∈ u) : s.func f v ∈ u := u.domain_closed f hv
 
-instance toStructure [s : Structure L M] (u : ClosedSubset L M) : Structure L u where
+instance toStructure (u : ClosedSubset L M) : Structure L u where
   func := fun k f v => ⟨s.func f (fun i ↦ ↑(v i)), u.closed f (by simp)⟩
   rel := fun k r v => s.rel r (fun i ↦ v i)
 

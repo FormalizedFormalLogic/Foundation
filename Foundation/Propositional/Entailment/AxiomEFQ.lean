@@ -34,7 +34,7 @@ instance [(𝓢 : S) → ModusPonens 𝓢] [(𝓢 : S) → HasAxiomEFQ 𝓢] : D
 
 section
 
-variable [LogicalConnective F] [Entailment S F] [Entailment.Minimal 𝓢]
+variable [Entailment.Minimal 𝓢]
 
 namespace FiniteContext
 
