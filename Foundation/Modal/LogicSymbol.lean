@@ -247,7 +247,7 @@ section
 variable [InjectiveBox F]
 
 @[grind]
-noncomputable def preboxItr [InjectiveBox F] (n : ℕ) (s : Finset F) : Finset F := s.preimage (□^[n]·) $ by
+noncomputable def preboxItr (n : ℕ) (s : Finset F) : Finset F := s.preimage (□^[n]·) $ by
   intro φ hφ ψ hψ;
   apply InjectiveBox.inj_multibox;
 notation:90 "□⁻¹^[" n "]'" s => Finset.LO.preboxItr n s
@@ -378,10 +378,10 @@ section
 variable [InjectiveBox F] [DecidableEq F]
 
 @[grind]
-noncomputable def preboxItr [InjectiveBox F] [DecidableEq F] (n : ℕ) : List F → List F := λ s => (□⁻¹^[n]'(s.toFinset)).toList
+noncomputable def preboxItr (n : ℕ) : List F → List F := λ s => (□⁻¹^[n]'(s.toFinset)).toList
 notation:90 "□⁻¹^[" n "]'" s => List.LO.preboxItr n s
 
-noncomputable abbrev prebox [InjectiveBox F] [DecidableEq F] : List F → List F := preboxItr 1
+noncomputable abbrev prebox : List F → List F := preboxItr 1
 prefix:90 "□⁻¹'" => List.LO.prebox
 
 @[simp, grind =] lemma eq_preboxItr_one_prebox : (□⁻¹^[1]'s) = □⁻¹'s := by rfl

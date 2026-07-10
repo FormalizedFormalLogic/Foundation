@@ -13,7 +13,7 @@ namespace Kripke
 variable {φ ψ : Formula ℕ}
          {F : Frame} [Fintype F] [F.IsConverseWellFounded] [F.IsTransitive] {x y i j : F}
 
-def Frame.rank [Fintype F] [F.IsConverseWellFounded] [F.IsTransitive] (i : F) : ℕ := cwfHeight (· ≺ ·) i
+def Frame.rank (i : F) : ℕ := cwfHeight (· ≺ ·) i
 
 def Frame.height (F : Frame) [Fintype F] [F.IsConverseWellFounded] [F.IsTransitive] [F.IsRooted] : ℕ := Frame.rank F.root.1
 
@@ -179,9 +179,9 @@ end extendRoot
 namespace pointGenerate
 
 open Classical in
-instance [Fintype F] : Fintype (F↾x) := by apply Subtype.fintype;
+instance : Fintype (F↾x) := by apply Subtype.fintype;
 
-instance [F.IsRooted] [F.IsTree] : (F↾x).IsTree := by constructor;
+instance [F.IsTree] : (F↾x).IsTree := by constructor;
 
 axiom eq_original_height (hxy : y = x ∨ x ≺ y) : Frame.rank (F := F↾x) (⟨y, hxy⟩) = Frame.rank y
 
