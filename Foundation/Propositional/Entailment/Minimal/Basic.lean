@@ -539,7 +539,7 @@ instance (Γ : FiniteContext F 𝓢) : Entailment.HasAxiomOrElim Γ := ⟨of or�
 
 instance (Γ : FiniteContext F 𝓢) : Entailment.NegationEquiv Γ := ⟨of negEquiv⟩
 
-instance [Entailment.Minimal 𝓢] (Γ : FiniteContext F 𝓢) : Entailment.Minimal Γ where
+instance (Γ : FiniteContext F 𝓢) : Entailment.Minimal Γ where
 
 
 def mdp' [DecidableEq F] (bΓ : Γ ⊢[𝓢]! φ 🡒 ψ) (bΔ : Δ ⊢[𝓢]! φ) : (Γ ++ Δ) ⊢[𝓢]! ψ :=
