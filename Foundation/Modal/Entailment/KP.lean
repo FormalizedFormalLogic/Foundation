@@ -13,7 +13,7 @@ variable {𝓢 : S} [Entailment.KP 𝓢]
 
 namespace KP
 
-protected def axiomD [HasDiaDuality 𝓢] : 𝓢 ⊢! Axioms.D φ := by
+protected def axiomD : 𝓢 ⊢! Axioms.D φ := by
   have : 𝓢 ⊢! φ 🡒 (∼φ 🡒 ⊥) := C_trans dni (K_left negEquiv);
   have : 𝓢 ⊢! □φ 🡒 □(∼φ 🡒 ⊥) := implyBoxDistribute' this;
   have : 𝓢 ⊢! □φ 🡒 (□(∼φ) 🡒 □⊥) := C_trans this axiomK;
