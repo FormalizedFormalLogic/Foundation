@@ -445,6 +445,7 @@ lemma neg_iff (h : φ ∈ Ω₁ ↔ ψ ∈ Ω₂) : (∼φ ∈ Ω₁) ↔ (∼ψ
 
 lemma iff_mem_conj : (⋀Γ ∈ Ω) ↔ (∀ φ ∈ Γ, φ ∈ Ω) := by simp [membership_iff, Conj₂!_iff_forall_provable];
 
+omit [Entailment.Cl 𝓢] in
 section
 
 variable [Entailment.K 𝓢]

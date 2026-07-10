@@ -1043,8 +1043,6 @@ lemma ENN!_of_E! [DecidableEq F] (b : 𝓢 ⊢ φ 🡘 ψ) : 𝓢 ⊢ ∼φ 🡘
 
 section NegationEquiv
 
-variable [Entailment.NegationEquiv 𝓢]
-
 def ENNCCOO [DecidableEq F] : 𝓢 ⊢! ∼∼φ 🡘 ((φ 🡒 ⊥) 🡒 ⊥) := by
   apply E_intro;
   . exact C_trans (by apply contra; exact K_right negEquiv) (K_left negEquiv)
