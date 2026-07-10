@@ -320,7 +320,7 @@ variable {φ ψ χ : Formula α} {Γ : FormulaFinset α} [Γ.SubformulaClosed]
 @[grind ⇒] lemma mem_imp₁ (h : φ 🡒 ψ ∈ Γ) : φ ∈ Γ := by apply SubformulaClosed.closed _ h; simp [Formula.subformulas];
 @[grind ⇒] lemma mem_imp₂ (h : φ 🡒 ψ ∈ Γ) : ψ ∈ Γ := by apply SubformulaClosed.closed _ h; simp [Formula.subformulas];
 
-instance subformulaClosed_subformulas [DecidableEq α] {φ : Formula α} : SubformulaClosed (φ.subformulas) := ⟨by
+instance subformulaClosed_subformulas {φ : Formula α} : SubformulaClosed (φ.subformulas) := ⟨by
   induction φ with
   | hatom => simp [Formula.subformulas];
   | hfalsum => simp [Formula.subformulas];
@@ -374,7 +374,7 @@ variable {φ ψ χ : Formula α} {T : FormulaSet α} [T.SubformulaClosed]
 @[grind ⇒] protected lemma mem_imp₁ (h : φ 🡒 ψ ∈ T) : φ ∈ T := by apply closed _ h; simp [Formula.subformulas];
 @[grind ⇒] protected lemma mem_imp₂ (h : φ 🡒 ψ ∈ T) : ψ ∈ T := by apply closed _ h; simp [Formula.subformulas];
 
-instance [DecidableEq α] {φ : Formula α} : SubformulaClosed φ.subformulas.toSet := ⟨by
+instance {φ : Formula α} : SubformulaClosed φ.subformulas.toSet := ⟨by
   simpa using FormulaFinset.SubformulaClosed.subformulaClosed_subformulas (φ := φ) |>.closed;
 ⟩
 

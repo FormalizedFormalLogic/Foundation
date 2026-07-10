@@ -226,7 +226,7 @@ section
 open Relation
 open Formula.Kripke.Satisfies (formula_hereditary)
 
-variable {M T} [T.SubformulaClosed]
+variable {M T}
 
 abbrev finestFiltrationTransitiveClosureFrame (M : Model) (T : FormulaSet ℕ) [T.SubformulaClosed] : Kripke.Frame where
   World := FilterEqvQuotient M T
@@ -306,7 +306,7 @@ abbrev finestFiltrationTransitiveClosureModel (M : Model) (T : FormulaSet ℕ) [
   ⟩
 
 
-instance finestFiltrationTransitiveClosureModel.filterOf : FilterOf (finestFiltrationTransitiveClosureModel M T) M T where
+instance finestFiltrationTransitiveClosureModel.filterOf {M} {T : FormulaSet ℕ} [T.SubformulaClosed] : FilterOf (finestFiltrationTransitiveClosureModel M T) M T where
   def_valuation := by tauto
   def_rel_forth := by
     intro x y Rxy;
