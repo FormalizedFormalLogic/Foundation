@@ -131,7 +131,7 @@ instance : T.rosserProvability.Rosser := ⟨rosserProvable_rosser⟩
 
 lemma rosserProvability_def (σ : Sentence L) : T.rosserProvability σ = T.rosserPred σ := rfl
 
-instance [T.Δ₁] : T.rosserProvability.SoundOn ℕ := by
+instance : T.rosserProvability.SoundOn ℕ := by
   constructor;
   intro σ h;
   apply Bootstrapping.provable_iff_provable.mp
