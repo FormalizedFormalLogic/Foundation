@@ -56,8 +56,10 @@ def swap₃ (d : 𝔇 (φ₄ :: φ₁ :: φ₂ :: φ₃ :: Γ)) : 𝔇 (φ₁ ::
 
 alias cut := OneSidedLK.Cut.cut
 
+omit [OneSidedLK 𝔇] in
 def eCut [Cut 𝔇] (d₁ : 𝔇 (φ :: Γ)) (d₂ : 𝔇 (ψ :: Δ)) (e : ∼φ = ψ := by simp) : 𝔇 (Γ ++ Δ) := cut d₁ (cast d₂ (by simp [e]))
 
+omit [OneSidedLK 𝔇] in
 def disj₂ {Γ Δ : List F} [Cut 𝔇] : 𝔇 (Γ ++ Δ) → 𝔇 (⋁Γ :: Δ) := fun d ↦
   match Γ with
   |               [] => contra d
@@ -100,6 +102,7 @@ lemma provable_iff :
 
 variable [OneSidedLK.Cut 𝔇] (𝓟)
 
+omit [OneSidedLK 𝔇] in
 instance : Entailment.ModusPonens 𝓟 where
   mdp {φ ψ} b₁ b₂ :=
     let b₁ := equiv b₁
@@ -109,6 +112,7 @@ instance : Entailment.ModusPonens 𝓟 where
     have : 𝔇 [ψ] := contraction (cut b₂ this) (by simp)
     equiv.symm <| cast this
 
+omit [OneSidedLK 𝔇] in
 instance : Entailment.Cl 𝓟 where
   negEquiv {φ} := Entailment.cast
     (show 𝓟 ⊢! (φ ⋎ ∼φ ⋎ ⊥) ⋏ (φ ⋏ ⊤ ⋎ ∼φ) from
@@ -151,6 +155,7 @@ instance : Entailment.Cl 𝓟 where
 
 variable {𝓟}
 
+omit [OneSidedLK 𝔇] in
 lemma derivable_iff_provable_disj : Nonempty (𝔇 Γ) ↔ 𝓟 ⊢ ⋁Γ := by
   constructor
   · rintro ⟨d⟩
@@ -175,13 +180,14 @@ def cast (d : 𝔇 Δ) (h : Δ = Γ.map f := by simp) : Pullback 𝔇 f Γ := by
 
 def uncast (d : Pullback 𝔇 f Γ) (h : Δ = Γ.map f := by simp) : 𝔇 Δ := h ▸ d
 
-instance oneSidedLK [OneSidedLK 𝔇] : OneSidedLK (Pullback 𝔇 f) where
+instance oneSidedLK : OneSidedLK (Pullback 𝔇 f) where
   identity φ := cast <| identity (f φ)
   contraction {Δ Γ} d h := cast (contraction d (List.map_subset f h) : 𝔇 (Γ.map f)) (by simp)
   verum := cast verum
   and d₁ d₂ := cast <| and d₁ d₂
   or d := cast <| or d
 
+omit [OneSidedLK 𝔇] in
 instance cut [Cut 𝔇] : Cut (Pullback 𝔇 f) where
   cut {φ Γ Δ} bp bn :=
     have bp : 𝔇 (f φ :: Γ.map f) := uncast bp
@@ -229,6 +235,7 @@ instance : Entailment.Axiomatized S where
 
 variable [OneSidedLK.Cut 𝔇]
 
+omit [OneSidedLK 𝔇] in
 instance (𝓢 : S) : Entailment.ModusPonens 𝓢 where
   mdp {φ ψ} b₁ b₂ :=
     let ⟨Γ₁, b₁⟩ := equiv b₁
@@ -238,6 +245,7 @@ instance (𝓢 : S) : Entailment.ModusPonens 𝓢 where
     have : 𝔇 (ψ :: ∼↑Γ₁ ++ ∼↑Γ₂) := contraction (cut b₂ this) (by simp)
     equiv.symm ⟨⟨Γ₁ ++ Γ₂, by simp; grind⟩, cast this⟩
 
+omit [OneSidedLK 𝔇] in
 instance : Entailment.StrongCut S S where
   cut {T U φ bs b} :=
   let rec bl (l : List F) (hl : ∀ ψ ∈ l, ψ ∈ U) (χ) (d : 𝔇 (χ :: ∼l)) : T ⊢! χ :=
@@ -252,6 +260,7 @@ instance : Entailment.StrongCut S S where
   have ⟨l, hl⟩ := equiv b
   bl l l.prop φ hl
 
+omit [OneSidedLK 𝔇] in
 instance : Entailment.DeductiveExplosion S where
   dexp b φ :=
     have ⟨Γ, b⟩ := equiv b
@@ -260,6 +269,7 @@ instance : Entailment.DeductiveExplosion S where
       have : 𝔇 [∼⊥] := cast verum (by simp)
       contraction (cut b this) (by simp) ⟩
 
+omit [OneSidedLK 𝔇] in
 lemma inconsistent_iff {𝓢 : S} :
     Entailment.Inconsistent 𝓢 ↔ ∃ Γ : List F, (∀ ψ ∈ Γ, ψ ∈ 𝓢) ∧ Nonempty (𝔇 (∼Γ)) := calc
   _ ↔ 𝓢 ⊢ ⊥ := Entailment.inconsistent_iff_provable_bot
@@ -272,6 +282,7 @@ lemma inconsistent_iff {𝓢 : S} :
     · rintro ⟨Γ, hΓ, ⟨d⟩⟩
       exact ⟨Γ, hΓ, ⟨contraction d (by simp)⟩⟩
 
+omit [OneSidedLK 𝔇] in
 instance cl (𝓢 : S) : Entailment.Cl 𝓢 where
   negEquiv {φ} := Entailment.cast
     (show 𝓢 ⊢! (φ ⋎ ∼φ ⋎ ⊥) ⋏ (φ ⋏ ⊤ ⋎ ∼φ) from
@@ -328,6 +339,7 @@ lemma empty_provable_iff_eprovable {𝓟 : P} [PrincipalEntailment 𝔇 𝓟] :
     have : 𝔇 [φ] := PrincipalEntailment.equiv b
     exact ⟨equiv.symm ⟨⟨[], by simp⟩, this⟩⟩
 
+omit [OneSidedLK 𝔇] in
 lemma iff_context {𝓢 : S} {𝓟 : P} [PrincipalEntailment 𝔇 𝓟] :
     𝓢 ⊢ φ ↔ AdjunctiveSet.set 𝓢 *⊢[𝓟] φ := by
   constructor
@@ -347,10 +359,12 @@ lemma iff_context {𝓢 : S} {𝓟 : P} [PrincipalEntailment 𝔇 𝓟] :
     have : 𝔇 (φ :: ∼Γ) := eCut d this
     refine provable_iff.mpr ⟨Γ, h, ⟨this⟩⟩
 
+omit [OneSidedLK 𝔇] in
 lemma of_principal_provable {𝓟 : P} [PrincipalEntailment 𝔇 𝓟] {𝓢 : S} : 𝓟 ⊢ φ → 𝓢 ⊢ φ := fun h ↦
   iff_context.mpr (Entailment.Context.of! h)
 
 open Classical in
+omit [OneSidedLK 𝔇] in
 noncomputable abbrev deduction (𝓟 : P) [PrincipalEntailment 𝔇 𝓟] : Entailment.Deduction S where
   ofInsert {φ ψ 𝓢 b} :=
     have : AdjunctiveSet.set (Adjoin.adjoin φ 𝓢) *⊢[𝓟] ψ := iff_context.mp ⟨b⟩
