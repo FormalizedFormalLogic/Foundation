@@ -154,7 +154,7 @@ variable [Operator.Mem L] [Membership M M] [Structure.Mem L M]
 instance (priority := 50) membership :
   Membership (SkolemHull L s) (SkolemHull L s) := ⟨fun y x ↦ x.val ∈ y.val⟩
 
-instance (priority := 50) mem [Operator.Mem L] [Membership M M] [Structure.Mem L M] :
+instance (priority := 50) mem :
     Structure.Mem L (SkolemHull L s) := ⟨fun x y ↦ by
   simpa [Operator.val, Matrix.fun_eq_vec_two] using! Structure.Mem.mem (L := L) (M := M) x.val y.val⟩
 
