@@ -18,13 +18,9 @@ open Formula.Kripke
 
 variable {F : Frame} [IsStrictTotalOrder _ F] {e : Cluster F} [F.IsBalloon e] {x : F.World} {φ : Formula ℕ}
 
--- `[IsStrictTotalOrder _ F]` must be given explicitly before `e : Cluster F` can even be stated,
--- so it cannot avoid overlapping with the `IsStrictTotalOrder` bundled inside `[F.IsBalloon e]`.
-set_option linter.overlappingInstances false in
 /-- Every points in enverope is reflexive. -/
 lemma rfl_in_envelope (hx : x ∈ e) : x ≺ x := Cluster.refl_of_mem_non_degenerate (envelope_non_degenerated) hx
 
-set_option linter.overlappingInstances false in
 /-- Every point in balloon can see all points in envelope. -/
 lemma covered_in_envelope (x : F.World) : ∀ t ∈ e, x ≺ t := by
   obtain ⟨t₁, rfl⟩ := Quotient.exists_rep e;
@@ -45,7 +41,6 @@ lemma covered_in_envelope (x : F.World) : ∀ t ∈ e, x ≺ t := by
     . have := IsTerminated.direct_terminated_of_trans (F := F.strictSkelteon) (t := ⟦t₁⟧) ⟦x⟧ ext₁;
       exact _root_.trans this.1 Rt₁₂;
 
-set_option linter.overlappingInstances false in
 /-- Every points from enverope is in enverope. -/
 lemma in_envelope_of_in_envelope (hx : x ∈ e) : ∀ {y}, x ≺ y → y ∈ e := by
   obtain ⟨t, rfl⟩ := Quotient.exists_rep e;
@@ -71,9 +66,6 @@ end Frame.IsBalloon
 lemma farthermost_point_of_not_box {M : Kripke.Model} [IsStrictOrder _ M.toFrame] {x : M} (h : ¬x ⊧ □φ) : ∃ y, x ≺ y ∧ ¬y ⊧ φ ∧ y ⊧ □φ := by
   sorry;
 
--- `[F.IsTransitive]` is a required prior argument of the `Frame.IsBalloon` class itself,
--- so it cannot avoid overlapping with the `IsTransitive` bundled inside `[F.IsBalloon e]`.
-set_option linter.overlappingInstances false in
 open
   Formula.Kripke
   Frame.IsBalloon

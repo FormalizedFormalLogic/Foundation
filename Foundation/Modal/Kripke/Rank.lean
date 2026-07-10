@@ -181,9 +181,6 @@ namespace pointGenerate
 open Classical in
 instance : Fintype (F↾x) := by apply Subtype.fintype;
 
--- the outer `variable [F.IsTransitive]` is needed by unrelated declarations in this section,
--- so it cannot avoid overlapping with the `IsTransitive` bundled inside `[F.IsTree]` here.
-set_option linter.overlappingInstances false in
 instance [F.IsTree] : (F↾x).IsTree := by constructor;
 
 axiom eq_original_height (hxy : y = x ∨ x ≺ y) : Frame.rank (F := F↾x) (⟨y, hxy⟩) = Frame.rank y
