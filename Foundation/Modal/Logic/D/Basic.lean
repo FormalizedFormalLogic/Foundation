@@ -152,12 +152,8 @@ noncomputable abbrev Formula.dzSubformula (φ : Formula ℕ) := (□⁻¹'φ.sub
 
 namespace Kripke
 
-instance {F : Frame} [F.IsFinite] [F.IsIrreflexive] [F.IsTransitive] : F.IsConverseWellFounded := ⟨by
-  apply Finite.converseWellFounded_of_trans_irrefl';
-  . infer_instance;
-  . intro x y z; apply F.trans;
-  . intro x; apply F.irrefl;
-⟩
+instance {F : Frame} [F.IsFinite] [F.IsIrreflexive] [F.IsTransitive] : F.IsConverseWellFounded :=
+  ⟨Finite.converseWellFounded_of_trans_of_irrefl⟩
 
 namespace Model
 

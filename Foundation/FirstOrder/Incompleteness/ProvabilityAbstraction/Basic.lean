@@ -181,7 +181,7 @@ variable
   [L.ReferenceableBy L]
   {T₀ T : Theory L} [Diagonalization T₀] {𝔅 : Provability T₀ T}
 
-def gödel [L.ReferenceableBy L] {T₀ T : Theory L} [Diagonalization T₀] (𝔅 : Provability T₀ T) : Sentence L :=
+def gödel (𝔅 : Provability T₀ T) : Sentence L :=
   fixedpoint T₀ “x. ¬!𝔅.prov x”
 
 lemma gödel_spec : T₀ ⊢ (gödel 𝔅) 🡘 ∼𝔅 (gödel 𝔅) := by simpa [gödel, Provability.pr] using diag “x. ¬!𝔅.prov x”;
@@ -264,7 +264,7 @@ end Second
 
 section Löb
 
-def kreisel [Diagonalization T₀] (𝔅 : Provability T₀ T) (σ : Sentence L) : Sentence L := fixedpoint T₀ “x. !𝔅.prov x → !σ”
+def kreisel (𝔅 : Provability T₀ T) (σ : Sentence L) : Sentence L := fixedpoint T₀ “x. !𝔅.prov x → !σ”
 
 variable {σ : Sentence L}
 

@@ -41,7 +41,7 @@ section last'
 variable [NeZero n]
 
 /-- The last element of `Fin n` when `n` is `NeZero`. -/
-def last' [NeZero n] : Fin n := ⟨n - 1, Nat.sub_one_lt'⟩
+def last' : Fin n := ⟨n - 1, Nat.sub_one_lt'⟩
 
 @[simp, grind .]
 lemma lt_last' : i ≤ Fin.last' := by

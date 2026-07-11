@@ -761,6 +761,7 @@ lemma iff_mem₂_neg : ∼φ ∈ t.1.2 ↔ φ ∈ t.1.1 := by
 @[grind]
 lemma iff_mem₂_neg' : ∼φ ∈ t.1.2 ↔ φ ∉ t.1.2 := Iff.trans iff_mem₂_neg $ Iff.symm iff_not_mem₂_mem₁
 
+omit [Entailment.Cl 𝓢] in
 section
 
 variable [Entailment.K 𝓢]

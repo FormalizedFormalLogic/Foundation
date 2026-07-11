@@ -228,7 +228,7 @@ lemma Satisfiable.of_subset {T U : Set F} (h : Satisfiable M U) (ss : T ⊆ U) :
 
 variable (M)
 
-instance [Semantics M F] : Semantics (Set M) F := ⟨fun s φ ↦ ∀ ⦃𝓜⦄, 𝓜 ∈ s → 𝓜 ⊧ φ⟩
+instance : Semantics (Set M) F := ⟨fun s φ ↦ ∀ ⦃𝓜⦄, 𝓜 ∈ s → 𝓜 ⊧ φ⟩
 
 @[simp] lemma empty_models (φ : F) : (∅ : Set M) ⊧ φ := by rintro h; simp
 
