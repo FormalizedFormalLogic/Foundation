@@ -24,6 +24,9 @@ namespace LO
 
 namespace FirstOrder
 
+/--
+A structure for maps which rewrite the variables occurring in a formula.
+-/
 structure Rew (L : Language) (ξ₁ : Type*) (n₁ : ℕ) (ξ₂ : Type*) (n₂ : ℕ) where
   toFun : Semiterm L ξ₁ n₁ → Semiterm L ξ₂ n₂
   func'' (f : L.Func k) (v : Fin k → Semiterm L ξ₁ n₁) : toFun (Semiterm.func f v) = Semiterm.func f fun i ↦ toFun (v i)
@@ -80,6 +83,7 @@ def bind (b : Fin n₁ → Semiterm L ξ₂ n₂) (e : ξ₁ → Semiterm L ξ�
   toFun := bindAux b e
   func'' := fun _ _ => rfl
 
+/-- `LO.FirstOrder.Rew.rewrite f` is a Rewriting of the free variables occurring in the term by `f : ξ₁ → Semiterm L ξ₂ n`. -/
 def rewrite (f : ξ₁ → Semiterm L ξ₂ n) : Rew L ξ₁ n ξ₂ n := bind Semiterm.bvar f
 
 def rewriteMap (e : ξ₁ → ξ₂) : Rew L ξ₁ n ξ₂ n := rewrite (fun m => &(e m))
@@ -87,15 +91,18 @@ def rewriteMap (e : ξ₁ → ξ₂) : Rew L ξ₁ n ξ₂ n := rewrite (fun m =
 def map (b : Fin n₁ → Fin n₂) (e : ξ₁ → ξ₂) : Rew L ξ₁ n₁ ξ₂ n₂ :=
   bind (fun n => #(b n)) (fun m => &(e m))
 
+/-- `LO.FirstOrder.Rew.subst v` is a substitution of the bounded variables occurring in the term by `v : Fin n → Semiterm L ξ n'`. -/
 def subst {n'} (v : Fin n → Semiterm L ξ n') : Rew L ξ n ξ n' :=
   bind v fvar
 
+/-- `LO.FirstOrder.Rew.emb` is a emb of the term with no free variables. -/
 def emb {o : Type v₁} [h : IsEmpty o] {ξ : Type v₂} {n} : Rew L o n ξ n := map id h.elim
 
 abbrev embs {o : Type v₁} [IsEmpty o] {n} : Rew L o n ℕ n := emb
 
 def empty {o : Type v₁} [h : IsEmpty o] {ξ : Type v₂} {n} : Rew L o 0 ξ n := map Fin.elim0 h.elim
 
+/-- `LO.FirstOrder.Rew.bShift` is a transformation of the bounded variables occurring in the term by `#x ↦ #(Fin.succ x)`. -/
 def bShift : Rew L ξ n ξ (n + 1) :=
   map Fin.succ id
 
@@ -448,6 +455,7 @@ section Syntactic
   #0 #1 ... #(n - 1) &1 &2 &3 ...
 -/
 
+/-- `LO.FirstOrder.Rew.shift` is a transformation of the free variables occurring in the term by `&x ↦ &(x + 1)`. -/
 def shift : SyntacticRew L n n := map id Nat.succ
 
 /-
