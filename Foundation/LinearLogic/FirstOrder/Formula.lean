@@ -49,16 +49,20 @@ namespace Semiformula
 variable {L : Language} {ξ : Type*}
 
 instance : MultiplicativeConnective (Semiformula L ξ n) where
-  one := one
-  bot := falsum
   tensor := tensor
   par := par
 
+instance : MultiplicativeNeutral (Semiformula L ξ n) where
+  one := one
+  bot := falsum
+
 instance : AdditiveConnective (Semiformula L ξ n) where
-  top := verum
-  zero := zero
   with' := .with
   plus := plus
+
+instance : AdditiveNeutral (Semiformula L ξ n) where
+  top := verum
+  zero := zero
 
 instance : ExponentialConnective (Semiformula L ξ n) where
   bang := bang
@@ -111,16 +115,20 @@ def neg : Semiformula L ξ n → Semiformula L ξ n
 instance : Tilde (Semiformula L ξ n) := ⟨neg⟩
 
 instance : MultiplicativeConnective.DeMorgan (Semiformula L ξ n) where
-  one := rfl
-  falsum := rfl
   tensor _ _ := rfl
   par _ _ := rfl
 
+instance : MultiplicativeNeutral.DeMorgan (Semiformula L ξ n) where
+  one := rfl
+  bot := rfl
+
 instance : AdditiveConnective.DeMorgan (Semiformula L ξ n) where
-  verum := rfl
-  zero := rfl
   with_ _ _ := rfl
   plus _ _ := rfl
+
+instance : AdditiveNeutral.DeMorgan (Semiformula L ξ n) where
+  top := rfl
+  zero := rfl
 
 instance : ExponentialConnective.DeMorgan (Semiformula L ξ n) where
   bang _ := rfl

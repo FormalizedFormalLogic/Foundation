@@ -8,21 +8,23 @@ public import Foundation.Logic.LogicSymbol
 
 namespace LO
 
-class MultiplicativeConnective (α : Type*) extends One α, Bot α, Tensor α, Par α
+class MultiplicativeConnective (α : Type*) extends Tensor α, Par α
 
-class AdditiveConnective (α : Type*) extends Top α, Zero α, With α, Plus α
+class MultiplicativeNeutral (α : Type*) extends One α, Bot α
+
+class AdditiveConnective (α : Type*) extends With α, Plus α
+
+class AdditiveNeutral (α : Type*) extends Top α, Zero α
 
 class ExponentialConnective (α : Type*) extends Bang α, Quest α
 
 namespace MultiplicativeConnective
 
 class DeMorgan (F : Type*) [MultiplicativeConnective F] [Tilde F] where
-  one : ∼(1 : F) = ⊥
-  falsum : ∼(⊥ : F) = 1
   tensor (φ ψ : F) : ∼(φ ⨂ ψ) = ∼φ ⅋ ∼ψ
   par (φ ψ : F) : ∼(φ ⅋ ψ) = ∼φ ⨂ ∼ψ
 
-attribute [simp] DeMorgan.one DeMorgan.falsum DeMorgan.tensor DeMorgan.par DeMorgan.neg
+attribute [simp] DeMorgan.tensor DeMorgan.par
 
 variable {F : Type*} [MultiplicativeConnective F] [Tilde F]
 
@@ -31,17 +33,35 @@ instance : Lolli F where
 
 end MultiplicativeConnective
 
+namespace MultiplicativeNeutral
+
+class DeMorgan (F : Type*) [MultiplicativeNeutral F] [Tilde F] where
+  one : ∼(1 : F) = ⊥
+  bot : ∼(⊥ : F) = 1
+
+attribute [simp] DeMorgan.one DeMorgan.bot
+
+end MultiplicativeNeutral
+
 namespace AdditiveConnective
 
 class DeMorgan (F : Type*) [AdditiveConnective F] [Tilde F] where
-  verum : ∼(⊤ : F) = 0
-  zero : ∼(0 : F) = ⊤
   with_ (φ ψ : F) : ∼(φ ＆ ψ) = ∼φ ⨁ ∼ψ
   plus (φ ψ : F) : ∼(φ ⨁ ψ) = ∼φ ＆ ∼ψ
 
-attribute [simp] DeMorgan.verum DeMorgan.zero DeMorgan.with_ DeMorgan.plus DeMorgan.neg
+attribute [simp] DeMorgan.with_ DeMorgan.plus
 
 end AdditiveConnective
+
+namespace AdditiveNeutral
+
+class DeMorgan (F : Type*) [AdditiveNeutral F] [Tilde F] where
+  top : ∼(⊤ : F) = 0
+  zero : ∼(0 : F) = ⊤
+
+attribute [simp] DeMorgan.top DeMorgan.zero
+
+end AdditiveNeutral
 
 namespace ExponentialConnective
 
