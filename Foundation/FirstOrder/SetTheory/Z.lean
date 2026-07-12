@@ -395,6 +395,10 @@ lemma inter_assoc (x y z : V) : (x ∩ y) ∩ z = x ∩ (y ∩ z) := by ext; sim
 
 @[simp] lemma empty_inter (x : V) : ∅ ∩ x = ∅ := by ext; simp
 
+@[simp] lemma inter_eq_left_of_subset {x y : V} (h : x ⊆ y) : x ∩ y = x := by ext z; simpa using h z
+
+@[simp] lemma inter_eq_right_of_subset {x y : V} (h : y ⊆ x) : x ∩ y = y := by ext z; simpa using h z
+
 @[simp] lemma sInter_insert (x y : V) [hy : IsNonempty y] : ⋂ˢ insert x y = x ∩ ⋂ˢ y := by
   ext; simp [*, mem_sInter_iff_of_nonempty]
 
