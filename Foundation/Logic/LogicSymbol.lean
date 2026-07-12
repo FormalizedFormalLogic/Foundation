@@ -63,6 +63,9 @@ variable {α : Type*} [Tilde α] [TildeInvolutive α]
   intro φ ψ h
   simpa using congr_arg (∼·) h
 
+@[simp] lemma TildeInvolutive.tilde_eq_tilde_iff_eq {φ ψ : α} : ∼φ = ∼ψ ↔ φ = ψ :=
+  Function.Injective.eq_iff TildeInvolutive.tilde_injective
+
 def Tilde.invol : α ↪ α := ⟨Tilde.tilde, TildeInvolutive.tilde_injective⟩
 
 @[simp] lemma Tilde.invol_app (φ : α) : Tilde.invol φ = ∼φ := rfl

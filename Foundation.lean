@@ -126,6 +126,7 @@ public import Foundation.LinearLogic.FirstOrder.ClassicalEmbedding
 public import Foundation.LinearLogic.FirstOrder.Formula
 public import Foundation.LinearLogic.FirstOrder.Rew
 public import Foundation.LinearLogic.LogicSymbol
+public import Foundation.LinearLogic.MELL
 public import Foundation.LinearLogic.MLL
 public import Foundation.Logic.Calculus
 public import Foundation.Logic.Decidability
