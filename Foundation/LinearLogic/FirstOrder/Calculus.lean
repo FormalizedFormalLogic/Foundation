@@ -37,21 +37,8 @@ namespace Negative
 
 end Negative
 
-def quest (Γ : Sequent L) : Sequent L := Γ.map (？·)
-
-instance : Quest (Sequent L) := ⟨quest⟩
-
-lemma quest_def (Γ : Sequent L) : ？Γ = Γ.map (？·) := rfl
-
-@[simp] lemma quest_nil : ？([] : Sequent L) = [] := rfl
-
-@[simp] lemma quest_cons (φ : Proposition L) (Γ : Sequent L) :
-    ？(φ :: Γ) = ？φ :: ？Γ := rfl
-
-@[simp] lemma quest_append (Γ Δ : Sequent L) :
-    ？(Γ ++ Δ) = ？Γ ++ ？Δ := by simp [quest_def]
-
-@[simp] lemma quest_isQuest (Γ : Sequent L) : Sequent.IsQuest (？Γ) := by simp [Sequent.IsQuest, quest_def]
+@[simp] lemma quest_isQuest (Γ : Sequent L) : Sequent.IsQuest (？Γ) := by
+  simp [Sequent.IsQuest, ExponentialConnective.listQuest_def]
 
 end Sequent
 
