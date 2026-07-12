@@ -330,6 +330,9 @@ instance (L : Language) (S : Language) [L.LT] : (L.add S).LT where
   func : {k : ℕ} → L₁.Func k → L₂.Func k
   rel : {k : ℕ} → L₁.Rel k → L₂.Rel k
 
+/--
+A structure for the homomorphisms (respecting function and relation symbols) between first-order languages.
+-/
 scoped[LO.FirstOrder] infix:25 " →ᵥ " => LO.FirstOrder.Language.Hom
 
 namespace Hom
