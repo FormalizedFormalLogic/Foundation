@@ -408,6 +408,7 @@ public import Foundation.Syntax.Predicate.Relational
 public import Foundation.Syntax.Predicate.Rew
 public import Foundation.Syntax.Predicate.Term
 public import Foundation.Vorspiel.AdjunctiveSet
+public import Foundation.Vorspiel.Algebra.IsNilpotent
 public import Foundation.Vorspiel.Arithmetic
 public import Foundation.Vorspiel.Computability
 public import Foundation.Vorspiel.DMatrix
