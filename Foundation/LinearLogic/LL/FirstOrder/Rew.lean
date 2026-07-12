@@ -1,6 +1,6 @@
 module
 
-public import Foundation.LinearLogic.FirstOrder.Formula
+public import Foundation.LinearLogic.LL.FirstOrder.Formula
 
 @[expose] public section
 

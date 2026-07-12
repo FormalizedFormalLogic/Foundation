@@ -1,7 +1,7 @@
 module
 
 public import Foundation.Vorspiel.List.Perm
-public import Foundation.LinearLogic.FirstOrder.Rew
+public import Foundation.LinearLogic.LL.FirstOrder.Rew
 
 /-! # One-sided sequent calculus for first-order linear logic -/
 
