@@ -51,6 +51,8 @@ variable {L : Language} {ξ : Type*}
 instance : MultiplicativeConnective (Semiformula L ξ n) where
   tensor := tensor
   par := par
+  tensor_injective _ _ _ _ := by simp [tensor.injEq]
+  par_injective _ _ _ _ := by simp [par.injEq]
 
 instance : MultiplicativeNeutral (Semiformula L ξ n) where
   one := one
@@ -59,6 +61,8 @@ instance : MultiplicativeNeutral (Semiformula L ξ n) where
 instance : AdditiveConnective (Semiformula L ξ n) where
   with' := .with
   plus := plus
+  with_injective _ _ _ _ := by simp [with.injEq]
+  plus_injective _ _ _ _ := by simp [plus.injEq]
 
 instance : AdditiveNeutral (Semiformula L ξ n) where
   top := verum
@@ -67,28 +71,12 @@ instance : AdditiveNeutral (Semiformula L ξ n) where
 instance : ExponentialConnective (Semiformula L ξ n) where
   bang := bang
   quest := quest
+  bang_injective _ _ := by simp [bang.injEq]
+  quest_injective _ _ := by simp [quest.injEq]
 
 instance : Quantifier (Semiformula L ξ) where
   all := all
   exs := exs
-
-@[simp] lemma tensor_inj {φ₁ ψ₁ φ₂ ψ₂ : Semiformula L ξ n} :
-    φ₁ ⨂ ψ₁ = φ₂ ⨂ ψ₂ ↔ φ₁ = φ₂ ∧ ψ₁ = ψ₂ := iff_of_eq (by apply tensor.injEq)
-
-@[simp] lemma par_inj {φ₁ ψ₁ φ₂ ψ₂ : Semiformula L ξ n} :
-    φ₁ ⅋ ψ₁ = φ₂ ⅋ ψ₂ ↔ φ₁ = φ₂ ∧ ψ₁ = ψ₂ := iff_of_eq (by apply par.injEq)
-
-@[simp] lemma with_inj {φ₁ ψ₁ φ₂ ψ₂ : Semiformula L ξ n} :
-    φ₁ ＆ ψ₁ = φ₂ ＆ ψ₂ ↔ φ₁ = φ₂ ∧ ψ₁ = ψ₂ := iff_of_eq (by apply with.injEq)
-
-@[simp] lemma plus_inj {φ₁ ψ₁ φ₂ ψ₂ : Semiformula L ξ n} :
-    φ₁ ⨁ ψ₁ = φ₂ ⨁ ψ₂ ↔ φ₁ = φ₂ ∧ ψ₁ = ψ₂ := iff_of_eq (by apply plus.injEq)
-
-@[simp] lemma bang_inj {φ₁ φ₂ : Semiformula L ξ n} :
-    ！φ₁ = ！φ₂ ↔ φ₁ = φ₂ := iff_of_eq (by apply bang.injEq)
-
-@[simp] lemma quant_inj {φ₁ φ₂ : Semiformula L ξ n} :
-    ？φ₁ = ？φ₂ ↔ φ₁ = φ₂ := iff_of_eq (by apply quest.injEq)
 
 @[simp] lemma all_inj {φ₁ φ₂ : Semiformula L ξ (n + 1)} :
     ∀⁰ φ₁ = ∀⁰ φ₂ ↔ φ₁ = φ₂ := iff_of_eq (by apply all.injEq)
