@@ -5,30 +5,30 @@ public import Foundation.FirstOrder.Arithmetic.Basic.PrenexNat
 
 @[expose] public section
 /-!
-# Strictness of the arithmetical hierarchy (issue #707, Step 4)
+# Strictness of the arithmetical hierarchy
 
 Main theorem: for every `n`, there is a `Σ_{n+1}` predicate (namely `sigmaTruth n` from
 `PartialTruth.lean`) that is not `Π_{n+1}`-definable on `ℕ`. This is proved by a direct
 diagonalization (no fixed-point machinery needed): assuming a `Π_{n+1}` formula `ψ` agrees with
 `sigmaTruth n` everywhere, `diagNeg ψ` is a `Σ_{n+1}` formula whose (semantic) prenex normal form
-`δ'` (via `EquivStrict.hierarchy_equivStrict` from Step 2, `PrenexNat.lean`) yields a
+`δ'` (via `EquivStrict.hierarchy_equivStrict` in `PrenexNat.lean`) yields a
 self-referential sentence `σ₀ := δ'/[⌜δ'⌝]` with `ℕ ⊧ σ₀ ↔ ¬ℕ ⊧ σ₀`, a contradiction.
 
 ## Implementation notes (Phase 0 skeleton)
 
-Only `diagNeg` is fully implemented; the remaining lemmas are stated with `sorry`. See the plan
-`.directions/strict-arithmetic-hierarchy.md`, section "Step3/Step4 詳細プラン", §3, for the full
-proof sketches. The only point where this file depends on Step 2
-(`EquivStrict.hierarchy_equivStrict`) is inside the proof of `sigmaTruth_not_pi`; the *signature*
-of `hierarchy_equivStrict` is stable already, so this file type-checks (up to the stated `sorry`s)
-regardless of whether Step 2 itself is finished.
+Only `diagNeg` is fully implemented; the remaining lemmas are stated with `sorry`. See
+`sigmaTruth_not_pi` and `strict_arithmetical_hierarchy` for the full proof sketches. The only
+point where this file depends on the `hierarchy_equivStrict` theorem from `PrenexNat.lean` is
+inside the proof of `sigmaTruth_not_pi`; the *signature* of `hierarchy_equivStrict` is stable
+already, so this file type-checks (up to the stated `sorry`s) regardless of whether the
+implementation of `hierarchy_equivStrict` in `PrenexNat.lean` is finished.
 -/
 
 namespace LO.FirstOrder.Arithmetic
 
 open Bootstrapping Bootstrapping.Arithmetic
 
-/-! ### The diagonal formula (L4-1, L4-2) -/
+/-! ### The diagonal formula -/
 
 /-- Given a formula `ψ`, `diagNeg ψ` is the formula `x ↦ ¬ψ(substNumeral x x)`, i.e. the
 "self-application negation" of `ψ`. This is the same pattern as `Bootstrapping.diag`
@@ -48,7 +48,7 @@ lemma diagNeg_eval (ψ : ArithmeticSemisentence 1) (x : ℕ) :
     ℕ ⊧/![x] (diagNeg ψ) ↔ ¬ℕ ⊧/![substNumeral x x] ψ := by
   simp [diagNeg]
 
-/-! ### Diagonalization (L4-3) -/
+/-! ### Diagonalization -/
 
 set_option maxHeartbeats 800000 in
 /-- No `Π_{n+1}` formula agrees everywhere with the partial truth predicate `sigmaTruth n`. -/
@@ -58,7 +58,7 @@ theorem sigmaTruth_not_pi (n : ℕ) :
         ℕ↓[ℒₒᵣ] ⊧ ψ/[(↑k : ArithmeticSemiterm Empty 0)] := by
   rintro ⟨ψ, hψ, hagree⟩
   have hδ₀ : Hierarchy 𝚺 (n + 1) (diagNeg ψ) := diagNeg_hierarchy hψ
-  -- Step2 dependency: only the *signature* of `hierarchy_equivStrict` is used here.
+  -- `PrenexNat.lean` dependency: only the *signature* of `hierarchy_equivStrict` is used here.
   obtain ⟨δ', hδ's, hδ'iff⟩ := EquivStrict.hierarchy_equivStrict hδ₀ (by omega)
   -- `σ₀` is the self-referential sentence obtained by substituting the code of `δ'` into itself.
   set σ₀ : ArithmeticSentence := δ'/[(⌜δ'⌝ : ArithmeticSemiterm Empty 0)] with hσ₀_def
@@ -89,7 +89,7 @@ theorem sigmaTruth_not_pi (n : ℕ) :
     step1.trans <| step2.trans <| step3.trans <| step4.trans <| step5.trans step6
   tauto
 
-/-! ### Main theorem (L4-4) -/
+/-! ### Main theorem -/
 
 /-- The arithmetical hierarchy is strict: for every `n`, there is a `Σ_{n+1}` predicate that is
 not equivalent (on `ℕ`) to any `Π_{n+1}` predicate. -/

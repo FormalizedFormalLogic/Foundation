@@ -8,7 +8,7 @@ public import Foundation.FirstOrder.Arithmetic.Basic.Prenex
 
 @[expose] public section
 /-!
-# Partial truth predicate for the arithmetical hierarchy (issue #707, Step 3)
+# Partial truth predicate for the arithmetical hierarchy
 
 This file defines, for each `n`, a `Σ_{n+1}` formula `sigmaTruth n` that (on `ℕ`) correctly
 computes the truth value of *strict* `Σ_{n+1}` sentences (i.e. sentences literally in prenex
@@ -16,17 +16,16 @@ form, see `StrictHierarchy` in `Foundation/FirstOrder/Arithmetic/Basic/Prenex.le
 "partial" truth predicate in the sense that no claim is made about its behaviour on formulas
 that are not (codes of) strict `Σ_{n+1}` sentences.
 
-This file is only used for the diagonalization argument in `StrictHierarchy.lean` (Step 4) and
+This file is only used for the diagonalization argument in `StrictHierarchy.lean` and
 does **not** depend on the (semantic) prenex normal form theorem
-`Foundation/FirstOrder/Arithmetic/Basic/PrenexNat.lean` (Step 2).
+`Foundation/FirstOrder/Arithmetic/Basic/PrenexNat.lean`.
 
 ## Implementation notes (Phase 0 skeleton)
 
 Most lemmas below are stated with `sorry`; only the definitions `sigmaTruth`
 (`sigmaTruth_zero`/`sigmaTruth_succ` in the recursive equations) are fully implemented, along with
-whatever is a one-line consequence of existing simp lemmas. See the plan
-`.directions/strict-arithmetic-hierarchy.md`, section "Step3/Step4 詳細プラン", §2, for the full
-proof sketches.
+whatever is a one-line consequence of existing simp lemmas. See `sigmaTruth_iff` for the main
+correctness statement and its proof for the full argument.
 -/
 
 namespace LO.FirstOrder.Arithmetic
@@ -35,7 +34,7 @@ open Bootstrapping Bootstrapping.Arithmetic
 
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 
-/-! ### Glue lemmas (L3-G1, L3-G2) -/
+/-! ### Glue lemmas -/
 
 -- `substNumeral` is (definitionally, up to the `?[t] = t ∷ 0`/`matrixToVec` unfolding) the `k = 1`
 -- special case of `substNumerals`; this bridges the two so that `substNumerals_app_quote` can be
@@ -60,7 +59,7 @@ lemma substNumeral_app_quote_nat (π : ArithmeticSemisentence 1) (k : ℕ) :
 lemma quote_neg (σ : ArithmeticSentence) : (⌜(∼σ)⌝ : V) = neg ℒₒᵣ (⌜σ⌝ : V) := by
   simp [Sentence.quote_eq]
 
-/-! ### The partial truth predicate `sigmaTruth` (L3-D) -/
+/-! ### The partial truth predicate `sigmaTruth` -/
 
 /-- `sigmaTruth n` is a `Σ_{n+1}` formula that, applied to (the code of) a strict `Σ_{n+1}`
 sentence, correctly decides its truth value on `ℕ` (see `sigmaTruth_iff`). The base case
@@ -72,7 +71,7 @@ noncomputable def sigmaTruth : ℕ → ArithmeticSemisentence 1
   | 0     => (provable 𝗜𝚺₁).val
   | n + 1 => “x. ∃ p, !qqExsDef x p ∧ ∃ k s y, !ssnum s p k ∧ !(negGraph ℒₒᵣ) y s ∧ ¬!(sigmaTruth n) y”
 
-/-! ### Hierarchy of `sigmaTruth` (L3-1) -/
+/-! ### Hierarchy of `sigmaTruth` -/
 
 @[simp, grind .]
 lemma sigmaTruth_hierarchy (n : ℕ) : Hierarchy 𝚺 (n + 1) (sigmaTruth n) := by
@@ -86,7 +85,7 @@ lemma sigmaTruth_hierarchy (n : ℕ) : Hierarchy 𝚺 (n + 1) (sigmaTruth n) := 
     . exact Hierarchy.mono (HierarchySymbol.Semiformula.hierarchy_sigma (φ := negGraph ℒₒᵣ)) (by omega);
     . exact ih.accum _;
 
-/-! ### Correctness, base case (L3-2) -/
+/-! ### Correctness, base case -/
 
 variable {σ : ArithmeticSentence}
 
@@ -108,7 +107,7 @@ lemma models_subst_iff (φ : ArithmeticSemisentence 1) (k : ℕ) :
     ℕ↓[ℒₒᵣ] ⊧ φ/[(↑k : ArithmeticSemiterm Empty 0)] ↔ ℕ ⊧/![k] φ := by
   simp [models_iff, Semiformula.eval_substs]
 
-/-! ### Correctness, main theorem (L3-4) -/
+/-! ### Correctness, main theorem -/
 
 
 /-- Main correctness theorem for the partial truth predicate: `sigmaTruth n` agrees with actual
