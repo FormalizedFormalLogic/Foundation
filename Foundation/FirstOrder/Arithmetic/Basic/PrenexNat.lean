@@ -80,14 +80,14 @@ namespace EquivStrict
 
 variable {Γ Γ' : Polarity} {s s' : ℕ} {n : ℕ} {φ ψ : ArithmeticSemiformula Empty n}
 
-@[grind] lemma refl (h : StrictHierarchy Γ s φ) : EquivStrict Γ s φ := ⟨φ, h, fun _ => Iff.rfl⟩
+@[grind →] lemma refl (h : StrictHierarchy Γ s φ) : EquivStrict Γ s φ := ⟨φ, h, fun _ => Iff.rfl⟩
 
 lemma of_iff (h : EquivStrict Γ s φ) (hiff : ∀ e : Fin n → ℕ, ℕ ⊧/e φ ↔ ℕ ⊧/e ψ) :
     EquivStrict Γ s ψ := by
   rcases h with ⟨φ', hφ', hiff'⟩
   exact ⟨φ', hφ', fun e => (hiff' e).trans (hiff e)⟩
 
-@[grind] lemma neg (h : EquivStrict Γ s φ) : EquivStrict Γ.alt s (∼φ) := by
+@[grind →] lemma neg (h : EquivStrict Γ s φ) : EquivStrict Γ.alt s (∼φ) := by
   rcases h with ⟨φ', hφ', hiff'⟩
   refine ⟨∼φ', hφ'.neg, fun e => ?_⟩
   simp [hiff' e]
@@ -100,7 +100,7 @@ lemma of_iff (h : EquivStrict Γ s φ) (hiff : ∀ e : Fin n → ℕ, ℕ ⊧/e 
   · intro h
     exact h.neg
 
-@[grind] lemma alt_up (h : EquivStrict Γ (s + 1) φ) : EquivStrict Γ.alt (s + 2) φ := by
+@[grind →] lemma alt_up (h : EquivStrict Γ (s + 1) φ) : EquivStrict Γ.alt (s + 2) φ := by
   rcases Γ with _ | _
   · rcases h with ⟨φ', hφ', hiff'⟩
     refine ⟨∀⁰ (Rew.bShift ▹ φ'), (hφ'.rew Rew.bShift).all, fun e => ?_⟩
@@ -119,7 +119,7 @@ lemma of_iff (h : EquivStrict Γ s φ) (hiff : ∀ e : Fin n → ℕ, ℕ ⊧/e 
     · intro h
       exact ⟨0, (hiff' e).mpr h⟩
 
-@[grind] lemma of_deltaZero (hp : Hierarchy 𝚺 0 φ) (hs : 1 ≤ s) : EquivStrict Γ s φ := by
+@[grind =>] lemma of_deltaZero (hp : Hierarchy 𝚺 0 φ) (hs : 1 ≤ s) : EquivStrict Γ s φ := by
   have aux : ∀ s, 1 ≤ s → ∀ Γ : Polarity, EquivStrict Γ s φ := by
     intro s
     induction s using Nat.strong_induction_on with
@@ -402,7 +402,7 @@ lemma coreClosure_succ (ih : CoreClosure (s + 1)) : CoreClosure (s + 2) where
       have := (ball_sigma_step ih ht hφ').neg
       simpa using this
 
-@[grind] lemma coreClosure (hs : 1 ≤ s) : CoreClosure s := by
+@[grind →] lemma coreClosure (hs : 1 ≤ s) : CoreClosure s := by
   induction s with
   | zero => omega
   | succ s ih =>
@@ -414,21 +414,21 @@ lemma coreClosure_succ (ih : CoreClosure (s + 1)) : CoreClosure (s + 2) where
 under conjunction.
 
 - [HP98, Theorem 0.34] -/
-@[grind] lemma and (hs : 1 ≤ s) (hφ : EquivStrict Γ s φ) (hψ : EquivStrict Γ s ψ) : EquivStrict Γ s (φ ⋏ ψ) :=
+@[grind .] lemma and (hs : 1 ≤ s) (hφ : EquivStrict Γ s φ) (hψ : EquivStrict Γ s ψ) : EquivStrict Γ s (φ ⋏ ψ) :=
   (coreClosure hs).and Γ hφ hψ
 
 /-- `Σ_s`/`Π_s` (`s ≥ 1`) formulas equivalent, on `ℕ`, to a strict hierarchy formula are closed
 under disjunction.
 
 - [HP98, Theorem 0.34] -/
-@[grind] lemma or (hs : 1 ≤ s) (hφ : EquivStrict Γ s φ) (hψ : EquivStrict Γ s ψ) : EquivStrict Γ s (φ ⋎ ψ) :=
+@[grind .] lemma or (hs : 1 ≤ s) (hφ : EquivStrict Γ s φ) (hψ : EquivStrict Γ s ψ) : EquivStrict Γ s (φ ⋎ ψ) :=
   (coreClosure hs).or Γ hφ hψ
 
 /-- `Σ_s`/`Π_s` (`s ≥ 1`) formulas equivalent, on `ℕ`, to a strict hierarchy formula are closed
 under bounded universal quantification.
 
 - [HP98, Theorem 0.34] -/
-@[grind] lemma ball {φ : ArithmeticSemiformula Empty (n + 1)} {t : ArithmeticSemiterm Empty (n + 1)}
+@[grind .] lemma ball {φ : ArithmeticSemiformula Empty (n + 1)} {t : ArithmeticSemiterm Empty (n + 1)}
     (hs : 1 ≤ s) (ht : t.Positive) (hφ : EquivStrict Γ s φ) : EquivStrict Γ s (∀⁰[“x. x < !!t”] φ) :=
   (coreClosure hs).ball Γ ht hφ
 
@@ -436,18 +436,18 @@ under bounded universal quantification.
 under bounded existential quantification.
 
 - [HP98, Theorem 0.34] -/
-@[grind] lemma bexs {φ : ArithmeticSemiformula Empty (n + 1)} {t : ArithmeticSemiterm Empty (n + 1)}
+@[grind .] lemma bexs {φ : ArithmeticSemiformula Empty (n + 1)} {t : ArithmeticSemiterm Empty (n + 1)}
     (hs : 1 ≤ s) (ht : t.Positive) (hφ : EquivStrict Γ s φ) : EquivStrict Γ s (∃⁰[“x. x < !!t”] φ) :=
   (coreClosure hs).bexs Γ ht hφ
 
-@[grind] lemma exs_of_pi {φ : ArithmeticSemiformula Empty (n + 1)} (h : EquivStrict 𝚷 (s + 1) φ) :
+@[grind →] lemma exs_of_pi {φ : ArithmeticSemiformula Empty (n + 1)} (h : EquivStrict 𝚷 (s + 1) φ) :
     EquivStrict 𝚺 (s + 2) (∃⁰ φ) := by
   rcases h with ⟨φ', hφ', hiff'⟩
   refine ⟨∃⁰ φ', hφ'.exs, fun e => ?_⟩
   simp only [Semiformula.eval_ex]
   exact exists_congr (fun x => hiff' (x :> e))
 
-@[grind] lemma all_of_sigma {φ : ArithmeticSemiformula Empty (n + 1)} (h : EquivStrict 𝚺 (s + 1) φ) :
+@[grind →] lemma all_of_sigma {φ : ArithmeticSemiformula Empty (n + 1)} (h : EquivStrict 𝚺 (s + 1) φ) :
     EquivStrict 𝚷 (s + 2) (∀⁰ φ) := by
   rcases h with ⟨φ', hφ', hiff'⟩
   refine ⟨∀⁰ φ', hφ'.all, fun e => ?_⟩
@@ -458,7 +458,7 @@ under bounded existential quantification.
 existential projection.
 
 - [HP98, Theorem 0.34] -/
-@[grind] lemma exs {φ : ArithmeticSemiformula Empty (n + 1)} (h : EquivStrict 𝚺 (s + 1) φ) :
+@[grind →] lemma exs {φ : ArithmeticSemiformula Empty (n + 1)} (h : EquivStrict 𝚺 (s + 1) φ) :
     EquivStrict 𝚺 (s + 1) (∃⁰ φ) := by
   rcases s with _ | s₀
   · -- s + 1 = 1: Σ₁ is already closed under ∃
@@ -526,7 +526,7 @@ existential projection.
 universal projection.
 
 - [HP98, Theorem 0.34] -/
-@[grind] lemma all {φ : ArithmeticSemiformula Empty (n + 1)} (h : EquivStrict 𝚷 (s + 1) φ) :
+@[grind →] lemma all {φ : ArithmeticSemiformula Empty (n + 1)} (h : EquivStrict 𝚷 (s + 1) φ) :
     EquivStrict 𝚷 (s + 1) (∀⁰ φ) := by
   have h' : EquivStrict 𝚺 (s + 1) (∼φ) := by simpa using h.neg
   have := (exs h').neg
@@ -542,7 +542,7 @@ universal projection.
 of the same level.
 
 - [HP98, Theorem 0.34] -/
-@[grind] lemma hierarchy_equivStrict {Γ₀ s₀} {φ₀ : ArithmeticSemiformula Empty n₀} :
+@[grind →] lemma hierarchy_equivStrict {Γ₀ s₀} {φ₀ : ArithmeticSemiformula Empty n₀} :
   Hierarchy Γ₀ s₀ φ₀ → 1 ≤ s₀ → EquivStrict Γ₀ s₀ φ₀
   | .verum _ _ _, hs => EquivStrict.of_deltaZero (Hierarchy.verum 𝚺 0 _) hs
   | .falsum _ _ _, hs => EquivStrict.of_deltaZero (Hierarchy.falsum 𝚺 0 _) hs
@@ -561,13 +561,13 @@ of the same level.
   | .dummy_pi (s := k) hp, _ => (EquivStrict.exs (hierarchy_equivStrict hp (by omega))).alt_up
   | .dummy_sigma (s := k) hp, _ => (EquivStrict.all (hierarchy_equivStrict hp (by omega))).alt_up
 
-@[grind] lemma mono (h : EquivStrict Γ s φ) (hs : 1 ≤ s) (hle : s ≤ s') : EquivStrict Γ s' φ := by
+@[grind <=] lemma mono (h : EquivStrict Γ s φ) (hs : 1 ≤ s) (hle : s ≤ s') : EquivStrict Γ s' φ := by
   rcases h with ⟨φ', hφ', hiff'⟩
   have hs' : 1 ≤ s' := le_trans hs hle
   have : EquivStrict Γ s' φ' := hierarchy_equivStrict (hφ'.hierarchy.mono hle) hs'
   exact this.of_iff hiff'
 
-@[grind] lemma mono' (h : EquivStrict Γ s φ) (hs : 1 ≤ s) (hlt : s < s') : EquivStrict Γ' s' φ := by
+@[grind <=] lemma mono' (h : EquivStrict Γ s φ) (hs : 1 ≤ s) (hlt : s < s') : EquivStrict Γ' s' φ := by
   rcases h with ⟨φ', hφ', hiff'⟩
   have hs' : 1 ≤ s' := le_trans hs (le_of_lt hlt)
   have : EquivStrict Γ' s' φ' := hierarchy_equivStrict (hφ'.hierarchy.strict_mono Γ' hlt) hs'
