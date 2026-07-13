@@ -533,45 +533,45 @@ universal projection.
   have := (exs h').neg
   simpa using this
 
--- Note: the outer binders are named `Γ₀ s₀ n₀` (rather than the ambient section names
--- `Γ s n`) to avoid an elaboration issue where recursive self-calls to
--- `hierarchy_equivStrict` inside this very definition would get their implicit level/arity
--- arguments incorrectly unified with the *outer* case's own indices whenever the section
--- variables `Γ s n` (used by `IsStrictHierarchyOnModel.exs`/`all`/`alt_up` etc.) shared the same names as
--- this lemma's own bound variables.
 /-- Every `Γ`-formula of hierarchy level `s ≥ 1` is equivalent, on `ℕ`, to a strict `Γ`-formula
 of the same level.
 
 - [HP98, Theorem 0.34] -/
-@[grind →] lemma hierarchy_equivStrict {Γ₀ s₀} {φ₀ : ArithmeticSemiformula Empty n₀} :
-  Hierarchy Γ₀ s₀ φ₀ → 1 ≤ s₀ → IsStrictHierarchyOnModel ℕ Γ₀ s₀ φ₀
-  | .verum _ _ _, hs => IsStrictHierarchyOnModel.of_deltaZero (Hierarchy.verum 𝚺 0 _) hs
-  | .falsum _ _ _, hs => IsStrictHierarchyOnModel.of_deltaZero (Hierarchy.falsum 𝚺 0 _) hs
-  | .rel _ _ r v, hs => IsStrictHierarchyOnModel.of_deltaZero (Hierarchy.rel 𝚺 0 r v) hs
-  | .nrel _ _ r v, hs => IsStrictHierarchyOnModel.of_deltaZero (Hierarchy.nrel 𝚺 0 r v) hs
-  | .and hp hq, hs => IsStrictHierarchyOnModel.and hs (hierarchy_equivStrict hp hs) (hierarchy_equivStrict hq hs)
-  | .or hp hq, hs => IsStrictHierarchyOnModel.or hs (hierarchy_equivStrict hp hs) (hierarchy_equivStrict hq hs)
-  | .ball pos hp, hs => IsStrictHierarchyOnModel.ball hs pos (hierarchy_equivStrict hp hs)
-  | .bexs pos hp, hs => IsStrictHierarchyOnModel.bexs hs pos (hierarchy_equivStrict hp hs)
-  | .exs hp, hs => IsStrictHierarchyOnModel.exs (hierarchy_equivStrict hp hs)
-  | .all hp, hs => IsStrictHierarchyOnModel.all (hierarchy_equivStrict hp hs)
-  | .sigma (s := 0) hp, _ => IsStrictHierarchyOnModel.refl (StrictHierarchy.base (Hierarchy.sigma hp))
-  | .sigma (s := k + 1) hp, _ => IsStrictHierarchyOnModel.exs_of_pi (hierarchy_equivStrict hp (by omega))
-  | .pi (s := 0) hp, _ => IsStrictHierarchyOnModel.refl (StrictHierarchy.base (Hierarchy.pi hp))
-  | .pi (s := k + 1) hp, _ => IsStrictHierarchyOnModel.all_of_sigma (hierarchy_equivStrict hp (by omega))
-  | .dummy_pi (s := k) hp, _ => (IsStrictHierarchyOnModel.exs (hierarchy_equivStrict hp (by omega))).alt_up
-  | .dummy_sigma (s := k) hp, _ => (IsStrictHierarchyOnModel.all (hierarchy_equivStrict hp (by omega))).alt_up
+@[grind →] lemma ofHierarchy (h : Hierarchy Γ s φ) (hs : 1 ≤ s) : IsStrictHierarchyOnModel ℕ Γ s φ := by
+  induction h with
+  | verum _ _ _ => exact IsStrictHierarchyOnModel.of_deltaZero (Hierarchy.verum 𝚺 0 _) hs
+  | falsum _ _ _ => exact IsStrictHierarchyOnModel.of_deltaZero (Hierarchy.falsum 𝚺 0 _) hs
+  | rel _ _ r v => exact IsStrictHierarchyOnModel.of_deltaZero (Hierarchy.rel 𝚺 0 r v) hs
+  | nrel _ _ r v => exact IsStrictHierarchyOnModel.of_deltaZero (Hierarchy.nrel 𝚺 0 r v) hs
+  | and hp hq ihp ihq => exact IsStrictHierarchyOnModel.and hs (ihp hs) (ihq hs)
+  | or hp hq ihp ihq => exact IsStrictHierarchyOnModel.or hs (ihp hs) (ihq hs)
+  | ball pos hp ih => exact IsStrictHierarchyOnModel.ball hs pos (ih hs)
+  | bexs pos hp ih => exact IsStrictHierarchyOnModel.bexs hs pos (ih hs)
+  | exs hp ih => exact IsStrictHierarchyOnModel.exs (ih hs)
+  | all hp ih => exact IsStrictHierarchyOnModel.all (ih hs)
+  | sigma hp ih =>
+    rename_i s' _ _
+    rcases s' with _ | k
+    · exact IsStrictHierarchyOnModel.refl (StrictHierarchy.base (Hierarchy.sigma hp))
+    · exact IsStrictHierarchyOnModel.exs_of_pi (ih (by omega))
+  | pi hp ih =>
+    rename_i s' _ _
+    rcases s' with _ | k
+    · exact IsStrictHierarchyOnModel.refl (StrictHierarchy.base (Hierarchy.pi hp))
+    · exact IsStrictHierarchyOnModel.all_of_sigma (ih (by omega))
+  | dummy_pi hp ih => exact (IsStrictHierarchyOnModel.exs (ih (by omega))).alt_up
+  | dummy_sigma hp ih => exact (IsStrictHierarchyOnModel.all (ih (by omega))).alt_up
 
 @[grind <=] lemma mono (h : IsStrictHierarchyOnModel ℕ Γ s φ) (hs : 1 ≤ s) (hle : s ≤ s') : IsStrictHierarchyOnModel ℕ Γ s' φ := by
   rcases h with ⟨φ', hφ', hiff'⟩
   have hs' : 1 ≤ s' := le_trans hs hle
-  have : IsStrictHierarchyOnModel ℕ Γ s' φ' := hierarchy_equivStrict (hφ'.hierarchy.mono hle) hs'
+  have : IsStrictHierarchyOnModel ℕ Γ s' φ' := ofHierarchy (hφ'.hierarchy.mono hle) hs'
   exact this.of_iff hiff'
 
 @[grind <=] lemma mono' (h : IsStrictHierarchyOnModel ℕ Γ s φ) (hs : 1 ≤ s) (hlt : s < s') : IsStrictHierarchyOnModel ℕ Γ' s' φ := by
   rcases h with ⟨φ', hφ', hiff'⟩
   have hs' : 1 ≤ s' := le_trans hs (le_of_lt hlt)
-  have : IsStrictHierarchyOnModel ℕ Γ' s' φ' := hierarchy_equivStrict (hφ'.hierarchy.strict_mono Γ' hlt) hs'
+  have : IsStrictHierarchyOnModel ℕ Γ' s' φ' := ofHierarchy (hφ'.hierarchy.strict_mono Γ' hlt) hs'
   exact this.of_iff hiff'
 
 end IsStrictHierarchyOnModel
