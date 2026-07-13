@@ -13,15 +13,6 @@ diagonalization (no fixed-point machinery needed): assuming a `Π_{n+1}` formula
 `sigmaTruth n` everywhere, `diagNeg ψ` is a `Σ_{n+1}` formula whose (semantic) prenex normal form
 `δ'` (via `EquivStrict.hierarchy_equivStrict` in `PrenexNat.lean`) yields a
 self-referential sentence `σ₀ := δ'/[⌜δ'⌝]` with `ℕ ⊧ σ₀ ↔ ¬ℕ ⊧ σ₀`, a contradiction.
-
-## Implementation notes (Phase 0 skeleton)
-
-Only `diagNeg` is fully implemented; the remaining lemmas are stated with `sorry`. See
-`sigmaTruth_not_pi` and `strict_arithmetical_hierarchy` for the full proof sketches. The only
-point where this file depends on the `hierarchy_equivStrict` theorem from `PrenexNat.lean` is
-inside the proof of `sigmaTruth_not_pi`; the *signature* of `hierarchy_equivStrict` is stable
-already, so this file type-checks (up to the stated `sorry`s) regardless of whether the
-implementation of `hierarchy_equivStrict` in `PrenexNat.lean` is finished.
 -/
 
 namespace LO.FirstOrder.Arithmetic

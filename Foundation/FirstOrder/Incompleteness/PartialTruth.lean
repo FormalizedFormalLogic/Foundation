@@ -19,13 +19,6 @@ that are not (codes of) strict `Σ_{n+1}` sentences.
 This file is only used for the diagonalization argument in `StrictHierarchy.lean` and
 does **not** depend on the (semantic) prenex normal form theorem
 `Foundation/FirstOrder/Arithmetic/Basic/PrenexNat.lean`.
-
-## Implementation notes (Phase 0 skeleton)
-
-Most lemmas below are stated with `sorry`; only the definitions `sigmaTruth`
-(`sigmaTruth_zero`/`sigmaTruth_succ` in the recursive equations) are fully implemented, along with
-whatever is a one-line consequence of existing simp lemmas. See `sigmaTruth_iff` for the main
-correctness statement and its proof for the full argument.
 -/
 
 namespace LO.FirstOrder.Arithmetic
