@@ -409,16 +409,32 @@ lemma coreClosure_succ (ih : CoreClosure (s + 1)) : CoreClosure (s + 2) where
     · exact coreClosure_one
     · exact coreClosure_succ (ih (by omega))
 
+/-- `Σ_s`/`Π_s` (`s ≥ 1`) formulas equivalent, on `ℕ`, to a strict hierarchy formula are closed
+under conjunction.
+
+- [HP98, Theorem 0.34] -/
 @[grind] lemma and (hs : 1 ≤ s) (hφ : EquivStrict Γ s φ) (hψ : EquivStrict Γ s ψ) : EquivStrict Γ s (φ ⋏ ψ) :=
   (coreClosure hs).and Γ hφ hψ
 
+/-- `Σ_s`/`Π_s` (`s ≥ 1`) formulas equivalent, on `ℕ`, to a strict hierarchy formula are closed
+under disjunction.
+
+- [HP98, Theorem 0.34] -/
 @[grind] lemma or (hs : 1 ≤ s) (hφ : EquivStrict Γ s φ) (hψ : EquivStrict Γ s ψ) : EquivStrict Γ s (φ ⋎ ψ) :=
   (coreClosure hs).or Γ hφ hψ
 
+/-- `Σ_s`/`Π_s` (`s ≥ 1`) formulas equivalent, on `ℕ`, to a strict hierarchy formula are closed
+under bounded universal quantification.
+
+- [HP98, Theorem 0.34] -/
 @[grind] lemma ball {φ : ArithmeticSemiformula Empty (n + 1)} {t : ArithmeticSemiterm Empty (n + 1)}
     (hs : 1 ≤ s) (ht : t.Positive) (hφ : EquivStrict Γ s φ) : EquivStrict Γ s (∀⁰[“x. x < !!t”] φ) :=
   (coreClosure hs).ball Γ ht hφ
 
+/-- `Σ_s`/`Π_s` (`s ≥ 1`) formulas equivalent, on `ℕ`, to a strict hierarchy formula are closed
+under bounded existential quantification.
+
+- [HP98, Theorem 0.34] -/
 @[grind] lemma bexs {φ : ArithmeticSemiformula Empty (n + 1)} {t : ArithmeticSemiterm Empty (n + 1)}
     (hs : 1 ≤ s) (ht : t.Positive) (hφ : EquivStrict Γ s φ) : EquivStrict Γ s (∃⁰[“x. x < !!t”] φ) :=
   (coreClosure hs).bexs Γ ht hφ
@@ -437,6 +453,10 @@ lemma coreClosure_succ (ih : CoreClosure (s + 1)) : CoreClosure (s + 2) where
   simp only [Semiformula.eval_all]
   exact forall_congr' (fun x => hiff' (x :> e))
 
+/-- `Σ_s` (`s ≥ 1`) formulas equivalent, on `ℕ`, to a strict hierarchy formula are closed under
+existential projection.
+
+- [HP98, Theorem 0.34] -/
 @[grind] lemma exs {φ : ArithmeticSemiformula Empty (n + 1)} (h : EquivStrict 𝚺 (s + 1) φ) :
     EquivStrict 𝚺 (s + 1) (∃⁰ φ) := by
   rcases s with _ | s₀
@@ -501,6 +521,10 @@ lemma coreClosure_succ (ih : CoreClosure (s + 1)) : CoreClosure (s + 2) where
     rw [hleft, hright]
     exact (nat_exists_exists (fun y x => ℕ ⊧/(x :> y :> e) ψ₀)).symm
 
+/-- `Π_s` (`s ≥ 1`) formulas equivalent, on `ℕ`, to a strict hierarchy formula are closed under
+universal projection.
+
+- [HP98, Theorem 0.34] -/
 @[grind] lemma all {φ : ArithmeticSemiformula Empty (n + 1)} (h : EquivStrict 𝚷 (s + 1) φ) :
     EquivStrict 𝚷 (s + 1) (∀⁰ φ) := by
   have h' : EquivStrict 𝚺 (s + 1) (∼φ) := by simpa using h.neg
