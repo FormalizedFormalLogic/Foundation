@@ -97,7 +97,6 @@ public import Foundation.FirstOrder.Incompleteness.Second
 public import Foundation.FirstOrder.Incompleteness.StandardProvability
 public import Foundation.FirstOrder.Incompleteness.Tarski
 public import Foundation.FirstOrder.Incompleteness.WitnessComparison
-public import Foundation.FirstOrder.Incompleteness.Yablo
 public import Foundation.FirstOrder.Interpretation
 public import Foundation.FirstOrder.Intuitionistic.Deduction
 public import Foundation.FirstOrder.Intuitionistic.Formula
