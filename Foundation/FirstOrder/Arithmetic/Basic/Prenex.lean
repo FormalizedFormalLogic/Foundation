@@ -61,6 +61,20 @@ lemma pi_of_pi_all {φ : Semiformula L ξ (n + 1)} :
     StrictHierarchy 𝚷 (s + 2) (∀⁰ φ) ↔ StrictHierarchy 𝚺 (s + 1) φ :=
   ⟨pi_of_pi_all, all⟩
 
+set_option linter.flexible false in
+lemma sigma_succ_elim {φ : Semiformula L ξ n} :
+    StrictHierarchy 𝚺 (s + 2) φ → ∃ ψ : Semiformula L ξ (n + 1), φ = ∃⁰ ψ ∧ StrictHierarchy 𝚷 (s + 1) ψ := by
+  generalize hb : (𝚺 : Polarity) = Γ
+  intro H
+  cases H <;> simp_all
+
+set_option linter.flexible false in
+lemma pi_succ_elim {φ : Semiformula L ξ n} :
+    StrictHierarchy 𝚷 (s + 2) φ → ∃ ψ : Semiformula L ξ (n + 1), φ = ∀⁰ ψ ∧ StrictHierarchy 𝚺 (s + 1) ψ := by
+  generalize hb : (𝚷 : Polarity) = Γ
+  intro H
+  cases H <;> simp_all
+
 end StrictHierarchy
 
 end LO.FirstOrder.Arithmetic
