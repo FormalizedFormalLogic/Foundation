@@ -64,35 +64,36 @@ every `Hierarchy Γ s φ` formula (`s ≥ 1`) is equivalent, on `ℕ`, to a form
   componentwise computation.
 -/
 
-/-- `φ` is equivalent, on `ℕ`, to some strict `Γ`-formula of level `s`. -/
-def EquivStrict (Γ : Polarity) (s : ℕ) {n : ℕ} (φ : ArithmeticSemiformula Empty n) : Prop :=
+/-- `φ` is equivalent, on the model `M`, to some strict `Γ`-formula of level `s`. -/
+def IsStrictHierarchyOnModel (M : Type*) [Structure ℒₒᵣ M] (Γ : Polarity) (s : ℕ) {n : ℕ}
+    (φ : ArithmeticSemiformula Empty n) : Prop :=
   ∃ φ' : ArithmeticSemiformula Empty n,
-    StrictHierarchy Γ s φ' ∧ ∀ e : Fin n → ℕ, ℕ ⊧/e φ' ↔ ℕ ⊧/e φ
+    StrictHierarchy Γ s φ' ∧ ∀ e : Fin n → M, M ⊧/e φ' ↔ M ⊧/e φ
 
 -- Bridge between `ball`/`bexs` notation and `ballLT`/`bexsLT`.
-@[simp, grind] lemma ball_eq_ballLT {n} (φ : ArithmeticSemiformula Empty (n + 1)) (u : ArithmeticSemiterm Empty n) :
+@[simp, grind =] lemma ball_eq_ballLT {n} (φ : ArithmeticSemiformula Empty (n + 1)) (u : ArithmeticSemiterm Empty n) :
     (∀⁰[“x. x < !!(Rew.bShift u)”] φ) = φ.ballLT u := rfl
 
-@[simp, grind] lemma bexs_eq_bexsLT {n} (φ : ArithmeticSemiformula Empty (n + 1)) (u : ArithmeticSemiterm Empty n) :
+@[simp, grind =] lemma bexs_eq_bexsLT {n} (φ : ArithmeticSemiformula Empty (n + 1)) (u : ArithmeticSemiterm Empty n) :
     (∃⁰[“x. x < !!(Rew.bShift u)”] φ) = φ.bexsLT u := rfl
 
-namespace EquivStrict
+namespace IsStrictHierarchyOnModel
 
 variable {Γ Γ' : Polarity} {s s' : ℕ} {n : ℕ} {φ ψ : ArithmeticSemiformula Empty n}
 
-@[grind →] lemma refl (h : StrictHierarchy Γ s φ) : EquivStrict Γ s φ := ⟨φ, h, fun _ => Iff.rfl⟩
+@[grind →] lemma refl (h : StrictHierarchy Γ s φ) : IsStrictHierarchyOnModel ℕ Γ s φ := ⟨φ, h, fun _ => Iff.rfl⟩
 
-lemma of_iff (h : EquivStrict Γ s φ) (hiff : ∀ e : Fin n → ℕ, ℕ ⊧/e φ ↔ ℕ ⊧/e ψ) :
-    EquivStrict Γ s ψ := by
+lemma of_iff (h : IsStrictHierarchyOnModel ℕ Γ s φ) (hiff : ∀ e : Fin n → ℕ, ℕ ⊧/e φ ↔ ℕ ⊧/e ψ) :
+    IsStrictHierarchyOnModel ℕ Γ s ψ := by
   rcases h with ⟨φ', hφ', hiff'⟩
   exact ⟨φ', hφ', fun e => (hiff' e).trans (hiff e)⟩
 
-@[grind →] lemma neg (h : EquivStrict Γ s φ) : EquivStrict Γ.alt s (∼φ) := by
+@[grind →] lemma neg (h : IsStrictHierarchyOnModel ℕ Γ s φ) : IsStrictHierarchyOnModel ℕ Γ.alt s (∼φ) := by
   rcases h with ⟨φ', hφ', hiff'⟩
   refine ⟨∼φ', hφ'.neg, fun e => ?_⟩
   simp [hiff' e]
 
-@[simp] lemma neg_iff : EquivStrict Γ.alt s (∼φ) ↔ EquivStrict Γ s φ := by
+@[simp] lemma neg_iff : IsStrictHierarchyOnModel ℕ Γ.alt s (∼φ) ↔ IsStrictHierarchyOnModel ℕ Γ s φ := by
   constructor
   · intro h
     have := h.neg
@@ -100,7 +101,7 @@ lemma of_iff (h : EquivStrict Γ s φ) (hiff : ∀ e : Fin n → ℕ, ℕ ⊧/e 
   · intro h
     exact h.neg
 
-@[grind →] lemma alt_up (h : EquivStrict Γ (s + 1) φ) : EquivStrict Γ.alt (s + 2) φ := by
+@[grind →] lemma alt_up (h : IsStrictHierarchyOnModel ℕ Γ (s + 1) φ) : IsStrictHierarchyOnModel ℕ Γ.alt (s + 2) φ := by
   rcases Γ with _ | _
   · rcases h with ⟨φ', hφ', hiff'⟩
     refine ⟨∀⁰ (Rew.bShift ▹ φ'), (hφ'.rew Rew.bShift).all, fun e => ?_⟩
@@ -119,8 +120,8 @@ lemma of_iff (h : EquivStrict Γ s φ) (hiff : ∀ e : Fin n → ℕ, ℕ ⊧/e 
     · intro h
       exact ⟨0, (hiff' e).mpr h⟩
 
-@[grind =>] lemma of_deltaZero (hp : Hierarchy 𝚺 0 φ) (hs : 1 ≤ s) : EquivStrict Γ s φ := by
-  have aux : ∀ s, 1 ≤ s → ∀ Γ : Polarity, EquivStrict Γ s φ := by
+@[grind =>] lemma of_deltaZero (hp : Hierarchy 𝚺 0 φ) (hs : 1 ≤ s) : IsStrictHierarchyOnModel ℕ Γ s φ := by
+  have aux : ∀ s, 1 ≤ s → ∀ Γ : Polarity, IsStrictHierarchyOnModel ℕ Γ s φ := by
     intro s
     induction s using Nat.strong_induction_on with
     | _ s ih =>
@@ -128,18 +129,18 @@ lemma of_iff (h : EquivStrict Γ s φ) (hiff : ∀ e : Fin n → ℕ, ℕ ⊧/e 
       rcases s with _ | _ | s
       · omega
       · exact refl (StrictHierarchy.base (Hierarchy.of_zero hp))
-      · have h2 : EquivStrict Γ.alt (s + 1) φ := ih (s + 1) (by omega) (by omega) Γ.alt
+      · have h2 : IsStrictHierarchyOnModel ℕ Γ.alt (s + 1) φ := ih (s + 1) (by omega) (by omega) Γ.alt
         simpa using h2.alt_up
   exact aux s hs Γ
 
 /-- The core closure properties needed at a fixed level `s`. -/
 structure CoreClosure (s : ℕ) : Prop where
-  and  : ∀ Γ {n} {φ ψ : ArithmeticSemiformula Empty n}, EquivStrict Γ s φ → EquivStrict Γ s ψ → EquivStrict Γ s (φ ⋏ ψ)
-  or   : ∀ Γ {n} {φ ψ : ArithmeticSemiformula Empty n}, EquivStrict Γ s φ → EquivStrict Γ s ψ → EquivStrict Γ s (φ ⋎ ψ)
+  and  : ∀ Γ {n} {φ ψ : ArithmeticSemiformula Empty n}, IsStrictHierarchyOnModel ℕ Γ s φ → IsStrictHierarchyOnModel ℕ Γ s ψ → IsStrictHierarchyOnModel ℕ Γ s (φ ⋏ ψ)
+  or   : ∀ Γ {n} {φ ψ : ArithmeticSemiformula Empty n}, IsStrictHierarchyOnModel ℕ Γ s φ → IsStrictHierarchyOnModel ℕ Γ s ψ → IsStrictHierarchyOnModel ℕ Γ s (φ ⋎ ψ)
   ball : ∀ Γ {n} {φ : ArithmeticSemiformula Empty (n + 1)} {t : ArithmeticSemiterm Empty (n + 1)},
-      t.Positive → EquivStrict Γ s φ → EquivStrict Γ s (∀⁰[“x. x < !!t”] φ)
+      t.Positive → IsStrictHierarchyOnModel ℕ Γ s φ → IsStrictHierarchyOnModel ℕ Γ s (∀⁰[“x. x < !!t”] φ)
   bexs : ∀ Γ {n} {φ : ArithmeticSemiformula Empty (n + 1)} {t : ArithmeticSemiterm Empty (n + 1)},
-      t.Positive → EquivStrict Γ s φ → EquivStrict Γ s (∃⁰[“x. x < !!t”] φ)
+      t.Positive → IsStrictHierarchyOnModel ℕ Γ s φ → IsStrictHierarchyOnModel ℕ Γ s (∃⁰[“x. x < !!t”] φ)
 
 lemma coreClosure_one : CoreClosure 1 where
   and {Γ n φ ψ} := by
@@ -163,13 +164,13 @@ lemma coreClosure_one : CoreClosure 1 where
 
 lemma or_sigma_step (ih : CoreClosure (s + 1)) :
     ∀ {n} {φ ψ : ArithmeticSemiformula Empty n},
-      EquivStrict 𝚺 (s + 2) φ → EquivStrict 𝚺 (s + 2) ψ → EquivStrict 𝚺 (s + 2) (φ ⋎ ψ) := by
+      IsStrictHierarchyOnModel ℕ 𝚺 (s + 2) φ → IsStrictHierarchyOnModel ℕ 𝚺 (s + 2) ψ → IsStrictHierarchyOnModel ℕ 𝚺 (s + 2) (φ ⋎ ψ) := by
   intro n φ ψ hφ hψ
   rcases hφ with ⟨φ', hφ', hφiff'⟩
   rcases hψ with ⟨ψ', hψ', hψiff'⟩
   obtain ⟨φ₀, rfl, hφ₀⟩ := hφ'.sigma_succ_elim
   obtain ⟨ψ₀, rfl, hψ₀⟩ := hψ'.sigma_succ_elim
-  obtain ⟨χ, hχ, hχiff⟩ := ih.or 𝚷 (EquivStrict.refl hφ₀) (EquivStrict.refl hψ₀)
+  obtain ⟨χ, hχ, hχiff⟩ := ih.or 𝚷 (IsStrictHierarchyOnModel.refl hφ₀) (IsStrictHierarchyOnModel.refl hψ₀)
   refine ⟨∃⁰ χ, hχ.exs, fun e => ?_⟩
   simp only [Semiformula.eval_ex]
   constructor
@@ -186,7 +187,7 @@ lemma or_sigma_step (ih : CoreClosure (s + 1)) :
 -- Confluence of existentials.
 lemma and_sigma_step (ih : CoreClosure (s + 1)) :
     ∀ {n} {φ ψ : ArithmeticSemiformula Empty n},
-      EquivStrict 𝚺 (s + 2) φ → EquivStrict 𝚺 (s + 2) ψ → EquivStrict 𝚺 (s + 2) (φ ⋏ ψ) := by
+      IsStrictHierarchyOnModel ℕ 𝚺 (s + 2) φ → IsStrictHierarchyOnModel ℕ 𝚺 (s + 2) ψ → IsStrictHierarchyOnModel ℕ 𝚺 (s + 2) (φ ⋏ ψ) := by
   intro n φ ψ hφ hψ
   rcases hφ with ⟨φ', hφ', hiffφ⟩
   rcases hψ with ⟨ψ', hψ', hiffψ⟩
@@ -198,11 +199,11 @@ lemma and_sigma_step (ih : CoreClosure (s + 1)) :
   -- The guard term `z + 1`, in the ambient context `z :> e`.
   set u : ArithmeticSemiterm Empty (n + 1) := ‘#0 + 1’ with hu_def
   have hu_pos : (Rew.bShift u).Positive := Rew.bShift_positive u
-  have hA : EquivStrict 𝚷 (s + 1) ((Rew.bShift.q ▹ φ₀ : ArithmeticSemiformula Empty (n + 2)).bexsLT u) :=
-    ih.bexs 𝚷 hu_pos (EquivStrict.refl hφ₀')
-  have hB : EquivStrict 𝚷 (s + 1) ((Rew.bShift.q ▹ ψ₀ : ArithmeticSemiformula Empty (n + 2)).bexsLT u) :=
-    ih.bexs 𝚷 hu_pos (EquivStrict.refl hψ₀')
-  have hAB : EquivStrict 𝚷 (s + 1)
+  have hA : IsStrictHierarchyOnModel ℕ 𝚷 (s + 1) ((Rew.bShift.q ▹ φ₀ : ArithmeticSemiformula Empty (n + 2)).bexsLT u) :=
+    ih.bexs 𝚷 hu_pos (IsStrictHierarchyOnModel.refl hφ₀')
+  have hB : IsStrictHierarchyOnModel ℕ 𝚷 (s + 1) ((Rew.bShift.q ▹ ψ₀ : ArithmeticSemiformula Empty (n + 2)).bexsLT u) :=
+    ih.bexs 𝚷 hu_pos (IsStrictHierarchyOnModel.refl hψ₀')
+  have hAB : IsStrictHierarchyOnModel ℕ 𝚷 (s + 1)
       ((Rew.bShift.q ▹ φ₀ : ArithmeticSemiformula Empty (n + 2)).bexsLT u ⋏
         (Rew.bShift.q ▹ ψ₀ : ArithmeticSemiformula Empty (n + 2)).bexsLT u) :=
     ih.and 𝚷 hA hB
@@ -262,7 +263,7 @@ lemma and_sigma_step (ih : CoreClosure (s + 1)) :
 -- Quantifier swap.
 lemma bexs_sigma_step (ih : CoreClosure (s + 1)) :
     ∀ {n} {φ : ArithmeticSemiformula Empty (n + 1)} {t : ArithmeticSemiterm Empty (n + 1)},
-      t.Positive → EquivStrict 𝚺 (s + 2) φ → EquivStrict 𝚺 (s + 2) (∃⁰[“x. x < !!t”] φ) := by
+      t.Positive → IsStrictHierarchyOnModel ℕ 𝚺 (s + 2) φ → IsStrictHierarchyOnModel ℕ 𝚺 (s + 2) (∃⁰[“x. x < !!t”] φ) := by
   intro n φ t ht hφ
   -- `t` is positive, hence of the shape `Rew.bShift u`.
   rcases Rew.positive_iff.mp ht with ⟨u, rfl⟩
@@ -294,8 +295,8 @@ lemma bexs_sigma_step (ih : CoreClosure (s + 1)) :
       funext i; exact i.elim
     rw [hA, hB]
   -- the guard, lifted to the `y :> x :> e` context of `ψ₀'`, is `Rew.bShift (Rew.bShift u)`.
-  have key : EquivStrict 𝚷 (s + 1) (ψ₀'.bexsLT (Rew.bShift u)) :=
-    ih.bexs 𝚷 (t := Rew.bShift (Rew.bShift u)) (by simp) (EquivStrict.refl hψ₀')
+  have key : IsStrictHierarchyOnModel ℕ 𝚷 (s + 1) (ψ₀'.bexsLT (Rew.bShift u)) :=
+    ih.bexs 𝚷 (t := Rew.bShift (Rew.bShift u)) (by simp) (IsStrictHierarchyOnModel.refl hψ₀')
   rcases key with ⟨χ, hχ, hiffχ⟩
   refine ⟨∃⁰ χ, hχ.exs, fun e => ?_⟩
   -- the goal `∃⁰[x < !!(Rew.bShift u)] φ` is definitionally `φ.bexsLT u`, so `eval_bexsLT` applies.
@@ -311,7 +312,7 @@ lemma bexs_sigma_step (ih : CoreClosure (s + 1)) :
 -- Collection (hardest case).
 lemma ball_sigma_step (ih : CoreClosure (s + 1)) :
     ∀ {n} {φ : ArithmeticSemiformula Empty (n + 1)} {t : ArithmeticSemiterm Empty (n + 1)},
-      t.Positive → EquivStrict 𝚺 (s + 2) φ → EquivStrict 𝚺 (s + 2) (∀⁰[“x. x < !!t”] φ) := by
+      t.Positive → IsStrictHierarchyOnModel ℕ 𝚺 (s + 2) φ → IsStrictHierarchyOnModel ℕ 𝚺 (s + 2) (∀⁰[“x. x < !!t”] φ) := by
   intro n φ t ht hφ
   obtain ⟨u, rfl⟩ := Rew.positive_iff.mp ht
   obtain ⟨φ', hφ'strict, hφ'iff⟩ := hφ
@@ -345,12 +346,12 @@ lemma ball_sigma_step (ih : CoreClosure (s + 1)) :
       funext i; exact i.elim
     simp only [Semiformula.eval_rew, hb, hf]
   -- Inner step: bind `y` under `y < w` (context `x :> w :> e`).
-  have hC : EquivStrict 𝚷 (s + 1)
+  have hC : IsStrictHierarchyOnModel ℕ 𝚷 (s + 1)
       ((Rew.bShift.q.q ▹ ψ₀).bexsLT (#1 : ArithmeticSemiterm Empty (n + 2))) :=
     ih.bexs 𝚷 (t := Rew.bShift (#1 : ArithmeticSemiterm Empty (n + 2)))
-      (Rew.bShift_positive _) (EquivStrict.refl hψ₀')
+      (Rew.bShift_positive _) (IsStrictHierarchyOnModel.refl hψ₀')
   -- Middle step: bind `x` under `x < u` (context `w :> e`).
-  have hD : EquivStrict 𝚷 (s + 1)
+  have hD : IsStrictHierarchyOnModel ℕ 𝚷 (s + 1)
       (((Rew.bShift.q.q ▹ ψ₀).bexsLT (#1 : ArithmeticSemiterm Empty (n + 2))).ballLT
         (Rew.bShift u)) :=
     ih.ball 𝚷 (t := Rew.bShift (Rew.bShift u)) (Rew.bShift_positive _) hC
@@ -378,27 +379,27 @@ lemma coreClosure_succ (ih : CoreClosure (s + 1)) : CoreClosure (s + 2) where
   and := fun Γ {n φ ψ} hφ hψ => by
     rcases Γ with _ | _
     · exact and_sigma_step ih hφ hψ
-    · have hφ' : EquivStrict 𝚺 (s + 2) (∼φ) := by simpa using hφ.neg
-      have hψ' : EquivStrict 𝚺 (s + 2) (∼ψ) := by simpa using hψ.neg
+    · have hφ' : IsStrictHierarchyOnModel ℕ 𝚺 (s + 2) (∼φ) := by simpa using hφ.neg
+      have hψ' : IsStrictHierarchyOnModel ℕ 𝚺 (s + 2) (∼ψ) := by simpa using hψ.neg
       have := (or_sigma_step ih hφ' hψ').neg
       simpa [Semiformula.imp_eq] using this
   or := fun Γ {n φ ψ} hφ hψ => by
     rcases Γ with _ | _
     · exact or_sigma_step ih hφ hψ
-    · have hφ' : EquivStrict 𝚺 (s + 2) (∼φ) := by simpa using hφ.neg
-      have hψ' : EquivStrict 𝚺 (s + 2) (∼ψ) := by simpa using hψ.neg
+    · have hφ' : IsStrictHierarchyOnModel ℕ 𝚺 (s + 2) (∼φ) := by simpa using hφ.neg
+      have hψ' : IsStrictHierarchyOnModel ℕ 𝚺 (s + 2) (∼ψ) := by simpa using hψ.neg
       have := (and_sigma_step ih hφ' hψ').neg
       simpa [Semiformula.imp_eq] using this
   ball := fun Γ {n φ t} ht hφ => by
     rcases Γ with _ | _
     · exact ball_sigma_step ih ht hφ
-    · have hφ' : EquivStrict 𝚺 (s + 2) (∼φ) := by simpa using hφ.neg
+    · have hφ' : IsStrictHierarchyOnModel ℕ 𝚺 (s + 2) (∼φ) := by simpa using hφ.neg
       have := (bexs_sigma_step ih ht hφ').neg
       simpa using this
   bexs := fun Γ {n φ t} ht hφ => by
     rcases Γ with _ | _
     · exact bexs_sigma_step ih ht hφ
-    · have hφ' : EquivStrict 𝚺 (s + 2) (∼φ) := by simpa using hφ.neg
+    · have hφ' : IsStrictHierarchyOnModel ℕ 𝚺 (s + 2) (∼φ) := by simpa using hφ.neg
       have := (ball_sigma_step ih ht hφ').neg
       simpa using this
 
@@ -414,14 +415,14 @@ lemma coreClosure_succ (ih : CoreClosure (s + 1)) : CoreClosure (s + 2) where
 under conjunction.
 
 - [HP98, Theorem 0.34] -/
-@[grind .] lemma and (hs : 1 ≤ s) (hφ : EquivStrict Γ s φ) (hψ : EquivStrict Γ s ψ) : EquivStrict Γ s (φ ⋏ ψ) :=
+@[grind .] lemma and (hs : 1 ≤ s) (hφ : IsStrictHierarchyOnModel ℕ Γ s φ) (hψ : IsStrictHierarchyOnModel ℕ Γ s ψ) : IsStrictHierarchyOnModel ℕ Γ s (φ ⋏ ψ) :=
   (coreClosure hs).and Γ hφ hψ
 
 /-- `Σ_s`/`Π_s` (`s ≥ 1`) formulas equivalent, on `ℕ`, to a strict hierarchy formula are closed
 under disjunction.
 
 - [HP98, Theorem 0.34] -/
-@[grind .] lemma or (hs : 1 ≤ s) (hφ : EquivStrict Γ s φ) (hψ : EquivStrict Γ s ψ) : EquivStrict Γ s (φ ⋎ ψ) :=
+@[grind .] lemma or (hs : 1 ≤ s) (hφ : IsStrictHierarchyOnModel ℕ Γ s φ) (hψ : IsStrictHierarchyOnModel ℕ Γ s ψ) : IsStrictHierarchyOnModel ℕ Γ s (φ ⋎ ψ) :=
   (coreClosure hs).or Γ hφ hψ
 
 /-- `Σ_s`/`Π_s` (`s ≥ 1`) formulas equivalent, on `ℕ`, to a strict hierarchy formula are closed
@@ -429,7 +430,7 @@ under bounded universal quantification.
 
 - [HP98, Theorem 0.34] -/
 @[grind .] lemma ball {φ : ArithmeticSemiformula Empty (n + 1)} {t : ArithmeticSemiterm Empty (n + 1)}
-    (hs : 1 ≤ s) (ht : t.Positive) (hφ : EquivStrict Γ s φ) : EquivStrict Γ s (∀⁰[“x. x < !!t”] φ) :=
+    (hs : 1 ≤ s) (ht : t.Positive) (hφ : IsStrictHierarchyOnModel ℕ Γ s φ) : IsStrictHierarchyOnModel ℕ Γ s (∀⁰[“x. x < !!t”] φ) :=
   (coreClosure hs).ball Γ ht hφ
 
 /-- `Σ_s`/`Π_s` (`s ≥ 1`) formulas equivalent, on `ℕ`, to a strict hierarchy formula are closed
@@ -437,18 +438,18 @@ under bounded existential quantification.
 
 - [HP98, Theorem 0.34] -/
 @[grind .] lemma bexs {φ : ArithmeticSemiformula Empty (n + 1)} {t : ArithmeticSemiterm Empty (n + 1)}
-    (hs : 1 ≤ s) (ht : t.Positive) (hφ : EquivStrict Γ s φ) : EquivStrict Γ s (∃⁰[“x. x < !!t”] φ) :=
+    (hs : 1 ≤ s) (ht : t.Positive) (hφ : IsStrictHierarchyOnModel ℕ Γ s φ) : IsStrictHierarchyOnModel ℕ Γ s (∃⁰[“x. x < !!t”] φ) :=
   (coreClosure hs).bexs Γ ht hφ
 
-@[grind →] lemma exs_of_pi {φ : ArithmeticSemiformula Empty (n + 1)} (h : EquivStrict 𝚷 (s + 1) φ) :
-    EquivStrict 𝚺 (s + 2) (∃⁰ φ) := by
+@[grind →] lemma exs_of_pi {φ : ArithmeticSemiformula Empty (n + 1)} (h : IsStrictHierarchyOnModel ℕ 𝚷 (s + 1) φ) :
+    IsStrictHierarchyOnModel ℕ 𝚺 (s + 2) (∃⁰ φ) := by
   rcases h with ⟨φ', hφ', hiff'⟩
   refine ⟨∃⁰ φ', hφ'.exs, fun e => ?_⟩
   simp only [Semiformula.eval_ex]
   exact exists_congr (fun x => hiff' (x :> e))
 
-@[grind →] lemma all_of_sigma {φ : ArithmeticSemiformula Empty (n + 1)} (h : EquivStrict 𝚺 (s + 1) φ) :
-    EquivStrict 𝚷 (s + 2) (∀⁰ φ) := by
+@[grind →] lemma all_of_sigma {φ : ArithmeticSemiformula Empty (n + 1)} (h : IsStrictHierarchyOnModel ℕ 𝚺 (s + 1) φ) :
+    IsStrictHierarchyOnModel ℕ 𝚷 (s + 2) (∀⁰ φ) := by
   rcases h with ⟨φ', hφ', hiff'⟩
   refine ⟨∀⁰ φ', hφ'.all, fun e => ?_⟩
   simp only [Semiformula.eval_all]
@@ -458,8 +459,8 @@ under bounded existential quantification.
 existential projection.
 
 - [HP98, Theorem 0.34] -/
-@[grind →] lemma exs {φ : ArithmeticSemiformula Empty (n + 1)} (h : EquivStrict 𝚺 (s + 1) φ) :
-    EquivStrict 𝚺 (s + 1) (∃⁰ φ) := by
+@[grind →] lemma exs {φ : ArithmeticSemiformula Empty (n + 1)} (h : IsStrictHierarchyOnModel ℕ 𝚺 (s + 1) φ) :
+    IsStrictHierarchyOnModel ℕ 𝚺 (s + 1) (∃⁰ φ) := by
   rcases s with _ | s₀
   · -- s + 1 = 1: Σ₁ is already closed under ∃
     rcases h with ⟨φ', hφ', hiff'⟩
@@ -477,13 +478,13 @@ existential projection.
     have hψ₀' : StrictHierarchy 𝚷 (s₀ + 1) ψ₀' := hψ₀.rew Rew.bShift.q.q
     set tx : ArithmeticSemiterm Empty (n + 2) := (‘#1 + 1’ : ArithmeticSemiterm Empty (n + 2)) with htx
     set ty : ArithmeticSemiterm Empty (n + 1) := (‘#0 + 1’ : ArithmeticSemiterm Empty (n + 1)) with hty
-    have hB : EquivStrict 𝚷 (s₀ + 1) (ψ₀'.bexsLT tx) := by
-      have := (coreClosure hs01).bexs 𝚷 (Rew.bShift_positive tx) (EquivStrict.refl hψ₀')
+    have hB : IsStrictHierarchyOnModel ℕ 𝚷 (s₀ + 1) (ψ₀'.bexsLT tx) := by
+      have := (coreClosure hs01).bexs 𝚷 (Rew.bShift_positive tx) (IsStrictHierarchyOnModel.refl hψ₀')
       rwa [bexs_eq_bexsLT] at this
-    have hC : EquivStrict 𝚷 (s₀ + 1) ((ψ₀'.bexsLT tx).bexsLT ty) := by
+    have hC : IsStrictHierarchyOnModel ℕ 𝚷 (s₀ + 1) ((ψ₀'.bexsLT tx).bexsLT ty) := by
       have := (coreClosure hs01).bexs 𝚷 (Rew.bShift_positive ty) hB
       rwa [bexs_eq_bexsLT] at this
-    have hExs : EquivStrict 𝚺 (s₀ + 2) (∃⁰ ((ψ₀'.bexsLT tx).bexsLT ty)) := EquivStrict.exs_of_pi hC
+    have hExs : IsStrictHierarchyOnModel ℕ 𝚺 (s₀ + 2) (∃⁰ ((ψ₀'.bexsLT tx).bexsLT ty)) := IsStrictHierarchyOnModel.exs_of_pi hC
     refine hExs.of_iff (fun e => ?_)
     have hrew : ∀ x y z : ℕ, ℕ ⊧/(x :> y :> z :> e) ψ₀' ↔ ℕ ⊧/(x :> y :> e) ψ₀ := by
       intro x y z
@@ -526,9 +527,9 @@ existential projection.
 universal projection.
 
 - [HP98, Theorem 0.34] -/
-@[grind →] lemma all {φ : ArithmeticSemiformula Empty (n + 1)} (h : EquivStrict 𝚷 (s + 1) φ) :
-    EquivStrict 𝚷 (s + 1) (∀⁰ φ) := by
-  have h' : EquivStrict 𝚺 (s + 1) (∼φ) := by simpa using h.neg
+@[grind →] lemma all {φ : ArithmeticSemiformula Empty (n + 1)} (h : IsStrictHierarchyOnModel ℕ 𝚷 (s + 1) φ) :
+    IsStrictHierarchyOnModel ℕ 𝚷 (s + 1) (∀⁰ φ) := by
+  have h' : IsStrictHierarchyOnModel ℕ 𝚺 (s + 1) (∼φ) := by simpa using h.neg
   have := (exs h').neg
   simpa using this
 
@@ -536,43 +537,43 @@ universal projection.
 -- `Γ s n`) to avoid an elaboration issue where recursive self-calls to
 -- `hierarchy_equivStrict` inside this very definition would get their implicit level/arity
 -- arguments incorrectly unified with the *outer* case's own indices whenever the section
--- variables `Γ s n` (used by `EquivStrict.exs`/`all`/`alt_up` etc.) shared the same names as
+-- variables `Γ s n` (used by `IsStrictHierarchyOnModel.exs`/`all`/`alt_up` etc.) shared the same names as
 -- this lemma's own bound variables.
 /-- Every `Γ`-formula of hierarchy level `s ≥ 1` is equivalent, on `ℕ`, to a strict `Γ`-formula
 of the same level.
 
 - [HP98, Theorem 0.34] -/
 @[grind →] lemma hierarchy_equivStrict {Γ₀ s₀} {φ₀ : ArithmeticSemiformula Empty n₀} :
-  Hierarchy Γ₀ s₀ φ₀ → 1 ≤ s₀ → EquivStrict Γ₀ s₀ φ₀
-  | .verum _ _ _, hs => EquivStrict.of_deltaZero (Hierarchy.verum 𝚺 0 _) hs
-  | .falsum _ _ _, hs => EquivStrict.of_deltaZero (Hierarchy.falsum 𝚺 0 _) hs
-  | .rel _ _ r v, hs => EquivStrict.of_deltaZero (Hierarchy.rel 𝚺 0 r v) hs
-  | .nrel _ _ r v, hs => EquivStrict.of_deltaZero (Hierarchy.nrel 𝚺 0 r v) hs
-  | .and hp hq, hs => EquivStrict.and hs (hierarchy_equivStrict hp hs) (hierarchy_equivStrict hq hs)
-  | .or hp hq, hs => EquivStrict.or hs (hierarchy_equivStrict hp hs) (hierarchy_equivStrict hq hs)
-  | .ball pos hp, hs => EquivStrict.ball hs pos (hierarchy_equivStrict hp hs)
-  | .bexs pos hp, hs => EquivStrict.bexs hs pos (hierarchy_equivStrict hp hs)
-  | .exs hp, hs => EquivStrict.exs (hierarchy_equivStrict hp hs)
-  | .all hp, hs => EquivStrict.all (hierarchy_equivStrict hp hs)
-  | .sigma (s := 0) hp, _ => EquivStrict.refl (StrictHierarchy.base (Hierarchy.sigma hp))
-  | .sigma (s := k + 1) hp, _ => EquivStrict.exs_of_pi (hierarchy_equivStrict hp (by omega))
-  | .pi (s := 0) hp, _ => EquivStrict.refl (StrictHierarchy.base (Hierarchy.pi hp))
-  | .pi (s := k + 1) hp, _ => EquivStrict.all_of_sigma (hierarchy_equivStrict hp (by omega))
-  | .dummy_pi (s := k) hp, _ => (EquivStrict.exs (hierarchy_equivStrict hp (by omega))).alt_up
-  | .dummy_sigma (s := k) hp, _ => (EquivStrict.all (hierarchy_equivStrict hp (by omega))).alt_up
+  Hierarchy Γ₀ s₀ φ₀ → 1 ≤ s₀ → IsStrictHierarchyOnModel ℕ Γ₀ s₀ φ₀
+  | .verum _ _ _, hs => IsStrictHierarchyOnModel.of_deltaZero (Hierarchy.verum 𝚺 0 _) hs
+  | .falsum _ _ _, hs => IsStrictHierarchyOnModel.of_deltaZero (Hierarchy.falsum 𝚺 0 _) hs
+  | .rel _ _ r v, hs => IsStrictHierarchyOnModel.of_deltaZero (Hierarchy.rel 𝚺 0 r v) hs
+  | .nrel _ _ r v, hs => IsStrictHierarchyOnModel.of_deltaZero (Hierarchy.nrel 𝚺 0 r v) hs
+  | .and hp hq, hs => IsStrictHierarchyOnModel.and hs (hierarchy_equivStrict hp hs) (hierarchy_equivStrict hq hs)
+  | .or hp hq, hs => IsStrictHierarchyOnModel.or hs (hierarchy_equivStrict hp hs) (hierarchy_equivStrict hq hs)
+  | .ball pos hp, hs => IsStrictHierarchyOnModel.ball hs pos (hierarchy_equivStrict hp hs)
+  | .bexs pos hp, hs => IsStrictHierarchyOnModel.bexs hs pos (hierarchy_equivStrict hp hs)
+  | .exs hp, hs => IsStrictHierarchyOnModel.exs (hierarchy_equivStrict hp hs)
+  | .all hp, hs => IsStrictHierarchyOnModel.all (hierarchy_equivStrict hp hs)
+  | .sigma (s := 0) hp, _ => IsStrictHierarchyOnModel.refl (StrictHierarchy.base (Hierarchy.sigma hp))
+  | .sigma (s := k + 1) hp, _ => IsStrictHierarchyOnModel.exs_of_pi (hierarchy_equivStrict hp (by omega))
+  | .pi (s := 0) hp, _ => IsStrictHierarchyOnModel.refl (StrictHierarchy.base (Hierarchy.pi hp))
+  | .pi (s := k + 1) hp, _ => IsStrictHierarchyOnModel.all_of_sigma (hierarchy_equivStrict hp (by omega))
+  | .dummy_pi (s := k) hp, _ => (IsStrictHierarchyOnModel.exs (hierarchy_equivStrict hp (by omega))).alt_up
+  | .dummy_sigma (s := k) hp, _ => (IsStrictHierarchyOnModel.all (hierarchy_equivStrict hp (by omega))).alt_up
 
-@[grind <=] lemma mono (h : EquivStrict Γ s φ) (hs : 1 ≤ s) (hle : s ≤ s') : EquivStrict Γ s' φ := by
+@[grind <=] lemma mono (h : IsStrictHierarchyOnModel ℕ Γ s φ) (hs : 1 ≤ s) (hle : s ≤ s') : IsStrictHierarchyOnModel ℕ Γ s' φ := by
   rcases h with ⟨φ', hφ', hiff'⟩
   have hs' : 1 ≤ s' := le_trans hs hle
-  have : EquivStrict Γ s' φ' := hierarchy_equivStrict (hφ'.hierarchy.mono hle) hs'
+  have : IsStrictHierarchyOnModel ℕ Γ s' φ' := hierarchy_equivStrict (hφ'.hierarchy.mono hle) hs'
   exact this.of_iff hiff'
 
-@[grind <=] lemma mono' (h : EquivStrict Γ s φ) (hs : 1 ≤ s) (hlt : s < s') : EquivStrict Γ' s' φ := by
+@[grind <=] lemma mono' (h : IsStrictHierarchyOnModel ℕ Γ s φ) (hs : 1 ≤ s) (hlt : s < s') : IsStrictHierarchyOnModel ℕ Γ' s' φ := by
   rcases h with ⟨φ', hφ', hiff'⟩
   have hs' : 1 ≤ s' := le_trans hs (le_of_lt hlt)
-  have : EquivStrict Γ' s' φ' := hierarchy_equivStrict (hφ'.hierarchy.strict_mono Γ' hlt) hs'
+  have : IsStrictHierarchyOnModel ℕ Γ' s' φ' := hierarchy_equivStrict (hφ'.hierarchy.strict_mono Γ' hlt) hs'
   exact this.of_iff hiff'
 
-end EquivStrict
+end IsStrictHierarchyOnModel
 
 end LO.FirstOrder.Arithmetic
