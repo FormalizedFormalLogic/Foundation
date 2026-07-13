@@ -513,6 +513,10 @@ lemma coreClosure_succ (ih : CoreClosure (s + 1)) : CoreClosure (s + 2) where
 -- arguments incorrectly unified with the *outer* case's own indices whenever the section
 -- variables `Γ s n` (used by `EquivStrict.exs`/`all`/`alt_up` etc.) shared the same names as
 -- this lemma's own bound variables.
+/-- Every `Γ`-formula of hierarchy level `s ≥ 1` is equivalent, on `ℕ`, to a strict `Γ`-formula
+of the same level.
+
+- [HP98, Theorem 0.34] -/
 @[grind] lemma hierarchy_equivStrict {Γ₀ s₀} {φ₀ : ArithmeticSemiformula Empty n₀} :
   Hierarchy Γ₀ s₀ φ₀ → 1 ≤ s₀ → EquivStrict Γ₀ s₀ φ₀
   | .verum _ _ _, hs => EquivStrict.of_deltaZero (Hierarchy.verum 𝚺 0 _) hs
