@@ -3,31 +3,6 @@ module
 public import Foundation.FirstOrder.Arithmetic.Basic.Prenex
 
 @[expose] public section
-namespace LO.FirstOrder.Arithmetic
-
-/-!
-# Prenex normal form over ℕ
-
-This file proves the "prenex normal form theorem" over the standard model `ℕ`:
-every `Hierarchy Γ s φ` formula (`s ≥ 1`) is equivalent, on `ℕ`, to a formula in `StrictHierarchy Γ s`
-(i.e. genuine prenex form).
-
-## Implementation notes
-
-- Bounded quantifier evaluation is always rewritten to `ballLT`/`bexsLT` form first (via the
-  bridge lemmas in this file), then closed with the simp lemmas `Semiformula.eval_ballLT`/`eval_bexsLT`.
-- Variable insertion uses `Rew.bShift.q` (insert at position 1) / `Rew.bShift.q.q` (insert at position 2);
-  variable swapping uses `Rew.subst (#1 :> #0 :> fun i => #(i+2))`. Strictness is preserved by
-  `StrictHierarchy.rew`; positivity of terms is preserved by `Rew.bShift_positive` / `Rew.q_positive_iff`.
-- Evaluation rewriting under substitutions mostly closes via
-  `simp [Semiformula.eval_rew, Function.comp_def, Matrix.comp_vecCons']` plus `Fin.cases` for
-  componentwise computation.
--/
-
-/-- `φ` is equivalent, on `ℕ`, to some strict `Γ`-formula of level `s`. -/
-def EquivStrict (Γ : Polarity) (s : ℕ) {n : ℕ} (φ : ArithmeticSemiformula Empty n) : Prop :=
-  ∃ φ' : ArithmeticSemiformula Empty n,
-    StrictHierarchy Γ s φ' ∧ ∀ e : Fin n → ℕ, ℕ ⊧/e φ' ↔ ℕ ⊧/e φ
 
 -- Pure Nat statement, no dependency on formulas.
 lemma nat_collection (m : ℕ) (P : ℕ → ℕ → Prop) :
@@ -67,6 +42,32 @@ lemma nat_exists_exists (P : ℕ → ℕ → Prop) :
       y, Nat.lt_succ_iff.mpr (le_max_right x y), hxy⟩
   · rintro ⟨z, x, _, y, _, hxy⟩
     exact ⟨x, y, hxy⟩
+
+namespace LO.FirstOrder.Arithmetic
+
+/-!
+# Prenex normal form over ℕ
+
+This file proves the "prenex normal form theorem" over the standard model `ℕ`:
+every `Hierarchy Γ s φ` formula (`s ≥ 1`) is equivalent, on `ℕ`, to a formula in `StrictHierarchy Γ s`
+(i.e. genuine prenex form).
+
+## Implementation notes
+
+- Bounded quantifier evaluation is always rewritten to `ballLT`/`bexsLT` form first (via the
+  bridge lemmas in this file), then closed with the simp lemmas `Semiformula.eval_ballLT`/`eval_bexsLT`.
+- Variable insertion uses `Rew.bShift.q` (insert at position 1) / `Rew.bShift.q.q` (insert at position 2);
+  variable swapping uses `Rew.subst (#1 :> #0 :> fun i => #(i+2))`. Strictness is preserved by
+  `StrictHierarchy.rew`; positivity of terms is preserved by `Rew.bShift_positive` / `Rew.q_positive_iff`.
+- Evaluation rewriting under substitutions mostly closes via
+  `simp [Semiformula.eval_rew, Function.comp_def, Matrix.comp_vecCons']` plus `Fin.cases` for
+  componentwise computation.
+-/
+
+/-- `φ` is equivalent, on `ℕ`, to some strict `Γ`-formula of level `s`. -/
+def EquivStrict (Γ : Polarity) (s : ℕ) {n : ℕ} (φ : ArithmeticSemiformula Empty n) : Prop :=
+  ∃ φ' : ArithmeticSemiformula Empty n,
+    StrictHierarchy Γ s φ' ∧ ∀ e : Fin n → ℕ, ℕ ⊧/e φ' ↔ ℕ ⊧/e φ
 
 -- Bridge between `ball`/`bexs` notation and `ballLT`/`bexsLT`.
 @[simp, grind] lemma ball_eq_ballLT {n} (φ : ArithmeticSemiformula Empty (n + 1)) (u : ArithmeticSemiterm Empty n) :
