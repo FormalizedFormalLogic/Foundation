@@ -7,7 +7,9 @@ namespace LO.FirstOrder.Arithmetic
 
 variable {L : Language} [L.LT]
 
-/-- A genuinely prenex (non-cumulative) Σ_n/Π_n class; level 1 is based on all of Σ₁/Π₁. -/
+/-- A genuinely prenex (non-cumulative) Σ_n/Π_n class; level 1 is based on all of Σ₁/Π₁.
+
+- [HP98, Definition 0.30] -/
 inductive StrictHierarchy : Polarity → ℕ → {n : ℕ} → Semiformula L ξ n → Prop
   | base {Γ φ} : Hierarchy Γ 1 φ → StrictHierarchy Γ 1 φ
   | exs {s n} {φ : Semiformula L ξ (n + 1)} :

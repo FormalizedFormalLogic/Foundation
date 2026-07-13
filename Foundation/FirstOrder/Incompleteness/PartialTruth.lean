@@ -59,7 +59,9 @@ sentence, correctly decides its truth value on `ℕ` (see `sigmaTruth_iff`). The
 (`n = 0`) is the (Σ₁) provability predicate for `𝗜𝚺₁`, which by Σ₁-completeness agrees with truth
 on `Σ₁` sentences. The inductive step peels off one existential quantifier: `sigmaTruth (n + 1)`
 holds of `x` iff `x` is (the code of) `∃⁰ π` for some `π`, and `sigmaTruth n` fails on (the code
-of) `∼(π/[k])` for some witness `k`. -/
+of) `∼(π/[k])` for some witness `k`.
+
+- [HP98, Definition 1.71, Definition 1.74] -/
 noncomputable def sigmaTruth : ℕ → ArithmeticSemisentence 1
   | 0     => (provable 𝗜𝚺₁).val
   | n + 1 => “x. ∃ p, !qqExsDef x p ∧ ∃ k s y, !ssnum s p k ∧ !(negGraph ℒₒᵣ) y s ∧ ¬!(sigmaTruth n) y”
@@ -104,7 +106,9 @@ lemma models_subst_iff (φ : ArithmeticSemisentence 1) (k : ℕ) :
 
 
 /-- Main correctness theorem for the partial truth predicate: `sigmaTruth n` agrees with actual
-truth on `ℕ` for every strict `Σ_{n+1}` sentence `σ`. -/
+truth on `ℕ` for every strict `Σ_{n+1}` sentence `σ`.
+
+- [HP98, Theorem 1.75] -/
 theorem sigmaTruth_iff (n : ℕ) (σ : ArithmeticSentence) (h : StrictHierarchy 𝚺 (n + 1) σ) :
     ℕ↓[ℒₒᵣ] ⊧ (sigmaTruth n)/[⌜σ⌝] ↔ ℕ↓[ℒₒᵣ] ⊧ σ := by
   induction n generalizing σ with
