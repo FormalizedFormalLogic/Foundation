@@ -64,6 +64,8 @@ open Classical
 
 noncomputable scoped instance : EmptyCollection V := ⟨Classical.choose! empty_existsUnique⟩
 
+noncomputable instance : Inhabited V := Inhabited.mk ∅
+
 @[simp] lemma IsEmpty.empty : IsEmpty (∅ : V) := Classical.choose!_spec empty_existsUnique
 
 @[simp] lemma not_mem_empty {x} : x ∉ (∅ : V) := IsEmpty.empty.not_mem
@@ -277,7 +279,7 @@ instance power.definable : ℒₛₑₜ-function₁[V] power := power.defined.to
 /-! ## Aussonderungsaxiom -/
 
 lemma separation_exists_eval (x : V) (φ : SetTheorySemiformula V 1) : ∃ y : V, ∀ z : V, z ∈ y ↔ z ∈ x ∧ φ.Eval ![z] id := by
-  have : Inhabited V := inhabited_of_nonempty inferInstance
+  -- have : Inhabited V := inhabited_of_nonempty inferInstance
   let f := φ.enumarateFVar
   let ψ := (Rew.rewriteMap φ.idxOfFVar) ▹ φ
   have := by simpa [models_iff, Semiformula.eval_univCl, Axiom.separationSchema] using Theory.models V 𝗭 (Zermelo.axiom_of_separation ψ)
