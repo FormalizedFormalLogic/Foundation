@@ -97,7 +97,6 @@ public import Foundation.FirstOrder.Incompleteness.RestrictedProvability
 public import Foundation.FirstOrder.Incompleteness.RosserProvability
 public import Foundation.FirstOrder.Incompleteness.Second
 public import Foundation.FirstOrder.Incompleteness.StandardProvability
-public import Foundation.FirstOrder.Incompleteness.StrictHierarchy
 public import Foundation.FirstOrder.Incompleteness.Tarski
 public import Foundation.FirstOrder.Incompleteness.WitnessComparison
 public import Foundation.FirstOrder.Interpretation
