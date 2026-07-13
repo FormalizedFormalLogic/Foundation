@@ -40,16 +40,21 @@ noncomputable def diagNeg (ψ : ArithmeticSemisentence 1) : ArithmeticSemisenten
 
 -- see plan Step4 §3 L4-1
 lemma diagNeg_hierarchy {n : ℕ} {ψ : ArithmeticSemisentence 1} (h : Hierarchy 𝚷 (n + 1) ψ) :
-    Hierarchy 𝚺 (n + 1) (diagNeg ψ) := sorry
+    Hierarchy 𝚺 (n + 1) (diagNeg ψ) := by
+  simp only [diagNeg]
+  refine Hierarchy.sigma_iff.mpr (Hierarchy.and_iff.mpr ⟨?_, Hierarchy.neg_iff.mpr (by simpa using h)⟩)
+  simpa using Hierarchy.mono (Γ := 𝚺) (s := 1) (by simp) (show (1 : ℕ) ≤ n + 1 by omega)
 
 -- see plan Step4 §3 L4-2
 lemma diagNeg_eval (ψ : ArithmeticSemisentence 1) (x : ℕ) :
-    ℕ ⊧/![x] (diagNeg ψ) ↔ ¬ℕ ⊧/![substNumeral x x] ψ := sorry
+    ℕ ⊧/![x] (diagNeg ψ) ↔ ¬ℕ ⊧/![substNumeral x x] ψ := by
+  simp [diagNeg]
 
 /-! ### Diagonalization (L4-3) -/
 
-/-- No `Π_{n+1}` formula agrees everywhere with the partial truth predicate `sigmaTruth n`. -/
 -- see plan Step4 §3 L4-3
+set_option maxHeartbeats 800000 in
+/-- No `Π_{n+1}` formula agrees everywhere with the partial truth predicate `sigmaTruth n`. -/
 theorem sigmaTruth_not_pi (n : ℕ) :
     ¬∃ ψ : ArithmeticSemisentence 1, Hierarchy 𝚷 (n + 1) ψ ∧
       ∀ k : ℕ, ℕ↓[ℒₒᵣ] ⊧ (sigmaTruth n)/[(↑k : ArithmeticSemiterm Empty 0)] ↔
@@ -58,7 +63,34 @@ theorem sigmaTruth_not_pi (n : ℕ) :
   have hδ₀ : Hierarchy 𝚺 (n + 1) (diagNeg ψ) := diagNeg_hierarchy hψ
   -- Step2 dependency: only the *signature* of `hierarchy_equivStrict` is used here.
   obtain ⟨δ', hδ's, hδ'iff⟩ := EquivStrict.hierarchy_equivStrict hδ₀ (by omega)
-  sorry
+  -- `σ₀` is the self-referential sentence obtained by substituting the code of `δ'` into itself.
+  set σ₀ : ArithmeticSentence := δ'/[(⌜δ'⌝ : ArithmeticSemiterm Empty 0)] with hσ₀_def
+  have hσ₀s : StrictHierarchy 𝚺 (n + 1) σ₀ :=
+    hδ's.rew (Rew.subst ![(⌜δ'⌝ : ArithmeticSemiterm Empty 0)])
+  -- G1-style key identity: self-applying `substNumeral` to (the code of) `δ'` yields (the code
+  -- of) `σ₀`. Same pattern as the `fixedpoint` construction in `FixedPoint.lean`.
+  have hkey : substNumeral (⌜δ'⌝ : ℕ) (⌜δ'⌝ : ℕ) = (⌜σ₀⌝ : ℕ) := substNumeral_app_quote δ' δ'
+  -- Evaluation chain: `ℕ ⊧ σ₀ ↔ ¬ℕ ⊧ σ₀`, a contradiction.
+  have step1 : ℕ↓[ℒₒᵣ] ⊧ σ₀ ↔ ℕ ⊧/![(⌜δ'⌝ : ℕ)] δ' := by
+    have h := models_subst_iff δ' (⌜δ'⌝ : ℕ)
+    rwa [Sentence.coe_quote] at h
+  have step2 : ℕ ⊧/![(⌜δ'⌝ : ℕ)] δ' ↔ ℕ ⊧/![(⌜δ'⌝ : ℕ)] (diagNeg ψ) := hδ'iff ![(⌜δ'⌝ : ℕ)]
+  have step3 : ℕ ⊧/![(⌜δ'⌝ : ℕ)] (diagNeg ψ) ↔ ¬ℕ ⊧/![(⌜σ₀⌝ : ℕ)] ψ := by
+    have h := diagNeg_eval ψ (⌜δ'⌝ : ℕ)
+    rwa [hkey] at h
+  have step4 : ¬ℕ ⊧/![(⌜σ₀⌝ : ℕ)] ψ ↔
+      ¬ℕ↓[ℒₒᵣ] ⊧ ψ/[(↑(⌜σ₀⌝ : ℕ) : ArithmeticSemiterm Empty 0)] :=
+    not_congr (models_subst_iff ψ (⌜σ₀⌝ : ℕ)).symm
+  have step5 : ¬ℕ↓[ℒₒᵣ] ⊧ ψ/[(↑(⌜σ₀⌝ : ℕ) : ArithmeticSemiterm Empty 0)] ↔
+      ¬ℕ↓[ℒₒᵣ] ⊧ (sigmaTruth n)/[(↑(⌜σ₀⌝ : ℕ) : ArithmeticSemiterm Empty 0)] :=
+    not_congr (hagree (⌜σ₀⌝ : ℕ)).symm
+  have step6 : ¬ℕ↓[ℒₒᵣ] ⊧ (sigmaTruth n)/[(↑(⌜σ₀⌝ : ℕ) : ArithmeticSemiterm Empty 0)] ↔
+      ¬ℕ↓[ℒₒᵣ] ⊧ σ₀ := by
+    rw [Sentence.coe_quote]
+    exact not_congr (sigmaTruth_iff hσ₀s)
+  have hcontra : ℕ↓[ℒₒᵣ] ⊧ σ₀ ↔ ¬ℕ↓[ℒₒᵣ] ⊧ σ₀ :=
+    step1.trans <| step2.trans <| step3.trans <| step4.trans <| step5.trans step6
+  tauto
 
 /-! ### Main theorem (L4-4) -/
 
