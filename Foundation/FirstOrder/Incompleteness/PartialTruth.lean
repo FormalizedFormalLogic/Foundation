@@ -6,7 +6,6 @@ public import Foundation.FirstOrder.Arithmetic.R0.Basic
 public import Foundation.FirstOrder.Incompleteness.InductionSchemeDelta1
 public import Foundation.FirstOrder.Arithmetic.Basic.Prenex
 
-@[expose] public section
 /-!
 # Partial truth predicate for the arithmetical hierarchy
 
@@ -20,6 +19,7 @@ This file is only used for the diagonalization argument in `StrictHierarchy.lean
 does **not** depend on the (semantic) prenex normal form theorem
 `Foundation/FirstOrder/Arithmetic/Basic/PrenexNat.lean`.
 -/
+@[expose] public section
 
 namespace LO.FirstOrder.Arithmetic
 
@@ -90,6 +90,7 @@ lemma sigmaTruth_zero_iff (h : Hierarchy 𝚺 1 σ) : ℕ↓[ℒₒᵣ] ⊧ (sig
       Provable.defined.defined (V := ℕ) (T := 𝗜𝚺₁) ![(⌜σ⌝ : ℕ)]
   rw [step1, Bootstrapping.provable_iff_provable]
   exact (sigma_one_completeness_iff (T := 𝗜𝚺₁) h).symm
+
 lemma sigmaTruth_succ_eval (n x : ℕ) :
     ℕ ⊧/![x] (sigmaTruth (n + 1)) ↔
     ∃ p : ℕ, x = qqExs p ∧ ∃ k : ℕ, ¬ℕ ⊧/![neg ℒₒᵣ (substNumeral p k)] (sigmaTruth n) := by
