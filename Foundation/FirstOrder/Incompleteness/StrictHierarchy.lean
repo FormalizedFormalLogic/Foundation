@@ -25,7 +25,9 @@ open Bootstrapping Bootstrapping.Arithmetic
 "self-application negation" of `ψ`. This is the same pattern as `Bootstrapping.diag`
 (`FixedPoint.lean`), but without the fixed-point wrapper: we only need the formula itself, and
 later push it through the (semantic) prenex normal form theorem instead of the provability-based
-fixed point lemma. -/
+fixed point lemma.
+
+- [HP98, Theorem 2.1] -/
 noncomputable def diagNeg (ψ : ArithmeticSemisentence 1) : ArithmeticSemisentence 1 :=
   “x. ∃ y, !ssnum y x x ∧ ¬!ψ y”
 
