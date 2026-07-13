@@ -6,21 +6,20 @@ public import Foundation.FirstOrder.Arithmetic.Basic.Prenex
 namespace LO.FirstOrder.Arithmetic
 
 /-!
-# Prenex normal form over ℕ (skeleton)
+# Prenex normal form over ℕ
 
-This file sets up the skeleton of the "prenex normal form theorem" over the standard model `ℕ`:
+This file proves the "prenex normal form theorem" over the standard model `ℕ`:
 every `Hierarchy Γ s φ` formula (`s ≥ 1`) is equivalent, on `ℕ`, to a formula in `StrictHierarchy Γ s`
-(i.e. genuine prenex form). Most of the interesting lemmas are only stated here (with `sorry`); the
-proofs are left for follow-up work.
+(i.e. genuine prenex form).
 
-## Notes for implementers
+## Implementation notes
 
-- Bounded quantifier evaluation should always be rewritten to `ballLT`/`bexsLT` form first (via the
-  bridge lemmas in this file), then use the simp lemmas `Semiformula.eval_ballLT`/`eval_bexsLT`.
+- Bounded quantifier evaluation is always rewritten to `ballLT`/`bexsLT` form first (via the
+  bridge lemmas in this file), then closed with the simp lemmas `Semiformula.eval_ballLT`/`eval_bexsLT`.
 - Variable insertion uses `Rew.bShift.q` (insert at position 1) / `Rew.bShift.q.q` (insert at position 2);
   variable swapping uses `Rew.subst (#1 :> #0 :> fun i => #(i+2))`. Strictness is preserved by
   `StrictHierarchy.rew`; positivity of terms is preserved by `Rew.bShift_positive` / `Rew.q_positive_iff`.
-- Evaluation rewriting under substitutions should mostly close via
+- Evaluation rewriting under substitutions mostly closes via
   `simp [Semiformula.eval_rew, Function.comp_def, Matrix.comp_vecCons']` plus `Fin.cases` for
   componentwise computation.
 -/
