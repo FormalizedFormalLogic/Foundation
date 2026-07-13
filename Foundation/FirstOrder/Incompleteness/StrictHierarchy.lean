@@ -38,21 +38,18 @@ fixed point lemma. -/
 noncomputable def diagNeg (ψ : ArithmeticSemisentence 1) : ArithmeticSemisentence 1 :=
   “x. ∃ y, !ssnum y x x ∧ ¬!ψ y”
 
--- see plan Step4 §3 L4-1
 lemma diagNeg_hierarchy {n : ℕ} {ψ : ArithmeticSemisentence 1} (h : Hierarchy 𝚷 (n + 1) ψ) :
     Hierarchy 𝚺 (n + 1) (diagNeg ψ) := by
   simp only [diagNeg]
   refine Hierarchy.sigma_iff.mpr (Hierarchy.and_iff.mpr ⟨?_, Hierarchy.neg_iff.mpr (by simpa using h)⟩)
   simpa using Hierarchy.mono (Γ := 𝚺) (s := 1) (by simp) (show (1 : ℕ) ≤ n + 1 by omega)
 
--- see plan Step4 §3 L4-2
 lemma diagNeg_eval (ψ : ArithmeticSemisentence 1) (x : ℕ) :
     ℕ ⊧/![x] (diagNeg ψ) ↔ ¬ℕ ⊧/![substNumeral x x] ψ := by
   simp [diagNeg]
 
 /-! ### Diagonalization (L4-3) -/
 
--- see plan Step4 §3 L4-3
 set_option maxHeartbeats 800000 in
 /-- No `Π_{n+1}` formula agrees everywhere with the partial truth predicate `sigmaTruth n`. -/
 theorem sigmaTruth_not_pi (n : ℕ) :
@@ -96,7 +93,6 @@ theorem sigmaTruth_not_pi (n : ℕ) :
 
 /-- The arithmetical hierarchy is strict: for every `n`, there is a `Σ_{n+1}` predicate that is
 not equivalent (on `ℕ`) to any `Π_{n+1}` predicate. -/
--- see plan Step4 §3 L4-4
 theorem strict_arithmetical_hierarchy (n : ℕ) :
     ∃ φ : ArithmeticSemisentence 1, Hierarchy 𝚺 (n + 1) φ ∧
       ∀ ψ : ArithmeticSemisentence 1, Hierarchy 𝚷 (n + 1) ψ →

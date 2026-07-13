@@ -30,7 +30,7 @@ def EquivStrict (Γ : Polarity) (s : ℕ) {n : ℕ} (φ : ArithmeticSemiformula 
   ∃ φ' : ArithmeticSemiformula Empty n,
     StrictHierarchy Γ s φ' ∧ ∀ e : Fin n → ℕ, ℕ ⊧/e φ' ↔ ℕ ⊧/e φ
 
--- see plan §3.1 L0-5. Pure Nat statement, no dependency on formulas.
+-- Pure Nat statement, no dependency on formulas.
 lemma nat_collection (m : ℕ) (P : ℕ → ℕ → Prop) :
     (∀ x < m, ∃ y, P x y) ↔ (∃ w, ∀ x < m, ∃ y < w, P x y) := by
   constructor
@@ -69,7 +69,7 @@ lemma nat_exists_exists (P : ℕ → ℕ → Prop) :
   · rintro ⟨z, x, _, y, _, hxy⟩
     exact ⟨x, y, hxy⟩
 
--- see plan §3.1 L0-6. Bridge between `ball`/`bexs` notation and `ballLT`/`bexsLT`.
+-- Bridge between `ball`/`bexs` notation and `ballLT`/`bexsLT`.
 lemma ball_eq_ballLT {n} (φ : ArithmeticSemiformula Empty (n + 1)) (u : ArithmeticSemiterm Empty n) :
     (∀⁰[“x. x < !!(Rew.bShift u)”] φ) = φ.ballLT u := rfl
 
@@ -141,7 +141,6 @@ structure CoreClosure (s : ℕ) : Prop where
   bexs : ∀ Γ {n} {φ : ArithmeticSemiformula Empty (n + 1)} {t : ArithmeticSemiterm Empty (n + 1)},
       t.Positive → EquivStrict Γ s φ → EquivStrict Γ s (∃⁰[“x. x < !!t”] φ)
 
--- see plan §3.4 L3-0
 lemma coreClosure_one : CoreClosure 1 where
   and := fun Γ {n φ ψ} hφ hψ => by
     rcases hφ with ⟨φ', hφ', hiffφ⟩
@@ -166,7 +165,6 @@ lemma coreClosure_one : CoreClosure 1 where
     simp only [Semiformula.eval_bexs]
     exact exists_congr (fun x => and_congr Iff.rfl (hiff' (x :> e)))
 
--- see plan §3.4 L3-1
 lemma or_sigma_step (ih : CoreClosure (s + 1)) :
     ∀ {n} {φ ψ : ArithmeticSemiformula Empty n},
       EquivStrict 𝚺 (s + 2) φ → EquivStrict 𝚺 (s + 2) ψ → EquivStrict 𝚺 (s + 2) (φ ⋎ ψ) := by
@@ -189,7 +187,7 @@ lemma or_sigma_step (ih : CoreClosure (s + 1)) :
     · obtain ⟨x, hx⟩ := (hψiff' e).mpr h
       exact ⟨x, (hχiff (x :> e)).mpr (Or.inr hx)⟩
 
--- see plan §3.4 L3-2 (max confluence of existentials)
+-- Confluence of existentials.
 lemma and_sigma_step (ih : CoreClosure (s + 1)) :
     ∀ {n} {φ ψ : ArithmeticSemiformula Empty n},
       EquivStrict 𝚺 (s + 2) φ → EquivStrict 𝚺 (s + 2) ψ → EquivStrict 𝚺 (s + 2) (φ ⋏ ψ) := by
@@ -265,7 +263,7 @@ lemma and_sigma_step (ih : CoreClosure (s + 1)) :
   rw [hφ_iff, hψ_iff]
   simp [LogicalConnective.HomClass.map_and, LogicalConnective.Prop.and_eq]
 
--- see plan §3.4 L3-3 (quantifier swap)
+-- Quantifier swap.
 lemma bexs_sigma_step (ih : CoreClosure (s + 1)) :
     ∀ {n} {φ : ArithmeticSemiformula Empty (n + 1)} {t : ArithmeticSemiterm Empty (n + 1)},
       t.Positive → EquivStrict 𝚺 (s + 2) φ → EquivStrict 𝚺 (s + 2) (∃⁰[“x. x < !!t”] φ) := by
@@ -319,7 +317,7 @@ lemma bexs_sigma_step (ih : CoreClosure (s + 1)) :
   · rintro ⟨b, hb, a, hab⟩
     exact ⟨a, b, hb, hab⟩
 
--- see plan §3.4 L3-4 (collection, hardest)
+-- Collection (hardest case).
 lemma ball_sigma_step (ih : CoreClosure (s + 1)) :
     ∀ {n} {φ : ArithmeticSemiformula Empty (n + 1)} {t : ArithmeticSemiterm Empty (n + 1)},
       t.Positive → EquivStrict 𝚺 (s + 2) φ → EquivStrict 𝚺 (s + 2) (∀⁰[“x. x < !!t”] φ) := by
@@ -449,7 +447,6 @@ lemma all_of_sigma {φ : ArithmeticSemiformula Empty (n + 1)} (h : EquivStrict �
   simp only [Semiformula.eval_all]
   exact forall_congr' (fun x => hiff' (x :> e))
 
--- see plan §3.5 L4
 lemma exs {φ : ArithmeticSemiformula Empty (n + 1)} (h : EquivStrict 𝚺 (s + 1) φ) :
     EquivStrict 𝚺 (s + 1) (∃⁰ φ) := by
   rcases s with _ | s₀
@@ -522,7 +519,6 @@ lemma all {φ : ArithmeticSemiformula Empty (n + 1)} (h : EquivStrict 𝚷 (s + 
   have := (exs h').neg
   simpa using this
 
--- see plan §3.7 L7 (main theorem)
 -- Note: the outer binders are named `Γ₀ s₀ n₀` (rather than the ambient section names
 -- `Γ s n`) to avoid an elaboration issue where recursive self-calls to
 -- `hierarchy_equivStrict` inside this very definition would get their implicit level/arity

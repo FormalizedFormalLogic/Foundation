@@ -37,14 +37,13 @@ variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 
 /-! ### Glue lemmas (L3-G1, L3-G2) -/
 
--- see plan Step3 §1.4 (G1) / §2 L3-G1.
 -- `substNumeral` is (definitionally, up to the `?[t] = t ∷ 0`/`matrixToVec` unfolding) the `k = 1`
 -- special case of `substNumerals`; this bridges the two so that `substNumerals_app_quote` can be
 -- reused for `substNumeral`.
 lemma substNumeral_eq_substNumerals (φ x : V) : substNumeral φ x = substNumerals φ ![x] := by
   simp [substNumeral, substNumerals, matrixToVec_succ, matrixToVec_nil]
 
--- see plan Step3 §1.4 (G1) / §2 L3-G1. Stated over `ℕ` only, which is all Step3/Step4 need.
+-- Stated over `ℕ` only, which is all Step3/Step4 need.
 lemma substNumeral_app_quote_nat (π : ArithmeticSemisentence 1) (k : ℕ) :
     (substNumeral (⌜π⌝ : ℕ) (k : ℕ) : ℕ) = ⌜(π/[(↑k : ArithmeticSemiterm Empty 0)] : ArithmeticSentence)⌝ := by
   rw [substNumeral_eq_substNumerals]
@@ -54,10 +53,8 @@ lemma substNumeral_app_quote_nat (π : ArithmeticSemisentence 1) (k : ℕ) :
       = ![(↑k : ArithmeticSemiterm Empty 0)] := by
     funext i
     simp [Matrix.cons_val_fin_one]
-  rw [hv] at h
-  exact h
+  rwa [hv] at h;
 
--- see plan Step3 §1.4 (G2) / §2 L3-G2.
 -- `⌜∼σ⌝ = neg L ⌜σ⌝`: quoting commutes with negation on the nose (via `Semiformula.val_neg` and
 -- the `LCWQIsoGödelQuote` instance's `neg` field).
 lemma quote_neg (σ : ArithmeticSentence) : (⌜(∼σ)⌝ : V) = neg ℒₒᵣ (⌜σ⌝ : V) := by
@@ -77,51 +74,45 @@ noncomputable def sigmaTruth : ℕ → ArithmeticSemisentence 1
 
 /-! ### Hierarchy of `sigmaTruth` (L3-1) -/
 
--- see plan Step3 §2 L3-1
+@[simp, grind .]
 lemma sigmaTruth_hierarchy (n : ℕ) : Hierarchy 𝚺 (n + 1) (sigmaTruth n) := by
   induction n with
   | zero => simp [sigmaTruth]
   | succ n ih =>
-    simp only [sigmaTruth, Hierarchy.sigma_iff, Hierarchy.and_iff, Hierarchy.rew_iff,
-      Hierarchy.neg_iff]
-    refine ⟨HierarchySymbol.Semiformula.hierarchy_zero _,
-      Hierarchy.mono (HierarchySymbol.Semiformula.hierarchy_sigma (φ := ssnum)) (by omega),
-      Hierarchy.mono (HierarchySymbol.Semiformula.hierarchy_sigma (φ := negGraph ℒₒᵣ)) (by omega),
-      ih.accum 𝚷⟩
+    simp only [sigmaTruth, Hierarchy.sigma_iff, Hierarchy.and_iff, Hierarchy.rew_iff, Hierarchy.neg_iff];
+    refine ⟨?_, ?_, ?_, ?_⟩;
+    . exact HierarchySymbol.Semiformula.hierarchy_zero _;
+    . exact Hierarchy.mono (HierarchySymbol.Semiformula.hierarchy_sigma (φ := ssnum)) (by omega);
+    . exact Hierarchy.mono (HierarchySymbol.Semiformula.hierarchy_sigma (φ := negGraph ℒₒᵣ)) (by omega);
+    . exact ih.accum _;
 
 /-! ### Correctness, base case (L3-2) -/
 
--- see plan Step3 §2 L3-2
-lemma sigmaTruth_zero_iff {σ : ArithmeticSentence} (h : Hierarchy 𝚺 1 σ) :
-    ℕ↓[ℒₒᵣ] ⊧ (sigmaTruth 0)/[⌜σ⌝] ↔ ℕ↓[ℒₒᵣ] ⊧ σ := by
+variable {σ : ArithmeticSentence}
+
+@[simp, grind .]
+lemma sigmaTruth_zero_iff (h : Hierarchy 𝚺 1 σ) : ℕ↓[ℒₒᵣ] ⊧ (sigmaTruth 0)/[⌜σ⌝] ↔ ℕ↓[ℒₒᵣ] ⊧ σ := by
   -- `sigmaTruth 0` is (by definition) the Σ₁ provability predicate for `𝗜𝚺₁`.
   have step1 : ℕ↓[ℒₒᵣ] ⊧ (sigmaTruth 0)/[⌜σ⌝] ↔ Provable 𝗜𝚺₁ (⌜σ⌝ : ℕ) := by
     simpa [sigmaTruth, models_iff, Matrix.constant_eq_singleton] using
       Provable.defined.defined (V := ℕ) (T := 𝗜𝚺₁) ![(⌜σ⌝ : ℕ)]
   rw [step1, Bootstrapping.provable_iff_provable]
   exact (sigma_one_completeness_iff (T := 𝗜𝚺₁) h).symm
-
-/-! ### Correctness, evaluation of the inductive step (L3-3) -/
-
--- see plan Step3 §2 L3-3
 lemma sigmaTruth_succ_eval (n x : ℕ) :
     ℕ ⊧/![x] (sigmaTruth (n + 1)) ↔
     ∃ p : ℕ, x = qqExs p ∧ ∃ k : ℕ, ¬ℕ ⊧/![neg ℒₒᵣ (substNumeral p k)] (sigmaTruth n) := by
   simp [sigmaTruth, qqExsists_defined.iff, substNumeral.defined.iff, neg.defined.iff,
     Semiformula.eval_rew, Function.comp_def, Matrix.comp_vecCons', Matrix.constant_eq_singleton]
 
-/-! ### Bridge between substitution and evaluation (L3-0) -/
-
--- see plan Step3 §2, auxiliary lemma right after L3-4.
 lemma models_subst_iff (φ : ArithmeticSemisentence 1) (k : ℕ) :
     ℕ↓[ℒₒᵣ] ⊧ φ/[(↑k : ArithmeticSemiterm Empty 0)] ↔ ℕ ⊧/![k] φ := by
   simp [models_iff, Semiformula.eval_substs]
 
 /-! ### Correctness, main theorem (L3-4) -/
 
+
 /-- Main correctness theorem for the partial truth predicate: `sigmaTruth n` agrees with actual
 truth on `ℕ` for every strict `Σ_{n+1}` sentence `σ`. -/
--- see plan Step3 §2 L3-4
 theorem sigmaTruth_iff : ∀ {n : ℕ} {σ : ArithmeticSentence},
     StrictHierarchy 𝚺 (n + 1) σ → (ℕ↓[ℒₒᵣ] ⊧ (sigmaTruth n)/[⌜σ⌝] ↔ ℕ↓[ℒₒᵣ] ⊧ σ)
   | 0, σ, h => sigmaTruth_zero_iff h.hierarchy
