@@ -30,6 +30,23 @@ def EquivStrict (Γ : Polarity) (s : ℕ) {n : ℕ} (φ : ArithmeticSemiformula 
   ∃ φ' : ArithmeticSemiformula Empty n,
     StrictHierarchy Γ s φ' ∧ ∀ e : Fin n → ℕ, ℕ ⊧/e φ' ↔ ℕ ⊧/e φ
 
+-- see plan §3.1 L0-5. Pure Nat statement, no dependency on formulas.
+lemma nat_collection (m : ℕ) (P : ℕ → ℕ → Prop) :
+    (∀ x < m, ∃ y, P x y) ↔ (∃ w, ∀ x < m, ∃ y < w, P x y) := sorry
+
+lemma nat_exists_and_exists (P Q : ℕ → Prop) :
+    ((∃ x, P x) ∧ (∃ y, Q y)) ↔ ∃ z, (∃ x < z + 1, P x) ∧ (∃ y < z + 1, Q y) := sorry
+
+lemma nat_exists_exists (P : ℕ → ℕ → Prop) :
+    (∃ x y, P x y) ↔ ∃ z, ∃ x < z + 1, ∃ y < z + 1, P x y := sorry
+
+-- see plan §3.1 L0-6. Bridge between `ball`/`bexs` notation and `ballLT`/`bexsLT`.
+lemma ball_eq_ballLT {n} (φ : ArithmeticSemiformula Empty (n + 1)) (u : ArithmeticSemiterm Empty n) :
+    (∀⁰[“x. x < !!(Rew.bShift u)”] φ) = φ.ballLT u := rfl
+
+lemma bexs_eq_bexsLT {n} (φ : ArithmeticSemiformula Empty (n + 1)) (u : ArithmeticSemiterm Empty n) :
+    (∃⁰[“x. x < !!(Rew.bShift u)”] φ) = φ.bexsLT u := rfl
+
 namespace EquivStrict
 
 variable {Γ Γ' : Polarity} {s s' : ℕ} {n : ℕ} {φ ψ : ArithmeticSemiformula Empty n}
@@ -118,14 +135,6 @@ lemma ball_sigma_step (ih : CoreClosure (s + 1)) :
     ∀ {n} {φ : ArithmeticSemiformula Empty (n + 1)} {t : ArithmeticSemiterm Empty (n + 1)},
       t.Positive → EquivStrict 𝚺 (s + 2) φ → EquivStrict 𝚺 (s + 2) (∀⁰[“x. x < !!t”] φ) := sorry
 
--- see plan §3.5 L4
-lemma exs {φ : ArithmeticSemiformula Empty (n + 1)} (h : EquivStrict 𝚺 (s + 1) φ) :
-    EquivStrict 𝚺 (s + 1) (∃⁰ φ) := sorry
-
--- see plan §3.7 L7 (main theorem)
-lemma hierarchy_equivStrict {Γ s} {φ : ArithmeticSemiformula Empty n} :
-    Hierarchy Γ s φ → 1 ≤ s → EquivStrict Γ s φ := sorry
-
 lemma coreClosure_succ (ih : CoreClosure (s + 1)) : CoreClosure (s + 2) where
   and := fun Γ {n φ ψ} hφ hψ => by
     rcases Γ with _ | _
@@ -176,12 +185,6 @@ lemma bexs {φ : ArithmeticSemiformula Empty (n + 1)} {t : ArithmeticSemiterm Em
     (hs : 1 ≤ s) (ht : t.Positive) (hφ : EquivStrict Γ s φ) : EquivStrict Γ s (∃⁰[“x. x < !!t”] φ) :=
   (coreClosure hs).bexs Γ ht hφ
 
-lemma all {φ : ArithmeticSemiformula Empty (n + 1)} (h : EquivStrict 𝚷 (s + 1) φ) :
-    EquivStrict 𝚷 (s + 1) (∀⁰ φ) := by
-  have h' : EquivStrict 𝚺 (s + 1) (∼φ) := by simpa using h.neg
-  have := (exs h').neg
-  simpa using this
-
 lemma exs_of_pi {φ : ArithmeticSemiformula Empty (n + 1)} (h : EquivStrict 𝚷 (s + 1) φ) :
     EquivStrict 𝚺 (s + 2) (∃⁰ φ) := by
   rcases h with ⟨φ', hφ', hiff'⟩
@@ -196,6 +199,83 @@ lemma all_of_sigma {φ : ArithmeticSemiformula Empty (n + 1)} (h : EquivStrict �
   simp only [Semiformula.eval_all]
   exact forall_congr' (fun x => hiff' (x :> e))
 
+-- see plan §3.5 L4
+lemma exs {φ : ArithmeticSemiformula Empty (n + 1)} (h : EquivStrict 𝚺 (s + 1) φ) :
+    EquivStrict 𝚺 (s + 1) (∃⁰ φ) := by
+  rcases s with _ | s₀
+  · -- s + 1 = 1: Σ₁ is already closed under ∃
+    rcases h with ⟨φ', hφ', hiff'⟩
+    cases hφ' with
+    | base hb =>
+      refine ⟨∃⁰ φ', StrictHierarchy.base hb.exs, fun e => ?_⟩
+      simp only [Semiformula.eval_ex]
+      exact exists_congr (fun x => hiff' (x :> e))
+  · -- s + 1 = s₀ + 2: contract the two existentials ∃x∃y into a single bounded pair
+    obtain ⟨φ', hφ', hiff'⟩ := h
+    obtain ⟨ψ₀, rfl, hψ₀⟩ := StrictHierarchy.sigma_succ_elim hφ'
+    have hs01 : 1 ≤ s₀ + 1 := by omega
+    -- insert a fresh variable `z` at position 2 (after `x`, `y`)
+    set ψ₀' : ArithmeticSemiformula Empty (n + 3) := Rew.bShift.q.q ▹ ψ₀ with hψ₀'def
+    have hψ₀' : StrictHierarchy 𝚷 (s₀ + 1) ψ₀' := hψ₀.rew Rew.bShift.q.q
+    set tx : ArithmeticSemiterm Empty (n + 2) := (‘#1 + 1’ : ArithmeticSemiterm Empty (n + 2)) with htx
+    set ty : ArithmeticSemiterm Empty (n + 1) := (‘#0 + 1’ : ArithmeticSemiterm Empty (n + 1)) with hty
+    have hB : EquivStrict 𝚷 (s₀ + 1) (ψ₀'.bexsLT tx) := by
+      have := (coreClosure hs01).bexs 𝚷 (Rew.bShift_positive tx) (EquivStrict.refl hψ₀')
+      rwa [bexs_eq_bexsLT] at this
+    have hC : EquivStrict 𝚷 (s₀ + 1) ((ψ₀'.bexsLT tx).bexsLT ty) := by
+      have := (coreClosure hs01).bexs 𝚷 (Rew.bShift_positive ty) hB
+      rwa [bexs_eq_bexsLT] at this
+    have hExs : EquivStrict 𝚺 (s₀ + 2) (∃⁰ ((ψ₀'.bexsLT tx).bexsLT ty)) := EquivStrict.exs_of_pi hC
+    refine hExs.of_iff (fun e => ?_)
+    have hrew : ∀ x y z : ℕ, ℕ ⊧/(x :> y :> z :> e) ψ₀' ↔ ℕ ⊧/(x :> y :> e) ψ₀ := by
+      intro x y z
+      have hb :
+          (Semiterm.val (x :> y :> z :> e) (Empty.elim : Empty → ℕ) ∘
+              (Rew.bShift.q.q : Rew ℒₒᵣ Empty (n + 2) Empty (n + 3)) ∘ Semiterm.bvar)
+            = (x :> y :> e : Fin (n + 2) → ℕ) := by
+        funext i
+        cases i using Fin.cases with
+        | zero =>
+          simp only [Function.comp_apply, Rew.q_bvar_zero, Semiterm.val_bvar,
+            Matrix.cons_val_zero]
+        | succ i =>
+          cases i using Fin.cases with
+          | zero =>
+            simp only [Function.comp_apply, Rew.q_bvar_succ, Rew.q_bvar_zero,
+              Semiterm.val_bShift, Semiterm.val_bvar]
+            simp
+          | succ i =>
+            simp only [Function.comp_apply, Rew.q_bvar_succ, Semiterm.val_bShift,
+              Semiterm.val_bvar]
+            simp
+      have hf :
+          (Semiterm.val (x :> y :> z :> e) (Empty.elim : Empty → ℕ) ∘
+              (Rew.bShift.q.q : Rew ℒₒᵣ Empty (n + 2) Empty (n + 3)) ∘ Semiterm.fvar)
+            = (Empty.elim : Empty → ℕ) := funext fun i => i.elim
+      rw [hψ₀'def, Semiformula.eval_rew, hb, hf]
+    have htyval : ∀ a : ℕ, ty.val (a :> e) Empty.elim = a + 1 := by simp [hty]
+    have htxval : ∀ a b : ℕ, tx.val (a :> b :> e) Empty.elim = b + 1 := by simp [htx]
+    have hleft : ℕ ⊧/e (∃⁰ ((ψ₀'.bexsLT tx).bexsLT ty)) ↔
+        ∃ z, ∃ y < z + 1, ∃ x < z + 1, ℕ ⊧/(x :> y :> e) ψ₀ := by
+      simp only [Semiformula.eval_ex, Semiformula.eval_bexsLT, htyval, htxval]
+      refine exists_congr (fun z => exists_congr (fun y => and_congr_right (fun _ =>
+        exists_congr (fun x => and_congr_right (fun _ => hrew x y z)))))
+    have hright : ℕ ⊧/e (∃⁰ φ) ↔ ∃ y, ∃ x, ℕ ⊧/(x :> y :> e) ψ₀ := by
+      simp only [Semiformula.eval_ex]
+      exact exists_congr (fun y => (hiff' (y :> e)).symm.trans (by simp))
+    rw [hleft, hright]
+    exact (nat_exists_exists (fun y x => ℕ ⊧/(x :> y :> e) ψ₀)).symm
+
+lemma all {φ : ArithmeticSemiformula Empty (n + 1)} (h : EquivStrict 𝚷 (s + 1) φ) :
+    EquivStrict 𝚷 (s + 1) (∀⁰ φ) := by
+  have h' : EquivStrict 𝚺 (s + 1) (∼φ) := by simpa using h.neg
+  have := (exs h').neg
+  simpa using this
+
+-- see plan §3.7 L7 (main theorem)
+lemma hierarchy_equivStrict {Γ s} {φ : ArithmeticSemiformula Empty n} :
+    Hierarchy Γ s φ → 1 ≤ s → EquivStrict Γ s φ := sorry
+
 lemma mono (h : EquivStrict Γ s φ) (hs : 1 ≤ s) (hle : s ≤ s') : EquivStrict Γ s' φ := by
   rcases h with ⟨φ', hφ', hiff'⟩
   have hs' : 1 ≤ s' := le_trans hs hle
@@ -209,22 +289,5 @@ lemma mono' (h : EquivStrict Γ s φ) (hs : 1 ≤ s) (hlt : s < s') : EquivStric
   exact this.of_iff hiff'
 
 end EquivStrict
-
--- see plan §3.1 L0-5. Pure Nat statement, no dependency on formulas.
-lemma nat_collection (m : ℕ) (P : ℕ → ℕ → Prop) :
-    (∀ x < m, ∃ y, P x y) ↔ (∃ w, ∀ x < m, ∃ y < w, P x y) := sorry
-
-lemma nat_exists_and_exists (P Q : ℕ → Prop) :
-    ((∃ x, P x) ∧ (∃ y, Q y)) ↔ ∃ z, (∃ x < z + 1, P x) ∧ (∃ y < z + 1, Q y) := sorry
-
-lemma nat_exists_exists (P : ℕ → ℕ → Prop) :
-    (∃ x y, P x y) ↔ ∃ z, ∃ x < z + 1, ∃ y < z + 1, P x y := sorry
-
--- see plan §3.1 L0-6. Bridge between `ball`/`bexs` notation and `ballLT`/`bexsLT`.
-lemma ball_eq_ballLT {n} (φ : ArithmeticSemiformula Empty (n + 1)) (u : ArithmeticSemiterm Empty n) :
-    (∀⁰[“x. x < !!(Rew.bShift u)”] φ) = φ.ballLT u := rfl
-
-lemma bexs_eq_bexsLT {n} (φ : ArithmeticSemiformula Empty (n + 1)) (u : ArithmeticSemiterm Empty n) :
-    (∃⁰[“x. x < !!(Rew.bShift u)”] φ) = φ.bexsLT u := rfl
 
 end LO.FirstOrder.Arithmetic
