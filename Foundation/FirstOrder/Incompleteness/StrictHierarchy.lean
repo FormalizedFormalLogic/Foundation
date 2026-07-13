@@ -11,7 +11,7 @@ Main theorem: for every `n`, there is a `Σ_{n+1}` predicate (namely `sigmaTruth
 `PartialTruth.lean`) that is not `Π_{n+1}`-definable on `ℕ`. This is proved by a direct
 diagonalization (no fixed-point machinery needed): assuming a `Π_{n+1}` formula `ψ` agrees with
 `sigmaTruth n` everywhere, `diagNeg ψ` is a `Σ_{n+1}` formula whose (semantic) prenex normal form
-`δ'` (via `IsStrictHierarchyOnModel.hierarchy_equivStrict` in `PrenexNat.lean`) yields a
+`δ'` (via `IsStrictHierarchyOnModel.ofHierarchy` in `PrenexNat.lean`) yields a
 self-referential sentence `σ₀ := δ'/[⌜δ'⌝]` with `ℕ ⊧ σ₀ ↔ ¬ℕ ⊧ σ₀`, a contradiction.
 -/
 
@@ -51,8 +51,8 @@ theorem sigmaTruth_not_pi (n : ℕ) :
         ℕ↓[ℒₒᵣ] ⊧ ψ/[(↑k : ArithmeticSemiterm Empty 0)] := by
   rintro ⟨ψ, hψ, hagree⟩
   have hδ₀ : Hierarchy 𝚺 (n + 1) (diagNeg ψ) := diagNeg_hierarchy hψ
-  -- `PrenexNat.lean` dependency: only the *signature* of `hierarchy_equivStrict` is used here.
-  obtain ⟨δ', hδ's, hδ'iff⟩ := IsStrictHierarchyOnModel.hierarchy_equivStrict hδ₀ (by omega)
+  -- `PrenexNat.lean` dependency: only the *signature* of `ofHierarchy` is used here.
+  obtain ⟨δ', hδ's, hδ'iff⟩ := IsStrictHierarchyOnModel.ofHierarchy hδ₀ (by omega)
   -- `σ₀` is the self-referential sentence obtained by substituting the code of `δ'` into itself.
   set σ₀ : ArithmeticSentence := δ'/[(⌜δ'⌝ : ArithmeticSemiterm Empty 0)] with hσ₀_def
   have hσ₀s : StrictHierarchy 𝚺 (n + 1) σ₀ :=
