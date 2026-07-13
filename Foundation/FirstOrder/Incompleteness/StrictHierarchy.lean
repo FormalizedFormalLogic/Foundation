@@ -87,7 +87,7 @@ theorem sigmaTruth_not_pi (n : ℕ) :
   have step6 : ¬ℕ↓[ℒₒᵣ] ⊧ (sigmaTruth n)/[(↑(⌜σ₀⌝ : ℕ) : ArithmeticSemiterm Empty 0)] ↔
       ¬ℕ↓[ℒₒᵣ] ⊧ σ₀ := by
     rw [Sentence.coe_quote]
-    exact not_congr (sigmaTruth_iff hσ₀s)
+    exact not_congr (sigmaTruth_iff n σ₀ hσ₀s)
   have hcontra : ℕ↓[ℒₒᵣ] ⊧ σ₀ ↔ ¬ℕ↓[ℒₒᵣ] ⊧ σ₀ :=
     step1.trans <| step2.trans <| step3.trans <| step4.trans <| step5.trans step6
   tauto
