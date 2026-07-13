@@ -5,6 +5,8 @@ public import Foundation.FirstOrder.Arithmetic.Basic.Hierarchy
 public import Foundation.FirstOrder.Arithmetic.Basic.Misc
 public import Foundation.FirstOrder.Arithmetic.Basic.Model
 public import Foundation.FirstOrder.Arithmetic.Basic.Monotone
+public import Foundation.FirstOrder.Arithmetic.Basic.Prenex
+public import Foundation.FirstOrder.Arithmetic.Basic.PrenexNat
 public import Foundation.FirstOrder.Arithmetic.Definability
 public import Foundation.FirstOrder.Arithmetic.Definability.Absoluteness
 public import Foundation.FirstOrder.Arithmetic.Definability.BoundedDefinable
@@ -88,6 +90,7 @@ public import Foundation.FirstOrder.Incompleteness.Halting
 public import Foundation.FirstOrder.Incompleteness.InductionSchemeDelta1
 public import Foundation.FirstOrder.Incompleteness.Jeroslow
 public import Foundation.FirstOrder.Incompleteness.Löb
+public import Foundation.FirstOrder.Incompleteness.PartialTruth
 public import Foundation.FirstOrder.Incompleteness.ProvabilityAbstraction.Basic
 public import Foundation.FirstOrder.Incompleteness.ProvabilityAbstraction.Height
 public import Foundation.FirstOrder.Incompleteness.ProvabilityAbstraction.Refutability
@@ -95,6 +98,7 @@ public import Foundation.FirstOrder.Incompleteness.RestrictedProvability
 public import Foundation.FirstOrder.Incompleteness.RosserProvability
 public import Foundation.FirstOrder.Incompleteness.Second
 public import Foundation.FirstOrder.Incompleteness.StandardProvability
+public import Foundation.FirstOrder.Incompleteness.StrictHierarchy
 public import Foundation.FirstOrder.Incompleteness.Tarski
 public import Foundation.FirstOrder.Incompleteness.WitnessComparison
 public import Foundation.FirstOrder.Interpretation
