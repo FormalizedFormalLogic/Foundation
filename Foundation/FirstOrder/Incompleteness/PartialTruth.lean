@@ -113,10 +113,11 @@ lemma models_subst_iff (φ : ArithmeticSemisentence 1) (k : ℕ) :
 
 /-- Main correctness theorem for the partial truth predicate: `sigmaTruth n` agrees with actual
 truth on `ℕ` for every strict `Σ_{n+1}` sentence `σ`. -/
-theorem sigmaTruth_iff : ∀ {n : ℕ} {σ : ArithmeticSentence},
-    StrictHierarchy 𝚺 (n + 1) σ → (ℕ↓[ℒₒᵣ] ⊧ (sigmaTruth n)/[⌜σ⌝] ↔ ℕ↓[ℒₒᵣ] ⊧ σ)
-  | 0, σ, h => sigmaTruth_zero_iff h.hierarchy
-  | n + 1, σ, h => by
+theorem sigmaTruth_iff (n : ℕ) (σ : ArithmeticSentence) (h : StrictHierarchy 𝚺 (n + 1) σ) :
+    ℕ↓[ℒₒᵣ] ⊧ (sigmaTruth n)/[⌜σ⌝] ↔ ℕ↓[ℒₒᵣ] ⊧ σ := by
+  induction n generalizing σ with
+  | zero => exact sigmaTruth_zero_iff h.hierarchy
+  | succ n ih =>
       -- σ is literally `∃⁰ π` for some strict `Π_{n+1}` formula `π`.
       obtain ⟨π, rfl, hπ⟩ := h.sigma_succ_elim
       -- Bridge between `/[·]`-substitution and evaluation at the numeral `⌜∃⁰π⌝`.
@@ -144,7 +145,7 @@ theorem sigmaTruth_iff : ∀ {n : ℕ} {σ : ArithmeticSentence},
         rw [hglue] at hk
         -- transport `hk` through the induction hypothesis for level `n`.
         have hk' : ¬ ℕ↓[ℒₒᵣ] ⊧ (∼(π/[(↑k : ArithmeticSemiterm Empty 0)]) : ArithmeticSentence) := by
-          have := sigmaTruth_iff hτ
+          have := ih _ hτ
           have hbridge' : ℕ↓[ℒₒᵣ] ⊧ (sigmaTruth n)/[⌜(∼(π/[(↑k : ArithmeticSemiterm Empty 0)]) : ArithmeticSentence)⌝] ↔
               ℕ ⊧/![(⌜(∼(π/[(↑k : ArithmeticSemiterm Empty 0)]) : ArithmeticSentence)⌝ : ℕ)] (sigmaTruth n) := by
             simpa using models_subst_iff (sigmaTruth n) (⌜(∼(π/[(↑k : ArithmeticSemiterm Empty 0)]) : ArithmeticSentence)⌝ : ℕ)
@@ -165,7 +166,7 @@ theorem sigmaTruth_iff : ∀ {n : ℕ} {σ : ArithmeticSentence},
         have hbridge' : ℕ↓[ℒₒᵣ] ⊧ (sigmaTruth n)/[⌜(∼(π/[(↑k : ArithmeticSemiterm Empty 0)]) : ArithmeticSentence)⌝] ↔
             ℕ ⊧/![(⌜(∼(π/[(↑k : ArithmeticSemiterm Empty 0)]) : ArithmeticSentence)⌝ : ℕ)] (sigmaTruth n) := by
           simpa using models_subst_iff (sigmaTruth n) (⌜(∼(π/[(↑k : ArithmeticSemiterm Empty 0)]) : ArithmeticSentence)⌝ : ℕ)
-        have := sigmaTruth_iff hτ
+        have := ih _ hτ
         rw [hbridge'] at this
         rw [this]
         simpa [models_iff] using (models_subst_iff π k).mpr hπk
