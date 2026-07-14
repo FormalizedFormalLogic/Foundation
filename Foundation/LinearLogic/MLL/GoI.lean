@@ -95,7 +95,7 @@ def Project.measurement [Fintype α] [DecidableEq α] (𝔞 𝔟 : Project α) :
 scoped notation "⟪" 𝔞 " | " 𝔟 "⟫" => Project.measurement 𝔞 𝔟
 
 def Project.IsPolar [Fintype α] [DecidableEq α] (𝔞 𝔟 : Project α) : Prop :=
-  0 < ⟪𝔞 | 𝔟⟫
+  ⟪𝔞 | 𝔟⟫ = 1
 
 scoped infix:50 " ⟂ " => Project.IsPolar
 
@@ -116,7 +116,7 @@ lemma measurement_comm (𝔞 𝔟 : Project α) :
   simp [Project.measurement, cycles_comm]
   grind
 
-@[symm] lemma isPolar_symm {𝔞 𝔟 : Project α} :
+@[symm, grind =] lemma isPolar_symm {𝔞 𝔟 : Project α} :
     𝔞 ⟂ 𝔟 ↔ 𝔟 ⟂ 𝔞 := by
   simp [Project.IsPolar, measurement_comm]
 
@@ -140,14 +140,67 @@ def fax (α : Type*) : Project (α ⊕ α) where
   simp_all [Equiv.Perm.parts_partition, Multiset.sum_replicate, Nat.mul_two]
   grind
 
-@[simp] lemma fax_polar_one [Nonempty α] : fax α ⟂ 1 := by
-  simpa [Project.IsPolar, measurement_fax_one, Fintype.card_pos_iff]
-
 def daimon (r : ℕ) (α : Type*) : Project α where
   wager := r
   plot := Equiv.refl α
 
 end Project
+
+/-! ### Polarity and Conduct -/
+
+variable {α β : Type*} [Fintype α] [Fintype β] [DecidableEq α] [DecidableEq β]
+
+def poler (A : Set (Project α)) : Set (Project α) :=
+  {𝔟 | ∀ 𝔞 ∈ A, 𝔞 ⟂ 𝔟}
+
+scoped postfix:max "ᗮ" => poler
+
+def IsConduct (A : Set (Project α)) : Prop :=
+  A = Aᗮᗮ
+
+structure Conduct (α : Type*) [Fintype α] [DecidableEq α] where
+  set : Set (Project α)
+  set_isConduct : IsConduct set
+
+instance : SetLike (Conduct α) (Project α) where
+  coe := Conduct.set
+  coe_injective p q h := by cases p; cases q; congr
+
+@[simp] lemma mem_poler_iff (A : Set (Project α)) (𝔟 : Project α) :
+    𝔟 ∈ Aᗮ ↔ ∀ 𝔞 ∈ A, 𝔞 ⟂ 𝔟 := by rfl
+
+@[simp] lemma tripoler_eq_poler (A : Set (Project α)) : Aᗮᗮᗮ = Aᗮ := by
+  ext 𝔟; simp; grind
+
+@[simp] lemma subset_bipoler (A : Set (Project α)) : A ⊆ Aᗮᗮ := by
+  intro 𝔞 h𝔞; simp; grind
+
+lemma isConduct_iff_subset_bipoler {A : Set (Project α)} : IsConduct A ↔ Aᗮᗮ ⊆ A := by
+  simp [IsConduct, subset_antisymm_iff]
+
+@[simp] lemma poler_isConduct (A : Set (Project α)) : IsConduct Aᗮ := by
+  simp [IsConduct]
+
+namespace Conduct
+
+def tensor (A : Conduct α) (B : Conduct β) : Conduct (α ⊕ β) where
+  set := {𝔠 | ∃ 𝔞 ∈ A, ∃ 𝔟 ∈ B, 𝔠 = 𝔞 + 𝔟}ᗮᗮ
+  set_isConduct := by simp
+
+def par (A : Conduct α) (B : Conduct β) : Conduct (α ⊕ β) where
+  set := {𝔠 | ∃ 𝔞 ∈ Aᗮ, ∃ 𝔟 ∈ Bᗮ, 𝔠 = 𝔞 + 𝔟}ᗮ
+  set_isConduct := by simp
+
+end Conduct
+
+/-! ### Successful Project -/
+
+structure Project.IsSuccessful (𝔞 : Project α) : Prop where
+  square_eq_one : 𝔞 * 𝔞 = 1
+  trace_zero : 𝔞.plot.support = Finset.univ
+
+def Conduct.IsSuccessful (A : Conduct α) : Prop :=
+  ∃ 𝔞 ∈ A, 𝔞.IsSuccessful
 
 end GoI
 
