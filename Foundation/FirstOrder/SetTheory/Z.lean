@@ -285,11 +285,11 @@ lemma separation_exists_eval (x : V) (φ : SetTheorySemiformula V 1) : ∃ y : V
   have := by simpa [models_iff, Semiformula.eval_univCl, Axiom.separationSchema] using Theory.models V 𝗭 (Zermelo.axiom_of_separation ψ)
   simpa [ψ, f, Semiformula.eval_rewriteMap, Matrix.constant_eq_singleton] using this f x
 
-lemma separation_exists (x : V) (P : V → Prop) [hP : ℒₛₑₜ-predicate P] : ∃ y : V, ∀ z : V, z ∈ y ↔ z ∈ x ∧ P z := by
+lemma separation_exists (x : V) (P : V → Prop) (hP : ℒₛₑₜ-predicate P := by definability) : ∃ y : V, ∀ z : V, z ∈ y ↔ z ∈ x ∧ P z := by
   rcases hP with ⟨φ, hP⟩
   simpa [hP.iff] using separation_exists_eval x φ
 
-lemma separation_existsUnique (x : V) (P : V → Prop) [hP : ℒₛₑₜ-predicate P] : ∃! y : V, ∀ z : V, z ∈ y ↔ z ∈ x ∧ P z := by
+lemma separation_existsUnique (x : V) (P : V → Prop) (hP : ℒₛₑₜ-predicate P := by definability) : ∃! y : V, ∀ z : V, z ∈ y ↔ z ∈ x ∧ P z := by
   rcases separation_exists x P with ⟨s, hs⟩
   apply ExistsUnique.intro s hs
   intro u hu
