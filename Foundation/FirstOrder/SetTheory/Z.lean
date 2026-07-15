@@ -285,20 +285,20 @@ lemma separation_exists_eval (x : V) (φ : SetTheorySemiformula V 1) : ∃ y : V
   have := by simpa [models_iff, Semiformula.eval_univCl, Axiom.separationSchema] using Theory.models V 𝗭 (Zermelo.axiom_of_separation ψ)
   simpa [ψ, f, Semiformula.eval_rewriteMap, Matrix.constant_eq_singleton] using this f x
 
-lemma separation_exists (x : V) (P : V → Prop) (hP : ℒₛₑₜ-predicate P := by definability) : ∃ y : V, ∀ z : V, z ∈ y ↔ z ∈ x ∧ P z := by
+lemma separation_exists (x : V) (P : V → Prop) (hP : ℒₛₑₜ-predicate P) : ∃ y : V, ∀ z : V, z ∈ y ↔ z ∈ x ∧ P z := by
   rcases hP with ⟨φ, hP⟩
   simpa [hP.iff] using separation_exists_eval x φ
 
-lemma separation_existsUnique (x : V) (P : V → Prop) (hP : ℒₛₑₜ-predicate P := by definability) : ∃! y : V, ∀ z : V, z ∈ y ↔ z ∈ x ∧ P z := by
-  rcases separation_exists x P with ⟨s, hs⟩
+lemma separation_existsUnique (x : V) (P : V → Prop) (hP : ℒₛₑₜ-predicate P) : ∃! y : V, ∀ z : V, z ∈ y ↔ z ∈ x ∧ P z := by
+  rcases separation_exists x P hP with ⟨s, hs⟩
   apply ExistsUnique.intro s hs
   intro u hu
   ext; simp_all
 
-noncomputable def sep (x : V) (P : V → Prop) [hP : ℒₛₑₜ-predicate P] : V := Classical.choose! (separation_existsUnique x P)
+noncomputable def sep (x : V) (P : V → Prop) (hP : ℒₛₑₜ-predicate P := by definability) : V := Classical.choose! (separation_existsUnique x P hP)
 
 @[simp] lemma mem_sep_iff {P : V → Prop} {hP : ℒₛₑₜ-predicate P} {z x : V} :
-    z ∈ sep x P ↔ z ∈ x ∧ P z := Classical.choose!_spec (separation_existsUnique x P) z
+    z ∈ sep x P ↔ z ∈ x ∧ P z := Classical.choose!_spec (separation_existsUnique x P hP) z
 
 @[simp] lemma sep_empty_eq (P : V → Prop) {hP : ℒₛₑₜ-predicate P} :
     sep ∅ P = ∅ := by ext; simp
@@ -318,7 +318,7 @@ syntax (name := internalSetBuilder) "{" binderIdent " ∈ " term " ; " term "}" 
 @[term_elab internalSetBuilder]
 meta def elabInternalSetBuilder : TermElab
   | `({ $x:ident ∈ $s ; $p }), expectedType? => do
-    elabTerm (← `(sep $s (fun $x:ident ↦ $p) (hP := by definability))) expectedType?
+    elabTerm (← `(sep $s (fun $x:ident ↦ $p))) expectedType?
   | _, _ => throwUnsupportedSyntax
 
 @[app_unexpander sep]

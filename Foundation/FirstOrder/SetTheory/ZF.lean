@@ -31,7 +31,7 @@ lemma replacement_exists_eval (X : V) (φ : SetTheorySemiformula V 2) (h : (∀ 
 /--
 Replacement exists (for a relation).
 -/
-lemma replacement_rel_exists (X : V) (R : V → V → Prop) (h : ∀ x, ∃! y, R x y) (hR : ℒₛₑₜ-relation R := by definability) :
+lemma replacement_rel_exists (X : V) (R : V → V → Prop) (h : ∀ x, ∃! y, R x y) (hR : ℒₛₑₜ-relation R) :
     ∃ Y : V, ∀ y, y ∈ Y ↔ ∃ x ∈ X, R x y := by
   rcases hR with ⟨φ, hR⟩
   -- Put hR in a useful form
@@ -42,9 +42,9 @@ lemma replacement_rel_exists (X : V) (R : V → V → Prop) (h : ∀ x, ∃! y, 
 /--
 Replacement exists uniquely (for a relation).
 -/
-lemma replacement_rel_existsUnique (X : V) (R : V → V → Prop) (h : ∀ x, ∃! y, R x y) (hR : ℒₛₑₜ-relation R := by definability) :
+lemma replacement_rel_existsUnique (X : V) (R : V → V → Prop) (h : ∀ x, ∃! y, R x y) (hR : ℒₛₑₜ-relation R) :
     ∃! Y : V, ∀ y : V, y ∈ Y ↔ ∃ x ∈ X, R x y := by
-  rcases replacement_rel_exists X R h with ⟨s, hs⟩
+  rcases replacement_rel_exists X R h hR with ⟨s, hs⟩
   apply ExistsUnique.intro s hs
   intro u hu
   ext; simp_all
@@ -52,29 +52,29 @@ lemma replacement_rel_existsUnique (X : V) (R : V → V → Prop) (h : ∀ x, �
 /--
 Replacement exists uniquely for a function.
 -/
-lemma replacement_existsUnique (X : V) (F : V → V) (hF : ℒₛₑₜ-function₁ F := by definability) :
+lemma replacement_existsUnique (X : V) (F : V → V) (hF : ℒₛₑₜ-function₁ F) :
     ∃! Y : V, ∀ y, y ∈ Y ↔ ∃ x ∈ X, y = F x := by
   let R (x y : V) : Prop := Function.Graph F y x
   have h : ∀ (x : V), ∃! y, R x y := by
     intro x
     simp only [Function.Graph, existsUnique_eq, R]
-  exact replacement_rel_existsUnique X R h
+  exact replacement_rel_existsUnique X R h (by definability)
 
 /--
 Replacement exists for a function.
 -/
-lemma replacement_exists (X : V) (F : V → V) (hF : ℒₛₑₜ-function₁ F := by definability) :
-    ∃ Y : V, ∀ y, y ∈ Y ↔ ∃ x ∈ X, y = F x := (replacement_existsUnique X F).exists
+lemma replacement_exists (X : V) (F : V → V) (hF : ℒₛₑₜ-function₁ F) :
+    ∃ Y : V, ∀ y, y ∈ Y ↔ ∃ x ∈ X, y = F x := (replacement_existsUnique X F hF).exists
 
 /--
 The axiom of replacement for a relation.
 -/
-noncomputable def replRel (X : V) (R : V → V → Prop) (h : ∀ x, ∃! y, R x y) (hR : ℒₛₑₜ-relation R := by definability) : V := Classical.choose! (replacement_rel_existsUnique X R h)
+noncomputable def replRel (X : V) (R : V → V → Prop) (h : ∀ x, ∃! y, R x y) (hR : ℒₛₑₜ-relation R := by definability) : V := Classical.choose! (replacement_rel_existsUnique X R h hR)
 
 /--
 The axiom of replacement.
 -/
-noncomputable def repl (X : V) (F : V → V) (hF : ℒₛₑₜ-function₁ F) : V := Classical.choose! (replacement_existsUnique X F)
+noncomputable def repl (X : V) (F : V → V) (hF : ℒₛₑₜ-function₁ F := by definability) : V := Classical.choose! (replacement_existsUnique X F hF)
 
 /-! ## Variants of replacement -/
 
@@ -82,7 +82,7 @@ noncomputable def repl (X : V) (F : V → V) (hF : ℒₛₑₜ-function₁ F) :
 A stronger variant of (unique existence of) replacement, which only requires uniqueness on `X`.
 The statement of this lemma is thanks to tosiaki.
 -/
-lemma replacement_rel_existsUnique_of_mem_existsUnique (X : V) (R : V → V → Prop) (h : ∀ x ∈ X, ∃! y, R x y) (hR : ℒₛₑₜ-relation R := by definability) :
+lemma replacement_rel_existsUnique_of_mem_existsUnique (X : V) (R : V → V → Prop) (h : ∀ x ∈ X, ∃! y, R x y) (hR : ℒₛₑₜ-relation R) :
     ∃! Y : V, ∀ y, y ∈ Y ↔ ∃ x ∈ X, R x y := by
   /- Proof sketch: Define `R' x y` to hold iff `x ∈ X` and `R x y`, or `x ∉ X` and `y = ∅`.
   Show that `∀ x, ∃! y, R' x y` holds, by case subdivision on whether `x ∈ X` or not.
@@ -93,7 +93,7 @@ lemma replacement_rel_existsUnique_of_mem_existsUnique (X : V) (R : V → V → 
   have cond : ∀ x, ∃! y, R' x y := by
     intro x
     refine Classical.byCases (p := x ∈ X) ?_ ?_ <;> (intro hx; simp_all [R'])
-  obtain ⟨Y, hY⟩ := replacement_rel_exists X R' cond
+  obtain ⟨Y, hY⟩ := replacement_rel_exists X R' cond (by definability)
   use Y
   aesop
 
@@ -101,24 +101,24 @@ lemma replacement_rel_existsUnique_of_mem_existsUnique (X : V) (R : V → V → 
 A stronger variant of replacement, which only requires uniqueness on `X`.
 The statement of this lemma is thanks to tosiaki.
 -/
-lemma replacement_rel_exists_of_over_set (X : V) (R : V → V → Prop) (h : ∀ x ∈ X, ∃! y, R x y) (hR : ℒₛₑₜ-relation R := by definability) :
-    ∃ Y : V, ∀ y, y ∈ Y ↔ ∃ x ∈ X, R x y := (replacement_rel_existsUnique_of_mem_existsUnique X R h).exists
+lemma replacement_rel_exists_of_mem_existsUnique (X : V) (R : V → V → Prop) (h : ∀ x ∈ X, ∃! y, R x y) (hR : ℒₛₑₜ-relation R) :
+    ∃ Y : V, ∀ y, y ∈ Y ↔ ∃ x ∈ X, R x y := (replacement_rel_existsUnique_of_mem_existsUnique X R h hR).exists
 
 /--
 The axiom of replacement, only assuming uniqueness on `X`.
 -/
 noncomputable def replRelOverSet (X : V) (R : V → V → Prop) (h : ∀ x ∈ X, ∃! y, R x y) (hR : ℒₛₑₜ-relation R := by definability) : V :=
-  Classical.choose! (replacement_rel_existsUnique_of_mem_existsUnique X R h)
+  Classical.choose! (replacement_rel_existsUnique_of_mem_existsUnique X R h hR)
 
 /-! ## Various lemmas -/
 
-@[simp] lemma replRel_spec {X y : V} {R : V → V → Prop} {h : ∀ x, ∃! y, R x y} (hR : ℒₛₑₜ-relation R := by definability) :
-    y ∈ replRel X R h ↔ ∃ x ∈ X, R x y := Classical.choose!_spec (replacement_rel_existsUnique X R h) y
+@[simp] lemma replRel_spec {X y : V} {R : V → V → Prop} {h : ∀ x, ∃! y, R x y} (hR : ℒₛₑₜ-relation R) :
+    y ∈ replRel X R h ↔ ∃ x ∈ X, R x y := Classical.choose!_spec (replacement_rel_existsUnique X R h hR) y
 
-@[simp] lemma repl_spec {X y : V} {F : V → V} (hF : ℒₛₑₜ-function₁ F := by definability) :
+@[simp] lemma repl_spec {X y : V} {F : V → V} (hF : ℒₛₑₜ-function₁ F) :
     y ∈ repl X F hF ↔ ∃ x ∈ X, y = F x := Classical.choose!_spec (replacement_existsUnique X F hF) y
 
-@[simp] lemma replRelOverSet_spec {X y : V} {R : V → V → Prop} {h : ∀ x ∈ X, ∃! y, R x y} (hR : ℒₛₑₜ-relation R := by definability) :
-    y ∈ replRelOverSet X R h ↔ ∃ x ∈ X, R x y := Classical.choose!_spec (replacement_rel_existsUnique_of_mem_existsUnique X R h) y
+@[simp] lemma replRelOverSet_spec {X y : V} {R : V → V → Prop} {h : ∀ x ∈ X, ∃! y, R x y} (hR : ℒₛₑₜ-relation R) :
+    y ∈ replRelOverSet X R h ↔ ∃ x ∈ X, R x y := Classical.choose!_spec (replacement_rel_existsUnique_of_mem_existsUnique X R h hR) y
 
 end LO.FirstOrder.SetTheory
