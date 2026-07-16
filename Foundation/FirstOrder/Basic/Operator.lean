@@ -287,6 +287,15 @@ namespace Operator
 def operator {arity : ℕ} (o : Operator L arity) (v : Fin arity → Semiterm L ξ n) : Semiformula L ξ n :=
   Rewriting.emb o.sentence ⇜ v
 
+/-- A formula operator is symbol-like when rewriting into one of its instances
+can only come from another instance of the same operator. -/
+class SymbolLike (o : Operator L k) (ξ₁ ξ₂ : Type*) : Prop where
+  symbolLike {n₁ n₂ : ℕ} (ω : Rew L ξ₁ n₁ ξ₂ n₂)
+    {φ : Semiformula L ξ₁ n₁} {v : Fin k → Semiterm L ξ₂ n₂} :
+    ω ▹ φ = o.operator v →
+      ∃ w : Fin k → Semiterm L ξ₁ n₁,
+        φ = o.operator w ∧ ∀ i, ω (w i) = v i
+
 @[coe] def const (c : Const L) : Semiformula L ξ n := c.operator ![]
 
 instance : Coe (Const L) (Semiformula L ξ n) := ⟨Operator.const⟩
@@ -562,6 +571,40 @@ lemma eq_mem_iff [L.Mem] {φ : Semiformula L ξ₁ n₁} {t u : Semiterm L ξ₂
   |      ∃⁰ _ => simp [Operator.operator, Operator.Mem.sentence_eq]
 
 end Rew
+
+namespace Semiformula.Operator
+
+instance symbolLikeEq [L.Eq] (ξ₁ ξ₂ : Type*) :
+    (Eq.eq : Operator L 2).SymbolLike ξ₁ ξ₂ where
+  symbolLike := by
+    intro n₁ n₂ ω φ v h
+    rw [Matrix.fun_eq_vec_two v] at h
+    rcases (Rew.eq_equal_iff (ω := ω)).mp h with ⟨t, u, ht, hu, hφ⟩
+    refine ⟨![t, u], hφ, ?_⟩
+    rw [Matrix.fun_eq_vec_two v]
+    simp [ht, hu]
+
+instance symbolLikeLT [L.LT] (ξ₁ ξ₂ : Type*) :
+    (LT.lt : Operator L 2).SymbolLike ξ₁ ξ₂ where
+  symbolLike := by
+    intro n₁ n₂ ω φ v h
+    rw [Matrix.fun_eq_vec_two v] at h
+    rcases (Rew.eq_lt_iff (ω := ω)).mp h with ⟨t, u, ht, hu, hφ⟩
+    refine ⟨![t, u], hφ, ?_⟩
+    rw [Matrix.fun_eq_vec_two v]
+    simp [ht, hu]
+
+instance symbolLikeMem [L.Mem] (ξ₁ ξ₂ : Type*) :
+    (Mem.mem : Operator L 2).SymbolLike ξ₁ ξ₂ where
+  symbolLike := by
+    intro n₁ n₂ ω φ v h
+    rw [Matrix.fun_eq_vec_two v] at h
+    rcases (Rew.eq_mem_iff (ω := ω)).mp h with ⟨t, u, ht, hu, hφ⟩
+    refine ⟨![t, u], hφ, ?_⟩
+    rw [Matrix.fun_eq_vec_two v]
+    simp [ht, hu]
+
+end Semiformula.Operator
 
 namespace Structure
 

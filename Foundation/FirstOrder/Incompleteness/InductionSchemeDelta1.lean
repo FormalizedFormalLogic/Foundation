@@ -1205,7 +1205,8 @@ lemma hierarchy_of_isSigma1 {n : ℕ} (ψ : _root_.LO.FirstOrder.ArithmeticSemif
       have hφ2 : Hierarchy 𝚺 1 φ₂ := by
         have hform : φ = (“#0 < !!(Rew.bShift s)” 🡒 φ₂) :=
           (Semiformula.all_inj _ _).mp (by rw [← Semiformula.ball_eq]; exact heq)
-        rw [hform, Semiformula.imp_eq, Hierarchy.or_iff] at hφ
+        change BoundingHierarchy.Hierarchy (ArithmeticBounding (L := ℒₒᵣ)) 𝚺 1 φ at hφ
+        rw [hform, Semiformula.imp_eq, BoundingHierarchy.Hierarchy.or_iff] at hφ
         exact hφ.2
       rw [heq]
       exact Hierarchy.ball (Rew.positive_iff.mpr ⟨s, rfl⟩) hφ2

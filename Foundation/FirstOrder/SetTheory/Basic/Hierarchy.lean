@@ -1,13 +1,13 @@
 module
 
 public import Foundation.FirstOrder.SetTheory.Basic.Model
-public import Foundation.FirstOrder.Basic.OperatorHierarchy
+public import Foundation.FirstOrder.Basic.BoundingHierarchy
 
 @[expose] public section
 /-!
 # The Lévy hierarchy
 
-This file specializes the reusable operator-bounded hierarchy to set theory,
+This file specializes the reusable bounding hierarchy to set theory,
 where bounded quantifiers are those bounded by membership.
 -/
 
@@ -15,27 +15,23 @@ namespace LO.FirstOrder.SetTheory
 
 variable {L : Language} [L.Mem]
 
-/-- The reusable operator-bounded hierarchy specialized to membership. -/
-abbrev LevyOperator : Semiformula.Operator L 2 :=
+/-- The reusable bounding relation specialized to membership. -/
+abbrev LevyBounding : Semiformula.Operator L 2 :=
   (Semiformula.Operator.Mem.mem : Semiformula.Operator L 2)
 
-/-- The generic operator-bounded hierarchy specialized to membership. -/
-abbrev OperatorLevyHierarchy : Polarity → ℕ → {n : ℕ} → Semiformula L ξ n → Prop :=
-  OperatorHierarchy.Hierarchy (R := LevyOperator (L := L))
-
 /--
-The set-theoretic Levy hierarchy, implemented by the generic operator hierarchy
+The set-theoretic Levy hierarchy, implemented by the generic bounding hierarchy
 with bounded quantifiers recognized through membership.
 -/
 abbrev Hierarchy : Polarity → ℕ → {n : ℕ} → Semiformula L ξ n → Prop :=
-  OperatorLevyHierarchy
+  BoundingHierarchy.Hierarchy (R := LevyBounding (L := L))
 
 def DeltaZero (φ : Semiformula L ξ n) : Prop :=
   Hierarchy 𝚺 0 φ
 
 namespace Hierarchy
 
-export OperatorHierarchy.Hierarchy
+export BoundingHierarchy.Hierarchy
   (verum falsum rel nrel and or and_iff
    or_iff conj_iff zero_eq_alt pi_zero_iff_sigma_zero zero_iff alt_zero_iff_zero
    neg neg_iff imp_iff pi_of_pi_all all_iff
@@ -47,57 +43,57 @@ export OperatorHierarchy.Hierarchy
 
 lemma exs {s n} {φ : Semiformula L ξ (n + 1)} :
     Hierarchy 𝚺 (s + 1) φ → Hierarchy 𝚺 (s + 1) (∃⁰ φ) :=
-  OperatorHierarchy.Hierarchy.exs
+  BoundingHierarchy.Hierarchy.exs
 
 lemma all {s n} {φ : Semiformula L ξ (n + 1)} :
     Hierarchy 𝚷 (s + 1) φ → Hierarchy 𝚷 (s + 1) (∀⁰ φ) :=
-  OperatorHierarchy.Hierarchy.all
+  BoundingHierarchy.Hierarchy.all
 
 lemma sigma {s n} {φ : Semiformula L ξ (n + 1)} :
     Hierarchy 𝚷 s φ → Hierarchy 𝚺 (s + 1) (∃⁰ φ) :=
-  OperatorHierarchy.Hierarchy.sigma
+  BoundingHierarchy.Hierarchy.sigma
 
 lemma pi {s n} {φ : Semiformula L ξ (n + 1)} :
     Hierarchy 𝚺 s φ → Hierarchy 𝚷 (s + 1) (∀⁰ φ) :=
-  OperatorHierarchy.Hierarchy.pi
+  BoundingHierarchy.Hierarchy.pi
 
 lemma dummy_sigma {s n} {φ : Semiformula L ξ (n + 1)} :
     Hierarchy 𝚷 (s + 1) φ → Hierarchy 𝚺 (s + 1 + 1) (∀⁰ φ) :=
-  OperatorHierarchy.Hierarchy.dummy_sigma
+  BoundingHierarchy.Hierarchy.dummy_sigma
 
 lemma dummy_pi {s n} {φ : Semiformula L ξ (n + 1)} :
     Hierarchy 𝚺 (s + 1) φ → Hierarchy 𝚷 (s + 1 + 1) (∃⁰ φ) :=
-  OperatorHierarchy.Hierarchy.dummy_pi
+  BoundingHierarchy.Hierarchy.dummy_pi
 
 lemma accum {Γ} {s : ℕ} {φ : Semiformula L ξ n} :
     Hierarchy Γ s φ → ∀ Γ', Hierarchy Γ' (s + 1) φ :=
-  OperatorHierarchy.Hierarchy.accum (R := LevyOperator (L := L))
+  BoundingHierarchy.Hierarchy.accum (R := LevyBounding (L := L))
 
 lemma strict_mono {Γ s} {φ : Semiformula L ξ n}
     (hp : Hierarchy Γ s φ) (Γ') {s'} (h : s < s') : Hierarchy Γ' s' φ :=
-  OperatorHierarchy.Hierarchy.strict_mono (R := LevyOperator (L := L)) hp Γ' h
+  BoundingHierarchy.Hierarchy.strict_mono (R := LevyBounding (L := L)) hp Γ' h
 
 lemma mono {Γ} {s s' : ℕ} {φ : Semiformula L ξ n}
     (hp : Hierarchy Γ s φ) (h : s ≤ s') : Hierarchy Γ s' φ :=
-  OperatorHierarchy.Hierarchy.mono (R := LevyOperator (L := L)) hp h
+  BoundingHierarchy.Hierarchy.mono (R := LevyBounding (L := L)) hp h
 
 lemma of_zero {Γ Γ'} {s : ℕ} {φ : Semiformula L ξ n}
     (hp : Hierarchy Γ 0 φ) : Hierarchy Γ' s φ :=
-  OperatorHierarchy.Hierarchy.of_zero (R := LevyOperator (L := L)) hp
+  BoundingHierarchy.Hierarchy.of_zero (R := LevyBounding (L := L)) hp
 
 lemma zero_iff_delta_zero {Γ} {φ : Semiformula L ξ n} :
     Hierarchy Γ 0 φ ↔ DeltaZero φ := by
-  simpa [DeltaZero, OperatorHierarchy.DeltaZero] using
-    (OperatorHierarchy.Hierarchy.zero_iff_delta_zero
-      (R := LevyOperator (L := L)) (Γ := Γ) (φ := φ))
+  simpa [DeltaZero, BoundingHierarchy.DeltaZero] using
+    (BoundingHierarchy.Hierarchy.zero_iff_delta_zero
+      (R := LevyBounding (L := L)) (Γ := Γ) (φ := φ))
 
 lemma ball {Γ s n} {φ : Semiformula L ξ (n + 1)} {t : Semiterm L ξ (n + 1)} :
     t.Positive → Hierarchy Γ s φ → Hierarchy Γ s (∀⁰[“x. x ∈ !!t”] φ) :=
-  OperatorHierarchy.Hierarchy.ball (R := LevyOperator (L := L))
+  BoundingHierarchy.Hierarchy.ball (R := LevyBounding (L := L))
 
 lemma bexs {Γ s n} {φ : Semiformula L ξ (n + 1)} {t : Semiterm L ξ (n + 1)} :
     t.Positive → Hierarchy Γ s φ → Hierarchy Γ s (∃⁰[“x. x ∈ !!t”] φ) :=
-  OperatorHierarchy.Hierarchy.bexs (R := LevyOperator (L := L))
+  BoundingHierarchy.Hierarchy.bexs (R := LevyBounding (L := L))
 
 section
 
@@ -116,12 +112,12 @@ end
 @[simp] lemma ball_iff {Γ s n} {φ : Semiformula L ξ (n + 1)} {t : Semiterm L ξ (n + 1)}
     (ht : t.Positive) :
     Hierarchy Γ s (∀⁰[“x. x ∈ !!t”] φ) ↔ Hierarchy Γ s φ :=
-  OperatorHierarchy.Hierarchy.ball_iff (R := LevyOperator (L := L)) ht
+  BoundingHierarchy.Hierarchy.ball_iff (R := LevyBounding (L := L)) ht
 
 @[simp] lemma bexs_iff {Γ s n} {φ : Semiformula L ξ (n + 1)} {t : Semiterm L ξ (n + 1)}
     (ht : t.Positive) :
     Hierarchy Γ s (∃⁰[“x. x ∈ !!t”] φ) ↔ Hierarchy Γ s φ :=
-  OperatorHierarchy.Hierarchy.bexs_iff (R := LevyOperator (L := L)) ht
+  BoundingHierarchy.Hierarchy.bexs_iff (R := LevyBounding (L := L)) ht
 
 @[simp] lemma ballMem_iff {Γ s n} {φ : Semiformula L ξ (n + 1)} {t : Semiterm L ξ n} :
     Hierarchy Γ s (φ.ballMem t) ↔ Hierarchy Γ s φ := by simp [Semiformula.ballMem]
@@ -145,8 +141,8 @@ lemma sigma₁_induction {P : (n : ℕ) → SetTheorySemiformula ξ n → Prop}
     (hBall : ∀ n t φ, Hierarchy 𝚺 1 φ → P (n + 1) φ → P n (∀⁰[“#0 ∈ !!(Rew.bShift t)”] φ))
     (hExs : ∀ n φ, Hierarchy 𝚺 1 φ → P (n + 1) φ → P n (∃⁰ φ)) (n φ) :
     Hierarchy 𝚺 1 φ → P n φ :=
-  OperatorHierarchy.Hierarchy.sigma₁_induction
-    (R := LevyOperator (L := ℒₛₑₜ)) (P := P)
+  BoundingHierarchy.Hierarchy.sigma₁_induction
+    (R := LevyBounding (L := ℒₛₑₜ)) (P := P)
     hVerum hFalsum
     (by
       intro n k r v
@@ -165,11 +161,11 @@ lemma sigma₁_induction {P : (n : ℕ) → SetTheorySemiformula ξ n → Prop}
     hAnd hOr
     (by
       intro n t φ hφ hp
-      simpa [LevyOperator, Semiformula.Operator.mem_def] using hBall n t φ hφ hp)
+      simpa [LevyBounding, Semiformula.Operator.mem_def] using hBall n t φ hφ hp)
     hExs
     (by
       intro n t
-      simpa [LevyOperator, Semiformula.Operator.mem_def] using hMem (n + 1) #0 (Rew.bShift t))
+      simpa [LevyBounding, Semiformula.Operator.mem_def] using hMem (n + 1) #0 (Rew.bShift t))
     n φ
 
 lemma sigma₁_induction' {n φ} (hp : Hierarchy 𝚺 1 φ)

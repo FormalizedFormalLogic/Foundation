@@ -39,6 +39,7 @@ public import Foundation.FirstOrder.Arithmetic.TA.Nonstandard
 public import Foundation.FirstOrder.Basic
 public import Foundation.FirstOrder.Basic.AesopInit
 public import Foundation.FirstOrder.Basic.BinderNotation
+public import Foundation.FirstOrder.Basic.BoundingHierarchy
 public import Foundation.FirstOrder.Basic.Calculus
 public import Foundation.FirstOrder.Basic.Calculus2
 public import Foundation.FirstOrder.Basic.Coding
@@ -47,7 +48,6 @@ public import Foundation.FirstOrder.Basic.Definability
 public import Foundation.FirstOrder.Basic.Eq
 public import Foundation.FirstOrder.Basic.Model
 public import Foundation.FirstOrder.Basic.Operator
-public import Foundation.FirstOrder.Basic.OperatorHierarchy
 public import Foundation.FirstOrder.Basic.Padding
 public import Foundation.FirstOrder.Basic.Semantics.Elementary
 public import Foundation.FirstOrder.Basic.Semantics.Semantics
