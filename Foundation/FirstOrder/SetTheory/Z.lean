@@ -298,13 +298,13 @@ lemma separation_existsUnique (x : V) (P : V → Prop) (hP : ℒₛₑₜ-predic
 noncomputable def sep (x : V) (P : V → Prop) (hP : ℒₛₑₜ-predicate P := by definability) : V := Classical.choose! (separation_existsUnique x P hP)
 
 @[simp] lemma mem_sep_iff {P : V → Prop} {hP : ℒₛₑₜ-predicate P} {z x : V} :
-    z ∈ sep x P ↔ z ∈ x ∧ P z := Classical.choose!_spec (separation_existsUnique x P hP) z
+    z ∈ sep x P (hP := hP) ↔ z ∈ x ∧ P z := Classical.choose!_spec (separation_existsUnique x P hP) z
 
 @[simp] lemma sep_empty_eq (P : V → Prop) {hP : ℒₛₑₜ-predicate P} :
-    sep ∅ P = ∅ := by ext; simp
+    sep ∅ P (hP := hP) = ∅ := by ext; simp
 
 @[simp] lemma sep_subset {P : V → Prop} {hP : ℒₛₑₜ-predicate P} {x : V} :
-    sep x P ⊆ x := by intro z; simp; tauto
+    sep x P (hP := hP) ⊆ x := by intro z; simp; tauto
 
 section set_notation
 
