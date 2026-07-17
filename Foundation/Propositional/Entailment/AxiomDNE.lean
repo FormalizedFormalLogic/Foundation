@@ -30,7 +30,7 @@ def of_NN [ModusPonens 𝓢] [HasAxiomDNE 𝓢] (b : 𝓢 ⊢! ∼∼φ) : 𝓢 
 
 section
 
-variable [LogicalConnective F] [Entailment S F] [Entailment.Minimal 𝓢]
+variable [Entailment.Minimal 𝓢]
 
 namespace FiniteContext
 

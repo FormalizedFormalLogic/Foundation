@@ -20,6 +20,9 @@ a function that preserves logical connectives.
 
 namespace LO
 
+/--
+A class for types with logical connectives $\top, \bot, \land, \lor, \to, \lnot$.
+-/
 class LogicalConnective (α : Type*)
   extends Top α, Bot α, Tilde α, Arrow α, Wedge α, Vee α
 
@@ -60,6 +63,9 @@ variable {α : Type*} [Tilde α] [TildeInvolutive α]
   intro φ ψ h
   simpa using congr_arg (∼·) h
 
+@[simp] lemma TildeInvolutive.tilde_eq_tilde_iff_eq {φ ψ : α} : ∼φ = ∼ψ ↔ φ = ψ :=
+  Function.Injective.eq_iff TildeInvolutive.tilde_injective
+
 def Tilde.invol : α ↪ α := ⟨Tilde.tilde, TildeInvolutive.tilde_injective⟩
 
 @[simp] lemma Tilde.invol_app (φ : α) : Tilde.invol φ = ∼φ := rfl
@@ -73,6 +79,9 @@ variable {α : Type*} [LogicalConnective α]
 
 @[match_pattern] def iff (a b : α) := (a 🡒 b) ⋏ (b 🡒 a)
 
+/--
+A defined logical connective for "iff", defined from the logical connectives `🡒` and `⋏`.
+-/
 infix:61 " 🡘 " => LogicalConnective.iff
 
 end
@@ -110,6 +119,9 @@ instance : DeMorgan Prop where
 instance : TildeInvolutive Prop where
   neg_involutive := fun _ => by simp
 
+/--
+A class for a type `F` which contains homomorphisms (for logical connectives) from `α` to `β`.
+-/
 class HomClass (F : Type*) (α β : outParam Type*) [LogicalConnective α] [LogicalConnective β] [FunLike F α β] where
   map_top : ∀ (f : F), f ⊤ = ⊤
   map_bot : ∀ (f : F), f ⊥ = ⊥
@@ -143,6 +155,9 @@ structure Hom where
   map_and' : ∀ φ ψ, toTr (φ ⋏ ψ) = toTr φ ⋏ toTr ψ
   map_or'  : ∀ φ ψ, toTr (φ ⋎ ψ) = toTr φ ⋎ toTr ψ
 
+/--
+A structure for homomorphisms (for logical connectives) from `α` to `β`.
+-/
 infix:25 " →ˡᶜ " => Hom
 
 namespace Hom
@@ -248,6 +263,9 @@ def conjLt (φ : ℕ → α) : ℕ → α
 
 @[simp] lemma conjLt_succ (φ : ℕ → α) (k) : conjLt φ (k + 1) = φ k ⋏ conjLt φ k := rfl
 
+/--
+Homomorphisms commute with `k`-ary conjunctions.
+-/
 @[simp] lemma hom_conj_prop [FunLike F α Prop] [LogicalConnective.HomClass F α Prop] (f : F) (φ : ℕ → α) :
     f (conjLt φ k) ↔ ∀ i < k, f (φ i) := by
   induction' k with k ih
@@ -269,6 +287,9 @@ def disjLt (φ : ℕ → α) : ℕ → α
 
 @[simp] lemma disjLt_succ (φ : ℕ → α) (k) : disjLt φ (k + 1) = φ k ⋎ disjLt φ k := rfl
 
+/--
+Homomorphisms commute with `k`-ary disjunctions.
+-/
 @[simp] lemma hom_disj_prop [FunLike F α Prop] [LogicalConnective.HomClass F α Prop] (f : F) (φ : ℕ → α) :
     f (disjLt φ k) ↔ ∃ i < k, f (φ i) := by
   induction' k with k ih
@@ -316,6 +337,9 @@ end disjunction
 
 variable [LogicalConnective α] [LogicalConnective β]
 
+/--
+Homomorphisms commute with `k`-ary conjunctions (vector version).
+-/
 @[simp] lemma conj_hom_prop [FunLike F α Prop] [LogicalConnective.HomClass F α Prop]
   (f : F) (v : Fin n → α) : f (conj v) = ∀ i, f (v i) := by
   induction' n with n ih
@@ -325,6 +349,9 @@ variable [LogicalConnective α] [LogicalConnective β]
     · intro ⟨hz, hs⟩ i; cases i using Fin.cases; { exact hz }; { exact hs _ }
     · intro h; exact ⟨h 0, fun i => h _⟩
 
+/--
+Homomorphisms commute with `k`-ary disjunctions (vector version).
+-/
 @[simp] lemma disj_hom_prop [FunLike F α Prop] [LogicalConnective.HomClass F α Prop]
   (f : F) (v : Fin n → α) : f (disj v) = ∃ i, f (v i) := by
   induction' n with n ih
@@ -399,12 +426,15 @@ def conj : List α → α
 
 @[simp] lemma conj_cons {a : α} {as : List α} : conj (a :: as) = a ⋏ as.conj := rfl
 
-/-- Remark: `[φ].conj₂ = φ ≠ φ ⋏ ⊤ = [φ].conj` -/
+/-- Remark: `[φ].conj₂ = φ ≠ φ ⋏ ⊤ = [φ].conj`. -/
 def conj₂ : List α → α
 |           [] => ⊤
 |          [φ] => φ
 | φ :: ψ :: rs => φ ⋏ (ψ :: rs).conj₂
 
+/--
+The conjunction of a list of members of type `α`.
+-/
 prefix:80 "⋀" => List.conj₂
 
 @[simp] lemma conj₂_nil : ⋀[] = (⊤ : α) := rfl
@@ -440,12 +470,15 @@ def disj : List α → α
 
 @[simp] lemma disj_cons {a : α} {as : List α} : disj (a :: as) = a ⋎ as.disj := rfl
 
-/-- Remark: `[φ].disj = φ ≠ φ ⋎ ⊥ = [φ].disj` -/
+/-- Remark: `[φ].disj₂ = φ ≠ φ ⋎ ⊥ = [φ].disj`. -/
 def disj₂ : List α → α
 |           [] => ⊥
 |          [φ] => φ
 | φ :: ψ :: rs => φ ⋎ (ψ :: rs).disj₂
 
+/--
+The disjunction of a list of members of type `α`.
+-/
 prefix:80 "⋁" => disj₂
 
 @[simp] lemma disj₂_nil : ⋁[] = (⊥ : α) := rfl
@@ -473,22 +506,34 @@ section tilde
 
 variable [LogicalConnective α] [DeMorgan α]
 
+/--
+Variadic de Morgan's law for lists of elements of type `α`.
+-/
 @[simp] lemma tilde_conj (l : List α) : ∼l.disj = (∼l).conj := by
   match l with
   |     [] => simp
   | a :: l => simp [tilde_conj l]
 
+/--
+Variadic de Morgan's law for lists of elements of type `α`.
+-/
 @[simp] lemma tilde_disj (l : List α) : ∼l.conj = (∼l).disj := by
   match l with
   |     [] => simp
   | a :: l => simp [tilde_disj l]
 
+/--
+Variadic de Morgan's law for lists of elements of type `α`.
+-/
 @[simp] lemma tilde_conj₂ (l : List α) : ∼⋁l = ⋀(∼l) := by
   match l with
   |          [] => simp
   |         [a] => simp
   | a :: b :: l => simp [tilde_conj₂ (b :: l)]
 
+/--
+Variadic de Morgan's law for lists of elements of type `α`.
+-/
 @[simp] lemma tilde_disj₂ (l : List α) : ∼⋀l = ⋁(∼l) := by
   match l with
   |          [] => simp

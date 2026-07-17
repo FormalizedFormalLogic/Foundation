@@ -217,6 +217,35 @@ lemma of_mem {f X Y : V} (h : f ∈ Y ^ X) : IsFunction f := ⟨X, Y, h⟩
 
 lemma mem_function (f : V) [hf : IsFunction f] : f ∈ range f ^ domain f := isFunction_iff.mp hf
 
+lemma mem_eq_kpair {f : V} [hf : IsFunction f] {p : V} (hpf : p ∈ f) : ∃ x y, p = ⟨x, y⟩ₖ := by
+  rcases hf with ⟨X, Y, hfXY⟩
+  have hsubset := (mem_function_iff.mp hfXY).1
+  apply hsubset at hpf
+  simp only [mem_prod_iff] at hpf
+  rcases hpf with ⟨x, hxX, y, hyY, hpxy⟩
+  exact ⟨x, y, hpxy⟩
+
+@[grind ->] lemma ofSubset (f g : V) [hf : IsFunction f] : g ⊆ f → IsFunction g := by
+  intro hgf
+  apply isFunction_iff.mpr
+  apply mem_function.intro
+  · intro p hp
+    have hpf : p ∈ f := hgf _ hp
+    rcases show ∃ x ∈ domain f, ∃ y ∈ range f, p = ⟨x, y⟩ₖ from by
+        simpa [mem_prod_iff] using subset_prod_of_mem_function hf.mem_function _ hpf with
+      ⟨x, -, y, -, rfl⟩
+    have hxg : x ∈ domain g := mem_domain_of_kpair_mem hp
+    have hyg : y ∈ range g := mem_range_of_kpair_mem hp
+    simpa [mem_prod_iff] using And.intro hxg hyg
+  · intro x hx
+    rcases mem_domain_iff.mp hx with ⟨y, hxy⟩
+    refine ExistsUnique.intro y hxy ?_
+    intro y' hxy'
+    have hyf : ⟨x, y⟩ₖ ∈ f := hgf _ hxy
+    have hy'f : ⟨x, y'⟩ₖ ∈ f := hgf _ hxy'
+    have hux : ∃! z, ⟨x, z⟩ₖ ∈ f := exists_unique_of_mem_function hf.mem_function x (mem_domain_of_kpair_mem hyf)
+    exact hux.unique hy'f hyf
+
 lemma unique {f : V} [hf : IsFunction f] {x y₁ y₂} (h₁ : ⟨x, y₁⟩ₖ ∈ f) (h₂ : ⟨x, y₂⟩ₖ ∈ f) : y₁ = y₂ := by
   have : ∃! y, ⟨x, y⟩ₖ ∈ f := exists_unique_of_mem_function (isFunction_iff.mp hf) x (mem_domain_of_kpair_mem h₁)
   exact this.unique h₁ h₂
@@ -425,6 +454,72 @@ lemma domain_restrict_eq (R A : V) : domain (R ↾ A) = domain R ∩ A := by
     use y
     simp_all only [kpair_mem_iff, true_and, mem_range_iff]
     use z
+
+lemma mem_restrict_iff {R A p : V} :
+    p ∈ (R ↾ A) ↔ p ∈ R ∧ ∃ x ∈ A, ∃ y, p = ⟨x, y⟩ₖ := by
+  constructor
+  · intro hp
+    rcases show p ∈ R ∧ p ∈ A ×ˢ range R by simpa [restrict] using hp with ⟨hpR, hpP⟩
+    rcases show ∃ x ∈ A, ∃ y ∈ range R, p = ⟨x, y⟩ₖ by simpa [mem_prod_iff] using hpP with
+      ⟨x, hxA, y, -, rfl⟩
+    exact ⟨hpR, x, hxA, y, rfl⟩
+  · rintro ⟨hpR, x, hxA, y, rfl⟩
+    have hyR : y ∈ range R := mem_range_of_kpair_mem hpR
+    have hpP : ⟨x, y⟩ₖ ∈ A ×ˢ range R := by simpa [mem_prod_iff] using ⟨hxA, hyR⟩
+    simpa [restrict] using And.intro hpR hpP
+
+@[simp] lemma restrict_subset (f A : V) : f ↾ A ⊆ f := by
+  intro p hp
+  exact (mem_restrict_iff.mp hp).1
+
+lemma IsFunction.restrict (f A : V) [hf : IsFunction f] : IsFunction (f ↾ A) := by
+  exact IsFunction.ofSubset f (f ↾ A) (restrict_subset f A)
+
+lemma IsFunction.restrict_eq_self (f A : V) [hf : IsFunction f] (hA : domain f ⊆ A) : f ↾ A = f := by
+  apply subset_antisymm
+  · intro p hp
+    exact (mem_restrict_iff.mp hp).1
+  · intro p hp
+    rcases show ∃ x ∈ domain f, ∃ y ∈ range f, p = ⟨x, y⟩ₖ from by
+        simpa [mem_prod_iff] using subset_prod_of_mem_function hf.mem_function p hp with
+      ⟨x, hxd, y, -, rfl⟩
+    exact mem_restrict_iff.mpr ⟨hp, x, hA x hxd, y, rfl⟩
+
+@[simp] lemma kpair_mem_restrict_iff {R A x y : V} :
+    ⟨x, y⟩ₖ ∈ (R ↾ A) ↔ ⟨x, y⟩ₖ ∈ R ∧ x ∈ A := by
+  simp [mem_restrict_iff]
+
+lemma restrict_restrict_eq_restrict_inter (R A B : V) : (R ↾ A) ↾ B = R ↾ (A ∩ B) := by
+  ext p
+  simp only [mem_restrict_iff, mem_inter_iff]
+  constructor
+  · rintro ⟨⟨hpR, x, hxA, y, rfl⟩, x', hx'B, y', hxy⟩
+    rcases kpair_inj hxy with ⟨rfl, rfl⟩
+    exact ⟨hpR, x, ⟨hxA, hx'B⟩, y, rfl⟩
+  · rintro ⟨hpR, x, hxAB, y, rfl⟩
+    exact ⟨⟨hpR, x, hxAB.1, y, rfl⟩, x, hxAB.2, y, rfl⟩
+
+lemma restrict_restrict_of_subset {R A B : V} (h : B ⊆ A) : (R ↾ A) ↾ B = R ↾ B := by
+  simpa [inter_eq_right_of_subset h] using restrict_restrict_eq_restrict_inter R A B
+
+/--
+Restricting an inserted relation to a set that does not contain the inserted first coordinate
+recovers the original restriction.
+-/
+lemma restrict_insert_kpair_eq_restrict_of_not_mem
+    {f x y A : V} (hxA : x ∉ A) :
+    (insert ⟨x, y⟩ₖ f) ↾ A = f ↾ A := by
+  ext p
+  constructor
+  · intro hp
+    rcases mem_restrict_iff.mp hp with ⟨hp', a, haA, b, rfl⟩
+    rcases show ⟨a, b⟩ₖ = ⟨x, y⟩ₖ ∨ ⟨a, b⟩ₖ ∈ f by simpa using hp' with (hxy | hf)
+    · rcases kpair_inj hxy with ⟨rfl, rfl⟩
+      exact (hxA haA).elim
+    · exact mem_restrict_iff.mpr ⟨hf, a, haA, b, rfl⟩
+  · intro hp
+    rcases mem_restrict_iff.mp hp with ⟨hf, a, haA, b, rfl⟩
+    exact mem_restrict_iff.mpr ⟨by simp [hf], a, haA, b, rfl⟩
 
 /-- Image of a set under a relation -/
 noncomputable def image (R A : V) : V := range (restrict R A)
