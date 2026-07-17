@@ -2,7 +2,7 @@ module
 
 public import Foundation.LinearLogic.MLL.Propositional
 public import Foundation.Vorspiel.Algebra.IsNilpotent
-public import Mathlib.GroupTheory.Perm.Cycle.Type
+public import Foundation.Vorspiel.GroupTheory.Perm
 
 /-!
 # Simplified Geometry of Interaction
@@ -84,7 +84,7 @@ lemma delocate_plot (𝔞 : Project α) (φ : α ≃ β) :
 
 end Project
 
-/-! #### Measurement and polarity -/
+/-! ### Measurement and polarity -/
 
 def Project.cycles [Fintype α] [DecidableEq α] (𝔞 𝔟 : Project α) : (Fintype.card α).Partition :=
   (𝔞 * 𝔟).plot.partition
@@ -120,7 +120,7 @@ lemma measurement_comm (𝔞 𝔟 : Project α) :
     𝔞 ⟂ 𝔟 ↔ 𝔟 ⟂ 𝔞 := by
   simp [Project.IsPolar, measurement_comm]
 
-/-! #### Projects -/
+/-! ### Projects -/
 
 def fax (α : Type*) : Project (α ⊕ α) where
   wager := 0
@@ -143,6 +143,13 @@ def fax (α : Type*) : Project (α ⊕ α) where
 def daimon (r : ℕ) (α : Type*) : Project α where
   wager := r
   plot := Equiv.refl α
+
+def permApp (F : Equiv.Perm (β ⊕ α)) (A : Equiv.Perm α) : Equiv.Perm (β ⊕ α) :=
+  F.trans ((Equiv.refl _).sumCongr A)
+
+def execution [DecidableEq β] [Fintype β] (𝔣 : Project (β ⊕ α)) (𝔞 : Project α) : Project β where
+  wager := 𝔣.wager + 𝔞.wager + Equiv.Perm.closedCycles (permApp 𝔣.plot 𝔞.plot)
+  plot := (permApp 𝔣.plot 𝔞.plot).trace
 
 end Project
 
