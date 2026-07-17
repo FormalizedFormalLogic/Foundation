@@ -5,7 +5,7 @@ public import Foundation.Vorspiel.Algebra.IsNilpotent
 public import Foundation.Vorspiel.GroupTheory.Perm
 
 /-!
-# Simplified Geometry of Interaction
+# A Toy Model of Geometry of Interaction
 -/
 
 @[expose] public section
@@ -16,9 +16,9 @@ namespace GoI
 
 @[ext]
 structure Project (Carrier : Type*) : Type _ where
-  /-- Wager, a remnant of internal cycles. -/
+  /-- Wager, a remnant of self-closed cycles. -/
   wager : ℕ
-  /-- A main gadget expresses permutation of loci. -/
+  /-- A main gadget expresses permutation of _loci_. -/
   plot : Equiv.Perm Carrier
 
 namespace Project
@@ -140,9 +140,9 @@ def fax (α : Type*) : Project (α ⊕ α) where
   simp_all [Equiv.Perm.parts_partition, Multiset.sum_replicate, Nat.mul_two]
   grind
 
-def daimon (r : ℕ) (α : Type*) : Project α where
+def daimon (r : ℕ) : Project PEmpty where
   wager := r
-  plot := Equiv.refl α
+  plot := default
 
 def permApp (F : Equiv.Perm (β ⊕ α)) (A : Equiv.Perm α) : Equiv.Perm (β ⊕ α) :=
   F.trans ((Equiv.refl _).sumCongr A)
@@ -150,6 +150,13 @@ def permApp (F : Equiv.Perm (β ⊕ α)) (A : Equiv.Perm α) : Equiv.Perm (β �
 def execution [DecidableEq β] [Fintype β] (𝔣 : Project (β ⊕ α)) (𝔞 : Project α) : Project β where
   wager := 𝔣.wager + 𝔞.wager + Equiv.Perm.closedCycles (permApp 𝔣.plot 𝔞.plot)
   plot := (permApp 𝔣.plot 𝔞.plot).trace
+
+scoped infix:80 " ∷ " => Project.execution
+
+theorem execution_adjoint [DecidableEq β] [Fintype β]
+    (𝔣 : Project (β ⊕ α)) (𝔞 : Project α) (𝔟 : Project β) :
+    ⟪𝔣 | 𝔟 + 𝔞⟫ = ⟪𝔣 ∷ 𝔞 | 𝔟⟫ := by
+  sorry
 
 end Project
 
