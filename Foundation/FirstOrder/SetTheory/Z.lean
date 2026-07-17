@@ -64,6 +64,8 @@ open Classical
 
 noncomputable scoped instance : EmptyCollection V := ⟨Classical.choose! empty_existsUnique⟩
 
+noncomputable instance : Inhabited V := Inhabited.mk ∅
+
 @[simp] lemma IsEmpty.empty : IsEmpty (∅ : V) := Classical.choose!_spec empty_existsUnique
 
 @[simp] lemma not_mem_empty {x} : x ∉ (∅ : V) := IsEmpty.empty.not_mem
@@ -277,7 +279,7 @@ instance power.definable : ℒₛₑₜ-function₁[V] power := power.defined.to
 /-! ## Aussonderungsaxiom -/
 
 lemma separation_exists_eval (x : V) (φ : SetTheorySemiformula V 1) : ∃ y : V, ∀ z : V, z ∈ y ↔ z ∈ x ∧ φ.Eval ![z] id := by
-  have : Inhabited V := inhabited_of_nonempty inferInstance
+  -- have : Inhabited V := inhabited_of_nonempty inferInstance
   let f := φ.enumarateFVar
   let ψ := (Rew.rewriteMap φ.idxOfFVar) ▹ φ
   have := by simpa [models_iff, Semiformula.eval_univCl, Axiom.separationSchema] using Theory.models V 𝗭 (Zermelo.axiom_of_separation ψ)
@@ -293,16 +295,16 @@ lemma separation_existsUnique (x : V) (P : V → Prop) (hP : ℒₛₑₜ-predic
   intro u hu
   ext; simp_all
 
-noncomputable def sep (x : V) (P : V → Prop) (hP : ℒₛₑₜ-predicate P) : V := Classical.choose! (separation_existsUnique x P hP)
+noncomputable def sep (x : V) (P : V → Prop) (hP : ℒₛₑₜ-predicate P := by definability) : V := Classical.choose! (separation_existsUnique x P hP)
 
 @[simp] lemma mem_sep_iff {P : V → Prop} {hP : ℒₛₑₜ-predicate P} {z x : V} :
-    z ∈ sep x P hP ↔ z ∈ x ∧ P z := Classical.choose!_spec (separation_existsUnique x P hP) z
+    z ∈ sep x P (hP := hP) ↔ z ∈ x ∧ P z := Classical.choose!_spec (separation_existsUnique x P hP) z
 
-@[simp] lemma sep_empty_eq (P : V → Prop) (hP : ℒₛₑₜ-predicate P) :
-    sep ∅ P hP = ∅ := by ext; simp
+@[simp] lemma sep_empty_eq (P : V → Prop) {hP : ℒₛₑₜ-predicate P} :
+    sep ∅ P (hP := hP) = ∅ := by ext; simp
 
 @[simp] lemma sep_subset {P : V → Prop} {hP : ℒₛₑₜ-predicate P} {x : V} :
-    sep x P hP ⊆ x := by intro z; simp; tauto
+    sep x P (hP := hP) ⊆ x := by intro z; simp; tauto
 
 section set_notation
 
@@ -316,7 +318,7 @@ syntax (name := internalSetBuilder) "{" binderIdent " ∈ " term " ; " term "}" 
 @[term_elab internalSetBuilder]
 meta def elabInternalSetBuilder : TermElab
   | `({ $x:ident ∈ $s ; $p }), expectedType? => do
-    elabTerm (← `(sep $s (fun $x:ident ↦ $p) (by definability))) expectedType?
+    elabTerm (← `(sep $s (fun $x:ident ↦ $p))) expectedType?
   | _, _ => throwUnsupportedSyntax
 
 @[app_unexpander sep]
