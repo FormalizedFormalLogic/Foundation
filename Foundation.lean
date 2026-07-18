@@ -97,7 +97,6 @@ public import Foundation.FirstOrder.Incompleteness.Second
 public import Foundation.FirstOrder.Incompleteness.StandardProvability
 public import Foundation.FirstOrder.Incompleteness.Tarski
 public import Foundation.FirstOrder.Incompleteness.WitnessComparison
-public import Foundation.FirstOrder.Incompleteness.Yablo
 public import Foundation.FirstOrder.Interpretation
 public import Foundation.FirstOrder.Intuitionistic.Deduction
 public import Foundation.FirstOrder.Intuitionistic.Formula
@@ -118,6 +117,7 @@ public import Foundation.FirstOrder.SetTheory.Ordinal
 public import Foundation.FirstOrder.SetTheory.TransitiveModel
 public import Foundation.FirstOrder.SetTheory.Universe
 public import Foundation.FirstOrder.SetTheory.Z
+public import Foundation.FirstOrder.SetTheory.ZF
 public import Foundation.FirstOrder.Skolemization.Hull
 public import Foundation.FirstOrder.Ultraproduct
 public import Foundation.Init
@@ -126,6 +126,7 @@ public import Foundation.LinearLogic.FirstOrder.ClassicalEmbedding
 public import Foundation.LinearLogic.FirstOrder.Formula
 public import Foundation.LinearLogic.FirstOrder.Rew
 public import Foundation.LinearLogic.LogicSymbol
+public import Foundation.LinearLogic.MELL
 public import Foundation.LinearLogic.MLL
 public import Foundation.Logic.Calculus
 public import Foundation.Logic.Decidability

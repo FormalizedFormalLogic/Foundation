@@ -5,7 +5,7 @@ public import Foundation.FirstOrder.Arithmetic.Basic.Misc
 @[expose] public section
 namespace LO.FirstOrder.Arithmetic
 
-private lemma complete_aux (T : ArithmeticTheory) [𝗘𝗤 ℒₒᵣ ⪯ T] (φ : Sentence ℒₒᵣ)
+private lemma complete_aux (T : ArithmeticTheory) [𝗘𝗤 ℒₒᵣ ⪯ T] (φ : ArithmeticSentence)
     (H : ∀ (M : Type w)
            [ORingStructure M]
            [Structure ℒₒᵣ M]
@@ -75,7 +75,7 @@ lemma standardModel_unique (s : Structure ℒₒᵣ M)
 end semantics
 
 /-- provable_of_models -/
-lemma complete (T : ArithmeticTheory) [𝗘𝗤 ℒₒᵣ ⪯ T] (φ : Sentence ℒₒᵣ) (H : ∀ (M : Type*) [ORingStructure M] [M↓[ℒₒᵣ] ⊧* T], M↓[ℒₒᵣ] ⊧ φ) :
+lemma complete (T : ArithmeticTheory) [𝗘𝗤 ℒₒᵣ ⪯ T] (φ : ArithmeticSentence) (H : ∀ (M : Type*) [ORingStructure M] [M↓[ℒₒᵣ] ⊧* T], M↓[ℒₒᵣ] ⊧ φ) :
     T ⊢ φ := complete_aux T φ fun M _ s _ _ ↦ by
   rcases standardModel_unique M s
   exact H M
@@ -89,12 +89,12 @@ lemma weakerThan_of_models (T S : ArithmeticTheory) [𝗘𝗤 ℒₒᵣ ⪯ S]
 
 end Arithmetic
 
-class ArithmeticTheory.SoundOn (T : ArithmeticTheory) (F : Sentence ℒₒᵣ → Prop) where
+class ArithmeticTheory.SoundOn (T : ArithmeticTheory) (F : ArithmeticSentence → Prop) where
   sound : ∀ {σ}, T ⊢ σ → F σ → ℕ↓[ℒₒᵣ] ⊧ σ
 
 namespace ArithmeticTheory
 
-variable (T : ArithmeticTheory) (F : Sentence ℒₒᵣ → Prop)
+variable (T : ArithmeticTheory) (F : ArithmeticSentence → Prop)
 
 instance [ℕ↓[ℒₒᵣ] ⊧* T] : T.SoundOn F := ⟨fun b _ ↦ consequence_iff.mp (Theory.Proof.sound b) ℕ inferInstance⟩
 

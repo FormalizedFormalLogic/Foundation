@@ -26,7 +26,7 @@ instance : V↓[ℒₒᵣ] ⊧* InductionScheme ℒₒᵣ Semiformula.Open :=
 
 @[elab_as_elim]
 lemma succ_induction {P : V → Prop}
-    (hP : ∃ φ : Semiformula ℒₒᵣ V 1, φ.Open ∧ ∀ x, P x ↔ φ.Eval ![x] id)
+    (hP : ∃ φ : ArithmeticSemiformula V 1, φ.Open ∧ ∀ x, P x ↔ φ.Eval ![x] id)
     (zero : P 0) (succ : ∀ x, P x → P (x + 1)) : ∀ x, P x :=
   InductionScheme.succ_induction (C := Semiformula.Open) (by
     rcases hP with ⟨φ, hp, hhp⟩
@@ -40,7 +40,7 @@ lemma succ_induction {P : V → Prop}
     zero succ
 
 lemma least_number {P : V → Prop}
-    (hP : ∃ φ : Semiformula ℒₒᵣ V 1, φ.Open ∧ ∀ x, P x ↔ φ.Eval ![x] id)
+    (hP : ∃ φ : ArithmeticSemiformula V 1, φ.Open ∧ ∀ x, P x ↔ φ.Eval ![x] id)
     (zero : P 0) {a} (counterex : ¬P a) : ∃ x, P x ∧ ¬P (x + 1) := by
   by_contra A
   have : ∀ x, P x := by

@@ -27,7 +27,10 @@ inductive Semiterm (L : Language) (ξ : Type*) (n : ℕ)
   | fvar : ξ → Semiterm L ξ n
   | func : ∀ {arity}, L.Func arity → (Fin arity → Semiterm L ξ n) → Semiterm L ξ n
 
+/-- `&x` is the free variable indexed by the element `x : ξ`. -/
 scoped prefix:max "&" => Semiterm.fvar
+
+/-- `#x` is the bound variable with de Bruijn index `x`. -/
 scoped prefix:max "#" => Semiterm.bvar
 
 abbrev Term (L : Language) (ξ : Type*) := Semiterm L ξ 0

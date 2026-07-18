@@ -45,7 +45,7 @@ instance : T.standardProvability.HBL2 := ⟨provable_D2⟩
 
 lemma standardProvability_def (σ : Sentence L) : T.standardProvability σ = provabilityPred T σ := rfl
 
-instance [T.Δ₁] : T.standardProvability.SoundOn ℕ :=
+instance : T.standardProvability.SoundOn ℕ :=
   ⟨fun h ↦ by simpa [Arithmetic.standardProvability_def, models_iff] using h⟩
 
 end
@@ -56,13 +56,13 @@ variable {T U : ArithmeticTheory} [T.Δ₁]
 
 local prefix:90 "□" => provabilityPred T
 
-lemma provable_sigma_one_complete [𝗣𝗔⁻ ⪯ T] {σ : Sentence ℒₒᵣ} (hσ : Hierarchy 𝚺 1 σ) :
+lemma provable_sigma_one_complete [𝗣𝗔⁻ ⪯ T] {σ : ArithmeticSentence} (hσ : Hierarchy 𝚺 1 σ) :
     𝗜𝚺₁ ⊢ σ 🡒 □σ :=
   complete 𝗜𝚺₁ _ fun (V : Type) _ _ ↦ by
     simpa [models_iff] using Bootstrapping.Arithmetic.sigma_one_complete (T := T) (V := V) hσ
 
 /-- The derivability condition D3. -/
-theorem provable_D3 [𝗣𝗔⁻ ⪯ T] {σ : Sentence ℒₒᵣ} :
+theorem provable_D3 [𝗣𝗔⁻ ⪯ T] {σ : ArithmeticSentence} :
     𝗜𝚺₁ ⊢ □σ 🡒 □□σ := provable_sigma_one_complete (by simp)
 
 open LO.Entailment LO.Entailment.FiniteContext

@@ -539,7 +539,7 @@ instance (Γ : FiniteContext F 𝓢) : Entailment.HasAxiomOrElim Γ := ⟨of or�
 
 instance (Γ : FiniteContext F 𝓢) : Entailment.NegationEquiv Γ := ⟨of negEquiv⟩
 
-instance [Entailment.Minimal 𝓢] (Γ : FiniteContext F 𝓢) : Entailment.Minimal Γ where
+instance (Γ : FiniteContext F 𝓢) : Entailment.Minimal Γ where
 
 
 def mdp' [DecidableEq F] (bΓ : Γ ⊢[𝓢]! φ 🡒 ψ) (bΔ : Δ ⊢[𝓢]! φ) : (Γ ++ Δ) ⊢[𝓢]! ψ :=
@@ -1042,8 +1042,6 @@ lemma ENN!_of_E! [DecidableEq F] (b : 𝓢 ⊢ φ 🡘 ψ) : 𝓢 ⊢ ∼φ 🡘
 
 
 section NegationEquiv
-
-variable [Entailment.NegationEquiv 𝓢]
 
 def ENNCCOO [DecidableEq F] : 𝓢 ⊢! ∼∼φ 🡘 ((φ 🡒 ⊥) 🡒 ⊥) := by
   apply E_intro;

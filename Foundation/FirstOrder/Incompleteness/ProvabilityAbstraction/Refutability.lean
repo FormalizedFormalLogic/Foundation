@@ -49,7 +49,7 @@ variable
   {𝔚 : Refutability T₀ T}
 
 /-- This sentence is refutable. -/
-def jeroslow (𝔚 : Refutability T₀ T) [Diagonalization T₀] : Sentence L := fixedpoint T₀ 𝔚.refu
+def jeroslow (𝔚 : Refutability T₀ T) : Sentence L := fixedpoint T₀ 𝔚.refu
 
 lemma jeroslow_def : T₀ ⊢ jeroslow 𝔚 🡘 𝔚 (jeroslow 𝔚) := Diagonalization.diag _
 
