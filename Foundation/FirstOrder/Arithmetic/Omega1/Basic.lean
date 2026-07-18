@@ -1,6 +1,6 @@
 module
 
-public import Foundation.FirstOrder.Arithmetic.Exponential
+public import Foundation.FirstOrder.Arithmetic.Exponential.Bit
 
 @[expose] public section
 /-!

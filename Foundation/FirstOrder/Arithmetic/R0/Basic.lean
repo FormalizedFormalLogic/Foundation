@@ -1,6 +1,7 @@
 module
 
-public import Foundation.FirstOrder.Arithmetic.Basic
+public import Foundation.FirstOrder.Arithmetic.Basic.Monotone
+public import Foundation.FirstOrder.Arithmetic.Basic.Hierarchy
 
 @[expose] public section
 /-!

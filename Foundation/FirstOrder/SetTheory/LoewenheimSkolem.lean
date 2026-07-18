@@ -1,6 +1,6 @@
 module
 
-public import Foundation.FirstOrder.SetTheory.Basic
+public import Foundation.FirstOrder.SetTheory.Basic.Model
 public import Foundation.FirstOrder.Skolemization.Hull
 
 @[expose] public section

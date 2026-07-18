@@ -1,6 +1,12 @@
 module
 
-public import Foundation.FirstOrder.Basic
+public import Foundation.FirstOrder.Basic.Model
+public import Foundation.FirstOrder.Basic.CutFree
+public import Foundation.FirstOrder.Basic.Calculus2
+public import Foundation.FirstOrder.Basic.Coding
+public import Foundation.FirstOrder.Basic.Eq
+public import Foundation.FirstOrder.Basic.Padding
+public import Foundation.FirstOrder.Basic.Definability
 public import Foundation.LinearLogic.LogicSymbol
 
 /-!

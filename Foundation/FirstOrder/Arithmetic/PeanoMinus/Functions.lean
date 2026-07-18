@@ -1,6 +1,6 @@
 module
 
-public import Foundation.FirstOrder.Arithmetic.Definability
+public import Foundation.FirstOrder.Arithmetic.Definability.Absoluteness
 public import Mathlib.Algebra.Prime.Lemmas
 public import Foundation.Vorspiel.ExistsUnique
 

@@ -1,6 +1,5 @@
 module
 
-public import Mathlib.Tactic.TypeStar
 public import Mathlib.Data.Nat.Basic
 
 /-!

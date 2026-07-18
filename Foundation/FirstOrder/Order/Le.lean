@@ -1,6 +1,6 @@
 module
 
-public import Foundation.FirstOrder.Completeness
+public import Foundation.FirstOrder.Completeness.CounterModel
 
 @[expose] public section
 namespace LO

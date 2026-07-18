@@ -1,6 +1,6 @@
 module
 
-public import Foundation.FirstOrder.Arithmetic.HFS
+public import Foundation.FirstOrder.Arithmetic.HFS.Coding
 
 @[expose] public section
 /-!

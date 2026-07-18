@@ -1,6 +1,6 @@
 module
 
-public import Foundation.FirstOrder.SetTheory.Basic
+public import Foundation.FirstOrder.SetTheory.Basic.Model
 public import Mathlib.Data.QPF.Univariate.Basic
 public import Mathlib.SetTheory.Cardinal.Aleph
 public import Foundation.Vorspiel.Small
