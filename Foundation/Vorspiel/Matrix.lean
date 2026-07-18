@@ -254,31 +254,31 @@ def foldr (f : α → β → β) (init : β) : {k : ℕ} → (Fin k → α) → 
 -- unimportable alongside Mathlib matrix/analysis theory (e.g. Bochner integration).
 def vecMap (f : α → β) : (Fin k → α) → (Fin k → β) := fun v ↦ f ∘ v
 
-section map
+section vecMap
 
 postfix:max "⨟" => vecMap
 
 variable (f : α → β)
 
-@[simp] lemma map_nil (v : Fin 0 → α) : f⨟ v = ![] := empty_eq (f⨟ v)
+@[simp] lemma vecMap_nil (v : Fin 0 → α) : f⨟ v = ![] := empty_eq (f⨟ v)
 
-@[simp] lemma map_cons (a : α) (v : Fin k → α) : f⨟ (a :> v) = f a :> f⨟ v := by
+@[simp] lemma vecMap_cons (a : α) (v : Fin k → α) : f⨟ (a :> v) = f a :> f⨟ v := by
   ext i
   cases i using Fin.cases <;> simp [vecMap]
 
-@[simp] lemma map_cons' (v : Fin (k + 1) → α) : f⨟ v = f (vecHead v) :> f⨟ (vecTail v) := by
+@[simp] lemma vecMap_cons' (v : Fin (k + 1) → α) : f⨟ v = f (vecHead v) :> f⨟ (vecTail v) := by
   ext i
   cases i using Fin.cases <;> { simp [vecMap]; rfl }
 
-@[simp] lemma map_app (v : Fin k → α) (i : Fin k) : (f⨟ v) i = f (v i) := rfl
+@[simp] lemma vecMap_app (v : Fin k → α) (i : Fin k) : (f⨟ v) i = f (v i) := rfl
 
-lemma map_map_comp (g : β → γ) (f : α → β) (v : Fin k → α) :
+lemma vecMap_vecMap_comp (g : β → γ) (f : α → β) (v : Fin k → α) :
     g⨟ (f⨟ v) = (g ∘ f)⨟ v := by ext x; simp
 
-lemma map_map_comp' (g : β → γ) (f : α → β) (v : Fin k → α) :
+lemma vecMap_vecMap_comp' (g : β → γ) (f : α → β) (v : Fin k → α) :
     g⨟ (f⨟ v) = (fun x ↦ g (f x))⨟ v := by ext x; simp
 
-end map
+end vecMap
 section foldr
 
 variable (f : α → β → β) (init : β)
