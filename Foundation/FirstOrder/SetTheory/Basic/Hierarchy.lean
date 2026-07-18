@@ -24,14 +24,14 @@ The set-theoretic Levy hierarchy, implemented by the generic bounding hierarchy
 with bounded quantifiers recognized through membership.
 -/
 abbrev Hierarchy : Polarity → ℕ → {n : ℕ} → Semiformula L ξ n → Prop :=
-  BoundingHierarchy.Hierarchy (R := LevyBounding (L := L))
+  BoundingHierarchy (R := LevyBounding (L := L))
 
 def DeltaZero (φ : Semiformula L ξ n) : Prop :=
   Hierarchy 𝚺 0 φ
 
 namespace Hierarchy
 
-export BoundingHierarchy.Hierarchy
+export BoundingHierarchy
   (verum falsum rel nrel and or and_iff
    or_iff conj_iff zero_eq_alt pi_zero_iff_sigma_zero zero_iff alt_zero_iff_zero
    neg neg_iff imp_iff pi_of_pi_all all_iff
@@ -43,57 +43,57 @@ export BoundingHierarchy.Hierarchy
 
 lemma exs {s n} {φ : Semiformula L ξ (n + 1)} :
     Hierarchy 𝚺 (s + 1) φ → Hierarchy 𝚺 (s + 1) (∃⁰ φ) :=
-  BoundingHierarchy.Hierarchy.exs
+  BoundingHierarchy.exs
 
 lemma all {s n} {φ : Semiformula L ξ (n + 1)} :
     Hierarchy 𝚷 (s + 1) φ → Hierarchy 𝚷 (s + 1) (∀⁰ φ) :=
-  BoundingHierarchy.Hierarchy.all
+  BoundingHierarchy.all
 
 lemma sigma {s n} {φ : Semiformula L ξ (n + 1)} :
     Hierarchy 𝚷 s φ → Hierarchy 𝚺 (s + 1) (∃⁰ φ) :=
-  BoundingHierarchy.Hierarchy.sigma
+  BoundingHierarchy.sigma
 
 lemma pi {s n} {φ : Semiformula L ξ (n + 1)} :
     Hierarchy 𝚺 s φ → Hierarchy 𝚷 (s + 1) (∀⁰ φ) :=
-  BoundingHierarchy.Hierarchy.pi
+  BoundingHierarchy.pi
 
 lemma dummy_sigma {s n} {φ : Semiformula L ξ (n + 1)} :
     Hierarchy 𝚷 (s + 1) φ → Hierarchy 𝚺 (s + 1 + 1) (∀⁰ φ) :=
-  BoundingHierarchy.Hierarchy.dummy_sigma
+  BoundingHierarchy.dummy_sigma
 
 lemma dummy_pi {s n} {φ : Semiformula L ξ (n + 1)} :
     Hierarchy 𝚺 (s + 1) φ → Hierarchy 𝚷 (s + 1 + 1) (∃⁰ φ) :=
-  BoundingHierarchy.Hierarchy.dummy_pi
+  BoundingHierarchy.dummy_pi
 
 lemma accum {Γ} {s : ℕ} {φ : Semiformula L ξ n} :
     Hierarchy Γ s φ → ∀ Γ', Hierarchy Γ' (s + 1) φ :=
-  BoundingHierarchy.Hierarchy.accum (R := LevyBounding (L := L))
+  BoundingHierarchy.accum (R := LevyBounding (L := L))
 
 lemma strict_mono {Γ s} {φ : Semiformula L ξ n}
     (hp : Hierarchy Γ s φ) (Γ') {s'} (h : s < s') : Hierarchy Γ' s' φ :=
-  BoundingHierarchy.Hierarchy.strict_mono (R := LevyBounding (L := L)) hp Γ' h
+  BoundingHierarchy.strict_mono (R := LevyBounding (L := L)) hp Γ' h
 
 lemma mono {Γ} {s s' : ℕ} {φ : Semiformula L ξ n}
     (hp : Hierarchy Γ s φ) (h : s ≤ s') : Hierarchy Γ s' φ :=
-  BoundingHierarchy.Hierarchy.mono (R := LevyBounding (L := L)) hp h
+  BoundingHierarchy.mono (R := LevyBounding (L := L)) hp h
 
 lemma of_zero {Γ Γ'} {s : ℕ} {φ : Semiformula L ξ n}
     (hp : Hierarchy Γ 0 φ) : Hierarchy Γ' s φ :=
-  BoundingHierarchy.Hierarchy.of_zero (R := LevyBounding (L := L)) hp
+  BoundingHierarchy.of_zero (R := LevyBounding (L := L)) hp
 
 lemma zero_iff_delta_zero {Γ} {φ : Semiformula L ξ n} :
     Hierarchy Γ 0 φ ↔ DeltaZero φ := by
   simpa [DeltaZero, BoundingHierarchy.DeltaZero] using
-    (BoundingHierarchy.Hierarchy.zero_iff_delta_zero
+    (BoundingHierarchy.zero_iff_delta_zero
       (R := LevyBounding (L := L)) (Γ := Γ) (φ := φ))
 
 lemma ball {Γ s n} {φ : Semiformula L ξ (n + 1)} {t : Semiterm L ξ (n + 1)} :
     t.Positive → Hierarchy Γ s φ → Hierarchy Γ s (∀⁰[“x. x ∈ !!t”] φ) :=
-  BoundingHierarchy.Hierarchy.ball (R := LevyBounding (L := L))
+  BoundingHierarchy.ball (R := LevyBounding (L := L))
 
 lemma bexs {Γ s n} {φ : Semiformula L ξ (n + 1)} {t : Semiterm L ξ (n + 1)} :
     t.Positive → Hierarchy Γ s φ → Hierarchy Γ s (∃⁰[“x. x ∈ !!t”] φ) :=
-  BoundingHierarchy.Hierarchy.bexs (R := LevyBounding (L := L))
+  BoundingHierarchy.bexs (R := LevyBounding (L := L))
 
 section
 
@@ -112,12 +112,12 @@ end
 @[simp] lemma ball_iff {Γ s n} {φ : Semiformula L ξ (n + 1)} {t : Semiterm L ξ (n + 1)}
     (ht : t.Positive) :
     Hierarchy Γ s (∀⁰[“x. x ∈ !!t”] φ) ↔ Hierarchy Γ s φ :=
-  BoundingHierarchy.Hierarchy.ball_iff (R := LevyBounding (L := L)) ht
+  BoundingHierarchy.ball_iff (R := LevyBounding (L := L)) ht
 
 @[simp] lemma bexs_iff {Γ s n} {φ : Semiformula L ξ (n + 1)} {t : Semiterm L ξ (n + 1)}
     (ht : t.Positive) :
     Hierarchy Γ s (∃⁰[“x. x ∈ !!t”] φ) ↔ Hierarchy Γ s φ :=
-  BoundingHierarchy.Hierarchy.bexs_iff (R := LevyBounding (L := L)) ht
+  BoundingHierarchy.bexs_iff (R := LevyBounding (L := L)) ht
 
 @[simp] lemma ballMem_iff {Γ s n} {φ : Semiformula L ξ (n + 1)} {t : Semiterm L ξ n} :
     Hierarchy Γ s (φ.ballMem t) ↔ Hierarchy Γ s φ := by simp [Semiformula.ballMem]
@@ -141,7 +141,7 @@ lemma sigma₁_induction {P : (n : ℕ) → SetTheorySemiformula ξ n → Prop}
     (hBall : ∀ n t φ, Hierarchy 𝚺 1 φ → P (n + 1) φ → P n (∀⁰[“#0 ∈ !!(Rew.bShift t)”] φ))
     (hExs : ∀ n φ, Hierarchy 𝚺 1 φ → P (n + 1) φ → P n (∃⁰ φ)) (n φ) :
     Hierarchy 𝚺 1 φ → P n φ :=
-  BoundingHierarchy.Hierarchy.sigma₁_induction
+  BoundingHierarchy.sigma₁_induction
     (R := LevyBounding (L := ℒₛₑₜ)) (P := P)
     hVerum hFalsum
     (by
