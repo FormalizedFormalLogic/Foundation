@@ -544,4 +544,18 @@ lemma tr_eq_closedCycles (f : Perm γ) :
   rw [Orbit.partition_parts_card_eq_fintype_card f]
   simp [closedCycles, Orbit.Closed, Orbit.Avoiding, Orbit.Meets]
 
+theorem trace_mul_subtypeCongr_not_mul_subtypeCongr
+    (f : Perm γ) (a : Perm {x : γ // P x}) (b : Perm {x : γ // ¬P x}) :
+    (f * (b.subtypeCongr (1 : Perm {x : γ // ¬¬P x}) *
+        a.subtypeCongr (1 : Perm {x : γ // ¬P x}))).trace P =
+      (f * a.subtypeCongr (1 : Perm {x : γ // ¬P x})).trace P * b := by
+  sorry
+
+theorem closedCycles_mul_subtypeCongr_not_mul_subtypeCongr
+    (f : Perm γ) (a : Perm {x : γ // P x}) (b : Perm {x : γ // ¬P x}) :
+    (f * (b.subtypeCongr (1 : Perm {x : γ // ¬¬P x}) *
+        a.subtypeCongr (1 : Perm {x : γ // ¬P x}))).closedCycles P =
+      (f * a.subtypeCongr (1 : Perm {x : γ // ¬P x})).closedCycles P := by
+  sorry
+
 end Equiv.Perm

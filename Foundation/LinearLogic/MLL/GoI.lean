@@ -101,6 +101,12 @@ def delocate (𝔞 : Project α) (φ : α ≃ β) : Project β where
 lemma delocate_plot (𝔞 : Project α) (φ : α ≃ β) :
     (𝔞.delocate φ).plot = (φ.symm.trans 𝔞.plot).trans φ := rfl
 
+@[simp] lemma delocate_mul (𝔞 𝔟 : Project α) (φ : α ≃ β) :
+    (𝔞 * 𝔟).delocate φ = 𝔞.delocate φ * 𝔟.delocate φ := by
+  ext x
+  · rfl
+  · simp [delocate_plot, mul_plot]
+
 @[simp] lemma delocate_sumComm_add {𝔠 : Project (α ⊕ β)} (𝔞 : Project α) (𝔟 : Project β) :
     𝔠.delocate (Equiv.sumComm α β) * (𝔟 + 𝔞) = (𝔠 * (𝔞 + 𝔟)).delocate (Equiv.sumComm α β) := by
   ext x
@@ -191,261 +197,18 @@ def notIsLeftEquivRight : { x : α ⊕ β // ¬x.isLeft} ≃ β where
     · rfl
   right_inv := fun _ ↦ rfl
 
-open Equiv.Perm.FirstReturn
-
-omit [DecidableEq α] [DecidableEq β] in
-lemma pow_mul_sumCongr_right_succ_of_lt_time
-    (σ : Equiv.Perm (α ⊕ β)) (b : Equiv.Perm β) (x : β) {k : ℕ}
-    (hk : k < time σ (⟨.inr (b x), by simp⟩ : {x : α ⊕ β // ¬x.isLeft})) :
-    ((σ * ((1 : Equiv.Perm α).sumCongr b)) ^ (k + 1)) (.inr x) =
-      (σ ^ (k + 1)) (.inr (b x)) := by
-  induction k with
-  | zero => rfl
-  | succ k ih =>
-      have hk' : k < time σ (⟨.inr (b x), by simp⟩ : {x : α ⊕ β // ¬x.isLeft}) :=
-        Nat.lt_trans (Nat.lt_succ_self k) hk
-      have hleft : Sum.isLeft ((σ ^ (k + 1)) (.inr (b x))) := by
-        by_contra hright
-        exact not_return_of_lt_time hk ⟨Nat.succ_pos k, hright⟩
-      rw [pow_succ', Equiv.Perm.mul_apply, ih hk']
-      change σ (((1 : Equiv.Perm α).sumCongr b) ((σ ^ (k + 1)) (.inr (b x)))) =
-        (σ ^ (k + 1 + 1)) (.inr (b x))
-      cases hσ : (σ ^ (k + 1)) (.inr (b x)) with
-      | inl a =>
-          calc
-            σ (((1 : Equiv.Perm α).sumCongr b) (.inl a)) = σ (.inl a) := rfl
-            _ = σ ((σ ^ (k + 1)) (.inr (b x))) := by rw [hσ]
-            _ = (σ ^ (k + 1 + 1)) (.inr (b x)) := by
-              simp [pow_succ', Equiv.Perm.mul_apply]
-      | inr c =>
-          simp [hσ] at hleft
-
-omit [DecidableEq α] [DecidableEq β] in
-lemma pow_mul_sumCongr_right_return_time
-    (σ : Equiv.Perm (α ⊕ β)) (b : Equiv.Perm β) (x : β) :
-    let n := time σ (⟨.inr (b x), by simp⟩ : {x : α ⊕ β // ¬x.isLeft})
-    ((σ * ((1 : Equiv.Perm α).sumCongr b)) ^ n) (.inr x) =
-      (σ ^ n) (.inr (b x)) := by
-  intro n
-  have hn : 0 < n := (time_spec σ (⟨.inr (b x), by simp⟩ :
-    {x : α ⊕ β // ¬x.isLeft})).1
-  obtain ⟨k, hk⟩ := Nat.exists_eq_succ_of_ne_zero (Nat.ne_of_gt hn)
-  rw [hk]
-  have hklt : k < n := by rw [hk]; exact Nat.lt_succ_self k
-  exact pow_mul_sumCongr_right_succ_of_lt_time σ b x (by change k < n; exact hklt)
-
-omit [DecidableEq α] [DecidableEq β] in
-lemma time_mul_sumCongr_right
-    (σ : Equiv.Perm (α ⊕ β)) (b : Equiv.Perm β) (x : β) :
-    time (σ * ((1 : Equiv.Perm α).sumCongr b))
-        (⟨.inr x, by simp⟩ : {x : α ⊕ β // ¬x.isLeft}) =
-      time σ (⟨.inr (b x), by simp⟩ : {x : α ⊕ β // ¬x.isLeft}) := by
-  let τ := σ * ((1 : Equiv.Perm α).sumCongr b)
-  let xτ : {x : α ⊕ β // ¬x.isLeft} := ⟨.inr x, by simp⟩
-  let yσ : {x : α ⊕ β // ¬x.isLeft} := ⟨.inr (b x), by simp⟩
-  have hreturn : ¬Sum.isLeft ((τ ^ time σ yσ) (.inr x)) := by
-    have hpow := pow_mul_sumCongr_right_return_time σ b x
-    change (τ ^ time σ yσ) (.inr x) = (σ ^ time σ yσ) (.inr (b x)) at hpow
-    rw [hpow]
-    exact (time_spec σ yσ).2
-  apply le_antisymm
-  · exact time_le_of_return ⟨(time_spec σ yσ).1, hreturn⟩
-  · by_contra hle
-    have hlt : time τ xτ < time σ yσ := Nat.lt_of_not_ge hle
-    have hmpos : 0 < time τ xτ := (time_spec τ xτ).1
-    obtain ⟨k, hk⟩ := Nat.exists_eq_succ_of_ne_zero (Nat.ne_of_gt hmpos)
-    have hklt : k < time σ (⟨.inr (b x), by simp⟩ : {x : α ⊕ β // ¬x.isLeft}) := by
-      change k < time σ yσ
-      omega
-    have hpow := pow_mul_sumCongr_right_succ_of_lt_time σ b x (k := k) hklt
-    have hτreturn : ¬Sum.isLeft ((τ ^ time τ xτ) (.inr x)) := (time_spec τ xτ).2
-    rw [hk] at hτreturn
-    change ((σ * ((1 : Equiv.Perm α).sumCongr b)) ^ (k + 1)) (.inr x) =
-      (σ ^ (k + 1)) (.inr (b x)) at hpow
-    rw [hpow] at hτreturn
-    exact not_return_of_lt_time (by omega : k + 1 < time σ yσ) ⟨by omega, hτreturn⟩
-
-omit [DecidableEq α] [DecidableEq β] in
-lemma trace_mul_sumCongr_right
-    (σ : Equiv.Perm (α ⊕ β)) (b : Equiv.Perm β) :
-    notIsLeftEquivRight.permCongr
-      ((σ * ((1 : Equiv.Perm α).sumCongr b)).trace (Sum.isLeft ·)) =
-    notIsLeftEquivRight.permCongr (σ.trace (Sum.isLeft ·)) * b := by
-  ext x
-  rw [Equiv.permCongr_apply, Equiv.Perm.mul_apply, Equiv.permCongr_apply]
-  simp [Equiv.Perm.trace, Equiv.Perm.FirstReturn.map, notIsLeftEquivRight,
-    time_mul_sumCongr_right σ b x, pow_mul_sumCongr_right_return_time σ b x]
-
-omit [Fintype α] [DecidableEq α] [Fintype β] [DecidableEq β] in
-lemma pow_mul_sumCongr_right_eq_pow_of_mul_closed
-    (σ : Equiv.Perm (α ⊕ β)) (b : Equiv.Perm β) (z : α ⊕ β)
-    (hclosed : ¬Orbit.Meets (σ * ((1 : Equiv.Perm α).sumCongr b)) (fun x ↦ ¬Sum.isLeft x)
-      (⟦z⟧ : (σ * ((1 : Equiv.Perm α).sumCongr b)).Orbit)) :
-    ∀ n : ℕ, ((σ * ((1 : Equiv.Perm α).sumCongr b)) ^ n) z = (σ ^ n) z := by
-  intro n
-  induction n with
-  | zero => rfl
-  | succ n ih =>
-      let τ := σ * ((1 : Equiv.Perm α).sumCongr b)
-      have hleft : Sum.isLeft ((τ ^ n) z) := by
-        by_contra hright
-        have hsame : τ.SameCycle z ((τ ^ n) z) := ⟨(n : ℤ), by rw [zpow_natCast]⟩
-        exact hclosed ⟨⟨(τ ^ n) z, hright⟩, Quotient.sound hsame⟩
-      rw [pow_succ', Equiv.Perm.mul_apply, ih]
-      change σ (((1 : Equiv.Perm α).sumCongr b) ((σ ^ n) z)) = (σ ^ (n + 1)) z
-      cases hσ : (σ ^ n) z with
-      | inl a =>
-          rw [pow_succ', Equiv.Perm.mul_apply]
-          rw [hσ]
-          rfl
-      | inr c =>
-          have : ¬Sum.isLeft ((τ ^ n) z) := by rw [ih, hσ]; simp
-          exact False.elim (this hleft)
-
-omit [Fintype α] [DecidableEq α] [Fintype β] [DecidableEq β] in
-lemma pow_mul_sumCongr_right_eq_pow_of_base_closed
-    (σ : Equiv.Perm (α ⊕ β)) (b : Equiv.Perm β) (z : α ⊕ β)
-    (hclosed : ¬Orbit.Meets σ (fun x ↦ ¬Sum.isLeft x) (⟦z⟧ : σ.Orbit)) :
-    ∀ n : ℕ, ((σ * ((1 : Equiv.Perm α).sumCongr b)) ^ n) z = (σ ^ n) z := by
-  intro n
-  induction n with
-  | zero => rfl
-  | succ n ih =>
-      have hleft : Sum.isLeft ((σ ^ n) z) := by
-        by_contra hright
-        have hsame : σ.SameCycle z ((σ ^ n) z) := ⟨(n : ℤ), by rw [zpow_natCast]⟩
-        exact hclosed ⟨⟨(σ ^ n) z, hright⟩, Quotient.sound hsame⟩
-      rw [pow_succ', Equiv.Perm.mul_apply, ih]
-      change σ (((1 : Equiv.Perm α).sumCongr b) ((σ ^ n) z)) = (σ ^ (n + 1)) z
-      cases hσ : (σ ^ n) z with
-      | inl a =>
-          rw [pow_succ', Equiv.Perm.mul_apply]
-          rw [hσ]
-          rfl
-      | inr c =>
-          have : ¬Sum.isLeft ((σ ^ n) z) := by rw [hσ]; simp
-          exact False.elim (this hleft)
-
-omit [DecidableEq α] [DecidableEq β] in
-lemma sameCycle_of_mul_sumCongr_right_closed
-    (σ : Equiv.Perm (α ⊕ β)) (b : Equiv.Perm β) (z y : α ⊕ β)
-    (hclosed : ¬Orbit.Meets (σ * ((1 : Equiv.Perm α).sumCongr b)) (fun x ↦ ¬Sum.isLeft x)
-      (⟦z⟧ : (σ * ((1 : Equiv.Perm α).sumCongr b)).Orbit))
-    (h : (σ * ((1 : Equiv.Perm α).sumCongr b)).SameCycle z y) :
-    σ.SameCycle z y := by
-  obtain ⟨n, hn⟩ := h.exists_nat_pow_eq
-  refine ⟨(n : ℤ), ?_⟩
-  rw [zpow_natCast]
-  exact (pow_mul_sumCongr_right_eq_pow_of_mul_closed σ b z hclosed n).symm.trans hn
-
-omit [DecidableEq α] [DecidableEq β] in
-lemma sameCycle_mul_sumCongr_right_of_base_closed
-    (σ : Equiv.Perm (α ⊕ β)) (b : Equiv.Perm β) (z y : α ⊕ β)
-    (hclosed : ¬Orbit.Meets σ (fun x ↦ ¬Sum.isLeft x) (⟦z⟧ : σ.Orbit))
-    (h : σ.SameCycle z y) :
-    (σ * ((1 : Equiv.Perm α).sumCongr b)).SameCycle z y := by
-  obtain ⟨n, hn⟩ := h.exists_nat_pow_eq
-  refine ⟨(n : ℤ), ?_⟩
-  rw [zpow_natCast]
-  exact (pow_mul_sumCongr_right_eq_pow_of_base_closed σ b z hclosed n).trans hn
-
-omit [DecidableEq α] [DecidableEq β] in
-lemma sameCycle_mul_sumCongr_right_of_mul_closed
-    (σ : Equiv.Perm (α ⊕ β)) (b : Equiv.Perm β) (z y : α ⊕ β)
-    (hclosed : ¬Orbit.Meets (σ * ((1 : Equiv.Perm α).sumCongr b)) (fun x ↦ ¬Sum.isLeft x)
-      (⟦z⟧ : (σ * ((1 : Equiv.Perm α).sumCongr b)).Orbit))
-    (h : σ.SameCycle z y) :
-    (σ * ((1 : Equiv.Perm α).sumCongr b)).SameCycle z y := by
-  obtain ⟨n, hn⟩ := h.exists_nat_pow_eq
-  refine ⟨(n : ℤ), ?_⟩
-  rw [zpow_natCast]
-  exact (pow_mul_sumCongr_right_eq_pow_of_mul_closed σ b z hclosed n).trans hn
-
-omit [DecidableEq α] [DecidableEq β] in
-lemma sameCycle_of_mul_sumCongr_right_base_closed
-    (σ : Equiv.Perm (α ⊕ β)) (b : Equiv.Perm β) (z y : α ⊕ β)
-    (hclosed : ¬Orbit.Meets σ (fun x ↦ ¬Sum.isLeft x) (⟦z⟧ : σ.Orbit))
-    (h : (σ * ((1 : Equiv.Perm α).sumCongr b)).SameCycle z y) :
-    σ.SameCycle z y := by
-  obtain ⟨n, hn⟩ := h.exists_nat_pow_eq
-  refine ⟨(n : ℤ), ?_⟩
-  rw [zpow_natCast]
-  exact (pow_mul_sumCongr_right_eq_pow_of_base_closed σ b z hclosed n).symm.trans hn
-
-lemma closedCycles_mul_sumCongr_right
-    (σ : Equiv.Perm (α ⊕ β)) (b : Equiv.Perm β) :
-    (σ * ((1 : Equiv.Perm α).sumCongr b)).closedCycles (Sum.isLeft ·) =
-      σ.closedCycles (Sum.isLeft ·) := by
-  classical
-  let τ := σ * ((1 : Equiv.Perm α).sumCongr b)
-  let toClosed : Orbit.Closed τ (Sum.isLeft ·) → Orbit.Closed σ (Sum.isLeft ·) := fun q ↦
-    let z := Quotient.out q.val
-    ⟨⟦z⟧, by
-      have hzq : (⟦z⟧ : τ.Orbit) = q.val := Quotient.out_eq q.val
-      have hqclosed : ¬Orbit.Meets τ (fun x ↦ ¬Sum.isLeft x) (⟦z⟧ : τ.Orbit) := by
-        intro hmeet
-        exact q.property (hzq ▸ hmeet)
-      change ¬Orbit.Meets σ (fun x ↦ ¬Sum.isLeft x) (⟦z⟧ : σ.Orbit)
-      intro hmeet
-      obtain ⟨y, hy⟩ := hmeet
-      apply hqclosed
-      refine ⟨y, ?_⟩
-      exact Quotient.sound
-        (sameCycle_mul_sumCongr_right_of_mul_closed σ b z y hqclosed (Quotient.eq.mp hy))⟩
-  have hbij : Function.Bijective toClosed := by
-    constructor
-    · intro q r hqr
-      apply Subtype.ext
-      let zq := Quotient.out q.val
-      let zr := Quotient.out r.val
-      have hzq : (⟦zq⟧ : τ.Orbit) = q.val := Quotient.out_eq q.val
-      have hzr : (⟦zr⟧ : τ.Orbit) = r.val := Quotient.out_eq r.val
-      have hqclosed : ¬Orbit.Meets τ (fun x ↦ ¬Sum.isLeft x) (⟦zq⟧ : τ.Orbit) := by
-        intro hmeet
-        exact q.property (hzq ▸ hmeet)
-      have hσ : σ.SameCycle zq zr := by
-        have hval := congrArg Subtype.val hqr
-        change (⟦zq⟧ : σ.Orbit) = ⟦zr⟧ at hval
-        exact Quotient.eq.mp hval
-      have hτ : τ.SameCycle zq zr :=
-        sameCycle_mul_sumCongr_right_of_mul_closed σ b zq zr hqclosed hσ
-      exact hzq.symm.trans ((Quotient.sound hτ).trans hzr)
-    · intro q
-      let z := Quotient.out q.val
-      have hzq : (⟦z⟧ : σ.Orbit) = q.val := Quotient.out_eq q.val
-      have hqclosed : ¬Orbit.Meets σ (fun x ↦ ¬Sum.isLeft x) (⟦z⟧ : σ.Orbit) := by
-        intro hmeet
-        exact q.property (hzq ▸ hmeet)
-      let qτ : Orbit.Closed τ (Sum.isLeft ·) :=
-        ⟨⟦z⟧, by
-          change ¬Orbit.Meets τ (fun x ↦ ¬Sum.isLeft x) (⟦z⟧ : τ.Orbit)
-          intro hmeet
-          obtain ⟨y, hy⟩ := hmeet
-          apply hqclosed
-          refine ⟨y, ?_⟩
-          exact Quotient.sound
-            (sameCycle_of_mul_sumCongr_right_base_closed σ b z y hqclosed
-              (Quotient.eq.mp hy))⟩
-      refine ⟨qτ, ?_⟩
-      apply Subtype.ext
-      let w := Quotient.out (⟦z⟧ : τ.Orbit)
-      have hwτ : (⟦w⟧ : τ.Orbit) = (⟦z⟧ : τ.Orbit) := Quotient.out_eq (⟦z⟧ : τ.Orbit)
-      have hqτclosed : ¬Orbit.Meets τ (fun x ↦ ¬Sum.isLeft x) (⟦w⟧ : τ.Orbit) := by
-        intro hmeet
-        apply qτ.property
-        change Orbit.Meets τ (fun x ↦ ¬Sum.isLeft x) (⟦z⟧ : τ.Orbit)
-        exact hwτ ▸ hmeet
-      have hσ : σ.SameCycle w z :=
-        sameCycle_of_mul_sumCongr_right_closed σ b w z hqτclosed (Quotient.eq.mp hwτ)
-      exact (Quotient.sound hσ).trans hzq
-  unfold Equiv.Perm.closedCycles
-  exact Fintype.card_of_bijective hbij
-
 omit [Fintype α] [DecidableEq α] [Fintype β] [DecidableEq β] in
 @[simp] lemma subtypeExtend_delocate_IsLeftEquivLeft_symm (𝔞 : Project α) :
     (𝔞.delocate IsLeftEquivLeft.symm).subtypeExtend = 𝔞 + (1 : Project β) := by
   ext x
   · rfl
+  · cases x <;> rfl
+
+omit [Fintype α] [DecidableEq α] [Fintype β] [DecidableEq β] in
+@[simp] lemma subtypeExtend_delocate_notIsLeftEquivRight_symm (𝔟 : Project β) :
+    (𝔟.delocate notIsLeftEquivRight.symm).subtypeExtend = (1 : Project α) + 𝔟 := by
+  ext x
+  · simp
   · cases x <;> rfl
 
 def trace (𝔣 : Project γ) (P : γ → Prop) [DecidablePred P] : Project {x : γ // ¬P x } where
@@ -490,14 +253,30 @@ scoped infix:60 " ∷ " => Project.executionSum
 theorem execution_mul
     (𝔣 : Project γ) (𝔞 : Project {x : γ // P x}) (𝔟 : Project {x : γ // ¬P x}) :
     (𝔣.execution 𝔞) * 𝔟 = (𝔣 * 𝔟.subtypeExtend).execution 𝔞 := by
-  ext
-  · simp; sorry
-  · simp [execution, trace, mul_plot]; sorry
+  ext x
+  · have hclosed :=
+      Equiv.Perm.closedCycles_mul_subtypeCongr_not_mul_subtypeCongr
+        (P := P) 𝔣.plot 𝔞.plot 𝔟.plot
+    simp [execution, trace, mul_plot, subtypeExtend, hclosed]
+    omega
+  · have htrace :=
+      (Equiv.Perm.trace_mul_subtypeCongr_not_mul_subtypeCongr
+        (P := P) 𝔣.plot 𝔞.plot 𝔟.plot).symm
+    simpa [execution, trace, mul_plot, subtypeExtend] using
+      congrArg (fun σ : Equiv.Perm {x : γ // ¬P x} ↦ (σ x : γ)) htrace
 
 theorem executionSum_mul
     (𝔣 : Project (α ⊕ β)) (𝔞 : Project α) (𝔟 : Project β) :
     (𝔣 ∷ 𝔞) * 𝔟 = 𝔣 * ((1 : Project α) + 𝔟) ∷ 𝔞 := by
-  sorry
+  let 𝔞' : Project {x : α ⊕ β // x.isLeft} :=
+    𝔞.delocate IsLeftEquivLeft.symm
+  let 𝔟' : Project {x : α ⊕ β // ¬x.isLeft} :=
+    𝔟.delocate notIsLeftEquivRight.symm
+  have h := congrArg (fun 𝔠 ↦ 𝔠.delocate notIsLeftEquivRight)
+    (execution_mul 𝔣 𝔞' 𝔟')
+  have hb : 𝔟'.delocate notIsLeftEquivRight = 𝔟 := by
+    ext x <;> simp [𝔟', delocate_plot]
+  simpa [executionSum, 𝔞', 𝔟', hb, delocate_comp] using h
 
 theorem execution_adjoint
     (𝔣 : Project (α ⊕ β)) (𝔞 : Project α) (𝔟 : Project β) :
@@ -506,52 +285,6 @@ theorem execution_adjoint
   let 𝔣𝔟 : Project (α ⊕ β) := 𝔣 * ((1 : Project α) + 𝔟)
   let 𝔣𝔟𝔞 := 𝔣𝔟 * (𝔞 + (1 : Project β))
   have 𝔣𝔟_wager : 𝔣𝔟.wager = 𝔣.wager + 𝔟.wager := by simp [𝔣𝔟]
-  have e3 : (𝔣 ∷ 𝔞) * 𝔟 = 𝔣𝔟 ∷ 𝔞 := by
-    have hproj :
-        𝔣𝔟 * (𝔞 + (1 : Project β)) =
-          (𝔣 * (𝔞 + (1 : Project β))) * ((1 : Project α) + 𝔟) := by
-      calc
-        𝔣𝔟 * (𝔞 + (1 : Project β))
-            = (𝔣 * ((1 : Project α) + 𝔟)) * (𝔞 + (1 : Project β)) := rfl
-        _ = 𝔣 * (((1 : Project α) + 𝔟) * (𝔞 + (1 : Project β))) := by
-          rw [mul_assoc]
-        _ = 𝔣 * (𝔞 + 𝔟) := by
-          rw [add_mul_add, one_mul, mul_one]
-        _ = 𝔣 * ((𝔞 + (1 : Project β)) * ((1 : Project α) + 𝔟)) := by
-          rw [add_mul_add, mul_one, one_mul]
-        _ = (𝔣 * (𝔞 + (1 : Project β))) * ((1 : Project α) + 𝔟) := by
-          rw [mul_assoc]
-    have hclosed :
-        (𝔣𝔟 * (𝔞 + (1 : Project β))).plot.closedCycles (Sum.isLeft ·) =
-          (𝔣 * (𝔞 + (1 : Project β))).plot.closedCycles (Sum.isLeft ·) := by
-      rw [hproj, Project.mul_plot, Project.add_plot, one_plot]
-      exact closedCycles_mul_sumCongr_right ((𝔣 * (𝔞 + (1 : Project β))).plot) 𝔟.plot
-    have htrace :
-        notIsLeftEquivRight.permCongr
-            (((𝔣 * (𝔞 + (1 : Project β))) * ((1 : Project α) + 𝔟)).plot.trace
-              (Sum.isLeft ·)) =
-          notIsLeftEquivRight.permCongr
-              ((𝔣 * (𝔞 + (1 : Project β))).plot.trace (Sum.isLeft ·)) * 𝔟.plot := by
-      rw [Project.mul_plot, Project.add_plot, one_plot]
-      exact trace_mul_sumCongr_right ((𝔣 * (𝔞 + (1 : Project β))).plot) 𝔟.plot
-    ext x
-    · simp [Project.executionSum, Project.execution, hclosed]
-      omega
-    · calc
-        ((𝔣 ∷ 𝔞) * 𝔟).plot x =
-            (notIsLeftEquivRight.permCongr
-                ((𝔣 * (𝔞 + (1 : Project β))).plot.trace (Sum.isLeft ·)) *
-              𝔟.plot) x := by
-          simp [Project.executionSum, Project.execution, Project.trace_plot, Project.mul_plot,
-            Project.delocate_plot]
-        _ =
-            (notIsLeftEquivRight.permCongr
-              (((𝔣 * (𝔞 + (1 : Project β))) * ((1 : Project α) + 𝔟)).plot.trace
-                (Sum.isLeft ·))) x := by
-          rw [htrace]
-        _ = (𝔣𝔟 ∷ 𝔞).plot x := by
-          simp [Project.executionSum, Project.execution, Project.trace_plot, Project.delocate_plot,
-            hproj]
   have e1 : (𝔣𝔟 ∷ 𝔞).tr = 𝔣.wager + 𝔞.wager + 𝔟.wager + (𝔣𝔟𝔞.trace (Sum.isLeft ·)).plot.tr + 𝔣𝔟𝔞.plot.closedCycles (Sum.isLeft ·) := by
     simp [𝔣𝔟_wager, 𝔣𝔟𝔞, ]; omega
   have e2 : (𝔣 * (𝔞 + 𝔟)).tr = 𝔣.wager + 𝔞.wager + 𝔟.wager + 𝔣𝔟𝔞.plot.tr := by
@@ -562,7 +295,7 @@ theorem execution_adjoint
                 simp [tr_eq_trace_tr_add_closedCycles 𝔣𝔟𝔞.plot (P := (Sum.isLeft ·)), trace_plot];
                 omega
               _ = (𝔣𝔟 ∷ 𝔞).tr := by symm; exact e1
-              _ = ⟪𝔣 ∷ 𝔞 | 𝔟⟫ := by unfold measurement; simp [e3]
+              _ = ⟪𝔣 ∷ 𝔞 | 𝔟⟫ := by unfold measurement; simp [𝔣𝔟, executionSum_mul 𝔣 𝔞 𝔟]
 
 end Project
 
