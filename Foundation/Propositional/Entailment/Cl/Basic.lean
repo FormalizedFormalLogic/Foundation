@@ -2,7 +2,7 @@ module
 public import Foundation.Propositional.Entailment.AxiomDNE
 public import Foundation.Propositional.Entailment.AxiomElimContra
 public import Foundation.Propositional.Entailment.AxiomLEM
-public import Foundation.Propositional.Entailment.Int.Basic
+public import Foundation.Propositional.Entailment.Int
 public import Foundation.Propositional.Entailment.AxiomPeirce
 
 @[expose] public section
