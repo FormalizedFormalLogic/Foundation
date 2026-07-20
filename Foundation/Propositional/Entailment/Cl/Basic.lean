@@ -2,7 +2,7 @@ module
 public import Foundation.Propositional.Entailment.AxiomDNE
 public import Foundation.Propositional.Entailment.AxiomElimContra
 public import Foundation.Propositional.Entailment.AxiomLEM
-public import Foundation.Propositional.Entailment.LC
+public import Foundation.Propositional.Entailment.Int.Basic
 public import Foundation.Propositional.Entailment.AxiomPeirce
 
 @[expose] public section
@@ -178,13 +178,6 @@ end consistency
 
 
 section
-
-instance : HasAxiomDummett 𝓢 where
-  dummett {φ ψ} := by
-    have d₁ : 𝓢 ⊢! φ 🡒 ((φ 🡒 ψ) ⋎ (ψ 🡒 φ)) := C_trans implyK or₂;
-    have d₂ : 𝓢 ⊢! ∼φ 🡒 ((φ 🡒 ψ) ⋎ (ψ 🡒 φ)) := C_trans CNC or₁;
-    exact of_C_of_C_of_A d₁ d₂ lem;
-instance : Entailment.LC 𝓢 where
 
 instance : HasAxiomPeirce 𝓢 where
   peirce {φ ψ} := by
