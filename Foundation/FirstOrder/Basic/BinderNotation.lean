@@ -45,14 +45,14 @@ lemma eval_nestFormulae {φ : Semiformula L ξ n} {Ψ : Fin n → Semiformula L 
 
 @[simp] lemma eval_nestFormulae₁ {φ : Semiformula L ξ 1} {ψ : Semiformula L ξ (m + 1)} :
     Eval e f (φ.nestFormulae ![ψ]) ↔ ∀ x : M, Eval (x :> e) f ψ → Eval ![x] f φ := by
-  simp [eval_nestFormulae, Matrix.forall_iff, Matrix.empty_eq]
+  simp [eval_nestFormulae, Matrix.vecForall_iff, Matrix.empty_eq]
 
 @[simp] lemma eval_nestFormulae₂ {φ : Semiformula L ξ 2} {ψ₁ ψ₂ : Semiformula L ξ (m + 1)} :
     Eval e f (φ.nestFormulae ![ψ₁, ψ₂]) ↔ ∀ x₁, Eval (x₁ :> e) f ψ₁ → ∀ x₂, Eval (x₂ :> e) f ψ₂ → Eval ![x₁, x₂] f φ := by
   suffices
     (∀ x₁ x₂, Eval (x₁ :> e) f ψ₁ → Eval (x₂ :> e) f ψ₂ → Eval ![x₁, x₂] f φ) ↔
     ∀ x₁, Eval (x₁ :> e) f ψ₁ → ∀ x₂, Eval (x₂ :> e) f ψ₂ → Eval ![x₁, x₂] f φ by
-    simpa [eval_nestFormulae, Matrix.forall_iff, Matrix.empty_eq, Fin.forall_fin_two]
+    simpa [eval_nestFormulae, Matrix.vecForall_iff, Matrix.empty_eq, Fin.forall_fin_two]
   grind
 
 @[simp] lemma eval_nestFormulae₃ {φ : Semiformula L ξ 3} {ψ₁ ψ₂ ψ₃ : Semiformula L ξ (m + 1)} :
@@ -61,7 +61,7 @@ lemma eval_nestFormulae {φ : Semiformula L ξ n} {Ψ : Fin n → Semiformula L 
   suffices
     (∀ x₁ x₂ x₃, Eval (x₁ :> e) f ψ₁ → Eval (x₂ :> e) f ψ₂ → Eval (x₃ :> e) f ψ₃ → Eval ![x₁, x₂, x₃] f φ) ↔
     ∀ x₁, Eval (x₁ :> e) f ψ₁ → ∀ x₂, Eval (x₂ :> e) f ψ₂ → ∀ x₃, Eval (x₃ :> e) f ψ₃ → Eval ![x₁, x₂, x₃] f φ by
-    simpa [eval_nestFormulae, Matrix.forall_iff, Matrix.empty_eq, Fin.forall_fin_succ]
+    simpa [eval_nestFormulae, Matrix.vecForall_iff, Matrix.empty_eq, Fin.forall_fin_succ]
   grind
 
 @[simp] lemma eval_nestFormulae₄ {φ : Semiformula L ξ 4} {ψ₁ ψ₂ ψ₃ ψ₄ : Semiformula L ξ (m + 1)} :
@@ -83,7 +83,7 @@ lemma eval_nestFormulae {φ : Semiformula L ξ n} {Ψ : Fin n → Semiformula L 
       ∀ x₃, Eval (x₃ :> e) f ψ₃ →
       ∀ x₄, Eval (x₄ :> e) f ψ₄ →
       Eval ![x₁, x₂, x₃, x₄] f φ) by
-    simpa [eval_nestFormulae, Matrix.forall_iff, Matrix.empty_eq, Fin.forall_fin_succ]
+    simpa [eval_nestFormulae, Matrix.vecForall_iff, Matrix.empty_eq, Fin.forall_fin_succ]
   grind
 
 lemma eval_nestFormulaeFunc {φ : Semiformula L ξ (n + 1)} {Ψ : Fin n → Semiformula L ξ (m + 1)} :
@@ -96,14 +96,14 @@ lemma eval_nestFormulaeFunc {φ : Semiformula L ξ (n + 1)} {Ψ : Fin n → Semi
 
 @[simp] lemma eval_nestFormulaeFunc₁ {φ : Semiformula L ξ 2} {ψ : Semiformula L ξ (m + 1)} :
     Eval (z :> e) f (φ.nestFormulaeFunc ![ψ]) ↔ ∀ x, Eval (x :> e) f ψ → Eval ![z, x] f φ := by
-  simp [eval_nestFormulaeFunc, Matrix.forall_iff, Matrix.empty_eq]
+  simp [eval_nestFormulaeFunc, Matrix.vecForall_iff, Matrix.empty_eq]
 
 @[simp] lemma eval_nestFormulaeFunc₂ {φ : Semiformula L ξ 3} {ψ₁ ψ₂ : Semiformula L ξ (m + 1)} :
     Eval (z :> e) f (φ.nestFormulaeFunc ![ψ₁, ψ₂]) ↔ ∀ x₁, Eval (x₁ :> e) f ψ₁ → ∀ x₂, Eval (x₂ :> e) f ψ₂ → Eval ![z, x₁, x₂] f φ := by
   suffices
     (∀ x₁ x₂, Eval (x₁ :> e) f ψ₁ → Eval (x₂ :> e) f ψ₂ → Eval ![z, x₁, x₂] f φ) ↔
     ∀ x₁, Eval (x₁ :> e) f ψ₁ → ∀ x₂, Eval (x₂ :> e) f ψ₂ → Eval ![z, x₁, x₂] f φ by
-    simpa [eval_nestFormulaeFunc, Matrix.forall_iff, Matrix.empty_eq, Fin.forall_fin_two]
+    simpa [eval_nestFormulaeFunc, Matrix.vecForall_iff, Matrix.empty_eq, Fin.forall_fin_two]
   grind
 
 @[simp] lemma eval_nestFormulaeFunc₃ {φ : Semiformula L ξ 4} {ψ₁ ψ₂ ψ₃ : Semiformula L ξ (m + 1)} :
@@ -112,7 +112,7 @@ lemma eval_nestFormulaeFunc {φ : Semiformula L ξ (n + 1)} {Ψ : Fin n → Semi
   suffices
     (∀ x₁ x₂ x₃, Eval (x₁ :> e) f ψ₁ → Eval (x₂ :> e) f ψ₂ → Eval (x₃ :> e) f ψ₃ → Eval ![z, x₁, x₂, x₃] f φ) ↔
     ∀ x₁, Eval (x₁ :> e) f ψ₁ → ∀ x₂, Eval (x₂ :> e) f ψ₂ → ∀ x₃, Eval (x₃ :> e) f ψ₃ → Eval ![z, x₁, x₂, x₃] f φ by
-    simpa [eval_nestFormulaeFunc, Matrix.forall_iff, Matrix.empty_eq, Fin.forall_fin_succ]
+    simpa [eval_nestFormulaeFunc, Matrix.vecForall_iff, Matrix.empty_eq, Fin.forall_fin_succ]
   grind
 
 @[simp] lemma eval_nestFormulaeFunc₄ {φ : Semiformula L ξ 5} {ψ₁ ψ₂ ψ₃ ψ₄ : Semiformula L ξ (m + 1)} :
@@ -134,7 +134,7 @@ lemma eval_nestFormulaeFunc {φ : Semiformula L ξ (n + 1)} {Ψ : Fin n → Semi
       ∀ x₃, Eval (x₃ :> e) f ψ₃ →
       ∀ x₄, Eval (x₄ :> e) f ψ₄ →
       Eval ![z, x₁, x₂, x₃, x₄] f φ) by
-    simpa [eval_nestFormulaeFunc, Matrix.forall_iff, Matrix.empty_eq, Fin.forall_fin_succ]
+    simpa [eval_nestFormulaeFunc, Matrix.vecForall_iff, Matrix.empty_eq, Fin.forall_fin_succ]
   grind
 
 end Semiformula
