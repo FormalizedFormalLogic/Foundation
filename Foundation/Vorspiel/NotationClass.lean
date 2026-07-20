@@ -49,23 +49,23 @@ infixl:70 " ▷ " => Rhd.rhd
 class Tensor (α : Type*) where
   tensor : α → α → α
 
-infix:69 " ⨂ " => Tensor.tensor
+infixr:69 " ⨂ " => Tensor.tensor
 
 class Par (α : Type*) where
   par : α → α → α
 
-infix:68 " ⅋ " => Par.par
+infixr:68 " ⅋ " => Par.par
 
 class With (α : Type*) where
   with' : α → α → α
 
 /-- Note that this notation "＆" (U+FF06) is distinct from "&" (U+0026) -/
-infix:69 " ＆ " => With.with'
+infixr:69 " ＆ " => With.with'
 
 class Plus (α : Type*) where
   plus : α → α → α
 
-infix:68 " ⨁ " => Plus.plus
+infixr:68 " ⨁ " => Plus.plus
 
 class Lolli (α : Type*) where
   lolli : α → α → α

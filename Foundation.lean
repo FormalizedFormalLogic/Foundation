@@ -121,13 +121,14 @@ public import Foundation.FirstOrder.SetTheory.ZF
 public import Foundation.FirstOrder.Skolemization.Hull
 public import Foundation.FirstOrder.Ultraproduct
 public import Foundation.Init
-public import Foundation.LinearLogic.FirstOrder.Calculus
-public import Foundation.LinearLogic.FirstOrder.ClassicalEmbedding
-public import Foundation.LinearLogic.FirstOrder.Formula
-public import Foundation.LinearLogic.FirstOrder.Rew
+public import Foundation.LinearLogic.LL.FirstOrder.Calculus
+public import Foundation.LinearLogic.LL.FirstOrder.ClassicalEmbedding
+public import Foundation.LinearLogic.LL.FirstOrder.Formula
+public import Foundation.LinearLogic.LL.FirstOrder.Rew
 public import Foundation.LinearLogic.LogicSymbol
-public import Foundation.LinearLogic.MELL
-public import Foundation.LinearLogic.MLL
+public import Foundation.LinearLogic.MELL.Propositional
+public import Foundation.LinearLogic.MLL.GoI
+public import Foundation.LinearLogic.MLL.Propositional
 public import Foundation.Logic.Calculus
 public import Foundation.Logic.Decidability
 public import Foundation.Logic.Disjunctive
@@ -408,6 +409,7 @@ public import Foundation.Syntax.Predicate.Relational
 public import Foundation.Syntax.Predicate.Rew
 public import Foundation.Syntax.Predicate.Term
 public import Foundation.Vorspiel.AdjunctiveSet
+public import Foundation.Vorspiel.Algebra.IsNilpotent
 public import Foundation.Vorspiel.Arithmetic
 public import Foundation.Vorspiel.Computability
 public import Foundation.Vorspiel.DMatrix
@@ -422,6 +424,7 @@ public import Foundation.Vorspiel.Finset.Card
 public import Foundation.Vorspiel.Fintype
 public import Foundation.Vorspiel.Function
 public import Foundation.Vorspiel.Graph
+public import Foundation.Vorspiel.GroupTheory.Perm
 public import Foundation.Vorspiel.IsEmpty
 public import Foundation.Vorspiel.List.Basic
 public import Foundation.Vorspiel.List.Chain
