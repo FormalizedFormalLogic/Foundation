@@ -199,6 +199,26 @@ lemma trace_sameCycle_iff_f_sameCycle
 
 end trace
 
+section permCongr
+
+variable {α β : Type*}
+
+lemma sameCycle_permCongr (e : α ≃ β) (σ : Perm α) (x y : α) :
+    (e.permCongr σ).SameCycle (e x) (e y) ↔ σ.SameCycle x y := by
+  constructor
+  · rintro ⟨i, hi⟩
+    change (e.permCongrHom σ ^ i) (e x) = e y at hi
+    rw [← map_zpow e.permCongrHom σ i] at hi
+    refine ⟨i, e.injective ?_⟩
+    simpa using hi
+  · rintro ⟨i, hi⟩
+    refine ⟨i, ?_⟩
+    change (e.permCongrHom σ ^ i) (e x) = e y
+    rw [← map_zpow e.permCongrHom σ i]
+    simp [hi]
+
+end permCongr
+
 variable {γ : Type*} [DecidableEq γ] [Fintype γ]
 
 abbrev Orbit (σ : Perm γ) := Quotient (SameCycle.setoid σ)
@@ -208,6 +228,31 @@ instance (σ : Perm γ) : Fintype (σ.Orbit) :=
   Quotient.fintype _
 
 namespace Orbit
+
+def permCongr {α β : Type*} (e : α ≃ β) (σ : Perm α) :
+    σ.Orbit ≃ (e.permCongr σ).Orbit where
+  toFun :=
+    Quotient.map e fun {a b} h ↦
+      (sameCycle_permCongr e σ _ _).mpr h
+  invFun :=
+    Quotient.map e.symm fun {a b} h ↦ by
+      change (e.permCongr σ).SameCycle a b at h
+      have h' :
+          (e.permCongr σ).SameCycle (e (e.symm a)) (e (e.symm b)) := by
+        simpa using h
+      exact (sameCycle_permCongr e σ (e.symm a) (e.symm b)).mp h'
+  left_inv := by
+    intro q
+    induction q using Quotient.inductionOn' with
+    | h x =>
+        change (⟦e.symm (e x)⟧ : σ.Orbit) = ⟦x⟧
+        simp
+  right_inv := by
+    intro q
+    induction q using Quotient.inductionOn' with
+    | h x =>
+        change (⟦e (e.symm x)⟧ : (e.permCongr σ).Orbit) = ⟦x⟧
+        simp
 
 abbrev Meets
     (f : Perm γ) (P : γ → Prop) (q : f.Orbit) : Prop :=
@@ -301,6 +346,17 @@ theorem partition_parts_card_eq_fintype_card (σ : Perm γ) :
       simp [Fintype.card_sum]
     _ = Fintype.card σ.Orbit := by
       exact (Fintype.card_of_bijective hbij).symm
+
+theorem partition_parts_card_permCongr {α β : Type*}
+    [DecidableEq α] [Fintype α] [DecidableEq β] [Fintype β]
+    (e : α ≃ β) (σ : Perm α) :
+    (e.permCongr σ).partition.parts.card = σ.partition.parts.card := by
+  calc
+    (e.permCongr σ).partition.parts.card
+        = Fintype.card (e.permCongr σ).Orbit := partition_parts_card_eq_fintype_card _
+    _ = Fintype.card σ.Orbit := by
+      exact (Fintype.card_congr (permCongr e σ)).symm
+    _ = σ.partition.parts.card := (partition_parts_card_eq_fintype_card σ).symm
 
 omit [DecidableEq γ] in
 noncomputable def meetingEquivTrace {P : γ → Prop} [DecidablePred P] (f : Perm γ) :
