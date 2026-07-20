@@ -1,6 +1,6 @@
 module
 
-public import Foundation.Propositional.Entailment.Int.DNE_of_LEM
+public import Foundation.Propositional.Entailment.Cl
 public import Foundation.Propositional.Logic.Basic
 public import Foundation.Propositional.Formula.Basic
 
