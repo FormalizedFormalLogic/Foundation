@@ -1168,7 +1168,8 @@ def right_Conj'_intro [DecidableEq F] (φ : F) (l : List ι) (ψ : ι → F) (b 
 lemma right_Conj'!_intro [DecidableEq F] (φ : F) (l : List ι) (ψ : ι → F) (b : ∀ i ∈ l, 𝓢 ⊢ φ 🡒 ψ i) : 𝓢 ⊢ φ 🡒 l.conj' ψ :=
   ⟨right_Conj'_intro φ l ψ fun i hi ↦ (b i hi).get⟩
 
-def left_Conj'_intro [DecidableEq F] {l : List ι} (h : i ∈ l) (φ : ι → F) : 𝓢 ⊢! l.conj' φ 🡒 φ i := left_Conj₂_intro (by simp; use i)
+def left_Conj'_intro [DecidableEq F] {l : List ι} (h : i ∈ l) (φ : ι → F) : 𝓢 ⊢! l.conj' φ 🡒 φ i :=
+  left_Conj₂_intro (by simp only [mem_map]; use i)
 lemma left_Conj'!_intro [DecidableEq F] {l : List ι} (h : i ∈ l) (φ : ι → F) : 𝓢 ⊢ l.conj' φ 🡒 φ i := ⟨left_Conj'_intro h φ⟩
 
 
@@ -1194,7 +1195,7 @@ lemma Conj₂!_iff_forall_provable [DecidableEq F] {Γ : List F} : (𝓢 ⊢ ⋀
   | hnil => simp;
   | hsingle => simp;
   | hcons φ Γ hΓ ih =>
-    simp_all;
+    simp_all only [ne_eq, not_false_eq_true, conj₂_cons_nonempty, mem_cons, forall_eq_or_imp];
     constructor;
     . intro h;
       constructor;
@@ -1206,21 +1207,28 @@ lemma Conj₂!_iff_forall_provable [DecidableEq F] {Γ : List F} : (𝓢 ⊢ ⋀
 lemma CConj₂Conj₂!_of_subset [DecidableEq F] (h : ∀ φ, φ ∈ Γ → φ ∈ Δ) : 𝓢 ⊢ ⋀Δ 🡒 ⋀Γ := by
   induction Γ using List.induction_with_singleton with
   | hnil => simp;
-  | hsingle => simp_all; exact left_Conj₂!_intro h;
-  | hcons φ Γ hne ih => simp_all; exact right_K!_intro (left_Conj₂!_intro h.1) ih;
+  | hsingle => simp_all only [mem_cons, not_mem_nil, or_false, forall_eq, conj₂_singleton]; exact left_Conj₂!_intro h;
+  | hcons φ Γ hne ih =>
+    simp_all only [ne_eq, mem_cons, or_true, implies_true, forall_const, forall_eq_or_imp, not_false_eq_true,
+      conj₂_cons_nonempty];
+    exact right_K!_intro (left_Conj₂!_intro h.1) ih;
 
 lemma CConj₂Conj₂!_of_provable [DecidableEq F] (h : ∀ φ, φ ∈ Γ → Δ ⊢[𝓢] φ) : 𝓢 ⊢ ⋀Δ 🡒 ⋀Γ :=
   by induction Γ using List.induction_with_singleton with
   | hnil => exact C!_of_conseq! verum!;
-  | hsingle => simp_all; exact provable_iff.mp h;
-  | hcons φ Γ hne ih => simp_all; exact right_K!_intro (provable_iff.mp h.1) ih;
+  | hsingle => simp_all only [mem_cons, not_mem_nil, or_false, forall_eq, conj₂_singleton]; exact provable_iff.mp h;
+  | hcons φ Γ hne ih =>
+    simp_all only [ne_eq, mem_cons, or_true, implies_true, forall_const, forall_eq_or_imp, not_false_eq_true,
+      conj₂_cons_nonempty];
+    exact right_K!_intro (provable_iff.mp h.1) ih;
 
 lemma CConj₂!_of_forall_provable [DecidableEq F] (h : ∀ φ, φ ∈ Γ → Δ ⊢[𝓢] φ) : Δ ⊢[𝓢] ⋀Γ := provable_iff.mpr $ CConj₂Conj₂!_of_provable h
 
 lemma CConj₂!_of_unique [DecidableEq F] (he : ∀ g ∈ Γ, g = φ) : 𝓢 ⊢ φ 🡒 ⋀Γ := by
   induction Γ using List.induction_with_singleton with
   | hcons χ Γ h ih =>
-    simp_all;
+    simp_all only [ne_eq, mem_cons, true_or, or_true, implies_true, forall_const, forall_eq_or_imp,
+      not_false_eq_true, conj₂_cons_nonempty];
     have ⟨he₁, he₂⟩ := he; subst he₁;
     exact right_K!_intro C!_id ih;
   | _ => simp_all;
@@ -1230,7 +1238,7 @@ lemma C!_of_CConj₂!_of_unique [DecidableEq F] (he : ∀ g ∈ Γ, g = φ) (hd 
 lemma CConj₂!_iff_CKConj₂! [DecidableEq F] : 𝓢 ⊢ ⋀(φ :: Γ) 🡒 ψ ↔ 𝓢 ⊢ φ ⋏ ⋀Γ 🡒 ψ := by
   induction Γ with
   | nil =>
-    simp [CK!_iff_CC!];
+    simp only [conj₂_singleton, conj₂_nil, CK!_iff_CC!];
     constructor;
     . intro h; apply C!_swap; exact C!_of_conseq! h;
     . intro h; exact C!_swap h ⨀ verum!;
@@ -1244,10 +1252,10 @@ lemma CConj₂!_iff_CKConj₂! [DecidableEq F] : 𝓢 ⊢ ⋀(φ :: Γ) 🡒 ψ 
   apply K!_intro;
   . apply Conj₂!_iff_forall_provable.mpr;
     intro φ hp;
-    exact d φ (by simp; left; exact hp);
+    exact d φ (by simp only [mem_append]; left; exact hp);
   . apply Conj₂!_iff_forall_provable.mpr;
     intro φ hp;
-    exact d φ (by simp; right; exact hp);
+    exact d φ (by simp only [mem_append]; right; exact hp);
 
 @[simp]
 lemma CKConj₂RemoveConj₂! [DecidableEq F] : 𝓢 ⊢ ⋀(Γ.remove φ) ⋏ φ 🡒 ⋀Γ := by

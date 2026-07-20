@@ -196,7 +196,7 @@ lemma EDisj₂AppendADisj₂Disj₂! : 𝓢 ⊢ ⋁(Γ ++ Δ) 🡘 ⋁Γ ⋎ ⋁
     . simp;
     . exact left_A!_intro C!_id efq!;
   case hcons.hnil =>
-    simp_all;
+    simp_all only [append_nil, disj₂_nil];
     apply E!_intro;
     . simp;
     . exact left_A!_intro C!_id efq!;
@@ -207,13 +207,15 @@ lemma EDisj₂AppendADisj₂Disj₂! : 𝓢 ⊢ ⋁(Γ ++ Δ) 🡘 ⋁Γ ⋎ ⋁
   case hsingle.hsingle => simp_all;
   case hsingle.hcons => simp_all;
   case hcons.hsingle φ ps hps ihp ψ =>
-    simp_all;
+    simp_all only [cons_append, ne_eq, append_eq_nil_iff, cons_ne_self, and_false, not_false_eq_true,
+      disj₂_cons_nonempty, disj₂_singleton];
     apply E!_trans (by
       apply EAA!_of_E!_right;
       simpa using @ihp [ψ];
     ) EAAAA!;
   case hcons.hcons φ ps hps ihp ψ qs hqs ihq =>
-    simp_all;
+    simp_all only [cons_append, ne_eq, append_eq_nil_iff, reduceCtorEq, and_false, not_false_eq_true,
+      disj₂_cons_nonempty];
     exact E!_trans (by
       apply EAA!_of_E!_right;
       exact E!_trans (@ihp (ψ :: qs)) (by
@@ -232,7 +234,7 @@ omit [DecidableEq F] in
 lemma CDisj₂!_iff_CADisj₂! : 𝓢 ⊢ φ 🡒 ⋁(ψ :: Γ) ↔ 𝓢 ⊢ φ 🡒 ψ ⋎ ⋁Γ := by
   induction Γ with
   | nil =>
-    simp;
+    simp only [disj₂_singleton, disj₂_nil];
     constructor;
     . intro h; exact C!_trans h or₁!;
     . intro h; exact C!_trans h $ left_A!_intro C!_id efq!;
@@ -243,25 +245,26 @@ lemma CDisj₂ADisj₂Remove! : 𝓢 ⊢ ⋁Γ 🡒 φ ⋎ ⋁(Γ.remove φ) := 
   induction Γ using List.induction_with_singleton with
   | hnil => simp;
   | hsingle ψ =>
-    simp;
+    simp only [disj₂_singleton];
     by_cases h: ψ = φ;
     . subst_vars; simp;
     . simp [(List.remove_singleton_of_ne h)];
   | hcons ψ Γ h ih =>
-    simp_all;
+    simp_all only [ne_eq, not_false_eq_true, disj₂_cons_nonempty];
     by_cases hpq : ψ = φ;
-    . simp_all only [ne_eq, List.remove_cons_self]; exact left_A!_intro or₁! ih;
-    . simp_all [(List.remove_cons_of_ne Γ hpq)];
+    . simp_all only [List.remove_cons_self]; exact left_A!_intro or₁! ih;
+    . simp_all only [(List.remove_cons_of_ne Γ hpq)];
       by_cases hqΓ : Γ.remove φ = [];
-      . simp_all;
+      . simp_all only [disj₂_nil, disj₂_singleton];
         exact left_A!_intro or₂! (C!_trans ih $ CAA!_of_C!_right efq!);
-      . simp_all;
+      . simp_all only [ne_eq, not_false_eq_true, disj₂_cons_nonempty];
         exact left_A!_intro (C!_trans or₁! or₂!) (C!_trans ih (CAA!_of_C!_right or₂!));
 
 lemma left_Disj₂!_intro' (hd : ∀ ψ ∈ Γ, ψ = φ) : 𝓢 ⊢ ⋁Γ 🡒 φ := by
   induction Γ using List.induction_with_singleton with
   | hcons ψ Δ hΔ ih =>
-    simp_all;
+    simp_all only [ne_eq, mem_cons, true_or, or_true, implies_true, forall_const, forall_eq_or_imp,
+      not_false_eq_true, disj₂_cons_nonempty];
     have ⟨hd₁, hd₂⟩ := hd; subst hd₁;
     apply provable_iff_provable.mpr;
     apply deduct_iff.mpr;
