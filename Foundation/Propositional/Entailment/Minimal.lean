@@ -1015,14 +1015,14 @@ def CCCNN [DecidableEq F] : 𝓢 ⊢! (φ 🡒 ψ) 🡒 (∼ψ 🡒 ∼φ) := by
   exact dnq ⨀ dq;
 @[simp] def CCCNN! [DecidableEq F] : 𝓢 ⊢ (φ 🡒 ψ) 🡒 (∼ψ 🡒 ∼φ) := ⟨CCCNN⟩
 
-@[deprecated "use `CCCNN`"] alias contra₀ := CCCNN
-@[deprecated "use `CCCNN!`"] alias contra₀! := CCCNN!
+@[deprecated "use `CCCNN`" (since := "2026-07-20")] alias contra₀ := CCCNN
+@[deprecated "use `CCCNN!`" (since := "2026-07-20")] alias contra₀! := CCCNN!
 
 def contra [DecidableEq F] (b : 𝓢 ⊢! φ 🡒 ψ) : 𝓢 ⊢! ∼ψ 🡒 ∼φ := CCCNN ⨀ b
 lemma contra! [DecidableEq F] (b : 𝓢 ⊢ φ 🡒 ψ) : 𝓢 ⊢ ∼ψ 🡒 ∼φ := ⟨contra b.some⟩
 
-@[deprecated "use `contra`"] alias contra₀' := contra
-@[deprecated "use `contra!`"] alias contra₀'! := contra!
+@[deprecated "use `contra`" (since := "2026-07-20")] alias contra₀' := contra
+@[deprecated "use `contra!`" (since := "2026-07-20")] alias contra₀'! := contra!
 
 def CNNNN_of_C [DecidableEq F] (b : 𝓢 ⊢! φ 🡒 ψ) : 𝓢 ⊢! ∼∼φ 🡒 ∼∼ψ := contra $ contra b
 @[grind] lemma CNNNN!_of_C! [DecidableEq F] (b : 𝓢 ⊢ φ 🡒 ψ) : 𝓢 ⊢ ∼∼φ 🡒 ∼∼ψ := ⟨CNNNN_of_C b.some⟩
@@ -1065,8 +1065,8 @@ def CCC_of_C_left (h : 𝓢 ⊢! ψ 🡒 φ) : 𝓢 ⊢! (φ 🡒 χ) 🡒 (ψ �
   exact C_trans (of h) id;
 lemma CCC!_of_C!_left (h : 𝓢 ⊢ ψ 🡒 φ) : 𝓢 ⊢ (φ 🡒 χ) 🡒 (ψ 🡒 χ) := ⟨CCC_of_C_left h.some⟩
 
-@[deprecated "use `CCC_of_C_left`"] alias rev_dhyp_imp' := CCC_of_C_left
-@[deprecated "use `CCC!_of_C!_left`"] alias rev_dhyp_imp'! := CCC!_of_C!_left
+@[deprecated "use `CCC_of_C_left`" (since := "2026-07-20")] alias rev_dhyp_imp' := CCC_of_C_left
+@[deprecated "use `CCC!_of_C!_left`" (since := "2026-07-20")] alias rev_dhyp_imp'! := CCC!_of_C!_left
 
 lemma C!_iff_C!_of_iff_left (h : 𝓢 ⊢ φ 🡘 ψ) : 𝓢 ⊢ φ 🡒 χ ↔ 𝓢 ⊢ ψ 🡒 χ := by
   constructor;
