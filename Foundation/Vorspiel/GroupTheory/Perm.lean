@@ -544,18 +544,197 @@ lemma tr_eq_closedCycles (f : Perm γ) :
   rw [Orbit.partition_parts_card_eq_fintype_card f]
   simp [closedCycles, Orbit.Closed, Orbit.Avoiding, Orbit.Meets]
 
+omit [DecidableEq γ] [Fintype γ] in
+theorem subtypeCongr_not_comm
+    (a : Perm {x : γ // P x}) (b : Perm {x : γ // ¬P x}) :
+    b.subtypeCongr 1 * a.subtypeCongr 1 = a.subtypeCongr 1 * b.subtypeCongr 1 := by
+  ext x
+  by_cases hx : P x
+  · have hax : P (a ⟨x, hx⟩) := (a ⟨x, hx⟩).2
+    simp [hx, hax]
+  · simp [hx]
+
+omit [DecidableEq γ] in
+theorem trace_mul_subtypeCongr_not
+    (σ : Perm γ) (b : Perm {x : γ // ¬P x}) :
+    (σ * b.subtypeCongr 1).trace P = σ.trace P * b := by
+  let τ := σ * b.subtypeCongr (1 : Perm {x : γ // ¬¬P x})
+  have pow_succ_of_lt_time :
+      ∀ (x : {x : γ // ¬P x}) {k : ℕ},
+        k < FirstReturn.time σ (b x) →
+        (τ ^ (k + 1)) (x : γ) = (σ ^ (k + 1)) (b x : γ) := by
+    intro x k hk
+    induction k with
+    | zero => simp [τ]
+    | succ k ih =>
+        have hk' : k < FirstReturn.time σ (b x) :=
+          Nat.lt_trans (Nat.lt_succ_self k) hk
+        have hP : P ((σ ^ (k + 1)) (b x : γ)) := by
+          by_contra hnot
+          exact FirstReturn.not_return_of_lt_time hk ⟨Nat.succ_pos k, hnot⟩
+        rw [pow_succ', mul_apply, ih hk']
+        change σ (b.subtypeCongr (1 : Perm {x : γ // ¬¬P x})
+            ((σ ^ (k + 1)) (b x : γ))) =
+          (σ ^ (k + 1 + 1)) (b x : γ)
+        have hb : b.subtypeCongr (1 : Perm {x : γ // ¬¬P x})
+            ((σ ^ (k + 1)) (b x : γ)) = (σ ^ (k + 1)) (b x : γ) := by
+          simp [hP]
+        rw [hb]
+        simp [pow_succ', mul_apply]
+  have pow_return_time :
+      ∀ x : {x : γ // ¬P x},
+        let n := FirstReturn.time σ (b x)
+        (τ ^ n) (x : γ) = (σ ^ n) (b x : γ) := by
+    intro x n
+    have hn : 0 < n := by
+      change 0 < FirstReturn.time σ (b x)
+      exact (FirstReturn.time_spec σ (b x)).1
+    obtain ⟨k, hk⟩ := Nat.exists_eq_succ_of_ne_zero (Nat.ne_of_gt hn)
+    rw [hk]
+    have hklt : k < n := by rw [hk]; exact Nat.lt_succ_self k
+    exact pow_succ_of_lt_time x (by change k < n; exact hklt)
+  have time_eq :
+      ∀ x : {x : γ // ¬P x},
+        FirstReturn.time τ x = FirstReturn.time σ (b x) := by
+    intro x
+    have hreturn : ¬P ((τ ^ FirstReturn.time σ (b x)) (x : γ)) := by
+      have hpow := pow_return_time x
+      change (τ ^ FirstReturn.time σ (b x)) (x : γ) =
+        (σ ^ FirstReturn.time σ (b x)) (b x : γ) at hpow
+      rw [hpow]
+      exact (FirstReturn.time_spec σ (b x)).2
+    apply le_antisymm
+    · exact FirstReturn.time_le_of_return ⟨(FirstReturn.time_spec σ (b x)).1, hreturn⟩
+    · by_contra hle
+      have hlt : FirstReturn.time τ x < FirstReturn.time σ (b x) := Nat.lt_of_not_ge hle
+      have hmpos : 0 < FirstReturn.time τ x := (FirstReturn.time_spec τ x).1
+      obtain ⟨k, hk⟩ := Nat.exists_eq_succ_of_ne_zero (Nat.ne_of_gt hmpos)
+      have hklt : k < FirstReturn.time σ (b x) := by omega
+      have hpow := pow_succ_of_lt_time x (k := k) hklt
+      have hτreturn : ¬P ((τ ^ FirstReturn.time τ x) (x : γ)) :=
+        (FirstReturn.time_spec τ x).2
+      rw [hk] at hτreturn
+      change (τ ^ (k + 1)) (x : γ) = (σ ^ (k + 1)) (b x : γ) at hpow
+      rw [hpow] at hτreturn
+      exact FirstReturn.not_return_of_lt_time
+        (by omega : k + 1 < FirstReturn.time σ (b x)) ⟨by omega, hτreturn⟩
+  ext x
+  rw [mul_apply]
+  simp [trace, FirstReturn.map, τ, time_eq x, pow_return_time x]
+
+theorem closedCycles_eq_of_eqOn_not_not
+    {σ τ : Perm γ} (h : ∀ x, ¬¬P x → σ x = τ x) :
+    σ.closedCycles P = τ.closedCycles P := by
+  have sameCycle_iff_of_closed :
+      ∀ {σ τ : Perm γ}, (∀ x, ¬¬P x → σ x = τ x) → ∀ {z y},
+        ¬Orbit.Meets σ (fun x ↦ ¬P x) (⟦z⟧ : σ.Orbit) →
+        (τ.SameCycle z y ↔ σ.SameCycle z y) := by
+    intro σ τ h z y hclosed
+    have pow_eq : ∀ n : ℕ, (τ ^ n) z = (σ ^ n) z := by
+      intro n
+      induction n with
+      | zero => rfl
+      | succ n ih =>
+          have hnnP : ¬¬P ((σ ^ n) z) := by
+            intro hnot
+            have hsame : σ.SameCycle z ((σ ^ n) z) :=
+              ⟨(n : ℤ), by rw [zpow_natCast]⟩
+            exact hclosed ⟨⟨(σ ^ n) z, hnot⟩, Quotient.sound hsame⟩
+          rw [pow_succ', mul_apply, ih]
+          change τ ((σ ^ n) z) = (σ ^ (n + 1)) z
+          rw [← h ((σ ^ n) z) hnnP]
+          simp [pow_succ', mul_apply]
+    constructor
+    · intro hcycle
+      obtain ⟨n, hn⟩ := hcycle.exists_nat_pow_eq
+      refine ⟨(n : ℤ), ?_⟩
+      rw [zpow_natCast]
+      exact (pow_eq n).symm.trans hn
+    · intro hcycle
+      obtain ⟨n, hn⟩ := hcycle.exists_nat_pow_eq
+      refine ⟨(n : ℤ), ?_⟩
+      rw [zpow_natCast]
+      exact (pow_eq n).trans hn
+  classical
+  let toClosed : Orbit.Closed σ P → Orbit.Closed τ P := fun q ↦
+    let z := Quotient.out q.val
+    ⟨⟦z⟧, by
+      have hzq : (⟦z⟧ : σ.Orbit) = q.val := Quotient.out_eq q.val
+      have hqclosed : ¬Orbit.Meets σ (fun x ↦ ¬P x) (⟦z⟧ : σ.Orbit) := by
+        intro hmeet
+        exact q.property (hzq ▸ hmeet)
+      change ¬Orbit.Meets τ (fun x ↦ ¬P x) (⟦z⟧ : τ.Orbit)
+      intro hmeet
+      obtain ⟨y, hy⟩ := hmeet
+      apply hqclosed
+      exact ⟨y, Quotient.sound ((sameCycle_iff_of_closed h hqclosed).mp (Quotient.eq.mp hy))⟩⟩
+  have hbij : Function.Bijective toClosed := by
+    constructor
+    · intro q r hqr
+      apply Subtype.ext
+      let zq := Quotient.out q.val
+      let zr := Quotient.out r.val
+      have hzq : (⟦zq⟧ : σ.Orbit) = q.val := Quotient.out_eq q.val
+      have hzr : (⟦zr⟧ : σ.Orbit) = r.val := Quotient.out_eq r.val
+      have hqclosed : ¬Orbit.Meets σ (fun x ↦ ¬P x) (⟦zq⟧ : σ.Orbit) := by
+        intro hmeet
+        exact q.property (hzq ▸ hmeet)
+      have hτ : τ.SameCycle zq zr := by
+        have hval := congrArg Subtype.val hqr
+        change (⟦zq⟧ : τ.Orbit) = ⟦zr⟧ at hval
+        exact Quotient.eq.mp hval
+      have hσ : σ.SameCycle zq zr := (sameCycle_iff_of_closed h hqclosed).mp hτ
+      exact hzq.symm.trans ((Quotient.sound hσ).trans hzr)
+    · intro q
+      let z := Quotient.out q.val
+      have hzq : (⟦z⟧ : τ.Orbit) = q.val := Quotient.out_eq q.val
+      have hqclosed : ¬Orbit.Meets τ (fun x ↦ ¬P x) (⟦z⟧ : τ.Orbit) := by
+        intro hmeet
+        exact q.property (hzq ▸ hmeet)
+      let qσ : Orbit.Closed σ P :=
+        ⟨⟦z⟧, by
+          change ¬Orbit.Meets σ (fun x ↦ ¬P x) (⟦z⟧ : σ.Orbit)
+          intro hmeet
+          obtain ⟨y, hy⟩ := hmeet
+          apply hqclosed
+          refine ⟨y, ?_⟩
+          exact Quotient.sound
+            ((sameCycle_iff_of_closed (fun x hx ↦ (h x hx).symm) hqclosed).mp
+              (Quotient.eq.mp hy))⟩
+      refine ⟨qσ, ?_⟩
+      apply Subtype.ext
+      let w := Quotient.out (⟦z⟧ : σ.Orbit)
+      have hwσ : (⟦w⟧ : σ.Orbit) = (⟦z⟧ : σ.Orbit) :=
+        Quotient.out_eq (⟦z⟧ : σ.Orbit)
+      have hqσclosed : ¬Orbit.Meets σ (fun x ↦ ¬P x) (⟦w⟧ : σ.Orbit) := by
+        intro hmeet
+        apply qσ.property
+        change Orbit.Meets σ (fun x ↦ ¬P x) (⟦z⟧ : σ.Orbit)
+        exact hwσ ▸ hmeet
+      have hτ : τ.SameCycle w z :=
+        (sameCycle_iff_of_closed h hqσclosed).mpr (Quotient.eq.mp hwσ)
+      exact (Quotient.sound hτ).trans hzq
+  unfold closedCycles
+  exact Fintype.card_of_bijective hbij
+
+theorem closedCycles_mul_subtypeCongr_not
+    (σ : Perm γ) (b : Perm {x : γ // ¬P x}) :
+    (σ * b.subtypeCongr 1).closedCycles P = σ.closedCycles P := by
+  refine closedCycles_eq_of_eqOn_not_not (P := P) ?_
+  intro x hx
+  simp [hx]
+
+omit [DecidableEq γ] in
 theorem trace_mul_subtypeCongr_not_mul_subtypeCongr
     (f : Perm γ) (a : Perm {x : γ // P x}) (b : Perm {x : γ // ¬P x}) :
-    (f * (b.subtypeCongr (1 : Perm {x : γ // ¬¬P x}) *
-        a.subtypeCongr (1 : Perm {x : γ // ¬P x}))).trace P =
-      (f * a.subtypeCongr (1 : Perm {x : γ // ¬P x})).trace P * b := by
-  sorry
+    (f * (b.subtypeCongr 1 * a.subtypeCongr 1)).trace P = (f * a.subtypeCongr 1).trace P * b := by
+  rw [subtypeCongr_not_comm a b, ← mul_assoc]
+  exact trace_mul_subtypeCongr_not (f * a.subtypeCongr 1) b
 
 theorem closedCycles_mul_subtypeCongr_not_mul_subtypeCongr
     (f : Perm γ) (a : Perm {x : γ // P x}) (b : Perm {x : γ // ¬P x}) :
-    (f * (b.subtypeCongr (1 : Perm {x : γ // ¬¬P x}) *
-        a.subtypeCongr (1 : Perm {x : γ // ¬P x}))).closedCycles P =
-      (f * a.subtypeCongr (1 : Perm {x : γ // ¬P x})).closedCycles P := by
-  sorry
+    (f * (b.subtypeCongr 1 * a.subtypeCongr 1)).closedCycles P = (f * a.subtypeCongr 1).closedCycles P := by
+  rw [subtypeCongr_not_comm a b, ← mul_assoc]
+  exact closedCycles_mul_subtypeCongr_not (f * a.subtypeCongr 1) b
 
 end Equiv.Perm
