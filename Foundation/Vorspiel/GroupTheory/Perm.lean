@@ -10,9 +10,75 @@ public import Mathlib.GroupTheory.Perm.Cycle.Type
 
 namespace Equiv.Perm
 
+section tr
+
+variable {α β : Type*} [DecidableEq α] [Fintype α] [DecidableEq β] [Fintype β]
+
+def tr (f : Perm α) : ℕ := f.partition.parts.card
+
+@[grind =] lemma tr_comm (f g : Perm α) :
+    (f * g).tr = (g * f).tr := by
+  have hpart : (f * g).partition = (g * f).partition := by
+    apply partition_eq_of_isConj.mp
+    rw [isConj_iff]
+    refine ⟨g, by group⟩
+  simp [tr, hpart]
+
+omit [DecidableEq α] [Fintype α] [DecidableEq β] [Fintype β] in
+lemma pow_sumCongr (a : Perm α) (b : Perm β) (n : ℕ) :
+    (a.sumCongr b) ^ n = (a ^ n).sumCongr (b ^ n) := by
+  induction n with
+  | zero => ext (_ | _) <;> rfl
+  | succ n ih =>
+      ext (_ | _) <;> simp [pow_succ, ih]
+
+omit [DecidableEq α] [DecidableEq β] in
+lemma sameCycle_sumCongr_left (a : Perm α) (b : Perm β) (x y : α) :
+    (a.sumCongr b).SameCycle (.inl x) (.inl y) ↔ a.SameCycle x y := by
+  constructor
+  · intro h
+    obtain ⟨n, hn⟩ := h.exists_nat_pow_eq
+    rw [pow_sumCongr] at hn
+    change Sum.inl ((a ^ n) x) = Sum.inl y at hn
+    exact ⟨n, Sum.inl.inj hn⟩
+  · intro h
+    obtain ⟨n, hn⟩ := h.exists_nat_pow_eq
+    refine ⟨(n : ℤ), ?_⟩
+    rw [zpow_natCast, pow_sumCongr]
+    change Sum.inl ((a ^ n) x) = Sum.inl y
+    exact congrArg Sum.inl hn
+
+omit [DecidableEq α] [DecidableEq β] in
+lemma sameCycle_sumCongr_right (a : Perm α) (b : Perm β) (x y : β) :
+    (a.sumCongr b).SameCycle (.inr x) (.inr y) ↔ b.SameCycle x y := by
+  constructor
+  · intro h
+    obtain ⟨n, hn⟩ := h.exists_nat_pow_eq
+    rw [pow_sumCongr] at hn
+    change Sum.inr ((b ^ n) x) = Sum.inr y at hn
+    exact ⟨n, Sum.inr.inj hn⟩
+  · intro h
+    obtain ⟨n, hn⟩ := h.exists_nat_pow_eq
+    refine ⟨(n : ℤ), ?_⟩
+    rw [zpow_natCast, pow_sumCongr]
+    change Sum.inr ((b ^ n) x) = Sum.inr y
+    exact congrArg Sum.inr hn
+
+omit [DecidableEq α] [DecidableEq β] in
+lemma not_sameCycle_sumCongr_left_right (a : Perm α) (b : Perm β) (x : α) (y : β) :
+    ¬(a.sumCongr b).SameCycle (.inl x) (.inr y) := by
+  intro h
+  obtain ⟨n, hn⟩ := h.exists_nat_pow_eq
+  rw [pow_sumCongr] at hn
+  change Sum.inl ((a ^ n) x) = Sum.inr y at hn
+  cases hn
+
+end tr
+
 lemma partition_parts_card_eq_cycleFactorsFinset_card_add_fixed
     {γ : Type*} [DecidableEq γ] [Fintype γ] (σ : Perm γ) :
-    σ.partition.parts.card = σ.cycleFactorsFinset.card + Fintype.card {x : γ // σ x = x} := by
+    σ.tr = σ.cycleFactorsFinset.card + Fintype.card {x : γ // σ x = x} := by
+  unfold tr
   rw [parts_partition, Multiset.card_add, Multiset.card_replicate, cycleType_def]
   simp only [Multiset.card_map]
   congr 1
@@ -36,6 +102,8 @@ lemma fintype_card_eq_fintype_card_subtype_add_fintype_card_subtype_not
     Fintype.card_subtype_le P
   rw [Fintype.card_subtype_compl P]
   omega
+
+
 
 namespace FirstReturn
 
@@ -279,7 +347,7 @@ instance instDecidablePredMeets (f : Perm γ) (P : γ → Prop) [DecidablePred P
         exact ⟨x, x.2, Quotient.eq.mp hx⟩
 
 theorem partition_parts_card_eq_fintype_card (σ : Perm γ) :
-    σ.partition.parts.card = Fintype.card σ.Orbit := by
+    σ.tr = Fintype.card σ.Orbit := by
   let toPart : γ → σ.cycleFactorsFinset ⊕ {x : γ // σ x = x} := fun x ↦
     if hx : x ∈ σ.support then
       Sum.inl ⟨σ.cycleOf x, cycleOf_mem_cycleFactorsFinset_iff.mpr hx⟩
@@ -350,13 +418,13 @@ theorem partition_parts_card_eq_fintype_card (σ : Perm γ) :
 theorem partition_parts_card_permCongr {α β : Type*}
     [DecidableEq α] [Fintype α] [DecidableEq β] [Fintype β]
     (e : α ≃ β) (σ : Perm α) :
-    (e.permCongr σ).partition.parts.card = σ.partition.parts.card := by
+    (e.permCongr σ).tr = σ.tr := by
   calc
-    (e.permCongr σ).partition.parts.card
+    (e.permCongr σ).tr
         = Fintype.card (e.permCongr σ).Orbit := partition_parts_card_eq_fintype_card _
     _ = Fintype.card σ.Orbit := by
       exact (Fintype.card_congr (permCongr e σ)).symm
-    _ = σ.partition.parts.card := (partition_parts_card_eq_fintype_card σ).symm
+    _ = σ.tr := (partition_parts_card_eq_fintype_card σ).symm
 
 omit [DecidableEq γ] in
 noncomputable def meetingEquivTrace {P : γ → Prop} [DecidablePred P] (f : Perm γ) :
@@ -386,16 +454,80 @@ noncomputable def meetingEquivTrace {P : γ → Prop} [DecidablePred P] (f : Per
 
 end Orbit
 
+section tr_sumCongr
+
+variable {α β : Type*} [DecidableEq α] [Fintype α] [DecidableEq β] [Fintype β]
+
+@[simp] lemma tr_sumCongr (a : Perm α) (b : Perm β) :
+    (a.sumCongr b).tr = a.tr + b.tr := by
+  let orbitEquiv : (a.sumCongr b).Orbit ≃ a.Orbit ⊕ b.Orbit := {
+    toFun :=
+      Quotient.lift
+        (fun x : α ⊕ β ↦ match x with
+          | .inl x => Sum.inl (⟦x⟧ : a.Orbit)
+          | .inr y => Sum.inr (⟦y⟧ : b.Orbit))
+        (fun x y h ↦ by
+          cases x with
+          | inl x =>
+              cases y with
+              | inl y =>
+                  change (a.sumCongr b).SameCycle (.inl x) (.inl y) at h
+                  exact congrArg Sum.inl
+                    (Quotient.sound ((sameCycle_sumCongr_left a b x y).mp h))
+              | inr y =>
+                  change (a.sumCongr b).SameCycle (.inl x) (.inr y) at h
+                  exact False.elim ((not_sameCycle_sumCongr_left_right a b x y) h)
+          | inr x =>
+              cases y with
+              | inl y =>
+                  change (a.sumCongr b).SameCycle (.inr x) (.inl y) at h
+                  exact False.elim ((not_sameCycle_sumCongr_left_right a b y x) h.symm)
+              | inr y =>
+                  change (a.sumCongr b).SameCycle (.inr x) (.inr y) at h
+                  exact congrArg Sum.inr
+                    (Quotient.sound ((sameCycle_sumCongr_right a b x y).mp h)))
+    invFun :=
+      Sum.elim
+        (Quotient.map Sum.inl fun {x y} h ↦ by
+          change a.SameCycle x y at h
+          exact (sameCycle_sumCongr_left a b x y).mpr h)
+        (Quotient.map Sum.inr fun {x y} h ↦ by
+          change b.SameCycle x y at h
+          exact (sameCycle_sumCongr_right a b x y).mpr h)
+    left_inv := by
+      intro q
+      induction q using Quotient.inductionOn' with
+      | h x =>
+          cases x <;> rfl
+    right_inv := by
+      intro q
+      cases q with
+      | inl q =>
+          induction q using Quotient.inductionOn' with
+          | h x => rfl
+      | inr q =>
+          induction q using Quotient.inductionOn' with
+          | h x => rfl }
+  calc
+    (a.sumCongr b).tr
+        = Fintype.card (a.sumCongr b).Orbit := Orbit.partition_parts_card_eq_fintype_card _
+    _ = Fintype.card (a.Orbit ⊕ b.Orbit) := Fintype.card_congr orbitEquiv
+    _ = a.tr + b.tr := by
+      rw [Fintype.card_sum, ← Orbit.partition_parts_card_eq_fintype_card a,
+        ← Orbit.partition_parts_card_eq_fintype_card b]
+
+end tr_sumCongr
+
 variable {P : γ → Prop} [DecidablePred P]
 
 def closedCycles
     (f : Perm γ) (P : γ → Prop) [DecidablePred P] : ℕ :=
   Fintype.card (Orbit.Closed f P)
 
-theorem partition_card_eq_trace_partition_card_add_closedCycles (f : Perm γ) :
-    f.partition.parts.card = (f.trace P).partition.parts.card + f.closedCycles P := by
+theorem tr_eq_trace_tr_add_closedCycles (f : Perm γ) :
+    f.tr = (f.trace P).tr + f.closedCycles P := by
   calc
-    f.partition.parts.card
+    f.tr
       = Fintype.card f.Orbit := Orbit.partition_parts_card_eq_fintype_card f
     _ = Fintype.card {q : f.Orbit // Orbit.Meets f (¬P ·) q} +
           Fintype.card {q : f.Orbit // ¬Orbit.Meets f (¬P ·) q} :=
@@ -403,8 +535,13 @@ theorem partition_card_eq_trace_partition_card_add_closedCycles (f : Perm γ) :
     _ = Fintype.card (f.trace P).Orbit + f.closedCycles P := by
       rw [Fintype.card_congr (Orbit.meetingEquivTrace f)]
       simp [closedCycles, Orbit.Closed, Orbit.Avoiding]
-    _ = (f.trace P).partition.parts.card + f.closedCycles P := by
+    _ = (f.trace P).tr + f.closedCycles P := by
       exact congrArg (fun n ↦ n + f.closedCycles P)
         (Orbit.partition_parts_card_eq_fintype_card (f.trace P)).symm
+
+lemma tr_eq_closedCycles (f : Perm γ) :
+    f.tr = f.closedCycles (fun _ ↦ True) := by
+  rw [Orbit.partition_parts_card_eq_fintype_card f]
+  simp [closedCycles, Orbit.Closed, Orbit.Avoiding, Orbit.Meets]
 
 end Equiv.Perm
