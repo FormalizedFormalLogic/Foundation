@@ -237,7 +237,7 @@ def execution (𝔣 : Project γ) (𝔞 : Project {x : γ // P x}) : Project {x 
 def executionSum (𝔣 : Project (α ⊕ β)) (𝔞 : Project α) : Project β :=
   (execution 𝔣 (𝔞.delocate IsLeftEquivLeft.symm)).delocate notIsLeftEquivRight
 
-scoped infix:60 " ∷ " => Project.executionSum
+scoped[LO.Propositional.LinearLogic.Multiplicative.GoI] infix:60 " ∷ " => Project.executionSum
 
 @[simp] lemma executionSum_wager (𝔣 : Project (α ⊕ β)) (𝔞 : Project α) :
     (𝔣 ∷ 𝔞).wager = 𝔣.wager + 𝔞.wager + (𝔣 * (𝔞 + (1 : Project β))).plot.closedCycles (Sum.isLeft ·) := by
@@ -297,6 +297,11 @@ theorem execution_adjoint
               _ = (𝔣𝔟 ∷ 𝔞).tr := by symm; exact e1
               _ = ⟪𝔣 ∷ 𝔞 | 𝔟⟫ := by unfold measurement; simp [𝔣𝔟, executionSum_mul 𝔣 𝔞 𝔟]
 
+@[grind =] theorem execution_adjoint_polar
+    (𝔣 : Project (α ⊕ β)) (𝔞 : Project α) (𝔟 : Project β) :
+    𝔣 ∷ 𝔞 ⟂ 𝔟 ↔ 𝔣 ⟂ 𝔞 + 𝔟 := by
+  simp [Project.IsPolar, execution_adjoint]
+
 end Project
 
 /-! ### Polarity and Conduct -/
@@ -336,6 +341,14 @@ lemma isConduct_iff_subset_bipoler {A : Set (Project α)} : IsConduct A ↔ Aᗮ
 
 namespace Conduct
 
+open Project
+
+@[grind =] lemma set_polar_polar (A : Conduct α) : A.setᗮᗮ = A.set := by
+  symm; simpa [IsConduct] using A.set_isConduct
+
+@[grind =, simp] lemma mem_set_polar_polar (A : Conduct α) : a ∈ A.setᗮᗮ ↔ a ∈ A := by
+  simp [set_polar_polar]; rfl
+
 def tensor (A : Conduct α) (B : Conduct β) : Conduct (α ⊕ β) where
   set := {𝔠 | ∃ 𝔞 ∈ A, ∃ 𝔟 ∈ B, 𝔠 = 𝔞 + 𝔟}ᗮᗮ
   set_isConduct := by simp
@@ -343,6 +356,19 @@ def tensor (A : Conduct α) (B : Conduct β) : Conduct (α ⊕ β) where
 def par (A : Conduct α) (B : Conduct β) : Conduct (α ⊕ β) where
   set := {𝔠 | ∃ 𝔞 ∈ Aᗮ, ∃ 𝔟 ∈ Bᗮ, 𝔠 = 𝔞 + 𝔟}ᗮ
   set_isConduct := by simp
+
+def lollipop (A : Conduct α) (B : Conduct β) : Conduct (α ⊕ β) where
+  set := {𝔣 | ∀ 𝔞 ∈ A, 𝔣 ∷ 𝔞 ∈ B}
+  set_isConduct := isConduct_iff_subset_bipoler.mpr <| by
+    intro 𝔣 H 𝔞 h𝔞
+    suffices ∀ 𝔟', (∀ 𝔟 ∈ B, 𝔟 ⟂ 𝔟') → 𝔟' ⟂ 𝔣 ∷ 𝔞 by
+      have : 𝔣 ∷ 𝔞 ∈ B.setᗮᗮ := by simpa
+      grind
+    intro 𝔟' h𝔟'
+    have H : ∀ 𝔠', (∀ 𝔠, (∀ 𝔞 ∈ A, 𝔠 ∷ 𝔞 ∈ B) → 𝔠 ⟂ 𝔠') → 𝔠' ⟂ 𝔣 := by simpa using H
+    have : 𝔞 + 𝔟' ⟂ 𝔣 := H (𝔞 + 𝔟') fun 𝔠 h𝔠 ↦ by
+      simpa [←execution_adjoint_polar] using h𝔟' _ (h𝔠 𝔞 h𝔞)
+    grind
 
 end Conduct
 
