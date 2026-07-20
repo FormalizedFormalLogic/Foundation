@@ -127,6 +127,7 @@ public import Foundation.LinearLogic.LL.FirstOrder.Formula
 public import Foundation.LinearLogic.LL.FirstOrder.Rew
 public import Foundation.LinearLogic.LogicSymbol
 public import Foundation.LinearLogic.MELL.Propositional
+public import Foundation.LinearLogic.MLL.GoI
 public import Foundation.LinearLogic.MLL.Propositional
 public import Foundation.Logic.Calculus
 public import Foundation.Logic.Decidability
@@ -423,6 +424,7 @@ public import Foundation.Vorspiel.Finset.Card
 public import Foundation.Vorspiel.Fintype
 public import Foundation.Vorspiel.Function
 public import Foundation.Vorspiel.Graph
+public import Foundation.Vorspiel.GroupTheory.Perm
 public import Foundation.Vorspiel.IsEmpty
 public import Foundation.Vorspiel.List.Basic
 public import Foundation.Vorspiel.List.Chain

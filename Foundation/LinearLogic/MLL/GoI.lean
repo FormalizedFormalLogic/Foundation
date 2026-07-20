@@ -5,24 +5,20 @@ public import Foundation.Vorspiel.Algebra.IsNilpotent
 public import Foundation.Vorspiel.GroupTheory.Perm
 
 /-!
-# A Toy Model of Geometry of Interaction
+# A Simplified Geometry of Interaction
+
+## References
+- [Jean-Yves Girard, *Geometry of interaction. V: Logic in the hyperfinite factor*][Gir11]
+- [Thomas Seiller, *Interaction graphs: multiplicatives*][Sei12]
 -/
 
 @[expose] public section
 
-namespace Equiv
-
-@[simp] lemma sumComm_trans_sumComm (α β : Type*) :
-    (Equiv.sumComm α β).trans (Equiv.sumComm β α) = 1 := by
-  ext (_ | _) <;> rfl
-
-end Equiv
-
-namespace LO.Propositional.LinearLogic.Multiplicative
-
-namespace GoI
+namespace LO.Propositional.LinearLogic.Multiplicative.GoI
 
 open Equiv.Perm
+
+/-! ### Project -/
 
 @[ext]
 structure Project (Carrier : Type*) : Type _ where
@@ -122,7 +118,7 @@ lemma delocate_comp (𝔞 : Project α) (φ : α ≃ β) (ψ : β ≃ γ) :
 
 end Project
 
-/-! ### Measurement and polarity -/
+/-! ### Measurement and Polarity -/
 
 def Project.tr [Fintype α] [DecidableEq α] (𝔞 : Project α) : ℕ := 𝔞.wager + 𝔞.plot.tr
 
@@ -155,8 +151,6 @@ lemma measurement_comm (𝔞 𝔟 : Project α) :
 @[symm, grind =] lemma isPolar_symm {𝔞 𝔟 : Project α} :
     𝔞 ⟂ 𝔟 ↔ 𝔟 ⟂ 𝔞 := by
   simp [Project.IsPolar, measurement_comm]
-
-/-! ### Projects -/
 
 def fax (α : Type*) : Project (α ⊕ α) where
   wager := 0
@@ -210,6 +204,8 @@ omit [Fintype α] [DecidableEq α] [Fintype β] [DecidableEq β] in
   ext x
   · simp
   · cases x <;> rfl
+
+/-! ### Execution and Adjoint -/
 
 def trace (𝔣 : Project γ) (P : γ → Prop) [DecidablePred P] : Project {x : γ // ¬P x } where
   wager := 𝔣.wager + 𝔣.plot.closedCycles P
@@ -285,17 +281,15 @@ theorem execution_adjoint
   let 𝔣𝔟 : Project (α ⊕ β) := 𝔣 * ((1 : Project α) + 𝔟)
   let 𝔣𝔟𝔞 := 𝔣𝔟 * (𝔞 + (1 : Project β))
   have 𝔣𝔟_wager : 𝔣𝔟.wager = 𝔣.wager + 𝔟.wager := by simp [𝔣𝔟]
-  have e1 : (𝔣𝔟 ∷ 𝔞).tr = 𝔣.wager + 𝔞.wager + 𝔟.wager + (𝔣𝔟𝔞.trace (Sum.isLeft ·)).plot.tr + 𝔣𝔟𝔞.plot.closedCycles (Sum.isLeft ·) := by
-    simp [𝔣𝔟_wager, 𝔣𝔟𝔞, ]; omega
-  have e2 : (𝔣 * (𝔞 + 𝔟)).tr = 𝔣.wager + 𝔞.wager + 𝔟.wager + 𝔣𝔟𝔞.plot.tr := by
-    simp [𝔣𝔟𝔞, 𝔣𝔟 , tr, add_mul_add]; omega
   calc
-    ⟪𝔣 | 𝔞 + 𝔟⟫ = 𝔣.wager + 𝔞.wager + 𝔟.wager + 𝔣𝔟𝔞.plot.tr := by simpa [measurement] using e2
-              _ = 𝔣.wager + 𝔞.wager + 𝔟.wager + (𝔣𝔟𝔞.trace (Sum.isLeft ·)).plot.tr + 𝔣𝔟𝔞.plot.closedCycles (Sum.isLeft ·) := by
-                simp [tr_eq_trace_tr_add_closedCycles 𝔣𝔟𝔞.plot (P := (Sum.isLeft ·)), trace_plot];
-                omega
-              _ = (𝔣𝔟 ∷ 𝔞).tr := by symm; exact e1
-              _ = ⟪𝔣 ∷ 𝔞 | 𝔟⟫ := by unfold measurement; simp [𝔣𝔟, executionSum_mul 𝔣 𝔞 𝔟]
+    ⟪𝔣 | 𝔞 + 𝔟⟫ = (𝔣 * (𝔞 + 𝔟)).tr                          := by unfold measurement; rfl
+              _ = 𝔣.wager + 𝔞.wager + 𝔟.wager + 𝔣𝔟𝔞.plot.tr := by simp [𝔣𝔟𝔞, 𝔣𝔟 , tr, add_mul_add]; omega
+              _ = 𝔣.wager + 𝔞.wager + 𝔟.wager
+                  + (𝔣𝔟𝔞.trace (Sum.isLeft ·)).plot.tr
+                  + 𝔣𝔟𝔞.plot.closedCycles (Sum.isLeft ·)    := by simp [tr_eq_trace_tr_add_closedCycles 𝔣𝔟𝔞.plot (P := (Sum.isLeft ·)), trace_plot]; omega
+              _ = (𝔣𝔟 ∷ 𝔞).tr                               := by simp [𝔣𝔟_wager, 𝔣𝔟𝔞, ]; omega
+              _ = ((𝔣 ∷ 𝔞) * 𝔟).tr                          := by simp [𝔣𝔟, executionSum_mul 𝔣 𝔞 𝔟]
+              _ = ⟪𝔣 ∷ 𝔞 | 𝔟⟫                               := by unfold measurement; rfl
 
 @[grind =] theorem execution_adjoint_polar
     (𝔣 : Project (α ⊕ β)) (𝔞 : Project α) (𝔟 : Project β) :
@@ -304,7 +298,7 @@ theorem execution_adjoint
 
 end Project
 
-/-! ### Polarity and Conduct -/
+/-! ### Conducts -/
 
 variable {α β : Type*} [Fintype α] [Fintype β] [DecidableEq α] [DecidableEq β]
 
@@ -372,7 +366,7 @@ def lollipop (A : Conduct α) (B : Conduct β) : Conduct (α ⊕ β) where
 
 end Conduct
 
-/-! ### Successful Project -/
+/-! ### Successful Projects and Conducts -/
 
 structure Project.IsSuccessful (𝔞 : Project α) : Prop where
   square_eq_one : 𝔞 * 𝔞 = 1
