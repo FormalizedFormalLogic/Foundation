@@ -22,6 +22,10 @@ abbrev IsDefinedBy (R : (Fin k → M) → Prop) (φ : Semisentence L k) : Prop :
 class Defined (R : outParam ((Fin k → M) → Prop)) (φ : Semisentence L k) : Prop where
   iff : IsDefinedBy R φ
 
+/--
+The relation `R` is definable by a formula `φ` with parameters over the domain `M`.
+Here, the free variables of `φ` are indexed by the type `M`, so that `φ` may contain finitely many parameters, which are interpreted by using `id : M → M` for the valuation of free variables.
+-/
 abbrev IsDefinedByWithParam (R : (Fin k → M) → Prop) (φ : Semiformula L M k) : Prop :=
   ∀ v, φ.Eval v id ↔ R v
 

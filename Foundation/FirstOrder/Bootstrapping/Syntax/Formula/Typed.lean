@@ -310,11 +310,11 @@ noncomputable def substItrDisj (w : SemitermVec V ℒₒᵣ m n) (φ : Semiformu
 
 @[simp] lemma substItrConj_free (w : SemitermVec V ℒₒᵣ m 1) (φ : Semiformula V ℒₒᵣ (m + 1)) (z : V) :
     (φ.substItrConj w z).free = φ.shift.substItrConj (Semiterm.free⨟ w) z := by
-  unfold free; simp [Matrix.map_map_comp']; rfl
+  unfold free; simp [Matrix.vecMap_vecMap_comp']; rfl
 
 @[simp] lemma substItrDisj_free (w : SemitermVec V ℒₒᵣ m 1) (φ : Semiformula V ℒₒᵣ (m + 1)) (z : V) :
     (φ.substItrDisj w z).free = φ.shift.substItrDisj (Semiterm.free⨟ w) z := by
-  unfold free; simp [Matrix.map_map_comp']; rfl
+  unfold free; simp [Matrix.vecMap_vecMap_comp']; rfl
 
 end Semiformula
 

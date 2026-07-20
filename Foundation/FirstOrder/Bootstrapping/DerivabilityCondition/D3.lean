@@ -129,7 +129,7 @@ theorem bold_sigma_one_complete {n} {φ : ArithmeticSemisentence n} (hp : Hierar
       apply ball_intro
       intro i hi
       suffices T.internalize V ⊢ (toNumVec (i :> w) ⤔ ⌜φ⌝) by
-        simpa [Semiformula.substs_substs, Matrix.map_map_comp']
+        simpa [Semiformula.substs_substs, Matrix.vecMap_vecMap_comp']
       exact ih (h i hi)
     exact ball_replace T ((toNumVec w).q ⤔ ⌜φ⌝) _ _ ⨀ (eq_comm <| term_complete T t w) ⨀ this
   case hExs =>
@@ -139,7 +139,7 @@ theorem bold_sigma_one_complete {n} {φ : ArithmeticSemisentence n} (hp : Hierar
     suffices T.internalize V ⊢ ∃⁰ ((toNumVec w).q ⤔ ⌜φ⌝) by simpa
     apply TProof.exs! (𝕹 i)
     suffices T.internalize V ⊢ (toNumVec (i :> w) ⤔ ⌜φ⌝) by
-      simpa [Semiformula.substs_substs, Matrix.map_map_comp']
+      simpa [Semiformula.substs_substs, Matrix.vecMap_vecMap_comp']
     exact ih hφ
 
 theorem sigma_one_provable_of_models {σ : ArithmeticSentence} (hσ : Hierarchy 𝚺 1 σ) :
