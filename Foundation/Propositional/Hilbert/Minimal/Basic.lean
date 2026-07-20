@@ -3,9 +3,6 @@ module
 public import Foundation.Propositional.Entailment.Int.DNE_of_LEM
 public import Foundation.Propositional.Logic.Basic
 public import Foundation.Propositional.Formula.Basic
-public import Foundation.Propositional.Entailment.KreiselPutnam
-public import Foundation.Propositional.Entailment.Scott
-public import Foundation.Propositional.Entailment.Corsi
 
 @[expose] public section
 
@@ -25,17 +22,11 @@ instance : SetLike (Hilbert α) (Formula α) where
 
 protected def Min : Hilbert α := ⟨∅, by tauto⟩
 protected def Int : Hilbert α := ⟨{ Axioms.EFQ φ | φ }, by grind⟩
-protected def KreiselPutnam : Hilbert α := ⟨
-  { Axioms.EFQ φ | φ } ∪
-  { Axioms.KreiselPutnam φ ψ χ | (φ) (ψ) (χ) },
-  by rintro φ (_ | _) <;> grind;
-⟩
 protected def Cl : Hilbert α := ⟨
   { Axioms.EFQ φ | φ } ∪ { Axioms.LEM φ | φ },
   by rintro φ (_ | _) <;> grind;
 ⟩
 
-@[simp, grind .] lemma Int_le_KreiselPutnam : (Hilbert.Int : Hilbert α).schema ⊆ Hilbert.KreiselPutnam.schema := by tauto;
 @[simp, grind .] lemma Int_le_Cl : (Hilbert.Int : Hilbert α).schema ⊆ Hilbert.Cl.schema := by tauto;
 
 end Hilbert
@@ -134,10 +125,6 @@ section
 instance : Entailment.Int (Hilbert.Int : Hilbert α) where
   efq := axm $ by tauto
 
-instance : Entailment.KreiselPutnam (Hilbert.KreiselPutnam : Hilbert α) where
-  efq           := axm $ by tauto
-  kreiselputnam := axm $ by right; grind;
-
 instance : Entailment.HasAxiomEFQ (Hilbert.Cl : Hilbert α) := ⟨axm $ by tauto⟩
 instance : Entailment.HasAxiomLEM (Hilbert.Cl : Hilbert α) := ⟨axm $ by tauto⟩
 instance : Entailment.Int (Hilbert.Cl : Hilbert α) where
@@ -168,9 +155,8 @@ lemma iff_mem_logic_provable : H ⊢ φ ↔ φ ∈ H.logic := ⟨mem_logic_of_pr
 end Hilbert
 
 
-protected abbrev Int           : Logic α := Hilbert.Int.logic
-protected abbrev KreiselPutnam : Logic α := Hilbert.KreiselPutnam.logic
-protected abbrev Cl            : Logic α := Hilbert.Cl.logic
+protected abbrev Int : Logic α := Hilbert.Int.logic
+protected abbrev Cl  : Logic α := Hilbert.Cl.logic
 
 end LO.Propositional
 
