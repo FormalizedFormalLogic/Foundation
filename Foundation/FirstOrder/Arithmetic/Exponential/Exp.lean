@@ -781,6 +781,12 @@ lemma nat_cast_exp (n : ℕ) : (Exp.exp n : ℕ) = Exp.exp (n : V) := by
   · simp
   · simp [exp_succ, ih]
 
+@[simp, grind =]
+lemma exp_nat {n : ℕ} : Exp.exp n = 2 ^ n := by
+  induction n with
+  | zero => simp
+  | succ => grind [exp_succ]
+
 end exponential
 
 end ISigma1

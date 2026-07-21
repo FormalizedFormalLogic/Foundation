@@ -90,14 +90,6 @@ theorem provable_restrictedGödel : T ⊢ T.restrictedGödel e := by
   apply Arithmetic.sigma_one_completeness_iff T.restrictedGödel'_sigmaOne |>.mp;
   apply iff_true_restrictedGödel_true_restrictedGödel'.mp $ true_restrictedGödel;
 
--- TODO: move to `Exp.lean`?
-@[simp, grind =]
-lemma exp_nat {n : ℕ} : Exp.exp n = 2 ^ n := by
-  induction n with
-  | zero => simp;
-  | succ => grind [exp_succ];
-
-
 /-- Lower bound of a Gödel number of proof of restricted Gödel sentence is `2^e`. -/
 theorem lower_bound_gödelNumber_proof_restrictedGödel : ∀ b : T ⊢! T.restrictedGödel e, 2^e ≤ ⌜b⌝ := by
   intro b;

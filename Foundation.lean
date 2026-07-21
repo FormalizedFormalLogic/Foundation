@@ -22,6 +22,7 @@ public import Foundation.FirstOrder.Arithmetic.HFS.Coding
 public import Foundation.FirstOrder.Arithmetic.HFS.Fixpoint
 public import Foundation.FirstOrder.Arithmetic.HFS.PRF
 public import Foundation.FirstOrder.Arithmetic.HFS.Seq
+public import Foundation.FirstOrder.Arithmetic.HFS.Standard
 public import Foundation.FirstOrder.Arithmetic.HFS.Vec
 public import Foundation.FirstOrder.Arithmetic.IOpen.Basic
 public import Foundation.FirstOrder.Arithmetic.Induction
