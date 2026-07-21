@@ -257,6 +257,25 @@ lemma nat_nth_eq (v i : ℕ) : v.[i] = natNth v i := by
   | succ i ih => rw [nth_succ, natNth, ih, natSndIdx_eq]
 
 
+/-! ### A reducible `insert`
+
+`nat_insert_eq` states what `insert` is at `ℕ`, but as a rewrite rule it is unavailable to
+`decide`. Mirrors that *build* sets need the reducible form. -/
+
+/-- `insert` at `V := ℕ`, reducibly. -/
+def natInsert (i a : ℕ) : ℕ := if a.testBit i then a else a + 2 ^ i
+
+lemma natInsert_eq (i a : ℕ) : (insert i a : ℕ) = natInsert i a := nat_insert_eq i a
+
+@[simp] lemma mem_natInsert_iff {i j a : ℕ} : i ∈ natInsert j a ↔ i = j ∨ i ∈ a := by
+  rw [← natInsert_eq]; exact mem_bitInsert_iff
+
+lemma mem_foldr_natInsert {y : ℕ} {l : List ℕ} :
+    y ∈ l.foldr natInsert 0 ↔ y ∈ l := by
+  induction l with
+  | nil => simp [nat_mem_iff_testBit (x := y) (s := 0)]
+  | cons x l ih => simp [ih]
+
 /-! ### The payoff -/
 
 example : (3 : ℕ) ∈ (40 : ℕ) := by decide
@@ -277,6 +296,8 @@ example : natUnpair 1234567890 = (29394, 35136) := by decide
 example : natLen (Nat.pair 3 (Nat.pair 5 0 + 1) + 1) = 2 := by decide
 
 example : natNth (Nat.pair 3 (Nat.pair 5 0 + 1) + 1) 1 = 5 := by decide
+
+example : natInsert 3 (natInsert 5 0) = 40 := by decide
 
 end LO.FirstOrder.Arithmetic
 

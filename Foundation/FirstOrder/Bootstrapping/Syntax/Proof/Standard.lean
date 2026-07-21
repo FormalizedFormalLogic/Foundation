@@ -39,6 +39,32 @@ theorem IsFormulaSet.check_iff {s : ℕ} : IsFormulaSet.check L s = true ↔ IsF
 instance decidableIsFormulaSet (L : Language) [L.Encodable] [L.LORDefinable] [L.DecidableSymbols]
     (s : ℕ) : Decidable (IsFormulaSet (V := ℕ) L s) := decidable_of_iff _ IsFormulaSet.check_iff
 
+/-! ### Function mirror: `setShift`
+
+Pattern C — no recursion at all. `setShift` is `Classical.choose!` from a replacement axiom,
+characterised by `mem_setShift_iff : y ∈ setShift L s ↔ ∃ x ∈ s, y = shift L x`, so the mirror maps
+`shift.check` over `Nat.bitIndices` and rebuilds the set with `natInsert`, and agreement is set
+extensionality (`mem_ext`) rather than an induction on codes. Structurally this is
+`IsFormulaSet.check` above, with a fold that builds instead of one that tests.
+
+This is the mirror the derivation checker calls: `Derivation.Phi`'s `shiftRule` side condition is
+`s = setShift L (fstIdx d)`, so `setShift.check` is what decides it. Its input and output are bare
+code numerals, per the constraint recorded above. -/
+
+/-- Executable mirror of `setShift` at `V := ℕ`. -/
+def setShift.check (L : Language) [L.Encodable] [L.LORDefinable] [L.DecidableSymbols]
+    (s : ℕ) : ℕ := (s.bitIndices.map (shift.check L)).foldr natInsert 0
+
+theorem setShift.check_eq (s : ℕ) : setShift.check L s = setShift L s := by
+  refine mem_ext fun y ↦ ?_
+  rw [setShift.check, mem_foldr_natInsert, mem_setShift_iff]
+  simp only [List.mem_map, Nat.mem_bitIndices]
+  constructor
+  · rintro ⟨x, hx, rfl⟩
+    exact ⟨x, nat_mem_iff_testBit.mpr hx, shift.check_eq (L := L) x⟩
+  · rintro ⟨x, hx, rfl⟩
+    exact ⟨x, nat_mem_iff_testBit.mp hx, shift.check_eq (L := L) x⟩
+
 /-! ### It runs -/
 
 /-- `0 = ∅`. -/
@@ -54,6 +80,11 @@ example : ¬IsFormulaSet (V := ℕ) ℒₒᵣ 1 :=
 /-- `384 = 2 ^ 7 + 2 ^ 8 = {^⊤, 8}`, and `8` is no formula. -/
 example : ¬IsFormulaSet (V := ℕ) ℒₒᵣ 384 :=
   fun h ↦ absurd (IsFormulaSet.check_iff.mpr h) (by decide)
+
+example : setShift.check ℒₒᵣ 0 = 0 := by decide
+
+/-- `128 = {^⊤}`, and `^⊤` is closed, so shifting the set fixes it. -/
+example : setShift (V := ℕ) ℒₒᵣ 128 = 128 := by rw [← setShift.check_eq]; decide
 
 end LO.FirstOrder.Arithmetic.Bootstrapping
 
