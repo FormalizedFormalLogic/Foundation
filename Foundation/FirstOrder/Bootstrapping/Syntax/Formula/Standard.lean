@@ -623,6 +623,169 @@ theorem shift.check_eq (p : ℕ) : shift.check L p = shift L p := by
   · rw [if_neg h]
     exact (shift_not_uformula fun hc ↦ h (IsUFormula.check_iff.mpr hc)).symm
 
+/-! ### Function mirrors: `subst`, and the composites over it
+
+Pattern B: the parameter *changes* under `^∀`/`^∃`, by `qVec`. The C1 `Semi` finding — that a
+shifting parameter costs nothing, because the induction quantifies over it inside the fuel — still
+applies, but it is no longer the whole story. `IsSemiformula`'s `n` was a bare number; `subst`'s `w`
+is a coded term vector, and `qVec.check` agrees with `qVec` only on *well-formed* vectors. So the
+induction carries a **second** invariant, on the parameter, alongside the one on the code:
+
+    ∀ w, IsUTermVec L (len w) w → ∀ p ≤ s, IsUFormula L p → substF L s w p = subst L w p
+
+and the quantifier branches re-establish it for the shifted parameter — `hqw`, from
+`IsUTermVec.qVec` and `len_qVec` — before invoking the induction hypothesis. That is the only thing
+pattern B adds; everything else is the `shift` proof with `w` threaded. -/
+
+def substF (L : Language) [L.Encodable] [L.LORDefinable] [L.DecidableSymbols] :
+    ℕ → ℕ → ℕ → ℕ
+  | 0, _, _ => 0
+  | _ + 1, _, 0 => 0
+  | s + 1, w, e + 1 =>
+    if natPi₁ e = 0 ∨ natPi₁ e = 1 then
+      Nat.pair (natPi₁ e) (Nat.pair (natPi₁ (natPi₂ e))
+        (Nat.pair (natPi₁ (natPi₂ (natPi₂ e)))
+          (termSubstVec.check L w (natPi₂ (natPi₂ (natPi₂ e)))))) + 1
+    else if natPi₁ e = 2 ∨ natPi₁ e = 3 then Nat.pair (natPi₁ e) 0 + 1
+    else if natPi₁ e = 4 ∨ natPi₁ e = 5 then
+      Nat.pair (natPi₁ e) (Nat.pair (substF L s w (natPi₁ (natPi₂ e)))
+        (substF L s w (natPi₂ (natPi₂ e)))) + 1
+    else if natPi₁ e = 6 ∨ natPi₁ e = 7 then
+      Nat.pair (natPi₁ e) (substF L s (qVec.check L w) (natPi₂ e)) + 1
+    else 0
+
+def subst.check (L : Language) [L.Encodable] [L.LORDefinable] [L.DecidableSymbols]
+    (w p : ℕ) : ℕ := if IsUFormula.check L p then substF L p w p else 0
+
+private lemma substF_succ (s w e : ℕ) :
+    substF L (s + 1) w (e + 1) =
+      (if (Nat.unpair e).1 = 0 ∨ (Nat.unpair e).1 = 1 then
+        Nat.pair (Nat.unpair e).1 (Nat.pair (Nat.unpair (Nat.unpair e).2).1
+          (Nat.pair (Nat.unpair (Nat.unpair (Nat.unpair e).2).2).1
+            (termSubstVec.check L w (Nat.unpair (Nat.unpair (Nat.unpair e).2).2).2))) + 1
+      else if (Nat.unpair e).1 = 2 ∨ (Nat.unpair e).1 = 3 then Nat.pair (Nat.unpair e).1 0 + 1
+      else if (Nat.unpair e).1 = 4 ∨ (Nat.unpair e).1 = 5 then
+        Nat.pair (Nat.unpair e).1 (Nat.pair (substF L s w (Nat.unpair (Nat.unpair e).2).1)
+          (substF L s w (Nat.unpair (Nat.unpair e).2).2)) + 1
+      else if (Nat.unpair e).1 = 6 ∨ (Nat.unpair e).1 = 7 then
+        Nat.pair (Nat.unpair e).1 (substF L s (qVec.check L w) (Nat.unpair e).2) + 1
+      else 0) := by
+  rw [substF]; simp only [natPi₁, natPi₂, natUnpair_eq]
+
+private lemma substF_eq_aux (s : ℕ) :
+    ∀ w, IsUTermVec L (len w) w → ∀ p ≤ s, IsUFormula L p → substF L s w p = subst L w p := by
+  induction s with
+  | zero =>
+    intro w hw p hp h
+    obtain rfl : p = 0 := by omega
+    simp at h
+  | succ m ih =>
+    intro w hw p hp h
+    match p with
+    | 0 => simp at h
+    | e + 1 =>
+      have he : Nat.pair (Nat.unpair e).1 (Nat.unpair e).2 = e := Nat.pair_unpair e
+      have e2 : Nat.pair (Nat.unpair (Nat.unpair e).2).1 (Nat.unpair (Nat.unpair e).2).2
+          = (Nat.unpair e).2 := Nat.pair_unpair _
+      have e3 : Nat.pair (Nat.unpair (Nat.unpair (Nat.unpair e).2).2).1
+          (Nat.unpair (Nat.unpair (Nat.unpair e).2).2).2
+          = (Nat.unpair (Nat.unpair e).2).2 := Nat.pair_unpair _
+      have hl₁ : (Nat.unpair (Nat.unpair e).2).1 ≤ m :=
+        le_trans (le_trans (Nat.unpair_left_le _) (Nat.unpair_right_le _)) (by omega)
+      have hl₂ : (Nat.unpair (Nat.unpair e).2).2 ≤ m :=
+        le_trans (le_trans (Nat.unpair_right_le _) (Nat.unpair_right_le _)) (by omega)
+      have hl₃ : (Nat.unpair e).2 ≤ m := le_trans (Nat.unpair_right_le _) (by omega)
+      -- the parameter invariant, re-established for the shifted parameter
+      have hqw : IsUTermVec L (len (qVec L w)) (qVec L w) := by
+        rw [len_qVec hw]; exact hw.qVec
+      rcases (show (Nat.unpair e).1 = 0 ∨ (Nat.unpair e).1 = 1 ∨ (Nat.unpair e).1 = 2 ∨
+          (Nat.unpair e).1 = 3 ∨ (Nat.unpair e).1 = 4 ∨ (Nat.unpair e).1 = 5 ∨
+          (Nat.unpair e).1 = 6 ∨ (Nat.unpair e).1 = 7 ∨ 8 ≤ (Nat.unpair e).1 by omega)
+        with h' | h' | h' | h' | h' | h' | h' | h' | h'
+      · have hs : (e : ℕ) + 1 = ^rel (Nat.unpair (Nat.unpair e).2).1
+            (Nat.unpair (Nat.unpair (Nat.unpair e).2).2).1
+            (Nat.unpair (Nat.unpair (Nat.unpair e).2).2).2 := by
+          rw [nat_qqRel_eq, e3, e2, ← h', he]
+        rw [hs] at h
+        obtain ⟨hR, hv⟩ := IsUFormula.rel.mp h
+        rw [substF_succ, if_pos (Or.inl h'), hs, substs_rel hR hv, nat_qqRel_eq, h',
+          termSubstVec.check_eq hv]
+      · have hs : (e : ℕ) + 1 = ^nrel (Nat.unpair (Nat.unpair e).2).1
+            (Nat.unpair (Nat.unpair (Nat.unpair e).2).2).1
+            (Nat.unpair (Nat.unpair (Nat.unpair e).2).2).2 := by
+          rw [nat_qqNRel_eq, e3, e2, ← h', he]
+        rw [hs] at h
+        obtain ⟨hR, hv⟩ := IsUFormula.nrel.mp h
+        rw [substF_succ, if_pos (Or.inr h'), hs, substs_nrel hR hv, nat_qqNRel_eq, h',
+          termSubstVec.check_eq hv]
+      · have hz : (Nat.unpair e).2 = 0 := (IsUFormula.tag_spec h).2 (Or.inl h')
+        have hs : (e : ℕ) + 1 = (^⊤ : ℕ) := by rw [nat_qqVerum_eq, ← h', ← hz, he]
+        rw [substF_succ, if_neg (by omega), if_pos (Or.inl h'), hs, substs_verum, nat_qqVerum_eq,
+          h']
+      · have hz : (Nat.unpair e).2 = 0 := (IsUFormula.tag_spec h).2 (Or.inr h')
+        have hs : (e : ℕ) + 1 = (^⊥ : ℕ) := by rw [nat_qqFalsum_eq, ← h', ← hz, he]
+        rw [substF_succ, if_neg (by omega), if_pos (Or.inr h'), hs, substs_falsum,
+          nat_qqFalsum_eq, h']
+      · have hs : (e : ℕ) + 1 =
+            (Nat.unpair (Nat.unpair e).2).1 ^⋏ (Nat.unpair (Nat.unpair e).2).2 := by
+          rw [nat_qqAnd_eq, e2, ← h', he]
+        rw [hs] at h
+        obtain ⟨hp₁, hp₂⟩ := IsUFormula.and.mp h
+        rw [substF_succ, if_neg (by omega), if_neg (by omega), if_pos (Or.inl h'), hs,
+          substs_and hp₁ hp₂, nat_qqAnd_eq, h', ih w hw _ hl₁ hp₁, ih w hw _ hl₂ hp₂]
+      · have hs : (e : ℕ) + 1 =
+            (Nat.unpair (Nat.unpair e).2).1 ^⋎ (Nat.unpair (Nat.unpair e).2).2 := by
+          rw [nat_qqOr_eq, e2, ← h', he]
+        rw [hs] at h
+        obtain ⟨hp₁, hp₂⟩ := IsUFormula.or.mp h
+        rw [substF_succ, if_neg (by omega), if_neg (by omega), if_pos (Or.inr h'), hs,
+          substs_or hp₁ hp₂, nat_qqOr_eq, h', ih w hw _ hl₁ hp₁, ih w hw _ hl₂ hp₂]
+      · have hs : (e : ℕ) + 1 = ^∀ (Nat.unpair e).2 := by rw [nat_qqAll_eq, ← h', he]
+        rw [hs] at h
+        have hp₁ := IsUFormula.all.mp h
+        rw [substF_succ, if_neg (by omega), if_neg (by omega), if_neg (by omega),
+          if_pos (Or.inl h'), hs, substs_all hp₁, nat_qqAll_eq, h', qVec.check_eq hw,
+          ih (qVec L w) hqw _ hl₃ hp₁]
+      · have hs : (e : ℕ) + 1 = ^∃ (Nat.unpair e).2 := by rw [nat_qqExs_eq, ← h', he]
+        rw [hs] at h
+        have hp₁ := IsUFormula.ex.mp h
+        rw [substF_succ, if_neg (by omega), if_neg (by omega), if_neg (by omega),
+          if_pos (Or.inr h'), hs, substs_ex hp₁, nat_qqExs_eq, h', qVec.check_eq hw,
+          ih (qVec L w) hqw _ hl₃ hp₁]
+      · rw [substF_succ, if_neg (by omega), if_neg (by omega), if_neg (by omega), if_neg (by omega)]
+        have := (IsUFormula.tag_spec h).1; omega
+
+theorem subst.check_eq {w : ℕ} (hw : IsUTermVec L (len w) w) (p : ℕ) :
+    subst.check L w p = subst L w p := by
+  rw [subst.check]
+  by_cases h : IsUFormula.check L p = true
+  · rw [if_pos h]
+    exact substF_eq_aux p w hw p le_rfl (IsUFormula.check_iff.mp h)
+  · rw [if_neg h]
+    exact (substs_not_uformula fun hc ↦ h (IsUFormula.check_iff.mpr hc)).symm
+
+/-! ### The composites
+
+`substs1 t u = subst L ?[t] u` and `free p = substs1 L ^&0 (shift L p)` are definitions, not
+recursions, so their mirrors are one-liners over `subst.check`. `free.check_eq` needs no hypothesis
+at all: `^&0` is a term outright, and `shift.check` agrees unconditionally. -/
+
+def substs1.check (L : Language) [L.Encodable] [L.LORDefinable] [L.DecidableSymbols]
+    (t u : ℕ) : ℕ := subst.check L (Nat.pair t 0 + 1) u
+
+def free.check (L : Language) [L.Encodable] [L.LORDefinable] [L.DecidableSymbols]
+    (p : ℕ) : ℕ := substs1.check L 3 (shift.check L p)
+
+theorem substs1.check_eq {t : ℕ} (ht : IsUTerm L t) (u : ℕ) :
+    substs1.check L t u = substs1 L t u := by
+  have hv : IsUTermVec L (len (?[t] : ℕ)) (?[t] : ℕ) := by simpa using ht
+  rw [substs1.check, substs1, show (Nat.pair t 0 + 1 : ℕ) = ?[t] by
+    simp [adjoin_def, nat_pair_eq], subst.check_eq hv]
+
+theorem free.check_eq (p : ℕ) : free.check L p = free L p := by
+  have h3 : (3 : ℕ) = ^&0 := by rw [nat_qqFvar_eq]; simp [Nat.pair]
+  rw [free.check, free, h3, substs1.check_eq (by simp), shift.check_eq]
+
 /-! ### It runs
 
 `7 = ^⊤`; `3974 = ^⊤ ^⋏ ^⊤`; `73` has constructor tag `8`. Inputs are bare numerals — see
@@ -655,6 +818,19 @@ example : neg (V := ℕ) ℒₒᵣ 73 = 0 := by rw [← neg.check_eq]; decide
 example : shift (V := ℕ) ℒₒᵣ 7 = 7 := by rw [← shift.check_eq]; decide
 
 example : shift (V := ℕ) ℒₒᵣ 73 = 0 := by rw [← shift.check_eq]; decide
+
+example : subst.check ℒₒᵣ 0 7 = 7 := by decide
+
+/-- Substituting into `^⊤` fixes it. -/
+example : subst (V := ℕ) ℒₒᵣ 0 7 = 7 := by
+  rw [← subst.check_eq (w := 0) (by simp)]; decide
+
+example : subst (V := ℕ) ℒₒᵣ 0 73 = 0 := by
+  rw [← subst.check_eq (w := 0) (by simp)]; decide
+
+example : free (V := ℕ) ℒₒᵣ 7 = 7 := by rw [← free.check_eq]; decide
+
+example : free (V := ℕ) ℒₒᵣ 73 = 0 := by rw [← free.check_eq]; decide
 
 end LO.FirstOrder.Arithmetic.Bootstrapping
 
