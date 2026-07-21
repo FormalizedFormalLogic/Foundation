@@ -498,6 +498,131 @@ theorem neg.check_eq (p : ℕ) : neg.check L p = neg L p := by
   · rw [if_neg h]
     exact (neg_not_uformula fun hc ↦ h (IsUFormula.check_iff.mpr hc)).symm
 
+/-! ### Function mirrors: `shift`
+
+`neg` again, with two differences: the `^rel`/`^nrel` branches call the term-level
+`termShiftVec.check` (which is why the term layer had to land first), and the constructor tag is
+*preserved* rather than flipped, so those two branches share a single arm. -/
+
+def shiftF (L : Language) [L.Encodable] [L.LORDefinable] [L.DecidableSymbols] : ℕ → ℕ → ℕ
+  | 0, _ => 0
+  | _ + 1, 0 => 0
+  | s + 1, e + 1 =>
+    if natPi₁ e = 0 ∨ natPi₁ e = 1 then
+      Nat.pair (natPi₁ e) (Nat.pair (natPi₁ (natPi₂ e))
+        (Nat.pair (natPi₁ (natPi₂ (natPi₂ e)))
+          (termShiftVec.check L (natPi₂ (natPi₂ (natPi₂ e)))))) + 1
+    else if natPi₁ e = 2 ∨ natPi₁ e = 3 then Nat.pair (natPi₁ e) 0 + 1
+    else if natPi₁ e = 4 ∨ natPi₁ e = 5 then
+      Nat.pair (natPi₁ e) (Nat.pair (shiftF L s (natPi₁ (natPi₂ e)))
+        (shiftF L s (natPi₂ (natPi₂ e)))) + 1
+    else if natPi₁ e = 6 ∨ natPi₁ e = 7 then
+      Nat.pair (natPi₁ e) (shiftF L s (natPi₂ e)) + 1
+    else 0
+
+/-- The total mirror: guarded by the `C1` recogniser, matching `shift_not_uformula`. -/
+def shift.check (L : Language) [L.Encodable] [L.LORDefinable] [L.DecidableSymbols] (p : ℕ) : ℕ :=
+  if IsUFormula.check L p then shiftF L p p else 0
+
+private lemma shiftF_succ (s e : ℕ) :
+    shiftF L (s + 1) (e + 1) =
+      (if (Nat.unpair e).1 = 0 ∨ (Nat.unpair e).1 = 1 then
+        Nat.pair (Nat.unpair e).1 (Nat.pair (Nat.unpair (Nat.unpair e).2).1
+          (Nat.pair (Nat.unpair (Nat.unpair (Nat.unpair e).2).2).1
+            (termShiftVec.check L (Nat.unpair (Nat.unpair (Nat.unpair e).2).2).2))) + 1
+      else if (Nat.unpair e).1 = 2 ∨ (Nat.unpair e).1 = 3 then Nat.pair (Nat.unpair e).1 0 + 1
+      else if (Nat.unpair e).1 = 4 ∨ (Nat.unpair e).1 = 5 then
+        Nat.pair (Nat.unpair e).1 (Nat.pair (shiftF L s (Nat.unpair (Nat.unpair e).2).1)
+          (shiftF L s (Nat.unpair (Nat.unpair e).2).2)) + 1
+      else if (Nat.unpair e).1 = 6 ∨ (Nat.unpair e).1 = 7 then
+        Nat.pair (Nat.unpair e).1 (shiftF L s (Nat.unpair e).2) + 1
+      else 0) := by
+  rw [shiftF]; simp only [natPi₁, natPi₂, natUnpair_eq]
+
+private lemma shiftF_eq_aux (s : ℕ) : ∀ p ≤ s, IsUFormula L p → shiftF L s p = shift L p := by
+  induction s with
+  | zero =>
+    intro p hp h
+    obtain rfl : p = 0 := by omega
+    simp at h
+  | succ m ih =>
+    intro p hp h
+    match p with
+    | 0 => simp at h
+    | e + 1 =>
+      have he : Nat.pair (Nat.unpair e).1 (Nat.unpair e).2 = e := Nat.pair_unpair e
+      have e2 : Nat.pair (Nat.unpair (Nat.unpair e).2).1 (Nat.unpair (Nat.unpair e).2).2
+          = (Nat.unpair e).2 := Nat.pair_unpair _
+      have e3 : Nat.pair (Nat.unpair (Nat.unpair (Nat.unpair e).2).2).1
+          (Nat.unpair (Nat.unpair (Nat.unpair e).2).2).2
+          = (Nat.unpair (Nat.unpair e).2).2 := Nat.pair_unpair _
+      have hl₁ : (Nat.unpair (Nat.unpair e).2).1 ≤ m :=
+        le_trans (le_trans (Nat.unpair_left_le _) (Nat.unpair_right_le _)) (by omega)
+      have hl₂ : (Nat.unpair (Nat.unpair e).2).2 ≤ m :=
+        le_trans (le_trans (Nat.unpair_right_le _) (Nat.unpair_right_le _)) (by omega)
+      have hl₃ : (Nat.unpair e).2 ≤ m := le_trans (Nat.unpair_right_le _) (by omega)
+      rcases (show (Nat.unpair e).1 = 0 ∨ (Nat.unpair e).1 = 1 ∨ (Nat.unpair e).1 = 2 ∨
+          (Nat.unpair e).1 = 3 ∨ (Nat.unpair e).1 = 4 ∨ (Nat.unpair e).1 = 5 ∨
+          (Nat.unpair e).1 = 6 ∨ (Nat.unpair e).1 = 7 ∨ 8 ≤ (Nat.unpair e).1 by omega)
+        with h' | h' | h' | h' | h' | h' | h' | h' | h'
+      · have hs : (e : ℕ) + 1 = ^rel (Nat.unpair (Nat.unpair e).2).1
+            (Nat.unpair (Nat.unpair (Nat.unpair e).2).2).1
+            (Nat.unpair (Nat.unpair (Nat.unpair e).2).2).2 := by
+          rw [nat_qqRel_eq, e3, e2, ← h', he]
+        rw [hs] at h
+        obtain ⟨hR, hv⟩ := IsUFormula.rel.mp h
+        rw [shiftF_succ, if_pos (Or.inl h'), hs, shift_rel hR hv, nat_qqRel_eq, h',
+          termShiftVec.check_eq hv]
+      · have hs : (e : ℕ) + 1 = ^nrel (Nat.unpair (Nat.unpair e).2).1
+            (Nat.unpair (Nat.unpair (Nat.unpair e).2).2).1
+            (Nat.unpair (Nat.unpair (Nat.unpair e).2).2).2 := by
+          rw [nat_qqNRel_eq, e3, e2, ← h', he]
+        rw [hs] at h
+        obtain ⟨hR, hv⟩ := IsUFormula.nrel.mp h
+        rw [shiftF_succ, if_pos (Or.inr h'), hs, shift_nrel hR hv, nat_qqNRel_eq, h',
+          termShiftVec.check_eq hv]
+      · have hz : (Nat.unpair e).2 = 0 := (IsUFormula.tag_spec h).2 (Or.inl h')
+        have hs : (e : ℕ) + 1 = (^⊤ : ℕ) := by rw [nat_qqVerum_eq, ← h', ← hz, he]
+        rw [shiftF_succ, if_neg (by omega), if_pos (Or.inl h'), hs, shift_verum, nat_qqVerum_eq, h']
+      · have hz : (Nat.unpair e).2 = 0 := (IsUFormula.tag_spec h).2 (Or.inr h')
+        have hs : (e : ℕ) + 1 = (^⊥ : ℕ) := by rw [nat_qqFalsum_eq, ← h', ← hz, he]
+        rw [shiftF_succ, if_neg (by omega), if_pos (Or.inr h'), hs, shift_falsum, nat_qqFalsum_eq,
+          h']
+      · have hs : (e : ℕ) + 1 =
+            (Nat.unpair (Nat.unpair e).2).1 ^⋏ (Nat.unpair (Nat.unpair e).2).2 := by
+          rw [nat_qqAnd_eq, e2, ← h', he]
+        rw [hs] at h
+        obtain ⟨hp₁, hp₂⟩ := IsUFormula.and.mp h
+        rw [shiftF_succ, if_neg (by omega), if_neg (by omega), if_pos (Or.inl h'), hs,
+          shift_and hp₁ hp₂, nat_qqAnd_eq, h', ih _ hl₁ hp₁, ih _ hl₂ hp₂]
+      · have hs : (e : ℕ) + 1 =
+            (Nat.unpair (Nat.unpair e).2).1 ^⋎ (Nat.unpair (Nat.unpair e).2).2 := by
+          rw [nat_qqOr_eq, e2, ← h', he]
+        rw [hs] at h
+        obtain ⟨hp₁, hp₂⟩ := IsUFormula.or.mp h
+        rw [shiftF_succ, if_neg (by omega), if_neg (by omega), if_pos (Or.inr h'), hs,
+          shift_or hp₁ hp₂, nat_qqOr_eq, h', ih _ hl₁ hp₁, ih _ hl₂ hp₂]
+      · have hs : (e : ℕ) + 1 = ^∀ (Nat.unpair e).2 := by rw [nat_qqAll_eq, ← h', he]
+        rw [hs] at h
+        have hp₁ := IsUFormula.all.mp h
+        rw [shiftF_succ, if_neg (by omega), if_neg (by omega), if_neg (by omega),
+          if_pos (Or.inl h'), hs, shift_all hp₁, nat_qqAll_eq, h', ih _ hl₃ hp₁]
+      · have hs : (e : ℕ) + 1 = ^∃ (Nat.unpair e).2 := by rw [nat_qqExs_eq, ← h', he]
+        rw [hs] at h
+        have hp₁ := IsUFormula.ex.mp h
+        rw [shiftF_succ, if_neg (by omega), if_neg (by omega), if_neg (by omega),
+          if_pos (Or.inr h'), hs, shift_exs hp₁, nat_qqExs_eq, h', ih _ hl₃ hp₁]
+      · rw [shiftF_succ, if_neg (by omega), if_neg (by omega), if_neg (by omega), if_neg (by omega)]
+        have := (IsUFormula.tag_spec h).1; omega
+
+theorem shift.check_eq (p : ℕ) : shift.check L p = shift L p := by
+  rw [shift.check]
+  by_cases h : IsUFormula.check L p = true
+  · rw [if_pos h]
+    exact shiftF_eq_aux p p le_rfl (IsUFormula.check_iff.mp h)
+  · rw [if_neg h]
+    exact (shift_not_uformula fun hc ↦ h (IsUFormula.check_iff.mpr hc)).symm
+
 /-! ### It runs
 
 `7 = ^⊤`; `3974 = ^⊤ ^⋏ ^⊤`; `73` has constructor tag `8`. Inputs are bare numerals — see
@@ -525,6 +650,11 @@ example : neg (V := ℕ) ℒₒᵣ 7 = 13 := by rw [← neg.check_eq]; decide
 
 /-- Off the well-formed codes `neg` is `0`, and the mirror agrees there too. -/
 example : neg (V := ℕ) ℒₒᵣ 73 = 0 := by rw [← neg.check_eq]; decide
+
+/-- `^⊤` is closed, so shifting fixes it. -/
+example : shift (V := ℕ) ℒₒᵣ 7 = 7 := by rw [← shift.check_eq]; decide
+
+example : shift (V := ℕ) ℒₒᵣ 73 = 0 := by rw [← shift.check_eq]; decide
 
 end LO.FirstOrder.Arithmetic.Bootstrapping
 
