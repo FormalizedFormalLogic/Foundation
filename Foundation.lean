@@ -59,6 +59,7 @@ public import Foundation.FirstOrder.Bootstrapping.DerivabilityCondition.D2
 public import Foundation.FirstOrder.Bootstrapping.DerivabilityCondition.D3
 public import Foundation.FirstOrder.Bootstrapping.DerivabilityCondition.EquationalTheory
 public import Foundation.FirstOrder.Bootstrapping.DerivabilityCondition.PeanoMinus
+public import Foundation.FirstOrder.Bootstrapping.DerivabilityCondition.Standard
 public import Foundation.FirstOrder.Bootstrapping.FixedPoint
 public import Foundation.FirstOrder.Bootstrapping.Syntax
 public import Foundation.FirstOrder.Bootstrapping.Syntax.DecidableTheory
