@@ -506,14 +506,6 @@ lemma le_termBShift {t : V} (ht : IsUTerm L t) : t ≤ termBShift L t := by
     exact add_le_add
       (pair_le_pair_right 2 (pair_le_pair_right k (pair_le_pair_right f hvle))) (le_refl 1)
 
-lemma IsUTerm.termBShift {t : V} (ht : IsUTerm L t) : IsUTerm L (termBShift L t) :=
-  (ht.isSemiterm.termBShift).isUTerm
-
-lemma IsUTermVec.termBShiftVec {k v : V} (hv : IsUTermVec L k v) :
-    IsUTermVec L k (termBShiftVec L k v) :=
-  ⟨(len_termBShiftVec hv).symm, fun i hi => by
-    rw [nth_termBShiftVec hv hi]; exact (hv.nth hi).termBShift⟩
-
 /-- `termBShift` shifts the bound-variable depth up by exactly one (on well-formed terms): so `t` is
 a level-`m` term iff `termBShift t` is level-`(m+1)`. The `←`-direction recovers the lowered arity,
 which is how the bounded-`∀` bound (a `termBShift`-image) is recognized as a `bShift` of a real term

@@ -393,6 +393,14 @@ lemma termBShiftVec_cons {k t ts : V} (ht : IsUTerm L t) (hts : IsUTermVec L k t
   ⟨by simp [hv.isUTerm], fun i hi ↦ by
     rw [nth_termBShiftVec hv.isUTerm hi]; exact (hv.nth hi).termBShift⟩
 
+lemma IsUTerm.termBShift {t : V} (ht : IsUTerm L t) : IsUTerm L (termBShift L t) :=
+  (ht.isSemiterm.termBShift).isUTerm
+
+lemma IsUTermVec.termBShiftVec {k v : V} (hv : IsUTermVec L k v) :
+    IsUTermVec L k (termBShiftVec L k v) :=
+  ⟨(len_termBShiftVec hv).symm, fun i hi ↦ by
+    rw [nth_termBShiftVec hv hi]; exact (hv.nth hi).termBShift⟩
+
 lemma termBShift_termShift {t : V} (ht : IsSemiterm L n t) : termBShift L (termShift L t) = termShift L (termBShift L t) := by
   apply IsSemiterm.induction 𝚺 ?_ ?_ ?_ ?_ t ht
   · definability
@@ -490,6 +498,10 @@ end
 
 @[simp] lemma len_qVec {k w : V} (h : IsUTermVec L k w) : len (qVec L w) = k + 1 := by
   rcases h.lh; simp [qVec, h]
+
+lemma IsUTermVec.qVec {k w : V} (h : IsUTermVec L k w) : IsUTermVec L (k + 1) (qVec L w) := by
+  rw [Bootstrapping.qVec, ← h.lh]
+  exact (h.termBShiftVec).adjoin IsUTerm.bvar
 
 lemma IsSemitermVec.qVec {k n w : V} (h : IsSemitermVec L k n w) : IsSemitermVec L (k + 1) (n + 1) (qVec L w) := by
   rcases h.lh
