@@ -2,6 +2,7 @@ module
 
 public import Foundation.FirstOrder.Bootstrapping.Syntax.Formula.Standard
 public import Foundation.FirstOrder.Bootstrapping.Syntax.Proof.Basic
+public import Foundation.FirstOrder.Bootstrapping.Syntax.DecidableTheory
 
 @[expose] public section
 /-!
@@ -21,6 +22,8 @@ sum of distinct powers of two.
 -/
 
 namespace LO.FirstOrder.Arithmetic.Bootstrapping
+
+open LO.FirstOrder.Theory
 
 variable {L : Language} [L.Encodable] [L.LORDefinable] [L.DecidableSymbols]
 
@@ -65,6 +68,111 @@ theorem setShift.check_eq (s : ℕ) : setShift.check L s = setShift L s := by
   · rintro ⟨x, hx, rfl⟩
     exact ⟨x, nat_mem_iff_testBit.mp hx, shift.check_eq (L := L) x⟩
 
+/-! ### The derivation constructors at `V := ℕ`
+
+Note the shape: unlike term and formula codes, whose tag is the *first* component, a derivation
+code is `⟪s, tag, …⟫ + 1` — the sequent comes first and the tag second. -/
+
+lemma nat_axL_eq (s p : ℕ) : (axL s p : ℕ) = Nat.pair s (Nat.pair 0 p) + 1 := by
+  simp [axL, nat_pair_eq]
+
+lemma nat_verumIntro_eq (s : ℕ) : (verumIntro s : ℕ) = Nat.pair s (Nat.pair 1 0) + 1 := by
+  simp [verumIntro, nat_pair_eq]
+
+lemma nat_andIntro_eq (s p q dp dq : ℕ) :
+    (andIntro s p q dp dq : ℕ)
+      = Nat.pair s (Nat.pair 2 (Nat.pair p (Nat.pair q (Nat.pair dp dq)))) + 1 := by
+  simp [andIntro, nat_pair_eq]
+
+lemma nat_orIntro_eq (s p q d : ℕ) :
+    (orIntro s p q d : ℕ) = Nat.pair s (Nat.pair 3 (Nat.pair p (Nat.pair q d))) + 1 := by
+  simp [orIntro, nat_pair_eq]
+
+lemma nat_allIntro_eq (s p d : ℕ) :
+    (allIntro s p d : ℕ) = Nat.pair s (Nat.pair 4 (Nat.pair p d)) + 1 := by
+  simp [allIntro, nat_pair_eq]
+
+lemma nat_exsIntro_eq (s p t d : ℕ) :
+    (exsIntro s p t d : ℕ) = Nat.pair s (Nat.pair 5 (Nat.pair p (Nat.pair t d))) + 1 := by
+  simp [exsIntro, nat_pair_eq]
+
+lemma nat_wkRule_eq (s d : ℕ) : (wkRule s d : ℕ) = Nat.pair s (Nat.pair 6 d) + 1 := by
+  simp [wkRule, nat_pair_eq]
+
+lemma nat_shiftRule_eq (s d : ℕ) : (shiftRule s d : ℕ) = Nat.pair s (Nat.pair 7 d) + 1 := by
+  simp [shiftRule, nat_pair_eq]
+
+lemma nat_cutRule_eq (s p d₁ d₂ : ℕ) :
+    (cutRule s p d₁ d₂ : ℕ) = Nat.pair s (Nat.pair 8 (Nat.pair p (Nat.pair d₁ d₂))) + 1 := by
+  simp [cutRule, nat_pair_eq]
+
+lemma nat_axm_eq (s p : ℕ) : (axm s p : ℕ) = Nat.pair s (Nat.pair 9 p) + 1 := by
+  simp [axm, nat_pair_eq]
+
+/-! ### The checker -/
+
+/-- Fuel-indexed executable mirror of `Derivation`, dispatching on the ten `Phi` disjuncts. -/
+def Derivation.checkF (L : Language) [L.Encodable] [L.LORDefinable] [L.DecidableSymbols]
+    (T : Theory L) [T.Δ₁] [T.DecidableΔ₁] : ℕ → ℕ → Bool
+  | 0, _ => false
+  | _ + 1, 0 => false
+  | fuel + 1, e + 1 =>
+    IsFormulaSet.check L (natPi₁ e) &&
+      (if natPi₁ (natPi₂ e) = 0 then
+        decide (natPi₂ (natPi₂ e) ∈ natPi₁ e) &&
+          decide (neg.check L (natPi₂ (natPi₂ e)) ∈ natPi₁ e)
+      else if natPi₁ (natPi₂ e) = 1 then
+        (natPi₂ (natPi₂ e) == 0) && decide ((Nat.pair 2 0 + 1 : ℕ) ∈ natPi₁ e)
+      else if natPi₁ (natPi₂ e) = 2 then
+        decide ((Nat.pair 4 (Nat.pair (natPi₁ (natPi₂ (natPi₂ e)))
+            (natPi₁ (natPi₂ (natPi₂ (natPi₂ e))))) + 1 : ℕ) ∈ natPi₁ e) &&
+          (natFstIdx (natPi₁ (natPi₂ (natPi₂ (natPi₂ (natPi₂ e))))) ==
+            natInsert (natPi₁ (natPi₂ (natPi₂ e))) (natPi₁ e)) &&
+          Derivation.checkF L T fuel (natPi₁ (natPi₂ (natPi₂ (natPi₂ (natPi₂ e))))) &&
+          (natFstIdx (natPi₂ (natPi₂ (natPi₂ (natPi₂ (natPi₂ e))))) ==
+            natInsert (natPi₁ (natPi₂ (natPi₂ (natPi₂ e)))) (natPi₁ e)) &&
+          Derivation.checkF L T fuel (natPi₂ (natPi₂ (natPi₂ (natPi₂ (natPi₂ e)))))
+      else if natPi₁ (natPi₂ e) = 3 then
+        decide ((Nat.pair 5 (Nat.pair (natPi₁ (natPi₂ (natPi₂ e)))
+            (natPi₁ (natPi₂ (natPi₂ (natPi₂ e))))) + 1 : ℕ) ∈ natPi₁ e) &&
+          (natFstIdx (natPi₂ (natPi₂ (natPi₂ (natPi₂ e)))) ==
+            natInsert (natPi₁ (natPi₂ (natPi₂ e)))
+              (natInsert (natPi₁ (natPi₂ (natPi₂ (natPi₂ e)))) (natPi₁ e))) &&
+          Derivation.checkF L T fuel (natPi₂ (natPi₂ (natPi₂ (natPi₂ e))))
+      else if natPi₁ (natPi₂ e) = 4 then
+        decide ((Nat.pair 6 (natPi₁ (natPi₂ (natPi₂ e))) + 1 : ℕ) ∈ natPi₁ e) &&
+          (natFstIdx (natPi₂ (natPi₂ (natPi₂ e))) ==
+            natInsert (free.check L (natPi₁ (natPi₂ (natPi₂ e))))
+              (setShift.check L (natPi₁ e))) &&
+          Derivation.checkF L T fuel (natPi₂ (natPi₂ (natPi₂ e)))
+      else if natPi₁ (natPi₂ e) = 5 then
+        decide ((Nat.pair 7 (natPi₁ (natPi₂ (natPi₂ e))) + 1 : ℕ) ∈ natPi₁ e) &&
+          IsSemiterm.check L 0 (natPi₁ (natPi₂ (natPi₂ (natPi₂ e)))) &&
+          (natFstIdx (natPi₂ (natPi₂ (natPi₂ (natPi₂ e)))) ==
+            natInsert (substs1.check L (natPi₁ (natPi₂ (natPi₂ (natPi₂ e))))
+              (natPi₁ (natPi₂ (natPi₂ e)))) (natPi₁ e)) &&
+          Derivation.checkF L T fuel (natPi₂ (natPi₂ (natPi₂ (natPi₂ e))))
+      else if natPi₁ (natPi₂ e) = 6 then
+        decide (natFstIdx (natPi₂ (natPi₂ e)) ⊆ natPi₁ e) &&
+          Derivation.checkF L T fuel (natPi₂ (natPi₂ e))
+      else if natPi₁ (natPi₂ e) = 7 then
+        (natPi₁ e == setShift.check L (natFstIdx (natPi₂ (natPi₂ e)))) &&
+          Derivation.checkF L T fuel (natPi₂ (natPi₂ e))
+      else if natPi₁ (natPi₂ e) = 8 then
+        (natFstIdx (natPi₁ (natPi₂ (natPi₂ (natPi₂ e)))) ==
+            natInsert (natPi₁ (natPi₂ (natPi₂ e))) (natPi₁ e)) &&
+          Derivation.checkF L T fuel (natPi₁ (natPi₂ (natPi₂ (natPi₂ e)))) &&
+          (natFstIdx (natPi₂ (natPi₂ (natPi₂ (natPi₂ e)))) ==
+            natInsert (neg.check L (natPi₁ (natPi₂ (natPi₂ e)))) (natPi₁ e)) &&
+          Derivation.checkF L T fuel (natPi₂ (natPi₂ (natPi₂ (natPi₂ e))))
+      else if natPi₁ (natPi₂ e) = 9 then
+        decide (natPi₂ (natPi₂ e) ∈ natPi₁ e) &&
+          DecidableΔ₁.decide (T := T) (natPi₂ (natPi₂ e))
+      else false)
+
+def Derivation.check (L : Language) [L.Encodable] [L.LORDefinable] [L.DecidableSymbols]
+    (T : Theory L) [T.Δ₁] [T.DecidableΔ₁] (d : ℕ) : Bool := Derivation.checkF L T d d
+
 /-! ### It runs -/
 
 /-- `0 = ∅`. -/
@@ -85,6 +193,8 @@ example : setShift.check ℒₒᵣ 0 = 0 := by decide
 
 /-- `128 = {^⊤}`, and `^⊤` is closed, so shifting the set fixes it. -/
 example : setShift (V := ℕ) ℒₒᵣ 128 = 128 := by rw [← setShift.check_eq]; decide
+
+example : Derivation.check ℒₒᵣ (∅ : Theory ℒₒᵣ) 0 = false := by decide
 
 end LO.FirstOrder.Arithmetic.Bootstrapping
 
