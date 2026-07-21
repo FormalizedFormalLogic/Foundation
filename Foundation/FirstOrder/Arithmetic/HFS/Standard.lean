@@ -276,6 +276,68 @@ lemma mem_foldr_natInsert {y : ℕ} {l : List ℕ} :
   | nil => simp [nat_mem_iff_testBit (x := y) (s := 0)]
   | cons x l ih => simp [ih]
 
+/-! ### `listMax`
+
+Proved **spec-first**, deliberately. `listMax_adjoin` produces `x ⊔ listMax v`, whose `⊔` at `ℕ`
+carries `SemilatticeSup.toMax` (via `instDistribLatticeOfLinearOrder`), while a `max` written in a
+fresh definition picks up `Nat.instMax`. The two are propositionally equal but not definitionally
+so, and no lemma stating `a ⊔ b = max a b` helps: written in one statement, both sides elaborate to
+the *same* instance and the lemma is a tautology.
+
+The way past is not to unify them but never to mention both. Upstream's `listMaxss_le_iff`
+characterises `listMax` as the *least upper bound* of the entries — an order statement, with no
+`max` in it — and that pins it down uniquely (the empty vector included: its least upper bound is
+`0`). So the mirror is proved to meet the same specification and agreement follows by antisymmetry.
+The only bridge needed is `nat_le_iff`, on `≤`, which this file already has. -/
+
+def listMaxF : ℕ → ℕ → ℕ
+  | 0, _ => 0
+  | _ + 1, 0 => 0
+  | s + 1, v + 1 => max (natPi₁ v) (listMaxF s (natPi₂ v))
+
+def natListMax (v : ℕ) : ℕ := listMaxF v v
+
+private lemma listMaxF_succ (s v : ℕ) :
+    listMaxF (s + 1) (v + 1) = max (Nat.unpair v).1 (listMaxF s (Nat.unpair v).2) := by
+  rw [listMaxF]; simp only [natPi₁, natPi₂, natUnpair_eq]
+
+/-- The mirror meets `listMax`'s own specification: it is an upper bound of the entries, and the
+least one. Neither half mentions `max` on the `listMax` side, which is the point — the two `Max ℕ`
+instances never meet in a single statement. -/
+private lemma listMaxF_spec (s : ℕ) : ∀ v ≤ s,
+    (∀ i < len v, v.[i] ≤ listMaxF s v) ∧
+    (∀ z, (∀ i < len v, v.[i] ≤ z) → listMaxF s v ≤ z) := by
+  induction s with
+  | zero =>
+    intro v hv
+    obtain rfl : v = 0 := by omega
+    refine ⟨by simp, fun z _ ↦ by simp [listMaxF]⟩
+  | succ m ih =>
+    intro v hv
+    match v with
+    | 0 => exact ⟨by simp, fun z _ ↦ by simp [listMaxF]⟩
+    | w + 1 =>
+      have hadj : (w : ℕ) + 1 = (Nat.unpair w).1 ∷ (Nat.unpair w).2 := by
+        rw [succ_eq_adjoin w, nat_pi₁_eq, nat_pi₂_eq]
+      have h₂ : (Nat.unpair w).2 ≤ m := le_trans (Nat.unpair_right_le _) (by omega)
+      obtain ⟨ihb, ihl⟩ := ih _ h₂
+      rw [listMaxF_succ, hadj, len_adjoin]
+      constructor
+      · intro i hi
+        rcases Nat.eq_zero_or_pos i with rfl | hpos
+        · simp
+        · obtain ⟨j, rfl⟩ : ∃ j, i = j + 1 := ⟨i - 1, by omega⟩
+          simpa using le_trans (ihb j (by simpa using hi)) (Nat.le_max_right _ _)
+      · intro z hz
+        refine Nat.max_le.mpr ⟨by simpa using hz 0 (by simp), ihl z fun j hj ↦ ?_⟩
+        simpa using hz (j + 1) (by simpa using hj)
+
+theorem nat_listMax_eq (v : ℕ) : listMax v = natListMax v := by
+  obtain ⟨hb, hl⟩ := listMaxF_spec v v le_rfl
+  refine Nat.le_antisymm ?_ ?_
+  · exact nat_le_iff.mp (listMaxss_le_iff.mpr fun i hi ↦ nat_le_iff.mpr (hb i hi))
+  · exact hl _ fun i hi ↦ nat_le_iff.mp (nth_le_listMax hi)
+
 /-! ### The payoff -/
 
 example : (3 : ℕ) ∈ (40 : ℕ) := by decide
@@ -298,6 +360,10 @@ example : natLen (Nat.pair 3 (Nat.pair 5 0 + 1) + 1) = 2 := by decide
 example : natNth (Nat.pair 3 (Nat.pair 5 0 + 1) + 1) 1 = 5 := by decide
 
 example : natInsert 3 (natInsert 5 0) = 40 := by decide
+
+example : natListMax 0 = 0 := by decide
+
+example : natListMax (Nat.pair 3 (Nat.pair 5 0 + 1) + 1) = 5 := by decide
 
 end LO.FirstOrder.Arithmetic
 
