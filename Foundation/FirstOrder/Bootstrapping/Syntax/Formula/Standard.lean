@@ -2,6 +2,7 @@ module
 
 public import Foundation.FirstOrder.Bootstrapping.Syntax.Term.Standard
 public import Foundation.FirstOrder.Bootstrapping.Syntax.Formula.Basic
+public import Foundation.FirstOrder.Bootstrapping.Syntax.Formula.Functions
 
 @[expose] public section
 /-!
@@ -356,6 +357,147 @@ instance decidableIsSemiformula (L : Language) [L.Encodable] [L.LORDefinable] [L
     (n p : ℕ) : Decidable (IsSemiformula (V := ℕ) L n p) :=
   decidable_of_iff _ IsSemiformula.check_iff
 
+/-! ### Function mirrors: `neg`
+
+`neg` is not a predicate but a `UformulaRec1.Construction`, so the mirror returns a *code* and
+agreement is an equation. Three things change from the `C1` pattern, and they are the template for
+the rest of the function family:
+
+* `case_iff` is replaced by the function's own case equations (`neg_rel` … `neg_ex`). Those are
+  guarded by well-formedness, so the induction carries `IsUFormula L p` as a hypothesis and
+  propagates it to subformulas with `IsUFormula.and`/`all`/… — the `C1` constructor lemmas;
+* adequacy-indexing carries over unchanged: `∀ p ≤ s, IsUFormula L p → negF s p = neg L p`;
+* totality is separate. `neg` is `0` off the well-formed codes (`neg_not_uformula`), so the total
+  mirror guards the recursion with the `C1` recogniser, and the two regimes are discharged
+  independently. This is why `C1` had to come first.
+
+`negF` itself needs no language data: every branch just flips the constructor tag. -/
+
+/-- Fuel-indexed mirror of `neg` on *well-formed* codes. Purely structural on the code: every
+branch flips the constructor tag, so no language data is needed. -/
+def negF : ℕ → ℕ → ℕ
+  | 0, _ => 0
+  | _ + 1, 0 => 0
+  | s + 1, e + 1 =>
+    if natPi₁ e = 0 then Nat.pair 1 (natPi₂ e) + 1
+    else if natPi₁ e = 1 then Nat.pair 0 (natPi₂ e) + 1
+    else if natPi₁ e = 2 then Nat.pair 3 0 + 1
+    else if natPi₁ e = 3 then Nat.pair 2 0 + 1
+    else if natPi₁ e = 4 then
+      Nat.pair 5 (Nat.pair (negF s (natPi₁ (natPi₂ e))) (negF s (natPi₂ (natPi₂ e)))) + 1
+    else if natPi₁ e = 5 then
+      Nat.pair 4 (Nat.pair (negF s (natPi₁ (natPi₂ e))) (negF s (natPi₂ (natPi₂ e)))) + 1
+    else if natPi₁ e = 6 then Nat.pair 7 (negF s (natPi₂ e)) + 1
+    else if natPi₁ e = 7 then Nat.pair 6 (negF s (natPi₂ e)) + 1
+    else 0
+
+/-- The total mirror: guarded by the `C1` recogniser, matching `neg_not_uformula`. -/
+def neg.check (L : Language) [L.Encodable] [L.LORDefinable] [L.DecidableSymbols] (p : ℕ) : ℕ :=
+  if IsUFormula.check L p then negF p p else 0
+
+private lemma negF_succ (s e : ℕ) :
+    negF (s + 1) (e + 1) =
+      (if (Nat.unpair e).1 = 0 then Nat.pair 1 (Nat.unpair e).2 + 1
+      else if (Nat.unpair e).1 = 1 then Nat.pair 0 (Nat.unpair e).2 + 1
+      else if (Nat.unpair e).1 = 2 then Nat.pair 3 0 + 1
+      else if (Nat.unpair e).1 = 3 then Nat.pair 2 0 + 1
+      else if (Nat.unpair e).1 = 4 then
+        Nat.pair 5 (Nat.pair (negF s (Nat.unpair (Nat.unpair e).2).1)
+          (negF s (Nat.unpair (Nat.unpair e).2).2)) + 1
+      else if (Nat.unpair e).1 = 5 then
+        Nat.pair 4 (Nat.pair (negF s (Nat.unpair (Nat.unpair e).2).1)
+          (negF s (Nat.unpair (Nat.unpair e).2).2)) + 1
+      else if (Nat.unpair e).1 = 6 then Nat.pair 7 (negF s (Nat.unpair e).2) + 1
+      else if (Nat.unpair e).1 = 7 then Nat.pair 6 (negF s (Nat.unpair e).2) + 1
+      else 0) := by
+  rw [negF]; simp only [natPi₁, natPi₂, natUnpair_eq]
+
+omit [L.DecidableSymbols] in
+private lemma negF_eq_aux (s : ℕ) : ∀ p ≤ s, IsUFormula L p → negF s p = neg L p := by
+  induction s with
+  | zero =>
+    intro p hp h
+    obtain rfl : p = 0 := by omega
+    simp at h
+  | succ m ih =>
+    intro p hp h
+    match p with
+    | 0 => simp at h
+    | e + 1 =>
+      have he : Nat.pair (Nat.unpair e).1 (Nat.unpair e).2 = e := Nat.pair_unpair e
+      have e2 : Nat.pair (Nat.unpair (Nat.unpair e).2).1 (Nat.unpair (Nat.unpair e).2).2
+          = (Nat.unpair e).2 := Nat.pair_unpair _
+      have e3 : Nat.pair (Nat.unpair (Nat.unpair (Nat.unpair e).2).2).1
+          (Nat.unpair (Nat.unpair (Nat.unpair e).2).2).2
+          = (Nat.unpair (Nat.unpair e).2).2 := Nat.pair_unpair _
+      have hl₁ : (Nat.unpair (Nat.unpair e).2).1 ≤ m :=
+        le_trans (le_trans (Nat.unpair_left_le _) (Nat.unpair_right_le _)) (by omega)
+      have hl₂ : (Nat.unpair (Nat.unpair e).2).2 ≤ m :=
+        le_trans (le_trans (Nat.unpair_right_le _) (Nat.unpair_right_le _)) (by omega)
+      have hl₃ : (Nat.unpair e).2 ≤ m := le_trans (Nat.unpair_right_le _) (by omega)
+      rcases (show (Nat.unpair e).1 = 0 ∨ (Nat.unpair e).1 = 1 ∨ (Nat.unpair e).1 = 2 ∨
+          (Nat.unpair e).1 = 3 ∨ (Nat.unpair e).1 = 4 ∨ (Nat.unpair e).1 = 5 ∨
+          (Nat.unpair e).1 = 6 ∨ (Nat.unpair e).1 = 7 ∨ 8 ≤ (Nat.unpair e).1 by omega)
+        with h' | h' | h' | h' | h' | h' | h' | h' | h'
+      · have hs : (e : ℕ) + 1 = ^rel (Nat.unpair (Nat.unpair e).2).1
+            (Nat.unpair (Nat.unpair (Nat.unpair e).2).2).1
+            (Nat.unpair (Nat.unpair (Nat.unpair e).2).2).2 := by
+          rw [nat_qqRel_eq, e3, e2, ← h', he]
+        rw [hs] at h
+        obtain ⟨hR, hv⟩ := IsUFormula.rel.mp h
+        rw [negF_succ, if_pos h', hs, neg_rel hR hv, nat_qqNRel_eq, e3, e2]
+      · have hs : (e : ℕ) + 1 = ^nrel (Nat.unpair (Nat.unpair e).2).1
+            (Nat.unpair (Nat.unpair (Nat.unpair e).2).2).1
+            (Nat.unpair (Nat.unpair (Nat.unpair e).2).2).2 := by
+          rw [nat_qqNRel_eq, e3, e2, ← h', he]
+        rw [hs] at h
+        obtain ⟨hR, hv⟩ := IsUFormula.nrel.mp h
+        rw [negF_succ, if_neg (by omega), if_pos h', hs, neg_nrel hR hv, nat_qqRel_eq, e3, e2]
+      · have hz : (Nat.unpair e).2 = 0 := (IsUFormula.tag_spec h).2 (Or.inl h')
+        have hs : (e : ℕ) + 1 = (^⊤ : ℕ) := by rw [nat_qqVerum_eq, ← h', ← hz, he]
+        rw [negF_succ, if_neg (by omega), if_neg (by omega), if_pos h', hs, neg_verum,
+          nat_qqFalsum_eq]
+      · have hz : (Nat.unpair e).2 = 0 := (IsUFormula.tag_spec h).2 (Or.inr h')
+        have hs : (e : ℕ) + 1 = (^⊥ : ℕ) := by rw [nat_qqFalsum_eq, ← h', ← hz, he]
+        rw [negF_succ, if_neg (by omega), if_neg (by omega), if_neg (by omega), if_pos h', hs,
+          neg_falsum, nat_qqVerum_eq]
+      · have hs : (e : ℕ) + 1 =
+            (Nat.unpair (Nat.unpair e).2).1 ^⋏ (Nat.unpair (Nat.unpair e).2).2 := by
+          rw [nat_qqAnd_eq, e2, ← h', he]
+        rw [hs] at h
+        obtain ⟨hp₁, hp₂⟩ := IsUFormula.and.mp h
+        rw [negF_succ, if_neg (by omega), if_neg (by omega), if_neg (by omega), if_neg (by omega),
+          if_pos h', hs, neg_and hp₁ hp₂, nat_qqOr_eq, ih _ hl₁ hp₁, ih _ hl₂ hp₂]
+      · have hs : (e : ℕ) + 1 =
+            (Nat.unpair (Nat.unpair e).2).1 ^⋎ (Nat.unpair (Nat.unpair e).2).2 := by
+          rw [nat_qqOr_eq, e2, ← h', he]
+        rw [hs] at h
+        obtain ⟨hp₁, hp₂⟩ := IsUFormula.or.mp h
+        rw [negF_succ, if_neg (by omega), if_neg (by omega), if_neg (by omega), if_neg (by omega),
+          if_neg (by omega), if_pos h', hs, neg_or hp₁ hp₂, nat_qqAnd_eq, ih _ hl₁ hp₁,
+          ih _ hl₂ hp₂]
+      · have hs : (e : ℕ) + 1 = ^∀ (Nat.unpair e).2 := by rw [nat_qqAll_eq, ← h', he]
+        rw [hs] at h
+        have hp₁ := IsUFormula.all.mp h
+        rw [negF_succ, if_neg (by omega), if_neg (by omega), if_neg (by omega), if_neg (by omega),
+          if_neg (by omega), if_neg (by omega), if_pos h', hs, neg_all hp₁, nat_qqExs_eq,
+          ih _ hl₃ hp₁]
+      · have hs : (e : ℕ) + 1 = ^∃ (Nat.unpair e).2 := by rw [nat_qqExs_eq, ← h', he]
+        rw [hs] at h
+        have hp₁ := IsUFormula.ex.mp h
+        rw [negF_succ, if_neg (by omega), if_neg (by omega), if_neg (by omega), if_neg (by omega),
+          if_neg (by omega), if_neg (by omega), if_neg (by omega), if_pos h', hs, neg_ex hp₁,
+          nat_qqAll_eq, ih _ hl₃ hp₁]
+      · have := (IsUFormula.tag_spec h).1; omega
+
+theorem neg.check_eq (p : ℕ) : neg.check L p = neg L p := by
+  rw [neg.check]
+  by_cases h : IsUFormula.check L p = true
+  · rw [if_pos h]
+    exact negF_eq_aux p p le_rfl (IsUFormula.check_iff.mp h)
+  · rw [if_neg h]
+    exact (neg_not_uformula fun hc ↦ h (IsUFormula.check_iff.mpr hc)).symm
+
 /-! ### It runs
 
 `7 = ^⊤`; `3974 = ^⊤ ^⋏ ^⊤`; `73` has constructor tag `8`. Inputs are bare numerals — see
@@ -375,6 +517,14 @@ example : IsSemiformula (V := ℕ) ℒₒᵣ 0 7 := IsSemiformula.check_iff.mp (
 
 example : ¬IsSemiformula (V := ℕ) ℒₒᵣ 0 73 :=
   fun h ↦ absurd (IsSemiformula.check_iff.mpr h) (by decide)
+
+example : neg.check ℒₒᵣ 7 = 13 := by decide
+
+/-- `7 = ^⊤`, `13 = ^⊥`. -/
+example : neg (V := ℕ) ℒₒᵣ 7 = 13 := by rw [← neg.check_eq]; decide
+
+/-- Off the well-formed codes `neg` is `0`, and the mirror agrees there too. -/
+example : neg (V := ℕ) ℒₒᵣ 73 = 0 := by rw [← neg.check_eq]; decide
 
 end LO.FirstOrder.Arithmetic.Bootstrapping
 
