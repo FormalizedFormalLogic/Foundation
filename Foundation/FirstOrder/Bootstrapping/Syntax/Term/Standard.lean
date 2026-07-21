@@ -849,6 +849,148 @@ theorem qVec.check_eq {w : ℕ} (h : IsUTermVec L (len w) w) : qVec.check L w = 
   rw [nat_qqBvar_eq]
   simp [Nat.pair]
 
+/-! ### Function mirror: `termBV`
+
+The `termShift` template a fourth time, with `termBV_bvar/fvar/func` leaves. The `^func` branch
+consumes `natListMax` — which is why this had to wait for `listMax`'s spec-first proof — but the
+consumption is a plain rewrite with `nat_listMax_eq`, not a re-entry into the instance problem. -/
+
+/-! ### `termBV` -/
+
+mutual
+
+def termBVF : ℕ → ℕ → ℕ
+  | 0, _ => 0
+  | _ + 1, 0 => 0
+  | s + 1, e + 1 =>
+    if natPi₁ e = 0 then natPi₂ e + 1
+    else if natPi₁ e = 1 then 0
+    else if natPi₁ e = 2 then
+      natListMax (termBVVecF s (natPi₂ (natPi₂ (natPi₂ e))))
+    else 0
+
+def termBVVecF : ℕ → ℕ → ℕ
+  | 0, _ => 0
+  | _ + 1, 0 => 0
+  | s + 1, w + 1 => Nat.pair (termBVF s (natPi₁ w)) (termBVVecF s (natPi₂ w)) + 1
+
+end
+
+def termBV.check (L : Language) [L.Encodable] [L.LORDefinable] [L.DecidableSymbols]
+    (t : ℕ) : ℕ := if IsUTerm.check L t then termBVF t t else 0
+
+def termBVVec.check (L : Language) [L.Encodable] [L.LORDefinable] [L.DecidableSymbols]
+    (v : ℕ) : ℕ := termBVVecF v v
+
+private lemma termBVF_succ (s e : ℕ) :
+    termBVF (s + 1) (e + 1) =
+      (if (Nat.unpair e).1 = 0 then (Nat.unpair e).2 + 1
+      else if (Nat.unpair e).1 = 1 then 0
+      else if (Nat.unpair e).1 = 2 then
+        natListMax (termBVVecF s (Nat.unpair (Nat.unpair (Nat.unpair e).2).2).2)
+      else 0) := by
+  rw [termBVF]; simp only [natPi₁, natPi₂, natUnpair_eq]
+
+private lemma termBVVecF_succ (s w : ℕ) :
+    termBVVecF (s + 1) (w + 1) =
+      Nat.pair (termBVF s (Nat.unpair w).1) (termBVVecF s (Nat.unpair w).2) + 1 := by
+  rw [termBVVecF]; simp only [natPi₁, natPi₂, natUnpair_eq]
+
+omit [L.DecidableSymbols] in
+private lemma termBVF_eq_aux (s : ℕ) :
+    (∀ t ≤ s, IsUTerm L t → termBVF s t = termBV L t) ∧
+    (∀ v ≤ s, ∀ k, IsUTermVec L k v → termBVVecF s v = termBVVec L k v) := by
+  induction s with
+  | zero =>
+    constructor
+    · intro t ht h
+      obtain rfl : t = 0 := by omega
+      rcases h.case with (⟨z, hz⟩ | ⟨x, hx⟩ | ⟨k, f, v, _, _, hv⟩)
+      · rw [nat_qqBvar_eq] at hz; omega
+      · rw [nat_qqFvar_eq] at hx; omega
+      · rw [nat_qqFunc_eq] at hv; omega
+    · intro v hv k h
+      obtain rfl : v = 0 := by omega
+      obtain rfl : k = 0 := by simpa using h.lh
+      simp [termBVVecF]
+  | succ m ih =>
+    constructor
+    · intro t ht h
+      match t with
+      | 0 =>
+        rcases h.case with (⟨z, hz⟩ | ⟨x, hx⟩ | ⟨k, f, v, _, _, hv⟩)
+        · rw [nat_qqBvar_eq] at hz; omega
+        · rw [nat_qqFvar_eq] at hx; omega
+        · rw [nat_qqFunc_eq] at hv; omega
+      | e + 1 =>
+        have he : Nat.pair (Nat.unpair e).1 (Nat.unpair e).2 = e := Nat.pair_unpair e
+        have e2 : Nat.pair (Nat.unpair (Nat.unpair e).2).1 (Nat.unpair (Nat.unpair e).2).2
+            = (Nat.unpair e).2 := Nat.pair_unpair _
+        have e3 : Nat.pair (Nat.unpair (Nat.unpair (Nat.unpair e).2).2).1
+            (Nat.unpair (Nat.unpair (Nat.unpair e).2).2).2
+            = (Nat.unpair (Nat.unpair e).2).2 := Nat.pair_unpair _
+        have hle : (Nat.unpair (Nat.unpair (Nat.unpair e).2).2).2 ≤ m :=
+          le_trans (le_trans (Nat.unpair_right_le _) <|
+            le_trans (Nat.unpair_right_le _) (Nat.unpair_right_le _)) (by omega)
+        rcases (show (Nat.unpair e).1 = 0 ∨ (Nat.unpair e).1 = 1 ∨ (Nat.unpair e).1 = 2 ∨
+            3 ≤ (Nat.unpair e).1 by omega) with h' | h' | h' | h'
+        · have hs : (e : ℕ) + 1 = ^#((Nat.unpair e).2) := by rw [nat_qqBvar_eq, ← h', he]
+          rw [termBVF_succ, if_pos h', hs, termBV_bvar]
+        · have hs : (e : ℕ) + 1 = ^&((Nat.unpair e).2) := by rw [nat_qqFvar_eq, ← h', he]
+          rw [termBVF_succ, if_neg (by omega), if_pos h', hs, termBV_fvar]
+        · have hs : (e : ℕ) + 1 =
+              ^func (Nat.unpair (Nat.unpair e).2).1
+                (Nat.unpair (Nat.unpair (Nat.unpair e).2).2).1
+                (Nat.unpair (Nat.unpair (Nat.unpair e).2).2).2 := by
+            rw [nat_qqFunc_eq, e3, e2, ← h', he]
+          rw [hs] at h
+          obtain ⟨hkf, hv⟩ := IsUTerm.func_iff.mp h
+          rw [termBVF_succ, if_neg (by omega), if_neg (by omega), if_pos h', hs,
+            termBV_func hkf hv, ih.2 _ hle _ hv, ← nat_listMax_eq]
+        · rw [termBVF_succ, if_neg (by omega), if_neg (by omega), if_neg (by omega)]
+          exfalso
+          rcases h.case with (⟨z, hz⟩ | ⟨x, hx⟩ | ⟨k, f, v, _, _, hv⟩)
+          · rw [nat_qqBvar_eq] at hz
+            obtain rfl : e = Nat.pair 0 z := by omega
+            simp at h'
+          · rw [nat_qqFvar_eq] at hx
+            obtain rfl : e = Nat.pair 1 x := by omega
+            simp at h'
+          · rw [nat_qqFunc_eq] at hv
+            obtain rfl : e = Nat.pair 2 (Nat.pair k (Nat.pair f v)) := by omega
+            simp at h'
+    · intro v hv k h
+      match v with
+      | 0 =>
+        obtain rfl : k = 0 := by simpa using h.lh
+        simp [termBVVecF]
+      | w + 1 =>
+        have hadj : (w : ℕ) + 1 = (Nat.unpair w).1 ∷ (Nat.unpair w).2 := by
+          rw [succ_eq_adjoin w, nat_pi₁_eq, nat_pi₂_eq]
+        have h₁ : (Nat.unpair w).1 ≤ m := le_trans (Nat.unpair_left_le _) (by omega)
+        have h₂ : (Nat.unpair w).2 ≤ m := le_trans (Nat.unpair_right_le _) (by omega)
+        rw [hadj] at h
+        obtain rfl : k = len (Nat.unpair w).2 + 1 := by
+          have := h.lh; simpa [len_adjoin] using this
+        have ht : IsUTerm L (Nat.unpair w).1 := by simpa using h.nth (i := 0) (by simp)
+        have hts : IsUTermVec L (len (Nat.unpair w).2) (Nat.unpair w).2 :=
+          ⟨rfl, fun i hi ↦ by simpa using h.nth (i := i + 1) (by simpa using hi)⟩
+        rw [termBVVecF_succ, hadj, termBVVec_cons ht hts, ih.1 _ h₁ ht, ih.2 _ h₂ _ hts,
+          adjoin_def, nat_pair_eq]
+
+theorem termBVVec.check_eq {k v : ℕ} (h : IsUTermVec L k v) :
+    termBVVec.check L v = termBVVec L k v :=
+  (termBVF_eq_aux v).2 v le_rfl k h
+
+theorem termBV.check_eq (t : ℕ) : termBV.check L t = termBV L t := by
+  rw [termBV.check]
+  by_cases h : IsUTerm.check L t = true
+  · rw [if_pos h]
+    exact (termBVF_eq_aux t).1 t le_rfl (IsUTerm.check_iff.mp h)
+  · rw [if_neg h]
+    exact (IsUTerm.BV.construction.result_prop_not (L := L) (param := ![])
+      (fun hc ↦ h (IsUTerm.check_iff.mpr hc))).symm
+
 /-! ### It runs
 
 The mirror is fuel-indexed and destructures with `natPi₁`/`natPi₂`, so it reduces in the kernel and
@@ -895,6 +1037,12 @@ example : termSubst (V := ℕ) ℒₒᵣ 13 1 = 3 := by rw [← termSubst.check_
 example : termBShift (V := ℕ) ℒₒᵣ 1 = 2 := by rw [← termBShift.check_eq]; decide
 
 example : termBShift (V := ℕ) ℒₒᵣ 0 = 0 := by rw [← termBShift.check_eq]; decide
+
+/-- `1 = ^#0`, whose bound-variable bound is `1`. -/
+example : termBV (V := ℕ) ℒₒᵣ 1 = 1 := by rw [← termBV.check_eq]; decide
+
+/-- `3 = ^&0` is closed. -/
+example : termBV (V := ℕ) ℒₒᵣ 3 = 0 := by rw [← termBV.check_eq]; decide
 
 end LO.FirstOrder.Arithmetic.Bootstrapping
 
