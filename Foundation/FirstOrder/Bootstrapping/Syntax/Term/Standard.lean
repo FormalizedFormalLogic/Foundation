@@ -216,6 +216,171 @@ theorem IsUTerm.checkVec_iff {v : ℕ} :
 instance decidableIsUTerm (L : Language) [L.Encodable] [L.LORDefinable] [L.DecidableSymbols]
     (t : ℕ) : Decidable (IsUTerm (V := ℕ) L t) := decidable_of_iff _ IsUTerm.check_iff
 
+/-! ### `IsSemiterm`
+
+The same mirror with the bound `n` threaded through as an ordinary parameter. It does not shift —
+terms bind nothing — so the recursion is unchanged apart from the `^#z` branch, which now checks
+`z < n`. `bv` never appears. -/
+
+mutual
+
+/-- Fuel-indexed executable mirror of `IsSemiterm` at `V := ℕ`. The bound `n` is an ordinary
+parameter; it does not shift, since terms bind nothing. -/
+def IsSemiterm.checkF (L : Language) [L.Encodable] [L.LORDefinable] [L.DecidableSymbols] :
+    ℕ → ℕ → ℕ → Bool
+  | 0, _, _ => false
+  | _ + 1, _, 0 => false
+  | s + 1, n, e + 1 =>
+    if natPi₁ e = 0 then decide (natPi₂ e < n)
+    else if natPi₁ e = 1 then true
+    else if natPi₁ e = 2 then
+      isFuncB L (natPi₁ (natPi₂ e)) (natPi₁ (natPi₂ (natPi₂ e))) &&
+        (natPi₁ (natPi₂ e) == natLen (natPi₂ (natPi₂ (natPi₂ e)))) &&
+        IsSemiterm.checkVecF L s n (natPi₂ (natPi₂ (natPi₂ e)))
+    else false
+
+def IsSemiterm.checkVecF (L : Language) [L.Encodable] [L.LORDefinable] [L.DecidableSymbols] :
+    ℕ → ℕ → ℕ → Bool
+  | 0, _, v => v == 0
+  | _ + 1, _, 0 => true
+  | s + 1, n, w + 1 =>
+    IsSemiterm.checkF L s n (natPi₁ w) && IsSemiterm.checkVecF L s n (natPi₂ w)
+
+end
+
+def IsSemiterm.check (L : Language) [L.Encodable] [L.LORDefinable] [L.DecidableSymbols]
+    (n t : ℕ) : Bool := IsSemiterm.checkF L t n t
+
+def IsSemiterm.checkVec (L : Language) [L.Encodable] [L.LORDefinable] [L.DecidableSymbols]
+    (n v : ℕ) : Bool := IsSemiterm.checkVecF L v n v
+
+private lemma IsSemiterm.checkF_succ (s n e : ℕ) :
+    IsSemiterm.checkF L (s + 1) n (e + 1) =
+      (if (Nat.unpair e).1 = 0 then decide ((Nat.unpair e).2 < n)
+      else if (Nat.unpair e).1 = 1 then true
+      else if (Nat.unpair e).1 = 2 then
+        isFuncB L (Nat.unpair (Nat.unpair e).2).1 (Nat.unpair (Nat.unpair (Nat.unpair e).2).2).1 &&
+          ((Nat.unpair (Nat.unpair e).2).1 ==
+            natLen (Nat.unpair (Nat.unpair (Nat.unpair e).2).2).2) &&
+          IsSemiterm.checkVecF L s n (Nat.unpair (Nat.unpair (Nat.unpair e).2).2).2
+      else false) := by
+  rw [IsSemiterm.checkF]; simp only [natPi₁, natPi₂, natUnpair_eq]
+
+private lemma IsSemiterm.checkVecF_succ (s n w : ℕ) :
+    IsSemiterm.checkVecF L (s + 1) n (w + 1) =
+      (IsSemiterm.checkF L s n (Nat.unpair w).1 && IsSemiterm.checkVecF L s n (Nat.unpair w).2) := by
+  rw [IsSemiterm.checkVecF]; simp only [natPi₁, natPi₂, natUnpair_eq]
+
+omit [L.DecidableSymbols] in
+/-- Tags of semiterm codes, once, for the negative branches. -/
+private lemma IsSemiterm.tag_le {n e : ℕ} (h : IsSemiterm L n (e + 1)) : (Nat.unpair e).1 ≤ 2 := by
+  rcases h.case with (⟨z, _, hv⟩ | ⟨x, hv⟩ | ⟨k, f, v, _, _, hv⟩)
+  · rw [nat_qqBvar_eq] at hv
+    obtain rfl : e = Nat.pair 0 z := by omega
+    simp
+  · rw [nat_qqFvar_eq] at hv
+    obtain rfl : e = Nat.pair 1 x := by omega
+    simp
+  · rw [nat_qqFunc_eq] at hv
+    obtain rfl : e = Nat.pair 2 (Nat.pair k (Nat.pair f v)) := by omega
+    simp
+
+private lemma IsSemiterm.checkF_iff_aux (s : ℕ) : ∀ n,
+    (∀ t ≤ s, (IsSemiterm.checkF L s n t = true ↔ IsSemiterm L n t)) ∧
+    (∀ v ≤ s, (IsSemiterm.checkVecF L s n v = true ↔ ∀ i < len v, IsSemiterm L n v.[i])) := by
+  induction s with
+  | zero =>
+    intro n
+    constructor
+    · intro t ht
+      obtain rfl : t = 0 := by omega
+      simp only [IsSemiterm.checkF, Bool.false_eq_true, false_iff]
+      intro hc
+      rcases hc.case with (⟨z, _, hz⟩ | ⟨x, hx⟩ | ⟨k, f, v, _, _, hv⟩)
+      · rw [nat_qqBvar_eq] at hz; omega
+      · rw [nat_qqFvar_eq] at hx; omega
+      · rw [nat_qqFunc_eq] at hv; omega
+    · intro v hv
+      obtain rfl : v = 0 := by omega
+      simp [IsSemiterm.checkVecF]
+  | succ m ih =>
+    intro n
+    constructor
+    · intro t ht
+      match t with
+      | 0 =>
+        simp only [IsSemiterm.checkF, Bool.false_eq_true, false_iff]
+        intro hc
+        rcases hc.case with (⟨z, _, hz⟩ | ⟨x, hx⟩ | ⟨k, f, v, _, _, hv⟩)
+        · rw [nat_qqBvar_eq] at hz; omega
+        · rw [nat_qqFvar_eq] at hx; omega
+        · rw [nat_qqFunc_eq] at hv; omega
+      | e + 1 =>
+        have he : Nat.pair (Nat.unpair e).1 (Nat.unpair e).2 = e := Nat.pair_unpair e
+        rcases (show (Nat.unpair e).1 = 0 ∨ (Nat.unpair e).1 = 1 ∨ (Nat.unpair e).1 = 2 ∨
+            3 ≤ (Nat.unpair e).1 by omega) with h | h | h | h
+        · have hb : (e : ℕ) + 1 = ^#((Nat.unpair e).2) := by rw [nat_qqBvar_eq, ← h, he]
+          rw [IsSemiterm.checkF_succ, if_pos h, hb]
+          simp
+        · have hf : (e : ℕ) + 1 = ^&((Nat.unpair e).2) := by rw [nat_qqFvar_eq, ← h, he]
+          rw [IsSemiterm.checkF_succ, if_neg (by omega), if_pos h, hf]
+          simp
+        · have e2 : Nat.pair (Nat.unpair (Nat.unpair e).2).1 (Nat.unpair (Nat.unpair e).2).2
+              = (Nat.unpair e).2 := Nat.pair_unpair _
+          have e3 : Nat.pair (Nat.unpair (Nat.unpair (Nat.unpair e).2).2).1
+              (Nat.unpair (Nat.unpair (Nat.unpair e).2).2).2
+              = (Nat.unpair (Nat.unpair e).2).2 := Nat.pair_unpair _
+          have hfn : (e : ℕ) + 1 =
+              ^func (Nat.unpair (Nat.unpair e).2).1
+                (Nat.unpair (Nat.unpair (Nat.unpair e).2).2).1
+                (Nat.unpair (Nat.unpair (Nat.unpair e).2).2).2 := by
+            rw [nat_qqFunc_eq, e3, e2, ← h, he]
+          have hle : (Nat.unpair (Nat.unpair (Nat.unpair e).2).2).2 ≤ m :=
+            le_trans (le_trans (Nat.unpair_right_le _) <|
+              le_trans (Nat.unpair_right_le _) (Nat.unpair_right_le _)) (by omega)
+          rw [IsSemiterm.checkF_succ, if_neg (by omega), if_neg (by omega), if_pos h, hfn,
+            IsSemiterm.func]
+          simp only [Bool.and_eq_true, beq_iff_eq, isFuncB_iff, IsSemitermVec.iff,
+            (ih n).2 _ hle, ← nat_len_eq]
+          constructor
+          · rintro ⟨⟨hF, hk⟩, hv⟩; exact ⟨hF, hk.symm, fun i hi ↦ hv i (hk ▸ hi)⟩
+          · rintro ⟨hF, hk, hv⟩; exact ⟨⟨hF, hk.symm⟩, fun i hi ↦ hv i (hk ▸ hi)⟩
+        · rw [IsSemiterm.checkF_succ, if_neg (by omega), if_neg (by omega), if_neg (by omega)]
+          simp only [Bool.false_eq_true, false_iff]
+          intro hc
+          have := IsSemiterm.tag_le hc
+          omega
+    · intro v hv
+      match v with
+      | 0 => simp [IsSemiterm.checkVecF]
+      | w + 1 =>
+        have hadj : (w : ℕ) + 1 = (Nat.unpair w).1 ∷ (Nat.unpair w).2 := by
+          rw [succ_eq_adjoin w, nat_pi₁_eq, nat_pi₂_eq]
+        have h₁ : (Nat.unpair w).1 ≤ m := le_trans (Nat.unpair_left_le _) (by omega)
+        have h₂ : (Nat.unpair w).2 ≤ m := le_trans (Nat.unpair_right_le _) (by omega)
+        rw [IsSemiterm.checkVecF_succ]
+        simp only [Bool.and_eq_true, (ih n).1 _ h₁, (ih n).2 _ h₂]
+        rw [hadj, len_adjoin]
+        constructor
+        · rintro ⟨ht, hvv⟩ i hi
+          rcases Nat.eq_zero_or_pos i with rfl | hpos
+          · simpa using ht
+          · obtain ⟨j, rfl⟩ : ∃ j, i = j + 1 := ⟨i - 1, by omega⟩
+            simpa using hvv j (by simpa using hi)
+        · intro H
+          exact ⟨by simpa using H 0 (by simp),
+            fun j hj ↦ by simpa using H (j + 1) (by simpa using hj)⟩
+
+theorem IsSemiterm.check_iff {n t : ℕ} : IsSemiterm.check L n t = true ↔ IsSemiterm L n t :=
+  (IsSemiterm.checkF_iff_aux t n).1 t le_rfl
+
+theorem IsSemiterm.checkVec_iff {n v : ℕ} :
+    IsSemiterm.checkVec L n v = true ↔ ∀ i < len v, IsSemiterm L n v.[i] :=
+  (IsSemiterm.checkF_iff_aux v n).2 v le_rfl
+
+instance decidableIsSemiterm (L : Language) [L.Encodable] [L.LORDefinable] [L.DecidableSymbols]
+    (n t : ℕ) : Decidable (IsSemiterm (V := ℕ) L n t) := decidable_of_iff _ IsSemiterm.check_iff
+
 /-! ### It runs
 
 The mirror is fuel-indexed and destructures with `natPi₁`/`natPi₂`, so it reduces in the kernel and
@@ -243,6 +408,12 @@ example : ¬IsUTerm (V := ℕ) ℒₒᵣ 0 := fun h ↦ absurd (IsUTerm.check_if
 
 /-- `13` has constructor tag `3`. -/
 example : ¬IsUTerm (V := ℕ) ℒₒᵣ 13 := fun h ↦ absurd (IsUTerm.check_iff.mpr h) (by decide)
+
+/-- `1 = ^#0` is a term at `n = 1` but not at `n = 0`. -/
+example : IsSemiterm (V := ℕ) ℒₒᵣ 1 1 := IsSemiterm.check_iff.mp (by decide)
+
+example : ¬IsSemiterm (V := ℕ) ℒₒᵣ 0 1 :=
+  fun h ↦ absurd (IsSemiterm.check_iff.mpr h) (by decide)
 
 end LO.FirstOrder.Arithmetic.Bootstrapping
 

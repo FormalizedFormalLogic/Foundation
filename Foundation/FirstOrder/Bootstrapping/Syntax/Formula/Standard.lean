@@ -98,7 +98,8 @@ private lemma isUTermVec_iff_check (k v : ℕ) :
 
 omit [L.DecidableSymbols] in
 /-- Read the constructor tag off a code that is a formula. Proved once, by the eight-way
-`case_iff` enumeration, so that the negative branches below need only `omega`. -/
+`case_iff` enumeration, so that the negative branches below need only `omega`. The `IsSemiformula`
+mirror reuses it through `IsSemiformula.isUFormula`. -/
 private lemma IsUFormula.tag_spec {e : ℕ} (h : IsUFormula L (e + 1)) :
     (Nat.unpair e).1 ≤ 7 ∧ ((Nat.unpair e).1 = 2 ∨ (Nat.unpair e).1 = 3 → (Nat.unpair e).2 = 0) := by
   rcases h.case with (⟨k, r, v, _, _, hv⟩ | ⟨k, r, v, _, _, hv⟩ | hv | hv |
@@ -216,6 +217,145 @@ theorem IsUFormula.check_iff {p : ℕ} : IsUFormula.check L p = true ↔ IsUForm
 instance decidableIsUFormula (L : Language) [L.Encodable] [L.LORDefinable] [L.DecidableSymbols]
     (p : ℕ) : Decidable (IsUFormula (V := ℕ) L p) := decidable_of_iff _ IsUFormula.check_iff
 
+/-! ### `IsSemiformula` -/
+
+/-- Fuel-indexed executable mirror of `IsSemiformula` at `V := ℕ`. The bound `n` is an ordinary
+parameter, shifting to `n + 1` under `^∀`/`^∃`. `bv` never appears. -/
+def IsSemiformula.checkF (L : Language) [L.Encodable] [L.LORDefinable] [L.DecidableSymbols] :
+    ℕ → ℕ → ℕ → Bool
+  | 0, _, _ => false
+  | _ + 1, _, 0 => false
+  | s + 1, n, e + 1 =>
+    if natPi₁ e = 0 ∨ natPi₁ e = 1 then
+      isRelB L (natPi₁ (natPi₂ e)) (natPi₁ (natPi₂ (natPi₂ e))) &&
+        (natPi₁ (natPi₂ e) == natLen (natPi₂ (natPi₂ (natPi₂ e)))) &&
+        IsSemiterm.checkVec L n (natPi₂ (natPi₂ (natPi₂ e)))
+    else if natPi₁ e = 2 ∨ natPi₁ e = 3 then natPi₂ e == 0
+    else if natPi₁ e = 4 ∨ natPi₁ e = 5 then
+      IsSemiformula.checkF L s n (natPi₁ (natPi₂ e)) &&
+        IsSemiformula.checkF L s n (natPi₂ (natPi₂ e))
+    else if natPi₁ e = 6 ∨ natPi₁ e = 7 then IsSemiformula.checkF L s (n + 1) (natPi₂ e)
+    else false
+
+def IsSemiformula.check (L : Language) [L.Encodable] [L.LORDefinable] [L.DecidableSymbols]
+    (n p : ℕ) : Bool := IsSemiformula.checkF L p n p
+
+private lemma IsSemiformula.checkF_succ (s n e : ℕ) :
+    IsSemiformula.checkF L (s + 1) n (e + 1) =
+      (if (Nat.unpair e).1 = 0 ∨ (Nat.unpair e).1 = 1 then
+        isRelB L (Nat.unpair (Nat.unpair e).2).1 (Nat.unpair (Nat.unpair (Nat.unpair e).2).2).1 &&
+          ((Nat.unpair (Nat.unpair e).2).1 ==
+            natLen (Nat.unpair (Nat.unpair (Nat.unpair e).2).2).2) &&
+          IsSemiterm.checkVec L n (Nat.unpair (Nat.unpair (Nat.unpair e).2).2).2
+      else if (Nat.unpair e).1 = 2 ∨ (Nat.unpair e).1 = 3 then (Nat.unpair e).2 == 0
+      else if (Nat.unpair e).1 = 4 ∨ (Nat.unpair e).1 = 5 then
+        IsSemiformula.checkF L s n (Nat.unpair (Nat.unpair e).2).1 &&
+          IsSemiformula.checkF L s n (Nat.unpair (Nat.unpair e).2).2
+      else if (Nat.unpair e).1 = 6 ∨ (Nat.unpair e).1 = 7 then
+        IsSemiformula.checkF L s (n + 1) (Nat.unpair e).2
+      else false) := by
+  rw [IsSemiformula.checkF]; simp only [natPi₁, natPi₂, natUnpair_eq]
+
+private lemma isSemitermVec_iff_check (k n v : ℕ) :
+    (k = natLen v ∧ IsSemiterm.checkVec L n v = true) ↔ IsSemitermVec L k n v := by
+  rw [IsSemiterm.checkVec_iff, IsSemitermVec.iff, ← nat_len_eq]
+  constructor
+  · rintro ⟨hk, hv⟩; exact ⟨hk.symm, fun i hi ↦ hv i (hk ▸ hi)⟩
+  · rintro ⟨hk, hv⟩; exact ⟨hk.symm, fun i hi ↦ hv i (hk.symm ▸ hi)⟩
+
+private lemma IsSemiformula.checkF_iff_aux (s : ℕ) :
+    ∀ n, ∀ p ≤ s, (IsSemiformula.checkF L s n p = true ↔ IsSemiformula L n p) := by
+  induction s with
+  | zero =>
+    intro n p hp
+    obtain rfl : p = 0 := by omega
+    simp only [IsSemiformula.checkF, Bool.false_eq_true, false_iff]
+    intro hc; simpa using hc.isUFormula
+  | succ m ih =>
+    intro n p hp
+    match p with
+    | 0 =>
+      simp only [IsSemiformula.checkF, Bool.false_eq_true, false_iff]
+      intro hc; simpa using hc.isUFormula
+    | e + 1 =>
+      have he : Nat.pair (Nat.unpair e).1 (Nat.unpair e).2 = e := Nat.pair_unpair e
+      have e2 : Nat.pair (Nat.unpair (Nat.unpair e).2).1 (Nat.unpair (Nat.unpair e).2).2
+          = (Nat.unpair e).2 := Nat.pair_unpair _
+      have e3 : Nat.pair (Nat.unpair (Nat.unpair (Nat.unpair e).2).2).1
+          (Nat.unpair (Nat.unpair (Nat.unpair e).2).2).2
+          = (Nat.unpair (Nat.unpair e).2).2 := Nat.pair_unpair _
+      have hl₁ : (Nat.unpair (Nat.unpair e).2).1 ≤ m :=
+        le_trans (le_trans (Nat.unpair_left_le _) (Nat.unpair_right_le _)) (by omega)
+      have hl₂ : (Nat.unpair (Nat.unpair e).2).2 ≤ m :=
+        le_trans (le_trans (Nat.unpair_right_le _) (Nat.unpair_right_le _)) (by omega)
+      have hl₃ : (Nat.unpair e).2 ≤ m := le_trans (Nat.unpair_right_le _) (by omega)
+      rcases (show (Nat.unpair e).1 = 0 ∨ (Nat.unpair e).1 = 1 ∨ (Nat.unpair e).1 = 2 ∨
+          (Nat.unpair e).1 = 3 ∨ (Nat.unpair e).1 = 4 ∨ (Nat.unpair e).1 = 5 ∨
+          (Nat.unpair e).1 = 6 ∨ (Nat.unpair e).1 = 7 ∨ 8 ≤ (Nat.unpair e).1 by omega)
+        with h | h | h | h | h | h | h | h | h
+      · have hs : (e : ℕ) + 1 = ^rel (Nat.unpair (Nat.unpair e).2).1
+            (Nat.unpair (Nat.unpair (Nat.unpair e).2).2).1
+            (Nat.unpair (Nat.unpair (Nat.unpair e).2).2).2 := by
+          rw [nat_qqRel_eq, e3, e2, ← h, he]
+        rw [IsSemiformula.checkF_succ, if_pos (Or.inl h), hs, IsSemiformula.rel]
+        simp only [Bool.and_eq_true, beq_iff_eq, isRelB_iff]
+        rw [and_assoc, isSemitermVec_iff_check]
+      · have hs : (e : ℕ) + 1 = ^nrel (Nat.unpair (Nat.unpair e).2).1
+            (Nat.unpair (Nat.unpair (Nat.unpair e).2).2).1
+            (Nat.unpair (Nat.unpair (Nat.unpair e).2).2).2 := by
+          rw [nat_qqNRel_eq, e3, e2, ← h, he]
+        rw [IsSemiformula.checkF_succ, if_pos (Or.inr h), hs, IsSemiformula.nrel]
+        simp only [Bool.and_eq_true, beq_iff_eq, isRelB_iff]
+        rw [and_assoc, isSemitermVec_iff_check]
+      · rw [IsSemiformula.checkF_succ, if_neg (by omega), if_pos (Or.inl h)]
+        simp only [beq_iff_eq]
+        constructor
+        · intro hz
+          have hv : (e : ℕ) + 1 = ^⊤ := by rw [nat_qqVerum_eq, ← h, ← hz, he]
+          rw [hv]; simp
+        · intro hc; exact (IsUFormula.tag_spec hc.isUFormula).2 (Or.inl h)
+      · rw [IsSemiformula.checkF_succ, if_neg (by omega), if_pos (Or.inr h)]
+        simp only [beq_iff_eq]
+        constructor
+        · intro hz
+          have hv : (e : ℕ) + 1 = ^⊥ := by rw [nat_qqFalsum_eq, ← h, ← hz, he]
+          rw [hv]; simp
+        · intro hc; exact (IsUFormula.tag_spec hc.isUFormula).2 (Or.inr h)
+      · have hs : (e : ℕ) + 1 =
+            (Nat.unpair (Nat.unpair e).2).1 ^⋏ (Nat.unpair (Nat.unpair e).2).2 := by
+          rw [nat_qqAnd_eq, e2, ← h, he]
+        rw [IsSemiformula.checkF_succ, if_neg (by omega), if_neg (by omega), if_pos (Or.inl h), hs,
+          IsSemiformula.and]
+        simp only [Bool.and_eq_true, ih n _ hl₁, ih n _ hl₂]
+      · have hs : (e : ℕ) + 1 =
+            (Nat.unpair (Nat.unpair e).2).1 ^⋎ (Nat.unpair (Nat.unpair e).2).2 := by
+          rw [nat_qqOr_eq, e2, ← h, he]
+        rw [IsSemiformula.checkF_succ, if_neg (by omega), if_neg (by omega), if_pos (Or.inr h), hs,
+          IsSemiformula.or]
+        simp only [Bool.and_eq_true, ih n _ hl₁, ih n _ hl₂]
+      · have hs : (e : ℕ) + 1 = ^∀ (Nat.unpair e).2 := by rw [nat_qqAll_eq, ← h, he]
+        rw [IsSemiformula.checkF_succ, if_neg (by omega), if_neg (by omega), if_neg (by omega),
+          if_pos (Or.inl h), hs, IsSemiformula.all]
+        exact ih (n + 1) _ hl₃
+      · have hs : (e : ℕ) + 1 = ^∃ (Nat.unpair e).2 := by rw [nat_qqExs_eq, ← h, he]
+        rw [IsSemiformula.checkF_succ, if_neg (by omega), if_neg (by omega), if_neg (by omega),
+          if_pos (Or.inr h), hs, IsSemiformula.exs]
+        exact ih (n + 1) _ hl₃
+      · rw [IsSemiformula.checkF_succ, if_neg (by omega), if_neg (by omega), if_neg (by omega),
+          if_neg (by omega)]
+        simp only [Bool.false_eq_true, false_iff]
+        intro hc
+        have := (IsUFormula.tag_spec hc.isUFormula).1
+        omega
+
+theorem IsSemiformula.check_iff {n p : ℕ} :
+    IsSemiformula.check L n p = true ↔ IsSemiformula L n p :=
+  IsSemiformula.checkF_iff_aux p n p le_rfl
+
+instance decidableIsSemiformula (L : Language) [L.Encodable] [L.LORDefinable] [L.DecidableSymbols]
+    (n p : ℕ) : Decidable (IsSemiformula (V := ℕ) L n p) :=
+  decidable_of_iff _ IsSemiformula.check_iff
+
 /-! ### It runs
 
 `7 = ^⊤`; `3974 = ^⊤ ^⋏ ^⊤`; `73` has constructor tag `8`. Inputs are bare numerals — see
@@ -230,6 +370,11 @@ example : IsUFormula (V := ℕ) ℒₒᵣ 3974 := IsUFormula.check_iff.mp (by de
 example : ¬IsUFormula (V := ℕ) ℒₒᵣ 0 := fun h ↦ absurd (IsUFormula.check_iff.mpr h) (by decide)
 
 example : ¬IsUFormula (V := ℕ) ℒₒᵣ 73 := fun h ↦ absurd (IsUFormula.check_iff.mpr h) (by decide)
+
+example : IsSemiformula (V := ℕ) ℒₒᵣ 0 7 := IsSemiformula.check_iff.mp (by decide)
+
+example : ¬IsSemiformula (V := ℕ) ℒₒᵣ 0 73 :=
+  fun h ↦ absurd (IsSemiformula.check_iff.mpr h) (by decide)
 
 end LO.FirstOrder.Arithmetic.Bootstrapping
 
