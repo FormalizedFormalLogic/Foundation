@@ -269,6 +269,155 @@ instance axm_defined : 𝚺₀-Function₂ (axm : V → V → V) via axmGraph :=
 @[simp] lemma fstIdx_cutRule (s p d₁ d₂ : V) : fstIdx (cutRule s p d₁ d₂) = s := by simp [fstIdx, cutRule]
 @[simp] lemma fstIdx_axm (s p : V) : fstIdx (axm s p) = s := by simp [fstIdx, axm]
 
+/-! ### Injectivity and disjointness of the constructors
+
+All ten constructors have the shape `⟪s, k, …⟫ + 1` with a distinct tag `k` in the second
+component, so they are injective and pairwise distinct. Together with the `fstIdx_*` and
+`_lt_` lemmas above this is what lets a recursion on a code decide which rule produced it.
+Each `_ne_` lemma is stated in the order the constructors are defined; use `.symm` for the
+other orientation. -/
+
+@[simp] lemma axL_inj {s p s' p' : V} : axL s p = axL s' p' ↔ s = s' ∧ p = p' := by simp [axL]
+
+@[simp] lemma verumIntro_inj {s s' : V} : verumIntro s = verumIntro s' ↔ s = s' := by simp [verumIntro]
+
+@[simp] lemma andIntro_inj {s p q dp dq s' p' q' dp' dq' : V} :
+    andIntro s p q dp dq = andIntro s' p' q' dp' dq' ↔
+      s = s' ∧ p = p' ∧ q = q' ∧ dp = dp' ∧ dq = dq' := by simp [andIntro]
+
+@[simp] lemma orIntro_inj {s p q d s' p' q' d' : V} :
+    orIntro s p q d = orIntro s' p' q' d' ↔ s = s' ∧ p = p' ∧ q = q' ∧ d = d' := by simp [orIntro]
+
+@[simp] lemma allIntro_inj {s p d s' p' d' : V} :
+    allIntro s p d = allIntro s' p' d' ↔ s = s' ∧ p = p' ∧ d = d' := by simp [allIntro]
+
+@[simp] lemma exsIntro_inj {s p t d s' p' t' d' : V} :
+    exsIntro s p t d = exsIntro s' p' t' d' ↔ s = s' ∧ p = p' ∧ t = t' ∧ d = d' := by simp [exsIntro]
+
+@[simp] lemma wkRule_inj {s d s' d' : V} : wkRule s d = wkRule s' d' ↔ s = s' ∧ d = d' := by simp [wkRule]
+
+@[simp] lemma shiftRule_inj {s d s' d' : V} :
+    shiftRule s d = shiftRule s' d' ↔ s = s' ∧ d = d' := by simp [shiftRule]
+
+@[simp] lemma cutRule_inj {s p d₁ d₂ s' p' d₁' d₂' : V} :
+    cutRule s p d₁ d₂ = cutRule s' p' d₁' d₂' ↔ s = s' ∧ p = p' ∧ d₁ = d₁' ∧ d₂ = d₂' := by simp [cutRule]
+
+@[simp] lemma axm_inj {s p s' p' : V} : axm s p = axm s' p' ↔ s = s' ∧ p = p' := by simp [axm]
+
+@[simp] lemma axL_ne_verumIntro {s p s' : V} : axL s p ≠ verumIntro s' := by simp [axL, verumIntro]
+
+@[simp] lemma axL_ne_andIntro {s p s' p' q' dp' dq' : V} :
+    axL s p ≠ andIntro s' p' q' dp' dq' := by simp [axL, andIntro]
+
+@[simp] lemma axL_ne_orIntro {s p s' p' q' d' : V} : axL s p ≠ orIntro s' p' q' d' := by simp [axL, orIntro]
+
+@[simp] lemma axL_ne_allIntro {s p s' p' d' : V} : axL s p ≠ allIntro s' p' d' := by simp [axL, allIntro]
+
+@[simp] lemma axL_ne_exsIntro {s p s' p' t' d' : V} : axL s p ≠ exsIntro s' p' t' d' := by simp [axL, exsIntro]
+
+@[simp] lemma axL_ne_wkRule {s p s' d' : V} : axL s p ≠ wkRule s' d' := by simp [axL, wkRule]
+
+@[simp] lemma axL_ne_shiftRule {s p s' d' : V} : axL s p ≠ shiftRule s' d' := by simp [axL, shiftRule]
+
+@[simp] lemma axL_ne_cutRule {s p s' p' d₁' d₂' : V} : axL s p ≠ cutRule s' p' d₁' d₂' := by simp [axL, cutRule]
+
+@[simp] lemma axL_ne_axm {s p s' p' : V} : axL s p ≠ axm s' p' := by simp [axL, axm]
+
+@[simp] lemma verumIntro_ne_andIntro {s s' p' q' dp' dq' : V} :
+    verumIntro s ≠ andIntro s' p' q' dp' dq' := by simp [verumIntro, andIntro]
+
+@[simp] lemma verumIntro_ne_orIntro {s s' p' q' d' : V} :
+    verumIntro s ≠ orIntro s' p' q' d' := by simp [verumIntro, orIntro]
+
+@[simp] lemma verumIntro_ne_allIntro {s s' p' d' : V} :
+    verumIntro s ≠ allIntro s' p' d' := by simp [verumIntro, allIntro]
+
+@[simp] lemma verumIntro_ne_exsIntro {s s' p' t' d' : V} :
+    verumIntro s ≠ exsIntro s' p' t' d' := by simp [verumIntro, exsIntro]
+
+@[simp] lemma verumIntro_ne_wkRule {s s' d' : V} : verumIntro s ≠ wkRule s' d' := by simp [verumIntro, wkRule]
+
+@[simp] lemma verumIntro_ne_shiftRule {s s' d' : V} :
+    verumIntro s ≠ shiftRule s' d' := by simp [verumIntro, shiftRule]
+
+@[simp] lemma verumIntro_ne_cutRule {s s' p' d₁' d₂' : V} :
+    verumIntro s ≠ cutRule s' p' d₁' d₂' := by simp [verumIntro, cutRule]
+
+@[simp] lemma verumIntro_ne_axm {s s' p' : V} : verumIntro s ≠ axm s' p' := by simp [verumIntro, axm]
+
+@[simp] lemma andIntro_ne_orIntro {s p q dp dq s' p' q' d' : V} :
+    andIntro s p q dp dq ≠ orIntro s' p' q' d' := by simp [andIntro, orIntro]
+
+@[simp] lemma andIntro_ne_allIntro {s p q dp dq s' p' d' : V} :
+    andIntro s p q dp dq ≠ allIntro s' p' d' := by simp [andIntro, allIntro]
+
+@[simp] lemma andIntro_ne_exsIntro {s p q dp dq s' p' t' d' : V} :
+    andIntro s p q dp dq ≠ exsIntro s' p' t' d' := by simp [andIntro, exsIntro]
+
+@[simp] lemma andIntro_ne_wkRule {s p q dp dq s' d' : V} :
+    andIntro s p q dp dq ≠ wkRule s' d' := by simp [andIntro, wkRule]
+
+@[simp] lemma andIntro_ne_shiftRule {s p q dp dq s' d' : V} :
+    andIntro s p q dp dq ≠ shiftRule s' d' := by simp [andIntro, shiftRule]
+
+@[simp] lemma andIntro_ne_cutRule {s p q dp dq s' p' d₁' d₂' : V} :
+    andIntro s p q dp dq ≠ cutRule s' p' d₁' d₂' := by simp [andIntro, cutRule]
+
+@[simp] lemma andIntro_ne_axm {s p q dp dq s' p' : V} : andIntro s p q dp dq ≠ axm s' p' := by simp [andIntro, axm]
+
+@[simp] lemma orIntro_ne_allIntro {s p q d s' p' d' : V} :
+    orIntro s p q d ≠ allIntro s' p' d' := by simp [orIntro, allIntro]
+
+@[simp] lemma orIntro_ne_exsIntro {s p q d s' p' t' d' : V} :
+    orIntro s p q d ≠ exsIntro s' p' t' d' := by simp [orIntro, exsIntro]
+
+@[simp] lemma orIntro_ne_wkRule {s p q d s' d' : V} : orIntro s p q d ≠ wkRule s' d' := by simp [orIntro, wkRule]
+
+@[simp] lemma orIntro_ne_shiftRule {s p q d s' d' : V} :
+    orIntro s p q d ≠ shiftRule s' d' := by simp [orIntro, shiftRule]
+
+@[simp] lemma orIntro_ne_cutRule {s p q d s' p' d₁' d₂' : V} :
+    orIntro s p q d ≠ cutRule s' p' d₁' d₂' := by simp [orIntro, cutRule]
+
+@[simp] lemma orIntro_ne_axm {s p q d s' p' : V} : orIntro s p q d ≠ axm s' p' := by simp [orIntro, axm]
+
+@[simp] lemma allIntro_ne_exsIntro {s p d s' p' t' d' : V} :
+    allIntro s p d ≠ exsIntro s' p' t' d' := by simp [allIntro, exsIntro]
+
+@[simp] lemma allIntro_ne_wkRule {s p d s' d' : V} : allIntro s p d ≠ wkRule s' d' := by simp [allIntro, wkRule]
+
+@[simp] lemma allIntro_ne_shiftRule {s p d s' d' : V} :
+    allIntro s p d ≠ shiftRule s' d' := by simp [allIntro, shiftRule]
+
+@[simp] lemma allIntro_ne_cutRule {s p d s' p' d₁' d₂' : V} :
+    allIntro s p d ≠ cutRule s' p' d₁' d₂' := by simp [allIntro, cutRule]
+
+@[simp] lemma allIntro_ne_axm {s p d s' p' : V} : allIntro s p d ≠ axm s' p' := by simp [allIntro, axm]
+
+@[simp] lemma exsIntro_ne_wkRule {s p t d s' d' : V} : exsIntro s p t d ≠ wkRule s' d' := by simp [exsIntro, wkRule]
+
+@[simp] lemma exsIntro_ne_shiftRule {s p t d s' d' : V} :
+    exsIntro s p t d ≠ shiftRule s' d' := by simp [exsIntro, shiftRule]
+
+@[simp] lemma exsIntro_ne_cutRule {s p t d s' p' d₁' d₂' : V} :
+    exsIntro s p t d ≠ cutRule s' p' d₁' d₂' := by simp [exsIntro, cutRule]
+
+@[simp] lemma exsIntro_ne_axm {s p t d s' p' : V} : exsIntro s p t d ≠ axm s' p' := by simp [exsIntro, axm]
+
+@[simp] lemma wkRule_ne_shiftRule {s d s' d' : V} : wkRule s d ≠ shiftRule s' d' := by simp [wkRule, shiftRule]
+
+@[simp] lemma wkRule_ne_cutRule {s d s' p' d₁' d₂' : V} :
+    wkRule s d ≠ cutRule s' p' d₁' d₂' := by simp [wkRule, cutRule]
+
+@[simp] lemma wkRule_ne_axm {s d s' p' : V} : wkRule s d ≠ axm s' p' := by simp [wkRule, axm]
+
+@[simp] lemma shiftRule_ne_cutRule {s d s' p' d₁' d₂' : V} :
+    shiftRule s d ≠ cutRule s' p' d₁' d₂' := by simp [shiftRule, cutRule]
+
+@[simp] lemma shiftRule_ne_axm {s d s' p' : V} : shiftRule s d ≠ axm s' p' := by simp [shiftRule, axm]
+
+@[simp] lemma cutRule_ne_axm {s p d₁ d₂ s' p' : V} : cutRule s p d₁ d₂ ≠ axm s' p' := by simp [cutRule, axm]
+
 end
 
 namespace Derivation
