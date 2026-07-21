@@ -121,4 +121,54 @@ noncomputable def replRelOverSet (X : V) (R : V → V → Prop) (h : ∀ x ∈ X
 @[simp] lemma replRelOverSet_spec {X y : V} {R : V → V → Prop} {h : ∀ x ∈ X, ∃! y, R x y} (hR : ℒₛₑₜ-relation R) :
     y ∈ replRelOverSet X R h ↔ ∃ x ∈ X, R x y := Classical.choose!_spec (replacement_rel_existsUnique_of_mem_existsUnique X R h hR) y
 
+
+/-! ### Definability Gadgets for Replacement -/
+
+namespace Repl
+
+structure Blueprint (arity : ℕ) where
+  graph : SetTheorySemisentence (arity + 2)
+
+def Blueprint.resultDef (b : Blueprint arity) : SetTheorySemisentence (arity + 2) :=
+  “Y X. ∀ y, y ∈ Y ↔ ∃ x ∈ X, !b.graph y x ⋯”
+
+variable (V)
+
+structure Construction {arity : ℕ} (b : Blueprint arity) where
+  map : (Fin arity → V) → V → V
+  map_defined : DefinedFunction (fun v ↦ map (v ·.succ) (v 0)) b.graph
+
+variable {V}
+
+namespace Construction
+
+variable {arity : ℕ} {b : Blueprint arity} (c : Construction V b)
+
+instance map_definable :
+  (ℒₛₑₜ).DefinableFunction (fun v ↦ c.map (v ·.succ) (v 0)) := c.map_defined.to_definable
+
+noncomputable def result (v : Fin arity → V) : V → V := fun x ↦ repl x (c.map v) (by
+  refine ⟨(Rew.embSubsts (#0 :> #1 :> fun i : Fin arity ↦ &(v i))) ▹ b.graph, ?_⟩
+  intro x
+  simpa [Semiformula.eval_embSubsts, Matrix.comp_vecCons', Function.comp_def]
+    using c.map_defined.iff (x 0 :> x 1 :> v))
+
+lemma result_defined : DefinedFunction (fun v ↦ c.result (v ·.succ) (v 0)) b.resultDef := .mk fun v ↦ by
+  constructor
+  · intro h
+    simp [Blueprint.resultDef] at h
+    ext y
+    simpa [result, c.map_defined.iff] using h y
+  · intro h
+    simp [Blueprint.resultDef, result, c.map_defined.iff, h]
+
+@[simp] lemma eval_resultDef : b.resultDef.Evalb v ↔ v 0 = c.result (v ·.succ.succ) (v 1) := c.result_defined.iff v
+
+@[simp] lemma mem_result : y ∈ c.result v X ↔ ∃ x ∈ X, y = c.map v x := by
+  simp [result, repl_spec]
+
+end Construction
+
+end Repl
+
 end LO.FirstOrder.SetTheory
