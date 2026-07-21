@@ -516,6 +516,82 @@ example {n : ℕ} (t : Semiterm L ξ n) : (decode (encode t) : Option (Semiterm 
 
 end Semiterm
 
+namespace Semiformula
+
+open LO.FirstOrder.Semiterm
+
+variable {L : Language} [L.Encodable] [L.Primcodable] {ξ : Type*} [Primcodable ξ]
+
+/-- The `rel`/`nrel` argument fold, the term-decoding sibling of `Semiterm.stepVec`. Where the term
+version reads each argument out of the strong-recursion table, this decodes each argument code as a
+term of `Semiterm L ξ n` — the arguments of a relation are terms, not sub-formulas, so they are not
+in any table. `0` is failure and `r + 1` success, exactly as there, and for the same reason. -/
+def stepVecT (n : ℕ) (l : List ℕ) : ℕ :=
+  l.foldr (fun j acc ↦
+    if encode (decode j : Option (Semiterm L ξ n)) = 0 ∨ acc = 0 then 0
+    else Nat.pair (encode (decode j : Option (Semiterm L ξ n)) - 1) (acc - 1) + 2) 1
+
+omit [L.Primcodable] in
+@[simp] lemma stepVecT_nil (n : ℕ) : stepVecT (L := L) (ξ := ξ) n [] = 1 := rfl
+
+omit [L.Primcodable] in
+lemma stepVecT_cons (n : ℕ) (j : ℕ) (l : List ℕ) :
+    stepVecT (L := L) (ξ := ξ) n (j :: l) =
+      if encode (decode j : Option (Semiterm L ξ n)) = 0 ∨ stepVecT (L := L) (ξ := ξ) n l = 0 then 0
+      else Nat.pair (encode (decode j : Option (Semiterm L ξ n)) - 1)
+        (stepVecT (L := L) (ξ := ξ) n l - 1) + 2 := rfl
+
+omit [L.Primcodable] in
+/-- Value fact, success. -/
+lemma stepVecT_ofFn {n a : ℕ} {w u : Fin a → ℕ}
+    (h : ∀ i, encode (decode (w i) : Option (Semiterm L ξ n)) = u i + 1) :
+    stepVecT (L := L) (ξ := ξ) n (List.ofFn w) = Matrix.vecToNat u + 1 := by
+  induction a with
+  | zero => simp [Matrix.vecToNat]
+  | succ a ih =>
+    rw [List.ofFn_succ, stepVecT_cons,
+      ih (w := fun i ↦ w i.succ) (u := fun i ↦ u i.succ) fun i ↦ by simpa using h i.succ,
+      h 0, if_neg (by simp)]
+    simp only [Nat.add_sub_cancel]
+    simpa using (Matrix.encode_succ (u 0) (fun i ↦ u i.succ)).symm
+
+omit [L.Primcodable] in
+/-- Value fact, failure. -/
+lemma stepVecT_eq_zero {n : ℕ} {l : List ℕ} {j : ℕ} (hj : j ∈ l)
+    (h : encode (decode j : Option (Semiterm L ξ n)) = 0) : stepVecT (L := L) (ξ := ξ) n l = 0 := by
+  induction l with
+  | nil => simp at hj
+  | cons b l ih =>
+    rw [stepVecT_cons]
+    rcases List.mem_cons.mp hj with rfl | hj'
+    · exact if_pos (Or.inl h)
+    · exact if_pos (Or.inr (ih hj'))
+
+open Primrec in
+theorem primrec_stepVecT : Primrec₂ (stepVecT (L := L) (ξ := ξ)) := by
+  have hp : Primrec fun p : ℕ × List ℕ ↦
+      p.2.foldr (fun j acc ↦
+        if encode (decode j : Option (Semiterm L ξ p.1)) = 0 ∨ acc = 0 then 0
+        else Nat.pair (encode (decode j : Option (Semiterm L ξ p.1)) - 1) (acc - 1) + 2) 1 := by
+    refine Primrec.list_foldr (β := ℕ) (σ := ℕ)
+      (f := fun p : ℕ × List ℕ ↦ p.2) (g := fun _ ↦ (1 : ℕ))
+      (h := fun p x ↦ if encode (decode x.1 : Option (Semiterm L ξ p.1)) = 0 ∨ x.2 = 0 then 0
+        else Nat.pair (encode (decode x.1 : Option (Semiterm L ξ p.1)) - 1) (x.2 - 1) + 2)
+      snd (const _) ?_
+    have hdec : Primrec fun y : (ℕ × List ℕ) × ℕ × ℕ ↦
+        encode (decode y.2.1 : Option (Semiterm L ξ y.1.1)) :=
+      (Semiterm.encode_ofNat_primrec (L := L) (ξ := ξ)).comp (fst.comp fst) (fst.comp snd)
+        |>.of_eq fun _ ↦ rfl
+    refine Primrec.ite (PrimrecPred.or (Primrec.eq.comp hdec (const 0))
+      (Primrec.eq.comp (snd.comp snd) (const 0))) (const 0) ?_
+    exact Primrec.nat_add.comp
+      (Primrec₂.natPair.comp (nat_sub.comp hdec (const 1))
+        (nat_sub.comp (snd.comp snd) (const 1))) (const 2)
+  exact hp.of_eq fun p ↦ rfl
+
+
+end Semiformula
+
 end LO.FirstOrder
 
 end
