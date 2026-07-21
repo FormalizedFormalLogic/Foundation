@@ -151,9 +151,42 @@ lemma getM_option_eq_some_iff {n : ℕ} {β : Type*} {f : Fin n → Option β} {
 
 end Matrix
 
-namespace LO.FirstOrder.Semiterm
+namespace LO.FirstOrder
 
 open Encodable Nat
+
+/-- Primitive-recursiveness of a language's symbol encodings, **uniformly in the arity**.
+
+This is strictly stronger than `[(k : ℕ) → Primcodable (L.Func k)]`, and the strengthening is
+forced rather than convenient: `Semiterm.ofNat` reads the arity `k` *out of the code being
+decoded* and then calls `decode : ℕ → Option (L.Func k)` at that `k`. Simulating `ofNat` therefore
+needs `(k, e) ↦ encode (decode e : Option (L.Func k))` to be primitive recursive as a function of
+the *pair*. A per-arity family gives primitive recursiveness only for each fixed `k`, with no
+uniformity across `k`, and no amount of assembling those gives the function of the pair. -/
+protected class Language.Primcodable (L : Language) [L.Encodable] where
+  func : Primrec₂ fun k e : ℕ ↦ Encodable.encode (Encodable.decode e : Option (L.Func k))
+  rel : Primrec₂ fun k e : ℕ ↦ Encodable.encode (Encodable.decode e : Option (L.Rel k))
+
+section
+
+variable (L : Language) [L.Encodable] [L.Primcodable]
+
+instance (k : ℕ) : Primcodable (L.Func k) where
+  toEncodable := Language.Encodable.func k
+  prim := Primrec.nat_iff.mp <| (Language.Primcodable.func (L := L)).comp
+    (Primrec.const k) Primrec.id
+
+instance (k : ℕ) : Primcodable (L.Rel k) where
+  toEncodable := Language.Encodable.rel k
+  prim := Primrec.nat_iff.mp <| (Language.Primcodable.rel (L := L)).comp
+    (Primrec.const k) Primrec.id
+
+example (k : ℕ) : (inferInstance : Primcodable (L.Func k)).toEncodable
+    = (inferInstance : Encodable (L.Func k)) := by with_reducible_and_instances rfl
+
+end
+
+namespace Semiterm
 
 /-- The argument-vector fold of the `func` branch. `T` is the table of values already computed by
 the strong recursion, `l` the list of argument codes.
@@ -218,6 +251,101 @@ theorem primrec_stepVec : Primrec₂ stepVec := by
         (nat_sub.comp (snd.comp snd) (const 1))) (const 2)
   exact hp.of_eq fun p ↦ rfl
 
-end LO.FirstOrder.Semiterm
+variable {L : Language} [L.Encodable] [L.Primcodable] {ξ : Type*} [Primcodable ξ]
+
+/-- The four branches of `Semiterm.ofNat` at the level of codes, with `d + 1` the code being
+decoded. Branch `2` is the `func` case: it checks that the argument vector decodes to the recorded
+arity, that the function symbol decodes, and that every argument's own decoding succeeded — the
+last through `stepVec`, reading the table. -/
+def stepBody (n : ℕ) (T : List ℕ) (d : ℕ) : ℕ :=
+    if d.unpair.1 = 0 then
+      (if d.unpair.2 < n then Nat.pair 0 d.unpair.2 + 2 else 0)
+    else if d.unpair.1 = 1 then
+      (if (encode (decode d.unpair.2 : Option ξ)) = 0 then 0
+        else Nat.pair 1 ((encode (decode d.unpair.2 : Option ξ)) - 1) + 2)
+    else if d.unpair.1 = 2 then
+      (if (Nat.natToList d.unpair.2.unpair.2.unpair.2).length = d.unpair.2.unpair.1 ∧
+          (encode (decode d.unpair.2.unpair.2.unpair.1 :
+            Option (L.Func d.unpair.2.unpair.1))) ≠ 0 ∧
+          stepVec T (Nat.natToList d.unpair.2.unpair.2.unpair.2) ≠ 0 then
+        Nat.pair 2 (Nat.pair d.unpair.2.unpair.1
+          (Nat.pair ((encode (decode d.unpair.2.unpair.2.unpair.1 :
+            Option (L.Func d.unpair.2.unpair.1))) - 1)
+            (stepVec T (Nat.natToList d.unpair.2.unpair.2.unpair.2) - 1))) + 2
+        else 0)
+    else 0
+
+/-- One step of the course-of-values recursion, at the level of codes: given the table `T` of the
+values `encode (ofNat n j)` for every `j < T.length`, it returns `encode (ofNat n T.length)`. -/
+def step (n : ℕ) (T : List ℕ) : ℕ :=
+  Nat.casesOn (motive := fun _ ↦ ℕ) T.length 0 (stepBody (L := L) (ξ := ξ) n T)
+
+open Primrec in
+theorem primrec_step : Primrec₂ (step (L := L) (ξ := ξ)) := by
+  set A := (ℕ × List ℕ) × ℕ with hA
+  have hn : Primrec fun q : A ↦ q.1.1 := fst.comp fst
+  have hT : Primrec fun q : A ↦ q.1.2 := snd.comp fst
+  have hd : Primrec fun q : A ↦ q.2 := snd
+  have hi : Primrec fun q : A ↦ q.2.unpair.1 := fst.comp (Primrec.unpair.comp hd)
+  have hc : Primrec fun q : A ↦ q.2.unpair.2 := snd.comp (Primrec.unpair.comp hd)
+  have ha : Primrec fun q : A ↦ q.2.unpair.2.unpair.1 := fst.comp (Primrec.unpair.comp hc)
+  have hr : Primrec fun q : A ↦ q.2.unpair.2.unpair.2 := snd.comp (Primrec.unpair.comp hc)
+  have hef : Primrec fun q : A ↦ q.2.unpair.2.unpair.2.unpair.1 :=
+    fst.comp (Primrec.unpair.comp hr)
+  have hev : Primrec fun q : A ↦ q.2.unpair.2.unpair.2.unpair.2 :=
+    snd.comp (Primrec.unpair.comp hr)
+  have hxi : Primrec fun q : A ↦ (encode (decode q.2.unpair.2 : Option ξ)) :=
+    Primrec.nat_iff.mpr (Primcodable.prim ξ) |>.comp hc
+  have hF : Primrec fun q : A ↦ (encode (decode q.2.unpair.2.unpair.2.unpair.1 :
+      Option (L.Func q.2.unpair.2.unpair.1))) :=
+    (Language.Primcodable.func (L := L)).comp ha hef
+  have hl : Primrec fun q : A ↦ Nat.natToList q.2.unpair.2.unpair.2.unpair.2 :=
+    Primrec.nat_natToList.comp hev
+  have hsv : Primrec fun q : A ↦ stepVec q.1.2 (Nat.natToList q.2.unpair.2.unpair.2.unpair.2) :=
+    primrec_stepVec.comp hT hl
+  -- branch 0
+  have b0 : Primrec fun q : A ↦
+      (if q.2.unpair.2 < q.1.1 then Nat.pair 0 q.2.unpair.2 + 2 else 0) :=
+    Primrec.ite (nat_lt.comp hc hn)
+      (Primrec.nat_add.comp (Primrec₂.natPair.comp (const 0) hc) (const 2)) (const 0)
+  -- branch 1
+  have b1 : Primrec fun q : A ↦
+      (if (encode (decode q.2.unpair.2 : Option ξ)) = 0 then 0
+        else Nat.pair 1 ((encode (decode q.2.unpair.2 : Option ξ)) - 1) + 2) :=
+    Primrec.ite (Primrec.eq.comp hxi (const 0)) (const 0)
+      (Primrec.nat_add.comp
+        (Primrec₂.natPair.comp (const 1) (nat_sub.comp hxi (const 1))) (const 2))
+  -- branch 2
+  have b2 : Primrec fun q : A ↦
+      (if (Nat.natToList q.2.unpair.2.unpair.2.unpair.2).length = q.2.unpair.2.unpair.1 ∧
+          (encode (decode q.2.unpair.2.unpair.2.unpair.1 :
+            Option (L.Func q.2.unpair.2.unpair.1))) ≠ 0 ∧
+          stepVec q.1.2 (Nat.natToList q.2.unpair.2.unpair.2.unpair.2) ≠ 0 then
+        Nat.pair 2 (Nat.pair q.2.unpair.2.unpair.1
+          (Nat.pair ((encode (decode q.2.unpair.2.unpair.2.unpair.1 :
+            Option (L.Func q.2.unpair.2.unpair.1))) - 1)
+            (stepVec q.1.2 (Nat.natToList q.2.unpair.2.unpair.2.unpair.2) - 1))) + 2
+        else 0) :=
+    Primrec.ite
+      (PrimrecPred.and (Primrec.eq.comp (list_length.comp hl) ha)
+        (PrimrecPred.and (PrimrecPred.not (Primrec.eq.comp hF (const 0)))
+          (PrimrecPred.not (Primrec.eq.comp hsv (const 0)))))
+      (Primrec.nat_add.comp
+        (Primrec₂.natPair.comp (const 2)
+          (Primrec₂.natPair.comp ha
+            (Primrec₂.natPair.comp (nat_sub.comp hF (const 1))
+              (nat_sub.comp hsv (const 1))))) (const 2))
+      (const 0)
+  have body : Primrec fun q : A ↦ stepBody (L := L) (ξ := ξ) q.1.1 q.1.2 q.2 :=
+    (Primrec.ite (Primrec.eq.comp hi (const 0)) b0
+      (Primrec.ite (Primrec.eq.comp hi (const 1)) b1
+        (Primrec.ite (Primrec.eq.comp hi (const 2)) b2 (const 0)))).of_eq fun q ↦ rfl
+  exact (Primrec.nat_casesOn (f := fun p : ℕ × List ℕ ↦ p.2.length) (g := fun _ ↦ (0 : ℕ))
+    (h := fun p d ↦ stepBody (L := L) (ξ := ξ) p.1 p.2 d)
+    (list_length.comp snd) (const 0) body).of_eq fun p ↦ rfl
+
+end Semiterm
+
+end LO.FirstOrder
 
 end
