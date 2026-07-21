@@ -246,6 +246,17 @@ lemma natLenF_eq : ∀ s v, v ≤ s → len v = natLenF s v := by
 
 lemma nat_len_eq (v : ℕ) : len v = natLen v := natLenF_eq v v le_rfl
 
+/-- `nth` at `V := ℕ`. Structural in the index, so it reduces. -/
+def natNth (v : ℕ) : ℕ → ℕ
+  | 0 => natFstIdx v
+  | i + 1 => natNth (natSndIdx v) i
+
+lemma nat_nth_eq (v i : ℕ) : v.[i] = natNth v i := by
+  induction i generalizing v with
+  | zero => rw [nth_zero, natNth, natFstIdx_eq]
+  | succ i ih => rw [nth_succ, natNth, ih, natSndIdx_eq]
+
+
 /-! ### The payoff -/
 
 example : (3 : ℕ) ∈ (40 : ℕ) := by decide
@@ -264,6 +275,8 @@ example : natUnpair 6 = (2, 0) := by decide
 example : natUnpair 1234567890 = (29394, 35136) := by decide
 
 example : natLen (Nat.pair 3 (Nat.pair 5 0 + 1) + 1) = 2 := by decide
+
+example : natNth (Nat.pair 3 (Nat.pair 5 0 + 1) + 1) 1 = 5 := by decide
 
 end LO.FirstOrder.Arithmetic
 

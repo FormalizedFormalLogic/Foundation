@@ -1,6 +1,7 @@
 module
 
 public import Foundation.FirstOrder.Bootstrapping.Syntax.Term.Basic
+public import Foundation.FirstOrder.Bootstrapping.Syntax.Term.Functions
 public import Foundation.FirstOrder.Arithmetic.HFS.Standard
 
 @[expose] public section
@@ -381,6 +382,308 @@ theorem IsSemiterm.checkVec_iff {n v : ℕ} :
 instance decidableIsSemiterm (L : Language) [L.Encodable] [L.LORDefinable] [L.DecidableSymbols]
     (n t : ℕ) : Decidable (IsSemiterm (V := ℕ) L n t) := decidable_of_iff _ IsSemiterm.check_iff
 
+/-! ### Function mirrors: `termShift` and `termSubst`
+
+Pattern A at term level, following `neg` (`Formula/Standard.lean`): the mirror returns a code,
+agreement is an equation, the induction carries `IsUTerm`/`IsUTermVec` and propagates it with the
+`C1` constructor lemmas, and totality comes from `Language.TermRec.Construction.result_prop_not`
+composed with the `C1` recogniser.
+
+What is new here is the **vector companion**. `termShiftVec`/`termSubstVec` are mutually recursive
+with the scalar, so the adequacy-indexed induction proves both at once — exactly as
+`IsUTerm.checkF`/`checkVecF` do — and the vector half is stated over *well-formed* vectors,
+
+    IsUTermVec L k v → termShiftVec.check L v = termShiftVec L k v
+
+which is the shape `shift` and `subst` consume: they only ever apply it under the well-formedness
+they have already established for the enclosing formula. There is no off-domain equation for the
+vector companion upstream, and none is needed. -/
+
+/-! ### `termShift` -/
+
+mutual
+
+def termShiftF : ℕ → ℕ → ℕ
+  | 0, _ => 0
+  | _ + 1, 0 => 0
+  | s + 1, e + 1 =>
+    if natPi₁ e = 0 then Nat.pair 0 (natPi₂ e) + 1
+    else if natPi₁ e = 1 then Nat.pair 1 (natPi₂ e + 1) + 1
+    else if natPi₁ e = 2 then
+      Nat.pair 2 (Nat.pair (natPi₁ (natPi₂ e))
+        (Nat.pair (natPi₁ (natPi₂ (natPi₂ e)))
+          (termShiftVecF s (natPi₂ (natPi₂ (natPi₂ e)))))) + 1
+    else 0
+
+def termShiftVecF : ℕ → ℕ → ℕ
+  | 0, _ => 0
+  | _ + 1, 0 => 0
+  | s + 1, w + 1 => Nat.pair (termShiftF s (natPi₁ w)) (termShiftVecF s (natPi₂ w)) + 1
+
+end
+
+def termShift.check (L : Language) [L.Encodable] [L.LORDefinable] [L.DecidableSymbols]
+    (t : ℕ) : ℕ := if IsUTerm.check L t then termShiftF t t else 0
+
+def termShiftVec.check (L : Language) [L.Encodable] [L.LORDefinable] [L.DecidableSymbols]
+    (v : ℕ) : ℕ := termShiftVecF v v
+
+private lemma termShiftF_succ (s e : ℕ) :
+    termShiftF (s + 1) (e + 1) =
+      (if (Nat.unpair e).1 = 0 then Nat.pair 0 (Nat.unpair e).2 + 1
+      else if (Nat.unpair e).1 = 1 then Nat.pair 1 ((Nat.unpair e).2 + 1) + 1
+      else if (Nat.unpair e).1 = 2 then
+        Nat.pair 2 (Nat.pair (Nat.unpair (Nat.unpair e).2).1
+          (Nat.pair (Nat.unpair (Nat.unpair (Nat.unpair e).2).2).1
+            (termShiftVecF s (Nat.unpair (Nat.unpair (Nat.unpair e).2).2).2))) + 1
+      else 0) := by
+  rw [termShiftF]; simp only [natPi₁, natPi₂, natUnpair_eq]
+
+private lemma termShiftVecF_succ (s w : ℕ) :
+    termShiftVecF (s + 1) (w + 1) =
+      Nat.pair (termShiftF s (Nat.unpair w).1) (termShiftVecF s (Nat.unpair w).2) + 1 := by
+  rw [termShiftVecF]; simp only [natPi₁, natPi₂, natUnpair_eq]
+
+omit [L.DecidableSymbols] in
+private lemma termShiftF_eq_aux (s : ℕ) :
+    (∀ t ≤ s, IsUTerm L t → termShiftF s t = termShift L t) ∧
+    (∀ v ≤ s, ∀ k, IsUTermVec L k v → termShiftVecF s v = termShiftVec L k v) := by
+  induction s with
+  | zero =>
+    constructor
+    · intro t ht h
+      obtain rfl : t = 0 := by omega
+      rcases h.case with (⟨z, hz⟩ | ⟨x, hx⟩ | ⟨k, f, v, _, _, hv⟩)
+      · rw [nat_qqBvar_eq] at hz; omega
+      · rw [nat_qqFvar_eq] at hx; omega
+      · rw [nat_qqFunc_eq] at hv; omega
+    · intro v hv k h
+      obtain rfl : v = 0 := by omega
+      obtain rfl : k = 0 := by simpa using h.lh
+      simp [termShiftVecF]
+  | succ m ih =>
+    constructor
+    · intro t ht h
+      match t with
+      | 0 =>
+        rcases h.case with (⟨z, hz⟩ | ⟨x, hx⟩ | ⟨k, f, v, _, _, hv⟩)
+        · rw [nat_qqBvar_eq] at hz; omega
+        · rw [nat_qqFvar_eq] at hx; omega
+        · rw [nat_qqFunc_eq] at hv; omega
+      | e + 1 =>
+        have he : Nat.pair (Nat.unpair e).1 (Nat.unpair e).2 = e := Nat.pair_unpair e
+        have e2 : Nat.pair (Nat.unpair (Nat.unpair e).2).1 (Nat.unpair (Nat.unpair e).2).2
+            = (Nat.unpair e).2 := Nat.pair_unpair _
+        have e3 : Nat.pair (Nat.unpair (Nat.unpair (Nat.unpair e).2).2).1
+            (Nat.unpair (Nat.unpair (Nat.unpair e).2).2).2
+            = (Nat.unpair (Nat.unpair e).2).2 := Nat.pair_unpair _
+        have hle : (Nat.unpair (Nat.unpair (Nat.unpair e).2).2).2 ≤ m :=
+          le_trans (le_trans (Nat.unpair_right_le _) <|
+            le_trans (Nat.unpair_right_le _) (Nat.unpair_right_le _)) (by omega)
+        rcases (show (Nat.unpair e).1 = 0 ∨ (Nat.unpair e).1 = 1 ∨ (Nat.unpair e).1 = 2 ∨
+            3 ≤ (Nat.unpair e).1 by omega) with h' | h' | h' | h'
+        · have hs : (e : ℕ) + 1 = ^#((Nat.unpair e).2) := by rw [nat_qqBvar_eq, ← h', he]
+          rw [termShiftF_succ, if_pos h', hs, termShift_bvar, nat_qqBvar_eq]
+        · have hs : (e : ℕ) + 1 = ^&((Nat.unpair e).2) := by rw [nat_qqFvar_eq, ← h', he]
+          rw [termShiftF_succ, if_neg (by omega), if_pos h', hs, termShift_fvar, nat_qqFvar_eq]
+        · have hs : (e : ℕ) + 1 =
+              ^func (Nat.unpair (Nat.unpair e).2).1
+                (Nat.unpair (Nat.unpair (Nat.unpair e).2).2).1
+                (Nat.unpair (Nat.unpair (Nat.unpair e).2).2).2 := by
+            rw [nat_qqFunc_eq, e3, e2, ← h', he]
+          rw [hs] at h
+          obtain ⟨hkf, hv⟩ := IsUTerm.func_iff.mp h
+          rw [termShiftF_succ, if_neg (by omega), if_neg (by omega), if_pos h', hs,
+            termShift_func hkf hv, nat_qqFunc_eq, ih.2 _ hle _ hv]
+        · rw [termShiftF_succ, if_neg (by omega), if_neg (by omega), if_neg (by omega)]
+          exfalso
+          rcases h.case with (⟨z, hz⟩ | ⟨x, hx⟩ | ⟨k, f, v, _, _, hv⟩)
+          · rw [nat_qqBvar_eq] at hz
+            obtain rfl : e = Nat.pair 0 z := by omega
+            simp at h'
+          · rw [nat_qqFvar_eq] at hx
+            obtain rfl : e = Nat.pair 1 x := by omega
+            simp at h'
+          · rw [nat_qqFunc_eq] at hv
+            obtain rfl : e = Nat.pair 2 (Nat.pair k (Nat.pair f v)) := by omega
+            simp at h'
+    · intro v hv k h
+      match v with
+      | 0 =>
+        obtain rfl : k = 0 := by simpa using h.lh
+        simp [termShiftVecF]
+      | w + 1 =>
+        have hadj : (w : ℕ) + 1 = (Nat.unpair w).1 ∷ (Nat.unpair w).2 := by
+          rw [succ_eq_adjoin w, nat_pi₁_eq, nat_pi₂_eq]
+        have h₁ : (Nat.unpair w).1 ≤ m := le_trans (Nat.unpair_left_le _) (by omega)
+        have h₂ : (Nat.unpair w).2 ≤ m := le_trans (Nat.unpair_right_le _) (by omega)
+        rw [hadj] at h
+        obtain ⟨hk, hrest⟩ : k = len (Nat.unpair w).2 + 1 ∧ True := by
+          refine ⟨?_, trivial⟩
+          have := h.lh
+          simpa [hadj, len_adjoin] using this
+        subst hk
+        have ht : IsUTerm L (Nat.unpair w).1 := by
+          simpa using h.nth (i := 0) (by simp)
+        have hts : IsUTermVec L (len (Nat.unpair w).2) (Nat.unpair w).2 :=
+          ⟨rfl, fun i hi ↦ by simpa using h.nth (i := i + 1) (by simpa using hi)⟩
+        rw [termShiftVecF_succ, hadj, termShiftVec_cons ht hts, ih.1 _ h₁ ht, ih.2 _ h₂ _ hts,
+          adjoin_def, nat_pair_eq]
+
+theorem termShiftVec.check_eq {k v : ℕ} (h : IsUTermVec L k v) :
+    termShiftVec.check L v = termShiftVec L k v :=
+  (termShiftF_eq_aux v).2 v le_rfl k h
+
+theorem termShift.check_eq (t : ℕ) : termShift.check L t = termShift L t := by
+  rw [termShift.check]
+  by_cases h : IsUTerm.check L t = true
+  · rw [if_pos h]
+    exact (termShiftF_eq_aux t).1 t le_rfl (IsUTerm.check_iff.mp h)
+  · rw [if_neg h]
+    exact (TermShift.construction.result_prop_not (L := L) (param := ![])
+      (fun hc ↦ h (IsUTerm.check_iff.mpr hc))).symm
+
+
+/-! ### `termSubst` -/
+
+mutual
+
+def termSubstF (w : ℕ) : ℕ → ℕ → ℕ
+  | 0, _ => 0
+  | _ + 1, 0 => 0
+  | s + 1, e + 1 =>
+    if natPi₁ e = 0 then natNth w (natPi₂ e)
+    else if natPi₁ e = 1 then Nat.pair 1 (natPi₂ e) + 1
+    else if natPi₁ e = 2 then
+      Nat.pair 2 (Nat.pair (natPi₁ (natPi₂ e))
+        (Nat.pair (natPi₁ (natPi₂ (natPi₂ e)))
+          (termSubstVecF w s (natPi₂ (natPi₂ (natPi₂ e)))))) + 1
+    else 0
+
+def termSubstVecF (w : ℕ) : ℕ → ℕ → ℕ
+  | 0, _ => 0
+  | _ + 1, 0 => 0
+  | s + 1, u + 1 => Nat.pair (termSubstF w s (natPi₁ u)) (termSubstVecF w s (natPi₂ u)) + 1
+
+end
+
+def termSubst.check (L : Language) [L.Encodable] [L.LORDefinable] [L.DecidableSymbols]
+    (w t : ℕ) : ℕ := if IsUTerm.check L t then termSubstF w t t else 0
+
+def termSubstVec.check (L : Language) [L.Encodable] [L.LORDefinable] [L.DecidableSymbols]
+    (w v : ℕ) : ℕ := termSubstVecF w v v
+
+private lemma termSubstF_succ (w s e : ℕ) :
+    termSubstF w (s + 1) (e + 1) =
+      (if (Nat.unpair e).1 = 0 then natNth w (Nat.unpair e).2
+      else if (Nat.unpair e).1 = 1 then Nat.pair 1 (Nat.unpair e).2 + 1
+      else if (Nat.unpair e).1 = 2 then
+        Nat.pair 2 (Nat.pair (Nat.unpair (Nat.unpair e).2).1
+          (Nat.pair (Nat.unpair (Nat.unpair (Nat.unpair e).2).2).1
+            (termSubstVecF w s (Nat.unpair (Nat.unpair (Nat.unpair e).2).2).2))) + 1
+      else 0) := by
+  rw [termSubstF]; simp only [natPi₁, natPi₂, natUnpair_eq]
+
+private lemma termSubstVecF_succ (w s u : ℕ) :
+    termSubstVecF w (s + 1) (u + 1) =
+      Nat.pair (termSubstF w s (Nat.unpair u).1) (termSubstVecF w s (Nat.unpair u).2) + 1 := by
+  rw [termSubstVecF]; simp only [natPi₁, natPi₂, natUnpair_eq]
+
+omit [L.DecidableSymbols] in
+private lemma termSubstF_eq_aux (w : ℕ) (s : ℕ) :
+    (∀ t ≤ s, IsUTerm L t → termSubstF w s t = termSubst L w t) ∧
+    (∀ v ≤ s, ∀ k, IsUTermVec L k v → termSubstVecF w s v = termSubstVec L k w v) := by
+  induction s with
+  | zero =>
+    constructor
+    · intro t ht h
+      obtain rfl : t = 0 := by omega
+      rcases h.case with (⟨z, hz⟩ | ⟨x, hx⟩ | ⟨k, f, v, _, _, hv⟩)
+      · rw [nat_qqBvar_eq] at hz; omega
+      · rw [nat_qqFvar_eq] at hx; omega
+      · rw [nat_qqFunc_eq] at hv; omega
+    · intro v hv k h
+      obtain rfl : v = 0 := by omega
+      obtain rfl : k = 0 := by simpa using h.lh
+      simp [termSubstVecF]
+  | succ m ih =>
+    constructor
+    · intro t ht h
+      match t with
+      | 0 =>
+        rcases h.case with (⟨z, hz⟩ | ⟨x, hx⟩ | ⟨k, f, v, _, _, hv⟩)
+        · rw [nat_qqBvar_eq] at hz; omega
+        · rw [nat_qqFvar_eq] at hx; omega
+        · rw [nat_qqFunc_eq] at hv; omega
+      | e + 1 =>
+        have he : Nat.pair (Nat.unpair e).1 (Nat.unpair e).2 = e := Nat.pair_unpair e
+        have e2 : Nat.pair (Nat.unpair (Nat.unpair e).2).1 (Nat.unpair (Nat.unpair e).2).2
+            = (Nat.unpair e).2 := Nat.pair_unpair _
+        have e3 : Nat.pair (Nat.unpair (Nat.unpair (Nat.unpair e).2).2).1
+            (Nat.unpair (Nat.unpair (Nat.unpair e).2).2).2
+            = (Nat.unpair (Nat.unpair e).2).2 := Nat.pair_unpair _
+        have hle : (Nat.unpair (Nat.unpair (Nat.unpair e).2).2).2 ≤ m :=
+          le_trans (le_trans (Nat.unpair_right_le _) <|
+            le_trans (Nat.unpair_right_le _) (Nat.unpair_right_le _)) (by omega)
+        rcases (show (Nat.unpair e).1 = 0 ∨ (Nat.unpair e).1 = 1 ∨ (Nat.unpair e).1 = 2 ∨
+            3 ≤ (Nat.unpair e).1 by omega) with h' | h' | h' | h'
+        · have hs : (e : ℕ) + 1 = ^#((Nat.unpair e).2) := by rw [nat_qqBvar_eq, ← h', he]
+          rw [termSubstF_succ, if_pos h', hs, termSubst_bvar, nat_nth_eq]
+        · have hs : (e : ℕ) + 1 = ^&((Nat.unpair e).2) := by rw [nat_qqFvar_eq, ← h', he]
+          rw [termSubstF_succ, if_neg (by omega), if_pos h', hs, termSubst_fvar, nat_qqFvar_eq]
+        · have hs : (e : ℕ) + 1 =
+              ^func (Nat.unpair (Nat.unpair e).2).1
+                (Nat.unpair (Nat.unpair (Nat.unpair e).2).2).1
+                (Nat.unpair (Nat.unpair (Nat.unpair e).2).2).2 := by
+            rw [nat_qqFunc_eq, e3, e2, ← h', he]
+          rw [hs] at h
+          obtain ⟨hkf, hv⟩ := IsUTerm.func_iff.mp h
+          rw [termSubstF_succ, if_neg (by omega), if_neg (by omega), if_pos h', hs,
+            termSubst_func hkf hv, nat_qqFunc_eq, ih.2 _ hle _ hv]
+        · rw [termSubstF_succ, if_neg (by omega), if_neg (by omega), if_neg (by omega)]
+          exfalso
+          rcases h.case with (⟨z, hz⟩ | ⟨x, hx⟩ | ⟨k, f, v, _, _, hv⟩)
+          · rw [nat_qqBvar_eq] at hz
+            obtain rfl : e = Nat.pair 0 z := by omega
+            simp at h'
+          · rw [nat_qqFvar_eq] at hx
+            obtain rfl : e = Nat.pair 1 x := by omega
+            simp at h'
+          · rw [nat_qqFunc_eq] at hv
+            obtain rfl : e = Nat.pair 2 (Nat.pair k (Nat.pair f v)) := by omega
+            simp at h'
+    · intro v hv k h
+      match v with
+      | 0 =>
+        obtain rfl : k = 0 := by simpa using h.lh
+        simp [termSubstVecF]
+      | u + 1 =>
+        have hadj : (u : ℕ) + 1 = (Nat.unpair u).1 ∷ (Nat.unpair u).2 := by
+          rw [succ_eq_adjoin u, nat_pi₁_eq, nat_pi₂_eq]
+        have h₁ : (Nat.unpair u).1 ≤ m := le_trans (Nat.unpair_left_le _) (by omega)
+        have h₂ : (Nat.unpair u).2 ≤ m := le_trans (Nat.unpair_right_le _) (by omega)
+        rw [hadj] at h
+        obtain rfl : k = len (Nat.unpair u).2 + 1 := by
+          have := h.lh; simpa [len_adjoin] using this
+        have ht : IsUTerm L (Nat.unpair u).1 := by simpa using h.nth (i := 0) (by simp)
+        have hts : IsUTermVec L (len (Nat.unpair u).2) (Nat.unpair u).2 :=
+          ⟨rfl, fun i hi ↦ by simpa using h.nth (i := i + 1) (by simpa using hi)⟩
+        rw [termSubstVecF_succ, hadj, termSubstVec_cons ht hts, ih.1 _ h₁ ht, ih.2 _ h₂ _ hts,
+          adjoin_def, nat_pair_eq]
+
+theorem termSubstVec.check_eq {k w v : ℕ} (h : IsUTermVec L k v) :
+    termSubstVec.check L w v = termSubstVec L k w v :=
+  (termSubstF_eq_aux w v).2 v le_rfl k h
+
+theorem termSubst.check_eq (w t : ℕ) : termSubst.check L w t = termSubst L w t := by
+  rw [termSubst.check]
+  by_cases h : IsUTerm.check L t = true
+  · rw [if_pos h]
+    exact (termSubstF_eq_aux w t).1 t le_rfl (IsUTerm.check_iff.mp h)
+  · rw [if_neg h]
+    exact (TermSubst.construction.result_prop_not (L := L) (param := ![w])
+      (fun hc ↦ h (IsUTerm.check_iff.mpr hc))).symm
+
 /-! ### It runs
 
 The mirror is fuel-indexed and destructures with `natPi₁`/`natPi₂`, so it reduces in the kernel and
@@ -414,6 +717,14 @@ example : IsSemiterm (V := ℕ) ℒₒᵣ 1 1 := IsSemiterm.check_iff.mp (by dec
 
 example : ¬IsSemiterm (V := ℕ) ℒₒᵣ 0 1 :=
   fun h ↦ absurd (IsSemiterm.check_iff.mpr h) (by decide)
+
+/-- `3 = ^&0`, and shifting gives `4 = ^&1`. -/
+example : termShift (V := ℕ) ℒₒᵣ 3 = 4 := by rw [← termShift.check_eq]; decide
+
+example : termShift (V := ℕ) ℒₒᵣ 0 = 0 := by rw [← termShift.check_eq]; decide
+
+/-- Substituting `?[^&0]` into `^#0` yields `^&0`. -/
+example : termSubst (V := ℕ) ℒₒᵣ 13 1 = 3 := by rw [← termSubst.check_eq]; decide
 
 end LO.FirstOrder.Arithmetic.Bootstrapping
 
