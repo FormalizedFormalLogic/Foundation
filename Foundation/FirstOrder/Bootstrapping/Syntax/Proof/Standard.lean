@@ -431,6 +431,101 @@ example : setShift (V := ℕ) ℒₒᵣ 128 = 128 := by rw [← setShift.check_e
 
 example : Derivation.check ℒₒᵣ (∅ : Theory ℒₒᵣ) 0 = false := by decide
 
+
+/-! ### `Decidable` instances
+
+The `Bool`-level entry points come first. `decide`'s own preprocessing normalises the goal and
+loses the `Proof`/`DerivationOf` head, so `by decide` on such a goal cannot find the instance below
+even though `#synth` does; going through `check_iff.mp (by decide)` states the `Bool` equation the
+kernel is asked to evaluate and keeps the head where the instance can see it. -/
+
+/-- Executable mirror of `DerivationOf`. -/
+def DerivationOf.check (L : Language) [L.Encodable] [L.LORDefinable] [L.DecidableSymbols]
+    (T : Theory L) [T.Δ₁] [T.DecidableΔ₁] (d s : ℕ) : Bool :=
+  (natFstIdx d == s) && Derivation.check L T d
+
+theorem DerivationOf.check_iff {d s : ℕ} :
+    DerivationOf.check L T d s = true ↔ DerivationOf (V := ℕ) T d s := by
+  simp [DerivationOf.check, DerivationOf, ← natFstIdx_eq, Derivation.check_iff]
+
+/-- Executable mirror of `Proof`. The sequent of a proof of `p` is the singleton `{p}`, which at
+`V := ℕ` is the numeral `2 ^ p` — see the size note under "It runs" below. -/
+def Proof.check (L : Language) [L.Encodable] [L.LORDefinable] [L.DecidableSymbols]
+    (T : Theory L) [T.Δ₁] [T.DecidableΔ₁] (d p : ℕ) : Bool :=
+  DerivationOf.check L T d (2 ^ p)
+
+theorem Proof.check_iff {d p : ℕ} : Proof.check L T d p = true ↔ Proof (V := ℕ) T d p := by
+  rw [Proof.check, DerivationOf.check_iff]; rw [Proof, nat_singleton_eq]
+
+instance decidableDerivation (d : ℕ) : Decidable (Derivation (V := ℕ) T d) :=
+  decidable_of_iff _ Derivation.check_iff
+
+instance decidableDerivationOf (d s : ℕ) : Decidable (DerivationOf (V := ℕ) T d s) :=
+  decidable_of_iff _ DerivationOf.check_iff
+
+instance decidableProof (d p : ℕ) : Decidable (Proof (V := ℕ) T d p) :=
+  decidable_of_iff _ Proof.check_iff
+
+/-! ### It runs, end to end
+
+`⌜(⊤ : Sentence ℒₒᵣ)⌝ = 7`, so the sequent `{⌜⊤⌝}` is the numeral `2 ^ 7 = 128` and the three
+probes below are genuine kernel-checked derivations: `⊤` by `verumIntro`, the same weakened onto
+itself by `wkRule` (which exercises `checkF`'s recursion and the subset test), and `⊤` from the
+theory `{⊤}` by `axm` (which exercises `Theory.DecidableΔ₁`). The negative probes are what rule
+out a vacuously-true checker.
+
+**On scale.** Two separate limits, both worth stating because only one of them is the checker's
+fault.
+
+*Representability.* `Proof T d φ` is `DerivationOf T d {φ}`, and a coded set `{φ}` at `V := ℕ` is
+`2 ^ φ`: a sequent containing `φ` is a numeral of `φ` bits. `𝗣𝗔⁻`'s smallest axiom code is
+`⌜Theory.Eq.refl ℒₒᵣ⌝ = 45974842864502507`, so `{⌜Theory.Eq.refl ℒₒᵣ⌝}` is a numeral of
+`4.6 · 10 ^ 16` bits — about 5.7 petabytes. No derivation mentioning any `𝗣𝗔⁻` axiom is
+representable as a machine numeral, at any speed. That is the Ackermann set encoding, not this
+file, and it is why the probes are at `⊤` rather than at an axiom of arithmetic.
+
+*Speed.* Derivation codes nest `Nat.pair`, which squares at every level, so codes grow fast even
+for small formulas: `⊤ ⋏ ⊤` has code `3974`, and an `andIntro` over two `verumIntro`s proving it
+has a code of `254337` bits. There the reducible arithmetic twins dominate — measured compiled,
+`natBitLen` `7.8 s`, `natSqrt` `34.8 s`, `natFstIdx` `36.5 s`, the whole `Proof.check` `149 s`,
+against `7 ms` for `IsFormulaSet.check` on the `3974`-bit sequent. `natBitLen` halves bit by bit
+and `natSqrtAux` does a full-width multiplication per bit, so both are quadratic or worse in the
+bit length; that is a fixable inefficiency in `HFS/Standard.lean`, not a limit of the approach. The
+probes below, at `57` bits and under, together add about three seconds to this file. -/
+
+/-- `⌜⊤⌝ = ^⊤ = 7`. -/
+lemma nat_quote_verum : (⌜(⊤ : Sentence ℒₒᵣ)⌝ : ℕ) = 7 := by
+  rw [Sentence.quote_eq_encode_standard]; rfl
+
+/-- `⊤`, by `verumIntro` on the sequent `{^⊤} = 128`. -/
+example : Proof (V := ℕ) (∅ : Theory ℒₒᵣ) (Nat.pair 128 (Nat.pair 1 0) + 1)
+    ⌜(⊤ : Sentence ℒₒᵣ)⌝ := by
+  rw [nat_quote_verum]; exact Proof.check_iff.mp (by decide)
+
+/-- The same, weakened from `{^⊤}` onto itself by `wkRule`: a two-rule derivation, so `checkF`
+actually recurses. -/
+example : Proof (V := ℕ) (∅ : Theory ℒₒᵣ)
+    (Nat.pair 128 (Nat.pair 6 (Nat.pair 128 (Nat.pair 1 0) + 1)) + 1) ⌜(⊤ : Sentence ℒₒᵣ)⌝ := by
+  rw [nat_quote_verum]; exact Proof.check_iff.mp (by decide)
+
+/-- `⊤` from the theory `{⊤}` by `axm`, which runs `Theory.DecidableΔ₁`. -/
+example : Proof (V := ℕ) ({(⊤ : Sentence ℒₒᵣ)} : Theory ℒₒᵣ) (Nat.pair 128 (Nat.pair 9 7) + 1)
+    ⌜(⊤ : Sentence ℒₒᵣ)⌝ := by
+  rw [nat_quote_verum]; exact Proof.check_iff.mp (by decide)
+
+/-- `⊤` is not an axiom of the empty theory, so the same `axm` code proves nothing there. -/
+example : ¬Proof (V := ℕ) (∅ : Theory ℒₒᵣ) (Nat.pair 128 (Nat.pair 9 7) + 1) 7 :=
+  fun h ↦ absurd (Proof.check_iff.mpr h) (by decide)
+
+/-- `verumIntro` needs `^⊤` in the sequent; `{^⊥} = 2 ^ 13` does not contain it. -/
+example : ¬Proof (V := ℕ) (∅ : Theory ℒₒᵣ) (Nat.pair (2 ^ 13) (Nat.pair 1 0) + 1) 13 :=
+  fun h ↦ absurd (Proof.check_iff.mpr h) (by decide)
+
+/-- A derivation of `⊤` is not a proof of `⊥`: `Proof` pins the sequent down. -/
+example : ¬Proof (V := ℕ) (∅ : Theory ℒₒᵣ) (Nat.pair 128 (Nat.pair 1 0) + 1) 13 :=
+  fun h ↦ absurd (Proof.check_iff.mpr h) (by decide)
+
+
 end LO.FirstOrder.Arithmetic.Bootstrapping
 
 end
