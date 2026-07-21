@@ -74,6 +74,7 @@ public import Foundation.FirstOrder.Bootstrapping.Syntax.Proof.Typed
 public import Foundation.FirstOrder.Bootstrapping.Syntax.Term.Basic
 public import Foundation.FirstOrder.Bootstrapping.Syntax.Term.Coding
 public import Foundation.FirstOrder.Bootstrapping.Syntax.Term.Functions
+public import Foundation.FirstOrder.Bootstrapping.Syntax.Term.Standard
 public import Foundation.FirstOrder.Bootstrapping.Syntax.Term.Typed
 public import Foundation.FirstOrder.Bootstrapping.Syntax.Theory
 public import Foundation.FirstOrder.Completeness

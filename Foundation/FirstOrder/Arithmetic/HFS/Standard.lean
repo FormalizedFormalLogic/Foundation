@@ -1,6 +1,6 @@
 module
 
-public import Foundation.FirstOrder.Arithmetic.HFS.Basic
+public import Foundation.FirstOrder.Arithmetic.HFS.Vec
 public import Mathlib.Data.Nat.BitIndices
 
 @[expose] public section
@@ -102,6 +102,28 @@ lemma nat_subset_iff {a b : ℕ} : a ⊆ b ↔ a.bitIndices.all (b.testBit ·) =
     fun h i hi ↦ nat_mem_iff_testBit.mpr (h _ (nat_mem_iff_testBit.mp hi))⟩
 
 instance (a b : ℕ) : Decidable (a ⊆ b) := decidable_of_iff _ nat_subset_iff.symm
+
+/-! ### Coded vectors
+
+A coded vector is the cons list `x ∷ v = ⟪x, v⟫ + 1` with `0` for nil, so `len` is a structural
+recursion on the code once `⟪·,·⟫` is `Nat.pair`. -/
+
+/-- `len` at `V := ℕ`. -/
+def natLen : ℕ → ℕ
+  | 0 => 0
+  | v + 1 => natLen (Nat.unpair v).2 + 1
+  decreasing_by exact Nat.lt_succ_of_le (Nat.unpair_right_le v)
+
+lemma nat_len_eq (v : ℕ) : len v = natLen v := by
+  induction v using Nat.strongRecOn with
+  | ind v ih =>
+    match v with
+    | 0 => simp [natLen]
+    | w + 1 =>
+      have h₁ : len ((w : ℕ) + 1) = len (Nat.unpair w).2 + 1 := by
+        rw [succ_eq_adjoin w, len_adjoin, nat_pi₂_eq]
+      have h₂ : natLen (w + 1) = natLen (Nat.unpair w).2 + 1 := by simp [natLen]
+      rw [h₁, h₂, ih _ (Nat.lt_succ_of_le (Nat.unpair_right_le w))]
 
 /-! ### The payoff -/
 
