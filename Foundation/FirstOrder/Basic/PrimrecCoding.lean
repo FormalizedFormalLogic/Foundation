@@ -85,6 +85,12 @@ lemma natToVec_eq_none_of_length {e k : ℕ} (h : (natToList e).length ≠ k) :
   · rfl
   · exact absurd (by rw [natToVec_eq_some_iff.mp hv]; simp) h
 
+lemma natToVec_isSome_of_length {e k : ℕ} (h : (natToList e).length = k) :
+    ∃ v : Fin k → ℕ, e.natToVec k = some v := by
+  subst h
+  refine ⟨fun i ↦ (natToList e).get i, natToVec_eq_some_iff.mpr ?_⟩
+  exact (List.ofFn_get _).symm
+
 end Nat
 
 section
@@ -185,6 +191,46 @@ example (k : ℕ) : (inferInstance : Primcodable (L.Func k)).toEncodable
     = (inferInstance : Encodable (L.Func k)) := by with_reducible_and_instances rfl
 
 end
+
+/-- `ℒₒᵣ` satisfies the uniform condition: `encode ∘ decode` is
+`fun k e ↦ if (k = 0 ∨ k = 2) ∧ e < 2 then e + 1 else 0`. -/
+instance : Language.Primcodable ℒₒᵣ where
+  func := by
+    have h : Primrec fun p : ℕ × ℕ ↦ if (p.1 = 0 ∨ p.1 = 2) ∧ p.2 < 2 then p.2 + 1 else 0 :=
+      Primrec.ite
+        (PrimrecPred.and
+          (PrimrecPred.or
+            (Primrec.eq.comp Primrec.fst (Primrec.const 0))
+            (Primrec.eq.comp Primrec.fst (Primrec.const 2)))
+          (Primrec.nat_lt.comp Primrec.snd (Primrec.const 2)))
+        (Primrec.succ.comp Primrec.snd) (Primrec.const 0)
+    refine h.of_eq ?_
+    rintro ⟨k, e⟩
+    match k, e with
+    |     0,     0 => rfl
+    |     0,     1 => rfl
+    |     0, _ + 2 => simp [Encodable.decode]
+    |     1,     _ => simp [Encodable.decode]
+    |     2,     0 => rfl
+    |     2,     1 => rfl
+    |     2, _ + 2 => simp [Encodable.decode]
+    | _ + 3,     _ => simp [Encodable.decode]
+  rel := by
+    have h : Primrec fun p : ℕ × ℕ ↦ if p.1 = 2 ∧ p.2 < 2 then p.2 + 1 else 0 :=
+      Primrec.ite
+        (PrimrecPred.and
+          (Primrec.eq.comp Primrec.fst (Primrec.const 2))
+          (Primrec.nat_lt.comp Primrec.snd (Primrec.const 2)))
+        (Primrec.succ.comp Primrec.snd) (Primrec.const 0)
+    refine h.of_eq ?_
+    rintro ⟨k, e⟩
+    match k, e with
+    |     0,     _ => simp [Encodable.decode]
+    |     1,     _ => simp [Encodable.decode]
+    |     2,     0 => rfl
+    |     2,     1 => rfl
+    |     2, _ + 2 => simp [Encodable.decode]
+    | _ + 3,     _ => simp [Encodable.decode]
 
 namespace Semiterm
 
@@ -343,6 +389,130 @@ theorem primrec_step : Primrec₂ (step (L := L) (ξ := ξ)) := by
   exact (Primrec.nat_casesOn (f := fun p : ℕ × List ℕ ↦ p.2.length) (g := fun _ ↦ (0 : ℕ))
     (h := fun p d ↦ stepBody (L := L) (ξ := ξ) p.1 p.2 d)
     (list_length.comp snd) (const 0) body).of_eq fun p ↦ rfl
+
+abbrev table (n e : ℕ) : List ℕ :=
+  (List.range e).map fun j ↦ encode (ofNat (L := L) (ξ := ξ) n j)
+
+omit [L.Primcodable] in
+@[simp] lemma table_length (n e : ℕ) : (table (L := L) (ξ := ξ) n e).length = e := by simp [table]
+
+omit [L.Primcodable] in
+lemma table_getD {n e j : ℕ} (h : j < e) :
+    (table (L := L) (ξ := ξ) n e).getD j 0 = encode (ofNat (L := L) (ξ := ξ) n j) := by
+  rw [List.getD_eq_getElem?_getD, List.getElem?_map, List.getElem?_range h]
+  rfl
+
+omit [L.Primcodable] in
+/-- The correctness of the step function: on the table of all previously computed values it
+returns the next one. This is what `Primrec.nat_strong_rec` asks for.
+
+Four branches, matching `ofNat`'s. The two atomic ones are arithmetic. The `func` branch is where
+the design pays off: `natToVec` succeeding is tested as `natToList` having the recorded length
+(`natToVec_isSome_of_length` and `natToVec_eq_none_of_length` are the two directions), the function
+symbol's decoding is read off `encode ∘ decode` being non-zero, and each argument's decoding is
+read out of the table — so the branch never reconstructs a term, and the argument-vector code comes
+straight from `stepVec_ofFn`. When any argument fails to decode, its table entry is `0` and
+`stepVec_eq_zero` collapses the fold, matching `Matrix.getM` returning `none` on the other side. -/
+theorem step_table (n e : ℕ) :
+    step (L := L) (ξ := ξ) n (table (L := L) (ξ := ξ) n e) = encode (ofNat (L := L) (ξ := ξ) n e) := by
+  rw [step, table_length]
+  cases e with
+  | zero => simp [ofNat]
+  | succ d =>
+  show stepBody (L := L) (ξ := ξ) n (table (L := L) (ξ := ξ) n (d + 1)) d = _
+  rw [stepBody, ofNat]
+  by_cases h0 : (Nat.unpair d).1 = 0
+  · rw [if_pos h0, h0]
+    by_cases hz : (Nat.unpair d).2 < n
+    · rw [if_pos hz, dif_pos hz]
+      simp [encode_eq_toNat, toNat]
+    · rw [if_neg hz, dif_neg hz]
+      simp
+  by_cases h1 : (Nat.unpair d).1 = 1
+  · rw [if_neg h0, if_pos h1, h1]
+    rcases hx : (decode (Nat.unpair d).2 : Option ξ) with _ | x
+    · simp
+    · rw [if_neg (by simp)]
+      simp [encode_eq_toNat, toNat]
+  by_cases h2 : (Nat.unpair d).1 = 2
+  · rw [if_neg h0, if_neg h1, if_pos h2, h2]
+    simp only []
+    rcases hv : (Nat.unpair (Nat.unpair (Nat.unpair d).2).2).2.natToVec
+        (Nat.unpair (Nat.unpair d).2).1 with _ | v'
+    · rw [if_neg ?_]
+      · simp
+      · rintro ⟨hlen, -, -⟩
+        obtain ⟨w, hw⟩ := Nat.natToVec_isSome_of_length hlen
+        rw [hw] at hv
+        exact absurd hv (by simp)
+    · have hl : (Nat.unpair (Nat.unpair (Nat.unpair d).2).2).2.natToList = List.ofFn v' :=
+        Nat.natToVec_eq_some_iff.mp hv
+      have hlen : (Nat.unpair (Nat.unpair (Nat.unpair d).2).2).2.natToList.length
+          = (Nat.unpair (Nat.unpair d).2).1 := by rw [hl]; simp
+      have hlt : ∀ i, v' i < d + 1 := fun i ↦
+        Nat.lt_succ_iff.mpr <| le_trans (le_of_lt <| Nat.lt_of_eq_natToVec hv i)
+          <| le_trans (Nat.unpair_right_le _) <| le_trans (Nat.unpair_right_le _)
+          <| Nat.unpair_right_le _
+      rcases hf : (decode (Nat.unpair (Nat.unpair (Nat.unpair d).2).2).1 :
+          Option (L.Func (Nat.unpair (Nat.unpair d).2).1)) with _ | f
+      · rw [if_neg ?_]
+        · simp
+        · rintro ⟨-, hne, -⟩
+          exact hne (by simp)
+      · rcases hg : (Matrix.getM fun i ↦ ofNat (L := L) (ξ := ξ) n (v' i)) with _ | t
+        · obtain ⟨i₀, hi₀⟩ : ∃ i, ofNat (L := L) (ξ := ξ) n (v' i) = none := by
+            by_contra hcon
+            push Not at hcon
+            choose t ht using fun i ↦ Option.ne_none_iff_exists'.mp (hcon i)
+            rw [Matrix.getM_option_eq_some_iff.mpr ht] at hg
+            exact absurd hg (by simp)
+          rw [if_neg ?_]
+          · simp [hg]
+          · rintro ⟨-, -, hne⟩
+            refine hne (stepVec_eq_zero (j := v' i₀) ?_ ?_)
+            · rw [hl]; exact List.mem_ofFn.mpr ⟨i₀, rfl⟩
+            · rw [table_getD (hlt i₀), hi₀]; simp
+        · have hT : ∀ i, (table (L := L) (ξ := ξ) n (d + 1)).getD (v' i) 0
+              = encode (t i) + 1 := fun i ↦ by
+            rw [table_getD (hlt i), Matrix.getM_option_eq_some_iff.mp hg i]
+            simp
+          have hsv : stepVec (table (L := L) (ξ := ξ) n (d + 1))
+              (Nat.natToList (Nat.unpair (Nat.unpair (Nat.unpair d).2).2).2)
+              = Matrix.vecToNat (fun i ↦ encode (t i)) + 1 := by
+            rw [hl]; exact stepVec_ofFn hT
+          rw [if_pos ⟨hlen, by simp, by rw [hsv]; simp⟩, hsv]
+          simp [hg, encode_eq_toNat, toNat]
+  · rw [if_neg h0, if_neg h1, if_neg h2]
+    match hi : (Nat.unpair d).1 with
+    | 0 => exact absurd hi h0
+    | 1 => exact absurd hi h1
+    | 2 => exact absurd hi h2
+    | k + 3 => simp
+
+/-- **Issue #506, term half.** -/
+theorem encode_ofNat_primrec :
+    Primrec₂ fun n e : ℕ ↦ encode (ofNat (L := L) (ξ := ξ) n e) :=
+  Primrec.nat_strong_rec _ (g := fun n T ↦ some (step (L := L) (ξ := ξ) n T))
+    (Primrec.option_some.comp primrec_step) fun n e ↦ congrArg some (step_table n e)
+
+/-- **Issue #506, first headline.** The instance sits on the `Encodable` instance already in
+`Basic/Coding.lean`, so nothing downstream sees a new `encode`; the checks below confirm that, and
+that `decode` is still `ofNat`. -/
+instance primcodable {n : ℕ} : Primcodable (Semiterm L ξ n) where
+  toEncodable := Semiterm.encodable
+  prim := Primrec.nat_iff.mp <|
+    (encode_ofNat_primrec (L := L) (ξ := ξ)).comp (Primrec.const n) Primrec.id
+
+example {n : ℕ} : (Semiterm.primcodable (L := L) (ξ := ξ) (n := n)).toEncodable
+    = Semiterm.encodable := by with_reducible_and_instances rfl
+
+example {n : ℕ} (t : Semiterm L ξ n) : encode t = toNat t := rfl
+
+example {n : ℕ} (e : ℕ) : (decode e : Option (Semiterm L ξ n)) = ofNat n e := rfl
+
+example {n : ℕ} (t : Semiterm L ξ n) : (decode (encode t) : Option (Semiterm L ξ n)) = some t :=
+  Encodable.encodek t
+
 
 end Semiterm
 
