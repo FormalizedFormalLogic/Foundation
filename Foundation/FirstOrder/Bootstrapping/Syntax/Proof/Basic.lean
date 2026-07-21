@@ -274,8 +274,10 @@ instance axm_defined : 𝚺₀-Function₂ (axm : V → V → V) via axmGraph :=
 All ten constructors have the shape `⟪s, k, …⟫ + 1` with a distinct tag `k` in the second
 component, so they are injective and pairwise distinct. Together with the `fstIdx_*` and
 `_lt_` lemmas above this is what lets a recursion on a code decide which rule produced it.
-Each `_ne_` lemma is stated in the order the constructors are defined; use `.symm` for the
-other orientation. -/
+Both orientations of each `_ne_` are provided. Stating only one and leaving the other to `.symm`
+looked sufficient, but `simp` will not reorient an equation itself: a recursion dispatching on
+constructor `k` meets `ctor k … = ctor j …` for every `j`, and needs the `j < k` orientations as
+much as the `j > k` ones. -/
 
 @[simp] lemma axL_inj {s p s' p' : V} : axL s p = axL s' p' ↔ s = s' ∧ p = p' := by simp [axL]
 
@@ -417,6 +419,120 @@ other orientation. -/
 @[simp] lemma shiftRule_ne_axm {s d s' p' : V} : shiftRule s d ≠ axm s' p' := by simp [shiftRule, axm]
 
 @[simp] lemma cutRule_ne_axm {s p d₁ d₂ s' p' : V} : cutRule s p d₁ d₂ ≠ axm s' p' := by simp [cutRule, axm]
+
+@[simp] lemma verumIntro_ne_axL {s p s' : V} : verumIntro s' ≠ axL s p := Ne.symm axL_ne_verumIntro
+
+@[simp] lemma andIntro_ne_axL {s p s' p' q' dp' dq' : V} :
+    andIntro s' p' q' dp' dq' ≠ axL s p := Ne.symm axL_ne_andIntro
+
+@[simp] lemma orIntro_ne_axL {s p s' p' q' d' : V} : orIntro s' p' q' d' ≠ axL s p := Ne.symm axL_ne_orIntro
+
+@[simp] lemma allIntro_ne_axL {s p s' p' d' : V} : allIntro s' p' d' ≠ axL s p := Ne.symm axL_ne_allIntro
+
+@[simp] lemma exsIntro_ne_axL {s p s' p' t' d' : V} : exsIntro s' p' t' d' ≠ axL s p := Ne.symm axL_ne_exsIntro
+
+@[simp] lemma wkRule_ne_axL {s p s' d' : V} : wkRule s' d' ≠ axL s p := Ne.symm axL_ne_wkRule
+
+@[simp] lemma shiftRule_ne_axL {s p s' d' : V} : shiftRule s' d' ≠ axL s p := Ne.symm axL_ne_shiftRule
+
+@[simp] lemma cutRule_ne_axL {s p s' p' d₁' d₂' : V} : cutRule s' p' d₁' d₂' ≠ axL s p := Ne.symm axL_ne_cutRule
+
+@[simp] lemma axm_ne_axL {s p s' p' : V} : axm s' p' ≠ axL s p := Ne.symm axL_ne_axm
+
+@[simp] lemma andIntro_ne_verumIntro {s s' p' q' dp' dq' : V} :
+    andIntro s' p' q' dp' dq' ≠ verumIntro s := Ne.symm verumIntro_ne_andIntro
+
+@[simp] lemma orIntro_ne_verumIntro {s s' p' q' d' : V} :
+    orIntro s' p' q' d' ≠ verumIntro s := Ne.symm verumIntro_ne_orIntro
+
+@[simp] lemma allIntro_ne_verumIntro {s s' p' d' : V} :
+    allIntro s' p' d' ≠ verumIntro s := Ne.symm verumIntro_ne_allIntro
+
+@[simp] lemma exsIntro_ne_verumIntro {s s' p' t' d' : V} :
+    exsIntro s' p' t' d' ≠ verumIntro s := Ne.symm verumIntro_ne_exsIntro
+
+@[simp] lemma wkRule_ne_verumIntro {s s' d' : V} : wkRule s' d' ≠ verumIntro s := Ne.symm verumIntro_ne_wkRule
+
+@[simp] lemma shiftRule_ne_verumIntro {s s' d' : V} :
+    shiftRule s' d' ≠ verumIntro s := Ne.symm verumIntro_ne_shiftRule
+
+@[simp] lemma cutRule_ne_verumIntro {s s' p' d₁' d₂' : V} :
+    cutRule s' p' d₁' d₂' ≠ verumIntro s := Ne.symm verumIntro_ne_cutRule
+
+@[simp] lemma axm_ne_verumIntro {s s' p' : V} : axm s' p' ≠ verumIntro s := Ne.symm verumIntro_ne_axm
+
+@[simp] lemma orIntro_ne_andIntro {s p q dp dq s' p' q' d' : V} :
+    orIntro s' p' q' d' ≠ andIntro s p q dp dq := Ne.symm andIntro_ne_orIntro
+
+@[simp] lemma allIntro_ne_andIntro {s p q dp dq s' p' d' : V} :
+    allIntro s' p' d' ≠ andIntro s p q dp dq := Ne.symm andIntro_ne_allIntro
+
+@[simp] lemma exsIntro_ne_andIntro {s p q dp dq s' p' t' d' : V} :
+    exsIntro s' p' t' d' ≠ andIntro s p q dp dq := Ne.symm andIntro_ne_exsIntro
+
+@[simp] lemma wkRule_ne_andIntro {s p q dp dq s' d' : V} :
+    wkRule s' d' ≠ andIntro s p q dp dq := Ne.symm andIntro_ne_wkRule
+
+@[simp] lemma shiftRule_ne_andIntro {s p q dp dq s' d' : V} :
+    shiftRule s' d' ≠ andIntro s p q dp dq := Ne.symm andIntro_ne_shiftRule
+
+@[simp] lemma cutRule_ne_andIntro {s p q dp dq s' p' d₁' d₂' : V} :
+    cutRule s' p' d₁' d₂' ≠ andIntro s p q dp dq := Ne.symm andIntro_ne_cutRule
+
+@[simp] lemma axm_ne_andIntro {s p q dp dq s' p' : V} : axm s' p' ≠ andIntro s p q dp dq := Ne.symm andIntro_ne_axm
+
+@[simp] lemma allIntro_ne_orIntro {s p q d s' p' d' : V} :
+    allIntro s' p' d' ≠ orIntro s p q d := Ne.symm orIntro_ne_allIntro
+
+@[simp] lemma exsIntro_ne_orIntro {s p q d s' p' t' d' : V} :
+    exsIntro s' p' t' d' ≠ orIntro s p q d := Ne.symm orIntro_ne_exsIntro
+
+@[simp] lemma wkRule_ne_orIntro {s p q d s' d' : V} : wkRule s' d' ≠ orIntro s p q d := Ne.symm orIntro_ne_wkRule
+
+@[simp] lemma shiftRule_ne_orIntro {s p q d s' d' : V} :
+    shiftRule s' d' ≠ orIntro s p q d := Ne.symm orIntro_ne_shiftRule
+
+@[simp] lemma cutRule_ne_orIntro {s p q d s' p' d₁' d₂' : V} :
+    cutRule s' p' d₁' d₂' ≠ orIntro s p q d := Ne.symm orIntro_ne_cutRule
+
+@[simp] lemma axm_ne_orIntro {s p q d s' p' : V} : axm s' p' ≠ orIntro s p q d := Ne.symm orIntro_ne_axm
+
+@[simp] lemma exsIntro_ne_allIntro {s p d s' p' t' d' : V} :
+    exsIntro s' p' t' d' ≠ allIntro s p d := Ne.symm allIntro_ne_exsIntro
+
+@[simp] lemma wkRule_ne_allIntro {s p d s' d' : V} : wkRule s' d' ≠ allIntro s p d := Ne.symm allIntro_ne_wkRule
+
+@[simp] lemma shiftRule_ne_allIntro {s p d s' d' : V} :
+    shiftRule s' d' ≠ allIntro s p d := Ne.symm allIntro_ne_shiftRule
+
+@[simp] lemma cutRule_ne_allIntro {s p d s' p' d₁' d₂' : V} :
+    cutRule s' p' d₁' d₂' ≠ allIntro s p d := Ne.symm allIntro_ne_cutRule
+
+@[simp] lemma axm_ne_allIntro {s p d s' p' : V} : axm s' p' ≠ allIntro s p d := Ne.symm allIntro_ne_axm
+
+@[simp] lemma wkRule_ne_exsIntro {s p t d s' d' : V} : wkRule s' d' ≠ exsIntro s p t d := Ne.symm exsIntro_ne_wkRule
+
+@[simp] lemma shiftRule_ne_exsIntro {s p t d s' d' : V} :
+    shiftRule s' d' ≠ exsIntro s p t d := Ne.symm exsIntro_ne_shiftRule
+
+@[simp] lemma cutRule_ne_exsIntro {s p t d s' p' d₁' d₂' : V} :
+    cutRule s' p' d₁' d₂' ≠ exsIntro s p t d := Ne.symm exsIntro_ne_cutRule
+
+@[simp] lemma axm_ne_exsIntro {s p t d s' p' : V} : axm s' p' ≠ exsIntro s p t d := Ne.symm exsIntro_ne_axm
+
+@[simp] lemma shiftRule_ne_wkRule {s d s' d' : V} : shiftRule s' d' ≠ wkRule s d := Ne.symm wkRule_ne_shiftRule
+
+@[simp] lemma cutRule_ne_wkRule {s d s' p' d₁' d₂' : V} :
+    cutRule s' p' d₁' d₂' ≠ wkRule s d := Ne.symm wkRule_ne_cutRule
+
+@[simp] lemma axm_ne_wkRule {s d s' p' : V} : axm s' p' ≠ wkRule s d := Ne.symm wkRule_ne_axm
+
+@[simp] lemma cutRule_ne_shiftRule {s d s' p' d₁' d₂' : V} :
+    cutRule s' p' d₁' d₂' ≠ shiftRule s d := Ne.symm shiftRule_ne_cutRule
+
+@[simp] lemma axm_ne_shiftRule {s d s' p' : V} : axm s' p' ≠ shiftRule s d := Ne.symm shiftRule_ne_axm
+
+@[simp] lemma axm_ne_cutRule {s p d₁ d₂ s' p' : V} : axm s' p' ≠ cutRule s p d₁ d₂ := Ne.symm cutRule_ne_axm
 
 end
 
