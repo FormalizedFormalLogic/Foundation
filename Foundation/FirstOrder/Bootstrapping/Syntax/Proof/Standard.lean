@@ -486,12 +486,13 @@ file, and it is why the probes are at `⊤` rather than at an axiom of arithmeti
 
 *Speed.* Derivation codes nest `Nat.pair`, which squares at every level, so codes grow fast even
 for small formulas: `⊤ ⋏ ⊤` has code `3974`, and an `andIntro` over two `verumIntro`s proving it
-has a code of `254337` bits. There the reducible arithmetic twins dominate — measured compiled,
-`natBitLen` `7.8 s`, `natSqrt` `34.8 s`, `natFstIdx` `36.5 s`, the whole `Proof.check` `149 s`,
-against `7 ms` for `IsFormulaSet.check` on the `3974`-bit sequent. `natBitLen` halves bit by bit
-and `natSqrtAux` does a full-width multiplication per bit, so both are quadratic or worse in the
-bit length; that is a fixable inefficiency in `HFS/Standard.lean`, not a limit of the approach. The
-probes below, at `57` bits and under, together add about three seconds to this file. -/
+has a code of `254337` bits, and destructuring it is where the time goes: `Proof.check` on it takes
+`7.2 s` measured compiled, of which `natFstIdx` — that is, `natSqrt` — is about `2 s` a call. By
+contrast `IsFormulaSet.check` on the `3974`-bit sequent is `7 ms`, so it is the derivation code's
+size rather than the sequent's that costs. The twins were an order of magnitude worse before they
+were given better recursion schemes (`149 s` for the same check); see the note in
+`HFS/Standard.lean`. The probes below, at `57` bits and under, together add about three seconds to
+this file. -/
 
 /-- `⌜⊤⌝ = ^⊤ = 7`. -/
 lemma nat_quote_verum : (⌜(⊤ : Sentence ℒₒᵣ)⌝ : ℕ) = 7 := by

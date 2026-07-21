@@ -26,6 +26,18 @@ proved against the *specification* `k * k ≤ n < (k + 1) * (k + 1)` and only th
 `Nat.sqrt`, and `natUnpair`/`natPi₁`/`natPi₂`/`natFstIdx` on top of it. Everything an executable
 mirror destructures a code with should be the twin, not the `Nat` original.
 
+The twins have to be fast as well as reducible, because a derivation code is a nest of `Nat.pair`s
+and so grows very quickly: a two-rule derivation over a formula of code `3974` already has a code
+of `254337` bits, and destructuring it calls `natSqrt` a handful of times. The obvious schemes are
+too slow at that size — halving bit by bit for the bit length, and refining one bit at a time under
+a full-width multiplication for the square root, are quadratic or worse in the bit length. So
+`natBitLen` doubles instead (logarithmically many comparisons, and a result within a factor of two
+of the true length, which is all its specification claims), and `natSqrt` is a fuel-indexed copy of
+`Nat.sqrt.iter`, the Newton iteration core already uses (logarithmically many divisions). Measured
+compiled on that `254337`-bit code: `natBitLen` `7.8 s → 0 ms`, `natSqrt` `34.8 s → 2.1 s`,
+`natFstIdx` `36.5 s → 2.0 s`, and the derivation check it feeds `149 s → 7.2 s`. What remains is
+the big divisions themselves.
+
 Note that `≤` is subtle at `V := ℕ`: a lemma stated for a general `V` carries
 `instLE_foundation` (`x ≤ y ↔ x = y ∨ x < y`), whereas `a ≤ b` written at `ℕ` elaborates with
 `instLENat`. `nat_le_iff` is the bridge, and is needed whenever a general-`V` lemma is applied
@@ -71,67 +83,81 @@ lemma nat_fstIdx_eq (p : ℕ) : fstIdx p = (Nat.unpair (p - 1)).1 := by
 
 /-! ### Bit length -/
 
-def natBitLenF : ℕ → ℕ → ℕ
-  | 0, _ => 0
-  | s + 1, n => if n = 0 then 0 else natBitLenF s (n / 2) + 1
+/-- `bitLenUp s n k` doubles `k` until `2 ^ k` overshoots `n`. The result is within a factor of
+two of the true bit length, which is all `natBitLen_spec` claims, and it costs logarithmically many
+big-number comparisons instead of linearly many halvings. -/
+def bitLenUp : ℕ → ℕ → ℕ → ℕ
+  | 0, _, k => k
+  | s + 1, n, k => if n < 2 ^ k then k else bitLenUp s n (2 * k)
+
+def natBitLenF (s n : ℕ) : ℕ := bitLenUp s n 1
 
 def natBitLen (n : ℕ) : ℕ := natBitLenF n n
 
-lemma natBitLenF_spec : ∀ s n, n ≤ s → n < 2 ^ natBitLenF s n := by
+lemma bitLenUp_spec : ∀ s n k, n < 2 ^ (k * 2 ^ s) → n < 2 ^ bitLenUp s n k := by
   intro s
   induction s with
-  | zero =>
-    intro n hn
-    have hz : n = 0 := by omega
-    subst hz
-    simp [natBitLenF]
+  | zero => intro n k h; simpa [bitLenUp] using h
   | succ s ih =>
-    intro n hn
-    rcases Nat.eq_zero_or_pos n with rfl | hpos
-    · simp [natBitLenF]
-    · have h2 : n / 2 ≤ s := by omega
-      have := ih (n / 2) h2
-      rw [natBitLenF, if_neg (by omega), Nat.pow_succ]
-      omega
+    intro n k h
+    rw [bitLenUp]
+    by_cases hc : n < 2 ^ k
+    · rw [if_pos hc]; exact hc
+    · rw [if_neg hc]
+      refine ih n (2 * k) ?_
+      have e : 2 * k * 2 ^ s = k * 2 ^ (s + 1) := by
+        simp [Nat.pow_succ, Nat.mul_comm, Nat.mul_assoc]
+      rw [e]; exact h
+
+lemma natBitLenF_spec : ∀ s n, n ≤ s → n < 2 ^ natBitLenF s n := by
+  intro s n hn
+  refine bitLenUp_spec s n 1 ?_
+  have h1 : s < 2 ^ s := Nat.lt_two_pow_self
+  have h2 : (2 : ℕ) ^ s ≤ 2 ^ 2 ^ s :=
+    Nat.pow_le_pow_right (by norm_num) (Nat.le_of_lt Nat.lt_two_pow_self)
+  simpa using Nat.lt_of_le_of_lt hn (Nat.lt_of_lt_of_le h1 h2)
 
 lemma natBitLen_spec (n : ℕ) : n < 2 ^ natBitLen n := natBitLenF_spec n n le_rfl
 
 /-! ### Square root -/
 
-/-- `natSqrtAux b n acc` refines `acc` by the bits `2^(b-1), …, 2^0`, maintaining
-`acc * acc ≤ n < (acc + 2 ^ b) * (acc + 2 ^ b)`. -/
-def natSqrtAux : ℕ → ℕ → ℕ → ℕ
-  | 0, _, acc => acc
-  | b + 1, n, acc =>
-    if (acc + 2 ^ b) * (acc + 2 ^ b) ≤ n then natSqrtAux b n (acc + 2 ^ b) else natSqrtAux b n acc
+/-- `sqrtIterF` is a fuel-indexed structural copy of `Nat.sqrt.iter`, the Newton iteration core
+already uses. Each step is one big division and the guess strictly decreases, so fuel equal to the
+starting guess always suffices — which is the whole of `sqrtIterF_eq`. Correctness then comes for
+free from `Nat.sqrt.iter_sq_le` and `Nat.sqrt.lt_iter_succ_sq`; nothing here re-derives it. -/
+def sqrtIterF : ℕ → ℕ → ℕ → ℕ
+  | 0, _, g => g
+  | s + 1, n, g => if (g + n / g) / 2 < g then sqrtIterF s n ((g + n / g) / 2) else g
 
-def natSqrt (n : ℕ) : ℕ := natSqrtAux ((natBitLen n + 1) / 2) n 0
+lemma sqrtIterF_eq : ∀ s n g, g ≤ s → sqrtIterF s n g = Nat.sqrt.iter n g := by
+  intro s
+  induction s with
+  | zero =>
+    intro n g hg
+    obtain rfl : g = 0 := by omega
+    rw [sqrtIterF, Nat.sqrt.iter.eq_def]
+    simp
+  | succ s ih =>
+    intro n g hg
+    rw [sqrtIterF, Nat.sqrt.iter.eq_def]
+    by_cases h : (g + n / g) / 2 < g
+    · rw [if_pos h, dif_pos h]; exact ih n _ (by omega)
+    · rw [if_neg h, dif_neg h]
 
-lemma natSqrtAux_spec : ∀ b n acc, acc * acc ≤ n → n < (acc + 2 ^ b) * (acc + 2 ^ b) →
-    natSqrtAux b n acc * natSqrtAux b n acc ≤ n ∧
-      n < (natSqrtAux b n acc + 1) * (natSqrtAux b n acc + 1) := by
-  intro b
-  induction b with
-  | zero => intro n acc h₁ h₂; simpa [natSqrtAux] using ⟨h₁, by simpa using h₂⟩
-  | succ b ih =>
-    intro n acc h₁ h₂
-    rw [natSqrtAux]
-    by_cases hc : (acc + 2 ^ b) * (acc + 2 ^ b) ≤ n
-    · rw [if_pos hc]
-      refine ih n (acc + 2 ^ b) hc ?_
-      have : acc + 2 ^ b + 2 ^ b = acc + 2 ^ (b + 1) := by rw [Nat.pow_succ]; omega
-      rw [this]; exact h₂
-    · rw [if_neg hc]
-      exact ih n acc h₁ (by omega)
+def natSqrt (n : ℕ) : ℕ :=
+  let g := 2 ^ ((natBitLen n + 1) / 2)
+  sqrtIterF g n g
 
 lemma natSqrt_spec (n : ℕ) :
     natSqrt n * natSqrt n ≤ n ∧ n < (natSqrt n + 1) * (natSqrt n + 1) := by
-  refine natSqrtAux_spec _ n 0 (by simp) ?_
+  rw [natSqrt, sqrtIterF_eq _ _ _ le_rfl]
+  refine ⟨Nat.sqrt.iter_sq_le _ _, Nat.sqrt.lt_iter_succ_sq _ _ ?_⟩
   have hb : n < 2 ^ natBitLen n := natBitLen_spec n
   have hle : natBitLen n ≤ (natBitLen n + 1) / 2 + (natBitLen n + 1) / 2 := by omega
-  have : (2 : ℕ) ^ natBitLen n ≤ 2 ^ ((natBitLen n + 1) / 2) * 2 ^ ((natBitLen n + 1) / 2) := by
+  have h : (2 : ℕ) ^ natBitLen n ≤ 2 ^ ((natBitLen n + 1) / 2) * 2 ^ ((natBitLen n + 1) / 2) := by
     rw [← Nat.pow_add]; exact Nat.pow_le_pow_right (by norm_num) hle
-  simpa using Nat.lt_of_lt_of_le hb this
+  exact Nat.lt_of_lt_of_le (Nat.lt_of_lt_of_le hb h)
+    (Nat.mul_le_mul (Nat.le_succ _) (Nat.le_succ _))
 
 lemma natSqrt_eq (n : ℕ) : natSqrt n = Nat.sqrt n := by
   have h := natSqrt_spec n
