@@ -233,6 +233,8 @@ lemma quote_eq_encode (φ : Semiproposition L n) : (⌜φ⌝ : V) = ↑(encode �
   case hall => simp [encode_all, qqAll, coe_pair_eq_pair_coe, *]; simp [encode_eq_toNat]
   case hexs => simp [encode_ex, qqExs, coe_pair_eq_pair_coe, *]; simp [encode_eq_toNat]
 
+lemma quote_eq_encode_standard (φ : Semiproposition L n) : (⌜φ⌝ : ℕ) = encode φ := by simp [quote_eq_encode]
+
 lemma coe_quote_eq_quote (φ : Semiproposition L n) : (↑(⌜φ⌝ : ℕ) : V) = ⌜φ⌝ := by
   simp [quote_eq_encode]
 
@@ -294,6 +296,8 @@ def quote_eq (σ : Semisentence L n) : (⌜σ⌝ : V) = (⌜σ⌝ : Bootstrappin
 @[simp] lemma quote_isSemiformul₁ (φ : Semisentence L 1) : IsSemiformula L 1 (⌜φ⌝ : V) := by simp [quote_def]
 
 lemma quote_eq_encode (σ : Semisentence L n) : (⌜σ⌝ : V) = ↑(encode σ) := by simp [quote_def, Semiformula.quote_eq_encode]
+
+lemma quote_eq_encode_standard (σ : Semisentence L n) : (⌜σ⌝ : ℕ) = encode σ := by simp [quote_eq_encode]
 
 lemma coe_quote_eq_quote (σ : Semisentence L n) : (↑(⌜σ⌝ : ℕ) : V) = ⌜σ⌝ := by
   simp [quote_eq_encode]
