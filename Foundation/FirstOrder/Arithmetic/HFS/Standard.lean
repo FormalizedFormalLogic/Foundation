@@ -19,6 +19,13 @@ corresponding executable `Nat` operation — `Nat.pair`, `Nat.unpair`, `Nat.sqrt
 The payoff is the `Decidable` instances: for `x s t : ℕ`, `x ∈ s` and `s ⊆ t` become `decide`-able,
 which is what any executable procedure over coded objects needs.
 
+A second thing is needed for any of this to *run*. Core's `Nat.sqrt` is defined by well-founded
+recursion, so it does not reduce in the kernel, and neither does `Nat.unpair`, which calls it —
+`decide` gets stuck on `Nat.unpair 6`. So this file also carries reducible twins: `natSqrt`,
+proved against the *specification* `k * k ≤ n < (k + 1) * (k + 1)` and only then identified with
+`Nat.sqrt`, and `natUnpair`/`natPi₁`/`natPi₂`/`natFstIdx` on top of it. Everything an executable
+mirror destructures a code with should be the twin, not the `Nat` original.
+
 Note that `≤` is subtle at `V := ℕ`: a lemma stated for a general `V` carries
 `instLE_foundation` (`x ≤ y ↔ x = y ∨ x < y`), whereas `a ≤ b` written at `ℕ` elaborates with
 `instLENat`. `nat_le_iff` is the bridge, and is needed whenever a general-`V` lemma is applied
@@ -61,6 +68,106 @@ lemma nat_pi₂_eq (a : ℕ) : π₂ a = (Nat.unpair a).2 := by rw [← nat_unpa
 lemma nat_fstIdx_eq (p : ℕ) : fstIdx p = (Nat.unpair (p - 1)).1 := by
   show π₁ (Arithmetic.sub p 1) = (Nat.unpair (p - 1)).1
   rw [nat_pi₁_eq, nat_sub_eq]
+
+/-! ### Bit length -/
+
+def natBitLenF : ℕ → ℕ → ℕ
+  | 0, _ => 0
+  | s + 1, n => if n = 0 then 0 else natBitLenF s (n / 2) + 1
+
+def natBitLen (n : ℕ) : ℕ := natBitLenF n n
+
+lemma natBitLenF_spec : ∀ s n, n ≤ s → n < 2 ^ natBitLenF s n := by
+  intro s
+  induction s with
+  | zero =>
+    intro n hn
+    have hz : n = 0 := by omega
+    subst hz
+    simp [natBitLenF]
+  | succ s ih =>
+    intro n hn
+    rcases Nat.eq_zero_or_pos n with rfl | hpos
+    · simp [natBitLenF]
+    · have h2 : n / 2 ≤ s := by omega
+      have := ih (n / 2) h2
+      rw [natBitLenF, if_neg (by omega), Nat.pow_succ]
+      omega
+
+lemma natBitLen_spec (n : ℕ) : n < 2 ^ natBitLen n := natBitLenF_spec n n le_rfl
+
+/-! ### Square root -/
+
+/-- `natSqrtAux b n acc` refines `acc` by the bits `2^(b-1), …, 2^0`, maintaining
+`acc * acc ≤ n < (acc + 2 ^ b) * (acc + 2 ^ b)`. -/
+def natSqrtAux : ℕ → ℕ → ℕ → ℕ
+  | 0, _, acc => acc
+  | b + 1, n, acc =>
+    if (acc + 2 ^ b) * (acc + 2 ^ b) ≤ n then natSqrtAux b n (acc + 2 ^ b) else natSqrtAux b n acc
+
+def natSqrt (n : ℕ) : ℕ := natSqrtAux ((natBitLen n + 1) / 2) n 0
+
+lemma natSqrtAux_spec : ∀ b n acc, acc * acc ≤ n → n < (acc + 2 ^ b) * (acc + 2 ^ b) →
+    natSqrtAux b n acc * natSqrtAux b n acc ≤ n ∧
+      n < (natSqrtAux b n acc + 1) * (natSqrtAux b n acc + 1) := by
+  intro b
+  induction b with
+  | zero => intro n acc h₁ h₂; simpa [natSqrtAux] using ⟨h₁, by simpa using h₂⟩
+  | succ b ih =>
+    intro n acc h₁ h₂
+    rw [natSqrtAux]
+    by_cases hc : (acc + 2 ^ b) * (acc + 2 ^ b) ≤ n
+    · rw [if_pos hc]
+      refine ih n (acc + 2 ^ b) hc ?_
+      have : acc + 2 ^ b + 2 ^ b = acc + 2 ^ (b + 1) := by rw [Nat.pow_succ]; omega
+      rw [this]; exact h₂
+    · rw [if_neg hc]
+      exact ih n acc h₁ (by omega)
+
+lemma natSqrt_spec (n : ℕ) :
+    natSqrt n * natSqrt n ≤ n ∧ n < (natSqrt n + 1) * (natSqrt n + 1) := by
+  refine natSqrtAux_spec _ n 0 (by simp) ?_
+  have hb : n < 2 ^ natBitLen n := natBitLen_spec n
+  have hle : natBitLen n ≤ (natBitLen n + 1) / 2 + (natBitLen n + 1) / 2 := by omega
+  have : (2 : ℕ) ^ natBitLen n ≤ 2 ^ ((natBitLen n + 1) / 2) * 2 ^ ((natBitLen n + 1) / 2) := by
+    rw [← Nat.pow_add]; exact Nat.pow_le_pow_right (by norm_num) hle
+  simpa using Nat.lt_of_lt_of_le hb this
+
+lemma natSqrt_eq (n : ℕ) : natSqrt n = Nat.sqrt n := by
+  have h := natSqrt_spec n
+  have h₁ : natSqrt n ≤ Nat.sqrt n := Nat.le_sqrt.mpr h.1
+  have h₂ : Nat.sqrt n < natSqrt n + 1 := Nat.sqrt_lt.mpr h.2
+  omega
+
+/-! ### Unpairing -/
+
+def natUnpair (n : ℕ) : ℕ × ℕ :=
+  let s := natSqrt n
+  if n - s * s < s then (n - s * s, s) else (s, n - s * s - s)
+
+lemma natUnpair_eq (n : ℕ) : natUnpair n = Nat.unpair n := by
+  simp [natUnpair, Nat.unpair, natSqrt_eq]
+
+/-! ### Reducible twins for the destructuring bridges -/
+
+def natPi₁ (a : ℕ) : ℕ := (natUnpair a).1
+
+def natPi₂ (a : ℕ) : ℕ := (natUnpair a).2
+
+def natFstIdx (p : ℕ) : ℕ := natPi₁ (p - 1)
+
+def natSndIdx (p : ℕ) : ℕ := natPi₂ (p - 1)
+
+lemma natPi₁_eq (a : ℕ) : π₁ a = natPi₁ a := by rw [nat_pi₁_eq, natPi₁, natUnpair_eq]
+
+lemma natPi₂_eq (a : ℕ) : π₂ a = natPi₂ a := by rw [nat_pi₂_eq, natPi₂, natUnpair_eq]
+
+lemma natFstIdx_eq (p : ℕ) : fstIdx p = natFstIdx p := by
+  rw [nat_fstIdx_eq, natFstIdx, natPi₁, natUnpair_eq]
+
+lemma natSndIdx_eq (p : ℕ) : sndIdx p = natSndIdx p := by
+  show π₂ (Arithmetic.sub p 1) = natSndIdx p
+  rw [nat_pi₂_eq, nat_sub_eq, natSndIdx, natPi₂, natUnpair_eq]
 
 /-! ### Membership -/
 
@@ -105,25 +212,39 @@ instance (a b : ℕ) : Decidable (a ⊆ b) := decidable_of_iff _ nat_subset_iff.
 
 /-! ### Coded vectors
 
-A coded vector is the cons list `x ∷ v = ⟪x, v⟫ + 1` with `0` for nil, so `len` is a structural
-recursion on the code once `⟪·,·⟫` is `Nat.pair`. -/
+A coded vector is the cons list `x ∷ v = ⟪x, v⟫ + 1` with `0` for nil, so `len` is a recursion on
+the code once `⟪·,·⟫` is `Nat.pair`; it is fuel-indexed, and destructures with `natPi₂`, so that it
+reduces. -/
+
+def natLenF : ℕ → ℕ → ℕ
+  | 0, _ => 0
+  | _ + 1, 0 => 0
+  | s + 1, v + 1 => natLenF s (natPi₂ v) + 1
 
 /-- `len` at `V := ℕ`. -/
-def natLen : ℕ → ℕ
-  | 0 => 0
-  | v + 1 => natLen (Nat.unpair v).2 + 1
-  decreasing_by exact Nat.lt_succ_of_le (Nat.unpair_right_le v)
+def natLen (v : ℕ) : ℕ := natLenF v v
 
-lemma nat_len_eq (v : ℕ) : len v = natLen v := by
-  induction v using Nat.strongRecOn with
-  | ind v ih =>
+lemma natLenF_eq : ∀ s v, v ≤ s → len v = natLenF s v := by
+  intro s
+  induction s with
+  | zero =>
+    intro v hv
+    have hz : v = 0 := by omega
+    subst hz
+    simp [natLenF]
+  | succ n ih =>
+    intro v hv
     match v with
-    | 0 => simp [natLen]
+    | 0 => simp [natLenF]
     | w + 1 =>
-      have h₁ : len ((w : ℕ) + 1) = len (Nat.unpair w).2 + 1 := by
-        rw [succ_eq_adjoin w, len_adjoin, nat_pi₂_eq]
-      have h₂ : natLen (w + 1) = natLen (Nat.unpair w).2 + 1 := by simp [natLen]
-      rw [h₁, h₂, ih _ (Nat.lt_succ_of_le (Nat.unpair_right_le w))]
+      have hle : natPi₂ w ≤ n := by
+        rw [← natPi₂_eq, nat_pi₂_eq]
+        exact le_trans (Nat.unpair_right_le _) (by omega)
+      have h₁ : len ((w : ℕ) + 1) = len (natPi₂ w) + 1 := by
+        rw [succ_eq_adjoin w, len_adjoin, natPi₂_eq]
+      rw [h₁, natLenF, ih _ hle]
+
+lemma nat_len_eq (v : ℕ) : len v = natLen v := natLenF_eq v v le_rfl
 
 /-! ### The payoff -/
 
@@ -134,6 +255,15 @@ example : (4 : ℕ) ∉ (40 : ℕ) := by decide
 example : (8 : ℕ) ⊆ (40 : ℕ) := by decide
 
 example : ¬((2 : ℕ) ⊆ (40 : ℕ)) := by decide
+
+example : natSqrt 6 = 2 := by decide
+
+example : natUnpair 6 = (2, 0) := by decide
+
+/-- A ten-digit input: kernel `Nat` is GMP-backed, so this is cheap. -/
+example : natUnpair 1234567890 = (29394, 35136) := by decide
+
+example : natLen (Nat.pair 3 (Nat.pair 5 0 + 1) + 1) = 2 := by decide
 
 end LO.FirstOrder.Arithmetic
 

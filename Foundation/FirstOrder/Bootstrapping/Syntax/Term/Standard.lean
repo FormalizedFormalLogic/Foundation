@@ -229,7 +229,7 @@ example : IsUTerm (V := ℕ) ℒₒᵣ (Nat.pair 1 0 + 1) :=
 /-- The code of `^func 0 0 0`, i.e. of the constant `0`. -/
 example : IsUTerm (V := ℕ) ℒₒᵣ (Nat.pair 2 (Nat.pair 0 (Nat.pair 0 0)) + 1) :=
   IsUTerm.check_iff.mp <| by
-    simp [IsUTerm.check_succ, natLen, show isFuncB ℒₒᵣ 0 0 = true from by decide]
+    simp [IsUTerm.check_succ, natLen, natLenF, show isFuncB ℒₒᵣ 0 0 = true from by decide]
 
 example : ¬IsUTerm (V := ℕ) ℒₒᵣ 0 := fun h ↦ by simpa using IsUTerm.check_iff.mpr h
 
