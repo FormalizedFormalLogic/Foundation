@@ -66,6 +66,7 @@ public import Foundation.FirstOrder.Bootstrapping.Syntax.Formula.Basic
 public import Foundation.FirstOrder.Bootstrapping.Syntax.Formula.Coding
 public import Foundation.FirstOrder.Bootstrapping.Syntax.Formula.Functions
 public import Foundation.FirstOrder.Bootstrapping.Syntax.Formula.Iteration
+public import Foundation.FirstOrder.Bootstrapping.Syntax.Formula.Standard
 public import Foundation.FirstOrder.Bootstrapping.Syntax.Formula.Typed
 public import Foundation.FirstOrder.Bootstrapping.Syntax.Language
 public import Foundation.FirstOrder.Bootstrapping.Syntax.Proof.Basic

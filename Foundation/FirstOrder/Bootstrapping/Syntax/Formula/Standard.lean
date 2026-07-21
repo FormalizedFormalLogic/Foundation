@@ -1,0 +1,236 @@
+module
+
+public import Foundation.FirstOrder.Bootstrapping.Syntax.Term.Standard
+public import Foundation.FirstOrder.Bootstrapping.Syntax.Formula.Basic
+
+@[expose] public section
+/-!
+# Executable formula-code recognition in the standard model
+
+The term mirror (`Syntax/Term/Standard.lean`), scaled up. `IsUFormula` is a `Fixpoint` with eight
+constructors instead of three; the mirror is fuel-indexed, destructures with `natPi₁`/`natPi₂`, and
+agreement is proved by the same adequacy-indexed induction against `IsUFormula.case_iff`.
+
+Two things differ from the term case:
+
+* the `^rel`/`^nrel` branches consume the *term* mirror rather than recursing — `IsUTerm.checkVec`
+  is a separate recursion, already proved, so `isUTermVec_iff_check` is all that is needed;
+* the negative direction is factored. Six of the nine branches would otherwise each repeat the
+  eight-way `case_iff` enumeration, so `IsUFormula.tag_spec` does it once: a code that is a formula
+  has tag `≤ 7`, and tags `2`/`3` (`^⊤`/`^⊥`) force the payload to be `0`. The branches then need
+  only `omega`.
+-/
+
+namespace LO.FirstOrder.Arithmetic.Bootstrapping
+
+/-! ### The formula constructors at `V := ℕ` -/
+
+lemma nat_qqRel_eq (k r v : ℕ) :
+    (^rel k r v : ℕ) = Nat.pair 0 (Nat.pair k (Nat.pair r v)) + 1 := by
+  simp [qqRel, nat_pair_eq]
+
+lemma nat_qqNRel_eq (k r v : ℕ) :
+    (^nrel k r v : ℕ) = Nat.pair 1 (Nat.pair k (Nat.pair r v)) + 1 := by
+  simp [qqNRel, nat_pair_eq]
+
+lemma nat_qqVerum_eq : (^⊤ : ℕ) = Nat.pair 2 0 + 1 := by simp [qqVerum, nat_pair_eq]
+
+lemma nat_qqFalsum_eq : (^⊥ : ℕ) = Nat.pair 3 0 + 1 := by simp [qqFalsum, nat_pair_eq]
+
+lemma nat_qqAnd_eq (p q : ℕ) : (p ^⋏ q : ℕ) = Nat.pair 4 (Nat.pair p q) + 1 := by
+  simp [qqAnd, nat_pair_eq]
+
+lemma nat_qqOr_eq (p q : ℕ) : (p ^⋎ q : ℕ) = Nat.pair 5 (Nat.pair p q) + 1 := by
+  simp [qqOr, nat_pair_eq]
+
+lemma nat_qqAll_eq (p : ℕ) : (^∀ p : ℕ) = Nat.pair 6 p + 1 := by simp [qqAll, nat_pair_eq]
+
+lemma nat_qqExs_eq (p : ℕ) : (^∃ p : ℕ) = Nat.pair 7 p + 1 := by simp [qqExs, nat_pair_eq]
+
+/-! ### The mirror -/
+
+/-- Fuel-indexed executable mirror of `IsUFormula` at `V := ℕ`. -/
+def IsUFormula.checkF (L : Language) [L.Encodable] [L.LORDefinable] [L.DecidableSymbols] :
+    ℕ → ℕ → Bool
+  | 0, _ => false
+  | _ + 1, 0 => false
+  | s + 1, e + 1 =>
+    if natPi₁ e = 0 ∨ natPi₁ e = 1 then
+      isRelB L (natPi₁ (natPi₂ e)) (natPi₁ (natPi₂ (natPi₂ e))) &&
+        (natPi₁ (natPi₂ e) == natLen (natPi₂ (natPi₂ (natPi₂ e)))) &&
+        IsUTerm.checkVec L (natPi₂ (natPi₂ (natPi₂ e)))
+    else if natPi₁ e = 2 ∨ natPi₁ e = 3 then natPi₂ e == 0
+    else if natPi₁ e = 4 ∨ natPi₁ e = 5 then
+      IsUFormula.checkF L s (natPi₁ (natPi₂ e)) && IsUFormula.checkF L s (natPi₂ (natPi₂ e))
+    else if natPi₁ e = 6 ∨ natPi₁ e = 7 then IsUFormula.checkF L s (natPi₂ e)
+    else false
+
+def IsUFormula.check (L : Language) [L.Encodable] [L.LORDefinable] [L.DecidableSymbols]
+    (p : ℕ) : Bool := IsUFormula.checkF L p p
+
+/-! ### Agreement -/
+
+variable {L : Language} [L.Encodable] [L.LORDefinable] [L.DecidableSymbols]
+
+private lemma IsUFormula.checkF_succ (s e : ℕ) :
+    IsUFormula.checkF L (s + 1) (e + 1) =
+      (if (Nat.unpair e).1 = 0 ∨ (Nat.unpair e).1 = 1 then
+        isRelB L (Nat.unpair (Nat.unpair e).2).1 (Nat.unpair (Nat.unpair (Nat.unpair e).2).2).1 &&
+          ((Nat.unpair (Nat.unpair e).2).1 ==
+            natLen (Nat.unpair (Nat.unpair (Nat.unpair e).2).2).2) &&
+          IsUTerm.checkVec L (Nat.unpair (Nat.unpair (Nat.unpair e).2).2).2
+      else if (Nat.unpair e).1 = 2 ∨ (Nat.unpair e).1 = 3 then (Nat.unpair e).2 == 0
+      else if (Nat.unpair e).1 = 4 ∨ (Nat.unpair e).1 = 5 then
+        IsUFormula.checkF L s (Nat.unpair (Nat.unpair e).2).1 &&
+          IsUFormula.checkF L s (Nat.unpair (Nat.unpair e).2).2
+      else if (Nat.unpair e).1 = 6 ∨ (Nat.unpair e).1 = 7 then
+        IsUFormula.checkF L s (Nat.unpair e).2
+      else false) := by
+  rw [IsUFormula.checkF]; simp only [natPi₁, natPi₂, natUnpair_eq]
+
+/-- The vector side condition, in the shape `IsUFormula.rel`/`nrel` want. -/
+private lemma isUTermVec_iff_check (k v : ℕ) :
+    (k = natLen v ∧ IsUTerm.checkVec L v = true) ↔ IsUTermVec L k v := by
+  rw [IsUTerm.checkVec_iff, IsUTermVec, ← nat_len_eq]
+  constructor
+  · rintro ⟨hk, hv⟩; exact ⟨hk, fun i hi ↦ hv i (hk ▸ hi)⟩
+  · rintro ⟨hk, hv⟩; exact ⟨hk, fun i hi ↦ hv i (hk ▸ hi)⟩
+
+omit [L.DecidableSymbols] in
+/-- Read the constructor tag off a code that is a formula. Proved once, by the eight-way
+`case_iff` enumeration, so that the negative branches below need only `omega`. -/
+private lemma IsUFormula.tag_spec {e : ℕ} (h : IsUFormula L (e + 1)) :
+    (Nat.unpair e).1 ≤ 7 ∧ ((Nat.unpair e).1 = 2 ∨ (Nat.unpair e).1 = 3 → (Nat.unpair e).2 = 0) := by
+  rcases h.case with (⟨k, r, v, _, _, hv⟩ | ⟨k, r, v, _, _, hv⟩ | hv | hv |
+    ⟨p₁, p₂, _, _, hv⟩ | ⟨p₁, p₂, _, _, hv⟩ | ⟨p₁, _, hv⟩ | ⟨p₁, _, hv⟩)
+  · rw [nat_qqRel_eq] at hv
+    obtain rfl : e = Nat.pair 0 (Nat.pair k (Nat.pair r v)) := by omega
+    simp
+  · rw [nat_qqNRel_eq] at hv
+    obtain rfl : e = Nat.pair 1 (Nat.pair k (Nat.pair r v)) := by omega
+    simp
+  · rw [nat_qqVerum_eq] at hv
+    obtain rfl : e = Nat.pair 2 0 := by omega
+    simp
+  · rw [nat_qqFalsum_eq] at hv
+    obtain rfl : e = Nat.pair 3 0 := by omega
+    simp
+  · rw [nat_qqAnd_eq] at hv
+    obtain rfl : e = Nat.pair 4 (Nat.pair p₁ p₂) := by omega
+    simp
+  · rw [nat_qqOr_eq] at hv
+    obtain rfl : e = Nat.pair 5 (Nat.pair p₁ p₂) := by omega
+    simp
+  · rw [nat_qqAll_eq] at hv
+    obtain rfl : e = Nat.pair 6 p₁ := by omega
+    simp
+  · rw [nat_qqExs_eq] at hv
+    obtain rfl : e = Nat.pair 7 p₁ := by omega
+    simp
+
+private lemma IsUFormula.checkF_iff_aux (s : ℕ) :
+    ∀ p ≤ s, (IsUFormula.checkF L s p = true ↔ IsUFormula L p) := by
+  induction s with
+  | zero =>
+    intro p hp
+    obtain rfl : p = 0 := by omega
+    simp [IsUFormula.checkF]
+  | succ n ih =>
+    intro p hp
+    match p with
+    | 0 => simp [IsUFormula.checkF]
+    | e + 1 =>
+      have he : Nat.pair (Nat.unpair e).1 (Nat.unpair e).2 = e := Nat.pair_unpair e
+      have e2 : Nat.pair (Nat.unpair (Nat.unpair e).2).1 (Nat.unpair (Nat.unpair e).2).2
+          = (Nat.unpair e).2 := Nat.pair_unpair _
+      have e3 : Nat.pair (Nat.unpair (Nat.unpair (Nat.unpair e).2).2).1
+          (Nat.unpair (Nat.unpair (Nat.unpair e).2).2).2
+          = (Nat.unpair (Nat.unpair e).2).2 := Nat.pair_unpair _
+      have hl₁ : (Nat.unpair (Nat.unpair e).2).1 ≤ n :=
+        le_trans (le_trans (Nat.unpair_left_le _) (Nat.unpair_right_le _)) (by omega)
+      have hl₂ : (Nat.unpair (Nat.unpair e).2).2 ≤ n :=
+        le_trans (le_trans (Nat.unpair_right_le _) (Nat.unpair_right_le _)) (by omega)
+      have hl₃ : (Nat.unpair e).2 ≤ n := le_trans (Nat.unpair_right_le _) (by omega)
+      rcases (show (Nat.unpair e).1 = 0 ∨ (Nat.unpair e).1 = 1 ∨ (Nat.unpair e).1 = 2 ∨
+          (Nat.unpair e).1 = 3 ∨ (Nat.unpair e).1 = 4 ∨ (Nat.unpair e).1 = 5 ∨
+          (Nat.unpair e).1 = 6 ∨ (Nat.unpair e).1 = 7 ∨ 8 ≤ (Nat.unpair e).1 by omega)
+        with h | h | h | h | h | h | h | h | h
+      · have hs : (e : ℕ) + 1 = ^rel (Nat.unpair (Nat.unpair e).2).1
+            (Nat.unpair (Nat.unpair (Nat.unpair e).2).2).1
+            (Nat.unpair (Nat.unpair (Nat.unpair e).2).2).2 := by
+          rw [nat_qqRel_eq, e3, e2, ← h, he]
+        rw [IsUFormula.checkF_succ, if_pos (Or.inl h), hs, IsUFormula.rel]
+        simp only [Bool.and_eq_true, beq_iff_eq, isRelB_iff]
+        rw [and_assoc, isUTermVec_iff_check]
+      · have hs : (e : ℕ) + 1 = ^nrel (Nat.unpair (Nat.unpair e).2).1
+            (Nat.unpair (Nat.unpair (Nat.unpair e).2).2).1
+            (Nat.unpair (Nat.unpair (Nat.unpair e).2).2).2 := by
+          rw [nat_qqNRel_eq, e3, e2, ← h, he]
+        rw [IsUFormula.checkF_succ, if_pos (Or.inr h), hs, IsUFormula.nrel]
+        simp only [Bool.and_eq_true, beq_iff_eq, isRelB_iff]
+        rw [and_assoc, isUTermVec_iff_check]
+      · rw [IsUFormula.checkF_succ, if_neg (by omega), if_pos (Or.inl h)]
+        simp only [beq_iff_eq]
+        constructor
+        · intro hz
+          have hv : (e : ℕ) + 1 = ^⊤ := by rw [nat_qqVerum_eq, ← h, ← hz, he]
+          rw [hv]; simp
+        · intro hc; exact (IsUFormula.tag_spec hc).2 (Or.inl h)
+      · rw [IsUFormula.checkF_succ, if_neg (by omega), if_pos (Or.inr h)]
+        simp only [beq_iff_eq]
+        constructor
+        · intro hz
+          have hv : (e : ℕ) + 1 = ^⊥ := by rw [nat_qqFalsum_eq, ← h, ← hz, he]
+          rw [hv]; simp
+        · intro hc; exact (IsUFormula.tag_spec hc).2 (Or.inr h)
+      · have hs : (e : ℕ) + 1 =
+            (Nat.unpair (Nat.unpair e).2).1 ^⋏ (Nat.unpair (Nat.unpair e).2).2 := by
+          rw [nat_qqAnd_eq, e2, ← h, he]
+        rw [IsUFormula.checkF_succ, if_neg (by omega), if_neg (by omega), if_pos (Or.inl h), hs,
+          IsUFormula.and]
+        simp only [Bool.and_eq_true, ih _ hl₁, ih _ hl₂]
+      · have hs : (e : ℕ) + 1 =
+            (Nat.unpair (Nat.unpair e).2).1 ^⋎ (Nat.unpair (Nat.unpair e).2).2 := by
+          rw [nat_qqOr_eq, e2, ← h, he]
+        rw [IsUFormula.checkF_succ, if_neg (by omega), if_neg (by omega), if_pos (Or.inr h), hs,
+          IsUFormula.or]
+        simp only [Bool.and_eq_true, ih _ hl₁, ih _ hl₂]
+      · have hs : (e : ℕ) + 1 = ^∀ (Nat.unpair e).2 := by rw [nat_qqAll_eq, ← h, he]
+        rw [IsUFormula.checkF_succ, if_neg (by omega), if_neg (by omega), if_neg (by omega),
+          if_pos (Or.inl h), hs, IsUFormula.all]
+        exact ih _ hl₃
+      · have hs : (e : ℕ) + 1 = ^∃ (Nat.unpair e).2 := by rw [nat_qqExs_eq, ← h, he]
+        rw [IsUFormula.checkF_succ, if_neg (by omega), if_neg (by omega), if_neg (by omega),
+          if_pos (Or.inr h), hs, IsUFormula.ex]
+        exact ih _ hl₃
+      · rw [IsUFormula.checkF_succ, if_neg (by omega), if_neg (by omega), if_neg (by omega),
+          if_neg (by omega)]
+        simp only [Bool.false_eq_true, false_iff]
+        intro hc
+        have := (IsUFormula.tag_spec hc).1
+        omega
+
+theorem IsUFormula.check_iff {p : ℕ} : IsUFormula.check L p = true ↔ IsUFormula L p :=
+  IsUFormula.checkF_iff_aux p p le_rfl
+
+instance decidableIsUFormula (L : Language) [L.Encodable] [L.LORDefinable] [L.DecidableSymbols]
+    (p : ℕ) : Decidable (IsUFormula (V := ℕ) L p) := decidable_of_iff _ IsUFormula.check_iff
+
+/-! ### It runs
+
+`7 = ^⊤`; `3974 = ^⊤ ^⋏ ^⊤`; `73` has constructor tag `8`. Inputs are bare numerals — see
+`Syntax/Term/Standard.lean` for why the `decide` tactic is reached through `check_iff`. -/
+
+example : IsUFormula.check ℒₒᵣ 7 = true := by decide
+
+example : IsUFormula (V := ℕ) ℒₒᵣ 7 := IsUFormula.check_iff.mp (by decide)
+
+example : IsUFormula (V := ℕ) ℒₒᵣ 3974 := IsUFormula.check_iff.mp (by decide)
+
+example : ¬IsUFormula (V := ℕ) ℒₒᵣ 0 := fun h ↦ absurd (IsUFormula.check_iff.mpr h) (by decide)
+
+example : ¬IsUFormula (V := ℕ) ℒₒᵣ 73 := fun h ↦ absurd (IsUFormula.check_iff.mpr h) (by decide)
+
+end LO.FirstOrder.Arithmetic.Bootstrapping
+
+end
