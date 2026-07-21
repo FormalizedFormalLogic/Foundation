@@ -49,6 +49,7 @@ public import Foundation.FirstOrder.Basic.Eq
 public import Foundation.FirstOrder.Basic.Model
 public import Foundation.FirstOrder.Basic.Operator
 public import Foundation.FirstOrder.Basic.Padding
+public import Foundation.FirstOrder.Basic.PrimrecCoding
 public import Foundation.FirstOrder.Basic.Semantics.Elementary
 public import Foundation.FirstOrder.Basic.Semantics.Semantics
 public import Foundation.FirstOrder.Basic.Soundness
