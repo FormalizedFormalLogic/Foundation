@@ -179,7 +179,7 @@ lemma existsUnique_of_ExistsAttempt (F : V → V) (α : V) (hex : ExistsAttempt 
 /--
 This lemma is originally by tosiaki
 -/
-lemma attemptOrEmpty_exists (F : V → V) (α : V) : ∃! y,
+lemma attemptOrEmpty_existsUnique (F : V → V) (α : V) : ∃! y,
     (ExistsAttempt F α ∧ IsAttempt F α y) ∨
     (¬ ExistsAttempt F α ∧ y = ∅) := by
   by_cases hexists : ExistsAttempt F α
@@ -203,7 +203,7 @@ An attempt of length `α`, or `∅` if one doesn't exist.
 This definition is by tosiaki
 -/
 noncomputable def attemptOrEmpty (F : V → V) (α : V) : V :=
-  Classical.choose! (attemptOrEmpty_exists F α)
+  Classical.choose! (attemptOrEmpty_existsUnique F α)
 
 def attemptOrEmpty.dfn (φ : SetTheorySemiformula V 2) : SetTheorySemiformula V 2 :=
   f“y α. !(ExistsAttempt.dfn φ) α ∧ !(IsAttempt.dfn φ) α y
@@ -253,46 +253,6 @@ lemma eq_of_kpair_eq_pairValueAttempt {F : V → V} {α : V} {x y : V} (h : ⟨x
     x = α := by
   simp only [pairValueAttempt, kpair_iff] at h
   exact h.1
-
--- lemma isPairValueAttempt_unique_of_ExistsAttempt
---     (F : V → V) (α : V) :
---     ExistsAttempt F α → ∃! p, IsPairValueAttempt F α p := by
---   intro h
---   let ⟨f, hf⟩ := h
---   have : IsOrdinal α := hf.1
---   have : IsFunction f := hf.2.1
---   let αo : Ordinal V := IsOrdinal.toOrdinal α
---   apply existsUnique_of_ExistsAttempt at h
---   refine ExistsUnique.intro ⟨α, F f⟩ₖ ?_ ?_
---   · simp only [IsPairValueAttempt, kpair_iff, true_and]
---     use f
---   · simp only [IsPairValueAttempt, forall_exists_index, and_imp]
---     intro p₂ f₂ hp₂ hf₂
---     have : IsFunction f₂ := hf₂.2.1
---     simp_all only [attempt_function_unique (α := αo) hf hf₂]
-
--- /--
--- A characterization of when the right argument of `IsPairValueAttempt` is unique.
--- -/
--- @[simp] lemma isPairValueAttempt_unique_eq_ExistsAttempt
---     (F : V → V) (α : V) :
---     (∃! p, IsPairValueAttempt F α p) = ExistsAttempt F α := by
---   apply eq_iff_iff.mpr
---   constructor <;> intro h
---   · simp only [IsPairValueAttempt] at h
---     apply ExistsUnique.exists at h
---     rcases h with ⟨p, f, hfleft, hfright⟩
---     use f
---   · exact isPairValueAttempt_unique_of_ExistsAttempt F α h
-
--- /--
--- A trivial lemma which maybe I can remove if I convert everything to use `α : Ordinal V` instead of `α : V`.
--- TODO: Remove this if I decide to use `Ordinal V` instead.
--- -/
--- lemma forall_ExistsAttmept_of_mem
---     (F : V → V) {α : V} [hα : IsTransitive α] {β : V} (hβα : β ∈ α)
---     (h : ∀ γ ∈ α, ExistsAttempt F γ) : ∀ γ ∈ β, ExistsAttempt F γ := by
---   exact fun γ hγβ ↦ (h γ (IsTransitive.mem_trans hα hγβ hβα))
 
 section Replacement
 
