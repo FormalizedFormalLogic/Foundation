@@ -120,6 +120,7 @@ macro_rules
     let binders' := binders.insertIdx 0 x
     `(bexsIn ⤫term(lit)[$binders* | $fbinders* | $t] ⤫formula(lit)[$binders'* | $fbinders* | $p])
 
+/-- `x ~[m] y` states that `⟪x, y⟫` is in `m`. (TODO: Is this a correct description?) -/
 syntax:45 first_order_term:45 " ∼[" first_order_term "]" first_order_term:0 : first_order_formula
 syntax:45 first_order_term:45 " ≁[" first_order_term "]" first_order_term:0 : first_order_formula
 syntax:45 ":⟪" first_order_term ", " first_order_term "⟫:∈ " first_order_term:0 : first_order_formula
