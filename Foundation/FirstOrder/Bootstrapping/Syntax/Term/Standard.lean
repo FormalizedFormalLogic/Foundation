@@ -8,29 +8,24 @@ public import Foundation.FirstOrder.Arithmetic.HFS.Standard
 /-!
 # Executable term-code recognition in the standard model
 
-`IsUTerm` is a `Fixpoint`: `Classical.choose!` all the way down, so nothing about it reduces, at
-any `V`. This file gives the `V := ℕ` mirror — a `Bool`-valued recursion on the code — together
-with the agreement theorem, and hence `Decidable (IsUTerm L t)` for `t : ℕ` that `decide` can
-actually run.
+`IsUTerm` is a `Fixpoint` — `Classical.choose!` all the way down — so nothing about it reduces, at
+any `V`. This file gives the `V := ℕ` mirror, a `Bool`-valued recursion on the code, together with
+the agreement theorem, and hence a `Decidable (IsUTerm L t)` that `decide` can run. Every mirror up
+to the derivation checker (`Proof/Standard.lean`) repeats this file's architecture:
 
-The architecture is the one the derivation checker will reuse, in miniature:
-
-* the mirror is **fuel-indexed** — structural in the fuel, so it reduces in the kernel — and the
-  fuel `t` supplied for the code `t` is adequate because every recursive call strictly decreases
-  the code (`Nat.unpair_left_le`/`unpair_right_le`, the `Nat` form of `arity_lt_qqFunc` and
-  friends). Codes are destructured with `natPi₁`/`natPi₂`, the reducible twins, never with
-  `Nat.unpair`, which does not reduce;
-* agreement is proved by strong induction on the code against `IsUTerm.case_iff`, never against
-  `limSeq` — `case_iff` already packages the fixpoint;
-* the negative direction needs the constructors to be *readable off* the code: a code whose tag
-  is not `0`, `1` or `2` is no term, which is exactly `Nat.unpair_pair` applied to
+* the mirror is fuel-indexed — structural in the fuel, so it reduces in the kernel — and fuel `t`
+  is adequate for the code `t` because every recursive call strictly decreases the code
+  (`Nat.unpair_left_le`/`unpair_right_le`). Codes are destructured with `natPi₁`/`natPi₂`, the
+  reducible twins, never with `Nat.unpair`, which does not reduce;
+* agreement is proved by strong induction on the code against `IsUTerm.case_iff`;
+* the negative direction reads the constructor tag off the code: a code whose tag is not `0`, `1`
+  or `2` is no term, by `Nat.unpair_pair` applied to
   `nat_qqBvar_eq`/`nat_qqFvar_eq`/`nat_qqFunc_eq`.
 
 `Language.DecidableSymbols` supplies the one thing that cannot be computed generically: whether a
 code is a function or relation symbol of a given arity. `L.IsFunc k f` unfolds to satisfaction of
-a `𝚺₀` formula, which is decidable in the arithmetical sense but carries no Lean `Decidable`
-instance, so — as with `Theory.DecidableΔ₁` — it is supplied per language. `ℒₒᵣ` is instantiated
-here.
+a `𝚺₀` formula — decidable in the arithmetical sense, but with no Lean `Decidable` instance — so,
+as with `Theory.DecidableΔ₁`, it is supplied per language; the `ℒₒᵣ` instance is below.
 -/
 
 namespace LO.FirstOrder.Arithmetic.Bootstrapping
@@ -89,7 +84,7 @@ def IsUTerm.checkVecF (L : Language) [L.Encodable] [L.LORDefinable] [L.Decidable
 
 end
 
-/-- The fuel `t` is adequate for the code `t`: every recursive call strictly decreases the code. -/
+/-- Executable `IsUTerm` at `V := ℕ`: fuel `t` is adequate for the code `t`. -/
 def IsUTerm.check (L : Language) [L.Encodable] [L.LORDefinable] [L.DecidableSymbols]
     (t : ℕ) : Bool := IsUTerm.checkF L t t
 
@@ -221,12 +216,11 @@ instance decidableIsUTerm (L : Language) [L.Encodable] [L.LORDefinable] [L.Decid
 
 The same mirror with the bound `n` threaded through as an ordinary parameter. It does not shift —
 terms bind nothing — so the recursion is unchanged apart from the `^#z` branch, which now checks
-`z < n`. `bv` never appears. -/
+`z < n`. -/
 
 mutual
 
-/-- Fuel-indexed executable mirror of `IsSemiterm` at `V := ℕ`. The bound `n` is an ordinary
-parameter; it does not shift, since terms bind nothing. -/
+/-- Fuel-indexed executable mirror of `IsSemiterm` at `V := ℕ`. -/
 def IsSemiterm.checkF (L : Language) [L.Encodable] [L.LORDefinable] [L.DecidableSymbols] :
     ℕ → ℕ → ℕ → Bool
   | 0, _, _ => false
@@ -273,7 +267,7 @@ private lemma IsSemiterm.checkVecF_succ (s n w : ℕ) :
   rw [IsSemiterm.checkVecF]; simp only [natPi₁, natPi₂, natUnpair_eq]
 
 omit [L.DecidableSymbols] in
-/-- Tags of semiterm codes, once, for the negative branches. -/
+/-- A semiterm code has constructor tag `0`, `1` or `2`. -/
 private lemma IsSemiterm.tag_le {n e : ℕ} (h : IsSemiterm L n (e + 1)) : (Nat.unpair e).1 ≤ 2 := by
   rcases h.case with (⟨z, _, hv⟩ | ⟨x, hv⟩ | ⟨k, f, v, _, _, hv⟩)
   · rw [nat_qqBvar_eq] at hv
@@ -382,22 +376,21 @@ theorem IsSemiterm.checkVec_iff {n v : ℕ} :
 instance decidableIsSemiterm (L : Language) [L.Encodable] [L.LORDefinable] [L.DecidableSymbols]
     (n t : ℕ) : Decidable (IsSemiterm (V := ℕ) L n t) := decidable_of_iff _ IsSemiterm.check_iff
 
-/-! ### Function mirrors: `termShift` and `termSubst`
+/-! ### Function mirrors
 
-Pattern A at term level, following `neg` (`Formula/Standard.lean`): the mirror returns a code,
-agreement is an equation, the induction carries `IsUTerm`/`IsUTermVec` and propagates it with the
-`C1` constructor lemmas, and totality comes from `Language.TermRec.Construction.result_prop_not`
-composed with the `C1` recogniser.
+For a function the mirror returns a code, agreement is an equation, the induction carries
+`IsUTerm`/`IsUTermVec` and propagates it with the constructor lemmas, and totality comes from
+`Language.TermRec.Construction.result_prop_not` composed with `IsUTerm.check`.
 
-What is new here is the **vector companion**. `termShiftVec`/`termSubstVec` are mutually recursive
-with the scalar, so the adequacy-indexed induction proves both at once — exactly as
-`IsUTerm.checkF`/`checkVecF` do — and the vector half is stated over *well-formed* vectors,
+`termShiftVec`/`termSubstVec` are mutually recursive with the scalar, so the fuel-indexed
+induction proves both at once — exactly as `IsUTerm.checkF`/`checkVecF` do — and the vector half
+is stated over well-formed vectors,
 
     IsUTermVec L k v → termShiftVec.check L v = termShiftVec L k v
 
-which is the shape `shift` and `subst` consume: they only ever apply it under the well-formedness
-they have already established for the enclosing formula. There is no off-domain equation for the
-vector companion upstream, and none is needed. -/
+which is the shape `shift` and `subst` consume: they apply it only under well-formedness already
+established for the enclosing formula. Upstream has no off-domain equation for the vector
+functions, and none is needed. -/
 
 /-! ### `termShift` -/
 
@@ -518,11 +511,8 @@ private lemma termShiftF_eq_aux (s : ℕ) :
         have h₁ : (Nat.unpair w).1 ≤ m := le_trans (Nat.unpair_left_le _) (by omega)
         have h₂ : (Nat.unpair w).2 ≤ m := le_trans (Nat.unpair_right_le _) (by omega)
         rw [hadj] at h
-        obtain ⟨hk, hrest⟩ : k = len (Nat.unpair w).2 + 1 ∧ True := by
-          refine ⟨?_, trivial⟩
-          have := h.lh
-          simpa [hadj, len_adjoin] using this
-        subst hk
+        obtain rfl : k = len (Nat.unpair w).2 + 1 := by
+          have := h.lh; simpa [len_adjoin] using this
         have ht : IsUTerm L (Nat.unpair w).1 := by
           simpa using h.nth (i := 0) (by simp)
         have hts : IsUTermVec L (len (Nat.unpair w).2) (Nat.unpair w).2 :=
@@ -542,7 +532,6 @@ theorem termShift.check_eq (t : ℕ) : termShift.check L t = termShift L t := by
   · rw [if_neg h]
     exact (TermShift.construction.result_prop_not (L := L) (param := ![])
       (fun hc ↦ h (IsUTerm.check_iff.mpr hc))).symm
-
 
 /-! ### `termSubst` -/
 
@@ -684,14 +673,12 @@ theorem termSubst.check_eq (w t : ℕ) : termSubst.check L w t = termSubst L w t
     exact (TermSubst.construction.result_prop_not (L := L) (param := ![w])
       (fun hc ↦ h (IsUTerm.check_iff.mpr hc))).symm
 
-/-! ### Function mirrors: `termBShift` and `qVec`
+/-! ### `termBShift` and `qVec`
 
-`termBShift` is the `termShift` template again — third instance — differing only in the leaves
-(`^#z ↦ ^#(z+1)`, `^&x ↦ ^&x`). `qVec w = ^#0 ∷ termBShiftVec L (len w) w` is a composite on top of
-it, and is what `subst` shifts its parameter by under `^∀`/`^∃`.
-
-Note the hypothesis on `qVec.check_eq`: it needs the vector `w` to be *well-formed*, because
-`termBShiftVec.check` only agrees there. A consumer that changes its parameter by `qVec` must
+`termBShift` differs from `termShift` only in the leaves (`^#z ↦ ^#(z+1)`, `^&x ↦ ^&x`).
+`qVec w = ^#0 ∷ termBShiftVec L (len w) w` is a composite over it, and is what `subst` shifts its
+parameter by under `^∀`/`^∃`. `qVec.check_eq` needs the vector `w` to be well-formed, because
+`termBShiftVec.check` only agrees there; a consumer that shifts its parameter by `qVec` must
 therefore carry the parameter's well-formedness as an invariant of its own recursion. -/
 
 mutual
@@ -811,11 +798,8 @@ private lemma termBShiftF_eq_aux (s : ℕ) :
         have h₁ : (Nat.unpair w).1 ≤ m := le_trans (Nat.unpair_left_le _) (by omega)
         have h₂ : (Nat.unpair w).2 ≤ m := le_trans (Nat.unpair_right_le _) (by omega)
         rw [hadj] at h
-        obtain ⟨hk, hrest⟩ : k = len (Nat.unpair w).2 + 1 ∧ True := by
-          refine ⟨?_, trivial⟩
-          have := h.lh
-          simpa [hadj, len_adjoin] using this
-        subst hk
+        obtain rfl : k = len (Nat.unpair w).2 + 1 := by
+          have := h.lh; simpa [len_adjoin] using this
         have ht : IsUTerm L (Nat.unpair w).1 := by
           simpa using h.nth (i := 0) (by simp)
         have hts : IsUTermVec L (len (Nat.unpair w).2) (Nat.unpair w).2 :=
@@ -836,8 +820,6 @@ theorem termBShift.check_eq (t : ℕ) : termBShift.check L t = termBShift L t :=
     exact (TermBShift.construction.result_prop_not (L := L) (param := ![])
       (fun hc ↦ h (IsUTerm.check_iff.mpr hc))).symm
 
-
-
 /-! ### `qVec` -/
 
 def qVec.check (L : Language) [L.Encodable] [L.LORDefinable] [L.DecidableSymbols] (w : ℕ) : ℕ :=
@@ -849,13 +831,10 @@ theorem qVec.check_eq {w : ℕ} (h : IsUTermVec L (len w) w) : qVec.check L w = 
   rw [nat_qqBvar_eq]
   simp [Nat.pair]
 
-/-! ### Function mirror: `termBV`
+/-! ### `termBV`
 
-The `termShift` template a fourth time, with `termBV_bvar/fvar/func` leaves. The `^func` branch
-consumes `natListMax` — which is why this had to wait for `listMax`'s spec-first proof — but the
-consumption is a plain rewrite with `nat_listMax_eq`, not a re-entry into the instance problem. -/
-
-/-! ### `termBV` -/
+The `^func` branch takes the maximum of the argument bounds through `natListMax`; agreement there
+is a rewrite with `nat_listMax_eq`. -/
 
 mutual
 
@@ -991,57 +970,54 @@ theorem termBV.check_eq (t : ℕ) : termBV.check L t = termBV L t := by
     exact (IsUTerm.BV.construction.result_prop_not (L := L) (param := ![])
       (fun hc ↦ h (IsUTerm.check_iff.mpr hc))).symm
 
-/-! ### It runs
+/-! ### Examples
 
-The mirror is fuel-indexed and destructures with `natPi₁`/`natPi₂`, so it reduces in the kernel and
-`decide` computes it — on bare numerals, not just on codes presented as `Nat.pair` trees.
-
-One wrinkle: the `decide` *tactic* cannot be pointed straight at `IsUTerm …`, because it normalises
-the proposition before synthesising `Decidable` and loses the head. Going through the agreement
-theorem — `IsUTerm.check_iff.mp (by decide)` — works, and is more informative anyway: it names the
-mirror that did the computing. `inferInstance` finds `decidableIsUTerm` without trouble. -/
+The mirrors are fuel-indexed and destructure with `natPi₁`/`natPi₂`, so they reduce in the kernel
+on bare numerals. The `decide` tactic cannot be pointed straight at `IsUTerm …` — it normalises
+the proposition before synthesising `Decidable` and loses the head — so the probes go through the
+agreement theorem, `IsUTerm.check_iff.mp (by decide)`. -/
 
 example : IsUTerm.check ℒₒᵣ 7 = true := by decide
 
 example : Decidable (IsUTerm (V := ℕ) ℒₒᵣ 7) := inferInstance
 
-/-- A bare numeral witness: `7 = ^func 0 0 0`, the constant `0`. -/
+-- `7 = ^func 0 0 0`, the constant `0`
 example : IsUTerm (V := ℕ) ℒₒᵣ 7 := IsUTerm.check_iff.mp (by decide)
 
-/-- `1 = ^#0`, a bound variable. -/
+-- `1 = ^#0`
 example : IsUTerm (V := ℕ) ℒₒᵣ 1 := IsUTerm.check_iff.mp (by decide)
 
-/-- `3 = ^&0`, a free variable. -/
+-- `3 = ^&0`
 example : IsUTerm (V := ℕ) ℒₒᵣ 3 := IsUTerm.check_iff.mp (by decide)
 
 example : ¬IsUTerm (V := ℕ) ℒₒᵣ 0 := fun h ↦ absurd (IsUTerm.check_iff.mpr h) (by decide)
 
-/-- `13` has constructor tag `3`. -/
+-- `13` has constructor tag `3`
 example : ¬IsUTerm (V := ℕ) ℒₒᵣ 13 := fun h ↦ absurd (IsUTerm.check_iff.mpr h) (by decide)
 
-/-- `1 = ^#0` is a term at `n = 1` but not at `n = 0`. -/
+-- `^#0` is a term at `n = 1` but not at `n = 0`
 example : IsSemiterm (V := ℕ) ℒₒᵣ 1 1 := IsSemiterm.check_iff.mp (by decide)
 
 example : ¬IsSemiterm (V := ℕ) ℒₒᵣ 0 1 :=
   fun h ↦ absurd (IsSemiterm.check_iff.mpr h) (by decide)
 
-/-- `3 = ^&0`, and shifting gives `4 = ^&1`. -/
+-- shifting `3 = ^&0` gives `4 = ^&1`
 example : termShift (V := ℕ) ℒₒᵣ 3 = 4 := by rw [← termShift.check_eq]; decide
 
 example : termShift (V := ℕ) ℒₒᵣ 0 = 0 := by rw [← termShift.check_eq]; decide
 
-/-- Substituting `?[^&0]` into `^#0` yields `^&0`. -/
+-- substituting `?[^&0] = 13` into `^#0` yields `^&0`
 example : termSubst (V := ℕ) ℒₒᵣ 13 1 = 3 := by rw [← termSubst.check_eq]; decide
 
-/-- `1 = ^#0`, and bound-shifting gives `2 = ^#1`. -/
+-- bound-shifting `1 = ^#0` gives `2 = ^#1`
 example : termBShift (V := ℕ) ℒₒᵣ 1 = 2 := by rw [← termBShift.check_eq]; decide
 
 example : termBShift (V := ℕ) ℒₒᵣ 0 = 0 := by rw [← termBShift.check_eq]; decide
 
-/-- `1 = ^#0`, whose bound-variable bound is `1`. -/
+-- `^#0` has bound-variable bound `1`
 example : termBV (V := ℕ) ℒₒᵣ 1 = 1 := by rw [← termBV.check_eq]; decide
 
-/-- `3 = ^&0` is closed. -/
+-- `^&0` is closed
 example : termBV (V := ℕ) ℒₒᵣ 3 = 0 := by rw [← termBV.check_eq]; decide
 
 end LO.FirstOrder.Arithmetic.Bootstrapping

@@ -7,41 +7,28 @@ public import Mathlib.Data.Nat.BitIndices
 /-!
 # The hereditarily finite sets of the standard model
 
-Every primitive the arithmetized-syntax development is built from is `noncomputable`, and not
-incidentally so: `⟪·,·⟫`, `unpair` and `√` branch on a classically decidable comparison or are
-introduced by `Classical.choose!`, and `∈`/`insert`/`⊆` go through `Exp.exp`, which is itself a
-`Classical.choose!`. For a general model `V` there is nothing to be done about that.
+The primitives of the arithmetized-syntax development are all `noncomputable`: `⟪·,·⟫`, `unpair`
+and `√` branch on classically decidable comparisons or come from `Classical.choose!`, and
+`∈`/`insert`/`⊆` go through `Exp.exp`, itself a `Classical.choose!`. At `V := ℕ` they nevertheless
+compute, and this file identifies each with an executable `Nat` operation, following the prototype
+`nat_pair_eq` (`IOpen/Basic.lean`); `Decidable` instances for `∈` and `⊆` on coded sets follow.
 
-At `V := ℕ` all of them nevertheless *compute*, and this file identifies each one with the
-corresponding executable `Nat` operation — `Nat.pair`, `Nat.unpair`, `Nat.sqrt`, `Nat.testBit`,
-`2 ^ ·`. `Semiterm.nat_pair_eq` (`IOpen/Basic.lean`) is the prototype; the rest follow it.
+Kernel reduction needs more: core's `Nat.sqrt` is defined by well-founded recursion, so `decide`
+gets stuck already on `Nat.unpair 6`. This file therefore also carries reducible twins — `natSqrt`,
+proved against the specification `k * k ≤ n < (k + 1) * (k + 1)` and only then identified with
+`Nat.sqrt`, and `natUnpair`/`natPi₁`/`natPi₂`/`natFstIdx` over it. Executable mirrors must
+destructure codes with the twins, never with the `Nat` originals.
 
-The payoff is the `Decidable` instances: for `x s t : ℕ`, `x ∈ s` and `s ⊆ t` become `decide`-able,
-which is what any executable procedure over coded objects needs.
-
-A second thing is needed for any of this to *run*. Core's `Nat.sqrt` is defined by well-founded
-recursion, so it does not reduce in the kernel, and neither does `Nat.unpair`, which calls it —
-`decide` gets stuck on `Nat.unpair 6`. So this file also carries reducible twins: `natSqrt`,
-proved against the *specification* `k * k ≤ n < (k + 1) * (k + 1)` and only then identified with
-`Nat.sqrt`, and `natUnpair`/`natPi₁`/`natPi₂`/`natFstIdx` on top of it. Everything an executable
-mirror destructures a code with should be the twin, not the `Nat` original.
-
-The twins have to be fast as well as reducible, because a derivation code is a nest of `Nat.pair`s
-and so grows very quickly: a two-rule derivation over a formula of code `3974` already has a code
-of `254337` bits, and destructuring it calls `natSqrt` a handful of times. The obvious schemes are
-too slow at that size — halving bit by bit for the bit length, and refining one bit at a time under
-a full-width multiplication for the square root, are quadratic or worse in the bit length. So
-`natBitLen` doubles instead (logarithmically many comparisons, and a result within a factor of two
+The twins must also be fast, since codes nest `Nat.pair`: a two-rule derivation over a formula of
+code `3974` already has a `254337`-bit code. Bit-by-bit schemes are quadratic or worse in the bit
+length, so `natBitLen` doubles its guess (logarithmically many comparisons, within a factor of two
 of the true length, which is all its specification claims), and `natSqrt` is a fuel-indexed copy of
-`Nat.sqrt.iter`, the Newton iteration core already uses (logarithmically many divisions). Measured
-compiled on that `254337`-bit code: `natBitLen` `7.8 s → 0 ms`, `natSqrt` `34.8 s → 2.1 s`,
-`natFstIdx` `36.5 s → 2.0 s`, and the derivation check it feeds `149 s → 7.2 s`. What remains is
-the big divisions themselves.
+`Nat.sqrt.iter`, the Newton iteration core already uses. Compiled, the derivation check on that
+`254337`-bit code runs in about `7` seconds, dominated by the big divisions.
 
-Note that `≤` is subtle at `V := ℕ`: a lemma stated for a general `V` carries
-`instLE_foundation` (`x ≤ y ↔ x = y ∨ x < y`), whereas `a ≤ b` written at `ℕ` elaborates with
-`instLENat`. `nat_le_iff` is the bridge, and is needed whenever a general-`V` lemma is applied
-at `ℕ` against a `Nat`-side hypothesis.
+`≤` is subtle at `V := ℕ`: a lemma stated over a general `V` carries `instLE_foundation`
+(`x ≤ y ↔ x = y ∨ x < y`), whereas `a ≤ b` written at `ℕ` elaborates with `instLENat`;
+`nat_le_iff` bridges the two.
 -/
 
 namespace LO.FirstOrder.Arithmetic
@@ -122,9 +109,9 @@ lemma natBitLen_spec (n : ℕ) : n < 2 ^ natBitLen n := natBitLenF_spec n n le_r
 /-! ### Square root -/
 
 /-- `sqrtIterF` is a fuel-indexed structural copy of `Nat.sqrt.iter`, the Newton iteration core
-already uses. Each step is one big division and the guess strictly decreases, so fuel equal to the
-starting guess always suffices — which is the whole of `sqrtIterF_eq`. Correctness then comes for
-free from `Nat.sqrt.iter_sq_le` and `Nat.sqrt.lt_iter_succ_sq`; nothing here re-derives it. -/
+already uses. The guess strictly decreases at each step, so fuel equal to the starting guess
+suffices (`sqrtIterF_eq`), and correctness is inherited from `Nat.sqrt.iter_sq_le` and
+`Nat.sqrt.lt_iter_succ_sq`. -/
 def sqrtIterF : ℕ → ℕ → ℕ → ℕ
   | 0, _, g => g
   | s + 1, n, g => if (g + n / g) / 2 < g then sqrtIterF s n ((g + n / g) / 2) else g
@@ -282,7 +269,6 @@ lemma nat_nth_eq (v i : ℕ) : v.[i] = natNth v i := by
   | zero => rw [nth_zero, natNth, natFstIdx_eq]
   | succ i ih => rw [nth_succ, natNth, ih, natSndIdx_eq]
 
-
 /-! ### A reducible `insert`
 
 `nat_insert_eq` states what `insert` is at `ℕ`, but as a rewrite rule it is unavailable to
@@ -304,17 +290,12 @@ lemma mem_foldr_natInsert {y : ℕ} {l : List ℕ} :
 
 /-! ### `listMax`
 
-Proved **spec-first**, deliberately. `listMax_adjoin` produces `x ⊔ listMax v`, whose `⊔` at `ℕ`
-carries `SemilatticeSup.toMax` (via `instDistribLatticeOfLinearOrder`), while a `max` written in a
-fresh definition picks up `Nat.instMax`. The two are propositionally equal but not definitionally
-so, and no lemma stating `a ⊔ b = max a b` helps: written in one statement, both sides elaborate to
-the *same* instance and the lemma is a tautology.
-
-The way past is not to unify them but never to mention both. Upstream's `listMaxss_le_iff`
-characterises `listMax` as the *least upper bound* of the entries — an order statement, with no
-`max` in it — and that pins it down uniquely (the empty vector included: its least upper bound is
-`0`). So the mirror is proved to meet the same specification and agreement follows by antisymmetry.
-The only bridge needed is `nat_le_iff`, on `≤`, which this file already has. -/
+`listMax_adjoin` produces `x ⊔ listMax v`, whose `⊔` at `ℕ` carries `SemilatticeSup.toMax` (via
+`instDistribLatticeOfLinearOrder`), while a `max` written in a fresh definition picks up
+`Nat.instMax`. The two are propositionally but not definitionally equal, and a lemma
+`a ⊔ b = max a b` cannot separate them, since both sides of one statement elaborate with the same
+instance. The mirror is therefore proved against the least-upper-bound characterisation
+(`listMaxss_le_iff`), which mentions neither, and agreement follows by antisymmetry. -/
 
 def listMaxF : ℕ → ℕ → ℕ
   | 0, _ => 0
@@ -327,9 +308,6 @@ private lemma listMaxF_succ (s v : ℕ) :
     listMaxF (s + 1) (v + 1) = max (Nat.unpair v).1 (listMaxF s (Nat.unpair v).2) := by
   rw [listMaxF]; simp only [natPi₁, natPi₂, natUnpair_eq]
 
-/-- The mirror meets `listMax`'s own specification: it is an upper bound of the entries, and the
-least one. Neither half mentions `max` on the `listMax` side, which is the point — the two `Max ℕ`
-instances never meet in a single statement. -/
 private lemma listMaxF_spec (s : ℕ) : ∀ v ≤ s,
     (∀ i < len v, v.[i] ≤ listMaxF s v) ∧
     (∀ z, (∀ i < len v, v.[i] ≤ z) → listMaxF s v ≤ z) := by
@@ -358,13 +336,13 @@ private lemma listMaxF_spec (s : ℕ) : ∀ v ≤ s,
         refine Nat.max_le.mpr ⟨by simpa using hz 0 (by simp), ihl z fun j hj ↦ ?_⟩
         simpa using hz (j + 1) (by simpa using hj)
 
-theorem nat_listMax_eq (v : ℕ) : listMax v = natListMax v := by
+lemma nat_listMax_eq (v : ℕ) : listMax v = natListMax v := by
   obtain ⟨hb, hl⟩ := listMaxF_spec v v le_rfl
   refine Nat.le_antisymm ?_ ?_
   · exact nat_le_iff.mp (listMaxss_le_iff.mpr fun i hi ↦ nat_le_iff.mpr (hb i hi))
   · exact hl _ fun i hi ↦ nat_le_iff.mp (nth_le_listMax hi)
 
-/-! ### The payoff -/
+/-! ### Examples -/
 
 example : (3 : ℕ) ∈ (40 : ℕ) := by decide
 
@@ -378,7 +356,7 @@ example : natSqrt 6 = 2 := by decide
 
 example : natUnpair 6 = (2, 0) := by decide
 
-/-- A ten-digit input: kernel `Nat` is GMP-backed, so this is cheap. -/
+-- a ten-digit input: kernel `Nat` is GMP-backed, so this is cheap
 example : natUnpair 1234567890 = (29394, 35136) := by decide
 
 example : natLen (Nat.pair 3 (Nat.pair 5 0 + 1) + 1) = 2 := by decide

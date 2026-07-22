@@ -5,53 +5,36 @@ public import Mathlib.Computability.Primrec.List
 
 @[expose] public section
 /-!
-# Groundwork for `Primcodable` on syntax (issue #506)
+# `Primcodable` for `Semiterm` and `Semiformula` (issue #506)
 
 `Semiterm.ofNat`/`Semiformula.ofNat` are strong recursions on the code: the `func` branch reads an
-argument vector out of the code and calls itself on each entry, each of which is smaller. Turning
-them into `Primrec` therefore goes through `Primrec.nat_strong_rec`, whose step function is handed
-the table of all previously computed values. This file is the layer that step function is built
-from.
+argument vector out of the code and calls itself on each entry. Their `Primrec` versions go
+through `Primrec.nat_strong_rec` (terms) and `Primrec.nat_omega_rec'` (formulas), whose step
+functions this file builds. Two design points:
 
-Two design points are worth stating, because they are what make the rest routine.
+Everything happens at the level of codes. The table entry for a sub-code `j` is
+`encode (ofNat n j)`, and `encode` on `Option` is `0` for `none` and `encode t + 1` for `some t`,
+so a successful entry already contains the argument's `toNat`, one less than itself, and the
+argument-vector code is rebuilt by arithmetic alone. No term is ever reconstructed, and nothing
+here needs `L` or `ξ` decidable.
 
-**Everything happens at the level of codes.** The table entry for a sub-code `j` is
-`encode (ofNat n j)`, and `encode` on `Option` is `0` for `none` and `encode t + 1` for `some t`.
-So a successful entry already *contains* the argument's `toNat`, one less than itself, and the
-argument-vector code can be rebuilt by arithmetic alone. No term is ever reconstructed, and none of
-this needs `L` or `ξ` decidable.
+`Option` is kept out of the folds. `stepVec` returns `ℕ` with `0` for failure and `r + 1` for
+success with value `r`: with `Option ℕ` as the fold's accumulator, the `Primrec` combinators must
+synthesise `Primcodable` for towers of products ending in `Option ℕ`, and elaboration diverges.
+The `ℕ` encoding costs one `- 1` per lookup and elaborates immediately.
 
-**`Option` is kept out of the fold.** `stepVec` returns `ℕ` with `0` meaning failure and `r + 1`
-meaning success with value `r`, rather than `Option ℕ`. This is not cosmetic: with `Option ℕ` as the
-fold's accumulator the `Primrec` combinators must synthesise `Primcodable` for towers of products
-ending in `Option ℕ`, and elaboration diverges. The `ℕ` encoding costs one `- 1` per lookup and
-elaborates immediately.
-
-The list bridges are here for the same reason: `Nat.natToVec` produces a `Fin k → ℕ` whose length
-lives in its type, which no `Primrec` combinator can consume. `Nat.natToList` is the same decoding
-without the dependency, and `natToVec_eq_some_iff` is what lets the correctness proof move between
-them.
+`Nat.natToList` exists for the same reason: `Nat.natToVec` produces a `Fin k → ℕ` whose length
+lives in its type, which no `Primrec` combinator can consume, so `natToList` is the same decoding
+without the dependency, and `natToVec_eq_some_iff` lets the correctness proofs move between them.
 -/
 
 namespace Nat
-
-/-- List form of `Matrix.vecToNat`. -/
-def listToNat : List ℕ → ℕ
-  | [] => 0
-  | a :: l => Nat.pair a (listToNat l) + 1
 
 /-- List form of `Nat.natToVec`: the same decoding, with the length out of the type. -/
 def natToList : ℕ → List ℕ
   | 0 => []
   | e + 1 => e.unpair.1 :: natToList e.unpair.2
   decreasing_by exact Nat.lt_succ_of_le (Nat.unpair_right_le e)
-
-lemma listToNat_ofFn {n : ℕ} (v : Fin n → ℕ) : listToNat (List.ofFn v) = Matrix.vecToNat v := by
-  induction n with
-  | zero => simp [listToNat, Matrix.vecToNat]
-  | succ n ih =>
-    rw [List.ofFn_succ, listToNat, ih]
-    simpa using (Matrix.encode_succ (v 0) (fun i ↦ v i.succ)).symm
 
 lemma natToVec_eq_some_iff {e k : ℕ} {v : Fin k → ℕ} :
     e.natToVec k = some v ↔ natToList e = List.ofFn v := by
@@ -77,8 +60,7 @@ lemma natToVec_eq_some_iff {e k : ℕ} {v : Fin k → ℕ} :
         refine Option.map_eq_some_iff.mpr ⟨fun i ↦ v i.succ, ih.mpr hl, ?_⟩
         exact funext fun i ↦ i.cases (by simp [h0]) (by simp)
 
-/-- The shape the correctness proof tests: `natToVec` succeeds exactly when the undependent
-decoding has the expected length. -/
+/-- `natToVec` succeeds exactly when the length-free decoding has the expected length. -/
 lemma natToVec_eq_none_of_length {e k : ℕ} (h : (natToList e).length ≠ k) :
     e.natToVec k = none := by
   rcases hv : e.natToVec k with _ | v
@@ -161,14 +143,14 @@ namespace LO.FirstOrder
 
 open Encodable Nat
 
-/-- Primitive-recursiveness of a language's symbol encodings, **uniformly in the arity**.
+/-- Primitive-recursiveness of a language's symbol encodings, uniformly in the arity.
 
-This is strictly stronger than `[(k : ℕ) → Primcodable (L.Func k)]`, and the strengthening is
-forced rather than convenient: `Semiterm.ofNat` reads the arity `k` *out of the code being
-decoded* and then calls `decode : ℕ → Option (L.Func k)` at that `k`. Simulating `ofNat` therefore
-needs `(k, e) ↦ encode (decode e : Option (L.Func k))` to be primitive recursive as a function of
-the *pair*. A per-arity family gives primitive recursiveness only for each fixed `k`, with no
-uniformity across `k`, and no amount of assembling those gives the function of the pair. -/
+This is strictly stronger than `[(k : ℕ) → Primcodable (L.Func k)]`, necessarily so:
+`Semiterm.ofNat` reads the arity `k` *out of the code being decoded* and then calls
+`decode : ℕ → Option (L.Func k)` at that `k`, so simulating it needs
+`(k, e) ↦ encode (decode e : Option (L.Func k))` to be primitive recursive as a function of the
+pair. A per-arity family gives primitive recursiveness only at each fixed `k`, with no uniformity
+across `k`. -/
 protected class Language.Primcodable (L : Language) [L.Encodable] where
   func : Primrec₂ fun k e : ℕ ↦ Encodable.encode (Encodable.decode e : Option (L.Func k))
   rel : Primrec₂ fun k e : ℕ ↦ Encodable.encode (Encodable.decode e : Option (L.Rel k))
@@ -252,8 +234,8 @@ lemma stepVec_cons (T : List ℕ) (j : ℕ) (l : List ℕ) :
       if T.getD j 0 = 0 ∨ stepVec T l = 0 then 0
       else Nat.pair (T.getD j 0 - 1) (stepVec T l - 1) + 2 := rfl
 
-/-- Value fact, success: with every lookup present and non-zero the fold rebuilds exactly the
-`vecToNat` code of the arguments. -/
+/-- With every lookup present and non-zero, the fold rebuilds the `vecToNat` code of the
+arguments. -/
 lemma stepVec_ofFn {T : List ℕ} {a : ℕ} {w u : Fin a → ℕ}
     (h : ∀ i, T.getD (w i) 0 = u i + 1) :
     stepVec T (List.ofFn w) = Matrix.vecToNat u + 1 := by
@@ -266,7 +248,7 @@ lemma stepVec_ofFn {T : List ℕ} {a : ℕ} {w u : Fin a → ℕ}
     simp only [Nat.add_sub_cancel]
     simpa using (Matrix.encode_succ (u 0) (fun i ↦ u i.succ)).symm
 
-/-- Value fact, failure: one absent-or-zero lookup anywhere kills the fold. -/
+/-- One absent-or-zero lookup anywhere kills the fold. -/
 lemma stepVec_eq_zero {T : List ℕ} {l : List ℕ} {j : ℕ} (hj : j ∈ l)
     (h : T.getD j 0 = 0) : stepVec T l = 0 := by
   induction l with
@@ -403,16 +385,16 @@ lemma table_getD {n e j : ℕ} (h : j < e) :
   rfl
 
 omit [L.Primcodable] in
-/-- The correctness of the step function: on the table of all previously computed values it
-returns the next one. This is what `Primrec.nat_strong_rec` asks for.
+/-- On the table of all previously computed values, the step function returns the next one — the
+obligation `Primrec.nat_strong_rec` asks for.
 
-Four branches, matching `ofNat`'s. The two atomic ones are arithmetic. The `func` branch is where
-the design pays off: `natToVec` succeeding is tested as `natToList` having the recorded length
-(`natToVec_isSome_of_length` and `natToVec_eq_none_of_length` are the two directions), the function
-symbol's decoding is read off `encode ∘ decode` being non-zero, and each argument's decoding is
-read out of the table — so the branch never reconstructs a term, and the argument-vector code comes
-straight from `stepVec_ofFn`. When any argument fails to decode, its table entry is `0` and
-`stepVec_eq_zero` collapses the fold, matching `Matrix.getM` returning `none` on the other side. -/
+Four branches, matching `ofNat`'s; the two atomic ones are arithmetic. In the `func` branch,
+`natToVec` succeeding is tested as `natToList` having the recorded length
+(`natToVec_isSome_of_length`/`natToVec_eq_none_of_length`), the function symbol's decoding is read
+off `encode ∘ decode` being non-zero, and each argument's decoding is read out of the table, so
+the branch never reconstructs a term; the argument-vector code comes from `stepVec_ofFn`, and when
+an argument fails to decode, its table entry is `0` and `stepVec_eq_zero` collapses the fold,
+matching `Matrix.getM` returning `none` on the other side. -/
 theorem step_table (n e : ℕ) :
     step (L := L) (ξ := ξ) n (table (L := L) (ξ := ξ) n e) = encode (ofNat (L := L) (ξ := ξ) n e) := by
   rw [step, table_length]
@@ -489,15 +471,16 @@ theorem step_table (n e : ℕ) :
     | 2 => exact absurd hi h2
     | k + 3 => simp
 
-/-- **Issue #506, term half.** -/
+/-- `fun n e ↦ encode (Semiterm.ofNat n e)` is primitive recursive: the term half of
+issue #506. -/
 theorem encode_ofNat_primrec :
     Primrec₂ fun n e : ℕ ↦ encode (ofNat (L := L) (ξ := ξ) n e) :=
   Primrec.nat_strong_rec _ (g := fun n T ↦ some (step (L := L) (ξ := ξ) n T))
     (Primrec.option_some.comp primrec_step) fun n e ↦ congrArg some (step_table n e)
 
-/-- **Issue #506, first headline.** The instance sits on the `Encodable` instance already in
-`Basic/Coding.lean`, so nothing downstream sees a new `encode`; the checks below confirm that, and
-that `decode` is still `ofNat`. -/
+/-- The instance sits on the `Encodable` instance already in `Basic/Coding.lean`, so nothing
+downstream sees a new `encode`; the examples below check that, and that `decode` is still
+`ofNat`. -/
 instance primcodable {n : ℕ} : Primcodable (Semiterm L ξ n) where
   toEncodable := Semiterm.encodable
   prim := Primrec.nat_iff.mp <|
@@ -513,7 +496,6 @@ example {n : ℕ} (e : ℕ) : (decode e : Option (Semiterm L ξ n)) = ofNat n e 
 example {n : ℕ} (t : Semiterm L ξ n) : (decode (encode t) : Option (Semiterm L ξ n)) = some t :=
   Encodable.encodek t
 
-
 end Semiterm
 
 namespace Semiformula
@@ -522,10 +504,10 @@ open LO.FirstOrder.Semiterm
 
 variable {L : Language} [L.Encodable] [L.Primcodable] {ξ : Type*} [Primcodable ξ]
 
-/-- The `rel`/`nrel` argument fold, the term-decoding sibling of `Semiterm.stepVec`. Where the term
-version reads each argument out of the strong-recursion table, this decodes each argument code as a
-term of `Semiterm L ξ n` — the arguments of a relation are terms, not sub-formulas, so they are not
-in any table. `0` is failure and `r + 1` success, exactly as there, and for the same reason. -/
+/-- The `rel`/`nrel` argument fold, the term-decoding sibling of `Semiterm.stepVec`. Where the
+term version reads each argument out of the strong-recursion table, this decodes each argument
+code as a term of `Semiterm L ξ n` — the arguments of a relation are terms, not sub-formulas, so
+they are in no table. `0` is failure and `r + 1` success, as there. -/
 def stepVecT (n : ℕ) (l : List ℕ) : ℕ :=
   l.foldr (fun j acc ↦
     if encode (decode j : Option (Semiterm L ξ n)) = 0 ∨ acc = 0 then 0
@@ -542,7 +524,6 @@ lemma stepVecT_cons (n : ℕ) (j : ℕ) (l : List ℕ) :
         (stepVecT (L := L) (ξ := ξ) n l - 1) + 2 := rfl
 
 omit [L.Primcodable] in
-/-- Value fact, success. -/
 lemma stepVecT_ofFn {n a : ℕ} {w u : Fin a → ℕ}
     (h : ∀ i, encode (decode (w i) : Option (Semiterm L ξ n)) = u i + 1) :
     stepVecT (L := L) (ξ := ξ) n (List.ofFn w) = Matrix.vecToNat u + 1 := by
@@ -556,7 +537,6 @@ lemma stepVecT_ofFn {n a : ℕ} {w u : Fin a → ℕ}
     simpa using (Matrix.encode_succ (u 0) (fun i ↦ u i.succ)).symm
 
 omit [L.Primcodable] in
-/-- Value fact, failure. -/
 lemma stepVecT_eq_zero {n : ℕ} {l : List ℕ} {j : ℕ} (hj : j ∈ l)
     (h : encode (decode j : Option (Semiterm L ξ n)) = 0) : stepVecT (L := L) (ξ := ξ) n l = 0 := by
   induction l with
@@ -589,22 +569,20 @@ theorem primrec_stepVecT : Primrec₂ (stepVecT (L := L) (ξ := ξ)) := by
         (nat_sub.comp (snd.comp snd) (const 1))) (const 2)
   exact hp.of_eq fun p ↦ rfl
 
-
 /-! ### The formula step function
 
-`Semiformula.ofNat` cannot use `Primrec.nat_strong_rec`, and the reason is structural rather than
-incidental: the `∀`/`∃` branches recurse at `ofNat (n + 1)`, so the arity changes as the recursion
-descends, while `nat_strong_rec` holds its parameter fixed and tabulates one arity only. The
-recursion is therefore run by `Primrec.nat_omega_rec'` over pairs `(n, e)`, with `e` as the measure
-and `subArgs` naming the immediate sub-formulas — two at the same arity for `⋏`/`⋎`, one at the
-successor arity for `∀`/`∃`, and none elsewhere. The measure obligation is discharged by
-`subArgs_ord`, which is just `ofNat`'s own internal `< e + 1` proofs read back.
+`Semiformula.ofNat` cannot use `Primrec.nat_strong_rec`: the `∀`/`∃` branches recurse at
+`ofNat (n + 1)`, so the arity changes as the recursion descends, while `nat_strong_rec` holds its
+parameter fixed and tabulates one arity only. The recursion is therefore run by
+`Primrec.nat_omega_rec'` over pairs `(n, e)`, with `e` as the measure and `subArgs` naming the
+immediate sub-formulas — two at the same arity for `⋏`/`⋎`, one at the successor arity for
+`∀`/`∃`, and none elsewhere. The measure obligation `subArgs_ord` is `ofNat`'s own internal
+`< e + 1` bounds read back.
 
-`step` is written with an `if` rather than a `Nat.casesOn` deliberately. The `Primrec` combinators
-have to synthesise `Primcodable` for the tower of products the ambient argument lives in, and a
-`casesOn` adds a level: with it the tower is `((ℕ × ℕ) × List ℕ) × ℕ` and elaboration diverges,
-exactly as an `Option`-valued fold did in the term half. The `if` keeps it at `(ℕ × ℕ) × List ℕ`
-and elaborates. -/
+`step` is written with an `if` rather than a `Nat.casesOn`: a `casesOn` adds a level to the tower
+of products the ambient argument lives in (`((ℕ × ℕ) × List ℕ) × ℕ` instead of
+`(ℕ × ℕ) × List ℕ`), and elaboration of the `Primrec` combinators diverges on it, exactly as it
+did on an `Option`-valued fold in the term half. -/
 
 def stepBody (n d : ℕ) (vs : List ℕ) : ℕ :=
     if d.unpair.1 = 0 then
@@ -657,14 +635,14 @@ lemma subArgs_succ (n d : ℕ) : subArgs (n, d + 1) =
       else if d.unpair.1 = 6 ∨ d.unpair.1 = 7 then [(n + 1, d.unpair.2)] else []) := rfl
 
 omit [L.Primcodable] in
-lemma vs_bin (n d : ℕ) (h : d.unpair.1 = 4 ∨ d.unpair.1 = 5) :
+private lemma vs_bin (n d : ℕ) (h : d.unpair.1 = 4 ∨ d.unpair.1 = 5) :
     (subArgs (n, d + 1)).map (fun b ↦ encode (ofNat (L := L) (ξ := ξ) b.1 b.2))
       = [encode (ofNat (L := L) (ξ := ξ) n d.unpair.2.unpair.1),
          encode (ofNat (L := L) (ξ := ξ) n d.unpair.2.unpair.2)] := by
   rw [subArgs_succ, if_pos h]; simp
 
 omit [L.Primcodable] in
-lemma vs_quant (n d : ℕ) (h45 : ¬(d.unpair.1 = 4 ∨ d.unpair.1 = 5))
+private lemma vs_quant (n d : ℕ) (h45 : ¬(d.unpair.1 = 4 ∨ d.unpair.1 = 5))
     (h : d.unpair.1 = 6 ∨ d.unpair.1 = 7) :
     (subArgs (n, d + 1)).map (fun b ↦ encode (ofNat (L := L) (ξ := ξ) b.1 b.2))
       = [encode (ofNat (L := L) (ξ := ξ) (n + 1) d.unpair.2)] := by
@@ -832,7 +810,6 @@ theorem step_correct (n e : ℕ) :
     | 7 => exact absurd hi h7
     | k + 8 => simp
 
-
 open Primrec in
 theorem primrec_subArgs : Primrec subArgs := by
   have hbody : Primrec fun r : (ℕ × ℕ) × ℕ ↦
@@ -943,12 +920,10 @@ theorem primrec_step :
                 (Primrec.ite (Primrec.eq.comp hi (const 7)) (hqArm 7)
                   (const 0))))))))
 
-/-- **Issue #506, formula half.**
-
-With `Semiterm.encode_ofNat_primrec` this closes the issue: `Primcodable` instances for both
-`Semiterm L ξ n` and `Semiformula L ξ n`, for every language satisfying `Language.Primcodable` —
-the uniform-in-arity condition, which `ℒₒᵣ` satisfies. Both instances sit on the `Encodable`
-instances already in `Basic/Coding.lean`, so no existing `encode` or `decode` changes. -/
+/-- `fun n e ↦ encode (Semiformula.ofNat n e)` is primitive recursive. With
+`Semiterm.encode_ofNat_primrec` this closes issue #506: `Primcodable` instances for both
+`Semiterm L ξ n` and `Semiformula L ξ n`, for every language satisfying the uniform-in-arity
+condition `Language.Primcodable`. -/
 theorem encode_ofNat_primrec :
     Primrec₂ fun n e : ℕ ↦ encode (ofNat (L := L) (ξ := ξ) n e) :=
   Primrec.nat_omega_rec' (fun b : ℕ × ℕ ↦ encode (ofNat (L := L) (ξ := ξ) b.1 b.2))
@@ -957,9 +932,9 @@ theorem encode_ofNat_primrec :
     Primrec.snd primrec_subArgs (Primrec.option_some.comp primrec_step)
     subArgs_ord (fun b ↦ congrArg some (step_correct b.1 b.2))
 
-/-- **Issue #506, second headline.** As with the term instance, this sits on
-`Semiformula.encodable` rather than introducing a second `Encodable`; the checks below confirm
-that, and that `encode` and `decode` are still `toNat` and `ofNat` definitionally. -/
+/-- As with the term instance, this sits on `Semiformula.encodable` rather than introducing a
+second `Encodable`; the examples below check that, and that `encode` and `decode` are still
+`toNat` and `ofNat` definitionally. -/
 instance primcodable {n : ℕ} : Primcodable (Semiformula L ξ n) where
   toEncodable := Semiformula.encodable
   prim := Primrec.nat_iff.mp <|
@@ -974,7 +949,6 @@ example {n : ℕ} (e : ℕ) : (decode e : Option (Semiformula L ξ n)) = ofNat n
 
 example {n : ℕ} (φ : Semiformula L ξ n) :
     (decode (encode φ) : Option (Semiformula L ξ n)) = some φ := Encodable.encodek φ
-
 
 end Semiformula
 
