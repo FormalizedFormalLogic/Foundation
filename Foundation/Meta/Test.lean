@@ -1,6 +1,5 @@
 module
 
-public import Foundation.Modal.Entailment.Basic
 public import Foundation.Meta.ClProver
 public import Foundation.Meta.IntProver
 
@@ -33,20 +32,6 @@ example : 𝓢 ⊢ (((p 🡒 q) 🡒 q) 🡒 p 🡒 q) 🡒 p 🡒 q := by cl_pr
 example : 𝓢 ⊢ (p 🡒 ∼q) ⋏ (q ⋎ r) ⋏ p 🡒 r := by cl_prover
 
 example : 𝓢 ⊢ p ⋏ ∼q 🡒 q 🡒 p := by cl_prover
-
-end
-
-section
-
-open LO.Modal.Entailment
-
-variable {S F : Type*} [DecidableEq F] [BasicModalLogicalConnective F] [Entailment S F]
-
-variable {𝓢 𝓣 𝓤 : S} [𝓣 ⪯ 𝓢] [𝓤 ⪯ 𝓢] [Modal.Entailment.K 𝓢] {φ ψ ξ χ : F}
-
-example : 𝓢 ⊢ ((□φ 🡒 □□φ) 🡒 □φ) 🡒 □φ := by cl_prover 6
-
-example (h₁ : 𝓣 ⊢ □φ 🡘 φ) (h₂ : 𝓤 ⊢ □ψ 🡘 ψ) : 𝓢 ⊢ φ ⋎ □ψ 🡘 □φ ⋏ φ ⋎ ψ := by cl_prover [h₁, h₂]
 
 end
 

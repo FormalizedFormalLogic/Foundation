@@ -1,6 +1,6 @@
 module
 
-public import Foundation.Propositional.Entailment.Cl.Basic
+public import Foundation.Propositional.Entailment.Cl
 
 /-!
 # Sequent calculus and variants
