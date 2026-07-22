@@ -45,7 +45,7 @@ lemma IsAttempt.defined (F : V → V) (hF : IsDefinedByWithParam (fun v ↦ v 0 
 /-
 TODO: Find a way to make `hFdef` not a typeclass without getting an error.
 -/
-instance IsAttempt.definable (F : V → V) (hF : IsDefinedByWithParam (fun (v : Fin 2 → V) ↦ v 0 = F (v 1)) φ) :
+lemma IsAttempt.definable (F : V → V) (hF : IsDefinedByWithParam (fun v ↦ v 0 = F (v 1)) φ) :
     ℒₛₑₜ-relation[V] (fun β f ↦ IsAttempt F β f) := by
   intro v
   simp only [IsAttempt.defined, Fin.isValue]
@@ -142,11 +142,11 @@ lemma attempt_function_coherent_on
 def ExistsAttempt (F : V → V) (α : V) : Prop :=
   ∃ f : V, IsAttempt F α f
 
-noncomputable def ExistsAttempt.dfn (F : V → V) (hF : ℒₛₑₜ-function₁ F) : SetTheorySemiformula V 1 :=
-  f“α. ∃ f, !(IsAttempt.dfn F) α f”
+noncomputable def ExistsAttempt.dfn (φ : SetTheorySemiformula V 2) : SetTheorySemiformula V 1 :=
+  f“α. ∃ f, !(IsAttempt.dfn φ) α f”
 
 lemma ExistsAttempt.defined (F : V → V) (hF : ℒₛₑₜ-function₁ F) :
-    IsDefinedByWithParam (fun v ↦ ExistsAttempt F (v 0)) (ExistsAttempt.dfn F hF) := by
+    IsDefinedByWithParam (fun v ↦ ExistsAttempt F (v 0)) (ExistsAttempt.dfn (Classical.choose hF.definable)) := by
   intro v
   simp [ExistsAttempt.dfn, IsAttempt.defined]
   rfl
