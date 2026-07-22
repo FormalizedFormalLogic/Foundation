@@ -272,12 +272,10 @@ instance axm_defined : 𝚺₀-Function₂ (axm : V → V → V) via axmGraph :=
 /-! ### Injectivity and disjointness of the constructors
 
 All ten constructors have the shape `⟪s, k, …⟫ + 1` with a distinct tag `k` in the second
-component, so they are injective and pairwise distinct. Together with the `fstIdx_*` and
-`_lt_` lemmas above this is what lets a recursion on a code decide which rule produced it.
-Both orientations of each `_ne_` are provided. Stating only one and leaving the other to `.symm`
-looked sufficient, but `simp` will not reorient an equation itself: a recursion dispatching on
-constructor `k` meets `ctor k … = ctor j …` for every `j`, and needs the `j < k` orientations as
-much as the `j > k` ones. -/
+component, so they are injective and pairwise distinct; together with the `fstIdx_*` and `_lt_`
+lemmas above, this lets a recursion on a code decide which rule produced it. Both orientations of
+each `_ne_` are stated, since `simp` does not reorient an equation, and a recursion dispatching on
+constructor `k` meets `ctor k … = ctor j …` for every `j`. -/
 
 @[simp] lemma axL_inj {s p s' p' : V} : axL s p = axL s' p' ↔ s = s' ∧ p = p' := by simp [axL]
 

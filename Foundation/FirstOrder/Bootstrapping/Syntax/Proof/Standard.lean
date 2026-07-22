@@ -13,12 +13,12 @@ than a `Fixpoint`, so no recursion is needed: the mirror folds `IsSemiformula.ch
 members. `Nat.bitIndices` enumerates them, and `nat_mem_iff_testBit` (`HFS/Standard.lean`) is the
 bridge from `∈` at `V := ℕ`.
 
-**Inputs must be numerals.** A set *literal* such as `({p, q} : ℕ)` is built from `insert` and
+Inputs must be numerals. A set literal such as `({p, q} : ℕ)` is built from `insert` and
 `singleton`, which go through `Exp.exp`, a `Classical.choose!`; it does not reduce, so `decide`
-gets stuck on the literal rather than on the recogniser. `nat_singleton_eq`/`nat_insert_eq` rewrite
-such a literal to a numeral, but as rewrite rules they are unavailable to `decide`. Feed the
-recogniser codes, not sets built with set notation — `{p}` becomes `2 ^ p`, and a union becomes a
-sum of distinct powers of two.
+gets stuck on the literal rather than on the recognizer. `nat_singleton_eq`/`nat_insert_eq`
+rewrite such a literal to a numeral, but as rewrite rules they are unavailable to `decide` — so
+the recognizer is fed codes, with `{p}` written as `2 ^ p` and a union as a sum of distinct
+powers of two.
 -/
 
 namespace LO.FirstOrder.Arithmetic.Bootstrapping
@@ -45,15 +45,12 @@ instance decidableIsFormulaSet (L : Language) [L.Encodable] [L.LORDefinable] [L.
 
 /-! ### Function mirror: `setShift`
 
-Pattern C — no recursion at all. `setShift` is `Classical.choose!` from a replacement axiom,
-characterised by `mem_setShift_iff : y ∈ setShift L s ↔ ∃ x ∈ s, y = shift L x`, so the mirror maps
-`shift.check` over `Nat.bitIndices` and rebuilds the set with `natInsert`, and agreement is set
-extensionality (`mem_ext`) rather than an induction on codes. Structurally this is
-`IsFormulaSet.check` above, with a fold that builds instead of one that tests.
-
-This is the mirror the derivation checker calls: `Derivation.Phi`'s `shiftRule` side condition is
-`s = setShift L (fstIdx d)`, so `setShift.check` is what decides it. Its input and output are bare
-code numerals, per the constraint recorded above. -/
+`setShift` is `Classical.choose!` from a replacement axiom, characterised by
+`mem_setShift_iff : y ∈ setShift L s ↔ ∃ x ∈ s, y = shift L x`, so the mirror needs no recursion:
+it maps `shift.check` over `Nat.bitIndices` and rebuilds the set with `natInsert`, and agreement
+is set extensionality (`mem_ext`) rather than an induction on codes. This is the mirror the
+derivation checker calls: `Derivation.Phi`'s `shiftRule` side condition is
+`s = setShift L (fstIdx d)`. -/
 
 /-- Executable mirror of `setShift` at `V := ℕ`. -/
 def setShift.check (L : Language) [L.Encodable] [L.LORDefinable] [L.DecidableSymbols]
@@ -176,21 +173,20 @@ def Derivation.check (L : Language) [L.Encodable] [L.LORDefinable] [L.DecidableS
 
 /-! ### Agreement
 
-The adequacy-indexed induction against `Derivation.case_iff`, eleven branches. Three things carry
-it:
+The fuel-indexed induction against `Derivation.case_iff`, eleven branches. Three things carry it:
 
 * the `IsFormulaSet` conjunct factors out with `and_congr_right`, which hands every branch the
-  well-formedness hypothesis structurally rather than by plumbing;
-* after `rw [hs]` the `C3` disjointness set collapses the nine wrong disjuncts to `False ∧ …`, so
-  most branches are two to six lines. This needs *both* orientations of each `_ne_`;
+  well-formedness hypothesis;
+* after `rw [hs]`, the constructor-disjointness simp set (`Proof/Basic.lean`) collapses the nine
+  wrong disjuncts to `False ∧ …`, so most branches are a few lines — this needs both orientations
+  of each `_ne_`;
 * negative branches rebuild `Derivation T (e + 1)` from the disjunction and `hfs` via
   `case_iff.mpr`, so `tag_spec` applies inside the backward direction.
 
-`exsIntro` is the only branch that is not uniform, and for the reason predicted when the interface
-was tabulated: `substs1.check_eq` is the single conditional agreement in the whole checker. `simp`
-reduces that branch to an implication carrying `IsSemiterm L 0 t` in its antecedent, so
-`intro _ ht _; rw [substs1.check_eq ht.isUTerm]` finishes it — the hypothesis `Phi` supplies is
-exactly the one the mirror wants. -/
+`exsIntro` is the one non-uniform branch: `substs1.check_eq` is the single conditional agreement
+in the whole checker, so `simp` leaves an implication carrying `IsSemiterm L 0 t`, and
+`intro _ ht _; rw [substs1.check_eq ht.isUTerm]` finishes it — `Phi` supplies exactly the
+hypothesis the mirror needs. -/
 
 /-- `fstIdx` of a successor code is the first projection. -/
 private lemma nat_fstIdx_succ (e : ℕ) : fstIdx ((e : ℕ) + 1) = (Nat.unpair e).1 := by
@@ -235,7 +231,6 @@ private lemma Derivation.tag_spec {e : ℕ} (h : Derivation T (e + 1)) :
   · rw [nat_axm_eq] at hv
     obtain rfl : e = Nat.pair s (Nat.pair 9 p) := by omega
     simp
-
 
 private lemma Derivation.checkF_iff_aux (n : ℕ) :
     ∀ d ≤ n, (Derivation.checkF L T n d = true ↔ Derivation T d) := by
@@ -408,36 +403,34 @@ private lemma Derivation.checkF_iff_aux (n : ℕ) :
 theorem Derivation.check_iff {d : ℕ} : Derivation.check L T d = true ↔ Derivation T d :=
   Derivation.checkF_iff_aux d d le_rfl
 
-/-! ### It runs -/
+/-! ### Examples -/
 
-/-- `0 = ∅`. -/
+-- `0 = ∅`
 example : IsFormulaSet (V := ℕ) ℒₒᵣ 0 := IsFormulaSet.check_iff.mp (by decide)
 
-/-- `128 = 2 ^ 7 = {^⊤}`. -/
+-- `128 = 2 ^ 7 = {^⊤}`
 example : IsFormulaSet (V := ℕ) ℒₒᵣ 128 := IsFormulaSet.check_iff.mp (by decide)
 
-/-- `1 = 2 ^ 0 = {0}`, and `0` is no formula. -/
+-- `1 = 2 ^ 0 = {0}`, and `0` is no formula
 example : ¬IsFormulaSet (V := ℕ) ℒₒᵣ 1 :=
   fun h ↦ absurd (IsFormulaSet.check_iff.mpr h) (by decide)
 
-/-- `384 = 2 ^ 7 + 2 ^ 8 = {^⊤, 8}`, and `8` is no formula. -/
+-- `384 = 2 ^ 7 + 2 ^ 8 = {^⊤, 8}`, and `8` is no formula
 example : ¬IsFormulaSet (V := ℕ) ℒₒᵣ 384 :=
   fun h ↦ absurd (IsFormulaSet.check_iff.mpr h) (by decide)
 
 example : setShift.check ℒₒᵣ 0 = 0 := by decide
 
-/-- `128 = {^⊤}`, and `^⊤` is closed, so shifting the set fixes it. -/
+-- `^⊤` is closed, so shifting the set `{^⊤}` fixes it
 example : setShift (V := ℕ) ℒₒᵣ 128 = 128 := by rw [← setShift.check_eq]; decide
 
 example : Derivation.check ℒₒᵣ (∅ : Theory ℒₒᵣ) 0 = false := by decide
 
-
 /-! ### `Decidable` instances
 
-The `Bool`-level entry points come first. `decide`'s own preprocessing normalises the goal and
-loses the `Proof`/`DerivationOf` head, so `by decide` on such a goal cannot find the instance below
-even though `#synth` does; going through `check_iff.mp (by decide)` states the `Bool` equation the
-kernel is asked to evaluate and keeps the head where the instance can see it. -/
+`decide`'s preprocessing normalises the goal and loses the `Proof`/`DerivationOf` head, so
+`by decide` on such a goal cannot find the instances below even though `#synth` does; going
+through `check_iff.mp (by decide)` states the `Bool` equation the kernel is asked to evaluate. -/
 
 /-- Executable mirror of `DerivationOf`. -/
 def DerivationOf.check (L : Language) [L.Encodable] [L.LORDefinable] [L.DecidableSymbols]
@@ -449,7 +442,7 @@ theorem DerivationOf.check_iff {d s : ℕ} :
   simp [DerivationOf.check, DerivationOf, ← natFstIdx_eq, Derivation.check_iff]
 
 /-- Executable mirror of `Proof`. The sequent of a proof of `p` is the singleton `{p}`, which at
-`V := ℕ` is the numeral `2 ^ p` — see the size note under "It runs" below. -/
+`V := ℕ` is the numeral `2 ^ p` — see the scale note below. -/
 def Proof.check (L : Language) [L.Encodable] [L.LORDefinable] [L.DecidableSymbols]
     (T : Theory L) [T.Δ₁] [T.DecidableΔ₁] (d p : ℕ) : Bool :=
   DerivationOf.check L T d (2 ^ p)
@@ -466,66 +459,53 @@ instance decidableDerivationOf (d s : ℕ) : Decidable (DerivationOf (V := ℕ) 
 instance decidableProof (d p : ℕ) : Decidable (Proof (V := ℕ) T d p) :=
   decidable_of_iff _ Proof.check_iff
 
-/-! ### It runs, end to end
+/-! ### End-to-end examples
 
 `⌜(⊤ : Sentence ℒₒᵣ)⌝ = 7`, so the sequent `{⌜⊤⌝}` is the numeral `2 ^ 7 = 128` and the three
-probes below are genuine kernel-checked derivations: `⊤` by `verumIntro`, the same weakened onto
-itself by `wkRule` (which exercises `checkF`'s recursion and the subset test), and `⊤` from the
-theory `{⊤}` by `axm` (which exercises `Theory.DecidableΔ₁`). The negative probes are what rule
-out a vacuously-true checker.
+positive probes below are kernel-checked derivations: `⊤` by `verumIntro`, the same weakened onto
+itself by `wkRule` (exercising `checkF`'s recursion and the subset test), and `⊤` from the theory
+`{⊤}` by `axm` (exercising `Theory.DecidableΔ₁`). The negative probes rule out a vacuously-true
+checker.
 
-**On scale.** Two separate limits, both worth stating because only one of them is the checker's
-fault.
+On scale: a sequent containing `φ` is the numeral `2 ^ φ`, so no derivation mentioning an axiom
+of arithmetic is representable as a machine numeral — the probes stay at `⊤`; see
+`DerivabilityCondition/Standard.lean` for the boundary this draws. Speed is a separate limit:
+derivation codes nest `Nat.pair`, which squares at every level, so `⊤ ⋏ ⊤` has code `3974` and an
+`andIntro` over two `verumIntro`s proving it has a `254337`-bit code. `Proof.check` on that code
+takes about `7` seconds compiled, dominated by `natFstIdx` — that is, `natSqrt` — at about `2`
+seconds a call, while `IsFormulaSet.check` on the `3974`-bit sequent alone takes milliseconds.
+The probes below, at `57` bits and under, together add about three seconds to this file. -/
 
-*Representability.* `Proof T d φ` is `DerivationOf T d {φ}`, and a coded set `{φ}` at `V := ℕ` is
-`2 ^ φ`: a sequent containing `φ` is a numeral of `φ` bits. `𝗣𝗔⁻`'s smallest axiom code is
-`⌜Theory.Eq.refl ℒₒᵣ⌝ = 45974842864502507`, so `{⌜Theory.Eq.refl ℒₒᵣ⌝}` is a numeral of
-`4.6 · 10 ^ 16` bits — about 5.7 petabytes. No derivation mentioning any `𝗣𝗔⁻` axiom is
-representable as a machine numeral, at any speed. That is the Ackermann set encoding, not this
-file, and it is why the probes are at `⊤` rather than at an axiom of arithmetic.
-
-*Speed.* Derivation codes nest `Nat.pair`, which squares at every level, so codes grow fast even
-for small formulas: `⊤ ⋏ ⊤` has code `3974`, and an `andIntro` over two `verumIntro`s proving it
-has a code of `254337` bits, and destructuring it is where the time goes: `Proof.check` on it takes
-`7.2 s` measured compiled, of which `natFstIdx` — that is, `natSqrt` — is about `2 s` a call. By
-contrast `IsFormulaSet.check` on the `3974`-bit sequent is `7 ms`, so it is the derivation code's
-size rather than the sequent's that costs. The twins were an order of magnitude worse before they
-were given better recursion schemes (`149 s` for the same check); see the note in
-`HFS/Standard.lean`. The probes below, at `57` bits and under, together add about three seconds to
-this file. -/
-
-/-- `⌜⊤⌝ = ^⊤ = 7`. -/
 lemma nat_quote_verum : (⌜(⊤ : Sentence ℒₒᵣ)⌝ : ℕ) = 7 := by
   rw [Sentence.quote_eq_encode_standard]; rfl
 
-/-- `⊤`, by `verumIntro` on the sequent `{^⊤} = 128`. -/
+-- `⊤`, by `verumIntro` on the sequent `{^⊤} = 128`
 example : Proof (V := ℕ) (∅ : Theory ℒₒᵣ) (Nat.pair 128 (Nat.pair 1 0) + 1)
     ⌜(⊤ : Sentence ℒₒᵣ)⌝ := by
   rw [nat_quote_verum]; exact Proof.check_iff.mp (by decide)
 
-/-- The same, weakened from `{^⊤}` onto itself by `wkRule`: a two-rule derivation, so `checkF`
-actually recurses. -/
+-- the same, weakened from `{^⊤}` onto itself by `wkRule`: a two-rule derivation, so `checkF`
+-- actually recurses
 example : Proof (V := ℕ) (∅ : Theory ℒₒᵣ)
     (Nat.pair 128 (Nat.pair 6 (Nat.pair 128 (Nat.pair 1 0) + 1)) + 1) ⌜(⊤ : Sentence ℒₒᵣ)⌝ := by
   rw [nat_quote_verum]; exact Proof.check_iff.mp (by decide)
 
-/-- `⊤` from the theory `{⊤}` by `axm`, which runs `Theory.DecidableΔ₁`. -/
+-- `⊤` from the theory `{⊤}` by `axm`, which runs `Theory.DecidableΔ₁`
 example : Proof (V := ℕ) ({(⊤ : Sentence ℒₒᵣ)} : Theory ℒₒᵣ) (Nat.pair 128 (Nat.pair 9 7) + 1)
     ⌜(⊤ : Sentence ℒₒᵣ)⌝ := by
   rw [nat_quote_verum]; exact Proof.check_iff.mp (by decide)
 
-/-- `⊤` is not an axiom of the empty theory, so the same `axm` code proves nothing there. -/
+-- `⊤` is not an axiom of the empty theory, so the same `axm` code proves nothing there
 example : ¬Proof (V := ℕ) (∅ : Theory ℒₒᵣ) (Nat.pair 128 (Nat.pair 9 7) + 1) 7 :=
   fun h ↦ absurd (Proof.check_iff.mpr h) (by decide)
 
-/-- `verumIntro` needs `^⊤` in the sequent; `{^⊥} = 2 ^ 13` does not contain it. -/
+-- `verumIntro` needs `^⊤` in the sequent; `{^⊥} = 2 ^ 13` does not contain it
 example : ¬Proof (V := ℕ) (∅ : Theory ℒₒᵣ) (Nat.pair (2 ^ 13) (Nat.pair 1 0) + 1) 13 :=
   fun h ↦ absurd (Proof.check_iff.mpr h) (by decide)
 
-/-- A derivation of `⊤` is not a proof of `⊥`: `Proof` pins the sequent down. -/
+-- a derivation of `⊤` is not a proof of `⊥`: `Proof` pins the sequent down
 example : ¬Proof (V := ℕ) (∅ : Theory ℒₒᵣ) (Nat.pair 128 (Nat.pair 1 0) + 1) 13 :=
   fun h ↦ absurd (Proof.check_iff.mpr h) (by decide)
-
 
 end LO.FirstOrder.Arithmetic.Bootstrapping
 

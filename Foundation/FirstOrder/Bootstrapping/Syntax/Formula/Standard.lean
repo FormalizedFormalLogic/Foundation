@@ -10,7 +10,7 @@ public import Foundation.FirstOrder.Bootstrapping.Syntax.Formula.Functions
 
 The term mirror (`Syntax/Term/Standard.lean`), scaled up. `IsUFormula` is a `Fixpoint` with eight
 constructors instead of three; the mirror is fuel-indexed, destructures with `natPi₁`/`natPi₂`, and
-agreement is proved by the same adequacy-indexed induction against `IsUFormula.case_iff`.
+agreement is proved by the same fuel-indexed induction against `IsUFormula.case_iff`.
 
 Two things differ from the term case:
 
@@ -359,17 +359,16 @@ instance decidableIsSemiformula (L : Language) [L.Encodable] [L.LORDefinable] [L
 
 /-! ### Function mirrors: `neg`
 
-`neg` is not a predicate but a `UformulaRec1.Construction`, so the mirror returns a *code* and
-agreement is an equation. Three things change from the `C1` pattern, and they are the template for
-the rest of the function family:
+`neg` is not a predicate but a `UformulaRec1.Construction`, so the mirror returns a code and
+agreement is an equation, as for the term-level function mirrors (`Term/Standard.lean`):
 
 * `case_iff` is replaced by the function's own case equations (`neg_rel` … `neg_ex`). Those are
   guarded by well-formedness, so the induction carries `IsUFormula L p` as a hypothesis and
-  propagates it to subformulas with `IsUFormula.and`/`all`/… — the `C1` constructor lemmas;
-* adequacy-indexing carries over unchanged: `∀ p ≤ s, IsUFormula L p → negF s p = neg L p`;
+  propagates it to subformulas with the constructor lemmas `IsUFormula.and`/`all`/…;
+* the fuel-indexing carries over unchanged: `∀ p ≤ s, IsUFormula L p → negF s p = neg L p`;
 * totality is separate. `neg` is `0` off the well-formed codes (`neg_not_uformula`), so the total
-  mirror guards the recursion with the `C1` recogniser, and the two regimes are discharged
-  independently. This is why `C1` had to come first.
+  mirror guards the recursion with `IsUFormula.check`, and the two regimes are discharged
+  independently.
 
 `negF` itself needs no language data: every branch just flips the constructor tag. -/
 
@@ -391,7 +390,7 @@ def negF : ℕ → ℕ → ℕ
     else if natPi₁ e = 7 then Nat.pair 6 (negF s (natPi₂ e)) + 1
     else 0
 
-/-- The total mirror: guarded by the `C1` recogniser, matching `neg_not_uformula`. -/
+/-- The total mirror: guarded by `IsUFormula.check`, matching `neg_not_uformula`. -/
 def neg.check (L : Language) [L.Encodable] [L.LORDefinable] [L.DecidableSymbols] (p : ℕ) : ℕ :=
   if IsUFormula.check L p then negF p p else 0
 
@@ -500,9 +499,9 @@ theorem neg.check_eq (p : ℕ) : neg.check L p = neg L p := by
 
 /-! ### Function mirrors: `shift`
 
-`neg` again, with two differences: the `^rel`/`^nrel` branches call the term-level
-`termShiftVec.check` (which is why the term layer had to land first), and the constructor tag is
-*preserved* rather than flipped, so those two branches share a single arm. -/
+As `neg`, with two differences: the `^rel`/`^nrel` branches call the term-level
+`termShiftVec.check`, and the constructor tag is preserved rather than flipped, so those two
+branches share a single arm. -/
 
 def shiftF (L : Language) [L.Encodable] [L.LORDefinable] [L.DecidableSymbols] : ℕ → ℕ → ℕ
   | 0, _ => 0
@@ -520,7 +519,7 @@ def shiftF (L : Language) [L.Encodable] [L.LORDefinable] [L.DecidableSymbols] : 
       Nat.pair (natPi₁ e) (shiftF L s (natPi₂ e)) + 1
     else 0
 
-/-- The total mirror: guarded by the `C1` recogniser, matching `shift_not_uformula`. -/
+/-- The total mirror: guarded by `IsUFormula.check`, matching `shift_not_uformula`. -/
 def shift.check (L : Language) [L.Encodable] [L.LORDefinable] [L.DecidableSymbols] (p : ℕ) : ℕ :=
   if IsUFormula.check L p then shiftF L p p else 0
 
@@ -623,19 +622,19 @@ theorem shift.check_eq (p : ℕ) : shift.check L p = shift L p := by
   · rw [if_neg h]
     exact (shift_not_uformula fun hc ↦ h (IsUFormula.check_iff.mpr hc)).symm
 
-/-! ### Function mirrors: `subst`, and the composites over it
+/-! ### Function mirrors: `subst`
 
-Pattern B: the parameter *changes* under `^∀`/`^∃`, by `qVec`. The C1 `Semi` finding — that a
-shifting parameter costs nothing, because the induction quantifies over it inside the fuel — still
-applies, but it is no longer the whole story. `IsSemiformula`'s `n` was a bare number; `subst`'s `w`
-is a coded term vector, and `qVec.check` agrees with `qVec` only on *well-formed* vectors. So the
-induction carries a **second** invariant, on the parameter, alongside the one on the code:
+Here the parameter changes under `^∀`/`^∃`, by `qVec`. A shifting parameter by itself costs
+nothing, because the induction quantifies over it inside the fuel — `IsSemiformula.checkF` already
+does this with its bound — but where `IsSemiformula`'s `n` was a bare number, `subst`'s `w` is a
+coded term vector, and `qVec.check` agrees with `qVec` only on well-formed ones. So the induction
+carries a second invariant, on the parameter, alongside the one on the code:
 
     ∀ w, IsUTermVec L (len w) w → ∀ p ≤ s, IsUFormula L p → substF L s w p = subst L w p
 
-and the quantifier branches re-establish it for the shifted parameter — `hqw`, from
-`IsUTermVec.qVec` and `len_qVec` — before invoking the induction hypothesis. That is the only thing
-pattern B adds; everything else is the `shift` proof with `w` threaded. -/
+and the quantifier branches re-establish it for the shifted parameter (`hqw`, from
+`IsUTermVec.qVec` and `len_qVec`) before invoking the induction hypothesis. Everything else is the
+`shift` proof with `w` threaded through. -/
 
 def substF (L : Language) [L.Encodable] [L.LORDefinable] [L.DecidableSymbols] :
     ℕ → ℕ → ℕ → ℕ
@@ -695,7 +694,6 @@ private lemma substF_eq_aux (s : ℕ) :
       have hl₂ : (Nat.unpair (Nat.unpair e).2).2 ≤ m :=
         le_trans (le_trans (Nat.unpair_right_le _) (Nat.unpair_right_le _)) (by omega)
       have hl₃ : (Nat.unpair e).2 ≤ m := le_trans (Nat.unpair_right_le _) (by omega)
-      -- the parameter invariant, re-established for the shifted parameter
       have hqw : IsUTermVec L (len (qVec L w)) (qVec L w) := by
         rw [len_qVec hw]; exact hw.qVec
       rcases (show (Nat.unpair e).1 = 0 ∨ (Nat.unpair e).1 = 1 ∨ (Nat.unpair e).1 = 2 ∨
@@ -764,11 +762,11 @@ theorem subst.check_eq {w : ℕ} (hw : IsUTermVec L (len w) w) (p : ℕ) :
   · rw [if_neg h]
     exact (substs_not_uformula fun hc ↦ h (IsUFormula.check_iff.mpr hc)).symm
 
-/-! ### The composites
+/-! ### `substs1` and `free`
 
 `substs1 t u = subst L ?[t] u` and `free p = substs1 L ^&0 (shift L p)` are definitions, not
-recursions, so their mirrors are one-liners over `subst.check`. `free.check_eq` needs no hypothesis
-at all: `^&0` is a term outright, and `shift.check` agrees unconditionally. -/
+recursions, so their mirrors are one-liners over `subst.check`. `free.check_eq` needs no
+hypothesis: `^&0` is a term outright, and `shift.check` agrees unconditionally. -/
 
 def substs1.check (L : Language) [L.Encodable] [L.LORDefinable] [L.DecidableSymbols]
     (t u : ℕ) : ℕ := subst.check L (Nat.pair t 0 + 1) u
@@ -786,7 +784,7 @@ theorem free.check_eq (p : ℕ) : free.check L p = free L p := by
   have h3 : (3 : ℕ) = ^&0 := by rw [nat_qqFvar_eq]; simp [Nat.pair]
   rw [free.check, free, h3, substs1.check_eq (by simp), shift.check_eq]
 
-/-! ### It runs
+/-! ### Examples
 
 `7 = ^⊤`; `3974 = ^⊤ ^⋏ ^⊤`; `73` has constructor tag `8`. Inputs are bare numerals — see
 `Syntax/Term/Standard.lean` for why the `decide` tactic is reached through `check_iff`. -/
@@ -808,20 +806,19 @@ example : ¬IsSemiformula (V := ℕ) ℒₒᵣ 0 73 :=
 
 example : neg.check ℒₒᵣ 7 = 13 := by decide
 
-/-- `7 = ^⊤`, `13 = ^⊥`. -/
+-- `13 = ^⊥`
 example : neg (V := ℕ) ℒₒᵣ 7 = 13 := by rw [← neg.check_eq]; decide
 
-/-- Off the well-formed codes `neg` is `0`, and the mirror agrees there too. -/
+-- off the well-formed codes `neg` is `0`, and the mirror agrees there too
 example : neg (V := ℕ) ℒₒᵣ 73 = 0 := by rw [← neg.check_eq]; decide
 
-/-- `^⊤` is closed, so shifting fixes it. -/
+-- `^⊤` is closed, so shifting fixes it
 example : shift (V := ℕ) ℒₒᵣ 7 = 7 := by rw [← shift.check_eq]; decide
 
 example : shift (V := ℕ) ℒₒᵣ 73 = 0 := by rw [← shift.check_eq]; decide
 
 example : subst.check ℒₒᵣ 0 7 = 7 := by decide
 
-/-- Substituting into `^⊤` fixes it. -/
 example : subst (V := ℕ) ℒₒᵣ 0 7 = 7 := by
   rw [← subst.check_eq (w := 0) (by simp)]; decide
 
