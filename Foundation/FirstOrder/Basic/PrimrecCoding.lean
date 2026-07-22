@@ -1,7 +1,7 @@
 module
 
 public import Foundation.FirstOrder.Basic.Coding
-public import Mathlib.Computability.Primrec.List
+public import Foundation.Vorspiel.Computability
 
 @[expose] public section
 /-!
@@ -23,82 +23,11 @@ success with value `r`: with `Option ℕ` as the fold's accumulator, the `Primre
 synthesise `Primcodable` for towers of products ending in `Option ℕ`, and elaboration diverges.
 The `ℕ` encoding costs one `- 1` per lookup and elaborates immediately.
 
-`Nat.natToList` exists for the same reason: `Nat.natToVec` produces a `Fin k → ℕ` whose length
-lives in its type, which no `Primrec` combinator can consume, so `natToList` is the same decoding
-without the dependency, and `natToVec_eq_some_iff` lets the correctness proofs move between them.
+`Nat.natToList` (`Vorspiel/Computability.lean`) is used throughout for the same reason:
+`Nat.natToVec` produces a `Fin k → ℕ` whose length lives in its type, which no `Primrec`
+combinator can consume, so `natToList` is the same decoding without the dependency, and
+`natToVec_eq_some_iff` lets the correctness proofs move between them.
 -/
-
-namespace Nat
-
-/-- List form of `Nat.natToVec`: the same decoding, with the length out of the type. -/
-def natToList : ℕ → List ℕ
-  | 0 => []
-  | e + 1 => e.unpair.1 :: natToList e.unpair.2
-  decreasing_by exact Nat.lt_succ_of_le (Nat.unpair_right_le e)
-
-lemma natToVec_eq_some_iff {e k : ℕ} {v : Fin k → ℕ} :
-    e.natToVec k = some v ↔ natToList e = List.ofFn v := by
-  induction k generalizing e with
-  | zero =>
-    cases e with
-    | zero => simp [natToVec, natToList, Matrix.empty_eq]
-    | succ e => simp [natToVec, natToList]
-  | succ k ih =>
-    cases e with
-    | zero => simp [natToVec, natToList]
-    | succ e =>
-      rw [natToVec, natToList, List.ofFn_succ]
-      constructor
-      · rintro h
-        rw [Option.map_eq_some_iff] at h
-        obtain ⟨w, hw, rfl⟩ := h
-        rw [ih.mp hw]
-        simp
-      · rintro h
-        rw [List.cons.injEq] at h
-        obtain ⟨h0, hl⟩ := h
-        refine Option.map_eq_some_iff.mpr ⟨fun i ↦ v i.succ, ih.mpr hl, ?_⟩
-        exact funext fun i ↦ i.cases (by simp [h0]) (by simp)
-
-/-- `natToVec` succeeds exactly when the length-free decoding has the expected length. -/
-lemma natToVec_eq_none_of_length {e k : ℕ} (h : (natToList e).length ≠ k) :
-    e.natToVec k = none := by
-  rcases hv : e.natToVec k with _ | v
-  · rfl
-  · exact absurd (by rw [natToVec_eq_some_iff.mp hv]; simp) h
-
-lemma natToVec_isSome_of_length {e k : ℕ} (h : (natToList e).length = k) :
-    ∃ v : Fin k → ℕ, e.natToVec k = some v := by
-  subst h
-  refine ⟨fun i ↦ (natToList e).get i, natToVec_eq_some_iff.mpr ?_⟩
-  exact (List.ofFn_get _).symm
-
-end Nat
-
-section
-open Primrec
-
-theorem Primrec.nat_natToList : Primrec Nat.natToList := by
-  have step : Primrec₂ fun (_ : Unit) (l : List (List ℕ)) ↦
-      (Nat.casesOn l.length (some []) fun e ↦
-        (l[e.unpair.2]?).map fun t ↦ e.unpair.1 :: t : Option (List ℕ)) :=
-    Primrec.to₂ <| Primrec.nat_casesOn
-      (list_length.comp <| snd.comp .id)
-      (const (some ([] : List ℕ)))
-      (Primrec.to₂ <| option_map
-        (list_getElem?.comp (snd.comp fst) (snd.comp <| Primrec.unpair.comp snd))
-        (Primrec.to₂ <| list_cons.comp
-          (fst.comp <| Primrec.unpair.comp <| snd.comp fst) snd))
-  have main : Primrec₂ fun (_ : Unit) (n : ℕ) ↦ Nat.natToList n := by
-    refine Primrec.nat_strong_rec _ step ?_
-    rintro ⟨⟩ (_ | e)
-    · simp [Nat.natToList]
-    · have hlen : ((List.range (e + 1)).map Nat.natToList).length = e + 1 := by simp
-      have hlt : e.unpair.2 < e + 1 := Nat.lt_succ_of_le (Nat.unpair_right_le e)
-      simp [hlen, List.getElem?_map, hlt, Nat.natToList]
-  simpa using main.comp (const ()) Primrec.id
-
-end
 
 namespace Matrix
 
