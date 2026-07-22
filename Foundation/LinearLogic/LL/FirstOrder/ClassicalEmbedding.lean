@@ -2,7 +2,7 @@ module
 
 public import Foundation.Logic.Embedding
 public import Foundation.FirstOrder.Polarity
-public import Foundation.LinearLogic.FirstOrder.Calculus
+public import Foundation.LinearLogic.LL.FirstOrder.Calculus
 
 /-! # Girard's embedding of classical logic into linear logic -/
 
