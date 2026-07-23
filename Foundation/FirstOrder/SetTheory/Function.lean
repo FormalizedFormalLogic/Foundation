@@ -444,7 +444,7 @@ instance restrict.defined : ℒₛₑₜ-function₂[V] restrict via restrict.df
 
 instance restrict.definable : ℒₛₑₜ-function₂[V] restrict := restrict.defined.to_definable
 
-lemma domain_restrict_eq (R A : V) : domain (R ↾ A) = domain R ∩ A := by
+@[simp] lemma domain_restrict_eq (R A : V) : domain (R ↾ A) = domain R ∩ A := by
   ext z
   apply Iff.intro <;> intro h
   · simp_all only [mem_domain_iff, mem_inter_iff, restrict]
@@ -472,7 +472,7 @@ lemma mem_restrict_iff {R A p : V} :
   intro p hp
   exact (mem_restrict_iff.mp hp).1
 
-lemma IsFunction.restrict (f A : V) [hf : IsFunction f] : IsFunction (f ↾ A) := by
+instance IsFunction.restrict (f A : V) [hf : IsFunction f] : IsFunction (f ↾ A) := by
   exact IsFunction.ofSubset f (f ↾ A) (restrict_subset f A)
 
 lemma IsFunction.restrict_eq_self (f A : V) [hf : IsFunction f] (hA : domain f ⊆ A) : f ↾ A = f := by
@@ -499,7 +499,7 @@ lemma restrict_restrict_eq_restrict_inter (R A B : V) : (R ↾ A) ↾ B = R ↾ 
   · rintro ⟨hpR, x, hxAB, y, rfl⟩
     exact ⟨⟨hpR, x, hxAB.1, y, rfl⟩, x, hxAB.2, y, rfl⟩
 
-lemma restrict_restrict_of_subset {R A B : V} (h : B ⊆ A) : (R ↾ A) ↾ B = R ↾ B := by
+@[simp] lemma restrict_restrict_of_subset {R A B : V} (h : B ⊆ A) : (R ↾ A) ↾ B = R ↾ B := by
   simpa [inter_eq_right_of_subset h] using restrict_restrict_eq_restrict_inter R A B
 
 /--
