@@ -288,50 +288,9 @@ noncomputable def replAttemptOrEmpty
     exact ⟨hβα, h⟩
   · use β
 
-/- Some definability lemmas, TODO: Might move these to `ZF.lean`. -/
-def repl.dfn (φ : SetTheorySemiformula V 2) : SetTheorySemiformula V 2 :=
-  f“Y X. ∀ y, y ∈ Y ↔ ∃ x ∈ X, y = !φ x”
-
-def replRel.dfn [V↓[ℒₛₑₜ] ⊧* 𝗭𝗙] (φ : SetTheorySemiformula V 2) : SetTheorySemiformula V 2 :=
-  f“Y X. ∀ y, y ∈ Y ↔ ∃ x ∈ X, !φ x y”
-
-def replRelOverSet.dfn [V↓[ℒₛₑₜ] ⊧* 𝗭𝗙] (φ : SetTheorySemiformula V 2) : SetTheorySemiformula V 2 :=
-  f“Y X. ∀ y, y ∈ Y ↔ ∃ x ∈ X, !φ x y”
-
 def replAttemptOrEmpty.dfn [V↓[ℒₛₑₜ] ⊧* 𝗭𝗙] (φ : SetTheorySemiformula V 2) :
     SetTheorySemiformula V 2 :=
   f“Y α. ∀ y, y ∈ Y ↔ ∃ β ∈ α, y = !(pairValueAttempt.dfn φ) β”
-
-lemma repl.defined [V↓[ℒₛₑₜ] ⊧* 𝗭𝗙]
-    {φ : SetTheorySemiformula V 2} (F : V → V) (hF : IsDefinedByWithParam (fun v ↦ v 0 = F (v 1)) φ) :
-    IsDefinedByWithParam (fun v ↦ v 0 = repl (v 1) F {definable := by aesop}) (repl.dfn φ) := by
-    -- ℒₛₑₜ-function₁ fun X ↦ repl X F (by definability) via repl.dfn φ := by
-  intro v
-  simp_all [repl, repl.dfn]
-
-instance replRel.definable [V↓[ℒₛₑₜ] ⊧* 𝗭𝗙]
-    {φ : SetTheorySemiformula V 2} (R : V → V → Prop) (h : ∀ x, ∃! y, R x y) (hR : IsDefinedByWithParam (fun v ↦ R (v 0) (v 1)) φ) :
-    ℒₛₑₜ-function₁ fun X ↦ replRel X R h {definable := by aesop} := by
-  use replRel.dfn φ
-  intro v
-  simp_all [replRel, replRel.dfn]
-
-lemma replRelOverSet.defined
-    [V↓[ℒₛₑₜ] ⊧* 𝗭𝗙]
-    {φ : SetTheorySemiformula V 2} (R : V → V → Prop) (h : (X : V) → ∀ x ∈ X, ∃! y, R x y) (hR : IsDefinedByWithParam (fun v ↦ R (v 0) (v 1)) φ) :
-    IsDefinedByWithParam (fun (v : Fin 2 → V) ↦ v 0 = replRelOverSet (v 1) R (h (v 1)) {definable := by aesop}) (replRelOverSet.dfn φ) := by
-  intro v
-  simp [replRelOverSet.dfn, replRelOverSet, hR]
-
-/--
-Unfortunately this definability instance has a modified `h` condition. TODO: See if this can be replaced with a usual one as in `replRelOverSet`.
--/
-instance replRelOverSet.definable [V↓[ℒₛₑₜ] ⊧* 𝗭𝗙]
-    {φ : SetTheorySemiformula V 2} (R : V → V → Prop) (h : (X : V) → ∀ x ∈ X, ∃! y, R x y) (hR : IsDefinedByWithParam (fun v ↦ R (v 0) (v 1)) φ) :
-    ℒₛₑₜ-function₁ fun X ↦ replRelOverSet X R (h X) {definable := by aesop} := by
-  use replRelOverSet.dfn φ
-  intro v
-  simp_all [replRelOverSet, replRelOverSet.dfn]
 
 lemma replAttemptOrEmpty.defined
     [V↓[ℒₛₑₜ] ⊧* 𝗭𝗙]
