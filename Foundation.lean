@@ -39,6 +39,7 @@ public import Foundation.FirstOrder.Arithmetic.TA.Nonstandard
 public import Foundation.FirstOrder.Basic
 public import Foundation.FirstOrder.Basic.AesopInit
 public import Foundation.FirstOrder.Basic.BinderNotation
+public import Foundation.FirstOrder.Basic.BoundingHierarchy
 public import Foundation.FirstOrder.Basic.Calculus
 public import Foundation.FirstOrder.Basic.Calculus2
 public import Foundation.FirstOrder.Basic.Coding
@@ -109,6 +110,7 @@ public import Foundation.FirstOrder.Order.Le
 public import Foundation.FirstOrder.Polarity
 public import Foundation.FirstOrder.SetTheory.Basic
 public import Foundation.FirstOrder.SetTheory.Basic.Axioms
+public import Foundation.FirstOrder.SetTheory.Basic.Hierarchy
 public import Foundation.FirstOrder.SetTheory.Basic.Misc
 public import Foundation.FirstOrder.SetTheory.Basic.Model
 public import Foundation.FirstOrder.SetTheory.Function
