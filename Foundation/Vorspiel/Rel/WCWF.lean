@@ -42,10 +42,13 @@ lemma Finite.exists_ne_map_eq_of_infinite_lt {α β} [LinearOrder α] [Infinite 
     . use j, i; simp [hij, e];
 
 
-lemma antisymm_of_weaklyConverseWellFounded : WeaklyConverseWellFounded rel → AntiSymmetric rel := by
-  dsimp [AntiSymmetric];
-  contrapose!;
-  rintro ⟨x, y, Rxy, Ryz, hxy⟩;
+lemma antisymm_of_weaklyConverseWellFounded : WeaklyConverseWellFounded rel → Std.Antisymm rel := by
+  intro h
+  refine ⟨?_⟩
+  by_contra hc
+  push Not at hc
+  obtain ⟨x, y, Rxy, Ryz, hxy⟩ := hc;
+  apply absurd h;
   apply ConverseWellFounded.iff_has_max.not.mpr;
   push Not;
   use {x, y};
@@ -56,40 +59,36 @@ lemma antisymm_of_weaklyConverseWellFounded : WeaklyConverseWellFounded rel → 
     . use y; simp_all [Rel.IrreflGen];
     . use x; simp_all [Rel.IrreflGen];
 
-instance [IsWeaklyConverseWellFounded _ rel] : Std.Antisymm rel := ⟨by
-  apply antisymm_of_weaklyConverseWellFounded;
-  apply isWeaklyConverseWellFounded_iff _ _ |>.mp;
-  assumption;
-⟩
+instance [IsWeaklyConverseWellFounded _ rel] : Std.Antisymm rel :=
+  antisymm_of_weaklyConverseWellFounded (isWeaklyConverseWellFounded_iff _ _ |>.mp ‹_›)
 
 
-lemma weaklyConverseWellFounded_of_finite_trans_antisymm (hFin : Finite α) (R_trans : Transitive rel)
-  : AntiSymmetric rel → WeaklyConverseWellFounded rel := by
-    simp only [AntiSymmetric, ConverseWellFounded.iff_has_max];
-    contrapose!;
-    rintro h;
+lemma weaklyConverseWellFounded_of_finite_trans_antisymm (hFin : Finite α) (R_trans : IsTrans α rel)
+  : Std.Antisymm rel → WeaklyConverseWellFounded rel := by
+    intro hAntisymm;
+    simp only [ConverseWellFounded.iff_has_max];
+    by_contra h;
+    push Not at h;
     obtain ⟨f, hf⟩ := dependent_choice h;
     dsimp [Rel.IrreflGen] at hf;
 
     obtain ⟨i, j, hij, e⟩ := Finite.exists_ne_map_eq_of_infinite_lt f;
-    use (f i), (f (i + 1));
-    have ⟨hi₁, hi₂⟩ := hf i;
-    refine ⟨(by assumption), ?_, (by assumption)⟩;
+    obtain ⟨hi₁, hi₂⟩ := hf i;
 
     have : i + 1 < j := lt_iff_le_and_ne.mpr ⟨by omega, by aesop⟩;
     have H : ∀ i j, i < j → rel (f i) (f j) := by
       intro i j hij
       induction hij with
       | refl => exact hf i |>.1;
-      | step _ ih => exact R_trans ih $ hf _ |>.1;
-    have := H (i + 1) j this;
-    simpa [e];
+      | step _ ih => exact R_trans.trans _ _ _ ih (hf _).1;
+    have hji : rel (f (i + 1)) (f i) := by simpa [e] using H (i + 1) j this;
+    exact hi₂ (hAntisymm.antisymm _ _ hi₁ hji);
 
 instance [Finite α] [IsTrans _ rel] [Std.Antisymm rel] : IsWeaklyConverseWellFounded α rel := ⟨by
   apply weaklyConverseWellFounded_of_finite_trans_antisymm;
   . assumption;
-  . exact IsTrans.trans;
-  . exact Std.Antisymm.antisymm;
+  . assumption;
+  . assumption;
 ⟩
 
 end

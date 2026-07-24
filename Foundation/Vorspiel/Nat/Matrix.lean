@@ -34,9 +34,9 @@ lemma lt_of_eq_natToVec {e : ℕ} {v : Fin n → ℕ} (h : e.natToVec n = some v
     · simp only [natToVec, Option.map_eq_some_iff] at h
       rcases h with ⟨v, hnv, rfl⟩
       cases' i using Fin.cases with i
-      · simp [lt_succ, unpair_left_le]
+      · simp [Nat.lt_succ_iff, unpair_left_le]
       · simp only [cons_val_succ]
-        exact lt_trans (ih hnv i) (lt_succ.mpr <| unpair_right_le e)
+        exact lt_trans (ih hnv i) (Nat.lt_succ_iff.mpr <| unpair_right_le e)
 
 /-- List form of `Nat.natToVec`: the same decoding, with the length out of the type. -/
 def natToList : ℕ → List ℕ
