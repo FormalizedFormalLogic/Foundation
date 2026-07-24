@@ -200,10 +200,10 @@ def C_of_E_mpr [HasAxiomAndInst 𝓢] [HasAxiomAndElim 𝓢] (h : 𝓢 ⊢! φ �
 @[grind →] lemma iff_of_E! [HasAxiomAndInst 𝓢] [HasAxiomAndElim 𝓢] (h : 𝓢 ⊢ φ 🡘 ψ) : 𝓢 ⊢ φ ↔ 𝓢 ⊢ ψ := ⟨fun hp ↦ K!_left h ⨀ hp, fun hq ↦ K!_right h ⨀ hq⟩
 
 def C_id [HasAxiomImplyK 𝓢] [HasAxiomImplyS 𝓢] {φ : F} : 𝓢 ⊢! φ 🡒 φ := implyS (φ := φ) (ψ := (φ 🡒 φ)) (χ := φ) ⨀ implyK ⨀ implyK
-@[simp] def C!_id [HasAxiomImplyK 𝓢] [HasAxiomImplyS 𝓢] : 𝓢 ⊢ φ 🡒 φ := ⟨C_id⟩
+@[simp] theorem C!_id [HasAxiomImplyK 𝓢] [HasAxiomImplyS 𝓢] : 𝓢 ⊢ φ 🡒 φ := ⟨C_id⟩
 
 def E_Id [HasAxiomAndInst 𝓢] [HasAxiomImplyK 𝓢] [HasAxiomImplyS 𝓢] {φ : F} : 𝓢 ⊢! φ 🡘 φ := K_intro C_id C_id
-@[simp] def E!_id [HasAxiomAndInst 𝓢] [HasAxiomImplyK 𝓢] [HasAxiomImplyS 𝓢] : 𝓢 ⊢ φ 🡘 φ := ⟨E_Id⟩
+@[simp] theorem E!_id [HasAxiomAndInst 𝓢] [HasAxiomImplyK 𝓢] [HasAxiomImplyS 𝓢] : 𝓢 ⊢ φ 🡘 φ := ⟨E_Id⟩
 
 instance [NegAbbrev F] [HasAxiomImplyK 𝓢] [HasAxiomImplyS 𝓢] [HasAxiomAndInst 𝓢] : Entailment.NegationEquiv 𝓢 where
   negEquiv {φ} := by
@@ -325,7 +325,7 @@ def conj₂Nth : (Γ : List F) → (n : ℕ) → (hn : n < Γ.length) → 𝓢 �
   | φ :: ψ :: Γ,     0, _  => and₁
   | φ :: ψ :: Γ, n + 1, hn => C_trans (and₂ (φ := φ)) (conj₂Nth (ψ :: Γ) n (Nat.succ_lt_succ_iff.mp hn))
 
-def conj₂_nth! (Γ : List F) (n : ℕ) (hn : n < Γ.length) : 𝓢 ⊢ ⋀Γ 🡒 Γ[n] := ⟨conj₂Nth Γ n hn⟩
+theorem conj₂_nth! (Γ : List F) (n : ℕ) (hn : n < Γ.length) : 𝓢 ⊢ ⋀Γ 🡒 Γ[n] := ⟨conj₂Nth Γ n hn⟩
 
 def left_Conj_intro [DecidableEq F] {Γ : List F} {φ : F} (h : φ ∈ Γ) : 𝓢 ⊢! Γ.conj 🡒 φ :=
   match Γ with
@@ -348,7 +348,7 @@ def right_Conj_intro (φ : F) (Γ : List F) (b : (ψ : F) → ψ ∈ Γ → 𝓢
   match Γ with
   |     [] => C_of_conseq verum
   | ψ :: Γ => CK_of_C_of_C (b ψ (by simp)) (right_Conj_intro φ Γ (fun ψ hq ↦ b ψ (by simp [hq])))
-def right_Conj!_intro (φ : F) (Γ : List F) (b : (ψ : F) → ψ ∈ Γ → 𝓢 ⊢ φ 🡒 ψ) : 𝓢 ⊢ φ 🡒 Γ.conj := ⟨right_Conj_intro φ Γ fun ψ h ↦ (b ψ h).get⟩
+theorem right_Conj!_intro (φ : F) (Γ : List F) (b : (ψ : F) → ψ ∈ Γ → 𝓢 ⊢ φ 🡒 ψ) : 𝓢 ⊢ φ 🡒 Γ.conj := ⟨right_Conj_intro φ Γ fun ψ h ↦ (b ψ h).get⟩
 
 def CConjConj [DecidableEq F] (h : Δ ⊆ Γ) : 𝓢 ⊢! Γ.conj 🡒 Δ.conj := right_Conj_intro _ _ (fun _ hq ↦ left_Conj_intro (h hq))
 
@@ -504,7 +504,7 @@ def of {φ : F} (b : 𝓢 ⊢! φ) : Γ ⊢[𝓢]! φ := C_of_conseq (ψ := ⋀�
 
 def emptyPrf {φ : F} : [] ⊢[𝓢]! φ → 𝓢 ⊢! φ := fun b ↦ b ⨀ verum
 
-def provable_iff_provable {φ : F} : 𝓢 ⊢ φ ↔ [] ⊢[𝓢] φ :=
+theorem provable_iff_provable {φ : F} : 𝓢 ⊢ φ ↔ [] ⊢[𝓢] φ :=
   ⟨fun b ↦ ⟨of b.some⟩, fun b ↦ ⟨emptyPrf b.some⟩⟩
 
 lemma of'! [DecidableEq F] (h : 𝓢 ⊢ φ) : Γ ⊢[𝓢] φ := weakening! (by simp) $ provable_iff_provable.mp h
@@ -1013,7 +1013,7 @@ def CCCNN [DecidableEq F] : 𝓢 ⊢! (φ 🡒 ψ) 🡒 (∼ψ 🡒 ∼φ) := by
   have dq  : [φ, ∼ψ, φ 🡒 ψ] ⊢[𝓢]! ψ := dpq ⨀ dp;
   have dnq : [φ, ∼ψ, φ 🡒 ψ] ⊢[𝓢]! ψ 🡒 ⊥ := CO_of_N $ FiniteContext.byAxm;
   exact dnq ⨀ dq;
-@[simp] def CCCNN! [DecidableEq F] : 𝓢 ⊢ (φ 🡒 ψ) 🡒 (∼ψ 🡒 ∼φ) := ⟨CCCNN⟩
+@[simp] theorem CCCNN! [DecidableEq F] : 𝓢 ⊢ (φ 🡒 ψ) 🡒 (∼ψ 🡒 ∼φ) := ⟨CCCNN⟩
 
 @[deprecated "use `CCCNN`" (since := "2026-07-20")] alias contra₀ := CCCNN
 @[deprecated "use `CCCNN!`" (since := "2026-07-20")] alias contra₀! := CCCNN!
@@ -1400,11 +1400,11 @@ def right_Disj_intro [DecidableEq F] (Γ : List F) (h : φ ∈ Γ) : 𝓢 ⊢! �
     else
       have : φ ∈ Γ := by simpa [e] using h
       C_trans (right_Disj_intro Γ this) or₂
-def right_Disj!_intro [DecidableEq F] (Γ : List F) (h : φ ∈ Γ) : 𝓢 ⊢ φ 🡒 Γ.disj := ⟨right_Disj_intro Γ h⟩
+theorem right_Disj!_intro [DecidableEq F] (Γ : List F) (h : φ ∈ Γ) : 𝓢 ⊢ φ 🡒 Γ.disj := ⟨right_Disj_intro Γ h⟩
 
 def right_Disj_intro' [DecidableEq F] (Γ : List F) (h : φ ∈ Γ) (hψ : 𝓢 ⊢! ψ 🡒 φ) : 𝓢 ⊢! ψ 🡒 Γ.disj :=
   C_trans hψ (right_Disj_intro Γ h)
-def right_Disj!_intro' [DecidableEq F] (Γ : List F) (h : φ ∈ Γ) (hψ : 𝓢 ⊢ ψ 🡒 φ) : 𝓢 ⊢ ψ 🡒 Γ.disj := ⟨right_Disj_intro' Γ h hψ.get⟩
+theorem right_Disj!_intro' [DecidableEq F] (Γ : List F) (h : φ ∈ Γ) (hψ : 𝓢 ⊢ ψ 🡒 φ) : 𝓢 ⊢ ψ 🡒 Γ.disj := ⟨right_Disj_intro' Γ h hψ.get⟩
 
 def right_Disj₂_intro [DecidableEq F] (Γ : List F) (h : φ ∈ Γ) : 𝓢 ⊢! φ 🡒 ⋁Γ :=
   match Γ with
@@ -1415,7 +1415,7 @@ def right_Disj₂_intro [DecidableEq F] (Γ : List F) (h : φ ∈ Γ) : 𝓢 ⊢
     else
       have : φ ∈ χ :: Γ := by simpa [e] using h
       C_trans (right_Disj₂_intro _ this) or₂
-def right_Disj₂!_intro [DecidableEq F] (Γ : List F) (h : φ ∈ Γ) : 𝓢 ⊢ φ 🡒 ⋁Γ := ⟨right_Disj₂_intro Γ h⟩
+theorem right_Disj₂!_intro [DecidableEq F] (Γ : List F) (h : φ ∈ Γ) : 𝓢 ⊢ φ 🡒 ⋁Γ := ⟨right_Disj₂_intro Γ h⟩
 
 def right_Disj'_intro [DecidableEq F] (φ : ι → F) (l : List ι) (h : i ∈ l) : 𝓢 ⊢! φ i 🡒 l.disj' φ :=
   right_Disj₂_intro (l.map φ) (by simpa using ⟨i, h, rfl⟩)

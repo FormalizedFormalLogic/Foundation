@@ -15,6 +15,13 @@ variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 
 namespace Fixpoint
 
+-- `Fixpoint` is intentionally re-opened here even though the ambient namespace
+-- already contains it; renaming would break the widely-used public API
+-- (`Arithmetic.Fixpoint.*`). Suppress the new dupNamespace linter for the
+-- declarations in this namespace (the option is scoped by `namespace`/`end` and
+-- reverts automatically at `end Fixpoint`).
+set_option linter.dupNamespace false
+
 structure Blueprint (k : ℕ) where
   core : 𝚫₁.Semisentence (k + 2)
 

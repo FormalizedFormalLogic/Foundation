@@ -9,6 +9,13 @@ public import Foundation.FirstOrder.Bootstrapping.DerivabilityCondition.PeanoMin
 
 namespace LO.FirstOrder.Arithmetic.Bootstrapping.Arithmetic
 
+-- `Arithmetic` is intentionally re-opened here even though the ambient namespace
+-- already contains it; renaming would break the widely-used public API
+-- (`Bootstrapping.Arithmetic.*`). Suppress the new dupNamespace linter for the
+-- declarations in this namespace (the option is scoped by `namespace`/`end` and
+-- reverts automatically at `end LO.FirstOrder.Arithmetic.Bootstrapping.Arithmetic`).
+set_option linter.dupNamespace false
+
 open Classical
 
 open LO.Entailment LO.Entailment.FiniteContext

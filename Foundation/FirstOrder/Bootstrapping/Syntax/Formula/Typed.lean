@@ -386,6 +386,13 @@ noncomputable def Semiformula.bexs (t : Semiterm V ℒₒᵣ n) (φ : Semiformul
 
 namespace Arithmetic
 
+-- `Arithmetic` is intentionally re-opened here even though the ambient namespace
+-- already contains it; renaming would break the widely-used public API
+-- (`Bootstrapping.Arithmetic.*`). Suppress the new dupNamespace linter for the
+-- declarations in this namespace (the option is scoped by `namespace`/`end` and
+-- reverts automatically at `end Arithmetic`).
+set_option linter.dupNamespace false
+
 variable {n m : ℕ}
 
 @[simp] lemma rel_eq_eq (v : Fin 2 → Semiterm V ℒₒᵣ n) :

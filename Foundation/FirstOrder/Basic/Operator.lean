@@ -616,19 +616,19 @@ variable {L M}
 @[simp] lemma add_eq_of_lang [L.Add] [Add M] [Structure.Add L M] {v : Fin 2 → M} :
     Structure.func (L := L) Language.Add.add v = v 0 + v 1 := by
   have h := Structure.Add.add (L := L) (v 0) (v 1)
-  simp [←Matrix.fun_eq_vec_two] at h
+  simp only [←Matrix.fun_eq_vec_two] at h
   exact h
 
 @[simp] lemma mul_eq_of_lang [L.Mul] [Mul M] [Structure.Mul L M] {v : Fin 2 → M} :
     Structure.func (L := L) Language.Mul.mul v = v 0 * v 1 := by
   have h := Structure.Mul.mul (L := L) (v 0) (v 1)
-  simp [←Matrix.fun_eq_vec_two] at h
+  simp only [←Matrix.fun_eq_vec_two] at h
   exact h
 
 @[simp] lemma exp_eq_of_lang [L.Exp] [Exp M] [Structure.Exp L M] {v : Fin 1 → M} :
     Structure.func (L := L) Language.Exp.exp v = LO.Exp.exp (v 0) := by
   have h := Structure.Exp.exp (L := L) (v 0)
-  simp [←Matrix.fun_eq_vec_one] at h
+  simp only [←Matrix.fun_eq_vec_one] at h
   exact h
 
 @[simp] lemma eq_iff_eq [Operator.Eq L] [Structure.Eq L M] {v : Fin 2 →M} :

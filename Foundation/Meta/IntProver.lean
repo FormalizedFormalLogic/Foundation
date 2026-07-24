@@ -35,6 +35,11 @@ lemma to_twoSided {Γ Δ} (h : Valid 𝓢 [Γ ⟶ Δ]) : Γ ⟹ Δ := by
   · assumption
   · simp_all
 
+-- `DecidableEq F` is not referenced in the proof term itself, but the ambient
+-- instance is needed for elaboration to disambiguate `TwoSided.to_provable`'s
+-- own `DecidableEq F`-dependent notation; omitting it (as the `unusedSectionVars`
+-- linter suggests) breaks elaboration, so the false-positive warning is suppressed.
+set_option linter.unusedSectionVars false in
 lemma to_provable {φ} (h : Valid 𝓢 [[] ⟶ [φ]]) : 𝓢 ⊢ φ := by
   rcases h
   · exact TwoSided.to_provable <| by assumption

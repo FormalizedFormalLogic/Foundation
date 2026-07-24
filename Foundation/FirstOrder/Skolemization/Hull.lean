@@ -89,6 +89,7 @@ instance (priority := 50) str : Structure L (SkolemHull L s) where
   func k f v := ⟨func f fun i ↦ (v i : M), closed_func (by simp)⟩
   rel k R v := Structure.rel R fun i ↦ (v i : M)
 
+omit [L.Eq] [Structure.Eq L M] in
 lemma set_nonempty : (SkolemHull L s).Nonempty := by
   have : ∃ z : M, (⊤ : Semisentence L 1).Evalb ![z] := by simp
   have : ∃ z, z ∈ SkolemHull L s := by

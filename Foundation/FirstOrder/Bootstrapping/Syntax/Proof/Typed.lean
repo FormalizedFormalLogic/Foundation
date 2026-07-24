@@ -515,7 +515,7 @@ noncomputable def allImpAll {Γ} {φ ψ : Semiformula V L 1} (d : Γ.map .shift 
     Entailment.FiniteContext.weakening (by simp) d
   exact h ⨀ hφ
 
-noncomputable def all_imp_all! {Γ} {φ ψ : Semiformula V L 1} (d : Γ.map .shift ⊢[T] φ.free 🡒 ψ.free) :
+theorem all_imp_all! {Γ} {φ ψ : Semiformula V L 1} (d : Γ.map .shift ⊢[T] φ.free 🡒 ψ.free) :
     Γ ⊢[T] ∀¹ φ 🡒 ∀¹ ψ := ⟨allImpAll d.get⟩
 
 noncomputable def exsImpExs {Γ} {φ ψ : Semiformula V L 1} (d : Γ.map .shift ⊢[T]! φ.free 🡒 ψ.free) : Γ ⊢[T]! ∃¹ φ 🡒 ∃¹ ψ := by
@@ -525,7 +525,7 @@ noncomputable def exsImpExs {Γ} {φ ψ : Semiformula V L 1} (d : Γ.map .shift 
   apply Entailment.C_of_CNN
   simpa [Semiformula.free] using d
 
-noncomputable def exs_imp_exs! {Γ} {φ ψ : Semiformula V L 1} (d : Γ.map .shift ⊢[T] φ.free 🡒 ψ.free) :
+theorem exs_imp_exs! {Γ} {φ ψ : Semiformula V L 1} (d : Γ.map .shift ⊢[T] φ.free 🡒 ψ.free) :
     Γ ⊢[T] ∃¹ φ 🡒 ∃¹ ψ := ⟨exsImpExs d.get⟩
 
 noncomputable def exs {φ : Semiformula V L 1} (t) (dp : T ⊢! φ.subst ![t]) : T ⊢! ∃¹ φ := TDerivation.exs t (by simpa using! dp)

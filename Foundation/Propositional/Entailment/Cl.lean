@@ -218,10 +218,10 @@ lemma not_imply_prem''! (hpq : 𝓢 ⊢ φ 🡒 ψ) (hpnr : 𝓢 ⊢ φ 🡒 ∼
 
 def ofAOfN (b : 𝓢 ⊢! φ ⋎ ψ) (d : 𝓢 ⊢! ∼φ) : 𝓢 ⊢! ψ := A_cases (C_of_CNN (dhyp d)) (C_id) b
 
-def of_a!_of_n! (b : 𝓢 ⊢ φ ⋎ ψ) (d : 𝓢 ⊢ ∼φ) : 𝓢 ⊢ ψ := ⟨ofAOfN b.get d.get⟩
+theorem of_a!_of_n! (b : 𝓢 ⊢ φ ⋎ ψ) (d : 𝓢 ⊢ ∼φ) : 𝓢 ⊢ ψ := ⟨ofAOfN b.get d.get⟩
 
 def ECAN : 𝓢 ⊢! (φ 🡒 ψ) 🡘 (∼φ ⋎ ψ) := E_intro CCAN (deduct' (A_cases CNC implyK byAxm₀))
-def ECAN! : 𝓢 ⊢ (φ 🡒 ψ) 🡘 (∼φ ⋎ ψ) := ⟨ECAN⟩
+theorem ECAN! : 𝓢 ⊢ (φ 🡒 ψ) 🡘 (∼φ ⋎ ψ) := ⟨ECAN⟩
 
 
 
@@ -305,7 +305,7 @@ section
 
 variable {G T : Type*} [Entailment T G] [LogicalConnective G] {𝓣 : T}
 
-def Cl.ofEquiv (𝓢 : S) [Entailment.Cl 𝓢] (𝓣 : T) (f : G →ˡᶜ F) (e : (φ : G) → 𝓢 ⊢! f φ ≃ 𝓣 ⊢! φ) : Entailment.Cl 𝓣 where
+abbrev Cl.ofEquiv (𝓢 : S) [Entailment.Cl 𝓢] (𝓣 : T) (f : G →ˡᶜ F) (e : (φ : G) → 𝓢 ⊢! f φ ≃ 𝓣 ⊢! φ) : Entailment.Cl 𝓣 where
   mdp {φ ψ dpq dp} := (e ψ) (
     let d : 𝓢 ⊢! f φ 🡒 f ψ := by simpa using (e (φ 🡒 ψ)).symm dpq
     d ⨀ ((e φ).symm dp))

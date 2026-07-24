@@ -265,7 +265,7 @@ end Semiformula
 
 namespace Sentence
 
-def typed_quote_def (σ : Semisentence L n) :
+theorem typed_quote_def (σ : Semisentence L n) :
     (⌜σ⌝ : Bootstrapping.Semiformula V L n) = ⌜(Rewriting.emb σ : Semiproposition L n)⌝ := rfl
 
 @[simp] lemma typed_quote_eq (t u : ClosedSemiterm ℒₒᵣ n) :
@@ -285,7 +285,7 @@ noncomputable instance : GödelQuote (Semisentence L n) V where
 
 lemma quote_def (σ : Semisentence L n) : (⌜σ⌝ : V) = ⌜(Rewriting.emb σ : Semiproposition L n)⌝ := rfl
 
-def quote_eq (σ : Semisentence L n) : (⌜σ⌝ : V) = (⌜σ⌝ : Bootstrapping.Semiformula V L n).val := rfl
+theorem quote_eq (σ : Semisentence L n) : (⌜σ⌝ : V) = (⌜σ⌝ : Bootstrapping.Semiformula V L n).val := rfl
 
 @[simp] lemma quote_isSemiformula (φ : Semisentence L n) : IsSemiformula L ↑n (⌜φ⌝ : V) := by simp [quote_def]
 

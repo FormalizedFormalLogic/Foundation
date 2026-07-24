@@ -101,7 +101,7 @@ lemma typed_quote_inj {t u : SyntacticSemiterm L n} : (⌜t⌝ : Bootstrapping.S
 noncomputable instance : GödelQuote (SyntacticSemiterm L n) V where
   quote t := (⌜t⌝ : Bootstrapping.Semiterm V L n).val
 
-def quote_def (t : SyntacticSemiterm L n) : (⌜t⌝ : V) = (⌜t⌝ : Bootstrapping.Semiterm V L n).val := rfl
+theorem quote_def (t : SyntacticSemiterm L n) : (⌜t⌝ : V) = (⌜t⌝ : Bootstrapping.Semiterm V L n).val := rfl
 
 private lemma quote_eq_encode'_aux (v : Fin k → Semiterm L ℕ n)
     (H : ∀ i, (⌜v i⌝ : Bootstrapping.Semiterm V L n).val = encode ↑(v i)) :
@@ -155,7 +155,7 @@ noncomputable instance : GödelQuote (ClosedSemiterm L n) (Bootstrapping.Semiter
 
 variable {V}
 
-def empty_typed_quote_def (t : ClosedSemiterm L n) :
+theorem empty_typed_quote_def (t : ClosedSemiterm L n) :
     (⌜t⌝ : Bootstrapping.Semiterm V L n) = ⌜(Rew.emb t : SyntacticSemiterm L n)⌝ := rfl
 
 @[simp] lemma empty_typed_quote_bvar (x : Fin n) :
@@ -179,7 +179,7 @@ noncomputable instance : GödelQuote (ClosedSemiterm L n) V where
 
 lemma empty_quote_def (t : ClosedSemiterm L n) : (⌜t⌝ : V) = ⌜(Rew.emb t : SyntacticSemiterm L n)⌝ := rfl
 
-def empty_quote_eq (t : ClosedSemiterm L n) : (⌜t⌝ : V) = (⌜t⌝ : Bootstrapping.Semiterm V L n).val := rfl
+theorem empty_quote_eq (t : ClosedSemiterm L n) : (⌜t⌝ : V) = (⌜t⌝ : Bootstrapping.Semiterm V L n).val := rfl
 
 lemma empty_quote_eq_encode (t : ClosedSemiterm L n) : (⌜t⌝ : V) = ↑(encode t) := by simp [empty_quote_def, quote_eq_encode]
 

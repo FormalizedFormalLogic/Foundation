@@ -15,7 +15,7 @@ variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 
 def Seq (s : V) : Prop := IsMapping s ∧ ∃ l, domain s = under l
 
-def Seq.isMapping {s : V} (h : Seq s) : IsMapping s := h.1
+theorem Seq.isMapping {s : V} (h : Seq s) : IsMapping s := h.1
 
 private lemma seq_iff (s : V) : Seq s ↔ IsMapping s ∧ ∃ l ≤ 2 * s, ∃ d ≤ 2 * s, d = domain s ∧ d = under l :=
   ⟨by rintro ⟨hs, l, h⟩
@@ -116,7 +116,7 @@ noncomputable def seqCons (s x : V) : V := insert ⟪lh s, x⟫ s
 
 section znth
 
-def znth_existsUnique (s i : V) : ∃! x, (Seq s ∧ i < lh s → ⟪i, x⟫ ∈ s) ∧ (¬(Seq s ∧ i < lh s) → x = 0) := by
+theorem znth_existsUnique (s i : V) : ∃! x, (Seq s ∧ i < lh s → ⟪i, x⟫ ∈ s) ∧ (¬(Seq s ∧ i < lh s) → x = 0) := by
   by_cases h : Seq s ∧ i < lh s
   · simpa [h] using h.1.nth_exists_uniq h.2
   · simp [h]

@@ -24,6 +24,7 @@ class AdjunctiveSet (β : outParam Type*) (α : Type*) extends Membership β α,
 attribute [simp] AdjunctiveSet.not_mem_empty AdjunctiveSet.mem_cons_iff
 
 instance Set.adjunctiveSet : AdjunctiveSet α (Set α) where
+  Subset := (· ⊆ ·)
   subset_iff := iff_of_eq Set.subset_def
   not_mem_empty := by simp
   mem_cons_iff := by simp [Adjoin.adjoin]
@@ -39,6 +40,7 @@ instance Multiset.adjunctiveSet : AdjunctiveSet α (Multiset α) where
   mem_cons_iff := by simp [Adjoin.adjoin]
 
 instance Finset.adjunctiveSet [DecidableEq α] : AdjunctiveSet α (Finset α) where
+  Subset := (· ⊆ ·)
   subset_iff := Finset.subset_iff
   not_mem_empty := by simp
   mem_cons_iff := by simp [Adjoin.adjoin]
