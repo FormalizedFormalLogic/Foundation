@@ -140,7 +140,7 @@ scoped notation "‖" d "‖" => depth d
 def specialize {φ} (b : Λ ⊢! ∀¹ φ) (t) : Λ ⊢! φ/[t] := all₁ φ t ⨀ b
 
 def implyAll {φ ψ} (b : Λ ⊢! shift φ 🡒 free ψ) : Λ ⊢! φ 🡒 ∀¹ ψ :=
-  have : Λ ⊢! ∀¹ (φ/[] 🡒 ψ) := gen <| by simp; exact b
+  have : Λ ⊢! ∀¹ (φ/[] 🡒 ψ) := gen <| by simp only [Nat.reduceAdd, LogicalConnective.HomClass.map_imply, free_subst_nil]; exact b
   all₂ φ ψ ⨀ this
 
 def geNOverFiniteContext {Γ φ} (b : Γ⁺ ⊢[Λ]! free φ) : Γ ⊢[Λ]! ∀¹ φ :=
