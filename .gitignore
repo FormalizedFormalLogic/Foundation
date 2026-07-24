@@ -12,7 +12,3 @@ import_graph.pdf
 
 # direnv
 .envrc
-
-
-# Claude
-.claude/settings.local.json

@@ -31,7 +31,7 @@ PR titles are in English, in the usual conventional-commit form:
 
 For `<subject>`, name one representative result of the PR; no verb phrases like "formalize the …" — write "Strict arithmetical hierarchy theorem", not "formalize the strict arithmetical hierarchy theorem".
 
-The PR body may be written in Japanese.
+PRs (title and body) are written in English.
 
 ## Before submitting
 
