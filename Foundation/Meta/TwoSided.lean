@@ -37,7 +37,11 @@ lemma rotate_right_inv (hφ : Γ ⟹ φ :: Δ) : Γ ⟹ Δ ++ [φ] := weakening 
 
 lemma rotate_left_inv (hφ : (φ :: Γ) ⟹ Δ) : (Γ ++ [φ]) ⟹ Δ := weakening hφ
 
-omit [DecidableEq F] in
+-- `DecidableEq F` is not referenced in the proof term itself, but the ambient
+-- instance is needed for elaboration to disambiguate the overloaded `⨀`
+-- notation; omitting it (as the `unusedSectionVars` linter suggests) breaks
+-- elaboration, so the false-positive warning is suppressed here.
+set_option linter.unusedSectionVars false in
 lemma to_provable {φ} (h : [] ⟹ [φ]) : 𝓢 ⊢ φ :=
   FiniteContext.provable_iff_provable.mpr <| left_Disj!_intro [φ] (by simp) ⨀ h
 
@@ -253,7 +257,6 @@ lemma remove : Valid 𝓢 T → Valid 𝓢 ((Γ ⟶ Δ) :: T) :=
 
 variable [DecidableEq F] [Entailment.Int 𝓢]
 
-omit [DecidableEq F] in
 lemma to_provable (h : Valid 𝓢 [[] ⟶ [φ]]) : 𝓢 ⊢ φ := by
   rcases h
   · exact TwoSided.to_provable <| by assumption
