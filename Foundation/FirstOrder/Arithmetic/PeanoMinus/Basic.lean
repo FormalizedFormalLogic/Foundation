@@ -188,7 +188,11 @@ lemma zero_lt_one : (0 : M) < 1 := by
 
 lemma one_le_of_zero_lt : ∀ x : M, 0 < x → 1 ≤ x := by
   have h := Theory.models M _ PeanoMinus.oneLeOfZeroLt
-  simp [models_iff] at h
+  simp only [models_iff, Semiformula.eval_all, Nat.succ_eq_add_one, Nat.reduceAdd, Fin.Fin1.eq_one, Fin.isValue,
+    LogicalConnective.HomClass.map_imply, Semiformula.eval_operator, Matrix.comp₂, Semiterm.val_operator, Matrix.comp₀,
+    Structure.numeral_eq_numeral, ORingStructure.zero_eq_zero, Semiterm.val_bvar, Matrix.cons_val_fin_one,
+    Structure.lt_iff_lt, Matrix.cons_val_zero, Matrix.cons_val_one, ORingStructure.one_eq_one,
+    LogicalConnective.Prop.arrow_eq] at h
   exact h
 
 lemma add_lt_add : ∀ x y z : M, x < y → x + z < y + z := by

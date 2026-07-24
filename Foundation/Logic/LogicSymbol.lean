@@ -217,6 +217,11 @@ class Closed {F} [LogicalConnective F] (C : F → Prop) extends AndOrClosed C wh
   not {f : F} : C f → C (∼f)
   imply {f g : F} : C f → C g → C (f 🡒 g)
 
+-- `AndOrClosed.verum`/`AndOrClosed.falsum` have `C` (a variable) as the simp LHS head symbol,
+-- since `C` is the predicate being closed under `⊤`/`⊥`. They are intentionally kept as global
+-- simp lemmas (`⊤`/`⊥` are always in any `AndOrClosed` predicate); scoping them would break
+-- implicit uses elsewhere.
+set_option warning.simp.varHead false in
 attribute [simp] AndOrClosed.verum AndOrClosed.falsum
 
 end LogicalConnective
