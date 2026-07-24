@@ -12,10 +12,9 @@ variable {T : ArithmeticTheory} [𝗜𝚺₁ ⪯ T] [Entailment.Consistent T]
 lemma not_exists_tarski_predicate : ¬∃ τ : ArithmeticSemisentence 1, ∀ σ, T ⊢ σ 🡘 τ/[⌜σ⌝] := by
   rintro ⟨τ, hτ⟩;
   apply Entailment.Consistent.not_bot (𝓢 := T);
-  . infer_instance;
-  . have h₁ : T ⊢ fixedpoint (∼τ) 🡘 τ/[⌜fixedpoint (∼τ)⌝] := by simpa using hτ $ fixedpoint “x. ¬!τ x”;;
-    have h₂ : T ⊢ fixedpoint (∼τ) 🡘 ∼τ/[⌜fixedpoint (∼τ)⌝] := by simpa using diagonal (T := T) “x. ¬!τ x”;
-    cl_prover [h₁, h₂];
+  have h₁ : T ⊢ fixedpoint (∼τ) 🡘 τ/[⌜fixedpoint (∼τ)⌝] := by simpa using hτ $ fixedpoint “x. ¬!τ x”;;
+  have h₂ : T ⊢ fixedpoint (∼τ) 🡘 ∼τ/[⌜fixedpoint (∼τ)⌝] := by simpa using diagonal (T := T) “x. ¬!τ x”;
+  cl_prover [h₁, h₂];
 
 /-- Tarski's Undefinability of Truth Theorem. -/
 theorem undefinability_of_truth : ¬∃ τ : ArithmeticSemisentence 1, ∀ σ : ArithmeticSentence, ℕ↓[ℒₒᵣ] ⊧ σ ↔ ℕ↓[ℒₒᵣ] ⊧ τ/[⌜σ⌝] := by

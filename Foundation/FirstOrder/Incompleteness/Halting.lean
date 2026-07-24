@@ -42,7 +42,7 @@ lemma incomplete_of_REPred_not_ComputablePred_Nat' {P : ℕ → Prop} (hRE : REP
     . simpa [hP] using! hd₁;
     . simpa;
   . exfalso;
-    apply Entailment.Consistent.not_bot (𝓢 := T) inferInstance;
+    apply Entailment.Consistent.not_bot (𝓢 := T);
     replace hd₁ : T ⊢ φ/[d] := by simpa [hP] using! hd₁;
     cl_prover [hd₁, hd₂];
 
