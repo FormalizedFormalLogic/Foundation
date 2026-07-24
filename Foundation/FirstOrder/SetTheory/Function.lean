@@ -252,7 +252,7 @@ lemma unique {f : V} [hf : IsFunction f] {x y₁ y₂} (h₁ : ⟨x, y₁⟩ₖ 
 
 @[simp] instance empty : IsFunction (∅ : V) := ⟨∅, ∅, by simp⟩
 
-protected def insert (f x y : V) (hx : x ∉ domain f) [hf : IsFunction f] : IsFunction (insert ⟨x, y⟩ₖ f) := by
+@[reducible] protected def insert (f x y : V) (hx : x ∉ domain f) [hf : IsFunction f] : IsFunction (insert ⟨x, y⟩ₖ f) := by
   refine ⟨insert x (domain f), insert y (range f), ?_⟩
   apply mem_function.intro
   · have : f ⊆ domain f ×ˢ range f := subset_prod_of_mem_function hf.mem_function
