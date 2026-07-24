@@ -63,8 +63,8 @@ lemma d_computable : Computable d := by
 
 /-- `d` applied to the code of `σ` is the code of `σ`'s diagonal self-substitution. -/
 lemma d_quote_eq (σ : ArithmeticSemisentence 1) :
-    d (⌜σ⌝ : ℕ) = (⌜(σ/[⌜σ⌝] : ArithmeticSentence)⌝ : ℕ) := by
-  sorry
+    d (⌜σ⌝ : ℕ) = (⌜(σ/[⌜σ⌝] : ArithmeticSentence)⌝ : ℕ) :=
+  substNumeral_app_quote σ σ
 
 /-- The diagonal substitution `σ ↦ σ/[⌜σ⌝]`. -/
 noncomputable def f (σ : ArithmeticSemisentence 1) : ArithmeticSentence := σ/[⌜σ⌝]
