@@ -295,6 +295,9 @@ end WeaklyForces₀
 
 end KripkeModel
 
+-- Inherits `IntKripke`'s universe parameters, which only occur together for the same
+-- intentional reason as there (`World`/`Carrier` need not share a universe).
+set_option linter.checkUnivs false in
 /-- Kripke model for classical first-order logic -/
 def ForcingNotion (L : Language) [L.Relational] := IntKripke L
 

@@ -17,6 +17,13 @@ variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 
 namespace Arithmetic
 
+-- `Arithmetic` is intentionally re-opened here even though the ambient namespace
+-- already contains it; renaming would break the widely-used public API
+-- (`Bootstrapping.Arithmetic.*`). Suppress the new dupNamespace linter for the
+-- declarations in this namespace (the option is scoped by `namespace`/`end` and
+-- reverts automatically at `end Bootstrapping.Arithmetic`).
+set_option linter.dupNamespace false
+
 local prefix:max "#'" => Semiterm.bvar (V := V) (L := ℒₒᵣ)
 
 local prefix:max "&'" => Semiterm.fvar (V := V) (L := ℒₒᵣ)

@@ -1191,6 +1191,13 @@ end fvfree
 
 namespace Arithmetic
 
+-- `Arithmetic` is intentionally re-opened here even though the ambient namespace
+-- already contains it; renaming would break the widely-used public API
+-- (`Bootstrapping.Arithmetic.*`). Suppress the new dupNamespace linter for the
+-- declarations in this namespace (the option is scoped by `namespace`/`end` and
+-- reverts automatically at `end Arithmetic`).
+set_option linter.dupNamespace false
+
 noncomputable def qqEQ (x y : V) : V := ^rel 2 (eqIndex : V) ?[x, y]
 
 noncomputable def qqNEQ (x y : V) : V := ^nrel 2 (eqIndex : V) ?[x, y]

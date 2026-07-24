@@ -258,6 +258,10 @@ end Forces₀
 
 end KripkeModel
 
+-- `World`'s and `Carrier`'s universes only occur together (via `Domain : World → Set Carrier`),
+-- which is intentional here rather than a sign of an unnecessary parameter; keeping them
+-- separate documents that the two carriers need not live in the same universe.
+set_option linter.checkUnivs false in
 /-- Kripke model for intuitionistic first-order logic -/
 structure IntKripke (L : Language) [L.Relational] where
   World : Type*

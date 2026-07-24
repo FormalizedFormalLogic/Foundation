@@ -151,6 +151,13 @@ end qqDisj
 
 namespace Arithmetic
 
+-- `Arithmetic` is intentionally re-opened here even though the ambient namespace
+-- already contains it; renaming would break the widely-used public API
+-- (`Bootstrapping.Arithmetic.*`). Suppress the new dupNamespace linter for the
+-- declarations in this namespace (the option is scoped by `namespace`/`end` and
+-- reverts automatically at `end Arithmetic`).
+set_option linter.dupNamespace false
+
 /-! ### Disjunction of sequential substution
 
 `disjSeqSubst w p k = subst (k ∷ w) p ^⋎ ⋯ ^⋎ subst (0 ∷ w) p ^⋎ ⊥`
