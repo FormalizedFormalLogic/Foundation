@@ -113,6 +113,10 @@ Citations go at the end of the docstring as a list, one line per BibTeX key, of 
 
 Attach `@[grind]` to lemmas and definitions that plausibly help `grind` close goals, choosing a direction (`@[grind =>]`, `@[grind .]`) where it matters. 🤖 Do not attach it mechanically to every declaration. The post-hoc form `attribute [grind] name₁ name₂ …` is also acceptable. Inside proofs, try `grind` before settling on a longer tactic sequence.
 
+## No `sorry`
+
+`sorry` is never acceptable in submitted proofs. CI runs `just axiom-audit`, which fails the build on any remaining `sorry` (as well as on axioms outside the allowlist) — a proof left in a skeleton state cannot land. If a proof is incomplete, keep it out of the PR rather than submitting it with `sorry` placeholders.
+
 ## `set_option`
 
 Whenever you use `set_option` (including the single-declaration form `set_option foo false in`), always add a comment explaining the intent: which option is changed, why, and for which declaration. The comment must make clear to a later reader that the option change is deliberate, not a workaround left behind by accident. For example, when suppressing a linter warning:
