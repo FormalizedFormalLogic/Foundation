@@ -73,9 +73,8 @@ variable
 lemma unprovable_jeroslow [T₀ ⪯ T] [Consistent T] [𝔚.SoundOn (jeroslow 𝔚)] : T ⊬ jeroslow 𝔚 := by
   by_contra hC;
   apply Entailment.Consistent.not_bot (𝓢 := T);
-  . infer_instance;
-  . have : T ⊢ ∼(jeroslow 𝔚) := Refutability.sound_on $ (Entailment.iff_of_E! $ jeroslow_def') |>.mp hC;
-    exact (N!_iff_CO!.mp this) ⨀ hC;
+  have : T ⊢ ∼(jeroslow 𝔚) := Refutability.sound_on $ (Entailment.iff_of_E! $ jeroslow_def') |>.mp hC;
+  exact (N!_iff_CO!.mp this) ⨀ hC;
 
 end
 
