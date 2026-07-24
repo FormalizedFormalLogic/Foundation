@@ -19,7 +19,7 @@ lemma le_eq (t₁ t₂ : Semiterm L μ n) : LT.le.operator ![t₁, t₂] = “!!
 namespace Order
 variable {T : Theory L} [𝗘𝗤 L ⪯ T]
 
-noncomputable def leIffEqOrLt : T ⊢ “∀ x y, x ≤ y ↔ x = y ∨ x < y” :=
+theorem leIffEqOrLt : T ⊢ “∀ x y, x ≤ y ↔ x = y ∨ x < y” :=
   Theory.Proof.small_complete
     <| consequence_iff.mpr fun _ ↦ by simp [models_iff, Semiformula.Operator.LE.def_of_Eq_of_LT]
 

@@ -149,7 +149,7 @@ def left_Disj_intro (Γ : List F) (b : (ψ : F) → ψ ∈ Γ → 𝓢 ⊢! ψ �
   match Γ with
   |     [] => efq
   | ψ :: Γ => left_A_intro (b ψ (by simp)) <| left_Disj_intro Γ fun ψ h ↦ b ψ (by simp [h])
-def left_Disj!_intro (Γ : List F) (b : (ψ : F) → ψ ∈ Γ → 𝓢 ⊢ ψ 🡒 φ) : 𝓢 ⊢ Γ.disj 🡒 φ :=
+theorem left_Disj!_intro (Γ : List F) (b : (ψ : F) → ψ ∈ Γ → 𝓢 ⊢ ψ 🡒 φ) : 𝓢 ⊢ Γ.disj 🡒 φ :=
   ⟨left_Disj_intro Γ fun ψ h ↦ (b ψ h).get⟩
 
 def left_Disj₂_intro (Γ : List F) (b : (ψ : F) → ψ ∈ Γ → 𝓢 ⊢! ψ 🡒 φ) : 𝓢 ⊢! ⋁Γ 🡒 φ :=

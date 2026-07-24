@@ -47,7 +47,7 @@ lemma rosser_quote_def {φ : Proposition L} :
 lemma rosser_quote_def₀ {φ : Sentence L} :
     T.RosserProvable (V := V) ⌜φ⌝ ↔ ∃ b : V, Proof T b ⌜φ⌝ ∧ ∀ b' < b, ¬Proof T b' ⌜∼φ⌝ := by simpa [Sentence.quote_def] using! rosser_quote
 
-def RosserProvable.to_provable {φ : V} : T.RosserProvable φ → Provable T φ := ProvabilityComparison.le_to_provable
+theorem RosserProvable.to_provable {φ : V} : T.RosserProvable φ → Provable T φ := ProvabilityComparison.le_to_provable
 
 lemma provable_of_standard_proof {n : ℕ} {φ : Sentence L} : Proof T (n : V) ⌜φ⌝ → T ⊢ φ := fun h ↦ by
   have : Proof T n ⌜φ⌝ ↔ Proof T (↑n : V) ⌜φ⌝ := by
@@ -60,7 +60,7 @@ lemma provable_of_standard_proof {n : ℕ} {φ : Sentence L} : Proof T (n : V) �
 
 open Classical
 
-def rosser_internalize [Entailment.Consistent T] {φ : Sentence L} : T ⊢ φ → T.RosserProvable (⌜φ⌝ : V) := by
+theorem rosser_internalize [Entailment.Consistent T] {φ : Sentence L} : T ⊢ φ → T.RosserProvable (⌜φ⌝ : V) := by
   intro h
   let n : ℕ := ⌜h.get⌝
   have hn : Proof T (↑n : V) ⌜φ⌝ := by simp [n, coe_quote_proof_eq]
@@ -72,11 +72,11 @@ def rosser_internalize [Entailment.Consistent T] {φ : Sentence L} : T ⊢ φ �
   have : ¬Entailment.Inconsistent T := Entailment.Consistent.not_inc inferInstance
   contradiction
 
-def rosser_internalize_sentence [Entailment.Consistent T] {σ : Sentence L} : T ⊢ σ → T.RosserProvable (⌜σ⌝ : V) := fun h ↦ by
+theorem rosser_internalize_sentence [Entailment.Consistent T] {σ : Sentence L} : T ⊢ σ → T.RosserProvable (⌜σ⌝ : V) := fun h ↦ by
   simpa [Sentence.quote_def] using! rosser_internalize h
 
 open Classical in
-def not_rosserProvable [Entailment.Consistent T] {φ : Sentence L} : T ⊢ ∼φ → ¬T.RosserProvable (⌜φ⌝ : V) := by
+theorem not_rosserProvable [Entailment.Consistent T] {φ : Sentence L} : T ⊢ ∼φ → ¬T.RosserProvable (⌜φ⌝ : V) := by
   rintro h r
   let n : ℕ := ⌜h.get⌝
   have hn : Proof T (↑n : V) ⌜∼φ⌝ := by simp [n, coe_quote_proof_eq]
@@ -88,7 +88,7 @@ def not_rosserProvable [Entailment.Consistent T] {φ : Sentence L} : T ⊢ ∼φ
   have : ¬Entailment.Inconsistent T := Entailment.Consistent.not_inc inferInstance
   contradiction
 
-def not_rosserProvable_sentence [Entailment.Consistent T] {σ : Sentence L} : T ⊢ ∼σ → ¬T.RosserProvable (⌜σ⌝ : V) := fun h ↦ by
+theorem not_rosserProvable_sentence [Entailment.Consistent T] {σ : Sentence L} : T ⊢ ∼σ → ¬T.RosserProvable (⌜σ⌝ : V) := fun h ↦ by
   simpa [Sentence.quote_def] using! not_rosserProvable h
 
 end LO.FirstOrder.Arithmetic.Bootstrapping

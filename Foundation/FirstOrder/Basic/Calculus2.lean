@@ -98,7 +98,7 @@ private lemma mem_embed_of_exists_shift_mem {A : List (Sentence L)} {φ : Propos
         ext x; simp
       cutManyProof A (by simp_all) c
 
-@[reducible] noncomputable def cutMany (A : List (Sentence L)) (hA : ∀ ψ ∈ A, ψ ∈ T)
+theorem cutMany (A : List (Sentence L)) (hA : ∀ ψ ∈ A, ψ ∈ T)
     (d : T ⟹₂! (insert (φ : Proposition L) (∼Sequent.embed A).toFinset)) : T ⟹₂! {φ} :=
   d.elim fun d ↦ ⟨cutManyProof A hA d⟩
 
@@ -155,7 +155,7 @@ noncomputable def toProofData : {Γ : Finset (Proposition L)} → T ⟹₂ Γ �
       exact (Derivation.cut
         b' bn').contra <| List.subset_def.mpr (by simp_all; grind)
 
-noncomputable def toProof (d : T ⟹₂ Γ) :
+theorem toProof (d : T ⟹₂ Γ) :
     ∃ A : List (Sentence L), (∀ ψ ∈ A, ψ ∈ T) ∧ Nonempty (⊢ᴸᴷ¹ Γ.toList ++ ∼Sequent.embed A) := by
   rcases toProofData d with ⟨A, hA, b⟩
   exact ⟨A, hA, ⟨b⟩⟩

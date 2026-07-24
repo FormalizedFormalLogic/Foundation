@@ -283,7 +283,7 @@ section
 
 variable [LogicalConnective F] [DeductiveExplosion S]
 
-def DeductiveExplosion.dexp! {𝓢 : S} (h : 𝓢 ⊢ ⊥) (φ : F) : 𝓢 ⊢ φ := by
+theorem DeductiveExplosion.dexp! {𝓢 : S} (h : 𝓢 ⊢ ⊥) (φ : F) : 𝓢 ⊢ φ := by
   rcases h with ⟨b⟩; exact ⟨dexp b φ⟩
 
 lemma inconsistent_iff_provable_bot {𝓢 : S} :
@@ -366,7 +366,7 @@ lemma axm_subset (𝓢 : S) : AdjunctiveSet.set 𝓢 ⊆ theory 𝓢 := fun _ hp
 
 protected def adjoin (φ : F) (𝓢 : S) : adjoin φ 𝓢 ⊢! φ := prfAxm (by simp)
 
-@[simp] def adjoin! (φ : F) (𝓢 : S) : adjoin φ 𝓢 ⊢ φ := provable_refl _ (by simp)
+@[simp] theorem adjoin! (φ : F) (𝓢 : S) : adjoin φ 𝓢 ⊢ φ := provable_refl _ (by simp)
 
 lemma le_of_subset (h : 𝓢 ⊆ 𝓣) : 𝓢 ⪯ 𝓣 := ⟨by rintro φ ⟨b⟩; exact ⟨weakening h b⟩⟩
 
@@ -376,7 +376,7 @@ abbrev weakerThanOfSubset (h : 𝓢 ⊆ 𝓣) : 𝓢 ⪯ 𝓣 := ⟨fun _ ↦ we
 
 def toAdjoin {𝓢 : S} : 𝓢 ⊢! ψ → adjoin φ 𝓢 ⊢! ψ := fun b ↦ wk (by simp) b
 
-def to_adjoin {𝓢 : S} : 𝓢 ⊢ ψ → adjoin φ 𝓢 ⊢ ψ := fun b ↦ weakening! (by simp) b
+theorem to_adjoin {𝓢 : S} : 𝓢 ⊢ ψ → adjoin φ 𝓢 ⊢ ψ := fun b ↦ weakening! (by simp) b
 
 end Axiomatized
 
