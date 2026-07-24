@@ -20,3 +20,8 @@ rev = "v4.32.1"
 scope = "leanprover-community"
 name = "mathlib"
 rev = "v4.32.1"
+
+[[require]]
+name = "axiom-audit"
+git = "https://github.com/SnO2WMaN/axiom-audit"
+rev = "827e715d39231df230cb5b1a200be07c151b323b"

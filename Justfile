@@ -22,3 +22,7 @@ mk-all:
 # Remove unused imports/variables and drop unnecessary `public` (run before merging any work)
 shake:
     lake shake --keep-public --fix
+
+# Audit Foundation for sorry/native_decide/unauthorized axioms (requires `lake build Foundation` first)
+axiom-audit:
+    lake exe axiom-audit --root Foundation
