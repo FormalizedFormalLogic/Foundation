@@ -121,12 +121,12 @@ variable [DecidableEq α]
 def hasDecEq : (φ ψ : Formula α) → Decidable (φ = ψ)
   | ⊥, ψ => by
     cases ψ using cases' <;>
-    { simp; try { exact isFalse not_false }; try { exact isTrue trivial } }
+    { simp only [reduceCtorEq]; try { exact isFalse not_false }; try { exact isTrue trivial } }
   | atom a, ψ => by
-    cases ψ using cases' <;> try { simp; exact isFalse not_false }
-    simp; exact decEq _ _
+    cases ψ using cases' <;> try { simp only [reduceCtorEq]; exact isFalse not_false }
+    simp only [atom.injEq]; exact decEq _ _
   | φ 🡒 ψ, χ => by
-    cases χ using cases' <;> try { simp; exact isFalse not_false }
+    cases χ using cases' <;> try { simp only [reduceCtorEq]; exact isFalse not_false }
     case himp φ' ψ' =>
       exact match hasDecEq φ φ' with
       | isTrue hp =>
@@ -135,7 +135,7 @@ def hasDecEq : (φ ψ : Formula α) → Decidable (φ = ψ)
         | isFalse hq => isFalse (by simp [hp, hq, imp_inj])
       | isFalse hp => isFalse (by simp [hp, imp_inj])
   | φ ⋏ ψ, χ => by
-    cases χ using cases' <;> try { simp; exact isFalse not_false }
+    cases χ using cases' <;> try { simp only [reduceCtorEq]; exact isFalse not_false }
     case hand φ' ψ' =>
       exact match hasDecEq φ φ' with
       | isTrue hp =>
@@ -144,7 +144,7 @@ def hasDecEq : (φ ψ : Formula α) → Decidable (φ = ψ)
         | isFalse hq => isFalse (by simp [hp, hq, and_inj])
       | isFalse hp => isFalse (by simp [hp, and_inj])
   | φ ⋎ ψ, χ => by
-    cases χ using cases' <;> try { simp; exact isFalse not_false }
+    cases χ using cases' <;> try { simp only [reduceCtorEq]; exact isFalse not_false }
     case hor φ' ψ' =>
       exact match hasDecEq φ φ' with
       | isTrue hp =>
