@@ -425,17 +425,17 @@ variable {M : Type w} {s : Structure L M}
 
 end
 
-def ballLT [Operator.LT L] (t : Semiterm L ξ n) (φ : Semiformula L ξ (n + 1)) : Semiformula L ξ n := ∀⁰[Operator.LT.lt.operator ![#0, Rew.bShift t]] φ
+def ballLT [Operator.LT L] (t : Semiterm L ξ n) (φ : Semiformula L ξ (n + 1)) : Semiformula L ξ n := ∀¹[Operator.LT.lt.operator ![#0, Rew.bShift t]] φ
 
-def bexsLT [Operator.LT L] (t : Semiterm L ξ n) (φ : Semiformula L ξ (n + 1)) : Semiformula L ξ n := ∃⁰[Operator.LT.lt.operator ![#0, Rew.bShift t]] φ
+def bexsLT [Operator.LT L] (t : Semiterm L ξ n) (φ : Semiformula L ξ (n + 1)) : Semiformula L ξ n := ∃¹[Operator.LT.lt.operator ![#0, Rew.bShift t]] φ
 
-def ballLE [Operator.LE L] (t : Semiterm L ξ n) (φ : Semiformula L ξ (n + 1)) : Semiformula L ξ n := ∀⁰[Operator.LE.le.operator ![#0, Rew.bShift t]] φ
+def ballLE [Operator.LE L] (t : Semiterm L ξ n) (φ : Semiformula L ξ (n + 1)) : Semiformula L ξ n := ∀¹[Operator.LE.le.operator ![#0, Rew.bShift t]] φ
 
-def bexsLE [Operator.LE L] (t : Semiterm L ξ n) (φ : Semiformula L ξ (n + 1)) : Semiformula L ξ n := ∃⁰[Operator.LE.le.operator ![#0, Rew.bShift t]] φ
+def bexsLE [Operator.LE L] (t : Semiterm L ξ n) (φ : Semiformula L ξ (n + 1)) : Semiformula L ξ n := ∃¹[Operator.LE.le.operator ![#0, Rew.bShift t]] φ
 
-def ballMem [Operator.Mem L] (t : Semiterm L ξ n) (φ : Semiformula L ξ (n + 1)) : Semiformula L ξ n := ∀⁰[Operator.Mem.mem.operator ![#0, Rew.bShift t]] φ
+def ballMem [Operator.Mem L] (t : Semiterm L ξ n) (φ : Semiformula L ξ (n + 1)) : Semiformula L ξ n := ∀¹[Operator.Mem.mem.operator ![#0, Rew.bShift t]] φ
 
-def bexsMem [Operator.Mem L] (t : Semiterm L ξ n) (φ : Semiformula L ξ (n + 1)) : Semiformula L ξ n := ∃⁰[Operator.Mem.mem.operator ![#0, Rew.bShift t]] φ
+def bexsMem [Operator.Mem L] (t : Semiterm L ξ n) (φ : Semiformula L ξ (n + 1)) : Semiformula L ξ n := ∃¹[Operator.Mem.mem.operator ![#0, Rew.bShift t]] φ
 
 end Semiformula
 
@@ -516,8 +516,8 @@ lemma eq_equal_iff [L.Eq] {φ : Semiformula L ξ₁ n₁} {t u : Semiterm L ξ�
   |         ⊥ => simp [Operator.operator, Operator.Eq.sentence_eq]
   |     _ ⋏ _ => simp [Operator.operator, Operator.Eq.sentence_eq]
   |     _ ⋎ _ => simp [Operator.operator, Operator.Eq.sentence_eq]
-  |      ∀⁰ _ => simp [Operator.operator, Operator.Eq.sentence_eq]
-  |      ∃⁰ _ => simp [Operator.operator, Operator.Eq.sentence_eq]
+  |      ∀¹ _ => simp [Operator.operator, Operator.Eq.sentence_eq]
+  |      ∃¹ _ => simp [Operator.operator, Operator.Eq.sentence_eq]
 
 lemma eq_lt_iff [L.LT] {φ : Semiformula L ξ₁ n₁} {t u : Semiterm L ξ₂ n₂} :
     ω ▹ φ = Operator.LT.lt.operator ![t, u]
@@ -537,8 +537,8 @@ lemma eq_lt_iff [L.LT] {φ : Semiformula L ξ₁ n₁} {t u : Semiterm L ξ₂ n
   |         ⊥ => simp [Operator.operator, Operator.LT.sentence_eq]
   |     _ ⋏ _ => simp [Operator.operator, Operator.LT.sentence_eq]
   |     _ ⋎ _ => simp [Operator.operator, Operator.LT.sentence_eq]
-  |      ∀⁰ _ => simp [Operator.operator, Operator.LT.sentence_eq]
-  |      ∃⁰ _ => simp [Operator.operator, Operator.LT.sentence_eq]
+  |      ∀¹ _ => simp [Operator.operator, Operator.LT.sentence_eq]
+  |      ∃¹ _ => simp [Operator.operator, Operator.LT.sentence_eq]
 
 lemma eq_mem_iff [L.Mem] {φ : Semiformula L ξ₁ n₁} {t u : Semiterm L ξ₂ n₂} :
     ω ▹ φ = Operator.Mem.mem.operator ![t, u]
@@ -558,8 +558,8 @@ lemma eq_mem_iff [L.Mem] {φ : Semiformula L ξ₁ n₁} {t u : Semiterm L ξ₂
   |         ⊥ => simp [Operator.operator, Operator.Mem.sentence_eq]
   |     _ ⋏ _ => simp [Operator.operator, Operator.Mem.sentence_eq]
   |     _ ⋎ _ => simp [Operator.operator, Operator.Mem.sentence_eq]
-  |      ∀⁰ _ => simp [Operator.operator, Operator.Mem.sentence_eq]
-  |      ∃⁰ _ => simp [Operator.operator, Operator.Mem.sentence_eq]
+  |      ∀¹ _ => simp [Operator.operator, Operator.Mem.sentence_eq]
+  |      ∃¹ _ => simp [Operator.operator, Operator.Mem.sentence_eq]
 
 end Rew
 

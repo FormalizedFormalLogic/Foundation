@@ -169,9 +169,9 @@ noncomputable def typedQuote {Γ : Finset (Proposition L)} : T ⟹₂ Γ → T.i
   |            or (φ := φ) (ψ := ψ) h b =>
     TDerivation.or' (show ⌜φ⌝ ⋎ ⌜ψ⌝ ∈ ⌜Γ⌝ by simpa using! Sequent.quote_mem_quote.mpr h) <| b.typedQuote.cast (by simp)
   |           all (φ := φ) h d =>
-    TDerivation.all' (show ∀⁰ ⌜φ⌝ ∈ ⌜Γ⌝ by simpa using! Sequent.quote_mem_quote.mpr h) <| d.typedQuote.cast (by simp)
+    TDerivation.all' (show ∀¹ ⌜φ⌝ ∈ ⌜Γ⌝ by simpa using! Sequent.quote_mem_quote.mpr h) <| d.typedQuote.cast (by simp)
   |          exs (φ := φ) h t d =>
-    TDerivation.exs' (show ∃⁰ ⌜φ⌝ ∈ ⌜Γ⌝ by simpa using! Sequent.quote_mem_quote.mpr h) ⌜t⌝ <| d.typedQuote.cast (by simp [Matrix.constant_eq_singleton])
+    TDerivation.exs' (show ∃¹ ⌜φ⌝ ∈ ⌜Γ⌝ by simpa using! Sequent.quote_mem_quote.mpr h) ⌜t⌝ <| d.typedQuote.cast (by simp [Matrix.constant_eq_singleton])
   |           wk d ss => TDerivation.wk d.typedQuote (by simpa)
   |           shift d => (TDerivation.shift d.typedQuote).cast (by simp)
   | cut (φ := φ) d dn =>

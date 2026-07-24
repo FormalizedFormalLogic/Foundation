@@ -16,7 +16,7 @@ variable {L : Language}
 
 inductive Positive (Ξ : Sequent L) : Sequent L → Type _
 | or : Positive Ξ (φ :: ψ :: Γ) → Positive Ξ (φ ⋎ ψ :: Γ)
-| exs : Positive Ξ (φ/[t] :: Γ) → Positive Ξ ((∃⁰ φ) :: Γ)
+| exs : Positive Ξ (φ/[t] :: Γ) → Positive Ξ ((∃¹ φ) :: Γ)
 | contraction : Positive Ξ Δ → Δ ⊆ Γ → Positive Ξ Γ
 | protected id : Positive Ξ Ξ
 
@@ -96,7 +96,7 @@ def K_left {p : ℙ} (φ ψ : Proposition L) : φ ⋏ ψ :: p ≼ φ :: p := tra
 
 def K_right {p : ℙ} (φ ψ : Proposition L) : φ ⋏ ψ :: p ≼ ψ :: p := trans (and φ ψ) (ofSubset <| by simp)
 
-def all {p : ℙ} (φ : Semiproposition L 1) (t) : (∀⁰ φ) :: p ≼ φ/[t] :: p := ⟨.exs (t := t) (by simpa [← Semiformula.neg_eq] using .id)⟩
+def all {p : ℙ} (φ : Semiproposition L 1) (t) : (∀¹ φ) :: p ≼ φ/[t] :: p := ⟨.exs (t := t) (by simpa [← Semiformula.neg_eq] using .id)⟩
 
 def minLeLeft (p q : ℙ) : p ⊓ q ≼ p := ofSubset (by simp [inf_def])
 
@@ -116,8 +116,8 @@ def Forces (p : ℙ) : Propositionᵢ L → Type u
   |    φ ⋏ ψ => Forces p φ × Forces p ψ
   |    φ ⋎ ψ => Forces p φ ⊕ Forces p ψ
   |    φ 🡒 ψ => (q : ℙ) → q ≼ p → Forces q φ → Forces q ψ
-  |     ∀⁰ φ => (t : SyntacticTerm L) → Forces p (φ/[t])
-  |     ∃⁰ φ => (t : SyntacticTerm L) × Forces p (φ/[t])
+  |     ∀¹ φ => (t : SyntacticTerm L) → Forces p (φ/[t])
+  |     ∃¹ φ => (t : SyntacticTerm L) × Forces p (φ/[t])
   termination_by φ => φ.complexity
 
 
@@ -153,13 +153,13 @@ def implyEquiv {φ ψ : Propositionᵢ L} : p ⊩ φ 🡒 ψ ≃ ((q : ℙ) → 
     unfold Forces
     exact .refl _
 
-def allEquiv {φ} : p ⊩ ∀⁰ φ ≃ ((t : SyntacticTerm L) → Forces p (φ/[t])) := by
+def allEquiv {φ} : p ⊩ ∀¹ φ ≃ ((t : SyntacticTerm L) → Forces p (φ/[t])) := by
   conv =>
     lhs
     unfold Forces
     exact .refl _
 
-def exsEquiv {φ} : p ⊩ ∃⁰ φ ≃ ((t : SyntacticTerm L) × Forces p (φ/[t])) := by
+def exsEquiv {φ} : p ⊩ ∃¹ φ ≃ ((t : SyntacticTerm L) × Forces p (φ/[t])) := by
   conv =>
     lhs
     unfold Forces
@@ -177,8 +177,8 @@ def monotone {q p : ℙ} (s : q ≼ p) : {φ : Propositionᵢ L} → p ⊩ φ �
   | φ ⋏ ψ, b => andEquiv.symm ⟨monotone s b.andEquiv.1, monotone s b.andEquiv.2⟩
   | φ ⋎ ψ, b => orEquiv.symm <| b.orEquiv.rec (fun b ↦ .inl <| b.monotone s) (fun b ↦ .inr <| b.monotone s)
   | φ 🡒 ψ, b => implyEquiv.symm fun r srq bφ ↦ b.implyEquiv r (srq.trans s) bφ
-  | ∀⁰ φ, b => allEquiv.symm fun t ↦ (b.allEquiv t).monotone s
-  | ∃⁰ φ, b =>
+  | ∀¹ φ, b => allEquiv.symm fun t ↦ (b.allEquiv t).monotone s
+  | ∃¹ φ, b =>
     let ⟨t, d⟩ : (t : SyntacticTerm L) × p ⊩ φ/[t] := b.exsEquiv
     exsEquiv.symm ⟨t, d.monotone s⟩
   termination_by φ => φ.complexity
@@ -191,8 +191,8 @@ def explosion {p : ℙ} (b : p ⊩ ⊥) : (φ : Propositionᵢ L) → p ⊩ φ
   | φ ⋏ ψ => andEquiv.symm ⟨b.explosion φ, b.explosion ψ⟩
   | φ ⋎ ψ => orEquiv.symm <| .inl <| b.explosion φ
   | φ 🡒 ψ => implyEquiv.symm fun q sqp dφ ↦ (b.monotone sqp).explosion ψ
-  | ∀⁰ φ => allEquiv.symm fun t ↦ b.explosion (φ/[t])
-  | ∃⁰ φ => exsEquiv.symm ⟨default, b.explosion (φ/[default])⟩
+  | ∀¹ φ => allEquiv.symm fun t ↦ b.explosion (φ/[t])
+  | ∃¹ φ => exsEquiv.symm ⟨default, b.explosion (φ/[default])⟩
   termination_by φ => φ.complexity
 
 def efq (φ : Propositionᵢ L) : ⊩ ⊥ 🡒 φ := fun _ ↦ implyEquiv.symm fun _ _ d ↦ d.explosion φ
@@ -283,18 +283,18 @@ protected def refl.or (ihφ : [φ] ⊩ φᴺ) (ihψ : [ψ] ⊩ ψᴺ) : [φ ⋎ 
     falsumEquiv.symm ⟨Derivation.cast band (by simp [inf_def]), by simp [band, hbbφ, hbbψ]⟩
 
 set_option backward.isDefEq.respectTransparency false in
-protected def refl.exs (d : ∀ x, [φ/[&x]] ⊩ (φ/[&x])ᴺ) : [∃⁰ φ] ⊩ (∃⁰ φ)ᴺ :=
+protected def refl.exs (d : ∀ x, [φ/[&x]] ⊩ (φ/[&x])ᴺ) : [∃¹ φ] ⊩ (∃¹ φ)ᴺ :=
   implyOf fun q f ↦
-    let x := Sequent.newVar ((∀⁰ ∼φ) :: ∼q)
+    let x := Sequent.newVar ((∀¹ ∼φ) :: ∼q)
     let ih : [φ/[&x]] ⊩ φᴺ/[&x] := cast (d x) (by simp [Semiformula.subst_doubleNegation])
     let b : [φ/[&x]] ⊓ q ⊩ ⊥ :=
       (f.allEquiv &x).implyEquiv ([φ/[&x]] ⊓ q) (StrongerThan.minLeRight _ _) (ih.monotone (StrongerThan.minLeLeft _ _))
     let ⟨b, hb⟩ := b.falsumEquiv
-    let ba : ⊢ᴸᴷ¹ (∀⁰ ∼φ) :: ∼q :=
+    let ba : ⊢ᴸᴷ¹ (∀¹ ∼φ) :: ∼q :=
       Derivation.genelalizeByNewver (m := x)
-        (by have : ¬Semiformula.FVar? (∀⁰ ∼φ) x := Sequent.not_fvar?_newVar (by simp)
+        (by have : ¬Semiformula.FVar? (∀¹ ∼φ) x := Sequent.not_fvar?_newVar (by simp)
             simpa using this)
-        (fun ψ hψ ↦ Sequent.not_fvar?_newVar (List.mem_cons_of_mem (∀⁰ ∼φ) hψ))
+        (fun ψ hψ ↦ Sequent.not_fvar?_newVar (List.mem_cons_of_mem (∀¹ ∼φ) hψ))
         (Derivation.cast b (by simp [inf_def]))
     falsumEquiv.symm ⟨ba, by simp [ba, hb]⟩
 
@@ -313,10 +313,10 @@ protected def refl : (φ : Proposition L) → [φ] ⊩ φᴺ
     let ihψ : [ψ] ⊩ ψᴺ := Forces.refl ψ
     andEquiv.symm ⟨ihφ.monotone (.K_left φ ψ), ihψ.monotone (.K_right φ ψ)⟩
   |     φ ⋎ ψ => refl.or (Forces.refl φ) (Forces.refl ψ)
-  |      ∀⁰ φ => allEquiv.symm fun t ↦
+  |      ∀¹ φ => allEquiv.symm fun t ↦
     let b : [φ/[t]] ⊩ φᴺ/[t] := by simpa [Semiformula.rew_doubleNegation] using Forces.refl (φ/[t])
     b.monotone (StrongerThan.all φ t)
-  |      ∃⁰ φ => refl.exs fun x ↦ Forces.refl (φ/[&x])
+  |      ∃¹ φ => refl.exs fun x ↦ Forces.refl (φ/[&x])
   termination_by φ => φ.complexity
 
 def conj : {Γ : Sequentᵢ L} → (b : (φ : Propositionᵢ L) → φ ∈ Γ → p ⊩ φ) → p ⊩ ⋀Γ
