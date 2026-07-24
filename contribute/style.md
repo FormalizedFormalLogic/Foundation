@@ -113,6 +113,14 @@ Citations go at the end of the docstring as a list, one line per BibTeX key, of 
 
 Attach `@[grind]` to lemmas and definitions that plausibly help `grind` close goals, choosing a direction (`@[grind =>]`, `@[grind .]`) where it matters. 🤖 Do not attach it mechanically to every declaration. The post-hoc form `attribute [grind] name₁ name₂ …` is also acceptable. Inside proofs, try `grind` before settling on a longer tactic sequence.
 
-## `set_option maxHeartbeats`
+## `set_option`
+
+Whenever you use `set_option` (including the single-declaration form `set_option foo false in`), always add a comment explaining the intent: which option is changed, why, and for which declaration. The comment must make clear to a later reader that the option change is deliberate, not a workaround left behind by accident. For example, when suppressing a linter warning:
+
+```lean
+-- Intentionally kept as a global simp lemma; scoping it would break implicit uses elsewhere.
+set_option warning.simp.varHead false in
+@[simp] lemma eq_zero : n = 0 := by cases n; omega
+```
 
 🤖 Do not raise `set_option maxHeartbeats` to push a proof through — it is a sign the proof is in an inefficient form. If a proof only works that way, refactor until the option is unnecessary: extract lemmas, narrow `grind`/`simp` sets, avoid computationally heavy definitions.
