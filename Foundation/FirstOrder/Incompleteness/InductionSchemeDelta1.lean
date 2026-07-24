@@ -716,7 +716,9 @@ alias ⟨IsSigma1.case, IsSigma1.mk⟩ := IsSigma1.case_iff
   constructor
   · intro h
     rcases h.case with (h | h | ⟨_,_,_,h⟩ | ⟨_,_,_,h⟩ | ⟨p₁,p₂,hp,hq,h⟩ | ⟨_,_,_,_,h⟩ | ⟨_,_,h⟩ | ⟨u,q',_,_,h⟩) <;>
-      simp [qqRel, qqNRel, qqVerum, qqFalsum, qqAnd, qqOr, qqExs, qqAll, qqBall] at h
+      simp only [qqAnd, qqVerum, qqFalsum, qqRel, qqNRel, qqOr, qqExs, qqBall, qqAll, add_left_inj, pair_ext_iff,
+        OfNat.ofNat_eq_ofNat, Nat.reduceEqDiff, OfNat.ofNat_ne_zero, OfNat.ofNat_ne_one, Nat.succ_ne_self, false_and,
+        true_and] at h
     · obtain ⟨rfl, rfl⟩ := h; exact ⟨hp, hq⟩
   · rintro ⟨hp, hq⟩
     exact IsSigma1.mk (Or.inr (Or.inr (Or.inr (Or.inr (Or.inl ⟨p, q, hp, hq, rfl⟩)))))
@@ -725,7 +727,9 @@ alias ⟨IsSigma1.case, IsSigma1.mk⟩ := IsSigma1.case_iff
   constructor
   · intro h
     rcases h.case with (h | h | ⟨_,_,_,h⟩ | ⟨_,_,_,h⟩ | ⟨_,_,_,_,h⟩ | ⟨p₁,p₂,hp,hq,h⟩ | ⟨_,_,h⟩ | ⟨u,q',_,_,h⟩) <;>
-      simp [qqRel, qqNRel, qqVerum, qqFalsum, qqAnd, qqOr, qqExs, qqAll, qqBall] at h
+      simp only [qqOr, qqVerum, qqFalsum, qqRel, qqNRel, qqAnd, qqExs, qqBall, qqAll, add_left_inj, pair_ext_iff,
+        OfNat.ofNat_eq_ofNat, Nat.reduceEqDiff, OfNat.ofNat_ne_zero, OfNat.ofNat_ne_one, Nat.succ_ne_self, false_and,
+        true_and] at h
     · obtain ⟨rfl, rfl⟩ := h; exact ⟨hp, hq⟩
   · rintro ⟨hp, hq⟩
     exact IsSigma1.mk (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inl ⟨p, q, hp, hq, rfl⟩))))))
@@ -734,7 +738,9 @@ alias ⟨IsSigma1.case, IsSigma1.mk⟩ := IsSigma1.case_iff
   constructor
   · intro h
     rcases h.case with (h | h | ⟨_,_,_,h⟩ | ⟨_,_,_,h⟩ | ⟨_,_,_,_,h⟩ | ⟨_,_,_,_,h⟩ | ⟨p₁,hp,h⟩ | ⟨u,q',_,_,h⟩) <;>
-      simp [qqRel, qqNRel, qqVerum, qqFalsum, qqAnd, qqOr, qqExs, qqAll, qqBall] at h
+      simp only [qqExs, qqVerum, qqFalsum, qqRel, qqNRel, qqAnd, qqOr, qqBall, qqAll, add_left_inj, pair_ext_iff,
+        OfNat.ofNat_eq_ofNat, Nat.reduceEqDiff, OfNat.ofNat_ne_zero, OfNat.ofNat_ne_one, Nat.succ_ne_self, false_and,
+        true_and] at h
     · obtain rfl := h; exact hp
   · rintro hp
     exact IsSigma1.mk (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inl ⟨p, hp, rfl⟩)))))))
