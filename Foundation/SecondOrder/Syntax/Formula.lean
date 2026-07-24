@@ -23,10 +23,10 @@ inductive Semiformula (L : Language) (Ξ ξ : Type*) : ℕ → ℕ → Type _ wh
   | falsum : Semiformula L Ξ ξ N n
   |    and : Semiformula L Ξ ξ N n → Semiformula L Ξ ξ N n → Semiformula L Ξ ξ N n
   |     or : Semiformula L Ξ ξ N n → Semiformula L Ξ ξ N n → Semiformula L Ξ ξ N n
-  |   all₀ : Semiformula L Ξ ξ N (n + 1) → Semiformula L Ξ ξ N n
-  |   exs₀ : Semiformula L Ξ ξ N (n + 1) → Semiformula L Ξ ξ N n
+  |   all₁ : Semiformula L Ξ ξ N (n + 1) → Semiformula L Ξ ξ N n
+  |   exs₁ : Semiformula L Ξ ξ N (n + 1) → Semiformula L Ξ ξ N n
   |   all₂ : Semiformula L Ξ ξ (N + 1) n → Semiformula L Ξ ξ N n
-  |   exs₁ : Semiformula L Ξ ξ (N + 1) n → Semiformula L Ξ ξ N n
+  |   exs₂ : Semiformula L Ξ ξ (N + 1) n → Semiformula L Ξ ξ N n
 
 abbrev Formula (L : Language) (Ξ ξ : Type*) := Semiformula L Ξ ξ 0 0
 
@@ -51,12 +51,12 @@ instance : Wedge (Semiformula L Ξ ξ N n) := ⟨and⟩
 instance : Vee (Semiformula L Ξ ξ N n) := ⟨or⟩
 
 instance : FirstOrder.Quantifier (Semiformula L Ξ ξ N) where
-  all := all₀
-  exs := exs₀
+  all := all₁
+  exs := exs₁
 
 instance : SecondOrder.Quantifier (Semiformula L Ξ ξ) where
-  all₁ := all₁
-  exs₁ := exs₁
+  all₁ := all₂
+  exs₁ := exs₂
 
 scoped notation:80 t " ∈# " X => Semiformula.bvar X t
 scoped notation:80 t " ∉# " X => Semiformula.nbvar X t
@@ -109,16 +109,16 @@ instance : DeMorgan (Semiformula L Ξ ξ N n) where
 @[simp] lemma neg_nfvar (X : Ξ) (t : Semiterm L ξ n) :
     ∼(t ∉& X : Semiformula L Ξ ξ N n) = t ∈& X := rfl
 
-@[simp] lemma neg_all₀ (φ : Semiformula L Ξ ξ N (n + 1)) :
+@[simp] lemma neg_all₁ (φ : Semiformula L Ξ ξ N (n + 1)) :
     ∼(∀¹ φ : Semiformula L Ξ ξ N n) = ∃¹ ∼φ := rfl
 
-@[simp] lemma neg_exs₀ (φ : Semiformula L Ξ ξ N (n + 1)) :
+@[simp] lemma neg_exs₁ (φ : Semiformula L Ξ ξ N (n + 1)) :
     ∼(∃¹ φ : Semiformula L Ξ ξ N n) = ∀¹ ∼φ := rfl
 
-@[simp] lemma neg_all₁ (φ : Semiformula L Ξ ξ (N + 1) n) :
+@[simp] lemma neg_all₂ (φ : Semiformula L Ξ ξ (N + 1) n) :
     ∼(∀² φ : Semiformula L Ξ ξ N n) = ∃² ∼φ := rfl
 
-@[simp] lemma neg_exs₁ (φ : Semiformula L Ξ ξ (N + 1) n) :
+@[simp] lemma neg_exs₂ (φ : Semiformula L Ξ ξ (N + 1) n) :
     ∼(∃² φ : Semiformula L Ξ ξ N n) = ∀² ∼φ := rfl
 
 lemma neg_neg (φ : Semiformula L Ξ ξ N n) : ∼∼φ = φ :=
@@ -146,17 +146,17 @@ instance : TildeInvolutive (Semiformula L Ξ ξ N n) := ⟨neg_neg⟩
 @[simp] lemma or_inj {φ₁ φ₂ ψ₁ ψ₂ : Semiformula L Ξ ξ N n} :
     φ₁ ⋎ φ₂ = ψ₁ ⋎ ψ₂ ↔ φ₁ = ψ₁ ∧ φ₂ = ψ₂ := iff_of_eq (by apply or.injEq)
 
-@[simp] lemma all₀_inj {φ ψ : Semiformula L Ξ ξ N (n + 1)} :
-    ∀¹ φ = ∀¹ ψ ↔ φ = ψ := iff_of_eq (by apply all₀.injEq)
+@[simp] lemma all₁_inj {φ ψ : Semiformula L Ξ ξ N (n + 1)} :
+    ∀¹ φ = ∀¹ ψ ↔ φ = ψ := iff_of_eq (by apply all₁.injEq)
 
-@[simp] lemma exs₀_inj {φ ψ : Semiformula L Ξ ξ N (n + 1)} :
-    ∃¹ φ = ∃¹ ψ ↔ φ = ψ := iff_of_eq (by apply exs₀.injEq)
+@[simp] lemma exs₁_inj {φ ψ : Semiformula L Ξ ξ N (n + 1)} :
+    ∃¹ φ = ∃¹ ψ ↔ φ = ψ := iff_of_eq (by apply exs₁.injEq)
 
-@[simp] lemma all₁_inj {φ ψ : Semiformula L Ξ ξ (N + 1) n} :
-    ∀² φ = ∀² ψ ↔ φ = ψ := iff_of_eq (by apply all₁.injEq)
+@[simp] lemma all₂_inj {φ ψ : Semiformula L Ξ ξ (N + 1) n} :
+    ∀² φ = ∀² ψ ↔ φ = ψ := iff_of_eq (by apply all₂.injEq)
 
-@[simp] lemma exs₁_inj {φ ψ : Semiformula L Ξ ξ (N + 1) n} :
-    ∃² φ = ∃² ψ ↔ φ = ψ := iff_of_eq (by apply exs₁.injEq)
+@[simp] lemma exs₂_inj {φ ψ : Semiformula L Ξ ξ (N + 1) n} :
+    ∃² φ = ∃² ψ ↔ φ = ψ := iff_of_eq (by apply exs₂.injEq)
 
 @[elab_as_elim]
 def cases' {C : ∀ N n, Semiformula L Ξ ξ N n → Sort w}
@@ -170,10 +170,10 @@ def cases' {C : ∀ N n, Semiformula L Ξ ξ N n → Sort w}
     (hFalsum : ∀ {N n}, C N n ⊥)
     (hAnd : ∀ {N n} (φ ψ : Semiformula L Ξ ξ N n), C N n (φ ⋏ ψ))
     (hOr : ∀ {N n} (φ ψ : Semiformula L Ξ ξ N n), C N n (φ ⋎ ψ))
-    (hAll₀ : ∀ {N n} (φ : Semiformula L Ξ ξ N (n + 1)), C N n (∀¹ φ))
-    (hExs₀ : ∀ {N n} (φ : Semiformula L Ξ ξ N (n + 1)), C N n (∃¹ φ))
-    (hAll₁ : ∀ {N n} (φ : Semiformula L Ξ ξ (N + 1) n), C N n (∀² φ))
-    (hExs₁ : ∀ {N n} (φ : Semiformula L Ξ ξ (N + 1) n), C N n (∃² φ))
+    (hAll₁ : ∀ {N n} (φ : Semiformula L Ξ ξ N (n + 1)), C N n (∀¹ φ))
+    (hExs₁ : ∀ {N n} (φ : Semiformula L Ξ ξ N (n + 1)), C N n (∃¹ φ))
+    (hAll₂ : ∀ {N n} (φ : Semiformula L Ξ ξ (N + 1) n), C N n (∀² φ))
+    (hExs₂ : ∀ {N n} (φ : Semiformula L Ξ ξ (N + 1) n), C N n (∃² φ))
     {N n} : (φ : Semiformula L Ξ ξ N n) → C N n φ
   |  rel r v => hRel r v
   | nrel r v => hNrel r v
@@ -185,10 +185,10 @@ def cases' {C : ∀ N n, Semiformula L Ξ ξ N n → Sort w}
   |        ⊥ => hFalsum
   |    φ ⋏ ψ => hAnd φ ψ
   |    φ ⋎ ψ => hOr φ ψ
-  |     ∀¹ φ => hAll₀ φ
-  |     ∃¹ φ => hExs₀ φ
-  |     ∀² φ => hAll₁ φ
-  |     ∃² φ => hExs₁ φ
+  |     ∀¹ φ => hAll₁ φ
+  |     ∃¹ φ => hExs₁ φ
+  |     ∀² φ => hAll₂ φ
+  |     ∃² φ => hExs₂ φ
 
 @[elab_as_elim]
 def rec' {C : ∀ N n, Semiformula L Ξ ξ N n → Sort w}
@@ -202,10 +202,10 @@ def rec' {C : ∀ N n, Semiformula L Ξ ξ N n → Sort w}
     (hFalsum : ∀ {N n}, C N n ⊥)
     (hAnd : ∀ {N n} (φ ψ : Semiformula L Ξ ξ N n), C N n φ → C N n ψ → C N n (φ ⋏ ψ))
     (hOr : ∀ {N n} (φ ψ : Semiformula L Ξ ξ N n), C N n φ → C N n ψ → C N n (φ ⋎ ψ))
-    (hAll₀ : ∀ {N n} (φ : Semiformula L Ξ ξ N (n + 1)), C N (n + 1) φ → C N n (∀¹ φ))
-    (hExs₀ : ∀ {N n} (φ : Semiformula L Ξ ξ N (n + 1)), C N (n + 1) φ → C N n (∃¹ φ))
-    (hAll₁ : ∀ {N n} (φ : Semiformula L Ξ ξ (N + 1) n), C (N + 1) n φ → C N n (∀² φ))
-    (hExs₁ : ∀ {N n} (φ : Semiformula L Ξ ξ (N + 1) n), C (N + 1) n φ → C N n (∃² φ))
+    (hAll₁ : ∀ {N n} (φ : Semiformula L Ξ ξ N (n + 1)), C N (n + 1) φ → C N n (∀¹ φ))
+    (hExs₁ : ∀ {N n} (φ : Semiformula L Ξ ξ N (n + 1)), C N (n + 1) φ → C N n (∃¹ φ))
+    (hAll₂ : ∀ {N n} (φ : Semiformula L Ξ ξ (N + 1) n), C (N + 1) n φ → C N n (∀² φ))
+    (hExs₂ : ∀ {N n} (φ : Semiformula L Ξ ξ (N + 1) n), C (N + 1) n φ → C N n (∃² φ))
     {N n} : (φ : Semiformula L Ξ ξ N n) → C N n φ
   |  rel r v => hRel r v
   | nrel r v => hNrel r v
@@ -216,15 +216,15 @@ def rec' {C : ∀ N n, Semiformula L Ξ ξ N n → Sort w}
   |        ⊤ => hVerum
   |        ⊥ => hFalsum
   |    φ ⋏ ψ => hAnd φ ψ
-    (rec' hRel hNrel hBvar hNbvar hFvar hNfvar hVerum hFalsum hAnd hOr hAll₀ hExs₀ hAll₁ hExs₁ φ)
-    (rec' hRel hNrel hBvar hNbvar hFvar hNfvar hVerum hFalsum hAnd hOr hAll₀ hExs₀ hAll₁ hExs₁ ψ)
+    (rec' hRel hNrel hBvar hNbvar hFvar hNfvar hVerum hFalsum hAnd hOr hAll₁ hExs₁ hAll₂ hExs₂ φ)
+    (rec' hRel hNrel hBvar hNbvar hFvar hNfvar hVerum hFalsum hAnd hOr hAll₁ hExs₁ hAll₂ hExs₂ ψ)
   |    φ ⋎ ψ => hOr φ ψ
-    (rec' hRel hNrel hBvar hNbvar hFvar hNfvar hVerum hFalsum hAnd hOr hAll₀ hExs₀ hAll₁ hExs₁ φ)
-    (rec' hRel hNrel hBvar hNbvar hFvar hNfvar hVerum hFalsum hAnd hOr hAll₀ hExs₀ hAll₁ hExs₁ ψ)
-  |     ∀¹ φ => hAll₀ φ (rec' hRel hNrel hBvar hNbvar hFvar hNfvar hVerum hFalsum hAnd hOr hAll₀ hExs₀ hAll₁ hExs₁ φ)
-  |     ∃¹ φ => hExs₀ φ (rec' hRel hNrel hBvar hNbvar hFvar hNfvar hVerum hFalsum hAnd hOr hAll₀ hExs₀ hAll₁ hExs₁ φ)
-  |     ∀² φ => hAll₁ φ (rec' hRel hNrel hBvar hNbvar hFvar hNfvar hVerum hFalsum hAnd hOr hAll₀ hExs₀ hAll₁ hExs₁ φ)
-  |     ∃² φ => hExs₁ φ (rec' hRel hNrel hBvar hNbvar hFvar hNfvar hVerum hFalsum hAnd hOr hAll₀ hExs₀ hAll₁ hExs₁ φ)
+    (rec' hRel hNrel hBvar hNbvar hFvar hNfvar hVerum hFalsum hAnd hOr hAll₁ hExs₁ hAll₂ hExs₂ φ)
+    (rec' hRel hNrel hBvar hNbvar hFvar hNfvar hVerum hFalsum hAnd hOr hAll₁ hExs₁ hAll₂ hExs₂ ψ)
+  |     ∀¹ φ => hAll₁ φ (rec' hRel hNrel hBvar hNbvar hFvar hNfvar hVerum hFalsum hAnd hOr hAll₁ hExs₁ hAll₂ hExs₂ φ)
+  |     ∃¹ φ => hExs₁ φ (rec' hRel hNrel hBvar hNbvar hFvar hNfvar hVerum hFalsum hAnd hOr hAll₁ hExs₁ hAll₂ hExs₂ φ)
+  |     ∀² φ => hAll₂ φ (rec' hRel hNrel hBvar hNbvar hFvar hNfvar hVerum hFalsum hAnd hOr hAll₁ hExs₁ hAll₂ hExs₂ φ)
+  |     ∃² φ => hExs₂ φ (rec' hRel hNrel hBvar hNbvar hFvar hNfvar hVerum hFalsum hAnd hOr hAll₁ hExs₁ hAll₂ hExs₂ φ)
 
 def complexity : Semiformula L Ξ ξ N n → ℕ
   |  rel _ _ => 0
@@ -276,25 +276,25 @@ def complexity : Semiformula L Ξ ξ N n → ℕ
 @[simp] lemma complexity_or' (φ ψ : Semiformula L Ξ ξ N n) :
     (φ.or ψ).complexity = max φ.complexity ψ.complexity + 1 := rfl
 
-@[simp] lemma complexity_all₀ (φ : Semiformula L Ξ ξ N (n + 1)) :
+@[simp] lemma complexity_all₁ (φ : Semiformula L Ξ ξ N (n + 1)) :
     (∀¹ φ).complexity = φ.complexity + 1 := rfl
-@[simp] lemma complexity_all₀' (φ : Semiformula L Ξ ξ N (n + 1)) :
-    φ.all₀.complexity = φ.complexity + 1 := rfl
-
-@[simp] lemma complexity_exs₀ (φ : Semiformula L Ξ ξ N (n + 1)) :
-    (∃¹ φ).complexity = φ.complexity + 1 := rfl
-@[simp] lemma complexity_exs₀' (φ : Semiformula L Ξ ξ N (n + 1)) :
-    φ.exs₀.complexity = φ.complexity + 1 := rfl
-
-@[simp] lemma complexity_all₁ (φ : Semiformula L Ξ ξ (N + 1) n) :
-    (∀² φ).complexity = φ.complexity + 1 := rfl
-@[simp] lemma complexity_all₁' (φ : Semiformula L Ξ ξ (N + 1) n) :
+@[simp] lemma complexity_all₁' (φ : Semiformula L Ξ ξ N (n + 1)) :
     φ.all₁.complexity = φ.complexity + 1 := rfl
 
-@[simp] lemma complexity_exs₁ (φ : Semiformula L Ξ ξ (N + 1) n) :
-    (∃² φ).complexity = φ.complexity + 1 := rfl
-@[simp] lemma complexity_exs₁' (φ : Semiformula L Ξ ξ (N + 1) n) :
+@[simp] lemma complexity_exs₁ (φ : Semiformula L Ξ ξ N (n + 1)) :
+    (∃¹ φ).complexity = φ.complexity + 1 := rfl
+@[simp] lemma complexity_exs₁' (φ : Semiformula L Ξ ξ N (n + 1)) :
     φ.exs₁.complexity = φ.complexity + 1 := rfl
+
+@[simp] lemma complexity_all₂ (φ : Semiformula L Ξ ξ (N + 1) n) :
+    (∀² φ).complexity = φ.complexity + 1 := rfl
+@[simp] lemma complexity_all₂' (φ : Semiformula L Ξ ξ (N + 1) n) :
+    φ.all₂.complexity = φ.complexity + 1 := rfl
+
+@[simp] lemma complexity_exs₂ (φ : Semiformula L Ξ ξ (N + 1) n) :
+    (∃² φ).complexity = φ.complexity + 1 := rfl
+@[simp] lemma complexity_exs₂' (φ : Semiformula L Ξ ξ (N + 1) n) :
+    φ.exs₂.complexity = φ.complexity + 1 := rfl
 
 end Semiformula
 
