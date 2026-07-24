@@ -23,7 +23,7 @@ success with value `r`: with `Option ℕ` as the fold's accumulator, the `Primre
 synthesise `Primcodable` for towers of products ending in `Option ℕ`, and elaboration diverges.
 The `ℕ` encoding costs one `- 1` per lookup and elaborates immediately.
 
-`Nat.natToList` (`Vorspiel/Computability.lean`) is used throughout for the same reason:
+`Nat.natToList` (`Vorspiel/Nat/Matrix.lean`) is used throughout for the same reason:
 `Nat.natToVec` produces a `Fin k → ℕ` whose length lives in its type, which no `Primrec`
 combinator can consume, so `natToList` is the same decoding without the dependency, and
 `natToVec_eq_some_iff` lets the correctness proofs move between them.
