@@ -7,6 +7,11 @@ on:
   pull_request:
     branches:
       - master
+  # Required so these checks also run against the queue's speculative merge
+  # commit; otherwise a merge queue entry has no status checks to wait on.
+  merge_group:
+    branches:
+      - master
   workflow_dispatch:
 
 concurrency:
