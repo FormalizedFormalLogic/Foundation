@@ -39,13 +39,13 @@ abbrev Eq.funcExt {k} (f : L.Func k) : Sentence L :=
   let σ : Semisentence L (k + k) :=
     (Matrix.conj fun i : Fin k ↦ “#(i.addCast k) = #(i.addNat k)”) 🡒
       op(=).operator ![Semiterm.func f (fun i ↦ #(i.addCast k)), Semiterm.func f (fun i ↦ #(i.addNat k))]
-  ∀⁰* σ
+  ∀¹* σ
 
 abbrev Eq.relExt {k} (r : L.Rel k) : Sentence L :=
   let σ : Semisentence L (k + k) :=
     (Matrix.conj fun i : Fin k ↦ “#(i.addCast k) = #(i.addNat k)”) 🡒
       Semiformula.rel r (fun i ↦ #(i.addCast k)) 🡒 Semiformula.rel r (fun i ↦ #(i.addNat k))
-  ∀⁰* σ
+  ∀¹* σ
 
 variable (L)
 
@@ -336,12 +336,12 @@ namespace Semiformula
 def existsUnique {ξ} (φ : Semiformula L ξ (n + 1)) : Semiformula L ξ n :=
   “∃ y, !φ y ⋯ ∧ ∀ z, !φ z ⋯ → z = y”
 
-prefix:64 "∃⁰! " => existsUnique
+prefix:64 "∃¹! " => existsUnique
 
 variable {M : Type*} [s : Structure L M] [Structure.Eq L M]
 
 @[simp] lemma eval_existsUnique {e ε} {φ : Semiformula L ξ (n + 1)} :
-    Eval (M := M) e ε (∃⁰! φ) ↔ ∃! x, Eval (M := M) (x :> e) ε φ := by
+    Eval (M := M) e ε (∃¹! φ) ↔ ∃! x, Eval (M := M) (x :> e) ε φ := by
   simp [existsUnique, Semiformula.eval_substs, Matrix.comp_vecCons'', ExistsUnique]
   simp [Function.comp_def]
 
@@ -358,11 +358,11 @@ macro_rules
   | `(⤫formula($type)[ $binders* | $fbinders* | ∃! $φ:first_order_formula ]) => do
     let v := mkIdent (Name.mkSimple ("var" ++ toString binders.size))
     let binders' := binders.insertIdx 0 v
-    `(∃⁰! ⤫formula($type)[ $binders'* | $fbinders* | $φ])
+    `(∃¹! ⤫formula($type)[ $binders'* | $fbinders* | $φ])
   | `(⤫formula($type)[ $binders* | $fbinders* | ∃! $x, $φ ])                 => do
     if binders.elem x then Macro.throwErrorAt x "error: variable is duplicated." else
     let binders' := binders.insertIdx 0 x
-    `(∃⁰! ⤫formula($type)[ $binders'* | $fbinders* | $φ ])
+    `(∃¹! ⤫formula($type)[ $binders'* | $fbinders* | $φ ])
 
 end BinderNotation
 

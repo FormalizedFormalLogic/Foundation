@@ -31,9 +31,9 @@ namespace LO.FirstOrder.Arithmetic.Bootstrapping
 /-! ## Internal iterated universal quantifier `qqAlls`
 
 `qqAlls p k = ^∀ ^∀ … ^∀ p` (`k` quantifiers), the internal counterpart of the meta universal
-closure `∀⁰*`. This is part (a) of arithmetizing `univCl` (part (b), the free→bound `fixitr`
+closure `∀¹*`. This is part (a) of arithmetizing `univCl` (part (b), the free→bound `fixitr`
 rewrite, is still open). The headline of this section is `quote_allClosure`:
-`⌜∀⁰* φ⌝ = qqAlls ⌜φ⌝ n`. -/
+`⌜∀¹* φ⌝ = qqAlls ⌜φ⌝ n`. -/
 
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 
@@ -131,14 +131,14 @@ lemma IsSemiformula.qqAlls {n k p : V} (h : IsSemiformula L (n + k) p) :
   exact hbv
 
 /-- The internal iterated-`^∀` computes the universal-closure code:
-`⌜∀⁰* φ⌝ = qqAlls ⌜φ⌝ n`. -/
+`⌜∀¹* φ⌝ = qqAlls ⌜φ⌝ n`. -/
 lemma quote_allClosure {n : ℕ} (φ : _root_.LO.FirstOrder.Semiformula L ℕ n) :
-    (⌜(∀⁰* φ : _root_.LO.FirstOrder.Semiformula L ℕ 0)⌝ : V) = qqAlls (⌜φ⌝ : V) (n : V) := by
+    (⌜(∀¹* φ : _root_.LO.FirstOrder.Semiformula L ℕ 0)⌝ : V) = qqAlls (⌜φ⌝ : V) (n : V) := by
   induction n
   case zero => simp
   case succ n ih =>
-    rw [show (∀⁰* φ : _root_.LO.FirstOrder.Semiformula L ℕ 0) = ∀⁰* (∀⁰ φ) from rfl]
-    have := ih (∀⁰ φ)
+    rw [show (∀¹* φ : _root_.LO.FirstOrder.Semiformula L ℕ 0) = ∀¹* (∀¹ φ) from rfl]
+    have := ih (∀¹ φ)
     rw [Semiformula.quote_all] at this
     rw [this, Nat.cast_succ, qqAlls_succ']
 
@@ -472,7 +472,7 @@ end fvarVec
 
 `IsSigma1 p` recognizes codes of `𝚺₁` formulas over `ℒₒᵣ`. By `Hierarchy.sigma₁_induction'`, over
 `ℒₒᵣ` a formula is `𝚺₁` iff built from atoms (`=,≠,<,≮,⊤,⊥`) by `∧`, `∨`, (unbounded) `∃`, and
-**bounded `∀`** `∀⁰[“#0 < !!(bShift t)”] φ`, whose body desugars to `(^#0 ^≮ u) ^⋎ φ` with
+**bounded `∀`** `∀¹[“#0 < !!(bShift t)”] φ`, whose body desugars to `(^#0 ^≮ u) ^⋎ φ` with
 `u = termBShift t`. The recognizer is applied to a code already known to be a semiformula, so atoms
 are matched purely structurally (no `IsUTermVec` guard). Positivity (`u` is a `bShift`-image) is
 `Δ₁`: `termBShift` only grows codes (`le_termBShift`), so `∃ t < u+1, u = termBShift t` is a
@@ -540,7 +540,7 @@ lemma termBV_termBShift_le {t : V} (ht : IsUTerm L t) (m : V) :
       have := H i (by rw [len_termBVVec hv]; exact hi)
       rwa [nth_termBVVec hv hi] at this
 
-/-- Internal bounded-`∀` code: `qqBall u q = ^∀ ((^#0 ^≮ u) ^⋎ q)`, the code of `∀⁰[“#0 < u”] q`.
+/-- Internal bounded-`∀` code: `qqBall u q = ^∀ ((^#0 ^≮ u) ^⋎ q)`, the code of `∀¹[“#0 < u”] q`.
 Packaged as a single `𝚺₁`-function (mirroring `qqNLT`/`qqRel`) so the `IsSigma1` fixpoint clause is
 flat. -/
 noncomputable def qqBall (u q : V) : V := qqAll (qqOr (Arithmetic.qqNLT (qqBvar 0) u) q)
@@ -783,15 +783,15 @@ variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 lemma succInd_eq (φ : _root_.LO.FirstOrder.ArithmeticSemiformula ℕ 1) :
     succInd φ =
       ((φ ⇜ (![‘0’] : Fin 1 → ArithmeticSemiterm ℕ 0))
-        🡒 ((∀⁰ (φ 🡒 (φ ⇜ (![‘#0 + 1’] : Fin 1 → ArithmeticSemiterm ℕ 1)))) 🡒 ∀⁰ φ)) := by
+        🡒 ((∀¹ (φ 🡒 (φ ⇜ (![‘#0 + 1’] : Fin 1 → ArithmeticSemiterm ℕ 1)))) 🡒 ∀¹ φ)) := by
   unfold succInd; simp
 
 /-- The typed Gödel code of the induction axiom body, built from the typed code `⌜φ⌝` purely with
-the existing typed constructors (`subst`, `🡒`, `∀⁰`). -/
+the existing typed constructors (`subst`, `🡒`, `∀¹`). -/
 lemma typed_quote_succInd (φ : _root_.LO.FirstOrder.ArithmeticSemiformula ℕ 1) :
     (⌜succInd φ⌝ : Bootstrapping.Semiformula V ℒₒᵣ 0) =
       (⌜φ ⇜ (![‘0’] : Fin 1 → ArithmeticSemiterm ℕ 0)⌝)
-        🡒 ((∀⁰ (⌜φ⌝ 🡒 ⌜φ ⇜ (![‘#0 + 1’] : Fin 1 → ArithmeticSemiterm ℕ 1)⌝)) 🡒 ∀⁰ ⌜φ⌝) := by
+        🡒 ((∀¹ (⌜φ⌝ 🡒 ⌜φ ⇜ (![‘#0 + 1’] : Fin 1 → ArithmeticSemiterm ℕ 1)⌝)) 🡒 ∀¹ ⌜φ⌝) := by
   unfold succInd
   rw [show φ ⇜ (![#0] : Fin 1 → ArithmeticSemiterm ℕ 1) = φ from by simp]
   simp
@@ -801,7 +801,7 @@ checks `subst (fvarVec m) b = (indBody K).val` to recover the core `K` and verif
 the induction-axiom shape. -/
 noncomputable def indBody (K : Bootstrapping.Semiformula V ℒₒᵣ 1) : Bootstrapping.Semiformula V ℒₒᵣ 0 :=
   (K.subst ![⌜(‘0’ : ArithmeticSemiterm ℕ 0)⌝])
-    🡒 ((∀⁰ (K 🡒 K.subst ![⌜(‘#0 + 1’ : ArithmeticSemiterm ℕ 1)⌝])) 🡒 ∀⁰ K)
+    🡒 ((∀¹ (K 🡒 K.subst ![⌜(‘#0 + 1’ : ArithmeticSemiterm ℕ 1)⌝])) 🡒 ∀¹ K)
 
 /-- `indBody ⌜ψ⌝ = ⌜succInd ψ⌝`: the typed reconstruction matches the actual code. -/
 lemma indBody_quote (φ : _root_.LO.FirstOrder.ArithmeticSemiformula ℕ 1) :
@@ -969,7 +969,7 @@ the genuine remaining math. -/
 theorem closure_inversion {m : ℕ} (β : _root_.LO.FirstOrder.ArithmeticSemiformula ℕ m) (γ : _root_.LO.FirstOrder.ArithmeticSemiformula ℕ 1)
     (hfree : β.freeVariables = ∅) (hbv : Bootstrapping.bv (V := ℕ) ℒₒᵣ (⌜β⌝ : ℕ) = m)
     (hβγ : β ⇜ (fun i : Fin m ↦ (&↑i : SyntacticTerm ℒₒᵣ)) = succInd γ) :
-    (∀⁰* β : _root_.LO.FirstOrder.ArithmeticSemiformula ℕ 0) = (succInd γ).univCl' := by
+    (∀¹* β : _root_.LO.FirstOrder.ArithmeticSemiformula ℕ 0) = (succInd γ).univCl' := by
   set χ : _root_.LO.FirstOrder.ArithmeticSemiformula ℕ 0 := succInd γ with hχ
   -- (*) code-level: `⌜fixitr 0 m ▹ χ⌝ = ⌜β⌝` (rebind composite = castLE on freevar-free β; codes
   -- erase the level index, sidestepping the `0 + m` vs `m` cast)
@@ -1014,7 +1014,7 @@ theorem closure_inversion {m : ℕ} (β : _root_.LO.FirstOrder.ArithmeticSemifor
       (Rew.fixitr 0 χ.fvSup ▹ χ : _root_.LO.FirstOrder.ArithmeticSemiformula ℕ (0 + χ.fvSup)) (by omega)]
   have hm : m = χ.fvSup := by
     rw [← hbv, ← hcodeβ, hcode]; exact Bootstrapping.bv_quote_fixitr χ
-  -- conclude via codes: `⌜∀⁰* β⌝ = qqAlls ⌜β⌝ m = qqAlls ⌜fixitr 0 χ.fvSup ▹ χ⌝ (0+χ.fvSup) = ⌜χ.univCl'⌝`
+  -- conclude via codes: `⌜∀¹* β⌝ = qqAlls ⌜β⌝ m = qqAlls ⌜fixitr 0 χ.fvSup ▹ χ⌝ (0+χ.fvSup) = ⌜χ.univCl'⌝`
   apply (Semiformula.quote_inj_iff (L := ℒₒᵣ) (V := ℕ)).mp
   rw [Bootstrapping.quote_allClosure (V := ℕ) β, Semiformula.univCl',
     Bootstrapping.quote_allClosure (V := ℕ) (Rew.fixitr 0 χ.fvSup ▹ χ), ← hcodeβ, hcode, hm]
@@ -1058,8 +1058,8 @@ theorem chUniv_mem_iff (φ : _root_.LO.FirstOrder.ArithmeticSemiformula ℕ 0) :
       have hnem := Finset.nonempty_of_ne_empty hne
       obtain ⟨hge, hpred⟩ := step (β.freeVariables.min' hnem) (β.freeVariables.min'_mem hnem)
       exact absurd (β.freeVariables.min'_le _ hpred) (by omega)
-    -- (3) `φ = ∀⁰* β`
-    have hφ : φ = (∀⁰* β : _root_.LO.FirstOrder.ArithmeticSemiformula ℕ 0) := by
+    -- (3) `φ = ∀¹* β`
+    have hφ : φ = (∀¹* β : _root_.LO.FirstOrder.ArithmeticSemiformula ℕ 0) := by
       apply (Semiformula.quote_inj_iff (L := ℒₒᵣ) (V := ℕ)).mp
       rw [hp, Bootstrapping.quote_allClosure (V := ℕ) β]; simp
     rw [hφ]
@@ -1126,9 +1126,9 @@ noncomputable instance InductionScheme.delta1_univ :
 /-! ## Correctness of `IsSigma1`: `IsSigma1 ⌜ψ⌝ ↔ Hierarchy 𝚺 1 ψ` -/
 
 open Bootstrapping in
-/-- The code of the bounded universal `∀⁰[#0 < bShift t] φ` is `qqBall (termBShift ⌜t⌝) ⌜φ⌝`. -/
+/-- The code of the bounded universal `∀¹[#0 < bShift t] φ` is `qqBall (termBShift ⌜t⌝) ⌜φ⌝`. -/
 lemma quote_ball {n : ℕ} (t : SyntacticSemiterm ℒₒᵣ n) (φ : _root_.LO.FirstOrder.ArithmeticSemiformula ℕ (n + 1)) :
-    (⌜(∀⁰[“#0 < !!(Rew.bShift t)”] φ : _root_.LO.FirstOrder.ArithmeticSemiformula ℕ n)⌝ : ℕ)
+    (⌜(∀¹[“#0 < !!(Rew.bShift t)”] φ : _root_.LO.FirstOrder.ArithmeticSemiformula ℕ n)⌝ : ℕ)
       = qqBall (termBShift ℒₒᵣ (⌜t⌝ : ℕ)) (⌜φ⌝ : ℕ) := by
   rw [Semiformula.ball_eq, Semiformula.imp_eq]
   simp only [Semiformula.Operator.lt_def, Semiformula.neg_rel, Semiformula.quote_all,
@@ -1197,7 +1197,7 @@ lemma hierarchy_of_isSigma1 {n : ℕ} (ψ : _root_.LO.FirstOrder.ArithmeticSemif
       obtain ⟨s, hs⟩ := Bootstrapping.IsSemiterm.sound
         ((IsSemiterm.def (L := ℒₒᵣ)).mpr ⟨ht,
           (termBV_termBShift_le (L := ℒₒᵣ) ht _).mp ((IsSemiterm.def (L := ℒₒᵣ)).mp htmsf).2⟩)
-      have heq : (∀⁰ φ) = ∀⁰[“#0 < !!(Rew.bShift s)”] φ₂ := by
+      have heq : (∀¹ φ) = ∀¹[“#0 < !!(Rew.bShift s)”] φ₂ := by
         apply (Semiformula.quote_inj_iff (L := ℒₒᵣ) (V := ℕ)).mp
         rw [Semiformula.quote_all (V := ℕ) φ, hφeq, quote_ball, hs, hφ₂]
         rfl
@@ -1315,7 +1315,7 @@ theorem chSigma1_mem_iff (φ : _root_.LO.FirstOrder.ArithmeticSemiformula ℕ 0)
       have hnem := Finset.nonempty_of_ne_empty hne
       obtain ⟨hge, hpred⟩ := step (β.freeVariables.min' hnem) (β.freeVariables.min'_mem hnem)
       exact absurd (β.freeVariables.min'_le _ hpred) (by omega)
-    have hφ : φ = (∀⁰* β : _root_.LO.FirstOrder.ArithmeticSemiformula ℕ 0) := by
+    have hφ : φ = (∀¹* β : _root_.LO.FirstOrder.ArithmeticSemiformula ℕ 0) := by
       apply (Semiformula.quote_inj_iff (L := ℒₒᵣ) (V := ℕ)).mp
       rw [hp, Bootstrapping.quote_allClosure (V := ℕ) β]; simp
     rw [hφ]

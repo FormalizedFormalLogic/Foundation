@@ -140,7 +140,7 @@ section Multidiagonalization
 
 /-- $\mathrm{diag}_i(\vec{x}) := (\forall \vec{y})\left[ \left(\bigwedge_j \mathrm{ssnums}(y_j, x_j, \vec{x})\right) \to \theta_i(\vec{y}) \right]$ -/
 noncomputable def multidiag (θ : ArithmeticSemisentence k) : ArithmeticSemisentence k :=
-  ∀⁰^[k] (
+  ∀¹^[k] (
     (Matrix.conj fun j : Fin k ↦ (Rew.subst <| #(j.addCast k) :> #(j.addNat k) :> fun l ↦ #(l.addNat k)) ▹ ssnums.val) 🡒
     (Rew.subst fun j ↦ #(j.addCast k)) ▹ θ)
 
@@ -198,7 +198,7 @@ noncomputable def parameterizedFixedpoint (θ : ArithmeticSemisentence (k + 1)) 
     (Rew.subst (⌜parameterizedDiag θ⌝ :> fun j ↦ #j)) ▹ parameterizedDiag θ
 
 theorem parameterized_diagonal (θ : ArithmeticSemisentence (k + 1)) :
-    T ⊢ ∀⁰* (parameterizedFixedpoint θ 🡘 “!θ !!(⌜parameterizedFixedpoint θ⌝) ⋯”) :=
+    T ⊢ ∀¹* (parameterizedFixedpoint θ 🡘 “!θ !!(⌜parameterizedFixedpoint θ⌝) ⋯”) :=
   haveI : 𝗘𝗤 _ ⪯ T := Entailment.WeakerThan.trans (𝓣 := 𝗜𝚺₁) inferInstance inferInstance
   complete.{0} T _ fun (V : Type) _ _ ↦ by
     haveI : V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁ := ModelsTheory.of_provably_subtheory V 𝗜𝚺₁ T inferInstance
@@ -217,7 +217,7 @@ theorem parameterized_diagonal (θ : ArithmeticSemisentence (k + 1)) :
       _ ↔ V ⊧/(⌜parameterizedFixedpoint θ⌝ :> params) θ := by simp [ht]
 
 theorem parameterized_diagonal₁ (θ : ArithmeticSemisentence 2) :
-    T ⊢ ∀⁰ (parameterizedFixedpoint θ 🡘 θ/[⌜parameterizedFixedpoint θ⌝, #0]) := by
+    T ⊢ ∀¹ (parameterizedFixedpoint θ 🡘 θ/[⌜parameterizedFixedpoint θ⌝, #0]) := by
   simpa [allClosure, BinderNotation.finSuccItr, Matrix.fun_eq_vec_one] using
     parameterized_diagonal (T := T) θ
 
