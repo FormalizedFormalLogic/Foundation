@@ -95,6 +95,7 @@ namespace Fin1
 
 variable {n : Fin 1}
 
+set_option warning.simp.varHead false in
 @[simp] lemma eq_one : n = 0 := by cases n; omega;
 @[simp] lemma not_lt_zero : ¬0 < n := by simp [eq_one];
 

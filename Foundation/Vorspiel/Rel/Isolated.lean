@@ -15,6 +15,7 @@ def Isolated (R : Rel α α) := ∀ ⦃x y⦄, ¬R x y
 class IsIsolated (R : Rel α α) where
   isolated : Isolated R
 
+set_option warning.simp.varHead false in
 @[simp] lemma isolated [IsIsolated R] {x y : α} : ¬R x y := by apply IsIsolated.isolated
 
 instance [IsIsolated R] : IsCoreflexive R := ⟨by simp_all [Coreflexive]⟩

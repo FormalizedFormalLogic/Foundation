@@ -7,7 +7,7 @@ public import Mathlib.Data.Set.Countable
 
 namespace Nat
 
-lemma monotone_of_succ_monotone {r : ℕ → ℕ → Prop} (rfx : Reflexive r) (tr : IsTrans ℕ r)
+lemma monotone_of_succ_monotone {r : ℕ → ℕ → Prop} (rfx : Std.Refl r) (tr : IsTrans ℕ r)
     (succ : ∀ n, r n (n + 1)) : n ≤ m → r n m := by
   revert n m
   suffices ∀ n d, r n (n + d) by
@@ -16,7 +16,7 @@ lemma monotone_of_succ_monotone {r : ℕ → ℕ → Prop} (rfx : Reflexive r) (
     grind
   intro n d
   induction d
-  case zero => simp [rfx n]
+  case zero => simp [rfx.refl n]
   case succ d ih =>
     simpa using! tr.trans _ _ _ ih (succ (n + d))
 
@@ -158,7 +158,7 @@ theorem exists_genericFilter_of_countable
   let s (n : ℕ) : α := n.rec a fun i ↦ (D i).val.choose
   have hs : ∀ i j, i ≤ j → s i ≥ s j := fun i j hij ↦
     Nat.monotone_of_succ_monotone (r := fun i j ↦ s i ≥ s j)
-      (fun _ ↦ le_refl _)
+      ⟨fun _ ↦ le_refl _⟩
       ⟨fun _ _ _ ↦ ge_trans⟩
       (by simp [s]) hij
   refine ⟨ofDescendingChain s hs, ⟨?_⟩, ?_⟩
