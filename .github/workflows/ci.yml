@@ -56,6 +56,9 @@ jobs:
       - name: Build Foundation
         run: lake build Foundation
 
+      - name: Check sorry-freeness and axiom allowlist (axiom-audit)
+        run: lake exe axiom-audit
+
       - name: Build docs
         run: lake build Foundation:docs
 
