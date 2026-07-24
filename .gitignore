@@ -10,9 +10,11 @@ _out
 # import graph
 import_graph.pdf
 
+# direnv
+.envrc
+
+# Notes
+.notes
+
 # Claude
 .claude/settings.local.json
-
-# Codex
-AGENTS.md
-
