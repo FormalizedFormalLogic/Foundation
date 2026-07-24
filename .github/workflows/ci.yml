@@ -65,11 +65,9 @@ jobs:
           key: ${{ steps.cache-restore.outputs.cache-primary-key }}
 
       - uses: ts-graphviz/setup-graphviz@v2
+      - uses: extractions/setup-just@v3
       - name: Generate import graph
-        run: |
-          lake exe graph ./import_graph.png
-          lake exe graph ./import_graph.pdf
-          lake exe graph ./import_graph.html
+        run: just import-graph
 
       - name: Upload lean artifacts
         uses: actions/upload-artifact@v7
@@ -88,31 +86,34 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
+      - uses: extractions/setup-just@v3
       - name: Install bibtool
         run: |
           sudo apt-get update
           sudo apt-get install -y bibtool
-      - name: Format references.bib
+      - name: Check references.bib is formatted
         run: |
-          bibtool -r .bibtoolrsc -i references.bib -o references.bib.formatted
-      - name: Check if formatted correctly
-        run: |
-          diff -u references.bib references.bib.formatted || (echo "references.bib is not formatted" && exit 1)
+          just format-references
+          if [ -n "$(git diff)" ]; then
+            echo "references.bib is not formatted. Please run 'just format-references' and commit the changes."
+            exit 1
+          fi
 
   mk-all-check:
     name: Check mk_all executed
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
+      - uses: extractions/setup-just@v3
       - name: Setup elan
         run: |
           curl https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -sSf | sh -s -- -y --default-toolchain none
           echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
       - name: Check mk_all executed
         run: |
-          lake exe mk_all --module
+          just mk-all
           if [ -n "$(git diff)" ]; then
-            echo "Files were modified by mk_all. Please run 'lake exe mk_all --module' and commit the changes."
+            echo "Files were modified by mk_all. Please run 'just mk-all' and commit the changes."
             exit 1
           fi
 
