@@ -89,22 +89,22 @@ end ToString
 @[simp] lemma imp_inj {φ₁ φ₂ ψ₁ ψ₂ : Semiformulaᵢ L ξ n} :
     φ₁ 🡒 φ₂ = ψ₁ 🡒 ψ₂ ↔ φ₁ = ψ₁ ∧ φ₂ = ψ₂ := by simp [Arrow.arrow]
 
-@[simp] lemma all_inj (φ ψ : Semiformulaᵢ L ξ (n + 1)) : ∀⁰ φ = ∀⁰ ψ ↔ φ = ψ := by
+@[simp] lemma all_inj (φ ψ : Semiformulaᵢ L ξ (n + 1)) : ∀¹ φ = ∀¹ ψ ↔ φ = ψ := by
   simp [UnivQuantifier.all]
 
-@[simp] lemma exs_inj (φ ψ : Semiformulaᵢ L ξ (n + 1)) : ∃⁰ φ = ∃⁰ ψ ↔ φ = ψ := by
+@[simp] lemma exs_inj (φ ψ : Semiformulaᵢ L ξ (n + 1)) : ∃¹ φ = ∃¹ ψ ↔ φ = ψ := by
   simp [ExsQuantifier.exs]
 
-@[simp] lemma allClosure_inj (φ ψ : Semiformulaᵢ L ξ n) : ∀⁰* φ = ∀⁰* ψ ↔ φ = ψ := by
+@[simp] lemma allClosure_inj (φ ψ : Semiformulaᵢ L ξ n) : ∀¹* φ = ∀¹* ψ ↔ φ = ψ := by
   induction n <;> simp [*, allClosure_succ]
 
-@[simp] lemma exsClosure_inj (φ ψ : Semiformulaᵢ L ξ n) : ∃⁰* φ = ∃⁰* ψ ↔ φ = ψ := by
+@[simp] lemma exsClosure_inj (φ ψ : Semiformulaᵢ L ξ n) : ∃¹* φ = ∃¹* ψ ↔ φ = ψ := by
   induction n <;> simp [*, exsClosure_succ]
 
-@[simp] lemma allItr_inj {k} (φ ψ : Semiformulaᵢ L ξ (n + k)) : ∀⁰^[k] φ = ∀⁰^[k] ψ ↔ φ = ψ := by
+@[simp] lemma allItr_inj {k} (φ ψ : Semiformulaᵢ L ξ (n + k)) : ∀¹^[k] φ = ∀¹^[k] ψ ↔ φ = ψ := by
   induction k <;> simp [*, allItr_succ]
 
-@[simp] lemma exsItr_inj {k} (φ ψ : Semiformulaᵢ L ξ (n + k)) : ∃⁰^[k] φ = ∃⁰^[k] ψ ↔ φ = ψ := by
+@[simp] lemma exsItr_inj {k} (φ ψ : Semiformulaᵢ L ξ (n + k)) : ∃¹^[k] φ = ∃¹^[k] ψ ↔ φ = ψ := by
   induction k <;> simp [*, exsItr_succ]
 
 def complexity {n} : Semiformulaᵢ L ξ n → ℕ
@@ -113,8 +113,8 @@ def complexity {n} : Semiformulaᵢ L ξ n → ℕ
 |   φ ⋏ ψ => max φ.complexity ψ.complexity + 1
 |   φ ⋎ ψ => max φ.complexity ψ.complexity + 1
 |   φ 🡒 ψ => max φ.complexity ψ.complexity + 1
-|    ∀⁰ φ => φ.complexity + 1
-|    ∃⁰ φ => φ.complexity + 1
+|    ∀¹ φ => φ.complexity + 1
+|    ∃¹ φ => φ.complexity + 1
 
 @[simp] lemma complexity_top : complexity (⊤ : Semiformulaᵢ L ξ n) = 1 := rfl
 
@@ -131,10 +131,10 @@ def complexity {n} : Semiformulaᵢ L ξ n → ℕ
 @[simp] lemma complexity_imp (φ ψ : Semiformulaᵢ L ξ n) : complexity (φ 🡒 ψ) = max φ.complexity ψ.complexity + 1 := rfl
 @[simp] lemma complexity_imp' (φ ψ : Semiformulaᵢ L ξ n) : complexity (imp φ ψ) = max φ.complexity ψ.complexity + 1 := rfl
 
-@[simp] lemma complexity_all (φ : Semiformulaᵢ L ξ (n + 1)) : complexity (∀⁰ φ) = φ.complexity + 1 := rfl
+@[simp] lemma complexity_all (φ : Semiformulaᵢ L ξ (n + 1)) : complexity (∀¹ φ) = φ.complexity + 1 := rfl
 @[simp] lemma complexity_all' (φ : Semiformulaᵢ L ξ (n + 1)) : complexity (all φ) = φ.complexity + 1 := rfl
 
-@[simp] lemma complexity_exs (φ : Semiformulaᵢ L ξ (n + 1)) : complexity (∃⁰ φ) = φ.complexity + 1 := rfl
+@[simp] lemma complexity_exs (φ : Semiformulaᵢ L ξ (n + 1)) : complexity (∃¹ φ) = φ.complexity + 1 := rfl
 @[simp] lemma complexity_exs' (φ : Semiformulaᵢ L ξ (n + 1)) : complexity (exs φ) = φ.complexity + 1 := rfl
 
 @[simp] lemma complexity_neg (φ : Semiformulaᵢ L ξ n) : complexity (∼φ) = complexity φ + 1 := by simp [neg_def]
@@ -146,16 +146,16 @@ def cases' {C : ∀ n, Semiformulaᵢ L ξ n → Sort w}
   (hAnd : ∀ {n : ℕ} (φ ψ : Semiformulaᵢ L ξ n), C n (φ ⋏ ψ))
   (hOr : ∀ {n : ℕ} (φ ψ : Semiformulaᵢ L ξ n), C n (φ ⋎ ψ))
   (hImp : ∀ {n : ℕ} (φ ψ : Semiformulaᵢ L ξ n), C n (φ 🡒 ψ))
-  (hAll : ∀ {n : ℕ} (φ : Semiformulaᵢ L ξ (n + 1)), C n (∀⁰ φ))
-  (hExs : ∀ {n : ℕ} (φ : Semiformulaᵢ L ξ (n + 1)), C n (∃⁰ φ)) {n} :
+  (hAll : ∀ {n : ℕ} (φ : Semiformulaᵢ L ξ (n + 1)), C n (∀¹ φ))
+  (hExs : ∀ {n : ℕ} (φ : Semiformulaᵢ L ξ (n + 1)), C n (∃¹ φ)) {n} :
     (φ : Semiformulaᵢ L ξ n) → C n φ
   | rel r v => hRel r v
   |       ⊥ => hFalsum
   |   φ ⋏ ψ => hAnd φ ψ
   |   φ ⋎ ψ => hOr φ ψ
   |   φ 🡒 ψ => hImp φ ψ
-  |    ∀⁰ φ => hAll φ
-  |    ∃⁰ φ => hExs φ
+  |    ∀¹ φ => hAll φ
+  |    ∃¹ φ => hExs φ
 
 @[elab_as_elim]
 def rec' {C : ∀ n, Semiformulaᵢ L ξ n → Sort w}
@@ -164,16 +164,16 @@ def rec' {C : ∀ n, Semiformulaᵢ L ξ n → Sort w}
   (hAnd : ∀ {n : ℕ} (φ ψ : Semiformulaᵢ L ξ n), C n φ → C n ψ → C n (φ ⋏ ψ))
   (hOr : ∀ {n : ℕ} (φ ψ : Semiformulaᵢ L ξ n), C n φ → C n ψ → C n (φ ⋎ ψ))
   (hImp : ∀ {n : ℕ} (φ ψ : Semiformulaᵢ L ξ n), C n φ → C n ψ → C n (φ 🡒 ψ))
-  (hAll : ∀ {n : ℕ} (φ : Semiformulaᵢ L ξ (n + 1)), C (n + 1) φ → C n (∀⁰ φ))
-  (hExs : ∀ {n : ℕ} (φ : Semiformulaᵢ L ξ (n + 1)), C (n + 1) φ → C n (∃⁰ φ)) {n} :
+  (hAll : ∀ {n : ℕ} (φ : Semiformulaᵢ L ξ (n + 1)), C (n + 1) φ → C n (∀¹ φ))
+  (hExs : ∀ {n : ℕ} (φ : Semiformulaᵢ L ξ (n + 1)), C (n + 1) φ → C n (∃¹ φ)) {n} :
     (φ : Semiformulaᵢ L ξ n) → C n φ
   | rel r v => hRel r v
   |       ⊥ => hFalsum
   |   φ ⋏ ψ => hAnd φ ψ (rec' hRel hFalsum hAnd hOr hImp hAll hExs φ) (rec' hRel hFalsum hAnd hOr hImp hAll hExs ψ)
   |   φ ⋎ ψ => hOr φ ψ (rec' hRel hFalsum hAnd hOr hImp hAll hExs φ) (rec' hRel hFalsum hAnd hOr hImp hAll hExs ψ)
   |   φ 🡒 ψ => hImp φ ψ (rec' hRel hFalsum hAnd hOr hImp hAll hExs φ) (rec' hRel hFalsum hAnd hOr hImp hAll hExs ψ)
-  |    ∀⁰ φ => hAll φ (rec' hRel hFalsum hAnd hOr hImp hAll hExs φ)
-  |    ∃⁰ φ => hExs φ (rec' hRel hFalsum hAnd hOr hImp hAll hExs φ)
+  |    ∀¹ φ => hAll φ (rec' hRel hFalsum hAnd hOr hImp hAll hExs φ)
+  |    ∃¹ φ => hExs φ (rec' hRel hFalsum hAnd hOr hImp hAll hExs φ)
 
 section Decidable
 
@@ -218,10 +218,10 @@ def hasDecEq {n} : (φ ψ : Semiformulaᵢ L ξ n) → Decidable (φ = ψ)
           | isTrue hq  => isTrue (hp ▸ hq ▸ rfl)
           | isFalse hq => isFalse (by simp [hp, hq])
         | isFalse hp => isFalse (by simp [hp])
-  | ∀⁰ φ, ψ => by
+  | ∀¹ φ, ψ => by
       cases ψ using cases' <;> try { simpa using isFalse not_false }
       case hAll φ' => simpa using hasDecEq φ φ'
-  | ∃⁰ φ, ψ => by
+  | ∃¹ φ, ψ => by
       cases ψ using cases' <;> try { simpa using isFalse not_false }
       case hExs φ' => simpa using hasDecEq φ φ'
 
@@ -239,7 +239,7 @@ inductive IsNegative : Semiformulaᵢ L ξ n → Prop
   | falsum : IsNegative ⊥
   | and {φ ψ} : IsNegative φ → IsNegative ψ → IsNegative (φ ⋏ ψ)
   | imply {φ ψ} : IsNegative ψ → IsNegative (φ 🡒 ψ)
-  | all {φ} : IsNegative φ → IsNegative (∀⁰ φ)
+  | all {φ} : IsNegative φ → IsNegative (∀¹ φ)
 
 attribute [simp] IsNegative.falsum
 
@@ -251,14 +251,14 @@ namespace IsNegative
 @[simp] lemma imp_iff {φ ψ : Semiformulaᵢ L ξ n} : (φ 🡒 ψ).IsNegative ↔ ψ.IsNegative :=
   ⟨by rintro ⟨⟩; simp_all, by rintro h; exact .imply h⟩
 
-@[simp] lemma all_iff {φ : Semiformulaᵢ L ξ (n + 1)} : (∀⁰ φ).IsNegative ↔ φ.IsNegative :=
+@[simp] lemma all_iff {φ : Semiformulaᵢ L ξ (n + 1)} : (∀¹ φ).IsNegative ↔ φ.IsNegative :=
   ⟨by rintro ⟨⟩; simp_all, by rintro h; exact .all h⟩
 
 @[simp] lemma verum : (⊤ : Semiformulaᵢ L ξ n).IsNegative := by simp [verum_def]
 
 @[simp] lemma not_or {φ ψ : Semiformulaᵢ L ξ n} : ¬(φ ⋎ ψ).IsNegative := by rintro ⟨⟩
 
-@[simp] lemma not_exs {φ : Semiformulaᵢ L ξ (n + 1)} : ¬(∃⁰ φ).IsNegative := by rintro ⟨⟩
+@[simp] lemma not_exs {φ : Semiformulaᵢ L ξ (n + 1)} : ¬(∃¹ φ).IsNegative := by rintro ⟨⟩
 
 @[simp] lemma not_rel {k} (r : L.Rel k) (v : Fin k → Semiterm L ξ n) : ¬(rel r v).IsNegative := by rintro ⟨⟩
 

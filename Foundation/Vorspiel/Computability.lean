@@ -1,6 +1,8 @@
 module
 
 public import Mathlib.Computability.Halting
+public import Mathlib.Computability.Primrec.List
+public import Foundation.Vorspiel.Nat.Matrix
 public import Foundation.Vorspiel.Part
 
 @[expose]
@@ -165,5 +167,30 @@ lemma or : ComputablePred p → ComputablePred q → ComputablePred fun x ↦ p 
   refine ⟨hp.or hq, (hnp.and hnq).of_eq <| by grind⟩
 
 end ComputablePred
+
+section
+open Primrec
+
+theorem Primrec.nat_natToList : Primrec Nat.natToList := by
+  have step : Primrec₂ fun (_ : Unit) (l : List (List ℕ)) ↦
+      (Nat.casesOn l.length (some []) fun e ↦
+        (l[e.unpair.2]?).map fun t ↦ e.unpair.1 :: t : Option (List ℕ)) :=
+    Primrec.to₂ <| Primrec.nat_casesOn
+      (list_length.comp <| snd.comp .id)
+      (const (some ([] : List ℕ)))
+      (Primrec.to₂ <| option_map
+        (list_getElem?.comp (snd.comp fst) (snd.comp <| Primrec.unpair.comp snd))
+        (Primrec.to₂ <| list_cons.comp
+          (fst.comp <| Primrec.unpair.comp <| snd.comp fst) snd))
+  have main : Primrec₂ fun (_ : Unit) (n : ℕ) ↦ Nat.natToList n := by
+    refine Primrec.nat_strong_rec _ step ?_
+    rintro ⟨⟩ (_ | e)
+    · simp [Nat.natToList]
+    · have hlen : ((List.range (e + 1)).map Nat.natToList).length = e + 1 := by simp
+      have hlt : e.unpair.2 < e + 1 := Nat.lt_succ_of_le (Nat.unpair_right_le e)
+      simp [hlen, List.getElem?_map, hlt, Nat.natToList]
+  simpa using main.comp (const ()) Primrec.id
+
+end
 
 end

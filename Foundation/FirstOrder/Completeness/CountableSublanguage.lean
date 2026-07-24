@@ -81,8 +81,8 @@ noncomputable def functionSymbols {n} : Semiformula L ξ n → Finset (Σ k, L.F
   |        ⊥ => ∅
   |    φ ⋏ ψ => functionSymbols φ ∪ functionSymbols ψ
   |    φ ⋎ ψ => functionSymbols φ ∪ functionSymbols ψ
-  |     ∀⁰ φ => functionSymbols φ
-  |     ∃⁰ φ => functionSymbols φ
+  |     ∀¹ φ => functionSymbols φ
+  |     ∃¹ φ => functionSymbols φ
 
 noncomputable def relationSymbols {n} : Semiformula L ξ n → Finset (Σ k, L.Rel k)
   | rel  r _ => {⟨_, r⟩}
@@ -91,8 +91,8 @@ noncomputable def relationSymbols {n} : Semiformula L ξ n → Finset (Σ k, L.R
   |        ⊥ => ∅
   |    φ ⋏ ψ => relationSymbols φ ∪ relationSymbols ψ
   |    φ ⋎ ψ => relationSymbols φ ∪ relationSymbols ψ
-  |     ∀⁰ φ => relationSymbols φ
-  |     ∃⁰ φ => relationSymbols φ
+  |     ∀¹ φ => relationSymbols φ
+  |     ∃¹ φ => relationSymbols φ
 
 lemma functionSymbols_rel_ss {k} (r : L.Rel k) (v : Fin k → Semiterm L ξ n) (i) :
     (v i).symbols ⊆ (rel r v).functionSymbols := by
@@ -119,8 +119,8 @@ def toSublanguage (pf : ∀ k, L.Func k → Prop) (pr : ∀ k, L.Rel k → Prop)
   |    φ ⋎ ψ, hf, hr =>
       toSublanguage pf pr φ (fun k f h ↦ hf k f (Finset.mem_union_left _ h)) (fun k r h ↦ hr k r (Finset.mem_union_left _ h)) ⋎
       toSublanguage pf pr ψ (fun k f h ↦ hf k f (Finset.mem_union_right _ h)) (fun k r h ↦ hr k r (Finset.mem_union_right _ h))
-  |     ∀⁰ φ, hf, hr => ∀⁰ toSublanguage pf pr φ hf hr
-  |     ∃⁰ φ, hf, hr => ∃⁰ toSublanguage pf pr φ hf hr
+  |     ∀¹ φ, hf, hr => ∀¹ toSublanguage pf pr φ hf hr
+  |     ∃¹ φ, hf, hr => ∃¹ toSublanguage pf pr φ hf hr
 
 @[simp] lemma lMap_toSublanguage
   (pf : ∀ k, L.Func k → Prop) (pr : ∀ k, L.Rel k → Prop) {n} (φ : Semiformula L ξ n)

@@ -252,12 +252,12 @@ lemma of_iff {P Q : (Fin k → M) → Prop} (H : L.Definable Q) (h : ∀ x, P x 
 lemma all {R : (Fin k → M) → M → Prop} (hR : L.Definable fun w ↦ R (w ·.succ) (w 0)) :
     L.Definable fun v : Fin k → M ↦ ∀ x, R v x := by
   rcases hR with ⟨φ, hR⟩
-  exact ⟨∀⁰ φ, fun v ↦ by simp [hR.iff]⟩
+  exact ⟨∀¹ φ, fun v ↦ by simp [hR.iff]⟩
 
 lemma exs {R : (Fin k → M) → M → Prop} (hR : L.Definable fun w ↦ R (w ·.succ) (w 0)) :
     L.Definable fun v : Fin k → M ↦ ∃ x, R v x := by
   rcases hR with ⟨φ, hR⟩
-  exact ⟨∃⁰ φ, fun v ↦ by simp [hR.iff]⟩
+  exact ⟨∃¹ φ, fun v ↦ by simp [hR.iff]⟩
 
 instance eq [L.Eq] [Structure.Eq L M] : L-relation[M] Eq := ⟨“x y. x = y”, fun _ ↦ by simp⟩
 
