@@ -76,9 +76,11 @@ class Tarski extends
   Semantics.Not M
   where
 
-attribute [simp, grind]
+attribute [simp, grind .]
   Top.models_verum
   Bot.models_falsum
+
+attribute [simp, grind =]
   Not.models_not
   And.models_and
   Or.models_or
