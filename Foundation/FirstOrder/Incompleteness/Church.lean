@@ -105,7 +105,8 @@ section PeanoMinusReduction
 /-- `𝗣𝗔⁻` is finitely axiomatized. -/
 lemma exists_peanoMinus_list :
     ∃ Γ : List ArithmeticSentence, ∀ σ, σ ∈ (𝗣𝗔⁻ : ArithmeticTheory) ↔ σ ∈ Γ := by
-  sorry
+  refine ⟨PeanoMinus.finite.toFinset.toList, fun σ ↦ ?_⟩
+  rw [Finset.mem_toList, Set.Finite.mem_toFinset]
 
 open Classical in
 /-- A fixed finite list of axioms for `𝗣𝗔⁻`, chosen once and for all from
