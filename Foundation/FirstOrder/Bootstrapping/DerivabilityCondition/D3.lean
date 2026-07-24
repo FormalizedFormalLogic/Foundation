@@ -136,7 +136,7 @@ theorem bold_sigma_one_complete {n} {φ : ArithmeticSemisentence n} (hp : Hierar
     intro n φ hφ ih w hφ
     have : ∃ a, V ⊧/(a :> w) φ := by simpa using hφ
     rcases this with ⟨i, hφ⟩
-    suffices T.internalize V ⊢ ∃⁰ ((toNumVec w).q ⤔ ⌜φ⌝) by simpa
+    suffices T.internalize V ⊢ ∃¹ ((toNumVec w).q ⤔ ⌜φ⌝) by simpa
     apply TProof.exs! (𝕹 i)
     suffices T.internalize V ⊢ (toNumVec (i :> w) ⤔ ⌜φ⌝) by
       simpa [Semiformula.substs_substs, Matrix.vecMap_vecMap_comp']

@@ -15,8 +15,8 @@ def doubleNegation {n} : Semiformula L ξ n → Semiformulaᵢ L ξ n
   |        ⊥ => ⊥
   |    φ ⋏ ψ => φ.doubleNegation ⋏ ψ.doubleNegation
   |    φ ⋎ ψ => ∼(∼φ.doubleNegation ⋏ ∼ψ.doubleNegation)
-  |     ∀⁰ φ => ∀⁰ φ.doubleNegation
-  |     ∃⁰ φ => ∼(∀⁰ ∼φ.doubleNegation)
+  |     ∀¹ φ => ∀¹ φ.doubleNegation
+  |     ∃¹ φ => ∼(∀¹ ∼φ.doubleNegation)
 
 scoped[LO.FirstOrder] postfix:max "ᴺ" => Semiformula.doubleNegation
 
@@ -32,9 +32,9 @@ scoped[LO.FirstOrder] postfix:max "ᴺ" => Semiformula.doubleNegation
 
 @[simp] lemma doubleNegation_or (φ ψ : Semiformula L ξ n) : (φ ⋎ ψ)ᴺ = ∼(∼φᴺ ⋏ ∼ψᴺ) := rfl
 
-@[simp] lemma doubleNegation_all (φ : Semiformula L ξ (n + 1)) : (∀⁰ φ)ᴺ = ∀⁰ φᴺ := rfl
+@[simp] lemma doubleNegation_all (φ : Semiformula L ξ (n + 1)) : (∀¹ φ)ᴺ = ∀¹ φᴺ := rfl
 
-@[simp] lemma doubleNegation_ex (φ : Semiformula L ξ (n + 1)) : (∃⁰ φ)ᴺ = ∼(∀⁰ ∼φᴺ) := rfl
+@[simp] lemma doubleNegation_ex (φ : Semiformula L ξ (n + 1)) : (∃¹ φ)ᴺ = ∼(∀¹ ∼φᴺ) := rfl
 
 lemma doubleNegation_imply (φ ψ : Semiformula L ξ n) : (φ 🡒 ψ)ᴺ = ∼(∼(∼φ)ᴺ ⋏ ∼ψᴺ) := by simp [imp_eq]
 
@@ -111,17 +111,17 @@ def negDoubleNegation : (φ : Proposition L) → Λ ⊢! ∼φᴺ 🡘 (∼φ)�
     have : Λ ⊢! ∼φᴺ ⋏ ∼ψᴺ 🡘 (∼φ)ᴺ ⋏ (∼ψ)ᴺ := Entailment.EKK_of_E_of_E ihφ ihψ
     have : Λ ⊢! ∼∼(∼φᴺ ⋏ ∼ψᴺ) 🡘 (∼φ)ᴺ ⋏ (∼ψ)ᴺ := Entailment.E_trans (DN_of_isNegative (by simp)) this
     this
-  | ∀⁰ φ =>
+  | ∀¹ φ =>
     have ihφ : Λ ⊢! ∼(free φ)ᴺ 🡘 (∼(free φ))ᴺ := negDoubleNegation (free φ)
     have : Λ ⊢! (free φ)ᴺ 🡘 (∼(∼(free φ))ᴺ) := iffnegOfNegIff (by simp) ihφ
-    have : Λ ⊢! ∀⁰ φᴺ 🡘 ∀⁰ ∼(∼φ)ᴺ :=
+    have : Λ ⊢! ∀¹ φᴺ 🡘 ∀¹ ∼(∼φ)ᴺ :=
       allIffAllOfIff <| Entailment.cast this (by simp [Semiformula.rew_doubleNegation])
     Entailment.ENN_of_E this
-  | ∃⁰ φ =>
+  | ∃¹ φ =>
     have ihφ : Λ ⊢! ∼(free φ)ᴺ 🡘 (∼(free φ))ᴺ := negDoubleNegation (free φ)
-    have : Λ ⊢! ∀⁰ ∼φᴺ 🡘 ∀⁰ (∼φ)ᴺ :=
+    have : Λ ⊢! ∀¹ ∼φᴺ 🡘 ∀¹ (∼φ)ᴺ :=
       allIffAllOfIff <| Entailment.cast ihφ (by simp [Semiformula.rew_doubleNegation])
-    have : Λ ⊢! ∼∼(∀⁰ ∼φᴺ) 🡘 ∀⁰ (∼φ)ᴺ := Entailment.E_trans (DN_of_isNegative (by simp)) this
+    have : Λ ⊢! ∼∼(∀¹ ∼φᴺ) 🡘 ∀¹ (∼φ)ᴺ := Entailment.E_trans (DN_of_isNegative (by simp)) this
     this
   termination_by φ => φ.complexity
 
@@ -173,7 +173,7 @@ def gödelGentzen {Γ : Sequent L} : ⊢ᴸᴷ¹ Γ → (∼Γ)ᴺ ⊢[Λ]! ⊥
   | exs (Γ := Γ) (φ := φ) (t := t) d =>
     have ih : (∼Γ)ᴺ ⊢[Λ]! ∼((∼φ)ᴺ/[t]) :=
       Entailment.cast (deduct (gödelGentzen d)) (by simp [Semiformula.rew_doubleNegation]; rfl)
-    have : ((∀⁰ (∼φ)ᴺ) :: (∼Γ)ᴺ) ⊢[Λ]! (∼φ)ᴺ/[t] := specializeOverContext (nthAxm 0) t
+    have : ((∀¹ (∼φ)ᴺ) :: (∼Γ)ᴺ) ⊢[Λ]! (∼φ)ᴺ/[t] := specializeOverContext (nthAxm 0) t
     (FiniteContext.weakening (by simp) ih) ⨀ this
   | cut (Γ := Γ) (Δ := Δ) (φ := φ) dp dn =>
     have ihp : ((∼φ)ᴺ :: (∼Γ)ᴺ) ⊢[Λ]! ⊥ := gödelGentzen dp

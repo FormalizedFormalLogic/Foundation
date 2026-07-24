@@ -119,7 +119,7 @@ variable {𝓼 s}
   | .rel R v | .nrel R v => by simp [Semiformula.eval_rel, Semiformula.eval_nrel, Empty.eq_elim, Function.comp_def]
   | ⊤ | ⊥ => by simp
   | φ ⋏ ψ | φ ⋎ ψ => by simp [str_eval (φ := φ), str_eval (φ := ψ)]
-  | ∀⁰ φ => by
+  | ∀¹ φ => by
     suffices
         (∃ x ∈ SkolemHull L s, (∼φ).Evalb (x :> (b ·))) ↔ (∃ x : M, (∼φ).Evalb (x :> (b ·))) by
       apply not_iff_not.mp
@@ -129,7 +129,7 @@ variable {𝓼 s}
       exact ⟨x, H⟩
     · intro h
       exact closed (s := s) (by simp) h
-  | ∃⁰ φ => by
+  | ∃¹ φ => by
     suffices
         (∃ x ∈ SkolemHull L s, φ.Evalb (x :> (b ·))) ↔ (∃ x : M, φ.Evalb (x :> (b ·))) by
       simpa [str_eval (φ := φ), Matrix.comp_vecCons']

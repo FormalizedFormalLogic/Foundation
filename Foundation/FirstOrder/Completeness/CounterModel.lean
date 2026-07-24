@@ -40,12 +40,12 @@ def decidablePoints (φ : Proposition K) : DenseSet ℙ⁻ where
     p ∈ decidablePoints φ ↔ p ⊩ᶜ φ ∨ p ⊩ᶜ ∼φ := by rfl
 
 def henkinPoints (φ : Semiproposition K 1) : DenseSet ℙ⁻ where
-  set := {p | ∀ q ≤ p, q ⊩ᶜ ∃⁰ φ → ∃ t, q ⊩ᶜ φ/[t]}
+  set := {p | ∀ q ≤ p, q ⊩ᶜ ∃¹ φ → ∃ t, q ⊩ᶜ φ/[t]}
   is_dense := by
     intro p
     suffices ∃ q ≤ p, ∀ q_1 ≤ q, (∀ q ≤ q_1, ∃ r ≤ q, ∃ t, r ⊩ᶜ φ/[t]) → ∃ t, q_1 ⊩ᶜ φ/[t] by
       simpa only [IsWeaklyForced.exs, Set.mem_setOf_eq]
-    have : p ⊩ᶜ (∃⁰ φ) ⋎ (∀⁰ ∼φ) := IsWeaklyForced.complete.mpr Entailment.lem! p
+    have : p ⊩ᶜ (∃¹ φ) ⋎ (∀¹ ∼φ) := IsWeaklyForced.complete.mpr Entailment.lem! p
     have : ∀ q ≤ p, ∃ r ≤ q, (∀ q ≤ r, ∃ r ≤ q, ∃ t, r ⊩ᶜ φ/[t]) ∨ (∀ t, ∀ q ≤ r, ¬q ⊩ᶜ φ/[t]) := by simpa using this
     rcases this p (by rfl) with ⟨q, hqp, (h | h)⟩
     · rcases h q (by rfl) with ⟨r, hrq, t, ht⟩
@@ -57,7 +57,7 @@ def henkinPoints (φ : Semiproposition K 1) : DenseSet ℙ⁻ where
       contradiction
 
 @[simp] lemma mem_henkinPoints_def (p : ℙ⁻) (φ : Semiproposition K 1) :
-    p ∈ henkinPoints φ ↔ ∀ q ≤ p, q ⊩ᶜ ∃⁰ φ → ∃ t, q ⊩ᶜ φ/[t] := by rfl
+    p ∈ henkinPoints φ ↔ ∀ q ≤ p, q ⊩ᶜ ∃¹ φ → ∃ t, q ⊩ᶜ φ/[t] := by rfl
 
 abbrev denseSets : Set (DenseSet ℙ⁻) := Set.range decidablePoints ∪ Set.range henkinPoints
 
@@ -110,8 +110,8 @@ lemma GenericForces.em (p : ℙ⁻) (φ : Proposition K) : p ⊫ φ ∨ p ⊫ �
   p ⊫ .nrel R v ↔ p ⊫ ∼(.rel R v) := by simp
   _         ↔ ¬p ⊫ .rel R v := by rw [GenericForces.neg]
 
-lemma GenericForces.henkin {p : ℙ⁻} {φ : Semiproposition K 1} : p ⊫ ∃⁰ φ → ∃ t, p ⊫ φ/[t] := by
-  have : ∃ q ∈ genericFilter p, ∀ r ≤ q, r ⊩ᶜ ∃⁰ φ → ∃ t, r ⊩ᶜ φ/[t] :=
+lemma GenericForces.henkin {p : ℙ⁻} {φ : Semiproposition K 1} : p ⊫ ∃¹ φ → ∃ t, p ⊫ φ/[t] := by
+  have : ∃ q ∈ genericFilter p, ∀ r ≤ q, r ⊩ᶜ ∃¹ φ → ∃ t, r ⊩ᶜ φ/[t] :=
     (genericFilter_isGeneric p).isGeneric (henkinPoints φ) (by simp)
   rcases this with ⟨q, hqG, H⟩
   rintro ⟨r, hrG, hr⟩
@@ -120,7 +120,7 @@ lemma GenericForces.henkin {p : ℙ⁻} {φ : Semiproposition K 1} : p ⊫ ∃�
   rcases this with ⟨t, hzt⟩
   refine ⟨t, ⟨z, hGz, hzt⟩⟩
 
-@[simp] lemma GenericForces.exs {p : ℙ⁻} : p ⊫ ∃⁰ φ ↔ ∃ t, p ⊫ φ/[t] := by
+@[simp] lemma GenericForces.exs {p : ℙ⁻} : p ⊫ ∃¹ φ ↔ ∃ t, p ⊫ φ/[t] := by
   constructor
   · exact GenericForces.henkin
   · rintro ⟨t, q, hqG, h⟩
@@ -129,9 +129,9 @@ lemma GenericForces.henkin {p : ℙ⁻} {φ : Semiproposition K 1} : p ⊫ ∃�
     intro r hrq
     refine ⟨r, by simp, t, h.monotone hrq⟩
 
-@[simp] lemma GenericForces.fal {p : ℙ⁻} : p ⊫ ∀⁰ φ ↔ ∀ t, p ⊫ φ/[t] := calc
-  p ⊫ ∀⁰ φ ↔ p ⊫ ∼(∃⁰ ∼φ) := by simp
-  _         ↔ ¬p ⊫ ∃⁰ ∼φ := by rw [GenericForces.neg]
+@[simp] lemma GenericForces.fal {p : ℙ⁻} : p ⊫ ∀¹ φ ↔ ∀ t, p ⊫ φ/[t] := calc
+  p ⊫ ∀¹ φ ↔ p ⊫ ∼(∃¹ ∼φ) := by simp
+  _         ↔ ¬p ⊫ ∃¹ ∼φ := by rw [GenericForces.neg]
   _         ↔ ∀ t, p ⊫ φ/[t] := by simp [GenericForces.exs]
 
 @[simp] lemma GenericForces.and {p : ℙ⁻} {φ ψ : Proposition K} : p ⊫ φ ⋏ ψ ↔ p ⊫ φ ∧ p ⊫ ψ := by
@@ -179,7 +179,7 @@ lemma forcing_lemma (φ : Semiformula K ξ n) {fv : ξ → 𝔗} {bv : Fin n →
   | .rel R v | .nrel R v => by simp [Function.comp_def]
   | ⊤ | ⊥ => by simp
   | φ ⋏ ψ | φ ⋎ ψ => by simp [forcing_lemma φ, forcing_lemma ψ]
-  | ∀⁰ φ | ∃⁰ φ => by simp [e, forcing_lemma φ]
+  | ∀¹ φ | ∃¹ φ => by simp [e, forcing_lemma φ]
 
 lemma refl (φ : Proposition K) (h : 𝐋𝐊¹ ⊬ ∼φ) :
     φ.Evalf (s := termModelOf (ConsistentSequent.ofUnprovable φ h)) (&·) :=

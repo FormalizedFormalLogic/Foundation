@@ -136,7 +136,7 @@ def ProperWithParamOn (φ : 𝚫-[m].Semiformula M n) : Prop :=
   ∀ (e : Fin n → M), φ.sigma.val.Eval e id ↔ φ.pi.val.Eval e id
 
 def ProvablyProperOn (φ : 𝚫-[m].Semisentence n) (T : ArithmeticTheory) : Prop :=
-  T ⊢ ∀⁰* “!φ.sigma.val ⋯ ↔ !φ.pi.val ⋯”
+  T ⊢ ∀¹* “!φ.sigma.val ⋯ ↔ !φ.pi.val ⋯”
 
 variable {M}
 
@@ -259,20 +259,20 @@ def negPi (φ : 𝚷-[m].Semiformula ξ n) : 𝚺-[m].Semiformula ξ n := mkSigm
 def negDelta (φ : 𝚫-[m].Semiformula ξ n) : 𝚫-[m].Semiformula ξ n := mkDelta (φ.pi.negPi) (φ.sigma.negSigma)
 
 def ball (t : ArithmeticSemiterm ξ n) : {Γ : HierarchySymbol} → Γ.Semiformula ξ (n + 1) → Γ.Semiformula ξ n
-  | 𝚺-[m], φ => mkSigma (∀⁰[“#0 < !!(Rew.bShift t)”] φ.val) (by simp)
-  | 𝚷-[m], φ => mkPi (∀⁰[“#0 < !!(Rew.bShift t)”] φ.val) (by simp)
+  | 𝚺-[m], φ => mkSigma (∀¹[“#0 < !!(Rew.bShift t)”] φ.val) (by simp)
+  | 𝚷-[m], φ => mkPi (∀¹[“#0 < !!(Rew.bShift t)”] φ.val) (by simp)
   | 𝚫-[m], φ =>
-    mkDelta (mkSigma (∀⁰[“#0 < !!(Rew.bShift t)”] φ.sigma.val) (by simp)) (mkPi (∀⁰[“#0 < !!(Rew.bShift t)”] φ.pi.val) (by simp))
+    mkDelta (mkSigma (∀¹[“#0 < !!(Rew.bShift t)”] φ.sigma.val) (by simp)) (mkPi (∀¹[“#0 < !!(Rew.bShift t)”] φ.pi.val) (by simp))
 
 def bexs (t : ArithmeticSemiterm ξ n) : {Γ : HierarchySymbol} → Γ.Semiformula ξ (n + 1) → Γ.Semiformula ξ n
-  | 𝚺-[m], φ => mkSigma (∃⁰[“#0 < !!(Rew.bShift t)”] φ.val) (by simp)
-  | 𝚷-[m], φ => mkPi (∃⁰[“#0 < !!(Rew.bShift t)”] φ.val) (by simp)
+  | 𝚺-[m], φ => mkSigma (∃¹[“#0 < !!(Rew.bShift t)”] φ.val) (by simp)
+  | 𝚷-[m], φ => mkPi (∃¹[“#0 < !!(Rew.bShift t)”] φ.val) (by simp)
   | 𝚫-[m], φ =>
-    mkDelta (mkSigma (∃⁰[“#0 < !!(Rew.bShift t)”] φ.sigma.val) (by simp)) (mkPi (∃⁰[“#0 < !!(Rew.bShift t)”] φ.pi.val) (by simp))
+    mkDelta (mkSigma (∃¹[“#0 < !!(Rew.bShift t)”] φ.sigma.val) (by simp)) (mkPi (∃¹[“#0 < !!(Rew.bShift t)”] φ.pi.val) (by simp))
 
-def all (φ : 𝚷-[m + 1].Semiformula ξ (n + 1)) : 𝚷-[m + 1].Semiformula ξ n := mkPi (∀⁰ φ.val) φ.pi_prop.all
+def all (φ : 𝚷-[m + 1].Semiformula ξ (n + 1)) : 𝚷-[m + 1].Semiformula ξ n := mkPi (∀¹ φ.val) φ.pi_prop.all
 
-def exs (φ : 𝚺-[m + 1].Semiformula ξ (n + 1)) : 𝚺-[m + 1].Semiformula ξ n := mkSigma (∃⁰ φ.val) φ.sigma_prop.exs
+def exs (φ : 𝚺-[m + 1].Semiformula ξ (n + 1)) : 𝚺-[m + 1].Semiformula ξ n := mkSigma (∃¹ φ.val) φ.sigma_prop.exs
 
 instance : Top (Γ.Semiformula ξ n) := ⟨verum⟩
 
@@ -334,15 +334,15 @@ lemma val_negDelta {m} (φ : 𝚫-[m].Semiformula ξ n) : (∼φ).val = ∼φ.pi
 
 @[simp] lemma sigma_negPi {m} (φ : 𝚫-[m].Semiformula ξ n) : (∼φ).pi = φ.sigma.negSigma := by simp [Tilde.tilde, negDelta]
 
-@[simp] lemma val_ball (t : ArithmeticSemiterm ξ n) (φ : Γ.Semiformula ξ (n + 1)) : (ball t φ).val = ∀⁰[“#0 < !!(Rew.bShift t)”] φ.val := by
+@[simp] lemma val_ball (t : ArithmeticSemiterm ξ n) (φ : Γ.Semiformula ξ (n + 1)) : (ball t φ).val = ∀¹[“#0 < !!(Rew.bShift t)”] φ.val := by
   rcases Γ with ⟨Γ, m⟩; rcases Γ <;> simp [ball, val, val_sigma]
 
-@[simp] lemma val_bexs (t : ArithmeticSemiterm ξ n) (φ : Γ.Semiformula ξ (n + 1)) : (bexs t φ).val = ∃⁰[“#0 < !!(Rew.bShift t)”] φ.val := by
+@[simp] lemma val_bexs (t : ArithmeticSemiterm ξ n) (φ : Γ.Semiformula ξ (n + 1)) : (bexs t φ).val = ∃¹[“#0 < !!(Rew.bShift t)”] φ.val := by
   rcases Γ with ⟨Γ, m⟩; rcases Γ <;> simp [bexs, val, val_sigma]
 
-@[simp] lemma val_exsSigma {m} (φ : 𝚺-[m + 1].Semiformula ξ (n + 1)) : (exs φ).val = ∃⁰ φ.val := rfl
+@[simp] lemma val_exsSigma {m} (φ : 𝚺-[m + 1].Semiformula ξ (n + 1)) : (exs φ).val = ∃¹ φ.val := rfl
 
-@[simp] lemma val_allPi {m} (φ : 𝚷-[m + 1].Semiformula ξ (n + 1)) : (all φ).val = ∀⁰ φ.val := rfl
+@[simp] lemma val_allPi {m} (φ : 𝚷-[m + 1].Semiformula ξ (n + 1)) : (all φ).val = ∀¹ φ.val := rfl
 
 @[simp] lemma ProperOn.verum : (⊤ : 𝚫-[m].Semisentence k).ProperOn M := by intro e; simp
 

@@ -59,8 +59,8 @@ inductive Derivation : Sequent L → Type _
 | verum : Derivation [⊤]
 | or : Derivation (φ :: ψ :: Γ) → Derivation (φ ⋎ ψ :: Γ)
 | and : Derivation (φ :: Γ) → Derivation (ψ :: Γ) → Derivation (φ ⋏ ψ :: Γ)
-| all : Derivation (φ.free :: Γ⁺) → Derivation ((∀⁰ φ) :: Γ)
-| exs : Derivation (φ/[t] :: Γ) → Derivation ((∃⁰ φ) :: Γ)
+| all : Derivation (φ.free :: Γ⁺) → Derivation ((∀¹ φ) :: Γ)
+| exs : Derivation (φ/[t] :: Γ) → Derivation ((∃¹ φ) :: Γ)
 
 prefix:45 "⊢ᴸᴷ¹ " => Derivation
 
@@ -122,13 +122,13 @@ def eta : (φ : Proposition L) → ⊢ᴸᴷ¹ [φ, ∼φ]
   | ⊤ | ⊥ => top
   | φ ⋏ ψ => ((eta φ).tensor (eta ψ)).rotate.or.rotate
   | φ ⋎ ψ => ((eta φ).rotate.tensor (eta ψ).rotate).rotate.or
-  | ∀⁰ φ =>
+  | ∀¹ φ =>
     have : ⊢ᴸᴷ¹ [(∼φ.shift)/[&0], φ.free] := (eta φ.free).rotate.cast
-    have : ⊢ᴸᴷ¹ φ.free :: [∃⁰ ∼φ]⁺ := this.exs.rotate.cast
+    have : ⊢ᴸᴷ¹ φ.free :: [∃¹ ∼φ]⁺ := this.exs.rotate.cast
     this.all
-  | ∃⁰ φ =>
+  | ∃¹ φ =>
     have : ⊢ᴸᴷ¹ [(φ.shift)/[&0], (∼φ).free] := (eta φ.free).cast
-    have : ⊢ᴸᴷ¹ (∼φ).free :: [∃⁰ φ]⁺ := this.exs.rotate.cast
+    have : ⊢ᴸᴷ¹ (∼φ).free :: [∃¹ φ]⁺ := this.exs.rotate.cast
     this.all.rotate
   termination_by φ => φ.complexity
 
@@ -162,12 +162,12 @@ def rewrite {Γ} (f : ℕ → SyntacticTerm L) : ⊢ᴸᴷ¹ Γ → ⊢ᴸᴷ¹ 
   | all (φ := φ) (Γ := Γ) d =>
     let g : ℕ → SyntacticTerm L := &0 :>ₙ fun x ↦ Rew.shift (f x)
     have : ⊢ᴸᴷ¹ (φ.free :: Γ⁺).map (Rew.rewrite g ▹ ·) := d.rewrite g
-    have : ⊢ᴸᴷ¹ (∀⁰ Rew.rewrite (Rew.bShift ∘ f) ▹ φ) :: Γ.map (Rew.rewrite f ▹ ·) :=
+    have : ⊢ᴸᴷ¹ (∀¹ Rew.rewrite (Rew.bShift ∘ f) ▹ φ) :: Γ.map (Rew.rewrite f ▹ ·) :=
       all (Derivation.cast this (by simp [g, free_rewrite_eq, Rewriting.shifts, shift_rewrite_eq, Function.comp_def]))
     Derivation.cast this (by simp [Rew.q_rewrite])
   | exs (φ := φ) (Γ := Γ) (t := t) d =>
     have : ⊢ᴸᴷ¹ (φ/[t] :: Γ).map (Rew.rewrite f ▹ ·) := d.rewrite f
-    have : ⊢ᴸᴷ¹ (∃⁰ Rew.rewrite (Rew.bShift ∘ f) ▹ φ) :: Γ.map (Rew.rewrite f ▹ ·) :=
+    have : ⊢ᴸᴷ¹ (∃¹ Rew.rewrite (Rew.bShift ∘ f) ▹ φ) :: Γ.map (Rew.rewrite f ▹ ·) :=
       exs (t := Rew.rewrite f t) (Derivation.cast this (by simp [rewrite_subst_eq]))
     Derivation.cast this (by simp [Rew.q_rewrite])
 
@@ -204,11 +204,11 @@ def lMap (Φ : L₁ →ᵥ L₂) {Γ} : ⊢ᴸᴷ¹ Γ → ⊢ᴸᴷ¹ Γ.map (.
       and (Derivation.cast (lMap Φ dp) (by simp)) (Derivation.cast (lMap Φ dq) (by simp))
     Derivation.cast this (by simp)
   | all (Γ := Γ) (φ := φ) d =>
-    have : ⊢ᴸᴷ¹ ((∀⁰ .lMap Φ φ) :: (Γ.map (.lMap Φ)) : Sequent L₂) :=
+    have : ⊢ᴸᴷ¹ ((∀¹ .lMap Φ φ) :: (Γ.map (.lMap Φ)) : Sequent L₂) :=
       all (Derivation.cast (lMap Φ d) (by simp [←Semiformula.lMap_free, shifts_image]))
     Derivation.cast this (by simp)
   | exs (Γ := Γ) (φ := φ) (t := t) d =>
-    have : ⊢ᴸᴷ¹ ((∃⁰ .lMap Φ φ) :: (Γ.map (.lMap Φ)) : Sequent L₂) :=
+    have : ⊢ᴸᴷ¹ ((∃¹ .lMap Φ φ) :: (Γ.map (.lMap Φ)) : Sequent L₂) :=
       exs (t := Semiterm.lMap Φ t)
         (.cast (lMap Φ d) (by simp [Semiformula.lMap_subst]))
     Derivation.cast this (by simp)
@@ -228,24 +228,24 @@ private lemma map_rewriteMap_eq_shifts (Δ : Sequent L) (h : ∀ φ ∈ Δ, ¬φ
     (by intro x hx; simp [ne_of_mem_of_not_mem hx (h φ hp)])
 
 def genelalizeByNewver {φ : Semiproposition L 1} (hp : ¬φ.FVar? m) (hΔ : ∀ ψ ∈ Δ, ¬ψ.FVar? m)
-    (d : ⊢ᴸᴷ¹ φ/[&m] :: Δ) : ⊢ᴸᴷ¹ (∀⁰ φ) :: Δ := by
+    (d : ⊢ᴸᴷ¹ φ/[&m] :: Δ) : ⊢ᴸᴷ¹ (∀¹ φ) :: Δ := by
   have : ⊢ᴸᴷ¹ φ.free :: Δ⁺ :=
     Derivation.cast (Derivation.map d (fun x ↦ if x = m then 0 else x + 1))
     (by simp [map_subst_eq_free φ hp, map_rewriteMap_eq_shifts Δ hΔ])
   exact all this
 
 def exOfInstances (v : List (SyntacticTerm L)) (φ : Semiproposition L 1)
-  (h : ⊢ᴸᴷ¹ v.map (φ/[·]) ++ Γ) : ⊢ᴸᴷ¹ (∃⁰ φ) :: Γ := by
+  (h : ⊢ᴸᴷ¹ v.map (φ/[·]) ++ Γ) : ⊢ᴸᴷ¹ (∃¹ φ) :: Γ := by
   induction' v with t v ih generalizing Γ
   · exact contra h (List.subset_cons_self _ _)
-  · exact (ih (Γ := (∃⁰ φ) :: Γ) ((exs h).contraction (by simp))).contraction (by simp)
+  · exact (ih (Γ := (∃¹ φ) :: Γ) ((exs h).contraction (by simp))).contraction (by simp)
 
 def exOfInstances' (v : List (SyntacticTerm L)) (φ : Semiproposition L 1)
-  (h : ⊢ᴸᴷ¹ (∃⁰ φ) :: v.map (φ/[·]) ++ Γ) : ⊢ᴸᴷ¹ (∃⁰ φ) :: Γ :=
-  (exOfInstances (Γ := (∃⁰ φ) :: Γ) v φ (h.contraction <| by simp)).contraction (by simp)
+  (h : ⊢ᴸᴷ¹ (∃¹ φ) :: v.map (φ/[·]) ++ Γ) : ⊢ᴸᴷ¹ (∃¹ φ) :: Γ :=
+  (exOfInstances (Γ := (∃¹ φ) :: Γ) v φ (h.contraction <| by simp)).contraction (by simp)
 
-def allNvar {Δ : Sequent L} {φ} (h : ∀⁰ φ ∈ Δ) : ⊢ᴸᴷ¹ φ/[&Δ.newVar] :: Δ → ⊢ᴸᴷ¹ Δ := fun b ↦
-  let b : ⊢ᴸᴷ¹ (∀⁰ φ) :: Δ :=
+def allNvar {Δ : Sequent L} {φ} (h : ∀¹ φ ∈ Δ) : ⊢ᴸᴷ¹ φ/[&Δ.newVar] :: Δ → ⊢ᴸᴷ¹ Δ := fun b ↦
+  let b : ⊢ᴸᴷ¹ (∀¹ φ) :: Δ :=
     b.genelalizeByNewver (by simpa [Semiformula.FVar?] using Sequent.not_fvar?_newVar h) (fun _ ↦ Sequent.not_fvar?_newVar)
   b.contraction (by simp [h])
 
@@ -279,9 +279,9 @@ instance : OneSidedLK.PrincipalEntailment (Derivation (L := L)) (𝐋𝐊¹ : LK
 
 instance classical : Entailment.Cl (𝐋𝐊¹ : LK L) := inferInstance
 
-lemma all (φ : Semiproposition L 1) : 𝐋𝐊¹ ⊢ φ.free → 𝐋𝐊¹ ⊢ ∀⁰ φ := fun h ↦ ⟨Derivation.all h.get⟩
+lemma all (φ : Semiproposition L 1) : 𝐋𝐊¹ ⊢ φ.free → 𝐋𝐊¹ ⊢ ∀¹ φ := fun h ↦ ⟨Derivation.all h.get⟩
 
-lemma allClosure_fixitr {φ : Proposition L} (dp : 𝐋𝐊¹ ⊢ φ) : (m : ℕ) → 𝐋𝐊¹ ⊢ ∀⁰* Rew.fixitr 0 m ▹ φ
+lemma allClosure_fixitr {φ : Proposition L} (dp : 𝐋𝐊¹ ⊢ φ) : (m : ℕ) → 𝐋𝐊¹ ⊢ ∀¹* Rew.fixitr 0 m ▹ φ
   |     0 => by simpa
   | m + 1 => by
     simp only [LawfulSyntacticRewriting.allClosure_fixitr]
@@ -360,14 +360,14 @@ lemma of_LK_provable {T : Theory L} {φ : Sentence L} : 𝐋𝐊¹ ⊢ (φ : Pro
   OneSidedLK.ContextualEntailment.of_principal_provable this
 
 lemma specialize {T : Theory L} (φ : Semisentence L 1) (t : ClosedTerm L) :
-    T ⊢ ∀⁰ φ 🡒 Semiformula.subst φ ![t] := by
+    T ⊢ ∀¹ φ 🡒 Semiformula.subst φ ![t] := by
   apply of_LK_provable
   refine ⟨?_⟩
   let φt : Sentence L := Semiformula.subst φ ![t]
   have d : ⊢ᴸᴷ¹ [∼(φt : Proposition L), φt] := (Derivation.eta (φt : Proposition L)).rotate.cast (by simp)
   have d₀ : ⊢ᴸᴷ¹ [(∼(φ : Semiproposition L 1))/[Rew.emb t], (φt : Proposition L)] := by
     simpa [φt, Semiformula.coe_subst_eq_subst_coe₁] using d
-  have d' : ⊢ᴸᴷ¹ [∃⁰ ∼(φ : Semiproposition L 1), (φt : Proposition L)] :=
+  have d' : ⊢ᴸᴷ¹ [∃¹ ∼(φ : Semiproposition L 1), (φt : Proposition L)] :=
     Derivation.exs (φ := ∼(φ : Semiproposition L 1)) (Γ := [(φt : Proposition L)]) (t := Rew.emb t) d₀
   exact d'.or.cast (by simp [Semiformula.imp_eq, φt])
 

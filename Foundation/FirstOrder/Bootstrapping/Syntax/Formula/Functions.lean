@@ -1172,10 +1172,10 @@ lemma Language.IsFVFree.or {n p q : V} (hp : L.IsFVFree n p) (hq : L.IsFVFree n 
     L.IsFVFree n (p ^⋎[n] q) := by simp [Language.IsFVFree, hp.1, hq.1, hp.2, hq.2]
 
 lemma Language.IsFVFree.all {n p : V} (hp : L.IsFVFree (n + 1) p) :
-    L.IsFVFree n (^∀⁰[n] p) := by simp [Language.IsFVFree, hp.1, hp.2]
+    L.IsFVFree n (^∀¹[n] p) := by simp [Language.IsFVFree, hp.1, hp.2]
 
 lemma Language.IsFVFree.exs {n p : V} (hp : L.IsFVFree (n + 1) p) :
-    L.IsFVFree n (^∃⁰[n] p) := by simp [Language.IsFVFree, hp.1, hp.2]
+    L.IsFVFree n (^∃¹[n] p) := by simp [Language.IsFVFree, hp.1, hp.2]
 
 @[simp] lemma Language.IsFVFree.neg_iff : L.IsFVFree n (neg L p) ↔ L.IsFVFree n p := by
   constructor

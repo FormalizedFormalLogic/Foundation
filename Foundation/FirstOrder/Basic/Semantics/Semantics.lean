@@ -216,8 +216,8 @@ def EvalAux (s : Structure L M) (f : ξ → M) {n} (b : Fin n → M) : Semiformu
   |        ⊥ => False
   |    φ ⋏ ψ => φ.EvalAux s f b ∧ ψ.EvalAux s f b
   |    φ ⋎ ψ => φ.EvalAux s f b ∨ ψ.EvalAux s f b
-  |     ∀⁰ φ => ∀ x : M, (φ.EvalAux s f (x :> b))
-  |     ∃⁰ φ => ∃ x : M, (φ.EvalAux s f (x :> b))
+  |     ∀¹ φ => ∀ x : M, (φ.EvalAux s f (x :> b))
+  |     ∃¹ φ => ∃ x : M, (φ.EvalAux s f (x :> b))
 
 @[simp] lemma EvalAux_neg (φ : Semiformula L ξ n) :
     EvalAux s f b (∼φ) = ¬EvalAux s f b φ :=
@@ -261,39 +261,39 @@ lemma eval_nrel' {r : L.Rel k} {v} :
     Eval b f (nrel r v) ↔ ¬s.rel r fun i ↦ (v i).val b f := of_eq rfl
 
 @[simp] lemma eval_all {φ : Semiformula L ξ (n + 1)} :
-    Eval b f (∀⁰ φ) ↔ ∀ x : M, Eval (x :> b) f φ := of_eq rfl
+    Eval b f (∀¹ φ) ↔ ∀ x : M, Eval (x :> b) f φ := of_eq rfl
 
 @[simp] lemma eval_ex {φ : Semiformula L ξ (n + 1)} :
-    Eval b f (∃⁰ φ) ↔ ∃ x : M, Eval (x :> b) f φ := of_eq rfl
+    Eval b f (∃¹ φ) ↔ ∃ x : M, Eval (x :> b) f φ := of_eq rfl
 
 @[simp] lemma eval_ball {φ ψ : Semiformula L ξ (n + 1)} :
-    Eval b f (∀⁰[φ] ψ) ↔ ∀ x : M, Eval (x :> b) f φ → Eval (x :> b) f ψ := by
+    Eval b f (∀¹[φ] ψ) ↔ ∀ x : M, Eval (x :> b) f φ → Eval (x :> b) f ψ := by
   simp [ball]
 
 @[simp] lemma eval_bexs {φ ψ : Semiformula L ξ (n + 1)} :
-    Eval b f (∃⁰[φ] ψ) ↔ ∃ x : M, Eval (x :> b) f φ ⋏ Eval (x :> b) f ψ := by
+    Eval b f (∃¹[φ] ψ) ↔ ∃ x : M, Eval (x :> b) f φ ⋏ Eval (x :> b) f ψ := by
   simp [bexs]
 
 @[simp] lemma eval_allClosure {b} {φ : Semiformula L ξ k} :
-    Eval b f (∀⁰* φ) ↔ ∀ e', Eval e' f φ :=
+    Eval b f (∀¹* φ) ↔ ∀ e', Eval e' f φ :=
   match k with
   |     0 => by simp [eq_finZeroElim]
   | k + 1 => by simpa [allClosure_succ, eval_allClosure (k := k), Matrix.vecForall_iff] using forall_comm
 
 @[simp] lemma eval_exsClosure {b} {φ : Semiformula L ξ k} :
-    Eval b f (∃⁰* φ) ↔ ∃ e', Eval e' f φ :=
+    Eval b f (∃¹* φ) ↔ ∃ e', Eval e' f φ :=
   match k with
   |     0 => by simp [eq_finZeroElim]
   | k + 1 => by simpa [exsClosure_succ, eval_exsClosure (k := k), Matrix.vecExists_iff] using exists_comm
 
 @[simp] lemma eval_allItr {b} {φ : Semiformula L ξ (n + k)} :
-    Eval b f (∀⁰^[k] φ) ↔ ∀ e', Eval (Matrix.appendr e' b) f φ :=
+    Eval b f (∀¹^[k] φ) ↔ ∀ e', Eval (Matrix.appendr e' b) f φ :=
   match k with
   |     0 => by simp [Matrix.empty_eq]
   | k + 1 => by simpa [allItr_succ, eval_allItr (k := k), Matrix.vecForall_iff] using forall_comm
 
 @[simp] lemma eval_exsItr {b} {φ : Semiformula L ξ (n + k)} :
-    Eval b f (∃⁰^[k] φ) ↔ ∃ e', Eval (Matrix.appendr e' b) f φ :=
+    Eval b f (∃¹^[k] φ) ↔ ∃ e', Eval (Matrix.appendr e' b) f φ :=
   match k with
   |     0 => by simp [Matrix.empty_eq]
   | k + 1 => by simpa [exsItr_succ, eval_exsItr (k := k), Matrix.vecExists_iff] using exists_comm
@@ -311,10 +311,10 @@ lemma eval_rew {n₁ n₂ b₂ f₂} (ω : Rew L ξ₁ n₁ ξ₂ n₂) (φ : Se
     simp [Semiterm.val_rew]
   | ⊤ | ⊥ => simp
   | φ ⋏ ψ | φ ⋎ ψ => simp [eval_rew ω φ, eval_rew ω ψ]
-  | ∀⁰ φ =>
+  | ∀¹ φ =>
     simpa [Function.comp_def, eval_rew ω.q φ] using
       iff_of_eq <| forall_congr fun x ↦ by congr; funext i; cases i using Fin.cases <;> simp
-  | ∃⁰ φ =>
+  | ∃¹ φ =>
     simpa [Function.comp_def, eval_rew ω.q φ] using
       exists_congr fun x ↦ iff_of_eq $ by congr; funext i; cases i using Fin.cases <;> simp
 
@@ -406,11 +406,11 @@ lemma eval_iff_of_funEqOn [DecidableEq ξ] {n b} (φ : Semiformula L ξ n) (h : 
     apply or_congr
     · exact eval_iff_of_funEqOn φ fun x hx ↦ h x (by simp [hx])
     · exact eval_iff_of_funEqOn ψ fun x hx ↦ h x (by simp [hx])
-  |      ∀⁰ φ =>
+  |      ∀¹ φ =>
     suffices (∀ x, Eval (x :> b) f φ) ↔ (∀ x, Eval (x :> b) f' φ) by simpa
     apply forall_congr'; intro x
     exact eval_iff_of_funEqOn φ fun x hx ↦ h _ (by simpa [FVar?])
-  |      ∃⁰ φ =>
+  |      ∃¹ φ =>
     suffices (∃ x, Eval (x :> b) f φ) ↔ (∃ x, Eval (x :> b) f' φ) by simpa
     apply exists_congr; intro x
     exact eval_iff_of_funEqOn φ fun x hx ↦ h _ (by simpa [FVar?])
@@ -428,11 +428,11 @@ lemma eval_toEmpty [DecidableEq ξ] {n} {φ : Semiformula L ξ n} (hp : φ.freeV
   | φ ⋏ ψ | φ ⋎ ψ =>
     simp [eval_toEmpty (φ := φ) (by simp [by simpa [Finset.union_eq_empty] using hp]),
       eval_toEmpty (φ := ψ) (by simp [by simpa [Finset.union_eq_empty] using hp])]
-  | ∀⁰ φ =>
+  | ∀¹ φ =>
     have : ∀ x, Eval (x :> b) f φ ↔ Evalb (x :> b) (φ.toEmpty hp) :=
       fun x ↦ eval_toEmpty (φ := φ) (b := (x :> b)) (by simpa using hp)
     simp [this]
-  | ∃⁰ φ =>
+  | ∃¹ φ =>
     have : ∀ x, Eval (x :> b) f φ ↔ Evalb (x :> b) (φ.toEmpty hp) :=
       fun x ↦ eval_toEmpty (φ := φ) (b := (x :> b)) (by simpa using hp)
     simp [this]
@@ -478,10 +478,10 @@ lemma eval_ofEquiv_iff {b : Fin n → N} {f : ξ → N} {φ : Semiformula L ξ n
   | .rel r v | .nrel r v => by simp [Function.comp_def, ofEquiv_rel Θ, Structure.ofEquiv_val Θ]
   | ⊤ | ⊥ => by simp
   | φ ⋏ ψ | φ ⋎ ψ => by simp [eval_ofEquiv_iff (φ := φ), eval_ofEquiv_iff (φ := ψ)]
-  | ∀⁰ φ =>
+  | ∀¹ φ =>
     ⟨fun h x ↦ by have h' := eval_ofEquiv_iff.mp (h (Θ x)); simp [Matrix.comp_vecCons''] at h'; exact h',
      fun h x ↦ eval_ofEquiv_iff.mpr (by simp only [Matrix.comp_vecCons'']; exact h (Θ.symm x))⟩
-  | ∃⁰ φ =>
+  | ∃¹ φ =>
     ⟨by rintro ⟨x, h⟩; exists Θ.symm x; have h' := eval_ofEquiv_iff.mp h; simp [Matrix.comp_vecCons''] at h'; exact h',
      by rintro ⟨x, h⟩; exists Θ x; apply eval_ofEquiv_iff.mpr; simp only [Matrix.comp_vecCons'', Equiv.symm_apply_apply]; exact h⟩
 
