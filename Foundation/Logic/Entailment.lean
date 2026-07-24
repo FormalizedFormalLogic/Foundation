@@ -295,7 +295,7 @@ lemma consistent_iff_unprovable_bot {𝓢 : S} :
     Consistent 𝓢 ↔ 𝓢 ⊬ ⊥ := by
   simp [inconsistent_iff_provable_bot, ←not_inconsistent_iff_consistent]
 
-@[simp, grind] lemma Consistent.not_bot {𝓢 : S} [Consistent 𝓢] : 𝓢 ⊬ ⊥ :=
+@[simp, grind .] lemma Consistent.not_bot {𝓢 : S} [Consistent 𝓢] : 𝓢 ⊬ ⊥ :=
   consistent_iff_unprovable_bot.mp inferInstance
 
 end
