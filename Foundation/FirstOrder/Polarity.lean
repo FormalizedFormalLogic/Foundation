@@ -20,8 +20,8 @@ def polarity {n} : Semiformula L ξ n → Bool
   |        ⊥ => false
   |    φ ⋏ ψ => polarity φ || polarity ψ
   |    φ ⋎ ψ => polarity φ && polarity ψ
-  |     ∀⁰ _ => false
-  |     ∃⁰ _ => true
+  |     ∀¹ _ => false
+  |     ∃¹ _ => true
 
 @[simp] lemma polarity_rel {k} (r : L.Rel k) (v : Fin k → Semiterm L ξ n) : (rel r v).polarity = true := rfl
 
@@ -35,9 +35,9 @@ def polarity {n} : Semiformula L ξ n → Bool
 
 @[simp] lemma polarity_or (φ ψ : Semiformula L ξ n) : (φ ⋎ ψ).polarity = (φ.polarity && ψ.polarity) := rfl
 
-@[simp] lemma polarity_all (φ : Semiformula L ξ (n + 1)) : (∀⁰ φ).polarity = false := rfl
+@[simp] lemma polarity_all (φ : Semiformula L ξ (n + 1)) : (∀¹ φ).polarity = false := rfl
 
-@[simp] lemma polarity_ex (φ : Semiformula L ξ (n + 1)) : (∃⁰ φ).polarity = true := rfl
+@[simp] lemma polarity_ex (φ : Semiformula L ξ (n + 1)) : (∃¹ φ).polarity = true := rfl
 
 @[simp] lemma polarity_neg {n} (φ : Semiformula L ξ n) : (∼φ).polarity = !φ.polarity := by
   induction φ using rec' <;> simp [polarity, *]
@@ -82,16 +82,16 @@ abbrev Negative (φ : Semiformula L ξ n) : Prop := φ.polarity = false
   simp [Negative]; grind
 
 @[simp] lemma ex_positive_iff {n} (φ : Semiformula L ξ (n + 1)) :
-    (∃⁰ φ).Positive := by simp [Positive]
+    (∃¹ φ).Positive := by simp [Positive]
 
 @[simp] lemma ex_negative_iff {n} (φ : Semiformula L ξ (n + 1)) :
-    ¬(∃⁰ φ).Negative := by simp [Negative]
+    ¬(∃¹ φ).Negative := by simp [Negative]
 
 @[simp] lemma all_positive_iff {n} (φ : Semiformula L ξ (n + 1)) :
-    ¬(∀⁰ φ).Positive := by simp [Positive]
+    ¬(∀¹ φ).Positive := by simp [Positive]
 
 @[simp] lemma all_negative_iff {n} (φ : Semiformula L ξ (n + 1)) :
-    (∀⁰ φ).Negative := by simp [Negative]
+    (∀¹ φ).Negative := by simp [Negative]
 
 @[simp] lemma neg_positive_iff {n} (φ : Semiformula L ξ n) : (∼φ).Positive ↔ φ.Negative := by simp [Positive, Negative]
 

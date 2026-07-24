@@ -58,7 +58,7 @@ end Hilbertᵢ
 inductive HilbertProofᵢ (Λ : Hilbertᵢ L) : Propositionᵢ L → Type _
   | eaxm {φ}     : φ ∈ Λ → HilbertProofᵢ Λ φ
   | mdp {φ ψ}    : HilbertProofᵢ Λ (φ 🡒 ψ) → HilbertProofᵢ Λ φ → HilbertProofᵢ Λ ψ
-  | gen {φ}      : HilbertProofᵢ Λ (Rewriting.free φ) → HilbertProofᵢ Λ (∀⁰ φ)
+  | gen {φ}      : HilbertProofᵢ Λ (Rewriting.free φ) → HilbertProofᵢ Λ (∀¹ φ)
   | verum        : HilbertProofᵢ Λ ⊤
   | implyK φ ψ   : HilbertProofᵢ Λ <| φ 🡒 ψ 🡒 φ
   | implyS φ ψ χ : HilbertProofᵢ Λ <| (φ 🡒 ψ 🡒 χ) 🡒 (φ 🡒 ψ) 🡒 φ 🡒 χ
@@ -68,10 +68,10 @@ inductive HilbertProofᵢ (Λ : Hilbertᵢ L) : Propositionᵢ L → Type _
   | or₁ φ ψ      : HilbertProofᵢ Λ <| φ 🡒 φ ⋎ ψ
   | or₂ φ ψ      : HilbertProofᵢ Λ <| ψ 🡒 φ ⋎ ψ
   | or₃ φ ψ χ    : HilbertProofᵢ Λ <| (φ 🡒 χ) 🡒 (ψ 🡒 χ) 🡒 (φ ⋎ ψ 🡒 χ)
-  | all₁ φ t     : HilbertProofᵢ Λ <| ∀⁰ φ 🡒 φ/[t]
-  | all₂ φ ψ     : HilbertProofᵢ Λ <| ∀⁰ (φ/[] 🡒 ψ) 🡒 φ 🡒 ∀⁰ ψ
-  | ex₁ t φ      : HilbertProofᵢ Λ <| φ/[t] 🡒 ∃⁰ φ
-  | ex₂ φ ψ      : HilbertProofᵢ Λ <| ∀⁰ (φ 🡒 ψ/[]) 🡒 ∃⁰ φ 🡒 ψ
+  | all₁ φ t     : HilbertProofᵢ Λ <| ∀¹ φ 🡒 φ/[t]
+  | all₂ φ ψ     : HilbertProofᵢ Λ <| ∀¹ (φ/[] 🡒 ψ) 🡒 φ 🡒 ∀¹ ψ
+  | ex₁ t φ      : HilbertProofᵢ Λ <| φ/[t] 🡒 ∃¹ φ
+  | ex₂ φ ψ      : HilbertProofᵢ Λ <| ∀¹ (φ 🡒 ψ/[]) 🡒 ∃¹ φ 🡒 ψ
 
 instance : Entailment (Hilbertᵢ L) (Propositionᵢ L) := ⟨HilbertProofᵢ⟩
 
@@ -137,30 +137,30 @@ scoped notation "‖" d "‖" => depth d
 
 @[simp] lemma depth_mdp' (b : Λ ⊢! φ 🡒 ψ) (d : Λ ⊢! φ) : ‖b ⨀ d‖ = max ‖b‖ ‖d‖ + 1 := rfl
 
-def specialize {φ} (b : Λ ⊢! ∀⁰ φ) (t) : Λ ⊢! φ/[t] := all₁ φ t ⨀ b
+def specialize {φ} (b : Λ ⊢! ∀¹ φ) (t) : Λ ⊢! φ/[t] := all₁ φ t ⨀ b
 
-def implyAll {φ ψ} (b : Λ ⊢! shift φ 🡒 free ψ) : Λ ⊢! φ 🡒 ∀⁰ ψ :=
-  have : Λ ⊢! ∀⁰ (φ/[] 🡒 ψ) := gen <| by simp; exact b
+def implyAll {φ ψ} (b : Λ ⊢! shift φ 🡒 free ψ) : Λ ⊢! φ 🡒 ∀¹ ψ :=
+  have : Λ ⊢! ∀¹ (φ/[] 🡒 ψ) := gen <| by simp; exact b
   all₂ φ ψ ⨀ this
 
-def geNOverFiniteContext {Γ φ} (b : Γ⁺ ⊢[Λ]! free φ) : Γ ⊢[Λ]! ∀⁰ φ :=
+def geNOverFiniteContext {Γ φ} (b : Γ⁺ ⊢[Λ]! free φ) : Γ ⊢[Λ]! ∀¹ φ :=
   ofDef <| implyAll <| by simpa [shift_conj₂] using toDef b
 
-def specializeOverContext {Γ φ} (b : Γ ⊢[Λ]! ∀⁰ φ) (t) : Γ ⊢[Λ]! φ/[t] :=
+def specializeOverContext {Γ φ} (b : Γ ⊢[Λ]! ∀¹ φ) (t) : Γ ⊢[Λ]! φ/[t] :=
   ofDef <| Entailment.C_trans (toDef b) (all₁ φ t)
 
-def allImplyAllOfAllImply (φ ψ) : Λ ⊢! ∀⁰ (φ 🡒 ψ) 🡒 ∀⁰ φ 🡒 ∀⁰ ψ := by
+def allImplyAllOfAllImply (φ ψ) : Λ ⊢! ∀¹ (φ 🡒 ψ) 🡒 ∀¹ φ 🡒 ∀¹ ψ := by
   apply deduct'
   apply deduct
   apply geNOverFiniteContext
-  have b₁ : [∀⁰ shift φ, ∀⁰ (shift φ 🡒 shift ψ)] ⊢[Λ]! free φ 🡒 free ψ :=
+  have b₁ : [∀¹ shift φ, ∀¹ (shift φ 🡒 shift ψ)] ⊢[Λ]! free φ 🡒 free ψ :=
     Entailment.cast (specializeOverContext (nthAxm 1) &0)
-  have b₂ : [∀⁰ shift φ, ∀⁰ (shift φ 🡒 shift ψ)] ⊢[Λ]! free φ :=
+  have b₂ : [∀¹ shift φ, ∀¹ (shift φ 🡒 shift ψ)] ⊢[Λ]! free φ :=
     Entailment.cast (specializeOverContext (nthAxm 0) &0)
-  have : [∀⁰ φ, ∀⁰ (φ 🡒 ψ)]⁺ ⊢[Λ]! free ψ := cast (by simp) (b₁ ⨀ b₂)
+  have : [∀¹ φ, ∀¹ (φ 🡒 ψ)]⁺ ⊢[Λ]! free ψ := cast (by simp) (b₁ ⨀ b₂)
   exact this
 
-def allIffAllOfIff {φ ψ} (b : Λ ⊢! free φ 🡘 free ψ) : Λ ⊢! ∀⁰ φ 🡘 ∀⁰ ψ := Entailment.K_intro
+def allIffAllOfIff {φ ψ} (b : Λ ⊢! free φ 🡘 free ψ) : Λ ⊢! ∀¹ φ 🡘 ∀¹ ψ := Entailment.K_intro
   (allImplyAllOfAllImply φ ψ ⨀ gen (Entailment.cast (Entailment.K_left b)))
   (allImplyAllOfAllImply ψ φ ⨀ gen (Entailment.cast (Entailment.K_right b)))
 
@@ -180,12 +180,12 @@ def dneOfNegative [L.DecidableEq] : {φ : Propositionᵢ L} → φ.IsNegative �
     have : [∼ψ, φ, ∼∼(φ 🡒 ψ)] ⊢[Λ]! ⊥ := byAxm₂ ⨀ this
     have : [φ, ∼∼(φ 🡒 ψ)] ⊢[Λ]! ψ := (of ihψ) ⨀ (deduct this)
     deduct' (deduct this)
-  | ∀⁰ φ,  h =>
+  | ∀¹ φ,  h =>
     have ihφ : Λ ⊢! ∼∼(free φ) 🡒 free φ := dneOfNegative (by simp [by simpa using h])
-    have : [∀⁰ shift φ, ∼(free φ), ∼∼(∀⁰ shift φ)] ⊢[Λ]! ⊥ :=
-      have : [∀⁰ shift φ, ∼(free φ), ∼∼(∀⁰ shift φ)] ⊢[Λ]! ∀⁰ shift φ := byAxm₀
+    have : [∀¹ shift φ, ∼(free φ), ∼∼(∀¹ shift φ)] ⊢[Λ]! ⊥ :=
+      have : [∀¹ shift φ, ∼(free φ), ∼∼(∀¹ shift φ)] ⊢[Λ]! ∀¹ shift φ := byAxm₀
       byAxm₁ ⨀ Entailment.cast (specializeOverContext this &0)
-    have : [∼∼(∀⁰ shift φ)] ⊢[Λ]! free φ := of ihφ ⨀ deduct (byAxm₁ ⨀ deduct this)
+    have : [∼∼(∀¹ shift φ)] ⊢[Λ]! free φ := of ihφ ⨀ deduct (byAxm₁ ⨀ deduct this)
     implyAll (Entailment.cast (deduct' this))
   termination_by φ _ => φ.complexity
 
@@ -204,7 +204,7 @@ def efqOfNegative : {φ : Propositionᵢ L} → φ.IsNegative → Λ ⊢! ⊥ �
   | φ 🡒 ψ, h =>
     have ihψ : Λ ⊢! ⊥ 🡒 ψ := efqOfNegative (by simp [by simpa using h])
     Entailment.C_trans ihψ Entailment.implyK
-  | ∀⁰ φ,  h =>
+  | ∀¹ φ,  h =>
     have ihφ : Λ ⊢! ⊥ 🡒 free φ := efqOfNegative (by simp [by simpa using h])
     implyAll <| Entailment.cast ihφ
   termination_by φ _ => φ.complexity

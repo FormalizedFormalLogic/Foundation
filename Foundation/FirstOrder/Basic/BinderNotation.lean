@@ -25,13 +25,13 @@ def nestFormulae (φ : Semiformula L ξ n) (Ψ : Fin n → Semiformula L ξ (m +
   let σ : Semiformula L ξ (m + n) :=
     (Matrix.conj fun i : Fin n ↦ Rewriting.subst (Ψ i) (#(i.addCast m) :> fun j ↦ #(j.addNat n))) 🡒
       Rewriting.subst φ fun i ↦ #(i.addCast m)
-  ∀⁰^[n] σ
+  ∀¹^[n] σ
 
 def nestFormulaeFunc (φ : Semiformula L ξ (n + 1)) (Ψ : Fin n → Semiformula L ξ (m + 1)) : Semiformula L ξ (m + 1) :=
   let σ : Semiformula L ξ ((m + 1) + n) :=
     (Matrix.conj fun i : Fin n ↦ Rewriting.subst (Ψ i) (#(i.addCast m.succ) :> fun j ↦ #(j.succ.addNat n))) 🡒
       Rewriting.subst φ (#((0 : Fin (m + 1)).addNat n) :> fun i ↦ #(i.addCast m.succ))
-  ∀⁰^[n] σ
+  ∀¹^[n] σ
 
 variable {M : Type*} [s : Structure L M] {f : ξ → M}
 
@@ -361,10 +361,10 @@ syntax:max "⋁ " ident " < " term ", " first_order_formula:0 : first_order_form
 
 syntax:max "∀ " ident+ ", " first_order_formula:0 : first_order_formula
 syntax:max "∃ " ident+ ", " first_order_formula:0 : first_order_formula
-syntax:max "∀⁰ " first_order_formula:0 : first_order_formula
-syntax:max "∃⁰ " first_order_formula:0 : first_order_formula
-syntax:max "∀⁰[" first_order_formula "] " first_order_formula:0 : first_order_formula
-syntax:max "∃⁰[" first_order_formula "] " first_order_formula:0 : first_order_formula
+syntax:max "∀¹ " first_order_formula:0 : first_order_formula
+syntax:max "∃¹ " first_order_formula:0 : first_order_formula
+syntax:max "∀¹[" first_order_formula "] " first_order_formula:0 : first_order_formula
+syntax:max "∃¹[" first_order_formula "] " first_order_formula:0 : first_order_formula
 
 macro_rules
   | `(⤫formula($type)[ $binders* | $fbinders* | ($e)          ]) => `(⤫formula($type)[ $binders* | $fbinders* | $e ])
@@ -388,7 +388,7 @@ macro_rules
         if binders.elem z then Macro.throwErrorAt z "error: variable is duplicated." else
         return binders'.insertIdx 0 z)
       binders
-    let s : TSyntax `term ← xs.size.rec `(⤫formula($type)[ $binders'* | $fbinders* | $φ ]) (fun _ ψ ↦ ψ >>= fun ψ ↦ `(∀⁰ $ψ))
+    let s : TSyntax `term ← xs.size.rec `(⤫formula($type)[ $binders'* | $fbinders* | $φ ]) (fun _ ψ ↦ ψ >>= fun ψ ↦ `(∀¹ $ψ))
     return s
   | `(⤫formula($type)[ $binders* | $fbinders* | ∃ $xs*, $φ    ]) => do
     let xs := xs.reverse
@@ -397,24 +397,24 @@ macro_rules
         if binders.elem z then Macro.throwErrorAt z "error: variable is duplicated." else
         return binders'.insertIdx 0 z)
       binders
-    let s : TSyntax `term ← xs.size.rec `(⤫formula($type)[ $binders'* | $fbinders* | $φ ]) (fun _ ψ ↦ ψ >>= fun ψ ↦ `(∃⁰ $ψ))
+    let s : TSyntax `term ← xs.size.rec `(⤫formula($type)[ $binders'* | $fbinders* | $φ ]) (fun _ ψ ↦ ψ >>= fun ψ ↦ `(∃¹ $ψ))
     return s
-  | `(⤫formula($type)[ $binders* | $fbinders* | ∀⁰ $φ         ]) => do
+  | `(⤫formula($type)[ $binders* | $fbinders* | ∀¹ $φ         ]) => do
     let v := mkIdent (Name.mkSimple ("var" ++ toString binders.size))
     let binders' := binders.insertIdx 0 v
-    `(∀⁰ ⤫formula($type)[ $binders'* | $fbinders* | $φ ])
-  | `(⤫formula($type)[ $binders* | $fbinders* | ∃⁰ $φ         ]) => do
+    `(∀¹ ⤫formula($type)[ $binders'* | $fbinders* | $φ ])
+  | `(⤫formula($type)[ $binders* | $fbinders* | ∃¹ $φ         ]) => do
     let v := mkIdent (Name.mkSimple ("var" ++ toString binders.size))
     let binders' := binders.insertIdx 0 v
-    `(∃⁰ ⤫formula($type)[ $binders'* | $fbinders* | $φ ])
-  | `(⤫formula($type)[ $binders* | $fbinders* | ∀⁰[ $φ ] $ψ    ]) => do
+    `(∃¹ ⤫formula($type)[ $binders'* | $fbinders* | $φ ])
+  | `(⤫formula($type)[ $binders* | $fbinders* | ∀¹[ $φ ] $ψ    ]) => do
     let v := mkIdent (Name.mkSimple ("var" ++ toString binders.size))
     let binders' := binders.insertIdx 0 v
-    `(∀⁰[⤫formula($type)[ $binders'* | $fbinders* | $φ ]] ⤫formula($type)[ $binders'* | $fbinders* | $ψ ])
-  | `(⤫formula($type)[ $binders* | $fbinders* | ∃⁰[ $φ ] $ψ    ]) => do
+    `(∀¹[⤫formula($type)[ $binders'* | $fbinders* | $φ ]] ⤫formula($type)[ $binders'* | $fbinders* | $ψ ])
+  | `(⤫formula($type)[ $binders* | $fbinders* | ∃¹[ $φ ] $ψ    ]) => do
     let v := mkIdent (Name.mkSimple ("var" ++ toString binders.size))
     let binders' := binders.insertIdx 0 v
-    `(∃⁰[⤫formula($type)[ $binders'* | $fbinders* | $φ ]] ⤫formula($type)[ $binders'* | $fbinders* | $ψ ])
+    `(∃¹[⤫formula($type)[ $binders'* | $fbinders* | $φ ]] ⤫formula($type)[ $binders'* | $fbinders* | $ψ ])
 
 macro_rules
   | `(⤫formula(lit)[ $binders* | $fbinders* | !$φ:term $vs:first_order_term*   ]) => do
@@ -492,7 +492,7 @@ macro_rules
 
 #check “∀ x, ∀ y, ∀ z, ∀ v, ∀ w, x + y + z + v + w = 0”
 #check “∀ x y z v w, x + y + z + v + w = 0”
-#check “x y z | ∃ v w, ∀ r < z + v + 7, ∀⁰ x + y + v = x ↔ z = .!(‘#0 + #1’) x y”
+#check “x y z | ∃ v w, ∀ r < z + v + 7, ∀¹ x + y + v = x ↔ z = .!(‘#0 + #1’) x y”
 #check “x y. ∀ z < 0, ∀ w < y, x = z + w”
 
 section delab
@@ -526,26 +526,26 @@ meta def unexpandNeg : Unexpander
 
 @[app_unexpander UnivQuantifier.all]
 meta def unexpandUniv : Unexpander
-  | `($_ “ $φ:first_order_formula ”) => `(“ ∀⁰ $φ:first_order_formula ”)
+  | `($_ “ $φ:first_order_formula ”) => `(“ ∀¹ $φ:first_order_formula ”)
   | _                                => throw ()
 
 @[app_unexpander ExsQuantifier.exs]
 meta def unexpandEx : Unexpander
-  | `($_ “ $φ:first_order_formula”) => `(“ ∃⁰ $φ:first_order_formula ”)
+  | `($_ “ $φ:first_order_formula”) => `(“ ∃¹ $φ:first_order_formula ”)
   | _                                   => throw ()
 
 @[app_unexpander ball]
 meta def unexpandBall : Unexpander
-  | `($_ “ $φ:first_order_formula ” “ $ψ:first_order_formula ”) => `(“ (∀⁰[$φ] $ψ) ”)
-  | `($_ “ $φ:first_order_formula ” $u:term                   ) => `(“ (∀⁰[$φ] !$u) ”)
-  | `($_ $t:term                    “ $ψ:first_order_formula ”) => `(“ (∀⁰[!$t] $ψ) ”)
+  | `($_ “ $φ:first_order_formula ” “ $ψ:first_order_formula ”) => `(“ (∀¹[$φ] $ψ) ”)
+  | `($_ “ $φ:first_order_formula ” $u:term                   ) => `(“ (∀¹[$φ] !$u) ”)
+  | `($_ $t:term                    “ $ψ:first_order_formula ”) => `(“ (∀¹[!$t] $ψ) ”)
   | _                                                           => throw ()
 
 @[app_unexpander bexs]
 meta def unexpandBex : Unexpander
-  | `($_ “ $φ:first_order_formula ” “ $ψ:first_order_formula ”) => `(“ (∃⁰[$φ] $ψ) ”)
-  | `($_ “ $φ:first_order_formula ” $u:term                   ) => `(“ (∃⁰[$φ] !$u) ”)
-  | `($_ $t:term                    “ $ψ:first_order_formula ”) => `(“ (∃⁰[!$t] $ψ) ”)
+  | `($_ “ $φ:first_order_formula ” “ $ψ:first_order_formula ”) => `(“ (∃¹[$φ] $ψ) ”)
+  | `($_ “ $φ:first_order_formula ” $u:term                   ) => `(“ (∃¹[$φ] !$u) ”)
+  | `($_ $t:term                    “ $ψ:first_order_formula ”) => `(“ (∃¹[!$t] $ψ) ”)
   | _                                                           => throw ()
 
 @[app_unexpander Arrow.arrow]
@@ -718,61 +718,61 @@ macro_rules
   | `(⤫formula(faf)[ $binders* | $fbinders* | $t:first_order_term = $u:first_order_term ]) => do
     let x₁ : TSyntax `ident ← TSyntax.freshIdent
     let x₂ : TSyntax `ident ← TSyntax.freshIdent
-    `(∀⁰ (⤫term(faf)[ $x₁ $binders* | $fbinders* | $t ] 🡒 ∀⁰ (⤫term(faf)[ $x₁ $x₂ $binders* | $fbinders* | $u ] 🡒 “#1 = #0”)))
+    `(∀¹ (⤫term(faf)[ $x₁ $binders* | $fbinders* | $t ] 🡒 ∀¹ (⤫term(faf)[ $x₁ $x₂ $binders* | $fbinders* | $u ] 🡒 “#1 = #0”)))
   | `(⤫formula(faf)[ $binders* | $fbinders* | $t:first_order_term ≠ $u:first_order_term ]) => do
     let x₁ : TSyntax `ident ← TSyntax.freshIdent
     let x₂ : TSyntax `ident ← TSyntax.freshIdent
-    `(∀⁰ (⤫term(faf)[ $x₁ $binders* | $fbinders* | $t ] 🡒 ∀⁰ (⤫term(faf)[ $x₁ $x₂ $binders* | $fbinders* | $u ] 🡒 “#1 ≠ #0”)))
+    `(∀¹ (⤫term(faf)[ $x₁ $binders* | $fbinders* | $t ] 🡒 ∀¹ (⤫term(faf)[ $x₁ $x₂ $binders* | $fbinders* | $u ] 🡒 “#1 ≠ #0”)))
   | `(⤫formula(faf)[ $binders* | $fbinders* | $t:first_order_term < $u:first_order_term ]) => do
     let x₁ : TSyntax `ident ← TSyntax.freshIdent
     let x₂ : TSyntax `ident ← TSyntax.freshIdent
-    `(∀⁰ (⤫term(faf)[ $x₁ $binders* | $fbinders* | $t ] 🡒 ∀⁰ (⤫term(faf)[ $x₁ $x₂ $binders* | $fbinders* | $u ] 🡒 “#1 < #0”)))
+    `(∀¹ (⤫term(faf)[ $x₁ $binders* | $fbinders* | $t ] 🡒 ∀¹ (⤫term(faf)[ $x₁ $x₂ $binders* | $fbinders* | $u ] 🡒 “#1 < #0”)))
   | `(⤫formula(faf)[ $binders* | $fbinders* | $t:first_order_term ≮ $u:first_order_term ]) => do
     let x₁ : TSyntax `ident ← TSyntax.freshIdent
     let x₂ : TSyntax `ident ← TSyntax.freshIdent
-    `(∀⁰ (⤫term(faf)[ $x₁ $binders* | $fbinders* | $t ] 🡒 ∀⁰ (⤫term(faf)[ $x₁ $x₂ $binders* | $fbinders* | $u ] 🡒 “#1 ≮ #0”)))
+    `(∀¹ (⤫term(faf)[ $x₁ $binders* | $fbinders* | $t ] 🡒 ∀¹ (⤫term(faf)[ $x₁ $x₂ $binders* | $fbinders* | $u ] 🡒 “#1 ≮ #0”)))
   | `(⤫formula(faf)[ $binders* | $fbinders* | $t:first_order_term ≤ $u:first_order_term ]) => do
     let x₁ : TSyntax `ident ← TSyntax.freshIdent
     let x₂ : TSyntax `ident ← TSyntax.freshIdent
-    `(∀⁰ (⤫term(faf)[ $x₁ $binders* | $fbinders* | $t ] 🡒 ∀⁰ (⤫term(faf)[ $x₁ $x₂ $binders* | $fbinders* | $u ] 🡒 “#1 ≤ #0”)))
+    `(∀¹ (⤫term(faf)[ $x₁ $binders* | $fbinders* | $t ] 🡒 ∀¹ (⤫term(faf)[ $x₁ $x₂ $binders* | $fbinders* | $u ] 🡒 “#1 ≤ #0”)))
   | `(⤫formula(faf)[ $binders* | $fbinders* | $t:first_order_term ≰ $u:first_order_term ]) => do
     let x₁ : TSyntax `ident ← TSyntax.freshIdent
     let x₂ : TSyntax `ident ← TSyntax.freshIdent
-    `(∀⁰ (⤫term(faf)[ $x₁ $binders* | $fbinders* | $t ] 🡒 ∀⁰ (⤫term(faf)[ $x₁ $x₂ $binders* | $fbinders* | $u ] 🡒 “#1 ≰ #0”)))
+    `(∀¹ (⤫term(faf)[ $x₁ $binders* | $fbinders* | $t ] 🡒 ∀¹ (⤫term(faf)[ $x₁ $x₂ $binders* | $fbinders* | $u ] 🡒 “#1 ≰ #0”)))
   | `(⤫formula(faf)[ $binders* | $fbinders* | $t:first_order_term ∈ $u:first_order_term ]) => do
     let x₁ : TSyntax `ident ← TSyntax.freshIdent
     let x₂ : TSyntax `ident ← TSyntax.freshIdent
-    `(∀⁰ (⤫term(faf)[ $x₁ $binders* | $fbinders* | $t ] 🡒 ∀⁰ (⤫term(faf)[ $x₁ $x₂ $binders* | $fbinders* | $u ] 🡒 “#1 ∈ #0”)))
+    `(∀¹ (⤫term(faf)[ $x₁ $binders* | $fbinders* | $t ] 🡒 ∀¹ (⤫term(faf)[ $x₁ $x₂ $binders* | $fbinders* | $u ] 🡒 “#1 ∈ #0”)))
   | `(⤫formula(faf)[ $binders* | $fbinders* | $t:first_order_term ∉ $u:first_order_term ]) => do
     let x₁ : TSyntax `ident ← TSyntax.freshIdent
     let x₂ : TSyntax `ident ← TSyntax.freshIdent
-    `(∀⁰ (⤫term(faf)[ $x₁ $binders* | $fbinders* | $t ] 🡒 ∀⁰ (⤫term(faf)[ $x₁ $x₂ $binders* | $fbinders* | $u ] 🡒 “#1 ∉ #0”)))
+    `(∀¹ (⤫term(faf)[ $x₁ $binders* | $fbinders* | $t ] 🡒 ∀¹ (⤫term(faf)[ $x₁ $x₂ $binders* | $fbinders* | $u ] 🡒 “#1 ∉ #0”)))
 
 macro_rules
   | `(⤫formula(faf)[ $binders* | $fbinders* | ∀ $x < $t, $φ ]) => do
     if binders.elem x then Macro.throwErrorAt x "error: variable is duplicated." else
       let vt : TSyntax `ident ← TSyntax.freshIdent
-      `(∀⁰ (⤫term(faf)[ $vt $binders* | $fbinders* | $t ] 🡒 Semiformula.ballLT #0 ⤫formula(faf)[ $x $vt $binders* | $fbinders* | $φ ]))
+      `(∀¹ (⤫term(faf)[ $vt $binders* | $fbinders* | $t ] 🡒 Semiformula.ballLT #0 ⤫formula(faf)[ $x $vt $binders* | $fbinders* | $φ ]))
   | `(⤫formula(faf)[ $binders* | $fbinders* | ∀ $x ≤ $t, $φ ]) => do
     if binders.elem x then Macro.throwErrorAt x "error: variable is duplicated." else
       let vt : TSyntax `ident ← TSyntax.freshIdent
-      `(∀⁰ (⤫term(faf)[ $vt $binders* | $fbinders* | $t ] 🡒 Semiformula.ballLE #0 ⤫formula(faf)[ $x $binders* | $fbinders* | $φ ]))
+      `(∀¹ (⤫term(faf)[ $vt $binders* | $fbinders* | $t ] 🡒 Semiformula.ballLE #0 ⤫formula(faf)[ $x $binders* | $fbinders* | $φ ]))
   | `(⤫formula(faf)[ $binders* | $fbinders* | ∀ $x ∈ $t, $φ ]) => do
     if binders.elem x then Macro.throwErrorAt x "error: variable is duplicated." else
       let vt : TSyntax `ident ← TSyntax.freshIdent
-      `(∀⁰ (⤫term(faf)[ $vt $binders* | $fbinders* | $t ] 🡒 Semiformula.ballMem #0 ⤫formula(faf)[ $x $vt $binders* | $fbinders* | $φ ]))
+      `(∀¹ (⤫term(faf)[ $vt $binders* | $fbinders* | $t ] 🡒 Semiformula.ballMem #0 ⤫formula(faf)[ $x $vt $binders* | $fbinders* | $φ ]))
   | `(⤫formula(faf)[ $binders* | $fbinders* | ∃ $x < $t, $φ ]) => do
     if binders.elem x then Macro.throwErrorAt x "error: variable is duplicated." else
       let vt : TSyntax `ident ← TSyntax.freshIdent
-      `(∀⁰ (⤫term(faf)[ $vt $binders* | $fbinders* | $t ] 🡒 Semiformula.bexsLT #0 ⤫formula(faf)[ $x $vt $binders* | $fbinders* | $φ ]))
+      `(∀¹ (⤫term(faf)[ $vt $binders* | $fbinders* | $t ] 🡒 Semiformula.bexsLT #0 ⤫formula(faf)[ $x $vt $binders* | $fbinders* | $φ ]))
   | `(⤫formula(faf)[ $binders* | $fbinders* | ∃ $x ≤ $t, $φ ]) => do
     if binders.elem x then Macro.throwErrorAt x "error: variable is duplicated." else
       let vt : TSyntax `ident ← TSyntax.freshIdent
-      `(∀⁰ (⤫term(faf)[ $vt $binders* | $fbinders* | $t ] 🡒 Semiformula.bexsLE #0 ⤫formula(faf)[ $x $vt $binders* | $fbinders* | $φ ]))
+      `(∀¹ (⤫term(faf)[ $vt $binders* | $fbinders* | $t ] 🡒 Semiformula.bexsLE #0 ⤫formula(faf)[ $x $vt $binders* | $fbinders* | $φ ]))
   | `(⤫formula(faf)[ $binders* | $fbinders* | ∃ $x ∈ $t, $φ ]) => do
     if binders.elem x then Macro.throwErrorAt x "error: variable is duplicated." else
       let vt : TSyntax `ident ← TSyntax.freshIdent
-      `(∀⁰ (⤫term(faf)[ $vt $binders* | $fbinders* | $t ] 🡒 Semiformula.bexsMem #0 ⤫formula(faf)[ $x $vt $binders* | $fbinders* | $φ ]))
+      `(∀¹ (⤫term(faf)[ $vt $binders* | $fbinders* | $t ] 🡒 Semiformula.bexsMem #0 ⤫formula(faf)[ $x $vt $binders* | $fbinders* | $φ ]))
 
 syntax "f‘" first_order_term:0 "’" : term
 syntax "f‘" ident* "| " first_order_term:0 "’" : term

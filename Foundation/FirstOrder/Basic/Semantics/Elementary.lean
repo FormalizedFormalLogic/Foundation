@@ -180,7 +180,7 @@ lemma eval_hom_iff_of_open {n} {e₁ : Fin n → M₁} {ε₁ : ξ → M₁} {φ
   | φ ⋏ ψ | φ ⋎ ψ => by simp at h ⊢; simp [eval_hom_iff_of_open h.1, eval_hom_iff_of_open h.2]
 
 lemma eval_hom_allClosure {n} {ε₁ : ξ → M₁} {φ : Semiformula L ξ n} (hp : φ.Open) :
-    (∀⁰* φ).Evalf (Θ ∘ ε₁) → (∀⁰* φ).Evalf ε₁ := by
+    (∀¹* φ).Evalf (Θ ∘ ε₁) → (∀¹* φ).Evalf ε₁ := by
   simp only [eval_allClosure]
   intro h e₁; exact (eval_hom_iff_of_open Θ hp).mpr (h (Θ ∘ e₁))
 
@@ -264,7 +264,7 @@ lemma eval_iff_of_equiv {f₁ f₂ b₁ b₂}
     simp [eval_iff_of_equiv I hf hb hrel hfunc φ, eval_iff_of_equiv I hf hb hrel hfunc ψ]
   | φ ⋎ ψ => by
     simp [eval_iff_of_equiv I hf hb hrel hfunc φ, eval_iff_of_equiv I hf hb hrel hfunc ψ]
-  | ∀⁰ φ => by
+  | ∀¹ φ => by
     suffices
       (∀ x₁ : M₁, φ.Eval (x₁ :> b₁) f₁) ↔ (∀ x₂ : M₂, φ.Eval (x₂ :> b₂) f₂) by simpa
     constructor
@@ -280,7 +280,7 @@ lemma eval_iff_of_equiv {f₁ f₂ b₁ b₂}
           (by intro i; cases i using Fin.cases <;> simp [hb])
           hrel hfunc φ
       exact this.mpr (h _)
-  | ∃⁰ φ => by
+  | ∃¹ φ => by
     suffices
       (∃ x₁, φ.Eval (x₁ :> b₁) f₁) ↔ (∃ x₂, φ.Eval (x₂ :> b₂) f₂) by simpa
     constructor
