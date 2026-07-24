@@ -4,7 +4,6 @@ public import Mathlib.Data.Set.Countable
 public import Mathlib.Tactic.TautoSet
 public import Mathlib.Data.Set.Finite.Range
 public import Mathlib.Order.Filter.Ultrafilter.Defs
-public import Foundation.Vorspiel.Rel.CWF
 
 @[expose]
 public section
