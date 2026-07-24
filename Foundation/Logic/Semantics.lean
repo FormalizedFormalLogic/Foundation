@@ -76,9 +76,18 @@ class Tarski extends
   Semantics.Not M
   where
 
-attribute [simp, grind]
+-- `Top.models_verum`/`Bot.models_falsum` are plain facts (not iffs), so `grind`
+-- can only use them as one-directional "known facts" (`.`), matching the
+-- precedent of `letterless_verum`/`letterless_falsum` in `Propositional/Formula/Basic.lean`.
+attribute [simp, grind .]
   Top.models_verum
   Bot.models_falsum
+
+-- `Not.models_not`/`And.models_and`/`Or.models_or`/`Imp.models_imply` are genuine
+-- bidirectional rewrites decomposing a connective, so `grind =` (equational rewrite
+-- in both directions) applies, matching the precedent of `letterless_and`/`letterless_or`/
+-- `letterless_imp`/`letterless_neg` in `Propositional/Formula/Basic.lean`.
+attribute [simp, grind =]
   Not.models_not
   And.models_and
   Or.models_or
