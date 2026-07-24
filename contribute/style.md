@@ -123,4 +123,4 @@ set_option warning.simp.varHead false in
 @[simp] lemma eq_zero : n = 0 := by cases n; omega
 ```
 
-🤖 Do not raise `set_option maxHeartbeats` to push a proof through — it is a sign the proof is in an inefficient form. If a proof only works that way, refactor until the option is unnecessary: extract lemmas, narrow `grind`/`simp` sets, avoid computationally heavy definitions.
+**`set_option maxHeartbeats` must not be used actively.** 🤖 In particular, do not raise it to push a proof through — needing it is a sign the proof is in an inefficient form. If a proof only works that way, refactor until the option is unnecessary: extract lemmas, narrow `grind`/`simp` sets, avoid computationally heavy definitions.
