@@ -240,6 +240,8 @@ lemma coe_quote_eq_quote' (φ : Semiproposition L n) :
     (↑(⌜φ⌝ : Bootstrapping.Semiformula ℕ L n).val : V) = (⌜φ⌝ : Bootstrapping.Semiformula V L n).val :=
   coe_quote_eq_quote φ
 
+lemma quote_eq_encode_nat (φ : Semiproposition L n) : (⌜φ⌝ : ℕ) = encode φ := by simpa using quote_eq_encode (V := ℕ) φ
+
 @[simp] lemma quote_inj_iff {φ₁ φ₂ : Semiproposition L n} :
     (⌜φ₁⌝ : V) = ⌜φ₂⌝ ↔ φ₁ = φ₂ := by simp [quote_eq_encode]
 
@@ -297,6 +299,8 @@ lemma quote_eq_encode (σ : Semisentence L n) : (⌜σ⌝ : V) = ↑(encode σ) 
 
 lemma coe_quote_eq_quote (σ : Semisentence L n) : (↑(⌜σ⌝ : ℕ) : V) = ⌜σ⌝ := by
   simp [quote_eq_encode]
+
+lemma quote_eq_encode_nat (σ : Semisentence L n) : (⌜σ⌝ : ℕ) = encode σ := by simpa using quote_eq_encode (V := ℕ) σ
 
 @[simp] lemma val_quote {bv : Fin m → V} {fv : ξ → V} (σ : Semisentence L n) :
     (⌜σ⌝ : ArithmeticSemiterm ξ m).val bv fv = ⌜σ⌝ := by

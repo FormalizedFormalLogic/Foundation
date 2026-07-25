@@ -115,6 +115,8 @@ theorem rosserProvable_rosser {σ} : T ⊢ ∼σ → 𝗜𝚺₁ ⊢ ∼𝗥σ :
 
 end
 
+section rosserProvability
+
 open ProvabilityAbstraction
 
 variable {L : Language} [L.Encodable] [L.LORDefinable]
@@ -137,5 +139,11 @@ instance : T.rosserProvability.SoundOn ℕ := by
   apply Bootstrapping.provable_iff_provable.mp
     $ Bootstrapping.ProvabilityComparison.le_to_provable
     $ by simpa [models_iff, Provability.pr, Theory.RosserProvable] using h;
+
+end rosserProvability
+
+/-- Gödel-Rosser incompleteness theorem -/
+theorem incomplete_GR (T : ArithmeticTheory) [T.Δ₁] [𝗜𝚺₁ ⪯ T] [Entailment.Consistent T] : Entailment.Incomplete T :=
+  ProvabilityAbstraction.rosser_first_incompleteness T.rosserProvability
 
 end LO.FirstOrder.Arithmetic

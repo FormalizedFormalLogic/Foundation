@@ -1,7 +1,7 @@
 # Foundation Project Instructions
 
 - Before committing or submitting PRs, read **`contribute/index.md`**.
-- Before writing or refactoring proofs, read **`contribute/style.md`**.
+- Before writing or refactoring proofs, read **`contribute/style.md`**, **`contribute/refactoring.md`**.
 
 ## Setup
 

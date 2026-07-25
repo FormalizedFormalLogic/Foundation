@@ -2,7 +2,7 @@
 
 Coding conventions for formal proofs in Foundation. The guiding principle: proofs are read and maintained by humans, so write them the way the human maintainers read them.
 
-As a baseline, follow the [Mathlib style guide](https://leanprover-community.github.io/contribute/style.html) (line length, indentation, spacing, naming, calc/tactic formatting, etc.). This document only records what is specific to Foundation; where it differs from the Mathlib guide, this document takes precedence.
+As a baseline, follow the [Mathlib style guide](https://leanprover-community.github.io/contribute/style.html) (line length, indentation, spacing, naming, calc/tactic formatting, etc.). This document only records what is specific to Foundation; where it differs from the Mathlib guide, this document takes precedence. For more detailed coding and refactoring conventions, also see [refactoring.md](./refactoring.md).
 
 Human contributors need not follow this document to the letter — treat it as a description of the house style. 🤖 AI coding agents should follow it as closely as possible, especially the items marked 🤖: machine-generated proofs tend to drift toward a verbose, defensive style, and those items exist to counteract that drift.
 

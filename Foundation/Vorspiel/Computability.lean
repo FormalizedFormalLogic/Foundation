@@ -166,6 +166,21 @@ lemma or : ComputablePred p → ComputablePred q → ComputablePred fun x ↦ p 
   rintro ⟨hq, hnq⟩
   refine ⟨hp.or hq, (hnp.and hnq).of_eq <| by grind⟩
 
+lemma of_graph_rePred {g : α → ℕ}
+    (h : REPred fun p : α × ℕ ↦ p.2 = g p.1) :
+    Computable g := by
+  have hF : Partrec₂
+      fun (a : α) (b : ℕ) ↦ (Part.assert (b = g a) fun _ ↦ Part.some ()).map fun _ ↦ b :=
+    (Partrec.map h ((Computable.snd.comp Computable.fst).to₂)).to₂
+  obtain ⟨k, hk, Hk⟩ := Partrec.projection hF (by
+    rintro a b₁ b₂ c₁ c₂ h₁ h₂
+    simp only [Part.mem_map_iff, Part.mem_assert_iff] at h₁ h₂
+    obtain ⟨-, ⟨rfl, -⟩, rfl⟩ := h₁
+    obtain ⟨-, ⟨rfl, -⟩, rfl⟩ := h₂
+    rfl)
+  refine hk.of_eq_tot fun a ↦ ?_
+  exact (Hk (g a) a).mpr ⟨g a, by simp [Part.mem_map_iff, Part.mem_assert_iff]⟩
+
 end ComputablePred
 
 section
