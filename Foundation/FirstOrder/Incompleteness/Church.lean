@@ -19,10 +19,6 @@ theorem). `church_theorem` specializes this to `T = ∅`: since `𝗣𝗔⁻` is
 `𝗣𝗔⁻`-provability computably many-one reduces to `∅`-provability, so undecidability transfers
 from `church_theorem_general` without needing the `𝗥₀ ⪯ T` and soundness hypotheses required
 there.
-
-- folklore; the standard proof of Church's theorem via undecidability of `𝚺₁`-completeness, see
-  e.g. Rogers, *Theory of Recursive Functions and Effective Computability*, or Smoryński's chapter
-  in the *Handbook of Mathematical Logic*.
 -/
 
 @[expose] public section
