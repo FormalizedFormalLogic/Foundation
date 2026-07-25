@@ -119,9 +119,13 @@ lemma f_computable : Computable f := by
 
 variable {T : ArithmeticTheory} [𝗥₀ ⪯ T] [T.SoundOnHierarchy 𝚺 1]
 
+-- This direction needs neither `𝗥₀ ⪯ T` nor `𝚺₁`-soundness, only closure of `ComputablePred`
+-- under complement and many-one reduction along the computable `f`.
+omit [𝗥₀ ⪯ T] [T.SoundOnHierarchy 𝚺 1] in
 /-- If `T`-provability is computable, so is `σ ↦ T ⊬ f σ`. -/
-lemma D_computable (hC : ComputablePred T.theory) : ComputablePred (fun σ ↦ T ⊬ f σ) := by
-  sorry
+lemma D_computable (hC : ComputablePred T.theory) : ComputablePred (fun σ ↦ T ⊬ f σ) :=
+  ComputablePred.computable_of_manyOneReducible
+    (ManyOneReducible.mk (fun σ ↦ T ⊬ σ) f_computable) hC.not
 
 /-- The diagonal fixed point for `σ ↦ T ⊬ f σ`: a sentence whose `T`-provability and
 `T`-unprovability (after diagonal substitution) coincide, obtained from `codeOfREPred` and
