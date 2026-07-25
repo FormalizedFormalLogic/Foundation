@@ -29,8 +29,6 @@ open Bootstrapping Bootstrapping.Arithmetic
 
 section Diagonalization
 
-/-! ### Part I: Church's theorem for an arbitrary theory `T ⊇ 𝗥₀` -/
-
 /-- A total function on `ℕ` whose graph is r.e. is computable. -/
 lemma computable_of_graph_rePred {g : ℕ → ℕ} (h : REPred fun p : ℕ × ℕ ↦ p.2 = g p.1) :
     Computable g := by
@@ -127,8 +125,6 @@ theorem church_theorem_general : ¬ComputablePred T.theory := by
 end Diagonalization
 
 section PeanoMinusReduction
-
-/-! ### Part II: Church's theorem for `T = ∅`, via a reduction through `𝗣𝗔⁻` -/
 
 /-- A finite theory proves the conjunction of its own (finite) axiom set. -/
 lemma finite_theory_provable_conj {T : Theory ℒₒᵣ} (hT : Set.Finite T) : T ⊢ hT.toFinset.conj :=
