@@ -59,6 +59,7 @@ lemma rePred_of_sigma1_relation {R : ℕ → ℕ → Prop} (h : 𝚺₁-Relation
         (Primrec.vector_cons.comp .snd (.const List.Vector.nil)))
   exact this.of_eq <| by intro p; simpa [List.Vector.cons_get] using hφ ![p.1, p.2]
 
+
 /-- The code-level diagonal self-substitution: if `n` is the code of a `Semisentence ℒₒᵣ 1`,
 `d n` is the code of its self-substitution `n/[⌜n⌝]`. This is `Bootstrapping.Arithmetic.substNumeral`
 applied to `n` twice, i.e. the same expression as the `D` used in `Incompleteness/First.lean`. -/
@@ -75,8 +76,9 @@ lemma d_computable : Computable d :=
   computable_of_graph_rePred (rePred_of_sigma1_relation d_graph_sigma1)
 
 /-- `d` applied to the code of `σ` is the code of `σ`'s diagonal self-substitution. -/
-lemma d_quote_eq (σ : ArithmeticSemisentence 1) : d (⌜σ⌝ : ℕ) = (⌜(σ/[⌜σ⌝] : ArithmeticSentence)⌝ : ℕ) :=
+lemma d_quote_eq (σ : ArithmeticSemisentence 1) : d ⌜σ⌝ = ⌜(σ/[⌜σ⌝] : ArithmeticSentence)⌝ :=
   substNumeral_app_quote σ σ
+
 
 /-- The diagonal substitution `σ ↦ σ/[⌜σ⌝]`. -/
 noncomputable def f (σ : ArithmeticSemisentence 1) : ArithmeticSentence := σ/[⌜σ⌝]
@@ -116,43 +118,53 @@ lemma D_diagonal (hD : ComputablePred (fun σ ↦ T ⊬ f σ)) : ∃ δ : Arithm
 
 /-- Church's theorem, for an arbitrary arithmetic theory `T ⊇ 𝗥₀` sound on `𝚺₁` sentences: the set
 of `T`-provable sentences is not computable. -/
-theorem church_theoremAux : ¬ComputablePred {σ : ArithmeticSentence | T ⊢ σ} := by
+theorem church_theoremAux : ¬ComputablePred T.theory := by
   by_contra hC;
   obtain ⟨δ, hδ⟩ := D_diagonal $ D_computable hC;
   tauto;
 
 end Diagonalization
 
+
+
 section PeanoMinusReduction
 
 /-! ### Part II: Church's theorem for `T = ∅`, via a reduction through `𝗣𝗔⁻` -/
 
-/-- `𝗣𝗔⁻`-provability agrees with provability from the singleton theory of the conjunction `π` of
-`𝗣𝗔⁻`'s (finitely many) axioms: routine technical bridge, folklore. -/
-lemma peanoMinus_iff_singletonConj_provable {σ : ArithmeticSentence} :
-  letI π := PeanoMinus.finite.toFinset.conj
-  (𝗣𝗔⁻ : ArithmeticTheory) ⊢ σ ↔ ({π} : ArithmeticTheory) ⊢ σ
-  := by
-  set π := PeanoMinus.finite.toFinset.conj
-  have hπ : (𝗣𝗔⁻ : ArithmeticTheory) ⊢ π :=
-    Entailment.FConj!_iff_forall_provable.mpr fun ψ hψ ↦
-      Entailment.by_axm (by simpa using hψ)
-  have h₁ : (𝗣𝗔⁻ : ArithmeticTheory) ⪯ ({π} : ArithmeticTheory) :=
-    Entailment.WeakerThan.ofAxm! fun {ψ} hψ ↦
-      Entailment.mdp! (Entailment.left_Fconj!_intro (by simpa using hψ)) (Entailment.by_axm rfl)
-  have h₂ : ({π} : ArithmeticTheory) ⪯ (𝗣𝗔⁻ : ArithmeticTheory) :=
-    Entailment.WeakerThan.ofAxm! fun {ψ} hψ ↦ by
-      rcases hψ with rfl; exact hπ
-  exact ⟨h₁.wk, h₂.wk⟩
+lemma ttt {T : Theory ℒₒᵣ} (hT : Set.Finite T) : T ⊢ hT.toFinset.conj := by
+  apply Entailment.FConj!_iff_forall_provable.mpr;
+  intro σ hσ;
+  apply Entailment.by_axm;
+  simp_all;
+
+lemma ttt' {T : Theory ℒₒᵣ} (hT : Set.Finite T) : T ⪯ ({hT.toFinset.conj} : ArithmeticTheory) := by
+  apply Entailment.WeakerThan.ofAxm!;
+  intro σ hσ;
+  exact Entailment.mdp! (Entailment.left_Fconj!_intro (by simp_all)) (Entailment.by_axm rfl);
+
+lemma ttt'' {T : Theory ℒₒᵣ} (hT : Set.Finite T) : ({hT.toFinset.conj} : ArithmeticTheory) ⪯ T := by
+  apply Entailment.WeakerThan.ofAxm!;
+  intro σ hσ;
+  rcases hσ with rfl;
+  exact ttt hT;
+
+lemma eqiiov_of_f {T : Theory ℒₒᵣ} (hT : Set.Finite T) : T ≊ ({hT.toFinset.conj} : ArithmeticTheory) := by
+  apply Entailment.Equiv.antisymm_iff.mpr;
+  constructor;
+  . exact ttt' hT;
+  . exact ttt'' hT;
+
+lemma _root_.LO.Entailment.Equiv.iff_iff [Entailment S F] [Entailment T F] {𝓢 : S} {𝓣 : T}
+  : 𝓢 ≊ 𝓣 ↔ (∀ {σ}, 𝓢 ⊢ σ ↔ 𝓣 ⊢ σ) := by
+  apply Iff.trans Entailment.Equiv.antisymm_iff;
+  grind [Entailment.weakerThan_iff];
 
 /-- The deduction theorem for the finite theory `𝗣𝗔⁻`: `𝗣𝗔⁻` proves `σ` iff `∅` proves the
 conjunction of `𝗣𝗔⁻`'s axioms implies `σ`. -/
-lemma peanoMinus_provable_iff {σ : ArithmeticSentence} :
-  letI π := PeanoMinus.finite.toFinset.conj
-  (𝗣𝗔⁻ : ArithmeticTheory) ⊢ σ ↔ (∅ : ArithmeticTheory) ⊢ π 🡒 σ := by
-  apply Iff.trans peanoMinus_iff_singletonConj_provable;
-  rw [← insert_empty_eq PeanoMinus.finite.toFinset.conj]
-  exact Entailment.deduction_iff
+lemma peanoMinus_provable_iff {T : Theory ℒₒᵣ} (hT : Set.Finite T) : T ⊢ σ ↔ (∅ : ArithmeticTheory) ⊢ hT.toFinset.conj 🡒 σ := by
+  apply Iff.trans $ (Entailment.Equiv.iff_iff.mp $ eqiiov_of_f hT);
+  rw [←insert_empty_eq];
+  exact Entailment.deduction_iff;
 
 /-- Church's theorem: the set of (purely logically, i.e. `∅`-)provable sentences is not
 computable. -/
@@ -160,8 +172,8 @@ theorem church_theorem : ¬ComputablePred ((∅ : ArithmeticTheory).theory) := b
   by_contra hC;
   apply church_theoremAux (T := 𝗣𝗔⁻) (ComputablePred.computable_of_manyOneReducible ?_ hC);
   refine ⟨λ σ => PeanoMinus.finite.toFinset.conj 🡒 σ, ?_, ?_⟩
-  . set π := PeanoMinus.finite.toFinset.conj
-    set c := Encodable.encode (∼π : ArithmeticSentence)
+  . set π := PeanoMinus.finite.toFinset.conj;
+    set c := Encodable.encode (∼π : ArithmeticSentence);
     have hPrim : Primrec fun e : ℕ ↦ (Nat.pair 5 <| Nat.pair c e) + 1 :=
       Primrec.succ.comp (Primrec₂.natPair.comp (Primrec.const 5)
         (Primrec₂.natPair.comp (Primrec.const c) Primrec.id))
@@ -174,7 +186,7 @@ theorem church_theorem : ¬ComputablePred ((∅ : ArithmeticTheory).theory) := b
       rw [Semiformula.imp_eq, Semiformula.encode_or, ← Semiformula.encode_eq_toNat, ← Semiformula.encode_eq_toNat]
     rw [h, Encodable.encodek, Option.getD_some]
   . intro σ;
-    exact peanoMinus_provable_iff;
+    exact peanoMinus_provable_iff $ PeanoMinus.finite;
 
 end PeanoMinusReduction
 
