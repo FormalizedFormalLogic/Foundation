@@ -19,10 +19,6 @@ of r.e. predicates, `re_complete`, is needed, unlike Gödel's first incompletene
 computably many-one reduces `𝗣𝗔⁻`-provability to itself, removing the `𝗥₀ ⪯ T` and soundness
 hypotheses needed by `church_theoremAux`.
 
-This file is currently a skeleton: every helper lemma (`A2`-`A9`, `C1`-`C4` in the accompanying
-proof plan) is stated with `sorry`; only `church_theoremAux` and `church_theorem` themselves have
-complete proofs, assembled from those (sorry'd) facts.
-
 - folklore; the standard proof of Church's theorem via undecidability of `𝚺₁`-completeness, see
   e.g. Rogers, *Theory of Recursive Functions and Effective Computability*, or Smoryński's chapter
   in the *Handbook of Mathematical Logic*.
@@ -152,6 +148,8 @@ section PeanoMinusReduction
 
 /-! ### Part II: Church's theorem for `T = ∅`, via a reduction through `𝗣𝗔⁻` -/
 
+/-- `𝗣𝗔⁻`-provability agrees with provability from the singleton theory of the conjunction `π` of
+`𝗣𝗔⁻`'s (finitely many) axioms: routine technical bridge, folklore. -/
 lemma ttt {σ : ArithmeticSentence} :
   letI π := PeanoMinus.finite.toFinset.conj
   (𝗣𝗔⁻ : ArithmeticTheory) ⊢ σ ↔ ({π} : ArithmeticTheory) ⊢ σ
@@ -168,14 +166,6 @@ lemma ttt {σ : ArithmeticSentence} :
       rcases hψ with rfl; exact hπ
   exact ⟨h₁.wk, h₂.wk⟩
 
-
-/-
-/-- `𝗣𝗔⁻` is finitely axiomatized. -/
-lemma exists_peanoMinus_list : ∃ Γ : List ArithmeticSentence, ∀ σ, σ ∈ (𝗣𝗔⁻ : ArithmeticTheory) ↔ σ ∈ Γ := by
-  refine ⟨PeanoMinus.finite.toFinset.toList, fun σ ↦ ?_⟩
-  rw [Finset.mem_toList, Set.Finite.mem_toFinset]
--/
-
 /-- The deduction theorem for the finite theory `𝗣𝗔⁻`: `𝗣𝗔⁻` proves `σ` iff `∅` proves the
 conjunction of `𝗣𝗔⁻`'s axioms implies `σ`. -/
 lemma peanoMinus_provable_iff {σ : ArithmeticSentence} :
@@ -191,7 +181,19 @@ theorem church_theorem : ¬ComputablePred ((∅ : ArithmeticTheory).theory) := b
   by_contra hC;
   apply church_theoremAux (T := 𝗣𝗔⁻) (ComputablePred.computable_of_manyOneReducible ?_ hC);
   refine ⟨λ σ => PeanoMinus.finite.toFinset.conj 🡒 σ, ?_, ?_⟩
-  . sorry;
+  . set π := PeanoMinus.finite.toFinset.conj
+    set c := Encodable.encode (∼π : ArithmeticSentence)
+    have hPrim : Primrec fun e : ℕ ↦ (Nat.pair 5 <| Nat.pair c e) + 1 :=
+      Primrec.succ.comp (Primrec₂.natPair.comp (Primrec.const 5)
+        (Primrec₂.natPair.comp (Primrec.const c) Primrec.id))
+    have : Computable (fun σ : ArithmeticSentence ↦
+        (Encodable.decode ((Nat.pair 5 <| Nat.pair c (Encodable.encode σ)) + 1) : Option ArithmeticSentence).getD ⊤) :=
+      Computable.option_getD (Computable.decode.comp (hPrim.to_comp.comp Computable.encode))
+        (Computable.const ⊤)
+    refine this.of_eq fun σ ↦ ?_
+    have h : (Nat.pair 5 <| Nat.pair c (Encodable.encode σ)) + 1 = Encodable.encode (π 🡒 σ) := by
+      rw [Semiformula.imp_eq, Semiformula.encode_or, ← Semiformula.encode_eq_toNat, ← Semiformula.encode_eq_toNat]
+    rw [h, Encodable.encodek, Option.getD_some]
   . intro σ;
     exact peanoMinus_provable_iff;
 
