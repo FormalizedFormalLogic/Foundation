@@ -91,7 +91,9 @@ noncomputable def d (n : ℕ) : ℕ := substNumeral (V := ℕ) n n
 
 /-- The graph of `d` is `𝚺₁`-definable. -/
 lemma d_graph_sigma1 : 𝚺₁-Relation fun n m : ℕ ↦ m = d n := by
-  sorry
+  have hSN : 𝚺-[1].Definable (fun w : Fin 3 → ℕ ↦ w 0 = substNumeral (w 1) (w 2)) :=
+    HierarchySymbol.Defined.to_definable ssnum substNumeral.defined
+  exact (hSN.retraction ![1, 0, 0]).of_iff fun v ↦ by simp [d]
 
 /-- `d` is computable. -/
 lemma d_computable : Computable d := by
