@@ -1,6 +1,6 @@
 module
 
-public import Foundation.FirstOrder.Incompleteness.GödelRosser
+public import Foundation.FirstOrder.Incompleteness.RosserProvability
 public import Foundation.Logic.LindenbaumAlgebra
 
 @[expose] public section
@@ -73,7 +73,7 @@ lemma FirstOrder.Arithmetic.dense (T : ArithmeticTheory) [𝗜𝚺₁ ⪯ T] [T.
   intro σ con
   have : 𝗜𝚺₁ ⪯ T := inferInstance
   have : 𝗜𝚺₁ ⪯ insert σ T := WeakerThan.trans this (Axiomatized.le_of_subset (Set.subset_insert _ _))
-  simpa using! Arithmetic.incomplete' (insert σ T)
+  simpa using! Arithmetic.incomplete_GR (insert σ T)
 
 instance (T : ArithmeticTheory) [𝗜𝚺₁ ⪯ T] [T.Δ₁] : DenselyOrdered (LindenbaumAlgebra T) where
   dense _ _ := FirstOrder.Arithmetic.dense T
