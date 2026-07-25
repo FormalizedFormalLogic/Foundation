@@ -62,7 +62,16 @@ section Diagonalization
 /-- A total function on `ℕ` whose graph is r.e. is computable. -/
 lemma computable_of_graph_rePred {g : ℕ → ℕ} (h : REPred fun p : ℕ × ℕ ↦ p.2 = g p.1) :
   Computable g := by
-  sorry
+  have hF : Partrec₂ fun a b : ℕ ↦ (Part.assert (b = g a) fun _ ↦ Part.some ()).map fun _ ↦ b :=
+    Partrec.map h (Primrec.snd.comp Primrec.fst).to_comp
+  obtain ⟨k, hk, Hk⟩ := Partrec.projection hF (by
+    rintro a b₁ b₂ c₁ c₂ h₁ h₂
+    simp only [Part.mem_map_iff, Part.mem_assert_iff] at h₁ h₂
+    obtain ⟨-, ⟨rfl, -⟩, rfl⟩ := h₁
+    obtain ⟨-, ⟨rfl, -⟩, rfl⟩ := h₂
+    rfl)
+  refine hk.of_eq_tot fun a ↦ ?_
+  exact (Hk (g a) a).mpr ⟨g a, by simp [Part.mem_map_iff, Part.mem_assert_iff]⟩
 
 /-- A `𝚺₁`-definable binary relation on `ℕ` is r.e. -/
 lemma rePred_of_sigma1_relation {R : ℕ → ℕ → Prop} (h : 𝚺₁-Relation R) :
