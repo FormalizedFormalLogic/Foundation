@@ -15,9 +15,9 @@ public import Mathlib.Computability.Reduce
 set of `T`-provable sentences is not computable, by a direct diagonalization on the self-applied
 substitution `σ ↦ σ/[⌜σ⌝]` (no fixed-point/Gödel-numbering machinery beyond weak representability
 of r.e. predicates, `re_complete`, is needed, unlike Gödel's first incompleteness theorem).
-`church_theorem` specializes this to `T = ∅`: since `𝗣𝗔⁻` is finitely axiomatizable, `∅`-provability
-computably many-one reduces `𝗣𝗔⁻`-provability to itself, removing the `𝗥₀ ⪯ T` and soundness
-hypotheses needed by `church_theoremAux`.
+`church_theorem` specializes this to `T = ∅`: since `𝗣𝗔⁻` is finitely axiomatizable, `𝗣𝗔⁻`-provability
+computably many-one reduces to `∅`-provability, so undecidability transfers from `church_theoremAux`
+without needing the `𝗥₀ ⪯ T` and soundness hypotheses required there.
 
 - folklore; the standard proof of Church's theorem via undecidability of `𝚺₁`-completeness, see
   e.g. Rogers, *Theory of Recursive Functions and Effective Computability*, or Smoryński's chapter
@@ -27,27 +27,6 @@ hypotheses needed by `church_theoremAux`.
 @[expose] public section
 
 namespace LO.FirstOrder.Arithmetic
-
-
-namespace ArithmeticTheory
-
-variable {T : ArithmeticTheory}
-
-abbrev codes (T : ArithmeticTheory) : ℕ → Prop := λ n => (Encodable.decode n).elim False (T ⊢ ·)
-
-def RE (T : ArithmeticTheory) : Prop := REPred T.theory
-
-lemma iff_RE_theoryCodes_RE : RE T ↔ REPred (codes T) :=
-  _root_.REPred.iff_decoded_pred
-
-
-def Computable (T : ArithmeticTheory) : Prop := ComputablePred T.theory
-
-lemma iff_Computable_theoryCodes_Computable : Computable T ↔ ComputablePred (codes T) :=
-  _root_.ComputablePred.iff_decoded_pred
-
-end ArithmeticTheory
-
 
 open Bootstrapping Bootstrapping.Arithmetic
 
@@ -150,7 +129,7 @@ section PeanoMinusReduction
 
 /-- `𝗣𝗔⁻`-provability agrees with provability from the singleton theory of the conjunction `π` of
 `𝗣𝗔⁻`'s (finitely many) axioms: routine technical bridge, folklore. -/
-lemma ttt {σ : ArithmeticSentence} :
+lemma peanoMinus_iff_singletonConj_provable {σ : ArithmeticSentence} :
   letI π := PeanoMinus.finite.toFinset.conj
   (𝗣𝗔⁻ : ArithmeticTheory) ⊢ σ ↔ ({π} : ArithmeticTheory) ⊢ σ
   := by
@@ -171,7 +150,7 @@ conjunction of `𝗣𝗔⁻`'s axioms implies `σ`. -/
 lemma peanoMinus_provable_iff {σ : ArithmeticSentence} :
   letI π := PeanoMinus.finite.toFinset.conj
   (𝗣𝗔⁻ : ArithmeticTheory) ⊢ σ ↔ (∅ : ArithmeticTheory) ⊢ π 🡒 σ := by
-  apply Iff.trans ttt;
+  apply Iff.trans peanoMinus_iff_singletonConj_provable;
   rw [← insert_empty_eq PeanoMinus.finite.toFinset.conj]
   exact Entailment.deduction_iff
 
