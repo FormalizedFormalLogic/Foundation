@@ -96,8 +96,8 @@ lemma d_graph_sigma1 : 𝚺₁-Relation fun n m : ℕ ↦ m = d n := by
   exact (hSN.retraction ![1, 0, 0]).of_iff fun v ↦ by simp [d]
 
 /-- `d` is computable. -/
-lemma d_computable : Computable d := by
-  sorry
+lemma d_computable : Computable d :=
+  computable_of_graph_rePred (rePred_of_sigma1_relation d_graph_sigma1)
 
 /-- `d` applied to the code of `σ` is the code of `σ`'s diagonal self-substitution. -/
 lemma d_quote_eq (σ : ArithmeticSemisentence 1) : d (⌜σ⌝ : ℕ) = (⌜(σ/[⌜σ⌝] : ArithmeticSentence)⌝ : ℕ) :=
