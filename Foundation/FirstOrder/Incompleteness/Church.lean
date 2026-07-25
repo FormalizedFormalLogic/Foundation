@@ -182,7 +182,8 @@ lemma peanoMinus_provable_iff {σ : ArithmeticSentence} :
   letI π := PeanoMinus.finite.toFinset.conj
   (𝗣𝗔⁻ : ArithmeticTheory) ⊢ σ ↔ (∅ : ArithmeticTheory) ⊢ π 🡒 σ := by
   apply Iff.trans ttt;
-  sorry;
+  rw [← insert_empty_eq PeanoMinus.finite.toFinset.conj]
+  exact Entailment.deduction_iff
 
 /-- Church's theorem: the set of (purely logically, i.e. `∅`-)provable sentences is not
 computable. -/
