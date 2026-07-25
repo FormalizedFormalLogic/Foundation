@@ -152,11 +152,21 @@ section PeanoMinusReduction
 
 /-! ### Part II: Church's theorem for `T = ∅`, via a reduction through `𝗣𝗔⁻` -/
 
-lemma ttt :
+lemma ttt {σ : ArithmeticSentence} :
   letI π := PeanoMinus.finite.toFinset.conj
   (𝗣𝗔⁻ : ArithmeticTheory) ⊢ σ ↔ ({π} : ArithmeticTheory) ⊢ σ
   := by
-  sorry;
+  set π := PeanoMinus.finite.toFinset.conj
+  have hπ : (𝗣𝗔⁻ : ArithmeticTheory) ⊢ π :=
+    Entailment.FConj!_iff_forall_provable.mpr fun ψ hψ ↦
+      Entailment.by_axm (by simpa using hψ)
+  have h₁ : (𝗣𝗔⁻ : ArithmeticTheory) ⪯ ({π} : ArithmeticTheory) :=
+    Entailment.WeakerThan.ofAxm! fun {ψ} hψ ↦
+      Entailment.mdp! (Entailment.left_Fconj!_intro (by simpa using hψ)) (Entailment.by_axm rfl)
+  have h₂ : ({π} : ArithmeticTheory) ⪯ (𝗣𝗔⁻ : ArithmeticTheory) :=
+    Entailment.WeakerThan.ofAxm! fun {ψ} hψ ↦ by
+      rcases hψ with rfl; exact hπ
+  exact ⟨h₁.wk, h₂.wk⟩
 
 
 /-
