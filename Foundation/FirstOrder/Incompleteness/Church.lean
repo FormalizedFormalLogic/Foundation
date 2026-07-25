@@ -15,7 +15,7 @@ public import Mathlib.Computability.Reduce
 the set of `T`-provable sentences is not computable, by a direct diagonalization on the
 self-applied substitution `σ ↦ σ/[⌜σ⌝]` (no fixed-point/Gödel-numbering machinery beyond weak
 representability of r.e. predicates, `re_complete`, is needed, unlike Gödel's first incompleteness
-theorem). `church_theorem` specializes this to `T = ∅`: since `𝗣𝗔⁻` is finitely axiomatizable,
+theorem). `undecidability_first_order_logic` specializes this to `T = ∅`: since `𝗣𝗔⁻` is finitely axiomatizable,
 `𝗣𝗔⁻`-provability computably many-one reduces to `∅`-provability, so undecidability transfers
 from `church_theorem_general` without needing the `𝗥₀ ⪯ T` and soundness hypotheses required
 there.
@@ -149,7 +149,7 @@ lemma finite_theory_provable_iff_conj_imp {T : Theory ℒₒᵣ} (hT : Set.Finit
 
 /-- Church's theorem: the set of (purely logically, i.e. `∅`-)provable sentences is not
 computable. -/
-theorem church_theorem : ¬ComputablePred ((∅ : ArithmeticTheory).theory) := by
+theorem undecidability_first_order_logic : ¬ComputablePred ((∅ : ArithmeticTheory).theory) := by
   by_contra hC
   apply church_theorem_general (T := 𝗣𝗔⁻) (ComputablePred.computable_of_manyOneReducible ?_ hC)
   refine ⟨fun σ ↦ PeanoMinus.finite.toFinset.conj 🡒 σ, ?_, ?_⟩
