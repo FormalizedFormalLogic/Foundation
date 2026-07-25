@@ -103,7 +103,13 @@ lemma D_computable (hC : ComputablePred T.theory) : ComputablePred (fun σ ↦ T
 `T`-unprovability (after diagonal substitution) coincide, obtained from `codeOfREPred` and
 `re_complete` applied to the decode-lifted predicate `σ ↦ T ⊬ f σ`. -/
 lemma D_diagonal (hD : ComputablePred (fun σ ↦ T ⊬ f σ)) : ∃ δ : ArithmeticSemisentence 1, (T ⊬ f δ) ↔ T ⊢ f δ := by
-  sorry
+  have hRe : REPred fun n : ℕ ↦ (Encodable.decode (α := ArithmeticSemisentence 1) n).elim False
+      (fun σ ↦ T ⊬ f σ) := REPred.iff_decoded_pred.mp hD.to_re
+  refine ⟨codeOfREPred fun n : ℕ ↦
+    (Encodable.decode (α := ArithmeticSemisentence 1) n).elim False (fun σ ↦ T ⊬ f σ), ?_⟩
+  simpa [Encodable.encodek, f, Arithmetic.gödelNumber'_eq_coe_encode]
+    using re_complete (T := T) hRe (x := Encodable.encode (codeOfREPred fun n : ℕ ↦
+      (Encodable.decode (α := ArithmeticSemisentence 1) n).elim False (fun σ ↦ T ⊬ f σ)))
 
 /-- Church's theorem, for an arbitrary arithmetic theory `T ⊇ 𝗥₀` sound on `𝚺₁` sentences: the set
 of `T`-provable sentences is not computable. -/
