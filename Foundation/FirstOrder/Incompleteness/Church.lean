@@ -108,7 +108,14 @@ noncomputable def f (σ : ArithmeticSemisentence 1) : ArithmeticSentence := σ/[
 
 /-- `f` is computable. -/
 lemma f_computable : Computable f := by
-  sorry
+  have : Computable (fun σ : ArithmeticSemisentence 1 ↦
+      (Encodable.decode (d (Encodable.encode σ)) : Option ArithmeticSentence).getD ⊤) :=
+    Computable.option_getD (Computable.decode.comp (d_computable.comp Computable.encode))
+      (Computable.const ⊤)
+  refine this.of_eq fun σ ↦ ?_
+  have h : d (Encodable.encode σ) = Encodable.encode (f σ) := by
+    simpa [f, Sentence.quote_eq_encode] using d_quote_eq σ
+  rw [h, Encodable.encodek, Option.getD_some]
 
 variable {T : ArithmeticTheory} [𝗥₀ ⪯ T] [T.SoundOnHierarchy 𝚺 1]
 
