@@ -11,12 +11,12 @@ public import Mathlib.Computability.Reduce
 /-!
 # Church's undecidability theorem
 
-`church_theoremAux` shows that for every arithmetic theory `T ⊇ 𝗥₀` sound on `𝚺₁` sentences, the
+`church_theorem_general` shows that for every arithmetic theory `T ⊇ 𝗥₀` sound on `𝚺₁` sentences, the
 set of `T`-provable sentences is not computable, by a direct diagonalization on the self-applied
 substitution `σ ↦ σ/[⌜σ⌝]` (no fixed-point/Gödel-numbering machinery beyond weak representability
 of r.e. predicates, `re_complete`, is needed, unlike Gödel's first incompleteness theorem).
 `church_theorem` specializes this to `T = ∅`: since `𝗣𝗔⁻` is finitely axiomatizable, `𝗣𝗔⁻`-provability
-computably many-one reduces to `∅`-provability, so undecidability transfers from `church_theoremAux`
+computably many-one reduces to `∅`-provability, so undecidability transfers from `church_theorem_general`
 without needing the `𝗥₀ ⪯ T` and soundness hypotheses required there.
 
 - folklore; the standard proof of Church's theorem via undecidability of `𝚺₁`-completeness, see
@@ -59,121 +59,103 @@ lemma rePred_of_sigma1_relation {R : ℕ → ℕ → Prop} (h : 𝚺₁-Relation
         (Primrec.vector_cons.comp .snd (.const List.Vector.nil)))
   exact this.of_eq <| by intro p; simpa [List.Vector.cons_get] using hφ ![p.1, p.2]
 
-
 /-- The code-level diagonal self-substitution: if `n` is the code of a `Semisentence ℒₒᵣ 1`,
-`d n` is the code of its self-substitution `n/[⌜n⌝]`. This is `Bootstrapping.Arithmetic.substNumeral`
+`diagCode n` is the code of its self-substitution `n/[⌜n⌝]`. This is `Bootstrapping.Arithmetic.substNumeral`
 applied to `n` twice, i.e. the same expression as the `D` used in `Incompleteness/First.lean`. -/
-noncomputable def d (n : ℕ) : ℕ := substNumeral (V := ℕ) n n
+noncomputable def diagCode (n : ℕ) : ℕ := substNumeral (V := ℕ) n n
 
-/-- The graph of `d` is `𝚺₁`-definable. -/
-lemma d_graph_sigma1 : 𝚺₁-Relation fun n m : ℕ ↦ m = d n := by
+/-- The graph of `diagCode` is `𝚺₁`-definable. -/
+lemma diagCode_graph_sigma1 : 𝚺₁-Relation fun n m : ℕ ↦ m = diagCode n := by
   have hSN : 𝚺-[1].Definable (fun w : Fin 3 → ℕ ↦ w 0 = substNumeral (w 1) (w 2)) :=
     HierarchySymbol.Defined.to_definable ssnum substNumeral.defined
-  exact (hSN.retraction ![1, 0, 0]).of_iff fun v ↦ by simp [d]
+  exact (hSN.retraction ![1, 0, 0]).of_iff fun v ↦ by simp [diagCode]
 
-/-- `d` is computable. -/
-lemma d_computable : Computable d :=
-  computable_of_graph_rePred (rePred_of_sigma1_relation d_graph_sigma1)
+/-- `diagCode` is computable. -/
+lemma diagCode_computable : Computable diagCode :=
+  computable_of_graph_rePred (rePred_of_sigma1_relation diagCode_graph_sigma1)
 
-/-- `d` applied to the code of `σ` is the code of `σ`'s diagonal self-substitution. -/
-lemma d_quote_eq (σ : ArithmeticSemisentence 1) : d ⌜σ⌝ = ⌜(σ/[⌜σ⌝] : ArithmeticSentence)⌝ :=
+/-- `diagCode` applied to the code of `σ` is the code of `σ`'s diagonal self-substitution. -/
+lemma diagCode_quote_eq (σ : ArithmeticSemisentence 1) : diagCode ⌜σ⌝ = ⌜(σ/[⌜σ⌝] : ArithmeticSentence)⌝ :=
   substNumeral_app_quote σ σ
 
-
 /-- The diagonal substitution `σ ↦ σ/[⌜σ⌝]`. -/
-noncomputable def f (σ : ArithmeticSemisentence 1) : ArithmeticSentence := σ/[⌜σ⌝]
+noncomputable def diagSubst (σ : ArithmeticSemisentence 1) : ArithmeticSentence := σ/[⌜σ⌝]
 
-/-- `f` is computable. -/
-lemma f_computable : Computable f := by
+/-- `diagSubst` is computable. -/
+lemma diagSubst_computable : Computable diagSubst := by
   have : Computable (fun σ : ArithmeticSemisentence 1 ↦
-      (Encodable.decode (d (Encodable.encode σ)) : Option ArithmeticSentence).getD ⊤) :=
-    Computable.option_getD (Computable.decode.comp (d_computable.comp Computable.encode))
+      (Encodable.decode (diagCode (Encodable.encode σ)) : Option ArithmeticSentence).getD ⊤) :=
+    Computable.option_getD (Computable.decode.comp (diagCode_computable.comp Computable.encode))
       (Computable.const ⊤)
   refine this.of_eq fun σ ↦ ?_
-  have h : d (Encodable.encode σ) = Encodable.encode (f σ) := by
-    simpa [f, Sentence.quote_eq_encode] using d_quote_eq σ
+  have h : diagCode (Encodable.encode σ) = Encodable.encode (diagSubst σ) := by
+    simpa [diagSubst, Sentence.quote_eq_encode] using diagCode_quote_eq σ
   rw [h, Encodable.encodek, Option.getD_some]
 
 variable {T : ArithmeticTheory} [𝗥₀ ⪯ T] [T.SoundOnHierarchy 𝚺 1]
 
 -- This direction needs neither `𝗥₀ ⪯ T` nor `𝚺₁`-soundness, only closure of `ComputablePred`
--- under complement and many-one reduction along the computable `f`.
+-- under complement and many-one reduction along the computable `diagSubst`.
 omit [𝗥₀ ⪯ T] [T.SoundOnHierarchy 𝚺 1] in
-/-- If `T`-provability is computable, so is `σ ↦ T ⊬ f σ`. -/
-lemma D_computable (hC : ComputablePred T.theory) : ComputablePred (fun σ ↦ T ⊬ f σ) :=
+/-- If `T`-provability is computable, so is `σ ↦ T ⊬ diagSubst σ`. -/
+lemma unprovable_diagSubst_computable (hC : ComputablePred T.theory) : ComputablePred (fun σ ↦ T ⊬ diagSubst σ) :=
   ComputablePred.computable_of_manyOneReducible
-    (ManyOneReducible.mk (fun σ ↦ T ⊬ σ) f_computable) hC.not
+    (ManyOneReducible.mk (fun σ ↦ T ⊬ σ) diagSubst_computable) hC.not
 
-/-- The diagonal fixed point for `σ ↦ T ⊬ f σ`: a sentence whose `T`-provability and
+/-- The diagonal fixed point for `σ ↦ T ⊬ diagSubst σ`: a sentence whose `T`-provability and
 `T`-unprovability (after diagonal substitution) coincide, obtained from `codeOfREPred` and
-`re_complete` applied to the decode-lifted predicate `σ ↦ T ⊬ f σ`. -/
-lemma D_diagonal (hD : ComputablePred (fun σ ↦ T ⊬ f σ)) : ∃ δ : ArithmeticSemisentence 1, (T ⊬ f δ) ↔ T ⊢ f δ := by
+`re_complete` applied to the decode-lifted predicate `σ ↦ T ⊬ diagSubst σ`. -/
+lemma diagSubst_fixedPoint (hD : ComputablePred (fun σ ↦ T ⊬ diagSubst σ)) : ∃ δ : ArithmeticSemisentence 1, (T ⊬ diagSubst δ) ↔ T ⊢ diagSubst δ := by
   have hRe : REPred fun n : ℕ ↦ (Encodable.decode (α := ArithmeticSemisentence 1) n).elim False
-      (fun σ ↦ T ⊬ f σ) := REPred.iff_decoded_pred.mp hD.to_re
+      (fun σ ↦ T ⊬ diagSubst σ) := REPred.iff_decoded_pred.mp hD.to_re
   refine ⟨codeOfREPred fun n : ℕ ↦
-    (Encodable.decode (α := ArithmeticSemisentence 1) n).elim False (fun σ ↦ T ⊬ f σ), ?_⟩
-  simpa [Encodable.encodek, f, Arithmetic.gödelNumber'_eq_coe_encode]
+    (Encodable.decode (α := ArithmeticSemisentence 1) n).elim False (fun σ ↦ T ⊬ diagSubst σ), ?_⟩
+  simpa [Encodable.encodek, diagSubst, Arithmetic.gödelNumber'_eq_coe_encode]
     using re_complete (T := T) hRe (x := Encodable.encode (codeOfREPred fun n : ℕ ↦
-      (Encodable.decode (α := ArithmeticSemisentence 1) n).elim False (fun σ ↦ T ⊬ f σ)))
+      (Encodable.decode (α := ArithmeticSemisentence 1) n).elim False (fun σ ↦ T ⊬ diagSubst σ)))
 
 /-- Church's theorem, for an arbitrary arithmetic theory `T ⊇ 𝗥₀` sound on `𝚺₁` sentences: the set
 of `T`-provable sentences is not computable. -/
-theorem church_theoremAux : ¬ComputablePred T.theory := by
-  by_contra hC;
-  obtain ⟨δ, hδ⟩ := D_diagonal $ D_computable hC;
-  tauto;
+theorem church_theorem_general : ¬ComputablePred T.theory := by
+  by_contra hC
+  obtain ⟨δ, hδ⟩ := diagSubst_fixedPoint (unprovable_diagSubst_computable hC)
+  tauto
 
 end Diagonalization
-
-
 
 section PeanoMinusReduction
 
 /-! ### Part II: Church's theorem for `T = ∅`, via a reduction through `𝗣𝗔⁻` -/
 
-lemma ttt {T : Theory ℒₒᵣ} (hT : Set.Finite T) : T ⊢ hT.toFinset.conj := by
-  apply Entailment.FConj!_iff_forall_provable.mpr;
-  intro σ hσ;
-  apply Entailment.by_axm;
-  simp_all;
+/-- A finite theory proves the conjunction of its own (finite) axiom set. -/
+lemma finite_theory_provable_conj {T : Theory ℒₒᵣ} (hT : Set.Finite T) : T ⊢ hT.toFinset.conj :=
+  Entailment.FConj!_iff_forall_provable.mpr fun {σ} hσ ↦ Entailment.by_axm (by simp_all)
 
-lemma ttt' {T : Theory ℒₒᵣ} (hT : Set.Finite T) : T ⪯ ({hT.toFinset.conj} : ArithmeticTheory) := by
-  apply Entailment.WeakerThan.ofAxm!;
-  intro σ hσ;
-  exact Entailment.mdp! (Entailment.left_Fconj!_intro (by simp_all)) (Entailment.by_axm rfl);
+/-- A finite theory is provability-equivalent to the (singleton) theory consisting of the
+conjunction of its own axioms. -/
+lemma finite_theory_equiv_singletonConj {T : Theory ℒₒᵣ} (hT : Set.Finite T) :
+    T ≊ ({hT.toFinset.conj} : ArithmeticTheory) :=
+  Entailment.Equiv.antisymm_iff.mpr
+    ⟨Entailment.WeakerThan.ofAxm! fun {σ} hσ ↦
+        Entailment.mdp! (Entailment.left_Fconj!_intro (by simp_all)) (Entailment.by_axm rfl),
+      Entailment.WeakerThan.ofAxm! fun {σ} hσ ↦ by
+        rcases hσ with rfl; exact finite_theory_provable_conj hT⟩
 
-lemma ttt'' {T : Theory ℒₒᵣ} (hT : Set.Finite T) : ({hT.toFinset.conj} : ArithmeticTheory) ⪯ T := by
-  apply Entailment.WeakerThan.ofAxm!;
-  intro σ hσ;
-  rcases hσ with rfl;
-  exact ttt hT;
-
-lemma eqiiov_of_f {T : Theory ℒₒᵣ} (hT : Set.Finite T) : T ≊ ({hT.toFinset.conj} : ArithmeticTheory) := by
-  apply Entailment.Equiv.antisymm_iff.mpr;
-  constructor;
-  . exact ttt' hT;
-  . exact ttt'' hT;
-
-lemma _root_.LO.Entailment.Equiv.iff_iff [Entailment S F] [Entailment T F] {𝓢 : S} {𝓣 : T}
-  : 𝓢 ≊ 𝓣 ↔ (∀ {σ}, 𝓢 ⊢ σ ↔ 𝓣 ⊢ σ) := by
-  apply Iff.trans Entailment.Equiv.antisymm_iff;
-  grind [Entailment.weakerThan_iff];
-
-/-- The deduction theorem for the finite theory `𝗣𝗔⁻`: `𝗣𝗔⁻` proves `σ` iff `∅` proves the
-conjunction of `𝗣𝗔⁻`'s axioms implies `σ`. -/
-lemma peanoMinus_provable_iff {T : Theory ℒₒᵣ} (hT : Set.Finite T) : T ⊢ σ ↔ (∅ : ArithmeticTheory) ⊢ hT.toFinset.conj 🡒 σ := by
-  apply Iff.trans $ (Entailment.Equiv.iff_iff.mp $ eqiiov_of_f hT);
-  rw [←insert_empty_eq];
-  exact Entailment.deduction_iff;
+/-- A deduction theorem for finite theories: a finite theory `T` proves `σ` iff `∅` proves the
+implication from the conjunction of `T`'s axioms to `σ`. -/
+lemma finite_theory_provable_iff_conj_imp {T : Theory ℒₒᵣ} (hT : Set.Finite T) :
+    T ⊢ σ ↔ (∅ : ArithmeticTheory) ⊢ hT.toFinset.conj 🡒 σ := by
+  rw [Entailment.Equiv.iff.mp (finite_theory_equiv_singletonConj hT) σ, ←insert_empty_eq]
+  exact Entailment.deduction_iff
 
 /-- Church's theorem: the set of (purely logically, i.e. `∅`-)provable sentences is not
 computable. -/
 theorem church_theorem : ¬ComputablePred ((∅ : ArithmeticTheory).theory) := by
-  by_contra hC;
-  apply church_theoremAux (T := 𝗣𝗔⁻) (ComputablePred.computable_of_manyOneReducible ?_ hC);
-  refine ⟨λ σ => PeanoMinus.finite.toFinset.conj 🡒 σ, ?_, ?_⟩
-  . set π := PeanoMinus.finite.toFinset.conj;
-    set c := Encodable.encode (∼π : ArithmeticSentence);
+  by_contra hC
+  apply church_theorem_general (T := 𝗣𝗔⁻) (ComputablePred.computable_of_manyOneReducible ?_ hC)
+  refine ⟨fun σ ↦ PeanoMinus.finite.toFinset.conj 🡒 σ, ?_, ?_⟩
+  . set π := PeanoMinus.finite.toFinset.conj
+    set c := Encodable.encode (∼π : ArithmeticSentence)
     have hPrim : Primrec fun e : ℕ ↦ (Nat.pair 5 <| Nat.pair c e) + 1 :=
       Primrec.succ.comp (Primrec₂.natPair.comp (Primrec.const 5)
         (Primrec₂.natPair.comp (Primrec.const c) Primrec.id))
@@ -185,8 +167,8 @@ theorem church_theorem : ¬ComputablePred ((∅ : ArithmeticTheory).theory) := b
     have h : (Nat.pair 5 <| Nat.pair c (Encodable.encode σ)) + 1 = Encodable.encode (π 🡒 σ) := by
       rw [Semiformula.imp_eq, Semiformula.encode_or, ← Semiformula.encode_eq_toNat, ← Semiformula.encode_eq_toNat]
     rw [h, Encodable.encodek, Option.getD_some]
-  . intro σ;
-    exact peanoMinus_provable_iff $ PeanoMinus.finite;
+  . -- specialize `finite_theory_provable_iff_conj_imp` to `T = 𝗣𝗔⁻`
+    exact fun σ ↦ finite_theory_provable_iff_conj_imp PeanoMinus.finite
 
 end PeanoMinusReduction
 
