@@ -32,6 +32,27 @@ complete proofs, assembled from those (sorry'd) facts.
 
 namespace LO.FirstOrder.Arithmetic
 
+
+namespace ArithmeticTheory
+
+variable {T : ArithmeticTheory}
+
+abbrev codes (T : ArithmeticTheory) : ℕ → Prop := λ n => (Encodable.decode n).elim False (T ⊢ ·)
+
+def RE (T : ArithmeticTheory) : Prop := REPred T.theory
+
+lemma iff_RE_theoryCodes_RE : RE T ↔ REPred (codes T) :=
+  _root_.REPred.iff_decoded_pred
+
+
+def Computable (T : ArithmeticTheory) : Prop := ComputablePred T.theory
+
+lemma iff_Computable_theoryCodes_Computable : Computable T ↔ ComputablePred (codes T) :=
+  _root_.ComputablePred.iff_decoded_pred
+
+end ArithmeticTheory
+
+
 open Bootstrapping Bootstrapping.Arithmetic
 
 section Diagonalization
@@ -40,7 +61,7 @@ section Diagonalization
 
 /-- A total function on `ℕ` whose graph is r.e. is computable. -/
 lemma computable_of_graph_rePred {g : ℕ → ℕ} (h : REPred fun p : ℕ × ℕ ↦ p.2 = g p.1) :
-    Computable g := by
+  Computable g := by
   sorry
 
 /-- A `𝚺₁`-definable binary relation on `ℕ` is r.e. -/
@@ -62,8 +83,7 @@ lemma d_computable : Computable d := by
   sorry
 
 /-- `d` applied to the code of `σ` is the code of `σ`'s diagonal self-substitution. -/
-lemma d_quote_eq (σ : ArithmeticSemisentence 1) :
-    d (⌜σ⌝ : ℕ) = (⌜(σ/[⌜σ⌝] : ArithmeticSentence)⌝ : ℕ) :=
+lemma d_quote_eq (σ : ArithmeticSemisentence 1) : d (⌜σ⌝ : ℕ) = (⌜(σ/[⌜σ⌝] : ArithmeticSentence)⌝ : ℕ) :=
   substNumeral_app_quote σ σ
 
 /-- The diagonal substitution `σ ↦ σ/[⌜σ⌝]`. -/
@@ -76,25 +96,21 @@ lemma f_computable : Computable f := by
 variable {T : ArithmeticTheory} [𝗥₀ ⪯ T] [T.SoundOnHierarchy 𝚺 1]
 
 /-- If `T`-provability is computable, so is `σ ↦ T ⊬ f σ`. -/
-lemma D_computable (hC : ComputablePred {σ : ArithmeticSentence | T ⊢ σ}) :
-    ComputablePred (fun σ : ArithmeticSemisentence 1 ↦ T ⊬ f σ) := by
+lemma D_computable (hC : ComputablePred T.theory) : ComputablePred (fun σ ↦ T ⊬ f σ) := by
   sorry
 
 /-- The diagonal fixed point for `σ ↦ T ⊬ f σ`: a sentence whose `T`-provability and
 `T`-unprovability (after diagonal substitution) coincide, obtained from `codeOfREPred` and
 `re_complete` applied to the decode-lifted predicate `σ ↦ T ⊬ f σ`. -/
-lemma D_diagonal (hD : ComputablePred (fun σ : ArithmeticSemisentence 1 ↦ T ⊬ f σ)) :
-    ∃ δ : ArithmeticSemisentence 1, (T ⊬ f δ) ↔ T ⊢ f δ := by
+lemma D_diagonal (hD : ComputablePred (fun σ ↦ T ⊬ f σ)) : ∃ δ : ArithmeticSemisentence 1, (T ⊬ f δ) ↔ T ⊢ f δ := by
   sorry
 
 /-- Church's theorem, for an arbitrary arithmetic theory `T ⊇ 𝗥₀` sound on `𝚺₁` sentences: the set
 of `T`-provable sentences is not computable. -/
 theorem church_theoremAux : ¬ComputablePred {σ : ArithmeticSentence | T ⊢ σ} := by
-  intro hC
-  obtain ⟨δ, hδ⟩ := D_diagonal (D_computable hC)
-  by_cases h : T ⊢ f δ
-  · exact hδ.mpr h h
-  · exact h (hδ.mp h)
+  by_contra hC;
+  obtain ⟨δ, hδ⟩ := D_diagonal $ D_computable hC;
+  tauto;
 
 end Diagonalization
 
@@ -102,48 +118,37 @@ section PeanoMinusReduction
 
 /-! ### Part II: Church's theorem for `T = ∅`, via a reduction through `𝗣𝗔⁻` -/
 
+lemma ttt :
+  letI π := PeanoMinus.finite.toFinset.conj
+  (𝗣𝗔⁻ : ArithmeticTheory) ⊢ σ ↔ ({π} : ArithmeticTheory) ⊢ σ
+  := by
+  sorry;
+
+
+/-
 /-- `𝗣𝗔⁻` is finitely axiomatized. -/
-lemma exists_peanoMinus_list :
-    ∃ Γ : List ArithmeticSentence, ∀ σ, σ ∈ (𝗣𝗔⁻ : ArithmeticTheory) ↔ σ ∈ Γ := by
+lemma exists_peanoMinus_list : ∃ Γ : List ArithmeticSentence, ∀ σ, σ ∈ (𝗣𝗔⁻ : ArithmeticTheory) ↔ σ ∈ Γ := by
   refine ⟨PeanoMinus.finite.toFinset.toList, fun σ ↦ ?_⟩
   rw [Finset.mem_toList, Set.Finite.mem_toFinset]
-
-open Classical in
-/-- A fixed finite list of axioms for `𝗣𝗔⁻`, chosen once and for all from
-`exists_peanoMinus_list`. -/
-noncomputable def peanoMinusList : List ArithmeticSentence := exists_peanoMinus_list.choose
-
-lemma mem_peanoMinusList_iff {σ : ArithmeticSentence} :
-    σ ∈ (𝗣𝗔⁻ : ArithmeticTheory) ↔ σ ∈ peanoMinusList :=
-  exists_peanoMinus_list.choose_spec σ
-
-/-- `𝗣𝗔⁻` proves the conjunction of its own (finitely many) axioms. -/
-lemma peanoMinus_provable_conj : (𝗣𝗔⁻ : ArithmeticTheory) ⊢ peanoMinusList.foldr (· ⋏ ·) ⊤ := by
-  sorry
+-/
 
 /-- The deduction theorem for the finite theory `𝗣𝗔⁻`: `𝗣𝗔⁻` proves `σ` iff `∅` proves the
 conjunction of `𝗣𝗔⁻`'s axioms implies `σ`. -/
-lemma peanoMinus_provable_iff (σ : ArithmeticSentence) :
-    (𝗣𝗔⁻ : ArithmeticTheory) ⊢ σ ↔ (∅ : ArithmeticTheory) ⊢ peanoMinusList.foldr (· ⋏ ·) ⊤ 🡒 σ := by
-  sorry
-
-/-- The many-one reduction witness from `𝗣𝗔⁻`-provability to `∅`-provability,
-`σ ↦ (conjunction of 𝗣𝗔⁻'s axioms) 🡒 σ`. -/
-noncomputable def peanoMinusReduction (σ : ArithmeticSentence) : ArithmeticSentence :=
-  peanoMinusList.foldr (· ⋏ ·) ⊤ 🡒 σ
-
-/-- `peanoMinusReduction` is computable: prepending a fixed sentence is elementary. -/
-lemma peanoMinusReduction_computable : Computable peanoMinusReduction := by
-  sorry
+lemma peanoMinus_provable_iff {σ : ArithmeticSentence} :
+  letI π := PeanoMinus.finite.toFinset.conj
+  (𝗣𝗔⁻ : ArithmeticTheory) ⊢ σ ↔ (∅ : ArithmeticTheory) ⊢ π 🡒 σ := by
+  apply Iff.trans ttt;
+  sorry;
 
 /-- Church's theorem: the set of (purely logically, i.e. `∅`-)provable sentences is not
 computable. -/
-theorem church_theorem : ¬ComputablePred {σ : ArithmeticSentence | (∅ : ArithmeticTheory) ⊢ σ} := by
-  intro hC
-  have hred : (fun σ : ArithmeticSentence ↦ (𝗣𝗔⁻ : ArithmeticTheory) ⊢ σ)
-      ≤₀ (fun σ : ArithmeticSentence ↦ (∅ : ArithmeticTheory) ⊢ σ) :=
-    ⟨peanoMinusReduction, peanoMinusReduction_computable, peanoMinus_provable_iff⟩
-  exact church_theoremAux (T := 𝗣𝗔⁻) (ComputablePred.computable_of_manyOneReducible hred hC)
+theorem church_theorem : ¬ComputablePred ((∅ : ArithmeticTheory).theory) := by
+  by_contra hC;
+  apply church_theoremAux (T := 𝗣𝗔⁻) (ComputablePred.computable_of_manyOneReducible ?_ hC);
+  refine ⟨λ σ => PeanoMinus.finite.toFinset.conj 🡒 σ, ?_, ?_⟩
+  . sorry;
+  . intro σ;
+    exact peanoMinus_provable_iff;
 
 end PeanoMinusReduction
 
