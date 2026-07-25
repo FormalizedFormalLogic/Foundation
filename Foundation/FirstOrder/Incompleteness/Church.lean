@@ -76,7 +76,13 @@ lemma computable_of_graph_rePred {g : ℕ → ℕ} (h : REPred fun p : ℕ × �
 /-- A `𝚺₁`-definable binary relation on `ℕ` is r.e. -/
 lemma rePred_of_sigma1_relation {R : ℕ → ℕ → Prop} (h : 𝚺₁-Relation R) :
     REPred fun p : ℕ × ℕ ↦ R p.1 p.2 := by
-  sorry
+  obtain ⟨φ, hφ⟩ := h
+  have : REPred fun p : ℕ × ℕ ↦
+      φ.val.Eval (p.1 ::ᵥ p.2 ::ᵥ List.Vector.nil : List.Vector ℕ 2).get id :=
+    (sigma1_re id φ.sigma_prop).comp
+      (Primrec.to_comp <| Primrec.vector_cons.comp .fst
+        (Primrec.vector_cons.comp .snd (.const List.Vector.nil)))
+  exact this.of_eq <| by intro p; simpa [List.Vector.cons_get] using hφ ![p.1, p.2]
 
 /-- The code-level diagonal self-substitution: if `n` is the code of a `Semisentence ℒₒᵣ 1`,
 `d n` is the code of its self-substitution `n/[⌜n⌝]`. This is `Bootstrapping.Arithmetic.substNumeral`
