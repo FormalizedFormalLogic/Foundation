@@ -141,20 +141,14 @@ lemma attemptOrEmpty_existsUnique (F : V → V) (α : V) : ∃! y,
     (IsAttempt.ExistsAttempt F α ∧ IsAttempt F α y) ∨
     (¬ IsAttempt.ExistsAttempt F α ∧ y = ∅) := by
   by_cases hexists : IsAttempt.ExistsAttempt F α
-  · refine existsUnique_of_exists_of_unique ?_ ?_
-    · exact ⟨Classical.choose hexists, Or.inl ⟨hexists, Classical.choose_spec hexists⟩⟩
-    · intro y₁ y₂
-      simp only [hexists, true_and, not_true_eq_false, false_and, or_false]
-      intro hy₁ hy₂
-      rcases hy₁.1, hy₁.2.1, hy₂.2.1 with ⟨hα, _, _⟩
-      let αo : Ordinal V := IsOrdinal.toOrdinal α
-      rw [← IsOrdinal.toOrdinal_val α] at hy₁
-      exact IsAttempt.isAttempt_unique hy₁ hy₂
-  · refine existsUnique_of_exists_of_unique ?_ ?_
-    · exact ⟨∅, Or.inr ⟨hexists, rfl⟩⟩
-    · intro y₁ y₂
-      simp only [hexists, false_and, not_false_eq_true, true_and, false_or]
-      exact fun (hy₁ : y₁ = ∅) (hy₂ : y₂ = ∅) ↦ hy₂ ▸ hy₁
+  · refine existsUnique_of_exists_of_unique ⟨hexists.choose, Or.inl ⟨hexists, hexists.choose_spec⟩⟩ ?_
+    intro y₁ y₂ hy₁ hy₂
+    simp_all only [true_and, not_true_eq_false, false_and, or_false]
+    rcases hy₁.1, hy₁.2.1, hy₂.2.1 with ⟨hα, _, _⟩
+    let αo : Ordinal V := IsOrdinal.toOrdinal α
+    rw [← IsOrdinal.toOrdinal_val α] at hy₁
+    exact IsAttempt.isAttempt_unique hy₁ hy₂
+  · refine existsUnique_of_exists_of_unique ⟨∅, Or.inr ⟨hexists, rfl⟩⟩ (by aesop)
 
 /--
 An attempt of length `α`, or `∅` if one doesn't exist.
@@ -213,10 +207,8 @@ lemma pairValueAttempt.definable {φ : SetTheorySemiformula V 2} (F : V → V) (
   intro v
   simp [pairValueAttempt.defined F hF]
 
-lemma eq_of_kpair_eq_pairValueAttempt {F : V → V} {α : V} {x y : V} (h : ⟨x, y⟩ₖ = pairValueAttempt F α) :
-    x = α := by
-  simp only [pairValueAttempt, kpair_iff] at h
-  exact h.1
+lemma eq_of_kpair_eq_pairValueAttempt {F : V → V} {α : V} {x y : V} (h : ⟨x, y⟩ₖ = pairValueAttempt F α) : x = α :=
+  (kpair_iff.mp (pairValueAttempt.eq_1 F α ▸ h)).1
 
 /-! #### Constructing attempt functions using replacement -/
 
