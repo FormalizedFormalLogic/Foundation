@@ -329,7 +329,7 @@ lemma replAttemptOrEmpty_aux
   intro α ih
   have hα := Ordinal.ordinal α
 
-  -- The case of (restrict) for `α`. This follows from ih for (aux) (i.e. `∀ β < α, ((aux) for β)`).
+  -- The case of (restrict) for `α`. This follows from ih for (aux), i.e. `∀ β < α, ((aux) for β)`.
   have hrestrict : ((β : V) → (hβα : β ∈ α.val) → IsAttempt F β ((replAttemptOrEmpty F hF α) ↾ β)) := by
     intro β hβα
     have hβ : IsOrdinal β := IsOrdinal.of_mem hβα
