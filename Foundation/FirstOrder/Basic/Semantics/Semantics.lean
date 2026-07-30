@@ -453,10 +453,10 @@ lemma eval_toEmpty [DecidableEq ξ] {n} {φ : Semiformula L ξ n} (hp : φ.freeV
   haveI : Inhabited M := Classical.inhabited_of_nonempty inferInstance
   simp [Semiformula.univCl, ←eval_toEmpty (f := default)]
 
-@[simp] lemma eval_enumarateFVar_idxOfFVar_eq_id [DecidableEq M] [Inhabited M] (φ : Semiformula L M n) (v) :
-    φ.Eval v (fun x ↦ φ.enumarateFVar (φ.idxOfFVar x)) ↔ φ.Eval v id :=
+@[simp] lemma eval_enumerateFVar_idxOfFVar_eq_id [DecidableEq M] [Inhabited M] (φ : Semiformula L M n) (v) :
+    φ.Eval v (fun x ↦ φ.enumerateFVar (φ.idxOfFVar x)) ↔ φ.Eval v id :=
   Semiformula.eval_iff_of_funEqOn _ <| by
-    intro x hx; simp [Semiformula.enumarateFVar_idxOfFVar (Semiformula.mem_fvarList_iff_fvar?.mpr hx)]
+    intro x hx; simp [Semiformula.enumerateFVar_idxOfFVar (Semiformula.mem_fvarList_iff_fvar?.mpr hx)]
 
 end rew
 

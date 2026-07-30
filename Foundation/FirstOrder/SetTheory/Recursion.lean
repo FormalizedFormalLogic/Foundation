@@ -116,7 +116,7 @@ lemma attempt_function_restrict_eq_of_lt
   intro γ hγβ y
   have hγα : γ ∈ α.val := by aesop
   have : IsOrdinal γ := of_mem hγβ
-  have hγsusbetβ : γ ⊆ β.val := by grind
+  have hγsubsetβ : γ ⊆ β.val := by grind
   simp_all [mem_restrict_iff]
 
 /-- Any two attempt functions agree on overlapping inputs. -/

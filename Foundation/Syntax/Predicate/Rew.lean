@@ -26,7 +26,9 @@ namespace FirstOrder
 
 /--
 A structure for maps which rewrite the semiterms occurring in a term.
+
 toFun - A function from `Semiterm L ξ₁ n₁` to `Semiterm L ξ₂ n₂`.
+
 func'' - A proof that `toFun` respects the function symbols of `L`.
 -/
 structure Rew (L : Language) (ξ₁ : Type*) (n₁ : ℕ) (ξ₂ : Type*) (n₂ : ℕ) where
@@ -95,7 +97,7 @@ def rewriteMap (e : ξ₁ → ξ₂) : Rew L ξ₁ n ξ₂ n := rewrite (fun m =
 def map (b : Fin n₁ → Fin n₂) (e : ξ₁ → ξ₂) : Rew L ξ₁ n₁ ξ₂ n₂ :=
   bind (fun n => #(b n)) (fun m => &(e m))
 
-/-- `LO.FirstOrder.Rew.subst v` is a substitution of the bounded variables occurring in a term by `v : Fin n → Semiterm L ξ n'`. -/
+/-- `LO.FirstOrder.Rew.subst v` is a substitution of the bound variables occurring in a term by `v : Fin n → Semiterm L ξ n'`. -/
 def subst {n'} (v : Fin n → Semiterm L ξ n') : Rew L ξ n ξ n' :=
   bind v fvar
 
@@ -119,6 +121,8 @@ def cast {n n' : ℕ} (h : n = n') : Rew L ξ n ξ n' :=
 def castLE {n n' : ℕ} (h : n ≤ n') : Rew L ξ n ξ n' :=
   map (Fin.castLE h) id
 
+/-- `LO.FirstOrder.Rew.embSubsts v` is a substitution of the bound variables occurring in a term with no free variables by `v : Fin n → Semiterm L ξ n'`.
+This closely resembles `LO.FirstOrder.Rew.subst`, however the term is required to have free variables of type `Empty`. -/
 def embSubsts (v : Fin k → Semiterm L ξ n) : Rew L Empty k ξ n := Rew.bind v Empty.elim
 
 protected def q (ω : Rew L ξ₁ n₁ ξ₂ n₂) : Rew L ξ₁ (n₁ + 1) ξ₂ (n₂ + 1) :=
