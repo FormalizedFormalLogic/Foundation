@@ -31,12 +31,12 @@ lemma succ_induction {P : V → Prop}
   InductionScheme.succ_induction (C := Semiformula.Open) (by
     rcases hP with ⟨φ, hp, hhp⟩
     haveI : Inhabited V := Classical.inhabited_of_nonempty'
-    refine ⟨φ.enumarateFVar, Rew.rewriteMap φ.idxOfFVar ▹ φ, by simp [hp], ?_⟩
+    refine ⟨φ.enumerateFVar, Rew.rewriteMap φ.idxOfFVar ▹ φ, by simp [hp], ?_⟩
     intro x
     simp only [hhp, Nat.succ_eq_add_one, Nat.reduceAdd, Semiformula.eval_rewriteMap]
     exact Semiformula.eval_iff_of_funEqOn φ (by
       intro z hz
-      simp [Semiformula.enumarateFVar_idxOfFVar (Semiformula.mem_fvarList_iff_fvar?.mpr hz)]))
+      simp [Semiformula.enumerateFVar_idxOfFVar (Semiformula.mem_fvarList_iff_fvar?.mpr hz)]))
     zero succ
 
 lemma least_number {P : V → Prop}

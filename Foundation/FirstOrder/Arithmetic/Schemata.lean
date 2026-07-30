@@ -141,7 +141,7 @@ lemma succ_induction {P : V → Prop} (hP : Γ-[m].DefinablePred P)
   InductionScheme.succ_induction (P := P) (C := Hierarchy Γ m) (by
     rcases hP with ⟨φ, hp⟩
     haveI : Inhabited V := Classical.inhabited_of_nonempty'
-    exact ⟨φ.val.enumarateFVar, (Rew.rewriteMap φ.val.idxOfFVar) ▹ φ.val, by simp,
+    exact ⟨φ.val.enumerateFVar, (Rew.rewriteMap φ.val.idxOfFVar) ▹ φ.val, by simp,
       by intro x; simp [Semiformula.eval_rewriteMap, hp.df.iff]⟩)
     zero succ
 

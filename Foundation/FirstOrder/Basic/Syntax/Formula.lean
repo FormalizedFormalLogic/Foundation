@@ -541,7 +541,7 @@ def lMap (Φ : L₁ →ᵥ L₂) {n} : Semiformula L₁ ξ n →ˡᶜ Semiformul
     (Semiformula.lMap Φ φ).freeVariables = φ.freeVariables := by
   induction φ using Semiformula.rec' <;> try simp [lMap_rel, lMap_nrel, freeVariables_rel, freeVariables_nrel, *]
 
-section enumarateFVar
+section enumerateFVar
 
 def fvarList {n : ℕ} : Semiformula L ξ n → List ξ
   |        ⊤ => []
@@ -566,7 +566,7 @@ lemma enumerateFVar_idxOfFVar [DecidableEq ξ] [Inhabited ξ] {φ : Semiformula 
 lemma mem_fvarList_iff_fvar? [DecidableEq ξ] {φ : Semiformula L ξ n} : x ∈ φ.fvarList ↔ φ.FVar? x := by
   induction φ using rec' <;> simp [fvarList, Semiterm.mem_fvarList_iff_fvar?, *]
 
-end enumarateFVar
+end enumerateFVar
 
 end Semiformula
 
