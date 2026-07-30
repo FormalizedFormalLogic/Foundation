@@ -2,7 +2,7 @@
 
 Coding conventions for formal proofs in Foundation. The guiding principle: proofs are read and maintained by humans, so write them the way the human maintainers read them.
 
-As a baseline, follow the [Mathlib style guide](https://leanprover-community.github.io/contribute/style.html) (line length, indentation, spacing, naming, calc/tactic formatting, etc.). This document only records what is specific to Foundation; where it differs from the Mathlib guide, this document takes precedence.
+As a baseline, follow the [Mathlib style guide](https://leanprover-community.github.io/contribute/style.html) (line length, indentation, spacing, naming, calc/tactic formatting, etc.). This document only records what is specific to Foundation; where it differs from the Mathlib guide, this document takes precedence. For more detailed coding and refactoring conventions, also see [refactoring.md](./refactoring.md).
 
 Human contributors need not follow this document to the letter — treat it as a description of the house style. 🤖 AI coding agents should follow it as closely as possible, especially the items marked 🤖: machine-generated proofs tend to drift toward a verbose, defensive style, and those items exist to counteract that drift.
 
@@ -112,6 +112,10 @@ Citations go at the end of the docstring as a list, one line per BibTeX key, of 
 ## The `grind` tactic
 
 Attach `@[grind]` to lemmas and definitions that plausibly help `grind` close goals, choosing a direction (`@[grind =>]`, `@[grind .]`) where it matters. 🤖 Do not attach it mechanically to every declaration. The post-hoc form `attribute [grind] name₁ name₂ …` is also acceptable. Inside proofs, try `grind` before settling on a longer tactic sequence.
+
+## No `sorry`
+
+`sorry` is never acceptable in submitted proofs. CI runs `just axiom-audit`, which fails the build on any remaining `sorry` (as well as on axioms outside the allowlist) — a proof left in a skeleton state cannot land. If a proof is incomplete, keep it out of the PR rather than submitting it with `sorry` placeholders.
 
 ## `set_option`
 

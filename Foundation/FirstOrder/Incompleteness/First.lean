@@ -10,18 +10,6 @@ public import Foundation.FirstOrder.Arithmetic.R0.Representation
 
 namespace LO.FirstOrder.Arithmetic
 
-lemma re_iff_sigma1 {P : ℕ → Prop} : REPred P ↔ 𝚺₁-Predicate P := by
-  constructor
-  · intro h
-    refine ⟨.mkSigma (codeOfREPred P) (by simp [codeOfREPred, codeOfPartrec']), ?_⟩
-    intro v
-    simpa [←Matrix.fun_eq_vec_one] using codeOfREPred_spec h (x := v 0)
-  · rintro ⟨φ, hφ⟩
-    have : REPred fun x ↦ (Semiformula.Eval (x ::ᵥ List.Vector.nil).get id) _ :=
-      (sigma1_re id (φ.sigma_prop)).comp
-        (Primrec.to_comp <| Primrec.vector_cons.comp .id <| .const _)
-    exact this.of_eq <| by intro x; simpa [List.Vector.cons_get, Matrix.empty_eq] using hφ ![x]
-
 open LO.Entailment Bootstrapping Bootstrapping.Arithmetic
 
 /-- Gödel's first incompleteness theorem-/
@@ -34,13 +22,13 @@ theorem incomplete (T : ArithmeticTheory) [T.Δ₁] [𝗥₀ ⪯ T] [T.SoundOnHi
     have : 𝚺₁-Predicate fun φ : ℕ ↦
         IsSemiformula ℒₒᵣ 1 φ ∧ Provable T (neg ℒₒᵣ <| subst ℒₒᵣ ?[numeral φ] φ) := by
       definability
-    exact re_iff_sigma1.mpr this
+    exact rePred_iff_sigma1.mpr this
   have D_spec (φ : ArithmeticSemisentence 1) : D ⌜φ⌝ ↔ T ⊢ ∼φ/[⌜φ⌝] := by
     simp [D, ←provable_iff_provable, Sentence.quote_def,
       Rewriting.emb_subst_eq_subst_coe₁, Semiformula.quote_def]
   let δ : ArithmeticSemisentence 1 := codeOfREPred D
   have (n : ℕ) : D n ↔ T ⊢ δ/[↑n] := by
-    simpa [Semiformula.coe_subst_eq_subst_coe₁] using re_complete D_re
+    simpa [Semiformula.coe_subst_eq_subst_coe₁] using rePred_weak_representation D_re
   let π : ArithmeticSentence := δ/[⌜δ⌝]
   have : T ⊢ π ↔ T ⊢ ∼π := calc
     T ⊢ π ↔ T ⊢ δ/[⌜δ⌝]  := by rfl

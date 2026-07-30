@@ -53,6 +53,8 @@ noncomputable def ssnum : 𝚺₁.Semisentence 3 := .mkSigma
 
 instance substNumeral.defined : 𝚺₁-Function₂ (substNumeral : V → V → V) via ssnum := .mk fun v ↦ by simp [ssnum, substNumeral]
 
+instance substNumeral.definable : 𝚺₁-Function₂ (substNumeral : V → V → V) := substNumeral.defined.to_definable
+
 attribute [irreducible] ssnum
 
 noncomputable def ssnums : 𝚺₁.Semisentence (k + 2) := .mkSigma

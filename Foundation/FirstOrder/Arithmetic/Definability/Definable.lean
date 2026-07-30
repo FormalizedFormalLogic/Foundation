@@ -329,6 +329,15 @@ lemma of_delta (h : 𝚫-[m].Definable P) : Γ-[m].Definable P := by
 
 instance [𝚫-[m].Definable P] (Γ) : Γ-[m].Definable P := of_delta inferInstance
 
+lemma delta_iff_sigma_and_pi : 𝚫-[m].Definable P ↔ 𝚷-[m].Definable P ∧ 𝚺-[m].Definable P := by
+  constructor
+  · intro h
+    exact ⟨of_delta (Γ := 𝚷) h, of_delta (Γ := 𝚺) h⟩
+  · rintro ⟨hπ, hσ⟩
+    rcases hσ with ⟨φ, hφ⟩
+    rcases hπ with ⟨ψ, hψ⟩
+    exact ⟨.mkDelta φ ψ, by intro v; simp [hφ.df.iff, hψ.df.iff], by intro v; simp [hφ.df.iff]⟩
+
 lemma of_sigma_of_pi (hσ : 𝚺-[m].Definable P) (hπ : 𝚷-[m].Definable P) : Γ-[m].Definable P :=
   match Γ with
   | 𝚺 => hσ
