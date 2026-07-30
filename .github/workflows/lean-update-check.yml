@@ -13,7 +13,6 @@ concurrency:
 permissions:
   contents: write
   pull-requests: write
-  issues: write
 
 jobs:
   check-update:
@@ -100,21 +99,57 @@ jobs:
         if: steps.check.outputs.ready == 'true' && steps.branch.outputs.exists == 'false'
         run: lake exe cache get
 
-      - name: lake build
+      - uses: extractions/setup-just@v4
+        if: steps.check.outputs.ready == 'true' && steps.branch.outputs.exists == 'false'
+
+      # Mirrors the checks ci.yml runs on every PR (build, axiom-audit, docs), since a PR
+      # opened here with the default GITHUB_TOKEN won't itself trigger ci.yml (GitHub's
+      # recursive-workflow-run prevention) — this is the only place these run.
+      - name: lake build, axiom-audit, and docs build
         id: build
         if: steps.check.outputs.ready == 'true' && steps.branch.outputs.exists == 'false'
         continue-on-error: true
-        run: lake build
+        run: |
+          lake build Foundation
+          just axiom-audit
+          lake build Foundation:docs
 
       - name: lake exe mk_all --module
         if: steps.check.outputs.ready == 'true' && steps.branch.outputs.exists == 'false' && steps.build.outcome == 'success'
         run: lake exe mk_all --module
 
+      # Build success or failure both lead to a PR: on success it's ready for normal review;
+      # on failure it's opened as a draft, carrying the partial bump (lean-toolchain /
+      # lakefile.toml / lake-manifest.json) as a starting point for manual fixes, instead of
+      # just filing an issue with no code attached.
+      - name: Determine PR draft state and status note
+        id: pr-meta
+        if: steps.check.outputs.ready == 'true' && steps.branch.outputs.exists == 'false'
+        env:
+          OUTCOME: ${{ steps.build.outcome }}
+        run: |
+          if [ "$OUTCOME" = "success" ]; then
+            echo "draft=false" >> "$GITHUB_OUTPUT"
+            {
+              echo "status<<STATUS_EOF"
+              echo "\`lake build Foundation\`, \`just axiom-audit\`, and \`lake build Foundation:docs\` all succeeded in this workflow run."
+              echo "STATUS_EOF"
+            } >> "$GITHUB_OUTPUT"
+          else
+            echo "draft=true" >> "$GITHUB_OUTPUT"
+            {
+              echo "status<<STATUS_EOF"
+              echo "**One of \`lake build Foundation\` / \`just axiom-audit\` / \`lake build Foundation:docs\` failed** in this workflow run (see the run log linked below)."
+              echo "This PR is opened as a draft: the toolchain/lakefile/manifest bump is included as a starting point, but breaking changes (or new lint warnings) still need manual fixes — see \`.claude/skills/lean4-update/SKILL.md\` for the manual update procedure."
+              echo "STATUS_EOF"
+            } >> "$GITHUB_OUTPUT"
+          fi
+
       # GITHUB_TOKEN-authored PRs don't auto-trigger CI on themselves (GitHub's
       # recursive-workflow-run prevention). Review this PR manually, or push an
       # empty commit / re-run CI by hand to get status checks.
       - name: Create pull request
-        if: steps.check.outputs.ready == 'true' && steps.branch.outputs.exists == 'false' && steps.build.outcome == 'success'
+        if: steps.check.outputs.ready == 'true' && steps.branch.outputs.exists == 'false'
         uses: peter-evans/create-pull-request@v7
         with:
           add-paths: |
@@ -127,12 +162,13 @@ jobs:
           base: master
           title: "update(Lean): Bump toolchain to v${{ steps.versions.outputs.latest }}"
           labels: auto-update-lean
+          draft: ${{ steps.pr-meta.outputs.draft }}
           body: |
             Automated update to `leanprover/lean4:v${{ steps.versions.outputs.latest }}`.
 
             - `lean-toolchain` bumped to `v${{ steps.versions.outputs.latest }}`.
             - `mathlib` and `doc-gen4` revs in `lakefile.toml` bumped to `v${{ steps.versions.outputs.latest }}`.
-            - `lake build` succeeded in this workflow run.
+            - ${{ steps.pr-meta.outputs.status }}
 
             Please review whether this bump introduces any new `lake build` warnings before merging
             (see `.claude/skills/lean4-update/SKILL.md` for the manual comparison procedure); this
@@ -140,32 +176,3 @@ jobs:
 
             This PR was opened automatically by the `lean-update-check` workflow
             (${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}).
-
-      - name: Open an issue when the build fails
-        if: steps.check.outputs.ready == 'true' && steps.branch.outputs.exists == 'false' && steps.build.outcome == 'failure'
-        env:
-          GH_TOKEN: ${{ github.token }}
-          LATEST: ${{ steps.versions.outputs.latest }}
-          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
-        run: |
-          title="Lean v$LATEST is available but the build fails"
-          if gh issue list --state open --search "in:title \"$title\"" --json title \
-            --jq '.[].title' | grep -qxF "$title"; then
-            echo "An open issue already exists, skipping."
-            exit 0
-          fi
-          gh issue create \
-            --title "$title" \
-            --label auto-update-lean \
-            --body "$(cat <<EOF
-          The lean-update-check workflow found that Lean \`v$LATEST\` (with matching
-          mathlib/doc-gen4 tags) is available, but \`lake build\` failed after bumping
-          \`lean-toolchain\` and \`lakefile.toml\`.
-
-          This likely needs manual fixes (breaking changes / new lint warnings) before the
-          bump can land. See \`.claude/skills/lean4-update/SKILL.md\` for the manual update
-          procedure.
-
-          Workflow run: $RUN_URL
-          EOF
-          )"
