@@ -10,12 +10,10 @@ namespace LO.FirstOrder.SetTheory
 
 variable {V : Type*} [SetStructure V] [Nonempty V] [V↓[ℒₛₑₜ] ⊧* 𝗭]
 
-variable {α β γ : V}
-
 /-! ### Attempt functions -/
 
 /--
-`f` is an attempt of length `α` for the function `F`, meaning that the domain of `f` is `α`, and for all `β < α`, it holds that `f(β) = y` iff `y = F (f ↾ β)`.
+`f` is an attempt of length `α` for the function `F`, meaning that the domain of `f` is `α`, and for all `β < α`, it holds that `f(β) = F (f ↾ β)`.
 The "attempt" terminology may be due to Paul Taylor.
 -/
 def IsAttempt (F : V → V) (α f : V) : Prop :=
@@ -36,14 +34,14 @@ def IsAttempt.dfn (φ : SetTheorySemiformula V 2) : SetTheorySemiformula V 2 :=
     kpair.dfn' : SetTheorySemiformula V 3 := (Rew.rewriteMap (Empty.elim : Empty → V)) ▹ kpair.dfn
     restrict.dfn' : SetTheorySemiformula V 3 := (Rew.rewriteMap (Empty.elim : Empty → V)) ▹ restrict.dfn
 
-lemma IsAttempt.defined {φ : SetTheorySemiformula V 2} (F : V → V) (hF : IsDefinedByWithParam (fun v ↦ v 0 = F (v 1)) φ) :
+lemma IsAttempt.defined (F : V → V) {φ : SetTheorySemiformula V 2} (hF : IsDefinedByWithParam (fun v ↦ v 0 = F (v 1)) φ) :
     IsDefinedByWithParam (fun v ↦ IsAttempt F (v 0) (v 1)) (IsAttempt.dfn φ) := by
   intro v
   simp_all [IsAttempt, IsAttempt.dfn,
     dfn.IsOrdinal.dfn', dfn.IsFunction.dfn', dfn.domain.dfn', dfn.kpair.dfn', dfn.restrict.dfn',
     Semiformula.eval_rewriteMap]
 
-lemma IsAttempt.definable {φ : SetTheorySemiformula V 2} (F : V → V) (hF : IsDefinedByWithParam (fun v ↦ v 0 = F (v 1)) φ) :
+lemma IsAttempt.definable (F : V → V) {φ : SetTheorySemiformula V 2} (hF : IsDefinedByWithParam (fun v ↦ v 0 = F (v 1)) φ) :
     ℒₛₑₜ-relation[V] (fun α f ↦ IsAttempt F α f) := by
   use IsAttempt.dfn φ
   intro v
@@ -109,13 +107,13 @@ def ExistsAttempt (F : V → V) (α : V) : Prop :=
 def ExistsAttempt.dfn (φ : SetTheorySemiformula V 2) : SetTheorySemiformula V 1 :=
   f“α. ∃ f, !(IsAttempt.dfn φ) α f”
 
-lemma ExistsAttempt.defined {φ : SetTheorySemiformula V 2} (F : V → V) (hF : IsDefinedByWithParam (fun v ↦ v 0 = F (v 1)) φ) :
+lemma ExistsAttempt.defined (F : V → V) {φ : SetTheorySemiformula V 2} (hF : IsDefinedByWithParam (fun v ↦ v 0 = F (v 1)) φ) :
     IsDefinedByWithParam (fun v ↦ ExistsAttempt F (v 0)) (ExistsAttempt.dfn φ) := by
   intro v
   simp [ExistsAttempt.dfn, IsAttempt.defined F hF]
   rfl
 
-lemma ExistsAttempt.definable {φ : SetTheorySemiformula V 2} (F : V → V) (hF : IsDefinedByWithParam (fun v ↦ v 0 = F (v 1)) φ) :
+lemma ExistsAttempt.definable (F : V → V) {φ : SetTheorySemiformula V 2} (hF : IsDefinedByWithParam (fun v ↦ v 0 = F (v 1)) φ) :
     ℒₛₑₜ-predicate (fun α ↦ ExistsAttempt F α) := by
   use ExistsAttempt.dfn φ
   intro v
@@ -219,6 +217,8 @@ lemma eq_of_kpair_eq_pairValueAttempt {F : V → V} {α : V} {x y : V} (h : ⟨x
     x = α := by
   simp only [pairValueAttempt, kpair_iff] at h
   exact h.1
+
+/-! #### Constructing attempt functions using replacement -/
 
 namespace Replacement
 
