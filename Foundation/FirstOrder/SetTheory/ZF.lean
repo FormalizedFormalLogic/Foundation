@@ -16,7 +16,7 @@ lemma replacement_exists_eval (φ : SetTheorySemiformula V 2) (X : V) (h : (∀ 
     ∃ Y : V, ∀ y : V, y ∈ Y ↔ ∃ x ∈ X, φ.Eval ![x, y] id := by
   /- `φ` can have finitely many free variables of type `V`, these are interpreted by `id : V → V` as finitely many parameters in `V`.
   `f` enumerates the parameters of `φ`. -/
-  let f := φ.enumarateFVar
+  let f := φ.enumerateFVar
   /- While `φ` has free variables of type `V`, `ψ` has free variables of type `ℕ`.
   Since `f` enumerates the parameters, it is intended to be the valuation of the free variables of `ψ`. -/
   let ψ := (Rew.rewriteMap φ.idxOfFVar) ▹ φ

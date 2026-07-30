@@ -555,12 +555,12 @@ def fvarList {n : ℕ} : Semiformula L ξ n → List ξ
 
 def idxOfFVar [DecidableEq ξ] (φ : Semiformula L ξ n) : ξ → ℕ := φ.fvarList.idxOf
 
-def enumarateFVar [Inhabited ξ] (φ : Semiformula L ξ n) : ℕ → ξ :=
+def enumerateFVar [Inhabited ξ] (φ : Semiformula L ξ n) : ℕ → ξ :=
   fun i ↦ if hi : i < φ.fvarList.length then φ.fvarList.get ⟨i, hi⟩ else default
 
-lemma enumarateFVar_idxOfFVar [DecidableEq ξ] [Inhabited ξ] {φ : Semiformula L ξ n} {x : ξ} (hx : x ∈ φ.fvarList) :
-    enumarateFVar φ (idxOfFVar φ x) = x := by
-  simpa [enumarateFVar, idxOfFVar]
+lemma enumerateFVar_idxOfFVar [DecidableEq ξ] [Inhabited ξ] {φ : Semiformula L ξ n} {x : ξ} (hx : x ∈ φ.fvarList) :
+    enumerateFVar φ (idxOfFVar φ x) = x := by
+  simpa [enumerateFVar, idxOfFVar]
   using fun h ↦ False.elim <| not_le.mpr (List.idxOf_lt_length_iff.mpr hx) h
 
 lemma mem_fvarList_iff_fvar? [DecidableEq ξ] {φ : Semiformula L ξ n} : x ∈ φ.fvarList ↔ φ.FVar? x := by
