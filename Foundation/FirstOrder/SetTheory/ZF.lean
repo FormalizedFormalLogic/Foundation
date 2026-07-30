@@ -12,7 +12,7 @@ variable {V : Type*} [SetStructure V] [Nonempty V] [V↓[ℒₛₑₜ] ⊧* 𝗭
 
 open Classical
 
-lemma replacement_exists_eval (X : V) (φ : SetTheorySemiformula V 2) (h : (∀ x : V, ∃! y : V, φ.Eval ![x, y] id)) :
+lemma replacement_exists_eval (φ : SetTheorySemiformula V 2) (X : V) (h : (∀ x : V, ∃! y : V, φ.Eval ![x, y] id)) :
     ∃ Y : V, ∀ y : V, y ∈ Y ↔ ∃ x ∈ X, φ.Eval ![x, y] id := by
   /- `φ` can have finitely many free variables of type `V`, these are interpreted by `id : V → V` as finitely many parameters in `V`.
   `f` enumerates the parameters of `φ`. -/
@@ -37,7 +37,7 @@ lemma replacement_rel_exists (X : V) (R : V → V → Prop) (h : ∀ x, ∃! y, 
   -- Put hR in a useful form
   have hR {x y : V} := by simpa using hR.iff ![x, y]
   have cond : ∀ x : V, ∃! y : V, φ.Eval ![x, y] id := by simpa [← hR] using h
-  simpa [hR] using replacement_exists_eval X φ cond
+  simpa [hR] using replacement_exists_eval φ X cond
 
 /--
 Replacement exists uniquely (for a relation).
@@ -120,7 +120,6 @@ noncomputable def replRelOverSet (X : V) (R : V → V → Prop) (h : ∀ x ∈ X
 
 @[simp] lemma replRelOverSet_spec {X y : V} {R : V → V → Prop} {h : ∀ x ∈ X, ∃! y, R x y} (hR : ℒₛₑₜ-relation R) :
     y ∈ replRelOverSet X R h ↔ ∃ x ∈ X, R x y := Classical.choose!_spec (replacement_rel_existsUnique_of_mem_existsUnique X R h hR) y
-
 
 /-! ### Definability Gadgets for Replacement -/
 
