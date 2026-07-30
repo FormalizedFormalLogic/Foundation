@@ -8,7 +8,7 @@ public import Foundation.FirstOrder.SetTheory.ZF
 
 namespace LO.FirstOrder.SetTheory
 
-variable {V : Type*} [SetStructure V] [Nonempty V] [V↓[ℒₛₑₜ] ⊧* 𝗭]
+variable {V : Type*} [SetStructure V] [Nonempty V]
 
 /-! ### Attempt functions -/
 
@@ -16,40 +16,18 @@ variable {V : Type*} [SetStructure V] [Nonempty V] [V↓[ℒₛₑₜ] ⊧* 𝗭
 `f` is an attempt of length `α` for the function `F`, meaning that the domain of `f` is `α`, and for all `β < α`, it holds that `f(β) = F (f ↾ β)`.
 The "attempt" terminology may be due to Paul Taylor.
 -/
-def IsAttempt (F : V → V) (α f : V) : Prop :=
+def IsAttempt [V↓[ℒₛₑₜ] ⊧* 𝗭] (F : V → V) (α f : V) : Prop :=
   IsOrdinal α ∧ IsFunction f ∧ domain f = α ∧
     ∀ β ∈ α, ∀ y, ⟨β, y⟩ₖ ∈ f ↔ y = F (f ↾ β)
 
-/--
-A `SetTheorySemiformula` defining `IsAttempt F` for a definable function `F`. Pass a formula `φ` defining `F`.
--/
-def IsAttempt.dfn (φ : SetTheorySemiformula V 2) : SetTheorySemiformula V 2 :=
-  f“α f. !IsOrdinal.dfn' α ∧ !IsFunction.dfn' f ∧ !domain.dfn' f = α ∧
-    ∀ β ∈ α, ∀ y, !kpair.dfn' β y ∈ f ↔ y = !φ (!restrict.dfn' f β)”
-  /- Cast `kpair.dfn` and `restrict.dfn` to a type that allows parameters, to work with `Semiformula.nestFormulaeFunc`. -/
-  where
-    IsOrdinal.dfn' : SetTheorySemiformula V 1 := (Rew.rewriteMap (Empty.elim : Empty → V)) ▹ IsOrdinal.dfn
-    IsFunction.dfn' : SetTheorySemiformula V 1 := (Rew.rewriteMap (Empty.elim : Empty → V)) ▹ IsFunction.dfn
-    domain.dfn' : SetTheorySemiformula V 2 := (Rew.rewriteMap (Empty.elim : Empty → V)) ▹ domain.dfn
-    kpair.dfn' : SetTheorySemiformula V 3 := (Rew.rewriteMap (Empty.elim : Empty → V)) ▹ kpair.dfn
-    restrict.dfn' : SetTheorySemiformula V 3 := (Rew.rewriteMap (Empty.elim : Empty → V)) ▹ restrict.dfn
-
-lemma IsAttempt.defined (F : V → V) {φ : SetTheorySemiformula V 2} (hF : IsDefinedByWithParam (fun v ↦ v 0 = F (v 1)) φ) :
-    IsDefinedByWithParam (fun v ↦ IsAttempt F (v 0) (v 1)) (IsAttempt.dfn φ) := by
-  intro v
-  simp_all [IsAttempt, IsAttempt.dfn,
-    dfn.IsOrdinal.dfn', dfn.IsFunction.dfn', dfn.domain.dfn', dfn.kpair.dfn', dfn.restrict.dfn',
-    Semiformula.eval_rewriteMap]
-
-lemma IsAttempt.definable (F : V → V) {φ : SetTheorySemiformula V 2} (hF : IsDefinedByWithParam (fun v ↦ v 0 = F (v 1)) φ) :
-    ℒₛₑₜ-relation[V] (fun α f ↦ IsAttempt F α f) := by
-  use IsAttempt.dfn φ
-  intro v
-  simp only [IsAttempt.defined F hF, Fin.isValue]
+lemma IsAttempt.definable [V↓[ℒₛₑₜ] ⊧* 𝗭] {F : V → V} (hF : ℒₛₑₜ-function₁ F) :
+    ℒₛₑₜ-relation (IsAttempt F) := by unfold IsAttempt; definability
 
 /-! #### Uniqueness of attempt functions -/
 
 namespace IsAttempt
+
+variable [V↓[ℒₛₑₜ] ⊧* 𝗭]
 
 /--
 Any two attempt functions restrict to the same function.
@@ -101,27 +79,11 @@ lemma isAttempt_restrict_eq_of_le
 /-! #### Existence and choices of attempt functions -/
 
 /-- Existence of an attempt function of a given length. -/
-def ExistsAttempt (F : V → V) (α : V) : Prop :=
+def Exists (F : V → V) (α : V) : Prop :=
   ∃ f : V, IsAttempt F α f
 
-def ExistsAttempt.dfn (φ : SetTheorySemiformula V 2) : SetTheorySemiformula V 1 :=
-  f“α. ∃ f, !(IsAttempt.dfn φ) α f”
-
-lemma ExistsAttempt.defined (F : V → V) {φ : SetTheorySemiformula V 2} (hF : IsDefinedByWithParam (fun v ↦ v 0 = F (v 1)) φ) :
-    IsDefinedByWithParam (fun v ↦ ExistsAttempt F (v 0)) (ExistsAttempt.dfn φ) := by
-  intro v
-  simp [ExistsAttempt.dfn, IsAttempt.defined F hF]
-  rfl
-
-lemma ExistsAttempt.definable (F : V → V) {φ : SetTheorySemiformula V 2} (hF : IsDefinedByWithParam (fun v ↦ v 0 = F (v 1)) φ) :
-    ℒₛₑₜ-predicate (fun α ↦ ExistsAttempt F α) := by
-  use ExistsAttempt.dfn φ
-  intro v
-  simp [ExistsAttempt.dfn, IsAttempt.defined F hF]
-  rfl
-
-/-- `ExistsAttempt` implies `∃!`. -/
-lemma existsUnique_of_ExistsAttempt (F : V → V) (α : V) (hex : ExistsAttempt F α) :
+/-- `Exists` implies `∃!`. -/
+lemma existsUnique_of_exists (F : V → V) (α : V) (hex : Exists F α) :
     ∃! f : V, IsAttempt F α f := by
   obtain ⟨f, hf⟩ := hex
   have : IsFunction f := hf.2.1
@@ -134,20 +96,20 @@ lemma existsUnique_of_ExistsAttempt (F : V → V) (α : V) (hex : ExistsAttempt 
 
 end IsAttempt
 
+variable [V↓[ℒₛₑₜ] ⊧* 𝗭]
+
 /--
 This lemma is originally by tosiaki.
 -/
 lemma attemptOrEmpty_existsUnique (F : V → V) (α : V) : ∃! y,
-    (IsAttempt.ExistsAttempt F α ∧ IsAttempt F α y) ∨
-    (¬ IsAttempt.ExistsAttempt F α ∧ y = ∅) := by
-  by_cases hexists : IsAttempt.ExistsAttempt F α
-  · refine existsUnique_of_exists_of_unique ⟨hexists.choose, Or.inl ⟨hexists, hexists.choose_spec⟩⟩ ?_
-    intro y₁ y₂ hy₁ hy₂
-    simp_all only [true_and, not_true_eq_false, false_and, or_false]
-    rcases hy₁.1, hy₁.2.1, hy₂.2.1 with ⟨hα, _, _⟩
-    let αo : Ordinal V := IsOrdinal.toOrdinal α
-    rw [← IsOrdinal.toOrdinal_val α] at hy₁
-    exact IsAttempt.isAttempt_unique hy₁ hy₂
+    (IsAttempt.Exists F α ∧ IsAttempt F α y) ∨
+    (¬IsAttempt.Exists F α ∧ y = ∅) := by
+  by_cases hexists : IsAttempt.Exists F α
+  · obtain ⟨f, hf, huniq⟩ := IsAttempt.existsUnique_of_exists F α hexists
+    refine ⟨f, Or.inl ⟨hexists, hf⟩, ?_⟩
+    intro y hy
+    simp only [hexists, true_and, not_true_eq_false, false_and, or_false] at hy
+    exact huniq y hy
   · refine existsUnique_of_exists_of_unique ⟨∅, Or.inr ⟨hexists, rfl⟩⟩ (by aesop)
 
 /--
@@ -158,57 +120,18 @@ noncomputable def attemptOrEmpty (F : V → V) (α : V) : V :=
   Classical.choose! (attemptOrEmpty_existsUnique F α)
 
 /--
-A `SetTheorySemiformula` defining `attemptOrEmpty F` for a definable function `F`. Pass a formula `φ` defining `F`.
--/
-def attemptOrEmpty.dfn (φ : SetTheorySemiformula V 2) : SetTheorySemiformula V 2 :=
-  f“y α. !(IsAttempt.ExistsAttempt.dfn φ) α ∧ !(IsAttempt.dfn φ) α y
-    ∨ ¬ !(IsAttempt.ExistsAttempt.dfn φ) α ∧ !isEmpty' y”
-    /- Cast `kpair.dfn` and `restrict.dfn` to a type that allows parameters, to work with `Semiformula.nestFormulaeFunc`. -/
-    where
-      isEmpty' : SetTheorySemiformula V 1 := (Rew.rewriteMap (Empty.elim : Empty → V)) ▹ isEmpty
-
-lemma attemptOrEmpty.defined {φ : SetTheorySemiformula V 2} (F : V → V) (hF : IsDefinedByWithParam (fun v ↦ v 0 = F (v 1)) φ) :
-    IsDefinedByWithParam (fun v ↦ v 0 = attemptOrEmpty F (v 1)) (attemptOrEmpty.dfn φ) := by
-  intro v
-  simp_all [attemptOrEmpty, attemptOrEmpty.dfn, IsAttempt.ExistsAttempt.defined F hF, IsAttempt.defined F hF,
-   dfn.isEmpty', Semiformula.eval_rewriteMap]
-
-lemma attemptOrEmpty.definable {φ : SetTheorySemiformula V 2} (F : V → V) (hF : IsDefinedByWithParam (fun v ↦ v 0 = F (v 1)) φ) :
-    ℒₛₑₜ-function₁[V] (attemptOrEmpty F) := by
-  use attemptOrEmpty.dfn φ
-  intro v
-  simp [attemptOrEmpty.defined F hF]
-
-/--
 A pair `⟨α, F f⟩ₖ` of an ordinal `α` and the value of `F` on `attemptOrEmpty F α`.
 This is a technical definition needed for the proof of the transfinite recursion theorem.
 -/
 noncomputable def pairValueAttempt (F : V → V) (α : V) : V :=
   ⟨α, F (attemptOrEmpty F α)⟩ₖ
 
-/--
-A `SetTheorySemiformula` defining `pairValueAttempt F` for a definable function `F`. Pass a formula `φ` defining `F`.
--/
-def pairValueAttempt.dfn (φ : SetTheorySemiformula V 2) : SetTheorySemiformula V 2 :=
-  f“y α. y = !kpair.dfn' α (!φ (!(attemptOrEmpty.dfn φ) α))”
-  /- Cast `kpair.dfn` and `restrict.dfn` to a type that allows parameters, to work with `Semiformula.nestFormulaeFunc`. -/
-  where
-    kpair.dfn' : SetTheorySemiformula V 3 := (Rew.rewriteMap (Empty.elim : Empty → V)) ▹ kpair.dfn
-
-lemma pairValueAttempt.defined {φ : SetTheorySemiformula V 2} (F : V → V) (hF : IsDefinedByWithParam (fun v ↦ v 0 = F (v 1)) φ) :
-    IsDefinedByWithParam (fun v ↦ v 0 = pairValueAttempt F (v 1)) (pairValueAttempt.dfn φ) := by
-  intro v
-  simp_all [pairValueAttempt.dfn, pairValueAttempt, dfn.kpair.dfn', Semiformula.eval_rewriteMap,
-    attemptOrEmpty.defined F hF]
-
-lemma pairValueAttempt.definable {φ : SetTheorySemiformula V 2} (F : V → V) (hF : IsDefinedByWithParam (fun v ↦ v 0 = F (v 1)) φ) :
-    ℒₛₑₜ-function₁ (pairValueAttempt F) := by
-  use pairValueAttempt.dfn φ
-  intro v
-  simp [pairValueAttempt.defined F hF]
+lemma kpair_eq_pairValueAttempt_iff {F : V → V} {α : V} {x y : V} :
+    ⟨x, y⟩ₖ = pairValueAttempt F α ↔ x = α ∧ y = F (attemptOrEmpty F α) := by
+  simp [pairValueAttempt]
 
 lemma eq_of_kpair_eq_pairValueAttempt {F : V → V} {α : V} {x y : V} (h : ⟨x, y⟩ₖ = pairValueAttempt F α) : x = α :=
-  (kpair_iff.mp (pairValueAttempt.eq_1 F α ▸ h)).1
+  (kpair_eq_pairValueAttempt_iff.mp h).1
 
 /-! #### Constructing attempt functions using replacement -/
 
@@ -220,19 +143,25 @@ variable [V↓[ℒₛₑₜ] ⊧* 𝗭𝗙]
 Function that outputs an attempt of length `α`, subject to the assumption that for all `β < α`, there is an attempt of length `β`.
 This is a big function constructed using replacement.
 -/
-noncomputable def replAttemptOrEmpty
-    {φ : SetTheorySemiformula V 2} (F : V → V) (hF : IsDefinedByWithParam (fun v ↦ v 0 = F (v 1)) φ)
-    (α : V) : V :=
-  repl α (pairValueAttempt F) (hF := pairValueAttempt.definable F hF)
+noncomputable def replAttemptOrEmpty (F : V → V) (hF : ℒₛₑₜ-function₁ F) : V → V :=
+  repl (pairValueAttempt F) (hF := by
+    have : ℒₛₑₜ-function₁ attemptOrEmpty F := by
+      suffices ℒₛₑₜ-relation[V] (· = attemptOrEmpty F ·) by exact this
+      simp only [attemptOrEmpty, Classical.choose!_eq_iff_right]
+      unfold IsAttempt.Exists
+      have : ℒₛₑₜ-relation (IsAttempt F) := IsAttempt.definable hF
+      definability
+    unfold pairValueAttempt
+    definability)
 
 @[simp] lemma mem_replAttemptOrEmpty_iff
-    {φ : SetTheorySemiformula V 2} (F : V → V) (hF : IsDefinedByWithParam (fun v ↦ v 0 = F (v 1)) φ)
+    (F : V → V) (hF : ℒₛₑₜ-function₁ F)
     (α : V) (p : V) :
     p ∈ replAttemptOrEmpty F hF α ↔ ∃ β ∈ α, p = pairValueAttempt F β := by
   apply repl_spec
 
 @[simp] lemma kpair_mem_replAttemptOrEmpty_iff
-    {φ : SetTheorySemiformula V 2} (F : V → V) (hF : IsDefinedByWithParam (fun v ↦ v 0 = F (v 1)) φ)
+    (F : V → V) (hF : ℒₛₑₜ-function₁ F)
     {α : Ordinal V} {β y : V} :
     ⟨β, y⟩ₖ ∈ replAttemptOrEmpty F hF α ↔ β ∈ α.val ∧ ⟨β, y⟩ₖ = pairValueAttempt F β := by
   simp only [mem_replAttemptOrEmpty_iff]
@@ -242,30 +171,7 @@ noncomputable def replAttemptOrEmpty
     exact ⟨hβα, h⟩
   · use β
 
-/--
-A `SetTheorySemiformula` defining `replAttemptOrEmpty F` for a definable function `F`. Pass a formula `φ` defining `F`.
--/
-def replAttemptOrEmpty.dfn (φ : SetTheorySemiformula V 2) :
-    SetTheorySemiformula V 2 :=
-  f“Y α. ∀ y, y ∈ Y ↔ ∃ β ∈ α, y = !(pairValueAttempt.dfn φ) β”
-
-lemma replAttemptOrEmpty.defined
-    {φ : SetTheorySemiformula V 2} (F : V → V) (hF : IsDefinedByWithParam (fun v ↦ v 0 = F (v 1)) φ) :
-    IsDefinedByWithParam (fun (v : Fin 2 → V) ↦ v 0 = replAttemptOrEmpty F hF (v 1)) (replAttemptOrEmpty.dfn φ) := by
-  intro v
-  simp_all [replAttemptOrEmpty, replAttemptOrEmpty.dfn, pairValueAttempt.defined F hF,
-    mem_ext_iff (x := v 0)]
-
-instance replAttemptOrEmpty.definable
-    {φ : SetTheorySemiformula V 2} (F : V → V) (hF : IsDefinedByWithParam (fun v ↦ v 0 = F (v 1)) φ) :
-    ℒₛₑₜ-function₁[V] (replAttemptOrEmpty F (hF := hF)) := by
-  use replAttemptOrEmpty.dfn φ
-  intro v
-  simp [replAttemptOrEmpty.defined F hF]
-
-lemma domain_replAttemptOrEmpty_eq
-    {φ : SetTheorySemiformula V 2} (F : V → V) (hF : IsDefinedByWithParam (fun v ↦ v 0 = F (v 1)) φ)
-    (α : Ordinal V) :
+lemma domain_replAttemptOrEmpty_eq (F : V → V) (hF : ℒₛₑₜ-function₁ F) (α : Ordinal V) :
     domain (replAttemptOrEmpty F hF α) = α.val := by
   ext z
   simp only [mem_domain_iff, mem_replAttemptOrEmpty_iff]
@@ -276,22 +182,18 @@ lemma domain_replAttemptOrEmpty_eq
     use z
     simp_all only [true_and, pairValueAttempt, true_and]
 
-instance {φ : SetTheorySemiformula V 2} (F : V → V) (hF : IsDefinedByWithParam (fun v ↦ v 0 = F (v 1)) φ)
-    (α : Ordinal V) :
-    IsFunction (replAttemptOrEmpty F hF α) := by
+instance (F : V → V) (hF : ℒₛₑₜ-function₁ F) (α : Ordinal V) : IsFunction (replAttemptOrEmpty F hF α) := by
   -- Name it for brevity
   let f := replAttemptOrEmpty F hF α
   have hdomain : domain f = α.val := domain_replAttemptOrEmpty_eq F hF α
   apply isFunction_iff.mpr
   apply mem_function_iff.mpr
   constructor
-  · -- Show that `f` contains only ordered pairs
-    intro p hpf
-    obtain ⟨β, hβα, f, rfl, hf⟩ := (repl_spec {definable := ⟨pairValueAttempt.dfn φ, pairValueAttempt.defined F hF⟩}).mp hpf
+  · intro p hpf
+    obtain ⟨β, _, f, rfl, _⟩ := (mem_replAttemptOrEmpty_iff F hF _ _).mp hpf
     apply kpair_mem_iff.mpr
     exact And.intro (mem_domain_of_kpair_mem hpf) (mem_range_of_kpair_mem hpf)
-  · -- Show well-definedness of `f`, i.e. uniqueness of output
-    intro x hx
+  · intro x hx
     simp only [kpair_mem_replAttemptOrEmpty_iff]
     apply existsUnique_of_exists_of_unique
     · rw [hdomain] at hx
@@ -303,30 +205,25 @@ instance {φ : SetTheorySemiformula V 2} (F : V → V) (hF : IsDefinedByWithPara
 An auxiliary lemma about `replAttemptOrEmpty`.
 -/
 lemma replAttemptOrEmpty_aux
-    {φ : SetTheorySemiformula V 2} (F : V → V) (hF : IsDefinedByWithParam (fun v ↦ v 0 = F (v 1)) φ) :
-    (α : Ordinal V) →
-    IsAttempt F α (replAttemptOrEmpty F hF α) := by
+    (F : V → V) (hF : ℒₛₑₜ-function₁ F) :
+    (α : Ordinal V) → IsAttempt F α (replAttemptOrEmpty F hF α) := by
   let motive (α : V) : Prop := IsAttempt F α (replAttemptOrEmpty F hF α)
 
-  let motive_dfn : SetTheorySemiformula V 1 :=
-    f“α. !(IsAttempt.dfn φ) α (!(replAttemptOrEmpty.dfn φ) α)”
-
+  have := IsAttempt.definable hF
+  have : ℒₛₑₜ-function₁ replAttemptOrEmpty F hF := by
+    unfold replAttemptOrEmpty
+    definability
   have motive_definable : ℒₛₑₜ-predicate motive := by
-    use motive_dfn
-    intro v
-    simp_all [motive, motive_dfn, replAttemptOrEmpty.defined F hF, IsAttempt.defined F hF]
-
+    unfold motive
+    definability
   refine transfinite_induction motive motive_definable ?_
-  -- Now I just need to prove the transfinite induction.
   intro α ih
   have hα := Ordinal.ordinal α
 
-  -- The case of (restrict) for `α`. This follows from ih for (aux), i.e. `∀ β < α, ((aux) for β)`.
   have hrestrict : ((β : V) → (hβα : β ∈ α.val) → IsAttempt F β ((replAttemptOrEmpty F hF α) ↾ β)) := by
     intro β hβα
     have hβ : IsOrdinal β := IsOrdinal.of_mem hβα
     let βo : Ordinal V := IsOrdinal.toOrdinal β
-    -- Get a case of (aux) that's been proven up to this point in the transfinite induction
     have haux := ih βo hβα
 
     suffices h : (replAttemptOrEmpty F hF α) ↾ β = replAttemptOrEmpty F hF β from h ▸ haux
@@ -342,7 +239,6 @@ lemma replAttemptOrEmpty_aux
       · use γ
         exact And.intro (IsTransitive.mem_trans IsOrdinal.toIsTransitive hγβ hβα) hγ
       · exact ⟨γ, hγβ, F (attemptOrEmpty F γ), hγ⟩
-  -- Proving (aux) for `α`
   refine ⟨hα, inferInstance, domain_replAttemptOrEmpty_eq F hF α, ?_⟩
   intro β hβα y
   have hβ : IsOrdinal β := IsOrdinal.of_mem hβα
@@ -358,7 +254,7 @@ lemma replAttemptOrEmpty_aux
       use (replAttemptOrEmpty F hF (↑α)) ↾ β
       simp only [h₂, true_and]
       exact hrestrict βo hβα
-  have hexists : IsAttempt.ExistsAttempt F β := ⟨replAttemptOrEmpty F hF β, ih βo hβα⟩
+  have hexists : IsAttempt.Exists F β := ⟨replAttemptOrEmpty F hF β, ih βo hβα⟩
   simp_all only [mem_replAttemptOrEmpty_iff, pairValueAttempt, kpair_iff, ↓existsAndEq, true_and,
     motive]
   have hattempt : IsAttempt F β (attemptOrEmpty F β) := by
@@ -376,17 +272,8 @@ lemma replAttemptOrEmpty_aux
 For any ordinal `α`, there exists an attempt function of length `α`.
 -/
 lemma attempt_function_exists
-    {φ : SetTheorySemiformula V 2} (F : V → V) (hF : IsDefinedByWithParam (fun v ↦ v 0 = F (v 1)) φ) :
-    (α : Ordinal V) → IsAttempt.ExistsAttempt F α := by
-  let motive (α : V) : Prop := IsAttempt.ExistsAttempt F α
-
-  refine transfinite_induction motive (IsAttempt.ExistsAttempt.definable F hF) ?_
-  intro α ih
-  have hexists : ∀ β ∈ α.val, motive β := by
-    intro β hβα
-    have : IsOrdinal β := IsOrdinal.of_mem hβα
-    exact ih (IsOrdinal.toOrdinal β) hβα
-  use replAttemptOrEmpty F hF α
-  exact replAttemptOrEmpty_aux F hF α
+    (F : V → V) (hF : ℒₛₑₜ-function₁ F) :
+    (α : Ordinal V) → IsAttempt.Exists F α :=
+  fun α ↦ ⟨replAttemptOrEmpty F hF α, replAttemptOrEmpty_aux F hF α⟩
 
 end LO.FirstOrder.SetTheory.Replacement
