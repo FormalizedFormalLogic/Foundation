@@ -83,11 +83,19 @@ def neg : Semiformula L Ξ ξ N n → Semiformula L Ξ ξ N n
   |     ∀² φ => ∃² φ.neg
   |     ∃² φ => ∀² φ.neg
 
+instance : Tilde (Semiformula L Ξ ξ N n) := ⟨neg⟩
+
 instance : LogicalConnective (Semiformula L Ξ ξ N n) where
-  wedge := and
-  vee := or
-  tilde := neg
-  arrow φ ψ := neg φ ⋎ ψ
+  arrow φ ψ := ∼φ ⋎ ψ
+
+instance : LogicalConnective.DeMorgan (Semiformula L Ξ ξ N n) where
+  imply _ _ := rfl
+  and _ _ := rfl
+  or _ _ := rfl
+
+instance : LogicalNeutral.DeMorgan (Semiformula L Ξ ξ N n) where
+  verum := rfl
+  falsum := rfl
 
 @[simp] lemma neg_rel (R : L.Rel k) (v : Fin k → Semiterm L ξ n) :
     ∼(rel R v : Semiformula L Ξ ξ N n) = nrel R v := rfl
@@ -129,31 +137,14 @@ lemma neg_neg (φ : Semiformula L Ξ ξ N n) : ∼∼φ = φ :=
   |   t ∉& X => rfl
   |        ⊤ => rfl
   |        ⊥ => rfl
-  |  and φ ψ => by
-    change neg (neg (and φ ψ)) = and φ ψ
-    simp only [neg]
-    rw [show φ.neg.neg = φ from neg_neg φ, show ψ.neg.neg = ψ from neg_neg ψ]
-    rfl
-  |   or φ ψ => by
-    change neg (neg (or φ ψ)) = or φ ψ
-    simp only [neg]
-    rw [show φ.neg.neg = φ from neg_neg φ, show ψ.neg.neg = ψ from neg_neg ψ]
-    rfl
+  |    φ ⋏ ψ => by simp [neg_neg φ, neg_neg ψ]
+  |    φ ⋎ ψ => by simp [neg_neg φ, neg_neg ψ]
   |     ∀¹ φ => by simp [neg_neg φ]
   |     ∃¹ φ => by simp [neg_neg φ]
   |     ∀² φ => by simp [neg_neg φ]
   |     ∃² φ => by simp [neg_neg φ]
 
 instance : TildeInvolutive (Semiformula L Ξ ξ N n) := ⟨neg_neg⟩
-
-instance : LogicalConnective.DeMorgan (Semiformula L Ξ ξ N n) where
-  and _ _ := rfl
-  or _ _ := rfl
-  imply _ _ := rfl
-
-instance : LogicalNeutral.DeMorgan (Semiformula L Ξ ξ N n) where
-  verum := rfl
-  falsum := rfl
 
 @[simp] lemma and_inj {φ₁ φ₂ ψ₁ ψ₂ : Semiformula L Ξ ξ N n} :
     φ₁ ⋏ φ₂ = ψ₁ ⋏ ψ₂ ↔ φ₁ = ψ₁ ∧ φ₂ = ψ₂ := iff_of_eq (by apply and.injEq)
