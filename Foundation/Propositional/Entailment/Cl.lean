@@ -5,7 +5,7 @@ public import Foundation.Propositional.Entailment.Int
 
 namespace LO.Axioms
 
-variable {F : Type*} [LogicalConnective F]
+variable {F : Type*} [LogicalConnective F] [LogicalNeutral F]
 variable (φ ψ χ : F)
 
 protected abbrev DNE := ∼∼φ 🡒 φ
@@ -21,16 +21,18 @@ end LO.Axioms
 
 namespace LO.Entailment
 
-variable {S F : Type*} [LogicalConnective F] [Entailment S F]
+variable {S F : Type*} [LogicalConnective F] [LogicalNeutral F] [Entailment S F]
 variable {𝓢 : S} {φ ψ χ : F}
 
 class HasAxiomDNE (𝓢 : S)  where
   dne {φ : F} : 𝓢 ⊢! Axioms.DNE φ
 export HasAxiomDNE (dne)
 
+omit [LogicalNeutral F] in
 @[simp] lemma dne! [HasAxiomDNE 𝓢] : 𝓢 ⊢ ∼∼φ 🡒 φ  := ⟨dne⟩
 
 def of_NN [ModusPonens 𝓢] [HasAxiomDNE 𝓢] (b : 𝓢 ⊢! ∼∼φ) : 𝓢 ⊢! φ := dne ⨀ b
+omit [LogicalNeutral F] in
 @[grind ⇒] lemma of_NN! [ModusPonens 𝓢] [HasAxiomDNE 𝓢] (h : 𝓢 ⊢ ∼∼φ) : 𝓢 ⊢ φ := ⟨of_NN h.some⟩
 
 section
@@ -57,6 +59,7 @@ class HasAxiomLEM (𝓢 : S)  where
   lem {φ : F} : 𝓢 ⊢! Axioms.LEM φ
 export HasAxiomLEM (lem)
 
+omit [LogicalNeutral F] in
 @[simp] lemma lem! [HasAxiomLEM 𝓢] : 𝓢 ⊢ φ ⋎ ∼φ := ⟨lem⟩
 
 
@@ -84,6 +87,7 @@ class HasAxiomPeirce (𝓢 : S)  where
   peirce {φ ψ : F} : 𝓢 ⊢! Axioms.Peirce φ ψ
 export HasAxiomPeirce (peirce)
 
+omit [LogicalNeutral F] in
 @[simp] lemma peirce! [HasAxiomPeirce 𝓢] : 𝓢 ⊢ ((φ 🡒 ψ) 🡒 φ) 🡒 φ := ⟨peirce⟩
 
 
@@ -111,10 +115,11 @@ class HasAxiomElimContra (𝓢 : S)  where
   elimContra {φ ψ : F} : 𝓢 ⊢! Axioms.ElimContra φ ψ
 export HasAxiomElimContra (elimContra)
 
+omit [LogicalNeutral F] in
 @[simp] lemma elim_contra! [HasAxiomElimContra 𝓢] : 𝓢 ⊢ (∼ψ 🡒 ∼φ) 🡒 (φ 🡒 ψ)  := ⟨elimContra⟩
 
 
-variable {F : Type*} [LogicalConnective F] [DecidableEq F]
+variable {F : Type*} [LogicalConnective F] [LogicalNeutral F] [DecidableEq F]
          {S : Type*} [Entailment S F]
          {𝓢 : S}
          {φ φ₁ φ₂ ψ ψ₁ ψ₂ χ ξ : F}
@@ -303,7 +308,7 @@ end
 
 section
 
-variable {G T : Type*} [Entailment T G] [LogicalConnective G] {𝓣 : T}
+variable {G T : Type*} [Entailment T G] [LogicalConnective G] [LogicalNeutral G] {𝓣 : T}
 
 abbrev Cl.ofEquiv (𝓢 : S) [Entailment.Cl 𝓢] (𝓣 : T) (f : G →ˡᶜ F) (e : (φ : G) → 𝓢 ⊢! f φ ≃ 𝓣 ⊢! φ) : Entailment.Cl 𝓣 where
   mdp {φ ψ dpq dp} := (e ψ) (
@@ -326,7 +331,7 @@ end
 
 section
 
-variable {S F : Type*} [LogicalConnective F] [DecidableEq F] [Entailment S F]
+variable {S F : Type*} [LogicalConnective F] [LogicalNeutral F] [DecidableEq F] [Entailment S F]
          {𝓢 : S} [Entailment.Int 𝓢]
 
 open FiniteContext

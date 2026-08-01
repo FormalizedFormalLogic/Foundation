@@ -50,17 +50,21 @@ def rewAux (ω : Rew L ξ₁ n₁ ξ₂ n₂) : Semiformula L Ξ ξ₁ N n₁ �
   |     ∃² φ => ∃² rewAux ω φ
 
 lemma rewAux_neg (ω : Rew L ξ₁ n₁ ξ₂ n₂) (φ : Semiformula L Ξ ξ₁ N n₁) :
-    rewAux ω (∼φ) = ∼rewAux ω φ := by
-  induction φ using rec' generalizing n₂ <;> simp [rewAux, *]
+    rewAux ω φ.neg = (rewAux ω φ).neg := by
+  induction φ using rec' generalizing n₂ <;> simp [rewAux, LO.SecondOrder.Semiformula.neg, *]
 
 def rew (ω : Rew L ξ₁ n₁ ξ₂ n₂) : Semiformula L Ξ ξ₁ N n₁ →ˡᶜ Semiformula L Ξ ξ₂ N n₂ where
   toTr := rewAux ω
   map_top' := rfl
   map_bot' := rfl
-  map_neg' φ := rewAux_neg _ _
+  map_neg' φ := by
+    change rewAux ω φ.neg = (rewAux ω φ).neg
+    exact rewAux_neg ω φ
   map_and' _ _ := rfl
   map_or' _ _ := rfl
-  map_imply' _ _ := by simp [DeMorgan.imply, rewAux, rewAux_neg]
+  map_imply' φ ψ := by
+    change rewAux ω (neg φ ⋎ ψ) = neg (rewAux ω φ) ⋎ rewAux ω ψ
+    simp [rewAux, rewAux_neg]
 
 instance : Rewriting L ξ₁ (Semiformula L Ξ ξ₁ N) ξ₂ (Semiformula L Ξ ξ₂ N) where
   app := rew
@@ -124,17 +128,21 @@ def bmapAux (f : Fin N → Fin M) : Semiformula L Ξ ξ N n → Semiformula L Ξ
   |     ∃² φ => ∃² φ.bmapAux (Fin.retrusion f)
 
 lemma bmapAux_neg {f : Fin N → Fin M} (φ : Semiformula L Ξ ξ N n) :
-    (∼φ).bmapAux f = ∼(φ.bmapAux f) := by
-  induction φ using rec' generalizing M <;> simp [bmapAux, *]
+    φ.neg.bmapAux f = (φ.bmapAux f).neg := by
+  induction φ using rec' generalizing M <;> simp [bmapAux, LO.SecondOrder.Semiformula.neg, *]
 
 def bmap (f : Fin N → Fin M) : Semiformula L Ξ ξ N n →ˡᶜ Semiformula L Ξ ξ M n where
   toTr := bmapAux f
   map_top' := rfl
   map_bot' := rfl
-  map_neg' φ := bmapAux_neg _
+  map_neg' φ := by
+    change bmapAux f φ.neg = (bmapAux f φ).neg
+    exact bmapAux_neg (f := f) φ
   map_and' _ _ := rfl
   map_or' _ _ := rfl
-  map_imply' _ _ := by simp [DeMorgan.imply, bmapAux_neg, bmapAux]
+  map_imply' φ ψ := by
+    change bmapAux f (neg φ ⋎ ψ) = neg (bmapAux f φ) ⋎ bmapAux f ψ
+    simp [bmapAux_neg, bmapAux]
 
 section bmap
 
@@ -246,10 +254,12 @@ def app (Ω : Rew L Ξ₁ N₁ Ξ₂ N₂ ξ) : Semiformula L Ξ₁ ξ N₁ n �
   toTr := Ω.appAux
   map_top' := rfl
   map_bot' := rfl
-  map_neg' := by simp [appAux_neg]
+  map_neg' φ := appAux_neg Ω φ
   map_and' _ _ := rfl
   map_or' _ _ := rfl
-  map_imply' _ _ := by simp [DeMorgan.imply, appAux_neg, appAux]
+  map_imply' φ ψ := by
+    change Ω.appAux (∼φ ⋎ ψ) = ∼Ω.appAux φ ⋎ Ω.appAux ψ
+    simp [appAux_neg, appAux]
 
 local infix:73 " • " => app
 

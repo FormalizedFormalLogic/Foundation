@@ -274,14 +274,14 @@ lemma Consistent.of_le {𝓢 : S} {𝓣 : T} (h𝓢 : Consistent 𝓢) (h : 𝓣
 
 variable (S)
 
-class DeductiveExplosion [LogicalConnective F] where
+class DeductiveExplosion [LogicalNeutral F] where
   dexp {𝓢 : S} : 𝓢 ⊢! ⊥ → (φ : F) → 𝓢 ⊢! φ
 
 variable {S}
 
 section
 
-variable [LogicalConnective F] [DeductiveExplosion S]
+variable [LogicalNeutral F] [DeductiveExplosion S]
 
 theorem DeductiveExplosion.dexp! {𝓢 : S} (h : 𝓢 ⊢ ⊥) (φ : F) : 𝓢 ⊢ φ := by
   rcases h with ⟨b⟩; exact ⟨dexp b φ⟩
@@ -304,7 +304,7 @@ end
 
 section
 
-variable [LogicalConnective F] (𝓢 : S)
+variable [Tilde F] (𝓢 : S)
 
 /-- `𝓢` is complete if, for every formula, either it or its negation is provable by `𝓢`. -/
 class Complete : Prop where
@@ -441,17 +441,19 @@ end Entailment
 
 namespace Entailment
 
-variable {S : Type*} {F : Type*} [LogicalConnective F] [Entailment S F]
+variable {S : Type*} {F : Type*} [LogicalConnective F] [LogicalNeutral F] [Entailment S F]
 
 section
 
 variable [DeductiveExplosion S] [AdjunctiveSet F S] [Axiomatized S] [Compact S]
 
+omit [LogicalConnective F] in
 lemma inconsistent_compact {𝓢 : S} :
     Inconsistent 𝓢 ↔ ∃ 𝓕 : S, 𝓕 ⊆ 𝓢 ∧ AdjunctiveSet.Finite 𝓕 ∧ Inconsistent 𝓕 :=
   ⟨fun H ↦ by rcases Compact.finite_provable (H ⊥) with ⟨𝓕, h𝓕, fin, h⟩; exact ⟨𝓕, h𝓕, fin, inconsistent_of_provable h⟩, by
     rintro ⟨𝓕, h𝓕, _, H⟩; exact H.of_supset h𝓕⟩
 
+omit [LogicalConnective F] in
 lemma consistent_compact {𝓢 : S} :
     Consistent 𝓢 ↔ ∀ 𝓕 : S, 𝓕 ⊆ 𝓢 → AdjunctiveSet.Finite 𝓕 → Consistent 𝓕 := by
   simp [←not_inconsistent_iff_consistent, inconsistent_compact (𝓢 := 𝓢)]
@@ -474,14 +476,17 @@ variable [Adjoin F S] [Deduction S] {𝓢 : S} {φ ψ : F}
 
 alias deduction := Deduction.ofInsert
 
+omit [LogicalNeutral F] in
 lemma Deduction.of_insert! (h : adjoin φ 𝓢 ⊢ ψ) : 𝓢 ⊢ φ 🡒 ψ := by
   rcases h with ⟨b⟩; exact ⟨Deduction.ofInsert b⟩
 
 alias deduction! := Deduction.of_insert!
 
+omit [LogicalNeutral F] in
 lemma Deduction.inv! (h : 𝓢 ⊢ φ 🡒 ψ) : adjoin φ 𝓢 ⊢ ψ := by
   rcases h with ⟨b⟩; exact ⟨Deduction.inv b⟩
 
+omit [LogicalNeutral F] in
 lemma deduction_iff : adjoin φ 𝓢 ⊢ ψ ↔ 𝓢 ⊢ φ 🡒 ψ := ⟨deduction!, Deduction.inv!⟩
 
 end deduction
@@ -512,7 +517,7 @@ lemma not_provable_of_countermodel {φ : F} (hp : 𝓜 ⊭ φ) : 𝓢 ⊬ φ :=
 lemma consistent_of_meaningful : Semantics.Meaningful 𝓜 → Entailment.Consistent 𝓢 :=
   fun H ↦ ⟨fun h ↦ by rcases H with ⟨φ, hf⟩; exact hf (Sound.sound (h φ))⟩
 
-lemma consistent_of_model [LogicalConnective F] [Semantics.Bot M] (𝓜 : M) [Sound 𝓢 𝓜] : Entailment.Consistent 𝓢 :=
+lemma consistent_of_model [LogicalNeutral F] [Semantics.Bot M] (𝓜 : M) [Sound 𝓢 𝓜] : Entailment.Consistent 𝓢 :=
   consistent_of_meaningful (𝓜 := 𝓜) inferInstance
 
 lemma modelsSet_of_prfSet {T : Set F} (b : 𝓢 ⊢* T) : 𝓜 ⊧* T :=
@@ -526,7 +531,7 @@ variable {𝓢 : S} {T : Set F} [Sound 𝓢 (Semantics.models M T)]
 
 lemma consequence_of_provable {φ : F} : 𝓢 ⊢ φ → T ⊨[M] φ := sound
 
-lemma consistent_of_satisfiable [LogicalConnective F] [∀ 𝓜 : M, Semantics.Meaningful 𝓜] : Semantics.Satisfiable M T → Entailment.Consistent 𝓢 :=
+lemma consistent_of_satisfiable [∀ 𝓜 : M, Semantics.Meaningful 𝓜] : Semantics.Satisfiable M T → Entailment.Consistent 𝓢 :=
   fun H ↦ consistent_of_meaningful (Semantics.meaningful_iff_satisfiableSet.mp H)
 
 end
@@ -562,7 +567,7 @@ lemma provable_iff_consequence [Sound 𝓢 (Semantics.models M s)] {φ : F} : s 
 
 section
 
-variable [LogicalConnective F] [∀ 𝓜 : M, Semantics.Meaningful 𝓜]
+variable [∀ 𝓜 : M, Semantics.Meaningful 𝓜]
 
 lemma satisfiable_of_consistent :
     Entailment.Consistent 𝓢 → Semantics.Satisfiable M s :=

@@ -18,7 +18,8 @@ namespace LO
 
 /-! ## One-sided $\mathbf{LK}$ -/
 
-class OneSidedLK {F : Type*} [LogicalConnective F] [DeMorgan F] [TildeInvolutive F] (𝔇 : List F → Type*) where
+class OneSidedLK {F : Type*} [LogicalConnective F] [LogicalNeutral F]
+    [TildeInvolutive F] [LogicalConnective.DeMorgan F] [LogicalNeutral.DeMorgan F] (𝔇 : List F → Type*) where
   identity (φ) : 𝔇 [φ, ∼φ]
   contraction : 𝔇 Δ → Δ ⊆ Γ → 𝔇 Γ
   verum : 𝔇 [⊤]
@@ -26,12 +27,14 @@ class OneSidedLK {F : Type*} [LogicalConnective F] [DeMorgan F] [TildeInvolutive
   or : 𝔇 (φ :: ψ :: Γ) → 𝔇 (φ ⋎ ψ :: Γ)
 
 class OneSidedLK.Cut
-    {F : Type*} [LogicalConnective F] [DeMorgan F] [TildeInvolutive F] (𝔇 : List F → Type*) extends OneSidedLK 𝔇 where
+    {F : Type*} [LogicalConnective F] [LogicalNeutral F]
+    [TildeInvolutive F] [LogicalConnective.DeMorgan F] [LogicalNeutral.DeMorgan F] (𝔇 : List F → Type*) extends OneSidedLK 𝔇 where
   cut : 𝔇 (φ :: Γ) → 𝔇 (∼φ :: Δ) → 𝔇 (Γ ++ Δ)
 
 namespace OneSidedLK
 
-variable {F : Type*} [LogicalConnective F] [DeMorgan F] [TildeInvolutive F] {𝔇 : List F → Type*}
+variable {F : Type*} [LogicalConnective F] [LogicalNeutral F]
+  [TildeInvolutive F] [LogicalConnective.DeMorgan F] [LogicalNeutral.DeMorgan F] {𝔇 : List F → Type*}
 
 def cast (b : 𝔇 Γ) (h : Γ = Δ := by simp) : 𝔇 Δ := h ▸ b
 
@@ -93,7 +96,8 @@ namespace PrincipalEntailment
 
 variable {P : Type*} [Entailment P F] {𝓟 : P} [PrincipalEntailment 𝔇 𝓟]
 
-omit [LogicalConnective F] [DeMorgan F] [TildeInvolutive F] in
+omit [LogicalConnective F] [LogicalNeutral F]
+  [LogicalConnective.DeMorgan F] [LogicalNeutral.DeMorgan F] in
 lemma provable_iff :
     𝓟 ⊢ φ ↔ Nonempty (𝔇 [φ]) := by
   simpa using! OneSidedLK.PrincipalEntailment.equiv.nonempty_congr
@@ -104,7 +108,7 @@ instance : Entailment.ModusPonens 𝓟 where
   mdp {φ ψ} b₁ b₂ :=
     let b₁ := equiv b₁
     let b₂ := equiv b₂
-    have : 𝔇 [∼(φ 🡒 ψ), ∼φ, ψ] := cast (tensor (𝔇 := 𝔇) (identity φ) (identity (∼ψ))) (by simp [DeMorgan.imply])
+    have : 𝔇 [∼(φ 🡒 ψ), ∼φ, ψ] := cast (tensor (𝔇 := 𝔇) (identity φ) (identity (∼ψ))) (by simp [LogicalConnective.DeMorgan.imply])
     have : 𝔇 [∼φ, ψ] := contraction (cut b₁ this) (by simp)
     have : 𝔇 [ψ] := contraction (cut b₂ this) (by simp)
     equiv.symm <| cast this
@@ -113,41 +117,41 @@ instance : Entailment.Cl 𝓟 where
   negEquiv {φ} := Entailment.cast
     (show 𝓟 ⊢! (φ ⋎ ∼φ ⋎ ⊥) ⋏ (φ ⋏ ⊤ ⋎ ∼φ) from
       equiv.symm <| and (or <| swap₁ <| or <| close φ) (or <| and (identity φ) top))
-    (by simp [Axioms.NegEquiv, DeMorgan.imply, LogicalConnective.iff])
+    (by simp [Axioms.NegEquiv, LogicalConnective.DeMorgan.imply, LogicalConnective.iff])
   verum := equiv.symm <| verum
   implyK {φ ψ} :=
     have : 𝓟 ⊢! ∼φ ⋎ ∼ψ ⋎ φ := equiv.symm <| or <| swap₁ <| or <| close φ
-    Entailment.cast this (by simp [DeMorgan.imply])
+    Entailment.cast this (by simp [LogicalConnective.DeMorgan.imply])
   implyS {φ ψ χ} :=
     have : 𝓟 ⊢! φ ⋏ ψ ⋏ ∼χ ⋎ φ ⋏ ∼ψ ⋎ ∼φ ⋎ χ :=
       equiv.symm <| or <| swap₁ <| or <| swap₁ <| or <| swap₃ <| and
         (close φ)
         (and (swap₃ <| and (close φ) (close ψ)) (close χ))
-    Entailment.cast this (by simp [DeMorgan.imply])
+    Entailment.cast this (by simp [LogicalConnective.DeMorgan.imply])
   and₁ {φ ψ} :=
     have : 𝓟 ⊢! (∼φ ⋎ ∼ψ) ⋎ φ :=  equiv.symm <|or <| or <| close φ
-    Entailment.cast this (by simp [DeMorgan.imply])
+    Entailment.cast this (by simp [LogicalConnective.DeMorgan.imply])
   and₂ {φ ψ} :=
     have : 𝓟 ⊢! (∼φ ⋎ ∼ψ) ⋎ ψ := equiv.symm <| or <| or <| close ψ
-    Entailment.cast this (by simp [DeMorgan.imply])
+    Entailment.cast this (by simp [LogicalConnective.DeMorgan.imply])
   and₃ {φ ψ} :=
     have : 𝓟 ⊢! ∼φ ⋎ ∼ψ ⋎ φ ⋏ ψ := equiv.symm <| or <| swap₁ <| or <| swap₁ <| and (close φ) (close ψ)
-    Entailment.cast this (by simp [DeMorgan.imply])
+    Entailment.cast this (by simp [LogicalConnective.DeMorgan.imply])
   or₁ {φ ψ} :=
     have : 𝓟 ⊢! ∼φ ⋎ φ ⋎ ψ := equiv.symm <| or <| swap₁ <| or <| close φ
-    Entailment.cast this (by simp [DeMorgan.imply])
+    Entailment.cast this (by simp [LogicalConnective.DeMorgan.imply])
   or₂ {φ ψ} :=
     have : 𝓟 ⊢! ∼ψ ⋎ φ ⋎ ψ := equiv.symm <| or <| swap₁ <| or <| close ψ
-    Entailment.cast this (by simp [DeMorgan.imply])
+    Entailment.cast this (by simp [LogicalConnective.DeMorgan.imply])
   or₃ {φ ψ χ} :=
     have : 𝓟 ⊢! φ ⋏ ∼χ ⋎ ψ ⋏ ∼ χ ⋎ ∼φ ⋏ ∼ψ ⋎ χ :=
       equiv.symm <| or <| swap₁ <| or <| swap₁ <| or <| and
         (swap₃ <| and (close φ) (close χ))
         (swap₂ <| and (close ψ) (close χ))
-    Entailment.cast this (by simp [DeMorgan.imply])
+    Entailment.cast this (by simp [LogicalConnective.DeMorgan.imply])
   dne {φ} :=
     have : 𝓟 ⊢! ∼φ ⋎ φ := equiv.symm <| or <| close φ
-    Entailment.cast this (by simp [DeMorgan.imply])
+    Entailment.cast this (by simp [LogicalConnective.DeMorgan.imply])
 
 variable {𝓟}
 
@@ -163,11 +167,12 @@ lemma derivable_iff_provable_disj : Nonempty (𝔇 Γ) ↔ 𝓟 ⊢ ⋁Γ := by
 
 end PrincipalEntailment
 
-abbrev Pullback (𝔇 : List F → Type*) {G : Type*} [LogicalConnective G] (f : G →ˡᶜ F) : List G → Type _ := fun Γ ↦ 𝔇 (Γ.map f)
+abbrev Pullback (𝔇 : List F → Type*) {G : Type*} [LogicalConnective G] [LogicalNeutral G] (f : G →ˡᶜ F) : List G → Type _ := fun Γ ↦ 𝔇 (Γ.map f)
 
 namespace Pullback
 
-variable {G : Type*} [LogicalConnective G] [DeMorgan G] [TildeInvolutive G] {f : G →ˡᶜ F}
+variable {G : Type*} [LogicalConnective G] [LogicalNeutral G]
+  [TildeInvolutive G] [LogicalConnective.DeMorgan G] [LogicalNeutral.DeMorgan G] {f : G →ˡᶜ F}
 
 def cast (d : 𝔇 Δ) (h : Δ = Γ.map f := by simp) : Pullback 𝔇 f Γ := by
   unfold Pullback
@@ -192,10 +197,12 @@ instance {P : Type*} [Entailment P F] (𝓟 : P) [PrincipalEntailment 𝔇 𝓟]
     PrincipalEntailment (Pullback 𝔇 f) (Entailment.pullback 𝓟 f) where
   equiv {φ} := PrincipalEntailment.equiv (φ := f φ)
 
-omit [DeMorgan F] [TildeInvolutive F] [DeMorgan G] [TildeInvolutive G] in
+omit [TildeInvolutive F] [LogicalConnective.DeMorgan F] [LogicalNeutral.DeMorgan F]
+  [TildeInvolutive G] [LogicalConnective.DeMorgan G] [LogicalNeutral.DeMorgan G] in
 @[simp] lemma nonempty_iff {Γ} : Nonempty (Pullback 𝔇 f Γ) ↔ Nonempty (𝔇 (Γ.map f)) := by simp [Pullback]
 
-omit [DeMorgan F] [TildeInvolutive F] [DeMorgan G] [TildeInvolutive G] in
+omit [TildeInvolutive F] [LogicalConnective.DeMorgan F] [LogicalNeutral.DeMorgan F]
+  [TildeInvolutive G] [LogicalConnective.DeMorgan G] [LogicalNeutral.DeMorgan G] in
 @[simp] lemma isEmpty_iff {Γ} : IsEmpty (Pullback 𝔇 f Γ) ↔ IsEmpty (𝔇 (Γ.map f)) := by simp [Pullback]
 
 end Pullback
@@ -208,7 +215,7 @@ namespace ContextualEntailment
 
 variable {S : Type*} [Entailment S F] [AdjunctiveSet F S] [ContextualEntailment 𝔇 S]
 
-omit [DeMorgan F] [TildeInvolutive F] in
+omit [LogicalNeutral F] [TildeInvolutive F] [LogicalConnective.DeMorgan F] [LogicalNeutral.DeMorgan F] in
 lemma provable_iff {𝓢 : S} :
     𝓢 ⊢ φ ↔ ∃ Γ : List F, (∀ ψ ∈ Γ, ψ ∈ 𝓢) ∧ Nonempty (𝔇 (φ :: ∼Γ)) := by
   simpa using! equiv.nonempty_congr
@@ -233,7 +240,7 @@ instance (𝓢 : S) : Entailment.ModusPonens 𝓢 where
   mdp {φ ψ} b₁ b₂ :=
     let ⟨Γ₁, b₁⟩ := equiv b₁
     let ⟨Γ₂, b₂⟩ := equiv b₂
-    have : 𝔇 [∼(φ 🡒 ψ), ∼φ, ψ] := cast (tensor (𝔇 := 𝔇) (identity φ) (identity (∼ψ))) (by simp [DeMorgan.imply])
+    have : 𝔇 [∼(φ 🡒 ψ), ∼φ, ψ] := cast (tensor (𝔇 := 𝔇) (identity φ) (identity (∼ψ))) (by simp [LogicalConnective.DeMorgan.imply])
     have : 𝔇 (∼φ :: ψ :: ∼↑Γ₁) := contraction (cut b₁ this) (by simp)
     have : 𝔇 (ψ :: ∼↑Γ₁ ++ ∼↑Γ₂) := contraction (cut b₂ this) (by simp)
     equiv.symm ⟨⟨Γ₁ ++ Γ₂, by simp; grind⟩, cast this⟩
@@ -246,7 +253,7 @@ instance : Entailment.StrongCut S S where
     | ψ :: l =>
       have bχ : T ⊢! ψ 🡒 χ :=
         Entailment.cast (bl l (by simp at hl; grind) (∼ψ ⋎ χ) (OneSidedLK.or <| OneSidedLK.swap₁ d))
-        (by simp [DeMorgan.imply])
+        (by simp [LogicalConnective.DeMorgan.imply])
       have bψ : T ⊢! ψ := bs (show ψ ∈ U by simp at hl; grind)
       Entailment.mdp bχ bψ
   have ⟨l, hl⟩ := equiv b
@@ -276,45 +283,45 @@ instance cl (𝓢 : S) : Entailment.Cl 𝓢 where
   negEquiv {φ} := Entailment.cast
     (show 𝓢 ⊢! (φ ⋎ ∼φ ⋎ ⊥) ⋏ (φ ⋏ ⊤ ⋎ ∼φ) from
       toProof _ <| and (or <| swap₁ <| or <| close φ) (or <| and (identity φ) top))
-    (by simp [Axioms.NegEquiv, DeMorgan.imply, LogicalConnective.iff])
+    (by simp [Axioms.NegEquiv, LogicalConnective.DeMorgan.imply, LogicalConnective.iff])
   verum := toProof _ <| verum
   implyK {φ ψ} :=
     have : 𝓢 ⊢! ∼φ ⋎ ∼ψ ⋎ φ := toProof _ <| or <| swap₁ <| or <| close φ
-    Entailment.cast this (by simp [DeMorgan.imply])
+    Entailment.cast this (by simp [LogicalConnective.DeMorgan.imply])
   implyS {φ ψ χ} :=
     have : 𝓢 ⊢! φ ⋏ ψ ⋏ ∼χ ⋎ φ ⋏ ∼ψ ⋎ ∼φ ⋎ χ :=
       toProof _ <| or <| swap₁ <| or <| swap₁ <| or <| swap₃ <| and
         (close φ)
         (and (swap₃ <| and (close φ) (close ψ)) (close χ))
-    Entailment.cast this (by simp [DeMorgan.imply])
+    Entailment.cast this (by simp [LogicalConnective.DeMorgan.imply])
   and₁ {φ ψ} :=
     have : 𝓢 ⊢! (∼φ ⋎ ∼ψ) ⋎ φ :=  toProof _ <|or <| or <| close φ
-    Entailment.cast this (by simp [DeMorgan.imply])
+    Entailment.cast this (by simp [LogicalConnective.DeMorgan.imply])
   and₂ {φ ψ} :=
     have : 𝓢 ⊢! (∼φ ⋎ ∼ψ) ⋎ ψ := toProof _ <| or <| or <| close ψ
-    Entailment.cast this (by simp [DeMorgan.imply])
+    Entailment.cast this (by simp [LogicalConnective.DeMorgan.imply])
   and₃ {φ ψ} :=
     have : 𝓢 ⊢! ∼φ ⋎ ∼ψ ⋎ φ ⋏ ψ := toProof _ <| or <| swap₁ <| or <| swap₁ <| and (close φ) (close ψ)
-    Entailment.cast this (by simp [DeMorgan.imply])
+    Entailment.cast this (by simp [LogicalConnective.DeMorgan.imply])
   or₁ {φ ψ} :=
     have : 𝓢 ⊢! ∼φ ⋎ φ ⋎ ψ := toProof _ <| or <| swap₁ <| or <| close φ
-    Entailment.cast this (by simp [DeMorgan.imply])
+    Entailment.cast this (by simp [LogicalConnective.DeMorgan.imply])
   or₂ {φ ψ} :=
     have : 𝓢 ⊢! ∼ψ ⋎ φ ⋎ ψ := toProof _ <| or <| swap₁ <| or <| close ψ
-    Entailment.cast this (by simp [DeMorgan.imply])
+    Entailment.cast this (by simp [LogicalConnective.DeMorgan.imply])
   or₃ {φ ψ χ} :=
     have : 𝓢 ⊢! φ ⋏ ∼χ ⋎ ψ ⋏ ∼ χ ⋎ ∼φ ⋏ ∼ψ ⋎ χ :=
       toProof _ <| or <| swap₁ <| or <| swap₁ <| or <| and
         (swap₃ <| and (close φ) (close χ))
         (swap₂ <| and (close ψ) (close χ))
-    Entailment.cast this (by simp [DeMorgan.imply])
+    Entailment.cast this (by simp [LogicalConnective.DeMorgan.imply])
   dne {φ} :=
     have : 𝓢 ⊢! ∼φ ⋎ φ := toProof _ <| or <| close φ
-    Entailment.cast this (by simp [DeMorgan.imply])
+    Entailment.cast this (by simp [LogicalConnective.DeMorgan.imply])
 
 variable {P : Type*} [Entailment P F]
 
-omit [DeMorgan F] [Cut 𝔇] in
+omit [LogicalNeutral F] [LogicalConnective.DeMorgan F] [LogicalNeutral.DeMorgan F] [Cut 𝔇] in
 lemma empty_provable_iff_eprovable {𝓟 : P} [PrincipalEntailment 𝔇 𝓟] :
     (∅ : S) ⊢ φ ↔ 𝓟 ⊢ φ := by
   constructor
@@ -335,12 +342,12 @@ lemma iff_context {𝓢 : S} {𝓟 : P} [PrincipalEntailment 𝔇 𝓟] :
     have ⟨Γ, hΓ, ⟨d⟩⟩ := provable_iff.mp h
     have : 𝓟 ⊢ ⋀Γ 🡒 φ := by
       have : 𝔇 (∼Γ ++ [φ]) := contra d
-      have : Nonempty (𝔇 [⋀Γ 🡒 φ]) := by simpa [DeMorgan.imply] using Nonempty.intro (or <| disj₂ this)
+      have : Nonempty (𝔇 [⋀Γ 🡒 φ]) := by simpa [LogicalConnective.DeMorgan.imply] using Nonempty.intro (or <| disj₂ this)
       exact PrincipalEntailment.provable_iff.mpr this
     refine ⟨⟨Γ, by simpa using hΓ, this.some⟩⟩
   · rintro ⟨Γ, h, d⟩
     have : 𝓟 ⊢! ⋀Γ 🡒 φ := d
-    have d : 𝔇 [⋁(∼Γ) ⋎ φ] := cast (PrincipalEntailment.equiv this) (by simp [DeMorgan.imply])
+    have d : 𝔇 [⋁(∼Γ) ⋎ φ] := cast (PrincipalEntailment.equiv this) (by simp [LogicalConnective.DeMorgan.imply])
     have : 𝔇 (⋀Γ ⋏ ∼φ :: φ :: ∼Γ) :=
       have : 𝔇 (⋀Γ :: ∼Γ) := conj₂ fun φ h ↦ close φ (by simp) (by simp [h])
       contra <| tensor this (rotate <| identity φ)

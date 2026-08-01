@@ -6,7 +6,7 @@ public import Foundation.Propositional.Entailment.Cl
 
 namespace LO
 
-variable {F S : Type*} [LogicalConnective F] [Entailment S F]
+variable {F S : Type*} [LogicalConnective F] [LogicalNeutral F] [Entailment S F]
 
 namespace Entailment
 

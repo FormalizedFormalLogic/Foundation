@@ -234,7 +234,7 @@ lemma generic_iff_not' {φ : Semiformula L ξ n} :
     p ⊩ᶜ[bv|fv] φ 🡒 ψ ↔ ∀ q ≤ p, q ⊩ᶜ[bv|fv] φ → q ⊩ᶜ[bv|fv] ψ := by
   suffices
     (∀ q ≤ p, ∃ r ≤ q, (∀ q ≤ r, ¬q ⊩ᶜ[bv|fv] φ) ∨ r ⊩ᶜ[bv|fv] ψ) ↔
-    (∀ q ≤ p, q ⊩ᶜ[bv|fv] φ → q ⊩ᶜ[bv|fv] ψ) by simpa [DeMorgan.imply]
+    (∀ q ≤ p, q ⊩ᶜ[bv|fv] φ → q ⊩ᶜ[bv|fv] ψ) by simpa [LogicalConnective.DeMorgan.imply]
   constructor
   · intro h q hqp Hqφ
     by_contra! Hqψ

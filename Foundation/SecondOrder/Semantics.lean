@@ -57,6 +57,10 @@ variable {𝕊 : Set (Set M)} {F : Ξ → Set M} {f : ξ → M} {E : Fin N → S
     EvalAux 𝕊 F f E e (∼φ) ↔ ¬EvalAux 𝕊 F f E e φ := by
   induction φ using rec' <;> simp [*, EvalAux, or_iff_not_imp_left]
 
+@[simp] lemma EvalAux_neg' (φ : Semiformula L Ξ ξ N n) :
+    EvalAux 𝕊 F f E e φ.neg ↔ ¬EvalAux 𝕊 F f E e φ := by
+  induction φ using rec' <;> simp [*, EvalAux, LO.SecondOrder.Semiformula.neg, or_iff_not_imp_left]
+
 def Eval (𝕊 : Set (Set M)) (F : Ξ → Set M) (f : ξ → M) (E : Fin N → Set M) (e : Fin n → M) : Semiformula L Ξ ξ N n →ˡᶜ Prop where
   toTr := EvalAux 𝕊 F f E e
   map_top' := rfl
@@ -64,7 +68,12 @@ def Eval (𝕊 : Set (Set M)) (F : Ξ → Set M) (f : ξ → M) (E : Fin N → S
   map_and' := by simp [EvalAux]
   map_or' := by simp [EvalAux]
   map_neg' := by simp [EvalAux_neg]
-  map_imply' := by simp [EvalAux_neg, EvalAux, imp_iff_not_or]
+  map_imply' := by
+    intro φ ψ
+    change EvalAux 𝕊 F f E e (LO.SecondOrder.Semiformula.neg φ ⋎ ψ) =
+      (EvalAux 𝕊 F f E e φ → EvalAux 𝕊 F f E e ψ)
+    apply propext
+    simp [EvalAux, imp_iff_not_or]
 
 @[simp] lemma eval_rel {k} {R : L.Rel k} {v} :
     (rel R v).Eval 𝕊 F f E e ↔ 𝓈.rel R (Semiterm.val e f ∘ v) := by rfl

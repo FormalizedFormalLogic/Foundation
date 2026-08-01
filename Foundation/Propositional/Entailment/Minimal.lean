@@ -7,7 +7,7 @@ public import Foundation.Vorspiel.Finset.Basic
 
 namespace LO.Axioms
 
-variable {F : Type*} [LogicalConnective F]
+variable {F : Type*} [LogicalConnective F] [LogicalNeutral F]
 variable (φ ψ χ : F)
 
 
@@ -45,7 +45,7 @@ namespace LO.Entailment
 
 section
 
-variable {S F : Type*} [LogicalConnective F] [Entailment S F]
+variable {S F : Type*} [LogicalConnective F] [LogicalNeutral F] [Entailment S F]
 variable {𝓢 : S} {φ ψ χ : F}
 
 class ModusPonens (𝓢 : S) where
@@ -54,6 +54,7 @@ class ModusPonens (𝓢 : S) where
 alias mdp := ModusPonens.mdp
 infixl:90 "⨀" => mdp
 
+omit [LogicalNeutral F] in
 lemma mdp! [ModusPonens 𝓢] : 𝓢 ⊢ φ 🡒 ψ → 𝓢 ⊢ φ → 𝓢 ⊢ ψ := by
   rintro ⟨hpq⟩ ⟨hp⟩;
   exact ⟨hpq ⨀ hp⟩
@@ -79,6 +80,7 @@ class HasAxiomVerum (𝓢 : S) where
   verum : 𝓢 ⊢! Axioms.Verum
 
 def verum [HasAxiomVerum 𝓢] : 𝓢 ⊢! ⊤ := HasAxiomVerum.verum
+omit [LogicalConnective F] in
 @[simp] lemma verum! [HasAxiomVerum 𝓢] : 𝓢 ⊢ ⊤ := ⟨verum⟩
 
 
@@ -86,11 +88,13 @@ class HasAxiomImplyK (𝓢 : S)  where
   implyK {φ ψ : F} : 𝓢 ⊢! Axioms.ImplyK φ ψ
 export HasAxiomImplyK (implyK)
 
+omit [LogicalNeutral F] in
 @[simp] lemma implyK! [HasAxiomImplyK 𝓢] : 𝓢 ⊢ φ 🡒 ψ 🡒 φ := ⟨implyK⟩
 
 def C_of_conseq [ModusPonens 𝓢] [HasAxiomImplyK 𝓢] (h : 𝓢 ⊢! φ) : 𝓢 ⊢! ψ 🡒 φ := implyK ⨀ h
 alias dhyp := C_of_conseq
 
+omit [LogicalNeutral F] in
 lemma C!_of_conseq! [ModusPonens 𝓢] [HasAxiomImplyK 𝓢] (d : 𝓢 ⊢ φ) : 𝓢 ⊢ ψ 🡒 φ := ⟨C_of_conseq d.some⟩
 alias dhyp! := C!_of_conseq!
 
@@ -99,6 +103,7 @@ class HasAxiomImplyS (𝓢 : S)  where
   implyS {φ ψ χ : F} : 𝓢 ⊢! Axioms.ImplyS φ ψ χ
 export HasAxiomImplyS (implyS)
 
+omit [LogicalNeutral F] in
 @[simp] lemma implyS! [HasAxiomImplyS 𝓢] : 𝓢 ⊢ (φ 🡒 ψ 🡒 χ) 🡒 (φ 🡒 ψ) 🡒 φ 🡒 χ := ⟨implyS⟩
 
 
@@ -108,15 +113,19 @@ class HasAxiomAndElim (𝓢 : S)  where
 export HasAxiomAndElim (and₁ and₂)
 
 
+omit [LogicalNeutral F] in
 @[simp] lemma and₁! [HasAxiomAndElim 𝓢] : 𝓢 ⊢ φ ⋏ ψ 🡒 φ := ⟨and₁⟩
 
 def K_left [ModusPonens 𝓢] [HasAxiomAndElim 𝓢] (d : 𝓢 ⊢! φ ⋏ ψ) : 𝓢 ⊢! φ := and₁ ⨀ d
+omit [LogicalNeutral F] in
 @[grind ->] lemma K!_left [ModusPonens 𝓢] [HasAxiomAndElim 𝓢] (d : 𝓢 ⊢ φ ⋏ ψ) : 𝓢 ⊢ φ := ⟨K_left d.some⟩
 
 
+omit [LogicalNeutral F] in
 @[simp] lemma and₂! [HasAxiomAndElim 𝓢] : 𝓢 ⊢ φ ⋏ ψ 🡒 ψ := ⟨and₂⟩
 
 def K_right [ModusPonens 𝓢] [HasAxiomAndElim 𝓢] (d : 𝓢 ⊢! φ ⋏ ψ) : 𝓢 ⊢! ψ := and₂ ⨀ d
+omit [LogicalNeutral F] in
 @[grind ->] lemma K!_right [ModusPonens 𝓢] [HasAxiomAndElim 𝓢] (d : 𝓢 ⊢ φ ⋏ ψ) : 𝓢 ⊢ ψ := ⟨K_right d.some⟩
 
 
@@ -124,9 +133,11 @@ class HasAxiomAndInst (𝓢 : S) where
   and₃ {φ ψ : F} : 𝓢 ⊢! Axioms.AndInst φ ψ
 export HasAxiomAndInst (and₃)
 
+omit [LogicalNeutral F] in
 @[simp] lemma and₃! [HasAxiomAndInst 𝓢] : 𝓢 ⊢ φ 🡒 ψ 🡒 φ ⋏ ψ := ⟨and₃⟩
 
 def K_intro [ModusPonens 𝓢] [HasAxiomAndInst 𝓢] (d₁ : 𝓢 ⊢! φ) (d₂: 𝓢 ⊢! ψ) : 𝓢 ⊢! φ ⋏ ψ := and₃ ⨀ d₁ ⨀ d₂
+omit [LogicalNeutral F] in
 @[grind <-] lemma K!_intro  [ModusPonens 𝓢] [HasAxiomAndInst 𝓢] (d₁ : 𝓢 ⊢ φ) (d₂: 𝓢 ⊢ ψ) : 𝓢 ⊢ φ ⋏ ψ := ⟨K_intro d₁.some d₂.some⟩
 
 
@@ -135,14 +146,18 @@ class HasAxiomOrInst (𝓢 : S) where
   or₂ {φ ψ : F} : 𝓢 ⊢! Axioms.OrInst₂ φ ψ
 export HasAxiomOrInst (or₁ or₂)
 
+omit [LogicalNeutral F] in
 @[simp] lemma or₁! [HasAxiomOrInst 𝓢] : 𝓢 ⊢ φ 🡒 φ ⋎ ψ := ⟨or₁⟩
 
 def A_intro_left [HasAxiomOrInst 𝓢] [ModusPonens 𝓢] (d : 𝓢 ⊢! φ) : 𝓢 ⊢! φ ⋎ ψ := or₁ ⨀ d
+omit [LogicalNeutral F] in
 @[grind .] lemma A!_intro_left [HasAxiomOrInst 𝓢] [ModusPonens 𝓢] (d : 𝓢 ⊢ φ) : 𝓢 ⊢ φ ⋎ ψ := ⟨A_intro_left d.some⟩
 
+omit [LogicalNeutral F] in
 @[simp] lemma or₂! [HasAxiomOrInst 𝓢] : 𝓢 ⊢ ψ 🡒 φ ⋎ ψ := ⟨or₂⟩
 
 def A_intro_right [HasAxiomOrInst 𝓢] [ModusPonens 𝓢] (d : 𝓢 ⊢! ψ) : 𝓢 ⊢! φ ⋎ ψ := or₂ ⨀ d
+omit [LogicalNeutral F] in
 @[grind .] lemma A!_intro_right [HasAxiomOrInst 𝓢] [ModusPonens 𝓢] (d : 𝓢 ⊢ ψ) : 𝓢 ⊢ φ ⋎ ψ := ⟨A_intro_right d.some⟩
 
 
@@ -150,17 +165,20 @@ class HasAxiomOrElim (𝓢 : S) where
   or₃ {φ ψ χ : F} : 𝓢 ⊢! Axioms.OrElim φ ψ χ
 export HasAxiomOrElim (or₃)
 
+omit [LogicalNeutral F] in
 @[simp] lemma or₃! [HasAxiomOrElim 𝓢] : 𝓢 ⊢ (φ 🡒 χ) 🡒 (ψ 🡒 χ) 🡒 (φ ⋎ ψ) 🡒 χ := ⟨or₃⟩
 
 def left_A_intro [HasAxiomOrElim 𝓢] [ModusPonens 𝓢] (d₁ : 𝓢 ⊢! φ 🡒 χ) (d₂ : 𝓢 ⊢! ψ 🡒 χ) : 𝓢 ⊢! φ ⋎ ψ 🡒 χ := or₃ ⨀ d₁ ⨀ d₂
 alias CA_of_C_of_C := left_A_intro
 
+omit [LogicalNeutral F] in
 lemma left_A!_intro [HasAxiomOrElim 𝓢] [ModusPonens 𝓢] (d₁ : 𝓢 ⊢ φ 🡒 χ) (d₂ : 𝓢 ⊢ ψ 🡒 χ) : 𝓢 ⊢ φ ⋎ ψ 🡒 χ := ⟨left_A_intro d₁.some d₂.some⟩
 alias CA!_of_C!_of_C! := left_A!_intro
 
 def of_C_of_C_of_A [HasAxiomOrElim 𝓢] [ModusPonens 𝓢] (d₁ : 𝓢 ⊢! φ 🡒 χ) (d₂ : 𝓢 ⊢! ψ 🡒 χ) (d₃ : 𝓢 ⊢! φ ⋎ ψ) : 𝓢 ⊢! χ := or₃ ⨀ d₁ ⨀ d₂ ⨀ d₃
 alias A_cases := of_C_of_C_of_A
 
+omit [LogicalNeutral F] in
 lemma of_C!_of_C!_of_A! [HasAxiomOrElim 𝓢] [ModusPonens 𝓢] (d₁ : 𝓢 ⊢ φ 🡒 χ) (d₂ : 𝓢 ⊢ ψ 🡒 χ) (d₃ : 𝓢 ⊢ φ ⋎ ψ) : 𝓢 ⊢ χ := ⟨of_C_of_C_of_A d₁.some d₂.some d₃.some⟩
 alias A!_cases := of_C!_of_C!_of_A!
 
@@ -177,7 +195,7 @@ end
 
 section
 
-variable {S F : Type*} [LogicalConnective F] [Entailment S F]
+variable {S F : Type*} [LogicalConnective F] [LogicalNeutral F] [Entailment S F]
 variable {𝓢 : S} [ModusPonens 𝓢] {φ ψ χ : F}
 
 def CO_of_N [HasAxiomAndElim 𝓢] [NegationEquiv 𝓢] : 𝓢 ⊢! ∼φ → 𝓢 ⊢! φ 🡒 ⊥ := λ h => (K_left negEquiv) ⨀ h
@@ -186,23 +204,31 @@ def N_of_CO [HasAxiomAndElim 𝓢] [NegationEquiv 𝓢] : 𝓢 ⊢! φ 🡒 ⊥ 
 
 
 def E_intro [HasAxiomAndInst 𝓢] (b₁ : 𝓢 ⊢! φ 🡒 ψ) (b₂ : 𝓢 ⊢! ψ 🡒 φ) : 𝓢 ⊢! φ 🡘 ψ := K_intro b₁ b₂
+omit [LogicalNeutral F] in
 @[grind ←] lemma E!_intro [HasAxiomAndInst 𝓢] (h₁ : 𝓢 ⊢ φ 🡒 ψ) (h₂ : 𝓢 ⊢ ψ 🡒 φ) : 𝓢 ⊢ φ 🡘 ψ := ⟨K_intro h₁.some h₂.some⟩
 
+omit [LogicalNeutral F] in
 @[grind =] lemma K!_intro_iff [HasAxiomAndInst 𝓢] [HasAxiomAndElim 𝓢] : 𝓢 ⊢ φ ⋏ ψ ↔ 𝓢 ⊢ φ ∧ 𝓢 ⊢ ψ := by grind
+omit [LogicalNeutral F] in
 @[grind =] lemma E!_intro_iff [HasAxiomAndInst 𝓢] [HasAxiomAndElim 𝓢] : 𝓢 ⊢ φ 🡘 ψ ↔ 𝓢 ⊢ φ 🡒 ψ ∧ 𝓢 ⊢ ψ 🡒 φ := ⟨fun h ↦ ⟨K!_left h, K!_right h⟩, by grind⟩
 
 def C_of_E_mp [HasAxiomAndInst 𝓢] [HasAxiomAndElim 𝓢] (h : 𝓢 ⊢! φ 🡘 ψ) : 𝓢 ⊢! φ 🡒 ψ := K_left h
+omit [LogicalNeutral F] in
 @[grind →] lemma C_of_E_mp! [HasAxiomAndInst 𝓢] [HasAxiomAndElim 𝓢] : 𝓢 ⊢ φ 🡘 ψ → 𝓢 ⊢ φ 🡒 ψ := λ ⟨d⟩ => ⟨C_of_E_mp d⟩
 
 def C_of_E_mpr [HasAxiomAndInst 𝓢] [HasAxiomAndElim 𝓢] (h : 𝓢 ⊢! φ 🡘 ψ) : 𝓢 ⊢! ψ 🡒 φ := K_right h
+omit [LogicalNeutral F] in
 @[grind →] lemma C_of_E_mpr! [HasAxiomAndInst 𝓢] [HasAxiomAndElim 𝓢] : 𝓢 ⊢ φ 🡘 ψ → 𝓢 ⊢ ψ 🡒 φ := λ ⟨d⟩ => ⟨C_of_E_mpr d⟩
 
+omit [LogicalNeutral F] in
 @[grind →] lemma iff_of_E! [HasAxiomAndInst 𝓢] [HasAxiomAndElim 𝓢] (h : 𝓢 ⊢ φ 🡘 ψ) : 𝓢 ⊢ φ ↔ 𝓢 ⊢ ψ := ⟨fun hp ↦ K!_left h ⨀ hp, fun hq ↦ K!_right h ⨀ hq⟩
 
 def C_id [HasAxiomImplyK 𝓢] [HasAxiomImplyS 𝓢] {φ : F} : 𝓢 ⊢! φ 🡒 φ := implyS (φ := φ) (ψ := (φ 🡒 φ)) (χ := φ) ⨀ implyK ⨀ implyK
+omit [LogicalNeutral F] in
 @[simp] theorem C!_id [HasAxiomImplyK 𝓢] [HasAxiomImplyS 𝓢] : 𝓢 ⊢ φ 🡒 φ := ⟨C_id⟩
 
 def E_Id [HasAxiomAndInst 𝓢] [HasAxiomImplyK 𝓢] [HasAxiomImplyS 𝓢] {φ : F} : 𝓢 ⊢! φ 🡘 φ := K_intro C_id C_id
+omit [LogicalNeutral F] in
 @[simp] theorem E!_id [HasAxiomAndInst 𝓢] [HasAxiomImplyK 𝓢] [HasAxiomImplyS 𝓢] : 𝓢 ⊢ φ 🡘 φ := ⟨E_Id⟩
 
 instance [NegAbbrev F] [HasAxiomImplyK 𝓢] [HasAxiomImplyS 𝓢] [HasAxiomAndInst 𝓢] : Entailment.NegationEquiv 𝓢 where
@@ -216,69 +242,83 @@ def NO [HasAxiomImplyK 𝓢] [HasAxiomImplyS 𝓢] [NegationEquiv 𝓢] [HasAxio
 
 
 def mdp₁ [HasAxiomImplyS 𝓢] (bqr : 𝓢 ⊢! φ 🡒 ψ 🡒 χ) (bq : 𝓢 ⊢! φ 🡒 ψ) : 𝓢 ⊢! φ 🡒 χ := implyS ⨀ bqr ⨀ bq
+omit [LogicalNeutral F] in
 @[grind →] lemma mdp₁! [HasAxiomImplyS 𝓢] (hqr : 𝓢 ⊢ φ 🡒 ψ 🡒 χ) (hq : 𝓢 ⊢ φ 🡒 ψ) : 𝓢 ⊢ φ 🡒 χ := ⟨mdp₁ hqr.some hq.some⟩
 
 infixl:90 "⨀₁" => mdp₁
 infixl:90 "⨀₁" => mdp₁!
 
 def mdp₂ [HasAxiomImplyK 𝓢] [HasAxiomImplyS 𝓢] (bqr : 𝓢 ⊢! φ 🡒 ψ 🡒 χ 🡒 s) (bq : 𝓢 ⊢! φ 🡒 ψ 🡒 χ) : 𝓢 ⊢! φ 🡒 ψ 🡒 s := C_of_conseq (implyS) ⨀₁ bqr ⨀₁ bq
+omit [LogicalNeutral F] in
 @[grind →] lemma mdp₂! [HasAxiomImplyK 𝓢] [HasAxiomImplyS 𝓢] (hqr : 𝓢 ⊢ φ 🡒 ψ 🡒 χ 🡒 s) (hq : 𝓢 ⊢ φ 🡒 ψ 🡒 χ) : 𝓢 ⊢ φ 🡒 ψ 🡒 s := ⟨mdp₂ hqr.some hq.some⟩
 
 infixl:90 "⨀₂" => mdp₂
 infixl:90 "⨀₂" => mdp₂!
 
 def mdp₃ [HasAxiomImplyK 𝓢] [HasAxiomImplyS 𝓢] (bqr : 𝓢 ⊢! φ 🡒 ψ 🡒 χ 🡒 s 🡒 t) (bq : 𝓢 ⊢! φ 🡒 ψ 🡒 χ 🡒 s) : 𝓢 ⊢! φ 🡒 ψ 🡒 χ 🡒 t := (C_of_conseq <| C_of_conseq <| implyS) ⨀₂ bqr ⨀₂ bq
+omit [LogicalNeutral F] in
 @[grind →] lemma mdp₃! [HasAxiomImplyK 𝓢] [HasAxiomImplyS 𝓢] (hqr : 𝓢 ⊢ φ 🡒 ψ 🡒 χ 🡒 s 🡒 t) (hq : 𝓢 ⊢ φ 🡒 ψ 🡒 χ 🡒 s) : 𝓢 ⊢ φ 🡒 ψ 🡒 χ 🡒 t := ⟨mdp₃ hqr.some hq.some⟩
 
 infixl:90 "⨀₃" => mdp₃
 infixl:90 "⨀₃" => mdp₃!
 
 def mdp₄ [HasAxiomImplyK 𝓢] [HasAxiomImplyS 𝓢] (bqr : 𝓢 ⊢! φ 🡒 ψ 🡒 χ 🡒 s 🡒 t 🡒 u) (bq : 𝓢 ⊢! φ 🡒 ψ 🡒 χ 🡒 s 🡒 t) : 𝓢 ⊢! φ 🡒 ψ 🡒 χ 🡒 s 🡒 u := (C_of_conseq <| C_of_conseq <| C_of_conseq <| implyS) ⨀₃ bqr ⨀₃ bq
+omit [LogicalNeutral F] in
 @[grind →] lemma mdp₄! [HasAxiomImplyK 𝓢] [HasAxiomImplyS 𝓢] (hqr : 𝓢 ⊢ φ 🡒 ψ 🡒 χ 🡒 s 🡒 t 🡒 u) (hq : 𝓢 ⊢ φ 🡒 ψ 🡒 χ 🡒 s 🡒 t) : 𝓢 ⊢ φ 🡒 ψ 🡒 χ 🡒 s 🡒 u := ⟨mdp₄ hqr.some hq.some⟩
 infixl:90 "⨀₄" => mdp₄
 infixl:90 "⨀₄" => mdp₄!
 
 
 def C_trans [HasAxiomImplyK 𝓢] [HasAxiomImplyS 𝓢] (bpq : 𝓢 ⊢! φ 🡒 ψ) (bqr : 𝓢 ⊢! ψ 🡒 χ) : 𝓢 ⊢! φ 🡒 χ := implyS ⨀ C_of_conseq bqr ⨀ bpq
+omit [LogicalNeutral F] in
 @[grind <=] lemma C!_trans [HasAxiomImplyK 𝓢] [HasAxiomImplyS 𝓢] (hpq : 𝓢 ⊢ φ 🡒 ψ) (hqr : 𝓢 ⊢ ψ 🡒 χ) : 𝓢 ⊢ φ 🡒 χ := ⟨C_trans hpq.some hqr.some⟩
 
 def C_replace [HasAxiomImplyK 𝓢] [HasAxiomImplyS 𝓢] (h₁ : 𝓢 ⊢! ψ₁ 🡒 φ₁) (h₂ : 𝓢 ⊢! φ₂ 🡒 ψ₂) : 𝓢 ⊢! φ₁ 🡒 φ₂ → 𝓢 ⊢! ψ₁ 🡒 ψ₂ := λ h => C_trans h₁ $ C_trans h h₂
+omit [LogicalNeutral F] in
 lemma C!_replace [HasAxiomImplyK 𝓢] [HasAxiomImplyS 𝓢] (h₁ : 𝓢 ⊢ ψ₁ 🡒 φ₁) (h₂ : 𝓢 ⊢ φ₂ 🡒 ψ₂) : 𝓢 ⊢ φ₁ 🡒 φ₂ → 𝓢 ⊢ ψ₁ 🡒 ψ₂ := λ h => ⟨C_replace h₁.some h₂.some h.some⟩
 
 def E_replace [HasAxiomAndInst 𝓢] [HasAxiomAndElim 𝓢] [HasAxiomImplyK 𝓢] [HasAxiomImplyS 𝓢] (h₁ : 𝓢 ⊢! φ₁ 🡘 ψ₁) (h₂ : 𝓢 ⊢! φ₂ 🡘 ψ₂) (h₃ : 𝓢 ⊢! φ₁ 🡘 φ₂) : 𝓢 ⊢! ψ₁ 🡘 ψ₂ := by
   apply E_intro;
   . exact C_replace (C_of_E_mpr h₁) (C_of_E_mp h₂) (C_of_E_mp h₃);
   . exact C_replace (C_of_E_mpr h₂) (C_of_E_mp h₁) (C_of_E_mpr h₃);
+omit [LogicalNeutral F] in
 lemma E!_replace [HasAxiomAndInst 𝓢] [HasAxiomAndElim 𝓢] [HasAxiomImplyK 𝓢] [HasAxiomImplyS 𝓢] : 𝓢 ⊢ φ₁ 🡘 ψ₁ → 𝓢 ⊢ φ₂ 🡘 ψ₂ → 𝓢 ⊢ φ₁ 🡘 φ₂ → 𝓢 ⊢ ψ₁ 🡘 ψ₂ := λ ⟨d₁⟩ ⟨d₂⟩ ⟨d₃⟩ => ⟨E_replace d₁ d₂ d₃⟩
 
 def E_trans [HasAxiomAndInst 𝓢] [HasAxiomAndElim 𝓢] [HasAxiomImplyK 𝓢] [HasAxiomImplyS 𝓢] (h₁ : 𝓢 ⊢! φ 🡘 ψ) (h₂ : 𝓢 ⊢! ψ 🡘 χ) : 𝓢 ⊢! φ 🡘 χ := by
   apply E_intro;
   . exact C_trans (K_left h₁) (K_left h₂);
   . exact C_trans (K_right h₂) (K_right h₁);
+omit [LogicalNeutral F] in
 @[grind <=]
 lemma E!_trans [HasAxiomAndInst 𝓢] [HasAxiomAndElim 𝓢] [HasAxiomImplyK 𝓢] [HasAxiomImplyS 𝓢] (h₁ : 𝓢 ⊢ φ 🡘 ψ) (h₂ : 𝓢 ⊢ ψ 🡘 χ) : 𝓢 ⊢ φ 🡘 χ := ⟨E_trans h₁.some h₂.some⟩
 
 def CCCC [HasAxiomAndElim 𝓢] [HasAxiomImplyK 𝓢] [HasAxiomImplyS 𝓢] : 𝓢 ⊢! φ 🡒 ψ 🡒 χ 🡒 φ := C_trans implyK implyK
+omit [LogicalNeutral F] in
 @[grind .]
 lemma CCCC! [HasAxiomAndElim 𝓢] [HasAxiomImplyK 𝓢] [HasAxiomImplyS 𝓢] : 𝓢 ⊢ φ 🡒 ψ 🡒 χ 🡒 φ := ⟨CCCC⟩
 
 def CK_of_C_of_C [HasAxiomAndInst 𝓢] [HasAxiomAndElim 𝓢] [HasAxiomImplyK 𝓢] [HasAxiomImplyS 𝓢] (bq : 𝓢 ⊢! φ 🡒 ψ) (br : 𝓢 ⊢! φ 🡒 χ)
   : 𝓢 ⊢! φ 🡒 ψ ⋏ χ := C_of_conseq and₃ ⨀₁ bq ⨀₁ br
+omit [LogicalNeutral F] in
 @[grind <=]
 lemma CK!_of_C!_of_C! [HasAxiomAndInst 𝓢] [HasAxiomAndElim 𝓢] [HasAxiomImplyK 𝓢] [HasAxiomImplyS 𝓢] (hq : 𝓢 ⊢ φ 🡒 ψ) (hr : 𝓢 ⊢ φ 🡒 χ) : 𝓢 ⊢ φ 🡒 ψ ⋏ χ := ⟨CK_of_C_of_C hq.some hr.some⟩
 
 
 def CKK [HasAxiomAndInst 𝓢] [HasAxiomAndElim 𝓢] [HasAxiomImplyK 𝓢] [HasAxiomImplyS 𝓢] : 𝓢 ⊢! φ ⋏ ψ 🡒 ψ ⋏ φ := CK_of_C_of_C and₂ and₁
+omit [LogicalNeutral F] in
 @[simp, grind .] lemma CKK! [HasAxiomAndInst 𝓢] [HasAxiomAndElim 𝓢] [HasAxiomImplyK 𝓢] [HasAxiomImplyS 𝓢] : 𝓢 ⊢ φ ⋏ ψ 🡒 ψ ⋏ φ := ⟨CKK⟩
 
 def K_symm [HasAxiomAndInst 𝓢] [HasAxiomAndElim 𝓢] [HasAxiomImplyK 𝓢] [HasAxiomImplyS 𝓢] (h : 𝓢 ⊢! φ ⋏ ψ) : 𝓢 ⊢! ψ ⋏ φ := CKK ⨀ h
+omit [LogicalNeutral F] in
 @[grind <-] lemma K!_symm [HasAxiomAndInst 𝓢] [HasAxiomAndElim 𝓢] [HasAxiomImplyK 𝓢] [HasAxiomImplyS 𝓢] (h : 𝓢 ⊢ φ ⋏ ψ) : 𝓢 ⊢ ψ ⋏ φ := ⟨K_symm h.some⟩
 
 
 def CEE [HasAxiomAndInst 𝓢] [HasAxiomAndElim 𝓢] [HasAxiomImplyK 𝓢] [HasAxiomImplyS 𝓢] : 𝓢 ⊢! (φ 🡘 ψ) 🡒 (ψ 🡘 φ) := CKK
+omit [LogicalNeutral F] in
 @[simp] lemma CEE! [HasAxiomAndInst 𝓢] [HasAxiomAndElim 𝓢] [HasAxiomImplyK 𝓢] [HasAxiomImplyS 𝓢] : 𝓢 ⊢ (φ 🡘 ψ) 🡒 (ψ 🡘 φ) := ⟨CEE⟩
 
 def E_symm [HasAxiomAndInst 𝓢] [HasAxiomAndElim 𝓢] [HasAxiomImplyK 𝓢] [HasAxiomImplyS 𝓢] (h : 𝓢 ⊢! φ 🡘 ψ) : 𝓢 ⊢! ψ 🡘 φ := CEE ⨀ h
+omit [LogicalNeutral F] in
 @[grind <-] lemma E!_symm [HasAxiomAndInst 𝓢] [HasAxiomAndElim 𝓢] [HasAxiomImplyK 𝓢] [HasAxiomImplyS 𝓢] (h : 𝓢 ⊢ φ 🡘 ψ) : 𝓢 ⊢ ψ 🡘 φ := ⟨E_symm h.some⟩
 
 
@@ -286,11 +326,13 @@ def ECKCC [HasAxiomAndInst 𝓢] [HasAxiomAndElim 𝓢] [HasAxiomImplyK 𝓢] [H
   let b₁ : 𝓢 ⊢! (φ ⋏ ψ 🡒 χ) 🡒 φ 🡒 ψ 🡒 χ := CCCC ⨀₃ C_of_conseq (ψ := φ ⋏ ψ 🡒 χ) and₃
   let b₂ : 𝓢 ⊢! (φ 🡒 ψ 🡒 χ) 🡒 φ ⋏ ψ 🡒 χ := implyK ⨀₂ (C_of_conseq (ψ := φ 🡒 ψ 🡒 χ) and₁) ⨀₂ (C_of_conseq (ψ := φ 🡒 ψ 🡒 χ) and₂);
   exact E_intro b₁ b₂
+omit [LogicalNeutral F] in
 @[simp, grind .] lemma ECKCC! [HasAxiomAndInst 𝓢] [HasAxiomAndElim 𝓢] [HasAxiomImplyK 𝓢] [HasAxiomImplyS 𝓢] : 𝓢 ⊢ (φ ⋏ ψ 🡒 χ) 🡘 (φ 🡒 ψ 🡒 χ) := ⟨ECKCC⟩
 
 def CC_of_CK [HasAxiomAndInst 𝓢] [HasAxiomAndElim 𝓢] [HasAxiomImplyK 𝓢] [HasAxiomImplyS 𝓢] (d : 𝓢 ⊢! φ ⋏ ψ 🡒 χ) : 𝓢 ⊢! φ 🡒 ψ 🡒 χ := (K_left $ ECKCC) ⨀ d
 def CK_of_CC [HasAxiomAndInst 𝓢] [HasAxiomAndElim 𝓢] [HasAxiomImplyK 𝓢] [HasAxiomImplyS 𝓢] (d : 𝓢 ⊢! φ 🡒 ψ 🡒 χ) : 𝓢 ⊢! φ ⋏ ψ 🡒 χ := (K_right $ ECKCC) ⨀ d
 
+omit [LogicalNeutral F] in
 @[grind =] lemma CK!_iff_CC! [HasAxiomAndInst 𝓢] [HasAxiomAndElim 𝓢] [HasAxiomImplyK 𝓢] [HasAxiomImplyS 𝓢] :
     (𝓢 ⊢ φ ⋏ ψ 🡒 χ) ↔ (𝓢 ⊢ φ 🡒 ψ 🡒 χ) := iff_of_E! ECKCC!
 
@@ -298,11 +340,13 @@ def CV [HasAxiomVerum 𝓢] [HasAxiomImplyK 𝓢] : 𝓢 ⊢! φ 🡒 ⊤ := C_o
 @[simp] lemma CV! [HasAxiomImplyK 𝓢] [HasAxiomVerum 𝓢] : 𝓢 ⊢ φ 🡒 ⊤ := ⟨CV⟩
 
 
+omit [LogicalNeutral F] in
 @[grind →]
 lemma unprovable_C!_trans [HasAxiomImplyK 𝓢] [HasAxiomImplyS 𝓢] (hpq : 𝓢 ⊢ φ 🡒 ψ) : 𝓢 ⊬ φ 🡒 χ → 𝓢 ⊬ ψ 🡒 χ := by
   contrapose!;
   exact C!_trans hpq;
 
+omit [LogicalNeutral F] in
 @[grind →]
 lemma uniff_of_E! [HasAxiomAndInst 𝓢] [HasAxiomAndElim 𝓢] [HasAxiomImplyK 𝓢] [HasAxiomImplyS 𝓢] (H : 𝓢 ⊢ φ 🡘 ψ) : 𝓢 ⊬ φ ↔ 𝓢 ⊬ ψ := by
   constructor;
@@ -314,7 +358,7 @@ end
 
 section
 
-variable {S F : Type*} [LogicalConnective F] [Entailment S F]
+variable {S F : Type*} [LogicalConnective F] [LogicalNeutral F] [Entailment S F]
 variable {𝓢 : S} [Entailment.Minimal 𝓢] {φ ψ χ : F}
 
 variable {Γ Δ : List F}
@@ -378,7 +422,7 @@ lemma CConj₂_Conj₂! [DecidableEq F] {Γ Δ : List F} (h : Δ ⊆ Γ) : 𝓢 
 
 section
 
-variable {G T : Type*} [Entailment T G] [LogicalConnective G] {𝓣 : T}
+variable {G T : Type*} [Entailment T G] [LogicalConnective G] [LogicalNeutral G] {𝓣 : T}
 
 abbrev Minimal.ofEquiv (𝓢 : S) [Entailment.Minimal 𝓢] (𝓣 : T)
     (f : G →ˡᶜ F) (e : (φ : G) → 𝓢 ⊢! f φ ≃ 𝓣 ⊢! φ) : Entailment.Minimal 𝓣 where
@@ -412,9 +456,9 @@ variable {F} {S} {𝓢 : S}
 
 instance : Coe (List F) (FiniteContext F 𝓢) := ⟨mk⟩
 
-abbrev conj [LogicalConnective F] (Γ : FiniteContext F 𝓢) : F := ⋀Γ.ctx
+abbrev conj [LogicalConnective F] [LogicalNeutral F] (Γ : FiniteContext F 𝓢) : F := ⋀Γ.ctx
 
-abbrev disj [LogicalConnective F] (Γ : FiniteContext F 𝓢) : F := ⋁Γ.ctx
+abbrev disj [LogicalConnective F] [LogicalNeutral F] (Γ : FiniteContext F 𝓢) : F := ⋁Γ.ctx
 
 instance : EmptyCollection (FiniteContext F 𝓢) := ⟨⟨[]⟩⟩
 
@@ -437,7 +481,7 @@ instance : AdjunctiveSet F (FiniteContext F 𝓢) where
   not_mem_empty := by simp
   mem_cons_iff := by simp [Adjoin.adjoin, mem_def]
 
-variable [Entailment S F] [LogicalConnective F]
+variable [Entailment S F] [LogicalConnective F] [LogicalNeutral F]
 
 instance (𝓢 : S) : Entailment (FiniteContext F 𝓢) F := ⟨(𝓢 ⊢! ·.conj 🡒 ·)⟩
 
@@ -619,7 +663,7 @@ instance : AdjunctiveSet F (Context F 𝓢) where
   not_mem_empty := by simp
   mem_cons_iff := by simp [Adjoin.adjoin, mem_def]
 
-variable [LogicalConnective F] [Entailment S F]
+variable [LogicalConnective F] [LogicalNeutral F] [Entailment S F]
 
 structure Proof (Γ : Context F 𝓢) (φ : F) where
   ctx : List F
@@ -768,7 +812,7 @@ end
 
 section
 
-variable {F : Type*} [LogicalConnective F]
+variable {F : Type*} [LogicalConnective F] [LogicalNeutral F]
          {S : Type*} [Entailment S F]
          {𝓢 : S} [Entailment.Minimal 𝓢]
          {φ φ₁ φ₂ ψ ψ₁ ψ₂ χ ξ : F}

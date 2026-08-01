@@ -34,10 +34,12 @@ abbrev neg (φ : Formula α) : Formula α := imp φ falsum
 abbrev verum : Formula α := imp falsum falsum
 
 instance : LogicalConnective (Formula α) where
-  tilde := neg
   arrow := imp
   wedge := and
   vee := or
+  tilde := neg
+
+instance : LogicalNeutral (Formula α) where
   top := verum
   bot := falsum
 
