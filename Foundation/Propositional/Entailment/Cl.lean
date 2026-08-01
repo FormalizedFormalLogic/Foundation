@@ -5,7 +5,7 @@ public import Foundation.Propositional.Entailment.Int
 
 namespace LO.Axioms
 
-variable {F : Type*} [LogicalConnective F] [LogicalNeutral F]
+variable {F : Type*} [LogicalConnective F]
 variable (φ ψ χ : F)
 
 protected abbrev DNE := ∼∼φ 🡒 φ
@@ -21,23 +21,21 @@ end LO.Axioms
 
 namespace LO.Entailment
 
-variable {S F : Type*} [LogicalConnective F] [LogicalNeutral F] [Entailment S F]
+variable {S F : Type*} [LogicalConnective F] [Entailment S F]
 variable {𝓢 : S} {φ ψ χ : F}
 
 class HasAxiomDNE (𝓢 : S)  where
   dne {φ : F} : 𝓢 ⊢! Axioms.DNE φ
 export HasAxiomDNE (dne)
 
-omit [LogicalNeutral F] in
 @[simp] lemma dne! [HasAxiomDNE 𝓢] : 𝓢 ⊢ ∼∼φ 🡒 φ  := ⟨dne⟩
 
 def of_NN [ModusPonens 𝓢] [HasAxiomDNE 𝓢] (b : 𝓢 ⊢! ∼∼φ) : 𝓢 ⊢! φ := dne ⨀ b
-omit [LogicalNeutral F] in
 @[grind ⇒] lemma of_NN! [ModusPonens 𝓢] [HasAxiomDNE 𝓢] (h : 𝓢 ⊢ ∼∼φ) : 𝓢 ⊢ φ := ⟨of_NN h.some⟩
 
 section
 
-variable [Entailment.Minimal 𝓢]
+variable [LogicalNeutral F] [Entailment.Minimal 𝓢]
 
 namespace FiniteContext
 
@@ -59,13 +57,12 @@ class HasAxiomLEM (𝓢 : S)  where
   lem {φ : F} : 𝓢 ⊢! Axioms.LEM φ
 export HasAxiomLEM (lem)
 
-omit [LogicalNeutral F] in
 @[simp] lemma lem! [HasAxiomLEM 𝓢] : 𝓢 ⊢ φ ⋎ ∼φ := ⟨lem⟩
 
 
 section
 
-variable [Entailment.Minimal 𝓢]
+variable [LogicalNeutral F] [Entailment.Minimal 𝓢]
 
 namespace FiniteContext
 
@@ -87,13 +84,12 @@ class HasAxiomPeirce (𝓢 : S)  where
   peirce {φ ψ : F} : 𝓢 ⊢! Axioms.Peirce φ ψ
 export HasAxiomPeirce (peirce)
 
-omit [LogicalNeutral F] in
-@[simp] lemma peirce! [HasAxiomPeirce 𝓢] : 𝓢 ⊢ ((φ 🡒 ψ) 🡒 φ) 🡒 φ := ⟨peirce⟩
+@[simp] lemma peirce! [LogicalNeutral F] [HasAxiomPeirce 𝓢] : 𝓢 ⊢ ((φ 🡒 ψ) 🡒 φ) 🡒 φ := ⟨peirce⟩
 
 
 section
 
-variable [Entailment.Minimal 𝓢]
+variable [LogicalNeutral F] [Entailment.Minimal 𝓢]
 
 namespace FiniteContext
 
@@ -115,7 +111,6 @@ class HasAxiomElimContra (𝓢 : S)  where
   elimContra {φ ψ : F} : 𝓢 ⊢! Axioms.ElimContra φ ψ
 export HasAxiomElimContra (elimContra)
 
-omit [LogicalNeutral F] in
 @[simp] lemma elim_contra! [HasAxiomElimContra 𝓢] : 𝓢 ⊢ (∼ψ 🡒 ∼φ) 🡒 (φ 🡒 ψ)  := ⟨elimContra⟩
 
 
