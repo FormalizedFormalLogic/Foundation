@@ -100,11 +100,16 @@ class Quantifier (α : ℕ → Type*) extends UnivQuantifier α, ExsQuantifier �
 /-- Logical Connectives with Quantifiers. -/
 class LCWQ (α : ℕ → Type*) extends Quantifier α where
   connectives : (n : ℕ) → LogicalConnective (α n)
+  neutrals : (n : ℕ) → LogicalNeutral (α n)
 
 instance (α : ℕ → Type*) [LCWQ α] (n : ℕ) : LogicalConnective (α n) := LCWQ.connectives n
 
-instance (α : ℕ → Type*) [Quantifier α] [(n : ℕ) → LogicalConnective (α n)] : LCWQ α where
+instance (α : ℕ → Type*) [LCWQ α] (n : ℕ) : LogicalNeutral (α n) := LCWQ.neutrals n
+
+instance (α : ℕ → Type*) [Quantifier α] [(n : ℕ) → LogicalConnective (α n)]
+    [(n : ℕ) → LogicalNeutral (α n)] : LCWQ α where
   connectives := inferInstance
+  neutrals := inferInstance
 
 section UnivQuantifier
 

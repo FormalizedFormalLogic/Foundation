@@ -123,7 +123,7 @@ theorem unprovable_jeroslow [𝗜𝚺₁ ⪯ T] [T.SoundOnHierarchy 𝚺 1]
 -/
 theorem unprovable_formalized_law_of_noncontradiction [𝗜𝚺₁ ⪯ T] [Entailment.Consistent T]
   : T ⊬ (∀¹ ∼(provable T ⋏ T.refutable) : ArithmeticSentence) := by
-    simpa [flon, safe, -DeMorgan.and] using ProvabilityAbstraction.unprovable_flon
+    simpa [flon, safe, -LogicalConnective.DeMorgan.and] using ProvabilityAbstraction.unprovable_flon
       (𝔅 := T.standardProvability) (𝔚 := T.standardRefutability)
 
 end Arithmetic

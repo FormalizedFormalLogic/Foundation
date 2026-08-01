@@ -23,23 +23,26 @@ namespace LO
 /--
 A class for types with logical connectives $\top, \bot, \land, \lor, \to, \lnot$.
 -/
-class LogicalConnective (α : Type*)
-  extends Top α, Bot α, Tilde α, Arrow α, Wedge α, Vee α
+class LogicalConnective (α : Type*) extends Tilde α, Arrow α, Wedge α, Vee α
+
+class LogicalNeutral (α : Type*) extends Top α, Bot α
 
 class TildeInvolutive (F : Type*) [Tilde F] where
-  neg_involutive (φ : F) : ∼∼φ = φ
+  tilde_involutive (φ : F) : ∼∼φ = φ
 
-class DeMorgan (F : Type*) [LogicalConnective F] where
-  verum : ∼(⊤ : F) = ⊥
-  falsum : ∼(⊥ : F) = ⊤
-  imply (φ ψ : F) : (φ 🡒 ψ) = ∼φ ⋎ ψ
+class LogicalConnective.DeMorgan (F : Type*) [LogicalConnective F] where
+  imply (φ ψ : F) : φ 🡒 ψ = ∼φ ⋎ ψ
   and (φ ψ : F) : ∼(φ ⋏ ψ) = ∼φ ⋎ ∼ψ
   or (φ ψ : F) : ∼(φ ⋎ ψ) = ∼φ ⋏ ∼ψ
 
-alias DeMorgan.neg := TildeInvolutive.neg_involutive
+class LogicalNeutral.DeMorgan (F : Type*) [LogicalNeutral F] [Tilde F] where
+  verum : ∼(⊤ : F) = ⊥
+  falsum : ∼(⊥ : F) = ⊤
 
-attribute [simp, grind =] TildeInvolutive.neg_involutive
-attribute [simp, grind =] DeMorgan.verum DeMorgan.falsum DeMorgan.and DeMorgan.or
+alias LogicalNeutral.DeMorgan.neg := TildeInvolutive.tilde_involutive
+
+attribute [simp, grind =] TildeInvolutive.tilde_involutive
+attribute [simp, grind =] LogicalNeutral.DeMorgan.verum LogicalNeutral.DeMorgan.falsum LogicalConnective.DeMorgan.and LogicalConnective.DeMorgan.or
 
 /-- Introducing `∼φ` as an abbreviation of `φ 🡒 ⊥`. -/
 class NegAbbrev (F : Type*) [Tilde F] [Arrow F] [Bot F] where
@@ -48,7 +51,7 @@ class NegAbbrev (F : Type*) [Tilde F] [Arrow F] [Bot F] where
 attribute [grind =] NegAbbrev.neg
 
 /-- Introducing `∼φ`, `φ ⋎ ψ`, `φ ⋏ ψ`, `⊤` as abbreviation. -/
-class ŁukasiewiczAbbrev (F : Type*) [LogicalConnective F] extends NegAbbrev F where
+class ŁukasiewiczAbbrev (F : Type*) [LogicalNeutral F] [LogicalConnective F] extends NegAbbrev F where
   protected top : ⊤ = ∼(⊥ : F)
   protected or {φ ψ : F} : φ ⋎ ψ = ∼φ 🡒 ψ
   protected and {φ ψ : F} : φ ⋏ ψ = ∼(φ 🡒 ∼ψ)
@@ -88,12 +91,14 @@ end
 
 @[reducible]
 instance PropLogicSymbols : LogicalConnective Prop where
-  top := True
-  bot := False
-  tilde := Not
   arrow := fun P Q => (P → Q)
   wedge := And
   vee := Or
+  tilde := Not
+
+instance PropLogicalNeutral : LogicalNeutral Prop where
+  top := True
+  bot := False
 
 @[simp] lemma Prop.top_eq : ⊤ = True := rfl
 
@@ -109,20 +114,23 @@ instance PropLogicSymbols : LogicalConnective Prop where
 
 @[simp] lemma Prop.iff_eq (φ ψ : Prop) : (φ 🡘 ψ) = (φ ↔ ψ) := by simp [LogicalConnective.iff, iff_iff_implies_and_implies]
 
-instance : DeMorgan Prop where
-  verum := by simp
-  falsum := by simp
+instance : TildeInvolutive Prop where
+  tilde_involutive := fun _ => by simp
+
+instance : LogicalConnective.DeMorgan Prop where
   imply := fun _ _ => by simp [imp_iff_not_or]
   and := fun _ _ => by simp [-not_and, not_and_or]
   or := fun _ _ => by simp [not_or]
 
-instance : TildeInvolutive Prop where
-  neg_involutive := fun _ => by simp
+instance : LogicalNeutral.DeMorgan Prop where
+  verum := by simp
+  falsum := by simp
 
 /--
 A class for a type `F` which contains homomorphisms (for logical connectives) from `α` to `β`.
 -/
-class HomClass (F : Type*) (α β : outParam Type*) [LogicalConnective α] [LogicalConnective β] [FunLike F α β] where
+class HomClass (F : Type*) (α β : outParam Type*)
+    [LogicalConnective α] [LogicalNeutral α] [LogicalConnective β] [LogicalNeutral β] [FunLike F α β] where
   map_top : ∀ (f : F), f ⊤ = ⊤
   map_bot : ∀ (f : F), f ⊥ = ⊥
   map_neg : ∀ (f : F) (φ : α), f (∼φ) = ∼f φ
@@ -134,7 +142,7 @@ attribute [simp, grind =] HomClass.map_top HomClass.map_bot HomClass.map_neg Hom
 
 namespace HomClass
 
-variable (F : Type*) (α β : outParam Type*) [LogicalConnective α] [LogicalConnective β] [FunLike F α β]
+variable (F : Type*) (α β : outParam Type*) [LogicalConnective α] [LogicalNeutral α] [LogicalConnective β] [LogicalNeutral β] [FunLike F α β]
 variable [HomClass F α β]
 variable (f : F) (a b : α)
 
@@ -144,7 +152,9 @@ instance : CoeFun F (fun _ => α → β) := ⟨DFunLike.coe⟩
 
 end HomClass
 
-variable (α β γ : Type*) [LogicalConnective α] [LogicalConnective β] [LogicalConnective γ]
+variable (α β γ : Type*)
+  [LogicalConnective α] [LogicalConnective β] [LogicalConnective γ]
+  [LogicalNeutral α] [LogicalNeutral β] [LogicalNeutral γ]
 
 structure Hom where
   toTr : α → β
@@ -207,13 +217,13 @@ def comp (g : β →ˡᶜ γ) (f : α →ˡᶜ β) : α →ˡᶜ γ where
 
 end Hom
 
-class AndOrClosed {F} [LogicalConnective F] (C : F → Prop) where
+class AndOrClosed {F} [LogicalConnective F] [LogicalNeutral F] (C : F → Prop) where
   verum  : C ⊤
   falsum : C ⊥
   and {f g : F} : C f → C g → C (f ⋏ g)
   or  {f g : F} : C f → C g → C (f ⋎ g)
 
-class Closed {F} [LogicalConnective F] (C : F → Prop) extends AndOrClosed C where
+class Closed {F} [LogicalConnective F] [LogicalNeutral F] (C : F → Prop) extends AndOrClosed C where
   not {f : F} : C f → C (∼f)
   imply {f g : F} : C f → C g → C (f 🡒 g)
 
@@ -258,7 +268,9 @@ end Subclosed
 
 section conjdisj
 
-variable {α β : Type*} [LogicalConnective α] [LogicalConnective β]
+variable {α β : Type*}
+  [LogicalConnective α] [LogicalConnective β]
+  [LogicalNeutral α] [LogicalNeutral β]
 
 def conjLt (φ : ℕ → α) : ℕ → α
   | 0     => ⊤
@@ -340,7 +352,9 @@ def disj : {n : ℕ} → (Fin n → α) → α
 
 end disjunction
 
-variable [LogicalConnective α] [LogicalConnective β]
+variable
+  [LogicalConnective α] [LogicalConnective β]
+  [LogicalNeutral α] [LogicalNeutral β]
 
 /--
 Homomorphisms commute with `k`-ary conjunctions (vector version).
@@ -411,11 +425,11 @@ lemma tilde_def (l : List α) : ∼l = l.map (∼·) := rfl
     constructor <;> {rintro rfl; simp}
 
 instance [TildeInvolutive α] : TildeInvolutive (List α) where
-  neg_involutive l := by
+  tilde_involutive l := by
     induction l with
     |          nil => simp [*]
     | cons a as ih =>
-      simp [ih, TildeInvolutive.neg_involutive a]
+      simp [ih, TildeInvolutive.tilde_involutive a]
 
 end tilde
 
@@ -509,7 +523,7 @@ end disjunction
 
 section tilde
 
-variable [LogicalConnective α] [DeMorgan α]
+variable [LogicalConnective α] [LogicalNeutral α] [LogicalNeutral.DeMorgan α] [LogicalConnective.DeMorgan α]
 
 /--
 Variadic de Morgan's law for lists of elements of type `α`.
@@ -549,7 +563,10 @@ end tilde
 
 section
 
-variable [LogicalConnective α] [LogicalConnective β] [FunLike G α β] [LogicalConnective.HomClass G α β]
+variable
+  [LogicalConnective α] [LogicalNeutral α]
+  [LogicalConnective β] [LogicalNeutral β]
+  [FunLike G α β] [LogicalConnective.HomClass G α β]
 
 lemma map_tilde (f : G) (l : List α) : (∼l : List α).map f = ∼(l.map f) := by
   induction l <;> simp [*]
@@ -576,7 +593,7 @@ end
 
 section
 
-variable [LogicalConnective α] [FunLike G α Prop] [LogicalConnective.HomClass G α Prop]
+variable [LogicalConnective α] [LogicalNeutral α] [FunLike G α Prop] [LogicalConnective.HomClass G α Prop]
 
 @[simp] lemma map_conj_prop {f : G} {l : List α} : f l.conj ↔ ∀ a ∈ l, f a := by
   induction l <;> simp [*]
@@ -628,7 +645,7 @@ lemma tilde_def (s : Finset α) : ∼s = s.map Tilde.invol := rfl
   simp [tilde_def]; grind
 
 instance : TildeInvolutive (Finset α) where
-  neg_involutive s := by ext a; simp
+  tilde_involutive s := by ext a; simp
 
 @[simp] lemma tilde_empty : ∼(∅ : Finset α) = ∅ := rfl
 
@@ -738,7 +755,9 @@ variable [Bot α] [Vee α]
 
 end disjunction
 
-variable [LogicalConnective α]
+variable
+  [LogicalConnective α] [LogicalNeutral α]
+  [LogicalConnective β] [LogicalNeutral β]
 
 @[simp] lemma map_conj_prop [FunLike F α Prop] [LogicalConnective.HomClass F α Prop]
     {f : F} {s : Finset α} : f s.conj ↔ ∀ a ∈ s, f a := by
@@ -749,14 +768,14 @@ lemma map_conj_union [DecidableEq α] [FunLike F α Prop] [LogicalConnective.Hom
   suffices (∀ (a : α), a ∈ s₁ ∨ a ∈ s₂ → f a) ↔ (∀ a ∈ s₁, f a) ∧ ∀ a ∈ s₂, f a by simpa
   grind
 
-lemma map_conj' {β : Type*} [LogicalConnective β] [FunLike F α β] [LogicalConnective.HomClass F α β]
+lemma map_conj' [FunLike F α β] [LogicalConnective.HomClass F α β]
     (Φ : F) (s : Finset ι) (f : ι → α) : Φ (⩕ i ∈ s, f i) = ⩕ i ∈ s, Φ (f i) := by
   simp [conj', Function.comp_def, List.map_conj']
 
 @[simp] lemma map_conj'_prop [FunLike F α Prop] [LogicalConnective.HomClass F α Prop] {f : F} {s : Finset ι} {p : ι → α} :
     f (s.conj' p) ↔ ∀ i ∈ s, f (p i) := by simp [conj']
 
-lemma map_uconj [LogicalConnective β] [FunLike F α β] [LogicalConnective.HomClass F α β]
+lemma map_uconj [FunLike F α β] [LogicalConnective.HomClass F α β]
     (Φ : F) [Fintype ι] (f : ι → α) : Φ (⩕ i, f i) = ⩕ i, Φ (f i) := by
   simp [uconj, map_conj']
 
@@ -771,14 +790,14 @@ lemma map_disj_union [DecidableEq α] [FunLike F α Prop] [LogicalConnective.Hom
   suffices (∃ a, (a ∈ s₁ ∨ a ∈ s₂) ∧ f a) ↔ (∃ a ∈ s₁, f a) ∨ ∃ a ∈ s₂, f a by simpa [map_disj_prop]
   grind
 
-lemma map_disj' [LogicalConnective β] [FunLike F α β] [LogicalConnective.HomClass F α β]
+lemma map_disj' [FunLike F α β] [LogicalConnective.HomClass F α β]
     (Φ : F) (s : Finset ι) (f : ι → α) : Φ (⩖ i ∈ s, f i) = ⩖ i ∈ s, Φ (f i) := by
   simp [disj', List.map_disj', Function.comp_def]
 
 @[simp] lemma map_disj'_prop [FunLike F α Prop] [LogicalConnective.HomClass F α Prop] {f : F} {s : Finset ι} {p : ι → α} :
     f (s.disj' p) ↔ ∃ i ∈ s, f (p i) := by simp [disj']
 
-lemma map_udisj [LogicalConnective β] [FunLike F α β] [LogicalConnective.HomClass F α β]
+lemma map_udisj [FunLike F α β] [LogicalConnective.HomClass F α β]
     (Φ : F) [Fintype ι] (f : ι → α) : Φ (⩖ i, f i) = ⩖ i, Φ (f i) := by
   simp [udisj, map_disj']
 

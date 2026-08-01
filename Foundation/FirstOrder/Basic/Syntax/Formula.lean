@@ -62,22 +62,26 @@ lemma neg_neg (φ : Semiformula L ξ n) : neg (neg φ) = φ :=
   by induction φ <;> simp [*, neg]
 
 instance : LogicalConnective (Semiformula L ξ n) where
-  tilde := neg
   arrow := fun φ ψ => or (neg φ) ψ
   wedge := and
   vee := or
+  tilde := neg
+
+instance : LogicalNeutral (Semiformula L ξ n) where
   top := verum
   bot := falsum
 
-instance : DeMorgan (Semiformula L ξ n) where
-  verum := rfl
-  falsum := rfl
+instance : TildeInvolutive (Semiformula L ξ n) where
+  tilde_involutive := neg_neg
+
+instance : LogicalConnective.DeMorgan (Semiformula L ξ n) where
   imply := fun _ _ => rfl
   and := fun _ _ => rfl
   or := fun _ _ => rfl
 
-instance : TildeInvolutive (Semiformula L ξ n) where
-  neg_involutive := neg_neg
+instance : LogicalNeutral.DeMorgan (Semiformula L ξ n) where
+  verum := rfl
+  falsum := rfl
 
 instance : Quantifier (Semiformula L ξ) where
   all := all

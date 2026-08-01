@@ -8,7 +8,7 @@ namespace LO.Entailment
 
 open FiniteContext
 
-variable {F : Type*} [LogicalConnective F] [DecidableEq F] {S : Type*} [Entailment S F]
+variable {F : Type*} [LogicalConnective F] [LogicalNeutral F] [DecidableEq F] {S : Type*} [Entailment S F]
 
 variable (𝓢 : S)
 

@@ -47,10 +47,14 @@ abbrev neg (φ : Semiformulaᵢ L ξ n) : Semiformulaᵢ L ξ n := φ 🡒 ⊥
 abbrev verum : Semiformulaᵢ L ξ n := ⊥ 🡒 ⊥
 
 instance : LogicalConnective (Semiformulaᵢ L ξ n) where
+  arrow := imp
   wedge := and
   vee := or
-  top := verum
   tilde := neg
+
+instance : LogicalNeutral (Semiformulaᵢ L ξ n) where
+  top := verum
+  bot := falsum
 
 lemma neg_def (φ : Semiformulaᵢ L ξ n) : ∼φ = φ 🡒 ⊥ := rfl
 

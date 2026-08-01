@@ -6,7 +6,7 @@ public import Foundation.Propositional.Entailment.Cl
 
 namespace LO.Entailment
 
-variable {F : Type*} [LogicalConnective F]
+variable {F : Type*} [LogicalConnective F] [LogicalNeutral F]
 variable {S : Type*} [Entailment S F]
 
 class Disjunctive (𝓢 : S) : Prop where
@@ -14,6 +14,7 @@ class Disjunctive (𝓢 : S) : Prop where
 
 alias disjunctive := Disjunctive.disjunctive
 
+omit [LogicalNeutral F] in
 lemma iff_disjunctive {𝓢 : S}  : (Disjunctive 𝓢) ↔ ∀ {φ ψ}, 𝓢 ⊢ φ ⋎ ψ → 𝓢 ⊢ φ ∨ 𝓢 ⊢ ψ := by
   constructor;
   . apply Disjunctive.disjunctive;

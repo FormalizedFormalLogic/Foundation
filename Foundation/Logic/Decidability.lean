@@ -18,7 +18,7 @@ class Decidable where
 
 def Undecidable := ¬Decidable 𝓢
 
-class EssentiallyUndecidable [LogicalConnective F] where
+class EssentiallyUndecidable [Tilde F] where
   essentially_undec : ∀ 𝓣 : S, 𝓢 ⪯ 𝓣 → Incomplete 𝓣 → Undecidable 𝓣
 
 variable {𝓢}

@@ -264,7 +264,7 @@ noncomputable def cut' (d₁ : T ⊢!ᵈᵉʳ insert φ Γ) (d₂ : T ⊢!ᵈᵉ
 noncomputable def modusPonens (dpq : T ⊢!ᵈᵉʳ insert (φ 🡒 ψ) Γ) (dp : T ⊢!ᵈᵉʳ insert φ Γ) : T ⊢!ᵈᵉʳ insert ψ Γ := by
   let d : T ⊢!ᵈᵉʳ insert (φ 🡒 ψ) (insert ψ Γ) := dpq.wk (insert_subset_insert_of_subset _ <| by simp)
   let b : T ⊢!ᵈᵉʳ insert (∼(φ 🡒 ψ)) (insert ψ Γ) := by
-    simp only [Semiformula.imp_def, DeMorgan.or, DeMorgan.neg]
+    simp only [Semiformula.imp_def, LogicalConnective.DeMorgan.or, LogicalNeutral.DeMorgan.neg]
     exact and (dp.wk (insert_subset_insert_of_subset _ <| by simp))
       (em ψ (by simp) (by simp))
   exact cut d b
@@ -283,7 +283,7 @@ noncomputable def rotate₃ (d : T ⊢!ᵈᵉʳ p₀ ⫽ p₁ ⫽ p₂ ⫽ p₃ 
 noncomputable def orInv (d : T ⊢!ᵈᵉʳ φ ⋎ ψ ⫽ Γ) : T ⊢!ᵈᵉʳ φ ⫽ ψ ⫽ Γ := by
   have b : T ⊢!ᵈᵉʳ φ ⋎ ψ ⫽ φ ⫽ ψ ⫽ Γ := wk d (by intro x; simp; tauto)
   have : T ⊢!ᵈᵉʳ ∼(φ ⋎ ψ) ⫽ φ ⫽ ψ ⫽ Γ := by
-    simp only [DeMorgan.or]
+    simp only [LogicalConnective.DeMorgan.or]
     apply and (em φ) (em ψ)
   exact cut b this
 
@@ -335,7 +335,7 @@ noncomputable instance : Entailment.Minimal T where
     apply TDerivation.or
     exact TDerivation.em φ
   implyS {φ ψ r} := by
-    simp only [Axioms.ImplyS, Semiformula.imp_def, DeMorgan.or, DeMorgan.neg]
+    simp only [Axioms.ImplyS, Semiformula.imp_def, LogicalConnective.DeMorgan.or, LogicalNeutral.DeMorgan.neg]
     apply TDerivation.or
     apply TDerivation.rotate₁
     apply TDerivation.or
@@ -351,12 +351,12 @@ noncomputable instance : Entailment.Minimal T where
         · exact TDerivation.em ψ
         · exact TDerivation.em r
   and₁ {φ ψ} := by
-    simp only [Axioms.AndElim₁, Semiformula.imp_def, DeMorgan.and]
+    simp only [Axioms.AndElim₁, Semiformula.imp_def, LogicalConnective.DeMorgan.and]
     apply TDerivation.or
     apply TDerivation.or
     exact TDerivation.em φ
   and₂ {φ ψ} := by
-    simp only [Axioms.AndElim₂, Semiformula.imp_def, DeMorgan.and]
+    simp only [Axioms.AndElim₂, Semiformula.imp_def, LogicalConnective.DeMorgan.and]
     apply TDerivation.or
     apply TDerivation.or
     exact TDerivation.em ψ

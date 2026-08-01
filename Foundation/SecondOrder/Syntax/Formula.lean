@@ -46,6 +46,10 @@ instance : Top (Semiformula L Ξ ξ N n) := ⟨verum⟩
 
 instance : Bot (Semiformula L Ξ ξ N n) := ⟨falsum⟩
 
+instance : LogicalNeutral (Semiformula L Ξ ξ N n) where
+  top := verum
+  bot := falsum
+
 instance : Wedge (Semiformula L Ξ ξ N n) := ⟨and⟩
 
 instance : Vee (Semiformula L Ξ ξ N n) := ⟨or⟩
@@ -84,12 +88,14 @@ instance : Tilde (Semiformula L Ξ ξ N n) := ⟨neg⟩
 instance : LogicalConnective (Semiformula L Ξ ξ N n) where
   arrow φ ψ := ∼φ ⋎ ψ
 
-instance : DeMorgan (Semiformula L Ξ ξ N n) where
-  verum := rfl
-  falsum := rfl
+instance : LogicalConnective.DeMorgan (Semiformula L Ξ ξ N n) where
+  imply _ _ := rfl
   and _ _ := rfl
   or _ _ := rfl
-  imply _ _ := rfl
+
+instance : LogicalNeutral.DeMorgan (Semiformula L Ξ ξ N n) where
+  verum := rfl
+  falsum := rfl
 
 @[simp] lemma neg_rel (R : L.Rel k) (v : Fin k → Semiterm L ξ n) :
     ∼(rel R v : Semiformula L Ξ ξ N n) = nrel R v := rfl
