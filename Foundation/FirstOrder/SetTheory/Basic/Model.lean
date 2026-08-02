@@ -81,6 +81,14 @@ instance [V↓[ℒₛₑₜ] ⊧* 𝗭] [V↓[ℒₛₑₜ] ⊧* 𝗔𝗖] : V�
 
 instance [V↓[ℒₛₑₜ] ⊧* 𝗭𝗙] [V↓[ℒₛₑₜ] ⊧* 𝗔𝗖] : V↓[ℒₛₑₜ] ⊧* 𝗭𝗙𝗖 := inferInstance
 
+instance [V↓[ℒₛₑₜ] ⊧* 𝗭𝗙] : V↓[ℒₛₑₜ] ⊧* 𝗭 := models_of_subtheory (inferInstance : V↓[ℒₛₑₜ] ⊧* 𝗭𝗙)
+
+instance [V↓[ℒₛₑₜ] ⊧* 𝗭𝗙𝗖] : V↓[ℒₛₑₜ] ⊧* 𝗭𝗙 := models_of_subtheory (inferInstance : V↓[ℒₛₑₜ] ⊧* 𝗭𝗙𝗖)
+
+instance [V↓[ℒₛₑₜ] ⊧* 𝗭𝗙𝗖] : V↓[ℒₛₑₜ] ⊧* 𝗭 := models_of_subtheory (inferInstance : V↓[ℒₛₑₜ] ⊧* 𝗭𝗙𝗖)
+
+instance [V↓[ℒₛₑₜ] ⊧* 𝗭𝗙𝗖] : V↓[ℒₛₑₜ] ⊧* 𝗔𝗖 := models_of_subtheory (inferInstance : V↓[ℒₛₑₜ] ⊧* 𝗭𝗙𝗖)
+
 instance : V↓[ℒₛₑₜ] ⊧* (𝗘𝗤 _ : SetTheory) := Structure.Eq.models_eqAxiom' ℒₛₑₜ V
 
 end

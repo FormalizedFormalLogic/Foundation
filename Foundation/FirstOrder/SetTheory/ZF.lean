@@ -6,7 +6,7 @@ public import Foundation.FirstOrder.SetTheory.Z
 
 namespace LO.FirstOrder.SetTheory
 
-variable {V : Type*} [SetStructure V] [Nonempty V] [V↓[ℒₛₑₜ] ⊧* 𝗭] [V↓[ℒₛₑₜ] ⊧* 𝗭𝗙]
+variable {V : Type*} [SetStructure V] [Nonempty V] [V↓[ℒₛₑₜ] ⊧* 𝗭𝗙]
 
 /-! ## Ersatzaxiom -/
 
@@ -69,12 +69,12 @@ lemma replacement_exists (X : V) (F : V → V) (hF : ℒₛₑₜ-function₁ F)
 /--
 The axiom of replacement for a relation.
 -/
-noncomputable def replRel (X : V) (R : V → V → Prop) (h : ∀ x, ∃! y, R x y) (hR : ℒₛₑₜ-relation R := by definability) : V := Classical.choose! (replacement_rel_existsUnique X R h hR)
+noncomputable def replRel (R : V → V → Prop) (h : ∀ x, ∃! y, R x y) (hR : ℒₛₑₜ-relation R := by definability) (X : V) : V := Classical.choose! (replacement_rel_existsUnique X R h hR)
 
 /--
 The axiom of replacement.
 -/
-noncomputable def repl (X : V) (F : V → V) (hF : ℒₛₑₜ-function₁ F := by definability) : V := Classical.choose! (replacement_existsUnique X F hF)
+noncomputable def repl (F : V → V) (hF : ℒₛₑₜ-function₁ F := by definability) (X : V) : V := Classical.choose! (replacement_existsUnique X F hF)
 
 /-! ## Variants of replacement -/
 
@@ -112,14 +112,19 @@ noncomputable def replRelOverSet (X : V) (R : V → V → Prop) (h : ∀ x ∈ X
 
 /-! ## Various lemmas -/
 
-@[simp] lemma replRel_spec {X y : V} {R : V → V → Prop} {h : ∀ x, ∃! y, R x y} (hR : ℒₛₑₜ-relation R) :
-    y ∈ replRel X R h ↔ ∃ x ∈ X, R x y := Classical.choose!_spec (replacement_rel_existsUnique X R h hR) y
+@[simp] lemma replRel_spec {X y : V} {R : V → V → Prop} {h : ∀ x ∈ X, ∃! y, R x y} (hR : ℒₛₑₜ-relation R) :
+    y ∈ replRelOverSet X R h hR ↔ ∃ x ∈ X, R x y := Classical.choose!_spec (replacement_rel_existsUnique_of_mem_existsUnique X R h hR) y
 
 @[simp] lemma repl_spec {X y : V} {F : V → V} (hF : ℒₛₑₜ-function₁ F) :
-    y ∈ repl X F hF ↔ ∃ x ∈ X, y = F x := Classical.choose!_spec (replacement_existsUnique X F hF) y
+    y ∈ repl F hF X ↔ ∃ x ∈ X, y = F x := Classical.choose!_spec (replacement_existsUnique X F hF) y
 
 @[simp] lemma replRelOverSet_spec {X y : V} {R : V → V → Prop} {h : ∀ x ∈ X, ∃! y, R x y} (hR : ℒₛₑₜ-relation R) :
     y ∈ replRelOverSet X R h ↔ ∃ x ∈ X, R x y := Classical.choose!_spec (replacement_rel_existsUnique_of_mem_existsUnique X R h hR) y
+
+@[simp, definability] instance repl_definable {F : V → V} [hF : ℒₛₑₜ-function₁ F] : ℒₛₑₜ-function₁ (repl F hF) := by
+  suffices ℒₛₑₜ-relation (fun y x ↦ y = repl F hF x) by exact this
+  simp only [repl, choose!_eq_iff_right]
+  definability
 
 /-! ### Definability Gadgets for Replacement -/
 
@@ -146,7 +151,7 @@ variable {arity : ℕ} {b : Blueprint arity} (c : Construction V b)
 instance map_definable :
   (ℒₛₑₜ).DefinableFunction (fun v ↦ c.map (v ·.succ) (v 0)) := c.map_defined.to_definable
 
-noncomputable def result (v : Fin arity → V) : V → V := fun x ↦ repl x (c.map v) (by
+noncomputable def result (v : Fin arity → V) : V → V := repl (c.map v) (by
   refine ⟨(Rew.embSubsts (#0 :> #1 :> fun i : Fin arity ↦ &(v i))) ▹ b.graph, ?_⟩
   intro x
   simpa [Semiformula.eval_embSubsts, Matrix.comp_vecCons', Function.comp_def]
