@@ -25,13 +25,13 @@ def Seq (s : V) : Prop := IsFunction s ∧ ∃ l, domain s = l ∧ IsOrdinal l
 
 def Seq.IsFunction {s : V} (h : Seq s) : IsFunction s := h.1
 
-def _root_.LO.FirstOrder.SetTheory.seqDef : SetTheorySemisentence 1 :=
+def _root_.LO.FirstOrder.SetTheory.seq.dfn : SetTheorySemisentence 1 :=
   f“s. !IsFunction.dfn s ∧ ∃ l, l = !domain.dfn s ∧ !IsOrdinal.dfn l”
 
-instance seq_defined : ℒₛₑₜ-predicate[V] (Seq : V → Prop) via seqDef := .mk <| by
-  intro v; simp [Seq, seqDef]
+instance seq.defined : ℒₛₑₜ-predicate[V] (Seq : V → Prop) via seq.dfn := .mk <| by
+  intro v; simp [Seq, seq.dfn]
 
-instance seq_definable : ℒₛₑₜ-predicate (Seq : V → Prop) := seq_defined.to_definable
+instance seq.definable : ℒₛₑₜ-predicate (Seq : V → Prop) := seq.defined.to_definable
 
 /- TODO: Once the Lévy hierarchy is added, add a hierarchy-symbol-specific version. -/
 -- instance seq_definable' (ℌ) : ℌ-Predicate (Seq : V → Prop) := seq_definable.of_zero
@@ -67,12 +67,12 @@ lemma lh_prop_of_not_seq {s : V} (h : ¬Seq s) : lh s = 0 := (lh_prop s).2 h
 
 lemma Seq.domain_eq {s : V} (h : Seq s) : domain s = lh s := (lh_prop s).1 h
 
-def _root_.LO.FirstOrder.SetTheory.lhDef : SetTheorySemisentence 2 :=
-  f“l s. (!seqDef s → l = !domain.dfn s) ∧ (¬!seqDef s → !isEmpty l)”
+def _root_.LO.FirstOrder.SetTheory.lh.dfn : SetTheorySemisentence 2 :=
+  f“l s. (!seq.dfn s → l = !domain.dfn s) ∧ (¬!seq.dfn s → !isEmpty l)”
 
-instance lh_defined : ℒₛₑₜ-function₁ (lh : V → V) via lhDef := .mk fun v ↦ by simp [lhDef, lh]; aesop
+instance lh.defined : ℒₛₑₜ-function₁ (lh : V → V) via lh.dfn := .mk fun v ↦ by simp [lh.dfn, lh]; aesop
 
-instance lh_definable : ℒₛₑₜ-function₁ (lh : V → V) := lh_defined.to_definable
+instance lh.definable : ℒₛₑₜ-function₁ (lh : V → V) := lh.defined.to_definable
 
 /- TODO: Once the Lévy hierarchy is added, add a hierarchy-symbol-specific version. -/
 -- instance lh_definable' (ℌ) : ℌ-Function₁ (lh : V → V) := lh_definable.of_zero
@@ -106,7 +106,7 @@ noncomputable def seqCons (s x : V) : V := insert ⟨lh s, x⟩ₖ s
 
 section znth
 
-def znth_existsUnique (s α : V) : ∃! x, (Seq s ∧ α ∈ lh s → ⟨α, x⟩ₖ ∈ s) ∧ (¬(Seq s ∧ α ∈ lh s) → x = ∅) := by
+theorem znth_existsUnique (s α : V) : ∃! x, (Seq s ∧ α ∈ lh s → ⟨α, x⟩ₖ ∈ s) ∧ (¬(Seq s ∧ α ∈ lh s) → x = ∅) := by
   by_cases h : Seq s ∧ α ∈ lh s
   · simpa [h] using h.1.nth_exists_uniq h.2
   · simp [h]
@@ -123,19 +123,19 @@ lemma Seq.znth_eq_of_mem {s α x : V} (h : Seq s) (hα : ⟨α, x⟩ₖ ∈ s) :
 lemma znth_prop_not {s α : V} (h : ¬Seq s ∨ α ∉ lh s) : znth s α = 0 :=
   Classical.choose!_spec (znth_existsUnique s α) |>.2 (by simpa [-not_and, not_and_or] using h)
 
-def _root_.LO.FirstOrder.SetTheory.znthDef : SetTheorySemisentence 3 :=
-  f“x s α. ∃ l, !lhDef l s ∧ (!seqDef s ∧ α ∈ l → !kpair.dfn α x ∈ s) ∧ (¬(!seqDef s ∧ α ∈ l) → !isEmpty x)”
+def _root_.LO.FirstOrder.SetTheory.znth.dfn : SetTheorySemisentence 3 :=
+  f“x s α. ∃ l, !lh.dfn l s ∧ (!seq.dfn s ∧ α ∈ l → !kpair.dfn α x ∈ s) ∧ (¬(!seq.dfn s ∧ α ∈ l) → !isEmpty x)”
 
 private lemma znth_graph {x s α : V} : (∃ l, l = lh s ∧ (Seq s ∧ α ∈ l → ⟨α, x⟩ₖ ∈ s) ∧ (¬(Seq s ∧ α ∈ l) → x = ∅)) ↔ x = znth s α := by
   simp [znth, Classical.choose!_eq_iff_right]
 
-instance znth_defined : ℒₛₑₜ-function₂ (znth : V → V → V) via znthDef := .mk fun v ↦ by
-  simpa [znthDef, -not_and, not_and_or] using znth_graph (V := V)
+instance znth.defined : ℒₛₑₜ-function₂ (znth : V → V → V) via znth.dfn := .mk fun v ↦ by
+  simpa [znth.dfn, -not_and, not_and_or] using znth_graph (V := V)
 
-instance znth_definable : ℒₛₑₜ-function₂ (znth : V → V → V) := znth_defined.to_definable
+instance znth.definable : ℒₛₑₜ-function₂ (znth : V → V → V) := znth.defined.to_definable
 
 /- TODO: Once the Lévy hierarchy is added, add a hierarchy-symbol-specific version. -/
--- instance znth_definable' (ℌ) : ℌ-Function₂ (znth : V → V → V) := znth_definable.of_zero
+-- instance znth.definable' (ℌ) : ℌ-Function₂ (znth : V → V → V) := znth.definable.of_zero
 
 end znth
 
@@ -194,15 +194,15 @@ lemma seqCons_graph (t x s : V) :
         rfl, by rfl⟩,
    by rintro ⟨l, rfl, p, rfl, rfl⟩; rfl⟩
 
-def _root_.LO.FirstOrder.SetTheory.seqConsDef : SetTheorySemisentence 3 :=
-  “t s x. ∃ l, !lhDef l s ∧ ∃ p, !kpair.dfn p l x ∧ !insert.dfn t p s”
+def _root_.LO.FirstOrder.SetTheory.seqCons.dfn : SetTheorySemisentence 3 :=
+  “t s x. ∃ l, !lh.dfn l s ∧ ∃ p, !kpair.dfn p l x ∧ !insert.dfn t p s”
 
-instance seqCons_defined : ℒₛₑₜ-function₂ (seqCons : V → V → V) via seqConsDef := .mk fun v ↦ by simp [seqConsDef, seqCons_graph]
+instance seqCons.defined : ℒₛₑₜ-function₂ (seqCons : V → V → V) via seqCons.dfn := .mk fun v ↦ by simp [seqCons.dfn, seqCons_graph]
 
-instance seqCons_definable : ℒₛₑₜ-function₂ (seqCons : V → V → V) := seqCons_defined.to_definable
+instance seqCons.definable : ℒₛₑₜ-function₂ (seqCons : V → V → V) := seqCons.defined.to_definable
 
 /- TODO: Once the Lévy hierarchy is added, add a hierarchy-symbol-specific version. -/
--- instance seqCons_definable' (ℌ) : ℌ-Function₂ (seqCons : V → V → V) := seqCons_definable.of_zero
+-- instance seqCons.definable' (ℌ) : ℌ-Function₂ (seqCons : V → V → V) := seqCons.definable.of_zero
 
 end
 
@@ -211,42 +211,47 @@ lemma Seq.restrict {s : V} (h : Seq s) {α : V} [hα : IsOrdinal α] (hsubseteq 
 
 lemma Seq.restrict_lh {s : V} (h : Seq s) {α : V} [hα : IsOrdinal α] (hsubseteq : α ⊆ lh s) : lh (s ↾ α) = α := by
   simp only [domain_restrict_eq, lh_eq_of (Seq.restrict h hsubseteq)]
-  exact inter_eq_right_of_subset (lh_eq_domain_of h ▸ hsubseteq)
+  exact inter_eq_right_of_subset (h.lh_eq_domain_of ▸ hsubseteq)
 
-lemma domain_setdiff_of_IsFunction_of_mem {x y s : V} (hs : Seq s) (hxy : ⟨x, y⟩ₖ ∈ s) :
+lemma domain_setdiff_of_Seq_of_mem {x y s : V} (hs : Seq s) (hxy : ⟨x, y⟩ₖ ∈ s) :
     domain (s \ {⟨x, y⟩ₖ}) = (domain s) \ {x} := by
   ext z
   simp only [mem_sdiff_iff, mem_singleton_iff, mem_domain_iff]
   constructor <;> intro h
   · obtain ⟨y₁, hy₁left, hy₁right⟩ := h
     constructor
-    ·
-      sorry
+    · aesop
     · by_contra
       rw [this, (hs.IsFunction.unique hxy (this ▸ hy₁left))] at hy₁right
       contradiction
-  · sorry
+  · aesop
 
 lemma Seq.eq_of_eq_of_subset {s₁ s₂ : V} (h₁ : Seq s₁) (h₂ : Seq s₂)
     (hl : lh s₁ = lh s₂) (hsubseteq : s₁ ⊆ s₂) : s₁ = s₂ := by
   ext z
   constructor <;> intro h
   · exact hsubseteq z h
-  · rw [lh_eq_domain_of h₁, lh_eq_domain_of h₂] at hl
+  · rw [h₁.lh_eq_domain_of, h₂.lh_eq_domain_of] at hl
     obtain ⟨α, y, rfl⟩ := h₂.IsFunction.mem_eq_kpair h
-    have hdefined : ∃ y', ⟨α, y'⟩ₖ ∈ s₁ := by
-      apply mem_domain_iff.mp
-      have h := mem_domain_iff.mpr ⟨y, h⟩
-      exact hl ▸ h
+    have hdefined : ∃ y', ⟨α, y'⟩ₖ ∈ s₁ := mem_domain_iff.mp (hl ▸ mem_domain_iff.mpr ⟨y, h⟩)
     obtain ⟨y', hy'⟩ := hdefined
     exact h₂.IsFunction.unique (hsubseteq ⟨α, y'⟩ₖ hy') h ▸ hy'
 
-lemma Seq.lh_ext {s₁ s₂ : V} (H₁ : Seq s₁) (H₂ : Seq s₂) (h : lh s₁ = lh s₂)
-    (H : ∀ α x₁ x₂, ⟨α, x₁⟩ₖ ∈ s₁ → ⟨α, x₂⟩ₖ ∈ s₂ → x₁ = x₂) : s₁ = s₂ := H₁.eq_of_eq_of_subset H₂ h <| subset_pair <| by
-      intro α x hx
-      have hα : α < lh s₂ := by simpa [← h] using H₁.lt_lh_of_mem hx
-      rcases H α _ _ hx (H₂.nth_mem hα)
-      simp
+lemma Seq.lh_ext {s₁ s₂ : V} (h₁ : Seq s₁) (h₂ : Seq s₂) (h : lh s₁ = lh s₂)
+    (H : ∀ α x₁ x₂, ⟨α, x₁⟩ₖ ∈ s₁ → ⟨α, x₂⟩ₖ ∈ s₂ → x₁ = x₂) : s₁ = s₂ := by
+  refine h₁.eq_of_eq_of_subset h₂ h ?_
+  intro z hy
+  rw [h₁.lh_eq_domain_of, h₂.lh_eq_domain_of] at h
+  obtain ⟨x, y, rfl⟩ := h₁.1.mem_eq_kpair hy
+  obtain ⟨y', hy'⟩ := mem_domain_iff.mp (h ▸ mem_domain_of_kpair_mem hy)
+  exact H x y y' hy hy' ▸ hy'
+
+-- lemma Seq.lh_ext {s₁ s₂ : V} (H₁ : Seq s₁) (H₂ : Seq s₂) (h : lh s₁ = lh s₂)
+--     (H : ∀ α x₁ x₂, ⟨α, x₁⟩ₖ ∈ s₁ → ⟨α, x₂⟩ₖ ∈ s₂ → x₁ = x₂) : s₁ = s₂ := H₁.eq_of_eq_of_subset H₂ h <| subset_pair <| by
+--       intro α x hx
+--       have hα : α < lh s₂ := by simpa [← h] using H₁.lt_lh_of_mem hx
+--       rcases H α _ _ hx (H₂.nth_mem hα)
+--       simp
 
 @[simp] lemma Seq.seqCons_ext {a₁ a₂ s₁ s₂ : V} (h₁ : Seq s₁) (h₂ : Seq s₂) :
     s₁ ⁀' a₁ = s₂ ⁀' a₂ ↔ a₁ = a₂ ∧ s₁ = s₂ := by
@@ -256,13 +261,14 @@ lemma Seq.lh_ext {s₁ s₂ : V} (H₁ : Seq s₁) (H₂ : Seq s₂) (h : lh s�
     have hs₁ : ⟨lh s₁, a₁⟩ₖ ∈ s₂ ⁀' a₂ := by simpa [h] using lh_mem_seqCons s₁ a₁
     have hs₂ : ⟨lh s₁, a₂⟩ₖ ∈ s₂ ⁀' a₂ := by simp [hs₁s₂]
     have ha₁a₂ : a₁ = a₂ := (h₂.seqCons a₂).IsFunction.unique hs₁ hs₂
-    have : s₁ ⊆ s₂ := subset_pair <| by
-      intro i x hix
-      have : i = lh s₂ ∧ x = a₂ ∨ ⟨i, x⟩ₖ ∈ s₂ := by
-        simpa [kpair_mem_seqCons_iff, h] using Seq.subset_seqCons s₁ a₁ hix
-      rcases this with (⟨rfl, rfl⟩ | hix₂)
-      · have := h₁.lt_lh_of_mem hix; simp [hs₁s₂] at this
-      · assumption
+    have : s₁ ⊆ s₂ := by
+      intro p hp
+      obtain ⟨x, y, rfl⟩ := h₁.1.mem_eq_kpair hp
+      have hmem : x ∈ lh s₁ := (h₁.lh_eq_domain_of) ▸ mem_domain_of_kpair_mem hp
+      have hp : ⟨x, y⟩ₖ ∈ s₁ ⁀' a₁ := (mem_insert).mpr (Or.inr hp)
+      rw [h] at hp
+      apply mem_insert.mp at hp
+      aesop
     exact ⟨ha₁a₂, h₁.eq_of_eq_of_subset h₂ hs₁s₂ this⟩
   · rintro ⟨rfl, rfl⟩; rfl
   -- ⟨by intro h
@@ -336,46 +342,43 @@ meta def vecConsUnexpander : Lean.PrettyPrinter.Unexpander
 
 section
 
-def _root_.LO.FirstOrder.SetTheory.mkSeq₁Def : SetTheorySemisentence 2 :=
-  “s x. ∀ z, !isEmpty z → !seqConsDef s z x”
+def _root_.LO.FirstOrder.SetTheory.mkSeq₁.dfn : SetTheorySemisentence 2 :=
+  “s x. ∀ z, !isEmpty z → !seqCons.dfn s z x”
 
-instance mkSeq₁_defined : ℒₛₑₜ-function₁ (fun x : V ↦ !⟦x⟧) via mkSeq₁Def := .mk fun v ↦ by simp [mkSeq₁Def]; rfl
+instance mkSeq₁.defined : ℒₛₑₜ-function₁ (fun x : V ↦ !⟦x⟧) via mkSeq₁.dfn := .mk fun v ↦ by simp [mkSeq₁.dfn]
 
-instance mkSeq₁_definable : ℒₛₑₜ-function₁ (fun x : V ↦ !⟦x⟧) := mkSeq₁_defined.to_definable
-
-/- TODO: Once the Lévy hierarchy is added, add a hierarchy-symbol-specific version. -/
--- instance mkSeq₁_definable' (Γ) : Γ-Function₁ (fun x : V ↦ !⟦x⟧) := mkSeq₁_definable.of_zero
-
-def _root_.LO.FirstOrder.SetTheory.mkSeq₂Def : SetTheorySemisentence 3 :=
-  “s x y. ∃ sx, !mkSeq₁Def sx x ∧ !seqConsDef s sx y”
-
-instance mkSeq₂_defined : ℒₛₑₜ-function₂ (fun x y : V ↦ !⟦x, y⟧) via mkSeq₂Def := .mk fun v ↦ by simp [mkSeq₂Def]
-
-instance mkSeq₂_definable : ℒₛₑₜ-function₂ (fun x y : V ↦ !⟦x, y⟧) := mkSeq₂_defined.to_definable
+instance mkSeq₁.definable : ℒₛₑₜ-function₁ (fun x : V ↦ !⟦x⟧) := mkSeq₁.defined.to_definable
 
 /- TODO: Once the Lévy hierarchy is added, add a hierarchy-symbol-specific version. -/
--- instance mkSeq₂_definable' (Γ m) : Γ-[m + 1]-Function₂ (fun x y : V ↦ !⟦x, y⟧) := mkSeq₂_definable.of_sigmaOne
+-- instance mkSeq₁.definable' (Γ) : Γ-Function₁ (fun x : V ↦ !⟦x⟧) := mkSeq₁.definable.of_zero
+
+def _root_.LO.FirstOrder.SetTheory.mkSeq₂.dfn : SetTheorySemisentence 3 :=
+  “s x y. ∃ sx, !mkSeq₁.dfn sx x ∧ !seqCons.dfn s sx y”
+
+instance mkSeq₂.defined : ℒₛₑₜ-function₂ (fun x y : V ↦ !⟦x, y⟧) via mkSeq₂.dfn := .mk fun v ↦ by simp [mkSeq₂.dfn]
+
+instance mkSeq₂.definable : ℒₛₑₜ-function₂ (fun x y : V ↦ !⟦x, y⟧) := mkSeq₂.defined.to_definable
+
+/- TODO: Once the Lévy hierarchy is added, add a hierarchy-symbol-specific version. -/
+-- instance mkSeq₂.definable' (Γ m) : Γ-[m + 1]-Function₂ (fun x y : V ↦ !⟦x, y⟧) := mkSeq₂.definable.of_sigmaOne
 
 end
 
-theorem skolem_seq {R : V → V → Prop} (hP : ℒₛₑₜ-relation R) {l : V} [IsOrdinal l]
-    (h : ∀ x ∈ l, ∃ y, R x y) : ∃ s : V, Seq s ∧ lh s = l ∧ ∀ α x, ⟨α, x⟩ₖ ∈ s → R α x := by
-  have h' : ∀ x : {x // x ∈ l}, ∃ y, R x.val y := by aesop
-  obtain ⟨s, hs⟩ := Classical.skolem.mp h'
-
-  sorry
-
-  -- rcases sigmaOne_skolem hP (show ∀ x ∈ under l, ∃ y, R x y by simpa using H) with ⟨s, ms, sdom, h⟩
-  -- have : Seq s := ⟨ms, l, sdom⟩
-  -- exact ⟨s, this, by simpa [this.domain_eq] using sdom, h⟩
+/- TODO: Add these once the Lévy hierarchy is added. -/
+/- theorem sigmaOne_skolem_seq {R : V → V → Prop} (hP : 𝚺₁-Relation R) {l}
+    (H : ∀ x < l, ∃ y, R x y) : ∃ s, Seq s ∧ lh s = l ∧ ∀ α x, ⟨α, x⟩ₖ ∈ s → R α x := by
+  rcases sigmaOne_skolem hP (show ∀ x ∈ under l, ∃ y, R x y by simpa using H) with ⟨s, ms, sdom, h⟩
+  have : Seq s := ⟨ms, l, sdom⟩
+  exact ⟨s, this, by simpa [this.domain_eq] using sdom, h⟩
 
 theorem sigmaOne_skolem_seq! {R : V → V → Prop} (hP : 𝚺₁-Relation R) {l}
-    (h : ∀ x < l, ∃! y, R x y) : ∃! s, Seq s ∧ lh s = l ∧ ∀ i x, ⟪i, x⟫ ∈ s → R i x := by
+    (h : ∀ x < l, ∃! y, R x y) : ∃! s, Seq s ∧ lh s = l ∧ ∀ α x, ⟨α, x⟩ₖ ∈ s → R α x := by
   have : ∀ x < l, ∃ y, R x y := fun x hx ↦ (h x hx).exists
   rcases sigmaOne_skolem_seq hP this with ⟨s, Ss, rfl, hs⟩
   exact ExistsUnique.intro s ⟨Ss, rfl, hs⟩ (by
     rintro s' ⟨Ss', hss', hs'⟩
     exact Seq.lh_ext Ss' Ss hss' (fun i x₁ x₂ h₁ h₂ ↦ H i (Ss.lt_lh_of_mem h₂) |>.unique (hs' i x₁ h₁) (hs i x₂ h₂)))
+-/
 
 section seqToVec
 
@@ -394,18 +397,14 @@ noncomputable def vecToSeq : {n : ℕ} → (Fin n → V) → V
   · exact (ih _).seqCons _
 
 @[simp] lemma lh_vecToSeq {n} (v : Fin n → V) : lh (vecToSeq v) = n := by
-  induction' n with n ih <;> simp [vecToSeq, *]
+  induction' n with n ih <;> (simp [vecToSeq, *]; rfl)
 
-/-
-TODO: No coercion from `ℕ` to `V` yet.
-
-lemma mem_vectoSeq {n : ℕ} (v : Fin n → V) (i : Fin n) : ⟪(i : V), v i⟫ ∈ vecToSeq v := by
+lemma mem_vectoSeq {n : ℕ} (v : Fin n → V) (i : Fin n) : ⟨(i : V), v i⟩ₖ ∈ vecToSeq v := by
   induction' n with n ih
   · exact i.elim0
   · cases' i using Fin.lastCases with i
     · simp [vecToSeq, kpair_mem_seqCons_iff]
     · simpa [vecToSeq, kpair_mem_seqCons_iff] using Or.inr <| ih (v ·.castSucc) i
--/
 
 end seqToVec
 
