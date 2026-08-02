@@ -85,7 +85,7 @@ open Entailment
 
 variable (T : ArithmeticTheory) [𝗜𝚺₁ ⪯ T] [T.Δ₁]
 
-instance [ℕ↓[ℒₒᵣ] ⊧* T] : ℕ↓[ℒₒᵣ] ⊧* (T ∪ T.Con) := by
+instance [ℕ↓[ℒₒᵣ] ⊧* T] : ℕ↓[ℒₒᵣ] ⊧* T ∪ T.Con := by
   have : 𝗥₀ ⪯ 𝗜𝚺₁ := inferInstance
   have : 𝗥₀ ⪯ T := Entailment.WeakerThan.trans this inferInstance
   have : Entailment.Consistent T := ArithmeticTheory.consistent_of_sound T (Eq ⊥) rfl

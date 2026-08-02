@@ -15,14 +15,14 @@ open LO.Entailment ProvabilityAbstraction
 variable (T : ArithmeticTheory) [T.Δ₁] [𝗜𝚺₁ ⪯ T]
 
 /-- Gödel's second incompleteness theorem -/
-theorem consistent_unprovable [Consistent T] : T ⊬ ↑T.consistent :=
+theorem consistent_unprovable [Consistent T] : T ⊬ T.consistent.val :=
   ProvabilityAbstraction.con_unprovable (𝔅 := T.standardProvability)
 
 theorem inconsistent_unprovable [ArithmeticTheory.SoundOnHierarchy T 𝚺 1] : T ⊬ ∼T.consistent.val :=
   ProvabilityAbstraction.con_unrefutable (𝔅 := T.standardProvability)
 
 /-- The consistency statement is independent. -/
-theorem inconsistent_independent [ArithmeticTheory.SoundOnHierarchy T 𝚺 1] : Independent T ↑T.consistent :=
+theorem inconsistent_independent [ArithmeticTheory.SoundOnHierarchy T 𝚺 1] : Independent T T.consistent.val :=
   ProvabilityAbstraction.con_independent (𝔅 := T.standardProvability)
 
 instance [Consistent T] : T ⪱ T ∪ T.Con :=
