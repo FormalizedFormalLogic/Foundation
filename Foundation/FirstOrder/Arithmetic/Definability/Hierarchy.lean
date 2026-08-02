@@ -312,27 +312,27 @@ def substSigma (φ : 𝚺-[m + 1].Semiformula ξ 1) (F : 𝚺-[m + 1].Semiformul
   suffices (φ.and ψ).val = φ.val ⋏ ψ.val from this
   rcases Γ with ⟨Γ, m⟩; rcases Γ <;> simp [and, val, val_sigma]
 
-@[simp] lemma sigma_and (φ ψ : 𝚫-[m].Semiformula ξ n) : (φ ⋏ ψ).sigma = φ.sigma ⋏ ψ.sigma := by simp [Wedge.wedge, and]
+@[simp] lemma sigma_and (φ ψ : 𝚫-[m].Semiformula ξ n) : (φ ⋏ ψ).sigma = φ.sigma ⋏ ψ.sigma := rfl
 
-@[simp] lemma pi_and (φ ψ : 𝚫-[m].Semiformula ξ n) : (φ ⋏ ψ).pi = φ.pi ⋏ ψ.pi := by simp [Wedge.wedge, and]
+@[simp] lemma pi_and (φ ψ : 𝚫-[m].Semiformula ξ n) : (φ ⋏ ψ).pi = φ.pi ⋏ ψ.pi := rfl
 
 @[simp] lemma val_or (φ ψ : Γ.Semiformula ξ n) : (φ ⋎ ψ).val = φ.val ⋎ ψ.val := by
   suffices (φ.or ψ).val = φ.val ⋎ ψ.val from this
   rcases Γ with ⟨Γ, m⟩; rcases Γ <;> simp [or, val, val_sigma]
 
-@[simp] lemma sigma_or (φ ψ : 𝚫-[m].Semiformula ξ n) : (φ ⋎ ψ).sigma = φ.sigma ⋎ ψ.sigma := by simp [Vee.vee, or]
+@[simp] lemma sigma_or (φ ψ : 𝚫-[m].Semiformula ξ n) : (φ ⋎ ψ).sigma = φ.sigma ⋎ ψ.sigma := rfl
 
-@[simp] lemma pi_or (φ ψ : 𝚫-[m].Semiformula ξ n) : (φ ⋎ ψ).pi = φ.pi ⋎ ψ.pi := by simp [Vee.vee, or]
+@[simp] lemma pi_or (φ ψ : 𝚫-[m].Semiformula ξ n) : (φ ⋎ ψ).pi = φ.pi ⋎ ψ.pi := rfl
 
 @[simp] lemma val_negSigma {m} (φ : 𝚺-[m].Semiformula ξ n) : φ.negSigma.val = ∼φ.val := by simp [negSigma]
 
 @[simp] lemma val_negPi {m} (φ : 𝚷-[m].Semiformula ξ n) : φ.negPi.val = ∼φ.val := by simp [negPi]
 
-lemma val_negDelta {m} (φ : 𝚫-[m].Semiformula ξ n) : (∼φ).val = ∼φ.pi.val := by simp [Tilde.tilde, negDelta]
+lemma val_negDelta {m} (φ : 𝚫-[m].Semiformula ξ n) : (∼φ).val = ∼φ.pi.val := by simp [HTilde.hTilde, Tilde.tilde, negDelta]
 
-@[simp] lemma sigma_negDelta {m} (φ : 𝚫-[m].Semiformula ξ n) : (∼φ).sigma = φ.pi.negPi := by simp [Tilde.tilde, negDelta]
+@[simp] lemma sigma_negDelta {m} (φ : 𝚫-[m].Semiformula ξ n) : (∼φ).sigma = φ.pi.negPi := by simp [HTilde.hTilde, Tilde.tilde, negDelta]
 
-@[simp] lemma sigma_negPi {m} (φ : 𝚫-[m].Semiformula ξ n) : (∼φ).pi = φ.sigma.negSigma := by simp [Tilde.tilde, negDelta]
+@[simp] lemma sigma_negPi {m} (φ : 𝚫-[m].Semiformula ξ n) : (∼φ).pi = φ.sigma.negSigma := by simp [HTilde.hTilde, Tilde.tilde, negDelta]
 
 @[simp] lemma val_ball (t : ArithmeticSemiterm ξ n) (φ : Γ.Semiformula ξ (n + 1)) : (ball t φ).val = ∀¹[“#0 < !!(Rew.bShift t)”] φ.val := by
   rcases Γ with ⟨Γ, m⟩; rcases Γ <;> simp [ball, val, val_sigma]

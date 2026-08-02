@@ -83,10 +83,10 @@ lemma imp_eq (φ ψ : NNFormula α) : φ 🡒 ψ = ∼φ ⋎ ψ := rfl
 lemma iff_eq (φ ψ : NNFormula α) : φ 🡘 ψ = (∼φ ⋎ ψ) ⋏ (∼ψ ⋎ φ) := rfl
 
 @[simp] lemma and_inj (φ₁ ψ₁ φ₂ ψ₂ : NNFormula α) : φ₁ ⋏ φ₂ = ψ₁ ⋏ ψ₂ ↔ φ₁ = ψ₁ ∧ φ₂ = ψ₂ :=
-by simp [Wedge.wedge]
+  Iff.of_eq <| and.injEq _ _ _ _
 
 @[simp] lemma or_inj (φ₁ ψ₁ φ₂ ψ₂ : NNFormula α) : φ₁ ⋎ φ₂ = ψ₁ ⋎ ψ₂ ↔ φ₁ = ψ₁ ∧ φ₂ = ψ₂ :=
-by simp [Vee.vee]
+  Iff.of_eq <| or.injEq _ _ _ _
 
 instance : TildeInvolutive (NNFormula α) where
   tilde_involutive := neg_neg

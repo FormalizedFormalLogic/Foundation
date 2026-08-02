@@ -60,7 +60,7 @@ end
 
 abbrev _root_.LO.FirstOrder.Theory.Con : ArithmeticTheory := {↑T.consistent}
 
-abbrev _root_.LO.FirstOrder.Theory.Incon : ArithmeticTheory := {∼↑T.consistent}
+abbrev _root_.LO.FirstOrder.Theory.Incon : ArithmeticTheory := {∼↑(T.consistent : ArithmeticSentence)}
 
 noncomputable instance : T.Con.Δ₁ := Theory.Δ₁.singleton _
 
