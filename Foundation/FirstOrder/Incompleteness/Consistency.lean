@@ -58,9 +58,9 @@ variable {T}
 
 end
 
-abbrev _root_.LO.FirstOrder.Theory.Con : ArithmeticTheory := {↑T.consistent}
+abbrev _root_.LO.FirstOrder.Theory.Con : ArithmeticTheory := {T.consistent.val}
 
-abbrev _root_.LO.FirstOrder.Theory.Incon : ArithmeticTheory := {∼↑(T.consistent : ArithmeticSentence)}
+abbrev _root_.LO.FirstOrder.Theory.Incon : ArithmeticTheory := {∼T.consistent.val}
 
 noncomputable instance : T.Con.Δ₁ := Theory.Δ₁.singleton _
 
