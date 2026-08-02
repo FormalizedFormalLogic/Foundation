@@ -749,7 +749,8 @@ lemma foundation' (x : V) [IsNonempty x] : ∃ y ∈ x, x ∩ y = ∅ := by
 lemma ne_of_mem {x y : V} : x ∈ y → x ≠ y := by
   rintro h rfl; simp_all
 
-lemma mem_asymm {x y : V} : x ∈ y → y ∉ x := by
+-- TODO: I don't know how `aesop` modifiers work, so I don't know if `norm` is the right choice.
+@[aesop norm] lemma mem_asymm {x y : V} : x ∈ y → y ∉ x := by
   intro hxy hyx
   have : y ∉ x ∨ x ∉ y := by simpa using foundation ({x, y} : V)
   rcases this with (_ | _) <;> simp_all
@@ -763,5 +764,20 @@ lemma mem_asymm₃ {x y z : V} : x ∈ y → y ∈ z → z ∉ x := by
   intro h
   have : x ∈ succ x := mem_succ_self x
   simp [←h] at this
+
+-- This lemma requires `foundation`
+lemma subset_of_succ_subset {x y : V} (h : succ x ⊆ succ y) : x ⊆ y := by
+  intro z hz
+  have hzy : z = y ∨ z ∈ y := mem_insert.mp (h z (mem_insert (x := x).mpr (Or.inr hz)))
+  have hxy : x = y ∨ x ∈ y := mem_insert.mp (h x (mem_succ_self x))
+  have : (z = y ∨ z ∈ y) ∧ (x = y ∨ x ∈ y) := by
+    exact And.intro hzy hxy
+  aesop
+
+@[simp] lemma succ_inj {x y : V} : succ x = succ y ↔ x = y := by
+  constructor <;> intro h
+  · ext z
+    exact Iff.intro (subset_of_succ_subset (subset_of_eq h) z) (subset_of_succ_subset (subset_of_eq h.symm) z)
+  · simp only [h]
 
 end LO.FirstOrder.SetTheory
