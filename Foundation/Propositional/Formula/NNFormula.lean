@@ -30,10 +30,12 @@ lemma neg_neg (φ : NNFormula α) : neg (neg φ) = φ :=
   by induction φ <;> simp [*, neg]
 
 instance : LogicalConnective (NNFormula α) where
-  tilde := neg
   arrow := fun φ ψ => or (neg φ) ψ
   wedge := and
   vee := or
+  tilde := neg
+
+instance : LogicalNeutral (NNFormula α) where
   top := verum
   bot := falsum
 
@@ -81,20 +83,22 @@ lemma imp_eq (φ ψ : NNFormula α) : φ 🡒 ψ = ∼φ ⋎ ψ := rfl
 lemma iff_eq (φ ψ : NNFormula α) : φ 🡘 ψ = (∼φ ⋎ ψ) ⋏ (∼ψ ⋎ φ) := rfl
 
 @[simp] lemma and_inj (φ₁ ψ₁ φ₂ ψ₂ : NNFormula α) : φ₁ ⋏ φ₂ = ψ₁ ⋏ ψ₂ ↔ φ₁ = ψ₁ ∧ φ₂ = ψ₂ :=
-by simp [Wedge.wedge]
+  Iff.of_eq <| and.injEq _ _ _ _
 
 @[simp] lemma or_inj (φ₁ ψ₁ φ₂ ψ₂ : NNFormula α) : φ₁ ⋎ φ₂ = ψ₁ ⋎ ψ₂ ↔ φ₁ = ψ₁ ∧ φ₂ = ψ₂ :=
-by simp [Vee.vee]
+  Iff.of_eq <| or.injEq _ _ _ _
 
-instance : DeMorgan (NNFormula α) where
-  verum := rfl
-  falsum := rfl
+instance : TildeInvolutive (NNFormula α) where
+  tilde_involutive := neg_neg
+
+instance : LogicalConnective.DeMorgan (NNFormula α) where
   and := by simp
   or := by simp
   imply := by simp [imp_eq]
 
-instance : TildeInvolutive (NNFormula α) where
-  neg_involutive := by simp
+instance : LogicalNeutral.DeMorgan (NNFormula α) where
+  verum := rfl
+  falsum := rfl
 
 def complexity : NNFormula α → ℕ
 | ⊤       => 0

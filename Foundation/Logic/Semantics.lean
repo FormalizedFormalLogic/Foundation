@@ -40,7 +40,7 @@ infix:45 " ⊭ " => NotModels
 
 section
 
-variable [LogicalConnective F] (M)
+variable [LogicalConnective F] [LogicalNeutral F] (M)
 
 /-- Tarski's truth definition for `⊤`. -/
 protected class Top where
@@ -149,7 +149,7 @@ def theory (𝓜 : M) : Set F := {φ | 𝓜 ⊧ φ}
 class Meaningful (𝓜 : M) : Prop where
   exists_unmodels : ∃ φ, 𝓜 ⊭ φ
 
-instance [LogicalConnective F] [Semantics.Bot M] (𝓜 : M) : Meaningful 𝓜 := ⟨⟨⊥, by grind⟩⟩
+instance [LogicalNeutral F] [Semantics.Bot M] (𝓜 : M) : Meaningful 𝓜 := ⟨⟨⊥, by grind⟩⟩
 
 lemma meaningful_iff {𝓜 : M} : Meaningful 𝓜 ↔ ∃ φ, 𝓜 ⊭ φ :=
   ⟨by rintro ⟨h⟩; exact h, fun h ↦ ⟨h⟩⟩
@@ -163,15 +163,15 @@ lemma modelsSet_iff {𝓜 : M} {T : Set F} : 𝓜 ⊧* T ↔ ∀ ⦃φ⦄, φ �
 
 @[simp] lemma theory_satisfiable (𝓜 : M) : Satisfiable M (theory 𝓜) := ⟨𝓜, by simp⟩
 
-lemma not_satisfiable_finset [LogicalConnective F] [Tarski M] [DecidableEq F] (t : Finset F) :
+lemma not_satisfiable_finset [LogicalConnective F] [LogicalNeutral F] [Tarski M] [DecidableEq F] (t : Finset F) :
     ¬Satisfiable M (t : Set F) ↔ Valid M (t.image (∼·)).disj := by
   simp [Satisfiable, modelsSet_iff, Valid];
 
-@[simp] lemma satisfiable_conj₂ [LogicalConnective F] [Tarski M] [DecidableEq F] (l : List F) :
+@[simp] lemma satisfiable_conj₂ [LogicalConnective F] [LogicalNeutral F] [Tarski M] [DecidableEq F] (l : List F) :
     Satisfiable M {⋀l} ↔ Satisfiable M {φ | φ ∈ l} := by
   simp [Satisfiable, modelsSet_iff]
 
-@[simp] lemma satisfiable_fconj [LogicalConnective F] [Tarski M] [DecidableEq F] (s : Finset F) :
+@[simp] lemma satisfiable_fconj [LogicalConnective F] [LogicalNeutral F] [Tarski M] [DecidableEq F] (s : Finset F) :
     Satisfiable M {s.conj} ↔ Satisfiable M {φ | φ ∈ s} := by
   simp [Satisfiable, modelsSet_iff]
 
@@ -222,7 +222,7 @@ instance empty' (𝓜 : M) : 𝓜 ⊧* (∅ : Set F) := ⟨by simp⟩
 
 end ModelsSet
 
-lemma valid_neg_iff [LogicalConnective F] [Tarski M] (φ : F) : Valid M (∼φ) ↔ ¬Satisfiable M {φ} := by
+lemma valid_neg_iff [LogicalConnective F] [LogicalNeutral F] [Tarski M] (φ : F) : Valid M (∼φ) ↔ ¬Satisfiable M {φ} := by
   simp [Valid, Satisfiable]
 
 lemma Satisfiable.of_subset {T U : Set F} (h : Satisfiable M U) (ss : T ⊆ U) : Satisfiable M T := by
@@ -246,9 +246,9 @@ variable {M}
 
 lemma set_models_iff {s : Set M} : s ⊧ φ ↔ ∀ 𝓜 ∈ s, 𝓜 ⊧ φ := iff_of_eq rfl
 
-instance [LogicalConnective F] [Semantics.Top M] : Semantics.Top (Set M) := ⟨fun s ↦ by simp [set_models_iff]⟩
+instance [LogicalNeutral F] [Semantics.Top M] : Semantics.Top (Set M) := ⟨fun s ↦ by simp [set_models_iff]⟩
 
-lemma set_meaningful_iff_nonempty [LogicalConnective F] [∀ 𝓜 : M, Meaningful 𝓜] {s : Set M} : Meaningful s ↔ s.Nonempty := by
+lemma set_meaningful_iff_nonempty [∀ 𝓜 : M, Meaningful 𝓜] {s : Set M} : Meaningful s ↔ s.Nonempty := by
   constructor;
   . rintro ⟨φ, hf⟩;
     by_contra A;
@@ -257,7 +257,7 @@ lemma set_meaningful_iff_nonempty [LogicalConnective F] [∀ 𝓜 : M, Meaningfu
     rcases Meaningful.exists_unmodels (self := by tauto) with ⟨φ, hf⟩;
     exact ⟨φ, by simpa [NotModels, set_models_iff] using ⟨𝓜, h𝓜, hf⟩⟩
 
-lemma meaningful_iff_satisfiableSet [LogicalConnective F] [∀ 𝓜 : M, Meaningful 𝓜] : Satisfiable M T ↔ Meaningful (models M T) := by
+lemma meaningful_iff_satisfiableSet [∀ 𝓜 : M, Meaningful 𝓜] : Satisfiable M T ↔ Meaningful (models M T) := by
   simp [set_meaningful_iff_nonempty, satisfiableSet_iff_models_nonempty]
 
 lemma consequence_iff {T : Set F} {φ} : T ⊨[M] φ ↔ ∀ {𝓜 : M}, 𝓜 ⊧* T → 𝓜 ⊧ φ := iff_of_eq rfl
@@ -265,7 +265,7 @@ lemma consequence_iff {T : Set F} {φ} : T ⊨[M] φ ↔ ∀ {𝓜 : M}, 𝓜 �
 lemma consequence_iff' {T : Set F} {φ : F} : T ⊨[M] φ ↔ (∀ (𝓜 : M) [𝓜 ⊧* T], 𝓜 ⊧ φ) :=
   ⟨fun h _ _ => consequence_iff.mp h inferInstance, fun H 𝓜 hs => @H 𝓜 hs⟩
 
-lemma consequence_iff_not_satisfiable [LogicalConnective F] [Tarski M] {φ : F} :
+lemma consequence_iff_not_satisfiable [LogicalConnective F] [LogicalNeutral F] [Tarski M] {φ : F} :
     T ⊨[M] φ ↔ ¬Satisfiable M (insert (∼φ) T) := by
   suffices (∀ {𝓜 : M}, 𝓜 ⊧* T → 𝓜 ⊧ φ) ↔ ∀ (x : M), x ⊭ φ → ¬x ⊧* T by
     simpa [consequence_iff, Satisfiable]
@@ -329,7 +329,7 @@ variable [Compact M]
 
 variable {𝓜 : M}
 
-lemma conseq_compact [LogicalConnective F] [Semantics.Tarski M] [DecidableEq F] {φ : F} :
+lemma conseq_compact [LogicalConnective F] [LogicalNeutral F] [Semantics.Tarski M] [DecidableEq F] {φ : F} :
     T ⊨[M] φ ↔ ∃ u : Finset F, ↑u ⊆ T ∧ u ⊨[M] φ := by
   suffices
     (∃ x : Finset F, ↑x ⊆ insert (∼φ) T ∧ ¬Semantics.Satisfiable M ↑x) ↔

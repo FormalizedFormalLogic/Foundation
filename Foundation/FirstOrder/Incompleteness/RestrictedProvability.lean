@@ -34,7 +34,8 @@ instance RestrictedProvable.defined {e} : 𝚷₁-Predicate[V] T.RestrictedProva
 /-- Gödel sentence by restricted provability -/
 noncomputable abbrev restrictedGödel (e : ℕ) (T : Theory L) [T.Δ₁] : ArithmeticSentence := fixedpoint (∼(T.restrictedProvable e))
 
-private noncomputable abbrev restrictedGödel' (e : ℕ) (T : Theory L) [T.Δ₁] : ArithmeticSentence := ∼(T.restrictedProvable e)/[⌜restrictedGödel e T⌝]
+private noncomputable abbrev restrictedGödel' (e : ℕ) (T : Theory L) [T.Δ₁] : ArithmeticSentence :=
+  ∼(T.restrictedProvable e).val/[⌜restrictedGödel e T⌝]
 
 private lemma restrictedGödel'_sigmaOne {e : ℕ} : Hierarchy 𝚺 1 (T.restrictedGödel' e) := by definability;
 
@@ -47,9 +48,9 @@ variable {V : Type} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 variable {T U : ArithmeticTheory} [T.Δ₁] -- [𝗜𝚺₁ ⪯ T] [𝗜𝚺₁ ⪯ U]
 variable {e : ℕ}
 
-lemma def_restrictedGödel [𝗜𝚺₁ ⪯ U] : U ⊢ T.restrictedGödel e 🡘 (∼T.restrictedProvable e)/[⌜T.restrictedGödel e⌝] := diagonal _
+lemma def_restrictedGödel [𝗜𝚺₁ ⪯ U] : U ⊢ T.restrictedGödel e 🡘 (∼(T.restrictedProvable e).val)/[⌜T.restrictedGödel e⌝] := diagonal _
 
-private lemma def_restrictedGödel' [𝗜𝚺₁ ⪯ U] : U ⊢ T.restrictedGödel' e 🡘 (∼T.restrictedProvable e)/[⌜T.restrictedGödel e⌝] := by simp;
+private lemma def_restrictedGödel' [𝗜𝚺₁ ⪯ U] : U ⊢ T.restrictedGödel' e 🡘 (∼(T.restrictedProvable e).val)/[⌜T.restrictedGödel e⌝] := by simp;
 
 private lemma provable_E_restrictedGödel_restrictedGödel' [𝗜𝚺₁ ⪯ U] : U ⊢ T.restrictedGödel e 🡘 T.restrictedGödel' e := by
   apply Entailment.E!_trans;

@@ -5,7 +5,7 @@ public import Foundation.Propositional.Entailment.Minimal
 
 namespace LO.Axioms
 
-variable {F : Type*} [LogicalConnective F]
+variable {F : Type*} [LogicalConnective F] [LogicalNeutral F]
 variable (φ ψ χ : F)
 
 protected abbrev EFQ := ⊥ 🡒 φ
@@ -16,7 +16,7 @@ end LO.Axioms
 
 namespace LO.Entailment
 
-variable {S F : Type*} [LogicalConnective F] [Entailment S F]
+variable {S F : Type*} [LogicalConnective F] [LogicalNeutral F] [Entailment S F]
 variable {𝓢 : S} {φ ψ χ : F}
 
 class HasAxiomEFQ (𝓢 : S)  where
@@ -62,7 +62,7 @@ end LO.Entailment
 
 namespace LO.Entailment
 
-variable {F : Type*} [LogicalConnective F] [DecidableEq F]
+variable {F : Type*} [LogicalConnective F] [LogicalNeutral F] [DecidableEq F]
          {S : Type*} [Entailment S F]
          {𝓢 : S}
          {φ φ₁ φ₂ ψ ψ₁ ψ₂ χ ξ : F}

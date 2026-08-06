@@ -245,7 +245,7 @@ lemma sound {T : Theoryᵢ L 𝗜𝗻𝘁¹} (b : T ⊢ φ) : W ∀⊩* T → W 
   rcases domain_nonempty' w with ⟨x, hx⟩
   have : (Rewriting.emb '' T.theory) *⊢[𝗜𝗻𝘁¹] ↑φ := b
   rcases Entailment.Context.provable_iff.mp this with ⟨Γ, HΓ, b⟩
-  have : w ⊩[![]|fun _ ↦ x] ⋀Γ 🡒 ↑φ := Forces.sound (L := L) w (fun _ ↦ x) (by simpa using hx) b
+  have : w ⊩[![]|fun _ ↦ x] ⋀Γ 🡒 (φ : Propositionᵢ L) := Forces.sound (L := L) w (fun _ ↦ x) (by simpa using hx) b
   have : w ⊩[![]|fun _ : ℕ ↦ x] ↑φ := by
     apply this w (by rfl)
     suffices ∀ φ ∈ Γ, w ⊩[![]|fun _ ↦ x] φ by simpa

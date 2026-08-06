@@ -80,7 +80,7 @@ theorem Proof.sound_proposition {M : Type*} [s : Structure L M] [Nonempty M] :
   have : φ.Realize M ∨ ∃ ψ, ∼ψ ∈ Sequent.embed Γ ∧ ψ.Evalf f := by simpa using b.sound f
   rcases this with (h | ⟨ψ, hψ, h⟩)
   · assumption
-  · have : ∃ χ, ∼χ ∈ Γ ∧ ↑χ = ψ := by
+  · have : ∃ χ : Sentence L, ∼χ ∈ Γ ∧ ↑χ = ψ := by
       have : ∃ χ ∈ Γ, χ = ∼ψ := by simpa [Sequent.embed] using hψ
       rcases this with ⟨χ, hχ, e⟩
       refine ⟨∼χ, by simpa using hχ, by simp [e]⟩

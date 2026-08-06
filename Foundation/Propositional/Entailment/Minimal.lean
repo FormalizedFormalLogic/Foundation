@@ -11,10 +11,10 @@ variable {F : Type*} [LogicalConnective F]
 variable (φ ψ χ : F)
 
 
-protected abbrev NegEquiv := ∼φ 🡘 (φ 🡒 ⊥)
+protected abbrev NegEquiv [LogicalNeutral F] := ∼φ 🡘 (φ 🡒 ⊥)
 
 
-protected abbrev Verum : F := ⊤
+protected abbrev Verum [LogicalNeutral F] : F := ⊤
 
 protected abbrev ImplyK := φ 🡒 ψ 🡒 φ
 
@@ -68,18 +68,20 @@ infixl:90 "⨀!" => mdp
 
   This is weaker asssumption than _"introducing `∼φ` as an abbreviation of `φ 🡒 ⊥`" (`NegAbbrev`)_.
 -/
-class NegationEquiv (𝓢 : S) where
+class NegationEquiv [LogicalNeutral F] (𝓢 : S) where
   negEquiv {φ : F} : 𝓢 ⊢! Axioms.NegEquiv φ
 export NegationEquiv (negEquiv)
 
-@[simp] lemma neg_equiv! [NegationEquiv 𝓢] : 𝓢 ⊢ ∼φ 🡘 (φ 🡒 ⊥) := ⟨negEquiv⟩
+@[simp] lemma neg_equiv! [LogicalNeutral F] [NegationEquiv 𝓢] : 𝓢 ⊢ ∼φ 🡘 (φ 🡒 ⊥) := ⟨negEquiv⟩
 
 
-class HasAxiomVerum (𝓢 : S) where
+class HasAxiomVerum [LogicalNeutral F] (𝓢 : S) where
   verum : 𝓢 ⊢! Axioms.Verum
 
-def verum [HasAxiomVerum 𝓢] : 𝓢 ⊢! ⊤ := HasAxiomVerum.verum
-@[simp] lemma verum! [HasAxiomVerum 𝓢] : 𝓢 ⊢ ⊤ := ⟨verum⟩
+def verum [LogicalNeutral F] [HasAxiomVerum 𝓢] : 𝓢 ⊢! ⊤ := HasAxiomVerum.verum
+
+omit [LogicalConnective F] in
+@[simp] lemma verum! [LogicalNeutral F] [HasAxiomVerum 𝓢] : 𝓢 ⊢ ⊤ := ⟨verum⟩
 
 
 class HasAxiomImplyK (𝓢 : S)  where
@@ -164,7 +166,7 @@ alias A_cases := of_C_of_C_of_A
 lemma of_C!_of_C!_of_A! [HasAxiomOrElim 𝓢] [ModusPonens 𝓢] (d₁ : 𝓢 ⊢ φ 🡒 χ) (d₂ : 𝓢 ⊢ ψ 🡒 χ) (d₃ : 𝓢 ⊢ φ ⋎ ψ) : 𝓢 ⊢ χ := ⟨of_C_of_C_of_A d₁.some d₂.some d₃.some⟩
 alias A!_cases := of_C!_of_C!_of_A!
 
-protected class Minimal (𝓢 : S) extends
+protected class Minimal [LogicalNeutral F] (𝓢 : S) extends
               ModusPonens 𝓢,
               NegationEquiv 𝓢,
               HasAxiomVerum 𝓢,
@@ -180,9 +182,9 @@ section
 variable {S F : Type*} [LogicalConnective F] [Entailment S F]
 variable {𝓢 : S} [ModusPonens 𝓢] {φ ψ χ : F}
 
-def CO_of_N [HasAxiomAndElim 𝓢] [NegationEquiv 𝓢] : 𝓢 ⊢! ∼φ → 𝓢 ⊢! φ 🡒 ⊥ := λ h => (K_left negEquiv) ⨀ h
-def N_of_CO [HasAxiomAndElim 𝓢] [NegationEquiv 𝓢] : 𝓢 ⊢! φ 🡒 ⊥ → 𝓢 ⊢! ∼φ := λ h => (K_right negEquiv) ⨀ h
-@[grind =] lemma N!_iff_CO! [HasAxiomAndElim 𝓢] [NegationEquiv 𝓢] : 𝓢 ⊢ ∼φ ↔ 𝓢 ⊢ φ 🡒 ⊥ := ⟨λ ⟨h⟩ => ⟨CO_of_N h⟩, λ ⟨h⟩ => ⟨N_of_CO h⟩⟩
+def CO_of_N [LogicalNeutral F] [HasAxiomAndElim 𝓢] [NegationEquiv 𝓢] : 𝓢 ⊢! ∼φ → 𝓢 ⊢! φ 🡒 ⊥ := λ h => (K_left negEquiv) ⨀ h
+def N_of_CO [LogicalNeutral F] [HasAxiomAndElim 𝓢] [NegationEquiv 𝓢] : 𝓢 ⊢! φ 🡒 ⊥ → 𝓢 ⊢! ∼φ := λ h => (K_right negEquiv) ⨀ h
+@[grind =] lemma N!_iff_CO! [LogicalNeutral F] [HasAxiomAndElim 𝓢] [NegationEquiv 𝓢] : 𝓢 ⊢ ∼φ ↔ 𝓢 ⊢ φ 🡒 ⊥ := ⟨λ ⟨h⟩ => ⟨CO_of_N h⟩, λ ⟨h⟩ => ⟨N_of_CO h⟩⟩
 
 
 def E_intro [HasAxiomAndInst 𝓢] (b₁ : 𝓢 ⊢! φ 🡒 ψ) (b₂ : 𝓢 ⊢! ψ 🡒 φ) : 𝓢 ⊢! φ 🡘 ψ := K_intro b₁ b₂
@@ -205,14 +207,14 @@ def C_id [HasAxiomImplyK 𝓢] [HasAxiomImplyS 𝓢] {φ : F} : 𝓢 ⊢! φ �
 def E_Id [HasAxiomAndInst 𝓢] [HasAxiomImplyK 𝓢] [HasAxiomImplyS 𝓢] {φ : F} : 𝓢 ⊢! φ 🡘 φ := K_intro C_id C_id
 @[simp] theorem E!_id [HasAxiomAndInst 𝓢] [HasAxiomImplyK 𝓢] [HasAxiomImplyS 𝓢] : 𝓢 ⊢ φ 🡘 φ := ⟨E_Id⟩
 
-instance [NegAbbrev F] [HasAxiomImplyK 𝓢] [HasAxiomImplyS 𝓢] [HasAxiomAndInst 𝓢] : Entailment.NegationEquiv 𝓢 where
+instance [LogicalNeutral F] [NegAbbrev F] [HasAxiomImplyK 𝓢] [HasAxiomImplyS 𝓢] [HasAxiomAndInst 𝓢] : Entailment.NegationEquiv 𝓢 where
   negEquiv {φ} := by
     suffices 𝓢 ⊢! (φ 🡒 ⊥) 🡘 (φ 🡒 ⊥) by simpa [Axioms.NegEquiv, NegAbbrev.neg];
     apply E_Id;
 
 
-def NO [HasAxiomImplyK 𝓢] [HasAxiomImplyS 𝓢] [NegationEquiv 𝓢] [HasAxiomAndElim 𝓢] : 𝓢 ⊢! ∼⊥ := N_of_CO C_id
-@[simp] lemma NO! [HasAxiomImplyK 𝓢] [HasAxiomImplyS 𝓢] [NegationEquiv 𝓢] [HasAxiomAndElim 𝓢] : 𝓢 ⊢ ∼⊥ := ⟨NO⟩
+def NO [LogicalNeutral F] [HasAxiomImplyK 𝓢] [HasAxiomImplyS 𝓢] [NegationEquiv 𝓢] [HasAxiomAndElim 𝓢] : 𝓢 ⊢! ∼⊥ := N_of_CO C_id
+@[simp] lemma NO! [LogicalNeutral F] [HasAxiomImplyK 𝓢] [HasAxiomImplyS 𝓢] [NegationEquiv 𝓢] [HasAxiomAndElim 𝓢] : 𝓢 ⊢ ∼⊥ := ⟨NO⟩
 
 
 def mdp₁ [HasAxiomImplyS 𝓢] (bqr : 𝓢 ⊢! φ 🡒 ψ 🡒 χ) (bq : 𝓢 ⊢! φ 🡒 ψ) : 𝓢 ⊢! φ 🡒 χ := implyS ⨀ bqr ⨀ bq
@@ -294,8 +296,8 @@ def CK_of_CC [HasAxiomAndInst 𝓢] [HasAxiomAndElim 𝓢] [HasAxiomImplyK 𝓢]
 @[grind =] lemma CK!_iff_CC! [HasAxiomAndInst 𝓢] [HasAxiomAndElim 𝓢] [HasAxiomImplyK 𝓢] [HasAxiomImplyS 𝓢] :
     (𝓢 ⊢ φ ⋏ ψ 🡒 χ) ↔ (𝓢 ⊢ φ 🡒 ψ 🡒 χ) := iff_of_E! ECKCC!
 
-def CV [HasAxiomVerum 𝓢] [HasAxiomImplyK 𝓢] : 𝓢 ⊢! φ 🡒 ⊤ := C_of_conseq verum
-@[simp] lemma CV! [HasAxiomImplyK 𝓢] [HasAxiomVerum 𝓢] : 𝓢 ⊢ φ 🡒 ⊤ := ⟨CV⟩
+def CV [LogicalNeutral F] [HasAxiomVerum 𝓢] [HasAxiomImplyK 𝓢] : 𝓢 ⊢! φ 🡒 ⊤ := C_of_conseq verum
+@[simp] lemma CV! [LogicalNeutral F] [HasAxiomImplyK 𝓢] [HasAxiomVerum 𝓢] : 𝓢 ⊢ φ 🡒 ⊤ := ⟨CV⟩
 
 
 @[grind →]
@@ -314,7 +316,7 @@ end
 
 section
 
-variable {S F : Type*} [LogicalConnective F] [Entailment S F]
+variable {S F : Type*} [LogicalConnective F] [LogicalNeutral F] [Entailment S F]
 variable {𝓢 : S} [Entailment.Minimal 𝓢] {φ ψ χ : F}
 
 variable {Γ Δ : List F}
@@ -378,7 +380,7 @@ lemma CConj₂_Conj₂! [DecidableEq F] {Γ Δ : List F} (h : Δ ⊆ Γ) : 𝓢 
 
 section
 
-variable {G T : Type*} [Entailment T G] [LogicalConnective G] {𝓣 : T}
+variable {G T : Type*} [Entailment T G] [LogicalConnective G] [LogicalNeutral G] {𝓣 : T}
 
 abbrev Minimal.ofEquiv (𝓢 : S) [Entailment.Minimal 𝓢] (𝓣 : T)
     (f : G →ˡᶜ F) (e : (φ : G) → 𝓢 ⊢! f φ ≃ 𝓣 ⊢! φ) : Entailment.Minimal 𝓣 where
@@ -412,9 +414,9 @@ variable {F} {S} {𝓢 : S}
 
 instance : Coe (List F) (FiniteContext F 𝓢) := ⟨mk⟩
 
-abbrev conj [LogicalConnective F] (Γ : FiniteContext F 𝓢) : F := ⋀Γ.ctx
+abbrev conj [LogicalConnective F] [LogicalNeutral F] (Γ : FiniteContext F 𝓢) : F := ⋀Γ.ctx
 
-abbrev disj [LogicalConnective F] (Γ : FiniteContext F 𝓢) : F := ⋁Γ.ctx
+abbrev disj [LogicalConnective F] [LogicalNeutral F] (Γ : FiniteContext F 𝓢) : F := ⋁Γ.ctx
 
 instance : EmptyCollection (FiniteContext F 𝓢) := ⟨⟨[]⟩⟩
 
@@ -437,7 +439,7 @@ instance : AdjunctiveSet F (FiniteContext F 𝓢) where
   not_mem_empty := by simp
   mem_cons_iff := by simp [Adjoin.adjoin, mem_def]
 
-variable [Entailment S F] [LogicalConnective F]
+variable [Entailment S F] [LogicalConnective F] [LogicalNeutral F]
 
 instance (𝓢 : S) : Entailment (FiniteContext F 𝓢) F := ⟨(𝓢 ⊢! ·.conj 🡒 ·)⟩
 
@@ -619,7 +621,7 @@ instance : AdjunctiveSet F (Context F 𝓢) where
   not_mem_empty := by simp
   mem_cons_iff := by simp [Adjoin.adjoin, mem_def]
 
-variable [LogicalConnective F] [Entailment S F]
+variable [LogicalConnective F] [LogicalNeutral F] [Entailment S F]
 
 structure Proof (Γ : Context F 𝓢) (φ : F) where
   ctx : List F
@@ -768,7 +770,7 @@ end
 
 section
 
-variable {F : Type*} [LogicalConnective F]
+variable {F : Type*} [LogicalConnective F] [LogicalNeutral F]
          {S : Type*} [Entailment S F]
          {𝓢 : S} [Entailment.Minimal 𝓢]
          {φ φ₁ φ₂ ψ ψ₁ ψ₂ χ ξ : F}

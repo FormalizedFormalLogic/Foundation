@@ -22,12 +22,14 @@ inductive Litform (α : Type*) : Type _
 namespace Litform
 
 instance : LogicalConnective (Litform α) where
-  top   := Litform.verum
-  bot   := Litform.falsum
   wedge := Litform.and
   vee   := Litform.or
-  tilde := Litform.neg
   arrow := Litform.imply
+  tilde := Litform.neg
+
+instance : LogicalNeutral (Litform α) where
+  top := Litform.verum
+  bot := Litform.falsum
 
 section ToString
 
@@ -58,7 +60,7 @@ instance [Repr α] : Repr (Litform α) := ⟨fun t _ ↦ format t⟩
 
 end ToString
 
-variable (F : Q(Type*)) (ls : Q(LogicalConnective $F))
+variable (F : Q(Type*)) (ls : Q(LogicalConnective $F)) (ln : Q(LogicalNeutral $F))
 
 abbrev _root_.LO.Meta.Lit := Litform Expr
 

@@ -366,16 +366,18 @@ syntax:max "∃¹ " first_order_formula:0 : first_order_formula
 syntax:max "∀¹[" first_order_formula "] " first_order_formula:0 : first_order_formula
 syntax:max "∃¹[" first_order_formula "] " first_order_formula:0 : first_order_formula
 
+#check @HTilde.hTilde _ _ Tilde.instHTilde
+
 macro_rules
   | `(⤫formula($type)[ $binders* | $fbinders* | ($e)          ]) => `(⤫formula($type)[ $binders* | $fbinders* | $e ])
   | `(⤫formula($type)[ $_*       | $_*        | !!$φ:term     ]) => `($φ)
   | `(⤫formula($type)[ $_*       | $_*        | .!!$φ:term    ]) => `(Rewriting.emb $φ)
   | `(⤫formula($type)[ $_*       | $_*        | ⊤             ]) => `(⊤)
   | `(⤫formula($type)[ $_*       | $_*        | ⊥             ]) => `(⊥)
-  | `(⤫formula($type)[ $binders* | $fbinders* | $φ ∧ $ψ       ]) => `(⤫formula($type)[ $binders* | $fbinders* | $φ ] ⋏ ⤫formula($type)[ $binders* | $fbinders* | $ψ ])
-  | `(⤫formula($type)[ $binders* | $fbinders* | $φ ∨ $ψ       ]) => `(⤫formula($type)[ $binders* | $fbinders* | $φ ] ⋎ ⤫formula($type)[ $binders* | $fbinders* | $ψ ])
-  | `(⤫formula($type)[ $binders* | $fbinders* | ¬$φ           ]) => `(∼⤫formula($type)[ $binders* | $fbinders* | $φ ])
-  | `(⤫formula($type)[ $binders* | $fbinders* | $φ → $ψ       ]) => `(⤫formula($type)[ $binders* | $fbinders* | $φ ] 🡒 ⤫formula($type)[ $binders* | $fbinders* | $ψ ])
+  | `(⤫formula($type)[ $binders* | $fbinders* | $φ ∧ $ψ       ]) => `(@HWedge.hWedge _ _ _ Wedge.instHWedge ⤫formula($type)[ $binders* | $fbinders* | $φ ] ⤫formula($type)[ $binders* | $fbinders* | $ψ ])
+  | `(⤫formula($type)[ $binders* | $fbinders* | $φ ∨ $ψ       ]) => `(@HVee.hVee _ _ _ Vee.instHVee ⤫formula($type)[ $binders* | $fbinders* | $φ ] ⤫formula($type)[ $binders* | $fbinders* | $ψ ])
+  | `(⤫formula($type)[ $binders* | $fbinders* | ¬$φ           ]) => `(@HTilde.hTilde _ _ Tilde.instHTilde ⤫formula($type)[ $binders* | $fbinders* | $φ ])
+  | `(⤫formula($type)[ $binders* | $fbinders* | $φ → $ψ       ]) => `(@HArrow.hArrow _ _ _ Arrow.instHArrow ⤫formula($type)[ $binders* | $fbinders* | $φ ] ⤫formula($type)[ $binders* | $fbinders* | $ψ ])
   | `(⤫formula($type)[ $binders* | $fbinders* | $φ ↔ $ψ       ]) => `(⤫formula($type)[ $binders* | $fbinders* | $φ ] 🡘 ⤫formula($type)[ $binders* | $fbinders* | $ψ ])
   | `(⤫formula($type)[ $binders* | $fbinders* | ⋀ $i, $φ      ]) => `(Matrix.conj fun $i ↦ ⤫formula($type)[ $binders* | $fbinders* | $φ ])
   | `(⤫formula($type)[ $binders* | $fbinders* | ⋁ $i, $φ      ]) => `(Matrix.disj fun $i ↦ ⤫formula($type)[ $binders* | $fbinders* | $φ ])
@@ -465,10 +467,10 @@ macro_rules
   | `(⤫formula(lit)[ $binders* | $fbinders* | $t:first_order_term < $u:first_order_term ]) => `(Semiformula.Operator.operator Operator.LT.lt ![⤫term(lit)[ $binders* | $fbinders* | $t ], ⤫term(lit)[ $binders* | $fbinders* | $u ]])
   | `(⤫formula(lit)[ $binders* | $fbinders* | $t:first_order_term ≤ $u:first_order_term ]) => `(Semiformula.Operator.operator Operator.LE.le ![⤫term(lit)[ $binders* | $fbinders* | $t ], ⤫term(lit)[ $binders* | $fbinders* | $u ]])
   | `(⤫formula(lit)[ $binders* | $fbinders* | $t:first_order_term ∈ $u:first_order_term ]) => `(Semiformula.Operator.operator Operator.Mem.mem ![⤫term(lit)[ $binders* | $fbinders* | $t ], ⤫term(lit)[ $binders* | $fbinders* | $u ]])
-  | `(⤫formula(lit)[ $binders* | $fbinders* | $t:first_order_term ≠ $u:first_order_term ]) => `(∼(Semiformula.Operator.operator Operator.Eq.eq ![⤫term(lit)[ $binders* | $fbinders* | $t ], ⤫term(lit)[ $binders* | $fbinders* | $u ]]))
-  | `(⤫formula(lit)[ $binders* | $fbinders* | $t:first_order_term ≮ $u:first_order_term ]) => `(∼(Semiformula.Operator.operator Operator.LT.lt ![⤫term(lit)[ $binders* | $fbinders* | $t ], ⤫term(lit)[ $binders* | $fbinders* | $u ]]))
-  | `(⤫formula(lit)[ $binders* | $fbinders* | $t:first_order_term ≰ $u:first_order_term ]) => `(∼(Semiformula.Operator.operator Operator.LE.le ![⤫term(lit)[ $binders* | $fbinders* | $t ], ⤫term(lit)[ $binders* | $fbinders* | $u ]]))
-  | `(⤫formula(lit)[ $binders* | $fbinders* | $t:first_order_term ∉ $u:first_order_term ]) => `(∼(Semiformula.Operator.operator Operator.Mem.mem ![⤫term(lit)[ $binders* | $fbinders* | $t ], ⤫term(lit)[ $binders* | $fbinders* | $u ]]))
+  | `(⤫formula(lit)[ $binders* | $fbinders* | $t:first_order_term ≠ $u:first_order_term ]) => `(@HTilde.hTilde _ _ Tilde.instHTilde (Semiformula.Operator.operator Operator.Eq.eq ![⤫term(lit)[ $binders* | $fbinders* | $t ], ⤫term(lit)[ $binders* | $fbinders* | $u ]]))
+  | `(⤫formula(lit)[ $binders* | $fbinders* | $t:first_order_term ≮ $u:first_order_term ]) => `(@HTilde.hTilde _ _ Tilde.instHTilde (Semiformula.Operator.operator Operator.LT.lt ![⤫term(lit)[ $binders* | $fbinders* | $t ], ⤫term(lit)[ $binders* | $fbinders* | $u ]]))
+  | `(⤫formula(lit)[ $binders* | $fbinders* | $t:first_order_term ≰ $u:first_order_term ]) => `(@HTilde.hTilde _ _ Tilde.instHTilde (Semiformula.Operator.operator Operator.LE.le ![⤫term(lit)[ $binders* | $fbinders* | $t ], ⤫term(lit)[ $binders* | $fbinders* | $u ]]))
+  | `(⤫formula(lit)[ $binders* | $fbinders* | $t:first_order_term ∉ $u:first_order_term ]) => `(@HTilde.hTilde _ _ Tilde.instHTilde (Semiformula.Operator.operator Operator.Mem.mem ![⤫term(lit)[ $binders* | $fbinders* | $t ], ⤫term(lit)[ $binders* | $fbinders* | $u ]]))
 
 macro_rules
   | `(⤫formula(lit)[ $binders* | $fbinders* | ∀ $x < $t, $φ ]) => do

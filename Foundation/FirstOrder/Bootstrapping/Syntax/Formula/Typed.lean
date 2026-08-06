@@ -62,15 +62,18 @@ noncomputable def Semiformula.nrel (R : L.Rel k) (v : SemitermVec V L k n) : Sem
     (Semiformula.nrel R v).val = ^nrel ↑k ⌜R⌝ v.val := rfl
 
 noncomputable scoped instance : LogicalConnective (Semiformula V L n) where
-  top := ⟨^⊤, by simp⟩
-  bot := ⟨^⊥, by simp⟩
   wedge (φ ψ) := ⟨φ.val ^⋏ ψ.val, by simp⟩
   vee (φ ψ) := ⟨φ.val ^⋎ ψ.val, by simp⟩
-  tilde (φ) := ⟨neg L φ.val, by simp⟩
   arrow (φ ψ) := ⟨imp L φ.val ψ.val, by simp⟩
+  tilde (φ) := ⟨neg L φ.val, by simp⟩
+
+noncomputable scoped instance : LogicalNeutral (Semiformula V L n) where
+  top := ⟨^⊤, by simp⟩
+  bot := ⟨^⊥, by simp⟩
 
 noncomputable instance : LCWQ (Semiformula V L) where
   connectives := inferInstance
+  neutrals := inferInstance
   all φ := ⟨^∀ φ.val, by simp⟩
   exs φ := ⟨^∃ φ.val, by simp⟩
 
@@ -126,15 +129,17 @@ lemma val_inj {φ ψ : Semiformula V L n} :
 
 @[simp] lemma verums_succ (k : V) : (verums (k + 1) : Semiformula V L n) = ⊤ ⋏ verums k := by ext; simp
 
-instance : DeMorgan (Semiformula V L n) where
-  verum := by ext; simp
-  falsum := by ext; simp
+instance : TildeInvolutive (Semiformula V L n) where
+  tilde_involutive _ := by ext; simp
+
+instance : LogicalConnective.DeMorgan (Semiformula V L n) where
   and _ _ := by ext; simp
   or _ _ := by ext; simp
   imply _ _ := by ext; simp; rfl
 
-instance : TildeInvolutive (Semiformula V L n) where
-  neg_involutive _ := by ext; simp
+instance : LogicalNeutral.DeMorgan (Semiformula V L n) where
+  verum := by ext; simp
+  falsum := by ext; simp
 
 @[simp] lemma neg_all (φ : Semiformula V L (n + 1)) : ∼(∀¹ φ) = ∃¹ (∼φ) := by ext; simp
 @[simp] lemma neg_ex (φ : Semiformula V L (n + 1)) : ∼(∃¹ φ) = ∀¹ (∼φ) := by ext; simp
