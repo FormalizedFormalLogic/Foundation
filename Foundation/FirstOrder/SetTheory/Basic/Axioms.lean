@@ -168,4 +168,6 @@ lemma zc_subset_zfc : 𝗭𝗖 ⊆ 𝗭𝗙𝗖 := Set.union_subset_union_left _
 
 instance : 𝗭𝗖 ⪯ 𝗭𝗙𝗖 := Entailment.WeakerThan.ofSubset zc_subset_zfc
 
+instance : 𝗭 ⪯ 𝗭𝗙𝗖 := Entailment.WeakerThan.trans (inferInstance : 𝗭 ⪯ 𝗭𝗙) inferInstance
+
 end LO.FirstOrder.SetTheory
