@@ -163,6 +163,7 @@ def exsItr : (k : ℕ) → α (n + k) → α n
   |     0, a => a
   | k + 1, a => exsItr k (∃¹ a)
 
+/-- Iterated application of `k` existential quantifiers. -/
 notation "∃¹^[" k "] " φ:64 => exsItr k φ
 
 @[simp] lemma exsItr_zero (a : α n) : ∃¹^[0] a = a := rfl
@@ -181,8 +182,10 @@ def ball [UnivQuantifier α] [Arrow (α (n + 1))] (φ : α (n + 1)) (ψ : α (n 
 
 def bexs [ExsQuantifier α] [Wedge (α (n + 1))] (φ : α (n + 1)) (ψ : α (n + 1)) : α n := ∃¹ (φ ⋏ ψ)
 
+/-- A bounded universal quantifier. `∀¹[φ] ψ` is defined as `∀¹ (φ 🡒 ψ)`. -/
 notation:64 "∀¹[" φ "] " ψ => ball φ ψ
 
+/-- A bounded existential quantifier. `∃¹[φ] ψ` is defined as `∃¹ (φ ⋏ ψ)`. -/
 notation:64 "∃¹[" φ "] " ψ => bexs φ ψ
 
 end quantifier

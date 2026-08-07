@@ -83,15 +83,15 @@ def bindAux (b : Fin n₁ → Semiterm L ξ₂ n₂) (e : ξ₁ → Semiterm L �
   |       &x => e x
   | func f v => func f (fun i => bindAux b e (v i))
 
-/-- `LO.FirstOrder.Rew.bind f` is a rewriting of the bound variables occurring in a term by `b : Fin n₁ → Semiterm L ξ₂ n₂`, and the free variables occurring in a term by `e : ξ₁ → Semiterm L ξ₂ n₂`. -/
+/-- `LO.FirstOrder.Rew.bind f` is a substitution of the bound variables occurring in a term by `b : Fin n₁ → Semiterm L ξ₂ n₂`, and the free variables occurring in a term by `e : ξ₁ → Semiterm L ξ₂ n₂`. -/
 def bind (b : Fin n₁ → Semiterm L ξ₂ n₂) (e : ξ₁ → Semiterm L ξ₂ n₂) : Rew L ξ₁ n₁ ξ₂ n₂ where
   toFun := bindAux b e
   func'' := fun _ _ => rfl
 
-/-- `LO.FirstOrder.Rew.rewrite f` is a rewriting of the free variables occurring in a term by `f : ξ₁ → Semiterm L ξ₂ n`. -/
+/-- `LO.FirstOrder.Rew.rewrite f` is a substitution of the free variables occurring in a term by `f : ξ₁ → Semiterm L ξ₂ n`. -/
 def rewrite (f : ξ₁ → Semiterm L ξ₂ n) : Rew L ξ₁ n ξ₂ n := bind Semiterm.bvar f
 
-/-- `LO.FirstOrder.Rew.rewriteMap` f is a rewriting of the free variables occurring in a term by `e : ξ₁ → ξ₂`. -/
+/-- `LO.FirstOrder.Rew.rewriteMap` f is a substitution of the free variables occurring in a term by `e : ξ₁ → ξ₂`. -/
 def rewriteMap (e : ξ₁ → ξ₂) : Rew L ξ₁ n ξ₂ n := rewrite (fun m => &(e m))
 
 def map (b : Fin n₁ → Fin n₂) (e : ξ₁ → ξ₂) : Rew L ξ₁ n₁ ξ₂ n₂ :=
@@ -101,7 +101,7 @@ def map (b : Fin n₁ → Fin n₂) (e : ξ₁ → ξ₂) : Rew L ξ₁ n₁ ξ�
 def subst {n'} (v : Fin n → Semiterm L ξ n') : Rew L ξ n ξ n' :=
   bind v fvar
 
-/-- `LO.FirstOrder.Rew.emb` is a embedding of a term with no free variables. -/
+/-- `LO.FirstOrder.Rew.emb` is a embedding of a term with no free variables. It can be thought of as a cast from `Semiterm L Empty n` to `Semiterm L ξ n` for any type `ξ`. -/
 def emb {o : Type v₁} [h : IsEmpty o] {ξ : Type v₂} {n} : Rew L o n ξ n := map id h.elim
 
 abbrev embs {o : Type v₁} [IsEmpty o] {n} : Rew L o n ℕ n := emb
@@ -796,6 +796,15 @@ end Semiterm
 
 /-! ### Rewriting system of formulae -/
 
+/--
+A typeclass for `Rew`s which additionally respect quantifiers.
+
+`app` - A notion of application of `Rew`s to formulas.
+
+`app_all` - Application preserves universal quantification.
+
+`app_exs` - Application preserves existential quantification.
+-/
 class Rewriting (L : outParam Language) (ξ : outParam Type*) (F : ℕ → Type*) (ζ : Type*) (G : outParam (ℕ → Type*))
     [LCWQ F] [LCWQ G] where
   app {n₁ n₂} : Rew L ξ n₁ ζ n₂ → F n₁ →ˡᶜ G n₂
@@ -811,6 +820,7 @@ variable [LCWQ F] [LCWQ G] [Rewriting L ξ F ζ G]
 
 attribute [simp] app_all app_exs
 
+/-- Application of a `Rewriting` to a formula. -/
 infixr:73 " ▹ " => app
 
 lemma smul_ext' {ω₁ ω₂ : Rew L ξ n₁ ζ n₂} (h : ω₁ = ω₂) {φ : F n₁} : ω₁ ▹ φ = ω₂ ▹ φ := by rw [h]
@@ -829,8 +839,10 @@ lemma smul_ext' {ω₁ ω₂ : Rew L ξ n₁ ζ n₂} (h : ω₁ = ω₂) {φ : 
 
 abbrev subst [Rewriting L ξ F ξ F] (φ : F n₁) (w : Fin n₁ → Semiterm L ξ n₂) : F n₂ := Rew.subst w ▹ φ
 
+/-- Applies the substitution `LO.FirstOrder.Rew.subst w` to a formula. This substitutes the bound variables occurring in the formula by `w : Fin n₁ → Semiterm L ξ n₂`. -/
 infix:90 " ⇜ " => LO.FirstOrder.Rewriting.subst
 
+/-- Applies the substitution `LO.FirstOrder.Rew.shift` to a formula. This substitutes each free variable `&x` with `&(x + 1)`. -/
 abbrev shift [Rewriting L ℕ F ℕ F] : F n →ˡᶜ F n := app Rew.shift
 
 abbrev free [Rewriting L ℕ F ℕ F] : F (n + 1) →ˡᶜ F n := app Rew.free
@@ -839,6 +851,7 @@ abbrev fix [Rewriting L ℕ F ℕ F] : F n →ˡᶜ F (n + 1) := app Rew.fix
 
 def shifts [Rewriting L ℕ F ℕ F] (Γ : List (F n)) : List (F n) := Γ.map Rewriting.shift
 
+/-- Applies the substitution `LO.FirstOrder.Rew.shift` to each formula in a list of formulas. This substitutes each free variable `&x` with `&(x + 1)`. -/
 scoped[LO.FirstOrder] postfix:max "⁺" => FirstOrder.Rewriting.shifts
 
 @[simp] lemma shifts_nil [Rewriting L ℕ F ℕ F] : ([] : List (F n))⁺ = [] := by rfl
@@ -858,11 +871,14 @@ open Lean PrettyPrinter Delaborator
 
 syntax (name := substNotation) term:max "/[" term,* "]" : term
 
+/-- Slash notation for rewriting bound variables of a formula.
+
+The notation `φ/w` is equivalent to `φ ⇜ w`, which for a formula `φ` with bound variables from `Fin n₁`, substitutes the bound variables occurring in `φ` by `w : Fin n₁ → Semiterm L ξ n₂`. -/
 macro_rules (kind := substNotation)
   | `($φ:term /[$terms:term,*]) => `($φ ⇜ ![$terms,*])
 
 @[app_unexpander Rewriting.subst]
-meta def _root_.unexpsnderSubstitute : Unexpander
+meta def _root_.unexpanderSubstitute : Unexpander
   | `($_ $φ:term ![$ts:term,*]) => `($φ /[ $ts,* ])
   | _                           => throw ()
 

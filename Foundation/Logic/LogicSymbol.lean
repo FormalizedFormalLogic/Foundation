@@ -328,6 +328,7 @@ section conjunction
 
 variable [Top α] [Wedge α]
 
+/-- The conjunction of a list of elements of type `α`, where `α` is a type with `Wedge α`. -/
 def conj : {n : ℕ} → (Fin n → α) → α
   |     0, _ => ⊤
   | _ + 1, v => v 0 ⋏ conj (vecTail v)
@@ -342,6 +343,7 @@ section disjunction
 
 variable [Bot α] [Vee α]
 
+/-- The disjunction of a list of elements of type `α`, where `α` is a type with `Vee α`. -/
 def disj : {n : ℕ} → (Fin n → α) → α
   |     0, _ => ⊥
   | _ + 1, v => v 0 ⋎ disj (vecTail v)
