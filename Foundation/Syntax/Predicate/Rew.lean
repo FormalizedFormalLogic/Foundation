@@ -820,7 +820,7 @@ variable [LCWQ F] [LCWQ G] [Rewriting L ξ F ζ G]
 
 attribute [simp] app_all app_exs
 
-/-- Application of a `Rewriting` to a formula. (TODO: Should I change the word "formula" here to something else?) -/
+/-- Application of a `Rewriting` to a formula. -/
 infixr:73 " ▹ " => app
 
 lemma smul_ext' {ω₁ ω₂ : Rew L ξ n₁ ζ n₂} (h : ω₁ = ω₂) {φ : F n₁} : ω₁ ▹ φ = ω₂ ▹ φ := by rw [h]
