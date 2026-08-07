@@ -20,6 +20,7 @@ section model
 
 def Bit (i a : V) : Prop := LenBit (Exp.exp i) a
 
+/-- Support for `∈` notation over a model of arithmetic, implemented by binary encoding. -/
 instance : Membership V V := ⟨fun a i ↦ Bit i a⟩
 
 def _root_.LO.FirstOrder.Arithmetic.bitDef : 𝚺₀.Semisentence 2 := .mkSigma
@@ -99,6 +100,7 @@ def memRel : 𝚺₀.Semisentence 3 := .mkSigma
 def memRel₃ : 𝚺₀.Semisentence 4 := .mkSigma
   “R x y z. ∃ yz <⁺ (y + z + 1)², !pairDef yz y z ∧ ∃ xyz <⁺ (x + yz + 1)², !pairDef xyz x yz ∧ xyz ∈ R”
 
+/-- The relation `⟪x, y⟫ ∈ R` in arithmetic, implemented by binary coding, as an operator. -/
 def memRelOpr : Semiformula.Operator ℒₒᵣ 3 := ⟨memRel.val⟩
 
 def memRel₃Opr : Semiformula.Operator ℒₒᵣ 4 := ⟨memRel₃.val⟩
@@ -120,7 +122,7 @@ macro_rules
     let binders' := binders.insertIdx 0 x
     `(bexsIn ⤫term(lit)[$binders* | $fbinders* | $t] ⤫formula(lit)[$binders'* | $fbinders* | $p])
 
-/-- `x ~[m] y` states that `⟪x, y⟫` is in `m`. (TODO: Is this a correct description?) -/
+/-- `x ~[m] y` states that `⟪x, y⟫` is in `m`, where the notion of "in" is implemented by binary coding. -/
 syntax:45 first_order_term:45 " ∼[" first_order_term "]" first_order_term:0 : first_order_formula
 syntax:45 first_order_term:45 " ≁[" first_order_term "]" first_order_term:0 : first_order_formula
 syntax:45 ":⟪" first_order_term ", " first_order_term "⟫:∈ " first_order_term:0 : first_order_formula
