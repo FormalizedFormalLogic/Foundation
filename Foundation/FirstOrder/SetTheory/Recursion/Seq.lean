@@ -44,7 +44,7 @@ syntax ":Seq " first_order_term : first_order_formula
 
 scoped macro_rules
   | `(⤫formula($type)[$binders* | $fbinders* | :Seq $t:first_order_term]) =>
-    `(⤫formula($type)[$binders* | $fbinders* | !seqDef.val $t])
+    `(⤫formula($type)[$binders* | $fbinders* | !seq.dfn $t])
 
 end
 
@@ -407,5 +407,50 @@ lemma mem_vectoSeq {n : ℕ} (v : Fin n → V) (i : Fin n) : ⟨(i : V), v i⟩�
     · simpa [vecToSeq, kpair_mem_seqCons_iff] using Or.inr <| ih (v ·.castSucc) i
 
 end seqToVec
+
+section notations
+
+/-! ### Macros for binder notation -/
+
+def memRel : SetTheorySemisentence 3 :=
+  “R x y. ∃ p, !kpair.dfn p x y ∧ p ∈ R”
+
+/-- The relation `⟨x, y⟩ₖ ∈ R` as an operator. -/
+def memRelOpr : Semiformula.Operator ℒₛₑₜ 3 := ⟨memRel⟩
+
+open Lean PrettyPrinter Delaborator
+
+/-- `x ~[f] y` states that `⟨x, y⟩ₖ` is in `f` -/
+syntax:45 first_order_term:45 " ∼[" first_order_term "]" first_order_term:0 : first_order_formula
+syntax:45 first_order_term:45 " ≁[" first_order_term "]" first_order_term:0 : first_order_formula
+
+macro_rules
+  | `(⤫formula(lit)[ $binders* | $fbinders* | $t₁:first_order_term ∼[ $u:first_order_term ] $t₂:first_order_term]) =>
+    `(memRelOpr.operator ![⤫term(lit)[$binders* | $fbinders* | $u], ⤫term(lit)[$binders* | $fbinders* | $t₁], ⤫term(lit)[$binders* | $fbinders* | $t₂]])
+  /- TODO: Add support for `∅ ∼[u] t` and `t ∼[u] ∅`. -/
+  -- | `(⤫formula(lit)[ $binders* | $fbinders* | ∅ ∼[ $u:first_order_term ] $t:first_order_term]) => -- The problem is with this line
+  --   `(⤫formula(lit)[ $binders* | $fbinders* | ∃¹ ((∀¹[#0 ∈ #1] ⊥) ∧ (#0 ∼[$u] $t₂))])
+  | `(⤫formula(lit)[ $binders* | $fbinders* | $t₁:first_order_term ≁[ $u:first_order_term ] $t₂:first_order_term]) =>
+    `(∼memRelOpr.operator ![⤫term(lit)[$binders* | $fbinders* | $u], ⤫term(lit)[$binders* | $fbinders* | $t₁], ⤫term(lit)[$binders* | $fbinders* | $t₂]])
+  | `(⤫formula(faf)[ $binders* | $fbinders* | $t₁:first_order_term ∼[ $u:first_order_term ] $t₂:first_order_term]) => do
+    let x₁ : TSyntax `ident ← TSyntax.freshIdent
+    let x₂ : TSyntax `ident ← TSyntax.freshIdent
+    let x₃ : TSyntax `ident ← TSyntax.freshIdent
+    `(∀¹ (⤫term(faf)[ $x₁ $binders* | $fbinders* | $t₁] 🡒 ∀¹ (⤫term(faf)[ $x₁ $x₂ $binders* | $fbinders* | $u ] 🡒 ∀¹ (⤫term(faf)[ $x₁ $x₂ $x₃ $binders* | $fbinders* | $t₂ ] 🡒 “#2 ∼[#1] #0”))))
+  | `(⤫formula(faf)[ $binders* | $fbinders* | $t₁:first_order_term ≁[ $u:first_order_term ] $t₂:first_order_term]) => do
+    let x₁ : TSyntax `ident ← TSyntax.freshIdent
+    let x₂ : TSyntax `ident ← TSyntax.freshIdent
+    let x₃ : TSyntax `ident ← TSyntax.freshIdent
+    `(∀¹ (⤫term(faf)[ $x₁ $binders* | $fbinders* | $t₁] 🡒 ∀¹ (⤫term(faf)[ $x₁ $x₂ $binders* | $fbinders* | $u ] 🡒 ∀¹ (⤫term(faf)[ $x₁ $x₂ $x₃ $binders* | $fbinders* | $t₂ ] 🡒 “#2 ≁[#1] #0”))))
+
+#check f“x y. x ∈ y”
+
+#check f“f x y. x ∼[f] y”
+
+#check f“f x y. x ∈ (!kpair.dfn y y)”
+
+#check f“f x y. x ∼[f] (!kpair.dfn y y)”
+
+end notations
 
 end LO.FirstOrder.SetTheory

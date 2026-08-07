@@ -116,9 +116,10 @@ public import Foundation.FirstOrder.SetTheory.Fixpoint
 public import Foundation.FirstOrder.SetTheory.Function
 public import Foundation.FirstOrder.SetTheory.LoewenheimSkolem
 public import Foundation.FirstOrder.SetTheory.Ordinal
-public import Foundation.FirstOrder.SetTheory.PRF.PRF
-public import Foundation.FirstOrder.SetTheory.PRF.Seq
 public import Foundation.FirstOrder.SetTheory.Recursion
+public import Foundation.FirstOrder.SetTheory.Recursion.Blueprint
+public import Foundation.FirstOrder.SetTheory.Recursion.Fixpoint
+public import Foundation.FirstOrder.SetTheory.Recursion.Seq
 public import Foundation.FirstOrder.SetTheory.TransitiveModel
 public import Foundation.FirstOrder.SetTheory.Universe
 public import Foundation.FirstOrder.SetTheory.Z

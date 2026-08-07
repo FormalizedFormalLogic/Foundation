@@ -1,34 +1,33 @@
 module
 
-public import Foundation.FirstOrder.SetTheory.Z
+public import Foundation.FirstOrder.SetTheory.Recursion.Seq
+public import Foundation.FirstOrder.SetTheory.Recursion
 
 @[expose] public section
 /-!
 
-# Primitive Recursive Set Functions in $\mathsf{Z}$
+# Blueprint for the recursion theorem in $\mathsf{ZF}$
 
 -/
 
 namespace LO.FirstOrder.SetTheory
 
-variable {V : Type*} [SetStructure V] [Nonempty V] [V↓[ℒₛₑₜ] ⊧* 𝗭]
+variable {V : Type*} [SetStructure V] [Nonempty V] [V↓[ℒₛₑₜ] ⊧* 𝗭𝗙]
 
 namespace PR
 
 structure Blueprint (k : ℕ) where
-  zero : SetTheorySemisentence (k + 1)
-  succ : SetTheorySemisentence (k + 3)
+  graph : SetTheorySemisentence (k + 2)
 
-def Blueprint.cseqDef (p : Blueprint k) : SetTheorySemisentence (k + 1) := .mkSigma
-  “s.
+def Blueprint.cseq_dfn (p : Blueprint k) : SetTheorySemisentence (k + 1) :=
+  f“s.
     :Seq s
-    ∧ (∃ z < s, !p.zero z ⋯ ∧ 0 ∼[s] z)
-    ∧ (∀ i < 2 * s,
-        (∃ l <⁺ 2 * s, !lhDef l s ∧ i + 1 < l) →
-        ∀ z < s, i ∼[s] z → ∃ u < s, !p.succ u z i ⋯ ∧ i + 1 ∼[s] u)”
+    ∧ (∀ α,
+        (∃ l, !lh.dfn l s ∧ α ∈ l) →
+        α ∼[s] (!p.graph (!restrict.dfn s α) ⋯))”
 
-def Blueprint.resultDef (p : Blueprint k) : SetTheorySemisentence (k + 2) := .mkSigma
-  “z u. ∃ s, !p.cseqDef s ⋯ ∧ u ∼[s] z”
+def Blueprint.result.dfn (p : Blueprint k) : SetTheorySemisentence (k + 2) :=
+  “z u. ∃ s, !p.cseq_dfn s ⋯ ∧ u ∼[s] z”
 
 /- TODO: Once the Lévy hierarchy has been added, add a `Δ` version. -/
 -- def Blueprint.resultDeltaDef (p : Blueprint k) : SetTheorySemisentence (k + 2) := p.resultDef.graphDelta
@@ -36,10 +35,8 @@ def Blueprint.resultDef (p : Blueprint k) : SetTheorySemisentence (k + 2) := .mk
 variable (V)
 
 structure Construction {k : ℕ} (p : Blueprint k) where
-  zero : (Fin k → V) → V
-  succ : (Fin k → V) → V → V → V
-  zero_defined : 𝚺₁.DefinedFunction zero p.zero
-  succ_defined : 𝚺₁.DefinedFunction (fun v ↦ succ (v ·.succ.succ) (v 1) (v 0)) p.succ
+  core : (Fin (k + 1) → V) → V
+  core_defined : DefinedFunction core p.graph
 
 variable {V}
 
@@ -47,13 +44,13 @@ namespace Construction
 
 variable {k : ℕ} {p : Blueprint k} (c : Construction V p) (v : Fin k → V)
 
-def CSeq (s : V) : Prop := Seq s ∧ ⟪0, c.zero v⟫ ∈ s ∧ ∀ i < lh s - 1, ∀ z, ⟪i, z⟫ ∈ s → ⟪i + 1, c.succ v i z⟫ ∈ s
+def CSeq (s : V) : Prop := Seq s ∧ ⟨0, c.zero v⟩ₖ ∈ s ∧ ∀ α, SetTheory.succ α ∈ lh s → ∀ z, ⟨α, z⟩ₖ ∈ s → ⟨SetTheory.succ α, c.succ v α z⟩ₖ ∈ s
 
 private lemma cseq_iff (s : V) : c.CSeq v s ↔
     Seq s
-    ∧ (∃ z < s, z = c.zero v ∧ ⟪0, z⟫ ∈ s)
+    ∧ (∃ z < s, z = c.zero v ∧ ⟨0, z⟩ₖ ∈ s)
     ∧ (∀ i < 2 * s,
-      (∃ l ≤ 2 * s, l = lh s ∧ i + 1 < l) → ∀ z < s, ⟪i, z⟫ ∈ s → ∃ u < s, u = c.succ v i z ∧ ⟪i + 1, u⟫ ∈ s) :=
+      (∃ l ≤ 2 * s, l = lh s ∧ i + 1 < l) → ∀ z < s, ⟨i, z⟩ₖ ∈ s → ∃ u < s, u = c.succ v i z ∧ ⟨i + 1, u⟩ₖ ∈ s) :=
   ⟨by rintro ⟨Hs, hz, hs⟩
       exact ⟨Hs, ⟨c.zero v, lt_of_mem_rng hz, rfl, hz⟩, fun i _ hi z _ hiz ↦
       ⟨c.succ v i z, by
@@ -66,7 +63,7 @@ private lemma cseq_iff (s : V) : c.CSeq v s ↔
           ⟨lh s, by simp, rfl, by simpa [lt_tsub_iff_right] using hi⟩ z (lt_of_mem_rng hiz) hiz with ⟨_, _, rfl, h⟩
         exact h⟩⟩
 
-lemma cseq_defined : 𝚺₁.Defined (fun v ↦ c.CSeq (v ·.succ) (v 0) : (Fin (k + 1) → V) → Prop) p.cseqDef := .mk fun v ↦ by
+lemma cseq_defined : Defined (fun v ↦ c.CSeq (v ·.succ) (v 0) : (Fin (k + 1) → V) → Prop) p.cseqDef := .mk fun v ↦ by
   simp [Blueprint.cseqDef, cseq_iff, c.zero_defined.iff, c.succ_defined.iff]
 
 @[simp] lemma cseq_defined_iff (v : Fin (k + 1) → V) :
@@ -187,21 +184,21 @@ lemma result_graph (z u : V) : z = c.result v u ↔ ∃ s, c.CSeq v s ∧ ⟪u, 
         (by simp [←hu]) h' h⟩
 
 set_option linter.flexible false in
-lemma result_defined : 𝚺₁.DefinedFunction (fun v ↦ c.result (v ·.succ) (v 0) : (Fin (k + 1) → V) → V) p.resultDef := .mk fun v ↦ by
+lemma result_defined : DefinedFunction (fun v ↦ c.result (v ·.succ) (v 0) : (Fin (k + 1) → V) → V) p.resultDef := .mk fun v ↦ by
   simp [Blueprint.resultDef, result_graph]
   apply exists_congr; intro x
   simp [c.cseq_defined_iff]
 
-lemma result_defined_delta : 𝚫₁.DefinedFunction (fun v ↦ c.result (v ·.succ) (v 0) : (Fin (k + 1) → V) → V) p.resultDeltaDef :=
+lemma result_defined_delta : DefinedFunction (fun v ↦ c.result (v ·.succ) (v 0) : (Fin (k + 1) → V) → V) p.resultDeltaDef :=
   c.result_defined.graph_delta
 
 @[simp] lemma result_defined_iff (v : Fin (k + 2) → V) :
     p.resultDef.val.Evalb v ↔ v 0 = c.result (v ·.succ.succ) (v 1) := c.result_defined.iff
 
-instance result_definable : 𝚺₁.DefinableFunction (fun v ↦ c.result (v ·.succ) (v 0) : (Fin (k + 1) → V) → V) :=
+instance result_definable : DefinableFunction (fun v ↦ c.result (v ·.succ) (v 0) : (Fin (k + 1) → V) → V) :=
   c.result_defined.to_definable
 
-instance result_definable_delta₁ : 𝚫₁.DefinableFunction (fun v ↦ c.result (v ·.succ) (v 0) : (Fin (k + 1) → V) → V) :=
+instance result_definable_delta₁ : DefinableFunction (fun v ↦ c.result (v ·.succ) (v 0) : (Fin (k + 1) → V) → V) :=
   c.result_defined_delta.to_definable
 
 attribute [irreducible] Blueprint.resultDef
