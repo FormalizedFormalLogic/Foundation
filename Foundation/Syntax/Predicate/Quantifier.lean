@@ -100,11 +100,16 @@ class Quantifier (α : ℕ → Type*) extends UnivQuantifier α, ExsQuantifier �
 /-- Logical Connectives with Quantifiers. -/
 class LCWQ (α : ℕ → Type*) extends Quantifier α where
   connectives : (n : ℕ) → LogicalConnective (α n)
+  neutrals : (n : ℕ) → LogicalNeutral (α n)
 
 instance (α : ℕ → Type*) [LCWQ α] (n : ℕ) : LogicalConnective (α n) := LCWQ.connectives n
 
-instance (α : ℕ → Type*) [Quantifier α] [(n : ℕ) → LogicalConnective (α n)] : LCWQ α where
+instance (α : ℕ → Type*) [LCWQ α] (n : ℕ) : LogicalNeutral (α n) := LCWQ.neutrals n
+
+instance (α : ℕ → Type*) [Quantifier α] [(n : ℕ) → LogicalConnective (α n)]
+    [(n : ℕ) → LogicalNeutral (α n)] : LCWQ α where
   connectives := inferInstance
+  neutrals := inferInstance
 
 section UnivQuantifier
 
@@ -158,6 +163,7 @@ def exsItr : (k : ℕ) → α (n + k) → α n
   |     0, a => a
   | k + 1, a => exsItr k (∃¹ a)
 
+/-- Iterated application of `k` existential quantifiers. -/
 notation "∃¹^[" k "] " φ:64 => exsItr k φ
 
 @[simp] lemma exsItr_zero (a : α n) : ∃¹^[0] a = a := rfl
@@ -176,8 +182,10 @@ def ball [UnivQuantifier α] [Arrow (α (n + 1))] (φ : α (n + 1)) (ψ : α (n 
 
 def bexs [ExsQuantifier α] [Wedge (α (n + 1))] (φ : α (n + 1)) (ψ : α (n + 1)) : α n := ∃¹ (φ ⋏ ψ)
 
+/-- A bounded universal quantifier. `∀¹[φ] ψ` is defined as `∀¹ (φ 🡒 ψ)`. -/
 notation:64 "∀¹[" φ "] " ψ => ball φ ψ
 
+/-- A bounded existential quantifier. `∃¹[φ] ψ` is defined as `∃¹ (φ ⋏ ψ)`. -/
 notation:64 "∃¹[" φ "] " ψ => bexs φ ψ
 
 end quantifier

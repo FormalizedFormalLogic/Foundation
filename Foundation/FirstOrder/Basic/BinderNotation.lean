@@ -160,8 +160,8 @@ syntax "⤫term(" first_order.quote_type ")[" ident* " | " ident* " | " first_or
 
 syntax "(" first_order_term ")" : first_order_term
 
-syntax:max ident : first_order_term         -- bounded variable
-syntax:max "#" term:max : first_order_term  -- bounded variable
+syntax:max ident : first_order_term         -- bound variable
+syntax:max "#" term:max : first_order_term  -- bound variable
 syntax:max "&" term:max : first_order_term  -- free variable
 syntax:80 "!" term:max first_order_term:81* (" ⋯")? : first_order_term
 syntax:80 "!!" term:max : first_order_term
@@ -233,7 +233,9 @@ macro_rules
     `(Rew.embSubsts $v $t)
 
 syntax "‘" first_order_term:0 "’" : term
+/-- A term with free variables. -/
 syntax "‘" ident* "| " first_order_term:0 "’" : term
+/-- A term with bound variables. -/
 syntax "‘" ident* ". " first_order_term:0 "’" : term
 
 macro_rules
@@ -247,21 +249,21 @@ macro_rules
 section delab
 
 @[app_unexpander Semiterm.Operator.numeral]
-meta def unexpsnderNatLit : Unexpander
+meta def unexpanderNatLit : Unexpander
   | `($_ $_ $z:num) => `($z:num)
   | _ => throw ()
 
 @[app_unexpander Semiterm.Operator.const]
-meta def unexpsnderOperatorConst : Unexpander
+meta def unexpanderOperatorConst : Unexpander
   | `($_ $z:num) => `(‘ $z:num ’)
   | _ => throw ()
 
 @[app_unexpander Semiterm.Operator.Add.add]
-meta def unexpsnderAdd : Unexpander
+meta def unexpanderAdd : Unexpander
   | `($_) => `(op(+))
 
 @[app_unexpander Semiterm.Operator.Mul.mul]
-meta def unexpsnderMul : Unexpander
+meta def unexpanderMul : Unexpander
   | `($_) => `(op(*))
 
 @[app_unexpander Semiterm.Operator.operator]
@@ -366,16 +368,18 @@ syntax:max "∃¹ " first_order_formula:0 : first_order_formula
 syntax:max "∀¹[" first_order_formula "] " first_order_formula:0 : first_order_formula
 syntax:max "∃¹[" first_order_formula "] " first_order_formula:0 : first_order_formula
 
+#check @HTilde.hTilde _ _ Tilde.instHTilde
+
 macro_rules
   | `(⤫formula($type)[ $binders* | $fbinders* | ($e)          ]) => `(⤫formula($type)[ $binders* | $fbinders* | $e ])
   | `(⤫formula($type)[ $_*       | $_*        | !!$φ:term     ]) => `($φ)
   | `(⤫formula($type)[ $_*       | $_*        | .!!$φ:term    ]) => `(Rewriting.emb $φ)
   | `(⤫formula($type)[ $_*       | $_*        | ⊤             ]) => `(⊤)
   | `(⤫formula($type)[ $_*       | $_*        | ⊥             ]) => `(⊥)
-  | `(⤫formula($type)[ $binders* | $fbinders* | $φ ∧ $ψ       ]) => `(⤫formula($type)[ $binders* | $fbinders* | $φ ] ⋏ ⤫formula($type)[ $binders* | $fbinders* | $ψ ])
-  | `(⤫formula($type)[ $binders* | $fbinders* | $φ ∨ $ψ       ]) => `(⤫formula($type)[ $binders* | $fbinders* | $φ ] ⋎ ⤫formula($type)[ $binders* | $fbinders* | $ψ ])
-  | `(⤫formula($type)[ $binders* | $fbinders* | ¬$φ           ]) => `(∼⤫formula($type)[ $binders* | $fbinders* | $φ ])
-  | `(⤫formula($type)[ $binders* | $fbinders* | $φ → $ψ       ]) => `(⤫formula($type)[ $binders* | $fbinders* | $φ ] 🡒 ⤫formula($type)[ $binders* | $fbinders* | $ψ ])
+  | `(⤫formula($type)[ $binders* | $fbinders* | $φ ∧ $ψ       ]) => `(@HWedge.hWedge _ _ _ Wedge.instHWedge ⤫formula($type)[ $binders* | $fbinders* | $φ ] ⤫formula($type)[ $binders* | $fbinders* | $ψ ])
+  | `(⤫formula($type)[ $binders* | $fbinders* | $φ ∨ $ψ       ]) => `(@HVee.hVee _ _ _ Vee.instHVee ⤫formula($type)[ $binders* | $fbinders* | $φ ] ⤫formula($type)[ $binders* | $fbinders* | $ψ ])
+  | `(⤫formula($type)[ $binders* | $fbinders* | ¬$φ           ]) => `(@HTilde.hTilde _ _ Tilde.instHTilde ⤫formula($type)[ $binders* | $fbinders* | $φ ])
+  | `(⤫formula($type)[ $binders* | $fbinders* | $φ → $ψ       ]) => `(@HArrow.hArrow _ _ _ Arrow.instHArrow ⤫formula($type)[ $binders* | $fbinders* | $φ ] ⤫formula($type)[ $binders* | $fbinders* | $ψ ])
   | `(⤫formula($type)[ $binders* | $fbinders* | $φ ↔ $ψ       ]) => `(⤫formula($type)[ $binders* | $fbinders* | $φ ] 🡘 ⤫formula($type)[ $binders* | $fbinders* | $ψ ])
   | `(⤫formula($type)[ $binders* | $fbinders* | ⋀ $i, $φ      ]) => `(Matrix.conj fun $i ↦ ⤫formula($type)[ $binders* | $fbinders* | $φ ])
   | `(⤫formula($type)[ $binders* | $fbinders* | ⋁ $i, $φ      ]) => `(Matrix.disj fun $i ↦ ⤫formula($type)[ $binders* | $fbinders* | $φ ])
@@ -465,10 +469,10 @@ macro_rules
   | `(⤫formula(lit)[ $binders* | $fbinders* | $t:first_order_term < $u:first_order_term ]) => `(Semiformula.Operator.operator Operator.LT.lt ![⤫term(lit)[ $binders* | $fbinders* | $t ], ⤫term(lit)[ $binders* | $fbinders* | $u ]])
   | `(⤫formula(lit)[ $binders* | $fbinders* | $t:first_order_term ≤ $u:first_order_term ]) => `(Semiformula.Operator.operator Operator.LE.le ![⤫term(lit)[ $binders* | $fbinders* | $t ], ⤫term(lit)[ $binders* | $fbinders* | $u ]])
   | `(⤫formula(lit)[ $binders* | $fbinders* | $t:first_order_term ∈ $u:first_order_term ]) => `(Semiformula.Operator.operator Operator.Mem.mem ![⤫term(lit)[ $binders* | $fbinders* | $t ], ⤫term(lit)[ $binders* | $fbinders* | $u ]])
-  | `(⤫formula(lit)[ $binders* | $fbinders* | $t:first_order_term ≠ $u:first_order_term ]) => `(∼(Semiformula.Operator.operator Operator.Eq.eq ![⤫term(lit)[ $binders* | $fbinders* | $t ], ⤫term(lit)[ $binders* | $fbinders* | $u ]]))
-  | `(⤫formula(lit)[ $binders* | $fbinders* | $t:first_order_term ≮ $u:first_order_term ]) => `(∼(Semiformula.Operator.operator Operator.LT.lt ![⤫term(lit)[ $binders* | $fbinders* | $t ], ⤫term(lit)[ $binders* | $fbinders* | $u ]]))
-  | `(⤫formula(lit)[ $binders* | $fbinders* | $t:first_order_term ≰ $u:first_order_term ]) => `(∼(Semiformula.Operator.operator Operator.LE.le ![⤫term(lit)[ $binders* | $fbinders* | $t ], ⤫term(lit)[ $binders* | $fbinders* | $u ]]))
-  | `(⤫formula(lit)[ $binders* | $fbinders* | $t:first_order_term ∉ $u:first_order_term ]) => `(∼(Semiformula.Operator.operator Operator.Mem.mem ![⤫term(lit)[ $binders* | $fbinders* | $t ], ⤫term(lit)[ $binders* | $fbinders* | $u ]]))
+  | `(⤫formula(lit)[ $binders* | $fbinders* | $t:first_order_term ≠ $u:first_order_term ]) => `(@HTilde.hTilde _ _ Tilde.instHTilde (Semiformula.Operator.operator Operator.Eq.eq ![⤫term(lit)[ $binders* | $fbinders* | $t ], ⤫term(lit)[ $binders* | $fbinders* | $u ]]))
+  | `(⤫formula(lit)[ $binders* | $fbinders* | $t:first_order_term ≮ $u:first_order_term ]) => `(@HTilde.hTilde _ _ Tilde.instHTilde (Semiformula.Operator.operator Operator.LT.lt ![⤫term(lit)[ $binders* | $fbinders* | $t ], ⤫term(lit)[ $binders* | $fbinders* | $u ]]))
+  | `(⤫formula(lit)[ $binders* | $fbinders* | $t:first_order_term ≰ $u:first_order_term ]) => `(@HTilde.hTilde _ _ Tilde.instHTilde (Semiformula.Operator.operator Operator.LE.le ![⤫term(lit)[ $binders* | $fbinders* | $t ], ⤫term(lit)[ $binders* | $fbinders* | $u ]]))
+  | `(⤫formula(lit)[ $binders* | $fbinders* | $t:first_order_term ∉ $u:first_order_term ]) => `(@HTilde.hTilde _ _ Tilde.instHTilde (Semiformula.Operator.operator Operator.Mem.mem ![⤫term(lit)[ $binders* | $fbinders* | $t ], ⤫term(lit)[ $binders* | $fbinders* | $u ]]))
 
 macro_rules
   | `(⤫formula(lit)[ $binders* | $fbinders* | ∀ $x < $t, $φ ]) => do
@@ -498,11 +502,11 @@ macro_rules
 section delab
 
 @[app_unexpander Language.Eq.eq]
-meta def unexpsnderEq : Unexpander
+meta def unexpanderEq : Unexpander
   | `($_) => `(op(=))
 
 @[app_unexpander Language.LT.lt]
-meta def unexpsnderLe : Unexpander
+meta def unexpanderLe : Unexpander
   | `($_) => `(op(<))
 
 @[app_unexpander Wedge.wedge]
@@ -789,6 +793,7 @@ syntax "f“" ident* "| "  first_order_formula:0 "”" : term
 syntax "f“" ident* ". "  first_order_formula:0 "”" : term
 syntax "f“" first_order_formula:0 "”" : term
 
+/-- A formula in formula-as-function notation. Use `f“⋯ . ⋯”` for bound variables, and `f“⋯ | ⋯”` for free variables. -/
 macro_rules
   | `(f“ $e:first_order_formula ”)              => `(⤫formula(faf)[           |            | $e ])
   | `(f“ $fbinders* | $e:first_order_formula ”) => `(⤫formula(faf)[           | $fbinders* | $e ])

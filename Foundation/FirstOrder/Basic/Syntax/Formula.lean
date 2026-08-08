@@ -62,22 +62,26 @@ lemma neg_neg (φ : Semiformula L ξ n) : neg (neg φ) = φ :=
   by induction φ <;> simp [*, neg]
 
 instance : LogicalConnective (Semiformula L ξ n) where
-  tilde := neg
   arrow := fun φ ψ => or (neg φ) ψ
   wedge := and
   vee := or
+  tilde := neg
+
+instance : LogicalNeutral (Semiformula L ξ n) where
   top := verum
   bot := falsum
 
-instance : DeMorgan (Semiformula L ξ n) where
-  verum := rfl
-  falsum := rfl
+instance : TildeInvolutive (Semiformula L ξ n) where
+  tilde_involutive := neg_neg
+
+instance : LogicalConnective.DeMorgan (Semiformula L ξ n) where
   imply := fun _ _ => rfl
   and := fun _ _ => rfl
   or := fun _ _ => rfl
 
-instance : TildeInvolutive (Semiformula L ξ n) where
-  neg_involutive := neg_neg
+instance : LogicalNeutral.DeMorgan (Semiformula L ξ n) where
+  verum := rfl
+  falsum := rfl
 
 instance : Quantifier (Semiformula L ξ) where
   all := all
@@ -140,13 +144,13 @@ lemma bexs_eq (φ ψ : Semiformula L ξ (n + 1)) : (∃¹[φ] ψ) = ∃¹ (φ �
 @[simp] lemma neg_bexs (φ ψ : Semiformula L ξ (n + 1)) : ∼(∃¹[φ] ψ) = ∀¹[φ] ∼ψ := by
   simp [ball, bexs, imp_eq]
 
-@[simp] lemma and_inj (φ₁ ψ₁ φ₂ ψ₂ : Semiformula L ξ n) : φ₁ ⋏ φ₂ = ψ₁ ⋏ ψ₂ ↔ φ₁ = ψ₁ ∧ φ₂ = ψ₂ := by simp [Wedge.wedge]
+@[simp] lemma and_inj (φ₁ ψ₁ φ₂ ψ₂ : Semiformula L ξ n) : φ₁ ⋏ φ₂ = ψ₁ ⋏ ψ₂ ↔ φ₁ = ψ₁ ∧ φ₂ = ψ₂ := Iff.of_eq <| and.injEq _ _ _ _
 
-@[simp] lemma or_inj (φ₁ ψ₁ φ₂ ψ₂ : Semiformula L ξ n) : φ₁ ⋎ φ₂ = ψ₁ ⋎ ψ₂ ↔ φ₁ = ψ₁ ∧ φ₂ = ψ₂ := by simp [Vee.vee]
+@[simp] lemma or_inj (φ₁ ψ₁ φ₂ ψ₂ : Semiformula L ξ n) : φ₁ ⋎ φ₂ = ψ₁ ⋎ ψ₂ ↔ φ₁ = ψ₁ ∧ φ₂ = ψ₂ := Iff.of_eq <| or.injEq _ _ _ _
 
-@[simp] lemma all_inj (φ ψ : Semiformula L ξ (n + 1)) : ∀¹ φ = ∀¹ ψ ↔ φ = ψ := by simp [UnivQuantifier.all]
+@[simp] lemma all_inj (φ ψ : Semiformula L ξ (n + 1)) : ∀¹ φ = ∀¹ ψ ↔ φ = ψ := Iff.of_eq <| all.injEq _ _
 
-@[simp] lemma exs_inj (φ ψ : Semiformula L ξ (n + 1)) : ∃¹ φ = ∃¹ ψ ↔ φ = ψ := by simp [ExsQuantifier.exs]
+@[simp] lemma exs_inj (φ ψ : Semiformula L ξ (n + 1)) : ∃¹ φ = ∃¹ ψ ↔ φ = ψ := Iff.of_eq <| exs.injEq _ _
 
 @[simp] lemma allClosure_inj (φ ψ : Semiformula L ξ n) : ∀¹* φ = ∀¹* ψ ↔ φ = ψ := by
   induction n <;> simp [*, allClosure_succ]

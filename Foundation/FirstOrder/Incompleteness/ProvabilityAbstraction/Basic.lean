@@ -271,7 +271,8 @@ variable {σ : Sentence L}
 local notation "𝐊" => kreisel 𝔅
 
 lemma kreisel_spec : T₀ ⊢ (𝐊 σ) 🡘 (𝔅 (𝐊 σ) 🡒 σ) := by
-  simpa [kreisel, Provability.pr, Rew.subst_comp_subst, ←TransitiveRewriting.comp_app] using diag “x. !𝔅.prov x → !σ”;
+  have := diag (T := T₀) “x. !𝔅.prov x → !σ”
+  simpa [kreisel, Provability.pr, Rew.subst_comp_subst, ←TransitiveRewriting.comp_app] using this;
 
 private lemma kreisel_specAux₂ : T₀ ⊢ (𝔅 (𝐊 σ) 🡒 σ) 🡒 (𝐊 σ) := K!_right kreisel_spec
 

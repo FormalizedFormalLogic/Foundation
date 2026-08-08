@@ -60,7 +60,7 @@ def rew (ω : Rew L ξ₁ n₁ ξ₂ n₂) : Semiformula L Ξ ξ₁ N n₁ →ˡ
   map_neg' φ := rewAux_neg _ _
   map_and' _ _ := rfl
   map_or' _ _ := rfl
-  map_imply' _ _ := by simp [DeMorgan.imply, rewAux, rewAux_neg]
+  map_imply' _ _ := by simp [LogicalConnective.DeMorgan.imply, rewAux, rewAux_neg]
 
 instance : Rewriting L ξ₁ (Semiformula L Ξ ξ₁ N) ξ₂ (Semiformula L Ξ ξ₂ N) where
   app := rew
@@ -134,7 +134,7 @@ def bmap (f : Fin N → Fin M) : Semiformula L Ξ ξ N n →ˡᶜ Semiformula L 
   map_neg' φ := bmapAux_neg _
   map_and' _ _ := rfl
   map_or' _ _ := rfl
-  map_imply' _ _ := by simp [DeMorgan.imply, bmapAux_neg, bmapAux]
+  map_imply' _ _ := by simp [LogicalConnective.DeMorgan.imply, bmapAux_neg, bmapAux]
 
 section bmap
 
@@ -249,7 +249,7 @@ def app (Ω : Rew L Ξ₁ N₁ Ξ₂ N₂ ξ) : Semiformula L Ξ₁ ξ N₁ n �
   map_neg' := by simp [appAux_neg]
   map_and' _ _ := rfl
   map_or' _ _ := rfl
-  map_imply' _ _ := by simp [DeMorgan.imply, appAux_neg, appAux]
+  map_imply' _ _ := by simp [LogicalConnective.DeMorgan.imply, appAux_neg, appAux]
 
 local infix:73 " • " => app
 

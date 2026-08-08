@@ -34,10 +34,12 @@ abbrev neg (φ : Formula α) : Formula α := imp φ falsum
 abbrev verum : Formula α := imp falsum falsum
 
 instance : LogicalConnective (Formula α) where
-  tilde := neg
   arrow := imp
   wedge := and
   vee := or
+  tilde := neg
+
+instance : LogicalNeutral (Formula α) where
   top := verum
   bot := falsum
 
@@ -61,10 +63,10 @@ instance : ToString (Formula α) := ⟨toStr⟩
 
 end ToString
 
-lemma and_inj : φ₁ ⋏ φ₂ = ψ₁ ⋏ ψ₂ ↔ φ₁ = ψ₁ ∧ φ₂ = ψ₂ := by simp [Wedge.wedge]
-lemma or_inj : φ₁ ⋎ φ₂ = ψ₁ ⋎ ψ₂ ↔ φ₁ = ψ₁ ∧ φ₂ = ψ₂ := by simp [Vee.vee]
-lemma imp_inj : φ₁ 🡒 φ₂ = ψ₁ 🡒 ψ₂ ↔ φ₁ = ψ₁ ∧ φ₂ = ψ₂ := by simp [Arrow.arrow]
-lemma neg_inj : ∼φ = ∼ψ ↔ φ = ψ := by simp [Tilde.tilde]
+lemma and_inj : φ₁ ⋏ φ₂ = ψ₁ ⋏ ψ₂ ↔ φ₁ = ψ₁ ∧ φ₂ = ψ₂ := Iff.of_eq <| and.injEq _ _ _ _
+lemma or_inj : φ₁ ⋎ φ₂ = ψ₁ ⋎ ψ₂ ↔ φ₁ = ψ₁ ∧ φ₂ = ψ₂ := Iff.of_eq <| or.injEq _ _ _ _
+lemma imp_inj : φ₁ 🡒 φ₂ = ψ₁ 🡒 ψ₂ ↔ φ₁ = ψ₁ ∧ φ₂ = ψ₂ := Iff.of_eq <| imp.injEq _ _ _ _
+lemma neg_inj : ∼φ = ∼ψ ↔ φ = ψ := by simp [NegAbbrev.neg, imp_inj]
 
 lemma neg_def : ∼φ = φ 🡒 ⊥ := rfl
 lemma top_def : (⊤ : Formula α) = ⊥ 🡒 ⊥ := rfl

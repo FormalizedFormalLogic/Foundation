@@ -47,10 +47,14 @@ abbrev neg (φ : Semiformulaᵢ L ξ n) : Semiformulaᵢ L ξ n := φ 🡒 ⊥
 abbrev verum : Semiformulaᵢ L ξ n := ⊥ 🡒 ⊥
 
 instance : LogicalConnective (Semiformulaᵢ L ξ n) where
+  arrow := imp
   wedge := and
   vee := or
-  top := verum
   tilde := neg
+
+instance : LogicalNeutral (Semiformulaᵢ L ξ n) where
+  top := verum
+  bot := falsum
 
 lemma neg_def (φ : Semiformulaᵢ L ξ n) : ∼φ = φ 🡒 ⊥ := rfl
 
@@ -80,14 +84,14 @@ instance : ToString (Semiformulaᵢ L ξ n) := ⟨toStr⟩
 
 end ToString
 
-@[simp] lemma and_inj (φ₁ ψ₁ φ₂ ψ₂ : Semiformulaᵢ L ξ n) : φ₁ ⋏ φ₂ = ψ₁ ⋏ ψ₂ ↔ φ₁ = ψ₁ ∧ φ₂ = ψ₂ := by
-  simp [Wedge.wedge]
+@[simp] lemma and_inj (φ₁ ψ₁ φ₂ ψ₂ : Semiformulaᵢ L ξ n) : φ₁ ⋏ φ₂ = ψ₁ ⋏ ψ₂ ↔ φ₁ = ψ₁ ∧ φ₂ = ψ₂ :=
+  Iff.of_eq <| and.injEq _ _ _ _
 
-@[simp] lemma or_inj (φ₁ ψ₁ φ₂ ψ₂ : Semiformulaᵢ L ξ n) : φ₁ ⋎ φ₂ = ψ₁ ⋎ ψ₂ ↔ φ₁ = ψ₁ ∧ φ₂ = ψ₂ := by
-  simp [Vee.vee]
+@[simp] lemma or_inj (φ₁ ψ₁ φ₂ ψ₂ : Semiformulaᵢ L ξ n) : φ₁ ⋎ φ₂ = ψ₁ ⋎ ψ₂ ↔ φ₁ = ψ₁ ∧ φ₂ = ψ₂ :=
+  Iff.of_eq <| or.injEq _ _ _ _
 
 @[simp] lemma imp_inj {φ₁ φ₂ ψ₁ ψ₂ : Semiformulaᵢ L ξ n} :
-    φ₁ 🡒 φ₂ = ψ₁ 🡒 ψ₂ ↔ φ₁ = ψ₁ ∧ φ₂ = ψ₂ := by simp [Arrow.arrow]
+    φ₁ 🡒 φ₂ = ψ₁ 🡒 ψ₂ ↔ φ₁ = ψ₁ ∧ φ₂ = ψ₂ := Iff.of_eq <| imp.injEq _ _ _ _
 
 @[simp] lemma all_inj (φ ψ : Semiformulaᵢ L ξ (n + 1)) : ∀¹ φ = ∀¹ ψ ↔ φ = ψ := by
   simp [UnivQuantifier.all]

@@ -64,7 +64,7 @@ def Eval (𝕊 : Set (Set M)) (F : Ξ → Set M) (f : ξ → M) (E : Fin N → S
   map_and' := by simp [EvalAux]
   map_or' := by simp [EvalAux]
   map_neg' := by simp [EvalAux_neg]
-  map_imply' := by simp [EvalAux_neg, EvalAux, imp_iff_not_or]
+  map_imply' := by simp [LogicalConnective.DeMorgan.imply, EvalAux_neg, EvalAux]
 
 @[simp] lemma eval_rel {k} {R : L.Rel k} {v} :
     (rel R v).Eval 𝕊 F f E e ↔ 𝓈.rel R (Semiterm.val e f ∘ v) := by rfl

@@ -8,7 +8,7 @@ namespace LO
 
 namespace Entailment
 
-variable {F S : Type*} [DecidableEq F] [LogicalConnective F] [Entailment S F] [AdjunctiveSet F S] [Deduction S]
+variable {F S : Type*} [DecidableEq F] [LogicalConnective F] [LogicalNeutral F] [Entailment S F] [AdjunctiveSet F S] [Deduction S]
          {𝓢 : S} [Entailment.Cl 𝓢]
 
 lemma consistent_cons_of_unprovable_neg (h : 𝓢 ⊬ ∼φ) : Consistent (adjoin φ 𝓢) := by
@@ -29,7 +29,7 @@ namespace Entailment.LindenbaumAlgebra
 
 open Entailment LindenbaumAlgebra
 
-variable {F S : Type*} [DecidableEq F] [LogicalConnective F] [Entailment S F] [AdjunctiveSet F S] [Deduction S]
+variable {F S : Type*} [DecidableEq F] [LogicalConnective F] [LogicalNeutral F] [Entailment S F] [AdjunctiveSet F S] [Deduction S]
          (𝓢 : S) [Entailment.Cl 𝓢]
 
 lemma dense_of_finite_extend_incomplete
