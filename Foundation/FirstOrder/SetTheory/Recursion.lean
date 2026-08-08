@@ -283,7 +283,7 @@ lemma attemptOrEmpty_eq_replAttemptOrEmpty
   have h₂ := replAttemptOrEmpty_aux F hF α
   have : IsFunction (attemptOrEmpty F α) := h₁.2.1
   have : IsFunction (replAttemptOrEmpty F hF α) := h₂.2.1
-  exact IsAttempt.attempt_function_unique h₁ h₂
+  exact IsAttempt.isAttempt_unique h₁ h₂
 
 noncomputable def transfiniteRec (F : V → V) (hF : ℒₛₑₜ-function₁ F) (α : V) : V :=
   F (replAttemptOrEmpty F hF α)
@@ -295,12 +295,12 @@ instance transfiniteRec_definable
   simp only [transfiniteRec, replAttemptOrEmpty]
   definability
 
-/-! Characterization of the transfinite recursion: $T \alpha = F (T \upharpoonright \alpha)$ -/
+/-! Characterization of the transfinite recursion: $R_F \alpha = F (R_F \upharpoonright \alpha)$ -/
 lemma transfiniteRec_spec
     (F : V → V) (hF : ℒₛₑₜ-function₁ F)
     (α : Ordinal V) :
     transfiniteRec F hF α = F (repl (fun β ↦ ⟨β, transfiniteRec F hF β⟩ₖ) (by definability) α) := by
-  simp only [transfiniteRec]
+  unfold transfiniteRec
   congr 1
   ext p
   simp only [mem_replAttemptOrEmpty_iff, repl_spec]
@@ -308,14 +308,12 @@ lemma transfiniteRec_spec
   · have hβ : IsOrdinal β := IsOrdinal.of_mem hβα
     let βo := IsOrdinal.toOrdinal β
     exact ⟨β, hβα, by
-      simp only [pairValueAttempt, kpair_iff, true_and]
-      simpa only [toOrdinal_val, βo] using
+      simpa [pairValueAttempt, βo] using
         congrArg F (attemptOrEmpty_eq_replAttemptOrEmpty F hF βo)⟩
   · have hβ : IsOrdinal β := IsOrdinal.of_mem hβα
     let βo := IsOrdinal.toOrdinal β
     exact ⟨β, hβα, by
-      simp only [pairValueAttempt, kpair_iff, true_and]
-      simpa only [toOrdinal_val, βo] using
+      simpa [pairValueAttempt, βo] using
         congrArg F (attemptOrEmpty_eq_replAttemptOrEmpty F hF βo).symm⟩
 
 end LO.FirstOrder.SetTheory.Replacement
