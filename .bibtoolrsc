@@ -42,6 +42,9 @@ preserve.key.case = on
 # Unify key format
 key.base = upper
 key.number.separator = {}
+fmt.name.name = {}
+# von part (e.g. "de" in "de Jongh") lower-case, last name initial upper-case: "de Jongh" -> "dJ"
+new.format.type {2 = "%-1v%+1l"}
 key.format =
 {
   %s(bibkey)
@@ -50,9 +53,16 @@ key.format =
     { %1.3n(author) }
     { %2d(year) }
  #
-    { %+8.1n(author) }
+    { %8.2p(author) }
     { %2d(year) }
 }
+
+# Strip unnecessary protective braces around a von-particle + surname
+# (e.g. "{de Jongh}" -> "de Jongh"), otherwise BibTool treats the whole
+# braced group as a single unsplittable name token, so it can't detect
+# the von-part and mis-keys "de Jongh" as "d..." instead of "dJ...".
+rewrite.rule { author "{\([a-z]+ [A-Z][a-zA-Z]*\)}" "\1" }
+rewrite.rule { editor "{\([a-z]+ [A-Z][a-zA-Z]*\)}" "\1" }
 
 # Remove empty fields
 rewrite.rule { "^{ *}$" }

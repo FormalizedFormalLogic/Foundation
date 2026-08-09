@@ -151,6 +151,13 @@ end qqDisj
 
 namespace Arithmetic
 
+-- `Arithmetic` is intentionally re-opened here even though the ambient namespace
+-- already contains it; renaming would break the widely-used public API
+-- (`Bootstrapping.Arithmetic.*`). Suppress the new dupNamespace linter for the
+-- declarations in this namespace (the option is scoped by `namespace`/`end` and
+-- reverts automatically at `end Arithmetic`).
+set_option linter.dupNamespace false
+
 /-! ### Disjunction of sequential substution
 
 `disjSeqSubst w p k = subst (k ∷ w) p ^⋎ ⋯ ^⋎ subst (0 ∷ w) p ^⋎ ⊥`
@@ -189,7 +196,7 @@ noncomputable def disjSeqSubstGraph : 𝚺₁.Semisentence 4 := blueprint.result
 section
 
 instance disjSeqSubst.defined : 𝚺₁-Function₃[V] disjSeqSubst via disjSeqSubstGraph := .mk fun v ↦ by
-  simp [construction.result_defined_iff, disjSeqSubstGraph, disjSeqSubst, Matrix.comp_vecCons', Matrix.constant_eq_singleton]
+  simp [construction.result_defined_iff, disjSeqSubstGraph, disjSeqSubst]
 
 instance disjSeqSubst.definable : 𝚺₁-Function₃[V] disjSeqSubst := disjSeqSubst.defined.to_definable
 
@@ -253,7 +260,7 @@ section
 noncomputable def substItrGraph : 𝚺₁.Semisentence 4 := blueprint.resultDef |>.rew (Rew.subst ![#0, #3, #1, #2])
 
 instance substItr.defined : 𝚺₁-Function₃[V] substItr via substItrGraph := .mk fun v ↦ by
-  simp [construction.result_defined_iff, substItrGraph, substItr, Matrix.comp_vecCons', Matrix.constant_eq_singleton]
+  simp [construction.result_defined_iff, substItrGraph, substItr]
 
 instance substItr.definable : 𝚺₁-Function₃ (substItr : V → V → V → V) := substItr.defined.to_definable
 

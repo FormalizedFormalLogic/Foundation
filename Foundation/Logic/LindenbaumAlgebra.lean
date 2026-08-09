@@ -1,12 +1,12 @@
 module
 
-public import Foundation.Propositional.Entailment.Cl.Basic
+public import Foundation.Propositional.Entailment.Cl
 
 @[expose] public section
 
 namespace LO
 
-variable {F S : Type*} [LogicalConnective F] [Entailment S F]
+variable {F S : Type*} [LogicalConnective F] [LogicalNeutral F] [Entailment S F]
 
 namespace Entailment
 

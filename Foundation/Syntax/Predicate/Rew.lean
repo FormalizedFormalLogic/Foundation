@@ -26,7 +26,9 @@ namespace FirstOrder
 
 /--
 A structure for maps which rewrite the semiterms occurring in a term.
+
 toFun - A function from `Semiterm L ξ₁ n₁` to `Semiterm L ξ₂ n₂`.
+
 func'' - A proof that `toFun` respects the function symbols of `L`.
 -/
 structure Rew (L : Language) (ξ₁ : Type*) (n₁ : ℕ) (ξ₂ : Type*) (n₂ : ℕ) where
@@ -81,25 +83,25 @@ def bindAux (b : Fin n₁ → Semiterm L ξ₂ n₂) (e : ξ₁ → Semiterm L �
   |       &x => e x
   | func f v => func f (fun i => bindAux b e (v i))
 
-/-- `LO.FirstOrder.Rew.bind f` is a rewriting of the bound variables occurring in a term by `b : Fin n₁ → Semiterm L ξ₂ n₂`, and the free variables occurring in a term by `e : ξ₁ → Semiterm L ξ₂ n₂`. -/
+/-- `LO.FirstOrder.Rew.bind f` is a substitution of the bound variables occurring in a term by `b : Fin n₁ → Semiterm L ξ₂ n₂`, and the free variables occurring in a term by `e : ξ₁ → Semiterm L ξ₂ n₂`. -/
 def bind (b : Fin n₁ → Semiterm L ξ₂ n₂) (e : ξ₁ → Semiterm L ξ₂ n₂) : Rew L ξ₁ n₁ ξ₂ n₂ where
   toFun := bindAux b e
   func'' := fun _ _ => rfl
 
-/-- `LO.FirstOrder.Rew.rewrite f` is a rewriting of the free variables occurring in a term by `f : ξ₁ → Semiterm L ξ₂ n`. -/
+/-- `LO.FirstOrder.Rew.rewrite f` is a substitution of the free variables occurring in a term by `f : ξ₁ → Semiterm L ξ₂ n`. -/
 def rewrite (f : ξ₁ → Semiterm L ξ₂ n) : Rew L ξ₁ n ξ₂ n := bind Semiterm.bvar f
 
-/-- `LO.FirstOrder.Rew.rewriteMap` f is a rewriting of the free variables occurring in a term by `e : ξ₁ → ξ₂`. -/
+/-- `LO.FirstOrder.Rew.rewriteMap` f is a substitution of the free variables occurring in a term by `e : ξ₁ → ξ₂`. -/
 def rewriteMap (e : ξ₁ → ξ₂) : Rew L ξ₁ n ξ₂ n := rewrite (fun m => &(e m))
 
 def map (b : Fin n₁ → Fin n₂) (e : ξ₁ → ξ₂) : Rew L ξ₁ n₁ ξ₂ n₂ :=
   bind (fun n => #(b n)) (fun m => &(e m))
 
-/-- `LO.FirstOrder.Rew.subst v` is a substitution of the bounded variables occurring in a term by `v : Fin n → Semiterm L ξ n'`. -/
+/-- `LO.FirstOrder.Rew.subst v` is a substitution of the bound variables occurring in a term by `v : Fin n → Semiterm L ξ n'`. -/
 def subst {n'} (v : Fin n → Semiterm L ξ n') : Rew L ξ n ξ n' :=
   bind v fvar
 
-/-- `LO.FirstOrder.Rew.emb` is a embedding of a term with no free variables. -/
+/-- `LO.FirstOrder.Rew.emb` is a embedding of a term with no free variables. It can be thought of as a cast from `Semiterm L Empty n` to `Semiterm L ξ n` for any type `ξ`. -/
 def emb {o : Type v₁} [h : IsEmpty o] {ξ : Type v₂} {n} : Rew L o n ξ n := map id h.elim
 
 abbrev embs {o : Type v₁} [IsEmpty o] {n} : Rew L o n ℕ n := emb
@@ -119,6 +121,8 @@ def cast {n n' : ℕ} (h : n = n') : Rew L ξ n ξ n' :=
 def castLE {n n' : ℕ} (h : n ≤ n') : Rew L ξ n ξ n' :=
   map (Fin.castLE h) id
 
+/-- `LO.FirstOrder.Rew.embSubsts v` is a substitution of the bound variables occurring in a term with no free variables by `v : Fin n → Semiterm L ξ n'`.
+This closely resembles `LO.FirstOrder.Rew.subst`, however the term is required to have free variables of type `Empty`. -/
 def embSubsts (v : Fin k → Semiterm L ξ n) : Rew L Empty k ξ n := Rew.bind v Empty.elim
 
 protected def q (ω : Rew L ξ₁ n₁ ξ₂ n₂) : Rew L ξ₁ (n₁ + 1) ξ₂ (n₂ + 1) :=
@@ -792,11 +796,20 @@ end Semiterm
 
 /-! ### Rewriting system of formulae -/
 
+/--
+A typeclass for `Rew`s which additionally respect quantifiers.
+
+`app` - A notion of application of `Rew`s to formulas.
+
+`app_all` - Application preserves universal quantification.
+
+`app_exs` - Application preserves existential quantification.
+-/
 class Rewriting (L : outParam Language) (ξ : outParam Type*) (F : ℕ → Type*) (ζ : Type*) (G : outParam (ℕ → Type*))
     [LCWQ F] [LCWQ G] where
   app {n₁ n₂} : Rew L ξ n₁ ζ n₂ → F n₁ →ˡᶜ G n₂
-  app_all (ω₁₂ : Rew L ξ n₁ ζ n₂) (φ) : app ω₁₂ (∀⁰ φ) = ∀⁰ (app ω₁₂.q φ)
-  app_exs (ω₁₂ : Rew L ξ n₁ ζ n₂) (φ) : app ω₁₂ (∃⁰ φ) = ∃⁰ (app ω₁₂.q φ)
+  app_all (ω₁₂ : Rew L ξ n₁ ζ n₂) (φ) : app ω₁₂ (∀¹ φ) = ∀¹ (app ω₁₂.q φ)
+  app_exs (ω₁₂ : Rew L ξ n₁ ζ n₂) (φ) : app ω₁₂ (∃¹ φ) = ∃¹ (app ω₁₂.q φ)
 
 abbrev SyntacticRewriting (L : outParam Language) (F : ℕ → Type*) (G : outParam (ℕ → Type*)) [LCWQ F] [LCWQ G] :=
   Rewriting L ℕ F ℕ G
@@ -807,26 +820,29 @@ variable [LCWQ F] [LCWQ G] [Rewriting L ξ F ζ G]
 
 attribute [simp] app_all app_exs
 
+/-- Application of a `Rewriting` to a formula. -/
 infixr:73 " ▹ " => app
 
 lemma smul_ext' {ω₁ ω₂ : Rew L ξ n₁ ζ n₂} (h : ω₁ = ω₂) {φ : F n₁} : ω₁ ▹ φ = ω₂ ▹ φ := by rw [h]
 
-@[simp] lemma smul_ball (ω : Rew L ξ n₁ ζ n₂) (φ ψ : F (n₁ + 1)) : ω ▹ (∀⁰[φ] ψ) = ∀⁰[ω.q ▹ φ] (ω.q ▹ ψ) := by simp [ball]
+@[simp] lemma smul_ball (ω : Rew L ξ n₁ ζ n₂) (φ ψ : F (n₁ + 1)) : ω ▹ (∀¹[φ] ψ) = ∀¹[ω.q ▹ φ] (ω.q ▹ ψ) := by simp [ball]
 
-@[simp] lemma smul_bexs (ω : Rew L ξ n₁ ζ n₂) (φ ψ : F (n₁ + 1)) : ω ▹ (∃⁰[φ] ψ) = ∃⁰[ω.q ▹ φ] (ω.q ▹ ψ) := by simp [bexs]
+@[simp] lemma smul_bexs (ω : Rew L ξ n₁ ζ n₂) (φ ψ : F (n₁ + 1)) : ω ▹ (∃¹[φ] ψ) = ∃¹[ω.q ▹ φ] (ω.q ▹ ψ) := by simp [bexs]
 
 @[simp] lemma smul_allItr (ω : Rew L ξ n₁ ζ n₂) (φ : F (n₁ + k)) :
-    ω ▹ (∀⁰^[k] φ) = ∀⁰^[k] (ω.qpow k ▹ φ : G (n₂ + k)) := by
+    ω ▹ (∀¹^[k] φ) = ∀¹^[k] (ω.qpow k ▹ φ : G (n₂ + k)) := by
   induction k <;> simp [allItr_succ, *]
 
 @[simp] lemma smul_exsItr (ω : Rew L ξ n₁ ζ n₂) (φ : F (n₁ + k)) :
-    ω ▹ (∃⁰^[k] φ) = ∃⁰^[k] (ω.qpow k ▹ φ : G (n₂ + k)) := by
+    ω ▹ (∃¹^[k] φ) = ∃¹^[k] (ω.qpow k ▹ φ : G (n₂ + k)) := by
   induction k <;> simp [exsItr_succ, *]
 
 abbrev subst [Rewriting L ξ F ξ F] (φ : F n₁) (w : Fin n₁ → Semiterm L ξ n₂) : F n₂ := Rew.subst w ▹ φ
 
+/-- Applies the substitution `LO.FirstOrder.Rew.subst w` to a formula. This substitutes the bound variables occurring in the formula by `w : Fin n₁ → Semiterm L ξ n₂`. -/
 infix:90 " ⇜ " => LO.FirstOrder.Rewriting.subst
 
+/-- Applies the substitution `LO.FirstOrder.Rew.shift` to a formula. This substitutes each free variable `&x` with `&(x + 1)`. -/
 abbrev shift [Rewriting L ℕ F ℕ F] : F n →ˡᶜ F n := app Rew.shift
 
 abbrev free [Rewriting L ℕ F ℕ F] : F (n + 1) →ˡᶜ F n := app Rew.free
@@ -835,6 +851,7 @@ abbrev fix [Rewriting L ℕ F ℕ F] : F n →ˡᶜ F (n + 1) := app Rew.fix
 
 def shifts [Rewriting L ℕ F ℕ F] (Γ : List (F n)) : List (F n) := Γ.map Rewriting.shift
 
+/-- Applies the substitution `LO.FirstOrder.Rew.shift` to each formula in a list of formulas. This substitutes each free variable `&x` with `&(x + 1)`. -/
 scoped[LO.FirstOrder] postfix:max "⁺" => FirstOrder.Rewriting.shifts
 
 @[simp] lemma shifts_nil [Rewriting L ℕ F ℕ F] : ([] : List (F n))⁺ = [] := by rfl
@@ -854,11 +871,14 @@ open Lean PrettyPrinter Delaborator
 
 syntax (name := substNotation) term:max "/[" term,* "]" : term
 
+/-- Slash notation for rewriting bound variables of a formula.
+
+The notation `φ/w` is equivalent to `φ ⇜ w`, which for a formula `φ` with bound variables from `Fin n₁`, substitutes the bound variables occurring in `φ` by `w : Fin n₁ → Semiterm L ξ n₂`. -/
 macro_rules (kind := substNotation)
   | `($φ:term /[$terms:term,*]) => `($φ ⇜ ![$terms,*])
 
 @[app_unexpander Rewriting.subst]
-meta def _root_.unexpsnderSubstitute : Unexpander
+meta def _root_.unexpanderSubstitute : Unexpander
   | `($_ $φ:term ![$ts:term,*]) => `($φ /[ $ts,* ])
   | _                           => throw ()
 
@@ -891,7 +911,7 @@ variable {S : ℕ → Type*} [LCWQ S] [SyntacticRewriting L S S]
 open Rewriting ReflectiveRewriting TransitiveRewriting InjMapRewriting Semiterm
 
 lemma fix_allClosure (φ : S n) :
-    ∀⁰ fix (∀⁰* φ) = ∀⁰* fix φ := by
+    ∀¹ fix (∀¹* φ) = ∀¹* fix φ := by
   induction n
   case zero => simp [allClosure_succ]
   case succ n ih => simp [allClosure_succ, ih]
@@ -975,7 +995,7 @@ def shiftEmb : S n ↪ S n where
 lemma shiftEmb_def (φ : S n) :
   shiftEmb φ = shift φ := rfl
 
-lemma allClosure_fixitr (φ : S 0) : ∀⁰* Rew.fixitr 0 (m + 1) ▹ φ = ∀⁰ Rew.fix ▹ (∀⁰* Rew.fixitr 0 m ▹ φ) := by
+lemma allClosure_fixitr (φ : S 0) : ∀¹* Rew.fixitr 0 (m + 1) ▹ φ = ∀¹ Rew.fix ▹ (∀¹* Rew.fixitr 0 m ▹ φ) := by
   simp [Rew.fixitr_succ, fix_allClosure, comp_app];
 
 @[simp] lemma mem_shifts_iff {φ : S n} {Γ : List (S n)} :
@@ -997,7 +1017,7 @@ lemma emb_injective [Rewriting L ο O ξ F] [InjMapRewriting L ο O ξ F] : Func
   smul_map_injective Function.injective_id (IsEmpty.elim inferInstance)
 
 @[simp] lemma emb_allClosure [Rewriting L ο O ξ F] {σ : O n} :
-    (emb (ξ := ξ) (∀⁰* σ)) = ∀⁰* (emb (ξ := ξ) σ) := by induction n <;> simp [*, allClosure_succ]
+    (emb (ξ := ξ) (∀¹* σ)) = ∀¹* (emb (ξ := ξ) σ) := by induction n <;> simp [*, allClosure_succ]
 
 @[simp] lemma rew_emb_eq_emb
     [Rewriting L ξ₁ F₁ ξ₂ F₂] [Rewriting L ο O ξ₁ F₁] [Rewriting L ο O ξ₂ F₂]

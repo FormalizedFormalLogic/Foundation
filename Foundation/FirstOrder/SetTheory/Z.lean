@@ -32,6 +32,8 @@ attribute [ext] mem_ext
 
 @[grind .] lemma subset_antisymm_iff {x y : V} : x ⊆ y ∧ y ⊆ x ↔ x = y := by aesop
 
+lemma subset_of_eq {x y : V} (h : x = y) : x ⊆ y := h ▸ subset_refl x
+
 lemma SSubset.iff {x y : V} : x ⊊ y ↔ x ⊆ y ∧ ∃ z ∈ y, z ∉ x := by
   constructor
   · rintro ⟨ss, eq⟩
@@ -280,7 +282,7 @@ instance power.definable : ℒₛₑₜ-function₁[V] power := power.defined.to
 
 lemma separation_exists_eval (x : V) (φ : SetTheorySemiformula V 1) : ∃ y : V, ∀ z : V, z ∈ y ↔ z ∈ x ∧ φ.Eval ![z] id := by
   -- have : Inhabited V := inhabited_of_nonempty inferInstance
-  let f := φ.enumarateFVar
+  let f := φ.enumerateFVar
   let ψ := (Rew.rewriteMap φ.idxOfFVar) ▹ φ
   have := by simpa [models_iff, Semiformula.eval_univCl, Axiom.separationSchema] using Theory.models V 𝗭 (Zermelo.axiom_of_separation ψ)
   simpa [ψ, f, Semiformula.eval_rewriteMap, Matrix.constant_eq_singleton] using this f x

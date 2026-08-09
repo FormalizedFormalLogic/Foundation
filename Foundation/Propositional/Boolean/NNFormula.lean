@@ -16,7 +16,8 @@ namespace NNFormula
 
 section val
 
-variable {F : Type*} [LogicalConnective F] [DeMorgan F] [TildeInvolutive F] (v : α → F)
+variable {F : Type*} [LogicalConnective F] [LogicalNeutral F]
+  [TildeInvolutive F] [LogicalNeutral.DeMorgan F] [LogicalConnective.DeMorgan F] (v : α → F)
 
 def valAux : NNFormula α → F
   | .atom a  => v a
@@ -36,7 +37,7 @@ def val : NNFormula α →ˡᶜ F where
   map_bot' := rfl
   map_and' := fun _ _ => rfl
   map_or' := fun _ _ => rfl
-  map_imply' := fun _ _ => by simp [DeMorgan.imply, valAux, ←neg_eq, valAux_neg]
+  map_imply' := fun _ _ => by simp [LogicalConnective.DeMorgan.imply, valAux, ←neg_eq, valAux_neg]
   map_neg' := fun _ => by simp [valAux_neg]
 
 @[simp] lemma val_atom : val v (atom a) = v a := rfl

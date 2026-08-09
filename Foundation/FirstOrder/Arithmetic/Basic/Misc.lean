@@ -83,10 +83,10 @@ def Semiformula.toStringORing : ∀ {n}, ArithmeticSemiformula ξ n → String
   | _,         nrel Language.LT.lt v => (v 0).toStringORing ++ " \\not < " ++ (v 1).toStringORing
   | _,                         φ ⋏ ψ => "[" ++ φ.toStringORing ++ "]" ++ " \\land " ++ "[" ++ ψ.toStringORing ++ "]"
   | _,                         φ ⋎ ψ => "[" ++ φ.toStringORing ++ "]" ++ " \\lor "  ++ "[" ++ ψ.toStringORing ++ "]"
-  | n, ∀⁰ (rel Language.LT.lt v 🡒 φ) => "(\\forall x_{" ++ toString n ++ "} < " ++ (v 1).toStringORing ++ ") " ++ "[" ++ φ.toStringORing ++ "]"
-  | n, ∃⁰ (rel Language.LT.lt v ⋏ φ) => "(\\exists x_{" ++ toString n ++ "} < " ++ (v 1).toStringORing ++ ") " ++ "[" ++ φ.toStringORing ++ "]"
-  | n,                          ∀⁰ φ => "(\\forall x_{" ++ toString n ++ "}) " ++ "[" ++ φ.toStringORing ++ "]"
-  | n,                          ∃⁰ φ => "(\\exists x_{" ++ toString n ++ "}) " ++ "[" ++ φ.toStringORing ++ "]"
+  | n, ∀¹ (rel Language.LT.lt v 🡒 φ) => "(\\forall x_{" ++ toString n ++ "} < " ++ (v 1).toStringORing ++ ") " ++ "[" ++ φ.toStringORing ++ "]"
+  | n, ∃¹ (rel Language.LT.lt v ⋏ φ) => "(\\exists x_{" ++ toString n ++ "} < " ++ (v 1).toStringORing ++ ") " ++ "[" ++ φ.toStringORing ++ "]"
+  | n,                          ∀¹ φ => "(\\forall x_{" ++ toString n ++ "}) " ++ "[" ++ φ.toStringORing ++ "]"
+  | n,                          ∃¹ φ => "(\\exists x_{" ++ toString n ++ "}) " ++ "[" ++ φ.toStringORing ++ "]"
 
 instance : Repr (ArithmeticSemiformula ξ n) := ⟨fun φ _ ↦ φ.toStringORing⟩
 

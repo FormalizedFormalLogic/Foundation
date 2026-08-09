@@ -1,0 +1,20 @@
+{
+  "permissions": {
+    "allow": [
+      "mcp__lean-lsp__lean_goal",
+      "mcp__lean-lsp__lean_multi_attempt",
+      "mcp__lean-lsp__lean_loogle",
+      "mcp__lean-lsp__lean_local_search",
+      "mcp__lean-lsp__lean_diagnostic_messages",
+      "mcp__lean-lsp__lean_hover_info"
+    ]
+  },
+  "extraKnownMarketplaces": {
+    "lean4-skills": {
+      "source": {
+        "source": "github",
+        "repo": "cameronfreer/lean4-skills"
+      }
+    }
+  }
+}

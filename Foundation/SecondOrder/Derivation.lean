@@ -49,10 +49,10 @@ inductive Derivation : Sequent L → Type _
 | verum : Derivation [⊤]
 | and : Derivation (φ :: Γ) → Derivation (ψ :: Γ) → Derivation (φ ⋏ ψ :: Γ)
 | or : Derivation (φ :: ψ :: Γ) → Derivation (φ ⋎ ψ :: Γ)
-| all₀ {φ : Semiproposition L 0 1} : Derivation (φ.free₀ :: Sequent.shift₀ Γ) → Derivation ((∀⁰ φ) :: Γ)
-| exs₀ {φ : Semiproposition L 0 1} : Derivation (φ/[t] :: Γ) → Derivation ((∃⁰ φ) :: Γ)
-| all₁ {φ : Semiproposition L 1 0} : Derivation (φ.free₁ :: Sequent.shift₁ Γ) → Derivation ((∀¹ φ) :: Γ)
-| exs₁ {φ : Semiproposition L 1 0} : Derivation (φ/⟦ψ⟧ :: Γ) → Derivation ((∃¹ φ) :: Γ)
+| all₁ {φ : Semiproposition L 0 1} : Derivation (φ.free₀ :: Sequent.shift₀ Γ) → Derivation ((∀¹ φ) :: Γ)
+| exs₁ {φ : Semiproposition L 0 1} : Derivation (φ/[t] :: Γ) → Derivation ((∃¹ φ) :: Γ)
+| all₂ {φ : Semiproposition L 1 0} : Derivation (φ.free₁ :: Sequent.shift₁ Γ) → Derivation ((∀² φ) :: Γ)
+| exs₂ {φ : Semiproposition L 1 0} : Derivation (φ/⟦ψ⟧ :: Γ) → Derivation ((∃² φ) :: Γ)
 
 scoped prefix:45 "⊢ᴸᴷ¹ " => Derivation
 

@@ -14,9 +14,14 @@ name = "Foundation"
 [[require]]
 scope = "leanprover"
 name = "doc-gen4"
-rev = "v4.31.0"
+rev = "v4.32.2"
 
 [[require]]
 scope = "leanprover-community"
 name = "mathlib"
-rev = "v4.31.0"
+rev = "v4.32.2"
+
+[[require]]
+name = "axiom-audit"
+git = "https://github.com/SnO2WMaN/axiom-audit"
+rev = "827e715d39231df230cb5b1a200be07c151b323b"

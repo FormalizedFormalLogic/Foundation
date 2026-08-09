@@ -16,8 +16,8 @@ inductive Derivation2 (T : Theory L) : Finset (Proposition L) → Type _
 | verum {Γ} : ⊤ ∈ Γ → Derivation2 T Γ
 | and {Γ} {φ ψ : Proposition L} : φ ⋏ ψ ∈ Γ → Derivation2 T (insert φ Γ) → Derivation2 T (insert ψ Γ) → Derivation2 T Γ
 | or {Γ} {φ ψ : Proposition L} : φ ⋎ ψ ∈ Γ → Derivation2 T (insert φ (insert ψ Γ)) → Derivation2 T Γ
-| all {Γ} {φ : Semiproposition L 1} : ∀⁰ φ ∈ Γ → Derivation2 T (insert (Rewriting.free φ) (Γ.image Rewriting.shift)) → Derivation2 T Γ
-| exs {Γ} {φ : Semiproposition L 1} : ∃⁰ φ ∈ Γ → (t : SyntacticTerm L) → Derivation2 T (insert (φ/[t]) Γ) → Derivation2 T Γ
+| all {Γ} {φ : Semiproposition L 1} : ∀¹ φ ∈ Γ → Derivation2 T (insert (Rewriting.free φ) (Γ.image Rewriting.shift)) → Derivation2 T Γ
+| exs {Γ} {φ : Semiproposition L 1} : ∃¹ φ ∈ Γ → (t : SyntacticTerm L) → Derivation2 T (insert (φ/[t]) Γ) → Derivation2 T Γ
 | wk {Δ Γ} : Derivation2 T Δ → Δ ⊆ Γ → Derivation2 T Γ
 | shift {Γ}   : Derivation2 T Γ → Derivation2 T (Γ.image Rewriting.shift)
 | cut {Γ φ} : Derivation2 T (insert φ Γ) → Derivation2 T (insert (∼φ) Γ) → Derivation2 T Γ
@@ -98,7 +98,7 @@ private lemma mem_embed_of_exists_shift_mem {A : List (Sentence L)} {φ : Propos
         ext x; simp
       cutManyProof A (by simp_all) c
 
-@[reducible] noncomputable def cutMany (A : List (Sentence L)) (hA : ∀ ψ ∈ A, ψ ∈ T)
+theorem cutMany (A : List (Sentence L)) (hA : ∀ ψ ∈ A, ψ ∈ T)
     (d : T ⟹₂! (insert (φ : Proposition L) (∼Sequent.embed A).toFinset)) : T ⟹₂! {φ} :=
   d.elim fun d ↦ ⟨cutManyProof A hA d⟩
 
@@ -155,7 +155,7 @@ noncomputable def toProofData : {Γ : Finset (Proposition L)} → T ⟹₂ Γ �
       exact (Derivation.cut
         b' bn').contra <| List.subset_def.mpr (by simp_all; grind)
 
-noncomputable def toProof (d : T ⟹₂ Γ) :
+theorem toProof (d : T ⟹₂ Γ) :
     ∃ A : List (Sentence L), (∀ ψ ∈ A, ψ ∈ T) ∧ Nonempty (⊢ᴸᴷ¹ Γ.toList ++ ∼Sequent.embed A) := by
   rcases toProofData d with ⟨A, hA, b⟩
   exact ⟨A, hA, ⟨b⟩⟩

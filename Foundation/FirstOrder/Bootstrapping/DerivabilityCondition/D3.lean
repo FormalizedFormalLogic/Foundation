@@ -9,6 +9,13 @@ public import Foundation.FirstOrder.Bootstrapping.DerivabilityCondition.PeanoMin
 
 namespace LO.FirstOrder.Arithmetic.Bootstrapping.Arithmetic
 
+-- `Arithmetic` is intentionally re-opened here even though the ambient namespace
+-- already contains it; renaming would break the widely-used public API
+-- (`Bootstrapping.Arithmetic.*`). Suppress the new dupNamespace linter for the
+-- declarations in this namespace (the option is scoped by `namespace`/`end` and
+-- reverts automatically at `end LO.FirstOrder.Arithmetic.Bootstrapping.Arithmetic`).
+set_option linter.dupNamespace false
+
 open Classical
 
 open LO.Entailment LO.Entailment.FiniteContext
@@ -136,7 +143,7 @@ theorem bold_sigma_one_complete {n} {φ : ArithmeticSemisentence n} (hp : Hierar
     intro n φ hφ ih w hφ
     have : ∃ a, V ⊧/(a :> w) φ := by simpa using hφ
     rcases this with ⟨i, hφ⟩
-    suffices T.internalize V ⊢ ∃⁰ ((toNumVec w).q ⤔ ⌜φ⌝) by simpa
+    suffices T.internalize V ⊢ ∃¹ ((toNumVec w).q ⤔ ⌜φ⌝) by simpa
     apply TProof.exs! (𝕹 i)
     suffices T.internalize V ⊢ (toNumVec (i :> w) ⤔ ⌜φ⌝) by
       simpa [Semiformula.substs_substs, Matrix.vecMap_vecMap_comp']

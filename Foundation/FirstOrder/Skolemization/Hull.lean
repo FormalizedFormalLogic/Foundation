@@ -89,6 +89,7 @@ instance (priority := 50) str : Structure L (SkolemHull L s) where
   func k f v := ⟨func f fun i ↦ (v i : M), closed_func (by simp)⟩
   rel k R v := Structure.rel R fun i ↦ (v i : M)
 
+omit [L.Eq] [Structure.Eq L M] in
 lemma set_nonempty : (SkolemHull L s).Nonempty := by
   have : ∃ z : M, (⊤ : Semisentence L 1).Evalb ![z] := by simp
   have : ∃ z, z ∈ SkolemHull L s := by
@@ -119,7 +120,7 @@ variable {𝓼 s}
   | .rel R v | .nrel R v => by simp [Semiformula.eval_rel, Semiformula.eval_nrel, Empty.eq_elim, Function.comp_def]
   | ⊤ | ⊥ => by simp
   | φ ⋏ ψ | φ ⋎ ψ => by simp [str_eval (φ := φ), str_eval (φ := ψ)]
-  | ∀⁰ φ => by
+  | ∀¹ φ => by
     suffices
         (∃ x ∈ SkolemHull L s, (∼φ).Evalb (x :> (b ·))) ↔ (∃ x : M, (∼φ).Evalb (x :> (b ·))) by
       apply not_iff_not.mp
@@ -129,7 +130,7 @@ variable {𝓼 s}
       exact ⟨x, H⟩
     · intro h
       exact closed (s := s) (by simp) h
-  | ∃⁰ φ => by
+  | ∃¹ φ => by
     suffices
         (∃ x ∈ SkolemHull L s, φ.Evalb (x :> (b ·))) ↔ (∃ x : M, φ.Evalb (x :> (b ·))) by
       simpa [str_eval (φ := φ), Matrix.comp_vecCons']

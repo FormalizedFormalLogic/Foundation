@@ -10,6 +10,5 @@ _out
 # import graph
 import_graph.pdf
 
-# Claude
-.claude/settings.local.json
-
+# direnv
+.envrc

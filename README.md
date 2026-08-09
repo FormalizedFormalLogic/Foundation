@@ -11,9 +11,6 @@ Formalizing mathematical logic in Lean 4.
 Main results of this repository. More detailed explanations are provided in the [Catalogue] and [Docs].
 
 - `Propositional`: [Propositional Logic][prop]
-  - [Tait-style Calculus][prop:classical_tait] and [Completeness][prop:classical_tait_complete]
-  - [Completeness for Kripke semantics][prop:kripke]
-  - [Disjunctive Property of intuitionistic logic][prop:int_disjunctive]
   - [Propositional Logic Zoo](#propositional-logic-zoo)
 - `FirstOrder`: [First-Order Logic][first_order]
   - [Completeness Theorem][first_order:completeness]
@@ -25,12 +22,6 @@ Main results of this repository. More detailed explanations are provided in the 
   - [Set Theory][setTheory]
     - [Consistency of ZFC][setTheory:zfc_consistent]
     - [Set Theory Zoo](#set-theory-zoo)
-- `Modal`: [Basic Modal Logic][modal:logic] (with modal operators $\Box, \Diamond$)
-  - [Kripke Semantics][modal:kripke_semantics]
-  - [Neighborhood Semantics][modal:neighborhood_semantics]
-  - [Gödel-McKinsey-Tarski Theorem][modal:gmt_theorem] and [Modal Companions](modal:companion)
-  - [Boxdot Conjecture][modal:boxdot_conjecture]
-  - [Modal Logic Zoo](#modal-logic-zoo)
 - `ProvabilityLogic`: [Provability Logic][provability_logic]
   - [Solovay's Arithmetical Completeness Theorem for GL][provability_logic:GL_arith_complete]
 - `Meta`: Proof automation.
@@ -38,12 +29,6 @@ Main results of this repository. More detailed explanations are provided in the 
 - `Vospiel`: Supplemental definitions and theorems for mathlib.
 
 [prop]: ./Foundation/Propositional
-[prop:classical_tait]: ./Foundation/Propositional/Tait/Calculus.lean
-[prop:classical_tait_complete]: ./Foundation/Propositional/Boolean/Tait.lean
-[prop:classical_complete]: ./Foundation/Propositional/Boolean/Tait.lean
-[prop:kripke]: ./Foundation/Propositional/Kripke
-[prop:int_disjunctive]: ./Foundation/Propositional/Kripke/Logic/Int.lean
-[prop:sublogics]: ./Foundation/Propositional/Logic/Sublogic.lean
 [first_order]: ./Foundation/FirstOrder
 [first_order:completeness]: ./Foundation/FirstOrder/Completeness/Completeness.lean
 [first_order:haupstaz]: ./Foundation/FirstOrder/Hauptsatz.lean
@@ -55,12 +40,6 @@ Main results of this repository. More detailed explanations are provided in the 
 [arithmetization]: ./Foundation/FirstOrder/Bootstrapping/
 [arith:goedel_it1]: ./Foundation/FirstOrder/Incompleteness/First.lean
 [arith:goedel_it2]: ./Foundation/FirstOrder/Incompleteness/Second.lean
-[modal:logic]: ./Foundation/Modal
-[modal:kripke_semantics]: ./Foundation/Modal/Kripke/
-[modal:neighborhood_semantics]: ./Foundation/Modal/Neighborhood/
-[modal:gmt_theorem]: ./Foundation/Modal/ModalCompanion/Standard/Int.lean
-[modal:companion]: ./Foundation/Modal/ModalCompanion/
-[modal:boxdot_conjecture]: ./Foundation/Modal/Boxdot/
 [provability_logic]: ./Foundation/ProvabilityLogic/
 [provability_logic:GL_arith_complete]: ./Foundation/ProvabilityLogic/GL/Completeness.lean
 
@@ -93,10 +72,6 @@ Automatically generated[^1] diagrams "Zoo", illustrate the Lean4-verified interr
 ### Propositional Logic Zoo
 
 ![Propositional Logic Zoo](https://formalizedformallogic.github.io/Zoo/propositional.png)
-
-### Modal Logic Zoo
-
-![Modal Logic Zoo](https://formalizedformallogic.github.io/Zoo/modal.png)
 
 ## Contributing
 

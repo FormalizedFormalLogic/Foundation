@@ -7,6 +7,12 @@ on:
   pull_request:
     branches:
       - master
+  # Required so these checks also run against the queue's speculative merge
+  # commit; otherwise a merge queue entry has no status checks to wait on.
+  merge_group:
+    branches:
+      - master
+  workflow_dispatch:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -14,14 +20,11 @@ concurrency:
 
 permissions:
   contents: read
-  pages: write
-  id-token: write
 
 jobs:
   build:
     name: Build project
     runs-on: ubuntu-latest
-    needs: mk-all-check
     steps:
       - uses: actions/checkout@v7
       - name: Setup elan
@@ -41,17 +44,22 @@ jobs:
         uses: actions/cache/restore@v6
         with:
           path: .lake/Foundation-x86_64-unknown-linux-gnu.tar.gz
-          # NOTE: including github branch name and SHA for avoding cache key reserving problem
-          key: lake-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('lean-toolchain') }}-${{ hashFiles('lake-manifest.json') }}-${{ github.ref_name }}-${{ github.sha }}
+          # Cache entries are immutable, so the key includes the commit SHA to always save fresh.
+          # Branch isolation is already enforced by the cache's built-in scoping.
+          key: lake-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('lean-toolchain') }}-${{ hashFiles('lake-manifest.json') }}-${{ github.sha }}
           restore-keys: |
-            lake-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('lean-toolchain') }}-${{ hashFiles('lake-manifest.json') }}-${{ github.ref_name }}
             lake-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('lean-toolchain') }}-${{ hashFiles('lake-manifest.json') }}
       - name: Unpack project cache
         if: hashFiles('.lake/Foundation-x86_64-unknown-linux-gnu.tar.gz') != ''
         run: lake unpack
 
+      - uses: extractions/setup-just@v4
+
       - name: Build Foundation
         run: lake build Foundation
+
+      - name: Check sorry-freeness and axiom allowlist (axiom-audit)
+        run: just axiom-audit
 
       - name: Build docs
         run: lake build Foundation:docs
@@ -68,10 +76,7 @@ jobs:
 
       - uses: ts-graphviz/setup-graphviz@v2
       - name: Generate import graph
-        run: |
-          lake exe graph ./import_graph.png
-          lake exe graph ./import_graph.pdf
-          lake exe graph ./import_graph.html
+        run: just import-graph
 
       - name: Upload lean artifacts
         uses: actions/upload-artifact@v7
@@ -90,31 +95,34 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
+      - uses: extractions/setup-just@v4
       - name: Install bibtool
         run: |
           sudo apt-get update
           sudo apt-get install -y bibtool
-      - name: Format references.bib
+      - name: Check references.bib is formatted
         run: |
-          bibtool -r .bibtoolrsc -i references.bib -o references.bib.formatted
-      - name: Check if formatted correctly
-        run: |
-          diff -u references.bib references.bib.formatted || (echo "references.bib is not formatted" && exit 1)
+          just format-references
+          if [ -n "$(git diff)" ]; then
+            echo "references.bib is not formatted. Please run 'just format-references' and commit the changes."
+            exit 1
+          fi
 
   mk-all-check:
     name: Check mk_all executed
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
+      - uses: extractions/setup-just@v4
       - name: Setup elan
         run: |
-          curl https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -sSf | sh -s -- -y
+          curl https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -sSf | sh -s -- -y --default-toolchain none
           echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
       - name: Check mk_all executed
         run: |
-          lake exe mk_all --module
+          just mk-all
           if [ -n "$(git diff)" ]; then
-            echo "Files were modified by mk_all. Please run 'lake exe mk_all --module' and commit the changes."
+            echo "Files were modified by mk_all. Please run 'just mk-all' and commit the changes."
             exit 1
           fi
 
@@ -125,6 +133,10 @@ jobs:
     needs:
       - build
       - check-references
+      - mk-all-check
+    permissions:
+      pages: write
+      id-token: write
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}

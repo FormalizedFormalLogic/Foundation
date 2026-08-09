@@ -256,6 +256,13 @@ end typed_isfvfree
 
 namespace Arithmetic
 
+-- `Arithmetic` is intentionally re-opened here even though the ambient namespace
+-- already contains it; renaming would break the widely-used public API
+-- (`Bootstrapping.Arithmetic.*`). Suppress the new dupNamespace linter for the
+-- declarations in this namespace (the option is scoped by `namespace`/`end` and
+-- reverts automatically at `end LO.FirstOrder.Arithmetic.Bootstrapping.Arithmetic`).
+set_option linter.dupNamespace false
+
 variable {k n m : ℕ}
 
 noncomputable def typedNumeral (m : V) : Semiterm V ℒₒᵣ n := ⟨numeral m, by simp⟩

@@ -6,17 +6,17 @@ public import Foundation.FirstOrder.SetTheory.Z
 
 namespace LO.FirstOrder.SetTheory
 
-variable {V : Type*} [SetStructure V] [Nonempty V] [V↓[ℒₛₑₜ] ⊧* 𝗭] [V↓[ℒₛₑₜ] ⊧* 𝗭𝗙]
+variable {V : Type*} [SetStructure V] [Nonempty V] [V↓[ℒₛₑₜ] ⊧* 𝗭𝗙]
 
 /-! ## Ersatzaxiom -/
 
 open Classical
 
-lemma replacement_exists_eval (X : V) (φ : SetTheorySemiformula V 2) (h : (∀ x : V, ∃! y : V, φ.Eval ![x, y] id)) :
+lemma replacement_exists_eval (φ : SetTheorySemiformula V 2) (X : V) (h : (∀ x : V, ∃! y : V, φ.Eval ![x, y] id)) :
     ∃ Y : V, ∀ y : V, y ∈ Y ↔ ∃ x ∈ X, φ.Eval ![x, y] id := by
   /- `φ` can have finitely many free variables of type `V`, these are interpreted by `id : V → V` as finitely many parameters in `V`.
   `f` enumerates the parameters of `φ`. -/
-  let f := φ.enumarateFVar
+  let f := φ.enumerateFVar
   /- While `φ` has free variables of type `V`, `ψ` has free variables of type `ℕ`.
   Since `f` enumerates the parameters, it is intended to be the valuation of the free variables of `ψ`. -/
   let ψ := (Rew.rewriteMap φ.idxOfFVar) ▹ φ
@@ -37,7 +37,7 @@ lemma replacement_rel_exists (X : V) (R : V → V → Prop) (h : ∀ x, ∃! y, 
   -- Put hR in a useful form
   have hR {x y : V} := by simpa using hR.iff ![x, y]
   have cond : ∀ x : V, ∃! y : V, φ.Eval ![x, y] id := by simpa [← hR] using h
-  simpa [hR] using replacement_exists_eval X φ cond
+  simpa [hR] using replacement_exists_eval φ X cond
 
 /--
 Replacement exists uniquely (for a relation).
@@ -69,12 +69,12 @@ lemma replacement_exists (X : V) (F : V → V) (hF : ℒₛₑₜ-function₁ F)
 /--
 The axiom of replacement for a relation.
 -/
-noncomputable def replRel (X : V) (R : V → V → Prop) (h : ∀ x, ∃! y, R x y) (hR : ℒₛₑₜ-relation R := by definability) : V := Classical.choose! (replacement_rel_existsUnique X R h hR)
+noncomputable def replRel (R : V → V → Prop) (h : ∀ x, ∃! y, R x y) (hR : ℒₛₑₜ-relation R := by definability) (X : V) : V := Classical.choose! (replacement_rel_existsUnique X R h hR)
 
 /--
 The axiom of replacement.
 -/
-noncomputable def repl (X : V) (F : V → V) (hF : ℒₛₑₜ-function₁ F := by definability) : V := Classical.choose! (replacement_existsUnique X F hF)
+noncomputable def repl (F : V → V) (hF : ℒₛₑₜ-function₁ F := by definability) (X : V) : V := Classical.choose! (replacement_existsUnique X F hF)
 
 /-! ## Variants of replacement -/
 
@@ -112,13 +112,67 @@ noncomputable def replRelOverSet (X : V) (R : V → V → Prop) (h : ∀ x ∈ X
 
 /-! ## Various lemmas -/
 
-@[simp] lemma replRel_spec {X y : V} {R : V → V → Prop} {h : ∀ x, ∃! y, R x y} (hR : ℒₛₑₜ-relation R) :
-    y ∈ replRel X R h ↔ ∃ x ∈ X, R x y := Classical.choose!_spec (replacement_rel_existsUnique X R h hR) y
+@[simp] lemma replRel_spec {X y : V} {R : V → V → Prop} {h : ∀ x ∈ X, ∃! y, R x y} (hR : ℒₛₑₜ-relation R) :
+    y ∈ replRelOverSet X R h hR ↔ ∃ x ∈ X, R x y := Classical.choose!_spec (replacement_rel_existsUnique_of_mem_existsUnique X R h hR) y
 
 @[simp] lemma repl_spec {X y : V} {F : V → V} (hF : ℒₛₑₜ-function₁ F) :
-    y ∈ repl X F hF ↔ ∃ x ∈ X, y = F x := Classical.choose!_spec (replacement_existsUnique X F hF) y
+    y ∈ repl F hF X ↔ ∃ x ∈ X, y = F x := Classical.choose!_spec (replacement_existsUnique X F hF) y
 
 @[simp] lemma replRelOverSet_spec {X y : V} {R : V → V → Prop} {h : ∀ x ∈ X, ∃! y, R x y} (hR : ℒₛₑₜ-relation R) :
     y ∈ replRelOverSet X R h ↔ ∃ x ∈ X, R x y := Classical.choose!_spec (replacement_rel_existsUnique_of_mem_existsUnique X R h hR) y
+
+@[simp, definability] instance repl_definable {F : V → V} [hF : ℒₛₑₜ-function₁ F] : ℒₛₑₜ-function₁ (repl F hF) := by
+  suffices ℒₛₑₜ-relation (fun y x ↦ y = repl F hF x) by exact this
+  simp only [repl, choose!_eq_iff_right]
+  definability
+
+/-! ### Definability Gadgets for Replacement -/
+
+namespace Repl
+
+structure Blueprint (arity : ℕ) where
+  graph : SetTheorySemisentence (arity + 2)
+
+def Blueprint.resultDef (b : Blueprint arity) : SetTheorySemisentence (arity + 2) :=
+  “Y X. ∀ y, y ∈ Y ↔ ∃ x ∈ X, !b.graph y x ⋯”
+
+variable (V)
+
+structure Construction {arity : ℕ} (b : Blueprint arity) where
+  map : (Fin arity → V) → V → V
+  map_defined : DefinedFunction (fun v ↦ map (v ·.succ) (v 0)) b.graph
+
+variable {V}
+
+namespace Construction
+
+variable {arity : ℕ} {b : Blueprint arity} (c : Construction V b)
+
+instance map_definable :
+  (ℒₛₑₜ).DefinableFunction (fun v ↦ c.map (v ·.succ) (v 0)) := c.map_defined.to_definable
+
+noncomputable def result (v : Fin arity → V) : V → V := repl (c.map v) (by
+  refine ⟨(Rew.embSubsts (#0 :> #1 :> fun i : Fin arity ↦ &(v i))) ▹ b.graph, ?_⟩
+  intro x
+  simpa [Semiformula.eval_embSubsts, Matrix.comp_vecCons', Function.comp_def]
+    using c.map_defined.iff (x 0 :> x 1 :> v))
+
+lemma result_defined : DefinedFunction (fun v ↦ c.result (v ·.succ) (v 0)) b.resultDef := .mk fun v ↦ by
+  constructor
+  · intro h
+    simp [Blueprint.resultDef] at h
+    ext y
+    simpa [result, c.map_defined.iff] using h y
+  · intro h
+    simp [Blueprint.resultDef, result, c.map_defined.iff, h]
+
+@[simp] lemma eval_resultDef : b.resultDef.Evalb v ↔ v 0 = c.result (v ·.succ.succ) (v 1) := c.result_defined.iff v
+
+@[simp] lemma mem_result : y ∈ c.result v X ↔ ∃ x ∈ X, y = c.map v x := by
+  simp [result, repl_spec]
+
+end Construction
+
+end Repl
 
 end LO.FirstOrder.SetTheory

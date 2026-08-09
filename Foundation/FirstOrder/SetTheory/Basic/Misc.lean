@@ -110,10 +110,10 @@ def Semiformula.toStringSet : ∀ {n}, SetTheorySemiformula ξ n → String
   | _,         .nrel Language.Mem.mem v => s!"{(v 0).toStringSet} ∉ {(v 1).toStringSet}"
   | _,                           φ ⋏ ψ => s!"[{φ.toStringSet}] ∧ [{ψ.toStringSet}]"
   | _,                           φ ⋎ ψ => s!"[{φ.toStringSet}] ∨ [{ψ.toStringSet}]"
-  | n, ∀⁰ (rel Language.Mem.mem v 🡒 φ) => s!"(∀ x{toString n} ∈ {(v 1).toStringSet}) [{φ.toStringSet}]"
-  | n, ∃⁰ (rel Language.Mem.mem v ⋏ φ) => s!"(∃ x{toString n} ∈ {(v 1).toStringSet}) [{φ.toStringSet}]"
-  | n,                            ∀⁰ φ => s!"(∀ x{toString n}) [{φ.toStringSet}]"
-  | n,                            ∃⁰ φ => s!"(∃ x{toString n}) [{φ.toStringSet}]"
+  | n, ∀¹ (rel Language.Mem.mem v 🡒 φ) => s!"(∀ x{toString n} ∈ {(v 1).toStringSet}) [{φ.toStringSet}]"
+  | n, ∃¹ (rel Language.Mem.mem v ⋏ φ) => s!"(∃ x{toString n} ∈ {(v 1).toStringSet}) [{φ.toStringSet}]"
+  | n,                            ∀¹ φ => s!"(∀ x{toString n}) [{φ.toStringSet}]"
+  | n,                            ∃¹ φ => s!"(∃ x{toString n}) [{φ.toStringSet}]"
 
 instance : Repr (SetTheorySemiformula ξ n) := ⟨fun φ _ ↦ φ.toStringSet⟩
 

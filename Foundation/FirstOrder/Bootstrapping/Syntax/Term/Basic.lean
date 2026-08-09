@@ -500,10 +500,10 @@ lemma graph_existsUnique_total (t : V) : ∃! y,
 
 noncomputable def result (t : V) : V := Classical.choose! (c.graph_existsUnique_total L param t)
 
-def result_prop {t : V} (ht : IsUTerm L t) : c.Graph L param t (c.result L param t) :=
+theorem result_prop {t : V} (ht : IsUTerm L t) : c.Graph L param t (c.result L param t) :=
   Classical.choose!_spec (c.graph_existsUnique_total L param t) |>.1 ht
 
-def result_prop_not {t : V} (ht : ¬IsUTerm L t) : c.result L param t = 0 :=
+theorem result_prop_not {t : V} (ht : ¬IsUTerm L t) : c.result L param t = 0 :=
   Classical.choose!_spec (c.graph_existsUnique_total L param t) |>.2 ht
 
 variable {L c param}
@@ -557,7 +557,7 @@ lemma nth_resultVec {k w i : V} (hw : IsUTermVec L k w) (hi : i < k) :
     (c.resultVec L param k w).[i] = c.result L param w.[i] :=
   c.result_eq_of_graph (hw.nth hi) (c.graph_of_mem_resultVec L param hw hi) |>.symm
 
-@[simp] def resultVec_of_not {k w : V} (hw : ¬IsUTermVec L k w) : c.resultVec L param k w = 0 :=
+@[simp] theorem resultVec_of_not {k w : V} (hw : ¬IsUTermVec L k w) : c.resultVec L param k w = 0 :=
   Classical.choose!_spec (c.graph_existsUnique_vec_total L param k w) |>.2 hw
 
 @[simp] lemma resultVec_nil :

@@ -23,7 +23,7 @@ namespace Theorems
 
 open Entailment TwoSided Tableaux FiniteContext
 
-variable {F : Type*} [LogicalConnective F] [DecidableEq F] {S : Type*} [Entailment S F] {𝓢 : S} [Entailment.Int 𝓢]
+variable {F : Type*} [LogicalConnective F] [LogicalNeutral F] [DecidableEq F] {S : Type*} [Entailment S F] {𝓢 : S} [Entailment.Int 𝓢]
 
 local notation Γ:45 " ⟹ " Δ:46 => TwoSided 𝓢 Γ Δ
 
@@ -35,6 +35,11 @@ lemma to_twoSided {Γ Δ} (h : Valid 𝓢 [Γ ⟶ Δ]) : Γ ⟹ Δ := by
   · assumption
   · simp_all
 
+-- `DecidableEq F` is not referenced in the proof term itself, but the ambient
+-- instance is needed for elaboration to disambiguate `TwoSided.to_provable`'s
+-- own `DecidableEq F`-dependent notation; omitting it (as the `unusedSectionVars`
+-- linter suggests) breaks elaboration, so the false-positive warning is suppressed.
+set_option linter.unusedSectionVars false in
 lemma to_provable {φ} (h : Valid 𝓢 [[] ⟶ [φ]]) : 𝓢 ⊢ φ := by
   rcases h
   · exact TwoSided.to_provable <| by assumption
@@ -128,6 +133,7 @@ structure Context where
   levelE : Level
   F : Q(Type levelF)
   instLC : Q(LogicalConnective $F)
+  instLN : Q(LogicalNeutral $F)
   instDE : Q(DecidableEq $F)
   S : Q(Type levelS)
   E : Q(Entailment.{_, _, levelE} $S $F)
@@ -140,35 +146,37 @@ open Mathlib Qq Lean Elab Meta Tactic
 abbrev M := ReaderT Context AtomM
 
 /-- Apply the function
-  `n : ∀ {F} [LogicalConnective F] [DecidableEq F] {S} [Entailment S F] {𝓢} [Entailment.Int 𝓢], _` to the
+  `n : ∀ {F} [LogicalConnective F] [LogicalNeutral F] [DecidableEq F] {S} [Entailment S F] {𝓢} [Entailment.Int 𝓢], _` to the
 implicit parameters in the context, and the given list of arguments. -/
 def Context.app (c : Context) (n : Name) : Array Expr → Expr :=
   mkAppN <| @Expr.const n [c.levelF, c.levelS, c.levelE]
-    |>.app c.F |>.app c.instLC |>.app c.instDE |>.app c.S |>.app c.E |>.app c.𝓢 |>.app c.instInt
+    |>.app c.F |>.app c.instLC |>.app c.instLN |>.app c.instDE |>.app c.S |>.app c.E |>.app c.𝓢 |>.app c.instInt
 
 def iapp (n : Name) (xs : Array Expr) : M Expr := do
   let c ← read
   return c.app n xs
 
 def getGoalTwoSided (e : Q(Prop)) : MetaM ((c : Context) × List Q($c.F) × List Q($c.F)) := do
-  let ~q(@Entailment.TwoSided $F $instLC $S $E $𝓢 $p $q) := e | throwError m!"(getGoal) error: {e} not a form of _ ⊢ _"
+  let ~q(@Entailment.TwoSided $F $instLC $instLN $S $E $𝓢 $p $q) := e | throwError m!"(getGoal) error: {e} not a form of _ ⊢ _"
   let .some instDE ← trySynthInstanceQ q(DecidableEq $F)
     | throwError m! "error: failed to find instance DecidableEq {F}"
   let .some instInt ← trySynthInstanceQ q(Entailment.Int $𝓢)
     | throwError m! "error: failed to find instance Entailment.Cl {𝓢}"
   let Γ ← Qq.ofQList p
   let Δ ← Qq.ofQList q
-  return ⟨⟨_, _, _, F, instLC, instDE, S, E, 𝓢, instInt⟩, Γ, Δ⟩
+  return ⟨⟨_, _, _, F, instLC, instLN, instDE, S, E, 𝓢, instInt⟩, Γ, Δ⟩
 
 def getGoalProvable (e : Q(Prop)) : MetaM ((c : Context) × Q($c.F)) := do
   let ~q(@Entailment.Provable $F $S $E $𝓢 $p) := e | throwError m!"(getGoal) error: {e} not a form of _ ⊢ _"
   let .some instDE ← trySynthInstanceQ q(DecidableEq $F)
     | throwError m! "error: failed to find instance DecidableEq {F}"
   let .some instLC ← trySynthInstanceQ q(LogicalConnective $F)
-    | throwError m! "error: failed to find instance DecidableEq {F}"
+    | throwError m! "error: failed to find instance LogicalConnective {F}"
+  let .some instLN ← trySynthInstanceQ q(LogicalNeutral $F)
+    | throwError m! "error: failed to find instance LogicalNeutral {F}"
   let .some instInt ← trySynthInstanceQ q(Entailment.Int $𝓢)
     | throwError m! "error: failed to find instance Entailment.Cl {𝓢}"
-  return ⟨⟨_, _, _, F, instLC, instDE, S, E, 𝓢, instInt⟩, p⟩
+  return ⟨⟨_, _, _, F, instLC, instLN, instDE, S, E, 𝓢, instInt⟩, p⟩
 
 abbrev Sequent := List Lit
 
@@ -178,23 +186,23 @@ scoped notation:0 Γ:45 " ⟶ " Δ:46 => Entailment.Tableaux.Sequent.mk Γ Δ
 
 def litToExpr (φ : Lit) : M Expr := do
   let c ← read
-  return Litform.toExpr c.instLC φ
+  return Litform.toExpr c.instLC c.instLN φ
 
 def exprToLit (e : Expr) : M Lit := do
   let c ← read
-  Litform.denote c.instLC e
+  Litform.denote c.instLC c.instLN e
 
 def Sequent.toExprList (Γ : Sequent) : M (List Expr) := do
   let c ← read
-  return Γ.map (Litform.toExpr c.instLC)
+  return Γ.map (Litform.toExpr c.instLC c.instLN)
 
 def exprListToLitList (l : List Expr) : M (List Lit) := do
   let c ← read
-  l.mapM (m := MetaM) (Litform.denote c.instLC)
+  l.mapM (m := MetaM) (Litform.denote c.instLC c.instLN)
 
 def Sequent.toExpr (Γ : Sequent) : M Expr := do
   let c ← read
-  return toQList <| Γ.map (Litform.toExpr c.instLC)
+  return toQList <| Γ.map (Litform.toExpr c.instLC c.instLN)
 
 def mkTableauSequentQ (F : Q(Type*)) (Γ Δ : Q(List $F)) : Q(Entailment.Tableaux.Sequent $F) :=
   q($Γ ⟶ $Δ)

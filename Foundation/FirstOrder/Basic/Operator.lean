@@ -287,8 +287,6 @@ namespace Operator
 def operator {arity : ℕ} (o : Operator L arity) (v : Fin arity → Semiterm L ξ n) : Semiformula L ξ n :=
   Rewriting.emb o.sentence ⇜ v
 
-/-- A formula operator is symbol-like when rewriting into one of its instances
-can only come from another instance of the same operator. -/
 class SymbolLike (o : Operator L k) (ξ₁ ξ₂ : Type*) : Prop where
   symbolLike {n₁ n₂ : ℕ} (ω : Rew L ξ₁ n₁ ξ₂ n₂)
     {φ : Semiformula L ξ₁ n₁} {v : Fin k → Semiterm L ξ₂ n₂} :
@@ -434,17 +432,17 @@ variable {M : Type w} {s : Structure L M}
 
 end
 
-def ballLT [Operator.LT L] (t : Semiterm L ξ n) (φ : Semiformula L ξ (n + 1)) : Semiformula L ξ n := ∀⁰[Operator.LT.lt.operator ![#0, Rew.bShift t]] φ
+def ballLT [Operator.LT L] (t : Semiterm L ξ n) (φ : Semiformula L ξ (n + 1)) : Semiformula L ξ n := ∀¹[Operator.LT.lt.operator ![#0, Rew.bShift t]] φ
 
-def bexsLT [Operator.LT L] (t : Semiterm L ξ n) (φ : Semiformula L ξ (n + 1)) : Semiformula L ξ n := ∃⁰[Operator.LT.lt.operator ![#0, Rew.bShift t]] φ
+def bexsLT [Operator.LT L] (t : Semiterm L ξ n) (φ : Semiformula L ξ (n + 1)) : Semiformula L ξ n := ∃¹[Operator.LT.lt.operator ![#0, Rew.bShift t]] φ
 
-def ballLE [Operator.LE L] (t : Semiterm L ξ n) (φ : Semiformula L ξ (n + 1)) : Semiformula L ξ n := ∀⁰[Operator.LE.le.operator ![#0, Rew.bShift t]] φ
+def ballLE [Operator.LE L] (t : Semiterm L ξ n) (φ : Semiformula L ξ (n + 1)) : Semiformula L ξ n := ∀¹[Operator.LE.le.operator ![#0, Rew.bShift t]] φ
 
-def bexsLE [Operator.LE L] (t : Semiterm L ξ n) (φ : Semiformula L ξ (n + 1)) : Semiformula L ξ n := ∃⁰[Operator.LE.le.operator ![#0, Rew.bShift t]] φ
+def bexsLE [Operator.LE L] (t : Semiterm L ξ n) (φ : Semiformula L ξ (n + 1)) : Semiformula L ξ n := ∃¹[Operator.LE.le.operator ![#0, Rew.bShift t]] φ
 
-def ballMem [Operator.Mem L] (t : Semiterm L ξ n) (φ : Semiformula L ξ (n + 1)) : Semiformula L ξ n := ∀⁰[Operator.Mem.mem.operator ![#0, Rew.bShift t]] φ
+def ballMem [Operator.Mem L] (t : Semiterm L ξ n) (φ : Semiformula L ξ (n + 1)) : Semiformula L ξ n := ∀¹[Operator.Mem.mem.operator ![#0, Rew.bShift t]] φ
 
-def bexsMem [Operator.Mem L] (t : Semiterm L ξ n) (φ : Semiformula L ξ (n + 1)) : Semiformula L ξ n := ∃⁰[Operator.Mem.mem.operator ![#0, Rew.bShift t]] φ
+def bexsMem [Operator.Mem L] (t : Semiterm L ξ n) (φ : Semiformula L ξ (n + 1)) : Semiformula L ξ n := ∃¹[Operator.Mem.mem.operator ![#0, Rew.bShift t]] φ
 
 end Semiformula
 
@@ -525,8 +523,8 @@ lemma eq_equal_iff [L.Eq] {φ : Semiformula L ξ₁ n₁} {t u : Semiterm L ξ�
   |         ⊥ => simp [Operator.operator, Operator.Eq.sentence_eq]
   |     _ ⋏ _ => simp [Operator.operator, Operator.Eq.sentence_eq]
   |     _ ⋎ _ => simp [Operator.operator, Operator.Eq.sentence_eq]
-  |      ∀⁰ _ => simp [Operator.operator, Operator.Eq.sentence_eq]
-  |      ∃⁰ _ => simp [Operator.operator, Operator.Eq.sentence_eq]
+  |      ∀¹ _ => simp [Operator.operator, Operator.Eq.sentence_eq]
+  |      ∃¹ _ => simp [Operator.operator, Operator.Eq.sentence_eq]
 
 lemma eq_lt_iff [L.LT] {φ : Semiformula L ξ₁ n₁} {t u : Semiterm L ξ₂ n₂} :
     ω ▹ φ = Operator.LT.lt.operator ![t, u]
@@ -546,8 +544,8 @@ lemma eq_lt_iff [L.LT] {φ : Semiformula L ξ₁ n₁} {t u : Semiterm L ξ₂ n
   |         ⊥ => simp [Operator.operator, Operator.LT.sentence_eq]
   |     _ ⋏ _ => simp [Operator.operator, Operator.LT.sentence_eq]
   |     _ ⋎ _ => simp [Operator.operator, Operator.LT.sentence_eq]
-  |      ∀⁰ _ => simp [Operator.operator, Operator.LT.sentence_eq]
-  |      ∃⁰ _ => simp [Operator.operator, Operator.LT.sentence_eq]
+  |      ∀¹ _ => simp [Operator.operator, Operator.LT.sentence_eq]
+  |      ∃¹ _ => simp [Operator.operator, Operator.LT.sentence_eq]
 
 lemma eq_mem_iff [L.Mem] {φ : Semiformula L ξ₁ n₁} {t u : Semiterm L ξ₂ n₂} :
     ω ▹ φ = Operator.Mem.mem.operator ![t, u]
@@ -567,8 +565,8 @@ lemma eq_mem_iff [L.Mem] {φ : Semiformula L ξ₁ n₁} {t u : Semiterm L ξ₂
   |         ⊥ => simp [Operator.operator, Operator.Mem.sentence_eq]
   |     _ ⋏ _ => simp [Operator.operator, Operator.Mem.sentence_eq]
   |     _ ⋎ _ => simp [Operator.operator, Operator.Mem.sentence_eq]
-  |      ∀⁰ _ => simp [Operator.operator, Operator.Mem.sentence_eq]
-  |      ∃⁰ _ => simp [Operator.operator, Operator.Mem.sentence_eq]
+  |      ∀¹ _ => simp [Operator.operator, Operator.Mem.sentence_eq]
+  |      ∃¹ _ => simp [Operator.operator, Operator.Mem.sentence_eq]
 
 end Rew
 
@@ -659,19 +657,19 @@ variable {L M}
 @[simp] lemma add_eq_of_lang [L.Add] [Add M] [Structure.Add L M] {v : Fin 2 → M} :
     Structure.func (L := L) Language.Add.add v = v 0 + v 1 := by
   have h := Structure.Add.add (L := L) (v 0) (v 1)
-  simp [←Matrix.fun_eq_vec_two] at h
+  simp only [←Matrix.fun_eq_vec_two] at h
   exact h
 
 @[simp] lemma mul_eq_of_lang [L.Mul] [Mul M] [Structure.Mul L M] {v : Fin 2 → M} :
     Structure.func (L := L) Language.Mul.mul v = v 0 * v 1 := by
   have h := Structure.Mul.mul (L := L) (v 0) (v 1)
-  simp [←Matrix.fun_eq_vec_two] at h
+  simp only [←Matrix.fun_eq_vec_two] at h
   exact h
 
 @[simp] lemma exp_eq_of_lang [L.Exp] [Exp M] [Structure.Exp L M] {v : Fin 1 → M} :
     Structure.func (L := L) Language.Exp.exp v = LO.Exp.exp (v 0) := by
   have h := Structure.Exp.exp (L := L) (v 0)
-  simp [←Matrix.fun_eq_vec_one] at h
+  simp only [←Matrix.fun_eq_vec_one] at h
   exact h
 
 @[simp] lemma eq_iff_eq [Operator.Eq L] [Structure.Eq L M] {v : Fin 2 →M} :

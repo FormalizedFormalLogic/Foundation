@@ -1,5 +1,6 @@
 module
 
+public import Foundation.FirstOrder.Arithmetic.Definability.Definable
 public import Foundation.FirstOrder.Arithmetic.R0.Basic
 public import Foundation.Vorspiel.Arithmetic
 public import Foundation.Vorspiel.Computability
@@ -108,7 +109,7 @@ def codeAux {k : ℕ} : Nat.ArithPart₁.Code k → ArithmeticFormula (Fin (k + 
       Matrix.conj fun i ↦ Rew.bind (L := ℒₒᵣ) (ξ₁ := Fin (k + 1)) ![] (#i :> (&·.succ)) ▹ codeAux (d i))
   |       Code.rfind c =>
     (Rew.bind (L := ℒₒᵣ) (ξ₁ := Fin (k + 1 + 1)) ![] (‘0’ :> &0 :> (&·.succ)) ▹ codeAux c) ⋏
-    (∀⁰[“z. z < &0”] ∃⁰ “z. z ≠ 0” ⋏ ((Rew.bind (L := ℒₒᵣ) (ξ₁ := Fin (k + 1 + 1)) ![] (#0 :> #1 :> (&·.succ)) ▹ codeAux c)))
+    (∀¹[“z. z < &0”] ∃¹ “z. z ≠ 0” ⋏ ((Rew.bind (L := ℒₒᵣ) (ξ₁ := Fin (k + 1 + 1)) ![] (#0 :> #1 :> (&·.succ)) ▹ codeAux c)))
 
 def code (c : Code k) : ArithmeticSemisentence (k + 1) := (Rew.bind (L := ℒₒᵣ) (ξ₁ := Fin (k + 1)) ![] (#0 :> (#·.succ))) ▹ (codeAux c)
 
@@ -241,14 +242,14 @@ lemma codeOfPartrec'_spec {k} {f : List.Vector ℕ k →. ℕ} (hf : Nat.Partrec
 
 open Classical
 
-noncomputable def codeOfREPred (A : ℕ → Prop) : ArithmeticSemisentence 1 :=
-  let f : ℕ →. Unit := fun a ↦ Part.assert (A a) fun _ ↦ Part.some ()
+noncomputable def codeOfREPred (p : ℕ → Prop) : ArithmeticSemisentence 1 :=
+  let f : ℕ →. Unit := fun a ↦ Part.assert (p a) fun _ ↦ Part.some ()
   (codeOfPartrec' (fun v ↦ (f (v.get 0)).map fun _ ↦ 0))/[‘0’, #0]
 
-lemma codeOfREPred_spec {A : ℕ → Prop} (hp : REPred A) {x : ℕ} :
-    (codeOfREPred A).Evalb (![x]) ↔ A x := by
-  let f : ℕ →. Unit := fun a ↦ Part.assert (A a) fun _ ↦ Part.some ()
-  suffices (codeOfPartrec' fun v ↦ Part.map (fun _ ↦ 0) (f (v.get 0)))/[‘0’, #0].Evalb (![x]) ↔ A x from this
+lemma codeOfREPred_spec {p : ℕ → Prop} (hp : REPred p) {x : ℕ} :
+    (codeOfREPred p).Evalb ![x] ↔ p x := by
+  let f : ℕ →. Unit := fun a ↦ Part.assert (p a) fun _ ↦ Part.some ()
+  suffices (codeOfPartrec' fun v ↦ Part.map (fun _ ↦ 0) (f (v.get 0)))/[‘0’, #0].Evalb (![x]) ↔ p x from this
   have : Partrec fun v : List.Vector ℕ 1 ↦ (f (v.get 0)).map fun _ ↦ 0 := by
     refine Partrec.map (Partrec.comp hp (Primrec.to_comp <| Primrec.vector_get.comp .id (.const 0))) (Computable.const 0).to₂
   simpa [Semiformula.eval_substs, Matrix.comp_vecCons', Matrix.constant_eq_singleton]
@@ -257,9 +258,83 @@ lemma codeOfREPred_spec {A : ℕ → Prop} (hp : REPred A) {x : ℕ} :
 variable {T : ArithmeticTheory} [𝗥₀ ⪯ T] [T.SoundOnHierarchy 𝚺 1]
 
 /-- Weak representation of a r.e. predicate -/
-theorem re_complete {A : ℕ → Prop} (hp : REPred A) {x : ℕ} :
-    A x ↔ T ⊢ (codeOfREPred A)/[‘↑x’] := Iff.trans
+theorem rePred_weak_representation {p : ℕ → Prop} (hp : REPred p) {x : ℕ} :
+    p x ↔ T ⊢ (codeOfREPred p)/[x] := Iff.trans
   (by simpa [models_iff, Semiformula.eval_substs, Matrix.constant_eq_singleton] using (codeOfREPred_spec hp (x := x)).symm)
   (sigma_one_completeness_iff <| by simp [codeOfREPred, codeOfPartrec'])
+
+theorem rePred_iff_sigma1 {p : ℕ → Prop} : REPred p ↔ 𝚺₁-Predicate p := by
+  constructor
+  · intro h
+    refine ⟨.mkSigma (codeOfREPred p) (by simp [codeOfREPred, codeOfPartrec']), ?_⟩
+    intro v
+    simpa [←Matrix.fun_eq_vec_one] using codeOfREPred_spec h (x := v 0)
+  · rintro ⟨φ, hφ⟩
+    have : REPred fun x ↦ (Semiformula.Eval (x ::ᵥ List.Vector.nil).get id) _ :=
+      (sigma1_re id (φ.sigma_prop)).comp
+        (Primrec.to_comp <| Primrec.vector_cons.comp .id <| .const _)
+    exact this.of_eq <| by intro x; simpa [List.Vector.cons_get, Matrix.empty_eq] using hφ ![x]
+
+theorem computablePred_iff_delta1 {p : ℕ → Prop} : ComputablePred p ↔ 𝚫₁-Predicate p := by
+  classical
+  constructor
+  · intro hp
+    change 𝚫₁.Definable (fun v : Fin 1 → ℕ ↦ p (v 0))
+    rw [HierarchySymbol.Definable.delta_iff_sigma_and_pi]
+    rcases ComputablePred.computable_iff_re_compl_re'.mp hp with ⟨hp, hnp⟩
+    exact ⟨(rePred_iff_sigma1.mp hnp).notSigma.of_iff (by intro v; simp), rePred_iff_sigma1.mp hp⟩
+  · intro h
+    change 𝚫₁.Definable (fun v : Fin 1 → ℕ ↦ p (v 0)) at h
+    rw [HierarchySymbol.Definable.delta_iff_sigma_and_pi] at h
+    exact ComputablePred.computable_iff_re_compl_re'.mpr
+      ⟨rePred_iff_sigma1.mpr h.2, rePred_iff_sigma1.mpr h.1.notPi⟩
+
+theorem computable_iff_sigma1 {f : ℕ → ℕ} : Computable f ↔ 𝚺₁-Function₁ f := by
+  constructor
+  · intro hf
+    let F : List.Vector ℕ 1 →. ℕ := fun v ↦ Part.some (f (v.get 0))
+    have hF : Partrec F := by
+      change Partrec fun v : List.Vector ℕ 1 ↦ Part.some (f (v.get 0))
+      exact hf.comp (Primrec.to_comp <| Primrec.vector_get.comp .id (.const (0 : Fin 1)))
+    refine ⟨.mkSigma (codeOfPartrec' F) (by simp [codeOfPartrec']), ?_⟩
+    intro v
+    simpa [F, ←Matrix.fun_eq_vec_two]
+      using codeOfPartrec'_spec (Nat.Partrec'.of_part hF) (y := v 0) (v := ![v 1])
+  · rintro ⟨φ, hφ⟩
+    have hRe : REPred fun p : ℕ × ℕ ↦
+        φ.val.Eval (p.2 ::ᵥ p.1 ::ᵥ List.Vector.nil : List.Vector ℕ 2).get id :=
+      (sigma1_re id φ.sigma_prop).comp
+        (Primrec.to_comp <| Primrec.vector_cons.comp .snd
+          (Primrec.vector_cons.comp .fst (.const List.Vector.nil)))
+    exact ComputablePred.of_graph_rePred <| hRe.of_eq <| by
+      intro p
+      simpa [List.Vector.cons_get] using hφ ![p.2, p.1]
+
+theorem computable₂_iff_sigma1 {f : ℕ → ℕ → ℕ} : Computable₂ f ↔ 𝚺₁-Function₂ f := by
+  constructor
+  · intro hf
+    let F : List.Vector ℕ 2 →. ℕ := fun v ↦ Part.some (f (v.get 0) (v.get 1))
+    have hF : Partrec F := by
+      have hArg : Computable fun v : List.Vector ℕ 2 ↦ (v.get 0, v.get 1) :=
+        (Primrec.vector_get.comp .id (.const (0 : Fin 2))).to_comp.pair
+          (Primrec.vector_get.comp .id (.const (1 : Fin 2))).to_comp
+      have hf' : Computable fun p : ℕ × ℕ ↦ f p.1 p.2 := hf
+      change Partrec fun v : List.Vector ℕ 2 ↦ Part.some (f (v.get 0) (v.get 1))
+      exact hf'.comp hArg
+    refine ⟨.mkSigma (codeOfPartrec' F) (by simp [codeOfPartrec']), ?_⟩
+    intro v
+    simpa [F, ←Matrix.fun_eq_vec_three]
+      using codeOfPartrec'_spec (Nat.Partrec'.of_part hF) (y := v 0) (v := ![v 1, v 2])
+  · rintro ⟨φ, hφ⟩
+    have hRe : REPred fun p : (ℕ × ℕ) × ℕ ↦
+        φ.val.Eval
+          (p.2 ::ᵥ p.1.1 ::ᵥ p.1.2 ::ᵥ List.Vector.nil : List.Vector ℕ 3).get id :=
+      (sigma1_re id φ.sigma_prop).comp
+        (Primrec.to_comp <| Primrec.vector_cons.comp .snd
+          (Primrec.vector_cons.comp (Primrec.fst.comp .fst)
+            (Primrec.vector_cons.comp (Primrec.snd.comp .fst) (.const List.Vector.nil))))
+    exact ComputablePred.of_graph_rePred <| hRe.of_eq <| by
+      intro p
+      simpa [List.Vector.cons_get] using hφ ![p.2, p.1.1, p.1.2]
 
 end LO.FirstOrder.Arithmetic

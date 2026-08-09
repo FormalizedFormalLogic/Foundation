@@ -14,8 +14,8 @@ def rewAux (ω : Rew L ξ₁ n₁ ξ₂ n₂) : Semiformulaᵢ L ξ₁ n₁ → 
   |   φ ⋏ ψ => rewAux ω φ ⋏ rewAux ω ψ
   |   φ ⋎ ψ => rewAux ω φ ⋎ rewAux ω ψ
   |   φ 🡒 ψ => rewAux ω φ 🡒 rewAux ω ψ
-  |    ∀⁰ φ => ∀⁰ rewAux ω.q φ
-  |    ∃⁰ φ => ∃⁰ rewAux ω.q φ
+  |    ∀¹ φ => ∀¹ rewAux ω.q φ
+  |    ∃¹ φ => ∃¹ rewAux ω.q φ
 
 def rew (ω : Rew L ξ₁ n₁ ξ₂ n₂) : Semiformulaᵢ L ξ₁ n₁ →ˡᶜ Semiformulaᵢ L ξ₂ n₂ where
   toTr := rewAux ω
@@ -57,11 +57,11 @@ private lemma map_inj {n₁ n₂} {b : Fin n₁ → Fin n₂} {f : ξ₁ → ξ�
   | φ 🡒 ψ, χ => by
     cases χ using cases' <;> simp [rew_rel]
     intro hp hq; exact ⟨map_inj hb hf hp, map_inj hb hf hq⟩
-  | ∀⁰ φ, ψ => by
+  | ∀¹ φ, ψ => by
     cases ψ using cases' <;> simp [rew_rel, Rew.q_map]
     intro h; exact map_inj (b := 0 :> Fin.succ ∘ b)
       (Matrix.injective_vecCons ((Fin.succ_injective _).comp hb) (fun _ ↦ (Fin.succ_ne_zero _).symm)) hf h
-  | ∃⁰ φ, ψ => by
+  | ∃¹ φ, ψ => by
     cases ψ using cases' <;> simp [rew_rel, Rew.q_map]
     intro h; exact map_inj (b := 0 :> Fin.succ ∘ b)
       (Matrix.injective_vecCons ((Fin.succ_injective _).comp hb) (fun _ ↦ (Fin.succ_ne_zero _).symm)) hf h

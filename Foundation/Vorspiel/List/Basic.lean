@@ -152,7 +152,7 @@ lemma remove_cons_subset_cons_remove (a b) (l : List α) :
   simp only [mem_remove_iff, mem_cons, ne_eq, and_imp]
   rintro (rfl | hx) nex <;> simp [*]
 
-lemma remove_map_substet_map_remove [DecidableEq β] (f : α → β) (l : List α) (a) :
+lemma remove_map_subset_map_remove [DecidableEq β] (f : α → β) (l : List α) (a) :
     (l.map f).remove (f a) ⊆ (l.remove a).map f := by
   simp only [subset_def, mem_remove_iff, mem_map, ne_eq, and_imp, forall_exists_index,
     forall_apply_eq_imp_iff₂]

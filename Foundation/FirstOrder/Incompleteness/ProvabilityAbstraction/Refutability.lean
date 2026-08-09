@@ -73,9 +73,8 @@ variable
 lemma unprovable_jeroslow [T₀ ⪯ T] [Consistent T] [𝔚.SoundOn (jeroslow 𝔚)] : T ⊬ jeroslow 𝔚 := by
   by_contra hC;
   apply Entailment.Consistent.not_bot (𝓢 := T);
-  . infer_instance;
-  . have : T ⊢ ∼(jeroslow 𝔚) := Refutability.sound_on $ (Entailment.iff_of_E! $ jeroslow_def') |>.mp hC;
-    exact (N!_iff_CO!.mp this) ⨀ hC;
+  have : T ⊢ ∼(jeroslow 𝔚) := Refutability.sound_on $ (Entailment.iff_of_E! $ jeroslow_def') |>.mp hC;
+  exact (N!_iff_CO!.mp this) ⨀ hC;
 
 end
 
@@ -116,7 +115,7 @@ lemma jeroslow_not_safe [𝔅.FormalizedCompleteOn 𝐉] : T ⊢ 𝐉 🡒 (𝔅
 -/
 lemma unprovable_flon [consis : Consistent T] [𝔅.FormalizedCompleteOn 𝐉] : T ⊬ flon 𝔅 𝔚 := by
   contrapose! consis;
-  replace consis : T ⊢ ∀⁰ safe 𝔅 𝔚 := by simpa [flon] using consis;
+  replace consis : T ⊢ ∀¹ safe 𝔅 𝔚 := by simpa [flon] using consis;
   have h₁ : T ⊢ ∼(𝔅 𝐉 ⋏ 𝔚 𝐉) := by simpa [safe] using! FirstOrder.Theory.Proof.specialize _ _ ⨀ consis;
   have h₂ : T ⊢ ∼𝐉 := (contra! jeroslow_not_safe) ⨀ h₁;
   have h₃ : T ⊢ 𝐉 🡘 𝔚 𝐉 := jeroslow_def';

@@ -58,9 +58,9 @@ variable {T}
 
 end
 
-abbrev _root_.LO.FirstOrder.Theory.Con : ArithmeticTheory := {↑T.consistent}
+abbrev _root_.LO.FirstOrder.Theory.Con : ArithmeticTheory := {T.consistent.val}
 
-abbrev _root_.LO.FirstOrder.Theory.Incon : ArithmeticTheory := {∼↑T.consistent}
+abbrev _root_.LO.FirstOrder.Theory.Incon : ArithmeticTheory := {∼T.consistent.val}
 
 noncomputable instance : T.Con.Δ₁ := Theory.Δ₁.singleton _
 
@@ -70,7 +70,7 @@ end
 
 variable (T : ArithmeticTheory) [T.Δ₁] (V)
 
-def consistent_eq : T.consistent = T.standardProvability.con := rfl
+theorem consistent_eq : T.consistent = T.standardProvability.con := rfl
 
 @[simp] lemma standard_consistent [𝗥₀ ⪯ T] : T.Consistent ℕ ↔ Entailment.Consistent T := by
   simp [Theory.Consistent, Entailment.consistent_iff_unprovable_bot]
@@ -85,7 +85,7 @@ open Entailment
 
 variable (T : ArithmeticTheory) [𝗜𝚺₁ ⪯ T] [T.Δ₁]
 
-instance [ℕ↓[ℒₒᵣ] ⊧* T] : ℕ↓[ℒₒᵣ] ⊧* (T ∪ T.Con) := by
+instance [ℕ↓[ℒₒᵣ] ⊧* T] : ℕ↓[ℒₒᵣ] ⊧* T ∪ T.Con := by
   have : 𝗥₀ ⪯ 𝗜𝚺₁ := inferInstance
   have : 𝗥₀ ⪯ T := Entailment.WeakerThan.trans this inferInstance
   have : Entailment.Consistent T := ArithmeticTheory.consistent_of_sound T (Eq ⊥) rfl

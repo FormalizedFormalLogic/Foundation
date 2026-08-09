@@ -44,10 +44,10 @@ def rewAux (ω : Rew L ξ₁ n₁ ξ₂ n₂) : Semiformula L Ξ ξ₁ N n₁ �
   |        ⊥ => ⊥
   |    φ ⋏ ψ => rewAux ω φ ⋏ rewAux ω ψ
   |    φ ⋎ ψ => rewAux ω φ ⋎ rewAux ω ψ
-  |     ∀⁰ φ => ∀⁰ rewAux ω.q φ
-  |     ∃⁰ φ => ∃⁰ rewAux ω.q φ
-  |     ∀¹ φ => ∀¹ rewAux ω φ
-  |     ∃¹ φ => ∃¹ rewAux ω φ
+  |     ∀¹ φ => ∀¹ rewAux ω.q φ
+  |     ∃¹ φ => ∃¹ rewAux ω.q φ
+  |     ∀² φ => ∀² rewAux ω φ
+  |     ∃² φ => ∃² rewAux ω φ
 
 lemma rewAux_neg (ω : Rew L ξ₁ n₁ ξ₂ n₂) (φ : Semiformula L Ξ ξ₁ N n₁) :
     rewAux ω (∼φ) = ∼rewAux ω φ := by
@@ -60,7 +60,7 @@ def rew (ω : Rew L ξ₁ n₁ ξ₂ n₂) : Semiformula L Ξ ξ₁ N n₁ →ˡ
   map_neg' φ := rewAux_neg _ _
   map_and' _ _ := rfl
   map_or' _ _ := rfl
-  map_imply' _ _ := by simp [DeMorgan.imply, rewAux, rewAux_neg]
+  map_imply' _ _ := by simp [LogicalConnective.DeMorgan.imply, rewAux, rewAux_neg]
 
 instance : Rewriting L ξ₁ (Semiformula L Ξ ξ₁ N) ξ₂ (Semiformula L Ξ ξ₂ N) where
   app := rew
@@ -89,16 +89,16 @@ lemma rew_nrel (ω : Rew L ξ₁ n₁ ξ₂ n₂) {k} (r : L.Rel k) (v : Fin k �
     ω ▹ (t ∉& X : Semiformula L Ξ ξ₁ N n₁) = (ω t) ∉& X := rfl
 
 @[simp] lemma rew_all₀ (ω : Rew L ξ₁ n₁ ξ₂ n₂) (φ : Semiformula L Ξ ξ₁ N (n₁ + 1)) :
-    ω ▹ (∀⁰ φ) = ∀⁰ (ω.q ▹ φ) := rfl
+    ω ▹ (∀¹ φ) = ∀¹ (ω.q ▹ φ) := rfl
 
 @[simp] lemma rew_exs₀ (ω : Rew L ξ₁ n₁ ξ₂ n₂) (φ : Semiformula L Ξ ξ₁ N (n₁ + 1)) :
-    ω ▹ (∃⁰ φ) = ∃⁰ (ω.q ▹ φ) := rfl
+    ω ▹ (∃¹ φ) = ∃¹ (ω.q ▹ φ) := rfl
 
 @[simp] lemma rew_all₁ (ω : Rew L ξ₁ n₁ ξ₂ n₂) (φ : Semiformula L Ξ ξ₁ (N + 1) n₁) :
-    ω ▹ (∀¹ φ) = ∀¹ (ω ▹ φ) := rfl
+    ω ▹ (∀² φ) = ∀² (ω ▹ φ) := rfl
 
 @[simp] lemma rew_exs₁ (ω : Rew L ξ₁ n₁ ξ₂ n₂) (φ : Semiformula L Ξ ξ₁ (N + 1) n₁) :
-    ω ▹ (∃¹ φ) = ∃¹ (ω ▹ φ) := rfl
+    ω ▹ (∃² φ) = ∃² (ω ▹ φ) := rfl
 
 instance : ReflectiveRewriting L ξ (Semiformula L Ξ ξ N) where
   id_app (φ) := by induction φ using rec' <;> simp [rew_rel, rew_nrel, *]
@@ -118,10 +118,10 @@ def bmapAux (f : Fin N → Fin M) : Semiformula L Ξ ξ N n → Semiformula L Ξ
   |        ⊥ => ⊥
   |    φ ⋏ ψ => φ.bmapAux f ⋏ ψ.bmapAux f
   |    φ ⋎ ψ => φ.bmapAux f ⋎ ψ.bmapAux f
-  |     ∀⁰ φ => ∀⁰ φ.bmapAux f
-  |     ∃⁰ φ => ∃⁰ φ.bmapAux f
-  |     ∀¹ φ => ∀¹ φ.bmapAux (Fin.retrusion f)
-  |     ∃¹ φ => ∃¹ φ.bmapAux (Fin.retrusion f)
+  |     ∀¹ φ => ∀¹ φ.bmapAux f
+  |     ∃¹ φ => ∃¹ φ.bmapAux f
+  |     ∀² φ => ∀² φ.bmapAux (Fin.retrusion f)
+  |     ∃² φ => ∃² φ.bmapAux (Fin.retrusion f)
 
 lemma bmapAux_neg {f : Fin N → Fin M} (φ : Semiformula L Ξ ξ N n) :
     (∼φ).bmapAux f = ∼(φ.bmapAux f) := by
@@ -134,7 +134,7 @@ def bmap (f : Fin N → Fin M) : Semiformula L Ξ ξ N n →ˡᶜ Semiformula L 
   map_neg' φ := bmapAux_neg _
   map_and' _ _ := rfl
   map_or' _ _ := rfl
-  map_imply' _ _ := by simp [DeMorgan.imply, bmapAux_neg, bmapAux]
+  map_imply' _ _ := by simp [LogicalConnective.DeMorgan.imply, bmapAux_neg, bmapAux]
 
 section bmap
 
@@ -159,16 +159,16 @@ variable {f : Fin N → Fin M}
     (t ∉& X : Semiformula L Ξ ξ N n).bmap f = t ∉& X := rfl
 
 @[simp] lemma bmap_all₀ (φ : Semiformula L Ξ ξ N (n + 1)) :
-    (∀⁰ φ).bmap f = ∀⁰ (φ.bmap f) := rfl
+    (∀¹ φ).bmap f = ∀¹ (φ.bmap f) := rfl
 
 @[simp] lemma bmap_exs₀ (φ : Semiformula L Ξ ξ N (n + 1)) :
-    (∃⁰ φ).bmap f = ∃⁰ (φ.bmap f) := rfl
+    (∃¹ φ).bmap f = ∃¹ (φ.bmap f) := rfl
 
 @[simp] lemma bmap_all₁ (φ : Semiformula L Ξ ξ (N + 1) n) :
-    (∀¹ φ).bmap f = ∀¹ (φ.bmap (Fin.retrusion f)) := rfl
+    (∀² φ).bmap f = ∀² (φ.bmap (Fin.retrusion f)) := rfl
 
 @[simp] lemma bmap_exs₁ (φ : Semiformula L Ξ ξ (N + 1) n) :
-    (∃¹ φ).bmap f = ∃¹ (φ.bmap (Fin.retrusion f)) := rfl
+    (∃² φ).bmap f = ∃² (φ.bmap (Fin.retrusion f)) := rfl
 
 lemma bmap_comp {M N n} (f : Fin N → Fin M) (g : Fin M → Fin P) (φ : Semiformula L Ξ ξ N n) :
     (φ.bmap f).bmap g = φ.bmap (g ∘ f) := by
@@ -181,8 +181,8 @@ lemma bmap_comm (ω : Rew L ξ₁ n₁ ξ₂ n₂) (φ : Semiformula L Ξ ξ₁ 
   match φ with
   | .rel R v | .nrel R v | t ∈# X | t ∉# X | t ∈& X | t ∉& X | ⊤ | ⊥ => rfl
   | φ ⋏ ψ | φ ⋎ ψ => simp [bmap_comm ω φ, bmap_comm ω ψ]
-  | ∀⁰ φ | ∃⁰ φ => simp [bmap_comm ω.q φ]
-  | ∀¹ φ | ∃¹ φ => simp [bmap_comm ω φ]
+  | ∀¹ φ | ∃¹ φ => simp [bmap_comm ω.q φ]
+  | ∀² φ | ∃² φ => simp [bmap_comm ω φ]
 
 end Semiformula
 
@@ -233,10 +233,10 @@ def appAux (Ω : Rew L Ξ₁ N₁ Ξ₂ N₂ ξ) : Semiformula L Ξ₁ ξ N₁ n
   |         ⊥ => ⊥
   |     φ ⋏ ψ => Ω.appAux φ ⋏ Ω.appAux ψ
   |     φ ⋎ ψ => Ω.appAux φ ⋎ Ω.appAux ψ
-  |      ∀⁰ φ => ∀⁰ Ω.appAux φ
-  |      ∃⁰ φ => ∃⁰ Ω.appAux φ
-  |      ∀¹ φ => ∀¹ Ω𐞥.appAux φ
-  |      ∃¹ φ => ∃¹ Ω𐞥.appAux φ
+  |      ∀¹ φ => ∀¹ Ω.appAux φ
+  |      ∃¹ φ => ∃¹ Ω.appAux φ
+  |      ∀² φ => ∀² Ω𐞥.appAux φ
+  |      ∃² φ => ∃² Ω𐞥.appAux φ
 
 lemma appAux_neg (Ω : Rew L Ξ₁ N₁ Ξ₂ N₂ ξ) (φ : Semiformula L Ξ₁ ξ N₁ n) :
     Ω.appAux (∼φ) = ∼Ω.appAux φ := by
@@ -249,7 +249,7 @@ def app (Ω : Rew L Ξ₁ N₁ Ξ₂ N₂ ξ) : Semiformula L Ξ₁ ξ N₁ n �
   map_neg' := by simp [appAux_neg]
   map_and' _ _ := rfl
   map_or' _ _ := rfl
-  map_imply' _ _ := by simp [DeMorgan.imply, appAux_neg, appAux]
+  map_imply' _ _ := by simp [LogicalConnective.DeMorgan.imply, appAux_neg, appAux]
 
 local infix:73 " • " => app
 
@@ -276,16 +276,16 @@ variable (Ω : Rew L Ξ₁ N₁ Ξ₂ N₂ ξ)
     Ω • (t ∉& X : Semiformula L Ξ₁ ξ N₁ n) = ∼(Ω.fv X)/[t] := rfl
 
 @[simp] lemma app_all₀ (φ : Semiformula L Ξ₁ ξ N₁ (n + 1)) :
-    Ω • (∀⁰ φ) = ∀⁰ Ω • φ := rfl
+    Ω • (∀¹ φ) = ∀¹ Ω • φ := rfl
 
 @[simp] lemma app_exs₀ (φ : Semiformula L Ξ₁ ξ N₁ (n + 1)) :
-    Ω • (∃⁰ φ) = ∃⁰ Ω • φ := rfl
+    Ω • (∃¹ φ) = ∃¹ Ω • φ := rfl
 
 @[simp] lemma app_all₁ (φ : Semiformula L Ξ₁ ξ (N₁ + 1) n) :
-    Ω • (∀¹ φ) = ∀¹ Ω𐞥 • φ := rfl
+    Ω • (∀² φ) = ∀² Ω𐞥 • φ := rfl
 
 @[simp] lemma app_exs₁ (φ : Semiformula L Ξ₁ ξ (N₁ + 1) n) :
-    Ω • (∃¹ φ) = ∃¹ Ω𐞥 • φ := rfl
+    Ω • (∃² φ) = ∃² Ω𐞥 • φ := rfl
 
 end
 

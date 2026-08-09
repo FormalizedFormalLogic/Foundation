@@ -21,7 +21,7 @@ infix:45 " ⊩↓ " => ForcingExists.Forces
 
 namespace ForcingRelation
 
-variable {W : Type*} {F : Type*} [ForcingRelation W F] [LogicalConnective F]
+variable {W : Type*} {F : Type*} [ForcingRelation W F] [LogicalConnective F] [LogicalNeutral F]
 
 abbrev NotForces (w : W) (φ : F) : Prop := ¬w ⊩ φ
 
@@ -89,7 +89,7 @@ infix:45 " ⊩ᶜ " => WeakForcingRelation.WeaklyForces
 
 namespace WeakForcingRelation
 
-variable {ℙ : Type*} {F : Type*} [WeakForcingRelation ℙ F] [LogicalConnective F]
+variable {ℙ : Type*} {F : Type*} [WeakForcingRelation ℙ F] [LogicalConnective F] [LogicalNeutral F]
 
 abbrev NotForces (p : ℙ) (φ : F) : Prop := ¬p ⊩ᶜ φ
 

@@ -46,10 +46,10 @@ def EvalAux
   |        ⊥ => False
   |    φ ⋏ ψ => φ.EvalAux 𝕊 F f E e ∧ ψ.EvalAux 𝕊 F f E e
   |    φ ⋎ ψ => φ.EvalAux 𝕊 F f E e ∨ ψ.EvalAux 𝕊 F f E e
-  |     ∀⁰ φ => ∀ x, φ.EvalAux 𝕊 F f E (x :> e)
-  |     ∃⁰ φ => ∃ x, φ.EvalAux 𝕊 F f E (x :> e)
-  |     ∀¹ φ => ∀ X ∈ 𝕊, φ.EvalAux 𝕊 F f (X :> E) e
-  |     ∃¹ φ => ∃ X ∈ 𝕊, φ.EvalAux 𝕊 F f (X :> E) e
+  |     ∀¹ φ => ∀ x, φ.EvalAux 𝕊 F f E (x :> e)
+  |     ∃¹ φ => ∃ x, φ.EvalAux 𝕊 F f E (x :> e)
+  |     ∀² φ => ∀ X ∈ 𝕊, φ.EvalAux 𝕊 F f (X :> E) e
+  |     ∃² φ => ∃ X ∈ 𝕊, φ.EvalAux 𝕊 F f (X :> E) e
 
 variable {𝕊 : Set (Set M)} {F : Ξ → Set M} {f : ξ → M} {E : Fin N → Set M} {e : Fin n → M}
 
@@ -64,7 +64,7 @@ def Eval (𝕊 : Set (Set M)) (F : Ξ → Set M) (f : ξ → M) (E : Fin N → S
   map_and' := by simp [EvalAux]
   map_or' := by simp [EvalAux]
   map_neg' := by simp [EvalAux_neg]
-  map_imply' := by simp [EvalAux_neg, EvalAux, imp_iff_not_or]
+  map_imply' := by simp [LogicalConnective.DeMorgan.imply, EvalAux_neg, EvalAux]
 
 @[simp] lemma eval_rel {k} {R : L.Rel k} {v} :
     (rel R v).Eval 𝕊 F f E e ↔ 𝓈.rel R (Semiterm.val e f ∘ v) := by rfl
@@ -85,16 +85,16 @@ def Eval (𝕊 : Set (Set M)) (F : Ξ → Set M) (f : ξ → M) (E : Fin N → S
     (t ∉# X).Eval 𝕊 F f E e ↔ t.val e f ∉ E X := by rfl
 
 @[simp] lemma eval_fal₀ {φ : Semiformula L Ξ ξ N (n + 1)} :
-    (∀⁰ φ).Eval 𝕊 F f E e ↔ ∀ x, φ.Eval 𝕊 F f E (x :> e) := by rfl
+    (∀¹ φ).Eval 𝕊 F f E e ↔ ∀ x, φ.Eval 𝕊 F f E (x :> e) := by rfl
 
 @[simp] lemma eval_exs₀ {φ : Semiformula L Ξ ξ N (n + 1)} :
-    (∃⁰ φ).Eval 𝕊 F f E e ↔ ∃ x, φ.Eval 𝕊 F f E (x :> e) := by rfl
+    (∃¹ φ).Eval 𝕊 F f E e ↔ ∃ x, φ.Eval 𝕊 F f E (x :> e) := by rfl
 
 @[simp] lemma eval_fal₁ {φ : Semiformula L Ξ ξ (N + 1) n} :
-    (∀¹ φ).Eval 𝕊 F f E e ↔ ∀ X ∈ 𝕊, φ.Eval 𝕊 F f (X :> E) e := by rfl
+    (∀² φ).Eval 𝕊 F f E e ↔ ∀ X ∈ 𝕊, φ.Eval 𝕊 F f (X :> E) e := by rfl
 
 @[simp] lemma eval_exs₁ {φ : Semiformula L Ξ ξ (N + 1) n} :
-    (∃¹ φ).Eval 𝕊 F f E e ↔ ∃ X ∈ 𝕊, φ.Eval 𝕊 F f (X :> E) e := by rfl
+    (∃² φ).Eval 𝕊 F f E e ↔ ∃ X ∈ 𝕊, φ.Eval 𝕊 F f (X :> E) e := by rfl
 
 end Semiformula
 

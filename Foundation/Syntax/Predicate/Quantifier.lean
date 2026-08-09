@@ -86,12 +86,12 @@ namespace FirstOrder
 class UnivQuantifier (α : ℕ → Type*) where
   all : α (n + 1) → α n
 
-prefix:64 "∀⁰ " => UnivQuantifier.all
+prefix:64 "∀¹ " => UnivQuantifier.all
 
 class ExsQuantifier (α : ℕ → Type*) where
   exs : α (n + 1) → α n
 
-prefix:64 "∃⁰ " => ExsQuantifier.exs
+prefix:64 "∃¹ " => ExsQuantifier.exs
 
 attribute [match_pattern] UnivQuantifier.all ExsQuantifier.exs
 
@@ -100,11 +100,16 @@ class Quantifier (α : ℕ → Type*) extends UnivQuantifier α, ExsQuantifier �
 /-- Logical Connectives with Quantifiers. -/
 class LCWQ (α : ℕ → Type*) extends Quantifier α where
   connectives : (n : ℕ) → LogicalConnective (α n)
+  neutrals : (n : ℕ) → LogicalNeutral (α n)
 
 instance (α : ℕ → Type*) [LCWQ α] (n : ℕ) : LogicalConnective (α n) := LCWQ.connectives n
 
-instance (α : ℕ → Type*) [Quantifier α] [(n : ℕ) → LogicalConnective (α n)] : LCWQ α where
+instance (α : ℕ → Type*) [LCWQ α] (n : ℕ) : LogicalNeutral (α n) := LCWQ.neutrals n
+
+instance (α : ℕ → Type*) [Quantifier α] [(n : ℕ) → LogicalConnective (α n)]
+    [(n : ℕ) → LogicalNeutral (α n)] : LCWQ α where
   connectives := inferInstance
+  neutrals := inferInstance
 
 section UnivQuantifier
 
@@ -112,28 +117,28 @@ variable {α : ℕ → Type*} [UnivQuantifier α]
 
 def allClosure : {n : ℕ} → α n → α 0
   |     0, a => a
-  | _ + 1, a => allClosure (∀⁰ a)
+  | _ + 1, a => allClosure (∀¹ a)
 
 /--
 The universal closure of a formula.
 -/
-prefix:64 "∀⁰* " => allClosure
+prefix:64 "∀¹* " => allClosure
 
-@[simp] lemma allClosure_zero (a : α 0) : ∀⁰* a = a := rfl
+@[simp] lemma allClosure_zero (a : α 0) : ∀¹* a = a := rfl
 
-lemma allClosure_succ {n} (a : α (n + 1)) : ∀⁰* a = ∀⁰* ∀⁰ a := rfl
+lemma allClosure_succ {n} (a : α (n + 1)) : ∀¹* a = ∀¹* ∀¹ a := rfl
 
 def allItr : (k : ℕ) → α (n + k) → α n
   |     0, a => a
-  | k + 1, a => allItr k (∀⁰ a)
+  | k + 1, a => allItr k (∀¹ a)
 
-notation "∀⁰^[" k "] " φ:64 => allItr k φ
+notation "∀¹^[" k "] " φ:64 => allItr k φ
 
-@[simp] lemma allItr_zero (a : α n) : ∀⁰^[0] a = a := rfl
+@[simp] lemma allItr_zero (a : α n) : ∀¹^[0] a = a := rfl
 
-@[simp] lemma allItr_one (a : α (n + 1)) : ∀⁰^[1] a = ∀⁰ a := rfl
+@[simp] lemma allItr_one (a : α (n + 1)) : ∀¹^[1] a = ∀¹ a := rfl
 
-lemma allItr_succ {k} (a : α (n + (k + 1))) : ∀⁰^[k + 1] a = ∀⁰^[k] (∀⁰ a) := rfl
+lemma allItr_succ {k} (a : α (n + (k + 1))) : ∀¹^[k + 1] a = ∀¹^[k] (∀¹ a) := rfl
 
 end UnivQuantifier
 
@@ -143,28 +148,29 @@ variable {α : ℕ → Type*} [ExsQuantifier α]
 
 def exsClosure : {n : ℕ} → α n → α 0
   |     0, a => a
-  | _ + 1, a => exsClosure (∃⁰ a)
+  | _ + 1, a => exsClosure (∃¹ a)
 
 /--
 The existential closure of a formula.
 -/
-prefix:64 "∃⁰* " => exsClosure
+prefix:64 "∃¹* " => exsClosure
 
-@[simp] lemma exsClosure_zero (a : α 0) : ∃⁰* a = a := rfl
+@[simp] lemma exsClosure_zero (a : α 0) : ∃¹* a = a := rfl
 
-lemma exsClosure_succ {n} (a : α (n + 1)) : ∃⁰* a = ∃⁰* ∃⁰ a := rfl
+lemma exsClosure_succ {n} (a : α (n + 1)) : ∃¹* a = ∃¹* ∃¹ a := rfl
 
 def exsItr : (k : ℕ) → α (n + k) → α n
   |     0, a => a
-  | k + 1, a => exsItr k (∃⁰ a)
+  | k + 1, a => exsItr k (∃¹ a)
 
-notation "∃⁰^[" k "] " φ:64 => exsItr k φ
+/-- Iterated application of `k` existential quantifiers. -/
+notation "∃¹^[" k "] " φ:64 => exsItr k φ
 
-@[simp] lemma exsItr_zero (a : α n) : ∃⁰^[0] a = a := rfl
+@[simp] lemma exsItr_zero (a : α n) : ∃¹^[0] a = a := rfl
 
-@[simp] lemma exsItr_one (a : α (n + 1)) : ∃⁰^[1] a = ∃⁰ a := rfl
+@[simp] lemma exsItr_one (a : α (n + 1)) : ∃¹^[1] a = ∃¹ a := rfl
 
-lemma exsItr_succ {k} (a : α (n + (k + 1))) : ∃⁰^[k + 1] a = ∃⁰^[k] (∃⁰ a) := rfl
+lemma exsItr_succ {k} (a : α (n + (k + 1))) : ∃¹^[k + 1] a = ∃¹^[k] (∃¹ a) := rfl
 
 end ExsQuantifier
 
@@ -172,13 +178,15 @@ section quantifier
 
 variable {α : ℕ → Type*}
 
-def ball [UnivQuantifier α] [Arrow (α (n + 1))] (φ : α (n + 1)) (ψ : α (n + 1)) : α n := ∀⁰ (φ 🡒 ψ)
+def ball [UnivQuantifier α] [Arrow (α (n + 1))] (φ : α (n + 1)) (ψ : α (n + 1)) : α n := ∀¹ (φ 🡒 ψ)
 
-def bexs [ExsQuantifier α] [Wedge (α (n + 1))] (φ : α (n + 1)) (ψ : α (n + 1)) : α n := ∃⁰ (φ ⋏ ψ)
+def bexs [ExsQuantifier α] [Wedge (α (n + 1))] (φ : α (n + 1)) (ψ : α (n + 1)) : α n := ∃¹ (φ ⋏ ψ)
 
-notation:64 "∀⁰[" φ "] " ψ => ball φ ψ
+/-- A bounded universal quantifier. `∀¹[φ] ψ` is defined as `∀¹ (φ 🡒 ψ)`. -/
+notation:64 "∀¹[" φ "] " ψ => ball φ ψ
 
-notation:64 "∃⁰[" φ "] " ψ => bexs φ ψ
+/-- A bounded existential quantifier. `∃¹[φ] ψ` is defined as `∃¹ (φ ⋏ ψ)`. -/
+notation:64 "∃¹[" φ "] " ψ => bexs φ ψ
 
 end quantifier
 
@@ -191,12 +199,12 @@ namespace SecondOrder
 class UnivQuantifier (α : ℕ → ℕ → Type*) where
   all₁ : α (m + 1) n → α m n
 
-prefix:64 "∀¹ " => UnivQuantifier.all₁
+prefix:64 "∀² " => UnivQuantifier.all₁
 
 class ExsQuantifier (α : ℕ → ℕ → Type*) where
   exs₁ : α (m + 1) n → α m n
 
-prefix:64 "∃¹ " => ExsQuantifier.exs₁
+prefix:64 "∃² " => ExsQuantifier.exs₁
 
 attribute [match_pattern] UnivQuantifier.all₁ ExsQuantifier.exs₁
 
@@ -217,25 +225,25 @@ variable {α : ℕ → ℕ → Type*} [UnivQuantifier α]
 
 def allClosure : {m : ℕ} → α m n → α 0 n
   |     0, a => a
-  | _ + 1, a => allClosure (∀¹ a)
+  | _ + 1, a => allClosure (∀² a)
 
-prefix:64 "∀¹* " => allClosure
+prefix:64 "∀²* " => allClosure
 
-@[simp] lemma allClosure_zero (a : α 0 n) : ∀¹* a = a := rfl
+@[simp] lemma allClosure_zero (a : α 0 n) : ∀²* a = a := rfl
 
-lemma allClosure_succ {n} (a : α (n + 1) n) : ∀¹* a = ∀¹* ∀¹ a := rfl
+lemma allClosure_succ {n} (a : α (n + 1) n) : ∀²* a = ∀²* ∀² a := rfl
 
 def allItr : (k : ℕ) → α (m + k) n → α m n
   |     0, a => a
-  | k + 1, a => allItr k (∀¹ a)
+  | k + 1, a => allItr k (∀² a)
 
-notation "∀¹^[" k "] " φ:64 => allItr k φ
+notation "∀²^[" k "] " φ:64 => allItr k φ
 
-@[simp] lemma allItr_zero (a : α m n) : ∀¹^[0] a = a := rfl
+@[simp] lemma allItr_zero (a : α m n) : ∀²^[0] a = a := rfl
 
-@[simp] lemma allItr_one (a : α (m + 1) n) : ∀¹^[1] a = ∀¹ a := rfl
+@[simp] lemma allItr_one (a : α (m + 1) n) : ∀²^[1] a = ∀² a := rfl
 
-lemma allItr_succ {k} (a : α (m + (k + 1)) n) : ∀¹^[k + 1] a = ∀¹^[k] (∀¹ a) := rfl
+lemma allItr_succ {k} (a : α (m + (k + 1)) n) : ∀²^[k + 1] a = ∀²^[k] (∀² a) := rfl
 
 end UnivQuantifier
 
@@ -245,25 +253,25 @@ variable {α : ℕ → ℕ → Type*} [ExsQuantifier α]
 
 def exsClosure : {m : ℕ} → α m n → α 0 n
   |     0, a => a
-  | _ + 1, a => exsClosure (∃¹ a)
+  | _ + 1, a => exsClosure (∃² a)
 
-prefix:64 "∃¹* " => exsClosure
+prefix:64 "∃²* " => exsClosure
 
-@[simp] lemma exsClosure_zero (a : α 0 n) : ∃¹* a = a := rfl
+@[simp] lemma exsClosure_zero (a : α 0 n) : ∃²* a = a := rfl
 
-lemma exsClosure_succ {n} (a : α (m + 1) n) : ∃¹* a = ∃¹* ∃¹ a := rfl
+lemma exsClosure_succ {n} (a : α (m + 1) n) : ∃²* a = ∃²* ∃² a := rfl
 
 def exsItr : (k : ℕ) → α (m + k) n → α m n
   |     0, a => a
-  | k + 1, a => exsItr k (∃¹ a)
+  | k + 1, a => exsItr k (∃² a)
 
-notation "∃¹^[" k "] " φ:64 => exsItr k φ
+notation "∃²^[" k "] " φ:64 => exsItr k φ
 
-@[simp] lemma exsItr_zero (a : α m n) : ∃¹^[0] a = a := rfl
+@[simp] lemma exsItr_zero (a : α m n) : ∃²^[0] a = a := rfl
 
-@[simp] lemma exsItr_one (a : α (m + 1) n) : ∃¹^[1] a = ∃¹ a := rfl
+@[simp] lemma exsItr_one (a : α (m + 1) n) : ∃²^[1] a = ∃² a := rfl
 
-lemma exsItr_succ {k} (a : α (m + (k + 1)) n) : ∃¹^[k + 1] a = ∃¹^[k] (∃¹ a) := rfl
+lemma exsItr_succ {k} (a : α (m + (k + 1)) n) : ∃²^[k + 1] a = ∃²^[k] (∃² a) := rfl
 
 end ExsQuantifier
 
@@ -271,13 +279,13 @@ section quantifier
 
 variable {α : ℕ → ℕ → Type*}
 
-def ball [UnivQuantifier α] [Arrow (α (m + 1) n)] (φ : α (m + 1) n) (ψ : α (m + 1) n) : α m n := ∀¹ (φ 🡒 ψ)
+def ball [UnivQuantifier α] [Arrow (α (m + 1) n)] (φ : α (m + 1) n) (ψ : α (m + 1) n) : α m n := ∀² (φ 🡒 ψ)
 
-def bexs [ExsQuantifier α] [Wedge (α (m + 1) n)] (φ : α (m + 1) n) (ψ : α (m + 1) n) : α m n := ∃¹ (φ ⋏ ψ)
+def bexs [ExsQuantifier α] [Wedge (α (m + 1) n)] (φ : α (m + 1) n) (ψ : α (m + 1) n) : α m n := ∃² (φ ⋏ ψ)
 
-notation:64 "∀¹[" φ "] " ψ => ball φ ψ
+notation:64 "∀²[" φ "] " ψ => ball φ ψ
 
-notation:64 "∃¹[" φ "] " ψ => bexs φ ψ
+notation:64 "∃²[" φ "] " ψ => bexs φ ψ
 
 end quantifier
 

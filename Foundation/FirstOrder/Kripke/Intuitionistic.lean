@@ -20,8 +20,8 @@ def Forces {n} (w : W) (bv : Fin n → C) (fv : ξ → C) : Semiformulaᵢ L ξ 
   |    φ ⋏ ψ => Forces w bv fv φ ∧ Forces w bv fv ψ
   |    φ ⋎ ψ => Forces w bv fv φ ∨ Forces w bv fv ψ
   |    φ 🡒 ψ => ∀ v ≤ w, Forces v bv fv φ → Forces v bv fv ψ
-  |     ∀⁰ φ => ∀ v ≤ w, ∀ x : v, Forces v (x.val :> bv) fv φ
-  |     ∃⁰ φ => ∃ x : w, Forces w (x.val :> bv) fv φ
+  |     ∀¹ φ => ∀ v ≤ w, ∀ x : v, Forces v (x.val :> bv) fv φ
+  |     ∃¹ φ => ∃ x : w, Forces w (x.val :> bv) fv φ
 
 scoped notation:45 w " ⊩[" bv "|" fv "] " φ:46 => Forces w bv fv φ
 
@@ -57,10 +57,10 @@ variable {w v bv fv}
   simp [LogicalConnective.iff]; grind
 
 @[simp] lemma all {φ : Semiformulaᵢ L ξ (n + 1)} :
-    w ⊩[bv|fv] ∀⁰ φ ↔ ∀ v ≤ w, ∀ x : v, Forces v (x.val :> bv) fv φ := by rfl
+    w ⊩[bv|fv] ∀¹ φ ↔ ∀ v ≤ w, ∀ x : v, Forces v (x.val :> bv) fv φ := by rfl
 
 @[simp] lemma ex {φ : Semiformulaᵢ L ξ (n + 1)} :
-    w ⊩[bv|fv] ∃⁰ φ ↔ ∃ x : w, w ⊩[↑x :> bv|fv] φ := by rfl
+    w ⊩[bv|fv] ∃¹ φ ↔ ∃ x : w, w ⊩[↑x :> bv|fv] φ := by rfl
 
 @[simp] lemma conj {Γ : List (Semiformulaᵢ L ξ n)} :
     w ⊩[bv|fv] ⋀Γ ↔ ∀ φ ∈ Γ, w ⊩[bv|fv] φ :=
@@ -134,8 +134,8 @@ lemma monotone
     · right; exact hr.monotone _ h
   |    φ 🡒 ψ => fun Hw v' h v hvv' Hv ↦
     Hw v (le_trans hvv' h) Hv
-  |     ∀⁰ φ => fun Hw w h v' hvv' x ↦ Hw v' (le_trans hvv' h) x
-  |     ∃⁰ φ => by
+  |     ∀¹ φ => fun Hw w h v' hvv' x ↦ Hw v' (le_trans hvv' h) x
+  |     ∃¹ φ => by
     rintro ⟨x, Hw⟩ v h
     exact ⟨⟨x, domain_antimonotone h x.prop⟩, Hw.monotone _ h⟩
 
@@ -149,7 +149,7 @@ lemma monotone
     refine ⟨v, by rfl, fun x hxv ↦ h x (le_trans hxv hvw)⟩
 
 @[simp] lemma all_of_constantDomain [ConstantDomain W] {φ : Semiformulaᵢ L ξ (n + 1)} :
-    w ⊩[bv|fv] ∀⁰ φ ↔ ∀ x : C, w ⊩[x :> bv|fv] φ := by
+    w ⊩[bv|fv] ∀¹ φ ↔ ∀ x : C, w ⊩[x :> bv|fv] φ := by
   constructor
   · intro h x
     exact all.mp h w (by rfl) ⟨x, by simp⟩
@@ -157,7 +157,7 @@ lemma monotone
     simpa using monotone (h x) v hvw
 
 @[simp] lemma ex_of_constantDomain [ConstantDomain W] {φ : Semiformulaᵢ L ξ (n + 1)} :
-    w ⊩[bv|fv] ∃⁰ φ ↔ ∃ x : C, w ⊩[x :> bv|fv] φ := by simp
+    w ⊩[bv|fv] ∃¹ φ ↔ ∃ x : C, w ⊩[x :> bv|fv] φ := by simp
 
 open HilbertProofᵢ Semantics
 
@@ -245,7 +245,7 @@ lemma sound {T : Theoryᵢ L 𝗜𝗻𝘁¹} (b : T ⊢ φ) : W ∀⊩* T → W 
   rcases domain_nonempty' w with ⟨x, hx⟩
   have : (Rewriting.emb '' T.theory) *⊢[𝗜𝗻𝘁¹] ↑φ := b
   rcases Entailment.Context.provable_iff.mp this with ⟨Γ, HΓ, b⟩
-  have : w ⊩[![]|fun _ ↦ x] ⋀Γ 🡒 ↑φ := Forces.sound (L := L) w (fun _ ↦ x) (by simpa using hx) b
+  have : w ⊩[![]|fun _ ↦ x] ⋀Γ 🡒 (φ : Propositionᵢ L) := Forces.sound (L := L) w (fun _ ↦ x) (by simpa using hx) b
   have : w ⊩[![]|fun _ : ℕ ↦ x] ↑φ := by
     apply this w (by rfl)
     suffices ∀ φ ∈ Γ, w ⊩[![]|fun _ ↦ x] φ by simpa
@@ -258,6 +258,10 @@ end Forces₀
 
 end KripkeModel
 
+-- `World`'s and `Carrier`'s universes only occur together (via `Domain : World → Set Carrier`),
+-- which is intentional here rather than a sign of an unnecessary parameter; keeping them
+-- separate documents that the two carriers need not live in the same universe.
+set_option linter.checkUnivs false in
 /-- Kripke model for intuitionistic first-order logic -/
 structure IntKripke (L : Language) [L.Relational] where
   World : Type*

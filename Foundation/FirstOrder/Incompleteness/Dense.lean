@@ -1,6 +1,6 @@
 module
 
-public import Foundation.FirstOrder.Incompleteness.GödelRosser
+public import Foundation.FirstOrder.Incompleteness.RosserProvability
 public import Foundation.Logic.LindenbaumAlgebra
 
 @[expose] public section
@@ -8,7 +8,7 @@ namespace LO
 
 namespace Entailment
 
-variable {F S : Type*} [DecidableEq F] [LogicalConnective F] [Entailment S F] [AdjunctiveSet F S] [Deduction S]
+variable {F S : Type*} [DecidableEq F] [LogicalConnective F] [LogicalNeutral F] [Entailment S F] [AdjunctiveSet F S] [Deduction S]
          {𝓢 : S} [Entailment.Cl 𝓢]
 
 lemma consistent_cons_of_unprovable_neg (h : 𝓢 ⊬ ∼φ) : Consistent (adjoin φ 𝓢) := by
@@ -29,7 +29,7 @@ namespace Entailment.LindenbaumAlgebra
 
 open Entailment LindenbaumAlgebra
 
-variable {F S : Type*} [DecidableEq F] [LogicalConnective F] [Entailment S F] [AdjunctiveSet F S] [Deduction S]
+variable {F S : Type*} [DecidableEq F] [LogicalConnective F] [LogicalNeutral F] [Entailment S F] [AdjunctiveSet F S] [Deduction S]
          (𝓢 : S) [Entailment.Cl 𝓢]
 
 lemma dense_of_finite_extend_incomplete
@@ -72,8 +72,8 @@ lemma FirstOrder.Arithmetic.dense (T : ArithmeticTheory) [𝗜𝚺₁ ⪯ T] [T.
   refine LindenbaumAlgebra.dense_of_finite_extend_incomplete T ?_ h
   intro σ con
   have : 𝗜𝚺₁ ⪯ T := inferInstance
-  have : 𝗜𝚺₁ ⪯ insert σ T := WeakerThan.trans this (Axiomatized.le_of_subset (by simp))
-  simpa using! Arithmetic.incomplete' (insert σ T)
+  have : 𝗜𝚺₁ ⪯ insert σ T := WeakerThan.trans this (Axiomatized.le_of_subset (Set.subset_insert _ _))
+  simpa using! Arithmetic.incomplete_GR (insert σ T)
 
 instance (T : ArithmeticTheory) [𝗜𝚺₁ ⪯ T] [T.Δ₁] : DenselyOrdered (LindenbaumAlgebra T) where
   dense _ _ := FirstOrder.Arithmetic.dense T

@@ -71,7 +71,7 @@ namespace IsForced
     let ⟨b, hb⟩ := hauptsatz d
     exact ⟨Forces.relEquiv.symm ⟨b, hb⟩⟩
 
-@[simp] lemma fal {p : ℙ⁻} : p ⊩ ∀⁰ φ ↔ ∀ t, p ⊩ φ/[t] := by
+@[simp] lemma fal {p : ℙ⁻} : p ⊩ ∀¹ φ ↔ ∀ t, p ⊩ φ/[t] := by
   constructor
   · rintro ⟨b⟩ t
     exact ⟨b.allEquiv t⟩
@@ -116,7 +116,7 @@ lemma imply {p : ℙ⁻} {φ ψ : Propositionᵢ L} : p ⊩ φ 🡒 ψ ↔ (∀ 
 lemma not {p : ℙ⁻} {φ : Propositionᵢ L} : p ⊩ ∼φ ↔ (∀ q ≤ p, ¬q ⊩ φ) := by
   simp [Semiformulaᵢ.neg_def, imply]
 
-@[simp] lemma exs {p : ℙ⁻} : p ⊩ ∃⁰ φ ↔ ∃ t, p ⊩ φ/[t] := by
+@[simp] lemma exs {p : ℙ⁻} : p ⊩ ∃¹ φ ↔ ∃ t, p ⊩ φ/[t] := by
   constructor
   · rintro ⟨b⟩
     have ⟨t, f⟩ := b.exsEquiv
@@ -164,10 +164,10 @@ lemma dn_neg_iff {φ : Proposition L} {p : ℙ⁻} : p ⊩ᶜ ∼φ ↔ p ⊩ �
 @[simp] lemma or {φ ψ : Proposition L} {p : ℙ⁻} : p ⊩ᶜ φ ⋎ ψ ↔ ∀ q ≤ p, ∃ r ≤ q, r ⊩ᶜ φ ∨ r ⊩ᶜ ψ := by
   simp [iff_isForced, IsForced.not, ]; grind
 
-@[simp] lemma all {φ : Semiproposition L 1} {p : ℙ⁻} : p ⊩ᶜ ∀⁰ φ ↔ ∀ t, p ⊩ᶜ φ/[t] := by
+@[simp] lemma all {φ : Semiproposition L 1} {p : ℙ⁻} : p ⊩ᶜ ∀¹ φ ↔ ∀ t, p ⊩ᶜ φ/[t] := by
   simp [iff_isForced, Semiformula.subst_doubleNegation]
 
-@[simp] lemma exs {φ : Semiproposition L 1} {p : ℙ⁻} : p ⊩ᶜ ∃⁰ φ ↔ ∀ q ≤ p, ∃ r ≤ q, ∃ t, r ⊩ᶜ φ/[t] := by
+@[simp] lemma exs {φ : Semiproposition L 1} {p : ℙ⁻} : p ⊩ᶜ ∃¹ φ ↔ ∀ q ≤ p, ∃ r ≤ q, ∃ t, r ⊩ᶜ φ/[t] := by
   simp [iff_isForced, IsForced.not, Semiformula.subst_doubleNegation]; grind
 
 lemma monotone {φ : Proposition L} {p q : ℙ⁻} (h : q ≤ p) : p ⊩ᶜ φ → q ⊩ᶜ φ := IsForced.monotone h

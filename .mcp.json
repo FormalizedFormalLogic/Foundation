@@ -3,9 +3,7 @@
     "lean-lsp": {
       "type": "stdio",
       "command": "uvx",
-      "args": [
-        "lean-lsp-mcp"
-      ],
+      "args": ["lean-lsp-mcp"],
       "env": {}
     }
   }

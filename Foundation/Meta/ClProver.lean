@@ -21,7 +21,7 @@ namespace Theorems
 
 open Entailment TwoSided FiniteContext
 
-variable {F : Type*} [LogicalConnective F] [DecidableEq F] {S : Type*} [Entailment S F] (𝓢 : S) [Entailment.Cl 𝓢]
+variable {F : Type*} [LogicalConnective F] [LogicalNeutral F] [DecidableEq F] {S : Type*} [Entailment S F] (𝓢 : S) [Entailment.Cl 𝓢]
 
 local notation Γ:45 " ⟹ " Δ:46 => TwoSided 𝓢 Γ Δ
 
@@ -87,6 +87,7 @@ structure Context where
   levelE : Level
   F : Q(Type levelF)
   LC : Q(LogicalConnective $F)
+  LN : Q(LogicalNeutral $F)
   DC : Q(DecidableEq $F)
   S : Q(Type levelS)
   E : Q(Entailment.{_, _, levelE} $S $F)
@@ -96,60 +97,60 @@ structure Context where
 /-- The monad for `cl_prover` contains. -/
 abbrev M := ReaderT Context AtomM
 
-#check Mathlib.Tactic.AtomM
-
 /-- Apply the function
-  `n : ∀ {F} [LogicalConnective F] [DecidableEq F] {S} [Entailment S F] {𝓢} [Entailment.Cl 𝓢], _` to the
+  `n : ∀ {F} [LogicalConnective F] [LogicalNeutral F] [DecidableEq F] {S} [Entailment S F] {𝓢} [Entailment.Cl 𝓢], _` to the
 implicit parameters in the context, and the given list of arguments. -/
 def Context.app (c : Context) (n : Name) : Array Expr → Expr :=
   mkAppN <| @Expr.const n [c.levelF, c.levelS, c.levelE]
-    |>.app c.F |>.app c.LC |>.app c.DC |>.app c.S |>.app c.E |>.app c.𝓢 |>.app c.CL
+    |>.app c.F |>.app c.LC |>.app c.LN |>.app c.DC |>.app c.S |>.app c.E |>.app c.𝓢 |>.app c.CL
 
 def iapp (n : Name) (xs : Array Expr) : M Expr := do
   let c ← read
   return c.app n xs
 
 def getGoalTwoSided (e : Q(Prop)) : MetaM ((c : Context) × List Q($c.F) × List Q($c.F)) := do
-  let ~q(@Entailment.TwoSided $F $LC $S $E $𝓢 $p $q) := e | throwError m!"(getGoal) error: {e} not a form of _ ⊢ _"
+  let ~q(@Entailment.TwoSided $F $LC $LN $S $E $𝓢 $p $q) := e | throwError m!"(getGoal) error: {e} not a form of _ ⊢ _"
   let .some DC ← trySynthInstanceQ q(DecidableEq $F)
     | throwError m! "error: failed to find instance DecidableEq {F}"
   let .some CL ← trySynthInstanceQ q(Entailment.Cl $𝓢)
     | throwError m! "error: failed to find instance Entailment.Cl {𝓢}"
   let Γ ← Qq.ofQList p
   let Δ ← Qq.ofQList q
-  return ⟨⟨_, _, _, F, LC, DC, S, E, 𝓢, CL⟩, Γ, Δ⟩
+  return ⟨⟨_, _, _, F, LC, LN, DC, S, E, 𝓢, CL⟩, Γ, Δ⟩
 
 def getGoalProvable (e : Q(Prop)) : MetaM ((c : Context) × Q($c.F)) := do
   let ~q(@Entailment.Provable $F $S $E $𝓢 $p) := e | throwError m!"(getGoal) error: {e} not a form of _ ⊢ _"
   let .some DC ← trySynthInstanceQ q(DecidableEq $F)
     | throwError m! "error: failed to find instance DecidableEq {F}"
   let .some LC ← trySynthInstanceQ q(LogicalConnective $F)
-    | throwError m! "error: failed to find instance DecidableEq {F}"
+    | throwError m! "error: failed to find instance LogicalConnective {F}"
+  let .some LN ← trySynthInstanceQ q(LogicalNeutral $F)
+    | throwError m! "error: failed to find instance LogicalNeutral {F}"
   let .some CL ← trySynthInstanceQ q(Entailment.Cl $𝓢)
     | throwError m! "error: failed to find instance Entailment.Cl {𝓢}"
-  return ⟨⟨_, _, _, F, LC, DC, S, E, 𝓢, CL⟩, p⟩
+  return ⟨⟨_, _, _, F, LC, LN, DC, S, E, 𝓢, CL⟩, p⟩
 
 abbrev Sequent := List Lit
 
 def litToExpr (φ : Lit) : M Expr := do
   let c ← read
-  return Litform.toExpr c.LC φ
+  return Litform.toExpr c.LC c.LN φ
 
 def exprToLit (e : Expr) : M Lit := do
   let c ← read
-  Litform.denote c.LC e
+  Litform.denote c.LC c.LN e
 
 def Sequent.toExprList (Γ : Sequent) : M (List Expr) := do
   let c ← read
-  return Γ.map (Litform.toExpr c.LC)
+  return Γ.map (Litform.toExpr c.LC c.LN)
 
 def exprListToLitList (l : List Expr) : M (List Lit) := do
   let c ← read
-  l.mapM (m := MetaM) (Litform.denote c.LC)
+  l.mapM (m := MetaM) (Litform.denote c.LC c.LN)
 
 def Sequent.toExpr (Γ : Sequent) : M Expr := do
   let c ← read
-  return toQList <| Γ.map (Litform.toExpr c.LC)
+  return toQList <| Γ.map (Litform.toExpr c.LC c.LN)
 
 def tryRightClose (φ : Lit) (Γ Δ : Sequent) : M (Option Expr) := do
   match ← memQList?' (← litToExpr φ) (← Γ.toExprList) with

@@ -39,13 +39,13 @@ lemma sound {M : Type*} [s : Structure L M] [Nonempty M] (f : ℕ → M) {Γ : S
       simpa [Rewriting.shifts, Matrix.vecConsLast_vecEmpty, forall_or_right]
         using fun a : M => sound (a :>ₙ f) d
     rcases this with (hp | ⟨ψ, hq, hhq⟩)
-    · exact ⟨∀⁰ φ, by simp, hp⟩
+    · exact ⟨∀¹ φ, by simp, hp⟩
     · exact ⟨ψ, by simp [hq], hhq⟩
   | exs (Γ := Γ) (φ := φ) (t := t) d => by
     have : Eval ![t.val ![] f] f φ ∨ ∃ φ ∈ Γ, Evalf f φ := by
       simpa [eval_substs, Matrix.constant_eq_singleton] using sound f d
     rcases this with (hp | ⟨ψ, hq, hhq⟩)
-    · exact ⟨∃⁰ φ, by simp, t.val ![] f, hp⟩
+    · exact ⟨∃¹ φ, by simp, t.val ![] f, hp⟩
     · exact ⟨ψ, by simp [hq], hhq⟩
   | contraction (Δ := Δ) (Γ := Γ) d ss => by
     have : ∃ φ ∈ Δ, Evalf f φ := sound f d
@@ -80,7 +80,7 @@ theorem Proof.sound_proposition {M : Type*} [s : Structure L M] [Nonempty M] :
   have : φ.Realize M ∨ ∃ ψ, ∼ψ ∈ Sequent.embed Γ ∧ ψ.Evalf f := by simpa using b.sound f
   rcases this with (h | ⟨ψ, hψ, h⟩)
   · assumption
-  · have : ∃ χ, ∼χ ∈ Γ ∧ ↑χ = ψ := by
+  · have : ∃ χ : Sentence L, ∼χ ∈ Γ ∧ ↑χ = ψ := by
       have : ∃ χ ∈ Γ, χ = ∼ψ := by simpa [Sequent.embed] using hψ
       rcases this with ⟨χ, hχ, e⟩
       refine ⟨∼χ, by simpa using hχ, by simp [e]⟩

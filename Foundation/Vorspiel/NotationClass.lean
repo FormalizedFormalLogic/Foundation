@@ -11,25 +11,69 @@ public import Mathlib.Data.Nat.Basic
 
 namespace LO
 
+/-! ## Heterogeneous notation classes -/
+
+class HTilde (α : Type*) (β : outParam Type*) where
+  hTilde : α → β
+
+prefix:75 "∼" => HTilde.hTilde
+macro_rules | `(∼$x) => `(unop% HTilde.hTilde $x)
+
+class HArrow (α β : Type*) (γ : outParam Type*) where
+  hArrow : α → β → γ
+
+infixr:60 " 🡒 " => HArrow.hArrow
+macro_rules | `($x 🡒 $y) => `(binop% HArrow.hArrow $x $y)
+
+class HWedge (α β : Type*) (γ : outParam Type*) where
+  hWedge : α → β → γ
+
+infixr:69 " ⋏ " => HWedge.hWedge
+macro_rules | `($x ⋏ $y) => `(binop% HWedge.hWedge $x $y)
+
+class HVee (α β : Type*) (γ : outParam Type*) where
+  hVee : α → β → γ
+
+infixr:68 " ⋎ " => HVee.hVee
+macro_rules | `($x ⋎ $y) => `(binop% HVee.hVee $x $y)
+
+attribute [match_pattern]
+  HTilde.hTilde
+  HArrow.hArrow
+  HWedge.hWedge
+  HVee.hVee
+
+/-! ## Homogeneous notation classes -/
+
 class Tilde (α : Type*) where
   tilde : α → α
-
-prefix:75 "∼" => Tilde.tilde
 
 class Arrow (α : Type*) where
   arrow : α → α → α
 
-infixr:60 " 🡒 " => Arrow.arrow
-
 class Wedge (α : Type*) where
   wedge : α → α → α
-
-infixr:69 " ⋏ " => Wedge.wedge
 
 class Vee (α : Type*) where
   vee : α → α → α
 
-infixr:68 " ⋎ " => Vee.vee
+attribute [match_pattern]
+  Tilde.tilde
+  Arrow.arrow
+  Wedge.wedge
+  Vee.vee
+
+@[default_instance]
+instance Tilde.instHTilde [Tilde α] : HTilde α α := ⟨Tilde.tilde⟩
+
+@[default_instance]
+instance Arrow.instHArrow [Arrow α] : HArrow α α α := ⟨Arrow.arrow⟩
+
+@[default_instance]
+instance Wedge.instHWedge [Wedge α] : HWedge α α α := ⟨Wedge.wedge⟩
+
+@[default_instance]
+instance Vee.instHVee [Vee α] : HVee α α α := ⟨Vee.vee⟩
 
 class Box (α : Type*) where
   box : α → α
@@ -46,59 +90,10 @@ class Rhd (α : Type*) where
 
 infixl:70 " ▷ " => Rhd.rhd
 
-class Tensor (α : Type*) where
-  tensor : α → α → α
-
-infix:69 " ⨂ " => Tensor.tensor
-
-class Par (α : Type*) where
-  par : α → α → α
-
-infix:68 " ⅋ " => Par.par
-
-class With (α : Type*) where
-  with' : α → α → α
-
-/-- Note that this notation "＆" (U+FF06) is distinct from "&" (U+0026) -/
-infix:69 " ＆ " => With.with'
-
-class Plus (α : Type*) where
-  plus : α → α → α
-
-infix:68 " ⨁ " => Plus.plus
-
-class Lolli (α : Type*) where
-  lolli : α → α → α
-
-infixr:60 " ⊸ " => Lolli.lolli
-
-class Bang (α : Type*) where
-  bang : α → α
-
-/-- Note that this notation "！" (U+FF01) is distinct from "!" (U+0021) -/
-prefix:75 "！" => Bang.bang
-
-class Quest (α : Type*) where
-  quest : α → α
-
-/-- Notice that this notation "？" (U+FF1F) is distinct from "?" (U+003F) -/
-prefix:75 "？" => Quest.quest
-
 attribute [match_pattern]
-  Tilde.tilde
-  Arrow.arrow
-  Wedge.wedge
-  Vee.vee
   Box.box
   Dia.dia
   Rhd.rhd
-  Tensor.tensor
-  Par.par
-  With.with'
-  Plus.plus
-  Lolli.lolli
-  Bang.bang
-  Quest.quest
 
 class Exp (α : Type*) where
   exp : α → α

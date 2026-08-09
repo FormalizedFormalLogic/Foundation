@@ -20,6 +20,13 @@ end LO.FirstOrder.Arithmetic
 
 namespace LO.FirstOrder.Arithmetic.Bootstrapping.Arithmetic
 
+-- `Arithmetic` is intentionally re-opened here even though the ambient namespace
+-- already contains it; renaming would break the widely-used public API
+-- (`Bootstrapping.Arithmetic.*`). Suppress the new dupNamespace linter for the
+-- declarations in this namespace (the option is scoped by `namespace`/`end` and
+-- reverts automatically at `end LO.FirstOrder.Arithmetic.Bootstrapping.Arithmetic`).
+set_option linter.dupNamespace false
+
 open Classical LO.Entailment
 
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
@@ -46,7 +53,7 @@ lemma term_add_assoc (t₁ t₂ t₃ : Term V ℒₒᵣ) :
     complete.{0} T _ fun (M : Type) _ (hM : M↓[ℒₒᵣ] ⊧* T) ↦ by
       have : M↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := models_of_subtheory hM
       simp [models_iff, add_assoc]
-  have : T.internalize V ⊢ ∀⁰ ∀⁰ ∀⁰ (#'2 + (#'1 + #'0) ≐ #'2 + #'1 + #'0) := by
+  have : T.internalize V ⊢ ∀¹ ∀¹ ∀¹ (#'2 + (#'1 + #'0) ≐ #'2 + #'1 + #'0) := by
     simpa using internal_provable_of_outer_provable (V := V) this
   simpa using TProof.specialize₃! this t₃ t₂ t₁
 
@@ -56,7 +63,7 @@ lemma numeral_add (n m : V) :
   · simp only [tprovable_iff_provable, val_equals, val_add, val_numeral]
     definability
   case zero =>
-    have : T.internalize V ⊢ ∀⁰ ((#'0 + 𝕹 0) ≐ #'0) := by
+    have : T.internalize V ⊢ ∀¹ ((#'0 + 𝕹 0) ≐ #'0) := by
       have : T ⊢ “∀ x, x + 0 = x” :=
         complete.{0} T _ fun (M : Type) _ (hM : M↓[ℒₒᵣ] ⊧* T) ↦ by
           have : M↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := models_of_subtheory hM
@@ -88,7 +95,7 @@ lemma numeral_mul (n m : V) :
   · simp only [tprovable_iff_provable, val_equals, val_mul, val_numeral]
     definability
   case zero =>
-    have : T.internalize V ⊢ ∀⁰ ((#'0 * 𝕹 0) ≐ 𝕹 0) := by
+    have : T.internalize V ⊢ ∀¹ ((#'0 * 𝕹 0) ≐ 𝕹 0) := by
       have : T ⊢ “∀ x, x * 0 = 0” :=
         complete.{0} T _ fun (M : Type) _ (hM : M↓[ℒₒᵣ] ⊧* T) ↦ by
           have : M↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := models_of_subtheory hM
@@ -97,7 +104,7 @@ lemma numeral_mul (n m : V) :
       simpa using this
     simpa using TProof.specialize! this (𝕹 n)
   case one =>
-    have : T.internalize V ⊢ ∀⁰ ((#'0 * 𝕹 1) ≐ #'0) := by
+    have : T.internalize V ⊢ ∀¹ ((#'0 * 𝕹 1) ≐ #'0) := by
       have : T ⊢ “∀ x, x * 1 = x” :=
         complete.{0} T _ fun (M : Type) _ (hM : M↓[ℒₒᵣ] ⊧* T) ↦ by
           have : M↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := models_of_subtheory hM
@@ -190,7 +197,7 @@ lemma lt_iff_substItrDisj (t : Term V ℒₒᵣ) (m : V) :
     definability
   case zero =>
     suffices T.internalize V ⊢ (t <' 𝕹 0) 🡘 ⊥ by simpa
-    have : T.internalize V ⊢ ∀⁰ ((#'0 <' 𝕹 0) 🡘 ⊥) := by
+    have : T.internalize V ⊢ ∀¹ ((#'0 <' 𝕹 0) 🡘 ⊥) := by
       have : T ⊢ “∀ x, x < 0 ↔ ⊥” :=
         complete.{0} T _ fun (M : Type) _ (hM : M↓[ℒₒᵣ] ⊧* T) ↦ by
           have : M↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := models_of_subtheory hM
@@ -199,7 +206,7 @@ lemma lt_iff_substItrDisj (t : Term V ℒₒᵣ) (m : V) :
     simpa using TProof.specialize! this t
   case one =>
     suffices T.internalize V ⊢ (t <' 𝕹 1) 🡘 (t ≐ 𝕹 0) ⋎ ⊥ by simpa
-    have : T.internalize V ⊢ ∀⁰ ((#'0 <' 𝕹 1) 🡘 (#'0 ≐ 𝕹 0) ⋎ ⊥) := by
+    have : T.internalize V ⊢ ∀¹ ((#'0 <' 𝕹 1) 🡘 (#'0 ≐ 𝕹 0) ⋎ ⊥) := by
       have : T ⊢ “∀ x, x < 1 ↔ x = 0 ∨ ⊥” :=
         complete.{0} T _ fun (M : Type) _ (hM : M↓[ℒₒᵣ] ⊧* T) ↦ by
           have : M↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := models_of_subtheory hM
@@ -212,7 +219,7 @@ lemma lt_iff_substItrDisj (t : Term V ℒₒᵣ) (m : V) :
           (t <' 𝕹(m + 1) + 𝕹 1) 🡘 (t ≐ 𝕹(m + 1)) ⋎ substItrDisj ![t] (#'1 ≐ #'0) (m + 1) by
       simpa [←one_add_one_eq_two, ←add_assoc]
     have : T.internalize V ⊢ (t <' 𝕹(m + 1) + 𝕹 1) 🡘 (t ≐ 𝕹(m + 1)) ⋎ (t <' 𝕹(m + 1)) := by
-      have : T.internalize V ⊢ ∀⁰ ∀⁰ ((#'0 <' #'1 + 𝕹 1) 🡘 (#'0 ≐ #'1) ⋎ (#'0 <' #'1)) := by
+      have : T.internalize V ⊢ ∀¹ ∀¹ ((#'0 <' #'1 + 𝕹 1) 🡘 (#'0 ≐ #'1) ⋎ (#'0 <' #'1)) := by
         have : T ⊢ “∀ m x, x < m + 1 ↔ x = m ∨ x < m” :=
           complete.{0} T _ fun (M : Type) _ (hM : M↓[ℒₒᵣ] ⊧* T) ↦ by
             have : M↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := models_of_subtheory hM

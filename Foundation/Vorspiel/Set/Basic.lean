@@ -4,7 +4,6 @@ public import Mathlib.Data.Set.Countable
 public import Mathlib.Tactic.TautoSet
 public import Mathlib.Data.Set.Finite.Range
 public import Mathlib.Order.Filter.Ultrafilter.Defs
-public import Foundation.Vorspiel.Rel.CWF
 
 @[expose]
 public section
@@ -54,8 +53,8 @@ lemma ssubset_of_subset_ne (h : s ⊆ t) (hne : s ≠ t) : s ⊂ t := by
 lemma infinitely_finset_approximate (count : s.Countable) (inf : s.Infinite) (ha : a ∈ s) :
   ∃ f : ℕ → Finset α, ((f 0) = {a}) ∧ (∀ i, f i ⊂ f (i + 1)) ∧ (∀ i, ↑(f i) ⊆ s) ∧ (∀ b ∈ s, ∃ i, b ∈ f i) := by
   let X' := s \ {a}
-  have count' : Countable X' := (count.mono Set.diff_subset).to_subtype
-  have inf' : Infinite X' := (inf.diff (Set.finite_singleton a)).to_subtype
+  have count' : Countable X' := (count.mono Set.sdiff_subset).to_subtype
+  have inf' : Infinite X' := (inf.sdiff (Set.finite_singleton a)).to_subtype
   obtain ⟨eq⟩ : Nonempty (Nat ≃ X') := nonempty_equiv_of_countable
   refine ⟨
     fun n => Finset.cons a ((Finset.range n).map
