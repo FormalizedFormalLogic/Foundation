@@ -246,13 +246,6 @@ lemma Seq.lh_ext {s₁ s₂ : V} (h₁ : Seq s₁) (h₂ : Seq s₂) (h : lh s�
   obtain ⟨y', hy'⟩ := mem_domain_iff.mp (h ▸ mem_domain_of_kpair_mem hy)
   exact H x y y' hy hy' ▸ hy'
 
--- lemma Seq.lh_ext {s₁ s₂ : V} (H₁ : Seq s₁) (H₂ : Seq s₂) (h : lh s₁ = lh s₂)
---     (H : ∀ α x₁ x₂, ⟨α, x₁⟩ₖ ∈ s₁ → ⟨α, x₂⟩ₖ ∈ s₂ → x₁ = x₂) : s₁ = s₂ := H₁.eq_of_eq_of_subset H₂ h <| subset_pair <| by
---       intro α x hx
---       have hα : α < lh s₂ := by simpa [← h] using H₁.lt_lh_of_mem hx
---       rcases H α _ _ hx (H₂.nth_mem hα)
---       simp
-
 @[simp] lemma Seq.seqCons_ext {a₁ a₂ s₁ s₂ : V} (h₁ : Seq s₁) (h₂ : Seq s₂) :
     s₁ ⁀' a₁ = s₂ ⁀' a₂ ↔ a₁ = a₂ ∧ s₁ = s₂ := by
   constructor
@@ -271,20 +264,6 @@ lemma Seq.lh_ext {s₁ s₂ : V} (h₁ : Seq s₁) (h₂ : Seq s₂) (h : lh s�
       aesop
     exact ⟨ha₁a₂, h₁.eq_of_eq_of_subset h₂ hs₁s₂ this⟩
   · rintro ⟨rfl, rfl⟩; rfl
-  -- ⟨by intro h
-  --     have hs₁s₂ : lh s₁ = lh s₂ := by simpa [H₁, H₂] using congr_arg lh h
-  --     have hs₁ : ⟨lh s₁, a₁⟩ₖ ∈ s₂ ⁀' a₂ := by simpa [h] using lh_mem_seqCons s₁ a₁
-  --     have hs₂ : ⟨lh s₁, a₂⟩ₖ ∈ s₂ ⁀' a₂ := by simp [hs₁s₂]
-  --     have ha₁a₂ : a₁ = a₂ := (H₂.seqCons a₂).IsFunction.uniq hs₁ hs₂
-  --     have : s₁ ⊆ s₂ := subset_pair <| by
-  --       intro i x hix
-  --       have : i = lh s₂ ∧ x = a₂ ∨ ⟨i, x⟩ₖ ∈ s₂ := by
-  --         simpa [kpair_mem_seqCons_iff, h] using Seq.subset_seqCons s₁ a₁ hix
-  --       rcases this with (⟨rfl, rfl⟩ | hix₂)
-  --       · have := H₁.lt_lh_of_mem hix; simp [hs₁s₂] at this
-  --       · assumption
-  --     exact ⟨ha₁a₂, H₁.eq_of_eq_of_subset H₂ hs₁s₂ this⟩,
-  --  by rintro ⟨rfl, rfl⟩; rfl⟩
 
 /-
 TODO: It might be useful to make a zero/succ/limit version of this lemma.

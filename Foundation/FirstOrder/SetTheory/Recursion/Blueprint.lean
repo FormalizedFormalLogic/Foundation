@@ -17,20 +17,24 @@ variable {V : Type*} [SetStructure V] [Nonempty V] [V↓[ℒₛₑₜ] ⊧* 𝗭
 namespace PR
 
 structure Blueprint (k : ℕ) where
-  graph : SetTheorySemisentence (k + 2)
+  -- graph : SetTheorySemisentence (k + 2)
+  graph : SetTheorySemisentence 2
 
-def Blueprint.cseq_dfn (p : Blueprint k) : SetTheorySemisentence (k + 1) :=
+-- def Blueprint.cseq_dfn (p : Blueprint k) : SetTheorySemisentence (k + 1) :=
+def Blueprint.cseq_dfn (p : Blueprint k) : SetTheorySemisentence 1 :=
   f“s.
     :Seq s
     ∧ (∀ α,
         (∃ l, !lh.dfn l s ∧ α ∈ l) →
         α ∼[s] (!p.graph (!restrict.dfn s α) ⋯))”
 
+#check fun (φ : SetTheorySemisentence 2) ↦ f“α. α = !φ α ⋯”
+
 def Blueprint.result.dfn (p : Blueprint k) : SetTheorySemisentence (k + 2) :=
   “z u. ∃ s, !p.cseq_dfn s ⋯ ∧ u ∼[s] z”
 
 /- TODO: Once the Lévy hierarchy has been added, add a `Δ` version. -/
--- def Blueprint.resultDeltaDef (p : Blueprint k) : SetTheorySemisentence (k + 2) := p.resultDef.graphDelta
+-- def Blueprint.resultDeltaDef (p : Blueprint k) : SetTheorySemisentence (k + 2) := p.result.dfn.graphDelta
 
 variable (V)
 
