@@ -21,12 +21,22 @@ namespace Semiformula
 
 variable {L : Language} {ξ : Type*}
 
+/-- `nestFormulae φ(x₁,…,xₙ) ![Ψ₁(x₁,y₁,…,yₘ), …, Ψₙ(xₙ,y₁,…,yₘ)]` is the formula `∀ x₁, …, xₙ ((Ψ₁(x₁,y₁,…,yₘ) ∧ … ∧ Ψₙ(xₙ,y₁,…,yₘ)) → φ(x₁,…,xₙ))`.
+
+Here, each formula `Ψᵢ` has `m + 1` bound variables, one for expressing a predicate of an `xᵢ`, and `m` remaining ones. In the resulting formula, the bound variables are the `m` remaining bound variables, while all of the original `n` bound variables of `φ` get bounded to a `∀` quantifier.
+
+Intuitively, nestFormulae gives `R(f₁(y₁,…,yₘ), …, fₙ(y₁,…,yₘ))`, the result of substituting functions `f₁, … fₙ` into a relation `R`, using the defining formulae of their graphs (`xᵢ = fᵢ(y₁,…,yₘ)` iff `Ψᵢ(xᵢ,y₁,…,yₘ)`, and `R(x₁,…,xₙ)` iff `φ(x₁,…,xₙ)`). -/
 def nestFormulae (φ : Semiformula L ξ n) (Ψ : Fin n → Semiformula L ξ (m + 1)) : Semiformula L ξ m :=
   let σ : Semiformula L ξ (m + n) :=
     (Matrix.conj fun i : Fin n ↦ Rewriting.subst (Ψ i) (#(i.addCast m) :> fun j ↦ #(j.addNat n))) 🡒
       Rewriting.subst φ fun i ↦ #(i.addCast m)
   ∀¹^[n] σ
 
+/-- `nestFormulaeFunc φ(x,x₁,…,xₙ) ![Ψ₁(x₁,y₁,…,yₘ), …, Ψₙ(xₙ,y₁,…,yₘ)]` is the formula `∀ x₁, …, xₙ ((Ψ₁(x₁,y₁,…,yₘ) ∧ … ∧ Ψₙ(xₙ,y₁,…,yₘ)) → φ(x,x₁,…,xₙ))`.
+
+Here, each formula `Ψᵢ` has `m + 1` bound variables, one for expressing a predicate of an `xᵢ`, and `m` remaining ones. In the resulting formula, the bound variables are the `m` remaining bound variables plus `x`, while all of the original bound variables `x₁,…,xₙ` get bounded to a `∀` quantifier.
+
+Intuitively, nestFormulaeFunc gives `F(f₁(y₁,…,yₘ), …, fₙ(y₁,…,yₘ))`, the result of substituting functions `f₁, … fₙ` into a function `F`, using the defining formulae of their graphs (`xᵢ = fᵢ(y₁,…,yₘ)` iff `Ψᵢ(xᵢ,y₁,…,yₘ)`, and `x = F(x₁,…,xₙ)` iff `φ(x,x₁,…,xₙ)`). -/
 def nestFormulaeFunc (φ : Semiformula L ξ (n + 1)) (Ψ : Fin n → Semiformula L ξ (m + 1)) : Semiformula L ξ (m + 1) :=
   let σ : Semiformula L ξ ((m + 1) + n) :=
     (Matrix.conj fun i : Fin n ↦ Rewriting.subst (Ψ i) (#(i.addCast m.succ) :> fun j ↦ #(j.succ.addNat n))) 🡒
@@ -793,7 +803,7 @@ syntax "f“" ident* "| "  first_order_formula:0 "”" : term
 syntax "f“" ident* ". "  first_order_formula:0 "”" : term
 syntax "f“" first_order_formula:0 "”" : term
 
-/-- A formula in formula-as-function notation. Use `f“⋯ . ⋯”` for bound variables, and `f“⋯ | ⋯”` for free variables. -/
+/-- A formula in formula-as-function notation. Use `f“⋯. ⋯”` for bound variables, and `f“⋯ | ⋯”` for free variables. -/
 macro_rules
   | `(f“ $e:first_order_formula ”)              => `(⤫formula(faf)[           |            | $e ])
   | `(f“ $fbinders* | $e:first_order_formula ”) => `(⤫formula(faf)[           | $fbinders* | $e ])
