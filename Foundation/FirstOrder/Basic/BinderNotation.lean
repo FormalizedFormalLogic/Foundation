@@ -430,6 +430,11 @@ macro_rules
     let binders' := binders.insertIdx 0 v
     `(∃¹[⤫formula($type)[ $binders'* | $fbinders* | $φ ]] ⤫formula($type)[ $binders'* | $fbinders* | $ψ ])
 
+/--
+A formula in literal notation. For a formula `φ`, write `!φ` to include `φ` in the formula. Identifiers may be written after `!φ` as its bound variables.
+
+`⋯` adds enough unnamed bound variables to fill up the arity of `φ`, with indices starting after the last named identifier. For example, assume `φ` is a `Semiformula L k`, and consider the formula `“x y z. !φ x y ⋯”`. Here `x`, `y`, and `z` are the bound variables `#0`, `#1`, and `#2` respectively. Then `!φ x y ⋯` will add `k - 2` new bound variables, and expand to `!φ #0 #1 #3 #4 ... #(k + 1)`.
+-/
 macro_rules
   | `(⤫formula(lit)[ $binders* | $fbinders* | !$φ:term $vs:first_order_term*   ]) => do
     let v ← vs.foldrM (β := Lean.TSyntax _) (init := ← `(![])) (fun a s ↦ `(⤫term(lit)[ $binders* | $fbinders* | $a ] :> $s))
@@ -724,7 +729,7 @@ macro_rules
     `(($f).nestFormulaeFunc $Ψ)
   | `(⤫term(faf)[ $binders* | $fbinders* | !$f:term $vs:first_order_term* ⋯ ]) => do
     let length := Syntax.mkNumLit (toString binders.size)
-    let Ψ ← vs.foldrM (β := Lean.TSyntax _) (init := ← `(fun x ↦ #(finSuccItr x $length))) fun a s ↦ do
+    let Ψ ← vs.foldrM (β := Lean.TSyntax _) (init := ← `(fun x ↦ “#0 = #(finSuccItr x $length)”)) fun a s ↦ do
       `(⤫term(faf)[ $binders* | $fbinders* | $a] :> $s)
     `(($f).nestFormulaeFunc $Ψ)
 
