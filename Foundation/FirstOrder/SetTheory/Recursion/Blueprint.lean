@@ -19,17 +19,15 @@ namespace PR
 structure Blueprint (k : ℕ) where
   graph : SetTheorySemisentence (k + 2)
 
-def Blueprint.cseq_dfn (p : Blueprint k) : SetTheorySemisentence (k + 1) :=
-  f“s.
-    :Seq s
-    ∧ (∀ α,
-        (∃ l, !lh.dfn l s ∧ α ∈ l) →
-        α ∼[s] (!p.graph (!restrict.dfn s α) ⋯))”
+def Blueprint.isAttempt_dfn (p : Blueprint k) : SetTheorySemisentence (k + 2) :=
+  f“α f.
+    !IsOrdinal.dfn α ∧ !IsFunction.dfn f ∧ !domain.dfn f = α ∧
+    ∀ β ∈ α, ∀ y, !kpair.dfn β y ∈ f ↔ y = !p.graph (!restrict.dfn f β) ⋯”
 
 #check fun (φ : Semisentence ℒₒᵣ 3) ↦ (⤫term(faf)[ α x y |   | !φ α x ⋯ ] : Semisentence ℒₒᵣ 3)
 
 def Blueprint.result.dfn {k} (p : Blueprint k) : SetTheorySemisentence (k + 2) :=
-  “z u. ∃ s, !p.cseq_dfn s ⋯ ∧ u ∼[s] z”
+  “x y. ∃ α, ∃ f, !p.isAttempt_dfn α f ⋯ ∧ x ∼[f] y”
 
 /- TODO: Once the Lévy hierarchy has been added, add a `Δ` version. -/
 -- def Blueprint.resultDeltaDef (p : Blueprint k) : SetTheorySemisentence (k + 2) := p.result.dfn.graphDelta
@@ -37,8 +35,8 @@ def Blueprint.result.dfn {k} (p : Blueprint k) : SetTheorySemisentence (k + 2) :
 variable (V)
 
 structure Construction {k : ℕ} (p : Blueprint k) where
-  core : (Fin (k + 1) → V) → V
-  core_defined : DefinedFunction core p.graph
+  core : (Fin k → V) → V → V
+  core_defined : DefinedFunction (fun v ↦ core (v ·.succ) (v 0)) p.graph
 
 variable {V}
 
@@ -46,77 +44,66 @@ namespace Construction
 
 variable {k : ℕ} {p : Blueprint k} (c : Construction V p) (v : Fin k → V)
 
-def CSeq (s : V) : Prop := Seq s ∧ ⟨0, c.zero v⟩ₖ ∈ s ∧ ∀ α, SetTheory.succ α ∈ lh s → ∀ z, ⟨α, z⟩ₖ ∈ s → ⟨SetTheory.succ α, c.succ v α z⟩ₖ ∈ s
+def IsAttempt (α f : V) : Prop :=
+  SetTheory.IsAttempt (c.core v) f α
 
-private lemma cseq_iff (s : V) : c.CSeq v s ↔
-    Seq s
-    ∧ (∃ z < s, z = c.zero v ∧ ⟨0, z⟩ₖ ∈ s)
-    ∧ (∀ i < 2 * s,
-      (∃ l ≤ 2 * s, l = lh s ∧ i + 1 < l) → ∀ z < s, ⟨i, z⟩ₖ ∈ s → ∃ u < s, u = c.succ v i z ∧ ⟨i + 1, u⟩ₖ ∈ s) :=
-  ⟨by rintro ⟨Hs, hz, hs⟩
-      exact ⟨Hs, ⟨c.zero v, lt_of_mem_rng hz, rfl, hz⟩, fun i _ hi z _ hiz ↦
-      ⟨c.succ v i z, by
-        have := hs i (by rcases hi with ⟨l, _, rfl, hl⟩; simp [lt_tsub_iff_right, hl]) z hiz
-        exact ⟨lt_of_mem_rng this, rfl, this⟩⟩⟩,
-   by rintro ⟨Hs, ⟨z, _, rfl, hz⟩, h⟩
-      exact ⟨Hs, hz, fun i hi z hiz ↦ by
-        rcases h i
-          (lt_of_lt_of_le hi (by simpa using le_trans (lh_bound _) (by simp)))
-          ⟨lh s, by simp, rfl, by simpa [lt_tsub_iff_right] using hi⟩ z (lt_of_mem_rng hiz) hiz with ⟨_, _, rfl, h⟩
-        exact h⟩⟩
+lemma attempt_defined : Defined (fun v ↦ c.IsAttempt (v ·.succ.succ) (v 1) (v 0) : (Fin (k + 2) → V) → Prop) p.isAttempt_dfn := .mk fun v ↦ by
+  simp_all [SetTheory.IsAttempt, Construction.IsAttempt, Blueprint.isAttempt_dfn]
+  intro h₁ h₂ h₃
+  sorry
 
-lemma cseq_defined : Defined (fun v ↦ c.CSeq (v ·.succ) (v 0) : (Fin (k + 1) → V) → Prop) p.cseqDef := .mk fun v ↦ by
-  simp [Blueprint.cseqDef, cseq_iff, c.zero_defined.iff, c.succ_defined.iff]
-
-@[simp] lemma cseq_defined_iff (v : Fin (k + 1) → V) :
-    p.cseqDef.val.Evalb v ↔ c.CSeq (v ·.succ) (v 0) := c.cseq_defined.iff
+@[simp] lemma attempt_defined_iff (v : Fin (k + 2) → V) :
+    p.isAttempt_dfn.Evalb (v ·.succ.succ) (v 0) ↔ c.IsAttempt (v ·.succ.succ) (v 1) (v 0) := c.attempt_defined.iff
 
 variable {c v}
 
-namespace CSeq
+namespace IsAttempt
 
-variable {s : V}
+variable {f : V}
 
-lemma seq (h : c.CSeq v s) : Seq s := h.1
+lemma seq (h : c.IsAttempt v f) : Seq s := h.1
 
-lemma zero (h : c.CSeq v s) : ⟪0, c.zero v⟫ ∈ s := h.2.1
+lemma zero (h : c.IsAttempt v f) : ⟨0, c.zero v⟩ₖ ∈ s := h.2.1
 
-lemma succ (h : c.CSeq v s) : ∀ i < lh s - 1, ∀ z, ⟪i, z⟫ ∈ s → ⟪i + 1, c.succ v i z⟫ ∈ s := h.2.2
+lemma succ (h : c.IsAttempt v f) : ∀ α, SetTheory.succ α ∈ lh s → ∀ z, ⟨α, z⟩ₖ ∈ s → ⟨SetTheory.succ α, c.core v z⟩ₖ ∈ s := h.2.2
 
-lemma unique {s₁ s₂ : V} (H₁ : c.CSeq v s₁) (H₂ : c.CSeq v s₂) (h₁₂ : lh s₁ ≤ lh s₂) {i} (hi : i < lh s₁) {z₁ z₂} :
-    ⟪i, z₁⟫ ∈ s₁ → ⟪i, z₂⟫ ∈ s₂ → z₁ = z₂ := by
-  revert z₁ z₂
-  suffices ∀ z₁ < s₁, ∀ z₂ < s₂, ⟪i, z₁⟫ ∈ s₁ → ⟪i, z₂⟫ ∈ s₂ → z₁ = z₂
-  by intro z₁ z₂ hz₁ hz₂; exact this z₁ (lt_of_mem_rng hz₁) z₂ (lt_of_mem_rng hz₂) hz₁ hz₂
-  intro z₁ hz₁ z₂ hz₂ h₁ h₂
-  induction i using ISigma1.sigma1_succ_induction generalizing z₁ z₂
-  · definability
-  case zero =>
-    have : z₁ = c.zero v := H₁.seq.isMapping.uniq h₁ H₁.zero
-    have : z₂ = c.zero v := H₂.seq.isMapping.uniq h₂ H₂.zero
-    simp_all
-  case succ i ih =>
-    have hi' : i < lh s₁ := lt_of_le_of_lt (by simp) hi
-    let z' := H₁.seq.nth hi'
-    have ih₁ : ⟪i, z'⟫ ∈ s₁ := H₁.seq.nth_mem hi'
-    have ih₂ : ⟪i, z'⟫ ∈ s₂ := by
-      have : z' = H₂.seq.nth (lt_of_lt_of_le hi' h₁₂) :=
-        ih hi' z' (by simp [z']) (H₂.seq.nth (lt_of_lt_of_le hi' h₁₂)) (by simp) (by simp [z']) (by simp)
-      simp [this]
-    have h₁' : ⟪i + 1, c.succ v i z'⟫ ∈ s₁ := H₁.succ i (by simp [lt_tsub_iff_right, hi]) z' ih₁
-    have h₂' : ⟪i + 1, c.succ v i z'⟫ ∈ s₂ :=
-      H₂.succ i (by simpa [lt_tsub_iff_right] using lt_of_lt_of_le hi h₁₂) z' ih₂
-    have e₁ : z₁ = c.succ v i z' := H₁.seq.isMapping.uniq h₁ h₁'
-    have e₂ : z₂ = c.succ v i z' := H₂.seq.isMapping.uniq h₂ h₂'
-    simp [e₁, e₂]
+lemma unique {f g α β : V} (H₁ : c.IsAttempt v α f) (H₂ : c.IsAttempt v β g) (h₁₂ : α ⊆ β) {x} (hi : x ∈ α) {y₁ y₂} :
+    ⟨x, y₁⟩ₖ ∈ f → ⟨x, y₂⟩ₖ ∈ g → y₁ = y₂ := by
+  #check SetTheory.IsAttempt.isAttempt_unique H₁
+  #check fun (hy₁ : ⟨x, y₁⟩ₖ ∈ f) (hy₂ : ⟨x, y₂⟩ₖ ∈ g) ↦ H₁.2.1.unique hy₁ hy₂
+  sorry
+  -- revert z₁ z₂
+  -- suffices ∀ z₁ < s₁, ∀ z₂ < s₂, ⟪i, z₁⟫ ∈ s₁ → ⟪i, z₂⟫ ∈ s₂ → z₁ = z₂
+  -- by intro z₁ z₂ hz₁ hz₂; exact this z₁ (lt_of_mem_rng hz₁) z₂ (lt_of_mem_rng hz₂) hz₁ hz₂
+  -- intro z₁ hz₁ z₂ hz₂ h₁ h₂
+  -- induction i using ISigma1.sigma1_succ_induction generalizing z₁ z₂
+  -- · definability
+  -- case zero =>
+  --   have : z₁ = c.zero v := H₁.seq.isMapping.uniq h₁ H₁.zero
+  --   have : z₂ = c.zero v := H₂.seq.isMapping.uniq h₂ H₂.zero
+  --   simp_all
+  -- case succ i ih =>
+  --   have hi' : i < lh s₁ := lt_of_le_of_lt (by simp) hi
+  --   let z' := H₁.seq.nth hi'
+  --   have ih₁ : ⟪i, z'⟫ ∈ s₁ := H₁.seq.nth_mem hi'
+  --   have ih₂ : ⟪i, z'⟫ ∈ s₂ := by
+  --     have : z' = H₂.seq.nth (lt_of_lt_of_le hi' h₁₂) :=
+  --       ih hi' z' (by simp [z']) (H₂.seq.nth (lt_of_lt_of_le hi' h₁₂)) (by simp) (by simp [z']) (by simp)
+  --     simp [this]
+  --   have h₁' : ⟪i + 1, c.succ v i z'⟫ ∈ s₁ := H₁.succ i (by simp [lt_tsub_iff_right, hi]) z' ih₁
+  --   have h₂' : ⟪i + 1, c.succ v i z'⟫ ∈ s₂ :=
+  --     H₂.succ i (by simpa [lt_tsub_iff_right] using lt_of_lt_of_le hi h₁₂) z' ih₂
+  --   have e₁ : z₁ = c.succ v i z' := H₁.seq.isMapping.uniq h₁ h₁'
+  --   have e₂ : z₂ = c.succ v i z' := H₂.seq.isMapping.uniq h₂ h₂'
+  --   simp [e₁, e₂]
 
-end CSeq
+end IsAttempt
 
-lemma CSeq.initial : c.CSeq v !⟦c.zero v⟧ :=
+lemma IsAttempt.initial : c.IsAttempt v !⟦c.zero v⟧ :=
   ⟨by simp, by simp [seqCons], by simp⟩
 
-lemma CSeq.successor {s l z : V} (Hs : c.CSeq v s) (hl : l + 1 = lh s) (hz : ⟪l, z⟫ ∈ s) :
-    c.CSeq v (s ⁀' c.succ v l z) :=
+lemma IsAttempt.successor {s l z : V} (Hs : c.IsAttempt v s) (hl : l + 1 = lh s) (hz : ⟪l, z⟫ ∈ s) :
+    c.IsAttempt v (s ⁀' c.succ v l z) :=
   ⟨ Hs.seq.seqCons _, by simp [seqCons, Hs.zero], by
     simp only [Hs.seq.lh_seqCons, add_tsub_cancel_right]
     intro i hi w hiw
@@ -135,15 +122,15 @@ lemma CSeq.successor {s l z : V} (Hs : c.CSeq v s) (hl : l + 1 = lh s) (hz : ⟪
 variable (c v)
 
 open Classical in
-lemma CSeq.exists (l : V) : ∃ s, c.CSeq v s ∧ l + 1 = lh s := by
+lemma IsAttempt.exists (l : V) : ∃ s, c.IsAttempt v s ∧ l + 1 = lh s := by
   induction l using ISigma1.sigma1_succ_induction
   · apply HierarchySymbol.Definable.exs
     apply HierarchySymbol.Definable.and
-    · exact ⟨p.cseqDef.rew (Rew.embSubsts <| #0 :> fun i ↦ &(v i)), by
-         intro w; simpa [Matrix.comp_vecCons''] using! c.cseq_defined_iff (w 0 :> v)⟩
+    · exact ⟨p.IsAttemptDef.rew (Rew.embSubsts <| #0 :> fun i ↦ &(v i)), by
+         intro w; simpa [Matrix.comp_vecCons''] using! c.attempt_defined_iff (w 0 :> v)⟩
     · definability
   case zero =>
-    exact ⟨!⟦c.zero v⟧, CSeq.initial, by simp⟩
+    exact ⟨!⟦c.zero v⟧, IsAttempt.initial, by simp⟩
   case succ l ih =>
     rcases ih with ⟨s, Hs, hls⟩
     have hl : l < lh s := by simp [←hls]
@@ -151,18 +138,18 @@ lemma CSeq.exists (l : V) : ∃ s, c.CSeq v s ∧ l + 1 = lh s := by
     rcases this with ⟨z, hz⟩
     exact ⟨s ⁀' c.succ v l z, Hs.successor hls hz, by simp [Hs.seq, hls]⟩
 
-lemma cSeq_result_existsUnique (l : V) : ∃! z, ∃ s, c.CSeq v s ∧ l + 1 = lh s ∧ ⟪l, z⟫ ∈ s := by
-  rcases CSeq.exists c v l with ⟨s, Hs, h⟩
+lemma attempt_result_existsUnique (l : V) : ∃! z, ∃ s, c.IsAttempt v s ∧ l + 1 = lh s ∧ ⟪l, z⟫ ∈ s := by
+  rcases IsAttempt.exists c v l with ⟨s, Hs, h⟩
   have : ∃ z, ⟪l, z⟫ ∈ s := Hs.seq.exists (show l < lh s from by simp [←h])
   rcases this with ⟨z, hz⟩
   exact ExistsUnique.intro z ⟨s, Hs, h, hz⟩ (by
     rintro z' ⟨s', Hs', h', hz'⟩
     exact Eq.symm <| Hs.unique Hs' (by simp [←h, ←h']) (show l < lh s from by simp [←h]) hz hz')
 
-noncomputable def result (u : V) : V := Classical.choose! (c.cSeq_result_existsUnique v u)
+noncomputable def result (u : V) : V := Classical.choose! (c.attempt_result_existsUnique v u)
 
-lemma result_spec (u : V) : ∃ s, c.CSeq v s ∧ u + 1 = lh s ∧ ⟪u, c.result v u⟫ ∈ s :=
-  Classical.choose!_spec (c.cSeq_result_existsUnique v u)
+lemma result_spec (u : V) : ∃ s, c.IsAttempt v s ∧ u + 1 = lh s ∧ ⟪u, c.result v u⟫ ∈ s :=
+  Classical.choose!_spec (c.attempt_result_existsUnique v u)
 
 @[simp] theorem result_zero : c.result v 0 = c.zero v := by
   rcases c.result_spec v 0 with ⟨s, Hs, _, h0⟩
@@ -170,12 +157,12 @@ lemma result_spec (u : V) : ∃ s, c.CSeq v s ∧ u + 1 = lh s ∧ ⟪u, c.resul
 
 @[simp] theorem result_succ (u : V) : c.result v (u + 1) = c.succ v u (c.result v u) := by
   rcases c.result_spec v u with ⟨s, Hs, hk, h⟩
-  have : CSeq c v (s ⁀' c.succ v u (result c v u) ) := Hs.successor hk h
+  have : IsAttempt c v (s ⁀' c.succ v u (result c v u) ) := Hs.successor hk h
   exact Eq.symm
-    <| Classical.choose_uniq (c.cSeq_result_existsUnique v (u + 1))
+    <| Classical.choose_uniq (c.attempt_result_existsUnique v (u + 1))
     ⟨_, this, by simp [Hs.seq, hk], by simp [hk]⟩
 
-lemma result_graph (z u : V) : z = c.result v u ↔ ∃ s, c.CSeq v s ∧ ⟪u, z⟫ ∈ s :=
+lemma result_graph (z u : V) : z = c.result v u ↔ ∃ s, c.IsAttempt v s ∧ ⟪u, z⟫ ∈ s :=
   ⟨by rintro rfl
       rcases c.result_spec v u with ⟨s, Hs, _, h⟩
       exact ⟨s, Hs, h⟩,
@@ -189,7 +176,7 @@ set_option linter.flexible false in
 lemma result_defined : DefinedFunction (fun v ↦ c.result (v ·.succ) (v 0) : (Fin (k + 1) → V) → V) p.resultDef := .mk fun v ↦ by
   simp [Blueprint.resultDef, result_graph]
   apply exists_congr; intro x
-  simp [c.cseq_defined_iff]
+  simp [c.attempt_defined_iff]
 
 lemma result_defined_delta : DefinedFunction (fun v ↦ c.result (v ·.succ) (v 0) : (Fin (k + 1) → V) → V) p.resultDeltaDef :=
   c.result_defined.graph_delta
@@ -200,8 +187,9 @@ lemma result_defined_delta : DefinedFunction (fun v ↦ c.result (v ·.succ) (v 
 instance result_definable : DefinableFunction (fun v ↦ c.result (v ·.succ) (v 0) : (Fin (k + 1) → V) → V) :=
   c.result_defined.to_definable
 
-instance result_definable_delta₁ : DefinableFunction (fun v ↦ c.result (v ·.succ) (v 0) : (Fin (k + 1) → V) → V) :=
-  c.result_defined_delta.to_definable
+/- TODO: Once the Lévy hierarchy has been added, add a `Δ₁` version. -/
+/- instance result_definable_delta₁ : DefinableFunction (fun v ↦ c.result (v ·.succ) (v 0) : (Fin (k + 1) → V) → V) :=
+  c.result_defined_delta.to_definable -/
 
 attribute [irreducible] Blueprint.resultDef
 
