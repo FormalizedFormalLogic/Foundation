@@ -112,7 +112,6 @@ public import Foundation.FirstOrder.SetTheory.Basic
 public import Foundation.FirstOrder.SetTheory.Basic.Axioms
 public import Foundation.FirstOrder.SetTheory.Basic.Misc
 public import Foundation.FirstOrder.SetTheory.Basic.Model
-public import Foundation.FirstOrder.SetTheory.Fixpoint
 public import Foundation.FirstOrder.SetTheory.Function
 public import Foundation.FirstOrder.SetTheory.LoewenheimSkolem
 public import Foundation.FirstOrder.SetTheory.Ordinal
