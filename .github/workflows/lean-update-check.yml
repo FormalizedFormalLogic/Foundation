@@ -1,0 +1,178 @@
+name: Lean update check
+
+on:
+  schedule:
+    # Twice a week: Monday and Thursday at 00:00 UTC.
+    - cron: "0 0 * * 1,4"
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  check-update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Setup elan
+        run: |
+          curl https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -sSf | sh -s -- -y --default-toolchain none
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+
+      - name: Determine current and latest stable Lean version
+        id: versions
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          current="$(sed -E 's#^leanprover/lean4:v##' lean-toolchain)"
+          echo "current=$current" >> "$GITHUB_OUTPUT"
+
+          latest="$(gh api repos/leanprover/lean4/releases --jq \
+            '[.[] | select(.prerelease == false and .draft == false)][0].tag_name' \
+            | sed -E 's/^v//')"
+          echo "latest=$latest" >> "$GITHUB_OUTPUT"
+
+          echo "Current: $current, latest stable: $latest"
+
+      - name: Check whether mathlib/doc-gen4 already tag the new version
+        id: check
+        if: steps.versions.outputs.current != steps.versions.outputs.latest
+        env:
+          GH_TOKEN: ${{ github.token }}
+          LATEST: ${{ steps.versions.outputs.latest }}
+        run: |
+          ready=true
+          for repo in leanprover-community/mathlib4 leanprover/doc-gen4; do
+            if ! gh api "repos/$repo/git/refs/tags/v$LATEST" >/dev/null 2>&1; then
+              echo "Tag v$LATEST not found yet on $repo, skipping this run."
+              ready=false
+            fi
+          done
+          echo "ready=$ready" >> "$GITHUB_OUTPUT"
+
+      - name: Check for an existing update branch
+        id: branch
+        if: steps.check.outputs.ready == 'true'
+        env:
+          LATEST: ${{ steps.versions.outputs.latest }}
+        run: |
+          branch="update-lean-v$LATEST"
+          if git ls-remote --exit-code --heads origin "$branch" >/dev/null 2>&1; then
+            echo "Branch $branch already exists, skipping this run."
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+          fi
+          echo "branch=$branch" >> "$GITHUB_OUTPUT"
+
+      - name: Bump lean-toolchain and lakefile.toml
+        if: steps.check.outputs.ready == 'true' && steps.branch.outputs.exists == 'false'
+        env:
+          LATEST: ${{ steps.versions.outputs.latest }}
+        run: |
+          echo "leanprover/lean4:v$LATEST" > lean-toolchain
+
+          # Only bump the `rev` of the doc-gen4/mathlib [[require]] blocks, keyed by the
+          # preceding `name = "..."` line, so unrelated deps (e.g. axiom-audit, pinned to a
+          # git commit) are left untouched.
+          awk -v latest="$LATEST" '
+            /^\[\[require\]\]/ { pkg="" }
+            /^name = "doc-gen4"/ { pkg="doc-gen4" }
+            /^name = "mathlib"/ { pkg="mathlib" }
+            /^rev = / && (pkg=="doc-gen4" || pkg=="mathlib") { sub(/rev = ".*"/, "rev = \"v" latest "\"") }
+            { print }
+          ' lakefile.toml > lakefile.toml.new
+          mv lakefile.toml.new lakefile.toml
+          cat lakefile.toml
+
+      - name: lake update
+        if: steps.check.outputs.ready == 'true' && steps.branch.outputs.exists == 'false'
+        run: lake update
+
+      - name: lake exe cache get
+        if: steps.check.outputs.ready == 'true' && steps.branch.outputs.exists == 'false'
+        run: lake exe cache get
+
+      - uses: extractions/setup-just@v4
+        if: steps.check.outputs.ready == 'true' && steps.branch.outputs.exists == 'false'
+
+      # Mirrors the checks ci.yml runs on every PR (build, axiom-audit, docs), since a PR
+      # opened here with the default GITHUB_TOKEN won't itself trigger ci.yml (GitHub's
+      # recursive-workflow-run prevention) — this is the only place these run.
+      - name: lake build, axiom-audit, and docs build
+        id: build
+        if: steps.check.outputs.ready == 'true' && steps.branch.outputs.exists == 'false'
+        continue-on-error: true
+        run: |
+          lake build Foundation
+          just axiom-audit
+          lake build Foundation:docs
+
+      - name: lake exe mk_all --module
+        if: steps.check.outputs.ready == 'true' && steps.branch.outputs.exists == 'false' && steps.build.outcome == 'success'
+        run: lake exe mk_all --module
+
+      # Build success or failure both lead to a PR: on success it's ready for normal review;
+      # on failure it's opened as a draft, carrying the partial bump (lean-toolchain /
+      # lakefile.toml / lake-manifest.json) as a starting point for manual fixes, instead of
+      # just filing an issue with no code attached.
+      - name: Determine PR draft state and status note
+        id: pr-meta
+        if: steps.check.outputs.ready == 'true' && steps.branch.outputs.exists == 'false'
+        env:
+          OUTCOME: ${{ steps.build.outcome }}
+        run: |
+          if [ "$OUTCOME" = "success" ]; then
+            echo "draft=false" >> "$GITHUB_OUTPUT"
+            {
+              echo "status<<STATUS_EOF"
+              echo "\`lake build Foundation\`, \`just axiom-audit\`, and \`lake build Foundation:docs\` all succeeded in this workflow run."
+              echo "STATUS_EOF"
+            } >> "$GITHUB_OUTPUT"
+          else
+            echo "draft=true" >> "$GITHUB_OUTPUT"
+            {
+              echo "status<<STATUS_EOF"
+              echo "**One of \`lake build Foundation\` / \`just axiom-audit\` / \`lake build Foundation:docs\` failed** in this workflow run (see the run log linked below)."
+              echo "This PR is opened as a draft: the toolchain/lakefile/manifest bump is included as a starting point, but breaking changes (or new lint warnings) still need manual fixes — see \`.claude/skills/lean4-update/SKILL.md\` for the manual update procedure."
+              echo "STATUS_EOF"
+            } >> "$GITHUB_OUTPUT"
+          fi
+
+      # GITHUB_TOKEN-authored PRs don't auto-trigger CI on themselves (GitHub's
+      # recursive-workflow-run prevention). Review this PR manually, or push an
+      # empty commit / re-run CI by hand to get status checks.
+      - name: Create pull request
+        if: steps.check.outputs.ready == 'true' && steps.branch.outputs.exists == 'false'
+        uses: peter-evans/create-pull-request@v7
+        with:
+          add-paths: |
+            lean-toolchain
+            lakefile.toml
+            lake-manifest.json
+            Foundation.lean
+          commit-message: "update(Lean): Bump toolchain to v${{ steps.versions.outputs.latest }}"
+          branch: ${{ steps.branch.outputs.branch }}
+          base: master
+          title: "update(Lean): Bump toolchain to v${{ steps.versions.outputs.latest }}"
+          labels: auto-update-lean
+          draft: ${{ steps.pr-meta.outputs.draft }}
+          body: |
+            Automated update to `leanprover/lean4:v${{ steps.versions.outputs.latest }}`.
+
+            - `lean-toolchain` bumped to `v${{ steps.versions.outputs.latest }}`.
+            - `mathlib` and `doc-gen4` revs in `lakefile.toml` bumped to `v${{ steps.versions.outputs.latest }}`.
+            - ${{ steps.pr-meta.outputs.status }}
+
+            Please review whether this bump introduces any new `lake build` warnings before merging
+            (see `.claude/skills/lean4-update/SKILL.md` for the manual comparison procedure); this
+            workflow does not diff warnings itself.
+
+            This PR was opened automatically by the `lean-update-check` workflow
+            (${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}).
