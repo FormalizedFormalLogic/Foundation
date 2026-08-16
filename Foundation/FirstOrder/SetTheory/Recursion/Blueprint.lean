@@ -45,32 +45,84 @@ namespace Construction
 variable {k : ℕ} {p : Blueprint k} (c : Construction V p) (v : Fin k → V)
 
 def IsAttempt (α f : V) : Prop :=
-  SetTheory.IsAttempt (c.core v) f α
+  SetTheory.IsAttempt (c.core v) α f
 
-lemma attempt_defined : Defined (fun v ↦ c.IsAttempt (v ·.succ.succ) (v 1) (v 0) : (Fin (k + 2) → V) → Prop) p.isAttempt_dfn := .mk fun v ↦ by
-  simp_all [SetTheory.IsAttempt, Construction.IsAttempt, Blueprint.isAttempt_dfn]
-  intro h₁ h₂ h₃
+set_option linter.flexible false in
+-- An example showing that `⋯` in faf notation is implemented correctly.
+example : Semiformula.Evalb v f“∀ x, ∃ y, y = !p.graph x ⋯” := by
+  simp
+  intro x
+  use c.core v x
+  intro z h
+  have heq : ((“#0 = #3” : SetTheorySemisentence (k + 4)) :> fun (x : Fin k) ↦ “#0 = #x.succ.succ.succ.succ”) = fun x ↦ “#0 = #x.succ.succ.succ” := by
+    apply funext_iff.mpr
+    intro x
+    by_cases hx : 0 ≠ x
+    · obtain ⟨y, hy⟩ := Fin.exists_succ_eq.mpr hx.symm
+      aesop
+    · aesop
+  suffices Semiformula.Evalb (z :> x :> v) p.graph by
+    apply (c.core_defined.iff (z :> x :> v)).mp at this
+    simp at this
+    exact this.symm
+  simp only [Semiformula.eval_nestFormulaeFunc, Nat.succ_eq_add_one, ← Semiformula.Evalb.eq_1] at h
+  specialize h (x :> v)
+  simpa [heq] using h
+
+lemma IsAttempt_defined : Defined (fun v ↦ c.IsAttempt (v ·.succ.succ) (v 0) (v 1) : (Fin (k + 2) → V) → Prop) p.isAttempt_dfn := .mk fun v ↦ by
+  simp [IsAttempt, SetTheory.IsAttempt, Blueprint.isAttempt_dfn]
+  intro hordinal hfunction hdomain
+  simp only [Semiformula.eval_nestFormulaeFunc, Nat.succ_eq_add_one, ← Semiformula.Evalb.eq_1]
+  simp only [c.core_defined.iff]
+
   sorry
 
-@[simp] lemma attempt_defined_iff (v : Fin (k + 2) → V) :
-    p.isAttempt_dfn.Evalb (v ·.succ.succ) (v 0) ↔ c.IsAttempt (v ·.succ.succ) (v 1) (v 0) := c.attempt_defined.iff
+  -- simp_all [SetTheory.IsAttempt, Construction.IsAttempt, Blueprint.isAttempt_dfn]
+  -- intro hordinal hfunction hdomain
+  -- constructor <;> (intro h; intro β hβ y; specialize h β hβ y; rw [h])
+  -- · constructor <;> intro h₂
+  --   · sorry
+  --   · sorry
+  -- · constructor <;> intro h₂
+  --   · simp_all [Semiformula.eval_nestFormulaeFunc]
+  --     sorry
+  --   · sorry
+
+#check c.IsAttempt_defined.iff
+
+@[simp] lemma isAttempt_defined_iff (v : Fin (k + 2) → V) :
+    Semiformula.Evalb v p.isAttempt_dfn ↔ c.IsAttempt (v ·.succ.succ) (v 0) (v 1) := c.IsAttempt_defined.iff v
 
 variable {c v}
 
 namespace IsAttempt
 
-variable {f : V}
+variable {α f : V}
 
-lemma seq (h : c.IsAttempt v f) : Seq s := h.1
+lemma seq (h : c.IsAttempt v α f) : IsFunction f := h.2.1
 
-lemma zero (h : c.IsAttempt v f) : ⟨0, c.zero v⟩ₖ ∈ s := h.2.1
+lemma spec (h : c.IsAttempt v α f) : ∀ β ∈ α, ∀ y, ⟨β, y⟩ₖ ∈ f ↔ y = c.core v (f ↾ β) := h.2.2.2
 
-lemma succ (h : c.IsAttempt v f) : ∀ α, SetTheory.succ α ∈ lh s → ∀ z, ⟨α, z⟩ₖ ∈ s → ⟨SetTheory.succ α, c.core v z⟩ₖ ∈ s := h.2.2
+lemma empty (h : c.IsAttempt v α f) (hα : ∅ ∈ α) : ⟨∅, c.core v ∅⟩ₖ ∈ f := by
+  have hrestrict {g : V} : g ↾ ∅ = ∅ := by simp only [restrict, empty_prod, inter_empty]
+  exact (h.2.2.2 ∅ hα (c.core v ∅)).mpr (by aesop)
 
-lemma unique {f g α β : V} (H₁ : c.IsAttempt v α f) (H₂ : c.IsAttempt v β g) (h₁₂ : α ⊆ β) {x} (hi : x ∈ α) {y₁ y₂} :
-    ⟨x, y₁⟩ₖ ∈ f → ⟨x, y₂⟩ₖ ∈ g → y₁ = y₂ := by
-  #check SetTheory.IsAttempt.isAttempt_unique H₁
-  #check fun (hy₁ : ⟨x, y₁⟩ₖ ∈ f) (hy₂ : ⟨x, y₂⟩ₖ ∈ g) ↦ H₁.2.1.unique hy₁ hy₂
+lemma succ (h : c.IsAttempt v α f) : ∀ β, SetTheory.succ β ∈ α → ∀ z, ⟨α, z⟩ₖ ∈ f → ⟨SetTheory.succ α, c.core v z⟩ₖ ∈ f := h.2.2
+
+lemma coherent {f g α β : V} (h₁ : c.IsAttempt v α f) (h₂ : c.IsAttempt v β g) (h₁₂ : α ⊆ β) {γ} (hγα : γ ∈ α) {y₁ y₂} :
+    ⟨γ, y₁⟩ₖ ∈ f → ⟨γ, y₂⟩ₖ ∈ g → y₁ = y₂ := by
+  have : IsOrdinal α := h₁.1
+  have : IsOrdinal β := h₂.1
+  have : IsOrdinal γ := IsOrdinal.of_mem hγα
+  let αo : Ordinal V := IsOrdinal.toOrdinal α
+  let βo : Ordinal V := IsOrdinal.toOrdinal β
+  let γo : Ordinal V := IsOrdinal.toOrdinal γ
+  have : IsFunction f := h₁.2.1
+  have : IsFunction g := h₂.2.1
+  have hγβ : γ ∈ β := h₁₂ γ hγα
+  have hrestrict : f ↾ γ = g ↾ γ := by
+    exact SetTheory.IsAttempt.isAttempt_coherent (α := αo) (β := βo) h₁ h₂ γo (by sorry)
+  #check fun y (hγ : ⟨γ, y⟩ₖ ∈ f) ↦ (h₂.2.2.2 γ hγβ y).mpr ((hrestrict ▸ (h₁.2.2.2 γ hγα y).mp) hγ)
   sorry
   -- revert z₁ z₂
   -- suffices ∀ z₁ < s₁, ∀ z₂ < s₂, ⟪i, z₁⟫ ∈ s₁ → ⟪i, z₂⟫ ∈ s₂ → z₁ = z₂
@@ -99,7 +151,10 @@ lemma unique {f g α β : V} (H₁ : c.IsAttempt v α f) (H₂ : c.IsAttempt v �
 
 end IsAttempt
 
-lemma IsAttempt.initial : c.IsAttempt v !⟦c.zero v⟧ :=
+lemma IsAttempt.zero : c.IsAttempt v 0 ∅ :=
+  ⟨by simp, by simp, by aesop, fun β hβ ↦ False.elim (not_mem_empty hβ)⟩
+
+lemma IsAttempt.one : c.IsAttempt v 1 {⟨∅, c.core v ∅⟩ₖ} :=
   ⟨by simp, by simp [seqCons], by simp⟩
 
 lemma IsAttempt.successor {s l z : V} (Hs : c.IsAttempt v s) (hl : l + 1 = lh s) (hz : ⟪l, z⟫ ∈ s) :
