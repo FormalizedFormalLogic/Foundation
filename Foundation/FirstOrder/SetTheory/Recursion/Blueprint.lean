@@ -72,10 +72,18 @@ example : Semiformula.Evalb v f“∀ x, ∃ y, y = !p.graph x ⋯” := by
 lemma IsAttempt_defined : Defined (fun v ↦ c.IsAttempt (v ·.succ.succ) (v 0) (v 1) : (Fin (k + 2) → V) → Prop) p.isAttempt_dfn := .mk fun v ↦ by
   simp [IsAttempt, SetTheory.IsAttempt, Blueprint.isAttempt_dfn]
   intro hordinal hfunction hdomain
-  simp only [Semiformula.eval_nestFormulaeFunc, Nat.succ_eq_add_one, ← Semiformula.Evalb.eq_1]
-  simp only [c.core_defined.iff]
 
-  sorry
+
+  -- simp only [Semiformula.eval_nestFormulaeFunc, Nat.succ_eq_add_one, ← Semiformula.Evalb.eq_1]
+  -- simp [c.core_defined.iff]
+  -- simp [Semiformula.nestFormulaeFunc, Rewriting.subst, Rew.subst]
+  -- conv in Semiformula.Evalb ?_ ?_ => {
+  --   rw [Semiformula.eval_nestFormulaeFunc]
+  -- }
+
+  -- constructor <;> (intro h x hx y; specialize h x hx y; rw [h])
+  -- · sorry
+  -- · sorry
 
   -- simp_all [SetTheory.IsAttempt, Construction.IsAttempt, Blueprint.isAttempt_dfn]
   -- intro hordinal hfunction hdomain
@@ -104,7 +112,7 @@ lemma seq (h : c.IsAttempt v α f) : IsFunction f := h.2.1
 lemma spec (h : c.IsAttempt v α f) : ∀ β ∈ α, ∀ y, ⟨β, y⟩ₖ ∈ f ↔ y = c.core v (f ↾ β) := h.2.2.2
 
 lemma empty (h : c.IsAttempt v α f) (hα : ∅ ∈ α) : ⟨∅, c.core v ∅⟩ₖ ∈ f := by
-  have hrestrict {g : V} : g ↾ ∅ = ∅ := by simp only [restrict, empty_prod, inter_empty]
+  have hrestrict {g : V} : g ↾ ∅ = ∅ := restrict_empty_eq
   exact (h.2.2.2 ∅ hα (c.core v ∅)).mpr (by aesop)
 
 lemma succ (h : c.IsAttempt v α f) : ∀ β, SetTheory.succ β ∈ α → ∀ z, ⟨α, z⟩ₖ ∈ f → ⟨SetTheory.succ α, c.core v z⟩ₖ ∈ f := h.2.2
@@ -155,15 +163,18 @@ lemma IsAttempt.zero : c.IsAttempt v 0 ∅ :=
   ⟨by simp, by simp, by aesop, fun β hβ ↦ False.elim (not_mem_empty hβ)⟩
 
 lemma IsAttempt.one : c.IsAttempt v 1 {⟨∅, c.core v ∅⟩ₖ} :=
-  ⟨by simp, by simp [seqCons], by simp⟩
+  ⟨IsOrdinal.nat one_mem_ω,
+    by simp,
+    by ext z; simp [mem_domain_iff, one_def, zero_def],
+    by simp [one_def, zero_def]⟩
 
-lemma IsAttempt.successor {s l z : V} (Hs : c.IsAttempt v s) (hl : l + 1 = lh s) (hz : ⟪l, z⟫ ∈ s) :
-    c.IsAttempt v (s ⁀' c.succ v l z) :=
+lemma IsAttempt.successor {f α y : V} (hf : c.IsAttempt v f α) (hα : SetTheory.succ α = lh f) (hy : ⟨α, y⟩ₖ ∈ f) :
+    c.IsAttempt v (SetTheory.succ α) (f ⁀' c.core v y) :=
   ⟨ Hs.seq.seqCons _, by simp [seqCons, Hs.zero], by
     simp only [Hs.seq.lh_seqCons, add_tsub_cancel_right]
     intro i hi w hiw
-    have hiws : ⟪i, w⟫ ∈ s := by
-      rcases show i = lh s ∧ w = c.succ v l z ∨ ⟪i, w⟫ ∈ s by
+    have hiws : ⟨i, w⟩ₖ ∈ s := by
+      rcases show i = lh s ∧ w = c.succ v l z ∨ ⟨i, w⟩ₖ ∈ s by
         simpa [mem_seqCons_iff] using hiw with (⟨rfl, rfl⟩ | h)
       · simp at hi
       · assumption
@@ -177,23 +188,24 @@ lemma IsAttempt.successor {s l z : V} (Hs : c.IsAttempt v s) (hl : l + 1 = lh s)
 variable (c v)
 
 open Classical in
-lemma IsAttempt.exists (l : V) : ∃ s, c.IsAttempt v s ∧ l + 1 = lh s := by
-  induction l using ISigma1.sigma1_succ_induction
-  · apply HierarchySymbol.Definable.exs
-    apply HierarchySymbol.Definable.and
-    · exact ⟨p.IsAttemptDef.rew (Rew.embSubsts <| #0 :> fun i ↦ &(v i)), by
-         intro w; simpa [Matrix.comp_vecCons''] using! c.attempt_defined_iff (w 0 :> v)⟩
-    · definability
-  case zero =>
-    exact ⟨!⟦c.zero v⟧, IsAttempt.initial, by simp⟩
-  case succ l ih =>
-    rcases ih with ⟨s, Hs, hls⟩
-    have hl : l < lh s := by simp [←hls]
-    have : ∃ z, ⟪l, z⟫ ∈ s := Hs.seq.exists hl
-    rcases this with ⟨z, hz⟩
-    exact ⟨s ⁀' c.succ v l z, Hs.successor hls hz, by simp [Hs.seq, hls]⟩
+lemma IsAttempt.exists (α : V) : ∃ f, c.IsAttempt v α f ∧ SetTheory.succ α = lh f := by
+  #check SetTheory.Replacement.attempt_function_exists (c.core v) (c.core_defined.to_definable) (SetTheory.succ α)
+  -- induction l using ISigma1.sigma1_succ_induction
+  -- · apply HierarchySymbol.Definable.exs
+  --   apply HierarchySymbol.Definable.and
+  --   · exact ⟨p.IsAttemptDef.rew (Rew.embSubsts <| #0 :> fun i ↦ &(v i)), by
+  --        intro w; simpa [Matrix.comp_vecCons''] using! c.attempt_defined_iff (w 0 :> v)⟩
+  --   · definability
+  -- case zero =>
+  --   exact ⟨!⟦c.zero v⟧, IsAttempt.initial, by simp⟩
+  -- case succ l ih =>
+  --   rcases ih with ⟨s, Hs, hls⟩
+  --   have hl : l < lh s := by simp [←hls]
+  --   have : ∃ z, ⟪l, z⟫ ∈ s := Hs.seq.exists hl
+  --   rcases this with ⟨z, hz⟩
+  --   exact ⟨s ⁀' c.succ v l z, Hs.successor hls hz, by simp [Hs.seq, hls]⟩
 
-lemma attempt_result_existsUnique (l : V) : ∃! z, ∃ s, c.IsAttempt v s ∧ l + 1 = lh s ∧ ⟪l, z⟫ ∈ s := by
+lemma attempt_result_existsUnique (α : V) : ∃! y, ∃ f, c.IsAttempt v α f ∧ SetTheory.succ α = lh f ∧ ⟨α, y⟩ₖ ∈ f := by
   rcases IsAttempt.exists c v l with ⟨s, Hs, h⟩
   have : ∃ z, ⟪l, z⟫ ∈ s := Hs.seq.exists (show l < lh s from by simp [←h])
   rcases this with ⟨z, hz⟩
@@ -233,18 +245,15 @@ lemma result_defined : DefinedFunction (fun v ↦ c.result (v ·.succ) (v 0) : (
   apply exists_congr; intro x
   simp [c.attempt_defined_iff]
 
-lemma result_defined_delta : DefinedFunction (fun v ↦ c.result (v ·.succ) (v 0) : (Fin (k + 1) → V) → V) p.resultDeltaDef :=
-  c.result_defined.graph_delta
+/- TODO: Once the Lévy hierarchy has been added, add a `Δ` version. -/
+-- lemma result_defined_delta : DefinedFunction (fun v ↦ c.result (v ·.succ) (v 0) : (Fin (k + 1) → V) → V) p.resultDeltaDef :=
+--   c.result_defined.graph_delta
 
 @[simp] lemma result_defined_iff (v : Fin (k + 2) → V) :
     p.resultDef.val.Evalb v ↔ v 0 = c.result (v ·.succ.succ) (v 1) := c.result_defined.iff
 
 instance result_definable : DefinableFunction (fun v ↦ c.result (v ·.succ) (v 0) : (Fin (k + 1) → V) → V) :=
   c.result_defined.to_definable
-
-/- TODO: Once the Lévy hierarchy has been added, add a `Δ₁` version. -/
-/- instance result_definable_delta₁ : DefinableFunction (fun v ↦ c.result (v ·.succ) (v 0) : (Fin (k + 1) → V) → V) :=
-  c.result_defined_delta.to_definable -/
 
 attribute [irreducible] Blueprint.resultDef
 

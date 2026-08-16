@@ -444,6 +444,8 @@ instance restrict.defined : ℒₛₑₜ-function₂[V] restrict via restrict.df
 
 instance restrict.definable : ℒₛₑₜ-function₂[V] restrict := restrict.defined.to_definable
 
+@[simp] lemma restrict_empty_eq {R : V} : R ↾ ∅ = ∅ := by simp [restrict, empty_prod]
+
 @[simp] lemma domain_restrict_eq (R A : V) : domain (R ↾ A) = domain R ∩ A := by
   ext z
   apply Iff.intro <;> intro h
