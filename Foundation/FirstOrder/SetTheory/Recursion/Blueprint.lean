@@ -47,8 +47,8 @@ variable {k : ℕ} {p : Blueprint k} (c : Construction V p) (v : Fin k → V)
 def IsAttempt (α f : V) : Prop :=
   SetTheory.IsAttempt (c.core v) α f
 
-set_option linter.flexible false in
 -- An example showing that `⋯` in faf notation is implemented correctly.
+set_option linter.flexible false in
 example : Semiformula.Evalb v f“∀ x, ∃ y, y = !p.graph x ⋯” := by
   simp
   intro x
@@ -69,32 +69,62 @@ example : Semiformula.Evalb v f“∀ x, ∃ y, y = !p.graph x ⋯” := by
   specialize h (x :> v)
   simpa [heq] using h
 
+set_option linter.flexible false in
+lemma eval_core_faf {x : V} : Semiformula.Evalb (x :> (c.core v x) :> v) f“x y. y = !p.graph x ⋯” := by
+  simp
+  intro z h
+  suffices Semiformula.Evalb (z :> x :> v) p.graph by
+    apply (c.core_defined.iff (z :> x :> v)).mp at this
+    simp at this
+    exact this.symm
+  simp only [Semiformula.eval_nestFormulaeFunc, Nat.succ_eq_add_one, ← Semiformula.Evalb.eq_1] at h
+  specialize h (x :> v)
+  refine h ?_
+  intro i
+  by_cases hi : i = 0
+  · aesop
+  · obtain ⟨j, hj⟩ := Fin.exists_succ_eq.mpr hi
+    aesop
+
 lemma IsAttempt_defined : Defined (fun v ↦ c.IsAttempt (v ·.succ.succ) (v 0) (v 1) : (Fin (k + 2) → V) → Prop) p.isAttempt_dfn := .mk fun v ↦ by
   simp [IsAttempt, SetTheory.IsAttempt, Blueprint.isAttempt_dfn]
   intro hordinal hfunction hdomain
+  apply forall_congr'
+  intro x
+  apply forall_congr'
+  intro hx
+  apply forall_congr'
+  intro y
+  simp only [Semiformula.eval_nestFormulaeFunc, Nat.succ_eq_add_one, ← Semiformula.Evalb.eq_1]
+  simp [c.core_defined.iff]
+  conv in Semiformula.Evalb ?_ ?_ => {
+    refine by_cases (p := i = 0) ?_ ?_
+    · exact fun hi ↦ by
+        aesop
+    · exact fun hi ↦ by
+        obtain ⟨j, rfl⟩ := Fin.exists_succ_eq.mpr hi
+        simp [Matrix.cons_val_succ]
+  }
 
 
-  -- simp only [Semiformula.eval_nestFormulaeFunc, Nat.succ_eq_add_one, ← Semiformula.Evalb.eq_1]
-  -- simp [c.core_defined.iff]
-  -- simp [Semiformula.nestFormulaeFunc, Rewriting.subst, Rew.subst]
-  -- conv in Semiformula.Evalb ?_ ?_ => {
-  --   rw [Semiformula.eval_nestFormulaeFunc]
-  -- }
+  -- have h {i : Fin (k + 1)} : (Semiformula.nestFormulaeFunc restrict.dfn ![“#0 = #6”, “#0 = #3”] :> fun x ↦ “#0 = #x.succ.succ.succ.succ.succ.succ.succ”) i = if i = 0 then Semiformula.nestFormulaeFunc restrict.dfn ![“#0 = #6”, “#0 = #3”] else “#0 = #i.succ.succ.succ.succ.succ.succ” := by
+  --   by_cases hi : i = 0
+  --   · aesop
+  --   · obtain ⟨j, rfl⟩ := Fin.exists_succ_eq.mpr hi
+  --     simp [Matrix.cons_val_succ]
+  -- simp only [h]
 
-  -- constructor <;> (intro h x hx y; specialize h x hx y; rw [h])
+  -- -- TODO: Is there a better way to write these next three lines, without two non-terminal `simp`s?
+  -- simp only [← eq_iff_iff (a := ⟨x, y⟩ₖ ∈ v 1)]
+  -- apply eq_iff_eq_cancel_left.mpr
+  -- simp only [eq_iff_iff]
+  -- constructor <;> intro h
   -- · sorry
-  -- · sorry
+  -- · intro x_1 h₂
+  --   subst h
+  --   specialize h₂ (((v 1) ↾ x) :> (Matrix.vecTail (Matrix.vecTail v))) -- TODO: Might not be right
 
-  -- simp_all [SetTheory.IsAttempt, Construction.IsAttempt, Blueprint.isAttempt_dfn]
-  -- intro hordinal hfunction hdomain
-  -- constructor <;> (intro h; intro β hβ y; specialize h β hβ y; rw [h])
-  -- · constructor <;> intro h₂
-  --   · sorry
-  --   · sorry
-  -- · constructor <;> intro h₂
-  --   · simp_all [Semiformula.eval_nestFormulaeFunc]
-  --     sorry
-  --   · sorry
+  --   sorry
 
 #check c.IsAttempt_defined.iff
 
