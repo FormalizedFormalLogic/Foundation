@@ -41,7 +41,7 @@ local postfix:max "⤉" => Semiformula.shift
 
 variable (T : ArithmeticTheory) [Theory.Δ₁ T] [𝗣𝗔⁻ ⪯ T]
 
-open Entailment Entailment.FiniteContext Semiformula
+open Entailment Entailment.FiniteContext _root_.LO.FirstOrder.Arithmetic.Bootstrapping.Semiformula
 
 instance : 𝗘𝗤 _ ⪯ T :=
   have : 𝗣𝗔⁻ ⪯ T := inferInstance

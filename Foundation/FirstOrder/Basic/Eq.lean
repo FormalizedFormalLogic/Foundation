@@ -81,8 +81,8 @@ lemma Eq.defeq :
     · exact eqAxiom.relExt _
 
 @[simp] lemma EqAxiom.finite [L.Finite] : Set.Finite (𝗘𝗤 L) := by
-  haveI : Fintype ((k : ℕ) × L.Func k) := Language.Finite.func
-  haveI : Fintype ((k : ℕ) × L.Rel k) := Language.Finite.rel
+  have : Fintype ((k : ℕ) × L.Func k) := Language.Finite.func
+  have : Fintype ((k : ℕ) × L.Rel k) := Language.Finite.rel
   rw [Eq.defeq]
   simp [Set.finite_range]
 
@@ -195,7 +195,16 @@ lemma rel_mk {k} (r : L.Rel k) (v : Fin k → M) : Structure.rel (M := QuotEq L 
 
 lemma val_mk {bv fv} (t : Semiterm L ξ n) :
     t.val (M := QuotEq L M) (⟦bv ·⟧) (⟦fv ·⟧) = ⟦t.val bv fv⟧ := by
-  induction t <;> simp [*, funk_mk, Function.comp_def]
+  induction t with
+  | bvar x => rfl
+  | fvar x => rfl
+  | func f v ih =>
+    show Structure.func (M := QuotEq L M) f (fun i ↦ val (⟦bv ·⟧) (⟦fv ·⟧) (v i))
+        = ⟦Structure.func f (fun i ↦ val bv fv (v i))⟧
+    rw [← funk_mk]
+    congr 1
+    funext i
+    exact ih i
 
 lemma eval_mk {bv fv} {φ : Semiformula L ξ n} :
     φ.Eval (M := QuotEq L M) (⟦bv ·⟧) (⟦fv ·⟧) ↔ φ.Eval bv fv := by
@@ -215,8 +224,18 @@ lemma eval_mk {bv fv} {φ : Semiformula L ξ n} :
       have h2 := ih.mpr h; simp only [Matrix.comp_vecCons] at h2; exact h2
   case _ => simp [*]
   case _ => simp [*]
-  case _ => simp [*, val_mk, rel_mk, Function.comp_def]
-  case _ => simp [*, val_mk, rel_mk, Function.comp_def]
+  case hrel r v =>
+    show Structure.rel (M := QuotEq L M) r (fun i ↦ val (⟦bv ·⟧) (⟦fv ·⟧) (v i))
+        ↔ Structure.rel r fun i ↦ val bv fv (v i)
+    have e : (fun i ↦ val (M := QuotEq L M) (⟦bv ·⟧) (⟦fv ·⟧) (v i))
+        = fun i ↦ (⟦val bv fv (v i)⟧ : QuotEq L M) := funext fun i ↦ val_mk (v i)
+    rw [e]; exact rel_mk r _
+  case hnrel r v =>
+    show ¬Structure.rel (M := QuotEq L M) r (fun i ↦ val (⟦bv ·⟧) (⟦fv ·⟧) (v i))
+        ↔ ¬Structure.rel r fun i ↦ val bv fv (v i)
+    have e : (fun i ↦ val (M := QuotEq L M) (⟦bv ·⟧) (⟦fv ·⟧) (v i))
+        = fun i ↦ (⟦val bv fv (v i)⟧ : QuotEq L M) := funext fun i ↦ val_mk (v i)
+    rw [e]; exact not_congr (rel_mk r _)
   case _ => simp [*]
   case _ => simp [*]
 
@@ -257,7 +276,7 @@ lemma consequence_iff_eq {T : Theory L} [𝗘𝗤 L ⪯ T] {σ : Sentence L} :
   constructor
   · intro h M x s _ hM; exact h M x hM
   · intro h M x s hM
-    haveI : Nonempty M := ⟨x⟩
+    have : Nonempty M := ⟨x⟩
     have H : M↓[L] ⊧* 𝗘𝗤 L := models_of_subtheory hM
     have e : Structure.Eq.QuotEq L M ≡ₑ[L] M := Structure.Eq.QuotEq.elementaryEquiv L M
     exact e.models.mp $ h (Structure.Eq.QuotEq L M) ⟦x⟧ (e.modelsTheory.mpr hM)
@@ -271,7 +290,7 @@ lemma satisfiable_iff_eq {T : Theory L} [𝗘𝗤 L ⪯ T] :
   simp only [satisfiable_iff, Nonempty.exists, exists_prop]
   constructor
   · intro ⟨M, x, s, hM⟩;
-    haveI : Nonempty M := ⟨x⟩
+    have : Nonempty M := ⟨x⟩
     have H : M↓[L] ⊧* 𝗘𝗤 L := models_of_subtheory hM
     have e : Structure.Eq.QuotEq L M ≡ₑ[L] M := Structure.Eq.QuotEq.elementaryEquiv L M
     exact ⟨Structure.Eq.QuotEq L M, ⟦x⟧, inferInstance, inferInstance, e.modelsTheory.mpr hM⟩

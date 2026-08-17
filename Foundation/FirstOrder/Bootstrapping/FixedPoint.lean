@@ -131,7 +131,7 @@ theorem diagonal (θ : ArithmeticSemisentence 1) :
     T ⊢ fixedpoint θ 🡘 θ/[⌜fixedpoint θ⌝] :=
   haveI : 𝗘𝗤 _ ⪯ T := Entailment.WeakerThan.trans (𝓣 := 𝗜𝚺₁) inferInstance inferInstance
   complete.{0} T _ fun (V : Type) _ _ ↦ by
-    haveI : V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁ := ModelsTheory.of_provably_subtheory V 𝗜𝚺₁ T inferInstance
+    have : V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁ := ModelsTheory.of_provably_subtheory V 𝗜𝚺₁ T inferInstance
     suffices V ⊧/![] (fixedpoint θ) ↔ V ⊧/![⌜fixedpoint θ⌝] θ by
       simpa [models_iff, Matrix.constant_eq_singleton]
     let t : V := ⌜diag θ⌝
@@ -159,7 +159,7 @@ theorem multidiagonal (θ : Fin k → ArithmeticSemisentence k) :
     T ⊢ multifixedpoint θ i 🡘 (Rew.subst fun j ↦ ⌜multifixedpoint θ j⌝) ▹ (θ i) :=
   haveI : 𝗘𝗤 _ ⪯ T := Entailment.WeakerThan.trans (𝓣 := 𝗜𝚺₁) inferInstance inferInstance
   complete.{0} T _ fun (V : Type) _ _ ↦ by
-    haveI : V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁ := ModelsTheory.of_provably_subtheory V 𝗜𝚺₁ T inferInstance
+    have : V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁ := ModelsTheory.of_provably_subtheory V 𝗜𝚺₁ T inferInstance
     suffices V ⊧/![] (multifixedpoint θ i) ↔ V ⊧/(fun i ↦ ⌜multifixedpoint θ i⌝) (θ i) by
       simpa [models_iff, Function.comp_def, Matrix.empty_eq]
     let t : Fin k → V := fun i ↦ ⌜multidiag (θ i)⌝
@@ -210,7 +210,7 @@ theorem parameterized_diagonal (θ : ArithmeticSemisentence (k + 1)) :
     T ⊢ ∀¹* (parameterizedFixedpoint θ 🡘 “!θ !!(⌜parameterizedFixedpoint θ⌝) ⋯”) :=
   haveI : 𝗘𝗤 _ ⪯ T := Entailment.WeakerThan.trans (𝓣 := 𝗜𝚺₁) inferInstance inferInstance
   complete.{0} T _ fun (V : Type) _ _ ↦ by
-    haveI : V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁ := ModelsTheory.of_provably_subtheory V 𝗜𝚺₁ T inferInstance
+    have : V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁ := ModelsTheory.of_provably_subtheory V 𝗜𝚺₁ T inferInstance
     suffices
         ∀ params : Fin k → V,
           V ⊧/params (parameterizedFixedpoint θ) ↔ V ⊧/(⌜parameterizedFixedpoint θ⌝ :> params) θ by

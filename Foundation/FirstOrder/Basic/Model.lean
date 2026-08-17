@@ -116,21 +116,49 @@ variable {L₁ L₂ M}
 
 @[simp] lemma val_lMap_add₁ {n} (t : Semiterm L₁ μ n) (e : Fin n → M) (f : μ → M) :
     Semiterm.val (s := add L₁ L₂ M) e f (t.lMap (Language.Hom.add₁ L₁ L₂)) = t.val (s := str₁) e f := by
-  induction t <;> simp [Language.Hom.func_add₁, Function.comp_def, *]
+  induction t with
+  | bvar x => simp
+  | fvar x => simp
+  | func F v ih =>
+    show func F (Semiterm.val e f ∘ (Semiterm.lMap (Language.Hom.add₁ L₁ L₂) ∘ v)) = func F (Semiterm.val e f ∘ v)
+    congr 1; funext x; simpa using ih x
 
 @[simp] lemma val_lMap_add₂ {n} (t : Semiterm L₂ μ n) (e : Fin n → M) (f : μ → M) :
     Semiterm.val (s := add L₁ L₂ M) e f (t.lMap (Language.Hom.add₂ L₁ L₂)) = t.val (s := str₂) e f := by
-  induction t <;> simp [Language.Hom.func_add₂, Function.comp_def, *]
+  induction t with
+  | bvar x => simp
+  | fvar x => simp
+  | func F v ih =>
+    show func F (Semiterm.val e f ∘ (Semiterm.lMap (Language.Hom.add₂ L₁ L₂) ∘ v)) = func F (Semiterm.val e f ∘ v)
+    congr 1; funext x; simpa using ih x
 
 @[simp] lemma eval_lMap_add₁ {n} (φ : Semiformula L₁ μ n) (e : Fin n → M) (f : μ → M) :
     (Semiformula.lMap (Language.Hom.add₁ L₁ L₂) φ).Eval (s := add L₁ L₂ M) e f
     ↔ φ.Eval (s := str₁) e f := by
-  induction φ using Semiformula.rec' <;> simp [*, Language.Hom.rel_add₁, Function.comp_def]
+  induction φ using Semiformula.rec' with
+  | hrel r v =>
+    show rel r (Semiterm.val e f ∘ (Semiterm.lMap (Language.Hom.add₁ L₁ L₂) ∘ v))
+      ↔ rel r (Semiterm.val e f ∘ v)
+    simp [Function.comp_def]
+  | hnrel r v =>
+    show ¬rel r (Semiterm.val e f ∘ (Semiterm.lMap (Language.Hom.add₁ L₁ L₂) ∘ v))
+      ↔ ¬rel r (Semiterm.val e f ∘ v)
+    simp [Function.comp_def]
+  | _ => simp [*]
 
 @[simp] lemma eval_lMap_add₂ {n} (φ : Semiformula L₂ μ n) (e : Fin n → M) (f : μ → M) :
     (Semiformula.lMap (Language.Hom.add₂ L₁ L₂) φ).Eval (s := add L₁ L₂ M) e f
     ↔ φ.Eval (s := str₂) e f := by
-  induction φ using Semiformula.rec' <;> simp [*, Language.Hom.rel_add₂, Function.comp_def]
+  induction φ using Semiformula.rec' with
+  | hrel r v =>
+    show rel r (Semiterm.val e f ∘ (Semiterm.lMap (Language.Hom.add₂ L₁ L₂) ∘ v))
+      ↔ rel r (Semiterm.val e f ∘ v)
+    simp [Function.comp_def]
+  | hnrel r v =>
+    show ¬rel r (Semiterm.val e f ∘ (Semiterm.lMap (Language.Hom.add₂ L₁ L₂) ∘ v))
+      ↔ ¬rel r (Semiterm.val e f ∘ v)
+    simp [Function.comp_def]
+  | _ => simp [*]
 
 end add
 
@@ -148,12 +176,26 @@ instance sigma : Structure (Language.sigma L) M where
 
 @[simp] lemma val_lMap_sigma {n} (t : Semiterm (L i) μ n) (e : Fin n → M) (f : μ → M) :
     Semiterm.val (s := sigma L M) e f (t.lMap (Language.Hom.sigma L i)) = t.val (s := str i) e f := by
-  induction t <;> simp [*, Language.Hom.func_sigma, Function.comp_def]
+  induction t with
+  | bvar x => simp
+  | fvar x => simp
+  | func F v ih =>
+    show func F (Semiterm.val e f ∘ (Semiterm.lMap (Language.Hom.sigma L i) ∘ v)) = func F (Semiterm.val e f ∘ v)
+    congr 1; funext x; simpa using ih x
 
 @[simp] lemma eval_lMap_sigma {n} (φ : Semiformula (L i) μ n) (e : Fin n → M) (f : μ → M) :
     (Semiformula.lMap (Language.Hom.sigma L i) φ).Eval (s := sigma L M) e f
     ↔ φ.Eval (s := str i) e f := by
-  induction φ using Semiformula.rec' <;> simp [*, Language.Hom.rel_sigma, Function.comp_def]
+  induction φ using Semiformula.rec' with
+  | hrel r v =>
+    show rel r (Semiterm.val e f ∘ (Semiterm.lMap (Language.Hom.sigma L i) ∘ v))
+      ↔ rel r (Semiterm.val e f ∘ v)
+    simp [Function.comp_def]
+  | hnrel r v =>
+    show ¬rel r (Semiterm.val e f ∘ (Semiterm.lMap (Language.Hom.sigma L i) ∘ v))
+      ↔ ¬rel r (Semiterm.val e f ∘ v)
+    simp [Function.comp_def]
+  | _ => simp [*]
 
 end sigma
 
