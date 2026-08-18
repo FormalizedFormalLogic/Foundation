@@ -86,8 +86,19 @@ lemma eval_core_faf {x : V} : Semiformula.Evalb (x :> (c.core v x) :> v) f“x y
   · obtain ⟨j, hj⟩ := Fin.exists_succ_eq.mpr hi
     aesop
 
+set_option linter.flexible false in
 lemma IsAttempt_defined : Defined (fun v ↦ c.IsAttempt (v ·.succ.succ) (v 0) (v 1) : (Fin (k + 2) → V) → Prop) p.isAttempt_dfn := .mk fun v ↦ by
+  -- TODO: This may be too specific to refactor into its own lemma.
+  have hsplit {p : Fin (k + 1) → Prop} : (∀ i : Fin (k + 1), p i) ↔ (p 0 ∧ ∀ i : Fin k, p i.succ) := by
+    constructor <;> intro h
+    · exact And.intro (h 0) fun i ↦ h (i.succ)
+    · intro i
+      refine by_cases (p := i = 0) (q := p i) (by aesop) ?_
+      · intro hi
+        obtain ⟨j, hj⟩ := Fin.exists_succ_eq.mpr hi
+        exact hj ▸ h.2 j
   simp [IsAttempt, SetTheory.IsAttempt, Blueprint.isAttempt_dfn]
+  simp [Semiformula.eval_nestFormulaeFunc, ← Semiformula.Evalb.eq_1]
   intro hordinal hfunction hdomain
   apply forall_congr'
   intro x
@@ -95,36 +106,21 @@ lemma IsAttempt_defined : Defined (fun v ↦ c.IsAttempt (v ·.succ.succ) (v 0) 
   intro hx
   apply forall_congr'
   intro y
-  simp only [Semiformula.eval_nestFormulaeFunc, Nat.succ_eq_add_one, ← Semiformula.Evalb.eq_1]
-  simp [c.core_defined.iff]
-  conv in Semiformula.Evalb ?_ ?_ => {
-    refine by_cases (p := i = 0) ?_ ?_
-    · exact fun hi ↦ by
-        aesop
-    · exact fun hi ↦ by
-        obtain ⟨j, rfl⟩ := Fin.exists_succ_eq.mpr hi
-        simp [Matrix.cons_val_succ]
-  }
-
-
-  -- have h {i : Fin (k + 1)} : (Semiformula.nestFormulaeFunc restrict.dfn ![“#0 = #6”, “#0 = #3”] :> fun x ↦ “#0 = #x.succ.succ.succ.succ.succ.succ.succ”) i = if i = 0 then Semiformula.nestFormulaeFunc restrict.dfn ![“#0 = #6”, “#0 = #3”] else “#0 = #i.succ.succ.succ.succ.succ.succ” := by
-  --   by_cases hi : i = 0
-  --   · aesop
-  --   · obtain ⟨j, rfl⟩ := Fin.exists_succ_eq.mpr hi
-  --     simp [Matrix.cons_val_succ]
-  -- simp only [h]
-
-  -- -- TODO: Is there a better way to write these next three lines, without two non-terminal `simp`s?
-  -- simp only [← eq_iff_iff (a := ⟨x, y⟩ₖ ∈ v 1)]
-  -- apply eq_iff_eq_cancel_left.mpr
-  -- simp only [eq_iff_iff]
-  -- constructor <;> intro h
-  -- · sorry
-  -- · intro x_1 h₂
-  --   subst h
-  --   specialize h₂ (((v 1) ↾ x) :> (Matrix.vecTail (Matrix.vecTail v))) -- TODO: Might not be right
-
-  --   sorry
+  simp [hsplit, c.core_defined.iff]
+  simp only [← eq_iff_iff (a := ⟨x, y⟩ₖ ∈ v 1)]
+  apply eq_iff_eq_cancel_left.mpr
+  simp only [eq_iff_iff]
+  constructor <;> intro h
+  · specialize h (c.core (fun x ↦ v x.succ.succ) ((v 1) ↾ x))
+    refine h ?_
+    intro v_1 h₂
+    aesop
+  · intro x_1 h₂
+    specialize h₂ (((v 1) ↾ x) :> (Matrix.vecTail (Matrix.vecTail v)))
+    subst h
+    simp_all only [Nat.succ_eq_add_one, Matrix.cons_val_zero, Matrix.cons_val_succ, forall_const]
+    refine (h₂ ?_).symm
+    aesop
 
 #check c.IsAttempt_defined.iff
 
@@ -145,7 +141,13 @@ lemma empty (h : c.IsAttempt v α f) (hα : ∅ ∈ α) : ⟨∅, c.core v ∅�
   have hrestrict {g : V} : g ↾ ∅ = ∅ := restrict_empty_eq
   exact (h.2.2.2 ∅ hα (c.core v ∅)).mpr (by aesop)
 
-lemma succ (h : c.IsAttempt v α f) : ∀ β, SetTheory.succ β ∈ α → ∀ z, ⟨α, z⟩ₖ ∈ f → ⟨SetTheory.succ α, c.core v z⟩ₖ ∈ f := h.2.2
+lemma succ (h : c.IsAttempt v α f) : ∀ β, SetTheory.succ β ∈ α → ∀ z, ⟨β, z⟩ₖ ∈ f → ⟨SetTheory.succ β, c.core v z⟩ₖ ∈ f := by
+  intro β hβsuccα z hzf
+  have hβα : β ∈ α := by
+    sorry
+  have heq := (spec h β hβα z).mp hzf
+  #check (spec h (SetTheory.succ β) hβsuccα z).mpr heq
+  sorry
 
 lemma coherent {f g α β : V} (h₁ : c.IsAttempt v α f) (h₂ : c.IsAttempt v β g) (h₁₂ : α ⊆ β) {γ} (hγα : γ ∈ α) {y₁ y₂} :
     ⟨γ, y₁⟩ₖ ∈ f → ⟨γ, y₂⟩ₖ ∈ g → y₁ = y₂ := by
