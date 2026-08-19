@@ -195,8 +195,8 @@ lemma IsAttempt.one : c.IsAttempt v 1 {⟨∅, c.core v ∅⟩ₖ} :=
     by ext z; simp [mem_domain_iff, one_def, zero_def],
     by simp [one_def, zero_def]⟩
 
-lemma IsAttempt.successor {f α y : V} (hf : c.IsAttempt v α f) (hα : SetTheory.succ α = lh f) (hy : ⟨α, y⟩ₖ ∈ f) :
-    c.IsAttempt v (SetTheory.succ α) (f ⁀' c.core v y) :=
+lemma IsAttempt.successor {f α y : V} (hf : c.IsAttempt v (SetTheory.succ α) f) (hα : SetTheory.succ α = lh f) (hy : ⟨α, y⟩ₖ ∈ f) :
+    c.IsAttempt v (SetTheory.succ (SetTheory.succ  α)) (f ⁀' c.core v y) :=
   ⟨ IsOrdinal.succ (h := hf.1), (hf.seq.seqCons _).1, by simp [seqCons, hf.2.2.1, hf.seq.lh_eq_domain_of, SetTheory.succ], by
     intro β hβ w
     constructor <;> intro h
@@ -258,26 +258,26 @@ lemma result_spec (α : V) [IsOrdinal α] : ∃ f, c.IsAttempt v (SetTheory.succ
   rcases c.result_spec v ∅ with ⟨f, hf, _, hempty⟩
   exact hf.seq.1.unique hempty (hf.empty (mem_succ_self ∅))
 
-@[simp] theorem result_succ (α : V) : c.result v (SetTheory.succ α) = c.succ v α (c.result v α) := by
+@[simp] theorem result_succ (α : V) [IsOrdinal α] : c.result v (SetTheory.succ α) = c.succ v α (c.result v α) := by
   rcases c.result_spec v α with ⟨f, Hf, hk, h⟩
-  have : IsAttempt c v (f ⁀' c.succ v u (result c v u) ) := Hf.successor hk h
+  have : IsAttempt c v (f ⁀' c.succ v α (result c v u) ) := Hf.successor hk h
   exact Eq.symm
     <| Classical.choose_uniq (c.attempt_result_existsUnique v (u + 1))
     ⟨_, this, by simp [Hf.seq, hk], by simp [hk]⟩
 
-lemma result_graph (z α : V) : z = c.result v α ↔ ∃ f, c.IsAttempt v (SetTheory.succ α) f ∧ ⟨α, z⟩ₖ ∈ f :=
+lemma result_graph (z α : V) [IsOrdinal α]: z = c.result v α ↔ ∃ f, c.IsAttempt v (SetTheory.succ α) f ∧ ⟨α, z⟩ₖ ∈ f :=
   ⟨by rintro rfl
-      rcases c.result_spec v u with ⟨f, Hf, _, h⟩
+      rcases c.result_spec v α with ⟨f, Hf, _, h⟩
       exact ⟨f, Hf, h⟩,
    by rintro ⟨f, Hf, h⟩
-      rcases c.result_spec v u with ⟨f', Hf', hu, h'⟩
+      rcases c.result_spec v α with ⟨f', Hf', hu, h'⟩
       exact Eq.symm <| Hf'.unique Hf
         (by simpa [←hu, succ_le_iff_lt] using Hf.seq.lt_lh_iff.mpr (mem_domain_of_pair_mem h))
         (by simp [←hu]) h' h⟩
 
 set_option linter.flexible false in
-lemma result_defined : DefinedFunction (fun v ↦ c.result (v ·.succ) (v 0) : (Fin (k + 1) → V) → V) p.result_dfn := .mk fun v ↦ by
-  simp [Blueprint.resultDef, result_graph]
+lemma result_defined : DefinedFunction (fun v ↦ c.result (v ·.succ) (v 0) : (Fin (k + 1) → V) → V) p.result.dfn := .mk fun v ↦ by
+  simp [Blueprint.result.dfn, result_graph]
   apply exists_congr; intro x
   simp [c.attempt_defined_iff]
 
@@ -291,7 +291,7 @@ lemma result_defined : DefinedFunction (fun v ↦ c.result (v ·.succ) (v 0) : (
 instance result_definable : DefinableFunction (fun v ↦ c.result (v ·.succ) (v 0) : (Fin (k + 1) → V) → V) :=
   c.result_defined.to_definable
 
-attribute [irreducible] Blueprint.resultDef
+attribute [irreducible] Blueprint.result.dfn
 
 end Construction
 
