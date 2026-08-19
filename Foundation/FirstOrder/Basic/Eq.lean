@@ -193,18 +193,25 @@ lemma funk_mk {k} (f : L.Func k) (v : Fin k → M) : Structure.func (M := QuotEq
 lemma rel_mk {k} (r : L.Rel k) (v : Fin k → M) : Structure.rel (M := QuotEq L M) r (⟦v ·⟧) ↔ Structure.rel r v :=
   of_eq <| Quotient.liftVec_mk (s := eqvSetoid L M) _ _ _
 
+/-- Variant of `funk_mk` for an argument vector that is only pointwise (rather than
+literally `⟦v ·⟧`-shaped) equal to the class of `v`, useful for discharging induction
+goals produced by an induction hypothesis. -/
+lemma funk_mk_of_eq {k} (f : L.Func k) {w : Fin k → QuotEq L M} {v : Fin k → M}
+    (h : ∀ i, w i = ⟦v i⟧) : Structure.func (M := QuotEq L M) f w = ⟦Structure.func f v⟧ :=
+  funext h ▸ funk_mk f v
+
+/-- Variant of `rel_mk` for an argument vector that is only pointwise equal to the class
+of `v`; see `funk_mk_of_eq`. -/
+lemma rel_mk_of_eq {k} (r : L.Rel k) {w : Fin k → QuotEq L M} {v : Fin k → M}
+    (h : ∀ i, w i = ⟦v i⟧) : Structure.rel (M := QuotEq L M) r w ↔ Structure.rel r v :=
+  funext h ▸ rel_mk r v
+
 lemma val_mk {bv fv} (t : Semiterm L ξ n) :
     t.val (M := QuotEq L M) (⟦bv ·⟧) (⟦fv ·⟧) = ⟦t.val bv fv⟧ := by
   induction t with
   | bvar x => rfl
   | fvar x => rfl
-  | func f v ih =>
-    show Structure.func (M := QuotEq L M) f (fun i ↦ val (⟦bv ·⟧) (⟦fv ·⟧) (v i))
-        = ⟦Structure.func f (fun i ↦ val bv fv (v i))⟧
-    rw [← funk_mk]
-    congr 1
-    funext i
-    exact ih i
+  | func f v ih => exact funk_mk_of_eq f ih
 
 lemma eval_mk {bv fv} {φ : Semiformula L ξ n} :
     φ.Eval (M := QuotEq L M) (⟦bv ·⟧) (⟦fv ·⟧) ↔ φ.Eval bv fv := by
@@ -224,18 +231,8 @@ lemma eval_mk {bv fv} {φ : Semiformula L ξ n} :
       have h2 := ih.mpr h; simp only [Matrix.comp_vecCons] at h2; exact h2
   case _ => simp [*]
   case _ => simp [*]
-  case hrel r v =>
-    show Structure.rel (M := QuotEq L M) r (fun i ↦ val (⟦bv ·⟧) (⟦fv ·⟧) (v i))
-        ↔ Structure.rel r fun i ↦ val bv fv (v i)
-    have e : (fun i ↦ val (M := QuotEq L M) (⟦bv ·⟧) (⟦fv ·⟧) (v i))
-        = fun i ↦ (⟦val bv fv (v i)⟧ : QuotEq L M) := funext fun i ↦ val_mk (v i)
-    rw [e]; exact rel_mk r _
-  case hnrel r v =>
-    show ¬Structure.rel (M := QuotEq L M) r (fun i ↦ val (⟦bv ·⟧) (⟦fv ·⟧) (v i))
-        ↔ ¬Structure.rel r fun i ↦ val bv fv (v i)
-    have e : (fun i ↦ val (M := QuotEq L M) (⟦bv ·⟧) (⟦fv ·⟧) (v i))
-        = fun i ↦ (⟦val bv fv (v i)⟧ : QuotEq L M) := funext fun i ↦ val_mk (v i)
-    rw [e]; exact not_congr (rel_mk r _)
+  case hrel r v => exact rel_mk_of_eq r fun i ↦ val_mk (v i)
+  case hnrel r v => exact not_congr (rel_mk_of_eq r fun i ↦ val_mk (v i))
   case _ => simp [*]
   case _ => simp [*]
 
