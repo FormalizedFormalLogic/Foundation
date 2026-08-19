@@ -960,7 +960,7 @@ end chDefined
 lemma mem_inductionScheme_univ_iff (φ : _root_.LO.FirstOrder.ArithmeticSemiformula ℕ 0) :
     (∃ σ ∈ InductionScheme ℒₒᵣ Set.univ, φ = (σ : _root_.LO.FirstOrder.ArithmeticSemiformula ℕ 0))
       ↔ ∃ ψ : _root_.LO.FirstOrder.ArithmeticSemiformula ℕ 1, φ = (succInd ψ).univCl' := by
-  simp only [InductionScheme, Set.mem_setOf_eq]
+  simp only [InductionScheme, Set.mem_ofPred_eq]
   constructor
   · rintro ⟨σ, ⟨ψ, -, rfl⟩, rfl⟩
     exact ⟨ψ, by simp [Semiformula.coe_univCl_eq_univCl']⟩
@@ -1127,7 +1127,7 @@ noncomputable instance InductionScheme.delta1_univ :
       simp
     rw [h]; exact chUniv_mem_iff φ
   isDelta1 := HierarchySymbol.Semiformula.ProvablyProperOn.ofProperOn.{0} _ fun V _ _ ↦ by
-    haveI := InductionUnivR.defined (V := V); simp
+    have := InductionUnivR.defined (V := V); simp
 
 /-! ## Correctness of `IsSigma1`: `IsSigma1 ⌜ψ⌝ ↔ Hierarchy 𝚺 1 ψ` -/
 
@@ -1278,7 +1278,7 @@ end chSigma1Defined
 lemma mem_inductionScheme_sigma1_iff (φ : _root_.LO.FirstOrder.ArithmeticSemiformula ℕ 0) :
     (∃ σ ∈ InductionScheme ℒₒᵣ (Arithmetic.Hierarchy 𝚺 1), φ = (σ : _root_.LO.FirstOrder.ArithmeticSemiformula ℕ 0))
       ↔ ∃ ψ : _root_.LO.FirstOrder.ArithmeticSemiformula ℕ 1, Hierarchy 𝚺 1 ψ ∧ φ = (succInd ψ).univCl' := by
-  simp only [InductionScheme, Set.mem_setOf_eq]
+  simp only [InductionScheme, Set.mem_ofPred_eq]
   constructor
   · rintro ⟨σ, ⟨ψ, hψ, rfl⟩, rfl⟩
     exact ⟨ψ, hψ, by simp [Semiformula.coe_univCl_eq_univCl']⟩
@@ -1379,7 +1379,7 @@ noncomputable instance InductionScheme.delta1_sigma1 :
       simp
     rw [h]; exact chSigma1_mem_iff φ
   isDelta1 := HierarchySymbol.Semiformula.ProvablyProperOn.ofProperOn.{0} _ fun V _ _ ↦ by
-    haveI := InductionSigma1R.defined (V := V); simp
+    have := InductionSigma1R.defined (V := V); simp
 
 /-! ## B2 / B3 — assemble the headline instances -/
 

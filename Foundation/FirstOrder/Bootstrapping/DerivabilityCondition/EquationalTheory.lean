@@ -11,7 +11,7 @@ public import Foundation.FirstOrder.Bootstrapping.DerivabilityCondition.D1
 
 namespace LO.FirstOrder.Arithmetic.Bootstrapping
 
-open Classical Entailment
+open Classical _root_.LO.FirstOrder.Entailment
 
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 
@@ -34,7 +34,7 @@ local postfix:max "⤉" => Semiformula.shift
 
 variable (T : ArithmeticTheory) [Theory.Δ₁ T] [𝗘𝗤 _ ⪯ T]
 
-open Entailment Entailment.FiniteContext Semiformula
+open _root_.LO.FirstOrder.Entailment Entailment.FiniteContext _root_.LO.FirstOrder.Arithmetic.Bootstrapping.Semiformula
 
 @[simp] lemma eq_refl (t : Term V ℒₒᵣ) : T.internalize V ⊢ t ≐ t := by
   have : T ⊢ “∀ x, x = x” := complete.{0} T _ fun (M : Type) _ _ ↦ by simp [models_iff]

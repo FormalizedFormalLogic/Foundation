@@ -144,7 +144,7 @@ theorem sigma_one_completeness {σ : ArithmeticSentence} (hσ : Hierarchy 𝚺 1
     ℕ↓[ℒₒᵣ] ⊧ σ → T ⊢ σ := fun H =>
   haveI : 𝗘𝗤 _ ⪯ T := Entailment.WeakerThan.trans (𝓣 := 𝗥₀) inferInstance inferInstance
   complete.{0} _ _ <| fun M _ _ ↦ by
-    haveI : M↓[ℒₒᵣ] ⊧* 𝗥₀ := ModelsTheory.of_provably_subtheory M 𝗥₀ T inferInstance
+    have : M↓[ℒₒᵣ] ⊧* 𝗥₀ := ModelsTheory.of_provably_subtheory M 𝗥₀ T inferInstance
     exact R0.model_complete hσ H
 
 open Classical in

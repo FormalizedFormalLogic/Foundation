@@ -266,7 +266,7 @@ def ofLE {Λ₁ Λ₂ : Hilbertᵢ L} (h : Λ₁ ≤ Λ₂) : Λ₁ ⊢! φ → 
 
 lemma of_le {Λ₁ Λ₂ : Hilbertᵢ L} (h : Λ₁ ≤ Λ₂) : Λ₁ ⊢ φ → Λ₂ ⊢ φ := fun b ↦ ⟨ofLE h b.get⟩
 
-open Entailment
+open _root_.LO.FirstOrder.Entailment
 
 end HilbertProofᵢ
 
