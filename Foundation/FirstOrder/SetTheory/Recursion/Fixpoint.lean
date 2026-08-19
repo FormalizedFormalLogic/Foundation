@@ -9,9 +9,9 @@ public import Foundation.FirstOrder.SetTheory.Recursion.Blueprint
 
 -/
 
-namespace LO.FirstOrder.Arithmetic
+namespace LO.FirstOrder.SetTheory
 
-variable {V : Type*} [SetStructure V] [Nonempty V] [V↓[ℒₛₑₜ] ⊧* 𝗭]
+variable {V : Type*} [SetStructure V] [Nonempty V] [V↓[ℒₛₑₜ] ⊧* 𝗭𝗙]
 
 namespace Fixpoint
 
@@ -31,8 +31,8 @@ variable {k} (φ : Blueprint k)
 
 instance : Coe (Blueprint k) (Semisentence (k + 2)) := ⟨Blueprint.core⟩
 
-def succDef : Semisentence (k + 3) := .mkSigma
-  “u ih s. ∀ x < u + (s + 1), (x ∈ u → x ≤ s ∧ !φ.core.sigma x ih ⋯) ∧ (x ≤ s ∧ !φ.core.pi x ih ⋯ → x ∈ u)”
+def succDef : Semisentence (k + 3) :=
+  “u ih s. ∀ x < u + (s + 1), (x ∈ u → x ≤ s ∧ !φ.core x ih ⋯) ∧ (x ≤ s ∧ !φ.core x ih ⋯ → x ∈ u)”
 
 def prBlueprint : PR.Blueprint k where
   zero := “x. x = 0”

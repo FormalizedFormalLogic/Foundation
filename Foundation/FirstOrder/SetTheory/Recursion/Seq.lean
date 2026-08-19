@@ -206,14 +206,14 @@ instance seqCons.definable : ℒₛₑₜ-function₂ (seqCons : V → V → V) 
 
 end
 
-lemma Seq.restrict {s : V} (h : Seq s) {α : V} [hα : IsOrdinal α] (hsubseteq : α ⊆ lh s) : Seq (s ↾ α) :=
+@[simp] lemma Seq.restrict {s : V} (h : Seq s) {α : V} [hα : IsOrdinal α] (hsubseteq : α ⊆ lh s) : Seq (s ↾ α) :=
   ⟨h.IsFunction.restrict s α, α, by simp [h.domain_eq, hsubseteq, hα]⟩
 
-lemma Seq.restrict_lh {s : V} (h : Seq s) {α : V} [hα : IsOrdinal α] (hsubseteq : α ⊆ lh s) : lh (s ↾ α) = α := by
+@[simp] lemma Seq.lh_restrict {s : V} (h : Seq s) {α : V} [hα : IsOrdinal α] (hsubseteq : α ⊆ lh s) : lh (s ↾ α) = α := by
   simp only [domain_restrict_eq, lh_eq_of (Seq.restrict h hsubseteq)]
   exact inter_eq_right_of_subset (h.lh_eq_domain_of ▸ hsubseteq)
 
-lemma domain_setdiff_of_Seq_of_mem {x y s : V} (hs : Seq s) (hxy : ⟨x, y⟩ₖ ∈ s) :
+@[simp] lemma domain_setdiff_of_Seq_of_mem {x y s : V} (hs : Seq s) (hxy : ⟨x, y⟩ₖ ∈ s) :
     domain (s \ {⟨x, y⟩ₖ}) = (domain s) \ {x} := by
   ext z
   simp only [mem_sdiff_iff, mem_singleton_iff, mem_domain_iff]

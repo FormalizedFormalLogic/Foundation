@@ -195,33 +195,34 @@ lemma IsAttempt.one : c.IsAttempt v 1 {⟨∅, c.core v ∅⟩ₖ} :=
     by ext z; simp [mem_domain_iff, one_def, zero_def],
     by simp [one_def, zero_def]⟩
 
-lemma IsAttempt.successor {f α y : V} (hf : c.IsAttempt v (SetTheory.succ α) f) (hα : SetTheory.succ α = lh f) (hy : ⟨α, y⟩ₖ ∈ f) :
-    c.IsAttempt v (SetTheory.succ (SetTheory.succ  α)) (f ⁀' c.core v y) :=
+lemma IsAttempt.successor {f α y : V} (hf : c.IsAttempt v (SetTheory.succ α) f) (hy : ⟨α, y⟩ₖ ∈ f) :
+    c.IsAttempt v (SetTheory.succ (SetTheory.succ α)) (f ⁀' c.core v f) :=
   ⟨ IsOrdinal.succ (h := hf.1), (hf.seq.seqCons _).1, by simp [seqCons, hf.2.2.1, hf.seq.lh_eq_domain_of, SetTheory.succ], by
     intro β hβ w
-    constructor <;> intro h
-    · have hβwf : ⟨β, w⟩ₖ ∈ f := by
-        rcases show β = lh f ∧ w = c.core v y ∨ ⟨β, w⟩ₖ ∈ f by
-          simpa [kpair_mem_seqCons_iff] using h with (⟨rfl, rfl⟩ | h)
-        · exact False.elim (mem_irrefl (lh f) (hα ▸ hβ))
-        · assumption
-      have : β ⊆ α := by simpa [←hα, mem_succ_iff, subset_of_eq] using hβ
-    ·
-      sorry
-
-    -- simp only [hf.seq.lh_seqCons, add_tsub_cancel_right]
-    -- intro β hβ w hiw
-    -- have hβwf : ⟨β, w⟩ₖ ∈ f := by
-    --   rcases show β = lh f ∧ w = c.succ v l z ∨ ⟨i, w⟩ₖ ∈ s by
-    --     simpa [mem_seqCons_iff] using hiw with (⟨rfl, rfl⟩ | h)
-    --   · simp at hi
-    --   · assumption
-    -- have : i ≤ α := by simpa [←hl, lt_succ_iff_le] using hi
-    -- rcases this with (rfl | hil)
-    -- · have : w = z := Hf.seq.isMapping.uniq hiws hz
-    --   simp [this, hl]
-    -- · simp only [mem_seqCons_iff]; right
-    --   exact Hf.succ i (by simp [←hl, hil]) w hiws
+    have := hf.1
+    have : IsOrdinal β := IsOrdinal.of_mem (by aesop)
+    have hβ : β ⊆ SetTheory.succ α := IsOrdinal.subset_iff.mpr (mem_succ_iff.mp hβ)
+    have hβdomain : β ⊆ domain f := hf.2.2.1 ▸ hβ
+    -- have hrestrictβ : (f ⁀' c.core v y) ↾ β = f ↾ β :=
+    --     restrict_insert_kpair_eq_restrict_of_not_mem (f := f) (x := lh f) (y := c.core v y) (A := β)
+    --       fun h₂ ↦ mem_irrefl (lh f) (hf.seq.domain_eq ▸ hβdomain (lh f) h₂)
+    have hrestrictβ {z : V} : (f ⁀' z) ↾ β = f ↾ β :=
+        restrict_insert_kpair_eq_restrict_of_not_mem (f := f) (x := lh f) (y := z) (A := β)
+          fun h₂ ↦ mem_irrefl (lh f) (hf.seq.domain_eq ▸ hβdomain (lh f) h₂)
+    have hyeq := (hf.2.2.2 α (mem_succ_self α) y).mp hy
+    rw [hrestrictβ, hyeq] at *
+    have hseq := hf.seq.seqCons (c.core v f)
+    have hrestrictlh := hf.2.1.restrict_eq_self f (lh f) (hf.seq.domain_eq ▸ subset_refl (domain f))
+    rcases show β = SetTheory.succ α ∨ β ∈ SetTheory.succ α by
+        exact IsOrdinal.subset_iff.mp hβ
+        with (hβ | hβ)
+    · have hβeq : β = lh f := hf.seq.lh_eq_domain_of ▸ hf.2.2.1 ▸ hβ
+      rw [hβeq, lh_mem_seqCons_iff hf.seq, hrestrictlh]
+    · have hβneq : β ≠ lh f := fun h ↦ mem_irrefl β ((h ▸ hf.seq.domain_eq ▸ hf.2.2.1) ▸ hβ)
+      rw [kpair_mem_seqCons_iff]
+      constructor <;> intro h
+      · exact Or.elim h (by aesop) fun h ↦ (hf.2.2.2 β hβ w).mp h
+      · exact Or.inr ((hf.2.2.2 β hβ w).mpr h)
   ⟩
 
 variable (c v)
@@ -235,45 +236,47 @@ lemma IsAttempt.exists (α : V) [IsOrdinal α] : ∃ f, c.IsAttempt v (SetTheory
     let φ : SetTheorySemiformula V 2 := Rewriting.subst p.graph.emb
         fun i ↦ (if hi : i.val < 2 then #(i.castLT hi) else &(v (i.subNat 2 (by omega))) : SetTheorySemiterm V 2)
     use φ
-    sorry
+    intro v
+    simpa [φ, c.core_defined.iff] using Iff.intro (fun h ↦ by simpa) (fun h ↦ by simpa)
   obtain ⟨f, hf⟩ := SetTheory.Replacement.attempt_function_exists (c.core v) hdefinable (IsOrdinal.toOrdinal (SetTheory.succ αo))
   refine ⟨f, ?_, ?_⟩
   · exact hf
   · simpa using (Construction.IsAttempt.seq hf).domain_eq ▸ hf.2.2.1.symm
 
-lemma attempt_result_existsUnique (α : V) [IsOrdinal α] : ∃! y, ∃ f, c.IsAttempt v (SetTheory.succ α) f ∧ SetTheory.succ α = lh f ∧ ⟨α, y⟩ₖ ∈ f := by
+lemma attempt_result_existsUnique (α : V) [IsOrdinal α] : ∃! y, ∃ f, c.IsAttempt v (SetTheory.succ α) f ∧ ⟨α, y⟩ₖ ∈ f := by
   rcases IsAttempt.exists c v α with ⟨f, hf, h⟩
   have : ∃ z, ⟨α, z⟩ₖ ∈ f := hf.seq.exists (show α ∈ lh f from by simp [←h])
   rcases this with ⟨z, hz⟩
-  exact ExistsUnique.intro z ⟨f, hf, h, hz⟩ (by
-    rintro z' ⟨f', hf', h', hz'⟩
+  exact ExistsUnique.intro z ⟨f, hf, hz⟩ (by
+    rintro z' ⟨f', hf', hz'⟩
     exact Eq.symm <| hf.unique hf' (by aesop) (mem_succ_self α) hz hz')
 
 noncomputable def result (α : V) [IsOrdinal α] : V := Classical.choose! (c.attempt_result_existsUnique v α)
 
-lemma result_spec (α : V) [IsOrdinal α] : ∃ f, c.IsAttempt v (SetTheory.succ α) f ∧ SetTheory.succ α = lh f ∧ ⟨α, c.result v α⟩ₖ ∈ f :=
+lemma result_spec (α : V) [IsOrdinal α] : ∃ f, c.IsAttempt v (SetTheory.succ α) f ∧ ⟨α, c.result v α⟩ₖ ∈ f :=
   Classical.choose!_spec (c.attempt_result_existsUnique v α)
 
 @[simp] theorem result_empty : c.result v ∅ = c.core v ∅ := by
-  rcases c.result_spec v ∅ with ⟨f, hf, _, hempty⟩
+  rcases c.result_spec v ∅ with ⟨f, hf, hempty⟩
   exact hf.seq.1.unique hempty (hf.empty (mem_succ_self ∅))
 
-@[simp] theorem result_succ (α : V) [IsOrdinal α] : c.result v (SetTheory.succ α) = c.succ v α (c.result v α) := by
-  rcases c.result_spec v α with ⟨f, Hf, hk, h⟩
-  have : IsAttempt c v (f ⁀' c.succ v α (result c v u) ) := Hf.successor hk h
+@[simp] theorem result_succ (α : V) [IsOrdinal α] : c.result v (SetTheory.succ α) = c.core v (c.result v α) := by
+  rcases c.result_spec v α with ⟨f, hf, h⟩
+  have := hf.successor h
   exact Eq.symm
-    <| Classical.choose_uniq (c.attempt_result_existsUnique v (u + 1))
-    ⟨_, this, by simp [Hf.seq, hk], by simp [hk]⟩
+    <| Classical.choose_uniq (c.attempt_result_existsUnique v (SetTheory.succ α))
+    ⟨_, this, by simp [hf.2.2.1 ▸ hf.seq.domain_eq]⟩
 
 lemma result_graph (z α : V) [IsOrdinal α]: z = c.result v α ↔ ∃ f, c.IsAttempt v (SetTheory.succ α) f ∧ ⟨α, z⟩ₖ ∈ f :=
   ⟨by rintro rfl
-      rcases c.result_spec v α with ⟨f, Hf, _, h⟩
-      exact ⟨f, Hf, h⟩,
-   by rintro ⟨f, Hf, h⟩
-      rcases c.result_spec v α with ⟨f', Hf', hu, h'⟩
-      exact Eq.symm <| Hf'.unique Hf
-        (by simpa [←hu, succ_le_iff_lt] using Hf.seq.lt_lh_iff.mpr (mem_domain_of_pair_mem h))
-        (by simp [←hu]) h' h⟩
+      rcases c.result_spec v α with ⟨f, hf, h⟩
+      exact ⟨f, hf, h⟩,
+   by rintro ⟨f, hf, h⟩
+      rcases c.result_spec v α with ⟨f', hf', h'⟩
+      have hα := hf.2.2.1 ▸ hf.seq.domain_eq
+      exact Eq.symm <| hf'.unique hf
+        (subset_refl (SetTheory.succ α))
+        (mem_succ_self α) h' h⟩
 
 set_option linter.flexible false in
 lemma result_defined : DefinedFunction (fun v ↦ c.result (v ·.succ) (v 0) : (Fin (k + 1) → V) → V) p.result.dfn := .mk fun v ↦ by
@@ -286,7 +289,7 @@ lemma result_defined : DefinedFunction (fun v ↦ c.result (v ·.succ) (v 0) : (
 --   c.result_defined.graph_delta
 
 @[simp] lemma result_defined_iff (v : Fin (k + 2) → V) :
-    p.resultDef.val.Evalb v ↔ v 0 = c.result (v ·.succ.succ) (v 1) := c.result_defined.iff
+    p.result.dfn.Evalb v ↔ v 0 = c.result (v ·.succ.succ) (v 1) := c.result_defined.iff
 
 instance result_definable : DefinableFunction (fun v ↦ c.result (v ·.succ) (v 0) : (Fin (k + 1) → V) → V) :=
   c.result_defined.to_definable
