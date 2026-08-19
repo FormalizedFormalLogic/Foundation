@@ -193,15 +193,10 @@ lemma funk_mk {k} (f : L.Func k) (v : Fin k → M) : Structure.func (M := QuotEq
 lemma rel_mk {k} (r : L.Rel k) (v : Fin k → M) : Structure.rel (M := QuotEq L M) r (⟦v ·⟧) ↔ Structure.rel r v :=
   of_eq <| Quotient.liftVec_mk (s := eqvSetoid L M) _ _ _
 
-/-- Variant of `funk_mk` for an argument vector that is only pointwise (rather than
-literally `⟦v ·⟧`-shaped) equal to the class of `v`, useful for discharging induction
-goals produced by an induction hypothesis. -/
 lemma funk_mk_of_eq {k} (f : L.Func k) {w : Fin k → QuotEq L M} {v : Fin k → M}
     (h : ∀ i, w i = ⟦v i⟧) : Structure.func (M := QuotEq L M) f w = ⟦Structure.func f v⟧ :=
   funext h ▸ funk_mk f v
 
-/-- Variant of `rel_mk` for an argument vector that is only pointwise equal to the class
-of `v`; see `funk_mk_of_eq`. -/
 lemma rel_mk_of_eq {k} (r : L.Rel k) {w : Fin k → QuotEq L M} {v : Fin k → M}
     (h : ∀ i, w i = ⟦v i⟧) : Structure.rel (M := QuotEq L M) r w ↔ Structure.rel r v :=
   funext h ▸ rel_mk r v

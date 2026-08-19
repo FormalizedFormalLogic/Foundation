@@ -114,10 +114,8 @@ variable {L₁ L₂ M}
 @[simp] lemma rel_sigma_inr {k} (r : L₂.Rel k) (v : Fin k → M) :
     (add L₁ L₂ M).rel (Sum.inr r) v ↔ rel r v := iff_of_eq rfl
 
-/-- Restricting the `add`-structure along `Language.Hom.add₁` gives back `str₁`. -/
 lemma lMap_add₁ : (add L₁ L₂ M).lMap (Language.Hom.add₁ L₁ L₂) = str₁ := rfl
 
-/-- Restricting the `add`-structure along `Language.Hom.add₂` gives back `str₂`. -/
 lemma lMap_add₂ : (add L₁ L₂ M).lMap (Language.Hom.add₂ L₁ L₂) = str₂ := rfl
 
 @[simp] lemma val_lMap_add₁ {n} (t : Semiterm L₁ μ n) (e : Fin n → M) (f : μ → M) :
@@ -152,7 +150,6 @@ instance sigma : Structure (Language.sigma L) M where
 
 @[simp] lemma rel_sigma {k} (r : (L i).Rel k) (v : Fin k → M) : (sigma L M).rel ⟨i, r⟩ v ↔ rel r v := iff_of_eq rfl
 
-/-- Restricting the `sigma`-structure along `Language.Hom.sigma` gives back `str i`. -/
 lemma lMap_sigma : (sigma L M).lMap (Language.Hom.sigma L i) = str i := rfl
 
 @[simp] lemma val_lMap_sigma {n} (t : Semiterm (L i) μ n) (e : Fin n → M) (f : μ → M) :
