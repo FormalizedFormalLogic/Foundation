@@ -152,9 +152,11 @@ lemma bind (f : List.Vector ℕ n → ℕ →. ℕ) (hf : @ArithPart₁ (n + 1) 
       have : List.Vector.mOfFn (fun i => (g :> fun j v => Part.some $ v.get j) i v) = pure (List.Vector.ofFn (x :> fun j => v.get j)) := by
         rw [←List.Vector.mOfFn_pure]; apply congr_arg
         funext i; cases i using Fin.cases
-        -- `simp [hgv]` here triggers a Lean 4.33 simproc panic (`Lean.Expr.appArg!`,
-        -- deterministic but non-fatal); this `simp only` + `exact` avoids the unrestricted
-        -- simp set that pulls the offending simproc in. Safe to revert once fixed upstream.
+        -- `simp [hgv]` here triggers a simproc panic (`Lean.Expr.appArg!`, reached via
+        -- `Simp.SimprocEntry.try`): deterministic, but non-fatal, so the build still
+        -- succeeds. This `simp only` + `exact` avoids the unrestricted simp set that pulls
+        -- the offending simproc in. Still reproduces verbatim on v4.34.0-rc1, so keep this
+        -- until an upstream fix actually lands.
         · simp only [Matrix.cons_val_zero]; exact hgv.trans (Part.pure_eq_some x).symm
         · rfl
       simp only [this, succ_eq_add_one, pure_eq_some, bind_some, tail_ofFn, Matrix.cons_val_succ,
