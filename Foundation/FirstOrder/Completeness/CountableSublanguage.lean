@@ -69,11 +69,7 @@ def toSublanguage (pf : ∀ k, L.Func k → Prop) (pr : ∀ k, L.Rel k → Prop)
   induction t with
   | bvar x => rfl
   | fvar x => rfl
-  | func f v ih =>
-    show func f (fun i ↦ lMap L.unsub (toSublanguage pf pr (v i) _)) = func f v
-    congr 1
-    funext i
-    exact ih i _
+  | func f v ih => exact congrArg (Semiterm.func f) (funext fun i ↦ ih i _)
 
 end Semiterm
 
@@ -136,26 +132,12 @@ def toSublanguage (pf : ∀ k, L.Func k → Prop) (pr : ∀ k, L.Rel k → Prop)
   induction φ using rec' with
   | hverum => rfl
   | hfalsum => rfl
-  | hrel r v =>
-    show rel r (fun i ↦ Semiterm.lMap L.unsub (Semiterm.toSublanguage pf pr (v i) _)) = rel r v
-    congr 1
-    funext i
-    exact Semiterm.lMap_toSublanguage _ _ _ _
-  | hnrel r v =>
-    show nrel r (fun i ↦ Semiterm.lMap L.unsub (Semiterm.toSublanguage pf pr (v i) _)) = nrel r v
-    congr 1
-    funext i
-    exact Semiterm.lMap_toSublanguage _ _ _ _
+  | hrel r v => exact congrArg (Semiformula.rel r) (funext fun i ↦ Semiterm.lMap_toSublanguage _ _ _ _)
+  | hnrel r v => exact congrArg (Semiformula.nrel r) (funext fun i ↦ Semiterm.lMap_toSublanguage _ _ _ _)
   | hand φ ψ ihφ ihψ => simp [*, toSublanguage]
   | hor φ ψ ihφ ihψ => simp [*, toSublanguage]
-  | hall φ ih =>
-    show ∀¹ lMap L.unsub (toSublanguage pf pr φ hf hr) = ∀¹ φ
-    congr 1
-    exact ih hf hr
-  | hexs φ ih =>
-    show ∃¹ lMap L.unsub (toSublanguage pf pr φ hf hr) = ∃¹ φ
-    congr 1
-    exact ih hf hr
+  | hall φ ih => exact congrArg Semiformula.all (ih hf hr)
+  | hexs φ ih => exact congrArg Semiformula.exs (ih hf hr)
 
 variable (φ : Semiformula L ξ n)
 
