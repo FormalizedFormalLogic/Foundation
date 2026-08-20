@@ -10,6 +10,8 @@ public import Foundation.FirstOrder.SetTheory.Ordinal
 
 This implements sequences for set theory. Here a sequence is a function whose domain is an ordinal.
 
+Compare to `Foundation.FirstOrder.Arithmetic.HFS.Seq`.
+
 -/
 
 namespace LO.FirstOrder.SetTheory

@@ -106,15 +106,12 @@ variable [V↓[ℒₛₑₜ] ⊧* 𝗭]
 This lemma is originally by tosiaki.
 -/
 lemma attemptOrEmpty_existsUnique (F : V → V) (α : V) : ∃! y,
-    (IsAttempt.Exists F α ∧ IsAttempt F α y) ∨
-    (¬IsAttempt.Exists F α ∧ y = ∅) := by
-  by_cases hexists : IsAttempt.Exists F α
+    (IsAttempt.Exists F α → IsAttempt F α y) ∧
+    (¬IsAttempt.Exists F α → y = ∅) := by
+  by_cases hexists : IsAttempt.Exists F α <;> simp only [hexists, not_false_eq_true, true_implies, false_implies, true_and]
   · obtain ⟨f, hf, huniq⟩ := IsAttempt.existsUnique_of_exists F α hexists
-    refine ⟨f, Or.inl ⟨hexists, hf⟩, ?_⟩
-    intro y hy
-    simp only [hexists, true_and, not_true_eq_false, false_and, or_false] at hy
-    exact huniq y hy
-  · refine existsUnique_of_exists_of_unique ⟨∅, Or.inr ⟨hexists, rfl⟩⟩ (by aesop)
+    exact ⟨f, by simpa using hf, fun y hy ↦ by aesop⟩
+  · exact existsUnique_of_exists_of_unique ⟨∅, rfl⟩ (by aesop)
 
 /--
 An attempt of length `α`, or `∅` if one doesn't exist.
