@@ -34,11 +34,11 @@ Any two attempt functions restrict to the same function.
 
 Also see lemma 3.7 in chapter 2 of Frank Drake's *Set Theory: An Introduction to Large Cardinals* (Studies in Logic and the Foundations of Mathematics vol. 76, 1974).
 -/
-lemma isAttempt_coherent (F : V → V) {α β : Ordinal V} {f g : V} [IsFunction f] [IsFunction g]
+lemma isAttempt_coherent {F : V → V} {α β : Ordinal V} {f g : V}
     (hf : IsAttempt F α f) (hg : IsAttempt F β g) :
     ∀ γ : Ordinal V, γ.val ⊆ α.val ∧ γ.val ⊆ β.val → f ↾ γ.val = g ↾ γ.val := by
-  rcases hf with ⟨_, _, _, testf⟩
-  rcases hg with ⟨_, _, _, testg⟩
+  rcases hf with ⟨_, _, _, _⟩
+  rcases hg with ⟨_, _, _, _⟩
   refine transfinite_induction (P := fun x ↦ x ⊆ α.val ∧ x ⊆ β.val → f ↾ x = g ↾ x) (by definability) ?_
   rintro γ ihγ ⟨hγα, hγβ⟩
   ext p
@@ -56,25 +56,29 @@ lemma isAttempt_coherent (F : V → V) {α β : Ordinal V} {f g : V} [IsFunction
 /--
 An attempt function of length `α`, if existing, is unique.
 -/
-lemma isAttempt_unique {F : V → V} {α : Ordinal V} {f g : V} [IsFunction f] [IsFunction g]
+lemma isAttempt_unique {F : V → V} {α : Ordinal V} {f g : V}
     (hf : IsAttempt F α f) (hg : IsAttempt F α g) :
     f = g := by
+  have := hf.2.1
+  have := hg.2.1
   have hfα : f ↾ α.val = f := IsFunction.restrict_eq_self f α.val (subset_of_eq hf.2.2.1)
   have hgα : g ↾ α.val = g := IsFunction.restrict_eq_self g α.val (subset_of_eq hg.2.2.1)
-  simpa [hfα, hgα] using isAttempt_coherent F hf hg α ⟨subset_refl α.val, subset_refl α.val⟩
+  simpa [hfα, hgα] using isAttempt_coherent hf hg α ⟨subset_refl α.val, subset_refl α.val⟩
 
 /--
 If `β ≤ α`, then an attempt function on `α` restricts to the attempt function on `β`.
 -/
 lemma isAttempt_restrict_eq_of_le
     (F : V → V)
-    {α β : Ordinal V} {f g : V} [IsFunction f] [IsFunction g]
+    {α β : Ordinal V} {f g : V}
     (hβα : β ≤ α)
     (hf : IsAttempt F α f)
     (hg : IsAttempt F β g) :
     f ↾ β.val = g := by
+  have := hf.2.1
+  have := hg.2.1
   have hsubset : domain g ⊆ β.val := subset_of_eq hg.2.2.1
-  exact isAttempt_coherent F hf hg β ⟨hβα, subset_refl β.val⟩ ▸ IsFunction.restrict_eq_self g β.val hsubset
+  exact isAttempt_coherent hf hg β ⟨hβα, subset_refl β.val⟩ ▸ IsFunction.restrict_eq_self g β.val hsubset
 
 /-! #### Existence and choices of attempt functions -/
 
@@ -102,15 +106,12 @@ variable [V↓[ℒₛₑₜ] ⊧* 𝗭]
 This lemma is originally by tosiaki.
 -/
 lemma attemptOrEmpty_existsUnique (F : V → V) (α : V) : ∃! y,
-    (IsAttempt.Exists F α ∧ IsAttempt F α y) ∨
-    (¬IsAttempt.Exists F α ∧ y = ∅) := by
-  by_cases hexists : IsAttempt.Exists F α
+    (IsAttempt.Exists F α → IsAttempt F α y) ∧
+    (¬IsAttempt.Exists F α → y = ∅) := by
+  by_cases hexists : IsAttempt.Exists F α <;> simp only [hexists, not_false_eq_true, true_implies, false_implies, true_and]
   · obtain ⟨f, hf, huniq⟩ := IsAttempt.existsUnique_of_exists F α hexists
-    refine ⟨f, Or.inl ⟨hexists, hf⟩, ?_⟩
-    intro y hy
-    simp only [hexists, true_and, not_true_eq_false, false_and, or_false] at hy
-    exact huniq y hy
-  · refine existsUnique_of_exists_of_unique ⟨∅, Or.inr ⟨hexists, rfl⟩⟩ (by aesop)
+    exact ⟨f, by simpa using hf, fun y hy ↦ by aesop⟩
+  · exact existsUnique_of_exists_of_unique ⟨∅, rfl⟩ (by aesop)
 
 /--
 An attempt of length `α`, or `∅` if one doesn't exist.
