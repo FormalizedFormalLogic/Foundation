@@ -69,6 +69,14 @@ lemma lh_prop_of_not_seq {s : V} (h : ¬Seq s) : lh s = 0 := (lh_prop s).2 h
 
 lemma Seq.domain_eq {s : V} (h : Seq s) : domain s = lh s := (lh_prop s).1 h
 
+lemma isOrdinal_lh {s : V} (hs : Seq s) : IsOrdinal (lh s) := exists_eq_left'.mp (hs.domain_eq ▸ hs.2)
+
+lemma isOrdinal_domain {s : V} (hs : Seq s) : IsOrdinal (domain s) := exists_eq_left'.mp hs.2
+
+lemma Seq.IsOrdinal_of_mem_lh {s α : V} (hs : Seq s) (hα : α ∈ lh s) : IsOrdinal α := IsOrdinal.of_mem (h := isOrdinal_lh hs) hα
+
+lemma Seq.IsOrdinal_of_mem_domain {s α : V} (hs : Seq s) (hα : α ∈ domain s) : IsOrdinal α := IsOrdinal.of_mem (h := isOrdinal_domain hs) hα
+
 def _root_.LO.FirstOrder.SetTheory.lh.dfn : SetTheorySemisentence 2 :=
   f“l s. (!seq.dfn s → l = !domain.dfn s) ∧ (¬!seq.dfn s → !isEmpty l)”
 
@@ -399,6 +407,9 @@ def memRel : SetTheorySemisentence 3 :=
 /-- The relation `⟨x, y⟩ₖ ∈ R` as an operator. -/
 def memRelOpr : Semiformula.Operator ℒₛₑₜ 3 := ⟨memRel⟩
 
+@[simp] lemma memRelOpr_def {v : Fin 3 → V} : memRelOpr.val v ↔ ⟨v 1, v 2⟩ₖ ∈ v 0 := by
+  simp [memRelOpr, Semiformula.Operator.val, memRel, Semiformula.Operator.mem_def]
+
 open Lean PrettyPrinter Delaborator
 
 /-- `x ~[f] y` states that `⟨x, y⟩ₖ` is in `f` -/
@@ -408,9 +419,6 @@ syntax:45 first_order_term:45 " ≁[" first_order_term "]" first_order_term:0 : 
 macro_rules
   | `(⤫formula(lit)[ $binders* | $fbinders* | $t₁:first_order_term ∼[ $u:first_order_term ] $t₂:first_order_term]) =>
     `(memRelOpr.operator ![⤫term(lit)[$binders* | $fbinders* | $u], ⤫term(lit)[$binders* | $fbinders* | $t₁], ⤫term(lit)[$binders* | $fbinders* | $t₂]])
-  /- TODO: Add support for `∅ ∼[u] t` and `t ∼[u] ∅`. -/
-  -- | `(⤫formula(lit)[ $binders* | $fbinders* | ∅ ∼[ $u:first_order_term ] $t:first_order_term]) => -- The problem is with this line
-  --   `(⤫formula(lit)[ $binders* | $fbinders* | ∃¹ ((∀¹[#0 ∈ #1] ⊥) ∧ (#0 ∼[$u] $t₂))])
   | `(⤫formula(lit)[ $binders* | $fbinders* | $t₁:first_order_term ≁[ $u:first_order_term ] $t₂:first_order_term]) =>
     `(∼memRelOpr.operator ![⤫term(lit)[$binders* | $fbinders* | $u], ⤫term(lit)[$binders* | $fbinders* | $t₁], ⤫term(lit)[$binders* | $fbinders* | $t₂]])
   | `(⤫formula(faf)[ $binders* | $fbinders* | $t₁:first_order_term ∼[ $u:first_order_term ] $t₂:first_order_term]) => do

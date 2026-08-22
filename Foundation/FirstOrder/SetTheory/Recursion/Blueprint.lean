@@ -28,7 +28,8 @@ def Blueprint.isAttempt_dfn (p : Blueprint k) : SetTheorySemisentence (k + 2) :=
 #check fun (φ : Semisentence ℒₒᵣ 3) ↦ (⤫term(faf)[ α x y |   | !φ α x ⋯ ] : Semisentence ℒₒᵣ 3)
 
 def Blueprint.result_dfn {k} (p : Blueprint k) : SetTheorySemisentence (k + 2) :=
-  “x y. ∃ α, ∃ f, !p.isAttempt_dfn α f ⋯ ∧ x ∼[f] y”
+  “y x. (!IsOrdinal.dfn x → ∃ α, ∃ f, !p.isAttempt_dfn α f ⋯ ∧ x ∼[f] y) ∧
+    (¬!IsOrdinal.dfn x → !isEmpty y)”
 
 /- TODO: Once the Lévy hierarchy has been added, add a `Δ` version. -/
 -- def Blueprint.resultDeltaDef (p : Blueprint k) : SetTheorySemisentence (k + 2) := p.result.dfn.graphDelta
@@ -88,7 +89,7 @@ lemma eval_core_faf {x : V} : Semiformula.Evalb (x :> (c.core v x) :> v) f“x y
     aesop
 
 set_option linter.flexible false in
-lemma IsAttempt_defined : Defined (fun v ↦ c.IsAttempt (v ·.succ.succ) (v 0) (v 1) : (Fin (k + 2) → V) → Prop) p.isAttempt_dfn := .mk fun v ↦ by
+lemma isAttempt_defined : Defined (fun v ↦ c.IsAttempt (v ·.succ.succ) (v 0) (v 1) : (Fin (k + 2) → V) → Prop) p.isAttempt_dfn := .mk fun v ↦ by
   -- TODO: This may be too specific to refactor into its own lemma.
   have hsplit {p : Fin (k + 1) → Prop} : (∀ i : Fin (k + 1), p i) ↔ (p 0 ∧ ∀ i : Fin k, p i.succ) := by
     constructor <;> intro h
@@ -123,10 +124,10 @@ lemma IsAttempt_defined : Defined (fun v ↦ c.IsAttempt (v ·.succ.succ) (v 0) 
     refine (h₂ ?_).symm
     aesop
 
-#check c.IsAttempt_defined.iff
+#check c.isAttempt_defined.iff
 
 @[simp] lemma isAttempt_defined_iff (v : Fin (k + 2) → V) :
-    Semiformula.Evalb v p.isAttempt_dfn ↔ c.IsAttempt (v ·.succ.succ) (v 0) (v 1) := c.IsAttempt_defined.iff v
+    Semiformula.Evalb v p.isAttempt_dfn ↔ c.IsAttempt (v ·.succ.succ) (v 0) (v 1) := c.isAttempt_defined.iff v
 
 variable {c v}
 
@@ -150,8 +151,10 @@ lemma succ (hf : c.IsAttempt v α f) : ∀ β, SetTheory.succ β ∈ α → ∀ 
   have hβα : β ∈ α :=
     IsTransitive.transitive (SetTheory.succ β) hβsuccα β (mem_succ_self (x := β))
   have := IsOrdinal.of_mem hβα
+  have hβsubsetα : β ⊆ α := IsOrdinal.subset_iff.mpr (Or.inr hβα)
   have hy := (spec hf β hβα y).mp hyf
-  have hrestr : f ↾ (SetTheory.succ β) = (f ↾ β) ⁀' y := by
+  have hlh : lh (f ↾ β) = β := (hf.seq.lh_restrict (by simpa using (hf.seq.lh_eq_domain_of ▸ hf.2.2.1).symm ▸ hβsubsetα))
+  have hrestrict : f ↾ (SetTheory.succ β) = (f ↾ β) ⁀' y := by
     ext w
     constructor <;> intro h₂
     · rw [seqCons, SetTheory.mem_insert]
@@ -163,17 +166,15 @@ lemma succ (hf : c.IsAttempt v α f) : ∀ β, SetTheory.succ β ∈ α → ∀ 
         apply mem_succ_iff.mp at hx
         have hxβ : x = β := by aesop
         refine And.intro ?_ (hf.2.1.unique (hxβ ▸ hy ▸ h₂.1) hyf)
-        have hβsubsetα : β ⊆ α := IsOrdinal.subset_iff.mpr (Or.inr hβα)
         exact hxβ ▸ (hf.seq.lh_restrict (α := β) (hf.seq.domain_eq ▸ hf.2.2.1 ▸ hβsubsetα)).symm
     · rw [mem_restrict_iff]
       by_cases hw : w ∈ f ↾ β
       · refine And.intro (mem_restrict_iff.mp hw).1 ?_
         obtain ⟨x, hx, y, hxy⟩ := (mem_restrict_iff.mp hw).2
         exact ⟨x, mem_succ_iff.mpr (Or.inr hx), y, hxy⟩
-      · simp [seqCons] at h₂
-        aesop
-  exact (spec hf (SetTheory.succ β) hβsuccα _).mpr (by rw [hrestr.symm])
-  -- exact (spec hf (SetTheory.succ β) hβsuccα (c.core v ((f ↾ β) ⁀' y))).mpr (by rw [hrestr.symm])
+      · rcases Or.resolve_right (mem_insert.mp h₂) hw with rfl
+        refine And.intro (hlh.symm ▸ hyf) ⟨lh (f ↾ β), And.intro (hlh.symm ▸ (mem_succ_self β)) ⟨y, by simp⟩⟩
+  exact (spec hf (SetTheory.succ β) hβsuccα _).mpr (by rw [hrestrict.symm])
 
 lemma unique {f g α β : V} (h₁ : c.IsAttempt v α f) (h₂ : c.IsAttempt v β g) (h₁₂ : α ⊆ β) {γ} (hγα : γ ∈ α) {y₁ y₂} :
     ⟨γ, y₁⟩ₖ ∈ f → ⟨γ, y₂⟩ₖ ∈ g → y₁ = y₂ := by
@@ -249,6 +250,19 @@ lemma IsAttempt.exists (α : V) [IsOrdinal α] : ∃ f, c.IsAttempt v (SetTheory
   · exact hf
   · simpa using (Construction.IsAttempt.seq hf).domain_eq ▸ hf.2.2.1.symm
 
+lemma IsAttempt.existsUnique (α : V) [IsOrdinal α] : ∃! f, c.IsAttempt v (SetTheory.succ α) f ∧ SetTheory.succ α = lh f := by
+  let αo : Ordinal V := IsOrdinal.toOrdinal α
+  have := IsOrdinal.succ (α := α)
+  have hdefinable : ℒₛₑₜ-function₁ c.core v := by
+    refine ⟨?_⟩
+    let φ : SetTheorySemiformula V 2 := Rewriting.subst p.graph.emb
+        fun i ↦ (if hi : i.val < 2 then #(i.castLT hi) else &(v (i.subNat 2 (by omega))) : SetTheorySemiterm V 2)
+    use φ
+    intro v
+    simpa [φ, c.core_defined.iff] using Iff.intro (fun h ↦ by simpa) (fun h ↦ by simpa)
+  obtain ⟨f, hf⟩ := SetTheory.Replacement.attempt_function_exists (c.core v) hdefinable (IsOrdinal.toOrdinal (SetTheory.succ αo))
+  #check SetTheory.IsAttempt.existsUnique_of_exists (c.core v) (SetTheory.succ α) (IsAttempt.exists c v α)
+
 lemma attempt_result_existsUnique (α : V) : ∃! y,
     (IsOrdinal α → ∃ f, c.IsAttempt v (SetTheory.succ α) f ∧ ⟨α, y⟩ₖ ∈ f) ∧
     (¬IsOrdinal α → y = ∅) := by
@@ -269,60 +283,89 @@ lemma result_spec (α : V) :
     (¬IsOrdinal α → c.result v α = ∅) :=
   Classical.choose!_spec (c.attempt_result_existsUnique v α)
 
-lemma result_spec_of_IsOrdinal (α : V) [hα : IsOrdinal α] : ∃ f, c.IsAttempt v (SetTheory.succ α) f ∧ ⟨α, c.result v α⟩ₖ ∈ f := by
+lemma result_spec_of_isOrdinal (α : V) [hα : IsOrdinal α] : ∃ f, c.IsAttempt v (SetTheory.succ α) f ∧ ⟨α, c.result v α⟩ₖ ∈ f := by
   simpa [hα] using c.result_spec v α
 
 @[simp] theorem result_empty : c.result v ∅ = c.core v ∅ := by
-  rcases c.result_spec_of_IsOrdinal v ∅ with ⟨f, hf, hempty⟩
+  rcases c.result_spec_of_isOrdinal v ∅ with ⟨f, hf, hempty⟩
   exact hf.seq.1.unique hempty (hf.empty (mem_succ_self ∅))
 
-@[simp] theorem result_succ (α : V) [hα : IsOrdinal α] : c.result v (SetTheory.succ α) = c.core v (c.result v α) := by
-  rcases c.result_spec_of_IsOrdinal v α with ⟨f, hf, h⟩
+@[simp] theorem result_succ (α : V) [hα : IsOrdinal α] : c.result v (SetTheory.succ α) = c.core v (Classical.choose (IsAttempt.exists c v α)) := by
+  -- TODO: The theorem statement is incorrect, I don't think there's a way to state it without obtaining an attempt `f` and writing `c.core v f`.
+  rcases c.result_spec_of_isOrdinal v α with ⟨f, hf, h⟩
   have := hf.successor h
-  have htest := hf.2.2.1.symm ▸ hf.seq.domain_eq ▸ SetTheory.lh_mem_seqCons f (c.core v f)
-  #check (this.2.2.2 (SetTheory.succ α) (mem_succ_self (SetTheory.succ α)) _).mp htest
+  have hmemcons := hf.2.2.1.symm ▸ hf.seq.domain_eq ▸ SetTheory.lh_mem_seqCons f (c.core v f)
+  -- have hrestrict := (hf.2.2.2 α (mem_succ_self α) _).mp h
+  have heq : Classical.choose (IsAttempt.exists c v α) = f := by
+    #check SetTheory.IsAttempt.un
+    sorry
   exact Eq.symm
     <| Classical.choose_uniq (c.attempt_result_existsUnique v (SetTheory.succ α))
     ⟨ by
-        simp [IsOrdinal.succ]
+        simp only [IsOrdinal.succ, forall_const]
         refine ⟨f ⁀' c.core v f, ?_⟩
         refine ⟨this, ?_⟩
-        #check IsAttempt.succ
-        refine (?_ : f = c.result v α) ▸ htest
-        -- I think this is impossible, since `h` would imply `c.result v α` is in `range f`
+        aesop
         ,
       by simp [IsOrdinal.succ]
     ⟩
     -- ⟨_, this, by simp [hf.2.2.1 ▸ hf.seq.domain_eq]⟩
 
-lemma result_graph (z α : V) : z = c.result v α ↔ ∃ f, c.IsAttempt v (SetTheory.succ α) f ∧ ⟨α, z⟩ₖ ∈ f :=
+lemma result_graph (y α : V) : y = c.result v α ↔
+    (IsOrdinal α → ∃ f, c.IsAttempt v (SetTheory.succ α) f ∧ ⟨α, y⟩ₖ ∈ f) ∧
+    (¬IsOrdinal α → y = ∅) :=
   ⟨by rintro rfl
-      rcases c.result_spec v α with ⟨f, hf, h⟩
-      exact ⟨f, hf, h⟩,
-   by rintro ⟨f, hf, h⟩
-      rcases c.result_spec v α with ⟨f', hf', h'⟩
-      have hα := hf.2.2.1 ▸ hf.seq.domain_eq
-      exact Eq.symm <| hf'.unique hf
-        (subset_refl (SetTheory.succ α))
-        (mem_succ_self α) h' h⟩
+      refine And.intro (fun hα ↦ ?_) (fun hα ↦ ?_)
+      · rcases (c.result_spec v α).1 hα with ⟨f, hf, h⟩
+        exact ⟨f, hf, h⟩
+      · exact (c.result_spec v α).2 hα,
+   by
+      rintro ⟨hleft, hright⟩
+      by_cases hα : IsOrdinal α
+      · rcases (c.result_spec v α).1 hα with ⟨f', hf', h'⟩
+        rcases hleft hα with ⟨f, hf, h⟩
+        exact Eq.symm <| hf'.unique hf
+          (subset_refl (SetTheory.succ α))
+          (mem_succ_self α) h' h
+      · exact Eq.symm <| hright hα ▸ (c.result_spec v α).2 hα⟩
 
 set_option linter.flexible false in
 lemma result_defined : DefinedFunction (fun v ↦ c.result (v ·.succ) (v 0) : (Fin (k + 1) → V) → V) p.result_dfn := .mk fun v ↦ by
-  simp [Blueprint.result_dfn, result_graph]
-  apply exists_congr; intro x
-  simp [c.isAttempt_defined_iff]
+  simp [Blueprint.result_dfn, result_graph, c.isAttempt_defined_iff, -and_congr_left_iff]
+  refine and_congr ?_ ?_
+  · refine eq_iff_iff.mp ?_
+    refine implies_congr rfl ?_
+    refine eq_iff_iff.mpr ?_
+    refine Iff.intro (fun h ↦ ?_) (by aesop)
+    · rcases h with ⟨α', f', hf'⟩
+      have := hf'.1.seq.IsOrdinal_of_mem_domain (mem_domain_of_kpair_mem hf'.2)
+      have : IsOrdinal α' := hf'.1.1
+      rcases IsAttempt.exists c (v ·.succ.succ) (v 1) with ⟨f, hf⟩
+      use f
+      refine And.intro ?_ ?_
+      · exact hf.1
+      · let α'o : Ordinal V := IsOrdinal.toOrdinal α'
+        let v1o : Ordinal V := IsOrdinal.toOrdinal (v 1)
+        have hsubset : succ v1o ⊆ α'o := (IsOrdinal.subset_succ_iff (succ v1o) α'o).mp
+        have hrestrict : f = f' ↾ (SetTheory.succ v1o) := by
+          rw [← hf.1.2.1.restrict_eq_self (A := succ (v 1))]
+          rw [← (by aesop : v1o.val = v 1)] at hf
+          #check SetTheory.IsAttempt.isAttempt_coherent hf.1 hf'.1
+          sorry
+        sorry
+  · rfl
 
 /- TODO: Once the Lévy hierarchy has been added, add a `Δ` version. -/
 -- lemma result_defined_delta : DefinedFunction (fun v ↦ c.result (v ·.succ) (v 0) : (Fin (k + 1) → V) → V) p.resultDeltaDef :=
 --   c.result_defined.graph_delta
 
 @[simp] lemma result_defined_iff (v : Fin (k + 2) → V) :
-    p.result.dfn.Evalb v ↔ v 0 = c.result (v ·.succ.succ) (v 1) := c.result_defined.iff
+    p.result_dfn.Evalb v ↔ v 0 = c.result (v ·.succ.succ) (v 1) := c.result_defined.iff
 
 instance result_definable : DefinableFunction (fun v ↦ c.result (v ·.succ) (v 0) : (Fin (k + 1) → V) → V) :=
   c.result_defined.to_definable
 
-attribute [irreducible] Blueprint.result.dfn
+attribute [irreducible] Blueprint.result_dfn
 
 end Construction
 

@@ -87,42 +87,6 @@ lemma eq_empty_or_isNonempty (x : V) : x = ∅ ∨ IsNonempty x := by
 
 @[simp] lemma subset_empty_iff_eq_empty {x : V} : x ⊆ ∅ ↔ x = ∅ := by simp [mem_ext_iff, subset_def]
 
-/-! #### Macros for binder notation -/
-
-syntax "∅" : first_order_term
-
-#check ball (Semiformula.Operator.operator op(∈) ![#0, #1]) ⊥
-
-#check (Semiformula.ballMem #0 ⊥ : SetTheorySemisentence 2)
-
--- /-- Macro rules for `∅`. Since `∅` isn't a `Semiterm` in the language `ℒₛₑₜ`, I think I have to define membership this way.
--- I also can't implement `⤫term(lit)[ $binders* | $fbinders* | ∅]`, so whenever `∅` is used in a formula, I think I will have to define its behavior.
-
--- TODO: Is it bad practice to define membership this way? If so, can I define `∅` to be a 0-ary operator instead? -/
--- macro_rules
---   | `(⤫formula($_)[ $binders* | $fbinders* | $t:first_order_term = ∅]) =>
---     `(Semiformula.ballMem ⤫term(lit)[$binders* | $fbinders* | $t] ⊥)
---   | `(⤫formula($_)[ $binders* | $fbinders* | ∅ = $t:first_order_term]) =>
---     `(Semiformula.ballMem ⤫term(lit)[$binders* | $fbinders* | $t] ⊥)
---   | `(⤫formula($_)[ $_* | $_* | $_:first_order_term ∈ ∅]) =>
---     `(⊥)
---   | `(⤫formula($_)[ $binders* | $fbinders* | ∅ ∈ $t:first_order_term]) =>
---     `(Semiformula.bexsMem ⤫term(lit)[$binders* | $fbinders* | $t] (Semiformula.ballMem #0 ⊥))
-
-macro_rules
-  | `(⤫term(faf)[ $binders* | $fbinders* | ∅]) =>
-    `(⤫term(faf)[ $binders* | $fbinders* | !isEmpty])
-
-#check f“x. x = !isEmpty” -- Testing a `0`-ary function for empty set instead
-
-#check (f“x. ∅ ∈ x” : SetTheorySemisentence 1)
-
-#check (f“∃ x, x = ∅” : SetTheorySemisentence 0)
-
-example : Semiformula.Evalb ![(∅ : V)] (f“∃ x, x = ∅” : SetTheorySemisentence 1) := by
-  -- have : ∃ (x : V), ∀ y, y ∉ x := ⟨∅, fun y ↦ not_mem_empty⟩
-  simp
-
 /-! ## Axiom of pairing -/
 
 lemma pairing_exists : ∀ x y : V, ∃ z : V, ∀ w, w ∈ z ↔ w = x ∨ w = y := by
