@@ -22,7 +22,8 @@ structure Blueprint (k : ℕ) where
 -- TODO: To make this closer to `PRF.lean` from arithmetic, create a branch `recursion-fixpoint-nolength` where I don't pass the length `α` in to this definition.
 def Blueprint.isAttempt_dfn (p : Blueprint k) : SetTheorySemisentence (k + 2) :=
   f“α f.
-    !IsOrdinal.dfn α ∧ !IsFunction.dfn f ∧ !domain.dfn f = α ∧
+    :Seq f ∧ !lh.dfn f = α ∧
+    -- !IsOrdinal.dfn α ∧ !IsFunction.dfn f ∧ !domain.dfn f = α ∧
     ∀ β ∈ α, ∀ y, !kpair.dfn β y ∈ f ↔ y = !p.graph (!restrict.dfn f β) ⋯”
 
 #check fun (φ : Semisentence ℒₒᵣ 3) ↦ (⤫term(faf)[ α x y |   | !φ α x ⋯ ] : Semisentence ℒₒᵣ 3)
@@ -46,8 +47,13 @@ namespace Construction
 
 variable {k : ℕ} {p : Blueprint k} (c : Construction V p) (v : Fin k → V)
 
+/--
+`f` is an attempt of length `α` for the function `F`, meaning that the domain of `f` is `α`, and for all `β < α`, it holds that `f(β) = F (f ↾ β)`.
+The "attempt" terminology may be due to Paul Taylor.
+-/
 def IsAttempt (α f : V) : Prop :=
-  SetTheory.IsAttempt (c.core v) α f
+  Seq f ∧ lh f = α ∧
+    ∀ β ∈ α, ∀ y, ⟨β, y⟩ₖ ∈ f ↔ y = c.core v (f ↾ β)
 
 -- An example showing that `⋯` in faf notation is implemented correctly.
 set_option linter.flexible false in
@@ -99,9 +105,9 @@ lemma isAttempt_defined : Defined (fun v ↦ c.IsAttempt (v ·.succ.succ) (v 0) 
       · intro hi
         obtain ⟨j, hj⟩ := Fin.exists_succ_eq.mpr hi
         exact hj ▸ h.2 j
-  simp [IsAttempt, SetTheory.IsAttempt, Blueprint.isAttempt_dfn]
+  simp [IsAttempt, Blueprint.isAttempt_dfn]
   simp [Semiformula.eval_nestFormulaeFunc, ← Semiformula.Evalb.eq_1]
-  intro hordinal hfunction hdomain
+  intro hseq hlh
   apply forall_congr'
   intro x
   apply forall_congr'
@@ -135,25 +141,27 @@ namespace IsAttempt
 
 variable {α f : V}
 
-lemma seq (h : c.IsAttempt v α f) : Seq f := ⟨h.2.1, α, h.2.2.1, h.1⟩
+lemma isOrdinal_of_isAttempt (hf : c.IsAttempt v α f) : IsOrdinal α := hf.2.1 ▸ SetTheory.isOrdinal_lh hf.1
 
-lemma spec (h : c.IsAttempt v α f) : ∀ β ∈ α, ∀ y, ⟨β, y⟩ₖ ∈ f ↔ y = c.core v (f ↾ β) := h.2.2.2
+lemma seq (h : c.IsAttempt v α f) : Seq f := h.1
+
+lemma spec (h : c.IsAttempt v α f) : ∀ β ∈ α, ∀ y, ⟨β, y⟩ₖ ∈ f ↔ y = c.core v (f ↾ β) := h.2.2
 
 lemma empty (h : c.IsAttempt v α f) (hα : ∅ ∈ α) : ⟨∅, c.core v ∅⟩ₖ ∈ f := by
   have hrestrict {g : V} : g ↾ ∅ = ∅ := restrict_empty_eq
-  exact (h.2.2.2 ∅ hα (c.core v ∅)).mpr (by aesop)
+  exact (h.2.2 ∅ hα (c.core v ∅)).mpr (by aesop)
 
 -- lemma succ (h : c.IsAttempt v α f) : ∀ β, SetTheory.succ β ∈ α → ∀ y, ⟨β, y⟩ₖ ∈ f → ⟨SetTheory.succ β, c.core v (insert ⟨β, y⟩ₖ (f ↾ β))⟩ₖ ∈ f := by
 lemma succ (hf : c.IsAttempt v α f) : ∀ β, SetTheory.succ β ∈ α → ∀ y, ⟨β, y⟩ₖ ∈ f → ⟨SetTheory.succ β, c.core v ((f ↾ β) ⁀' y)⟩ₖ ∈ f := by
   intro β hβsuccα y hyf
-  have := hf.1
-  have := IsOrdinal.of_mem hβsuccα
+  have hα := isOrdinal_of_isAttempt hf
+  have := IsOrdinal.of_mem (h := hα) hβsuccα
   have hβα : β ∈ α :=
-    IsTransitive.transitive (SetTheory.succ β) hβsuccα β (mem_succ_self (x := β))
-  have := IsOrdinal.of_mem hβα
-  have hβsubsetα : β ⊆ α := IsOrdinal.subset_iff.mpr (Or.inr hβα)
+    IsTransitive.transitive (self := IsOrdinal.toIsTransitive (self := hα)) (SetTheory.succ β) hβsuccα β (mem_succ_self (x := β))
+  have := IsOrdinal.of_mem (h := hα) hβα
+  have hβsubsetα : β ⊆ α := (IsOrdinal.subset_iff (hβ := hα)).mpr (Or.inr hβα)
   have hy := (spec hf β hβα y).mp hyf
-  have hlh : lh (f ↾ β) = β := (hf.seq.lh_restrict (by simpa using (hf.seq.lh_eq_domain_of ▸ hf.2.2.1).symm ▸ hβsubsetα))
+  have hlh : lh (f ↾ β) = β := (hf.seq.lh_restrict (by simpa using hf.2.1.symm ▸ hβsubsetα))
   have hrestrict : f ↾ (SetTheory.succ β) = (f ↾ β) ⁀' y := by
     ext w
     constructor <;> intro h₂
@@ -165,8 +173,8 @@ lemma succ (hf : c.IsAttempt v α f) : ∀ β, SetTheory.succ β ∈ α → ∀ 
         refine Or.inl (hy ▸ kpair_iff.mpr ?_)
         apply mem_succ_iff.mp at hx
         have hxβ : x = β := by aesop
-        refine And.intro ?_ (hf.2.1.unique (hxβ ▸ hy ▸ h₂.1) hyf)
-        exact hxβ ▸ (hf.seq.lh_restrict (α := β) (hf.seq.domain_eq ▸ hf.2.2.1 ▸ hβsubsetα)).symm
+        refine And.intro ?_ (hf.1.IsFunction.unique (hxβ ▸ hy ▸ h₂.1) hyf)
+        exact hxβ ▸ (hf.seq.lh_restrict (α := β) (hf.2.1 ▸ hβsubsetα)).symm
     · rw [mem_restrict_iff]
       by_cases hw : w ∈ f ↾ β
       · refine And.intro (mem_restrict_iff.mp hw).1 ?_
@@ -176,35 +184,53 @@ lemma succ (hf : c.IsAttempt v α f) : ∀ β, SetTheory.succ β ∈ α → ∀ 
         refine And.intro (hlh.symm ▸ hyf) ⟨lh (f ↾ β), And.intro (hlh.symm ▸ (mem_succ_self β)) ⟨y, by simp⟩⟩
   exact (spec hf (SetTheory.succ β) hβsuccα _).mpr (by rw [hrestrict.symm])
 
+lemma isAttempt_coherent {α β : Ordinal V} {f g : V}
+    (hf : c.IsAttempt v α f) (hg : c.IsAttempt v β g) :
+    ∀ γ : Ordinal V, γ.val ⊆ α.val ∧ γ.val ⊆ β.val → f ↾ γ.val = g ↾ γ.val := by
+  rcases hf with ⟨_, _⟩
+  rcases hg with ⟨_, _⟩
+  refine transfinite_induction (P := fun x ↦ x ⊆ α.val ∧ x ⊆ β.val → f ↾ x = g ↾ x) (by definability) ?_
+  rintro γ ihγ ⟨hγα, hγβ⟩
+  ext p
+  simp only [mem_restrict_iff, and_congr_left_iff, forall_exists_index, and_imp]
+  intro x hxγ y rfl
+  have : IsOrdinal x := IsOrdinal.of_mem hxγ
+  let xo : Ordinal V := IsOrdinal.toOrdinal x
+  have hxα : x ∈ α.val := hγα x hxγ
+  have hxβ : x ∈ β.val := hγβ x hxγ
+  have hxoα : xo.val ⊆ α.val := α.ordinal.toIsTransitive.transitive x hxα
+  have hxoβ : xo.val ⊆ β.val := β.ordinal.toIsTransitive.transitive x hxβ
+  have : f ↾ xo = g ↾ xo := ihγ xo hxγ ⟨hxoα, hxoβ⟩
+  simp_all only [IsOrdinal.toOrdinal_val, xo]
+
 lemma unique {f g α β : V} (h₁ : c.IsAttempt v α f) (h₂ : c.IsAttempt v β g) (h₁₂ : α ⊆ β) {γ} (hγα : γ ∈ α) {y₁ y₂} :
     ⟨γ, y₁⟩ₖ ∈ f → ⟨γ, y₂⟩ₖ ∈ g → y₁ = y₂ := by
-  have : IsOrdinal α := h₁.1
-  have : IsOrdinal β := h₂.1
+  have : IsOrdinal α := isOrdinal_of_isAttempt h₁
+  have : IsOrdinal β := isOrdinal_of_isAttempt h₂
   let αo : Ordinal V := IsOrdinal.toOrdinal α
   let βo : Ordinal V := IsOrdinal.toOrdinal β
-  have := h₁.2.1
-  have := h₂.2.1
+  have hg := h₂.1.IsFunction
   have hrestrict : f ↾ α = g ↾ α := by
-    exact SetTheory.IsAttempt.isAttempt_coherent (α := αo) (β := βo) h₁ h₂ αo (by aesop)
+    exact isAttempt_coherent (α := αo) (β := βo) h₁ h₂ αo (by aesop)
   intro hy₁ hy₂
   have h := (mem_ext_iff.mp hrestrict) ⟨γ, y₁⟩ₖ
   have hy₁g : ⟨γ, y₁⟩ₖ ∈ g := by simpa [kpair_mem_restrict_iff, hy₁, hγα] using fun h₂ ↦ h.mp h₂
-  exact this.unique hy₁g hy₂
+  exact hg.unique hy₁g hy₂
 
 end IsAttempt
 
 lemma IsAttempt.zero : c.IsAttempt v 0 ∅ :=
-  ⟨by simp, by simp, by aesop, fun β hβ ↦ False.elim (not_mem_empty hβ)⟩
+  ⟨by simp, by aesop, fun β hβ ↦ False.elim (not_mem_empty hβ)⟩
 
 lemma IsAttempt.one : c.IsAttempt v 1 {⟨∅, c.core v ∅⟩ₖ} :=
-  ⟨IsOrdinal.nat one_mem_ω,
-    by simp,
-    by ext z; simp [mem_domain_iff, one_def, zero_def],
+  ⟨by simpa [seqCons] using SetTheory.singleton_seq (c.core v ∅),
+    by rw [(by simp [seqCons] : {⟨∅, c.core v ∅⟩ₖ} = !⟦c.core v ∅⟧)]; ext z; simp [Seq.lh_seqCons, mem_succ_iff, one_def, zero_def],
     by simp [one_def, zero_def]⟩
 
 lemma IsAttempt.successor {f α y : V} (hf : c.IsAttempt v (SetTheory.succ α) f) (hy : ⟨α, y⟩ₖ ∈ f) :
     c.IsAttempt v (SetTheory.succ (SetTheory.succ α)) (f ⁀' c.core v f) :=
-  ⟨ IsOrdinal.succ (h := hf.1), (hf.seq.seqCons _).1, by simp [seqCons, hf.2.2.1, hf.seq.lh_eq_domain_of, SetTheory.succ], by
+  ⟨ Seq.seqCons hf.1 _ , Seq.lh_seqCons _ (Seq.seqCons hf.1 _), by
+  -- ⟨ IsOrdinal.succ (h := hf.1), (hf.seq.seqCons _).1, by simp [seqCons, hf.2.2.1, hf.seq.lh_eq_domain_of, SetTheory.succ], by
     intro β hβ w
     have := hf.1
     have : IsOrdinal β := IsOrdinal.of_mem (by aesop)

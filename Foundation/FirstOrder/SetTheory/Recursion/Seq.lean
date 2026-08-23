@@ -25,7 +25,10 @@ A sequence is a function with an ordinal domain.
 -/
 def Seq (s : V) : Prop := IsFunction s ∧ ∃ l, domain s = l ∧ IsOrdinal l
 
-def Seq.IsFunction {s : V} (h : Seq s) : IsFunction s := h.1
+lemma Seq.seq_iff {s : V} : Seq s ↔ IsFunction s ∧ IsOrdinal (domain s) :=
+  Iff.intro (fun h ↦ And.intro h.1 (exists_eq_left'.mp h.2)) fun h ↦ ⟨h.1, by aesop⟩
+
+theorem Seq.IsFunction {s : V} (h : Seq s) : IsFunction s := h.1
 
 def _root_.LO.FirstOrder.SetTheory.seq.dfn : SetTheorySemisentence 1 :=
   f“s. !IsFunction.dfn s ∧ ∃ l, l = !domain.dfn s ∧ !IsOrdinal.dfn l”
