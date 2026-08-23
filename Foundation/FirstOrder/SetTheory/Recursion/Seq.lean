@@ -76,9 +76,9 @@ lemma isOrdinal_lh {s : V} (hs : Seq s) : IsOrdinal (lh s) := exists_eq_left'.mp
 
 lemma isOrdinal_domain {s : V} (hs : Seq s) : IsOrdinal (domain s) := exists_eq_left'.mp hs.2
 
-lemma Seq.IsOrdinal_of_mem_lh {s α : V} (hs : Seq s) (hα : α ∈ lh s) : IsOrdinal α := IsOrdinal.of_mem (h := isOrdinal_lh hs) hα
+lemma Seq.isOrdinal_of_mem_lh {s α : V} (hs : Seq s) (hα : α ∈ lh s) : IsOrdinal α := IsOrdinal.of_mem (h := isOrdinal_lh hs) hα
 
-lemma Seq.IsOrdinal_of_mem_domain {s α : V} (hs : Seq s) (hα : α ∈ domain s) : IsOrdinal α := IsOrdinal.of_mem (h := isOrdinal_domain hs) hα
+lemma Seq.isOrdinal_of_mem_domain {s α : V} (hs : Seq s) (hα : α ∈ domain s) : IsOrdinal α := IsOrdinal.of_mem (h := isOrdinal_domain hs) hα
 
 def _root_.LO.FirstOrder.SetTheory.lh.dfn : SetTheorySemisentence 2 :=
   f“l s. (!seq.dfn s → l = !domain.dfn s) ∧ (¬!seq.dfn s → !isEmpty l)”

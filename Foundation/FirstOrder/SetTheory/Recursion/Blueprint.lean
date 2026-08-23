@@ -130,8 +130,6 @@ lemma isAttempt_defined : Defined (fun v ↦ c.IsAttempt (v ·.succ.succ) (v 0) 
     refine (h₂ ?_).symm
     aesop
 
-#check c.isAttempt_defined.iff
-
 @[simp] lemma isAttempt_defined_iff (v : Fin (k + 2) → V) :
     Semiformula.Evalb v p.isAttempt_dfn ↔ c.IsAttempt (v ·.succ.succ) (v 0) (v 1) := c.isAttempt_defined.iff v
 
@@ -146,6 +144,8 @@ lemma isOrdinal_of_isAttempt (hf : c.IsAttempt v α f) : IsOrdinal α := hf.2.1 
 lemma seq (h : c.IsAttempt v α f) : Seq f := h.1
 
 lemma spec (h : c.IsAttempt v α f) : ∀ β ∈ α, ∀ y, ⟨β, y⟩ₖ ∈ f ↔ y = c.core v (f ↾ β) := h.2.2
+
+lemma domain_eq (hf : c.IsAttempt v α f) : domain f = α := hf.seq.lh_eq_domain_of ▸ hf.2.1
 
 lemma empty (h : c.IsAttempt v α f) (hα : ∅ ∈ α) : ⟨∅, c.core v ∅⟩ₖ ∈ f := by
   have hrestrict {g : V} : g ↾ ∅ = ∅ := restrict_empty_eq
@@ -217,7 +217,226 @@ lemma unique {f g α β : V} (h₁ : c.IsAttempt v α f) (h₂ : c.IsAttempt v �
   have hy₁g : ⟨γ, y₁⟩ₖ ∈ g := by simpa [kpair_mem_restrict_iff, hy₁, hγα] using fun h₂ ↦ h.mp h₂
   exact hg.unique hy₁g hy₂
 
+/--
+An attempt function of length `α`, if existing, is unique.
+-/
+lemma eq_of_isAttempt {α : Ordinal V} {f g : V}
+    (hf : c.IsAttempt v α f) (hg : c.IsAttempt v α g) :
+    f = g := by
+  have := hf.seq.IsFunction
+  have := hg.seq.IsFunction
+  have hfα : f ↾ α.val = f := IsFunction.restrict_eq_self f α.val (subset_of_eq (domain_eq hf))
+  have hgα : g ↾ α.val = g := IsFunction.restrict_eq_self g α.val (subset_of_eq (domain_eq hg))
+  simpa [hfα, hgα] using isAttempt_coherent hf hg α ⟨subset_refl α.val, subset_refl α.val⟩
+
+/--
+If `β ≤ α`, then an attempt function on `α` restricts to the attempt function on `β`.
+-/
+lemma isAttempt_restrict_eq_of_le
+    {α β : Ordinal V} {f g : V}
+    (hβα : β ≤ α)
+    (hf : c.IsAttempt v α f)
+    (hg : c.IsAttempt v β g) :
+    f ↾ β.val = g := by
+  have := hf.seq.IsFunction
+  have := hg.seq.IsFunction
+  have hsubset : domain g ⊆ β.val := subset_of_eq (domain_eq hg)
+  exact isAttempt_coherent hf hg β ⟨hβα, subset_refl β.val⟩ ▸ IsFunction.restrict_eq_self g β.val hsubset
+
+/-! #### Existence and choices of attempt functions -/
+
+/-- Existence of an attempt function of a given length. -/
+def Exists (α : V) : Prop :=
+  ∃ f : V, c.IsAttempt v α f
+
+/-- `Exists` implies `∃!`. -/
+lemma existsUnique_of_exists (α : V) (hex : Exists (c := c) (v := v) α) :
+    ∃! f : V, c.IsAttempt v α f := by
+  obtain ⟨f, hf⟩ := hex
+  have : IsFunction f := hf.seq.IsFunction
+  refine ⟨f, hf, ?_⟩
+  intro g hg
+  have : IsFunction g := hg.seq.IsFunction
+  have hα : IsOrdinal α := hf.2.1 ▸ SetTheory.isOrdinal_lh hf.seq
+  let αo : Ordinal V := IsOrdinal.toOrdinal α
+  apply (eq_of_isAttempt (α := αo) hf hg).symm
+
 end IsAttempt
+
+section Somethingidk
+
+/--
+This lemma is originally by tosiaki.
+-/
+lemma attemptOrEmpty_existsUnique (α : V) : ∃! y,
+    (Construction.IsAttempt.Exists (c := c) (v := v) α → c.IsAttempt v α y) ∧
+    (¬Construction.IsAttempt.Exists (c := c) (v := v) α → y = ∅) := by
+  by_cases hexists : Construction.IsAttempt.Exists (c := c) (v := v) α <;> simp only [hexists, not_false_eq_true, true_implies, false_implies, true_and]
+  · obtain ⟨f, hf, huniq⟩ := IsAttempt.existsUnique_of_exists α hexists
+    exact ⟨f, by simpa using hf, fun y hy ↦ by aesop⟩
+  · exact existsUnique_of_exists_of_unique ⟨∅, rfl⟩ (by aesop)
+
+/--
+An attempt of length `α`, or `∅` if one doesn't exist.
+This definition is by tosiaki.
+-/
+noncomputable def attemptOrEmpty (α : V) : V :=
+  Classical.choose! (c.attemptOrEmpty_existsUnique (v := v) α)
+
+/--
+A pair `⟨α, F f⟩ₖ` of an ordinal `α` and the value of `F` on `attemptOrEmpty F α`.
+This is a technical definition needed for the proof of the transfinite recursion theorem.
+-/
+noncomputable def pairValueAttempt (α : V) : V :=
+  ⟨α, c.core v (c.attemptOrEmpty (v := v) α)⟩ₖ
+
+lemma kpair_eq_pairValueAttempt_iff {α : V} {x y : V} :
+    ⟨x, y⟩ₖ = c.pairValueAttempt (v := v) α ↔ x = α ∧ y = c.core v (c.attemptOrEmpty (v := v) α) := by
+  simp [pairValueAttempt]
+
+lemma eq_of_kpair_eq_pairValueAttempt {α : V} {x y : V} (h : ⟨x, y⟩ₖ = c.pairValueAttempt (v := v) α) : x = α :=
+  (kpair_eq_pairValueAttempt_iff.mp h).1
+
+/-! #### Constructing attempt functions using replacement -/
+
+namespace Replacement
+
+/--
+Function that outputs an attempt of length `α`, subject to the assumption that for all `β < α`, there is an attempt of length `β`.
+This is a big function constructed using replacement.
+-/
+noncomputable def replAttemptOrEmpty : V → V :=
+  repl (c.pairValueAttempt (v := v)) (hF := by
+    have : ℒₛₑₜ-function₁ c.attemptOrEmpty (v := v) := by
+      suffices ℒₛₑₜ-relation[V] (· = c.attemptOrEmpty (v := v) ·) by exact this
+      simp only [attemptOrEmpty, Classical.choose!_eq_iff_right]
+      unfold IsAttempt.Exists
+      have : ℒₛₑₜ-relation (c.IsAttempt v) := c.isAttempt_defined.to_definable
+      sorry
+      definability
+    unfold pairValueAttempt
+    definability)
+
+@[simp] lemma mem_replAttemptOrEmpty_iff
+    (α : V) (p : V) :
+    p ∈ replAttemptOrEmpty (c := c) (v := v) α ↔ ∃ β ∈ α, p = c.pairValueAttempt (v := v) β := by
+  apply repl_spec
+
+@[simp] lemma kpair_mem_replAttemptOrEmpty_iff
+    {α : Ordinal V} {β y : V} :
+    ⟨β, y⟩ₖ ∈ replAttemptOrEmpty (c := c) (v := v) α ↔ β ∈ α.val ∧ ⟨β, y⟩ₖ = c.pairValueAttempt (v := v) β := by
+  simp only [mem_replAttemptOrEmpty_iff]
+  constructor <;> intro h
+  · obtain ⟨β, hβα, h⟩ := h
+    rw [eq_of_kpair_eq_pairValueAttempt h] at *
+    exact ⟨hβα, h⟩
+  · use β
+
+lemma domain_replAttemptOrEmpty_eq (α : Ordinal V) :
+    domain (replAttemptOrEmpty (c := c) (v := v) α) = α.val := by
+  ext z
+  simp only [mem_domain_iff, mem_replAttemptOrEmpty_iff]
+  constructor <;> intro h
+  · obtain ⟨y, β, hβα, hβ⟩ := h
+    exact eq_of_kpair_eq_pairValueAttempt hβ ▸ hβα
+  · use c.core v (attemptOrEmpty F z)
+    use z
+    simp_all only [true_and, pairValueAttempt, true_and]
+
+instance (α : Ordinal V) : IsFunction (replAttemptOrEmpty (c := c) (v := v) α) := by
+  let f := replAttemptOrEmpty (c := c) (v := v) α
+  have hdomain : domain f = α.val := domain_replAttemptOrEmpty_eq (c := c) (v := v) α
+  apply isFunction_iff.mpr
+  apply mem_function_iff.mpr
+  constructor
+  · intro p hpf
+    obtain ⟨β, _, f, rfl, _⟩ := (mem_replAttemptOrEmpty_iff (c := c) (v := v) _ _).mp hpf
+    apply kpair_mem_iff.mpr
+    exact And.intro (mem_domain_of_kpair_mem hpf) (mem_range_of_kpair_mem hpf)
+  · intro x hx
+    simp only [kpair_mem_replAttemptOrEmpty_iff]
+    apply existsUnique_of_exists_of_unique
+    · rw [hdomain] at hx
+      exact ⟨c.core v (c.attemptOrEmpty (v := v) x), And.intro hx (pairValueAttempt.eq_1 (c := c) (v := v) x)⟩
+    · intro y₁ y₂
+      simp_all only [pairValueAttempt, kpair_iff, true_and, implies_true]
+
+/--
+An auxiliary lemma about `replAttemptOrEmpty`.
+-/
+lemma replAttemptOrEmpty_aux :
+    (α : Ordinal V) → c.IsAttempt v α (replAttemptOrEmpty (c := c) (v := v) α) := by
+  let motive (α : V) : Prop := c.IsAttempt v α (replAttemptOrEmpty (c := c) (v := v) α)
+
+  have := c.isAttempt_defined.to_definable
+  have : ℒₛₑₜ-function₁ replAttemptOrEmpty (c := c) (v := v) := by
+    unfold replAttemptOrEmpty
+    definability
+  have motive_definable : ℒₛₑₜ-predicate motive := by
+    unfold motive
+    definability
+  refine transfinite_induction motive motive_definable ?_
+  intro α ih
+  have hα := Ordinal.ordinal α
+
+  have hrestrict : ((β : V) → (hβα : β ∈ α.val) → c.IsAttempt v β ((replAttemptOrEmpty (c := c) (v := v) α) ↾ β)) := by
+    intro β hβα
+    have hβ : IsOrdinal β := IsOrdinal.of_mem hβα
+    let βo : Ordinal V := IsOrdinal.toOrdinal β
+    have haux := ih βo hβα
+
+    suffices h : (replAttemptOrEmpty (c := c) (v := v) α) ↾ β = replAttemptOrEmpty (c := c) (v := v) β from h ▸ haux
+    ext p
+    simp only [mem_restrict_iff, mem_replAttemptOrEmpty_iff]
+    constructor <;> intro h
+    · rcases h with ⟨⟨γ, hγα, hγ⟩, ⟨x, hxβ, y, rfl⟩⟩
+      use x
+      refine And.intro hxβ ?_
+      exact (eq_of_kpair_eq_pairValueAttempt hγ).symm ▸ hγ
+    · obtain ⟨γ, hγβ, hγ⟩ := h
+      refine And.intro ?_ ?_
+      · use γ
+        exact And.intro (IsTransitive.mem_trans IsOrdinal.toIsTransitive hγβ hβα) hγ
+      · exact ⟨γ, hγβ, c.core v (attemptOrEmpty (c := c) (v := v) γ), hγ⟩
+  refine ⟨hα, inferInstance, domain_replAttemptOrEmpty_eq (c := c) (v := v) α, ?_⟩
+  intro β hβα y
+  have hβ : IsOrdinal β := IsOrdinal.of_mem hβα
+  let βo : Ordinal V := IsOrdinal.toOrdinal β
+
+  suffices h : ⟨β, y⟩ₖ ∈ replAttemptOrEmpty (c := c) (v := v) α.val ↔ ∃ f, y = F f ∧ c.IsAttempt v β f from by
+    constructor <;> intro h₂
+    · obtain ⟨f, rfl, hf⟩ := h.mp h₂
+      have : IsFunction f := hf.2.1
+      have : IsFunction ((replAttemptOrEmpty (c := c) (v := v) (↑α)) ↾ ↑βo) := inferInstance
+      simp only [IsAttempt.isAttempt_unique hf (hrestrict βo hβα), IsOrdinal.toOrdinal_val, βo]
+    · apply h.mpr
+      use (replAttemptOrEmpty (c := c) (v := v) (↑α)) ↾ β
+      simp only [h₂, true_and]
+      exact hrestrict βo hβα
+  have hexists : IsAttempt.Exists (c := c) (v := v) β := ⟨replAttemptOrEmpty (c := c) (v := v) β, ih βo hβα⟩
+  simp_all only [mem_replAttemptOrEmpty_iff, pairValueAttempt, kpair_iff, ↓existsAndEq, true_and,
+    motive]
+  have hattempt : c.IsAttempt v β (c.attemptOrEmpty (v := v) β) := by
+    simp_all [attemptOrEmpty, Classical.choose!_spec]
+  constructor <;> intro h
+  · use c.attemptOrEmpty (v := v) β
+  · obtain ⟨f, hfleft, hfright⟩ := h
+    have heq := IsOrdinal.toOrdinal_val β
+    rw [← heq] at *
+    have := hfright.2.1
+    have := hattempt.2.1
+    exact (IsAttempt.isAttempt_unique hfright hattempt) ▸ hfleft
+
+/--
+For any ordinal `α`, there exists an attempt function of length `α`.
+-/
+lemma attempt_function_exists :
+    (α : Ordinal V) → IsAttempt.Exists (c := c) (v := v) α :=
+  fun α ↦ ⟨replAttemptOrEmpty (c := c) (v := v) α, replAttemptOrEmpty_aux (c := c) (v := v) α⟩
+
+end Replacement
+
+end Somethingidk
 
 lemma IsAttempt.zero : c.IsAttempt v 0 ∅ :=
   ⟨by simp, by aesop, fun β hβ ↦ False.elim (not_mem_empty hβ)⟩
@@ -227,35 +446,30 @@ lemma IsAttempt.one : c.IsAttempt v 1 {⟨∅, c.core v ∅⟩ₖ} :=
     by rw [(by simp [seqCons] : {⟨∅, c.core v ∅⟩ₖ} = !⟦c.core v ∅⟧)]; ext z; simp [Seq.lh_seqCons, mem_succ_iff, one_def, zero_def],
     by simp [one_def, zero_def]⟩
 
-lemma IsAttempt.successor {f α y : V} (hf : c.IsAttempt v (SetTheory.succ α) f) (hy : ⟨α, y⟩ₖ ∈ f) :
-    c.IsAttempt v (SetTheory.succ (SetTheory.succ α)) (f ⁀' c.core v f) :=
-  ⟨ Seq.seqCons hf.1 _ , Seq.lh_seqCons _ (Seq.seqCons hf.1 _), by
-  -- ⟨ IsOrdinal.succ (h := hf.1), (hf.seq.seqCons _).1, by simp [seqCons, hf.2.2.1, hf.seq.lh_eq_domain_of, SetTheory.succ], by
+lemma IsAttempt.successor {f α : V} (hf : c.IsAttempt v α f) :
+    c.IsAttempt v (SetTheory.succ α) (f ⁀' c.core v f) :=
+  ⟨ hf.seq.seqCons (c.core v f), hf.2.1 ▸ Seq.lh_seqCons (c.core v f) hf.seq, by
     intro β hβ w
-    have := hf.1
-    have : IsOrdinal β := IsOrdinal.of_mem (by aesop)
-    have hβ : β ⊆ SetTheory.succ α := IsOrdinal.subset_iff.mpr (mem_succ_iff.mp hβ)
-    have hβdomain : β ⊆ domain f := hf.2.2.1 ▸ hβ
-    -- have hrestrictβ : (f ⁀' c.core v y) ↾ β = f ↾ β :=
-    --     restrict_insert_kpair_eq_restrict_of_not_mem (f := f) (x := lh f) (y := c.core v y) (A := β)
-    --       fun h₂ ↦ mem_irrefl (lh f) (hf.seq.domain_eq ▸ hβdomain (lh f) h₂)
+    have := hf.1.IsFunction
+    have : IsOrdinal α := hf.2.1 ▸ SetTheory.isOrdinal_lh hf.seq
+    have : IsOrdinal β := IsOrdinal.of_mem hβ
+    have hβ : β ⊆ α := IsOrdinal.subset_iff.mpr (mem_succ_iff.mp hβ)
+    have hβdomain : β ⊆ domain f := (hf.seq.domain_eq ▸ hf.2.1) ▸ hβ
     have hrestrictβ {z : V} : (f ⁀' z) ↾ β = f ↾ β :=
         restrict_insert_kpair_eq_restrict_of_not_mem (f := f) (x := lh f) (y := z) (A := β)
           fun h₂ ↦ mem_irrefl (lh f) (hf.seq.domain_eq ▸ hβdomain (lh f) h₂)
-    have hyeq := (hf.2.2.2 α (mem_succ_self α) y).mp hy
-    rw [hrestrictβ, hyeq] at *
-    have hseq := hf.seq.seqCons (c.core v f)
-    have hrestrictlh := hf.2.1.restrict_eq_self f (lh f) (hf.seq.domain_eq ▸ subset_refl (domain f))
-    rcases show β = SetTheory.succ α ∨ β ∈ SetTheory.succ α by
-        exact IsOrdinal.subset_iff.mp hβ
+    have hrestrictlh := IsFunction.restrict_eq_self f (lh f) (hf.seq.domain_eq ▸ subset_refl (domain f))
+    rw [hrestrictβ] at *
+    rcases show β = α ∨ β ∈ α
+        from IsOrdinal.subset_iff.mp hβ
         with (hβ | hβ)
-    · have hβeq : β = lh f := hf.seq.lh_eq_domain_of ▸ hf.2.2.1 ▸ hβ
+    · have hβeq : β = lh f := hf.2.1 ▸ hβ
       rw [hβeq, lh_mem_seqCons_iff hf.seq, hrestrictlh]
-    · have hβneq : β ≠ lh f := fun h ↦ mem_irrefl β ((h ▸ hf.seq.domain_eq ▸ hf.2.2.1) ▸ hβ)
+    · have hβneq : β ≠ lh f := fun h ↦ mem_irrefl β ((h ▸ hf.2.1) ▸ hβ)
       rw [kpair_mem_seqCons_iff]
-      constructor <;> intro h
-      · exact Or.elim h (by aesop) fun h ↦ (hf.2.2.2 β hβ w).mp h
-      · exact Or.inr ((hf.2.2.2 β hβ w).mpr h)
+      refine Iff.intro (fun h ↦ ?_) fun h ↦ ?_
+      · exact Or.elim h (by aesop) fun h ↦ (hf.2.2 β hβ w).mp h
+      · exact Or.inr ((hf.2.2 β hβ w).mpr h)
   ⟩
 
 variable (c v)
@@ -364,8 +578,9 @@ lemma result_defined : DefinedFunction (fun v ↦ c.result (v ·.succ) (v 0) : (
     refine eq_iff_iff.mpr ?_
     refine Iff.intro (fun h ↦ ?_) (by aesop)
     · rcases h with ⟨α', f', hf'⟩
-      have := hf'.1.seq.IsOrdinal_of_mem_domain (mem_domain_of_kpair_mem hf'.2)
-      have : IsOrdinal α' := hf'.1.1
+      have := Seq.isOrdinal_of_mem_domain hf'.1.seq (mem_domain_of_kpair_mem hf'.2)
+      -- have := hf'.1.seq.IsOrdinal_of_mem_domain (mem_domain_of_kpair_mem hf'.2)
+      have : IsOrdinal α' := SetTheory.isOrdinal_lh hf'.1.seq
       rcases IsAttempt.exists c (v ·.succ.succ) (v 1) with ⟨f, hf⟩
       use f
       refine And.intro ?_ ?_
