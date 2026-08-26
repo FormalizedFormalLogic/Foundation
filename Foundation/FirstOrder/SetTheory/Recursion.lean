@@ -2,6 +2,7 @@ module
 
 public import Foundation.FirstOrder.SetTheory.Ordinal
 public import Foundation.FirstOrder.SetTheory.Function
+public import Foundation.FirstOrder.SetTheory.Seq
 public import Foundation.FirstOrder.SetTheory.ZF
 
 @[expose] public section
@@ -16,8 +17,8 @@ variable {V : Type*} [SetStructure V] [Nonempty V]
 `f` is an attempt of length `α` for the function `F`, meaning that the domain of `f` is `α`, and for all `β < α`, it holds that `f(β) = F (f ↾ β)`.
 The "attempt" terminology may be due to Paul Taylor.
 -/
-def IsAttempt [V↓[ℒₛₑₜ] ⊧* 𝗭] (F : V → V) (α f : V) : Prop :=
-  IsOrdinal α ∧ IsFunction f ∧ domain f = α ∧
+def IsAttempt [V↓[ℒₛₑₜ] ⊧* 𝗭] (F : V → V) (f : V) : Prop :=
+  Seq f ∧
     ∀ β ∈ α, ∀ y, ⟨β, y⟩ₖ ∈ f ↔ y = F (f ↾ β)
 
 lemma IsAttempt.definable [V↓[ℒₛₑₜ] ⊧* 𝗭] {F : V → V} (hF : ℒₛₑₜ-function₁ F) :
