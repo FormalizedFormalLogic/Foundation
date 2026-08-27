@@ -93,7 +93,7 @@ arithmetic theories are order isomorphic: both are countable, nontrivial, atomle
 Boolean algebras, so `iso_of_countable_atomless` applies. -/
 theorem lindenbaum_iso (T U : ArithmeticTheory)
     [𝗜𝚺₁ ⪯ T] [T.Δ₁] [Consistent T] [𝗜𝚺₁ ⪯ U] [U.Δ₁] [Consistent U] :
-    Nonempty (LindenbaumAlgebra T ≃o LindenbaumAlgebra U) := by
-  sorry
+    Nonempty (LindenbaumAlgebra T ≃o LindenbaumAlgebra U) :=
+  iso_of_countable_atomless
 
 end LO
