@@ -36,7 +36,13 @@ lemma inf_le_iff_sdiff_disjoint {y₁ y₂ a : γ} : y₁ ⊓ a ≤ y₂ ⊓ a �
 lemma insertRep_le_insertRep_iff {y₁ z₁ y₂ z₂ a : γ} :
     (y₁ ⊓ a) ⊔ (z₁ ⊓ aᶜ) ≤ (y₂ ⊓ a) ⊔ (z₂ ⊓ aᶜ) ↔
       (y₁ \ y₂) ⊓ a = ⊥ ∧ (z₁ \ z₂) ⊓ aᶜ = ⊥ := by
-  sorry
+  have h₁ : y₁ ⊓ a ≤ y₂ ⊓ a ⊔ z₂ ⊓ aᶜ ↔ y₁ ⊓ a ≤ y₂ ⊓ a :=
+    ⟨fun h => by simpa [inf_sup_right, inf_assoc] using inf_le_inf_right a h,
+      fun h => h.trans le_sup_left⟩
+  have h₂ : z₁ ⊓ aᶜ ≤ y₂ ⊓ a ⊔ z₂ ⊓ aᶜ ↔ z₁ ⊓ aᶜ ≤ z₂ ⊓ aᶜ :=
+    ⟨fun h => by simpa [inf_sup_right, inf_assoc] using inf_le_inf_right aᶜ h,
+      fun h => h.trans le_sup_right⟩
+  rw [sup_le_iff, h₁, h₂, inf_le_iff_sdiff_disjoint, inf_le_iff_sdiff_disjoint]
 
 /-- The complement of a normal-form representative `(y ⊓ a) ⊔ (z ⊓ aᶜ)` is again a
 normal-form representative, with `y` and `z` complemented. -/
