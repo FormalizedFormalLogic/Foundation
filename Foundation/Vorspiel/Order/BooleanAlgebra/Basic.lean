@@ -58,8 +58,8 @@ lemma compl_insertRep (y z a : γ) : ((y ⊓ a) ⊔ (z ⊓ aᶜ))ᶜ = (yᶜ ⊓
     rw [inf_sup_right, inf_sup_left, inf_sup_left, h1, h2, h3, h4]; simp
   exact (IsCompl.mk (disjoint_iff.mpr hinf) (codisjoint_iff.mpr hsup)).compl_eq
 
-lemma IsAtom.le_or_disjoint {p : γ} (hp : IsAtom p) (w : γ) : p ≤ w ∨ p ⊓ w = ⊥ := by
-  sorry
+lemma IsAtom.le_or_disjoint {p : γ} (hp : IsAtom p) (w : γ) : p ≤ w ∨ p ⊓ w = ⊥ :=
+  (em (p ≤ w)).imp_right fun h => disjoint_iff.mp (hp.not_le_iff_disjoint.mp h)
 
 open Classical in
 noncomputable def atomsBelow [Fintype γ] (w : γ) : Finset γ :=
