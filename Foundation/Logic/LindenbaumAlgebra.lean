@@ -1,6 +1,7 @@
 module
 
 public import Foundation.Propositional.Entailment.Cl
+public import Mathlib.Data.Countable.Defs
 
 @[expose] public section
 
@@ -156,6 +157,8 @@ lemma consistent_iff_nontrivial : Consistent 𝓢 ↔ Nontrivial (LindenbaumAlge
   · intro h φ; exact h φ ⊤
 
 instance nontrivial_of_consistent [Consistent 𝓢] : Nontrivial (LindenbaumAlgebra 𝓢) := consistent_iff_nontrivial.mp inferInstance
+
+instance [Countable F] : Countable (LindenbaumAlgebra 𝓢) := Quotient.countable
 
 end LindenbaumAlgebra
 
