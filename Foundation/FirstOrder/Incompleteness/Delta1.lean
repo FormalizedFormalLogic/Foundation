@@ -6,7 +6,7 @@ public import Foundation.FirstOrder.Incompleteness.Second
 /-!
 # $\Delta_1$-definability of the induction schemata, and of `𝗜𝚺₁` and `𝗣𝗔`
 
-This file discharges the two `axiom`s that previously sat in `Examples.lean`:
+This file establishes `Δ₁`-definability of the induction schemata, and hence of `𝗣𝗔` and `𝗜𝚺₁`:
 `PA_delta1Definable : 𝗣𝗔.Δ₁` and `ISigma1_delta1Definable : 𝗜𝚺₁.Δ₁`.
 
 The route:
@@ -23,17 +23,12 @@ The route:
 
 @[expose] public section
 
--- #794 removed the formula-level `SyntacticSemiformula`/`SyntacticFormula` aliases, so this file
--- uses the expanded `_root_.LO.FirstOrder.Semiformula L ℕ n` spelling instead of re-exporting those names.
-
 namespace LO.FirstOrder.Arithmetic.Bootstrapping
 
 /-! ## Internal iterated universal quantifier `qqAlls`
 
 `qqAlls p k = ^∀ ^∀ … ^∀ p` (`k` quantifiers), the internal counterpart of the meta universal
-closure `∀¹*`. This is part (a) of arithmetizing `univCl` (part (b), the free→bound `fixitr`
-rewrite, is still open). The headline of this section is `quote_allClosure`:
-`⌜∀¹* φ⌝ = qqAlls ⌜φ⌝ n`. -/
+closure `∀¹*`. The headline of this section is `quote_allClosure`: `⌜∀¹* φ⌝ = qqAlls ⌜φ⌝ n`. -/
 
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 
@@ -132,47 +127,45 @@ lemma IsSemiformula.qqAlls {n k p : V} (h : IsSemiformula L (n + k) p) :
 
 /-- The internal iterated-`^∀` computes the universal-closure code:
 `⌜∀¹* φ⌝ = qqAlls ⌜φ⌝ n`. -/
-lemma quote_allClosure {n : ℕ} (φ : _root_.LO.FirstOrder.Semiformula L ℕ n) :
-    (⌜(∀¹* φ : _root_.LO.FirstOrder.Semiformula L ℕ 0)⌝ : V) = qqAlls (⌜φ⌝ : V) (n : V) := by
+lemma quote_allClosure {n : ℕ} (φ : Semiproposition L n) :
+    (⌜(∀¹* φ : Semiproposition L 0)⌝ : V) = qqAlls (⌜φ⌝ : V) (n : V) := by
   induction n
   case zero => simp
   case succ n ih =>
-    rw [show (∀¹* φ : _root_.LO.FirstOrder.Semiformula L ℕ 0) = ∀¹* (∀¹ φ) from rfl]
+    rw [show (∀¹* φ : Semiproposition L 0) = ∀¹* (∀¹ φ) from rfl]
     have := ih (∀¹ φ)
     rw [Semiformula.quote_all] at this
     rw [this, Nat.cast_succ, qqAlls_succ']
 
 /-- The Gödel code of a sentence `univCl ψ` agrees with that of its 0-ary semiformula
 unfolding `univCl' ψ` (which prepends `fvSup ψ` universals to the `fixitr`-rewritten body). -/
-lemma quote_univCl (ψ : _root_.LO.FirstOrder.Semiformula L ℕ 0) :
+lemma quote_univCl (ψ : Semiproposition L 0) :
     (⌜Semiformula.univCl ψ⌝ : V) = (⌜Semiformula.univCl' ψ⌝ : V) := by
-  show (⌜(Rewriting.emb (Semiformula.univCl ψ) : _root_.LO.FirstOrder.Semiformula L ℕ 0)⌝ : V) = ⌜Semiformula.univCl' ψ⌝
+  show (⌜(Rewriting.emb (Semiformula.univCl ψ) : Semiproposition L 0)⌝ : V) = ⌜Semiformula.univCl' ψ⌝
   congr 1
   simp [Semiformula.univCl]
 
 /-- `⌜univCl' ψ⌝ = qqAlls ⌜fixitr 0 (fvSup ψ) ▹ ψ⌝ (fvSup ψ)`: the universal closure is the
 internal iterated-`^∀` applied to the freevar-free `fixitr`-image of `ψ`. -/
-lemma quote_univCl' (ψ : _root_.LO.FirstOrder.Semiformula L ℕ 0) :
+lemma quote_univCl' (ψ : Semiproposition L 0) :
     (⌜Semiformula.univCl' ψ⌝ : V)
-      = qqAlls (⌜(Rew.fixitr 0 ψ.fvSup ▹ ψ : _root_.LO.FirstOrder.Semiformula L ℕ (0 + ψ.fvSup))⌝ : V)
+      = qqAlls (⌜(Rew.fixitr 0 ψ.fvSup ▹ ψ : Semiproposition L (0 + ψ.fvSup))⌝ : V)
           ((0 + ψ.fvSup : ℕ) : V) := by
   rw [Semiformula.univCl']; exact quote_allClosure _
 
 /-- Combined: the code of the universal closure of `ψ`. -/
-lemma quote_univCl_eq (ψ : _root_.LO.FirstOrder.Semiformula L ℕ 0) :
+lemma quote_univCl_eq (ψ : Semiproposition L 0) :
     (⌜Semiformula.univCl ψ⌝ : V)
-      = qqAlls (⌜(Rew.fixitr 0 ψ.fvSup ▹ ψ : _root_.LO.FirstOrder.Semiformula L ℕ (0 + ψ.fvSup))⌝ : V)
+      = qqAlls (⌜(Rew.fixitr 0 ψ.fvSup ▹ ψ : Semiproposition L (0 + ψ.fvSup))⌝ : V)
           ((0 + ψ.fvSup : ℕ) : V) := by
   rw [quote_univCl, quote_univCl']
 
 /-- **Closure inversion at the code level.** Substituting the free-variable atoms `&0 … &(m-1)`
-back into the `fixitr`-image recovers `⌜φ⌝`. This is the DECODE direction: the recognizer can
-recover `⌜succInd ψ⌝` (hence `ψ`) from the freevar-free closure body using the *already-proven*
-internal `subst`, with no need for an internal `fixitr`. Meta witness: `subst_comp_fixitr`. -/
-lemma quote_subst_fvar_fixitr (φ : _root_.LO.FirstOrder.Semiformula L ℕ 0) :
-    (⌜(Rew.fixitr 0 φ.fvSup ▹ φ : _root_.LO.FirstOrder.Semiformula L ℕ (0 + φ.fvSup))
+back into the `fixitr`-image recovers `⌜φ⌝`. -/
+lemma quote_subst_fvar_fixitr (φ : Semiproposition L 0) :
+    (⌜(Rew.fixitr 0 φ.fvSup ▹ φ : Semiproposition L (0 + φ.fvSup))
         ⇜ (fun x : Fin (0 + φ.fvSup) ↦ (&↑x : SyntacticTerm L))⌝ : V) = ⌜φ⌝ := by
-  rw [show (Rew.fixitr 0 φ.fvSup ▹ φ : _root_.LO.FirstOrder.Semiformula L ℕ (0 + φ.fvSup))
+  rw [show (Rew.fixitr 0 φ.fvSup ▹ φ : Semiproposition L (0 + φ.fvSup))
         ⇜ (fun x : Fin (0 + φ.fvSup) ↦ (&↑x : SyntacticTerm L)) = φ from by
     have := Semiformula.subst_comp_fixitr (L := L) φ
     convert this using 2]
@@ -184,7 +177,7 @@ variables). Together with `lt_fvSup_of_fvar?` this pins `fvSup` as exactly the c
 in `univCl'`, and is what the recognizer's `bv b = m` clause checks (no over-recognition by padding
 leading `∀`s). -/
 lemma _root_.LO.FirstOrder.Semiformula.fvar?_fvSup_pred {L : Language} {n : ℕ}
-    (φ : _root_.LO.FirstOrder.Semiformula L ℕ n) (h : 0 < φ.fvSup) : φ.FVar? (φ.fvSup - 1) := by
+    (φ : Semiproposition L n) (h : 0 < φ.fvSup) : φ.FVar? (φ.fvSup - 1) := by
   by_cases he : φ.freeVariables = ∅
   · simp [Semiformula.fvSup, he] at h
   · obtain ⟨k, hk⟩ := Finset.max_of_nonempty (Finset.nonempty_iff_ne_empty.mpr he)
@@ -235,8 +228,8 @@ lemma _root_.LO.FirstOrder.Semiterm.freeVariables_castLE {n : ℕ} (t : Syntacti
       apply Finset.biUnion_congr rfl
       intro i _; exact ih i h
 
-lemma _root_.LO.FirstOrder.Semiformula.quote_castLE {n : ℕ} (φ : _root_.LO.FirstOrder.Semiformula L ℕ n) :
-    ∀ {n' : ℕ} (h : n ≤ n'), (⌜(Rew.castLE h ▹ φ : _root_.LO.FirstOrder.Semiformula L ℕ n')⌝ : V) = ⌜φ⌝ := by
+lemma _root_.LO.FirstOrder.Semiformula.quote_castLE {n : ℕ} (φ : Semiproposition L n) :
+    ∀ {n' : ℕ} (h : n ≤ n'), (⌜(Rew.castLE h ▹ φ : Semiproposition L n')⌝ : V) = ⌜φ⌝ := by
   induction φ using Semiformula.rec' with
   | hverum => intro n' h; simp
   | hfalsum => intro n' h; simp
@@ -256,8 +249,8 @@ lemma _root_.LO.FirstOrder.Semiformula.quote_castLE {n : ℕ} (φ : _root_.LO.Fi
   | hexs φ ih => intro n' h; rw [Rewriting.app_exs, Semiformula.quote_ex, Rew.q_castLE, ih, Semiformula.quote_ex]
 
 omit [L.Encodable] [L.LORDefinable] in
-lemma _root_.LO.FirstOrder.Semiformula.freeVariables_castLE {n : ℕ} (φ : _root_.LO.FirstOrder.Semiformula L ℕ n) :
-    ∀ {n' : ℕ} (h : n ≤ n'), (Rew.castLE h ▹ φ : _root_.LO.FirstOrder.Semiformula L ℕ n').freeVariables = φ.freeVariables := by
+lemma _root_.LO.FirstOrder.Semiformula.freeVariables_castLE {n : ℕ} (φ : Semiproposition L n) :
+    ∀ {n' : ℕ} (h : n ≤ n'), (Rew.castLE h ▹ φ : Semiproposition L n').freeVariables = φ.freeVariables := by
   induction φ using Semiformula.rec' with
   | hverum => intro n' h; simp
   | hfalsum => intro n' h; simp
@@ -287,14 +280,9 @@ section bvPin
 
 variable {L : Language} [L.Encodable] [L.LORDefinable]
 
-/-- **`bv`-pin bridge** (over ℕ): `bv ⌜fixitr 0 (fvSup χ) ▹ χ⌝ = fvSup χ`.
-- `≤` is immediate from `quote_univCl_eq` + `bv_qqAlls` (closing `fvSup` quantifiers reaches a
-  sentence, whose `bv` is `0`).
-- `≥` is by level-factoring: were the body an `IsSemiformula j` for some `j < fvSup`, `IsSemiformula.sound`
-  + `castLE`-invariance would re-express `χ` as `γ ⇜ ![&0, …, &(j-1)]` with `γ` free-variable-free,
-  forcing `fvSup χ ≤ j < fvSup χ`. -/
-lemma bv_quote_fixitr (χ : _root_.LO.FirstOrder.Semiformula L ℕ 0) :
-    bv (V := ℕ) L (⌜(Rew.fixitr 0 χ.fvSup ▹ χ : _root_.LO.FirstOrder.Semiformula L ℕ (0 + χ.fvSup))⌝ : ℕ)
+/-- **`bv`-pin bridge** (over ℕ): `bv ⌜fixitr 0 (fvSup χ) ▹ χ⌝ = fvSup χ`. -/
+lemma bv_quote_fixitr (χ : Semiproposition L 0) :
+    bv (V := ℕ) L (⌜(Rew.fixitr 0 χ.fvSup ▹ χ : Semiproposition L (0 + χ.fvSup))⌝ : ℕ)
       = χ.fvSup := by
   -- the freevar-free closure body
   have not_fvar_body : ∀ x, ¬(Rew.fixitr 0 χ.fvSup ▹ χ).FVar? x := by
@@ -307,40 +295,40 @@ lemma bv_quote_fixitr (χ : _root_.LO.FirstOrder.Semiformula L ℕ 0) :
     · have : z < χ.fvSup := Semiformula.lt_fvSup_of_fvar? hz
       simp [this] at hx
   have hbsemi := Semiformula.quote_isSemiformula (V := ℕ)
-    (Rew.fixitr 0 χ.fvSup ▹ χ : _root_.LO.FirstOrder.Semiformula L ℕ (0 + χ.fvSup))
-  have hbU : IsUFormula L (⌜(Rew.fixitr 0 χ.fvSup ▹ χ : _root_.LO.FirstOrder.Semiformula L ℕ (0 + χ.fvSup))⌝ : ℕ) :=
+    (Rew.fixitr 0 χ.fvSup ▹ χ : Semiproposition L (0 + χ.fvSup))
+  have hbU : IsUFormula L (⌜(Rew.fixitr 0 χ.fvSup ▹ χ : Semiproposition L (0 + χ.fvSup))⌝ : ℕ) :=
     hbsemi.isUFormula
   -- `≤` direction: the body has `0 + fvSup` bound slots, so `bv ≤ fvSup` (model order over ℕ).
   -- On ℕ the model cast is the identity (`natCast_nat`) and `<` is `Nat.lt`.
   have hle := hbsemi.bv_le
   simp only [Nat.zero_add, natCast_nat] at hle
   -- the model `≤` on ℕ unfolds to `= ∨ <` with `<` the standard `Nat.lt`
-  rcases (hle : bv (V := ℕ) L (⌜(Rew.fixitr 0 χ.fvSup ▹ χ : _root_.LO.FirstOrder.Semiformula L ℕ (0 + χ.fvSup))⌝ : ℕ)
-      = χ.fvSup ∨ bv (V := ℕ) L (⌜(Rew.fixitr 0 χ.fvSup ▹ χ : _root_.LO.FirstOrder.Semiformula L ℕ (0 + χ.fvSup))⌝ : ℕ)
+  rcases (hle : bv (V := ℕ) L (⌜(Rew.fixitr 0 χ.fvSup ▹ χ : Semiproposition L (0 + χ.fvSup))⌝ : ℕ)
+      = χ.fvSup ∨ bv (V := ℕ) L (⌜(Rew.fixitr 0 χ.fvSup ▹ χ : Semiproposition L (0 + χ.fvSup))⌝ : ℕ)
       < χ.fvSup) with heq | hlt
   · exact heq
   -- `hlt : bv ⌜body⌝ < χ.fvSup` ; this case is impossible (forbids vacuous leading `∀`s)
   exfalso
-  set j := bv (V := ℕ) L (⌜(Rew.fixitr 0 χ.fvSup ▹ χ : _root_.LO.FirstOrder.Semiformula L ℕ (0 + χ.fvSup))⌝ : ℕ) with hj
+  set j := bv (V := ℕ) L (⌜(Rew.fixitr 0 χ.fvSup ▹ χ : Semiproposition L (0 + χ.fvSup))⌝ : ℕ) with hj
   have hpos : 0 < χ.fvSup := by omega
-  have hsemi : IsSemiformula L j (⌜(Rew.fixitr 0 χ.fvSup ▹ χ : _root_.LO.FirstOrder.Semiformula L ℕ (0 + χ.fvSup))⌝ : ℕ) := by
+  have hsemi : IsSemiformula L j (⌜(Rew.fixitr 0 χ.fvSup ▹ χ : Semiproposition L (0 + χ.fvSup))⌝ : ℕ) := by
     have := IsUFormula.isSemiformula hbU; rwa [← hj] at this
   obtain ⟨γ, hγ⟩ := IsSemiformula.sound hsemi
   have hjle : j ≤ 0 + χ.fvSup := by omega
   -- codes agree across levels, hence the formulas agree
-  have hcast : (Rew.castLE hjle ▹ γ : _root_.LO.FirstOrder.Semiformula L ℕ (0 + χ.fvSup))
-      = (Rew.fixitr 0 χ.fvSup ▹ χ : _root_.LO.FirstOrder.Semiformula L ℕ (0 + χ.fvSup)) := by
+  have hcast : (Rew.castLE hjle ▹ γ : Semiproposition L (0 + χ.fvSup))
+      = (Rew.fixitr 0 χ.fvSup ▹ χ : Semiproposition L (0 + χ.fvSup)) := by
     apply (Semiformula.quote_inj_iff (V := ℕ)).mp
     rw [Semiformula.quote_castLE, hγ]
   -- `γ` is free-variable-free
   have hγfree : γ.freeVariables = ∅ := by
-    have hb : (Rew.fixitr 0 χ.fvSup ▹ χ : _root_.LO.FirstOrder.Semiformula L ℕ (0 + χ.fvSup)).freeVariables = ∅ :=
+    have hb : (Rew.fixitr 0 χ.fvSup ▹ χ : Semiproposition L (0 + χ.fvSup)).freeVariables = ∅ :=
       Finset.eq_empty_of_forall_notMem fun x hx ↦ not_fvar_body x hx
     have := Semiformula.freeVariables_castLE γ hjle
     rw [hcast, hb] at this; exact this.symm
   -- invert the closure: `χ = γ ⇜ ![&0, …, &(j-1)]`
   have hχeq : χ = γ ⇜ (fun i : Fin j ↦ (&↑i : SyntacticTerm L)) := by
-    have e1 : (Rew.fixitr 0 χ.fvSup ▹ χ : _root_.LO.FirstOrder.Semiformula L ℕ (0 + χ.fvSup))
+    have e1 : (Rew.fixitr 0 χ.fvSup ▹ χ : Semiproposition L (0 + χ.fvSup))
         ⇜ (fun x : Fin (0 + χ.fvSup) ↦ (&↑x : SyntacticTerm L)) = χ := Semiformula.subst_comp_fixitr χ
     have hRewEq : (Rew.subst (fun x : Fin (0 + χ.fvSup) ↦ (&↑x : SyntacticTerm L))).comp (Rew.castLE hjle)
         = Rew.subst (fun i : Fin j ↦ (&↑i : SyntacticTerm L)) := by
@@ -431,27 +419,27 @@ lemma fvarVec_val_eq (m : ℕ) :
 /-- **Raw closure inversion.** `subst (fvarVec (fvSup φ)) ⌜fixitr 0 (fvSup φ) ▹ φ⌝ = ⌜φ⌝`: the
 internal substitution by `fvarVec` undoes the universal-closure `fixitr` at the code level. This
 is the recognizer's mechanism for recovering `⌜succInd ψ⌝` from the freevar-free closure body. -/
-lemma subst_fvarVec_quote (φ : _root_.LO.FirstOrder.ArithmeticSemiformula ℕ 0) :
+lemma subst_fvarVec_quote (φ : ArithmeticSemiproposition 0) :
     Bootstrapping.subst ℒₒᵣ (fvarVec ((0 + φ.fvSup : ℕ) : V))
-        (⌜(Rew.fixitr 0 φ.fvSup ▹ φ : _root_.LO.FirstOrder.ArithmeticSemiformula ℕ (0 + φ.fvSup))⌝ : V)
+        (⌜(Rew.fixitr 0 φ.fvSup ▹ φ : ArithmeticSemiproposition (0 + φ.fvSup))⌝ : V)
       = (⌜φ⌝ : V) := by
   set Kt : Bootstrapping.Semiformula V ℒₒᵣ (0 + φ.fvSup) :=
-    ⌜(Rew.fixitr 0 φ.fvSup ▹ φ : _root_.LO.FirstOrder.ArithmeticSemiformula ℕ (0 + φ.fvSup))⌝ with hKt
+    ⌜(Rew.fixitr 0 φ.fvSup ▹ φ : ArithmeticSemiproposition (0 + φ.fvSup))⌝ with hKt
   set w : SemitermVec V ℒₒᵣ (0 + φ.fvSup) 0 :=
     (fun i : Fin (0 + φ.fvSup) ↦ (Semiterm.fvar (↑(i : ℕ)) : Bootstrapping.Semiterm V ℒₒᵣ 0)) with hw
   rw [fvarVec_val_eq,
-    show (⌜(Rew.fixitr 0 φ.fvSup ▹ φ : _root_.LO.FirstOrder.ArithmeticSemiformula ℕ (0 + φ.fvSup))⌝ : V) = Kt.val from rfl,
+    show (⌜(Rew.fixitr 0 φ.fvSup ▹ φ : ArithmeticSemiproposition (0 + φ.fvSup))⌝ : V) = Kt.val from rfl,
     show Bootstrapping.subst ℒₒᵣ w.val Kt.val = (Kt.subst w).val from rfl,
     ← quote_subst_fvar_fixitr (V := V) φ]
   congr 1
   rw [hKt]
   simp only [FirstOrder.Semiformula.typed_quote_substs, hw, Semiterm.typed_quote_fvar]
 
-/-- **Generalized free-ization.** For *any* `β : _root_.LO.FirstOrder.ArithmeticSemiformula ℕ m`, substituting the
+/-- **Generalized free-ization.** For *any* `β : ArithmeticSemiproposition m`, substituting the
 free-variable atoms `&0 … &(m-1)` for its `m` bound slots equals `⌜β ⇜ (&·)⌝`. This is the forward
 recognizer's tool: once `IsSemiformula.sound` yields a `β` with `⌜β⌝ = b`, this computes
 `subst (fvarVec m) b`. (Specializes to `subst_fvarVec_quote` when `β` is a `fixitr`-image.) -/
-lemma subst_fvarVec_quote' {m : ℕ} (β : _root_.LO.FirstOrder.ArithmeticSemiformula ℕ m) :
+lemma subst_fvarVec_quote' {m : ℕ} (β : ArithmeticSemiproposition m) :
     Bootstrapping.subst ℒₒᵣ (fvarVec ((m : ℕ) : V)) (⌜β⌝ : V)
       = (⌜(β ⇜ (fun i : Fin m ↦ (&↑i : SyntacticTerm ℒₒᵣ)))⌝ : V) := by
   set Kt : Bootstrapping.Semiformula V ℒₒᵣ m := ⌜β⌝ with hKt
@@ -777,16 +765,15 @@ noncomputable instance PeanoMinus.delta1 : (𝗣𝗔⁻ : ArithmeticTheory).Δ�
 /-! ## Typed decomposition of `succInd`
 
 The crux relates the code `⌜univCl (succInd φ)⌝` to internal primitives. The macro `!φ t` in
-formula position desugars to `φ ⇜ ![t]` (`Rew.substs`, **not** `embSubsts` as an earlier handoff
-claimed), so `⌜succInd φ⌝` collapses under the *already-present* `typed_quote_substs`/`map_imply`/
-`LCWQIsoGödelQuote.all` simp set — no `typed_quote_embSubsts` bridge is needed. -/
+formula position desugars to `φ ⇜ ![t]` (`Rew.substs`, not `embSubsts`), so `⌜succInd φ⌝`
+collapses under the `typed_quote_substs`/`map_imply`/`LCWQIsoGödelQuote.all` simp set. -/
 
 section succInd
 
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 
 /-- `succInd φ`, simplified (the `∀ x, !φ x` instances are the identity substitution `φ ⇜ ![#0]`). -/
-lemma succInd_eq (φ : _root_.LO.FirstOrder.ArithmeticSemiformula ℕ 1) :
+lemma succInd_eq (φ : ArithmeticSemiproposition 1) :
     succInd φ =
       ((φ ⇜ (![‘0’] : Fin 1 → ArithmeticSemiterm ℕ 0))
         🡒 ((∀¹ (φ 🡒 (φ ⇜ (![‘#0 + 1’] : Fin 1 → ArithmeticSemiterm ℕ 1)))) 🡒 ∀¹ φ)) := by
@@ -794,7 +781,7 @@ lemma succInd_eq (φ : _root_.LO.FirstOrder.ArithmeticSemiformula ℕ 1) :
 
 /-- The typed Gödel code of the induction axiom body, built from the typed code `⌜φ⌝` purely with
 the existing typed constructors (`subst`, `🡒`, `∀¹`). -/
-lemma typed_quote_succInd (φ : _root_.LO.FirstOrder.ArithmeticSemiformula ℕ 1) :
+lemma typed_quote_succInd (φ : ArithmeticSemiproposition 1) :
     (⌜succInd φ⌝ : Bootstrapping.Semiformula V ℒₒᵣ 0) =
       (⌜φ ⇜ (![‘0’] : Fin 1 → ArithmeticSemiterm ℕ 0)⌝)
         🡒 ((∀¹ (⌜φ⌝ 🡒 ⌜φ ⇜ (![‘#0 + 1’] : Fin 1 → ArithmeticSemiterm ℕ 1)⌝)) 🡒 ∀¹ ⌜φ⌝) := by
@@ -810,7 +797,7 @@ noncomputable def indBody (K : Bootstrapping.Semiformula V ℒₒᵣ 1) : Bootst
     🡒 ((∀¹ (K 🡒 K.subst ![⌜(‘#0 + 1’ : ArithmeticSemiterm ℕ 1)⌝])) 🡒 ∀¹ K)
 
 /-- `indBody ⌜ψ⌝ = ⌜succInd ψ⌝`: the typed reconstruction matches the actual code. -/
-lemma indBody_quote (φ : _root_.LO.FirstOrder.ArithmeticSemiformula ℕ 1) :
+lemma indBody_quote (φ : ArithmeticSemiproposition 1) :
     indBody (⌜φ⌝ : Bootstrapping.Semiformula V ℒₒᵣ 1) = ⌜succInd φ⌝ := by
   rw [typed_quote_succInd]; unfold indBody; simp [Matrix.constant_eq_singleton]
 
@@ -834,16 +821,14 @@ lemma indBodyVal_eq (K : Bootstrapping.Semiformula V ℒₒᵣ 1) : indBodyVal K
     Bootstrapping.Semiformula.val_substs]
 
 /-- `k ≤ indBodyVal k`: the core `k` sits as the bound body of the `^∀ k` conclusion inside the
-`succInd` shape, so its code is below the whole axiom's code. This is the *clean half* of the old
-size race — it bounds the recovered core `K` by the (functionally pinned) `subst (fvarVec m) b`,
-which equals `indBodyVal K`. -/
+`succInd` shape, so its code is below the whole axiom's code. -/
 lemma le_indBodyVal (k : V) : k ≤ indBodyVal k := by
   unfold indBodyVal Bootstrapping.imp
   exact (Bootstrapping.le_qqAll _).trans
     (le_of_lt ((Bootstrapping.lt_or_right _ _).trans (Bootstrapping.lt_or_right _ _)))
 
 /-- `indBodyVal ⌜γ⌝ = ⌜succInd γ⌝`: the raw recognizer body computes the `succInd` shape. -/
-lemma indBodyVal_quote (γ : _root_.LO.FirstOrder.ArithmeticSemiformula ℕ 1) : indBodyVal (⌜γ⌝ : ℕ) = (⌜succInd γ⌝ : ℕ) := by
+lemma indBodyVal_quote (γ : ArithmeticSemiproposition 1) : indBodyVal (⌜γ⌝ : ℕ) = (⌜succInd γ⌝ : ℕ) := by
   rw [show (⌜γ⌝ : ℕ) = (⌜γ⌝ : Bootstrapping.Semiformula ℕ ℒₒᵣ 1).val from rfl, indBodyVal_eq,
     indBody_quote]
   rfl
@@ -957,9 +942,9 @@ end chDefined
 /-! ## The crux — the induction schema is `Δ₁` -/
 
 /-- RHS of `chUniv_mem_iff` reduced to a clean `∃ψ` over the *syntactic* universal closure. -/
-lemma mem_inductionScheme_univ_iff (φ : _root_.LO.FirstOrder.ArithmeticSemiformula ℕ 0) :
-    (∃ σ ∈ InductionScheme ℒₒᵣ Set.univ, φ = (σ : _root_.LO.FirstOrder.ArithmeticSemiformula ℕ 0))
-      ↔ ∃ ψ : _root_.LO.FirstOrder.ArithmeticSemiformula ℕ 1, φ = (succInd ψ).univCl' := by
+lemma mem_inductionScheme_univ_iff (φ : ArithmeticSemiproposition 0) :
+    (∃ σ ∈ InductionScheme ℒₒᵣ Set.univ, φ = (σ : ArithmeticSemiproposition 0))
+      ↔ ∃ ψ : ArithmeticSemiproposition 1, φ = (succInd ψ).univCl' := by
   simp only [InductionScheme, Set.mem_setOf_eq]
   constructor
   · rintro ⟨σ, ⟨ψ, -, rfl⟩, rfl⟩
@@ -970,24 +955,23 @@ lemma mem_inductionScheme_univ_iff (φ : _root_.LO.FirstOrder.ArithmeticSemiform
 
 /-- **Closure inversion (forward keystone).** A freevar-free level-`m` formula `β` whose internal
 `bv` is `m` and which substitutes back to `succInd γ` is exactly the `fixitr`-image, so its
-`m`-fold closure is `(succInd γ).univCl'`. Mirror of `bv_quote_fixitr`'s `≥`-direction inversion;
-the genuine remaining math. -/
-theorem closure_inversion {m : ℕ} (β : _root_.LO.FirstOrder.ArithmeticSemiformula ℕ m) (γ : _root_.LO.FirstOrder.ArithmeticSemiformula ℕ 1)
+`m`-fold closure is `(succInd γ).univCl'`. Mirror of `bv_quote_fixitr`'s `≥`-direction inversion. -/
+theorem closure_inversion {m : ℕ} (β : ArithmeticSemiproposition m) (γ : ArithmeticSemiproposition 1)
     (hfree : β.freeVariables = ∅) (hbv : Bootstrapping.bv (V := ℕ) ℒₒᵣ (⌜β⌝ : ℕ) = m)
     (hβγ : β ⇜ (fun i : Fin m ↦ (&↑i : SyntacticTerm ℒₒᵣ)) = succInd γ) :
-    (∀¹* β : _root_.LO.FirstOrder.ArithmeticSemiformula ℕ 0) = (succInd γ).univCl' := by
-  set χ : _root_.LO.FirstOrder.ArithmeticSemiformula ℕ 0 := succInd γ with hχ
+    (∀¹* β : ArithmeticSemiproposition 0) = (succInd γ).univCl' := by
+  set χ : ArithmeticSemiproposition 0 := succInd γ with hχ
   -- (*) code-level: `⌜fixitr 0 m ▹ χ⌝ = ⌜β⌝` (rebind composite = castLE on freevar-free β; codes
   -- erase the level index, sidestepping the `0 + m` vs `m` cast)
-  have hcodeβ : (⌜(Rew.fixitr 0 m ▹ χ : _root_.LO.FirstOrder.ArithmeticSemiformula ℕ (0 + m))⌝ : ℕ) = ⌜β⌝ := by
+  have hcodeβ : (⌜(Rew.fixitr 0 m ▹ χ : ArithmeticSemiproposition (0 + m))⌝ : ℕ) = ⌜β⌝ := by
     have hcompcast :
         ((Rew.fixitr 0 m).comp (Rew.subst (fun i : Fin m ↦ (&↑i : SyntacticTerm ℒₒᵣ)))) ▹ β
-          = (Rew.castLE (Nat.le_add_left m 0) ▹ β : _root_.LO.FirstOrder.ArithmeticSemiformula ℕ (0 + m)) := by
+          = (Rew.castLE (Nat.le_add_left m 0) ▹ β : ArithmeticSemiproposition (0 + m)) := by
       apply Semiformula.rew_eq_of_funEqOn
       · intro x; simp [Rew.comp_app, Rew.fixitr_fvar, Fin.ext_iff]
       · intro x hx; rw [Semiformula.FVar?, hfree] at hx; simp at hx
-    have heq : (Rew.fixitr 0 m ▹ χ : _root_.LO.FirstOrder.ArithmeticSemiformula ℕ (0 + m))
-        = (Rew.castLE (Nat.le_add_left m 0) ▹ β : _root_.LO.FirstOrder.ArithmeticSemiformula ℕ (0 + m)) := by
+    have heq : (Rew.fixitr 0 m ▹ χ : ArithmeticSemiproposition (0 + m))
+        = (Rew.castLE (Nat.le_add_left m 0) ▹ β : ArithmeticSemiproposition (0 + m)) := by
       rw [← hcompcast, TransitiveRewriting.comp_app,
         show (Rew.subst (fun i : Fin m ↦ (&↑i : SyntacticTerm ℒₒᵣ)) ▹ β) = χ from hβγ]
     rw [heq, Semiformula.quote_castLE (V := ℕ) β (Nat.le_add_left m 0)]
@@ -1006,18 +990,18 @@ theorem closure_inversion {m : ℕ} (β : _root_.LO.FirstOrder.ArithmeticSemifor
     · have := hfvbound (χ.fvSup - 1) (Semiformula.fvar?_fvSup_pred χ hpos); omega
   -- (A) `m = χ.fvSup`: `fixitr 0 m ▹ χ` shares the *code* of `fixitr 0 χ.fvSup ▹ χ` (castLE), whose
   -- `bv` is `χ.fvSup` (bv_quote_fixitr); but `bv ⌜β⌝ = m` (hbv), and `⌜β⌝ = ⌜fixitr 0 m ▹ χ⌝`.
-  have hcast_eq : (Rew.fixitr 0 m ▹ χ : _root_.LO.FirstOrder.ArithmeticSemiformula ℕ (0 + m))
+  have hcast_eq : (Rew.fixitr 0 m ▹ χ : ArithmeticSemiproposition (0 + m))
       = (Rew.castLE (by omega : (0 + χ.fvSup) ≤ (0 + m))
-          ▹ (Rew.fixitr 0 χ.fvSup ▹ χ : _root_.LO.FirstOrder.ArithmeticSemiformula ℕ (0 + χ.fvSup))) := by
+          ▹ (Rew.fixitr 0 χ.fvSup ▹ χ : ArithmeticSemiproposition (0 + χ.fvSup))) := by
     rw [← TransitiveRewriting.comp_app]
     apply Semiformula.rew_eq_of_funEqOn₀
     intro x hx
     have hxlt : x < χ.fvSup := Semiformula.lt_fvSup_of_fvar? hx
     simp [Rew.comp_app, Rew.fixitr_fvar, hxlt, show x < m from by omega]
-  have hcode : (⌜(Rew.fixitr 0 m ▹ χ : _root_.LO.FirstOrder.ArithmeticSemiformula ℕ (0 + m))⌝ : ℕ)
-      = ⌜(Rew.fixitr 0 χ.fvSup ▹ χ : _root_.LO.FirstOrder.ArithmeticSemiformula ℕ (0 + χ.fvSup))⌝ := by
+  have hcode : (⌜(Rew.fixitr 0 m ▹ χ : ArithmeticSemiproposition (0 + m))⌝ : ℕ)
+      = ⌜(Rew.fixitr 0 χ.fvSup ▹ χ : ArithmeticSemiproposition (0 + χ.fvSup))⌝ := by
     rw [hcast_eq, Semiformula.quote_castLE (V := ℕ)
-      (Rew.fixitr 0 χ.fvSup ▹ χ : _root_.LO.FirstOrder.ArithmeticSemiformula ℕ (0 + χ.fvSup)) (by omega)]
+      (Rew.fixitr 0 χ.fvSup ▹ χ : ArithmeticSemiproposition (0 + χ.fvSup)) (by omega)]
   have hm : m = χ.fvSup := by
     rw [← hbv, ← hcodeβ, hcode]; exact Bootstrapping.bv_quote_fixitr χ
   -- conclude via codes: `⌜∀¹* β⌝ = qqAlls ⌜β⌝ m = qqAlls ⌜fixitr 0 χ.fvSup ▹ χ⌝ (0+χ.fvSup) = ⌜χ.univCl'⌝`
@@ -1026,11 +1010,10 @@ theorem closure_inversion {m : ℕ} (β : _root_.LO.FirstOrder.ArithmeticSemifor
     Bootstrapping.quote_allClosure (V := ℕ) (Rew.fixitr 0 χ.fvSup ▹ χ), ← hcodeβ, hcode, hm]
   simp
 
-/-- **mem_iff math (C = univ).** The recognizer fires on `⌜φ⌝` exactly when `φ` is the universal
-closure of `succInd ψ` for some one-variable `ψ`. Forward inverts via `IsSemiformula.sound` +
-`closure_inversion`; backward composes `quote_univCl'`/`subst_fvarVec_quote'`/`indBodyVal_quote`. -/
-theorem chUniv_mem_iff (φ : _root_.LO.FirstOrder.ArithmeticSemiformula ℕ 0) :
-    InductionUnivR (⌜φ⌝ : ℕ) ↔ ∃ σ ∈ InductionScheme ℒₒᵣ Set.univ, φ = (σ : _root_.LO.FirstOrder.ArithmeticSemiformula ℕ 0) := by
+/-- The recognizer fires on `⌜φ⌝` exactly when `φ` is the universal closure of `succInd ψ` for
+some one-variable `ψ`. -/
+theorem chUniv_mem_iff (φ : ArithmeticSemiproposition 0) :
+    InductionUnivR (⌜φ⌝ : ℕ) ↔ ∃ σ ∈ InductionScheme ℒₒᵣ Set.univ, φ = (σ : ArithmeticSemiproposition 0) := by
   rw [mem_inductionScheme_univ_iff]
   constructor
   · -- forward: recognizer fires ⟹ φ is an induction axiom
@@ -1065,15 +1048,15 @@ theorem chUniv_mem_iff (φ : _root_.LO.FirstOrder.ArithmeticSemiformula ℕ 0) :
       obtain ⟨hge, hpred⟩ := step (β.freeVariables.min' hnem) (β.freeVariables.min'_mem hnem)
       exact absurd (β.freeVariables.min'_le _ hpred) (by omega)
     -- (3) `φ = ∀¹* β`
-    have hφ : φ = (∀¹* β : _root_.LO.FirstOrder.ArithmeticSemiformula ℕ 0) := by
+    have hφ : φ = (∀¹* β : ArithmeticSemiproposition 0) := by
       apply (Semiformula.quote_inj_iff (L := ℒₒᵣ) (V := ℕ)).mp
       rw [hp, Bootstrapping.quote_allClosure (V := ℕ) β]; simp
     rw [hφ]
     exact closure_inversion β γ hβfree hbv hβγ
   · -- backward: φ = univCl'(succInd ψ) ⟹ recognizer fires
     rintro ⟨ψ, rfl⟩
-    set χ : _root_.LO.FirstOrder.ArithmeticSemiformula ℕ 0 := succInd ψ with hχ
-    set b : ℕ := (⌜(Rew.fixitr 0 χ.fvSup ▹ χ : _root_.LO.FirstOrder.ArithmeticSemiformula ℕ (0 + χ.fvSup))⌝ : ℕ) with hb
+    set χ : ArithmeticSemiproposition 0 := succInd ψ with hχ
+    set b : ℕ := (⌜(Rew.fixitr 0 χ.fvSup ▹ χ : ArithmeticSemiproposition (0 + χ.fvSup))⌝ : ℕ) with hb
     have hcode : (⌜χ.univCl'⌝ : ℕ) = Bootstrapping.qqAlls b ((0 + χ.fvSup : ℕ)) := by
       rw [hb, Bootstrapping.quote_univCl' (V := ℕ) χ]; simp
     -- `s := subst (fvarVec m) b = indBodyVal ⌜ψ⌝ = ⌜succInd ψ⌝`, computed once and reused.
@@ -1081,7 +1064,7 @@ theorem chUniv_mem_iff (φ : _root_.LO.FirstOrder.ArithmeticSemiformula ℕ 0) :
         = indBodyVal (⌜ψ⌝ : ℕ) := by
       rw [hb]
       have hsub := Bootstrapping.subst_fvarVec_quote' (V := ℕ)
-        (Rew.fixitr 0 χ.fvSup ▹ χ : _root_.LO.FirstOrder.ArithmeticSemiformula ℕ (0 + χ.fvSup))
+        (Rew.fixitr 0 χ.fvSup ▹ χ : ArithmeticSemiproposition (0 + χ.fvSup))
       simp only [natCast_nat] at hsub
       rw [hsub, Bootstrapping.quote_subst_fvar_fixitr χ,
         show (⌜ψ⌝ : ℕ) = (⌜ψ⌝ : Bootstrapping.Semiformula ℕ ℒₒᵣ 1).val from rfl,
@@ -1093,10 +1076,10 @@ theorem chUniv_mem_iff (φ : _root_.LO.FirstOrder.ArithmeticSemiformula ℕ 0) :
     · exact hcode
     · rw [hb]
       exact (Semiformula.quote_isSemiformula (V := ℕ)
-        (Rew.fixitr 0 χ.fvSup ▹ χ : _root_.LO.FirstOrder.ArithmeticSemiformula ℕ (0 + χ.fvSup))).isUFormula
+        (Rew.fixitr 0 χ.fvSup ▹ χ : ArithmeticSemiproposition (0 + χ.fvSup))).isUFormula
     · -- shift b = b: the closure body is freevar-free, so meta `shift` fixes it
       rw [hb]
-      have hnf : ∀ x, ¬(Rew.fixitr 0 χ.fvSup ▹ χ : _root_.LO.FirstOrder.ArithmeticSemiformula ℕ (0 + χ.fvSup)).FVar? x := by
+      have hnf : ∀ x, ¬(Rew.fixitr 0 χ.fvSup ▹ χ : ArithmeticSemiproposition (0 + χ.fvSup)).FVar? x := by
         intro x
         rw [Rew.eq_bind (Rew.fixitr 0 χ.fvSup)]
         simp only [Function.comp_def, Rew.fixitr_bvar, Rew.fixitr_fvar, Fin.natAdd_mk, zero_add]
@@ -1105,11 +1088,11 @@ theorem chUniv_mem_iff (φ : _root_.LO.FirstOrder.ArithmeticSemiformula ℕ 0) :
         · simp at hz
         · have : z < χ.fvSup := Semiformula.lt_fvSup_of_fvar? hz
           simp [this] at hx
-      have hshift : Rewriting.shift (Rew.fixitr 0 χ.fvSup ▹ χ : _root_.LO.FirstOrder.ArithmeticSemiformula ℕ (0 + χ.fvSup))
-          = (Rew.fixitr 0 χ.fvSup ▹ χ : _root_.LO.FirstOrder.ArithmeticSemiformula ℕ (0 + χ.fvSup)) :=
+      have hshift : Rewriting.shift (Rew.fixitr 0 χ.fvSup ▹ χ : ArithmeticSemiproposition (0 + χ.fvSup))
+          = (Rew.fixitr 0 χ.fvSup ▹ χ : ArithmeticSemiproposition (0 + χ.fvSup)) :=
         Semiformula.rew_eq_self_of (by simp) (fun x hx ↦ absurd hx (hnf x))
       rw [← Semiformula.quote_shift (V := ℕ)
-        (Rew.fixitr 0 χ.fvSup ▹ χ : _root_.LO.FirstOrder.ArithmeticSemiformula ℕ (0 + χ.fvSup)), hshift]
+        (Rew.fixitr 0 χ.fvSup ▹ χ : ArithmeticSemiproposition (0 + χ.fvSup)), hshift]
     · rw [hb]; exact (Bootstrapping.bv_quote_fixitr χ).trans (zero_add _).symm
     · -- `K = ⌜ψ⌝ ≤ subst (fvarVec m) b = indBodyVal ⌜ψ⌝` — the clean half: `ψ` is the
       -- bound body of the `^∀ ⌜ψ⌝` conclusion sitting inside the `succInd` shape.
@@ -1133,8 +1116,8 @@ noncomputable instance InductionScheme.delta1_univ :
 
 open Bootstrapping in
 /-- The code of the bounded universal `∀¹[#0 < bShift t] φ` is `qqBall (termBShift ⌜t⌝) ⌜φ⌝`. -/
-lemma quote_ball {n : ℕ} (t : SyntacticSemiterm ℒₒᵣ n) (φ : _root_.LO.FirstOrder.ArithmeticSemiformula ℕ (n + 1)) :
-    (⌜(∀¹[“#0 < !!(Rew.bShift t)”] φ : _root_.LO.FirstOrder.ArithmeticSemiformula ℕ n)⌝ : ℕ)
+lemma quote_ball {n : ℕ} (t : SyntacticSemiterm ℒₒᵣ n) (φ : ArithmeticSemiproposition (n + 1)) :
+    (⌜(∀¹[“#0 < !!(Rew.bShift t)”] φ : ArithmeticSemiproposition n)⌝ : ℕ)
       = qqBall (termBShift ℒₒᵣ (⌜t⌝ : ℕ)) (⌜φ⌝ : ℕ) := by
   rw [Semiformula.ball_eq, Semiformula.imp_eq]
   simp only [Semiformula.Operator.lt_def, Semiformula.neg_rel, Semiformula.quote_all,
@@ -1151,7 +1134,7 @@ lemma termBShift_quote {n : ℕ} (s : SyntacticSemiterm ℒₒᵣ n) :
 
 open Bootstrapping in
 /-- `(⟸)` Every `𝚺₁` formula has a `𝚺₁`-recognized code. By `sigma₁_induction'`. -/
-lemma isSigma1_of_hierarchy {n : ℕ} {ψ : _root_.LO.FirstOrder.ArithmeticSemiformula ℕ n} (h : Hierarchy 𝚺 1 ψ) :
+lemma isSigma1_of_hierarchy {n : ℕ} {ψ : ArithmeticSemiproposition n} (h : Hierarchy 𝚺 1 ψ) :
     IsSigma1 (⌜ψ⌝ : ℕ) := by
   refine sigma₁_induction' h (P := fun n φ => IsSigma1 (⌜φ⌝ : ℕ))
     ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_
@@ -1171,11 +1154,8 @@ lemma isSigma1_of_hierarchy {n : ℕ} {ψ : _root_.LO.FirstOrder.ArithmeticSemif
   · intro n φ hφ ihφ; simpa [Semiformula.quote_ex] using ihφ
 
 open Bootstrapping in
-/-- `(⟹)` A `𝚺₁`-recognized code is the code of a `𝚺₁` formula. Meta-induction on the formula:
-atoms are `𝚺₁` unconditionally; `∧/∨/∃` recurse; the `^∀` case is forced into the bounded shape by
-the recognizer (`IsSigma1.of_all`), and the bound is a `bShift`-image (positivity via
-`termBV_termBShift_le`), so `Hierarchy.ball` applies. -/
-lemma hierarchy_of_isSigma1 {n : ℕ} (ψ : _root_.LO.FirstOrder.ArithmeticSemiformula ℕ n) :
+/-- `(⟹)` A `𝚺₁`-recognized code is the code of a `𝚺₁` formula. -/
+lemma hierarchy_of_isSigma1 {n : ℕ} (ψ : ArithmeticSemiproposition n) :
     IsSigma1 (⌜ψ⌝ : ℕ) → Hierarchy 𝚺 1 ψ := by
   induction ψ using Semiformula.rec' with
   | hverum => intro _; simp
@@ -1220,7 +1200,7 @@ lemma hierarchy_of_isSigma1 {n : ℕ} (ψ : _root_.LO.FirstOrder.ArithmeticSemif
       exact Hierarchy.exs (ihφ h)
 
 /-- **Correctness of the `𝚺₁`-code recognizer**: `IsSigma1 ⌜ψ⌝ ↔ Hierarchy 𝚺 1 ψ`. -/
-lemma isSigma1_iff_hierarchy {n : ℕ} (ψ : _root_.LO.FirstOrder.ArithmeticSemiformula ℕ n) :
+lemma isSigma1_iff_hierarchy {n : ℕ} (ψ : ArithmeticSemiproposition n) :
     Bootstrapping.IsSigma1 (⌜ψ⌝ : ℕ) ↔ Hierarchy 𝚺 1 ψ :=
   ⟨hierarchy_of_isSigma1 ψ, isSigma1_of_hierarchy⟩
 
@@ -1275,9 +1255,9 @@ instance InductionSigma1R.defined : 𝚫₁-Predicate[V] (InductionSigma1R : V �
 end chSigma1Defined
 
 /-- RHS of `chSigma1_mem_iff` reduced to a clean `∃ψ` (with the `𝚺₁` side condition). -/
-lemma mem_inductionScheme_sigma1_iff (φ : _root_.LO.FirstOrder.ArithmeticSemiformula ℕ 0) :
-    (∃ σ ∈ InductionScheme ℒₒᵣ (Arithmetic.Hierarchy 𝚺 1), φ = (σ : _root_.LO.FirstOrder.ArithmeticSemiformula ℕ 0))
-      ↔ ∃ ψ : _root_.LO.FirstOrder.ArithmeticSemiformula ℕ 1, Hierarchy 𝚺 1 ψ ∧ φ = (succInd ψ).univCl' := by
+lemma mem_inductionScheme_sigma1_iff (φ : ArithmeticSemiproposition 0) :
+    (∃ σ ∈ InductionScheme ℒₒᵣ (Arithmetic.Hierarchy 𝚺 1), φ = (σ : ArithmeticSemiproposition 0))
+      ↔ ∃ ψ : ArithmeticSemiproposition 1, Hierarchy 𝚺 1 ψ ∧ φ = (succInd ψ).univCl' := by
   simp only [InductionScheme, Set.mem_setOf_eq]
   constructor
   · rintro ⟨σ, ⟨ψ, hψ, rfl⟩, rfl⟩
@@ -1287,11 +1267,11 @@ lemma mem_inductionScheme_sigma1_iff (φ : _root_.LO.FirstOrder.ArithmeticSemifo
       by simp [Semiformula.coe_univCl_eq_univCl']⟩
 
 open Bootstrapping in
-/-- **mem_iff math (C = Hierarchy 𝚺 1).** Mirrors `chUniv_mem_iff`, threading the `IsSigma1 K`
-side condition through `isSigma1_iff_hierarchy`. -/
-theorem chSigma1_mem_iff (φ : _root_.LO.FirstOrder.ArithmeticSemiformula ℕ 0) :
+/-- The `𝚺₁`-recognizer version of `chUniv_mem_iff`: the recognizer fires on `⌜φ⌝` exactly when
+`φ` is the universal closure of `succInd ψ` for some `𝚺₁` one-variable `ψ`. -/
+theorem chSigma1_mem_iff (φ : ArithmeticSemiproposition 0) :
     InductionSigma1R (⌜φ⌝ : ℕ)
-      ↔ ∃ σ ∈ InductionScheme ℒₒᵣ (Arithmetic.Hierarchy 𝚺 1), φ = (σ : _root_.LO.FirstOrder.ArithmeticSemiformula ℕ 0) := by
+      ↔ ∃ σ ∈ InductionScheme ℒₒᵣ (Arithmetic.Hierarchy 𝚺 1), φ = (σ : ArithmeticSemiproposition 0) := by
   rw [mem_inductionScheme_sigma1_iff]
   constructor
   · rintro ⟨m, -, b, -, hp, hU, hsh, hbv, K, -, hKsemi, hKsig, hsubst⟩
@@ -1321,21 +1301,21 @@ theorem chSigma1_mem_iff (φ : _root_.LO.FirstOrder.ArithmeticSemiformula ℕ 0)
       have hnem := Finset.nonempty_of_ne_empty hne
       obtain ⟨hge, hpred⟩ := step (β.freeVariables.min' hnem) (β.freeVariables.min'_mem hnem)
       exact absurd (β.freeVariables.min'_le _ hpred) (by omega)
-    have hφ : φ = (∀¹* β : _root_.LO.FirstOrder.ArithmeticSemiformula ℕ 0) := by
+    have hφ : φ = (∀¹* β : ArithmeticSemiproposition 0) := by
       apply (Semiformula.quote_inj_iff (L := ℒₒᵣ) (V := ℕ)).mp
       rw [hp, Bootstrapping.quote_allClosure (V := ℕ) β]; simp
     rw [hφ]
     exact closure_inversion β γ hβfree hbv hβγ
   · rintro ⟨ψ, hψ, rfl⟩
-    set χ : _root_.LO.FirstOrder.ArithmeticSemiformula ℕ 0 := succInd ψ with hχ
-    set b : ℕ := (⌜(Rew.fixitr 0 χ.fvSup ▹ χ : _root_.LO.FirstOrder.ArithmeticSemiformula ℕ (0 + χ.fvSup))⌝ : ℕ) with hb
+    set χ : ArithmeticSemiproposition 0 := succInd ψ with hχ
+    set b : ℕ := (⌜(Rew.fixitr 0 χ.fvSup ▹ χ : ArithmeticSemiproposition (0 + χ.fvSup))⌝ : ℕ) with hb
     have hcode : (⌜χ.univCl'⌝ : ℕ) = Bootstrapping.qqAlls b ((0 + χ.fvSup : ℕ)) := by
       rw [hb, Bootstrapping.quote_univCl' (V := ℕ) χ]; simp
     have hs : Bootstrapping.subst ℒₒᵣ (Bootstrapping.fvarVec (0 + χ.fvSup : ℕ)) b
         = indBodyVal (⌜ψ⌝ : ℕ) := by
       rw [hb]
       have hsub := Bootstrapping.subst_fvarVec_quote' (V := ℕ)
-        (Rew.fixitr 0 χ.fvSup ▹ χ : _root_.LO.FirstOrder.ArithmeticSemiformula ℕ (0 + χ.fvSup))
+        (Rew.fixitr 0 χ.fvSup ▹ χ : ArithmeticSemiproposition (0 + χ.fvSup))
       simp only [natCast_nat] at hsub
       rw [hsub, Bootstrapping.quote_subst_fvar_fixitr χ,
         show (⌜ψ⌝ : ℕ) = (⌜ψ⌝ : Bootstrapping.Semiformula ℕ ℒₒᵣ 1).val from rfl,
@@ -1347,9 +1327,9 @@ theorem chSigma1_mem_iff (φ : _root_.LO.FirstOrder.ArithmeticSemiformula ℕ 0)
     · exact hcode
     · rw [hb]
       exact (Semiformula.quote_isSemiformula (V := ℕ)
-        (Rew.fixitr 0 χ.fvSup ▹ χ : _root_.LO.FirstOrder.ArithmeticSemiformula ℕ (0 + χ.fvSup))).isUFormula
+        (Rew.fixitr 0 χ.fvSup ▹ χ : ArithmeticSemiproposition (0 + χ.fvSup))).isUFormula
     · rw [hb]
-      have hnf : ∀ x, ¬(Rew.fixitr 0 χ.fvSup ▹ χ : _root_.LO.FirstOrder.ArithmeticSemiformula ℕ (0 + χ.fvSup)).FVar? x := by
+      have hnf : ∀ x, ¬(Rew.fixitr 0 χ.fvSup ▹ χ : ArithmeticSemiproposition (0 + χ.fvSup)).FVar? x := by
         intro x
         rw [Rew.eq_bind (Rew.fixitr 0 χ.fvSup)]
         simp only [Function.comp_def, Rew.fixitr_bvar, Rew.fixitr_fvar, Fin.natAdd_mk, zero_add]
@@ -1358,11 +1338,11 @@ theorem chSigma1_mem_iff (φ : _root_.LO.FirstOrder.ArithmeticSemiformula ℕ 0)
         · simp at hz
         · have : z < χ.fvSup := Semiformula.lt_fvSup_of_fvar? hz
           simp [this] at hx
-      have hshift : Rewriting.shift (Rew.fixitr 0 χ.fvSup ▹ χ : _root_.LO.FirstOrder.ArithmeticSemiformula ℕ (0 + χ.fvSup))
-          = (Rew.fixitr 0 χ.fvSup ▹ χ : _root_.LO.FirstOrder.ArithmeticSemiformula ℕ (0 + χ.fvSup)) :=
+      have hshift : Rewriting.shift (Rew.fixitr 0 χ.fvSup ▹ χ : ArithmeticSemiproposition (0 + χ.fvSup))
+          = (Rew.fixitr 0 χ.fvSup ▹ χ : ArithmeticSemiproposition (0 + χ.fvSup)) :=
         Semiformula.rew_eq_self_of (by simp) (fun x hx ↦ absurd hx (hnf x))
       rw [← Semiformula.quote_shift (V := ℕ)
-        (Rew.fixitr 0 χ.fvSup ▹ χ : _root_.LO.FirstOrder.ArithmeticSemiformula ℕ (0 + χ.fvSup)), hshift]
+        (Rew.fixitr 0 χ.fvSup ▹ χ : ArithmeticSemiproposition (0 + χ.fvSup)), hshift]
     · rw [hb]; exact (Bootstrapping.bv_quote_fixitr χ).trans (zero_add _).symm
     · rw [hs]; exact le_indBodyVal _
     · simp
