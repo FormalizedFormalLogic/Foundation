@@ -387,10 +387,8 @@ instance models_Peano : ℕ↓[ℒₒᵣ] ⊧* 𝗣𝗔 := by
   simp [Peano, InductionScheme]
   grind
 
-/-- `𝗜𝚺₁` is `𝚺₁`-sound: every `𝚺₁` sentence provable in `𝗜𝚺₁` is true in the standard model `ℕ`. -/
 instance sigmaOneSound_ISigmaOne : 𝗜𝚺₁.SoundOnHierarchy 𝚺 1 := inferInstance
 
-/-- `𝗣𝗔` is `𝚺₁`-sound: every `𝚺₁` sentence provable in `𝗣𝗔` is true in the standard model `ℕ`. -/
 instance sigmaOneSound_Peano : 𝗣𝗔.SoundOnHierarchy 𝚺 1 := inferInstance
 
 instance : Entailment.Consistent (𝗜𝗡𝗗 Γ k) := (𝗜𝗡𝗗 Γ k).consistent_of_sound (Eq ⊥) rfl
