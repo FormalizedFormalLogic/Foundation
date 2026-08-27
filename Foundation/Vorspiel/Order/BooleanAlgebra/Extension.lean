@@ -117,7 +117,10 @@ variable {e : A ≃o B} {a : α} {b : β}
 
 /-- The companion relation is symmetric under swapping `e` for `e.symm`. -/
 lemma IsCompanion.symm (h : IsCompanion e a b) : IsCompanion e.symm b a := by
-  sorry
+  intro v
+  have := h (e.symm v)
+  rw [OrderIso.apply_symm_apply] at this
+  exact ⟨this.1.symm, this.2.symm⟩
 
 /-- If `A` is finite and `β` is a nontrivial densely ordered (equivalently, atomless)
 Boolean algebra, every `a : α` admits a companion under `e`. -/
