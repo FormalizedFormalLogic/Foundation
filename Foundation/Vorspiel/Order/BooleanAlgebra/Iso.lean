@@ -29,6 +29,10 @@ open BooleanSubalgebra
 
 variable {α β : Type*} [BooleanAlgebra α] [BooleanAlgebra β]
 
+/-- The bottom Boolean subalgebra, namely `{⊥, ⊤}`, is finite. -/
+lemma BooleanSubalgebra.coe_bot_finite : ((⊥ : BooleanSubalgebra α) : Set α).Finite := by
+  rw [coe_bot]; exact (Set.finite_singleton _).insert _
+
 variable (α β) in
 /-- A partial isomorphism between `α` and `β`: an order isomorphism between two finite
 Boolean subalgebras. -/
@@ -45,11 +49,12 @@ namespace PartialIso
 `f`'s domain. -/
 instance : Preorder (PartialIso α β) where
   le f g := ∃ hA : f.domSubalg ≤ g.domSubalg, ∀ x : f.domSubalg, (g.iso ⟨x, hA x.2⟩ : β) = f.iso x
-  le_refl f := ⟨le_refl _, fun x => by sorry⟩
-  le_trans f g h hfg hgh := by sorry
+  le_refl _ := ⟨le_refl _, fun _ ↦ rfl⟩
+  le_trans _ _ _ := fun ⟨hfg, hfg'⟩ ⟨hgh, hgh'⟩ ↦
+    ⟨hfg.trans hgh, fun x ↦ (hgh' ⟨x, hfg x.2⟩).trans (hfg' x)⟩
 
 noncomputable instance [Nontrivial α] [Nontrivial β] : Inhabited (PartialIso α β) :=
-  ⟨⟨⊥, ⊥, by sorry, by sorry, botOrderIso⟩⟩
+  ⟨⟨⊥, ⊥, coe_bot_finite, coe_bot_finite, botOrderIso⟩⟩
 
 lemma le_def {f g : PartialIso α β} :
     f ≤ g ↔ ∃ hA : f.domSubalg ≤ g.domSubalg,
