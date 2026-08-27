@@ -26,7 +26,9 @@ variable {γ : Type*} [BooleanAlgebra γ]
 /-- Comparing `y₁ ⊓ a` and `y₂ ⊓ a` reduces to the vanishing of the relative
 complement `(y₁ \ y₂) ⊓ a`. -/
 lemma inf_le_iff_sdiff_disjoint {y₁ y₂ a : γ} : y₁ ⊓ a ≤ y₂ ⊓ a ↔ (y₁ \ y₂) ⊓ a = ⊥ := by
-  sorry
+  rw [← sdiff_eq_bot_iff,
+    show (y₁ ⊓ a) \ (y₂ ⊓ a) = y₁ \ y₂ ⊓ a by
+      rw [sdiff_eq, sdiff_eq, compl_inf, inf_sup_left]; simp [inf_left_comm, inf_comm]]
 
 /-- Comparing the normal-form representatives `(y ⊓ a) ⊔ (z ⊓ aᶜ)` of an element of
 `closure (insert a A)` splits into independent comparisons on the `a`-part and the
