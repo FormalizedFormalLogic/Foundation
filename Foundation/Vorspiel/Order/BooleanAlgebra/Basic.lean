@@ -10,9 +10,7 @@ public import Mathlib.Data.Finset.Lattice.Fold
 
 Elementary Boolean algebra identities and finite-atom-theory facts used to build the
 back-and-forth isomorphism between countable atomless Boolean algebras
-(`Foundation.Vorspiel.Order.BooleanAlgebra.Iso`): comparing normal-form
-representatives `(y ⊓ a) ⊔ (z ⊓ aᶜ)` reduces to comparing relative complements, and
-every element of a finite Boolean algebra is the supremum of the atoms lying below it.
+(`Foundation.Vorspiel.Order.BooleanAlgebra.Iso`).
 
 Folklore Boolean algebra manipulations; there is no direct literature source.
 -/
@@ -23,16 +21,12 @@ namespace BooleanAlgebra
 
 variable {γ : Type*} [BooleanAlgebra γ]
 
-/-- Comparing `y₁ ⊓ a` and `y₂ ⊓ a` reduces to the vanishing of the relative
-complement `(y₁ \ y₂) ⊓ a`. -/
 lemma inf_le_iff_sdiff_disjoint {y₁ y₂ a : γ} : y₁ ⊓ a ≤ y₂ ⊓ a ↔ (y₁ \ y₂) ⊓ a = ⊥ := by
   rw [← sdiff_eq_bot_iff,
     show (y₁ ⊓ a) \ (y₂ ⊓ a) = y₁ \ y₂ ⊓ a by
       rw [sdiff_eq, sdiff_eq, compl_inf, inf_sup_left]; simp [inf_left_comm, inf_comm]]
 
-/-- Comparing the normal-form representatives `(y ⊓ a) ⊔ (z ⊓ aᶜ)` of an element of
-`closure (insert a A)` splits into independent comparisons on the `a`-part and the
-`aᶜ`-part. -/
+/-- `(y ⊓ a) ⊔ (z ⊓ aᶜ)` is the normal form of an element of `closure (insert a A)`. -/
 lemma insertRep_le_insertRep_iff {y₁ z₁ y₂ z₂ a : γ} :
     (y₁ ⊓ a) ⊔ (z₁ ⊓ aᶜ) ≤ (y₂ ⊓ a) ⊔ (z₂ ⊓ aᶜ) ↔
       (y₁ \ y₂) ⊓ a = ⊥ ∧ (z₁ \ z₂) ⊓ aᶜ = ⊥ := by
@@ -44,27 +38,38 @@ lemma insertRep_le_insertRep_iff {y₁ z₁ y₂ z₂ a : γ} :
       fun h => h.trans le_sup_right⟩
   rw [sup_le_iff, h₁, h₂, inf_le_iff_sdiff_disjoint, inf_le_iff_sdiff_disjoint]
 
-/-- The complement of a normal-form representative `(y ⊓ a) ⊔ (z ⊓ aᶜ)` is again a
-normal-form representative, with `y` and `z` complemented. -/
 lemma compl_insertRep (y z a : γ) : ((y ⊓ a) ⊔ (z ⊓ aᶜ))ᶜ = (yᶜ ⊓ a) ⊔ (zᶜ ⊓ aᶜ) := by
-  sorry
+  have e1 : (y ⊓ a) ⊔ (yᶜ ⊓ a) = a := by rw [← inf_sup_right, sup_compl_eq_top, top_inf_eq]
+  have e2 : (z ⊓ aᶜ) ⊔ (zᶜ ⊓ aᶜ) = aᶜ := by rw [← inf_sup_right, sup_compl_eq_top, top_inf_eq]
+  have hsup : (y ⊓ a) ⊔ (z ⊓ aᶜ) ⊔ ((yᶜ ⊓ a) ⊔ (zᶜ ⊓ aᶜ)) = ⊤ := by
+    have hperm : (y ⊓ a) ⊔ (z ⊓ aᶜ) ⊔ ((yᶜ ⊓ a) ⊔ (zᶜ ⊓ aᶜ)) =
+        (y ⊓ a) ⊔ (yᶜ ⊓ a) ⊔ ((z ⊓ aᶜ) ⊔ (zᶜ ⊓ aᶜ)) := by ac_rfl
+    rw [hperm, e1, e2, sup_compl_eq_top]
+  have hac : aᶜ ⊓ a = ⊥ := by rw [inf_comm]; exact inf_compl_eq_bot
+  have h1 : (y ⊓ a) ⊓ (yᶜ ⊓ a) = ⊥ :=
+    le_bot_iff.mp <| (inf_le_inf inf_le_left inf_le_left).trans_eq inf_compl_eq_bot
+  have h2 : (y ⊓ a) ⊓ (zᶜ ⊓ aᶜ) = ⊥ :=
+    le_bot_iff.mp <| (inf_le_inf inf_le_right inf_le_right).trans_eq inf_compl_eq_bot
+  have h3 : (z ⊓ aᶜ) ⊓ (yᶜ ⊓ a) = ⊥ :=
+    le_bot_iff.mp <| (inf_le_inf inf_le_right inf_le_right).trans_eq hac
+  have h4 : (z ⊓ aᶜ) ⊓ (zᶜ ⊓ aᶜ) = ⊥ :=
+    le_bot_iff.mp <| (inf_le_inf inf_le_left inf_le_left).trans_eq inf_compl_eq_bot
+  have hinf : ((y ⊓ a) ⊔ (z ⊓ aᶜ)) ⊓ ((yᶜ ⊓ a) ⊔ (zᶜ ⊓ aᶜ)) = ⊥ := by
+    rw [inf_sup_right, inf_sup_left, inf_sup_left, h1, h2, h3, h4]; simp
+  exact (IsCompl.mk (disjoint_iff.mpr hinf) (codisjoint_iff.mpr hsup)).compl_eq
 
-/-- An atom `p` is either below `w`, or disjoint from it. -/
 lemma IsAtom.le_or_disjoint {p : γ} (hp : IsAtom p) (w : γ) : p ≤ w ∨ p ⊓ w = ⊥ := by
   sorry
 
 open Classical in
-/-- The (finite) set of atoms lying below `w`. -/
 noncomputable def atomsBelow [Fintype γ] (w : γ) : Finset γ :=
   {p | IsAtom p ∧ p ≤ w}
 
-/-- Every element of a finite Boolean algebra is the supremum of the atoms below it. -/
 lemma sup_atomsBelow_eq [Finite γ] (w : γ) :
     haveI := Fintype.ofFinite γ
     (atomsBelow w).sup id = w := by
   sorry
 
-/-- An element `a'` is disjoint from `w` iff it is disjoint from every atom below `w`. -/
 lemma inf_eq_bot_iff_atomsBelow [Finite γ] {w a' : γ} :
     haveI := Fintype.ofFinite γ
     w ⊓ a' = ⊥ ↔ ∀ p ∈ atomsBelow w, p ⊓ a' = ⊥ := by
@@ -76,7 +81,6 @@ namespace BooleanSubalgebra
 
 variable {α : Type*} [BooleanAlgebra α] {A : BooleanSubalgebra α}
 
-/-- Coercion into the ambient algebra commutes with finite suprema. -/
 lemma val_finsetSup (s : Finset A) : ((s.sup id : A) : α) = s.sup (fun p => (p : α)) := by
   sorry
 
