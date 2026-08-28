@@ -14,19 +14,6 @@ namespace LO.FirstOrder
 open FirstOrder Arithmetic
 open PeanoMinus ISigma0 ISigma1 Bootstrapping Derivation
 
-namespace Arithmetic
-
-variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
-
-/-- A function equipped with a canonical `𝚺₁`-definition of its graph. -/
-class SigmaOneFunction₁ (f : V → V) where
-  fDef : 𝚺₁.Semisentence 2
-  defined : 𝚺₁-Function₁[V] f via fDef
-
-instance {f : V → V} [SigmaOneFunction₁ f] : 𝚺₁-Function₁[V] f via (SigmaOneFunction₁.fDef f) := SigmaOneFunction₁.defined
-
-end Arithmetic
-
 namespace Theory
 
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
@@ -35,27 +22,23 @@ variable {L : Language} [L.Encodable] [L.LORDefinable]
 variable {T U : Theory L} [T.Δ₁] [U.Δ₁]
 
 /-- Provability with restriction of proof size -/
-def RestrictedProvable (f : V → V) (e : ℕ) (T : Theory L) [T.Δ₁] (φ : V) := ∃ d < f (ORingStructure.numeral e), Arithmetic.Bootstrapping.Proof T d φ
+def RestrictedProvable (F : V → V) (e : ℕ) (T : Theory L) [T.Δ₁] (φ : V) := ∃ d < F (ORingStructure.numeral e), Arithmetic.Bootstrapping.Proof T d φ
 
-noncomputable def restrictedProvable (f : V → V) [Arithmetic.SigmaOneFunction₁ f] (e : ℕ) : 𝚷₁.Semisentence 1 :=
-  .mkPi “φ. ∀ E, !(Arithmetic.SigmaOneFunction₁.fDef f) E !e → ∃ d < E, !(proof T).pi d φ”
+noncomputable def restrictedProvable (fDef : 𝚺₁.Semisentence 2) (e : ℕ) : 𝚷₁.Semisentence 1 := .mkPi “φ. ∀ E, !fDef E !e → ∃ d < E, !(proof T).pi d φ”
 
-noncomputable abbrev restrictedProvabilityPred (f : V → V) [Arithmetic.SigmaOneFunction₁ f] (e : ℕ) (σ : Sentence L) : ArithmeticSentence :=
-  (T.restrictedProvable f e).val/[⌜σ⌝]
+noncomputable abbrev restrictedProvabilityPred (fDef : 𝚺₁.Semisentence 2) (e : ℕ) (σ : Sentence L) : ArithmeticSentence := (T.restrictedProvable fDef e).val/[⌜σ⌝]
 
-instance RestrictedProvable.defined {f : V → V} [Arithmetic.SigmaOneFunction₁ f] {e} :
-    𝚷₁-Predicate[V] (T.RestrictedProvable f e) via (T.restrictedProvable f e) where
+instance RestrictedProvable.defined {F : V → V} {fDef : 𝚺₁.Semisentence 2} [𝚺₁-Function₁[V] F via fDef] {e} :
+    𝚷₁-Predicate[V] (T.RestrictedProvable F e) via (T.restrictedProvable fDef e) where
   defined {φ} := by simp [Theory.restrictedProvable, Theory.RestrictedProvable];
 
 /-- Gödel sentence by restricted provability -/
-noncomputable abbrev restrictedGödel (f : V → V) [Arithmetic.SigmaOneFunction₁ f] (e : ℕ) (T : Theory L) [T.Δ₁] : ArithmeticSentence :=
-  fixedpoint (∼(T.restrictedProvable f e))
+noncomputable abbrev restrictedGödel (fDef : 𝚺₁.Semisentence 2) (e : ℕ) (T : Theory L) [T.Δ₁] : ArithmeticSentence := fixedpoint (∼(T.restrictedProvable fDef e))
 
-private noncomputable abbrev restrictedGödel' (f : V → V) [Arithmetic.SigmaOneFunction₁ f] (e : ℕ) (T : Theory L) [T.Δ₁] : ArithmeticSentence :=
-  ∼(T.restrictedProvable f e).val/[⌜restrictedGödel f e T⌝]
+private noncomputable abbrev restrictedGödel' (fDef : 𝚺₁.Semisentence 2) (e : ℕ) (T : Theory L) [T.Δ₁] : ArithmeticSentence :=
+  ∼(T.restrictedProvable fDef e).val/[⌜restrictedGödel fDef e T⌝]
 
-omit [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] in
-private lemma restrictedGödel'_sigmaOne {f : V → V} [Arithmetic.SigmaOneFunction₁ f] {e : ℕ} : Hierarchy 𝚺 1 (T.restrictedGödel' f e) := by definability;
+private lemma restrictedGödel'_sigmaOne {fDef : 𝚺₁.Semisentence 2} {e : ℕ} : Hierarchy 𝚺 1 (T.restrictedGödel' fDef e) := by definability;
 
 end Theory
 
@@ -63,46 +46,41 @@ end Theory
 namespace Arithmetic
 
 variable {V : Type} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
-variable {T U : ArithmeticTheory} [T.Δ₁]
-variable {f : V → V} [SigmaOneFunction₁ f] {e : ℕ}
+variable {T U : ArithmeticTheory} [T.Δ₁] -- [𝗜𝚺₁ ⪯ T] [𝗜𝚺₁ ⪯ U]
+variable {fDef : 𝚺₁.Semisentence 2} {e : ℕ}
 
-omit [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] in
-lemma def_restrictedGödel [𝗜𝚺₁ ⪯ U] : U ⊢ T.restrictedGödel f e 🡘 (∼(T.restrictedProvable f e).val)/[⌜T.restrictedGödel f e⌝] := diagonal _
+lemma def_restrictedGödel [𝗜𝚺₁ ⪯ U] : U ⊢ T.restrictedGödel fDef e 🡘 (∼(T.restrictedProvable fDef e).val)/[⌜T.restrictedGödel fDef e⌝] := diagonal _
 
-omit [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] in
-private lemma def_restrictedGödel' [𝗜𝚺₁ ⪯ U] : U ⊢ T.restrictedGödel' f e 🡘 (∼(T.restrictedProvable f e).val)/[⌜T.restrictedGödel f e⌝] := by simp;
+private lemma def_restrictedGödel' [𝗜𝚺₁ ⪯ U] : U ⊢ T.restrictedGödel' fDef e 🡘 (∼(T.restrictedProvable fDef e).val)/[⌜T.restrictedGödel fDef e⌝] := by simp;
 
-omit [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] in
-private lemma provable_E_restrictedGödel_restrictedGödel' [𝗜𝚺₁ ⪯ U] : U ⊢ T.restrictedGödel f e 🡘 T.restrictedGödel' f e := by
+private lemma provable_E_restrictedGödel_restrictedGödel' [𝗜𝚺₁ ⪯ U] : U ⊢ T.restrictedGödel fDef e 🡘 T.restrictedGödel' fDef e := by
   apply Entailment.E!_trans;
   . exact def_restrictedGödel;
   . exact Entailment.E!_symm $ def_restrictedGödel';
 
-omit [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] in
-private lemma iff_provable_restrictedGödel_provable_restrictedGödel' [𝗜𝚺₁ ⪯ U] : U ⊢ (T.restrictedGödel f e) ↔ U ⊢ (T.restrictedGödel' f e) := by
+private lemma iff_provable_restrictedGödel_provable_restrictedGödel' [𝗜𝚺₁ ⪯ U] : U ⊢ (T.restrictedGödel fDef e) ↔ U ⊢ (T.restrictedGödel' fDef e) := by
   apply Entailment.iff_of_E! provable_E_restrictedGödel_restrictedGödel';
 
-omit [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] in
-private lemma iff_true_restrictedGödel_true_restrictedGödel' : ℕ↓[ℒₒᵣ] ⊧ (T.restrictedGödel f e) ↔ ℕ↓[ℒₒᵣ] ⊧ (T.restrictedGödel' f e) := by
+private lemma iff_true_restrictedGödel_true_restrictedGödel' : ℕ↓[ℒₒᵣ] ⊧ (T.restrictedGödel fDef e) ↔ ℕ↓[ℒₒᵣ] ⊧ (T.restrictedGödel' fDef e) := by
   apply Semantics.models_iff.mp;
   apply models_of_provable (T := 𝗜𝚺₁) inferInstance;
   apply provable_E_restrictedGödel_restrictedGödel';
 
-lemma models_restrictedGödel :
-    V↓[ℒₒᵣ] ⊧ T.restrictedGödel f e ↔ ∀ x : V, x < f (ORingStructure.numeral e) → ¬Arithmetic.Bootstrapping.Proof T x (⌜T.restrictedGödel f e⌝) := by
+lemma models_restrictedGödel {F : V → V} [𝚺₁-Function₁[V] F via fDef] :
+    V↓[ℒₒᵣ] ⊧ T.restrictedGödel fDef e ↔ ∀ x : V, x < F (ORingStructure.numeral e) → ¬Arithmetic.Bootstrapping.Proof T x (⌜T.restrictedGödel fDef e⌝) := by
   apply Iff.trans $ Semantics.models_iff.mp $ models_of_provable (T := 𝗜𝚺₁) inferInstance $ def_restrictedGödel;
   simp [models_iff, Theory.RestrictedProvable]
 
-private lemma models_neg_restrictedGödel :
-    ¬V↓[ℒₒᵣ] ⊧ T.restrictedGödel f e ↔ ∃ x : V, x < f (ORingStructure.numeral e) ∧ Arithmetic.Bootstrapping.Proof T x (⌜T.restrictedGödel f e⌝) := by
-  simpa using models_restrictedGödel (f := f).not;
+private lemma models_neg_restrictedGödel {F : V → V} [𝚺₁-Function₁[V] F via fDef] :
+    ¬V↓[ℒₒᵣ] ⊧ T.restrictedGödel fDef e ↔ ∃ x : V, x < F (ORingStructure.numeral e) ∧ Arithmetic.Bootstrapping.Proof T x (⌜T.restrictedGödel fDef e⌝) := by
+  simpa using models_restrictedGödel.not;
 
 variable [𝗜𝚺₁ ⪯ T] [T.SoundOnHierarchy 𝚺 1]
 
 /- Gödel sentence by restricted provability is true. -/
-theorem true_restrictedGödel {f : ℕ → ℕ} [SigmaOneFunction₁ f] : ℕ↓[ℒₒᵣ] ⊧ T.restrictedGödel f e := by
+theorem true_restrictedGödel {F : ℕ → ℕ} [𝚺₁-Function₁ F via fDef] : ℕ↓[ℒₒᵣ] ⊧ T.restrictedGödel fDef e := by
   by_contra hC;
-  obtain ⟨e, _, he⟩ := models_neg_restrictedGödel (f := f) (e := e) |>.mp hC;
+  obtain ⟨e, _, he⟩ := models_neg_restrictedGödel (F := F) (e := e) |>.mp hC;
   apply hC;
   apply iff_true_restrictedGödel_true_restrictedGödel'.mpr;
   apply ArithmeticTheory.soundOnHierarchy T _ _ ?_ T.restrictedGödel'_sigmaOne;
@@ -111,17 +89,17 @@ theorem true_restrictedGödel {f : ℕ → ℕ} [SigmaOneFunction₁ f] : ℕ↓
   simpa using he;
 
 /- Gödel sentence by restricted provability is provable. -/
-theorem provable_restrictedGödel {f : ℕ → ℕ} [SigmaOneFunction₁ f] : T ⊢ T.restrictedGödel f e := by
+theorem provable_restrictedGödel {F : ℕ → ℕ} [𝚺₁-Function₁ F via fDef] : T ⊢ T.restrictedGödel fDef e := by
   apply iff_provable_restrictedGödel_provable_restrictedGödel'.mpr;
   apply Arithmetic.sigma_one_completeness_iff T.restrictedGödel'_sigmaOne |>.mp;
-  apply iff_true_restrictedGödel_true_restrictedGödel'.mp $ true_restrictedGödel (f := f);
+  apply iff_true_restrictedGödel_true_restrictedGödel'.mp $ true_restrictedGödel (F := F);
 
 /-- Lower bound of a Gödel number of proof of restricted Gödel sentence is `F e`. -/
-theorem lower_bound_gödelNumber_proof_restrictedGödel {f : ℕ → ℕ} [SigmaOneFunction₁ f] :
-    ∀ b : T ⊢! T.restrictedGödel f e, f (ORingStructure.numeral e) ≤ ⌜b⌝ := by
+theorem lower_bound_gödelNumber_proof_restrictedGödel {F : ℕ → ℕ} [𝚺₁-Function₁ F via fDef] :
+    ∀ b : T ⊢! T.restrictedGödel fDef e, F (ORingStructure.numeral e) ≤ ⌜b⌝ := by
   intro b;
   exact Nat.le_of_not_lt
-    $ (imp_not_comm.mp $ models_restrictedGödel (f := f).mp (true_restrictedGödel (f := f)) ⌜b⌝)
+    $ (imp_not_comm.mp $ models_restrictedGödel.mp (true_restrictedGödel (F := F)) ⌜b⌝)
     $ proof_of_quote_proof b;
 
 end Arithmetic
@@ -134,8 +112,7 @@ private lemma exp_nat {n : ℕ} : Exp.exp n = 2 ^ n := by
   | succ n ih => grind [exp_succ]
 
 private lemma iterExp_le_succ (x y : ℕ) : iterExp x y ≤ iterExp x (y + 1) := by
-  simp only [iterExp_succ];
-  exact (exponential_exp (iterExp x y)).lt.le
+  simp only [iterExp_succ]; exact (exponential_exp (iterExp x y)).lt.le
 
 private lemma iterExp_mono_right {x : ℕ} : Monotone (iterExp x) :=
   monotone_nat_of_le_succ (iterExp_le_succ x)
@@ -146,23 +123,21 @@ theorem two_pow_le_superexp {e : ℕ} (he : 1 ≤ e) : 2 ^ e ≤ Superexp.supere
     _ ≤ iterExp e e := iterExp_mono_right he
     _ = Superexp.superexp e := (superexp_eq e).symm
 
-instance {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] : SigmaOneFunction₁ (Superexp.superexp : V → V) := ⟨superexpDef, superexp_defined⟩
-
 variable {T : ArithmeticTheory} [T.Δ₁] [𝗜𝚺₁ ⪯ T] [T.SoundOnHierarchy 𝚺 1]
 
-theorem provable_restrictedGödel_superexp {e : ℕ} : T ⊢ T.restrictedGödel (Superexp.superexp : ℕ → ℕ) e :=
-  provable_restrictedGödel
+theorem provable_restrictedGödel_superexp {e : ℕ} : T ⊢ T.restrictedGödel superexpDef e :=
+  provable_restrictedGödel (F := Superexp.superexp)
 
 theorem lower_bound_gödelNumber_proof_restrictedGödel_superexp {e : ℕ} :
-    ∀ b : T ⊢! T.restrictedGödel (Superexp.superexp : ℕ → ℕ) e, Superexp.superexp e ≤ ⌜b⌝ := by
-  simpa [numeral_eq_natCast] using lower_bound_gödelNumber_proof_restrictedGödel (f := (Superexp.superexp : ℕ → ℕ)) (e := e)
+    ∀ b : T ⊢! T.restrictedGödel superexpDef e, Superexp.superexp e ≤ ⌜b⌝ := by
+  simpa [numeral_eq_natCast] using lower_bound_gödelNumber_proof_restrictedGödel (F := Superexp.superexp) (e := e)
 
 /--
   "This sentence cannot be proved by proof whose Gödel number is less than the superexponential of `10^9`" is provable and length of its proof is larger than the superexponential of `10^9`.
 -/
 example :
-  letI e : ℕ := 10^9;
-   T ⊢ T.restrictedGödel (Superexp.superexp : ℕ → ℕ) e ∧ ∀ b : T ⊢! T.restrictedGödel (Superexp.superexp : ℕ → ℕ) e, Superexp.superexp e ≤ ⌜b⌝  := by
+  letI 𝔲 : ℕ := 10^9;
+   T ⊢ T.restrictedGödel superexpDef 𝔲 ∧ ∀ b : T ⊢! T.restrictedGödel superexpDef 𝔲, Superexp.superexp 𝔲 ≤ ⌜b⌝  := by
   constructor;
   . apply provable_restrictedGödel_superexp;
   . apply lower_bound_gödelNumber_proof_restrictedGödel_superexp;
