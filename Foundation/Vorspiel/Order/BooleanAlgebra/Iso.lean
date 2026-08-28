@@ -95,12 +95,14 @@ theorem exists_le_mem_dom [Nontrivial β] [DenselyOrdered β]
   exact ⟨⟨_, _, closure_insert_finite f.finite_dom a, closure_insert_finite f.finite_cod b,
     IsCompanion.extend h⟩, ⟨le_closure_insert, IsCompanion.extend_coe h⟩, self_mem_closure_insert⟩
 
+/-- The partial isomorphisms defined at `a`, cofinal since any one extends to cover `a`. -/
 def definedAtLeft [Nontrivial β] [DenselyOrdered β] (a : α) : Order.Cofinal (PartialIso α β) where
   carrier := {f | a ∈ f.domSubalg}
   isCofinal f := by
     obtain ⟨g, hfg, hmem⟩ := exists_le_mem_dom f a
     exact ⟨g, hmem, hfg⟩
 
+/-- The partial isomorphisms defined at `b`, cofinal by symmetry with `definedAtLeft`. -/
 def definedAtRight [Nontrivial α] [DenselyOrdered α] (b : β) : Order.Cofinal (PartialIso α β) where
   carrier := {f | b ∈ f.codSubalg}
   isCofinal f := by
