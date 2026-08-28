@@ -116,56 +116,64 @@ def assumption {φ : Propositionᵢ L} (h : φ ∈ Γ) : Γ ⊢ᴸᴶ¹ φ :=
     have : θ = φ := by simpa only [Multiset.mem_atom_iff] using hθ
     simpa [this] using h) (by simp)
 
-def modusPonens {φ ψ : Propositionᵢ L} (di : Γ ⊢ᴸᴶ¹ (φ 🡒 ψ)) (dφ : Γ ⊢ᴸᴶ¹ φ) : Γ ⊢ᴸᴶ¹ ψ :=
+def positiveNeg {φ : Propositionᵢ L} (d : Γ + ⦃φ⦄ ⊢ᴸᴶ¹ (⊥ : Propositionᵢ L)) : Γ ⊢ᴸᴶ¹ (∼φ : Propositionᵢ L) :=
+  positiveImply d
+
+def negativeNeg {φ : Propositionᵢ L} (d : Γ ⊢ᴸᴶ¹ φ) : Γ + ⦃(∼φ : Propositionᵢ L)⦄ ⊢ᴸᴶ¹ none :=
+  cast (seq := by rw [add_zero]; rfl) <| negativeImply (φ := φ) (ψ := ⊥) (Γ := Γ) (Δ := 0) (Ξ := none) d <|
+    cast falsum (by simp) (by rfl)
+
+def modusPonens {φ ψ : Propositionᵢ L} (di : Γ ⊢ᴸᴶ¹ φ 🡒 ψ) (dφ : Γ ⊢ᴸᴶ¹ φ) : Γ ⊢ᴸᴶ¹ ψ :=
   contraction
     (cut (φ := φ 🡒 ψ) (Γ := Γ) (Δ := Γ) (Ξ := ψ) di <| cast (seq := by simp) <|
       negativeImply (φ := φ) (ψ := ψ) (Γ := Γ) (Δ := 0) (Ξ := ψ)
         dφ (cast (eta ψ) (by simp) (by simp)))
     (by intro θ hθ; simp_all) (by simp)
 
+def negElim {φ : Propositionᵢ L} (dn : Γ ⊢ᴸᴶ¹ (∼φ : Propositionᵢ L)) (dφ : Γ ⊢ᴸᴶ¹ φ) : Γ ⊢ᴸᴶ¹ (⊥ : Propositionᵢ L) :=
+  modusPonens dn dφ
+
 def cutOne {φ : Propositionᵢ L} (dφ : Γ ⊢ᴸᴶ¹ φ) (d : ⦃φ⦄ ⊢ᴸᴶ¹ Ξ) : Γ ⊢ᴸᴶ¹ Ξ :=
   cast (seq := by simp) <| cut (Γ := Γ) (Δ := 0) (Ξ := Ξ) dφ <| cast d (by simp)
 
-def andLeft {φ ψ : Propositionᵢ L} (d : Γ ⊢ᴸᴶ¹ (φ ⋏ ψ)) : Γ ⊢ᴸᴶ¹ φ :=
+def andLeft {φ ψ : Propositionᵢ L} (d : Γ ⊢ᴸᴶ¹ φ ⋏ ψ) : Γ ⊢ᴸᴶ¹ φ :=
   cutOne d <| cast <| negativeAnd (Γ := 0) (φ := φ) (ψ := ψ) (Ξ := φ) <|
     cast (contraction (Γ' := ⦃φ, ψ⦄) (eta φ) (by intro θ hθ; simp_all) (Option.IsSubsetOf.some φ)) (by simp) (by rfl)
 
-def andRight {φ ψ : Propositionᵢ L} (d : Γ ⊢ᴸᴶ¹ (φ ⋏ ψ)) : Γ ⊢ᴸᴶ¹ ψ :=
+def andRight {φ ψ : Propositionᵢ L} (d : Γ ⊢ᴸᴶ¹ φ ⋏ ψ) : Γ ⊢ᴸᴶ¹ ψ :=
   cutOne d <| cast <| negativeAnd (Γ := 0) (φ := φ) (ψ := ψ) (Ξ := ψ) <|
     cast (contraction (Γ' := ⦃φ, ψ⦄) (eta ψ) (by intro θ hθ; simp_all) (Option.IsSubsetOf.some ψ)) (by simp) (by rfl)
 
-def specialize {φ : Semipropositionᵢ L 1} (d : Γ ⊢ᴸᴶ¹ (∀¹ φ)) (t : Term L ℕ) : Γ ⊢ᴸᴶ¹ φ/[t] :=
+def specialize {φ : Semipropositionᵢ L 1} (d : Γ ⊢ᴸᴶ¹ ∀¹ φ) (t : Term L ℕ) : Γ ⊢ᴸᴶ¹ φ/[t] :=
   cutOne d <| cast <| negativeForall (Γ := 0) (Ξ := φ/[t]) (φ := φ) (t := t) <|
     cast (eta (φ/[t])) (by simp) (by simp)
 
 def dneOfNegative [L.DecidableEq] : {φ : Propositionᵢ L} → φ.IsNegative → ⦃∼∼φ⦄ ⊢ᴸᴶ¹ φ
   | ⊥, _ => by
     have dn : ⦃(∼∼⊥ : Propositionᵢ L)⦄ ⊢ᴸᴶ¹ (∼⊥ : Propositionᵢ L) := contraction
-      (positiveImply (Γ := 0) (φ := (⊥ : Propositionᵢ L)) (ψ := (⊥ : Propositionᵢ L)) <|
-        cast (eta ⊥) (by simp) (by rfl))
+      (positiveNeg (Γ := 0) <| cast (eta ⊥) (by simp) (by rfl))
       (by intro θ hθ; simp_all) (Option.IsSubsetOf.some _)
-    exact modusPonens (φ := (∼⊥ : Propositionᵢ L)) (ψ := (⊥ : Propositionᵢ L))
-      (assumption (φ := (∼∼⊥ : Propositionᵢ L)) (by simp)) dn
+    exact negElim (assumption (φ := (∼∼⊥ : Propositionᵢ L)) (by simp)) dn
   | φ ⋏ ψ, h => by
     have hn : φ.IsNegative ∧ ψ.IsNegative := by simpa using h
     have ihφ := dneOfNegative hn.1
     have ihψ := dneOfNegative hn.2
     let N : Sequent L := ⦃∼∼(φ ⋏ ψ)⦄
     have dφ : N ⊢ᴸᴶ¹ φ := by
-      have dnnφ : N ⊢ᴸᴶ¹ (∼∼φ : Propositionᵢ L) := positiveImply (Γ := N) (φ := ∼φ) (ψ := ⊥) <| by
+      have dnnφ : N ⊢ᴸᴶ¹ ↑(∼∼φ) := positiveNeg (Γ := N) <| by
         let C : Sequent L := N + ⦃∼φ⦄
-        have dnAnd : C ⊢ᴸᴶ¹ (∼(φ ⋏ ψ) : Propositionᵢ L) := positiveImply (Γ := C) (φ := φ ⋏ ψ) (ψ := ⊥) <| by
+        have dnAnd : C ⊢ᴸᴶ¹ ∼(φ ⋏ ψ) := positiveNeg (Γ := C) <| by
           have dAnd : C + ⦃φ ⋏ ψ⦄ ⊢ᴸᴶ¹ φ ⋏ ψ := assumption (by simp [C])
-          exact modusPonens (assumption (φ := (∼φ : Propositionᵢ L)) (by simp [C, Semiformulaᵢ.neg_def])) (andLeft dAnd)
-        exact modusPonens (assumption (φ := (∼∼(φ ⋏ ψ) : Propositionᵢ L)) (by simp [N, Semiformulaᵢ.neg_def])) dnAnd
+          exact negElim (assumption (φ := ∼φ) (by simp [C, Semiformulaᵢ.neg_def])) (andLeft dAnd)
+        exact negElim (assumption (φ := ∼∼(φ ⋏ ψ)) (by simp [N, Semiformulaᵢ.neg_def])) dnAnd
       exact cutOne dnnφ ihφ
     have dψ : N ⊢ᴸᴶ¹ ψ := by
-      have dnnψ : N ⊢ᴸᴶ¹ (∼∼ψ : Propositionᵢ L) := positiveImply (Γ := N) (φ := ∼ψ) (ψ := ⊥) <| by
+      have dnnψ : N ⊢ᴸᴶ¹ ↑(∼∼ψ) := positiveNeg (Γ := N) <| by
         let C : Sequent L := N + ⦃∼ψ⦄
-        have dnAnd : C ⊢ᴸᴶ¹ (∼(φ ⋏ ψ) : Propositionᵢ L) := positiveImply (Γ := C) (φ := φ ⋏ ψ) (ψ := ⊥) <| by
+        have dnAnd : C ⊢ᴸᴶ¹ ∼(φ ⋏ ψ) := positiveNeg (Γ := C) <| by
           have dAnd : C + ⦃φ ⋏ ψ⦄ ⊢ᴸᴶ¹ φ ⋏ ψ := assumption (by simp [C])
-          exact modusPonens (assumption (φ := (∼ψ : Propositionᵢ L)) (by simp [C, Semiformulaᵢ.neg_def])) (andRight dAnd)
-        exact modusPonens (assumption (φ := (∼∼(φ ⋏ ψ) : Propositionᵢ L)) (by simp [N, Semiformulaᵢ.neg_def])) dnAnd
+          exact negElim (assumption (φ := ∼ψ) (by simp [C, Semiformulaᵢ.neg_def])) (andRight dAnd)
+        exact negElim (assumption (φ := ∼∼(φ ⋏ ψ)) (by simp [N, Semiformulaᵢ.neg_def])) dnAnd
       exact cutOne dnnψ ihψ
     exact positiveAnd dφ dψ
   | φ 🡒 ψ, h => by
@@ -174,17 +182,17 @@ def dneOfNegative [L.DecidableEq] : {φ : Propositionᵢ L} → φ.IsNegative �
     let N : Sequent L := ⦃∼∼(φ 🡒 ψ)⦄
     apply positiveImply (Γ := N) (φ := φ) (ψ := ψ)
     let C : Sequent L := N + ⦃φ⦄
-    have dnnψ : C ⊢ᴸᴶ¹ (∼∼ψ : Propositionᵢ L) := positiveImply (Γ := C) (φ := ∼ψ) (ψ := ⊥) <| by
+    have dnnψ : C ⊢ᴸᴶ¹ ↑(∼∼ψ) := positiveNeg (Γ := C) <| by
       let D : Sequent L := C + ⦃∼ψ⦄
-      have dnImp : D ⊢ᴸᴶ¹ (∼(φ 🡒 ψ) : Propositionᵢ L) := positiveImply (Γ := D) (φ := φ 🡒 ψ) (ψ := ⊥) <| by
+      have dnImp : D ⊢ᴸᴶ¹ ∼(φ 🡒 ψ) := positiveNeg (Γ := D) <| by
         let E : Sequent L := D + ⦃φ 🡒 ψ⦄
         have dψ : E ⊢ᴸᴶ¹ ψ := modusPonens
           (assumption (φ := φ 🡒 ψ) (by simp [E]))
           (assumption (φ := φ) (by simp [E, D, C]))
-        exact modusPonens
-          (assumption (φ := (∼ψ : Propositionᵢ L)) (by simp [D, Semiformulaᵢ.neg_def])) dψ
-      exact modusPonens
-        (assumption (φ := (∼∼(φ 🡒 ψ) : Propositionᵢ L)) (by simp [C, N, Semiformulaᵢ.neg_def])) dnImp
+        exact negElim
+          (assumption (φ := ∼ψ) (by simp [D, Semiformulaᵢ.neg_def])) dψ
+      exact negElim
+        (assumption (φ := ∼∼(φ 🡒 ψ)) (by simp [C, N, Semiformulaᵢ.neg_def])) dnImp
     exact cutOne dnnψ ihψ
   | ∀¹ φ, h => by
     have hnFree : (Rewriting.free φ).IsNegative := by simpa using h
@@ -192,18 +200,18 @@ def dneOfNegative [L.DecidableEq] : {φ : Propositionᵢ L} → φ.IsNegative �
     let N : Sequent L := ⦃∼∼(∀¹ φ)⦄
     apply positiveForall (Γ := N)
     let S : Sequent L := N⁺ᵐ
-    have dnnFree : S ⊢ᴸᴶ¹ (∼∼(Rewriting.free φ) : Propositionᵢ L) :=
-      positiveImply (Γ := S) (φ := ∼(Rewriting.free φ)) (ψ := ⊥) <| by
+    have dnnFree : S ⊢ᴸᴶ¹ ↑(∼∼(Rewriting.free φ)) :=
+      positiveNeg (Γ := S) <| by
         let C : Sequent L := S + ⦃∼(Rewriting.free φ)⦄
-        have dnAll : C ⊢ᴸᴶ¹ (∼(∀¹ Rewriting.shift φ) : Propositionᵢ L) :=
-          positiveImply (Γ := C) (φ := ∀¹ Rewriting.shift φ) (ψ := ⊥) <| by
+        have dnAll : C ⊢ᴸᴶ¹ ↑(∼(∀¹ Rewriting.shift φ)) :=
+          positiveNeg (Γ := C) <| by
             let D : Sequent L := C + ⦃∀¹ Rewriting.shift φ⦄
             have dAll : D ⊢ᴸᴶ¹ ∀¹ Rewriting.shift φ := assumption (by simp [D])
             have dFree : D ⊢ᴸᴶ¹ Rewriting.free φ := cast (specialize dAll &0) (by rfl) (by simp)
-            exact modusPonens
-              (assumption (φ := (∼(Rewriting.free φ) : Propositionᵢ L)) (by simp [C, Semiformulaᵢ.neg_def])) dFree
-        exact modusPonens
-          (assumption (φ := (∼∼(∀¹ Rewriting.shift φ) : Propositionᵢ L))
+            exact negElim
+              (assumption (φ := ∼(Rewriting.free φ)) (by simp [C, Semiformulaᵢ.neg_def])) dFree
+        exact negElim
+          (assumption (φ := ∼∼(∀¹ Rewriting.shift φ))
             (by simp [S, N, Semiformulaᵢ.neg_def])) dnAll
     exact cutOne dnnFree ihFree
   termination_by φ _ => φ.complexity
