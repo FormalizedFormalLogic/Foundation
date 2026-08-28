@@ -6,19 +6,18 @@ public import Foundation.FirstOrder.Incompleteness.Second
 /-!
 # $\Delta_1$-definability of the induction schemata, and of `𝗜𝚺₁` and `𝗣𝗔`
 
-This file establishes `Δ₁`-definability of the induction schemata, and hence of `𝗣𝗔` and `𝗜𝚺₁`:
-`PA_delta1Definable : 𝗣𝗔.Δ₁` and `ISigma1_delta1Definable : 𝗜𝚺₁.Δ₁`.
+`Δ₁`-definability of the induction schemata, and hence of `𝗣𝗔` and `𝗜𝚺₁`
+(`PA_delta1Definable`, `ISigma1_delta1Definable`).
 
-The route:
+Since
 
 ```
 𝗣𝗔  = 𝗣𝗔⁻ + InductionScheme ℒₒᵣ Set.univ
 𝗜𝚺₁ = 𝗣𝗔⁻ + InductionScheme ℒₒᵣ (Arithmetic.Hierarchy 𝚺 1)
 ```
 
-`𝗣𝗔⁻` is a finite set of sentences, so `Theory.Δ₁.ofFinite` gives `𝗣𝗔⁻.Δ₁`.
-`Theory.Δ₁.add`/`.ofEq` then reduce both headline instances to the single obligation
-`(InductionScheme ℒₒᵣ C).Δ₁`, which is the mathematical content of this file.
+and `𝗣𝗔⁻` is finite, `Theory.Δ₁.ofFinite` and `Theory.Δ₁.add` reduce both to
+`(InductionScheme ℒₒᵣ C).Δ₁`.
 -/
 
 @[expose] public section
@@ -645,7 +644,7 @@ namespace LO.FirstOrder.Arithmetic
 
 open LO.FirstOrder.Theory
 
-/-! ## B1 — `𝗣𝗔⁻` is `Δ₁` (it is finite) -/
+/-! ## `𝗣𝗔⁻` is `Δ₁` -/
 
 noncomputable instance PeanoMinus.delta1 : (𝗣𝗔⁻ : ArithmeticTheory).Δ₁ :=
   Theory.Δ₁.ofFinite _ PeanoMinus.finite
@@ -746,7 +745,7 @@ instance indBodyVal.defined : 𝚺₁-Function₁ (indBodyVal : V → V) via ind
 
 end succInd
 
-/-! ## The crux — the induction schema is `Δ₁` -/
+/-! ## The induction schema is `Δ₁` -/
 
 section ch
 
@@ -1052,7 +1051,7 @@ noncomputable instance InductionScheme.delta1_sigma1 :
   isDelta1 := HierarchySymbol.Semiformula.ProvablyProperOn.ofProperOn.{0} _ fun V _ _ ↦ by
     haveI := InductionR.sigma1_defined (V := V); simp
 
-/-! ## B2 / B3 — assemble the headline instances -/
+/-! ## `𝗣𝗔` and `𝗜𝚺₁` are `Δ₁` -/
 
 noncomputable instance PA_delta1Definable : 𝗣𝗔.Δ₁ :=
   Theory.Δ₁.add PeanoMinus.delta1 InductionScheme.delta1_univ
