@@ -82,11 +82,11 @@ public import Foundation.FirstOrder.Completeness.CounterModel
 public import Foundation.FirstOrder.Hauptsatz
 public import Foundation.FirstOrder.Incompleteness.Church
 public import Foundation.FirstOrder.Incompleteness.Consistency
+public import Foundation.FirstOrder.Incompleteness.Delta1
 public import Foundation.FirstOrder.Incompleteness.Dense
 public import Foundation.FirstOrder.Incompleteness.Examples
 public import Foundation.FirstOrder.Incompleteness.First
 public import Foundation.FirstOrder.Incompleteness.Halting
-public import Foundation.FirstOrder.Incompleteness.InductionSchemeDelta1
 public import Foundation.FirstOrder.Incompleteness.Jeroslow
 public import Foundation.FirstOrder.Incompleteness.Löb
 public import Foundation.FirstOrder.Incompleteness.ProvabilityAbstraction.Basic
