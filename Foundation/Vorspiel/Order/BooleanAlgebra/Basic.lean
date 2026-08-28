@@ -68,7 +68,18 @@ noncomputable def atomsBelow [Fintype γ] (w : γ) : Finset γ :=
 lemma sup_atomsBelow_eq [Finite γ] (w : γ) :
     haveI := Fintype.ofFinite γ
     (atomsBelow w).sup id = w := by
-  sorry
+  letI := Fintype.ofFinite γ
+  have hmem : ∀ p, p ∈ atomsBelow w ↔ IsAtom p ∧ p ≤ w := fun p => by simp [atomsBelow]
+  refine le_antisymm (Finset.sup_le fun p hp => (hmem p).mp hp |>.2) ?_
+  by_contra hlt
+  have hd : w \ (atomsBelow w).sup id ≠ ⊥ := fun h => hlt (sdiff_eq_bot_iff.mp h)
+  obtain hd0 | ⟨p, hp, hple⟩ := (isAtomic_iff γ).mp Finite.to_isAtomic
+    (w \ (atomsBelow w).sup id)
+  · exact hd hd0
+  · have hpw : p ≤ w := hple.trans sdiff_le
+    have hple' : p ≤ (atomsBelow w).sup id := Finset.le_sup (f := id) ((hmem p).mpr ⟨hp, hpw⟩)
+    have hdc : p ≤ ((atomsBelow w).sup id)ᶜ := hple.trans (by rw [sdiff_eq]; exact inf_le_right)
+    exact hp.1 (le_bot_iff.mp ((le_inf hple' hdc).trans_eq inf_compl_eq_bot))
 
 lemma inf_eq_bot_iff_atomsBelow [Finite γ] {w a' : γ} :
     haveI := Fintype.ofFinite γ
