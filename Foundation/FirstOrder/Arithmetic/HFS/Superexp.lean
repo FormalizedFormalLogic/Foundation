@@ -54,6 +54,32 @@ lemma superexp_eq (x : V) : Superexp.superexp x = iterExp x x := rfl
 
 @[simp] lemma superexp_zero : Superexp.superexp (0 : V) = 0 := by simp [superexp_eq]
 
+@[simp] lemma superexp_one : Superexp.superexp (1 : V) = 2 := by
+  rw [superexp_eq, congrArg (iterExp 1) (zero_add 1).symm, iterExp_succ, iterExp_zero, exp_one]
+
+@[simp] lemma superexp_two : Superexp.superexp (2 : V) = 16 := by
+  have exp_two : Exp.exp (2 : V) = 4 := by
+    rw [show (2 : V) = 1 + 1 from one_add_one_eq_two.symm, exp_succ, exp_one]; norm_num
+  have exp_four : Exp.exp (4 : V) = 16 := by
+    rw [show (4 : V) = 3 + 1 from three_add_one_eq_four.symm, exp_succ,
+      show (3 : V) = 2 + 1 from two_add_one_eq_three.symm, exp_succ, exp_two]
+    norm_num
+  rw [superexp_eq, congrArg (iterExp 2) (one_add_one_eq_two (R := V)).symm, iterExp_succ,
+    congrArg (iterExp 2) (zero_add 1).symm, iterExp_succ, iterExp_zero, exp_two, exp_four]
+
+@[simp] lemma superexp_three : Superexp.superexp (3 : V) = Exp.exp 256 := by
+  have exp_two : Exp.exp (2 : V) = 4 := by
+    rw [show (2 : V) = 1 + 1 from one_add_one_eq_two.symm, exp_succ, exp_one]; norm_num
+  have exp_three : Exp.exp (3 : V) = 8 := by
+    rw [show (3 : V) = 2 + 1 from two_add_one_eq_three.symm, exp_succ, exp_two]; norm_num
+  have exp_four : Exp.exp (4 : V) = 16 := by
+    rw [show (4 : V) = 3 + 1 from three_add_one_eq_four.symm, exp_succ, exp_three]; norm_num
+  have exp_eight : Exp.exp (8 : V) = 256 := by
+    rw [show (8 : V) = 2 * 4 from by norm_num, exp_even, exp_four]; norm_num
+  rw [superexp_eq, congrArg (iterExp 3) (two_add_one_eq_three (R := V)).symm, iterExp_succ,
+    congrArg (iterExp 3) (one_add_one_eq_two (R := V)).symm, iterExp_succ,
+    congrArg (iterExp 3) (zero_add 1).symm, iterExp_succ, iterExp_zero, exp_three, exp_eight]
+
 def _root_.LO.FirstOrder.Arithmetic.superexpDef : 𝚺₁.Semisentence 2 := .mkSigma
   “y x. !iterExpDef y x x”
 

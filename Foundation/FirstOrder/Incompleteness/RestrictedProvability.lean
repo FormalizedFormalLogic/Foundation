@@ -1,12 +1,14 @@
 module
 
 public import Foundation.FirstOrder.Incompleteness.RosserProvability
+public import Foundation.FirstOrder.Arithmetic.HFS.Superexp
 
 @[expose] public section
 /-!
 # Provability with restricted proof size
 
-Some results to consider provable predicate modified to state that "provable by proof whose Gödel number is less than `f e`" for a `𝚺₁`-definable bounding function `f` (where `e` is an arbitary meta natural number). The results with `f = Superexp.superexp` recover "provable by proof whose Gödel number is less than the superexponential of `e`".
+Some results to consider provable predicate modified to state that "provable by proof whose Gödel number is less than `f e`" for a `𝚺₁`-definable bounding function `f` (where `e` is an arbitary meta natural number).
+The results with `f = Superexp.superexp` recover "provable by proof whose Gödel number is less than the superexponential of `e`".
 -/
 
 namespace LO.FirstOrder
