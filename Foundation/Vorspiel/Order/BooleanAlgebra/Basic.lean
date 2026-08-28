@@ -97,6 +97,8 @@ namespace BooleanSubalgebra
 variable {α : Type*} [BooleanAlgebra α] {A : BooleanSubalgebra α}
 
 lemma val_finsetSup (s : Finset A) : ((s.sup id : A) : α) = s.sup (fun p => (p : α)) := by
-  sorry
+  change A.subtype (s.sup id) = s.sup (fun p => A.subtype p)
+  rw [map_finset_sup]
+  rfl
 
 end BooleanSubalgebra
