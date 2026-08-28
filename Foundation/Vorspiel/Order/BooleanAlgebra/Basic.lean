@@ -21,13 +21,16 @@ namespace BooleanAlgebra
 
 variable {γ : Type*} [BooleanAlgebra γ]
 
-lemma inf_le_iff_sdiff_disjoint {y₁ y₂ a : γ} : y₁ ⊓ a ≤ y₂ ⊓ a ↔ (y₁ \ y₂) ⊓ a = ⊥ := by
+section
+variable {y₁ z₁ y₂ z₂ a : γ}
+
+lemma inf_le_iff_sdiff_disjoint : y₁ ⊓ a ≤ y₂ ⊓ a ↔ (y₁ \ y₂) ⊓ a = ⊥ := by
   rw [← sdiff_eq_bot_iff,
     show (y₁ ⊓ a) \ (y₂ ⊓ a) = y₁ \ y₂ ⊓ a by
       rw [sdiff_eq, sdiff_eq, compl_inf, inf_sup_left]; simp [inf_left_comm, inf_comm]]
 
 /-- `(y ⊓ a) ⊔ (z ⊓ aᶜ)` is the normal form of an element of `closure (insert a A)`. -/
-lemma insertRep_le_insertRep_iff {y₁ z₁ y₂ z₂ a : γ} :
+lemma insertRep_le_insertRep_iff :
     (y₁ ⊓ a) ⊔ (z₁ ⊓ aᶜ) ≤ (y₂ ⊓ a) ⊔ (z₂ ⊓ aᶜ) ↔
       (y₁ \ y₂) ⊓ a = ⊥ ∧ (z₁ \ z₂) ⊓ aᶜ = ⊥ := by
   have h₁ : y₁ ⊓ a ≤ y₂ ⊓ a ⊔ z₂ ⊓ aᶜ ↔ y₁ ⊓ a ≤ y₂ ⊓ a :=
@@ -38,13 +41,16 @@ lemma insertRep_le_insertRep_iff {y₁ z₁ y₂ z₂ a : γ} :
       fun h => h.trans le_sup_right⟩
   rw [sup_le_iff, h₁, h₂, inf_le_iff_sdiff_disjoint, inf_le_iff_sdiff_disjoint]
 
+end
+
 lemma compl_insertRep (y z a : γ) : ((y ⊓ a) ⊔ (z ⊓ aᶜ))ᶜ = (yᶜ ⊓ a) ⊔ (zᶜ ⊓ aᶜ) := by
   have e1 : (y ⊓ a) ⊔ (yᶜ ⊓ a) = a := by rw [← inf_sup_right, sup_compl_eq_top, top_inf_eq]
   have e2 : (z ⊓ aᶜ) ⊔ (zᶜ ⊓ aᶜ) = aᶜ := by rw [← inf_sup_right, sup_compl_eq_top, top_inf_eq]
-  have hsup : (y ⊓ a) ⊔ (z ⊓ aᶜ) ⊔ ((yᶜ ⊓ a) ⊔ (zᶜ ⊓ aᶜ)) = ⊤ := by
-    have hperm : (y ⊓ a) ⊔ (z ⊓ aᶜ) ⊔ ((yᶜ ⊓ a) ⊔ (zᶜ ⊓ aᶜ)) =
-        (y ⊓ a) ⊔ (yᶜ ⊓ a) ⊔ ((z ⊓ aᶜ) ⊔ (zᶜ ⊓ aᶜ)) := by ac_rfl
-    rw [hperm, e1, e2, sup_compl_eq_top]
+  have hsup : (y ⊓ a) ⊔ (z ⊓ aᶜ) ⊔ ((yᶜ ⊓ a) ⊔ (zᶜ ⊓ aᶜ)) = ⊤ :=
+    calc (y ⊓ a) ⊔ (z ⊓ aᶜ) ⊔ ((yᶜ ⊓ a) ⊔ (zᶜ ⊓ aᶜ))
+        = (y ⊓ a) ⊔ (yᶜ ⊓ a) ⊔ ((z ⊓ aᶜ) ⊔ (zᶜ ⊓ aᶜ)) := by ac_rfl
+      _ = a ⊔ aᶜ := by rw [e1, e2]
+      _ = ⊤ := sup_compl_eq_top
   have hac : aᶜ ⊓ a = ⊥ := by rw [inf_comm]; exact inf_compl_eq_bot
   have h1 : (y ⊓ a) ⊓ (yᶜ ⊓ a) = ⊥ :=
     le_bot_iff.mp <| (inf_le_inf inf_le_left inf_le_left).trans_eq inf_compl_eq_bot
@@ -54,8 +60,12 @@ lemma compl_insertRep (y z a : γ) : ((y ⊓ a) ⊔ (z ⊓ aᶜ))ᶜ = (yᶜ ⊓
     le_bot_iff.mp <| (inf_le_inf inf_le_right inf_le_right).trans_eq hac
   have h4 : (z ⊓ aᶜ) ⊓ (zᶜ ⊓ aᶜ) = ⊥ :=
     le_bot_iff.mp <| (inf_le_inf inf_le_left inf_le_left).trans_eq inf_compl_eq_bot
-  have hinf : ((y ⊓ a) ⊔ (z ⊓ aᶜ)) ⊓ ((yᶜ ⊓ a) ⊔ (zᶜ ⊓ aᶜ)) = ⊥ := by
-    rw [inf_sup_right, inf_sup_left, inf_sup_left, h1, h2, h3, h4]; simp
+  have hinf : ((y ⊓ a) ⊔ (z ⊓ aᶜ)) ⊓ ((yᶜ ⊓ a) ⊔ (zᶜ ⊓ aᶜ)) = ⊥ :=
+    calc ((y ⊓ a) ⊔ (z ⊓ aᶜ)) ⊓ ((yᶜ ⊓ a) ⊔ (zᶜ ⊓ aᶜ))
+        = (y ⊓ a) ⊓ (yᶜ ⊓ a) ⊔ (y ⊓ a) ⊓ (zᶜ ⊓ aᶜ) ⊔
+            ((z ⊓ aᶜ) ⊓ (yᶜ ⊓ a) ⊔ (z ⊓ aᶜ) ⊓ (zᶜ ⊓ aᶜ)) := by
+          rw [inf_sup_right, inf_sup_left, inf_sup_left]
+      _ = ⊥ := by rw [h1, h2, h3, h4]; simp
   exact (IsCompl.mk (disjoint_iff.mpr hinf) (codisjoint_iff.mpr hsup)).compl_eq
 
 lemma IsAtom.le_or_disjoint {p : γ} (hp : IsAtom p) (w : γ) : p ≤ w ∨ p ⊓ w = ⊥ :=
