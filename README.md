@@ -21,7 +21,6 @@ Main results of this repository. More detailed explanations are provided in the 
 - `Logic`: Fundamental notions shared by all logics (entailment, semantics, calculi, Lindenbaum algebras, …).
 - `Propositional`: Propositional logic (classical and intuitionistic).
   - [Completeness of Tait calculus][prop:completeness]
-  - [Propositional Logic Zoo](#propositional-logic-zoo)
 - `FirstOrder`: [First-order logic][first_order]
   - [Completeness theorem][first_order:completeness]
   - [Cut-elimination of first-order sequent calculus _(Gentzen's Hauptsatz)_][first_order:hauptsatz]
@@ -98,10 +97,6 @@ Automatically generated[^1] diagrams "Zoo" illustrate the Lean 4-verified interr
 ### Set Theory Zoo
 
 ![Set Theory Zoo](https://formalizedformallogic.github.io/Zoo/set_theory.png)
-
-### Propositional Logic Zoo
-
-![Propositional Logic Zoo](https://formalizedformallogic.github.io/Zoo/propositional.png)
 
 ## Building
 
