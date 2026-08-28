@@ -6,7 +6,7 @@ public import Foundation.FirstOrder.Incompleteness.RosserProvability
 /-!
 # Provability with restricted proof size
 
-Some results to consider provable predicate modified to state that "provable by proof whose Gödel number is less than `F e`" for a `𝚺₁`-definable bounding function `F` (where `e` is an arbitary meta natural number). The results with `F = Superexp.superexp` recover "provable by proof whose Gödel number is less than the superexponential of `e`".
+Some results to consider provable predicate modified to state that "provable by proof whose Gödel number is less than `f e`" for a `𝚺₁`-definable bounding function `f` (where `e` is an arbitary meta natural number). The results with `f = Superexp.superexp` recover "provable by proof whose Gödel number is less than the superexponential of `e`".
 -/
 
 namespace LO.FirstOrder
@@ -22,14 +22,14 @@ variable {L : Language} [L.Encodable] [L.LORDefinable]
 variable {T U : Theory L} [T.Δ₁] [U.Δ₁]
 
 /-- Provability with restriction of proof size -/
-def RestrictedProvable (F : V → V) (e : ℕ) (T : Theory L) [T.Δ₁] (φ : V) := ∃ d < F (ORingStructure.numeral e), Arithmetic.Bootstrapping.Proof T d φ
+def RestrictedProvable (f : V → V) (e : ℕ) (T : Theory L) [T.Δ₁] (φ : V) := ∃ d < f (ORingStructure.numeral e), Arithmetic.Bootstrapping.Proof T d φ
 
 noncomputable def restrictedProvable (fDef : 𝚺₁.Semisentence 2) (e : ℕ) : 𝚷₁.Semisentence 1 := .mkPi “φ. ∀ E, !fDef E !e → ∃ d < E, !(proof T).pi d φ”
 
 noncomputable abbrev restrictedProvabilityPred (fDef : 𝚺₁.Semisentence 2) (e : ℕ) (σ : Sentence L) : ArithmeticSentence := (T.restrictedProvable fDef e).val/[⌜σ⌝]
 
-instance RestrictedProvable.defined {F : V → V} {fDef : 𝚺₁.Semisentence 2} [𝚺₁-Function₁[V] F via fDef] {e} :
-    𝚷₁-Predicate[V] (T.RestrictedProvable F e) via (T.restrictedProvable fDef e) where
+instance RestrictedProvable.defined {f : V → V} {fDef : 𝚺₁.Semisentence 2} [𝚺₁-Function₁[V] f via fDef] {e} :
+    𝚷₁-Predicate[V] (T.RestrictedProvable f e) via (T.restrictedProvable fDef e) where
   defined {φ} := by simp [Theory.restrictedProvable, Theory.RestrictedProvable];
 
 /-- Gödel sentence by restricted provability -/
@@ -66,21 +66,21 @@ private lemma iff_true_restrictedGödel_true_restrictedGödel' : ℕ↓[ℒₒ�
   apply models_of_provable (T := 𝗜𝚺₁) inferInstance;
   apply provable_E_restrictedGödel_restrictedGödel';
 
-lemma models_restrictedGödel (F : V → V) [𝚺₁-Function₁[V] F via fDef] :
-    V↓[ℒₒᵣ] ⊧ T.restrictedGödel fDef e ↔ ∀ x : V, x < F (ORingStructure.numeral e) → ¬Arithmetic.Bootstrapping.Proof T x (⌜T.restrictedGödel fDef e⌝) := by
+lemma models_restrictedGödel (f : V → V) [𝚺₁-Function₁[V] f via fDef] :
+    V↓[ℒₒᵣ] ⊧ T.restrictedGödel fDef e ↔ ∀ x : V, x < f (ORingStructure.numeral e) → ¬Arithmetic.Bootstrapping.Proof T x (⌜T.restrictedGödel fDef e⌝) := by
   apply Iff.trans $ Semantics.models_iff.mp $ models_of_provable (T := 𝗜𝚺₁) inferInstance $ def_restrictedGödel;
   simp [models_iff, Theory.RestrictedProvable]
 
-private lemma models_neg_restrictedGödel (F : V → V) [𝚺₁-Function₁[V] F via fDef] :
-    ¬V↓[ℒₒᵣ] ⊧ T.restrictedGödel fDef e ↔ ∃ x : V, x < F (ORingStructure.numeral e) ∧ Arithmetic.Bootstrapping.Proof T x (⌜T.restrictedGödel fDef e⌝) := by
-  simpa using (models_restrictedGödel F).not;
+private lemma models_neg_restrictedGödel (f : V → V) [𝚺₁-Function₁[V] f via fDef] :
+    ¬V↓[ℒₒᵣ] ⊧ T.restrictedGödel fDef e ↔ ∃ x : V, x < f (ORingStructure.numeral e) ∧ Arithmetic.Bootstrapping.Proof T x (⌜T.restrictedGödel fDef e⌝) := by
+  simpa using (models_restrictedGödel f).not;
 
 variable [𝗜𝚺₁ ⪯ T] [T.SoundOnHierarchy 𝚺 1]
 
 /- Gödel sentence by restricted provability is true. -/
-theorem true_restrictedGödel (F : ℕ → ℕ) [𝚺₁-Function₁ F via fDef] : ℕ↓[ℒₒᵣ] ⊧ T.restrictedGödel fDef e := by
+theorem true_restrictedGödel (f : ℕ → ℕ) [𝚺₁-Function₁ f via fDef] : ℕ↓[ℒₒᵣ] ⊧ T.restrictedGödel fDef e := by
   by_contra hC;
-  obtain ⟨e, _, he⟩ := models_neg_restrictedGödel F (e := e) |>.mp hC;
+  obtain ⟨e, _, he⟩ := models_neg_restrictedGödel f (e := e) |>.mp hC;
   apply hC;
   apply iff_true_restrictedGödel_true_restrictedGödel'.mpr;
   apply ArithmeticTheory.soundOnHierarchy T _ _ ?_ T.restrictedGödel'_sigmaOne;
@@ -89,17 +89,17 @@ theorem true_restrictedGödel (F : ℕ → ℕ) [𝚺₁-Function₁ F via fDef]
   simpa using he;
 
 /- Gödel sentence by restricted provability is provable. -/
-theorem provable_restrictedGödel (F : ℕ → ℕ) [𝚺₁-Function₁ F via fDef] : T ⊢ T.restrictedGödel fDef e := by
+theorem provable_restrictedGödel (f : ℕ → ℕ) [𝚺₁-Function₁ f via fDef] : T ⊢ T.restrictedGödel fDef e := by
   apply iff_provable_restrictedGödel_provable_restrictedGödel'.mpr;
   apply Arithmetic.sigma_one_completeness_iff T.restrictedGödel'_sigmaOne |>.mp;
-  apply iff_true_restrictedGödel_true_restrictedGödel'.mp $ true_restrictedGödel F;
+  apply iff_true_restrictedGödel_true_restrictedGödel'.mp $ true_restrictedGödel f;
 
-/-- Lower bound of a Gödel number of proof of restricted Gödel sentence is `F e`. -/
-theorem lower_bound_gödelNumber_proof_restrictedGödel (F : ℕ → ℕ) [𝚺₁-Function₁ F via fDef] :
-    ∀ b : T ⊢! T.restrictedGödel fDef e, F (ORingStructure.numeral e) ≤ ⌜b⌝ := by
+/-- Lower bound of a Gödel number of proof of restricted Gödel sentence is `f e`. -/
+theorem lower_bound_gödelNumber_proof_restrictedGödel (f : ℕ → ℕ) [𝚺₁-Function₁ f via fDef] :
+    ∀ b : T ⊢! T.restrictedGödel fDef e, f (ORingStructure.numeral e) ≤ ⌜b⌝ := by
   intro b;
   exact Nat.le_of_not_lt
-    $ (imp_not_comm.mp $ (models_restrictedGödel F).mp (true_restrictedGödel F) ⌜b⌝)
+    $ (imp_not_comm.mp $ (models_restrictedGödel f).mp (true_restrictedGödel f) ⌜b⌝)
     $ proof_of_quote_proof b;
 
 end Arithmetic
