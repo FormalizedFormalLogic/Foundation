@@ -275,4 +275,60 @@ lemma attempt_function_exists
     (α : Ordinal V) → IsAttempt.Exists F α :=
   fun α ↦ ⟨replAttemptOrEmpty F hF α, replAttemptOrEmpty_aux F hF α⟩
 
+lemma attemptOrEmpty_eq_replAttemptOrEmpty
+    (F : V → V) (hF : ℒₛₑₜ-function₁ F) (α : Ordinal V) :
+    attemptOrEmpty F α = replAttemptOrEmpty F hF α := by
+  have h₁ : IsAttempt F α (attemptOrEmpty F α) := by
+    simp [attemptOrEmpty, Classical.choose!_spec, attempt_function_exists F hF α]
+  have h₂ := replAttemptOrEmpty_aux F hF α
+  have : IsFunction (attemptOrEmpty F α) := h₁.2.1
+  have : IsFunction (replAttemptOrEmpty F hF α) := h₂.2.1
+  exact IsAttempt.isAttempt_unique h₁ h₂
+
+open Classical in
+noncomputable def transfiniteRec (F : V → V) (hF : ℒₛₑₜ-function₁ F) (α : V) : V :=
+  if IsOrdinal α then F (replAttemptOrEmpty F hF α) else ∅
+
+/-- The transfinite recursion function is definable. -/
+instance transfiniteRec_definable
+    {F : V → V} (hF : ℒₛₑₜ-function₁ F) :
+    ℒₛₑₜ-function₁ (transfiniteRec F hF) := by
+  suffices ℒₛₑₜ-relation (fun y α ↦ y = transfiniteRec F hF α) by exact this
+  suffices ℒₛₑₜ-relation fun y α ↦
+      IsOrdinal α ∧ y = F (replAttemptOrEmpty F hF α) ∨ ¬IsOrdinal α ∧ y = ∅ by
+    apply Language.Definable.of_iff this
+    intro v
+    by_cases h : IsOrdinal (v 1) <;> simp [transfiniteRec, h]
+  unfold replAttemptOrEmpty
+  definability
+
+/-! Characterization of the transfinite recursion: $R_F \alpha = F (R_F \upharpoonright \alpha)$ -/
+lemma transfiniteRec_spec (F : V → V) (hF : ℒₛₑₜ-function₁ F) (α : Ordinal V) :
+    transfiniteRec F hF α = F (repl (fun β ↦ ⟨β, transfiniteRec F hF β⟩ₖ) (by definability) α) := by
+  classical
+  suffices
+      ∀ p, (∃ β ∈ (α : V), p = pairValueAttempt F β) ↔
+      ∃ x ∈ (α : V), p = ⟨x, if IsOrdinal x then F (replAttemptOrEmpty F hF x) else ∅⟩ₖ by
+    simp only [transfiniteRec, if_pos α.ordinal]
+    congr 1
+    ext p
+    simp only [mem_replAttemptOrEmpty_iff, repl_spec]
+    exact this p
+  intro p
+  constructor <;> rintro ⟨β, hβα, rfl⟩
+  · have hβ : IsOrdinal β := IsOrdinal.of_mem hβα
+    exact ⟨β, hβα, by
+      simpa [transfiniteRec, pairValueAttempt, hβ] using
+        congrArg F (attemptOrEmpty_eq_replAttemptOrEmpty F hF (IsOrdinal.toOrdinal β))⟩
+  · have hβ : IsOrdinal β := IsOrdinal.of_mem hβα
+    exact ⟨β, hβα, by
+      simpa [transfiniteRec, pairValueAttempt, hβ] using
+        congrArg F (attemptOrEmpty_eq_replAttemptOrEmpty F hF (IsOrdinal.toOrdinal β)).symm⟩
+
+/-- The transfinite recursion function is empty outside the ordinals. -/
+lemma transfiniteRec_spec_of_not_isOrdinal (F : V → V) (hF : ℒₛₑₜ-function₁ F)
+    {x : V} (hx : ¬IsOrdinal x) :
+    transfiniteRec F hF x = ∅ := by
+  simp [transfiniteRec, hx]
+
 end LO.FirstOrder.SetTheory.Replacement
