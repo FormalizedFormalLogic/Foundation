@@ -6,7 +6,7 @@ public import Foundation.FirstOrder.Incompleteness.RosserProvability
 /-!
 # Provability with restricted proof size
 
-Some results to consider provable predicate modified to state that "provable by proof whose Gödel number is less than `F e`" for a `𝚺₁`-definable bounding function `F` (where `e` is an arbitary meta natural number). The results with `F = Exp.exp` recover "provable by proof whose Gödel number is less than `2^e`".
+Some results to consider provable predicate modified to state that "provable by proof whose Gödel number is less than `F e`" for a `𝚺₁`-definable bounding function `F` (where `e` is an arbitary meta natural number). The results with `F = Superexp.superexp` recover "provable by proof whose Gödel number is less than the superexponential of `e`".
 -/
 
 namespace LO.FirstOrder
@@ -106,37 +106,41 @@ end Arithmetic
 
 namespace Arithmetic
 
--- TODO: move to `Exp.lean`?
-@[simp, grind =]
-lemma exp_nat {n : ℕ} : Exp.exp n = 2 ^ n := by
+private lemma exp_nat {n : ℕ} : Exp.exp n = 2 ^ n := by
   induction n with
-  | zero => simp;
-  | succ => grind [exp_succ];
+  | zero => simp
+  | succ n ih => grind [exp_succ]
+
+private lemma iterExp_le_succ (x y : ℕ) : iterExp x y ≤ iterExp x (y + 1) := by
+  simp only [iterExp_succ]; exact (exponential_exp (iterExp x y)).lt.le
+
+private lemma iterExp_mono_right {x : ℕ} : Monotone (iterExp x) :=
+  monotone_nat_of_le_succ (iterExp_le_succ x)
+
+theorem two_pow_le_superexp {e : ℕ} (he : 1 ≤ e) : 2 ^ e ≤ Superexp.superexp e := by
+  have h1 : iterExp e 1 = 2 ^ e := (iterExp_succ e 0).trans (by rw [iterExp_zero]; exact exp_nat)
+  calc 2 ^ e = iterExp e 1 := h1.symm
+    _ ≤ iterExp e e := iterExp_mono_right he
+    _ = Superexp.superexp e := (superexp_eq e).symm
 
 variable {T : ArithmeticTheory} [T.Δ₁] [𝗜𝚺₁ ⪯ T] [T.SoundOnHierarchy 𝚺 1]
 
--- `Exp.exp` is `𝚺₀`-definable via `expDef`; lift this to `𝚺₁` so the generalized
--- restricted-provability machinery applies with `F := Exp.exp`.
-instance exp_defined_sigmaOne {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] :
-    𝚺₁-Function₁[V] Exp.exp via expDef.ofZero 𝚺₁ := exp_defined_deltaZero.of_zero
+theorem provable_restrictedGödel_superexp {e : ℕ} : T ⊢ T.restrictedGödel superexpDef e :=
+  provable_restrictedGödel (F := Superexp.superexp)
 
-theorem provable_restrictedGödel_exp {e : ℕ} : T ⊢ T.restrictedGödel (expDef.ofZero 𝚺₁) e :=
-  provable_restrictedGödel (F := Exp.exp)
-
-/-- Lower bound of a Gödel number of proof of restricted Gödel sentence is `2^e`. -/
-theorem lower_bound_gödelNumber_proof_restrictedGödel_exp {e : ℕ} :
-    ∀ b : T ⊢! T.restrictedGödel (expDef.ofZero 𝚺₁) e, 2 ^ e ≤ ⌜b⌝ := by
-  simpa using lower_bound_gödelNumber_proof_restrictedGödel (F := Exp.exp) (e := e)
+theorem lower_bound_gödelNumber_proof_restrictedGödel_superexp {e : ℕ} :
+    ∀ b : T ⊢! T.restrictedGödel superexpDef e, Superexp.superexp e ≤ ⌜b⌝ := by
+  simpa [numeral_eq_natCast] using lower_bound_gödelNumber_proof_restrictedGödel (F := Superexp.superexp) (e := e)
 
 /--
-  "This sentence cannot be proved by proof whose Gödel number is less than `2^(10^9)`" is provable and length of its proof is larger than `2^(10^9)`.
+  "This sentence cannot be proved by proof whose Gödel number is less than the superexponential of `10^9`" is provable and length of its proof is larger than the superexponential of `10^9`.
 -/
 example :
   letI 𝔲 : ℕ := 10^9;
-   T ⊢ T.restrictedGödel (expDef.ofZero 𝚺₁) 𝔲 ∧ ∀ b : T ⊢! T.restrictedGödel (expDef.ofZero 𝚺₁) 𝔲, (2^𝔲) ≤ ⌜b⌝  := by
+   T ⊢ T.restrictedGödel superexpDef 𝔲 ∧ ∀ b : T ⊢! T.restrictedGödel superexpDef 𝔲, Superexp.superexp 𝔲 ≤ ⌜b⌝  := by
   constructor;
-  . apply provable_restrictedGödel_exp;
-  . apply lower_bound_gödelNumber_proof_restrictedGödel_exp;
+  . apply provable_restrictedGödel_superexp;
+  . apply lower_bound_gödelNumber_proof_restrictedGödel_superexp;
 
 end Arithmetic
 
