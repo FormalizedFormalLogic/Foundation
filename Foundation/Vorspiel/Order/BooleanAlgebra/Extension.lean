@@ -100,6 +100,20 @@ open BooleanSubalgebra
 variable {α β : Type*} [BooleanAlgebra α] [BooleanAlgebra β]
   {A : BooleanSubalgebra α} {B : BooleanSubalgebra β}
 
+namespace BooleanSubalgebra
+
+@[simp] lemma val_eq_bot {L : BooleanSubalgebra α} {x : L} : (x : α) = ⊥ ↔ x = ⊥ := by
+  rw [← val_bot (L := L), Subtype.coe_inj]
+
+lemma val_map_finsetSup (e : A ≃o B) (s : Finset A) :
+    ((e (s.sup id) : B) : β) = s.sup fun p => (e p : β) := by
+  classical
+  induction s using Finset.induction with
+  | empty => simp
+  | insert p s _ ih => simp only [Finset.sup_insert, id_eq, e.map_sup, val_sup, ih]
+
+end BooleanSubalgebra
+
 /-- `b` is a companion of `a` under `e : A ≃o B`: every `w : A` relates to `a` (by
 disjointness or by `≤`) exactly as `e w` relates to `b`. -/
 def IsCompanion (e : A ≃o B) (a : α) (b : β) : Prop :=
@@ -116,7 +130,77 @@ lemma IsCompanion.symm (h : IsCompanion e a b) : IsCompanion e.symm b a := by
 theorem exists_isCompanion [Nontrivial β] [DenselyOrdered β]
     (hA : (A : Set α).Finite) (e : A ≃o B) (a : α) :
     ∃ b : β, IsCompanion e a b := by
-  sorry
+  have : Finite A := hA.to_subtype
+  -- `letI` (not `haveI`): the atom lemmas of `Basic` mention `Fintype.ofFinite` in their
+  -- statements, so the instance has to stay transparent for them to apply.
+  letI := Fintype.ofFinite A
+  have hmemw : ∀ {w p : A}, p ∈ BooleanAlgebra.atomsBelow w ↔ IsAtom p ∧ p ≤ w := by
+    intro w p; simp [BooleanAlgebra.atomsBelow]
+  have hsup : ∀ w : A, ((BooleanAlgebra.atomsBelow w).sup id : A) = w :=
+    BooleanAlgebra.sup_atomsBelow_eq
+  have hbot : ∀ p : A, ((e p : β) = ⊥ ↔ (p : α) = ⊥) := fun p => by
+    rw [val_eq_bot, val_eq_bot, ← e.map_bot, EquivLike.apply_eq_iff_eq]
+  have hinf : ∀ p q : A, p ⊓ q = ⊥ → (e p : β) ⊓ (e q : β) = ⊥ := fun p q h => by
+    have : (e p ⊓ e q : B) = ⊥ := by rw [← e.map_inf, h, e.map_bot]
+    simpa using congrArg Subtype.val this
+  have hspec : ∀ p : A, ∃ c : β, c ≤ (e p : β) ∧ (c = ⊥ ↔ (p : α) ⊓ a = ⊥) ∧
+      (c = (e p : β) ↔ (p : α) ≤ a) := by
+    intro p
+    by_cases h₁ : (p : α) ⊓ a = ⊥
+    · refine ⟨⊥, bot_le, iff_of_true rfl h₁, ?_⟩
+      rw [eq_comm, hbot p]
+      exact ⟨fun h => le_of_eq_of_le h bot_le, fun h => by rw [← h₁, inf_eq_left.2 h]⟩
+    · by_cases h₂ : (p : α) ≤ a
+      · exact ⟨(e p : β), le_rfl,
+          ⟨fun h => by rw [hbot p] at h; simp [h], fun h => absurd h h₁⟩, iff_of_true rfl h₂⟩
+      · obtain ⟨c, hc₁, hc₂⟩ :=
+          exists_between (bot_lt_iff_ne_bot.2 fun h => h₁ (by rw [(hbot p).1 h]; simp))
+        exact ⟨c, hc₂.le, iff_of_false hc₁.ne' h₁, iff_of_false hc₂.ne h₂⟩
+  choose bp hs₁ hs₂ hs₃ using hspec
+  obtain ⟨atoms, hmem⟩ : ∃ s : Finset A, ∀ p, p ∈ s ↔ IsAtom p :=
+    ⟨BooleanAlgebra.atomsBelow ⊤, fun p => by simp [hmemw]⟩
+  have hX : ∀ p ∈ atoms, (e p : β) ⊓ atoms.sup bp = bp p := fun p hp => by
+    rw [Finset.sup_inf_distrib_left]
+    refine le_antisymm (Finset.sup_le fun q hq => ?_) ?_
+    · rcases eq_or_ne q p with rfl | hqp
+      · exact inf_le_right
+      · calc (e p : β) ⊓ bp q ≤ (e p : β) ⊓ (e q : β) := inf_le_inf_left _ (hs₁ q)
+          _ = ⊥ := hinf p q (disjoint_iff.mp
+            (((hmem p).1 hp).disjoint_of_ne ((hmem q).1 hq) hqp.symm))
+          _ ≤ bp p := bot_le
+    · calc bp p = (e p : β) ⊓ bp p := (inf_eq_right.2 (hs₁ p)).symm
+        _ ≤ atoms.sup fun q => (e p : β) ⊓ bp q :=
+          Finset.le_sup (f := fun q => (e p : β) ⊓ bp q) hp
+  refine ⟨atoms.sup bp, fun w => ?_⟩
+  have hsub : ∀ p ∈ BooleanAlgebra.atomsBelow w, p ∈ atoms := fun _ hp =>
+    (hmem _).2 (hmemw.1 hp).1
+  have hvalw : (w : α) = (BooleanAlgebra.atomsBelow w).sup fun p => (p : α) := by
+    rw [← val_finsetSup, hsup]
+  have hvalew : (e w : β) = (BooleanAlgebra.atomsBelow w).sup fun p => (e p : β) := by
+    rw [← val_map_finsetSup e, hsup]
+  refine ⟨⟨fun hw => ?_, fun hw => ?_⟩, fun hw => ?_, fun hw => ?_⟩
+  · rw [Finset.sup_inf_distrib_left, Finset.sup_eq_bot_iff]
+    intro p hp
+    rcases BooleanAlgebra.IsAtom.le_or_disjoint ((hmem p).1 hp) w with hle | hdis
+    · rw [(hs₂ p).2 (le_bot_iff.1 ((inf_le_inf_right a (show (p : α) ≤ (w : α) from hle)).trans_eq
+        hw)), inf_bot_eq]
+    · exact le_bot_iff.1 <| (inf_le_inf_left _ (hs₁ p)).trans_eq
+        (hinf w p (by rwa [inf_comm] at hdis))
+  · rw [hvalw, Finset.sup_inf_distrib_right, Finset.sup_eq_bot_iff]
+    intro p hp
+    refine (hs₂ p).1 (le_bot_iff.1 ?_)
+    calc bp p = (e p : β) ⊓ atoms.sup bp := (hX p (hsub p hp)).symm
+      _ ≤ (e w : β) ⊓ atoms.sup bp :=
+        inf_le_inf_right _ (show (e p : β) ≤ (e w : β) from e.monotone (hmemw.1 hp).2)
+      _ = ⊥ := hw
+  · rw [hvalew]
+    refine Finset.sup_le fun p hp => ?_
+    rw [← (hs₃ p).2 (le_trans (show (p : α) ≤ (w : α) from (hmemw.1 hp).2) hw)]
+    exact Finset.le_sup (hsub p hp)
+  · rw [hvalw]
+    refine Finset.sup_le fun p hp => (hs₃ p).1 ?_
+    rw [← hX p (hsub p hp), inf_eq_left]
+    exact le_trans (show (e p : β) ≤ (e w : β) from e.monotone (hmemw.1 hp).2) hw
 
 noncomputable section
 
