@@ -47,12 +47,6 @@ inductive Derivation : Sequent L → Head L → Type _
 /-- Negative introduction of implication -/
 | negativeImply {φ ψ : Propositionᵢ L} :
   Derivation Γ φ → Derivation (Δ + ⦃ψ⦄) Ξ → Derivation (Γ + Δ + ⦃φ 🡒 ψ⦄) Ξ
-/-- Positive introduction of negation -/
-| positiveNot {φ : Propositionᵢ L} :
-  Derivation (Γ + ⦃φ⦄) none → Derivation Γ (∼φ : Propositionᵢ L)
-/-- Negative introduction of negation -/
-| negativeNot {φ : Propositionᵢ L} :
-  Derivation Γ φ → Derivation (Γ + ⦃∼φ⦄) none
 /-- Positive introduction of conjunction -/
 | positiveAnd {φ ψ : Propositionᵢ L} :
   Derivation Γ φ → Derivation Γ ψ → Derivation Γ (φ ⋏ ψ)
@@ -89,7 +83,28 @@ variable {Γ Δ : Sequent L} {Ξ Λ : Head L}
 
 def cast (d : Γ ⊢ᴸᴶ¹ Ξ) (seq : Γ = Δ := by abel) (heq : Ξ = Λ := by simp) : Δ ⊢ᴸᴶ¹ Λ := seq ▸ heq ▸ d
 
-def eta : (φ : Propositionᵢ L) → ⦃φ⦄ ⊢ᴸᴶ¹ φ := sorry
+def eta : (φ : Propositionᵢ L) → ⦃φ⦄ ⊢ᴸᴶ¹ φ
+  | .rel R v => identity R v
+  |        ⊥ => contraction falsum (by simp) (by simp)
+  |    φ ⋏ ψ => positiveAnd
+      (cast (negativeAnd (Γ := 0) (φ := φ) (ψ := ψ) (Ξ := φ) <|
+        contraction (eta φ) (by simpa using Multiset.subset_add_left) (by simp)))
+      (cast (negativeAnd (Γ := 0) (φ := φ) (ψ := ψ) (Ξ := ψ) <|
+        contraction (eta ψ) (by simpa using Multiset.subset_add_right) (by simp)))
+  |    φ ⋎ ψ => negativeOr (Γ := 0) (φ := φ) (ψ := ψ) (Ξ := φ ⋎ ψ)
+      (cast (positiveOrLeft (ψ := ψ) (eta φ)))
+      (cast (positiveOrRight (φ := φ) (eta ψ)))
+  |    φ 🡒 ψ => positiveImply <|
+      cast (negativeImply (φ := φ) (ψ := ψ) (Δ := 0) (Ξ := ψ)
+        (eta φ)
+        (cast (eta ψ) (by simp) (by simp)))
+  |     ∀¹ φ => positiveForall (Γ := ⦃∀¹ φ⦄) <|
+      cast (negativeForall (Γ := 0) (Ξ := Rewriting.free φ) (φ := Rewriting.shift φ) (t := &0) <|
+        cast (eta (Rewriting.free φ)) (by simp) (by simp)) (by simp)
+  |     ∃¹ φ => negativeExists (Γ := 0) (Ξ := ∃¹ φ) <|
+      cast (positiveExists (Γ := ⦃Rewriting.free φ⦄) (φ := Rewriting.shift φ) (t := &0) <|
+        cast (eta (Rewriting.free φ)) (by simp) (by simp))
+  termination_by φ => φ.complexity
 
 end Derivation
 
