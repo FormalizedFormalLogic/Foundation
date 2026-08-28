@@ -168,13 +168,9 @@ theorem exists_isCompanion [Nontrivial β] [DenselyOrdered β]
     (hA : (A : Set α).Finite) (e : A ≃o B) (a : α) :
     ∃ b : β, IsCompanion e a b := by
   have : Finite A := hA.to_subtype
-  -- `letI` (not `haveI`): the atom lemmas of `Basic` mention `Fintype.ofFinite` in their
-  -- statements, so the instance has to stay transparent for them to apply.
   letI := Fintype.ofFinite A
   have hmemw : ∀ {w p : A}, p ∈ BooleanAlgebra.atomsBelow w ↔ IsAtom p ∧ p ≤ w := by
     intro w p; simp [BooleanAlgebra.atomsBelow]
-  have hsup : ∀ w : A, ((BooleanAlgebra.atomsBelow w).sup id : A) = w :=
-    BooleanAlgebra.sup_atomsBelow_eq
   choose bp hs₁ hs₂ hs₃ using exists_companionPiece e a
   obtain ⟨atoms, hmem⟩ : ∃ s : Finset A, ∀ p, p ∈ s ↔ IsAtom p :=
     ⟨BooleanAlgebra.atomsBelow ⊤, fun p => by simp [hmemw]⟩
@@ -194,9 +190,9 @@ theorem exists_isCompanion [Nontrivial β] [DenselyOrdered β]
   have hsub : ∀ p ∈ BooleanAlgebra.atomsBelow w, p ∈ atoms := fun _ hp =>
     (hmem _).2 (hmemw.1 hp).1
   have hvalw : (w : α) = (BooleanAlgebra.atomsBelow w).sup fun p => (p : α) := by
-    rw [← val_finsetSup, hsup]
+    rw [← val_finsetSup, BooleanAlgebra.sup_atomsBelow_eq]
   have hvalew : (e w : β) = (BooleanAlgebra.atomsBelow w).sup fun p => (e p : β) := by
-    rw [← val_map_finsetSup e, hsup]
+    rw [← val_map_finsetSup e, BooleanAlgebra.sup_atomsBelow_eq]
   refine ⟨⟨fun hw => ?_, fun hw => ?_⟩, fun hw => ?_, fun hw => ?_⟩
   · rw [Finset.sup_inf_distrib_left, Finset.sup_eq_bot_iff]
     intro p hp

@@ -75,10 +75,8 @@ open Classical in
 noncomputable def atomsBelow [Fintype γ] (w : γ) : Finset γ :=
   {p | IsAtom p ∧ p ≤ w}
 
-lemma sup_atomsBelow_eq [Finite γ] (w : γ) :
-    haveI := Fintype.ofFinite γ
+lemma sup_atomsBelow_eq [Fintype γ] (w : γ) :
     (atomsBelow w).sup id = w := by
-  letI := Fintype.ofFinite γ
   have hmem : ∀ p, p ∈ atomsBelow w ↔ IsAtom p ∧ p ≤ w := fun p => by simp [atomsBelow]
   refine le_antisymm (Finset.sup_le fun p hp => (hmem p).mp hp |>.2) ?_
   by_contra hlt
@@ -91,10 +89,8 @@ lemma sup_atomsBelow_eq [Finite γ] (w : γ) :
     have hdc : p ≤ ((atomsBelow w).sup id)ᶜ := hple.trans (by rw [sdiff_eq]; exact inf_le_right)
     exact hp.1 (le_bot_iff.mp ((le_inf hple' hdc).trans_eq inf_compl_eq_bot))
 
-lemma inf_eq_bot_iff_atomsBelow [Finite γ] {w a' : γ} :
-    haveI := Fintype.ofFinite γ
+lemma inf_eq_bot_iff_atomsBelow [Fintype γ] {w a' : γ} :
     w ⊓ a' = ⊥ ↔ ∀ p ∈ atomsBelow w, p ⊓ a' = ⊥ := by
-  letI := Fintype.ofFinite γ
   rw [← disjoint_iff]
   conv_lhs => rw [← sup_atomsBelow_eq w]
   rw [Finset.disjoint_sup_left]
