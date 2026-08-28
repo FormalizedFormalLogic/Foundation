@@ -84,7 +84,11 @@ lemma sup_atomsBelow_eq [Finite γ] (w : γ) :
 lemma inf_eq_bot_iff_atomsBelow [Finite γ] {w a' : γ} :
     haveI := Fintype.ofFinite γ
     w ⊓ a' = ⊥ ↔ ∀ p ∈ atomsBelow w, p ⊓ a' = ⊥ := by
-  sorry
+  letI := Fintype.ofFinite γ
+  rw [← disjoint_iff]
+  conv_lhs => rw [← sup_atomsBelow_eq w]
+  rw [Finset.disjoint_sup_left]
+  simp only [id, disjoint_iff]
 
 end BooleanAlgebra
 
