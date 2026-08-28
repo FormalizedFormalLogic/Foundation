@@ -571,16 +571,7 @@ private lemma phi_iff (C p : V) :
     unfold Phi
     rintro (rfl | rfl | ⟨k, _, r, _, v, _, rfl⟩ | ⟨k, _, r, _, v, _, rfl⟩
       | ⟨p₁, _, p₂, _, hp, hq, rfl⟩ | ⟨p₁, _, p₂, _, hp, hq, rfl⟩ | ⟨p₁, _, hp, rfl⟩
-      | ⟨u, _, q, _, ⟨t, _, ht, rfl⟩, hq, rfl⟩)
-    · exact Or.inl rfl
-    · exact Or.inr (Or.inl rfl)
-    · exact Or.inr (Or.inr (Or.inl ⟨k, r, v, rfl⟩))
-    · exact Or.inr (Or.inr (Or.inr (Or.inl ⟨k, r, v, rfl⟩)))
-    · exact Or.inr (Or.inr (Or.inr (Or.inr (Or.inl ⟨p₁, p₂, hp, hq, rfl⟩))))
-    · exact Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inl ⟨p₁, p₂, hp, hq, rfl⟩)))))
-    · exact Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inl ⟨p₁, hp, rfl⟩))))))
-    · exact Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr
-        ⟨termBShift ℒₒᵣ t, q, ⟨t, ht, rfl⟩, hq, rfl⟩))))))
+      | ⟨u, _, q, _, ⟨t, _, ht, rfl⟩, hq, rfl⟩) <;> grind
 
 noncomputable def blueprint : Fixpoint.Blueprint 0 := ⟨.mkDelta
   (.mkSigma “p C.
@@ -619,15 +610,7 @@ def construction : Fixpoint.Construction V blueprint where
   monotone := by
     unfold Phi
     rintro C C' hC _ x (h | h | h | h | ⟨p₁, p₂, hp, hq, rfl⟩ | ⟨p₁, p₂, hp, hq, rfl⟩
-      | ⟨p₁, hp, rfl⟩ | ⟨u, q, ht, hq, rfl⟩)
-    · exact Or.inl h
-    · exact Or.inr (Or.inl h)
-    · exact Or.inr (Or.inr (Or.inl h))
-    · exact Or.inr (Or.inr (Or.inr (Or.inl h)))
-    · exact Or.inr (Or.inr (Or.inr (Or.inr (Or.inl ⟨p₁, p₂, hC hp, hC hq, rfl⟩))))
-    · exact Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inl ⟨p₁, p₂, hC hp, hC hq, rfl⟩)))))
-    · exact Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inl ⟨p₁, hC hp, rfl⟩))))))
-    · exact Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr ⟨u, q, ht, hC hq, rfl⟩))))))
+      | ⟨p₁, hp, rfl⟩ | ⟨u, q, ht, hq, rfl⟩) <;> grind
 
 instance : construction.StrongFinite V where
   strong_finite := by
@@ -718,16 +701,12 @@ lemma IsSigma1.of_all {p : V} (h : IsSigma1 (^∀ p)) :
     ∃ u q, (∃ t, IsUTerm ℒₒᵣ t ∧ u = termBShift ℒₒᵣ t) ∧ IsSigma1 q
       ∧ p = qqOr (Arithmetic.qqNLT (qqBvar 0) u) q := by
   rcases h.case with (h | h | ⟨_,_,_,h⟩ | ⟨_,_,_,h⟩ | ⟨_,_,_,_,h⟩ | ⟨_,_,_,_,h⟩ | ⟨_,_,h⟩
-    | ⟨u, q, hguard, hq, h⟩)
-  · exact absurd h (by simp [qqAll, qqVerum])
-  · exact absurd h (by simp [qqAll, qqFalsum])
-  · exact absurd h (by simp [qqAll, qqRel])
-  · exact absurd h (by simp [qqAll, qqNRel])
-  · exact absurd h (by simp [qqAll, qqAnd])
-  · exact absurd h (by simp [qqAll, qqOr])
-  · exact absurd h (by simp [qqAll, qqExs])
-  · rw [show qqBall u q = ^∀ (qqOr (Arithmetic.qqNLT (qqBvar 0) u) q) from rfl, qqAll_inj] at h
-    exact ⟨u, q, hguard, hq, h⟩
+    | ⟨u, q, hguard, hq, h⟩) <;>
+    first
+      | (simp [qqAll, qqVerum, qqFalsum, qqRel, qqNRel, qqAnd, qqOr, qqExs] at h
+         done)
+      | (rw [show qqBall u q = ^∀ (qqOr (Arithmetic.qqNLT (qqBvar 0) u) q) from rfl, qqAll_inj] at h
+         exact ⟨u, q, hguard, hq, h⟩)
 
 end isSigma1
 
