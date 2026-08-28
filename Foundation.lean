@@ -177,6 +177,9 @@ public import Foundation.Vorspiel.Matrix
 public import Foundation.Vorspiel.Nat.Basic
 public import Foundation.Vorspiel.Nat.Matrix
 public import Foundation.Vorspiel.NotationClass
+public import Foundation.Vorspiel.Order.BooleanAlgebra.Basic
+public import Foundation.Vorspiel.Order.BooleanAlgebra.Extension
+public import Foundation.Vorspiel.Order.BooleanAlgebra.Iso
 public import Foundation.Vorspiel.Order.Dense
 public import Foundation.Vorspiel.Order.Heyting
 public import Foundation.Vorspiel.Part
