@@ -6,18 +6,10 @@ public import Mathlib.Order.Ideal
 /-!
 # Countable atomless Boolean algebras are isomorphic
 
-Any two countable, nontrivial, atomless (equivalently, densely ordered) Boolean
-algebras are order isomorphic (`iso_of_countable_atomless`). The proof is a
-back-and-forth argument, modeled on `Order.iso_of_countable_dense`
-(`Mathlib.Order.CountableDenseLinearOrder`):
-
-* `PartialIso α β` bundles an order isomorphism between two finite Boolean
-  subalgebras of `α` and `β`, preordered by extension.
-* `PartialIso.definedAtLeft`/`PartialIso.definedAtRight` are cofinal in that preorder
-  whenever the codomain is a nontrivial densely ordered (atomless) Boolean algebra.
-* A generic ideal in this poset, obtained from `Order.idealOfCofinals`, is directed and
-  meets every `definedAtLeft`/`definedAtRight`, hence assembles into a total order
-  isomorphism `α ≃o β`.
+Any two countable, nontrivial, atomless (equivalently, densely ordered) Boolean algebras are
+order isomorphic (`iso_of_countable_atomless`), by a back-and-forth argument over the preorder
+`PartialIso α β` of isomorphisms between finite Boolean subalgebras, modeled on
+`Order.iso_of_countable_dense` (`Mathlib.Order.CountableDenseLinearOrder`).
 
 Analogue, for Boolean algebras, of Cantor's isomorphism theorem for countable dense
 linear orders; there is no direct literature source for the Boolean algebra case.
@@ -29,7 +21,6 @@ open BooleanSubalgebra
 
 variable {α β : Type*} [BooleanAlgebra α] [BooleanAlgebra β]
 
-/-- The bottom Boolean subalgebra, namely `{⊥, ⊤}`, is finite. -/
 lemma BooleanSubalgebra.coe_bot_finite : ((⊥ : BooleanSubalgebra α) : Set α).Finite := by
   rw [coe_bot]; exact (Set.finite_singleton _).insert _
 
@@ -45,8 +36,6 @@ structure PartialIso where
 
 namespace PartialIso
 
-/-- `f ≤ g` when `g`'s domain extends `f`'s and `g`'s isomorphism agrees with `f`'s on
-`f`'s domain. -/
 instance : Preorder (PartialIso α β) where
   le f g := ∃ hA : f.domSubalg ≤ g.domSubalg, ∀ x : f.domSubalg, (g.iso ⟨x, hA x.2⟩ : β) = f.iso x
   le_refl _ := ⟨le_refl _, fun _ ↦ rfl⟩
@@ -56,45 +45,53 @@ instance : Preorder (PartialIso α β) where
 noncomputable instance [Nontrivial α] [Nontrivial β] : Inhabited (PartialIso α β) :=
   ⟨⟨⊥, ⊥, coe_bot_finite, coe_bot_finite, botOrderIso⟩⟩
 
-lemma le_def {f g : PartialIso α β} :
-    f ≤ g ↔ ∃ hA : f.domSubalg ≤ g.domSubalg,
-      ∀ x : f.domSubalg, (g.iso ⟨x, hA x.2⟩ : β) = f.iso x := Iff.rfl
-
-/-- The codomain of an extension `g` of `f` also extends `f`'s codomain. -/
-lemma cod_le_of_le {f g : PartialIso α β} (hfg : f ≤ g) : f.codSubalg ≤ g.codSubalg := by
-  sorry
-
-/-- The inverse isomorphisms of `f ≤ g` agree on `f`'s codomain. -/
-lemma symm_agree_of_le {f g : PartialIso α β} (hfg : f ≤ g) (v : f.codSubalg) :
-    (g.iso.symm ⟨v, cod_le_of_le hfg v.2⟩ : α) = f.iso.symm v := by
-  sorry
-
-/-- A partial isomorphism between `α` and `β` is also one between `β` and `α`. -/
 def comm : PartialIso α β → PartialIso β α :=
   fun f => ⟨f.codSubalg, f.domSubalg, f.finite_cod, f.finite_dom, f.iso.symm⟩
 
-lemma comm_le_comm {f g : PartialIso α β} (hfg : f ≤ g) : f.comm ≤ g.comm := by
-  sorry
+section
 
-/-- Any `f : PartialIso α β` extends to some `g` whose domain contains `a`, provided `β`
-is a nontrivial densely ordered (atomless) Boolean algebra. -/
+variable {f g : PartialIso α β}
+
+lemma le_def :
+    f ≤ g ↔ ∃ hA : f.domSubalg ≤ g.domSubalg,
+      ∀ x : f.domSubalg, (g.iso ⟨x, hA x.2⟩ : β) = f.iso x := Iff.rfl
+
+lemma cod_le_of_le (hfg : f ≤ g) : f.codSubalg ≤ g.codSubalg := by
+  obtain ⟨hA, hval⟩ := hfg
+  intro v hv
+  have h : (g.iso ⟨f.iso.symm ⟨v, hv⟩, hA (f.iso.symm ⟨v, hv⟩).2⟩ : β) = v := by
+    rw [hval, OrderIso.apply_symm_apply]
+  exact h ▸ (g.iso _).2
+
+lemma symm_agree_of_le (hfg : f ≤ g) (v : f.codSubalg) :
+    (g.iso.symm ⟨v, cod_le_of_le hfg v.2⟩ : α) = f.iso.symm v := by
+  obtain ⟨hA, hval⟩ := id hfg
+  have h : g.iso ⟨f.iso.symm v, hA (f.iso.symm v).2⟩ = ⟨v, cod_le_of_le hfg v.2⟩ :=
+    Subtype.ext (by rw [hval, OrderIso.apply_symm_apply])
+  rw [← h, OrderIso.symm_apply_apply]
+
+lemma comm_le_comm (hfg : f ≤ g) : f.comm ≤ g.comm :=
+  ⟨cod_le_of_le hfg, symm_agree_of_le hfg⟩
+
+end
+
 theorem exists_le_mem_dom [Nontrivial β] [DenselyOrdered β]
     (f : PartialIso α β) (a : α) : ∃ g : PartialIso α β, f ≤ g ∧ a ∈ g.domSubalg := by
-  sorry
+  obtain ⟨b, h⟩ := exists_isCompanion f.finite_dom f.iso a
+  exact ⟨⟨_, _, closure_insert_finite f.finite_dom a, closure_insert_finite f.finite_cod b,
+    IsCompanion.extend h⟩, ⟨le_closure_insert, IsCompanion.extend_coe h⟩, self_mem_closure_insert⟩
 
-/-- The set of partial isomorphisms whose domain contains `a`, which is cofinal whenever
-`β` is a nontrivial densely ordered (atomless) Boolean algebra. -/
 def definedAtLeft [Nontrivial β] [DenselyOrdered β] (a : α) : Order.Cofinal (PartialIso α β) where
   carrier := {f | a ∈ f.domSubalg}
   isCofinal f := by
-    sorry
+    obtain ⟨g, hfg, hmem⟩ := exists_le_mem_dom f a
+    exact ⟨g, hmem, hfg⟩
 
-/-- The set of partial isomorphisms whose codomain contains `b`, which is cofinal
-whenever `α` is a nontrivial densely ordered (atomless) Boolean algebra. -/
 def definedAtRight [Nontrivial α] [DenselyOrdered α] (b : β) : Order.Cofinal (PartialIso α β) where
   carrier := {f | b ∈ f.codSubalg}
   isCofinal f := by
-    sorry
+    obtain ⟨g, hmem, hfg⟩ := (definedAtLeft (β := α) b).isCofinal f.comm
+    exact ⟨g.comm, hmem, comm_le_comm hfg⟩
 
 end PartialIso
 
