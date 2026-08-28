@@ -7,12 +7,7 @@ public import Mathlib.Order.Ideal
 # Countable atomless Boolean algebras are isomorphic
 
 Any two countable, nontrivial, atomless (equivalently, densely ordered) Boolean algebras are
-order isomorphic (`iso_of_countable_atomless`), by a back-and-forth argument over the preorder
-`PartialIso α β` of isomorphisms between finite Boolean subalgebras, modeled on
-`Order.iso_of_countable_dense` (`Mathlib.Order.CountableDenseLinearOrder`).
-
-Analogue, for Boolean algebras, of Cantor's isomorphism theorem for countable dense
-linear orders; there is no direct literature source for the Boolean algebra case.
+order isomorphic (`iso_of_countable_atomless`).
 -/
 
 @[expose] public section
@@ -95,14 +90,14 @@ theorem exists_le_mem_dom [Nontrivial β] [DenselyOrdered β]
   exact ⟨⟨_, _, closure_insert_finite f.finite_dom a, closure_insert_finite f.finite_cod b,
     IsCompanion.extend h⟩, ⟨le_closure_insert, IsCompanion.extend_coe h⟩, self_mem_closure_insert⟩
 
-/-- The partial isomorphisms defined at `a`, cofinal since any one extends to cover `a`. -/
+/-- The cofinal family of partial isomorphisms whose domain contains `a`. -/
 def definedAtLeft [Nontrivial β] [DenselyOrdered β] (a : α) : Order.Cofinal (PartialIso α β) where
   carrier := {f | a ∈ f.domSubalg}
   isCofinal f := by
     obtain ⟨g, hfg, hmem⟩ := exists_le_mem_dom f a
     exact ⟨g, hmem, hfg⟩
 
-/-- The partial isomorphisms defined at `b`, cofinal by symmetry with `definedAtLeft`. -/
+/-- The cofinal family of partial isomorphisms whose codomain contains `b`. -/
 def definedAtRight [Nontrivial α] [DenselyOrdered α] (b : β) : Order.Cofinal (PartialIso α β) where
   carrier := {f | b ∈ f.codSubalg}
   isCofinal f := by
@@ -113,8 +108,6 @@ end PartialIso
 
 open PartialIso
 
-/-- Any two countable, nontrivial, atomless (densely ordered) Boolean algebras are
-order isomorphic. -/
 theorem iso_of_countable_atomless
     [Countable α] [Nontrivial α] [DenselyOrdered α]
     [Countable β] [Nontrivial β] [DenselyOrdered β] :

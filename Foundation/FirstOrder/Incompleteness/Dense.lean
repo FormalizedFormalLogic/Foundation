@@ -4,15 +4,6 @@ public import Foundation.FirstOrder.Incompleteness.RosserProvability
 public import Foundation.Logic.LindenbaumAlgebra
 public import Foundation.Vorspiel.Order.BooleanAlgebra.Iso
 
-/-!
-# Density of Lindenbaum algebras of consistent theories
-
-By Gödel's first incompleteness theorem, the Lindenbaum algebra of any consistent,
-`𝗜𝚺₁`-extension, `Δ₁`-definable arithmetic theory is densely ordered (atomless). Since
-it is also countable and nontrivial, `iso_of_countable_atomless` applies: any two such
-Lindenbaum algebras are order isomorphic (`lindenbaum_iso`).
--/
-
 @[expose] public section
 namespace LO
 
@@ -88,9 +79,6 @@ lemma FirstOrder.Arithmetic.dense (T : ArithmeticTheory) [𝗜𝚺₁ ⪯ T] [T.
 instance (T : ArithmeticTheory) [𝗜𝚺₁ ⪯ T] [T.Δ₁] : DenselyOrdered (LindenbaumAlgebra T) where
   dense _ _ := FirstOrder.Arithmetic.dense T
 
-/-- The Lindenbaum algebras of any two consistent, `𝗜𝚺₁`-extension, `Δ₁`-definable
-arithmetic theories are order isomorphic: both are countable, nontrivial, atomless
-Boolean algebras, so `iso_of_countable_atomless` applies. -/
 theorem lindenbaum_iso (T U : ArithmeticTheory)
     [𝗜𝚺₁ ⪯ T] [T.Δ₁] [Consistent T] [𝗜𝚺₁ ⪯ U] [U.Δ₁] [Consistent U] :
     Nonempty (LindenbaumAlgebra T ≃o LindenbaumAlgebra U) :=

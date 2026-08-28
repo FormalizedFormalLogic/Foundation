@@ -8,11 +8,7 @@ public import Mathlib.Data.Finset.Lattice.Fold
 /-!
 # Auxiliary identities and atom theory for Boolean algebras
 
-Elementary Boolean algebra identities and finite-atom-theory facts used to build the
-back-and-forth isomorphism between countable atomless Boolean algebras
-(`Foundation.Vorspiel.Order.BooleanAlgebra.Iso`).
-
-Folklore Boolean algebra manipulations; there is no direct literature source.
+Elementary Boolean algebra identities and facts about atoms in finite Boolean algebras.
 -/
 
 @[expose] public section
