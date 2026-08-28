@@ -2,14 +2,14 @@ module
 
 public import Foundation.FirstOrder.Incompleteness.First
 public import Foundation.FirstOrder.Incompleteness.Second
-public import Foundation.FirstOrder.Incompleteness.InductionSchemeDelta1
+public import Foundation.FirstOrder.Incompleteness.Delta1
 
 @[expose] public section
 /-!
 # $\Delta_1$-definability of theories
 
 `𝗜𝚺₁` and `𝗣𝗔` are $\Delta_1$-definable; the proofs are in
-`Foundation.FirstOrder.Incompleteness.InductionSchemeDelta1`
+`Foundation.FirstOrder.Incompleteness.Delta1`
 (instances `ISigma1_delta1Definable`, `PA_delta1Definable`).
 -/
 
