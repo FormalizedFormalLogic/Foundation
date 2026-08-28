@@ -6,18 +6,7 @@ public import Foundation.FirstOrder.Incompleteness.Second
 /-!
 # $\Delta_1$-definability of the induction schemata, and of `𝗜𝚺₁` and `𝗣𝗔`
 
-`Δ₁`-definability of the induction schemata, and hence of `𝗣𝗔` and `𝗜𝚺₁`
-(`PA_delta1Definable`, `ISigma1_delta1Definable`).
-
-Since
-
-```
-𝗣𝗔  = 𝗣𝗔⁻ + InductionScheme ℒₒᵣ Set.univ
-𝗜𝚺₁ = 𝗣𝗔⁻ + InductionScheme ℒₒᵣ (Arithmetic.Hierarchy 𝚺 1)
-```
-
-and `𝗣𝗔⁻` is finite, `Theory.Δ₁.ofFinite` and `Theory.Δ₁.add` reduce both to
-`(InductionScheme ℒₒᵣ C).Δ₁`.
+The instances `PA_delta1Definable : 𝗣𝗔.Δ₁` and `ISigma1_delta1Definable : 𝗜𝚺₁.Δ₁`.
 -/
 
 @[expose] public section
