@@ -282,19 +282,36 @@ end
 lemma IsCompanion.extend_spec (h : IsCompanion e a b)
     (x : (closure (insert a (A : Set α)) : BooleanSubalgebra α)) :
     ∃ y z : A, (x : α) = ((y : α) ⊓ a) ⊔ ((z : α) ⊓ aᶜ) ∧
-      (h.extend x : β) = ((e y : β) ⊓ b) ⊔ ((e z : β) ⊓ bᶜ) := by
-  sorry
+      (h.extend x : β) = ((e y : β) ⊓ b) ⊔ ((e z : β) ⊓ bᶜ) :=
+  ⟨(insertRepPair x).1, (insertRepPair x).2, insertRepPair_spec x, h.val_mapRep⟩
 
 lemma IsCompanion.extend_coe (h : IsCompanion e a b) (x : A) :
     (h.extend ⟨x, le_closure_insert x.2⟩ : β) = e x := by
-  sorry
+  show (h.mapRep ⟨x, le_closure_insert x.2⟩ : β) = e x
+  rw [h.mapRep_eq (y := x) (z := x) (BooleanAlgebra.eq_insertRep_self ..)]
+  exact (BooleanAlgebra.eq_insertRep_self ..).symm
 
 lemma IsCompanion.extend_self (h : IsCompanion e a b) :
     (h.extend ⟨a, self_mem_closure_insert⟩ : β) = b := by
-  sorry
+  show (h.mapRep ⟨a, self_mem_closure_insert⟩ : β) = b
+  rw [h.mapRep_eq (y := ⊤) (z := ⊥) (by simp)]
+  simp [e.map_top, e.map_bot]
 
+open Classical in
 def botOrderIso [Nontrivial α] [Nontrivial β] :
-    (⊥ : BooleanSubalgebra α) ≃o (⊥ : BooleanSubalgebra β) := by
-  sorry
+    (⊥ : BooleanSubalgebra α) ≃o (⊥ : BooleanSubalgebra β) where
+  toFun x := if (x : α) = ⊥ then ⊥ else ⊤
+  invFun v := if (v : β) = ⊥ then ⊥ else ⊤
+  left_inv x := Subtype.ext <| by rcases mem_bot.mp x.2 with hx | hx <;> simp [hx]
+  right_inv v := Subtype.ext <| by rcases mem_bot.mp v.2 with hv | hv <;> simp [hv]
+  map_rel_iff' {x y} := by
+    have hβ : ∀ u v : (⊥ : BooleanSubalgebra β), u ≤ v ↔ (u : β) ≤ (v : β) := fun _ _ => Iff.rfl
+    have hα : ∀ u v : (⊥ : BooleanSubalgebra α), u ≤ v ↔ (u : α) ≤ (v : α) := fun _ _ => Iff.rfl
+    have hcases : ∀ u : (⊥ : BooleanSubalgebra α), u = ⊥ ∨ u = ⊤ := fun u =>
+      (mem_bot.mp u.2).imp Subtype.ext Subtype.ext
+    have hα' : (⊤ : (⊥ : BooleanSubalgebra α)) ≠ ⊥ := fun hc => by
+      simpa using congrArg Subtype.val hc
+    rw [hβ, hα]
+    rcases hcases x with rfl | rfl <;> rcases hcases y with rfl | rfl <;> simp [hα']
 
 end
