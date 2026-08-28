@@ -3,6 +3,7 @@ module
 public import Foundation.Syntax.Predicate.Quantifier
 public import Foundation.Syntax.Predicate.Term
 public import Foundation.Vorspiel.Function
+public import Foundation.Vorspiel.Multiset
 
 /-!
 # Rewriting
@@ -860,6 +861,16 @@ scoped[LO.FirstOrder] postfix:max "⁺" => FirstOrder.Rewriting.shifts
 
 @[simp] lemma shifts_neg [Rewriting L ℕ F ℕ F] (Γ : List (F n)) : (∼Γ)⁺ = ∼(Γ⁺) := by
   simp [shifts, List.tilde_def]
+
+def shiftsM [Rewriting L ℕ F ℕ F] (Γ : Multiset (F n)) : Multiset (F n) := Γ.map Rewriting.shift
+
+scoped[LO.FirstOrder] postfix:max "⁺ᵐ" => FirstOrder.Rewriting.shiftsM
+
+@[simp] lemma shiftsM_empty [Rewriting L ℕ F ℕ F] : (0 : Multiset (F n))⁺ᵐ = 0 := by rfl
+
+@[simp] lemma shiftsM_add [Rewriting L ℕ F ℕ F] (Γ Δ : Multiset (F n)) : (Γ + Δ)⁺ᵐ = Γ⁺ᵐ + Δ⁺ᵐ := by simp [shiftsM]
+
+@[simp] lemma shiftsM_singleton [Rewriting L ℕ F ℕ F] (φ : F n) : (⦃φ⦄ : Multiset (F n))⁺ᵐ = ⦃shift φ⦄ := by simp [shiftsM]
 
 abbrev emb {ο ξ} [IsEmpty ο] {O F : ℕ → Type*} [LCWQ O] [LCWQ F] [Rewriting L ο O ξ F] : O n →ˡᶜ F n := app (Rew.emb (ξ := ξ))
 
