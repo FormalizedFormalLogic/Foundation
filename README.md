@@ -109,14 +109,7 @@ lake build
 
 ## Contributing
 
-Contributions are welcome. Before opening a pull request, please read:
-
-- [`CONTRIBUTING.md`](./CONTRIBUTING.md) — how changes land on `master`, PR/commit title conventions, pre-submission checks, and disclosure of AI involvement.
-- [`contribute/style.md`](./contribute/style.md) — coding conventions for the Lean sources.
-- [`contribute/refactoring.md`](./contribute/refactoring.md) — guidelines for refactoring existing proofs.
-
-All changes go through pull requests and are squash-merged; the PR title becomes the commit message on `master`.
-Whenever an AI coding agent was involved in producing a change, this must be disclosed as described in `CONTRIBUTING.md`.
+See [CONTRIBUTING.md](./CONTRIBUTING.md) for the contribution flow and [contribute/style.md](./contribute/style.md) for the coding conventions.
 
 ## Developers
 
