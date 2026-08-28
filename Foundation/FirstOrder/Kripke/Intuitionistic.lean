@@ -241,7 +241,7 @@ instance : ForcingRelation.IntKripke W (· ≥ ·) where
 
 open HilbertProofᵢ Semantics
 
-lemma sound {T : Theoryᵢ L 𝗜𝗻𝘁¹} (b : T ⊢ φ) : W ∀⊩* T → W ∀⊩ φ := fun H w ↦ by
+lemma sound {T : HilbTheory L 𝗜𝗻𝘁¹} (b : T ⊢ φ) : W ∀⊩* T → W ∀⊩ φ := fun H w ↦ by
   rcases domain_nonempty' w with ⟨x, hx⟩
   have : (Rewriting.emb '' T.theory) *⊢[𝗜𝗻𝘁¹] ↑φ := b
   rcases Entailment.Context.provable_iff.mp this with ⟨Γ, HΓ, b⟩
@@ -303,12 +303,12 @@ variable {𝓚}
 
 lemma models_def : 𝓚 ⊧ φ ↔ 𝓚 ∀⊩ φ := by rfl
 
-lemma sound {T : Theoryᵢ L 𝗜𝗻𝘁¹} (b : T ⊢ φ) : 𝓚 ⊧* T → 𝓚 ⊧ φ := fun H ↦
+lemma sound {T : HilbTheory L 𝗜𝗻𝘁¹} (b : T ⊢ φ) : 𝓚 ⊧* T → 𝓚 ⊧ φ := fun H ↦
   Forces₀.sound (W := 𝓚) b fun _ hφ ↦ H.models_set hφ
 
-instance (T : Theoryᵢ L 𝗜𝗻𝘁¹) : Sound T (Semantics.models (IntKripke L) T) := ⟨fun b _ H ↦ sound b H⟩
+instance (T : HilbTheory L 𝗜𝗻𝘁¹) : Sound T (Semantics.models (IntKripke L) T) := ⟨fun b _ H ↦ sound b H⟩
 
-lemma sound_empty (b : (∅ : Theoryᵢ L 𝗜𝗻𝘁¹) ⊢ φ) : 𝓚 ⊧ φ := 𝓚.sound b (by simp)
+lemma sound_empty (b : (∅ : HilbTheory L 𝗜𝗻𝘁¹) ⊢ φ) : 𝓚 ⊧ φ := 𝓚.sound b (by simp)
 
 instance : Semantics.Top (IntKripke L) := ⟨fun 𝓚 ↦ by simpa [models_def] using ForcingRelation.AllForces.verum⟩
 

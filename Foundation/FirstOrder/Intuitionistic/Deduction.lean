@@ -272,26 +272,26 @@ end HilbertProofᵢ
 
 variable (L)
 
-@[ext] structure Theoryᵢ (𝓗 : Hilbertᵢ L) where
+@[ext] structure HilbTheory (𝓗 : Hilbertᵢ L) where
   theory : Set (Sentenceᵢ L)
 
 variable {L}
 
-namespace Theoryᵢ
+namespace HilbTheory
 
 open LO.Entailment
 
-variable {𝓗 : Hilbertᵢ L} {T : Theoryᵢ L 𝓗}
+variable {𝓗 : Hilbertᵢ L} {T : HilbTheory L 𝓗}
 
-instance : SetLike (Theoryᵢ L 𝓗) (Sentenceᵢ L) where
+instance : SetLike (HilbTheory L 𝓗) (Sentenceᵢ L) where
   coe := theory
-  coe_injective _ _ := Theoryᵢ.ext
+  coe_injective _ _ := HilbTheory.ext
 
 lemma mem_def : φ ∈ T ↔ φ ∈ T.theory := by rfl
 
-@[simp] lemma mem_mk_iff (s : Set (Sentenceᵢ L)) : φ ∈ (⟨s⟩ : Theoryᵢ L 𝓗) ↔ φ ∈ s := by rfl
+@[simp] lemma mem_mk_iff (s : Set (Sentenceᵢ L)) : φ ∈ (⟨s⟩ : HilbTheory L 𝓗) ↔ φ ∈ s := by rfl
 
-instance : AdjunctiveSet (Sentenceᵢ L) (Theoryᵢ L 𝓗) where
+instance : AdjunctiveSet (Sentenceᵢ L) (HilbTheory L 𝓗) where
   Subset T U := ∀ φ ∈ T, φ ∈ U
   emptyCollection := ⟨∅⟩
   adjoin φ T := ⟨adjoin φ T.theory⟩
@@ -299,14 +299,14 @@ instance : AdjunctiveSet (Sentenceᵢ L) (Theoryᵢ L 𝓗) where
   not_mem_empty := by simp
   mem_cons_iff := by simp [mem_def]
 
-@[simp] lemma empty_eq_empty : ((∅ : Theoryᵢ L 𝓗) : Set (Sentenceᵢ L)) = ∅  := by rfl
+@[simp] lemma empty_eq_empty : ((∅ : HilbTheory L 𝓗) : Set (Sentenceᵢ L)) = ∅  := by rfl
 
 @[simp] lemma adjoin_theory_def : (adjoin φ T).theory = insert φ T.theory := rfl
 
-def Proof (T : Theoryᵢ L 𝓗) (φ : Sentenceᵢ L) :=
+def Proof (T : HilbTheory L 𝓗) (φ : Sentenceᵢ L) :=
   (Rewriting.emb '' T.theory) *⊢[𝓗]! (Rewriting.emb φ : Propositionᵢ L)
 
-instance : Entailment (Theoryᵢ L 𝓗) (Sentenceᵢ L) := ⟨Theoryᵢ.Proof⟩
+instance : Entailment (HilbTheory L 𝓗) (Sentenceᵢ L) := ⟨HilbTheory.Proof⟩
 
 lemma provable_def {φ : Sentenceᵢ L} : T ⊢ φ ↔ (Rewriting.emb '' T.theory) *⊢[𝓗] ↑φ := by rfl
 
@@ -319,7 +319,7 @@ open Context
 
 variable [L.DecidableEq]
 
-instance : Axiomatized (Theoryᵢ L 𝓗) where
+instance : Axiomatized (HilbTheory L 𝓗) where
   prfAxm {T} φ h := by
     show (Rewriting.emb '' T.theory) *⊢[𝓗]! ↑φ
     exact Context.byAxm (Set.mem_image_of_mem _ (by simpa [mem_def] using h))
@@ -339,7 +339,7 @@ def deductInv! {φ ψ} (b : T ⊢! φ 🡒 ψ) : adjoin φ T ⊢! ψ :=
   have : insert ↑φ (Rewriting.emb '' T.theory) *⊢[𝓗]! ↑ψ := Context.deductInv b
   Context.weakening (by simp [Set.image_insert_eq]) this
 
-instance : Deduction (Theoryᵢ L 𝓗) where
+instance : Deduction (HilbTheory L 𝓗) where
   ofInsert := deduct!
   inv := deductInv!
 
@@ -355,6 +355,6 @@ instance minimal [Entailment.Int 𝓗] : Entailment.Int T where
 instance cl [Entailment.Cl 𝓗] : Entailment.Cl T where
   dne := ofHilbert <| dne
 
-end Theoryᵢ
+end HilbTheory
 
 end LO.FirstOrder

@@ -82,11 +82,11 @@ lemma shift_doubleNegation (Γ : Sequent L) : (Γᴺ)⁺ = (Γ⁺)ᴺ := by
 
 end Sequent
 
-def Theory.ToTheoryᵢ (T : Theory L) (Λ : Hilbertᵢ L) : Theoryᵢ L Λ where
+def Theory.ToHilbTheory (T : Theory L) (Λ : Hilbertᵢ L) : HilbTheory L Λ where
   theory := Semiformula.doubleNegation '' T
 
-@[simp] lemma Theory.ToTheoryᵢ_theory_def (T : Theory L) (Λ : Hilbertᵢ L) :
-    (T.ToTheoryᵢ Λ).theory = Semiformula.doubleNegation '' T := rfl
+@[simp] lemma Theory.ToHilbTheory_theory_def (T : Theory L) (Λ : Hilbertᵢ L) :
+    (T.ToHilbTheory Λ).theory = Semiformula.doubleNegation '' T := rfl
 
 namespace Derivation
 
