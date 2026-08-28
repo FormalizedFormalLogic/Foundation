@@ -119,6 +119,14 @@ namespace BooleanSubalgebra
 @[simp] lemma val_eq_bot {L : BooleanSubalgebra α} {x : L} : (x : α) = ⊥ ↔ x = ⊥ := by
   rw [← val_bot (L := L), Subtype.coe_inj]
 
+lemma val_map_eq_bot (e : A ≃o B) (p : A) : (e p : β) = ⊥ ↔ (p : α) = ⊥ := by
+  rw [val_eq_bot, val_eq_bot, ← e.map_bot, EquivLike.apply_eq_iff_eq]
+
+lemma val_map_inf_eq_bot (e : A ≃o B) {p q : A} (h : p ⊓ q = ⊥) :
+    (e p : β) ⊓ (e q : β) = ⊥ := by
+  have : (e p ⊓ e q : B) = ⊥ := by rw [← e.map_inf, h, e.map_bot]
+  simpa using congrArg Subtype.val this
+
 lemma val_map_finsetSup (e : A ≃o B) (s : Finset A) :
     ((e (s.sup id) : B) : β) = s.sup fun p => (e p : β) := by
   classical
@@ -141,6 +149,21 @@ lemma IsCompanion.symm (h : IsCompanion e a b) : IsCompanion e.symm b a := by
   rw [OrderIso.apply_symm_apply] at this
   exact ⟨this.1.symm, this.2.symm⟩
 
+/-- The piece of a companion of `a` lying below `e p`: it vanishes exactly when `p` misses `a`,
+and exhausts `e p` exactly when `p` lies below `a`. -/
+lemma exists_companionPiece [DenselyOrdered β] (e : A ≃o B) (a : α) (p : A) :
+    ∃ c : β, c ≤ (e p : β) ∧ (c = ⊥ ↔ (p : α) ⊓ a = ⊥) ∧ (c = (e p : β) ↔ (p : α) ≤ a) := by
+  by_cases h₁ : (p : α) ⊓ a = ⊥
+  · refine ⟨⊥, bot_le, iff_of_true rfl h₁, ?_⟩
+    rw [eq_comm, val_map_eq_bot]
+    exact ⟨fun h => le_of_eq_of_le h bot_le, fun h => by rw [← h₁, inf_eq_left.2 h]⟩
+  · by_cases h₂ : (p : α) ≤ a
+    · exact ⟨(e p : β), le_rfl,
+        ⟨fun h => by rw [val_map_eq_bot] at h; simp [h], fun h => absurd h h₁⟩, iff_of_true rfl h₂⟩
+    · obtain ⟨c, hc₁, hc₂⟩ :=
+        exists_between (bot_lt_iff_ne_bot.2 fun h => h₁ (by rw [(val_map_eq_bot e p).1 h]; simp))
+      exact ⟨c, hc₂.le, iff_of_false hc₁.ne' h₁, iff_of_false hc₂.ne h₂⟩
+
 theorem exists_isCompanion [Nontrivial β] [DenselyOrdered β]
     (hA : (A : Set α).Finite) (e : A ≃o B) (a : α) :
     ∃ b : β, IsCompanion e a b := by
@@ -152,25 +175,7 @@ theorem exists_isCompanion [Nontrivial β] [DenselyOrdered β]
     intro w p; simp [BooleanAlgebra.atomsBelow]
   have hsup : ∀ w : A, ((BooleanAlgebra.atomsBelow w).sup id : A) = w :=
     BooleanAlgebra.sup_atomsBelow_eq
-  have hbot : ∀ p : A, ((e p : β) = ⊥ ↔ (p : α) = ⊥) := fun p => by
-    rw [val_eq_bot, val_eq_bot, ← e.map_bot, EquivLike.apply_eq_iff_eq]
-  have hinf : ∀ p q : A, p ⊓ q = ⊥ → (e p : β) ⊓ (e q : β) = ⊥ := fun p q h => by
-    have : (e p ⊓ e q : B) = ⊥ := by rw [← e.map_inf, h, e.map_bot]
-    simpa using congrArg Subtype.val this
-  have hspec : ∀ p : A, ∃ c : β, c ≤ (e p : β) ∧ (c = ⊥ ↔ (p : α) ⊓ a = ⊥) ∧
-      (c = (e p : β) ↔ (p : α) ≤ a) := by
-    intro p
-    by_cases h₁ : (p : α) ⊓ a = ⊥
-    · refine ⟨⊥, bot_le, iff_of_true rfl h₁, ?_⟩
-      rw [eq_comm, hbot p]
-      exact ⟨fun h => le_of_eq_of_le h bot_le, fun h => by rw [← h₁, inf_eq_left.2 h]⟩
-    · by_cases h₂ : (p : α) ≤ a
-      · exact ⟨(e p : β), le_rfl,
-          ⟨fun h => by rw [hbot p] at h; simp [h], fun h => absurd h h₁⟩, iff_of_true rfl h₂⟩
-      · obtain ⟨c, hc₁, hc₂⟩ :=
-          exists_between (bot_lt_iff_ne_bot.2 fun h => h₁ (by rw [(hbot p).1 h]; simp))
-        exact ⟨c, hc₂.le, iff_of_false hc₁.ne' h₁, iff_of_false hc₂.ne h₂⟩
-  choose bp hs₁ hs₂ hs₃ using hspec
+  choose bp hs₁ hs₂ hs₃ using exists_companionPiece e a
   obtain ⟨atoms, hmem⟩ : ∃ s : Finset A, ∀ p, p ∈ s ↔ IsAtom p :=
     ⟨BooleanAlgebra.atomsBelow ⊤, fun p => by simp [hmemw]⟩
   have hX : ∀ p ∈ atoms, (e p : β) ⊓ atoms.sup bp = bp p := fun p hp => by
@@ -179,7 +184,7 @@ theorem exists_isCompanion [Nontrivial β] [DenselyOrdered β]
     · rcases eq_or_ne q p with rfl | hqp
       · exact inf_le_right
       · calc (e p : β) ⊓ bp q ≤ (e p : β) ⊓ (e q : β) := inf_le_inf_left _ (hs₁ q)
-          _ = ⊥ := hinf p q (disjoint_iff.mp
+          _ = ⊥ := val_map_inf_eq_bot e (disjoint_iff.mp
             (((hmem p).1 hp).disjoint_of_ne ((hmem q).1 hq) hqp.symm))
           _ ≤ bp p := bot_le
     · calc bp p = (e p : β) ⊓ bp p := (inf_eq_right.2 (hs₁ p)).symm
@@ -199,7 +204,7 @@ theorem exists_isCompanion [Nontrivial β] [DenselyOrdered β]
     · rw [(hs₂ p).2 (le_bot_iff.1 ((inf_le_inf_right a (show (p : α) ≤ (w : α) from hle)).trans_eq
         hw)), inf_bot_eq]
     · exact le_bot_iff.1 <| (inf_le_inf_left _ (hs₁ p)).trans_eq
-        (hinf w p (by rwa [inf_comm] at hdis))
+        (val_map_inf_eq_bot e (by rwa [inf_comm] at hdis))
   · rw [hvalw, Finset.sup_inf_distrib_right, Finset.sup_eq_bot_iff]
     intro p hp
     refine (hs₂ p).1 (le_bot_iff.1 ?_)
@@ -235,8 +240,9 @@ section
 variable {u u₁ u₂ : (closure (insert a (A : Set α)) : BooleanSubalgebra α)}
 
 /-- The underlying map of `IsCompanion.extend`: transport a normal-form representative of `u`
-along `e`, `a ↦ b`. -/
-def IsCompanion.mapRep (h : IsCompanion e a b)
+along `e`, `a ↦ b`. The companion hypothesis is not needed to define the map, only to prove
+that it is well defined (`IsCompanion.mapRep_eq`). -/
+def IsCompanion.mapRep (_h : IsCompanion e a b)
     (u : (closure (insert a (A : Set α)) : BooleanSubalgebra α)) :
     (closure (insert b (B : Set β)) : BooleanSubalgebra β) :=
   ⟨((e (insertRepPair u).1 : β) ⊓ b) ⊔ ((e (insertRepPair u).2 : β) ⊓ bᶜ),
@@ -245,13 +251,15 @@ def IsCompanion.mapRep (h : IsCompanion e a b)
 @[simp] lemma IsCompanion.val_mapRep (h : IsCompanion e a b) : (h.mapRep u : β) =
     ((e (insertRepPair u).1 : β) ⊓ b) ⊔ ((e (insertRepPair u).2 : β) ⊓ bᶜ) := rfl
 
-lemma IsCompanion.mapRep_eq (h : IsCompanion e a b) {y z : A} (hu : (u : α) = ((y : α) ⊓ a) ⊔ ((z : α) ⊓ aᶜ)) :
+lemma IsCompanion.mapRep_eq (h : IsCompanion e a b) {y z : A}
+    (hu : (u : α) = ((y : α) ⊓ a) ⊔ ((z : α) ⊓ aᶜ)) :
     (h.mapRep u : β) = ((e y : β) ⊓ b) ⊔ ((e z : β) ⊓ bᶜ) := by
   rw [h.val_mapRep]
   exact le_antisymm (h.map_le_map (by rw [← insertRepPair_spec u, hu]))
     (h.map_le_map (by rw [← hu, insertRepPair_spec u]))
 
-lemma IsCompanion.mapRep_mono (h : IsCompanion e a b) (hu : u₁ ≤ u₂) : h.mapRep u₁ ≤ h.mapRep u₂ := by
+lemma IsCompanion.mapRep_mono (h : IsCompanion e a b) (hu : u₁ ≤ u₂) :
+    h.mapRep u₁ ≤ h.mapRep u₂ := by
   show (h.mapRep u₁ : β) ≤ (h.mapRep u₂ : β)
   rw [h.val_mapRep, h.val_mapRep]
   exact h.map_le_map (by rw [← insertRepPair_spec u₁, ← insertRepPair_spec u₂]; exact hu)
