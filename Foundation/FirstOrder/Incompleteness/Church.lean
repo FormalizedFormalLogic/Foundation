@@ -10,14 +10,8 @@ public import Mathlib.Computability.Reduce
 /-!
 # Church's undecidability theorem
 
-`church_theorem_general` shows that for every arithmetic theory `T ⊇ 𝗥₀` sound on `𝚺₁` sentences,
-the set of `T`-provable sentences is not computable, by a direct diagonalization on the
-self-applied substitution `σ ↦ σ/[⌜σ⌝]` (no fixed-point/Gödel-numbering machinery beyond weak
-representability of r.e. predicates, `rePred_weak_representation`, is needed, unlike Gödel's first incompleteness
-theorem). `undecidability_first_order_logic` specializes this to `T = ∅`: since `𝗣𝗔⁻` is finitely axiomatizable,
-`𝗣𝗔⁻`-provability computably many-one reduces to `∅`-provability, so undecidability transfers
-from `church_theorem_general` without needing the `𝗥₀ ⪯ T` and soundness hypotheses required
-there.
+Neither the set of sentences provable in an arithmetic theory `T ⊇ 𝗥₀` that is sound on `𝚺₁`
+sentences, nor the set of sentences provable in pure first-order logic, is computable.
 -/
 
 @[expose] public section
@@ -51,9 +45,7 @@ lemma computable₂_iff_sigma1_simulate {α β γ : Type*} [Primcodable α] [Pri
 
 variable {T : ArithmeticTheory} [𝗥₀ ⪯ T] [T.SoundOnHierarchy 𝚺 1]
 
-/-- Church's theorem, for an arbitrary arithmetic theory `T ⊇ 𝗥₀` sound on `𝚺₁` sentences: the set
-of `T`-provable sentences is not computable. -/
-theorem church_theorem_general : ¬ComputablePred T.theory := by
+theorem uncomputable_theory_of_sigma1Sound : ¬ComputablePred T.theory := by
   by_contra hC
   have hQuoteSubst :
       Computable₂ fun σ π : ArithmeticSemisentence 1 ↦ (σ/[⌜π⌝] : ArithmeticSentence) :=
@@ -79,8 +71,8 @@ end Diagonalization
 
 section PeanoMinusReduction
 
-/-- Church's theorem: the set of (purely logically, i.e. `∅`-)provable sentences is not
-computable. -/
+/-- Provability in pure first-order logic, i.e. provability from the empty theory, is
+undecidable. -/
 theorem undecidability_first_order_logic : ¬ComputablePred ((∅ : ArithmeticTheory).theory) := by
   have hDeduction (σ : ArithmeticSentence) :
       𝗣𝗔⁻ ⊢ σ ↔ (∅ : ArithmeticTheory) ⊢ PeanoMinus.finite.toFinset.conj 🡒 σ := by
@@ -94,7 +86,7 @@ theorem undecidability_first_order_logic : ¬ComputablePred ((∅ : ArithmeticTh
       fun σ ↦ by
       simp [nat_pair_eq, c, Semiformula.imp_eq, Semiformula.encode_or,
         ← Semiformula.encode_eq_toNat, ← Semiformula.encode_eq_toNat]
-  apply church_theorem_general (T := 𝗣𝗔⁻) (ComputablePred.computable_of_manyOneReducible ?_ hC)
+  apply uncomputable_theory_of_sigma1Sound (T := 𝗣𝗔⁻) (ComputablePred.computable_of_manyOneReducible ?_ hC)
   refine ⟨fun σ ↦ PeanoMinus.finite.toFinset.conj 🡒 σ, ?_, ?_⟩
   . exact hImpIntro
   . exact hDeduction
