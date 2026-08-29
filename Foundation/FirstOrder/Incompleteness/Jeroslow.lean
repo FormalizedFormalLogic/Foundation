@@ -85,11 +85,7 @@ instance [𝗜𝚺₁ ⪯ T] [T.SoundOnHierarchy 𝚺 1] : T.standardRefutabilit
   constructor;
   intro h;
   have := ArithmeticTheory.SoundOn.sound (F := Arithmetic.Hierarchy 𝚺 1) h $ by simp [standardRefutability, Refutability.rf];
-  exact provable_iff_provable (L := ℒₒᵣ) |>.mp $ by simpa [
-    models_iff, standardRefutability, Refutability.rf, Refutable,
-    Sentence.quote_def, Semiformula.quote_def,
-    provable_iff_provable
-  ] using this;
+  exact provable_iff_provable (L := ℒₒᵣ) |>.mp $ by simpa [models_iff, standardRefutability, Refutability.rf, Refutable.quote_iff] using this;
 
 instance [𝗜𝚺₁ ⪯ T] : T.standardProvability.FormalizedCompleteOn (ProvabilityAbstraction.jeroslow T.standardRefutability) := by
   constructor;

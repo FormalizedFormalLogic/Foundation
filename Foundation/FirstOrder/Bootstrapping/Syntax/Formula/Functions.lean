@@ -417,8 +417,18 @@ noncomputable def construction : UformulaRec1.Construction V (blueprint L) where
   or_defined := .mk fun v ↦ by simp [blueprint]
   all_defined := .mk fun v ↦ by simp [blueprint]
   exs_defined := .mk fun v ↦ by simp [blueprint]
-  allChanges_defined := .mk fun v ↦ by simp [blueprint]
-  exChanges_defined := .mk fun v ↦ by simp [blueprint]
+  -- These two are the only blueprint fields here that substitute into another semisentence
+  -- (`qVecGraph`). On Lean v4.33.1 letting `simp` apply `Semiformula.eval_substs` to such a goal
+  -- makes it allocate without bound (~170MB/s, OOM after a few minutes); driving that single
+  -- rewrite with `rw` instead keeps it at a few seconds. Revert once upstream is fixed.
+  allChanges_defined := .mk fun v ↦ by
+    simp only [blueprint, HierarchySymbol.Semiformula.val_mkSigma]
+    rw [Semiformula.eval_substs]
+    simp [qVec.defined.df]
+  exChanges_defined := .mk fun v ↦ by
+    simp only [blueprint, HierarchySymbol.Semiformula.val_mkSigma]
+    rw [Semiformula.eval_substs]
+    simp [qVec.defined.df]
 
 end Substs
 
