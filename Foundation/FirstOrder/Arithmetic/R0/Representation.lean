@@ -1,6 +1,7 @@
 module
 
 public import Foundation.FirstOrder.Arithmetic.Definability.Definable
+public import Foundation.FirstOrder.Arithmetic.PeanoMinus.Basic
 public import Foundation.FirstOrder.Arithmetic.R0.Basic
 public import Foundation.Vorspiel.Arithmetic
 public import Foundation.Vorspiel.Computability
@@ -113,54 +114,64 @@ def codeAux {k : ℕ} : Nat.ArithPart₁.Code k → ArithmeticFormula (Fin (k + 
 
 def code (c : Code k) : ArithmeticSemisentence (k + 1) := (Rew.bind (L := ℒₒᵣ) (ξ₁ := Fin (k + 1)) ![] (#0 :> (#·.succ))) ▹ (codeAux c)
 
-/-
 section model
 
-open LO.Arithmetic
+open PeanoMinus
 
-variable {M : Type*} [ORingStructure M] [M↓[ℒₒᵣ] ⊧* 𝗥₀]
+variable {M : Type*} [ORingStructure M] [M↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻]
 
+-- Each case below rewrites hypotheses with `simp [...] at h h'` and then destructures the
+-- normalized hypotheses; the flexible-tactic linter cannot see that the later tactics only
+-- depend on the (already fully simplified) shape of `h`/`h'`, not on the exact simp set used.
+set_option linter.flexible false in
 private lemma codeAux_uniq {k} {c : Code k} {v : Fin k → M} {z z' : M} :
-    Semiformula.Evalfm M (z :> v) (codeAux c) → Semiformula.Evalfm M (z' :> v) (codeAux c) → z = z' := by
-  induction c generalizing z z' <;> simp [code, codeAux]
-  case zero => rintro rfl rfl; rfl
-  case one  => rintro rfl rfl; rfl
-  case add  => rintro rfl rfl; rfl
-  case mul  => rintro rfl rfl; rfl
-  case proj => rintro rfl rfl; rfl
-  case equal i j =>
-    by_cases hv : v i = v j <;> simp [hv]
-    · rintro rfl rfl; rfl
-    · rintro rfl rfl; rfl
-  case lt i j =>
-    by_cases hv : v i < v j <;> simp [hv, -not_lt, ←not_lt]
-    · rintro rfl rfl; rfl
-    · rintro rfl rfl; rfl
-  case comp m n c d ihc ihd =>
-    simp [Semiformula.eval_rew, Function.comp_def, Matrix.empty_eq, Matrix.comp_vecCons']
-    intro w₁ hc₁ hd₁ w₂ hc₂ hd₂;
+    (codeAux c).Evalf (M := M) (z :> v) → (codeAux c).Evalf (M := M) (z' :> v) → z = z' := by
+  induction c generalizing z z' with
+  | zero _ => intro h h'; simp [codeAux] at h h'; rw [h, h']
+  | one _ => intro h h'; simp [codeAux] at h h'; rw [h, h']
+  | add i j => intro h h'; simp [codeAux] at h h'; rw [h, h']
+  | mul i j => intro h h'; simp [codeAux] at h h'; rw [h, h']
+  | proj i => intro h h'; simp [codeAux] at h h'; rw [h, h']
+  | equal i j =>
+    intro h h'
+    by_cases hv : v i = v j <;> simp [codeAux, hv] at h h' <;> rw [h, h']
+  | lt i j =>
+    intro h h'
+    by_cases hv : v i < v j <;> simp [codeAux, hv] at h h' <;> rw [h, h']
+  | comp c d ihc ihd =>
+    intro h h'
+    simp [codeAux, Semiformula.eval_rew, Function.comp_def, Matrix.empty_eq,
+      Matrix.comp_vecCons'] at h h'
+    obtain ⟨w₁, hc₁, hd₁⟩ := h
+    obtain ⟨w₂, hc₂, hd₂⟩ := h'
     have : w₁ = w₂ := funext fun i => ihd i (hd₁ i) (hd₂ i)
     rcases this with rfl
     exact ihc hc₁ hc₂
-  case rfind c ih =>
-    simp [Semiformula.eval_rew, Function.comp_def, Matrix.empty_eq, Matrix.comp_vecCons']
-    intro h₁ hm₁ h₂ hm₂
+  | rfind c ih =>
+    intro H₁ H₂
+    simp [codeAux, Semiformula.eval_rew, Function.comp_def, Matrix.empty_eq,
+      Matrix.comp_vecCons'] at H₁ H₂
+    obtain ⟨h₁, hm₁⟩ := H₁
+    obtain ⟨h₂, hm₂⟩ := H₂
     by_contra hz
     wlog h : z < z' with Hz
     case inr =>
       have : z' < z := lt_of_le_of_ne (not_lt.mp h) (Ne.symm hz)
       exact Hz (k := k) c ih h₂ hm₂ h₁ hm₁ (Ne.symm hz) this
-    have : ∃ x, x ≠ 0 ∧ (Semiformula.Evalfm M (x :> z :> fun i => v i)) (codeAux c) := hm₂ z h
+    have : ∃ x, x ≠ 0 ∧ (codeAux c).Evalf (M := M) (x :> z :> fun i => v i) := hm₂ z h
     rcases this with ⟨x, xz, hx⟩
     exact xz (ih hx h₁)
 
+-- `simp ... at h h'` normalizes the two hypotheses to the `codeAux_uniq` shape before
+-- `exact`; the flexible-tactic linter cannot see that `exact` only depends on that final shape.
+set_option linter.flexible false in
 lemma code_uniq {k} {c : Code k} {v : Fin k → M} {z z' : M} :
-    Semiformula.Evalbm M (z :> v) (code c) → Semiformula.Evalbm M (z' :> v) (code c) → z = z' := by
-  simp [code, Semiformula.eval_rew, Matrix.empty_eq, Function.comp_def, Matrix.comp_vecCons']
-  exact codeAux_uniq
+    (code c).Evalb (M := M) (z :> v) → (code c).Evalb (M := M) (z' :> v) → z = z' := by
+  intro h h'
+  simp [code, Semiformula.eval_rew, Function.comp_def, Matrix.empty_eq] at h h'
+  exact codeAux_uniq h h'
 
 end model
--/
 
 private lemma codeAux_sigma_one {k} (c : Nat.ArithPart₁.Code k) : Hierarchy 𝚺 1 (codeAux c) := by
   induction c
