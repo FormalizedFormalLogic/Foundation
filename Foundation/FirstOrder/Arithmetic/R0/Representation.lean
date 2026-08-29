@@ -200,39 +200,48 @@ section model
 
 variable {M : Type*} [ORingStructure M] [M↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻]
 
--- Each case below rewrites hypotheses with `simp [...] at h h'` and then destructures the
--- normalized hypotheses; the flexible-tactic linter cannot see that the later tactics only
--- depend on the (already fully simplified) shape of `h`/`h'`, not on the exact simp set used.
-set_option linter.flexible false in
 private lemma codeAux_uniq {k} {c : Code k} {v : Fin k → M} {z z' : M} :
     (codeAux c).Evalf (M := M) (z :> v) → (codeAux c).Evalf (M := M) (z' :> v) → z = z' := by
   induction c generalizing z z' with
-  | zero _ => intro h h'; simp [codeAux] at h h'; rw [h, h']
-  | one _ => intro h h'; simp [codeAux] at h h'; rw [h, h']
-  | add i j => intro h h'; simp [codeAux] at h h'; rw [h, h']
-  | mul i j => intro h h'; simp [codeAux] at h h'; rw [h, h']
-  | proj i => intro h h'; simp [codeAux] at h h'; rw [h, h']
+  | zero _ => intro h h'; simp_all [codeAux]
+  | one _ => intro h h'; simp_all [codeAux]
+  | add i j => intro h h'; simp_all [codeAux]
+  | mul i j => intro h h'; simp_all [codeAux]
+  | proj i => intro h h'; simp_all [codeAux]
   | equal i j =>
     intro h h'
-    by_cases hv : v i = v j <;> simp [codeAux, hv] at h h' <;> rw [h, h']
+    by_cases hv : v i = v j <;> simp_all [codeAux]
   | lt i j =>
     intro h h'
-    by_cases hv : v i < v j <;> simp [codeAux, hv] at h h' <;> rw [h, h']
+    by_cases hv : v i < v j <;> simp_all [codeAux]
   | comp c d ihc ihd =>
     intro h h'
-    simp [codeAux, Semiformula.eval_rew, Function.comp_def, Matrix.empty_eq,
-      Matrix.comp_vecCons'] at h h'
-    obtain ⟨w₁, hc₁, hd₁⟩ := h
-    obtain ⟨w₂, hc₂, hd₂⟩ := h'
+    obtain ⟨w₁, hc₁, hd₁⟩ :
+        ∃ e', (codeAux c).Evalf (M := M) (z :> e') ∧
+          ∀ i, (codeAux (d i)).Evalf (M := M) (e' i :> v) := by
+      simpa [codeAux, Semiformula.eval_rew, Function.comp_def, Matrix.empty_eq,
+        Matrix.comp_vecCons'] using h
+    obtain ⟨w₂, hc₂, hd₂⟩ :
+        ∃ e', (codeAux c).Evalf (M := M) (z' :> e') ∧
+          ∀ i, (codeAux (d i)).Evalf (M := M) (e' i :> v) := by
+      simpa [codeAux, Semiformula.eval_rew, Function.comp_def, Matrix.empty_eq,
+        Matrix.comp_vecCons'] using h'
     have : w₁ = w₂ := funext fun i => ihd i (hd₁ i) (hd₂ i)
     rcases this with rfl
     exact ihc hc₁ hc₂
   | rfind c ih =>
     intro H₁ H₂
-    simp [codeAux, Semiformula.eval_rew, Function.comp_def, Matrix.empty_eq,
-      Matrix.comp_vecCons'] at H₁ H₂
-    obtain ⟨h₁, hm₁⟩ := H₁
-    obtain ⟨h₂, hm₂⟩ := H₂
+    obtain ⟨h₁, hm₁⟩ :
+        (codeAux c).Evalf (M := M) (0 :> z :> v) ∧
+          ∀ x < z, ∃ y, y ≠ 0 ∧ (codeAux c).Evalf (M := M) (y :> x :> v) := by
+      simpa [codeAux, Semiformula.eval_rew, Function.comp_def, Matrix.empty_eq,
+        Matrix.comp_vecCons'] using H₁
+    obtain ⟨h₂, hm₂⟩ :
+        (codeAux c).Evalf (M := M) (0 :> z' :> v) ∧
+          ∀ x < z', ∃ y, y ≠ 0 ∧ (codeAux c).Evalf (M := M) (y :> x :> v) := by
+      simpa [codeAux, Semiformula.eval_rew, Function.comp_def, Matrix.empty_eq,
+        Matrix.comp_vecCons'] using H₂
+    clear H₁ H₂
     by_contra hz
     wlog h : z < z' with Hz
     case inr =>
@@ -242,14 +251,12 @@ private lemma codeAux_uniq {k} {c : Code k} {v : Fin k → M} {z z' : M} :
     rcases this with ⟨x, xz, hx⟩
     exact xz (ih hx h₁)
 
--- `simp ... at h h'` normalizes the two hypotheses to the `codeAux_uniq` shape before
--- `exact`; the flexible-tactic linter cannot see that `exact` only depends on that final shape.
-set_option linter.flexible false in
 lemma code_uniq {k} {c : Code k} {v : Fin k → M} {z z' : M} :
     (code c).Evalb (M := M) (z :> v) → (code c).Evalb (M := M) (z' :> v) → z = z' := by
   intro h h'
-  simp [code, Semiformula.eval_rew, Function.comp_def, Matrix.empty_eq] at h h'
-  exact codeAux_uniq h h'
+  exact codeAux_uniq
+    (by simpa [code, Semiformula.eval_rew, Matrix.empty_eq, Function.comp_def] using h)
+    (by simpa [code, Semiformula.eval_rew, Matrix.empty_eq, Function.comp_def] using h')
 
 end model
 
@@ -284,57 +291,27 @@ section codeOfComputablePred
 
 open Classical
 
-/-- The `0`/`1`-valued characteristic function of `p`, packaged as a one-variable partial
-function for `codeOfPartrec'`. -/
-noncomputable def charFnPart (p : ℕ → Prop) : List.Vector ℕ 1 →. ℕ :=
-  fun v ↦ Part.some (if p (v.get 0) then 1 else 0)
-
 noncomputable def codeOfComputablePred (p : ℕ → Prop) : ArithmeticSemisentence 1 :=
-  (codeOfPartrec' (charFnPart p))/[‘1’, #0]
+  (codeOfPartrec' (fun v ↦ Part.some (if p (v.get 0) then 1 else 0)))/[‘1’, #0]
 
 @[simp] lemma codeOfComputablePred_sigma1 (p : ℕ → Prop) : Hierarchy 𝚺 1 (codeOfComputablePred p) := by
   simp [codeOfComputablePred, codeOfPartrec']
 
 variable {p : ℕ → Prop}
 
-lemma ComputablePred.partrec'_charFn (hp : ComputablePred p) :
-    Nat.Partrec' (charFnPart p) := by
-  obtain ⟨f, hf, rfl⟩ := ComputablePred.computable_iff.mp hp
-  have hc : Computable fun v : List.Vector ℕ 1 ↦ f (v.get 0) :=
-    hf.comp (Primrec.to_comp <| Primrec.vector_get.comp .id (.const 0))
-  have : Computable fun v : List.Vector ℕ 1 ↦ if (f (v.get 0) : Prop) then (1 : ℕ) else 0 :=
-    (Computable.cond hc (Computable.const 1) (Computable.const 0)).of_eq fun v ↦ by
-      cases f (v.get 0) <;> simp
-  exact Nat.Partrec'.of_part (this.partrec.of_eq fun v ↦ by simp [charFnPart])
-
-lemma codeOfComputablePred_val_spec (hp : ComputablePred p) (x y : ℕ) :
-    (codeOfPartrec' (charFnPart p)).Evalb (y :> ![x]) ↔ y = if p x then 1 else 0 := by
-  simpa [charFnPart] using codeOfPartrec'_spec (ComputablePred.partrec'_charFn hp) (y := y) (v := ![x])
-
-lemma codeOfComputablePred_spec (hp : ComputablePred p) {x : ℕ} :
-    (codeOfComputablePred p).Evalb ![x] ↔ p x := by
-  simpa [codeOfComputablePred, Semiformula.eval_substs, Matrix.comp_vecCons', Matrix.constant_eq_singleton]
-    using (codeOfComputablePred_val_spec hp x 1).trans (by by_cases h : p x <;> simp [h])
-
-section model
-
-variable {M : Type*} [ORingStructure M] [M↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻]
-
-lemma codeOfComputablePred_not_eval (hp : ComputablePred p) {x : ℕ} (h : ¬p x) :
-    ¬(codeOfComputablePred p).Evalb (M := M) ![ORingStructure.numeral x] := by
-  intro hM
-  have : M↓[ℒₒᵣ] ⊧* 𝗥₀ := ModelsTheory.of_provably_subtheory M 𝗥₀ 𝗣𝗔⁻ inferInstance
-  have h0 : (codeOfPartrec' (charFnPart p)).Evalb (M := ℕ) (0 :> ![x]) :=
-    (codeOfComputablePred_val_spec hp x 0).mpr (by simp [h])
-  have h1 : (codeOfPartrec' (charFnPart p)).Evalb (M := M) ((0 : M) :> ![ORingStructure.numeral x]) := by
-    simpa using bold_sigma_one_completeness' (M := M) (σ := codeOfPartrec' (charFnPart p))
-      (by simp [codeOfPartrec']) h0
-  have h2 : (codeOfPartrec' (charFnPart p)).Evalb (M := M) ((1 : M) :> ![ORingStructure.numeral x]) := by
-    simpa [codeOfComputablePred, Semiformula.eval_substs, Matrix.comp_vecCons', Matrix.constant_eq_singleton]
-      using hM
-  exact absurd (code_uniq h1 h2) (ne_of_lt zero_lt_one)
-
-end model
+private lemma codeOfComputablePred_val_spec (hp : ComputablePred p) (x y : ℕ) :
+    (codeOfPartrec' (fun v ↦ Part.some (if p (v.get 0) then 1 else 0))).Evalb (y :> ![x]) ↔
+      y = if p x then 1 else 0 := by
+  have hpart :
+      Nat.Partrec' (fun v : List.Vector ℕ 1 ↦ Part.some (if p (v.get 0) then 1 else 0)) := by
+    obtain ⟨f, hf, rfl⟩ := ComputablePred.computable_iff.mp hp
+    have hc : Computable fun v : List.Vector ℕ 1 ↦ f (v.get 0) :=
+      hf.comp (Primrec.to_comp <| Primrec.vector_get.comp .id (.const 0))
+    have : Computable fun v : List.Vector ℕ 1 ↦ if (f (v.get 0) : Prop) then (1 : ℕ) else 0 :=
+      (Computable.cond hc (Computable.const 1) (Computable.const 0)).of_eq fun v ↦ by
+        cases f (v.get 0) <;> simp
+    exact Nat.Partrec'.of_part (this.partrec.of_eq fun v ↦ by simp)
+  simpa using codeOfPartrec'_spec hpart (y := y) (v := ![x])
 
 variable {T : ArithmeticTheory} {x : ℕ}
 
@@ -342,17 +319,36 @@ variable {T : ArithmeticTheory} {x : ℕ}
 theorem codeOfComputablePred_provable [𝗥₀ ⪯ T] (hp : ComputablePred p) (h : p x) :
     T ⊢ (codeOfComputablePred p)/[↑x] :=
   sigma_one_completeness (by simp) (by
-    simpa [models_iff, Semiformula.eval_substs, Matrix.constant_eq_singleton]
-      using (codeOfComputablePred_spec hp (x := x)).mpr h)
+    have : (codeOfComputablePred p).Evalb ![x] ↔ p x := by
+      simpa [codeOfComputablePred, Semiformula.eval_substs, Matrix.comp_vecCons',
+        Matrix.constant_eq_singleton]
+        using (codeOfComputablePred_val_spec hp x 1).trans (by by_cases hx : p x <;> simp [hx])
+    simpa [models_iff, Semiformula.eval_substs, Matrix.constant_eq_singleton] using this.mpr h)
 
 /-- Negative representation of a computable predicate. -/
 theorem codeOfComputablePred_provable_neg [𝗣𝗔⁻ ⪯ T] (hp : ComputablePred p) (h : ¬p x) :
     T ⊢ ∼((codeOfComputablePred p)/[↑x]) := by
   have : 𝗘𝗤 _ ⪯ T := Entailment.WeakerThan.trans (𝓣 := 𝗣𝗔⁻) inferInstance inferInstance
   refine complete.{0} T _ fun M _ _ ↦ ?_
-  have : M↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := ModelsTheory.of_provably_subtheory M 𝗣𝗔⁻ T inferInstance
-  simpa [models_iff, Semiformula.eval_substs, Matrix.constant_eq_singleton]
-    using codeOfComputablePred_not_eval hp h
+  have hPA : M↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := ModelsTheory.of_provably_subtheory M 𝗣𝗔⁻ T inferInstance
+  have hNotEval : ¬(codeOfComputablePred p).Evalb (M := M) ![ORingStructure.numeral x] := by
+    intro hM
+    have hR0 : M↓[ℒₒᵣ] ⊧* 𝗥₀ := ModelsTheory.of_provably_subtheory M 𝗥₀ 𝗣𝗔⁻ inferInstance
+    have h0 : (codeOfPartrec' (fun v ↦ Part.some (if p (v.get 0) then 1 else 0))).Evalb
+        (M := ℕ) (0 :> ![x]) :=
+      (codeOfComputablePred_val_spec hp x 0).mpr (by simp [h])
+    have h1 : (codeOfPartrec' (fun v ↦ Part.some (if p (v.get 0) then 1 else 0))).Evalb (M := M)
+        ((0 : M) :> ![ORingStructure.numeral x]) := by
+      simpa using bold_sigma_one_completeness' (M := M)
+        (σ := codeOfPartrec' (fun v ↦ Part.some (if p (v.get 0) then 1 else 0)))
+        (by simp [codeOfPartrec']) h0
+    have h2 : (codeOfPartrec' (fun v ↦ Part.some (if p (v.get 0) then 1 else 0))).Evalb (M := M)
+        ((1 : M) :> ![ORingStructure.numeral x]) := by
+      simpa [codeOfComputablePred, Semiformula.eval_substs, Matrix.comp_vecCons',
+        Matrix.constant_eq_singleton]
+        using hM
+    exact absurd (code_uniq h1 h2) (ne_of_lt zero_lt_one)
+  simpa [models_iff, Semiformula.eval_substs, Matrix.constant_eq_singleton] using hNotEval
 
 end codeOfComputablePred
 
