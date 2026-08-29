@@ -78,7 +78,6 @@ variable {T : ArithmeticTheory} [𝗜𝚺₁ ⪯ T] [Entailment.Consistent T]
 
 theorem uncomputable_theory_of_consistent : ¬ComputablePred T.theory := by
   by_contra hC
-  have : 𝗣𝗔⁻ ⪯ T := Entailment.WeakerThan.trans (𝓣 := 𝗜𝚺₁) inferInstance inferInstance
   let p : ℕ → Prop := fun n ↦ (Encodable.decode (α := ArithmeticSentence) n).elim False (fun σ ↦ T ⊢ σ)
   have hp : ComputablePred p := ComputablePred.iff_decoded_pred.mp hC
   let ψ : ArithmeticSemisentence 1 := codeOfComputablePred p

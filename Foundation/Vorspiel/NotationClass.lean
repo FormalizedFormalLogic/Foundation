@@ -98,6 +98,9 @@ attribute [match_pattern]
 class Exp (α : Type*) where
   exp : α → α
 
+class Superexp (α : Type*) where
+  superexp : α → α
+
 class Smash (α : Type*) where
   smash : α → α → α
 
