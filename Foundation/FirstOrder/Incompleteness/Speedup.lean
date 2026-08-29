@@ -155,24 +155,28 @@ lemma exists_lt_minProof [L.DecidableEq] [L.Primcodable]
   exact ehrenfeucht_mycielski_speedup hU ⟨f, hf, h⟩
 
 theorem ehrenfeucht_mycielski_speedup_arithmetic {T : ArithmeticTheory} [T.Δ₁] {σ : ArithmeticSentence}
-    [𝗥₀ ⪯ T] [(insert (∼σ) T).SoundOnHierarchy 𝚺 1] :
+    [𝗜𝚺₁ ⪯ T] (hσ : T ⊬ σ) :
     ¬∃ f : ℕ → ℕ, Computable f ∧
       ∀ π : ArithmeticSentence, T ⊢ π → T.minProof π ≤ f ((insert σ T).minProof π) :=
-  have : 𝗥₀ ⪯ insert (∼σ) T :=
-    Entailment.WeakerThan.trans ‹𝗥₀ ⪯ T› (Entailment.Axiomatized.le_of_subset (Set.subset_insert _ T))
-  ehrenfeucht_mycielski_speedup (church_theorem_general (insert (∼σ) T))
+  have : 𝗜𝚺₁ ⪯ insert (∼σ) T :=
+    Entailment.WeakerThan.trans ‹𝗜𝚺₁ ⪯ T› (Entailment.Axiomatized.le_of_subset (Set.subset_insert _ T))
+  have : Entailment.Consistent (insert (∼σ) T) := Entailment.unprovable_iff_consistent_adjoin.mp hσ
+  ehrenfeucht_mycielski_speedup
+    (uncomputable_theory_of_consistent : ¬ComputablePred (insert (∼σ) T).theory)
 
 lemma exists_lt_minProof_arithmetic (T : ArithmeticTheory) [T.Δ₁] (σ : ArithmeticSentence)
-    [𝗥₀ ⪯ T] [(insert (∼σ) T).SoundOnHierarchy 𝚺 1] (f : ℕ → ℕ) (hf : Computable f) :
+    [𝗜𝚺₁ ⪯ T] (hσ : T ⊬ σ) (f : ℕ → ℕ) (hf : Computable f) :
     ∃ π : ArithmeticSentence, T ⊢ π ∧ f ((insert σ T).minProof π) < T.minProof π :=
-  have : 𝗥₀ ⪯ insert (∼σ) T :=
-    Entailment.WeakerThan.trans ‹𝗥₀ ⪯ T› (Entailment.Axiomatized.le_of_subset (Set.subset_insert _ T))
-  exists_lt_minProof (church_theorem_general (insert (∼σ) T)) f hf
+  have : 𝗜𝚺₁ ⪯ insert (∼σ) T :=
+    Entailment.WeakerThan.trans ‹𝗜𝚺₁ ⪯ T› (Entailment.Axiomatized.le_of_subset (Set.subset_insert _ T))
+  have : Entailment.Consistent (insert (∼σ) T) := Entailment.unprovable_iff_consistent_adjoin.mp hσ
+  exists_lt_minProof
+    (uncomputable_theory_of_consistent : ¬ComputablePred (insert (∼σ) T).theory) f hf
 
 example {T : ArithmeticTheory} [T.Δ₁] {σ : ArithmeticSentence}
-    [𝗥₀ ⪯ T] [(insert (∼σ) T).SoundOnHierarchy 𝚺 1] :
+    [𝗜𝚺₁ ⪯ T] (hσ : T ⊬ σ) :
     ∃ π : ArithmeticSentence, T ⊢ π ∧ (insert σ T).minProof π < Nat.log 2 (T.minProof π) := by
-  obtain ⟨π, hπ, hlt⟩ := exists_lt_minProof_arithmetic T σ (λ x ↦ 2 ^ (x + 1))
+  obtain ⟨π, hπ, hlt⟩ := exists_lt_minProof_arithmetic T σ hσ (λ x ↦ 2 ^ (x + 1))
     (((Primrec₂.unpaired'.1 Nat.Primrec.pow).comp (Primrec.const 2) Primrec.succ).to_comp)
   exact ⟨π, hπ, (Nat.le_log_iff_pow_le (b := 2) (by norm_num)
     (((Nat.zero_le _).trans_lt hlt).ne')).mpr hlt.le⟩
