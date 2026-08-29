@@ -101,7 +101,7 @@ def CCN : 𝓢 ⊢! φ 🡒 ∼φ 🡒 ψ := by
   apply efq_of_mem_either (φ := φ) (by simp) (by simp);
 @[simp] lemma CCN! : 𝓢 ⊢ φ 🡒 ∼φ 🡒 ψ := ⟨CCN⟩
 
-lemma C_of_N (h : 𝓢 ⊢ ∼φ) : 𝓢 ⊢ φ 🡒 ψ := by
+lemma C!_of_N! (h : 𝓢 ⊢ ∼φ) : 𝓢 ⊢ φ 🡒 ψ := by
   apply provable_iff_provable.mpr;
   apply deduct_iff.mpr;
   have dnp : [φ] ⊢[𝓢] φ 🡒 ⊥ := of'! $ N!_iff_CO!.mp h;
@@ -275,19 +275,19 @@ lemma left_Disj₂!_intro' (hd : ∀ ψ ∈ Γ, ψ = φ) : 𝓢 ⊢ ⋁Γ 🡒 �
 lemma of_Disj₂!_of_mem_eq (hd : ∀ ψ ∈ Γ, ψ = φ) (h : 𝓢 ⊢ ⋁Γ) : 𝓢 ⊢ φ := (left_Disj₂!_intro' hd) ⨀ h
 
 
-@[simp] lemma CFDisjDisj₂ {Γ : Finset F} : 𝓢 ⊢ ⋁Γ.toList 🡒 Γ.disj := by
+@[simp] lemma CDisj₂FDisj! {Γ : Finset F} : 𝓢 ⊢ ⋁Γ.toList 🡒 Γ.disj := by
   apply left_Disj₂!_intro;
   intro ψ hψ;
   apply right_Fdisj!_intro;
   simpa using hψ;
 
-@[simp] lemma CDisj₂Disj {Γ : Finset F} : 𝓢 ⊢ Γ.disj 🡒 ⋁Γ.toList := by
+@[simp] lemma CFDisjDisj₂! {Γ : Finset F} : 𝓢 ⊢ Γ.disj 🡒 ⋁Γ.toList := by
   apply left_Fdisj!_intro;
   intro ψ hψ;
   apply right_Disj₂!_intro;
   simpa;
 
-lemma CDisj₂Disj₂_of_subset {Γ Δ : List F} (h : ∀ φ ∈ Γ, φ ∈ Δ) : 𝓢 ⊢ ⋁Γ 🡒 ⋁Δ := by
+lemma CDisj₂Disj₂!_of_subset {Γ Δ : List F} (h : ∀ φ ∈ Γ, φ ∈ Δ) : 𝓢 ⊢ ⋁Γ 🡒 ⋁Δ := by
   match Δ with
   | [] =>
     have : Γ = [] := List.iff_nil_forall.mpr h;
@@ -305,10 +305,10 @@ lemma CDisj₂Disj₂_of_subset {Γ Δ : List F} (h : ∀ φ ∈ Γ, φ ∈ Δ) 
     apply h;
     exact hψ;
 
-lemma CFDisjFDisj_of_subset {Γ Δ : Finset F} (h : Γ ⊆ Δ) : 𝓢 ⊢ Γ.disj 🡒 Δ.disj := by
-  refine C!_trans (C!_trans ?_ (CDisj₂Disj₂_of_subset (Γ := Γ.toList) (Δ := Δ.toList) (by simpa))) ?_ <;> simp;
+lemma CFDisjFDisj!_of_subset {Γ Δ : Finset F} (h : Γ ⊆ Δ) : 𝓢 ⊢ Γ.disj 🡒 Δ.disj := by
+  refine C!_trans (C!_trans ?_ (CDisj₂Disj₂!_of_subset (Γ := Γ.toList) (Δ := Δ.toList) (by simpa))) ?_ <;> simp;
 
-lemma EDisj₂FDisj {Γ : List F} : 𝓢 ⊢ ⋁Γ 🡘 Γ.toFinset.disj := by
+lemma EDisj₂FDisj! {Γ : List F} : 𝓢 ⊢ ⋁Γ 🡘 Γ.toFinset.disj := by
   match Γ with
   | [] => simp;
   | φ :: Γ =>
@@ -331,19 +331,19 @@ lemma EDisj₂FDisj {Γ : List F} : 𝓢 ⊢ ⋁Γ 🡘 Γ.toFinset.disj := by
         tauto;
 
 lemma EDisj₂FDisj!_doubleton : 𝓢 ⊢ ⋁[φ, ψ] 🡘 Finset.disj {φ, ψ} := by
-  convert EDisj₂FDisj (𝓢 := 𝓢) (Γ := [φ, ψ]);
+  convert EDisj₂FDisj! (𝓢 := 𝓢) (Γ := [φ, ψ]);
   simp;
 
-lemma EConj₂_FConj!_doubleton : 𝓢 ⊢ ⋁[φ, ψ] ↔ 𝓢 ⊢ Finset.disj {φ, ψ} := by
+lemma EConj₂FConj!_doubleton : 𝓢 ⊢ ⋁[φ, ψ] ↔ 𝓢 ⊢ Finset.disj {φ, ψ} := by
   constructor;
-  . intro h; exact (C_of_E_mp! $ EDisj₂FDisj!_doubleton) ⨀ h;
-  . intro h; exact (C_of_E_mpr! $ EDisj₂FDisj!_doubleton) ⨀ h;
+  . intro h; exact (C!_of_E!_mp $ EDisj₂FDisj!_doubleton) ⨀ h;
+  . intro h; exact (C!_of_E!_mpr $ EDisj₂FDisj!_doubleton) ⨀ h;
 
 @[simp]
 lemma CAFDisjinsertFDisj! {Γ : Finset F} : 𝓢 ⊢ φ ⋎ Γ.disj 🡒 (insert φ Γ).disj := by
   apply left_A!_intro;
   . apply right_Fdisj!_intro; simp;
-  . apply CFDisjFDisj_of_subset; simp;
+  . apply CFDisjFDisj!_of_subset; simp;
 
 @[simp]
 lemma CinsertFDisjAFDisj! {Γ : Finset F} : 𝓢 ⊢ (insert φ Γ).disj 🡒 φ ⋎ Γ.disj := by
@@ -354,13 +354,13 @@ lemma CinsertFDisjAFDisj! {Γ : Finset F} : 𝓢 ⊢ (insert φ Γ).disj 🡒 φ
   apply right_Fdisj!_intro;
   assumption;
 
-@[simp] lemma CAFdisjFdisjUnion {Γ Δ : Finset F} : 𝓢 ⊢ Γ.disj ⋎ Δ.disj 🡒 (Γ ∪ Δ).disj := by
+@[simp] lemma CAFdisjFdisjUnion! {Γ Δ : Finset F} : 𝓢 ⊢ Γ.disj ⋎ Δ.disj 🡒 (Γ ∪ Δ).disj := by
   apply left_A!_intro <;>
-  . apply CFDisjFDisj_of_subset;
+  . apply CFDisjFDisj!_of_subset;
     simp;
 
 @[simp]
-lemma CFdisjUnionAFdisj {Γ Δ : Finset F} : 𝓢 ⊢ (Γ ∪ Δ).disj 🡒 Γ.disj ⋎ Δ.disj := by
+lemma CFdisjUnionAFdisj! {Γ Δ : Finset F} : 𝓢 ⊢ (Γ ∪ Δ).disj 🡒 Γ.disj ⋎ Δ.disj := by
   apply left_Fdisj!_intro;
   simp only [Finset.mem_union];
   rintro ψ (hψ | hψ);
@@ -382,14 +382,14 @@ section
 
 variable {Γ Δ : Finset F}
 
-lemma CFConj_CDisj!_of_A (hφψ : φ ⋎ ψ ∈ Γ) (hφ : φ ∈ Δ) (hψ : ψ ∈ Δ) : 𝓢 ⊢ Γ.conj 🡒 Δ.disj := by
+lemma CFConjFDisj!_of_A (hφψ : φ ⋎ ψ ∈ Γ) (hφ : φ ∈ Δ) (hψ : ψ ∈ Δ) : 𝓢 ⊢ Γ.conj 🡒 Δ.disj := by
   apply C!_trans (ψ := Finset.disj {φ, ψ});
   . apply C!_trans (ψ := Finset.conj {φ ⋎ ψ}) ?_;
-    . apply FConj_DT.mpr;
-      suffices ↑{φ ⋎ ψ} *⊢[𝓢] [φ, ψ].disj₂ by simpa using EConj₂_FConj!_doubleton.mp this;
+    . apply FConj!_DT.mpr;
+      suffices ↑{φ ⋎ ψ} *⊢[𝓢] [φ, ψ].disj₂ by simpa using EConj₂FConj!_doubleton.mp this;
       apply Context.by_axm!;
       simp;
-    . apply CFConj_FConj!_of_subset;
+    . apply CFConjFConj!_of_subset;
       simpa;
   . apply left_Fdisj!_intro;
     simp only [Finset.mem_insert, Finset.mem_singleton, forall_eq_or_imp, forall_eq];
@@ -418,7 +418,7 @@ lemma CNDisj₁Conj₂! : 𝓢 ⊢ ∼⋁Γ 🡒 ⋀(Γ.map (∼·)) := by
 lemma CNFdisjFconj! {Γ : Finset F} : 𝓢 ⊢ ∼Γ.disj 🡒 (Γ.image (∼·)).conj := by
   apply C!_replace ?_ ?_ $ CNDisj₁Conj₂! (Γ := Γ.toList);
   . apply contra!;
-    exact CFDisjDisj₂;
+    exact CDisj₂FDisj!;
   . apply CConj₂Conj₂!_of_provable;
     intro φ hφ;
     apply FiniteContext.by_axm!

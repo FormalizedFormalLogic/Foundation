@@ -43,7 +43,7 @@ variable [Entailment.Minimal 𝓢]
 lemma of_eq_of {φ ψ : F} : (⟦φ⟧ : LindenbaumAlgebra 𝓢) = ⟦ψ⟧ ↔ φ ≡ ψ := Quotient.eq (r := ProvablyEquivalent.setoid 𝓢)
 
 instance [DecidableEq F] : LE (LindenbaumAlgebra 𝓢) :=
-  ⟨Quotient.lift₂ (fun φ ψ ↦ 𝓢 ⊢ φ 🡒 ψ) fun φ₁ ψ₁ φ₂ ψ₂ hp hq ↦ by simp only [C!_repalce hp hq]⟩
+  ⟨Quotient.lift₂ (fun φ ψ ↦ 𝓢 ⊢ φ 🡒 ψ) fun φ₁ ψ₁ φ₂ ψ₂ hp hq ↦ by simp only [C!_iff_C!_of_E!_of_E! hp hq]⟩
 
 lemma le_def [DecidableEq F] {φ ψ : F} : (⟦φ⟧ : LindenbaumAlgebra 𝓢) ≤ ⟦ψ⟧ ↔ 𝓢 ⊢ φ 🡒 ψ := iff_of_eq rfl
 

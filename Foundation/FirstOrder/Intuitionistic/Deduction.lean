@@ -100,7 +100,7 @@ instance : Entailment.Minimal Λ where
   or₁ := or₁ _ _
   or₂ := or₂ _ _
   or₃ := or₃ _ _ _
-  negEquiv := Entailment.E_Id
+  negEquiv := Entailment.E_id
 
 variable {Λ}
 

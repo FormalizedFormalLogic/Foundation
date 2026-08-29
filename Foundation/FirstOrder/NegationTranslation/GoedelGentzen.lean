@@ -96,9 +96,9 @@ open Rewriting LO.Entailment Entailment.FiniteContext HilbertProofᵢ
 
 def negDoubleNegation : (φ : Proposition L) → Λ ⊢! ∼φᴺ 🡘 (∼φ)ᴺ
   | .rel r v => Entailment.tneIff (φ := Semiformulaᵢ.rel r v)
-  | .nrel r v => Entailment.E_Id (φ := ∼∼(Semiformulaᵢ.rel r v))
+  | .nrel r v => Entailment.E_id (φ := ∼∼(Semiformulaᵢ.rel r v))
   | ⊤ => Entailment.ENNOO
-  | ⊥ => Entailment.E_Id (φ := ∼⊥)
+  | ⊥ => Entailment.E_id (φ := ∼⊥)
   | φ ⋏ ψ =>
     have ihφ : Λ ⊢! ∼φᴺ 🡘 (∼φ)ᴺ := negDoubleNegation φ
     have ihψ : Λ ⊢! ∼ψᴺ 🡘 (∼ψ)ᴺ := negDoubleNegation ψ

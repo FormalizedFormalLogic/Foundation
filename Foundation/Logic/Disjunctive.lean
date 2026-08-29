@@ -27,7 +27,7 @@ lemma iff_complete_disjunctive [DecidableEq F] {𝓢 : S} [Entailment.Cl 𝓢] :
     intro φ ψ hpq;
     rcases (hComp.con φ) with (hp | hnp);
     . left; assumption;
-    . right; exact of_C!_of_C!_of_A! (C_of_N hnp) C!_id hpq;
+    . right; exact of_C!_of_C!_of_A! (C!_of_N! hnp) C!_id hpq;
   . intro hDisj;
     refine ⟨fun φ ↦ ?_⟩
     replace hDisj : ∀ {φ ψ}, 𝓢 ⊢ φ ⋎ ψ → 𝓢 ⊢ φ ∨ 𝓢 ⊢ ψ := iff_disjunctive.mp hDisj;

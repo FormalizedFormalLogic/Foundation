@@ -223,7 +223,7 @@ theorem small_satisfiable_of_consistent :
   have : T ⊢ σ := Conj₂!_intro fun φ hφ ↦ by_axm <| hu (by simpa using hφ)
   have : 𝐋𝐊¹ ⊬ ∼(σ : Proposition L) := fun h ↦
     have : T ⊢ ∼σ := Theory.Proof.of_LK_provable (φ := ∼σ) (by simpa using h)
-    have : T ⊢ ⊥ := neg_mdp this (by assumption)
+    have : T ⊢ ⊥ := neg_mdp! this (by assumption)
     consistent_iff_unprovable_bot.mp consistent this
   have : Satisfiable {σ} := LK.satisfiable_of_irrefutable σ this
   simpa [σ] using this
