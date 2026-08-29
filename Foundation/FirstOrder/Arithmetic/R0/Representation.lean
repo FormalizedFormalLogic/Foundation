@@ -268,6 +268,32 @@ lemma codeOfREPred_spec {p : ℕ → Prop} (hp : REPred p) {x : ℕ} :
   simpa [Semiformula.eval_substs, Matrix.comp_vecCons', Matrix.constant_eq_singleton]
     using (codeOfPartrec'_spec (Nat.Partrec'.of_part this) (v := ![x]) (y := 0)).trans (by simp [f])
 
+noncomputable def codeOfComputablePred (p : ℕ → Prop) : ArithmeticSemisentence 1 :=
+  (codeOfPartrec' fun v : List.Vector ℕ 1 ↦ Part.some (if p (v.get 0) then 1 else 0))/[‘1’, #0]
+
+lemma ComputablePred.partrec'_charFn {p : ℕ → Prop} (hp : ComputablePred p) :
+    Nat.Partrec' fun v : List.Vector ℕ 1 ↦ (Part.some (if p (v.get 0) then 1 else 0) : Part ℕ) := by
+  obtain ⟨f, hf, rfl⟩ := ComputablePred.computable_iff.mp hp
+  have hc : Computable fun v : List.Vector ℕ 1 ↦ f (v.get 0) :=
+    hf.comp (Primrec.to_comp <| Primrec.vector_get.comp .id (.const 0))
+  have : Computable fun v : List.Vector ℕ 1 ↦ if (f (v.get 0) : Prop) then (1 : ℕ) else 0 :=
+    (Computable.cond hc (Computable.const 1) (Computable.const 0)).of_eq fun v ↦ by
+      cases f (v.get 0) <;> simp
+  exact Nat.Partrec'.of_part (this.partrec.of_eq fun v ↦ by simp)
+
+@[simp] lemma codeOfComputablePred_sigma1 (p : ℕ → Prop) : Hierarchy 𝚺 1 (codeOfComputablePred p) := by
+  simp [codeOfComputablePred, codeOfPartrec']
+
+lemma codeOfComputablePred_val_spec {p : ℕ → Prop} (hp : ComputablePred p) (x y : ℕ) :
+    (codeOfPartrec' fun v : List.Vector ℕ 1 ↦ (Part.some (if p (v.get 0) then 1 else 0) : Part ℕ)).Evalb (y :> ![x])
+      ↔ y = if p x then 1 else 0 := by
+  simpa using codeOfPartrec'_spec (ComputablePred.partrec'_charFn hp) (y := y) (v := ![x])
+
+lemma codeOfComputablePred_spec {p : ℕ → Prop} (hp : ComputablePred p) {x : ℕ} :
+    (codeOfComputablePred p).Evalb ![x] ↔ p x := by
+  simpa [codeOfComputablePred, Semiformula.eval_substs, Matrix.comp_vecCons', Matrix.constant_eq_singleton]
+    using (codeOfComputablePred_val_spec hp x 1).trans (by by_cases h : p x <;> simp [h])
+
 variable {T : ArithmeticTheory} [𝗥₀ ⪯ T] [T.SoundOnHierarchy 𝚺 1]
 
 /-- Weak representation of a r.e. predicate -/
