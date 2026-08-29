@@ -4,6 +4,7 @@ public import Foundation.FirstOrder.Basic.PrimrecCoding
 public import Foundation.FirstOrder.Bootstrapping.DerivabilityCondition.D1
 public import Foundation.FirstOrder.Incompleteness.Church
 public import Mathlib.Computability.Reduce
+public import Mathlib.Data.Nat.Log
 
 /-!
 # Ehrenfeucht–Mycielski speedup theorem
@@ -51,8 +52,7 @@ open Encodable
 lemma computablePred_proof : ComputablePred λ p : ℕ × ℕ ↦ Proof T p.1 p.2 := by
   apply ComputablePred.computable_iff_re_compl_re'.mpr
   obtain ⟨φ, hφ⟩ := HierarchySymbol.Definable.of_delta (Γ := 𝚺) (Proof.definable (V := ℕ) (T := T))
-  obtain ⟨ψ, hψ⟩ :=
-    (HierarchySymbol.Definable.of_delta (Γ := 𝚷) (Proof.definable (V := ℕ) (T := T))).notPi
+  obtain ⟨ψ, hψ⟩ := (HierarchySymbol.Definable.of_delta (Γ := 𝚷) (Proof.definable (V := ℕ) (T := T))).notPi
   have hcomp : Computable λ p : ℕ × ℕ ↦ (p.1 ::ᵥ p.2 ::ᵥ List.Vector.nil : List.Vector ℕ 2) :=
     Primrec.to_comp <|
       Primrec.vector_cons.comp .fst (Primrec.vector_cons.comp .snd (.const List.Vector.nil))
@@ -126,44 +126,49 @@ lemma computablePred_bddExists_proof {α : Type*} [Primcodable α] {bd cd : α �
 
 /-- The Ehrenfeucht–Mycielski speedup theorem [EM71]. -/
 theorem ehrenfeucht_mycielski_speedup [L.DecidableEq] [L.Primcodable]
-  (hU : ¬ComputablePred λ π : Sentence L ↦ insert (∼σ) T ⊢ π) :
-  ¬∃ s : ℕ → ℕ,
-    Computable s ∧
-    ∀ π : Sentence L, T ⊢ π → T.minProof π ≤ s ((insert σ T).minProof π) := by
-  rintro ⟨s, hs_comp, hs_bound⟩
+  (hU : ¬ComputablePred (insert (∼σ) T).theory) :
+  ¬∃ f : ℕ → ℕ,
+    Computable f ∧
+    ∀ π : Sentence L, T ⊢ π → T.minProof π ≤ f ((insert σ T).minProof π) := by
+  rintro ⟨f, hf_comp, hf_bound⟩
   apply hU
   refine ComputablePred.of_eq ?_ (λ π ↦ provable_insert_neg_iff_or.symm)
   refine ComputablePred.of_eq
     (computablePred_bddExists_proof (T := T)
-      (bd := λ π ↦ s ((insert σ T).minProof (σ ⋎ π))) (cd := λ π ↦ encode (σ ⋎ π))
-      (hs_comp.comp computable_insert_minProof_or) (Computable.encode.comp computable_or_left))
+      (bd := λ π ↦ f ((insert σ T).minProof (σ ⋎ π))) (cd := λ π ↦ encode (σ ⋎ π))
+      (hf_comp.comp computable_insert_minProof_or) (Computable.encode.comp computable_or_left))
     λ π ↦ ?_
   constructor
   · rintro ⟨d, _, hd⟩
     exact Provable.sound (⟨d, by rwa [Sentence.quote_eq_encode_nat]⟩ : Provable T (⌜σ ⋎ π⌝ : ℕ))
   · intro h
-    exact ⟨T.minProof (σ ⋎ π), hs_bound (σ ⋎ π) h, by
+    exact ⟨T.minProof (σ ⋎ π), hf_bound (σ ⋎ π) h, by
       have := proof_minProof h
       rwa [Sentence.quote_eq_encode_nat] at this⟩
 
-theorem ehrenfeucht_mycielski_speedup' {T : ArithmeticTheory} [T.Δ₁] {σ : ArithmeticSentence}
+theorem ehrenfeucht_mycielski_speedup_arithmetic {T : ArithmeticTheory} [T.Δ₁] {σ : ArithmeticSentence}
     [𝗥₀ ⪯ T] [(insert (∼σ) T).SoundOnHierarchy 𝚺 1] :
-    ¬∃ s : ℕ → ℕ,
-      Computable s ∧
-      ∀ π : ArithmeticSentence, T ⊢ π → T.minProof π ≤ s ((insert σ T).minProof π) :=
+    ¬∃ f : ℕ → ℕ, Computable f ∧
+      ∀ π : ArithmeticSentence, T ⊢ π → T.minProof π ≤ f ((insert σ T).minProof π) :=
   have : 𝗥₀ ⪯ insert (∼σ) T :=
     Entailment.WeakerThan.trans ‹𝗥₀ ⪯ T› (Entailment.Axiomatized.le_of_subset (Set.subset_insert _ T))
   ehrenfeucht_mycielski_speedup (church_theorem_general (insert (∼σ) T))
 
 example {T : ArithmeticTheory} [T.Δ₁] {σ : ArithmeticSentence}
     [𝗥₀ ⪯ T] [(insert (∼σ) T).SoundOnHierarchy 𝚺 1] :
-    ∃ π : ArithmeticSentence, T ⊢ π ∧ 2 ^ ((insert σ T).minProof π) < T.minProof π := by
-  have hcomp : Computable λ x : ℕ ↦ 2 ^ x :=
-    ((Primrec₂.unpaired'.1 Nat.Primrec.pow).comp (Primrec.const 2) Primrec.id).to_comp
-  have h : ¬∀ π : ArithmeticSentence, T ⊢ π → T.minProof π ≤ 2 ^ ((insert σ T).minProof π) :=
-    λ h ↦ ehrenfeucht_mycielski_speedup' ⟨_, hcomp, h⟩
+    ∃ π : ArithmeticSentence, T ⊢ π ∧ (insert σ T).minProof π < Nat.log 2 (T.minProof π) := by
+  have hcomp : Computable λ x : ℕ ↦ 2 ^ (x + 1) :=
+    ((Primrec₂.unpaired'.1 Nat.Primrec.pow).comp (Primrec.const 2) Primrec.succ).to_comp
+  have h : ¬∀ π : ArithmeticSentence, T ⊢ π → T.minProof π ≤ 2 ^ ((insert σ T).minProof π + 1) :=
+    λ h ↦ ehrenfeucht_mycielski_speedup_arithmetic ⟨_, hcomp, h⟩
   push Not at h
-  exact h
+  obtain ⟨π, hπ, hlt⟩ := h
+  refine ⟨π, hπ, ?_⟩
+  have hle : 2 ^ ((insert σ T).minProof π + 1) ≤ T.minProof π := hlt.le
+  have hpos : 0 < 2 ^ ((insert σ T).minProof π + 1) := pow_pos (by norm_num) _
+  have hn0 : T.minProof π ≠ 0 := by omega
+  have := (Nat.le_log_iff_pow_le (b := 2) (by norm_num) hn0).mpr hle
+  omega
 
 end Speedup
 
