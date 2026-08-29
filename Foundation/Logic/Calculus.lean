@@ -105,7 +105,7 @@ lemma provable_iff :
 variable [OneSidedLK.Cut 𝔇] (𝓟)
 
 instance : Entailment.ModusPonens 𝓟 where
-  mdp {φ ψ} b₁ b₂ :=
+  mdp! {φ ψ} b₁ b₂ :=
     let b₁ := equiv b₁
     let b₂ := equiv b₂
     have : 𝔇 [∼(φ 🡒 ψ), ∼φ, ψ] := cast (tensor (𝔇 := 𝔇) (identity φ) (identity (∼ψ))) (by simp [LogicalConnective.DeMorgan.imply])
@@ -114,42 +114,42 @@ instance : Entailment.ModusPonens 𝓟 where
     equiv.symm <| cast this
 
 instance : Entailment.Cl 𝓟 where
-  negEquiv {φ} := Entailment.cast
+  negEquiv! {φ} := Entailment.cast
     (show 𝓟 ⊢! (φ ⋎ ∼φ ⋎ ⊥) ⋏ (φ ⋏ ⊤ ⋎ ∼φ) from
       equiv.symm <| and (or <| swap₁ <| or <| close φ) (or <| and (identity φ) top))
     (by simp [Axioms.NegEquiv, LogicalConnective.DeMorgan.imply, LogicalConnective.iff])
-  verum := equiv.symm <| verum
-  implyK {φ ψ} :=
+  verum! := equiv.symm <| verum
+  implyK! {φ ψ} :=
     have : 𝓟 ⊢! ∼φ ⋎ ∼ψ ⋎ φ := equiv.symm <| or <| swap₁ <| or <| close φ
     Entailment.cast this (by simp [LogicalConnective.DeMorgan.imply])
-  implyS {φ ψ χ} :=
+  implyS! {φ ψ χ} :=
     have : 𝓟 ⊢! φ ⋏ ψ ⋏ ∼χ ⋎ φ ⋏ ∼ψ ⋎ ∼φ ⋎ χ :=
       equiv.symm <| or <| swap₁ <| or <| swap₁ <| or <| swap₃ <| and
         (close φ)
         (and (swap₃ <| and (close φ) (close ψ)) (close χ))
     Entailment.cast this (by simp [LogicalConnective.DeMorgan.imply])
-  and₁ {φ ψ} :=
+  and₁! {φ ψ} :=
     have : 𝓟 ⊢! (∼φ ⋎ ∼ψ) ⋎ φ :=  equiv.symm <|or <| or <| close φ
     Entailment.cast this (by simp [LogicalConnective.DeMorgan.imply])
-  and₂ {φ ψ} :=
+  and₂! {φ ψ} :=
     have : 𝓟 ⊢! (∼φ ⋎ ∼ψ) ⋎ ψ := equiv.symm <| or <| or <| close ψ
     Entailment.cast this (by simp [LogicalConnective.DeMorgan.imply])
-  and₃ {φ ψ} :=
+  and₃! {φ ψ} :=
     have : 𝓟 ⊢! ∼φ ⋎ ∼ψ ⋎ φ ⋏ ψ := equiv.symm <| or <| swap₁ <| or <| swap₁ <| and (close φ) (close ψ)
     Entailment.cast this (by simp [LogicalConnective.DeMorgan.imply])
-  or₁ {φ ψ} :=
+  or₁! {φ ψ} :=
     have : 𝓟 ⊢! ∼φ ⋎ φ ⋎ ψ := equiv.symm <| or <| swap₁ <| or <| close φ
     Entailment.cast this (by simp [LogicalConnective.DeMorgan.imply])
-  or₂ {φ ψ} :=
+  or₂! {φ ψ} :=
     have : 𝓟 ⊢! ∼ψ ⋎ φ ⋎ ψ := equiv.symm <| or <| swap₁ <| or <| close ψ
     Entailment.cast this (by simp [LogicalConnective.DeMorgan.imply])
-  or₃ {φ ψ χ} :=
+  or₃! {φ ψ χ} :=
     have : 𝓟 ⊢! φ ⋏ ∼χ ⋎ ψ ⋏ ∼ χ ⋎ ∼φ ⋏ ∼ψ ⋎ χ :=
       equiv.symm <| or <| swap₁ <| or <| swap₁ <| or <| and
         (swap₃ <| and (close φ) (close χ))
         (swap₂ <| and (close ψ) (close χ))
     Entailment.cast this (by simp [LogicalConnective.DeMorgan.imply])
-  dne {φ} :=
+  dne! {φ} :=
     have : 𝓟 ⊢! ∼φ ⋎ φ := equiv.symm <| or <| close φ
     Entailment.cast this (by simp [LogicalConnective.DeMorgan.imply])
 
@@ -237,7 +237,7 @@ instance [OneSidedLK 𝔇] : Entailment.Axiomatized S where
 variable [OneSidedLK.Cut 𝔇]
 
 instance (𝓢 : S) : Entailment.ModusPonens 𝓢 where
-  mdp {φ ψ} b₁ b₂ :=
+  mdp! {φ ψ} b₁ b₂ :=
     let ⟨Γ₁, b₁⟩ := equiv b₁
     let ⟨Γ₂, b₂⟩ := equiv b₂
     have : 𝔇 [∼(φ 🡒 ψ), ∼φ, ψ] := cast (tensor (𝔇 := 𝔇) (identity φ) (identity (∼ψ))) (by simp [LogicalConnective.DeMorgan.imply])
@@ -255,7 +255,7 @@ instance : Entailment.StrongCut S S where
         Entailment.cast (bl l (by simp at hl; grind) (∼ψ ⋎ χ) (OneSidedLK.or <| OneSidedLK.swap₁ d))
         (by simp [LogicalConnective.DeMorgan.imply])
       have bψ : T ⊢! ψ := bs (show ψ ∈ U by simp at hl; grind)
-      Entailment.mdp bχ bψ
+      Entailment.mdp! bχ bψ
   have ⟨l, hl⟩ := equiv b
   bl l l.prop φ hl
 
@@ -280,42 +280,42 @@ lemma inconsistent_iff {𝓢 : S} :
       exact ⟨Γ, hΓ, ⟨contraction d (by simp)⟩⟩
 
 instance cl (𝓢 : S) : Entailment.Cl 𝓢 where
-  negEquiv {φ} := Entailment.cast
+  negEquiv! {φ} := Entailment.cast
     (show 𝓢 ⊢! (φ ⋎ ∼φ ⋎ ⊥) ⋏ (φ ⋏ ⊤ ⋎ ∼φ) from
       toProof _ <| and (or <| swap₁ <| or <| close φ) (or <| and (identity φ) top))
     (by simp [Axioms.NegEquiv, LogicalConnective.DeMorgan.imply, LogicalConnective.iff])
-  verum := toProof _ <| verum
-  implyK {φ ψ} :=
+  verum! := toProof _ <| verum
+  implyK! {φ ψ} :=
     have : 𝓢 ⊢! ∼φ ⋎ ∼ψ ⋎ φ := toProof _ <| or <| swap₁ <| or <| close φ
     Entailment.cast this (by simp [LogicalConnective.DeMorgan.imply])
-  implyS {φ ψ χ} :=
+  implyS! {φ ψ χ} :=
     have : 𝓢 ⊢! φ ⋏ ψ ⋏ ∼χ ⋎ φ ⋏ ∼ψ ⋎ ∼φ ⋎ χ :=
       toProof _ <| or <| swap₁ <| or <| swap₁ <| or <| swap₃ <| and
         (close φ)
         (and (swap₃ <| and (close φ) (close ψ)) (close χ))
     Entailment.cast this (by simp [LogicalConnective.DeMorgan.imply])
-  and₁ {φ ψ} :=
+  and₁! {φ ψ} :=
     have : 𝓢 ⊢! (∼φ ⋎ ∼ψ) ⋎ φ :=  toProof _ <|or <| or <| close φ
     Entailment.cast this (by simp [LogicalConnective.DeMorgan.imply])
-  and₂ {φ ψ} :=
+  and₂! {φ ψ} :=
     have : 𝓢 ⊢! (∼φ ⋎ ∼ψ) ⋎ ψ := toProof _ <| or <| or <| close ψ
     Entailment.cast this (by simp [LogicalConnective.DeMorgan.imply])
-  and₃ {φ ψ} :=
+  and₃! {φ ψ} :=
     have : 𝓢 ⊢! ∼φ ⋎ ∼ψ ⋎ φ ⋏ ψ := toProof _ <| or <| swap₁ <| or <| swap₁ <| and (close φ) (close ψ)
     Entailment.cast this (by simp [LogicalConnective.DeMorgan.imply])
-  or₁ {φ ψ} :=
+  or₁! {φ ψ} :=
     have : 𝓢 ⊢! ∼φ ⋎ φ ⋎ ψ := toProof _ <| or <| swap₁ <| or <| close φ
     Entailment.cast this (by simp [LogicalConnective.DeMorgan.imply])
-  or₂ {φ ψ} :=
+  or₂! {φ ψ} :=
     have : 𝓢 ⊢! ∼ψ ⋎ φ ⋎ ψ := toProof _ <| or <| swap₁ <| or <| close ψ
     Entailment.cast this (by simp [LogicalConnective.DeMorgan.imply])
-  or₃ {φ ψ χ} :=
+  or₃! {φ ψ χ} :=
     have : 𝓢 ⊢! φ ⋏ ∼χ ⋎ ψ ⋏ ∼ χ ⋎ ∼φ ⋏ ∼ψ ⋎ χ :=
       toProof _ <| or <| swap₁ <| or <| swap₁ <| or <| and
         (swap₃ <| and (close φ) (close χ))
         (swap₂ <| and (close ψ) (close χ))
     Entailment.cast this (by simp [LogicalConnective.DeMorgan.imply])
-  dne {φ} :=
+  dne! {φ} :=
     have : 𝓢 ⊢! ∼φ ⋎ φ := toProof _ <| or <| close φ
     Entailment.cast this (by simp [LogicalConnective.DeMorgan.imply])
 
@@ -355,16 +355,16 @@ lemma iff_context {𝓢 : S} {𝓟 : P} [PrincipalEntailment 𝔇 𝓟] :
     refine provable_iff.mpr ⟨Γ, h, ⟨this⟩⟩
 
 lemma of_principal_provable {𝓟 : P} [PrincipalEntailment 𝔇 𝓟] {𝓢 : S} : 𝓟 ⊢ φ → 𝓢 ⊢ φ := fun h ↦
-  iff_context.mpr (Entailment.Context.of! h)
+  iff_context.mpr (Entailment.Context.of h)
 
 open Classical in
 noncomputable abbrev deduction (𝓟 : P) [PrincipalEntailment 𝔇 𝓟] : Entailment.Deduction S where
   ofInsert {φ ψ 𝓢 b} :=
     have : AdjunctiveSet.set (Adjoin.adjoin φ 𝓢) *⊢[𝓟] ψ := iff_context.mp ⟨b⟩
-    have : AdjunctiveSet.set 𝓢 *⊢[𝓟] φ 🡒 ψ := Context.deduct! <| by simpa using this
+    have : AdjunctiveSet.set 𝓢 *⊢[𝓟] φ 🡒 ψ := Context.deduct <| by simpa using this
     (iff_context.mpr this).get
   inv {φ ψ 𝓢 b} :=
-    have : AdjunctiveSet.set (Adjoin.adjoin φ 𝓢) *⊢[𝓟] ψ := by simpa using Context.deductInv! (iff_context.mp ⟨b⟩)
+    have : AdjunctiveSet.set (Adjoin.adjoin φ 𝓢) *⊢[𝓟] ψ := by simpa using Context.deductInv (iff_context.mp ⟨b⟩)
     (iff_context.mpr this).get
 
 end ContextualEntailment

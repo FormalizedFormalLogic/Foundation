@@ -313,7 +313,7 @@ lemma of_subset (h : T ⊆ U) {φ : Formula V L} : T ⊢ φ → U ⊢ φ := by
 noncomputable instance : Entailment.ModusPonens T := ⟨modusPonens⟩
 
 noncomputable instance : Entailment.NegationEquiv T where
-  negEquiv {φ} := by
+  negEquiv! {φ} := by
     suffices T ⊢! (φ ⋎ ∼φ ⋎ ⊥) ⋏ (φ ⋏ ⊤ ⋎ ∼φ) by
       simpa [Axioms.NegEquiv, LO.LogicalConnective.iff, Semiformula.imp_def]
     apply TDerivation.and
@@ -327,14 +327,14 @@ noncomputable instance : Entailment.NegationEquiv T where
       · exact TDerivation.verum
 
 noncomputable instance : Entailment.Minimal T where
-  verum := TDerivation.toTProof <| TDerivation.verum
-  implyK {φ ψ} := by
+  verum! := TDerivation.toTProof <| TDerivation.verum
+  implyK! {φ ψ} := by
     simp only [Axioms.ImplyK, Semiformula.imp_def]
     apply TDerivation.or
     apply TDerivation.rotate₁
     apply TDerivation.or
     exact TDerivation.em φ
-  implyS {φ ψ r} := by
+  implyS! {φ ψ r} := by
     simp only [Axioms.ImplyS, Semiformula.imp_def, LogicalConnective.DeMorgan.or, LogicalNeutral.DeMorgan.neg]
     apply TDerivation.or
     apply TDerivation.rotate₁
@@ -350,17 +350,17 @@ noncomputable instance : Entailment.Minimal T where
       · apply TDerivation.and
         · exact TDerivation.em ψ
         · exact TDerivation.em r
-  and₁ {φ ψ} := by
+  and₁! {φ ψ} := by
     simp only [Axioms.AndElim₁, Semiformula.imp_def, LogicalConnective.DeMorgan.and]
     apply TDerivation.or
     apply TDerivation.or
     exact TDerivation.em φ
-  and₂ {φ ψ} := by
+  and₂! {φ ψ} := by
     simp only [Axioms.AndElim₂, Semiformula.imp_def, LogicalConnective.DeMorgan.and]
     apply TDerivation.or
     apply TDerivation.or
     exact TDerivation.em ψ
-  and₃ {φ ψ} := by
+  and₃! {φ ψ} := by
     simp only [Axioms.AndInst, Semiformula.imp_def]
     apply TDerivation.or
     apply TDerivation.rotate₁
@@ -369,20 +369,20 @@ noncomputable instance : Entailment.Minimal T where
     apply TDerivation.and
     · exact TDerivation.em φ
     · exact TDerivation.em ψ
-  or₁ {φ ψ} := by
+  or₁! {φ ψ} := by
     simp only [Axioms.OrInst₁, Semiformula.imp_def]
     apply TDerivation.or
     apply TDerivation.rotate₁
     apply TDerivation.or
     exact TDerivation.em φ
-  or₂ {φ ψ} := by
+  or₂! {φ ψ} := by
     suffices T ⊢! ∼ψ ⋎ φ ⋎ ψ by
       simpa [Axioms.OrInst₂, Semiformula.imp_def]
     apply TDerivation.or
     apply TDerivation.rotate₁
     apply TDerivation.or
     exact TDerivation.em ψ
-  or₃ {φ ψ r} := by
+  or₃! {φ ψ r} := by
     suffices T ⊢! φ ⋏ ∼r ⋎ ψ ⋏ ∼r ⋎ ∼φ ⋏ ∼ψ ⋎ r by
       simpa [Axioms.OrElim, Semiformula.imp_def]
     apply TDerivation.or
@@ -401,7 +401,7 @@ noncomputable instance : Entailment.Minimal T where
       · exact TDerivation.em r
 
 noncomputable instance : Entailment.Cl T where
-  dne {φ} := by simpa [Axioms.DNE, Semiformula.imp_def] using! TDerivation.or (TDerivation.em φ)
+  dne! {φ} := by simpa [Axioms.DNE, Semiformula.imp_def] using! TDerivation.or (TDerivation.em φ)
 
 noncomputable def exsIntro (φ : Semiformula V L 1) (t : Term V L) (b : T ⊢! φ.subst ![t]) : T ⊢! (∃¹ φ) := TDerivation.exs t b
 
@@ -484,9 +484,9 @@ lemma conj_shift (Γ : List (Formula V L)) : (⋀Γ).shift = ⋀(Γ.map .shift) 
       simp [hps, ih]
 
 noncomputable def generalize {Γ} {φ : Semiformula V L 1} (d : Γ.map .shift ⊢[T]! φ.free) : Γ ⊢[T]! ∀¹ φ := by
-  apply Entailment.FiniteContext.ofDef
+  apply Entailment.FiniteContext.ofDef!
   apply generalizeAux
-  simpa [conj_shift] using Entailment.FiniteContext.toDef d
+  simpa [conj_shift] using Entailment.FiniteContext.toDef! d
 
 lemma generalize! {Γ} {φ : Semiformula V L 1} (d : Γ.map .shift ⊢[T] φ.free) : Γ ⊢[T] ∀¹ φ := ⟨generalize d.get⟩
 
@@ -505,24 +505,24 @@ open Entailment.FiniteContext Classical
 
 noncomputable def allImpAll {Γ} {φ ψ : Semiformula V L 1} (d : Γ.map .shift ⊢[T]! φ.free 🡒 ψ.free) :
     Γ ⊢[T]! ∀¹ φ 🡒 ∀¹ ψ := by
-  apply deduct
+  apply deduct!
   apply generalize
   suffices ((∀¹ φ.shift) :: Γ.map Semiformula.shift) ⊢[T]! ψ.free by simpa
   have hφ : ((∀¹ φ.shift) :: Γ.map Semiformula.shift) ⊢[T]! φ.free := by
     apply specializeWithCtx
-    apply byAxm₀
+    apply byAxm₀!
   have h : ((∀¹ φ.shift) :: Γ.map Semiformula.shift) ⊢[T]! φ.free 🡒 ψ.free :=
-    Entailment.FiniteContext.weakening (by simp) d
+    Entailment.FiniteContext.weakening! (by simp) d
   exact h ⨀ hφ
 
 theorem all_imp_all! {Γ} {φ ψ : Semiformula V L 1} (d : Γ.map .shift ⊢[T] φ.free 🡒 ψ.free) :
     Γ ⊢[T] ∀¹ φ 🡒 ∀¹ ψ := ⟨allImpAll d.get⟩
 
 noncomputable def exsImpExs {Γ} {φ ψ : Semiformula V L 1} (d : Γ.map .shift ⊢[T]! φ.free 🡒 ψ.free) : Γ ⊢[T]! ∃¹ φ 🡒 ∃¹ ψ := by
-  apply Entailment.C_of_CNN
+  apply Entailment.C!_of_CNN!
   suffices Γ ⊢[T]! ∀¹ ∼ψ 🡒 ∀¹ ∼φ by simpa
   apply allImpAll
-  apply Entailment.C_of_CNN
+  apply Entailment.C!_of_CNN!
   simpa [Semiformula.free] using d
 
 theorem exs_imp_exs! {Γ} {φ ψ : Semiformula V L 1} (d : Γ.map .shift ⊢[T] φ.free 🡒 ψ.free) :
@@ -562,7 +562,7 @@ lemma substItrDisj_right {i z : V}
 lemma substItrDisj_right_intro {ψ} {i z : V} {w : TermVec V ℒₒᵣ m} {φ : Semiformula V ℒₒᵣ (m + 1)}
     (hi : i < z) (h : A ⊢ ψ 🡒 φ.subst (𝕹 i :> w)) :
      A ⊢ ψ 🡒 φ.substItrDisj w z :=
-  Entailment.C!_trans h (substItrDisj_right A w φ hi)
+  Entailment.C_trans h (substItrDisj_right A w φ hi)
 
 lemma substItrConj_right_intro {ψ} {w : TermVec V ℒₒᵣ m} {φ : Semiformula V ℒₒᵣ (m + 1)} {z : V}
     (h : ∀ i < z, A ⊢ ψ 🡒 φ.subst (𝕹 i :> w)) :
@@ -584,11 +584,11 @@ open Classical in
 lemma substItrDisj_left_intro {ψ} {w : TermVec V ℒₒᵣ m} {φ : Semiformula V ℒₒᵣ (m + 1)} {z : V}
     (h : ∀ i < z, A ⊢ φ.subst (𝕹 i :> w) 🡒 ψ) :
     A ⊢ φ.substItrDisj w z 🡒 ψ := by
-  apply Entailment.C!_of_CNN!
+  apply Entailment.C_of_CNN
   simp only [Semiformula.substItrDisj_neg]
   apply substItrConj_right_intro
   intro i hi
-  apply Entailment.C!_of_CNN!
+  apply Entailment.C_of_CNN
   simpa using h i hi
 
 end TProof
