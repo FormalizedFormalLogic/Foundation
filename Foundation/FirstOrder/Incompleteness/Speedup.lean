@@ -36,11 +36,11 @@ noncomputable def _root_.LO.FirstOrder.Theory.minProof (σ : Sentence L) : ℕ :
 variable {T} {σ : Sentence L}
 
 lemma proof_minProof (h : T ⊢ σ) : Proof T (T.minProof σ) (⌜σ⌝ : ℕ) :=
-  Nat.sInf_mem (internalize_provability (V := ℕ) h)
+  Nat.sInf_mem (provable_iff_provable.mpr h)
 
-lemma minProof_eq_zero_of_unprovable [L.DecidableEq] (h : T ⊬ σ) : T.minProof σ = 0 :=
+lemma minProof_eq_zero_of_unprovable (h : T ⊬ σ) : T.minProof σ = 0 :=
   Nat.sInf_eq_zero.mpr <| .inr <| Set.eq_empty_iff_forall_notMem.mpr λ d hd ↦
-    h (Provable.sound (⟨d, hd⟩ : Provable T (⌜σ⌝ : ℕ)))
+    h (provable_iff_provable.mp ⟨d, hd⟩)
 
 lemma minProof_le {d} (h : Proof T d (⌜σ⌝ : ℕ)) : T.minProof σ ≤ d :=
   Nat.sInf_le h
@@ -84,9 +84,11 @@ lemma computable_insert_minProof_or [L.DecidableEq] [L.Primcodable] :
     (Semiformula.primrec₂_or.comp (Primrec.const σ) Primrec.id).to_comp
     λ π ↦ Entailment.deduction_iff.mpr (by cl_prover)
 
-lemma computablePred_bddExists_proof (T : Theory L) [T.Δ₁] {α : Type*} [Primcodable α]
-    (bd cd : α → ℕ) (hbd : Computable bd) (hcd : Computable cd) :
-    ComputablePred λ a : α ↦ ∃ d ≤ bd a, Proof T d (cd a) := by
+lemma computablePred_bddExists_proof (T : Theory L) [T.Δ₁] [L.Primcodable] {α : Type*}
+    [Primcodable α] (bd : α → ℕ) (hbd : Computable bd) {F : α → Sentence L} (hF : Computable F) :
+    ComputablePred λ a : α ↦ ∃ d ≤ bd a, Proof T d (⌜F a⌝ : ℕ) := by
+  set cd : α → ℕ := λ a ↦ encode (F a)
+  have hcd : Computable cd := Computable.encode.comp hF
   obtain ⟨χ, hχ, hχe⟩ := ComputablePred.computable_iff.mp (computablePred_proof T)
   have hstep : Computable (λ q : α × (ℕ × Bool) ↦ Bool.or q.2.2 (χ (q.2.1, cd q.1))) :=
     Computable₂.comp Primrec.or.to_comp (Computable.snd.comp Computable.snd)
@@ -104,7 +106,19 @@ lemma computablePred_bddExists_proof (T : Theory L) [T.Δ₁] {α : Type*} [Prim
         grind
   refine ComputablePred.computable_iff.mpr ⟨_, hS, funext λ a ↦ propext ?_⟩
   rw [key (bd a) (cd a)]
+  simp only [Sentence.quote_eq_encode_nat]
   exact exists_congr λ d ↦ and_congr_right λ _ ↦ (congrFun hχe (d, cd a)).to_iff
+
+lemma computablePred_provable_of_minProof_le (T : Theory L) [T.Δ₁] [L.Primcodable]
+    {α : Type*} [Primcodable α] {F : α → Sentence L} (hF : Computable F)
+    {bd : α → ℕ} (hbd : Computable bd) (hb : ∀ a, T ⊢ F a → T.minProof (F a) ≤ bd a) :
+    ComputablePred λ a ↦ T ⊢ F a := by
+  refine ComputablePred.of_eq (computablePred_bddExists_proof T bd hbd hF) λ a ↦ ?_
+  constructor
+  · rintro ⟨d, _, hd⟩
+    exact provable_iff_provable.mp ⟨d, hd⟩
+  · intro h
+    exact ⟨T.minProof (F a), hb a h, proof_minProof h⟩
 
 /-- The Ehrenfeucht–Mycielski speedup theorem [EM71]. -/
 theorem ehrenfeucht_mycielski_speedup [L.DecidableEq] [L.Primcodable]
@@ -114,18 +128,9 @@ theorem ehrenfeucht_mycielski_speedup [L.DecidableEq] [L.Primcodable]
   push Not at h
   apply hU
   refine ComputablePred.of_eq ?_ (λ π ↦ provable_insert_neg_iff_or.symm)
-  refine ComputablePred.of_eq
-    (computablePred_bddExists_proof T (λ π ↦ f ((insert σ T).minProof (σ ⋎ π)))
-      (λ π ↦ encode (σ ⋎ π)) (hf.comp computable_insert_minProof_or)
-      (Computable.encode.comp (Semiformula.primrec₂_or.comp (Primrec.const σ) Primrec.id).to_comp))
-    λ π ↦ ?_
-  constructor
-  · rintro ⟨d, _, hd⟩
-    exact Provable.sound (⟨d, by rwa [Sentence.quote_eq_encode_nat]⟩ : Provable T (⌜σ ⋎ π⌝ : ℕ))
-  · intro hp
-    exact ⟨T.minProof (σ ⋎ π), h (σ ⋎ π) hp, by
-      have := proof_minProof hp
-      rwa [Sentence.quote_eq_encode_nat] at this⟩
+  exact computablePred_provable_of_minProof_le T
+    (Semiformula.primrec₂_or.comp (Primrec.const σ) Primrec.id).to_comp
+    (hf.comp computable_insert_minProof_or) λ π ↦ h (σ ⋎ π)
 
 theorem ehrenfeucht_mycielski_speedup_arithmetic (T : ArithmeticTheory) [T.Δ₁] (σ : ArithmeticSentence)
     [𝗜𝚺₁ ⪯ T] (hσ : T ⊬ σ) (f : ℕ → ℕ) (hf : Computable f) :
