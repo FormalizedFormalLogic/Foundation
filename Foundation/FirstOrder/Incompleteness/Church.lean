@@ -95,7 +95,7 @@ theorem undecidability_first_order_logic : ¬ComputablePred ((∅ : ArithmeticTh
       fun σ ↦ by
       simp [nat_pair_eq, c, Semiformula.imp_eq, Semiformula.encode_or,
         ← Semiformula.encode_eq_toNat, ← Semiformula.encode_eq_toNat]
-  apply church_theorem_general (T := 𝗣𝗔⁻) (ComputablePred.computable_of_manyOneReducible ?_ hC)
+  apply church_theorem_general 𝗣𝗔⁻ (ComputablePred.computable_of_manyOneReducible ?_ hC)
   refine ⟨fun σ ↦ PeanoMinus.finite.toFinset.conj 🡒 σ, ?_, ?_⟩
   . exact hImpIntro
   . exact hDeduction
