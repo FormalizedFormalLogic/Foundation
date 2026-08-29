@@ -28,7 +28,7 @@ Main results of this repository. More detailed explanations are provided in [Doc
     - [Arithmetic Theory Zoo](#arithmetic-theory-zoo)
   - [Incompleteness][incompleteness]
     - Gödel's [First][arith:goedel_it1] and [Second][arith:goedel_it2] incompleteness theorems
-    - [Gödel-Rosser's incompleteness theorem][arith:goedel_rosser]
+    - [Gödel–Rosser's incompleteness theorem][arith:goedel_rosser]
     - [Löb's theorem][arith:loeb]
     - [Tarski's undefinability of truth][arith:tarski]
     - [Church's theorem and undecidability of first-order logic][arith:church]
@@ -48,7 +48,6 @@ Main results of this repository. More detailed explanations are provided in [Doc
 [first_order:downward_loewenheim_skolem]: ./Foundation/FirstOrder/Skolemization/Hull.lean
 [first_order:intuitionistic]: ./Foundation/FirstOrder/Intuitionistic
 [arith]: ./Foundation/FirstOrder/Arithmetic
-[bootstrapping]: ./Foundation/FirstOrder/Bootstrapping
 [incompleteness]: ./Foundation/FirstOrder/Incompleteness
 [arith:goedel_it1]: ./Foundation/FirstOrder/Incompleteness/First.lean
 [arith:goedel_it2]: ./Foundation/FirstOrder/Incompleteness/Second.lean
@@ -56,9 +55,6 @@ Main results of this repository. More detailed explanations are provided in [Doc
 [arith:loeb]: ./Foundation/FirstOrder/Incompleteness/Löb.lean
 [arith:tarski]: ./Foundation/FirstOrder/Incompleteness/Tarski.lean
 [arith:church]: ./Foundation/FirstOrder/Incompleteness/Church.lean
-[arith:halting]: ./Foundation/FirstOrder/Incompleteness/Halting.lean
-[arith:rosser]: ./Foundation/FirstOrder/Incompleteness/RosserProvability.lean
-[arith:restricted]: ./Foundation/FirstOrder/Incompleteness/RestrictedProvability.lean
 [set_theory]: ./Foundation/FirstOrder/SetTheory
 [set_theory:zfc_consistent]: ./Foundation/FirstOrder/SetTheory/Universe.lean
 [set_theory:loewenheim_skolem]: ./Foundation/FirstOrder/SetTheory/LoewenheimSkolem.lean
