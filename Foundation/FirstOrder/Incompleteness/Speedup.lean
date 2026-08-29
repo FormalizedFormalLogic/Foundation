@@ -49,7 +49,8 @@ section Speedup
 
 open Encodable
 
-lemma computablePred_proof : ComputablePred λ p : ℕ × ℕ ↦ Proof T p.1 p.2 := by
+lemma computablePred_proof (T : Theory L) [T.Δ₁] :
+    ComputablePred λ p : ℕ × ℕ ↦ Proof T p.1 p.2 := by
   apply ComputablePred.computable_iff_re_compl_re'.mpr
   obtain ⟨φ, hφ⟩ := HierarchySymbol.Definable.of_delta (Γ := 𝚺) (Proof.definable (V := ℕ) (T := T))
   obtain ⟨ψ, hψ⟩ := (HierarchySymbol.Definable.of_delta (Γ := 𝚷) (Proof.definable (V := ℕ) (T := T))).notPi
@@ -61,14 +62,14 @@ lemma computablePred_proof : ComputablePred λ p : ℕ × ℕ ↦ Proof T p.1 p.
     ((sigma1_re id ψ.sigma_prop).comp hcomp).of_eq
       λ p ↦ by simpa [List.Vector.cons_get] using hψ.iff (v := ![p.1, p.2])⟩
 
-lemma computable_minProof_comp [L.Primcodable] {α : Type*} [Primcodable α] {F : α → Sentence L}
-    (hF : Computable F) (hprov : ∀ a, T ⊢ F a) :
+lemma computable_minProof_comp (T : Theory L) [T.Δ₁] [L.Primcodable] {α : Type*} [Primcodable α]
+    {F : α → Sentence L} (hF : Computable F) (hprov : ∀ a, T ⊢ F a) :
     Computable λ a ↦ T.minProof (F a) := by
   classical
   have hex : ∀ a, ∃ d, Proof T d (⌜F a⌝ : ℕ) :=
     λ a ↦ ⟨T.minProof (F a), proof_minProof (hprov a)⟩
   have hcomp : ComputablePred λ p : α × ℕ ↦ Proof T p.2 (⌜F p.1⌝ : ℕ) := by
-    obtain ⟨f, hf, hfe⟩ := ComputablePred.computable_iff.mp (computablePred_proof (T := T))
+    obtain ⟨f, hf, hfe⟩ := ComputablePred.computable_iff.mp (computablePred_proof T)
     refine ComputablePred.computable_iff.mpr
       ⟨λ p ↦ f (p.2, encode (F p.1)),
         hf.comp (Computable.pair Computable.snd (Computable.encode.comp (hF.comp Computable.fst))),
@@ -90,13 +91,13 @@ lemma computable_or_left [L.Primcodable] : Computable λ π : Sentence L ↦ σ 
 
 lemma computable_insert_minProof_or [L.DecidableEq] [L.Primcodable] :
     Computable λ π : Sentence L ↦ (insert σ T).minProof (σ ⋎ π) :=
-  computable_minProof_comp (T := insert σ T) computable_or_left
+  computable_minProof_comp (insert σ T) computable_or_left
     λ π ↦ Entailment.deduction_iff.mpr (by cl_prover)
 
-lemma computablePred_bddExists_proof {α : Type*} [Primcodable α] {bd cd : α → ℕ}
-    (hbd : Computable bd) (hcd : Computable cd) :
+lemma computablePred_bddExists_proof (T : Theory L) [T.Δ₁] {α : Type*} [Primcodable α]
+    (bd cd : α → ℕ) (hbd : Computable bd) (hcd : Computable cd) :
     ComputablePred λ a : α ↦ ∃ d ≤ bd a, Proof T d (cd a) := by
-  obtain ⟨χ, hχ, hχe⟩ := ComputablePred.computable_iff.mp (computablePred_proof (T := T))
+  obtain ⟨χ, hχ, hχe⟩ := ComputablePred.computable_iff.mp (computablePred_proof T)
   have hstep : Computable (λ q : α × (ℕ × Bool) ↦ Bool.or q.2.2 (χ (q.2.1, cd q.1))) :=
     Computable₂.comp Primrec.or.to_comp (Computable.snd.comp Computable.snd)
       (hχ.comp (Computable.pair (Computable.fst.comp Computable.snd) (hcd.comp Computable.fst)))
@@ -134,9 +135,9 @@ theorem ehrenfeucht_mycielski_speedup [L.DecidableEq] [L.Primcodable]
   apply hU
   refine ComputablePred.of_eq ?_ (λ π ↦ provable_insert_neg_iff_or.symm)
   refine ComputablePred.of_eq
-    (computablePred_bddExists_proof (T := T)
-      (bd := λ π ↦ f ((insert σ T).minProof (σ ⋎ π))) (cd := λ π ↦ encode (σ ⋎ π))
-      (hf_comp.comp computable_insert_minProof_or) (Computable.encode.comp computable_or_left))
+    (computablePred_bddExists_proof T (λ π ↦ f ((insert σ T).minProof (σ ⋎ π)))
+      (λ π ↦ encode (σ ⋎ π)) (hf_comp.comp computable_insert_minProof_or)
+      (Computable.encode.comp computable_or_left))
     λ π ↦ ?_
   constructor
   · rintro ⟨d, _, hd⟩
@@ -147,7 +148,7 @@ theorem ehrenfeucht_mycielski_speedup [L.DecidableEq] [L.Primcodable]
       rwa [Sentence.quote_eq_encode_nat] at this⟩
 
 lemma exists_lt_minProof [L.DecidableEq] [L.Primcodable]
-    (hU : ¬ComputablePred (insert (∼σ) T).theory) {f : ℕ → ℕ} (hf : Computable f) :
+    (hU : ¬ComputablePred (insert (∼σ) T).theory) (f : ℕ → ℕ) (hf : Computable f) :
     ∃ π : Sentence L, T ⊢ π ∧ f ((insert σ T).minProof π) < T.minProof π := by
   by_contra h
   push Not at h
@@ -161,19 +162,18 @@ theorem ehrenfeucht_mycielski_speedup_arithmetic {T : ArithmeticTheory} [T.Δ₁
     Entailment.WeakerThan.trans ‹𝗥₀ ⪯ T› (Entailment.Axiomatized.le_of_subset (Set.subset_insert _ T))
   ehrenfeucht_mycielski_speedup (church_theorem_general (insert (∼σ) T))
 
-lemma exists_lt_minProof_arithmetic {T : ArithmeticTheory} [T.Δ₁] {σ : ArithmeticSentence}
-    [𝗥₀ ⪯ T] [(insert (∼σ) T).SoundOnHierarchy 𝚺 1] {f : ℕ → ℕ} (hf : Computable f) :
+lemma exists_lt_minProof_arithmetic (T : ArithmeticTheory) [T.Δ₁] (σ : ArithmeticSentence)
+    [𝗥₀ ⪯ T] [(insert (∼σ) T).SoundOnHierarchy 𝚺 1] (f : ℕ → ℕ) (hf : Computable f) :
     ∃ π : ArithmeticSentence, T ⊢ π ∧ f ((insert σ T).minProof π) < T.minProof π :=
   have : 𝗥₀ ⪯ insert (∼σ) T :=
     Entailment.WeakerThan.trans ‹𝗥₀ ⪯ T› (Entailment.Axiomatized.le_of_subset (Set.subset_insert _ T))
-  exists_lt_minProof (church_theorem_general (insert (∼σ) T)) hf
+  exists_lt_minProof (church_theorem_general (insert (∼σ) T)) f hf
 
 example {T : ArithmeticTheory} [T.Δ₁] {σ : ArithmeticSentence}
     [𝗥₀ ⪯ T] [(insert (∼σ) T).SoundOnHierarchy 𝚺 1] :
     ∃ π : ArithmeticSentence, T ⊢ π ∧ (insert σ T).minProof π < Nat.log 2 (T.minProof π) := by
-  have hcomp : Computable λ x : ℕ ↦ 2 ^ (x + 1) :=
-    ((Primrec₂.unpaired'.1 Nat.Primrec.pow).comp (Primrec.const 2) Primrec.succ).to_comp
-  obtain ⟨π, hπ, hlt⟩ := exists_lt_minProof_arithmetic (T := T) (σ := σ) hcomp
+  obtain ⟨π, hπ, hlt⟩ := exists_lt_minProof_arithmetic T σ (λ x ↦ 2 ^ (x + 1))
+    (((Primrec₂.unpaired'.1 Nat.Primrec.pow).comp (Primrec.const 2) Primrec.succ).to_comp)
   exact ⟨π, hπ, (Nat.le_log_iff_pow_le (b := 2) (by norm_num)
     (((Nat.zero_le _).trans_lt hlt).ne')).mpr hlt.le⟩
 
