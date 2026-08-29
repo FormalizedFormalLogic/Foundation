@@ -292,7 +292,12 @@ noncomputable def charFnPart (p : ℕ → Prop) : List.Vector ℕ 1 →. ℕ :=
 noncomputable def codeOfComputablePred (p : ℕ → Prop) : ArithmeticSemisentence 1 :=
   (codeOfPartrec' (charFnPart p))/[‘1’, #0]
 
-lemma ComputablePred.partrec'_charFn {p : ℕ → Prop} (hp : ComputablePred p) :
+@[simp] lemma codeOfComputablePred_sigma1 (p : ℕ → Prop) : Hierarchy 𝚺 1 (codeOfComputablePred p) := by
+  simp [codeOfComputablePred, codeOfPartrec']
+
+variable {p : ℕ → Prop}
+
+lemma ComputablePred.partrec'_charFn (hp : ComputablePred p) :
     Nat.Partrec' (charFnPart p) := by
   obtain ⟨f, hf, rfl⟩ := ComputablePred.computable_iff.mp hp
   have hc : Computable fun v : List.Vector ℕ 1 ↦ f (v.get 0) :=
@@ -302,14 +307,11 @@ lemma ComputablePred.partrec'_charFn {p : ℕ → Prop} (hp : ComputablePred p) 
       cases f (v.get 0) <;> simp
   exact Nat.Partrec'.of_part (this.partrec.of_eq fun v ↦ by simp [charFnPart])
 
-@[simp] lemma codeOfComputablePred_sigma1 (p : ℕ → Prop) : Hierarchy 𝚺 1 (codeOfComputablePred p) := by
-  simp [codeOfComputablePred, codeOfPartrec']
-
-lemma codeOfComputablePred_val_spec {p : ℕ → Prop} (hp : ComputablePred p) (x y : ℕ) :
+lemma codeOfComputablePred_val_spec (hp : ComputablePred p) (x y : ℕ) :
     (codeOfPartrec' (charFnPart p)).Evalb (y :> ![x]) ↔ y = if p x then 1 else 0 := by
   simpa [charFnPart] using codeOfPartrec'_spec (ComputablePred.partrec'_charFn hp) (y := y) (v := ![x])
 
-lemma codeOfComputablePred_spec {p : ℕ → Prop} (hp : ComputablePred p) {x : ℕ} :
+lemma codeOfComputablePred_spec (hp : ComputablePred p) {x : ℕ} :
     (codeOfComputablePred p).Evalb ![x] ↔ p x := by
   simpa [codeOfComputablePred, Semiformula.eval_substs, Matrix.comp_vecCons', Matrix.constant_eq_singleton]
     using (codeOfComputablePred_val_spec hp x 1).trans (by by_cases h : p x <;> simp [h])
@@ -318,7 +320,7 @@ section model
 
 variable {M : Type*} [ORingStructure M] [M↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻]
 
-lemma codeOfComputablePred_not_eval {p : ℕ → Prop} (hp : ComputablePred p) {x : ℕ} (h : ¬p x) :
+lemma codeOfComputablePred_not_eval (hp : ComputablePred p) {x : ℕ} (h : ¬p x) :
     ¬(codeOfComputablePred p).Evalb (M := M) ![ORingStructure.numeral x] := by
   intro hM
   have : M↓[ℒₒᵣ] ⊧* 𝗥₀ := ModelsTheory.of_provably_subtheory M 𝗥₀ 𝗣𝗔⁻ inferInstance
@@ -334,18 +336,18 @@ lemma codeOfComputablePred_not_eval {p : ℕ → Prop} (hp : ComputablePred p) {
 
 end model
 
-variable {T : ArithmeticTheory}
+variable {T : ArithmeticTheory} {x : ℕ}
 
 /-- Positive representation of a computable predicate. -/
-theorem codeOfComputablePred_provable [𝗥₀ ⪯ T] {p : ℕ → Prop} (hp : ComputablePred p)
-    {x : ℕ} (h : p x) : T ⊢ (codeOfComputablePred p)/[↑x] :=
+theorem codeOfComputablePred_provable [𝗥₀ ⪯ T] (hp : ComputablePred p) (h : p x) :
+    T ⊢ (codeOfComputablePred p)/[↑x] :=
   sigma_one_completeness (by simp) (by
     simpa [models_iff, Semiformula.eval_substs, Matrix.constant_eq_singleton]
       using (codeOfComputablePred_spec hp (x := x)).mpr h)
 
 /-- Negative representation of a computable predicate. -/
-theorem codeOfComputablePred_provable_neg [𝗣𝗔⁻ ⪯ T] {p : ℕ → Prop} (hp : ComputablePred p)
-    {x : ℕ} (h : ¬p x) : T ⊢ ∼((codeOfComputablePred p)/[↑x]) := by
+theorem codeOfComputablePred_provable_neg [𝗣𝗔⁻ ⪯ T] (hp : ComputablePred p) (h : ¬p x) :
+    T ⊢ ∼((codeOfComputablePred p)/[↑x]) := by
   have : 𝗘𝗤 _ ⪯ T := Entailment.WeakerThan.trans (𝓣 := 𝗣𝗔⁻) inferInstance inferInstance
   refine complete.{0} T _ fun M _ _ ↦ ?_
   have : M↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := ModelsTheory.of_provably_subtheory M 𝗣𝗔⁻ T inferInstance
