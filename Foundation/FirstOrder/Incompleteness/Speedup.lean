@@ -43,8 +43,10 @@ section Speedup
 open Encodable
 variable {σ : Sentence L}
 
+omit [L.Encodable] [L.LORDefinable] [T.Δ₁] in
 lemma provable_insert_neg_iff_or {π : Sentence L} :
-    insert (∼σ) T ⊢ π ↔ T ⊢ σ ⋎ π := sorry
+    insert (∼σ) T ⊢ π ↔ T ⊢ σ ⋎ π :=
+  Entailment.deduction_iff.trans ⟨fun h ↦ by cl_prover [h], fun h ↦ by cl_prover [h]⟩
 
 lemma computablePred_proof : ComputablePred fun p : ℕ × ℕ ↦ Proof T p.1 p.2 := sorry
 
@@ -65,13 +67,18 @@ computable, then adjoining `σ` to `T` as a new axiom gives an unbounded proof-l
 - [EM71, Theorem] -/
 theorem ehrenfeucht_mycielski_speedup [L.Primcodable]
   (hU : ¬ComputablePred fun π : Sentence L ↦ insert (∼σ) T ⊢ π) :
-  ¬∃ s : ℕ → ℕ, Computable s ∧ Monotone s ∧ ∀ π : Sentence L, T ⊢ π → T.minProof π ≤ s ((insert σ T).minProof π) := sorry
+  ¬∃ s : ℕ → ℕ,
+    Computable s ∧
+    Monotone s ∧
+    ∀ π : Sentence L, T ⊢ π → T.minProof π ≤ s ((insert σ T).minProof π) := sorry
 
 /-- The hypothesis `hU` in `ehrenfeucht_mycielski_speedup` is automatically satisfied when `T` is
 an arithmetic theory extending `𝗥₀` and sound on `𝚺₁` sentences, by Church's theorem. -/
 theorem ehrenfeucht_mycielski_speedup' {T : ArithmeticTheory} [T.Δ₁] {σ : ArithmeticSentence}
     [𝗥₀ ⪯ insert (∼σ) T] [(insert (∼σ) T).SoundOnHierarchy 𝚺 1] :
-    ¬∃ s : ℕ → ℕ, Computable s ∧ Monotone s ∧
+    ¬∃ s : ℕ → ℕ,
+      Computable s ∧
+      Monotone s ∧
       ∀ π : ArithmeticSentence, T ⊢ π → T.minProof π ≤ s ((insert σ T).minProof π) :=
   ehrenfeucht_mycielski_speedup (church_theorem_general (T := insert (∼σ) T))
 
