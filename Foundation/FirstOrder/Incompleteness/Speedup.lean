@@ -48,7 +48,19 @@ lemma provable_insert_neg_iff_or {π : Sentence L} :
     insert (∼σ) T ⊢ π ↔ T ⊢ σ ⋎ π :=
   Entailment.deduction_iff.trans ⟨fun h ↦ by cl_prover [h], fun h ↦ by cl_prover [h]⟩
 
-lemma computablePred_proof : ComputablePred fun p : ℕ × ℕ ↦ Proof T p.1 p.2 := sorry
+omit [L.DecidableEq] in
+lemma computablePred_proof : ComputablePred fun p : ℕ × ℕ ↦ Proof T p.1 p.2 := by
+  apply ComputablePred.computable_iff_re_compl_re'.mpr
+  obtain ⟨φ, hφ⟩ := HierarchySymbol.Definable.of_delta (Γ := 𝚺) (Proof.definable (V := ℕ) (T := T))
+  obtain ⟨ψ, hψ⟩ :=
+    (HierarchySymbol.Definable.of_delta (Γ := 𝚷) (Proof.definable (V := ℕ) (T := T))).notPi
+  have hcomp : Computable fun p : ℕ × ℕ ↦ (p.1 ::ᵥ p.2 ::ᵥ List.Vector.nil : List.Vector ℕ 2) :=
+    Primrec.to_comp <|
+      Primrec.vector_cons.comp .fst (Primrec.vector_cons.comp .snd (.const List.Vector.nil))
+  exact ⟨((sigma1_re id φ.sigma_prop).comp hcomp).of_eq
+      fun p ↦ by simpa [List.Vector.cons_get] using hφ.iff (v := ![p.1, p.2]),
+    ((sigma1_re id ψ.sigma_prop).comp hcomp).of_eq
+      fun p ↦ by simpa [List.Vector.cons_get] using hψ.iff (v := ![p.1, p.2])⟩
 
 lemma exists_computable_bound_minProof_imp_or :
   ∃ g : ℕ → ℕ, Computable g ∧ ∀ π : Sentence L, T.minProof (σ 🡒 (σ ⋎ π)) ≤ g (encode π) := sorry
