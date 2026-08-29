@@ -87,12 +87,21 @@ instance [𝗜𝚺₁ ⪯ T] [T.SoundOnHierarchy 𝚺 1] : T.standardRefutabilit
   have := ArithmeticTheory.SoundOn.sound (F := Arithmetic.Hierarchy 𝚺 1) h $ by simp [standardRefutability, Refutability.rf];
   exact provable_iff_provable (L := ℒₒᵣ) |>.mp $ by simpa [models_iff, standardRefutability, Refutability.rf, Refutable.quote_iff] using this;
 
+-- On Lean v4.33.1 the kernel decides `ProvabilityAbstraction.jeroslow T.standardRefutability =?=
+-- T.jeroslow` by unfolding `fixedpoint` down to the Gödel numeral `⌜diag θ⌝` and allocates without
+-- bound (~170MB/s, OOM). Splitting the identification into the three shallow reduction steps below
+-- (each a cheap `rfl`) keeps that defeq away from the kernel; downstream proofs then `rw` with this
+-- equation instead of relying on defeq. Revert to plain defeq once upstream is fixed.
+private lemma jeroslow_eq_standard :
+    ProvabilityAbstraction.jeroslow (T.standardRefutability) = T.jeroslow := by
+  unfold ProvabilityAbstraction.jeroslow
+  rw [show (T.standardRefutability).refu = T.refutable.val from rfl,
+      show (Diagonalization.fixedpoint (T := 𝗜𝚺₁)) = Arithmetic.fixedpoint from rfl]
+
 instance [𝗜𝚺₁ ⪯ T] : T.standardProvability.FormalizedCompleteOn (ProvabilityAbstraction.jeroslow T.standardRefutability) := by
   constructor;
-  apply provable_sigma_one_complete_of_E;
-  . show Hierarchy 𝚺 1 T.jeroslow';
-    exact jeroslow'_sigmaOne;
-  . apply Entailment.E!_symm $ provable_E_jeroslow_jeroslow';
+  rw [jeroslow_eq_standard];
+  exact provable_sigma_one_complete_of_E jeroslow'_sigmaOne (Entailment.E!_symm provable_E_jeroslow_jeroslow');
 
 end
 
@@ -108,7 +117,10 @@ variable {T : ArithmeticTheory} [T.Δ₁]
   Jeroslow sentence of `T` is not provable in `T` itself.
 -/
 theorem unprovable_jeroslow [𝗜𝚺₁ ⪯ T] [T.SoundOnHierarchy 𝚺 1]
-  : T ⊬ T.jeroslow := ProvabilityAbstraction.unprovable_jeroslow (𝔚 := T.standardRefutability)
+  : T ⊬ T.jeroslow := by
+  -- `rw` with `jeroslow_eq_standard` instead of defeq; see the comment on that lemma.
+  rw [← Theory.jeroslow_eq_standard];
+  exact ProvabilityAbstraction.unprovable_jeroslow (𝔚 := T.standardRefutability)
 
 /--
   Jeroslow's formulation of the second incompleteness theorem.
