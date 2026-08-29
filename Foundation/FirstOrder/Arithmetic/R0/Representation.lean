@@ -294,6 +294,30 @@ lemma codeOfComputablePred_spec {p : ℕ → Prop} (hp : ComputablePred p) {x : 
   simpa [codeOfComputablePred, Semiformula.eval_substs, Matrix.comp_vecCons', Matrix.constant_eq_singleton]
     using (codeOfComputablePred_val_spec hp x 1).trans (by by_cases h : p x <;> simp [h])
 
+section model
+
+variable {M : Type*} [ORingStructure M] [M↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻]
+
+lemma codeOfComputablePred_not_eval {p : ℕ → Prop} (hp : ComputablePred p) {x : ℕ} (h : ¬p x) :
+    ¬(codeOfComputablePred p).Evalb (M := M) ![ORingStructure.numeral x] := by
+  intro hM
+  have : M↓[ℒₒᵣ] ⊧* 𝗥₀ := ModelsTheory.of_provably_subtheory M 𝗥₀ 𝗣𝗔⁻ inferInstance
+  have h0 : (codeOfPartrec' fun v : List.Vector ℕ 1 ↦ (Part.some (if p (v.get 0) then 1 else 0) : Part ℕ)).Evalb
+      (M := ℕ) (0 :> ![x]) :=
+    (codeOfComputablePred_val_spec hp x 0).mpr (by simp [h])
+  have h1 : (codeOfPartrec' fun v : List.Vector ℕ 1 ↦ (Part.some (if p (v.get 0) then 1 else 0) : Part ℕ)).Evalb
+      (M := M) ((0 : M) :> ![ORingStructure.numeral x]) := by
+    simpa using bold_sigma_one_completeness' (M := M)
+      (σ := codeOfPartrec' fun v : List.Vector ℕ 1 ↦ (Part.some (if p (v.get 0) then 1 else 0) : Part ℕ))
+      (by simp [codeOfPartrec']) h0
+  have h2 : (codeOfPartrec' fun v : List.Vector ℕ 1 ↦ (Part.some (if p (v.get 0) then 1 else 0) : Part ℕ)).Evalb
+      (M := M) ((1 : M) :> ![ORingStructure.numeral x]) := by
+    simpa [codeOfComputablePred, Semiformula.eval_substs, Matrix.comp_vecCons', Matrix.constant_eq_singleton]
+      using hM
+  exact absurd (code_uniq h1 h2) (ne_of_lt zero_lt_one)
+
+end model
+
 variable {T : ArithmeticTheory} [𝗥₀ ⪯ T] [T.SoundOnHierarchy 𝚺 1]
 
 /-- Weak representation of a r.e. predicate -/
@@ -310,6 +334,20 @@ theorem codeOfComputablePred_provable {p : ℕ → Prop} (hp : ComputablePred p)
   sigma_one_completeness (by simp) (by
     simpa [models_iff, Semiformula.eval_substs, Matrix.constant_eq_singleton]
       using (codeOfComputablePred_spec hp (x := x)).mpr h)
+
+section
+
+variable {T : ArithmeticTheory} [𝗣𝗔⁻ ⪯ T]
+
+theorem codeOfComputablePred_provable_neg {p : ℕ → Prop} (hp : ComputablePred p) {x : ℕ} (h : ¬p x) :
+    T ⊢ ∼((codeOfComputablePred p)/[↑x]) := by
+  have : 𝗘𝗤 _ ⪯ T := Entailment.WeakerThan.trans (𝓣 := 𝗣𝗔⁻) inferInstance inferInstance
+  refine complete.{0} T _ fun M _ _ ↦ ?_
+  have : M↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := ModelsTheory.of_provably_subtheory M 𝗣𝗔⁻ T inferInstance
+  simpa [models_iff, Semiformula.eval_substs, Matrix.constant_eq_singleton]
+    using codeOfComputablePred_not_eval hp h
+
+end
 
 theorem rePred_iff_sigma1 {p : ℕ → Prop} : REPred p ↔ 𝚺₁-Predicate p := by
   constructor
