@@ -90,22 +90,22 @@ instance : Entailment.HasAxiomImplyK Λ := ⟨implyK _ _⟩
 instance : Entailment.HasAxiomImplyS Λ := ⟨implyS _ _ _⟩
 
 instance : Entailment.Minimal Λ where
-  mdp := mdp
-  verum := verum
-  implyK := implyK _ _
-  implyS := implyS _ _ _
-  and₁ := and₁ _ _
-  and₂ := and₂ _ _
-  and₃ := and₃ _ _
-  or₁ := or₁ _ _
-  or₂ := or₂ _ _
-  or₃ := or₃ _ _ _
-  negEquiv := Entailment.E_id
+  mdp! := mdp
+  verum! := verum
+  implyK! := implyK _ _
+  implyS! := implyS _ _ _
+  and₁! := and₁ _ _
+  and₂! := and₂ _ _
+  and₃! := and₃ _ _
+  or₁! := or₁ _ _
+  or₂! := or₂ _ _
+  or₃! := or₃ _ _ _
+  negEquiv! := Entailment.E!_id
 
 variable {Λ}
 
 instance : Entailment.Int (𝗜𝗻𝘁¹ : Hilbertᵢ L) where
-  efq := eaxm <| by simp [Hilbertᵢ.Intuitionistic]
+  efq! := eaxm <| by simp [Hilbertᵢ.Intuitionistic]
 
 protected def cast {φ ψ} (b : Λ ⊢! φ) (e : φ = ψ := by simp) : Λ ⊢! ψ := e ▸ b
 
@@ -144,73 +144,73 @@ def implyAll {φ ψ} (b : Λ ⊢! shift φ 🡒 free ψ) : Λ ⊢! φ 🡒 ∀¹
   all₂ φ ψ ⨀ this
 
 def geNOverFiniteContext {Γ φ} (b : Γ⁺ ⊢[Λ]! free φ) : Γ ⊢[Λ]! ∀¹ φ :=
-  ofDef <| implyAll <| by simpa [shift_conj₂] using toDef b
+  ofDef! <| implyAll <| by simpa [shift_conj₂] using toDef! b
 
 def specializeOverContext {Γ φ} (b : Γ ⊢[Λ]! ∀¹ φ) (t) : Γ ⊢[Λ]! φ/[t] :=
-  ofDef <| Entailment.C_trans (toDef b) (all₁ φ t)
+  ofDef! <| Entailment.C!_trans (toDef! b) (all₁ φ t)
 
 def allImplyAllOfAllImply (φ ψ) : Λ ⊢! ∀¹ (φ 🡒 ψ) 🡒 ∀¹ φ 🡒 ∀¹ ψ := by
-  apply deduct'
-  apply deduct
+  apply deduct'!
+  apply deduct!
   apply geNOverFiniteContext
   have b₁ : [∀¹ shift φ, ∀¹ (shift φ 🡒 shift ψ)] ⊢[Λ]! free φ 🡒 free ψ :=
-    Entailment.cast (specializeOverContext (nthAxm 1) &0)
+    Entailment.cast (specializeOverContext (nthAxm! 1) &0)
   have b₂ : [∀¹ shift φ, ∀¹ (shift φ 🡒 shift ψ)] ⊢[Λ]! free φ :=
-    Entailment.cast (specializeOverContext (nthAxm 0) &0)
+    Entailment.cast (specializeOverContext (nthAxm! 0) &0)
   have : [∀¹ φ, ∀¹ (φ 🡒 ψ)]⁺ ⊢[Λ]! free ψ := cast (by simp) (b₁ ⨀ b₂)
   exact this
 
-def allIffAllOfIff {φ ψ} (b : Λ ⊢! free φ 🡘 free ψ) : Λ ⊢! ∀¹ φ 🡘 ∀¹ ψ := Entailment.K_intro
-  (allImplyAllOfAllImply φ ψ ⨀ gen (Entailment.cast (Entailment.K_left b)))
-  (allImplyAllOfAllImply ψ φ ⨀ gen (Entailment.cast (Entailment.K_right b)))
+def allIffAllOfIff {φ ψ} (b : Λ ⊢! free φ 🡘 free ψ) : Λ ⊢! ∀¹ φ 🡘 ∀¹ ψ := Entailment.K!_intro
+  (allImplyAllOfAllImply φ ψ ⨀ gen (Entailment.cast (Entailment.K!_left b)))
+  (allImplyAllOfAllImply ψ φ ⨀ gen (Entailment.cast (Entailment.K!_right b)))
 
 def dneOfNegative [L.DecidableEq] : {φ : Propositionᵢ L} → φ.IsNegative → Λ ⊢! ∼∼φ 🡒 φ
-  | ⊥,     _ => Entailment.CNNOO
+  | ⊥,     _ => Entailment.CNNOO!
   | φ ⋏ ψ, h =>
     have ihφ : Λ ⊢! ∼∼φ 🡒 φ := dneOfNegative (by simp [by simpa using h])
     have ihψ : Λ ⊢! ∼∼ψ 🡒 ψ := dneOfNegative (by simp [by simpa using h])
-    have : Λ ⊢! ∼φ 🡒 ∼(φ ⋏ ψ) := Entailment.contra Entailment.and₁
-    have dφ : [∼∼(φ ⋏ ψ)] ⊢[Λ]! φ := of ihφ ⨀ (deduct <| byAxm₁ ⨀ (of this ⨀ byAxm₀))
-    have : Λ ⊢! ∼ψ 🡒 ∼(φ ⋏ ψ) := Entailment.contra Entailment.and₂
-    have dψ : [∼∼(φ ⋏ ψ)] ⊢[Λ]! ψ := of ihψ ⨀ (deduct <| byAxm₁ ⨀ (of this ⨀ byAxm₀))
-    deduct' (Entailment.K_intro dφ dψ)
+    have : Λ ⊢! ∼φ 🡒 ∼(φ ⋏ ψ) := Entailment.contra! Entailment.and₁!
+    have dφ : [∼∼(φ ⋏ ψ)] ⊢[Λ]! φ := of! ihφ ⨀ (deduct! <| byAxm₁! ⨀ (of! this ⨀ byAxm₀!))
+    have : Λ ⊢! ∼ψ 🡒 ∼(φ ⋏ ψ) := Entailment.contra! Entailment.and₂!
+    have dψ : [∼∼(φ ⋏ ψ)] ⊢[Λ]! ψ := of! ihψ ⨀ (deduct! <| byAxm₁! ⨀ (of! this ⨀ byAxm₀!))
+    deduct'! (Entailment.K!_intro dφ dψ)
   | φ 🡒 ψ, h =>
     let ihψ : Λ ⊢! ∼∼ψ 🡒 ψ := dneOfNegative (by simp [by simpa using h])
-    have : [∼ψ, φ, ∼∼(φ 🡒 ψ)] ⊢[Λ]! ∼(φ 🡒 ψ) := deduct <| byAxm₁ ⨀ (byAxm₀ ⨀ byAxm₂)
-    have : [∼ψ, φ, ∼∼(φ 🡒 ψ)] ⊢[Λ]! ⊥ := byAxm₂ ⨀ this
-    have : [φ, ∼∼(φ 🡒 ψ)] ⊢[Λ]! ψ := (of ihψ) ⨀ (deduct this)
-    deduct' (deduct this)
+    have : [∼ψ, φ, ∼∼(φ 🡒 ψ)] ⊢[Λ]! ∼(φ 🡒 ψ) := deduct! <| byAxm₁! ⨀ (byAxm₀! ⨀ byAxm₂!)
+    have : [∼ψ, φ, ∼∼(φ 🡒 ψ)] ⊢[Λ]! ⊥ := byAxm₂! ⨀ this
+    have : [φ, ∼∼(φ 🡒 ψ)] ⊢[Λ]! ψ := (of! ihψ) ⨀ (deduct! this)
+    deduct'! (deduct! this)
   | ∀¹ φ,  h =>
     have ihφ : Λ ⊢! ∼∼(free φ) 🡒 free φ := dneOfNegative (by simp [by simpa using h])
     have : [∀¹ shift φ, ∼(free φ), ∼∼(∀¹ shift φ)] ⊢[Λ]! ⊥ :=
-      have : [∀¹ shift φ, ∼(free φ), ∼∼(∀¹ shift φ)] ⊢[Λ]! ∀¹ shift φ := byAxm₀
-      byAxm₁ ⨀ Entailment.cast (specializeOverContext this &0)
-    have : [∼∼(∀¹ shift φ)] ⊢[Λ]! free φ := of ihφ ⨀ deduct (byAxm₁ ⨀ deduct this)
-    implyAll (Entailment.cast (deduct' this))
+      have : [∀¹ shift φ, ∼(free φ), ∼∼(∀¹ shift φ)] ⊢[Λ]! ∀¹ shift φ := byAxm₀!
+      byAxm₁! ⨀ Entailment.cast (specializeOverContext this &0)
+    have : [∼∼(∀¹ shift φ)] ⊢[Λ]! free φ := of! ihφ ⨀ deduct! (byAxm₁! ⨀ deduct! this)
+    implyAll (Entailment.cast (deduct'! this))
   termination_by φ _ => φ.complexity
 
 def ofDNOfNegative [L.DecidableEq] {φ : Propositionᵢ L} {Γ} (b : Γ ⊢[Λ]! ∼∼φ) (h : φ.IsNegative) : Γ ⊢[Λ]! φ :=
-  Entailment.C_trans (toDef b) (dneOfNegative h)
+  Entailment.C!_trans (toDef! b) (dneOfNegative h)
 
 def DN_of_isNegative [L.DecidableEq] {φ : Propositionᵢ L} (h : φ.IsNegative) : Λ ⊢! ∼∼φ 🡘 φ :=
-  Entailment.K_intro (dneOfNegative h) Entailment.dni
+  Entailment.K!_intro (dneOfNegative h) Entailment.dni!
 
 def efqOfNegative : {φ : Propositionᵢ L} → φ.IsNegative → Λ ⊢! ⊥ 🡒 φ
-  | ⊥,     _ => Entailment.C_id
+  | ⊥,     _ => Entailment.C!_id
   | φ ⋏ ψ, h =>
     have ihφ : Λ ⊢! ⊥ 🡒 φ := efqOfNegative (by simp [by simpa using h])
     have ihψ : Λ ⊢! ⊥ 🡒 ψ := efqOfNegative (by simp [by simpa using h])
-    Entailment.CK_of_C_of_C ihφ ihψ
+    Entailment.CK!_of_C!_of_C! ihφ ihψ
   | φ 🡒 ψ, h =>
     have ihψ : Λ ⊢! ⊥ 🡒 ψ := efqOfNegative (by simp [by simpa using h])
-    Entailment.C_trans ihψ Entailment.implyK
+    Entailment.C!_trans ihψ Entailment.implyK!
   | ∀¹ φ,  h =>
     have ihφ : Λ ⊢! ⊥ 🡒 free φ := efqOfNegative (by simp [by simpa using h])
     implyAll <| Entailment.cast ihφ
   termination_by φ _ => φ.complexity
 
 def iffnegOfNegIff [L.DecidableEq] {φ ψ : Propositionᵢ L} (h : φ.IsNegative) (b : Λ ⊢! ∼φ 🡘 ψ) : Λ ⊢! φ 🡘 ∼ψ :=
-  Entailment.E_trans (Entailment.E_symm <| DN_of_isNegative h) (Entailment.ENN_of_E b)
+  Entailment.E!_trans (Entailment.E!_symm <| DN_of_isNegative h) (Entailment.ENN!_of_E! b)
 
 def rewrite (f : ℕ → SyntacticTerm L) : Λ ⊢! φ → Λ ⊢! Rew.rewrite f ▹ φ
   | mdp b d        => rewrite f b ⨀ rewrite f d
@@ -313,7 +313,7 @@ lemma provable_def {φ : Sentenceᵢ L} : T ⊢ φ ↔ (Rewriting.emb '' T.theor
 def Proof.cast! (e : φ = ψ) : T ⊢! φ → T ⊢! ψ := fun b ↦ e ▸ b
 
 def Proof.weakening! [L.DecidableEq] (ss : T ⊆ U) : T ⊢! φ → U ⊢! φ :=
-  Context.weakening (Set.image_mono ss)
+  Context.weakening! (Set.image_mono ss)
 
 open Context
 
@@ -322,22 +322,22 @@ variable [L.DecidableEq]
 instance : Axiomatized (Theoryᵢ L 𝓗) where
   prfAxm {T} φ h := by
     show (Rewriting.emb '' T.theory) *⊢[𝓗]! ↑φ
-    exact Context.byAxm (Set.mem_image_of_mem _ (by simpa [mem_def] using h))
+    exact Context.byAxm! (Set.mem_image_of_mem _ (by simpa [mem_def] using h))
   weakening {φ T U} ss b := by
     show (Rewriting.emb '' U.theory) *⊢[𝓗]! ↑φ
-    apply Context.weakening ?_ b
+    apply Context.weakening! ?_ b
     exact Set.image_mono ss
 
-def ofHilbert {φ : Sentenceᵢ L} : 𝓗 ⊢! ↑φ → T ⊢! φ := Context.of
+def ofHilbert {φ : Sentenceᵢ L} : 𝓗 ⊢! ↑φ → T ⊢! φ := Context.of!
 
 def deduct! {φ ψ} (b : adjoin φ T ⊢! ψ) : T ⊢! φ 🡒 ψ :=
   have : (Rewriting.emb '' T.theory) *⊢[𝓗]! ↑φ 🡒 ↑ψ :=
-    Context.deduct <| Context.weakening (by simp [-Set.image_subset_iff, Set.image_insert_eq]) b
+    Context.deduct! <| Context.weakening! (by simp [-Set.image_subset_iff, Set.image_insert_eq]) b
   this
 
 def deductInv! {φ ψ} (b : T ⊢! φ 🡒 ψ) : adjoin φ T ⊢! ψ :=
-  have : insert ↑φ (Rewriting.emb '' T.theory) *⊢[𝓗]! ↑ψ := Context.deductInv b
-  Context.weakening (by simp [Set.image_insert_eq]) this
+  have : insert ↑φ (Rewriting.emb '' T.theory) *⊢[𝓗]! ↑ψ := Context.deductInv! b
+  Context.weakening! (by simp [Set.image_insert_eq]) this
 
 instance : Deduction (Theoryᵢ L 𝓗) where
   ofInsert := deduct!
@@ -350,10 +350,10 @@ instance : Entailment.Minimal T :=
     fun φ ↦ (Equiv.refl ((Rewriting.emb '' T.theory) *⊢[𝓗]! ↑φ))
 
 instance minimal [Entailment.Int 𝓗] : Entailment.Int T where
-  efq := ofHilbert <| efq
+  efq! := ofHilbert <| efq!
 
 instance cl [Entailment.Cl 𝓗] : Entailment.Cl T where
-  dne := ofHilbert <| dne
+  dne! := ofHilbert <| dne!
 
 end Theoryᵢ
 
