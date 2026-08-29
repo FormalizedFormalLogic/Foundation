@@ -32,7 +32,7 @@ def decidablePoints (φ : Proposition K) : DenseSet ℙ⁻ where
   set := {p | p ⊩ᶜ φ ∨ p ⊩ᶜ ∼φ}
   is_dense := by
     intro p
-    have : p ⊩ᶜ φ ⋎ ∼φ := IsWeaklyForced.complete.mpr Entailment.lem! p
+    have : p ⊩ᶜ φ ⋎ ∼φ := IsWeaklyForced.complete.mpr Entailment.lem p
     have : ∀ q ≤ p, ∃ r ≤ q, r ⊩ᶜ φ ∨ r ⊩ᶜ ∼φ := by simpa using this
     simpa using this p (by rfl)
 
@@ -44,8 +44,8 @@ def henkinPoints (φ : Semiproposition K 1) : DenseSet ℙ⁻ where
   is_dense := by
     intro p
     suffices ∃ q ≤ p, ∀ q_1 ≤ q, (∀ q ≤ q_1, ∃ r ≤ q, ∃ t, r ⊩ᶜ φ/[t]) → ∃ t, q_1 ⊩ᶜ φ/[t] by
-      simpa only [IsWeaklyForced.exs, Set.mem_setOf_eq]
-    have : p ⊩ᶜ (∃¹ φ) ⋎ (∀¹ ∼φ) := IsWeaklyForced.complete.mpr Entailment.lem! p
+      simpa only [IsWeaklyForced.exs, Set.mem_ofPred_eq]
+    have : p ⊩ᶜ (∃¹ φ) ⋎ (∀¹ ∼φ) := IsWeaklyForced.complete.mpr Entailment.lem p
     have : ∀ q ≤ p, ∃ r ≤ q, (∀ q ≤ r, ∃ r ≤ q, ∃ t, r ⊩ᶜ φ/[t]) ∨ (∀ t, ∀ q ≤ r, ¬q ⊩ᶜ φ/[t]) := by simpa using this
     rcases this p (by rfl) with ⟨q, hqp, (h | h)⟩
     · rcases h q (by rfl) with ⟨r, hrq, t, ht⟩
@@ -220,7 +220,7 @@ variable {L : Language.{u}} {T : Theory L}
 theorem small_satisfiable_of_consistent :
     Consistent T → Satisfiable T := fun consistent ↦ compact.mpr fun u hu ↦ by
   let σ := ⋀u.toList
-  have : T ⊢ σ := Conj₂!_intro fun φ hφ ↦ by_axm <| hu (by simpa using hφ)
+  have : T ⊢ σ := Conj₂_intro fun φ hφ ↦ by_axm <| hu (by simpa using hφ)
   have : 𝐋𝐊¹ ⊬ ∼(σ : Proposition L) := fun h ↦
     have : T ⊢ ∼σ := Theory.Proof.of_LK_provable (φ := ∼σ) (by simpa using h)
     have : T ⊢ ⊥ := neg_mdp this (by assumption)

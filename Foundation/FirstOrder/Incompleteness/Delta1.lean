@@ -800,7 +800,7 @@ end chDefined
 lemma mem_inductionScheme_iff {C : ArithmeticSemiproposition 1 → Prop} (φ : ArithmeticSemiproposition 0) :
     (∃ σ ∈ InductionScheme ℒₒᵣ C, φ = (σ : ArithmeticSemiproposition 0))
       ↔ ∃ ψ : ArithmeticSemiproposition 1, C ψ ∧ φ = (succInd ψ).univCl' := by
-  simp only [InductionScheme, Set.mem_setOf_eq]
+  simp only [InductionScheme, Set.mem_ofPred_eq]
   constructor
   · rintro ⟨σ, ⟨ψ, hψ, rfl⟩, rfl⟩
     exact ⟨ψ, hψ, by simp [Semiformula.coe_univCl_eq_univCl']⟩
@@ -938,7 +938,7 @@ noncomputable instance InductionScheme.delta1_univ :
     rw [h]
     exact (inductionR_quote_iff (C := Set.univ) (fun _ ↦ Iff.rfl) φ).trans (mem_inductionScheme_iff φ).symm
   isDelta1 := HierarchySymbol.Semiformula.ProvablyProperOn.ofProperOn.{0} _ fun V _ _ ↦ by
-    haveI := InductionR.univ_defined (V := V); simp
+    have := InductionR.univ_defined (V := V); simp
 
 /-! ## Correctness of `IsSigma1`: `IsSigma1 ⌜ψ⌝ ↔ Hierarchy 𝚺 1 ψ` -/
 
@@ -1038,7 +1038,7 @@ noncomputable instance InductionScheme.delta1_sigma1 :
     rw [h]
     exact (inductionR_quote_iff isSigma1_iff_hierarchy φ).trans (mem_inductionScheme_iff φ).symm
   isDelta1 := HierarchySymbol.Semiformula.ProvablyProperOn.ofProperOn.{0} _ fun V _ _ ↦ by
-    haveI := InductionR.sigma1_defined (V := V); simp
+    have := InductionR.sigma1_defined (V := V); simp
 
 /-! ## `𝗣𝗔` and `𝗜𝚺₁` are `Δ₁` -/
 
