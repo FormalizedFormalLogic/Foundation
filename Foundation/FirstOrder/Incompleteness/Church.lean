@@ -53,7 +53,8 @@ variable {T : ArithmeticTheory} [𝗥₀ ⪯ T] [T.SoundOnHierarchy 𝚺 1]
 
 /-- Church's theorem, for an arbitrary arithmetic theory `T ⊇ 𝗥₀` sound on `𝚺₁` sentences: the set
 of `T`-provable sentences is not computable. -/
-theorem church_theorem_general : ¬ComputablePred T.theory := by
+theorem church_theorem_general (T : ArithmeticTheory) [𝗥₀ ⪯ T] [T.SoundOnHierarchy 𝚺 1] :
+    ¬ComputablePred T.theory := by
   by_contra hC
   have hQuoteSubst :
       Computable₂ fun σ π : ArithmeticSemisentence 1 ↦ (σ/[⌜π⌝] : ArithmeticSentence) :=
