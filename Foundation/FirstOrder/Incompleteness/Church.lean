@@ -5,6 +5,7 @@ public import Foundation.FirstOrder.Basic.PrimrecCoding
 public import Foundation.FirstOrder.Incompleteness.RosserProvability
 public import Foundation.FirstOrder.Arithmetic.R0.Representation
 public import Foundation.FirstOrder.Incompleteness.Halting
+public import Foundation.Meta.ClProver
 public import Mathlib.Computability.Reduce
 
 /-!
@@ -68,6 +69,32 @@ theorem uncomputable_theory_of_sigma1Sound : ¬ComputablePred T.theory := by
   tauto
 
 end Diagonalization
+
+section ConsistencyOnly
+
+variable {T : ArithmeticTheory} [𝗜𝚺₁ ⪯ T] [Entailment.Consistent T]
+
+theorem uncomputable_theory_of_consistent : ¬ComputablePred T.theory := by
+  by_contra hC
+  have : 𝗣𝗔⁻ ⪯ T := Entailment.WeakerThan.trans (𝓣 := 𝗜𝚺₁) inferInstance inferInstance
+  let p : ℕ → Prop := fun n ↦ (Encodable.decode (α := ArithmeticSentence) n).elim False (fun σ ↦ T ⊢ σ)
+  have hp : ComputablePred p := ComputablePred.iff_decoded_pred.mp hC
+  let ψ : ArithmeticSemisentence 1 := codeOfComputablePred p
+  let δ : ArithmeticSentence := fixedpoint (∼ψ)
+  have hδ : T ⊢ δ 🡘 ∼(ψ/[⌜δ⌝]) := by simpa using diagonal (T := T) (∼ψ)
+  have hp_iff : p (Encodable.encode δ) ↔ T ⊢ δ := by simp [p, Encodable.encodek]
+  by_cases h : T ⊢ δ
+  · have hψ : T ⊢ ψ/[⌜δ⌝] := by
+      simpa [Arithmetic.gödelNumber'_eq_coe_encode] using
+        codeOfComputablePred_provable hp (hp_iff.mpr h)
+    apply Entailment.Consistent.not_bot (𝓢 := T)
+    cl_prover [hδ, h, hψ]
+  · have hnψ : T ⊢ ∼(ψ/[⌜δ⌝]) := by
+      simpa [Arithmetic.gödelNumber'_eq_coe_encode] using
+        codeOfComputablePred_provable_neg hp (hp_iff.not.mpr h)
+    exact h (by cl_prover [hδ, hnψ])
+
+end ConsistencyOnly
 
 section PeanoMinusReduction
 
