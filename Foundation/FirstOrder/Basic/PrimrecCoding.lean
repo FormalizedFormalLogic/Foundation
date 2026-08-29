@@ -879,6 +879,18 @@ example {n : ℕ} (e : ℕ) : (decode e : Option (Semiformula L ξ n)) = ofNat n
 example {n : ℕ} (φ : Semiformula L ξ n) :
     (decode (encode φ) : Option (Semiformula L ξ n)) = some φ := Encodable.encodek φ
 
+theorem primrec₂_and {n : ℕ} : Primrec₂ (fun φ ψ : Semiformula L ξ n ↦ φ ⋏ ψ) :=
+  Primrec₂.encode_iff.mp <|
+    (Primrec.comp₂ (Primrec.succ.comp (Primrec₂.natPair.comp (Primrec.const 4) Primrec.id))
+      (Primrec₂.natPair.comp₂ (Primrec.encode.comp₂ Primrec₂.left)
+        (Primrec.encode.comp₂ Primrec₂.right))).of_eq fun φ ψ ↦ (encode_and φ ψ).symm
+
+theorem primrec₂_or {n : ℕ} : Primrec₂ (fun φ ψ : Semiformula L ξ n ↦ φ ⋎ ψ) :=
+  Primrec₂.encode_iff.mp <|
+    (Primrec.comp₂ (Primrec.succ.comp (Primrec₂.natPair.comp (Primrec.const 5) Primrec.id))
+      (Primrec₂.natPair.comp₂ (Primrec.encode.comp₂ Primrec₂.left)
+        (Primrec.encode.comp₂ Primrec₂.right))).of_eq fun φ ψ ↦ (encode_or φ ψ).symm
+
 end Semiformula
 
 end LO.FirstOrder

@@ -78,20 +78,10 @@ lemma computable_minProof_comp (T : Theory L) [T.Δ₁] [L.Primcodable] {α : Ty
     exact congrFun hfe (p.2, encode (F p.1))
   exact (Computable.find hcomp hex).of_eq λ a ↦ (Nat.sInf_def (hex a)).symm
 
-omit [L.LORDefinable] in
-lemma computable_or_left [L.Primcodable] : Computable λ π : Sentence L ↦ σ ⋎ π := by
-  set b : ℕ := encode σ with hb
-  have hCode : Primrec λ e : ℕ ↦ (Nat.pair 5 <| b.pair e) + 1 :=
-    Primrec.succ.comp (Primrec₂.natPair.comp (Primrec.const 5)
-      (Primrec₂.natPair.comp (Primrec.const b) Primrec.id))
-  refine (Computable.ofOption ((Computable.decode (α := Sentence L)).comp
-    (hCode.to_comp.comp Computable.encode))).of_eq_tot λ π ↦ ?_
-  have he : (Nat.pair 5 <| b.pair (encode π)) + 1 = encode (σ ⋎ π) := by rw [hb]; rfl
-  simp [he, Encodable.encodek]
-
 lemma computable_insert_minProof_or [L.DecidableEq] [L.Primcodable] :
     Computable λ π : Sentence L ↦ (insert σ T).minProof (σ ⋎ π) :=
-  computable_minProof_comp (insert σ T) computable_or_left
+  computable_minProof_comp (insert σ T)
+    (Semiformula.primrec₂_or.comp (Primrec.const σ) Primrec.id).to_comp
     λ π ↦ Entailment.deduction_iff.mpr (by cl_prover)
 
 lemma computablePred_bddExists_proof (T : Theory L) [T.Δ₁] {α : Type*} [Primcodable α]
@@ -127,7 +117,7 @@ theorem ehrenfeucht_mycielski_speedup [L.DecidableEq] [L.Primcodable]
   refine ComputablePred.of_eq
     (computablePred_bddExists_proof T (λ π ↦ f ((insert σ T).minProof (σ ⋎ π)))
       (λ π ↦ encode (σ ⋎ π)) (hf.comp computable_insert_minProof_or)
-      (Computable.encode.comp computable_or_left))
+      (Computable.encode.comp (Semiformula.primrec₂_or.comp (Primrec.const σ) Primrec.id).to_comp))
     λ π ↦ ?_
   constructor
   · rintro ⟨d, _, hd⟩
