@@ -174,11 +174,8 @@ example {T : ArithmeticTheory} [T.Δ₁] {σ : ArithmeticSentence}
   have hcomp : Computable λ x : ℕ ↦ 2 ^ (x + 1) :=
     ((Primrec₂.unpaired'.1 Nat.Primrec.pow).comp (Primrec.const 2) Primrec.succ).to_comp
   obtain ⟨π, hπ, hlt⟩ := exists_lt_minProof_arithmetic (T := T) (σ := σ) hcomp
-  refine ⟨π, hπ, ?_⟩
-  have hpos : 0 < 2 ^ ((insert σ T).minProof π + 1) := pow_pos (by norm_num) _
-  have hn0 : T.minProof π ≠ 0 := by omega
-  have := (Nat.le_log_iff_pow_le (b := 2) (by norm_num) hn0).mpr hlt.le
-  omega
+  exact ⟨π, hπ, (Nat.le_log_iff_pow_le (b := 2) (by norm_num)
+    (((Nat.zero_le _).trans_lt hlt).ne')).mpr hlt.le⟩
 
 end Speedup
 
