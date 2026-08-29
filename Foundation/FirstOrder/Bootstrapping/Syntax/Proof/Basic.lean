@@ -487,7 +487,10 @@ noncomputable abbrev provabilityPred (σ : Sentence L) : ArithmeticSentence := (
 noncomputable def provabilityPred' (σ : Sentence L) : 𝚺₁.Sentence := .mkSigma
   “!(provable T) !!(⌜σ⌝)”
 
-@[simp] lemma provabilityPred'_val (σ : Sentence L) : (provabilityPred' T σ).val = provabilityPred T σ := by rfl
+-- Proving this by `rfl` overflows memory on Lean v4.33.1.
+@[simp] lemma provabilityPred'_val (σ : Sentence L) : (provabilityPred' T σ).val = provabilityPred T σ := by
+  unfold provabilityPred' provabilityPred
+  simp only [HierarchySymbol.Semiformula.val_mkSigma]
 
 variable {T}
 

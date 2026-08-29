@@ -85,18 +85,19 @@ instance [𝗜𝚺₁ ⪯ T] [T.SoundOnHierarchy 𝚺 1] : T.standardRefutabilit
   constructor;
   intro h;
   have := ArithmeticTheory.SoundOn.sound (F := Arithmetic.Hierarchy 𝚺 1) h $ by simp [standardRefutability, Refutability.rf];
-  exact provable_iff_provable (L := ℒₒᵣ) |>.mp $ by simpa [
-    models_iff, standardRefutability, Refutability.rf, Refutable,
-    Sentence.quote_def, Semiformula.quote_def,
-    provable_iff_provable
-  ] using this;
+  exact provable_iff_provable (L := ℒₒᵣ) |>.mp $ by simpa [models_iff, standardRefutability, Refutability.rf, Refutable.quote_iff] using this;
+
+-- Proving this by a plain `rfl` overflows memory on Lean v4.33.1.
+private lemma jeroslow_eq_standard :
+    ProvabilityAbstraction.jeroslow (T.standardRefutability) = T.jeroslow := by
+  unfold ProvabilityAbstraction.jeroslow
+  rw [show (T.standardRefutability).refu = T.refutable.val from rfl,
+      show (Diagonalization.fixedpoint (T := 𝗜𝚺₁)) = Arithmetic.fixedpoint from rfl]
 
 instance [𝗜𝚺₁ ⪯ T] : T.standardProvability.FormalizedCompleteOn (ProvabilityAbstraction.jeroslow T.standardRefutability) := by
   constructor;
-  apply provable_sigma_one_complete_of_E;
-  . show Hierarchy 𝚺 1 T.jeroslow';
-    exact jeroslow'_sigmaOne;
-  . apply Entailment.E!_symm $ provable_E_jeroslow_jeroslow';
+  rw [jeroslow_eq_standard];
+  exact provable_sigma_one_complete_of_E jeroslow'_sigmaOne (Entailment.E!_symm provable_E_jeroslow_jeroslow');
 
 end
 
@@ -112,7 +113,9 @@ variable {T : ArithmeticTheory} [T.Δ₁]
   Jeroslow sentence of `T` is not provable in `T` itself.
 -/
 theorem unprovable_jeroslow [𝗜𝚺₁ ⪯ T] [T.SoundOnHierarchy 𝚺 1]
-  : T ⊬ T.jeroslow := ProvabilityAbstraction.unprovable_jeroslow (𝔚 := T.standardRefutability)
+  : T ⊬ T.jeroslow := by
+  rw [← Theory.jeroslow_eq_standard];
+  exact ProvabilityAbstraction.unprovable_jeroslow (𝔚 := T.standardRefutability)
 
 /--
   Jeroslow's formulation of the second incompleteness theorem.

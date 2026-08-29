@@ -417,8 +417,15 @@ noncomputable def construction : UformulaRec1.Construction V (blueprint L) where
   or_defined := .mk fun v ↦ by simp [blueprint]
   all_defined := .mk fun v ↦ by simp [blueprint]
   exs_defined := .mk fun v ↦ by simp [blueprint]
-  allChanges_defined := .mk fun v ↦ by simp [blueprint]
-  exChanges_defined := .mk fun v ↦ by simp [blueprint]
+  -- Letting `simp` apply `Semiformula.eval_substs` here overflows memory on Lean v4.33.1.
+  allChanges_defined := .mk fun v ↦ by
+    simp only [blueprint, HierarchySymbol.Semiformula.val_mkSigma]
+    rw [Semiformula.eval_substs]
+    simp [qVec.defined.df]
+  exChanges_defined := .mk fun v ↦ by
+    simp only [blueprint, HierarchySymbol.Semiformula.val_mkSigma]
+    rw [Semiformula.eval_substs]
+    simp [qVec.defined.df]
 
 end Substs
 
