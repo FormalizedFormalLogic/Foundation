@@ -110,73 +110,46 @@ lemma computablePred_bddExists_proof (T : Theory L) [T.Δ₁] {α : Type*} [Prim
     induction N with
     | zero => simp
     | succ n ih =>
-        show ((Nat.rec (motive := λ _ ↦ Bool) false (λ d ih ↦ ih || χ (d, e)) (n + 1)) ||
-            χ (n + 1, e)) = true ↔ ∃ d ≤ n + 1, χ (d, e) = true
         rw [Bool.or_eq_true_iff, ih]
-        constructor
-        · rintro (⟨d, hd, hc⟩ | h)
-          · exact ⟨d, hd.trans (Nat.le_succ n), hc⟩
-          · exact ⟨n + 1, le_refl _, h⟩
-        · rintro ⟨d, hd, hc⟩
-          rcases hd.eq_or_lt with rfl | hlt
-          · exact Or.inr hc
-          · exact Or.inl ⟨d, Nat.lt_succ_iff.mp hlt, hc⟩
+        grind
   refine ComputablePred.computable_iff.mpr ⟨_, hS, funext λ a ↦ propext ?_⟩
   rw [key (bd a) (cd a)]
   exact exists_congr λ d ↦ and_congr_right λ _ ↦ (congrFun hχe (d, cd a)).to_iff
 
 /-- The Ehrenfeucht–Mycielski speedup theorem [EM71]. -/
 theorem ehrenfeucht_mycielski_speedup [L.DecidableEq] [L.Primcodable]
-  (hU : ¬ComputablePred (insert (∼σ) T).theory) :
-  ¬∃ f : ℕ → ℕ,
-    Computable f ∧
-    ∀ π : Sentence L, T ⊢ π → T.minProof π ≤ f ((insert σ T).minProof π) := by
-  rintro ⟨f, hf_comp, hf_bound⟩
+    (hU : ¬ComputablePred (insert (∼σ) T).theory) (f : ℕ → ℕ) (hf : Computable f) :
+    ∃ π : Sentence L, T ⊢ π ∧ f ((insert σ T).minProof π) < T.minProof π := by
+  by_contra h
+  push Not at h
   apply hU
   refine ComputablePred.of_eq ?_ (λ π ↦ provable_insert_neg_iff_or.symm)
   refine ComputablePred.of_eq
     (computablePred_bddExists_proof T (λ π ↦ f ((insert σ T).minProof (σ ⋎ π)))
-      (λ π ↦ encode (σ ⋎ π)) (hf_comp.comp computable_insert_minProof_or)
+      (λ π ↦ encode (σ ⋎ π)) (hf.comp computable_insert_minProof_or)
       (Computable.encode.comp computable_or_left))
     λ π ↦ ?_
   constructor
   · rintro ⟨d, _, hd⟩
     exact Provable.sound (⟨d, by rwa [Sentence.quote_eq_encode_nat]⟩ : Provable T (⌜σ ⋎ π⌝ : ℕ))
-  · intro h
-    exact ⟨T.minProof (σ ⋎ π), hf_bound (σ ⋎ π) h, by
-      have := proof_minProof h
+  · intro hp
+    exact ⟨T.minProof (σ ⋎ π), h (σ ⋎ π) hp, by
+      have := proof_minProof hp
       rwa [Sentence.quote_eq_encode_nat] at this⟩
 
-lemma exists_lt_minProof [L.DecidableEq] [L.Primcodable]
-    (hU : ¬ComputablePred (insert (∼σ) T).theory) (f : ℕ → ℕ) (hf : Computable f) :
-    ∃ π : Sentence L, T ⊢ π ∧ f ((insert σ T).minProof π) < T.minProof π := by
-  by_contra h
-  push Not at h
-  exact ehrenfeucht_mycielski_speedup hU ⟨f, hf, h⟩
-
-theorem ehrenfeucht_mycielski_speedup_arithmetic {T : ArithmeticTheory} [T.Δ₁] {σ : ArithmeticSentence}
-    [𝗜𝚺₁ ⪯ T] (hσ : T ⊬ σ) :
-    ¬∃ f : ℕ → ℕ, Computable f ∧
-      ∀ π : ArithmeticSentence, T ⊢ π → T.minProof π ≤ f ((insert σ T).minProof π) :=
-  have : 𝗜𝚺₁ ⪯ insert (∼σ) T :=
-    Entailment.WeakerThan.trans ‹𝗜𝚺₁ ⪯ T› (Entailment.Axiomatized.le_of_subset (Set.subset_insert _ T))
-  have : Entailment.Consistent (insert (∼σ) T) := Entailment.unprovable_iff_consistent_adjoin.mp hσ
-  ehrenfeucht_mycielski_speedup
-    (uncomputable_theory_of_consistent : ¬ComputablePred (insert (∼σ) T).theory)
-
-lemma exists_lt_minProof_arithmetic (T : ArithmeticTheory) [T.Δ₁] (σ : ArithmeticSentence)
+theorem ehrenfeucht_mycielski_speedup_arithmetic (T : ArithmeticTheory) [T.Δ₁] (σ : ArithmeticSentence)
     [𝗜𝚺₁ ⪯ T] (hσ : T ⊬ σ) (f : ℕ → ℕ) (hf : Computable f) :
     ∃ π : ArithmeticSentence, T ⊢ π ∧ f ((insert σ T).minProof π) < T.minProof π :=
   have : 𝗜𝚺₁ ⪯ insert (∼σ) T :=
     Entailment.WeakerThan.trans ‹𝗜𝚺₁ ⪯ T› (Entailment.Axiomatized.le_of_subset (Set.subset_insert _ T))
   have : Entailment.Consistent (insert (∼σ) T) := Entailment.unprovable_iff_consistent_adjoin.mp hσ
-  exists_lt_minProof
+  ehrenfeucht_mycielski_speedup
     (uncomputable_theory_of_consistent : ¬ComputablePred (insert (∼σ) T).theory) f hf
 
 example {T : ArithmeticTheory} [T.Δ₁] {σ : ArithmeticSentence}
     [𝗜𝚺₁ ⪯ T] (hσ : T ⊬ σ) :
     ∃ π : ArithmeticSentence, T ⊢ π ∧ (insert σ T).minProof π < Nat.log 2 (T.minProof π) := by
-  obtain ⟨π, hπ, hlt⟩ := exists_lt_minProof_arithmetic T σ hσ (λ x ↦ 2 ^ (x + 1))
+  obtain ⟨π, hπ, hlt⟩ := ehrenfeucht_mycielski_speedup_arithmetic T σ hσ (λ x ↦ 2 ^ (x + 1))
     (((Primrec₂.unpaired'.1 Nat.Primrec.pow).comp (Primrec.const 2) Primrec.succ).to_comp)
   exact ⟨π, hπ, (Nat.le_log_iff_pow_le (b := 2) (by norm_num)
     (((Nat.zero_le _).trans_lt hlt).ne')).mpr hlt.le⟩
