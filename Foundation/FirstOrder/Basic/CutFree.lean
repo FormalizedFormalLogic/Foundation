@@ -66,7 +66,8 @@ set_option backward.isDefEq.respectTransparency false in
     IsCutFree (Derivation.map d f) ↔ IsCutFree d := isCutFree_rewrite_iff_isCutFree
 
 set_option backward.isDefEq.respectTransparency false in
-@[simp] lemma IsCutFree.genelalizeByNewver_isCutFree {φ : Semiproposition L 1} (hp : ¬φ.FVar? m) (hΔ : ∀ ψ ∈ Δ, ¬ψ.FVar? m)
-    (d : ⊢ᴸᴷ¹ φ/[&m] :: Δ) : IsCutFree (genelalizeByNewver hp hΔ d) ↔ IsCutFree d := by simp [genelalizeByNewver]
+@[simp] lemma IsCutFree.generalizeByNewVar_isCutFree {φ : Semiproposition L 1} (hp : ¬φ.FVar? m)
+    (hΔ : ∀ ψ ∈ Δ, ¬ψ.FVar? m) (d : ⊢ᴸᴷ¹ φ/[&m] :: Δ) :
+    IsCutFree (generalizeByNewVar hp hΔ d) ↔ IsCutFree d := by simp [generalizeByNewVar]
 
 end Derivation

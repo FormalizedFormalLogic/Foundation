@@ -291,7 +291,7 @@ protected def refl.exs (d : ∀ x, [φ/[&x]] ⊩ (φ/[&x])ᴺ) : [∃¹ φ] ⊩ 
       (f.allEquiv &x).implyEquiv ([φ/[&x]] ⊓ q) (StrongerThan.minLeRight _ _) (ih.monotone (StrongerThan.minLeLeft _ _))
     let ⟨b, hb⟩ := b.falsumEquiv
     let ba : ⊢ᴸᴷ¹ (∀¹ ∼φ) :: ∼q :=
-      Derivation.genelalizeByNewver (m := x)
+      Derivation.generalizeByNewVar (m := x)
         (by have : ¬Semiformula.FVar? (∀¹ ∼φ) x := Sequent.not_fvar?_newVar (by simp)
             simpa using this)
         (fun ψ hψ ↦ Sequent.not_fvar?_newVar (List.mem_cons_of_mem (∀¹ ∼φ) hψ))
