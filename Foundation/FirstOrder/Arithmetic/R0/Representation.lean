@@ -302,6 +302,15 @@ theorem rePred_weak_representation {p : ℕ → Prop} (hp : REPred p) {x : ℕ} 
   (by simpa [models_iff, Semiformula.eval_substs, Matrix.constant_eq_singleton] using (codeOfREPred_spec hp (x := x)).symm)
   (sigma_one_completeness_iff <| by simp [codeOfREPred, codeOfPartrec'])
 
+-- `T.SoundOnHierarchy 𝚺 1` is not needed here: only `sigma_one_completeness` (which
+-- requires `𝗥₀ ⪯ T` alone) is used, not the `Iff` version.
+omit [T.SoundOnHierarchy 𝚺 1] in
+theorem codeOfComputablePred_provable {p : ℕ → Prop} (hp : ComputablePred p) {x : ℕ} (h : p x) :
+    T ⊢ (codeOfComputablePred p)/[↑x] :=
+  sigma_one_completeness (by simp) (by
+    simpa [models_iff, Semiformula.eval_substs, Matrix.constant_eq_singleton]
+      using (codeOfComputablePred_spec hp (x := x)).mpr h)
+
 theorem rePred_iff_sigma1 {p : ℕ → Prop} : REPred p ↔ 𝚺₁-Predicate p := by
   constructor
   · intro h
