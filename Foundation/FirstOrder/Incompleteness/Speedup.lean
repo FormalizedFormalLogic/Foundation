@@ -2,6 +2,7 @@ module
 
 public import Foundation.FirstOrder.Basic.PrimrecCoding
 public import Foundation.FirstOrder.Bootstrapping.DerivabilityCondition.D1
+public import Foundation.FirstOrder.Incompleteness.Church
 public import Mathlib.Computability.Reduce
 
 /-!
@@ -39,39 +40,40 @@ lemma minProof_le {σ d} (h : Proof T d (⌜σ⌝ : ℕ)) : T.minProof σ ≤ d 
 
 section Speedup
 
-variable [L.Primcodable] {α : Sentence L}
+open Encodable
+variable {σ : Sentence L}
 
-omit [L.Primcodable] in
-lemma provable_insert_neg_iff_or {σ : Sentence L} :
-    insert (∼α) T ⊢ σ ↔ T ⊢ α ⋎ σ := sorry
+lemma provable_insert_neg_iff_or {π : Sentence L} :
+    insert (∼σ) T ⊢ π ↔ T ⊢ σ ⋎ π := sorry
 
-omit [L.Primcodable] in
 lemma computablePred_proof : ComputablePred fun p : ℕ × ℕ ↦ Proof T p.1 p.2 := sorry
 
-omit [L.Primcodable] in
 lemma exists_computable_bound_minProof_imp_or :
-    ∃ g : ℕ → ℕ, Computable g ∧
-      ∀ σ : Sentence L, T.minProof (α 🡒 (α ⋎ σ)) ≤ g (Encodable.encode σ) := sorry
+  ∃ g : ℕ → ℕ, Computable g ∧ ∀ π : Sentence L, T.minProof (σ 🡒 (σ ⋎ π)) ≤ g (encode π) := sorry
 
-omit [L.Primcodable] in
 lemma exists_computable_bound_insert_minProof :
-    ∃ r : ℕ → ℕ, Computable r ∧
-      ∀ τ : Sentence L, T ⊢ α 🡒 τ → (insert α T).minProof τ ≤ r (T.minProof (α 🡒 τ)) := sorry
+  ∃ r : ℕ → ℕ, Computable r ∧ ∀ π : Sentence L, T ⊢ σ 🡒 π → (insert σ T).minProof π ≤ r (T.minProof (σ 🡒 π)) := sorry
 
-lemma not_exists_computable_monotone_bound_minProof
-    (hU : ¬ComputablePred fun σ : Sentence L ↦ insert (∼α) T ⊢ σ) :
-    ¬∃ f : ℕ → ℕ, Computable f ∧ Monotone f ∧
-      ∀ τ : Sentence L, T ⊢ τ → T.minProof τ ≤ f (T.minProof (α 🡒 τ)) := sorry
+lemma not_exists_computable_monotone_bound_minProof [L.Primcodable]
+  (hU : ¬ComputablePred fun π : Sentence L ↦ insert (∼σ) T ⊢ π) :
+  ¬∃ f : ℕ → ℕ, Computable f ∧ Monotone f ∧ ∀ π : Sentence L, T ⊢ π → T.minProof π ≤ f (T.minProof (σ 🡒 π)) := sorry
 
-/-- The Ehrenfeucht–Mycielski speedup theorem: if the set of `T + ∼α`-provable sentences is not
-computable, then adjoining `α` to `T` as a new axiom gives an unbounded proof-length speedup over
+/-- The Ehrenfeucht–Mycielski speedup theorem: if the set of `T + ∼σ`-provable sentences is not
+computable, then adjoining `σ` to `T` as a new axiom gives an unbounded proof-length speedup over
 `T`, in the sense that no computable monotone function bounds the minimal `T`-proof code of a
-`T`-provable `τ` in terms of the minimal `(T + α)`-proof code of `τ`.
+`T`-provable `π` in terms of the minimal `(T + σ)`-proof code of `π`.
 - [EM71, Theorem] -/
-theorem ehrenfeucht_mycielski_speedup
-    (hU : ¬ComputablePred fun σ : Sentence L ↦ insert (∼α) T ⊢ σ) :
+theorem ehrenfeucht_mycielski_speedup [L.Primcodable]
+  (hU : ¬ComputablePred fun π : Sentence L ↦ insert (∼σ) T ⊢ π) :
+  ¬∃ s : ℕ → ℕ, Computable s ∧ Monotone s ∧ ∀ π : Sentence L, T ⊢ π → T.minProof π ≤ s ((insert σ T).minProof π) := sorry
+
+/-- The hypothesis `hU` in `ehrenfeucht_mycielski_speedup` is automatically satisfied when `T` is
+an arithmetic theory extending `𝗥₀` and sound on `𝚺₁` sentences, by Church's theorem. -/
+theorem ehrenfeucht_mycielski_speedup' {T : ArithmeticTheory} [T.Δ₁] {σ : ArithmeticSentence}
+    [𝗥₀ ⪯ insert (∼σ) T] [(insert (∼σ) T).SoundOnHierarchy 𝚺 1] :
     ¬∃ s : ℕ → ℕ, Computable s ∧ Monotone s ∧
-      ∀ τ : Sentence L, T ⊢ τ → T.minProof τ ≤ s ((insert α T).minProof τ) := sorry
+      ∀ π : ArithmeticSentence, T ⊢ π → T.minProof π ≤ s ((insert σ T).minProof π) :=
+  ehrenfeucht_mycielski_speedup (church_theorem_general (T := insert (∼σ) T))
 
 end Speedup
 
