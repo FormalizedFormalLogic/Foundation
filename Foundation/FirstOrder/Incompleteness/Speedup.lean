@@ -62,8 +62,47 @@ lemma computablePred_proof : ComputablePred fun p : ℕ × ℕ ↦ Proof T p.1 p
     ((sigma1_re id ψ.sigma_prop).comp hcomp).of_eq
       fun p ↦ by simpa [List.Vector.cons_get] using hψ.iff (v := ![p.1, p.2])⟩
 
-lemma exists_computable_bound_minProof_imp_or :
-  ∃ g : ℕ → ℕ, Computable g ∧ ∀ π : Sentence L, T.minProof (σ 🡒 (σ ⋎ π)) ≤ g (encode π) := sorry
+omit [L.DecidableEq] in
+lemma computable_minProof_comp [L.Primcodable] {α : Type*} [Primcodable α] {F : α → Sentence L}
+    (hF : Computable F) (hprov : ∀ a, T ⊢ F a) :
+    Computable fun a ↦ T.minProof (F a) := by
+  classical
+  have hex : ∀ a, ∃ d, Proof T d (⌜F a⌝ : ℕ) :=
+    fun a ↦ ⟨T.minProof (F a), proof_minProof (hprov a)⟩
+  have hcomp : ComputablePred fun p : α × ℕ ↦ Proof T p.2 (⌜F p.1⌝ : ℕ) := by
+    obtain ⟨f, hf, hfe⟩ := ComputablePred.computable_iff.mp (computablePred_proof (T := T))
+    refine ComputablePred.computable_iff.mpr
+      ⟨fun p ↦ f (p.2, encode (F p.1)),
+        hf.comp (Computable.pair Computable.snd (Computable.encode.comp (hF.comp Computable.fst))),
+        funext fun p ↦ ?_⟩
+    simp only [Sentence.quote_eq_encode_nat]
+    exact congrFun hfe (p.2, encode (F p.1))
+  exact (Computable.find hcomp hex).of_eq fun a ↦ (Nat.sInf_def (hex a)).symm
+
+lemma exists_computable_bound_minProof_imp_or [L.Primcodable] :
+  ∃ g : ℕ → ℕ, Computable g ∧ ∀ π : Sentence L, T.minProof (σ 🡒 (σ ⋎ π)) ≤ g (encode π) := by
+  set a : ℕ := encode (∼σ) with ha
+  set b : ℕ := encode σ with hb
+  have hf : Primrec fun e : ℕ ↦ (Nat.pair 5 <| a.pair ((Nat.pair 5 <| b.pair e) + 1)) + 1 :=
+    Primrec.succ.comp (Primrec₂.natPair.comp (Primrec.const 5)
+      (Primrec₂.natPair.comp (Primrec.const a)
+        (Primrec.succ.comp (Primrec₂.natPair.comp (Primrec.const 5)
+          (Primrec₂.natPair.comp (Primrec.const b) Primrec.id)))))
+  have hF : Computable fun π : Sentence L ↦ σ 🡒 (σ ⋎ π) := by
+    have hCode : Computable fun π : Sentence L ↦
+        (Nat.pair 5 <| a.pair ((Nat.pair 5 <| b.pair (encode π)) + 1)) + 1 :=
+      hf.to_comp.comp Computable.encode
+    refine (Computable.ofOption ((Computable.decode (α := Sentence L)).comp hCode)).of_eq_tot
+      fun π ↦ ?_
+    have he : (Nat.pair 5 <| a.pair ((Nat.pair 5 <| b.pair (encode π)) + 1)) + 1
+        = encode (σ 🡒 (σ ⋎ π)) := by rw [ha, hb]; rfl
+    simp [he, Encodable.encodek]
+  have hM : Computable fun π : Sentence L ↦ T.minProof (σ 🡒 (σ ⋎ π)) :=
+    computable_minProof_comp hF fun π ↦ by cl_prover
+  refine ⟨fun n ↦ Option.casesOn (decode n : Option (Sentence L)) 0
+      (fun π ↦ T.minProof (σ 🡒 (σ ⋎ π))), ?_, fun π ↦ by simp [Encodable.encodek]⟩
+  exact Computable.option_casesOn Computable.decode (Computable.const 0)
+    (hM.comp Computable.snd).to₂
 
 lemma exists_computable_bound_insert_minProof :
   ∃ r : ℕ → ℕ, Computable r ∧ ∀ π : Sentence L, T ⊢ σ 🡒 π → (insert σ T).minProof π ≤ r (T.minProof (σ 🡒 π)) := sorry
