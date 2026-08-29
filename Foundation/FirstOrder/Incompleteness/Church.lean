@@ -11,8 +11,10 @@ public import Mathlib.Computability.Reduce
 /-!
 # Church's undecidability theorem
 
-Neither the set of sentences provable in an arithmetic theory `T ⊇ 𝗥₀` that is sound on `𝚺₁`
-sentences, nor the set of sentences provable in pure first-order logic, is computable.
+The set of sentences provable in an arithmetic theory `T ⊇ 𝗥₀` is not computable, whether `T` is
+sound on `𝚺₁` sentences (`uncomputable_theory_of_sigma1Sound`) or merely consistent and extends
+`𝗜𝚺₁` (`uncomputable_theory_of_consistent`). Provability in pure first-order logic is likewise
+undecidable (`undecidability_first_order_logic`).
 -/
 
 @[expose] public section
