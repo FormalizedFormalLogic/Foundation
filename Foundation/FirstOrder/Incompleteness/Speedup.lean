@@ -75,11 +75,13 @@ theorem ehrenfeucht_mycielski_speedup [L.Primcodable]
 /-- The hypothesis `hU` in `ehrenfeucht_mycielski_speedup` is automatically satisfied when `T` is
 an arithmetic theory extending `𝗥₀` and sound on `𝚺₁` sentences, by Church's theorem. -/
 theorem ehrenfeucht_mycielski_speedup' {T : ArithmeticTheory} [T.Δ₁] {σ : ArithmeticSentence}
-    [𝗥₀ ⪯ insert (∼σ) T] [(insert (∼σ) T).SoundOnHierarchy 𝚺 1] :
+    [𝗥₀ ⪯ T] [(insert (∼σ) T).SoundOnHierarchy 𝚺 1] :
     ¬∃ s : ℕ → ℕ,
       Computable s ∧
       Monotone s ∧
       ∀ π : ArithmeticSentence, T ⊢ π → T.minProof π ≤ s ((insert σ T).minProof π) :=
+  have : 𝗥₀ ⪯ insert (∼σ) T :=
+    Entailment.WeakerThan.trans ‹𝗥₀ ⪯ T› (Entailment.Axiomatized.le_of_subset (Set.subset_insert _ T))
   ehrenfeucht_mycielski_speedup (church_theorem_general (T := insert (∼σ) T))
 
 end Speedup
