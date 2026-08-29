@@ -146,6 +146,13 @@ theorem ehrenfeucht_mycielski_speedup [L.DecidableEq] [L.Primcodable]
       have := proof_minProof h
       rwa [Sentence.quote_eq_encode_nat] at this⟩
 
+lemma exists_lt_minProof [L.DecidableEq] [L.Primcodable]
+    (hU : ¬ComputablePred (insert (∼σ) T).theory) {f : ℕ → ℕ} (hf : Computable f) :
+    ∃ π : Sentence L, T ⊢ π ∧ f ((insert σ T).minProof π) < T.minProof π := by
+  by_contra h
+  push Not at h
+  exact ehrenfeucht_mycielski_speedup hU ⟨f, hf, h⟩
+
 theorem ehrenfeucht_mycielski_speedup_arithmetic {T : ArithmeticTheory} [T.Δ₁] {σ : ArithmeticSentence}
     [𝗥₀ ⪯ T] [(insert (∼σ) T).SoundOnHierarchy 𝚺 1] :
     ¬∃ f : ℕ → ℕ, Computable f ∧
@@ -154,20 +161,23 @@ theorem ehrenfeucht_mycielski_speedup_arithmetic {T : ArithmeticTheory} [T.Δ₁
     Entailment.WeakerThan.trans ‹𝗥₀ ⪯ T› (Entailment.Axiomatized.le_of_subset (Set.subset_insert _ T))
   ehrenfeucht_mycielski_speedup (church_theorem_general (insert (∼σ) T))
 
+lemma exists_lt_minProof_arithmetic {T : ArithmeticTheory} [T.Δ₁] {σ : ArithmeticSentence}
+    [𝗥₀ ⪯ T] [(insert (∼σ) T).SoundOnHierarchy 𝚺 1] {f : ℕ → ℕ} (hf : Computable f) :
+    ∃ π : ArithmeticSentence, T ⊢ π ∧ f ((insert σ T).minProof π) < T.minProof π :=
+  have : 𝗥₀ ⪯ insert (∼σ) T :=
+    Entailment.WeakerThan.trans ‹𝗥₀ ⪯ T› (Entailment.Axiomatized.le_of_subset (Set.subset_insert _ T))
+  exists_lt_minProof (church_theorem_general (insert (∼σ) T)) hf
+
 example {T : ArithmeticTheory} [T.Δ₁] {σ : ArithmeticSentence}
     [𝗥₀ ⪯ T] [(insert (∼σ) T).SoundOnHierarchy 𝚺 1] :
     ∃ π : ArithmeticSentence, T ⊢ π ∧ (insert σ T).minProof π < Nat.log 2 (T.minProof π) := by
   have hcomp : Computable λ x : ℕ ↦ 2 ^ (x + 1) :=
     ((Primrec₂.unpaired'.1 Nat.Primrec.pow).comp (Primrec.const 2) Primrec.succ).to_comp
-  have h : ¬∀ π : ArithmeticSentence, T ⊢ π → T.minProof π ≤ 2 ^ ((insert σ T).minProof π + 1) :=
-    λ h ↦ ehrenfeucht_mycielski_speedup_arithmetic ⟨_, hcomp, h⟩
-  push Not at h
-  obtain ⟨π, hπ, hlt⟩ := h
+  obtain ⟨π, hπ, hlt⟩ := exists_lt_minProof_arithmetic (T := T) (σ := σ) hcomp
   refine ⟨π, hπ, ?_⟩
-  have hle : 2 ^ ((insert σ T).minProof π + 1) ≤ T.minProof π := hlt.le
   have hpos : 0 < 2 ^ ((insert σ T).minProof π + 1) := pow_pos (by norm_num) _
   have hn0 : T.minProof π ≠ 0 := by omega
-  have := (Nat.le_log_iff_pow_le (b := 2) (by norm_num) hn0).mpr hle
+  have := (Nat.le_log_iff_pow_le (b := 2) (by norm_num) hn0).mpr hlt.le
   omega
 
 end Speedup
