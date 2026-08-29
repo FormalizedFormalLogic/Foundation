@@ -35,130 +35,145 @@ scoped infix: 45 " ⊢!₂! " => Theory.Proof2
 variable {T : Theory L}
 
 lemma shifts_toFinset_eq_image_shift (Γ : Sequent L) :
-    (Rewriting.shifts Γ).toFinset = Γ.toFinset.image Rewriting.shift := by ext φ; simp [Rewriting.shifts]
+    Γ⁺ᵐ.toFinset = Γ.toFinset.image Rewriting.shift := by ext φ; simp [Rewriting.shiftsM]
 
 def Derivation.toDerivation2 (T) {Γ : Sequent L} : ⊢ᴸᴷ¹ Γ → T ⟹₂ Γ.toFinset
   | Derivation.identity R v => Derivation2.closed _ (Semiformula.rel R v) (by simp) (by simp)
   | Derivation.verum => Derivation2.verum (by simp)
   | Derivation.and (Γ := Γ) (φ := φ) (ψ := ψ) dp dq =>
     Derivation2.and (φ := φ) (ψ := ψ) (by simp)
-      (Derivation2.wk (Derivation.toDerivation2 T dp) (by simp))
-      (Derivation2.wk (Derivation.toDerivation2 T dq) (by simp))
+      (Derivation2.wk (Derivation.toDerivation2 T dp) (by intro x hx; simp_all; tauto))
+      (Derivation2.wk (Derivation.toDerivation2 T dq) (by intro x hx; simp_all; tauto))
   | Derivation.or (Γ := Γ) (φ := φ) (ψ := ψ) dpq =>
     Derivation2.or (φ := φ) (ψ := ψ) (by simp)
       (Derivation2.wk (Derivation.toDerivation2 T dpq)
-      (by simp))
+      (by intro x hx; simp_all; tauto))
   | Derivation.all (Γ := Γ) (φ := φ) dp =>
     Derivation2.all (φ := φ) (by simp)
       (Derivation2.wk (Derivation.toDerivation2 T dp)
-        (by simp [shifts_toFinset_eq_image_shift]))
+        (by
+          intro x hx
+          simp [shifts_toFinset_eq_image_shift] at hx ⊢
+          aesop))
   | Derivation.exs (Γ := Γ) (φ := φ) (t := t) dp =>
     Derivation2.exs (φ := φ) (by simp) t
-      (Derivation2.wk (Derivation.toDerivation2 T dp) (by simp))
+      (Derivation2.wk (Derivation.toDerivation2 T dp) (by intro x hx; simp_all; tauto))
   | Derivation.contraction d h =>
-    Derivation2.wk (Derivation.toDerivation2 T d) (List.toFinset_mono h)
+    Derivation2.wk (Derivation.toDerivation2 T d) (Multiset.toFinset_subset.mpr h)
   | Derivation.cut (Γ := Γ) (Δ := Δ) (φ := φ) d₁ d₂ =>
     Derivation2.cut (φ := φ)
-      (Derivation2.wk (Derivation.toDerivation2 T d₁) (List.subset_def.mpr <| by simp_all))
-      (Derivation2.wk (Derivation.toDerivation2 T d₂) (List.subset_def.mpr <| by simp_all))
+      (Derivation2.wk (Derivation.toDerivation2 T d₁) (by intro x hx; simp_all; tauto))
+      (Derivation2.wk (Derivation.toDerivation2 T d₂) (by intro x hx; simp_all; tauto))
+
+/-- Contracts a principal formula already present in the side context.
+This is a routine structural derivation. -/
+def Derivation.absorb (d : ⊢ᴸᴷ¹ Γ + ⦃φ⦄) (h : φ ∈ Γ) : ⊢ᴸᴷ¹ Γ :=
+  d.contra <| by
+    intro ψ hψ
+    rcases Multiset.mem_add.mp hψ with hψ | hψ <;> simp_all
 
 namespace Derivation2
 
 structure ProofData (T : Theory L) (Γ : Finset (Proposition L)) where
-  axioms : List (Sentence L)
+  axioms : Multiset (Sentence L)
   axioms_mem : ∀ ψ ∈ axioms, ψ ∈ T
-  derivation : ⊢ᴸᴷ¹ Γ.toList ++ ∼Sequent.embed axioms
+  derivation : ⊢ᴸᴷ¹ Γ.1 + ∼Sequent.embed axioms
 
-noncomputable def cast {Γ Δ : Finset (Proposition L)} (d : T ⟹₂ Γ) (h : Γ = Δ := by simp) : T ⟹₂ Δ := by
-  rcases h; exact d
-
-omit [L.DecidableEq] in
-private lemma exists_shift_mem_embed_of_mem {A : List (Sentence L)} {φ : Proposition L}
-    (h : φ ∈ Sequent.embed A) : ∃ ψ ∈ Sequent.embed A, Rewriting.shift ψ = φ := by
-  simp [Sequent.embed] at h ⊢
-  grind
+noncomputable def cast {Γ Δ : Finset (Proposition L)} (d : T ⟹₂ Γ)
+    (h : Γ = Δ := by simp) : T ⟹₂ Δ := h ▸ d
 
 omit [L.DecidableEq] in
-private lemma mem_embed_of_exists_shift_mem {A : List (Sentence L)} {φ : Proposition L}
-    (h : ∃ ψ ∈ Sequent.embed A, Rewriting.shift ψ = φ) : φ ∈ Sequent.embed A := by
-  simp [Sequent.embed] at h ⊢
-  grind
+@[simp] lemma shifts_tilde_embed (A : Multiset (Sentence L)) :
+    (∼Sequent.embed A)⁺ᵐ = ∼Sequent.embed A := by
+  simp [Rewriting.shiftsM, Sequent.embed, Multiset.tilde_def]
 
-@[reducible] noncomputable def cutManyProof : (A : List (Sentence L)) → (∀ ψ ∈ A, ψ ∈ T) →
-    T ⟹₂ (insert (φ : Proposition L) (∼Sequent.embed A).toFinset) → T ⟹₂ {φ}
-  | [], _, d => d
-  | ψ :: A, hA, d =>
-      have ax : T ⟹₂ insert (ψ : Proposition L) (insert φ (∼Sequent.embed A).toFinset) :=
-        Derivation2.axm ψ (hA ψ (by simp)) (by simp)
-      have dn : T ⟹₂ insert (∼(ψ : Proposition L)) (insert φ (∼Sequent.embed A).toFinset) := by
-        refine Derivation2.cast d ?_
-        ext x; simp [List.toFinset_cons]; grind
-      have c : T ⟹₂ insert φ (∼Sequent.embed A).toFinset := by
-        refine Derivation2.cast (Derivation2.cut ax dn) ?_
-        ext x; simp
-      cutManyProof A (by simp_all) c
-
-theorem cutMany (A : List (Sentence L)) (hA : ∀ ψ ∈ A, ψ ∈ T)
-    (d : T ⟹₂! (insert (φ : Proposition L) (∼Sequent.embed A).toFinset)) : T ⟹₂! {φ} :=
-  d.elim fun d ↦ ⟨cutManyProof A hA d⟩
+@[reducible] noncomputable def cutManyProof (A : Multiset (Sentence L))
+    (hA : ∀ ψ ∈ A, ψ ∈ T)
+    (d : T ⟹₂ (insert (φ : Proposition L) (∼Sequent.embed A).toFinset)) : T ⟹₂ {φ} :=
+  -- Multiset induction cannot eliminate into the Type-valued derivation family.
+  let rec go : (l : List (Sentence L)) → (∀ ψ ∈ l, ψ ∈ T) →
+      T ⟹₂ (insert (φ : Proposition L) (∼Sequent.embed (l : Multiset _)).toFinset) →
+      T ⟹₂ {φ}
+    | [], _, d => Derivation2.cast d (by simp)
+    | ψ :: l, hl, d =>
+        have ax : T ⟹₂ insert (ψ : Proposition L)
+            (insert φ (∼Sequent.embed (l : Multiset _)).toFinset) :=
+          Derivation2.axm ψ (hl ψ (by simp)) (by simp)
+        have dn : T ⟹₂ insert (∼(ψ : Proposition L))
+            (insert φ (∼Sequent.embed (l : Multiset _)).toFinset) := by
+          refine Derivation2.cast d ?_
+          ext x
+          have hneg : ∼x = Rewriting.emb ψ ↔ x = ∼Rewriting.emb ψ := by grind
+          simp [Sequent.embed, hneg, or_left_comm]
+        have c : T ⟹₂ insert φ (∼Sequent.embed (l : Multiset _)).toFinset := by
+          exact Derivation2.cast (Derivation2.cut ax dn) (by ext x; simp)
+        go l (by simp_all) c
+  go A.toList (by simpa using hA) <| Derivation2.cast d (by ext x; simp)
 
 noncomputable def toProofData : {Γ : Finset (Proposition L)} → T ⟹₂ Γ →
     ProofData T Γ
   | Γ, closed _ φ hp hn =>
-      ⟨[], by simp, (Derivation.eta φ).contra <| List.subset_def.mpr (by simp_all)⟩
+      ⟨0, by simp, (Derivation.eta φ).contra (by
+        intro x hx
+        rcases Multiset.mem_add.mp hx with hx | hx <;> simp_all)⟩
   | Γ, axm φ hT hΓ =>
-      ⟨[φ], by simp [hT], (Derivation.eta (φ : Proposition L)).contra <| List.subset_def.mpr (by simp_all)⟩
+      ⟨⦃φ⦄, by simp [hT],
+        (Derivation.eta (φ : Proposition L)).contra (by
+          intro x hx
+          rcases Multiset.mem_add.mp hx with hx | hx <;> simp_all)⟩
   | Γ, verum h =>
-      ⟨[], by simp, Derivation.verum.contra <| List.subset_def.mpr (by simp_all)⟩
+      ⟨0, by simp, Derivation.verum.contra (by intro x hx; simp_all)⟩
   | Γ, and (φ := φ) (ψ := ψ) h dφ dψ => by
       rcases toProofData dφ with ⟨A, hA, bφ⟩
       rcases toProofData dψ with ⟨B, hB, bψ⟩
-      refine ⟨A ++ B, by simp; grind, ?_⟩
-      have bφ' : ⊢ᴸᴷ¹ φ :: Γ.toList ++ ∼Sequent.embed (A ++ B) :=
-        bφ.contra <| List.subset_def.mpr (by simp_all [Sequent.embed_append]; grind)
-      have bψ' : ⊢ᴸᴷ¹ ψ :: Γ.toList ++ ∼Sequent.embed (A ++ B) :=
-        bψ.contra <| List.subset_def.mpr (by simp_all [Sequent.embed_append]; grind)
-      exact (Derivation.and bφ' bψ').contra <| List.subset_def.mpr (by simp_all)
+      refine ⟨A + B, by simp; grind, ?_⟩
+      have bφ' : ⊢ᴸᴷ¹ (Γ.1 + ∼Sequent.embed (A + B)) + ⦃φ⦄ :=
+        bφ.contra (by intro x hx; simp_all [Sequent.embed]; aesop)
+      have bψ' : ⊢ᴸᴷ¹ (Γ.1 + ∼Sequent.embed (A + B)) + ⦃ψ⦄ :=
+        bψ.contra (by intro x hx; simp_all [Sequent.embed]; aesop)
+      exact (Derivation.and bφ' bψ').absorb (Multiset.mem_add.mpr <| Or.inl h)
   | Γ, or (φ := φ) (ψ := ψ) h d => by
       rcases toProofData d with ⟨A, hA, b⟩
       refine ⟨A, hA, ?_⟩
-      have b' : ⊢ᴸᴷ¹ φ :: ψ :: Γ.toList ++ ∼Sequent.embed A :=
-        b.contra <| List.subset_def.mpr (by simp_all; grind)
-      exact (Derivation.or b').contra <| List.subset_def.mpr (by simp_all)
+      have b' : ⊢ᴸᴷ¹ (Γ.1 + ∼Sequent.embed A) + ⦃φ, ψ⦄ :=
+        b.contra (by intro x hx; simp_all; aesop)
+      exact (Derivation.or b').absorb (Multiset.mem_add.mpr <| Or.inl h)
   | Γ, all (φ := φ) h d => by
       rcases toProofData d with ⟨A, hA, b⟩
       refine ⟨A, hA, ?_⟩
-      have b' : ⊢ᴸᴷ¹ Rewriting.free φ :: (Γ.toList ++ ∼Sequent.embed A)⁺ :=
-        b.contra <| List.subset_def.mpr (by simp_all [Rewriting.shifts]; grind [exists_shift_mem_embed_of_mem])
-      exact (Derivation.all b').contra <| List.subset_def.mpr (by simp_all)
+      have b' : ⊢ᴸᴷ¹ (Γ.1 + ∼Sequent.embed A)⁺ᵐ + ⦃Rewriting.free φ⦄ :=
+        b.contra (by
+          rw [Rewriting.shiftsM_add, shifts_tilde_embed]
+          intro x hx
+          simp [Rewriting.shiftsM] at hx ⊢
+          aesop)
+      exact (Derivation.all b').absorb (Multiset.mem_add.mpr <| Or.inl h)
   | Γ, exs (φ := φ) h t d => by
       rcases toProofData d with ⟨A, hA, b⟩
       refine ⟨A, hA, ?_⟩
-      have b' : ⊢ᴸᴷ¹ φ/[t] :: Γ.toList ++ ∼Sequent.embed A :=
-        b.contra <| List.subset_def.mpr (by simp_all; grind)
-      exact (Derivation.exs (t := t) b').contra <| List.subset_def.mpr (by simp_all)
+      have b' : ⊢ᴸᴷ¹ (Γ.1 + ∼Sequent.embed A) + ⦃φ/[t]⦄ :=
+        b.contra (by intro x hx; simp_all; aesop)
+      exact (Derivation.exs (t := t) b').absorb (Multiset.mem_add.mpr <| Or.inl h)
   | Γ, wk d h => by
       rcases toProofData d with ⟨A, hA, b⟩
-      refine ⟨A, hA, b.contra <| List.subset_def.mpr (by simp_all; grind)⟩
+      exact ⟨A, hA, b.contra (by intro x hx; simp_all; aesop)⟩
   | _, shift (Γ := Γ) d => by
       rcases toProofData d with ⟨A, hA, b⟩
-      refine ⟨A, hA, ?_⟩
-      exact b.shift.contra <| List.subset_def.mpr (by simp_all [Rewriting.shifts]; grind [mem_embed_of_exists_shift_mem])
+      refine ⟨A, hA, b.shift.contra ?_⟩
+      rw [Rewriting.shiftsM_add, shifts_tilde_embed]
+      intro x hx
+      simpa [Rewriting.shiftsM] using hx
   | Γ, cut (φ := φ) d dn => by
       rcases toProofData d with ⟨A, hA, b⟩
       rcases toProofData dn with ⟨B, hB, bn⟩
-      refine ⟨A ++ B, by simp; grind, ?_⟩
-      have b' : ⊢ᴸᴷ¹ φ :: Γ.toList ++ ∼Sequent.embed (A ++ B) :=
-        b.contra <| List.subset_def.mpr (by simp_all [Sequent.embed_append]; grind)
-      have bn' : ⊢ᴸᴷ¹ ∼φ :: Γ.toList ++ ∼Sequent.embed (A ++ B) :=
-        bn.contra <| List.subset_def.mpr (by simp_all [Sequent.embed_append]; grind)
-      exact (Derivation.cut
-        b' bn').contra <| List.subset_def.mpr (by simp_all; grind)
-
-theorem toProof (d : T ⟹₂ Γ) :
-    ∃ A : List (Sentence L), (∀ ψ ∈ A, ψ ∈ T) ∧ Nonempty (⊢ᴸᴷ¹ Γ.toList ++ ∼Sequent.embed A) := by
-  rcases toProofData d with ⟨A, hA, b⟩
-  exact ⟨A, hA, ⟨b⟩⟩
+      refine ⟨A + B, by simp; grind, ?_⟩
+      have b' : ⊢ᴸᴷ¹ (Γ.1 + ∼Sequent.embed (A + B)) + ⦃φ⦄ :=
+        b.contra (by intro x hx; simp_all [Sequent.embed]; aesop)
+      have bn' : ⊢ᴸᴷ¹ (Γ.1 + ∼Sequent.embed (A + B)) + ⦃∼φ⦄ :=
+        bn.contra (by intro x hx; simp_all [Sequent.embed]; aesop)
+      exact (Derivation.cut (Γ := Γ.1 + ∼Sequent.embed (A + B))
+        (Δ := Γ.1 + ∼Sequent.embed (A + B)) (φ := φ) b' bn').contra
+        (by intro x hx; simp_all)
 
 end Derivation2
 
@@ -166,19 +181,16 @@ namespace Theory
 
 noncomputable def Proof.toProof2 {φ : Sentence L} (b : T ⊢! φ) : T ⊢!₂! (φ : Proposition L) :=
   Derivation2.cutManyProof b.axioms b.axioms_mem <|
-    Derivation2.cast (Derivation.toDerivation2 T b.derivation) (by ext x; simp [List.toFinset_cons, Sequent.embed])
+    Derivation2.cast (Derivation.toDerivation2 T b.derivation) (by ext x; simp [Sequent.embed])
 
 noncomputable def Proof2.toProof {φ : Sentence L} (d : T ⊢!₂! (φ : Proposition L)) : T ⊢! φ := by
   rcases Derivation2.toProofData d with ⟨A, hA, b⟩
-  exact ⟨A, hA, b.contra <| List.subset_def.mpr (by simp [Sequent.embed])⟩
+  exact ⟨A, hA, Derivation.cast b (by simp [Sequent.embed, Multiset.atom_eq_singleton])⟩
 
 end Theory
 
 lemma provable_iff_derivable2 {φ : Sentence L} : T ⊢ φ ↔ Nonempty (T ⊢!₂! (φ : Proposition L)) := by
-  constructor
-  · exact fun h ↦ ⟨h.get.toProof2⟩
-  · rintro ⟨h⟩
-    exact ⟨h.toProof⟩
+  exact ⟨fun h ↦ ⟨h.get.toProof2⟩, fun ⟨h⟩ ↦ ⟨h.toProof⟩⟩
 
 end derivation2
 

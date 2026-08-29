@@ -872,6 +872,10 @@ scoped[LO.FirstOrder] postfix:max "⁺ᵐ" => FirstOrder.Rewriting.shiftsM
 
 @[simp] lemma shiftsM_singleton [Rewriting L ℕ F ℕ F] (φ : F n) : (⦃φ⦄ : Multiset (F n))⁺ᵐ = ⦃shift φ⦄ := by simp [shiftsM]
 
+@[simp] lemma shiftsM_neg [Rewriting L ℕ F ℕ F] (Γ : Multiset (F n)) :
+    (∼Γ)⁺ᵐ = ∼(Γ⁺ᵐ) := by
+  simp [shiftsM, Multiset.tilde_def]
+
 abbrev emb {ο ξ} [IsEmpty ο] {O F : ℕ → Type*} [LCWQ O] [LCWQ F] [Rewriting L ο O ξ F] : O n →ˡᶜ F n := app (Rew.emb (ξ := ξ))
 
 end Rewriting

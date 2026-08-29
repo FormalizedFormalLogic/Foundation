@@ -21,46 +21,51 @@ lemma sound {M : Type*} [s : Structure L M] [Nonempty M] (f : ℕ → M) {Γ : S
     · exact ⟨nrel r v, by simp, h⟩
   | verum => ⟨⊤, by simp⟩
   | or (Γ := Γ) (φ := φ) (ψ := ψ) d => by
-    have : Evalf f φ ∨ Evalf f ψ ∨ ∃ ψ ∈ Γ, Evalf f ψ := by simpa using sound f d
-    rcases this with (hp | hq | ⟨r, hr, hhr⟩)
-    · exact ⟨φ ⋎ ψ, by simp, by simp [hp]⟩
-    · exact ⟨φ ⋎ ψ, by simp, by simp [hq]⟩
+    rcases sound f d with ⟨r, hr, hhr⟩
+    rcases Multiset.mem_add.mp hr with hr | hr
     · exact ⟨r, by simp [hr], hhr⟩
+    · rcases Multiset.mem_add.mp hr with hr | hr
+      · have : r = φ := by simpa using hr
+        subst r
+        exact ⟨φ ⋎ ψ, by simp, by simp [hhr]⟩
+      · have : r = ψ := by simpa using hr
+        subst r
+        exact ⟨φ ⋎ ψ, by simp, by simp [hhr]⟩
   | and (Γ := Γ) (φ := φ) (ψ := ψ) dp dq => by
-    have : Evalf f φ ∨ ∃ r ∈ Γ, Evalf f r := by simpa using sound f dp
-    rcases this with (hp | ⟨r, hr, hhr⟩)
-    · have : Evalf f ψ ∨ ∃ r ∈ Γ, Evalf f r := by simpa using sound f dq
-      rcases this with (hq | ⟨r, hr, hhr⟩)
-      · exact ⟨φ ⋏ ψ, by simp, by simp [hp, hq]⟩
-      · exact ⟨r, by simp [hr], hhr⟩
+    have : (∃ r ∈ Γ, Evalf f r) ∨ Evalf f φ := by simpa using sound f dp
+    rcases this with (⟨r, hr, hhr⟩ | hp)
     · exact ⟨r, by simp [hr], hhr⟩
+    · have : (∃ r ∈ Γ, Evalf f r) ∨ Evalf f ψ := by simpa using sound f dq
+      rcases this with (⟨r, hr, hhr⟩ | hq)
+      · exact ⟨r, by simp [hr], hhr⟩
+      · exact ⟨φ ⋏ ψ, by simp, by simp [hp, hq]⟩
   | all (Γ := Γ) (φ := φ) d => by
-    have : (∀ a : M, Eval ![a] f φ) ∨ ∃ ψ ∈ Γ, Evalf f ψ := by
-      simpa [Rewriting.shifts, Matrix.vecConsLast_vecEmpty, forall_or_right]
+    have : (∃ ψ ∈ Γ, Evalf f ψ) ∨ ∀ a : M, Eval ![a] f φ := by
+      simpa [Rewriting.shiftsM, Matrix.vecConsLast_vecEmpty, forall_or_left]
         using fun a : M => sound (a :>ₙ f) d
-    rcases this with (hp | ⟨ψ, hq, hhq⟩)
+    rcases this with (⟨ψ, hq, hhq⟩ | hp)
+    · exact ⟨ψ, by simp [hq], hhq⟩
     · exact ⟨∀¹ φ, by simp, hp⟩
-    · exact ⟨ψ, by simp [hq], hhq⟩
   | exs (Γ := Γ) (φ := φ) (t := t) d => by
-    have : Eval ![t.val ![] f] f φ ∨ ∃ φ ∈ Γ, Evalf f φ := by
+    have : (∃ φ ∈ Γ, Evalf f φ) ∨ Eval ![t.val ![] f] f φ := by
       simpa [eval_substs, Matrix.constant_eq_singleton] using sound f d
-    rcases this with (hp | ⟨ψ, hq, hhq⟩)
-    · exact ⟨∃¹ φ, by simp, t.val ![] f, hp⟩
+    rcases this with (⟨ψ, hq, hhq⟩ | hp)
     · exact ⟨ψ, by simp [hq], hhq⟩
+    · exact ⟨∃¹ φ, by simp, t.val ![] f, hp⟩
   | contraction (Δ := Δ) (Γ := Γ) d ss => by
     have : ∃ φ ∈ Δ, Evalf f φ := sound f d
     rcases this with ⟨φ, hp, h⟩
     exact ⟨φ, ss hp, h⟩
   | cut (Γ := Γ) (Δ := Δ) (φ := φ) d dn => by
-    have h : Evalf f φ ∨ ∃ ψ ∈ Γ, Evalf f ψ := by simpa using sound f d
-    have hn : ¬Evalf f φ ∨ ∃ ψ ∈ Δ, Evalf f ψ := by simpa using sound f dn
-    rcases h with (h | ⟨ψ, h, hq⟩)
-    · rcases hn with (hn | ⟨ψ, hn, hq⟩)
-      · contradiction
-      · exact ⟨ψ, by simp [hn], hq⟩
+    have h : (∃ ψ ∈ Γ, Evalf f ψ) ∨ Evalf f φ := by simpa using sound f d
+    have hn : (∃ ψ ∈ Δ, Evalf f ψ) ∨ ¬Evalf f φ := by simpa using sound f dn
+    rcases h with (⟨ψ, h, hq⟩ | h)
     · exact ⟨ψ, by simp [h], hq⟩
+    · rcases hn with (⟨ψ, hn, hq⟩ | hn)
+      · exact ⟨ψ, by simp [hn], hq⟩
+      · contradiction
 
-@[simp] lemma nil_empty : IsEmpty (⊢ᴸᴷ¹ ([] : Sequent L)) := by
+@[simp] lemma nil_empty : IsEmpty (⊢ᴸᴷ¹ (0 : Sequent L)) := by
   refine ⟨fun b ↦ ?_⟩
   simpa using sound (fun _ ↦ ()) b
 

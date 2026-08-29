@@ -10,25 +10,33 @@ public import Foundation.FirstOrder.Intuitionistic.Rew
 
 namespace LO.FirstOrder
 
-variable {L : Language}
+variable {L : Language.{u}}
 
 open Semiformulaᵢ
 
-abbrev Theoryᵢ (L : Language) := Set (Sentenceᵢ L)
+abbrev Theoryᵢ (L : Language.{u}) := Set (Sentenceᵢ L)
 
 namespace LJ
 
-abbrev Sequent (L : Language) := Multiset (Propositionᵢ L)
+abbrev Sequent (L : Language.{u}) := Multiset (Propositionᵢ L)
 
-abbrev Head (L : Language) := Option (Propositionᵢ L)
+abbrev Head (L : Language.{u}) := Option (Propositionᵢ L)
 
 namespace Head
 
 def shift (Ξ : Head L) : Head L := Ξ.map Rewriting.shift
 
+def rewrite (f : ℕ → SyntacticTerm L) (Ξ : Head L) : Head L :=
+  Ξ.map (Rew.rewrite f ▹ ·)
+
 @[simp] lemma shift_none : shift (none : Head L) = none := rfl
 
 @[simp] lemma shift_some (φ : Propositionᵢ L) : shift φ = some (Rewriting.shift φ) := rfl
+
+@[simp] lemma rewrite_none (f : ℕ → SyntacticTerm L) : rewrite f (none : Head L) = none := rfl
+
+@[simp] lemma rewrite_some (f : ℕ → SyntacticTerm L) (φ : Propositionᵢ L) :
+    rewrite f φ = some (Rew.rewrite f ▹ φ) := rfl
 
 end Head
 
@@ -84,6 +92,8 @@ infix:45 " ⊢ᴸᴶ¹ " => Derivation
 namespace Derivation
 
 variable {Γ Δ : Sequent L} {Ξ Λ : Head L}
+
+open Rewriting LawfulSyntacticRewriting
 
 def cast (d : Γ ⊢ᴸᴶ¹ Ξ) (seq : Γ = Δ := by abel) (heq : Ξ = Λ := by simp) : Δ ⊢ᴸᴶ¹ Λ := seq ▸ heq ▸ d
 
@@ -147,6 +157,79 @@ def andRight {φ ψ : Propositionᵢ L} (d : Γ ⊢ᴸᴶ¹ φ ⋏ ψ) : Γ ⊢�
 def specialize {φ : Semipropositionᵢ L 1} (d : Γ ⊢ᴸᴶ¹ ∀¹ φ) (t : Term L ℕ) : Γ ⊢ᴸᴶ¹ φ/[t] :=
   cutOne d <| cast <| negativeForall (Γ := 0) (Ξ := φ/[t]) (φ := φ) (t := t) <|
     cast (eta (φ/[t])) (by simp) (by simp)
+
+def rewrite (f : ℕ → SyntacticTerm L) {Γ : Sequent L} {Ξ : Head L} : Γ ⊢ᴸᴶ¹ Ξ →
+    Γ.map (Rew.rewrite f ▹ ·) ⊢ᴸᴶ¹ Head.rewrite f Ξ
+  | identity R v => identity R (Rew.rewrite f ∘ v)
+  | cut (φ := φ) (Γ := Γ) (Δ := Δ) dφ d =>
+    (cut (φ := Rew.rewrite f ▹ φ)
+      (Γ := Γ.map (Rew.rewrite f ▹ ·)) (Δ := Δ.map (Rew.rewrite f ▹ ·))
+      (Ξ := Head.rewrite f Ξ)
+      ((rewrite f dφ).cast) ((rewrite f d).cast (by simp))).cast (by simp)
+  | contraction d hΓ hΞ =>
+    (rewrite f d).contraction (Multiset.map_subset_map hΓ) (by
+      cases hΞ <;> simp [Head.rewrite])
+  | verum => verum
+  | falsum => falsum
+  | positiveImply (Γ := Γ) (φ := φ) (ψ := ψ) d =>
+    (positiveImply (Γ := Γ.map (Rew.rewrite f ▹ ·))
+      (φ := Rew.rewrite f ▹ φ) (ψ := Rew.rewrite f ▹ ψ)
+      ((rewrite f d).cast (by simp))).cast (by simp)
+  | negativeImply (Γ := Γ) (Δ := Δ) (φ := φ) (ψ := ψ) dφ dψ =>
+    (negativeImply (Γ := Γ.map (Rew.rewrite f ▹ ·))
+      (Δ := Δ.map (Rew.rewrite f ▹ ·)) (Ξ := Head.rewrite f Ξ)
+      (φ := Rew.rewrite f ▹ φ) (ψ := Rew.rewrite f ▹ ψ)
+      (rewrite f dφ).cast ((rewrite f dψ).cast (by simp))).cast (by simp)
+  | positiveAnd dφ dψ => positiveAnd (rewrite f dφ) (rewrite f dψ)
+  | negativeAnd (Γ := Γ) (φ := φ) (ψ := ψ) d =>
+    (negativeAnd (Γ := Γ.map (Rew.rewrite f ▹ ·)) (Ξ := Head.rewrite f Ξ)
+      (φ := Rew.rewrite f ▹ φ) (ψ := Rew.rewrite f ▹ ψ)
+      ((rewrite f d).cast (by simp))).cast (by simp)
+  | positiveOrLeft d => positiveOrLeft (rewrite f d)
+  | positiveOrRight d => positiveOrRight (rewrite f d)
+  | negativeOr (Γ := Γ) (φ := φ) (ψ := ψ) dφ dψ =>
+    (negativeOr (Γ := Γ.map (Rew.rewrite f ▹ ·))
+      (Ξ := Head.rewrite f Ξ) (φ := Rew.rewrite f ▹ φ) (ψ := Rew.rewrite f ▹ ψ)
+      ((rewrite f dφ).cast (by simp)) ((rewrite f dψ).cast (by simp))).cast (by simp)
+  | positiveForall (Γ := Γ) (φ := φ) d =>
+    let g : ℕ → SyntacticTerm L := &0 :>ₙ fun x ↦ Rew.shift (f x)
+    (positiveForall (Γ := Γ.map (Rew.rewrite f ▹ ·))
+      (φ := Rew.rewrite (Rew.bShift ∘ f) ▹ φ) <|
+      (rewrite g d).cast
+        (by simp [g, Rewriting.shiftsM, shift_rewrite_eq])
+        (by simp [g, Head.rewrite, free_rewrite_eq, Function.comp_def]))
+      |>.cast (by simp) (by simp [Head.rewrite, Rew.q_rewrite])
+  | negativeForall (Γ := Γ) (φ := φ) (t := t) d =>
+    (negativeForall (Γ := Γ.map (Rew.rewrite f ▹ ·))
+      (Ξ := Head.rewrite f Ξ) (φ := Rew.rewrite (Rew.bShift ∘ f) ▹ φ)
+      (t := Rew.rewrite f t)
+      ((rewrite f d).cast (by simp [rewrite_subst_eq]))).cast (by simp [Rew.q_rewrite])
+  | positiveExists (φ := φ) (t := t) d =>
+    (positiveExists (Γ := Γ.map (Rew.rewrite f ▹ ·))
+      (φ := Rew.rewrite (Rew.bShift ∘ f) ▹ φ) (t := Rew.rewrite f t)
+      ((rewrite f d).cast (heq := by simp [rewrite_subst_eq]))).cast
+        (heq := by simp [Head.rewrite, Rew.q_rewrite])
+  | negativeExists (Γ := Γ) (Ξ := Ξ) (φ := φ) d =>
+    let g : ℕ → SyntacticTerm L := &0 :>ₙ fun x ↦ Rew.shift (f x)
+    (negativeExists (Γ := Γ.map (Rew.rewrite f ▹ ·))
+      (Ξ := Head.rewrite f Ξ) (φ := Rew.rewrite (Rew.bShift ∘ f) ▹ φ) <|
+      (rewrite g d).cast
+        (by simp [g, Rewriting.shiftsM, free_rewrite_eq, shift_rewrite_eq, Function.comp_def])
+        (by cases Ξ <;> simp [g, Head.rewrite, Head.shift, shift_rewrite_eq]))
+      |>.cast (by simp [Rew.q_rewrite])
+
+protected def map (d : Γ ⊢ᴸᴶ¹ Ξ) (f : ℕ → ℕ) :
+    Γ.map (Rew.rewriteMap f ▹ ·) ⊢ᴸᴶ¹ Ξ.map (Rew.rewriteMap f ▹ ·) :=
+  d.rewrite fun x ↦ &(f x)
+
+protected def shift (d : Γ ⊢ᴸᴶ¹ Ξ) : Γ⁺ᵐ ⊢ᴸᴶ¹ Ξ.shift :=
+  cast (d.map Nat.succ) (by rfl) (by cases Ξ <;> rfl)
+
+def weakening (d : Γ ⊢ᴸᴶ¹ Ξ) (hΓ : Γ ⊆ Δ) : Δ ⊢ᴸᴶ¹ Ξ :=
+  contraction d hΓ (by cases Ξ <;> simp)
+
+def dni {φ : Propositionᵢ L} (d : Γ ⊢ᴸᴶ¹ φ) : Γ ⊢ᴸᴶ¹ (∼∼φ : Propositionᵢ L) :=
+  positiveNeg <| contraction d.negativeNeg (by simp) (by simp)
 
 def dneOfNegative [L.DecidableEq] : {φ : Propositionᵢ L} → φ.IsNegative → ⦃∼∼φ⦄ ⊢ᴸᴶ¹ φ
   | ⊥, _ => by
@@ -219,11 +302,59 @@ def dneOfNegative [L.DecidableEq] : {φ : Propositionᵢ L} → φ.IsNegative �
 def ofDNOfNegative [L.DecidableEq] {φ : Propositionᵢ L} (d : Γ ⊢ᴸᴶ¹ (∼∼φ : Propositionᵢ L))
     (h : φ.IsNegative) : Γ ⊢ᴸᴶ¹ φ := cutOne d (dneOfNegative h)
 
+/-- Mutual LJ derivability from singleton antecedents. -/
+abbrev Interderivable (L : Language.{u}) (φ ψ : Propositionᵢ L) :=
+  (⦃φ⦄ ⊢ᴸᴶ¹ ψ) × (⦃ψ⦄ ⊢ᴸᴶ¹ φ)
+
+namespace Interderivable
+
+variable {φ ψ χ φ₁ φ₂ ψ₁ ψ₂ : Propositionᵢ L}
+
+protected def refl (φ : Propositionᵢ L) : Interderivable L φ φ := ⟨eta φ, eta φ⟩
+
+def symm (d : Interderivable L φ ψ) : Interderivable L ψ φ := ⟨d.2, d.1⟩
+
+def trans (d₁ : Interderivable L φ ψ) (d₂ : Interderivable L ψ χ) :
+    Interderivable L φ χ := ⟨cutOne d₁.1 d₂.1, cutOne d₂.2 d₁.2⟩
+
+def contrapose (d : ⦃φ⦄ ⊢ᴸᴶ¹ ψ) : ⦃∼ψ⦄ ⊢ᴸᴶ¹ (∼φ : Propositionᵢ L) := by
+  apply positiveNeg
+  exact negElim (assumption (by simp [Semiformulaᵢ.neg_def])) <|
+    cutOne (assumption (by simp)) d
+
+def neg (d : Interderivable L φ ψ) : Interderivable L (∼φ) (∼ψ) :=
+  ⟨contrapose d.2, contrapose d.1⟩
+
+def and (dφ : Interderivable L φ₁ φ₂) (dψ : Interderivable L ψ₁ ψ₂) :
+    Interderivable L (φ₁ ⋏ ψ₁) (φ₂ ⋏ ψ₂) := by
+  constructor
+  · exact positiveAnd (cutOne (andLeft (eta _)) dφ.1) (cutOne (andRight (eta _)) dψ.1)
+  · exact positiveAnd (cutOne (andLeft (eta _)) dφ.2) (cutOne (andRight (eta _)) dψ.2)
+
+def all {φ ψ : Semipropositionᵢ L 1}
+    (d : Interderivable L (Rewriting.free φ) (Rewriting.free ψ)) :
+    Interderivable L (∀¹ φ) (∀¹ ψ) := by
+  let lift : ∀ {φ ψ : Semipropositionᵢ L 1},
+      (⦃Rewriting.free φ⦄ ⊢ᴸᴶ¹ Rewriting.free ψ) → ⦃∀¹ φ⦄ ⊢ᴸᴶ¹ ∀¹ ψ :=
+    fun {φ ψ} d ↦ positiveForall <| cutOne
+      (cast (specialize (φ := Rewriting.shift φ)
+        (assumption (Γ := ⦃∀¹ Rewriting.shift φ⦄) (by simp)) &0) (by simp) (by simp)) d
+  exact ⟨lift d.1, lift d.2⟩
+
+def dne [L.DecidableEq] (h : φ.IsNegative) : Interderivable L (∼∼φ) φ :=
+  ⟨dneOfNegative h, dni (eta φ)⟩
+
+def iffnegOfNegIff [L.DecidableEq] (h : φ.IsNegative)
+    (d : Interderivable L (∼φ) ψ) : Interderivable L φ (∼ψ) :=
+  (dne h).symm.trans d.neg
+
+end Interderivable
+
 end Derivation
 
 end LJ
 
-inductive LJ (L : Language)
+inductive LJ (L : Language.{u})
   | symbol
 
 notation "𝐋𝐉¹" => LJ.symbol

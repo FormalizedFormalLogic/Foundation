@@ -6,7 +6,7 @@ public import Mathlib.Data.Option.Basic
 
 namespace Option
 
-variable {α : Type}
+variable {α : Type u}
 
 inductive IsSubsetOf : Option α → Option α → Prop
 | none : IsSubsetOf none o

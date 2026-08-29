@@ -17,36 +17,6 @@ public section
 
 namespace LO
 
-namespace Multiset
-
-variable {α : Type*} [Tilde α]
-
-instance : Tilde (Multiset α) := ⟨fun Γ ↦ Γ.map (∼·)⟩
-
-lemma tilde_def (Γ : Multiset α) : ∼Γ = Γ.map (∼·) := rfl
-
-@[simp] lemma tilde_zero : ∼(0 : Multiset α) = 0 := rfl
-
-@[simp] lemma tilde_add (Γ Δ : Multiset α) : ∼(Γ + Δ) = ∼Γ + ∼Δ := by
-  simp [tilde_def]
-
-@[simp] lemma tilde_atom (φ : α) : ∼(⦃φ⦄ : Multiset α) = ⦃∼φ⦄ := by
-  simp [tilde_def]
-
-@[simp] lemma mem_tilde_iff [TildeInvolutive α] {φ : α} {Γ : Multiset α} : φ ∈ ∼Γ ↔ ∼φ ∈ Γ := by
-  rw [tilde_def]
-  constructor
-  · intro h
-    rcases Multiset.mem_map.mp h with ⟨ψ, hψ, rfl⟩
-    simpa using hψ
-  · intro hφ
-    simpa using Multiset.mem_map_of_mem (fun ψ ↦ ∼ψ) hφ
-
-instance [TildeInvolutive α] : TildeInvolutive (Multiset α) where
-  tilde_involutive Γ := by simp [tilde_def, Multiset.map_map]
-
-end Multiset
-
 /-! ## One-sided $\mathbf{LK}$ -/
 
 class OneSidedLK {F : Type*} [LogicalConnective F] [LogicalNeutral F]

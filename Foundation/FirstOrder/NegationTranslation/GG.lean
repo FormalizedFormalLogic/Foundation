@@ -68,21 +68,137 @@ def doubleNegation (Γ : Sequent L) : LJ.Sequent L :=
 
 scoped[LO.FirstOrder] postfix:max "ᴺ" => Sequent.doubleNegation
 
-@[simp] lemma doubleNegation_nil : ([] : Sequent L)ᴺ = [] := rfl
+@[simp] lemma doubleNegation_zero : (0 : Sequent L)ᴺ = 0 := rfl
 
-@[simp] lemma doubleNegation_cons (φ : Proposition L) (Γ : Sequent L) :
-    (φ :: Γ)ᴺ = φᴺ :: Γᴺ := rfl
+@[simp] lemma doubleNegation_atom (φ : Proposition L) :
+    (⦃φ⦄ : Sequent L)ᴺ = ⦃φᴺ⦄ := by simp [doubleNegation]
 
-@[simp] lemma doubleNegation_append (Γ Δ : Sequent L) : (Γ ++ Δ)ᴺ = Γᴺ ++ Δᴺ := by
+@[simp] lemma doubleNegation_add (Γ Δ : Sequent L) : (Γ + Δ)ᴺ = Γᴺ + Δᴺ := by
   simp [doubleNegation]
 
-lemma shift_doubleNegation (Γ : Sequent L) : (Γᴺ)⁺ = (Γ⁺)ᴺ := by
-  simp [Sequent.doubleNegation, Rewriting.shifts, Semiformula.rew_doubleNegation, Function.comp_def]
+lemma shift_doubleNegation (Γ : Sequent L) : (Γᴺ)⁺ᵐ = (Γ⁺ᵐ)ᴺ := by
+  simp [Sequent.doubleNegation, Rewriting.shiftsM, Semiformula.rew_doubleNegation]
 
 end Sequent
 
-def Theory.ToHilbTheory (T : Theory L) (Λ : Hilbertᵢ L) : HilbTheory L Λ where
-  theory := Semiformula.doubleNegation '' T
+def Theory.doubleNegation (T : Theory L) : Theoryᵢ L :=
+  Semiformula.doubleNegation '' T
 
-@[simp] lemma Theory.ToHilbTheory_theory_def (T : Theory L) (Λ : Hilbertᵢ L) :
-    (T.ToHilbTheory Λ).theory = Semiformula.doubleNegation '' T := rfl
+namespace LJ.Derivation
+
+open Rewriting LawfulSyntacticRewriting
+
+variable {L : Language} [L.DecidableEq]
+
+def negDoubleNegation : (φ : Proposition L) →
+    Interderivable L (∼φᴺ) ((∼φ)ᴺ)
+  | .rel R v => Interderivable.dne (by simp)
+  | .nrel R v => Interderivable.refl _
+  | ⊤ => by
+      constructor
+      · exact negElim (eta (∼(⊤ : Propositionᵢ L))) <|
+          weakening verum (by simp)
+      · apply positiveNeg
+        exact assumption (by simp)
+  | ⊥ => Interderivable.refl _
+  | φ ⋏ ψ => by
+      have eφ := (negDoubleNegation φ).iffnegOfNegIff (by simp)
+      have eψ := (negDoubleNegation ψ).iffnegOfNegIff (by simp)
+      simpa using (eφ.and eψ).neg
+  | φ ⋎ ψ => by
+      have e := (negDoubleNegation φ).and (negDoubleNegation ψ)
+      exact (Interderivable.dne (by simp)).trans e
+  | ∀¹ φ => by
+      have e := (negDoubleNegation (Rewriting.free φ)).iffnegOfNegIff (by simp)
+      have e : Interderivable L (Rewriting.free φᴺ)
+          (Rewriting.free (∼(∼φ)ᴺ)) :=
+        by simpa [Semiformula.rew_doubleNegation] using e
+      simpa using (Interderivable.all e).neg
+  | ∃¹ φ => by
+      have e := negDoubleNegation (Rewriting.free φ)
+      have e : Interderivable L (Rewriting.free (∼φᴺ))
+          (Rewriting.free ((∼φ)ᴺ)) :=
+        by simpa [Semiformula.rew_doubleNegation] using e
+      exact (Interderivable.dne (by simp)).trans (Interderivable.all e)
+  termination_by φ => φ.complexity
+
+def negDoubleNegation' (φ : Proposition L) :
+    Interderivable L (∼(∼φ)ᴺ) φᴺ := by
+  simpa using negDoubleNegation (∼φ)
+
+end LJ.Derivation
+
+namespace Derivation
+
+open Rewriting LawfulSyntacticRewriting
+
+variable {L : Language} [L.DecidableEq]
+
+/-- Discharges a translated negated formula from an LJ contradiction derivation. -/
+def deductNeg {Γ : Sequent L} {φ : Proposition L}
+    (d : (∼(Γ + ⦃φ⦄))ᴺ ⊢ᴸᴶ¹ (⊥ : Propositionᵢ L)) :
+    (∼Γ)ᴺ ⊢ᴸᴶ¹ (∼(∼φ)ᴺ : Propositionᵢ L) :=
+  LJ.Derivation.positiveNeg (Γ := (∼Γ)ᴺ) (φ := (∼φ)ᴺ) <|
+    d.cast (by simp)
+
+def gödelGentzen {Γ : Sequent L} : ⊢ᴸᴷ¹ Γ → (∼Γ)ᴺ ⊢ᴸᴶ¹ (⊥ : Propositionᵢ L)
+  | identity R v => by
+      exact LJ.Derivation.contraction
+        (LJ.Derivation.eta (∼(.rel R v) : Propositionᵢ L)).negativeNeg
+        (by simp [Sequent.doubleNegation]) (by simp)
+  | verum => by
+      simpa [Sequent.doubleNegation] using LJ.Derivation.eta (⊥ : Propositionᵢ L)
+  | and (Γ := Γ) (φ := φ) (ψ := ψ) dφ dψ => by
+      have dφ : (∼Γ)ᴺ ⊢ᴸᴶ¹ (∼(∼φ)ᴺ : Propositionᵢ L) :=
+        deductNeg (gödelGentzen dφ)
+      have dψ : (∼Γ)ᴺ ⊢ᴸᴶ¹ (∼(∼ψ)ᴺ : Propositionᵢ L) :=
+        deductNeg (gödelGentzen dψ)
+      have dAnd := LJ.Derivation.positiveAnd dφ dψ
+      exact LJ.Derivation.contraction dAnd.negativeNeg
+        (by simp [Sequent.doubleNegation]) (by simp)
+  | or (Γ := Γ) (φ := φ) (ψ := ψ) d =>
+      (LJ.Derivation.negativeAnd (Γ := (∼Γ)ᴺ) (φ := (∼φ)ᴺ)
+        (ψ := (∼ψ)ᴺ) (Ξ := (⊥ : Propositionᵢ L)) <|
+        (gödelGentzen d).cast (by simp)).cast (by simp [Sequent.doubleNegation])
+  | all (Γ := Γ) (φ := φ) d => by
+      have hshift : (∼Γ⁺ᵐ)ᴺ = ((∼Γ)ᴺ)⁺ᵐ := by
+        rw [←Rewriting.shiftsM_neg, Sequent.shift_doubleNegation]
+      have dFree : ((∼Γ)ᴺ)⁺ᵐ ⊢ᴸᴶ¹
+          (∼Rewriting.free ((∼φ)ᴺ) : Propositionᵢ L) :=
+        (deductNeg (gödelGentzen d)).cast
+          (by simp [hshift]) (by simp [Semiformula.rew_doubleNegation])
+      have dAll := LJ.Derivation.positiveForall (Γ := (∼Γ)ᴺ)
+        (φ := ∼(∼φ)ᴺ) <|
+        dFree.cast (heq := by simp [Semiformula.rew_doubleNegation])
+      exact LJ.Derivation.contraction dAll.negativeNeg
+        (by simp [Sequent.doubleNegation]) (by simp)
+  | exs (Γ := Γ) (φ := φ) (t := t) d =>
+      (LJ.Derivation.negativeForall (Γ := (∼Γ)ᴺ) (φ := (∼φ)ᴺ)
+        (t := t) (Ξ := (⊥ : Propositionᵢ L)) <|
+        (gödelGentzen d).cast (by simp [Semiformula.rew_doubleNegation]))
+        |>.cast (by simp [Sequent.doubleNegation])
+  | cut (Γ := Γ) (Δ := Δ) (φ := φ) d dn => by
+      have ihn := gödelGentzen dn
+      have dnφ : (∼Γ)ᴺ ⊢ᴸᴶ¹ (∼(∼φ)ᴺ : Propositionᵢ L) :=
+        deductNeg (gödelGentzen d)
+      have dφ : (∼Γ)ᴺ ⊢ᴸᴶ¹ φᴺ :=
+        LJ.Derivation.cutOne dnφ (LJ.Derivation.negDoubleNegation' φ).1
+      exact (LJ.Derivation.cut (Γ := (∼Γ)ᴺ) (Δ := (∼Δ)ᴺ)
+        (φ := φᴺ) (Ξ := (⊥ : Propositionᵢ L)) dφ <|
+        ihn.cast (by simp)).cast (by simp [Sequent.doubleNegation])
+  | contraction d h =>
+      LJ.Derivation.weakening (gödelGentzen d) <|
+        Multiset.map_subset_map <| Multiset.map_subset_map h
+
+end Derivation
+
+theorem Provable.gödel_gentzen {L : Language.{u}} [L.DecidableEq] {φ : Proposition L} :
+    𝐋𝐊¹ ⊢ φ → 𝐋𝐉¹ ⊢ φᴺ := by
+  rintro ⟨d⟩
+  have d : ⦃(∼φ)ᴺ⦄ ⊢ᴸᴶ¹ (⊥ : Propositionᵢ L) := by
+    simpa [Sequent.doubleNegation] using Derivation.gödelGentzen d
+  have dn : (0 : LJ.Sequent L) ⊢ᴸᴶ¹ (∼(∼φ)ᴺ : Propositionᵢ L) :=
+    LJ.Derivation.positiveNeg (φ := (∼φ)ᴺ) d
+  exact ⟨LJ.Derivation.cutOne dn (LJ.Derivation.negDoubleNegation' φ).1⟩
+
+end LO.FirstOrder
