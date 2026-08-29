@@ -487,9 +487,7 @@ noncomputable abbrev provabilityPred (σ : Sentence L) : ArithmeticSentence := (
 noncomputable def provabilityPred' (σ : Sentence L) : 𝚺₁.Sentence := .mkSigma
   “!(provable T) !!(⌜σ⌝)”
 
--- `rfl` here makes Lean v4.33.1 decide `val (mkSigma φ _) =?= φ` on the (very large) `φ` and
--- allocate without bound (~170MB/s, OOM after a minute). Rewriting with the generic
--- `val_mkSigma` keeps the defeq check off the big term. Revert to `by rfl` once upstream is fixed.
+-- Proving this by `rfl` overflows memory on Lean v4.33.1.
 @[simp] lemma provabilityPred'_val (σ : Sentence L) : (provabilityPred' T σ).val = provabilityPred T σ := by
   unfold provabilityPred' provabilityPred
   simp only [HierarchySymbol.Semiformula.val_mkSigma]

@@ -87,11 +87,7 @@ instance [𝗜𝚺₁ ⪯ T] [T.SoundOnHierarchy 𝚺 1] : T.standardRefutabilit
   have := ArithmeticTheory.SoundOn.sound (F := Arithmetic.Hierarchy 𝚺 1) h $ by simp [standardRefutability, Refutability.rf];
   exact provable_iff_provable (L := ℒₒᵣ) |>.mp $ by simpa [models_iff, standardRefutability, Refutability.rf, Refutable.quote_iff] using this;
 
--- On Lean v4.33.1 the kernel decides `ProvabilityAbstraction.jeroslow T.standardRefutability =?=
--- T.jeroslow` by unfolding `fixedpoint` down to the Gödel numeral `⌜diag θ⌝` and allocates without
--- bound (~170MB/s, OOM). Splitting the identification into the three shallow reduction steps below
--- (each a cheap `rfl`) keeps that defeq away from the kernel; downstream proofs then `rw` with this
--- equation instead of relying on defeq. Revert to plain defeq once upstream is fixed.
+-- Proving this by a plain `rfl` overflows memory on Lean v4.33.1.
 private lemma jeroslow_eq_standard :
     ProvabilityAbstraction.jeroslow (T.standardRefutability) = T.jeroslow := by
   unfold ProvabilityAbstraction.jeroslow
@@ -118,7 +114,6 @@ variable {T : ArithmeticTheory} [T.Δ₁]
 -/
 theorem unprovable_jeroslow [𝗜𝚺₁ ⪯ T] [T.SoundOnHierarchy 𝚺 1]
   : T ⊬ T.jeroslow := by
-  -- `rw` with `jeroslow_eq_standard` instead of defeq; see the comment on that lemma.
   rw [← Theory.jeroslow_eq_standard];
   exact ProvabilityAbstraction.unprovable_jeroslow (𝔚 := T.standardRefutability)
 
