@@ -18,38 +18,38 @@ decidable.
 
 namespace LO.FirstOrder.Arithmetic.Bootstrapping
 
-variable {L : Language} [L.DecidableEq] [L.Encodable] [L.LORDefinable] {T : Theory L} [T.Δ₁]
+section
+variable {L : Language} [L.DecidableEq] {T : Theory L} {σ π : Sentence L}
+
+lemma provable_insert_neg_iff_or :
+    insert (∼σ) T ⊢ π ↔ T ⊢ σ ⋎ π :=
+  Entailment.deduction_iff.trans ⟨fun h ↦ by cl_prover [h], fun h ↦ by cl_prover [h]⟩
+
+end
+
+variable {L : Language} [L.Encodable] [L.LORDefinable] {T : Theory L} [T.Δ₁]
 
 variable (T)
 
 noncomputable def _root_.LO.FirstOrder.Theory.minProof (σ : Sentence L) : ℕ :=
   sInf {d : ℕ | Proof T d (⌜σ⌝ : ℕ)}
 
-variable {T}
+variable {T} {σ : Sentence L}
 
-omit [L.DecidableEq] in
-lemma proof_minProof {σ} (h : T ⊢ σ) : Proof T (T.minProof σ) (⌜σ⌝ : ℕ) :=
+lemma proof_minProof (h : T ⊢ σ) : Proof T (T.minProof σ) (⌜σ⌝ : ℕ) :=
   Nat.sInf_mem (internalize_provability (V := ℕ) h)
 
-lemma minProof_eq_zero_of_unprovable {σ} (h : T ⊬ σ) : T.minProof σ = 0 :=
+lemma minProof_eq_zero_of_unprovable [L.DecidableEq] (h : T ⊬ σ) : T.minProof σ = 0 :=
   Nat.sInf_eq_zero.mpr <| .inr <| Set.eq_empty_iff_forall_notMem.mpr fun d hd ↦
     h (Provable.sound (⟨d, hd⟩ : Provable T (⌜σ⌝ : ℕ)))
 
-omit [L.DecidableEq] in
-lemma minProof_le {σ d} (h : Proof T d (⌜σ⌝ : ℕ)) : T.minProof σ ≤ d :=
+lemma minProof_le {d} (h : Proof T d (⌜σ⌝ : ℕ)) : T.minProof σ ≤ d :=
   Nat.sInf_le h
 
 section Speedup
 
 open Encodable
-variable {σ : Sentence L}
 
-omit [L.Encodable] [L.LORDefinable] [T.Δ₁] in
-lemma provable_insert_neg_iff_or {π : Sentence L} :
-    insert (∼σ) T ⊢ π ↔ T ⊢ σ ⋎ π :=
-  Entailment.deduction_iff.trans ⟨fun h ↦ by cl_prover [h], fun h ↦ by cl_prover [h]⟩
-
-omit [L.DecidableEq] in
 lemma computablePred_proof : ComputablePred fun p : ℕ × ℕ ↦ Proof T p.1 p.2 := by
   apply ComputablePred.computable_iff_re_compl_re'.mpr
   obtain ⟨φ, hφ⟩ := HierarchySymbol.Definable.of_delta (Γ := 𝚺) (Proof.definable (V := ℕ) (T := T))
@@ -63,7 +63,6 @@ lemma computablePred_proof : ComputablePred fun p : ℕ × ℕ ↦ Proof T p.1 p
     ((sigma1_re id ψ.sigma_prop).comp hcomp).of_eq
       fun p ↦ by simpa [List.Vector.cons_get] using hψ.iff (v := ![p.1, p.2])⟩
 
-omit [L.DecidableEq] in
 lemma computable_minProof_comp [L.Primcodable] {α : Type*} [Primcodable α] {F : α → Sentence L}
     (hF : Computable F) (hprov : ∀ a, T ⊢ F a) :
     Computable fun a ↦ T.minProof (F a) := by
@@ -80,7 +79,7 @@ lemma computable_minProof_comp [L.Primcodable] {α : Type*} [Primcodable α] {F 
     exact congrFun hfe (p.2, encode (F p.1))
   exact (Computable.find hcomp hex).of_eq fun a ↦ (Nat.sInf_def (hex a)).symm
 
-omit [L.DecidableEq] [L.LORDefinable] in
+omit [L.LORDefinable] in
 lemma computable_or_left [L.Primcodable] : Computable fun π : Sentence L ↦ σ ⋎ π := by
   set b : ℕ := encode σ with hb
   have hCode : Primrec fun e : ℕ ↦ (Nat.pair 5 <| b.pair e) + 1 :=
@@ -91,12 +90,11 @@ lemma computable_or_left [L.Primcodable] : Computable fun π : Sentence L ↦ σ
   have he : (Nat.pair 5 <| b.pair (encode π)) + 1 = encode (σ ⋎ π) := by rw [hb]; rfl
   simp [he, Encodable.encodek]
 
-lemma computable_insert_minProof_or [L.Primcodable] :
+lemma computable_insert_minProof_or [L.DecidableEq] [L.Primcodable] :
     Computable fun π : Sentence L ↦ (insert σ T).minProof (σ ⋎ π) :=
   computable_minProof_comp (T := insert σ T) computable_or_left
     fun π ↦ Entailment.deduction_iff.mpr (by cl_prover)
 
-omit [L.DecidableEq] in
 lemma computablePred_bddExists_proof {α : Type*} [Primcodable α] {bd cd : α → ℕ}
     (hbd : Computable bd) (hcd : Computable cd) :
     ComputablePred fun a : α ↦ ∃ d ≤ bd a, Proof T d (cd a) := by
@@ -133,7 +131,7 @@ computable, then adjoining `σ` to `T` as a new axiom gives an unbounded proof-l
 `T`, in the sense that no computable monotone function bounds the minimal `T`-proof code of a
 `T`-provable `π` in terms of the minimal `(T + σ)`-proof code of `π`.
 - [EM71, Theorem] -/
-theorem ehrenfeucht_mycielski_speedup [L.Primcodable]
+theorem ehrenfeucht_mycielski_speedup [L.DecidableEq] [L.Primcodable]
   (hU : ¬ComputablePred fun π : Sentence L ↦ insert (∼σ) T ⊢ π) :
   ¬∃ s : ℕ → ℕ,
     Computable s ∧
@@ -167,7 +165,7 @@ theorem ehrenfeucht_mycielski_speedup' {T : ArithmeticTheory} [T.Δ₁] {σ : Ar
     Entailment.WeakerThan.trans ‹𝗥₀ ⪯ T› (Entailment.Axiomatized.le_of_subset (Set.subset_insert _ T))
   ehrenfeucht_mycielski_speedup (church_theorem_general (T := insert (∼σ) T))
 
-theorem ehrenfeucht_mycielski_speedup_exp [L.Primcodable]
+theorem ehrenfeucht_mycielski_speedup_exp [L.DecidableEq] [L.Primcodable]
     (hU : ¬ComputablePred fun π : Sentence L ↦ insert (∼σ) T ⊢ π) :
     ∃ π : Sentence L, T ⊢ π ∧ 2 ^ ((insert σ T).minProof π) < T.minProof π := by
   have hcomp : Computable fun x : ℕ ↦ 2 ^ x :=
