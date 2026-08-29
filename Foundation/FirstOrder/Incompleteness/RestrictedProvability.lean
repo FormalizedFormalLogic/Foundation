@@ -53,12 +53,12 @@ lemma def_restrictedGödel [𝗜𝚺₁ ⪯ U] : U ⊢ T.restrictedGödel e 🡘
 private lemma def_restrictedGödel' [𝗜𝚺₁ ⪯ U] : U ⊢ T.restrictedGödel' e 🡘 (∼(T.restrictedProvable e).val)/[⌜T.restrictedGödel e⌝] := by simp;
 
 private lemma provable_E_restrictedGödel_restrictedGödel' [𝗜𝚺₁ ⪯ U] : U ⊢ T.restrictedGödel e 🡘 T.restrictedGödel' e := by
-  apply Entailment.E!_trans;
+  apply Entailment.E_trans;
   . exact def_restrictedGödel;
-  . exact Entailment.E!_symm $ def_restrictedGödel';
+  . exact Entailment.E_symm $ def_restrictedGödel';
 
 private lemma iff_provable_restrictedGödel_provable_restrictedGödel' [𝗜𝚺₁ ⪯ U] : U ⊢ (T.restrictedGödel e) ↔ U ⊢ (T.restrictedGödel' e) := by
-  apply Entailment.iff_of_E! provable_E_restrictedGödel_restrictedGödel';
+  apply Entailment.iff_of_E provable_E_restrictedGödel_restrictedGödel';
 
 private lemma iff_true_restrictedGödel_true_restrictedGödel' : ℕ↓[ℒₒᵣ] ⊧ (T.restrictedGödel e) ↔ ℕ↓[ℒₒᵣ] ⊧ (T.restrictedGödel' e) := by
   apply Semantics.models_iff.mp;

@@ -125,7 +125,7 @@ lemma maximalConsistentTheory_consistent' {φ} :
   intro h hn
   have : Inconsistent (maximalConsistentTheory consisT) :=
     Entailment.inconsistent_iff_provable_bot.mpr
-      (neg_mdp (mem_maximalConsistentTheory_iff.mp hn) (mem_maximalConsistentTheory_iff.mp h))
+      (neg_mdp! (mem_maximalConsistentTheory_iff.mp hn) (mem_maximalConsistentTheory_iff.mp h))
   have := this.not_con
   simp_all
 
@@ -134,7 +134,7 @@ lemma not_mem_maximalConsistentTheory_iff :
   by_cases hp : φ ∈ maximalConsistentTheory consisT <;> simp [hp]
   · intro bnp
     have : Inconsistent (maximalConsistentTheory consisT) :=
-      Entailment.inconsistent_of_provable (neg_mdp bnp (mem_maximalConsistentTheory_iff.mp hp))
+      Entailment.inconsistent_of_provable (neg_mdp! bnp (mem_maximalConsistentTheory_iff.mp hp))
     have := this.not_con
     simp_all
   · exact mem_maximalConsistentTheory_iff.mp

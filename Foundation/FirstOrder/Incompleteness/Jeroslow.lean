@@ -75,10 +75,10 @@ lemma def_jeroslow [𝗜𝚺₁ ⪯ U] : U ⊢ T.jeroslow 🡘 (T.refutable)/[�
 
 private lemma def_jeroslow' [𝗜𝚺₁ ⪯ U] : U ⊢ T.jeroslow' 🡘 (T.refutable)/[⌜T.jeroslow⌝] := by simp;
 
-private lemma provable_E_jeroslow_jeroslow' [𝗜𝚺₁ ⪯ U] : U ⊢ T.jeroslow 🡘 T.jeroslow' := Entailment.E!_trans def_jeroslow def_jeroslow'
+private lemma provable_E_jeroslow_jeroslow' [𝗜𝚺₁ ⪯ U] : U ⊢ T.jeroslow 🡘 T.jeroslow' := Entailment.E_trans def_jeroslow def_jeroslow'
 
 private lemma iff_provable_jeroslow_provable_jeroslow' [𝗜𝚺₁ ⪯ U] : U ⊢ (T.jeroslow) ↔ U ⊢ (T.jeroslow') := by
-  apply Entailment.iff_of_E! provable_E_jeroslow_jeroslow';
+  apply Entailment.iff_of_E provable_E_jeroslow_jeroslow';
 
 open LO.Entailment in
 instance [𝗜𝚺₁ ⪯ T] [T.SoundOnHierarchy 𝚺 1] : T.standardRefutability.SoundOn (ProvabilityAbstraction.jeroslow T.standardRefutability) := by
@@ -96,7 +96,7 @@ instance [𝗜𝚺₁ ⪯ T] : T.standardProvability.FormalizedCompleteOn (Prova
   apply provable_sigma_one_complete_of_E;
   . show Hierarchy 𝚺 1 T.jeroslow';
     exact jeroslow'_sigmaOne;
-  . apply Entailment.E!_symm $ provable_E_jeroslow_jeroslow';
+  . apply Entailment.E_symm $ provable_E_jeroslow_jeroslow';
 
 end
 
