@@ -95,6 +95,8 @@ lemma sigma1_re (ε : ξ → ℕ) {k} {φ : ArithmeticSemiformula ξ k} (hp : Hi
 
 end
 
+section code
+
 open Nat.ArithPart₁
 
 def codeAux {k : ℕ} : Nat.ArithPart₁.Code k → ArithmeticFormula (Fin (k + 1))
@@ -113,65 +115,6 @@ def codeAux {k : ℕ} : Nat.ArithPart₁.Code k → ArithmeticFormula (Fin (k + 
     (∀¹[“z. z < &0”] ∃¹ “z. z ≠ 0” ⋏ ((Rew.bind (L := ℒₒᵣ) (ξ₁ := Fin (k + 1 + 1)) ![] (#0 :> #1 :> (&·.succ)) ▹ codeAux c)))
 
 def code (c : Code k) : ArithmeticSemisentence (k + 1) := (Rew.bind (L := ℒₒᵣ) (ξ₁ := Fin (k + 1)) ![] (#0 :> (#·.succ))) ▹ (codeAux c)
-
-section model
-
-open PeanoMinus
-
-variable {M : Type*} [ORingStructure M] [M↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻]
-
--- Each case below rewrites hypotheses with `simp [...] at h h'` and then destructures the
--- normalized hypotheses; the flexible-tactic linter cannot see that the later tactics only
--- depend on the (already fully simplified) shape of `h`/`h'`, not on the exact simp set used.
-set_option linter.flexible false in
-private lemma codeAux_uniq {k} {c : Code k} {v : Fin k → M} {z z' : M} :
-    (codeAux c).Evalf (M := M) (z :> v) → (codeAux c).Evalf (M := M) (z' :> v) → z = z' := by
-  induction c generalizing z z' with
-  | zero _ => intro h h'; simp [codeAux] at h h'; rw [h, h']
-  | one _ => intro h h'; simp [codeAux] at h h'; rw [h, h']
-  | add i j => intro h h'; simp [codeAux] at h h'; rw [h, h']
-  | mul i j => intro h h'; simp [codeAux] at h h'; rw [h, h']
-  | proj i => intro h h'; simp [codeAux] at h h'; rw [h, h']
-  | equal i j =>
-    intro h h'
-    by_cases hv : v i = v j <;> simp [codeAux, hv] at h h' <;> rw [h, h']
-  | lt i j =>
-    intro h h'
-    by_cases hv : v i < v j <;> simp [codeAux, hv] at h h' <;> rw [h, h']
-  | comp c d ihc ihd =>
-    intro h h'
-    simp [codeAux, Semiformula.eval_rew, Function.comp_def, Matrix.empty_eq,
-      Matrix.comp_vecCons'] at h h'
-    obtain ⟨w₁, hc₁, hd₁⟩ := h
-    obtain ⟨w₂, hc₂, hd₂⟩ := h'
-    have : w₁ = w₂ := funext fun i => ihd i (hd₁ i) (hd₂ i)
-    rcases this with rfl
-    exact ihc hc₁ hc₂
-  | rfind c ih =>
-    intro H₁ H₂
-    simp [codeAux, Semiformula.eval_rew, Function.comp_def, Matrix.empty_eq,
-      Matrix.comp_vecCons'] at H₁ H₂
-    obtain ⟨h₁, hm₁⟩ := H₁
-    obtain ⟨h₂, hm₂⟩ := H₂
-    by_contra hz
-    wlog h : z < z' with Hz
-    case inr =>
-      have : z' < z := lt_of_le_of_ne (not_lt.mp h) (Ne.symm hz)
-      exact Hz (k := k) c ih h₂ hm₂ h₁ hm₁ (Ne.symm hz) this
-    have : ∃ x, x ≠ 0 ∧ (codeAux c).Evalf (M := M) (x :> z :> fun i => v i) := hm₂ z h
-    rcases this with ⟨x, xz, hx⟩
-    exact xz (ih hx h₁)
-
--- `simp ... at h h'` normalizes the two hypotheses to the `codeAux_uniq` shape before
--- `exact`; the flexible-tactic linter cannot see that `exact` only depends on that final shape.
-set_option linter.flexible false in
-lemma code_uniq {k} {c : Code k} {v : Fin k → M} {z z' : M} :
-    (code c).Evalb (M := M) (z :> v) → (code c).Evalb (M := M) (z' :> v) → z = z' := by
-  intro h h'
-  simp [code, Semiformula.eval_rew, Function.comp_def, Matrix.empty_eq] at h h'
-  exact codeAux_uniq h h'
-
-end model
 
 private lemma codeAux_sigma_one {k} (c : Nat.ArithPart₁.Code k) : Hierarchy 𝚺 1 (codeAux c) := by
   induction c
@@ -253,7 +196,66 @@ lemma codeOfPartrec'_spec {k} {f : List.Vector ℕ k →. ℕ} (hf : Nat.Partrec
     exact ⟨c, models_code hc⟩
   exact Classical.epsilon_spec this y v
 
-open Classical
+section model
+
+variable {M : Type*} [ORingStructure M] [M↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻]
+
+-- Each case below rewrites hypotheses with `simp [...] at h h'` and then destructures the
+-- normalized hypotheses; the flexible-tactic linter cannot see that the later tactics only
+-- depend on the (already fully simplified) shape of `h`/`h'`, not on the exact simp set used.
+set_option linter.flexible false in
+private lemma codeAux_uniq {k} {c : Code k} {v : Fin k → M} {z z' : M} :
+    (codeAux c).Evalf (M := M) (z :> v) → (codeAux c).Evalf (M := M) (z' :> v) → z = z' := by
+  induction c generalizing z z' with
+  | zero _ => intro h h'; simp [codeAux] at h h'; rw [h, h']
+  | one _ => intro h h'; simp [codeAux] at h h'; rw [h, h']
+  | add i j => intro h h'; simp [codeAux] at h h'; rw [h, h']
+  | mul i j => intro h h'; simp [codeAux] at h h'; rw [h, h']
+  | proj i => intro h h'; simp [codeAux] at h h'; rw [h, h']
+  | equal i j =>
+    intro h h'
+    by_cases hv : v i = v j <;> simp [codeAux, hv] at h h' <;> rw [h, h']
+  | lt i j =>
+    intro h h'
+    by_cases hv : v i < v j <;> simp [codeAux, hv] at h h' <;> rw [h, h']
+  | comp c d ihc ihd =>
+    intro h h'
+    simp [codeAux, Semiformula.eval_rew, Function.comp_def, Matrix.empty_eq,
+      Matrix.comp_vecCons'] at h h'
+    obtain ⟨w₁, hc₁, hd₁⟩ := h
+    obtain ⟨w₂, hc₂, hd₂⟩ := h'
+    have : w₁ = w₂ := funext fun i => ihd i (hd₁ i) (hd₂ i)
+    rcases this with rfl
+    exact ihc hc₁ hc₂
+  | rfind c ih =>
+    intro H₁ H₂
+    simp [codeAux, Semiformula.eval_rew, Function.comp_def, Matrix.empty_eq,
+      Matrix.comp_vecCons'] at H₁ H₂
+    obtain ⟨h₁, hm₁⟩ := H₁
+    obtain ⟨h₂, hm₂⟩ := H₂
+    by_contra hz
+    wlog h : z < z' with Hz
+    case inr =>
+      have : z' < z := lt_of_le_of_ne (not_lt.mp h) (Ne.symm hz)
+      exact Hz (k := k) c ih h₂ hm₂ h₁ hm₁ (Ne.symm hz) this
+    have : ∃ x, x ≠ 0 ∧ (codeAux c).Evalf (M := M) (x :> z :> fun i => v i) := hm₂ z h
+    rcases this with ⟨x, xz, hx⟩
+    exact xz (ih hx h₁)
+
+-- `simp ... at h h'` normalizes the two hypotheses to the `codeAux_uniq` shape before
+-- `exact`; the flexible-tactic linter cannot see that `exact` only depends on that final shape.
+set_option linter.flexible false in
+lemma code_uniq {k} {c : Code k} {v : Fin k → M} {z z' : M} :
+    (code c).Evalb (M := M) (z :> v) → (code c).Evalb (M := M) (z' :> v) → z = z' := by
+  intro h h'
+  simp [code, Semiformula.eval_rew, Function.comp_def, Matrix.empty_eq] at h h'
+  exact codeAux_uniq h h'
+
+end model
+
+end code
+
+section codeOfREPred
 
 noncomputable def codeOfREPred (p : ℕ → Prop) : ArithmeticSemisentence 1 :=
   let f : ℕ →. Unit := fun a ↦ Part.assert (p a) fun _ ↦ Part.some ()
@@ -267,6 +269,20 @@ lemma codeOfREPred_spec {p : ℕ → Prop} (hp : REPred p) {x : ℕ} :
     refine Partrec.map (Partrec.comp hp (Primrec.to_comp <| Primrec.vector_get.comp .id (.const 0))) (Computable.const 0).to₂
   simpa [Semiformula.eval_substs, Matrix.comp_vecCons', Matrix.constant_eq_singleton]
     using (codeOfPartrec'_spec (Nat.Partrec'.of_part this) (v := ![x]) (y := 0)).trans (by simp [f])
+
+variable {T : ArithmeticTheory} [𝗥₀ ⪯ T] [T.SoundOnHierarchy 𝚺 1]
+
+/-- Weak representation of a r.e. predicate -/
+theorem rePred_weak_representation {p : ℕ → Prop} (hp : REPred p) {x : ℕ} :
+    p x ↔ T ⊢ (codeOfREPred p)/[x] := Iff.trans
+  (by simpa [models_iff, Semiformula.eval_substs, Matrix.constant_eq_singleton] using (codeOfREPred_spec hp (x := x)).symm)
+  (sigma_one_completeness_iff <| by simp [codeOfREPred, codeOfPartrec'])
+
+end codeOfREPred
+
+section codeOfComputablePred
+
+open Classical
 
 /-- The `0`/`1`-valued characteristic function of `p`, packaged as a one-variable partial
 function for `codeOfPartrec'`. -/
@@ -318,41 +334,27 @@ lemma codeOfComputablePred_not_eval {p : ℕ → Prop} (hp : ComputablePred p) {
 
 end model
 
-section
-
-variable {T : ArithmeticTheory} [𝗥₀ ⪯ T]
+variable {T : ArithmeticTheory}
 
 /-- Positive representation of a computable predicate. -/
-theorem codeOfComputablePred_provable {p : ℕ → Prop} (hp : ComputablePred p) {x : ℕ} (h : p x) :
-    T ⊢ (codeOfComputablePred p)/[↑x] :=
+theorem codeOfComputablePred_provable [𝗥₀ ⪯ T] {p : ℕ → Prop} (hp : ComputablePred p)
+    {x : ℕ} (h : p x) : T ⊢ (codeOfComputablePred p)/[↑x] :=
   sigma_one_completeness (by simp) (by
     simpa [models_iff, Semiformula.eval_substs, Matrix.constant_eq_singleton]
       using (codeOfComputablePred_spec hp (x := x)).mpr h)
 
-end
-
-section
-
-variable {T : ArithmeticTheory} [𝗣𝗔⁻ ⪯ T]
-
 /-- Negative representation of a computable predicate. -/
-theorem codeOfComputablePred_provable_neg {p : ℕ → Prop} (hp : ComputablePred p) {x : ℕ} (h : ¬p x) :
-    T ⊢ ∼((codeOfComputablePred p)/[↑x]) := by
+theorem codeOfComputablePred_provable_neg [𝗣𝗔⁻ ⪯ T] {p : ℕ → Prop} (hp : ComputablePred p)
+    {x : ℕ} (h : ¬p x) : T ⊢ ∼((codeOfComputablePred p)/[↑x]) := by
   have : 𝗘𝗤 _ ⪯ T := Entailment.WeakerThan.trans (𝓣 := 𝗣𝗔⁻) inferInstance inferInstance
   refine complete.{0} T _ fun M _ _ ↦ ?_
   have : M↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := ModelsTheory.of_provably_subtheory M 𝗣𝗔⁻ T inferInstance
   simpa [models_iff, Semiformula.eval_substs, Matrix.constant_eq_singleton]
     using codeOfComputablePred_not_eval hp h
 
-end
+end codeOfComputablePred
 
-variable {T : ArithmeticTheory} [𝗥₀ ⪯ T] [T.SoundOnHierarchy 𝚺 1]
-
-/-- Weak representation of a r.e. predicate -/
-theorem rePred_weak_representation {p : ℕ → Prop} (hp : REPred p) {x : ℕ} :
-    p x ↔ T ⊢ (codeOfREPred p)/[x] := Iff.trans
-  (by simpa [models_iff, Semiformula.eval_substs, Matrix.constant_eq_singleton] using (codeOfREPred_spec hp (x := x)).symm)
-  (sigma_one_completeness_iff <| by simp [codeOfREPred, codeOfPartrec'])
+section
 
 theorem rePred_iff_sigma1 {p : ℕ → Prop} : REPred p ↔ 𝚺₁-Predicate p := by
   constructor
@@ -427,5 +429,7 @@ theorem computable₂_iff_sigma1 {f : ℕ → ℕ → ℕ} : Computable₂ f ↔
     exact ComputablePred.of_graph_rePred <| hRe.of_eq <| by
       intro p
       simpa [List.Vector.cons_get] using hφ ![p.2, p.1.1, p.1.2]
+
+end
 
 end LO.FirstOrder.Arithmetic
