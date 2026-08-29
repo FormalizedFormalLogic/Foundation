@@ -159,7 +159,7 @@ theorem exists_isCompanion [Nontrivial β] [DenselyOrdered β]
     (hA : (A : Set α).Finite) (e : A ≃o B) (a : α) :
     ∃ b : β, IsCompanion e a b := by
   have : Finite A := hA.to_subtype
-  letI := Fintype.ofFinite A
+  let := Fintype.ofFinite A
   have hmemw : ∀ {w p : A}, p ∈ BooleanAlgebra.atomsBelow w ↔ IsAtom p ∧ p ≤ w := by
     intro w p; simp [BooleanAlgebra.atomsBelow]
   choose bp hs₁ hs₂ hs₃ using exists_companionPiece e a
