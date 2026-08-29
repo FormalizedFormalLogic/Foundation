@@ -19,7 +19,7 @@ is not provable in `T` itself.
 
 namespace LO.FirstOrder
 
-open Entailment
+open _root_.LO.FirstOrder.Entailment
 open Arithmetic Bootstrapping
 open Derivation ProvabilityAbstraction
 

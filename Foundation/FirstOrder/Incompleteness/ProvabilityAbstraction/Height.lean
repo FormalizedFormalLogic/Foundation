@@ -62,7 +62,7 @@ lemma height_lt_pos_of_boxBot (hSound : ∀ {σ}, T₀ ⊢ 𝔅 σ → T ⊢ σ)
   have : 𝔅.height ≤ n.pred := height_le_of_boxBot $ hSound this
   have : 𝔅.height < n := by
     rw [←e]
-    exact lt_of_le_of_lt this <| ENat.coe_lt_coe.mpr <| by simp
+    exact lt_of_le_of_lt this <| ENat.natCast_lt_natCast.mpr <| by simp
   exact this
 
 lemma height_le_iff_boxBot [T₀ ⪯ T] [𝔅.HBL] {n : ℕ} :

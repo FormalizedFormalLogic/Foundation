@@ -44,7 +44,7 @@ def henkinPoints (φ : Semiproposition K 1) : DenseSet ℙ⁻ where
   is_dense := by
     intro p
     suffices ∃ q ≤ p, ∀ q_1 ≤ q, (∀ q ≤ q_1, ∃ r ≤ q, ∃ t, r ⊩ᶜ φ/[t]) → ∃ t, q_1 ⊩ᶜ φ/[t] by
-      simpa only [IsWeaklyForced.exs, Set.mem_setOf_eq]
+      simpa only [IsWeaklyForced.exs, Set.mem_ofPred_eq]
     have : p ⊩ᶜ (∃¹ φ) ⋎ (∀¹ ∼φ) := IsWeaklyForced.complete.mpr Entailment.lem! p
     have : ∀ q ≤ p, ∃ r ≤ q, (∀ q ≤ r, ∃ r ≤ q, ∃ t, r ⊩ᶜ φ/[t]) ∨ (∀ t, ∀ q ≤ r, ¬q ⊩ᶜ φ/[t]) := by simpa using this
     rcases this p (by rfl) with ⟨q, hqp, (h | h)⟩

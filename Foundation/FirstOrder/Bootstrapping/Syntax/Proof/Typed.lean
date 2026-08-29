@@ -536,7 +536,7 @@ variable (A : InternalTheory V ℒₒᵣ)
 
 open Bootstrapping.Arithmetic
 
-open Entailment
+open _root_.LO.FirstOrder.Entailment
 
 lemma substItrDisj_right {i z : V}
     (w : TermVec V ℒₒᵣ m) (φ : Semiformula V ℒₒᵣ (m + 1)) (hi : i < z) :

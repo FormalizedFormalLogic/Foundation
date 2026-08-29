@@ -30,7 +30,7 @@ lemma succ_induction {P : V → Prop}
     (zero : P 0) (succ : ∀ x, P x → P (x + 1)) : ∀ x, P x :=
   InductionScheme.succ_induction (C := Semiformula.Open) (by
     rcases hP with ⟨φ, hp, hhp⟩
-    haveI : Inhabited V := Classical.inhabited_of_nonempty'
+    have : Inhabited V := Classical.inhabited_of_nonempty'
     refine ⟨φ.enumerateFVar, Rew.rewriteMap φ.idxOfFVar ▹ φ, by simp [hp], ?_⟩
     intro x
     simp only [hhp, Nat.succ_eq_add_one, Nat.reduceAdd, Semiformula.eval_rewriteMap]

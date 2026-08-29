@@ -24,12 +24,12 @@ abbrev modelStar (c : ℕ) : Structure Language.unit ℕ where
   rel  := fun _ r _ ↦ PEmpty.elim r
 
 lemma satisfiable_trueArithWithStarUnbounded (c : ℕ) : Satisfiable (trueArithWithStarUnbounded c) := by
-  letI : Structure Language.unit ℕ := modelStar c
-  haveI : Structure.Zero ℒₒᵣ⋆ ℕ := ⟨rfl⟩
-  haveI : Structure.One ℒₒᵣ⋆ ℕ := ⟨rfl⟩
-  haveI : Structure.Add ℒₒᵣ⋆ ℕ := ⟨fun _ _ => rfl⟩
-  haveI : Structure.Eq ℒₒᵣ⋆ ℕ := ⟨fun _ _ => iff_of_eq rfl⟩
-  haveI : Structure.LT ℒₒᵣ⋆ ℕ := ⟨fun _ _ => iff_of_eq rfl⟩
+  let : Structure Language.unit ℕ := modelStar c
+  have : Structure.Zero ℒₒᵣ⋆ ℕ := ⟨rfl⟩
+  have : Structure.One ℒₒᵣ⋆ ℕ := ⟨rfl⟩
+  have : Structure.Add ℒₒᵣ⋆ ℕ := ⟨fun _ _ => rfl⟩
+  have : Structure.Eq ℒₒᵣ⋆ ℕ := ⟨fun _ _ => iff_of_eq rfl⟩
+  have : Structure.LT ℒₒᵣ⋆ ℕ := ⟨fun _ _ => iff_of_eq rfl⟩
   have : ℕ↓[ℒₒᵣ⋆] ⊧* starUnbounded c := by
     have : ∀ (i : Fin c), (↑i : ℕ) < Semiterm.Operator.Star.star.val (L := ℒₒᵣ⋆) ![] := Fin.prop
     simp [starUnbounded, models_iff, this]
@@ -68,14 +68,14 @@ instance : ℕ⋆↓[ℒₒᵣ] ⊧* 𝗧𝗔 := ⟨by
   let s : Structure ℒₒᵣ ℕ⋆ := (ModelOfSatEq.struc satisfiable_union_trueArithWithStarUnbounded).lMap
     (Language.Hom.add₁ ℒₒᵣ Language.unit)
   have e : s = standardModel ℕ⋆ := by
-    haveI : Structure.Zero ℒₒᵣ ℕ⋆ := ⟨rfl⟩
-    haveI : Structure.One ℒₒᵣ ℕ⋆ := ⟨rfl⟩
-    haveI : Structure.Add ℒₒᵣ ℕ⋆ := ⟨fun _ _ => rfl⟩
-    haveI : Structure.Mul ℒₒᵣ ℕ⋆ := ⟨fun _ _ => rfl⟩
-    haveI : Structure.Eq ℒₒᵣ ℕ⋆ := ⟨fun _ _ => by
+    have : Structure.Zero ℒₒᵣ ℕ⋆ := ⟨rfl⟩
+    have : Structure.One ℒₒᵣ ℕ⋆ := ⟨rfl⟩
+    have : Structure.Add ℒₒᵣ ℕ⋆ := ⟨fun _ _ => rfl⟩
+    have : Structure.Mul ℒₒᵣ ℕ⋆ := ⟨fun _ _ => rfl⟩
+    have : Structure.Eq ℒₒᵣ ℕ⋆ := ⟨fun _ _ => by
       simp [Semiformula.Operator.val, Semiformula.Operator.Eq.sentence_eq,
         Matrix.fun_eq_vec_two]⟩
-    haveI : Structure.LT ℒₒᵣ ℕ⋆ := ⟨fun _ _ => iff_of_eq rfl⟩
+    have : Structure.LT ℒₒᵣ ℕ⋆ := ⟨fun _ _ => iff_of_eq rfl⟩
     exact standardModel_unique _ _
   have : s.toStruc ⊧ σ := Semiformula.models_lMap.mp (this.models _ (Set.mem_image_of_mem _ hσ))
   exact e ▸ this⟩
