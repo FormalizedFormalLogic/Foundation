@@ -45,16 +45,21 @@ noncomputable def _root_.LO.FirstOrder.Theory.fghSentenceSigma : ArithmeticSente
 /-! ### Evaluation and complexity -/
 
 lemma eval_witnessedBefore {x : V} :
-    V ⊧/![x] (T.witnessedBefore θ) ↔ T.WitnessedBefore θ x := sorry
+    V ⊧/![x] (T.witnessedBefore θ) ↔ T.WitnessedBefore θ x := by
+  simp [Theory.witnessedBefore, Theory.WitnessedBefore]
 
 lemma eval_provedBefore {x : V} :
-    V ⊧/![x] (T.provedBefore θ) ↔ T.ProvedBefore θ x := sorry
+    V ⊧/![x] (T.provedBefore θ) ↔ T.ProvedBefore θ x := by
+  simp [Theory.provedBefore, Theory.ProvedBefore]
 
-lemma hierarchy_witnessedBefore (hθ : Hierarchy 𝚺 0 θ) : Hierarchy 𝚺 1 (T.witnessedBefore θ) := sorry
+lemma hierarchy_witnessedBefore (hθ : Hierarchy 𝚺 0 θ) : Hierarchy 𝚺 1 (T.witnessedBefore θ) := by
+  simp [Theory.witnessedBefore, hθ.mono (by omega)]
 
-lemma hierarchy_provedBefore (hθ : Hierarchy 𝚺 0 θ) : Hierarchy 𝚺 1 (T.provedBefore θ) := sorry
+lemma hierarchy_provedBefore (hθ : Hierarchy 𝚺 0 θ) : Hierarchy 𝚺 1 (T.provedBefore θ) := by
+  simp [Theory.provedBefore, (Hierarchy.pi_zero_iff_sigma_zero.mpr hθ).mono (by omega : (0:ℕ) ≤ 1)]
 
-lemma hierarchy_fghSentenceSigma (hθ : Hierarchy 𝚺 0 θ) : Hierarchy 𝚺 1 (T.fghSentenceSigma θ) := sorry
+lemma hierarchy_fghSentenceSigma (hθ : Hierarchy 𝚺 0 θ) : Hierarchy 𝚺 1 (T.fghSentenceSigma θ) := by
+  simp [Theory.fghSentenceSigma, hierarchy_witnessedBefore T θ hθ]
 
 /-! ### Exclusivity of witness and proof -/
 
