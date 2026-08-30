@@ -155,7 +155,12 @@ local prefix:90 "□" => provabilityPred T
 
 lemma fgh_equation (hθ : Hierarchy 𝚺 0 θ) {σ : ArithmeticSentence}
     (hwit : ∀ (V : Type) [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁], V ⊧/![] σ ↔ ∃ w, V ⊧/![w] θ) :
-    𝗜𝚺₁ ⊢ □(T.fghSentence θ) 🡘 σ ⋎ □⊥ := sorry
+    𝗜𝚺₁ ⊢ □(T.fghSentence θ) 🡘 σ ⋎ □⊥ :=
+  complete 𝗜𝚺₁ _ fun (V : Type) _ _ ↦ by
+    simpa [models_iff, hwit V] using
+      Iff.intro (witness_or_provable_bot_of_provable_fghSentence T θ hθ)
+        (fun h ↦ h.elim (provable_fghSentence_of_witness T θ hθ)
+          (provable_fghSentence_of_provable_bot T θ))
 
 lemma provable_fghSentence_iff_sigma (hθ : Hierarchy 𝚺 0 θ) :
     𝗜𝚺₁ ⊢ □(T.fghSentence θ) 🡘 □(T.fghSentenceSigma θ) := sorry
