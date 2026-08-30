@@ -4,10 +4,6 @@ public import Foundation.FirstOrder.Arithmetic.Schemata
 
 /-!
 # Δ₀-witnessed form for Σ₁ formulas
-
-This file shows that every `Σ₁` arithmetic formula is, in every model of `𝗜𝚺₁`, equivalent to
-an existential `∃ w, θ` where `θ` is a `Δ₀` (`Σ₀`) formula containing one extra free variable
-`w` for the witness.
 -/
 
 @[expose] public section
