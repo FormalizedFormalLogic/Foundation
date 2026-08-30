@@ -177,7 +177,14 @@ open Bootstrapping
 variable {T : ArithmeticTheory} [T.Δ₁] [𝗜𝚺₁ ⪯ T]
 
 theorem fgh_theorem {σ : ArithmeticSentence} (hσ : Hierarchy 𝚺 1 σ) :
-    ∃ π : ArithmeticSentence, Hierarchy 𝚺 1 π ∧ 𝗜𝚺₁ ⊢ provabilityPred T π 🡘 σ ⋎ provabilityPred T ⊥ := sorry
+    ∃ π : ArithmeticSentence, Hierarchy 𝚺 1 π ∧ 𝗜𝚺₁ ⊢ provabilityPred T π 🡘 σ ⋎ provabilityPred T ⊥ := by
+  obtain ⟨θ, hθ, hwit⟩ := exists_delta0_witness_form hσ
+  refine ⟨T.fghSentenceSigma θ, hierarchy_fghSentenceSigma T θ hθ, ?_⟩
+  have heq : 𝗜𝚺₁ ⊢ provabilityPred T (T.fghSentence θ) 🡘 σ ⋎ provabilityPred T ⊥ :=
+    fgh_equation T θ hθ (fun V _ _ ↦ hwit V ![])
+  have hiff : 𝗜𝚺₁ ⊢ provabilityPred T (T.fghSentence θ) 🡘 provabilityPred T (T.fghSentenceSigma θ) :=
+    provable_fghSentence_iff_sigma T θ hθ
+  exact Entailment.E_trans (Entailment.E_symm hiff) heq
 
 theorem fgh_theorem_con {σ : ArithmeticSentence} (hσ : Hierarchy 𝚺 1 σ) :
     ∃ π : ArithmeticSentence, Hierarchy 𝚺 1 π ∧ T ∪ T.Con ⊢ σ 🡘 provabilityPred T π := sorry
