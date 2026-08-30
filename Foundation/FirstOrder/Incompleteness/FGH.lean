@@ -71,7 +71,10 @@ lemma not_witnessedBefore_of_provedBefore {x : V} :
   · exact hbound w h hw
 
 lemma provedBefore_imp_not_witnessedBefore (ρ : ArithmeticSentence) :
-    𝗜𝚺₁ ⊢ (T.provedBefore θ)/[⌜ρ⌝] 🡒 ∼(T.witnessedBefore θ)/[⌜ρ⌝] := sorry
+    𝗜𝚺₁ ⊢ (T.provedBefore θ)/[⌜ρ⌝] 🡒 ∼(T.witnessedBefore θ)/[⌜ρ⌝] :=
+  complete 𝗜𝚺₁ _ fun (W : Type) _ _ ↦ by
+    simpa [models_iff, eval_witnessedBefore, eval_provedBefore, Sentence.coe_quote_eq_quote] using
+      not_witnessedBefore_of_provedBefore (T := T) (θ := θ) (x := (⌜ρ⌝ : W))
 
 /-! ### Internal logic helpers -/
 
@@ -90,7 +93,12 @@ variable [𝗜𝚺₁ ⪯ T]
 /-! ### The refutability lemma -/
 
 lemma refutable_fghSentence_of_provedBefore :
-    T ⊢ (T.provedBefore θ)/[⌜T.fghSentence θ⌝] 🡒 ∼T.fghSentence θ := sorry
+    T ⊢ (T.provedBefore θ)/[⌜T.fghSentence θ⌝] 🡒 ∼T.fghSentence θ := by
+  set π := T.fghSentence θ with hπ
+  have h1 : T ⊢ (T.provedBefore θ)/[⌜π⌝] 🡒 ∼(T.witnessedBefore θ)/[⌜π⌝] :=
+    Entailment.WeakerThan.pbl (provedBefore_imp_not_witnessedBefore T θ π)
+  have h2 : T ⊢ π 🡘 (T.witnessedBefore θ)/[⌜π⌝] := hπ ▸ diagonal (T.witnessedBefore θ)
+  exact Entailment.C_trans h1 (Entailment.contra (Entailment.K_left h2))
 
 /-! ### Provability of the FGH sentence -/
 
