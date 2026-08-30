@@ -54,10 +54,13 @@ private lemma hierarchy_insert2 {Γ s} {θ : ArithmeticSemiformula Empty (n + 2)
     Hierarchy Γ s (Rew.bShift.q.q ▹ θ) ↔ Hierarchy Γ s θ := by
   simp
 
+private def Delta0Witnessed {n : ℕ} (φ : ArithmeticSemiformula Empty n)
+    (θ : ArithmeticSemiformula Empty (n + 1)) : Prop :=
+  ∀ (V : Type u) [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] (e : Fin n → V),
+    V ⊧/e φ ↔ ∃ w, V ⊧/(w :> e) θ
+
 private lemma witnessForm_atomic {φ : ArithmeticSemiformula Empty n} (hφ : Hierarchy 𝚺 0 φ) :
-    ∃ θ : ArithmeticSemiformula Empty (n + 1), Hierarchy 𝚺 0 θ ∧
-      ∀ (V : Type u) [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] (e : Fin n → V),
-        V ⊧/e φ ↔ ∃ w, V ⊧/(w :> e) θ := by
+    ∃ θ : ArithmeticSemiformula Empty (n + 1), Hierarchy 𝚺 0 θ ∧ Delta0Witnessed.{u} φ θ := by
   refine ⟨Rew.bShift ▹ φ, by simpa using hφ, ?_⟩
   intro V _ _ e
   constructor
@@ -66,13 +69,8 @@ private lemma witnessForm_atomic {φ : ArithmeticSemiformula Empty n} (hφ : Hie
 
 private lemma witnessForm_and {φ₁ φ₂ : ArithmeticSemiformula Empty n}
     {θ₁ θ₂ : ArithmeticSemiformula Empty (n + 1)} (hθ₁ : Hierarchy 𝚺 0 θ₁) (hθ₂ : Hierarchy 𝚺 0 θ₂)
-    (h₁ : ∀ (V : Type u) [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] (e : Fin n → V),
-      V ⊧/e φ₁ ↔ ∃ w, V ⊧/(w :> e) θ₁)
-    (h₂ : ∀ (V : Type u) [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] (e : Fin n → V),
-      V ⊧/e φ₂ ↔ ∃ w, V ⊧/(w :> e) θ₂) :
-    ∃ θ : ArithmeticSemiformula Empty (n + 1), Hierarchy 𝚺 0 θ ∧
-      ∀ (V : Type u) [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] (e : Fin n → V),
-        V ⊧/e (φ₁ ⋏ φ₂) ↔ ∃ w, V ⊧/(w :> e) θ := by
+    (h₁ : Delta0Witnessed.{u} φ₁ θ₁) (h₂ : Delta0Witnessed.{u} φ₂ θ₂) :
+    ∃ θ : ArithmeticSemiformula Empty (n + 1), Hierarchy 𝚺 0 θ ∧ Delta0Witnessed.{u} (φ₁ ⋏ φ₂) θ := by
   refine ⟨(Rew.bShift.q ▹ θ₁).bexsLTSucc (#0 : ArithmeticSemiterm Empty (n + 1)) ⋏
     (Rew.bShift.q ▹ θ₂).bexsLTSucc (#0 : ArithmeticSemiterm Empty (n + 1)), by simp [hθ₁, hθ₂], ?_⟩
   intro V _ _ e
@@ -87,13 +85,8 @@ private lemma witnessForm_and {φ₁ φ₂ : ArithmeticSemiformula Empty n}
 
 private lemma witnessForm_or {φ₁ φ₂ : ArithmeticSemiformula Empty n}
     {θ₁ θ₂ : ArithmeticSemiformula Empty (n + 1)} (hθ₁ : Hierarchy 𝚺 0 θ₁) (hθ₂ : Hierarchy 𝚺 0 θ₂)
-    (h₁ : ∀ (V : Type u) [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] (e : Fin n → V),
-      V ⊧/e φ₁ ↔ ∃ w, V ⊧/(w :> e) θ₁)
-    (h₂ : ∀ (V : Type u) [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] (e : Fin n → V),
-      V ⊧/e φ₂ ↔ ∃ w, V ⊧/(w :> e) θ₂) :
-    ∃ θ : ArithmeticSemiformula Empty (n + 1), Hierarchy 𝚺 0 θ ∧
-      ∀ (V : Type u) [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] (e : Fin n → V),
-        V ⊧/e (φ₁ ⋎ φ₂) ↔ ∃ w, V ⊧/(w :> e) θ := by
+    (h₁ : Delta0Witnessed.{u} φ₁ θ₁) (h₂ : Delta0Witnessed.{u} φ₂ θ₂) :
+    ∃ θ : ArithmeticSemiformula Empty (n + 1), Hierarchy 𝚺 0 θ ∧ Delta0Witnessed.{u} (φ₁ ⋎ φ₂) θ := by
   refine ⟨θ₁ ⋎ θ₂, by simp [hθ₁, hθ₂], ?_⟩
   intro V _ _ e
   simp only [LO.LogicalConnective.HomClass.map_or]
@@ -178,11 +171,8 @@ end Collection
 
 private lemma witnessForm_exs {φ : ArithmeticSemiformula Empty (n + 1)}
     {θ' : ArithmeticSemiformula Empty (n + 2)} (hθ' : Hierarchy 𝚺 0 θ')
-    (h : ∀ (V : Type u) [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] (e' : Fin (n + 1) → V),
-      V ⊧/e' φ ↔ ∃ w, V ⊧/(w :> e') θ') :
-    ∃ θ : ArithmeticSemiformula Empty (n + 1), Hierarchy 𝚺 0 θ ∧
-      ∀ (V : Type u) [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] (e : Fin n → V),
-        V ⊧/e (∃¹ φ) ↔ ∃ w, V ⊧/(w :> e) θ := by
+    (h : Delta0Witnessed.{u} φ θ') :
+    ∃ θ : ArithmeticSemiformula Empty (n + 1), Hierarchy 𝚺 0 θ ∧ Delta0Witnessed.{u} (∃¹ φ) θ := by
   refine ⟨((Rew.bShift.q.q ▹ θ').bexsLTSucc (#1 : ArithmeticSemiterm Empty (n + 2))).bexsLTSucc
     (#0 : ArithmeticSemiterm Empty (n + 1)), by simp [hθ'], ?_⟩
   intro V _ _ e
@@ -196,11 +186,8 @@ private lemma witnessForm_exs {φ : ArithmeticSemiformula Empty (n + 1)}
 
 private lemma witnessForm_ball {t : ArithmeticSemiterm Empty n} {φ : ArithmeticSemiformula Empty (n + 1)}
     {θ' : ArithmeticSemiformula Empty (n + 2)} (hθ' : Hierarchy 𝚺 0 θ')
-    (h : ∀ (V : Type u) [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] (e' : Fin (n + 1) → V),
-      V ⊧/e' φ ↔ ∃ w, V ⊧/(w :> e') θ') :
-    ∃ θ : ArithmeticSemiformula Empty (n + 1), Hierarchy 𝚺 0 θ ∧
-      ∀ (V : Type u) [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] (e : Fin n → V),
-        V ⊧/e (φ.ballLT t) ↔ ∃ w, V ⊧/(w :> e) θ := by
+    (h : Delta0Witnessed.{u} φ θ') :
+    ∃ θ : ArithmeticSemiformula Empty (n + 1), Hierarchy 𝚺 0 θ ∧ Delta0Witnessed.{u} (φ.ballLT t) θ := by
   refine ⟨((Rew.bShift.q.q ▹ θ').bexsLTSucc (#1 : ArithmeticSemiterm Empty (n + 2))).ballLT
     (Rew.bShift t : ArithmeticSemiterm Empty (n + 1)), by simp [hθ'], ?_⟩
   intro V _ _ e
