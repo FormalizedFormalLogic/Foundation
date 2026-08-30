@@ -8,8 +8,6 @@ public import Foundation.FirstOrder.Arithmetic.Sigma1WitnessForm
 
 For every `Σ₁` sentence `σ` there is a `Σ₁` sentence `π` such that `𝗜𝚺₁` proves
 `□_T π ↔ σ ∨ □_T ⊥`, and consequently `T ∪ Con_T ⊢ σ ↔ □_T π`.
-
-- A. Visser, *Faith & Falsity*, Annals of Pure and Applied Logic, 2005.
 -/
 
 @[expose] public section
