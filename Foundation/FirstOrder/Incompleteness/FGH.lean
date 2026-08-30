@@ -6,8 +6,8 @@ public import Foundation.FirstOrder.Arithmetic.Sigma1WitnessForm
 /-!
 # The Friedman–Goldfarb–Harrington theorem
 
-For a `Δ₀` formula `θ`, `𝗜𝚺₁` proves `□_T (T.fghSentenceSigma θ) ↔ (∃¹ θ) ∨ □_T ⊥`,
-and consequently `T ∪ Con_T ⊢ (∃¹ θ) ↔ □_T (T.fghSentenceSigma θ)`. Every `Σ₁` sentence
+For a `Δ₀` formula `θ`, `𝗜𝚺₁` proves `□_T (T.fghSentence θ) ↔ (∃¹ θ) ∨ □_T ⊥`,
+and consequently `T ∪ Con_T ⊢ (∃¹ θ) ↔ □_T (T.fghSentence θ)`. Every `Σ₁` sentence
 is of the form `∃¹ θ` for some `Δ₀` witness form `θ`, by `exists_delta0_witness_form`.
 -/
 
@@ -36,7 +36,7 @@ noncomputable def _root_.LO.FirstOrder.Theory.provedBefore : ArithmeticSemisente
 noncomputable def _root_.LO.FirstOrder.Theory.fghSentence : ArithmeticSentence :=
   fixedpoint (T.witnessedBefore θ)
 
-noncomputable def _root_.LO.FirstOrder.Theory.fghSentenceSigma : ArithmeticSentence :=
+noncomputable def _root_.LO.FirstOrder.Theory.fghSentence' : ArithmeticSentence :=
   (T.witnessedBefore θ)/[⌜T.fghSentence θ⌝]
 
 lemma eval_witnessedBefore : V ⊧/![x] (T.witnessedBefore θ) ↔ T.WitnessedBefore θ x := by
@@ -45,8 +45,8 @@ lemma eval_witnessedBefore : V ⊧/![x] (T.witnessedBefore θ) ↔ T.WitnessedBe
 lemma eval_provedBefore : V ⊧/![x] (T.provedBefore θ) ↔ T.ProvedBefore θ x := by
   simp [Theory.provedBefore, Theory.ProvedBefore];
 
-lemma hierarchy_fghSentenceSigma (hθ : Hierarchy 𝚺 0 θ) : Hierarchy 𝚺 1 (T.fghSentenceSigma θ) := by
-  simp [Theory.fghSentenceSigma, Theory.witnessedBefore, hθ.mono (by omega)];
+lemma hierarchy_fghSentence' (hθ : Hierarchy 𝚺 0 θ) : Hierarchy 𝚺 1 (T.fghSentence' θ) := by
+  simp [Theory.fghSentence', Theory.witnessedBefore, hθ.mono (by omega)];
 
 lemma not_witnessedBefore_of_provedBefore : T.ProvedBefore θ x → ¬T.WitnessedBefore θ x := by
   rintro ⟨p, hp, hbound⟩ ⟨w, hw, hbound'⟩;
@@ -105,11 +105,11 @@ lemma provable_fghSentence_iff (hθ : Hierarchy 𝚺 0 θ) :
       · push Not at hp;
         have h2 : V↓[ℒₒᵣ] ⊧ (T.witnessedBefore θ)/[⌜π⌝] := by
           simpa [models_iff] using (eval_witnessedBefore T θ).mpr (⟨w₀, hw₀, hp⟩ : T.WitnessedBefore θ (⌜π⌝ : V));
-        have hdiag : T ⊢ T.fghSentenceSigma θ 🡒 π :=
+        have hdiag : T ⊢ T.fghSentence' θ 🡒 π :=
           K_right
             (hπ ▸ diagonal (T.witnessedBefore θ) : T ⊢ π 🡘 (T.witnessedBefore θ)/[⌜π⌝]);
         exact modus_ponens_sentence T (internalize_provability hdiag)
-          (Bootstrapping.Arithmetic.sigma_one_complete T (hierarchy_fghSentenceSigma T θ hθ) h2);
+          (Bootstrapping.Arithmetic.sigma_one_complete T (hierarchy_fghSentence' T θ hθ) h2);
     · exact provable_of_provable_bot T hbot;
 
 end LO.FirstOrder.Arithmetic.Bootstrapping
@@ -122,24 +122,18 @@ open LO.Entailment
 variable (T : ArithmeticTheory) [T.Δ₁] [𝗜𝚺₁ ⪯ T] (θ : ArithmeticSemisentence 1)
 
 theorem fgh_theorem (hθ : Hierarchy 𝚺 0 θ) :
-    𝗜𝚺₁ ⊢ provabilityPred T (T.fghSentenceSigma θ) 🡘 (∃¹ θ) ⋎ provabilityPred T ⊥ := by
-  have heq : 𝗜𝚺₁ ⊢ provabilityPred T (T.fghSentence θ) 🡘 (∃¹ θ) ⋎ provabilityPred T ⊥ := by
-    apply complete.{0};
-    intro V _ _;
-    simpa [models_iff] using provable_fghSentence_iff T θ hθ;
-  have hdiag : 𝗜𝚺₁ ⊢ T.fghSentence θ 🡘 T.fghSentenceSigma θ := diagonal (T.witnessedBefore θ);
-  have hiff : 𝗜𝚺₁ ⊢ provabilityPred T (T.fghSentence θ) 🡘 provabilityPred T (T.fghSentenceSigma θ) :=
-    E_intro (T.standardProvability.mono' (K_left hdiag))
-      (T.standardProvability.mono' (K_right hdiag));
-  exact E_trans (E_symm hiff) heq;
+    𝗜𝚺₁ ⊢ provabilityPred T (T.fghSentence θ) 🡘 (∃¹ θ) ⋎ provabilityPred T ⊥ := by
+  apply complete.{0};
+  intro V _ _;
+  simpa [models_iff] using provable_fghSentence_iff T θ hθ;
 
 theorem fgh_theorem_con (hθ : Hierarchy 𝚺 0 θ) :
-    T ∪ T.Con ⊢ (∃¹ θ) 🡘 provabilityPred T (T.fghSentenceSigma θ) := by
+    T ∪ T.Con ⊢ (∃¹ θ) 🡘 provabilityPred T (T.fghSentence θ) := by
   have : 𝗜𝚺₁ ⪯ T ∪ T.Con := WeakerThan.trans (inferInstance : 𝗜𝚺₁ ⪯ T) inferInstance;
-  have heq : T ∪ T.Con ⊢ provabilityPred T (T.fghSentenceSigma θ) 🡘 (∃¹ θ) ⋎ provabilityPred T ⊥ :=
+  have heq : T ∪ T.Con ⊢ provabilityPred T (T.fghSentence θ) 🡘 (∃¹ θ) ⋎ provabilityPred T ⊥ :=
     WeakerThan.pbl $ fgh_theorem T θ hθ;
   have hcon : T ∪ T.Con ⊢ ∼provabilityPred T ⊥ := by_axm (by simp [Theory.consistent]);
-  generalize T.fghSentenceSigma θ = π at heq ⊢;
+  generalize T.fghSentence θ = π at heq ⊢;
   cl_prover [heq, hcon];
 
 end LO.FirstOrder.Arithmetic
