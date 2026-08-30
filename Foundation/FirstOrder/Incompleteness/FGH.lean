@@ -119,9 +119,10 @@ lemma provable_fghSentence_of_witness_or_provable_bot (hθ : Hierarchy 𝚺 0 θ
   . exact provable_of_provable_bot T hbot;
 
 lemma provable_fghSentence_iff (hθ : Hierarchy 𝚺 0 θ) :
-  □(T.fghSentence θ) ↔ (∃ w, V ⊧/![w] θ) ∨ □(⊥ : ArithmeticSentence) :=
-  ⟨witness_or_provable_bot_of_provable_fghSentence T θ hθ,
-    provable_fghSentence_of_witness_or_provable_bot T θ hθ⟩
+  □(T.fghSentence θ) ↔ (∃ w, V ⊧/![w] θ) ∨ □(⊥ : ArithmeticSentence) := ⟨
+    witness_or_provable_bot_of_provable_fghSentence T θ hθ,
+    provable_fghSentence_of_witness_or_provable_bot T θ hθ
+  ⟩
 
 /-- The constructive form of the FGH theorem: `T.fghSentence θ` is an explicit witness. -/
 lemma provable_fixedpoint_iff_exs_or_provable_bot (hθ : Hierarchy 𝚺 0 θ) :
@@ -137,9 +138,9 @@ namespace LO.FirstOrder.Arithmetic
 open Bootstrapping
 open LO.Entailment
 
-variable (T : ArithmeticTheory) [T.Δ₁] [𝗜𝚺₁ ⪯ T]
+variable (T : ArithmeticTheory) [T.Δ₁] [𝗜𝚺₁ ⪯ T] {σ : ArithmeticSentence}
 
-theorem fgh_theorem {σ : ArithmeticSentence} (hσ : Hierarchy 𝚺 1 σ) :
+theorem fgh_theorem (hσ : Hierarchy 𝚺 1 σ) :
   ∃ π : ArithmeticSentence, Hierarchy 𝚺 1 π ∧ 𝗜𝚺₁ ⊢ provabilityPred T π 🡘 σ ⋎ provabilityPred T ⊥ := by
   obtain ⟨θ, hθ, hwit⟩ := exists_delta0_witness_form.{0} hσ;
   use T.fghSentence' θ;
@@ -155,7 +156,7 @@ theorem fgh_theorem {σ : ArithmeticSentence} (hσ : Hierarchy 𝚺 1 σ) :
       E_intro (T.standardProvability.mono' (K_left hdiag)) (T.standardProvability.mono' (K_right hdiag));
     exact E_trans (E_symm hiff) heq;
 
-theorem fgh_theorem_con {σ : ArithmeticSentence} (hσ : Hierarchy 𝚺 1 σ) :
+theorem fgh_theorem_con (hσ : Hierarchy 𝚺 1 σ) :
   ∃ π : ArithmeticSentence, Hierarchy 𝚺 1 π ∧ 𝗜𝚺₁ ∪ T.Con ⊢ σ 🡘 provabilityPred T π := by
   obtain ⟨π, hπ, heq⟩ := fgh_theorem T hσ;
   use π;
