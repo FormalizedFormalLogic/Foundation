@@ -32,14 +32,11 @@ noncomputable def _root_.LO.FirstOrder.Theory.witnessedBefore : ArithmeticSemise
 noncomputable def _root_.LO.FirstOrder.Theory.provedBefore : ArithmeticSemisentence 1 :=
   “x. ∃ p, !(proof T).sigma p x ∧ ∀ w <⁺ p, ¬!θ w”
 
-local notation:max "𝗪" ρ:max => (T.witnessedBefore θ)/[⌜ρ⌝]
-local notation:max "𝗣" ρ:max => (T.provedBefore θ)/[⌜ρ⌝]
-
 noncomputable def _root_.LO.FirstOrder.Theory.fghSentence : ArithmeticSentence :=
   fixedpoint (T.witnessedBefore θ)
 
 noncomputable def _root_.LO.FirstOrder.Theory.fghSentenceSigma : ArithmeticSentence :=
-  𝗪(T.fghSentence θ)
+  (T.witnessedBefore θ)/[⌜T.fghSentence θ⌝]
 
 /-! ### Evaluation and complexity -/
 
@@ -74,14 +71,17 @@ variable [𝗜𝚺₁ ⪯ T]
 
 /-! ### The refutability lemma -/
 
-private lemma refutable_fghSentence_of_provedBefore : T ⊢ 𝗣(T.fghSentence θ) 🡒 ∼T.fghSentence θ := by
+private lemma refutable_fghSentence_of_provedBefore :
+    T ⊢ (T.provedBefore θ)/[⌜T.fghSentence θ⌝] 🡒 ∼T.fghSentence θ := by
   set π := T.fghSentence θ with hπ
-  have h1 : T ⊢ 𝗣π 🡒 ∼𝗪π := Entailment.WeakerThan.pbl (show 𝗜𝚺₁ ⊢ 𝗣π 🡒 ∼𝗪π by
-    apply complete
-    intro (W : Type) _ _
-    simpa [models_iff, eval_witnessedBefore, eval_provedBefore, Sentence.coe_quote_eq_quote]
-      using not_witnessedBefore_of_provedBefore (T := T) (θ := θ) (x := ⌜π⌝))
-  have h2 : T ⊢ π 🡘 𝗪π := hπ ▸ diagonal (T.witnessedBefore θ)
+  have h1 : T ⊢ (T.provedBefore θ)/[⌜π⌝] 🡒 ∼(T.witnessedBefore θ)/[⌜π⌝] :=
+    Entailment.WeakerThan.pbl
+      (show 𝗜𝚺₁ ⊢ (T.provedBefore θ)/[⌜π⌝] 🡒 ∼(T.witnessedBefore θ)/[⌜π⌝] by
+        apply complete
+        intro (W : Type) _ _
+        simpa [models_iff, eval_witnessedBefore, eval_provedBefore, Sentence.coe_quote_eq_quote]
+          using not_witnessedBefore_of_provedBefore (T := T) (θ := θ) (x := ⌜π⌝))
+  have h2 : T ⊢ π 🡘 (T.witnessedBefore θ)/[⌜π⌝] := hπ ▸ diagonal (T.witnessedBefore θ)
   exact Entailment.C_trans h1 (Entailment.contra (Entailment.K_left h2))
 
 /-! ### Provability of the FGH sentence -/
@@ -95,14 +95,15 @@ private lemma provable_fghSentence_iff (hθ : Hierarchy 𝚺 0 θ) :
     · exact Or.inl hw
     · push Not at hw
       obtain ⟨p₀, hp₀⟩ := hprov
-      have h2 : V↓[ℒₒᵣ] ⊧ 𝗣π := by
+      have h2 : V↓[ℒₒᵣ] ⊧ (T.provedBefore θ)/[⌜π⌝] := by
         simpa [models_iff] using
           (eval_provedBefore T θ).mpr (⟨p₀, hp₀, fun w _ ↦ hw w⟩ : T.ProvedBefore θ (⌜π⌝ : V))
-      have hp2 : □𝗣π :=
+      have hp2 : □((T.provedBefore θ)/[⌜π⌝]) :=
         Bootstrapping.Arithmetic.sigma_one_complete T
           (by simp [Theory.provedBefore, (Hierarchy.pi_zero_iff_sigma_zero.mpr hθ).mono
             (by omega : (0:ℕ) ≤ 1)]) h2
-      have hrefut : T ⊢ 𝗣π 🡒 ∼π := hπ ▸ refutable_fghSentence_of_provedBefore T θ
+      have hrefut : T ⊢ (T.provedBefore θ)/[⌜π⌝] 🡒 ∼π :=
+        hπ ▸ refutable_fghSentence_of_provedBefore T θ
       exact Or.inr (provable_bot_of_provable_of_provable_neg T ⟨p₀, hp₀⟩
         (modus_ponens_sentence T (internalize_provability hrefut) hp2))
   · rintro (⟨w₀, hw₀⟩ | hbot)
@@ -110,10 +111,11 @@ private lemma provable_fghSentence_iff (hθ : Hierarchy 𝚺 0 θ) :
       · obtain ⟨p, -, hp⟩ := hp
         use p
       · push Not at hp
-        have h2 : V↓[ℒₒᵣ] ⊧ 𝗪π := by
+        have h2 : V↓[ℒₒᵣ] ⊧ (T.witnessedBefore θ)/[⌜π⌝] := by
           simpa [models_iff] using (eval_witnessedBefore T θ).mpr (⟨w₀, hw₀, hp⟩ : T.WitnessedBefore θ (⌜π⌝ : V))
         have hdiag : T ⊢ T.fghSentenceSigma θ 🡒 π :=
-          Entailment.K_right (hπ ▸ diagonal (T.witnessedBefore θ) : T ⊢ π 🡘 𝗪π)
+          Entailment.K_right
+            (hπ ▸ diagonal (T.witnessedBefore θ) : T ⊢ π 🡘 (T.witnessedBefore θ)/[⌜π⌝])
         exact modus_ponens_sentence T (internalize_provability hdiag)
           (Bootstrapping.Arithmetic.sigma_one_complete T (hierarchy_fghSentenceSigma T θ hθ) h2)
     · exact provable_of_provable_bot T hbot
