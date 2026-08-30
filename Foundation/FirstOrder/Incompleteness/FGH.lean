@@ -79,41 +79,49 @@ lemma refutable_fghSentence_of_provedBefore :
   have h2 : T ⊢ π 🡘 (T.witnessedBefore θ)/[⌜π⌝] := hπ ▸ diagonal (T.witnessedBefore θ);
   exact C_trans h1 $ contra $ K_left h2;
 
-lemma provable_fghSentence_iff (hθ : Hierarchy 𝚺 0 θ) :
-  □(T.fghSentence θ) ↔ (∃ w, V ⊧/![w] θ) ∨ □(⊥ : ArithmeticSentence) := by
+lemma witness_or_provable_bot_of_provable_fghSentence (hθ : Hierarchy 𝚺 0 θ) :
+  □(T.fghSentence θ) → (∃ w, V ⊧/![w] θ) ∨ □(⊥ : ArithmeticSentence) := by
   set π := T.fghSentence θ with hπ;
-  constructor;
-  · intro hprov;
-    by_cases hw : ∃ w, V ⊧/![w] θ;
-    · tauto;
-    · push Not at hw;
-      obtain ⟨p₀, hp₀⟩ := hprov;
-      have h2 : V↓[ℒₒᵣ] ⊧ (T.provedBefore θ)/[⌜π⌝] := by
-        simpa [models_iff] using
-          (eval_provedBefore T θ).mpr (⟨p₀, hp₀, fun w _ ↦ hw w⟩ : T.ProvedBefore θ (⌜π⌝ : V));
-      have hp2 : □((T.provedBefore θ)/[⌜π⌝]) :=
-        Bootstrapping.Arithmetic.sigma_one_complete T (by simp [
-            Theory.provedBefore,
-            (Hierarchy.pi_zero_iff_sigma_zero.mpr hθ).mono (by omega)
-          ]) h2;
-      have hrefut : T ⊢ (T.provedBefore θ)/[⌜π⌝] 🡒 ∼π :=
-        hπ ▸ refutable_fghSentence_of_provedBefore T θ;
-      right;
-      exact provable_bot_of_provable_of_provable_neg T ⟨p₀, hp₀⟩
-        (modus_ponens_sentence T (internalize_provability hrefut) hp2);
-  · rintro (⟨w₀, hw₀⟩ | hbot);
-    · by_cases hp : ∃ p < w₀, Proof T p (⌜π⌝ : V);
-      · obtain ⟨p, -, hp⟩ := hp;
-        use p;
-      · push Not at hp;
-        have h2 : V↓[ℒₒᵣ] ⊧ (T.witnessedBefore θ)/[⌜π⌝] := by
-          simpa [models_iff] using (eval_witnessedBefore T θ).mpr (⟨w₀, hw₀, hp⟩ : T.WitnessedBefore θ (⌜π⌝ : V));
-        have hdiag : T ⊢ T.fghSentence' θ 🡒 π :=
-          K_right
-            (hπ ▸ diagonal (T.witnessedBefore θ) : T ⊢ π 🡘 (T.witnessedBefore θ)/[⌜π⌝]);
-        exact modus_ponens_sentence T (internalize_provability hdiag)
-          (Bootstrapping.Arithmetic.sigma_one_complete T (hierarchy_fghSentence' T θ hθ) h2);
-    · exact provable_of_provable_bot T hbot;
+  intro hprov;
+  by_cases hw : ∃ w, V ⊧/![w] θ;
+  · tauto;
+  · push Not at hw;
+    obtain ⟨p₀, hp₀⟩ := hprov;
+    have h2 : V↓[ℒₒᵣ] ⊧ (T.provedBefore θ)/[⌜π⌝] := by
+      simpa [models_iff] using
+        (eval_provedBefore T θ).mpr (⟨p₀, hp₀, fun w _ ↦ hw w⟩ : T.ProvedBefore θ (⌜π⌝ : V));
+    have hp2 : □((T.provedBefore θ)/[⌜π⌝]) :=
+      Bootstrapping.Arithmetic.sigma_one_complete T (by simp [
+          Theory.provedBefore,
+          (Hierarchy.pi_zero_iff_sigma_zero.mpr hθ).mono (by omega)
+        ]) h2;
+    have hrefut : T ⊢ (T.provedBefore θ)/[⌜π⌝] 🡒 ∼π :=
+      hπ ▸ refutable_fghSentence_of_provedBefore T θ;
+    right;
+    exact provable_bot_of_provable_of_provable_neg T ⟨p₀, hp₀⟩
+      (modus_ponens_sentence T (internalize_provability hrefut) hp2);
+
+lemma provable_fghSentence_of_witness_or_provable_bot (hθ : Hierarchy 𝚺 0 θ) :
+  (∃ w, V ⊧/![w] θ) ∨ □(⊥ : ArithmeticSentence) → □(T.fghSentence θ) := by
+  set π := T.fghSentence θ with hπ;
+  rintro (⟨w₀, hw₀⟩ | hbot);
+  · by_cases hp : ∃ p < w₀, Proof T p (⌜π⌝ : V);
+    · obtain ⟨p, -, hp⟩ := hp;
+      use p;
+    · push Not at hp;
+      have h2 : V↓[ℒₒᵣ] ⊧ (T.witnessedBefore θ)/[⌜π⌝] := by
+        simpa [models_iff] using (eval_witnessedBefore T θ).mpr (⟨w₀, hw₀, hp⟩ : T.WitnessedBefore θ (⌜π⌝ : V));
+      have hdiag : T ⊢ T.fghSentence' θ 🡒 π :=
+        K_right
+          (hπ ▸ diagonal (T.witnessedBefore θ) : T ⊢ π 🡘 (T.witnessedBefore θ)/[⌜π⌝]);
+      exact modus_ponens_sentence T (internalize_provability hdiag)
+        (Bootstrapping.Arithmetic.sigma_one_complete T (hierarchy_fghSentence' T θ hθ) h2);
+  · exact provable_of_provable_bot T hbot;
+
+lemma provable_fghSentence_iff (hθ : Hierarchy 𝚺 0 θ) :
+  □(T.fghSentence θ) ↔ (∃ w, V ⊧/![w] θ) ∨ □(⊥ : ArithmeticSentence) :=
+  ⟨witness_or_provable_bot_of_provable_fghSentence T θ hθ,
+    provable_fghSentence_of_witness_or_provable_bot T θ hθ⟩
 
 /-- The constructive form of the FGH theorem: `T.fghSentence θ` is an explicit witness. -/
 lemma fgh_equation (hθ : Hierarchy 𝚺 0 θ) :
