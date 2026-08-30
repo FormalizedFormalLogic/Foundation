@@ -64,7 +64,11 @@ lemma hierarchy_fghSentenceSigma (hθ : Hierarchy 𝚺 0 θ) : Hierarchy 𝚺 1 
 /-! ### Exclusivity of witness and proof -/
 
 lemma not_witnessedBefore_of_provedBefore {x : V} :
-    T.ProvedBefore θ x → ¬T.WitnessedBefore θ x := sorry
+    T.ProvedBefore θ x → ¬T.WitnessedBefore θ x := by
+  rintro ⟨p, hp, hbound⟩ ⟨w, hw, hbound'⟩
+  rcases lt_or_ge p w with h | h
+  · exact hbound' p h hp
+  · exact hbound w h hw
 
 lemma provedBefore_imp_not_witnessedBefore (ρ : ArithmeticSentence) :
     𝗜𝚺₁ ⊢ (T.provedBefore θ)/[⌜ρ⌝] 🡒 ∼(T.witnessedBefore θ)/[⌜ρ⌝] := sorry
@@ -72,10 +76,14 @@ lemma provedBefore_imp_not_witnessedBefore (ρ : ArithmeticSentence) :
 /-! ### Internal logic helpers -/
 
 lemma provable_of_provable_bot {σ : ArithmeticSentence} :
-    Provable T (⌜(⊥ : ArithmeticSentence)⌝ : V) → Provable T (⌜σ⌝ : V) := sorry
+    Provable T (⌜(⊥ : ArithmeticSentence)⌝ : V) → Provable T (⌜σ⌝ : V) :=
+  modus_ponens_sentence T (internalize_provability (V := V) Entailment.efq)
 
 lemma provable_bot_of_provable_of_provable_neg {σ : ArithmeticSentence} :
-    Provable T (⌜σ⌝ : V) → Provable T (⌜∼σ⌝ : V) → Provable T (⌜(⊥ : ArithmeticSentence)⌝ : V) := sorry
+    Provable T (⌜σ⌝ : V) → Provable T (⌜∼σ⌝ : V) → Provable T (⌜(⊥ : ArithmeticSentence)⌝ : V) :=
+  fun hσ hnσ ↦
+    modus_ponens_sentence T
+      (modus_ponens_sentence T (internalize_provability (V := V) (by cl_prover)) hσ) hnσ
 
 variable [𝗜𝚺₁ ⪯ T]
 
