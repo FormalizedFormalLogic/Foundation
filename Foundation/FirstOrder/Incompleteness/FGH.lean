@@ -5,12 +5,6 @@ public import Foundation.FirstOrder.Arithmetic.Sigma1WitnessForm
 
 /-!
 # The Friedman–Goldfarb–Harrington theorem
-
-For a `Δ₀` formula `θ`, `𝗜𝚺₁` proves `□_T (T.fghSentence θ) ↔ (∃¹ θ) ∨ □_T ⊥`, with
-`T.fghSentence θ` an explicit witness. Every `Σ₁` sentence is of the form `∃¹ θ` for
-some `Δ₀` witness form `θ`, by `exists_delta0_witness_form`, which yields the theorem
-proper: for every `Σ₁` sentence `σ` there is a `Σ₁` sentence `π` with `𝗜𝚺₁ ⊢ □_T π ↔ σ ∨ □_T ⊥`
-and `T ∪ Con_T ⊢ σ ↔ □_T π`.
 -/
 
 @[expose] public section
