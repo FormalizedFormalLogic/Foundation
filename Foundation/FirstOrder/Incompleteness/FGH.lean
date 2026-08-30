@@ -187,6 +187,13 @@ theorem fgh_theorem {σ : ArithmeticSentence} (hσ : Hierarchy 𝚺 1 σ) :
   exact Entailment.E_trans (Entailment.E_symm hiff) heq
 
 theorem fgh_theorem_con {σ : ArithmeticSentence} (hσ : Hierarchy 𝚺 1 σ) :
-    ∃ π : ArithmeticSentence, Hierarchy 𝚺 1 π ∧ T ∪ T.Con ⊢ σ 🡘 provabilityPred T π := sorry
+    ∃ π : ArithmeticSentence, Hierarchy 𝚺 1 π ∧ T ∪ T.Con ⊢ σ 🡘 provabilityPred T π := by
+  obtain ⟨π, hπ, heq⟩ := fgh_theorem (T := T) hσ
+  have : 𝗜𝚺₁ ⪯ T ∪ T.Con := Entailment.WeakerThan.trans (inferInstance : 𝗜𝚺₁ ⪯ T) inferInstance
+  refine ⟨π, hπ, ?_⟩
+  have heq' : T ∪ T.Con ⊢ provabilityPred T π 🡘 σ ⋎ provabilityPred T ⊥ :=
+    Entailment.WeakerThan.pbl heq
+  have hcon : T ∪ T.Con ⊢ ∼provabilityPred T ⊥ := Entailment.by_axm (Or.inr rfl)
+  cl_prover [heq', hcon]
 
 end LO.FirstOrder.Arithmetic
