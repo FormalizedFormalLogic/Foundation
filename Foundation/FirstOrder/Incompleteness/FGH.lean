@@ -103,10 +103,29 @@ lemma refutable_fghSentence_of_provedBefore :
 /-! ### Provability of the FGH sentence -/
 
 lemma provable_fghSentence_of_witness (hθ : Hierarchy 𝚺 0 θ) :
-    (∃ w, V ⊧/![w] θ) → Provable T (⌜T.fghSentence θ⌝ : V) := sorry
+    (∃ w, V ⊧/![w] θ) → Provable T (⌜T.fghSentence θ⌝ : V) := by
+  rintro ⟨w₀, hw₀⟩
+  set π := T.fghSentence θ with hπ
+  by_cases hp : ∃ p < w₀, Proof T p (⌜π⌝ : V)
+  · obtain ⟨p, -, hp⟩ := hp
+    exact ⟨p, hp⟩
+  · push Not at hp
+    have hwb : T.WitnessedBefore θ (⌜π⌝ : V) := ⟨w₀, hw₀, hp⟩
+    have h1 : V ⊧/![(⌜π⌝ : V)] (T.witnessedBefore θ) := (eval_witnessedBefore T θ).mpr hwb
+    have h2 : V↓[ℒₒᵣ] ⊧ (T.witnessedBefore θ)/[⌜π⌝] := by
+      simpa [models_iff] using h1
+    have hp2 : Provable T (⌜T.fghSentenceSigma θ⌝ : V) :=
+      Bootstrapping.Arithmetic.sigma_one_complete T (hierarchy_fghSentenceSigma T θ hθ) h2
+    have h2iff : T ⊢ π 🡘 (T.witnessedBefore θ)/[⌜π⌝] := hπ ▸ diagonal (T.witnessedBefore θ)
+    have hdiag : T ⊢ T.fghSentenceSigma θ 🡒 π := Entailment.K_right h2iff
+    have hinternal : Provable T (⌜T.fghSentenceSigma θ 🡒 π⌝ : V) :=
+      internalize_provability hdiag
+    exact modus_ponens_sentence T hinternal hp2
 
+omit [𝗜𝚺₁ ⪯ T] in
 lemma provable_fghSentence_of_provable_bot :
-    Provable T (⌜(⊥ : ArithmeticSentence)⌝ : V) → Provable T (⌜T.fghSentence θ⌝ : V) := sorry
+    Provable T (⌜(⊥ : ArithmeticSentence)⌝ : V) → Provable T (⌜T.fghSentence θ⌝ : V) :=
+  provable_of_provable_bot T
 
 lemma witness_or_provable_bot_of_provable_fghSentence (hθ : Hierarchy 𝚺 0 θ) :
     Provable T (⌜T.fghSentence θ⌝ : V) → (∃ w, V ⊧/![w] θ) ∨ Provable T (⌜(⊥ : ArithmeticSentence)⌝ : V) := sorry
