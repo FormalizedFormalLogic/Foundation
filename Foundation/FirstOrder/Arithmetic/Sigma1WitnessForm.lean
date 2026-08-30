@@ -63,11 +63,11 @@ private lemma witnessForm_atomic {φ : ArithmeticSemiformula Empty n} (hφ : Hie
     ∃ θ : ArithmeticSemiformula Empty (n + 1), Hierarchy 𝚺 0 θ ∧ Delta0Witnessed.{u} φ θ := by
   use Rew.bShift ▹ φ;
   and_intros
-  · simpa using hφ
-  · intro V _ _ e
+  . simpa using hφ
+  . intro V _ _ e
     constructor
-    · intro h; exact ⟨0, by simpa using h⟩
-    · rintro ⟨w, h⟩; simpa using h
+    . intro h; exact ⟨0, by simpa using h⟩
+    . rintro ⟨w, h⟩; simpa using h
 
 private lemma witnessForm_and {φ₁ φ₂ : ArithmeticSemiformula Empty n}
     {θ₁ θ₂ : ArithmeticSemiformula Empty (n + 1)} (hθ₁ : Hierarchy 𝚺 0 θ₁) (hθ₂ : Hierarchy 𝚺 0 θ₂)
@@ -76,15 +76,15 @@ private lemma witnessForm_and {φ₁ φ₂ : ArithmeticSemiformula Empty n}
   use (Rew.bShift.q ▹ θ₁).bexsLTSucc (#0 : ArithmeticSemiterm Empty (n + 1)) ⋏
     (Rew.bShift.q ▹ θ₂).bexsLTSucc (#0 : ArithmeticSemiterm Empty (n + 1));
   and_intros
-  · simp [hθ₁, hθ₂]
-  · intro V _ _ e
+  . simp [hθ₁, hθ₂]
+  . intro V _ _ e
     simp only [LO.LogicalConnective.HomClass.map_and]
     rw [h₁ V e, h₂ V e]
     simp only [Semiformula.eval_bexsLTSucc, Arithmetic.lt_succ_iff_le, eval_insert1]
     constructor
-    · rintro ⟨⟨w₁, hw₁⟩, ⟨w₂, hw₂⟩⟩
+    . rintro ⟨⟨w₁, hw₁⟩, ⟨w₂, hw₂⟩⟩
       exact ⟨w₁ + w₂, ⟨w₁, self_le_add_right w₁ w₂, hw₁⟩, ⟨w₂, self_le_add_left w₂ w₁, hw₂⟩⟩
-    · rintro ⟨w, ⟨w₁, _, hw₁⟩, ⟨w₂, _, hw₂⟩⟩
+    . rintro ⟨w, ⟨w₁, _, hw₁⟩, ⟨w₂, _, hw₂⟩⟩
       exact ⟨⟨w₁, hw₁⟩, ⟨w₂, hw₂⟩⟩
 
 private lemma witnessForm_or {φ₁ φ₂ : ArithmeticSemiformula Empty n}
@@ -93,8 +93,8 @@ private lemma witnessForm_or {φ₁ φ₂ : ArithmeticSemiformula Empty n}
     ∃ θ : ArithmeticSemiformula Empty (n + 1), Hierarchy 𝚺 0 θ ∧ Delta0Witnessed.{u} (φ₁ ⋎ φ₂) θ := by
   use θ₁ ⋎ θ₂;
   and_intros
-  · simp [hθ₁, hθ₂]
-  · intro V _ _ e
+  . simp [hθ₁, hθ₂]
+  . intro V _ _ e
     simp only [LO.LogicalConnective.HomClass.map_or]
     rw [h₁ V e, h₂ V e]
     aesop
@@ -157,21 +157,21 @@ private lemma exists_bound_witness {θ : ArithmeticSemiformula Empty (n + 2)} (h
     apply InductionOnHierarchy.succ_induction_sigma 𝚺 1
       (P := fun y => ∃ w, ∀ x < y, x < a → ∃ u ≤ w, V ⊧/(u :> x :> e) θ)
       (hP := collectionMotive_definable hθ e a)
-    · exact ⟨0, fun x hx _ => absurd hx (by simp)⟩
-    · rintro y ⟨w, hw⟩
+    . exact ⟨0, fun x hx _ => absurd hx (by simp)⟩
+    . rintro y ⟨w, hw⟩
       by_cases hya : y < a
-      · obtain ⟨u₀, hu₀⟩ := h y hya
+      . obtain ⟨u₀, hu₀⟩ := h y hya
         use max w u₀;
         intro x hx _
         rcases le_iff_lt_or_eq.mp (Arithmetic.lt_succ_iff_le.mp hx) with hx | rfl
-        · obtain ⟨u, hu, hPu⟩ := hw x hx (lt_trans hx hya)
+        . obtain ⟨u, hu, hPu⟩ := hw x hx (lt_trans hx hya)
           exact ⟨u, le_trans hu (le_max_left w u₀), hPu⟩
-        · exact ⟨u₀, le_max_right w u₀, hu₀⟩
-      · use w;
+        . exact ⟨u₀, le_max_right w u₀, hu₀⟩
+      . use w;
         intro x hx hxa
         rcases le_iff_lt_or_eq.mp (Arithmetic.lt_succ_iff_le.mp hx) with hx | rfl
-        · exact hw x hx hxa
-        · exact absurd hxa hya
+        . exact hw x hx hxa
+        . exact absurd hxa hya
   obtain ⟨w, hw⟩ := key (a + 1)
   exact ⟨w, fun x hx => hw x (lt_trans hx (lt_add_one a)) hx⟩
 
@@ -184,14 +184,14 @@ private lemma witnessForm_exs {φ : ArithmeticSemiformula Empty (n + 1)}
   use ((Rew.bShift.q.q ▹ θ').bexsLTSucc (#1 : ArithmeticSemiterm Empty (n + 2))).bexsLTSucc
     (#0 : ArithmeticSemiterm Empty (n + 1));
   and_intros
-  · simp [hθ']
-  · intro V _ _ e
+  . simp [hθ']
+  . intro V _ _ e
     simp only [Semiformula.eval_ex, eval_bexsLTSucc', eval_insert2]
     constructor
-    · rintro ⟨x, hx⟩
+    . rintro ⟨x, hx⟩
       obtain ⟨w', hw'⟩ := (h V (x :> e)).mp hx
       exact ⟨x + w', x, self_le_add_right x w', w', self_le_add_left w' x, hw'⟩
-    · rintro ⟨_, x, -, w', -, hw'⟩
+    . rintro ⟨_, x, -, w', -, hw'⟩
       exact ⟨x, (h V (x :> e)).mpr ⟨w', hw'⟩⟩
 
 private lemma witnessForm_ball {t : ArithmeticSemiterm Empty n} {φ : ArithmeticSemiformula Empty (n + 1)}
@@ -201,16 +201,16 @@ private lemma witnessForm_ball {t : ArithmeticSemiterm Empty n} {φ : Arithmetic
   use ((Rew.bShift.q.q ▹ θ').bexsLTSucc (#1 : ArithmeticSemiterm Empty (n + 2))).ballLT
     (Rew.bShift t : ArithmeticSemiterm Empty (n + 1));
   and_intros
-  · simp [hθ']
-  · intro V _ _ e
+  . simp [hθ']
+  . intro V _ _ e
     simp only [Semiformula.eval_ballLT, eval_bexsLTSucc', eval_insert2, Semiterm.val_bShift]
     constructor
-    · intro hφ
+    . intro hφ
       have hex : ∀ x < t.valb e, ∃ w', V ⊧/(w' :> x :> e) θ' :=
         fun x hx => (h V (x :> e)).mp (hφ x hx)
       obtain ⟨w, hw⟩ := exists_bound_witness hθ' e (t.valb e) hex
       exact ⟨w, fun x hx => hw x hx⟩
-    · rintro ⟨w, hw⟩ x hx
+    . rintro ⟨w, hw⟩ x hx
       obtain ⟨w', -, hθ'x⟩ := hw x hx
       exact (h V (x :> e)).mpr ⟨w', hθ'x⟩
 
@@ -222,19 +222,19 @@ lemma exists_delta0_witness_form {n : ℕ} {φ : ArithmeticSemiformula Empty n} 
     (P := fun n φ => ∃ θ : ArithmeticSemiformula Empty (n + 1), Hierarchy 𝚺 0 θ ∧
       ∀ (V : Type u) [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] (e : Fin n → V),
         V ⊧/e φ ↔ ∃ w, V ⊧/(w :> e) θ)
-  · exact fun n => witnessForm_atomic (Hierarchy.verum _ _ _)
-  · exact fun n => witnessForm_atomic (Hierarchy.falsum _ _ _)
-  · exact fun n t₁ t₂ => witnessForm_atomic (Hierarchy.rel _ _ _ _)
-  · exact fun n t₁ t₂ => witnessForm_atomic (Hierarchy.nrel _ _ _ _)
-  · exact fun n t₁ t₂ => witnessForm_atomic (Hierarchy.rel _ _ _ _)
-  · exact fun n t₁ t₂ => witnessForm_atomic (Hierarchy.nrel _ _ _ _)
-  · rintro n φ ψ hφ hψ ⟨θ₁, hθ₁, h₁⟩ ⟨θ₂, hθ₂, h₂⟩
+  . exact fun n => witnessForm_atomic (Hierarchy.verum _ _ _)
+  . exact fun n => witnessForm_atomic (Hierarchy.falsum _ _ _)
+  . exact fun n t₁ t₂ => witnessForm_atomic (Hierarchy.rel _ _ _ _)
+  . exact fun n t₁ t₂ => witnessForm_atomic (Hierarchy.nrel _ _ _ _)
+  . exact fun n t₁ t₂ => witnessForm_atomic (Hierarchy.rel _ _ _ _)
+  . exact fun n t₁ t₂ => witnessForm_atomic (Hierarchy.nrel _ _ _ _)
+  . rintro n φ ψ hφ hψ ⟨θ₁, hθ₁, h₁⟩ ⟨θ₂, hθ₂, h₂⟩
     exact witnessForm_and hθ₁ hθ₂ h₁ h₂
-  · rintro n φ ψ hφ hψ ⟨θ₁, hθ₁, h₁⟩ ⟨θ₂, hθ₂, h₂⟩
+  . rintro n φ ψ hφ hψ ⟨θ₁, hθ₁, h₁⟩ ⟨θ₂, hθ₂, h₂⟩
     exact witnessForm_or hθ₁ hθ₂ h₁ h₂
-  · rintro n t φ hφ ⟨θ', hθ', h⟩
+  . rintro n t φ hφ ⟨θ', hθ', h⟩
     exact witnessForm_ball hθ' h
-  · rintro n φ hφ ⟨θ', hθ', h⟩
+  . rintro n φ hφ ⟨θ', hθ', h⟩
     exact witnessForm_exs hθ' h
 
 end LO.FirstOrder.Arithmetic

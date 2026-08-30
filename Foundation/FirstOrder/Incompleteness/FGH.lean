@@ -84,8 +84,8 @@ lemma witness_or_provable_bot_of_provable_fghSentence (hθ : Hierarchy 𝚺 0 θ
   set π := T.fghSentence θ with hπ;
   intro hprov;
   by_cases hw : ∃ w, V ⊧/![w] θ;
-  · tauto;
-  · push Not at hw;
+  . tauto;
+  . push Not at hw;
     obtain ⟨p₀, hp₀⟩ := hprov;
     have h2 : V↓[ℒₒᵣ] ⊧ (T.provedBefore θ)/[⌜π⌝] := by
       simpa [models_iff] using
@@ -105,10 +105,10 @@ lemma provable_fghSentence_of_witness_or_provable_bot (hθ : Hierarchy 𝚺 0 θ
   (∃ w, V ⊧/![w] θ) ∨ □(⊥ : ArithmeticSentence) → □(T.fghSentence θ) := by
   set π := T.fghSentence θ with hπ;
   rintro (⟨w₀, hw₀⟩ | hbot);
-  · by_cases hp : ∃ p < w₀, Proof T p (⌜π⌝ : V);
-    · obtain ⟨p, -, hp⟩ := hp;
+  . by_cases hp : ∃ p < w₀, Proof T p (⌜π⌝ : V);
+    . obtain ⟨p, -, hp⟩ := hp;
       use p;
-    · push Not at hp;
+    . push Not at hp;
       have h2 : V↓[ℒₒᵣ] ⊧ (T.witnessedBefore θ)/[⌜π⌝] := by
         simpa [models_iff] using (eval_witnessedBefore T θ).mpr (⟨w₀, hw₀, hp⟩ : T.WitnessedBefore θ (⌜π⌝ : V));
       have hdiag : T ⊢ T.fghSentence' θ 🡒 π :=
@@ -116,7 +116,7 @@ lemma provable_fghSentence_of_witness_or_provable_bot (hθ : Hierarchy 𝚺 0 θ
           (hπ ▸ diagonal (T.witnessedBefore θ) : T ⊢ π 🡘 (T.witnessedBefore θ)/[⌜π⌝]);
       exact modus_ponens_sentence T (internalize_provability hdiag)
         (Bootstrapping.Arithmetic.sigma_one_complete T (hierarchy_fghSentence' T θ hθ) h2);
-  · exact provable_of_provable_bot T hbot;
+  . exact provable_of_provable_bot T hbot;
 
 lemma provable_fghSentence_iff (hθ : Hierarchy 𝚺 0 θ) :
   □(T.fghSentence θ) ↔ (∃ w, V ⊧/![w] θ) ∨ □(⊥ : ArithmeticSentence) :=
@@ -144,8 +144,8 @@ theorem fgh_theorem {σ : ArithmeticSentence} (hσ : Hierarchy 𝚺 1 σ) :
   obtain ⟨θ, hθ, hwit⟩ := exists_delta0_witness_form.{0} hσ;
   use T.fghSentence' θ;
   and_intros;
-  · exact hierarchy_fghSentence' T θ hθ;
-  · have heq : 𝗜𝚺₁ ⊢ provabilityPred T (T.fghSentence θ) 🡘 σ ⋎ provabilityPred T ⊥ := by
+  . exact hierarchy_fghSentence' T θ hθ;
+  . have heq : 𝗜𝚺₁ ⊢ provabilityPred T (T.fghSentence θ) 🡘 σ ⋎ provabilityPred T ⊥ := by
       apply complete.{0};
       intro V _ _;
       have hwit' : V ⊧/![] σ ↔ ∃ w, V ⊧/![w] θ := hwit V ![];
@@ -156,14 +156,13 @@ theorem fgh_theorem {σ : ArithmeticSentence} (hσ : Hierarchy 𝚺 1 σ) :
     exact E_trans (E_symm hiff) heq;
 
 theorem fgh_theorem_con {σ : ArithmeticSentence} (hσ : Hierarchy 𝚺 1 σ) :
-  ∃ π : ArithmeticSentence, Hierarchy 𝚺 1 π ∧ T ∪ T.Con ⊢ σ 🡘 provabilityPred T π := by
+  ∃ π : ArithmeticSentence, Hierarchy 𝚺 1 π ∧ 𝗜𝚺₁ ∪ T.Con ⊢ σ 🡘 provabilityPred T π := by
   obtain ⟨π, hπ, heq⟩ := fgh_theorem T hσ;
   use π;
   and_intros;
-  · exact hπ;
-  · have : 𝗜𝚺₁ ⪯ T ∪ T.Con := WeakerThan.trans (inferInstance : 𝗜𝚺₁ ⪯ T) inferInstance;
-    have heq' : T ∪ T.Con ⊢ provabilityPred T π 🡘 σ ⋎ provabilityPred T ⊥ := WeakerThan.pbl heq;
-    have hcon : T ∪ T.Con ⊢ ∼provabilityPred T ⊥ := by_axm (by simp [Theory.consistent]);
+  . exact hπ;
+  . have heq' : 𝗜𝚺₁ ∪ T.Con ⊢ provabilityPred T π 🡘 σ ⋎ provabilityPred T ⊥ := WeakerThan.pbl heq;
+    have hcon : 𝗜𝚺₁ ∪ T.Con ⊢ ∼provabilityPred T ⊥ := by_axm (by simp [Theory.consistent]);
     cl_prover [heq', hcon];
 
 end LO.FirstOrder.Arithmetic
