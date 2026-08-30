@@ -133,8 +133,8 @@ theorem fgh_theorem (hσ : Hierarchy 𝚺 1 σ) :
   obtain ⟨θ, hθ, hwit⟩ := exists_delta0_witness_form hσ
   refine ⟨T.fghSentenceSigma θ, hierarchy_fghSentenceSigma T θ hθ, ?_⟩
   have heq : 𝗜𝚺₁ ⊢ provabilityPred T (T.fghSentence θ) 🡘 σ ⋎ provabilityPred T ⊥ := by
-    apply complete
-    intro (V : Type) _ _
+    apply complete;
+    intro (V : Type) _ _;
     have hwit' : V ⊧/![] σ ↔ ∃ w, V ⊧/![w] θ := hwit V ![]
     simpa [models_iff, hwit'] using provable_fghSentence_iff T θ hθ
   have hdiag : 𝗜𝚺₁ ⊢ T.fghSentence θ 🡘 T.fghSentenceSigma θ := diagonal (T.witnessedBefore θ)
@@ -146,10 +146,12 @@ theorem fgh_theorem (hσ : Hierarchy 𝚺 1 σ) :
 theorem fgh_theorem_con (hσ : Hierarchy 𝚺 1 σ) :
   ∃ π : ArithmeticSentence, Hierarchy 𝚺 1 π ∧ T ∪ T.Con ⊢ σ 🡘 provabilityPred T π := by
   obtain ⟨π, hπ, heq⟩ := fgh_theorem (T := T) hσ
-  have : 𝗜𝚺₁ ⪯ T ∪ T.Con := Entailment.WeakerThan.trans (inferInstance : 𝗜𝚺₁ ⪯ T) inferInstance
-  refine ⟨π, hπ, ?_⟩
-  have heq' : T ∪ T.Con ⊢ provabilityPred T π 🡘 σ ⋎ provabilityPred T ⊥ := Entailment.WeakerThan.pbl heq
-  have hcon : T ∪ T.Con ⊢ ∼provabilityPred T ⊥ := Entailment.by_axm (Or.inr rfl)
-  cl_prover [heq', hcon]
+  use π;
+  constructor;
+  . assumption;
+  . have : 𝗜𝚺₁ ⪯ T ∪ T.Con := Entailment.WeakerThan.trans (inferInstance : 𝗜𝚺₁ ⪯ T) inferInstance;
+    have heq' : T ∪ T.Con ⊢ provabilityPred T π 🡘 σ ⋎ provabilityPred T ⊥ := Entailment.WeakerThan.pbl heq;
+    have hcon : T ∪ T.Con ⊢ ∼provabilityPred T ⊥ := Entailment.by_axm (Or.inr rfl);
+    cl_prover [heq', hcon]
 
 end LO.FirstOrder.Arithmetic
