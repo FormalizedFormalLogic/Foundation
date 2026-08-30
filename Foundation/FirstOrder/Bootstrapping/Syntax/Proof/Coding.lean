@@ -181,6 +181,9 @@ noncomputable instance (Γ : Finset (Proposition L)) : GödelQuote (T ⟹₂ Γ)
 
 noncomputable instance (Γ : Finset (Proposition L)) : GödelQuote (T ⟹₂ Γ) V := ⟨fun d ↦ (⌜d⌝ : T.internalize V ⊢!ᵈᵉʳ ⌜Γ⌝).val⟩
 
+lemma quote_cast {Γ Δ : Finset (Proposition L)} (d : T ⟹₂ Γ) (h : Γ = Δ) :
+    (⌜Derivation2.cast d h⌝ : V) = ⌜d⌝ := by subst h; rfl
+
 lemma quote_def (d : T ⟹₂ Γ) : (⌜d⌝ : V) = (⌜d⌝ : T.internalize V ⊢!ᵈᵉʳ ⌜Γ⌝).val := rfl
 
 set_option backward.isDefEq.respectTransparency false in
