@@ -20,8 +20,6 @@ variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] {x : 
 
 variable (T : ArithmeticTheory) [T.Δ₁] (θ : ArithmeticSemisentence 1)
 
-/-! ### The FGH sentence -/
-
 def _root_.LO.FirstOrder.Theory.WitnessedBefore (φ : V) := ∃ b, V ⊧/![b] θ ∧ ∀ b' < b, ¬Proof T b' φ
 
 def _root_.LO.FirstOrder.Theory.ProvedBefore (φ : V) := ∃ b, Proof T b φ ∧ ∀ b' ≤ b, ¬V ⊧/![b'] θ
@@ -38,8 +36,6 @@ noncomputable def _root_.LO.FirstOrder.Theory.fghSentence : ArithmeticSentence :
 noncomputable def _root_.LO.FirstOrder.Theory.fghSentenceSigma : ArithmeticSentence :=
   (T.witnessedBefore θ)/[⌜T.fghSentence θ⌝]
 
-/-! ### Evaluation and complexity -/
-
 private lemma eval_witnessedBefore : V ⊧/![x] (T.witnessedBefore θ) ↔ T.WitnessedBefore θ x := by
   simp [Theory.witnessedBefore, Theory.WitnessedBefore]
 
@@ -49,13 +45,9 @@ private lemma eval_provedBefore : V ⊧/![x] (T.provedBefore θ) ↔ T.ProvedBef
 private lemma hierarchy_fghSentenceSigma (hθ : Hierarchy 𝚺 0 θ) : Hierarchy 𝚺 1 (T.fghSentenceSigma θ) := by
   simp [Theory.fghSentenceSigma, Theory.witnessedBefore, hθ.mono (by omega)]
 
-/-! ### Exclusivity of witness and proof -/
-
 private lemma not_witnessedBefore_of_provedBefore : T.ProvedBefore θ x → ¬T.WitnessedBefore θ x := by
   rintro ⟨p, hp, hbound⟩ ⟨w, hw, hbound'⟩
   rcases lt_or_ge p w with h | h <;> grind
-
-/-! ### Internal logic helpers -/
 
 local notation:max "□" σ:max => Provable T (⌜σ⌝ : V)
 
@@ -69,8 +61,6 @@ lemma provable_bot_of_provable_of_provable_neg : □σ → □(∼σ) → □(�
 
 variable [𝗜𝚺₁ ⪯ T]
 
-/-! ### The refutability lemma -/
-
 private lemma refutable_fghSentence_of_provedBefore :
     T ⊢ (T.provedBefore θ)/[⌜T.fghSentence θ⌝] 🡒 ∼T.fghSentence θ := by
   set π := T.fghSentence θ with hπ
@@ -83,8 +73,6 @@ private lemma refutable_fghSentence_of_provedBefore :
           using not_witnessedBefore_of_provedBefore (T := T) (θ := θ) (x := ⌜π⌝))
   have h2 : T ⊢ π 🡘 (T.witnessedBefore θ)/[⌜π⌝] := hπ ▸ diagonal (T.witnessedBefore θ)
   exact Entailment.C_trans h1 (Entailment.contra (Entailment.K_left h2))
-
-/-! ### Provability of the FGH sentence -/
 
 private lemma provable_fghSentence_iff (hθ : Hierarchy 𝚺 0 θ) :
     □(T.fghSentence θ) ↔ (∃ w, V ⊧/![w] θ) ∨ □(⊥ : ArithmeticSentence) := by
@@ -130,11 +118,11 @@ variable {T : ArithmeticTheory} [T.Δ₁] [𝗜𝚺₁ ⪯ T] {σ : ArithmeticSe
 
 theorem fgh_theorem (hσ : Hierarchy 𝚺 1 σ) :
   ∃ π : ArithmeticSentence, Hierarchy 𝚺 1 π ∧ 𝗜𝚺₁ ⊢ provabilityPred T π 🡘 σ ⋎ provabilityPred T ⊥ := by
-  obtain ⟨θ, hθ, hwit⟩ := exists_delta0_witness_form hσ
+  obtain ⟨θ, hθ, hwit⟩ := exists_delta0_witness_form.{0} hσ
   refine ⟨T.fghSentenceSigma θ, hierarchy_fghSentenceSigma T θ hθ, ?_⟩
   have heq : 𝗜𝚺₁ ⊢ provabilityPred T (T.fghSentence θ) 🡘 σ ⋎ provabilityPred T ⊥ := by
     apply complete;
-    intro (V : Type) _ _;
+    intro V _ _;
     have hwit' : V ⊧/![] σ ↔ ∃ w, V ⊧/![w] θ := hwit V ![]
     simpa [models_iff, hwit'] using provable_fghSentence_iff T θ hθ
   have hdiag : 𝗜𝚺₁ ⊢ T.fghSentence θ 🡘 T.fghSentenceSigma θ := diagonal (T.witnessedBefore θ)
