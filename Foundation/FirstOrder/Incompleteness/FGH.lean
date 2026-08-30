@@ -163,7 +163,10 @@ lemma fgh_equation (hθ : Hierarchy 𝚺 0 θ) {σ : ArithmeticSentence}
           (provable_fghSentence_of_provable_bot T θ))
 
 lemma provable_fghSentence_iff_sigma (hθ : Hierarchy 𝚺 0 θ) :
-    𝗜𝚺₁ ⊢ □(T.fghSentence θ) 🡘 □(T.fghSentenceSigma θ) := sorry
+    𝗜𝚺₁ ⊢ □(T.fghSentence θ) 🡘 □(T.fghSentenceSigma θ) := by
+  have h : 𝗜𝚺₁ ⊢ T.fghSentence θ 🡘 T.fghSentenceSigma θ := diagonal (T.witnessedBefore θ)
+  exact Entailment.E_intro (T.standardProvability.mono' (Entailment.K_left h))
+    (T.standardProvability.mono' (Entailment.K_right h))
 
 end LO.FirstOrder.Arithmetic.Bootstrapping
 
