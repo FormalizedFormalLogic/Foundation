@@ -184,7 +184,55 @@ noncomputable instance (Γ : Finset (Proposition L)) : GödelQuote (T ⟹₂ Γ)
 lemma quote_cast {Γ Δ : Finset (Proposition L)} (d : T ⟹₂ Γ) (h : Γ = Δ) :
     (⌜Derivation2.cast d h⌝ : V) = ⌜d⌝ := by subst h; rfl
 
-lemma quote_def (d : T ⟹₂ Γ) : (⌜d⌝ : V) = (⌜d⌝ : T.internalize V ⊢!ᵈᵉʳ ⌜Γ⌝).val := rfl
+lemma quote_def (d : T ⟹₂ Γ) : (⌜d⌝ : V) = (typedQuote V d).val := rfl
+
+section
+
+attribute [local simp] Semiformula.quote_def Semiterm.quote_def Sentence.quote_eq
+
+variable {Γ Δ : Finset (Proposition L)} {φ ψ : Proposition L}
+
+lemma quote_closed (h : φ ∈ Γ) (hn : ∼φ ∈ Γ) :
+    (⌜closed (T := T) Γ φ h hn⌝ : V) = axL ⌜Γ⌝ ⌜φ⌝ := by
+  simp [quote_def, typedQuote]
+
+lemma quote_axm (σ : Sentence L) (hT : σ ∈ T) (hΓ : (σ : Proposition L) ∈ Γ) :
+    (⌜axm (Γ := Γ) σ hT hΓ⌝ : V) = Bootstrapping.axm ⌜Γ⌝ ⌜σ⌝ := by
+  simp [quote_def, typedQuote]
+
+lemma quote_verum (h : ⊤ ∈ Γ) : (⌜verum (T := T) h⌝ : V) = verumIntro ⌜Γ⌝ := by
+  simp [quote_def, typedQuote]
+
+lemma quote_and (h : φ ⋏ ψ ∈ Γ) (d₁ : T ⟹₂ insert φ Γ) (d₂ : T ⟹₂ insert ψ Γ) :
+    (⌜and h d₁ d₂⌝ : V) = andIntro ⌜Γ⌝ ⌜φ⌝ ⌜ψ⌝ ⌜d₁⌝ ⌜d₂⌝ := by
+  simp [quote_def, typedQuote]
+
+lemma quote_or (h : φ ⋎ ψ ∈ Γ) (d : T ⟹₂ insert φ (insert ψ Γ)) :
+    (⌜or h d⌝ : V) = orIntro ⌜Γ⌝ ⌜φ⌝ ⌜ψ⌝ ⌜d⌝ := by
+  simp [quote_def, typedQuote]
+
+lemma quote_all {φ : Semiproposition L 1} (h : ∀¹ φ ∈ Γ)
+    (d : T ⟹₂ insert (Rewriting.free φ) (Γ.image Rewriting.shift)) :
+    (⌜all h d⌝ : V) = allIntro ⌜Γ⌝ ⌜φ⌝ ⌜d⌝ := by
+  simp [quote_def, typedQuote]
+
+lemma quote_exs {φ : Semiproposition L 1} (h : ∃¹ φ ∈ Γ) (t : SyntacticTerm L)
+    (d : T ⟹₂ insert (φ/[t]) Γ) :
+    (⌜exs h t d⌝ : V) = exsIntro ⌜Γ⌝ ⌜φ⌝ ⌜t⌝ ⌜d⌝ := by
+  simp [quote_def, typedQuote]
+
+lemma quote_wk (d : T ⟹₂ Δ) (ss : Δ ⊆ Γ) : (⌜wk d ss⌝ : V) = wkRule ⌜Γ⌝ ⌜d⌝ := by
+  simp [quote_def, typedQuote]
+
+lemma quote_shift (d : T ⟹₂ Γ) :
+    (⌜shift d⌝ : V) = shiftRule ⌜Γ.image Rewriting.shift⌝ ⌜d⌝ := by
+  simp [quote_def, typedQuote, ←setShift_typed_quote]
+
+lemma quote_cut (d₁ : T ⟹₂ insert φ Γ) (d₂ : T ⟹₂ insert (∼φ) Γ) :
+    (⌜cut d₁ d₂⌝ : V) = cutRule ⌜Γ⌝ ⌜φ⌝ ⌜d₁⌝ ⌜d₂⌝ := by
+  simp [quote_def, typedQuote]
+
+end
 
 set_option backward.isDefEq.respectTransparency false in
 lemma coe_typedQuote_val_eq (d : T ⟹₂ Γ) : ↑(d.typedQuote ℕ).val = (d.typedQuote V).val :=
