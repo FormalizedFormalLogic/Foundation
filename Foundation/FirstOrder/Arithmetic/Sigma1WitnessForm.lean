@@ -253,6 +253,7 @@ theorem exists_delta0_witness_provable {n : ℕ} {φ : ArithmeticSemiformula Emp
 
 theorem exists_delta0_witness_provable_of_sentence {σ : ArithmeticSentence} (hσ : Hierarchy 𝚺 1 σ) :
     ∃ θ : ArithmeticSemisentence 1, Hierarchy 𝚺 0 θ ∧ 𝗜𝚺₁ ⊢ σ 🡘 ∃¹ θ := by
-  sorry
+  obtain ⟨θ, hθ, h⟩ := exists_delta0_witness_provable hσ
+  exact ⟨θ, hθ, h⟩
 
 end LO.FirstOrder.Arithmetic
