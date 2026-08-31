@@ -236,7 +236,9 @@ lemma exists_delta0_witness_form {n : ℕ} {φ : ArithmeticSemiformula Empty n} 
 lemma models_iff_of_provable_iff {T : ArithmeticTheory} [𝗘𝗤 ℒₒᵣ ⪯ T] {n} {φ ψ : ArithmeticSemiformula Empty n}
     (h : T ⊢ ∀¹* (φ 🡘 ψ)) (V : Type w) [ORingStructure V] [V↓[ℒₒᵣ] ⊧* T] (e : Fin n → V) :
     V ⊧/e φ ↔ V ⊧/e ψ := by
-  sorry
+  have := consequence_iff.mp (Theory.Proof.sound h) V inferInstance
+  simp only [models_iff, Semiformula.eval_allClosure] at this
+  simpa using this e
 
 theorem exists_delta0_witness_provable {n : ℕ} {φ : ArithmeticSemiformula Empty n} (hφ : Hierarchy 𝚺 1 φ) :
     ∃ θ : ArithmeticSemiformula Empty (n + 1),
