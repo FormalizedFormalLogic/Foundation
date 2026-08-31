@@ -192,9 +192,52 @@ private lemma and_sigma_step (ih : CoreClosure.{u} s) :
     . rintro ⟨z, ⟨x, _, hx⟩, ⟨y, _, hy⟩⟩;
       exact ⟨⟨x, hx⟩, ⟨y, hy⟩⟩;
 
-private lemma bexs_sigma_step (ih : CoreClosure s) :
+private lemma bexs_sigma_step (ih : CoreClosure.{u} s) :
     ∀ {n} {φ : ArithmeticSemiformula Empty (n + 1)} {t : ArithmeticSemiterm Empty (n + 1)},
-      t.Positive → StrictEquivOnPA.{u} 𝚺 (s + 1) φ → StrictEquivOnPA.{u} 𝚺 (s + 1) (∃¹[“x. x < !!t”] φ) := sorry
+      t.Positive → StrictEquivOnPA.{u} 𝚺 (s + 1) φ → StrictEquivOnPA.{u} 𝚺 (s + 1) (∃¹[“x. x < !!t”] φ) := by
+  intro n φ t ht hφ;
+  obtain ⟨u, rfl⟩ := Rew.positive_iff.mp ht;
+  obtain ⟨φ', hφ', hiff'⟩ := hφ;
+  obtain ⟨ψ₀, rfl, hψ₀⟩ := hφ'.sigma_succ_elim;
+  -- swap the two leading bound variables of `ψ₀`, turning the order into `x :> y :> e`.
+  set v : Fin (n + 2) → ArithmeticSemiterm Empty (n + 2) :=
+    #1 :> #0 :> fun i => #(i.succ.succ) with hv;
+  set ψ₀' : ArithmeticSemiformula Empty (n + 2) := Rew.subst v ▹ ψ₀ with hψ₀'def;
+  have hψ₀'strict : StrictHierarchy 𝚷 s ψ₀' := hψ₀.rew (Rew.subst v);
+  obtain ⟨χ, hχ, hχiff⟩ := ih.bexs 𝚷 (t := Rew.bShift (Rew.bShift u))
+    (by simp) (refl hψ₀'strict);
+  -- `∃¹[cond]ψ₀'` is definitionally `ψ₀'.bexsLT (Rew.bShift u)`; restate `hχiff` in that
+  -- form so that `Semiformula.eval_bexsLT` can fire on it as a simp lemma.
+  have hχiff' : ∀ (V : Type u) [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗣𝗔] (e : Fin (n + 1) → V),
+      V ⊧/e (ψ₀'.bexsLT (Rew.bShift u)) ↔ V ⊧/e χ := hχiff;
+  use ∃¹ χ;
+  and_intros;
+  . exact hχ.sigma;
+  . intro V _ _ e;
+    have hswap : ∀ (a b : V) (e : Fin n → V),
+        V ⊧/(b :> a :> e) ψ₀' ↔ V ⊧/(a :> b :> e) ψ₀ := by
+      intro a b e;
+      show V ⊧/(b :> a :> e) (Rew.subst v ▹ ψ₀) ↔ V ⊧/(a :> b :> e) ψ₀;
+      rw [Semiformula.eval_rew];
+      have hA : (Semiterm.val (M := V) (b :> a :> e) Empty.elim) ∘ (Rew.subst v) ∘ Semiterm.bvar
+          = (a :> b :> e : Fin (n + 2) → V) := by
+        funext i;
+        cases i using Fin.cases with
+        | zero => simp [hv];
+        | succ i =>
+          cases i using Fin.cases with
+          | zero => simp [hv];
+          | succ i => simp [hv];
+      have hB : (Semiterm.val (M := V) (b :> a :> e) Empty.elim) ∘ (Rew.subst v) ∘ Semiterm.fvar
+          = (Empty.elim : Empty → V) := by
+        funext i; exact i.elim;
+      rw [hA, hB];
+    have hφiff : ∀ b : V, V ⊧/(b :> e) φ ↔ ∃ a, V ⊧/(a :> b :> e) ψ₀ := fun b =>
+      (hiff' V (b :> e)).trans Semiformula.eval_ex;
+    show V ⊧/e (φ.bexsLT u) ↔ V ⊧/e (∃¹ χ);
+    simp only [Semiformula.eval_bexsLT, Semiformula.eval_ex, ← hχiff', Semiterm.val_bShift,
+      hswap, hφiff];
+    grind;
 
 private lemma ball_sigma_step (ih : CoreClosure s) :
     ∀ {n} {φ : ArithmeticSemiformula Empty (n + 1)} {t : ArithmeticSemiterm Empty (n + 1)},
