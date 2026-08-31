@@ -336,7 +336,14 @@ private lemma all {φ : ArithmeticSemiformula Empty (n + 1)} (h : StrictEquivOnP
     StrictEquivOnPA.{u} 𝚷 (s + 1) (∀¹ φ) := sorry
 
 private lemma exs_of_pi {φ : ArithmeticSemiformula Empty (n + 1)} (h : StrictEquivOnPA.{u} 𝚷 s φ) :
-    StrictEquivOnPA.{u} 𝚺 (s + 1) (∃¹ φ) := sorry
+    StrictEquivOnPA.{u} 𝚺 (s + 1) (∃¹ φ) := by
+  obtain ⟨φ', hφ', hiff'⟩ := h;
+  use ∃¹ φ';
+  and_intros;
+  . exact hφ'.sigma;
+  . intro V _ _ e;
+    simp only [Semiformula.eval_ex];
+    exact exists_congr (fun x => hiff' V (x :> e));
 
 private lemma all_of_sigma {φ : ArithmeticSemiformula Empty (n + 1)} (h : StrictEquivOnPA.{u} 𝚺 s φ) :
     StrictEquivOnPA.{u} 𝚷 (s + 1) (∀¹ φ) := sorry
