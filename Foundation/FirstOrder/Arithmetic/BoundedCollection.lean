@@ -18,24 +18,24 @@ namespace LO.FirstOrder.Arithmetic
 
 variable {V : Type*} [ORingStructure V] {n s : ℕ} [V↓[ℒₒᵣ] ⊧* 𝗜𝚺 (s + 1)]
 
-private noncomputable def collectionCore (θ : ArithmeticSemiformula Empty (n + 2))
+private noncomputable def collectionCore (θ : ArithmeticSemisentence (n + 2))
     (e : Fin n → V) : ArithmeticSemiformula V 4 :=
   Rew.embSubsts (#0 :> #1 :> fun i => (&(e i) : ArithmeticSemiterm V 4)) ▹ θ
 
 omit [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺 (s + 1)] in
-private lemma hierarchy_collectionCore {θ : ArithmeticSemiformula Empty (n + 2)}
+private lemma hierarchy_collectionCore {θ : ArithmeticSemisentence (n + 2)}
     (hθ : Hierarchy 𝚺 (s + 1) θ) (e : Fin n → V) : Hierarchy 𝚺 (s + 1) (collectionCore θ e) := by
   simp [collectionCore, hθ]
 
 omit [V↓[ℒₒᵣ] ⊧* 𝗜𝚺 (s + 1)] in
-private lemma eval_collectionCore {θ : ArithmeticSemiformula Empty (n + 2)} (e : Fin n → V)
+private lemma eval_collectionCore {θ : ArithmeticSemisentence (n + 2)} (e : Fin n → V)
     (u x w y : V) :
     (collectionCore θ e).Eval (u :> x :> w :> ![y]) id ↔ V ⊧/(u :> x :> e) θ := by
   simp only [collectionCore, Semiformula.eval_embSubsts, Function.comp_def]
   exact Iff.of_eq (congrArg (fun b => Semiformula.Evalb (M := V) b θ)
     (Fin.funext_two (by simp) (by simp) fun i => by simp))
 
-private noncomputable def collectionMotive (θ : ArithmeticSemiformula Empty (n + 2))
+private noncomputable def collectionMotive (θ : ArithmeticSemisentence (n + 2))
     (e : Fin n → V) (a : V) : ArithmeticSemiformula V 1 :=
   let cond : ArithmeticSemiformula V 3 :=
     Semiformula.rel Language.LT.lt ![(#0 : ArithmeticSemiterm V 3), (&a : ArithmeticSemiterm V 3)]
@@ -43,14 +43,14 @@ private noncomputable def collectionMotive (θ : ArithmeticSemiformula Empty (n 
   ∃¹ ((cond 🡒 inner).ballLT (#1 : ArithmeticSemiterm V 2))
 
 omit [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺 (s + 1)] in
-private lemma hierarchy_collectionMotive {θ : ArithmeticSemiformula Empty (n + 2)}
+private lemma hierarchy_collectionMotive {θ : ArithmeticSemisentence (n + 2)}
     (hθ : Hierarchy 𝚺 (s + 1) θ) (e : Fin n → V) (a : V) :
     Hierarchy 𝚺 (s + 1) (collectionMotive θ e a) := by
   have : Hierarchy 𝚺 (s + 1) (collectionCore θ e) := hierarchy_collectionCore hθ e
   simp [collectionMotive, this]
 
 omit [V↓[ℒₒᵣ] ⊧* 𝗜𝚺 (s + 1)] in
-private lemma eval_collectionMotive [V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻] {θ : ArithmeticSemiformula Empty (n + 2)}
+private lemma eval_collectionMotive [V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻] {θ : ArithmeticSemisentence (n + 2)}
     (e : Fin n → V) (a : V) (v : Fin 1 → V) :
     (collectionMotive θ e a).Eval v id ↔
       ∃ w, ∀ x < v 0, x < a → ∃ u ≤ w, V ⊧/(u :> x :> e) θ := by
@@ -60,15 +60,14 @@ private lemma eval_collectionMotive [V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻] {θ : Ari
   simp [collectionMotive, Semiformula.eval_ballLT, Semiformula.eval_bexsLTSucc,
     Arithmetic.lt_succ_iff_le, eval_collectionCore, Function.comp_def]
 
-private lemma collectionMotive_definable {θ : ArithmeticSemiformula Empty (n + 2)}
+private lemma collectionMotive_definable {θ : ArithmeticSemisentence (n + 2)}
     (hθ : Hierarchy 𝚺 (s + 1) θ) (e : Fin n → V) (a : V) :
     𝚺-[s + 1].DefinablePred (fun y => ∃ w, ∀ x < y, x < a → ∃ u ≤ w, V ⊧/(u :> x :> e) θ) := by
   have := mod_paMinus_of_ISigma (V := V) (n := s + 1)
   exact HierarchySymbol.Definable.mkPolarity (collectionMotive θ e a) (hierarchy_collectionMotive hθ e a)
     (fun v => (eval_collectionMotive e a v).symm)
 
-/-- Semantic Σ_{s+1}-collection over models of `𝗜𝚺 (s + 1)`. -/
-theorem sigma_exists_bound_witness {θ : ArithmeticSemiformula Empty (n + 2)}
+theorem sigma_exists_bound_witness {θ : ArithmeticSemisentence (n + 2)}
     (hθ : Hierarchy 𝚺 (s + 1) θ)
     (e : Fin n → V) (a : V) (h : ∀ x < a, ∃ u, V ⊧/(u :> x :> e) θ) :
     ∃ w, ∀ x < a, ∃ u ≤ w, V ⊧/(u :> x :> e) θ := by

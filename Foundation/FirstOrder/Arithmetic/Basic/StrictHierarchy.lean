@@ -7,9 +7,6 @@ public import Foundation.FirstOrder.Arithmetic.Basic.Hierarchy
 
 `StrictHierarchy Γ s φ` is the genuinely prenex (non-cumulative) subclass of `Hierarchy Γ s φ`:
 `strictΣ₀ = strictΠ₀ = Δ₀`, `strictΣₛ₊₁ = ∃¹ strictΠₛ`, `strictΠₛ₊₁ = ∀¹ strictΣₛ`.
-
-The base case (`zero`) could be generalized to an arbitrary formula set `S` by replacing it with
-`base : φ ∈ S → StrictHierarchy Γ 0 φ`; this generalization is not carried out here.
 -/
 
 @[expose] public section
@@ -23,10 +20,6 @@ inductive StrictHierarchy : Polarity → ℕ → {n : ℕ} → Semiformula L ξ 
   | pi {s n} {φ : Semiformula L ξ (n + 1)} : StrictHierarchy 𝚺 s φ → StrictHierarchy 𝚷 (s + 1) (∀¹ φ)
 
 namespace StrictHierarchy
-
--- `hierarchy`, `neg`, `rew` are recursive pattern matches on `StrictHierarchy`; the equation
--- compiler needs their indices freshly bound in each signature to generalize correctly across
--- the recursive calls, so a shared `variable` cannot be used for them.
 
 lemma hierarchy {Γ s} {φ : Semiformula L ξ n} : StrictHierarchy Γ s φ → Hierarchy Γ s φ
   | zero h => h.of_zero

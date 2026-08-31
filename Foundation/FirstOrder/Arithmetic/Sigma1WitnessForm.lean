@@ -18,12 +18,12 @@ namespace LO.FirstOrder.Arithmetic.ISigma1
 
 variable {n : ℕ}
 
-lemma nonempty_strictEquiv_sigma1 {φ : ArithmeticSemiformula Empty n} (h : Hierarchy 𝚺 1 φ) :
+lemma nonempty_strictEquiv_sigma1 {φ : ArithmeticSemisentence n} (h : Hierarchy 𝚺 1 φ) :
   Nonempty (StrictEquiv 𝗜𝚺₁ 𝚺 1 φ) :=
   nonempty_strictEquiv (T := 𝗜𝚺₁) h inferInstance
 
-lemma exists_delta0_witness_provable {φ : ArithmeticSemiformula Empty n} (h : Hierarchy 𝚺 1 φ) :
-  ∃ θ : ArithmeticSemiformula Empty (n + 1), Hierarchy 𝚺 0 θ ∧ 𝗜𝚺₁ ⊢ ∀¹* (φ 🡘 ∃¹ θ) := by
+lemma exists_delta0_witness_provable {φ : ArithmeticSemisentence n} (h : Hierarchy 𝚺 1 φ) :
+  ∃ θ : ArithmeticSemisentence (n + 1), Hierarchy 𝚺 0 θ ∧ 𝗜𝚺₁ ⊢ ∀¹* (φ 🡘 ∃¹ θ) := by
   have ⟨⟨ψ, ψ_hie, ψ_iff⟩⟩ := nonempty_strictEquiv_sigma1 h;
   obtain ⟨θ, rfl, hθ⟩ := ψ_hie.sigma_succ_elim;
   use θ;

@@ -18,14 +18,14 @@ open LO.FirstOrder
 
 namespace LO.FirstOrder.Arithmetic
 
-lemma provable_iff_of_models_iff {T : ArithmeticTheory} [𝗘𝗤 ℒₒᵣ ⪯ T] {n} {φ ψ : ArithmeticSemiformula Empty n}
+lemma provable_iff_of_models_iff {T : ArithmeticTheory} [𝗘𝗤 ℒₒᵣ ⪯ T] {n} {φ ψ : ArithmeticSemisentence n}
     (h : ∀ (V : Type) [ORingStructure V] [V↓[ℒₒᵣ] ⊧* T] (e : Fin n → V), V ⊧/e φ ↔ V ⊧/e ψ) :
     T ⊢ ∀¹* (φ 🡘 ψ) := by
   apply Arithmetic.complete T _;
   intro V _ _;
   simpa [models_iff] using h V;
 
-lemma models_iff_of_provable_iff {T : ArithmeticTheory} [𝗘𝗤 ℒₒᵣ ⪯ T] {n} {φ ψ : ArithmeticSemiformula Empty n}
+lemma models_iff_of_provable_iff {T : ArithmeticTheory} [𝗘𝗤 ℒₒᵣ ⪯ T] {n} {φ ψ : ArithmeticSemisentence n}
     (h : T ⊢ ∀¹* (φ 🡘 ψ)) (V : Type*) [ORingStructure V] [V↓[ℒₒᵣ] ⊧* T] (e : Fin n → V) :
     V ⊧/e φ ↔ V ⊧/e ψ := by
   have := consequence_iff.mp (Theory.Proof.sound h) V inferInstance;
@@ -34,21 +34,21 @@ lemma models_iff_of_provable_iff {T : ArithmeticTheory} [𝗘𝗤 ℒₒᵣ ⪯ 
 
 -- Pinning `V` to `Type` keeps `simp` from stalling on an unsolved universe metavariable when the
 -- result is stored unapplied.
-lemma models_iff_of_provable_iff' {T : ArithmeticTheory} [𝗘𝗤 ℒₒᵣ ⪯ T] {n} {φ ψ : ArithmeticSemiformula Empty n}
+lemma models_iff_of_provable_iff' {T : ArithmeticTheory} [𝗘𝗤 ℒₒᵣ ⪯ T] {n} {φ ψ : ArithmeticSemisentence n}
     (h : T ⊢ ∀¹* (φ 🡘 ψ)) :
     ∀ (V : Type) [ORingStructure V] [V↓[ℒₒᵣ] ⊧* T] (e : Fin n → V), V ⊧/e φ ↔ V ⊧/e ψ :=
   models_iff_of_provable_iff h
 
 structure StrictEquiv (T : ArithmeticTheory) (Γ : Polarity) (s : ℕ) {n : ℕ}
-    (φ : ArithmeticSemiformula Empty n) where
-  witness : ArithmeticSemiformula Empty n
+    (φ : ArithmeticSemisentence n) where
+  witness : ArithmeticSemisentence n
   hierarchy : StrictHierarchy Γ s witness
   provable : T ⊢ ∀¹* (φ 🡘 witness)
 
 namespace StrictEquiv
 
 variable {T : ArithmeticTheory} [𝗘𝗤 ℒₒᵣ ⪯ T] {Γ : Polarity} {s : ℕ} {n : ℕ}
-  {φ : ArithmeticSemiformula Empty n}
+  {φ : ArithmeticSemisentence n}
 
 lemma iff_models (d : StrictEquiv T Γ s φ) (V : Type*) [ORingStructure V] [V↓[ℒₒᵣ] ⊧* T]
     (e : Fin n → V) : V ⊧/e φ ↔ V ⊧/e d.witness :=
@@ -57,7 +57,7 @@ lemma iff_models (d : StrictEquiv T Γ s φ) (V : Type*) [ORingStructure V] [V�
 def refl (h : StrictHierarchy Γ s φ) : StrictEquiv T Γ s φ :=
   ⟨φ, h, provable_iff_of_models_iff fun _ _ _ _ => Iff.rfl⟩
 
-def of_iff {ψ : ArithmeticSemiformula Empty n} (h : StrictEquiv T Γ s φ)
+def of_iff {ψ : ArithmeticSemisentence n} (h : StrictEquiv T Γ s φ)
     (hiff : ∀ (V : Type) [ORingStructure V] [V↓[ℒₒᵣ] ⊧* T] (e : Fin n → V), V ⊧/e φ ↔ V ⊧/e ψ) :
     StrictEquiv T Γ s ψ :=
   ⟨h.witness, h.hierarchy, provable_iff_of_models_iff fun V _ _ e => (hiff V e).symm.trans (h.iff_models V e)⟩
@@ -84,7 +84,7 @@ def of_deltaZero (hp : Hierarchy 𝚺 0 φ) : StrictEquiv T Γ s φ := by
   | zero => exact refl (StrictHierarchy.zero hp);
   | succ s ih => simpa using alt_up (ih (Γ := Γ.alt));
 
-def exs_of_pi {φ : ArithmeticSemiformula Empty (n + 1)} (h : StrictEquiv T 𝚷 s φ) :
+def exs_of_pi {φ : ArithmeticSemisentence (n + 1)} (h : StrictEquiv T 𝚷 s φ) :
     StrictEquiv T 𝚺 (s + 1) (∃¹ φ) := by
   use ∃¹ h.witness;
   . exact h.hierarchy.sigma;
@@ -93,7 +93,7 @@ def exs_of_pi {φ : ArithmeticSemiformula Empty (n + 1)} (h : StrictEquiv T 𝚷
     simp only [Semiformula.eval_ex];
     exact exists_congr (fun x => h.iff_models V (x :> e));
 
-def all_of_sigma {φ : ArithmeticSemiformula Empty (n + 1)} (h : StrictEquiv T 𝚺 s φ) :
+def all_of_sigma {φ : ArithmeticSemisentence (n + 1)} (h : StrictEquiv T 𝚺 s φ) :
     StrictEquiv T 𝚷 (s + 1) (∀¹ φ) := by
   use ∀¹ h.witness;
   . exact h.hierarchy.pi;
@@ -107,16 +107,16 @@ end StrictEquiv
 open StrictEquiv (refl neg alt_up of_deltaZero exs_of_pi all_of_sigma)
 
 structure Closure (T : ArithmeticTheory) [𝗘𝗤 ℒₒᵣ ⪯ T] (s : ℕ) : Prop where
-  ball : ∀ Γ {n} {φ : ArithmeticSemiformula Empty (n + 1)} {t : ArithmeticSemiterm Empty (n + 1)},
+  ball : ∀ Γ {n} {φ : ArithmeticSemisentence (n + 1)} {t : ArithmeticSemiterm Empty (n + 1)},
       t.Positive → Nonempty (StrictEquiv T Γ s φ) →
         Nonempty (StrictEquiv T Γ s (∀¹[“x. x < !!t”] φ))
-  bexs : ∀ Γ {n} {φ : ArithmeticSemiformula Empty (n + 1)} {t : ArithmeticSemiterm Empty (n + 1)},
+  bexs : ∀ Γ {n} {φ : ArithmeticSemisentence (n + 1)} {t : ArithmeticSemiterm Empty (n + 1)},
       t.Positive → Nonempty (StrictEquiv T Γ s φ) →
         Nonempty (StrictEquiv T Γ s (∃¹[“x. x < !!t”] φ))
-  and : ∀ Γ {n} {φ ψ : ArithmeticSemiformula Empty n},
+  and : ∀ Γ {n} {φ ψ : ArithmeticSemisentence n},
       Nonempty (StrictEquiv T Γ s φ) → Nonempty (StrictEquiv T Γ s ψ) →
         Nonempty (StrictEquiv T Γ s (φ ⋏ ψ))
-  or : ∀ Γ {n} {φ ψ : ArithmeticSemiformula Empty n},
+  or : ∀ Γ {n} {φ ψ : ArithmeticSemisentence n},
       Nonempty (StrictEquiv T Γ s φ) → Nonempty (StrictEquiv T Γ s ψ) →
         Nonempty (StrictEquiv T Γ s (φ ⋎ ψ))
 
@@ -151,7 +151,7 @@ lemma closure_zero : Closure T 0 where
       provable_iff_of_models_iff fun V _ _ e => by simp [hφ.iff_models V e, hψ.iff_models V e]⟩
 
 lemma bexs_sigma_step (ih : Closure T s) :
-    ∀ {n} {φ : ArithmeticSemiformula Empty (n + 1)} {t : ArithmeticSemiterm Empty (n + 1)},
+    ∀ {n} {φ : ArithmeticSemisentence (n + 1)} {t : ArithmeticSemiterm Empty (n + 1)},
       t.Positive → Nonempty (StrictEquiv T 𝚺 (s + 1) φ) →
         Nonempty (StrictEquiv T 𝚺 (s + 1) (∃¹[“x. x < !!t”] φ)) := by
   rintro n φ t ht ⟨⟨φ', hφ', hprov'⟩⟩;
@@ -160,7 +160,7 @@ lemma bexs_sigma_step (ih : Closure T s) :
   obtain ⟨ψ₀, rfl, hψ₀⟩ := hφ'.sigma_succ_elim;
   set v : Fin (n + 2) → ArithmeticSemiterm Empty (n + 2) :=
     #1 :> #0 :> fun i => #(i.succ.succ) with hv;
-  set ψ₀' : ArithmeticSemiformula Empty (n + 2) := Rew.subst v ▹ ψ₀;
+  set ψ₀' : ArithmeticSemisentence (n + 2) := Rew.subst v ▹ ψ₀;
   have hψ₀'strict : StrictHierarchy 𝚷 s ψ₀' := hψ₀.rew (Rew.subst v);
   obtain ⟨⟨χ, hχ, hχprov⟩⟩ := ih.bexs 𝚷 (t := Rew.bShift (Rew.bShift u))
     (by simp) ⟨refl hψ₀'strict⟩;
@@ -197,7 +197,7 @@ lemma bexs_sigma_step (ih : Closure T s) :
     grind;
 
 lemma ball_sigma_step (hT : 𝗜𝚺 (s + 1) ⪯ T) (ih : Closure T s) :
-    ∀ {n} {φ : ArithmeticSemiformula Empty (n + 1)} {t : ArithmeticSemiterm Empty (n + 1)},
+    ∀ {n} {φ : ArithmeticSemisentence (n + 1)} {t : ArithmeticSemiterm Empty (n + 1)},
       t.Positive → Nonempty (StrictEquiv T 𝚺 (s + 1) φ) →
         Nonempty (StrictEquiv T 𝚺 (s + 1) (∀¹[“x. x < !!t”] φ)) := by
   have := hT;
@@ -240,7 +240,7 @@ lemma ball_sigma_step (hT : 𝗜𝚺 (s + 1) ⪯ T) (ih : Closure T s) :
       exact ⟨y, hy⟩;
 
 lemma or_sigma_step (ih : Closure T s) :
-    ∀ {n} {φ ψ : ArithmeticSemiformula Empty n},
+    ∀ {n} {φ ψ : ArithmeticSemisentence n},
       Nonempty (StrictEquiv T 𝚺 (s + 1) φ) → Nonempty (StrictEquiv T 𝚺 (s + 1) ψ) →
         Nonempty (StrictEquiv T 𝚺 (s + 1) (φ ⋎ ψ)) := by
   rintro n φ ψ ⟨⟨φ', hφ', hφprov⟩⟩ ⟨⟨ψ', hψ', hψprov⟩⟩;
@@ -267,7 +267,7 @@ lemma or_sigma_step (ih : Closure T s) :
       . right; exact ⟨x, h⟩;
 
 lemma and_sigma_step (hT : 𝗜𝚺 (s + 1) ⪯ T) (ih : Closure T s) :
-    ∀ {n} {φ ψ : ArithmeticSemiformula Empty n},
+    ∀ {n} {φ ψ : ArithmeticSemisentence n},
       Nonempty (StrictEquiv T 𝚺 (s + 1) φ) → Nonempty (StrictEquiv T 𝚺 (s + 1) ψ) →
         Nonempty (StrictEquiv T 𝚺 (s + 1) (φ ⋏ ψ)) := by
   have : 𝗜𝚺₀ ⪯ T := Entailment.WeakerThan.trans (ISigma_weakerThan_of_le (Nat.zero_le (s + 1))) hT;
@@ -296,13 +296,13 @@ lemma and_sigma_step (hT : 𝗜𝚺 (s + 1) ⪯ T) (ih : Closure T s) :
     have hA_eval : ∀ z : V, V ⊧/(z :> e) A ↔ ∃ x ≤ z, V ⊧/(x :> e) φ₀ := fun z => by
       rw [← hAiff V (z :> e)];
       show V ⊧/(z :> e)
-        ((φ₀ ⇜ (#0 :> (#·.succ.succ)) : ArithmeticSemiformula Empty (n + 2)).bexsLTSucc
+        ((φ₀ ⇜ (#0 :> (#·.succ.succ)) : ArithmeticSemisentence (n + 2)).bexsLTSucc
           (‘#0’ : ArithmeticSemiterm Empty (n + 1))) ↔ _;
       simp [Semiformula.eval_insert1, -Semiformula.eval_substs];
     have hB_eval : ∀ z : V, V ⊧/(z :> e) B ↔ ∃ x ≤ z, V ⊧/(x :> e) ψ₀ := fun z => by
       rw [← hBiff V (z :> e)];
       show V ⊧/(z :> e)
-        ((ψ₀ ⇜ (#0 :> (#·.succ.succ)) : ArithmeticSemiformula Empty (n + 2)).bexsLTSucc
+        ((ψ₀ ⇜ (#0 :> (#·.succ.succ)) : ArithmeticSemisentence (n + 2)).bexsLTSucc
           (‘#0’ : ArithmeticSemiterm Empty (n + 1))) ↔ _;
       simp [Semiformula.eval_insert1, -Semiformula.eval_substs];
     have hφiff' : V ⊧/e φ ↔ ∃ x, V ⊧/(x :> e) φ₀ := (hφiff V e).trans Semiformula.eval_ex;
@@ -344,7 +344,7 @@ lemma closure (hT : 𝗜𝚺 s ⪯ T) : Closure T s := by
     exact closure_succ hT (ih (ISigma_weakerThan_of_le_trans (by omega) hT));
 
 lemma exs (hT : 𝗜𝚺 s ⪯ T) (c : Closure T s) {n : ℕ}
-    {φ : ArithmeticSemiformula Empty (n + 1)} (h : Nonempty (StrictEquiv T 𝚺 (s + 1) φ)) :
+    {φ : ArithmeticSemisentence (n + 1)} (h : Nonempty (StrictEquiv T 𝚺 (s + 1) φ)) :
     Nonempty (StrictEquiv T 𝚺 (s + 1) (∃¹ φ)) := by
   have : 𝗜𝚺₀ ⪯ T := Entailment.WeakerThan.trans (ISigma_weakerThan_of_le (Nat.zero_le s)) hT;
   obtain ⟨⟨φ', hφ', hprov'⟩⟩ := h;
@@ -360,7 +360,7 @@ lemma exs (hT : 𝗜𝚺 s ⪯ T) (c : Closure T s) {n : ℕ}
   have hAiff := models_iff_of_provable_iff' hAprov;
   have hBiff := models_iff_of_provable_iff' hBprov;
   have hAiff' : ∀ (V : Type) [ORingStructure V] [V↓[ℒₒᵣ] ⊧* T] (e : Fin (n + 2) → V),
-      V ⊧/e ((ψ₀ ⇜ (#0 :> #1 :> (#·.succ.succ.succ)) : ArithmeticSemiformula Empty (n + 3)).bexsLTSucc
+      V ⊧/e ((ψ₀ ⇜ (#0 :> #1 :> (#·.succ.succ.succ)) : ArithmeticSemisentence (n + 3)).bexsLTSucc
         (‘#1’ : ArithmeticSemiterm Empty (n + 2))) ↔ V ⊧/e A := hAiff;
   have hBiff' : ∀ (V : Type) [ORingStructure V] [V↓[ℒₒᵣ] ⊧* T] (e : Fin (n + 1) → V),
       V ⊧/e (A.bexsLTSucc (‘#0’ : ArithmeticSemiterm Empty (n + 1))) ↔ V ⊧/e B := hBiff;
@@ -387,13 +387,13 @@ lemma exs (hT : 𝗜𝚺 s ⪯ T) (c : Closure T s) {n : ℕ}
       exact ⟨y, x, hx⟩;
 
 lemma all (hT : 𝗜𝚺 s ⪯ T) (c : Closure T s) {n : ℕ}
-    {φ : ArithmeticSemiformula Empty (n + 1)} (h : Nonempty (StrictEquiv T 𝚷 (s + 1) φ)) :
+    {φ : ArithmeticSemisentence (n + 1)} (h : Nonempty (StrictEquiv T 𝚷 (s + 1) φ)) :
     Nonempty (StrictEquiv T 𝚷 (s + 1) (∀¹ φ)) := by
   simpa using (exs hT c (h.map neg)).map neg;
 
 variable {Γ : Polarity} {n : ℕ}
 
-theorem nonempty_strictEquiv {φ : ArithmeticSemiformula Empty n}
+theorem nonempty_strictEquiv {φ : ArithmeticSemisentence n}
     (h : Hierarchy Γ s φ) (hT : 𝗜𝚺 s ⪯ T) : Nonempty (StrictEquiv T Γ s φ) := by
   induction h with
   | verum Γ s n => exact ⟨of_deltaZero (Hierarchy.verum 𝚺 0 n)⟩;

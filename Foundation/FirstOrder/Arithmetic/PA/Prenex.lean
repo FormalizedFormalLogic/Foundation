@@ -19,8 +19,8 @@ namespace LO.FirstOrder.Arithmetic.Peano
 
 variable {Γ : Polarity} {s n : ℕ}
 
-lemma exists_strictHierarchy_provable {φ : ArithmeticSemiformula Empty n} (h : Hierarchy Γ s φ) :
-    ∃ ψ : ArithmeticSemiformula Empty n, StrictHierarchy Γ s ψ ∧ 𝗣𝗔 ⊢ ∀¹* (φ 🡘 ψ) := by
+lemma exists_strictHierarchy_provable {φ : ArithmeticSemisentence n} (h : Hierarchy Γ s φ) :
+    ∃ ψ : ArithmeticSemisentence n, StrictHierarchy Γ s ψ ∧ 𝗣𝗔 ⊢ ∀¹* (φ 🡘 ψ) := by
   have ⟨⟨ψ, ψ_hie, ψ_iff⟩⟩ := nonempty_strictEquiv (T := 𝗣𝗔) h inferInstance;
   use ψ;
 
