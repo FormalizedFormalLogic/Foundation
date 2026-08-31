@@ -103,7 +103,7 @@ lemma witness_or_provable_bot_of_provable_fghSentence :
     have hrefut : T ⊢ (T.provedBefore θ).val/[⌜π⌝] 🡒 ∼π :=
       hπ ▸ refutable_fghSentence_of_provedBefore;
     right;
-    apply provable_bot_of_provable_of_provable_neg (T := T) (σ := π);
+    apply provable_bot_of_provable_of_provable_neg (σ := π);
     . use p₀;
     . exact modus_ponens_sentence T (internalize_provability hrefut) hp2;
 
