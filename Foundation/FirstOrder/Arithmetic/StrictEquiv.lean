@@ -77,7 +77,7 @@ def neg (φ' : StrictHierarchyFormulaEquivOf T Γ s φ) :
   ⟨φ'.toStrictHierarchyFormula.neg,
     provable_iff_of_models_iff fun V _ _ e ↦ by simp [φ'.iff_models V e]⟩
 
-def alt_up (φ' : StrictHierarchyFormulaEquivOf T Γ s φ) :
+def altUp (φ' : StrictHierarchyFormulaEquivOf T Γ s φ) :
     StrictHierarchyFormulaEquivOf T Γ.alt (s + 1) φ := by
   rcases Γ with _ | _;
   . exact ⟨(φ'.toStrictHierarchyFormula.rew Rew.bShift).pi,
@@ -87,18 +87,18 @@ def alt_up (φ' : StrictHierarchyFormulaEquivOf T Γ s φ) :
   . exact ⟨(φ'.toStrictHierarchyFormula.rew Rew.bShift).sigma,
       provable_iff_of_models_iff fun V _ _ e ↦ by simp [φ'.iff_models V e]⟩;
 
-def of_deltaZero (hp : Hierarchy 𝚺 0 φ) : StrictHierarchyFormulaEquivOf T Γ s φ := by
+def ofDeltaZero (hp : Hierarchy 𝚺 0 φ) : StrictHierarchyFormulaEquivOf T Γ s φ := by
   induction s generalizing Γ with
   | zero => exact refl (StrictHierarchyFormula.zero Γ φ hp);
-  | succ s ih => simpa using alt_up (ih (Γ := Γ.alt));
+  | succ s ih => simpa using altUp (ih (Γ := Γ.alt));
 
-def exs_of_pi {φ : ArithmeticSemisentence (n + 1)} (φ' : StrictHierarchyFormulaEquivOf T 𝚷 s φ) :
+def exsOfPi {φ : ArithmeticSemisentence (n + 1)} (φ' : StrictHierarchyFormulaEquivOf T 𝚷 s φ) :
     StrictHierarchyFormulaEquivOf T 𝚺 (s + 1) (∃¹ φ) :=
   ⟨φ'.toStrictHierarchyFormula.sigma, provable_iff_of_models_iff fun V _ _ e ↦ by
     rw [StrictHierarchyFormula.coe_sigma];
     exact exists_congr (fun x ↦ φ'.iff_models V (x :> e))⟩
 
-def all_of_sigma {φ : ArithmeticSemisentence (n + 1)} (φ' : StrictHierarchyFormulaEquivOf T 𝚺 s φ) :
+def allOfSigma {φ : ArithmeticSemisentence (n + 1)} (φ' : StrictHierarchyFormulaEquivOf T 𝚺 s φ) :
     StrictHierarchyFormulaEquivOf T 𝚷 (s + 1) (∀¹ φ) :=
   ⟨φ'.toStrictHierarchyFormula.pi, provable_iff_of_models_iff fun V _ _ e ↦ by
     simp only [StrictHierarchyFormula.coe_pi, Semiformula.eval_all];
@@ -429,17 +429,17 @@ lemma all (hT : 𝗜𝚺 s ⪯ T) (c : Closure T s) {n : ℕ}
 
 end StrictHierarchyFormulaEquivOf
 
-open StrictHierarchyFormulaEquivOf (refl of_deltaZero exs_of_pi all_of_sigma alt_up closure exs all)
+open StrictHierarchyFormulaEquivOf (refl ofDeltaZero exsOfPi allOfSigma altUp closure exs all)
 
 variable {T : ArithmeticTheory} [𝗘𝗤 ℒₒᵣ ⪯ T] {Γ : Polarity} {s : ℕ} {n : ℕ}
 
 theorem nonempty_strictHierarchyFormulaEquivOf {φ : ArithmeticSemisentence n}
     (h : Hierarchy Γ s φ) (hT : 𝗜𝚺 s ⪯ T) : Nonempty (StrictHierarchyFormulaEquivOf T Γ s φ) := by
   induction h with
-  | verum Γ s n => exact ⟨of_deltaZero (Hierarchy.verum 𝚺 0 n)⟩;
-  | falsum Γ s n => exact ⟨of_deltaZero (Hierarchy.falsum 𝚺 0 n)⟩;
-  | rel Γ s r v => exact ⟨of_deltaZero (Hierarchy.rel 𝚺 0 r v)⟩;
-  | nrel Γ s r v => exact ⟨of_deltaZero (Hierarchy.nrel 𝚺 0 r v)⟩;
+  | verum Γ s n => exact ⟨ofDeltaZero (Hierarchy.verum 𝚺 0 n)⟩;
+  | falsum Γ s n => exact ⟨ofDeltaZero (Hierarchy.falsum 𝚺 0 n)⟩;
+  | rel Γ s r v => exact ⟨ofDeltaZero (Hierarchy.rel 𝚺 0 r v)⟩;
+  | nrel Γ s r v => exact ⟨ofDeltaZero (Hierarchy.nrel 𝚺 0 r v)⟩;
   | and _ _ ihp ihq => exact (closure hT).and _ (ihp hT) (ihq hT);
   | or _ _ ihp ihq => exact (closure hT).or _ (ihp hT) (ihq hT);
   | ball pos _ ih => exact (closure hT).ball _ pos (ih hT);
@@ -454,18 +454,18 @@ theorem nonempty_strictHierarchyFormulaEquivOf {φ : ArithmeticSemisentence n}
     rcases s with _ | s;
     . use (StrictHierarchyFormula.zero 𝚷 φ (Hierarchy.zero_iff.mp hp)).sigma;
       simp [provable_iff_of_models_iff];
-    . exact (ih (ISigma_weakerThan_of_le_trans (by omega) hT)).map exs_of_pi;
+    . exact (ih (ISigma_weakerThan_of_le_trans (by omega) hT)).map exsOfPi;
   | @pi s n φ hp ih =>
     rcases s with _ | s;
     . use (StrictHierarchyFormula.zero 𝚺 φ (Hierarchy.zero_iff.mp hp)).pi;
       simp [provable_iff_of_models_iff];
-    . exact (ih (ISigma_weakerThan_of_le_trans (by omega) hT)).map all_of_sigma;
+    . exact (ih (ISigma_weakerThan_of_le_trans (by omega) hT)).map allOfSigma;
   | @dummy_sigma s n φ hp ih =>
     have hT' : 𝗜𝚺 s ⪯ T := ISigma_weakerThan_of_le_trans (by omega) hT;
-    exact (all hT' (closure hT') (ih (ISigma_weakerThan_of_le_trans (by omega) hT))).map alt_up;
+    exact (all hT' (closure hT') (ih (ISigma_weakerThan_of_le_trans (by omega) hT))).map altUp;
   | @dummy_pi s n φ hp ih =>
     have hT' : 𝗜𝚺 s ⪯ T := ISigma_weakerThan_of_le_trans (by omega) hT;
-    exact (exs hT' (closure hT') (ih (ISigma_weakerThan_of_le_trans (by omega) hT))).map alt_up;
+    exact (exs hT' (closure hT') (ih (ISigma_weakerThan_of_le_trans (by omega) hT))).map altUp;
 
 variable {T : ArithmeticTheory} {Γ : Polarity} {s n : ℕ}
 
