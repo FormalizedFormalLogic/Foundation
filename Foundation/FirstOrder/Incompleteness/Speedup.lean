@@ -18,14 +18,14 @@ public import Mathlib.Data.Nat.Log
 
 namespace LO.FirstOrder.Arithmetic.Bootstrapping
 
-section
+section Provability
 
 variable {L : Language} [L.DecidableEq] {T : Theory L} {σ π : Sentence L}
 
 lemma provable_insert_neg_iff_or : insert (∼σ) T ⊢ π ↔ T ⊢ σ ⋎ π :=
   Entailment.deduction_iff.trans ⟨λ h ↦ by cl_prover [h], λ h ↦ by cl_prover [h]⟩
 
-end
+end Provability
 
 variable
   {L : Language} [L.DecidableEq] [L.Encodable] [L.LORDefinable]
@@ -47,8 +47,6 @@ lemma minProof_eq_zero_of_unprovable (h : T ⊬ σ) : T.minProof σ = 0 := by
 
 @[grind ←]
 lemma minProof_le (b : T ⊢! σ) : T.minProof σ ≤ ⌜b⌝ := Nat.sInf_le (Set.mem_range_self b)
-
-section Speedup
 
 open Encodable
 
@@ -107,7 +105,7 @@ private def speedupProof (T : Theory L) (σ π : Sentence L) : insert σ T ⊢! 
   axioms_mem := by simp
   derivation := .cast (speedupDerivation (Derivation.eta ↑σ) ↑π)
 
-section
+section Quotation
 
 variable {φ ψ : Sentence L} {χ ξ : Proposition L}
 
@@ -162,7 +160,7 @@ private lemma quote_speedupDerivation (d : ⊢ᴸᴷ¹ [χ, ∼χ]) :
           (Derivation.toDerivation2 T d) (by simp)⌝ := rfl;
   rw [h₁, Derivation2.quote_or, Derivation2.quote_wk, h₂, Derivation2.quote_wk];
 
-end
+end Quotation
 
 private lemma quote_speedupProof_eq (π : Sentence L) :
     (⌜speedupProof T σ π⌝ : ℕ)
@@ -180,7 +178,7 @@ private lemma quote_speedupProof_eq (π : Sentence L) :
   rw [h, quote_speedupDerivation];
   simp [Sentence.quote_def];
 
-section
+section SpeedupCode
 
 variable {p q : α → ℕ}
 
@@ -202,7 +200,7 @@ private lemma primrec_speedupCode (hp : Primrec p) (hq : Primrec q) (a na n₀ :
   exact primrec_cutRule h₁ (.const a) (primrec_axm (primrec_insert (.const a) h₁) (.const a))
     (primrec_orIntro h₂ (.const a) hp h₅);
 
-end
+end SpeedupCode
 
 private lemma computable_quote_speedupProof [L.Primcodable] :
     Computable λ π ↦ (⌜speedupProof T σ π⌝ : ℕ) := by
@@ -252,7 +250,5 @@ example {T : ArithmeticTheory} [T.Δ₁] {σ : ArithmeticSentence} [𝗜𝚺₁ 
   . assumption;
   . apply Nat.le_log_iff_pow_le ?_ ?_ |>.mpr;
     all_goals grind;
-
-end Speedup
 
 end LO.FirstOrder.Arithmetic.Bootstrapping
