@@ -18,7 +18,7 @@ open LO.FirstOrder
 
 namespace LO.FirstOrder.Arithmetic
 
-variable {Γ : Polarity} {s : ℕ} {n : ℕ} {φ ψ : ArithmeticSemiformula Empty n}
+variable {Γ : Polarity} {s : ℕ} {n : ℕ} {φ : ArithmeticSemiformula Empty n}
 
 -- `ClosureBallBexs` (the ball/bexs induction-closure bundle driving `of_hierarchy`, needing
 -- collection so it stays `𝗣𝗔`-fixed) and everything built on top of it (`exs`/`all`/`of_hierarchy`
@@ -228,9 +228,6 @@ private noncomputable def all {φ : ArithmeticSemiformula Empty (n + 1)} (h : St
 -- `StrictEquiv` (a `Type`). Prove `Nonempty (StrictEquiv 𝗣𝗔 Γ s φ)` by induction instead (a
 -- legal `Prop`-target elimination) and unwrap the single needed witness via choice.
 private noncomputable def of_hierarchy (h : Hierarchy Γ s φ) : StrictEquiv 𝗣𝗔 Γ s φ := by
-  -- `ψ` (from the ambient `variable`) shares `φ`'s arity `n`, so `induction h` would otherwise
-  -- generalize it too, needlessly threading a spurious `∀ ψ` through every inductive case.
-  clear ψ;
   have nonempty : Nonempty (StrictEquiv 𝗣𝗔 Γ s φ) := by
     induction h with
     | verum Γ s n => exact ⟨StrictEquiv.of_deltaZero (Hierarchy.verum 𝚺 0 n)⟩;

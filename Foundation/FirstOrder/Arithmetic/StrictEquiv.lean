@@ -54,7 +54,7 @@ structure StrictEquiv (T : ArithmeticTheory) (Γ : Polarity) (s : ℕ) {n : ℕ}
 namespace StrictEquiv
 
 variable {T : ArithmeticTheory} [𝗘𝗤 ℒₒᵣ ⪯ T] {Γ : Polarity} {s : ℕ} {n : ℕ}
-  {φ ψ : ArithmeticSemiformula Empty n}
+  {φ : ArithmeticSemiformula Empty n}
 
 lemma iff_models (d : StrictEquiv T Γ s φ) (V : Type*) [ORingStructure V] [V↓[ℒₒᵣ] ⊧* T]
     (e : Fin n → V) : V ⊧/e φ ↔ V ⊧/e d.witness :=
@@ -63,7 +63,7 @@ lemma iff_models (d : StrictEquiv T Γ s φ) (V : Type*) [ORingStructure V] [V�
 def refl (h : StrictHierarchy Γ s φ) : StrictEquiv T Γ s φ :=
   ⟨φ, h, provable_iff_of_models_iff fun _ _ _ _ => Iff.rfl⟩
 
-def of_iff (h : StrictEquiv T Γ s φ)
+def of_iff {ψ : ArithmeticSemiformula Empty n} (h : StrictEquiv T Γ s φ)
     (hiff : ∀ (V : Type) [ORingStructure V] [V↓[ℒₒᵣ] ⊧* T] (e : Fin n → V), V ⊧/e φ ↔ V ⊧/e ψ) :
     StrictEquiv T Γ s ψ :=
   ⟨h.witness, h.hierarchy, provable_iff_of_models_iff fun V _ _ e => (hiff V e).symm.trans (h.iff_models V e)⟩

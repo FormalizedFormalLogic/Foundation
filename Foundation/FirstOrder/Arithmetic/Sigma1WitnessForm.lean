@@ -17,7 +17,7 @@ noncomputable section
 
 namespace LO.FirstOrder.Arithmetic
 
-variable {V : Type} [ORingStructure V] {n : ℕ}
+variable {n : ℕ}
 
 -- A `StrictHierarchy 𝚺 1` witness is always of the form `∃¹ θ` for some Δ₀ `θ`; extract that
 -- `θ` as data (mirroring `StrictHierarchy.sigma_succ_elim`, a `Prop`-valued existential).
@@ -86,7 +86,7 @@ private noncomputable def witnessForm_or {φ₁ φ₂ : ArithmeticSemiformula Em
 
 section Collection
 
-variable [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
+variable {V : Type} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 
 -- Specialize the general `Σ_{s+1}`-collection of `BoundedCollection.lean` to `s = 0`
 -- (i.e. Δ₀-collection over `𝗜𝚺₁`).
