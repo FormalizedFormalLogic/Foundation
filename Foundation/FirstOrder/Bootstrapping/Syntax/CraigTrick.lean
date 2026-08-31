@@ -190,4 +190,11 @@ noncomputable instance craig.original_weakerThan (T : Theory L) [L.DecidableEq] 
     exact Entailment.mdp (Entailment.C_of_E_mp (Entailment.padding_iff σ s))
       (Entailment.by_axm hpadding)
 
+noncomputable instance craig_equiv (T : Theory L) [L.DecidableEq] [T.«Σ₁»] : T ≊ T.craig :=
+  Entailment.Equiv.antisymm_iff.mpr ⟨inferInstance, inferInstance⟩
+
+noncomputable instance craig.consistent (T : Theory L) [L.DecidableEq] [T.«Σ₁»]
+    [Entailment.Consistent T] : Entailment.Consistent T.craig :=
+  Entailment.Consistent.of_le (𝓢 := T) (𝓣 := T.craig) inferInstance inferInstance
+
 end LO.FirstOrder.Theory
