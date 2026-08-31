@@ -19,21 +19,20 @@ namespace LO.FirstOrder.Arithmetic.ISigma1
 variable {n : ℕ}
 
 lemma nonempty_strictEquiv_sigma1 {φ : ArithmeticSemiformula Empty n} (h : Hierarchy 𝚺 1 φ) :
-    Nonempty (StrictEquiv 𝗜𝚺₁ 𝚺 1 φ) :=
+  Nonempty (StrictEquiv 𝗜𝚺₁ 𝚺 1 φ) :=
   nonempty_strictEquiv (T := 𝗜𝚺₁) h inferInstance
 
 lemma exists_delta0_witness_provable {φ : ArithmeticSemiformula Empty n} (h : Hierarchy 𝚺 1 φ) :
-    ∃ θ : ArithmeticSemiformula Empty (n + 1), Hierarchy 𝚺 0 θ ∧ 𝗜𝚺₁ ⊢ ∀¹* (φ 🡘 ∃¹ θ) := by
+  ∃ θ : ArithmeticSemiformula Empty (n + 1), Hierarchy 𝚺 0 θ ∧ 𝗜𝚺₁ ⊢ ∀¹* (φ 🡘 ∃¹ θ) := by
   have ⟨⟨ψ, ψ_hie, ψ_iff⟩⟩ := nonempty_strictEquiv_sigma1 h;
   obtain ⟨θ, rfl, hθ⟩ := strictSigmaSuccElim ψ_hie;
   use θ;
   and_intros;
   . exact StrictHierarchy.zero_iff.mp hθ;
-  . exact ψ_iff;
+  . assumption;
 
 lemma exists_delta0_witness_provable_of_sentence {σ : ArithmeticSentence} (h : Hierarchy 𝚺 1 σ) :
-    ∃ θ : ArithmeticSemisentence 1, Hierarchy 𝚺 0 θ ∧ 𝗜𝚺₁ ⊢ σ 🡘 ∃¹ θ := by
-  obtain ⟨θ, hθ, hprov⟩ := exists_delta0_witness_provable h;
-  exact ⟨θ, hθ, hprov⟩;
+  ∃ θ : ArithmeticSemisentence 1, Hierarchy 𝚺 0 θ ∧ 𝗜𝚺₁ ⊢ σ 🡘 ∃¹ θ := by
+  exact exists_delta0_witness_provable h;
 
 end LO.FirstOrder.Arithmetic.ISigma1

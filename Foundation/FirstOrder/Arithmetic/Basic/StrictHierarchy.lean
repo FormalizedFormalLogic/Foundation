@@ -46,9 +46,11 @@ lemma rew {Γ s} {φ : Semiformula L ξ₁ n₁} (ω : Rew L ξ₁ n₁ ξ₂ n�
 
 variable {ξ : Type*} {n : ℕ} {Γ : Polarity} {s : ℕ} {φ : Semiformula L ξ n}
 
-@[simp] lemma neg_iff :
-    StrictHierarchy Γ s (∼φ) ↔ StrictHierarchy Γ.alt s φ :=
-  ⟨fun h => by simpa using neg h, fun h => by simpa using neg h⟩
+@[simp]
+lemma neg_iff : StrictHierarchy Γ s (∼φ) ↔ StrictHierarchy Γ.alt s φ := ⟨
+  fun h => by simpa using neg h,
+  fun h => by simpa using neg h
+⟩
 
 lemma zero_iff : StrictHierarchy Γ 0 φ ↔ Hierarchy 𝚺 0 φ :=
   ⟨fun h => Hierarchy.zero_iff.mp h.hierarchy, zero⟩
@@ -63,29 +65,28 @@ lemma sigma_of_sigma_ex {φ : Semiformula L ξ (n + 1)} :
   intro H;
   cases H <;> simp_all;
 
-@[simp] lemma exs_iff {φ : Semiformula L ξ (n + 1)} :
-    StrictHierarchy 𝚺 (s + 1) (∃¹ φ) ↔ StrictHierarchy 𝚷 s φ :=
+@[simp]
+lemma exs_iff {φ : Semiformula L ξ (n + 1)} : StrictHierarchy 𝚺 (s + 1) (∃¹ φ) ↔ StrictHierarchy 𝚷 s φ :=
   ⟨sigma_of_sigma_ex, sigma⟩
 
-lemma pi_of_pi_all {φ : Semiformula L ξ (n + 1)} :
-    StrictHierarchy 𝚷 (s + 1) (∀¹ φ) → StrictHierarchy 𝚺 s φ := by
+lemma pi_of_pi_all {φ : Semiformula L ξ (n + 1)} : StrictHierarchy 𝚷 (s + 1) (∀¹ φ) → StrictHierarchy 𝚺 s φ := by
   generalize hr : ∀¹ φ = r;
   generalize hb : (𝚷 : Polarity) = Γ;
   intro H;
   cases H <;> simp_all;
 
-@[simp] lemma all_iff {φ : Semiformula L ξ (n + 1)} :
-    StrictHierarchy 𝚷 (s + 1) (∀¹ φ) ↔ StrictHierarchy 𝚺 s φ :=
+@[simp]
+lemma all_iff {φ : Semiformula L ξ (n + 1)} : StrictHierarchy 𝚷 (s + 1) (∀¹ φ) ↔ StrictHierarchy 𝚺 s φ :=
   ⟨pi_of_pi_all, pi⟩
 
 lemma sigma_succ_elim :
-    StrictHierarchy 𝚺 (s + 1) φ → ∃ ψ : Semiformula L ξ (n + 1), φ = ∃¹ ψ ∧ StrictHierarchy 𝚷 s ψ := by
+  StrictHierarchy 𝚺 (s + 1) φ → ∃ ψ : Semiformula L ξ (n + 1), φ = ∃¹ ψ ∧ StrictHierarchy 𝚷 s ψ := by
   generalize hb : (𝚺 : Polarity) = Γ;
   intro H;
   cases H <;> simp_all;
 
 lemma pi_succ_elim :
-    StrictHierarchy 𝚷 (s + 1) φ → ∃ ψ : Semiformula L ξ (n + 1), φ = ∀¹ ψ ∧ StrictHierarchy 𝚺 s ψ := by
+  StrictHierarchy 𝚷 (s + 1) φ → ∃ ψ : Semiformula L ξ (n + 1), φ = ∀¹ ψ ∧ StrictHierarchy 𝚺 s ψ := by
   generalize hb : (𝚷 : Polarity) = Γ;
   intro H;
   cases H <;> simp_all;

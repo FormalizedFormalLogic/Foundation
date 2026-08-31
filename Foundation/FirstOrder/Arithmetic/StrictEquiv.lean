@@ -166,9 +166,8 @@ def closure_zero : Closure T 0 where
 noncomputable def bexs_sigma_step (ih : Closure T s) :
     ∀ {n} {φ : ArithmeticSemiformula Empty (n + 1)} {t : ArithmeticSemiterm Empty (n + 1)},
       t.Positive → StrictEquiv T 𝚺 (s + 1) φ → StrictEquiv T 𝚺 (s + 1) (∃¹[“x. x < !!t”] φ) := by
-  intro n φ t ht hφ;
+  rintro n φ t ht ⟨φ', hφ', hprov'⟩;
   obtain ⟨u, rfl⟩ := bShiftWitness ht;
-  obtain ⟨φ', hφ', hprov'⟩ := hφ;
   have hiff' := models_iff_of_provable_iff' hprov';
   obtain ⟨ψ₀, rfl, hψ₀⟩ := strictSigmaSuccElim hφ';
   -- swap the two leading bound variables of `ψ₀`, turning the order into `x :> y :> e`.
@@ -216,9 +215,8 @@ noncomputable def ball_sigma_step (hT : 𝗜𝚺 (s + 1) ⪯ T) (ih : Closure T 
     ∀ {n} {φ : ArithmeticSemiformula Empty (n + 1)} {t : ArithmeticSemiterm Empty (n + 1)},
       t.Positive → StrictEquiv T 𝚺 (s + 1) φ → StrictEquiv T 𝚺 (s + 1) (∀¹[“x. x < !!t”] φ) := by
   haveI := hT;
-  intro n φ t ht hφ;
+  rintro n φ t ht ⟨φ', hφ', hprov'⟩;
   obtain ⟨u, rfl⟩ := bShiftWitness ht;
-  obtain ⟨φ', hφ', hprov'⟩ := hφ;
   have hiff' := models_iff_of_provable_iff' hprov';
   obtain ⟨ψ₀, rfl, hψ₀⟩ := strictSigmaSuccElim hφ';
   have hψ₀qq : StrictHierarchy 𝚷 s (ψ₀ ⇜ (#0 :> #1 :> (#·.succ.succ.succ))) := hψ₀.rew (Rew.subst _);
@@ -285,9 +283,7 @@ noncomputable def and_sigma_step (hT : 𝗜𝚺 (s + 1) ⪯ T) (ih : Closure T s
     ∀ {n} {φ ψ : ArithmeticSemiformula Empty n},
       StrictEquiv T 𝚺 (s + 1) φ → StrictEquiv T 𝚺 (s + 1) ψ → StrictEquiv T 𝚺 (s + 1) (φ ⋏ ψ) := by
   haveI : 𝗜𝚺₀ ⪯ T := Entailment.WeakerThan.trans (ISigma_weakerThan_of_le (Nat.zero_le (s + 1))) hT;
-  intro n φ ψ hφ hψ;
-  obtain ⟨φ', hφ', hφprov⟩ := hφ;
-  obtain ⟨ψ', hψ', hψprov⟩ := hψ;
+  rintro n φ ψ ⟨φ', hφ', hφprov⟩ ⟨ψ', hψ', hψprov⟩;
   have hφiff := models_iff_of_provable_iff' hφprov;
   have hψiff := models_iff_of_provable_iff' hψprov;
   obtain ⟨φ₀, rfl, hφ₀⟩ := strictSigmaSuccElim hφ';
@@ -419,25 +415,17 @@ noncomputable def all (hT : 𝗜𝚺 s ⪯ T) (c : Closure T s) {n : ℕ}
   have h'' := neg (exs hT c h');
   simpa using h'';
 
-theorem nonempty_strictEquiv {Γ : Polarity} {n : ℕ} {φ : ArithmeticSemiformula Empty n}
-    (h : Hierarchy Γ s φ) (hT : 𝗜𝚺 s ⪯ T) : Nonempty (StrictEquiv T Γ s φ) := by
+theorem nonempty_strictEquiv {φ : ArithmeticSemiformula Empty n}
+  (h : Hierarchy Γ s φ) (hT : 𝗜𝚺 s ⪯ T) : Nonempty (StrictEquiv T Γ s φ) := by
   induction h with
-  | verum Γ s n =>
-    exact ⟨StrictEquiv.of_deltaZero (Hierarchy.verum 𝚺 0 n)⟩;
-  | falsum Γ s n =>
-    exact ⟨StrictEquiv.of_deltaZero (Hierarchy.falsum 𝚺 0 n)⟩;
-  | rel Γ s r v =>
-    exact ⟨StrictEquiv.of_deltaZero (Hierarchy.rel 𝚺 0 r v)⟩;
-  | nrel Γ s r v =>
-    exact ⟨StrictEquiv.of_deltaZero (Hierarchy.nrel 𝚺 0 r v)⟩;
-  | and _ _ ihp ihq =>
-    exact ⟨(closure hT).and _ (ihp hT).some (ihq hT).some⟩;
-  | or _ _ ihp ihq =>
-    exact ⟨(closure hT).or _ (ihp hT).some (ihq hT).some⟩;
-  | ball pos _ ih =>
-    exact ⟨(closure hT).ball _ pos (ih hT).some⟩;
-  | bexs pos _ ih =>
-    exact ⟨(closure hT).bexs _ pos (ih hT).some⟩;
+  | verum Γ s n => exact ⟨StrictEquiv.of_deltaZero (Hierarchy.verum 𝚺 0 n)⟩;
+  | falsum Γ s n => exact ⟨StrictEquiv.of_deltaZero (Hierarchy.falsum 𝚺 0 n)⟩;
+  | rel Γ s r v => exact ⟨StrictEquiv.of_deltaZero (Hierarchy.rel 𝚺 0 r v)⟩;
+  | nrel Γ s r v => exact ⟨StrictEquiv.of_deltaZero (Hierarchy.nrel 𝚺 0 r v)⟩;
+  | and _ _ ihp ihq => exact ⟨(closure hT).and _ (ihp hT).some (ihq hT).some⟩;
+  | or _ _ ihp ihq => exact ⟨(closure hT).or _ (ihp hT).some (ihq hT).some⟩;
+  | ball pos _ ih => exact ⟨(closure hT).ball _ pos (ih hT).some⟩;
+  | bexs pos _ ih => exact ⟨(closure hT).bexs _ pos (ih hT).some⟩;
   | @exs s n φ _ ih =>
     have hT' : 𝗜𝚺 s ⪯ T := ISigma_weakerThan_of_le_trans (by omega) hT;
     exact ⟨exs hT' (closure hT') (ih hT).some⟩;
