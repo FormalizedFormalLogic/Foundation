@@ -10,6 +10,8 @@ public import Foundation.FirstOrder.Bootstrapping.Syntax.CraigTrick
 
 namespace LO.FirstOrder.Arithmetic.Bootstrapping
 
+open LO.Entailment
+
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 
 variable {L : Language} [L.Encodable] [L.LORDefinable]
@@ -61,7 +63,7 @@ lemma provable_of_standard_proof {n : ℕ} {φ : Sentence L} : Proof T (n : V) �
 
 open Classical
 
-theorem rosser_internalize [Entailment.Consistent T] {φ : Sentence L} : T ⊢ φ → T.RosserProvable (⌜φ⌝ : V) := by
+theorem rosser_internalize [Consistent T] {φ : Sentence L} : T ⊢ φ → T.RosserProvable (⌜φ⌝ : V) := by
   intro h
   let n : ℕ := ⌜h.get⌝
   have hn : Proof T (↑n : V) ⌜φ⌝ := by simp [n, coe_quote_proof_eq]
@@ -69,15 +71,15 @@ theorem rosser_internalize [Entailment.Consistent T] {φ : Sentence L} : T ⊢ �
   intro b hb Hb
   rcases eq_nat_of_lt_nat hb with ⟨b, rfl⟩
   have : T ⊢ ∼φ := provable_of_standard_proof (V := V) Hb
-  have : Entailment.Inconsistent T := Entailment.inconsistent_of_provable_of_unprovable h this
-  have : ¬Entailment.Inconsistent T := Entailment.Consistent.not_inc inferInstance
+  have : Inconsistent T := inconsistent_of_provable_of_unprovable h this
+  have : ¬Inconsistent T := Consistent.not_inc inferInstance
   contradiction
 
-theorem rosser_internalize_sentence [Entailment.Consistent T] {σ : Sentence L} : T ⊢ σ → T.RosserProvable (⌜σ⌝ : V) := fun h ↦ by
+theorem rosser_internalize_sentence [Consistent T] {σ : Sentence L} : T ⊢ σ → T.RosserProvable (⌜σ⌝ : V) := fun h ↦ by
   simpa [Sentence.quote_def] using! rosser_internalize h
 
 open Classical in
-theorem not_rosserProvable [Entailment.Consistent T] {φ : Sentence L} : T ⊢ ∼φ → ¬T.RosserProvable (⌜φ⌝ : V) := by
+theorem not_rosserProvable [Consistent T] {φ : Sentence L} : T ⊢ ∼φ → ¬T.RosserProvable (⌜φ⌝ : V) := by
   rintro h r
   let n : ℕ := ⌜h.get⌝
   have hn : Proof T (↑n : V) ⌜∼φ⌝ := by simp [n, coe_quote_proof_eq]
@@ -85,11 +87,11 @@ theorem not_rosserProvable [Entailment.Consistent T] {φ : Sentence L} : T ⊢ �
   have : b ≤ n := by grind;
   rcases eq_nat_of_le_nat this with ⟨b, rfl⟩
   have : T ⊢ φ := provable_of_standard_proof hb
-  have : Entailment.Inconsistent T := Entailment.inconsistent_of_provable_of_unprovable this h
-  have : ¬Entailment.Inconsistent T := Entailment.Consistent.not_inc inferInstance
+  have : Inconsistent T := inconsistent_of_provable_of_unprovable this h
+  have : ¬Inconsistent T := Consistent.not_inc inferInstance
   contradiction
 
-theorem not_rosserProvable_sentence [Entailment.Consistent T] {σ : Sentence L} : T ⊢ ∼σ → ¬T.RosserProvable (⌜σ⌝ : V) := fun h ↦ by
+theorem not_rosserProvable_sentence [Consistent T] {σ : Sentence L} : T ⊢ ∼σ → ¬T.RosserProvable (⌜σ⌝ : V) := fun h ↦ by
   simpa [Sentence.quote_def] using! not_rosserProvable h
 
 end LO.FirstOrder.Arithmetic.Bootstrapping
@@ -97,12 +99,13 @@ end LO.FirstOrder.Arithmetic.Bootstrapping
 namespace LO.FirstOrder.Arithmetic
 
 open Bootstrapping
+open LO.Entailment
 
 section
 
 variable {L : Language} [L.Encodable] [L.LORDefinable]
 
-variable {T : Theory L} [T.Δ₁] [Entailment.Consistent T]
+variable {T : Theory L} [T.Δ₁] [Consistent T]
 
 local prefix:90 "𝗥" => T.rosserPred
 
@@ -122,7 +125,7 @@ open ProvabilityAbstraction
 
 variable {L : Language} [L.Encodable] [L.LORDefinable]
 
-variable {T : Theory L} [T.Δ₁] [Entailment.Consistent T]
+variable {T : Theory L} [T.Δ₁] [Consistent T]
 
 variable (T)
 
@@ -144,13 +147,13 @@ instance : T.rosserProvability.SoundOn ℕ := by
 end rosserProvability
 
 /-- Gödel-Rosser incompleteness theorem -/
-theorem incomplete_GR (T : ArithmeticTheory) [T.Δ₁] [𝗜𝚺₁ ⪯ T] [Entailment.Consistent T] : Entailment.Incomplete T :=
+theorem incomplete_GR (T : ArithmeticTheory) [T.Δ₁] [𝗜𝚺₁ ⪯ T] [Consistent T] : Incomplete T :=
   ProvabilityAbstraction.rosser_first_incompleteness T.rosserProvability
 
 theorem incomplete_GR_of_sigma1_definable (T : ArithmeticTheory) [T.«Σ₁»] [𝗜𝚺₁ ⪯ T]
-    [Entailment.Consistent T] : Entailment.Incomplete T := by
+    [Consistent T] : Incomplete T := by
   let craig_weakerThan : 𝗜𝚺₁ ⪯ T.craig :=
-    Entailment.WeakerThan.trans (𝓣 := T) inferInstance (Theory.craig.original_weakerThan (T := T))
+    WeakerThan.trans (𝓣 := T) inferInstance (Theory.craig.original_weakerThan (T := T))
   exact (Theory.craig_equiv (T := T)).symm.incomplete
     (@incomplete_GR T.craig inferInstance craig_weakerThan inferInstance)
 
