@@ -46,7 +46,10 @@ private lemma neg (h : StrictEquivOnPA.{u} Γ s φ) : StrictEquivOnPA.{u} Γ.alt
   obtain ⟨φ', hφ', hiff'⟩ := h;
   exact ⟨∼φ', hφ'.neg, fun V _ _ e => by simp [hiff' V e]⟩;
 
-@[simp] private lemma neg_iff : StrictEquivOnPA.{u} Γ.alt s (∼φ) ↔ StrictEquivOnPA.{u} Γ s φ := sorry
+@[simp] private lemma neg_iff : StrictEquivOnPA.{u} Γ.alt s (∼φ) ↔ StrictEquivOnPA.{u} Γ s φ := by
+  constructor;
+  . intro h; simpa using neg h;
+  . intro h; exact neg h;
 
 private lemma alt_up (h : StrictEquivOnPA.{u} Γ s φ) : StrictEquivOnPA.{u} Γ.alt (s + 1) φ := sorry
 
