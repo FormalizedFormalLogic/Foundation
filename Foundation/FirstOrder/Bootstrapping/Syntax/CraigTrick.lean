@@ -155,3 +155,18 @@ lemma Theory.isCraigAxiom_quote_iff {T : Theory L} [T.«Σ₁»] (φ : Propositi
     . exact hT
 
 end LO.FirstOrder.Arithmetic.Bootstrapping
+
+namespace LO.FirstOrder.Theory
+
+open Arithmetic.Bootstrapping
+
+variable {L : Language} [L.Encodable] [L.LORDefinable]
+
+noncomputable instance craig.delta1 (T : Theory L) [T.«Σ₁»] : (T.craig).Δ₁ where
+  ch := T.craigCh
+  mem_iff φ := (Theory.IsCraigAxiom.defined (V := ℕ) T).iff.trans
+    (Theory.isCraigAxiom_quote_iff φ)
+  isDelta1 := Arithmetic.HierarchySymbol.Semiformula.ProvablyProperOn.ofProperOn.{0} _ fun V _ _ ↦
+    (Theory.IsCraigAxiom.defined (V := V) T).proper
+
+end LO.FirstOrder.Theory
