@@ -1,6 +1,6 @@
 module
 
-public import Foundation.FirstOrder.Arithmetic.Basic.Prenex
+public import Foundation.FirstOrder.Arithmetic.Basic.StrictHierarchy
 public import Foundation.FirstOrder.Arithmetic.Schemata
 public import Foundation.FirstOrder.Arithmetic.BoundedCollection
 
@@ -26,11 +26,18 @@ namespace LO.FirstOrder.Arithmetic
 -- signature from referring to a private identifier (bodies may still call private lemmas
 -- freely). Only the three theorems in `namespace Hierarchy` at the end of the file, whose
 -- statements are fully inlined, are exposed publicly.
-namespace StrictEquivOnPA
 
 private def StrictEquivOnPA (Γ : Polarity) (s : ℕ) {n : ℕ} (φ : ArithmeticSemiformula Empty n) : Prop :=
-  ∃ ψ : ArithmeticSemiformula Empty n, StrictHierarchy Γ s ψ ∧
+  ∃ ψ : ArithmeticSemiformula Empty n,
+    StrictHierarchy Γ s ψ ∧
     ∀ (V : Type u) [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗣𝗔] (e : Fin n → V), V ⊧/e φ ↔ V ⊧/e ψ
+
+private structure StrictEquivOnPA₂ (Γ : Polarity) (s : ℕ) {n : ℕ} (φ : ArithmeticSemiformula Empty n) where
+  ψ : ArithmeticSemiformula Empty n
+  h : StrictHierarchy Γ s ψ
+  m : ∀ (V : Type u) [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗣𝗔] (e : Fin n → V), V ⊧/e φ ↔ V ⊧/e ψ
+
+namespace StrictEquivOnPA
 
 variable {Γ Γ' : Polarity} {s s' : ℕ} {n : ℕ} {φ ψ : ArithmeticSemiformula Empty n}
 
@@ -427,7 +434,7 @@ lemma exists_strictHierarchy_form {Γ s n} {φ : ArithmeticSemiformula Empty n} 
   StrictEquivOnPA.strictEquivOnPA_of_hierarchy h
 
 theorem exists_strictHierarchy_provable {Γ s n} {φ : ArithmeticSemiformula Empty n} (h : Hierarchy Γ s φ) :
-    ∃ ψ : ArithmeticSemiformula Empty n, StrictHierarchy Γ s ψ ∧ 𝗣𝗔 ⊢ ∀¹* (φ 🡘 ψ) := by
+  ∃ ψ : ArithmeticSemiformula Empty n, StrictHierarchy Γ s ψ ∧ 𝗣𝗔 ⊢ ∀¹* (φ 🡘 ψ) := by
   obtain ⟨ψ, hψ, H⟩ := exists_strictHierarchy_form.{0} h;
   use ψ;
   and_intros;
@@ -437,7 +444,7 @@ theorem exists_strictHierarchy_provable {Γ s n} {φ : ArithmeticSemiformula Emp
     simpa [models_iff] using fun e => H M e;
 
 theorem exists_strictHierarchy_provable_of_sentence {Γ s} {σ : ArithmeticSentence} (h : Hierarchy Γ s σ) :
-    ∃ π : ArithmeticSentence, StrictHierarchy Γ s π ∧ 𝗣𝗔 ⊢ σ 🡘 π := by
+  ∃ π : ArithmeticSentence, StrictHierarchy Γ s π ∧ 𝗣𝗔 ⊢ σ 🡘 π := by
   obtain ⟨π, hπ, h⟩ := exists_strictHierarchy_provable h;
   exact ⟨π, hπ, h⟩;
 

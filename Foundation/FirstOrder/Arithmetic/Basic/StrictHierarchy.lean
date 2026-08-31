@@ -19,10 +19,8 @@ variable {L : Language} [L.LT]
 
 inductive StrictHierarchy : Polarity → ℕ → {n : ℕ} → Semiformula L ξ n → Prop
   | zero {Γ φ} : Hierarchy 𝚺 0 φ → StrictHierarchy Γ 0 φ
-  | sigma {s n} {φ : Semiformula L ξ (n + 1)} :
-      StrictHierarchy 𝚷 s φ → StrictHierarchy 𝚺 (s + 1) (∃¹ φ)
-  | pi {s n} {φ : Semiformula L ξ (n + 1)} :
-      StrictHierarchy 𝚺 s φ → StrictHierarchy 𝚷 (s + 1) (∀¹ φ)
+  | sigma {s n} {φ : Semiformula L ξ (n + 1)} : StrictHierarchy 𝚷 s φ → StrictHierarchy 𝚺 (s + 1) (∃¹ φ)
+  | pi {s n} {φ : Semiformula L ξ (n + 1)} : StrictHierarchy 𝚺 s φ → StrictHierarchy 𝚷 (s + 1) (∀¹ φ)
 
 namespace StrictHierarchy
 
