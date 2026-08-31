@@ -329,8 +329,44 @@ private lemma coreClosure : CoreClosure.{u} s := by
   | zero => exact coreClosure_zero;
   | succ s ih => exact coreClosure_succ ih;
 
+-- Contracts the two nested existentials `∃x∃y` of a strict `Σ_{s+1}` witness into a single
+-- bounded pair `∃z (∃x ≤ z)(∃y ≤ z)`, using two applications of `coreClosure.bexs`.
 private lemma exs {φ : ArithmeticSemiformula Empty (n + 1)} (h : StrictEquivOnPA.{u} 𝚺 (s + 1) φ) :
-    StrictEquivOnPA.{u} 𝚺 (s + 1) (∃¹ φ) := sorry
+    StrictEquivOnPA.{u} 𝚺 (s + 1) (∃¹ φ) := by
+  obtain ⟨φ', hφ', hiff'⟩ := h;
+  obtain ⟨ψ₀, rfl, hψ₀⟩ := hφ'.sigma_succ_elim;
+  have hψ₀' : StrictHierarchy 𝚷 s (Rew.bShift.q.q ▹ ψ₀) := hψ₀.rew Rew.bShift.q.q;
+  obtain ⟨A, hA, hAiff⟩ := coreClosure.bexs 𝚷
+    (t := Rew.bShift (‘#1 + 1’ : ArithmeticSemiterm Empty (n + 2)))
+    (Rew.bShift_positive _) (refl hψ₀');
+  obtain ⟨B, hB, hBiff⟩ := coreClosure.bexs 𝚷
+    (t := Rew.bShift (‘#0 + 1’ : ArithmeticSemiterm Empty (n + 1)))
+    (Rew.bShift_positive _) (refl hA);
+  have hAiff' : ∀ (V : Type u) [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗣𝗔] (e : Fin (n + 2) → V),
+      V ⊧/e ((Rew.bShift.q.q ▹ ψ₀ : ArithmeticSemiformula Empty (n + 3)).bexsLTSucc
+        (‘#1’ : ArithmeticSemiterm Empty (n + 2))) ↔ V ⊧/e A := hAiff;
+  have hBiff' : ∀ (V : Type u) [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗣𝗔] (e : Fin (n + 1) → V),
+      V ⊧/e (A.bexsLTSucc (‘#0’ : ArithmeticSemiterm Empty (n + 1))) ↔ V ⊧/e B := hBiff;
+  use ∃¹ B;
+  and_intros;
+  . exact hB.sigma;
+  . intro V _ _ e;
+    have hAeval : ∀ y z : V, V ⊧/(y :> z :> e) A ↔ ∃ x ≤ z, V ⊧/(x :> y :> e) ψ₀ := by
+      intro y z;
+      rw [← hAiff' V (y :> z :> e)];
+      simp [eval_insert2];
+    have hBeval : ∀ z : V, V ⊧/(z :> e) B ↔ ∃ y ≤ z, V ⊧/(y :> z :> e) A := by
+      intro z;
+      rw [← hBiff' V (z :> e)];
+      simp;
+    have hφeval : ∀ y : V, V ⊧/(y :> e) φ ↔ ∃ x, V ⊧/(x :> y :> e) ψ₀ := fun y =>
+      (hiff' V (y :> e)).trans Semiformula.eval_ex;
+    simp only [Semiformula.eval_ex, hφeval, hBeval, hAeval];
+    constructor;
+    . rintro ⟨y, x, hx⟩;
+      exact ⟨max x y, y, le_max_right x y, x, le_max_left x y, hx⟩;
+    . rintro ⟨z, y, -, x, -, hx⟩;
+      exact ⟨y, x, hx⟩;
 
 private lemma all {φ : ArithmeticSemiformula Empty (n + 1)} (h : StrictEquivOnPA.{u} 𝚷 (s + 1) φ) :
     StrictEquivOnPA.{u} 𝚷 (s + 1) (∀¹ φ) := sorry
