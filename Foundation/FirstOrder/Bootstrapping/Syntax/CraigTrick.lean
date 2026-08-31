@@ -27,6 +27,10 @@ lemma «Σ₁witness_spec» (T : Theory L) [T.«Σ₁»]
   simpa [«Σ₁witness»] using
     (exists_delta0_witness_form.{0} T.«Σ₁ch».sigma_prop).choose_spec.2 (V := V) e
 
+def craig (T : Theory L) [T.«Σ₁»] : Theory L :=
+  { φ : Sentence L | ∃ (σ : Sentence L) (s : ℕ),
+      ℕ ⊧/![(s : ℕ), ⌜σ⌝] T.«Σ₁witness».val ∧ φ = σ.padding s }
+
 end LO.FirstOrder.Theory
 
 namespace LO.FirstOrder.Arithmetic.Bootstrapping
@@ -34,6 +38,16 @@ namespace LO.FirstOrder.Arithmetic.Bootstrapping
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 
 variable {L : Language} [L.Encodable] [L.LORDefinable]
+
+def _root_.LO.FirstOrder.Theory.IsCraigAxiom (T : Theory L) [T.«Σ₁»] : V → Prop :=
+  fun x ↦ ∃ s p : V, x = p ^⋏ qqVerums s ∧ V ⊧/![s, p] T.«Σ₁witness».val
+
+noncomputable def _root_.LO.FirstOrder.Theory.craigCh (T : Theory L) [T.«Σ₁»] :
+    𝚫₁.Semisentence 1 := .mkDelta
+  (.mkSigma “x. ∃ s < x, ∃ p < x, ∃ v < x,
+    !qqVerumsGraph v s ∧ !qqAndDef x p v ∧ !(T.«Σ₁witness».val) s p”)
+  (.mkPi “x. ∃ s < x, ∃ p < x, ∃ v < x,
+    (∀ v', !qqVerumsGraph v' s → v' = v) ∧ !qqAndDef x p v ∧ !(T.«Σ₁witness».val) s p”)
 
 lemma quote_eq_qqAnd_iff {φ : Proposition L} {p q : ℕ} :
     (⌜φ⌝ : ℕ) = p ^⋏ q ↔ ∃ φ₁ φ₂, φ = φ₁ ⋏ φ₂ ∧ p = ⌜φ₁⌝ ∧ q = ⌜φ₂⌝ := by
