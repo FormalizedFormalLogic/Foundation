@@ -51,7 +51,14 @@ private lemma neg (h : StrictEquivOnPA.{u} Γ s φ) : StrictEquivOnPA.{u} Γ.alt
   . intro h; simpa using neg h;
   . intro h; exact neg h;
 
-private lemma alt_up (h : StrictEquivOnPA.{u} Γ s φ) : StrictEquivOnPA.{u} Γ.alt (s + 1) φ := sorry
+private lemma alt_up (h : StrictEquivOnPA.{u} Γ s φ) : StrictEquivOnPA.{u} Γ.alt (s + 1) φ := by
+  obtain ⟨φ', hφ', hiff'⟩ := h;
+  rcases Γ with _ | _;
+  . refine ⟨∀¹ (Rew.bShift ▹ φ'), (hφ'.rew Rew.bShift).pi, fun V _ _ e => ?_⟩;
+    have : Nonempty V := ⟨0⟩;
+    simp [hiff' V e];
+  . refine ⟨∃¹ (Rew.bShift ▹ φ'), (hφ'.rew Rew.bShift).sigma, fun V _ _ e => ?_⟩;
+    simp [hiff' V e];
 
 private lemma of_deltaZero (hp : Hierarchy 𝚺 0 φ) : StrictEquivOnPA.{u} Γ s φ := sorry
 
