@@ -20,38 +20,15 @@ namespace LO.FirstOrder.Arithmetic
 
 variable {Γ : Polarity} {s : ℕ} {n : ℕ} {φ ψ : ArithmeticSemiformula Empty n}
 
--- `ModelEquiv` is the `Type 0`, `𝗣𝗔`-fixed model-theoretic counterpart of `StrictEquiv`: it lets
+-- `ModelEquiv 𝗣𝗔` is the `Type 0` model-theoretic counterpart of `StrictEquiv 𝗣𝗔`: it lets
 -- `CoreClosure` (the induction-closure bundle driving `of_hierarchy`) be built up purely by model
 -- theory, converting the result to a `𝗣𝗔`-provable `StrictEquiv` only once, via
--- `Arithmetic.complete`, at the boundary with the public `StrictEquiv` API. It has no meaning
--- outside this file's proof and stays `private`, as does everything built on top of it. Since it
--- is `Type`-valued (not `Prop`-valued), any `def` whose *value* mentions it — not just its type —
--- must itself stay `private` too: this module's visibility check exposes a public `def`'s body
--- (unlike a `theorem`/`lemma`, where proof irrelevance means only the statement is exposed), so
--- `exs`/`all`/`of_hierarchy`/`coreClosure` and friends all stay `private` even though some of
--- their *statements* mention only the now-public `StrictEquiv`.
-private structure ModelEquiv (Γ : Polarity) (s : ℕ) {n : ℕ} (φ : ArithmeticSemiformula Empty n) where
-  witness : ArithmeticSemiformula Empty n
-  hierarchy : StrictHierarchy Γ s witness
-  iff_models : ∀ (V : Type) [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗣𝗔] (e : Fin n → V), V ⊧/e φ ↔ V ⊧/e witness
-
--- Combinators are named `ModelEquiv.xxx` via dotted `def`s (rather than a `namespace ModelEquiv`
--- block) because `ModelEquiv` is `private`: opening an actual namespace of the same name shadows
--- the private-declaration alias and makes the bare identifier `ModelEquiv` unresolvable below.
-private def ModelEquiv.refl (h : StrictHierarchy Γ s φ) : ModelEquiv Γ s φ :=
-  ⟨φ, h, fun _ _ _ _ => Iff.rfl⟩
-
-private def ModelEquiv.neg (h : ModelEquiv Γ s φ) : ModelEquiv Γ.alt s (∼φ) :=
-  ⟨∼h.witness, h.hierarchy.neg, fun V _ _ e => by simp [h.iff_models V e]⟩
-
-/-- Convert to the public, `𝗣𝗔`-provable `StrictEquiv`, via completeness. -/
-private def ModelEquiv.toStrictEquiv (h : ModelEquiv Γ s φ) : StrictEquiv 𝗣𝗔 Γ s φ :=
-  ⟨h.witness, h.hierarchy, provable_iff_of_models_iff h.iff_models⟩
-
-/-- Convert from the public, `𝗣𝗔`-provable `StrictEquiv`, via soundness. -/
-private def ModelEquiv.ofStrictEquiv (d : StrictEquiv 𝗣𝗔 Γ s φ) : ModelEquiv Γ s φ :=
-  ⟨d.witness, d.hierarchy, fun V _ _ e => d.iff_models V e⟩
-
+-- `Arithmetic.complete`, at the boundary with the public `StrictEquiv` API. `CoreClosure` and
+-- everything built on top of it (`exs`/`all`/`of_hierarchy`/`coreClosure` and friends) have no
+-- meaning outside this file's proof and stay `private`, even though their *statements* mention
+-- only the now-public `StrictEquiv`/`ModelEquiv`: since these `def`s are `Type`-valued (not
+-- `Prop`-valued), this module's visibility check exposes a public `def`'s body (unlike a
+-- `theorem`/`lemma`, where proof irrelevance means only the statement is exposed).
 open ModelEquiv (refl neg)
 
 -- `StrictHierarchy.sigma_succ_elim` and `Rew.positive_iff` only assert the *existence* of a
@@ -73,13 +50,13 @@ private noncomputable def bShiftWitness {t : ArithmeticSemiterm Empty (n + 1)} (
 /-- The core closure properties needed at a fixed level `s`. -/
 private structure CoreClosure (s : ℕ) where
   and  : ∀ Γ {n} {φ ψ : ArithmeticSemiformula Empty n},
-      ModelEquiv Γ s φ → ModelEquiv Γ s ψ → ModelEquiv Γ s (φ ⋏ ψ)
+      ModelEquiv 𝗣𝗔 Γ s φ → ModelEquiv 𝗣𝗔 Γ s ψ → ModelEquiv 𝗣𝗔 Γ s (φ ⋏ ψ)
   or   : ∀ Γ {n} {φ ψ : ArithmeticSemiformula Empty n},
-      ModelEquiv Γ s φ → ModelEquiv Γ s ψ → ModelEquiv Γ s (φ ⋎ ψ)
+      ModelEquiv 𝗣𝗔 Γ s φ → ModelEquiv 𝗣𝗔 Γ s ψ → ModelEquiv 𝗣𝗔 Γ s (φ ⋎ ψ)
   ball : ∀ Γ {n} {φ : ArithmeticSemiformula Empty (n + 1)} {t : ArithmeticSemiterm Empty (n + 1)},
-      t.Positive → ModelEquiv Γ s φ → ModelEquiv Γ s (∀¹[“x. x < !!t”] φ)
+      t.Positive → ModelEquiv 𝗣𝗔 Γ s φ → ModelEquiv 𝗣𝗔 Γ s (∀¹[“x. x < !!t”] φ)
   bexs : ∀ Γ {n} {φ : ArithmeticSemiformula Empty (n + 1)} {t : ArithmeticSemiterm Empty (n + 1)},
-      t.Positive → ModelEquiv Γ s φ → ModelEquiv Γ s (∃¹[“x. x < !!t”] φ)
+      t.Positive → ModelEquiv 𝗣𝗔 Γ s φ → ModelEquiv 𝗣𝗔 Γ s (∃¹[“x. x < !!t”] φ)
 
 private def coreClosure_zero : CoreClosure 0 where
   and := fun Γ {n φ ψ} hφ hψ =>
@@ -107,7 +84,7 @@ private def coreClosure_zero : CoreClosure 0 where
 
 private noncomputable def or_sigma_step (ih : CoreClosure s) :
     ∀ {n} {φ ψ : ArithmeticSemiformula Empty n},
-      ModelEquiv 𝚺 (s + 1) φ → ModelEquiv 𝚺 (s + 1) ψ → ModelEquiv 𝚺 (s + 1) (φ ⋎ ψ) := by
+      ModelEquiv 𝗣𝗔 𝚺 (s + 1) φ → ModelEquiv 𝗣𝗔 𝚺 (s + 1) ψ → ModelEquiv 𝗣𝗔 𝚺 (s + 1) (φ ⋎ ψ) := by
   intro n φ ψ hφ hψ;
   obtain ⟨φ', hφ', hφiff⟩ := hφ;
   obtain ⟨ψ', hψ', hψiff⟩ := hψ;
@@ -131,7 +108,7 @@ private noncomputable def or_sigma_step (ih : CoreClosure s) :
 
 private noncomputable def and_sigma_step (ih : CoreClosure s) :
     ∀ {n} {φ ψ : ArithmeticSemiformula Empty n},
-      ModelEquiv 𝚺 (s + 1) φ → ModelEquiv 𝚺 (s + 1) ψ → ModelEquiv 𝚺 (s + 1) (φ ⋏ ψ) := by
+      ModelEquiv 𝗣𝗔 𝚺 (s + 1) φ → ModelEquiv 𝗣𝗔 𝚺 (s + 1) ψ → ModelEquiv 𝗣𝗔 𝚺 (s + 1) (φ ⋏ ψ) := by
   intro n φ ψ hφ hψ;
   obtain ⟨φ', hφ', hφiff⟩ := hφ;
   obtain ⟨ψ', hψ', hψiff⟩ := hψ;
@@ -173,7 +150,7 @@ private noncomputable def and_sigma_step (ih : CoreClosure s) :
 
 private noncomputable def bexs_sigma_step (ih : CoreClosure s) :
     ∀ {n} {φ : ArithmeticSemiformula Empty (n + 1)} {t : ArithmeticSemiterm Empty (n + 1)},
-      t.Positive → ModelEquiv 𝚺 (s + 1) φ → ModelEquiv 𝚺 (s + 1) (∃¹[“x. x < !!t”] φ) := by
+      t.Positive → ModelEquiv 𝗣𝗔 𝚺 (s + 1) φ → ModelEquiv 𝗣𝗔 𝚺 (s + 1) (∃¹[“x. x < !!t”] φ) := by
   intro n φ t ht hφ;
   obtain ⟨u, rfl⟩ := bShiftWitness ht;
   obtain ⟨φ', hφ', hiff'⟩ := hφ;
@@ -219,7 +196,7 @@ private noncomputable def bexs_sigma_step (ih : CoreClosure s) :
 
 private noncomputable def ball_sigma_step (ih : CoreClosure s) :
     ∀ {n} {φ : ArithmeticSemiformula Empty (n + 1)} {t : ArithmeticSemiterm Empty (n + 1)},
-      t.Positive → ModelEquiv 𝚺 (s + 1) φ → ModelEquiv 𝚺 (s + 1) (∀¹[“x. x < !!t”] φ) := by
+      t.Positive → ModelEquiv 𝗣𝗔 𝚺 (s + 1) φ → ModelEquiv 𝗣𝗔 𝚺 (s + 1) (∀¹[“x. x < !!t”] φ) := by
   intro n φ t ht hφ;
   obtain ⟨u, rfl⟩ := bShiftWitness ht;
   obtain ⟨φ', hφ', hiff'⟩ := hφ;
@@ -257,27 +234,27 @@ private noncomputable def coreClosure_succ (ih : CoreClosure s) : CoreClosure (s
   and := fun Γ {n φ ψ} hφ hψ => by
     rcases Γ with _ | _;
     . exact and_sigma_step ih hφ hψ;
-    . have hφ' : ModelEquiv 𝚺 (s + 1) (∼φ) := by simpa using neg hφ;
-      have hψ' : ModelEquiv 𝚺 (s + 1) (∼ψ) := by simpa using neg hψ;
+    . have hφ' : ModelEquiv 𝗣𝗔 𝚺 (s + 1) (∼φ) := by simpa using neg hφ;
+      have hψ' : ModelEquiv 𝗣𝗔 𝚺 (s + 1) (∼ψ) := by simpa using neg hψ;
       have h' := neg (or_sigma_step ih hφ' hψ');
       simpa [Semiformula.imp_eq] using h';
   or := fun Γ {n φ ψ} hφ hψ => by
     rcases Γ with _ | _;
     . exact or_sigma_step ih hφ hψ;
-    . have hφ' : ModelEquiv 𝚺 (s + 1) (∼φ) := by simpa using neg hφ;
-      have hψ' : ModelEquiv 𝚺 (s + 1) (∼ψ) := by simpa using neg hψ;
+    . have hφ' : ModelEquiv 𝗣𝗔 𝚺 (s + 1) (∼φ) := by simpa using neg hφ;
+      have hψ' : ModelEquiv 𝗣𝗔 𝚺 (s + 1) (∼ψ) := by simpa using neg hψ;
       have h' := neg (and_sigma_step ih hφ' hψ');
       simpa [Semiformula.imp_eq] using h';
   ball := fun Γ {n φ t} ht hφ => by
     rcases Γ with _ | _;
     . exact ball_sigma_step ih ht hφ;
-    . have hφ' : ModelEquiv 𝚺 (s + 1) (∼φ) := by simpa using neg hφ;
+    . have hφ' : ModelEquiv 𝗣𝗔 𝚺 (s + 1) (∼φ) := by simpa using neg hφ;
       have h' := neg (bexs_sigma_step ih ht hφ');
       simpa using h';
   bexs := fun Γ {n φ t} ht hφ => by
     rcases Γ with _ | _;
     . exact bexs_sigma_step ih ht hφ;
-    . have hφ' : ModelEquiv 𝚺 (s + 1) (∼φ) := by simpa using neg hφ;
+    . have hφ' : ModelEquiv 𝗣𝗔 𝚺 (s + 1) (∼φ) := by simpa using neg hφ;
       have h' := neg (ball_sigma_step ih ht hφ');
       simpa using h';
 
@@ -288,8 +265,8 @@ private noncomputable def coreClosure : CoreClosure s := by
 
 -- Contracts the two nested existentials `∃x∃y` of a strict `Σ_{s+1}` witness into a single
 -- bounded pair `∃z (∃x ≤ z)(∃y ≤ z)`, using two applications of `coreClosure.bexs`.
-private noncomputable def exs {φ : ArithmeticSemiformula Empty (n + 1)} (h : ModelEquiv 𝚺 (s + 1) φ) :
-    ModelEquiv 𝚺 (s + 1) (∃¹ φ) := by
+private noncomputable def exs {φ : ArithmeticSemiformula Empty (n + 1)} (h : ModelEquiv 𝗣𝗔 𝚺 (s + 1) φ) :
+    ModelEquiv 𝗣𝗔 𝚺 (s + 1) (∃¹ φ) := by
   obtain ⟨φ', hφ', hiff'⟩ := h;
   obtain ⟨ψ₀, rfl, hψ₀⟩ := strictSigmaSuccElim hφ';
   have hψ₀' : StrictHierarchy 𝚷 s (ψ₀ ⇜ (#0 :> #1 :> (#·.succ.succ.succ))) := hψ₀.rew (Rew.subst _);
@@ -324,9 +301,9 @@ private noncomputable def exs {φ : ArithmeticSemiformula Empty (n + 1)} (h : Mo
     . rintro ⟨z, y, -, x, -, hx⟩;
       exact ⟨y, x, hx⟩;
 
-private noncomputable def all {φ : ArithmeticSemiformula Empty (n + 1)} (h : ModelEquiv 𝚷 (s + 1) φ) :
-    ModelEquiv 𝚷 (s + 1) (∀¹ φ) := by
-  have h' : ModelEquiv 𝚺 (s + 1) (∼φ) := neg h;
+private noncomputable def all {φ : ArithmeticSemiformula Empty (n + 1)} (h : ModelEquiv 𝗣𝗔 𝚷 (s + 1) φ) :
+    ModelEquiv 𝗣𝗔 𝚷 (s + 1) (∀¹ φ) := by
+  have h' : ModelEquiv 𝗣𝗔 𝚺 (s + 1) (∼φ) := neg h;
   have h'' := neg (exs h');
   simpa using h'';
 
