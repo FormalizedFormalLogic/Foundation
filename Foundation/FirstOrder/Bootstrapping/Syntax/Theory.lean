@@ -1,6 +1,7 @@
 module
 
 public import Foundation.FirstOrder.Bootstrapping.Syntax.Formula.Coding
+public import Foundation.Vorspiel.Computability
 
 @[expose] public section
 namespace LO.FirstOrder.Arithmetic.Bootstrapping
@@ -24,6 +25,11 @@ namespace LO.FirstOrder.Theory
 variable {L : Language} [L.Encodable] [L.LORDefinable]
 
 variable {T : Theory L}
+
+abbrev codes (T : Theory L) : Set ℕ := Encodable.encode '' T
+
+class RE (T : Theory L) : Prop where
+  re : REPred T.codes
 
 class «Σ₁» (T : Theory L) where
   ch : 𝚺₁.Semisentence 1
