@@ -2,6 +2,7 @@ module
 
 public import Foundation.FirstOrder.Incompleteness.StandardProvability
 public import Foundation.FirstOrder.Arithmetic.R0.Representation
+public import Foundation.FirstOrder.Bootstrapping.Syntax.CraigTrick
 
 @[expose] public section
 /-!
@@ -50,6 +51,29 @@ theorem exists_true_but_unprovable_sentence
   by_cases ℕ↓[ℒₒᵣ] ⊧ δ
   . exact ⟨δ, by assumption, hδ.1⟩
   . exact ⟨∼δ, by simpa, hδ.2⟩
+
+noncomputable instance (T : ArithmeticTheory) [T.«Σ₁»] [𝗥₀ ⪯ T] : 𝗥₀ ⪯ T.craig :=
+  WeakerThan.trans (𝓣 := T) inferInstance (Theory.craig.original_weakerThan (T := T))
+
+theorem incomplete_of_sigma1 (T : ArithmeticTheory) [T.«Σ₁»] [𝗥₀ ⪯ T]
+    [T.SoundOnHierarchy 𝚺 1] : Incomplete T := by
+  exact (Theory.craig_equiv (T := T)).symm.incomplete
+    (@incomplete T.craig inferInstance inferInstance
+      (ArithmeticTheory.SoundOn.of_weakerThan _ T T.craig))
+
+theorem exists_true_but_unprovable_sentence_of_sigma1
+    (T : ArithmeticTheory) [T.«Σ₁»] [𝗥₀ ⪯ T] [T.SoundOnHierarchy 𝚺 1] :
+    ∃ δ : ArithmeticSentence, ℕ↓[ℒₒᵣ] ⊧ δ ∧ T ⊬ δ := by
+  obtain ⟨δ, hδ⟩ := incomplete_def.mp (incomplete_of_sigma1 T);
+  by_cases h : ℕ↓[ℒₒᵣ] ⊧ δ
+  . use δ;
+    and_intros;
+    . exact h
+    . exact hδ.1
+  . use ∼δ;
+    and_intros;
+    . simpa
+    . exact hδ.2
 
 instance {T : ArithmeticTheory} [ℕ↓[ℒₒᵣ] ⊧* T] [T.Δ₁] [𝗥₀ ⪯ T] [T.SoundOnHierarchy 𝚺 1] : T ⪱ 𝗧𝗔 := by
   constructor;
