@@ -132,4 +132,26 @@ lemma quote_padding (σ : Sentence L) (k : ℕ) :
 
 end Sentence
 
+lemma Theory.isCraigAxiom_quote_iff {T : Theory L} [T.«Σ₁»] (φ : Proposition L) :
+    T.IsCraigAxiom (⌜φ⌝ : ℕ) ↔ ∃ ρ ∈ T.craig, φ = ρ := by
+  constructor
+  . rintro ⟨s, p, hφ, hT⟩
+    rcases quote_eq_qqAnd_iff.mp hφ with ⟨φ₁, φ₂, hφ, hp, hs⟩
+    have hφ₂ : φ₂ = Semiformula.weight s := quote_eq_qqVerums hs.symm
+    have h₁ : ℕ ⊧/![p] T.«Σ₁ch».val := (Theory.«Σ₁witness_spec» T ℕ ![p]).mpr ⟨s, hT⟩
+    rcases (Theory.«Σ₁».mem_iff φ₁).mp (by simpa [hp] using h₁) with ⟨ρ, hρ, hρ'⟩
+    use ρ.padding s
+    and_intros
+    . use ρ, s
+      and_intros
+      . simpa [hp, hρ', Sentence.quote_def] using hT
+      . rfl
+    . rw [Semiformula.rew_padding]
+      simpa [Semiformula.padding, Semiformula.weight, hρ', hφ₂] using hφ
+  . rintro ⟨ρ, ⟨σ, s, hT, rfl⟩, rfl⟩
+    use s, ⌜σ⌝
+    and_intros
+    . simpa [Sentence.quote_def] using Sentence.quote_padding (V := ℕ) σ s
+    . exact hT
+
 end LO.FirstOrder.Arithmetic.Bootstrapping
