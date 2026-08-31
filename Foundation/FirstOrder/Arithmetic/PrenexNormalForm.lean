@@ -162,12 +162,6 @@ private noncomputable def or_sigma_step (ih : CoreClosure.{u} s) :
       . left; exact ⟨x, h⟩;
       . right; exact ⟨x, h⟩;
 
--- Insertion of an unused fresh variable at position 1 does not affect evaluation.
-private lemma eval_insert1 {n} (θ : ArithmeticSemiformula Empty (n + 1)) (V : Type u) [ORingStructure V]
-    (u w : V) (e : Fin n → V) :
-    V ⊧/(u :> w :> e) (Rew.bShift.q ▹ θ) ↔ V ⊧/(u :> e) θ := by
-  simp [Semiformula.eval_rew_q, Function.comp_def];
-
 private lemma funext_two {α : Type*} {n : ℕ} {f g : Fin (n + 2) → α}
     (h0 : f 0 = g 0) (h1 : f (Fin.succ 0) = g (Fin.succ 0))
     (hs : ∀ i : Fin n, f i.succ.succ = g i.succ.succ) : f = g := by
@@ -179,12 +173,20 @@ private lemma funext_two {α : Type*} {n : ℕ} {f g : Fin (n + 2) → α}
     | zero => exact h1;
     | succ i => exact hs i;
 
+-- Insertion of an unused fresh variable at position 1 does not affect evaluation.
+private lemma eval_insert1 {n} (θ : ArithmeticSemiformula Empty (n + 1)) (V : Type u) [ORingStructure V]
+    (u w : V) (e : Fin n → V) :
+    V ⊧/(u :> w :> e) (θ ⇜ (#0 :> (#·.succ.succ))) ↔ V ⊧/(u :> e) θ := by
+  simp only [Semiformula.eval_substs];
+  exact Iff.of_eq (congrArg (fun b => Semiformula.Eval (L := ℒₒᵣ) (M := V) b Empty.elim θ)
+    (funext fun i => by induction i using Fin.cases <;> simp));
+
 -- Insertion of an unused fresh variable at position 2 does not affect evaluation.
 private lemma eval_insert2 {n} (θ : ArithmeticSemiformula Empty (n + 2)) (V : Type u) [ORingStructure V]
     (y x w : V) (e : Fin n → V) :
-    V ⊧/(y :> x :> w :> e) (Rew.bShift.q.q ▹ θ) ↔ V ⊧/(y :> x :> e) θ := by
-  simp only [Semiformula.eval_rew_q, Function.comp_def];
-  exact Iff.of_eq (congrArg (fun b => Semiformula.Evalb (M := V) b θ)
+    V ⊧/(y :> x :> w :> e) (θ ⇜ (#0 :> #1 :> (#·.succ.succ.succ))) ↔ V ⊧/(y :> x :> e) θ := by
+  simp only [Semiformula.eval_substs, Function.comp_def];
+  exact Iff.of_eq (congrArg (fun b => Semiformula.Eval (L := ℒₒᵣ) (M := V) b Empty.elim θ)
     (funext_two (by simp) (by simp) fun i => by simp));
 
 private noncomputable def and_sigma_step (ih : CoreClosure.{u} s) :
@@ -195,8 +197,8 @@ private noncomputable def and_sigma_step (ih : CoreClosure.{u} s) :
   obtain ⟨ψ', hψ', hψiff⟩ := hψ;
   obtain ⟨φ₀, rfl, hφ₀⟩ := strictSigmaSuccElim hφ';
   obtain ⟨ψ₀, rfl, hψ₀⟩ := strictSigmaSuccElim hψ';
-  have hφ₀' : StrictHierarchy 𝚷 s (Rew.bShift.q ▹ φ₀) := hφ₀.rew Rew.bShift.q;
-  have hψ₀' : StrictHierarchy 𝚷 s (Rew.bShift.q ▹ ψ₀) := hψ₀.rew Rew.bShift.q;
+  have hφ₀' : StrictHierarchy 𝚷 s (φ₀ ⇜ (#0 :> (#·.succ.succ))) := hφ₀.rew (Rew.subst _);
+  have hψ₀' : StrictHierarchy 𝚷 s (ψ₀ ⇜ (#0 :> (#·.succ.succ))) := hψ₀.rew (Rew.subst _);
   obtain ⟨A, hA, hAiff⟩ := ih.bexs 𝚷
     (t := Rew.bShift (‘#0 + 1’ : ArithmeticSemiterm Empty (n + 1)))
     (Rew.bShift_positive _) (refl hφ₀');
@@ -210,15 +212,15 @@ private noncomputable def and_sigma_step (ih : CoreClosure.{u} s) :
     have hA_eval : ∀ z : V, V ⊧/(z :> e) A ↔ ∃ x ≤ z, V ⊧/(x :> e) φ₀ := fun z => by
       rw [← hAiff V (z :> e)];
       show V ⊧/(z :> e)
-        ((Rew.bShift.q ▹ φ₀ : ArithmeticSemiformula Empty (n + 2)).bexsLTSucc
+        ((φ₀ ⇜ (#0 :> (#·.succ.succ)) : ArithmeticSemiformula Empty (n + 2)).bexsLTSucc
           (‘#0’ : ArithmeticSemiterm Empty (n + 1))) ↔ _;
-      simp [eval_insert1];
+      simp [eval_insert1, -Semiformula.eval_substs];
     have hB_eval : ∀ z : V, V ⊧/(z :> e) B ↔ ∃ x ≤ z, V ⊧/(x :> e) ψ₀ := fun z => by
       rw [← hBiff V (z :> e)];
       show V ⊧/(z :> e)
-        ((Rew.bShift.q ▹ ψ₀ : ArithmeticSemiformula Empty (n + 2)).bexsLTSucc
+        ((ψ₀ ⇜ (#0 :> (#·.succ.succ)) : ArithmeticSemiformula Empty (n + 2)).bexsLTSucc
           (‘#0’ : ArithmeticSemiterm Empty (n + 1))) ↔ _;
-      simp [eval_insert1];
+      simp [eval_insert1, -Semiformula.eval_substs];
     have hφiff' : V ⊧/e φ ↔ ∃ x, V ⊧/(x :> e) φ₀ := (hφiff V e).trans Semiformula.eval_ex;
     have hψiff' : V ⊧/e ψ ↔ ∃ x, V ⊧/(x :> e) ψ₀ := (hψiff V e).trans Semiformula.eval_ex;
     simp only [LogicalConnective.HomClass.map_and, Semiformula.eval_ex, hφiff', hψiff',
@@ -282,7 +284,7 @@ private noncomputable def ball_sigma_step (ih : CoreClosure.{u} s) :
   obtain ⟨u, rfl⟩ := bShiftWitness ht;
   obtain ⟨φ', hφ', hiff'⟩ := hφ;
   obtain ⟨ψ₀, rfl, hψ₀⟩ := strictSigmaSuccElim hφ';
-  have hψ₀qq : StrictHierarchy 𝚷 s (Rew.bShift.q.q ▹ ψ₀) := hψ₀.rew Rew.bShift.q.q;
+  have hψ₀qq : StrictHierarchy 𝚷 s (ψ₀ ⇜ (#0 :> #1 :> (#·.succ.succ.succ))) := hψ₀.rew (Rew.subst _);
   obtain ⟨A, hA, hAiff⟩ := ih.bexs 𝚷
     (t := Rew.bShift (‘#1 + 1’ : ArithmeticSemiterm Empty (n + 2)))
     (Rew.bShift_positive _) (refl hψ₀qq);
@@ -294,7 +296,7 @@ private noncomputable def ball_sigma_step (ih : CoreClosure.{u} s) :
     have hAeval : ∀ x w : V, V ⊧/(x :> w :> e) A ↔ ∃ y ≤ w, V ⊧/(y :> x :> e) ψ₀ := by
       intro x w;
       rw [← hAiff V (x :> w :> e)];
-      simp [eval_insert2, Arithmetic.lt_succ_iff_le];
+      simp [eval_insert2, Arithmetic.lt_succ_iff_le, -Semiformula.eval_substs];
     have hDeval : ∀ w : V, V ⊧/(w :> e) D ↔ ∀ x < u.valb e, ∃ y ≤ w, V ⊧/(y :> x :> e) ψ₀ := by
       intro w;
       rw [← hDiff V (w :> e)];
@@ -350,7 +352,7 @@ private noncomputable def exs {φ : ArithmeticSemiformula Empty (n + 1)} (h : St
     StrictEquiv.{u} 𝗣𝗔 𝚺 (s + 1) (∃¹ φ) := by
   obtain ⟨φ', hφ', hiff'⟩ := h;
   obtain ⟨ψ₀, rfl, hψ₀⟩ := strictSigmaSuccElim hφ';
-  have hψ₀' : StrictHierarchy 𝚷 s (Rew.bShift.q.q ▹ ψ₀) := hψ₀.rew Rew.bShift.q.q;
+  have hψ₀' : StrictHierarchy 𝚷 s (ψ₀ ⇜ (#0 :> #1 :> (#·.succ.succ.succ))) := hψ₀.rew (Rew.subst _);
   obtain ⟨A, hA, hAiff⟩ := coreClosure.bexs 𝚷
     (t := Rew.bShift (‘#1 + 1’ : ArithmeticSemiterm Empty (n + 2)))
     (Rew.bShift_positive _) (refl hψ₀');
@@ -358,7 +360,7 @@ private noncomputable def exs {φ : ArithmeticSemiformula Empty (n + 1)} (h : St
     (t := Rew.bShift (‘#0 + 1’ : ArithmeticSemiterm Empty (n + 1)))
     (Rew.bShift_positive _) (refl hA);
   have hAiff' : ∀ (V : Type u) [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗣𝗔] (e : Fin (n + 2) → V),
-      V ⊧/e ((Rew.bShift.q.q ▹ ψ₀ : ArithmeticSemiformula Empty (n + 3)).bexsLTSucc
+      V ⊧/e ((ψ₀ ⇜ (#0 :> #1 :> (#·.succ.succ.succ)) : ArithmeticSemiformula Empty (n + 3)).bexsLTSucc
         (‘#1’ : ArithmeticSemiterm Empty (n + 2))) ↔ V ⊧/e A := hAiff;
   have hBiff' : ∀ (V : Type u) [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗣𝗔] (e : Fin (n + 1) → V),
       V ⊧/e (A.bexsLTSucc (‘#0’ : ArithmeticSemiterm Empty (n + 1))) ↔ V ⊧/e B := hBiff;
@@ -368,7 +370,7 @@ private noncomputable def exs {φ : ArithmeticSemiformula Empty (n + 1)} (h : St
     have hAeval : ∀ y z : V, V ⊧/(y :> z :> e) A ↔ ∃ x ≤ z, V ⊧/(x :> y :> e) ψ₀ := by
       intro y z;
       rw [← hAiff' V (y :> z :> e)];
-      simp [eval_insert2];
+      simp [eval_insert2, -Semiformula.eval_substs];
     have hBeval : ∀ z : V, V ⊧/(z :> e) B ↔ ∃ y ≤ z, V ⊧/(y :> z :> e) A := by
       intro z;
       rw [← hBiff' V (z :> e)];
