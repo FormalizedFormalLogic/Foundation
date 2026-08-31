@@ -33,7 +33,8 @@ private def StrictEquivOnPA (Γ : Polarity) (s : ℕ) {n : ℕ} (φ : Arithmetic
 
 variable {Γ Γ' : Polarity} {s s' : ℕ} {n : ℕ} {φ ψ : ArithmeticSemiformula Empty n}
 
-private lemma refl (h : StrictHierarchy Γ s φ) : StrictEquivOnPA.{u} Γ s φ := sorry
+private lemma refl (h : StrictHierarchy Γ s φ) : StrictEquivOnPA.{u} Γ s φ :=
+  ⟨φ, h, fun _ _ _ _ => Iff.rfl⟩
 
 private lemma of_iff (h : StrictEquivOnPA.{u} Γ s φ)
     (hiff : ∀ (V : Type u) [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗣𝗔] (e : Fin n → V), V ⊧/e φ ↔ V ⊧/e ψ) :
