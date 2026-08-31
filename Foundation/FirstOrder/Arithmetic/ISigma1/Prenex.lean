@@ -25,11 +25,7 @@ lemma nonempty_strictHierarchyFormulaEquivOf {φ : ArithmeticSemisentence n} (h 
 lemma exists_strictHierarchy_provable {φ : ArithmeticSemisentence n} (h : Hierarchy 𝚺 1 φ) :
     ∃ θ : ArithmeticSemisentence (n + 1), Hierarchy 𝚺 0 θ ∧ 𝗜𝚺₁ ⊢ ∀¹* (φ 🡘 ∃¹ θ) := by
   obtain ⟨φ'⟩ := nonempty_strictHierarchyFormulaEquivOf h;
-  use (↑φ'.sigmaInv : ArithmeticSemisentence (n + 1));
-  and_intros;
-  . exact φ'.sigmaInv.deltaZero;
-  . rw [← φ'.coe_sigmaInv];
-    exact φ'.provable;
+  exact ⟨↑φ'.sigmaInv, φ'.sigmaInv.deltaZero, φ'.provable_sigmaInv⟩
 
 lemma exists_strictHierarchy_provable_of_sentence {σ : ArithmeticSentence} (h : Hierarchy 𝚺 1 σ) :
     ∃ θ : ArithmeticSemisentence 1, Hierarchy 𝚺 0 θ ∧ 𝗜𝚺₁ ⊢ σ 🡘 ∃¹ θ :=

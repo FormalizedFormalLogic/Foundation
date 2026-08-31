@@ -36,21 +36,11 @@ lemma exists_kernel_provable_of_sentence {σ : ArithmeticSentence} (h : Hierarch
 lemma exists_hierarchy_provable_of_sentence {σ : ArithmeticSentence} (h : Hierarchy 𝚺 (s + 1) σ) :
     ∃ θ : ArithmeticSemisentence 1, Hierarchy 𝚷 s θ ∧ 𝗣𝗔 ⊢ σ 🡘 ∃¹ θ := by
   obtain ⟨σ'⟩ := nonempty_strictHierarchyFormulaEquivOf h;
-  use ↑σ'.sigmaInv;
-  and_intros;
-  . exact σ'.sigmaInv.hierarchy;
-  . have hprov := σ'.provable;
-    rw [σ'.coe_sigmaInv] at hprov;
-    exact hprov;
+  exact ⟨↑σ'.sigmaInv, σ'.sigmaInv.hierarchy, σ'.provable_sigmaInv⟩
 
 lemma exists_hierarchy_provable_of_sentence_pi {σ : ArithmeticSentence} (h : Hierarchy 𝚷 (s + 1) σ) :
     ∃ θ : ArithmeticSemisentence 1, Hierarchy 𝚺 s θ ∧ 𝗣𝗔 ⊢ σ 🡘 ∀¹ θ := by
   obtain ⟨σ'⟩ := nonempty_strictHierarchyFormulaEquivOf h;
-  use ↑σ'.piInv;
-  and_intros;
-  . exact σ'.piInv.hierarchy;
-  . have hprov := σ'.provable;
-    rw [σ'.coe_piInv] at hprov;
-    exact hprov;
+  exact ⟨↑σ'.piInv, σ'.piInv.hierarchy, σ'.provable_piInv⟩
 
 end LO.FirstOrder.Arithmetic.Peano
