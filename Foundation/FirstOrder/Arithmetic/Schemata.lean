@@ -367,6 +367,12 @@ instance [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] : V↓[ℒₒᵣ] ⊧* 𝗜𝚺₀ :
 abbrev mod_ISigma_of_le {n₁ n₂} (h : n₁ ≤ n₂) [V↓[ℒₒᵣ] ⊧* 𝗜𝚺 n₂] : V↓[ℒₒᵣ] ⊧* 𝗜𝚺 n₁ :=
   models_of_ss inferInstance (ISigma_subset_mono h)
 
+-- `𝗜𝚺 n ⪯ 𝗣𝗔⁻` is only registered as an instance for literal levels (`𝗜𝚺₀`, `𝗜𝚺₁`);
+-- this covers the general level `n`, where `n` cannot be inferred from the conclusion type.
+lemma mod_paMinus_of_ISigma {n} [V↓[ℒₒᵣ] ⊧* 𝗜𝚺 n] : V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ :=
+  have : V↓[ℒₒᵣ] ⊧* 𝗜𝚺₀ := mod_ISigma_of_le (Nat.zero_le n)
+  inferInstance
+
 instance [V↓[ℒₒᵣ] ⊧* 𝗣𝗔] : V↓[ℒₒᵣ] ⊧* 𝗜𝚺 n :=
   have : V↓[ℒₒᵣ] ⊧* 𝗣𝗔 := inferInstance
   models_of_subtheory this

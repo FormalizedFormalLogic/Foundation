@@ -18,12 +18,6 @@ namespace LO.FirstOrder.Arithmetic
 
 variable {V : Type*} [ORingStructure V] {n s : ℕ} [V↓[ℒₒᵣ] ⊧* 𝗜𝚺 (s + 1)]
 
--- `𝗜𝚺₁ ⪯ 𝗜𝚺 (s + 1) ⪯ 𝗣𝗔⁻` is only registered as an instance for the literal level `1`;
--- derive it here for the general level so downstream order/ring instances on `V` resolve.
-private lemma models_paMinus {s : ℕ} [V↓[ℒₒᵣ] ⊧* 𝗜𝚺 (s + 1)] : V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := by
-  have : 𝗜𝚺₁ ⪯ 𝗜𝚺 (s + 1) := ISigma_weakerThan_of_le (by omega)
-  exact models_of_subtheory (U := 𝗜𝚺 (s + 1)) inferInstance
-
 private noncomputable def collectionCore (θ : ArithmeticSemiformula Empty (n + 2))
     (e : Fin n → V) : ArithmeticSemiformula V 4 :=
   Rew.embSubsts (#0 :> #1 :> fun i => (&(e i) : ArithmeticSemiterm V 4)) ▹ θ
@@ -69,7 +63,7 @@ private lemma eval_collectionMotive [V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻] {θ : Ari
 private lemma collectionMotive_definable {θ : ArithmeticSemiformula Empty (n + 2)}
     (hθ : Hierarchy 𝚺 (s + 1) θ) (e : Fin n → V) (a : V) :
     𝚺-[s + 1].DefinablePred (fun y => ∃ w, ∀ x < y, x < a → ∃ u ≤ w, V ⊧/(u :> x :> e) θ) := by
-  have := models_paMinus (V := V) (s := s)
+  have := mod_paMinus_of_ISigma (V := V) (n := s + 1)
   exact HierarchySymbol.Definable.mkPolarity (collectionMotive θ e a) (hierarchy_collectionMotive hθ e a)
     (fun v => (eval_collectionMotive e a v).symm)
 
@@ -78,7 +72,7 @@ theorem sigma_exists_bound_witness {θ : ArithmeticSemiformula Empty (n + 2)}
     (hθ : Hierarchy 𝚺 (s + 1) θ)
     (e : Fin n → V) (a : V) (h : ∀ x < a, ∃ u, V ⊧/(u :> x :> e) θ) :
     ∃ w, ∀ x < a, ∃ u ≤ w, V ⊧/(u :> x :> e) θ := by
-  have := models_paMinus (V := V) (s := s)
+  have := mod_paMinus_of_ISigma (V := V) (n := s + 1)
   have key : ∀ y : V, ∃ w, ∀ x < y, x < a → ∃ u ≤ w, V ⊧/(u :> x :> e) θ := by
     apply InductionOnHierarchy.succ_induction_sigma 𝚺 (s + 1)
       (P := fun y => ∃ w, ∀ x < y, x < a → ∃ u ≤ w, V ⊧/(u :> x :> e) θ)
