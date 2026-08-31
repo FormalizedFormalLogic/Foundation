@@ -17,21 +17,26 @@ open LO.FirstOrder.Arithmetic
 
 variable {L : Language} [L.Encodable] [L.LORDefinable]
 
-noncomputable def «Σ₁witness» (T : Theory L) [T.«Σ₁»] : 𝚺₀.Semisentence 2 :=
+section
+
+variable (T : Theory L) [T.«Σ₁»]
+
+noncomputable def «Σ₁witness» : 𝚺₀.Semisentence 2 :=
   let h := ISigma1.exists_delta0_witness_provable T.«Σ₁ch».sigma_prop;
   .mkSigma h.choose h.choose_spec.1
 
-lemma «Σ₁witness_spec» (T : Theory L) [T.«Σ₁»]
-    (V : Type) [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] (e : Fin 1 → V) :
+lemma «Σ₁witness_spec» (V : Type) [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] (e : Fin 1 → V) :
     V ⊧/e T.«Σ₁ch».val ↔ ∃ w, V ⊧/(w :> e) T.«Σ₁witness».val := by
   simpa [«Σ₁witness»] using
     (models_iff_of_provable_iff
       (ISigma1.exists_delta0_witness_provable T.«Σ₁ch».sigma_prop).choose_spec.2 V e).trans
       Semiformula.eval_ex
 
-def craig (T : Theory L) [T.«Σ₁»] : Theory L :=
+def craig : Theory L :=
   { φ : Sentence L | ∃ (σ : Sentence L) (s : ℕ),
       ℕ ⊧/![(s : ℕ), ⌜σ⌝] T.«Σ₁witness».val ∧ φ = σ.padding s }
+
+end
 
 end LO.FirstOrder.Theory
 
@@ -41,11 +46,14 @@ variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 
 variable {L : Language} [L.Encodable] [L.LORDefinable]
 
-def _root_.LO.FirstOrder.Theory.IsCraigAxiom (T : Theory L) [T.«Σ₁»] : V → Prop :=
+section
+
+variable (T : Theory L) [T.«Σ₁»]
+
+def _root_.LO.FirstOrder.Theory.IsCraigAxiom : V → Prop :=
   fun x ↦ ∃ s p : V, x = p ^⋏ qqVerums s ∧ V ⊧/![s, p] T.«Σ₁witness».val
 
-noncomputable def _root_.LO.FirstOrder.Theory.craigCh (T : Theory L) [T.«Σ₁»]
-  : 𝚫₁.Semisentence 1 := .mkDelta
+noncomputable def _root_.LO.FirstOrder.Theory.craigCh : 𝚫₁.Semisentence 1 := .mkDelta
   (.mkSigma “x. ∃ s < x, ∃ p < x, ∃ v < x,
     !qqVerumsGraph v s ∧ !qqAndDef x p v ∧ !(T.«Σ₁witness».val) s p”
   )
@@ -53,7 +61,9 @@ noncomputable def _root_.LO.FirstOrder.Theory.craigCh (T : Theory L) [T.«Σ₁�
     (∀ v', !qqVerumsGraph v' s → v' = v) ∧ !qqAndDef x p v ∧ !(T.«Σ₁witness».val) s p”
   )
 
-instance Theory.IsCraigAxiom.defined (T : Theory L) [T.«Σ₁»] :
+end
+
+instance Theory.IsCraigAxiom.defined {T : Theory L} [T.«Σ₁»] :
     𝚫₁-Predicate[V] (T.IsCraigAxiom : V → Prop) via T.craigCh := .mk <| by
   have h (v : Fin 1 → V) :
       (∃ s < v 0, ∃ p < v 0, qqVerums s < v 0 ∧ v 0 = p ^⋏ qqVerums s
@@ -165,14 +175,18 @@ variable {L : Language} [L.Encodable] [L.LORDefinable]
 
 open LO.Entailment
 
-noncomputable instance craig.delta1 (T : Theory L) [T.«Σ₁»] : (T.craig).Δ₁ where
+section
+
+variable {T : Theory L} [T.«Σ₁»]
+
+noncomputable instance craig.delta1 : (T.craig).Δ₁ where
   ch := T.craigCh
-  mem_iff φ := (Theory.IsCraigAxiom.defined (V := ℕ) T).iff.trans
+  mem_iff φ := (Theory.IsCraigAxiom.defined (V := ℕ) (T := T)).iff.trans
     (Theory.isCraigAxiom_quote_iff φ)
   isDelta1 := Arithmetic.HierarchySymbol.Semiformula.ProvablyProperOn.ofProperOn.{0} _ fun V _ _ ↦
-    (Theory.IsCraigAxiom.defined (V := V) T).proper
+    (Theory.IsCraigAxiom.defined (V := V) (T := T)).proper
 
-noncomputable instance craig.weakerThan (T : Theory L) [L.DecidableEq] [T.«Σ₁»] : T.craig ⪯ T :=
+noncomputable instance craig.weakerThan [L.DecidableEq] : T.craig ⪯ T :=
   WeakerThan.ofAxm! $ by
     rintro σ ⟨ρ, s, hρ, rfl⟩;
     have hρ' : ℕ ⊧/![⌜ρ⌝] T.«Σ₁ch».val := («Σ₁witness_spec» T ℕ ![⌜ρ⌝]).mpr ⟨s, hρ⟩
@@ -181,7 +195,7 @@ noncomputable instance craig.weakerThan (T : Theory L) [L.DecidableEq] [T.«Σ�
     have hρT : ρ ∈ T := Rewriting.emb_injective hρτ ▸ hτ
     exact mdp (C_of_E_mpr (Entailment.padding_iff ρ s)) (by_axm hρT)
 
-noncomputable instance craig.original_weakerThan {T : Theory L} [L.DecidableEq] [T.«Σ₁»]
+noncomputable instance craig.original_weakerThan [L.DecidableEq]
   : T ⪯ T.craig :=
   WeakerThan.ofAxm! fun {σ} hσ ↦ by
     have hσ' : ℕ ⊧/![⌜σ⌝] T.«Σ₁ch».val :=
@@ -190,12 +204,14 @@ noncomputable instance craig.original_weakerThan {T : Theory L} [L.DecidableEq] 
     have hpadding : σ.padding s ∈ T.craig := ⟨σ, s, hs, rfl⟩
     exact mdp (C_of_E_mp (Entailment.padding_iff σ s)) (by_axm hpadding)
 
-noncomputable instance craig_equiv {T : Theory L} [L.DecidableEq] [T.«Σ₁»]
+noncomputable instance craig_equiv [L.DecidableEq]
   : T ≊ T.craig :=
   Equiv.antisymm_iff.mpr ⟨inferInstance, inferInstance⟩
 
-noncomputable instance craig.consistent {T : Theory L} [L.DecidableEq] [T.«Σ₁»] [Consistent T]
+noncomputable instance craig.consistent [L.DecidableEq] [Consistent T]
   : Consistent T.craig :=
   Consistent.of_le (𝓢 := T) (𝓣 := T.craig) inferInstance inferInstance
+
+end
 
 end LO.FirstOrder.Theory
