@@ -369,7 +369,10 @@ private lemma exs {φ : ArithmeticSemiformula Empty (n + 1)} (h : StrictEquivOnP
       exact ⟨y, x, hx⟩;
 
 private lemma all {φ : ArithmeticSemiformula Empty (n + 1)} (h : StrictEquivOnPA.{u} 𝚷 (s + 1) φ) :
-    StrictEquivOnPA.{u} 𝚷 (s + 1) (∀¹ φ) := sorry
+    StrictEquivOnPA.{u} 𝚷 (s + 1) (∀¹ φ) := by
+  have h' : StrictEquivOnPA.{u} 𝚺 (s + 1) (∼φ) := neg h;
+  have := neg (exs h');
+  simpa using this;
 
 private lemma exs_of_pi {φ : ArithmeticSemiformula Empty (n + 1)} (h : StrictEquivOnPA.{u} 𝚷 s φ) :
     StrictEquivOnPA.{u} 𝚺 (s + 1) (∃¹ φ) := by
