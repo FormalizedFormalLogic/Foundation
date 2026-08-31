@@ -147,20 +147,20 @@ lemma iff_models_piInv' (φ' : StrictHierarchyFormulaEquivOf T 𝚷 (s + 1) φ) 
 structure Closure (T : ArithmeticTheory) [𝗘𝗤 ℒₒᵣ ⪯ T] (s : ℕ) where
   ball : ∀ Γ {n} {φ : ArithmeticSemisentence (n + 1)} {t : ArithmeticSemiterm Empty (n + 1)},
       t.Positive → StrictHierarchyFormulaEquivOf T Γ s φ →
-        StrictHierarchyFormulaEquivOf T Γ s (∀¹[“x. x < !!t”] φ)
+        Nonempty (StrictHierarchyFormulaEquivOf T Γ s (∀¹[“x. x < !!t”] φ))
   bexs : ∀ Γ {n} {φ : ArithmeticSemisentence (n + 1)} {t : ArithmeticSemiterm Empty (n + 1)},
       t.Positive → StrictHierarchyFormulaEquivOf T Γ s φ →
-        StrictHierarchyFormulaEquivOf T Γ s (∃¹[“x. x < !!t”] φ)
+        Nonempty (StrictHierarchyFormulaEquivOf T Γ s (∃¹[“x. x < !!t”] φ))
   and : ∀ Γ {n} {φ ψ : ArithmeticSemisentence n},
       StrictHierarchyFormulaEquivOf T Γ s φ →
       StrictHierarchyFormulaEquivOf T Γ s ψ →
-        StrictHierarchyFormulaEquivOf T Γ s (φ ⋏ ψ)
+        Nonempty (StrictHierarchyFormulaEquivOf T Γ s (φ ⋏ ψ))
   or : ∀ Γ {n} {φ ψ : ArithmeticSemisentence n},
       StrictHierarchyFormulaEquivOf T Γ s φ →
       StrictHierarchyFormulaEquivOf T Γ s ψ →
-        StrictHierarchyFormulaEquivOf T Γ s (φ ⋎ ψ)
+        Nonempty (StrictHierarchyFormulaEquivOf T Γ s (φ ⋎ ψ))
 
-def closureZero : Closure T 0 where
+lemma closure_zero : Closure T 0 where
   ball := by
     intro Γ n φ t ht φ';
     use StrictHierarchyFormula.zero Γ _ (Hierarchy.ball ht φ'.deltaZero);
@@ -188,20 +188,18 @@ def closureZero : Closure T 0 where
     intro V _ _ e;
     simp [StrictHierarchyFormula.coe_zero, φ'.iff_models V e, ψ'.iff_models V e];
 
--- Extracting `u` from `Rew.positive_iff.mp ht : ∃ u, t = Rew.bShift u` into a data-valued
--- (`Type`-returning) goal requires `Classical.choice`.
-noncomputable def bexsSigmaStep {n} {φ : ArithmeticSemisentence (n + 1)}
+lemma bexs_sigma_step {n} {φ : ArithmeticSemisentence (n + 1)}
     {t : ArithmeticSemiterm Empty (n + 1)} (ih : Closure T s) (ht : t.Positive)
     (φ' : StrictHierarchyFormulaEquivOf T 𝚺 (s + 1) φ) :
-    StrictHierarchyFormulaEquivOf T 𝚺 (s + 1) (∃¹[“x. x < !!t”] φ) := by
-  obtain ⟨u, rfl⟩ := Classical.indefiniteDescription _ (Rew.positive_iff.mp ht);
+    Nonempty (StrictHierarchyFormulaEquivOf T 𝚺 (s + 1) (∃¹[“x. x < !!t”] φ)) := by
+  obtain ⟨u, rfl⟩ := Rew.positive_iff.mp ht;
   set φ₁' := φ'.sigmaInv;
   set φ₁ : ArithmeticSemisentence (n + 2) := ↑φ₁';
   set v : Fin (n + 2) → ArithmeticSemiterm Empty (n + 2) :=
     #1 :> #0 :> fun i => #(i.succ.succ) with hv;
   set φ₂ : ArithmeticSemisentence (n + 2) := Rew.subst v ▹ φ₁;
   let φ₂' : StrictHierarchyFormula ℒₒᵣ Empty 𝚷 s (n + 2) := φ₁'.rew (Rew.subst v);
-  have χ' := ih.bexs 𝚷 (φ := φ₂) (t := Rew.bShift (Rew.bShift u)) (by simp)
+  obtain ⟨χ'⟩ := ih.bexs 𝚷 (φ := φ₂) (t := Rew.bShift (Rew.bShift u)) (by simp)
     ((refl φ₂').ofEq (by simp [φ₂', φ₂, φ₁, StrictHierarchyFormula.coe_rew]));
   have hχiff := χ'.iff_models';
   have hχiff' : ∀ (V : Type) [ORingStructure V] [V↓[ℒₒᵣ] ⊧* T] (e : Fin (n + 1) → V),
@@ -236,22 +234,20 @@ noncomputable def bexsSigmaStep {n} {φ : ArithmeticSemisentence (n + 1)}
       hswap, hφiff];
     grind;
 
--- Extracting `u` from `Rew.positive_iff.mp ht : ∃ u, t = Rew.bShift u` into a data-valued
--- (`Type`-returning) goal requires `Classical.choice`.
-noncomputable def ballSigmaStep {n} {φ : ArithmeticSemisentence (n + 1)}
+lemma ball_sigma_step {n} {φ : ArithmeticSemisentence (n + 1)}
     {t : ArithmeticSemiterm Empty (n + 1)} [𝗜𝚺 (s + 1) ⪯ T] (ih : Closure T s) (ht : t.Positive)
     (φ' : StrictHierarchyFormulaEquivOf T 𝚺 (s + 1) φ) :
-    StrictHierarchyFormulaEquivOf T 𝚺 (s + 1) (∀¹[“x. x < !!t”] φ) := by
-  obtain ⟨u, rfl⟩ := Classical.indefiniteDescription _ (Rew.positive_iff.mp ht);
+    Nonempty (StrictHierarchyFormulaEquivOf T 𝚺 (s + 1) (∀¹[“x. x < !!t”] φ)) := by
+  obtain ⟨u, rfl⟩ := Rew.positive_iff.mp ht;
   set φ₁' := φ'.sigmaInv;
   set φ₁ : ArithmeticSemisentence (n + 2) := ↑φ₁';
   let φ₂' : StrictHierarchyFormula ℒₒᵣ Empty 𝚷 s (n + 3) :=
     φ₁'.rew (Rew.subst (#0 :> #1 :> (#·.succ.succ.succ)));
-  have α' := ih.bexs 𝚷 (φ := φ₁ ⇜ (#0 :> #1 :> (#·.succ.succ.succ)))
+  obtain ⟨α'⟩ := ih.bexs 𝚷 (φ := φ₁ ⇜ (#0 :> #1 :> (#·.succ.succ.succ)))
     (t := Rew.bShift (‘#1 + 1’ : ArithmeticSemiterm Empty (n + 2)))
     (Rew.bShift_positive _) ((refl φ₂').ofEq (by simp [φ₂', φ₁, StrictHierarchyFormula.coe_rew]));
   have hαiff := models_iff_of_provable_iff' α'.provable;
-  have δ' := ih.ball 𝚷 (t := Rew.bShift (Rew.bShift u)) (by simp) (refl α'.toStrictHierarchyFormula);
+  obtain ⟨δ'⟩ := ih.ball 𝚷 (t := Rew.bShift (Rew.bShift u)) (by simp) (refl α'.toStrictHierarchyFormula);
   have hδiff := models_iff_of_provable_iff' δ'.provable;
   use δ'.sigma;
   . apply provable_iff_of_models_iff;
@@ -281,15 +277,15 @@ noncomputable def ballSigmaStep {n} {φ : ArithmeticSemisentence (n + 1)}
       obtain ⟨y, -, hy⟩ := hw x hx;
       exact ⟨y, hy⟩;
 
-def orSigmaStep {n} {φ ψ : ArithmeticSemisentence n} (ih : Closure T s)
+lemma or_sigma_step {n} {φ ψ : ArithmeticSemisentence n} (ih : Closure T s)
     (φ' : StrictHierarchyFormulaEquivOf T 𝚺 (s + 1) φ)
     (ψ' : StrictHierarchyFormulaEquivOf T 𝚺 (s + 1) ψ) :
-    StrictHierarchyFormulaEquivOf T 𝚺 (s + 1) (φ ⋎ ψ) := by
+    Nonempty (StrictHierarchyFormulaEquivOf T 𝚺 (s + 1) (φ ⋎ ψ)) := by
   set φ₁' := φ'.sigmaInv;
   set ψ₁' := ψ'.sigmaInv;
   set φ₁ : ArithmeticSemisentence (n + 1) := ↑φ₁';
   set ψ₁ : ArithmeticSemisentence (n + 1) := ↑ψ₁';
-  have χ' := ih.or 𝚷 (refl φ₁') (refl ψ₁');
+  obtain ⟨χ'⟩ := ih.or 𝚷 (refl φ₁') (refl ψ₁');
   have hχiff := χ'.iff_models';
   use χ'.sigma;
   . apply provable_iff_of_models_iff;
@@ -307,10 +303,10 @@ def orSigmaStep {n} {φ ψ : ArithmeticSemisentence n} (ih : Closure T s)
       . left; exact ⟨x, h⟩;
       . right; exact ⟨x, h⟩;
 
-def andSigmaStep {n} {φ ψ : ArithmeticSemisentence n} [𝗜𝚺 (s + 1) ⪯ T] (ih : Closure T s)
+lemma and_sigma_step {n} {φ ψ : ArithmeticSemisentence n} [𝗜𝚺 (s + 1) ⪯ T] (ih : Closure T s)
     (φ' : StrictHierarchyFormulaEquivOf T 𝚺 (s + 1) φ)
     (ψ' : StrictHierarchyFormulaEquivOf T 𝚺 (s + 1) ψ) :
-    StrictHierarchyFormulaEquivOf T 𝚺 (s + 1) (φ ⋏ ψ) := by
+    Nonempty (StrictHierarchyFormulaEquivOf T 𝚺 (s + 1) (φ ⋏ ψ)) := by
   have : 𝗜𝚺₀ ⪯ T :=
     Entailment.WeakerThan.trans (ISigma_weakerThan_of_le (Nat.zero_le (s + 1))) inferInstance;
   set φ₁' := φ'.sigmaInv;
@@ -319,17 +315,17 @@ def andSigmaStep {n} {φ ψ : ArithmeticSemisentence n} [𝗜𝚺 (s + 1) ⪯ T]
   set ψ₁ : ArithmeticSemisentence (n + 1) := ↑ψ₁';
   let φ₂' : StrictHierarchyFormula ℒₒᵣ Empty 𝚷 s (n + 2) :=
     φ₁'.rew (Rew.subst (#0 :> (#·.succ.succ)));
-  have α' := ih.bexs 𝚷 (φ := φ₁ ⇜ (#0 :> (#·.succ.succ)))
+  obtain ⟨α'⟩ := ih.bexs 𝚷 (φ := φ₁ ⇜ (#0 :> (#·.succ.succ)))
     (t := Rew.bShift (‘#0 + 1’ : ArithmeticSemiterm Empty (n + 1)))
     (Rew.bShift_positive _) ((refl φ₂').ofEq (by simp [φ₂', φ₁, StrictHierarchyFormula.coe_rew]));
   let ψ₂' : StrictHierarchyFormula ℒₒᵣ Empty 𝚷 s (n + 2) :=
     ψ₁'.rew (Rew.subst (#0 :> (#·.succ.succ)));
-  have β' := ih.bexs 𝚷 (φ := ψ₁ ⇜ (#0 :> (#·.succ.succ)))
+  obtain ⟨β'⟩ := ih.bexs 𝚷 (φ := ψ₁ ⇜ (#0 :> (#·.succ.succ)))
     (t := Rew.bShift (‘#0 + 1’ : ArithmeticSemiterm Empty (n + 1)))
     (Rew.bShift_positive _) ((refl ψ₂').ofEq (by simp [ψ₂', ψ₁, StrictHierarchyFormula.coe_rew]));
   have hαiff := models_iff_of_provable_iff' α'.provable;
   have hβiff := models_iff_of_provable_iff' β'.provable;
-  have χ' := ih.and 𝚷 (refl α'.toStrictHierarchyFormula) (refl β'.toStrictHierarchyFormula);
+  obtain ⟨χ'⟩ := ih.and 𝚷 (refl α'.toStrictHierarchyFormula) (refl β'.toStrictHierarchyFormula);
   have hχiff := models_iff_of_provable_iff' χ'.provable;
   use χ'.sigma;
   . apply provable_iff_of_models_iff;
@@ -360,51 +356,55 @@ def andSigmaStep {n} {φ ψ : ArithmeticSemisentence n} [𝗜𝚺 (s + 1) ⪯ T]
     . rintro ⟨z, ⟨x, _, hx⟩, ⟨y, _, hy⟩⟩;
       exact ⟨⟨x, hx⟩, ⟨y, hy⟩⟩;
 
-noncomputable def closureSucc [𝗜𝚺 (s + 1) ⪯ T] (ih : Closure T s) : Closure T (s + 1) where
+lemma closure_succ [𝗜𝚺 (s + 1) ⪯ T] (ih : Closure T s) : Closure T (s + 1) where
   ball := by
     intro Γ n φ t ht hφ;
     rcases Γ with _ | _;
-    . exact ballSigmaStep ih ht hφ;
-    . simpa using (bexsSigmaStep ih ht hφ.neg).neg;
+    . exact ball_sigma_step ih ht hφ;
+    . obtain ⟨χ'⟩ := bexs_sigma_step ih ht hφ.neg;
+      exact ⟨by simpa using χ'.neg⟩;
   bexs := by
     intro Γ n φ t ht hφ;
     rcases Γ with _ | _;
-    . exact bexsSigmaStep ih ht hφ;
-    . simpa using (ballSigmaStep ih ht hφ.neg).neg;
+    . exact bexs_sigma_step ih ht hφ;
+    . obtain ⟨χ'⟩ := ball_sigma_step ih ht hφ.neg;
+      exact ⟨by simpa using χ'.neg⟩;
   and := by
     intro Γ n φ ψ hφ hψ;
     rcases Γ with _ | _;
-    . exact andSigmaStep ih hφ hψ;
-    . simpa [Semiformula.imp_eq] using (orSigmaStep ih hφ.neg hψ.neg).neg;
+    . exact and_sigma_step ih hφ hψ;
+    . obtain ⟨χ'⟩ := or_sigma_step ih hφ.neg hψ.neg;
+      exact ⟨by simpa [Semiformula.imp_eq] using χ'.neg⟩;
   or := by
     intro Γ n φ ψ hφ hψ;
     rcases Γ with _ | _;
-    . exact orSigmaStep ih hφ hψ;
-    . simpa [Semiformula.imp_eq] using (andSigmaStep ih hφ.neg hψ.neg).neg;
+    . exact or_sigma_step ih hφ hψ;
+    . obtain ⟨χ'⟩ := and_sigma_step ih hφ.neg hψ.neg;
+      exact ⟨by simpa [Semiformula.imp_eq] using χ'.neg⟩;
 
-noncomputable def closure [𝗜𝚺 s ⪯ T] : Closure T s := by
+lemma closure [𝗜𝚺 s ⪯ T] : Closure T s := by
   revert ‹𝗜𝚺 s ⪯ T›;
   induction s with
-  | zero => intro _; exact closureZero;
+  | zero => intro _; exact closure_zero;
   | succ s ih =>
     intro inst;
     have : 𝗜𝚺 s ⪯ T := ISigma_weakerThan_of_le_trans (by omega) inst;
-    exact closureSucc ih;
+    exact closure_succ ih;
 
-def exs [𝗜𝚺 s ⪯ T] (c : Closure T s) {n : ℕ}
+lemma exs [𝗜𝚺 s ⪯ T] (c : Closure T s) {n : ℕ}
     {φ : ArithmeticSemisentence (n + 1)}
     (φ' : StrictHierarchyFormulaEquivOf T 𝚺 (s + 1) φ) :
-    StrictHierarchyFormulaEquivOf T 𝚺 (s + 1) (∃¹ φ) := by
+    Nonempty (StrictHierarchyFormulaEquivOf T 𝚺 (s + 1) (∃¹ φ)) := by
   have : 𝗜𝚺₀ ⪯ T :=
     Entailment.WeakerThan.trans (ISigma_weakerThan_of_le (Nat.zero_le s)) inferInstance;
   set φ₁' := φ'.sigmaInv;
   set φ₁ : ArithmeticSemisentence (n + 2) := ↑φ₁';
   let φ₂' : StrictHierarchyFormula ℒₒᵣ Empty 𝚷 s (n + 3) :=
     φ₁'.rew (Rew.subst (#0 :> #1 :> (#·.succ.succ.succ)));
-  have α' := c.bexs 𝚷 (φ := φ₁ ⇜ (#0 :> #1 :> (#·.succ.succ.succ)))
+  obtain ⟨α'⟩ := c.bexs 𝚷 (φ := φ₁ ⇜ (#0 :> #1 :> (#·.succ.succ.succ)))
     (t := Rew.bShift (‘#1 + 1’ : ArithmeticSemiterm Empty (n + 2)))
     (Rew.bShift_positive _) ((refl φ₂').ofEq (by simp [φ₂', φ₁, StrictHierarchyFormula.coe_rew]));
-  have β' := c.bexs 𝚷
+  obtain ⟨β'⟩ := c.bexs 𝚷
     (t := Rew.bShift (‘#0 + 1’ : ArithmeticSemiterm Empty (n + 1)))
     (Rew.bShift_positive _) (refl α'.toStrictHierarchyFormula);
   have hαiff := models_iff_of_provable_iff' α'.provable;
@@ -443,11 +443,12 @@ def exs [𝗜𝚺 s ⪯ T] (c : Closure T s) {n : ℕ}
     . rintro ⟨z, y, -, x, -, hx⟩;
       exact ⟨y, x, hx⟩;
 
-def all [𝗜𝚺 s ⪯ T] (c : Closure T s) {n : ℕ}
+lemma all [𝗜𝚺 s ⪯ T] (c : Closure T s) {n : ℕ}
     {φ : ArithmeticSemisentence (n + 1)}
     (φ' : StrictHierarchyFormulaEquivOf T 𝚷 (s + 1) φ) :
-    StrictHierarchyFormulaEquivOf T 𝚷 (s + 1) (∀¹ φ) := by
-  simpa using (exs c φ'.neg).neg;
+    Nonempty (StrictHierarchyFormulaEquivOf T 𝚷 (s + 1) (∀¹ φ)) := by
+  obtain ⟨χ'⟩ := exs c φ'.neg;
+  exact ⟨by simpa using χ'.neg⟩;
 
 end StrictHierarchyFormulaEquivOf
 
@@ -465,18 +466,20 @@ theorem nonempty_strictHierarchyFormulaEquivOf {φ : ArithmeticSemisentence n}
   | nrel Γ s r v => exact ⟨ofDeltaZero (Hierarchy.nrel 𝚺 0 r v)⟩;
   | and _ _ ihp ihq =>
     obtain ⟨φ'⟩ := ihp; obtain ⟨ψ'⟩ := ihq;
-    exact ⟨closure.and _ φ' ψ'⟩;
+    exact closure.and _ φ' ψ';
   | or _ _ ihp ihq =>
     obtain ⟨φ'⟩ := ihp; obtain ⟨ψ'⟩ := ihq;
-    exact ⟨closure.or _ φ' ψ'⟩;
-  | ball pos _ ih => obtain ⟨φ'⟩ := ih; exact ⟨closure.ball _ pos φ'⟩;
-  | bexs pos _ ih => obtain ⟨φ'⟩ := ih; exact ⟨closure.bexs _ pos φ'⟩;
+    exact closure.or _ φ' ψ';
+  | ball pos _ ih => obtain ⟨φ'⟩ := ih; exact closure.ball _ pos φ';
+  | bexs pos _ ih => obtain ⟨φ'⟩ := ih; exact closure.bexs _ pos φ';
   | @exs s n φ _ ih =>
     have : 𝗜𝚺 s ⪯ T := ISigma_weakerThan_of_le_trans (by omega) hT;
-    exact ih.map (exs closure);
+    obtain ⟨φ'⟩ := ih;
+    exact exs closure φ';
   | @all s n φ _ ih =>
     have : 𝗜𝚺 s ⪯ T := ISigma_weakerThan_of_le_trans (by omega) hT;
-    exact ih.map (all closure);
+    obtain ⟨φ'⟩ := ih;
+    exact all closure φ';
   | @sigma s n φ hp ih =>
     rcases s with _ | s;
     . use (StrictHierarchyFormula.zero 𝚷 φ (Hierarchy.zero_iff.mp hp)).sigma;
@@ -492,11 +495,15 @@ theorem nonempty_strictHierarchyFormulaEquivOf {φ : ArithmeticSemisentence n}
   | @dummy_sigma s n φ hp ih =>
     have : 𝗜𝚺 s ⪯ T := ISigma_weakerThan_of_le_trans (by omega) hT;
     have : 𝗜𝚺 (s + 1) ⪯ T := ISigma_weakerThan_of_le_trans (by omega) hT;
-    exact (ih.map (all closure)).map altUp;
+    obtain ⟨φ'⟩ := ih;
+    obtain ⟨ψ'⟩ := all closure φ';
+    exact ⟨altUp ψ'⟩;
   | @dummy_pi s n φ hp ih =>
     have : 𝗜𝚺 s ⪯ T := ISigma_weakerThan_of_le_trans (by omega) hT;
     have : 𝗜𝚺 (s + 1) ⪯ T := ISigma_weakerThan_of_le_trans (by omega) hT;
-    exact (ih.map (exs closure)).map altUp;
+    obtain ⟨φ'⟩ := ih;
+    obtain ⟨ψ'⟩ := exs closure φ';
+    exact ⟨altUp ψ'⟩;
 
 variable (T : ArithmeticTheory) {Γ : Polarity} {s n : ℕ} [𝗜𝚺 s ⪯ T]
 
