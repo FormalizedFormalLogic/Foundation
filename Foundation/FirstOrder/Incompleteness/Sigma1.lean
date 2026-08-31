@@ -25,4 +25,18 @@ theorem incomplete_of_sigma1 (T : ArithmeticTheory) [T.«Σ₁»] [𝗥₀ ⪯ T
     (@incomplete T.craig inferInstance inferInstance
       (ArithmeticTheory.SoundOn.of_weakerThan _ T T.craig))
 
+theorem exists_true_but_unprovable_sentence_of_sigma1
+    (T : ArithmeticTheory) [T.«Σ₁»] [𝗥₀ ⪯ T] [T.SoundOnHierarchy 𝚺 1] :
+    ∃ δ : ArithmeticSentence, ℕ↓[ℒₒᵣ] ⊧ δ ∧ T ⊬ δ := by
+  obtain ⟨δ, hδ⟩ := incomplete_def.mp (incomplete_of_sigma1 T);
+  by_cases h : ℕ↓[ℒₒᵣ] ⊧ δ
+  . use δ;
+    and_intros;
+    . exact h
+    . exact hδ.1
+  . use ∼δ;
+    and_intros;
+    . simpa
+    . exact hδ.2
+
 end LO.FirstOrder.Arithmetic
