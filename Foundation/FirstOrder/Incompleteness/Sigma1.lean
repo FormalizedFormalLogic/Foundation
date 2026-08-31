@@ -1,6 +1,7 @@
 module
 
 public import Foundation.FirstOrder.Bootstrapping.Syntax.CraigTrick
+public import Foundation.FirstOrder.Incompleteness.First
 
 /-!
 # Sigma-one definability and incompleteness
@@ -17,5 +18,11 @@ noncomputable instance (T : ArithmeticTheory) [T.«Σ₁»] [𝗥₀ ⪯ T] : �
 
 noncomputable instance (T : ArithmeticTheory) [T.«Σ₁»] [𝗜𝚺₁ ⪯ T] : 𝗜𝚺₁ ⪯ T.craig :=
   WeakerThan.trans (𝓣 := T) inferInstance (Theory.craig.original_weakerThan (T := T))
+
+theorem incomplete_of_sigma1 (T : ArithmeticTheory) [T.«Σ₁»] [𝗥₀ ⪯ T]
+    [T.SoundOnHierarchy 𝚺 1] : Incomplete T := by
+  exact (Theory.craig_equiv (T := T)).symm.incomplete
+    (@incomplete T.craig inferInstance inferInstance
+      (ArithmeticTheory.SoundOn.of_weakerThan _ T T.craig))
 
 end LO.FirstOrder.Arithmetic
