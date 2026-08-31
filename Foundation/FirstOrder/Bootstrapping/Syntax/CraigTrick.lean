@@ -49,6 +49,34 @@ noncomputable def _root_.LO.FirstOrder.Theory.craigCh (T : Theory L) [T.«Σ₁�
   (.mkPi “x. ∃ s < x, ∃ p < x, ∃ v < x,
     (∀ v', !qqVerumsGraph v' s → v' = v) ∧ !qqAndDef x p v ∧ !(T.«Σ₁witness».val) s p”)
 
+instance Theory.IsCraigAxiom.defined (T : Theory L) [T.«Σ₁»] :
+    𝚫₁-Predicate[V] (T.IsCraigAxiom : V → Prop) via T.craigCh := .mk <| by
+  have h (v : Fin 1 → V) :
+      (∃ s < v 0, ∃ p < v 0, qqVerums s < v 0 ∧ v 0 = p ^⋏ qqVerums s
+        ∧ (Semiformula.Eval ![s, p] Empty.elim) T.«Σ₁witness».val) ↔
+        ∃ s p, v 0 = p ^⋏ qqVerums s ∧ (Semiformula.Evalb ![s, p]) T.«Σ₁witness».val := by
+    constructor
+    . rintro ⟨s, _, p, _, _, h, hT⟩
+      exact ⟨s, p, h, hT⟩
+    . rintro ⟨s, p, hx, hT⟩
+      use s
+      and_intros
+      . rw [hx]
+        exact lt_of_le_of_lt (le_qqVerums s) (lt_K!_right _ _)
+      use p
+      and_intros
+      . rw [hx]
+        exact lt_K!_left _ _
+      . rw [hx]
+        exact lt_K!_right _ _
+      . exact hx
+      . exact hT
+  constructor
+  . intro v
+    simp [Theory.craigCh, h]
+  . intro v
+    simp [Theory.craigCh, Theory.IsCraigAxiom, h]
+
 lemma quote_eq_qqAnd_iff {φ : Proposition L} {p q : ℕ} :
     (⌜φ⌝ : ℕ) = p ^⋏ q ↔ ∃ φ₁ φ₂, φ = φ₁ ⋏ φ₂ ∧ p = ⌜φ₁⌝ ∧ q = ⌜φ₂⌝ := by
   constructor
