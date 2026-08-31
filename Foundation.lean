@@ -67,6 +67,7 @@ public import Foundation.FirstOrder.Bootstrapping.DerivabilityCondition.Equation
 public import Foundation.FirstOrder.Bootstrapping.DerivabilityCondition.PeanoMinus
 public import Foundation.FirstOrder.Bootstrapping.FixedPoint
 public import Foundation.FirstOrder.Bootstrapping.Syntax
+public import Foundation.FirstOrder.Bootstrapping.Syntax.CraigTrick
 public import Foundation.FirstOrder.Bootstrapping.Syntax.Formula.Basic
 public import Foundation.FirstOrder.Bootstrapping.Syntax.Formula.Coding
 public import Foundation.FirstOrder.Bootstrapping.Syntax.Formula.Functions
