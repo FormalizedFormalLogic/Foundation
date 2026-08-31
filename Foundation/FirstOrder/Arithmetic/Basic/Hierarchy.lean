@@ -28,6 +28,7 @@ inductive Hierarchy : Polarity → ℕ → {n : ℕ} → Semiformula L ξ n → 
 def DeltaZero (φ : Semiformula L ξ n) : Prop := Hierarchy 𝚺 0 φ
 
 attribute [simp] Hierarchy.verum Hierarchy.falsum Hierarchy.rel Hierarchy.nrel
+attribute [grind .] Hierarchy.verum Hierarchy.falsum
 
 namespace Hierarchy
 

@@ -5,6 +5,8 @@ public import Foundation.FirstOrder.Arithmetic.Basic.Hierarchy
 public import Foundation.FirstOrder.Arithmetic.Basic.Misc
 public import Foundation.FirstOrder.Arithmetic.Basic.Model
 public import Foundation.FirstOrder.Arithmetic.Basic.Monotone
+public import Foundation.FirstOrder.Arithmetic.Basic.StrictHierarchy
+public import Foundation.FirstOrder.Arithmetic.BoundedCollection
 public import Foundation.FirstOrder.Arithmetic.Definability
 public import Foundation.FirstOrder.Arithmetic.Definability.Absoluteness
 public import Foundation.FirstOrder.Arithmetic.Definability.BoundedDefinable
@@ -25,9 +27,11 @@ public import Foundation.FirstOrder.Arithmetic.HFS.Seq
 public import Foundation.FirstOrder.Arithmetic.HFS.Superexp
 public import Foundation.FirstOrder.Arithmetic.HFS.Vec
 public import Foundation.FirstOrder.Arithmetic.IOpen.Basic
+public import Foundation.FirstOrder.Arithmetic.ISigma1.Prenex
 public import Foundation.FirstOrder.Arithmetic.Induction
 public import Foundation.FirstOrder.Arithmetic.Omega1.Basic
 public import Foundation.FirstOrder.Arithmetic.Omega1.Nuon
+public import Foundation.FirstOrder.Arithmetic.PA.Prenex
 public import Foundation.FirstOrder.Arithmetic.PeanoMinus.Basic
 public import Foundation.FirstOrder.Arithmetic.PeanoMinus.Functions
 public import Foundation.FirstOrder.Arithmetic.PeanoMinus.Q
@@ -35,7 +39,7 @@ public import Foundation.FirstOrder.Arithmetic.Q.Basic
 public import Foundation.FirstOrder.Arithmetic.R0.Basic
 public import Foundation.FirstOrder.Arithmetic.R0.Representation
 public import Foundation.FirstOrder.Arithmetic.Schemata
-public import Foundation.FirstOrder.Arithmetic.Sigma1WitnessForm
+public import Foundation.FirstOrder.Arithmetic.StrictEquiv
 public import Foundation.FirstOrder.Arithmetic.TA.Basic
 public import Foundation.FirstOrder.Arithmetic.TA.Nonstandard
 public import Foundation.FirstOrder.Basic
