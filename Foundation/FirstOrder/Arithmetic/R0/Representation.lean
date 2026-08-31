@@ -3,6 +3,7 @@ module
 public import Foundation.FirstOrder.Arithmetic.Definability.Definable
 public import Foundation.FirstOrder.Arithmetic.PeanoMinus.Basic
 public import Foundation.FirstOrder.Arithmetic.R0.Basic
+public import Foundation.FirstOrder.Bootstrapping.Syntax.Theory
 public import Foundation.Vorspiel.Arithmetic
 public import Foundation.Vorspiel.Computability
 
@@ -286,6 +287,15 @@ theorem rePred_weak_representation {p : ℕ → Prop} (hp : REPred p) {x : ℕ} 
   (sigma_one_completeness_iff <| by simp [codeOfREPred, codeOfPartrec'])
 
 end codeOfREPred
+
+@[instance_reducible] noncomputable def _root_.LO.FirstOrder.Theory.«Σ₁».ofRE
+    {L : Language} [L.Encodable] [L.LORDefinable] (T : Theory L)
+    (hT : REPred fun n : ℕ ↦ n ∈ Encodable.encode '' T) : T.«Σ₁» where
+  ch := .mkSigma (codeOfREPred fun n : ℕ ↦ n ∈ Encodable.encode '' T)
+    (by simp [codeOfREPred, codeOfPartrec'])
+  mem_iff φ := by
+    simpa [Matrix.fun_eq_vec_one, Semiformula.quote_eq_encode] using
+      (codeOfREPred_spec hT (x := (⌜φ⌝ : ℕ)))
 
 section codeOfComputablePred
 
