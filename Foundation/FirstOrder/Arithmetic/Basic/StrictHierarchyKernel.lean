@@ -31,7 +31,7 @@ def quantItr (Γ : Polarity) : (k : ℕ) → α (n + k) → α n
 lemma quantItr_zero (φ : α n) : quantItr Γ 0 φ = φ := rfl
 
 lemma quantItr_succ {k} (φ : α (n + (k + 1))) :
-  quantItr Γ (k + 1) φ = quantItr Γ k ((Polarity.alt^[k] Γ).quant φ) := rfl
+    quantItr Γ (k + 1) φ = quantItr Γ k ((Polarity.alt^[k] Γ).quant φ) := rfl
 
 end LO.Polarity
 
