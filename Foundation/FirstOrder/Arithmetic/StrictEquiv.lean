@@ -461,7 +461,7 @@ theorem nonempty_strictEquiv {Γ : Polarity} {n : ℕ} {φ : ArithmeticSemiformu
   | @sigma s n φ hp ih =>
     rcases s with _ | s;
     . exact ⟨StrictEquiv.refl (StrictHierarchy.sigma (StrictHierarchy.zero (Hierarchy.zero_iff.mp hp)))⟩;
-    . exact ⟨StrictEquiv.exs_of_pi (ih (hmono (Nat.le_succ _) hT)).some⟩;
+    . exact ⟨StrictEquiv.exs_of_pi (ih (hmono (by omega) hT)).some⟩;
   | @pi s n φ hp ih =>
     rcases s with _ | s;
     . exact ⟨StrictEquiv.refl (StrictHierarchy.pi (StrictHierarchy.zero (Hierarchy.zero_iff.mp hp)))⟩;
