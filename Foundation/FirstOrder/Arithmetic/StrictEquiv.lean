@@ -1,7 +1,6 @@
 module
 
 public import Foundation.FirstOrder.Arithmetic.Basic.StrictHierarchy
-public import Foundation.FirstOrder.Arithmetic.Sigma1WitnessForm
 
 /-!
 # `T`-provable strict hierarchy equivalence
@@ -25,6 +24,15 @@ lemma provable_iff_of_models_iff {T : ArithmeticTheory} [𝗘𝗤 ℒₒᵣ ⪯ 
   apply Arithmetic.complete T _;
   intro V _ _;
   simpa [models_iff] using h V;
+
+/-- A `T`-provable biconditional yields a model-theoretic equivalence in every model of `T`,
+via soundness. Converse of `provable_iff_of_models_iff`. -/
+lemma models_iff_of_provable_iff {T : ArithmeticTheory} [𝗘𝗤 ℒₒᵣ ⪯ T] {n} {φ ψ : ArithmeticSemiformula Empty n}
+    (h : T ⊢ ∀¹* (φ 🡘 ψ)) (V : Type*) [ORingStructure V] [V↓[ℒₒᵣ] ⊧* T] (e : Fin n → V) :
+    V ⊧/e φ ↔ V ⊧/e ψ := by
+  have := consequence_iff.mp (Theory.Proof.sound h) V inferInstance;
+  simp only [models_iff, Semiformula.eval_allClosure] at this;
+  simpa using this e;
 
 /-- A witness that `φ` is `T`-provably equivalent to some formula in `StrictHierarchy Γ s`. -/
 structure StrictEquiv (T : ArithmeticTheory) (Γ : Polarity) (s : ℕ) {n : ℕ}

@@ -1,6 +1,7 @@
 module
 
-public import Foundation.FirstOrder.Arithmetic.Schemata
+public import Foundation.FirstOrder.Arithmetic.StrictEquiv
+public import Foundation.FirstOrder.Arithmetic.BoundedCollection
 
 /-!
 # Δ₀-witnessed form for Σ₁ formulas
@@ -12,207 +13,150 @@ open Classical
 open LO
 open LO.FirstOrder
 
-universe u
 noncomputable section
 
 namespace LO.FirstOrder.Arithmetic
 
-variable {V : Type u} [ORingStructure V] {n : ℕ}
+variable {V : Type} [ORingStructure V] {n : ℕ}
 
-private def Delta0Witnessed {n : ℕ} (φ : ArithmeticSemiformula Empty n)
-    (θ : ArithmeticSemiformula Empty (n + 1)) : Prop :=
-  ∀ (V : Type u) [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] (e : Fin n → V),
-    V ⊧/e φ ↔ ∃ w, V ⊧/(w :> e) θ
+-- A `StrictHierarchy 𝚺 1` witness is always of the form `∃¹ θ` for some Δ₀ `θ`; extract that
+-- `θ` as data (mirroring `StrictHierarchy.sigma_succ_elim`, a `Prop`-valued existential).
+private noncomputable def strictSigma1Elim {φ : ArithmeticSemiformula Empty n} (h : StrictHierarchy 𝚺 1 φ) :
+    Σ' θ : ArithmeticSemiformula Empty (n + 1), φ = ∃¹ θ ∧ Hierarchy 𝚺 0 θ :=
+  ⟨h.sigma_succ_elim.choose, h.sigma_succ_elim.choose_spec.1,
+    StrictHierarchy.zero_iff.mp h.sigma_succ_elim.choose_spec.2⟩
 
-private lemma witnessForm_atomic {φ : ArithmeticSemiformula Empty n} (hφ : Hierarchy 𝚺 0 φ) :
-    ∃ θ : ArithmeticSemiformula Empty (n + 1), Hierarchy 𝚺 0 θ ∧ Delta0Witnessed.{u} φ θ := by
-  use Rew.bShift ▹ φ;
-  and_intros
-  . simpa using hφ
-  . intro V _ _ e
-    constructor
-    . intro h; exact ⟨0, by simpa using h⟩
-    . rintro ⟨w, h⟩; simpa using h
+private def witnessForm_atomic {φ : ArithmeticSemiformula Empty n} (hφ : Hierarchy 𝚺 0 φ) :
+    ModelEquiv 𝗜𝚺₁ 𝚺 1 φ where
+  witness := ∃¹ (Rew.bShift ▹ φ)
+  hierarchy := StrictHierarchy.sigma (StrictHierarchy.zero (by simpa using hφ))
+  iff_models := fun V _ _ e => by
+    simp only [Semiformula.eval_ex];
+    constructor;
+    . intro h; exact ⟨0, by simpa using h⟩;
+    . rintro ⟨w, h⟩; simpa using h;
 
-private lemma witnessForm_and {φ₁ φ₂ : ArithmeticSemiformula Empty n}
-    {θ₁ θ₂ : ArithmeticSemiformula Empty (n + 1)} (hθ₁ : Hierarchy 𝚺 0 θ₁) (hθ₂ : Hierarchy 𝚺 0 θ₂)
-    (h₁ : Delta0Witnessed.{u} φ₁ θ₁) (h₂ : Delta0Witnessed.{u} φ₂ θ₂) :
-    ∃ θ : ArithmeticSemiformula Empty (n + 1), Hierarchy 𝚺 0 θ ∧ Delta0Witnessed.{u} (φ₁ ⋏ φ₂) θ := by
-  use (θ₁ ⇜ (#0 :> (#·.succ.succ))).bexsLTSucc (#0 : ArithmeticSemiterm Empty (n + 1)) ⋏
-    (θ₂ ⇜ (#0 :> (#·.succ.succ))).bexsLTSucc (#0 : ArithmeticSemiterm Empty (n + 1));
-  and_intros
-  . simp [hθ₁, hθ₂]
-  . intro V _ _ e
-    simp only [LO.LogicalConnective.HomClass.map_and]
-    rw [h₁ V e, h₂ V e]
-    simp only [Semiformula.eval_bexsLTSucc, Arithmetic.lt_succ_iff_le, Semiformula.eval_insert1]
-    constructor
-    . rintro ⟨⟨w₁, hw₁⟩, ⟨w₂, hw₂⟩⟩
-      exact ⟨w₁ + w₂, ⟨w₁, self_le_add_right w₁ w₂, hw₁⟩, ⟨w₂, self_le_add_left w₂ w₁, hw₂⟩⟩
-    . rintro ⟨w, ⟨w₁, _, hw₁⟩, ⟨w₂, _, hw₂⟩⟩
-      exact ⟨⟨w₁, hw₁⟩, ⟨w₂, hw₂⟩⟩
+private noncomputable def witnessForm_and {φ₁ φ₂ : ArithmeticSemiformula Empty n}
+    (h₁ : ModelEquiv 𝗜𝚺₁ 𝚺 1 φ₁) (h₂ : ModelEquiv 𝗜𝚺₁ 𝚺 1 φ₂) :
+    ModelEquiv 𝗜𝚺₁ 𝚺 1 (φ₁ ⋏ φ₂) := by
+  obtain ⟨ψ₁, hψ₁, hmi₁⟩ := h₁;
+  obtain ⟨ψ₂, hψ₂, hmi₂⟩ := h₂;
+  obtain ⟨θ₁, rfl, hθ₁⟩ := strictSigma1Elim hψ₁;
+  obtain ⟨θ₂, rfl, hθ₂⟩ := strictSigma1Elim hψ₂;
+  have h₁' : ∀ (V : Type) [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] (e : Fin n → V),
+      V ⊧/e φ₁ ↔ ∃ w, V ⊧/(w :> e) θ₁ := fun V _ _ e => (hmi₁ V e).trans Semiformula.eval_ex;
+  have h₂' : ∀ (V : Type) [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] (e : Fin n → V),
+      V ⊧/e φ₂ ↔ ∃ w, V ⊧/(w :> e) θ₂ := fun V _ _ e => (hmi₂ V e).trans Semiformula.eval_ex;
+  use ∃¹ ((θ₁ ⇜ (#0 :> (#·.succ.succ))).bexsLTSucc (#0 : ArithmeticSemiterm Empty (n + 1)) ⋏
+    (θ₂ ⇜ (#0 :> (#·.succ.succ))).bexsLTSucc (#0 : ArithmeticSemiterm Empty (n + 1)));
+  . exact StrictHierarchy.sigma (StrictHierarchy.zero (by simp [hθ₁, hθ₂]));
+  . intro V _ _ e;
+    simp only [Semiformula.eval_ex, LO.LogicalConnective.HomClass.map_and];
+    rw [h₁' V e, h₂' V e];
+    simp only [Semiformula.eval_bexsLTSucc, Arithmetic.lt_succ_iff_le, Semiformula.eval_insert1];
+    constructor;
+    . rintro ⟨⟨w₁, hw₁⟩, ⟨w₂, hw₂⟩⟩;
+      exact ⟨w₁ + w₂, ⟨w₁, self_le_add_right w₁ w₂, hw₁⟩, ⟨w₂, self_le_add_left w₂ w₁, hw₂⟩⟩;
+    . rintro ⟨w, ⟨w₁, _, hw₁⟩, ⟨w₂, _, hw₂⟩⟩;
+      exact ⟨⟨w₁, hw₁⟩, ⟨w₂, hw₂⟩⟩;
 
-private lemma witnessForm_or {φ₁ φ₂ : ArithmeticSemiformula Empty n}
-    {θ₁ θ₂ : ArithmeticSemiformula Empty (n + 1)} (hθ₁ : Hierarchy 𝚺 0 θ₁) (hθ₂ : Hierarchy 𝚺 0 θ₂)
-    (h₁ : Delta0Witnessed.{u} φ₁ θ₁) (h₂ : Delta0Witnessed.{u} φ₂ θ₂) :
-    ∃ θ : ArithmeticSemiformula Empty (n + 1), Hierarchy 𝚺 0 θ ∧ Delta0Witnessed.{u} (φ₁ ⋎ φ₂) θ := by
-  use θ₁ ⋎ θ₂;
-  and_intros
-  . simp [hθ₁, hθ₂]
-  . intro V _ _ e
-    simp only [LO.LogicalConnective.HomClass.map_or]
-    rw [h₁ V e, h₂ V e]
-    aesop
+private noncomputable def witnessForm_or {φ₁ φ₂ : ArithmeticSemiformula Empty n}
+    (h₁ : ModelEquiv 𝗜𝚺₁ 𝚺 1 φ₁) (h₂ : ModelEquiv 𝗜𝚺₁ 𝚺 1 φ₂) :
+    ModelEquiv 𝗜𝚺₁ 𝚺 1 (φ₁ ⋎ φ₂) := by
+  obtain ⟨ψ₁, hψ₁, hmi₁⟩ := h₁;
+  obtain ⟨ψ₂, hψ₂, hmi₂⟩ := h₂;
+  obtain ⟨θ₁, rfl, hθ₁⟩ := strictSigma1Elim hψ₁;
+  obtain ⟨θ₂, rfl, hθ₂⟩ := strictSigma1Elim hψ₂;
+  have h₁' : ∀ (V : Type) [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] (e : Fin n → V),
+      V ⊧/e φ₁ ↔ ∃ w, V ⊧/(w :> e) θ₁ := fun V _ _ e => (hmi₁ V e).trans Semiformula.eval_ex;
+  have h₂' : ∀ (V : Type) [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] (e : Fin n → V),
+      V ⊧/e φ₂ ↔ ∃ w, V ⊧/(w :> e) θ₂ := fun V _ _ e => (hmi₂ V e).trans Semiformula.eval_ex;
+  use ∃¹ (θ₁ ⋎ θ₂);
+  . exact StrictHierarchy.sigma (StrictHierarchy.zero (by simp [hθ₁, hθ₂]));
+  . intro V _ _ e;
+    simp only [Semiformula.eval_ex, LO.LogicalConnective.HomClass.map_or];
+    rw [h₁' V e, h₂' V e];
+    aesop;
 
 section Collection
 
 variable [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 
-private noncomputable def collectionCore (θ : ArithmeticSemiformula Empty (n + 2))
-    (e : Fin n → V) : ArithmeticSemiformula V 4 :=
-  Rew.embSubsts (#0 :> #1 :> fun i => (&(e i) : ArithmeticSemiterm V 4)) ▹ θ
-
-omit [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] in
-private lemma hierarchy_collectionCore {θ : ArithmeticSemiformula Empty (n + 2)}
-    (hθ : Hierarchy 𝚺 0 θ) (e : Fin n → V) : Hierarchy 𝚺 0 (collectionCore θ e) := by
-  simp [collectionCore, hθ]
-
-omit [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] in
-private lemma eval_collectionCore {θ : ArithmeticSemiformula Empty (n + 2)} (e : Fin n → V)
-    (u x w y : V) :
-    (collectionCore θ e).Eval (u :> x :> w :> ![y]) id ↔ V ⊧/(u :> x :> e) θ := by
-  simp only [collectionCore, Semiformula.eval_embSubsts, Function.comp_def]
-  exact Iff.of_eq (congrArg (fun b => Semiformula.Evalb (M := V) b θ)
-    (Fin.funext_two (by simp) (by simp) fun i => by simp))
-
-private noncomputable def collectionMotive (θ : ArithmeticSemiformula Empty (n + 2))
-    (e : Fin n → V) (a : V) : ArithmeticSemiformula V 1 :=
-  let cond : ArithmeticSemiformula V 3 :=
-    Semiformula.rel Language.LT.lt ![(#0 : ArithmeticSemiterm V 3), (&a : ArithmeticSemiterm V 3)]
-  let inner : ArithmeticSemiformula V 3 := (collectionCore θ e).bexsLTSucc (#1 : ArithmeticSemiterm V 3)
-  ∃¹ ((cond 🡒 inner).ballLT (#1 : ArithmeticSemiterm V 2))
-
-omit [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] in
-private lemma hierarchy_collectionMotive {θ : ArithmeticSemiformula Empty (n + 2)}
-    (hθ : Hierarchy 𝚺 0 θ) (e : Fin n → V) (a : V) :
-    Hierarchy 𝚺 1 (collectionMotive θ e a) := by
-  have : Hierarchy 𝚺 1 (collectionCore θ e) := (hierarchy_collectionCore hθ e).mono (by omega)
-  simp [collectionMotive, this]
-
-private lemma eval_collectionMotive {θ : ArithmeticSemiformula Empty (n + 2)}
-    (e : Fin n → V) (a : V) (v : Fin 1 → V) :
-    (collectionMotive θ e a).Eval v id ↔
-      ∃ w, ∀ x < v 0, x < a → ∃ u ≤ w, V ⊧/(u :> x :> e) θ := by
-  have hv : v = ![v 0] := by
-    funext i; induction i using Fin.cases with | zero => simp | succ i => exact i.elim0
-  rw [hv]
-  simp [collectionMotive, Semiformula.eval_ballLT, Semiformula.eval_bexsLTSucc,
-    Arithmetic.lt_succ_iff_le, eval_collectionCore, Function.comp_def]
-
-private lemma collectionMotive_definable {θ : ArithmeticSemiformula Empty (n + 2)}
-    (hθ : Hierarchy 𝚺 0 θ) (e : Fin n → V) (a : V) :
-    𝚺-[1].DefinablePred (fun y => ∃ w, ∀ x < y, x < a → ∃ u ≤ w, V ⊧/(u :> x :> e) θ) :=
-  HierarchySymbol.Definable.mkPolarity (collectionMotive θ e a) (hierarchy_collectionMotive hθ e a)
-    (fun v => (eval_collectionMotive e a v).symm)
-
+-- Specialize the general `Σ_{s+1}`-collection of `BoundedCollection.lean` to `s = 0`
+-- (i.e. Δ₀-collection over `𝗜𝚺₁`).
 private lemma exists_bound_witness {θ : ArithmeticSemiformula Empty (n + 2)} (hθ : Hierarchy 𝚺 0 θ)
     (e : Fin n → V) (a : V) (h : ∀ x < a, ∃ u, V ⊧/(u :> x :> e) θ) :
-    ∃ w, ∀ x < a, ∃ u ≤ w, V ⊧/(u :> x :> e) θ := by
-  have key : ∀ y : V, ∃ w, ∀ x < y, x < a → ∃ u ≤ w, V ⊧/(u :> x :> e) θ := by
-    apply InductionOnHierarchy.succ_induction_sigma 𝚺 1
-      (P := fun y => ∃ w, ∀ x < y, x < a → ∃ u ≤ w, V ⊧/(u :> x :> e) θ)
-      (hP := collectionMotive_definable hθ e a)
-    . exact ⟨0, fun x hx _ => absurd hx (by simp)⟩
-    . rintro y ⟨w, hw⟩
-      by_cases hya : y < a
-      . obtain ⟨u₀, hu₀⟩ := h y hya
-        use max w u₀;
-        intro x hx _
-        rcases le_iff_lt_or_eq.mp (Arithmetic.lt_succ_iff_le.mp hx) with hx | rfl
-        . obtain ⟨u, hu, hPu⟩ := hw x hx (lt_trans hx hya)
-          exact ⟨u, le_trans hu (le_max_left w u₀), hPu⟩
-        . exact ⟨u₀, le_max_right w u₀, hu₀⟩
-      . use w;
-        intro x hx hxa
-        rcases le_iff_lt_or_eq.mp (Arithmetic.lt_succ_iff_le.mp hx) with hx | rfl
-        . exact hw x hx hxa
-        . exact absurd hxa hya
-  obtain ⟨w, hw⟩ := key (a + 1)
-  exact ⟨w, fun x hx => hw x (lt_trans hx (lt_add_one a)) hx⟩
+    ∃ w, ∀ x < a, ∃ u ≤ w, V ⊧/(u :> x :> e) θ :=
+  sigma_exists_bound_witness (s := 0) (hθ.mono (by omega)) e a h
 
 end Collection
 
-private lemma witnessForm_exs {φ : ArithmeticSemiformula Empty (n + 1)}
-    {θ' : ArithmeticSemiformula Empty (n + 2)} (hθ' : Hierarchy 𝚺 0 θ')
-    (h : Delta0Witnessed.{u} φ θ') :
-    ∃ θ : ArithmeticSemiformula Empty (n + 1), Hierarchy 𝚺 0 θ ∧ Delta0Witnessed.{u} (∃¹ φ) θ := by
-  use ((θ' ⇜ (#0 :> #1 :> (#·.succ.succ.succ))).bexsLTSucc
-    (#1 : ArithmeticSemiterm Empty (n + 2))).bexsLTSucc (#0 : ArithmeticSemiterm Empty (n + 1));
-  and_intros
-  . simp [hθ']
-  . intro V _ _ e
-    simp only [Semiformula.eval_ex, eval_bexsLTSucc', Semiformula.eval_insert2]
-    constructor
-    . rintro ⟨x, hx⟩
-      obtain ⟨w', hw'⟩ := (h V (x :> e)).mp hx
-      exact ⟨x + w', x, self_le_add_right x w', w', self_le_add_left w' x, hw'⟩
-    . rintro ⟨_, x, -, w', -, hw'⟩
-      exact ⟨x, (h V (x :> e)).mpr ⟨w', hw'⟩⟩
+private noncomputable def witnessForm_exs {φ : ArithmeticSemiformula Empty (n + 1)}
+    (h : ModelEquiv 𝗜𝚺₁ 𝚺 1 φ) :
+    ModelEquiv 𝗜𝚺₁ 𝚺 1 (∃¹ φ) := by
+  obtain ⟨ψ, hψ, hmi⟩ := h;
+  obtain ⟨θ', rfl, hθ'⟩ := strictSigma1Elim hψ;
+  have h' : ∀ (V : Type) [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] (e : Fin (n + 1) → V),
+      V ⊧/e φ ↔ ∃ w, V ⊧/(w :> e) θ' := fun V _ _ e => (hmi V e).trans Semiformula.eval_ex;
+  use ∃¹ (((θ' ⇜ (#0 :> #1 :> (#·.succ.succ.succ))).bexsLTSucc
+    (#1 : ArithmeticSemiterm Empty (n + 2))).bexsLTSucc (#0 : ArithmeticSemiterm Empty (n + 1)));
+  . exact StrictHierarchy.sigma (StrictHierarchy.zero (by simp [hθ']));
+  . intro V _ _ e;
+    simp only [Semiformula.eval_ex, eval_bexsLTSucc', Semiformula.eval_insert2];
+    constructor;
+    . rintro ⟨x, hx⟩;
+      obtain ⟨w', hw'⟩ := (h' V (x :> e)).mp hx;
+      exact ⟨x + w', x, self_le_add_right x w', w', self_le_add_left w' x, hw'⟩;
+    . rintro ⟨_, x, -, w', -, hw'⟩;
+      exact ⟨x, (h' V (x :> e)).mpr ⟨w', hw'⟩⟩;
 
-private lemma witnessForm_ball {t : ArithmeticSemiterm Empty n} {φ : ArithmeticSemiformula Empty (n + 1)}
-    {θ' : ArithmeticSemiformula Empty (n + 2)} (hθ' : Hierarchy 𝚺 0 θ')
-    (h : Delta0Witnessed.{u} φ θ') :
-    ∃ θ : ArithmeticSemiformula Empty (n + 1), Hierarchy 𝚺 0 θ ∧ Delta0Witnessed.{u} (φ.ballLT t) θ := by
-  use ((θ' ⇜ (#0 :> #1 :> (#·.succ.succ.succ))).bexsLTSucc
-    (#1 : ArithmeticSemiterm Empty (n + 2))).ballLT (Rew.bShift t : ArithmeticSemiterm Empty (n + 1));
-  and_intros
-  . simp [hθ']
-  . intro V _ _ e
-    simp only [Semiformula.eval_ballLT, eval_bexsLTSucc', Semiformula.eval_insert2, Semiterm.val_bShift]
-    constructor
-    . intro hφ
+private noncomputable def witnessForm_ball {t : ArithmeticSemiterm Empty n} {φ : ArithmeticSemiformula Empty (n + 1)}
+    (h : ModelEquiv 𝗜𝚺₁ 𝚺 1 φ) :
+    ModelEquiv 𝗜𝚺₁ 𝚺 1 (φ.ballLT t) := by
+  obtain ⟨ψ, hψ, hmi⟩ := h;
+  obtain ⟨θ', rfl, hθ'⟩ := strictSigma1Elim hψ;
+  have h' : ∀ (V : Type) [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] (e : Fin (n + 1) → V),
+      V ⊧/e φ ↔ ∃ w, V ⊧/(w :> e) θ' := fun V _ _ e => (hmi V e).trans Semiformula.eval_ex;
+  use ∃¹ (((θ' ⇜ (#0 :> #1 :> (#·.succ.succ.succ))).bexsLTSucc
+    (#1 : ArithmeticSemiterm Empty (n + 2))).ballLT (Rew.bShift t : ArithmeticSemiterm Empty (n + 1)));
+  . exact StrictHierarchy.sigma (StrictHierarchy.zero (by simp [hθ']));
+  . intro V _ _ e;
+    simp only [Semiformula.eval_ex, Semiformula.eval_ballLT, eval_bexsLTSucc', Semiformula.eval_insert2,
+      Semiterm.val_bShift];
+    constructor;
+    . intro hφ;
       have hex : ∀ x < t.valb e, ∃ w', V ⊧/(w' :> x :> e) θ' :=
-        fun x hx => (h V (x :> e)).mp (hφ x hx)
-      obtain ⟨w, hw⟩ := exists_bound_witness hθ' e (t.valb e) hex
-      exact ⟨w, fun x hx => hw x hx⟩
-    . rintro ⟨w, hw⟩ x hx
-      obtain ⟨w', -, hθ'x⟩ := hw x hx
-      exact (h V (x :> e)).mpr ⟨w', hθ'x⟩
+        fun x hx => (h' V (x :> e)).mp (hφ x hx);
+      obtain ⟨w, hw⟩ := exists_bound_witness hθ' e (t.valb e) hex;
+      exact ⟨w, fun x hx => hw x hx⟩;
+    . rintro ⟨w, hw⟩ x hx;
+      obtain ⟨w', -, hθ'x⟩ := hw x hx;
+      exact (h' V (x :> e)).mpr ⟨w', hθ'x⟩;
 
 lemma exists_delta0_witness_form {n : ℕ} {φ : ArithmeticSemiformula Empty n} (hφ : Hierarchy 𝚺 1 φ) :
   ∃ θ : ArithmeticSemiformula Empty (n + 1), Hierarchy 𝚺 0 θ ∧
-    ∀ (V : Type u) [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] (e : Fin n → V),
+    ∀ (V : Type) [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] (e : Fin n → V),
       V ⊧/e φ ↔ ∃ w, V ⊧/(w :> e) θ := by
-  apply sigma₁_induction' hφ
-    (P := fun n φ => ∃ θ : ArithmeticSemiformula Empty (n + 1), Hierarchy 𝚺 0 θ ∧
-      ∀ (V : Type u) [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] (e : Fin n → V),
-        V ⊧/e φ ↔ ∃ w, V ⊧/(w :> e) θ)
-  . exact fun n => witnessForm_atomic (Hierarchy.verum _ _ _)
-  . exact fun n => witnessForm_atomic (Hierarchy.falsum _ _ _)
-  . exact fun n t₁ t₂ => witnessForm_atomic (Hierarchy.rel _ _ _ _)
-  . exact fun n t₁ t₂ => witnessForm_atomic (Hierarchy.nrel _ _ _ _)
-  . exact fun n t₁ t₂ => witnessForm_atomic (Hierarchy.rel _ _ _ _)
-  . exact fun n t₁ t₂ => witnessForm_atomic (Hierarchy.nrel _ _ _ _)
-  . rintro n φ ψ hφ hψ ⟨θ₁, hθ₁, h₁⟩ ⟨θ₂, hθ₂, h₂⟩
-    exact witnessForm_and hθ₁ hθ₂ h₁ h₂
-  . rintro n φ ψ hφ hψ ⟨θ₁, hθ₁, h₁⟩ ⟨θ₂, hθ₂, h₂⟩
-    exact witnessForm_or hθ₁ hθ₂ h₁ h₂
-  . rintro n t φ hφ ⟨θ', hθ', h⟩
-    exact witnessForm_ball hθ' h
-  . rintro n φ hφ ⟨θ', hθ', h⟩
-    exact witnessForm_exs hθ' h
-
-lemma models_iff_of_provable_iff {T : ArithmeticTheory} [𝗘𝗤 ℒₒᵣ ⪯ T] {n} {φ ψ : ArithmeticSemiformula Empty n}
-    (h : T ⊢ ∀¹* (φ 🡘 ψ)) (V : Type w) [ORingStructure V] [V↓[ℒₒᵣ] ⊧* T] (e : Fin n → V) :
-    V ⊧/e φ ↔ V ⊧/e ψ := by
-  have := consequence_iff.mp (Theory.Proof.sound h) V inferInstance;
-  simp only [models_iff, Semiformula.eval_allClosure] at this;
-  simpa using this e;
+  have H : Nonempty (ModelEquiv 𝗜𝚺₁ 𝚺 1 φ) := by
+    apply sigma₁_induction' hφ (P := fun n φ => Nonempty (ModelEquiv 𝗜𝚺₁ 𝚺 1 φ))
+    . exact fun n => ⟨witnessForm_atomic (Hierarchy.verum _ _ _)⟩
+    . exact fun n => ⟨witnessForm_atomic (Hierarchy.falsum _ _ _)⟩
+    . exact fun n t₁ t₂ => ⟨witnessForm_atomic (Hierarchy.rel _ _ _ _)⟩
+    . exact fun n t₁ t₂ => ⟨witnessForm_atomic (Hierarchy.nrel _ _ _ _)⟩
+    . exact fun n t₁ t₂ => ⟨witnessForm_atomic (Hierarchy.rel _ _ _ _)⟩
+    . exact fun n t₁ t₂ => ⟨witnessForm_atomic (Hierarchy.nrel _ _ _ _)⟩
+    . rintro n φ ψ hφ hψ ⟨h₁⟩ ⟨h₂⟩; exact ⟨witnessForm_and h₁ h₂⟩
+    . rintro n φ ψ hφ hψ ⟨h₁⟩ ⟨h₂⟩; exact ⟨witnessForm_or h₁ h₂⟩
+    . rintro n t φ hφ ⟨h⟩; exact ⟨witnessForm_ball h⟩
+    . rintro n φ hφ ⟨h⟩; exact ⟨witnessForm_exs h⟩
+  obtain ⟨ψ, hψ, hmi⟩ := H.some;
+  obtain ⟨θ, rfl, hθ⟩ := strictSigma1Elim hψ;
+  exact ⟨θ, hθ, fun V _ _ e => (hmi V e).trans Semiformula.eval_ex⟩;
 
 theorem exists_delta0_witness_provable {n : ℕ} {φ : ArithmeticSemiformula Empty n} (hφ : Hierarchy 𝚺 1 φ) :
     ∃ θ : ArithmeticSemiformula Empty (n + 1),
       Hierarchy 𝚺 0 θ ∧ 𝗜𝚺₁ ⊢ ∀¹* (φ 🡘 ∃¹ θ) := by
-  obtain ⟨θ, hθ, H⟩ := exists_delta0_witness_form.{0} hφ;
+  obtain ⟨θ, hθ, H⟩ := exists_delta0_witness_form hφ;
   use θ;
   and_intros;
   . exact hθ;
@@ -224,5 +168,16 @@ theorem exists_delta0_witness_provable_of_sentence {σ : ArithmeticSentence} (h�
     ∃ θ : ArithmeticSemisentence 1, Hierarchy 𝚺 0 θ ∧ 𝗜𝚺₁ ⊢ σ 🡘 ∃¹ θ := by
   obtain ⟨θ, hθ, h⟩ := exists_delta0_witness_provable hσ;
   exact ⟨θ, hθ, h⟩;
+
+/-- The `StrictEquiv`-vocabulary form of `exists_delta0_witness_provable`: every `Σ₁` formula is
+`𝗜𝚺₁`-provably equivalent to a genuine `∃¹`-Δ₀ prenex form, without needing full `𝗣𝗔`. -/
+noncomputable def strictEquiv_sigma1 {n : ℕ} {φ : ArithmeticSemiformula Empty n} (hφ : Hierarchy 𝚺 1 φ) :
+    StrictEquiv 𝗜𝚺₁ 𝚺 1 φ :=
+  let e := exists_delta0_witness_provable hφ
+  ⟨∃¹ e.choose, StrictHierarchy.sigma (StrictHierarchy.zero e.choose_spec.1), e.choose_spec.2⟩
+
+noncomputable def strictEquiv_sigma1_of_sentence {σ : ArithmeticSentence} (hσ : Hierarchy 𝚺 1 σ) :
+    StrictEquiv 𝗜𝚺₁ 𝚺 1 σ :=
+  strictEquiv_sigma1 hσ
 
 end LO.FirstOrder.Arithmetic
