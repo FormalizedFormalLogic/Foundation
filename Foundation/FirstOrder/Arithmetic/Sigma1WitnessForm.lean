@@ -143,7 +143,7 @@ private noncomputable def witnessForm_ball {t : ArithmeticSemiterm Empty n} {φ 
       obtain ⟨w', -, hθ'x⟩ := hw x hx;
       exact (h' V (x :> e)).mpr ⟨w', hθ'x⟩;
 
-theorem exists_delta0_witness_provable {n : ℕ} {φ : ArithmeticSemiformula Empty n} (hφ : Hierarchy 𝚺 1 φ) :
+theorem ISigma1.exists_delta0_witness_provable {n : ℕ} {φ : ArithmeticSemiformula Empty n} (hφ : Hierarchy 𝚺 1 φ) :
     ∃ θ : ArithmeticSemiformula Empty (n + 1),
       Hierarchy 𝚺 0 θ ∧ 𝗜𝚺₁ ⊢ ∀¹* (φ 🡘 ∃¹ θ) := by
   have H : Nonempty (StrictEquiv 𝗜𝚺₁ 𝚺 1 φ) := by
@@ -161,20 +161,20 @@ theorem exists_delta0_witness_provable {n : ℕ} {φ : ArithmeticSemiformula Emp
   obtain ⟨θ, heq, hθ⟩ := strictSigma1Elim H.some.hierarchy;
   exact ⟨θ, hθ, heq ▸ H.some.provable⟩;
 
-theorem exists_delta0_witness_provable_of_sentence {σ : ArithmeticSentence} (hσ : Hierarchy 𝚺 1 σ) :
+theorem ISigma1.exists_delta0_witness_provable_of_sentence {σ : ArithmeticSentence} (hσ : Hierarchy 𝚺 1 σ) :
     ∃ θ : ArithmeticSemisentence 1, Hierarchy 𝚺 0 θ ∧ 𝗜𝚺₁ ⊢ σ 🡘 ∃¹ θ := by
-  obtain ⟨θ, hθ, h⟩ := exists_delta0_witness_provable hσ;
+  obtain ⟨θ, hθ, h⟩ := ISigma1.exists_delta0_witness_provable hσ;
   exact ⟨θ, hθ, h⟩;
 
-/-- The `StrictEquiv`-vocabulary form of `exists_delta0_witness_provable`: every `Σ₁` formula is
-`𝗜𝚺₁`-provably equivalent to a genuine `∃¹`-Δ₀ prenex form, without needing full `𝗣𝗔`. -/
-noncomputable def strictEquiv_sigma1 {n : ℕ} {φ : ArithmeticSemiformula Empty n} (hφ : Hierarchy 𝚺 1 φ) :
+/-- The `StrictEquiv`-vocabulary form of `ISigma1.exists_delta0_witness_provable`: every `Σ₁`
+formula is `𝗜𝚺₁`-provably equivalent to a genuine `∃¹`-Δ₀ prenex form, without needing full `𝗣𝗔`. -/
+noncomputable def ISigma1.strictEquiv_sigma1 {n : ℕ} {φ : ArithmeticSemiformula Empty n} (hφ : Hierarchy 𝚺 1 φ) :
     StrictEquiv 𝗜𝚺₁ 𝚺 1 φ :=
-  let e := exists_delta0_witness_provable hφ
+  let e := ISigma1.exists_delta0_witness_provable hφ
   ⟨∃¹ e.choose, StrictHierarchy.sigma (StrictHierarchy.zero e.choose_spec.1), e.choose_spec.2⟩
 
-noncomputable def strictEquiv_sigma1_of_sentence {σ : ArithmeticSentence} (hσ : Hierarchy 𝚺 1 σ) :
+noncomputable def ISigma1.strictEquiv_sigma1_of_sentence {σ : ArithmeticSentence} (hσ : Hierarchy 𝚺 1 σ) :
     StrictEquiv 𝗜𝚺₁ 𝚺 1 σ :=
-  strictEquiv_sigma1 hσ
+  ISigma1.strictEquiv_sigma1 hσ
 
 end LO.FirstOrder.Arithmetic

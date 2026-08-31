@@ -255,18 +255,14 @@ private noncomputable def of_hierarchy (h : Hierarchy Γ s φ) : StrictEquiv �
     | dummy_pi hp ih => exact ⟨StrictEquiv.alt_up (exs ih.some)⟩;
   exact nonempty.some;
 
-namespace Hierarchy
-
-theorem exists_strictHierarchy_provable {Γ s n} {φ : ArithmeticSemiformula Empty n} (h : Hierarchy Γ s φ) :
+theorem Peano.exists_strictHierarchy_provable {Γ s n} {φ : ArithmeticSemiformula Empty n} (h : Hierarchy Γ s φ) :
   ∃ ψ : ArithmeticSemiformula Empty n, StrictHierarchy Γ s ψ ∧ 𝗣𝗔 ⊢ ∀¹* (φ 🡘 ψ) := by
   have hEquiv := of_hierarchy h;
   exact ⟨hEquiv.witness, hEquiv.hierarchy, hEquiv.provable⟩;
 
-theorem exists_strictHierarchy_provable_of_sentence {Γ s} {σ : ArithmeticSentence} (h : Hierarchy Γ s σ) :
+theorem Peano.exists_strictHierarchy_provable_of_sentence {Γ s} {σ : ArithmeticSentence} (h : Hierarchy Γ s σ) :
   ∃ π : ArithmeticSentence, StrictHierarchy Γ s π ∧ 𝗣𝗔 ⊢ σ 🡘 π := by
-  obtain ⟨π, hπ, h⟩ := exists_strictHierarchy_provable h;
+  obtain ⟨π, hπ, h⟩ := Peano.exists_strictHierarchy_provable h;
   exact ⟨π, hπ, h⟩;
-
-end Hierarchy
 
 end LO.FirstOrder.Arithmetic
