@@ -66,8 +66,7 @@ def refl (W : StrictHierarchyFormula ℒₒᵣ Empty Γ s n) :
 def ofEq (h : φ = ψ) (Φ : StrictHierarchyFormulaEquivOf T Γ s φ) :
     StrictHierarchyFormulaEquivOf T Γ s ψ := h ▸ Φ
 
-/-- Transport an equivalence along a semantic equivalence of the target formula. -/
-def of_iff (Φ : StrictHierarchyFormulaEquivOf T Γ s φ)
+def ofModelIff (Φ : StrictHierarchyFormulaEquivOf T Γ s φ)
     (hiff : ∀ (V : Type) [ORingStructure V] [V↓[ℒₒᵣ] ⊧* T] (e : Fin n → V), V ⊧/e ψ ↔ V ⊧/e φ) :
     StrictHierarchyFormulaEquivOf T Γ s ψ :=
   ⟨Φ.toStrictHierarchyFormula,
