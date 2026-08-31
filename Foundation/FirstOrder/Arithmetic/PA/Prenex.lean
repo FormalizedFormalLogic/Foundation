@@ -30,4 +30,22 @@ lemma exists_strictHierarchy_provable_of_sentence {σ : ArithmeticSentence} (h :
     ∃ π : ArithmeticSentence, StrictHierarchy Γ s π ∧ 𝗣𝗔 ⊢ σ 🡘 π :=
   exists_strictHierarchy_provable h
 
+lemma exists_hierarchy_provable_of_sentence {σ : ArithmeticSentence} (h : Hierarchy 𝚺 (s + 1) σ) :
+    ∃ θ : ArithmeticSemisentence 1, Hierarchy 𝚷 s θ ∧ 𝗣𝗔 ⊢ σ 🡘 ∃¹ θ := by
+  have ⟨⟨ψ, ψ_hie, ψ_iff⟩⟩ := nonempty_strictEquiv h;
+  obtain ⟨θ, rfl, hθ⟩ := ψ_hie.sigma_succ_elim;
+  use θ;
+  and_intros;
+  . exact hθ.hierarchy;
+  . assumption;
+
+lemma exists_hierarchy_provable_of_sentence_pi {σ : ArithmeticSentence} (h : Hierarchy 𝚷 (s + 1) σ) :
+    ∃ θ : ArithmeticSemisentence 1, Hierarchy 𝚺 s θ ∧ 𝗣𝗔 ⊢ σ 🡘 ∀¹ θ := by
+  have ⟨⟨ψ, ψ_hie, ψ_iff⟩⟩ := nonempty_strictEquiv h;
+  obtain ⟨θ, rfl, hθ⟩ := ψ_hie.pi_succ_elim;
+  use θ;
+  and_intros;
+  . exact hθ.hierarchy;
+  . assumption;
+
 end LO.FirstOrder.Arithmetic.Peano
