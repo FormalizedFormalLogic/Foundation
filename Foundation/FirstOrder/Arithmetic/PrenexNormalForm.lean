@@ -296,7 +296,33 @@ private lemma ball_sigma_step (ih : CoreClosure.{u} s) :
       obtain ⟨y, -, hy⟩ := hw x hx;
       exact ⟨y, hy⟩;
 
-private lemma coreClosure_succ (ih : CoreClosure s) : CoreClosure (s + 1) := sorry
+private lemma coreClosure_succ (ih : CoreClosure.{u} s) : CoreClosure.{u} (s + 1) where
+  and := fun Γ {n φ ψ} hφ hψ => by
+    rcases Γ with _ | _;
+    . exact and_sigma_step ih hφ hψ;
+    . have hφ' : StrictEquivOnPA.{u} 𝚺 (s + 1) (∼φ) := by simpa using neg hφ;
+      have hψ' : StrictEquivOnPA.{u} 𝚺 (s + 1) (∼ψ) := by simpa using neg hψ;
+      have := neg (or_sigma_step ih hφ' hψ');
+      simpa [Semiformula.imp_eq] using this;
+  or := fun Γ {n φ ψ} hφ hψ => by
+    rcases Γ with _ | _;
+    . exact or_sigma_step ih hφ hψ;
+    . have hφ' : StrictEquivOnPA.{u} 𝚺 (s + 1) (∼φ) := by simpa using neg hφ;
+      have hψ' : StrictEquivOnPA.{u} 𝚺 (s + 1) (∼ψ) := by simpa using neg hψ;
+      have := neg (and_sigma_step ih hφ' hψ');
+      simpa [Semiformula.imp_eq] using this;
+  ball := fun Γ {n φ t} ht hφ => by
+    rcases Γ with _ | _;
+    . exact ball_sigma_step ih ht hφ;
+    . have hφ' : StrictEquivOnPA.{u} 𝚺 (s + 1) (∼φ) := by simpa using neg hφ;
+      have := neg (bexs_sigma_step ih ht hφ');
+      simpa using this;
+  bexs := fun Γ {n φ t} ht hφ => by
+    rcases Γ with _ | _;
+    . exact bexs_sigma_step ih ht hφ;
+    . have hφ' : StrictEquivOnPA.{u} 𝚺 (s + 1) (∼φ) := by simpa using neg hφ;
+      have := neg (ball_sigma_step ih ht hφ');
+      simpa using this;
 
 private lemma coreClosure : CoreClosure s := sorry
 
