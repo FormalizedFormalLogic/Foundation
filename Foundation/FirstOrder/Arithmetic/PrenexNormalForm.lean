@@ -76,7 +76,35 @@ private structure CoreClosure (s : ℕ) : Prop where
   bexs : ∀ Γ {n} {φ : ArithmeticSemiformula Empty (n + 1)} {t : ArithmeticSemiterm Empty (n + 1)},
       t.Positive → StrictEquivOnPA.{u} Γ s φ → StrictEquivOnPA.{u} Γ s (∃¹[“x. x < !!t”] φ)
 
-private lemma coreClosure_zero : CoreClosure 0 := sorry
+private lemma coreClosure_zero : CoreClosure 0 where
+  and := fun Γ {n φ ψ} hφ hψ => by
+    obtain ⟨φ', hφ', hiffφ⟩ := hφ;
+    obtain ⟨ψ', hψ', hiffψ⟩ := hψ;
+    refine ⟨φ' ⋏ ψ', StrictHierarchy.zero
+      (Hierarchy.and (StrictHierarchy.zero_iff.mp hφ') (StrictHierarchy.zero_iff.mp hψ')), ?_⟩;
+    intro V _ _ e;
+    simp [hiffφ V e, hiffψ V e];
+  or := fun Γ {n φ ψ} hφ hψ => by
+    obtain ⟨φ', hφ', hiffφ⟩ := hφ;
+    obtain ⟨ψ', hψ', hiffψ⟩ := hψ;
+    refine ⟨φ' ⋎ ψ', StrictHierarchy.zero
+      (Hierarchy.or (StrictHierarchy.zero_iff.mp hφ') (StrictHierarchy.zero_iff.mp hψ')), ?_⟩;
+    intro V _ _ e;
+    simp [hiffφ V e, hiffψ V e];
+  ball := fun Γ {n φ t} ht hφ => by
+    obtain ⟨φ', hφ', hiff'⟩ := hφ;
+    refine ⟨∀¹[“x. x < !!t”] φ', StrictHierarchy.zero
+      (Hierarchy.ball ht (StrictHierarchy.zero_iff.mp hφ')), ?_⟩;
+    intro V _ _ e;
+    simp only [Semiformula.eval_ball];
+    exact forall_congr' (fun x => imp_congr Iff.rfl (hiff' V (x :> e)));
+  bexs := fun Γ {n φ t} ht hφ => by
+    obtain ⟨φ', hφ', hiff'⟩ := hφ;
+    refine ⟨∃¹[“x. x < !!t”] φ', StrictHierarchy.zero
+      (Hierarchy.bexs ht (StrictHierarchy.zero_iff.mp hφ')), ?_⟩;
+    intro V _ _ e;
+    simp only [Semiformula.eval_bexs];
+    exact exists_congr (fun x => and_congr Iff.rfl (hiff' V (x :> e)));
 
 private lemma or_sigma_step (ih : CoreClosure s) :
     ∀ {n} {φ ψ : ArithmeticSemiformula Empty n},
