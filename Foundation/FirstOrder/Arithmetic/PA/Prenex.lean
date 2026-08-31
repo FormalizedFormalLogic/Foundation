@@ -20,28 +20,18 @@ namespace LO.FirstOrder.Arithmetic
 
 variable {Γ : Polarity} {s : ℕ} {n : ℕ} {φ ψ : ArithmeticSemiformula Empty n}
 
--- `ClosureBallBexs`/`ClosureAndOr` (the induction-closure bundles driving `of_hierarchy`) and
--- everything built on top of them (`exs`/`all`/`of_hierarchy` and friends) have no meaning
--- outside this file's proof and stay `private`, even though their *statements* mention only
--- the now-public `StrictEquiv`: since these `def`s are `Type`-valued (not `Prop`-valued), this module's
--- visibility check exposes a public `def`'s body (unlike a `theorem`/`lemma`, where proof
--- irrelevance means only the statement is exposed). Each step here drops from `StrictEquiv`
--- (provable) to a bare model-theoretic `Iff` via `models_iff_of_provable_iff`, does the actual
--- combinatorics purely model-theoretically, then climbs back to `StrictEquiv` via
--- `provable_iff_of_models_iff` (i.e. `Arithmetic.complete`) at the very end.
+-- `ClosureBallBexs` (the ball/bexs induction-closure bundle driving `of_hierarchy`, needing
+-- collection so it stays `𝗣𝗔`-fixed) and everything built on top of it (`exs`/`all`/`of_hierarchy`
+-- and friends) have no meaning outside this file's proof and stay `private`, even though their
+-- *statements* mention only the now-public `StrictEquiv`: since these `def`s are `Type`-valued
+-- (not `Prop`-valued), this module's visibility check exposes a public `def`'s body (unlike a
+-- `theorem`/`lemma`, where proof irrelevance means only the statement is exposed). Each step here
+-- drops from `StrictEquiv` (provable) to a bare model-theoretic `Iff` via
+-- `models_iff_of_provable_iff`, does the actual combinatorics purely model-theoretically, then
+-- climbs back to `StrictEquiv` via `provable_iff_of_models_iff` (i.e. `Arithmetic.complete`) at
+-- the very end. (The `and`/`or` counterpart, `ClosureAndOr`, needs no collection and lives,
+-- theory-generically, in `StrictEquiv.lean`.)
 open StrictEquiv (refl neg)
-
--- `StrictHierarchy.sigma_succ_elim` and `Rew.positive_iff` only assert the *existence* of a
--- witness formula/term (as a `Prop`). Since `StrictHierarchy` and `Semiterm.Positive` are
--- `Prop`-valued, Lean forbids eliminating them into a `Type`-valued goal directly, so extracting
--- the witness as data requires one (noncomputable) application of choice.
--- `n` here is a *fresh* arity (not the ambient section `n`): callers use this both at the
--- ambient arity (`or_sigma_step`, `and_sigma_step`) and at the ambient arity `+ 1`
--- (`bexs_sigma_step`, `ball_sigma_step`, `exs`).
-private noncomputable def strictSigmaSuccElim {n : ℕ} {φ : ArithmeticSemiformula Empty n}
-    (h : StrictHierarchy 𝚺 (s + 1) φ) :
-    Σ' ψ : ArithmeticSemiformula Empty (n + 1), φ = ∃¹ ψ ∧ StrictHierarchy 𝚷 s ψ :=
-  ⟨h.sigma_succ_elim.choose, h.sigma_succ_elim.choose_spec⟩
 
 private noncomputable def bShiftWitness {t : ArithmeticSemiterm Empty (n + 1)} (ht : t.Positive) :
     Σ' u : ArithmeticSemiterm Empty n, t = Rew.bShift u :=
@@ -180,123 +170,11 @@ private noncomputable def closureBallBexs : ClosureBallBexs s := by
   | zero => exact closureBallBexs_zero;
   | succ s ih => exact closureBallBexs_succ ih;
 
--- `and`/`or` never need `ball` directly; the induction below only reaches for `bexs`, taken from
--- `closureBallBexs` (already available at every level), so it is a plain 2-field induction rather
--- than a joint one with `ClosureBallBexs`.
-private structure ClosureAndOr (s : ℕ) where
-  and  : ∀ Γ {n} {φ ψ : ArithmeticSemiformula Empty n},
-      StrictEquiv 𝗣𝗔 Γ s φ → StrictEquiv 𝗣𝗔 Γ s ψ → StrictEquiv 𝗣𝗔 Γ s (φ ⋏ ψ)
-  or   : ∀ Γ {n} {φ ψ : ArithmeticSemiformula Empty n},
-      StrictEquiv 𝗣𝗔 Γ s φ → StrictEquiv 𝗣𝗔 Γ s ψ → StrictEquiv 𝗣𝗔 Γ s (φ ⋎ ψ)
-
-private def closureAndOr_zero : ClosureAndOr 0 where
-  and := fun Γ {n φ ψ} hφ hψ =>
-    ⟨hφ.witness ⋏ hψ.witness,
-      StrictHierarchy.zero
-        (Hierarchy.and (StrictHierarchy.zero_iff.mp hφ.hierarchy) (StrictHierarchy.zero_iff.mp hψ.hierarchy)),
-      provable_iff_of_models_iff fun V _ _ e => by simp [hφ.iff_models V e, hψ.iff_models V e]⟩
-  or := fun Γ {n φ ψ} hφ hψ =>
-    ⟨hφ.witness ⋎ hψ.witness,
-      StrictHierarchy.zero
-        (Hierarchy.or (StrictHierarchy.zero_iff.mp hφ.hierarchy) (StrictHierarchy.zero_iff.mp hψ.hierarchy)),
-      provable_iff_of_models_iff fun V _ _ e => by simp [hφ.iff_models V e, hψ.iff_models V e]⟩
-
-private noncomputable def or_sigma_step (ih : ClosureAndOr s) :
-    ∀ {n} {φ ψ : ArithmeticSemiformula Empty n},
-      StrictEquiv 𝗣𝗔 𝚺 (s + 1) φ → StrictEquiv 𝗣𝗔 𝚺 (s + 1) ψ → StrictEquiv 𝗣𝗔 𝚺 (s + 1) (φ ⋎ ψ) := by
-  intro n φ ψ hφ hψ;
-  obtain ⟨φ', hφ', hφprov⟩ := hφ;
-  obtain ⟨ψ', hψ', hψprov⟩ := hψ;
-  have hφiff := models_iff_of_provable_iff' hφprov;
-  have hψiff := models_iff_of_provable_iff' hψprov;
-  obtain ⟨φ₀, rfl, hφ₀⟩ := strictSigmaSuccElim hφ';
-  obtain ⟨ψ₀, rfl, hψ₀⟩ := strictSigmaSuccElim hψ';
-  obtain ⟨χ, hχ, hχprov⟩ := ih.or 𝚷 (refl hφ₀) (refl hψ₀);
-  have hχiff := models_iff_of_provable_iff' hχprov;
-  use ∃¹ χ;
-  . exact hχ.sigma;
-  . apply provable_iff_of_models_iff;
-    intro V _ _ e;
-    have hφiff' : V ⊧/e φ ↔ ∃ x, V ⊧/(x :> e) φ₀ := (hφiff V e).trans Semiformula.eval_ex;
-    have hψiff' : V ⊧/e ψ ↔ ∃ x, V ⊧/(x :> e) ψ₀ := (hψiff V e).trans Semiformula.eval_ex;
-    simp only [LogicalConnective.HomClass.map_or, Semiformula.eval_ex, hφiff', hψiff'];
-    constructor;
-    . rintro (⟨x, hx⟩ | ⟨x, hx⟩);
-      . exact ⟨x, (hχiff V (x :> e)).mp (by left; exact hx)⟩;
-      . exact ⟨x, (hχiff V (x :> e)).mp (by right; exact hx)⟩;
-    . rintro ⟨x, hx⟩;
-      rcases (hχiff V (x :> e)).mpr hx with h | h;
-      . left; exact ⟨x, h⟩;
-      . right; exact ⟨x, h⟩;
-
-private noncomputable def and_sigma_step (ih : ClosureAndOr s) :
-    ∀ {n} {φ ψ : ArithmeticSemiformula Empty n},
-      StrictEquiv 𝗣𝗔 𝚺 (s + 1) φ → StrictEquiv 𝗣𝗔 𝚺 (s + 1) ψ → StrictEquiv 𝗣𝗔 𝚺 (s + 1) (φ ⋏ ψ) := by
-  intro n φ ψ hφ hψ;
-  obtain ⟨φ', hφ', hφprov⟩ := hφ;
-  obtain ⟨ψ', hψ', hψprov⟩ := hψ;
-  have hφiff := models_iff_of_provable_iff' hφprov;
-  have hψiff := models_iff_of_provable_iff' hψprov;
-  obtain ⟨φ₀, rfl, hφ₀⟩ := strictSigmaSuccElim hφ';
-  obtain ⟨ψ₀, rfl, hψ₀⟩ := strictSigmaSuccElim hψ';
-  have hφ₀' : StrictHierarchy 𝚷 s (φ₀ ⇜ (#0 :> (#·.succ.succ))) := hφ₀.rew (Rew.subst _);
-  have hψ₀' : StrictHierarchy 𝚷 s (ψ₀ ⇜ (#0 :> (#·.succ.succ))) := hψ₀.rew (Rew.subst _);
-  obtain ⟨A, hA, hAprov⟩ := closureBallBexs.bexs 𝚷
-    (t := Rew.bShift (‘#0 + 1’ : ArithmeticSemiterm Empty (n + 1)))
-    (Rew.bShift_positive _) (refl hφ₀');
-  obtain ⟨B, hB, hBprov⟩ := closureBallBexs.bexs 𝚷
-    (t := Rew.bShift (‘#0 + 1’ : ArithmeticSemiterm Empty (n + 1)))
-    (Rew.bShift_positive _) (refl hψ₀');
-  have hAiff := models_iff_of_provable_iff' hAprov;
-  have hBiff := models_iff_of_provable_iff' hBprov;
-  obtain ⟨χ, hχ, hχprov⟩ := ih.and 𝚷 (refl hA) (refl hB);
-  have hχiff := models_iff_of_provable_iff' hχprov;
-  use ∃¹ χ;
-  . exact hχ.sigma;
-  . apply provable_iff_of_models_iff;
-    intro V _ _ e;
-    have hA_eval : ∀ z : V, V ⊧/(z :> e) A ↔ ∃ x ≤ z, V ⊧/(x :> e) φ₀ := fun z => by
-      rw [← hAiff V (z :> e)];
-      show V ⊧/(z :> e)
-        ((φ₀ ⇜ (#0 :> (#·.succ.succ)) : ArithmeticSemiformula Empty (n + 2)).bexsLTSucc
-          (‘#0’ : ArithmeticSemiterm Empty (n + 1))) ↔ _;
-      simp [Semiformula.eval_insert1, -Semiformula.eval_substs];
-    have hB_eval : ∀ z : V, V ⊧/(z :> e) B ↔ ∃ x ≤ z, V ⊧/(x :> e) ψ₀ := fun z => by
-      rw [← hBiff V (z :> e)];
-      show V ⊧/(z :> e)
-        ((ψ₀ ⇜ (#0 :> (#·.succ.succ)) : ArithmeticSemiformula Empty (n + 2)).bexsLTSucc
-          (‘#0’ : ArithmeticSemiterm Empty (n + 1))) ↔ _;
-      simp [Semiformula.eval_insert1, -Semiformula.eval_substs];
-    have hφiff' : V ⊧/e φ ↔ ∃ x, V ⊧/(x :> e) φ₀ := (hφiff V e).trans Semiformula.eval_ex;
-    have hψiff' : V ⊧/e ψ ↔ ∃ x, V ⊧/(x :> e) ψ₀ := (hψiff V e).trans Semiformula.eval_ex;
-    simp only [LogicalConnective.HomClass.map_and, Semiformula.eval_ex, hφiff', hψiff',
-      ← hχiff, hA_eval, hB_eval];
-    constructor;
-    . rintro ⟨⟨x, hx⟩, ⟨y, hy⟩⟩;
-      exact ⟨max x y, ⟨x, le_max_left x y, hx⟩, ⟨y, le_max_right x y, hy⟩⟩;
-    . rintro ⟨z, ⟨x, _, hx⟩, ⟨y, _, hy⟩⟩;
-      exact ⟨⟨x, hx⟩, ⟨y, hy⟩⟩;
-
-private noncomputable def closureAndOr_succ (ih : ClosureAndOr s) : ClosureAndOr (s + 1) where
-  and := fun Γ {n φ ψ} hφ hψ => by
-    rcases Γ with _ | _;
-    . exact and_sigma_step ih hφ hψ;
-    . have hφ' : StrictEquiv 𝗣𝗔 𝚺 (s + 1) (∼φ) := by simpa using neg hφ;
-      have hψ' : StrictEquiv 𝗣𝗔 𝚺 (s + 1) (∼ψ) := by simpa using neg hψ;
-      have h' := neg (or_sigma_step ih hφ' hψ');
-      simpa [Semiformula.imp_eq] using h';
-  or := fun Γ {n φ ψ} hφ hψ => by
-    rcases Γ with _ | _;
-    . exact or_sigma_step ih hφ hψ;
-    . have hφ' : StrictEquiv 𝗣𝗔 𝚺 (s + 1) (∼φ) := by simpa using neg hφ;
-      have hψ' : StrictEquiv 𝗣𝗔 𝚺 (s + 1) (∼ψ) := by simpa using neg hψ;
-      have h' := neg (and_sigma_step ih hφ' hψ');
-      simpa [Semiformula.imp_eq] using h';
-
-private noncomputable def closureAndOr : ClosureAndOr s := by
-  induction s with
-  | zero => exact closureAndOr_zero;
-  | succ s ih => exact closureAndOr_succ ih;
+-- `ClosureAndOr` (theory-generic, in `StrictEquiv.lean`) only needs a `bexs`-closure fact at
+-- each level, not the full `ball`/`bexs` induction; specialize it to `𝗣𝗔` here by feeding it
+-- `closureBallBexs.bexs`.
+private noncomputable def paClosureAndOr : ClosureAndOr 𝗣𝗔 s :=
+  closureAndOr (fun _s => closureBallBexs.bexs)
 
 -- Contracts the two nested existentials `∃x∃y` of a strict `Σ_{s+1}` witness into a single
 -- bounded pair `∃z (∃x ≤ z)(∃y ≤ z)`, using two applications of `closureBallBexs.bexs`.
@@ -359,8 +237,8 @@ private noncomputable def of_hierarchy (h : Hierarchy Γ s φ) : StrictEquiv �
     | falsum Γ s n => exact ⟨StrictEquiv.of_deltaZero (Hierarchy.falsum 𝚺 0 n)⟩;
     | rel Γ s r v => exact ⟨StrictEquiv.of_deltaZero (Hierarchy.rel 𝚺 0 r v)⟩;
     | nrel Γ s r v => exact ⟨StrictEquiv.of_deltaZero (Hierarchy.nrel 𝚺 0 r v)⟩;
-    | and _ _ ihp ihq => exact ⟨closureAndOr.and _ ihp.some ihq.some⟩;
-    | or _ _ ihp ihq => exact ⟨closureAndOr.or _ ihp.some ihq.some⟩;
+    | and _ _ ihp ihq => exact ⟨paClosureAndOr.and _ ihp.some ihq.some⟩;
+    | or _ _ ihp ihq => exact ⟨paClosureAndOr.or _ ihp.some ihq.some⟩;
     | ball pos _ ih => exact ⟨closureBallBexs.ball _ pos ih.some⟩;
     | bexs pos _ ih => exact ⟨closureBallBexs.bexs _ pos ih.some⟩;
     | exs _ ih => exact ⟨exs ih.some⟩;
