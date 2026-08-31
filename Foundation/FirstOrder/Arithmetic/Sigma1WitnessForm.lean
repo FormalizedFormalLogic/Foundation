@@ -25,7 +25,7 @@ lemma nonempty_strictEquiv_sigma1 {φ : ArithmeticSemiformula Empty n} (h : Hier
 lemma exists_delta0_witness_provable {φ : ArithmeticSemiformula Empty n} (h : Hierarchy 𝚺 1 φ) :
   ∃ θ : ArithmeticSemiformula Empty (n + 1), Hierarchy 𝚺 0 θ ∧ 𝗜𝚺₁ ⊢ ∀¹* (φ 🡘 ∃¹ θ) := by
   have ⟨⟨ψ, ψ_hie, ψ_iff⟩⟩ := nonempty_strictEquiv_sigma1 h;
-  obtain ⟨θ, rfl, hθ⟩ := strictSigmaSuccElim ψ_hie;
+  obtain ⟨θ, rfl, hθ⟩ := ψ_hie.sigma_succ_elim;
   use θ;
   and_intros;
   . exact StrictHierarchy.zero_iff.mp hθ;
