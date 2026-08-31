@@ -2,6 +2,7 @@ module
 
 public import Foundation.FirstOrder.Basic.PrimrecCoding
 public import Foundation.FirstOrder.Bootstrapping.DerivabilityCondition.D1
+public import Foundation.FirstOrder.Bootstrapping.Syntax.Proof.Primrec
 public import Foundation.FirstOrder.Incompleteness.Church
 public import Mathlib.Computability.Reduce
 public import Mathlib.Data.Nat.Log
@@ -49,6 +50,7 @@ variable
   {L : Language} [L.DecidableEq] [L.Encodable] [L.LORDefinable]
   {T : Theory L} [T.Δ₁] {σ : Sentence L}
 
+/-- The least Gödel code of a proof object `T ⊢! σ`, or zero if no such object exists. -/
 noncomputable def _root_.LO.FirstOrder.Theory.minProof (T : Theory L) [T.Δ₁] (σ : Sentence L) : ℕ :=
   sInf (Set.range λ d : T ⊢! σ ↦ (⌜d⌝ : ℕ))
 
@@ -116,10 +118,10 @@ lemma computablePred_provable_of_minProof_le [L.Primcodable] (hF : Computable F)
   have hp : ∀ d, Proof T d ⌜F a⌝ → T ⊢ F a := λ d hd ↦ provable_iff_provable.mp ⟨d, hd⟩;
   grind;
 
-def speedupDerivation {φ : Proposition L} (d : ⊢ᴸᴷ¹ [φ, ∼φ]) (ψ : Proposition L) :
+private def speedupDerivation {φ : Proposition L} (d : ⊢ᴸᴷ¹ [φ, ∼φ]) (ψ : Proposition L) :
     ⊢ᴸᴷ¹ [φ ⋎ ψ, ∼φ] := Derivation.or d.contra
 
-def speedupProof (σ π : Sentence L) : insert σ T ⊢! σ ⋎ π where
+private def speedupProof (T : Theory L) (σ π : Sentence L) : insert σ T ⊢! σ ⋎ π where
   axioms := [σ]
   axioms_mem := by simp
   derivation := .cast (speedupDerivation (Derivation.eta ↑σ) ↑π)
@@ -182,15 +184,15 @@ private lemma quote_speedupDerivation (d : ⊢ᴸᴷ¹ [χ, ∼χ]) :
 end
 
 private lemma quote_speedupProof_eq (π : Sentence L) :
-    (⌜speedupProof (T := T) σ π⌝ : ℕ)
+    (⌜speedupProof T σ π⌝ : ℕ)
       = cutRule (insert ⌜σ ⋎ π⌝ ∅) ⌜σ⌝ (axm (insert ⌜σ⌝ (insert ⌜σ ⋎ π⌝ ∅)) ⌜σ⌝)
           (orIntro (insert ⌜σ ⋎ π⌝ (insert ⌜∼σ⌝ ∅)) ⌜σ⌝ ⌜π⌝
             (wkRule (insert ⌜σ⌝ (insert ⌜π⌝ (insert ⌜σ ⋎ π⌝ (insert ⌜∼σ⌝ ∅))))
               (wkRule (insert ⌜σ⌝ (insert ⌜π⌝ (insert ⌜∼σ⌝ ∅)))
                 ⌜Derivation.toDerivation2 (insert σ T)
                   (Derivation.eta (σ : Proposition L))⌝))) := by
-  rw [quote_proof_eq (speedupProof σ π) rfl];
-  have h : (⌜Derivation.toDerivation2 (insert σ T) (speedupProof (T := T) σ π).derivation⌝ : ℕ)
+  rw [quote_proof_eq (speedupProof T σ π) rfl];
+  have h : (⌜Derivation.toDerivation2 (insert σ T) (speedupProof T σ π).derivation⌝ : ℕ)
       = ⌜Derivation.toDerivation2 (insert σ T)
           (speedupDerivation (Derivation.eta (σ : Proposition L)) (π : Proposition L))⌝ :=
     quote_pullback_cast _ _;
@@ -199,43 +201,7 @@ private lemma quote_speedupProof_eq (π : Sentence L) :
 
 section
 
-variable {s p q d d₁ d₂ : α → ℕ}
-
-private lemma primrec₂_nat_insert : Primrec₂ λ x s : ℕ ↦ (insert x s : ℕ) := by
-  have hpow : Primrec λ z : ℕ × ℕ ↦ 2 ^ z.1 :=
-    (Primrec₂.unpaired'.1 Nat.Primrec.pow).comp (Primrec.const 2) Primrec.fst;
-  have hc : PrimrecPred λ z : ℕ × ℕ ↦ z.2 / 2 ^ z.1 % 2 = 1 :=
-    Primrec.eq.comp
-      (Primrec.nat_mod.comp (Primrec.nat_div.comp Primrec.snd hpow) (Primrec.const 2))
-      (Primrec.const 1);
-  exact (Primrec.ite hc Primrec.snd (Primrec.nat_add.comp Primrec.snd hpow)).of_eq
-    λ z ↦ (nat_insert_eq z.1 z.2).symm;
-
-private lemma primrec_insert (hp : Primrec p) (hq : Primrec q) :
-    Primrec λ x ↦ (insert (p x) (q x) : ℕ) := primrec₂_nat_insert.comp hp hq
-
-private lemma primrec_axm (hs : Primrec s) (hp : Primrec p) :
-    Primrec λ x ↦ axm (s x) (p x) :=
-  (Primrec.succ.comp (Primrec₂.natPair.comp hs (Primrec₂.natPair.comp (.const 9) hp))).of_eq
-    λ x ↦ by simp [axm, nat_pair_eq]
-
-private lemma primrec_wkRule (hs : Primrec s) (hd : Primrec d) :
-    Primrec λ x ↦ wkRule (s x) (d x) :=
-  (Primrec.succ.comp (Primrec₂.natPair.comp hs (Primrec₂.natPair.comp (.const 6) hd))).of_eq
-    λ x ↦ by simp [wkRule, nat_pair_eq]
-
-private lemma primrec_orIntro (hs : Primrec s) (hp : Primrec p) (hq : Primrec q) (hd : Primrec d) :
-    Primrec λ x ↦ orIntro (s x) (p x) (q x) (d x) :=
-  (Primrec.succ.comp (Primrec₂.natPair.comp hs (Primrec₂.natPair.comp (.const 3)
-    (Primrec₂.natPair.comp hp (Primrec₂.natPair.comp hq hd))))).of_eq
-    λ x ↦ by simp [orIntro, nat_pair_eq]
-
-private lemma primrec_cutRule (hs : Primrec s) (hp : Primrec p)
-    (hd₁ : Primrec d₁) (hd₂ : Primrec d₂) :
-    Primrec λ x ↦ cutRule (s x) (p x) (d₁ x) (d₂ x) :=
-  (Primrec.succ.comp (Primrec₂.natPair.comp hs (Primrec₂.natPair.comp (.const 8)
-    (Primrec₂.natPair.comp hp (Primrec₂.natPair.comp hd₁ hd₂))))).of_eq
-    λ x ↦ by simp [cutRule, nat_pair_eq]
+variable {p q : α → ℕ}
 
 private lemma primrec_speedupCode (hp : Primrec p) (hq : Primrec q) (a na n₀ : ℕ) :
     Primrec λ x ↦
@@ -257,8 +223,8 @@ private lemma primrec_speedupCode (hp : Primrec p) (hq : Primrec q) (a na n₀ :
 
 end
 
-lemma computable_quote_speedupProof [L.Primcodable] :
-    Computable λ π ↦ (⌜speedupProof (T := T) σ π⌝ : ℕ) := by
+private lemma computable_quote_speedupProof [L.Primcodable] :
+    Computable λ π ↦ (⌜speedupProof T σ π⌝ : ℕ) := by
   have hp : Primrec λ π : Sentence L ↦ (⌜π⌝ : ℕ) :=
     Primrec.encode.of_eq λ π ↦ (Sentence.quote_eq_encode_nat π).symm;
   have hq : Primrec λ π : Sentence L ↦ (⌜σ ⋎ π⌝ : ℕ) :=
@@ -271,8 +237,8 @@ lemma computable_quote_speedupProof [L.Primcodable] :
 
 lemma exists_computable_bound_minProof_or [L.Primcodable] :
     ∃ c : Sentence L → ℕ, Computable c ∧ ∀ π, (insert σ T).minProof (σ ⋎ π) ≤ c π :=
-  ⟨λ π ↦ ⌜speedupProof σ π⌝, computable_quote_speedupProof,
-    λ π ↦ minProof_le (speedupProof σ π)⟩
+  ⟨λ π ↦ ⌜speedupProof T σ π⌝, computable_quote_speedupProof,
+    λ π ↦ minProof_le (speedupProof T σ π)⟩
 
 /-- The Ehrenfeucht–Mycielski speedup theorem.
 
