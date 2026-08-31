@@ -97,6 +97,10 @@ instance : 𝗜𝗢𝗽𝗲𝗻 ⪯ 𝗜𝚺₀ := inferInstance
 
 instance : 𝗜𝚺₁ ⪯ 𝗣𝗔 := inferInstance
 
+instance : 𝗘𝗤 ℒₒᵣ ⪯ 𝗣𝗔 :=
+  have : 𝗘𝗤 ℒₒᵣ ⪯ 𝗣𝗔⁻ := inferInstance
+  Entailment.WeakerThan.trans this inferInstance
+
 end axioms
 
 section models
@@ -362,6 +366,10 @@ instance [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] : V↓[ℒₒᵣ] ⊧* 𝗜𝚺₀ :
 
 abbrev mod_ISigma_of_le {n₁ n₂} (h : n₁ ≤ n₂) [V↓[ℒₒᵣ] ⊧* 𝗜𝚺 n₂] : V↓[ℒₒᵣ] ⊧* 𝗜𝚺 n₁ :=
   models_of_ss inferInstance (ISigma_subset_mono h)
+
+instance [V↓[ℒₒᵣ] ⊧* 𝗣𝗔] : V↓[ℒₒᵣ] ⊧* 𝗜𝚺 n :=
+  have : V↓[ℒₒᵣ] ⊧* 𝗣𝗔 := inferInstance
+  models_of_subtheory this
 
 end models
 
