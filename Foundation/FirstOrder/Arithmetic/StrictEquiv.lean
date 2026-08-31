@@ -236,10 +236,9 @@ lemma bexs_sigma_step {n} {φ : ArithmeticSemisentence (n + 1)} {t : ArithmeticS
     grind;
 
 lemma ball_sigma_step {n} {φ : ArithmeticSemisentence (n + 1)} {t : ArithmeticSemiterm Empty (n + 1)}
-    (hT : 𝗜𝚺 (s + 1) ⪯ T) (ih : Closure T s) (ht : t.Positive) :
+    [𝗜𝚺 (s + 1) ⪯ T] (ih : Closure T s) (ht : t.Positive) :
     Nonempty (StrictHierarchyFormulaEquivOf T 𝚺 (s + 1) φ) →
       Nonempty (StrictHierarchyFormulaEquivOf T 𝚺 (s + 1) (∀¹[“x. x < !!t”] φ)) := by
-  have := hT;
   rintro ⟨φ'⟩;
   obtain ⟨u, rfl⟩ := Rew.positive_iff.mp ht;
   set φ₁' := φ'.sigmaInv;
@@ -307,11 +306,12 @@ lemma or_sigma_step {n} {φ ψ : ArithmeticSemisentence n} (ih : Closure T s) :
       . left; exact ⟨x, h⟩;
       . right; exact ⟨x, h⟩;
 
-lemma and_sigma_step {n} {φ ψ : ArithmeticSemisentence n} (hT : 𝗜𝚺 (s + 1) ⪯ T) (ih : Closure T s) :
+lemma and_sigma_step {n} {φ ψ : ArithmeticSemisentence n} [𝗜𝚺 (s + 1) ⪯ T] (ih : Closure T s) :
     Nonempty (StrictHierarchyFormulaEquivOf T 𝚺 (s + 1) φ) →
     Nonempty (StrictHierarchyFormulaEquivOf T 𝚺 (s + 1) ψ) →
     Nonempty (StrictHierarchyFormulaEquivOf T 𝚺 (s + 1) (φ ⋏ ψ)) := by
-  have : 𝗜𝚺₀ ⪯ T := Entailment.WeakerThan.trans (ISigma_weakerThan_of_le (Nat.zero_le (s + 1))) hT;
+  have : 𝗜𝚺₀ ⪯ T :=
+    Entailment.WeakerThan.trans (ISigma_weakerThan_of_le (Nat.zero_le (s + 1))) inferInstance;
   rintro ⟨φ'⟩ ⟨ψ'⟩;
   set φ₁' := φ'.sigmaInv;
   set ψ₁' := ψ'.sigmaInv;
@@ -360,39 +360,43 @@ lemma and_sigma_step {n} {φ ψ : ArithmeticSemisentence n} (hT : 𝗜𝚺 (s + 
     . rintro ⟨z, ⟨x, _, hx⟩, ⟨y, _, hy⟩⟩;
       exact ⟨⟨x, hx⟩, ⟨y, hy⟩⟩;
 
-lemma closure_succ (hT : 𝗜𝚺 (s + 1) ⪯ T) (ih : Closure T s) : Closure T (s + 1) where
+lemma closure_succ [𝗜𝚺 (s + 1) ⪯ T] (ih : Closure T s) : Closure T (s + 1) where
   ball := by
     rintro Γ n φ t ht hφ;
     rcases Γ with _ | _;
-    . exact ball_sigma_step hT ih ht hφ;
+    . exact ball_sigma_step ih ht hφ;
     . simpa using (bexs_sigma_step ih ht (hφ.map neg)).map neg;
   bexs := by
     rintro Γ n φ t ht hφ;
     rcases Γ with _ | _;
     . exact bexs_sigma_step ih ht hφ;
-    . simpa using (ball_sigma_step hT ih ht (hφ.map neg)).map neg;
+    . simpa using (ball_sigma_step ih ht (hφ.map neg)).map neg;
   and := by
     rintro Γ n φ ψ hφ hψ;
     rcases Γ with _ | _;
-    . exact and_sigma_step hT ih hφ hψ;
+    . exact and_sigma_step ih hφ hψ;
     . simpa [Semiformula.imp_eq] using (or_sigma_step ih (hφ.map neg) (hψ.map neg)).map neg;
   or := by
     rintro Γ n φ ψ hφ hψ;
     rcases Γ with _ | _;
     . exact or_sigma_step ih hφ hψ;
-    . simpa [Semiformula.imp_eq] using (and_sigma_step hT ih (hφ.map neg) (hψ.map neg)).map neg;
+    . simpa [Semiformula.imp_eq] using (and_sigma_step ih (hφ.map neg) (hψ.map neg)).map neg;
 
-lemma closure (hT : 𝗜𝚺 s ⪯ T) : Closure T s := by
+lemma closure [𝗜𝚺 s ⪯ T] : Closure T s := by
+  revert ‹𝗜𝚺 s ⪯ T›;
   induction s with
-  | zero => exact closure_zero;
+  | zero => intro _; exact closure_zero;
   | succ s ih =>
-    exact closure_succ hT (ih (ISigma_weakerThan_of_le_trans (by omega) hT));
+    intro inst;
+    have : 𝗜𝚺 s ⪯ T := ISigma_weakerThan_of_le_trans (by omega) inst;
+    exact closure_succ ih;
 
-lemma exs (hT : 𝗜𝚺 s ⪯ T) (c : Closure T s) {n : ℕ}
+lemma exs [𝗜𝚺 s ⪯ T] (c : Closure T s) {n : ℕ}
     {φ : ArithmeticSemisentence (n + 1)}
     (h : Nonempty (StrictHierarchyFormulaEquivOf T 𝚺 (s + 1) φ)) :
     Nonempty (StrictHierarchyFormulaEquivOf T 𝚺 (s + 1) (∃¹ φ)) := by
-  have : 𝗜𝚺₀ ⪯ T := Entailment.WeakerThan.trans (ISigma_weakerThan_of_le (Nat.zero_le s)) hT;
+  have : 𝗜𝚺₀ ⪯ T :=
+    Entailment.WeakerThan.trans (ISigma_weakerThan_of_le (Nat.zero_le s)) inferInstance;
   obtain ⟨φ'⟩ := h;
   set φ₁' := φ'.sigmaInv;
   set φ₁ : ArithmeticSemisentence (n + 2) := ↑φ₁';
@@ -440,11 +444,11 @@ lemma exs (hT : 𝗜𝚺 s ⪯ T) (c : Closure T s) {n : ℕ}
     . rintro ⟨z, y, -, x, -, hx⟩;
       exact ⟨y, x, hx⟩;
 
-lemma all (hT : 𝗜𝚺 s ⪯ T) (c : Closure T s) {n : ℕ}
+lemma all [𝗜𝚺 s ⪯ T] (c : Closure T s) {n : ℕ}
     {φ : ArithmeticSemisentence (n + 1)}
     (h : Nonempty (StrictHierarchyFormulaEquivOf T 𝚷 (s + 1) φ)) :
     Nonempty (StrictHierarchyFormulaEquivOf T 𝚷 (s + 1) (∀¹ φ)) := by
-  simpa using (exs hT c (h.map neg)).map neg;
+  simpa using (exs c (h.map neg)).map neg;
 
 end StrictHierarchyFormulaEquivOf
 
@@ -453,66 +457,63 @@ open StrictHierarchyFormulaEquivOf (refl ofDeltaZero exsOfPi allOfSigma altUp cl
 variable {T : ArithmeticTheory} [𝗘𝗤 ℒₒᵣ ⪯ T] {Γ : Polarity} {s : ℕ} {n : ℕ}
 
 theorem nonempty_strictHierarchyFormulaEquivOf {φ : ArithmeticSemisentence n}
-    (h : Hierarchy Γ s φ) (hT : 𝗜𝚺 s ⪯ T) : Nonempty (StrictHierarchyFormulaEquivOf T Γ s φ) := by
+    (h : Hierarchy Γ s φ) [𝗜𝚺 s ⪯ T] : Nonempty (StrictHierarchyFormulaEquivOf T Γ s φ) := by
+  revert ‹𝗜𝚺 s ⪯ T›;
   induction h with
-  | verum Γ s n => exact ⟨ofDeltaZero (Hierarchy.verum 𝚺 0 n)⟩;
-  | falsum Γ s n => exact ⟨ofDeltaZero (Hierarchy.falsum 𝚺 0 n)⟩;
-  | rel Γ s r v => exact ⟨ofDeltaZero (Hierarchy.rel 𝚺 0 r v)⟩;
-  | nrel Γ s r v => exact ⟨ofDeltaZero (Hierarchy.nrel 𝚺 0 r v)⟩;
-  | and _ _ ihp ihq => exact (closure hT).and _ (ihp hT) (ihq hT);
-  | or _ _ ihp ihq => exact (closure hT).or _ (ihp hT) (ihq hT);
-  | ball pos _ ih => exact (closure hT).ball _ pos (ih hT);
-  | bexs pos _ ih => exact (closure hT).bexs _ pos (ih hT);
+  | verum Γ s n => intro _; exact ⟨ofDeltaZero (Hierarchy.verum 𝚺 0 n)⟩;
+  | falsum Γ s n => intro _; exact ⟨ofDeltaZero (Hierarchy.falsum 𝚺 0 n)⟩;
+  | rel Γ s r v => intro _; exact ⟨ofDeltaZero (Hierarchy.rel 𝚺 0 r v)⟩;
+  | nrel Γ s r v => intro _; exact ⟨ofDeltaZero (Hierarchy.nrel 𝚺 0 r v)⟩;
+  | and _ _ ihp ihq => intro _; exact closure.and _ ihp ihq;
+  | or _ _ ihp ihq => intro _; exact closure.or _ ihp ihq;
+  | ball pos _ ih => intro _; exact closure.ball _ pos ih;
+  | bexs pos _ ih => intro _; exact closure.bexs _ pos ih;
   | @exs s n φ _ ih =>
-    have hT' : 𝗜𝚺 s ⪯ T := ISigma_weakerThan_of_le_trans (by omega) hT;
-    exact exs hT' (closure hT') (ih hT);
+    intro inst;
+    have : 𝗜𝚺 s ⪯ T := ISigma_weakerThan_of_le_trans (by omega) inst;
+    exact exs closure ih;
   | @all s n φ _ ih =>
-    have hT' : 𝗜𝚺 s ⪯ T := ISigma_weakerThan_of_le_trans (by omega) hT;
-    exact all hT' (closure hT') (ih hT);
+    intro inst;
+    have : 𝗜𝚺 s ⪯ T := ISigma_weakerThan_of_le_trans (by omega) inst;
+    exact all closure ih;
   | @sigma s n φ hp ih =>
     rcases s with _ | s;
-    . use (StrictHierarchyFormula.zero 𝚷 φ (Hierarchy.zero_iff.mp hp)).sigma;
+    . intro _;
+      use (StrictHierarchyFormula.zero 𝚷 φ (Hierarchy.zero_iff.mp hp)).sigma;
       simp [provable_iff_of_models_iff];
-    . exact (ih (ISigma_weakerThan_of_le_trans (by omega) hT)).map exsOfPi;
+    . intro inst;
+      have : 𝗜𝚺 (s + 1) ⪯ T := ISigma_weakerThan_of_le_trans (by omega) inst;
+      exact ih.map exsOfPi;
   | @pi s n φ hp ih =>
     rcases s with _ | s;
-    . use (StrictHierarchyFormula.zero 𝚺 φ (Hierarchy.zero_iff.mp hp)).pi;
+    . intro _;
+      use (StrictHierarchyFormula.zero 𝚺 φ (Hierarchy.zero_iff.mp hp)).pi;
       simp [provable_iff_of_models_iff];
-    . exact (ih (ISigma_weakerThan_of_le_trans (by omega) hT)).map allOfSigma;
+    . intro inst;
+      have : 𝗜𝚺 (s + 1) ⪯ T := ISigma_weakerThan_of_le_trans (by omega) inst;
+      exact ih.map allOfSigma;
   | @dummy_sigma s n φ hp ih =>
-    have hT' : 𝗜𝚺 s ⪯ T := ISigma_weakerThan_of_le_trans (by omega) hT;
-    exact (all hT' (closure hT') (ih (ISigma_weakerThan_of_le_trans (by omega) hT))).map altUp;
+    intro inst;
+    have : 𝗜𝚺 s ⪯ T := ISigma_weakerThan_of_le_trans (by omega) inst;
+    have : 𝗜𝚺 (s + 1) ⪯ T := ISigma_weakerThan_of_le_trans (by omega) inst;
+    exact (all closure ih).map altUp;
   | @dummy_pi s n φ hp ih =>
-    have hT' : 𝗜𝚺 s ⪯ T := ISigma_weakerThan_of_le_trans (by omega) hT;
-    exact (exs hT' (closure hT') (ih (ISigma_weakerThan_of_le_trans (by omega) hT))).map altUp;
+    intro inst;
+    have : 𝗜𝚺 s ⪯ T := ISigma_weakerThan_of_le_trans (by omega) inst;
+    have : 𝗜𝚺 (s + 1) ⪯ T := ISigma_weakerThan_of_le_trans (by omega) inst;
+    exact (exs closure ih).map altUp;
 
-variable {T : ArithmeticTheory} {Γ : Polarity} {s n : ℕ}
+variable (T : ArithmeticTheory) {Γ : Polarity} {s n : ℕ} [𝗜𝚺 s ⪯ T]
 
-theorem exists_kernel_provable {φ : ArithmeticSemisentence n} (h : Hierarchy Γ s φ) (hT : 𝗜𝚺 s ⪯ T) :
-    ∃ φ₀ : ArithmeticSemisentence (n + s),
-      Hierarchy 𝚺 0 φ₀ ∧ T ⊢ ∀¹* (φ 🡘 Polarity.quantItr Γ s φ₀) := by
-  have : 𝗘𝗤 ℒₒᵣ ⪯ T :=
-    Entailment.WeakerThan.trans inferInstance (ISigma_weakerThan_of_le_trans (Nat.zero_le s) hT);
-  obtain ⟨φ'⟩ := nonempty_strictHierarchyFormulaEquivOf h hT;
+theorem exists_kernel_provable {φ : ArithmeticSemisentence n} (h : Hierarchy Γ s φ) :
+  ∃ φ₀ : ArithmeticSemisentence (n + s), Hierarchy 𝚺 0 φ₀ ∧ T ⊢ ∀¹* (φ 🡘 Polarity.quantItr Γ s φ₀) := by
+  have : 𝗘𝗤 ℒₒᵣ ⪯ T := Entailment.WeakerThan.trans inferInstance (ISigma_weakerThan_of_le_trans (Nat.zero_le s) ‹𝗜𝚺 s ⪯ T›);
+  obtain ⟨φ'⟩ := nonempty_strictHierarchyFormulaEquivOf (T := T) h;
   exact ⟨φ'.kernel, φ'.kernel_deltaZero, φ'.provable⟩;
 
-theorem exists_kernel_provable' {φ : ArithmeticSemisentence n} (h : Hierarchy Γ s φ) (hT : 𝗜𝚺 s ⪯ T) :
+theorem exists_kernel_provable' {φ : ArithmeticSemisentence n} (h : Hierarchy Γ s φ) :
     ∃ φ₀ : 𝚺₀.Semisentence (n + s), T ⊢ ∀¹* (φ 🡘 Polarity.quantItr Γ s φ₀.val) := by
-  obtain ⟨φ₀, hφ₀, hprov⟩ := exists_kernel_provable h hT;
+  obtain ⟨φ₀, hφ₀, hprov⟩ := exists_kernel_provable T h;
   exact ⟨.mkSigma φ₀ hφ₀, by simpa using hprov⟩;
-
-namespace ISigma1
-
-lemma exists_delta0_kernel_provable {φ : ArithmeticSemisentence n} (h : Hierarchy 𝚺 1 φ) :
-    ∃ θ : ArithmeticSemisentence (n + 1), Hierarchy 𝚺 0 θ ∧ 𝗜𝚺₁ ⊢ ∀¹* (φ 🡘 ∃¹ θ) := by
-  obtain ⟨θ, hθ, hprov⟩ := exists_kernel_provable h (inferInstance : 𝗜𝚺 1 ⪯ 𝗜𝚺₁);
-  exact ⟨θ, hθ, hprov⟩;
-
-lemma exists_delta0_kernel_provable_pi {φ : ArithmeticSemisentence n} (h : Hierarchy 𝚷 1 φ) :
-    ∃ θ : ArithmeticSemisentence (n + 1), Hierarchy 𝚺 0 θ ∧ 𝗜𝚺₁ ⊢ ∀¹* (φ 🡘 ∀¹ θ) := by
-  obtain ⟨θ, hθ, hprov⟩ := exists_kernel_provable h (inferInstance : 𝗜𝚺 1 ⪯ 𝗜𝚺₁);
-  exact ⟨θ, hθ, hprov⟩;
-
-end ISigma1
 
 end LO.FirstOrder.Arithmetic

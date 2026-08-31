@@ -20,7 +20,7 @@ variable {Γ : Polarity} {s n : ℕ}
 
 lemma nonempty_strictHierarchyFormulaEquivOf {φ : ArithmeticSemisentence n} (h : Hierarchy Γ s φ) :
     Nonempty (StrictHierarchyFormulaEquivOf 𝗣𝗔 Γ s φ) :=
-  Arithmetic.nonempty_strictHierarchyFormulaEquivOf h inferInstance
+  Arithmetic.nonempty_strictHierarchyFormulaEquivOf h
 
 lemma exists_kernel_provable {φ : ArithmeticSemisentence n} (h : Hierarchy Γ s φ) :
     ∃ φ₀ : ArithmeticSemisentence (n + s),
