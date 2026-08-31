@@ -233,4 +233,18 @@ lemma exists_delta0_witness_form {n : ℕ} {φ : ArithmeticSemiformula Empty n} 
   . rintro n φ hφ ⟨θ', hθ', h⟩
     exact witnessForm_exs hθ' h
 
+lemma models_iff_of_provable_iff {T : ArithmeticTheory} [𝗘𝗤 ℒₒᵣ ⪯ T] {n} {φ ψ : ArithmeticSemiformula Empty n}
+    (h : T ⊢ ∀¹* (φ 🡘 ψ)) (V : Type w) [ORingStructure V] [V↓[ℒₒᵣ] ⊧* T] (e : Fin n → V) :
+    V ⊧/e φ ↔ V ⊧/e ψ := by
+  sorry
+
+theorem exists_delta0_witness_provable {n : ℕ} {φ : ArithmeticSemiformula Empty n} (hφ : Hierarchy 𝚺 1 φ) :
+    ∃ θ : ArithmeticSemiformula Empty (n + 1),
+      Hierarchy 𝚺 0 θ ∧ 𝗜𝚺₁ ⊢ ∀¹* (φ 🡘 ∃¹ θ) := by
+  sorry
+
+theorem exists_delta0_witness_provable_of_sentence {σ : ArithmeticSentence} (hσ : Hierarchy 𝚺 1 σ) :
+    ∃ θ : ArithmeticSemisentence 1, Hierarchy 𝚺 0 θ ∧ 𝗜𝚺₁ ⊢ σ 🡘 ∃¹ θ := by
+  sorry
+
 end LO.FirstOrder.Arithmetic
