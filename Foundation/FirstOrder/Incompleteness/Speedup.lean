@@ -108,36 +108,6 @@ private def speedupProof (T : Theory L) (σ π : Sentence L) : insert σ T ⊢! 
   axioms_mem := by simp
   derivation := .cast (speedupDerivation ↑σ ↑π)
 
-section Code
-
-variable {s p q d : α → ℕ}
-
-private noncomputable def cutAxmCode (cΓ cφ cd : ℕ) : ℕ :=
-  cutRule cΓ cφ (axm (insert cφ cΓ) cφ) cd
-
-private noncomputable def speedupCode (cσ cnσ cπ cor cd : ℕ) : ℕ :=
-  cutAxmCode (insert cor ∅) cσ
-    (orIntro (insert cor (insert cnσ ∅)) cσ cπ
-      (wkRule (insert cσ (insert cπ (insert cor (insert cnσ ∅))))
-        (wkRule (insert cσ (insert cπ (insert cnσ ∅))) cd)))
-
-private lemma primrec_cutAxmCode (hs : Primrec s) (hp : Primrec p) (hd : Primrec d) :
-    Primrec λ x ↦ cutAxmCode (s x) (p x) (d x) :=
-  primrec_cutRule hs hp (primrec_axm (primrec_insert hp hs) hp) hd
-
-private lemma primrec_speedupCode (hp : Primrec p) (hq : Primrec q) (cσ cnσ cd : ℕ) :
-    Primrec λ x ↦ speedupCode cσ cnσ (p x) (q x) cd := by
-  have h₁ : Primrec λ x ↦ (insert (q x) ∅ : ℕ) := primrec_insert hq (.const ∅);
-  have h₂ : Primrec λ x ↦ (insert (q x) (insert cnσ ∅) : ℕ) := primrec_insert hq (.const _);
-  have h₃ : Primrec λ x ↦ (insert cσ (insert (p x) (insert cnσ ∅)) : ℕ) :=
-    primrec_insert (.const cσ) (primrec_insert hp (.const _));
-  have h₄ : Primrec λ x ↦ (insert cσ (insert (p x) (insert (q x) (insert cnσ ∅))) : ℕ) :=
-    primrec_insert (.const cσ) (primrec_insert hp h₂);
-  exact primrec_cutAxmCode h₁ (.const cσ)
-    (primrec_orIntro h₂ (.const cσ) hp (primrec_wkRule h₄ (primrec_wkRule h₃ (.const cd))));
-
-end Code
-
 section Quotation
 
 variable {φ ψ : Sentence L} {χ ξ : Proposition L}
@@ -145,17 +115,21 @@ variable {φ ψ : Sentence L} {χ ξ : Proposition L}
 private lemma quote_cutManyProof_singleton (hψ : ∀ χ ∈ [ψ], χ ∈ T)
     (e : T ⟹₂ insert (φ : Proposition L) (∼Sequent.embed [ψ]).toFinset) :
     (⌜Derivation2.cutManyProof [ψ] hψ e⌝ : ℕ)
-      = cutAxmCode ⌜insert (φ : Proposition L) (∅ : Finset (Proposition L))⌝ ⌜ψ⌝ ⌜e⌝ := by
+      = cutRule ⌜insert (φ : Proposition L) (∅ : Finset (Proposition L))⌝ ⌜ψ⌝
+          (axm ⌜insert (ψ : Proposition L)
+            (insert (φ : Proposition L) (∅ : Finset (Proposition L)))⌝ ⌜ψ⌝) ⌜e⌝ := by
   have h : (⌜Derivation2.cutManyProof [ψ] hψ e⌝ : ℕ)
       = ⌜Derivation2.cut (Γ := insert (φ : Proposition L) (∅ : Finset (Proposition L)))
             (φ := (ψ : Proposition L)) (Derivation2.axm ψ (hψ ψ (by simp)) (by simp))
             (Derivation2.cast e (by ext x; simp [Sequent.embed]; grind))⌝ := rfl;
   rw [h, Derivation2.quote_cut, Derivation2.quote_axm, Derivation2.quote_cast];
-  simp [cutAxmCode, Sentence.quote_def];
+  rfl;
 
 private lemma quote_proof_eq (b : T ⊢! φ) (h : b.axioms = [ψ]) :
     (⌜b⌝ : ℕ)
-      = cutAxmCode ⌜insert (φ : Proposition L) (∅ : Finset (Proposition L))⌝ ⌜ψ⌝
+      = cutRule ⌜insert (φ : Proposition L) (∅ : Finset (Proposition L))⌝ ⌜ψ⌝
+          (axm ⌜insert (ψ : Proposition L)
+            (insert (φ : Proposition L) (∅ : Finset (Proposition L)))⌝ ⌜ψ⌝)
           ⌜Derivation.toDerivation2 T b.derivation⌝ := by
   obtain ⟨A, hA, d⟩ := b;
   subst h;
@@ -189,17 +163,45 @@ private lemma quote_speedupDerivation :
 
 private lemma quote_speedupProof_eq (π : Sentence L) :
     (⌜speedupProof T σ π⌝ : ℕ)
-      = speedupCode ⌜σ⌝ ⌜∼σ⌝ ⌜π⌝ ⌜σ ⋎ π⌝
-          ⌜Derivation.toDerivation2 (insert σ T) (Derivation.eta (σ : Proposition L))⌝ := by
+      = cutRule (insert ⌜σ ⋎ π⌝ ∅) ⌜σ⌝ (axm (insert ⌜σ⌝ (insert ⌜σ ⋎ π⌝ ∅)) ⌜σ⌝)
+          (orIntro (insert ⌜σ ⋎ π⌝ (insert ⌜∼σ⌝ ∅)) ⌜σ⌝ ⌜π⌝
+            (wkRule (insert ⌜σ⌝ (insert ⌜π⌝ (insert ⌜σ ⋎ π⌝ (insert ⌜∼σ⌝ ∅))))
+              (wkRule (insert ⌜σ⌝ (insert ⌜π⌝ (insert ⌜∼σ⌝ ∅)))
+                ⌜Derivation.toDerivation2 (insert σ T)
+                  (Derivation.eta (σ : Proposition L))⌝))) := by
   rw [quote_proof_eq (speedupProof T σ π) rfl];
   have h : (⌜Derivation.toDerivation2 (insert σ T) (speedupProof T σ π).derivation⌝ : ℕ)
       = ⌜Derivation.toDerivation2 (insert σ T)
           (speedupDerivation (σ : Proposition L) (π : Proposition L))⌝ :=
     quote_pullback_cast _ _;
   rw [h, quote_speedupDerivation];
-  simp [speedupCode, Sentence.quote_def];
+  simp [Sentence.quote_def];
 
 end Quotation
+
+section SpeedupCode
+
+variable {p q : α → ℕ}
+
+private lemma primrec_speedupCode (hp : Primrec p) (hq : Primrec q) (a na n₀ : ℕ) :
+    Primrec λ x ↦
+      cutRule (insert (q x) ∅) a (axm (insert a (insert (q x) ∅)) a)
+        (orIntro (insert (q x) (insert na ∅)) a (p x)
+          (wkRule (insert a (insert (p x) (insert (q x) (insert na ∅))))
+            (wkRule (insert a (insert (p x) (insert na ∅))) n₀))) := by
+  have h₁ : Primrec λ x ↦ (insert (q x) ∅ : ℕ) := primrec_insert hq (.const ∅);
+  have h₂ : Primrec λ x ↦ (insert (q x) (insert na ∅) : ℕ) := primrec_insert hq (.const _);
+  have h₃ : Primrec λ x ↦ (insert a (insert (p x) (insert na ∅)) : ℕ) :=
+    primrec_insert (.const a) (primrec_insert hp (.const _));
+  have h₄ : Primrec λ x ↦ (insert a (insert (p x) (insert (q x) (insert na ∅))) : ℕ) :=
+    primrec_insert (.const a) (primrec_insert hp h₂);
+  have h₅ : Primrec λ x ↦ wkRule (insert a (insert (p x) (insert (q x) (insert na ∅))))
+      (wkRule (insert a (insert (p x) (insert na ∅))) n₀) :=
+    primrec_wkRule h₄ (primrec_wkRule h₃ (.const n₀));
+  exact primrec_cutRule h₁ (.const a) (primrec_axm (primrec_insert (.const a) h₁) (.const a))
+    (primrec_orIntro h₂ (.const a) hp h₅);
+
+end SpeedupCode
 
 private lemma computable_quote_speedupProof [L.Primcodable] :
     Computable λ π ↦ (⌜speedupProof T σ π⌝ : ℕ) := by
