@@ -162,11 +162,11 @@ lemma closure_zero : Closure T 0 where
       intro V _ _ e;
       simp [hφiff V e, hψiff V e];
 
-lemma bexs_sigma_step (ih : Closure T s) :
-    ∀ {n} {φ : ArithmeticSemisentence (n + 1)} {t : ArithmeticSemiterm Empty (n + 1)},
-      t.Positive → Nonempty (StrictEquiv T 𝚺 (s + 1) φ) →
-        Nonempty (StrictEquiv T 𝚺 (s + 1) (∃¹[“x. x < !!t”] φ)) := by
-  rintro n φ t ht ⟨⟨φ', hφ', hprov'⟩⟩;
+lemma bexs_sigma_step {n} {φ : ArithmeticSemisentence (n + 1)} {t : ArithmeticSemiterm Empty (n + 1)}
+    (ih : Closure T s) (ht : t.Positive) :
+    Nonempty (StrictEquiv T 𝚺 (s + 1) φ) →
+      Nonempty (StrictEquiv T 𝚺 (s + 1) (∃¹[“x. x < !!t”] φ)) := by
+  rintro ⟨⟨φ', hφ', hprov'⟩⟩;
   obtain ⟨u, rfl⟩ := Rew.positive_iff.mp ht;
   have hiff' := models_iff_of_provable_iff' hprov';
   obtain ⟨ψ₀, rfl, hψ₀⟩ := hφ'.sigma_succ_elim;
@@ -208,12 +208,12 @@ lemma bexs_sigma_step (ih : Closure T s) :
       hswap, hφiff];
     grind;
 
-lemma ball_sigma_step (hT : 𝗜𝚺 (s + 1) ⪯ T) (ih : Closure T s) :
-    ∀ {n} {φ : ArithmeticSemisentence (n + 1)} {t : ArithmeticSemiterm Empty (n + 1)},
-      t.Positive → Nonempty (StrictEquiv T 𝚺 (s + 1) φ) →
-        Nonempty (StrictEquiv T 𝚺 (s + 1) (∀¹[“x. x < !!t”] φ)) := by
+lemma ball_sigma_step {n} {φ : ArithmeticSemisentence (n + 1)} {t : ArithmeticSemiterm Empty (n + 1)}
+    (hT : 𝗜𝚺 (s + 1) ⪯ T) (ih : Closure T s) (ht : t.Positive) :
+    Nonempty (StrictEquiv T 𝚺 (s + 1) φ) →
+      Nonempty (StrictEquiv T 𝚺 (s + 1) (∀¹[“x. x < !!t”] φ)) := by
   have := hT;
-  rintro n φ t ht ⟨⟨φ', hφ', hprov'⟩⟩;
+  rintro ⟨⟨φ', hφ', hprov'⟩⟩;
   obtain ⟨u, rfl⟩ := Rew.positive_iff.mp ht;
   have hiff' := models_iff_of_provable_iff' hprov';
   obtain ⟨ψ₀, rfl, hψ₀⟩ := hφ'.sigma_succ_elim;
@@ -251,11 +251,10 @@ lemma ball_sigma_step (hT : 𝗜𝚺 (s + 1) ⪯ T) (ih : Closure T s) :
       obtain ⟨y, -, hy⟩ := hw x hx;
       exact ⟨y, hy⟩;
 
-lemma or_sigma_step (ih : Closure T s) :
-    ∀ {n} {φ ψ : ArithmeticSemisentence n},
-      Nonempty (StrictEquiv T 𝚺 (s + 1) φ) → Nonempty (StrictEquiv T 𝚺 (s + 1) ψ) →
-        Nonempty (StrictEquiv T 𝚺 (s + 1) (φ ⋎ ψ)) := by
-  rintro n φ ψ ⟨⟨φ', hφ', hφprov⟩⟩ ⟨⟨ψ', hψ', hψprov⟩⟩;
+lemma or_sigma_step {n} {φ ψ : ArithmeticSemisentence n} (ih : Closure T s) :
+    Nonempty (StrictEquiv T 𝚺 (s + 1) φ) → Nonempty (StrictEquiv T 𝚺 (s + 1) ψ) →
+      Nonempty (StrictEquiv T 𝚺 (s + 1) (φ ⋎ ψ)) := by
+  rintro ⟨⟨φ', hφ', hφprov⟩⟩ ⟨⟨ψ', hψ', hψprov⟩⟩;
   have hφiff := models_iff_of_provable_iff' hφprov;
   have hψiff := models_iff_of_provable_iff' hψprov;
   obtain ⟨φ₀, rfl, hφ₀⟩ := hφ'.sigma_succ_elim;
@@ -278,12 +277,11 @@ lemma or_sigma_step (ih : Closure T s) :
       . left; exact ⟨x, h⟩;
       . right; exact ⟨x, h⟩;
 
-lemma and_sigma_step (hT : 𝗜𝚺 (s + 1) ⪯ T) (ih : Closure T s) :
-    ∀ {n} {φ ψ : ArithmeticSemisentence n},
-      Nonempty (StrictEquiv T 𝚺 (s + 1) φ) → Nonempty (StrictEquiv T 𝚺 (s + 1) ψ) →
-        Nonempty (StrictEquiv T 𝚺 (s + 1) (φ ⋏ ψ)) := by
+lemma and_sigma_step {n} {φ ψ : ArithmeticSemisentence n} (hT : 𝗜𝚺 (s + 1) ⪯ T) (ih : Closure T s) :
+    Nonempty (StrictEquiv T 𝚺 (s + 1) φ) → Nonempty (StrictEquiv T 𝚺 (s + 1) ψ) →
+      Nonempty (StrictEquiv T 𝚺 (s + 1) (φ ⋏ ψ)) := by
   have : 𝗜𝚺₀ ⪯ T := Entailment.WeakerThan.trans (ISigma_weakerThan_of_le (Nat.zero_le (s + 1))) hT;
-  rintro n φ ψ ⟨⟨φ', hφ', hφprov⟩⟩ ⟨⟨ψ', hψ', hψprov⟩⟩;
+  rintro ⟨⟨φ', hφ', hφprov⟩⟩ ⟨⟨ψ', hψ', hψprov⟩⟩;
   have hφiff := models_iff_of_provable_iff' hφprov;
   have hψiff := models_iff_of_provable_iff' hψprov;
   obtain ⟨φ₀, rfl, hφ₀⟩ := hφ'.sigma_succ_elim;
