@@ -25,17 +25,22 @@ namespace LO.FirstOrder.Arithmetic
 -- A single shared universe parameter avoids that.
 universe u
 
--- Every declaration below whose *type* mentions the private `StrictEquiv` must itself be
--- `private`: this module's public/private visibility check forbids a public declaration's
--- signature from referring to a private identifier (bodies may still call private lemmas
--- freely). Only the three theorems in `namespace Hierarchy` at the end of the file, whose
--- statements are fully inlined, are exposed publicly.
+-- `CoreClosure` (the induction-closure bundle driving `of_hierarchy`) stays `private`: it has
+-- no meaning outside this file's proof, and pinning its underlying theory to `𝗣𝗔` (via
+-- `sigma_exists_bound_witness` in `ball_sigma_step`) is likewise an implementation detail.
+-- Since it is `Type`-valued (not `Prop`-valued), any `def` whose *value* mentions it — not just
+-- its type — must itself stay `private` too: this module's visibility check exposes a public
+-- `def`'s body (unlike a `theorem`/`lemma`, where proof irrelevance means only the statement is
+-- exposed), so `exs`/`all`/`of_hierarchy`/`coreClosure` and friends all stay `private` even
+-- though some of their *statements* mention only the now-public `StrictEquiv`.
 
 /-- A witness that `φ` is `T`-provably equivalent to some formula in `StrictHierarchy Γ s`.
 
-The theory `T` is a parameter so that this can, in principle, be refined to a level-optimal
-theory (e.g. `𝗜𝚺ₛ`/`𝗕𝚺ₛ`) instead of the uniform `𝗣𝗔`; every lemma below fixes `T := 𝗣𝗔`. -/
-private structure StrictEquiv (T : ArithmeticTheory) (Γ : Polarity) (s : ℕ) {n : ℕ}
+The theory `T` is a parameter: most combinators below (`refl`, `neg`, `alt_up`, …) hold for an
+arbitrary `T`, while the ones built from `CoreClosure` fix `T := 𝗣𝗔` (the level of arithmetic
+induction that closure genuinely needs, e.g. via `sigma_exists_bound_witness`, is not tracked
+here). -/
+structure StrictEquiv (T : ArithmeticTheory) (Γ : Polarity) (s : ℕ) {n : ℕ}
     (φ : ArithmeticSemiformula Empty n) where
   witness : ArithmeticSemiformula Empty n
   hierarchy : StrictHierarchy Γ s witness
@@ -43,29 +48,29 @@ private structure StrictEquiv (T : ArithmeticTheory) (Γ : Polarity) (s : ℕ) {
 
 namespace StrictEquiv
 
-variable {Γ Γ' : Polarity} {s s' : ℕ} {n : ℕ} {φ ψ : ArithmeticSemiformula Empty n}
+variable {T : ArithmeticTheory} {Γ Γ' : Polarity} {s s' : ℕ} {n : ℕ} {φ ψ : ArithmeticSemiformula Empty n}
 
-private def refl (h : StrictHierarchy Γ s φ) : StrictEquiv.{u} 𝗣𝗔 Γ s φ :=
+def refl (h : StrictHierarchy Γ s φ) : StrictEquiv.{u} T Γ s φ :=
   ⟨φ, h, fun _ _ _ _ => Iff.rfl⟩
 
-private def of_iff (h : StrictEquiv.{u} 𝗣𝗔 Γ s φ)
-    (hiff : ∀ (V : Type u) [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗣𝗔] (e : Fin n → V), V ⊧/e φ ↔ V ⊧/e ψ) :
-    StrictEquiv.{u} 𝗣𝗔 Γ s ψ :=
+def of_iff (h : StrictEquiv.{u} T Γ s φ)
+    (hiff : ∀ (V : Type u) [ORingStructure V] [V↓[ℒₒᵣ] ⊧* T] (e : Fin n → V), V ⊧/e φ ↔ V ⊧/e ψ) :
+    StrictEquiv.{u} T Γ s ψ :=
   ⟨h.witness, h.hierarchy, fun V _ _ e => (hiff V e).symm.trans (h.iff_models V e)⟩
 
-private def neg (h : StrictEquiv.{u} 𝗣𝗔 Γ s φ) : StrictEquiv.{u} 𝗣𝗔 Γ.alt s (∼φ) :=
+def neg (h : StrictEquiv.{u} T Γ s φ) : StrictEquiv.{u} T Γ.alt s (∼φ) :=
   ⟨∼h.witness, h.hierarchy.neg, fun V _ _ e => by simp [h.iff_models V e]⟩
 
 -- `StrictEquiv` carries data (the witness formula), so an `Iff` between two instances of it
 -- is not itself a `Prop`; state the analogue of `neg`'s converse between the truncated
 -- (`Nonempty`) versions instead.
-@[simp] private lemma neg_iff :
-    Nonempty (StrictEquiv.{u} 𝗣𝗔 Γ.alt s (∼φ)) ↔ Nonempty (StrictEquiv.{u} 𝗣𝗔 Γ s φ) := by
+@[simp] lemma neg_iff :
+    Nonempty (StrictEquiv.{u} T Γ.alt s (∼φ)) ↔ Nonempty (StrictEquiv.{u} T Γ s φ) := by
   constructor;
   . rintro ⟨h⟩; exact ⟨by simpa using neg h⟩;
   . rintro ⟨h⟩; exact ⟨neg h⟩;
 
-private def alt_up (h : StrictEquiv.{u} 𝗣𝗔 Γ s φ) : StrictEquiv.{u} 𝗣𝗔 Γ.alt (s + 1) φ := by
+def alt_up (h : StrictEquiv.{u} T Γ s φ) : StrictEquiv.{u} T Γ.alt (s + 1) φ := by
   rcases Γ with _ | _;
   . use ∀¹ (Rew.bShift ▹ h.witness);
     . exact (h.hierarchy.rew Rew.bShift).pi;
@@ -77,7 +82,7 @@ private def alt_up (h : StrictEquiv.{u} 𝗣𝗔 Γ s φ) : StrictEquiv.{u} 𝗣
     . intro V _ _ e;
       simp [h.iff_models V e];
 
-private def of_deltaZero (hp : Hierarchy 𝚺 0 φ) : StrictEquiv.{u} 𝗣𝗔 Γ s φ := by
+def of_deltaZero (hp : Hierarchy 𝚺 0 φ) : StrictEquiv.{u} T Γ s φ := by
   induction s generalizing Γ with
   | zero => exact refl (StrictHierarchy.zero hp);
   | succ s ih => simpa using alt_up (ih (Γ := Γ.alt));
@@ -383,8 +388,8 @@ private noncomputable def all {φ : ArithmeticSemiformula Empty (n + 1)} (h : St
   have h'' := neg (exs h');
   simpa using h'';
 
-private def exs_of_pi {φ : ArithmeticSemiformula Empty (n + 1)} (h : StrictEquiv.{u} 𝗣𝗔 𝚷 s φ) :
-    StrictEquiv.{u} 𝗣𝗔 𝚺 (s + 1) (∃¹ φ) := by
+def exs_of_pi {φ : ArithmeticSemiformula Empty (n + 1)} (h : StrictEquiv.{u} T 𝚷 s φ) :
+    StrictEquiv.{u} T 𝚺 (s + 1) (∃¹ φ) := by
   obtain ⟨φ', hφ', hiff'⟩ := h;
   use ∃¹ φ';
   . exact hφ'.sigma;
@@ -392,8 +397,8 @@ private def exs_of_pi {φ : ArithmeticSemiformula Empty (n + 1)} (h : StrictEqui
     simp only [Semiformula.eval_ex];
     exact exists_congr (fun x => hiff' V (x :> e));
 
-private def all_of_sigma {φ : ArithmeticSemiformula Empty (n + 1)} (h : StrictEquiv.{u} 𝗣𝗔 𝚺 s φ) :
-    StrictEquiv.{u} 𝗣𝗔 𝚷 (s + 1) (∀¹ φ) := by
+def all_of_sigma {φ : ArithmeticSemiformula Empty (n + 1)} (h : StrictEquiv.{u} T 𝚺 s φ) :
+    StrictEquiv.{u} T 𝚷 (s + 1) (∀¹ φ) := by
   obtain ⟨φ', hφ', hiff'⟩ := h;
   use ∀¹ φ';
   . exact hφ'.pi;
@@ -404,7 +409,7 @@ private def all_of_sigma {φ : ArithmeticSemiformula Empty (n + 1)} (h : StrictE
 -- `Hierarchy` is `Prop`-valued with many constructors, so `induction h` cannot directly build a
 -- `StrictEquiv` (a `Type`). Prove `Nonempty (StrictEquiv.{u} 𝗣𝗔 Γ s φ)` by induction instead
 -- (a legal `Prop`-target elimination) and unwrap the single needed witness via choice.
-private noncomputable def strictEquiv_of_hierarchy (h : Hierarchy Γ s φ) : StrictEquiv.{u} 𝗣𝗔 Γ s φ := by
+private noncomputable def of_hierarchy (h : Hierarchy Γ s φ) : StrictEquiv.{u} 𝗣𝗔 Γ s φ := by
   -- `ψ` (from the ambient `variable`) shares `φ`'s arity `n`, so `induction h` would otherwise
   -- generalize it too, needlessly threading a spurious `∀ ψ` through every inductive case.
   clear ψ;
@@ -433,7 +438,7 @@ private noncomputable def strictEquiv_of_hierarchy (h : Hierarchy Γ s φ) : Str
   exact nonempty.some;
 
 -- The syntactic (`T ⊢ …`) counterpart of `iff_models`, via completeness for `T`.
-private lemma provable {T : ArithmeticTheory} [𝗘𝗤 ℒₒᵣ ⪯ T] {Γ s n} {φ : ArithmeticSemiformula Empty n}
+lemma provable {T : ArithmeticTheory} [𝗘𝗤 ℒₒᵣ ⪯ T] {Γ s n} {φ : ArithmeticSemiformula Empty n}
     (d : StrictEquiv.{u} T Γ s φ) : T ⊢ ∀¹* (φ 🡘 d.witness) := by
   apply FirstOrder.Arithmetic.complete T _;
   intro M _ _;
@@ -446,13 +451,13 @@ namespace Hierarchy
 lemma exists_strictHierarchy_form {Γ s n} {φ : ArithmeticSemiformula Empty n} (h : Hierarchy Γ s φ) :
     ∃ ψ : ArithmeticSemiformula Empty n, StrictHierarchy Γ s ψ ∧
       ∀ (V : Type u) [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗣𝗔] (e : Fin n → V), V ⊧/e φ ↔ V ⊧/e ψ := by
-  have hEquiv := StrictEquiv.strictEquiv_of_hierarchy h;
+  have hEquiv := StrictEquiv.of_hierarchy h;
   exact ⟨hEquiv.witness, hEquiv.hierarchy, hEquiv.iff_models⟩;
 
 theorem exists_strictHierarchy_provable {Γ s n} {φ : ArithmeticSemiformula Empty n} (h : Hierarchy Γ s φ) :
   ∃ ψ : ArithmeticSemiformula Empty n, StrictHierarchy Γ s ψ ∧ 𝗣𝗔 ⊢ ∀¹* (φ 🡘 ψ) := by
   -- the model universe used internally is immaterial to this statement, so fix it to `0`.
-  have hEquiv := StrictEquiv.strictEquiv_of_hierarchy.{0} h;
+  have hEquiv := StrictEquiv.of_hierarchy.{0} h;
   exact ⟨hEquiv.witness, hEquiv.hierarchy, hEquiv.provable⟩;
 
 theorem exists_strictHierarchy_provable_of_sentence {Γ s} {σ : ArithmeticSentence} (h : Hierarchy Γ s σ) :
