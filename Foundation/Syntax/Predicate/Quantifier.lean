@@ -192,6 +192,32 @@ end quantifier
 
 end FirstOrder
 
+namespace Polarity
+
+variable {α : ℕ → Type*} [FirstOrder.UnivQuantifier α] [FirstOrder.ExsQuantifier α] {n : ℕ} {Γ : Polarity}
+
+def quant : Polarity → α (n + 1) → α n
+  | 𝚺 => FirstOrder.ExsQuantifier.exs
+  | 𝚷 => FirstOrder.UnivQuantifier.all
+
+@[simp] lemma quant_sigma (φ : α (n + 1)) : (𝚺 : Polarity).quant φ = ∃¹ φ := rfl
+
+@[simp] lemma quant_pi (φ : α (n + 1)) : (𝚷 : Polarity).quant φ = ∀¹ φ := rfl
+
+def quantItr (Γ : Polarity) : (k : ℕ) → α (n + k) → α n
+  | 0,     φ => φ
+  | k + 1, φ => quantItr Γ k ((Polarity.alt^[k] Γ).quant φ)
+
+@[simp]
+lemma quantItr_zero (φ : α n) : quantItr Γ 0 φ = φ := rfl
+
+@[simp] lemma quantItr_one (φ : α (n + 1)) : quantItr Γ 1 φ = Γ.quant φ := rfl
+
+lemma quantItr_succ {k} (φ : α (n + (k + 1))) :
+    quantItr Γ (k + 1) φ = quantItr Γ k ((Polarity.alt^[k] Γ).quant φ) := rfl
+
+end Polarity
+
 /-! ## Second-order quantifiers -/
 
 namespace SecondOrder

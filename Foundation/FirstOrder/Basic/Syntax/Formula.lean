@@ -117,6 +117,20 @@ end ToString
 
 @[simp] lemma neg_ex (φ : Semiformula L ξ (n + 1)) : ∼(∃¹ φ) = ∀¹ ∼φ := rfl
 
+@[simp] lemma neg_quant (Γ : Polarity) (φ : Semiformula L ξ (n + 1)) :
+    ∼(Γ.quant φ) = Γ.alt.quant (∼φ) := by
+  rcases Γ <;> rfl
+
+@[simp] lemma neg_quantItr (Γ : Polarity) (s : ℕ) (φ : Semiformula L ξ (n + s)) :
+    ∼(Polarity.quantItr Γ s φ) = Polarity.quantItr Γ.alt s (∼φ) := by
+  induction s generalizing n with
+  | zero => rfl
+  | succ s ih =>
+    rw [Polarity.quantItr_succ, ih, neg_quant, Polarity.quantItr_succ]
+    have h : (Polarity.alt^[s] Γ).alt = Polarity.alt^[s] Γ.alt := by
+      rw [← Function.iterate_succ_apply' Polarity.alt s Γ, Function.iterate_succ_apply]
+    rw [h]
+
 @[simp] lemma neg_inj (φ ψ : Semiformula L ξ n) : ∼φ = ∼ψ ↔ φ = ψ := by
   constructor
   · intro h; simpa using congr_arg (∼·) h
