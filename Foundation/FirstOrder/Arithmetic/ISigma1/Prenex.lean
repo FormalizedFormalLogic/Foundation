@@ -3,7 +3,7 @@ module
 public import Foundation.FirstOrder.Arithmetic.StrictEquiv
 
 /-!
-# Δ₀-witnessed form for Σ₁ formulas
+# Prenex normal form theorem over $\mathsf{I\Sigma_1}$
 
 Every `Hierarchy 𝚺 1` formula is `𝗜𝚺₁`-provably equivalent to a formula of the form `∃¹ θ`
 with `θ` in `Hierarchy 𝚺 0`.

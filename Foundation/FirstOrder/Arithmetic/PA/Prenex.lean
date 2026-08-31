@@ -5,9 +5,7 @@ public import Foundation.FirstOrder.Arithmetic.StrictEquiv
 /-!
 # Prenex normal form theorem over $\mathsf{PA}$
 
-Every `Hierarchy Γ s φ` formula is, over models of `𝗣𝗔`, equivalent to some formula in
-`StrictHierarchy Γ s`, i.e. a genuine prenex normal form of the same level, and this
-equivalence is provable in `𝗣𝗔`.
+Every `Hierarchy Γ s` formula is `𝗣𝗔`-provably equivalent to a formula in `StrictHierarchy Γ s`.
 -/
 
 @[expose] public section
