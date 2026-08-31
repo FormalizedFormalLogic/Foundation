@@ -28,3 +28,19 @@ lemma «Σ₁witness_spec» (T : Theory L) [T.«Σ₁»]
     (exists_delta0_witness_form.{0} T.«Σ₁ch».sigma_prop).choose_spec.2 (V := V) e
 
 end LO.FirstOrder.Theory
+
+namespace LO.FirstOrder.Arithmetic.Bootstrapping
+
+variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
+
+variable {L : Language} [L.Encodable] [L.LORDefinable]
+
+lemma quote_weight (k : ℕ) :
+    (⌜(Semiformula.weight k : Proposition L)⌝ : V) = qqVerums (k : V) := by
+  induction k with
+  | zero => simp [Semiformula.weight]
+  | succ k ih =>
+    change ⌜(⊤ : Proposition L) ⋏ Semiformula.weight k⌝ = _
+    simp [ih]
+
+end LO.FirstOrder.Arithmetic.Bootstrapping
