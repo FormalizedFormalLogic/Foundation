@@ -56,7 +56,8 @@ omit [L.DecidableEq] in
 lemma computablePred_proof : ComputablePred λ p : ℕ × ℕ ↦ Proof T p.1 p.2 := by
   apply ComputablePred.computable_iff_re_compl_re'.mpr;
   obtain ⟨φ, hφ⟩ := HierarchySymbol.Definable.of_delta (Γ := 𝚺) (Proof.definable (V := ℕ) (T := T));
-  obtain ⟨ψ, hψ⟩ := (HierarchySymbol.Definable.of_delta (Γ := 𝚷) (Proof.definable (V := ℕ) (T := T))).notPi;
+  obtain ⟨ψ, hψ⟩ :=
+    (HierarchySymbol.Definable.of_delta (Γ := 𝚷) (Proof.definable (V := ℕ) (T := T))).notPi;
   have hcomp : Computable λ p : ℕ × ℕ ↦ p.1 ::ᵥ p.2 ::ᵥ List.Vector.nil :=
     Primrec.to_comp <|
     Primrec.vector_cons.comp .fst (Primrec.vector_cons.comp .snd (.const List.Vector.nil));
@@ -66,22 +67,24 @@ lemma computablePred_proof : ComputablePred λ p : ℕ × ℕ ↦ Proof T p.1 p.
       λ p ↦ by simpa [List.Vector.cons_get] using hψ.iff (v := ![p.1, p.2])⟩;
 
 omit [L.DecidableEq] in
-lemma computablePred_bddExists_proof [L.Primcodable]
-  (hF : Computable F) {bd : α → ℕ} (hbd : Computable bd) :
-  ComputablePred λ a ↦ ∃ d ≤ bd a, Proof T d ⌜F a⌝ := by
+lemma computablePred_bddExists_proof [L.Primcodable] (hF : Computable F) {bd : α → ℕ}
+    (hbd : Computable bd) :
+    ComputablePred λ a ↦ ∃ d ≤ bd a, Proof T d ⌜F a⌝ := by
   set cd := λ a ↦ encode (F a);
   have hcd : Computable cd := Computable.encode.comp hF;
   obtain ⟨χ, hχ, hχe⟩ := ComputablePred.computable_iff.mp (computablePred_proof (T := T));
   have hstep : Computable (λ q : α × (ℕ × Bool) ↦ Bool.or q.2.2 (χ (q.2.1, cd q.1))) :=
     Computable₂.comp Primrec.or.to_comp (Computable.snd.comp Computable.snd)
       (hχ.comp (Computable.pair (Computable.fst.comp Computable.snd) (hcd.comp Computable.fst)));
-  have hS : Computable λ a ↦ Nat.rec (motive := λ _ ↦ Bool) false (λ d ih ↦ ih || χ (d, cd a)) (bd a + 1) :=
+  have hS : Computable λ a ↦
+      Nat.rec (motive := λ _ ↦ Bool) false (λ d ih ↦ ih || χ (d, cd a)) (bd a + 1) :=
     Computable.nat_rec (Computable.succ.comp hbd) (Computable.const false) hstep.to₂;
   refine ComputablePred.computable_iff.mpr ⟨_, hS, ?_⟩;
   . funext a;
     apply propext;
-    have key : ∀ N e, (Nat.rec (motive := λ _ ↦ Bool) false (λ d ih ↦ ih || χ (d, e)) (N + 1) = true) ↔
-      ∃ d ≤ N, χ (d, e) = true := by
+    have key : ∀ N e,
+        (Nat.rec (motive := λ _ ↦ Bool) false (λ d ih ↦ ih || χ (d, e)) (N + 1) = true)
+          ↔ ∃ d ≤ N, χ (d, e) = true := by
       intro N e;
       induction N with
       | zero => simp;
@@ -89,9 +92,9 @@ lemma computablePred_bddExists_proof [L.Primcodable]
     rw [key (bd a) (cd a), Sentence.quote_eq_encode_nat];
     exact exists_congr λ d ↦ and_congr_right λ _ ↦ (congrFun hχe (d, cd a)).to_iff;
 
-lemma computablePred_provable_of_minProof_le [L.Primcodable] (hF : Computable F)
-  {bd : α → ℕ} (hbd : Computable bd) (hb : ∀ a, T ⊢ F a → T.minProof (F a) ≤ bd a) :
-  ComputablePred λ a ↦ T ⊢ F a := by
+lemma computablePred_provable_of_minProof_le [L.Primcodable] (hF : Computable F) {bd : α → ℕ}
+    (hbd : Computable bd) (hb : ∀ a, T ⊢ F a → T.minProof (F a) ≤ bd a) :
+    ComputablePred λ a ↦ T ⊢ F a := by
   apply ComputablePred.of_eq (computablePred_bddExists_proof (T := T) hF hbd);
   intro a;
   have hp : ∀ d, Proof T d ⌜F a⌝ → T ⊢ F a := λ d hd ↦ provable_iff_provable.mp ⟨d, hd⟩;
@@ -105,6 +108,36 @@ private def speedupProof (T : Theory L) (σ π : Sentence L) : insert σ T ⊢! 
   axioms_mem := by simp
   derivation := .cast (speedupDerivation ↑σ ↑π)
 
+section Code
+
+variable {s p q d : α → ℕ}
+
+private noncomputable def cutAxmCode (cΓ cφ cd : ℕ) : ℕ :=
+  cutRule cΓ cφ (axm (insert cφ cΓ) cφ) cd
+
+private noncomputable def speedupCode (cσ cnσ cπ cor cd : ℕ) : ℕ :=
+  cutAxmCode (insert cor ∅) cσ
+    (orIntro (insert cor (insert cnσ ∅)) cσ cπ
+      (wkRule (insert cσ (insert cπ (insert cor (insert cnσ ∅))))
+        (wkRule (insert cσ (insert cπ (insert cnσ ∅))) cd)))
+
+private lemma primrec_cutAxmCode (hs : Primrec s) (hp : Primrec p) (hd : Primrec d) :
+    Primrec λ x ↦ cutAxmCode (s x) (p x) (d x) :=
+  primrec_cutRule hs hp (primrec_axm (primrec_insert hp hs) hp) hd
+
+private lemma primrec_speedupCode (hp : Primrec p) (hq : Primrec q) (cσ cnσ cd : ℕ) :
+    Primrec λ x ↦ speedupCode cσ cnσ (p x) (q x) cd := by
+  have h₁ : Primrec λ x ↦ (insert (q x) ∅ : ℕ) := primrec_insert hq (.const ∅);
+  have h₂ : Primrec λ x ↦ (insert (q x) (insert cnσ ∅) : ℕ) := primrec_insert hq (.const _);
+  have h₃ : Primrec λ x ↦ (insert cσ (insert (p x) (insert cnσ ∅)) : ℕ) :=
+    primrec_insert (.const cσ) (primrec_insert hp (.const _));
+  have h₄ : Primrec λ x ↦ (insert cσ (insert (p x) (insert (q x) (insert cnσ ∅))) : ℕ) :=
+    primrec_insert (.const cσ) (primrec_insert hp h₂);
+  exact primrec_cutAxmCode h₁ (.const cσ)
+    (primrec_orIntro h₂ (.const cσ) hp (primrec_wkRule h₄ (primrec_wkRule h₃ (.const cd))));
+
+end Code
+
 section Quotation
 
 variable {φ ψ : Sentence L} {χ ξ : Proposition L}
@@ -112,21 +145,17 @@ variable {φ ψ : Sentence L} {χ ξ : Proposition L}
 private lemma quote_cutManyProof_singleton (hψ : ∀ χ ∈ [ψ], χ ∈ T)
     (e : T ⟹₂ insert (φ : Proposition L) (∼Sequent.embed [ψ]).toFinset) :
     (⌜Derivation2.cutManyProof [ψ] hψ e⌝ : ℕ)
-      = cutRule ⌜insert (φ : Proposition L) (∅ : Finset (Proposition L))⌝ ⌜ψ⌝
-          (axm ⌜insert (ψ : Proposition L)
-            (insert (φ : Proposition L) (∅ : Finset (Proposition L)))⌝ ⌜ψ⌝) ⌜e⌝ := by
+      = cutAxmCode ⌜insert (φ : Proposition L) (∅ : Finset (Proposition L))⌝ ⌜ψ⌝ ⌜e⌝ := by
   have h : (⌜Derivation2.cutManyProof [ψ] hψ e⌝ : ℕ)
       = ⌜Derivation2.cut (Γ := insert (φ : Proposition L) (∅ : Finset (Proposition L)))
             (φ := (ψ : Proposition L)) (Derivation2.axm ψ (hψ ψ (by simp)) (by simp))
             (Derivation2.cast e (by ext x; simp [Sequent.embed]; grind))⌝ := rfl;
   rw [h, Derivation2.quote_cut, Derivation2.quote_axm, Derivation2.quote_cast];
-  rfl;
+  simp [cutAxmCode, Sentence.quote_def];
 
 private lemma quote_proof_eq (b : T ⊢! φ) (h : b.axioms = [ψ]) :
     (⌜b⌝ : ℕ)
-      = cutRule ⌜insert (φ : Proposition L) (∅ : Finset (Proposition L))⌝ ⌜ψ⌝
-          (axm ⌜insert (ψ : Proposition L)
-            (insert (φ : Proposition L) (∅ : Finset (Proposition L)))⌝ ⌜ψ⌝)
+      = cutAxmCode ⌜insert (φ : Proposition L) (∅ : Finset (Proposition L))⌝ ⌜ψ⌝
           ⌜Derivation.toDerivation2 T b.derivation⌝ := by
   obtain ⟨A, hA, d⟩ := b;
   subst h;
@@ -158,47 +187,19 @@ private lemma quote_speedupDerivation :
               (Derivation.toDerivation2 T (Derivation.eta χ)) (by simp)) (by simp))⌝ := rfl;
   rw [h, Derivation2.quote_or, Derivation2.quote_wk, Derivation2.quote_wk];
 
-end Quotation
-
 private lemma quote_speedupProof_eq (π : Sentence L) :
     (⌜speedupProof T σ π⌝ : ℕ)
-      = cutRule (insert ⌜σ ⋎ π⌝ ∅) ⌜σ⌝ (axm (insert ⌜σ⌝ (insert ⌜σ ⋎ π⌝ ∅)) ⌜σ⌝)
-          (orIntro (insert ⌜σ ⋎ π⌝ (insert ⌜∼σ⌝ ∅)) ⌜σ⌝ ⌜π⌝
-            (wkRule (insert ⌜σ⌝ (insert ⌜π⌝ (insert ⌜σ ⋎ π⌝ (insert ⌜∼σ⌝ ∅))))
-              (wkRule (insert ⌜σ⌝ (insert ⌜π⌝ (insert ⌜∼σ⌝ ∅)))
-                ⌜Derivation.toDerivation2 (insert σ T)
-                  (Derivation.eta (σ : Proposition L))⌝))) := by
+      = speedupCode ⌜σ⌝ ⌜∼σ⌝ ⌜π⌝ ⌜σ ⋎ π⌝
+          ⌜Derivation.toDerivation2 (insert σ T) (Derivation.eta (σ : Proposition L))⌝ := by
   rw [quote_proof_eq (speedupProof T σ π) rfl];
   have h : (⌜Derivation.toDerivation2 (insert σ T) (speedupProof T σ π).derivation⌝ : ℕ)
       = ⌜Derivation.toDerivation2 (insert σ T)
           (speedupDerivation (σ : Proposition L) (π : Proposition L))⌝ :=
     quote_pullback_cast _ _;
   rw [h, quote_speedupDerivation];
-  simp [Sentence.quote_def];
+  simp [speedupCode, Sentence.quote_def];
 
-section SpeedupCode
-
-variable {p q : α → ℕ}
-
-private lemma primrec_speedupCode (hp : Primrec p) (hq : Primrec q) (a na n₀ : ℕ) :
-    Primrec λ x ↦
-      cutRule (insert (q x) ∅) a (axm (insert a (insert (q x) ∅)) a)
-        (orIntro (insert (q x) (insert na ∅)) a (p x)
-          (wkRule (insert a (insert (p x) (insert (q x) (insert na ∅))))
-            (wkRule (insert a (insert (p x) (insert na ∅))) n₀))) := by
-  have h₁ : Primrec λ x ↦ (insert (q x) ∅ : ℕ) := primrec_insert hq (.const ∅);
-  have h₂ : Primrec λ x ↦ (insert (q x) (insert na ∅) : ℕ) := primrec_insert hq (.const _);
-  have h₃ : Primrec λ x ↦ (insert a (insert (p x) (insert na ∅)) : ℕ) :=
-    primrec_insert (.const a) (primrec_insert hp (.const _));
-  have h₄ : Primrec λ x ↦ (insert a (insert (p x) (insert (q x) (insert na ∅))) : ℕ) :=
-    primrec_insert (.const a) (primrec_insert hp h₂);
-  have h₅ : Primrec λ x ↦ wkRule (insert a (insert (p x) (insert (q x) (insert na ∅))))
-      (wkRule (insert a (insert (p x) (insert na ∅))) n₀) :=
-    primrec_wkRule h₄ (primrec_wkRule h₃ (.const n₀));
-  exact primrec_cutRule h₁ (.const a) (primrec_axm (primrec_insert (.const a) h₁) (.const a))
-    (primrec_orIntro h₂ (.const a) hp h₅);
-
-end SpeedupCode
+end Quotation
 
 private lemma computable_quote_speedupProof [L.Primcodable] :
     Computable λ π ↦ (⌜speedupProof T σ π⌝ : ℕ) := by
@@ -221,8 +222,8 @@ private lemma exists_computable_bound_minProof_or [L.Primcodable] :
 
 - [EM71] -/
 theorem ehrenfeucht_mycielski_speedup [L.Primcodable]
-  (hU : ¬ComputablePred (insert (∼σ) T).theory) (f : ℕ → ℕ) (hf : Computable f) :
-  ∃ π : Sentence L, T ⊢ π ∧ f ((insert σ T).minProof π) < T.minProof π := by
+    (hU : ¬ComputablePred (insert (∼σ) T).theory) (f : ℕ → ℕ) (hf : Computable f) :
+    ∃ π : Sentence L, T ⊢ π ∧ f ((insert σ T).minProof π) < T.minProof π := by
   contrapose! hU;
   obtain ⟨c, hc, hcb⟩ := exists_computable_bound_minProof_or (T := T) (σ := σ);
   refine ComputablePred.of_eq ?_ (λ π ↦ provable_insert_neg_iff_or.symm);
@@ -231,22 +232,27 @@ theorem ehrenfeucht_mycielski_speedup [L.Primcodable]
     ((Nat.computable_boundedMax hf).comp hc)
     λ π hπ ↦ (hU (σ ⋎ π) hπ).trans (Nat.le_boundedMax (hcb π));
 
-theorem ehrenfeucht_mycielski_speedup_arithmetic
-  {T : ArithmeticTheory} [T.Δ₁] [𝗜𝚺₁ ⪯ T] {σ : ArithmeticSentence} (hσ : T ⊬ σ) (f : ℕ → ℕ) (hf : Computable f) :
-  ∃ π : ArithmeticSentence, T ⊢ π ∧ f ((insert σ T).minProof π) < T.minProof π :=
-  have : 𝗜𝚺₁ ⪯ insert (∼σ) T := Entailment.WeakerThan.trans ‹𝗜𝚺₁ ⪯ T› (Entailment.Axiomatized.le_of_subset (Set.subset_insert _ T));
-  have : Entailment.Consistent (insert (∼σ) T) := Entailment.unprovable_iff_consistent_adjoin.mp hσ;
-  ehrenfeucht_mycielski_speedup (uncomputable_theory_of_consistent : ¬ComputablePred (insert (∼σ) T).theory) f hf
+section Arithmetic
 
-example {T : ArithmeticTheory} [T.Δ₁] {σ : ArithmeticSentence} [𝗜𝚺₁ ⪯ T] (hσ : T ⊬ σ) :
-  ∃ π : ArithmeticSentence, T ⊢ π ∧ (insert σ T).minProof π < Nat.log 2 (T.minProof π) := by
-  obtain ⟨π, hπ, hlt⟩ := ehrenfeucht_mycielski_speedup_arithmetic hσ
-    (λ x ↦ 2 ^ (x + 1))
+variable {T : ArithmeticTheory} [T.Δ₁] [𝗜𝚺₁ ⪯ T] {σ : ArithmeticSentence}
+
+theorem ehrenfeucht_mycielski_speedup_arithmetic (hσ : T ⊬ σ) (f : ℕ → ℕ) (hf : Computable f) :
+    ∃ π : ArithmeticSentence, T ⊢ π ∧ f ((insert σ T).minProof π) < T.minProof π :=
+  have : 𝗜𝚺₁ ⪯ insert (∼σ) T :=
+    Entailment.WeakerThan.trans ‹𝗜𝚺₁ ⪯ T›
+      (Entailment.Axiomatized.le_of_subset (Set.subset_insert _ T));
+  have : Entailment.Consistent (insert (∼σ) T) :=
+    Entailment.unprovable_iff_consistent_adjoin.mp hσ;
+  ehrenfeucht_mycielski_speedup
+    (uncomputable_theory_of_consistent : ¬ComputablePred (insert (∼σ) T).theory) f hf
+
+example (hσ : T ⊬ σ) :
+    ∃ π : ArithmeticSentence, T ⊢ π ∧ (insert σ T).minProof π < Nat.log 2 (T.minProof π) := by
+  obtain ⟨π, hπ, hlt⟩ := ehrenfeucht_mycielski_speedup_arithmetic hσ (λ x ↦ 2 ^ (x + 1))
     (((Primrec₂.unpaired'.1 Nat.Primrec.pow).comp (Primrec.const 2) Primrec.succ).to_comp);
-  use π;
-  and_intros;
-  . assumption;
-  . apply Nat.le_log_iff_pow_le ?_ ?_ |>.mpr;
-    all_goals grind;
+  refine ⟨π, hπ, (Nat.le_log_iff_pow_le ?_ ?_).mpr ?_⟩;
+  all_goals grind;
+
+end Arithmetic
 
 end LO.FirstOrder.Arithmetic.Bootstrapping
