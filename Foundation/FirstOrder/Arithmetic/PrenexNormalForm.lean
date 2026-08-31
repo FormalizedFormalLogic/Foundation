@@ -432,6 +432,13 @@ private noncomputable def strictEquiv_of_hierarchy (h : Hierarchy Γ s φ) : Str
     | dummy_pi hp ih => exact ⟨alt_up (exs ih.some)⟩;
   exact nonempty.some;
 
+-- The syntactic (`T ⊢ …`) counterpart of `iff_models`, via completeness for `T`.
+private lemma provable {T : ArithmeticTheory} [𝗘𝗤 ℒₒᵣ ⪯ T] {Γ s n} {φ : ArithmeticSemiformula Empty n}
+    (d : StrictEquiv.{u} T Γ s φ) : T ⊢ ∀¹* (φ 🡘 d.witness) := by
+  apply FirstOrder.Arithmetic.complete T _;
+  intro M _ _;
+  simpa [models_iff] using fun e => d.iff_models M e;
+
 end StrictEquiv
 
 namespace Hierarchy
@@ -444,13 +451,9 @@ lemma exists_strictHierarchy_form {Γ s n} {φ : ArithmeticSemiformula Empty n} 
 
 theorem exists_strictHierarchy_provable {Γ s n} {φ : ArithmeticSemiformula Empty n} (h : Hierarchy Γ s φ) :
   ∃ ψ : ArithmeticSemiformula Empty n, StrictHierarchy Γ s ψ ∧ 𝗣𝗔 ⊢ ∀¹* (φ 🡘 ψ) := by
-  obtain ⟨ψ, hψ, H⟩ := exists_strictHierarchy_form.{0} h;
-  use ψ;
-  and_intros;
-  . exact hψ;
-  . apply FirstOrder.Arithmetic.complete.{0} 𝗣𝗔 _;
-    intro M _ _;
-    simpa [models_iff] using fun e => H M e;
+  -- the model universe used internally is immaterial to this statement, so fix it to `0`.
+  have hEquiv := StrictEquiv.strictEquiv_of_hierarchy.{0} h;
+  exact ⟨hEquiv.witness, hEquiv.hierarchy, hEquiv.provable⟩;
 
 theorem exists_strictHierarchy_provable_of_sentence {Γ s} {σ : ArithmeticSentence} (h : Hierarchy Γ s σ) :
   ∃ π : ArithmeticSentence, StrictHierarchy Γ s π ∧ 𝗣𝗔 ⊢ σ 🡘 π := by
