@@ -288,13 +288,13 @@ theorem rePred_weak_representation {p : ℕ → Prop} (hp : REPred p) {x : ℕ} 
 
 end codeOfREPred
 
-@[instance_reducible] noncomputable def _root_.LO.FirstOrder.Theory.«Σ₁».ofRE
-    {L : Language} [L.Encodable] [L.LORDefinable] (T : Theory L)
-    (hT : REPred fun n : ℕ ↦ n ∈ Encodable.encode '' T) : T.«Σ₁» where
-  ch := .mkSigma (codeOfREPred fun n : ℕ ↦ n ∈ Encodable.encode '' T)
+@[instance_reducible] noncomputable instance _root_.LO.FirstOrder.Theory.RE.sigma1
+    {L : Language} [L.Encodable] [L.LORDefinable] (T : Theory L) [T.RE] : T.«Σ₁» where
+  ch := .mkSigma (codeOfREPred fun n ↦ n ∈ T.codes)
     (by simp [codeOfREPred, codeOfPartrec'])
   mem_iff φ := by
-    simpa [Matrix.fun_eq_vec_one, Semiformula.quote_eq_encode] using
+    have hT : REPred fun n : ℕ ↦ n ∈ T.codes := Theory.RE.re
+    simpa [Theory.codes, Matrix.fun_eq_vec_one, Semiformula.quote_eq_encode] using
       (codeOfREPred_spec hT (x := (⌜φ⌝ : ℕ)))
 
 section codeOfComputablePred
