@@ -60,7 +60,10 @@ private lemma alt_up (h : StrictEquivOnPA.{u} Γ s φ) : StrictEquivOnPA.{u} Γ.
   . refine ⟨∃¹ (Rew.bShift ▹ φ'), (hφ'.rew Rew.bShift).sigma, fun V _ _ e => ?_⟩;
     simp [hiff' V e];
 
-private lemma of_deltaZero (hp : Hierarchy 𝚺 0 φ) : StrictEquivOnPA.{u} Γ s φ := sorry
+private lemma of_deltaZero (hp : Hierarchy 𝚺 0 φ) : StrictEquivOnPA.{u} Γ s φ := by
+  induction s generalizing Γ with
+  | zero => exact refl (StrictHierarchy.zero hp);
+  | succ s ih => simpa using alt_up (ih (Γ := Γ.alt));
 
 /-- The core closure properties needed at a fixed level `s`. -/
 private structure CoreClosure (s : ℕ) : Prop where
