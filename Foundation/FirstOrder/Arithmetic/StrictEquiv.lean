@@ -34,6 +34,15 @@ lemma models_iff_of_provable_iff {T : ArithmeticTheory} [𝗘𝗤 ℒₒᵣ ⪯ 
   simp only [models_iff, Semiformula.eval_allClosure] at this;
   simpa using this e;
 
+-- `Type 0` specialization of `models_iff_of_provable_iff`, with `V` pinned in the statement
+-- itself rather than left universe-polymorphic. Storing the general version unapplied (e.g. via
+-- `have h := models_iff_of_provable_iff hp`, to be fed to `V`/`e` later) leaves `V`'s universe a
+-- metavariable that `simp` fails to unify against; pinning it here avoids that.
+lemma models_iff_of_provable_iff' {T : ArithmeticTheory} [𝗘𝗤 ℒₒᵣ ⪯ T] {n} {φ ψ : ArithmeticSemiformula Empty n}
+    (h : T ⊢ ∀¹* (φ 🡘 ψ)) :
+    ∀ (V : Type) [ORingStructure V] [V↓[ℒₒᵣ] ⊧* T] (e : Fin n → V), V ⊧/e φ ↔ V ⊧/e ψ :=
+  models_iff_of_provable_iff h
+
 /-- A witness that `φ` is `T`-provably equivalent to some formula in `StrictHierarchy Γ s`. -/
 structure StrictEquiv (T : ArithmeticTheory) (Γ : Polarity) (s : ℕ) {n : ℕ}
     (φ : ArithmeticSemiformula Empty n) where
