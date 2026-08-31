@@ -1,7 +1,7 @@
 module
 
 public import Foundation.FirstOrder.Incompleteness.Consistency
-public import Foundation.FirstOrder.Arithmetic.Sigma1WitnessForm
+public import Foundation.FirstOrder.Arithmetic.ISigma1.Prenex
 
 /-!
 # The Friedman–Goldfarb–Harrington theorem
@@ -148,7 +148,7 @@ variable (T : ArithmeticTheory) [T.Δ₁] [𝗜𝚺₁ ⪯ T] {σ : ArithmeticSe
 
 theorem fgh_theorem (hσ : Hierarchy 𝚺 1 σ) :
   ∃ π : ArithmeticSentence, Hierarchy 𝚺 1 π ∧ 𝗜𝚺₁ ⊢ provabilityPred T π 🡘 σ ⋎ provabilityPred T ⊥ := by
-  obtain ⟨θ, hθ, hwit⟩ := exists_delta0_witness_form.{0} hσ;
+  obtain ⟨θ, hθ, hwit⟩ := ISigma1.exists_strictHierarchy_provable_of_sentence hσ;
   set θ' : 𝚺₀.Semisentence 1 := .mkSigma θ hθ with hθ';
   use T.fghSentence' θ';
   and_intros;
@@ -156,7 +156,8 @@ theorem fgh_theorem (hσ : Hierarchy 𝚺 1 σ) :
   . have heq : 𝗜𝚺₁ ⊢ provabilityPred T (T.fghSentence θ') 🡘 σ ⋎ provabilityPred T ⊥ := by
       apply complete.{0};
       intro V _ _;
-      have hwit' : V ⊧/![] σ ↔ ∃ w, V ⊧/![w] θ := hwit V ![];
+      have hwit' : V ⊧/![] σ ↔ ∃ w, V ⊧/![w] θ := by
+        simpa [Semiformula.eval_ex] using models_iff_of_provable_iff' hwit V ![];
       simpa [models_iff, hwit', hθ'] using provable_fghSentence_iff (θ := θ');
     have hdiag : 𝗜𝚺₁ ⊢ T.fghSentence θ' 🡘 T.fghSentence' θ' := diagonal (T.witnessedBefore θ').val;
     have hiff : 𝗜𝚺₁ ⊢ provabilityPred T (T.fghSentence θ') 🡘 provabilityPred T (T.fghSentence' θ') :=
