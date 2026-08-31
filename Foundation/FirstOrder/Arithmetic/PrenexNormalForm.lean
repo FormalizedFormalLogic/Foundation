@@ -143,9 +143,54 @@ private lemma or_sigma_step (ih : CoreClosure.{u} s) :
       . left; exact ⟨x, h⟩;
       . right; exact ⟨x, h⟩;
 
-private lemma and_sigma_step (ih : CoreClosure s) :
+-- Insertion of an unused fresh variable at position 1 does not affect evaluation.
+private lemma eval_insert1 {n} (θ : ArithmeticSemiformula Empty (n + 1)) (V : Type u) [ORingStructure V]
+    (u w : V) (e : Fin n → V) :
+    V ⊧/(u :> w :> e) (Rew.bShift.q ▹ θ) ↔ V ⊧/(u :> e) θ := by
+  simp [Semiformula.eval_rew_q, Function.comp_def];
+
+private lemma and_sigma_step (ih : CoreClosure.{u} s) :
     ∀ {n} {φ ψ : ArithmeticSemiformula Empty n},
-      StrictEquivOnPA.{u} 𝚺 (s + 1) φ → StrictEquivOnPA.{u} 𝚺 (s + 1) ψ → StrictEquivOnPA.{u} 𝚺 (s + 1) (φ ⋏ ψ) := sorry
+      StrictEquivOnPA.{u} 𝚺 (s + 1) φ → StrictEquivOnPA.{u} 𝚺 (s + 1) ψ → StrictEquivOnPA.{u} 𝚺 (s + 1) (φ ⋏ ψ) := by
+  intro n φ ψ hφ hψ;
+  obtain ⟨φ', hφ', hφiff⟩ := hφ;
+  obtain ⟨ψ', hψ', hψiff⟩ := hψ;
+  obtain ⟨φ₀, rfl, hφ₀⟩ := hφ'.sigma_succ_elim;
+  obtain ⟨ψ₀, rfl, hψ₀⟩ := hψ'.sigma_succ_elim;
+  have hφ₀' : StrictHierarchy 𝚷 s (Rew.bShift.q ▹ φ₀) := hφ₀.rew Rew.bShift.q;
+  have hψ₀' : StrictHierarchy 𝚷 s (Rew.bShift.q ▹ ψ₀) := hψ₀.rew Rew.bShift.q;
+  obtain ⟨A, hA, hAiff⟩ := ih.bexs 𝚷
+    (t := Rew.bShift (‘#0 + 1’ : ArithmeticSemiterm Empty (n + 1)))
+    (Rew.bShift_positive _) (refl hφ₀');
+  obtain ⟨B, hB, hBiff⟩ := ih.bexs 𝚷
+    (t := Rew.bShift (‘#0 + 1’ : ArithmeticSemiterm Empty (n + 1)))
+    (Rew.bShift_positive _) (refl hψ₀');
+  obtain ⟨χ, hχ, hχiff⟩ := ih.and 𝚷 (refl hA) (refl hB);
+  use ∃¹ χ;
+  and_intros;
+  . exact hχ.sigma;
+  . intro V _ _ e;
+    have hA_eval : ∀ z : V, V ⊧/(z :> e) A ↔ ∃ x ≤ z, V ⊧/(x :> e) φ₀ := fun z => by
+      rw [← hAiff V (z :> e)];
+      show V ⊧/(z :> e)
+        ((Rew.bShift.q ▹ φ₀ : ArithmeticSemiformula Empty (n + 2)).bexsLTSucc
+          (‘#0’ : ArithmeticSemiterm Empty (n + 1))) ↔ _;
+      simp [eval_insert1];
+    have hB_eval : ∀ z : V, V ⊧/(z :> e) B ↔ ∃ x ≤ z, V ⊧/(x :> e) ψ₀ := fun z => by
+      rw [← hBiff V (z :> e)];
+      show V ⊧/(z :> e)
+        ((Rew.bShift.q ▹ ψ₀ : ArithmeticSemiformula Empty (n + 2)).bexsLTSucc
+          (‘#0’ : ArithmeticSemiterm Empty (n + 1))) ↔ _;
+      simp [eval_insert1];
+    have hφiff' : V ⊧/e φ ↔ ∃ x, V ⊧/(x :> e) φ₀ := (hφiff V e).trans Semiformula.eval_ex;
+    have hψiff' : V ⊧/e ψ ↔ ∃ x, V ⊧/(x :> e) ψ₀ := (hψiff V e).trans Semiformula.eval_ex;
+    simp only [LogicalConnective.HomClass.map_and, Semiformula.eval_ex, hφiff', hψiff',
+      ← hχiff, hA_eval, hB_eval];
+    constructor;
+    . rintro ⟨⟨x, hx⟩, ⟨y, hy⟩⟩;
+      exact ⟨max x y, ⟨x, le_max_left x y, hx⟩, ⟨y, le_max_right x y, hy⟩⟩;
+    . rintro ⟨z, ⟨x, _, hx⟩, ⟨y, _, hy⟩⟩;
+      exact ⟨⟨x, hx⟩, ⟨y, hy⟩⟩;
 
 private lemma bexs_sigma_step (ih : CoreClosure s) :
     ∀ {n} {φ : ArithmeticSemiformula Empty (n + 1)} {t : ArithmeticSemiterm Empty (n + 1)},
