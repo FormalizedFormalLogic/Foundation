@@ -24,12 +24,9 @@ inductive StrictHierarchy : Polarity → ℕ → {n : ℕ} → Semiformula L ξ 
 
 namespace StrictHierarchy
 
--- Note: `hierarchy`, `neg`, and `rew` below are defined by recursive pattern matching on
--- `StrictHierarchy`. Lean's equation compiler needs the indices `Γ`, `s`, `φ` (and hence `n`)
--- to be freshly bound directly in each declaration's own signature in order to generalize them
--- correctly across the recursive calls; reusing a shared `variable` here breaks that
--- generalization. So we keep these three self-contained and share `variable`s only for the
--- remaining (non-recursive) lemmas below.
+-- `hierarchy`, `neg`, `rew` are recursive pattern matches on `StrictHierarchy`; the equation
+-- compiler needs their indices freshly bound in each signature to generalize correctly across
+-- the recursive calls, so a shared `variable` cannot be used for them.
 
 lemma hierarchy {Γ s} {φ : Semiformula L ξ n} : StrictHierarchy Γ s φ → Hierarchy Γ s φ
   | zero h => h.of_zero

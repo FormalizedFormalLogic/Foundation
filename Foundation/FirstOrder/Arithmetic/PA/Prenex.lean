@@ -20,17 +20,10 @@ namespace LO.FirstOrder.Arithmetic
 
 variable {Γ : Polarity} {s : ℕ} {n : ℕ} {φ : ArithmeticSemiformula Empty n}
 
--- `ClosureBallBexs` (the ball/bexs induction-closure bundle driving `of_hierarchy`, needing
--- collection so it stays `𝗣𝗔`-fixed) and everything built on top of it (`exs`/`all`/`of_hierarchy`
--- and friends) have no meaning outside this file's proof and stay `private`, even though their
--- *statements* mention only the now-public `StrictEquiv`: since these `def`s are `Type`-valued
--- (not `Prop`-valued), this module's visibility check exposes a public `def`'s body (unlike a
--- `theorem`/`lemma`, where proof irrelevance means only the statement is exposed). Each step here
--- drops from `StrictEquiv` (provable) to a bare model-theoretic `Iff` via
--- `models_iff_of_provable_iff`, does the actual combinatorics purely model-theoretically, then
--- climbs back to `StrictEquiv` via `provable_iff_of_models_iff` (i.e. `Arithmetic.complete`) at
--- the very end. (The `and`/`or` counterpart, `ClosureAndOr`, needs no collection and lives,
--- theory-generically, in `StrictEquiv.lean`.)
+-- `ClosureBallBexs` and everything built on it (`exs`/`all`/`of_hierarchy`) stay `private`, even
+-- though their *statements* mention only the public `StrictEquiv`: these `def`s are `Type`-valued
+-- (not `Prop`-valued), so unlike a `theorem`/`lemma` (proof-irrelevant, only the statement is
+-- exposed), making one public would expose its body.
 open StrictEquiv (refl neg)
 
 private noncomputable def bShiftWitness {t : ArithmeticSemiterm Empty (n + 1)} (ht : t.Positive) :
@@ -39,9 +32,7 @@ private noncomputable def bShiftWitness {t : ArithmeticSemiterm Empty (n + 1)} (
 
 -- `ball` and `bexs` are mutually dependent at each level (the polarity-flip trick builds each
 -- one's `𝚷` case out of the *other*'s `𝚺` step), so they are constructed by a single joint
--- induction below. `and`/`or` (`ClosureAndOr` further down) never need `ball`, only `bexs`, so
--- once this closure is available for every `s` they are proved by a separate, independent
--- induction that simply reads off `bexs` at each level.
+-- induction below.
 private structure ClosureBallBexs (s : ℕ) where
   ball : ∀ Γ {n} {φ : ArithmeticSemiformula Empty (n + 1)} {t : ArithmeticSemiterm Empty (n + 1)},
       t.Positive → StrictEquiv 𝗣𝗔 Γ s φ → StrictEquiv 𝗣𝗔 Γ s (∀¹[“x. x < !!t”] φ)
@@ -170,14 +161,12 @@ private noncomputable def closureBallBexs : ClosureBallBexs s := by
   | zero => exact closureBallBexs_zero;
   | succ s ih => exact closureBallBexs_succ ih;
 
--- `ClosureAndOr` (theory-generic, in `StrictEquiv.lean`) only needs a `bexs`-closure fact at
--- each level, not the full `ball`/`bexs` induction; specialize it to `𝗣𝗔` here by feeding it
--- `closureBallBexs.bexs`.
+-- Specializes the theory-generic `ClosureAndOr` to `𝗣𝗔` by feeding it `closureBallBexs.bexs`.
 private noncomputable def paClosureAndOr : ClosureAndOr 𝗣𝗔 s :=
   closureAndOr (fun _s => closureBallBexs.bexs)
 
 -- Contracts the two nested existentials `∃x∃y` of a strict `Σ_{s+1}` witness into a single
--- bounded pair `∃z (∃x ≤ z)(∃y ≤ z)`, using two applications of `closureBallBexs.bexs`.
+-- bounded pair `∃z (∃x ≤ z)(∃y ≤ z)`.
 private noncomputable def exs {φ : ArithmeticSemiformula Empty (n + 1)} (h : StrictEquiv 𝗣𝗔 𝚺 (s + 1) φ) :
     StrictEquiv 𝗣𝗔 𝚺 (s + 1) (∃¹ φ) := by
   obtain ⟨φ', hφ', hprov'⟩ := h;
@@ -224,9 +213,8 @@ private noncomputable def all {φ : ArithmeticSemiformula Empty (n + 1)} (h : St
   have h'' := neg (exs h');
   simpa using h'';
 
--- `Hierarchy` is `Prop`-valued with many constructors, so `induction h` cannot directly build a
--- `StrictEquiv` (a `Type`). Prove `Nonempty (StrictEquiv 𝗣𝗔 Γ s φ)` by induction instead (a
--- legal `Prop`-target elimination) and unwrap the single needed witness via choice.
+-- `Hierarchy` is `Prop`-valued, so `induction h` cannot directly build a `StrictEquiv` (a `Type`).
+-- Prove `Nonempty (StrictEquiv 𝗣𝗔 Γ s φ)` by induction instead and unwrap via choice.
 private noncomputable def of_hierarchy (h : Hierarchy Γ s φ) : StrictEquiv 𝗣𝗔 Γ s φ := by
   have nonempty : Nonempty (StrictEquiv 𝗣𝗔 Γ s φ) := by
     induction h with

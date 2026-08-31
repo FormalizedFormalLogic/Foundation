@@ -19,8 +19,9 @@ namespace LO.FirstOrder.Arithmetic
 
 variable {n : ℕ}
 
--- A `StrictHierarchy 𝚺 1` witness is always of the form `∃¹ θ` for some Δ₀ `θ`; extract that
--- `θ` as data (mirroring `StrictHierarchy.sigma_succ_elim`, a `Prop`-valued existential).
+-- A `StrictHierarchy 𝚺 1` witness is always of the form `∃¹ θ` for some Δ₀ `θ`, but
+-- `StrictHierarchy.sigma_succ_elim` only asserts this as a `Prop`-valued existential;
+-- extract `θ` as `Type`-valued data via choice.
 private noncomputable def strictSigma1Elim {φ : ArithmeticSemiformula Empty n} (h : StrictHierarchy 𝚺 1 φ) :
     Σ' θ : ArithmeticSemiformula Empty (n + 1), φ = ∃¹ θ ∧ Hierarchy 𝚺 0 θ :=
   ⟨h.sigma_succ_elim.choose, h.sigma_succ_elim.choose_spec.1,

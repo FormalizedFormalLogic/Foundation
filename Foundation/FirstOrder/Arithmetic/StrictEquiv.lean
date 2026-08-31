@@ -17,8 +17,7 @@ open LO.FirstOrder
 
 namespace LO.FirstOrder.Arithmetic
 
-/-- A `Type 0` model-theoretic equivalence between two formulas, valid in every model of `T`,
-yields a `T`-provable biconditional via completeness. Converse of `models_iff_of_provable_iff`. -/
+/-- Converse of `models_iff_of_provable_iff`. -/
 lemma provable_iff_of_models_iff {T : ArithmeticTheory} [𝗘𝗤 ℒₒᵣ ⪯ T] {n} {φ ψ : ArithmeticSemiformula Empty n}
     (h : ∀ (V : Type) [ORingStructure V] [V↓[ℒₒᵣ] ⊧* T] (e : Fin n → V), V ⊧/e φ ↔ V ⊧/e ψ) :
     T ⊢ ∀¹* (φ 🡘 ψ) := by
@@ -26,8 +25,7 @@ lemma provable_iff_of_models_iff {T : ArithmeticTheory} [𝗘𝗤 ℒₒᵣ ⪯ 
   intro V _ _;
   simpa [models_iff] using h V;
 
-/-- A `T`-provable biconditional yields a model-theoretic equivalence in every model of `T`,
-via soundness. Converse of `provable_iff_of_models_iff`. -/
+/-- Converse of `provable_iff_of_models_iff`. -/
 lemma models_iff_of_provable_iff {T : ArithmeticTheory} [𝗘𝗤 ℒₒᵣ ⪯ T] {n} {φ ψ : ArithmeticSemiformula Empty n}
     (h : T ⊢ ∀¹* (φ 🡘 ψ)) (V : Type*) [ORingStructure V] [V↓[ℒₒᵣ] ⊧* T] (e : Fin n → V) :
     V ⊧/e φ ↔ V ⊧/e ψ := by
@@ -35,10 +33,10 @@ lemma models_iff_of_provable_iff {T : ArithmeticTheory} [𝗘𝗤 ℒₒᵣ ⪯ 
   simp only [models_iff, Semiformula.eval_allClosure] at this;
   simpa using this e;
 
--- `Type 0` specialization of `models_iff_of_provable_iff`, with `V` pinned in the statement
--- itself rather than left universe-polymorphic. Storing the general version unapplied (e.g. via
--- `have h := models_iff_of_provable_iff hp`, to be fed to `V`/`e` later) leaves `V`'s universe a
--- metavariable that `simp` fails to unify against; pinning it here avoids that.
+-- `Type 0` specialization of `models_iff_of_provable_iff`: storing the universe-polymorphic
+-- version unapplied (e.g. `have h := models_iff_of_provable_iff hp`, fed to `V`/`e` later)
+-- leaves `V`'s universe a metavariable that `simp` fails to unify against; pinning `V` here
+-- avoids that.
 lemma models_iff_of_provable_iff' {T : ArithmeticTheory} [𝗘𝗤 ℒₒᵣ ⪯ T] {n} {φ ψ : ArithmeticSemiformula Empty n}
     (h : T ⊢ ∀¹* (φ 🡘 ψ)) :
     ∀ (V : Type) [ORingStructure V] [V↓[ℒₒᵣ] ⊧* T] (e : Fin n → V), V ⊧/e φ ↔ V ⊧/e ψ :=
@@ -71,9 +69,8 @@ def of_iff {ψ : ArithmeticSemiformula Empty n} (h : StrictEquiv T Γ s φ)
 def neg (h : StrictEquiv T Γ s φ) : StrictEquiv T Γ.alt s (∼φ) :=
   ⟨∼h.witness, h.hierarchy.neg, provable_iff_of_models_iff fun V _ _ e => by simp [h.iff_models V e]⟩
 
--- `StrictEquiv` carries data (the witness formula), so an `Iff` between two instances of it
--- is not itself a `Prop`; state the analogue of `neg`'s converse between the truncated
--- (`Nonempty`) versions instead.
+-- `StrictEquiv` carries data (the witness formula), so an `Iff` between two instances is not
+-- itself a `Prop`; state `neg`'s converse between the `Nonempty`-truncated versions instead.
 @[simp] lemma neg_iff :
     Nonempty (StrictEquiv T Γ.alt s (∼φ)) ↔ Nonempty (StrictEquiv T Γ s φ) := by
   constructor;
@@ -121,18 +118,15 @@ end StrictEquiv
 
 open StrictEquiv (refl neg)
 
--- `StrictHierarchy.sigma_succ_elim` only asserts the *existence* of a witness formula (as a
--- `Prop`), so extracting it as `Type`-valued data requires one (noncomputable) application of
--- choice. Theory-independent, unlike `StrictEquiv` itself.
+-- `StrictHierarchy.sigma_succ_elim` only asserts the *existence* of a witness formula (a `Prop`),
+-- so extracting it as `Type`-valued data needs one (noncomputable) application of choice.
 noncomputable def strictSigmaSuccElim {s n : ℕ} {φ : ArithmeticSemiformula Empty n}
     (h : StrictHierarchy 𝚺 (s + 1) φ) :
     Σ' ψ : ArithmeticSemiformula Empty (n + 1), φ = ∃¹ ψ ∧ StrictHierarchy 𝚷 s ψ :=
   ⟨h.sigma_succ_elim.choose, h.sigma_succ_elim.choose_spec⟩
 
--- `and`/`or` for `StrictHierarchy` merge two witnesses via `max`, which needs only ordered
--- semiring reasoning (available under `[𝗣𝗔⁻ ⪯ T]`), applied to a `bexs`-closure fact at the same
--- level `s`. Building that `bexs`-closure needs collection, so it is not reproduced here; callers
--- supply whatever `T`-specific bundle they already have (e.g. `closureBallBexs.bexs` for `𝗣𝗔`).
+-- Merging witnesses via `and`/`or` needs a `bexs`-closure fact at level `s`, supplied by the
+-- caller (e.g. `closureBallBexs.bexs` for `𝗣𝗔`) rather than built here, since it needs collection.
 structure ClosureAndOr (T : ArithmeticTheory) [𝗘𝗤 ℒₒᵣ ⪯ T] (s : ℕ) where
   and : ∀ Γ {n} {φ ψ : ArithmeticSemiformula Empty n},
       StrictEquiv T Γ s φ → StrictEquiv T Γ s ψ → StrictEquiv T Γ s (φ ⋏ ψ)
