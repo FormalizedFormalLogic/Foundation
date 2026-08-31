@@ -20,10 +20,10 @@ namespace LO.FirstOrder.Arithmetic
 
 variable {Γ : Polarity} {s : ℕ} {n : ℕ} {φ ψ : ArithmeticSemiformula Empty n}
 
--- `CoreClosure` (the induction-closure bundle driving `of_hierarchy`) and everything built on top
--- of it (`exs`/`all`/`of_hierarchy`/`coreClosure` and friends) have no meaning outside this file's
--- proof and stay `private`, even though their *statements* mention only the now-public
--- `StrictEquiv`: since these `def`s are `Type`-valued (not `Prop`-valued), this module's
+-- `BallBexsClosure`/`AndOrClosure` (the induction-closure bundles driving `of_hierarchy`) and
+-- everything built on top of them (`exs`/`all`/`of_hierarchy` and friends) have no meaning
+-- outside this file's proof and stay `private`, even though their *statements* mention only
+-- the now-public `StrictEquiv`: since these `def`s are `Type`-valued (not `Prop`-valued), this module's
 -- visibility check exposes a public `def`'s body (unlike a `theorem`/`lemma`, where proof
 -- irrelevance means only the statement is exposed). Each step here drops from `StrictEquiv`
 -- (provable) to a bare model-theoretic `Iff` via `models_iff_of_provable_iff`, does the actual
@@ -47,28 +47,18 @@ private noncomputable def bShiftWitness {t : ArithmeticSemiterm Empty (n + 1)} (
     Σ' u : ArithmeticSemiterm Empty n, t = Rew.bShift u :=
   ⟨(Rew.positive_iff.mp ht).choose, (Rew.positive_iff.mp ht).choose_spec⟩
 
-/-- The core closure properties needed at a fixed level `s`. -/
-private structure CoreClosure (s : ℕ) where
-  and  : ∀ Γ {n} {φ ψ : ArithmeticSemiformula Empty n},
-      StrictEquiv 𝗣𝗔 Γ s φ → StrictEquiv 𝗣𝗔 Γ s ψ → StrictEquiv 𝗣𝗔 Γ s (φ ⋏ ψ)
-  or   : ∀ Γ {n} {φ ψ : ArithmeticSemiformula Empty n},
-      StrictEquiv 𝗣𝗔 Γ s φ → StrictEquiv 𝗣𝗔 Γ s ψ → StrictEquiv 𝗣𝗔 Γ s (φ ⋎ ψ)
+-- `ball` and `bexs` are mutually dependent at each level (the polarity-flip trick builds each
+-- one's `𝚷` case out of the *other*'s `𝚺` step), so they are constructed by a single joint
+-- induction below. `and`/`or` (`AndOrClosure` further down) never need `ball`, only `bexs`, so
+-- once this closure is available for every `s` they are proved by a separate, independent
+-- induction that simply reads off `bexs` at each level.
+private structure BallBexsClosure (s : ℕ) where
   ball : ∀ Γ {n} {φ : ArithmeticSemiformula Empty (n + 1)} {t : ArithmeticSemiterm Empty (n + 1)},
       t.Positive → StrictEquiv 𝗣𝗔 Γ s φ → StrictEquiv 𝗣𝗔 Γ s (∀¹[“x. x < !!t”] φ)
   bexs : ∀ Γ {n} {φ : ArithmeticSemiformula Empty (n + 1)} {t : ArithmeticSemiterm Empty (n + 1)},
       t.Positive → StrictEquiv 𝗣𝗔 Γ s φ → StrictEquiv 𝗣𝗔 Γ s (∃¹[“x. x < !!t”] φ)
 
-private def coreClosure_zero : CoreClosure 0 where
-  and := fun Γ {n φ ψ} hφ hψ =>
-    ⟨hφ.witness ⋏ hψ.witness,
-      StrictHierarchy.zero
-        (Hierarchy.and (StrictHierarchy.zero_iff.mp hφ.hierarchy) (StrictHierarchy.zero_iff.mp hψ.hierarchy)),
-      provable_iff_of_models_iff fun V _ _ e => by simp [hφ.iff_models V e, hψ.iff_models V e]⟩
-  or := fun Γ {n φ ψ} hφ hψ =>
-    ⟨hφ.witness ⋎ hψ.witness,
-      StrictHierarchy.zero
-        (Hierarchy.or (StrictHierarchy.zero_iff.mp hφ.hierarchy) (StrictHierarchy.zero_iff.mp hψ.hierarchy)),
-      provable_iff_of_models_iff fun V _ _ e => by simp [hφ.iff_models V e, hψ.iff_models V e]⟩
+private def ballBexsClosure_zero : BallBexsClosure 0 where
   ball := fun Γ {n φ t} ht hφ =>
     ⟨∀¹[“x. x < !!t”] hφ.witness,
       StrictHierarchy.zero (Hierarchy.ball ht (StrictHierarchy.zero_iff.mp hφ.hierarchy)),
@@ -82,83 +72,7 @@ private def coreClosure_zero : CoreClosure 0 where
         simp only [Semiformula.eval_bexs];
         exact exists_congr (fun x => and_congr Iff.rfl (hφ.iff_models V (x :> e)))⟩
 
-private noncomputable def or_sigma_step (ih : CoreClosure s) :
-    ∀ {n} {φ ψ : ArithmeticSemiformula Empty n},
-      StrictEquiv 𝗣𝗔 𝚺 (s + 1) φ → StrictEquiv 𝗣𝗔 𝚺 (s + 1) ψ → StrictEquiv 𝗣𝗔 𝚺 (s + 1) (φ ⋎ ψ) := by
-  intro n φ ψ hφ hψ;
-  obtain ⟨φ', hφ', hφprov⟩ := hφ;
-  obtain ⟨ψ', hψ', hψprov⟩ := hψ;
-  have hφiff := models_iff_of_provable_iff' hφprov;
-  have hψiff := models_iff_of_provable_iff' hψprov;
-  obtain ⟨φ₀, rfl, hφ₀⟩ := strictSigmaSuccElim hφ';
-  obtain ⟨ψ₀, rfl, hψ₀⟩ := strictSigmaSuccElim hψ';
-  obtain ⟨χ, hχ, hχprov⟩ := ih.or 𝚷 (refl hφ₀) (refl hψ₀);
-  have hχiff := models_iff_of_provable_iff' hχprov;
-  use ∃¹ χ;
-  . exact hχ.sigma;
-  . apply provable_iff_of_models_iff;
-    intro V _ _ e;
-    have hφiff' : V ⊧/e φ ↔ ∃ x, V ⊧/(x :> e) φ₀ := (hφiff V e).trans Semiformula.eval_ex;
-    have hψiff' : V ⊧/e ψ ↔ ∃ x, V ⊧/(x :> e) ψ₀ := (hψiff V e).trans Semiformula.eval_ex;
-    simp only [LogicalConnective.HomClass.map_or, Semiformula.eval_ex, hφiff', hψiff'];
-    constructor;
-    . rintro (⟨x, hx⟩ | ⟨x, hx⟩);
-      . exact ⟨x, (hχiff V (x :> e)).mp (by left; exact hx)⟩;
-      . exact ⟨x, (hχiff V (x :> e)).mp (by right; exact hx)⟩;
-    . rintro ⟨x, hx⟩;
-      rcases (hχiff V (x :> e)).mpr hx with h | h;
-      . left; exact ⟨x, h⟩;
-      . right; exact ⟨x, h⟩;
-
-private noncomputable def and_sigma_step (ih : CoreClosure s) :
-    ∀ {n} {φ ψ : ArithmeticSemiformula Empty n},
-      StrictEquiv 𝗣𝗔 𝚺 (s + 1) φ → StrictEquiv 𝗣𝗔 𝚺 (s + 1) ψ → StrictEquiv 𝗣𝗔 𝚺 (s + 1) (φ ⋏ ψ) := by
-  intro n φ ψ hφ hψ;
-  obtain ⟨φ', hφ', hφprov⟩ := hφ;
-  obtain ⟨ψ', hψ', hψprov⟩ := hψ;
-  have hφiff := models_iff_of_provable_iff' hφprov;
-  have hψiff := models_iff_of_provable_iff' hψprov;
-  obtain ⟨φ₀, rfl, hφ₀⟩ := strictSigmaSuccElim hφ';
-  obtain ⟨ψ₀, rfl, hψ₀⟩ := strictSigmaSuccElim hψ';
-  have hφ₀' : StrictHierarchy 𝚷 s (φ₀ ⇜ (#0 :> (#·.succ.succ))) := hφ₀.rew (Rew.subst _);
-  have hψ₀' : StrictHierarchy 𝚷 s (ψ₀ ⇜ (#0 :> (#·.succ.succ))) := hψ₀.rew (Rew.subst _);
-  obtain ⟨A, hA, hAprov⟩ := ih.bexs 𝚷
-    (t := Rew.bShift (‘#0 + 1’ : ArithmeticSemiterm Empty (n + 1)))
-    (Rew.bShift_positive _) (refl hφ₀');
-  obtain ⟨B, hB, hBprov⟩ := ih.bexs 𝚷
-    (t := Rew.bShift (‘#0 + 1’ : ArithmeticSemiterm Empty (n + 1)))
-    (Rew.bShift_positive _) (refl hψ₀');
-  have hAiff := models_iff_of_provable_iff' hAprov;
-  have hBiff := models_iff_of_provable_iff' hBprov;
-  obtain ⟨χ, hχ, hχprov⟩ := ih.and 𝚷 (refl hA) (refl hB);
-  have hχiff := models_iff_of_provable_iff' hχprov;
-  use ∃¹ χ;
-  . exact hχ.sigma;
-  . apply provable_iff_of_models_iff;
-    intro V _ _ e;
-    have hA_eval : ∀ z : V, V ⊧/(z :> e) A ↔ ∃ x ≤ z, V ⊧/(x :> e) φ₀ := fun z => by
-      rw [← hAiff V (z :> e)];
-      show V ⊧/(z :> e)
-        ((φ₀ ⇜ (#0 :> (#·.succ.succ)) : ArithmeticSemiformula Empty (n + 2)).bexsLTSucc
-          (‘#0’ : ArithmeticSemiterm Empty (n + 1))) ↔ _;
-      simp [Semiformula.eval_insert1, -Semiformula.eval_substs];
-    have hB_eval : ∀ z : V, V ⊧/(z :> e) B ↔ ∃ x ≤ z, V ⊧/(x :> e) ψ₀ := fun z => by
-      rw [← hBiff V (z :> e)];
-      show V ⊧/(z :> e)
-        ((ψ₀ ⇜ (#0 :> (#·.succ.succ)) : ArithmeticSemiformula Empty (n + 2)).bexsLTSucc
-          (‘#0’ : ArithmeticSemiterm Empty (n + 1))) ↔ _;
-      simp [Semiformula.eval_insert1, -Semiformula.eval_substs];
-    have hφiff' : V ⊧/e φ ↔ ∃ x, V ⊧/(x :> e) φ₀ := (hφiff V e).trans Semiformula.eval_ex;
-    have hψiff' : V ⊧/e ψ ↔ ∃ x, V ⊧/(x :> e) ψ₀ := (hψiff V e).trans Semiformula.eval_ex;
-    simp only [LogicalConnective.HomClass.map_and, Semiformula.eval_ex, hφiff', hψiff',
-      ← hχiff, hA_eval, hB_eval];
-    constructor;
-    . rintro ⟨⟨x, hx⟩, ⟨y, hy⟩⟩;
-      exact ⟨max x y, ⟨x, le_max_left x y, hx⟩, ⟨y, le_max_right x y, hy⟩⟩;
-    . rintro ⟨z, ⟨x, _, hx⟩, ⟨y, _, hy⟩⟩;
-      exact ⟨⟨x, hx⟩, ⟨y, hy⟩⟩;
-
-private noncomputable def bexs_sigma_step (ih : CoreClosure s) :
+private noncomputable def bexs_sigma_step (ih : BallBexsClosure s) :
     ∀ {n} {φ : ArithmeticSemiformula Empty (n + 1)} {t : ArithmeticSemiterm Empty (n + 1)},
       t.Positive → StrictEquiv 𝗣𝗔 𝚺 (s + 1) φ → StrictEquiv 𝗣𝗔 𝚺 (s + 1) (∃¹[“x. x < !!t”] φ) := by
   intro n φ t ht hφ;
@@ -207,7 +121,7 @@ private noncomputable def bexs_sigma_step (ih : CoreClosure s) :
       hswap, hφiff];
     grind;
 
-private noncomputable def ball_sigma_step (ih : CoreClosure s) :
+private noncomputable def ball_sigma_step (ih : BallBexsClosure s) :
     ∀ {n} {φ : ArithmeticSemiformula Empty (n + 1)} {t : ArithmeticSemiterm Empty (n + 1)},
       t.Positive → StrictEquiv 𝗣𝗔 𝚺 (s + 1) φ → StrictEquiv 𝗣𝗔 𝚺 (s + 1) (∀¹[“x. x < !!t”] φ) := by
   intro n φ t ht hφ;
@@ -247,7 +161,123 @@ private noncomputable def ball_sigma_step (ih : CoreClosure s) :
       obtain ⟨y, -, hy⟩ := hw x hx;
       exact ⟨y, hy⟩;
 
-private noncomputable def coreClosure_succ (ih : CoreClosure s) : CoreClosure (s + 1) where
+private noncomputable def ballBexsClosure_succ (ih : BallBexsClosure s) : BallBexsClosure (s + 1) where
+  ball := fun Γ {n φ t} ht hφ => by
+    rcases Γ with _ | _;
+    . exact ball_sigma_step ih ht hφ;
+    . have hφ' : StrictEquiv 𝗣𝗔 𝚺 (s + 1) (∼φ) := by simpa using neg hφ;
+      have h' := neg (bexs_sigma_step ih ht hφ');
+      simpa using h';
+  bexs := fun Γ {n φ t} ht hφ => by
+    rcases Γ with _ | _;
+    . exact bexs_sigma_step ih ht hφ;
+    . have hφ' : StrictEquiv 𝗣𝗔 𝚺 (s + 1) (∼φ) := by simpa using neg hφ;
+      have h' := neg (ball_sigma_step ih ht hφ');
+      simpa using h';
+
+private noncomputable def ballBexsClosure : BallBexsClosure s := by
+  induction s with
+  | zero => exact ballBexsClosure_zero;
+  | succ s ih => exact ballBexsClosure_succ ih;
+
+-- `and`/`or` never need `ball` directly; the induction below only reaches for `bexs`, taken from
+-- `ballBexsClosure` (already available at every level), so it is a plain 2-field induction rather
+-- than a joint one with `BallBexsClosure`.
+private structure AndOrClosure (s : ℕ) where
+  and  : ∀ Γ {n} {φ ψ : ArithmeticSemiformula Empty n},
+      StrictEquiv 𝗣𝗔 Γ s φ → StrictEquiv 𝗣𝗔 Γ s ψ → StrictEquiv 𝗣𝗔 Γ s (φ ⋏ ψ)
+  or   : ∀ Γ {n} {φ ψ : ArithmeticSemiformula Empty n},
+      StrictEquiv 𝗣𝗔 Γ s φ → StrictEquiv 𝗣𝗔 Γ s ψ → StrictEquiv 𝗣𝗔 Γ s (φ ⋎ ψ)
+
+private def andOrClosure_zero : AndOrClosure 0 where
+  and := fun Γ {n φ ψ} hφ hψ =>
+    ⟨hφ.witness ⋏ hψ.witness,
+      StrictHierarchy.zero
+        (Hierarchy.and (StrictHierarchy.zero_iff.mp hφ.hierarchy) (StrictHierarchy.zero_iff.mp hψ.hierarchy)),
+      provable_iff_of_models_iff fun V _ _ e => by simp [hφ.iff_models V e, hψ.iff_models V e]⟩
+  or := fun Γ {n φ ψ} hφ hψ =>
+    ⟨hφ.witness ⋎ hψ.witness,
+      StrictHierarchy.zero
+        (Hierarchy.or (StrictHierarchy.zero_iff.mp hφ.hierarchy) (StrictHierarchy.zero_iff.mp hψ.hierarchy)),
+      provable_iff_of_models_iff fun V _ _ e => by simp [hφ.iff_models V e, hψ.iff_models V e]⟩
+
+private noncomputable def or_sigma_step (ih : AndOrClosure s) :
+    ∀ {n} {φ ψ : ArithmeticSemiformula Empty n},
+      StrictEquiv 𝗣𝗔 𝚺 (s + 1) φ → StrictEquiv 𝗣𝗔 𝚺 (s + 1) ψ → StrictEquiv 𝗣𝗔 𝚺 (s + 1) (φ ⋎ ψ) := by
+  intro n φ ψ hφ hψ;
+  obtain ⟨φ', hφ', hφprov⟩ := hφ;
+  obtain ⟨ψ', hψ', hψprov⟩ := hψ;
+  have hφiff := models_iff_of_provable_iff' hφprov;
+  have hψiff := models_iff_of_provable_iff' hψprov;
+  obtain ⟨φ₀, rfl, hφ₀⟩ := strictSigmaSuccElim hφ';
+  obtain ⟨ψ₀, rfl, hψ₀⟩ := strictSigmaSuccElim hψ';
+  obtain ⟨χ, hχ, hχprov⟩ := ih.or 𝚷 (refl hφ₀) (refl hψ₀);
+  have hχiff := models_iff_of_provable_iff' hχprov;
+  use ∃¹ χ;
+  . exact hχ.sigma;
+  . apply provable_iff_of_models_iff;
+    intro V _ _ e;
+    have hφiff' : V ⊧/e φ ↔ ∃ x, V ⊧/(x :> e) φ₀ := (hφiff V e).trans Semiformula.eval_ex;
+    have hψiff' : V ⊧/e ψ ↔ ∃ x, V ⊧/(x :> e) ψ₀ := (hψiff V e).trans Semiformula.eval_ex;
+    simp only [LogicalConnective.HomClass.map_or, Semiformula.eval_ex, hφiff', hψiff'];
+    constructor;
+    . rintro (⟨x, hx⟩ | ⟨x, hx⟩);
+      . exact ⟨x, (hχiff V (x :> e)).mp (by left; exact hx)⟩;
+      . exact ⟨x, (hχiff V (x :> e)).mp (by right; exact hx)⟩;
+    . rintro ⟨x, hx⟩;
+      rcases (hχiff V (x :> e)).mpr hx with h | h;
+      . left; exact ⟨x, h⟩;
+      . right; exact ⟨x, h⟩;
+
+private noncomputable def and_sigma_step (ih : AndOrClosure s) :
+    ∀ {n} {φ ψ : ArithmeticSemiformula Empty n},
+      StrictEquiv 𝗣𝗔 𝚺 (s + 1) φ → StrictEquiv 𝗣𝗔 𝚺 (s + 1) ψ → StrictEquiv 𝗣𝗔 𝚺 (s + 1) (φ ⋏ ψ) := by
+  intro n φ ψ hφ hψ;
+  obtain ⟨φ', hφ', hφprov⟩ := hφ;
+  obtain ⟨ψ', hψ', hψprov⟩ := hψ;
+  have hφiff := models_iff_of_provable_iff' hφprov;
+  have hψiff := models_iff_of_provable_iff' hψprov;
+  obtain ⟨φ₀, rfl, hφ₀⟩ := strictSigmaSuccElim hφ';
+  obtain ⟨ψ₀, rfl, hψ₀⟩ := strictSigmaSuccElim hψ';
+  have hφ₀' : StrictHierarchy 𝚷 s (φ₀ ⇜ (#0 :> (#·.succ.succ))) := hφ₀.rew (Rew.subst _);
+  have hψ₀' : StrictHierarchy 𝚷 s (ψ₀ ⇜ (#0 :> (#·.succ.succ))) := hψ₀.rew (Rew.subst _);
+  obtain ⟨A, hA, hAprov⟩ := ballBexsClosure.bexs 𝚷
+    (t := Rew.bShift (‘#0 + 1’ : ArithmeticSemiterm Empty (n + 1)))
+    (Rew.bShift_positive _) (refl hφ₀');
+  obtain ⟨B, hB, hBprov⟩ := ballBexsClosure.bexs 𝚷
+    (t := Rew.bShift (‘#0 + 1’ : ArithmeticSemiterm Empty (n + 1)))
+    (Rew.bShift_positive _) (refl hψ₀');
+  have hAiff := models_iff_of_provable_iff' hAprov;
+  have hBiff := models_iff_of_provable_iff' hBprov;
+  obtain ⟨χ, hχ, hχprov⟩ := ih.and 𝚷 (refl hA) (refl hB);
+  have hχiff := models_iff_of_provable_iff' hχprov;
+  use ∃¹ χ;
+  . exact hχ.sigma;
+  . apply provable_iff_of_models_iff;
+    intro V _ _ e;
+    have hA_eval : ∀ z : V, V ⊧/(z :> e) A ↔ ∃ x ≤ z, V ⊧/(x :> e) φ₀ := fun z => by
+      rw [← hAiff V (z :> e)];
+      show V ⊧/(z :> e)
+        ((φ₀ ⇜ (#0 :> (#·.succ.succ)) : ArithmeticSemiformula Empty (n + 2)).bexsLTSucc
+          (‘#0’ : ArithmeticSemiterm Empty (n + 1))) ↔ _;
+      simp [Semiformula.eval_insert1, -Semiformula.eval_substs];
+    have hB_eval : ∀ z : V, V ⊧/(z :> e) B ↔ ∃ x ≤ z, V ⊧/(x :> e) ψ₀ := fun z => by
+      rw [← hBiff V (z :> e)];
+      show V ⊧/(z :> e)
+        ((ψ₀ ⇜ (#0 :> (#·.succ.succ)) : ArithmeticSemiformula Empty (n + 2)).bexsLTSucc
+          (‘#0’ : ArithmeticSemiterm Empty (n + 1))) ↔ _;
+      simp [Semiformula.eval_insert1, -Semiformula.eval_substs];
+    have hφiff' : V ⊧/e φ ↔ ∃ x, V ⊧/(x :> e) φ₀ := (hφiff V e).trans Semiformula.eval_ex;
+    have hψiff' : V ⊧/e ψ ↔ ∃ x, V ⊧/(x :> e) ψ₀ := (hψiff V e).trans Semiformula.eval_ex;
+    simp only [LogicalConnective.HomClass.map_and, Semiformula.eval_ex, hφiff', hψiff',
+      ← hχiff, hA_eval, hB_eval];
+    constructor;
+    . rintro ⟨⟨x, hx⟩, ⟨y, hy⟩⟩;
+      exact ⟨max x y, ⟨x, le_max_left x y, hx⟩, ⟨y, le_max_right x y, hy⟩⟩;
+    . rintro ⟨z, ⟨x, _, hx⟩, ⟨y, _, hy⟩⟩;
+      exact ⟨⟨x, hx⟩, ⟨y, hy⟩⟩;
+
+private noncomputable def andOrClosure_succ (ih : AndOrClosure s) : AndOrClosure (s + 1) where
   and := fun Γ {n φ ψ} hφ hψ => by
     rcases Γ with _ | _;
     . exact and_sigma_step ih hφ hψ;
@@ -262,36 +292,24 @@ private noncomputable def coreClosure_succ (ih : CoreClosure s) : CoreClosure (s
       have hψ' : StrictEquiv 𝗣𝗔 𝚺 (s + 1) (∼ψ) := by simpa using neg hψ;
       have h' := neg (and_sigma_step ih hφ' hψ');
       simpa [Semiformula.imp_eq] using h';
-  ball := fun Γ {n φ t} ht hφ => by
-    rcases Γ with _ | _;
-    . exact ball_sigma_step ih ht hφ;
-    . have hφ' : StrictEquiv 𝗣𝗔 𝚺 (s + 1) (∼φ) := by simpa using neg hφ;
-      have h' := neg (bexs_sigma_step ih ht hφ');
-      simpa using h';
-  bexs := fun Γ {n φ t} ht hφ => by
-    rcases Γ with _ | _;
-    . exact bexs_sigma_step ih ht hφ;
-    . have hφ' : StrictEquiv 𝗣𝗔 𝚺 (s + 1) (∼φ) := by simpa using neg hφ;
-      have h' := neg (ball_sigma_step ih ht hφ');
-      simpa using h';
 
-private noncomputable def coreClosure : CoreClosure s := by
+private noncomputable def andOrClosure : AndOrClosure s := by
   induction s with
-  | zero => exact coreClosure_zero;
-  | succ s ih => exact coreClosure_succ ih;
+  | zero => exact andOrClosure_zero;
+  | succ s ih => exact andOrClosure_succ ih;
 
 -- Contracts the two nested existentials `∃x∃y` of a strict `Σ_{s+1}` witness into a single
--- bounded pair `∃z (∃x ≤ z)(∃y ≤ z)`, using two applications of `coreClosure.bexs`.
+-- bounded pair `∃z (∃x ≤ z)(∃y ≤ z)`, using two applications of `ballBexsClosure.bexs`.
 private noncomputable def exs {φ : ArithmeticSemiformula Empty (n + 1)} (h : StrictEquiv 𝗣𝗔 𝚺 (s + 1) φ) :
     StrictEquiv 𝗣𝗔 𝚺 (s + 1) (∃¹ φ) := by
   obtain ⟨φ', hφ', hprov'⟩ := h;
   have hiff' := models_iff_of_provable_iff' hprov';
   obtain ⟨ψ₀, rfl, hψ₀⟩ := strictSigmaSuccElim hφ';
   have hψ₀' : StrictHierarchy 𝚷 s (ψ₀ ⇜ (#0 :> #1 :> (#·.succ.succ.succ))) := hψ₀.rew (Rew.subst _);
-  obtain ⟨A, hA, hAprov⟩ := coreClosure.bexs 𝚷
+  obtain ⟨A, hA, hAprov⟩ := ballBexsClosure.bexs 𝚷
     (t := Rew.bShift (‘#1 + 1’ : ArithmeticSemiterm Empty (n + 2)))
     (Rew.bShift_positive _) (refl hψ₀');
-  obtain ⟨B, hB, hBprov⟩ := coreClosure.bexs 𝚷
+  obtain ⟨B, hB, hBprov⟩ := ballBexsClosure.bexs 𝚷
     (t := Rew.bShift (‘#0 + 1’ : ArithmeticSemiterm Empty (n + 1)))
     (Rew.bShift_positive _) (refl hA);
   have hAiff := models_iff_of_provable_iff' hAprov;
@@ -341,10 +359,10 @@ private noncomputable def of_hierarchy (h : Hierarchy Γ s φ) : StrictEquiv �
     | falsum Γ s n => exact ⟨StrictEquiv.of_deltaZero (Hierarchy.falsum 𝚺 0 n)⟩;
     | rel Γ s r v => exact ⟨StrictEquiv.of_deltaZero (Hierarchy.rel 𝚺 0 r v)⟩;
     | nrel Γ s r v => exact ⟨StrictEquiv.of_deltaZero (Hierarchy.nrel 𝚺 0 r v)⟩;
-    | and _ _ ihp ihq => exact ⟨coreClosure.and _ ihp.some ihq.some⟩;
-    | or _ _ ihp ihq => exact ⟨coreClosure.or _ ihp.some ihq.some⟩;
-    | ball pos _ ih => exact ⟨coreClosure.ball _ pos ih.some⟩;
-    | bexs pos _ ih => exact ⟨coreClosure.bexs _ pos ih.some⟩;
+    | and _ _ ihp ihq => exact ⟨andOrClosure.and _ ihp.some ihq.some⟩;
+    | or _ _ ihp ihq => exact ⟨andOrClosure.or _ ihp.some ihq.some⟩;
+    | ball pos _ ih => exact ⟨ballBexsClosure.ball _ pos ih.some⟩;
+    | bexs pos _ ih => exact ⟨ballBexsClosure.bexs _ pos ih.some⟩;
     | exs _ ih => exact ⟨exs ih.some⟩;
     | all _ ih => exact ⟨all ih.some⟩;
     | @sigma s n φ hp ih =>
