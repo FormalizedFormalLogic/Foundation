@@ -25,8 +25,8 @@ lemma nonempty_strictHierarchyFormulaEquivOf {φ : ArithmeticSemisentence n} (h 
 lemma exists_kernel_provable {φ : ArithmeticSemisentence n} (h : Hierarchy Γ s φ) :
     ∃ φ₀ : ArithmeticSemisentence (n + s),
       Hierarchy 𝚺 0 φ₀ ∧ 𝗣𝗔 ⊢ ∀¹* (φ 🡘 Polarity.quantItr Γ s φ₀) := by
-  obtain ⟨W⟩ := nonempty_strictHierarchyFormulaEquivOf h;
-  exact ⟨W.kernel, W.kernel_deltaZero, W.provable⟩
+  obtain ⟨Φ⟩ := nonempty_strictHierarchyFormulaEquivOf h;
+  exact ⟨Φ.kernel, Φ.kernel_deltaZero, Φ.provable⟩
 
 lemma exists_kernel_provable_of_sentence {σ : ArithmeticSentence} (h : Hierarchy Γ s σ) :
     ∃ π₀ : ArithmeticSemisentence (0 + s),

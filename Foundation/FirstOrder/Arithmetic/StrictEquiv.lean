@@ -48,62 +48,62 @@ namespace StrictHierarchyFormulaEquivOf
 variable {T : ArithmeticTheory} [𝗘𝗤 ℒₒᵣ ⪯ T] {Γ : Polarity} {s : ℕ} {n : ℕ}
   {φ ψ : ArithmeticSemisentence n}
 
-lemma iff_models (W : StrictHierarchyFormulaEquivOf T Γ s φ) (V : Type*) [ORingStructure V]
+lemma iff_models (Φ : StrictHierarchyFormulaEquivOf T Γ s φ) (V : Type*) [ORingStructure V]
     [V↓[ℒₒᵣ] ⊧* T] (e : Fin n → V) :
-    V ⊧/e φ ↔ V ⊧/e (↑W.toStrictHierarchyFormula : ArithmeticSemisentence n) :=
-  models_iff_of_provable_iff W.provable V e
+    V ⊧/e φ ↔ V ⊧/e (↑Φ.toStrictHierarchyFormula : ArithmeticSemisentence n) :=
+  models_iff_of_provable_iff Φ.provable V e
 
-lemma iff_models' (W : StrictHierarchyFormulaEquivOf T Γ s φ) :
+lemma iff_models' (Φ : StrictHierarchyFormulaEquivOf T Γ s φ) :
     ∀ (V : Type) [ORingStructure V] [V↓[ℒₒᵣ] ⊧* T] (e : Fin n → V),
-      V ⊧/e φ ↔ V ⊧/e (↑W.toStrictHierarchyFormula : ArithmeticSemisentence n) :=
-  models_iff_of_provable_iff' W.provable
+      V ⊧/e φ ↔ V ⊧/e (↑Φ.toStrictHierarchyFormula : ArithmeticSemisentence n) :=
+  models_iff_of_provable_iff' Φ.provable
 
 def refl (W : StrictHierarchyFormula ℒₒᵣ Empty Γ s n) :
     StrictHierarchyFormulaEquivOf T Γ s (↑W : ArithmeticSemisentence n) :=
   ⟨W, provable_iff_of_models_iff fun _ _ _ _ ↦ Iff.rfl⟩
 
 /-- Transport an equivalence along a definitional equality of the target formula. -/
-def ofEq (h : φ = ψ) (W : StrictHierarchyFormulaEquivOf T Γ s φ) :
-    StrictHierarchyFormulaEquivOf T Γ s ψ := h ▸ W
+def ofEq (h : φ = ψ) (Φ : StrictHierarchyFormulaEquivOf T Γ s φ) :
+    StrictHierarchyFormulaEquivOf T Γ s ψ := h ▸ Φ
 
 /-- Transport an equivalence along a semantic equivalence of the target formula. -/
-def of_iff (W : StrictHierarchyFormulaEquivOf T Γ s φ)
+def of_iff (Φ : StrictHierarchyFormulaEquivOf T Γ s φ)
     (hiff : ∀ (V : Type) [ORingStructure V] [V↓[ℒₒᵣ] ⊧* T] (e : Fin n → V), V ⊧/e ψ ↔ V ⊧/e φ) :
     StrictHierarchyFormulaEquivOf T Γ s ψ :=
-  ⟨W.toStrictHierarchyFormula,
-    provable_iff_of_models_iff fun V _ _ e ↦ (hiff V e).trans (W.iff_models V e)⟩
+  ⟨Φ.toStrictHierarchyFormula,
+    provable_iff_of_models_iff fun V _ _ e ↦ (hiff V e).trans (Φ.iff_models V e)⟩
 
-def neg (W : StrictHierarchyFormulaEquivOf T Γ s φ) :
+def neg (Φ : StrictHierarchyFormulaEquivOf T Γ s φ) :
     StrictHierarchyFormulaEquivOf T Γ.alt s (∼φ) :=
-  ⟨W.toStrictHierarchyFormula.neg,
-    provable_iff_of_models_iff fun V _ _ e ↦ by simp [W.iff_models V e]⟩
+  ⟨Φ.toStrictHierarchyFormula.neg,
+    provable_iff_of_models_iff fun V _ _ e ↦ by simp [Φ.iff_models V e]⟩
 
-def alt_up (W : StrictHierarchyFormulaEquivOf T Γ s φ) :
+def alt_up (Φ : StrictHierarchyFormulaEquivOf T Γ s φ) :
     StrictHierarchyFormulaEquivOf T Γ.alt (s + 1) φ := by
   rcases Γ with _ | _;
-  . exact ⟨(W.toStrictHierarchyFormula.rew Rew.bShift).pi,
+  . exact ⟨(Φ.toStrictHierarchyFormula.rew Rew.bShift).pi,
       provable_iff_of_models_iff fun V _ _ e ↦ by
         have : Nonempty V := ⟨0⟩;
-        simp [W.iff_models V e]⟩;
-  . exact ⟨(W.toStrictHierarchyFormula.rew Rew.bShift).sigma,
-      provable_iff_of_models_iff fun V _ _ e ↦ by simp [W.iff_models V e]⟩;
+        simp [Φ.iff_models V e]⟩;
+  . exact ⟨(Φ.toStrictHierarchyFormula.rew Rew.bShift).sigma,
+      provable_iff_of_models_iff fun V _ _ e ↦ by simp [Φ.iff_models V e]⟩;
 
 def of_deltaZero (hp : Hierarchy 𝚺 0 φ) : StrictHierarchyFormulaEquivOf T Γ s φ := by
   induction s generalizing Γ with
   | zero => exact refl (StrictHierarchyFormula.zero Γ φ hp);
   | succ s ih => simpa using alt_up (ih (Γ := Γ.alt));
 
-def exs_of_pi {φ : ArithmeticSemisentence (n + 1)} (W : StrictHierarchyFormulaEquivOf T 𝚷 s φ) :
+def exs_of_pi {φ : ArithmeticSemisentence (n + 1)} (Φ : StrictHierarchyFormulaEquivOf T 𝚷 s φ) :
     StrictHierarchyFormulaEquivOf T 𝚺 (s + 1) (∃¹ φ) :=
-  ⟨W.toStrictHierarchyFormula.sigma, provable_iff_of_models_iff fun V _ _ e ↦ by
+  ⟨Φ.toStrictHierarchyFormula.sigma, provable_iff_of_models_iff fun V _ _ e ↦ by
     rw [StrictHierarchyFormula.coe_sigma];
-    exact exists_congr (fun x ↦ W.iff_models V (x :> e))⟩
+    exact exists_congr (fun x ↦ Φ.iff_models V (x :> e))⟩
 
-def all_of_sigma {φ : ArithmeticSemisentence (n + 1)} (W : StrictHierarchyFormulaEquivOf T 𝚺 s φ) :
+def all_of_sigma {φ : ArithmeticSemisentence (n + 1)} (Φ : StrictHierarchyFormulaEquivOf T 𝚺 s φ) :
     StrictHierarchyFormulaEquivOf T 𝚷 (s + 1) (∀¹ φ) :=
-  ⟨W.toStrictHierarchyFormula.pi, provable_iff_of_models_iff fun V _ _ e ↦ by
+  ⟨Φ.toStrictHierarchyFormula.pi, provable_iff_of_models_iff fun V _ _ e ↦ by
     simp only [StrictHierarchyFormula.coe_pi, Semiformula.eval_all];
-    exact forall_congr' (fun x ↦ W.iff_models V (x :> e))⟩
+    exact forall_congr' (fun x ↦ Φ.iff_models V (x :> e))⟩
 
 structure Closure (T : ArithmeticTheory) [𝗘𝗤 ℒₒᵣ ⪯ T] (s : ℕ) : Prop where
   ball : ∀ Γ {n} {φ : ArithmeticSemisentence (n + 1)} {t : ArithmeticSemiterm Empty (n + 1)},
@@ -123,49 +123,49 @@ structure Closure (T : ArithmeticTheory) [𝗘𝗤 ℒₒᵣ ⪯ T] (s : ℕ) : 
 
 lemma closure_zero : Closure T 0 where
   ball := by
-    rintro Γ n φ t ht ⟨W⟩;
-    use StrictHierarchyFormula.zero Γ _ (Hierarchy.ball ht W.deltaZero);
+    rintro Γ n φ t ht ⟨Φ⟩;
+    use StrictHierarchyFormula.zero Γ _ (Hierarchy.ball ht Φ.deltaZero);
     apply provable_iff_of_models_iff;
     intro V _ _ e;
     simp only [StrictHierarchyFormula.coe_zero, Semiformula.eval_ball];
-    exact forall_congr' (fun x => imp_congr Iff.rfl (W.iff_models V (x :> e)));
+    exact forall_congr' (fun x => imp_congr Iff.rfl (Φ.iff_models V (x :> e)));
   bexs := by
-    rintro Γ n φ t ht ⟨W⟩;
-    use StrictHierarchyFormula.zero Γ _ (Hierarchy.bexs ht W.deltaZero);
+    rintro Γ n φ t ht ⟨Φ⟩;
+    use StrictHierarchyFormula.zero Γ _ (Hierarchy.bexs ht Φ.deltaZero);
     apply provable_iff_of_models_iff;
     intro V _ _ e;
     simp only [StrictHierarchyFormula.coe_zero, Semiformula.eval_bexs];
-    exact exists_congr (fun x => and_congr Iff.rfl (W.iff_models V (x :> e)));
+    exact exists_congr (fun x => and_congr Iff.rfl (Φ.iff_models V (x :> e)));
   and := by
-    rintro Γ n φ ψ ⟨Wφ⟩ ⟨Wψ⟩;
-    use StrictHierarchyFormula.zero Γ _ (Hierarchy.and Wφ.deltaZero Wψ.deltaZero);
+    rintro Γ n φ ψ ⟨Φ⟩ ⟨Ψ⟩;
+    use StrictHierarchyFormula.zero Γ _ (Hierarchy.and Φ.deltaZero Ψ.deltaZero);
     apply provable_iff_of_models_iff;
     intro V _ _ e;
-    simp [StrictHierarchyFormula.coe_zero, Wφ.iff_models V e, Wψ.iff_models V e];
+    simp [StrictHierarchyFormula.coe_zero, Φ.iff_models V e, Ψ.iff_models V e];
   or := by
-    rintro Γ n φ ψ ⟨Wφ⟩ ⟨Wψ⟩;
-    use StrictHierarchyFormula.zero Γ _ (Hierarchy.or Wφ.deltaZero Wψ.deltaZero);
+    rintro Γ n φ ψ ⟨Φ⟩ ⟨Ψ⟩;
+    use StrictHierarchyFormula.zero Γ _ (Hierarchy.or Φ.deltaZero Ψ.deltaZero);
     apply provable_iff_of_models_iff;
     intro V _ _ e;
-    simp [StrictHierarchyFormula.coe_zero, Wφ.iff_models V e, Wψ.iff_models V e];
+    simp [StrictHierarchyFormula.coe_zero, Φ.iff_models V e, Ψ.iff_models V e];
 
 lemma bexs_sigma_step {n} {φ : ArithmeticSemisentence (n + 1)} {t : ArithmeticSemiterm Empty (n + 1)}
     (ih : Closure T s) (ht : t.Positive) :
     Nonempty (StrictHierarchyFormulaEquivOf T 𝚺 (s + 1) φ) →
       Nonempty (StrictHierarchyFormulaEquivOf T 𝚺 (s + 1) (∃¹[“x. x < !!t”] φ)) := by
-  rintro ⟨W⟩;
+  rintro ⟨Φ⟩;
   obtain ⟨u, rfl⟩ := Rew.positive_iff.mp ht;
-  have hprov' := W.provable;
-  rw [W.coe_sigmaInv] at hprov';
+  have hprov' := Φ.provable;
+  rw [Φ.coe_sigmaInv] at hprov';
   have hiff' := models_iff_of_provable_iff' hprov';
-  set W₀ := W.sigmaInv;
-  set ψ₀ : ArithmeticSemisentence (n + 2) := ↑W₀;
+  set Φ₀ := Φ.sigmaInv;
+  set ψ₀ : ArithmeticSemisentence (n + 2) := ↑Φ₀;
   set v : Fin (n + 2) → ArithmeticSemiterm Empty (n + 2) :=
     #1 :> #0 :> fun i => #(i.succ.succ) with hv;
   set ψ₀' : ArithmeticSemisentence (n + 2) := Rew.subst v ▹ ψ₀;
-  let hW₀ : StrictHierarchyFormula ℒₒᵣ Empty 𝚷 s (n + 2) := W₀.rew (Rew.subst v);
+  let Φ₀' : StrictHierarchyFormula ℒₒᵣ Empty 𝚷 s (n + 2) := Φ₀.rew (Rew.subst v);
   obtain ⟨χ⟩ := ih.bexs 𝚷 (φ := ψ₀') (t := Rew.bShift (Rew.bShift u)) (by simp)
-    ⟨(refl hW₀).ofEq (by simp [hW₀, ψ₀', ψ₀, StrictHierarchyFormula.coe_rew])⟩;
+    ⟨(refl Φ₀').ofEq (by simp [Φ₀', ψ₀', ψ₀, StrictHierarchyFormula.coe_rew])⟩;
   have hχiff := models_iff_of_provable_iff' χ.provable;
   have hχiff' : ∀ (V : Type) [ORingStructure V] [V↓[ℒₒᵣ] ⊧* T] (e : Fin (n + 1) → V),
       V ⊧/e (ψ₀'.bexsLT (Rew.bShift u)) ↔ V ⊧/e (↑χ.toStrictHierarchyFormula : ArithmeticSemisentence (n + 1)) :=
@@ -204,18 +204,18 @@ lemma ball_sigma_step {n} {φ : ArithmeticSemisentence (n + 1)} {t : ArithmeticS
     Nonempty (StrictHierarchyFormulaEquivOf T 𝚺 (s + 1) φ) →
       Nonempty (StrictHierarchyFormulaEquivOf T 𝚺 (s + 1) (∀¹[“x. x < !!t”] φ)) := by
   have := hT;
-  rintro ⟨W⟩;
+  rintro ⟨Φ⟩;
   obtain ⟨u, rfl⟩ := Rew.positive_iff.mp ht;
-  have hprov' := W.provable;
-  rw [W.coe_sigmaInv] at hprov';
+  have hprov' := Φ.provable;
+  rw [Φ.coe_sigmaInv] at hprov';
   have hiff' := models_iff_of_provable_iff' hprov';
-  set W₀ := W.sigmaInv;
-  set ψ₀ : ArithmeticSemisentence (n + 2) := ↑W₀;
-  let hW₀ : StrictHierarchyFormula ℒₒᵣ Empty 𝚷 s (n + 3) :=
-    W₀.rew (Rew.subst (#0 :> #1 :> (#·.succ.succ.succ)));
+  set Φ₀ := Φ.sigmaInv;
+  set ψ₀ : ArithmeticSemisentence (n + 2) := ↑Φ₀;
+  let Φ₀' : StrictHierarchyFormula ℒₒᵣ Empty 𝚷 s (n + 3) :=
+    Φ₀.rew (Rew.subst (#0 :> #1 :> (#·.succ.succ.succ)));
   obtain ⟨A⟩ := ih.bexs 𝚷 (φ := ψ₀ ⇜ (#0 :> #1 :> (#·.succ.succ.succ)))
     (t := Rew.bShift (‘#1 + 1’ : ArithmeticSemiterm Empty (n + 2)))
-    (Rew.bShift_positive _) ⟨(refl hW₀).ofEq (by simp [hW₀, ψ₀, StrictHierarchyFormula.coe_rew])⟩;
+    (Rew.bShift_positive _) ⟨(refl Φ₀').ofEq (by simp [Φ₀', ψ₀, StrictHierarchyFormula.coe_rew])⟩;
   have hAiff := models_iff_of_provable_iff' A.provable;
   obtain ⟨D⟩ := ih.ball 𝚷 (t := Rew.bShift (Rew.bShift u)) (by simp) ⟨refl A.toStrictHierarchyFormula⟩;
   have hDiff := models_iff_of_provable_iff' D.provable;
@@ -241,7 +241,7 @@ lemma ball_sigma_step {n} {φ : ArithmeticSemisentence (n + 1)} {t : ArithmeticS
     simp only [Semiformula.eval_ballLT, Semiformula.eval_ex, hDeval, hφeval];
     constructor;
     . intro h;
-      have hθ : Hierarchy 𝚺 (s + 1) ψ₀ := W₀.hierarchy.accum 𝚺;
+      have hθ : Hierarchy 𝚺 (s + 1) ψ₀ := Φ₀.hierarchy.accum 𝚺;
       exact sigma_exists_bound_witness hθ e (u.valb e) h;
     . rintro ⟨w, hw⟩ x hx;
       obtain ⟨y, -, hy⟩ := hw x hx;
@@ -251,18 +251,18 @@ lemma or_sigma_step {n} {φ ψ : ArithmeticSemisentence n} (ih : Closure T s) :
     Nonempty (StrictHierarchyFormulaEquivOf T 𝚺 (s + 1) φ) →
     Nonempty (StrictHierarchyFormulaEquivOf T 𝚺 (s + 1) ψ) →
       Nonempty (StrictHierarchyFormulaEquivOf T 𝚺 (s + 1) (φ ⋎ ψ)) := by
-  rintro ⟨Wφ⟩ ⟨Wψ⟩;
-  have hφprov := Wφ.provable;
-  have hψprov := Wψ.provable;
-  rw [Wφ.coe_sigmaInv] at hφprov;
-  rw [Wψ.coe_sigmaInv] at hψprov;
+  rintro ⟨Φ⟩ ⟨Ψ⟩;
+  have hφprov := Φ.provable;
+  have hψprov := Ψ.provable;
+  rw [Φ.coe_sigmaInv] at hφprov;
+  rw [Ψ.coe_sigmaInv] at hψprov;
   have hφiff := models_iff_of_provable_iff' hφprov;
   have hψiff := models_iff_of_provable_iff' hψprov;
-  set Wφ₀ := Wφ.sigmaInv;
-  set Wψ₀ := Wψ.sigmaInv;
-  set φ₀ : ArithmeticSemisentence (n + 1) := ↑Wφ₀;
-  set ψ₀ : ArithmeticSemisentence (n + 1) := ↑Wψ₀;
-  obtain ⟨χ⟩ := ih.or 𝚷 ⟨refl Wφ₀⟩ ⟨refl Wψ₀⟩;
+  set Φ₀ := Φ.sigmaInv;
+  set Ψ₀ := Ψ.sigmaInv;
+  set φ₀ : ArithmeticSemisentence (n + 1) := ↑Φ₀;
+  set ψ₀ : ArithmeticSemisentence (n + 1) := ↑Ψ₀;
+  obtain ⟨χ⟩ := ih.or 𝚷 ⟨refl Φ₀⟩ ⟨refl Ψ₀⟩;
   have hχiff := models_iff_of_provable_iff' χ.provable;
   use χ.toStrictHierarchyFormula.sigma;
   . apply provable_iff_of_models_iff;
@@ -285,27 +285,27 @@ lemma and_sigma_step {n} {φ ψ : ArithmeticSemisentence n} (hT : 𝗜𝚺 (s + 
     Nonempty (StrictHierarchyFormulaEquivOf T 𝚺 (s + 1) ψ) →
       Nonempty (StrictHierarchyFormulaEquivOf T 𝚺 (s + 1) (φ ⋏ ψ)) := by
   have : 𝗜𝚺₀ ⪯ T := Entailment.WeakerThan.trans (ISigma_weakerThan_of_le (Nat.zero_le (s + 1))) hT;
-  rintro ⟨Wφ⟩ ⟨Wψ⟩;
-  have hφprov := Wφ.provable;
-  have hψprov := Wψ.provable;
-  rw [Wφ.coe_sigmaInv] at hφprov;
-  rw [Wψ.coe_sigmaInv] at hψprov;
+  rintro ⟨Φ⟩ ⟨Ψ⟩;
+  have hφprov := Φ.provable;
+  have hψprov := Ψ.provable;
+  rw [Φ.coe_sigmaInv] at hφprov;
+  rw [Ψ.coe_sigmaInv] at hψprov;
   have hφiff := models_iff_of_provable_iff' hφprov;
   have hψiff := models_iff_of_provable_iff' hψprov;
-  set Wφ₀ := Wφ.sigmaInv;
-  set Wψ₀ := Wψ.sigmaInv;
-  set φ₀ : ArithmeticSemisentence (n + 1) := ↑Wφ₀;
-  set ψ₀ : ArithmeticSemisentence (n + 1) := ↑Wψ₀;
-  let hWφ₀ : StrictHierarchyFormula ℒₒᵣ Empty 𝚷 s (n + 2) :=
-    Wφ₀.rew (Rew.subst (#0 :> (#·.succ.succ)));
+  set Φ₀ := Φ.sigmaInv;
+  set Ψ₀ := Ψ.sigmaInv;
+  set φ₀ : ArithmeticSemisentence (n + 1) := ↑Φ₀;
+  set ψ₀ : ArithmeticSemisentence (n + 1) := ↑Ψ₀;
+  let Φ₀' : StrictHierarchyFormula ℒₒᵣ Empty 𝚷 s (n + 2) :=
+    Φ₀.rew (Rew.subst (#0 :> (#·.succ.succ)));
   obtain ⟨A⟩ := ih.bexs 𝚷 (φ := φ₀ ⇜ (#0 :> (#·.succ.succ)))
     (t := Rew.bShift (‘#0 + 1’ : ArithmeticSemiterm Empty (n + 1)))
-    (Rew.bShift_positive _) ⟨(refl hWφ₀).ofEq (by simp [hWφ₀, φ₀, StrictHierarchyFormula.coe_rew])⟩;
-  let hWψ₀ : StrictHierarchyFormula ℒₒᵣ Empty 𝚷 s (n + 2) :=
-    Wψ₀.rew (Rew.subst (#0 :> (#·.succ.succ)));
+    (Rew.bShift_positive _) ⟨(refl Φ₀').ofEq (by simp [Φ₀', φ₀, StrictHierarchyFormula.coe_rew])⟩;
+  let Ψ₀' : StrictHierarchyFormula ℒₒᵣ Empty 𝚷 s (n + 2) :=
+    Ψ₀.rew (Rew.subst (#0 :> (#·.succ.succ)));
   obtain ⟨B⟩ := ih.bexs 𝚷 (φ := ψ₀ ⇜ (#0 :> (#·.succ.succ)))
     (t := Rew.bShift (‘#0 + 1’ : ArithmeticSemiterm Empty (n + 1)))
-    (Rew.bShift_positive _) ⟨(refl hWψ₀).ofEq (by simp [hWψ₀, ψ₀, StrictHierarchyFormula.coe_rew])⟩;
+    (Rew.bShift_positive _) ⟨(refl Ψ₀').ofEq (by simp [Ψ₀', ψ₀, StrictHierarchyFormula.coe_rew])⟩;
   have hAiff := models_iff_of_provable_iff' A.provable;
   have hBiff := models_iff_of_provable_iff' B.provable;
   obtain ⟨χ⟩ := ih.and 𝚷 ⟨refl A.toStrictHierarchyFormula⟩ ⟨refl B.toStrictHierarchyFormula⟩;
@@ -372,17 +372,17 @@ lemma exs (hT : 𝗜𝚺 s ⪯ T) (c : Closure T s) {n : ℕ}
     (h : Nonempty (StrictHierarchyFormulaEquivOf T 𝚺 (s + 1) φ)) :
     Nonempty (StrictHierarchyFormulaEquivOf T 𝚺 (s + 1) (∃¹ φ)) := by
   have : 𝗜𝚺₀ ⪯ T := Entailment.WeakerThan.trans (ISigma_weakerThan_of_le (Nat.zero_le s)) hT;
-  obtain ⟨W⟩ := h;
-  have hprov' := W.provable;
-  rw [W.coe_sigmaInv] at hprov';
+  obtain ⟨Φ⟩ := h;
+  have hprov' := Φ.provable;
+  rw [Φ.coe_sigmaInv] at hprov';
   have hiff' := models_iff_of_provable_iff' hprov';
-  set W₀ := W.sigmaInv;
-  set ψ₀ : ArithmeticSemisentence (n + 2) := ↑W₀;
-  let hW₀ : StrictHierarchyFormula ℒₒᵣ Empty 𝚷 s (n + 3) :=
-    W₀.rew (Rew.subst (#0 :> #1 :> (#·.succ.succ.succ)));
+  set Φ₀ := Φ.sigmaInv;
+  set ψ₀ : ArithmeticSemisentence (n + 2) := ↑Φ₀;
+  let Φ₀' : StrictHierarchyFormula ℒₒᵣ Empty 𝚷 s (n + 3) :=
+    Φ₀.rew (Rew.subst (#0 :> #1 :> (#·.succ.succ.succ)));
   obtain ⟨A⟩ := c.bexs 𝚷 (φ := ψ₀ ⇜ (#0 :> #1 :> (#·.succ.succ.succ)))
     (t := Rew.bShift (‘#1 + 1’ : ArithmeticSemiterm Empty (n + 2)))
-    (Rew.bShift_positive _) ⟨(refl hW₀).ofEq (by simp [hW₀, ψ₀, StrictHierarchyFormula.coe_rew])⟩;
+    (Rew.bShift_positive _) ⟨(refl Φ₀').ofEq (by simp [Φ₀', ψ₀, StrictHierarchyFormula.coe_rew])⟩;
   obtain ⟨B⟩ := c.bexs 𝚷
     (t := Rew.bShift (‘#0 + 1’ : ArithmeticSemiterm Empty (n + 1)))
     (Rew.bShift_positive _) ⟨refl A.toStrictHierarchyFormula⟩;
@@ -475,8 +475,8 @@ theorem exists_kernel_provable {φ : ArithmeticSemisentence n} (h : Hierarchy Γ
       Hierarchy 𝚺 0 φ₀ ∧ T ⊢ ∀¹* (φ 🡘 Polarity.quantItr Γ s φ₀) := by
   have : 𝗘𝗤 ℒₒᵣ ⪯ T :=
     Entailment.WeakerThan.trans inferInstance (ISigma_weakerThan_of_le_trans (Nat.zero_le s) hT);
-  obtain ⟨W⟩ := nonempty_strictHierarchyFormulaEquivOf h hT;
-  exact ⟨W.kernel, W.kernel_deltaZero, W.provable⟩;
+  obtain ⟨Φ⟩ := nonempty_strictHierarchyFormulaEquivOf h hT;
+  exact ⟨Φ.kernel, Φ.kernel_deltaZero, Φ.provable⟩;
 
 theorem exists_kernel_provable' {φ : ArithmeticSemisentence n} (h : Hierarchy Γ s φ) (hT : 𝗜𝚺 s ⪯ T) :
     ∃ φ₀ : 𝚺₀.Semisentence (n + s), T ⊢ ∀¹* (φ 🡘 Polarity.quantItr Γ s φ₀.val) := by
