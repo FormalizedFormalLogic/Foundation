@@ -84,6 +84,16 @@ lemma exists_fin_iff_zero_or_exists_succ {P : Fin (k + 1) → Prop} : (∃ i, P 
       · exact ⟨0, hz⟩
       · exact ⟨_, h⟩⟩
 
+lemma funext_two {α : Type*} {f g : Fin (k + 2) → α}
+    (h0 : f 0 = g 0) (h1 : f (Fin.succ 0) = g (Fin.succ 0))
+    (hs : ∀ i : Fin k, f i.succ.succ = g i.succ.succ) : f = g := by
+  funext i
+  cases' i using Fin.cases with i
+  · exact h0
+  · cases' i using Fin.cases with i
+    · exact h1
+    · exact hs i
+
 
 
 @[inline] def addCast (m) : Fin n → Fin (m + n) := castLE <| Nat.le_add_left n m

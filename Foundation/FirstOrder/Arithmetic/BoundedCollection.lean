@@ -17,17 +17,6 @@ noncomputable section
 
 namespace LO.FirstOrder.Arithmetic
 
-private lemma funext_two {α : Type*} {n : ℕ} {f g : Fin (n + 2) → α}
-    (h0 : f 0 = g 0) (h1 : f (Fin.succ 0) = g (Fin.succ 0))
-    (hs : ∀ i : Fin n, f i.succ.succ = g i.succ.succ) : f = g := by
-  funext i
-  induction i using Fin.cases with
-  | zero => exact h0
-  | succ i =>
-    induction i using Fin.cases with
-    | zero => exact h1
-    | succ i => exact hs i
-
 variable {V : Type u} [ORingStructure V] {n s : ℕ} [V↓[ℒₒᵣ] ⊧* 𝗜𝚺 (s + 1)]
 
 -- `𝗜𝚺₁ ⪯ 𝗜𝚺 (s + 1) ⪯ 𝗣𝗔⁻` is only registered as an instance for the literal level `1`;
@@ -51,7 +40,7 @@ private lemma eval_collectionCore {θ : ArithmeticSemiformula Empty (n + 2)} (e 
     (collectionCore θ e).Eval (u :> x :> w :> ![y]) id ↔ V ⊧/(u :> x :> e) θ := by
   simp only [collectionCore, Semiformula.eval_embSubsts, Function.comp_def]
   exact Iff.of_eq (congrArg (fun b => Semiformula.Evalb (M := V) b θ)
-    (funext_two (by simp) (by simp) fun i => by simp))
+    (Fin.funext_two (by simp) (by simp) fun i => by simp))
 
 private noncomputable def collectionMotive (θ : ArithmeticSemiformula Empty (n + 2))
     (e : Fin n → V) (a : V) : ArithmeticSemiformula V 1 :=

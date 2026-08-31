@@ -17,40 +17,7 @@ noncomputable section
 
 namespace LO.FirstOrder.Arithmetic
 
-private lemma funext_two {α : Type*} {n : ℕ} {f g : Fin (n + 2) → α}
-    (h0 : f 0 = g 0) (h1 : f (Fin.succ 0) = g (Fin.succ 0))
-    (hs : ∀ i : Fin n, f i.succ.succ = g i.succ.succ) : f = g := by
-  funext i
-  induction i using Fin.cases with
-  | zero => exact h0
-  | succ i =>
-    induction i using Fin.cases with
-    | zero => exact h1
-    | succ i => exact hs i
-
 variable {V : Type u} [ORingStructure V] {n : ℕ}
-
-private lemma eval_insert1 (θ : ArithmeticSemiformula Empty (n + 1)) (u w : V) (e : Fin n → V) :
-    V ⊧/(u :> w :> e) (θ ⇜ (#0 :> (#·.succ.succ))) ↔ V ⊧/(u :> e) θ := by
-  simp only [Semiformula.eval_substs]
-  exact Iff.of_eq (congrArg (fun b => Semiformula.Eval (L := ℒₒᵣ) (M := V) b Empty.elim θ)
-    (funext fun i => by induction i using Fin.cases <;> simp))
-
-@[simp]
-private lemma hierarchy_insert1 {Γ s} {θ : ArithmeticSemiformula Empty (n + 1)} :
-    Hierarchy Γ s (θ ⇜ (#0 :> (#·.succ.succ))) ↔ Hierarchy Γ s θ := by
-  simp
-
-private lemma eval_insert2 (θ : ArithmeticSemiformula Empty (n + 2)) (u x w : V) (e : Fin n → V) :
-    V ⊧/(u :> x :> w :> e) (θ ⇜ (#0 :> #1 :> (#·.succ.succ.succ))) ↔ V ⊧/(u :> x :> e) θ := by
-  simp only [Semiformula.eval_substs, Function.comp_def]
-  exact Iff.of_eq (congrArg (fun b => Semiformula.Eval (L := ℒₒᵣ) (M := V) b Empty.elim θ)
-    (funext_two (by simp) (by simp) fun i => by simp))
-
-@[simp]
-private lemma hierarchy_insert2 {Γ s} {θ : ArithmeticSemiformula Empty (n + 2)} :
-    Hierarchy Γ s (θ ⇜ (#0 :> #1 :> (#·.succ.succ.succ))) ↔ Hierarchy Γ s θ := by
-  simp
 
 private def Delta0Witnessed {n : ℕ} (φ : ArithmeticSemiformula Empty n)
     (θ : ArithmeticSemiformula Empty (n + 1)) : Prop :=
@@ -78,7 +45,7 @@ private lemma witnessForm_and {φ₁ φ₂ : ArithmeticSemiformula Empty n}
   . intro V _ _ e
     simp only [LO.LogicalConnective.HomClass.map_and]
     rw [h₁ V e, h₂ V e]
-    simp only [Semiformula.eval_bexsLTSucc, Arithmetic.lt_succ_iff_le, eval_insert1]
+    simp only [Semiformula.eval_bexsLTSucc, Arithmetic.lt_succ_iff_le, Semiformula.eval_insert1]
     constructor
     . rintro ⟨⟨w₁, hw₁⟩, ⟨w₂, hw₂⟩⟩
       exact ⟨w₁ + w₂, ⟨w₁, self_le_add_right w₁ w₂, hw₁⟩, ⟨w₂, self_le_add_left w₂ w₁, hw₂⟩⟩
@@ -116,7 +83,7 @@ private lemma eval_collectionCore {θ : ArithmeticSemiformula Empty (n + 2)} (e 
     (collectionCore θ e).Eval (u :> x :> w :> ![y]) id ↔ V ⊧/(u :> x :> e) θ := by
   simp only [collectionCore, Semiformula.eval_embSubsts, Function.comp_def]
   exact Iff.of_eq (congrArg (fun b => Semiformula.Evalb (M := V) b θ)
-    (funext_two (by simp) (by simp) fun i => by simp))
+    (Fin.funext_two (by simp) (by simp) fun i => by simp))
 
 private noncomputable def collectionMotive (θ : ArithmeticSemiformula Empty (n + 2))
     (e : Fin n → V) (a : V) : ArithmeticSemiformula V 1 :=
@@ -184,7 +151,7 @@ private lemma witnessForm_exs {φ : ArithmeticSemiformula Empty (n + 1)}
   and_intros
   . simp [hθ']
   . intro V _ _ e
-    simp only [Semiformula.eval_ex, eval_bexsLTSucc', eval_insert2]
+    simp only [Semiformula.eval_ex, eval_bexsLTSucc', Semiformula.eval_insert2]
     constructor
     . rintro ⟨x, hx⟩
       obtain ⟨w', hw'⟩ := (h V (x :> e)).mp hx
@@ -201,7 +168,7 @@ private lemma witnessForm_ball {t : ArithmeticSemiterm Empty n} {φ : Arithmetic
   and_intros
   . simp [hθ']
   . intro V _ _ e
-    simp only [Semiformula.eval_ballLT, eval_bexsLTSucc', eval_insert2, Semiterm.val_bShift]
+    simp only [Semiformula.eval_ballLT, eval_bexsLTSucc', Semiformula.eval_insert2, Semiterm.val_bShift]
     constructor
     . intro hφ
       have hex : ∀ x < t.valb e, ∃ w', V ⊧/(w' :> x :> e) θ' :=
