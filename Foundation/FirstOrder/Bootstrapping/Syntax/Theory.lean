@@ -17,6 +17,34 @@ class _root_.LO.FirstOrder.Theory.Δ₁ (T : Theory L) where
 
 abbrev _root_.LO.FirstOrder.Theory.Δ₁ch (T : Theory L) [T.Δ₁] : 𝚫₁.Semisentence 1 := Theory.Δ₁.ch T
 
+end LO.FirstOrder.Arithmetic.Bootstrapping
+
+namespace LO.FirstOrder.Theory
+
+variable {L : Language} [L.Encodable] [L.LORDefinable]
+
+variable {T : Theory L}
+
+class «Σ₁» (T : Theory L) where
+  ch : 𝚺₁.Semisentence 1
+  mem_iff : ∀ φ : Proposition L, ℕ ⊧/![⌜φ⌝] ch.val ↔ ∃ σ ∈ T, φ = σ
+
+abbrev «Σ₁ch» (T : Theory L) [T.«Σ₁»] : 𝚺₁.Semisentence 1 := Theory.«Σ₁».ch T
+
+instance [T.Δ₁] : T.«Σ₁» where
+  ch := T.Δ₁ch.sigma
+  mem_iff φ := by
+    rw [Arithmetic.HierarchySymbol.Semiformula.val_sigma]
+    exact Theory.Δ₁.mem_iff φ
+
+end LO.FirstOrder.Theory
+
+namespace LO.FirstOrder.Arithmetic.Bootstrapping
+
+variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
+
+variable {L : Language} [L.Encodable] [L.LORDefinable]
+
 def _root_.LO.FirstOrder.Theory.Δ₁Class (T : Theory L) [T.Δ₁] : Set V := { φ : V | V ⊧/![φ] T.Δ₁ch.val }
 
 variable {T : Theory L} [T.Δ₁]
