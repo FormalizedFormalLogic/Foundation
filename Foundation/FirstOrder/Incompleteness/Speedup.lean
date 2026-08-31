@@ -97,13 +97,13 @@ lemma computablePred_provable_of_minProof_le [L.Primcodable] (hF : Computable F)
   have hp : ∀ d, Proof T d ⌜F a⌝ → T ⊢ F a := λ d hd ↦ provable_iff_provable.mp ⟨d, hd⟩;
   grind;
 
-private def speedupDerivation {φ : Proposition L} (d : ⊢ᴸᴷ¹ [φ, ∼φ]) (ψ : Proposition L) :
-    ⊢ᴸᴷ¹ [φ ⋎ ψ, ∼φ] := Derivation.or d.contra
+private def speedupDerivation (φ ψ : Proposition L) : ⊢ᴸᴷ¹ [φ ⋎ ψ, ∼φ] :=
+  Derivation.or (Derivation.eta φ).contra
 
 private def speedupProof (T : Theory L) (σ π : Sentence L) : insert σ T ⊢! σ ⋎ π where
   axioms := [σ]
   axioms_mem := by simp
-  derivation := .cast (speedupDerivation (Derivation.eta ↑σ) ↑π)
+  derivation := .cast (speedupDerivation ↑σ ↑π)
 
 section Quotation
 
@@ -144,21 +144,19 @@ private lemma quote_pullback_cast {A : List (Sentence L)} {Γ : List (Propositio
       = ⌜Derivation.toDerivation2 T d⌝ := by
   subst h; rfl;
 
-private lemma quote_speedupDerivation (d : ⊢ᴸᴷ¹ [χ, ∼χ]) :
-    (⌜Derivation.toDerivation2 T (speedupDerivation d ξ)⌝ : ℕ)
+private lemma quote_speedupDerivation :
+    (⌜Derivation.toDerivation2 T (speedupDerivation χ ξ)⌝ : ℕ)
       = orIntro ⌜([χ ⋎ ξ, ∼χ] : List (Proposition L)).toFinset⌝ ⌜χ⌝ ⌜ξ⌝
           (wkRule ⌜insert χ (insert ξ ([χ ⋎ ξ, ∼χ] : List (Proposition L)).toFinset)⌝
             (wkRule ⌜([χ, ξ, ∼χ] : List (Proposition L)).toFinset⌝
-              ⌜Derivation.toDerivation2 T d⌝)) := by
-  have h₁ : (⌜Derivation.toDerivation2 T (speedupDerivation d ξ)⌝ : ℕ)
+              ⌜Derivation.toDerivation2 T (Derivation.eta χ)⌝)) := by
+  have h : (⌜Derivation.toDerivation2 T (speedupDerivation χ ξ)⌝ : ℕ)
       = ⌜Derivation2.or (Γ := ([χ ⋎ ξ, ∼χ] : List (Proposition L)).toFinset)
           (φ := χ) (ψ := ξ) (by simp)
-          (Derivation2.wk (Derivation.toDerivation2 T (Derivation.contra (Γ := [χ, ξ, ∼χ]) d))
-            (by simp))⌝ := rfl;
-  have h₂ : (⌜Derivation.toDerivation2 T (Derivation.contra (Γ := [χ, ξ, ∼χ]) d)⌝ : ℕ)
-      = ⌜Derivation2.wk (Γ := ([χ, ξ, ∼χ] : List (Proposition L)).toFinset)
-          (Derivation.toDerivation2 T d) (by simp)⌝ := rfl;
-  rw [h₁, Derivation2.quote_or, Derivation2.quote_wk, h₂, Derivation2.quote_wk];
+          (Derivation2.wk
+            (Derivation2.wk (Γ := ([χ, ξ, ∼χ] : List (Proposition L)).toFinset)
+              (Derivation.toDerivation2 T (Derivation.eta χ)) (by simp)) (by simp))⌝ := rfl;
+  rw [h, Derivation2.quote_or, Derivation2.quote_wk, Derivation2.quote_wk];
 
 end Quotation
 
@@ -173,7 +171,7 @@ private lemma quote_speedupProof_eq (π : Sentence L) :
   rw [quote_proof_eq (speedupProof T σ π) rfl];
   have h : (⌜Derivation.toDerivation2 (insert σ T) (speedupProof T σ π).derivation⌝ : ℕ)
       = ⌜Derivation.toDerivation2 (insert σ T)
-          (speedupDerivation (Derivation.eta (σ : Proposition L)) (π : Proposition L))⌝ :=
+          (speedupDerivation (σ : Proposition L) (π : Proposition L))⌝ :=
     quote_pullback_cast _ _;
   rw [h, quote_speedupDerivation];
   simp [Sentence.quote_def];
