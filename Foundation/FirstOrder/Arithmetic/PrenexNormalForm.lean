@@ -2,6 +2,7 @@ module
 
 public import Foundation.FirstOrder.Arithmetic.Basic.Prenex
 public import Foundation.FirstOrder.Arithmetic.Schemata
+public import Foundation.FirstOrder.Arithmetic.BoundedCollection
 
 /-!
 # Prenex normal form theorem
@@ -149,6 +150,25 @@ private lemma eval_insert1 {n} (θ : ArithmeticSemiformula Empty (n + 1)) (V : T
     V ⊧/(u :> w :> e) (Rew.bShift.q ▹ θ) ↔ V ⊧/(u :> e) θ := by
   simp [Semiformula.eval_rew_q, Function.comp_def];
 
+private lemma funext_two {α : Type*} {n : ℕ} {f g : Fin (n + 2) → α}
+    (h0 : f 0 = g 0) (h1 : f (Fin.succ 0) = g (Fin.succ 0))
+    (hs : ∀ i : Fin n, f i.succ.succ = g i.succ.succ) : f = g := by
+  funext i;
+  induction i using Fin.cases with
+  | zero => exact h0;
+  | succ i =>
+    induction i using Fin.cases with
+    | zero => exact h1;
+    | succ i => exact hs i;
+
+-- Insertion of an unused fresh variable at position 2 does not affect evaluation.
+private lemma eval_insert2 {n} (θ : ArithmeticSemiformula Empty (n + 2)) (V : Type u) [ORingStructure V]
+    (y x w : V) (e : Fin n → V) :
+    V ⊧/(y :> x :> w :> e) (Rew.bShift.q.q ▹ θ) ↔ V ⊧/(y :> x :> e) θ := by
+  simp only [Semiformula.eval_rew_q, Function.comp_def];
+  exact Iff.of_eq (congrArg (fun b => Semiformula.Evalb (M := V) b θ)
+    (funext_two (by simp) (by simp) fun i => by simp));
+
 private lemma and_sigma_step (ih : CoreClosure.{u} s) :
     ∀ {n} {φ ψ : ArithmeticSemiformula Empty n},
       StrictEquivOnPA.{u} 𝚺 (s + 1) φ → StrictEquivOnPA.{u} 𝚺 (s + 1) ψ → StrictEquivOnPA.{u} 𝚺 (s + 1) (φ ⋏ ψ) := by
@@ -239,9 +259,42 @@ private lemma bexs_sigma_step (ih : CoreClosure.{u} s) :
       hswap, hφiff];
     grind;
 
-private lemma ball_sigma_step (ih : CoreClosure s) :
+private lemma ball_sigma_step (ih : CoreClosure.{u} s) :
     ∀ {n} {φ : ArithmeticSemiformula Empty (n + 1)} {t : ArithmeticSemiterm Empty (n + 1)},
-      t.Positive → StrictEquivOnPA.{u} 𝚺 (s + 1) φ → StrictEquivOnPA.{u} 𝚺 (s + 1) (∀¹[“x. x < !!t”] φ) := sorry
+      t.Positive → StrictEquivOnPA.{u} 𝚺 (s + 1) φ → StrictEquivOnPA.{u} 𝚺 (s + 1) (∀¹[“x. x < !!t”] φ) := by
+  intro n φ t ht hφ;
+  obtain ⟨u, rfl⟩ := Rew.positive_iff.mp ht;
+  obtain ⟨φ', hφ', hiff'⟩ := hφ;
+  obtain ⟨ψ₀, rfl, hψ₀⟩ := hφ'.sigma_succ_elim;
+  have hψ₀qq : StrictHierarchy 𝚷 s (Rew.bShift.q.q ▹ ψ₀) := hψ₀.rew Rew.bShift.q.q;
+  obtain ⟨A, hA, hAiff⟩ := ih.bexs 𝚷
+    (t := Rew.bShift (‘#1 + 1’ : ArithmeticSemiterm Empty (n + 2)))
+    (Rew.bShift_positive _) (refl hψ₀qq);
+  obtain ⟨D, hD, hDiff⟩ := ih.ball 𝚷
+    (t := Rew.bShift (Rew.bShift u)) (by simp) (refl hA);
+  use ∃¹ D;
+  and_intros;
+  . exact hD.sigma;
+  . intro V _ _ e;
+    have hAeval : ∀ x w : V, V ⊧/(x :> w :> e) A ↔ ∃ y ≤ w, V ⊧/(y :> x :> e) ψ₀ := by
+      intro x w;
+      rw [← hAiff V (x :> w :> e)];
+      simp [eval_insert2, Arithmetic.lt_succ_iff_le];
+    have hDeval : ∀ w : V, V ⊧/(w :> e) D ↔ ∀ x < u.valb e, ∃ y ≤ w, V ⊧/(y :> x :> e) ψ₀ := by
+      intro w;
+      rw [← hDiff V (w :> e)];
+      simp [hAeval];
+    have hφeval : ∀ x : V, V ⊧/(x :> e) φ ↔ ∃ y, V ⊧/(y :> x :> e) ψ₀ := fun x =>
+      (hiff' V (x :> e)).trans Semiformula.eval_ex;
+    show V ⊧/e (φ.ballLT u) ↔ V ⊧/e (∃¹ D);
+    simp only [Semiformula.eval_ballLT, Semiformula.eval_ex, hDeval, hφeval];
+    constructor;
+    . intro h;
+      have hθ : Hierarchy 𝚺 (s + 1) ψ₀ := hψ₀.hierarchy.accum 𝚺;
+      exact sigma_exists_bound_witness hθ e (u.valb e) h;
+    . rintro ⟨w, hw⟩ x hx;
+      obtain ⟨y, -, hy⟩ := hw x hx;
+      exact ⟨y, hy⟩;
 
 private lemma coreClosure_succ (ih : CoreClosure s) : CoreClosure (s + 1) := sorry
 
