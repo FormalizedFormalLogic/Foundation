@@ -70,6 +70,12 @@ lemma quote_weight (k : ℕ) :
     change ⌜(⊤ : Proposition L) ⋏ Semiformula.weight k⌝ = _
     simp [ih]
 
+lemma quote_eq_qqVerums {χ : Proposition L} {s : ℕ} :
+    (⌜χ⌝ : ℕ) = qqVerums (s : ℕ) → χ = Semiformula.weight s := by
+  intro h
+  apply (Semiformula.quote_inj_iff (V := ℕ)).mp
+  simpa [quote_weight] using h
+
 lemma quote_padding (φ : Proposition L) (k : ℕ) :
     (⌜φ.padding k⌝ : V) = ⌜φ⌝ ^⋏ qqVerums (k : V) := by
   change ⌜φ ⋏ Semiformula.weight k⌝ = _
