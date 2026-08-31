@@ -236,24 +236,24 @@ lemma exists_delta0_witness_form {n : ℕ} {φ : ArithmeticSemiformula Empty n} 
 lemma models_iff_of_provable_iff {T : ArithmeticTheory} [𝗘𝗤 ℒₒᵣ ⪯ T] {n} {φ ψ : ArithmeticSemiformula Empty n}
     (h : T ⊢ ∀¹* (φ 🡘 ψ)) (V : Type w) [ORingStructure V] [V↓[ℒₒᵣ] ⊧* T] (e : Fin n → V) :
     V ⊧/e φ ↔ V ⊧/e ψ := by
-  have := consequence_iff.mp (Theory.Proof.sound h) V inferInstance
-  simp only [models_iff, Semiformula.eval_allClosure] at this
-  simpa using this e
+  have := consequence_iff.mp (Theory.Proof.sound h) V inferInstance;
+  simp only [models_iff, Semiformula.eval_allClosure] at this;
+  simpa using this e;
 
 theorem exists_delta0_witness_provable {n : ℕ} {φ : ArithmeticSemiformula Empty n} (hφ : Hierarchy 𝚺 1 φ) :
     ∃ θ : ArithmeticSemiformula Empty (n + 1),
       Hierarchy 𝚺 0 θ ∧ 𝗜𝚺₁ ⊢ ∀¹* (φ 🡘 ∃¹ θ) := by
-  obtain ⟨θ, hθ, H⟩ := exists_delta0_witness_form.{0} hφ
-  use θ
-  and_intros
-  . exact hθ
-  . apply FirstOrder.Arithmetic.complete.{0} 𝗜𝚺₁ _ ?_
-    intro M _ _
-    simpa [models_iff] using fun e => H M e
+  obtain ⟨θ, hθ, H⟩ := exists_delta0_witness_form.{0} hφ;
+  use θ;
+  and_intros;
+  . exact hθ;
+  . apply FirstOrder.Arithmetic.complete.{0} 𝗜𝚺₁ _ ?_;
+    intro M _ _;
+    simpa [models_iff] using fun e => H M e;
 
 theorem exists_delta0_witness_provable_of_sentence {σ : ArithmeticSentence} (hσ : Hierarchy 𝚺 1 σ) :
     ∃ θ : ArithmeticSemisentence 1, Hierarchy 𝚺 0 θ ∧ 𝗜𝚺₁ ⊢ σ 🡘 ∃¹ θ := by
-  obtain ⟨θ, hθ, h⟩ := exists_delta0_witness_provable hσ
-  exact ⟨θ, hθ, h⟩
+  obtain ⟨θ, hθ, h⟩ := exists_delta0_witness_provable hσ;
+  exact ⟨θ, hθ, h⟩;
 
 end LO.FirstOrder.Arithmetic
