@@ -118,9 +118,30 @@ private lemma coreClosure_zero : CoreClosure 0 where
       simp only [Semiformula.eval_bexs];
       exact exists_congr (fun x => and_congr Iff.rfl (hiff' V (x :> e)));
 
-private lemma or_sigma_step (ih : CoreClosure s) :
+private lemma or_sigma_step (ih : CoreClosure.{u} s) :
     ∀ {n} {φ ψ : ArithmeticSemiformula Empty n},
-      StrictEquivOnPA.{u} 𝚺 (s + 1) φ → StrictEquivOnPA.{u} 𝚺 (s + 1) ψ → StrictEquivOnPA.{u} 𝚺 (s + 1) (φ ⋎ ψ) := sorry
+      StrictEquivOnPA.{u} 𝚺 (s + 1) φ → StrictEquivOnPA.{u} 𝚺 (s + 1) ψ → StrictEquivOnPA.{u} 𝚺 (s + 1) (φ ⋎ ψ) := by
+  intro n φ ψ hφ hψ;
+  obtain ⟨φ', hφ', hφiff⟩ := hφ;
+  obtain ⟨ψ', hψ', hψiff⟩ := hψ;
+  obtain ⟨φ₀, rfl, hφ₀⟩ := hφ'.sigma_succ_elim;
+  obtain ⟨ψ₀, rfl, hψ₀⟩ := hψ'.sigma_succ_elim;
+  obtain ⟨χ, hχ, hχiff⟩ := ih.or 𝚷 (refl hφ₀) (refl hψ₀);
+  use ∃¹ χ;
+  and_intros;
+  . exact hχ.sigma;
+  . intro V _ _ e;
+    have hφiff' : V ⊧/e φ ↔ ∃ x, V ⊧/(x :> e) φ₀ := (hφiff V e).trans Semiformula.eval_ex;
+    have hψiff' : V ⊧/e ψ ↔ ∃ x, V ⊧/(x :> e) ψ₀ := (hψiff V e).trans Semiformula.eval_ex;
+    simp only [LogicalConnective.HomClass.map_or, Semiformula.eval_ex, hφiff', hψiff'];
+    constructor;
+    . rintro (⟨x, hx⟩ | ⟨x, hx⟩);
+      . exact ⟨x, (hχiff V (x :> e)).mp (by left; exact hx)⟩;
+      . exact ⟨x, (hχiff V (x :> e)).mp (by right; exact hx)⟩;
+    . rintro ⟨x, hx⟩;
+      rcases (hχiff V (x :> e)).mpr hx with h | h;
+      . left; exact ⟨x, h⟩;
+      . right; exact ⟨x, h⟩;
 
 private lemma and_sigma_step (ih : CoreClosure s) :
     ∀ {n} {φ ψ : ArithmeticSemiformula Empty n},
