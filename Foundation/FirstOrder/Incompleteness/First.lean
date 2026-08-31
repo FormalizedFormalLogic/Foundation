@@ -76,7 +76,7 @@ theorem exists_true_but_unprovable_sentence_of_sigma1_definable
     . simpa
     . exact hδ.2
 
-theorem incomplete_of_re (T : ArithmeticTheory) [T.RE] [𝗜𝚺₁ ⪯ T] [Entailment.Consistent T] :
+theorem incomplete_of_re (T : ArithmeticTheory) [T.RE] [𝗜𝚺₁ ⪯ T] [Consistent T] :
     Incomplete T := incomplete_GR_of_sigma1_definable T
 
 theorem incomplete_of_re_of_sound (T : ArithmeticTheory) [T.RE] [𝗥₀ ⪯ T]
@@ -86,6 +86,6 @@ instance {T : ArithmeticTheory} [ℕ↓[ℒₒᵣ] ⊧* T] [T.Δ₁] [𝗥₀ �
   constructor;
   . infer_instance
   . obtain ⟨δ, δTrue, δUnprov⟩ := exists_true_but_unprovable_sentence T;
-    exact Entailment.not_weakerThan_iff.mpr ⟨δ, TA.provable_iff.mpr δTrue, δUnprov⟩
+    exact not_weakerThan_iff.mpr ⟨δ, TA.provable_iff.mpr δTrue, δUnprov⟩
 
 end LO.FirstOrder.Arithmetic
