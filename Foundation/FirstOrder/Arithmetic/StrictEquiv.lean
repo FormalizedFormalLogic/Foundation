@@ -72,14 +72,6 @@ def of_iff {ψ : ArithmeticSemiformula Empty n} (h : StrictEquiv T Γ s φ)
 def neg (h : StrictEquiv T Γ s φ) : StrictEquiv T Γ.alt s (∼φ) :=
   ⟨∼h.witness, h.hierarchy.neg, provable_iff_of_models_iff fun V _ _ e => by simp [h.iff_models V e]⟩
 
--- `StrictEquiv` carries data (the witness formula), so an `Iff` between two instances is not
--- itself a `Prop`; state `neg`'s converse between the `Nonempty`-truncated versions instead.
-@[simp] lemma neg_iff :
-    Nonempty (StrictEquiv T Γ.alt s (∼φ)) ↔ Nonempty (StrictEquiv T Γ s φ) := by
-  constructor;
-  . rintro ⟨h⟩; exact ⟨by simpa using neg h⟩;
-  . rintro ⟨h⟩; exact ⟨neg h⟩;
-
 def alt_up (h : StrictEquiv T Γ s φ) : StrictEquiv T Γ.alt (s + 1) φ := by
   rcases Γ with _ | _;
   . use ∀¹ (Rew.bShift ▹ h.witness);
@@ -266,9 +258,7 @@ noncomputable def ball_sigma_step (hT : 𝗜𝚺 (s + 1) ⪯ T) (ih : Closure T 
 noncomputable def or_sigma_step (ih : Closure T s) :
     ∀ {n} {φ ψ : ArithmeticSemiformula Empty n},
       StrictEquiv T 𝚺 (s + 1) φ → StrictEquiv T 𝚺 (s + 1) ψ → StrictEquiv T 𝚺 (s + 1) (φ ⋎ ψ) := by
-  intro n φ ψ hφ hψ;
-  obtain ⟨φ', hφ', hφprov⟩ := hφ;
-  obtain ⟨ψ', hψ', hψprov⟩ := hψ;
+  rintro n φ ψ ⟨φ', hφ', hφprov⟩ ⟨ψ', hψ', hψprov⟩;
   have hφiff := models_iff_of_provable_iff' hφprov;
   have hψiff := models_iff_of_provable_iff' hψprov;
   obtain ⟨φ₀, rfl, hφ₀⟩ := strictSigmaSuccElim hφ';
@@ -433,8 +423,6 @@ noncomputable def all (hT : 𝗜𝚺 s ⪯ T) (c : Closure T s) {n : ℕ}
 
 theorem nonempty_strictEquiv {Γ : Polarity} {n : ℕ} {φ : ArithmeticSemiformula Empty n}
     (h : Hierarchy Γ s φ) (hT : 𝗜𝚺 s ⪯ T) : Nonempty (StrictEquiv T Γ s φ) := by
-  have hmono : ∀ {s₁ s₂ : ℕ}, s₁ ≤ s₂ → 𝗜𝚺 s₂ ⪯ T → 𝗜𝚺 s₁ ⪯ T := fun hle hs =>
-    Entailment.WeakerThan.trans (ISigma_weakerThan_of_le hle) hs;
   induction h with
   | verum Γ s n =>
     exact ⟨StrictEquiv.of_deltaZero (Hierarchy.verum 𝚺 0 n)⟩;
@@ -453,24 +441,24 @@ theorem nonempty_strictEquiv {Γ : Polarity} {n : ℕ} {φ : ArithmeticSemiformu
   | bexs pos _ ih =>
     exact ⟨(closure hT).bexs _ pos (ih hT).some⟩;
   | @exs s n φ _ ih =>
-    have hT' : 𝗜𝚺 s ⪯ T := hmono (Nat.le_succ s) hT;
+    have hT' : 𝗜𝚺 s ⪯ T := ISigma_weakerThan_of_le_trans (by omega) hT;
     exact ⟨exs hT' (closure hT') (ih hT).some⟩;
   | @all s n φ _ ih =>
-    have hT' : 𝗜𝚺 s ⪯ T := hmono (Nat.le_succ s) hT;
+    have hT' : 𝗜𝚺 s ⪯ T := ISigma_weakerThan_of_le_trans (by omega) hT;
     exact ⟨all hT' (closure hT') (ih hT).some⟩;
   | @sigma s n φ hp ih =>
     rcases s with _ | s;
     . exact ⟨StrictEquiv.refl (StrictHierarchy.sigma (StrictHierarchy.zero (Hierarchy.zero_iff.mp hp)))⟩;
-    . exact ⟨StrictEquiv.exs_of_pi (ih (hmono (by omega) hT)).some⟩;
+    . exact ⟨StrictEquiv.exs_of_pi (ih (ISigma_weakerThan_of_le_trans (by omega) hT)).some⟩;
   | @pi s n φ hp ih =>
     rcases s with _ | s;
     . exact ⟨StrictEquiv.refl (StrictHierarchy.pi (StrictHierarchy.zero (Hierarchy.zero_iff.mp hp)))⟩;
-    . exact ⟨StrictEquiv.all_of_sigma (ih (hmono (Nat.le_succ _) hT)).some⟩;
+    . exact ⟨StrictEquiv.all_of_sigma (ih (ISigma_weakerThan_of_le_trans (by omega) hT)).some⟩;
   | @dummy_sigma s n φ hp ih =>
-    have hT' : 𝗜𝚺 s ⪯ T := hmono (by omega) hT;
-    exact ⟨StrictEquiv.alt_up (all hT' (closure hT') (ih (hmono (Nat.le_succ _) hT)).some)⟩;
+    have hT' : 𝗜𝚺 s ⪯ T := ISigma_weakerThan_of_le_trans (by omega) hT;
+    exact ⟨StrictEquiv.alt_up (all hT' (closure hT') (ih (ISigma_weakerThan_of_le_trans (by omega) hT)).some)⟩;
   | @dummy_pi s n φ hp ih =>
-    have hT' : 𝗜𝚺 s ⪯ T := hmono (by omega) hT;
-    exact ⟨StrictEquiv.alt_up (exs hT' (closure hT') (ih (hmono (Nat.le_succ _) hT)).some)⟩;
+    have hT' : 𝗜𝚺 s ⪯ T := ISigma_weakerThan_of_le_trans (by omega) hT;
+    exact ⟨StrictEquiv.alt_up (exs hT' (closure hT') (ih (ISigma_weakerThan_of_le_trans (by omega) hT)).some)⟩;
 
 end LO.FirstOrder.Arithmetic

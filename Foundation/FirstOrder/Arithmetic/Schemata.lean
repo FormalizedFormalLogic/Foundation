@@ -67,6 +67,10 @@ lemma ISigma_subset_mono {s₁ s₂} (h : s₁ ≤ s₂) : 𝗜𝚺 s₁ ⊆ �
 lemma ISigma_weakerThan_of_le {s₁ s₂} (h : s₁ ≤ s₂) : 𝗜𝚺 s₁ ⪯ 𝗜𝚺 s₂ :=
   Entailment.WeakerThan.ofSubset (ISigma_subset_mono h)
 
+lemma ISigma_weakerThan_of_le_trans {T : ArithmeticTheory} {s₁ s₂} (h : s₁ ≤ s₂) (hT : 𝗜𝚺 s₂ ⪯ T) :
+    𝗜𝚺 s₁ ⪯ T :=
+  Entailment.WeakerThan.trans (ISigma_weakerThan_of_le h) hT
+
 instance : 𝗘𝗤 ℒₒᵣ ⪯ 𝗜𝗡𝗗 Γ n :=
   have : 𝗘𝗤 ℒₒᵣ ⪯ 𝗣𝗔⁻ := inferInstance
   Entailment.WeakerThan.trans this inferInstance
