@@ -12,12 +12,11 @@ open Classical
 open LO
 open LO.FirstOrder
 
-universe u
 noncomputable section
 
 namespace LO.FirstOrder.Arithmetic
 
-variable {V : Type u} [ORingStructure V] {n s : ℕ} [V↓[ℒₒᵣ] ⊧* 𝗜𝚺 (s + 1)]
+variable {V : Type*} [ORingStructure V] {n s : ℕ} [V↓[ℒₒᵣ] ⊧* 𝗜𝚺 (s + 1)]
 
 -- `𝗜𝚺₁ ⪯ 𝗜𝚺 (s + 1) ⪯ 𝗣𝗔⁻` is only registered as an instance for the literal level `1`;
 -- derive it here for the general level so downstream order/ring instances on `V` resolve.
