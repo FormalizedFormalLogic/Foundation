@@ -13,7 +13,7 @@ shows that `StrictHierarchy Γ s ψ` holds iff `ψ = quantItr Γ s φ` for some 
 @[expose] public section
 namespace LO.Polarity
 
-variable {α : ℕ → Type*} [FirstOrder.UnivQuantifier α] [FirstOrder.ExsQuantifier α] {n : ℕ}
+variable {α : ℕ → Type*} [FirstOrder.UnivQuantifier α] [FirstOrder.ExsQuantifier α] {n : ℕ} {Γ : Polarity}
 
 def quant : Polarity → α (n + 1) → α n
   | 𝚺 => FirstOrder.ExsQuantifier.exs
@@ -27,59 +27,47 @@ def quantItr (Γ : Polarity) : (k : ℕ) → α (n + k) → α n
   | 0,     φ => φ
   | k + 1, φ => quantItr Γ k ((Polarity.alt^[k] Γ).quant φ)
 
-@[simp] lemma quantItr_zero (φ : α n) : quantItr Γ 0 φ = φ := rfl
+@[simp]
+lemma quantItr_zero (φ : α n) : quantItr Γ 0 φ = φ := rfl
 
 lemma quantItr_succ {k} (φ : α (n + (k + 1))) :
-    quantItr Γ (k + 1) φ = quantItr Γ k ((Polarity.alt^[k] Γ).quant φ) := rfl
+  quantItr Γ (k + 1) φ = quantItr Γ k ((Polarity.alt^[k] Γ).quant φ) := rfl
 
 end LO.Polarity
 
 namespace LO.FirstOrder.Arithmetic
 
-variable {L : Language} [L.LT] {ξ : Type*}
+variable {L : Language} [L.LT] {ξ : Type*} {Γ : Polarity} {s j n : ℕ}
 
 example {φ₀ : Semiformula L ξ (n + 2)} : Polarity.quantItr 𝚺 2 φ₀ = ∃¹ ∀¹ φ₀ := rfl
 
 example {φ₀ : Semiformula L ξ (n + 1)} : Polarity.quantItr 𝚺 1 φ₀ = ∃¹ φ₀ := rfl
 
-lemma strictHierarchy_quantItr {Γ : Polarity} {j : ℕ} :
-    ∀ (s : ℕ) {n} {φ : Semiformula L ξ (n + s)},
-      StrictHierarchy (Polarity.alt^[s] Γ) j φ → StrictHierarchy Γ (s + j) (Polarity.quantItr Γ s φ) := by
-  suffices H : ∀ (s j : ℕ) {n} {φ : Semiformula L ξ (n + s)},
-      StrictHierarchy (Polarity.alt^[s] Γ) j φ → StrictHierarchy Γ (s + j) (Polarity.quantItr Γ s φ) from
-    fun s => H s j;
-  intro s;
-  induction s with
-  | zero => intro j n φ h; simpa using h;
+lemma strictHierarchy_quantItr {φ : Semiformula L ξ (n + s)}
+    (h : StrictHierarchy (Polarity.alt^[s] Γ) j φ) :
+    StrictHierarchy Γ (s + j) (Polarity.quantItr Γ s φ) := by
+  induction s generalizing n j with
+  | zero => simpa using h;
   | succ s ih =>
-    intro j n φ h;
     rw [Function.iterate_succ_apply'] at h;
     have e : s + (j + 1) = s + 1 + j := by omega;
     rw [Polarity.quantItr_succ, ← e];
     rcases hΓ : Polarity.alt^[s] Γ with _ | _;
-    . refine ih (j + 1) ?_;
+    . refine ih ?_;
       rw [hΓ] at h ⊢;
       exact StrictHierarchy.sigma h;
-    . refine ih (j + 1) ?_;
+    . refine ih ?_;
       rw [hΓ] at h ⊢;
       exact StrictHierarchy.pi h;
 
-lemma exists_kernel {Γ : Polarity} {j : ℕ} :
-    ∀ (s : ℕ) {n} {ψ : Semiformula L ξ n},
-      StrictHierarchy Γ (s + j) ψ →
-        ∃ φ : Semiformula L ξ (n + s), StrictHierarchy (Polarity.alt^[s] Γ) j φ ∧ ψ = Polarity.quantItr Γ s φ := by
-  suffices H : ∀ (s j : ℕ) {n} {ψ : Semiformula L ξ n},
-      StrictHierarchy Γ (s + j) ψ →
-        ∃ φ : Semiformula L ξ (n + s), StrictHierarchy (Polarity.alt^[s] Γ) j φ ∧ ψ = Polarity.quantItr Γ s φ from
-    fun s => H s j;
-  intro s;
-  induction s with
-  | zero => intro j n ψ h; exact ⟨ψ, by simpa using h, rfl⟩;
+lemma exists_kernel {ψ : Semiformula L ξ n} (h : StrictHierarchy Γ (s + j) ψ) :
+    ∃ φ : Semiformula L ξ (n + s), StrictHierarchy (Polarity.alt^[s] Γ) j φ ∧ ψ = Polarity.quantItr Γ s φ := by
+  induction s generalizing n j with
+  | zero => exact ⟨ψ, by simpa using h, rfl⟩;
   | succ s ih =>
-    intro j n ψ h;
     have e : s + 1 + j = s + (j + 1) := by omega;
     rw [e] at h;
-    obtain ⟨φ', hφ', rfl⟩ := ih (j + 1) h;
+    obtain ⟨φ', hφ', rfl⟩ := ih h;
     rcases hΓ : Polarity.alt^[s] Γ with _ | _;
     . rw [hΓ] at hφ';
       obtain ⟨φ'', rfl, hφ''⟩ := StrictHierarchy.sigma_succ_elim hφ';
@@ -96,13 +84,13 @@ lemma exists_kernel {Γ : Polarity} {j : ℕ} :
         exact hφ'';
       . rw [Polarity.quantItr_succ, hΓ]; rfl;
 
-theorem strictHierarchy_iff_exists_kernel {Γ : Polarity} {s n : ℕ} {ψ : Semiformula L ξ n} :
+theorem strictHierarchy_iff_exists_kernel {ψ : Semiformula L ξ n} :
     StrictHierarchy Γ s ψ ↔ ∃ φ : Semiformula L ξ (n + s), Hierarchy 𝚺 0 φ ∧ ψ = Polarity.quantItr Γ s φ := by
   constructor;
   . intro h;
-    obtain ⟨φ, hφ, rfl⟩ := exists_kernel s (j := 0) h;
+    obtain ⟨φ, hφ, rfl⟩ := exists_kernel (j := 0) h;
     exact ⟨φ, StrictHierarchy.zero_iff.mp hφ, rfl⟩;
   . rintro ⟨φ, hφ, rfl⟩;
-    exact strictHierarchy_quantItr s (StrictHierarchy.zero hφ);
+    exact strictHierarchy_quantItr (StrictHierarchy.zero hφ);
 
 end LO.FirstOrder.Arithmetic
