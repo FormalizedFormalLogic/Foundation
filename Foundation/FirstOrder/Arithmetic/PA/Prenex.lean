@@ -25,8 +25,8 @@ lemma nonempty_strictHierarchyFormulaEquivOf {φ : ArithmeticSemisentence n} (h 
 lemma exists_kernel_provable {φ : ArithmeticSemisentence n} (h : Hierarchy Γ s φ) :
     ∃ φ₀ : ArithmeticSemisentence (n + s),
       Hierarchy 𝚺 0 φ₀ ∧ 𝗣𝗔 ⊢ ∀¹* (φ 🡘 Polarity.quantItr Γ s φ₀) := by
-  obtain ⟨Φ⟩ := nonempty_strictHierarchyFormulaEquivOf h;
-  exact ⟨Φ.kernel, Φ.kernel_deltaZero, Φ.provable⟩
+  obtain ⟨φ'⟩ := nonempty_strictHierarchyFormulaEquivOf h;
+  exact ⟨φ'.kernel, φ'.kernel_deltaZero, φ'.provable⟩
 
 lemma exists_kernel_provable_of_sentence {σ : ArithmeticSentence} (h : Hierarchy Γ s σ) :
     ∃ π₀ : ArithmeticSemisentence (0 + s),
@@ -35,22 +35,22 @@ lemma exists_kernel_provable_of_sentence {σ : ArithmeticSentence} (h : Hierarch
 
 lemma exists_hierarchy_provable_of_sentence {σ : ArithmeticSentence} (h : Hierarchy 𝚺 (s + 1) σ) :
     ∃ θ : ArithmeticSemisentence 1, Hierarchy 𝚷 s θ ∧ 𝗣𝗔 ⊢ σ 🡘 ∃¹ θ := by
-  obtain ⟨W⟩ := nonempty_strictHierarchyFormulaEquivOf h;
-  use ↑W.sigmaInv;
+  obtain ⟨σ'⟩ := nonempty_strictHierarchyFormulaEquivOf h;
+  use ↑σ'.sigmaInv;
   and_intros;
-  . exact W.sigmaInv.hierarchy;
-  . have hprov := W.provable;
-    rw [W.coe_sigmaInv] at hprov;
+  . exact σ'.sigmaInv.hierarchy;
+  . have hprov := σ'.provable;
+    rw [σ'.coe_sigmaInv] at hprov;
     exact hprov;
 
 lemma exists_hierarchy_provable_of_sentence_pi {σ : ArithmeticSentence} (h : Hierarchy 𝚷 (s + 1) σ) :
     ∃ θ : ArithmeticSemisentence 1, Hierarchy 𝚺 s θ ∧ 𝗣𝗔 ⊢ σ 🡘 ∀¹ θ := by
-  obtain ⟨W⟩ := nonempty_strictHierarchyFormulaEquivOf h;
-  use ↑W.piInv;
+  obtain ⟨σ'⟩ := nonempty_strictHierarchyFormulaEquivOf h;
+  use ↑σ'.piInv;
   and_intros;
-  . exact W.piInv.hierarchy;
-  . have hprov := W.provable;
-    rw [W.coe_piInv] at hprov;
+  . exact σ'.piInv.hierarchy;
+  . have hprov := σ'.provable;
+    rw [σ'.coe_piInv] at hprov;
     exact hprov;
 
 end LO.FirstOrder.Arithmetic.Peano
