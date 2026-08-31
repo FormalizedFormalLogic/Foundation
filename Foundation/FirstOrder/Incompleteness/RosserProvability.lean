@@ -1,6 +1,7 @@
 module
 
 public import Foundation.FirstOrder.Incompleteness.WitnessComparison
+public import Foundation.FirstOrder.Bootstrapping.Syntax.CraigTrick
 
 @[expose] public section
 /-!
@@ -145,5 +146,12 @@ end rosserProvability
 /-- Gödel-Rosser incompleteness theorem -/
 theorem incomplete_GR (T : ArithmeticTheory) [T.Δ₁] [𝗜𝚺₁ ⪯ T] [Entailment.Consistent T] : Entailment.Incomplete T :=
   ProvabilityAbstraction.rosser_first_incompleteness T.rosserProvability
+
+theorem incomplete_GR_of_sigma1_definable (T : ArithmeticTheory) [T.«Σ₁»] [𝗜𝚺₁ ⪯ T]
+    [Entailment.Consistent T] : Entailment.Incomplete T := by
+  let craig_weakerThan : 𝗜𝚺₁ ⪯ T.craig :=
+    Entailment.WeakerThan.trans (𝓣 := T) inferInstance (Theory.craig.original_weakerThan (T := T))
+  exact (Theory.craig_equiv (T := T)).symm.incomplete
+    (@incomplete_GR T.craig inferInstance craig_weakerThan inferInstance)
 
 end LO.FirstOrder.Arithmetic
