@@ -78,7 +78,7 @@ lemma computablePred_proof : ComputablePred λ p : ℕ × ℕ ↦ Proof T p.1 p.
   apply ComputablePred.computable_iff_re_compl_re'.mpr;
   obtain ⟨φ, hφ⟩ := HierarchySymbol.Definable.of_delta (Γ := 𝚺) (Proof.definable (V := ℕ) (T := T));
   obtain ⟨ψ, hψ⟩ := (HierarchySymbol.Definable.of_delta (Γ := 𝚷) (Proof.definable (V := ℕ) (T := T))).notPi;
-  have hcomp : Computable λ p : ℕ × ℕ ↦ (p.1 ::ᵥ p.2 ::ᵥ List.Vector.nil : List.Vector ℕ 2) :=
+  have hcomp : Computable λ p : ℕ × ℕ ↦ p.1 ::ᵥ p.2 ::ᵥ List.Vector.nil :=
     Primrec.to_comp <|
     Primrec.vector_cons.comp .fst (Primrec.vector_cons.comp .snd (.const List.Vector.nil));
   exact ⟨((sigma1_re id φ.sigma_prop).comp hcomp).of_eq
@@ -235,7 +235,7 @@ private lemma computable_quote_speedupProof [L.Primcodable] :
       ⌜Derivation.toDerivation2 (insert σ T) (Derivation.eta (σ : Proposition L))⌝).of_eq
       λ π ↦ (quote_speedupProof_eq π).symm;
 
-lemma exists_computable_bound_minProof_or [L.Primcodable] :
+private lemma exists_computable_bound_minProof_or [L.Primcodable] :
     ∃ c : Sentence L → ℕ, Computable c ∧ ∀ π, (insert σ T).minProof (σ ⋎ π) ≤ c π :=
   ⟨λ π ↦ ⌜speedupProof T σ π⌝, computable_quote_speedupProof,
     λ π ↦ minProof_le (speedupProof T σ π)⟩
