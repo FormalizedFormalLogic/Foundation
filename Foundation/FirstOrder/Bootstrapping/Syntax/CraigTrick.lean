@@ -43,4 +43,18 @@ lemma quote_weight (k : ℕ) :
     change ⌜(⊤ : Proposition L) ⋏ Semiformula.weight k⌝ = _
     simp [ih]
 
+lemma quote_padding (φ : Proposition L) (k : ℕ) :
+    (⌜φ.padding k⌝ : V) = ⌜φ⌝ ^⋏ qqVerums (k : V) := by
+  change ⌜φ ⋏ Semiformula.weight k⌝ = _
+  simp [quote_weight]
+
+namespace Sentence
+
+lemma quote_padding (σ : Sentence L) (k : ℕ) :
+    (⌜σ.padding k⌝ : V) = ⌜σ⌝ ^⋏ qqVerums (k : V) := by
+  simpa [Sentence.quote_def] using
+    LO.FirstOrder.Arithmetic.Bootstrapping.quote_padding (V := V) (Rewriting.emb σ) k
+
+end Sentence
+
 end LO.FirstOrder.Arithmetic.Bootstrapping
