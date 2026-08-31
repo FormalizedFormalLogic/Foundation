@@ -114,9 +114,8 @@ lemma quote_weight (k : ℕ) :
 
 lemma quote_eq_qqVerums {χ : Proposition L} {s : ℕ} :
     (⌜χ⌝ : ℕ) = qqVerums (s : ℕ) → χ = Semiformula.weight s := by
-  intro h
-  apply (Semiformula.quote_inj_iff (V := ℕ)).mp
-  simpa [quote_weight] using h
+  intro h;
+  exact (Semiformula.quote_inj_iff (V := ℕ)).mp <| by simpa [quote_weight] using h
 
 lemma quote_padding (φ : Proposition L) (k : ℕ) :
     (⌜φ.padding k⌝ : V) = ⌜φ⌝ ^⋏ qqVerums (k : V) := by
@@ -174,22 +173,20 @@ noncomputable instance craig.delta1 (T : Theory L) [T.«Σ₁»] : (T.craig).Δ�
 noncomputable instance craig.weakerThan (T : Theory L) [L.DecidableEq] [T.«Σ₁»] : T.craig ⪯ T :=
   WeakerThan.ofAxm! $ by
     rintro σ ⟨ρ, s, hρ, rfl⟩;
-    have hρ' : ℕ ⊧/![⌜ρ⌝] T.«Σ₁ch».val := (Theory.«Σ₁witness_spec» T ℕ ![⌜ρ⌝]).mpr ⟨s, hρ⟩
-    rcases (Theory.«Σ₁».mem_iff (Rewriting.emb ρ)).mp
+    have hρ' : ℕ ⊧/![⌜ρ⌝] T.«Σ₁ch».val := («Σ₁witness_spec» T ℕ ![⌜ρ⌝]).mpr ⟨s, hρ⟩
+    rcases («Σ₁».mem_iff (Rewriting.emb ρ)).mp
       (by simpa [Sentence.quote_def] using hρ') with ⟨τ, hτ, hρτ⟩
     have hρT : ρ ∈ T := Rewriting.emb_injective hρτ ▸ hτ
-    exact mdp (C_of_E_mpr (Entailment.padding_iff ρ s))
-      (by_axm hρT)
+    exact mdp (C_of_E_mpr (Entailment.padding_iff ρ s)) (by_axm hρT)
 
 noncomputable instance craig.original_weakerThan {T : Theory L} [L.DecidableEq] [T.«Σ₁»]
   : T ⪯ T.craig :=
   WeakerThan.ofAxm! fun {σ} hσ ↦ by
     have hσ' : ℕ ⊧/![⌜σ⌝] T.«Σ₁ch».val :=
-      (Theory.«Σ₁».mem_iff (Rewriting.emb σ)).mpr ⟨σ, hσ, rfl⟩
-    rcases (Theory.«Σ₁witness_spec» T ℕ ![⌜σ⌝]).mp hσ' with ⟨s, hs⟩
+      («Σ₁».mem_iff (Rewriting.emb σ)).mpr ⟨σ, hσ, rfl⟩
+    rcases («Σ₁witness_spec» T ℕ ![⌜σ⌝]).mp hσ' with ⟨s, hs⟩
     have hpadding : σ.padding s ∈ T.craig := ⟨σ, s, hs, rfl⟩
-    exact mdp (Entailment.C_of_E_mp (Entailment.padding_iff σ s))
-      (by_axm hpadding)
+    exact mdp (C_of_E_mp (Entailment.padding_iff σ s)) (by_axm hpadding)
 
 noncomputable instance craig_equiv {T : Theory L} [L.DecidableEq] [T.«Σ₁»]
   : T ≊ T.craig :=
