@@ -27,25 +27,6 @@ lemma provable_insert_neg_iff_or : insert (∼σ) T ⊢ π ↔ T ⊢ σ ⋎ π :
 
 end
 
-section boundedMax
-
-variable {f : ℕ → ℕ}
-
-private def boundedMax (f : ℕ → ℕ) (n : ℕ) : ℕ := Nat.rec (f 0) (λ k ih ↦ max ih (f (k + 1))) n
-
-private lemma computable_boundedMax (hf : Computable f) : Computable (boundedMax f) := by
-  have h : Computable λ q : ℕ × (ℕ × ℕ) ↦ max q.2.2 (f (q.2.1 + 1)) :=
-    Computable₂.comp Primrec.nat_max.to_comp (Computable.snd.comp Computable.snd)
-      (hf.comp (Computable.succ.comp (Computable.fst.comp Computable.snd)));
-  exact Computable.nat_rec Computable.id (Computable.const (f 0)) h.to₂;
-
-private lemma le_boundedMax {k n : ℕ} (h : k ≤ n) : f k ≤ boundedMax f n := by
-  induction n with
-  | zero => simp_all [boundedMax];
-  | succ n ih => rcases Nat.eq_or_lt_of_le h with rfl | h <;> simp_all [boundedMax];
-
-end boundedMax
-
 variable
   {L : Language} [L.DecidableEq] [L.Encodable] [L.LORDefinable]
   {T : Theory L} [T.Δ₁] {σ : Sentence L}
@@ -251,8 +232,8 @@ theorem ehrenfeucht_mycielski_speedup [L.Primcodable]
   refine ComputablePred.of_eq ?_ (λ π ↦ provable_insert_neg_iff_or.symm);
   exact computablePred_provable_of_minProof_le
     (Semiformula.primrec₂_or.comp (Primrec.const σ) Primrec.id).to_comp
-    ((computable_boundedMax hf).comp hc)
-    λ π hπ ↦ (hU (σ ⋎ π) hπ).trans (le_boundedMax (hcb π));
+    ((Nat.computable_boundedMax hf).comp hc)
+    λ π hπ ↦ (hU (σ ⋎ π) hπ).trans (Nat.le_boundedMax (hcb π));
 
 theorem ehrenfeucht_mycielski_speedup_arithmetic
   {T : ArithmeticTheory} [T.Δ₁] [𝗜𝚺₁ ⪯ T] {σ : ArithmeticSentence} (hσ : T ⊬ σ) (f : ℕ → ℕ) (hf : Computable f) :
