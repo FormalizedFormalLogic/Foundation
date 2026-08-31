@@ -324,7 +324,10 @@ private lemma coreClosure_succ (ih : CoreClosure.{u} s) : CoreClosure.{u} (s + 1
       have := neg (ball_sigma_step ih ht hφ');
       simpa using this;
 
-private lemma coreClosure : CoreClosure s := sorry
+private lemma coreClosure : CoreClosure.{u} s := by
+  induction s with
+  | zero => exact coreClosure_zero;
+  | succ s ih => exact coreClosure_succ ih;
 
 private lemma exs {φ : ArithmeticSemiformula Empty (n + 1)} (h : StrictEquivOnPA.{u} 𝚺 (s + 1) φ) :
     StrictEquivOnPA.{u} 𝚺 (s + 1) (∃¹ φ) := sorry
