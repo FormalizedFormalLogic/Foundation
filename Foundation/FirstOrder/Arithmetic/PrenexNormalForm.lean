@@ -54,11 +54,17 @@ private lemma neg (h : StrictEquivOnPA.{u} Γ s φ) : StrictEquivOnPA.{u} Γ.alt
 private lemma alt_up (h : StrictEquivOnPA.{u} Γ s φ) : StrictEquivOnPA.{u} Γ.alt (s + 1) φ := by
   obtain ⟨φ', hφ', hiff'⟩ := h;
   rcases Γ with _ | _;
-  . refine ⟨∀¹ (Rew.bShift ▹ φ'), (hφ'.rew Rew.bShift).pi, fun V _ _ e => ?_⟩;
-    have : Nonempty V := ⟨0⟩;
-    simp [hiff' V e];
-  . refine ⟨∃¹ (Rew.bShift ▹ φ'), (hφ'.rew Rew.bShift).sigma, fun V _ _ e => ?_⟩;
-    simp [hiff' V e];
+  . use ∀¹ (Rew.bShift ▹ φ');
+    and_intros;
+    . exact (hφ'.rew Rew.bShift).pi;
+    . intro V _ _ e;
+      have : Nonempty V := ⟨0⟩;
+      simp [hiff' V e];
+  . use ∃¹ (Rew.bShift ▹ φ');
+    and_intros;
+    . exact (hφ'.rew Rew.bShift).sigma;
+    . intro V _ _ e;
+      simp [hiff' V e];
 
 private lemma of_deltaZero (hp : Hierarchy 𝚺 0 φ) : StrictEquivOnPA.{u} Γ s φ := by
   induction s generalizing Γ with
@@ -80,31 +86,37 @@ private lemma coreClosure_zero : CoreClosure 0 where
   and := fun Γ {n φ ψ} hφ hψ => by
     obtain ⟨φ', hφ', hiffφ⟩ := hφ;
     obtain ⟨ψ', hψ', hiffψ⟩ := hψ;
-    refine ⟨φ' ⋏ ψ', StrictHierarchy.zero
-      (Hierarchy.and (StrictHierarchy.zero_iff.mp hφ') (StrictHierarchy.zero_iff.mp hψ')), ?_⟩;
-    intro V _ _ e;
-    simp [hiffφ V e, hiffψ V e];
+    use φ' ⋏ ψ';
+    and_intros;
+    . exact StrictHierarchy.zero
+        (Hierarchy.and (StrictHierarchy.zero_iff.mp hφ') (StrictHierarchy.zero_iff.mp hψ'));
+    . intro V _ _ e;
+      simp [hiffφ V e, hiffψ V e];
   or := fun Γ {n φ ψ} hφ hψ => by
     obtain ⟨φ', hφ', hiffφ⟩ := hφ;
     obtain ⟨ψ', hψ', hiffψ⟩ := hψ;
-    refine ⟨φ' ⋎ ψ', StrictHierarchy.zero
-      (Hierarchy.or (StrictHierarchy.zero_iff.mp hφ') (StrictHierarchy.zero_iff.mp hψ')), ?_⟩;
-    intro V _ _ e;
-    simp [hiffφ V e, hiffψ V e];
+    use φ' ⋎ ψ';
+    and_intros;
+    . exact StrictHierarchy.zero
+        (Hierarchy.or (StrictHierarchy.zero_iff.mp hφ') (StrictHierarchy.zero_iff.mp hψ'));
+    . intro V _ _ e;
+      simp [hiffφ V e, hiffψ V e];
   ball := fun Γ {n φ t} ht hφ => by
     obtain ⟨φ', hφ', hiff'⟩ := hφ;
-    refine ⟨∀¹[“x. x < !!t”] φ', StrictHierarchy.zero
-      (Hierarchy.ball ht (StrictHierarchy.zero_iff.mp hφ')), ?_⟩;
-    intro V _ _ e;
-    simp only [Semiformula.eval_ball];
-    exact forall_congr' (fun x => imp_congr Iff.rfl (hiff' V (x :> e)));
+    use ∀¹[“x. x < !!t”] φ';
+    and_intros;
+    . exact StrictHierarchy.zero (Hierarchy.ball ht (StrictHierarchy.zero_iff.mp hφ'));
+    . intro V _ _ e;
+      simp only [Semiformula.eval_ball];
+      exact forall_congr' (fun x => imp_congr Iff.rfl (hiff' V (x :> e)));
   bexs := fun Γ {n φ t} ht hφ => by
     obtain ⟨φ', hφ', hiff'⟩ := hφ;
-    refine ⟨∃¹[“x. x < !!t”] φ', StrictHierarchy.zero
-      (Hierarchy.bexs ht (StrictHierarchy.zero_iff.mp hφ')), ?_⟩;
-    intro V _ _ e;
-    simp only [Semiformula.eval_bexs];
-    exact exists_congr (fun x => and_congr Iff.rfl (hiff' V (x :> e)));
+    use ∃¹[“x. x < !!t”] φ';
+    and_intros;
+    . exact StrictHierarchy.zero (Hierarchy.bexs ht (StrictHierarchy.zero_iff.mp hφ'));
+    . intro V _ _ e;
+      simp only [Semiformula.eval_bexs];
+      exact exists_congr (fun x => and_congr Iff.rfl (hiff' V (x :> e)));
 
 private lemma or_sigma_step (ih : CoreClosure s) :
     ∀ {n} {φ ψ : ArithmeticSemiformula Empty n},
