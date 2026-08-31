@@ -38,7 +38,9 @@ private lemma refl (h : StrictHierarchy Γ s φ) : StrictEquivOnPA.{u} Γ s φ :
 
 private lemma of_iff (h : StrictEquivOnPA.{u} Γ s φ)
     (hiff : ∀ (V : Type u) [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗣𝗔] (e : Fin n → V), V ⊧/e φ ↔ V ⊧/e ψ) :
-    StrictEquivOnPA.{u} Γ s ψ := sorry
+    StrictEquivOnPA.{u} Γ s ψ := by
+  obtain ⟨φ', hφ', hiff'⟩ := h;
+  exact ⟨φ', hφ', fun V _ _ e => (hiff V e).symm.trans (hiff' V e)⟩;
 
 private lemma neg (h : StrictEquivOnPA.{u} Γ s φ) : StrictEquivOnPA.{u} Γ.alt s (∼φ) := sorry
 
