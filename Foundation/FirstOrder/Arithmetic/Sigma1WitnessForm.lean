@@ -31,23 +31,25 @@ private lemma funext_two {α : Type*} {n : ℕ} {f g : Fin (n + 2) → α}
 variable {V : Type u} [ORingStructure V] {n : ℕ}
 
 private lemma eval_insert1 (θ : ArithmeticSemiformula Empty (n + 1)) (u w : V) (e : Fin n → V) :
-    V ⊧/(u :> w :> e) (Rew.bShift.q ▹ θ) ↔ V ⊧/(u :> e) θ := by
-  simp [Semiformula.eval_rew_q, Function.comp_def]
+    V ⊧/(u :> w :> e) (θ ⇜ (#0 :> (#·.succ.succ))) ↔ V ⊧/(u :> e) θ := by
+  simp only [Semiformula.eval_substs]
+  exact Iff.of_eq (congrArg (fun b => Semiformula.Eval (L := ℒₒᵣ) (M := V) b Empty.elim θ)
+    (funext fun i => by induction i using Fin.cases <;> simp))
 
 @[simp]
 private lemma hierarchy_insert1 {Γ s} {θ : ArithmeticSemiformula Empty (n + 1)} :
-    Hierarchy Γ s (Rew.bShift.q ▹ θ) ↔ Hierarchy Γ s θ := by
+    Hierarchy Γ s (θ ⇜ (#0 :> (#·.succ.succ))) ↔ Hierarchy Γ s θ := by
   simp
 
 private lemma eval_insert2 (θ : ArithmeticSemiformula Empty (n + 2)) (u x w : V) (e : Fin n → V) :
-    V ⊧/(u :> x :> w :> e) (Rew.bShift.q.q ▹ θ) ↔ V ⊧/(u :> x :> e) θ := by
-  simp only [Semiformula.eval_rew_q, Function.comp_def]
+    V ⊧/(u :> x :> w :> e) (θ ⇜ (#0 :> #1 :> (#·.succ.succ.succ))) ↔ V ⊧/(u :> x :> e) θ := by
+  simp only [Semiformula.eval_substs, Function.comp_def]
   exact Iff.of_eq (congrArg (fun b => Semiformula.Eval (L := ℒₒᵣ) (M := V) b Empty.elim θ)
     (funext_two (by simp) (by simp) fun i => by simp))
 
 @[simp]
 private lemma hierarchy_insert2 {Γ s} {θ : ArithmeticSemiformula Empty (n + 2)} :
-    Hierarchy Γ s (Rew.bShift.q.q ▹ θ) ↔ Hierarchy Γ s θ := by
+    Hierarchy Γ s (θ ⇜ (#0 :> #1 :> (#·.succ.succ.succ))) ↔ Hierarchy Γ s θ := by
   simp
 
 private def Delta0Witnessed {n : ℕ} (φ : ArithmeticSemiformula Empty n)
@@ -69,8 +71,8 @@ private lemma witnessForm_and {φ₁ φ₂ : ArithmeticSemiformula Empty n}
     {θ₁ θ₂ : ArithmeticSemiformula Empty (n + 1)} (hθ₁ : Hierarchy 𝚺 0 θ₁) (hθ₂ : Hierarchy 𝚺 0 θ₂)
     (h₁ : Delta0Witnessed.{u} φ₁ θ₁) (h₂ : Delta0Witnessed.{u} φ₂ θ₂) :
     ∃ θ : ArithmeticSemiformula Empty (n + 1), Hierarchy 𝚺 0 θ ∧ Delta0Witnessed.{u} (φ₁ ⋏ φ₂) θ := by
-  use (Rew.bShift.q ▹ θ₁).bexsLTSucc (#0 : ArithmeticSemiterm Empty (n + 1)) ⋏
-    (Rew.bShift.q ▹ θ₂).bexsLTSucc (#0 : ArithmeticSemiterm Empty (n + 1));
+  use (θ₁ ⇜ (#0 :> (#·.succ.succ))).bexsLTSucc (#0 : ArithmeticSemiterm Empty (n + 1)) ⋏
+    (θ₂ ⇜ (#0 :> (#·.succ.succ))).bexsLTSucc (#0 : ArithmeticSemiterm Empty (n + 1));
   and_intros
   . simp [hθ₁, hθ₂]
   . intro V _ _ e
@@ -177,8 +179,8 @@ private lemma witnessForm_exs {φ : ArithmeticSemiformula Empty (n + 1)}
     {θ' : ArithmeticSemiformula Empty (n + 2)} (hθ' : Hierarchy 𝚺 0 θ')
     (h : Delta0Witnessed.{u} φ θ') :
     ∃ θ : ArithmeticSemiformula Empty (n + 1), Hierarchy 𝚺 0 θ ∧ Delta0Witnessed.{u} (∃¹ φ) θ := by
-  use ((Rew.bShift.q.q ▹ θ').bexsLTSucc (#1 : ArithmeticSemiterm Empty (n + 2))).bexsLTSucc
-    (#0 : ArithmeticSemiterm Empty (n + 1));
+  use ((θ' ⇜ (#0 :> #1 :> (#·.succ.succ.succ))).bexsLTSucc
+    (#1 : ArithmeticSemiterm Empty (n + 2))).bexsLTSucc (#0 : ArithmeticSemiterm Empty (n + 1));
   and_intros
   . simp [hθ']
   . intro V _ _ e
@@ -194,8 +196,8 @@ private lemma witnessForm_ball {t : ArithmeticSemiterm Empty n} {φ : Arithmetic
     {θ' : ArithmeticSemiformula Empty (n + 2)} (hθ' : Hierarchy 𝚺 0 θ')
     (h : Delta0Witnessed.{u} φ θ') :
     ∃ θ : ArithmeticSemiformula Empty (n + 1), Hierarchy 𝚺 0 θ ∧ Delta0Witnessed.{u} (φ.ballLT t) θ := by
-  use ((Rew.bShift.q.q ▹ θ').bexsLTSucc (#1 : ArithmeticSemiterm Empty (n + 2))).ballLT
-    (Rew.bShift t : ArithmeticSemiterm Empty (n + 1));
+  use ((θ' ⇜ (#0 :> #1 :> (#·.succ.succ.succ))).bexsLTSucc
+    (#1 : ArithmeticSemiterm Empty (n + 2))).ballLT (Rew.bShift t : ArithmeticSemiterm Empty (n + 1));
   and_intros
   . simp [hθ']
   . intro V _ _ e
