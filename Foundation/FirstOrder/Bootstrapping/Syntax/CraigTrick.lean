@@ -180,4 +180,14 @@ noncomputable instance craig.weakerThan (T : Theory L) [L.DecidableEq] [T.«Σ�
     exact Entailment.mdp (Entailment.C_of_E_mpr (Entailment.padding_iff ρ s))
       (Entailment.by_axm hρT)
 
+noncomputable instance craig.original_weakerThan (T : Theory L) [L.DecidableEq] [T.«Σ₁»] :
+    T ⪯ T.craig :=
+  Entailment.WeakerThan.ofAxm! fun {σ} hσ ↦ by
+    have hσ' : ℕ ⊧/![⌜σ⌝] T.«Σ₁ch».val :=
+      (Theory.«Σ₁».mem_iff (Rewriting.emb σ)).mpr ⟨σ, hσ, rfl⟩
+    rcases (Theory.«Σ₁witness_spec» T ℕ ![⌜σ⌝]).mp hσ' with ⟨s, hs⟩
+    have hpadding : σ.padding s ∈ T.craig := ⟨σ, s, hs, rfl⟩
+    exact Entailment.mdp (Entailment.C_of_E_mp (Entailment.padding_iff σ s))
+      (Entailment.by_axm hpadding)
+
 end LO.FirstOrder.Theory
