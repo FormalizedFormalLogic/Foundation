@@ -124,31 +124,43 @@ variable {T : ArithmeticTheory} [𝗘𝗤 ℒₒᵣ ⪯ T] {s : ℕ}
 
 lemma closure_zero : Closure T 0 where
   ball := by
-    rintro Γ n φ t ht ⟨hφ⟩;
-    exact ⟨∀¹[“x. x < !!t”] hφ.witness,
-      StrictHierarchy.zero (Hierarchy.ball ht (StrictHierarchy.zero_iff.mp hφ.hierarchy)),
-      provable_iff_of_models_iff fun V _ _ e => by
-        simp only [Semiformula.eval_ball];
-        exact forall_congr' (fun x => imp_congr Iff.rfl (hφ.iff_models V (x :> e)))⟩
+    rintro Γ n φ t ht ⟨⟨ψ, hψ, hprov⟩⟩;
+    have hiff := models_iff_of_provable_iff' hprov;
+    use ∀¹[“x. x < !!t”] ψ;
+    . exact StrictHierarchy.zero (Hierarchy.ball ht (StrictHierarchy.zero_iff.mp hψ));
+    . apply provable_iff_of_models_iff;
+      intro V _ _ e;
+      simp only [Semiformula.eval_ball];
+      exact forall_congr' (fun x => imp_congr Iff.rfl (hiff V (x :> e)));
   bexs := by
-    rintro Γ n φ t ht ⟨hφ⟩;
-    exact ⟨∃¹[“x. x < !!t”] hφ.witness,
-      StrictHierarchy.zero (Hierarchy.bexs ht (StrictHierarchy.zero_iff.mp hφ.hierarchy)),
-      provable_iff_of_models_iff fun V _ _ e => by
-        simp only [Semiformula.eval_bexs];
-        exact exists_congr (fun x => and_congr Iff.rfl (hφ.iff_models V (x :> e)))⟩
+    rintro Γ n φ t ht ⟨⟨ψ, hψ, hprov⟩⟩;
+    have hiff := models_iff_of_provable_iff' hprov;
+    use ∃¹[“x. x < !!t”] ψ;
+    . exact StrictHierarchy.zero (Hierarchy.bexs ht (StrictHierarchy.zero_iff.mp hψ));
+    . apply provable_iff_of_models_iff;
+      intro V _ _ e;
+      simp only [Semiformula.eval_bexs];
+      exact exists_congr (fun x => and_congr Iff.rfl (hiff V (x :> e)));
   and := by
-    rintro Γ n φ ψ ⟨hφ⟩ ⟨hψ⟩;
-    exact ⟨hφ.witness ⋏ hψ.witness,
-      StrictHierarchy.zero
-        (Hierarchy.and (StrictHierarchy.zero_iff.mp hφ.hierarchy) (StrictHierarchy.zero_iff.mp hψ.hierarchy)),
-      provable_iff_of_models_iff fun V _ _ e => by simp [hφ.iff_models V e, hψ.iff_models V e]⟩
+    rintro Γ n φ ψ ⟨⟨φ', hφ', hφprov⟩⟩ ⟨⟨ψ', hψ', hψprov⟩⟩;
+    have hφiff := models_iff_of_provable_iff' hφprov;
+    have hψiff := models_iff_of_provable_iff' hψprov;
+    use φ' ⋏ ψ';
+    . exact StrictHierarchy.zero
+        (Hierarchy.and (StrictHierarchy.zero_iff.mp hφ') (StrictHierarchy.zero_iff.mp hψ'));
+    . apply provable_iff_of_models_iff;
+      intro V _ _ e;
+      simp [hφiff V e, hψiff V e];
   or := by
-    rintro Γ n φ ψ ⟨hφ⟩ ⟨hψ⟩;
-    exact ⟨hφ.witness ⋎ hψ.witness,
-      StrictHierarchy.zero
-        (Hierarchy.or (StrictHierarchy.zero_iff.mp hφ.hierarchy) (StrictHierarchy.zero_iff.mp hψ.hierarchy)),
-      provable_iff_of_models_iff fun V _ _ e => by simp [hφ.iff_models V e, hψ.iff_models V e]⟩
+    rintro Γ n φ ψ ⟨⟨φ', hφ', hφprov⟩⟩ ⟨⟨ψ', hψ', hψprov⟩⟩;
+    have hφiff := models_iff_of_provable_iff' hφprov;
+    have hψiff := models_iff_of_provable_iff' hψprov;
+    use φ' ⋎ ψ';
+    . exact StrictHierarchy.zero
+        (Hierarchy.or (StrictHierarchy.zero_iff.mp hφ') (StrictHierarchy.zero_iff.mp hψ'));
+    . apply provable_iff_of_models_iff;
+      intro V _ _ e;
+      simp [hφiff V e, hψiff V e];
 
 lemma bexs_sigma_step (ih : Closure T s) :
     ∀ {n} {φ : ArithmeticSemisentence (n + 1)} {t : ArithmeticSemiterm Empty (n + 1)},
