@@ -42,12 +42,14 @@ variable {L : Language} [L.Encodable] [L.LORDefinable]
 def _root_.LO.FirstOrder.Theory.IsCraigAxiom (T : Theory L) [T.«Σ₁»] : V → Prop :=
   fun x ↦ ∃ s p : V, x = p ^⋏ qqVerums s ∧ V ⊧/![s, p] T.«Σ₁witness».val
 
-noncomputable def _root_.LO.FirstOrder.Theory.craigCh (T : Theory L) [T.«Σ₁»] :
-    𝚫₁.Semisentence 1 := .mkDelta
+noncomputable def _root_.LO.FirstOrder.Theory.craigCh (T : Theory L) [T.«Σ₁»]
+  : 𝚫₁.Semisentence 1 := .mkDelta
   (.mkSigma “x. ∃ s < x, ∃ p < x, ∃ v < x,
-    !qqVerumsGraph v s ∧ !qqAndDef x p v ∧ !(T.«Σ₁witness».val) s p”)
+    !qqVerumsGraph v s ∧ !qqAndDef x p v ∧ !(T.«Σ₁witness».val) s p”
+  )
   (.mkPi “x. ∃ s < x, ∃ p < x, ∃ v < x,
-    (∀ v', !qqVerumsGraph v' s → v' = v) ∧ !qqAndDef x p v ∧ !(T.«Σ₁witness».val) s p”)
+    (∀ v', !qqVerumsGraph v' s → v' = v) ∧ !qqAndDef x p v ∧ !(T.«Σ₁witness».val) s p”
+  )
 
 instance Theory.IsCraigAxiom.defined (T : Theory L) [T.«Σ₁»] :
     𝚫₁-Predicate[V] (T.IsCraigAxiom : V → Prop) via T.craigCh := .mk <| by
@@ -72,10 +74,8 @@ instance Theory.IsCraigAxiom.defined (T : Theory L) [T.«Σ₁»] :
       . exact hx
       . exact hT
   constructor
-  . intro v
-    simp [Theory.craigCh, h]
-  . intro v
-    simp [Theory.craigCh, Theory.IsCraigAxiom, h]
+  . intro v; simp [Theory.craigCh, h]
+  . intro v; simp [Theory.craigCh, Theory.IsCraigAxiom, h]
 
 lemma quote_eq_qqAnd_iff {φ : Proposition L} {p q : ℕ} :
     (⌜φ⌝ : ℕ) = p ^⋏ q ↔ ∃ φ₁ φ₂, φ = φ₁ ⋏ φ₂ ∧ p = ⌜φ₁⌝ ∧ q = ⌜φ₂⌝ := by
@@ -84,16 +84,16 @@ lemma quote_eq_qqAnd_iff {φ : Proposition L} {p q : ℕ} :
     cases φ with
     | rel | nrel => simp [qqRel, qqNRel, qqAnd] at h
     | verum =>
-      change qqVerum = p ^⋏ q at h
+      change qqVerum = p ^⋏ q at h;
       simp [qqVerum, qqAnd] at h
     | falsum =>
-      change qqFalsum = p ^⋏ q at h
+      change qqFalsum = p ^⋏ q at h;
       simp [qqFalsum, qqAnd] at h
     | or φ₁ φ₂ =>
-      change ⌜φ₁⌝ ^⋎ ⌜φ₂⌝ = p ^⋏ q at h
+      change ⌜φ₁⌝ ^⋎ ⌜φ₂⌝ = p ^⋏ q at h;
       simp [qqOr, qqAnd] at h
     | all φ =>
-      change ^∀ ⌜φ⌝ = p ^⋏ q at h
+      change ^∀ ⌜φ⌝ = p ^⋏ q at h;
       simp [qqAll, qqAnd] at h
     | exs φ =>
       change ^∃ ⌜φ⌝ = p ^⋏ q at h
@@ -101,7 +101,7 @@ lemma quote_eq_qqAnd_iff {φ : Proposition L} {p q : ℕ} :
     | and φ₁ φ₂ =>
       rcases (qqAnd_inj _ _ _ _).mp h with ⟨rfl, rfl⟩
       exact ⟨φ₁, φ₂, rfl, rfl, rfl⟩
-  . rintro ⟨φ₁, φ₂, rfl, rfl, rfl⟩
+  . rintro ⟨φ₁, φ₂, rfl, rfl, rfl⟩;
     rfl
 
 lemma quote_weight (k : ℕ) :
@@ -162,6 +162,8 @@ open Arithmetic.Bootstrapping
 
 variable {L : Language} [L.Encodable] [L.LORDefinable]
 
+open LO.Entailment
+
 noncomputable instance craig.delta1 (T : Theory L) [T.«Σ₁»] : (T.craig).Δ₁ where
   ch := T.craigCh
   mem_iff φ := (Theory.IsCraigAxiom.defined (V := ℕ) T).iff.trans
@@ -170,31 +172,31 @@ noncomputable instance craig.delta1 (T : Theory L) [T.«Σ₁»] : (T.craig).Δ�
     (Theory.IsCraigAxiom.defined (V := V) T).proper
 
 noncomputable instance craig.weakerThan (T : Theory L) [L.DecidableEq] [T.«Σ₁»] : T.craig ⪯ T :=
-  Entailment.WeakerThan.ofAxm! fun {σ} hσ ↦ by
-    rcases hσ with ⟨ρ, s, hρ, rfl⟩
-    have hρ' : ℕ ⊧/![⌜ρ⌝] T.«Σ₁ch».val :=
-      (Theory.«Σ₁witness_spec» T ℕ ![⌜ρ⌝]).mpr ⟨s, hρ⟩
+  WeakerThan.ofAxm! $ by
+    rintro σ ⟨ρ, s, hρ, rfl⟩;
+    have hρ' : ℕ ⊧/![⌜ρ⌝] T.«Σ₁ch».val := (Theory.«Σ₁witness_spec» T ℕ ![⌜ρ⌝]).mpr ⟨s, hρ⟩
     rcases (Theory.«Σ₁».mem_iff (Rewriting.emb ρ)).mp
       (by simpa [Sentence.quote_def] using hρ') with ⟨τ, hτ, hρτ⟩
     have hρT : ρ ∈ T := Rewriting.emb_injective hρτ ▸ hτ
-    exact Entailment.mdp (Entailment.C_of_E_mpr (Entailment.padding_iff ρ s))
-      (Entailment.by_axm hρT)
+    exact mdp (C_of_E_mpr (Entailment.padding_iff ρ s))
+      (by_axm hρT)
 
-noncomputable instance craig.original_weakerThan (T : Theory L) [L.DecidableEq] [T.«Σ₁»] :
-    T ⪯ T.craig :=
-  Entailment.WeakerThan.ofAxm! fun {σ} hσ ↦ by
+noncomputable instance craig.original_weakerThan {T : Theory L} [L.DecidableEq] [T.«Σ₁»]
+  : T ⪯ T.craig :=
+  WeakerThan.ofAxm! fun {σ} hσ ↦ by
     have hσ' : ℕ ⊧/![⌜σ⌝] T.«Σ₁ch».val :=
       (Theory.«Σ₁».mem_iff (Rewriting.emb σ)).mpr ⟨σ, hσ, rfl⟩
     rcases (Theory.«Σ₁witness_spec» T ℕ ![⌜σ⌝]).mp hσ' with ⟨s, hs⟩
     have hpadding : σ.padding s ∈ T.craig := ⟨σ, s, hs, rfl⟩
-    exact Entailment.mdp (Entailment.C_of_E_mp (Entailment.padding_iff σ s))
-      (Entailment.by_axm hpadding)
+    exact mdp (Entailment.C_of_E_mp (Entailment.padding_iff σ s))
+      (by_axm hpadding)
 
-noncomputable instance craig_equiv (T : Theory L) [L.DecidableEq] [T.«Σ₁»] : T ≊ T.craig :=
-  Entailment.Equiv.antisymm_iff.mpr ⟨inferInstance, inferInstance⟩
+noncomputable instance craig_equiv {T : Theory L} [L.DecidableEq] [T.«Σ₁»]
+  : T ≊ T.craig :=
+  Equiv.antisymm_iff.mpr ⟨inferInstance, inferInstance⟩
 
-noncomputable instance craig.consistent (T : Theory L) [L.DecidableEq] [T.«Σ₁»]
-    [Entailment.Consistent T] : Entailment.Consistent T.craig :=
-  Entailment.Consistent.of_le (𝓢 := T) (𝓣 := T.craig) inferInstance inferInstance
+noncomputable instance craig.consistent {T : Theory L} [L.DecidableEq] [T.«Σ₁»] [Consistent T]
+  : Consistent T.craig :=
+  Consistent.of_le (𝓢 := T) (𝓣 := T.craig) inferInstance inferInstance
 
 end LO.FirstOrder.Theory
