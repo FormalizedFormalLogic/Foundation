@@ -1,6 +1,7 @@
 module
 
 public import Foundation.FirstOrder.Incompleteness.StandardProvability
+public import Foundation.FirstOrder.Incompleteness.RosserProvability
 public import Foundation.FirstOrder.Arithmetic.R0.Representation
 public import Foundation.FirstOrder.Bootstrapping.Syntax.CraigTrick
 
@@ -74,6 +75,18 @@ theorem exists_true_but_unprovable_sentence_of_sigma1_definable
     and_intros;
     . simpa
     . exact hδ.2
+
+theorem incomplete_of_re (T : ArithmeticTheory)
+    (hT : REPred fun n : ℕ ↦ n ∈ Encodable.encode '' T) [𝗜𝚺₁ ⪯ T] [Entailment.Consistent T] :
+    Incomplete T := by
+  let _ : T.«Σ₁» := Theory.«Σ₁».ofRE T hT
+  exact incomplete_GR_of_sigma1_definable T
+
+theorem incomplete_of_re_of_sound (T : ArithmeticTheory)
+    (hT : REPred fun n : ℕ ↦ n ∈ Encodable.encode '' T) [𝗥₀ ⪯ T]
+    [T.SoundOnHierarchy 𝚺 1] : Incomplete T := by
+  let _ : T.«Σ₁» := Theory.«Σ₁».ofRE T hT
+  exact incomplete_of_sigma1_definable T
 
 instance {T : ArithmeticTheory} [ℕ↓[ℒₒᵣ] ⊧* T] [T.Δ₁] [𝗥₀ ⪯ T] [T.SoundOnHierarchy 𝚺 1] : T ⪱ 𝗧𝗔 := by
   constructor;
