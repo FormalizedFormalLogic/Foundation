@@ -102,10 +102,6 @@ def all_of_sigma {φ : ArithmeticSemisentence (n + 1)} (h : StrictEquiv T 𝚺 s
     simp only [Semiformula.eval_all];
     exact forall_congr' (fun x => h.iff_models V (x :> e));
 
-end StrictEquiv
-
-open StrictEquiv (refl neg alt_up of_deltaZero exs_of_pi all_of_sigma)
-
 structure Closure (T : ArithmeticTheory) [𝗘𝗤 ℒₒᵣ ⪯ T] (s : ℕ) : Prop where
   ball : ∀ Γ {n} {φ : ArithmeticSemisentence (n + 1)} {t : ArithmeticSemiterm Empty (n + 1)},
       t.Positive → Nonempty (StrictEquiv T Γ s φ) →
@@ -119,8 +115,6 @@ structure Closure (T : ArithmeticTheory) [𝗘𝗤 ℒₒᵣ ⪯ T] (s : ℕ) : 
   or : ∀ Γ {n} {φ ψ : ArithmeticSemisentence n},
       Nonempty (StrictEquiv T Γ s φ) → Nonempty (StrictEquiv T Γ s ψ) →
         Nonempty (StrictEquiv T Γ s (φ ⋎ ψ))
-
-variable {T : ArithmeticTheory} [𝗘𝗤 ℒₒᵣ ⪯ T] {s : ℕ}
 
 lemma closure_zero : Closure T 0 where
   ball := by
@@ -401,7 +395,11 @@ lemma all (hT : 𝗜𝚺 s ⪯ T) (c : Closure T s) {n : ℕ}
     Nonempty (StrictEquiv T 𝚷 (s + 1) (∀¹ φ)) := by
   simpa using (exs hT c (h.map neg)).map neg;
 
-variable {Γ : Polarity} {n : ℕ}
+end StrictEquiv
+
+open StrictEquiv (refl of_deltaZero exs_of_pi all_of_sigma alt_up closure exs all)
+
+variable {T : ArithmeticTheory} [𝗘𝗤 ℒₒᵣ ⪯ T] {Γ : Polarity} {s : ℕ} {n : ℕ}
 
 theorem nonempty_strictEquiv {φ : ArithmeticSemisentence n}
     (h : Hierarchy Γ s φ) (hT : 𝗜𝚺 s ⪯ T) : Nonempty (StrictEquiv T Γ s φ) := by
