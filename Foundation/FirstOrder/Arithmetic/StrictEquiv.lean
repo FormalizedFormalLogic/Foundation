@@ -364,9 +364,7 @@ noncomputable def closure (hT : 𝗜𝚺 s ⪯ T) : Closure T s := by
   induction s with
   | zero => exact closure_zero;
   | succ s ih =>
-    have h : 𝗜𝚺 s ⪯ T :=
-      Entailment.WeakerThan.trans (ISigma_weakerThan_of_le (Nat.le_succ s)) hT;
-    exact closure_succ hT (ih h);
+    exact closure_succ hT (ih (ISigma_weakerThan_of_le_trans (by omega) hT));
 
 -- Contracts the two nested existentials `∃x∃y` of a strict `Σ_{s+1}` witness into a single
 -- bounded pair `∃z (∃x ≤ z)(∃y ≤ z)`.
