@@ -118,33 +118,4 @@ def all_of_sigma {φ : ArithmeticSemiformula Empty (n + 1)} (h : StrictEquiv T �
 
 end StrictEquiv
 
-/-- A `Type 0` model-theoretic equivalence between two formulas, valid in every model of `T`.
-This is the `iff_models`-only counterpart of `StrictEquiv`, useful for building up equivalences
-purely by model theory before crossing to the `T`-provable `StrictEquiv` via completeness. -/
-structure ModelEquiv (T : ArithmeticTheory) (Γ : Polarity) (s : ℕ) {n : ℕ}
-    (φ : ArithmeticSemiformula Empty n) where
-  witness : ArithmeticSemiformula Empty n
-  hierarchy : StrictHierarchy Γ s witness
-  iff_models : ∀ (V : Type) [ORingStructure V] [V↓[ℒₒᵣ] ⊧* T] (e : Fin n → V), V ⊧/e φ ↔ V ⊧/e witness
-
-namespace ModelEquiv
-
-variable {T : ArithmeticTheory} {Γ : Polarity} {s : ℕ} {n : ℕ} {φ : ArithmeticSemiformula Empty n}
-
-def refl (h : StrictHierarchy Γ s φ) : ModelEquiv T Γ s φ :=
-  ⟨φ, h, fun _ _ _ _ => Iff.rfl⟩
-
-def neg (h : ModelEquiv T Γ s φ) : ModelEquiv T Γ.alt s (∼φ) :=
-  ⟨∼h.witness, h.hierarchy.neg, fun V _ _ e => by simp [h.iff_models V e]⟩
-
-/-- Convert to the `T`-provable `StrictEquiv`, via completeness. -/
-def toStrictEquiv [𝗘𝗤 ℒₒᵣ ⪯ T] (h : ModelEquiv T Γ s φ) : StrictEquiv T Γ s φ :=
-  ⟨h.witness, h.hierarchy, provable_iff_of_models_iff h.iff_models⟩
-
-/-- Convert from the `T`-provable `StrictEquiv`, via soundness. -/
-def ofStrictEquiv [𝗘𝗤 ℒₒᵣ ⪯ T] (d : StrictEquiv T Γ s φ) : ModelEquiv T Γ s φ :=
-  ⟨d.witness, d.hierarchy, fun V _ _ e => d.iff_models V e⟩
-
-end ModelEquiv
-
 end LO.FirstOrder.Arithmetic
