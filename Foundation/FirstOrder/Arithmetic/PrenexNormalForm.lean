@@ -42,7 +42,9 @@ private lemma of_iff (h : StrictEquivOnPA.{u} Γ s φ)
   obtain ⟨φ', hφ', hiff'⟩ := h;
   exact ⟨φ', hφ', fun V _ _ e => (hiff V e).symm.trans (hiff' V e)⟩;
 
-private lemma neg (h : StrictEquivOnPA.{u} Γ s φ) : StrictEquivOnPA.{u} Γ.alt s (∼φ) := sorry
+private lemma neg (h : StrictEquivOnPA.{u} Γ s φ) : StrictEquivOnPA.{u} Γ.alt s (∼φ) := by
+  obtain ⟨φ', hφ', hiff'⟩ := h;
+  exact ⟨∼φ', hφ'.neg, fun V _ _ e => by simp [hiff' V e]⟩;
 
 @[simp] private lemma neg_iff : StrictEquivOnPA.{u} Γ.alt s (∼φ) ↔ StrictEquivOnPA.{u} Γ s φ := sorry
 
