@@ -169,4 +169,15 @@ noncomputable instance craig.delta1 (T : Theory L) [T.«Σ₁»] : (T.craig).Δ�
   isDelta1 := Arithmetic.HierarchySymbol.Semiformula.ProvablyProperOn.ofProperOn.{0} _ fun V _ _ ↦
     (Theory.IsCraigAxiom.defined (V := V) T).proper
 
+noncomputable instance craig.weakerThan (T : Theory L) [L.DecidableEq] [T.«Σ₁»] : T.craig ⪯ T :=
+  Entailment.WeakerThan.ofAxm! fun {σ} hσ ↦ by
+    rcases hσ with ⟨ρ, s, hρ, rfl⟩
+    have hρ' : ℕ ⊧/![⌜ρ⌝] T.«Σ₁ch».val :=
+      (Theory.«Σ₁witness_spec» T ℕ ![⌜ρ⌝]).mpr ⟨s, hρ⟩
+    rcases (Theory.«Σ₁».mem_iff (Rewriting.emb ρ)).mp
+      (by simpa [Sentence.quote_def] using hρ') with ⟨τ, hτ, hρτ⟩
+    have hρT : ρ ∈ T := Rewriting.emb_injective hρτ ▸ hτ
+    exact Entailment.mdp (Entailment.C_of_E_mpr (Entailment.padding_iff ρ s))
+      (Entailment.by_axm hρT)
+
 end LO.FirstOrder.Theory
