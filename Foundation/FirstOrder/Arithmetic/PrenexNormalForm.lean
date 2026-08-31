@@ -394,7 +394,28 @@ private lemma all_of_sigma {φ : ArithmeticSemiformula Empty (n + 1)} (h : Stric
     simp only [Semiformula.eval_all];
     exact forall_congr' (fun x => hiff' V (x :> e));
 
-private lemma strictEquivOnPA_of_hierarchy (h : Hierarchy Γ s φ) : StrictEquivOnPA.{u} Γ s φ := sorry
+private lemma strictEquivOnPA_of_hierarchy (h : Hierarchy Γ s φ) : StrictEquivOnPA.{u} Γ s φ := by
+  induction h with
+  | verum Γ s n => exact of_deltaZero (Hierarchy.verum 𝚺 0 n);
+  | falsum Γ s n => exact of_deltaZero (Hierarchy.falsum 𝚺 0 n);
+  | rel Γ s r v => exact of_deltaZero (Hierarchy.rel 𝚺 0 r v);
+  | nrel Γ s r v => exact of_deltaZero (Hierarchy.nrel 𝚺 0 r v);
+  | and _ _ ihp ihq => exact coreClosure.and _ ihp ihq;
+  | or _ _ ihp ihq => exact coreClosure.or _ ihp ihq;
+  | ball pos _ ih => exact coreClosure.ball _ pos ih;
+  | bexs pos _ ih => exact coreClosure.bexs _ pos ih;
+  | exs _ ih => exact exs ih;
+  | all _ ih => exact all ih;
+  | @sigma s n φ hp ih =>
+    rcases s with _ | s;
+    . exact refl (StrictHierarchy.sigma (StrictHierarchy.zero (Hierarchy.zero_iff.mp hp)));
+    . exact exs_of_pi ih;
+  | @pi s n φ hp ih =>
+    rcases s with _ | s;
+    . exact refl (StrictHierarchy.pi (StrictHierarchy.zero (Hierarchy.zero_iff.mp hp)));
+    . exact all_of_sigma ih;
+  | dummy_sigma hp ih => exact alt_up (all ih);
+  | dummy_pi hp ih => exact alt_up (exs ih);
 
 end StrictEquivOnPA
 
