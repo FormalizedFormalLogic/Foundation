@@ -1,6 +1,6 @@
 module
 
-public import Foundation.FirstOrder.Arithmetic.StrictEquiv
+public import Foundation.FirstOrder.Arithmetic.Prenex
 
 /-!
 # Prenex normal form theorem over $\mathsf{PA}$

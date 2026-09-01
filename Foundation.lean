@@ -34,11 +34,11 @@ public import Foundation.FirstOrder.Arithmetic.PA.Prenex
 public import Foundation.FirstOrder.Arithmetic.PeanoMinus.Basic
 public import Foundation.FirstOrder.Arithmetic.PeanoMinus.Functions
 public import Foundation.FirstOrder.Arithmetic.PeanoMinus.Q
+public import Foundation.FirstOrder.Arithmetic.Prenex
 public import Foundation.FirstOrder.Arithmetic.Q.Basic
 public import Foundation.FirstOrder.Arithmetic.R0.Basic
 public import Foundation.FirstOrder.Arithmetic.R0.Representation
 public import Foundation.FirstOrder.Arithmetic.Schemata
-public import Foundation.FirstOrder.Arithmetic.StrictEquiv
 public import Foundation.FirstOrder.Arithmetic.TA.Basic
 public import Foundation.FirstOrder.Arithmetic.TA.Nonstandard
 public import Foundation.FirstOrder.Basic
