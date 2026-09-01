@@ -54,7 +54,7 @@ theorem exists_true_but_unprovable_sentence
   . exact ⟨∼δ, by simpa, hδ.2⟩
 
 noncomputable instance (T : ArithmeticTheory) [T.RE] [𝗥₀ ⪯ T] : 𝗥₀ ⪯ T.craig :=
-  WeakerThan.trans (𝓣 := T) inferInstance (Theory.craig.original_weakerThan (T := T))
+  WeakerThan.trans (𝓣 := T) inferInstance (inferInstance : T ⪯ T.craig)
 
 /-- Gödel's first incompleteness theorem for r.e. theories -/
 theorem incomplete_of_RE (T : ArithmeticTheory) [T.RE] [𝗥₀ ⪯ T] [T.SoundOnHierarchy 𝚺 1] :

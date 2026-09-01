@@ -18,16 +18,14 @@ open LO.FirstOrder.Arithmetic
 
 -- `[T.RE]` is spelled out instead of taken from a `variable`: the body does not use it, so Lean
 -- would drop it from the signature and let the Craig companion be built for an arbitrary theory.
-noncomputable def reCh {L : Language} [L.Encodable] [L.LORDefinable]
-    (T : Theory L) [T.RE] : 𝚺₁.Semisentence 1 :=
+noncomputable def reCh {L : Language} [L.Encodable] [L.LORDefinable] (T : Theory L) [T.RE] : 𝚺₁.Semisentence 1 :=
   .mkSigma (codeOfREPred fun n ↦ n ∈ T.codes) (by simp [codeOfREPred, codeOfPartrec'])
 
-lemma reCh_mem_iff {L : Language} [L.Encodable] [L.LORDefinable]
-    (T : Theory L) [T.RE] (φ : Proposition L) :
-    ℕ ⊧/![⌜φ⌝] T.reCh.val ↔ ∃ σ ∈ T, φ = σ := by
+lemma reCh_mem_iff {L : Language} [L.Encodable] [L.LORDefinable] (T : Theory L) [T.RE] (φ : Proposition L) :
+  ℕ ⊧/![⌜φ⌝] T.reCh.val ↔ ∃ σ ∈ T, φ = σ := by
   have hT : REPred fun n : ℕ ↦ n ∈ T.codes := Theory.RE.re
   simpa [Theory.reCh, Theory.codes, Matrix.fun_eq_vec_one, Semiformula.quote_eq_encode] using
-    codeOfREPred_spec hT (x := (⌜φ⌝ : ℕ))
+    codeOfREPred_spec hT (x := ⌜φ⌝)
 
 variable {L : Language} [L.Encodable] [L.LORDefinable]
 
@@ -40,15 +38,13 @@ noncomputable def reWitness : 𝚺₀.Semisentence 2 :=
   .mkSigma h.choose h.choose_spec.1
 
 lemma reWitness_spec (V : Type) [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] (e : Fin 1 → V) :
-    V ⊧/e T.reCh.val ↔ ∃ w, V ⊧/(w :> e) T.reWitness.val := by
+  V ⊧/e T.reCh.val ↔ ∃ w, V ⊧/(w :> e) T.reWitness.val := by
   simpa [reWitness] using
     (models_iff_of_provable_iff
       (ISigma1.exists_matrix_provable T.reCh.sigma_prop).choose_spec.2 V e).trans
       Semiformula.eval_ex
 
-def craig : Theory L :=
-  { φ : Sentence L | ∃ (σ : Sentence L) (s : ℕ),
-      ℕ ⊧/![(s : ℕ), ⌜σ⌝] T.reWitness.val ∧ φ = σ.padding s }
+def craig : Theory L := { φ | ∃ (σ : Sentence L) (s : ℕ), ℕ ⊧/![(s : ℕ), ⌜σ⌝] T.reWitness.val ∧ φ = σ.padding s}
 
 end
 
@@ -84,21 +80,16 @@ instance Theory.IsCraigAxiom.defined {T : Theory L} [T.RE] :
         ∧ (Semiformula.Eval ![s, p] Empty.elim) T.reWitness.val) ↔
         ∃ s p, v 0 = p ^⋏ qqVerums s ∧ (Semiformula.Evalb ![s, p]) T.reWitness.val := by
     constructor
-    . rintro ⟨s, _, p, _, _, h, hT⟩
-      exact ⟨s, p, h, hT⟩
-    . rintro ⟨s, p, hx, hT⟩
-      use s
-      and_intros
-      . rw [hx]
-        exact lt_of_le_of_lt (le_qqVerums s) (lt_K!_right _ _)
-      use p
-      and_intros
-      . rw [hx]
-        exact lt_K!_left _ _
-      . rw [hx]
-        exact lt_K!_right _ _
-      . exact hx
-      . exact hT
+    . rintro ⟨s, _, p, _, _, h, hT⟩;
+      use s, p;
+    . rintro ⟨s, p, hx, hT⟩;
+      refine ⟨s, ?_, p, ?_⟩;
+      . exact hx ▸ lt_of_le_of_lt (le_qqVerums s) (lt_K!_right _ _)
+      . and_intros
+        . exact hx ▸ lt_K!_left _ _
+        . exact hx ▸ lt_K!_right _ _
+        . exact hx
+        . exact hT
   constructor
   . intro v; simp [Theory.craigCh, h]
   . intro v; simp [Theory.craigCh, Theory.IsCraigAxiom, h]
@@ -130,28 +121,24 @@ lemma quote_eq_qqAnd_iff {φ : Proposition L} {p q : ℕ} :
   . rintro ⟨φ₁, φ₂, rfl, rfl, rfl⟩;
     rfl
 
-lemma quote_weight (k : ℕ) :
-    (⌜(Semiformula.weight k : Proposition L)⌝ : V) = qqVerums (k : V) := by
+lemma quote_weight (k : ℕ) : (⌜(Semiformula.weight k : Proposition L)⌝ : V) = qqVerums (k : V) := by
   induction k with
   | zero => simp [Semiformula.weight]
   | succ k ih =>
     change ⌜(⊤ : Proposition L) ⋏ Semiformula.weight k⌝ = _
     simp [ih]
 
-lemma quote_eq_qqVerums {χ : Proposition L} {s : ℕ} :
-    (⌜χ⌝ : ℕ) = qqVerums (s : ℕ) → χ = Semiformula.weight s := by
+lemma quote_eq_qqVerums {χ : Proposition L} {s : ℕ} : (⌜χ⌝ : ℕ) = qqVerums (s : ℕ) → χ = Semiformula.weight s := by
   intro h;
   exact (Semiformula.quote_inj_iff (V := ℕ)).mp <| by simpa [quote_weight] using h
 
-lemma quote_padding (φ : Proposition L) (k : ℕ) :
-    (⌜φ.padding k⌝ : V) = ⌜φ⌝ ^⋏ qqVerums (k : V) := by
+lemma quote_padding (φ : Proposition L) (k : ℕ) : (⌜φ.padding k⌝ : V) = ⌜φ⌝ ^⋏ qqVerums (k : V) := by
   change ⌜φ ⋏ Semiformula.weight k⌝ = _
   simp [quote_weight]
 
 namespace Sentence
 
-lemma quote_padding (σ : Sentence L) (k : ℕ) :
-    (⌜σ.padding k⌝ : V) = ⌜σ⌝ ^⋏ qqVerums (k : V) := by
+lemma quote_padding (σ : Sentence L) (k : ℕ) : (⌜σ.padding k⌝ : V) = ⌜σ⌝ ^⋏ qqVerums (k : V) := by
   simpa [Sentence.quote_def] using
     LO.FirstOrder.Arithmetic.Bootstrapping.quote_padding (V := V) (Rewriting.emb σ) k
 
@@ -193,15 +180,14 @@ section
 
 variable {T : Theory L} [T.RE]
 
-noncomputable instance craig.delta1 : (T.craig).Δ₁ where
+noncomputable instance : (T.craig).Δ₁ where
   ch := T.craigCh
   mem_iff φ := (Theory.IsCraigAxiom.defined (V := ℕ) (T := T)).iff.trans
     (Theory.isCraigAxiom_quote_iff φ)
   isDelta1 := Arithmetic.HierarchySymbol.Semiformula.ProvablyProperOn.ofProperOn.{0} _ fun V _ _ ↦
     (Theory.IsCraigAxiom.defined (V := V) (T := T)).proper
 
-noncomputable instance craig.weakerThan [L.DecidableEq] : T.craig ⪯ T :=
-  WeakerThan.ofAxm! $ by
+noncomputable instance [L.DecidableEq] : T.craig ⪯ T := WeakerThan.ofAxm! $ by
     rintro σ ⟨ρ, s, hρ, rfl⟩;
     have hρ' : ℕ ⊧/![⌜ρ⌝] T.reCh.val := (reWitness_spec T ℕ ![⌜ρ⌝]).mpr ⟨s, hρ⟩
     rcases (T.reCh_mem_iff (Rewriting.emb ρ)).mp
@@ -209,8 +195,7 @@ noncomputable instance craig.weakerThan [L.DecidableEq] : T.craig ⪯ T :=
     have hρT : ρ ∈ T := Rewriting.emb_injective hρτ ▸ hτ
     exact mdp (C_of_E_mpr (Entailment.padding_iff ρ s)) (by_axm hρT)
 
-noncomputable instance craig.original_weakerThan [L.DecidableEq]
-  : T ⪯ T.craig :=
+noncomputable instance [L.DecidableEq] : T ⪯ T.craig :=
   WeakerThan.ofAxm! fun {σ} hσ ↦ by
     have hσ' : ℕ ⊧/![⌜σ⌝] T.reCh.val :=
       (T.reCh_mem_iff (Rewriting.emb σ)).mpr ⟨σ, hσ, rfl⟩
@@ -218,12 +203,10 @@ noncomputable instance craig.original_weakerThan [L.DecidableEq]
     have hpadding : σ.padding s ∈ T.craig := ⟨σ, s, hs, rfl⟩
     exact mdp (C_of_E_mp (Entailment.padding_iff σ s)) (by_axm hpadding)
 
-noncomputable instance craig_equiv [L.DecidableEq]
-  : T ≊ T.craig :=
+noncomputable instance craig_equiv [L.DecidableEq] : T ≊ T.craig :=
   Equiv.antisymm_iff.mpr ⟨inferInstance, inferInstance⟩
 
-noncomputable instance craig.consistent [L.DecidableEq] [Consistent T]
-  : Consistent T.craig :=
+noncomputable instance [L.DecidableEq] [Consistent T] : Consistent T.craig :=
   Consistent.of_le (𝓢 := T) (𝓣 := T.craig) inferInstance inferInstance
 
 end

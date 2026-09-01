@@ -23,7 +23,7 @@ theorem consistent_unprovable [Consistent T] : T ⊬ T.consistent.val :=
 theorem craig_consistent_unprovable_of_RE (T : ArithmeticTheory) [T.RE] [𝗜𝚺₁ ⪯ T]
     [Consistent T] : T ⊬ T.craig.consistent.val := by
   let craig_weakerThan : 𝗜𝚺₁ ⪯ T.craig :=
-    WeakerThan.trans (𝓣 := T) inferInstance (Theory.craig.original_weakerThan (T := T))
+    WeakerThan.trans (𝓣 := T) inferInstance (inferInstance : T ⪯ T.craig)
   intro h;
   exact @consistent_unprovable T.craig inferInstance craig_weakerThan inferInstance
     (WeakerThan.pbl h)
