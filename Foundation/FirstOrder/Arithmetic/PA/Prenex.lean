@@ -16,31 +16,29 @@ open LO.FirstOrder
 
 namespace LO.FirstOrder.Arithmetic.Peano
 
-variable {Γ : Polarity} {s n : ℕ}
+variable {Γ : Polarity} {s n : ℕ} {φ : ArithmeticSemisentence n} {σ : ArithmeticSentence}
 
-lemma nonempty_prenexNormalForm {φ : ArithmeticSemisentence n} (h : Hierarchy Γ s φ) :
-    Nonempty (ArithmeticSemisentence.PrenexNormalForm 𝗣𝗔 Γ s φ) :=
-  Arithmetic.nonempty_prenexNormalForm h
+lemma hasPrenex (h : Hierarchy Γ s φ) :
+    ∃ π : Prenex Γ s Empty n, 𝗣𝗔 ⊢ ∀¹* (φ 🡘 π.val) :=
+  Arithmetic.hasPrenex h
 
-lemma exists_matrix_provable {φ : ArithmeticSemisentence n} (h : Hierarchy Γ s φ) :
-    ∃ φ₀ : ArithmeticSemisentence (n + s),
-      Hierarchy 𝚺 0 φ₀ ∧ 𝗣𝗔 ⊢ ∀¹* (φ 🡘 φ₀.toPrenex Γ s) := by
-  obtain ⟨φ'⟩ := nonempty_prenexNormalForm h;
-  exact ⟨φ'.matrix, φ'.matrix_Δ₀, φ'.provable⟩
+lemma exists_matrix_provable (h : Hierarchy Γ s φ) :
+    ∃ φ₀ : 𝚺₀.Semisentence (n + s), 𝗣𝗔 ⊢ ∀¹* (φ 🡘 φ₀.val.toPrenex Γ s) := by
+  obtain ⟨π, hπ⟩ := hasPrenex h;
+  exact ⟨π.matrix, hπ⟩
 
-lemma exists_matrix_provable_of_sentence {σ : ArithmeticSentence} (h : Hierarchy Γ s σ) :
-    ∃ π₀ : ArithmeticSemisentence (0 + s),
-      Hierarchy 𝚺 0 π₀ ∧ 𝗣𝗔 ⊢ σ 🡘 π₀.toPrenex Γ s :=
+lemma exists_matrix_provable_of_sentence (h : Hierarchy Γ s σ) :
+    ∃ π₀ : 𝚺₀.Semisentence (0 + s), 𝗣𝗔 ⊢ σ 🡘 π₀.val.toPrenex Γ s :=
   exists_matrix_provable h
 
-lemma exists_hierarchy_provable_of_sentence {σ : ArithmeticSentence} (h : Hierarchy 𝚺 (s + 1) σ) :
+lemma exists_hierarchy_provable_of_sentence (h : Hierarchy 𝚺 (s + 1) σ) :
     ∃ θ : ArithmeticSemisentence 1, Hierarchy 𝚷 s θ ∧ 𝗣𝗔 ⊢ σ 🡘 ∃¹ θ := by
-  obtain ⟨σ'⟩ := nonempty_prenexNormalForm h;
-  exact ⟨↑σ'.sigmaInv, σ'.sigmaInv.hierarchy, σ'.provable_sigmaInv⟩
+  obtain ⟨π, hπ⟩ := hasPrenex h;
+  exact ⟨π.sigmaInv.val, π.sigmaInv.val_hierarchy, Prenex.provable_iff_sigmaInv hπ⟩
 
-lemma exists_hierarchy_provable_of_sentence_pi {σ : ArithmeticSentence} (h : Hierarchy 𝚷 (s + 1) σ) :
+lemma exists_hierarchy_provable_of_sentence_pi (h : Hierarchy 𝚷 (s + 1) σ) :
     ∃ θ : ArithmeticSemisentence 1, Hierarchy 𝚺 s θ ∧ 𝗣𝗔 ⊢ σ 🡘 ∀¹ θ := by
-  obtain ⟨σ'⟩ := nonempty_prenexNormalForm h;
-  exact ⟨↑σ'.piInv, σ'.piInv.hierarchy, σ'.provable_piInv⟩
+  obtain ⟨π, hπ⟩ := hasPrenex h;
+  exact ⟨π.piInv.val, π.piInv.val_hierarchy, Prenex.provable_iff_piInv hπ⟩
 
 end LO.FirstOrder.Arithmetic.Peano
