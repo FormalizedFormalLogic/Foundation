@@ -24,24 +24,10 @@ namespace LO.FirstOrder.Theory
 
 variable {L : Language} [L.Encodable] [L.LORDefinable]
 
-variable {T : Theory L}
-
 abbrev codes (T : Theory L) : Set ℕ := Encodable.encode '' T
 
 class RE (T : Theory L) : Prop where
   re : REPred T.codes
-
-class «Σ₁» (T : Theory L) where
-  ch : 𝚺₁.Semisentence 1
-  mem_iff : ∀ φ : Proposition L, ℕ ⊧/![⌜φ⌝] ch.val ↔ ∃ σ ∈ T, φ = σ
-
-abbrev «Σ₁ch» (T : Theory L) [T.«Σ₁»] : 𝚺₁.Semisentence 1 := Theory.«Σ₁».ch T
-
-instance [T.Δ₁] : T.«Σ₁» where
-  ch := T.Δ₁ch.sigma
-  mem_iff φ := by
-    rw [Arithmetic.HierarchySymbol.Semiformula.val_sigma]
-    exact Theory.Δ₁.mem_iff φ
 
 end LO.FirstOrder.Theory
 
