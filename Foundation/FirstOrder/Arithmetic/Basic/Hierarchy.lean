@@ -28,7 +28,6 @@ inductive Hierarchy : Polarity → ℕ → {n : ℕ} → Semiformula L ξ n → 
 def DeltaZero (φ : Semiformula L ξ n) : Prop := Hierarchy 𝚺 0 φ
 
 attribute [simp] Hierarchy.verum Hierarchy.falsum Hierarchy.rel Hierarchy.nrel
-attribute [grind .] Hierarchy.verum Hierarchy.falsum
 
 namespace Hierarchy
 
@@ -411,6 +410,23 @@ lemma remove_exists {φ : Semiformula L ξ (n + 1)} : Hierarchy b s (∃¹ φ) �
   match k with
   |     0 => simp
   | k + 1 => simp [LO.FirstOrder.allItr_succ, allItr]
+
+lemma quantItr {φ : Semiformula L ξ (n + s)}
+    (h : Hierarchy (Γ.altItr s) j φ) :
+    Hierarchy Γ (j + s) (φ.toPrenex Γ s) := by
+  induction s generalizing n j with
+  | zero => simpa using h
+  | succ s ih =>
+    rw [Polarity.altItr_succ] at h
+    show Hierarchy Γ (j + (s + 1)) (Polarity.quantItr Γ (s + 1) φ)
+    rw [Polarity.quantItr_succ, (show j + (s + 1) = (j + 1) + s by omega)]
+    rcases hΓ : Γ.altItr s with _ | _
+    . apply ih
+      rw [hΓ] at h ⊢
+      exact h.sigma
+    . apply ih
+      rw [hΓ] at h ⊢
+      exact h.pi
 
 end Hierarchy
 
