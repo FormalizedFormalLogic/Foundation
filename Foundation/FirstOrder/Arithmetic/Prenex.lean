@@ -532,14 +532,8 @@ lemma succ_correct [𝗜𝚺 (s + 1) ⪯ T] {C : ClosureData s} (hC : C.Correct 
       intro V _ _ e;
       have hthis := models_iff_of_provable_iff this V e;
       simp only [Semiformula.eval_ballLT, Semiformula.eval_bexsLT, val_neg,
-        LogicalConnective.HomClass.map_neg, show ∀ p : Prop, ∼p = ¬p from fun _ => rfl] at hthis ⊢;
-      constructor;
-      . intro h hQ;
-        obtain ⟨x, hx, hnP⟩ := hthis.mpr hQ;
-        exact hnP (h x hx);
-      . intro hnQ x hx;
-        by_contra hnP;
-        exact hnQ (hthis.mp ⟨x, hx, hnP⟩);
+        LogicalConnective.HomClass.map_neg, LogicalConnective.Prop.neg_eq] at hthis ⊢;
+      grind;
   bexs {Γ} {n} {φ} u π hπ := by
     rcases Γ with _ | _;
     . exact bexsSigma_correct hC u π hπ;
@@ -549,13 +543,8 @@ lemma succ_correct [𝗜𝚺 (s + 1) ⪯ T] {C : ClosureData s} (hC : C.Correct 
       intro V _ _ e;
       have hthis := models_iff_of_provable_iff this V e;
       simp only [Semiformula.eval_ballLT, Semiformula.eval_bexsLT, val_neg,
-        LogicalConnective.HomClass.map_neg, show ∀ p : Prop, ∼p = ¬p from fun _ => rfl] at hthis ⊢;
-      constructor;
-      . rintro ⟨x, hx, hP⟩ hQ;
-        exact (hthis.mpr hQ) x hx hP;
-      . intro hnQ;
-        by_contra hne;
-        exact hnQ (hthis.mp fun x hx hP => hne ⟨x, hx, hP⟩);
+        LogicalConnective.HomClass.map_neg, LogicalConnective.Prop.neg_eq] at hthis ⊢;
+      grind;
   and {Γ} {n} {φ} {ψ} π ρ hπ hρ := by
     rcases Γ with _ | _;
     . exact andSigma_correct hC π ρ hπ hρ;
@@ -565,9 +554,8 @@ lemma succ_correct [𝗜𝚺 (s + 1) ⪯ T] {C : ClosureData s} (hC : C.Correct 
       intro V _ _ e;
       have hthis := models_iff_of_provable_iff this V e;
       simp only [val_neg, LogicalConnective.HomClass.map_neg, LogicalConnective.HomClass.map_and,
-        LogicalConnective.HomClass.map_or, show ∀ p : Prop, ∼p = ¬p from fun _ => rfl,
-        show ∀ p q : Prop, (p ⋎ q) = (p ∨ q) from fun _ _ => rfl,
-        show ∀ p q : Prop, (p ⋏ q) = (p ∧ q) from fun _ _ => rfl] at hthis ⊢;
+        LogicalConnective.HomClass.map_or, LogicalConnective.Prop.neg_eq,
+        LogicalConnective.Prop.or_eq, LogicalConnective.Prop.and_eq] at hthis ⊢;
       tauto;
   or {Γ} {n} {φ} {ψ} π ρ hπ hρ := by
     rcases Γ with _ | _;
@@ -578,9 +566,8 @@ lemma succ_correct [𝗜𝚺 (s + 1) ⪯ T] {C : ClosureData s} (hC : C.Correct 
       intro V _ _ e;
       have hthis := models_iff_of_provable_iff this V e;
       simp only [val_neg, LogicalConnective.HomClass.map_neg, LogicalConnective.HomClass.map_and,
-        LogicalConnective.HomClass.map_or, show ∀ p : Prop, ∼p = ¬p from fun _ => rfl,
-        show ∀ p q : Prop, (p ⋎ q) = (p ∨ q) from fun _ _ => rfl,
-        show ∀ p q : Prop, (p ⋏ q) = (p ∧ q) from fun _ _ => rfl] at hthis ⊢;
+        LogicalConnective.HomClass.map_or, LogicalConnective.Prop.neg_eq,
+        LogicalConnective.Prop.or_eq, LogicalConnective.Prop.and_eq] at hthis ⊢;
       tauto;
 
 end ClosureData
