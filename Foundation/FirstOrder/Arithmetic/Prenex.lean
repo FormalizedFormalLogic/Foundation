@@ -504,6 +504,85 @@ lemma andSigma_correct [𝗜𝚺 (s + 1) ⪯ T] {C : ClosureData s} (hC : C.Corr
     . rintro ⟨z, ⟨x, _, hx⟩, ⟨y, _, hy⟩⟩;
       exact ⟨⟨x, hx⟩, ⟨y, hy⟩⟩;
 
+def succ (C : ClosureData s) : ClosureData (s + 1) where
+  ball {Γ} {_n} u π :=
+    match Γ with
+    | 𝚺 => C.ballSigma u π
+    | 𝚷 => (C.bexsSigma u π.neg).neg
+  bexs {Γ} {_n} u π :=
+    match Γ with
+    | 𝚺 => C.bexsSigma u π
+    | 𝚷 => (C.ballSigma u π.neg).neg
+  and {Γ} {_n} π ρ :=
+    match Γ with
+    | 𝚺 => C.andSigma π ρ
+    | 𝚷 => (C.orSigma π.neg ρ.neg).neg
+  or {Γ} {_n} π ρ :=
+    match Γ with
+    | 𝚺 => C.orSigma π ρ
+    | 𝚷 => (C.andSigma π.neg ρ.neg).neg
+
+lemma succ_correct [𝗜𝚺 (s + 1) ⪯ T] {C : ClosureData s} (hC : C.Correct T) : C.succ.Correct T where
+  ball {Γ} {n} {φ} u π hπ := by
+    rcases Γ with _ | _;
+    . exact ballSigma_correct hC u π hπ;
+    . have := bexsSigma_correct hC u π.neg (provable_iff_neg hπ);
+      show T ⊢ ∀¹* (φ.ballLT u 🡘 (C.bexsSigma u π.neg).neg.val);
+      apply provable_iff_of_models_iff;
+      intro V _ _ e;
+      have hthis := models_iff_of_provable_iff this V e;
+      simp only [Semiformula.eval_ballLT, Semiformula.eval_bexsLT, val_neg,
+        LogicalConnective.HomClass.map_neg, show ∀ p : Prop, ∼p = ¬p from fun _ => rfl] at hthis ⊢;
+      constructor;
+      . intro h hQ;
+        obtain ⟨x, hx, hnP⟩ := hthis.mpr hQ;
+        exact hnP (h x hx);
+      . intro hnQ x hx;
+        by_contra hnP;
+        exact hnQ (hthis.mp ⟨x, hx, hnP⟩);
+  bexs {Γ} {n} {φ} u π hπ := by
+    rcases Γ with _ | _;
+    . exact bexsSigma_correct hC u π hπ;
+    . have := ballSigma_correct hC u π.neg (provable_iff_neg hπ);
+      show T ⊢ ∀¹* (φ.bexsLT u 🡘 (C.ballSigma u π.neg).neg.val);
+      apply provable_iff_of_models_iff;
+      intro V _ _ e;
+      have hthis := models_iff_of_provable_iff this V e;
+      simp only [Semiformula.eval_ballLT, Semiformula.eval_bexsLT, val_neg,
+        LogicalConnective.HomClass.map_neg, show ∀ p : Prop, ∼p = ¬p from fun _ => rfl] at hthis ⊢;
+      constructor;
+      . rintro ⟨x, hx, hP⟩ hQ;
+        exact (hthis.mpr hQ) x hx hP;
+      . intro hnQ;
+        by_contra hne;
+        exact hnQ (hthis.mp fun x hx hP => hne ⟨x, hx, hP⟩);
+  and {Γ} {n} {φ} {ψ} π ρ hπ hρ := by
+    rcases Γ with _ | _;
+    . exact andSigma_correct hC π ρ hπ hρ;
+    . have := orSigma_correct hC π.neg ρ.neg (provable_iff_neg hπ) (provable_iff_neg hρ);
+      show T ⊢ ∀¹* ((φ ⋏ ψ) 🡘 (C.orSigma π.neg ρ.neg).neg.val);
+      apply provable_iff_of_models_iff;
+      intro V _ _ e;
+      have hthis := models_iff_of_provable_iff this V e;
+      simp only [val_neg, LogicalConnective.HomClass.map_neg, LogicalConnective.HomClass.map_and,
+        LogicalConnective.HomClass.map_or, show ∀ p : Prop, ∼p = ¬p from fun _ => rfl,
+        show ∀ p q : Prop, (p ⋎ q) = (p ∨ q) from fun _ _ => rfl,
+        show ∀ p q : Prop, (p ⋏ q) = (p ∧ q) from fun _ _ => rfl] at hthis ⊢;
+      tauto;
+  or {Γ} {n} {φ} {ψ} π ρ hπ hρ := by
+    rcases Γ with _ | _;
+    . exact orSigma_correct hC π ρ hπ hρ;
+    . have := andSigma_correct hC π.neg ρ.neg (provable_iff_neg hπ) (provable_iff_neg hρ);
+      show T ⊢ ∀¹* ((φ ⋎ ψ) 🡘 (C.andSigma π.neg ρ.neg).neg.val);
+      apply provable_iff_of_models_iff;
+      intro V _ _ e;
+      have hthis := models_iff_of_provable_iff this V e;
+      simp only [val_neg, LogicalConnective.HomClass.map_neg, LogicalConnective.HomClass.map_and,
+        LogicalConnective.HomClass.map_or, show ∀ p : Prop, ∼p = ¬p from fun _ => rfl,
+        show ∀ p q : Prop, (p ⋎ q) = (p ∨ q) from fun _ _ => rfl,
+        show ∀ p q : Prop, (p ⋏ q) = (p ∧ q) from fun _ _ => rfl] at hthis ⊢;
+      tauto;
+
 end ClosureData
 
 
