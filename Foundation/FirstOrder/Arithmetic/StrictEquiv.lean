@@ -31,8 +31,7 @@ variable {T : ArithmeticTheory} [𝗘𝗤 ℒₒᵣ ⪯ T] {Γ : Polarity} {s n 
 @[coe]
 def val {φ : ArithmeticSemisentence n} (φ' : φ.PrenexNormalForm T Γ s) : ArithmeticSemisentence n := Polarity.quantItr Γ s φ'.matrix
 
-instance {φ : ArithmeticSemisentence n} : CoeTC (φ.PrenexNormalForm T Γ s)
-    (ArithmeticSemisentence n) := ⟨val⟩
+instance {φ : ArithmeticSemisentence n} : CoeTC (φ.PrenexNormalForm T Γ s) (ArithmeticSemisentence n) := ⟨val⟩
 
 lemma iff_models {φ : ArithmeticSemisentence n} (φ' : φ.PrenexNormalForm T Γ s) (V : Type*) [ORingStructure V] [V↓[ℒₒᵣ] ⊧* T] (e : Fin n → V) :
   V ⊧/e φ ↔ V ⊧/e φ'.val :=
@@ -48,33 +47,40 @@ def ofModelIff {φ ψ : ArithmeticSemisentence n} (φ' : φ.PrenexNormalForm T �
   ψ.PrenexNormalForm T Γ s :=
   ⟨φ'.matrix, φ'.matrix_Δ₀, provable_iff_of_models_iff fun V _ _ e ↦ (hiff V e).trans (φ'.iff_models V e)⟩
 
-def neg {φ : ArithmeticSemisentence n} (φ' : φ.PrenexNormalForm T Γ s) :
-    PrenexNormalForm T Γ.alt s (∼φ) := ⟨(∼φ'.matrix),
+def neg {φ : ArithmeticSemisentence n} (φ' : φ.PrenexNormalForm T Γ s) : PrenexNormalForm T Γ.alt s (∼φ) := ⟨
+  (∼φ'.matrix),
   φ'.matrix_Δ₀.neg.of_zero,
   by
     apply provable_iff_of_models_iff;
     intro V _ _ e;
-    simpa [val, ← Semiformula.neg_quantItr] using not_congr (φ'.iff_models V e)
+    simpa [val, ← Semiformula.neg_quantItr] using
+      not_congr (φ'.iff_models V e)
 ⟩
 
-def rew {φ : ArithmeticSemisentence n₁} (φ' : φ.PrenexNormalForm T Γ s)
-    (ω : Rew ℒₒᵣ Empty n₁ Empty n₂) :
-  PrenexNormalForm T Γ s (ω ▹ φ'.val) :=
-  ⟨ω.qpow s ▹ φ'.matrix, φ'.matrix_Δ₀.rew _,
-    provable_iff_of_models_iff fun V _ _ e ↦ by simp [val]⟩
+def rew {φ : ArithmeticSemisentence n₁} (φ' : φ.PrenexNormalForm T Γ s) (ω : Rew ℒₒᵣ Empty n₁ Empty n₂)
+  : PrenexNormalForm T Γ s (ω ▹ φ'.val) := ⟨
+  ω.qpow s ▹ φ'.matrix,
+  φ'.matrix_Δ₀.rew _,
+  provable_iff_of_models_iff fun V _ _ e ↦ by simp [val]
+⟩
 
 @[simp]
-lemma coe_rew {φ : ArithmeticSemisentence n₁} (φ' : φ.PrenexNormalForm T Γ s)
-    (ω : Rew ℒₒᵣ Empty n₁ Empty n₂) : (φ'.rew ω).val = ω ▹ φ'.val := by
+lemma coe_rew
+  {φ : ArithmeticSemisentence n₁} (φ' : φ.PrenexNormalForm T Γ s)
+  (ω : Rew ℒₒᵣ Empty n₁ Empty n₂) : (φ'.rew ω).val = ω ▹ φ'.val := by
   simp [val, rew]
 
 
 def sigma {φ : ArithmeticSemisentence (n + 1)} (φ' : φ.PrenexNormalForm T 𝚷 s) :
-    PrenexNormalForm T 𝚺 (s + 1) (∃¹ φ) :=
-  ⟨Rew.castLE (Nat.succ_add n s).le ▹ φ'.matrix, φ'.matrix_Δ₀.rew _,
-    provable_iff_of_models_iff fun V _ _ e ↦ by
-      simpa [val, Rewriting.quantItr_succ_smul_castLE] using
-        exists_congr (fun x ↦ φ'.iff_models V (x :> e))⟩
+  PrenexNormalForm T 𝚺 (s + 1) (∃¹ φ) := ⟨
+  Rew.castLE (Nat.succ_add n s).le ▹ φ'.matrix,
+  φ'.matrix_Δ₀.rew _,
+  by
+    apply provable_iff_of_models_iff;
+    intro V _ _ e;
+    simpa [val, Rewriting.quantItr_succ_smul_castLE] using
+      exists_congr (fun x ↦ φ'.iff_models V (x :> e))
+⟩
 
 @[simp]
 lemma coe_sigma {φ : ArithmeticSemisentence (n + 1)} (φ' : φ.PrenexNormalForm T 𝚷 s) :
@@ -83,11 +89,15 @@ lemma coe_sigma {φ : ArithmeticSemisentence (n + 1)} (φ' : φ.PrenexNormalForm
 
 
 def pi {φ : ArithmeticSemisentence (n + 1)} (φ' : φ.PrenexNormalForm T 𝚺 s) :
-    PrenexNormalForm T 𝚷 (s + 1) (∀¹ φ) :=
-  ⟨Rew.castLE (Nat.succ_add n s).le ▹ φ'.matrix, φ'.matrix_Δ₀.rew _,
-    provable_iff_of_models_iff fun V _ _ e ↦ by
-      simpa [val, Rewriting.quantItr_succ_smul_castLE] using
-        forall_congr' (fun x ↦ φ'.iff_models V (x :> e))⟩
+    PrenexNormalForm T 𝚷 (s + 1) (∀¹ φ) := ⟨
+  Rew.castLE (Nat.succ_add n s).le ▹ φ'.matrix,
+  φ'.matrix_Δ₀.rew _,
+  by
+    apply provable_iff_of_models_iff;
+    intro V _ _ e;
+    simpa [val, Rewriting.quantItr_succ_smul_castLE] using
+      forall_congr' (fun x ↦ φ'.iff_models V (x :> e))
+⟩
 
 @[simp]
 lemma coe_pi {φ : ArithmeticSemisentence (n + 1)} (φ' : φ.PrenexNormalForm T 𝚺 s) :
@@ -97,9 +107,14 @@ lemma coe_pi {φ : ArithmeticSemisentence (n + 1)} (φ' : φ.PrenexNormalForm T 
 
 def sigmaInv {φ : ArithmeticSemisentence n} (φ' : φ.PrenexNormalForm T 𝚺 (s + 1)) :
   PrenexNormalForm T 𝚷 s
-    (Polarity.quantItr 𝚷 s (Rew.castLE (Nat.succ_add n s).ge ▹ φ'.matrix)) :=
-  ⟨Rew.castLE (Nat.succ_add n s).ge ▹ φ'.matrix, φ'.matrix_Δ₀.rew _,
-    provable_iff_of_models_iff fun _ _ _ _ ↦ Iff.rfl⟩
+    (Polarity.quantItr 𝚷 s (Rew.castLE (Nat.succ_add n s).ge ▹ φ'.matrix)) := ⟨
+  Rew.castLE (Nat.succ_add n s).ge ▹ φ'.matrix,
+  φ'.matrix_Δ₀.rew _,
+  by
+    apply provable_iff_of_models_iff;
+    intro V _ _ e;
+    exact Iff.rfl
+⟩
 
 lemma coe_sigmaInv {φ : ArithmeticSemisentence n} (φ' : φ.PrenexNormalForm T 𝚺 (s + 1)) :
     φ'.val = ∃¹ φ'.sigmaInv.val := by
@@ -111,9 +126,14 @@ lemma coe_sigmaInv {φ : ArithmeticSemisentence n} (φ' : φ.PrenexNormalForm T 
 
 def piInv {φ : ArithmeticSemisentence n} (φ' : φ.PrenexNormalForm T 𝚷 (s + 1)) :
     PrenexNormalForm T 𝚺 s
-      (Polarity.quantItr 𝚺 s (Rew.castLE (Nat.succ_add n s).ge ▹ φ'.matrix)) :=
-  ⟨Rew.castLE (Nat.succ_add n s).ge ▹ φ'.matrix, φ'.matrix_Δ₀.rew _,
-    provable_iff_of_models_iff fun _ _ _ _ ↦ Iff.rfl⟩
+      (Polarity.quantItr 𝚺 s (Rew.castLE (Nat.succ_add n s).ge ▹ φ'.matrix)) := ⟨
+  Rew.castLE (Nat.succ_add n s).ge ▹ φ'.matrix,
+  φ'.matrix_Δ₀.rew _,
+  by
+    apply provable_iff_of_models_iff;
+    intro V _ _ e;
+    exact Iff.rfl
+⟩
 
 lemma coe_piInv {φ : ArithmeticSemisentence n} (φ' : φ.PrenexNormalForm T 𝚷 (s + 1)) :
     φ'.val = ∀¹ φ'.piInv.val := by
@@ -210,9 +230,11 @@ lemma closure_zero : Closure T 0 where
           exists_congr (fun x ↦ and_congr Iff.rfl (φ'.iff_models V (x :> e)))⟩;
   and := by
     intro Γ n φ ψ φ' ψ';
-    exact ⟨_, Hierarchy.and φ'.deltaZero ψ'.deltaZero,
+    exact ⟨_,
+      Hierarchy.and φ'.deltaZero ψ'.deltaZero,
       provable_iff_of_models_iff fun V _ _ e ↦ by
-        simp [φ'.iff_models V e, ψ'.iff_models V e]⟩;
+        simp [φ'.iff_models V e, ψ'.iff_models V e]
+    ⟩;
   or := by
     intro Γ n φ ψ φ' ψ';
     exact ⟨_, Hierarchy.or φ'.deltaZero ψ'.deltaZero,
@@ -332,8 +354,8 @@ lemma or_sigma_step {n} {φ ψ : ArithmeticSemisentence n} (ih : Closure T s)
     simp only [LogicalConnective.HomClass.map_or, Semiformula.eval_ex, hφiff', hψiff'];
     constructor;
     . rintro (⟨x, hx⟩ | ⟨x, hx⟩);
-      . exact ⟨x, (hχiff V (x :> e)).mp (by left; exact hx)⟩;
-      . exact ⟨x, (hχiff V (x :> e)).mp (by right; exact hx)⟩;
+      . exact ⟨x, (hχiff V (x :> e)).mp (Or.inl hx)⟩;
+      . exact ⟨x, (hχiff V (x :> e)).mp (Or.inr hx)⟩;
     . rintro ⟨x, hx⟩;
       rcases (hχiff V (x :> e)).mpr hx with h | h;
       . left; exact ⟨x, h⟩;
