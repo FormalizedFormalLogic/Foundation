@@ -24,13 +24,13 @@ lemma nonempty_prenexNormalForm {φ : ArithmeticSemisentence n} (h : Hierarchy �
 
 lemma exists_matrix_provable {φ : ArithmeticSemisentence n} (h : Hierarchy Γ s φ) :
     ∃ φ₀ : ArithmeticSemisentence (n + s),
-      Hierarchy 𝚺 0 φ₀ ∧ 𝗣𝗔 ⊢ ∀¹* (φ 🡘 Polarity.quantItr Γ s φ₀) := by
+      Hierarchy 𝚺 0 φ₀ ∧ 𝗣𝗔 ⊢ ∀¹* (φ 🡘 φ₀.toPrenex Γ s) := by
   obtain ⟨φ'⟩ := nonempty_prenexNormalForm h;
   exact ⟨φ'.matrix, φ'.matrix_Δ₀, φ'.provable⟩
 
 lemma exists_matrix_provable_of_sentence {σ : ArithmeticSentence} (h : Hierarchy Γ s σ) :
     ∃ π₀ : ArithmeticSemisentence (0 + s),
-      Hierarchy 𝚺 0 π₀ ∧ 𝗣𝗔 ⊢ σ 🡘 Polarity.quantItr Γ s π₀ :=
+      Hierarchy 𝚺 0 π₀ ∧ 𝗣𝗔 ⊢ σ 🡘 π₀.toPrenex Γ s :=
   exists_matrix_provable h
 
 lemma exists_hierarchy_provable_of_sentence {σ : ArithmeticSentence} (h : Hierarchy 𝚺 (s + 1) σ) :

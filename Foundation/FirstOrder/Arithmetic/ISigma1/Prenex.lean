@@ -22,17 +22,17 @@ lemma nonempty_prenexNormalForm {φ : ArithmeticSemisentence n} (h : Hierarchy �
     Nonempty (ArithmeticSemisentence.PrenexNormalForm 𝗜𝚺₁ 𝚺 1 φ) :=
   Arithmetic.nonempty_prenexNormalForm h
 
-lemma exists_strictHierarchy_provable {φ : ArithmeticSemisentence n} (h : Hierarchy 𝚺 1 φ) :
+lemma exists_matrix_provable {φ : ArithmeticSemisentence n} (h : Hierarchy 𝚺 1 φ) :
     ∃ θ : ArithmeticSemisentence (n + 1), Hierarchy 𝚺 0 θ ∧ 𝗜𝚺₁ ⊢ ∀¹* (φ 🡘 ∃¹ θ) := by
   obtain ⟨φ'⟩ := nonempty_prenexNormalForm h;
   exact ⟨↑φ'.sigmaInv, φ'.sigmaInv.deltaZero, φ'.provable_sigmaInv⟩
 
-lemma exists_strictHierarchy_provable_pi {φ : ArithmeticSemisentence n} (h : Hierarchy 𝚷 1 φ) :
+lemma exists_matrix_provable_pi {φ : ArithmeticSemisentence n} (h : Hierarchy 𝚷 1 φ) :
     ∃ θ : ArithmeticSemisentence (n + 1), Hierarchy 𝚺 0 θ ∧ 𝗜𝚺₁ ⊢ ∀¹* (φ 🡘 ∀¹ θ) :=
-  exists_matrix_provable _ h
+  Arithmetic.exists_matrix_provable _ h
 
-lemma exists_strictHierarchy_provable_of_sentence {σ : ArithmeticSentence} (h : Hierarchy 𝚺 1 σ) :
+lemma exists_matrix_provable_of_sentence {σ : ArithmeticSentence} (h : Hierarchy 𝚺 1 σ) :
     ∃ θ : ArithmeticSemisentence 1, Hierarchy 𝚺 0 θ ∧ 𝗜𝚺₁ ⊢ σ 🡘 ∃¹ θ :=
-  exists_strictHierarchy_provable h
+  exists_matrix_provable h
 
 end LO.FirstOrder.Arithmetic.ISigma1

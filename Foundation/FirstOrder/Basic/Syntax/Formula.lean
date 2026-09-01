@@ -117,15 +117,20 @@ end ToString
 
 @[simp] lemma neg_ex (φ : Semiformula L ξ (n + 1)) : ∼(∃¹ φ) = ∀¹ ∼φ := rfl
 
+/-- `φ.toPrenex Γ s` prefixes `φ` with `s` alternating quantifiers, the outermost one being `Γ`. -/
+abbrev toPrenex (Γ : Polarity) (s : ℕ) (φ : Semiformula L ξ (n + s)) : Semiformula L ξ n :=
+  Polarity.quantItr Γ s φ
+
 @[simp] lemma neg_quant (Γ : Polarity) (φ : Semiformula L ξ (n + 1)) :
     ∼(Γ.quant φ) = Γ.alt.quant (∼φ) := by
   rcases Γ <;> rfl
 
 @[simp] lemma neg_quantItr (Γ : Polarity) (s : ℕ) (φ : Semiformula L ξ (n + s)) :
-    ∼(Polarity.quantItr Γ s φ) = Polarity.quantItr Γ.alt s (∼φ) := by
+    ∼(φ.toPrenex Γ s) = (∼φ).toPrenex Γ.alt s := by
   induction s generalizing n with
   | zero => rfl
   | succ s ih =>
+    show ∼(Polarity.quantItr Γ (s + 1) φ) = Polarity.quantItr Γ.alt (s + 1) (∼φ)
     rw [Polarity.quantItr_succ, ih, neg_quant, Polarity.quantItr_succ]
     rw [← Polarity.altItr_succ, Polarity.altItr_succ']
 

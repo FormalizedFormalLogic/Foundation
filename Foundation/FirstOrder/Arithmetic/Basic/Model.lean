@@ -97,12 +97,6 @@ lemma models_iff_of_provable_iff {T : ArithmeticTheory} [𝗘𝗤 ℒₒᵣ ⪯ 
   simp only [models_iff, Semiformula.eval_allClosure] at h'
   simpa using h' e
 
-lemma models_iff_of_provable_iff' {T : ArithmeticTheory} [𝗘𝗤 ℒₒᵣ ⪯ T] {n}
-    {φ ψ : ArithmeticSemisentence n} (h : T ⊢ ∀¹* (φ 🡘 ψ)) :
-    ∀ (V : Type) [ORingStructure V] [V↓[ℒₒᵣ] ⊧* T] (e : Fin n → V),
-      V ⊧/e φ ↔ V ⊧/e ψ :=
-  models_iff_of_provable_iff h
-
 lemma weakerThan_of_models (T S : ArithmeticTheory) [𝗘𝗤 ℒₒᵣ ⪯ S]
     (H : ∀ (M : Type*)
            [ORingStructure M]

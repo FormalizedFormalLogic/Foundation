@@ -5,10 +5,10 @@ public import Foundation.FirstOrder.Arithmetic.BoundedCollection
 public import Foundation.FirstOrder.Arithmetic.Definability.Hierarchy
 
 /-!
-# `T`-provable strict hierarchy equivalence
+# Prenex normal form for the arithmetical hierarchy
 
-Every `Hierarchy Γ s` formula is `T`-provably equivalent to an alternating quantifier prefix over a
-bounded matrix. The file also provides the equivalent bounded-matrix formulation.
+For `𝗜𝚺 s ⪯ T`, every `Hierarchy Γ s` formula `φ` is `T`-provably equivalent to `φ₀.toPrenex Γ s`
+for some `φ₀ : ArithmeticSemisentence (n + s)` in `Hierarchy 𝚺 0`.
 -/
 
 @[expose] public section
@@ -20,7 +20,7 @@ namespace LO.FirstOrder
 structure ArithmeticSemisentence.PrenexNormalForm (T : ArithmeticTheory) (Γ : Polarity) (s : ℕ) {n : ℕ} (φ : ArithmeticSemisentence n) where
   matrix : ArithmeticSemisentence (n + s)
   matrix_Δ₀ : Arithmetic.Hierarchy 𝚺 0 matrix
-  provable : T ⊢ ∀¹* (φ 🡘 Polarity.quantItr Γ s matrix)
+  provable : T ⊢ ∀¹* (φ 🡘 matrix.toPrenex Γ s)
 
 namespace ArithmeticSemisentence.PrenexNormalForm
 
@@ -29,7 +29,7 @@ open Arithmetic
 variable {T : ArithmeticTheory} [𝗘𝗤 ℒₒᵣ ⪯ T] {Γ : Polarity} {s n n₁ n₂ : ℕ}
 
 @[coe]
-def val {φ : ArithmeticSemisentence n} (φ' : φ.PrenexNormalForm T Γ s) : ArithmeticSemisentence n := Polarity.quantItr Γ s φ'.matrix
+def val {φ : ArithmeticSemisentence n} (φ' : φ.PrenexNormalForm T Γ s) : ArithmeticSemisentence n := φ'.matrix.toPrenex Γ s
 
 instance {φ : ArithmeticSemisentence n} : CoeTC (φ.PrenexNormalForm T Γ s) (ArithmeticSemisentence n) := ⟨val⟩
 
@@ -107,7 +107,7 @@ lemma coe_pi {φ : ArithmeticSemisentence (n + 1)} (φ' : φ.PrenexNormalForm T 
 
 def sigmaInv {φ : ArithmeticSemisentence n} (φ' : φ.PrenexNormalForm T 𝚺 (s + 1)) :
   PrenexNormalForm T 𝚷 s
-    (Polarity.quantItr 𝚷 s (Rew.castLE (Nat.succ_add n s).ge ▹ φ'.matrix)) := ⟨
+    ((Rew.castLE (Nat.succ_add n s).ge ▹ φ'.matrix).toPrenex 𝚷 s) := ⟨
   Rew.castLE (Nat.succ_add n s).ge ▹ φ'.matrix,
   φ'.matrix_Δ₀.rew _,
   by
@@ -118,15 +118,15 @@ def sigmaInv {φ : ArithmeticSemisentence n} (φ' : φ.PrenexNormalForm T 𝚺 (
 
 lemma coe_sigmaInv {φ : ArithmeticSemisentence n} (φ' : φ.PrenexNormalForm T 𝚺 (s + 1)) :
     φ'.val = ∃¹ φ'.sigmaInv.val := by
-  change Polarity.quantItr 𝚺 (s + 1) φ'.matrix =
-    (𝚺 : Polarity).quant (Polarity.quantItr (𝚺 : Polarity).alt s (Rew.castLE _ ▹ φ'.matrix))
-  rw [← Rewriting.quantItr_succ_smul_castLE, ← TransitiveRewriting.comp_app]
+  change φ'.matrix.toPrenex 𝚺 (s + 1) = ∃¹ ((Rew.castLE _ ▹ φ'.matrix).toPrenex 𝚷 s)
+  rw [← Polarity.quant_sigma, ← Polarity.alt_sigma, ← Rewriting.quantItr_succ_smul_castLE,
+    ← TransitiveRewriting.comp_app]
   simp
 
 
 def piInv {φ : ArithmeticSemisentence n} (φ' : φ.PrenexNormalForm T 𝚷 (s + 1)) :
     PrenexNormalForm T 𝚺 s
-      (Polarity.quantItr 𝚺 s (Rew.castLE (Nat.succ_add n s).ge ▹ φ'.matrix)) := ⟨
+      ((Rew.castLE (Nat.succ_add n s).ge ▹ φ'.matrix).toPrenex 𝚺 s) := ⟨
   Rew.castLE (Nat.succ_add n s).ge ▹ φ'.matrix,
   φ'.matrix_Δ₀.rew _,
   by
@@ -137,16 +137,16 @@ def piInv {φ : ArithmeticSemisentence n} (φ' : φ.PrenexNormalForm T 𝚷 (s +
 
 lemma coe_piInv {φ : ArithmeticSemisentence n} (φ' : φ.PrenexNormalForm T 𝚷 (s + 1)) :
     φ'.val = ∀¹ φ'.piInv.val := by
-  change Polarity.quantItr 𝚷 (s + 1) φ'.matrix =
-    (𝚷 : Polarity).quant (Polarity.quantItr (𝚷 : Polarity).alt s (Rew.castLE _ ▹ φ'.matrix))
-  rw [← Rewriting.quantItr_succ_smul_castLE, ← TransitiveRewriting.comp_app]
+  change φ'.matrix.toPrenex 𝚷 (s + 1) = ∀¹ ((Rew.castLE _ ▹ φ'.matrix).toPrenex 𝚺 s)
+  rw [← Polarity.quant_pi, ← Polarity.alt_pi, ← Rewriting.quantItr_succ_smul_castLE,
+    ← TransitiveRewriting.comp_app]
   simp
 
 
 omit [𝗘𝗤 ℒₒᵣ ⪯ T] in
 lemma hierarchy {φ : ArithmeticSemisentence n} (φ' : φ.PrenexNormalForm T Γ s) :
     Hierarchy Γ s φ'.val := by
-  change Hierarchy Γ s (Polarity.quantItr Γ s φ'.matrix)
+  change Hierarchy Γ s (φ'.matrix.toPrenex Γ s)
   simpa only [Nat.zero_add] using
     Hierarchy.quantItr (Γ := Γ) (j := 0) φ'.matrix_Δ₀.of_zero
 
@@ -168,14 +168,6 @@ def ofDeltaZero {φ : ArithmeticSemisentence n} (φ_Δ₀ : Hierarchy 𝚺 0 φ)
   induction s generalizing Γ with
   | zero => exact ⟨φ, φ_Δ₀, provable_iff_of_models_iff fun _ _ _ _ ↦ Iff.rfl⟩
   | succ s ih => simpa using altUp (ih (Γ := Γ.alt));
-
-def exsOfPi {φ : ArithmeticSemisentence (n + 1)} (φ' : φ.PrenexNormalForm T 𝚷 s) :
-    PrenexNormalForm T 𝚺 (s + 1) (∃¹ φ) :=
-  φ'.sigma
-
-def allOfSigma {φ : ArithmeticSemisentence (n + 1)} (φ' : φ.PrenexNormalForm T 𝚺 s) :
-    PrenexNormalForm T 𝚷 (s + 1) (∀¹ φ) :=
-  φ'.pi
 
 lemma provable_sigmaInv {φ : ArithmeticSemisentence n} (φ' : φ.PrenexNormalForm T 𝚺 (s + 1)) :
     T ⊢ ∀¹* (φ 🡘 ∃¹ φ'.sigmaInv.val) := by
@@ -199,7 +191,7 @@ lemma iff_models_piInv {φ : ArithmeticSemisentence n}
     V ⊧/e φ ↔ ∀ x, V ⊧/(x :> e) φ'.piInv.val := by
   simpa [Semiformula.eval_all] using models_iff_of_provable_iff φ'.provable_piInv V e
 
-structure Closure (T : ArithmeticTheory) [𝗘𝗤 ℒₒᵣ ⪯ T] (s : ℕ) where
+structure Closure (T : ArithmeticTheory) [𝗘𝗤 ℒₒᵣ ⪯ T] (s : ℕ) : Prop where
   ball : ∀ Γ {n} {φ : ArithmeticSemisentence (n + 1)} {t : ArithmeticSemiterm Empty (n + 1)},
       t.Positive → φ.PrenexNormalForm T Γ s →
         Nonempty (PrenexNormalForm T Γ s (∀¹[“x. x < !!t”] φ))
@@ -262,7 +254,7 @@ lemma bexs_sigma_step {n} {φ : ArithmeticSemisentence (n + 1)}
   refine ⟨χ'.sigma.matrix, χ'.sigma.matrix_Δ₀, ?_⟩;
   apply provable_iff_of_models_iff;
   intro V _ _ e;
-  · change V ⊧/e (φ.bexsLT u) ↔ V ⊧/e χ'.sigma.val;
+  . change V ⊧/e (φ.bexsLT u) ↔ V ⊧/e χ'.sigma.val;
     rw [coe_sigma]
     have hswap : ∀ (a b : V) (e : Fin n → V),
         V ⊧/(b :> a :> e) φ₂ ↔ V ⊧/(a :> b :> e) φ₁ := by
@@ -308,7 +300,7 @@ lemma ball_sigma_step {n} {φ : ArithmeticSemisentence (n + 1)}
   refine ⟨δ'.sigma.matrix, δ'.sigma.matrix_Δ₀, ?_⟩;
   apply provable_iff_of_models_iff;
   intro V _ _ e;
-  · change V ⊧/e (φ.ballLT u) ↔ V ⊧/e δ'.sigma.val;
+  . change V ⊧/e (φ.ballLT u) ↔ V ⊧/e δ'.sigma.val;
     rw [coe_sigma]
     have : V↓[ℒₒᵣ] ⊧* 𝗜𝚺 (s + 1) := models_of_subtheory (T := 𝗜𝚺 (s + 1)) (U := T) inferInstance;
     have : V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := mod_paMinus_of_ISigma (n := s + 1);
@@ -347,7 +339,7 @@ lemma or_sigma_step {n} {φ ψ : ArithmeticSemisentence n} (ih : Closure T s)
   refine ⟨χ'.sigma.matrix, χ'.sigma.matrix_Δ₀, ?_⟩;
   apply provable_iff_of_models_iff;
   intro V _ _ e;
-  · change V ⊧/e (φ ⋎ ψ) ↔ V ⊧/e χ'.sigma.val;
+  . change V ⊧/e (φ ⋎ ψ) ↔ V ⊧/e χ'.sigma.val;
     rw [coe_sigma]
     have hφiff' : V ⊧/e φ ↔ ∃ x, V ⊧/(x :> e) φ₁ := φ'.iff_models_sigmaInv V e;
     have hψiff' : V ⊧/e ψ ↔ ∃ x, V ⊧/(x :> e) ψ₁ := ψ'.iff_models_sigmaInv V e;
@@ -387,7 +379,7 @@ lemma and_sigma_step {n} {φ ψ : ArithmeticSemisentence n} [𝗜𝚺 (s + 1) �
   refine ⟨χ'.sigma.matrix, χ'.sigma.matrix_Δ₀, ?_⟩;
   apply provable_iff_of_models_iff;
   intro V _ _ e;
-  · change V ⊧/e (φ ⋏ ψ) ↔ V ⊧/e χ'.sigma.val;
+  . change V ⊧/e (φ ⋏ ψ) ↔ V ⊧/e χ'.sigma.val;
     rw [coe_sigma]
     have : V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := models_of_subtheory (T := 𝗣𝗔⁻) (U := T) inferInstance;
     have hα_eval : ∀ z : V, V ⊧/(z :> e) (↑α' : ArithmeticSemisentence (n + 1)) ↔
@@ -482,7 +474,7 @@ lemma exs {n} {φ : ArithmeticSemisentence (n + 1)} [𝗜𝚺 s ⪯ T]
   refine ⟨β'.sigma.matrix, β'.sigma.matrix_Δ₀, ?_⟩;
   apply provable_iff_of_models_iff;
   intro V _ _ e;
-  · change V ⊧/e (∃¹ φ) ↔ V ⊧/e β'.sigma.val;
+  . change V ⊧/e (∃¹ φ) ↔ V ⊧/e β'.sigma.val;
     rw [coe_sigma]
     have : V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := models_of_subtheory (T := 𝗣𝗔⁻) (U := T) inferInstance;
     have hαeval : ∀ y z : V, V ⊧/(y :> z :> e) (↑α' : ArithmeticSemisentence (n + 2)) ↔
@@ -515,7 +507,7 @@ end ArithmeticSemisentence.PrenexNormalForm
 namespace Arithmetic
 
 open LO.FirstOrder.ArithmeticSemisentence.PrenexNormalForm
-  (ofDeltaZero exsOfPi allOfSigma altUp closure exs all)
+  (ofDeltaZero sigma pi altUp closure exs all)
 
 variable {T : ArithmeticTheory} [𝗘𝗤 ℒₒᵣ ⪯ T] {Γ : Polarity} {s : ℕ} {n : ℕ}
 
@@ -547,12 +539,12 @@ theorem nonempty_prenexNormalForm {φ : ArithmeticSemisentence n} (h : Hierarchy
     rcases s with _ | s;
     . exact ⟨(ofDeltaZero (Γ := 𝚷) (s := 0) (Hierarchy.zero_iff.mp hp)).sigma⟩;
     . have : 𝗜𝚺 (s + 1) ⪯ T := ISigma_weakerThan_of_le_trans (by omega) hT;
-      exact ih.map exsOfPi;
+      exact ih.map sigma;
   | @pi s n φ hp ih =>
     rcases s with _ | s;
     . exact ⟨(ofDeltaZero (Γ := 𝚺) (s := 0) (Hierarchy.zero_iff.mp hp)).pi⟩;
     . have : 𝗜𝚺 (s + 1) ⪯ T := ISigma_weakerThan_of_le_trans (by omega) hT;
-      exact ih.map allOfSigma;
+      exact ih.map pi;
   | @dummy_sigma s n φ hp ih =>
     have : 𝗜𝚺 s ⪯ T := ISigma_weakerThan_of_le_trans (by omega) hT;
     have : 𝗜𝚺 (s + 1) ⪯ T := ISigma_weakerThan_of_le_trans (by omega) hT;
@@ -566,16 +558,16 @@ theorem nonempty_prenexNormalForm {φ : ArithmeticSemisentence n} (h : Hierarchy
     obtain ⟨ψ'⟩ := exs closure φ';
     exact ⟨altUp ψ'⟩;
 
-variable (T : ArithmeticTheory) {Γ : Polarity} {s n : ℕ} [𝗜𝚺 s ⪯ T]
+variable (T : ArithmeticTheory) {Γ : Polarity} {s n : ℕ} {φ : ArithmeticSemisentence n} [𝗜𝚺 s ⪯ T]
 
 theorem exists_matrix_provable (h : Hierarchy Γ s φ) :
-  ∃ φ₀ : ArithmeticSemisentence (n + s), Hierarchy 𝚺 0 φ₀ ∧ T ⊢ ∀¹* (φ 🡘 Polarity.quantItr Γ s φ₀) := by
+  ∃ φ₀ : ArithmeticSemisentence (n + s), Hierarchy 𝚺 0 φ₀ ∧ T ⊢ ∀¹* (φ 🡘 φ₀.toPrenex Γ s) := by
   have : 𝗘𝗤 ℒₒᵣ ⪯ T := Entailment.WeakerThan.trans (inferInstance : 𝗘𝗤 ℒₒᵣ ⪯ 𝗜𝚺₀) (ISigma_weakerThan_of_le_trans (by omega) ‹𝗜𝚺 s ⪯ T›);
   obtain ⟨φ'⟩ := nonempty_prenexNormalForm (T := T) h;
   exact ⟨φ'.matrix, φ'.matrix_Δ₀, φ'.provable⟩;
 
 theorem exists_matrix_provable' (h : Hierarchy Γ s φ) :
-    ∃ φ₀ : 𝚺₀.Semisentence (n + s), T ⊢ ∀¹* (φ 🡘 Polarity.quantItr Γ s φ₀.val) := by
+    ∃ φ₀ : 𝚺₀.Semisentence (n + s), T ⊢ ∀¹* (φ 🡘 φ₀.val.toPrenex Γ s) := by
   obtain ⟨φ₀, hφ₀, hprov⟩ := exists_matrix_provable T h;
   exact ⟨.mkSigma φ₀ hφ₀, by simpa using hprov⟩;
 

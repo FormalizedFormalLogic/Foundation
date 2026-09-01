@@ -28,6 +28,7 @@ def alt : Polarity → Polarity
 
 @[simp] lemma alt_alt (Γ : Polarity) : Γ.alt.alt = Γ := by rcases Γ <;> simp
 
+/-- `Γ` with its polarity flipped `k` times. -/
 abbrev altItr (Γ : Polarity) (k : ℕ) : Polarity := Polarity.alt^[k] Γ
 
 @[simp] lemma altItr_zero (Γ : Polarity) : Γ.altItr 0 = Γ := rfl
@@ -214,6 +215,7 @@ def quant : Polarity → α (n + 1) → α n
 
 @[simp] lemma quant_pi (φ : α (n + 1)) : (𝚷 : Polarity).quant φ = ∀¹ φ := rfl
 
+/-- Prefixes `k` alternating quantifiers starting with `Γ`. -/
 def quantItr (Γ : Polarity) : (k : ℕ) → α (n + k) → α n
   | 0,     φ => φ
   | k + 1, φ => quantItr Γ k ((Γ.altItr k).quant φ)
