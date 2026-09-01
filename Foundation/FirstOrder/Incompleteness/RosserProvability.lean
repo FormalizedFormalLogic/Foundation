@@ -150,12 +150,13 @@ end rosserProvability
 theorem incomplete_GR (T : ArithmeticTheory) [T.Δ₁] [𝗜𝚺₁ ⪯ T] [Consistent T] : Incomplete T :=
   ProvabilityAbstraction.rosser_first_incompleteness T.rosserProvability
 
+instance {T : ArithmeticTheory} [T.RE] [𝗜𝚺₁ ⪯ T] : 𝗜𝚺₁ ⪯ T.craig := WeakerThan.trans inferInstance (inferInstance : T ⪯ T.craig)
+
 /-- Gödel-Rosser incompleteness theorem for r.e. theories -/
-theorem incomplete_GR_of_RE (T : ArithmeticTheory) [T.RE] [𝗜𝚺₁ ⪯ T] [Consistent T] :
-    Incomplete T := by
-  let craig_weakerThan : 𝗜𝚺₁ ⪯ T.craig :=
-    WeakerThan.trans (𝓣 := T) inferInstance (inferInstance : T ⪯ T.craig)
-  exact (Theory.craig_equiv (T := T)).symm.incomplete
-    (@incomplete_GR T.craig inferInstance craig_weakerThan inferInstance)
+theorem incomplete_GR_of_RE (T : ArithmeticTheory) [T.RE] [𝗜𝚺₁ ⪯ T] [Consistent T] : Incomplete T := by
+  apply Equiv.incomplete (𝓢 := T.craig);
+  . symm;
+    infer_instance;
+  . apply incomplete_GR;
 
 end LO.FirstOrder.Arithmetic

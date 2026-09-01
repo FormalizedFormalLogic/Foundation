@@ -1042,10 +1042,10 @@ noncomputable instance InductionScheme.delta1_sigma1 :
 
 /-! ## `𝗣𝗔` and `𝗜𝚺₁` are `Δ₁` -/
 
-noncomputable instance PA_delta1Definable : 𝗣𝗔.Δ₁ :=
+noncomputable instance : 𝗣𝗔.Δ₁ :=
   Theory.Δ₁.add PeanoMinus.delta1 InductionScheme.delta1_univ
 
-noncomputable instance ISigma1_delta1Definable : 𝗜𝚺₁.Δ₁ :=
+noncomputable instance : 𝗜𝚺₁.Δ₁ :=
   Theory.Δ₁.add PeanoMinus.delta1 InductionScheme.delta1_sigma1
 
 end LO.FirstOrder.Arithmetic

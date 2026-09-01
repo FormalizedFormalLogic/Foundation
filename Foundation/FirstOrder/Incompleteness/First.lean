@@ -53,15 +53,18 @@ theorem exists_true_but_unprovable_sentence
   . exact ⟨δ, by assumption, hδ.1⟩
   . exact ⟨∼δ, by simpa, hδ.2⟩
 
-noncomputable instance (T : ArithmeticTheory) [T.RE] [𝗥₀ ⪯ T] : 𝗥₀ ⪯ T.craig :=
+instance {T : ArithmeticTheory} [T.RE] [𝗥₀ ⪯ T] : 𝗥₀ ⪯ T.craig :=
   WeakerThan.trans (𝓣 := T) inferInstance (inferInstance : T ⪯ T.craig)
 
+instance {T : ArithmeticTheory} [T.RE] [T.SoundOnHierarchy 𝚺 1] : ArithmeticTheory.SoundOnHierarchy (T.craig) 𝚺 1 :=
+  ArithmeticTheory.SoundOn.of_weakerThan _ T T.craig
+
 /-- Gödel's first incompleteness theorem for r.e. theories -/
-theorem incomplete_of_RE (T : ArithmeticTheory) [T.RE] [𝗥₀ ⪯ T] [T.SoundOnHierarchy 𝚺 1] :
-    Incomplete T :=
-  (Theory.craig_equiv (T := T)).symm.incomplete
-    (@incomplete T.craig inferInstance inferInstance
-      (ArithmeticTheory.SoundOn.of_weakerThan _ T T.craig))
+theorem incomplete_of_RE (T : ArithmeticTheory) [T.RE] [𝗥₀ ⪯ T] [T.SoundOnHierarchy 𝚺 1] : Incomplete T := by
+  apply Equiv.incomplete (𝓢 := T.craig);
+  . symm;
+    infer_instance;
+  . apply incomplete;
 
 theorem exists_true_but_unprovable_sentence_of_RE
     (T : ArithmeticTheory) [T.RE] [𝗥₀ ⪯ T] [T.SoundOnHierarchy 𝚺 1] :

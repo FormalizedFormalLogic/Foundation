@@ -187,27 +187,27 @@ noncomputable instance : (T.craig).Δ₁ where
   isDelta1 := Arithmetic.HierarchySymbol.Semiformula.ProvablyProperOn.ofProperOn.{0} _ fun V _ _ ↦
     (Theory.IsCraigAxiom.defined (V := V) (T := T)).proper
 
-noncomputable instance [L.DecidableEq] : T.craig ⪯ T := WeakerThan.ofAxm! $ by
-    rintro σ ⟨ρ, s, hρ, rfl⟩;
-    have hρ' : ℕ ⊧/![⌜ρ⌝] T.reCh.val := (reWitness_spec T ℕ ![⌜ρ⌝]).mpr ⟨s, hρ⟩
-    rcases (T.reCh_mem_iff (Rewriting.emb ρ)).mp
-      (by simpa [Sentence.quote_def] using hρ') with ⟨τ, hτ, hρτ⟩
-    have hρT : ρ ∈ T := Rewriting.emb_injective hρτ ▸ hτ
-    exact mdp (C_of_E_mpr (Entailment.padding_iff ρ s)) (by_axm hρT)
+instance [L.DecidableEq] : T.craig ⪯ T := WeakerThan.ofAxm! $ by
+  rintro σ ⟨ρ, s, hρ, rfl⟩;
+  have hρ' : ℕ ⊧/![⌜ρ⌝] T.reCh.val := (reWitness_spec T ℕ ![⌜ρ⌝]).mpr ⟨s, hρ⟩
+  rcases (T.reCh_mem_iff (Rewriting.emb ρ)).mp
+    (by simpa [Sentence.quote_def] using hρ') with ⟨τ, hτ, hρτ⟩
+  have hρT : ρ ∈ T := Rewriting.emb_injective hρτ ▸ hτ
+  exact mdp (C_of_E_mpr (Entailment.padding_iff ρ s)) (by_axm hρT)
 
-noncomputable instance [L.DecidableEq] : T ⪯ T.craig :=
-  WeakerThan.ofAxm! fun {σ} hσ ↦ by
-    have hσ' : ℕ ⊧/![⌜σ⌝] T.reCh.val :=
-      (T.reCh_mem_iff (Rewriting.emb σ)).mpr ⟨σ, hσ, rfl⟩
-    rcases (reWitness_spec T ℕ ![⌜σ⌝]).mp hσ' with ⟨s, hs⟩
-    have hpadding : σ.padding s ∈ T.craig := ⟨σ, s, hs, rfl⟩
-    exact mdp (C_of_E_mp (Entailment.padding_iff σ s)) (by_axm hpadding)
+instance [L.DecidableEq] : T ⪯ T.craig := WeakerThan.ofAxm! $ by
+  intro σ hσ;
+  have hσ' : ℕ ⊧/![⌜σ⌝] T.reCh.val :=
+    (T.reCh_mem_iff (Rewriting.emb σ)).mpr ⟨σ, hσ, rfl⟩
+  rcases (reWitness_spec T ℕ ![⌜σ⌝]).mp hσ' with ⟨s, hs⟩
+  have hpadding : σ.padding s ∈ T.craig := ⟨σ, s, hs, rfl⟩
+  exact mdp (C_of_E_mp (Entailment.padding_iff σ s)) (by_axm hpadding)
 
-noncomputable instance craig_equiv [L.DecidableEq] : T ≊ T.craig :=
+instance [L.DecidableEq] : T ≊ T.craig :=
   Equiv.antisymm_iff.mpr ⟨inferInstance, inferInstance⟩
 
-noncomputable instance [L.DecidableEq] [Consistent T] : Consistent T.craig :=
-  Consistent.of_le (𝓢 := T) (𝓣 := T.craig) inferInstance inferInstance
+instance [L.DecidableEq] [Consistent T] : Consistent T.craig :=
+  Consistent.of_le inferInstance (inferInstance : T.craig ⪯ T)
 
 end
 
