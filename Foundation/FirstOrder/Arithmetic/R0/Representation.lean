@@ -3,7 +3,6 @@ module
 public import Foundation.FirstOrder.Arithmetic.Definability.Definable
 public import Foundation.FirstOrder.Arithmetic.PeanoMinus.Basic
 public import Foundation.FirstOrder.Arithmetic.R0.Basic
-public import Foundation.FirstOrder.Bootstrapping.Syntax.Theory
 public import Foundation.Vorspiel.Arithmetic
 public import Foundation.Vorspiel.Computability
 
@@ -287,19 +286,6 @@ theorem rePred_weak_representation {p : ℕ → Prop} (hp : REPred p) {x : ℕ} 
   (sigma_one_completeness_iff <| by simp [codeOfREPred, codeOfPartrec'])
 
 end codeOfREPred
-
--- `[T.RE]` is spelled out instead of taken from a `variable`: the body does not use it, so Lean
--- would drop it from the signature and let the Craig companion be built for an arbitrary theory.
-noncomputable def _root_.LO.FirstOrder.Theory.reCh {L : Language} [L.Encodable] [L.LORDefinable]
-    (T : Theory L) [T.RE] : 𝚺₁.Semisentence 1 :=
-  .mkSigma (codeOfREPred fun n ↦ n ∈ T.codes) (by simp [codeOfREPred, codeOfPartrec'])
-
-lemma _root_.LO.FirstOrder.Theory.reCh_mem_iff {L : Language} [L.Encodable] [L.LORDefinable]
-    (T : Theory L) [T.RE] (φ : Proposition L) :
-    ℕ ⊧/![⌜φ⌝] T.reCh.val ↔ ∃ σ ∈ T, φ = σ := by
-  have hT : REPred fun n : ℕ ↦ n ∈ T.codes := Theory.RE.re
-  simpa [Theory.reCh, Theory.codes, Matrix.fun_eq_vec_one, Semiformula.quote_eq_encode] using
-    codeOfREPred_spec hT (x := (⌜φ⌝ : ℕ))
 
 section codeOfComputablePred
 

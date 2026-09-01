@@ -16,6 +16,19 @@ namespace LO.FirstOrder.Theory
 
 open LO.FirstOrder.Arithmetic
 
+-- `[T.RE]` is spelled out instead of taken from a `variable`: the body does not use it, so Lean
+-- would drop it from the signature and let the Craig companion be built for an arbitrary theory.
+noncomputable def reCh {L : Language} [L.Encodable] [L.LORDefinable]
+    (T : Theory L) [T.RE] : 𝚺₁.Semisentence 1 :=
+  .mkSigma (codeOfREPred fun n ↦ n ∈ T.codes) (by simp [codeOfREPred, codeOfPartrec'])
+
+lemma reCh_mem_iff {L : Language} [L.Encodable] [L.LORDefinable]
+    (T : Theory L) [T.RE] (φ : Proposition L) :
+    ℕ ⊧/![⌜φ⌝] T.reCh.val ↔ ∃ σ ∈ T, φ = σ := by
+  have hT : REPred fun n : ℕ ↦ n ∈ T.codes := Theory.RE.re
+  simpa [Theory.reCh, Theory.codes, Matrix.fun_eq_vec_one, Semiformula.quote_eq_encode] using
+    codeOfREPred_spec hT (x := (⌜φ⌝ : ℕ))
+
 variable {L : Language} [L.Encodable] [L.LORDefinable]
 
 section
