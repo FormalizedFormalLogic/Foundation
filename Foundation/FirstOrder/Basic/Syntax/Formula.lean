@@ -127,9 +127,7 @@ end ToString
   | zero => rfl
   | succ s ih =>
     rw [Polarity.quantItr_succ, ih, neg_quant, Polarity.quantItr_succ]
-    have h : (Polarity.alt^[s] Γ).alt = Polarity.alt^[s] Γ.alt := by
-      rw [← Function.iterate_succ_apply' Polarity.alt s Γ, Function.iterate_succ_apply]
-    rw [h]
+    rw [← Polarity.altItr_succ, Polarity.altItr_succ']
 
 @[simp] lemma neg_inj (φ ψ : Semiformula L ξ n) : ∼φ = ∼ψ ↔ φ = ψ := by
   constructor

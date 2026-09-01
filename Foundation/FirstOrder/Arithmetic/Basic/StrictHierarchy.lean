@@ -3,9 +3,9 @@ module
 public import Foundation.FirstOrder.Arithmetic.Basic.Hierarchy
 
 /-!
-# Strict arithmetical hierarchy formulas
+# Strict arithmetical hierarchy prenex forms
 
-A strict hierarchy formula stores its bounded kernel together with its alternating
+A strict hierarchy formula stores its bounded matrix together with its alternating
 quantifier prefix.
 -/
 
@@ -14,129 +14,128 @@ namespace LO.FirstOrder.Arithmetic
 
 variable {L : Language} [L.LT]
 
-structure StrictHierarchyFormula (L : Language) [L.LT] (ξ : Type*) (Γ : Polarity) (s n : ℕ) where
-  kernel : Semiformula L ξ (n + s)
-  kernel_deltaZero : Hierarchy 𝚺 0 kernel
+structure Prenex (L : Language) [L.LT] (ξ : Type*) (Γ : Polarity) (s n : ℕ) where
+  matrix : Semiformula L ξ (n + s)
+  matrix_Δ₀ : Hierarchy 𝚺 0 matrix
 
-namespace StrictHierarchyFormula
+namespace Prenex
 
 variable {ξ : Type*} {Γ : Polarity} {s n : ℕ}
 
-@[coe] def val (φ : StrictHierarchyFormula L ξ Γ s n) : Semiformula L ξ n :=
-  Polarity.quantItr Γ s φ.kernel
+@[coe]
+def val (φ : Prenex L ξ Γ s n) : Semiformula L ξ n := Polarity.quantItr Γ s φ.matrix
 
-instance : CoeTC (StrictHierarchyFormula L ξ Γ s n) (Semiformula L ξ n) := ⟨val⟩
+instance : CoeTC (Prenex L ξ Γ s n) (Semiformula L ξ n) := ⟨val⟩
 
-@[ext] lemma ext {φ ψ : StrictHierarchyFormula L ξ Γ s n} (h : φ.kernel = ψ.kernel) : φ = ψ := by
-  cases φ
-  cases ψ
-  simp_all
+@[ext]
+lemma ext {φ ψ : Prenex L ξ Γ s n} (h : φ.matrix = ψ.matrix) : φ = ψ := by
+  cases φ; cases ψ; simp_all
 
-@[simp] lemma val_mk (φ : Semiformula L ξ (n + s)) (h : Hierarchy 𝚺 0 φ) :
-    (⟨φ, h⟩ : StrictHierarchyFormula L ξ Γ s n).val = Polarity.quantItr Γ s φ := rfl
+@[simp]
+lemma val_mk (φ : Semiformula L ξ (n + s)) (φ_Δ₀ : Hierarchy 𝚺 0 φ) :
+  (⟨φ, φ_Δ₀⟩ : Prenex L ξ Γ s n).val = Polarity.quantItr Γ s φ := rfl
 
-def zero (Γ : Polarity) (φ : Semiformula L ξ n) (h : Hierarchy 𝚺 0 φ) :
-    StrictHierarchyFormula L ξ Γ 0 n := ⟨φ, h⟩
+def zero (Γ : Polarity) (φ : Semiformula L ξ n) (φ_Δ₀ : Hierarchy 𝚺 0 φ) :
+    Prenex L ξ Γ 0 n := ⟨φ, φ_Δ₀⟩
 
-def sigma (φ : StrictHierarchyFormula L ξ 𝚷 s (n + 1)) :
-    StrictHierarchyFormula L ξ 𝚺 (s + 1) n :=
-  ⟨Rew.castLE (Nat.succ_add n s).le ▹ φ.kernel, φ.kernel_deltaZero.rew _⟩
+def sigma (φ : Prenex L ξ 𝚷 s (n + 1)) :
+    Prenex L ξ 𝚺 (s + 1) n :=
+  ⟨Rew.castLE (Nat.succ_add n s).le ▹ φ.matrix, φ.matrix_Δ₀.rew _⟩
 
-def pi (φ : StrictHierarchyFormula L ξ 𝚺 s (n + 1)) :
-    StrictHierarchyFormula L ξ 𝚷 (s + 1) n :=
-  ⟨Rew.castLE (Nat.succ_add n s).le ▹ φ.kernel, φ.kernel_deltaZero.rew _⟩
+def pi (φ : Prenex L ξ 𝚺 s (n + 1)) :
+    Prenex L ξ 𝚷 (s + 1) n :=
+  ⟨Rew.castLE (Nat.succ_add n s).le ▹ φ.matrix, φ.matrix_Δ₀.rew _⟩
 
-def sigmaInv (φ : StrictHierarchyFormula L ξ 𝚺 (s + 1) n) :
-    StrictHierarchyFormula L ξ 𝚷 s (n + 1) :=
-  ⟨Rew.castLE (Nat.succ_add n s).ge ▹ φ.kernel, φ.kernel_deltaZero.rew _⟩
+def sigmaInv (φ : Prenex L ξ 𝚺 (s + 1) n) :
+    Prenex L ξ 𝚷 s (n + 1) :=
+  ⟨Rew.castLE (Nat.succ_add n s).ge ▹ φ.matrix, φ.matrix_Δ₀.rew _⟩
 
-def piInv (φ : StrictHierarchyFormula L ξ 𝚷 (s + 1) n) :
-    StrictHierarchyFormula L ξ 𝚺 s (n + 1) :=
-  ⟨Rew.castLE (Nat.succ_add n s).ge ▹ φ.kernel, φ.kernel_deltaZero.rew _⟩
+def piInv (φ : Prenex L ξ 𝚷 (s + 1) n) :
+    Prenex L ξ 𝚺 s (n + 1) :=
+  ⟨Rew.castLE (Nat.succ_add n s).ge ▹ φ.matrix, φ.matrix_Δ₀.rew _⟩
 
-def neg (φ : StrictHierarchyFormula L ξ Γ s n) : StrictHierarchyFormula L ξ Γ.alt s n :=
-  ⟨∼φ.kernel, φ.kernel_deltaZero.neg.of_zero⟩
+def neg (φ : Prenex L ξ Γ s n) : Prenex L ξ Γ.alt s n :=
+  ⟨∼φ.matrix, φ.matrix_Δ₀.neg.of_zero⟩
 
-def rew (φ : StrictHierarchyFormula L ξ₁ Γ s n₁) (ω : Rew L ξ₁ n₁ ξ₂ n₂) :
-    StrictHierarchyFormula L ξ₂ Γ s n₂ :=
-  ⟨ω.qpow s ▹ φ.kernel, φ.kernel_deltaZero.rew _⟩
+def rew (φ : Prenex L ξ₁ Γ s n₁) (ω : Rew L ξ₁ n₁ ξ₂ n₂) :
+    Prenex L ξ₂ Γ s n₂ :=
+  ⟨ω.qpow s ▹ φ.matrix, φ.matrix_Δ₀.rew _⟩
 
-@[simp] lemma coe_zero (Γ : Polarity) (φ : Semiformula L ξ n) (h : Hierarchy 𝚺 0 φ) :
-    (↑(zero Γ φ h) : Semiformula L ξ n) = φ := rfl
+@[simp]
+lemma coe_zero (Γ : Polarity) (φ : Semiformula L ξ n) (φ_Δ₀ : Hierarchy 𝚺 0 φ) :
+  (↑(zero Γ φ φ_Δ₀) : Semiformula L ξ n) = φ := rfl
 
-@[simp] lemma coe_sigma (φ : StrictHierarchyFormula L ξ 𝚷 s (n + 1)) :
-    (↑φ.sigma : Semiformula L ξ n) = ∃¹ (↑φ : Semiformula L ξ (n + 1)) := by
+@[simp]
+lemma coe_sigma (φ : Prenex L ξ 𝚷 s (n + 1)) :
+  (↑φ.sigma : Semiformula L ξ n) = ∃¹ (↑φ : Semiformula L ξ (n + 1)) := by
   simp [val, sigma, Rewriting.quantItr_succ_smul_castLE]
 
-@[simp] lemma coe_pi (φ : StrictHierarchyFormula L ξ 𝚺 s (n + 1)) :
+@[simp]
+lemma coe_pi (φ : Prenex L ξ 𝚺 s (n + 1)) :
     (↑φ.pi : Semiformula L ξ n) = ∀¹ (↑φ : Semiformula L ξ (n + 1)) := by
   simp [val, pi, Rewriting.quantItr_succ_smul_castLE]
 
-lemma coe_sigmaInv (φ : StrictHierarchyFormula L ξ 𝚺 (s + 1) n) :
+lemma coe_sigmaInv (φ : Prenex L ξ 𝚺 (s + 1) n) :
     (↑φ : Semiformula L ξ n) = ∃¹ (↑φ.sigmaInv : Semiformula L ξ (n + 1)) := by
-  change Polarity.quantItr 𝚺 (s + 1) φ.kernel =
-    (𝚺 : Polarity).quant (Polarity.quantItr (𝚺 : Polarity).alt s (Rew.castLE _ ▹ φ.kernel))
+  change Polarity.quantItr 𝚺 (s + 1) φ.matrix =
+    (𝚺 : Polarity).quant (Polarity.quantItr (𝚺 : Polarity).alt s (Rew.castLE _ ▹ φ.matrix))
   rw [← Rewriting.quantItr_succ_smul_castLE]
   rw [← TransitiveRewriting.comp_app]
   simp
 
-lemma coe_piInv (φ : StrictHierarchyFormula L ξ 𝚷 (s + 1) n) :
+lemma coe_piInv (φ : Prenex L ξ 𝚷 (s + 1) n) :
     (↑φ : Semiformula L ξ n) = ∀¹ (↑φ.piInv : Semiformula L ξ (n + 1)) := by
-  change Polarity.quantItr 𝚷 (s + 1) φ.kernel =
-    (𝚷 : Polarity).quant (Polarity.quantItr (𝚷 : Polarity).alt s (Rew.castLE _ ▹ φ.kernel))
+  change Polarity.quantItr 𝚷 (s + 1) φ.matrix =
+    (𝚷 : Polarity).quant (Polarity.quantItr (𝚷 : Polarity).alt s (Rew.castLE _ ▹ φ.matrix))
   rw [← Rewriting.quantItr_succ_smul_castLE]
   rw [← TransitiveRewriting.comp_app]
   simp
 
-@[simp] lemma sigmaInv_sigma (φ : StrictHierarchyFormula L ξ 𝚷 s (n + 1)) :
-    φ.sigma.sigmaInv = φ := by
+@[simp]
+lemma sigmaInv_sigma (φ : Prenex L ξ 𝚷 s (n + 1)) : φ.sigma.sigmaInv = φ := by
   ext
-  simp only [sigma, sigmaInv]
-  rw [← TransitiveRewriting.comp_app]
-  simp
+  simp [sigma, sigmaInv, ← TransitiveRewriting.comp_app]
 
-@[simp] lemma sigma_sigmaInv (φ : StrictHierarchyFormula L ξ 𝚺 (s + 1) n) :
-    φ.sigmaInv.sigma = φ := by
+@[simp]
+lemma sigma_sigmaInv (φ : Prenex L ξ 𝚺 (s + 1) n) : φ.sigmaInv.sigma = φ := by
   ext
-  simp only [sigma, sigmaInv]
-  rw [← TransitiveRewriting.comp_app]
-  simp
+  simp [sigma, sigmaInv, ← TransitiveRewriting.comp_app]
 
-@[simp] lemma piInv_pi (φ : StrictHierarchyFormula L ξ 𝚺 s (n + 1)) : φ.pi.piInv = φ := by
+@[simp]
+lemma piInv_pi (φ : Prenex L ξ 𝚺 s (n + 1)) : φ.pi.piInv = φ := by
   ext
-  simp only [pi, piInv]
-  rw [← TransitiveRewriting.comp_app]
-  simp
+  simp [pi, piInv, ← TransitiveRewriting.comp_app]
 
-@[simp] lemma pi_piInv (φ : StrictHierarchyFormula L ξ 𝚷 (s + 1) n) : φ.piInv.pi = φ := by
+@[simp]
+lemma pi_piInv (φ : Prenex L ξ 𝚷 (s + 1) n) : φ.piInv.pi = φ := by
   ext
-  simp only [pi, piInv]
-  rw [← TransitiveRewriting.comp_app]
-  simp
+  simp [pi, piInv, ← TransitiveRewriting.comp_app]
 
-@[simp] lemma coe_neg (φ : StrictHierarchyFormula L ξ Γ s n) :
+@[simp]
+lemma coe_neg (φ : Prenex L ξ Γ s n) :
     (↑φ.neg : Semiformula L ξ n) = ∼(↑φ : Semiformula L ξ n) := by
   simp [val, neg]
 
-@[simp] lemma coe_rew (φ : StrictHierarchyFormula L ξ₁ Γ s n₁) (ω : Rew L ξ₁ n₁ ξ₂ n₂) :
+@[simp]
+lemma coe_rew (φ : Prenex L ξ₁ Γ s n₁) (ω : Rew L ξ₁ n₁ ξ₂ n₂) :
     (↑(φ.rew ω) : Semiformula L ξ₂ n₂) = ω ▹ (↑φ : Semiformula L ξ₁ n₁) := by
   simp [val, rew]
 
-end StrictHierarchyFormula
+end Prenex
 
 namespace Hierarchy
 
 variable {ξ : Type*} {Γ : Polarity} {s j n : ℕ}
 
 lemma quantItr {φ : Semiformula L ξ (n + s)}
-    (h : Hierarchy (Polarity.alt^[s] Γ) j φ) :
+    (h : Hierarchy (Γ.altItr s) j φ) :
     Hierarchy Γ (j + s) (Polarity.quantItr Γ s φ) := by
   induction s generalizing n j with
   | zero => simpa using h
   | succ s ih =>
-    rw [Function.iterate_succ_apply'] at h
+    rw [Polarity.altItr_succ] at h
     rw [Polarity.quantItr_succ, (show j + (s + 1) = (j + 1) + s by omega)]
-    rcases hΓ : Polarity.alt^[s] Γ with _ | _
+    rcases hΓ : Γ.altItr s with _ | _
     . apply ih
       rw [hΓ] at h ⊢
       exact h.sigma
@@ -146,20 +145,21 @@ lemma quantItr {φ : Semiformula L ξ (n + s)}
 
 end Hierarchy
 
-namespace StrictHierarchyFormula
+namespace Prenex
 
 variable {ξ : Type*} {Γ : Polarity} {s n : ℕ}
 
-lemma hierarchy (φ : StrictHierarchyFormula L ξ Γ s n) :
+lemma hierarchy (φ : Prenex L ξ Γ s n) :
     Hierarchy Γ s (↑φ : Semiformula L ξ n) := by
-  change Hierarchy Γ s (Polarity.quantItr Γ s φ.kernel)
-  simpa only [Nat.zero_add] using Hierarchy.quantItr (Γ := Γ) (j := 0) φ.kernel_deltaZero.of_zero
+  change Hierarchy Γ s (Polarity.quantItr Γ s φ.matrix)
+  simpa only [Nat.zero_add] using Hierarchy.quantItr (Γ := Γ) (j := 0) φ.matrix_Δ₀.of_zero
 
-@[simp] lemma deltaZero (φ : StrictHierarchyFormula L ξ Γ 0 n) :
+@[simp]
+lemma deltaZero (φ : Prenex L ξ Γ 0 n) :
     Hierarchy 𝚺 0 (↑φ : Semiformula L ξ n) := by
-  change Hierarchy 𝚺 0 (Polarity.quantItr Γ 0 φ.kernel)
-  exact φ.kernel_deltaZero
+  change Hierarchy 𝚺 0 (Polarity.quantItr Γ 0 φ.matrix)
+  exact φ.matrix_Δ₀
 
-end StrictHierarchyFormula
+end Prenex
 
 end LO.FirstOrder.Arithmetic

@@ -28,6 +28,16 @@ def alt : Polarity → Polarity
 
 @[simp] lemma alt_alt (Γ : Polarity) : Γ.alt.alt = Γ := by rcases Γ <;> simp
 
+abbrev altItr (Γ : Polarity) (k : ℕ) : Polarity := Polarity.alt^[k] Γ
+
+@[simp] lemma altItr_zero (Γ : Polarity) : Γ.altItr 0 = Γ := rfl
+
+lemma altItr_succ (Γ : Polarity) (k : ℕ) : Γ.altItr (k + 1) = (Γ.altItr k).alt :=
+  Function.iterate_succ_apply' _ _ _
+
+lemma altItr_succ' (Γ : Polarity) (k : ℕ) : Γ.altItr (k + 1) = Γ.alt.altItr k :=
+  Function.iterate_succ_apply _ _ _
+
 section symbol
 
 variable {α : Type*} [SigmaSymbol α] [PiSymbol α]
@@ -206,7 +216,7 @@ def quant : Polarity → α (n + 1) → α n
 
 def quantItr (Γ : Polarity) : (k : ℕ) → α (n + k) → α n
   | 0,     φ => φ
-  | k + 1, φ => quantItr Γ k ((Polarity.alt^[k] Γ).quant φ)
+  | k + 1, φ => quantItr Γ k ((Γ.altItr k).quant φ)
 
 @[simp]
 lemma quantItr_zero (φ : α n) : quantItr Γ 0 φ = φ := rfl
@@ -214,7 +224,7 @@ lemma quantItr_zero (φ : α n) : quantItr Γ 0 φ = φ := rfl
 @[simp] lemma quantItr_one (φ : α (n + 1)) : quantItr Γ 1 φ = Γ.quant φ := rfl
 
 lemma quantItr_succ {k} (φ : α (n + (k + 1))) :
-    quantItr Γ (k + 1) φ = quantItr Γ k ((Polarity.alt^[k] Γ).quant φ) := rfl
+    quantItr Γ (k + 1) φ = quantItr Γ k ((Γ.altItr k).quant φ) := rfl
 
 end Polarity
 
