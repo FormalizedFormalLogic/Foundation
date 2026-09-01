@@ -89,10 +89,10 @@ lemma funext_two {α : Type*} {f g : Fin (k + 2) → α}
     (hs : ∀ i : Fin k, f i.succ.succ = g i.succ.succ) : f = g := by
   funext i
   cases' i using Fin.cases with i
-  · exact h0
-  · cases' i using Fin.cases with i
-    · exact h1
-    · exact hs i
+  . exact h0
+  . cases' i using Fin.cases with i
+    . exact h1
+    . exact hs i
 
 
 

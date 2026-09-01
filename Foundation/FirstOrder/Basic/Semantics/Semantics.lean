@@ -357,14 +357,12 @@ lemma eval_bShift' (φ : Semiformula L ξ n) :
     Eval b f (φ ⇜ w) ↔ φ.Eval (Semiterm.val b f ∘ w) f := by
   simp [eval_rew, Function.comp_def]
 
--- Insertion of an unused fresh bound variable at position 1 does not affect evaluation.
 lemma eval_insert1 {n} (φ : Semiformula L ξ (n + 1)) (u w : M) (e : Fin n → M) :
     Eval (u :> w :> e) f (φ ⇜ (#0 :> (#·.succ.succ))) ↔ Eval (u :> e) f φ := by
   simp only [eval_substs]
   exact Iff.of_eq (congrArg (fun c => Eval c f φ)
     (funext fun i => by induction i using Fin.cases <;> simp))
 
--- Insertion of an unused fresh bound variable at position 2 does not affect evaluation.
 lemma eval_insert2 {n} (φ : Semiformula L ξ (n + 2)) (u x w : M) (e : Fin n → M) :
     Eval (u :> x :> w :> e) f (φ ⇜ (#0 :> #1 :> (#·.succ.succ.succ))) ↔ Eval (u :> x :> e) f φ := by
   simp only [eval_substs, Function.comp_def]

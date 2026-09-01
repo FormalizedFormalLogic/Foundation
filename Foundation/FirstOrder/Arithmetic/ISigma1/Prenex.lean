@@ -1,12 +1,12 @@
 module
 
-public import Foundation.FirstOrder.Arithmetic.StrictEquiv
+public import Foundation.FirstOrder.Arithmetic.Prenex
 
 /-!
 # Prenex normal form theorem over $\mathsf{I\Sigma_1}$
 
 Every `Hierarchy 𝚺 1` formula is `𝗜𝚺₁`-provably equivalent to a formula of the form `∃¹ θ`
-with `θ` in `Hierarchy 𝚺 0`.
+with `θ` in `Hierarchy 𝚺 0`, and dually for `Hierarchy 𝚷 1` and `∀¹ θ`.
 -/
 
 @[expose] public section
@@ -18,21 +18,21 @@ namespace LO.FirstOrder.Arithmetic.ISigma1
 
 variable {n : ℕ}
 
-lemma nonempty_strictEquiv {φ : ArithmeticSemisentence n} (h : Hierarchy 𝚺 1 φ) :
-    Nonempty (StrictEquiv 𝗜𝚺₁ 𝚺 1 φ) :=
-  Arithmetic.nonempty_strictEquiv h inferInstance
+lemma nonempty_prenexNormalForm {φ : ArithmeticSemisentence n} (h : Hierarchy 𝚺 1 φ) :
+    Nonempty (ArithmeticSemisentence.PrenexNormalForm 𝗜𝚺₁ 𝚺 1 φ) :=
+  Arithmetic.nonempty_prenexNormalForm h
 
-lemma exists_strictHierarchy_provable {φ : ArithmeticSemisentence n} (h : Hierarchy 𝚺 1 φ) :
+lemma exists_matrix_provable {φ : ArithmeticSemisentence n} (h : Hierarchy 𝚺 1 φ) :
     ∃ θ : ArithmeticSemisentence (n + 1), Hierarchy 𝚺 0 θ ∧ 𝗜𝚺₁ ⊢ ∀¹* (φ 🡘 ∃¹ θ) := by
-  have ⟨⟨ψ, ψ_hie, ψ_iff⟩⟩ := nonempty_strictEquiv h;
-  obtain ⟨θ, rfl, hθ⟩ := ψ_hie.sigma_succ_elim;
-  use θ;
-  and_intros;
-  . exact StrictHierarchy.zero_iff.mp hθ;
-  . assumption;
+  obtain ⟨φ'⟩ := nonempty_prenexNormalForm h;
+  exact ⟨↑φ'.sigmaInv, φ'.sigmaInv.deltaZero, φ'.provable_sigmaInv⟩
 
-lemma exists_strictHierarchy_provable_of_sentence {σ : ArithmeticSentence} (h : Hierarchy 𝚺 1 σ) :
+lemma exists_matrix_provable_pi {φ : ArithmeticSemisentence n} (h : Hierarchy 𝚷 1 φ) :
+    ∃ θ : ArithmeticSemisentence (n + 1), Hierarchy 𝚺 0 θ ∧ 𝗜𝚺₁ ⊢ ∀¹* (φ 🡘 ∀¹ θ) :=
+  Arithmetic.exists_matrix_provable _ h
+
+lemma exists_matrix_provable_of_sentence {σ : ArithmeticSentence} (h : Hierarchy 𝚺 1 σ) :
     ∃ θ : ArithmeticSemisentence 1, Hierarchy 𝚺 0 θ ∧ 𝗜𝚺₁ ⊢ σ 🡘 ∃¹ θ :=
-  exists_strictHierarchy_provable h
+  exists_matrix_provable h
 
 end LO.FirstOrder.Arithmetic.ISigma1
