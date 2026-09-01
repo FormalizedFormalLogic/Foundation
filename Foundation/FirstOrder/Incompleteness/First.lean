@@ -53,34 +53,23 @@ theorem exists_true_but_unprovable_sentence
   . exact ⟨δ, by assumption, hδ.1⟩
   . exact ⟨∼δ, by simpa, hδ.2⟩
 
-noncomputable instance (T : ArithmeticTheory) [T.«Σ₁»] [𝗥₀ ⪯ T] : 𝗥₀ ⪯ T.craig :=
+noncomputable instance (T : ArithmeticTheory) [T.RE] [𝗥₀ ⪯ T] : 𝗥₀ ⪯ T.craig :=
   WeakerThan.trans (𝓣 := T) inferInstance (Theory.craig.original_weakerThan (T := T))
 
-theorem incomplete_of_sigma1_definable (T : ArithmeticTheory) [T.«Σ₁»] [𝗥₀ ⪯ T]
-    [T.SoundOnHierarchy 𝚺 1] : Incomplete T := by
-  exact (Theory.craig_equiv (T := T)).symm.incomplete
+/-- Gödel's first incompleteness theorem for r.e. theories -/
+theorem incomplete_of_re (T : ArithmeticTheory) [T.RE] [𝗥₀ ⪯ T] [T.SoundOnHierarchy 𝚺 1] :
+    Incomplete T :=
+  (Theory.craig_equiv (T := T)).symm.incomplete
     (@incomplete T.craig inferInstance inferInstance
       (ArithmeticTheory.SoundOn.of_weakerThan _ T T.craig))
 
-theorem exists_true_but_unprovable_sentence_of_sigma1_definable
-    (T : ArithmeticTheory) [T.«Σ₁»] [𝗥₀ ⪯ T] [T.SoundOnHierarchy 𝚺 1] :
+theorem exists_true_but_unprovable_sentence_of_re
+    (T : ArithmeticTheory) [T.RE] [𝗥₀ ⪯ T] [T.SoundOnHierarchy 𝚺 1] :
     ∃ δ : ArithmeticSentence, ℕ↓[ℒₒᵣ] ⊧ δ ∧ T ⊬ δ := by
-  obtain ⟨δ, hδ⟩ := incomplete_def.mp (incomplete_of_sigma1_definable T);
-  by_cases h : ℕ↓[ℒₒᵣ] ⊧ δ
-  . use δ;
-    and_intros;
-    . exact h
-    . exact hδ.1
-  . use ∼δ;
-    and_intros;
-    . simpa
-    . exact hδ.2
-
-theorem incomplete_of_re (T : ArithmeticTheory) [T.RE] [𝗜𝚺₁ ⪯ T] [Consistent T] :
-    Incomplete T := incomplete_GR_of_sigma1_definable T
-
-theorem incomplete_of_re_of_sound (T : ArithmeticTheory) [T.RE] [𝗥₀ ⪯ T]
-    [T.SoundOnHierarchy 𝚺 1] : Incomplete T := incomplete_of_sigma1_definable T
+  obtain ⟨δ, hδ⟩ := incomplete_def.mp (incomplete_of_re T);
+  by_cases ℕ↓[ℒₒᵣ] ⊧ δ
+  . exact ⟨δ, by assumption, hδ.1⟩
+  . exact ⟨∼δ, by simpa, hδ.2⟩
 
 instance {T : ArithmeticTheory} [ℕ↓[ℒₒᵣ] ⊧* T] [T.Δ₁] [𝗥₀ ⪯ T] [T.SoundOnHierarchy 𝚺 1] : T ⪱ 𝗧𝗔 := by
   constructor;

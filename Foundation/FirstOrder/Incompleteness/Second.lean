@@ -19,7 +19,8 @@ variable (T : ArithmeticTheory) [T.Δ₁] [𝗜𝚺₁ ⪯ T]
 theorem consistent_unprovable [Consistent T] : T ⊬ T.consistent.val :=
   ProvabilityAbstraction.con_unprovable (𝔅 := T.standardProvability)
 
-theorem craig_consistent_unprovable_of_sigma1_definable (T : ArithmeticTheory) [T.«Σ₁»] [𝗜𝚺₁ ⪯ T]
+/-- Gödel's second incompleteness theorem for r.e. theories -/
+theorem craig_consistent_unprovable_of_re (T : ArithmeticTheory) [T.RE] [𝗜𝚺₁ ⪯ T]
     [Consistent T] : T ⊬ T.craig.consistent.val := by
   let craig_weakerThan : 𝗜𝚺₁ ⪯ T.craig :=
     WeakerThan.trans (𝓣 := T) inferInstance (Theory.craig.original_weakerThan (T := T))
