@@ -585,6 +585,17 @@ lemma succ_correct [𝗜𝚺 (s + 1) ⪯ T] {C : ClosureData s} (hC : C.Correct 
 
 end ClosureData
 
+def closureData : (s : ℕ) → ClosureData s
+  | 0 => .zero
+  | s + 1 => (closureData s).succ
+
+lemma closureData_correct [𝗜𝚺 s ⪯ T] : (closureData s).Correct T := by
+  rename_i h;
+  induction s generalizing h with
+  | zero => exact ClosureData.zero_correct T;
+  | succ s ih =>
+    have : 𝗜𝚺 s ⪯ T := ISigma_weakerThan_of_le_trans (by omega) h;
+    exact ClosureData.succ_correct ih;
 
 structure Closure (T : ArithmeticTheory) [𝗘𝗤 ℒₒᵣ ⪯ T] (s : ℕ) : Prop where
   ball : ∀ Γ {n} {φ : ArithmeticSemisentence (n + 1)} {t : ArithmeticSemiterm Empty (n + 1)},
