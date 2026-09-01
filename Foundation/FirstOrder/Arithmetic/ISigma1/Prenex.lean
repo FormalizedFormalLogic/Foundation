@@ -18,13 +18,13 @@ namespace LO.FirstOrder.Arithmetic.ISigma1
 
 variable {n : ℕ}
 
-lemma nonempty_prenexEquivOf {φ : ArithmeticSemisentence n} (h : Hierarchy 𝚺 1 φ) :
-    Nonempty (PrenexEquivOf 𝗜𝚺₁ 𝚺 1 _ φ) :=
-  Arithmetic.nonempty_prenexEquivOf h
+lemma nonempty_prenexNormalForm {φ : ArithmeticSemisentence n} (h : Hierarchy 𝚺 1 φ) :
+    Nonempty (ArithmeticSemisentence.PrenexNormalForm 𝗜𝚺₁ 𝚺 1 φ) :=
+  Arithmetic.nonempty_prenexNormalForm h
 
 lemma exists_strictHierarchy_provable {φ : ArithmeticSemisentence n} (h : Hierarchy 𝚺 1 φ) :
     ∃ θ : ArithmeticSemisentence (n + 1), Hierarchy 𝚺 0 θ ∧ 𝗜𝚺₁ ⊢ ∀¹* (φ 🡘 ∃¹ θ) := by
-  obtain ⟨φ'⟩ := nonempty_prenexEquivOf h;
+  obtain ⟨φ'⟩ := nonempty_prenexNormalForm h;
   exact ⟨↑φ'.sigmaInv, φ'.sigmaInv.deltaZero, φ'.provable_sigmaInv⟩
 
 lemma exists_strictHierarchy_provable_pi {φ : ArithmeticSemisentence n} (h : Hierarchy 𝚷 1 φ) :
