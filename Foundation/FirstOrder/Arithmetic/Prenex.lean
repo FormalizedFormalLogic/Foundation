@@ -255,10 +255,9 @@ def bexsSigma (C : ClosureData s) (u : ArithmeticSemiterm Empty n)
     (π : Prenex 𝚺 (s + 1) Empty (n + 1)) : Prenex 𝚺 (s + 1) Empty n :=
   (C.bexs (Rew.bShift u) (π.sigmaInv.rew (Rew.subst (#1 :> #0 :> (#·.succ.succ))))).sigma
 
-lemma bexsSigma_correct {C : ClosureData s} (hC : C.Correct T)
-    {φ : ArithmeticSemisentence (n + 1)} (u : ArithmeticSemiterm Empty n)
-    (π : Prenex 𝚺 (s + 1) Empty (n + 1)) (hπ : T ⊢ ∀¹* (φ 🡘 π.val)) :
-    T ⊢ ∀¹* (φ.bexsLT u 🡘 (C.bexsSigma u π).val) := by
+lemma bexsSigma_correct {C : ClosureData s} (hC : C.Correct T) (u : ArithmeticSemiterm Empty n)
+  (π : Prenex 𝚺 (s + 1) Empty (n + 1)) (hπ : T ⊢ ∀¹* (φ 🡘 π.val)) :
+  T ⊢ ∀¹* (φ.bexsLT u 🡘 (C.bexsSigma u π).val) := by
   set φ₁' := π.sigmaInv;
   set φ₁ : ArithmeticSemisentence (n + 2) := ↑φ₁';
   set v : Fin (n + 2) → ArithmeticSemiterm Empty (n + 2) :=
@@ -399,10 +398,10 @@ lemma ballSigma_correct [𝗜𝚺 (s + 1) ⪯ T] {C : ClosureData s} (hC : C.Cor
 def orSigma (C : ClosureData s) (π ρ : Prenex 𝚺 (s + 1) Empty n) : Prenex 𝚺 (s + 1) Empty n :=
   (C.or π.sigmaInv ρ.sigmaInv).sigma
 
-lemma orSigma_correct {C : ClosureData s} (hC : C.Correct T) {φ ψ : ArithmeticSemisentence n}
-    (π ρ : Prenex 𝚺 (s + 1) Empty n)
-    (hπ : T ⊢ ∀¹* (φ 🡘 π.val)) (hρ : T ⊢ ∀¹* (ψ 🡘 ρ.val)) :
-    T ⊢ ∀¹* ((φ ⋎ ψ) 🡘 (C.orSigma π ρ).val) := by
+lemma orSigma_correct {C : ClosureData s} (hC : C.Correct T)
+  (π ρ : Prenex 𝚺 (s + 1) Empty n)
+  (hπ : T ⊢ ∀¹* (φ 🡘 π.val)) (hρ : T ⊢ ∀¹* (ψ 🡘 ρ.val)) :
+  T ⊢ ∀¹* ((φ ⋎ ψ) 🡘 (C.orSigma π ρ).val) := by
   set φ₁' := π.sigmaInv;
   set ψ₁' := ρ.sigmaInv;
   set φ₁ : ArithmeticSemisentence (n + 1) := ↑φ₁';
@@ -410,7 +409,7 @@ lemma orSigma_correct {C : ClosureData s} (hC : C.Correct T) {φ ψ : Arithmetic
   have hχ := hC.or φ₁' ψ₁' provable_iff_refl provable_iff_refl;
   have hχiff := models_iff_of_provable_iff hχ;
   show T ⊢ ∀¹* ((φ ⋎ ψ) 🡘 (C.or φ₁' ψ₁').sigma.val);
-  apply provable_iff_of_models_iff
+  apply provable_iff_of_models_iff;
   intro V _ _ e;
   . rw [val_sigma]
     have hφiff' : V ⊧/e φ ↔ ∃ x, V ⊧/(x :> e) φ₁ := models_iff_sigmaInv hπ V e;
@@ -436,11 +435,9 @@ def andSigma (C : ClosureData s) (π ρ : Prenex 𝚺 (s + 1) Empty n) : Prenex 
          (C.bexs ‘#0 + 1’ (ρ.sigmaInv.rew (Rew.subst (#0 :> (#·.succ.succ)))))).sigma
 
 lemma andSigma_correct [𝗜𝚺 (s + 1) ⪯ T] {C : ClosureData s} (hC : C.Correct T)
-    {φ ψ : ArithmeticSemisentence n} (π ρ : Prenex 𝚺 (s + 1) Empty n)
-    (hπ : T ⊢ ∀¹* (φ 🡘 π.val)) (hρ : T ⊢ ∀¹* (ψ 🡘 ρ.val)) :
-    T ⊢ ∀¹* ((φ ⋏ ψ) 🡘 (C.andSigma π ρ).val) := by
-  have : 𝗜𝚺₀ ⪯ T := Entailment.WeakerThan.trans
-    (ISigma_weakerThan_of_le (by omega)) ‹𝗜𝚺(s + 1) ⪯ T›;
+  (π ρ : Prenex 𝚺 (s + 1) Empty n)  (hπ : T ⊢ ∀¹* (φ 🡘 π.val)) (hρ : T ⊢ ∀¹* (ψ 🡘 ρ.val)) :
+  T ⊢ ∀¹* ((φ ⋏ ψ) 🡘 (C.andSigma π ρ).val) := by
+  have : 𝗜𝚺₀ ⪯ T := Entailment.WeakerThan.trans (ISigma_weakerThan_of_le (by omega)) ‹𝗜𝚺(s + 1) ⪯ T›;
   set φ₁' := π.sigmaInv;
   set ψ₁' := ρ.sigmaInv;
   set φ₁ : ArithmeticSemisentence (n + 1) := ↑φ₁';
@@ -505,19 +502,19 @@ lemma andSigma_correct [𝗜𝚺 (s + 1) ⪯ T] {C : ClosureData s} (hC : C.Corr
       exact ⟨⟨x, hx⟩, ⟨y, hy⟩⟩;
 
 def succ (C : ClosureData s) : ClosureData (s + 1) where
-  ball {Γ} {_n} u π :=
+  ball {Γ} _ u π :=
     match Γ with
     | 𝚺 => C.ballSigma u π
     | 𝚷 => (C.bexsSigma u π.neg).neg
-  bexs {Γ} {_n} u π :=
+  bexs {Γ} _ u π :=
     match Γ with
     | 𝚺 => C.bexsSigma u π
     | 𝚷 => (C.ballSigma u π.neg).neg
-  and {Γ} {_n} π ρ :=
+  and {Γ} _ π ρ :=
     match Γ with
     | 𝚺 => C.andSigma π ρ
     | 𝚷 => (C.orSigma π.neg ρ.neg).neg
-  or {Γ} {_n} π ρ :=
+  or {Γ} _ π ρ :=
     match Γ with
     | 𝚺 => C.orSigma π ρ
     | 𝚷 => (C.andSigma π.neg ρ.neg).neg
@@ -588,18 +585,21 @@ section UnboundedQuantifier
 
 variable {φ : ArithmeticSemisentence (n + 1)}
 
-lemma exs [𝗜𝚺 s ⪯ T]
-    (hφ : ∃ π : Prenex 𝚺 (s + 1) Empty (n + 1), T ⊢ ∀¹* (φ 🡘 π.val)) :
-  ∃ π : Prenex 𝚺 (s + 1) Empty n, T ⊢ ∀¹* ((∃¹ φ) 🡘 π.val) := by
+def exs' (π : Prenex 𝚺 (s + 1) Empty (n + 1)) : Prenex 𝚺 (s + 1) Empty n :=
+  letI φ₁' := π.sigmaInv;
+  letI φ₂' := φ₁'.rew (Rew.subst (#0 :> #1 :> (#·.succ.succ.succ)));
+  letI α   := (closureData s).bexs (‘#1 + 1’) φ₂';
+  letI β   := (closureData s).bexs (‘#0 + 1’) α;
+  β.sigma
+
+lemma exs'_correct [𝗜𝚺 s ⪯ T] {π : Prenex 𝚺 (s + 1) Empty (n + 1)} (hπ : T ⊢ ∀¹* (φ 🡘 π.val))
+  : T ⊢ ∀¹* ((∃¹ φ) 🡘 (exs' π).val) := by
   have : 𝗜𝚺₀ ⪯ T :=
     Entailment.WeakerThan.trans (ISigma_weakerThan_of_le (Nat.zero_le s)) inferInstance;
-  obtain ⟨π, hπ⟩ := hφ
   set φ₁' := π.sigmaInv;
   set φ₁ : ArithmeticSemisentence (n + 2) := ↑φ₁';
-  let φ₂' :=
-    φ₁'.rew (Rew.subst (#0 :> #1 :> (#·.succ.succ.succ)));
-  let α := (closureData s).bexs
-    (‘#1 + 1’ : ArithmeticSemiterm Empty (n + 2)) φ₂';
+  let φ₂' := φ₁'.rew (Rew.subst (#0 :> #1 :> (#·.succ.succ.succ)));
+  let α := (closureData s).bexs (‘#1 + 1’ : ArithmeticSemiterm Empty (n + 2)) φ₂';
   have hα : T ⊢ ∀¹* ((φ₁ ⇜ (#0 :> #1 :> (#·.succ.succ.succ)) : ArithmeticSemisentence (n + 3)).bexsLT
       (‘#1 + 1’ : ArithmeticSemiterm Empty (n + 2)) 🡘 α.val) :=
     closureData_correct.bexs (φ := φ₁ ⇜ (#0 :> #1 :> (#·.succ.succ.succ)))
@@ -613,7 +613,7 @@ lemma exs [𝗜𝚺 s ⪯ T]
     closureData_correct.bexs (‘#0 + 1’ : ArithmeticSemiterm Empty (n + 1)) α provable_iff_refl;
   have hαiff := models_iff_of_provable_iff hα;
   have hβiff := models_iff_of_provable_iff hβ;
-  use β.sigma
+  unfold exs';
   apply provable_iff_of_models_iff
   intro V _ _ e;
   . change V ⊧/e (∃¹ φ) ↔ V ⊧/e β.sigma.val;
@@ -639,24 +639,24 @@ lemma exs [𝗜𝚺 s ⪯ T]
     . rintro ⟨z, y, -, x, -, hx⟩;
       exact ⟨y, x, hx⟩;
 
-lemma all [𝗜𝚺 s ⪯ T]
-    (hφ : ∃ π : Prenex 𝚷 (s + 1) Empty (n + 1), T ⊢ ∀¹* (φ 🡘 π.val)) :
-  ∃ π : Prenex 𝚷 (s + 1) Empty n, T ⊢ ∀¹* ((∀¹ φ) 🡘 π.val) := by
-  obtain ⟨π, hπ⟩ := hφ
-  obtain ⟨χ, hχ⟩ := exs ⟨π.neg, provable_iff_neg hπ⟩
-  exact ⟨χ.neg, by simpa using provable_iff_neg hχ⟩
+
+def all' (π : Prenex 𝚷 (s + 1) Empty (n + 1)) : Prenex 𝚷 (s + 1) Empty n := (exs' π.neg).neg
+
+lemma all'_correct [𝗜𝚺 s ⪯ T] {π : Prenex 𝚷 (s + 1) Empty (n + 1)} (hπ : T ⊢ ∀¹* (φ 🡘 π.val))
+  : T ⊢ ∀¹* ((∀¹ φ) 🡘 (all' π).val) := by
+  unfold all';
+  simpa using provable_iff_neg $ exs'_correct (provable_iff_neg hπ);
+
 
 end UnboundedQuantifier
 
 end Prenex
 
-open Prenex (ofΔ₀ exs all closureData_correct)
+open Prenex (ofΔ₀ closureData_correct)
 
-variable {T : ArithmeticTheory} [𝗘𝗤 ℒₒᵣ ⪯ T] {Γ : Polarity} {s n : ℕ}
-  {φ : ArithmeticSemisentence n}
+variable {T : ArithmeticTheory} [𝗘𝗤 ℒₒᵣ ⪯ T] {Γ : Polarity} {s n : ℕ} {φ : ArithmeticSemisentence n}
 
-theorem hasPrenex (h : Hierarchy Γ s φ) [𝗜𝚺 s ⪯ T] :
-    ∃ π : Prenex Γ s Empty n, T ⊢ ∀¹* (φ 🡘 π.val) := by
+theorem hasPrenex (h : Hierarchy Γ s φ) [𝗜𝚺 s ⪯ T] : ∃ π : Prenex Γ s Empty n, T ⊢ ∀¹* (φ 🡘 π.val) := by
   rename_i hT;
   induction h generalizing hT with
   | verum Γ s n =>
@@ -689,10 +689,14 @@ theorem hasPrenex (h : Hierarchy Γ s φ) [𝗜𝚺 s ⪯ T] :
     exact ⟨_, closureData_correct.bexs u π hπ⟩;
   | @exs s n φ _ ih =>
     have : 𝗜𝚺 s ⪯ T := ISigma_weakerThan_of_le_trans (by omega) hT;
-    exact exs ih;
+    obtain ⟨π, hπ⟩ := ih;
+    use π.exs';
+    exact Prenex.exs'_correct hπ;
   | @all s n φ _ ih =>
     have : 𝗜𝚺 s ⪯ T := ISigma_weakerThan_of_le_trans (by omega) hT;
-    exact all ih;
+    obtain ⟨π, hπ⟩ := ih;
+    use π.all';
+    exact Prenex.all'_correct hπ;
   | @sigma s n φ hp ih =>
     rcases s with _ | s;
     . let φ₀ : 𝚺₀.Semisentence (n + 1) := .mkSigma _ (Hierarchy.zero_iff.mp hp)
@@ -712,13 +716,13 @@ theorem hasPrenex (h : Hierarchy Γ s φ) [𝗜𝚺 s ⪯ T] :
   | @dummy_sigma s n φ hp ih =>
     have : 𝗜𝚺 s ⪯ T := ISigma_weakerThan_of_le_trans (by omega) hT;
     have : 𝗜𝚺 (s + 1) ⪯ T := ISigma_weakerThan_of_le_trans (by omega) hT;
-    obtain ⟨ψ, hψ⟩ := all ih
-    exact ⟨ψ.altUp, Prenex.provable_iff_altUp hψ⟩
+    obtain ⟨π, hπ⟩ := ih
+    exact ⟨π.all'.altUp, Prenex.provable_iff_altUp (Prenex.all'_correct hπ)⟩
   | @dummy_pi s n φ hp ih =>
     have : 𝗜𝚺 s ⪯ T := ISigma_weakerThan_of_le_trans (by omega) hT;
     have : 𝗜𝚺 (s + 1) ⪯ T := ISigma_weakerThan_of_le_trans (by omega) hT;
-    obtain ⟨ψ, hψ⟩ := exs ih
-    exact ⟨ψ.altUp, Prenex.provable_iff_altUp hψ⟩
+    obtain ⟨π, hπ⟩ := ih
+    exact ⟨π.exs'.altUp, Prenex.provable_iff_altUp (Prenex.exs'_correct hπ)⟩
 
 variable (T : ArithmeticTheory) {Γ : Polarity} {s n : ℕ} {φ : ArithmeticSemisentence n} [𝗜𝚺 s ⪯ T]
 
