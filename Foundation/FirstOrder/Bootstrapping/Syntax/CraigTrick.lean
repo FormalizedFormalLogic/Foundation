@@ -22,14 +22,14 @@ section
 variable (T : Theory L) [T.«Σ₁»]
 
 noncomputable def «Σ₁witness» : 𝚺₀.Semisentence 2 :=
-  let h := ISigma1.exists_delta0_witness_provable T.«Σ₁ch».sigma_prop;
+  let h := ISigma1.exists_matrix_provable T.«Σ₁ch».sigma_prop;
   .mkSigma h.choose h.choose_spec.1
 
 lemma «Σ₁witness_spec» (V : Type) [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] (e : Fin 1 → V) :
     V ⊧/e T.«Σ₁ch».val ↔ ∃ w, V ⊧/(w :> e) T.«Σ₁witness».val := by
   simpa [«Σ₁witness»] using
     (models_iff_of_provable_iff
-      (ISigma1.exists_delta0_witness_provable T.«Σ₁ch».sigma_prop).choose_spec.2 V e).trans
+      (ISigma1.exists_matrix_provable T.«Σ₁ch».sigma_prop).choose_spec.2 V e).trans
       Semiformula.eval_ex
 
 def craig : Theory L :=
