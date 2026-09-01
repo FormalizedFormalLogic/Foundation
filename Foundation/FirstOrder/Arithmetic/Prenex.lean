@@ -302,6 +302,100 @@ lemma bexsSigma_correct {C : ClosureData s} (hC : C.Correct T)
       hswap, hφiff];
     grind;
 
+def ballSigma (C : ClosureData s) (u : ArithmeticSemiterm Empty n)
+    (π : Prenex 𝚺 (s + 1) Empty (n + 1)) : Prenex 𝚺 (s + 1) Empty n :=
+  (C.ball (Rew.bShift u)
+    (C.bexs ‘#1 + 1’ (π.sigmaInv.rew (Rew.subst (#0 :> #1 :> (#·.succ.succ.succ)))))).sigma
+
+lemma ballSigma_correct [𝗜𝚺 (s + 1) ⪯ T] {C : ClosureData s} (hC : C.Correct T)
+    {φ : ArithmeticSemisentence (n + 1)} (u : ArithmeticSemiterm Empty n)
+    (π : Prenex 𝚺 (s + 1) Empty (n + 1)) (hπ : T ⊢ ∀¹* (φ 🡘 π.val)) :
+    T ⊢ ∀¹* (φ.ballLT u 🡘 (C.ballSigma u π).val) := by
+  set φ₁' := π.sigmaInv;
+  set φ₁ : ArithmeticSemisentence (n + 2) := ↑φ₁';
+  let φ₂' := φ₁'.rew (Rew.subst (#0 :> #1 :> (#·.succ.succ.succ)));
+  have hα := hC.bexs (φ := φ₁ ⇜ (#0 :> #1 :> (#·.succ.succ.succ)))
+    (‘#1 + 1’ : ArithmeticSemiterm Empty (n + 2)) φ₂'
+    (by simpa [φ₂', φ₁] using
+      (provable_iff_rew (T := T) (by grind) (Rew.subst (#0 :> #1 :> (#·.succ.succ.succ)))));
+  have hαiff := models_iff_of_provable_iff hα;
+  have hδ := hC.ball (Rew.bShift u) (C.bexs (‘#1 + 1’ : ArithmeticSemiterm Empty (n + 2)) φ₂') hα;
+  have hδiff := models_iff_of_provable_iff hδ;
+  show T ⊢ ∀¹* (φ.ballLT u 🡘
+    (C.ball (Rew.bShift u) (C.bexs (‘#1 + 1’ : ArithmeticSemiterm Empty (n + 2)) φ₂')).sigma.val);
+  apply provable_iff_of_models_iff
+  intro V _ _ e;
+  . rw [val_sigma]
+    have : V↓[ℒₒᵣ] ⊧* 𝗜𝚺 (s + 1) := models_of_subtheory (T := 𝗜𝚺 (s + 1)) (U := T) inferInstance;
+    have : V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := mod_paMinus_of_ISigma (n := s + 1);
+    have hαeval : ∀ x w : V,
+        V ⊧/(x :> w :> e) ((C.bexs (‘#1 + 1’ : ArithmeticSemiterm Empty (n + 2)) φ₂').val :
+          ArithmeticSemisentence (n + 2)) ↔ ∃ y ≤ w, V ⊧/(y :> x :> e) φ₁ := by
+      intro x w;
+      rw [← hαiff V (x :> w :> e)];
+      simp [Semiformula.eval_insert2, Arithmetic.lt_succ_iff_le, -Semiformula.eval_substs];
+    have hδeval : ∀ w : V,
+        V ⊧/(w :> e) ((C.ball (Rew.bShift u)
+          (C.bexs (‘#1 + 1’ : ArithmeticSemiterm Empty (n + 2)) φ₂')).val :
+          ArithmeticSemisentence (n + 1)) ↔ ∀ x < u.valb e, ∃ y ≤ w, V ⊧/(y :> x :> e) φ₁ := by
+      intro w;
+      rw [← hδiff V (w :> e)];
+      simp only [Semiformula.eval_ballLT, Semiterm.val_bShift, Nat.succ_eq_add_one,
+        Semiformula.eval_bexsLT, Semiterm.val_operator, Matrix.comp₂, Nat.reduceAdd,
+        Semiterm.val_bvar, Matrix.cons_val_one, Matrix.cons_val_zero, Matrix.comp₀,
+        Structure.numeral_eq_numeral, ORingStructure.one_eq_one, Structure.Add.add,
+        Semiformula.eval_substs]
+      constructor
+      . intro h x hx
+        obtain ⟨y, hy, hxy⟩ := h x hx
+        use y
+        constructor
+        . simpa [Arithmetic.lt_succ_iff_le] using hy
+        . have hv :
+              Semiterm.val (L := ℒₒᵣ) (M := V) (y :> x :> w :> e) Empty.elim ∘
+                  (#0 :> #1 :> (#·.succ.succ.succ)) =
+                (y :> x :> e) := by
+            funext i
+            cases i using Fin.cases with
+            | zero => simp
+            | succ i =>
+              cases i using Fin.cases with
+              | zero => simp
+              | succ i => simp
+          rw [hv] at hxy
+          simpa [Semiformula.eval_insert2, -Semiformula.eval_substs] using hxy
+      . intro h x hx
+        obtain ⟨y, hy, hxy⟩ := h x hx
+        use y
+        constructor
+        . simpa [Arithmetic.lt_succ_iff_le] using hy
+        . have hv :
+              Semiterm.val (L := ℒₒᵣ) (M := V) (y :> x :> w :> e) Empty.elim ∘
+                  (#0 :> #1 :> (#·.succ.succ.succ)) =
+                (y :> x :> e) := by
+            funext i
+            cases i using Fin.cases with
+            | zero => simp
+            | succ i =>
+              cases i using Fin.cases with
+              | zero => simp
+              | succ i => simp
+          rw [hv]
+          simpa [Semiformula.eval_insert2, -Semiformula.eval_substs] using hxy;
+    have hφeval : ∀ x : V, V ⊧/(x :> e) φ ↔ ∃ y, V ⊧/(y :> x :> e) φ₁ := fun x =>
+      models_iff_sigmaInv hπ V (x :> e);
+    show V ⊧/e (φ.ballLT u) ↔
+      V ⊧/e (∃¹ (C.ball (Rew.bShift u)
+        (C.bexs (‘#1 + 1’ : ArithmeticSemiterm Empty (n + 2)) φ₂')).val);
+    simp only [Semiformula.eval_ballLT, Semiformula.eval_ex, hδeval, hφeval];
+    constructor;
+    . intro h;
+      have hθ : Hierarchy 𝚺 (s + 1) φ₁ := φ₁'.val_hierarchy.accum 𝚺;
+      exact sigma_exists_bound_witness hθ e (u.valb e) h;
+    . rintro ⟨w, hw⟩ x hx;
+      obtain ⟨y, -, hy⟩ := hw x hx;
+      exact ⟨y, hy⟩;
+
 end ClosureData
 
 
