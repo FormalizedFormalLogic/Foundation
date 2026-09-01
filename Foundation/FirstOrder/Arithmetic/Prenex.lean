@@ -33,11 +33,11 @@ def val {φ : ArithmeticSemisentence n} (φ' : φ.PrenexNormalForm T Γ s) : Ari
 
 instance {φ : ArithmeticSemisentence n} : CoeTC (φ.PrenexNormalForm T Γ s) (ArithmeticSemisentence n) := ⟨val⟩
 
-lemma iff_models {φ : ArithmeticSemisentence n} (φ' : φ.PrenexNormalForm T Γ s) (V : Type*) [ORingStructure V] [V↓[ℒₒᵣ] ⊧* T] (e : Fin n → V) :
+lemma models_iff {φ : ArithmeticSemisentence n} (φ' : φ.PrenexNormalForm T Γ s) (V : Type*) [ORingStructure V] [V↓[ℒₒᵣ] ⊧* T] (e : Fin n → V) :
   V ⊧/e φ ↔ V ⊧/e φ'.val :=
   Arithmetic.models_iff_of_provable_iff φ'.provable V e
 
-def refl {φ : ArithmeticSemisentence n} (φ' : φ.PrenexNormalForm T Γ s) : φ'.val.PrenexNormalForm T Γ s :=
+def ofVal {φ : ArithmeticSemisentence n} (φ' : φ.PrenexNormalForm T Γ s) : φ'.val.PrenexNormalForm T Γ s :=
   ⟨φ'.matrix, φ'.matrix_Δ₀, provable_iff_of_models_iff fun _ _ _ _ ↦ Iff.rfl⟩
 
 def ofEq {φ ψ : ArithmeticSemisentence n} (h : φ = ψ) (φ' : φ.PrenexNormalForm T Γ s) : ψ.PrenexNormalForm T Γ s := h ▸ φ'
@@ -45,7 +45,7 @@ def ofEq {φ ψ : ArithmeticSemisentence n} (h : φ = ψ) (φ' : φ.PrenexNormal
 def ofModelIff {φ ψ : ArithmeticSemisentence n} (φ' : φ.PrenexNormalForm T Γ s)
   (hiff : ∀ (V : Type) [ORingStructure V] [V↓[ℒₒᵣ] ⊧* T] (e : Fin n → V), V ⊧/e ψ ↔ V ⊧/e φ) :
   ψ.PrenexNormalForm T Γ s :=
-  ⟨φ'.matrix, φ'.matrix_Δ₀, provable_iff_of_models_iff fun V _ _ e ↦ (hiff V e).trans (φ'.iff_models V e)⟩
+  ⟨φ'.matrix, φ'.matrix_Δ₀, provable_iff_of_models_iff fun V _ _ e ↦ (hiff V e).trans (φ'.models_iff V e)⟩
 
 def neg {φ : ArithmeticSemisentence n} (φ' : φ.PrenexNormalForm T Γ s) : PrenexNormalForm T Γ.alt s (∼φ) := ⟨
   (∼φ'.matrix),
@@ -53,8 +53,8 @@ def neg {φ : ArithmeticSemisentence n} (φ' : φ.PrenexNormalForm T Γ s) : Pre
   by
     apply provable_iff_of_models_iff;
     intro V _ _ e;
-    simpa [val, ← Semiformula.neg_quantItr] using
-      not_congr (φ'.iff_models V e)
+    simpa [val, ← Semiformula.neg_toPrenex] using
+      not_congr (φ'.models_iff V e)
 ⟩
 
 def rew {φ : ArithmeticSemisentence n₁} (φ' : φ.PrenexNormalForm T Γ s) (ω : Rew ℒₒᵣ Empty n₁ Empty n₂)
@@ -79,7 +79,7 @@ def sigma {φ : ArithmeticSemisentence (n + 1)} (φ' : φ.PrenexNormalForm T �
     apply provable_iff_of_models_iff;
     intro V _ _ e;
     simpa [val, Rewriting.quantItr_succ_smul_castLE] using
-      exists_congr (fun x ↦ φ'.iff_models V (x :> e))
+      exists_congr (fun x ↦ φ'.models_iff V (x :> e))
 ⟩
 
 @[simp]
@@ -96,7 +96,7 @@ def pi {φ : ArithmeticSemisentence (n + 1)} (φ' : φ.PrenexNormalForm T 𝚺 s
     apply provable_iff_of_models_iff;
     intro V _ _ e;
     simpa [val, Rewriting.quantItr_succ_smul_castLE] using
-      forall_congr' (fun x ↦ φ'.iff_models V (x :> e))
+      forall_congr' (fun x ↦ φ'.models_iff V (x :> e))
 ⟩
 
 @[simp]
@@ -148,7 +148,7 @@ lemma hierarchy {φ : ArithmeticSemisentence n} (φ' : φ.PrenexNormalForm T Γ 
     Hierarchy Γ s φ'.val := by
   change Hierarchy Γ s (φ'.matrix.toPrenex Γ s)
   simpa only [Nat.zero_add] using
-    Hierarchy.quantItr (Γ := Γ) (j := 0) φ'.matrix_Δ₀.of_zero
+    Hierarchy.toPrenex (Γ := Γ) (j := 0) φ'.matrix_Δ₀.of_zero
 
 omit [𝗘𝗤 ℒₒᵣ ⪯ T] in
 @[simp] lemma deltaZero {φ : ArithmeticSemisentence n} (φ' : φ.PrenexNormalForm T Γ 0) :
@@ -159,9 +159,9 @@ def altUp {φ : ArithmeticSemisentence n} (φ' : φ.PrenexNormalForm T Γ s) :
   rcases Γ with _ | _;
   . exact (φ'.rew Rew.bShift).pi.ofModelIff fun V _ _ e ↦ by
         have : Nonempty V := ⟨0⟩;
-        simp [φ'.iff_models V e]
+        simp [φ'.models_iff V e]
   . exact (φ'.rew Rew.bShift).sigma.ofModelIff fun V _ _ e ↦ by
-      simp [φ'.iff_models V e]
+      simp [φ'.models_iff V e]
 
 def ofDeltaZero {φ : ArithmeticSemisentence n} (φ_Δ₀ : Hierarchy 𝚺 0 φ) :
     φ.PrenexNormalForm T Γ s := by
@@ -179,13 +179,13 @@ lemma provable_piInv {φ : ArithmeticSemisentence n} (φ' : φ.PrenexNormalForm 
   rw [← coe_piInv]
   exact φ'.provable
 
-lemma iff_models_sigmaInv {φ : ArithmeticSemisentence n}
+lemma models_iff_sigmaInv {φ : ArithmeticSemisentence n}
     (φ' : φ.PrenexNormalForm T 𝚺 (s + 1)) (V : Type*)
     [ORingStructure V] [V↓[ℒₒᵣ] ⊧* T] (e : Fin n → V) :
     V ⊧/e φ ↔ ∃ x, V ⊧/(x :> e) φ'.sigmaInv.val :=
   (models_iff_of_provable_iff φ'.provable_sigmaInv V e).trans Semiformula.eval_ex
 
-lemma iff_models_piInv {φ : ArithmeticSemisentence n}
+lemma models_iff_piInv {φ : ArithmeticSemisentence n}
     (φ' : φ.PrenexNormalForm T 𝚷 (s + 1)) (V : Type*)
     [ORingStructure V] [V↓[ℒₒᵣ] ⊧* T] (e : Fin n → V) :
     V ⊧/e φ ↔ ∀ x, V ⊧/(x :> e) φ'.piInv.val := by
@@ -213,25 +213,25 @@ lemma closure_zero : Closure T 0 where
     exact ⟨_, Hierarchy.ball ht φ'.deltaZero,
       provable_iff_of_models_iff fun V _ _ e ↦ by
         simpa [Semiformula.eval_ball] using
-          forall_congr' (fun x ↦ imp_congr Iff.rfl (φ'.iff_models V (x :> e)))⟩;
+          forall_congr' (fun x ↦ imp_congr Iff.rfl (φ'.models_iff V (x :> e)))⟩;
   bexs := by
     intro Γ n φ t ht φ';
     exact ⟨_, Hierarchy.bexs ht φ'.deltaZero,
       provable_iff_of_models_iff fun V _ _ e ↦ by
         simpa [Semiformula.eval_bexs] using
-          exists_congr (fun x ↦ and_congr Iff.rfl (φ'.iff_models V (x :> e)))⟩;
+          exists_congr (fun x ↦ and_congr Iff.rfl (φ'.models_iff V (x :> e)))⟩;
   and := by
     intro Γ n φ ψ φ' ψ';
     exact ⟨_,
       Hierarchy.and φ'.deltaZero ψ'.deltaZero,
       provable_iff_of_models_iff fun V _ _ e ↦ by
-        simp [φ'.iff_models V e, ψ'.iff_models V e]
+        simp [φ'.models_iff V e, ψ'.models_iff V e]
     ⟩;
   or := by
     intro Γ n φ ψ φ' ψ';
     exact ⟨_, Hierarchy.or φ'.deltaZero ψ'.deltaZero,
       provable_iff_of_models_iff fun V _ _ e ↦ by
-        simp [φ'.iff_models V e, ψ'.iff_models V e]⟩;
+        simp [φ'.models_iff V e, ψ'.models_iff V e]⟩;
 
 lemma bexs_sigma_step {n} {φ : ArithmeticSemisentence (n + 1)}
     {t : ArithmeticSemiterm Empty (n + 1)} (ih : Closure T s) (ht : t.Positive)
@@ -245,8 +245,8 @@ lemma bexs_sigma_step {n} {φ : ArithmeticSemisentence (n + 1)}
   set φ₂ : ArithmeticSemisentence (n + 2) := Rew.subst v ▹ φ₁;
   let φ₂' := φ₁'.rew (Rew.subst v);
   obtain ⟨χ'⟩ := ih.bexs 𝚷 (φ := φ₂) (t := Rew.bShift (Rew.bShift u)) (by simp)
-    ((refl φ₂').ofEq (by simp [φ₂', φ₂, φ₁]));
-  have hχiff := χ'.iff_models;
+    (φ₂'.ofVal.ofEq (by simp [φ₂', φ₂, φ₁]));
+  have hχiff := χ'.models_iff;
   have hχiff' : ∀ (V : Type) [ORingStructure V] [V↓[ℒₒᵣ] ⊧* T] (e : Fin (n + 1) → V),
       V ⊧/e (φ₂.bexsLT (Rew.bShift u)) ↔
         V ⊧/e (↑χ' : ArithmeticSemisentence (n + 1)) :=
@@ -275,7 +275,7 @@ lemma bexs_sigma_step {n} {φ : ArithmeticSemisentence (n + 1)}
         funext i; exact i.elim;
       rw [hA, hB];
     have hφiff : ∀ b : V, V ⊧/(b :> e) φ ↔ ∃ a, V ⊧/(a :> b :> e) φ₁ := fun b =>
-      φ'.iff_models_sigmaInv V (b :> e);
+      φ'.models_iff_sigmaInv V (b :> e);
     show V ⊧/e (φ.bexsLT u) ↔
       V ⊧/e (∃¹ (↑χ' : ArithmeticSemisentence (n + 1)));
     simp only [Semiformula.eval_bexsLT, Semiformula.eval_ex, ← hχiff', Semiterm.val_bShift,
@@ -293,10 +293,10 @@ lemma ball_sigma_step {n} {φ : ArithmeticSemisentence (n + 1)}
     φ₁'.rew (Rew.subst (#0 :> #1 :> (#·.succ.succ.succ)));
   obtain ⟨α'⟩ := ih.bexs 𝚷 (φ := φ₁ ⇜ (#0 :> #1 :> (#·.succ.succ.succ)))
     (t := Rew.bShift (‘#1 + 1’ : ArithmeticSemiterm Empty (n + 2)))
-    (Rew.bShift_positive _) ((refl φ₂').ofEq (by simp [φ₂', φ₁]));
-  have hαiff := α'.iff_models;
-  obtain ⟨δ'⟩ := ih.ball 𝚷 (t := Rew.bShift (Rew.bShift u)) (by simp) (refl α');
-  have hδiff := δ'.iff_models;
+    (Rew.bShift_positive _) (φ₂'.ofVal.ofEq (by simp [φ₂', φ₁]));
+  have hαiff := α'.models_iff;
+  obtain ⟨δ'⟩ := ih.ball 𝚷 (t := Rew.bShift (Rew.bShift u)) (by simp) α'.ofVal;
+  have hδiff := δ'.models_iff;
   refine ⟨δ'.sigma.matrix, δ'.sigma.matrix_Δ₀, ?_⟩;
   apply provable_iff_of_models_iff;
   intro V _ _ e;
@@ -315,7 +315,7 @@ lemma ball_sigma_step {n} {φ : ArithmeticSemisentence (n + 1)}
       rw [← hδiff V (w :> e)];
       simp [hαeval];
     have hφeval : ∀ x : V, V ⊧/(x :> e) φ ↔ ∃ y, V ⊧/(y :> x :> e) φ₁ := fun x =>
-      φ'.iff_models_sigmaInv V (x :> e);
+      φ'.models_iff_sigmaInv V (x :> e);
     show V ⊧/e (φ.ballLT u) ↔ V ⊧/e (∃¹ (↑δ' : ArithmeticSemisentence (n + 1)));
     simp only [Semiformula.eval_ballLT, Semiformula.eval_ex, hδeval, hφeval];
     constructor;
@@ -334,15 +334,15 @@ lemma or_sigma_step {n} {φ ψ : ArithmeticSemisentence n} (ih : Closure T s)
   set ψ₁' := ψ'.sigmaInv;
   set φ₁ : ArithmeticSemisentence (n + 1) := ↑φ₁';
   set ψ₁ : ArithmeticSemisentence (n + 1) := ↑ψ₁';
-  obtain ⟨χ'⟩ := ih.or 𝚷 (refl φ₁') (refl ψ₁');
-  have hχiff := χ'.iff_models;
+  obtain ⟨χ'⟩ := ih.or 𝚷 φ₁'.ofVal ψ₁'.ofVal;
+  have hχiff := χ'.models_iff;
   refine ⟨χ'.sigma.matrix, χ'.sigma.matrix_Δ₀, ?_⟩;
   apply provable_iff_of_models_iff;
   intro V _ _ e;
   . change V ⊧/e (φ ⋎ ψ) ↔ V ⊧/e χ'.sigma.val;
     rw [coe_sigma]
-    have hφiff' : V ⊧/e φ ↔ ∃ x, V ⊧/(x :> e) φ₁ := φ'.iff_models_sigmaInv V e;
-    have hψiff' : V ⊧/e ψ ↔ ∃ x, V ⊧/(x :> e) ψ₁ := ψ'.iff_models_sigmaInv V e;
+    have hφiff' : V ⊧/e φ ↔ ∃ x, V ⊧/(x :> e) φ₁ := φ'.models_iff_sigmaInv V e;
+    have hψiff' : V ⊧/e ψ ↔ ∃ x, V ⊧/(x :> e) ψ₁ := ψ'.models_iff_sigmaInv V e;
     simp only [LogicalConnective.HomClass.map_or, Semiformula.eval_ex, hφiff', hψiff'];
     constructor;
     . rintro (⟨x, hx⟩ | ⟨x, hx⟩);
@@ -366,16 +366,16 @@ lemma and_sigma_step {n} {φ ψ : ArithmeticSemisentence n} [𝗜𝚺 (s + 1) �
     φ₁'.rew (Rew.subst (#0 :> (#·.succ.succ)));
   obtain ⟨α'⟩ := ih.bexs 𝚷 (φ := φ₁ ⇜ (#0 :> (#·.succ.succ)))
     (t := Rew.bShift (‘#0 + 1’ : ArithmeticSemiterm Empty (n + 1)))
-    (Rew.bShift_positive _) ((refl φ₂').ofEq (by simp [φ₂', φ₁]));
+    (Rew.bShift_positive _) (φ₂'.ofVal.ofEq (by simp [φ₂', φ₁]));
   let ψ₂' :=
     ψ₁'.rew (Rew.subst (#0 :> (#·.succ.succ)));
   obtain ⟨β'⟩ := ih.bexs 𝚷 (φ := ψ₁ ⇜ (#0 :> (#·.succ.succ)))
     (t := Rew.bShift (‘#0 + 1’ : ArithmeticSemiterm Empty (n + 1)))
-    (Rew.bShift_positive _) ((refl ψ₂').ofEq (by simp [ψ₂', ψ₁]));
-  have hαiff := α'.iff_models;
-  have hβiff := β'.iff_models;
-  obtain ⟨χ'⟩ := ih.and 𝚷 (refl α') (refl β');
-  have hχiff := χ'.iff_models;
+    (Rew.bShift_positive _) (ψ₂'.ofVal.ofEq (by simp [ψ₂', ψ₁]));
+  have hαiff := α'.models_iff;
+  have hβiff := β'.models_iff;
+  obtain ⟨χ'⟩ := ih.and 𝚷 α'.ofVal β'.ofVal;
+  have hχiff := χ'.models_iff;
   refine ⟨χ'.sigma.matrix, χ'.sigma.matrix_Δ₀, ?_⟩;
   apply provable_iff_of_models_iff;
   intro V _ _ e;
@@ -396,8 +396,8 @@ lemma and_sigma_step {n} {φ ψ : ArithmeticSemisentence n} [𝗜𝚺 (s + 1) �
         ((ψ₁ ⇜ (#0 :> (#·.succ.succ)) : ArithmeticSemisentence (n + 2)).bexsLTSucc
           (‘#0’ : ArithmeticSemiterm Empty (n + 1))) ↔ _;
       simp [Semiformula.eval_insert1, -Semiformula.eval_substs];
-    have hφiff' : V ⊧/e φ ↔ ∃ x, V ⊧/(x :> e) φ₁ := φ'.iff_models_sigmaInv V e;
-    have hψiff' : V ⊧/e ψ ↔ ∃ x, V ⊧/(x :> e) ψ₁ := ψ'.iff_models_sigmaInv V e;
+    have hφiff' : V ⊧/e φ ↔ ∃ x, V ⊧/(x :> e) φ₁ := φ'.models_iff_sigmaInv V e;
+    have hψiff' : V ⊧/e ψ ↔ ∃ x, V ⊧/(x :> e) ψ₁ := ψ'.models_iff_sigmaInv V e;
     have hχ_eval : ∀ z : V, V ⊧/(z :> e) (↑χ' : ArithmeticSemisentence (n + 1)) ↔
         V ⊧/(z :> e) (↑α' : ArithmeticSemisentence (n + 1)) ∧
           V ⊧/(z :> e) (↑β' : ArithmeticSemisentence (n + 1)) := fun z ↦
@@ -455,12 +455,12 @@ lemma exs {n} {φ : ArithmeticSemisentence (n + 1)} [𝗜𝚺 s ⪯ T]
     φ₁'.rew (Rew.subst (#0 :> #1 :> (#·.succ.succ.succ)));
   obtain ⟨α'⟩ := c.bexs 𝚷 (φ := φ₁ ⇜ (#0 :> #1 :> (#·.succ.succ.succ)))
     (t := Rew.bShift (‘#1 + 1’ : ArithmeticSemiterm Empty (n + 2)))
-    (Rew.bShift_positive _) ((refl φ₂').ofEq (by simp [φ₂', φ₁]));
+    (Rew.bShift_positive _) (φ₂'.ofVal.ofEq (by simp [φ₂', φ₁]));
   obtain ⟨β'⟩ := c.bexs 𝚷
     (t := Rew.bShift (‘#0 + 1’ : ArithmeticSemiterm Empty (n + 1)))
-    (Rew.bShift_positive _) (refl α');
-  have hαiff := α'.iff_models;
-  have hβiff := β'.iff_models;
+    (Rew.bShift_positive _) α'.ofVal;
+  have hαiff := α'.models_iff;
+  have hβiff := β'.models_iff;
   have hαiff' : ∀ (V : Type) [ORingStructure V] [V↓[ℒₒᵣ] ⊧* T] (e : Fin (n + 2) → V),
       V ⊧/e ((φ₁ ⇜ (#0 :> #1 :> (#·.succ.succ.succ)) : ArithmeticSemisentence (n + 3)).bexsLTSucc
         (‘#1’ : ArithmeticSemiterm Empty (n + 2))) ↔
@@ -488,7 +488,7 @@ lemma exs {n} {φ : ArithmeticSemisentence (n + 1)} [𝗜𝚺 s ⪯ T]
       rw [← hβiff' V (z :> e)];
       simp;
     have hφeval : ∀ y : V, V ⊧/(y :> e) φ ↔ ∃ x, V ⊧/(x :> y :> e) φ₁ := fun y =>
-      φ'.iff_models_sigmaInv V (y :> e);
+      φ'.models_iff_sigmaInv V (y :> e);
     simp only [Semiformula.eval_ex, hφeval, hβeval, hαeval];
     constructor;
     . rintro ⟨y, x, hx⟩;

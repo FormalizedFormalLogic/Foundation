@@ -411,7 +411,7 @@ lemma remove_exists {φ : Semiformula L ξ (n + 1)} : Hierarchy b s (∃¹ φ) �
   |     0 => simp
   | k + 1 => simp [LO.FirstOrder.allItr_succ, allItr]
 
-lemma quantItr {φ : Semiformula L ξ (n + s)}
+lemma toPrenex {φ : Semiformula L ξ (n + s)}
     (h : Hierarchy (Γ.altItr s) j φ) :
     Hierarchy Γ (j + s) (φ.toPrenex Γ s) := by
   induction s generalizing n j with

@@ -125,7 +125,7 @@ abbrev toPrenex (Γ : Polarity) (s : ℕ) (φ : Semiformula L ξ (n + s)) : Semi
     ∼(Γ.quant φ) = Γ.alt.quant (∼φ) := by
   rcases Γ <;> rfl
 
-@[simp] lemma neg_quantItr (Γ : Polarity) (s : ℕ) (φ : Semiformula L ξ (n + s)) :
+@[simp] lemma neg_toPrenex (Γ : Polarity) (s : ℕ) (φ : Semiformula L ξ (n + s)) :
     ∼(φ.toPrenex Γ s) = (∼φ).toPrenex Γ.alt s := by
   induction s generalizing n with
   | zero => rfl
