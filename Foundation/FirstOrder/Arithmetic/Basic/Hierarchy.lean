@@ -399,18 +399,6 @@ lemma remove_exists {φ : Semiformula L ξ (n + 1)} : Hierarchy b s (∃¹ φ) �
 @[simp] lemma finset_udisj_iff {Γ s n} [Fintype ι] {φ : ι → Semiformula L ξ n} :
     Hierarchy Γ s (Finset.udisj φ) ↔ ∀ i, Hierarchy Γ s (φ i) := by simp [Finset.udisj]
 
-@[simp] lemma exsItr {n k} {φ : Semiformula L ξ (n + k)} :
-    Hierarchy 𝚺 (s + 1) (∃¹^[k] φ) ↔ Hierarchy 𝚺 (s + 1) φ := by
-  match k with
-  |     0 => simp
-  | k + 1 => simp [LO.FirstOrder.exsItr_succ, exsItr]
-
-@[simp] lemma allItr {n k} {φ : Semiformula L ξ (n + k)} :
-    Hierarchy 𝚷 (s + 1) (∀¹^[k] φ) ↔ Hierarchy 𝚷 (s + 1) φ := by
-  match k with
-  |     0 => simp
-  | k + 1 => simp [LO.FirstOrder.allItr_succ, allItr]
-
 end Hierarchy
 
 section LOR
