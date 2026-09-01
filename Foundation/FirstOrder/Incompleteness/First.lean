@@ -57,16 +57,16 @@ noncomputable instance (T : ArithmeticTheory) [T.RE] [𝗥₀ ⪯ T] : 𝗥₀ �
   WeakerThan.trans (𝓣 := T) inferInstance (Theory.craig.original_weakerThan (T := T))
 
 /-- Gödel's first incompleteness theorem for r.e. theories -/
-theorem incomplete_of_re (T : ArithmeticTheory) [T.RE] [𝗥₀ ⪯ T] [T.SoundOnHierarchy 𝚺 1] :
+theorem incomplete_of_RE (T : ArithmeticTheory) [T.RE] [𝗥₀ ⪯ T] [T.SoundOnHierarchy 𝚺 1] :
     Incomplete T :=
   (Theory.craig_equiv (T := T)).symm.incomplete
     (@incomplete T.craig inferInstance inferInstance
       (ArithmeticTheory.SoundOn.of_weakerThan _ T T.craig))
 
-theorem exists_true_but_unprovable_sentence_of_re
+theorem exists_true_but_unprovable_sentence_of_RE
     (T : ArithmeticTheory) [T.RE] [𝗥₀ ⪯ T] [T.SoundOnHierarchy 𝚺 1] :
     ∃ δ : ArithmeticSentence, ℕ↓[ℒₒᵣ] ⊧ δ ∧ T ⊬ δ := by
-  obtain ⟨δ, hδ⟩ := incomplete_def.mp (incomplete_of_re T);
+  obtain ⟨δ, hδ⟩ := incomplete_def.mp (incomplete_of_RE T);
   by_cases ℕ↓[ℒₒᵣ] ⊧ δ
   . exact ⟨δ, by assumption, hδ.1⟩
   . exact ⟨∼δ, by simpa, hδ.2⟩
