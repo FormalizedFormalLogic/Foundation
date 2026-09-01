@@ -275,8 +275,7 @@ lemma and_sigma_step {n} {φ ψ : ArithmeticSemisentence n} [𝗜𝚺 (s + 1) �
   (φ' : PrenexEquivOf T 𝚺 (s + 1) _ φ)
   (ψ' : PrenexEquivOf T 𝚺 (s + 1) _ ψ) :
   Nonempty (PrenexEquivOf T 𝚺 (s + 1) _ (φ ⋏ ψ)) := by
-  have : 𝗜𝚺₀ ⪯ T :=
-    Entailment.WeakerThan.trans (ISigma_weakerThan_of_le (Nat.zero_le (s + 1))) inferInstance;
+  have : 𝗜𝚺₀ ⪯ T := Entailment.WeakerThan.trans (ISigma_weakerThan_of_le (by omega)) ‹𝗜𝚺(s + 1) ⪯ T›;
   set φ₁' := φ'.sigmaInv;
   set ψ₁' := ψ'.sigmaInv;
   set φ₁ : ArithmeticSemisentence (n + 1) := ↑φ₁';
@@ -471,7 +470,7 @@ variable (T : ArithmeticTheory) {Γ : Polarity} {s n : ℕ} [𝗜𝚺 s ⪯ T]
 
 theorem exists_matrix_provable (h : Hierarchy Γ s φ) :
   ∃ φ₀ : ArithmeticSemisentence (n + s), Hierarchy 𝚺 0 φ₀ ∧ T ⊢ ∀¹* (φ 🡘 Polarity.quantItr Γ s φ₀) := by
-  have : 𝗘𝗤 ℒₒᵣ ⪯ T := Entailment.WeakerThan.trans inferInstance (ISigma_weakerThan_of_le_trans (Nat.zero_le s) ‹𝗜𝚺 s ⪯ T›);
+  have : 𝗘𝗤 ℒₒᵣ ⪯ T := Entailment.WeakerThan.trans (inferInstance : 𝗘𝗤 ℒₒᵣ ⪯ 𝗜𝚺₀) (ISigma_weakerThan_of_le_trans (by omega) ‹𝗜𝚺 s ⪯ T›);
   obtain ⟨φ'⟩ := nonempty_prenexEquivOf (T := T) h;
   exact ⟨φ'.matrix, φ'.toPrenex.matrix_Δ₀, φ'.provable⟩;
 
