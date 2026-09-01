@@ -18,11 +18,10 @@ structure Blueprint (k : ℕ) where
   graph : SetTheorySemisentence (k + 2)
 
 -- TODO: Look at how `ZF.lean` uses `ℒₛₑₜ-relation` vs. graph sentences, and imitate that here.
--- def Blueprint.isAttempt_dfn (p : Blueprint k) : SetTheorySemisentence (k + 1) :=
---   f“f.
---     :Seq f ∧
---     -- !IsOrdinal.dfn α ∧ !IsFunction.dfn f ∧ !domain.dfn f = α ∧
---     ∀ β ∈ !lh.dfn f, ∀ y, !kpair.dfn β y ∈ f ↔ y = !p.graph (!restrict.dfn f β) ⋯”
+def Blueprint.isAttempt_dfn (p : Blueprint k) : SetTheorySemisentence (k + 1) :=
+  f“f.
+    :Seq f ∧
+    ∀ β ∈ !lh.dfn f, ∀ y, !kpair.dfn β y ∈ f ↔ y = !p.graph (!restrict.dfn f β) ⋯”
 
 #check fun (φ : Semisentence ℒₒᵣ 3) ↦ (⤫term(faf)[ α x y |   | !φ α x ⋯ ] : Semisentence ℒₒᵣ 3)
 
@@ -44,6 +43,12 @@ variable {V}
 namespace Construction
 
 variable {k : ℕ} {p : Blueprint k} (c : Construction V p) (v : Fin k → V)
+
+instance core_definable : ℒₛₑₜ-function₁ c.core v := by
+  refine ⟨(Rew.embSubsts (#0 :> #1 :> fun i : Fin k ↦ &(v i))) ▹ p.graph, ?_⟩
+  intro x
+  simpa [Semiformula.eval_embSubsts, Matrix.comp_vecCons', Function.comp_def]
+    using c.core_defined.iff (x 0 :> x 1 :> v)
 
 -- An example showing that `⋯` in faf notation is implemented correctly.
 set_option linter.flexible false in
@@ -191,12 +196,12 @@ lemma eval_core_faf {x : V} : Semiformula.Evalb (x :> (c.core v x) :> v) f“x y
 --   have : f ↾ xo = g ↾ xo := ihγ xo hxγ ⟨hxoα, hxoβ⟩
 --   simp_all only [IsOrdinal.toOrdinal_val, xo]
 
--- lemma unique {f g α β : V} (h₁ : c.IsAttempt v f) (h₂ : c.IsAttempt v g)
+-- lemma unique {f g α β : V} (h₁ : SetTheory.IsAttempt (c.core v) f) (h₂ : SetTheory.IsAttempt (c.core v) g)
 --     (hlh₁ : lh f = α) (hlh₂ : lh g = β)
 --     (h₁₂ : α ⊆ β) {γ} (hγα : γ ∈ α) {y₁ y₂} :
 --     ⟨γ, y₁⟩ₖ ∈ f → ⟨γ, y₂⟩ₖ ∈ g → y₁ = y₂ := by
---   have : IsOrdinal α := hlh₁ ▸ SetTheory.isOrdinal_lh h₁.seq
---   have : IsOrdinal β := hlh₂ ▸ SetTheory.isOrdinal_lh h₂.seq
+--   have : IsOrdinal α := hlh₁ ▸ SetTheory.isOrdinal_lh h₁.1
+--   have : IsOrdinal β := hlh₂ ▸ SetTheory.isOrdinal_lh h₂.1
 --   let αo : Ordinal V := IsOrdinal.toOrdinal α
 --   let βo : Ordinal V := IsOrdinal.toOrdinal β
 --   have hαtest : αo.val = α := by simp [αo]
@@ -496,11 +501,13 @@ lemma eval_core_faf {x : V} : Semiformula.Evalb (x :> (c.core v x) :> v) f“x y
 --   obtain ⟨f, hf⟩ := SetTheory.Replacement.attempt_function_exists (c.core v) hdefinable (IsOrdinal.toOrdinal (SetTheory.succ αo))
 --   #check SetTheory.IsAttempt.existsUnique_of_exists (c.core v) (SetTheory.succ α) (IsAttempt.exists c v α)
 
+include c v in
 lemma attempt_result_existsUnique (F : V → V) (hF : ℒₛₑₜ-function₁ F) (α : V) : ∃! y,
     (IsOrdinal α → ∃ f, SetTheory.IsAttempt F f ∧ lh f = SetTheory.succ α ∧ ⟨α, y⟩ₖ ∈ f) ∧
     (¬IsOrdinal α → y = ∅) := by
   by_cases hα : IsOrdinal α
-  · let αsucco : Ordinal V := IsOrdinal.toOrdinal (SetTheory.succ α)
+  · let αo : Ordinal V := IsOrdinal.toOrdinal α
+    let αsucco : Ordinal V := IsOrdinal.toOrdinal (SetTheory.succ α)
     rcases SetTheory.Replacement.attempt_function_exists F hF αsucco with ⟨f, hf, hlhf⟩
     have : ∃ z, ⟨α, z⟩ₖ ∈ f := hf.1.exists (show α ∈ lh f from by simp_all [αsucco])
     rcases this with ⟨z, hz⟩
@@ -509,45 +516,36 @@ lemma attempt_result_existsUnique (F : V → V) (hF : ℒₛₑₜ-function₁ F
     --   rintro z' ⟨f', hf', hz'⟩
     --   exact Eq.symm <| hf.unique hf' (by aesop) (mem_succ_self α) hz hz')
     exact ExistsUnique.intro z ⟨f, hf, by simpa, hz⟩ (by
-      rintro z' ⟨f', hf', hz'⟩
-      exact Eq.symm <| hf.1.IsFunction.unique hf' (by aesop) (mem_succ_self α) hz hz')
+      rintro z' ⟨f', hf', hlhf', hz'⟩
+      -- exact Eq.symm <| hf.1.IsFunction.unique hf' (by aesop) (mem_succ_self α) hz hz')
+      exact Eq.symm <| SetTheory.IsAttempt.eq_of_isAttempt hf hf' hlhf hlhf' (by aesop) αo.lt_succ hz hz')
   · refine ExistsUnique.intro (∅ : V) (by aesop) fun y ↦ by aesop
 
 #check attempt_result_existsUnique
 
-noncomputable def result (α : V) : V := Classical.choose! (attempt_result_existsUnique (c.core v)
-  (by
-    refine ⟨(Rew.embSubsts (#0 :> #1 :> fun i : Fin k ↦ &(v i))) ▹ p.graph, ?_⟩
-    intro x
-    simpa [Semiformula.eval_embSubsts, Matrix.comp_vecCons', Function.comp_def]
-      using c.core_defined.iff (x 0 :> x 1 :> v))
-  α)
+noncomputable def result (α : V) : V := Classical.choose! (attempt_result_existsUnique (c.core v) (c.core_definable v) α)
 
 -- TODO: The definability argument is the same here as in `result`. Adding a lemma which proves `ℒₛₑₜ-function₁ c.core v` would help to remove redundant code.
 lemma result_spec (α : V) :
     (IsOrdinal α → ∃ f, SetTheory.IsAttempt (c.core v) f ∧ lh f = SetTheory.succ α ∧ ⟨α, c.result v α⟩ₖ ∈ f) ∧
     (¬IsOrdinal α → c.result v α = ∅) :=
-  Classical.choose!_spec (attempt_result_existsUnique (c.core v) (by
-    refine ⟨(Rew.embSubsts (#0 :> #1 :> fun i : Fin k ↦ &(v i))) ▹ p.graph, ?_⟩
-    intro x
-    simpa [Semiformula.eval_embSubsts, Matrix.comp_vecCons', Function.comp_def]
-      using c.core_defined.iff (x 0 :> x 1 :> v)) α)
+  Classical.choose!_spec (attempt_result_existsUnique (c.core v) (c.core_definable v) α)
 
 lemma result_spec_of_isOrdinal (α : V) [hα : IsOrdinal α] : ∃ f, SetTheory.IsAttempt (c.core v) f ∧ lh f = SetTheory.succ α ∧ ⟨α, c.result v α⟩ₖ ∈ f := by
   simpa [hα] using c.result_spec v α
 
 @[simp] theorem result_empty : c.result v ∅ = c.core v ∅ := by
   rcases c.result_spec_of_isOrdinal v ∅ with ⟨f, hf, _, hempty⟩
-  exact hf.unique hempty (hf.empty (mem_succ_self ∅))
+  exact hf.1.IsFunction.unique hempty (hf.empty (mem_succ_self ∅))
 
-@[simp] theorem result_succ (α : V) [hα : IsOrdinal α] : c.result v (SetTheory.succ α) = c.core v (Classical.choose (SetTheory.Replacement.attempt_function_exists (c.core v) sorry α)) := by
+@[simp] theorem result_succ (α : V) [hα : IsOrdinal α] : c.result v (SetTheory.succ α) = c.core v (Classical.choose (SetTheory.Replacement.attempt_function_exists (c.core v) (c.core_definable v) α)) := by
   -- TODO: The theorem statement is incorrect, I don't think there's a way to state it without obtaining an attempt `f` and writing `c.core v f`.
   rcases c.result_spec_of_isOrdinal v α with ⟨f, hf, h⟩
   have := hf.successor h
   have hmemcons := hf.2.2.1.symm ▸ hf.seq.domain_eq ▸ SetTheory.lh_mem_seqCons f (c.core v f)
   -- have hrestrict := (hf.2.2.2 α (mem_succ_self α) _).mp h
   have heq : Classical.choose (IsAttempt.exists c v α) = f := by
-    #check SetTheory.IsAttempt.un
+    #check SetTheory.IsAttempt.isAttempt_unique
     sorry
   exact Eq.symm
     <| Classical.choose_uniq (c.attempt_result_existsUnique v (SetTheory.succ α))

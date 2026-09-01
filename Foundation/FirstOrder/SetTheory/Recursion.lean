@@ -72,7 +72,7 @@ lemma isAttempt_unique {F : V → V} {α : Ordinal V} {f g : V}
 If `β ≤ α`, then an attempt function on `α` restricts to the attempt function on `β`.
 -/
 lemma isAttempt_restrict_eq_of_le
-    (F : V → V)
+    {F : V → V}
     {α β : Ordinal V} {f g : V}
     (hβα : β ≤ α)
     (hf : IsAttempt F f)
@@ -84,6 +84,21 @@ lemma isAttempt_restrict_eq_of_le
   have := hg.1.IsFunction
   have hsubset : domain g ⊆ β.val := subset_of_eq (hlhg ▸ hg.1.domain_eq)
   exact isAttempt_coherent hf hg hlhf hlhg β ⟨hβα, subset_refl β.val⟩ ▸ IsFunction.restrict_eq_self g β.val hsubset
+
+lemma eq_of_isAttempt
+    {F : V → V}
+    {α β : Ordinal V} {f g : V}
+    (hf : IsAttempt F f) (hg : IsAttempt F g)
+    (hlh₁ : lh f = α) (hlh₂ : lh g = β)
+    (h₁₂ : α ≤ β) {γ} (hγα : γ < α) {y₁ y₂} :
+    ⟨γ.val, y₁⟩ₖ ∈ f → ⟨γ.val, y₂⟩ₖ ∈ g → y₁ = y₂ := by
+  have hγα' : γ.val ∈ α.val := by simpa [Ordinal.lt_def] using hγα
+  have hrestrict : f ↾ α = g ↾ α :=
+    isAttempt_coherent (α := α) (β := β) hf hg hlh₁ hlh₂ α (by aesop)
+  intro hy₁ hy₂
+  have h := (mem_ext_iff.mp hrestrict) ⟨γ, y₁⟩ₖ
+  have hy₁g : ⟨γ.val, y₁⟩ₖ ∈ g := by simpa [kpair_mem_restrict_iff, hy₁, hγα'] using fun h₂ ↦ h.mp h₂
+  exact hg.1.1.unique hy₁g hy₂
 
 /-! #### Existence and choices of attempt functions -/
 
