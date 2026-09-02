@@ -25,6 +25,75 @@ lemma term_primrec {k f} : (t : ArithmeticSemiterm ξ k) → Primrec (fun v : Li
   |   .func Language.Mul.mul v => by
     simpa [Semiterm.val_func] using Primrec.nat_mul.comp (term_primrec (v 0)) (term_primrec (v 1))
 
+/-- Truth of a fixed bounded arithmetic formula is primitive recursive.
+This is a routine structural induction on bounded formulas. -/
+lemma delta0_primrec (ε : ξ → ℕ) {k} {φ : ArithmeticSemiformula ξ k}
+    (hp : Hierarchy 𝚺 0 φ) :
+    PrimrecPred fun v : List.Vector ℕ k ↦ φ.Eval v.get ε := by
+  apply sigma₁_induction' (P := fun n φ ↦
+    Hierarchy 𝚺 0 φ → PrimrecPred fun v : List.Vector ℕ n ↦ φ.Eval v.get ε) (hp.mono (by simp))
+  case hVerum =>
+    intro _ _
+    change PrimrecPred (fun _ : List.Vector ℕ _ => True)
+    exact (Primrec.const true).primrecPred
+  case hFalsum =>
+    intro _ _
+    change PrimrecPred (fun _ : List.Vector ℕ _ => False)
+    exact (Primrec.const false).primrecPred
+  case hEQ =>
+    intro n t₁ t₂ _
+    exact Primrec.eq.comp (term_primrec t₁) (term_primrec t₂)
+  case hNEQ =>
+    intro n t₁ t₂ _
+    exact (Primrec.eq.comp (term_primrec t₁) (term_primrec t₂)).not
+  case hLT =>
+    intro n t₁ t₂ _
+    exact Primrec.nat_lt.comp (term_primrec t₁) (term_primrec t₂)
+  case hNLT =>
+    intro n t₁ t₂ _
+    exact (Primrec.nat_lt.comp (term_primrec t₁) (term_primrec t₂)).not
+  case hAnd =>
+    intro n φ ψ _ _ ihp ihq h
+    exact (ihp (Hierarchy.and_iff.mp h).1).and
+      (ihq (Hierarchy.and_iff.mp h).2) |>.of_eq fun v ↦ by simp
+  case hOr =>
+    intro n φ ψ _ _ ihp ihq h
+    exact (ihp (Hierarchy.or_iff.mp h).1).or
+      (ihq (Hierarchy.or_iff.mp h).2) |>.of_eq fun v ↦ by simp
+  case hBall =>
+    intro n t φ _ ih h
+    have hbody := ih ((Hierarchy.ball_iff (t := Rew.bShift t) (by simp)).mp h)
+    have hrel : PrimrecRel (fun x (v : List.Vector ℕ n) ↦ φ.Eval (x ::ᵥ v).get ε) :=
+      (hbody.comp (Primrec.vector_cons.comp .fst .snd)).primrecRel
+    have hbounded : PrimrecPred (fun p : ℕ × List.Vector ℕ n ↦
+        ∀ x < p.1, φ.Eval (x ::ᵥ p.2).get ε) :=
+      ((PrimrecRel.forall_mem_list hrel).comp
+        (Primrec.list_range.comp Primrec.fst) Primrec.snd).of_eq (by simp)
+    have hforall : PrimrecPred (fun v : List.Vector ℕ n ↦
+        ∀ x < t.val v.get ε, φ.Eval (x ::ᵥ v).get ε) :=
+      hbounded.comp ((term_primrec t).pair Primrec.id)
+    exact hforall.of_eq fun v ↦ by simp [List.Vector.cons_get]
+  case hExs =>
+    intro n ψ _ ih h
+    cases h with
+    | bexs ht hφ =>
+      rename_i body originalBound hSigma
+      rcases Rew.positive_iff.mp ht with ⟨t, rfl⟩
+      have hbody := ih (by simp [hφ])
+      have hrel : PrimrecRel (fun x (v : List.Vector ℕ n) ↦
+          ((“#0 < !!(Rew.bShift t)” ⋏ body).Eval (x ::ᵥ v).get ε)) :=
+        (hbody.comp (Primrec.vector_cons.comp .fst .snd)).primrecRel
+      have hbounded : PrimrecPred (fun p : ℕ × List.Vector ℕ n ↦
+          ∃ x < p.1, (“#0 < !!(Rew.bShift t)” ⋏ body).Eval (x ::ᵥ p.2).get ε) :=
+        ((PrimrecRel.exists_mem_list hrel).comp
+          (Primrec.list_range.comp Primrec.fst) Primrec.snd).of_eq (by simp)
+      have hexists : PrimrecPred (fun v : List.Vector ℕ n ↦
+          ∃ x < t.val v.get ε,
+            (“#0 < !!(Rew.bShift t)” ⋏ body).Eval (x ::ᵥ v).get ε) :=
+        hbounded.comp ((term_primrec t).pair Primrec.id)
+      exact hexists.of_eq fun v ↦ by simp [List.Vector.cons_get]
+  exact hp
+
 lemma sigma1_re (ε : ξ → ℕ) {k} {φ : ArithmeticSemiformula ξ k} (hp : Hierarchy 𝚺 1 φ) :
     REPred fun v : List.Vector ℕ k ↦ φ.Eval v.get ε := by
   apply sigma₁_induction' hp

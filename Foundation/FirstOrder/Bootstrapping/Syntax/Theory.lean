@@ -29,6 +29,16 @@ abbrev codes (T : Theory L) : Set ℕ := Encodable.encode '' T
 class RE (T : Theory L) : Prop where
   re : REPred T.codes
 
+/-- A theory is primitive recursive when membership in its set of axiom codes is primitive
+recursive. -/
+protected class Primrec (T : Theory L) : Prop where
+  primrec : PrimrecPred (· ∈ T.codes)
+
+variable {T : Theory L}
+
+instance [T.Primrec] : T.RE :=
+  ⟨Theory.Primrec.primrec.computablePred.to_re⟩
+
 end LO.FirstOrder.Theory
 
 namespace LO.FirstOrder.Arithmetic.Bootstrapping

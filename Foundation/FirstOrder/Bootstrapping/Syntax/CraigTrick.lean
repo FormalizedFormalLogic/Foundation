@@ -5,12 +5,86 @@ public import Foundation.FirstOrder.Arithmetic.R0.Representation
 public import Foundation.FirstOrder.Bootstrapping.Syntax.Theory
 public import Foundation.FirstOrder.Bootstrapping.Syntax.Formula.Iteration
 public import Foundation.FirstOrder.Basic.Padding
+public import Foundation.FirstOrder.Basic.PrimrecCoding
 
 /-!
 # Craig's trick
+
+The Craig companion of a recursively enumerable theory is moreover primitive recursive.
 -/
 
 @[expose] public section
+
+namespace LO.FirstOrder.Semiformula
+
+open Encodable
+
+variable {L : Language} {ξ : Type*} {n : ℕ}
+
+lemma weight_succ (k : ℕ) :
+    (weight (k + 1) : Semiformula L ξ n) = ⊤ ⋏ weight k := by
+  simp [weight, List.replicate_succ]
+
+lemma encode_weight_succ [L.Encodable] [Encodable ξ] (k : ℕ) :
+    encode (weight (k + 1) : Semiformula L ξ n) =
+      Nat.pair 4 (Nat.pair (encode (⊤ : Semiformula L ξ n))
+        (encode (weight k : Semiformula L ξ n))) + 1 := by
+  rw [weight_succ]
+  rfl
+
+lemma le_encode_weight [L.Encodable] [Encodable ξ] (k : ℕ) :
+    k ≤ encode (weight k : Semiformula L ξ n) := by
+  induction k with
+  | zero => simp
+  | succ k ih =>
+    rw [encode_weight_succ]
+    have h₁ := Nat.right_le_pair (encode (⊤ : Semiformula L ξ n))
+      (encode (weight k : Semiformula L ξ n))
+    have h₂ := Nat.right_le_pair 4
+      (Nat.pair (encode (⊤ : Semiformula L ξ n))
+        (encode (weight k : Semiformula L ξ n)))
+    omega
+
+lemma encode_padding [L.Encodable] [Encodable ξ] (φ : Semiformula L ξ n) (k : ℕ) :
+    encode (φ.padding k) =
+      Nat.pair 4 (Nat.pair (encode φ) (encode (weight k : Semiformula L ξ n))) + 1 := by
+  rfl
+
+lemma encode_lt_encode_padding [L.Encodable] [Encodable ξ]
+    (φ : Semiformula L ξ n) (k : ℕ) :
+    encode φ < encode (φ.padding k) := by
+  rw [encode_padding]
+  have h₁ := Nat.left_le_pair (encode φ) (encode (weight k : Semiformula L ξ n))
+  have h₂ := Nat.right_le_pair 4
+    (Nat.pair (encode φ) (encode (weight k : Semiformula L ξ n)))
+  omega
+
+lemma lt_encode_padding [L.Encodable] [Encodable ξ] (φ : Semiformula L ξ n) (k : ℕ) :
+    k < encode (φ.padding k) := by
+  rw [encode_padding]
+  have h₁ := le_encode_weight (L := L) (ξ := ξ) (n := n) k
+  have h₂ := Nat.right_le_pair (encode φ) (encode (weight k : Semiformula L ξ n))
+  have h₃ := Nat.right_le_pair 4
+    (Nat.pair (encode φ) (encode (weight k : Semiformula L ξ n)))
+  omega
+
+/-- The code of the iterated truth padding is primitive recursive.
+This is a routine technical bridge from syntax recursion to code recursion. -/
+lemma primrec_encode_weight [L.Encodable] [Encodable ξ] :
+    Primrec fun k : ℕ ↦ encode (weight k : Semiformula L ξ n) := by
+  let step : Primrec₂ fun _ r : ℕ ↦
+      Nat.pair 4 (Nat.pair (encode (⊤ : Semiformula L ξ n)) r) + 1 :=
+    Primrec.nat_add.comp
+      (Primrec₂.natPair.comp (Primrec.const 4)
+        (Primrec₂.natPair.comp (Primrec.const (encode (⊤ : Semiformula L ξ n))) Primrec.snd))
+      (Primrec.const 1)
+  refine (Primrec.nat_rec₁ (encode (⊤ : Semiformula L ξ n)) step).of_eq ?_
+  intro k
+  induction k with
+  | zero => simp [weight]
+  | succ k ih => simp [encode_weight_succ, ih]
+
+end LO.FirstOrder.Semiformula
 
 namespace LO.FirstOrder.Theory
 
@@ -180,6 +254,80 @@ section
 
 variable {T : Theory L} [T.RE]
 
+/-- Code-level bounded-search characterization of the axioms of the Craig companion.
+This is a routine technical bridge specific to the coding used here. -/
+lemma mem_craig_codes_iff (n : ℕ) :
+    n ∈ T.craig.codes ↔
+      ∃ s < n, ∃ m < n, (Encodable.decode₂ (Sentence L) m).isSome ∧
+        n = Nat.pair 4 (Nat.pair m
+          (Encodable.encode (Semiformula.weight s : Sentence L))) + 1 ∧
+        ℕ ⊧/![s, m] T.reWitness.val := by
+  constructor
+  · rintro ⟨φ, ⟨σ, s, hs, rfl⟩, rfl⟩
+    refine ⟨s, Semiformula.lt_encode_padding σ s,
+      Encodable.encode σ, Semiformula.encode_lt_encode_padding σ s, ?_⟩
+    simp only [Encodable.decode₂_encode, Option.isSome_some, true_and]
+    exact ⟨(Semiformula.encode_padding σ s).symm,
+      by simpa [Sentence.quote_def, Semiformula.quote_eq_encode] using hs⟩
+  · rintro ⟨s, _, m, _, hm, hn, hT⟩
+    obtain ⟨σ, hσ⟩ := Option.isSome_iff_exists.mp hm
+    have hσm : Encodable.encode σ = m := Encodable.decode₂_eq_some.mp hσ
+    refine ⟨σ.padding s, ⟨σ, s, ?_, rfl⟩, ?_⟩
+    · simpa [Sentence.quote_def, Semiformula.quote_eq_encode, hσm] using hT
+    · exact (Semiformula.encode_padding σ s).trans <| by simpa [hσm] using hn.symm
+
+instance [L.Primcodable] : T.craig.Primrec := by
+  constructor
+  refine PrimrecPred.of_eq ?_ fun n ↦ (mem_craig_codes_iff n).symm
+  let hm : Primrec fun p : ℕ × (ℕ × ℕ) ↦ p.1 := Primrec.fst
+  let hn : Primrec fun p : ℕ × (ℕ × ℕ) ↦ p.2.1 := Primrec.fst.comp Primrec.snd
+  let hs : Primrec fun p : ℕ × (ℕ × ℕ) ↦ p.2.2 := Primrec.snd.comp Primrec.snd
+  have hdecode : PrimrecPred fun p : ℕ × (ℕ × ℕ) ↦
+      (Encodable.decode₂ (Sentence L) p.1).isSome := by
+    simpa using Primrec.eq.comp
+      (Primrec.option_isSome.comp (Primrec.decode₂.comp hm)) (Primrec.const true)
+  have hweight : Primrec fun p : ℕ × (ℕ × ℕ) ↦
+      Encodable.encode (Semiformula.weight p.2.2 : Sentence L) :=
+    Semiformula.primrec_encode_weight.comp hs
+  have hpad : Primrec fun p : ℕ × (ℕ × ℕ) ↦
+      Nat.pair 4 (Nat.pair p.1
+        (Encodable.encode (Semiformula.weight p.2.2 : Sentence L))) + 1 :=
+    Primrec.nat_add.comp
+      (Primrec₂.natPair.comp (Primrec.const 4)
+        (Primrec₂.natPair.comp hm hweight))
+      (Primrec.const 1)
+  have heq : PrimrecPred fun p : ℕ × (ℕ × ℕ) ↦
+      p.2.1 = Nat.pair 4 (Nat.pair p.1
+        (Encodable.encode (Semiformula.weight p.2.2 : Sentence L))) + 1 :=
+    Primrec.eq.comp hn hpad
+  have hvec : Primrec fun p : ℕ × (ℕ × ℕ) ↦
+      (p.2.2 ::ᵥ p.1 ::ᵥ List.Vector.nil : List.Vector ℕ 2) :=
+    Primrec.vector_cons.comp hs
+      (Primrec.vector_cons.comp hm (Primrec.const List.Vector.nil))
+  have heval : PrimrecPred fun p : ℕ × (ℕ × ℕ) ↦
+      ℕ ⊧/![p.2.2, p.1] T.reWitness.val :=
+    ((Arithmetic.delta0_primrec Empty.elim T.reWitness.sigma_prop).comp hvec).of_eq fun p ↦ by
+      simp [List.Vector.cons_get]
+  have hcore : PrimrecPred fun p : ℕ × (ℕ × ℕ) ↦
+      (Encodable.decode₂ (Sentence L) p.1).isSome ∧
+        p.2.1 = Nat.pair 4 (Nat.pair p.1
+          (Encodable.encode (Semiformula.weight p.2.2 : Sentence L))) + 1 ∧
+        ℕ ⊧/![p.2.2, p.1] T.reWitness.val := hdecode.and (heq.and heval)
+  have hinner : PrimrecPred fun p : ℕ × ℕ ↦
+      ∃ m < p.1, (Encodable.decode₂ (Sentence L) m).isSome ∧
+        p.1 = Nat.pair 4 (Nat.pair m
+          (Encodable.encode (Semiformula.weight p.2 : Sentence L))) + 1 ∧
+        ℕ ⊧/![p.2, m] T.reWitness.val :=
+    ((PrimrecRel.exists_mem_list hcore.primrecRel).comp
+      (Primrec.list_range.comp Primrec.fst) Primrec.id).of_eq (by simp)
+  have houter : PrimrecRel fun s n : ℕ ↦
+      ∃ m < n, (Encodable.decode₂ (Sentence L) m).isSome ∧
+        n = Nat.pair 4 (Nat.pair m
+          (Encodable.encode (Semiformula.weight s : Sentence L))) + 1 ∧
+        ℕ ⊧/![s, m] T.reWitness.val :=
+    (hinner.comp (Primrec.pair Primrec.snd Primrec.fst)).primrecRel
+  exact ((PrimrecRel.exists_mem_list houter).comp Primrec.list_range Primrec.id).of_eq (by simp)
+
 noncomputable instance : (T.craig).Δ₁ where
   ch := T.craigCh
   mem_iff φ := (Theory.IsCraigAxiom.defined (V := ℕ) (T := T)).iff.trans
@@ -210,5 +358,11 @@ instance [L.DecidableEq] [Consistent T] : Consistent T.craig :=
   Consistent.of_le inferInstance (inferInstance : T.craig ⪯ T)
 
 end
+
+/-- Every recursively enumerable theory is equivalent to a primitive-recursively axiomatized
+theory. This is the strengthened form of Craig's trick developed directly in this file. -/
+theorem exists_primrec_equiv [L.Primcodable] [L.DecidableEq] (T : Theory L) [T.RE] :
+    ∃ U : Theory L, U.Primrec ∧ Nonempty U.Δ₁ ∧ T ≊ U :=
+  ⟨T.craig, inferInstance, ⟨inferInstance⟩, inferInstance⟩
 
 end LO.FirstOrder.Theory
