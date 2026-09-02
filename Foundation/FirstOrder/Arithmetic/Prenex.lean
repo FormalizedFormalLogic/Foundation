@@ -837,7 +837,27 @@ lemma models_and_succ_sigma {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧*
       V ⊧/e (and π ρ).val ↔ V ⊧/e π.val ∧ V ⊧/e ρ.val)
     (π ρ : Prenex 𝚺 (s + 1) Empty n) (e : Fin n → V) :
     V ⊧/e (and π ρ).val ↔ V ⊧/e π.val ∧ V ⊧/e ρ.val := by
-  sorry
+  have : V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := mod_paMinus_of_ISigma (n := s);
+  rw [and_succ_sigma (φ := π) (ψ := ρ), models_sigma];
+  set φ₂' := π.sigmaInv.rew (Rew.subst (#0 :> (#·.succ.succ)));
+  set ψ₂' := ρ.sigmaInv.rew (Rew.subst (#0 :> (#·.succ.succ)));
+  have hα_eval : ∀ z : V, V ⊧/(z :> e) (bexs ‘#0 + 1’ φ₂').val ↔ ∃ x ≤ z, V ⊧/(x :> e) π.sigmaInv.val := by
+    intro z;
+    rw [models_bexs ‘#0 + 1’ φ₂' (z :> e)];
+    simp only [φ₂', val_rew, Semiformula.eval_insert1];
+    simp [Arithmetic.lt_succ_iff_le];
+  have hβ_eval : ∀ z : V, V ⊧/(z :> e) (bexs ‘#0 + 1’ ψ₂').val ↔ ∃ x ≤ z, V ⊧/(x :> e) ρ.sigmaInv.val := by
+    intro z;
+    rw [models_bexs ‘#0 + 1’ ψ₂' (z :> e)];
+    simp only [ψ₂', val_rew, Semiformula.eval_insert1];
+    simp [Arithmetic.lt_succ_iff_le];
+  simp only [ih (bexs ‘#0 + 1’ φ₂') (bexs ‘#0 + 1’ ψ₂'), models_sigmaInv π V, models_sigmaInv ρ V,
+    hα_eval, hβ_eval];
+  constructor;
+  . rintro ⟨z, ⟨x, -, hx⟩, ⟨y, -, hy⟩⟩;
+    exact ⟨⟨x, hx⟩, ⟨y, hy⟩⟩;
+  . rintro ⟨⟨x, hx⟩, ⟨y, hy⟩⟩;
+    exact ⟨max x y, ⟨x, le_max_left x y, hx⟩, ⟨y, le_max_right x y, hy⟩⟩;
 
 def closureData : (s : ℕ) → ClosureData s
   | 0 => .zero
