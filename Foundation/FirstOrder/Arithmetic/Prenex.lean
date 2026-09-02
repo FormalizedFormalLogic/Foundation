@@ -998,69 +998,124 @@ lemma all_correct [𝗜𝚺 s ⪯ T] {φ : ArithmeticSemisentence (n + 1)} {π :
   rw [models_all π e, Semiformula.eval_all];
   exact forall_congr' (fun x ↦ models_iff_of_provable_iff hπ V (x :> e));
 
+theorem models_exists_prenex {Γ : Polarity} {s n : ℕ} {φ : ArithmeticSemisentence n} (h : Hierarchy Γ s φ) :
+    ∃ π : Prenex Γ s Empty n,
+      ∀ (V : Type*) [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺 s] (e : Fin n → V),
+        V ⊧/e φ ↔ V ⊧/e π.val := by
+  induction h with
+  | verum Γ s n =>
+    use verum;
+    intro V _ _ e;
+    unfold verum;
+    exact (models_ofΔ₀ (.mkSigma ⊤ (Hierarchy.verum 𝚺 0 n)) V e).symm;
+  | falsum Γ s n =>
+    use falsum;
+    intro V _ _ e;
+    unfold falsum;
+    exact (models_ofΔ₀ (.mkSigma ⊥ (Hierarchy.falsum 𝚺 0 n)) V e).symm;
+  | rel Γ s r v =>
+    use rel r v;
+    intro V _ _ e;
+    unfold rel;
+    exact (models_ofΔ₀ (.mkSigma (.rel r v) (Hierarchy.rel 𝚺 0 r v)) V e).symm;
+  | nrel Γ s r v =>
+    use nrel r v;
+    intro V _ _ e;
+    unfold nrel;
+    exact (models_ofΔ₀ (.mkSigma (.nrel r v) (Hierarchy.nrel 𝚺 0 r v)) V e).symm;
+  | and _ _ ihφ ihψ =>
+    obtain ⟨π, hπ⟩ := ihφ;
+    obtain ⟨ρ, hρ⟩ := ihψ;
+    use and π ρ;
+    intro V _ _ e;
+    rw [models_and π ρ e];
+    simp only [LogicalConnective.HomClass.map_and, LogicalConnective.Prop.and_eq];
+    exact and_congr (hπ V e) (hρ V e);
+  | or _ _ ihφ ihψ =>
+    obtain ⟨π, hπ⟩ := ihφ;
+    obtain ⟨ρ, hρ⟩ := ihψ;
+    use or π ρ;
+    intro V _ _ e;
+    rw [models_or π ρ e];
+    simp only [LogicalConnective.HomClass.map_or, LogicalConnective.Prop.or_eq];
+    exact or_congr (hπ V e) (hρ V e);
+  | ball pos _ ih =>
+    obtain ⟨u, rfl⟩ := Rew.positive_iff.mp pos;
+    obtain ⟨π, hπ⟩ := ih;
+    use ball u π;
+    intro V _ _ e;
+    rw [models_ball u π e];
+    simp only [Semiformula.eval_ball];
+    exact forall_congr' fun x => (imp_congr Iff.rfl (hπ V (x :> e))).trans (by simp);
+  | bexs pos _ ih =>
+    obtain ⟨u, rfl⟩ := Rew.positive_iff.mp pos;
+    obtain ⟨π, hπ⟩ := ih;
+    use bexs u π;
+    intro V _ _ e;
+    rw [models_bexs u π e];
+    simp only [Semiformula.eval_bexs];
+    exact exists_congr fun x => (and_congr Iff.rfl (hπ V (x :> e))).trans (by simp);
+  | @exs s n φ _ ih =>
+    obtain ⟨π, hπ⟩ := ih;
+    use exs π;
+    intro V _ _ e;
+    have : V↓[ℒₒᵣ] ⊧* 𝗜𝚺 s := mod_ISigma_of_le (n₂ := s + 1) (by omega);
+    rw [models_exs π e, Semiformula.eval_ex];
+    exact exists_congr fun x => hπ V (x :> e);
+  | @all s n φ _ ih =>
+    obtain ⟨π, hπ⟩ := ih;
+    use all π;
+    intro V _ _ e;
+    have : V↓[ℒₒᵣ] ⊧* 𝗜𝚺 s := mod_ISigma_of_le (n₂ := s + 1) (by omega);
+    rw [models_all π e, Semiformula.eval_all];
+    exact forall_congr' fun x => hπ V (x :> e);
+  | @sigma s n φ _ ih =>
+    obtain ⟨π, hπ⟩ := ih;
+    use π.sigma;
+    intro V _ _ e;
+    have : V↓[ℒₒᵣ] ⊧* 𝗜𝚺 s := mod_ISigma_of_le (n₂ := s + 1) (by omega);
+    rw [models_sigma π V e, Semiformula.eval_ex];
+    exact exists_congr fun x => hπ V (x :> e);
+  | @pi s n φ _ ih =>
+    obtain ⟨π, hπ⟩ := ih;
+    use π.pi;
+    intro V _ _ e;
+    have : V↓[ℒₒᵣ] ⊧* 𝗜𝚺 s := mod_ISigma_of_le (n₂ := s + 1) (by omega);
+    rw [models_pi π V e, Semiformula.eval_all];
+    exact forall_congr' fun x => hπ V (x :> e);
+  | @dummy_sigma s n φ _ ih =>
+    obtain ⟨π, hπ⟩ := ih;
+    use π.all.altUp;
+    intro V _ _ e;
+    have : V↓[ℒₒᵣ] ⊧* 𝗜𝚺 s := mod_ISigma_of_le (n₂ := s + 1 + 1) (by omega);
+    have : V↓[ℒₒᵣ] ⊧* 𝗜𝚺 (s + 1) := mod_ISigma_of_le (n₂ := s + 1 + 1) (by omega);
+    exact Semiformula.eval_all.trans
+      ((forall_congr' fun x => hπ V (x :> e)).trans
+        ((models_all π e).symm.trans (models_altUp π.all V e).symm));
+  | @dummy_pi s n φ _ ih =>
+    obtain ⟨π, hπ⟩ := ih;
+    use π.exs.altUp;
+    intro V _ _ e;
+    have : V↓[ℒₒᵣ] ⊧* 𝗜𝚺 s := mod_ISigma_of_le (n₂ := s + 1 + 1) (by omega);
+    have : V↓[ℒₒᵣ] ⊧* 𝗜𝚺 (s + 1) := mod_ISigma_of_le (n₂ := s + 1 + 1) (by omega);
+    exact Semiformula.eval_ex.trans
+      ((exists_congr fun x => hπ V (x :> e)).trans
+        ((models_exs π e).symm.trans (models_altUp π.exs V e).symm));
+
 end Prenex
 
 open Prenex (ofΔ₀ closureData_correct)
 
 variable (T : ArithmeticTheory) [𝗘𝗤 ℒₒᵣ ⪯ T] {Γ : Polarity} {s n : ℕ} {φ : ArithmeticSemisentence n}
 
-theorem exists_prenex_of_hierarchy (h : Hierarchy Γ s φ) [𝗜𝚺 s ⪯ T] : ∃ π : Prenex Γ s Empty n, T ⊢ ∀¹* (φ 🡘 π.val) := by
-  rename_i hT;
-  induction h generalizing hT with
-  | verum Γ s n => exact ⟨.verum, Prenex.provable_iff_verum⟩;
-  | falsum Γ s n => exact ⟨.falsum, Prenex.provable_iff_falsum⟩;
-  | rel Γ s r v => exact ⟨.rel r v, Prenex.provable_iff_rel r v⟩;
-  | nrel Γ s r v => exact ⟨.nrel r v, Prenex.provable_iff_nrel r v⟩;
-  | and _ _ ihφ ihψ =>
-    obtain ⟨φ', hφ⟩ := ihφ;
-    obtain ⟨ψ', hψ⟩ := ihψ;
-    exact ⟨_, closureData_correct.and φ' ψ' hφ hψ⟩;
-  | or _ _ ihφ ihψ =>
-    obtain ⟨φ', hφ⟩ := ihφ;
-    obtain ⟨ψ', hψ⟩ := ihψ;
-    exact ⟨_, closureData_correct.or φ' ψ' hφ hψ⟩;
-  | ball pos _ ih =>
-    obtain ⟨u, rfl⟩ := Rew.positive_iff.mp pos;
-    obtain ⟨π, hπ⟩ := ih;
-    exact ⟨_, closureData_correct.ball u π hπ⟩;
-  | bexs pos _ ih =>
-    obtain ⟨u, rfl⟩ := Rew.positive_iff.mp pos;
-    obtain ⟨π, hπ⟩ := ih;
-    exact ⟨_, closureData_correct.bexs u π hπ⟩;
-  | @exs s n φ _ ih =>
-    have : 𝗜𝚺 s ⪯ T := ISigma_weakerThan_of_le_trans (by omega) hT;
-    obtain ⟨π, hπ⟩ := ih;
-    use π.exs;
-    exact Prenex.exs_correct hπ;
-  | @all s n φ _ ih =>
-    have : 𝗜𝚺 s ⪯ T := ISigma_weakerThan_of_le_trans (by omega) hT;
-    obtain ⟨π, hπ⟩ := ih;
-    use π.all;
-    exact Prenex.all_correct hπ;
-  | @sigma s n φ hp ih =>
-    rcases s with _ | s;
-    . let φ₀ : 𝚺₀.Semisentence (n + 1) := .mkSigma _ (Hierarchy.zero_iff.mp hp)
-      exact ⟨_, Prenex.provable_iff_sigma (Prenex.provable_iff_ofΔ₀ φ₀)⟩
-    . have : 𝗜𝚺 (s + 1) ⪯ T := ISigma_weakerThan_of_le_trans (by omega) hT
-      obtain ⟨π, hπ⟩ := ih
-      exact ⟨_, Prenex.provable_iff_sigma hπ⟩
-  | @pi s n φ hp ih =>
-    rcases s with _ | s;
-    . let φ₀ : 𝚺₀.Semisentence (n + 1) := .mkSigma _ (Hierarchy.zero_iff.mp hp)
-      exact ⟨_, Prenex.provable_iff_pi (Prenex.provable_iff_ofΔ₀ φ₀)⟩
-    . have : 𝗜𝚺 (s + 1) ⪯ T := ISigma_weakerThan_of_le_trans (by omega) hT
-      obtain ⟨π, hπ⟩ := ih
-      exact ⟨_, Prenex.provable_iff_pi hπ⟩
-  | @dummy_sigma s n φ hp ih =>
-    have : 𝗜𝚺 s ⪯ T := ISigma_weakerThan_of_le_trans (by omega) hT;
-    have : 𝗜𝚺 (s + 1) ⪯ T := ISigma_weakerThan_of_le_trans (by omega) hT;
-    obtain ⟨_, hπ⟩ := ih
-    exact ⟨_, Prenex.provable_iff_altUp (Prenex.all_correct hπ)⟩
-  | @dummy_pi s n φ hp ih =>
-    have : 𝗜𝚺 s ⪯ T := ISigma_weakerThan_of_le_trans (by omega) hT;
-    have : 𝗜𝚺 (s + 1) ⪯ T := ISigma_weakerThan_of_le_trans (by omega) hT;
-    obtain ⟨_, hπ⟩ := ih
-    exact ⟨_, Prenex.provable_iff_altUp (Prenex.exs_correct hπ)⟩
+theorem exists_prenex_of_hierarchy (h : Hierarchy Γ s φ) [𝗜𝚺 s ⪯ T] :
+    ∃ π : Prenex Γ s Empty n, T ⊢ ∀¹* (φ 🡘 π.val) := by
+  obtain ⟨π, hπ⟩ := Prenex.models_exists_prenex h;
+  use π;
+  apply provable_iff_of_models_iff;
+  intro V _ _ e;
+  have : V↓[ℒₒᵣ] ⊧* 𝗜𝚺 s := models_of_subtheory (T := 𝗜𝚺 s) (U := T) inferInstance;
+  exact hπ V e;
 
 variable (T : ArithmeticTheory) {Γ : Polarity} {s n : ℕ} {φ : ArithmeticSemisentence n} [𝗜𝚺 s ⪯ T]
 
