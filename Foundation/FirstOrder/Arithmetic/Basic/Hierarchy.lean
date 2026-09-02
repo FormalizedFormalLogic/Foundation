@@ -407,7 +407,7 @@ lemma toPrenex {φ : Semiformula L ξ (n + s)}
   | succ s ih =>
     rw [Polarity.altItr_succ] at h
     show Hierarchy Γ (j + (s + 1)) (Polarity.quantItr Γ (s + 1) φ)
-    rw [Polarity.quantItr_succ, (show j + (s + 1) = (j + 1) + s by omega)]
+    rw [Polarity.quantItr_succ', (show j + (s + 1) = (j + 1) + s by omega)]
     rcases hΓ : Γ.altItr s with _ | _
     . apply ih
       rw [hΓ] at h ⊢

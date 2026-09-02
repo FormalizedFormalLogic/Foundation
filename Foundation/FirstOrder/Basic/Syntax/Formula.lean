@@ -131,7 +131,7 @@ abbrev toPrenex (Γ : Polarity) (s : ℕ) (φ : Semiformula L ξ (n + s)) : Semi
   | zero => rfl
   | succ s ih =>
     show ∼(Polarity.quantItr Γ (s + 1) φ) = Polarity.quantItr Γ.alt (s + 1) (∼φ)
-    rw [Polarity.quantItr_succ, ih, neg_quant, Polarity.quantItr_succ]
+    rw [Polarity.quantItr_succ', ih, neg_quant, Polarity.quantItr_succ']
     rw [← Polarity.altItr_succ, Polarity.altItr_succ']
 
 @[simp] lemma neg_inj (φ ψ : Semiformula L ξ n) : ∼φ = ∼ψ ↔ φ = ψ := by
