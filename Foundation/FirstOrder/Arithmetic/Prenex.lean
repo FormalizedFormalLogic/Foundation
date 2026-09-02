@@ -558,6 +558,97 @@ lemma succ_correct [𝗜𝚺 (s + 1) ⪯ T] {C : ClosureData s} (hC : C.Correct 
 
 end ClosureData
 
+mutual
+
+def ball : {Γ : Polarity} → {s n : ℕ} →
+    ArithmeticSemiterm Empty n → Prenex Γ s Empty (n + 1) → Prenex Γ s Empty n
+  | _, 0,     _, u, π => ⟨.mkSigma _ (Hierarchy.ball (Rew.bShift_positive u) π.val_deltaZero)⟩
+  | 𝚺, _ + 1, _, u, π =>
+      (ball (Rew.bShift u) (bexs ‘#1 + 1’ (π.sigmaInv.rew (Rew.subst (#0 :> #1 :> (#·.succ.succ.succ)))))).sigma
+  | 𝚷, _ + 1, _, u, π => (bexs u π.neg).neg
+termination_by Γ s n _u _π => (s, match Γ with | 𝚺 => 0 | 𝚷 => 1)
+
+def bexs : {Γ : Polarity} → {s n : ℕ} →
+    ArithmeticSemiterm Empty n → Prenex Γ s Empty (n + 1) → Prenex Γ s Empty n
+  | _, 0,     _, u, π => ⟨.mkSigma _ (Hierarchy.bexs (Rew.bShift_positive u) π.val_deltaZero)⟩
+  | 𝚺, _ + 1, _, u, π =>
+      (bexs (Rew.bShift u) (π.sigmaInv.rew (Rew.subst (#1 :> #0 :> (#·.succ.succ))))).sigma
+  | 𝚷, _ + 1, _, u, π => (ball u π.neg).neg
+termination_by Γ s n _u _π => (s, match Γ with | 𝚺 => 0 | 𝚷 => 1)
+
+end
+
+@[simp] lemma ball_zero {u : ArithmeticSemiterm Empty n} {π : Prenex Γ 0 Empty (n + 1)} :
+    ball u π = ⟨.mkSigma _ (Hierarchy.ball (Rew.bShift_positive u) π.val_deltaZero)⟩ := by
+  simp [ball]
+
+@[simp] lemma bexs_zero {u : ArithmeticSemiterm Empty n} {π : Prenex Γ 0 Empty (n + 1)} :
+    bexs u π = ⟨.mkSigma _ (Hierarchy.bexs (Rew.bShift_positive u) π.val_deltaZero)⟩ := by
+  simp [bexs]
+
+lemma ball_succ_sigma {u : ArithmeticSemiterm Empty n} {π : Prenex 𝚺 (s + 1) Empty (n + 1)} :
+    ball u π =
+      (ball (Rew.bShift u)
+        (bexs ‘#1 + 1’ (π.sigmaInv.rew (Rew.subst (#0 :> #1 :> (#·.succ.succ.succ)))))).sigma := by
+  rw [ball]
+
+lemma ball_succ_pi {u : ArithmeticSemiterm Empty n} {π : Prenex 𝚷 (s + 1) Empty (n + 1)} :
+    ball u π = (bexs u π.neg).neg := by
+  rw [ball]
+
+lemma bexs_succ_sigma {u : ArithmeticSemiterm Empty n} {π : Prenex 𝚺 (s + 1) Empty (n + 1)} :
+    bexs u π =
+      (bexs (Rew.bShift u) (π.sigmaInv.rew (Rew.subst (#1 :> #0 :> (#·.succ.succ))))).sigma := by
+  rw [bexs]
+
+lemma bexs_succ_pi {u : ArithmeticSemiterm Empty n} {π : Prenex 𝚷 (s + 1) Empty (n + 1)} :
+    bexs u π = (ball u π.neg).neg := by
+  rw [bexs]
+
+mutual
+
+def and : {Γ : Polarity} → {s n : ℕ} → Prenex Γ s Empty n → Prenex Γ s Empty n → Prenex Γ s Empty n
+  | _, 0,     _, π, ρ => ⟨.mkSigma _ (Hierarchy.and π.val_deltaZero ρ.val_deltaZero)⟩
+  | 𝚺, _ + 1, _, π, ρ =>
+      (and (bexs ‘#0 + 1’ (π.sigmaInv.rew (Rew.subst (#0 :> (#·.succ.succ)))))
+           (bexs ‘#0 + 1’ (ρ.sigmaInv.rew (Rew.subst (#0 :> (#·.succ.succ)))))).sigma
+  | 𝚷, _ + 1, _, π, ρ => (or π.neg ρ.neg).neg
+termination_by Γ s n π ρ => (s, match Γ with | 𝚺 => 0 | 𝚷 => 1)
+
+def or : {Γ : Polarity} → {s n : ℕ} → Prenex Γ s Empty n → Prenex Γ s Empty n → Prenex Γ s Empty n
+  | _, 0,     _, π, ρ => ⟨.mkSigma _ (Hierarchy.or π.val_deltaZero ρ.val_deltaZero)⟩
+  | 𝚺, _ + 1, _, π, ρ => (or π.sigmaInv ρ.sigmaInv).sigma
+  | 𝚷, _ + 1, _, π, ρ => (and π.neg ρ.neg).neg
+termination_by Γ s n π ρ => (s, match Γ with | 𝚺 => 0 | 𝚷 => 1)
+
+end
+
+@[simp] lemma and_zero {π ρ : Prenex Γ 0 Empty n} :
+    and π ρ = ⟨.mkSigma _ (Hierarchy.and π.val_deltaZero ρ.val_deltaZero)⟩ := by
+  simp [and]
+
+@[simp] lemma or_zero {π ρ : Prenex Γ 0 Empty n} :
+    or π ρ = ⟨.mkSigma _ (Hierarchy.or π.val_deltaZero ρ.val_deltaZero)⟩ := by
+  simp [or]
+
+lemma and_succ_sigma {π ρ : Prenex 𝚺 (s + 1) Empty n} :
+    and π ρ =
+      (and (bexs ‘#0 + 1’ (π.sigmaInv.rew (Rew.subst (#0 :> (#·.succ.succ)))))
+           (bexs ‘#0 + 1’ (ρ.sigmaInv.rew (Rew.subst (#0 :> (#·.succ.succ)))))).sigma := by
+  rw [and]
+
+lemma and_succ_pi {π ρ : Prenex 𝚷 (s + 1) Empty n} :
+    and π ρ = (or π.neg ρ.neg).neg := by
+  rw [and]
+
+lemma or_succ_sigma {π ρ : Prenex 𝚺 (s + 1) Empty n} :
+    or π ρ = (or π.sigmaInv ρ.sigmaInv).sigma := by
+  rw [or]
+
+lemma or_succ_pi {π ρ : Prenex 𝚷 (s + 1) Empty n} :
+    or π ρ = (and π.neg ρ.neg).neg := by
+  rw [or]
+
 def closureData : (s : ℕ) → ClosureData s
   | 0 => .zero
   | s + 1 => (closureData s).succ
