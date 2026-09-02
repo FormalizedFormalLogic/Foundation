@@ -823,6 +823,22 @@ lemma models_bexs {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺 
     V ⊧/e (bexs u π).val ↔ ∃ x < u.valb e, V ⊧/(x :> e) π.val :=
   (models_ball_bexs s u π e).2
 
+lemma models_or_succ_sigma {V : Type*} [ORingStructure V]
+    (ih : ∀ {m : ℕ} (π ρ : Prenex 𝚷 s Empty m) (e : Fin m → V),
+      V ⊧/e (or π ρ).val ↔ V ⊧/e π.val ∨ V ⊧/e ρ.val)
+    (π ρ : Prenex 𝚺 (s + 1) Empty n) (e : Fin n → V) :
+    V ⊧/e (or π ρ).val ↔ V ⊧/e π.val ∨ V ⊧/e ρ.val := by
+  rw [or_succ_sigma (φ := π) (ψ := ρ), models_sigma];
+  simp only [ih π.sigmaInv ρ.sigmaInv, models_sigmaInv π V, models_sigmaInv ρ V];
+  exact exists_or;
+
+lemma models_and_succ_sigma {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺 s]
+    (ih : ∀ {m : ℕ} (π ρ : Prenex 𝚷 s Empty m) (e : Fin m → V),
+      V ⊧/e (and π ρ).val ↔ V ⊧/e π.val ∧ V ⊧/e ρ.val)
+    (π ρ : Prenex 𝚺 (s + 1) Empty n) (e : Fin n → V) :
+    V ⊧/e (and π ρ).val ↔ V ⊧/e π.val ∧ V ⊧/e ρ.val := by
+  sorry
+
 def closureData : (s : ℕ) → ClosureData s
   | 0 => .zero
   | s + 1 => (closureData s).succ
