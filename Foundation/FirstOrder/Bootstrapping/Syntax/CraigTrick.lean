@@ -335,10 +335,4 @@ instance [L.DecidableEq] [Consistent T] : Consistent T.craig :=
 
 end
 
-/-- Every recursively enumerable theory is equivalent to a primitive-recursively axiomatized
-theory. -/
-theorem exists_primrec_equiv [L.Primcodable] [L.DecidableEq] (T : Theory L) [T.RE] :
-    ∃ U : Theory L, U.Primrec ∧ Nonempty U.Δ₁ ∧ T ≊ U :=
-  ⟨T.craig, inferInstance, ⟨inferInstance⟩, inferInstance⟩
-
 end LO.FirstOrder.Theory
