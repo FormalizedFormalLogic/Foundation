@@ -20,7 +20,7 @@ variable {Γ : Polarity} {s n : ℕ} {φ : ArithmeticSemisentence n} {σ : Arith
 
 lemma hasPrenex (h : Hierarchy Γ s φ) :
     ∃ π : Prenex Γ s Empty n, 𝗣𝗔 ⊢ ∀¹* (φ 🡘 π.val) :=
-  Arithmetic.hasPrenex h
+  exists_prenex_of_hierarchy 𝗣𝗔 h
 
 lemma exists_matrix_provable (h : Hierarchy Γ s φ) :
     ∃ φ₀ : 𝚺₀.Semisentence (n + s), 𝗣𝗔 ⊢ ∀¹* (φ 🡘 φ₀.val.toPrenex Γ s) := by

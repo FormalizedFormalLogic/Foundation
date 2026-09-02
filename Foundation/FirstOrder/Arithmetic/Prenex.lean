@@ -181,25 +181,26 @@ def verum : Prenex Γ s ξ n := ofΔ₀ (.mkSigma ⊤ (Hierarchy.verum 𝚺 0 n)
 
 def falsum : Prenex Γ s ξ n := ofΔ₀ (.mkSigma ⊥ (Hierarchy.falsum 𝚺 0 n)) Γ s
 
-def rel {k : ℕ} (r : (ℒₒᵣ).Rel k) (v : Fin k → ArithmeticSemiterm ξ n) : Prenex Γ s ξ n :=
+def rel (r : (ℒₒᵣ).Rel k) (v : Fin k → ArithmeticSemiterm ξ n) : Prenex Γ s ξ n :=
   ofΔ₀ (.mkSigma (.rel r v) (Hierarchy.rel 𝚺 0 r v)) Γ s
 
-def nrel {k : ℕ} (r : (ℒₒᵣ).Rel k) (v : Fin k → ArithmeticSemiterm ξ n) : Prenex Γ s ξ n :=
+def nrel (r : (ℒₒᵣ).Rel k) (v : Fin k → ArithmeticSemiterm ξ n) : Prenex Γ s ξ n :=
   ofΔ₀ (.mkSigma (.nrel r v) (Hierarchy.nrel 𝚺 0 r v)) Γ s
 
-lemma provable_iff_verum : T ⊢ ∀¹* ((⊤ : ArithmeticSemisentence n) 🡘 (verum : Prenex Γ s Empty n).val) :=
-  provable_iff_ofΔ₀ (.mkSigma ⊤ (Hierarchy.verum 𝚺 0 n))
 
-lemma provable_iff_falsum : T ⊢ ∀¹* ((⊥ : ArithmeticSemisentence n) 🡘 (falsum : Prenex Γ s Empty n).val) :=
-  provable_iff_ofΔ₀ (.mkSigma ⊥ (Hierarchy.falsum 𝚺 0 n))
+lemma provable_iff_verum : T ⊢ ∀¹* (⊤ 🡘 (verum : Prenex Γ s Empty n).val) :=
+  provable_iff_ofΔ₀ (.mkSigma ⊤ (by simp))
 
-lemma provable_iff_rel {k : ℕ} (r : (ℒₒᵣ).Rel k) (v : Fin k → ArithmeticSemiterm Empty n) :
-    T ⊢ ∀¹* (Semiformula.rel r v 🡘 (rel r v : Prenex Γ s Empty n).val) :=
-  provable_iff_ofΔ₀ (.mkSigma (.rel r v) (Hierarchy.rel 𝚺 0 r v))
+lemma provable_iff_falsum : T ⊢ ∀¹* (⊥ 🡘 (falsum : Prenex Γ s Empty n).val) :=
+  provable_iff_ofΔ₀ (.mkSigma ⊥ (by simp))
 
-lemma provable_iff_nrel {k : ℕ} (r : (ℒₒᵣ).Rel k) (v : Fin k → ArithmeticSemiterm Empty n) :
-    T ⊢ ∀¹* (Semiformula.nrel r v 🡘 (nrel r v : Prenex Γ s Empty n).val) :=
-  provable_iff_ofΔ₀ (.mkSigma (.nrel r v) (Hierarchy.nrel 𝚺 0 r v))
+lemma provable_iff_rel (r : (ℒₒᵣ).Rel k) (v : Fin k → ArithmeticSemiterm Empty n) :
+  T ⊢ ∀¹* (Semiformula.rel r v 🡘 (rel r v : Prenex Γ s Empty n).val) :=
+  provable_iff_ofΔ₀ (.mkSigma (.rel r v) (by simp))
+
+lemma provable_iff_nrel (r : (ℒₒᵣ).Rel k) (v : Fin k → ArithmeticSemiterm Empty n) :
+  T ⊢ ∀¹* (Semiformula.nrel r v 🡘 (nrel r v : Prenex Γ s Empty n).val) :=
+  provable_iff_ofΔ₀ (.mkSigma (.nrel r v) (by simp))
 
 
 omit [𝗘𝗤 ℒₒᵣ ⪯ T] in
@@ -230,10 +231,10 @@ structure ClosureData (s : ℕ) where
   or   {Γ : Polarity} {n : ℕ} : Prenex Γ s Empty n → Prenex Γ s Empty n → Prenex Γ s Empty n
 
 structure ClosureData.Correct (T : ArithmeticTheory) [𝗘𝗤 ℒₒᵣ ⪯ T] (C : ClosureData s) where
-  ball {Γ : Polarity} {n : ℕ} {φ} (u : ArithmeticSemiterm Empty n) (φ' : Prenex Γ s Empty (n + 1)) :
+  ball {Γ : Polarity} {n : ℕ} {φ} (u) (φ' : Prenex Γ s Empty (n + 1)) :
     T ⊢ ∀¹* (φ 🡘 φ'.val) →
     T ⊢ ∀¹* (φ.ballLT u 🡘 (C.ball u φ').val)
-  bexs {Γ : Polarity} {n : ℕ} {φ} (u : ArithmeticSemiterm Empty n) (φ' : Prenex Γ s Empty (n + 1)) :
+  bexs {Γ : Polarity} {n : ℕ} {φ} (u) (φ' : Prenex Γ s Empty (n + 1)) :
     T ⊢ ∀¹* (φ 🡘 φ'.val) →
     T ⊢ ∀¹* (φ.bexsLT u 🡘 (C.bexs u φ').val)
   and {Γ : Polarity} {n : ℕ} {φ ψ} (φ' ψ' : Prenex Γ s Empty n) :
@@ -653,23 +654,23 @@ end Prenex
 
 open Prenex (ofΔ₀ closureData_correct)
 
-variable {T : ArithmeticTheory} [𝗘𝗤 ℒₒᵣ ⪯ T] {Γ : Polarity} {s n : ℕ} {φ : ArithmeticSemisentence n}
+variable (T : ArithmeticTheory) [𝗘𝗤 ℒₒᵣ ⪯ T] {Γ : Polarity} {s n : ℕ} {φ : ArithmeticSemisentence n}
 
-theorem hasPrenex (h : Hierarchy Γ s φ) [𝗜𝚺 s ⪯ T] : ∃ π : Prenex Γ s Empty n, T ⊢ ∀¹* (φ 🡘 π.val) := by
+theorem exists_prenex_of_hierarchy (h : Hierarchy Γ s φ) [𝗜𝚺 s ⪯ T] : ∃ π : Prenex Γ s Empty n, T ⊢ ∀¹* (φ 🡘 π.val) := by
   rename_i hT;
   induction h generalizing hT with
   | verum Γ s n => exact ⟨.verum, Prenex.provable_iff_verum⟩;
   | falsum Γ s n => exact ⟨.falsum, Prenex.provable_iff_falsum⟩;
   | rel Γ s r v => exact ⟨.rel r v, Prenex.provable_iff_rel r v⟩;
   | nrel Γ s r v => exact ⟨.nrel r v, Prenex.provable_iff_nrel r v⟩;
-  | and _ _ ihp ihq =>
-    obtain ⟨π, hπ⟩ := ihp;
-    obtain ⟨ρ, hρ⟩ := ihq;
-    exact ⟨_, closureData_correct.and π ρ hπ hρ⟩;
-  | or _ _ ihp ihq =>
-    obtain ⟨π, hπ⟩ := ihp;
-    obtain ⟨ρ, hρ⟩ := ihq;
-    exact ⟨_, closureData_correct.or π ρ hπ hρ⟩;
+  | and _ _ ihφ ihψ =>
+    obtain ⟨φ', hφ⟩ := ihφ;
+    obtain ⟨ψ', hψ⟩ := ihψ;
+    exact ⟨_, closureData_correct.and φ' ψ' hφ hψ⟩;
+  | or _ _ ihφ ihψ =>
+    obtain ⟨φ', hφ⟩ := ihφ;
+    obtain ⟨ψ', hψ⟩ := ihψ;
+    exact ⟨_, closureData_correct.or φ' ψ' hφ hψ⟩;
   | ball pos _ ih =>
     obtain ⟨u, rfl⟩ := Rew.positive_iff.mp pos;
     obtain ⟨π, hπ⟩ := ih;
@@ -691,38 +692,35 @@ theorem hasPrenex (h : Hierarchy Γ s φ) [𝗜𝚺 s ⪯ T] : ∃ π : Prenex �
   | @sigma s n φ hp ih =>
     rcases s with _ | s;
     . let φ₀ : 𝚺₀.Semisentence (n + 1) := .mkSigma _ (Hierarchy.zero_iff.mp hp)
-      let π := Prenex.ofΔ₀ φ₀ 𝚷 0
-      exact ⟨π.sigma, Prenex.provable_iff_sigma (Prenex.provable_iff_ofΔ₀ φ₀)⟩
+      exact ⟨_, Prenex.provable_iff_sigma (Prenex.provable_iff_ofΔ₀ φ₀)⟩
     . have : 𝗜𝚺 (s + 1) ⪯ T := ISigma_weakerThan_of_le_trans (by omega) hT
       obtain ⟨π, hπ⟩ := ih
-      exact ⟨π.sigma, Prenex.provable_iff_sigma hπ⟩
+      exact ⟨_, Prenex.provable_iff_sigma hπ⟩
   | @pi s n φ hp ih =>
     rcases s with _ | s;
     . let φ₀ : 𝚺₀.Semisentence (n + 1) := .mkSigma _ (Hierarchy.zero_iff.mp hp)
-      let π := Prenex.ofΔ₀ φ₀ 𝚺 0
-      exact ⟨π.pi, Prenex.provable_iff_pi (Prenex.provable_iff_ofΔ₀ φ₀)⟩
+      exact ⟨_, Prenex.provable_iff_pi (Prenex.provable_iff_ofΔ₀ φ₀)⟩
     . have : 𝗜𝚺 (s + 1) ⪯ T := ISigma_weakerThan_of_le_trans (by omega) hT
       obtain ⟨π, hπ⟩ := ih
-      exact ⟨π.pi, Prenex.provable_iff_pi hπ⟩
+      exact ⟨_, Prenex.provable_iff_pi hπ⟩
   | @dummy_sigma s n φ hp ih =>
     have : 𝗜𝚺 s ⪯ T := ISigma_weakerThan_of_le_trans (by omega) hT;
     have : 𝗜𝚺 (s + 1) ⪯ T := ISigma_weakerThan_of_le_trans (by omega) hT;
-    obtain ⟨π, hπ⟩ := ih
-    exact ⟨π.all.altUp, Prenex.provable_iff_altUp (Prenex.all_correct hπ)⟩
+    obtain ⟨_, hπ⟩ := ih
+    exact ⟨_, Prenex.provable_iff_altUp (Prenex.all_correct hπ)⟩
   | @dummy_pi s n φ hp ih =>
     have : 𝗜𝚺 s ⪯ T := ISigma_weakerThan_of_le_trans (by omega) hT;
     have : 𝗜𝚺 (s + 1) ⪯ T := ISigma_weakerThan_of_le_trans (by omega) hT;
-    obtain ⟨π, hπ⟩ := ih
-    exact ⟨π.exs.altUp, Prenex.provable_iff_altUp (Prenex.exs_correct hπ)⟩
+    obtain ⟨_, hπ⟩ := ih
+    exact ⟨_, Prenex.provable_iff_altUp (Prenex.exs_correct hπ)⟩
 
 variable (T : ArithmeticTheory) {Γ : Polarity} {s n : ℕ} {φ : ArithmeticSemisentence n} [𝗜𝚺 s ⪯ T]
 
 theorem exists_matrix_provable (h : Hierarchy Γ s φ) :
   ∃ φ₀ : 𝚺₀.Semisentence (n + s), T ⊢ ∀¹* (φ 🡘 φ₀.val.toPrenex Γ s) := by
-  have : 𝗘𝗤 ℒₒᵣ ⪯ T := Entailment.WeakerThan.trans
-    (inferInstance : 𝗘𝗤 ℒₒᵣ ⪯ 𝗜𝚺₀) (ISigma_weakerThan_of_le_trans (by omega) ‹𝗜𝚺 s ⪯ T›);
-  obtain ⟨π, hπ⟩ := hasPrenex (T := T) h;
-  exact ⟨π.matrix, by simpa [Prenex.val] using hπ⟩;
+  have : 𝗘𝗤 ℒₒᵣ ⪯ T := Entailment.WeakerThan.trans (inferInstance : 𝗘𝗤 ℒₒᵣ ⪯ 𝗜𝚺₀) (ISigma_weakerThan_of_le_trans (by omega) ‹𝗜𝚺 s ⪯ T›);
+  obtain ⟨_, hπ⟩ := exists_prenex_of_hierarchy T h;
+  exact ⟨_, by simpa [Prenex.val] using hπ⟩;
 
 end Arithmetic
 
