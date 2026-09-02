@@ -922,18 +922,57 @@ lemma models_or {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺 s]
     V ⊧/e (or π ρ).val ↔ V ⊧/e π.val ∨ V ⊧/e ρ.val :=
   (models_and_or s π ρ e).2
 
+def exs (π : Prenex 𝚺 (s + 1) Empty (n + 1)) : Prenex 𝚺 (s + 1) Empty n :=
+  (bexs ‘#0 + 1’ (bexs ‘#1 + 1’ (π.sigmaInv.rew (Rew.subst (#0 :> #1 :> (#·.succ.succ.succ)))))).sigma
+
+def all (π : Prenex 𝚷 (s + 1) Empty (n + 1)) : Prenex 𝚷 (s + 1) Empty n := (exs π.neg).neg
+
+lemma models_exs {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺 s]
+    (π : Prenex 𝚺 (s + 1) Empty (n + 1)) (e : Fin n → V) :
+    V ⊧/e (exs π).val ↔ ∃ x, V ⊧/(x :> e) π.val := by
+  have : V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := mod_paMinus_of_ISigma (n := s);
+  show V ⊧/e
+      (bexs ‘#0 + 1’ (bexs ‘#1 + 1’
+        (π.sigmaInv.rew (Rew.subst (#0 :> #1 :> (#·.succ.succ.succ)))))).sigma.val ↔
+    ∃ x, V ⊧/(x :> e) π.val;
+  rw [models_sigma];
+  have hβeval : ∀ z : V,
+      V ⊧/(z :> e)
+        (bexs ‘#0 + 1’ (bexs ‘#1 + 1’
+          (π.sigmaInv.rew (Rew.subst (#0 :> #1 :> (#·.succ.succ.succ)))))).val ↔
+        ∃ y ≤ z, V ⊧/(y :> z :> e)
+          (bexs ‘#1 + 1’ (π.sigmaInv.rew (Rew.subst (#0 :> #1 :> (#·.succ.succ.succ))))).val := by
+    intro z;
+    rw [models_bexs];
+    have hval : (‘#0 + 1’ : ArithmeticSemiterm Empty (n + 1)).valb (z :> e) = z + 1 := by simp;
+    rw [hval];
+    simp only [Arithmetic.lt_succ_iff_le];
+  have hαeval : ∀ y z : V,
+      V ⊧/(y :> z :> e)
+        (bexs ‘#1 + 1’ (π.sigmaInv.rew (Rew.subst (#0 :> #1 :> (#·.succ.succ.succ))))).val ↔
+        ∃ x ≤ z, V ⊧/(x :> y :> e) π.sigmaInv.val :=
+    fun y z => models_bexs_witness models_bexs π y z e;
+  simp only [hβeval, hαeval, models_sigmaInv π V];
+  constructor;
+  . rintro ⟨z, y, -, x, -, hx⟩;
+    exact ⟨y, x, hx⟩;
+  . rintro ⟨y, x, hx⟩;
+    exact ⟨max x y, y, le_max_right x y, x, le_max_left x y, hx⟩;
+
+lemma models_all {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺 s]
+    (π : Prenex 𝚷 (s + 1) Empty (n + 1)) (e : Fin n → V) :
+    V ⊧/e (all π).val ↔ ∀ x, V ⊧/(x :> e) π.val := by
+  have hthis : V ⊧/e (exs π.neg).val ↔ ∃ x, V ⊧/(x :> e) π.neg.val := models_exs π.neg e;
+  have hval : (all π).val = ∼(exs π.neg).val := by
+    unfold all;
+    exact val_neg (exs π.neg);
+  rw [hval];
+  simp only [val_neg, LogicalConnective.HomClass.map_neg, LogicalConnective.Prop.neg_eq] at hthis ⊢;
+  grind;
+
 def closureData : (s : ℕ) → ClosureData s
   | 0 => .zero
   | s + 1 => (closureData s).succ
-
-def exs (π : Prenex 𝚺 (s + 1) Empty (n + 1)) : Prenex 𝚺 (s + 1) Empty n :=
-  letI φ₁' := π.sigmaInv;
-  letI φ₂' := φ₁'.rew (Rew.subst (#0 :> #1 :> (#·.succ.succ.succ)));
-  letI α   := (closureData s).bexs (‘#1 + 1’) φ₂';
-  letI β   := (closureData s).bexs (‘#0 + 1’) α;
-  β.sigma
-
-def all (π : Prenex 𝚷 (s + 1) Empty (n + 1)) : Prenex 𝚷 (s + 1) Empty n := (exs π.neg).neg
 
 lemma closureData_correct [𝗜𝚺 s ⪯ T] : (closureData s).Correct T := by
   rename_i h;
@@ -945,50 +984,19 @@ lemma closureData_correct [𝗜𝚺 s ⪯ T] : (closureData s).Correct T := by
 
 lemma exs_correct [𝗜𝚺 s ⪯ T] {φ : ArithmeticSemisentence (n + 1)} {π : Prenex 𝚺 (s + 1) Empty (n + 1)}
     (hπ : T ⊢ ∀¹* (φ 🡘 π.val)) : T ⊢ ∀¹* ((∃¹ φ) 🡘 (exs π).val) := by
-  have : 𝗜𝚺₀ ⪯ T := Entailment.WeakerThan.trans (ISigma_weakerThan_of_le (Nat.zero_le s)) inferInstance;
-  set φ₁' := π.sigmaInv;
-  set φ₁ := φ₁'.val;
-  let φ₂' := φ₁'.rew (Rew.subst (#0 :> #1 :> (#·.succ.succ.succ)));
-  let α := (closureData s).bexs (‘#1 + 1’) φ₂';
-  have hα : T ⊢ ∀¹* ((φ₁ ⇜ (#0 :> #1 :> (#·.succ.succ.succ))).bexsLT (‘#1 + 1’) 🡘 α.val) :=
-    closureData_correct.bexs (φ := φ₁ ⇜ (#0 :> #1 :> (#·.succ.succ.succ))) (‘#1 + 1’) φ₂'
-      (by simpa [φ₂', φ₁] using
-        (provable_iff_rew (T := T) (by grind)
-        (Rew.subst (#0 :> #1 :> (#·.succ.succ.succ)))));
-  let β := (closureData s).bexs (‘#0 + 1’) α;
-  have hβ : T ⊢ ∀¹* ((α.val).bexsLT (‘#0 + 1’) 🡘 β.val) := closureData_correct.bexs (‘#0 + 1’) α provable_iff_refl;
-  have hαiff := models_iff_of_provable_iff hα;
-  have hβiff := models_iff_of_provable_iff hβ;
-  unfold exs;
-  apply provable_iff_of_models_iff
+  apply provable_iff_of_models_iff;
   intro V _ _ e;
-  . change V ⊧/e (∃¹ φ) ↔ V ⊧/e β.sigma.val;
-    rw [val_sigma]
-    have : V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := models_of_subtheory (T := 𝗣𝗔⁻) (U := T) inferInstance;
-    have hαeval : ∀ y z : V, V ⊧/(y :> z :> e) α.val ↔
-        ∃ x ≤ z, V ⊧/(x :> y :> e) φ₁ := by
-      intro y z;
-      rw [← hαiff V (y :> z :> e)];
-      simp [Semiformula.eval_bexsLT, Semiformula.eval_insert2, Arithmetic.lt_succ_iff_le,
-        -Semiformula.eval_substs];
-    have hβeval : ∀ z : V, V ⊧/(z :> e) β.val ↔
-        ∃ y ≤ z, V ⊧/(y :> z :> e) α.val := by
-      intro z;
-      rw [← hβiff V (z :> e)];
-      simp [Semiformula.eval_bexsLT, Arithmetic.lt_succ_iff_le];
-    have hφeval : ∀ y : V, V ⊧/(y :> e) φ ↔ ∃ x, V ⊧/(x :> y :> e) φ₁ := fun y =>
-      models_iff_sigmaInv hπ V (y :> e);
-    simp only [Semiformula.eval_ex, hφeval, hβeval, hαeval];
-    constructor;
-    . rintro ⟨y, x, hx⟩;
-      exact ⟨max x y, y, le_max_right x y, x, le_max_left x y, hx⟩;
-    . rintro ⟨z, y, -, x, -, hx⟩;
-      exact ⟨y, x, hx⟩;
+  have : V↓[ℒₒᵣ] ⊧* 𝗜𝚺 s := models_of_subtheory (T := 𝗜𝚺 s) (U := T) inferInstance;
+  rw [models_exs π e, Semiformula.eval_ex];
+  exact exists_congr (fun x ↦ models_iff_of_provable_iff hπ V (x :> e));
 
 lemma all_correct [𝗜𝚺 s ⪯ T] {φ : ArithmeticSemisentence (n + 1)} {π : Prenex 𝚷 (s + 1) Empty (n + 1)}
     (hπ : T ⊢ ∀¹* (φ 🡘 π.val)) : T ⊢ ∀¹* ((∀¹ φ) 🡘 (all π).val) := by
-  unfold all;
-  simpa using provable_iff_neg $ exs_correct (provable_iff_neg hπ);
+  apply provable_iff_of_models_iff;
+  intro V _ _ e;
+  have : V↓[ℒₒᵣ] ⊧* 𝗜𝚺 s := models_of_subtheory (T := 𝗜𝚺 s) (U := T) inferInstance;
+  rw [models_all π e, Semiformula.eval_all];
+  exact forall_congr' (fun x ↦ models_iff_of_provable_iff hπ V (x :> e));
 
 end Prenex
 
