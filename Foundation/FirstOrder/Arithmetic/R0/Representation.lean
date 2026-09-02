@@ -28,10 +28,8 @@ lemma term_primrec {k f} : (t : ArithmeticSemiterm ξ k) → Primrec (fun v : Li
 lemma primrecPred_ball (ε : ξ → ℕ) {n} (t : ArithmeticSemiterm ξ n) {ψ : ArithmeticSemiformula ξ (n + 1)}
     (h : PrimrecPred fun v : List.Vector ℕ (n + 1) ↦ ψ.Eval v.get ε) :
     PrimrecPred fun v : List.Vector ℕ n ↦ ∀ x < t.val v.get ε, ψ.Eval (x :> v.get) ε := by
-  have hrel : PrimrecRel (fun x (v : List.Vector ℕ n) ↦ ψ.Eval (x ::ᵥ v).get ε) :=
-    (h.comp (Primrec.vector_cons.comp .fst .snd)).primrecRel
   have hbounded : PrimrecPred fun p : ℕ × List.Vector ℕ n ↦ ∀ x < p.1, ψ.Eval (x ::ᵥ p.2).get ε :=
-    ((PrimrecRel.forall_mem_list hrel).comp
+    ((PrimrecRel.forall_mem_list (h.comp (Primrec.vector_cons.comp .fst .snd)).primrecRel).comp
       (Primrec.list_range.comp Primrec.fst) Primrec.snd).of_eq (by simp);
   exact (hbounded.comp ((term_primrec (f := ε) t).pair Primrec.id)).of_eq
     fun v ↦ by simp [List.Vector.cons_get];
@@ -39,10 +37,8 @@ lemma primrecPred_ball (ε : ξ → ℕ) {n} (t : ArithmeticSemiterm ξ n) {ψ :
 lemma primrecPred_bexs (ε : ξ → ℕ) {n} (t : ArithmeticSemiterm ξ n) {ψ : ArithmeticSemiformula ξ (n + 1)}
     (h : PrimrecPred fun v : List.Vector ℕ (n + 1) ↦ ψ.Eval v.get ε) :
     PrimrecPred fun v : List.Vector ℕ n ↦ ∃ x < t.val v.get ε, ψ.Eval (x :> v.get) ε := by
-  have hrel : PrimrecRel (fun x (v : List.Vector ℕ n) ↦ ψ.Eval (x ::ᵥ v).get ε) :=
-    (h.comp (Primrec.vector_cons.comp .fst .snd)).primrecRel
   have hbounded : PrimrecPred fun p : ℕ × List.Vector ℕ n ↦ ∃ x < p.1, ψ.Eval (x ::ᵥ p.2).get ε :=
-    ((PrimrecRel.exists_mem_list hrel).comp
+    ((PrimrecRel.exists_mem_list (h.comp (Primrec.vector_cons.comp .fst .snd)).primrecRel).comp
       (Primrec.list_range.comp Primrec.fst) Primrec.snd).of_eq (by simp);
   exact (hbounded.comp ((term_primrec (f := ε) t).pair Primrec.id)).of_eq
     fun v ↦ by simp [List.Vector.cons_get];
@@ -52,39 +48,39 @@ lemma delta0_primrec (ε : ξ → ℕ) {k} {φ : ArithmeticSemiformula ξ k}
     PrimrecPred fun v : List.Vector ℕ k ↦ φ.Eval v.get ε := by
   apply sigma₁_induction' (P := fun n φ ↦
     Hierarchy 𝚺 0 φ → PrimrecPred fun v : List.Vector ℕ n ↦ φ.Eval v.get ε) (hp.mono (by simp))
-  case hVerum => intro _ _; exact (Primrec.const true).primrecPred (p := fun _ : List.Vector ℕ _ ↦ True);
-  case hFalsum => intro _ _; exact (Primrec.const false).primrecPred (p := fun _ : List.Vector ℕ _ ↦ False);
+  case hVerum => intro _ _; exact (Primrec.const true).primrecPred (p := fun _ ↦ True);
+  case hFalsum => intro _ _; exact (Primrec.const false).primrecPred (p := fun _ ↦ False);
   case hEQ =>
-    intro n t₁ t₂ _
-    exact Primrec.eq.comp (term_primrec t₁) (term_primrec t₂)
+    intro n t₁ t₂ _;
+    exact Primrec.eq.comp (term_primrec t₁) (term_primrec t₂);
   case hNEQ =>
-    intro n t₁ t₂ _
-    exact (Primrec.eq.comp (term_primrec t₁) (term_primrec t₂)).not
+    intro n t₁ t₂ _;
+    exact (Primrec.eq.comp (term_primrec t₁) (term_primrec t₂)).not;
   case hLT =>
-    intro n t₁ t₂ _
-    exact Primrec.nat_lt.comp (term_primrec t₁) (term_primrec t₂)
+    intro n t₁ t₂ _;
+    exact Primrec.nat_lt.comp (term_primrec t₁) (term_primrec t₂);
   case hNLT =>
-    intro n t₁ t₂ _
-    exact (Primrec.nat_lt.comp (term_primrec t₁) (term_primrec t₂)).not
+    intro n t₁ t₂ _;
+    exact (Primrec.nat_lt.comp (term_primrec t₁) (term_primrec t₂)).not;
   case hAnd =>
-    intro n φ ψ _ _ ihp ihq h
+    intro n φ ψ _ _ ihp ihq h;
     exact (ihp (Hierarchy.and_iff.mp h).1).and
-      (ihq (Hierarchy.and_iff.mp h).2) |>.of_eq fun v ↦ by simp
+      (ihq (Hierarchy.and_iff.mp h).2) |>.of_eq fun v ↦ by simp;
   case hOr =>
-    intro n φ ψ _ _ ihp ihq h
+    intro n φ ψ _ _ ihp ihq h;
     exact (ihp (Hierarchy.or_iff.mp h).1).or
-      (ihq (Hierarchy.or_iff.mp h).2) |>.of_eq fun v ↦ by simp
+      (ihq (Hierarchy.or_iff.mp h).2) |>.of_eq fun v ↦ by simp;
   case hBall =>
-    intro n t φ _ ih h
+    intro n t φ _ ih h;
     exact (primrecPred_ball ε t
-      (ih ((Hierarchy.ball_iff (t := Rew.bShift t) (by simp)).mp h))).of_eq fun v ↦ by simp
+      (ih ((Hierarchy.ball_iff (t := Rew.bShift t) (by simp)).mp h))).of_eq fun v ↦ by simp;
   case hExs =>
-    intro n ψ _ ih h
+    intro n ψ _ ih h;
     cases h with
-    | @bexs _ _ _ body originalBound ht hφ =>
-      rcases Rew.positive_iff.mp ht with ⟨t, rfl⟩
-      exact (primrecPred_bexs ε t (ih (by simp [hφ]))).of_eq fun v ↦ by simp
-  exact hp
+    | @bexs _ _ _ ψ _ ht hφ =>
+      rcases Rew.positive_iff.mp ht with ⟨t, rfl⟩;
+      exact (primrecPred_bexs ε t (ih (by simp [hφ]))).of_eq fun v ↦ by simp;
+  exact hp;
 
 lemma sigma1_re (ε : ξ → ℕ) {k} {φ : ArithmeticSemiformula ξ k} (hp : Hierarchy 𝚺 1 φ) :
     REPred fun v : List.Vector ℕ k ↦ φ.Eval v.get ε := by

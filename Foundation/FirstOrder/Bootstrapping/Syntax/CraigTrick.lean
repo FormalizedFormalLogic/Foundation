@@ -19,18 +19,17 @@ namespace LO.FirstOrder.Semiformula
 
 open Encodable
 
-variable {L : Language} {ξ : Type*} {n : ℕ} [L.Encodable] [Encodable ξ]
-
-omit [L.Encodable] [Encodable ξ] in
-lemma weight_succ (k : ℕ) :
+lemma weight_succ {L : Language} {ξ : Type*} {n : ℕ} (k : ℕ) :
     (weight (k + 1) : Semiformula L ξ n) = ⊤ ⋏ weight k := by
   simp [weight, List.replicate_succ];
+
+variable {L : Language} {ξ : Type*} {n : ℕ} [L.Encodable] [Encodable ξ]
 
 lemma encode_weight_succ (k : ℕ) :
     encode (weight (k + 1) : Semiformula L ξ n) =
       Nat.pair 4 (Nat.pair (encode (⊤ : Semiformula L ξ n))
         (encode (weight k : Semiformula L ξ n))) + 1 := by
-  rw [weight_succ]; rfl
+  rw [weight_succ]; rfl;
 
 lemma le_encode_weight (k : ℕ) :
     k ≤ encode (weight k : Semiformula L ξ n) := by
@@ -62,12 +61,12 @@ lemma lt_encode_padding (φ : Semiformula L ξ n) (k : ℕ) :
 
 lemma primrec_encode_weight :
     Primrec fun k : ℕ ↦ encode (weight k : Semiformula L ξ n) := by
-  let step : Primrec₂ fun _ r : ℕ ↦
+  have step : Primrec₂ fun _ r : ℕ ↦
       Nat.pair 4 (Nat.pair (encode (⊤ : Semiformula L ξ n)) r) + 1 :=
     Primrec.nat_add.comp
       (Primrec₂.natPair.comp (Primrec.const 4)
         (Primrec₂.natPair.comp (Primrec.const (encode (⊤ : Semiformula L ξ n))) Primrec.snd))
-      (Primrec.const 1)
+      (Primrec.const 1);
   refine (Primrec.nat_rec₁ (encode (⊤ : Semiformula L ξ n)) step).of_eq ?_;
   intro k;
   induction k with
@@ -278,21 +277,19 @@ lemma primrecPred_craig_core [L.Primcodable] : PrimrecPred fun p : ℕ × (ℕ �
   have hn : Primrec fun p : ℕ × (ℕ × ℕ) ↦ p.2.1 := Primrec.fst.comp Primrec.snd;
   have hs : Primrec fun p : ℕ × (ℕ × ℕ) ↦ p.2.2 := Primrec.snd.comp Primrec.snd;
   have hweight : Primrec fun p : ℕ × (ℕ × ℕ) ↦ encode (Semiformula.weight p.2.2 : Sentence L) :=
-    Semiformula.primrec_encode_weight.comp hs
+    Semiformula.primrec_encode_weight.comp hs;
   have hdecode : PrimrecPred fun p : ℕ × (ℕ × ℕ) ↦ (decode₂ (Sentence L) p.1).isSome := by
     simpa using Primrec.eq.comp
-      (Primrec.option_isSome.comp (Primrec.decode₂.comp hm)) (Primrec.const true)
-  have heq : PrimrecPred fun p : ℕ × (ℕ × ℕ) ↦
-      p.2.1 = Nat.pair 4 (Nat.pair p.1 (encode (Semiformula.weight p.2.2 : Sentence L))) + 1 :=
-    Primrec.eq.comp hn (Primrec.nat_add.comp
+      (Primrec.option_isSome.comp (Primrec.decode₂.comp hm)) (Primrec.const true);
+  have heq := Primrec.eq.comp hn (Primrec.nat_add.comp
       (Primrec₂.natPair.comp (Primrec.const 4) (Primrec₂.natPair.comp hm hweight))
-      (Primrec.const 1))
+      (Primrec.const 1));
   have heval : PrimrecPred fun p : ℕ × (ℕ × ℕ) ↦ ℕ ⊧/![p.2.2, p.1] T.reWitness.val :=
     ((Arithmetic.delta0_primrec Empty.elim T.reWitness.sigma_prop).comp
       (Primrec.vector_cons.comp hs
         (Primrec.vector_cons.comp hm (Primrec.const List.Vector.nil)))).of_eq fun p ↦ by
-      simp [List.Vector.cons_get]
-  exact hdecode.and (heq.and heval)
+      simp [List.Vector.cons_get];
+  exact hdecode.and (heq.and heval);
 
 instance [L.Primcodable] : T.craig.Primrec := by
   constructor;
@@ -302,10 +299,10 @@ instance [L.Primcodable] : T.craig.Primrec := by
         p.1 = Nat.pair 4 (Nat.pair m (encode (Semiformula.weight p.2 : Sentence L))) + 1 ∧
         ℕ ⊧/![p.2, m] T.reWitness.val :=
     ((PrimrecRel.exists_mem_list (primrecPred_craig_core (T := T)).primrecRel).comp
-      (Primrec.list_range.comp Primrec.fst) Primrec.id).of_eq (by simp)
+      (Primrec.list_range.comp Primrec.fst) Primrec.id).of_eq (by simp);
   exact ((PrimrecRel.exists_mem_list
       (hinner.comp (Primrec.pair Primrec.snd Primrec.fst)).primrecRel).comp
-    Primrec.list_range Primrec.id).of_eq (by simp)
+    Primrec.list_range Primrec.id).of_eq (by simp);
 
 noncomputable instance : (T.craig).Δ₁ where
   ch := T.craigCh
