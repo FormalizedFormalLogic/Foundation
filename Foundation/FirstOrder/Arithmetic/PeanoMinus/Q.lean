@@ -12,7 +12,7 @@ lemma Nat.iff_lt_exists_add_succ : n < m ↔ ∃ k, m = n + (k + 1) := by
     apply Nat.lt_add_of_pos_right;
     omega;
 
-namespace LO.FirstOrder.Arithmetic
+namespace FFL.FirstOrder.Arithmetic
 
 namespace Countermodel
 
@@ -159,4 +159,4 @@ instance : 𝗤 ⪱ 𝗣𝗔⁻ :=
   Entailment.StrictlyWeakerThan.of_unprovable_provable RobinsonQ.unprovable_neSucc
     <| complete.{0} _ _ fun _ _ _ ↦ by simp [models_iff]
 
-end LO.FirstOrder.Arithmetic
+end FFL.FirstOrder.Arithmetic

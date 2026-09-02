@@ -3,7 +3,7 @@ public import Foundation.FirstOrder.Basic.Semantics.Semantics
 public import Foundation.FirstOrder.Basic.Calculus
 @[expose] public section
 
-namespace LO.FirstOrder
+namespace FFL.FirstOrder
 
 variable {L : Language} {ξ : Type*}
 
@@ -59,6 +59,6 @@ def Entailment.paddingIff [L.DecidableEq] [DecidableEq ξ] [Entailment S (Formul
 @[simp] theorem Entailment.padding_iff [L.DecidableEq] [DecidableEq ξ] [Entailment S (Formula L ξ)] {𝓢 : S} [Entailment.Minimal 𝓢] (φ k) :
     𝓢 ⊢ φ.padding k 🡘 φ := ⟨paddingIff φ k⟩
 
-end LO.FirstOrder
+end FFL.FirstOrder
 
 end

@@ -5,9 +5,9 @@ public import Foundation.Propositional.Entailment.Cl
 
 @[expose] public section
 
-namespace LO.Propositional
+namespace FFL.Propositional
 
-open LO.Entailment
+open FFL.Entailment
 open Entailment
 
 @[ext]
@@ -36,7 +36,7 @@ protected abbrev Trivial : Logic α := ⟨Set.univ, by tauto, by tauto⟩
 instance : (Propositional.Trivial : Logic α).IsTrivial  := ⟨rfl⟩
 
 
-end LO.Propositional
+end FFL.Propositional
 
 
 end

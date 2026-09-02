@@ -5,7 +5,7 @@ public import Foundation.Propositional.Formula.NNFormula
 
 @[expose] public section
 
-namespace LO.Propositional
+namespace FFL.Propositional
 
 variable {α : Type*}
 
@@ -51,7 +51,10 @@ section semantics
 
 variable {v : Valuation α}
 
-instance semantics : Semantics (Valuation α) (NNFormula α) := ⟨fun v ↦ NNFormula.val v⟩
+-- `Valuation α` is also the model type of `Formula.Boolean.semantics` and the formula parameter of
+-- `Semantics` is an `outParam`, so an explicit priority is needed to pin down which of the two
+-- instances a valuation resolves to.
+instance (priority := high) semantics : Semantics (Valuation α) (NNFormula α) := ⟨fun v ↦ NNFormula.val v⟩
 
 lemma models_iff_val {v : Valuation α} {f : NNFormula α} : v ⊧ f ↔ NNFormula.val v f := iff_of_eq rfl
 
@@ -72,5 +75,5 @@ end semantics
 end NNFormula
 
 
-end LO.Propositional
+end FFL.Propositional
 end

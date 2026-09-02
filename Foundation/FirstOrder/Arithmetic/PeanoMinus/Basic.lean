@@ -8,7 +8,7 @@ public import Foundation.FirstOrder.Arithmetic.Q.Basic
 
 -/
 
-namespace LO.FirstOrder.Arithmetic
+namespace FFL.FirstOrder.Arithmetic
 
 namespace PeanoMinus.Axiom
 
@@ -613,4 +613,4 @@ instance : 𝗥₀ ⪱ 𝗣𝗔⁻ :=
 
 instance (M : Type*) [ORingStructure M] [M↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻] : M↓[ℒₒᵣ] ⊧* 𝗥₀ := models_of_subtheory (U := 𝗣𝗔⁻) inferInstance
 
-end LO.FirstOrder.Arithmetic
+end FFL.FirstOrder.Arithmetic

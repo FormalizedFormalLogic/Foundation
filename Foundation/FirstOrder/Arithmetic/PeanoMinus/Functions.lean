@@ -12,7 +12,7 @@ This file provides functions and relations defined in $\mathsf{PA^-}
 
 -/
 
-namespace LO.FirstOrder.Arithmetic
+namespace FFL.FirstOrder.Arithmetic
 
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻]
 
@@ -48,7 +48,7 @@ lemma sub_eq_iff : c = a - b ↔ ((a ≥ b → a = b + c) ∧ (a < b → c = 0))
 
 open FirstOrder.Arithmetic.HierarchySymbol.Definable
 
-def _root_.LO.FirstOrder.Arithmetic.subDef : 𝚺₀.Semisentence 3 :=
+def _root_.FFL.FirstOrder.Arithmetic.subDef : 𝚺₀.Semisentence 3 :=
   .mkSigma “z x y. (x ≥ y → x = y + z) ∧ (x < y → z = 0)”
 
 instance sub_defined : 𝚺₀-Function₂ ((· - ·) : V → V → V) via subDef := .mk <| by intro v; simp [FirstOrder.Arithmetic.subDef, sub_eq_iff]
@@ -167,7 +167,7 @@ lemma dvd_iff_bounded {a b : V} : a ∣ b ↔ ∃ c ≤ b, b = a * c := by
     · rintro ⟨c, rfl⟩; exact ⟨c, le_mul_self_of_pos_left (pos_iff_ne_zero.mpr hx), rfl⟩
     · rintro ⟨c, hz, rfl⟩; exact dvd_mul_right a c
 
-def _root_.LO.FirstOrder.Arithmetic.dvd : 𝚺₀.Semisentence 2 :=
+def _root_.FFL.FirstOrder.Arithmetic.dvd : 𝚺₀.Semisentence 2 :=
   .mkSigma “x y. ∃ z <⁺ y, y = x * z”
 
 instance dvd_defined : 𝚺₀-Relation (fun a b : V ↦ a ∣ b) via dvd := .mk fun v ↦ by simp [dvd_iff_bounded, dvd]
@@ -227,7 +227,7 @@ lemma eq_one_or_eq_of_dvd_of_prime {p a : V} (pp : Prime p) (hxp : a ∣ p) : a 
 def IsPrime (a : V) : Prop := 1 < a ∧ ∀ b ≤ a, b ∣ a → b = 1 ∨ b = a
 -- TODO: prove IsPrime a ↔ Prime a
 
-def _root_.LO.FirstOrder.Arithmetic.isPrime : 𝚺₀.Semisentence 1 :=
+def _root_.FFL.FirstOrder.Arithmetic.isPrime : 𝚺₀.Semisentence 1 :=
   .mkSigma “x. 1 < x ∧ ∀ y <⁺ x, !dvd.val y x → y = 1 ∨ y = x”
 
 instance isPrime_defined : 𝚺₀-Predicate (fun a : V ↦ IsPrime a) via isPrime := .mk fun v ↦ by
@@ -268,4 +268,4 @@ instance max_polybounded : Bounded₂ (max : V → V → V) := ⟨‘#0 + #1’,
 
 end max
 
-end LO.FirstOrder.Arithmetic
+end FFL.FirstOrder.Arithmetic

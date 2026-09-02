@@ -8,7 +8,7 @@ public import Foundation.FirstOrder.Skolemization.Hull
 # Downward Löwenheim-Skolem theorem for models of set theory
 -/
 
-namespace LO.FirstOrder.SetTheory
+namespace FFL.FirstOrder.SetTheory
 
 variable {V : Type*} [SetStructure V] [Nonempty V] (s : Set V)
 
@@ -62,4 +62,4 @@ instance small [hs : Countable s] : Small.{w} ↑(Hull s) := Countable.toSmall (
 
 end Hull
 
-end LO.FirstOrder.SetTheory
+end FFL.FirstOrder.SetTheory

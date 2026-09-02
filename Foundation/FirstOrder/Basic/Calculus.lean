@@ -10,7 +10,7 @@ public import Mathlib.Data.List.MinMax
 
 @[expose] public section
 
-namespace LO
+namespace FFL
 
 namespace FirstOrder
 
@@ -386,6 +386,6 @@ def Theory.theory (T : Theory L) : Theory L := {σ | T ⊢ σ}
 
 end FirstOrder
 
-end LO
+end FFL
 
 end

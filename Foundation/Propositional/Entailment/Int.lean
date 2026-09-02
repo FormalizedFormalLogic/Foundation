@@ -3,18 +3,18 @@ public import Foundation.Propositional.Entailment.Minimal
 
 @[expose] public section
 
-namespace LO.Axioms
+namespace FFL.Axioms
 
 variable {F : Type*} [LogicalConnective F] [LogicalNeutral F]
 variable (φ ψ χ : F)
 
 protected abbrev EFQ := ⊥ 🡒 φ
 
-end LO.Axioms
+end FFL.Axioms
 
 
 
-namespace LO.Entailment
+namespace FFL.Entailment
 
 variable {S F : Type*} [LogicalConnective F] [LogicalNeutral F] [Entailment S F]
 variable {𝓢 : S} {φ ψ χ : F}
@@ -56,11 +56,11 @@ end Context
 end
 
 
-end LO.Entailment
+end FFL.Entailment
 
 
 
-namespace LO.Entailment
+namespace FFL.Entailment
 
 variable {F : Type*} [LogicalConnective F] [LogicalNeutral F] [DecidableEq F]
          {S : Type*} [Entailment S F]
@@ -458,6 +458,6 @@ lemma inconsistent_of_provable_of_unprovable {φ : F}
 
 end consistency
 
-end LO.Entailment
+end FFL.Entailment
 
 end

@@ -3,7 +3,7 @@ module
 public import Foundation.FirstOrder.Arithmetic.Omega1.Basic
 
 @[expose] public section
-namespace LO.FirstOrder.Arithmetic
+namespace FFL.FirstOrder.Arithmetic
 
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₀ ∪ 𝝮₁]
 
@@ -663,11 +663,11 @@ lemma nuon_bit1 (a : V) : nuon (2 * a + 1) = nuon a + 1 := by
 
 @[simp] lemma nuon_zero : nuon (0 : V) = 0 := Nuon.nuon_eq (by simp [Nuon])
 
-def _root_.LO.FirstOrder.Arithmetic.nuonDef : 𝚺₀.Semisentence 2 := .mkSigma
+def _root_.FFL.FirstOrder.Arithmetic.nuonDef : 𝚺₀.Semisentence 2 := .mkSigma
   “n A. ∃ l <⁺ A, !lengthDef l A ∧ !Nuon.nuonAuxDef A l n”
 
 instance nuon_defined : 𝚺₀-Function₁ (nuon : V → V) via nuonDef := .mk fun v ↦ by simp [Nuon.nuon_eq_iff, Nuon, nuonDef]
 
 instance nuon_definable : 𝚺₀-Function₁ (nuon : V → V) := nuon_defined.to_definable
 
-end LO.FirstOrder.Arithmetic
+end FFL.FirstOrder.Arithmetic

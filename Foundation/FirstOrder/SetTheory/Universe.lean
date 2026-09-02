@@ -15,7 +15,7 @@ reference:
 
  -/
 
-namespace LO.FirstOrder.SetTheory
+namespace FFL.FirstOrder.SetTheory
 
 /-- QPF functor to generate universe -/
 @[ext]
@@ -329,4 +329,4 @@ instance zf_consistent : Entailment.Consistent 𝗭𝗙 := consistent_of_model �
 
 instance zfc_consistent : Entailment.Consistent 𝗭𝗙𝗖 := consistent_of_model 𝗭𝗙𝗖 Universe.{0}
 
-end LO.FirstOrder.SetTheory
+end FFL.FirstOrder.SetTheory

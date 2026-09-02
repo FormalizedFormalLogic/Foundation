@@ -10,7 +10,7 @@ public import Foundation.FirstOrder.Arithmetic.Basic
 
 noncomputable section
 
-namespace LO.FirstOrder.Arithmetic
+namespace FFL.FirstOrder.Arithmetic
 
 inductive R0 : ArithmeticTheory
   | equal : ∀ φ ∈ 𝗘𝗤 ℒₒᵣ, R0 φ
@@ -244,6 +244,6 @@ lemma unprovable_addZero : 𝗥₀ ⊬ “∀ x, x + 0 = x” :=
 
 end R0
 
-end LO.FirstOrder.Arithmetic
+end FFL.FirstOrder.Arithmetic
 
 end

@@ -10,12 +10,12 @@ public import Mathlib.Logic.Encodable.Basic
 
 This file defines the language of first-order logic.
 
-- `LO.FirstOrder.Language.empty` is the empty language.
-- `LO.FirstOrder.Language.constant C` is a language with only constants of the element `C`.
-- `LO.FirstOrder.Language.oRing`, `ℒₒᵣ` is the language of ordered ring.
+- `FFL.FirstOrder.Language.empty` is the empty language.
+- `FFL.FirstOrder.Language.constant C` is a language with only constants of the element `C`.
+- `FFL.FirstOrder.Language.oRing`, `ℒₒᵣ` is the language of ordered ring.
 -/
 
-namespace LO
+namespace FFL
 
 namespace FirstOrder
 
@@ -333,7 +333,7 @@ instance (L : Language) (S : Language) [L.LT] : (L.add S).LT where
 /--
 A structure for the homomorphisms (respecting function and relation symbols) between first-order languages.
 -/
-scoped[LO.FirstOrder] infix:25 " →ᵥ " => LO.FirstOrder.Language.Hom
+scoped[FFL.FirstOrder] infix:25 " →ᵥ " => FFL.FirstOrder.Language.Hom
 
 namespace Hom
 variable (L L₁ L₂ L₃ : Language) (Φ : Hom L₁ L₂)
@@ -441,5 +441,5 @@ instance : Language.Finite ℒₒᵣ where
 
 end FirstOrder
 
-end LO
+end FFL
 end

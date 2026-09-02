@@ -5,7 +5,7 @@ public import Foundation.FirstOrder.Arithmetic.HFS
 @[expose] public section
 /-! # Internalized languages of first-order logic -/
 
-namespace LO.FirstOrder.Arithmetic.Bootstrapping
+namespace FFL.FirstOrder.Arithmetic.Bootstrapping
 
 variable {L : Language} [L.Encodable]
 
@@ -15,7 +15,7 @@ instance (k) : Semiterm.Operator.GödelNumber ℒₒᵣ (L.Rel k) := ⟨fun r �
 
 variable (L)
 
-protected class _root_.LO.FirstOrder.Language.LORDefinable where
+protected class _root_.FFL.FirstOrder.Language.LORDefinable where
   func : 𝚺₀.Semisentence 2
   rel : 𝚺₀.Semisentence 2
   func_iff {k c : ℕ} :
@@ -23,16 +23,16 @@ protected class _root_.LO.FirstOrder.Language.LORDefinable where
   rel_iff {k c : ℕ} :
     c ∈ Set.range (Encodable.encode : L.Rel k → ℕ) ↔ ℕ ⊧/![k, c] rel.val
 
-alias _root_.LO.FirstOrder.Language.isFunc := Language.LORDefinable.func
-alias _root_.LO.FirstOrder.Language.isRel := Language.LORDefinable.rel
-alias _root_.LO.FirstOrder.Language.iff_isFunc := Language.LORDefinable.func_iff
-alias _root_.LO.FirstOrder.Language.iff_isRel := Language.LORDefinable.rel_iff
+alias _root_.FFL.FirstOrder.Language.isFunc := Language.LORDefinable.func
+alias _root_.FFL.FirstOrder.Language.isRel := Language.LORDefinable.rel
+alias _root_.FFL.FirstOrder.Language.iff_isFunc := Language.LORDefinable.func_iff
+alias _root_.FFL.FirstOrder.Language.iff_isRel := Language.LORDefinable.rel_iff
 
 variable {V : Type*} [ORingStructure V] [L.LORDefinable]
 
-def _root_.LO.FirstOrder.Language.IsFunc (arity f : V) : Prop := V ⊧/![arity, f] L.isFunc.val
+def _root_.FFL.FirstOrder.Language.IsFunc (arity f : V) : Prop := V ⊧/![arity, f] L.isFunc.val
 
-def _root_.LO.FirstOrder.Language.IsRel (arity f : V) : Prop := V ⊧/![arity, f] L.isRel.val
+def _root_.FFL.FirstOrder.Language.IsRel (arity f : V) : Prop := V ⊧/![arity, f] L.isRel.val
 
 variable {L}
 
@@ -46,18 +46,18 @@ lemma isRel_def (k R : V) : L.IsRel k R ↔ V ⊧/![k, R] L.isRel.val := by rfl
 @[simp] lemma eval_rel_iff (v : Fin 2 → V) :
     L.isRel.val.Evalb v ↔ L.IsRel (v 0) (v 1) := by simp [Language.IsRel, ← Matrix.fun_eq_vec_two]
 
-instance _root_.LO.FirstOrder.Language.IsFunc.defined : 𝚺₀-Relation (L.IsFunc (V := V)) via L.isFunc := .mk fun v ↦ by simp
+instance _root_.FFL.FirstOrder.Language.IsFunc.defined : 𝚺₀-Relation (L.IsFunc (V := V)) via L.isFunc := .mk fun v ↦ by simp
 
-instance _root_.LO.FirstOrder.Language.IsRel.defined : 𝚺₀-Relation (L.IsRel (V := V)) via L.isRel := .mk fun v ↦ by simp
+instance _root_.FFL.FirstOrder.Language.IsRel.defined : 𝚺₀-Relation (L.IsRel (V := V)) via L.isRel := .mk fun v ↦ by simp
 
-instance _root_.LO.FirstOrder.Language.IsFunc.definable : 𝚺₀-Relation (L.IsFunc (V := V)) := Language.IsFunc.defined.to_definable
+instance _root_.FFL.FirstOrder.Language.IsFunc.definable : 𝚺₀-Relation (L.IsFunc (V := V)) := Language.IsFunc.defined.to_definable
 
-instance _root_.LO.FirstOrder.Language.IsRel.definable : 𝚺₀-Relation (L.IsRel (V := V)) := Language.IsRel.defined.to_definable
+instance _root_.FFL.FirstOrder.Language.IsRel.definable : 𝚺₀-Relation (L.IsRel (V := V)) := Language.IsRel.defined.to_definable
 
-@[simp, definability] instance _root_.LO.FirstOrder.Language.IsFunc.definable' (ℌ) : ℌ-Relation (L.IsFunc (V := V)) :=
+@[simp, definability] instance _root_.FFL.FirstOrder.Language.IsFunc.definable' (ℌ) : ℌ-Relation (L.IsFunc (V := V)) :=
   HierarchySymbol.Definable.of_zero Language.IsFunc.definable
 
-@[simp, definability] instance _root_.LO.FirstOrder.Language.IsRel.definable' (ℌ) : ℌ-Relation (L.IsRel (V := V)) :=
+@[simp, definability] instance _root_.FFL.FirstOrder.Language.IsRel.definable' (ℌ) : ℌ-Relation (L.IsRel (V := V)) :=
   HierarchySymbol.Definable.of_zero Language.IsRel.definable
 
 section
@@ -108,7 +108,7 @@ omit [L.LORDefinable]
 
 end
 
-lemma _root_.LO.FirstOrder.Language.ORing.of_mem_range_encode_func {k f : ℕ} :
+lemma _root_.FFL.FirstOrder.Language.ORing.of_mem_range_encode_func {k f : ℕ} :
     f ∈ Set.range (Encodable.encode : FirstOrder.Language.Func ℒₒᵣ k → ℕ) ↔
     (k = 0 ∧ f = 0) ∨ (k = 0 ∧ f = 1) ∨ (k = 2 ∧ f = 0) ∨ (k = 2 ∧ f = 1) := by
   constructor
@@ -125,7 +125,7 @@ lemma _root_.LO.FirstOrder.Language.ORing.of_mem_range_encode_func {k f : ℕ} :
     · exact ⟨Language.ORing.Func.mul, rfl⟩
 
 /-- TODO: move to Basic/Syntax/Bootstrapping.Language.lean-/
-lemma _root_.LO.FirstOrder.Language.ORing.of_mem_range_encode_rel {k r : ℕ} :
+lemma _root_.FFL.FirstOrder.Language.ORing.of_mem_range_encode_rel {k r : ℕ} :
     r ∈ Set.range (Encodable.encode : FirstOrder.Language.Rel ℒₒᵣ k → ℕ) ↔
     (k = 2 ∧ r = 0) ∨ (k = 2 ∧ r = 1) := by
   constructor
@@ -233,4 +233,4 @@ lemma isRel_iff_LOR {k R : V} :
 
 end Arithmetic
 
-end LO.FirstOrder.Arithmetic.Bootstrapping
+end FFL.FirstOrder.Arithmetic.Bootstrapping

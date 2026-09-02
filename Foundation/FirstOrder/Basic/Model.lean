@@ -3,7 +3,7 @@ public import Foundation.FirstOrder.Basic.Operator
 public import Foundation.FirstOrder.Basic.Semantics.Elementary
 @[expose] public section
 
-namespace LO
+namespace FFL
 
 namespace FirstOrder
 
@@ -197,6 +197,6 @@ end ULift
 
 end FirstOrder
 
-end LO
+end FFL
 
 end

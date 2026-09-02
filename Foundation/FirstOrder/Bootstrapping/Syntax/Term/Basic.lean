@@ -3,7 +3,7 @@ module
 public import Foundation.FirstOrder.Bootstrapping.Syntax.Language
 
 @[expose] public section
-namespace LO.FirstOrder.Arithmetic.Bootstrapping
+namespace FFL.FirstOrder.Arithmetic.Bootstrapping
 
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 
@@ -49,11 +49,11 @@ lemma nth_lt_qqFunc_of_lt {i k f v : V} (hi : i < len v) : v.[i] < ^func k f v :
 
 @[simp] lemma qqFunc_inj {k f v k' f' w : V} : ^func k f v = ^func k' f' w ↔ k = k' ∧ f = f' ∧ v = w := by simp [qqFunc]
 
-def _root_.LO.FirstOrder.Arithmetic.qqBvarDef : 𝚺₀.Semisentence 2 := .mkSigma “t z. ∃ t' < t, !pairDef t' 0 z ∧ t = t' + 1”
+def _root_.FFL.FirstOrder.Arithmetic.qqBvarDef : 𝚺₀.Semisentence 2 := .mkSigma “t z. ∃ t' < t, !pairDef t' 0 z ∧ t = t' + 1”
 
 instance qqBvar_defined : 𝚺₀-Function₁ (qqBvar : V → V) via qqBvarDef := .mk fun _ ↦ by simp_all [qqBvarDef, qqBvar]
 
-def _root_.LO.FirstOrder.Arithmetic.qqFvarDef : 𝚺₀.Semisentence 2 := .mkSigma “t x. ∃ t' < t, !pairDef t' 1 x ∧ t = t' + 1”
+def _root_.FFL.FirstOrder.Arithmetic.qqFvarDef : 𝚺₀.Semisentence 2 := .mkSigma “t x. ∃ t' < t, !pairDef t' 1 x ∧ t = t' + 1”
 
 instance qqFvar_defined : 𝚺₀-Function₁ (qqFvar : V → V) via qqFvarDef := .mk fun v ↦ by simp_all [qqFvarDef, qqFvar]
 
@@ -65,7 +65,7 @@ private lemma qqFunc_graph {x k f v : V} :
         ⟪2, k, f, v⟫, by simp [qqFunc], rfl, rfl⟩,
    by rintro ⟨_, _, rfl, _, _, rfl, _, _, rfl, rfl⟩; rfl⟩
 
-def _root_.LO.FirstOrder.Arithmetic.qqFuncDef : 𝚺₀.Semisentence 4 := .mkSigma
+def _root_.FFL.FirstOrder.Arithmetic.qqFuncDef : 𝚺₀.Semisentence 4 := .mkSigma
   “x k f v. ∃ fv < x, !pairDef fv f v ∧ ∃ kfv < x, !pairDef kfv k fv ∧ ∃ x' < x, !pairDef x' 2 kfv ∧ x = x' + 1”
 
 instance qqFunc_defined : 𝚺₀-Function₃ (qqFunc : V → V → V → V) via qqFuncDef := .mk fun v ↦ by simp [qqFuncDef, qqFunc_graph]
@@ -863,4 +863,4 @@ lemma IsSemiterm.sigma1_induction {P : V → Prop} (hP : 𝚺₁-Predicate P)
 
 end isSemiterm
 
-end LO.FirstOrder.Arithmetic.Bootstrapping
+end FFL.FirstOrder.Arithmetic.Bootstrapping

@@ -9,18 +9,18 @@ public import Foundation.FirstOrder.Basic.Syntax.Formula
 /-!
 # Rewriting Entailment
 
-term/formula morphisms such as Rewritings, substitutions, and embs are handled by the structure `LO.FirstOrder.Rew`.
-- `LO.FirstOrder.Rew.rewrite f` is a Rewriting of the free variables occurring in the term by `f : ξ₁ → Semiterm L ξ₂ n`.
-- `LO.FirstOrder.Rew.subst v` is a substitution of the bounded variables occurring in the term by `v : Fin n → Semiterm L ξ n'`.
-- `LO.FirstOrder.Rew.bShift` is a transformation of the bounded variables occurring in the term by `#x ↦ #(Fin.succ x)`.
-- `LO.FirstOrder.Rew.shift` is a transformation of the free variables occurring in the term by `&x ↦ &(x + 1)`.
-- `LO.FirstOrder.Rew.emb` is a emb of the term with no free variables.
+term/formula morphisms such as Rewritings, substitutions, and embs are handled by the structure `FFL.FirstOrder.Rew`.
+- `FFL.FirstOrder.Rew.rewrite f` is a Rewriting of the free variables occurring in the term by `f : ξ₁ → Semiterm L ξ₂ n`.
+- `FFL.FirstOrder.Rew.subst v` is a substitution of the bounded variables occurring in the term by `v : Fin n → Semiterm L ξ n'`.
+- `FFL.FirstOrder.Rew.bShift` is a transformation of the bounded variables occurring in the term by `#x ↦ #(Fin.succ x)`.
+- `FFL.FirstOrder.Rew.shift` is a transformation of the free variables occurring in the term by `&x ↦ &(x + 1)`.
+- `FFL.FirstOrder.Rew.emb` is a emb of the term with no free variables.
 
-Rewritings `LO.FirstOrder.Rew` is naturally converted to formula Rewritings by `LO.FirstOrder.Rew.hom`.
+Rewritings `FFL.FirstOrder.Rew` is naturally converted to formula Rewritings by `FFL.FirstOrder.Rew.hom`.
 
 -/
 
-namespace LO
+namespace FFL
 
 namespace FirstOrder
 
@@ -524,6 +524,6 @@ end lMap
 
 end Semiformula
 
-end LO.FirstOrder
+end FFL.FirstOrder
 
 end

@@ -12,7 +12,7 @@ public import Foundation.Vorspiel.Empty
 This file defines the structure and the evaluation of terms and formulas by Tarski's truth definition.
 -/
 
-namespace LO
+namespace FFL
 
 namespace FirstOrder
 
@@ -669,6 +669,6 @@ end Structure
 
 end FirstOrder
 
-end LO
+end FFL
 
 end

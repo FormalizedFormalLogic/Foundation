@@ -4,7 +4,7 @@ public import Foundation.Logic.LogicSymbol
 
 @[expose] public section
 
-namespace LO
+namespace FFL
 
 inductive Polarity where | sigma | pi
 
@@ -291,6 +291,6 @@ end quantifier
 
 end SecondOrder
 
-end LO
+end FFL
 
 end

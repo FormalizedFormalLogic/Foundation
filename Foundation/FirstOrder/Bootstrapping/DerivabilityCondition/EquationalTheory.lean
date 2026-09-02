@@ -9,9 +9,9 @@ public import Foundation.FirstOrder.Bootstrapping.DerivabilityCondition.D1
 # Bootstrapping theory of equality
 -/
 
-namespace LO.FirstOrder.Arithmetic.Bootstrapping
+namespace FFL.FirstOrder.Arithmetic.Bootstrapping
 
-open Classical _root_.LO.FirstOrder.Entailment
+open Classical _root_.FFL.FirstOrder.Entailment
 
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 
@@ -34,7 +34,7 @@ local postfix:max "⤉" => Semiformula.shift
 
 variable (T : ArithmeticTheory) [Theory.Δ₁ T] [𝗘𝗤 _ ⪯ T]
 
-open _root_.LO.FirstOrder.Entailment Entailment.FiniteContext _root_.LO.FirstOrder.Arithmetic.Bootstrapping.Semiformula
+open _root_.FFL.FirstOrder.Entailment Entailment.FiniteContext _root_.FFL.FirstOrder.Arithmetic.Bootstrapping.Semiformula
 
 @[simp] lemma eq_refl (t : Term V ℒₒᵣ) : T.internalize V ⊢ t ≐ t := by
   have : T ⊢ “∀ x, x = x” := complete.{0} T _ fun (M : Type) _ _ ↦ by simp [models_iff]
@@ -75,7 +75,7 @@ variable (T)
 
 section replace
 
-open LO.Entailment
+open FFL.Entailment
 
 lemma subst_eq (t₁ t₂ u₁ u₂ : Term V ℒₒᵣ) : T.internalize V ⊢ (t₁ ≐ t₂) 🡒 (u₁ ≐ u₂) 🡒 (t₁ ≐ u₁) 🡒 (t₂ ≐ u₂) := by
   have : T ⊢ “∀ x₁ x₂ y₁ y₂, x₁ = x₂ → y₁ = y₂ → x₁ = y₁ → x₂ = y₂” := complete.{0} T _ fun (M : Type) _ _ ↦ by simp [models_iff]

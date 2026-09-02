@@ -10,7 +10,7 @@ public import Foundation.FirstOrder.Arithmetic.HFS.PRF
 
 @[expose] public section
 
-namespace LO.FirstOrder.Arithmetic
+namespace FFL.FirstOrder.Arithmetic
 
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 
@@ -34,7 +34,7 @@ noncomputable def iterExp (x y : V) : V := iterExp.construction.result ![x] y
 @[simp] lemma iterExp_succ (x y : V) : iterExp x (y + 1) = Exp.exp (iterExp x y) := by
   simp [iterExp, iterExp.construction]
 
-def _root_.LO.FirstOrder.Arithmetic.iterExpDef : 𝚺₁.Semisentence 3 :=
+def _root_.FFL.FirstOrder.Arithmetic.iterExpDef : 𝚺₁.Semisentence 3 :=
   iterExp.blueprint.resultDef |>.rew (Rew.subst ![#0, #2, #1])
 
 instance iterExp_defined : 𝚺₁-Function₂[V] iterExp via iterExpDef := .mk
@@ -80,7 +80,7 @@ lemma superexp_eq (x : V) : Superexp.superexp x = iterExp x x := rfl
     congrArg (iterExp 3) (one_add_one_eq_two (R := V)).symm, iterExp_succ,
     congrArg (iterExp 3) (zero_add 1).symm, iterExp_succ, iterExp_zero, exp_three, exp_eight]
 
-def _root_.LO.FirstOrder.Arithmetic.superexpDef : 𝚺₁.Semisentence 2 := .mkSigma
+def _root_.FFL.FirstOrder.Arithmetic.superexpDef : 𝚺₁.Semisentence 2 := .mkSigma
   “y x. !iterExpDef y x x”
 
 instance superexp_defined : 𝚺₁-Function₁[V] Superexp.superexp via superexpDef := .mk
@@ -90,4 +90,4 @@ instance superexp_definable : 𝚺₁-Function₁[V] Superexp.superexp := supere
 
 end superexp
 
-end LO.FirstOrder.Arithmetic
+end FFL.FirstOrder.Arithmetic

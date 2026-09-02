@@ -7,7 +7,7 @@ public import Foundation.FirstOrder.Bootstrapping.Syntax.Proof.Basic
 # Typed internal Tait-calculus
 -/
 
-namespace LO
+namespace FFL
 
 open FirstOrder Arithmetic
 
@@ -113,7 +113,7 @@ instance (T : InternalTheory V L) : T.theory.Δ₁ := T.Δ₁
 
 variable (V)
 
-def _root_.LO.FirstOrder.Theory.internalize (T : Theory L) [T.Δ₁] : InternalTheory V L := ⟨T, inferInstance⟩
+def _root_.FFL.FirstOrder.Theory.internalize (T : Theory L) [T.Δ₁] : InternalTheory V L := ⟨T, inferInstance⟩
 
 variable {V}
 
@@ -136,7 +136,7 @@ instance : HasSubset (InternalTheory V L) := ⟨fun T U ↦ T.theory.Δ₁Class 
 
 variable {T U : InternalTheory V L}
 
-noncomputable def _root_.LO.FirstOrder.Arithmetic.Bootstrapping.Derivable.toTDerivation (Γ : Sequent V L) (h : Derivable T.theory Γ.val) : T ⊢!ᵈᵉʳ Γ := by
+noncomputable def _root_.FFL.FirstOrder.Arithmetic.Bootstrapping.Derivable.toTDerivation (Γ : Sequent V L) (h : Derivable T.theory Γ.val) : T ⊢!ᵈᵉʳ Γ := by
   choose a ha using h; choose d hd using ha.2
   exact ⟨a, ha.1, d, hd⟩
 
@@ -151,7 +151,7 @@ lemma TProvable.iff_provable {σ : Formula V L} :
   · intro h
     exact ⟨Derivable.toTDerivation _ <| by simpa [←singleton_eq_insert] using! h⟩
 
-alias ⟨toProvable, _root_.LO.FirstOrder.Arithmetic.Bootstrapping.Provable.toTProvable⟩ := TProvable.iff_provable
+alias ⟨toProvable, _root_.FFL.FirstOrder.Arithmetic.Bootstrapping.Provable.toTProvable⟩ := TProvable.iff_provable
 
 def proof_to_tDerivation {σ : Formula V L} : T ⊢! σ → T ⊢!ᵈᵉʳ insert σ ∅ := fun x ↦ x
 
@@ -315,7 +315,7 @@ noncomputable instance : Entailment.ModusPonens T := ⟨modusPonens⟩
 noncomputable instance : Entailment.NegationEquiv T where
   negEquiv! {φ} := by
     suffices T ⊢! (φ ⋎ ∼φ ⋎ ⊥) ⋏ (φ ⋏ ⊤ ⋎ ∼φ) by
-      simpa [Axioms.NegEquiv, LO.LogicalConnective.iff, Semiformula.imp_def]
+      simpa [Axioms.NegEquiv, FFL.LogicalConnective.iff, Semiformula.imp_def]
     apply TDerivation.and
     · apply TDerivation.or
       apply TDerivation.rotate₁
@@ -536,7 +536,7 @@ variable (A : InternalTheory V ℒₒᵣ)
 
 open Bootstrapping.Arithmetic
 
-open _root_.LO.FirstOrder.Entailment
+open _root_.FFL.FirstOrder.Entailment
 
 lemma substItrDisj_right {i z : V}
     (w : TermVec V ℒₒᵣ m) (φ : Semiformula V ℒₒᵣ (m + 1)) (hi : i < z) :

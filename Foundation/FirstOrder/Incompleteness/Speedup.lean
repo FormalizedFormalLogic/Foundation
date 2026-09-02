@@ -15,7 +15,7 @@ public import Mathlib.Data.Nat.Log
 
 @[expose] public section
 
-namespace LO.FirstOrder.Arithmetic.Bootstrapping
+namespace FFL.FirstOrder.Arithmetic.Bootstrapping
 
 
 section
@@ -33,7 +33,7 @@ variable
   {L : Language} [L.Encodable] [L.LORDefinable]
   {T : Theory L} [T.Δ₁] {σ : Sentence L}
 
-noncomputable def _root_.LO.FirstOrder.Theory.minProof (T : Theory L) [T.Δ₁] (σ : Sentence L) : ℕ :=
+noncomputable def _root_.FFL.FirstOrder.Theory.minProof (T : Theory L) [T.Δ₁] (σ : Sentence L) : ℕ :=
   sInf {d : ℕ | Proof T d (⌜σ⌝ : ℕ)}
 
 @[grind →]
@@ -146,4 +146,4 @@ example {T : ArithmeticTheory} [T.Δ₁] {σ : ArithmeticSentence} [𝗜𝚺₁ 
 
 end Speedup
 
-end LO.FirstOrder.Arithmetic.Bootstrapping
+end FFL.FirstOrder.Arithmetic.Bootstrapping

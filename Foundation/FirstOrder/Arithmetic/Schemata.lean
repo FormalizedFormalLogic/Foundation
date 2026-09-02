@@ -9,7 +9,7 @@ public import Foundation.FirstOrder.Arithmetic.TA.Basic
 # Induction schemata of Arithmetic
 -/
 
-namespace LO.FirstOrder.Arithmetic
+namespace FFL.FirstOrder.Arithmetic
 
 section axioms
 
@@ -416,4 +416,4 @@ instance (T : ArithmeticTheory) [𝗣𝗔 ⪯ T] : 𝗣𝗔⁻ ⪯ T :=
   have : 𝗣𝗔⁻ ⪯ 𝗣𝗔 := inferInstance
   Entailment.WeakerThan.trans this inferInstance
 
-end LO.FirstOrder.Arithmetic
+end FFL.FirstOrder.Arithmetic

@@ -6,7 +6,7 @@ public import Foundation.FirstOrder.Bootstrapping.Syntax
 @[expose] public section
 open Classical
 
-namespace LO.FirstOrder.Arithmetic
+namespace FFL.FirstOrder.Arithmetic
 
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 
@@ -232,4 +232,4 @@ theorem parameterized_diagonal₁ (θ : ArithmeticSemisentence 2) :
 
 end ParameterizedDiagonalization
 
-end LO.FirstOrder.Arithmetic
+end FFL.FirstOrder.Arithmetic

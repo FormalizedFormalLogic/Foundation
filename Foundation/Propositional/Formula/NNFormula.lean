@@ -4,7 +4,7 @@ public import Foundation.Logic.LogicSymbol
 
 @[expose] public section
 
-namespace LO.Propositional
+namespace FFL.Propositional
 
 inductive NNFormula (α : Type u) : Type u where
   | verum  : NNFormula α
@@ -200,5 +200,5 @@ end NNFormula
 
 abbrev Theory (α : Type*) := Set (NNFormula α)
 
-end LO.Propositional
+end FFL.Propositional
 end

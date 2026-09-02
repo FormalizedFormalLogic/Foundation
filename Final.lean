@@ -1,7 +1,7 @@
 import Foundation
 
-#print axioms LO.FirstOrder.ProvabilityAbstraction.unprovable_flon
+#print axioms FFL.FirstOrder.ProvabilityAbstraction.unprovable_flon
 
-#print axioms LO.FirstOrder.Arithmetic.unprovable_jeroslow
+#print axioms FFL.FirstOrder.Arithmetic.unprovable_jeroslow
 
-#print axioms LO.FirstOrder.Arithmetic.unprovable_formalized_law_of_noncontradiction
+#print axioms FFL.FirstOrder.Arithmetic.unprovable_formalized_law_of_noncontradiction

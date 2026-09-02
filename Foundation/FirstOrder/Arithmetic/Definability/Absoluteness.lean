@@ -3,7 +3,7 @@ module
 public import Foundation.FirstOrder.Arithmetic.Definability.BoundedDefinable
 
 @[expose] public section
-namespace LO.FirstOrder.Arithmetic
+namespace FFL.FirstOrder.Arithmetic
 
 open PeanoMinus R0
 
@@ -113,4 +113,4 @@ lemma models_iff_provable_of_Delta1_param [V↓[ℒₒᵣ] ⊧* T] {σ : 𝚫₁
 
 end Arithmetic
 
-end LO.FirstOrder
+end FFL.FirstOrder

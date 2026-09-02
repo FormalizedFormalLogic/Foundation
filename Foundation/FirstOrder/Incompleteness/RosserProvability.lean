@@ -7,7 +7,7 @@ public import Foundation.FirstOrder.Incompleteness.WitnessComparison
 # Rosser's provability predicate
 -/
 
-namespace LO.FirstOrder.Arithmetic.Bootstrapping
+namespace FFL.FirstOrder.Arithmetic.Bootstrapping
 
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 
@@ -15,21 +15,21 @@ variable {L : Language} [L.Encodable] [L.LORDefinable]
 
 variable (T : Theory L) [T.Δ₁]
 
-def _root_.LO.FirstOrder.Theory.RosserProvable (φ : V) : Prop := T.ProvabilityComparisonLE φ (neg L φ)
+def _root_.FFL.FirstOrder.Theory.RosserProvable (φ : V) : Prop := T.ProvabilityComparisonLE φ (neg L φ)
 
 section
 
-noncomputable def _root_.LO.FirstOrder.Theory.rosserProvable : 𝚺₁.Semisentence 1 := .mkSigma
+noncomputable def _root_.FFL.FirstOrder.Theory.rosserProvable : 𝚺₁.Semisentence 1 := .mkSigma
   “φ. ∃ nφ, !(negGraph L) nφ φ ∧ !T.provabilityComparisonLE φ nφ”
 
-instance _root_.LO.FirstOrder.Theory.RosserProvable_defined :
+instance _root_.FFL.FirstOrder.Theory.RosserProvable_defined :
     𝚺₁-Predicate (T.RosserProvable : V → Prop) via T.rosserProvable := .mk fun v ↦ by
   simp [Theory.rosserProvable, Theory.RosserProvable]
 
-instance _root_.LO.FirstOrder.Theory.rosserProvable_definable :
+instance _root_.FFL.FirstOrder.Theory.rosserProvable_definable :
     𝚺₁-Predicate (T.RosserProvable : V → Prop) := T.RosserProvable_defined.to_definable
 
-noncomputable abbrev _root_.LO.FirstOrder.Theory.rosserPred (σ : Sentence L) : ArithmeticSentence := T.rosserProvable.val/[⌜σ⌝]
+noncomputable abbrev _root_.FFL.FirstOrder.Theory.rosserPred (σ : Sentence L) : ArithmeticSentence := T.rosserProvable.val/[⌜σ⌝]
 
 end
 
@@ -91,9 +91,9 @@ theorem not_rosserProvable [Entailment.Consistent T] {φ : Sentence L} : T ⊢ �
 theorem not_rosserProvable_sentence [Entailment.Consistent T] {σ : Sentence L} : T ⊢ ∼σ → ¬T.RosserProvable (⌜σ⌝ : V) := fun h ↦ by
   simpa [Sentence.quote_def] using! not_rosserProvable h
 
-end LO.FirstOrder.Arithmetic.Bootstrapping
+end FFL.FirstOrder.Arithmetic.Bootstrapping
 
-namespace LO.FirstOrder.Arithmetic
+namespace FFL.FirstOrder.Arithmetic
 
 open Bootstrapping
 
@@ -125,7 +125,7 @@ variable {T : Theory L} [T.Δ₁] [Entailment.Consistent T]
 
 variable (T)
 
-noncomputable abbrev _root_.LO.FirstOrder.Theory.rosserProvability : Provability 𝗜𝚺₁ T where
+noncomputable abbrev _root_.FFL.FirstOrder.Theory.rosserProvability : Provability 𝗜𝚺₁ T where
   prov := T.rosserProvable
   bew_def := rosserProvable_D1
 
@@ -146,4 +146,4 @@ end rosserProvability
 theorem incomplete_GR (T : ArithmeticTheory) [T.Δ₁] [𝗜𝚺₁ ⪯ T] [Entailment.Consistent T] : Entailment.Incomplete T :=
   ProvabilityAbstraction.rosser_first_incompleteness T.rosserProvability
 
-end LO.FirstOrder.Arithmetic
+end FFL.FirstOrder.Arithmetic

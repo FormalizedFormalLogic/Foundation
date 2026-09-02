@@ -11,7 +11,7 @@ Some results to consider provable predicate modified to state that "provable by 
 The results with `f = Superexp.superexp` recover "provable by proof whose Gödel number is less than the superexponential of `e`".
 -/
 
-namespace LO.FirstOrder
+namespace FFL.FirstOrder
 
 open FirstOrder Arithmetic
 open PeanoMinus ISigma0 ISigma1 Bootstrapping Derivation
@@ -146,4 +146,4 @@ example :
 
 end Arithmetic
 
-end LO.FirstOrder
+end FFL.FirstOrder

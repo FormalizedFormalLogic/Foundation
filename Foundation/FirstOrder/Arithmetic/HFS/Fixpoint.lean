@@ -9,7 +9,7 @@ public import Foundation.FirstOrder.Arithmetic.HFS.PRF
 
 -/
 
-namespace LO.FirstOrder.Arithmetic
+namespace FFL.FirstOrder.Arithmetic
 
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 
@@ -275,4 +275,4 @@ attribute [irreducible] Blueprint.fixpointDef
 
 end Fixpoint
 
-end LO.FirstOrder.Arithmetic
+end FFL.FirstOrder.Arithmetic

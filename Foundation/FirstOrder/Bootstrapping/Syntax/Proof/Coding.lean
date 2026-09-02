@@ -4,7 +4,7 @@ public import Foundation.FirstOrder.Bootstrapping.Syntax.Proof.Typed
 
 @[expose] public section
 
-namespace LO.FirstOrder
+namespace FFL.FirstOrder
 
 open Arithmetic Bootstrapping
 
@@ -338,4 +338,4 @@ lemma Provable.sound {φ : Sentence L} (h : Provable T (⌜φ⌝ : ℕ)) : T ⊢
 
 end Arithmetic.Bootstrapping
 
-end LO.FirstOrder
+end FFL.FirstOrder

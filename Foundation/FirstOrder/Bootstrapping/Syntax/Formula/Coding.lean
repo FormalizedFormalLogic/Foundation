@@ -4,9 +4,9 @@ public import Foundation.FirstOrder.Bootstrapping.Syntax.Formula.Typed
 public import Foundation.FirstOrder.Bootstrapping.Syntax.Term.Coding
 
 @[expose] public section
-open Encodable LO FirstOrder Arithmetic Bootstrapping
+open Encodable FFL FirstOrder Arithmetic Bootstrapping
 
-namespace LO
+namespace FFL
 
 class LCWQIsoGödelQuote (α β : ℕ → Type*) [LCWQ α] [LCWQ β] where
   gq : ∀ n, GödelQuote (α n) (β n)
@@ -30,16 +30,16 @@ instance (n : ℕ) : GödelQuote (α n) (β n) := gq n
 @[simp] lemma iff (φ ψ : α n) : (⌜φ 🡘 ψ⌝ : β n) = ⌜φ⌝ 🡘 ⌜ψ⌝ := by simp [LogicalConnective.iff]
 
 @[simp] lemma ball (φ : α (n + 1)) (ψ : α (n + 1)) :
-    (⌜∀¹[φ] ψ⌝ : β n)  = ∀¹[⌜φ⌝] ⌜ψ⌝ := by simp [LO.FirstOrder.ball]
+    (⌜∀¹[φ] ψ⌝ : β n)  = ∀¹[⌜φ⌝] ⌜ψ⌝ := by simp [FFL.FirstOrder.ball]
 
 @[simp] lemma bexs (φ : α (n + 1)) (ψ : α (n + 1)) :
-    (⌜∃¹[φ] ψ⌝ : β n)  = ∃¹[⌜φ⌝] ⌜ψ⌝ := by simp [LO.FirstOrder.bexs]
+    (⌜∃¹[φ] ψ⌝ : β n)  = ∃¹[⌜φ⌝] ⌜ψ⌝ := by simp [FFL.FirstOrder.bexs]
 
 end LCWQIsoGödelQuote
 
-end LO
+end FFL
 
-namespace LO
+namespace FFL
 
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 
@@ -373,4 +373,4 @@ lemma IsSemiformula.sound {n φ : ℕ} (h : IsSemiformula L n φ) : ∃ F : Firs
 
 end FirstOrder.Arithmetic.Bootstrapping
 
-end LO
+end FFL

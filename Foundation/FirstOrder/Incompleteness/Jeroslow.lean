@@ -17,9 +17,9 @@ is not provable in `T` itself.
 
 @[expose] public section
 
-namespace LO.FirstOrder
+namespace FFL.FirstOrder
 
-open _root_.LO.FirstOrder.Entailment
+open _root_.FFL.FirstOrder.Entailment
 open Arithmetic Bootstrapping
 open Derivation ProvabilityAbstraction
 
@@ -80,7 +80,7 @@ private lemma provable_E_jeroslow_jeroslow' [𝗜𝚺₁ ⪯ U] : U ⊢ T.jerosl
 private lemma iff_provable_jeroslow_provable_jeroslow' [𝗜𝚺₁ ⪯ U] : U ⊢ (T.jeroslow) ↔ U ⊢ (T.jeroslow') := by
   apply Entailment.iff_of_E provable_E_jeroslow_jeroslow';
 
-open LO.Entailment in
+open FFL.Entailment in
 instance [𝗜𝚺₁ ⪯ T] [T.SoundOnHierarchy 𝚺 1] : T.standardRefutability.SoundOn (ProvabilityAbstraction.jeroslow T.standardRefutability) := by
   constructor;
   intro h;
@@ -129,6 +129,6 @@ theorem unprovable_formalized_law_of_noncontradiction [𝗜𝚺₁ ⪯ T] [Entai
 end Arithmetic
 
 
-end LO.FirstOrder
+end FFL.FirstOrder
 
 end

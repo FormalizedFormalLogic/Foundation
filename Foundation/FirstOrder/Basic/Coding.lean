@@ -5,7 +5,7 @@ public import Foundation.Vorspiel.Nat.Matrix
 
 @[expose] public section
 
-namespace LO.FirstOrder
+namespace FFL.FirstOrder
 
 variable {L : Language} [(k : ℕ) → Encodable (L.Func k)]
 
@@ -217,6 +217,6 @@ instance Semiformula.countable [Countable ξ] : Countable (Semiformula L ξ n) :
 
 end
 
-end LO.FirstOrder
+end FFL.FirstOrder
 
 end

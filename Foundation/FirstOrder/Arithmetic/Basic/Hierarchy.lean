@@ -3,7 +3,7 @@ module
 public import Foundation.FirstOrder.Arithmetic.Basic.Model
 
 @[expose] public section
-namespace LO.FirstOrder.Arithmetic
+namespace FFL.FirstOrder.Arithmetic
 
 variable {L : Language} [L.LT]
 
@@ -35,7 +35,7 @@ set_option linter.flexible false in
 @[simp] lemma and_iff {φ ψ : Semiformula L ξ n} : Hierarchy Γ s (φ ⋏ ψ) ↔ Hierarchy Γ s φ ∧ Hierarchy Γ s ψ :=
   ⟨by generalize hr : φ ⋏ ψ = r
       intro H
-      induction H <;> try simp [LO.FirstOrder.ball, LO.FirstOrder.bexs] at hr
+      induction H <;> try simp [FFL.FirstOrder.ball, FFL.FirstOrder.bexs] at hr
       case and =>
         rcases hr with ⟨rfl, rfl⟩
         constructor <;> assumption,
@@ -45,7 +45,7 @@ set_option linter.flexible false in
 @[simp] lemma or_iff {φ ψ : Semiformula L ξ n} : Hierarchy Γ s (φ ⋎ ψ) ↔ Hierarchy Γ s φ ∧ Hierarchy Γ s ψ :=
   ⟨by generalize hr : φ ⋎ ψ = r
       intro H
-      induction H <;> try simp [LO.FirstOrder.ball, LO.FirstOrder.bexs] at hr
+      induction H <;> try simp [FFL.FirstOrder.ball, FFL.FirstOrder.bexs] at hr
       case or =>
         rcases hr with ⟨rfl, rfl⟩
         constructor <;> assumption,
@@ -171,7 +171,7 @@ set_option linter.flexible false in
     Hierarchy Γ s (∀¹[“x. x < !!t”] φ) ↔ Hierarchy Γ s φ :=
   ⟨by generalize hq : (∀¹[“x. x < !!t”] φ) = ψ
       intro H
-      induction H <;> try simp [LO.FirstOrder.ball, LO.FirstOrder.bexs] at hq
+      induction H <;> try simp [FFL.FirstOrder.ball, FFL.FirstOrder.bexs] at hq
       case ball φ t pt hp ih =>
         rcases hq with ⟨rfl, rfl⟩
         assumption
@@ -192,7 +192,7 @@ set_option linter.flexible false in
     Hierarchy Γ s (∃¹[“x. x < !!t”] φ) ↔ Hierarchy Γ s φ :=
   ⟨by generalize hq : (∃¹[“x. x < !!t”] φ) = ψ
       intro H
-      induction H <;> try simp [LO.FirstOrder.ball, LO.FirstOrder.bexs] at hq
+      induction H <;> try simp [FFL.FirstOrder.ball, FFL.FirstOrder.bexs] at hq
       case bexs φ t pt hp ih =>
         rcases hq with ⟨rfl, rfl⟩
         assumption
@@ -225,7 +225,7 @@ lemma pi_of_pi_all {φ : Semiformula L ξ (n + 1)} : Hierarchy 𝚷 s (∀¹ φ)
   generalize hr : ∀¹ φ = r
   generalize hb : (𝚷 : Polarity) = Γ
   intro H
-  cases H <;> try simp [LO.FirstOrder.ball, LO.FirstOrder.bexs] at hr
+  cases H <;> try simp [FFL.FirstOrder.ball, FFL.FirstOrder.bexs] at hr
   case ball => rcases hr with rfl; simpa
   case all => rcases hr with rfl; simpa
   case pi hp => rcases hr with rfl; exact hp.accum _
@@ -242,7 +242,7 @@ lemma sigma_of_sigma_ex {φ : Semiformula L ξ (n + 1)} : Hierarchy 𝚺 s (∃�
   generalize hr : ∃¹ φ = r
   generalize hb : (𝚺 : Polarity) = Γ
   intro H
-  cases H <;> try simp [LO.FirstOrder.ball, LO.FirstOrder.bexs] at hr
+  cases H <;> try simp [FFL.FirstOrder.ball, FFL.FirstOrder.bexs] at hr
   case bexs => rcases hr with rfl; simpa
   case exs => rcases hr with rfl; simpa
   case sigma hp => rcases hr with rfl; exact hp.accum _
@@ -474,4 +474,4 @@ instance (T : ArithmeticTheory) [T.SoundOnHierarchy 𝚷 2] : Entailment.Consist
 
 end FirstOrder
 
-end LO
+end FFL

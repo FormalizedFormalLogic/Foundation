@@ -4,7 +4,7 @@ public import Foundation.FirstOrder.Incompleteness.Examples
 public import Foundation.Vorspiel.ENat
 
 @[expose] public section
-namespace LO.FirstOrder
+namespace FFL.FirstOrder
 
 variable {L : Language} [L.ReferenceableBy L] {T₀ T : Theory L}
 
@@ -105,4 +105,4 @@ lemma Peano_height_eq_top : 𝗣𝗔.height = ⊤ := height_eq_top_of_sigma1_sou
 
 end Arithmetic
 
-end LO.FirstOrder
+end FFL.FirstOrder

@@ -4,7 +4,7 @@ public import Foundation.Propositional.Entailment.Cl
 
 @[expose] public section
 
-namespace LO.Entailment
+namespace FFL.Entailment
 
 open FiniteContext
 
@@ -355,6 +355,6 @@ lemma imply_left :
 
 end Tableaux.Valid
 
-end LO.Entailment
+end FFL.Entailment
 
 end

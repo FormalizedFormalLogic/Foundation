@@ -10,11 +10,11 @@ This file defines a characterization of the system/proof/provability/calculus of
 Also defines soundness and completeness.
 
 ## Main Definitions
-* `LO.Entailment S F`: a general framework of deductive system `S` for formulae `F`.
-* `LO.Entailment.Inconsistent 𝓢`: a proposition that states that all formulae in `F` is provable from `𝓢`.
-* `LO.Entailment.Consistent 𝓢`: a proposition that states that `𝓢` is not inconsistent.
-* `LO.Entailment.Sound 𝓢 𝓜`: provability from `𝓢` implies satisfiability on `𝓜`.
-* `LO.Entailment.Complete 𝓢 𝓜`: satisfiability on `𝓜` implies provability from `𝓢`.
+* `FFL.Entailment S F`: a general framework of deductive system `S` for formulae `F`.
+* `FFL.Entailment.Inconsistent 𝓢`: a proposition that states that all formulae in `F` is provable from `𝓢`.
+* `FFL.Entailment.Consistent 𝓢`: a proposition that states that `𝓢` is not inconsistent.
+* `FFL.Entailment.Sound 𝓢 𝓜`: provability from `𝓢` implies satisfiability on `𝓜`.
+* `FFL.Entailment.Complete 𝓢 𝓜`: satisfiability on `𝓜` implies provability from `𝓢`.
 
 ## Notation
 * `𝓢 ⊢! φ`: a type of formalized proofs of `φ : F` from deductive system `𝓢 : S`.
@@ -28,7 +28,7 @@ Also defines soundness and completeness.
 
 @[expose] public section
 
-namespace LO
+namespace FFL
 
 /-- Entailment relation on proof system `S` and formula `F` -/
 class Entailment (S : Type*) (F : outParam Type*) where
@@ -640,6 +640,6 @@ end Pullback
 
 end Entailment
 
-end LO
+end FFL
 
 end

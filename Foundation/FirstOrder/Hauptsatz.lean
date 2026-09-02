@@ -10,7 +10,7 @@ public import Foundation.FirstOrder.NegationTranslation.GoedelGentzen
 Main reference: Jeremy Avigad, Algebraic proofs of cut elimination [Avi01]
  -/
 
-namespace LO.FirstOrder.Derivation
+namespace FFL.FirstOrder.Derivation
 
 variable {L : Language}
 

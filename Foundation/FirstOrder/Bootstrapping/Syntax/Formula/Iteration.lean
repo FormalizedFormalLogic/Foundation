@@ -3,7 +3,7 @@ module
 public import Foundation.FirstOrder.Bootstrapping.Syntax.Formula.Functions
 
 @[expose] public section
-namespace LO.FirstOrder.Semiformula
+namespace FFL.FirstOrder.Semiformula
 
 variable {L : Language} {ξ : Type*} {n : ℕ}
 
@@ -17,9 +17,9 @@ lemma replicate_succ (p : Semiformula L ξ n) (k : ℕ) : p.replicate (k + 1) = 
 
 def weight (k : ℕ) : Semiformula L ξ n := (List.replicate k ⊤).conj
 
-end LO.FirstOrder.Semiformula
+end FFL.FirstOrder.Semiformula
 
-namespace LO.FirstOrder.Arithmetic.Bootstrapping
+namespace FFL.FirstOrder.Arithmetic.Bootstrapping
 
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 
@@ -204,7 +204,7 @@ instance disjSeqSubst.definable' : Γ-[m + 1]-Function₃[V] disjSeqSubst := .of
 
 end
 
-lemma _root_.LO.FirstOrder.Arithmetic.Bootstrapping.IsSemiformula.disjSeqSubst {n m w p : V} (hw : IsSemitermVec ℒₒᵣ n m w) (hp : IsSemiformula ℒₒᵣ (n + 1) p) (k : V) :
+lemma _root_.FFL.FirstOrder.Arithmetic.Bootstrapping.IsSemiformula.disjSeqSubst {n m w p : V} (hw : IsSemitermVec ℒₒᵣ n m w) (hp : IsSemiformula ℒₒᵣ (n + 1) p) (k : V) :
     IsSemiformula ℒₒᵣ m (disjSeqSubst w p k) := by
   induction k using ISigma1.sigma1_succ_induction
   · definability
@@ -285,7 +285,7 @@ end
     · simp
     · simp [ih (by simpa using hi)]
 
-lemma _root_.LO.FirstOrder.Arithmetic.Bootstrapping.IsSemiformula.substItrConj
+lemma _root_.FFL.FirstOrder.Arithmetic.Bootstrapping.IsSemiformula.substItrConj
     {m n w p : V} (hp : IsSemiformula ℒₒᵣ (n + 1) p) (hw : IsSemitermVec ℒₒᵣ n m w) (k : V) :
     IsSemiformula ℒₒᵣ m (^⋀ substItr w p k) := by
   simp only [qqConj_semiformula, len_substItr]
@@ -293,7 +293,7 @@ lemma _root_.LO.FirstOrder.Arithmetic.Bootstrapping.IsSemiformula.substItrConj
   simp only [hi, substItr_nth]
   apply hp.subst (by simp [hw])
 
-lemma _root_.LO.FirstOrder.Arithmetic.Bootstrapping.IsSemiformula.substItrDisj
+lemma _root_.FFL.FirstOrder.Arithmetic.Bootstrapping.IsSemiformula.substItrDisj
     {m n w p : V} (hp : IsSemiformula ℒₒᵣ (n + 1) p) (hw : IsSemitermVec ℒₒᵣ n m w) (k : V) :
     IsSemiformula ℒₒᵣ m (^⋁ substItr w p k) := by
   simp only [qqDisj_semiformula, len_substItr]
@@ -421,4 +421,4 @@ end
 
 end verums
 
-end LO.FirstOrder.Arithmetic.Bootstrapping
+end FFL.FirstOrder.Arithmetic.Bootstrapping
