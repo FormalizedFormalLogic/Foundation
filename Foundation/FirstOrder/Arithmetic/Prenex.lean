@@ -26,6 +26,8 @@ namespace Prenex
 
 variable {Γ : Polarity} {s : ℕ} {ξ ξ₁ ξ₂ : Type*} {n n₁ n₂ : ℕ}
 
+section Data
+
 @[coe]
 def val (π : Prenex Γ s ξ n) : ArithmeticSemiformula ξ n := π.matrix.val.toPrenex Γ s
 
@@ -43,14 +45,14 @@ lemma val_deltaZero {π : Prenex Γ 0 ξ n} : Hierarchy 𝚺 0 π.val := π.matr
 def neg (π : Prenex Γ s ξ n) : Prenex Γ.alt s ξ n :=
   ⟨.mkSigma (∼π.matrix.val) π.matrix.sigma_prop.neg.of_zero⟩
 
-@[simp]
+@[simp, grind .]
 lemma val_neg (π : Prenex Γ s ξ n) : π.neg.val = ∼π.val := by simp [neg, val]
 
 
 def rew (π : Prenex Γ s ξ₁ n₁) (ω : Rew ℒₒᵣ ξ₁ n₁ ξ₂ n₂) : Prenex Γ s ξ₂ n₂ :=
   ⟨π.matrix.rew (ω.qpow s)⟩
 
-@[simp]
+@[simp, grind .]
 lemma val_rew (π : Prenex Γ s ξ₁ n₁) (ω : Rew ℒₒᵣ ξ₁ n₁ ξ₂ n₂) :
   (π.rew ω).val = ω ▹ π.val := by
   simp [val, rew]
@@ -59,7 +61,7 @@ lemma val_rew (π : Prenex Γ s ξ₁ n₁) (ω : Rew ℒₒᵣ ξ₁ n₁ ξ₂
 def sigma (π : Prenex 𝚷 s ξ (n + 1)) : Prenex 𝚺 (s + 1) ξ n :=
   ⟨π.matrix.rew (Rew.castLE (Nat.succ_add n s).le)⟩
 
-@[simp]
+@[simp, grind .]
 lemma val_sigma {π : Prenex 𝚷 s ξ (n + 1)} : π.sigma.val = ∃¹ π.val := by
   simp [val, sigma, Rewriting.quantItr_succ_smul_castLE]
 
@@ -125,7 +127,28 @@ lemma models_ofΔ₀ (φ : 𝚺₀.Semisentence n) (V : Type*) [ORingStructure V
     . change V ⊧/e (ofΔ₀ φ 𝚺 s).altUp.val ↔ V ⊧/e φ.val
       exact (models_altUp (ofΔ₀ φ 𝚺 s) V e).trans (ih (Γ := 𝚺))
 
-variable {T : ArithmeticTheory} [𝗘𝗤 ℒₒᵣ ⪯ T]
+
+def verum : Prenex Γ s ξ n := ofΔ₀ (.mkSigma ⊤ (Hierarchy.verum 𝚺 0 n)) Γ s
+
+def falsum : Prenex Γ s ξ n := ofΔ₀ (.mkSigma ⊥ (Hierarchy.falsum 𝚺 0 n)) Γ s
+
+def rel (r : (ℒₒᵣ).Rel k) (v : Fin k → ArithmeticSemiterm ξ n) : Prenex Γ s ξ n :=
+  ofΔ₀ (.mkSigma (.rel r v) (Hierarchy.rel 𝚺 0 r v)) Γ s
+
+def nrel (r : (ℒₒᵣ).Rel k) (v : Fin k → ArithmeticSemiterm ξ n) : Prenex Γ s ξ n :=
+  ofΔ₀ (.mkSigma (.nrel r v) (Hierarchy.nrel 𝚺 0 r v)) Γ s
+
+end Data
+
+variable {T : ArithmeticTheory}
+
+lemma provable_iff_sigmaInv {π : Prenex 𝚺 (s + 1) Empty n} (hπ : T ⊢ ∀¹* (φ 🡘 π.val)) :
+  T ⊢ ∀¹* (φ 🡘 ∃¹ π.sigmaInv.val) := π.val_sigmaInv ▸ hπ
+
+lemma provable_iff_piInv {π : Prenex 𝚷 (s + 1) Empty n} (hπ : T ⊢ ∀¹* (φ 🡘 π.val)) :
+  T ⊢ ∀¹* (φ 🡘 ∀¹ π.piInv.val) := π.val_piInv ▸ hπ
+
+variable [𝗘𝗤 ℒₒᵣ ⪯ T]
 
 @[simp, grind .]
 lemma provable_iff_refl {π : Prenex Γ s Empty n} : T ⊢ ∀¹* (π.val 🡘 π.val) :=
@@ -135,8 +158,7 @@ lemma provable_iff_neg {π : Prenex Γ s Empty n} (hπ : T ⊢ ∀¹* (φ 🡘 �
   T ⊢ ∀¹* ((∼φ) 🡘 π.neg.val) := by
   apply provable_iff_of_models_iff
   intro V _ _ e;
-  simpa [neg, val, ← Semiformula.neg_toPrenex] using
-    not_congr (models_iff_of_provable_iff hπ V e)
+  simpa [val_neg] using not_congr (models_iff_of_provable_iff hπ V e)
 
 lemma provable_iff_rew {π : Prenex Γ s Empty n₁} (hπ : T ⊢ ∀¹* (φ 🡘 π.val))
   (ω : Rew ℒₒᵣ Empty n₁ Empty n₂) :
@@ -176,18 +198,6 @@ lemma provable_iff_ofΔ₀ (φ₀ : 𝚺₀.Semisentence n) :
   intro V _ _ e
   exact (models_ofΔ₀ φ₀ V e).symm
 
-
-def verum : Prenex Γ s ξ n := ofΔ₀ (.mkSigma ⊤ (Hierarchy.verum 𝚺 0 n)) Γ s
-
-def falsum : Prenex Γ s ξ n := ofΔ₀ (.mkSigma ⊥ (Hierarchy.falsum 𝚺 0 n)) Γ s
-
-def rel (r : (ℒₒᵣ).Rel k) (v : Fin k → ArithmeticSemiterm ξ n) : Prenex Γ s ξ n :=
-  ofΔ₀ (.mkSigma (.rel r v) (Hierarchy.rel 𝚺 0 r v)) Γ s
-
-def nrel (r : (ℒₒᵣ).Rel k) (v : Fin k → ArithmeticSemiterm ξ n) : Prenex Γ s ξ n :=
-  ofΔ₀ (.mkSigma (.nrel r v) (Hierarchy.nrel 𝚺 0 r v)) Γ s
-
-
 lemma provable_iff_verum : T ⊢ ∀¹* (⊤ 🡘 (verum : Prenex Γ s Empty n).val) :=
   provable_iff_ofΔ₀ (.mkSigma ⊤ (by simp))
 
@@ -201,16 +211,6 @@ lemma provable_iff_rel (r : (ℒₒᵣ).Rel k) (v : Fin k → ArithmeticSemiterm
 lemma provable_iff_nrel (r : (ℒₒᵣ).Rel k) (v : Fin k → ArithmeticSemiterm Empty n) :
   T ⊢ ∀¹* (Semiformula.nrel r v 🡘 (nrel r v : Prenex Γ s Empty n).val) :=
   provable_iff_ofΔ₀ (.mkSigma (.nrel r v) (by simp))
-
-
-omit [𝗘𝗤 ℒₒᵣ ⪯ T] in
-lemma provable_iff_sigmaInv {π : Prenex 𝚺 (s + 1) Empty n} (hπ : T ⊢ ∀¹* (φ 🡘 π.val)) :
-  T ⊢ ∀¹* (φ 🡘 ∃¹ π.sigmaInv.val) := π.val_sigmaInv ▸ hπ
-
-omit [𝗘𝗤 ℒₒᵣ ⪯ T] in
-lemma provable_iff_piInv {π : Prenex 𝚷 (s + 1) Empty n} (hπ : T ⊢ ∀¹* (φ 🡘 π.val)) :
-  T ⊢ ∀¹* (φ 🡘 ∀¹ π.piInv.val) := π.val_piInv ▸ hπ
-
 
 lemma models_iff_sigmaInv
   {π : Prenex 𝚺 (s + 1) Empty n} (hπ : T ⊢ ∀¹* (φ 🡘 π.val))
