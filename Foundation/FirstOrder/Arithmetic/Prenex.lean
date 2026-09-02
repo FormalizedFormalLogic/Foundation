@@ -679,6 +679,36 @@ lemma models_or_zero (π ρ : Prenex Γ 0 Empty n) (V : Type*) [ORingStructure V
     V ⊧/e (or π ρ).val ↔ V ⊧/e π.val ∨ V ⊧/e ρ.val := by
   simp [or_zero, Prenex.val];
 
+lemma models_bexs_succ_sigma {V : Type*} [ORingStructure V]
+    (ih : ∀ {m : ℕ} (u : ArithmeticSemiterm Empty m) (π : Prenex 𝚷 s Empty (m + 1))
+      (e : Fin m → V), V ⊧/e (bexs u π).val ↔ ∃ x < u.valb e, V ⊧/(x :> e) π.val)
+    (u : ArithmeticSemiterm Empty n) (π : Prenex 𝚺 (s + 1) Empty (n + 1)) (e : Fin n → V) :
+    V ⊧/e (bexs u π).val ↔ ∃ x < u.valb e, V ⊧/(x :> e) π.val := by
+  set φ₁' := π.sigmaInv;
+  set φ₁ := φ₁'.val;
+  set v := #1 :> #0 :> fun i => #(i.succ.succ) with hv;
+  let φ₂' := φ₁'.rew (Rew.subst v);
+  have hswap : ∀ (x b : V), V ⊧/(x :> b :> e) φ₂'.val ↔ V ⊧/(b :> x :> e) φ₁ := by
+    intro x b;
+    rw [val_rew, Semiformula.eval_rew];
+    have hA : (Semiterm.val (M := V) (x :> b :> e) Empty.elim) ∘ (Rew.subst v) ∘ Semiterm.bvar
+        = (b :> x :> e : Fin (n + 2) → V) := by
+      funext i;
+      cases i using Fin.cases with
+      | zero => simp [hv];
+      | succ i =>
+        cases i using Fin.cases with
+        | zero => simp [hv];
+        | succ i => simp [hv];
+    have hB : (Semiterm.val (M := V) (x :> b :> e) Empty.elim) ∘ (Rew.subst v) ∘ Semiterm.fvar
+        = (Empty.elim : Empty → V) := by
+      funext i; exact i.elim;
+    rw [hA, hB];
+  rw [bexs_succ_sigma (u := u) (π := π), val_sigma]
+  show (∃ b, V ⊧/(b :> e) (bexs (Rew.bShift u) φ₂').val) ↔ ∃ x < u.valb e, V ⊧/(x :> e) π.val;
+  simp only [ih (Rew.bShift u) φ₂', Semiterm.val_bShift, hswap, models_sigmaInv π V];
+  grind;
+
 def closureData : (s : ℕ) → ClosureData s
   | 0 => .zero
   | s + 1 => (closureData s).succ
