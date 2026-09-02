@@ -760,6 +760,69 @@ lemma models_ball_succ_sigma {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧
     have hθ : Hierarchy 𝚺 (s + 1) π.sigmaInv.val := π.sigmaInv.val_hierarchy.accum 𝚺;
     exact sigma_exists_bound_witness hθ e (u.valb e) h;
 
+lemma models_ball_succ_pi {V : Type*} [ORingStructure V]
+    (h : ∀ {m : ℕ} (u : ArithmeticSemiterm Empty m) (π : Prenex 𝚺 (s + 1) Empty (m + 1))
+      (e : Fin m → V), V ⊧/e (bexs u π).val ↔ ∃ x < u.valb e, V ⊧/(x :> e) π.val)
+    (u : ArithmeticSemiterm Empty n) (π : Prenex 𝚷 (s + 1) Empty (n + 1)) (e : Fin n → V) :
+    V ⊧/e (ball u π).val ↔ ∀ x < u.valb e, V ⊧/(x :> e) π.val := by
+  have hthis : V ⊧/e (bexs u π.neg).val ↔ ∃ x < u.valb e, V ⊧/(x :> e) π.neg.val := h u π.neg e;
+  have hval : (ball u π).val = ∼(bexs u π.neg).val := by
+    rw [ball_succ_pi (u := u) (π := π)];
+    exact val_neg (bexs u π.neg);
+  rw [hval];
+  simp only [val_neg, LogicalConnective.HomClass.map_neg, LogicalConnective.Prop.neg_eq] at hthis ⊢;
+  grind;
+
+lemma models_bexs_succ_pi {V : Type*} [ORingStructure V]
+    (h : ∀ {m : ℕ} (u : ArithmeticSemiterm Empty m) (π : Prenex 𝚺 (s + 1) Empty (m + 1))
+      (e : Fin m → V), V ⊧/e (ball u π).val ↔ ∀ x < u.valb e, V ⊧/(x :> e) π.val)
+    (u : ArithmeticSemiterm Empty n) (π : Prenex 𝚷 (s + 1) Empty (n + 1)) (e : Fin n → V) :
+    V ⊧/e (bexs u π).val ↔ ∃ x < u.valb e, V ⊧/(x :> e) π.val := by
+  have hthis : V ⊧/e (ball u π.neg).val ↔ ∀ x < u.valb e, V ⊧/(x :> e) π.neg.val := h u π.neg e;
+  have hval : (bexs u π).val = ∼(ball u π.neg).val := by
+    rw [bexs_succ_pi (u := u) (π := π)];
+    exact val_neg (ball u π.neg);
+  rw [hval];
+  simp only [val_neg, LogicalConnective.HomClass.map_neg, LogicalConnective.Prop.neg_eq] at hthis ⊢;
+  grind;
+
+lemma models_ball_bexs {V : Type*} [ORingStructure V] :
+    ∀ (s : ℕ) [V↓[ℒₒᵣ] ⊧* 𝗜𝚺 s] {Γ : Polarity} {n : ℕ}
+      (u : ArithmeticSemiterm Empty n) (π : Prenex Γ s Empty (n + 1)) (e : Fin n → V),
+      (V ⊧/e (ball u π).val ↔ ∀ x < u.valb e, V ⊧/(x :> e) π.val) ∧
+      (V ⊧/e (bexs u π).val ↔ ∃ x < u.valb e, V ⊧/(x :> e) π.val) := by
+  intro s;
+  induction s with
+  | zero => intro _ Γ n u π e; exact ⟨models_ball_zero u π V e, models_bexs_zero u π V e⟩;
+  | succ s ih =>
+    intro _ Γ n u π e;
+    have : V↓[ℒₒᵣ] ⊧* 𝗜𝚺 s := mod_ISigma_of_le (n₂ := s + 1) (by omega);
+    have iha : ∀ {m : ℕ} (u : ArithmeticSemiterm Empty m) (π : Prenex 𝚷 s Empty (m + 1))
+        (e : Fin m → V), V ⊧/e (ball u π).val ↔ ∀ x < u.valb e, V ⊧/(x :> e) π.val :=
+      fun u π e => (ih u π e).1;
+    have ihb : ∀ {m : ℕ} (u : ArithmeticSemiterm Empty m) (π : Prenex 𝚷 s Empty (m + 1))
+        (e : Fin m → V), V ⊧/e (bexs u π).val ↔ ∃ x < u.valb e, V ⊧/(x :> e) π.val :=
+      fun u π e => (ih u π e).2;
+    have haSigma : ∀ {m : ℕ} (u : ArithmeticSemiterm Empty m) (π : Prenex 𝚺 (s + 1) Empty (m + 1))
+        (e : Fin m → V), V ⊧/e (ball u π).val ↔ ∀ x < u.valb e, V ⊧/(x :> e) π.val :=
+      fun u π e => models_ball_succ_sigma iha ihb u π e;
+    have hbSigma : ∀ {m : ℕ} (u : ArithmeticSemiterm Empty m) (π : Prenex 𝚺 (s + 1) Empty (m + 1))
+        (e : Fin m → V), V ⊧/e (bexs u π).val ↔ ∃ x < u.valb e, V ⊧/(x :> e) π.val :=
+      fun u π e => models_bexs_succ_sigma ihb u π e;
+    rcases Γ with _ | _;
+    . exact ⟨haSigma u π e, hbSigma u π e⟩;
+    . exact ⟨models_ball_succ_pi hbSigma u π e, models_bexs_succ_pi haSigma u π e⟩;
+
+lemma models_ball {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺 s]
+    (u : ArithmeticSemiterm Empty n) (π : Prenex Γ s Empty (n + 1)) (e : Fin n → V) :
+    V ⊧/e (ball u π).val ↔ ∀ x < u.valb e, V ⊧/(x :> e) π.val :=
+  (models_ball_bexs s u π e).1
+
+lemma models_bexs {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺 s]
+    (u : ArithmeticSemiterm Empty n) (π : Prenex Γ s Empty (n + 1)) (e : Fin n → V) :
+    V ⊧/e (bexs u π).val ↔ ∃ x < u.valb e, V ⊧/(x :> e) π.val :=
+  (models_ball_bexs s u π e).2
+
 def closureData : (s : ℕ) → ClosureData s
   | 0 => .zero
   | s + 1 => (closureData s).succ
