@@ -859,6 +859,69 @@ lemma models_and_succ_sigma {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧*
   . rintro ⟨⟨x, hx⟩, ⟨y, hy⟩⟩;
     exact ⟨max x y, ⟨x, le_max_left x y, hx⟩, ⟨y, le_max_right x y, hy⟩⟩;
 
+lemma models_and_succ_pi {V : Type*} [ORingStructure V]
+    (h : ∀ {m : ℕ} (π ρ : Prenex 𝚺 (s + 1) Empty m) (e : Fin m → V),
+      V ⊧/e (or π ρ).val ↔ V ⊧/e π.val ∨ V ⊧/e ρ.val)
+    (π ρ : Prenex 𝚷 (s + 1) Empty n) (e : Fin n → V) :
+    V ⊧/e (and π ρ).val ↔ V ⊧/e π.val ∧ V ⊧/e ρ.val := by
+  have hthis : V ⊧/e (or π.neg ρ.neg).val ↔ V ⊧/e π.neg.val ∨ V ⊧/e ρ.neg.val := h π.neg ρ.neg e;
+  have hval : (and π ρ).val = ∼(or π.neg ρ.neg).val := by
+    rw [and_succ_pi (φ := π) (ψ := ρ)];
+    exact val_neg (or π.neg ρ.neg);
+  rw [hval];
+  simp only [val_neg, LogicalConnective.HomClass.map_neg, LogicalConnective.Prop.neg_eq] at hthis ⊢;
+  grind;
+
+lemma models_or_succ_pi {V : Type*} [ORingStructure V]
+    (h : ∀ {m : ℕ} (π ρ : Prenex 𝚺 (s + 1) Empty m) (e : Fin m → V),
+      V ⊧/e (and π ρ).val ↔ V ⊧/e π.val ∧ V ⊧/e ρ.val)
+    (π ρ : Prenex 𝚷 (s + 1) Empty n) (e : Fin n → V) :
+    V ⊧/e (or π ρ).val ↔ V ⊧/e π.val ∨ V ⊧/e ρ.val := by
+  have hthis : V ⊧/e (and π.neg ρ.neg).val ↔ V ⊧/e π.neg.val ∧ V ⊧/e ρ.neg.val := h π.neg ρ.neg e;
+  have hval : (or π ρ).val = ∼(and π.neg ρ.neg).val := by
+    rw [or_succ_pi (φ := π) (ψ := ρ)];
+    exact val_neg (and π.neg ρ.neg);
+  rw [hval];
+  simp only [val_neg, LogicalConnective.HomClass.map_neg, LogicalConnective.Prop.neg_eq] at hthis ⊢;
+  grind;
+
+lemma models_and_or {V : Type*} [ORingStructure V] :
+    ∀ (s : ℕ) [V↓[ℒₒᵣ] ⊧* 𝗜𝚺 s] {Γ : Polarity} {n : ℕ}
+      (π ρ : Prenex Γ s Empty n) (e : Fin n → V),
+      (V ⊧/e (and π ρ).val ↔ V ⊧/e π.val ∧ V ⊧/e ρ.val) ∧
+      (V ⊧/e (or π ρ).val ↔ V ⊧/e π.val ∨ V ⊧/e ρ.val) := by
+  intro s;
+  induction s with
+  | zero => intro _ Γ n π ρ e; exact ⟨models_and_zero π ρ V e, models_or_zero π ρ V e⟩;
+  | succ s ih =>
+    intro _ Γ n π ρ e;
+    have : V↓[ℒₒᵣ] ⊧* 𝗜𝚺 s := mod_ISigma_of_le (n₂ := s + 1) (by omega);
+    have iha : ∀ {m : ℕ} (π ρ : Prenex 𝚷 s Empty m) (e : Fin m → V),
+        V ⊧/e (and π ρ).val ↔ V ⊧/e π.val ∧ V ⊧/e ρ.val :=
+      fun π ρ e => (ih π ρ e).1;
+    have iho : ∀ {m : ℕ} (π ρ : Prenex 𝚷 s Empty m) (e : Fin m → V),
+        V ⊧/e (or π ρ).val ↔ V ⊧/e π.val ∨ V ⊧/e ρ.val :=
+      fun π ρ e => (ih π ρ e).2;
+    have haSigma : ∀ {m : ℕ} (π ρ : Prenex 𝚺 (s + 1) Empty m) (e : Fin m → V),
+        V ⊧/e (and π ρ).val ↔ V ⊧/e π.val ∧ V ⊧/e ρ.val :=
+      fun π ρ e => models_and_succ_sigma iha π ρ e;
+    have hoSigma : ∀ {m : ℕ} (π ρ : Prenex 𝚺 (s + 1) Empty m) (e : Fin m → V),
+        V ⊧/e (or π ρ).val ↔ V ⊧/e π.val ∨ V ⊧/e ρ.val :=
+      fun π ρ e => models_or_succ_sigma iho π ρ e;
+    rcases Γ with _ | _;
+    . exact ⟨haSigma π ρ e, hoSigma π ρ e⟩;
+    . exact ⟨models_and_succ_pi hoSigma π ρ e, models_or_succ_pi haSigma π ρ e⟩;
+
+lemma models_and {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺 s]
+    (π ρ : Prenex Γ s Empty n) (e : Fin n → V) :
+    V ⊧/e (and π ρ).val ↔ V ⊧/e π.val ∧ V ⊧/e ρ.val :=
+  (models_and_or s π ρ e).1
+
+lemma models_or {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺 s]
+    (π ρ : Prenex Γ s Empty n) (e : Fin n → V) :
+    V ⊧/e (or π ρ).val ↔ V ⊧/e π.val ∨ V ⊧/e ρ.val :=
+  (models_and_or s π ρ e).2
+
 def closureData : (s : ℕ) → ClosureData s
   | 0 => .zero
   | s + 1 => (closureData s).succ
