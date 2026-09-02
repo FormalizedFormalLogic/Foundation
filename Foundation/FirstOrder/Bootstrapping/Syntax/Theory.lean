@@ -63,6 +63,12 @@ lemma ofFinite (hT : Set.Finite T) : T.RE := by
 
 end RE
 
+protected class Primrec (T : Theory L) : Prop where
+  primrec : PrimrecPred (· ∈ T.codes)
+
+instance {T : Theory L} [T.Primrec] : T.RE :=
+  ⟨Theory.Primrec.primrec.computablePred.to_re⟩
+
 end LO.FirstOrder.Theory
 
 namespace LO.FirstOrder.Arithmetic.Bootstrapping
