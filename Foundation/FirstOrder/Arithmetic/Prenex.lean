@@ -365,10 +365,10 @@ lemma models_ball_succ_pi
       (e : Fin m → V), V ⊧/e (∃'[u] φ).val ↔ ∃ x < u.valb e, V ⊧/(x :> e) φ.val)
     (u : ArithmeticSemiterm Empty n) (φ : Prenex 𝚷 (s + 1) Empty (n + 1)) (e : Fin n → V) :
     V ⊧/e (∀'[u] φ).val ↔ ∀ x < u.valb e, V ⊧/(x :> e) φ.val := by
-  have hthis : V ⊧/e (∃'[u] ∼φ).val ↔ ∃ x < u.valb e, V ⊧/(x :> e) (∼φ).val := h u φ.neg e;
+  have hthis : V ⊧/e (∃'[u] ∼φ).val ↔ ∃ x < u.valb e, V ⊧/(x :> e) (∼φ).val := h u (∼φ) e;
   have hval : (∀'[u] φ).val = ∼(∃'[u] ∼φ).val := by
     rw [ball_succ_pi (u := u) (φ := φ)];
-    exact val_neg (bexs u φ.neg);
+    exact val_neg (∃'[u] ∼φ);
   rw [hval];
   simp only [val_neg, LogicalConnective.HomClass.map_neg, LogicalConnective.Prop.neg_eq] at hthis ⊢;
   grind;
@@ -378,10 +378,10 @@ lemma models_bexs_succ_pi
       (e : Fin m → V), V ⊧/e (∀'[u] φ).val ↔ ∀ x < u.valb e, V ⊧/(x :> e) φ.val)
     (u : ArithmeticSemiterm Empty n) (φ : Prenex 𝚷 (s + 1) Empty (n + 1)) (e : Fin n → V) :
     V ⊧/e (∃'[u] φ).val ↔ ∃ x < u.valb e, V ⊧/(x :> e) φ.val := by
-  have hthis : V ⊧/e (∀'[u] ∼φ).val ↔ ∀ x < u.valb e, V ⊧/(x :> e) (∼φ).val := h u φ.neg e;
+  have hthis : V ⊧/e (∀'[u] ∼φ).val ↔ ∀ x < u.valb e, V ⊧/(x :> e) (∼φ).val := h u (∼φ) e;
   have hval : (∃'[u] φ).val = ∼(∀'[u] ∼φ).val := by
     rw [bexs_succ_pi (u := u) (φ := φ)];
-    exact val_neg (ball u φ.neg);
+    exact val_neg (∀'[u] ∼φ);
   rw [hval];
   simp only [val_neg, LogicalConnective.HomClass.map_neg, LogicalConnective.Prop.neg_eq] at hthis ⊢;
   grind;
@@ -449,7 +449,7 @@ lemma models_and_succ_sigma [V↓[ℒₒᵣ] ⊧* 𝗜𝚺 s]
     rw [models_bexs ‘#0 + 1’ ψ₂' (z :> e)];
     simp only [ψ₂', val_rew, Semiformula.eval_insert1];
     simp [Arithmetic.lt_succ_iff_le];
-  simp only [ih (bexs ‘#0 + 1’ φ₂') (bexs ‘#0 + 1’ ψ₂'), models_sigmaInv φ, models_sigmaInv ψ,
+  simp only [ih (∃'[‘#0 + 1’] φ₂') (∃'[‘#0 + 1’] ψ₂'), models_sigmaInv φ, models_sigmaInv ψ,
     hα_eval, hβ_eval];
   constructor;
   . rintro ⟨z, ⟨x, -, hx⟩, ⟨y, -, hy⟩⟩;
@@ -462,10 +462,10 @@ lemma models_and_succ_pi
       V ⊧/e (φ ⋎ ψ).val ↔ V ⊧/e φ.val ∨ V ⊧/e ψ.val)
     (φ ψ : Prenex 𝚷 (s + 1) Empty n) (e : Fin n → V) :
     V ⊧/e (φ ⋏ ψ).val ↔ V ⊧/e φ.val ∧ V ⊧/e ψ.val := by
-  have hthis : V ⊧/e (∼φ ⋎ ∼ψ).val ↔ V ⊧/e (∼φ).val ∨ V ⊧/e (∼ψ).val := h φ.neg ψ.neg e;
+  have hthis : V ⊧/e (∼φ ⋎ ∼ψ).val ↔ V ⊧/e (∼φ).val ∨ V ⊧/e (∼ψ).val := h (∼φ) (∼ψ) e;
   have hval : (φ ⋏ ψ).val = ∼(∼φ ⋎ ∼ψ).val := by
     rw [and_succ_pi (φ := φ) (ψ := ψ)];
-    exact val_neg (or φ.neg ψ.neg);
+    exact val_neg (∼φ ⋎ ∼ψ);
   rw [hval];
   simp only [val_neg, LogicalConnective.HomClass.map_neg, LogicalConnective.Prop.neg_eq] at hthis ⊢;
   grind;
@@ -475,10 +475,10 @@ lemma models_or_succ_pi
       V ⊧/e (φ ⋏ ψ).val ↔ V ⊧/e φ.val ∧ V ⊧/e ψ.val)
     (φ ψ : Prenex 𝚷 (s + 1) Empty n) (e : Fin n → V) :
     V ⊧/e (φ ⋎ ψ).val ↔ V ⊧/e φ.val ∨ V ⊧/e ψ.val := by
-  have hthis : V ⊧/e (∼φ ⋏ ∼ψ).val ↔ V ⊧/e (∼φ).val ∧ V ⊧/e (∼ψ).val := h φ.neg ψ.neg e;
+  have hthis : V ⊧/e (∼φ ⋏ ∼ψ).val ↔ V ⊧/e (∼φ).val ∧ V ⊧/e (∼ψ).val := h (∼φ) (∼ψ) e;
   have hval : (φ ⋎ ψ).val = ∼(∼φ ⋏ ∼ψ).val := by
     rw [or_succ_pi (φ := φ) (ψ := ψ)];
-    exact val_neg (and φ.neg ψ.neg);
+    exact val_neg (∼φ ⋏ ∼ψ);
   rw [hval];
   simp only [val_neg, LogicalConnective.HomClass.map_neg, LogicalConnective.Prop.neg_eq] at hthis ⊢;
   grind;
@@ -561,10 +561,10 @@ lemma models_exs [V↓[ℒₒᵣ] ⊧* 𝗜𝚺 s]
 lemma models_all [V↓[ℒₒᵣ] ⊧* 𝗜𝚺 s]
     (φ : Prenex 𝚷 (s + 1) Empty (n + 1)) (e : Fin n → V) :
     V ⊧/e (∀' φ).val ↔ ∀ x, V ⊧/(x :> e) φ.val := by
-  have hthis : V ⊧/e (∃' ∼φ).val ↔ ∃ x, V ⊧/(x :> e) (∼φ).val := models_exs φ.neg e;
+  have hthis : V ⊧/e (∃' ∼φ).val ↔ ∃ x, V ⊧/(x :> e) (∼φ).val := models_exs (∼φ) e;
   have hval : (∀' φ).val = ∼(∃' ∼φ).val := by
     unfold all;
-    exact val_neg (exs φ.neg);
+    exact val_neg (∃' ∼φ);
   rw [hval];
   simp only [val_neg, LogicalConnective.HomClass.map_neg, LogicalConnective.Prop.neg_eq] at hthis ⊢;
   grind;
@@ -657,7 +657,7 @@ theorem models_exists_prenex {Γ : Polarity} {s n : ℕ} {φ : ArithmeticSemisen
     have : V↓[ℒₒᵣ] ⊧* 𝗜𝚺 (s + 1) := mod_ISigma_of_le (show s + 1 ≤ s + 1 + 1 by omega);
     exact Semiformula.eval_all.trans
       ((forall_congr' fun x => hπ V (x :> e)).trans
-        ((models_all π e).symm.trans (models_altUp π.all e).symm));
+        ((models_all π e).symm.trans (models_altUp (∀' π) e).symm));
   | @dummy_pi s n φ _ ih =>
     obtain ⟨π, hπ⟩ := ih;
     use (∃' π).altUp;
@@ -666,7 +666,7 @@ theorem models_exists_prenex {Γ : Polarity} {s n : ℕ} {φ : ArithmeticSemisen
     have : V↓[ℒₒᵣ] ⊧* 𝗜𝚺 (s + 1) := mod_ISigma_of_le (show s + 1 ≤ s + 1 + 1 by omega);
     exact Semiformula.eval_ex.trans
       ((exists_congr fun x => hπ V (x :> e)).trans
-        ((models_exs π e).symm.trans (models_altUp π.exs e).symm));
+        ((models_exs π e).symm.trans (models_altUp (∃' π) e).symm));
 
 end Prenex
 
