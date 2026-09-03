@@ -52,9 +52,6 @@ noncomputable def _root_.LO.FirstOrder.Theory.fghSentence : ArithmeticSentence :
 noncomputable def _root_.LO.FirstOrder.Theory.fghSentence' : ArithmeticSentence :=
   (T.witnessedBefore θ).val/[⌜T.fghSentence θ⌝]
 
-noncomputable def _root_.LO.FirstOrder.Theory.provedBeforeSentence : ArithmeticSentence :=
-  (T.provedBefore θ).val/[⌜T.fghSentence θ⌝]
-
 
 variable {T : ArithmeticTheory} [T.Δ₁] {θ : 𝚺₀.Semisentence 1} {σ : ArithmeticSentence}
 
@@ -66,10 +63,6 @@ lemma not_witnessedBefore_of_provedBefore : T.ProvedBefore θ x → ¬T.Witnesse
 @[simp, grind .]
 lemma hierarchy_fghSentence' : Hierarchy 𝚺 1 (T.fghSentence' θ) := by
   simp [Theory.fghSentence'];
-
-@[simp, grind .]
-lemma hierarchy_provedBeforeSentence : Hierarchy 𝚺 1 (T.provedBeforeSentence θ) := by
-  simp [Theory.provedBeforeSentence];
 
 lemma diagonal_fghSentence {T' : ArithmeticTheory} [𝗜𝚺₁ ⪯ T'] :
     T' ⊢ T.fghSentence θ 🡘 T.fghSentence' θ :=
@@ -87,13 +80,13 @@ lemma provable_bot_of_provable_of_provable_neg : □σ → □(∼σ) → □(�
 variable [𝗜𝚺₁ ⪯ T]
 
 lemma refutable_fghSentence_of_provedBefore :
-  T ⊢ T.provedBeforeSentence θ 🡒 ∼T.fghSentence θ := by
-  have h1 : T ⊢ T.provedBeforeSentence θ 🡒 ∼T.fghSentence' θ :=
+  T ⊢ (T.provedBefore θ).val/[⌜T.fghSentence θ⌝] 🡒 ∼T.fghSentence θ := by
+  have h1 : T ⊢ (T.provedBefore θ).val/[⌜T.fghSentence θ⌝] 🡒 ∼T.fghSentence' θ :=
     WeakerThan.pbl $
-      show 𝗜𝚺₁ ⊢ T.provedBeforeSentence θ 🡒 ∼T.fghSentence' θ by
+      show 𝗜𝚺₁ ⊢ (T.provedBefore θ).val/[⌜T.fghSentence θ⌝] 🡒 ∼T.fghSentence' θ by
       apply complete.{0};
       intro W _ _;
-      simpa [models_iff, Sentence.coe_quote_eq_quote, Theory.provedBeforeSentence, Theory.fghSentence']
+      simpa [models_iff, Sentence.coe_quote_eq_quote, Theory.fghSentence']
         using not_witnessedBefore_of_provedBefore;
   exact C_trans h1 $ contra $ K_left diagonal_fghSentence;
 
@@ -104,10 +97,10 @@ lemma witness_or_provable_bot_of_provable_fghSentence :
   . tauto;
   . push Not at hw;
     obtain ⟨p₀, hp₀⟩ := hprov;
-    have h2 : V↓[ℒₒᵣ] ⊧ T.provedBeforeSentence θ := by
+    have h2 : V↓[ℒₒᵣ] ⊧ (T.provedBefore θ).val/[⌜T.fghSentence θ⌝] := by
       have hpb : T.ProvedBefore θ (⌜T.fghSentence θ⌝ : V) := ⟨p₀, hp₀, fun w _ ↦ hw w⟩;
-      simpa [models_iff, Theory.provedBeforeSentence] using hpb;
-    have hp2 : □(T.provedBeforeSentence θ) :=
+      simpa [models_iff] using hpb;
+    have hp2 : □((T.provedBefore θ).val/[⌜T.fghSentence θ⌝]) :=
       Bootstrapping.Arithmetic.sigma_one_complete T (by simp) h2;
     right;
     apply provable_bot_of_provable_of_provable_neg (σ := T.fghSentence θ);
