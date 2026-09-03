@@ -109,11 +109,9 @@ lemma provable_fghSentence_of_witness_or_provable_bot :
     . obtain ⟨p, -, hp⟩ := hp;
       use p;
     . push Not at hp;
-      have h2 : V↓[ℒₒᵣ] ⊧ T.fghSentence' θ := by
-        have hwb : T.WitnessedBefore θ (⌜T.fghSentence θ⌝ : V) := ⟨w₀, hw₀, hp⟩;
-        simpa [models_iff, Theory.fghSentence'] using hwb;
-      exact modus_ponens_sentence T (internalize_provability (K_right diagonal_fghSentence))
-        (Bootstrapping.Arithmetic.sigma_one_complete T (by simp) h2);
+      apply modus_ponens_sentence T (internalize_provability (K_right diagonal_fghSentence));
+      apply Bootstrapping.Arithmetic.sigma_one_complete T (by simp);
+      simpa [models_iff, Theory.fghSentence'] using ⟨w₀, hw₀, hp⟩;
   . exact provable_of_provable_bot hbot;
 
 lemma provable_fghSentence_iff : □(T.fghSentence θ) ↔ (∃ w, V ⊧/![w] θ.val) ∨ □(⊥ : ArithmeticSentence) := ⟨
@@ -129,11 +127,8 @@ lemma provable_fixedpoint_iff_exs_or_provable_bot :
   simpa [models_iff] using provable_fghSentence_iff;
 
 lemma provable_fixedpoint'_iff_exs_or_provable_bot :
-  𝗜𝚺₁ ⊢ provabilityPred T (T.fghSentence' θ) 🡘 (∃¹ θ.val) ⋎ provabilityPred T ⊥ := by
-  apply E_trans (E_symm ?_) provable_fixedpoint_iff_exs_or_provable_bot;
-  apply E_intro;
-  . apply T.standardProvability.mono' $ K_left diagonal_fghSentence;
-  . apply T.standardProvability.mono' $ K_right diagonal_fghSentence;
+  𝗜𝚺₁ ⊢ provabilityPred T (T.fghSentence' θ) 🡘 (∃¹ θ.val) ⋎ provabilityPred T ⊥ :=
+  E_trans (E_symm $ T.standardProvability.ext' diagonal_fghSentence) provable_fixedpoint_iff_exs_or_provable_bot
 
 end LO.FirstOrder.Arithmetic.Bootstrapping
 
@@ -151,13 +146,11 @@ theorem fgh_theorem (hσ : Hierarchy 𝚺 1 σ) :
   use T.fghSentence' θ';
   and_intros;
   . simp;
-  . have heq : 𝗜𝚺₁ ⊢ (∃¹ θ'.val) ⋎ provabilityPred T ⊥ 🡘 σ ⋎ provabilityPred T ⊥ := by
-      apply complete.{0};
-      intro V _ _;
-      have hwit' : V ⊧/![] σ ↔ ∃ w, V ⊧/![w] θ := by
-        simpa [Semiformula.eval_ex] using models_iff_of_provable_iff hwit V ![];
-      simp [models_iff, hwit', hθ'];
-    exact E_trans provable_fixedpoint'_iff_exs_or_provable_bot heq;
+  . apply E_trans provable_fixedpoint'_iff_exs_or_provable_bot;
+    apply complete.{0};
+    intro V _ _;
+    simp [models_iff, hθ', show V ⊧/![] σ ↔ ∃ w, V ⊧/![w] θ from
+      by simpa [Semiformula.eval_ex] using models_iff_of_provable_iff hwit V ![]];
 
 theorem fgh_theorem_con (hσ : Hierarchy 𝚺 1 σ) :
   ∃ π : ArithmeticSentence, Hierarchy 𝚺 1 π ∧ 𝗜𝚺₁ ∪ T.Con ⊢ σ 🡘 provabilityPred T π := by
