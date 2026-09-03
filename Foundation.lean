@@ -22,6 +22,7 @@ public import Foundation.FirstOrder.Arithmetic.HFS.Coding
 public import Foundation.FirstOrder.Arithmetic.HFS.Fixpoint
 public import Foundation.FirstOrder.Arithmetic.HFS.PRF
 public import Foundation.FirstOrder.Arithmetic.HFS.Seq
+public import Foundation.FirstOrder.Arithmetic.HFS.Superexp
 public import Foundation.FirstOrder.Arithmetic.HFS.Vec
 public import Foundation.FirstOrder.Arithmetic.IOpen.Basic
 public import Foundation.FirstOrder.Arithmetic.Induction
@@ -82,11 +83,11 @@ public import Foundation.FirstOrder.Completeness.CounterModel
 public import Foundation.FirstOrder.Hauptsatz
 public import Foundation.FirstOrder.Incompleteness.Church
 public import Foundation.FirstOrder.Incompleteness.Consistency
+public import Foundation.FirstOrder.Incompleteness.Delta1
 public import Foundation.FirstOrder.Incompleteness.Dense
 public import Foundation.FirstOrder.Incompleteness.Examples
 public import Foundation.FirstOrder.Incompleteness.First
 public import Foundation.FirstOrder.Incompleteness.Halting
-public import Foundation.FirstOrder.Incompleteness.InductionSchemeDelta1
 public import Foundation.FirstOrder.Incompleteness.Jeroslow
 public import Foundation.FirstOrder.Incompleteness.Löb
 public import Foundation.FirstOrder.Incompleteness.ProvabilityAbstraction.Basic
@@ -95,6 +96,7 @@ public import Foundation.FirstOrder.Incompleteness.ProvabilityAbstraction.Refuta
 public import Foundation.FirstOrder.Incompleteness.RestrictedProvability
 public import Foundation.FirstOrder.Incompleteness.RosserProvability
 public import Foundation.FirstOrder.Incompleteness.Second
+public import Foundation.FirstOrder.Incompleteness.Speedup
 public import Foundation.FirstOrder.Incompleteness.StandardProvability
 public import Foundation.FirstOrder.Incompleteness.Tarski
 public import Foundation.FirstOrder.Incompleteness.WitnessComparison
@@ -180,6 +182,9 @@ public import Foundation.Vorspiel.Matrix
 public import Foundation.Vorspiel.Nat.Basic
 public import Foundation.Vorspiel.Nat.Matrix
 public import Foundation.Vorspiel.NotationClass
+public import Foundation.Vorspiel.Order.BooleanAlgebra.Basic
+public import Foundation.Vorspiel.Order.BooleanAlgebra.Extension
+public import Foundation.Vorspiel.Order.BooleanAlgebra.Iso
 public import Foundation.Vorspiel.Order.Dense
 public import Foundation.Vorspiel.Order.Heyting
 public import Foundation.Vorspiel.Part

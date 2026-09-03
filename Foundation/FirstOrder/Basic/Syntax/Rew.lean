@@ -440,7 +440,10 @@ def toEmpty [DecidableEq ξ] {n : ℕ} : (φ : Semiformula L ξ n) → φ.freeVa
   |     ∃¹ φ, h => ∃¹ φ.toEmpty (by simpa using h)
 
 @[simp] lemma emb_toEmpty [DecidableEq ξ] (φ : Semiformula L ξ n) (hp : φ.freeVariables = ∅) : Rewriting.emb (φ.toEmpty hp) = φ := by
-  induction φ using rec' <;> simp [toEmpty, Function.comp_def, *]
+  induction φ using rec' with
+  | hall φ ih => simp only [toEmpty, Rewriting.app_all, Rew.q_emb]; congr 1; exact ih hp
+  | hexs φ ih => simp only [toEmpty, Rewriting.app_exs, Rew.q_emb]; congr 1; exact ih hp
+  | _ => simp [toEmpty, Function.comp_def, *]
 
 @[simp] lemma toEmpty_emb [DecidableEq ξ] (φ : Semisentence L n) : (Rewriting.emb φ : Semiformula L ξ n).toEmpty (by simp) = φ := by
   induction φ using rec' <;> simp [toEmpty, *]

@@ -185,7 +185,7 @@ def induction_with_singleton'
   | a :: b :: as => hcons a b as (induction_with_singleton' hnil hsingle hcons (b :: as))
 
 instance Nodup.finite [Finite α] : Finite {l : List α // l.Nodup} := by
-  haveI : Fintype α := Fintype.ofFinite α
+  have : Fintype α := Fintype.ofFinite α
   let N := Fintype.card α + 1
   have : Fintype ((i : Fin N) × Vector α i) := Sigma.instFintype
   let f : {l : List α // l.Nodup} → ((i : Fin N) × Vector α i) := fun l ↦

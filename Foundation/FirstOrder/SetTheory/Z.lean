@@ -32,6 +32,7 @@ attribute [ext] mem_ext
 
 @[grind .] lemma subset_antisymm_iff {x y : V} : x ⊆ y ∧ y ⊆ x ↔ x = y := by aesop
 
+omit [Nonempty V] [V↓[ℒₛₑₜ] ⊧* 𝗭] in
 lemma subset_of_eq {x y : V} (h : x = y) : x ⊆ y := h ▸ subset_refl x
 
 lemma SSubset.iff {x y : V} : x ⊊ y ↔ x ⊆ y ∧ ∃ z ∈ y, z ∉ x := by

@@ -131,6 +131,10 @@ lemma rec_mk (g : (s : Set α) → [Small.{u} s] → α) (s : Set Universe.{u}) 
     rec g (mk s) = g (rec g '' s) := by
   exact QPF.Fix.rec_eq (F := UniverseFunctor) (fun p ↦ g p.set) ⟨s, small⟩
 
+-- `Universe := QPF.Fix UniverseFunctor` is a plain `def`, so unifying `s.set : Set (QPF.Fix UniverseFunctor)`
+-- against `mk`'s `Set Universe` parameter (needed to resolve the `Small` instance argument) requires
+-- unfolding past `implicit` transparency; mathlib's own `QPF.Fix.ind_aux`/`ind_rec` need the same relaxation.
+set_option backward.isDefEq.respectTransparency false in
 @[elab_as_elim]
 theorem ind
     {P : Universe.{u} → Prop}

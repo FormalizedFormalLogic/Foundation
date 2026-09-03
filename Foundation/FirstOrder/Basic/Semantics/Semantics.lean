@@ -450,7 +450,7 @@ lemma eval_toEmpty [DecidableEq ξ] {n} {φ : Semiformula L ξ n} (hp : φ.freeV
 
 @[simp] lemma eval_univCl [Nonempty M] (φ : Proposition L) :
     Realize M φ.univCl ↔ ∀ f : ℕ → M, Evalf f φ := by
-  haveI : Inhabited M := Classical.inhabited_of_nonempty inferInstance
+  have : Inhabited M := Classical.inhabited_of_nonempty inferInstance
   simp [Semiformula.univCl, ←eval_toEmpty (f := default)]
 
 @[simp] lemma eval_enumerateFVar_idxOfFVar_eq_id [DecidableEq M] [Inhabited M] (φ : Semiformula L M n) (v) :
@@ -607,7 +607,7 @@ variable {L₁ L₂ : Language} {Φ : L₁ →ᵥ L₂}
 section lMap
 variable {M : Type u} {s₂ : Structure L₂ M} {n} {b : Fin n → M} {f : ξ → M}
 
-lemma eval_lMap [Nonempty M] {φ : Semiformula L₁ ξ n} :
+lemma eval_lMap {φ : Semiformula L₁ ξ n} :
     Eval (s := s₂) b f (lMap Φ φ) ↔ Eval (s := s₂.lMap Φ) b f φ := by
   induction φ using rec' <;>
     simp [*, Semiterm.val_lMap, lMap_rel, lMap_nrel, eval_rel, eval_nrel, Function.comp_def]

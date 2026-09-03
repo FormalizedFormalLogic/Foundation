@@ -139,10 +139,10 @@ open FirstOrder Arithmetic Language
 lemma equiv_singleton_finiteConj :
     𝗣𝗔⁻ ≊ ({finite.toFinset.conj} : ArithmeticTheory) := by
   have hConj : 𝗣𝗔⁻ ⊢ finite.toFinset.conj :=
-    Entailment.FConj!_iff_forall_provable.mpr fun {σ} hσ ↦ Entailment.by_axm (by simp_all)
+    Entailment.FConj_iff_forall_provable.mpr fun {σ} hσ ↦ Entailment.by_axm (by simp_all)
   exact Entailment.Equiv.antisymm_iff.mpr
     ⟨Entailment.WeakerThan.ofAxm! fun {σ} hσ ↦
-        Entailment.mdp! (Entailment.left_Fconj!_intro (by simp_all)) (Entailment.by_axm rfl),
+        Entailment.mdp (Entailment.left_Fconj_intro (by simp_all)) (Entailment.by_axm rfl),
       Entailment.WeakerThan.ofAxm! fun {σ} hσ ↦ by
         rcases hσ with rfl; exact hConj⟩
 

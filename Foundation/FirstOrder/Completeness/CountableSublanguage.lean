@@ -66,7 +66,10 @@ def toSublanguage (pf : ∀ k, L.Func k → Prop) (pr : ∀ k, L.Rel k → Prop)
 @[simp] lemma lMap_toSublanguage (pf : ∀ k, L.Func k → Prop) (pr : ∀ k, L.Rel k → Prop)
   (t : Semiterm L ξ n) (h : ∀ k f, ⟨k, f⟩ ∈ t.symbols → pf k f) :
     (t.toSublanguage pf pr h).lMap L.unsub = t := by
-  induction t <;> simp [*, toSublanguage, Function.comp_def]
+  induction t with
+  | bvar x => rfl
+  | fvar x => rfl
+  | func f v ih => exact congrArg (Semiterm.func f) (funext fun i ↦ ih i _)
 
 end Semiterm
 
@@ -126,7 +129,15 @@ def toSublanguage (pf : ∀ k, L.Func k → Prop) (pr : ∀ k, L.Rel k → Prop)
   (pf : ∀ k, L.Func k → Prop) (pr : ∀ k, L.Rel k → Prop) {n} (φ : Semiformula L ξ n)
   (hf : ∀ k f, ⟨k, f⟩ ∈ φ.functionSymbols → pf k f) (hr : ∀ k r, ⟨k, r⟩ ∈ φ.relationSymbols → pr k r) :
     lMap L.unsub (φ.toSublanguage pf pr hf hr) = φ := by
-  induction φ using rec' <;> simp [*, toSublanguage, lMap_rel, lMap_nrel, Function.comp_def]
+  induction φ using rec' with
+  | hverum => rfl
+  | hfalsum => rfl
+  | hrel r v => exact congrArg (Semiformula.rel r) (funext fun i ↦ Semiterm.lMap_toSublanguage _ _ _ _)
+  | hnrel r v => exact congrArg (Semiformula.nrel r) (funext fun i ↦ Semiterm.lMap_toSublanguage _ _ _ _)
+  | hand φ ψ ihφ ihψ => simp [*, toSublanguage]
+  | hor φ ψ ihφ ihψ => simp [*, toSublanguage]
+  | hall φ ih => exact congrArg Semiformula.all (ih hf hr)
+  | hexs φ ih => exact congrArg Semiformula.exs (ih hf hr)
 
 variable (φ : Semiformula L ξ n)
 

@@ -58,12 +58,12 @@ instance : Entailment.HasAxiomImplyK H := ⟨implyK⟩
 instance : Entailment.HasAxiomImplyS H := ⟨implyS⟩
 instance : Entailment.HasAxiomAndInst H := ⟨andIntro⟩
 instance : Entailment.Minimal H where
-  verum := verum
-  and₁ := andElimL
-  and₂ := andElimR
-  or₁ := orIntroL
-  or₂ := orIntroR
-  or₃ := orElim
+  verum! := verum
+  and₁! := andElimL
+  and₂! := andElimR
+  or₁! := orIntroL
+  or₂! := orIntroR
+  or₃! := orElim
 
 variable {H} {H₁ H₂ : Hilbert α}
 
@@ -123,7 +123,7 @@ lemma weakerThan_of_provable_schema (h : H₂ ⊢* H₁.schema) : H₁ ⪯ H₂ 
 section
 
 instance : Entailment.Int (Hilbert.Int : Hilbert α) where
-  efq := axm $ by tauto
+  efq! := axm $ by tauto
 
 instance : Entailment.HasAxiomEFQ (Hilbert.Cl : Hilbert α) := ⟨axm $ by tauto⟩
 instance : Entailment.HasAxiomLEM (Hilbert.Cl : Hilbert α) := ⟨axm $ by tauto⟩
@@ -140,7 +140,7 @@ namespace Hilbert
 abbrev logic (H : Hilbert α) : Logic α where
   logic := Entailment.theory H
   subst s {_} := Hilbert.subst s
-  mdp := Entailment.mdp!;
+  mdp := Entailment.mdp;
 
 variable {H : Hilbert α}
 

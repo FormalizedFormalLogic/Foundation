@@ -141,7 +141,7 @@ lemma ultrafilter_exists [(t : FinSubtheory T) → Nonempty (A t)]
     (H : ∀ (i : FinSubtheory T), (A i)↓[L] ⊧* (i.val : Theory L)) :
     ∃ 𝓤 : Ultrafilter (FinSubtheory T), Set.image (Sentence.domain A) T ⊆ 𝓤.sets :=
   Ultrafilter.exists_ultrafilter_of_finite_inter_nonempty _ (by
-    haveI : DecidableEq (Set (FinSubtheory T)) := fun _ _ => Classical.propDecidable _
+    have : DecidableEq (Set (FinSubtheory T)) := fun _ _ => Classical.propDecidable _
     intro t ht
     have : ∃ t' : Finset (Sentence L), ↑t' ⊆ T ∧ Finset.image (Sentence.domain A) t' = t := by
       simpa [Finset.subset_set_image_iff] using ht

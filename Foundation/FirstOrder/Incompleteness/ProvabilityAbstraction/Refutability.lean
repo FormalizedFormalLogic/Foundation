@@ -73,8 +73,8 @@ variable
 lemma unprovable_jeroslow [T₀ ⪯ T] [Consistent T] [𝔚.SoundOn (jeroslow 𝔚)] : T ⊬ jeroslow 𝔚 := by
   by_contra hC;
   apply Entailment.Consistent.not_bot (𝓢 := T);
-  have : T ⊢ ∼(jeroslow 𝔚) := Refutability.sound_on $ (Entailment.iff_of_E! $ jeroslow_def') |>.mp hC;
-  exact (N!_iff_CO!.mp this) ⨀ hC;
+  have : T ⊢ ∼(jeroslow 𝔚) := Refutability.sound_on $ (Entailment.iff_of_E $ jeroslow_def') |>.mp hC;
+  exact (N_iff_CO.mp this) ⨀ hC;
 
 end
 
@@ -117,12 +117,12 @@ lemma unprovable_flon [consis : Consistent T] [𝔅.FormalizedCompleteOn 𝐉] :
   contrapose! consis;
   replace consis : T ⊢ ∀¹ safe 𝔅 𝔚 := by simpa [flon] using consis;
   have h₁ : T ⊢ ∼(𝔅 𝐉 ⋏ 𝔚 𝐉) := by simpa [safe] using! FirstOrder.Theory.Proof.specialize _ _ ⨀ consis;
-  have h₂ : T ⊢ ∼𝐉 := (contra! jeroslow_not_safe) ⨀ h₁;
+  have h₂ : T ⊢ ∼𝐉 := (contra jeroslow_not_safe) ⨀ h₁;
   have h₃ : T ⊢ 𝐉 🡘 𝔚 𝐉 := jeroslow_def';
   have h₄ : T ⊢ 𝔚 𝐉 := R1' h₂;
   have h₅ : T ⊢ 𝔚 𝐉 🡒 𝐉 := by cl_prover [h₃];
   have h₆ : T ⊢ 𝐉 := h₅ ⨀ h₄;
-  exact not_consistent_iff_inconsistent.mpr <| inconsistent_iff_provable_bot.mpr $ (N!_iff_CO!.mp h₂) ⨀ h₆;
+  exact not_consistent_iff_inconsistent.mpr <| inconsistent_iff_provable_bot.mpr $ (N_iff_CO.mp h₂) ⨀ h₆;
 
 end
 

@@ -5,19 +5,16 @@ public import Foundation.FirstOrder.Basic.PrimrecCoding
 public import Foundation.FirstOrder.Incompleteness.RosserProvability
 public import Foundation.FirstOrder.Arithmetic.R0.Representation
 public import Foundation.FirstOrder.Incompleteness.Halting
+public import Foundation.Meta.ClProver
 public import Mathlib.Computability.Reduce
 
 /-!
 # Church's undecidability theorem
 
-`church_theorem_general` shows that for every arithmetic theory `T ⊇ 𝗥₀` sound on `𝚺₁` sentences,
-the set of `T`-provable sentences is not computable, by a direct diagonalization on the
-self-applied substitution `σ ↦ σ/[⌜σ⌝]` (no fixed-point/Gödel-numbering machinery beyond weak
-representability of r.e. predicates, `rePred_weak_representation`, is needed, unlike Gödel's first incompleteness
-theorem). `undecidability_first_order_logic` specializes this to `T = ∅`: since `𝗣𝗔⁻` is finitely axiomatizable,
-`𝗣𝗔⁻`-provability computably many-one reduces to `∅`-provability, so undecidability transfers
-from `church_theorem_general` without needing the `𝗥₀ ⪯ T` and soundness hypotheses required
-there.
+The set of sentences provable in an arithmetic theory `T ⊇ 𝗥₀` is not computable, whether `T` is
+sound on `𝚺₁` sentences (`uncomputable_theory_of_sigma1Sound`) or merely consistent and extends
+`𝗜𝚺₁` (`uncomputable_theory_of_consistent`). Provability in pure first-order logic is likewise
+undecidable (`undecidability_first_order_logic`).
 -/
 
 @[expose] public section
@@ -51,9 +48,7 @@ lemma computable₂_iff_sigma1_simulate {α β γ : Type*} [Primcodable α] [Pri
 
 variable {T : ArithmeticTheory} [𝗥₀ ⪯ T] [T.SoundOnHierarchy 𝚺 1]
 
-/-- Church's theorem, for an arbitrary arithmetic theory `T ⊇ 𝗥₀` sound on `𝚺₁` sentences: the set
-of `T`-provable sentences is not computable. -/
-theorem church_theorem_general : ¬ComputablePred T.theory := by
+theorem uncomputable_theory_of_sigma1Sound : ¬ComputablePred T.theory := by
   by_contra hC
   have hQuoteSubst :
       Computable₂ fun σ π : ArithmeticSemisentence 1 ↦ (σ/[⌜π⌝] : ArithmeticSentence) :=
@@ -77,10 +72,35 @@ theorem church_theorem_general : ¬ComputablePred T.theory := by
 
 end Diagonalization
 
+section ConsistencyOnly
+
+variable {T : ArithmeticTheory} [𝗜𝚺₁ ⪯ T] [Entailment.Consistent T]
+
+theorem uncomputable_theory_of_consistent : ¬ComputablePred T.theory := by
+  by_contra hC
+  let p : ℕ → Prop := fun n ↦ (Encodable.decode (α := ArithmeticSentence) n).elim False (fun σ ↦ T ⊢ σ)
+  have hp : ComputablePred p := ComputablePred.iff_decoded_pred.mp hC
+  let ψ : ArithmeticSemisentence 1 := codeOfComputablePred p
+  let δ : ArithmeticSentence := fixedpoint (∼ψ)
+  have hδ : T ⊢ δ 🡘 ∼(ψ/[⌜δ⌝]) := by simpa using diagonal (T := T) (∼ψ)
+  have hp_iff : p (Encodable.encode δ) ↔ T ⊢ δ := by simp [p, Encodable.encodek]
+  by_cases h : T ⊢ δ
+  · have hψ : T ⊢ ψ/[⌜δ⌝] := by
+      simpa [Arithmetic.gödelNumber'_eq_coe_encode] using
+        codeOfComputablePred_provable hp (hp_iff.mpr h)
+    apply Entailment.Consistent.not_bot (𝓢 := T)
+    cl_prover [hδ, h, hψ]
+  · have hnψ : T ⊢ ∼(ψ/[⌜δ⌝]) := by
+      simpa [Arithmetic.gödelNumber'_eq_coe_encode] using
+        codeOfComputablePred_provable_neg hp (hp_iff.not.mpr h)
+    exact h (by cl_prover [hδ, hnψ])
+
+end ConsistencyOnly
+
 section PeanoMinusReduction
 
-/-- Church's theorem: the set of (purely logically, i.e. `∅`-)provable sentences is not
-computable. -/
+/-- Provability in pure first-order logic, i.e. provability from the empty theory, is
+undecidable. -/
 theorem undecidability_first_order_logic : ¬ComputablePred ((∅ : ArithmeticTheory).theory) := by
   have hDeduction (σ : ArithmeticSentence) :
       𝗣𝗔⁻ ⊢ σ ↔ (∅ : ArithmeticTheory) ⊢ PeanoMinus.finite.toFinset.conj 🡒 σ := by
@@ -94,7 +114,7 @@ theorem undecidability_first_order_logic : ¬ComputablePred ((∅ : ArithmeticTh
       fun σ ↦ by
       simp [nat_pair_eq, c, Semiformula.imp_eq, Semiformula.encode_or,
         ← Semiformula.encode_eq_toNat, ← Semiformula.encode_eq_toNat]
-  apply church_theorem_general (T := 𝗣𝗔⁻) (ComputablePred.computable_of_manyOneReducible ?_ hC)
+  apply uncomputable_theory_of_sigma1Sound (T := 𝗣𝗔⁻) (ComputablePred.computable_of_manyOneReducible ?_ hC)
   refine ⟨fun σ ↦ PeanoMinus.finite.toFinset.conj 🡒 σ, ?_, ?_⟩
   . exact hImpIntro
   . exact hDeduction

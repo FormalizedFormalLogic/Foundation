@@ -928,8 +928,8 @@ lemma graph_ex_inv {p₁ r : V} :
 variable (param)
 
 lemma graph_exists {p : V} : IsUFormula L p → ∃ y, c.Graph L param p y := by
-  haveI : 𝚺₁-Function₁ c.allChanges := c.allChanges_defined.to_definable
-  haveI : 𝚺₁-Function₁ c.exsChanges := c.exChanges_defined.to_definable
+  have : 𝚺₁-Function₁ c.allChanges := c.allChanges_defined.to_definable
+  have : 𝚺₁-Function₁ c.exsChanges := c.exChanges_defined.to_definable
   let f : V → V → V := fun _ param ↦ Max.max param (Max.max (c.allChanges param) (c.exsChanges param))
   have hf : 𝚺₁-Function₂ f := by definability
   apply bounded_all_sigma1_order_induction hf ?_ ?_ p param
@@ -1068,9 +1068,9 @@ lemma uformula_result_induction {P : V → V → V → Prop} (hP : 𝚺₁-Relat
       P (c.exsChanges param) p (c.result L (c.exsChanges param) p) →
       P param (^∃ p) (c.exs param p (c.result L (c.exsChanges param) p))) :
     ∀ {param p : V}, IsUFormula L p → P param p (c.result L param p) := by
-  haveI : 𝚺₁-Function₂ c.result L := c.result_definable
-  haveI : 𝚺₁-Function₁ c.allChanges := c.allChanges_defined.to_definable
-  haveI : 𝚺₁-Function₁ c.exsChanges := c.exChanges_defined.to_definable
+  have : 𝚺₁-Function₂ c.result L := c.result_definable
+  have : 𝚺₁-Function₁ c.allChanges := c.allChanges_defined.to_definable
+  have : 𝚺₁-Function₁ c.exsChanges := c.exChanges_defined.to_definable
   let f : V → V → V := fun _ param ↦ Max.max param (Max.max (c.allChanges param) (c.exsChanges param))
   have hf : 𝚺₁-Function₂ f := by definability
   intro param p
@@ -1452,9 +1452,9 @@ lemma semiformula_result_induction {P : V → V → V → V → Prop} (hP : 𝚺
       P (c.exsChanges param) (n + 1) p (c.result L (c.exsChanges param) p) →
       P param n (^∃ p) (c.exs param p (c.result L (c.exsChanges param) p))) :
     ∀ {param n p : V}, IsSemiformula L n p → P param n p (c.result L param p) := by
-  haveI : 𝚺₁-Function₂ c.result L := c.result_definable
-  haveI : 𝚺₁-Function₁ c.allChanges := c.allChanges_defined.to_definable
-  haveI : 𝚺₁-Function₁ c.exsChanges := c.exChanges_defined.to_definable
+  have : 𝚺₁-Function₂ c.result L := c.result_definable
+  have : 𝚺₁-Function₁ c.allChanges := c.allChanges_defined.to_definable
+  have : 𝚺₁-Function₁ c.exsChanges := c.exChanges_defined.to_definable
   let f : V → V → V → V := fun _ param _ ↦ Max.max param (Max.max (c.allChanges param) (c.exsChanges param))
   have hf : 𝚺₁-Function₃ f := by definability
   let g : V → V → V → V := fun _ _ n ↦ n + 1

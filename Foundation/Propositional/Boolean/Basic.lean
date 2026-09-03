@@ -111,7 +111,7 @@ namespace Formula
 open Semantics (Valid)
 open Formula (atom)
 open Formula.Boolean
-open Boolean
+open _root_.LO.Propositional.Boolean
 
 variable {v : Boolean.Valuation α} {φ ψ : Formula α}
 

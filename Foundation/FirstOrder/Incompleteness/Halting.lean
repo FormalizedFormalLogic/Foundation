@@ -88,7 +88,11 @@ lemma _root_.ComputablePred.iff_decoded_pred {α : Type*} [Primcodable α] {A : 
       (f := fun _ => false) (g := fun _ a => decide (A a))
       Computable.decode (Computable.const false) (hA.decide.comp Computable.snd)
     refine hcomp.of_eq fun n => ?_
-    rcases h : Encodable.decode (α := α) n with _ | a <;> simp
+    rcases h : Encodable.decode (α := α) n with _ | a
+    · simp only [Option.elim_none, Bool.false_eq]
+      exact decide_eq_false_iff_not.mpr not_false
+    · simp only [Option.elim_some]
+      rfl
   · intro hg
     have hdec : Computable fun a : α =>
         decide ((Encodable.decode (α := α) (Encodable.encode a)).elim False A) :=

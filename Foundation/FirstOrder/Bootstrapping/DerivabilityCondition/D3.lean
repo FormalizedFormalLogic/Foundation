@@ -118,14 +118,14 @@ theorem bold_sigma_one_complete {n} {φ : ArithmeticSemisentence n} (hp : Hierar
   case hAnd =>
     intro n φ ψ _ _ ihφ ihψ w h
     have H : V ⊧/w φ ∧ V ⊧/w ψ := by simpa using  h
-    simpa using K!_intro (ihφ H.1) (ihψ H.2)
+    simpa using K_intro (ihφ H.1) (ihψ H.2)
   case hOr =>
     intro n φ ψ _ _ ihφ ihψ w h
     suffices T.internalize V ⊢ (toNumVec w ⤔ ⌜φ⌝) ⋎ (toNumVec w ⤔ ⌜ψ⌝) by simpa
     have : V ⊧/w φ ∨ V ⊧/w ψ := by simpa using h
     rcases this with (h | h)
-    · apply A!_intro_left (ihφ h)
-    · apply A!_intro_right (ihψ h)
+    · apply A_intro_left (ihφ h)
+    · apply A_intro_right (ihψ h)
   case hBall =>
     intro n t φ _ ih w h
     have h : ∀ i < t.valb w, V ⊧/(i :> w) φ := by
