@@ -34,7 +34,7 @@ instance : CoeTC (Prenex Γ s ξ n) (ArithmeticSemiformula ξ n) := ⟨val⟩
 
 def neg (φ : Prenex Γ s ξ n) : Prenex Γ.alt s ξ n := ⟨.mkSigma (∼φ.matrix.val) φ.matrix.sigma_prop.neg.of_zero⟩
 
-local prefix:75 "∼" => Prenex.neg
+instance : HTilde (Prenex Γ s ξ n) (Prenex Γ.alt s ξ n) := ⟨neg⟩
 
 def rew (φ : Prenex Γ s ξ₁ n₁) (ω : Rew ℒₒᵣ ξ₁ n₁ ξ₂ n₂) : Prenex Γ s ξ₂ n₂ := ⟨φ.matrix.rew (ω.qpow s)⟩
 
@@ -75,7 +75,9 @@ lemma val_hierarchy {φ : Prenex Γ s ξ n} : Hierarchy Γ s φ.val := by
 lemma val_deltaZero {φ : Prenex Γ 0 ξ n} : Hierarchy 𝚺 0 φ.val := φ.matrix.sigma_prop
 
 @[simp, grind .]
-lemma val_neg (φ : Prenex Γ s ξ n) : (∼φ).val = ∼φ.val := by simp [neg, val]
+lemma val_neg (φ : Prenex Γ s ξ n) : (∼φ).val = ∼φ.val := by
+  show (neg φ).val = ∼φ.val
+  simp [neg, val]
 
 @[simp, grind .]
 lemma val_rew (φ : Prenex Γ s ξ₁ n₁) (ω : Rew ℒₒᵣ ξ₁ n₁ ξ₂ n₂) :
@@ -172,14 +174,14 @@ lemma provable_iff_piInv {φ' : Prenex 𝚷 (s + 1) Empty n} (hφ' : T ⊢ ∀¹
 mutual
 
 def ball : {Γ : Polarity} → {s n : ℕ} →
-    ArithmeticSemiterm Empty n → Prenex Γ s Empty (n + 1) → Prenex Γ s Empty n
+    ArithmeticSemiterm ξ n → Prenex Γ s ξ (n + 1) → Prenex Γ s ξ n
   | _, 0    , _, u, φ => ⟨.mkSigma _ (Hierarchy.ball (Rew.bShift_positive u) φ.val_deltaZero)⟩
   | 𝚺, _ + 1, _, u, φ => (ball (Rew.bShift u) (bexs ‘#1 + 1’ (φ.sigmaInv.rew (Rew.subst (#0 :> #1 :> (#·.succ.succ.succ)))))).sigma
   | 𝚷, _ + 1, _, u, φ => ∼(bexs u (∼φ))
 termination_by Γ s n _u _φ => (s, match Γ with | 𝚺 => 0 | 𝚷 => 1)
 
 def bexs : {Γ : Polarity} → {s n : ℕ} →
-    ArithmeticSemiterm Empty n → Prenex Γ s Empty (n + 1) → Prenex Γ s Empty n
+    ArithmeticSemiterm ξ n → Prenex Γ s ξ (n + 1) → Prenex Γ s ξ n
   | _, 0    , _, u, φ => ⟨.mkSigma _ (Hierarchy.bexs (Rew.bShift_positive u) φ.val_deltaZero)⟩
   | 𝚺, _ + 1, _, u, φ => (bexs (Rew.bShift u) (φ.sigmaInv.rew (Rew.subst (#1 :> #0 :> (#·.succ.succ))))).sigma
   | 𝚷, _ + 1, _, u, φ => ∼(ball u (∼φ))
@@ -191,36 +193,36 @@ local notation:64 "∀'[" u "] " φ => Prenex.ball u φ
 local notation:64 "∃'[" u "] " φ => Prenex.bexs u φ
 
 @[simp]
-lemma ball_zero {u : ArithmeticSemiterm Empty n} {φ : Prenex Γ 0 Empty (n + 1)} :
+lemma ball_zero {u : ArithmeticSemiterm ξ n} {φ : Prenex Γ 0 ξ (n + 1)} :
   (∀'[u] φ) = ⟨.mkSigma _ (Hierarchy.ball (Rew.bShift_positive u) φ.val_deltaZero)⟩ := by
   simp [ball]
 
-lemma ball_succ_sigma {u : ArithmeticSemiterm Empty n} {φ : Prenex 𝚺 (s + 1) Empty (n + 1)} :
+lemma ball_succ_sigma {u : ArithmeticSemiterm ξ n} {φ : Prenex 𝚺 (s + 1) ξ (n + 1)} :
   (∀'[u] φ) = (∀'[Rew.bShift u] (∃'[‘#1 + 1’] (φ.sigmaInv.rew (Rew.subst (#0 :> #1 :> (#·.succ.succ.succ)))))).sigma := by
   rw [ball]
 
-lemma ball_succ_pi {u : ArithmeticSemiterm Empty n} {φ : Prenex 𝚷 (s + 1) Empty (n + 1)} :
+lemma ball_succ_pi {u : ArithmeticSemiterm ξ n} {φ : Prenex 𝚷 (s + 1) ξ (n + 1)} :
   (∀'[u] φ) = ∼(∃'[u] ∼φ) := by
   rw [ball]
 
 
 @[simp]
-lemma bexs_zero {u : ArithmeticSemiterm Empty n} {φ : Prenex Γ 0 Empty (n + 1)} :
+lemma bexs_zero {u : ArithmeticSemiterm ξ n} {φ : Prenex Γ 0 ξ (n + 1)} :
   (∃'[u] φ) = ⟨.mkSigma _ (Hierarchy.bexs (Rew.bShift_positive u) φ.val_deltaZero)⟩ := by
   simp [bexs]
 
-lemma bexs_succ_sigma {u : ArithmeticSemiterm Empty n} {φ : Prenex 𝚺 (s + 1) Empty (n + 1)} :
+lemma bexs_succ_sigma {u : ArithmeticSemiterm ξ n} {φ : Prenex 𝚺 (s + 1) ξ (n + 1)} :
   (∃'[u] φ) = (∃'[Rew.bShift u] (φ.sigmaInv.rew (Rew.subst (#1 :> #0 :> (#·.succ.succ))))).sigma := by
   rw [bexs]
 
-lemma bexs_succ_pi {u : ArithmeticSemiterm Empty n} {φ : Prenex 𝚷 (s + 1) Empty (n + 1)} :
+lemma bexs_succ_pi {u : ArithmeticSemiterm ξ n} {φ : Prenex 𝚷 (s + 1) ξ (n + 1)} :
   (∃'[u] φ) = ∼(∀'[u] ∼φ) := by
   rw [bexs]
 
 
 mutual
 
-def and : {Γ : Polarity} → {s n : ℕ} → Prenex Γ s Empty n → Prenex Γ s Empty n → Prenex Γ s Empty n
+def and : {Γ : Polarity} → {s n : ℕ} → Prenex Γ s ξ n → Prenex Γ s ξ n → Prenex Γ s ξ n
   | _, 0    , _, φ, ψ => ⟨.mkSigma _ (Hierarchy.and φ.val_deltaZero ψ.val_deltaZero)⟩
   | 𝚺, _ + 1, _, φ, ψ =>
       (and (∃'[‘#0 + 1’] (φ.sigmaInv.rew (Rew.subst (#0 :> (#·.succ.succ)))))
@@ -228,7 +230,7 @@ def and : {Γ : Polarity} → {s n : ℕ} → Prenex Γ s Empty n → Prenex Γ 
   | 𝚷, _ + 1, _, φ, ψ => ∼(or (∼φ) (∼ψ))
 termination_by Γ s n φ ψ => (s, match Γ with | 𝚺 => 0 | 𝚷 => 1)
 
-def or : {Γ : Polarity} → {s n : ℕ} → Prenex Γ s Empty n → Prenex Γ s Empty n → Prenex Γ s Empty n
+def or : {Γ : Polarity} → {s n : ℕ} → Prenex Γ s ξ n → Prenex Γ s ξ n → Prenex Γ s ξ n
   | _, 0    , _, φ, ψ => ⟨.mkSigma _ (Hierarchy.or φ.val_deltaZero ψ.val_deltaZero)⟩
   | 𝚺, _ + 1, _, φ, ψ => (or φ.sigmaInv ψ.sigmaInv).sigma
   | 𝚷, _ + 1, _, φ, ψ => ∼(and (∼φ) (∼ψ))
@@ -236,30 +238,37 @@ termination_by Γ s n φ ψ => (s, match Γ with | 𝚺 => 0 | 𝚷 => 1)
 
 end
 
-local infixr:69 " ⋏ " => Prenex.and
-local infixr:68 " ⋎ " => Prenex.or
+instance : HWedge (Prenex Γ s ξ n) (Prenex Γ s ξ n) (Prenex Γ s ξ n) := ⟨and⟩
+instance : HVee (Prenex Γ s ξ n) (Prenex Γ s ξ n) (Prenex Γ s ξ n) := ⟨or⟩
 
 @[simp]
-lemma and_zero {φ ψ : Prenex Γ 0 Empty n} : (φ ⋏ ψ) = ⟨.mkSigma _ (Hierarchy.and φ.val_deltaZero ψ.val_deltaZero)⟩ := by
+lemma and_zero {φ ψ : Prenex Γ 0 ξ n} : (φ ⋏ ψ) = ⟨.mkSigma _ (Hierarchy.and φ.val_deltaZero ψ.val_deltaZero)⟩ := by
+  show and φ ψ = _
   simp [and]
 
-lemma and_succ_sigma {φ ψ : Prenex 𝚺 (s + 1) Empty n} :
+lemma and_succ_sigma {φ ψ : Prenex 𝚺 (s + 1) ξ n} :
   (φ ⋏ ψ) = ((∃'[‘#0 + 1’] (φ.sigmaInv.rew (Rew.subst (#0 :> (#·.succ.succ))))) ⋏
     (∃'[‘#0 + 1’] (ψ.sigmaInv.rew (Rew.subst (#0 :> (#·.succ.succ)))))).sigma := by
-  rw [and]
+  show and φ ψ = _
+  rw [and]; rfl
 
-lemma and_succ_pi {φ ψ : Prenex 𝚷 (s + 1) Empty n} : (φ ⋏ ψ) = ∼(∼φ ⋎ ∼ψ) := by rw [and]
+lemma and_succ_pi {φ ψ : Prenex 𝚷 (s + 1) ξ n} : (φ ⋏ ψ) = ∼(∼φ ⋎ ∼ψ) := by
+  show and φ ψ = _
+  rw [and]; rfl
 
 
 @[simp]
-lemma or_zero {φ ψ : Prenex Γ 0 Empty n} : (φ ⋎ ψ) = ⟨.mkSigma _ (Hierarchy.or φ.val_deltaZero ψ.val_deltaZero)⟩ := by
+lemma or_zero {φ ψ : Prenex Γ 0 ξ n} : (φ ⋎ ψ) = ⟨.mkSigma _ (Hierarchy.or φ.val_deltaZero ψ.val_deltaZero)⟩ := by
+  show or φ ψ = _
   simp [or]
 
-lemma or_succ_sigma {φ ψ : Prenex 𝚺 (s + 1) Empty n} : (φ ⋎ ψ) = (φ.sigmaInv ⋎ ψ.sigmaInv).sigma := by
-  rw [or]
+lemma or_succ_sigma {φ ψ : Prenex 𝚺 (s + 1) ξ n} : (φ ⋎ ψ) = (φ.sigmaInv ⋎ ψ.sigmaInv).sigma := by
+  show or φ ψ = _
+  rw [or]; rfl
 
-lemma or_succ_pi {φ ψ : Prenex 𝚷 (s + 1) Empty n} : (φ ⋎ ψ) = ∼(∼φ ⋏ ∼ψ) := by
-  rw [or]
+lemma or_succ_pi {φ ψ : Prenex 𝚷 (s + 1) ξ n} : (φ ⋎ ψ) = ∼(∼φ ⋏ ∼ψ) := by
+  show or φ ψ = _
+  rw [or]; rfl
 
 lemma models_ball_zero (u : ArithmeticSemiterm Empty n) (φ : Prenex Γ 0 Empty (n + 1))
     (e : Fin n → V) :
@@ -518,10 +527,10 @@ lemma models_or [V↓[ℒₒᵣ] ⊧* 𝗜𝚺 s]
     V ⊧/e (φ ⋎ ψ).val ↔ V ⊧/e φ.val ∨ V ⊧/e ψ.val :=
   (models_and_or φ ψ e).2
 
-def exs (φ : Prenex 𝚺 (s + 1) Empty (n + 1)) : Prenex 𝚺 (s + 1) Empty n :=
+def exs (φ : Prenex 𝚺 (s + 1) ξ (n + 1)) : Prenex 𝚺 (s + 1) ξ n :=
   (∃'[‘#0 + 1’] (∃'[‘#1 + 1’] (φ.sigmaInv.rew (Rew.subst (#0 :> #1 :> (#·.succ.succ.succ)))))).sigma
 
-def all (φ : Prenex 𝚷 (s + 1) Empty (n + 1)) : Prenex 𝚷 (s + 1) Empty n := ∼(exs (∼φ))
+def all (φ : Prenex 𝚷 (s + 1) ξ (n + 1)) : Prenex 𝚷 (s + 1) ξ n := ∼(exs (∼φ))
 
 local prefix:64 "∃' " => Prenex.exs
 local prefix:64 "∀' " => Prenex.all
