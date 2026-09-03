@@ -1,6 +1,7 @@
 module
 
 public import Foundation.FirstOrder.Basic.Syntax.Rew
+public import Foundation.Vorspiel.Fin.Basic
 public import Foundation.Vorspiel.IsEmpty
 public import Foundation.Vorspiel.Empty
 
@@ -355,6 +356,18 @@ lemma eval_bShift' (φ : Semiformula L ξ n) :
 @[simp] lemma eval_substs {k} (w : Fin k → Semiterm L ξ n) (φ : Semiformula L ξ k) :
     Eval b f (φ ⇜ w) ↔ φ.Eval (Semiterm.val b f ∘ w) f := by
   simp [eval_rew, Function.comp_def]
+
+lemma eval_insert1 {n} (φ : Semiformula L ξ (n + 1)) (u w : M) (e : Fin n → M) :
+    Eval (u :> w :> e) f (φ ⇜ (#0 :> (#·.succ.succ))) ↔ Eval (u :> e) f φ := by
+  simp only [eval_substs]
+  exact Iff.of_eq (congrArg (fun c => Eval c f φ)
+    (funext fun i => by induction i using Fin.cases <;> simp))
+
+lemma eval_insert2 {n} (φ : Semiformula L ξ (n + 2)) (u x w : M) (e : Fin n → M) :
+    Eval (u :> x :> w :> e) f (φ ⇜ (#0 :> #1 :> (#·.succ.succ.succ))) ↔ Eval (u :> x :> e) f φ := by
+  simp only [eval_substs, Function.comp_def]
+  exact Iff.of_eq (congrArg (fun c => Eval c f φ)
+    (Fin.funext_two (by simp) (by simp) fun i => by simp))
 
 @[simp] lemma eval_emb {f : ξ → M} (φ : Semiformula L Empty n) :
     Eval b f (Rewriting.emb (ξ := ξ) φ : Semiformula L ξ n) ↔ Eval b Empty.elim φ := by

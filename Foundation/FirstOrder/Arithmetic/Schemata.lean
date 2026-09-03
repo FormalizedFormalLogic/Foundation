@@ -67,6 +67,10 @@ lemma ISigma_subset_mono {s₁ s₂} (h : s₁ ≤ s₂) : 𝗜𝚺 s₁ ⊆ �
 lemma ISigma_weakerThan_of_le {s₁ s₂} (h : s₁ ≤ s₂) : 𝗜𝚺 s₁ ⪯ 𝗜𝚺 s₂ :=
   Entailment.WeakerThan.ofSubset (ISigma_subset_mono h)
 
+lemma ISigma_weakerThan_of_le_trans {T : ArithmeticTheory} {s₁ s₂} (h : s₁ ≤ s₂) (hT : 𝗜𝚺 s₂ ⪯ T) :
+    𝗜𝚺 s₁ ⪯ T :=
+  Entailment.WeakerThan.trans (ISigma_weakerThan_of_le h) hT
+
 instance : 𝗘𝗤 ℒₒᵣ ⪯ 𝗜𝗡𝗗 Γ n :=
   have : 𝗘𝗤 ℒₒᵣ ⪯ 𝗣𝗔⁻ := inferInstance
   Entailment.WeakerThan.trans this inferInstance
@@ -96,6 +100,15 @@ instance : 𝗣𝗔⁻ ⪯ 𝗜𝗢𝗽𝗲𝗻 := inferInstance
 instance : 𝗜𝗢𝗽𝗲𝗻 ⪯ 𝗜𝚺₀ := inferInstance
 
 instance : 𝗜𝚺₁ ⪯ 𝗣𝗔 := inferInstance
+
+instance : 𝗘𝗤 ℒₒᵣ ⪯ 𝗣𝗔 :=
+  have : 𝗘𝗤 ℒₒᵣ ⪯ 𝗣𝗔⁻ := inferInstance
+  Entailment.WeakerThan.trans this inferInstance
+
+-- This is stated as a `lemma`, not an `instance`, since `s` does not occur in the conclusion
+-- `𝗘𝗤 ℒₒᵣ ⪯ T`, so instance search cannot infer it.
+lemma eq_weakerThan_of_ISigma {T : ArithmeticTheory} {s : ℕ} [𝗜𝚺 s ⪯ T] : 𝗘𝗤 ℒₒᵣ ⪯ T :=
+  Entailment.WeakerThan.trans (inferInstance : 𝗘𝗤 ℒₒᵣ ⪯ 𝗜𝚺₀) (ISigma_weakerThan_of_le_trans (by omega) ‹𝗜𝚺 s ⪯ T›)
 
 end axioms
 
@@ -362,6 +375,16 @@ instance [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] : V↓[ℒₒᵣ] ⊧* 𝗜𝚺₀ :
 
 abbrev mod_ISigma_of_le {n₁ n₂} (h : n₁ ≤ n₂) [V↓[ℒₒᵣ] ⊧* 𝗜𝚺 n₂] : V↓[ℒₒᵣ] ⊧* 𝗜𝚺 n₁ :=
   models_of_ss inferInstance (ISigma_subset_mono h)
+
+-- This is stated as a `lemma`, not an `instance`, since `n` does not occur in the conclusion
+-- `V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻`, so instance search cannot infer it.
+lemma mod_paMinus_of_ISigma {n} [V↓[ℒₒᵣ] ⊧* 𝗜𝚺 n] : V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ :=
+  have : V↓[ℒₒᵣ] ⊧* 𝗜𝚺₀ := mod_ISigma_of_le (Nat.zero_le n)
+  inferInstance
+
+instance [V↓[ℒₒᵣ] ⊧* 𝗣𝗔] : V↓[ℒₒᵣ] ⊧* 𝗜𝚺 n :=
+  have : V↓[ℒₒᵣ] ⊧* 𝗣𝗔 := inferInstance
+  models_of_subtheory this
 
 end models
 
