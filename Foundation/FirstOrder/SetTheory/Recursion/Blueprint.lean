@@ -501,7 +501,6 @@ lemma eval_core_faf {x : V} : Semiformula.Evalb (x :> (c.core v x) :> v) f“x y
 --   obtain ⟨f, hf⟩ := SetTheory.Replacement.attempt_function_exists (c.core v) hdefinable (IsOrdinal.toOrdinal (SetTheory.succ αo))
 --   #check SetTheory.IsAttempt.existsUnique_of_exists (c.core v) (SetTheory.succ α) (IsAttempt.exists c v α)
 
-include c v in
 lemma attempt_result_existsUnique (F : V → V) (hF : ℒₛₑₜ-function₁ F) (α : V) : ∃! y,
     (IsOrdinal α → ∃ f, SetTheory.IsAttempt F f ∧ lh f = SetTheory.succ α ∧ ⟨α, y⟩ₖ ∈ f) ∧
     (¬IsOrdinal α → y = ∅) := by
@@ -512,16 +511,10 @@ lemma attempt_result_existsUnique (F : V → V) (hF : ℒₛₑₜ-function₁ F
     have : ∃ z, ⟨α, z⟩ₖ ∈ f := hf.1.exists (show α ∈ lh f from by simp_all [αsucco])
     rcases this with ⟨z, hz⟩
     simp only [hα, not_true, true_implies, false_implies, and_true]
-    -- exact ExistsUnique.intro z ⟨f, hf, hz⟩ (by
-    --   rintro z' ⟨f', hf', hz'⟩
-    --   exact Eq.symm <| hf.unique hf' (by aesop) (mem_succ_self α) hz hz')
     exact ExistsUnique.intro z ⟨f, hf, by simpa, hz⟩ (by
       rintro z' ⟨f', hf', hlhf', hz'⟩
-      -- exact Eq.symm <| hf.1.IsFunction.unique hf' (by aesop) (mem_succ_self α) hz hz')
       exact Eq.symm <| SetTheory.IsAttempt.eq_of_isAttempt hf hf' hlhf hlhf' (by aesop) αo.lt_succ hz hz')
   · refine ExistsUnique.intro (∅ : V) (by aesop) fun y ↦ by aesop
-
-#check attempt_result_existsUnique
 
 noncomputable def result (α : V) : V := Classical.choose! (attempt_result_existsUnique (c.core v) (c.core_definable v) α)
 
@@ -535,29 +528,28 @@ lemma result_spec_of_isOrdinal (α : V) [hα : IsOrdinal α] : ∃ f, SetTheory.
   simpa [hα] using c.result_spec v α
 
 @[simp] theorem result_empty : c.result v ∅ = c.core v ∅ := by
-  rcases c.result_spec_of_isOrdinal v ∅ with ⟨f, hf, _, hempty⟩
-  exact hf.1.IsFunction.unique hempty (hf.empty (mem_succ_self ∅))
+  rcases c.result_spec_of_isOrdinal v ∅ with ⟨f, hf, hlhf, hempty⟩
+  exact hf.1.IsFunction.unique hempty (hf.empty (hlhf ▸ mem_succ_self ∅))
 
-@[simp] theorem result_succ (α : V) [hα : IsOrdinal α] : c.result v (SetTheory.succ α) = c.core v (Classical.choose (SetTheory.Replacement.attempt_function_exists (c.core v) (c.core_definable v) α)) := by
-  -- TODO: The theorem statement is incorrect, I don't think there's a way to state it without obtaining an attempt `f` and writing `c.core v f`.
-  rcases c.result_spec_of_isOrdinal v α with ⟨f, hf, h⟩
-  have := hf.successor h
-  have hmemcons := hf.2.2.1.symm ▸ hf.seq.domain_eq ▸ SetTheory.lh_mem_seqCons f (c.core v f)
-  -- have hrestrict := (hf.2.2.2 α (mem_succ_self α) _).mp h
-  have heq : Classical.choose (IsAttempt.exists c v α) = f := by
-    #check SetTheory.IsAttempt.isAttempt_unique
-    sorry
+@[simp] theorem result_succ (α : V) [hα : IsOrdinal α] : c.result v (SetTheory.succ α) = c.core v (Classical.choose (Replacement.attempt_function_exists (c.core v) (c.core_definable v) (IsOrdinal.toOrdinal α).succ)) := by
+  rcases c.result_spec_of_isOrdinal v α with ⟨f, hf, hlhf, h⟩
+  let αo : Ordinal V := IsOrdinal.toOrdinal α
+  have := hf.successor
+  have hmemcons := hlhf.symm ▸ SetTheory.lh_mem_seqCons f (c.core v f)
+  have hexists := Replacement.attempt_function_exists (c.core v) (c.core_definable v) αo.succ
+  let g := Classical.choose hexists
+  have hg := Classical.choose_spec hexists
+  have heq : Classical.choose hexists = f := by
+    exact Eq.symm <| IsAttempt.isAttempt_unique hf hg.1 (by aesop : lh f = αo.succ.val) hg.2
+  rw [heq]
   exact Eq.symm
-    <| Classical.choose_uniq (c.attempt_result_existsUnique v (SetTheory.succ α))
+    <| Classical.choose_uniq (attempt_result_existsUnique (c.core v) (c.core_definable v) (SetTheory.succ α))
     ⟨ by
         simp only [IsOrdinal.succ, forall_const]
-        refine ⟨f ⁀' c.core v f, ?_⟩
-        refine ⟨this, ?_⟩
-        aesop
+        exact ⟨f ⁀' c.core v f, this, hlhf ▸ Seq.lh_seqCons (c.core v f) hf.1, hlhf ▸ lh_mem_seqCons f (c.core v f)⟩
         ,
       by simp [IsOrdinal.succ]
     ⟩
-    -- ⟨_, this, by simp [hf.2.2.1 ▸ hf.seq.domain_eq]⟩
 
 lemma result_graph (y α : V) : y = c.result v α ↔
     (IsOrdinal α → ∃ f, SetTheory.IsAttempt (c.core v) f ∧ lh f = SetTheory.succ α ∧ ⟨α, y⟩ₖ ∈ f) ∧
@@ -570,11 +562,12 @@ lemma result_graph (y α : V) : y = c.result v α ↔
    by
       rintro ⟨hleft, hright⟩
       by_cases hα : IsOrdinal α
-      · rcases (c.result_spec v α).1 hα with ⟨f', hf', h'⟩
-        rcases hleft hα with ⟨f, hf, h⟩
-        exact Eq.symm <| hf'.unique hf
-          (subset_refl (SetTheory.succ α))
-          (mem_succ_self α) h' h
+      · rcases (c.result_spec v α).1 hα with ⟨f', hf', hlhf', h'⟩
+        rcases hleft hα with ⟨f, hf, hlhf, h⟩
+        let αo : Ordinal V := IsOrdinal.toOrdinal α
+        exact Eq.symm <| hf'.eq_of_isAttempt hf (by aesop : lh f' = αo.succ) (by aesop : lh f = αo.succ)
+          (le_refl αo.succ)
+          (Ordinal.lt_succ αo) h' h
       · exact Eq.symm <| hright hα ▸ (c.result_spec v α).2 hα⟩
 
 set_option linter.flexible false in
