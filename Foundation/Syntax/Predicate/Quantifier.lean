@@ -216,9 +216,9 @@ def quant : Polarity → α (n + 1) → α n
 @[simp] lemma quant_pi (φ : α (n + 1)) : (𝚷 : Polarity).quant φ = ∀¹ φ := rfl
 
 /-- Prefixes `k` alternating quantifiers starting with `Γ`. -/
-def quantItr (Γ : Polarity) : (k : ℕ) → α (n + k) → α n
-  | 0,     φ => φ
-  | k + 1, φ => quantItr Γ k ((Γ.altItr k).quant φ)
+def quantItr (Γ : Polarity) : (k : ℕ) → {n : ℕ} → α (n + k) → α n
+  | 0,     n, φ => φ
+  | k + 1, n, φ => Γ.quant $ quantItr Γ.alt k (cast (by grind) φ)
 
 @[simp]
 lemma quantItr_zero (φ : α n) : quantItr Γ 0 φ = φ := rfl
@@ -226,7 +226,20 @@ lemma quantItr_zero (φ : α n) : quantItr Γ 0 φ = φ := rfl
 @[simp] lemma quantItr_one (φ : α (n + 1)) : quantItr Γ 1 φ = Γ.quant φ := rfl
 
 lemma quantItr_succ {k} (φ : α (n + (k + 1))) :
-    quantItr Γ (k + 1) φ = quantItr Γ k ((Γ.altItr k).quant φ) := rfl
+    quantItr Γ (k + 1) φ = Γ.quant (quantItr Γ.alt k (cast (by grind) φ)) := rfl
+
+lemma cast_quant {m₁ m₂ : ℕ} (h : m₁ = m₂) (Γ : Polarity) (φ : α (m₁ + 1)) :
+  cast (congrArg α h) (Γ.quant φ) = Γ.quant (cast (by grind) φ) := by
+  subst h; rfl
+
+lemma quantItr_succ' {k} (φ : α (n + (k + 1))) :
+    quantItr Γ (k + 1) φ = quantItr Γ k ((Γ.altItr k).quant φ) := by
+  induction k generalizing n Γ with
+  | zero => simp [quantItr_one];
+  | succ k ih =>
+    rw [quantItr_succ, ih, quantItr_succ, altItr_succ']
+    congr 2;
+    grind;
 
 end Polarity
 
