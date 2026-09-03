@@ -46,24 +46,35 @@ instance _root_.LO.FirstOrder.Theory.ProvedBefore.definable :
     𝚺₁-Predicate[V] T.ProvedBefore θ := (Theory.ProvedBefore.defined T θ).to_definable
 
 
-lemma not_witnessedBefore_of_provedBefore {T : ArithmeticTheory} [T.Δ₁] {θ}
-  : T.ProvedBefore θ x → ¬T.WitnessedBefore θ x := by
-  rintro ⟨p, hp, hbound⟩ ⟨w, hw, hbound'⟩;
-  rcases lt_or_ge p w with h | h <;> grind;
-
-
 noncomputable def _root_.LO.FirstOrder.Theory.fghSentence : ArithmeticSentence :=
   fixedpoint (T.witnessedBefore θ).val
 
 noncomputable def _root_.LO.FirstOrder.Theory.fghSentence' : ArithmeticSentence :=
   (T.witnessedBefore θ).val/[⌜T.fghSentence θ⌝]
 
-@[simp, grind .]
-lemma hierarchy_fghSentence' {T : ArithmeticTheory} [T.Δ₁] {θ} : Hierarchy 𝚺 1 (T.fghSentence' θ) := by
-  simp [Theory.fghSentence'];
+noncomputable def _root_.LO.FirstOrder.Theory.provedBeforeSentence : ArithmeticSentence :=
+  (T.provedBefore θ).val/[⌜T.fghSentence θ⌝]
 
 
 variable {T : ArithmeticTheory} [T.Δ₁] {θ : 𝚺₀.Semisentence 1} {σ : ArithmeticSentence}
+
+lemma not_witnessedBefore_of_provedBefore : T.ProvedBefore θ x → ¬T.WitnessedBefore θ x := by
+  rintro ⟨p, hp, hbound⟩ ⟨w, hw, hbound'⟩;
+  rcases lt_or_ge p w with h | h <;> grind;
+
+
+@[simp, grind .]
+lemma hierarchy_fghSentence' : Hierarchy 𝚺 1 (T.fghSentence' θ) := by
+  simp [Theory.fghSentence'];
+
+@[simp, grind .]
+lemma hierarchy_provedBeforeSentence : Hierarchy 𝚺 1 (T.provedBeforeSentence θ) := by
+  simp [Theory.provedBeforeSentence];
+
+lemma diagonal_fghSentence {T' : ArithmeticTheory} [𝗜𝚺₁ ⪯ T'] :
+    T' ⊢ T.fghSentence θ 🡘 T.fghSentence' θ :=
+  diagonal (T.witnessedBefore θ).val
+
 
 local notation:max "□" σ:max => Provable T (⌜σ⌝ : V)
 
@@ -76,52 +87,44 @@ lemma provable_bot_of_provable_of_provable_neg : □σ → □(∼σ) → □(�
 variable [𝗜𝚺₁ ⪯ T]
 
 lemma refutable_fghSentence_of_provedBefore :
-  T ⊢ (T.provedBefore θ).val/[⌜T.fghSentence θ⌝] 🡒 ∼T.fghSentence θ := by
-  set π := T.fghSentence θ with hπ;
-  have h1 : T ⊢ (T.provedBefore θ).val/[⌜π⌝] 🡒 ∼(T.witnessedBefore θ).val/[⌜π⌝] :=
+  T ⊢ T.provedBeforeSentence θ 🡒 ∼T.fghSentence θ := by
+  have h1 : T ⊢ T.provedBeforeSentence θ 🡒 ∼T.fghSentence' θ :=
     WeakerThan.pbl $
-      show 𝗜𝚺₁ ⊢ (T.provedBefore θ).val/[⌜π⌝] 🡒 ∼(T.witnessedBefore θ).val/[⌜π⌝] by
+      show 𝗜𝚺₁ ⊢ T.provedBeforeSentence θ 🡒 ∼T.fghSentence' θ by
       apply complete.{0};
       intro W _ _;
-      simpa [models_iff, Sentence.coe_quote_eq_quote] using not_witnessedBefore_of_provedBefore;
-  have h2 : T ⊢ π 🡘 (T.witnessedBefore θ).val/[⌜π⌝] := hπ ▸ diagonal (T.witnessedBefore θ).val;
-  exact C_trans h1 $ contra $ K_left h2;
+      simpa [models_iff, Sentence.coe_quote_eq_quote, Theory.provedBeforeSentence, Theory.fghSentence']
+        using not_witnessedBefore_of_provedBefore;
+  exact C_trans h1 $ contra $ K_left diagonal_fghSentence;
 
 lemma witness_or_provable_bot_of_provable_fghSentence :
   □(T.fghSentence θ) → (∃ w, V ⊧/![w] θ.val) ∨ □(⊥ : ArithmeticSentence) := by
-  set π := T.fghSentence θ with hπ;
   intro hprov;
   by_cases hw : ∃ w, V ⊧/![w] θ.val;
   . tauto;
   . push Not at hw;
     obtain ⟨p₀, hp₀⟩ := hprov;
-    have h2 : V↓[ℒₒᵣ] ⊧ (T.provedBefore θ).val/[⌜π⌝] := by
-      have hpb : T.ProvedBefore θ (⌜π⌝ : V) := ⟨p₀, hp₀, fun w _ ↦ hw w⟩;
-      simpa [models_iff] using hpb;
-    have hp2 : □((T.provedBefore θ).val/[⌜π⌝]) :=
+    have h2 : V↓[ℒₒᵣ] ⊧ T.provedBeforeSentence θ := by
+      have hpb : T.ProvedBefore θ (⌜T.fghSentence θ⌝ : V) := ⟨p₀, hp₀, fun w _ ↦ hw w⟩;
+      simpa [models_iff, Theory.provedBeforeSentence] using hpb;
+    have hp2 : □(T.provedBeforeSentence θ) :=
       Bootstrapping.Arithmetic.sigma_one_complete T (by simp) h2;
-    have hrefut : T ⊢ (T.provedBefore θ).val/[⌜π⌝] 🡒 ∼π :=
-      hπ ▸ refutable_fghSentence_of_provedBefore;
     right;
-    apply provable_bot_of_provable_of_provable_neg (σ := π);
+    apply provable_bot_of_provable_of_provable_neg (σ := T.fghSentence θ);
     . use p₀;
-    . exact modus_ponens_sentence T (internalize_provability hrefut) hp2;
+    . exact modus_ponens_sentence T (internalize_provability refutable_fghSentence_of_provedBefore) hp2;
 
 lemma provable_fghSentence_of_witness_or_provable_bot :
   (∃ w, V ⊧/![w] θ.val) ∨ □(⊥ : ArithmeticSentence) → □(T.fghSentence θ) := by
-  set π := T.fghSentence θ with hπ;
   rintro (⟨w₀, hw₀⟩ | hbot);
-  . by_cases hp : ∃ p < w₀, Proof T p (⌜π⌝ : V);
+  . by_cases hp : ∃ p < w₀, Proof T p (⌜T.fghSentence θ⌝ : V);
     . obtain ⟨p, -, hp⟩ := hp;
       use p;
     . push Not at hp;
-      have h2 : V↓[ℒₒᵣ] ⊧ (T.witnessedBefore θ).val/[⌜π⌝] := by
-        have hwb : T.WitnessedBefore θ (⌜π⌝ : V) := ⟨w₀, hw₀, hp⟩;
-        simpa [models_iff] using hwb;
-      have hdiag : T ⊢ T.fghSentence' θ 🡒 π :=
-        K_right
-          (hπ ▸ diagonal (T.witnessedBefore θ).val : T ⊢ π 🡘 (T.witnessedBefore θ).val/[⌜π⌝]);
-      exact modus_ponens_sentence T (internalize_provability hdiag)
+      have h2 : V↓[ℒₒᵣ] ⊧ T.fghSentence' θ := by
+        have hwb : T.WitnessedBefore θ (⌜T.fghSentence θ⌝ : V) := ⟨w₀, hw₀, hp⟩;
+        simpa [models_iff, Theory.fghSentence'] using hwb;
+      exact modus_ponens_sentence T (internalize_provability (K_right diagonal_fghSentence))
         (Bootstrapping.Arithmetic.sigma_one_complete T (by simp) h2);
   . exact provable_of_provable_bot hbot;
 
@@ -136,6 +139,13 @@ lemma provable_fixedpoint_iff_exs_or_provable_bot :
   apply complete.{0};
   intro V _ _;
   simpa [models_iff] using provable_fghSentence_iff;
+
+lemma provable_fixedpoint'_iff_exs_or_provable_bot :
+  𝗜𝚺₁ ⊢ provabilityPred T (T.fghSentence' θ) 🡘 (∃¹ θ.val) ⋎ provabilityPred T ⊥ := by
+  have hiff : 𝗜𝚺₁ ⊢ provabilityPred T (T.fghSentence θ) 🡘 provabilityPred T (T.fghSentence' θ) :=
+    E_intro (T.standardProvability.mono' (K_left diagonal_fghSentence))
+      (T.standardProvability.mono' (K_right diagonal_fghSentence));
+  exact E_trans (E_symm hiff) provable_fixedpoint_iff_exs_or_provable_bot;
 
 end LO.FirstOrder.Arithmetic.Bootstrapping
 
@@ -153,16 +163,13 @@ theorem fgh_theorem (hσ : Hierarchy 𝚺 1 σ) :
   use T.fghSentence' θ';
   and_intros;
   . simp;
-  . have heq : 𝗜𝚺₁ ⊢ provabilityPred T (T.fghSentence θ') 🡘 σ ⋎ provabilityPred T ⊥ := by
+  . have heq : 𝗜𝚺₁ ⊢ (∃¹ θ'.val) ⋎ provabilityPred T ⊥ 🡘 σ ⋎ provabilityPred T ⊥ := by
       apply complete.{0};
       intro V _ _;
       have hwit' : V ⊧/![] σ ↔ ∃ w, V ⊧/![w] θ := by
         simpa [Semiformula.eval_ex] using models_iff_of_provable_iff hwit V ![];
-      simpa [models_iff, hwit', hθ'] using provable_fghSentence_iff (θ := θ');
-    have hdiag : 𝗜𝚺₁ ⊢ T.fghSentence θ' 🡘 T.fghSentence' θ' := diagonal (T.witnessedBefore θ').val;
-    have hiff : 𝗜𝚺₁ ⊢ provabilityPred T (T.fghSentence θ') 🡘 provabilityPred T (T.fghSentence' θ') :=
-      E_intro (T.standardProvability.mono' (K_left hdiag)) (T.standardProvability.mono' (K_right hdiag));
-    exact E_trans (E_symm hiff) heq;
+      simp [models_iff, hwit', hθ'];
+    exact E_trans provable_fixedpoint'_iff_exs_or_provable_bot heq;
 
 theorem fgh_theorem_con (hσ : Hierarchy 𝚺 1 σ) :
   ∃ π : ArithmeticSentence, Hierarchy 𝚺 1 π ∧ 𝗜𝚺₁ ∪ T.Con ⊢ σ 🡘 provabilityPred T π := by
