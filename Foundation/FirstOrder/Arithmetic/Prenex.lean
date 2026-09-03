@@ -28,28 +28,28 @@ variable {Γ : Polarity} {s : ℕ} {ξ ξ₁ ξ₂ : Type*} {n n₁ n₂ : ℕ}
 variable {V : Type*} [ORingStructure V]
 
 @[coe]
-def val (π : Prenex Γ s ξ n) : ArithmeticSemiformula ξ n := π.matrix.val.toPrenex Γ s
+def val (φ : Prenex Γ s ξ n) : ArithmeticSemiformula ξ n := φ.matrix.val.toPrenex Γ s
 
 instance : CoeTC (Prenex Γ s ξ n) (ArithmeticSemiformula ξ n) := ⟨val⟩
 
-def neg (π : Prenex Γ s ξ n) : Prenex Γ.alt s ξ n := ⟨.mkSigma (∼π.matrix.val) π.matrix.sigma_prop.neg.of_zero⟩
+def neg (φ : Prenex Γ s ξ n) : Prenex Γ.alt s ξ n := ⟨.mkSigma (∼φ.matrix.val) φ.matrix.sigma_prop.neg.of_zero⟩
 
 local prefix:75 "∼" => Prenex.neg
 
-def rew (π : Prenex Γ s ξ₁ n₁) (ω : Rew ℒₒᵣ ξ₁ n₁ ξ₂ n₂) : Prenex Γ s ξ₂ n₂ := ⟨π.matrix.rew (ω.qpow s)⟩
+def rew (φ : Prenex Γ s ξ₁ n₁) (ω : Rew ℒₒᵣ ξ₁ n₁ ξ₂ n₂) : Prenex Γ s ξ₂ n₂ := ⟨φ.matrix.rew (ω.qpow s)⟩
 
-def sigma (π : Prenex 𝚷 s ξ (n + 1)) : Prenex 𝚺 (s + 1) ξ n := ⟨π.matrix.rew (Rew.castLE (Nat.succ_add n s).le)⟩
+def sigma (φ : Prenex 𝚷 s ξ (n + 1)) : Prenex 𝚺 (s + 1) ξ n := ⟨φ.matrix.rew (Rew.castLE (Nat.succ_add n s).le)⟩
 
-def pi (π : Prenex 𝚺 s ξ (n + 1)) : Prenex 𝚷 (s + 1) ξ n := ⟨π.matrix.rew (Rew.castLE (Nat.succ_add n s).le)⟩
+def pi (φ : Prenex 𝚺 s ξ (n + 1)) : Prenex 𝚷 (s + 1) ξ n := ⟨φ.matrix.rew (Rew.castLE (Nat.succ_add n s).le)⟩
 
-def sigmaInv (π : Prenex 𝚺 (s + 1) ξ n) : Prenex 𝚷 s ξ (n + 1) := ⟨π.matrix.rew (Rew.castLE (Nat.succ_add n s).ge)⟩
+def sigmaInv (φ : Prenex 𝚺 (s + 1) ξ n) : Prenex 𝚷 s ξ (n + 1) := ⟨φ.matrix.rew (Rew.castLE (Nat.succ_add n s).ge)⟩
 
-def piInv (π : Prenex 𝚷 (s + 1) ξ n) : Prenex 𝚺 s ξ (n + 1) := ⟨π.matrix.rew (Rew.castLE (Nat.succ_add n s).ge)⟩
+def piInv (φ : Prenex 𝚷 (s + 1) ξ n) : Prenex 𝚺 s ξ (n + 1) := ⟨φ.matrix.rew (Rew.castLE (Nat.succ_add n s).ge)⟩
 
-def altUp (π : Prenex Γ s ξ n) : Prenex Γ.alt (s + 1) ξ n := by
+def altUp (φ : Prenex Γ s ξ n) : Prenex Γ.alt (s + 1) ξ n := by
   rcases Γ with _ | _
-  . exact (π.rew Rew.bShift).pi
-  . exact (π.rew Rew.bShift).sigma
+  . exact (φ.rew Rew.bShift).pi
+  . exact (φ.rew Rew.bShift).sigma
 
 def ofΔ₀ (φ : 𝚺₀.Semiformula ξ n) : (Γ : Polarity) → (s : ℕ) → Prenex Γ s ξ n
   | Γ, 0     => ⟨φ⟩
@@ -67,31 +67,31 @@ def nrel (r : (ℒₒᵣ).Rel k) (v : Fin k → ArithmeticSemiterm ξ n) : Prene
 
 
 @[simp, grind .]
-lemma val_hierarchy {π : Prenex Γ s ξ n} : Hierarchy Γ s π.val := by
-  change Hierarchy Γ s (π.matrix.val.toPrenex Γ s)
-  simpa only [Nat.zero_add] using Hierarchy.toPrenex (Γ := Γ) (j := 0) π.matrix.sigma_prop.of_zero
+lemma val_hierarchy {φ : Prenex Γ s ξ n} : Hierarchy Γ s φ.val := by
+  change Hierarchy Γ s (φ.matrix.val.toPrenex Γ s)
+  simpa only [Nat.zero_add] using Hierarchy.toPrenex (Γ := Γ) (j := 0) φ.matrix.sigma_prop.of_zero
 
 @[simp, grind .]
-lemma val_deltaZero {π : Prenex Γ 0 ξ n} : Hierarchy 𝚺 0 π.val := π.matrix.sigma_prop
+lemma val_deltaZero {φ : Prenex Γ 0 ξ n} : Hierarchy 𝚺 0 φ.val := φ.matrix.sigma_prop
 
 @[simp, grind .]
-lemma val_neg (π : Prenex Γ s ξ n) : (∼π).val = ∼π.val := by simp [neg, val]
+lemma val_neg (φ : Prenex Γ s ξ n) : (∼φ).val = ∼φ.val := by simp [neg, val]
 
 @[simp, grind .]
-lemma val_rew (π : Prenex Γ s ξ₁ n₁) (ω : Rew ℒₒᵣ ξ₁ n₁ ξ₂ n₂) :
-  (π.rew ω).val = ω ▹ π.val := by
+lemma val_rew (φ : Prenex Γ s ξ₁ n₁) (ω : Rew ℒₒᵣ ξ₁ n₁ ξ₂ n₂) :
+  (φ.rew ω).val = ω ▹ φ.val := by
   simp [val, rew]
 
 @[simp, grind .]
-lemma val_sigma {π : Prenex 𝚷 s ξ (n + 1)} : π.sigma.val = ∃¹ π.val := by
+lemma val_sigma {φ : Prenex 𝚷 s ξ (n + 1)} : φ.sigma.val = ∃¹ φ.val := by
   simp [val, sigma, Rewriting.quantItr_succ_smul_castLE]
 
 @[simp, grind .]
-lemma val_pi {π : Prenex 𝚺 s ξ (n + 1)} : π.pi.val = ∀¹ π.val := by
+lemma val_pi {φ : Prenex 𝚺 s ξ (n + 1)} : φ.pi.val = ∀¹ φ.val := by
   simp [val, pi, Rewriting.quantItr_succ_smul_castLE]
 
 @[simp, grind .]
-lemma val_sigmaInv {π : Prenex 𝚺 (s + 1) ξ n} : π.val = ∃¹ π.sigmaInv.val := by
+lemma val_sigmaInv {φ : Prenex 𝚺 (s + 1) ξ n} : φ.val = ∃¹ φ.sigmaInv.val := by
   unfold val sigmaInv
   simp only [HierarchySymbol.Semiformula.val_rew]
   rw [← Polarity.quant_sigma, ← Polarity.alt_sigma, ← Rewriting.quantItr_succ_smul_castLE,
@@ -101,7 +101,7 @@ lemma val_sigmaInv {π : Prenex 𝚺 (s + 1) ξ n} : π.val = ∃¹ π.sigmaInv.
 
 
 @[simp, grind .]
-lemma val_piInv {π : Prenex 𝚷 (s + 1) ξ n} : π.val = ∀¹ π.piInv.val := by
+lemma val_piInv {φ : Prenex 𝚷 (s + 1) ξ n} : φ.val = ∀¹ φ.piInv.val := by
   unfold val piInv
   simp only [HierarchySymbol.Semiformula.val_rew]
   rw [← Polarity.quant_pi, ← Polarity.alt_pi, ← Rewriting.quantItr_succ_smul_castLE,
@@ -163,27 +163,27 @@ lemma models_nrel {k} (r : (ℒₒᵣ).Rel k) (v : Fin k → ArithmeticSemiterm 
 
 variable {T : ArithmeticTheory}
 
-lemma provable_iff_sigmaInv {π : Prenex 𝚺 (s + 1) Empty n} (hπ : T ⊢ ∀¹* (φ 🡘 π.val)) :
-  T ⊢ ∀¹* (φ 🡘 ∃¹ π.sigmaInv.val) := π.val_sigmaInv ▸ hπ
+lemma provable_iff_sigmaInv {φ' : Prenex 𝚺 (s + 1) Empty n} (hφ' : T ⊢ ∀¹* (φ 🡘 φ'.val)) :
+  T ⊢ ∀¹* (φ 🡘 ∃¹ φ'.sigmaInv.val) := φ'.val_sigmaInv ▸ hφ'
 
-lemma provable_iff_piInv {π : Prenex 𝚷 (s + 1) Empty n} (hπ : T ⊢ ∀¹* (φ 🡘 π.val)) :
-  T ⊢ ∀¹* (φ 🡘 ∀¹ π.piInv.val) := π.val_piInv ▸ hπ
+lemma provable_iff_piInv {φ' : Prenex 𝚷 (s + 1) Empty n} (hφ' : T ⊢ ∀¹* (φ 🡘 φ'.val)) :
+  T ⊢ ∀¹* (φ 🡘 ∀¹ φ'.piInv.val) := φ'.val_piInv ▸ hφ'
 
 mutual
 
 def ball : {Γ : Polarity} → {s n : ℕ} →
     ArithmeticSemiterm Empty n → Prenex Γ s Empty (n + 1) → Prenex Γ s Empty n
-  | _, 0    , _, u, π => ⟨.mkSigma _ (Hierarchy.ball (Rew.bShift_positive u) π.val_deltaZero)⟩
-  | 𝚺, _ + 1, _, u, π => (ball (Rew.bShift u) (bexs ‘#1 + 1’ (π.sigmaInv.rew (Rew.subst (#0 :> #1 :> (#·.succ.succ.succ)))))).sigma
-  | 𝚷, _ + 1, _, u, π => ∼(bexs u (∼π))
-termination_by Γ s n _u _π => (s, match Γ with | 𝚺 => 0 | 𝚷 => 1)
+  | _, 0    , _, u, φ => ⟨.mkSigma _ (Hierarchy.ball (Rew.bShift_positive u) φ.val_deltaZero)⟩
+  | 𝚺, _ + 1, _, u, φ => (ball (Rew.bShift u) (bexs ‘#1 + 1’ (φ.sigmaInv.rew (Rew.subst (#0 :> #1 :> (#·.succ.succ.succ)))))).sigma
+  | 𝚷, _ + 1, _, u, φ => ∼(bexs u (∼φ))
+termination_by Γ s n _u _φ => (s, match Γ with | 𝚺 => 0 | 𝚷 => 1)
 
 def bexs : {Γ : Polarity} → {s n : ℕ} →
     ArithmeticSemiterm Empty n → Prenex Γ s Empty (n + 1) → Prenex Γ s Empty n
-  | _, 0    , _, u, π => ⟨.mkSigma _ (Hierarchy.bexs (Rew.bShift_positive u) π.val_deltaZero)⟩
-  | 𝚺, _ + 1, _, u, π => (bexs (Rew.bShift u) (π.sigmaInv.rew (Rew.subst (#1 :> #0 :> (#·.succ.succ))))).sigma
-  | 𝚷, _ + 1, _, u, π => ∼(ball u (∼π))
-termination_by Γ s n _u _π => (s, match Γ with | 𝚺 => 0 | 𝚷 => 1)
+  | _, 0    , _, u, φ => ⟨.mkSigma _ (Hierarchy.bexs (Rew.bShift_positive u) φ.val_deltaZero)⟩
+  | 𝚺, _ + 1, _, u, φ => (bexs (Rew.bShift u) (φ.sigmaInv.rew (Rew.subst (#1 :> #0 :> (#·.succ.succ))))).sigma
+  | 𝚷, _ + 1, _, u, φ => ∼(ball u (∼φ))
+termination_by Γ s n _u _φ => (s, match Γ with | 𝚺 => 0 | 𝚷 => 1)
 
 end
 
@@ -518,10 +518,10 @@ lemma models_or [V↓[ℒₒᵣ] ⊧* 𝗜𝚺 s]
     V ⊧/e (φ ⋎ ψ).val ↔ V ⊧/e φ.val ∨ V ⊧/e ψ.val :=
   (models_and_or φ ψ e).2
 
-def exs (π : Prenex 𝚺 (s + 1) Empty (n + 1)) : Prenex 𝚺 (s + 1) Empty n :=
-  (∃'[‘#0 + 1’] (∃'[‘#1 + 1’] (π.sigmaInv.rew (Rew.subst (#0 :> #1 :> (#·.succ.succ.succ)))))).sigma
+def exs (φ : Prenex 𝚺 (s + 1) Empty (n + 1)) : Prenex 𝚺 (s + 1) Empty n :=
+  (∃'[‘#0 + 1’] (∃'[‘#1 + 1’] (φ.sigmaInv.rew (Rew.subst (#0 :> #1 :> (#·.succ.succ.succ)))))).sigma
 
-def all (π : Prenex 𝚷 (s + 1) Empty (n + 1)) : Prenex 𝚷 (s + 1) Empty n := ∼(exs (∼π))
+def all (φ : Prenex 𝚷 (s + 1) Empty (n + 1)) : Prenex 𝚷 (s + 1) Empty n := ∼(exs (∼φ))
 
 local prefix:64 "∃' " => Prenex.exs
 local prefix:64 "∀' " => Prenex.all
@@ -570,8 +570,8 @@ lemma models_all [V↓[ℒₒᵣ] ⊧* 𝗜𝚺 s]
   grind;
 
 theorem models_exists_prenex {Γ : Polarity} {s n : ℕ} {φ : ArithmeticSemisentence n} (h : Hierarchy Γ s φ) :
-  ∃ π : Prenex Γ s Empty n,
-    ∀ (V : Type*) [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺 s] (e : Fin n → V), V ⊧/e φ ↔ V ⊧/e π.val := by
+  ∃ φ' : Prenex Γ s Empty n,
+    ∀ (V : Type*) [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺 s] (e : Fin n → V), V ⊧/e φ ↔ V ⊧/e φ'.val := by
   induction h with
   | verum Γ s n =>
     use verum;
@@ -590,102 +590,102 @@ theorem models_exists_prenex {Γ : Polarity} {s n : ℕ} {φ : ArithmeticSemisen
     intro V _ _ e;
     exact (models_nrel r v e).symm;
   | and _ _ ihφ ihψ =>
-    obtain ⟨π, hπ⟩ := ihφ;
-    obtain ⟨ρ, hρ⟩ := ihψ;
-    use π ⋏ ρ;
+    obtain ⟨φ', hφ'⟩ := ihφ;
+    obtain ⟨ψ', hψ'⟩ := ihψ;
+    use φ' ⋏ ψ';
     intro V _ _ e;
-    rw [models_and π ρ e];
+    rw [models_and φ' ψ' e];
     simp only [LogicalConnective.HomClass.map_and, LogicalConnective.Prop.and_eq];
-    exact and_congr (hπ V e) (hρ V e);
+    exact and_congr (hφ' V e) (hψ' V e);
   | or _ _ ihφ ihψ =>
-    obtain ⟨π, hπ⟩ := ihφ;
-    obtain ⟨ρ, hρ⟩ := ihψ;
-    use π ⋎ ρ;
+    obtain ⟨φ', hφ'⟩ := ihφ;
+    obtain ⟨ψ', hψ'⟩ := ihψ;
+    use φ' ⋎ ψ';
     intro V _ _ e;
-    rw [models_or π ρ e];
+    rw [models_or φ' ψ' e];
     simp only [LogicalConnective.HomClass.map_or, LogicalConnective.Prop.or_eq];
-    exact or_congr (hπ V e) (hρ V e);
+    exact or_congr (hφ' V e) (hψ' V e);
   | ball pos _ ih =>
     obtain ⟨u, rfl⟩ := Rew.positive_iff.mp pos;
-    obtain ⟨π, hπ⟩ := ih;
-    use ∀'[u] π;
+    obtain ⟨φ', hφ'⟩ := ih;
+    use ∀'[u] φ';
     intro V _ _ e;
-    rw [models_ball u π e];
+    rw [models_ball u φ' e];
     simp only [Semiformula.eval_ball];
-    exact forall_congr' fun x => (imp_congr Iff.rfl (hπ V (x :> e))).trans (by simp);
+    exact forall_congr' fun x => (imp_congr Iff.rfl (hφ' V (x :> e))).trans (by simp);
   | bexs pos _ ih =>
     obtain ⟨u, rfl⟩ := Rew.positive_iff.mp pos;
-    obtain ⟨π, hπ⟩ := ih;
-    use ∃'[u] π;
+    obtain ⟨φ', hφ'⟩ := ih;
+    use ∃'[u] φ';
     intro V _ _ e;
-    rw [models_bexs u π e];
+    rw [models_bexs u φ' e];
     simp only [Semiformula.eval_bexs];
-    exact exists_congr fun x => (and_congr Iff.rfl (hπ V (x :> e))).trans (by simp);
+    exact exists_congr fun x => (and_congr Iff.rfl (hφ' V (x :> e))).trans (by simp);
   | @exs s n φ _ ih =>
-    obtain ⟨π, hπ⟩ := ih;
-    use ∃' π;
+    obtain ⟨φ', hφ'⟩ := ih;
+    use ∃' φ';
     intro V _ _ e;
     have : V↓[ℒₒᵣ] ⊧* 𝗜𝚺 s := mod_ISigma_of_le (n₂ := s + 1) (by omega);
-    rw [models_exs π e, Semiformula.eval_ex];
-    exact exists_congr fun x => hπ V (x :> e);
+    rw [models_exs φ' e, Semiformula.eval_ex];
+    exact exists_congr fun x => hφ' V (x :> e);
   | @all s n φ _ ih =>
-    obtain ⟨π, hπ⟩ := ih;
-    use ∀' π;
+    obtain ⟨φ', hφ'⟩ := ih;
+    use ∀' φ';
     intro V _ _ e;
     have : V↓[ℒₒᵣ] ⊧* 𝗜𝚺 s := mod_ISigma_of_le (n₂ := s + 1) (by omega);
-    rw [models_all π e, Semiformula.eval_all];
-    exact forall_congr' fun x => hπ V (x :> e);
+    rw [models_all φ' e, Semiformula.eval_all];
+    exact forall_congr' fun x => hφ' V (x :> e);
   | @sigma s n φ _ ih =>
-    obtain ⟨π, hπ⟩ := ih;
-    use π.sigma;
+    obtain ⟨φ', hφ'⟩ := ih;
+    use φ'.sigma;
     intro V _ _ e;
     have : V↓[ℒₒᵣ] ⊧* 𝗜𝚺 s := mod_ISigma_of_le (n₂ := s + 1) (by omega);
-    rw [models_sigma π e, Semiformula.eval_ex];
-    exact exists_congr fun x => hπ V (x :> e);
+    rw [models_sigma φ' e, Semiformula.eval_ex];
+    exact exists_congr fun x => hφ' V (x :> e);
   | @pi s n φ _ ih =>
-    obtain ⟨π, hπ⟩ := ih;
-    use π.pi;
+    obtain ⟨φ', hφ'⟩ := ih;
+    use φ'.pi;
     intro V _ _ e;
     have : V↓[ℒₒᵣ] ⊧* 𝗜𝚺 s := mod_ISigma_of_le (n₂ := s + 1) (by omega);
-    rw [models_pi π e, Semiformula.eval_all];
-    exact forall_congr' fun x => hπ V (x :> e);
+    rw [models_pi φ' e, Semiformula.eval_all];
+    exact forall_congr' fun x => hφ' V (x :> e);
   | @dummy_sigma s n φ _ ih =>
-    obtain ⟨π, hπ⟩ := ih;
-    use (∀' π).altUp;
+    obtain ⟨φ', hφ'⟩ := ih;
+    use (∀' φ').altUp;
     intro V _ _ e;
     have : V↓[ℒₒᵣ] ⊧* 𝗜𝚺 s := mod_ISigma_of_le (show s ≤ s + 1 + 1 by omega);
     have : V↓[ℒₒᵣ] ⊧* 𝗜𝚺 (s + 1) := mod_ISigma_of_le (show s + 1 ≤ s + 1 + 1 by omega);
     exact Semiformula.eval_all.trans
-      ((forall_congr' fun x => hπ V (x :> e)).trans
-        ((models_all π e).symm.trans (models_altUp (∀' π) e).symm));
+      ((forall_congr' fun x => hφ' V (x :> e)).trans
+        ((models_all φ' e).symm.trans (models_altUp (∀' φ') e).symm));
   | @dummy_pi s n φ _ ih =>
-    obtain ⟨π, hπ⟩ := ih;
-    use (∃' π).altUp;
+    obtain ⟨φ', hφ'⟩ := ih;
+    use (∃' φ').altUp;
     intro V _ _ e;
     have : V↓[ℒₒᵣ] ⊧* 𝗜𝚺 s := mod_ISigma_of_le (show s ≤ s + 1 + 1 by omega);
     have : V↓[ℒₒᵣ] ⊧* 𝗜𝚺 (s + 1) := mod_ISigma_of_le (show s + 1 ≤ s + 1 + 1 by omega);
     exact Semiformula.eval_ex.trans
-      ((exists_congr fun x => hπ V (x :> e)).trans
-        ((models_exs π e).symm.trans (models_altUp (∃' π) e).symm));
+      ((exists_congr fun x => hφ' V (x :> e)).trans
+        ((models_exs φ' e).symm.trans (models_altUp (∃' φ') e).symm));
 
 end Prenex
 
 theorem exists_prenex_of_hierarchy {Γ : Polarity} {s : ℕ} (T : ArithmeticTheory) [𝗜𝚺 s ⪯ T]
   {n : ℕ} {φ : ArithmeticSemisentence n} (h : Hierarchy Γ s φ) :
-  ∃ π : Prenex Γ s Empty n, T ⊢ ∀¹* (φ 🡘 π.val) := by
+  ∃ φ' : Prenex Γ s Empty n, T ⊢ ∀¹* (φ 🡘 φ'.val) := by
   have : 𝗘𝗤 ℒₒᵣ ⪯ T := eq_weakerThan_of_ISigma (s := s);
-  obtain ⟨π, hπ⟩ := Prenex.models_exists_prenex h;
-  use π;
+  obtain ⟨φ', hφ'⟩ := Prenex.models_exists_prenex h;
+  use φ';
   apply provable_iff_of_models_iff;
   intro V _ _ e;
   have : V↓[ℒₒᵣ] ⊧* 𝗜𝚺 s := models_of_subtheory (T := 𝗜𝚺 s) (U := T) (inferInstance);
-  exact hπ V e;
+  exact hφ' V e;
 
 theorem exists_matrix_provable {Γ : Polarity} {s: ℕ} (T : ArithmeticTheory) [𝗜𝚺 s ⪯ T]
   {n : ℕ} {φ : ArithmeticSemisentence n} (h : Hierarchy Γ s φ) :
   ∃ φ₀ : 𝚺₀.Semisentence (n + s), T ⊢ ∀¹* (φ 🡘 φ₀.val.toPrenex Γ s) := by
-  obtain ⟨_, hπ⟩ := exists_prenex_of_hierarchy T h;
-  exact ⟨_, by simpa [Prenex.val] using hπ⟩;
+  obtain ⟨_, hφ'⟩ := exists_prenex_of_hierarchy T h;
+  exact ⟨_, by simpa [Prenex.val] using hφ'⟩;
 
 end Arithmetic
 
