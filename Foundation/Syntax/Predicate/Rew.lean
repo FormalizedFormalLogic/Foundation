@@ -847,7 +847,7 @@ lemma smul_ext' {ω₁ ω₂ : Rew L ξ n₁ ζ n₂} (h : ω₁ = ω₂) {φ : 
 
 @[simp] lemma smul_quantItr (ω : Rew L ξ n₁ ζ n₂) (Γ : Polarity) (φ : F (n₁ + k)) :
     ω ▹ Polarity.quantItr Γ k φ = Polarity.quantItr Γ k (ω.qpow k ▹ φ : G (n₂ + k)) := by
-  induction k <;> simp [Polarity.quantItr_succ, *]
+  induction k <;> simp [Polarity.quantItr_succ', *]
 
 abbrev subst [Rewriting L ξ F ξ F] (φ : F n₁) (w : Fin n₁ → Semiterm L ξ n₂) : F n₂ := Rew.subst w ▹ φ
 
@@ -925,15 +925,16 @@ lemma quantItr_succ_smul_castLE {φ : F ((n + 1) + s)} :
       ((Rew.castLE (Nat.succ_add n s).le : Rew L ξ ((n + 1) + s) ξ (n + (s + 1))) ▹ φ)
       = Γ.quant (Polarity.quantItr Γ.alt s φ) := by
   induction s with
-  | zero => simp [Polarity.quantItr_succ]
+  | zero => simp [Polarity.quantItr_succ']
   | succ s ih =>
     have hcast :
         (Rew.castLE (Nat.succ_add n (s + 1)).le : Rew L ξ ((n + 1) + (s + 1)) ξ (n + ((s + 1) + 1)))
           = (Rew.castLE (Nat.succ_add n s).le : Rew L ξ ((n + 1) + s) ξ (n + (s + 1))).q := by
       simp
-    rw [Polarity.quantItr_succ, hcast, ← smul_quant]
+    rw [Polarity.quantItr_succ', hcast, ← smul_quant]
     rw [ih]
-    congr 2
+    congr 1
+    rw [Polarity.quantItr_succ', Polarity.altItr_succ']
 
 end Rewriting
 
