@@ -99,13 +99,13 @@ public import Foundation.FirstOrder.Incompleteness.StandardProvability
 public import Foundation.FirstOrder.Incompleteness.Tarski
 public import Foundation.FirstOrder.Incompleteness.WitnessComparison
 public import Foundation.FirstOrder.Interpretation
-public import Foundation.FirstOrder.Intuitionistic.Deduction
+public import Foundation.FirstOrder.Intuitionistic.LJ
 public import Foundation.FirstOrder.Intuitionistic.Formula
 public import Foundation.FirstOrder.Intuitionistic.Rew
 public import Foundation.FirstOrder.Kripke.Basic
 public import Foundation.FirstOrder.Kripke.Intuitionistic
 public import Foundation.FirstOrder.Kripke.WeakForcing
-public import Foundation.FirstOrder.NegationTranslation.GoedelGentzen
+public import Foundation.FirstOrder.NegationTranslation.GG
 public import Foundation.FirstOrder.Order.Le
 public import Foundation.FirstOrder.Polarity
 public import Foundation.FirstOrder.SetTheory.Basic

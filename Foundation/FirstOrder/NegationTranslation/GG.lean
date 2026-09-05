@@ -91,7 +91,7 @@ open Rewriting LawfulSyntacticRewriting
 variable {L : Language} [L.DecidableEq]
 
 def negDoubleNegation : (φ : Proposition L) →
-    Interderivable L (∼φᴺ) ((∼φ)ᴺ)
+    Interderivable L (∼φᴺ) (∼φ)ᴺ
   | .rel R v => Interderivable.dne (by simp)
   | .nrel R v => Interderivable.refl _
   | ⊤ => by

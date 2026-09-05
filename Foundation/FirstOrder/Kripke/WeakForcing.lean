@@ -1,7 +1,7 @@
 module
 
 public import Foundation.FirstOrder.Kripke.Intuitionistic
-public import Foundation.FirstOrder.NegationTranslation.GoedelGentzen
+public import Foundation.FirstOrder.NegationTranslation.GG
 
 @[expose] public section
 /-! # Weak forcing
@@ -284,11 +284,11 @@ instance : WeakForcingRelation.ClassicalKripke ℙ (· ≥ ·) where
   monotone := monotone
   generic := generic
 
-lemma sound : 𝐋𝐊¹ ⊢ φ → ∀ p : ℙ, ∀ fv, (∀ i, p ⊩↓ fv i) → p ⊩ᶜ[![] | fv] φ := fun b p fv Hfv ↦ by
-  have : 𝗜𝗻𝘁¹ ⊢ φᴺ := Provable.gödel_gentzen b
-  exact Forces.sound p fv Hfv this
+lemma sound [L.DecidableEq] : 𝐋𝐊¹ ⊢ φ → ∀ p : ℙ, ∀ fv, (∀ i, p ⊩↓ fv i) → p ⊩ᶜ[![] | fv] φ := fun b p fv Hfv ↦ by
+  rcases Provable.gödel_gentzen b with ⟨d⟩
+  exact Forces.sound d p fv Hfv (by simp)
 
-lemma sound₀ {σ : Sentence L} : 𝐋𝐊¹ ⊢ (σ : Proposition L) → ℙ ∀⊩ᶜ σ := fun b p ↦ by
+lemma sound₀ [L.DecidableEq] {σ : Sentence L} : 𝐋𝐊¹ ⊢ (σ : Proposition L) → ℙ ∀⊩ᶜ σ := fun b p ↦ by
   simpa using! sound b p (fun _ ↦ (Classical.ofNonempty : p).val) fun _ ↦ by simp
 
 end WeaklyForces₀
@@ -327,81 +327,13 @@ instance : Semantics (ForcingNotion L) (Sentence L) := ⟨fun ℙ φ ↦ ℙ ∀
 
 lemma models_def : ℙ ⊧ φ ↔ ℙ ∀⊩ᶜ φ := by rfl
 
-lemma sound {σ : Sentence L} : 𝐋𝐊¹ ⊢ (σ : Proposition L) → ℙ ⊧ σ :=
+lemma sound [L.DecidableEq] {σ : Sentence L} : 𝐋𝐊¹ ⊢ (σ : Proposition L) → ℙ ⊧ σ :=
   WeaklyForces₀.sound₀
 
-instance (ℙ : ForcingNotion L) :
+instance [L.DecidableEq] (ℙ : ForcingNotion L) :
     Sound (Entailment.pullback (𝐋𝐊¹ : LK L) ((↑·) : Sentence L → Proposition L)) ℙ :=
   ⟨fun {_} ↦ sound⟩
 
 end ForcingNotion
-
-/-! ## Completeness -/
-
-section completeness
-
-
-inductive PositiveDerivationFrom (Ξ : Sequent L) : Sequent L → Type _
-| or : PositiveDerivationFrom Ξ (φ :: ψ :: Γ) → PositiveDerivationFrom Ξ (φ ⋎ ψ :: Γ)
-| exs : PositiveDerivationFrom Ξ (φ/[t] :: Γ) → PositiveDerivationFrom Ξ ((∃¹ φ) :: Γ)
-| wk : PositiveDerivationFrom Ξ Δ → Δ ⊆ Γ → PositiveDerivationFrom Ξ Γ
-| protected id : PositiveDerivationFrom Ξ Ξ
-
-infix:45 " ⟶⁺ " => PositiveDerivationFrom
-
-namespace PositiveDerivationFrom
-
-variable {Ξ Γ Δ : Sequent L}
-
-def ofSubset (ss : Ξ ⊆ Γ) : Ξ ⟶⁺ Γ := wk .id ss
-
-def trans {Ξ Γ Δ : Sequent L} : Ξ ⟶⁺ Γ → Γ ⟶⁺ Δ → Ξ ⟶⁺ Δ
-  | b,    or d => or (b.trans d)
-  | b,   exs d => exs (b.trans d)
-  | b,  wk d h => wk (b.trans d) h
-  | b,     .id => b
-
-def cons {Ξ Γ : Sequent L} (φ) : Ξ ⟶⁺ Γ → φ :: Ξ ⟶⁺ φ :: Γ
-  | or (Γ := Γ) (φ := ψ) (ψ := χ) d =>
-    have : φ :: Ξ ⟶⁺ ψ :: χ :: φ :: Γ := wk (cons φ d) (by simp; tauto)
-    wk (or this) (by simp)
-  | exs (Ξ := Ξ) (Γ := Γ) (φ := ψ) (t := t) d =>
-    have : φ :: Ξ ⟶⁺ ψ/[t] :: φ :: Γ := wk (cons φ d) (by simp)
-    wk this.exs (by simp)
-  | wk d h => wk (d.cons φ) (by simp [h])
-  | .id => .id
-
-def append {Ξ Γ : Sequent L} : (Δ : Sequent L) → Ξ ⟶⁺ Γ → Δ ++ Ξ ⟶⁺ Δ ++ Γ
-  | [],     d => d
-  | φ :: Δ, d => (d.append Δ).cons φ
-
-def add {Γ Δ Ξ Θ : Sequent L} : Γ ⟶⁺ Δ → Ξ ⟶⁺ Θ → Γ ++ Ξ ⟶⁺ Δ ++ Θ
-  |    or d, b => or (d.add b)
-  |   exs d, b => exs (d.add b)
-  |  wk d h, b => wk (d.add b) (by simp [h])
-  |     .id, b => b.append Γ
-
-def graft {Ξ Γ : Sequent L} (b : ⊢ᴸᴷ¹ Ξ) : Ξ ⟶⁺ Γ → ⊢ᴸᴷ¹ Γ
-  |    or d => .or (d.graft b)
-  |   exs d => .exs (d.graft b)
-  |  wk d h => .contraction (d.graft b) h
-  |     .id => b
-
-end PositiveDerivationFrom
-
-variable (L)
-
-abbrev ConsistentSequent := {Γ : Sequent L // IsEmpty (⊢ᴸᴷ¹ ∼Γ)}
-
-variable {L}
-
-instance : Preorder (ConsistentSequent L) where
-  le := fun Γ Δ ↦ Nonempty (PositiveDerivationFrom (∼Δ.val) (∼Γ.val))
-  le_refl Γ := ⟨PositiveDerivationFrom.id⟩
-  le_trans Γ Δ Ξ := by
-    rintro ⟨bΔ⟩ ⟨bΞ⟩
-    exact ⟨PositiveDerivationFrom.trans bΞ bΔ⟩
-
-end completeness
 
 end LO.FirstOrder

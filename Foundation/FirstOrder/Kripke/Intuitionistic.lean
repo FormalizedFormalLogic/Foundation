@@ -1,6 +1,6 @@
 module
 
-public import Foundation.FirstOrder.Intuitionistic.Deduction
+public import Foundation.FirstOrder.Intuitionistic.LJ
 public import Foundation.FirstOrder.Kripke.Basic
 
 @[expose] public section
@@ -159,63 +159,111 @@ lemma monotone
 @[simp] lemma ex_of_constantDomain [ConstantDomain W] {φ : Semiformulaᵢ L ξ (n + 1)} :
     w ⊩[bv|fv] ∃¹ φ ↔ ∃ x : C, w ⊩[x :> bv|fv] φ := by simp
 
-open HilbertProofᵢ Semantics
+def ForcesHead (w : W) (fv : ℕ → C) : LJ.Head L → Prop
+  | none   => False
+  | some φ => w ⊩[![]|fv] φ
 
-lemma sound! (w : W) (fv : ℕ → C) (hfv : ∀ i, w ⊩↓ fv i) {φ} : 𝗜𝗻𝘁¹ ⊢! φ → w ⊩[![]|fv] φ
-  |     eaxm h => by
-    have : ∃ ψ, Axioms.EFQ ψ = φ := by simpa [Hilbertᵢ.Intuitionistic] using h
-    rcases this with ⟨ψ, rfl⟩
-    rintro v hvw ⟨⟩
-  | mdp bφψ bφ => by simpa using sound! w fv hfv bφψ w (by simp) (sound! w fv hfv bφ)
-  |      gen b => fun v hwv x ↦ by
-    simpa using sound! v (x :>ₙ fv)
-      (by rintro (i | i) <;> simp [fun i ↦ domain_monotone (hfv i) _ hwv]) b
-  | .verum => by simp
-  | implyK φ ψ => by
-    intro w₁ hw₁w₀ hw₁φ w₂ hw₁w₂ hw₂φ
-    exact hw₁φ.monotone _ hw₁w₂
-  | implyS φ ψ χ => by
-    intro w₁ hw₁w₀ hw₁ w₂ hw₂w₁ hw₂ w₃ hw₃w₂ hw₃
-    have : w₃ ⊩[![]|fv] ψ := hw₂ w₃ hw₃w₂ hw₃
-    exact hw₁ w₃ (le_trans hw₃w₂ hw₂w₁) hw₃ w₃ (by rfl) this
-  | and₁ φ ψ => by
-    rintro v hvw ⟨hφ, hψ⟩
-    exact hφ
-  | and₂ φ ψ => by
-    rintro v hvw ⟨hφ, hψ⟩
-    exact hψ
-  | and₃ φ ψ => by
-    intro v₁ hv₁w hφ v₂ hv₂v₁ hψ
-    exact ⟨hφ.monotone _ hv₂v₁, hψ⟩
-  | or₁ φ ψ => by
-    intro v hvw hφ
-    left; exact hφ
-  | or₂ φ ψ => by
-    intro v hvw hψ
-    right; exact hψ
-  | or₃ φ ψ χ => by
-    rintro w₁ hw₁w hφχ w₂ hw₂w₁ hψχ w₃ hw₃w₂ (hφ | hψ)
-    · exact hφχ w₃ (le_trans hw₃w₂ hw₂w₁) hφ
-    · exact hψχ w₃ hw₃w₂ hψ
-  | all₁ φ t => by
-    rcases t.fvar_of_relational with ⟨x, rfl⟩
-    intro v hvw hφ
-    suffices v ⊩[![fv x]|fv] φ by simpa [Forces.subst, Matrix.constant_eq_singleton]
-    simpa using hφ v (by rfl) ⟨fv x, domain_antimonotone hvw (hfv x)⟩
-  | all₂ φ ψ => by
-    intro w₁ hw₁ H w₂ hw₂₁ hφ w₃ hw₃₂ x
-    exact H w₃ (le_trans hw₃₂ hw₂₁) x w₃ (by rfl) (by simpa using hφ.monotone _ hw₃₂)
-  | ex₁ t φ => by
-    rcases t.fvar_of_relational with ⟨x, rfl⟩
-    intro v hvw hφ
-    have : v ⊩[![fv x]|fv] φ := by simpa using hφ
-    exact ⟨⟨fv x, domain_antimonotone hvw (hfv x)⟩, by simpa using this⟩
-  | ex₂ φ ψ => by
-    rintro w₁ hw₁ H w₂ hw₂₁ ⟨x, hφ⟩
-    simpa using H w₂ hw₂₁ x w₂ (by rfl) hφ
+@[simp] lemma forcesHead_none (w : W) (fv : ℕ → C) : ForcesHead w fv none = False := rfl
 
-lemma sound (w : W) (fv : ℕ → C) (hfv : ∀ i, w ⊩↓ fv i) {φ} :
-    𝗜𝗻𝘁¹ ⊢ φ → w ⊩[![]|fv] φ := fun b ↦ sound! w fv hfv b.get
+@[simp] lemma forcesHead_some (w : W) (fv : ℕ → C) (φ : Propositionᵢ L) :
+    ForcesHead w fv (some φ) = (w ⊩[![]|fv] φ) := rfl
+
+/-- Soundness of LJ with respect to intuitionistic Kripke forcing.
+- [Min00, Chapter 2]
+-/
+theorem sound {Γ : LJ.Sequent L} {Ξ : LJ.Head L} :
+    (d : Γ ⊢ᴸᴶ¹ Ξ) → (w : W) → (fv : ℕ → C) → (∀ i, w ⊩↓ fv i) →
+      (∀ φ ∈ Γ, w ⊩[![]|fv] φ) → ForcesHead w fv Ξ
+  | .identity R v, w, fv, _, hΓ => hΓ _ (by simp)
+  | .cut (φ := φ) dφ d, w, fv, hfv, hΓ =>
+      sound d w fv hfv (fun ψ hψ ↦ by
+        rcases Multiset.mem_add.mp hψ with hψ | hψ
+        · exact hΓ ψ (Multiset.mem_add.mpr <| Or.inr hψ)
+        · have : ψ = φ := by simpa using hψ
+          subst ψ
+          exact sound dφ w fv hfv fun θ hθ ↦
+            hΓ θ (Multiset.mem_add.mpr <| Or.inl hθ))
+  | .contraction (Ξ := Ξ) d hΔ hΞ, w, fv, hfv, hΓ => by
+      have hd := sound d w fv hfv fun φ hφ ↦ hΓ φ (hΔ hφ)
+      cases Ξ <;> cases hΞ <;> simp_all [ForcesHead]
+  | .verum, _, _, _, _ => by simp [ForcesHead]
+  | .falsum, _, _, _, hΓ => hΓ (⊥ : Propositionᵢ L) (by simp)
+  | .positiveImply (φ := φ) d, w, fv, hfv, hΓ => by
+      intro v hvw hφ
+      exact sound d v fv (fun i ↦ domain_monotone (hfv i) v hvw) fun θ hθ ↦ by
+        rcases Multiset.mem_add.mp hθ with hθ | hθ
+        · exact (hΓ θ hθ).monotone v hvw
+        · have : θ = φ := by simpa using hθ
+          simpa [this] using hφ
+  | .negativeImply (φ := φ) (ψ := ψ) dφ dψ, w, fv, hfv, hΓ => by
+      have hφ : w ⊩[![]|fv] φ := sound dφ w fv hfv fun θ hθ ↦
+        hΓ θ (Multiset.mem_add.mpr <| Or.inl <| Multiset.mem_add.mpr <| Or.inl hθ)
+      have hi : w ⊩[![]|fv] φ 🡒 ψ := hΓ _ (by simp)
+      have hψ := hi w (by rfl) hφ
+      exact sound dψ w fv hfv fun θ hθ ↦ by
+        rcases Multiset.mem_add.mp hθ with hθ | hθ
+        · exact hΓ θ (Multiset.mem_add.mpr <| Or.inl <| Multiset.mem_add.mpr <| Or.inr hθ)
+        · have : θ = ψ := by simpa using hθ
+          simpa [this] using hψ
+  | .positiveAnd dφ dψ, w, fv, hfv, hΓ =>
+      ⟨sound dφ w fv hfv hΓ, sound dψ w fv hfv hΓ⟩
+  | .negativeAnd (φ := φ) (ψ := ψ) d, w, fv, hfv, hΓ => by
+      have h : w ⊩[![]|fv] φ ⋏ ψ := hΓ _ (by simp)
+      rcases h with ⟨hφ, hψ⟩
+      exact sound d w fv hfv fun θ hθ ↦ by
+        rcases Multiset.mem_add.mp hθ with hθ | hθ
+        · exact hΓ θ (Multiset.mem_add.mpr <| Or.inl hθ)
+        · simp only [Multiset.mem_add, Multiset.mem_atom_iff] at hθ
+          rcases hθ with hθ | hθ
+          · simpa [hθ] using hφ
+          · simpa [hθ] using hψ
+  | .positiveOrLeft d, w, fv, hfv, hΓ => Or.inl <| sound d w fv hfv hΓ
+  | .positiveOrRight d, w, fv, hfv, hΓ => Or.inr <| sound d w fv hfv hΓ
+  | .negativeOr (φ := φ) (ψ := ψ) dφ dψ, w, fv, hfv, hΓ => by
+      have h : w ⊩[![]|fv] φ ⋎ ψ := hΓ _ (by simp)
+      rcases h with hφ | hψ
+      · exact sound dφ w fv hfv fun θ hθ ↦ by
+          rcases Multiset.mem_add.mp hθ with hθ | hθ
+          · exact hΓ θ (Multiset.mem_add.mpr <| Or.inl hθ)
+          · have : θ = φ := by simpa using hθ
+            simpa [this] using hφ
+      · exact sound dψ w fv hfv fun θ hθ ↦ by
+          rcases Multiset.mem_add.mp hθ with hθ | hθ
+          · exact hΓ θ (Multiset.mem_add.mpr <| Or.inl hθ)
+          · have : θ = ψ := by simpa using hθ
+            simpa [this] using hψ
+  | .positiveForall d, w, fv, hfv, hΓ => by
+      intro v hvw x
+      simpa [ForcesHead] using sound d v (x.val :>ₙ fv)
+        (by rintro (i | i) <;> simp [fun i ↦ domain_monotone (hfv i) v hvw])
+        (fun θ hθ ↦ by
+          rcases Multiset.mem_map.mp hθ with ⟨ψ, hψ, rfl⟩
+          simpa [Rewriting.shift, Forces.rew] using (hΓ ψ hψ).monotone v hvw)
+  | .negativeForall (φ := φ) (t := t) d, w, fv, hfv, hΓ => by
+      obtain ⟨x, ht⟩ := t.fvar_of_relational
+      have hAll : w ⊩[![]|fv] ∀¹ φ := hΓ _ (by simp)
+      have hφ := hAll w (by rfl) ⟨fv x, hfv x⟩
+      exact sound d w fv hfv fun θ hθ ↦ by
+        rcases Multiset.mem_add.mp hθ with hθ | hθ
+        · exact hΓ θ (Multiset.mem_add.mpr <| Or.inl hθ)
+        · have : θ = φ/[t] := by simpa using hθ
+          simpa [this, ht] using hφ
+  | .positiveExists (t := t) d, w, fv, hfv, hΓ => by
+      obtain ⟨x, ht⟩ := t.fvar_of_relational
+      exact ⟨⟨fv x, hfv x⟩, by simpa [ht] using sound d w fv hfv hΓ⟩
+  | .negativeExists (φ := φ) (Ξ := Ξ) d, w, fv, hfv, hΓ => by
+      have hEx : w ⊩[![]|fv] ∃¹ φ := hΓ _ (by simp)
+      rcases hEx with ⟨x, hx⟩
+      have hd := sound d w (x.val :>ₙ fv) (by rintro (i | i) <;> simp [hfv]) (fun θ hθ ↦ by
+        rcases Multiset.mem_add.mp hθ with hθ | hθ
+        · rcases Multiset.mem_map.mp hθ with ⟨ψ, hψ, rfl⟩
+          simpa [Rewriting.shift, Forces.rew] using hΓ ψ (by simp [hψ])
+        · have : θ = Rewriting.free φ := by simpa using hθ
+          simpa [this] using hx)
+      cases Ξ with
+      | none => exact hd
+      | some ψ =>
+          simpa [ForcesHead, LJ.Head.shift, Rewriting.shift, Forces.rew] using hd
 
 end Forces
 
@@ -239,20 +287,15 @@ instance : ForcingRelation.IntKripke W (· ≥ ·) where
   not w := by simp [forces₀_def, Forces.not]
   monotone := monotone
 
-open HilbertProofᵢ Semantics
+open Semantics
 
-lemma sound {T : HilbTheory L 𝗜𝗻𝘁¹} (b : T ⊢ φ) : W ∀⊩* T → W ∀⊩ φ := fun H w ↦ by
+lemma sound {T : Theoryᵢ L} (b : T ⊢ φ) : W ∀⊩* T → W ∀⊩ φ := fun H w ↦ by
   rcases domain_nonempty' w with ⟨x, hx⟩
-  have : (Rewriting.emb '' T.theory) *⊢[𝗜𝗻𝘁¹] ↑φ := b
-  rcases Entailment.Context.provable_iff.mp this with ⟨Γ, HΓ, b⟩
-  have : w ⊩[![]|fun _ ↦ x] ⋀Γ 🡒 (φ : Propositionᵢ L) := Forces.sound (L := L) w (fun _ ↦ x) (by simpa using hx) b
-  have : w ⊩[![]|fun _ : ℕ ↦ x] ↑φ := by
-    apply this w (by rfl)
-    suffices ∀ φ ∈ Γ, w ⊩[![]|fun _ ↦ x] φ by simpa
-    intro φ hφ
-    rcases show ∃ x ∈ T.theory, ↑x = φ by simpa using HΓ φ hφ with ⟨φ, hφ', rfl⟩
-    simp only [Forces.forces_emb]; exact H _ hφ' w
-  simp only [Forces.forces_emb] at this; exact this
+  rcases b with ⟨Γ, hΓ, d⟩
+  have hd := Forces.sound d w (fun _ ↦ x) (by simpa using hx) fun ψ hψ ↦ by
+    rcases Multiset.mem_map.mp hψ with ⟨σ, hσ, rfl⟩
+    simpa [forces₀_def] using H σ (hΓ σ hσ) w
+  simpa [forces₀_def, Forces.ForcesHead] using hd
 
 end Forces₀
 
@@ -303,12 +346,13 @@ variable {𝓚}
 
 lemma models_def : 𝓚 ⊧ φ ↔ 𝓚 ∀⊩ φ := by rfl
 
-lemma sound {T : HilbTheory L 𝗜𝗻𝘁¹} (b : T ⊢ φ) : 𝓚 ⊧* T → 𝓚 ⊧ φ := fun H ↦
+lemma sound {T : Theoryᵢ L} (b : T ⊢ φ) : 𝓚 ⊧* T → 𝓚 ⊧ φ := fun H ↦
   Forces₀.sound (W := 𝓚) b fun _ hφ ↦ H.models_set hφ
 
-instance (T : HilbTheory L 𝗜𝗻𝘁¹) : Sound T (Semantics.models (IntKripke L) T) := ⟨fun b _ H ↦ sound b H⟩
+instance (T : Theoryᵢ L) : Sound T (Semantics.models (IntKripke L) T) :=
+  ⟨fun b _ H ↦ sound b H⟩
 
-lemma sound_empty (b : (∅ : HilbTheory L 𝗜𝗻𝘁¹) ⊢ φ) : 𝓚 ⊧ φ := 𝓚.sound b (by simp)
+lemma sound_empty (b : (∅ : Theoryᵢ L) ⊢ φ) : 𝓚 ⊧ φ := 𝓚.sound b (by simp)
 
 instance : Semantics.Top (IntKripke L) := ⟨fun 𝓚 ↦ by simpa [models_def] using ForcingRelation.AllForces.verum⟩
 

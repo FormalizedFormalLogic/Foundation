@@ -1,6 +1,6 @@
 module
 
-public import Foundation.FirstOrder.NegationTranslation.GoedelGentzen
+public import Foundation.FirstOrder.NegationTranslation.GG
 
 @[expose] public section
 
@@ -15,8 +15,8 @@ namespace LO.FirstOrder.Derivation
 variable {L : Language}
 
 inductive Positive (Ξ : Sequent L) : Sequent L → Type _
-| or : Positive Ξ (φ :: ψ :: Γ) → Positive Ξ (φ ⋎ ψ :: Γ)
-| exs : Positive Ξ (φ/[t] :: Γ) → Positive Ξ ((∃¹ φ) :: Γ)
+| or : Positive Ξ (Γ + ⦃φ, ψ⦄) → Positive Ξ (Γ + ⦃φ ⋎ ψ⦄)
+| exs : Positive Ξ (Γ + ⦃φ/[t]⦄) → Positive Ξ (Γ + ⦃∃¹ φ⦄)
 | contraction : Positive Ξ Δ → Δ ⊆ Γ → Positive Ξ Γ
 | protected id : Positive Ξ Ξ
 
@@ -34,7 +34,7 @@ def trans {Ξ Γ Δ : Sequent L} : Ξ ⟶⁺ Γ → Γ ⟶⁺ Δ → Ξ ⟶⁺ �
   | b,  contraction d h => contraction (b.trans d) h
   | b,     .id => b
 
-def cons {Ξ Γ : Sequent L} (φ) : Ξ ⟶⁺ Γ → φ :: Ξ ⟶⁺ φ :: Γ
+def cons {Ξ Γ : Sequent L} (φ) : Ξ ⟶⁺ Γ → Ξ + ⦃φ⦄ ⟶⁺ Γ + ⦃φ⦄
   | or (Γ := Γ) (φ := ψ) (ψ := χ) d =>
     have : φ :: Ξ ⟶⁺ ψ :: χ :: φ :: Γ := contraction (cons φ d) (by simp; tauto)
     contraction (or this) (by simp)
@@ -44,11 +44,11 @@ def cons {Ξ Γ : Sequent L} (φ) : Ξ ⟶⁺ Γ → φ :: Ξ ⟶⁺ φ :: Γ
   | contraction d h => contraction (d.cons φ) (by simp [h])
   | .id => .id
 
-def append {Ξ Γ : Sequent L} : (Δ : Sequent L) → Ξ ⟶⁺ Γ → Δ ++ Ξ ⟶⁺ Δ ++ Γ
+def append {Ξ Γ : Sequent L} : (Δ : Sequent L) → Ξ ⟶⁺ Γ → Δ + Ξ ⟶⁺ Δ + Γ
   | [],     d => d
   | φ :: Δ, d => (d.append Δ).cons φ
 
-def add {Γ Δ Ξ Θ : Sequent L} : Γ ⟶⁺ Δ → Ξ ⟶⁺ Θ → Γ ++ Ξ ⟶⁺ Δ ++ Θ
+def add {Γ Δ Ξ Θ : Sequent L} : Γ ⟶⁺ Δ → Ξ ⟶⁺ Θ → Γ + Ξ ⟶⁺ Δ + Θ
   |    or d, b => or (d.add b)
   |   exs d, b => exs (d.add b)
   |  contraction d h, b => contraction (d.add b) (by simp [h])
@@ -76,11 +76,11 @@ structure StrongerThan (q p : ℙ) where
 
 scoped infix:60 " ≼ " => StrongerThan
 
-scoped instance : Min ℙ := ⟨fun p q ↦ p ++ q⟩
+scoped instance : Min ℙ := ⟨fun p q ↦ p + q⟩
 
-lemma inf_def (p q : ℙ) : p ⊓ q = p ++ q := rfl
+lemma inf_def (p q : ℙ) : p ⊓ q = p + q := rfl
 
-@[simp] lemma neg_inf_p_eq (p q : ℙ) : ∼(p ⊓ q) = ∼p ⊓ ∼q := List.map_append
+@[simp] lemma neg_inf_p_eq (p q : ℙ) : ∼(p ⊓ q) = ∼p ⊓ ∼q := Multiset.map_add _ _ _
 
 namespace StrongerThan
 
@@ -88,15 +88,15 @@ protected def refl (p : ℙ) : p ≼ p := ⟨.id⟩
 
 def trans {r q p : ℙ} (srq : r ≼ q) (sqp : q ≼ p) : r ≼ p := ⟨sqp.val.trans srq.val⟩
 
-def ofSubset {q p : ℙ} (h : q ⊇ p) : q ≼ p := ⟨.ofSubset <| List.map_subset _ h⟩
+def ofSubset {q p : ℙ} (h : q ⊇ p) : q ≼ p := ⟨.ofSubset <| sorry⟩
 
-def and {p : ℙ} (φ ψ : Proposition L) : φ ⋏ ψ :: p ≼ φ :: ψ :: p := ⟨.or .id⟩
+def and {p : ℙ} (φ ψ : Proposition L) : p + ⦃φ ⋏ ψ⦄ ≼ p + ⦃φ, ψ⦄ := ⟨.or .id⟩
 
-def K_left {p : ℙ} (φ ψ : Proposition L) : φ ⋏ ψ :: p ≼ φ :: p := trans (and φ ψ) (ofSubset <| by simp)
+def K_left {p : ℙ} (φ ψ : Proposition L) : p + ⦃φ ⋏ ψ⦄ ≼ p + ⦃φ⦄ := trans (and φ ψ) (ofSubset <| by simp)
 
-def K_right {p : ℙ} (φ ψ : Proposition L) : φ ⋏ ψ :: p ≼ ψ :: p := trans (and φ ψ) (ofSubset <| by simp)
+def K_right {p : ℙ} (φ ψ : Proposition L) : p + ⦃φ ⋏ ψ⦄ ≼ p + ⦃ψ⦄ := trans (and φ ψ) (ofSubset <| by simp)
 
-def all {p : ℙ} (φ : Semiproposition L 1) (t) : (∀¹ φ) :: p ≼ φ/[t] :: p := ⟨.exs (t := t) (by simpa [← Semiformula.neg_eq] using .id)⟩
+def all {p : ℙ} (φ : Semiproposition L 1) (t) : p + ⦃∀¹ φ⦄ ≼ p + ⦃φ/[t]⦄ := ⟨.exs (t := t) (by simpa [← Semiformula.neg_eq] using .id)⟩
 
 def minLeLeft (p q : ℙ) : p ⊓ q ≼ p := ofSubset (by simp [inf_def])
 
@@ -112,7 +112,7 @@ end StrongerThan
 
 def Forces (p : ℙ) : Propositionᵢ L → Type u
   |        ⊥ => { b : ⊢ᴸᴷ¹ ∼p // Derivation.IsCutFree b }
-  | .rel R v => { b : ⊢ᴸᴷ¹ .rel R v :: ∼p // Derivation.IsCutFree b }
+  | .rel R v => { b : ⊢ᴸᴷ¹ ∼p + ⦃.rel R v⦄ // Derivation.IsCutFree b }
   |    φ ⋏ ψ => Forces p φ × Forces p ψ
   |    φ ⋎ ψ => Forces p φ ⊕ Forces p ψ
   |    φ 🡒 ψ => (q : ℙ) → q ≼ p → Forces q φ → Forces q ψ
@@ -132,7 +132,7 @@ scoped prefix:45 "⊩ " => allForces
 
 def falsumEquiv : p ⊩ ⊥ ≃ { b : ⊢ᴸᴷ¹ ∼p // Derivation.IsCutFree b} := by unfold Forces; exact .refl _
 
-def relEquiv {k} {R : L.Rel k} {v} : p ⊩ .rel R v ≃ { b : ⊢ᴸᴷ¹ .rel R v :: ∼p // Derivation.IsCutFree b } := by
+def relEquiv {k} {R : L.Rel k} {v} : p ⊩ .rel R v ≃ { b : ⊢ᴸᴷ¹ ∼p + ⦃.rel R v⦄ // Derivation.IsCutFree b } := by
   unfold Forces; exact .refl _
 
 def andEquiv {φ ψ : Propositionᵢ L} : p ⊩ φ ⋏ ψ ≃ (p ⊩ φ) × (p ⊩ ψ) := by
@@ -207,6 +207,14 @@ open LawfulSyntacticRewriting
 def modusPonens {φ ψ : Propositionᵢ L} (f : p ⊩ φ 🡒 ψ) (g : p ⊩ φ) : p ⊩ ψ :=
   f.implyEquiv p (StrongerThan.refl p) g
 
+abbrev LJSequent (p : ℙ) (Γ : LJ.Sequent L) (φ : Propositionᵢ L) :=
+  (q : ℙ) → q ≼ p → ((ψ : Propositionᵢ L) → ψ ∈ Γ → q ⊩ ψ) → q ⊩ φ
+
+def sound {Γ : LJ.Sequent L} {φ : Propositionᵢ L} : Γ ⊢ᴸᴶ¹ some φ → (p : ℙ) → LJSequent p Γ φ := sorry
+
+def ljSound {φ : Propositionᵢ L} : 𝐋𝐉¹ ⊢! φ → ⊩ φ := sorry
+
+/-
 def sound {φ : Propositionᵢ L} : 𝗠𝗶𝗻¹ ⊢! φ → ⊩ φ
   | .mdp (φ := ψ) b d => fun p ↦
     let b : p ⊩ ψ 🡒 φ := sound b p
@@ -265,17 +273,18 @@ def sound {φ : Propositionᵢ L} : 𝗠𝗶𝗻¹ ⊢! φ → ⊩ φ
         let d : q ⊩ φ/[t] 🡒 ψ := by simpa using b.allEquiv t
       d.implyEquiv r srq dt
   termination_by b => HilbertProofᵢ.depth b
+-/
 
-def relRefl {k} (R : L.Rel k) (v : Fin k → SyntacticTerm L) : [.rel R v] ⊩ rel R v :=
-  relEquiv.symm ⟨Derivation.identity _ _, by simp⟩
+def relRefl {k} (R : L.Rel k) (v : Fin k → SyntacticTerm L) : ⦃.rel R v⦄ ⊩ rel R v :=
+  relEquiv.symm ⟨Derivation.cast <| Derivation.identity _ _, by simp⟩
 
-protected def refl.or (ihφ : [φ] ⊩ φᴺ) (ihψ : [ψ] ⊩ ψᴺ) : [φ ⋎ ψ] ⊩ (φ ⋎ ψ)ᴺ :=
+protected def refl.or (ihφ : ⦃φ⦄ ⊩ φᴺ) (ihψ : ⦃ψ⦄ ⊩ ψᴺ) : ⦃φ ⋎ ψ⦄ ⊩ (φ ⋎ ψ)ᴺ :=
   implyOf fun q dq ↦
     let ⟨dφ, dψ⟩ : q ⊩ ∼φᴺ × q ⊩ ∼ψᴺ := dq.andEquiv
-    let ihφ : [φ] ⊩ φᴺ := ihφ
-    let ihψ : [ψ] ⊩ ψᴺ := ihψ
-    let bφ : [φ] ⊓ q ⊩ ⊥ := dφ.implyEquiv ([φ] ⊓ q) (.minLeRight _ _) (ihφ.monotone (.minLeLeft _ _))
-    let bψ : [ψ] ⊓ q ⊩ ⊥ := dψ.implyEquiv ([ψ] ⊓ q) (.minLeRight _ _) (ihψ.monotone (.minLeLeft _ _))
+    let ihφ : ⦃φ⦄ ⊩ φᴺ := ihφ
+    let ihψ : ⦃ψ⦄ ⊩ ψᴺ := ihψ
+    let bφ : ⦃φ⦄ ⊓ q ⊩ ⊥ := dφ.implyEquiv (⦃φ⦄ ⊓ q) (.minLeRight _ _) (ihφ.monotone (.minLeLeft _ _))
+    let bψ : ⦃ψ⦄ ⊓ q ⊩ ⊥ := dψ.implyEquiv (⦃ψ⦄ ⊓ q) (.minLeRight _ _) (ihψ.monotone (.minLeLeft _ _))
     let ⟨bbφ, hbbφ⟩ := bφ.falsumEquiv
     let ⟨bbψ, hbbψ⟩ := bψ.falsumEquiv
     let band : ⊢ᴸᴷ¹ ∼φ ⋏ ∼ψ :: ∼q := Derivation.and
@@ -291,7 +300,7 @@ protected def refl.exs (d : ∀ x, [φ/[&x]] ⊩ (φ/[&x])ᴺ) : [∃¹ φ] ⊩ 
       (f.allEquiv &x).implyEquiv ([φ/[&x]] ⊓ q) (StrongerThan.minLeRight _ _) (ih.monotone (StrongerThan.minLeLeft _ _))
     let ⟨b, hb⟩ := b.falsumEquiv
     let ba : ⊢ᴸᴷ¹ (∀¹ ∼φ) :: ∼q :=
-      Derivation.generalizeByNewVar (m := x)
+      Derivation.genelalizeByNewver (m := x)
         (by have : ¬Semiformula.FVar? (∀¹ ∼φ) x := Sequent.not_fvar?_newVar (by simp)
             simpa using this)
         (fun ψ hψ ↦ Sequent.not_fvar?_newVar (List.mem_cons_of_mem (∀¹ ∼φ) hψ))
@@ -299,7 +308,7 @@ protected def refl.exs (d : ∀ x, [φ/[&x]] ⊩ (φ/[&x])ᴺ) : [∃¹ φ] ⊩ 
     falsumEquiv.symm ⟨ba, by simp [ba, hb]⟩
 
 set_option backward.isDefEq.respectTransparency false in
-protected def refl : (φ : Proposition L) → [φ] ⊩ φᴺ
+protected def refl : (φ : Proposition L) → ⦃φ⦄ ⊩ φᴺ
   |         ⊤ => implyEquiv.symm fun q sqp dφ ↦ dφ
   |         ⊥ => falsumEquiv.symm ⟨Derivation.verum, by simp⟩
   |  .rel R v => implyOf fun q dq ↦
@@ -309,8 +318,8 @@ protected def refl : (φ : Proposition L) → [φ] ⊩ φᴺ
     let ⟨d, hd⟩ := dq.relEquiv
     falsumEquiv.symm ⟨Derivation.cast d (by simp [inf_def]), by simp [hd]⟩
   |     φ ⋏ ψ =>
-    let ihφ : [φ] ⊩ φᴺ := Forces.refl φ
-    let ihψ : [ψ] ⊩ ψᴺ := Forces.refl ψ
+    let ihφ : ⦃φ⦄ ⊩ φᴺ := Forces.refl φ
+    let ihψ : ⦃ψ⦄ ⊩ ψᴺ := Forces.refl ψ
     andEquiv.symm ⟨ihφ.monotone (.K_left φ ψ), ihψ.monotone (.K_right φ ψ)⟩
   |     φ ⋎ ψ => refl.or (Forces.refl φ) (Forces.refl ψ)
   |      ∀¹ φ => allEquiv.symm fun t ↦
@@ -332,8 +341,27 @@ def conj' : {Γ : Sequent L} → (b : (φ : Proposition L) → φ ∈ Γ → p �
 end Forces
 
 /-- Cut elimination theorem of $\mathbf{LK}$. -/
+def hauptsatz [L.DecidableEq] {Γ : Sequent L} : ⊢ᴸᴷ¹ Γ → {d : ⊢ᴸᴷ¹ Γ // Derivation.IsCutFree d} := fun d ↦ by
+  have f : ((ψ : Propositionᵢ L) → ψ ∈ (∼Γ)ᴺ → Forces (∼Γ) ψ) → Forces (∼Γ) ⊥ :=
+    Forces.sound (Derivation.gödelGentzen d) (∼Γ) (∼Γ) (StrongerThan.refl _)
+  have g : (ψ : Propositionᵢ L) → ψ ∈ (∼Γ)ᴺ → Forces (∼Γ) ψ := fun φ hφ ↦
+    have φ₀ : { φ₀ // φ₀ ∈ ∼Γ ∧ φ₀ᴺ = φ } := Multiset.extractFromImage hφ
+    have : Forces (∼Γ) (φ₀.val)ᴺ := (Forces.refl φ₀.val).monotone (StrongerThan.ofSubset (by simpa using φ₀.property.1))
+    this.cast (by simpa using φ₀.property.2)
+  have ⟨b, hb⟩ := (f g).falsumEquiv
+
+
+
+
+
+
+
+
+/-- Cut elimination theorem of $\mathbf{LK}$. -/
 def hauptsatz [L.DecidableEq] {Γ : Sequent L} : ⊢ᴸᴷ¹ Γ → {d : ⊢ᴸᴷ¹ Γ // Derivation.IsCutFree d} := fun d ↦
-  let d : 𝗠𝗶𝗻¹ ⊢! ⋀(∼Γ)ᴺ 🡒 ⊥ := Entailment.FiniteContext.toDef (Derivation.gödelGentzen d)
+  have := Derivation.gödelGentzen d
+
+  let d : 𝐋𝐉¹ ⊢! ⋀(∼Γ)ᴺ 🡒 ⊥ := Entailment.FiniteContext.toDef! (Derivation.gödelGentzen d)
   let ff : Forces (∼Γ) (⋀(∼Γ)ᴺ 🡒 ⊥) := Forces.sound d (∼Γ)
   let fc : Forces (∼Γ) (⋀(∼Γ)ᴺ) := Forces.conj' fun φ hφ ↦
     (Forces.refl φ).monotone (StrongerThan.ofSubset <| List.cons_subset.mpr ⟨hφ, by simp⟩)

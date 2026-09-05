@@ -31,10 +31,23 @@ lemma add_atom_eq_cons (a : α) (s : Multiset α) : s + ⦃a⦄ = a ::ₘ s := b
 
 @[simp] lemma mem_atom_iff {a b : α} : a ∈ ⦃b⦄ ↔ a = b := by simp [atom_eq_singleton]
 
-@[simp] lemma atom_subset_iff {a : α} {s : Multiset α} : ⦃a⦄ ≤ s ↔ a ∈ s := by simp [atom_eq_singleton]
+@[simp] lemma atom_le_iff {a : α} {s : Multiset α} : ⦃a⦄ ≤ s ↔ a ∈ s := by simp [atom_eq_singleton]
+
+@[simp] lemma atom_subset_iff {a : α} {s : Multiset α} : ⦃a⦄ ⊆ s ↔ a ∈ s := by simp [atom_eq_singleton]
 
 @[simp] lemma map_atom (f : α → β) (a : α) : ⦃a⦄.map f = ⦃f a⦄ := by
   simp [atom_eq_singleton]
+
+/-- Universal membership over a sum splits into the two summands. This is a routine
+property of multiset membership. -/
+@[simp] lemma forall_mem_add {p : α → Prop} {s t : Multiset α} :
+    (∀ a ∈ s + t, p a) ↔ (∀ a ∈ s, p a) ∧ ∀ a ∈ t, p a := by
+  simp only [mem_add, or_imp, forall_and]
+
+/-- Universal membership over an atom reduces to its unique member. This is a routine
+property of multiset membership. -/
+@[simp] lemma forall_mem_atom {p : α → Prop} {a : α} : (∀ b ∈ ⦃a⦄, p b) ↔ p a := by
+  simp only [mem_atom_iff, forall_eq]
 
 /-- After filtering out `a`, adjoining `f a` recovers every mapped member.
 This is a routine technical property of multiset membership. -/
@@ -50,5 +63,7 @@ lemma add_map_subset_map_filter_add_atom [DecidableEq α]
       exact mem_add.mpr <| Or.inl <| mem_add.mpr <| Or.inr <| by simp
     · exact mem_add.mpr <| Or.inl <| mem_add.mpr <| Or.inl <|
         mem_map.mpr ⟨c, mem_filter.mpr ⟨hc, h⟩, rfl⟩
+
+def extractFromImage [DecidableEq β] {f : α → β} {s : Multiset α} : b ∈ s.map f → {a : α // a ∈ s ∧ f a = b} := sorry
 
 end Multiset
