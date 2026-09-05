@@ -1,6 +1,7 @@
 module
 
 public import Foundation.FirstOrder.Bootstrapping.Syntax.Formula.Coding
+public import Foundation.FirstOrder.Basic.PrimrecCoding
 public import Foundation.Vorspiel.Computability
 
 @[expose] public section
@@ -28,6 +29,39 @@ abbrev codes (T : Theory L) : Set ℕ := Encodable.encode '' T
 
 class RE (T : Theory L) : Prop where
   re : REPred T.codes
+
+namespace RE
+
+variable {T U : Theory L}
+
+omit [L.LORDefinable] in
+lemma add (hT : T.RE) (hU : U.RE) : (T ∪ U).RE where
+  re := (hT.re.or hU.re).of_eq fun n ↦ by
+    change n ∈ Encodable.encode '' T ∨ n ∈ Encodable.encode '' U ↔
+      n ∈ Encodable.encode '' (T ∪ U)
+    grind [Set.image_union]
+
+variable [Language.Primcodable L]
+
+omit [L.LORDefinable] in
+lemma of_re_mem (hT : REPred (· ∈ T)) : T.RE :=
+  ⟨((hT.comp Computable.snd).and (PrimrecPred.computablePred
+    (Primrec.eq.comp (Primrec.encode.comp Primrec.snd) Primrec.fst)).to_re).projection.of_eq
+    fun _ ↦ Iff.rfl⟩
+
+variable [L.DecidableEq]
+
+omit [L.LORDefinable] in
+lemma ofFinite (hT : Set.Finite T) : T.RE := by
+  apply of_re_mem;
+  simpa using show REPred (· ∈ hT.toFinset) by
+    induction hT.toFinset using Finset.induction_on with
+    | empty => exact (REPred.const False).of_eq fun _ ↦ by simp
+    | @insert σ s _ ih =>
+      exact ((PrimrecPred.computablePred
+        (Primrec.eq.comp Primrec.id (Primrec.const σ))).to_re.or ih).of_eq fun _ ↦ by simp
+
+end RE
 
 protected class Primrec (T : Theory L) : Prop where
   primrec : PrimrecPred (· ∈ T.codes)
