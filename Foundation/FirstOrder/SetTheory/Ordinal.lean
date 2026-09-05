@@ -374,6 +374,11 @@ protected noncomputable def succ (α : Ordinal V) : Ordinal V where
 
 @[simp] lemma lt_succ (α : Ordinal V) : α < α.succ := lt_def.mpr <| by simp
 
+@[simp] lemma subset_succ_iff (α β : V) [IsOrdinal α] [IsOrdinal β] : SetTheory.succ α ⊆ β ↔ α ∈ β := by
+  refine Iff.intro (fun h ↦ h α (mem_succ_self α)) fun h ↦ ?_
+  have hnmem : β ∉ succ α := fun h₂ ↦ (by simp_all [mem_succ_iff, mem_asymm])
+  simpa [IsOrdinal.subset_iff, hnmem] using Or.symm (IsOrdinal.mem_trichotomy (succ α) β)
+
 protected noncomputable def ω : Ordinal V := IsOrdinal.toOrdinal ω
 
 noncomputable def minimal (α : Ordinal V) (P : V → Prop) (hP : ℒₛₑₜ-predicate P := by definability) : Ordinal V where

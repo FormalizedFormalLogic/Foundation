@@ -2,6 +2,7 @@ module
 
 public import Foundation.FirstOrder.SetTheory.Ordinal
 public import Foundation.FirstOrder.SetTheory.Function
+public import Foundation.FirstOrder.SetTheory.Recursion.Seq
 public import Foundation.FirstOrder.SetTheory.ZF
 
 @[expose] public section
@@ -16,12 +17,12 @@ variable {V : Type*} [SetStructure V] [Nonempty V]
 `f` is an attempt of length `α` for the function `F`, meaning that the domain of `f` is `α`, and for all `β < α`, it holds that `f(β) = F (f ↾ β)`.
 The "attempt" terminology may be due to Paul Taylor.
 -/
-def IsAttempt [V↓[ℒₛₑₜ] ⊧* 𝗭] (F : V → V) (α f : V) : Prop :=
-  IsOrdinal α ∧ IsFunction f ∧ domain f = α ∧
-    ∀ β ∈ α, ∀ y, ⟨β, y⟩ₖ ∈ f ↔ y = F (f ↾ β)
+def IsAttempt [V↓[ℒₛₑₜ] ⊧* 𝗭] (F : V → V) (f : V) : Prop :=
+  Seq f ∧
+    ∀ β ∈ lh f, ∀ y, ⟨β, y⟩ₖ ∈ f ↔ y = F (f ↾ β)
 
 lemma IsAttempt.definable [V↓[ℒₛₑₜ] ⊧* 𝗭] {F : V → V} (hF : ℒₛₑₜ-function₁ F) :
-    ℒₛₑₜ-relation (IsAttempt F) := by unfold IsAttempt; definability
+    ℒₛₑₜ-predicate (IsAttempt F) := by unfold IsAttempt; definability
 
 /-! #### Uniqueness of attempt functions -/
 
@@ -34,11 +35,12 @@ Any two attempt functions restrict to the same function.
 
 Also see lemma 3.7 in chapter 2 of Frank Drake's *Set Theory: An Introduction to Large Cardinals* (Studies in Logic and the Foundations of Mathematics vol. 76, 1974).
 -/
-lemma isAttempt_coherent (F : V → V) {α β : Ordinal V} {f g : V} [IsFunction f] [IsFunction g]
-    (hf : IsAttempt F α f) (hg : IsAttempt F β g) :
+lemma isAttempt_coherent {F : V → V} {α β : Ordinal V} {f g : V}
+    (hf : IsAttempt F f) (hg : IsAttempt F g)
+    (hdomf : lh f = α) (hdomg : lh g = β):
     ∀ γ : Ordinal V, γ.val ⊆ α.val ∧ γ.val ⊆ β.val → f ↾ γ.val = g ↾ γ.val := by
-  rcases hf with ⟨_, _, _, testf⟩
-  rcases hg with ⟨_, _, _, testg⟩
+  rcases hf with ⟨_, _⟩
+  rcases hg with ⟨_, _⟩
   refine transfinite_induction (P := fun x ↦ x ⊆ α.val ∧ x ⊆ β.val → f ↾ x = g ↾ x) (by definability) ?_
   rintro γ ihγ ⟨hγα, hγβ⟩
   ext p
@@ -56,43 +58,65 @@ lemma isAttempt_coherent (F : V → V) {α β : Ordinal V} {f g : V} [IsFunction
 /--
 An attempt function of length `α`, if existing, is unique.
 -/
-lemma isAttempt_unique {F : V → V} {α : Ordinal V} {f g : V} [IsFunction f] [IsFunction g]
-    (hf : IsAttempt F α f) (hg : IsAttempt F α g) :
+lemma isAttempt_unique {F : V → V} {α : Ordinal V} {f g : V}
+    (hf : IsAttempt F f) (hg : IsAttempt F g)
+    (hlhf : lh f = α) (hlhg : lh g = α) :
     f = g := by
-  have hfα : f ↾ α.val = f := IsFunction.restrict_eq_self f α.val (subset_of_eq hf.2.2.1)
-  have hgα : g ↾ α.val = g := IsFunction.restrict_eq_self g α.val (subset_of_eq hg.2.2.1)
-  simpa [hfα, hgα] using isAttempt_coherent F hf hg α ⟨subset_refl α.val, subset_refl α.val⟩
+  have := hf.1.IsFunction
+  have := hg.1.IsFunction
+  have hfα : f ↾ α.val = f := IsFunction.restrict_eq_self f α.val (subset_of_eq (hf.1.domain_eq ▸ hlhf))
+  have hgα : g ↾ α.val = g := IsFunction.restrict_eq_self g α.val (subset_of_eq (hg.1.domain_eq ▸ hlhg))
+  simpa [hfα, hgα] using isAttempt_coherent hf hg hlhf hlhg α ⟨subset_refl α.val, subset_refl α.val⟩
 
 /--
 If `β ≤ α`, then an attempt function on `α` restricts to the attempt function on `β`.
 -/
 lemma isAttempt_restrict_eq_of_le
-    (F : V → V)
-    {α β : Ordinal V} {f g : V} [IsFunction f] [IsFunction g]
+    {F : V → V}
+    {α β : Ordinal V} {f g : V}
     (hβα : β ≤ α)
-    (hf : IsAttempt F α f)
-    (hg : IsAttempt F β g) :
+    (hf : IsAttempt F f)
+    (hg : IsAttempt F g)
+    (hlhf : lh f = α)
+    (hlhg : lh g = β) :
     f ↾ β.val = g := by
-  have hsubset : domain g ⊆ β.val := subset_of_eq hg.2.2.1
-  exact isAttempt_coherent F hf hg β ⟨hβα, subset_refl β.val⟩ ▸ IsFunction.restrict_eq_self g β.val hsubset
+  have := hf.1.IsFunction
+  have := hg.1.IsFunction
+  have hsubset : domain g ⊆ β.val := subset_of_eq (hlhg ▸ hg.1.domain_eq)
+  exact isAttempt_coherent hf hg hlhf hlhg β ⟨hβα, subset_refl β.val⟩ ▸ IsFunction.restrict_eq_self g β.val hsubset
+
+lemma eq_of_isAttempt
+    {F : V → V}
+    {α β : Ordinal V} {f g : V}
+    (hf : IsAttempt F f) (hg : IsAttempt F g)
+    (hlh₁ : lh f = α) (hlh₂ : lh g = β)
+    (h₁₂ : α ≤ β) {γ} (hγα : γ < α) {y₁ y₂} :
+    ⟨γ.val, y₁⟩ₖ ∈ f → ⟨γ.val, y₂⟩ₖ ∈ g → y₁ = y₂ := by
+  have hγα' : γ.val ∈ α.val := by simpa [Ordinal.lt_def] using hγα
+  have hrestrict : f ↾ α = g ↾ α :=
+    isAttempt_coherent (α := α) (β := β) hf hg hlh₁ hlh₂ α (by aesop)
+  intro hy₁ hy₂
+  have h := (mem_ext_iff.mp hrestrict) ⟨γ, y₁⟩ₖ
+  have hy₁g : ⟨γ.val, y₁⟩ₖ ∈ g := by simpa [kpair_mem_restrict_iff, hy₁, hγα'] using fun h₂ ↦ h.mp h₂
+  exact hg.1.1.unique hy₁g hy₂
 
 /-! #### Existence and choices of attempt functions -/
 
 /-- Existence of an attempt function of a given length. -/
 def Exists (F : V → V) (α : V) : Prop :=
-  ∃ f : V, IsAttempt F α f
+  ∃ f : V, IsAttempt F f ∧ lh f = α
 
 /-- `Exists` implies `∃!`. -/
-lemma existsUnique_of_exists (F : V → V) (α : V) (hex : Exists F α) :
-    ∃! f : V, IsAttempt F α f := by
+lemma existsUnique_of_exists {F : V → V} {α : V} (hex : Exists F α) :
+    ∃! f : V, IsAttempt F f ∧ lh f = α := by
   obtain ⟨f, hf⟩ := hex
-  have : IsFunction f := hf.2.1
+  have : IsFunction f := hf.1.1.IsFunction
   refine ⟨f, hf, ?_⟩
   intro g hg
-  have : IsFunction g := hg.2.1
-  have hα : IsOrdinal α := hf.1
+  have : IsFunction g := hg.1.1.IsFunction
+  have hα : IsOrdinal α := hf.2 ▸ SetTheory.isOrdinal_lh hf.1.1
   let αo : Ordinal V := IsOrdinal.toOrdinal α
-  apply (IsAttempt.isAttempt_unique (α := αo) hf hg).symm
+  apply (IsAttempt.isAttempt_unique (α := αo) hf.1 hg.1 hf.2 hg.2).symm
 
 end IsAttempt
 
@@ -102,15 +126,12 @@ variable [V↓[ℒₛₑₜ] ⊧* 𝗭]
 This lemma is originally by tosiaki.
 -/
 lemma attemptOrEmpty_existsUnique (F : V → V) (α : V) : ∃! y,
-    (IsAttempt.Exists F α ∧ IsAttempt F α y) ∨
-    (¬IsAttempt.Exists F α ∧ y = ∅) := by
-  by_cases hexists : IsAttempt.Exists F α
-  · obtain ⟨f, hf, huniq⟩ := IsAttempt.existsUnique_of_exists F α hexists
-    refine ⟨f, Or.inl ⟨hexists, hf⟩, ?_⟩
-    intro y hy
-    simp only [hexists, true_and, not_true_eq_false, false_and, or_false] at hy
-    exact huniq y hy
-  · refine existsUnique_of_exists_of_unique ⟨∅, Or.inr ⟨hexists, rfl⟩⟩ (by aesop)
+    (IsAttempt.Exists F α → IsAttempt F y ∧ lh y = α) ∧
+    (¬IsAttempt.Exists F α → y = ∅) := by
+  by_cases hexists : IsAttempt.Exists F α <;> simp only [hexists, not_false_eq_true, true_implies, false_implies, true_and]
+  · obtain ⟨f, hf, huniq⟩ := IsAttempt.existsUnique_of_exists hexists
+    exact ⟨f, by simpa using hf, fun y hy ↦ by aesop⟩
+  · exact existsUnique_of_exists_of_unique ⟨∅, rfl⟩ (by aesop)
 
 /--
 An attempt of length `α`, or `∅` if one doesn't exist.
@@ -118,6 +139,14 @@ This definition is by tosiaki.
 -/
 noncomputable def attemptOrEmpty (F : V → V) (α : V) : V :=
   Classical.choose! (attemptOrEmpty_existsUnique F α)
+
+lemma isAttempt_attemptOrEmpty_of_exists (F : V → V) (α : V) (hexists : IsAttempt.Exists F α) :
+    IsAttempt F (attemptOrEmpty F α) := by
+  simpa [attemptOrEmpty, hexists] using (Classical.choose!_spec (IsAttempt.existsUnique_of_exists hexists)).1
+
+lemma lh_attemptOrEmpty_eq_of_exists (F : V → V) (α : V) (hexists : IsAttempt.Exists F α) :
+    lh (attemptOrEmpty F α) = α := by
+  simpa [attemptOrEmpty, hexists] using (Classical.choose!_spec (IsAttempt.existsUnique_of_exists hexists)).2
 
 /--
 A pair `⟨α, F f⟩ₖ` of an ordinal `α` and the value of `F` on `attemptOrEmpty F α`.
@@ -149,7 +178,7 @@ noncomputable def replAttemptOrEmpty (F : V → V) (hF : ℒₛₑₜ-function�
       suffices ℒₛₑₜ-relation[V] (· = attemptOrEmpty F ·) by exact this
       simp only [attemptOrEmpty, Classical.choose!_eq_iff_right]
       unfold IsAttempt.Exists
-      have : ℒₛₑₜ-relation (IsAttempt F) := IsAttempt.definable hF
+      have : ℒₛₑₜ-predicate (IsAttempt F) := IsAttempt.definable hF
       definability
     unfold pairValueAttempt
     definability)
@@ -171,7 +200,7 @@ noncomputable def replAttemptOrEmpty (F : V → V) (hF : ℒₛₑₜ-function�
     exact ⟨hβα, h⟩
   · use β
 
-lemma domain_replAttemptOrEmpty_eq (F : V → V) (hF : ℒₛₑₜ-function₁ F) (α : Ordinal V) :
+@[simp] lemma domain_replAttemptOrEmpty_eq (F : V → V) (hF : ℒₛₑₜ-function₁ F) (α : Ordinal V) :
     domain (replAttemptOrEmpty F hF α) = α.val := by
   ext z
   simp only [mem_domain_iff, mem_replAttemptOrEmpty_iff]
@@ -182,7 +211,7 @@ lemma domain_replAttemptOrEmpty_eq (F : V → V) (hF : ℒₛₑₜ-function₁ 
     use z
     simp_all only [true_and, pairValueAttempt, true_and]
 
-instance (F : V → V) (hF : ℒₛₑₜ-function₁ F) (α : Ordinal V) : IsFunction (replAttemptOrEmpty F hF α) := by
+instance isFunction_replAttemptOrEmpty (F : V → V) (hF : ℒₛₑₜ-function₁ F) (α : Ordinal V) : IsFunction (replAttemptOrEmpty F hF α) := by
   let f := replAttemptOrEmpty F hF α
   have hdomain : domain f = α.val := domain_replAttemptOrEmpty_eq F hF α
   apply isFunction_iff.mpr
@@ -200,13 +229,20 @@ instance (F : V → V) (hF : ℒₛₑₜ-function₁ F) (α : Ordinal V) : IsFu
     · intro y₁ y₂
       simp_all only [pairValueAttempt, kpair_iff, true_and, implies_true]
 
+lemma seq_replAttemptOrEmpty (F : V → V) (hF : ℒₛₑₜ-function₁ F) (α : Ordinal V) : Seq (replAttemptOrEmpty F hF α) :=
+  And.intro (isFunction_replAttemptOrEmpty F hF α)
+    ⟨α, And.intro (domain_replAttemptOrEmpty_eq F hF α) Ordinal.instIsOrdinalVal⟩
+
+@[simp] lemma lh_replAttemptOrEmpty_eq (F : V → V) (hF : ℒₛₑₜ-function₁ F) (α : Ordinal V) : lh (replAttemptOrEmpty F hF α) = α :=
+  (seq_replAttemptOrEmpty F hF α).lh_eq_domain_of ▸ domain_replAttemptOrEmpty_eq F hF α
+
 /--
 An auxiliary lemma about `replAttemptOrEmpty`.
 -/
 lemma replAttemptOrEmpty_aux
     (F : V → V) (hF : ℒₛₑₜ-function₁ F) :
-    (α : Ordinal V) → IsAttempt F α (replAttemptOrEmpty F hF α) := by
-  let motive (α : V) : Prop := IsAttempt F α (replAttemptOrEmpty F hF α)
+    (α : Ordinal V) → IsAttempt F (replAttemptOrEmpty F hF α) := by
+  let motive (α : V) : Prop := IsAttempt F (replAttemptOrEmpty F hF α)
 
   have := IsAttempt.definable hF
   have : ℒₛₑₜ-function₁ replAttemptOrEmpty F hF := by
@@ -218,8 +254,11 @@ lemma replAttemptOrEmpty_aux
   refine transfinite_induction motive motive_definable ?_
   intro α ih
   have hα := Ordinal.ordinal α
+  have : IsOrdinal (lh (replAttemptOrEmpty F hF α)) := (lh_replAttemptOrEmpty_eq F hF α).symm ▸ hα
 
-  have hrestrict : ((β : V) → (hβα : β ∈ α.val) → IsAttempt F β ((replAttemptOrEmpty F hF α) ↾ β)) := by
+  have hrestrict : (β : V) → (hβα : β ∈ α.val) →
+      IsAttempt F ((replAttemptOrEmpty F hF α) ↾ β) := by
+      -- IsAttempt F ((replAttemptOrEmpty F hF α) ↾ β) ∧ lh ((replAttemptOrEmpty F hF α) ↾ β) = β := by
     intro β hβα
     have hβ : IsOrdinal β := IsOrdinal.of_mem hβα
     let βo : Ordinal V := IsOrdinal.toOrdinal β
@@ -238,34 +277,39 @@ lemma replAttemptOrEmpty_aux
       · use γ
         exact And.intro (IsTransitive.mem_trans IsOrdinal.toIsTransitive hγβ hβα) hγ
       · exact ⟨γ, hγβ, F (attemptOrEmpty F γ), hγ⟩
-  refine ⟨hα, inferInstance, domain_replAttemptOrEmpty_eq F hF α, ?_⟩
-  intro β hβα y
-  have hβ : IsOrdinal β := IsOrdinal.of_mem hβα
-  let βo : Ordinal V := IsOrdinal.toOrdinal β
+  refine And.intro ?_ ?_
+  · exact seq_replAttemptOrEmpty F hF α
+  · intro β hβα y
+    have hβ : IsOrdinal β := IsOrdinal.of_mem hβα
+    let βo : Ordinal V := IsOrdinal.toOrdinal β
 
-  suffices h : ⟨β, y⟩ₖ ∈ replAttemptOrEmpty F hF α.val ↔ ∃ f, y = F f ∧ IsAttempt F β f from by
-    constructor <;> intro h₂
-    · obtain ⟨f, rfl, hf⟩ := h.mp h₂
-      have : IsFunction f := hf.2.1
-      have : IsFunction ((replAttemptOrEmpty F hF (↑α)) ↾ ↑βo) := inferInstance
-      simp only [IsAttempt.isAttempt_unique hf (hrestrict βo hβα), IsOrdinal.toOrdinal_val, βo]
-    · apply h.mpr
-      use (replAttemptOrEmpty F hF (↑α)) ↾ β
-      simp only [h₂, true_and]
-      exact hrestrict βo hβα
-  have hexists : IsAttempt.Exists F β := ⟨replAttemptOrEmpty F hF β, ih βo hβα⟩
-  simp_all only [mem_replAttemptOrEmpty_iff, pairValueAttempt, kpair_iff, ↓existsAndEq, true_and,
-    motive]
-  have hattempt : IsAttempt F β (attemptOrEmpty F β) := by
-    simp_all [attemptOrEmpty, Classical.choose!_spec]
-  constructor <;> intro h
-  · use attemptOrEmpty F β
-  · obtain ⟨f, hfleft, hfright⟩ := h
-    have heq := IsOrdinal.toOrdinal_val β
-    rw [← heq] at *
-    have := hfright.2.1
-    have := hattempt.2.1
-    exact (IsAttempt.isAttempt_unique hfright hattempt) ▸ hfleft
+    suffices h : ⟨β, y⟩ₖ ∈ replAttemptOrEmpty F hF α.val ↔ ∃ f, y = F f ∧ IsAttempt F f ∧ lh f = β from by
+      constructor <;> intro h₂
+      · obtain ⟨f, rfl, hf, hlhf⟩ := h.mp h₂
+        have : IsFunction f := hf.1.IsFunction
+        have : IsFunction ((replAttemptOrEmpty F hF (↑α)) ↾ ↑βo) := inferInstance
+        refine (?_ : f = (replAttemptOrEmpty F hF α) ↾ β) ▸ rfl
+        exact IsAttempt.isAttempt_unique hf (hrestrict βo (lh_replAttemptOrEmpty_eq F hF α ▸ hβα))
+          (IsOrdinal.toOrdinal_val β ▸ hlhf)
+          ((seq_replAttemptOrEmpty F hF α).lh_restrict (IsTransitive.transitive β hβα))
+      · apply h.mpr
+        use (replAttemptOrEmpty F hF (↑α)) ↾ β
+        simp only [h₂, true_and]
+        exact ⟨hrestrict βo ((lh_replAttemptOrEmpty_eq F hF α) ▸ hβα), (seq_replAttemptOrEmpty F hF α).lh_restrict (IsTransitive.transitive β hβα)⟩
+    have hexists : IsAttempt.Exists F β := ⟨replAttemptOrEmpty F hF β,
+      ih βo (Ordinal.lt_def.mpr (IsOrdinal.toOrdinal_val β ▸ lh_replAttemptOrEmpty_eq F hF α ▸ hβα)),
+      lh_replAttemptOrEmpty_eq F hF βo⟩
+    simp_all only [mem_replAttemptOrEmpty_iff, pairValueAttempt, kpair_iff, ↓existsAndEq, true_and,
+      motive]
+    have hattempt : IsAttempt F (attemptOrEmpty F β) := isAttempt_attemptOrEmpty_of_exists F β hexists
+    have hlh := lh_attemptOrEmpty_eq_of_exists F β hexists
+    constructor <;> intro h
+    · exact ⟨attemptOrEmpty F β, h.2, hattempt, hlh⟩
+    · obtain ⟨f, hyf, hf, hlhf⟩ := h
+      have heq := IsOrdinal.toOrdinal_val β
+      rw [← heq] at *
+      refine And.intro (lh_replAttemptOrEmpty_eq F hF α ▸ hβα) ?_
+      exact (IsAttempt.isAttempt_unique hf hattempt hlhf hlh) ▸ hyf
 
 /--
 For any ordinal `α`, there exists an attempt function of length `α`.
@@ -273,17 +317,27 @@ For any ordinal `α`, there exists an attempt function of length `α`.
 lemma attempt_function_exists
     (F : V → V) (hF : ℒₛₑₜ-function₁ F) :
     (α : Ordinal V) → IsAttempt.Exists F α :=
-  fun α ↦ ⟨replAttemptOrEmpty F hF α, replAttemptOrEmpty_aux F hF α⟩
+  fun α ↦ ⟨replAttemptOrEmpty F hF α, replAttemptOrEmpty_aux F hF α, lh_replAttemptOrEmpty_eq F hF α⟩
+
+lemma isAttempt_attemptOrEmpty
+    (F : V → V) (hF : ℒₛₑₜ-function₁ F) (α : Ordinal V) :
+    IsAttempt F (attemptOrEmpty F α) := by
+  exact isAttempt_attemptOrEmpty_of_exists F α (attempt_function_exists F hF α)
+
+@[simp] lemma lh_attemptOrEmpty_eq
+    (F : V → V) (hF : ℒₛₑₜ-function₁ F) (α : Ordinal V) :
+    lh (attemptOrEmpty F α) = α := by
+  exact lh_attemptOrEmpty_eq_of_exists F α (attempt_function_exists F hF α)
 
 lemma attemptOrEmpty_eq_replAttemptOrEmpty
     (F : V → V) (hF : ℒₛₑₜ-function₁ F) (α : Ordinal V) :
     attemptOrEmpty F α = replAttemptOrEmpty F hF α := by
-  have h₁ : IsAttempt F α (attemptOrEmpty F α) := by
-    simp [attemptOrEmpty, Classical.choose!_spec, attempt_function_exists F hF α]
+  have h₁ : IsAttempt F (attemptOrEmpty F α) ∧ lh (attemptOrEmpty F α) = α :=
+    ⟨isAttempt_attemptOrEmpty F hF α, lh_attemptOrEmpty_eq F hF α⟩
   have h₂ := replAttemptOrEmpty_aux F hF α
-  have : IsFunction (attemptOrEmpty F α) := h₁.2.1
-  have : IsFunction (replAttemptOrEmpty F hF α) := h₂.2.1
-  exact IsAttempt.isAttempt_unique h₁ h₂
+  have : IsFunction (attemptOrEmpty F α) := h₁.1.1.IsFunction
+  have : IsFunction (replAttemptOrEmpty F hF α) := h₂.1.IsFunction
+  exact IsAttempt.isAttempt_unique h₁.1 h₂ (lh_attemptOrEmpty_eq F hF α) (lh_replAttemptOrEmpty_eq F hF α)
 
 open Classical in
 noncomputable def transfiniteRec (F : V → V) (hF : ℒₛₑₜ-function₁ F) (α : V) : V :=

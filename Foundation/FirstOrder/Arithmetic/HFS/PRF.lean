@@ -187,9 +187,7 @@ lemma result_graph (z u : V) : z = c.result v u ↔ ∃ s, c.CSeq v s ∧ ⟪u, 
 
 set_option linter.flexible false in
 lemma result_defined : 𝚺₁.DefinedFunction (fun v ↦ c.result (v ·.succ) (v 0) : (Fin (k + 1) → V) → V) p.resultDef := .mk fun v ↦ by
-  simp [Blueprint.resultDef, result_graph]
-  apply exists_congr; intro x
-  simp [c.cseq_defined_iff]
+  simp [Blueprint.resultDef, result_graph, c.cseq_defined_iff]
 
 lemma result_defined_delta : 𝚫₁.DefinedFunction (fun v ↦ c.result (v ·.succ) (v 0) : (Fin (k + 1) → V) → V) p.resultDeltaDef :=
   c.result_defined.graph_delta
