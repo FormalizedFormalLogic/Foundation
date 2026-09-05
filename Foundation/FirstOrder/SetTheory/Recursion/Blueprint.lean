@@ -25,8 +25,11 @@ def Blueprint.isAttempt_dfn (p : Blueprint k) : SetTheorySemisentence (k + 1) :=
 
 #check fun (φ : Semisentence ℒₒᵣ 3) ↦ (⤫term(faf)[ α x y |   | !φ α x ⋯ ] : Semisentence ℒₒᵣ 3)
 
+-- TODO: I don't know how to write a literal formula while in faf notation, so I specified `lh f = SetTheory.succ x` this way.
 def Blueprint.result_dfn {k} (p : Blueprint k) : SetTheorySemisentence (k + 2) :=
-  “y x. (!IsOrdinal.dfn x → ∃ f, !p.isAttempt_dfn f ⋯ ∧ x ∼[f] y) ∧
+  -- “y x. (!IsOrdinal.dfn x → ∃ f, !p.isAttempt_dfn f ⋯ ∧ x ∼[f] y) ∧
+  --   (¬!IsOrdinal.dfn x → !isEmpty y)”
+  “y x. (!IsOrdinal.dfn x → ∃ f, !p.isAttempt_dfn f ⋯ ∧ (∀ z, !SetTheory.succ.dfn z x → !lh.dfn z f) ∧ x ∼[f] y) ∧
     (¬!IsOrdinal.dfn x → !isEmpty y)”
 
 /- TODO: Once the Lévy hierarchy has been added, add a `Δ` version. -/
@@ -89,40 +92,40 @@ lemma eval_core_faf {x : V} : Semiformula.Evalb (x :> (c.core v x) :> v) f“x y
   · obtain ⟨j, hj⟩ := Fin.exists_succ_eq.mpr hi
     aesop
 
--- set_option linter.flexible false in
--- lemma isAttempt_defined : Defined (fun v ↦ c.IsAttempt (v ·.succ) (v 0) : (Fin (k + 1) → V) → Prop) p.isAttempt_dfn := .mk fun v ↦ by
---   have hsplit {p : Fin (k + 1) → Prop} : (∀ i : Fin (k + 1), p i) ↔ (p 0 ∧ ∀ i : Fin k, p i.succ) := by
---     constructor <;> intro h
---     · exact And.intro (h 0) fun i ↦ h (i.succ)
---     · intro i
---       refine by_cases (p := i = 0) (q := p i) (by aesop) ?_
---       · intro hi
---         obtain ⟨j, hj⟩ := Fin.exists_succ_eq.mpr hi
---         exact hj ▸ h.2 j
---   simp [IsAttempt, Blueprint.isAttempt_dfn]
---   simp [Semiformula.eval_nestFormulaeFunc, ← Semiformula.Evalb.eq_1]
---   intro hseq
---   apply forall_congr'
---   intro x
---   apply forall_congr'
---   intro hx
---   apply forall_congr'
---   intro y
---   simp [hsplit, c.core_defined.iff]
---   simp only [← eq_iff_iff (a := ⟨x, y⟩ₖ ∈ v 1)]
---   apply eq_iff_eq_cancel_left.mpr
---   simp only [eq_iff_iff]
---   constructor <;> intro h
---   · specialize h (c.core (fun x ↦ v x.succ.succ) ((v 1) ↾ x))
---     refine h ?_
---     intro v_1 h₂
---     aesop
---   · intro x_1 h₂
---     specialize h₂ (((v 1) ↾ x) :> (Matrix.vecTail (Matrix.vecTail v)))
---     subst h
---     simp_all only [Nat.succ_eq_add_one, Matrix.cons_val_zero, Matrix.cons_val_succ, forall_const]
---     refine (h₂ ?_).symm
---     aesop
+set_option linter.flexible false in
+lemma isAttempt_defined : Defined (fun v ↦ SetTheory.IsAttempt (c.core (v ·.succ)) (v 0) : (Fin (k + 1) → V) → Prop) p.isAttempt_dfn := .mk fun v ↦ by
+  have hsplit {p : Fin (k + 1) → Prop} : (∀ i : Fin (k + 1), p i) ↔ (p 0 ∧ ∀ i : Fin k, p i.succ) := by
+    refine Iff.intro (fun h ↦ ⟨h 0, fun i ↦ h (i.succ)⟩) fun h i ↦ ?_
+    refine by_cases (p := i = 0) (q := p i) (by aesop) ?_
+    · intro hi
+      obtain ⟨j, hj⟩ := Fin.exists_succ_eq.mpr hi
+      exact hj ▸ h.2 j
+  simp [IsAttempt, Blueprint.isAttempt_dfn]
+  simp [Semiformula.eval_nestFormulaeFunc, ← Semiformula.Evalb.eq_1]
+  intro hseq
+  apply forall_congr'
+  intro x
+  apply forall_congr'
+  intro hx
+  apply forall_congr'
+  intro y
+  simp [hsplit, c.core_defined.iff]
+  simp only [← eq_iff_iff (a := ⟨x, y⟩ₖ ∈ v 0)]
+  apply eq_iff_eq_cancel_left.mpr
+  simp only [eq_iff_iff]
+  constructor <;> intro h
+  · specialize h (c.core (fun x ↦ v x.succ) ((v 0) ↾ x))
+    refine h ?_
+    intro v_1 h₂
+    aesop
+  · intro x_1 h₂
+    specialize h₂ (((v 0) ↾ x) :> (Matrix.vecTail v))
+    subst h
+    simp_all only [Matrix.cons_val_zero, Matrix.cons_val_succ, forall_const]
+    refine (h₂ ?_).symm
+    aesop
+
+@[simp] lemma eval_isAttempt_dfn {v} : p.isAttempt_dfn.Evalb v ↔ SetTheory.IsAttempt (c.core (v ·.succ)) (v 0) := c.isAttempt_defined.iff v
 
 -- @[simp] lemma isAttempt_defined_iff (v : Fin (k + 1) → V) :
 --     Semiformula.Evalb v p.isAttempt_dfn ↔ c.IsAttempt (v ·.succ) (v 0) := c.isAttempt_defined.iff v
@@ -572,39 +575,26 @@ lemma result_graph (y α : V) : y = c.result v α ↔
 
 set_option linter.flexible false in
 lemma result_defined : DefinedFunction (fun v ↦ c.result (v ·.succ) (v 0) : (Fin (k + 1) → V) → V) p.result_dfn := .mk fun v ↦ by
-  simp [Blueprint.result_dfn, result_graph, c.isAttempt_defined, -and_congr_left_iff]
+  simp [Blueprint.result_dfn, result_graph, c.eval_isAttempt_dfn, -and_congr_left_iff]
   refine and_congr ?_ ?_
   · refine eq_iff_iff.mp ?_
     refine implies_congr rfl ?_
     refine eq_iff_iff.mpr ?_
     refine Iff.intro (fun h ↦ ?_) (by aesop)
-    · rcases h with ⟨α', f', hf'⟩
-      have := Seq.isOrdinal_of_mem_domain hf'.1.seq (mem_domain_of_kpair_mem hf'.2)
-      -- have := hf'.1.seq.IsOrdinal_of_mem_domain (mem_domain_of_kpair_mem hf'.2)
-      have : IsOrdinal α' := SetTheory.isOrdinal_lh hf'.1.seq
-      rcases IsAttempt.exists c (v ·.succ.succ) (v 1) with ⟨f, hf⟩
-      use f
-      refine And.intro ?_ ?_
-      · exact hf.1
-      · let α'o : Ordinal V := IsOrdinal.toOrdinal α'
-        let v1o : Ordinal V := IsOrdinal.toOrdinal (v 1)
-        have hsubset : succ v1o ⊆ α'o := (IsOrdinal.subset_succ_iff (succ v1o) α'o).mp
-        have hrestrict : f = f' ↾ (SetTheory.succ v1o) := by
-          rw [← hf.1.2.1.restrict_eq_self (A := succ (v 1))]
-          rw [← (by aesop : v1o.val = v 1)] at hf
-          #check SetTheory.IsAttempt.isAttempt_coherent hf.1 hf'.1
-          sorry
-        sorry
+    · rcases h with ⟨f, hf, hmemf⟩
+      exact ⟨f, hf, hmemf.1.symm, hmemf.2⟩
   · rfl
+
+@[simp] lemma eval_resultDef {v} : p.result_dfn.Evalb v ↔ v 0 = c.result (v ·.succ.succ) (v 1) := c.result_defined.iff v
 
 /- TODO: Once the Lévy hierarchy has been added, add a `Δ` version. -/
 -- lemma result_defined_delta : DefinedFunction (fun v ↦ c.result (v ·.succ) (v 0) : (Fin (k + 1) → V) → V) p.resultDeltaDef :=
 --   c.result_defined.graph_delta
 
 @[simp] lemma result_defined_iff (v : Fin (k + 2) → V) :
-    p.result_dfn.Evalb v ↔ v 0 = c.result (v ·.succ.succ) (v 1) := c.result_defined.iff
+    p.result_dfn.Evalb v ↔ v 0 = c.result (v ·.succ.succ) (v 1) := c.result_defined.iff v
 
-instance result_definable : DefinableFunction (fun v ↦ c.result (v ·.succ) (v 0) : (Fin (k + 1) → V) → V) :=
+instance result_definable : (ℒₛₑₜ).DefinableFunction (fun v ↦ c.result (v ·.succ) (v 0) : (Fin (k + 1) → V) → V) :=
   c.result_defined.to_definable
 
 attribute [irreducible] Blueprint.result_dfn
