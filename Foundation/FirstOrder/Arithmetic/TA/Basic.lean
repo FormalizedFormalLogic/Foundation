@@ -3,7 +3,7 @@ module
 public import Foundation.FirstOrder.Arithmetic.Basic
 
 @[expose] public section
-namespace LO.FirstOrder.Arithmetic
+namespace FFL.FirstOrder.Arithmetic
 
 abbrev FirstOrderTrueArith : ArithmeticTheory := Structure.theory ℒₒᵣ ℕ
 
@@ -25,4 +25,4 @@ instance (T : ArithmeticTheory) [ℕ↓[ℒₒᵣ] ⊧* T] : T ⪯ 𝗧𝗔 := �
 
 end TA
 
-end LO.FirstOrder.Arithmetic
+end FFL.FirstOrder.Arithmetic

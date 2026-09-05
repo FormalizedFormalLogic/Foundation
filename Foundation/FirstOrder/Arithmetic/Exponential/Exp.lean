@@ -13,7 +13,7 @@ it's inductive property is provable in $\mathsf{I}\Sigma_0$.
 
 -/
 
-namespace LO.FirstOrder.Arithmetic
+namespace FFL.FirstOrder.Arithmetic
 
 variable {V : Type*} [ORingStructure V]
 
@@ -26,7 +26,7 @@ noncomputable def ext (u z : V) : V := z / u % u
 lemma ext_graph (a b c : V) : a = ext b c ↔ ∃ x ≤ c, x = c / b ∧ a = x % b := by
   simp [ext]
 
-def _root_.LO.FirstOrder.Arithmetic.extDef : 𝚺₀.Semisentence 3 :=
+def _root_.FFL.FirstOrder.Arithmetic.extDef : 𝚺₀.Semisentence 3 :=
   .mkSigma “a b c. ∃ x <⁺ c, !divDef x c b ∧ !remDef a x b”
 
 instance ext_defined : 𝚺₀-Function₂[V] ext via extDef := .mk fun v ↦ by simp [extDef, ext_graph, Semiformula.eval_substs, le_iff_lt_succ]
@@ -106,7 +106,7 @@ lemma Exponential.graph_iff (x y : V) :
       · exact Or.inl H
       · exact Or.inr ⟨X, bX, Y, bY, ⟨H₀.1.symm, H₀.2.symm⟩, Hₛ, ⟨u, hu, ne2, ppu, hX.symm, hY.symm⟩⟩⟩
 
-def _root_.LO.FirstOrder.Arithmetic.exponentialDef : 𝚺₀.Semisentence 2 := .mkSigma
+def _root_.FFL.FirstOrder.Arithmetic.exponentialDef : 𝚺₀.Semisentence 2 := .mkSigma
   “x y.
     (x = 0 ∧ y = 1) ∨ ∃ X <⁺ y⁴, ∃ Y <⁺ y⁴,
       (!extDef 1 4 X ∧ !extDef 2 4 Y) ∧
@@ -739,7 +739,7 @@ lemma exponential_exp (a : V) : Exponential a (Exp.exp a) := Classical.choose!_s
 
 lemma exponential_graph {a b : V} : a = Exp.exp b ↔ Exponential b a := Classical.choose!_eq_iff_right _
 
-def _root_.LO.FirstOrder.Arithmetic.expDef : 𝚺₀.Semisentence 2 := .mkSigma “x y. !exponentialDef.val y x”
+def _root_.FFL.FirstOrder.Arithmetic.expDef : 𝚺₀.Semisentence 2 := .mkSigma “x y. !exponentialDef.val y x”
 
 instance exp_defined_deltaZero : 𝚺₀-Function₁[V] Exp.exp via expDef := .mk fun v ↦ by simp [expDef, exponential_graph]
 
@@ -785,4 +785,4 @@ end exponential
 
 end ISigma1
 
-end LO.FirstOrder.Arithmetic
+end FFL.FirstOrder.Arithmetic

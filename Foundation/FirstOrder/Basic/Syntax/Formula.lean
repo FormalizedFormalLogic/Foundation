@@ -16,7 +16,7 @@ The quantification is represented by de Bruijn index.
 
 -/
 
-namespace LO.FirstOrder
+namespace FFL.FirstOrder
 
 /--
 A semiformula of language `L`. Free variables are of type `ξ`, and bound variables are implemented as de Bruijn indices, of a type `Fin n` separate from free variables.
@@ -599,6 +599,6 @@ def lMap (Φ : L₁ →ᵥ L₂) (T : Theory L₁) : Theory L₂ := Semiformula.
 
 end Theory
 
-end LO.FirstOrder
+end FFL.FirstOrder
 
 end

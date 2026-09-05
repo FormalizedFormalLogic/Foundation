@@ -15,7 +15,7 @@ meta def freshIdent [Monad m] [MonadQuotation m] : m (TSyntax `ident) := do
 
 end Lean.TSyntax
 
-namespace LO.FirstOrder
+namespace FFL.FirstOrder
 
 namespace Semiformula
 
@@ -846,6 +846,6 @@ lemma egegege : M ⊧/![x, y, z] (f“x y z. ∀ w ∈ x, w ∈ z” : Semisente
 
 end BinderNotation
 
-end LO.FirstOrder
+end FFL.FirstOrder
 
 end

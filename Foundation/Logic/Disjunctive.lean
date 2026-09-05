@@ -4,7 +4,7 @@ public import Foundation.Propositional.Entailment.Cl
 
 @[expose] public section
 
-namespace LO.Entailment
+namespace FFL.Entailment
 
 variable {F : Type*} [LogicalConnective F] [LogicalNeutral F]
 variable {S : Type*} [Entailment S F]
@@ -33,6 +33,6 @@ lemma iff_complete_disjunctive [DecidableEq F] {𝓢 : S} [Entailment.Cl 𝓢] :
     replace hDisj : ∀ {φ ψ}, 𝓢 ⊢ φ ⋎ ψ → 𝓢 ⊢ φ ∨ 𝓢 ⊢ ψ := iff_disjunctive.mp hDisj;
     exact @hDisj φ (∼φ) lem;
 
-end LO.Entailment
+end FFL.Entailment
 
 end

@@ -3,7 +3,7 @@ module
 public import Foundation.FirstOrder.Arithmetic.Definability.Definable
 
 @[expose] public section
-namespace LO.FirstOrder.Arithmetic
+namespace FFL.FirstOrder.Arithmetic
 
 open PeanoMinus
 
@@ -411,4 +411,4 @@ example {ex : V → V} [h : 𝚺₁.DefinableFunction₁ ex] :
 
 end
 
-end LO.FirstOrder.Arithmetic
+end FFL.FirstOrder.Arithmetic

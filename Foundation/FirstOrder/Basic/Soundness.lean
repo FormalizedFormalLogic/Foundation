@@ -5,7 +5,7 @@ public import Foundation.FirstOrder.Basic.Calculus
 
 /-! # Soundness theorem for first-order classical logic -/
 
-namespace LO.FirstOrder
+namespace FFL.FirstOrder
 
 open Semiformula
 
@@ -130,6 +130,6 @@ end model
 
 end FirstOrder
 
-end LO
+end FFL
 
 end

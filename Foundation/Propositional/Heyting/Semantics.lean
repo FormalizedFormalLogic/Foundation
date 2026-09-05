@@ -6,7 +6,7 @@ public import Foundation.Vorspiel.Order.Heyting
 
 @[expose] public section
 
-namespace LO.Propositional
+namespace FFL.Propositional
 
 variable {α : Type u}
 
@@ -55,7 +55,7 @@ instance : Nontrivial ℍ := ℍ.nontrivial
 
 def hVal (ℍ : HeytingSemantics α) (φ : Formula α) : ℍ := φ.hVal ℍ.valAtom
 
-scoped [LO.Propositional] infix:45 " ⊧ₕ " => LO.Propositional.HeytingSemantics.hVal
+scoped [FFL.Propositional] infix:45 " ⊧ₕ " => FFL.Propositional.HeytingSemantics.hVal
 
 @[simp] lemma hVal_falsum : (ℍ ⊧ₕ ⊥) = ⊥ := rfl
 
@@ -158,5 +158,5 @@ instance [DecidableEq α] [Entailment.Int H] : Complete H (mod.{_,u} H) := ⟨co
 
 end HeytingSemantics
 
-end LO.Propositional
+end FFL.Propositional
 end

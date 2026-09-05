@@ -3,7 +3,7 @@ module
 public import Foundation.FirstOrder.Arithmetic.HFS.Vec
 
 @[expose] public section
-namespace LO.FirstOrder.Arithmetic
+namespace FFL.FirstOrder.Arithmetic
 
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 
@@ -32,4 +32,4 @@ noncomputable def _root_.Finset.arithmetize (s : Finset V) : V := finsetArithmet
     (insert a s).arithmetize = insert a s.arithmetize := mem_ext <| by
   intro x; simp
 
-end LO.FirstOrder.Arithmetic
+end FFL.FirstOrder.Arithmetic

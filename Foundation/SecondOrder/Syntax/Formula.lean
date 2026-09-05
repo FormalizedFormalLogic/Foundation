@@ -8,7 +8,7 @@ public import Foundation.FirstOrder.Basic
 # Formulas of monadic second-order logic
 -/
 
-namespace LO.SecondOrder
+namespace FFL.SecondOrder
 
 open FirstOrder
 
@@ -306,4 +306,4 @@ end Semiformula
 
 end SecondOrder
 
-end LO
+end FFL

@@ -3,7 +3,7 @@ module
 public import Foundation.FirstOrder.Arithmetic.Basic.Misc
 
 @[expose] public section
-namespace LO.FirstOrder.Arithmetic
+namespace FFL.FirstOrder.Arithmetic
 
 private lemma complete_aux (T : ArithmeticTheory) [𝗘𝗤 ℒₒᵣ ⪯ T] (φ : ArithmeticSentence)
     (H : ∀ (M : Type w)
@@ -120,4 +120,4 @@ lemma consistent_of_sound [SoundOn T F] (hF : F ⊥) : Entailment.Consistent T :
 
 end ArithmeticTheory
 
-end LO.FirstOrder
+end FFL.FirstOrder

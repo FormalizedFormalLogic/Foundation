@@ -3,7 +3,7 @@ public import Foundation.Propositional.Entailment.Int
 
 @[expose] public section
 
-namespace LO.Axioms
+namespace FFL.Axioms
 
 variable {F : Type*} [LogicalConnective F]
 variable (φ ψ χ : F)
@@ -16,10 +16,10 @@ protected abbrev Peirce := ((φ 🡒 ψ) 🡒 φ) 🡒 φ
 
 protected abbrev ElimContra := (∼ψ 🡒 ∼φ) 🡒 (φ 🡒 ψ)
 
-end LO.Axioms
+end FFL.Axioms
 
 
-namespace LO.Entailment
+namespace FFL.Entailment
 
 variable {S F : Type*} [LogicalConnective F] [Entailment S F]
 variable {𝓢 : S} {φ ψ χ : F}
@@ -346,6 +346,6 @@ instance [HasAxiomLEM 𝓢] : Entailment.Cl 𝓢 where
 
 end
 
-end LO.Entailment
+end FFL.Entailment
 
 end

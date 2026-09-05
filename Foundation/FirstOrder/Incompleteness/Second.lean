@@ -8,9 +8,9 @@ public import Foundation.FirstOrder.Incompleteness.RosserProvability
 # Gödel's second incompleteness theorem for arithmetic theories stronger than $\mathsf{I}\Sigma_1$
 -/
 
-namespace LO.FirstOrder.Arithmetic
+namespace FFL.FirstOrder.Arithmetic
 
-open LO.Entailment ProvabilityAbstraction
+open FFL.Entailment ProvabilityAbstraction
 
 variable (T : ArithmeticTheory) [T.Δ₁] [𝗜𝚺₁ ⪯ T]
 
@@ -35,4 +35,4 @@ instance [ArithmeticTheory.SoundOnHierarchy T 𝚺 1] : T ⪱ T ∪ T.Incon :=
     (inconsistent_unprovable T)
     (Entailment.by_axm (by simp))
 
-end LO.FirstOrder.Arithmetic
+end FFL.FirstOrder.Arithmetic

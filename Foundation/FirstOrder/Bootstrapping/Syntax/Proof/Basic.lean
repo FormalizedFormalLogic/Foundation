@@ -3,7 +3,7 @@ module
 public import Foundation.FirstOrder.Bootstrapping.Syntax.Theory
 
 @[expose] public section
-namespace LO
+namespace FFL
 
 open FirstOrder Arithmetic
 
@@ -546,7 +546,7 @@ lemma case_iff {d : V} :
       (∃ s p, d = axm s p ∧ p ∈ s ∧ p ∈ T.Δ₁Class) ) :=
   (construction T).case
 
-alias ⟨case, _root_.LO.FirstOrder.Arithmetic.Bootstrapping.Derivation.mk⟩ := case_iff
+alias ⟨case, _root_.FFL.FirstOrder.Arithmetic.Bootstrapping.Derivation.mk⟩ := case_iff
 
 lemma induction1 (Γ) {P : V → Prop} (hP : Γ-[1]-Predicate P)
     {d} (hd : Derivation T d)
@@ -588,7 +588,7 @@ lemma induction1 (Γ) {P : V → Prop} (hP : Γ-[1]-Predicate P)
 
 lemma isFormulaSet {d : V} (h : Derivation T d) : IsFormulaSet L (fstIdx d) := (h : Derivation T d).case.1
 
-lemma _root_.LO.FirstOrder.Arithmetic.Bootstrapping.DerivationOf.isFormulaSet {d s : V} (h : DerivationOf T d s) : IsFormulaSet L s := by
+lemma _root_.FFL.FirstOrder.Arithmetic.Bootstrapping.DerivationOf.isFormulaSet {d s : V} (h : DerivationOf T d s) : IsFormulaSet L s := by
   simpa [h.1] using h.2.case.1
 
 lemma axL {s p : V} (hs : IsFormulaSet L s) (h : p ∈ s) (hn : neg L p ∈ s) : Derivation T (axL s p) :=
@@ -848,4 +848,4 @@ lemma disj (ps : V) {i} (hps : ∀ i < len ps, IsFormula L ps.[i])
 
 end Provable
 
-end LO.FirstOrder.Arithmetic.Bootstrapping
+end FFL.FirstOrder.Arithmetic.Bootstrapping

@@ -8,9 +8,9 @@ public import Foundation.Meta.ClProver
 # Abstract incompleteness theorems and related results
 -/
 
-namespace LO
+namespace FFL
 
-open LO.Entailment
+open FFL.Entailment
 
 namespace FirstOrder
 
@@ -175,7 +175,7 @@ class Diagonalization [L.ReferenceableBy L] (T : Theory L) where
   fixedpoint : Semisentence L 1 → Sentence L
   diag (θ) : T ⊢ fixedpoint θ 🡘 θ/[⌜fixedpoint θ⌝]
 
-open LO.Entailment Diagonalization Provability
+open FFL.Entailment Diagonalization Provability
 
 variable
   [L.ReferenceableBy L]

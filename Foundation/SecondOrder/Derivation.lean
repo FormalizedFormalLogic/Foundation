@@ -8,7 +8,7 @@ public import Foundation.SecondOrder.Syntax.Rew
 # Second-order one-sided $\mathbf{LK}$
 -/
 
-namespace LO.SecondOrder
+namespace FFL.SecondOrder
 
 open FirstOrder
 
@@ -102,6 +102,6 @@ lemma provable_def {φ : Sentence L} : T ⊢ φ ↔ φ ∈ T :=
 
 end Theory
 
-end LO.SecondOrder
+end FFL.SecondOrder
 
 end

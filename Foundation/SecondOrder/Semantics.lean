@@ -10,7 +10,7 @@ public import Foundation.SecondOrder.Syntax.Rew
 - TODO: Align with https://github.com/FormalizedFormalLogic/Foundation/pull/794
 -/
 
-namespace LO.SecondOrder
+namespace FFL.SecondOrder
 
 open FirstOrder
 
@@ -119,4 +119,4 @@ instance : Semantics.Tarski (Struc₂ L) where
   models_imply := by simp [models_def]
   models_not := by simp [models_def]
 
-end LO.SecondOrder
+end FFL.SecondOrder

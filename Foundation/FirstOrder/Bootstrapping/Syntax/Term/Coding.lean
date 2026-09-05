@@ -4,9 +4,9 @@ public import Foundation.FirstOrder.Bootstrapping.Syntax.Term.Typed
 public import Mathlib.Combinatorics.Colex
 
 @[expose] public section
-open Encodable LO FirstOrder Arithmetic PeanoMinus Bootstrapping
+open Encodable FFL FirstOrder Arithmetic PeanoMinus Bootstrapping
 
-namespace LO.FirstOrder.Semiterm
+namespace FFL.FirstOrder.Semiterm
 
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 
@@ -189,9 +189,9 @@ lemma empty_quote_eq_encode (t : ClosedSemiterm L n) : (⌜t⌝ : V) = ↑(encod
 @[simp] lemma coe_empty_quote {ξ n} (t : ClosedSemiterm L n) : ↑(⌜t⌝ : ℕ) = (⌜t⌝ : ArithmeticSemiterm ξ m) := by
   simp [gödelNumber'_def, empty_quote_eq_encode]
 
-end LO.FirstOrder.Semiterm
+end FFL.FirstOrder.Semiterm
 
-namespace LO.FirstOrder.Arithmetic.Bootstrapping
+namespace FFL.FirstOrder.Arithmetic.Bootstrapping
 
 open Encodable FirstOrder
 
@@ -228,4 +228,4 @@ lemma IsSemiterm.sound {n t : ℕ} (ht : IsSemiterm L n t) : ∃ T : FirstOrder.
           simpa [Semiterm.quote_def] using SemitermVec.val_nth_eq (fun i ↦ (⌜v' i⌝ : Bootstrapping.Semiterm ℕ L n)) j
         _                                    = v.[i] := hv' j
 
-end LO.FirstOrder.Arithmetic.Bootstrapping
+end FFL.FirstOrder.Arithmetic.Bootstrapping

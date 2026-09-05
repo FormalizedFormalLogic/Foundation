@@ -12,7 +12,7 @@ public import Mathlib.SetTheory.Cardinal.Basic
   If you wish to use a type with `Structure ℒₛₑₜ`, use `QuotNormalize`.
 -/
 
-namespace LO.FirstOrder
+namespace FFL.FirstOrder
 
 namespace Language
 
@@ -119,7 +119,7 @@ instance : Repr (SetTheorySemiformula ξ n) := ⟨fun φ _ ↦ φ.toStringSet⟩
 
 instance : ToString (SetTheorySemiformula ξ n) := ⟨fun φ ↦ φ.toStringSet⟩
 
-abbrev _root_.LO.SetStructure (V : Type*) := Membership V V
+abbrev _root_.FFL.SetStructure (V : Type*) := Membership V V
 
 class Structure.Set (M : Type w) [SetStructure M] [Structure ℒₛₑₜ M] extends Structure.Eq ℒₛₑₜ M, Structure.Mem ℒₛₑₜ M
 
@@ -239,4 +239,4 @@ end SetTheory
 
 namespace SetTheory
 
-end LO.FirstOrder.SetTheory
+end FFL.FirstOrder.SetTheory

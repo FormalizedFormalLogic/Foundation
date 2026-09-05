@@ -9,7 +9,7 @@ public import Mathlib.Data.Nat.Basic
 
 @[expose] public section
 
-namespace LO
+namespace FFL
 
 /-! ## Heterogeneous notation classes -/
 
@@ -134,6 +134,6 @@ notation "𝚫" => DeltaSymbol.delta
 
 attribute [match_pattern] SigmaSymbol.sigma PiSymbol.pi DeltaSymbol.delta
 
-end LO
+end FFL
 
 end

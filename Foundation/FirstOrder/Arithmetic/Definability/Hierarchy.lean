@@ -16,7 +16,7 @@ This file defines the $\Sigma_n / \Pi_n / \Delta_n$ formulas of arithmetic of fi
 
 -/
 
-namespace LO.FirstOrder.Arithmetic
+namespace FFL.FirstOrder.Arithmetic
 
 structure HierarchySymbol where
   Γ : SigmaPiDelta
@@ -405,4 +405,4 @@ end Semiformula
 
 end HierarchySymbol
 
-end LO.FirstOrder.Arithmetic
+end FFL.FirstOrder.Arithmetic

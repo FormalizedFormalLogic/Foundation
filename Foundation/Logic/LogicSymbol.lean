@@ -12,13 +12,13 @@ This file defines structure that has logical connectives $\top, \bot, \land, \lo
 and their homomorphisms.
 
 ## Main Definitions
-* `LO.LogicalConnective` is defined so that `LO.LogicalConnective F` is a type that has logical connectives $\top, \bot, \land, \lor, \to, \lnot$.
-* `LO.LogicalConnective.Hom` is defined so that `f : F →ˡᶜ G` is a homomorphism from `F` to `G`, i.e.,
+* `FFL.LogicalConnective` is defined so that `FFL.LogicalConnective F` is a type that has logical connectives $\top, \bot, \land, \lor, \to, \lnot$.
+* `FFL.LogicalConnective.Hom` is defined so that `f : F →ˡᶜ G` is a homomorphism from `F` to `G`, i.e.,
 a function that preserves logical connectives.
 
 -/
 
-namespace LO
+namespace FFL
 
 /--
 A class for types with logical connectives $\top, \bot, \land, \lor, \to, \lnot$.
@@ -316,9 +316,9 @@ Homomorphisms commute with `k`-ary disjunctions.
 
 end conjdisj
 
-end LO
+end FFL
 
-open LO
+open FFL
 
 namespace Matrix
 

@@ -9,7 +9,7 @@ public import Foundation.FirstOrder.Basic.Calculus
 Main reference: Jeremy Avigad, Algebraic proofs of cut elimination [Avi01]
  -/
 
-namespace LO.FirstOrder
+namespace FFL.FirstOrder
 
 variable {L : Language.{u}}
 

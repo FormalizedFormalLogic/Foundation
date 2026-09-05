@@ -6,7 +6,7 @@ public import Foundation.FirstOrder.Intuitionistic.Rew
 
 @[expose] public section
 
-namespace LO.FirstOrder
+namespace FFL.FirstOrder
 
 abbrev Sequentᵢ (L : Language) := List (Propositionᵢ L)
 
@@ -266,7 +266,7 @@ def ofLE {Λ₁ Λ₂ : Hilbertᵢ L} (h : Λ₁ ≤ Λ₂) : Λ₁ ⊢! φ → 
 
 lemma of_le {Λ₁ Λ₂ : Hilbertᵢ L} (h : Λ₁ ≤ Λ₂) : Λ₁ ⊢ φ → Λ₂ ⊢ φ := fun b ↦ ⟨ofLE h b.get⟩
 
-open _root_.LO.FirstOrder.Entailment
+open _root_.FFL.FirstOrder.Entailment
 
 end HilbertProofᵢ
 
@@ -279,7 +279,7 @@ variable {L}
 
 namespace Theoryᵢ
 
-open LO.Entailment
+open FFL.Entailment
 
 variable {𝓗 : Hilbertᵢ L} {T : Theoryᵢ L 𝓗}
 
@@ -357,4 +357,4 @@ instance cl [Entailment.Cl 𝓗] : Entailment.Cl T where
 
 end Theoryᵢ
 
-end LO.FirstOrder
+end FFL.FirstOrder

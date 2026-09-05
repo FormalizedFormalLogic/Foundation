@@ -4,7 +4,7 @@ public import Foundation.FirstOrder.Intuitionistic.Deduction
 public import Foundation.Meta.IntProver
 
 @[expose] public section
-namespace LO.FirstOrder
+namespace FFL.FirstOrder
 
 namespace Semiformula
 
@@ -18,7 +18,7 @@ def doubleNegation {n} : Semiformula L ξ n → Semiformulaᵢ L ξ n
   |     ∀¹ φ => ∀¹ φ.doubleNegation
   |     ∃¹ φ => ∼(∀¹ ∼φ.doubleNegation)
 
-scoped[LO.FirstOrder] postfix:max "ᴺ" => Semiformula.doubleNegation
+scoped[FFL.FirstOrder] postfix:max "ᴺ" => Semiformula.doubleNegation
 
 @[simp] lemma doubleNegation_rel {k} (r : L.Rel k) (v : Fin k → Semiterm L ξ n) : (rel r v)ᴺ = ∼∼(.rel r v) := rfl
 
@@ -67,7 +67,7 @@ namespace Sequent
 def doubleNegation (Γ : Sequent L) : Sequentᵢ L :=
   Γ.map Semiformula.doubleNegation
 
-scoped[LO.FirstOrder] postfix:max "ᴺ" => Sequent.doubleNegation
+scoped[FFL.FirstOrder] postfix:max "ᴺ" => Sequent.doubleNegation
 
 @[simp] lemma doubleNegation_nil : ([] : Sequent L)ᴺ = [] := rfl
 
@@ -92,7 +92,7 @@ namespace Derivation
 
 variable {L : Language} [L.DecidableEq] {T : Theory L} {Λ : Hilbertᵢ L}
 
-open Rewriting LO.Entailment Entailment.FiniteContext HilbertProofᵢ
+open Rewriting FFL.Entailment Entailment.FiniteContext HilbertProofᵢ
 
 def negDoubleNegation : (φ : Proposition L) → Λ ⊢! ∼φᴺ 🡘 (∼φ)ᴺ
   | .rel r v => Entailment.tneIff! (φ := Semiformulaᵢ.rel r v)
@@ -196,4 +196,4 @@ theorem Provable.gödel_gentzen {φ : Proposition L} {Λ : Hilbertᵢ L} : 𝐋�
   have : Λ ⊢ ∼(∼φ)ᴺ := ⟨Derivation.gödelGentzen d⟩
   exact Entailment.K_left (Derivation.neg_doubleNegation' φ) ⨀ this
 
-end LO.FirstOrder
+end FFL.FirstOrder

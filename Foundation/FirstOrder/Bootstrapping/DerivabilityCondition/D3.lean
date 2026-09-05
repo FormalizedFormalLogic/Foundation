@@ -7,18 +7,18 @@ public import Foundation.FirstOrder.Bootstrapping.DerivabilityCondition.PeanoMin
 # Hilbert-Bernays-Löb derivability condition $\mathbf{D3}$ and formalized $\Sigma_1$-completeness
 -/
 
-namespace LO.FirstOrder.Arithmetic.Bootstrapping.Arithmetic
+namespace FFL.FirstOrder.Arithmetic.Bootstrapping.Arithmetic
 
 -- `Arithmetic` is intentionally re-opened here even though the ambient namespace
 -- already contains it; renaming would break the widely-used public API
 -- (`Bootstrapping.Arithmetic.*`). Suppress the new dupNamespace linter for the
 -- declarations in this namespace (the option is scoped by `namespace`/`end` and
--- reverts automatically at `end LO.FirstOrder.Arithmetic.Bootstrapping.Arithmetic`).
+-- reverts automatically at `end FFL.FirstOrder.Arithmetic.Bootstrapping.Arithmetic`).
 set_option linter.dupNamespace false
 
 open Classical
 
-open LO.Entailment LO.Entailment.FiniteContext
+open FFL.Entailment FFL.Entailment.FiniteContext
 
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 
@@ -166,4 +166,4 @@ theorem provable_internalize {σ : ArithmeticSentence} :
     Provable T (⌜σ⌝ : V) → Provable T (⌜provabilityPred T σ⌝ : V) := by
   simpa [models_iff] using sigma_one_complete (V := V) (T := T) (σ := provabilityPred T σ) (by simp)
 
-end LO.FirstOrder.Arithmetic.Bootstrapping.Arithmetic
+end FFL.FirstOrder.Arithmetic.Bootstrapping.Arithmetic

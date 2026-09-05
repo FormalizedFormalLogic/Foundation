@@ -6,7 +6,7 @@ public import Mathlib.SetTheory.Cardinal.Basic
 @[expose] public section
 /-! # Skolem hull -/
 
-namespace LO.FirstOrder
+namespace FFL.FirstOrder
 
 /-- Skolem function of rank 1 -/
 def Language.skolemFunction₁ (L : Language) : Language where
@@ -187,4 +187,4 @@ end SkolemHull
 
 end Structure
 
-end LO.FirstOrder
+end FFL.FirstOrder

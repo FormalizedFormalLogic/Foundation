@@ -9,7 +9,7 @@ public import Foundation.Vorspiel.Computability
 @[expose] public section
 open Encodable Denumerable
 
-namespace LO.FirstOrder.Arithmetic
+namespace FFL.FirstOrder.Arithmetic
 
 open Mathlib Encodable Semiterm.Operator.GödelNumber
 
@@ -430,4 +430,4 @@ theorem computable₂_iff_sigma1 {f : ℕ → ℕ → ℕ} : Computable₂ f ↔
 
 end
 
-end LO.FirstOrder.Arithmetic
+end FFL.FirstOrder.Arithmetic

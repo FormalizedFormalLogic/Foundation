@@ -7,7 +7,7 @@ public import Foundation.FirstOrder.Bootstrapping.Syntax
 # Hilbert-Bernays-Löb derivability condition $\mathbf{D2}$
 -/
 
-namespace LO.FirstOrder.Arithmetic.Bootstrapping
+namespace FFL.FirstOrder.Arithmetic.Bootstrapping
 
 open FirstOrder
 
@@ -32,4 +32,4 @@ theorem modus_ponens_sentence {σ τ : Sentence L} (hστ : Provable T (⌜σ �
   have hσ : Theory.internalize V T ⊢ ⌜σ⌝ := (tprovable_tquote_iff_provable_quote (L := L)).mpr hσ
   exact hστ ⨀ hσ
 
-end LO.FirstOrder.Arithmetic.Bootstrapping
+end FFL.FirstOrder.Arithmetic.Bootstrapping

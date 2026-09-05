@@ -11,7 +11,7 @@ The instances `PA_delta1Definable : 𝗣𝗔.Δ₁` and `ISigma1_delta1Definable
 
 @[expose] public section
 
-namespace LO.FirstOrder.Arithmetic.Bootstrapping
+namespace FFL.FirstOrder.Arithmetic.Bootstrapping
 
 /-! ## Internal iterated universal quantifier `qqAlls` -/
 
@@ -39,7 +39,7 @@ noncomputable def qqAlls (p k : V) : V := qqAlls.construction.result ![p] k
 
 section
 
-def _root_.LO.FirstOrder.Arithmetic.qqAllsDef : 𝚺₁.Semisentence 3 :=
+def _root_.FFL.FirstOrder.Arithmetic.qqAllsDef : 𝚺₁.Semisentence 3 :=
   qqAlls.blueprint.resultDef |>.rew (Rew.subst ![#0, #2, #1])
 
 instance qqAlls_defined : 𝚺₁-Function₂ (qqAlls : V → V → V) via qqAllsDef := .mk
@@ -132,7 +132,7 @@ lemma quote_subst_fvar_fixitr (φ : Semiproposition L 0) :
 
 end qqAlls
 
-lemma _root_.LO.FirstOrder.Semiformula.fvar?_fvSup_pred {L : Language} {n : ℕ}
+lemma _root_.FFL.FirstOrder.Semiformula.fvar?_fvSup_pred {L : Language} {n : ℕ}
     (φ : Semiproposition L n) (h : 0 < φ.fvSup) : φ.FVar? (φ.fvSup - 1) := by
   by_cases he : φ.freeVariables = ∅
   · simp [Semiformula.fvSup, he] at h
@@ -155,7 +155,7 @@ private lemma semitermVec_val_congr {k m m' : ℕ}
   funext i
   exact h i
 
-lemma _root_.LO.FirstOrder.Semiterm.quote_castLE {n : ℕ} (t : SyntacticSemiterm L n) :
+lemma _root_.FFL.FirstOrder.Semiterm.quote_castLE {n : ℕ} (t : SyntacticSemiterm L n) :
     ∀ {n' : ℕ} (h : n ≤ n'), (⌜(Rew.castLE h t : SyntacticSemiterm L n')⌝ : V) = ⌜t⌝ := by
   induction t with
   | bvar x => intro n' h; simp
@@ -167,7 +167,7 @@ lemma _root_.LO.FirstOrder.Semiterm.quote_castLE {n : ℕ} (t : SyntacticSemiter
         (fun i ↦ by rw [← Semiterm.quote_def, ← Semiterm.quote_def]; exact ih i h)]
 
 omit [L.Encodable] [L.LORDefinable] in
-lemma _root_.LO.FirstOrder.Semiterm.freeVariables_castLE {n : ℕ} (t : SyntacticSemiterm L n) :
+lemma _root_.FFL.FirstOrder.Semiterm.freeVariables_castLE {n : ℕ} (t : SyntacticSemiterm L n) :
     ∀ {n' : ℕ} (h : n ≤ n'), (Rew.castLE h t : SyntacticSemiterm L n').freeVariables = t.freeVariables := by
   induction t with
   | bvar x => intro n' h; simp
@@ -178,7 +178,7 @@ lemma _root_.LO.FirstOrder.Semiterm.freeVariables_castLE {n : ℕ} (t : Syntacti
       apply Finset.biUnion_congr rfl
       intro i _; exact ih i h
 
-lemma _root_.LO.FirstOrder.Semiformula.quote_castLE {n : ℕ} (φ : Semiproposition L n) :
+lemma _root_.FFL.FirstOrder.Semiformula.quote_castLE {n : ℕ} (φ : Semiproposition L n) :
     ∀ {n' : ℕ} (h : n ≤ n'), (⌜(Rew.castLE h ▹ φ : Semiproposition L n')⌝ : V) = ⌜φ⌝ := by
   induction φ using Semiformula.rec' with
   | hverum => intro n' h; simp
@@ -199,7 +199,7 @@ lemma _root_.LO.FirstOrder.Semiformula.quote_castLE {n : ℕ} (φ : Semiproposit
   | hexs φ ih => intro n' h; rw [Rewriting.app_exs, Semiformula.quote_ex, Rew.q_castLE, ih, Semiformula.quote_ex]
 
 omit [L.Encodable] [L.LORDefinable] in
-lemma _root_.LO.FirstOrder.Semiformula.freeVariables_castLE {n : ℕ} (φ : Semiproposition L n) :
+lemma _root_.FFL.FirstOrder.Semiformula.freeVariables_castLE {n : ℕ} (φ : Semiproposition L n) :
     ∀ {n' : ℕ} (h : n ≤ n'), (Rew.castLE h ▹ φ : Semiproposition L n').freeVariables = φ.freeVariables := by
   induction φ using Semiformula.rec' with
   | hverum => intro n' h; simp
@@ -319,7 +319,7 @@ noncomputable def fvarVec (k : V) : V := fvarVec.construction.result ![] k
 @[simp] lemma fvarVec_succ (k : V) : fvarVec (k + 1) = concat (fvarVec k) (^&k) := by
   simp [fvarVec, fvarVec.construction]
 
-def _root_.LO.FirstOrder.Arithmetic.fvarVecDef : 𝚺₁.Semisentence 2 := fvarVec.blueprint.resultDef
+def _root_.FFL.FirstOrder.Arithmetic.fvarVecDef : 𝚺₁.Semisentence 2 := fvarVec.blueprint.resultDef
 
 instance fvarVec_defined : 𝚺₁-Function₁ (fvarVec : V → V) via fvarVecDef := .mk
   fun v ↦ by simp [fvarVec.construction.result_defined_iff, fvarVecDef]; rfl
@@ -439,7 +439,7 @@ noncomputable def qqBall (u q : V) : V := qqAll (qqOr (Arithmetic.qqNLT (qqBvar 
 @[simp] lemma lt_u_qqBall (u q : V) : u < qqBall u q :=
   lt_trans (Arithmetic.lt_qqNLT_right _ _) (lt_trans (lt_or_left _ _) (lt_forall _))
 
-def _root_.LO.FirstOrder.Arithmetic.qqBallDef : 𝚺₁.Semisentence 3 := .mkSigma
+def _root_.FFL.FirstOrder.Arithmetic.qqBallDef : 𝚺₁.Semisentence 3 := .mkSigma
   “p u q. ∃ bv, !qqBvarDef bv 0 ∧ ∃ nlt, !qqNLTDef nlt bv u ∧ ∃ g, !qqOrDef g nlt q ∧ !qqAllDef p g”
 
 instance qqBall_defined : 𝚺₁-Function₂ (qqBall : V → V → V) via Arithmetic.qqBallDef := .mk fun v ↦ by
@@ -627,11 +627,11 @@ lemma IsSigma1.of_all {p : V} (h : IsSigma1 (^∀ p)) :
 
 end isSigma1
 
-end LO.FirstOrder.Arithmetic.Bootstrapping
+end FFL.FirstOrder.Arithmetic.Bootstrapping
 
-namespace LO.FirstOrder.Arithmetic
+namespace FFL.FirstOrder.Arithmetic
 
-open LO.FirstOrder.Theory
+open FFL.FirstOrder.Theory
 
 /-! ## `𝗣𝗔⁻` is `Δ₁` -/
 
@@ -709,13 +709,13 @@ def indSubstConst1 : ℕ :=
 lemma val_indSubstConst0 :
     (↑indSubstConst0 : V)
       = Bootstrapping.SemitermVec.val (![⌜(‘0’ : ArithmeticSemiterm ℕ 0)⌝] : Bootstrapping.SemitermVec V ℒₒᵣ 1 0) := by
-  rw [indSubstConst0, ← LO.FirstOrder.Semiterm.quote_eq_encode' (V := V) (![(‘0’ : ArithmeticSemiterm ℕ 0)])]
+  rw [indSubstConst0, ← FFL.FirstOrder.Semiterm.quote_eq_encode' (V := V) (![(‘0’ : ArithmeticSemiterm ℕ 0)])]
   congr 1; funext i; simp [Matrix.cons_val_fin_one]
 
 lemma val_indSubstConst1 :
     (↑indSubstConst1 : V)
       = Bootstrapping.SemitermVec.val (![⌜(‘#0 + 1’ : ArithmeticSemiterm ℕ 1)⌝] : Bootstrapping.SemitermVec V ℒₒᵣ 1 1) := by
-  rw [indSubstConst1, ← LO.FirstOrder.Semiterm.quote_eq_encode' (V := V) (![(‘#0 + 1’ : ArithmeticSemiterm ℕ 1)])]
+  rw [indSubstConst1, ← FFL.FirstOrder.Semiterm.quote_eq_encode' (V := V) (![(‘#0 + 1’ : ArithmeticSemiterm ℕ 1)])]
   congr 1; funext i; simp [Matrix.cons_val_fin_one]
 
 /-- Concrete `𝚺₁`-graph of `indBodyVal`, a chain of the `subst`/`imp`/`qqAll` graphs. -/
@@ -1048,4 +1048,4 @@ noncomputable instance PA_delta1Definable : 𝗣𝗔.Δ₁ :=
 noncomputable instance ISigma1_delta1Definable : 𝗜𝚺₁.Δ₁ :=
   Theory.Δ₁.add PeanoMinus.delta1 InductionScheme.delta1_sigma1
 
-end LO.FirstOrder.Arithmetic
+end FFL.FirstOrder.Arithmetic

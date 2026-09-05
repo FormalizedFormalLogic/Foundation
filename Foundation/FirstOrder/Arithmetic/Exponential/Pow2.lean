@@ -9,7 +9,7 @@ public import Foundation.FirstOrder.Arithmetic.IOpen.Basic
 $\mathrm{Pow2}(n)$ is a property that holds iff $n = 2^i$ for some $i$.
 -/
 
-namespace LO.FirstOrder.Arithmetic
+namespace FFL.FirstOrder.Arithmetic
 
 variable {V : Type*} [ORingStructure V]
 
@@ -19,7 +19,7 @@ variable [V↓[ℒₒᵣ] ⊧* 𝗜𝗢𝗽𝗲𝗻]
 
 def Pow2 (a : V) : Prop := 0 < a ∧ ∀ r ≤ a, 1 < r → r ∣ a → 2 ∣ r
 
-def _root_.LO.FirstOrder.Arithmetic.pow2Def : 𝚺₀.Semisentence 1 :=
+def _root_.FFL.FirstOrder.Arithmetic.pow2Def : 𝚺₀.Semisentence 1 :=
   .mkSigma “a. 0 < a ∧ ∀ r <⁺ a, 1 < r → r ∣ a → 2 ∣ r”
 
 instance pow2_defined : 𝚺₀-Predicate (Pow2 : V → Prop) via pow2Def := .mk fun v ↦ by
@@ -111,7 +111,7 @@ section LenBit
 /-- $\mathrm{LenBit} (2^i, a) \iff \text{$i$th-bit of $a$ is $1$}$. -/
 def LenBit (i a : V) : Prop := ¬2 ∣ (a / i)
 
-def _root_.LO.FirstOrder.Arithmetic.lenbitDef : 𝚺₀.Semisentence 2 :=
+def _root_.FFL.FirstOrder.Arithmetic.lenbitDef : 𝚺₀.Semisentence 2 :=
   .mkSigma “i a. ∃ z <⁺ a, !divDef.val z a i ∧ ¬2 ∣ z”
 
 instance lenbit_defined : 𝚺₀-Relation (LenBit : V → V → Prop) via lenbitDef := .mk fun v ↦ by
@@ -415,4 +415,4 @@ lemma lenbit_sub_pow2_iff_of_lenbit {a i j : V} (pi : Pow2 i) (pj : Pow2 j) (h :
 
 end ISigma0
 
-end LO.FirstOrder.Arithmetic
+end FFL.FirstOrder.Arithmetic
