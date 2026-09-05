@@ -55,44 +55,28 @@ open Encodable
 variable {α : Type*} [Primcodable α] {F : α → Sentence L}
 
 omit [L.DecidableEq] in
-lemma computablePred_proof : ComputablePred λ p : ℕ × ℕ ↦ Proof T p.1 p.2 := by
-  apply ComputablePred.computable_iff_re_compl_re'.mpr;
-  obtain ⟨φ, hφ⟩ := HierarchySymbol.Definable.of_delta (Γ := 𝚺) (Proof.definable (V := ℕ) (T := T));
-  obtain ⟨ψ, hψ⟩ :=
-    (HierarchySymbol.Definable.of_delta (Γ := 𝚷) (Proof.definable (V := ℕ) (T := T))).notPi;
-  have hcomp : Computable λ p : ℕ × ℕ ↦ p.1 ::ᵥ p.2 ::ᵥ List.Vector.nil :=
-    Primrec.to_comp <|
-    Primrec.vector_cons.comp .fst (Primrec.vector_cons.comp .snd (.const List.Vector.nil));
-  exact ⟨((sigma1_re id φ.sigma_prop).comp hcomp).of_eq
-      λ p ↦ by simpa [List.Vector.cons_get] using hφ.iff (v := ![p.1, p.2]),
-    ((sigma1_re id ψ.sigma_prop).comp hcomp).of_eq
-      λ p ↦ by simpa [List.Vector.cons_get] using hψ.iff (v := ![p.1, p.2])⟩;
+lemma computablePred_proof : ComputablePred λ p : ℕ × ℕ ↦ Proof T p.1 p.2 :=
+  have h : ComputablePred λ n : ℕ ↦ Proof T (π₁ n) (π₂ n) :=
+    computablePred_iff_delta1.mpr (by definability)
+  ComputablePred.computable_of_manyOneReducible
+    ⟨λ p ↦ Nat.pair p.1 p.2, Primrec₂.natPair.to_comp, λ p ↦ by simp [← nat_pair_eq]⟩ h
+
+omit [L.DecidableEq] in
+private lemma definable_bddExists_proof :
+    𝚫₁-Predicate λ n : ℕ ↦ ∃ d ≤ π₁ n, Proof T d (π₂ n) :=
+  (HierarchySymbol.Definable.bexs_ble (ℌ := 𝚫₁) (f := λ v : Fin 1 → ℕ ↦ π₁ (v 0))
+    (P := λ v x ↦ Proof T x (π₂ (v 0))) (by simp) (by definability)).of_iff <| λ v ↦
+      exists_congr λ d ↦ and_congr_left' (by simp only [Arithmetic.le_def]; omega)
 
 omit [L.DecidableEq] in
 lemma computablePred_bddExists_proof [L.Primcodable] (hF : Computable F) {bd : α → ℕ}
     (hbd : Computable bd) :
-    ComputablePred λ a ↦ ∃ d ≤ bd a, Proof T d ⌜F a⌝ := by
-  set cd := λ a ↦ encode (F a);
-  have hcd : Computable cd := Computable.encode.comp hF;
-  obtain ⟨χ, hχ, hχe⟩ := ComputablePred.computable_iff.mp (computablePred_proof (T := T));
-  have hstep : Computable (λ q : α × (ℕ × Bool) ↦ Bool.or q.2.2 (χ (q.2.1, cd q.1))) :=
-    Computable₂.comp Primrec.or.to_comp (Computable.snd.comp Computable.snd)
-      (hχ.comp (Computable.pair (Computable.fst.comp Computable.snd) (hcd.comp Computable.fst)));
-  have hS : Computable λ a ↦
-      Nat.rec (motive := λ _ ↦ Bool) false (λ d ih ↦ ih || χ (d, cd a)) (bd a + 1) :=
-    Computable.nat_rec (Computable.succ.comp hbd) (Computable.const false) hstep.to₂;
-  refine ComputablePred.computable_iff.mpr ⟨_, hS, ?_⟩;
-  . funext a;
-    apply propext;
-    have key : ∀ N e,
-        (Nat.rec (motive := λ _ ↦ Bool) false (λ d ih ↦ ih || χ (d, e)) (N + 1) = true)
-          ↔ ∃ d ≤ N, χ (d, e) = true := by
-      intro N e;
-      induction N with
-      | zero => simp;
-      | succ n ih => grind;
-    rw [key (bd a) (cd a), Sentence.quote_eq_encode_nat];
-    exact exists_congr λ d ↦ and_congr_right λ _ ↦ (congrFun hχe (d, cd a)).to_iff;
+    ComputablePred λ a ↦ ∃ d ≤ bd a, Proof T d ⌜F a⌝ :=
+  ComputablePred.computable_of_manyOneReducible
+    ⟨λ a ↦ Nat.pair (bd a) (encode (F a)),
+      Computable₂.comp Primrec₂.natPair.to_comp hbd (Computable.encode.comp hF),
+      λ a ↦ by simp [← nat_pair_eq, Sentence.quote_eq_encode_nat]⟩
+    (computablePred_iff_delta1.mpr (definable_bddExists_proof (T := T)))
 
 lemma computablePred_provable_of_minProof_le [L.Primcodable] (hF : Computable F) {bd : α → ℕ}
     (hbd : Computable bd) (hb : ∀ a, T ⊢ F a → T.minProof (F a) ≤ bd a) :
@@ -127,10 +111,8 @@ private lemma computable_quote_speedupProof [L.Primcodable] :
       (primrec_axm (primrec_insert (.const ⌜σ⌝) (primrec_insert hp hq)) (.const ⌜σ⌝))).of_eq
       λ π ↦ (quote_speedupProof_eq π).symm;
 
-private lemma exists_computable_bound_minProof_or [L.Primcodable] :
-    ∃ c : Sentence L → ℕ, Computable c ∧ ∀ π, (insert σ T).minProof (σ ⋎ π) ≤ c π :=
-  ⟨λ π ↦ ⌜speedupProof T σ π⌝, computable_quote_speedupProof,
-    λ π ↦ minProof_le (speedupProof T σ π)⟩
+private lemma minProof_or_le_speedupProof (π : Sentence L) :
+    (insert σ T).minProof (σ ⋎ π) ≤ ⌜speedupProof T σ π⌝ := minProof_le (speedupProof T σ π)
 
 /-- The Ehrenfeucht–Mycielski speedup theorem.
 
@@ -139,12 +121,11 @@ theorem ehrenfeucht_mycielski_speedup [L.Primcodable]
     (hU : ¬ComputablePred (insert (∼σ) T).theory) (f : ℕ → ℕ) (hf : Computable f) :
     ∃ π : Sentence L, T ⊢ π ∧ f ((insert σ T).minProof π) < T.minProof π := by
   contrapose! hU;
-  obtain ⟨c, hc, hcb⟩ := exists_computable_bound_minProof_or (T := T) (σ := σ);
   refine ComputablePred.of_eq ?_ (λ π ↦ provable_insert_neg_iff_or.symm);
   exact computablePred_provable_of_minProof_le
     (Semiformula.primrec₂_or.comp (Primrec.const σ) Primrec.id).to_comp
-    ((Nat.computable_boundedMax hf).comp hc)
-    λ π hπ ↦ (hU (σ ⋎ π) hπ).trans (Nat.le_boundedMax (hcb π));
+    ((Nat.computable_boundedMax hf).comp computable_quote_speedupProof)
+    λ π hπ ↦ (hU (σ ⋎ π) hπ).trans (Nat.le_boundedMax (minProof_or_le_speedupProof π));
 
 section Arithmetic
 
