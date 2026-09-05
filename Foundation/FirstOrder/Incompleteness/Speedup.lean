@@ -91,25 +91,18 @@ private def speedupProof (T : Theory L) (σ π : Sentence L) :
   Derivation2.or (φ := (σ : Proposition L)) (ψ := (π : Proposition L)) (by simp)
     (Derivation2.axm σ (by simp) (by simp))
 
-private lemma quote_speedupProof_eq (π : Sentence L) :
-    (⌜speedupProof T σ π⌝ : ℕ)
-      = orIntro (insert ⌜σ ⋎ π⌝ ∅) ⌜σ⌝ ⌜π⌝
-          (axm (insert ⌜σ⌝ (insert ⌜π⌝ (insert ⌜σ ⋎ π⌝ ∅))) ⌜σ⌝) := by
-  rw [speedupProof, Derivation2.quote_or, Derivation2.quote_axm];
-  simp [Sentence.quote_def];
-
 private lemma computable_quote_speedupProof [L.Primcodable] :
-    Computable λ π ↦ (⌜speedupProof T σ π⌝ : ℕ) := by
-  have hp : Primrec λ π : Sentence L ↦ (⌜π⌝ : ℕ) :=
+    Computable λ π ↦ (⌜speedupProof T σ π⌝ : ℕ) :=
+  have hπ : Primrec λ π : Sentence L ↦ (⌜(π : Proposition L)⌝ : ℕ) :=
     Primrec.encode.of_eq λ π ↦ (Sentence.quote_eq_encode_nat π).symm;
-  have hq : Primrec λ π : Sentence L ↦ (insert (⌜σ ⋎ π⌝ : ℕ) ∅ : ℕ) :=
-    primrec_insert
-      ((Primrec.encode.comp (Semiformula.primrec₂_or.comp (Primrec.const σ) Primrec.id)).of_eq
-        λ π ↦ (Sentence.quote_eq_encode_nat _).symm) (.const ∅);
-  exact Primrec.to_comp <|
-    (primrec_orIntro hq (.const ⌜σ⌝) hp
-      (primrec_axm (primrec_insert (.const ⌜σ⌝) (primrec_insert hp hq)) (.const ⌜σ⌝))).of_eq
-      λ π ↦ (quote_speedupProof_eq π).symm;
+  have hσπ : Primrec λ π : Sentence L ↦ (⌜((σ ⋎ π : Sentence L) : Proposition L)⌝ : ℕ) :=
+    (Primrec.encode.comp (Semiformula.primrec₂_or.comp (Primrec.const σ) Primrec.id)).of_eq
+      λ π ↦ (Sentence.quote_eq_encode_nat (σ ⋎ π)).symm;
+  Primrec.to_comp <|
+    primrec_quote_or (primrec_quote_singleton hσπ) (.const _) hπ
+      (primrec_quote_axm
+        (primrec_quote_insert (.const _) (primrec_quote_insert hπ (primrec_quote_singleton hσπ)))
+        (.const _))
 
 private lemma minProof_or_le_speedupProof (π : Sentence L) :
     (insert σ T).minProof (σ ⋎ π) ≤ ⌜speedupProof T σ π⌝ := minProof_le (speedupProof T σ π)
