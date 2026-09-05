@@ -5,7 +5,7 @@ public import Foundation.FirstOrder.SetTheory.Recursion.Blueprint
 @[expose] public section
 /-!
 
-# Fixpoint Construction
+# Fixpoint Construction for the recursion theorem in $\mathsf{ZF}$
 
 -/
 
@@ -23,24 +23,24 @@ namespace Fixpoint
 set_option linter.dupNamespace false
 
 structure Blueprint (k : ℕ) where
-  core : Semisentence (k + 2)
+  core : SetTheorySemisentence (k + 2)
 
 namespace Blueprint
 
 variable {k} (φ : Blueprint k)
 
-instance : Coe (Blueprint k) (Semisentence (k + 2)) := ⟨Blueprint.core⟩
+instance : Coe (Blueprint k) (SetTheorySemisentence (k + 2)) := ⟨Blueprint.core⟩
 
-def succDef : Semisentence (k + 3) :=
-  “u ih s. ∀ x < u + (s + 1), (x ∈ u → x ≤ s ∧ !φ.core x ih ⋯) ∧ (x ≤ s ∧ !φ.core x ih ⋯ → x ∈ u)”
+def succDef : SetTheorySemisentence (k + 3) :=
+  “α ih s. ∀ x < α + (s + 1), (x ∈ α → x ≤ s ∧ !φ.core x ih ⋯) ∧ (x ≤ s ∧ !φ.core x ih ⋯ → x ∈ α)”
 
-def prBlueprint : PR.Blueprint k where
+def recBlueprint : Recursion.Blueprint k where
   zero := “x. x = 0”
   succ := φ.succDef
 
-def limSeqDef : Semisentence (k + 2) := (φ.prBlueprint).resultDef
+def limSeqDef : SetTheorySemisentence (k + 2) := (φ.recBlueprint).resultDef
 
-def fixpointDef : Semisentence (k + 1) :=
+def fixpointDef : SetTheorySemisentence (k + 1) :=
   “x. ∃ s L, !φ.limSeqDef L s ⋯  ∧ x ∈ L”
 
 end Blueprint
@@ -104,11 +104,11 @@ lemma succ_defined : DefinedFunction (fun v : Fin (k + 2) → V ↦ c.succ (v ·
 lemma eval_succDef (v : Fin (k + 3) → V) :
     φ.succDef.val.Evalb v ↔ v 0 = c.succ (v ·.succ.succ.succ) (v 2) (v 1) := c.succ_defined.iff
 
-noncomputable def prConstruction : PR.Construction V φ.prBlueprint where
+noncomputable def prConstruction : Recursion.Construction V φ.recBlueprint where
   zero := fun _ ↦ ∅
   succ := c.succ
-  zero_defined := .mk fun v ↦ by simp [Blueprint.prBlueprint, emptyset_def]
-  succ_defined := .mk fun v ↦ by simp [Blueprint.prBlueprint, c.eval_succDef]
+  zero_defined := .mk fun v ↦ by simp [Blueprint.recBlueprint, emptyset_def]
+  succ_defined := .mk fun v ↦ by simp [Blueprint.recBlueprint, c.eval_succDef]
 
 variable (v)
 
