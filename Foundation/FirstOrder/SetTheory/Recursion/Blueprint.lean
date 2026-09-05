@@ -17,7 +17,6 @@ variable {V : Type*} [SetStructure V] [Nonempty V] [V↓[ℒₛₑₜ] ⊧* 𝗭
 structure Blueprint (k : ℕ) where
   graph : SetTheorySemisentence (k + 2)
 
--- TODO: Look at how `ZF.lean` uses `ℒₛₑₜ-relation` vs. graph sentences, and imitate that here.
 def Blueprint.isAttempt_dfn (p : Blueprint k) : SetTheorySemisentence (k + 1) :=
   f“f.
     :Seq f ∧
