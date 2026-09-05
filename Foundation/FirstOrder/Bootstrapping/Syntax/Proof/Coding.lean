@@ -286,10 +286,14 @@ lemma quote_proof_def {φ : Sentence L} (b : T ⊢! φ) : (⌜b⌝ : V) = ⌜b.t
     change V ⊧/![p] (⊥ : 𝚫₁.Semisentence 1).val at hp
     simp at hp)⟩
 
-@[simp] lemma proof_of_quote_proof {φ : Sentence L} (b : T ⊢! φ) : Proof T (⌜b⌝ : V) ⌜φ⌝ := by
-  let x := Derivation2.typedQuote V b.toProof2
+@[simp] lemma proof_of_quote_proof2 {φ : Sentence L} (d : T ⊢!₂! (φ : Proposition L)) :
+    Proof T (⌜d⌝ : V) ⌜φ⌝ := by
+  let x := Derivation2.typedQuote V d
   suffices Proof T x.val ⌜φ⌝ from this
   simpa using! x.derivationOf
+
+@[simp] lemma proof_of_quote_proof {φ : Sentence L} (b : T ⊢! φ) : Proof T (⌜b⌝ : V) ⌜φ⌝ :=
+  proof_of_quote_proof2 b.toProof2
 
 lemma coe_quote_proof_eq (d : T ⊢! φ) : (↑(⌜d⌝ : ℕ) : V) = ⌜d⌝ := by
   simp [quote_proof_def, Derivation2.coe_quote_eq]
