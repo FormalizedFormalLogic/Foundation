@@ -108,11 +108,6 @@ end Arithmetic
 
 namespace Arithmetic
 
-private lemma exp_nat {n : ℕ} : Exp.exp n = 2 ^ n := by
-  induction n with
-  | zero => simp
-  | succ n ih => grind [exp_succ]
-
 private lemma iterExp_le_succ (x y : ℕ) : iterExp x y ≤ iterExp x (y + 1) := by
   simp only [iterExp_succ]; exact (exponential_exp (iterExp x y)).lt.le
 
@@ -120,7 +115,7 @@ private lemma iterExp_mono_right {x : ℕ} : Monotone (iterExp x) :=
   monotone_nat_of_le_succ (iterExp_le_succ x)
 
 theorem two_pow_le_superexp {e : ℕ} (he : 1 ≤ e) : 2 ^ e ≤ Superexp.superexp e := by
-  have h1 : iterExp e 1 = 2 ^ e := (iterExp_succ e 0).trans (by rw [iterExp_zero]; exact exp_nat)
+  have h1 : iterExp e 1 = 2 ^ e := (iterExp_succ e 0).trans (by rw [iterExp_zero]; exact exp_nat_eq_two_pow e)
   calc 2 ^ e = iterExp e 1 := h1.symm
     _ ≤ iterExp e e := iterExp_mono_right he
     _ = Superexp.superexp e := (superexp_eq e).symm
