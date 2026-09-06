@@ -98,16 +98,14 @@ lemma reCh_mem_iff (T : Theory L) [T.RE] (φ : Proposition L) :
 variable (T : Theory L) [T.RE]
 
 noncomputable def reWitness : 𝚺₀.Semisentence 2 :=
-  let h := ISigma1.exists_matrix_provable T.reCh.sigma_prop;
-  .mkSigma h.choose h.choose_spec.1
+  (ISigma1.exists_matrix_provable T.reCh.sigma_prop).choose
 
 omit [L.LORDefinable] in
 lemma reWitness_spec (V : Type) [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] (e : Fin 1 → V) :
-  V ⊧/e T.reCh.val ↔ ∃ w, V ⊧/(w :> e) T.reWitness.val := by
-  simpa [reWitness] using
-    (models_iff_of_provable_iff
-      (ISigma1.exists_matrix_provable T.reCh.sigma_prop).choose_spec.2 V e).trans
-      Semiformula.eval_ex
+    V ⊧/e T.reCh.val ↔ ∃ w, V ⊧/(w :> e) T.reWitness.val :=
+  (models_iff_of_provable_iff
+    (ISigma1.exists_matrix_provable T.reCh.sigma_prop).choose_spec V e).trans
+    Semiformula.eval_ex
 
 def craig : Theory L := { φ | ∃ (σ : Sentence L) (s : ℕ), ℕ ⊧/![(s : ℕ), ⌜σ⌝] T.reWitness.val ∧ φ = σ.padding s}
 
