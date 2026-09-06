@@ -95,11 +95,11 @@ lemma primrec_quote_singleton (hφ : Primrec λ x ↦ (⌜φ x⌝ : ℕ)) :
   (primrec_insert hφ (.const ∅)).of_eq λ x ↦ by simp
 
 lemma primrec_quote_insert (hφ : Primrec λ x ↦ (⌜φ x⌝ : ℕ)) (hΓ : Primrec λ x ↦ (⌜Γ x⌝ : ℕ)) :
-    Primrec λ x ↦ (⌜φ x ⫽ Γ x⌝ : ℕ) :=
+    Primrec λ x ↦ (⌜insert (φ x) (Γ x)⌝ : ℕ) :=
   (primrec_insert hφ hΓ).of_eq λ x ↦ by simp
 
 lemma primrec_quote_or {h : ∀ x, φ x ⋎ ψ x ∈ Γ x}
-    {d : ∀ x, T ⟹₂ φ x ⫽ ψ x ⫽ Γ x}
+    {d : ∀ x, T ⟹₂ insert (φ x) (insert (ψ x) (Γ x))}
     (hΓ : Primrec λ x ↦ (⌜Γ x⌝ : ℕ)) (hφ : Primrec λ x ↦ (⌜φ x⌝ : ℕ))
     (hψ : Primrec λ x ↦ (⌜ψ x⌝ : ℕ)) (hd : Primrec λ x ↦ (⌜d x⌝ : ℕ)) :
     Primrec λ x ↦ (⌜Derivation2.or (h x) (d x)⌝ : ℕ) :=

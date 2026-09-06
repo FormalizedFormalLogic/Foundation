@@ -22,7 +22,7 @@ section Provability
 
 variable {L : Language} [L.DecidableEq] {T : Theory L} {σ π : Sentence L}
 
-lemma provable_insert_neg_iff_or : ∼σ ⫽ T ⊢ π ↔ T ⊢ σ ⋎ π :=
+lemma provable_insert_neg_iff_or : insert (∼σ) T ⊢ π ↔ T ⊢ σ ⋎ π :=
   Entailment.deduction_iff.trans ⟨λ h ↦ by cl_prover [h], λ h ↦ by cl_prover [h]⟩
 
 end Provability
@@ -72,7 +72,8 @@ private lemma definable_bddExists_proof : 𝚫₁-Predicate λ n : ℕ ↦ ∃ d
       exists_congr λ d ↦ and_congr_left' (by simp only [Arithmetic.le_def]; omega)
 
 omit [L.DecidableEq] in
-lemma computablePred_bddExists_proof [L.Primcodable] (hF : Computable F) {bd : α → ℕ} (hbd : Computable bd) :
+lemma computablePred_bddExists_proof [L.Primcodable] (hF : Computable F) {bd : α → ℕ}
+    (hbd : Computable bd) :
   ComputablePred λ a ↦ ∃ d ≤ bd a, Proof T d ⌜F a⌝ := by
   apply ComputablePred.computable_of_manyOneReducible (q := λ n : ℕ ↦ ∃ d ≤ π₁ n, Proof T d (π₂ n));
   . use λ a => Nat.pair (bd a) (encode (F a));
@@ -90,7 +91,8 @@ lemma computablePred_provable_of_minProof_le [L.Primcodable] (hF : Computable F)
   have hp : ∀ d, Proof T d ⌜F a⌝ → T ⊢ F a := λ d hd ↦ provable_iff_provable.mp ⟨d, hd⟩;
   grind;
 
-private def speedupProof (T : Theory L) (σ π : Sentence L) : σ ⫽ T ⊢!₂! ((σ ⋎ π : Sentence L)) :=
+private def speedupProof (T : Theory L) (σ π : Sentence L) :
+    insert σ T ⊢!₂! ((σ ⋎ π : Sentence L)) :=
   Derivation2.or (φ := σ) (ψ := π) (by simp) $
     Derivation2.axm σ (by simp) (by simp)
 
@@ -108,14 +110,14 @@ private lemma computable_quote_speedupProof [L.Primcodable] :
         (.const _))
 
 private lemma minProof_or_le_speedupProof (π : Sentence L) :
-  (σ ⫽ T).minProof (σ ⋎ π) ≤ ⌜speedupProof T σ π⌝ := minProof_le (speedupProof T σ π)
+  (insert σ T).minProof (σ ⋎ π) ≤ ⌜speedupProof T σ π⌝ := minProof_le (speedupProof T σ π)
 
 /-- The Ehrenfeucht–Mycielski speedup theorem.
 
 - [EM71] -/
 theorem ehrenfeucht_mycielski_speedup [L.Primcodable]
-    (hU : ¬ComputablePred (∼σ ⫽ T).theory) (f : ℕ → ℕ) (hf : Computable f) :
-    ∃ π : Sentence L, T ⊢ π ∧ f ((σ ⫽ T).minProof π) < T.minProof π := by
+    (hU : ¬ComputablePred (insert (∼σ) T).theory) (f : ℕ → ℕ) (hf : Computable f) :
+    ∃ π : Sentence L, T ⊢ π ∧ f ((insert σ T).minProof π) < T.minProof π := by
   contrapose! hU;
   apply ComputablePred.of_eq ?_ (λ π ↦ provable_insert_neg_iff_or.symm);
   exact computablePred_provable_of_minProof_le
@@ -129,13 +131,14 @@ variable {T : ArithmeticTheory} [T.Δ₁] [𝗜𝚺₁ ⪯ T] {σ : ArithmeticSe
 
 open LO.Entailment in
 theorem ehrenfeucht_mycielski_speedup_arithmetic (hσ : T ⊬ σ) (f : ℕ → ℕ) (hf : Computable f) :
-  ∃ π : ArithmeticSentence, T ⊢ π ∧ f ((σ ⫽ T).minProof π) < T.minProof π :=
-  have : 𝗜𝚺₁ ⪯ (∼σ ⫽ T) := WeakerThan.trans ‹𝗜𝚺₁ ⪯ T› (Axiomatized.le_of_subset (Set.subset_insert _ T));
-  have : Consistent (∼σ ⫽ T) := unprovable_iff_consistent_adjoin.mp hσ;
+  ∃ π : ArithmeticSentence, T ⊢ π ∧ f ((insert σ T).minProof π) < T.minProof π :=
+  have : 𝗜𝚺₁ ⪯ (insert (∼σ) T) :=
+    WeakerThan.trans ‹𝗜𝚺₁ ⪯ T› (Axiomatized.le_of_subset (Set.subset_insert _ T));
+  have : Consistent (insert (∼σ) T) := unprovable_iff_consistent_adjoin.mp hσ;
   ehrenfeucht_mycielski_speedup uncomputable_theory_of_consistent f hf
 
 example (hσ : T ⊬ σ) :
-  ∃ π : ArithmeticSentence, T ⊢ π ∧ (σ ⫽ T).minProof π < Nat.log 2 (T.minProof π) := by
+  ∃ π : ArithmeticSentence, T ⊢ π ∧ (insert σ T).minProof π < Nat.log 2 (T.minProof π) := by
   obtain ⟨π, hπ, hlt⟩ := ehrenfeucht_mycielski_speedup_arithmetic hσ (λ x ↦ 2 ^ (x + 1)) $
     Primrec₂.unpaired'.1 Nat.Primrec.pow |>.comp (Primrec.const 2) Primrec.succ |>.to_comp;
   use π;
