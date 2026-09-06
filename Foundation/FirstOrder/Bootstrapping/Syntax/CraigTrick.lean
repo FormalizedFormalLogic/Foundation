@@ -82,7 +82,19 @@ namespace LO.FirstOrder.Theory
 
 open LO.FirstOrder.Arithmetic
 
-variable {L : Language} [L.Encodable] [L.LORDefinable]
+variable {L : Language} [L.Encodable] [L.LORDefinable] [L.Primcodable]
+
+abbrev codes (T : Theory L) : Set ℕ := Encodable.encode '' T
+
+namespace RE
+
+omit [L.LORDefinable] in
+lemma re_codes (T : Theory L) [T.RE] : REPred T.codes :=
+  ((RE.re.comp Computable.snd).and (PrimrecPred.computablePred
+    (Primrec.eq.comp (Primrec.encode.comp Primrec.snd) Primrec.fst)).to_re).projection.of_eq
+    fun _ ↦ Iff.rfl
+
+end RE
 
 -- `[T.RE]` is spelled out instead of taken from a `variable`: the body does not use it, so Lean
 -- would drop it from the signature and let the Craig companion be built for an arbitrary theory.
@@ -91,7 +103,7 @@ noncomputable def reCh (T : Theory L) [T.RE] : 𝚺₁.Semisentence 1 :=
 
 lemma reCh_mem_iff (T : Theory L) [T.RE] (φ : Proposition L) :
   ℕ ⊧/![⌜φ⌝] T.reCh.val ↔ ∃ σ ∈ T, φ = σ := by
-  have hT : REPred fun n : ℕ ↦ n ∈ T.codes := Theory.RE.re
+  have hT : REPred fun n : ℕ ↦ n ∈ T.codes := Theory.RE.re_codes T
   simpa [Theory.reCh, Theory.codes, Matrix.fun_eq_vec_one, Semiformula.quote_eq_encode] using
     codeOfREPred_spec hT (x := ⌜φ⌝)
 
@@ -115,7 +127,7 @@ namespace LO.FirstOrder.Arithmetic.Bootstrapping
 
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 
-variable {L : Language} [L.Encodable] [L.LORDefinable]
+variable {L : Language} [L.Encodable] [L.LORDefinable] [L.Primcodable]
 
 section
 
@@ -150,6 +162,7 @@ instance Theory.IsCraigAxiom.defined {T : Theory L} [T.RE] :
   . intro v; simp [Theory.craigCh, h]
   . intro v; simp [Theory.craigCh, Theory.IsCraigAxiom, h]
 
+omit [L.Primcodable] in
 lemma quote_eq_qqAnd_iff {φ : Proposition L} {p q : ℕ} :
     (⌜φ⌝ : ℕ) = p ^⋏ q ↔ ∃ φ₁ φ₂, φ = φ₁ ⋏ φ₂ ∧ p = ⌜φ₁⌝ ∧ q = ⌜φ₂⌝ := by
   constructor
@@ -177,6 +190,7 @@ lemma quote_eq_qqAnd_iff {φ : Proposition L} {p q : ℕ} :
   . rintro ⟨φ₁, φ₂, rfl, rfl, rfl⟩;
     rfl
 
+omit [L.Primcodable] in
 lemma quote_weight (k : ℕ) : (⌜(Semiformula.weight k : Proposition L)⌝ : V) = qqVerums (k : V) := by
   induction k with
   | zero => simp [Semiformula.weight]
@@ -184,16 +198,19 @@ lemma quote_weight (k : ℕ) : (⌜(Semiformula.weight k : Proposition L)⌝ : V
     change ⌜(⊤ : Proposition L) ⋏ Semiformula.weight k⌝ = _
     simp [ih]
 
+omit [L.Primcodable] in
 lemma quote_eq_qqVerums {χ : Proposition L} {s : ℕ} : (⌜χ⌝ : ℕ) = qqVerums (s : ℕ) → χ = Semiformula.weight s := by
   intro h;
   exact (Semiformula.quote_inj_iff (V := ℕ)).mp <| by simpa [quote_weight] using h
 
+omit [L.Primcodable] in
 lemma quote_padding (φ : Proposition L) (k : ℕ) : (⌜φ.padding k⌝ : V) = ⌜φ⌝ ^⋏ qqVerums (k : V) := by
   change ⌜φ ⋏ Semiformula.weight k⌝ = _
   simp [quote_weight]
 
 namespace Sentence
 
+omit [L.Primcodable] in
 lemma quote_padding (σ : Sentence L) (k : ℕ) : (⌜σ.padding k⌝ : V) = ⌜σ⌝ ^⋏ qqVerums (k : V) := by
   simpa [Sentence.quote_def] using
     LO.FirstOrder.Arithmetic.Bootstrapping.quote_padding (V := V) (Rewriting.emb σ) k
@@ -228,7 +245,7 @@ namespace LO.FirstOrder.Theory
 
 open Arithmetic.Bootstrapping
 
-variable {L : Language} [L.Encodable] [L.LORDefinable]
+variable {L : Language} [L.Encodable] [L.LORDefinable] [L.Primcodable]
 
 open LO.Entailment
 
@@ -263,7 +280,7 @@ lemma mem_craig_codes_iff (n : ℕ) :
 -- `p = (m, (n, s))`: `m` is the sentence code, `n` is the candidate craig axiom code,
 -- `s` is the padding index.
 omit [L.LORDefinable] in
-lemma primrecPred_craig_core [L.Primcodable] : PrimrecPred fun p : ℕ × (ℕ × ℕ) ↦
+lemma primrecPred_craig_core : PrimrecPred fun p : ℕ × (ℕ × ℕ) ↦
     (decode₂ (Sentence L) p.1).isSome ∧
       p.2.1 = Nat.pair 4 (Nat.pair p.1 (encode (Semiformula.weight p.2.2 : Sentence L))) + 1 ∧
       ℕ ⊧/![p.2.2, p.1] T.reWitness.val := by
@@ -287,8 +304,7 @@ lemma primrecPred_craig_core [L.Primcodable] : PrimrecPred fun p : ℕ × (ℕ �
       simp [List.Vector.cons_get];
   exact hdecode.and (heq.and heval);
 
-instance [L.Primcodable] : T.craig.Primrec := by
-  constructor;
+lemma primrecPred_craig_codes : PrimrecPred (· ∈ T.craig.codes) := by
   refine PrimrecPred.of_eq ?_ fun n ↦ (mem_craig_codes_iff n).symm;
   have hinner : PrimrecPred fun p : ℕ × ℕ ↦
       ∃ m < p.1, (decode₂ (Sentence L) m).isSome ∧
@@ -299,6 +315,9 @@ instance [L.Primcodable] : T.craig.Primrec := by
   exact ((PrimrecRel.exists_mem_list
       (hinner.comp (Primrec.pair Primrec.snd Primrec.fst)).primrecRel).comp
     Primrec.list_range Primrec.id).of_eq (by simp);
+
+instance : T.craig.Primrec :=
+  ⟨((primrecPred_craig_codes (T := T)).comp Primrec.encode).of_eq fun _ ↦ by simp [Theory.codes]⟩
 
 noncomputable instance : (T.craig).Δ₁ where
   ch := T.craigCh

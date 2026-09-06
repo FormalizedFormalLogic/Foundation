@@ -1055,10 +1055,9 @@ lemma inductionScheme_re_sigma1 : REPred (· ∈ InductionScheme ℒₒᵣ (Arit
   simpa [Semiformula.quote_eq_encode] using
     (inductionR_quote_iff isSigma1_iff_hierarchy σ).trans (mem_inductionScheme_iff σ).symm
 
-instance : (InductionScheme ℒₒᵣ Set.univ).RE := Theory.RE.of_re_mem inductionScheme_re_univ
+instance : (InductionScheme ℒₒᵣ Set.univ).RE := ⟨inductionScheme_re_univ⟩
 
-instance : (InductionScheme ℒₒᵣ (Arithmetic.Hierarchy 𝚺 1)).RE :=
-  Theory.RE.of_re_mem inductionScheme_re_sigma1
+instance : (InductionScheme ℒₒᵣ (Arithmetic.Hierarchy 𝚺 1)).RE := ⟨inductionScheme_re_sigma1⟩
 
 instance : 𝗣𝗔.RE := Theory.RE.add (Theory.RE.ofFinite PeanoMinus.finite) inferInstance
 
