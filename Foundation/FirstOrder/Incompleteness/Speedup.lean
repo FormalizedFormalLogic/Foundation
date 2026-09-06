@@ -100,9 +100,7 @@ private lemma computable_quote_speedupProof [L.Primcodable] :
   have hc : Computable₂ λ s p : ℕ ↦
       orIntro (insert (s ^⋎ p) ∅) s p (axm (insert s (insert p (insert (s ^⋎ p) ∅))) s) :=
     computable₂_iff_sigma1.mpr (by definability);
-  have hπ : Computable λ π : Sentence L ↦ (⌜π⌝ : ℕ) :=
-    Primrec.encode.to_comp.of_eq λ π ↦ (Sentence.quote_eq_encode_nat π).symm;
-  (hc.comp (Computable.const ⌜σ⌝) hπ).of_eq λ π ↦ by
+  (hc.comp (Computable.const ⌜σ⌝) Sentence.primrec_quote_natCast.to_comp).of_eq λ π ↦ by
     simp [speedupProof, Derivation2.quote_or, Derivation2.quote_axm, Sentence.quote_def];
 
 private lemma minProof_or_le_speedupProof (π : Sentence L) :
