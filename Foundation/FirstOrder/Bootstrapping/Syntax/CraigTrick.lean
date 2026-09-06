@@ -31,16 +31,23 @@ lemma encode_weight_succ (k : ℕ) :
         (encode (weight k : Semiformula L ξ n))) + 1 := by
   rw [weight_succ]; rfl;
 
+private lemma left_lt_pair4 (a b : ℕ) : a < Nat.pair 4 (Nat.pair a b) + 1 := by
+  have := Nat.left_le_pair a b;
+  have := Nat.right_le_pair 4 (Nat.pair a b);
+  omega;
+
+private lemma right_lt_pair4 (a b : ℕ) : b < Nat.pair 4 (Nat.pair a b) + 1 := by
+  have := Nat.right_le_pair a b;
+  have := Nat.right_le_pair 4 (Nat.pair a b);
+  omega;
+
 lemma le_encode_weight (k : ℕ) :
     k ≤ encode (weight k : Semiformula L ξ n) := by
   induction k with
   | zero => simp
   | succ k ih =>
-    have := Nat.right_le_pair (encode (⊤ : Semiformula L ξ n))
-      (encode (weight k : Semiformula L ξ n));
-    have := Nat.right_le_pair 4
-      (Nat.pair (encode (⊤ : Semiformula L ξ n)) (encode (weight k : Semiformula L ξ n)));
-    simp only [encode_weight_succ]; omega;
+    simp only [encode_weight_succ];
+    exact Nat.succ_le_of_lt (lt_of_le_of_lt ih (right_lt_pair4 _ _));
 
 lemma encode_padding (φ : Semiformula L ξ n) (k : ℕ) :
     encode (φ.padding k) =
@@ -48,16 +55,12 @@ lemma encode_padding (φ : Semiformula L ξ n) (k : ℕ) :
 
 lemma encode_lt_encode_padding (φ : Semiformula L ξ n) (k : ℕ) :
     encode φ < encode (φ.padding k) := by
-  have := Nat.left_le_pair (encode φ) (encode (weight k : Semiformula L ξ n));
-  have := Nat.right_le_pair 4 (Nat.pair (encode φ) (encode (weight k : Semiformula L ξ n)));
-  simp only [encode_padding]; omega;
+  simp only [encode_padding]; exact left_lt_pair4 _ _;
 
 lemma lt_encode_padding (φ : Semiformula L ξ n) (k : ℕ) :
     k < encode (φ.padding k) := by
-  have := le_encode_weight (L := L) (ξ := ξ) (n := n) k;
-  have := Nat.right_le_pair (encode φ) (encode (weight k : Semiformula L ξ n));
-  have := Nat.right_le_pair 4 (Nat.pair (encode φ) (encode (weight k : Semiformula L ξ n)));
-  simp only [encode_padding]; omega;
+  simp only [encode_padding];
+  exact lt_of_le_of_lt (le_encode_weight (L := L) (ξ := ξ) (n := n) k) (right_lt_pair4 _ _);
 
 lemma primrec_encode_weight :
     Primrec fun k : ℕ ↦ encode (weight k : Semiformula L ξ n) := by
@@ -79,20 +82,18 @@ namespace LO.FirstOrder.Theory
 
 open LO.FirstOrder.Arithmetic
 
+variable {L : Language} [L.Encodable] [L.LORDefinable]
+
 -- `[T.RE]` is spelled out instead of taken from a `variable`: the body does not use it, so Lean
 -- would drop it from the signature and let the Craig companion be built for an arbitrary theory.
-noncomputable def reCh {L : Language} [L.Encodable] [L.LORDefinable] (T : Theory L) [T.RE] : 𝚺₁.Semisentence 1 :=
+noncomputable def reCh (T : Theory L) [T.RE] : 𝚺₁.Semisentence 1 :=
   .mkSigma (codeOfREPred fun n ↦ n ∈ T.codes) (by simp [codeOfREPred, codeOfPartrec'])
 
-lemma reCh_mem_iff {L : Language} [L.Encodable] [L.LORDefinable] (T : Theory L) [T.RE] (φ : Proposition L) :
+lemma reCh_mem_iff (T : Theory L) [T.RE] (φ : Proposition L) :
   ℕ ⊧/![⌜φ⌝] T.reCh.val ↔ ∃ σ ∈ T, φ = σ := by
   have hT : REPred fun n : ℕ ↦ n ∈ T.codes := Theory.RE.re
   simpa [Theory.reCh, Theory.codes, Matrix.fun_eq_vec_one, Semiformula.quote_eq_encode] using
     codeOfREPred_spec hT (x := ⌜φ⌝)
-
-variable {L : Language} [L.Encodable] [L.LORDefinable]
-
-section
 
 variable (T : Theory L) [T.RE]
 
@@ -100,6 +101,7 @@ noncomputable def reWitness : 𝚺₀.Semisentence 2 :=
   let h := ISigma1.exists_matrix_provable T.reCh.sigma_prop;
   .mkSigma h.choose h.choose_spec.1
 
+omit [L.LORDefinable] in
 lemma reWitness_spec (V : Type) [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] (e : Fin 1 → V) :
   V ⊧/e T.reCh.val ↔ ∃ w, V ⊧/(w :> e) T.reWitness.val := by
   simpa [reWitness] using
@@ -108,8 +110,6 @@ lemma reWitness_spec (V : Type) [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜�
       Semiformula.eval_ex
 
 def craig : Theory L := { φ | ∃ (σ : Sentence L) (s : ℕ), ℕ ⊧/![(s : ℕ), ⌜σ⌝] T.reWitness.val ∧ φ = σ.padding s}
-
-end
 
 end LO.FirstOrder.Theory
 
@@ -146,13 +146,8 @@ instance Theory.IsCraigAxiom.defined {T : Theory L} [T.RE] :
     . rintro ⟨s, _, p, _, _, h, hT⟩;
       use s, p;
     . rintro ⟨s, p, hx, hT⟩;
-      refine ⟨s, ?_, p, ?_⟩;
-      . exact hx ▸ lt_of_le_of_lt (le_qqVerums s) (lt_K!_right _ _)
-      . and_intros
-        . exact hx ▸ lt_K!_left _ _
-        . exact hx ▸ lt_K!_right _ _
-        . exact hx
-        . exact hT
+      exact ⟨s, hx ▸ lt_of_le_of_lt (le_qqVerums s) (lt_K!_right _ _), p,
+        hx ▸ lt_K!_left _ _, hx ▸ lt_K!_right _ _, hx, hT⟩
   constructor
   . intro v; simp [Theory.craigCh, h]
   . intro v; simp [Theory.craigCh, Theory.IsCraigAxiom, h]
@@ -239,8 +234,6 @@ variable {L : Language} [L.Encodable] [L.LORDefinable]
 
 open LO.Entailment
 
-section
-
 open Encodable
 
 variable {T : Theory L} [T.RE]
@@ -269,6 +262,9 @@ lemma mem_craig_codes_iff (n : ℕ) :
       . rfl;
     . exact (Semiformula.encode_padding σ s).trans <| by simpa [hσm] using hn.symm;
 
+-- `p = (m, (n, s))`: `m` is the sentence code, `n` is the candidate craig axiom code,
+-- `s` is the padding index.
+omit [L.LORDefinable] in
 lemma primrecPred_craig_core [L.Primcodable] : PrimrecPred fun p : ℕ × (ℕ × ℕ) ↦
     (decode₂ (Sentence L) p.1).isSome ∧
       p.2.1 = Nat.pair 4 (Nat.pair p.1 (encode (Semiformula.weight p.2.2 : Sentence L))) + 1 ∧
@@ -281,7 +277,9 @@ lemma primrecPred_craig_core [L.Primcodable] : PrimrecPred fun p : ℕ × (ℕ �
   have hdecode : PrimrecPred fun p : ℕ × (ℕ × ℕ) ↦ (decode₂ (Sentence L) p.1).isSome := by
     simpa using Primrec.eq.comp
       (Primrec.option_isSome.comp (Primrec.decode₂.comp hm)) (Primrec.const true);
-  have heq := Primrec.eq.comp hn (Primrec.nat_add.comp
+  have heq : PrimrecPred fun p : ℕ × (ℕ × ℕ) ↦
+      p.2.1 = Nat.pair 4 (Nat.pair p.1 (encode (Semiformula.weight p.2.2 : Sentence L))) + 1 :=
+    Primrec.eq.comp hn (Primrec.nat_add.comp
       (Primrec₂.natPair.comp (Primrec.const 4) (Primrec₂.natPair.comp hm hweight))
       (Primrec.const 1));
   have heval : PrimrecPred fun p : ℕ × (ℕ × ℕ) ↦ ℕ ⊧/![p.2.2, p.1] T.reWitness.val :=
@@ -332,7 +330,5 @@ instance [L.DecidableEq] : T ≊ T.craig :=
 
 instance [L.DecidableEq] [Consistent T] : Consistent T.craig :=
   Consistent.of_le inferInstance (inferInstance : T.craig ⪯ T)
-
-end
 
 end LO.FirstOrder.Theory
