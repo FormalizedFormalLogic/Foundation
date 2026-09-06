@@ -86,14 +86,13 @@ open LO.FirstOrder.Arithmetic
 
 variable {L : Language} [L.Encodable]
 
-abbrev codes (T : Theory L) : Set ℕ := Encodable.encode '' T
-
 section
 variable [L.Primcodable]
 
 namespace RE
 
-lemma re_codes (T : Theory L) [T.RE] : REPred T.codes :=
+@[simp, grind .]
+lemma re_codes (T : Theory L) [T.RE] : REPred (Encodable.encode '' T) :=
   ((RE.re.comp Computable.snd).and (PrimrecPred.computablePred
     (Primrec.eq.comp (Primrec.encode.comp Primrec.snd) Primrec.fst)).to_re).projection.of_eq
     fun _ ↦ Iff.rfl
@@ -103,7 +102,7 @@ end RE
 -- `[T.RE]` is spelled out instead of taken from a `variable`: the body does not use it, so Lean
 -- would drop it from the signature and let the Craig companion be built for an arbitrary theory.
 noncomputable def reCh (T : Theory L) [T.RE] : 𝚺₁.Semisentence 1 :=
-  .mkSigma (codeOfREPred fun n ↦ n ∈ T.codes) (by simp [codeOfREPred, codeOfPartrec'])
+  .mkSigma (codeOfREPred (Encodable.encode '' T)) $ by simp [codeOfREPred, codeOfPartrec']
 
 variable (T : Theory L) [T.RE]
 
@@ -118,11 +117,15 @@ lemma reWitness_spec (V : Type) [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜�
 
 variable [L.LORDefinable]
 
-lemma reCh_mem_iff (φ : Proposition L) :
-  ℕ ⊧/![⌜φ⌝] T.reCh.val ↔ ∃ σ ∈ T, φ = σ := by
-  have hT : REPred fun n : ℕ ↦ n ∈ T.codes := Theory.RE.re_codes T
-  simpa [Theory.reCh, Theory.codes, Matrix.fun_eq_vec_one, Semiformula.quote_eq_encode] using
-    codeOfREPred_spec hT (x := ⌜φ⌝)
+lemma reCh_mem_iff (φ : Proposition L) : ℕ ⊧/![⌜φ⌝] T.reCh.val ↔ ∃ σ ∈ T, φ = σ := by
+  show (codeOfREPred (Encodable.encode '' T)).Evalb ![⌜φ⌝] ↔ ∃ σ ∈ T, φ = σ;
+  rw [show ((codeOfREPred (Encodable.encode '' T)).Evalb ![⌜φ⌝] ↔ ⌜φ⌝ ∈ Encodable.encode '' T) from
+    codeOfREPred_spec (Theory.RE.re_codes T), Set.mem_image];
+  constructor;
+  . rintro ⟨σ, hσ, hσφ⟩;
+    exact ⟨σ, hσ, Semiformula.encode_inj_sentence.mp (by simpa [Semiformula.quote_eq_encode_nat] using hσφ)⟩;
+  . rintro ⟨σ, hσ, rfl⟩;
+    exact ⟨σ, hσ, by simp [Semiformula.quote_eq_encode_nat]⟩;
 
 def craig : Theory L := { φ | ∃ (σ : Sentence L) (s : ℕ), ℕ ⊧/![(s : ℕ), ⌜σ⌝] T.reWitness.val ∧ φ = σ.padding s}
 
@@ -259,7 +262,7 @@ open Encodable
 variable {L : Language} [L.Encodable] [L.LORDefinable] [L.Primcodable] {T : Theory L} [T.RE]
 
 lemma mem_craig_codes_iff (n : ℕ) :
-    n ∈ T.craig.codes ↔
+    n ∈ Encodable.encode '' T.craig ↔
       ∃ s < n, ∃ m < n, (decode₂ (Sentence L) m).isSome ∧
         n = Nat.pair 4 (Nat.pair m
           (encode (Semiformula.weight s : Sentence L))) + 1 ∧
@@ -309,7 +312,7 @@ lemma primrecPred_craig_core : PrimrecPred fun p : ℕ × (ℕ × ℕ) ↦
       simp [List.Vector.cons_get];
   exact hdecode.and (heq.and heval);
 
-lemma primrecPred_craig_codes : PrimrecPred (· ∈ T.craig.codes) := by
+lemma primrecPred_craig_codes : PrimrecPred (· ∈ Encodable.encode '' T.craig) := by
   refine PrimrecPred.of_eq ?_ fun n ↦ (mem_craig_codes_iff n).symm;
   have hinner : PrimrecPred fun p : ℕ × ℕ ↦
       ∃ m < p.1, (decode₂ (Sentence L) m).isSome ∧
@@ -322,7 +325,7 @@ lemma primrecPred_craig_codes : PrimrecPred (· ∈ T.craig.codes) := by
     Primrec.list_range Primrec.id).of_eq (by simp);
 
 instance : T.craig.Primrec :=
-  ⟨((primrecPred_craig_codes (T := T)).comp Primrec.encode).of_eq fun _ ↦ by simp [Theory.codes]⟩
+  ⟨((primrecPred_craig_codes (T := T)).comp Primrec.encode).of_eq fun _ ↦ by simp⟩
 
 section
 
