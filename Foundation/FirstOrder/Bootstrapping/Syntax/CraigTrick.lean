@@ -89,16 +89,6 @@ variable {L : Language} [L.Encodable]
 section
 variable [L.Primcodable]
 
-namespace RE
-
-@[simp, grind .]
-lemma re_codes (T : Theory L) [T.RE] : REPred (Encodable.encode '' T) :=
-  ((RE.re.comp Computable.snd).and (PrimrecPred.computablePred
-    (Primrec.eq.comp (Primrec.encode.comp Primrec.snd) Primrec.fst)).to_re).projection.of_eq
-    fun _ ↦ Iff.rfl
-
-end RE
-
 -- `[T.RE]` is spelled out instead of taken from a `variable`: the body does not use it, so Lean
 -- would drop it from the signature and let the Craig companion be built for an arbitrary theory.
 noncomputable def reCh (T : Theory L) [T.RE] : 𝚺₁.Semisentence 1 :=
@@ -119,8 +109,12 @@ variable [L.LORDefinable]
 
 lemma reCh_mem_iff (φ : Proposition L) : ℕ ⊧/![⌜φ⌝] T.reCh.val ↔ ∃ σ ∈ T, φ = σ := by
   show (codeOfREPred (Encodable.encode '' T)).Evalb ![⌜φ⌝] ↔ ∃ σ ∈ T, φ = σ;
+  have hRE : REPred (Encodable.encode '' T) :=
+    ((Theory.RE.re.comp Computable.snd).and (PrimrecPred.computablePred
+      (Primrec.eq.comp (Primrec.encode.comp Primrec.snd) Primrec.fst)).to_re).projection.of_eq
+      fun _ ↦ Iff.rfl;
   rw [show ((codeOfREPred (Encodable.encode '' T)).Evalb ![⌜φ⌝] ↔ ⌜φ⌝ ∈ Encodable.encode '' T) from
-    codeOfREPred_spec (Theory.RE.re_codes T), Set.mem_image];
+    codeOfREPred_spec hRE, Set.mem_image];
   constructor;
   . rintro ⟨σ, hσ, hσφ⟩;
     exact ⟨σ, hσ, Semiformula.encode_inj_sentence.mp (by simpa [Semiformula.quote_eq_encode_nat] using hσφ)⟩;
