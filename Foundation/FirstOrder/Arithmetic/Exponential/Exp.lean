@@ -783,6 +783,11 @@ lemma nat_cast_exp (n : ℕ) : (Exp.exp n : ℕ) = Exp.exp (n : V) := by
 
 end exponential
 
+lemma exp_nat_eq_two_pow (n : ℕ) : Exp.exp n = 2 ^ n := by
+  induction n with
+  | zero => simp
+  | succ n ih => grind [exp_succ]
+
 end ISigma1
 
 end LO.FirstOrder.Arithmetic
