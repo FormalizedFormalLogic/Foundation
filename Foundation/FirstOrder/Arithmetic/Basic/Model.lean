@@ -80,6 +80,23 @@ lemma complete (T : ArithmeticTheory) [𝗘𝗤 ℒₒᵣ ⪯ T] (φ : Arithmeti
   rcases standardModel_unique M s
   exact H M
 
+lemma provable_iff_of_models_iff {T : ArithmeticTheory} [𝗘𝗤 ℒₒᵣ ⪯ T] {n}
+    {φ ψ : ArithmeticSemisentence n}
+    (h : ∀ (V : Type) [ORingStructure V] [V↓[ℒₒᵣ] ⊧* T] (e : Fin n → V),
+      V ⊧/e φ ↔ V ⊧/e ψ) :
+    T ⊢ ∀¹* (φ 🡘 ψ) := by
+  apply Arithmetic.complete T _
+  intro V _ _
+  simpa [models_iff] using h V
+
+lemma models_iff_of_provable_iff {T : ArithmeticTheory} [𝗘𝗤 ℒₒᵣ ⪯ T] {n}
+    {φ ψ : ArithmeticSemisentence n} (h : T ⊢ ∀¹* (φ 🡘 ψ)) (V : Type*)
+    [ORingStructure V] [V↓[ℒₒᵣ] ⊧* T] (e : Fin n → V) :
+    V ⊧/e φ ↔ V ⊧/e ψ := by
+  have h' := consequence_iff.mp (Theory.Proof.sound h) V inferInstance
+  simp only [models_iff, Semiformula.eval_allClosure] at h'
+  simpa using h' e
+
 lemma weakerThan_of_models (T S : ArithmeticTheory) [𝗘𝗤 ℒₒᵣ ⪯ S]
     (H : ∀ (M : Type*)
            [ORingStructure M]
@@ -97,6 +114,10 @@ namespace ArithmeticTheory
 variable (T : ArithmeticTheory) (F : ArithmeticSentence → Prop)
 
 instance [ℕ↓[ℒₒᵣ] ⊧* T] : T.SoundOn F := ⟨fun b _ ↦ consequence_iff.mp (Theory.Proof.sound b) ℕ inferInstance⟩
+
+lemma SoundOn.of_weakerThan (F : ArithmeticSentence → Prop) (T U : ArithmeticTheory) [U ⪯ T] [T.SoundOn F] :
+    U.SoundOn F :=
+  ⟨fun h ↦ SoundOn.sound (Entailment.WeakerThan.pbl (𝓢 := U) (𝓣 := T) h)⟩
 
 lemma consistent_of_sound [SoundOn T F] (hF : F ⊥) : Entailment.Consistent T :=
   Entailment.consistent_iff_unprovable_bot.mpr fun b ↦ SoundOn.sound b hF

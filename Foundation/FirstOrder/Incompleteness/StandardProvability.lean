@@ -100,4 +100,12 @@ lemma provable_sigma_one_complete_of_E {σ π} [𝗜𝚺₁ ⪯ T]
 
 end arithmetic
 
+open FFL.Entailment in
+lemma exists_true_but_unprovable_sentence_of_incomplete {T : ArithmeticTheory} (h : Incomplete T) :
+    ∃ δ : ArithmeticSentence, ℕ↓[ℒₒᵣ] ⊧ δ ∧ T ⊬ δ := by
+  obtain ⟨δ, hδ⟩ := incomplete_def.mp h;
+  by_cases ℕ↓[ℒₒᵣ] ⊧ δ
+  . exact ⟨δ, by assumption, hδ.1⟩
+  . exact ⟨∼δ, by simpa, hδ.2⟩
+
 end FFL.FirstOrder.Arithmetic
