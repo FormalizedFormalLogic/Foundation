@@ -1,7 +1,6 @@
 module
 
 public import Foundation.FirstOrder.Incompleteness.StandardProvability
-public import Foundation.FirstOrder.Incompleteness.RosserProvability
 public import Foundation.FirstOrder.Arithmetic.R0.Representation
 public import Foundation.FirstOrder.Bootstrapping.Syntax.CraigTrick
 
@@ -45,13 +44,6 @@ theorem incomplete (T : ArithmeticTheory) [T.Δ₁] [𝗥₀ ⪯ T] [T.SoundOnHi
     exact not_consistent_iff_inconsistent.mpr
       (inconsistent_of_provable_of_unprovable (this.mpr h) h) inferInstance
 
-private lemma exists_true_but_unprovable_sentence_of_incomplete {T : ArithmeticTheory} (h : Incomplete T) :
-    ∃ δ : ArithmeticSentence, ℕ↓[ℒₒᵣ] ⊧ δ ∧ T ⊬ δ := by
-  obtain ⟨δ, hδ⟩ := incomplete_def.mp h;
-  by_cases ℕ↓[ℒₒᵣ] ⊧ δ
-  . exact ⟨δ, by assumption, hδ.1⟩
-  . exact ⟨∼δ, by simpa, hδ.2⟩
-
 theorem exists_true_but_unprovable_sentence_of_sigma1sound
     (T : ArithmeticTheory) [T.Δ₁] [𝗥₀ ⪯ T] [T.SoundOnHierarchy 𝚺 1] :
     ∃ δ : ArithmeticSentence, ℕ↓[ℒₒᵣ] ⊧ δ ∧ T ⊬ δ :=
@@ -71,11 +63,6 @@ theorem exists_true_but_unprovable_sentence_of_RE_of_sigma1sound
     (T : ArithmeticTheory) [T.RE] [𝗥₀ ⪯ T] [T.SoundOnHierarchy 𝚺 1] :
     ∃ δ : ArithmeticSentence, ℕ↓[ℒₒᵣ] ⊧ δ ∧ T ⊬ δ :=
   exists_true_but_unprovable_sentence_of_incomplete (incomplete_of_RE T)
-
-theorem exists_true_but_unprovable_sentence_of_RE_of_consistent
-    (T : ArithmeticTheory) [T.RE] [𝗜𝚺₁ ⪯ T] [Consistent T] :
-    ∃ δ : ArithmeticSentence, ℕ↓[ℒₒᵣ] ⊧ δ ∧ T ⊬ δ :=
-  exists_true_but_unprovable_sentence_of_incomplete (incomplete_GR_of_RE T)
 
 instance {T : ArithmeticTheory} [ℕ↓[ℒₒᵣ] ⊧* T] [T.Δ₁] [𝗥₀ ⪯ T] [T.SoundOnHierarchy 𝚺 1] : T ⪱ 𝗧𝗔 := by
   constructor;

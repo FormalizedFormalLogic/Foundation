@@ -152,4 +152,9 @@ instance {T : ArithmeticTheory} [T.RE] [𝗜𝚺₁ ⪯ T] : 𝗜𝚺₁ ⪯ T.c
 theorem incomplete_GR_of_RE (T : ArithmeticTheory) [T.RE] [𝗜𝚺₁ ⪯ T] [Consistent T] : Incomplete T :=
   (Equiv.incomplete_iff (inferInstance : T ≊ T.craig)).mpr (incomplete_GR T.craig)
 
+theorem exists_true_but_unprovable_sentence_of_RE_of_consistent
+    (T : ArithmeticTheory) [T.RE] [𝗜𝚺₁ ⪯ T] [Consistent T] :
+    ∃ δ : ArithmeticSentence, ℕ↓[ℒₒᵣ] ⊧ δ ∧ T ⊬ δ :=
+  exists_true_but_unprovable_sentence_of_incomplete (incomplete_GR_of_RE T)
+
 end LO.FirstOrder.Arithmetic
