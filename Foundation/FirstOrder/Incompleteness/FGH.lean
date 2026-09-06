@@ -60,9 +60,19 @@ lemma not_witnessedBefore_of_provedBefore : T.ProvedBefore θ x → ¬T.Witnesse
   rcases lt_or_ge p w with h | h <;> grind;
 
 
+-- On Lean v4.33.1 the kernel decides `(T.fghSentence' θ).val =?= (T.witnessedBefore θ).val/[...]`
+-- by unfolding the `HierarchySymbol.Semiformula.rew`/`.val` projections against the (very large)
+-- `witnessedBefore` formula and allocates without bound. Rewriting with the existing `val_rew`
+-- lemma first keeps that reduction off the kernel. Revert to a plain term proof once upstream is fixed.
+private lemma fghSentence'_val_eq :
+    (T.fghSentence' θ).val = (T.witnessedBefore θ).val/[⌜T.fghSentence θ⌝] := by
+  unfold Theory.fghSentence'
+  rw [HierarchySymbol.Semiformula.val_rew]
+
 lemma diagonal_fghSentence :
-    𝗜𝚺₁ ⊢ T.fghSentence θ 🡘 (T.fghSentence' θ).val :=
-  diagonal (T.witnessedBefore θ).val
+    𝗜𝚺₁ ⊢ T.fghSentence θ 🡘 (T.fghSentence' θ).val := by
+  rw [fghSentence'_val_eq]
+  exact diagonal (T.witnessedBefore θ).val
 
 lemma refutable_fghSentence_of_provedBefore :
     𝗜𝚺₁ ⊢ (T.provedBefore θ).val/[⌜T.fghSentence θ⌝] 🡒 ∼T.fghSentence θ := by
