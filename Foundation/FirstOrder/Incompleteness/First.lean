@@ -2,6 +2,7 @@ module
 
 public import Foundation.FirstOrder.Incompleteness.StandardProvability
 public import Foundation.FirstOrder.Arithmetic.R0.Representation
+public import Foundation.FirstOrder.Bootstrapping.Syntax.CraigTrick
 
 @[expose] public section
 /-!
@@ -43,18 +44,30 @@ theorem incomplete (T : ArithmeticTheory) [T.Δ₁] [𝗥₀ ⪯ T] [T.SoundOnHi
     exact not_consistent_iff_inconsistent.mpr
       (inconsistent_of_provable_of_unprovable (this.mpr h) h) inferInstance
 
-theorem exists_true_but_unprovable_sentence
+theorem exists_true_but_unprovable_sentence_of_sigma1sound
     (T : ArithmeticTheory) [T.Δ₁] [𝗥₀ ⪯ T] [T.SoundOnHierarchy 𝚺 1] :
-    ∃ δ : ArithmeticSentence, ℕ↓[ℒₒᵣ] ⊧ δ ∧ T ⊬ δ := by
-  obtain ⟨δ, hδ⟩ := incomplete_def.mp $ Arithmetic.incomplete T;
-  by_cases ℕ↓[ℒₒᵣ] ⊧ δ
-  . exact ⟨δ, by assumption, hδ.1⟩
-  . exact ⟨∼δ, by simpa, hδ.2⟩
+    ∃ δ : ArithmeticSentence, ℕ↓[ℒₒᵣ] ⊧ δ ∧ T ⊬ δ :=
+  exists_true_but_unprovable_sentence_of_incomplete (Arithmetic.incomplete T)
+
+instance {T : ArithmeticTheory} [T.RE] [𝗥₀ ⪯ T] : 𝗥₀ ⪯ T.craig :=
+  WeakerThan.trans (𝓣 := T) inferInstance (inferInstance : T ⪯ T.craig)
+
+instance {T : ArithmeticTheory} [T.RE] [T.SoundOnHierarchy 𝚺 1] : ArithmeticTheory.SoundOnHierarchy (T.craig) 𝚺 1 :=
+  ArithmeticTheory.SoundOn.of_weakerThan _ T T.craig
+
+/-- Gödel's first incompleteness theorem for r.e. theories -/
+theorem incomplete_of_RE (T : ArithmeticTheory) [T.RE] [𝗥₀ ⪯ T] [T.SoundOnHierarchy 𝚺 1] : Incomplete T :=
+  (Equiv.incomplete_iff (inferInstance : T ≊ T.craig)).mpr (incomplete T.craig)
+
+theorem exists_true_but_unprovable_sentence_of_RE_of_sigma1sound
+    (T : ArithmeticTheory) [T.RE] [𝗥₀ ⪯ T] [T.SoundOnHierarchy 𝚺 1] :
+    ∃ δ : ArithmeticSentence, ℕ↓[ℒₒᵣ] ⊧ δ ∧ T ⊬ δ :=
+  exists_true_but_unprovable_sentence_of_incomplete (incomplete_of_RE T)
 
 instance {T : ArithmeticTheory} [ℕ↓[ℒₒᵣ] ⊧* T] [T.Δ₁] [𝗥₀ ⪯ T] [T.SoundOnHierarchy 𝚺 1] : T ⪱ 𝗧𝗔 := by
   constructor;
   . infer_instance
-  . obtain ⟨δ, δTrue, δUnprov⟩ := exists_true_but_unprovable_sentence T;
-    exact Entailment.not_weakerThan_iff.mpr ⟨δ, TA.provable_iff.mpr δTrue, δUnprov⟩
+  . obtain ⟨δ, δTrue, δUnprov⟩ := exists_true_but_unprovable_sentence_of_sigma1sound T;
+    exact not_weakerThan_iff.mpr ⟨δ, TA.provable_iff.mpr δTrue, δUnprov⟩
 
 end LO.FirstOrder.Arithmetic

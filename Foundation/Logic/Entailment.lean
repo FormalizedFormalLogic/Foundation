@@ -317,13 +317,24 @@ def Independent (φ : F) : Prop := 𝓢 ⊬ φ ∧ 𝓢 ⊬ ∼φ
 class Incomplete : Prop where
   indep : ∃ φ, Independent 𝓢 φ
 
-variable {𝓢}
+variable {𝓢 : S} {𝓣 : T}
 
 lemma complete_def : Complete 𝓢 ↔ ∀ φ, 𝓢 ⊢ φ ∨ 𝓢 ⊢ ∼φ :=
   ⟨fun h ↦ h.con, Complete.mk⟩
 
 lemma incomplete_def : Incomplete 𝓢 ↔ ∃ φ, Independent 𝓢 φ :=
   ⟨fun h ↦ h.indep, Incomplete.mk⟩
+
+omit [Tilde F] in
+lemma Equiv.unprovable (e : 𝓢 ≊ 𝓣) {φ : F} : 𝓢 ⊬ φ ↔ 𝓣 ⊬ φ :=
+  not_congr <| Equiv.iff.mp e φ
+
+lemma Equiv.incomplete (e : 𝓢 ≊ 𝓣) : Incomplete 𝓢 → Incomplete 𝓣 := by
+  rintro ⟨φ, hφ⟩
+  exact ⟨φ, e.unprovable.mp hφ.1, e.unprovable.mp hφ.2⟩
+
+lemma Equiv.incomplete_iff (e : 𝓢 ≊ 𝓣) : Incomplete 𝓢 ↔ Incomplete 𝓣 :=
+  ⟨e.incomplete, e.symm.incomplete⟩
 
 @[simp] lemma not_complete_iff_incomplete : ¬Complete 𝓢 ↔ Incomplete 𝓢 := by
   simp [complete_def, incomplete_def, Independent, not_or]

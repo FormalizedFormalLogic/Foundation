@@ -66,6 +66,7 @@ public import Foundation.FirstOrder.Bootstrapping.DerivabilityCondition.Equation
 public import Foundation.FirstOrder.Bootstrapping.DerivabilityCondition.PeanoMinus
 public import Foundation.FirstOrder.Bootstrapping.FixedPoint
 public import Foundation.FirstOrder.Bootstrapping.Syntax
+public import Foundation.FirstOrder.Bootstrapping.Syntax.CraigTrick
 public import Foundation.FirstOrder.Bootstrapping.Syntax.Formula.Basic
 public import Foundation.FirstOrder.Bootstrapping.Syntax.Formula.Coding
 public import Foundation.FirstOrder.Bootstrapping.Syntax.Formula.Functions
@@ -87,7 +88,7 @@ public import Foundation.FirstOrder.Completeness.CounterModel
 public import Foundation.FirstOrder.Hauptsatz
 public import Foundation.FirstOrder.Incompleteness.Church
 public import Foundation.FirstOrder.Incompleteness.Consistency
-public import Foundation.FirstOrder.Incompleteness.Delta1
+public import Foundation.FirstOrder.Incompleteness.Definability
 public import Foundation.FirstOrder.Incompleteness.Dense
 public import Foundation.FirstOrder.Incompleteness.Examples
 public import Foundation.FirstOrder.Incompleteness.FGH

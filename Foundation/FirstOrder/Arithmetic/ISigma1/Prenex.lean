@@ -23,17 +23,17 @@ lemma hasPrenex (h : Hierarchy 𝚺 1 φ) :
   exists_prenex_of_hierarchy 𝗜𝚺₁ h
 
 lemma exists_matrix_provable (h : Hierarchy 𝚺 1 φ) :
-    ∃ θ : ArithmeticSemisentence (n + 1), Hierarchy 𝚺 0 θ ∧ 𝗜𝚺₁ ⊢ ∀¹* (φ 🡘 ∃¹ θ) := by
+    ∃ θ : 𝚺₀.Semisentence (n + 1), 𝗜𝚺₁ ⊢ ∀¹* (φ 🡘 ∃¹ θ.val) := by
   obtain ⟨φ', hφ'⟩ := hasPrenex h;
-  exact ⟨φ'.sigmaInv.val, φ'.sigmaInv.val_deltaZero, Prenex.provable_iff_sigmaInv hφ'⟩
+  exact ⟨φ'.sigmaInv.matrix, Prenex.provable_iff_sigmaInv hφ'⟩
 
 lemma exists_matrix_provable_pi (h : Hierarchy 𝚷 1 φ) :
-    ∃ θ : ArithmeticSemisentence (n + 1), Hierarchy 𝚺 0 θ ∧ 𝗜𝚺₁ ⊢ ∀¹* (φ 🡘 ∀¹ θ) := by
+    ∃ θ : 𝚺₀.Semisentence (n + 1), 𝗜𝚺₁ ⊢ ∀¹* (φ 🡘 ∀¹ θ.val) := by
   obtain ⟨φ', hφ'⟩ := exists_prenex_of_hierarchy 𝗜𝚺₁ h
-  exact ⟨φ'.piInv.val, φ'.piInv.val_hierarchy, Prenex.provable_iff_piInv hφ'⟩
+  exact ⟨φ'.piInv.matrix, Prenex.provable_iff_piInv hφ'⟩
 
 lemma exists_matrix_provable_of_sentence (h : Hierarchy 𝚺 1 σ) :
-    ∃ θ : ArithmeticSemisentence 1, Hierarchy 𝚺 0 θ ∧ 𝗜𝚺₁ ⊢ σ 🡘 ∃¹ θ :=
+    ∃ θ : 𝚺₀.Semisentence 1, 𝗜𝚺₁ ⊢ σ 🡘 ∃¹ θ.val :=
   exists_matrix_provable h
 
 end LO.FirstOrder.Arithmetic.ISigma1

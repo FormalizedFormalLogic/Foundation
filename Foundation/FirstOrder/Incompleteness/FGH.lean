@@ -136,13 +136,12 @@ variable (T : ArithmeticTheory) [T.Δ₁] [𝗜𝚺₁ ⪯ T] {σ : ArithmeticSe
 
 theorem fgh_theorem (hσ : Hierarchy 𝚺 1 σ) :
   ∃ π : 𝚺₁.Sentence, 𝗜𝚺₁ ⊢ provabilityPred T π.val 🡘 σ ⋎ provabilityPred T ⊥ := by
-  obtain ⟨θ, hθ, hwit⟩ := ISigma1.exists_matrix_provable_of_sentence hσ;
-  set θ' : 𝚺₀.Semisentence 1 := .mkSigma θ hθ with hθ';
-  use T.fghSentence' θ';
+  obtain ⟨θ, hwit⟩ := ISigma1.exists_matrix_provable_of_sentence hσ;
+  use T.fghSentence' θ;
   apply E_trans provable_fixedpoint'_iff_exs_or_provable_bot;
   apply complete.{0};
   intro V _ _;
-  simp [models_iff, hθ', show V ⊧/![] σ ↔ ∃ w, V ⊧/![w] θ from
+  simp [models_iff, show V ⊧/![] σ ↔ ∃ w, V ⊧/![w] θ.val from
     by simpa [Semiformula.eval_ex] using models_iff_of_provable_iff hwit V ![]];
 
 theorem fgh_theorem_con (hσ : Hierarchy 𝚺 1 σ) :
