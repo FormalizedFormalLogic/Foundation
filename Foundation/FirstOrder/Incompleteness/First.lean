@@ -52,7 +52,7 @@ private lemma exists_true_but_unprovable_sentence_of_incomplete {T : ArithmeticT
   . exact ⟨δ, by assumption, hδ.1⟩
   . exact ⟨∼δ, by simpa, hδ.2⟩
 
-theorem exists_true_but_unprovable_sentence
+theorem exists_true_but_unprovable_sentence_of_sigma1sound
     (T : ArithmeticTheory) [T.Δ₁] [𝗥₀ ⪯ T] [T.SoundOnHierarchy 𝚺 1] :
     ∃ δ : ArithmeticSentence, ℕ↓[ℒₒᵣ] ⊧ δ ∧ T ⊬ δ :=
   exists_true_but_unprovable_sentence_of_incomplete (Arithmetic.incomplete T)
@@ -80,7 +80,7 @@ theorem exists_true_but_unprovable_sentence_of_RE_of_consistent
 instance {T : ArithmeticTheory} [ℕ↓[ℒₒᵣ] ⊧* T] [T.Δ₁] [𝗥₀ ⪯ T] [T.SoundOnHierarchy 𝚺 1] : T ⪱ 𝗧𝗔 := by
   constructor;
   . infer_instance
-  . obtain ⟨δ, δTrue, δUnprov⟩ := exists_true_but_unprovable_sentence T;
+  . obtain ⟨δ, δTrue, δUnprov⟩ := exists_true_but_unprovable_sentence_of_sigma1sound T;
     exact not_weakerThan_iff.mpr ⟨δ, TA.provable_iff.mpr δTrue, δUnprov⟩
 
 end LO.FirstOrder.Arithmetic
