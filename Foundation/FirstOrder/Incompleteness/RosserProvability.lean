@@ -71,9 +71,7 @@ theorem rosser_internalize [Consistent T] {φ : Sentence L} : T ⊢ φ → T.Ros
   intro b hb Hb
   rcases eq_nat_of_lt_nat hb with ⟨b, rfl⟩
   have : T ⊢ ∼φ := provable_of_standard_proof (V := V) Hb
-  have : Inconsistent T := inconsistent_of_provable_of_unprovable h this
-  have : ¬Inconsistent T := Consistent.not_inc inferInstance
-  contradiction
+  exact Consistent.not_inc inferInstance (inconsistent_of_provable_of_unprovable h this)
 
 theorem rosser_internalize_sentence [Consistent T] {σ : Sentence L} : T ⊢ σ → T.RosserProvable (⌜σ⌝ : V) := fun h ↦ by
   simpa [Sentence.quote_def] using! rosser_internalize h
@@ -87,9 +85,7 @@ theorem not_rosserProvable [Consistent T] {φ : Sentence L} : T ⊢ ∼φ → ¬
   have : b ≤ n := by grind;
   rcases eq_nat_of_le_nat this with ⟨b, rfl⟩
   have : T ⊢ φ := provable_of_standard_proof hb
-  have : Inconsistent T := inconsistent_of_provable_of_unprovable this h
-  have : ¬Inconsistent T := Consistent.not_inc inferInstance
-  contradiction
+  exact Consistent.not_inc inferInstance (inconsistent_of_provable_of_unprovable this h)
 
 theorem not_rosserProvable_sentence [Consistent T] {σ : Sentence L} : T ⊢ ∼σ → ¬T.RosserProvable (⌜σ⌝ : V) := fun h ↦ by
   simpa [Sentence.quote_def] using! not_rosserProvable h
@@ -153,10 +149,7 @@ theorem incomplete_GR (T : ArithmeticTheory) [T.Δ₁] [𝗜𝚺₁ ⪯ T] [Cons
 instance {T : ArithmeticTheory} [T.RE] [𝗜𝚺₁ ⪯ T] : 𝗜𝚺₁ ⪯ T.craig := WeakerThan.trans inferInstance (inferInstance : T ⪯ T.craig)
 
 /-- Gödel-Rosser incompleteness theorem for r.e. theories -/
-theorem incomplete_GR_of_RE (T : ArithmeticTheory) [T.RE] [𝗜𝚺₁ ⪯ T] [Consistent T] : Incomplete T := by
-  apply Equiv.incomplete (𝓢 := T.craig);
-  . symm;
-    infer_instance;
-  . apply incomplete_GR;
+theorem incomplete_GR_of_RE (T : ArithmeticTheory) [T.RE] [𝗜𝚺₁ ⪯ T] [Consistent T] : Incomplete T :=
+  (Equiv.incomplete_iff (inferInstance : T ≊ T.craig)).mpr (incomplete_GR T.craig)
 
 end LO.FirstOrder.Arithmetic
