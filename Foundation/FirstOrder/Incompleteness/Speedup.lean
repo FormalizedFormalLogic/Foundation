@@ -15,7 +15,7 @@ public import Mathlib.Data.Nat.Log
 
 @[expose] public section
 
-namespace LO.FirstOrder.Arithmetic.Bootstrapping
+namespace FFL.FirstOrder.Arithmetic.Bootstrapping
 
 section Provability
 
@@ -30,7 +30,7 @@ variable
   {L : Language} [L.DecidableEq] [L.Encodable] [L.LORDefinable]
   {T : Theory L} [T.Δ₁] {σ : Sentence L}
 
-noncomputable def _root_.LO.FirstOrder.Theory.minProof (T : Theory L) [T.Δ₁] (σ : Sentence L) : ℕ :=
+noncomputable def _root_.FFL.FirstOrder.Theory.minProof (T : Theory L) [T.Δ₁] (σ : Sentence L) : ℕ :=
   sInf (Set.range λ d : T ⊢!₂! (σ : Proposition L) ↦ (⌜d⌝ : ℕ))
 
 @[grind →]
@@ -123,7 +123,7 @@ section Arithmetic
 
 variable {T : ArithmeticTheory} [T.Δ₁] [𝗜𝚺₁ ⪯ T] {σ : ArithmeticSentence}
 
-open LO.Entailment in
+open FFL.Entailment in
 theorem ehrenfeucht_mycielski_speedup_arithmetic (hσ : T ⊬ σ) (f : ℕ → ℕ) (hf : Computable f) :
   ∃ π : ArithmeticSentence, T ⊢ π ∧ f ((insert σ T).minProof π) < T.minProof π :=
   have : 𝗜𝚺₁ ⪯ (insert (∼σ) T) :=
@@ -143,4 +143,4 @@ example (hσ : T ⊬ σ) :
 
 end Arithmetic
 
-end LO.FirstOrder.Arithmetic.Bootstrapping
+end FFL.FirstOrder.Arithmetic.Bootstrapping

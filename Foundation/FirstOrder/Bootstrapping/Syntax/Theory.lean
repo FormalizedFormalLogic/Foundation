@@ -5,7 +5,7 @@ public import Foundation.FirstOrder.Basic.PrimrecCoding
 public import Foundation.Vorspiel.Computability
 
 @[expose] public section
-namespace LO.FirstOrder.Theory
+namespace FFL.FirstOrder.Theory
 
 variable {L : Language} [L.Encodable] [L.LORDefinable]
 
@@ -50,15 +50,15 @@ lemma ofFinite (hT : Set.Finite T) : T.RE := by
 
 end RE
 
-end LO.FirstOrder.Theory
+end FFL.FirstOrder.Theory
 
-namespace LO.FirstOrder.Arithmetic.Bootstrapping
+namespace FFL.FirstOrder.Arithmetic.Bootstrapping
 
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 
 variable {L : Language} [L.Encodable] [L.LORDefinable]
 
-def _root_.LO.FirstOrder.Theory.Δ₁Class (T : Theory L) [T.Δ₁] : Set V := { φ : V | V ⊧/![φ] T.Δ₁ch.val }
+def _root_.FFL.FirstOrder.Theory.Δ₁Class (T : Theory L) [T.Δ₁] : Set V := { φ : V | V ⊧/![φ] T.Δ₁ch.val }
 
 variable {T : Theory L} [T.Δ₁]
 
@@ -92,9 +92,9 @@ instance Δ₁Class.definable : 𝚫₁-Predicate[V] (· ∈ T.Δ₁Class) := Δ
 @[simp] lemma Δ₁Class.mem_iff'' {φ : Sentence L} : ((⌜φ⌝ : Bootstrapping.Formula V L).val : V) ∈ T.Δ₁Class ↔ φ ∈ T :=
   Δ₁Class.mem_iff
 
-end LO.FirstOrder.Arithmetic.Bootstrapping
+end FFL.FirstOrder.Arithmetic.Bootstrapping
 
-namespace LO.FirstOrder.Theory
+namespace FFL.FirstOrder.Theory
 
 variable {L : Language} [L.Encodable] [L.LORDefinable]
 
@@ -102,7 +102,7 @@ variable {T U : Theory L}
 
 namespace Δ₁
 
-open Arithmetic.HierarchySymbol.Semiformula LO.FirstOrder.Theory
+open Arithmetic.HierarchySymbol.Semiformula FFL.FirstOrder.Theory
 
 abbrev add (dT : T.Δ₁) (dU : U.Δ₁) : (T ∪ U).Δ₁ where
   ch := T.Δ₁ch ⋎ U.Δ₁ch
@@ -146,4 +146,4 @@ instance insert [d : T.Δ₁] : (insert φ T).Δ₁ := (d.add (singleton φ)).of
 
 end Δ₁
 
-end LO.FirstOrder.Theory
+end FFL.FirstOrder.Theory
