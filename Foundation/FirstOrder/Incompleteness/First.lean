@@ -67,10 +67,15 @@ instance {T : ArithmeticTheory} [T.RE] [T.SoundOnHierarchy 𝚺 1] : ArithmeticT
 theorem incomplete_of_RE (T : ArithmeticTheory) [T.RE] [𝗥₀ ⪯ T] [T.SoundOnHierarchy 𝚺 1] : Incomplete T :=
   (Equiv.incomplete_iff (inferInstance : T ≊ T.craig)).mpr (incomplete T.craig)
 
-theorem exists_true_but_unprovable_sentence_of_RE
+theorem exists_true_but_unprovable_sentence_of_RE_of_sigma1sound
     (T : ArithmeticTheory) [T.RE] [𝗥₀ ⪯ T] [T.SoundOnHierarchy 𝚺 1] :
     ∃ δ : ArithmeticSentence, ℕ↓[ℒₒᵣ] ⊧ δ ∧ T ⊬ δ :=
   exists_true_but_unprovable_sentence_of_incomplete (incomplete_of_RE T)
+
+theorem exists_true_but_unprovable_sentence_of_RE_of_consistent
+    (T : ArithmeticTheory) [T.RE] [𝗜𝚺₁ ⪯ T] [Consistent T] :
+    ∃ δ : ArithmeticSentence, ℕ↓[ℒₒᵣ] ⊧ δ ∧ T ⊬ δ :=
+  exists_true_but_unprovable_sentence_of_incomplete (incomplete_GR_of_RE T)
 
 instance {T : ArithmeticTheory} [ℕ↓[ℒₒᵣ] ⊧* T] [T.Δ₁] [𝗥₀ ⪯ T] [T.SoundOnHierarchy 𝚺 1] : T ⪱ 𝗧𝗔 := by
   constructor;
