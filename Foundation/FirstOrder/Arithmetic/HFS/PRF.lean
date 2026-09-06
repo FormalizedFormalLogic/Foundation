@@ -73,6 +73,8 @@ lemma cseq_defined : 𝚺₁.Defined (fun v ↦ c.CSeq (v ·.succ) (v 0) : (Fin 
 
 variable {c v}
 
+/-! ## Helper lemmas for `Cseq`s -/
+
 namespace CSeq
 
 variable {s : V}
@@ -110,12 +112,10 @@ lemma unique {s₁ s₂ : V} (H₁ : c.CSeq v s₁) (H₂ : c.CSeq v s₂) (h₁
     have e₂ : z₂ = c.succ v i z' := H₂.seq.isMapping.uniq h₂ h₂'
     simp [e₁, e₂]
 
-end CSeq
-
-lemma CSeq.initial : c.CSeq v !⟦c.zero v⟧ :=
+lemma initial : c.CSeq v !⟦c.zero v⟧ :=
   ⟨by simp, by simp [seqCons], by simp⟩
 
-lemma CSeq.successor {s l z : V} (Hs : c.CSeq v s) (hl : l + 1 = lh s) (hz : ⟪l, z⟫ ∈ s) :
+lemma successor {s l z : V} (Hs : c.CSeq v s) (hl : l + 1 = lh s) (hz : ⟪l, z⟫ ∈ s) :
     c.CSeq v (s ⁀' c.succ v l z) :=
   ⟨ Hs.seq.seqCons _, by simp [seqCons, Hs.zero], by
     simp only [Hs.seq.lh_seqCons, add_tsub_cancel_right]
@@ -131,6 +131,10 @@ lemma CSeq.successor {s l z : V} (Hs : c.CSeq v s) (hl : l + 1 = lh s) (hz : ⟪
       simp [this, hl]
     · simp only [mem_seqCons_iff]; right
       exact Hs.succ i (by simp [←hl, hil]) w hiws ⟩
+
+end CSeq
+
+/-! ## Result of primitive recursion -/
 
 variable (c v)
 
@@ -187,9 +191,7 @@ lemma result_graph (z u : V) : z = c.result v u ↔ ∃ s, c.CSeq v s ∧ ⟪u, 
 
 set_option linter.flexible false in
 lemma result_defined : 𝚺₁.DefinedFunction (fun v ↦ c.result (v ·.succ) (v 0) : (Fin (k + 1) → V) → V) p.resultDef := .mk fun v ↦ by
-  simp [Blueprint.resultDef, result_graph]
-  apply exists_congr; intro x
-  simp [c.cseq_defined_iff]
+  simp [Blueprint.resultDef, result_graph, c.cseq_defined_iff]
 
 lemma result_defined_delta : 𝚫₁.DefinedFunction (fun v ↦ c.result (v ·.succ) (v 0) : (Fin (k + 1) → V) → V) p.resultDeltaDef :=
   c.result_defined.graph_delta
