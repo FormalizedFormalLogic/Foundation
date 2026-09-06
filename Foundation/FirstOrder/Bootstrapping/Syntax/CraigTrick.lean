@@ -100,33 +100,33 @@ lemma re_codes (T : Theory L) [T.RE] : REPred T.codes :=
 
 end RE
 
-variable [L.LORDefinable]
-
-noncomputable def reCh (T : Theory L) : 𝚺₁.Semisentence 1 :=
+-- `[T.RE]` is spelled out instead of taken from a `variable`: the body does not use it, so Lean
+-- would drop it from the signature and let the Craig companion be built for an arbitrary theory.
+noncomputable def reCh (T : Theory L) [T.RE] : 𝚺₁.Semisentence 1 :=
   .mkSigma (codeOfREPred fun n ↦ n ∈ T.codes) (by simp [codeOfREPred, codeOfPartrec'])
 
-lemma reCh_mem_iff (T : Theory L) [T.RE] (φ : Proposition L) :
-  ℕ ⊧/![⌜φ⌝] T.reCh.val ↔ ∃ σ ∈ T, φ = σ := by
-  have hT : REPred fun n : ℕ ↦ n ∈ T.codes := Theory.RE.re_codes T
-  simpa [Theory.reCh, Theory.codes, Matrix.fun_eq_vec_one, Semiformula.quote_eq_encode] using
-    codeOfREPred_spec hT (x := ⌜φ⌝)
-
-variable (T : Theory L)
+variable (T : Theory L) [T.RE]
 
 noncomputable def reWitness : 𝚺₀.Semisentence 2 :=
   (ISigma1.exists_matrix_provable T.reCh.sigma_prop).choose
-
-def craig : Theory L := { φ | ∃ (σ : Sentence L) (s : ℕ), ℕ ⊧/![(s : ℕ), ⌜σ⌝] T.reWitness.val ∧ φ = σ.padding s}
-
-end
-
-variable (T : Theory L)
 
 lemma reWitness_spec (V : Type) [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] (e : Fin 1 → V) :
     V ⊧/e T.reCh.val ↔ ∃ w, V ⊧/(w :> e) T.reWitness.val :=
   (models_iff_of_provable_iff
     (ISigma1.exists_matrix_provable T.reCh.sigma_prop).choose_spec V e).trans
     Semiformula.eval_ex
+
+variable [L.LORDefinable]
+
+lemma reCh_mem_iff (φ : Proposition L) :
+  ℕ ⊧/![⌜φ⌝] T.reCh.val ↔ ∃ σ ∈ T, φ = σ := by
+  have hT : REPred fun n : ℕ ↦ n ∈ T.codes := Theory.RE.re_codes T
+  simpa [Theory.reCh, Theory.codes, Matrix.fun_eq_vec_one, Semiformula.quote_eq_encode] using
+    codeOfREPred_spec hT (x := ⌜φ⌝)
+
+def craig : Theory L := { φ | ∃ (σ : Sentence L) (s : ℕ), ℕ ⊧/![(s : ℕ), ⌜σ⌝] T.reWitness.val ∧ φ = σ.padding s}
+
+end
 
 end LO.FirstOrder.Theory
 
@@ -193,7 +193,7 @@ variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] [L.Pr
 
 section
 
-variable (T : Theory L)
+variable (T : Theory L) [T.RE]
 
 def _root_.LO.FirstOrder.Theory.IsCraigAxiom : V → Prop :=
   fun x ↦ ∃ s p : V, x = p ^⋏ qqVerums s ∧ V ⊧/![s, p] T.reWitness.val
@@ -208,7 +208,7 @@ noncomputable def _root_.LO.FirstOrder.Theory.craigCh : 𝚫₁.Semisentence 1 :
 
 end
 
-instance Theory.IsCraigAxiom.defined {T : Theory L} :
+instance Theory.IsCraigAxiom.defined {T : Theory L} [T.RE] :
     𝚫₁-Predicate[V] (T.IsCraigAxiom : V → Prop) via T.craigCh := .mk <| by
   have h (v : Fin 1 → V) :
       (∃ s < v 0, ∃ p < v 0, qqVerums s < v 0 ∧ v 0 = p ^⋏ qqVerums s
@@ -256,7 +256,7 @@ open LO.Entailment
 
 open Encodable
 
-variable {L : Language} [L.Encodable] [L.LORDefinable] {T : Theory L}
+variable {L : Language} [L.Encodable] [L.LORDefinable] [L.Primcodable] {T : Theory L} [T.RE]
 
 lemma mem_craig_codes_iff (n : ℕ) :
     n ∈ T.craig.codes ↔
@@ -281,8 +281,6 @@ lemma mem_craig_codes_iff (n : ℕ) :
       . simpa [Sentence.quote_def, Semiformula.quote_eq_encode, hσm] using hT;
       . rfl;
     . exact (Semiformula.encode_padding σ s).trans <| by simpa [hσm] using hn.symm;
-
-variable [L.Primcodable]
 
 -- `p = (m, (n, s))`: `m` is the sentence code, `n` is the candidate craig axiom code,
 -- `s` is the padding index.
@@ -327,7 +325,6 @@ instance : T.craig.Primrec :=
   ⟨((primrecPred_craig_codes (T := T)).comp Primrec.encode).of_eq fun _ ↦ by simp [Theory.codes]⟩
 
 section
-variable [T.RE]
 
 noncomputable instance : (T.craig).Δ₁ where
   ch := T.craigCh
