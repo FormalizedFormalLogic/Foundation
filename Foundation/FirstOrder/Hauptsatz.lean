@@ -333,7 +333,7 @@ end Forces
 
 /-- Cut elimination theorem of $\mathbf{LK}$. -/
 def hauptsatz [L.DecidableEq] {Γ : Sequent L} : ⊢ᴸᴷ¹ Γ → {d : ⊢ᴸᴷ¹ Γ // Derivation.IsCutFree d} := fun d ↦
-  let d : 𝗠𝗶𝗻¹ ⊢! ⋀(∼Γ)ᴺ 🡒 ⊥ := Entailment.FiniteContext.toDef (Derivation.gödelGentzen d)
+  let d : 𝗠𝗶𝗻¹ ⊢! ⋀(∼Γ)ᴺ 🡒 ⊥ := Entailment.FiniteContext.toDef! (Derivation.gödelGentzen d)
   let ff : Forces (∼Γ) (⋀(∼Γ)ᴺ 🡒 ⊥) := Forces.sound d (∼Γ)
   let fc : Forces (∼Γ) (⋀(∼Γ)ᴺ) := Forces.conj' fun φ hφ ↦
     (Forces.refl φ).monotone (StrongerThan.ofSubset <| List.cons_subset.mpr ⟨hφ, by simp⟩)

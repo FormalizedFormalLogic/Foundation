@@ -68,10 +68,10 @@ theorem provable_D3 [𝗣𝗔⁻ ⪯ T] {σ : ArithmeticSentence} :
 open LO.Entailment LO.Entailment.FiniteContext
 
 lemma provable_D2_context [𝗜𝚺₁ ⪯ U] {Γ σ π} (hσπ : Γ ⊢[U] □(σ 🡒 π)) (hσ : Γ ⊢[U] □σ) :
-    Γ ⊢[U] □π := FiniteContext.of'! (weakening inferInstance provable_D2) ⨀ hσπ ⨀ hσ
+    Γ ⊢[U] □π := FiniteContext.of' (weakening inferInstance provable_D2) ⨀ hσπ ⨀ hσ
 
 lemma provable_D3_context [𝗣𝗔⁻ ⪯ T] [𝗜𝚺₁ ⪯ U] {Γ σ} (hσπ : Γ ⊢[U] □σ) :
-  Γ ⊢[U] □□σ := FiniteContext.of'! (weakening inferInstance provable_D3) ⨀ hσπ
+  Γ ⊢[U] □□σ := FiniteContext.of' (weakening inferInstance provable_D3) ⨀ hσπ
 
 lemma provable_sound [U.SoundOnHierarchy 𝚺 1] {σ} : U ⊢ □σ → T ⊢ σ := fun h ↦ by
   have : ℕ↓[ℒₒᵣ] ⊧ provabilityPred T σ := ArithmeticTheory.SoundOn.sound (F := Arithmetic.Hierarchy 𝚺 1) h (by simp)
@@ -93,7 +93,7 @@ open LO.Entailment in
 -/
 lemma provable_sigma_one_complete_of_E {σ π} [𝗜𝚺₁ ⪯ T]
   (hσ : Hierarchy 𝚺 1 σ) (hσπ : 𝗜𝚺₁ ⊢ σ 🡘 π) : 𝗜𝚺₁ ⊢ π 🡒 □π := by
-  apply C!_replace ?_ ?_ $ provable_sigma_one_complete (T := T) $ hσ;
+  apply C_replace ?_ ?_ $ provable_sigma_one_complete (T := T) $ hσ;
   . cl_prover [hσπ];
   . apply T.standardProvability.mono';
     cl_prover [hσπ];

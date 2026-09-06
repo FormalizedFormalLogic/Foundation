@@ -235,7 +235,7 @@ lemma ball_intro (φ : Semiformula V ℒₒᵣ 1) (n : V)
   suffices T.internalize V ⊢ (&'0 <' 𝕹 n) 🡒 φ⤉.subst ![&'0] by
     simpa [imp_def, Semiformula.free, SemitermVec.q, Semiterm.shift_substs, Semiterm.substs_substs]
   suffices T.internalize V ⊢ substItrDisj ![&'0] (#'1 ≐ #'0) n 🡒 φ⤉.subst ![&'0] from
-    C!_trans (K!_left (lt_iff_substItrDisj T &'0 n)) this
+    C_trans (K_left (lt_iff_substItrDisj T &'0 n)) this
   apply TProof.substItrDisj_left_intro
   · intro i hi
     suffices T.internalize V ⊢ (&'0 ≐ 𝕹 i) 🡒 φ⤉.subst ![&'0] by simpa
@@ -251,7 +251,7 @@ lemma bexs_intro (φ : Semiformula V ℒₒᵣ 1) (n : V) {i}
     T.internalize V ⊢ φ.bexs (𝕹 n) := by
   apply TProof.exs! (𝕹 i)
   suffices T.internalize V ⊢ (𝕹 i <' 𝕹 n) ⋏ φ.subst ![𝕹 i] by simpa
-  apply K!_intro
+  apply K_intro
   · exact numeral_lt T hi
   · exact b
 

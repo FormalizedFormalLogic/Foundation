@@ -65,7 +65,7 @@ variable {T}
 
 lemma eq_comm_ctx {t u : Term V ℒₒᵣ} :
     Γ ⊢[T.internalize V] t ≐ u → Γ ⊢[T.internalize V] u ≐ t := fun b ↦
-  of'! (eq_symm T t u) ⨀ b
+  of' (eq_symm T t u) ⨀ b
 
 lemma eq_trans {t₁ t₂ t₃ : Term V ℒₒᵣ} :
     T.internalize V ⊢ t₁ ≐ t₂ → T.internalize V ⊢ t₂ ≐ t₃ → T.internalize V ⊢ t₁ ≐ t₃ := fun h₁ h₂ ↦
@@ -135,7 +135,7 @@ lemma term_replace_aux (t : V) :
         T.internalize V ⊢ ∀¹ ∀¹ ((#'1 ≐ #'0) 🡒 (typedNumeral 0 ≐ typedNumeral 0)) by simpa
       suffices T.internalize V ⊢ (&'1 ≐ &'0) 🡒 (typedNumeral 0 ≐ typedNumeral 0) by
         apply TProof.all₂!; simpa [Semiformula.free]
-      apply Entailment.dhyp! (eq_refl _ _)
+      apply Entailment.dhyp (eq_refl _ _)
     · rcases show v = 0 by simpa using hv
       suffices
           T.internalize V ⊢ ∀¹ ∀¹ ((#'1 ≐ #'0) 🡒 ((typedNumeral 1).subst ![#'1] ≐ (typedNumeral 1).subst ![#'0])) by
@@ -145,7 +145,7 @@ lemma term_replace_aux (t : V) :
         T.internalize V ⊢ ∀¹ ∀¹ ((#'1 ≐ #'0) 🡒 (typedNumeral 1 ≐ typedNumeral 1)) by simpa
       suffices T.internalize V ⊢ (&'1 ≐ &'0) 🡒 (typedNumeral 1 ≐ typedNumeral 1) by
         apply TProof.all₂!; simpa [Semiformula.free]
-      apply Entailment.dhyp! (eq_refl _ _)
+      apply Entailment.dhyp (eq_refl _ _)
     · let t : Semiterm V ℒₒᵣ 1 := ⟨v.[0], by simpa using hv.nth (by simp)⟩
       let u : Semiterm V ℒₒᵣ 1 := ⟨v.[1], by simpa using hv.nth (by simp)⟩
       have veq : v = ?[t.val, u.val] := by simp [t, u, vec2_eq hv.lh]
@@ -172,7 +172,7 @@ lemma term_replace_aux (t : V) :
         simpa [Semiterm.shift_substs, Semiterm.substs_substs] using! this
       have := subst_add_eq_add T (t⇞⇞.subst ![&'1]) (t⇞⇞.subst ![&'0])
         (u⇞⇞.subst ![&'1]) (u⇞⇞.subst ![&'0])
-      exact of'! this ⨀ iht ⨀ ihu
+      exact of' this ⨀ iht ⨀ ihu
     · let t : Semiterm V ℒₒᵣ 1 := ⟨v.[0], by simpa using hv.nth (by simp)⟩
       let u : Semiterm V ℒₒᵣ 1 := ⟨v.[1], by simpa using hv.nth (by simp)⟩
       have veq : v = ?[t.val, u.val] := by simp [t, u, vec2_eq hv.lh]
@@ -199,7 +199,7 @@ lemma term_replace_aux (t : V) :
         simpa [Semiterm.shift_substs, Semiterm.substs_substs] using! this
       have := subst_mul_eq_mul T (t⇞⇞.subst ![&'1]) (t⇞⇞.subst ![&'0])
         (u⇞⇞.subst ![&'1]) (u⇞⇞.subst ![&'0])
-      exact of'! this ⨀ iht ⨀ ihu
+      exact of' this ⨀ iht ⨀ ihu
   case hbvar =>
     intro z hz
     have : z = 0 := lt_one_iff_eq_zero.mp hz
@@ -216,7 +216,7 @@ lemma term_replace_aux (t : V) :
       simpa [-substs_equals, val_all] using this
     suffices T.internalize V ⊢ (&'1 ≐ &'0) 🡒 (&'(x + 1 + 1) ≐ &'(x + 1 + 1)) by
       apply TProof.all₂!; simpa [Semiformula.free]
-    apply Entailment.dhyp! (eq_refl T _)
+    apply Entailment.dhyp (eq_refl T _)
 
 lemma term_replace (t : Semiterm V ℒₒᵣ 1) :
     T.internalize V ⊢ ∀¹ ∀¹ ((#'1 ≐ #'0) 🡒 (t.subst ![#'1] ≐ t.subst ![#'0])) := by
@@ -240,16 +240,16 @@ lemma replace_eq (t u : Semiterm V ℒₒᵣ 1) :
   let Γ : List (Formula V ℒₒᵣ) := [t⇞⇞.subst ![&'1] ≐ u⇞⇞.subst ![&'1], &'1 ≐ &'0]
   suffices
       Γ ⊢[T.internalize V] t⇞⇞.subst ![&'0] ≐ u⇞⇞.subst ![&'0] by
-    apply deduct'!
-    apply deduct!
+    apply deduct'
+    apply deduct
     exact this
   have hh : Γ ⊢[T.internalize V] t⇞⇞.subst ![&'1] ≐ u⇞⇞.subst ![&'1] :=
-    by_axm₀!
+    by_axm₀
   have ht : Γ ⊢[T.internalize V] t⇞⇞.subst ![&'1] ≐ t⇞⇞.subst ![&'0] :=
-    of'! (term_replace' T t⇞⇞ &'1 &'0) ⨀ by_axm₁!
+    of' (term_replace' T t⇞⇞ &'1 &'0) ⨀ by_axm₁
   have hu : Γ ⊢[T.internalize V] u⇞⇞.subst ![&'1] ≐ u⇞⇞.subst ![&'0] :=
-    of'! (term_replace' T u⇞⇞ &'1 &'0) ⨀ by_axm₁!
-  exact of'!
+    of' (term_replace' T u⇞⇞ &'1 &'0) ⨀ by_axm₁
+  exact of'
     (subst_eq T (t⇞⇞.subst ![&'1]) (t⇞⇞.subst ![&'0])
       (u⇞⇞.subst ![&'1]) (u⇞⇞.subst ![&'0]))
     ⨀ ht ⨀ hu ⨀ hh
@@ -266,16 +266,16 @@ lemma replace_lt (t u : Semiterm V ℒₒᵣ 1) :
   let Γ : List (Formula V ℒₒᵣ) := [t⇞⇞.subst ![&'1] <' u⇞⇞.subst ![&'1], &'1 ≐ &'0]
   suffices
       Γ ⊢[T.internalize V] t⇞⇞.subst ![&'0] <' u⇞⇞.subst ![&'0] by
-    apply deduct'!
-    apply deduct!
+    apply deduct'
+    apply deduct
     exact this
   have hh : Γ ⊢[T.internalize V] t⇞⇞.subst ![&'1] <' u⇞⇞.subst ![&'1] :=
-    by_axm₀!
+    by_axm₀
   have ht : Γ ⊢[T.internalize V] t⇞⇞.subst ![&'1] ≐ t⇞⇞.subst ![&'0] :=
-    of'! (term_replace' T t⇞⇞ &'1 &'0) ⨀ by_axm₁!
+    of' (term_replace' T t⇞⇞ &'1 &'0) ⨀ by_axm₁
   have hu : Γ ⊢[T.internalize V] u⇞⇞.subst ![&'1] ≐ u⇞⇞.subst ![&'0] :=
-    of'! (term_replace' T u⇞⇞ &'1 &'0) ⨀ by_axm₁!
-  exact of'!
+    of' (term_replace' T u⇞⇞ &'1 &'0) ⨀ by_axm₁
+  exact of'
     (subst_lt T (t⇞⇞.subst ![&'1]) (t⇞⇞.subst ![&'0])
       (u⇞⇞.subst ![&'1]) (u⇞⇞.subst ![&'0]))
     ⨀ ht ⨀ hu ⨀ hh
@@ -292,16 +292,16 @@ lemma replace_ne (t u : Semiterm V ℒₒᵣ 1) :
   let Γ : List (Formula V ℒₒᵣ) := [t⇞⇞.subst ![&'1] ≉ u⇞⇞.subst ![&'1], &'1 ≐ &'0]
   suffices
       Γ ⊢[T.internalize V] t⇞⇞.subst ![&'0] ≉ u⇞⇞.subst ![&'0] by
-    apply deduct'!
-    apply deduct!
+    apply deduct'
+    apply deduct
     exact this
   have hh : Γ ⊢[T.internalize V] t⇞⇞.subst ![&'1] ≉ u⇞⇞.subst ![&'1] :=
-    by_axm₀!
+    by_axm₀
   have ht : Γ ⊢[T.internalize V] t⇞⇞.subst ![&'1] ≐ t⇞⇞.subst ![&'0] :=
-    of'! (term_replace' T t⇞⇞ &'1 &'0) ⨀ by_axm₁!
+    of' (term_replace' T t⇞⇞ &'1 &'0) ⨀ by_axm₁
   have hu : Γ ⊢[T.internalize V] u⇞⇞.subst ![&'1] ≐ u⇞⇞.subst ![&'0] :=
-    of'! (term_replace' T u⇞⇞ &'1 &'0) ⨀ by_axm₁!
-  exact of'!
+    of' (term_replace' T u⇞⇞ &'1 &'0) ⨀ by_axm₁
+  exact of'
     (subst_ne T (t⇞⇞.subst ![&'1]) (t⇞⇞.subst ![&'0])
       (u⇞⇞.subst ![&'1]) (u⇞⇞.subst ![&'0]))
     ⨀ ht ⨀ hu ⨀ hh
@@ -318,16 +318,16 @@ lemma replace_nlt (t u : Semiterm V ℒₒᵣ 1) :
   let Γ : List (Formula V ℒₒᵣ) := [t⇞⇞.subst ![&'1] ≮' u⇞⇞.subst ![&'1], &'1 ≐ &'0]
   suffices
       Γ ⊢[T.internalize V] t⇞⇞.subst ![&'0] ≮' u⇞⇞.subst ![&'0] by
-    apply deduct'!
-    apply deduct!
+    apply deduct'
+    apply deduct
     exact this
   have hh : Γ ⊢[T.internalize V] t⇞⇞.subst ![&'1] ≮' u⇞⇞.subst ![&'1] :=
-    by_axm₀!
+    by_axm₀
   have ht : Γ ⊢[T.internalize V] t⇞⇞.subst ![&'1] ≐ t⇞⇞.subst ![&'0] :=
-    of'! (term_replace' T t⇞⇞ &'1 &'0) ⨀ by_axm₁!
+    of' (term_replace' T t⇞⇞ &'1 &'0) ⨀ by_axm₁
   have hu : Γ ⊢[T.internalize V] u⇞⇞.subst ![&'1] ≐ u⇞⇞.subst ![&'0] :=
-    of'! (term_replace' T u⇞⇞ &'1 &'0) ⨀ by_axm₁!
-  exact of'!
+    of' (term_replace' T u⇞⇞ &'1 &'0) ⨀ by_axm₁
+  exact of'
     (subst_nlt T (t⇞⇞.subst ![&'1]) (t⇞⇞.subst ![&'0])
       (u⇞⇞.subst ![&'1]) (u⇞⇞.subst ![&'0]))
     ⨀ ht ⨀ hu ⨀ hh
@@ -398,7 +398,7 @@ lemma replace_aux (φ : V) :
     suffices Theory.internalize V T ⊢ (&'1 ≐ &'0) 🡒 ⊤ 🡒 ⊤ by
       apply TProof.all₂!
       simpa
-    apply dhyp!; exact CV!
+    apply dhyp; exact CV
   case hfalsum =>
     suffices T.internalize V ⊢ ∀¹ ∀¹ ((#'1 ≐ #'0) 🡒 ⊥ 🡒 ⊥) by
       have := (tprovable_iff_provable (T := T)).mp this
@@ -406,7 +406,7 @@ lemma replace_aux (φ : V) :
     suffices Theory.internalize V T ⊢ (&'1 ≐ &'0) 🡒 ⊥ 🡒 ⊥ by
       apply TProof.all₂!
       simpa
-    apply dhyp!; exact efq!
+    apply dhyp; exact efq
   case hrel =>
     intro k R v hR hv
     rcases isRel_iff_LOR.mp hR with (⟨rfl, rfl⟩ | ⟨rfl, rfl⟩)
@@ -456,9 +456,9 @@ lemma replace_aux (φ : V) :
     suffices
         T.internalize V ⊢ (&'1 ≐ &'0) 🡒 ∀¹ φ⤉⤉.subst ![#'0, &'1] 🡒 ∀¹ φ⤉⤉.subst ![#'0, &'0] by
       apply TProof.all₂!; simpa [Semiformula.free, SemitermVec.q, Semiformula.shift_substs, Semiformula.substs_substs]
-    apply deduct'!
+    apply deduct'
     apply TProof.all_imp_all!
-    apply deductInv'!
+    apply deductInv'
     simpa [Semiformula.free1, Semiformula.free, SemitermVec.q,
       Semiformula.shift_substs, Semiformula.substs_substs, one_add_one_eq_two]
     using TProof.specialize₂! ih (&'1) (&'2)
@@ -477,9 +477,9 @@ lemma replace_aux (φ : V) :
     suffices
         T.internalize V ⊢ (&'1 ≐ &'0) 🡒 ∃¹ φ⤉⤉.subst ![#'0, &'1] 🡒 ∃¹ φ⤉⤉.subst ![#'0, &'0] by
       apply TProof.all₂!; simpa [Semiformula.free, SemitermVec.q, Semiformula.shift_substs, Semiformula.substs_substs]
-    apply deduct'!
+    apply deduct'
     apply TProof.exs_imp_exs!
-    apply deductInv'!
+    apply deductInv'
     simpa [Semiformula.free1, Semiformula.free, SemitermVec.q,
       Semiformula.shift_substs, Semiformula.substs_substs, one_add_one_eq_two]
       using TProof.specialize₂! ih (&'1) (&'2)

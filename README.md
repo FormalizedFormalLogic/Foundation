@@ -1,82 +1,109 @@
 [Docs]: https://FormalizedFormalLogic.github.io/Foundation/docs
 [Catalogue]: https://FormalizedFormalLogic.github.io/Catalogue
 [Zoo]: https://github.com/FormalizedFormalLogic/Zoo
+[ProvabilityLogic]: https://github.com/FormalizedFormalLogic/ProvabilityLogic
+[FFL]: https://github.com/FormalizedFormalLogic
 
 # Foundation
+
+[![CI](https://github.com/FormalizedFormalLogic/Foundation/actions/workflows/ci.yml/badge.svg)](https://github.com/FormalizedFormalLogic/Foundation/actions/workflows/ci.yml)
+[![License: Apache 2.0](https://img.shields.io/github/license/FormalizedFormalLogic/Foundation)](./LICENSE)
 
 Formalizing mathematical logic in Lean 4.
 
 ## Structure & Summary
 
-Main results of this repository. More detailed explanations are provided in the [Catalogue] and [Docs].
+Main results of this repository. More detailed explanations are provided in [Docs].
 
-- `Propositional`: [Propositional Logic][prop]
-  - [Propositional Logic Zoo](#propositional-logic-zoo)
-- `FirstOrder`: [First-Order Logic][first_order]
-  - [Completeness Theorem][first_order:completeness]
-  - [Cut-Elimination of First-Order Sequent Calculus _(Gentzen's Hauptsatz)_][first_order:haupstaz]
-  - [Gödel-Gentzen Translation][first_order:goedel_translation]
-  - [Arithmetic][arith]
-    - Gödel's [First][arith:goedel_it1] and [Second][arith:goedel_it2] Incompleteness Theorems
+- `Logic`: Fundamental notions shared by all logics (entailment, semantics, calculi, Lindenbaum algebras, …).
+- `Propositional`: Propositional logic (classical and intuitionistic).
+  - [Completeness of Tait calculus][prop:completeness]
+- `FirstOrder`: [First-order logic][first_order]
+  - [Completeness theorem][first_order:completeness]
+  - [Cut-elimination of first-order sequent calculus _(Gentzen's Hauptsatz)_][first_order:hauptsatz]
+  - [Gödel–Gentzen negative translation][first_order:goedel_translation]
+  - [Downward Löwenheim–Skolem theorem][first_order:downward_loewenheim_skolem]
+  - [Intuitionistic first-order logic and Kripke semantics][first_order:intuitionistic]
+  - [Arithmetic][arith]: arithmetical theories ($\mathsf{PA^-}$, $\mathsf{I}\Sigma_n$, $\mathsf{I\Delta_0 + \Omega_1}$, $\mathsf{R_0}$, $\mathsf{Q}$, …), definability, exponentiation, hereditarily finite sets, and true arithmetic.
     - [Arithmetic Theory Zoo](#arithmetic-theory-zoo)
-  - [Set Theory][setTheory]
-    - [Consistency of ZFC][setTheory:zfc_consistent]
+  - [Incompleteness][incompleteness]
+    - Gödel's [First][arith:goedel_it1] and [Second][arith:goedel_it2] incompleteness theorems
+    - [Gödel–Rosser's incompleteness theorem][arith:goedel_rosser]
+    - [Löb's theorem][arith:loeb]
+    - [Tarski's undefinability of truth][arith:tarski]
+    - [Church's theorem and undecidability of first-order logic][arith:church]
+  - [Set theory][set_theory]: $\mathsf{Z}$, $\mathsf{ZF}$, $\mathsf{ZFC}$ and their models.
+    - [Consistency of ZFC][set_theory:zfc_consistent] (relative to Lean's type theory)
+    - [Downward Löwenheim–Skolem theorem for models of set theory][set_theory:loewenheim_skolem]
     - [Set Theory Zoo](#set-theory-zoo)
-- `ProvabilityLogic`: [Provability Logic][provability_logic]
-  - [Solovay's Arithmetical Completeness Theorem for GL][provability_logic:GL_arith_complete]
+- `SecondOrder`: Syntax, semantics, and derivations of second-order logic.
 - `Meta`: Proof automation.
-- `Logic`: Fundamental tools for various logics.
-- `Vospiel`: Supplemental definitions and theorems for mathlib.
+- `Vorspiel`: Supplemental definitions and theorems for Mathlib.
 
-[prop]: ./Foundation/Propositional
+[prop:completeness]: ./Foundation/Propositional/Boolean/Tait.lean
 [first_order]: ./Foundation/FirstOrder
-[first_order:completeness]: ./Foundation/FirstOrder/Completeness/Completeness.lean
-[first_order:haupstaz]: ./Foundation/FirstOrder/Hauptsatz.lean
+[first_order:completeness]: ./Foundation/FirstOrder/Completeness/CounterModel.lean
+[first_order:hauptsatz]: ./Foundation/FirstOrder/Hauptsatz.lean
 [first_order:goedel_translation]: ./Foundation/FirstOrder/NegationTranslation/GoedelGentzen.lean
 [first_order:downward_loewenheim_skolem]: ./Foundation/FirstOrder/Skolemization/Hull.lean
-[arith]: ./Foundation/FirstOrder/Arithmetic/
-[setTheory]: ./Foundation/FirstOrder/SetTheory/
-[setTheory:zfc_consistent]: ./Foundation/FirstOrder/SetTheory/Universe.lean
-[arithmetization]: ./Foundation/FirstOrder/Bootstrapping/
+[first_order:intuitionistic]: ./Foundation/FirstOrder/Intuitionistic
+[arith]: ./Foundation/FirstOrder/Arithmetic
+[incompleteness]: ./Foundation/FirstOrder/Incompleteness
 [arith:goedel_it1]: ./Foundation/FirstOrder/Incompleteness/First.lean
 [arith:goedel_it2]: ./Foundation/FirstOrder/Incompleteness/Second.lean
-[provability_logic]: ./Foundation/ProvabilityLogic/
-[provability_logic:GL_arith_complete]: ./Foundation/ProvabilityLogic/GL/Completeness.lean
+[arith:goedel_rosser]: ./Foundation/FirstOrder/Incompleteness/RosserProvability.lean
+[arith:loeb]: ./Foundation/FirstOrder/Incompleteness/Löb.lean
+[arith:tarski]: ./Foundation/FirstOrder/Incompleteness/Tarski.lean
+[arith:church]: ./Foundation/FirstOrder/Incompleteness/Church.lean
+[set_theory]: ./Foundation/FirstOrder/SetTheory
+[set_theory:zfc_consistent]: ./Foundation/FirstOrder/SetTheory/Universe.lean
+[set_theory:loewenheim_skolem]: ./Foundation/FirstOrder/SetTheory/LoewenheimSkolem.lean
 
-## Documents
+### Further Results
 
-- [Catalogue], summary of results, _generated by [verso]_.
-- [Docs], catelogue of definitions and theorems, _generated by [doc-gen4](https://github.com/leanprover/doc-gen4)_.
-- [Zoo], diagram of interrelationships among proof systems.
+Results that depend on Foundation but are developed in their own repositories under the [Formalized Formal Logic][FFL] organization:
 
-[Monthly Reports]: https://formalizedformallogic.github.io/Foundation/book/Monthly-Reports
+- [ProvabilityLogic]: provability logics ($\mathsf{GL}$ and its relatives), their Kripke semantics, and arithmetical completeness via the provability predicates formalized here.
 
-## Zoo
+See the [organization page][FFL] for the other repositories.
 
-Automatically generated[^1] diagrams "Zoo", illustrate the Lean4-verified interrelationships among proof systems.
+### Documents
 
-[^1]: To reduce build time in GitHub Actions, generated in separated repositry, see [Zoo].
+- [Docs]: catalogue of definitions and theorems, _generated by [doc-gen4](https://github.com/leanprover/doc-gen4)_.
+- [Catalogue]: an overview of the formalized results across the organization.
+
+### Zoo
+
+Automatically generated[^1] diagrams "Zoo" illustrate the Lean 4-verified interrelationships among theories and proof systems.
+
+[^1]: To reduce build time in GitHub Actions, generated in a separate repository, see [Zoo].
 
 - A solid arrow $\mathsf{A} \leftarrow \mathsf{B}$ indicates that $\mathsf{B}$ is strictly stronger than $\mathsf{A}$; that is, $\mathsf{B}$ is stronger than $\mathsf{A}$, while $\mathsf{A}$ is not stronger than $\mathsf{B}$, in terms of provability strength.
 - A dashed arrow $\mathsf{A} \dashleftarrow \mathsf{B}$ indicates that $\mathsf{B}$ is stronger than $\mathsf{A}$ in terms of provability strength.
 - A double line $\mathsf{A} \xlongequal{} \mathsf{B}$ indicates that $\mathsf{A}$ and $\mathsf{B}$ are equivalent in terms of provability strength.
 
-### Arithmetic Theory Zoo
+#### Arithmetic Theory Zoo
 
 ![Arithmetic Theory Zoo](https://formalizedformallogic.github.io/Zoo/arithmetic.png)
 
-### Set Theory Zoo
+#### Set Theory Zoo
 
 ![Set Theory Zoo](https://formalizedformallogic.github.io/Zoo/set_theory.png)
 
-### Propositional Logic Zoo
-
-![Propositional Logic Zoo](https://formalizedformallogic.github.io/Zoo/propositional.png)
-
 ## Contributing
 
-For instructions on how to build the project, run tests, and contribute, see [CONTRIBUTING](./CONTRIBUTING.md).
-## Developers
+See [CONTRIBUTING.md](./CONTRIBUTING.md) for the contribution flow.
+
+### Building
+
+Foundation is a [Lake](https://github.com/leanprover/lean4/tree/master/src/lake) project depending on [Mathlib](https://github.com/leanprover-community/mathlib4); the Lean version is pinned in [`lean-toolchain`](./lean-toolchain).
+
+```shell
+lake exe cache get   # fetch prebuilt Mathlib oleans
+lake build
+```
+
+### Developers
 
 List of contact information and areas of expertise of the current main developers.
 If you have any interest or questions, [create a new issue](https://github.com/FormalizedFormalLogic/Foundation/issues) or contact us directly.
@@ -85,32 +112,39 @@ If you have any interest or questions, [create a new issue](https://github.com/F
   - Overall design and maintenance.
   - First-order logic.
   - Intuitionistic first-order logic.
+  - Arithmetic, set theory, and incompleteness.
   - Proof automation.
   - Provability logic.
-- SnO2WMaN (Mashu Noguchi, [@SnO2WMaN][sno2wman:github], ✉️:[me@sno2wman.net][SnO2WMaN:email])
+- SnO2WMaN (Mashu Noguchi, [@SnO2WMaN][sno2wman:github], ✉️:[me@sno2wman.net][sno2wman:email])
   - Modal logic.
   - Propositional logic (including intermediate logic).
   - Provability logic.
-  - Interpretability Logic.
-  - Miscellaneous repository maintenance (e.g. GitHub Actions)
+  - Interpretability logic.
+  - Miscellaneous repository maintenance (e.g. GitHub Actions).
 
 [iehality:github]: https://github.com/iehality
 [iehality:email]: mailto:palalansouki@gmail.com
-[SnO2WMaN:github]: https://github.com/SnO2WMaN
-[SnO2WMaN:email]: mailto:me@sno2wman.net
+[sno2wman:github]: https://github.com/SnO2WMaN
+[sno2wman:email]: mailto:me@sno2wman.net
 
-If you with to cite this repository in academic papers, refer to [CITATION.cff](./CITATION.cff).
+## License
+
+This project is licensed under the [Apache License 2.0](./LICENSE).
+
+## Citation
+
+If you wish to cite this repository in academic papers, refer to [`CITATION.cff`](./CITATION.cff).
 
 ## Financial Supports
 
-Any financial supports would be grateful for us.
-If you found this project valuable, to sustain our OSS development, please consider support us.
+Any financial support would be greatly appreciated.
+If you find this project valuable, please consider supporting us to sustain our OSS development.
 
 ### Open Collective
 
 [![Open Collective](https://opencollective.com/formalizedformallogic/donate/button.png?color=gray)][opencollective]
 
-We would like to thanks the following backers.
+We would like to thank the following backers.
 
 [![Open Collective Backers](https://opencollective.com/formalizedformallogic/backers.svg)][opencollective:backers]
 

@@ -28,6 +28,17 @@ def alt : Polarity → Polarity
 
 @[simp] lemma alt_alt (Γ : Polarity) : Γ.alt.alt = Γ := by rcases Γ <;> simp
 
+/-- `Γ` with its polarity flipped `k` times. -/
+abbrev altItr (Γ : Polarity) (k : ℕ) : Polarity := Polarity.alt^[k] Γ
+
+@[simp] lemma altItr_zero (Γ : Polarity) : Γ.altItr 0 = Γ := rfl
+
+lemma altItr_succ (Γ : Polarity) (k : ℕ) : Γ.altItr (k + 1) = (Γ.altItr k).alt :=
+  Function.iterate_succ_apply' _ _ _
+
+lemma altItr_succ' (Γ : Polarity) (k : ℕ) : Γ.altItr (k + 1) = Γ.alt.altItr k :=
+  Function.iterate_succ_apply _ _ _
+
 section symbol
 
 variable {α : Type*} [SigmaSymbol α] [PiSymbol α]
@@ -191,6 +202,46 @@ notation:64 "∃¹[" φ "] " ψ => bexs φ ψ
 end quantifier
 
 end FirstOrder
+
+namespace Polarity
+
+variable {α : ℕ → Type*} [FirstOrder.UnivQuantifier α] [FirstOrder.ExsQuantifier α] {n : ℕ} {Γ : Polarity}
+
+def quant : Polarity → α (n + 1) → α n
+  | 𝚺 => FirstOrder.ExsQuantifier.exs
+  | 𝚷 => FirstOrder.UnivQuantifier.all
+
+@[simp] lemma quant_sigma (φ : α (n + 1)) : (𝚺 : Polarity).quant φ = ∃¹ φ := rfl
+
+@[simp] lemma quant_pi (φ : α (n + 1)) : (𝚷 : Polarity).quant φ = ∀¹ φ := rfl
+
+/-- Prefixes `k` alternating quantifiers starting with `Γ`. -/
+def quantItr (Γ : Polarity) : (k : ℕ) → {n : ℕ} → α (n + k) → α n
+  | 0,     n, φ => φ
+  | k + 1, n, φ => Γ.quant $ quantItr Γ.alt k (cast (by grind) φ)
+
+@[simp]
+lemma quantItr_zero (φ : α n) : quantItr Γ 0 φ = φ := rfl
+
+@[simp] lemma quantItr_one (φ : α (n + 1)) : quantItr Γ 1 φ = Γ.quant φ := rfl
+
+lemma quantItr_succ {k} (φ : α (n + (k + 1))) :
+    quantItr Γ (k + 1) φ = Γ.quant (quantItr Γ.alt k (cast (by grind) φ)) := rfl
+
+lemma cast_quant {m₁ m₂ : ℕ} (h : m₁ = m₂) (Γ : Polarity) (φ : α (m₁ + 1)) :
+  cast (congrArg α h) (Γ.quant φ) = Γ.quant (cast (by grind) φ) := by
+  subst h; rfl
+
+lemma quantItr_succ' {k} (φ : α (n + (k + 1))) :
+    quantItr Γ (k + 1) φ = quantItr Γ k ((Γ.altItr k).quant φ) := by
+  induction k generalizing n Γ with
+  | zero => simp [quantItr_one];
+  | succ k ih =>
+    rw [quantItr_succ, ih, quantItr_succ, altItr_succ']
+    congr 2;
+    grind;
+
+end Polarity
 
 /-! ## Second-order quantifiers -/
 

@@ -329,6 +329,10 @@ section castLE
 
 @[simp] lemma castLe_eq_id {h} : (castLE h : Rew L ξ n ξ n) = Rew.id := by ext <;> simp
 
+@[simp] lemma castLE_comp {h₁ : n₁ ≤ n₂} {h₂ : n₂ ≤ n₃} :
+    (castLE h₂).comp (castLE h₁) = (castLE (h₁.trans h₂) : Rew L ξ n₁ ξ n₃) := by
+  ext x <;> simp [comp_app]
+
 end castLE
 
 section embSubsts
@@ -837,6 +841,14 @@ lemma smul_ext' {ω₁ ω₂ : Rew L ξ n₁ ζ n₂} (h : ω₁ = ω₂) {φ : 
     ω ▹ (∃¹^[k] φ) = ∃¹^[k] (ω.qpow k ▹ φ : G (n₂ + k)) := by
   induction k <;> simp [exsItr_succ, *]
 
+@[simp] lemma smul_quant (ω : Rew L ξ n₁ ζ n₂) (Γ : Polarity) (φ : F (n₁ + 1)) :
+    ω ▹ Γ.quant φ = Γ.quant (ω.q ▹ φ) := by
+  rcases Γ <;> simp
+
+@[simp] lemma smul_quantItr (ω : Rew L ξ n₁ ζ n₂) (Γ : Polarity) (φ : F (n₁ + k)) :
+    ω ▹ Polarity.quantItr Γ k φ = Polarity.quantItr Γ k (ω.qpow k ▹ φ : G (n₂ + k)) := by
+  induction k <;> simp [Polarity.quantItr_succ', *]
+
 abbrev subst [Rewriting L ξ F ξ F] (φ : F n₁) (w : Fin n₁ → Semiterm L ξ n₂) : F n₂ := Rew.subst w ▹ φ
 
 /-- Applies the substitution `LO.FirstOrder.Rew.subst w` to a formula. This substitutes the bound variables occurring in the formula by `w : Fin n₁ → Semiterm L ξ n₂`. -/
@@ -903,6 +915,28 @@ class LawfulSyntacticRewriting (L : outParam Language) (S : ℕ → Type*) [LCWQ
   ReflectiveRewriting L ℕ S, TransitiveRewriting L ℕ S ℕ S ℕ S, InjMapRewriting L ℕ S ℕ S
 
 attribute [simp] ReflectiveRewriting.id_app
+
+namespace Rewriting
+
+variable [LCWQ F] [Rewriting L ξ F ξ F] [ReflectiveRewriting L ξ F]
+
+lemma quantItr_succ_smul_castLE {φ : F ((n + 1) + s)} :
+    Polarity.quantItr Γ (s + 1)
+      ((Rew.castLE (Nat.succ_add n s).le : Rew L ξ ((n + 1) + s) ξ (n + (s + 1))) ▹ φ)
+      = Γ.quant (Polarity.quantItr Γ.alt s φ) := by
+  induction s with
+  | zero => simp [Polarity.quantItr_succ']
+  | succ s ih =>
+    have hcast :
+        (Rew.castLE (Nat.succ_add n (s + 1)).le : Rew L ξ ((n + 1) + (s + 1)) ξ (n + ((s + 1) + 1)))
+          = (Rew.castLE (Nat.succ_add n s).le : Rew L ξ ((n + 1) + s) ξ (n + (s + 1))).q := by
+      simp
+    rw [Polarity.quantItr_succ', hcast, ← smul_quant]
+    rw [ih]
+    congr 1
+    rw [Polarity.quantItr_succ', Polarity.altItr_succ']
+
+end Rewriting
 
 namespace LawfulSyntacticRewriting
 
