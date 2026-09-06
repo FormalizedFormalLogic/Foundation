@@ -45,13 +45,17 @@ theorem incomplete (T : ArithmeticTheory) [T.Δ₁] [𝗥₀ ⪯ T] [T.SoundOnHi
     exact not_consistent_iff_inconsistent.mpr
       (inconsistent_of_provable_of_unprovable (this.mpr h) h) inferInstance
 
-theorem exists_true_but_unprovable_sentence
-    (T : ArithmeticTheory) [T.Δ₁] [𝗥₀ ⪯ T] [T.SoundOnHierarchy 𝚺 1] :
+private lemma exists_true_but_unprovable_sentence_of_incomplete {T : ArithmeticTheory} (h : Incomplete T) :
     ∃ δ : ArithmeticSentence, ℕ↓[ℒₒᵣ] ⊧ δ ∧ T ⊬ δ := by
-  obtain ⟨δ, hδ⟩ := incomplete_def.mp $ Arithmetic.incomplete T;
+  obtain ⟨δ, hδ⟩ := incomplete_def.mp h;
   by_cases ℕ↓[ℒₒᵣ] ⊧ δ
   . exact ⟨δ, by assumption, hδ.1⟩
   . exact ⟨∼δ, by simpa, hδ.2⟩
+
+theorem exists_true_but_unprovable_sentence
+    (T : ArithmeticTheory) [T.Δ₁] [𝗥₀ ⪯ T] [T.SoundOnHierarchy 𝚺 1] :
+    ∃ δ : ArithmeticSentence, ℕ↓[ℒₒᵣ] ⊧ δ ∧ T ⊬ δ :=
+  exists_true_but_unprovable_sentence_of_incomplete (Arithmetic.incomplete T)
 
 instance {T : ArithmeticTheory} [T.RE] [𝗥₀ ⪯ T] : 𝗥₀ ⪯ T.craig :=
   WeakerThan.trans (𝓣 := T) inferInstance (inferInstance : T ⪯ T.craig)
@@ -60,19 +64,13 @@ instance {T : ArithmeticTheory} [T.RE] [T.SoundOnHierarchy 𝚺 1] : ArithmeticT
   ArithmeticTheory.SoundOn.of_weakerThan _ T T.craig
 
 /-- Gödel's first incompleteness theorem for r.e. theories -/
-theorem incomplete_of_RE (T : ArithmeticTheory) [T.RE] [𝗥₀ ⪯ T] [T.SoundOnHierarchy 𝚺 1] : Incomplete T := by
-  apply Equiv.incomplete (𝓢 := T.craig);
-  . symm;
-    infer_instance;
-  . apply incomplete;
+theorem incomplete_of_RE (T : ArithmeticTheory) [T.RE] [𝗥₀ ⪯ T] [T.SoundOnHierarchy 𝚺 1] : Incomplete T :=
+  (Equiv.incomplete_iff (inferInstance : T ≊ T.craig)).mpr (incomplete T.craig)
 
 theorem exists_true_but_unprovable_sentence_of_RE
     (T : ArithmeticTheory) [T.RE] [𝗥₀ ⪯ T] [T.SoundOnHierarchy 𝚺 1] :
-    ∃ δ : ArithmeticSentence, ℕ↓[ℒₒᵣ] ⊧ δ ∧ T ⊬ δ := by
-  obtain ⟨δ, hδ⟩ := incomplete_def.mp (incomplete_of_RE T);
-  by_cases ℕ↓[ℒₒᵣ] ⊧ δ
-  . exact ⟨δ, by assumption, hδ.1⟩
-  . exact ⟨∼δ, by simpa, hδ.2⟩
+    ∃ δ : ArithmeticSentence, ℕ↓[ℒₒᵣ] ⊧ δ ∧ T ⊬ δ :=
+  exists_true_but_unprovable_sentence_of_incomplete (incomplete_of_RE T)
 
 instance {T : ArithmeticTheory} [ℕ↓[ℒₒᵣ] ⊧* T] [T.Δ₁] [𝗥₀ ⪯ T] [T.SoundOnHierarchy 𝚺 1] : T ⪱ 𝗧𝗔 := by
   constructor;
