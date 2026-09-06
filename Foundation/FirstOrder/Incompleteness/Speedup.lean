@@ -2,7 +2,6 @@ module
 
 public import Foundation.FirstOrder.Basic.PrimrecCoding
 public import Foundation.FirstOrder.Bootstrapping.DerivabilityCondition.D1
-public import Foundation.FirstOrder.Bootstrapping.Syntax.Proof.Primrec
 public import Foundation.FirstOrder.Incompleteness.Church
 public import Mathlib.Computability.Reduce
 public import Mathlib.Data.Nat.Log
@@ -98,16 +97,13 @@ private def speedupProof (T : Theory L) (σ π : Sentence L) :
 
 private lemma computable_quote_speedupProof [L.Primcodable] :
     Computable λ π ↦ (⌜speedupProof T σ π⌝ : ℕ) :=
-  have hπ : Primrec λ π : Sentence L ↦ (⌜(π : Proposition L)⌝ : ℕ) :=
-    Primrec.encode.of_eq λ π ↦ (Sentence.quote_eq_encode_nat π).symm;
-  have hσπ : Primrec λ π : Sentence L ↦ (⌜((σ ⋎ π : Sentence L) : Proposition L)⌝ : ℕ) :=
-    (Primrec.encode.comp (Semiformula.primrec₂_or.comp (Primrec.const σ) Primrec.id)).of_eq
-      λ π ↦ (Sentence.quote_eq_encode_nat (σ ⋎ π)).symm;
-  Primrec.to_comp <|
-    primrec_quote_or (primrec_quote_singleton hσπ) (.const _) hπ
-      (primrec_quote_axm
-        (primrec_quote_insert (.const _) (primrec_quote_insert hπ (primrec_quote_singleton hσπ)))
-        (.const _))
+  have hc : Computable₂ λ s p : ℕ ↦
+      orIntro (insert (s ^⋎ p) ∅) s p (axm (insert s (insert p (insert (s ^⋎ p) ∅))) s) :=
+    computable₂_iff_sigma1.mpr (by definability);
+  have hπ : Computable λ π : Sentence L ↦ (⌜π⌝ : ℕ) :=
+    Primrec.encode.to_comp.of_eq λ π ↦ (Sentence.quote_eq_encode_nat π).symm;
+  (hc.comp (Computable.const ⌜σ⌝) hπ).of_eq λ π ↦ by
+    simp [speedupProof, Derivation2.quote_or, Derivation2.quote_axm, Sentence.quote_def];
 
 private lemma minProof_or_le_speedupProof (π : Sentence L) :
   (insert σ T).minProof (σ ⋎ π) ≤ ⌜speedupProof T σ π⌝ := minProof_le (speedupProof T σ π)
