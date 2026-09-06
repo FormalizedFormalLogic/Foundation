@@ -18,31 +18,6 @@ class _root_.LO.FirstOrder.Theory.Δ₁ (T : Theory L) where
 
 abbrev _root_.LO.FirstOrder.Theory.Δ₁ch (T : Theory L) [T.Δ₁] : 𝚫₁.Semisentence 1 := Theory.Δ₁.ch T
 
-end LO.FirstOrder.Arithmetic.Bootstrapping
-
-namespace LO.FirstOrder.Theory
-
-variable {L : Language} [L.Encodable] [L.LORDefinable]
-
-abbrev codes (T : Theory L) : Set ℕ := Encodable.encode '' T
-
-class RE (T : Theory L) : Prop where
-  re : REPred T.codes
-
-protected class Primrec (T : Theory L) : Prop where
-  primrec : PrimrecPred (· ∈ T.codes)
-
-instance {T : Theory L} [T.Primrec] : T.RE :=
-  ⟨Theory.Primrec.primrec.computablePred.to_re⟩
-
-end LO.FirstOrder.Theory
-
-namespace LO.FirstOrder.Arithmetic.Bootstrapping
-
-variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
-
-variable {L : Language} [L.Encodable] [L.LORDefinable]
-
 def _root_.LO.FirstOrder.Theory.Δ₁Class (T : Theory L) [T.Δ₁] : Set V := { φ : V | V ⊧/![φ] T.Δ₁ch.val }
 
 variable {T : Theory L} [T.Δ₁]
@@ -82,6 +57,17 @@ end LO.FirstOrder.Arithmetic.Bootstrapping
 namespace LO.FirstOrder.Theory
 
 variable {L : Language} [L.Encodable] [L.LORDefinable]
+
+abbrev codes (T : Theory L) : Set ℕ := Encodable.encode '' T
+
+class RE (T : Theory L) : Prop where
+  re : REPred T.codes
+
+protected class Primrec (T : Theory L) : Prop where
+  primrec : PrimrecPred (· ∈ T.codes)
+
+instance {T : Theory L} [T.Primrec] : T.RE :=
+  ⟨Theory.Primrec.primrec.computablePred.to_re⟩
 
 variable {T U : Theory L}
 
