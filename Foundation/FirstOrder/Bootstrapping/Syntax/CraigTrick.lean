@@ -15,7 +15,7 @@ The Craig companion of a recursively enumerable theory is moreover primitive rec
 
 @[expose] public section
 
-namespace LO.FirstOrder.Semiformula
+namespace FFL.FirstOrder.Semiformula
 
 open Encodable
 
@@ -76,11 +76,11 @@ lemma primrec_encode_weight :
   | zero => simp [weight]
   | succ k ih => simp [encode_weight_succ, ih]
 
-end LO.FirstOrder.Semiformula
+end FFL.FirstOrder.Semiformula
 
-namespace LO.FirstOrder.Theory
+namespace FFL.FirstOrder.Theory
 
-open LO.FirstOrder.Arithmetic
+open FFL.FirstOrder.Arithmetic
 
 variable {L : Language} [L.Encodable] [L.LORDefinable]
 
@@ -109,9 +109,9 @@ lemma reWitness_spec (V : Type) [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜�
 
 def craig : Theory L := { φ | ∃ (σ : Sentence L) (s : ℕ), ℕ ⊧/![(s : ℕ), ⌜σ⌝] T.reWitness.val ∧ φ = σ.padding s}
 
-end LO.FirstOrder.Theory
+end FFL.FirstOrder.Theory
 
-namespace LO.FirstOrder.Arithmetic.Bootstrapping
+namespace FFL.FirstOrder.Arithmetic.Bootstrapping
 
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 
@@ -121,10 +121,10 @@ section
 
 variable (T : Theory L) [T.RE]
 
-def _root_.LO.FirstOrder.Theory.IsCraigAxiom : V → Prop :=
+def _root_.FFL.FirstOrder.Theory.IsCraigAxiom : V → Prop :=
   fun x ↦ ∃ s p : V, x = p ^⋏ qqVerums s ∧ V ⊧/![s, p] T.reWitness.val
 
-noncomputable def _root_.LO.FirstOrder.Theory.craigCh : 𝚫₁.Semisentence 1 := .mkDelta
+noncomputable def _root_.FFL.FirstOrder.Theory.craigCh : 𝚫₁.Semisentence 1 := .mkDelta
   (.mkSigma “x. ∃ s < x, ∃ p < x, ∃ v < x,
     !qqVerumsGraph v s ∧ !qqAndDef x p v ∧ !(T.reWitness.val) s p”
   )
@@ -196,7 +196,7 @@ namespace Sentence
 
 lemma quote_padding (σ : Sentence L) (k : ℕ) : (⌜σ.padding k⌝ : V) = ⌜σ⌝ ^⋏ qqVerums (k : V) := by
   simpa [Sentence.quote_def] using
-    LO.FirstOrder.Arithmetic.Bootstrapping.quote_padding (V := V) (Rewriting.emb σ) k
+    FFL.FirstOrder.Arithmetic.Bootstrapping.quote_padding (V := V) (Rewriting.emb σ) k
 
 end Sentence
 
@@ -222,15 +222,15 @@ lemma Theory.isCraigAxiom_quote_iff {T : Theory L} [T.RE] (φ : Proposition L) :
     . simpa [Sentence.quote_def] using Sentence.quote_padding (V := ℕ) σ s
     . exact hT
 
-end LO.FirstOrder.Arithmetic.Bootstrapping
+end FFL.FirstOrder.Arithmetic.Bootstrapping
 
-namespace LO.FirstOrder.Theory
+namespace FFL.FirstOrder.Theory
 
 open Arithmetic.Bootstrapping
 
 variable {L : Language} [L.Encodable] [L.LORDefinable]
 
-open LO.Entailment
+open FFL.Entailment
 
 open Encodable
 
@@ -329,4 +329,4 @@ instance [L.DecidableEq] : T ≊ T.craig :=
 instance [L.DecidableEq] [Consistent T] : Consistent T.craig :=
   Consistent.of_le inferInstance (inferInstance : T.craig ⪯ T)
 
-end LO.FirstOrder.Theory
+end FFL.FirstOrder.Theory

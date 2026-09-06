@@ -10,7 +10,7 @@ public import Foundation.FirstOrder.Bootstrapping.Syntax.CraigTrick
 
 namespace FFL.FirstOrder.Arithmetic.Bootstrapping
 
-open LO.Entailment
+open FFL.Entailment
 
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 
@@ -95,7 +95,7 @@ end FFL.FirstOrder.Arithmetic.Bootstrapping
 namespace FFL.FirstOrder.Arithmetic
 
 open Bootstrapping
-open LO.Entailment
+open FFL.Entailment
 
 section
 

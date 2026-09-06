@@ -12,7 +12,7 @@ system.
 
 @[expose] public section
 
-namespace LO.FirstOrder.Arithmetic.Bootstrapping
+namespace FFL.FirstOrder.Arithmetic.Bootstrapping
 
 lemma primrec₂_nat_insert : Primrec₂ λ x s : ℕ ↦ (insert x s : ℕ) := by
   have hpow : Primrec λ z : ℕ × ℕ ↦ 2 ^ z.1 :=
@@ -112,4 +112,4 @@ lemma primrec_quote_axm {hT : ∀ x, ξ x ∈ T} {hm : ∀ x, ((ξ x : Sentence 
 
 end Derivation2
 
-end LO.FirstOrder.Arithmetic.Bootstrapping
+end FFL.FirstOrder.Arithmetic.Bootstrapping

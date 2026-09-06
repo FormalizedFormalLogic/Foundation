@@ -123,7 +123,7 @@ section Arithmetic
 
 variable {T : ArithmeticTheory} [T.Δ₁] [𝗜𝚺₁ ⪯ T] {σ : ArithmeticSentence}
 
-open LO.Entailment in
+open FFL.Entailment in
 theorem ehrenfeucht_mycielski_speedup_arithmetic (hσ : T ⊬ σ) (f : ℕ → ℕ) (hf : Computable f) :
   ∃ π : ArithmeticSentence, T ⊢ π ∧ f ((σ ⫽ T).minProof π) < T.minProof π :=
   have : 𝗜𝚺₁ ⪯ (∼σ ⫽ T) := WeakerThan.trans ‹𝗜𝚺₁ ⪯ T› (Axiomatized.le_of_subset (Set.subset_insert _ T));
