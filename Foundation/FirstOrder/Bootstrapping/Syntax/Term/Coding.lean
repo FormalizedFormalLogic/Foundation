@@ -204,6 +204,13 @@ lemma mem_iff_mem_bitIndices {x s : ℕ} : x ∈ s ↔ x ∈ s.bitIndices := by
     · cases' x with x <;> simp [ih]
     · cases' x with x <;> simp [ih]
 
+lemma nat_mem_iff {x s : ℕ} : x ∈ s ↔ s / 2 ^ x % 2 = 1 := by
+  simp [mem_iff_mem_bitIndices, Nat.testBit_eq_decide_div_mod_eq]
+
+lemma nat_insert_eq (x s : ℕ) :
+    (insert x s : ℕ) = if s / 2 ^ x % 2 = 1 then s else s + 2 ^ x := by
+  simp [insert_eq, bitInsert, exp_nat_eq_two_pow, nat_mem_iff]
+
 variable {L : Language} [L.Encodable] [L.LORDefinable]
 
 lemma IsSemiterm.sound {n t : ℕ} (ht : IsSemiterm L n t) : ∃ T : FirstOrder.SyntacticSemiterm L n, ⌜T⌝ = t := by

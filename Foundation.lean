@@ -70,6 +70,7 @@ public import Foundation.FirstOrder.Bootstrapping.Syntax.Formula.Typed
 public import Foundation.FirstOrder.Bootstrapping.Syntax.Language
 public import Foundation.FirstOrder.Bootstrapping.Syntax.Proof.Basic
 public import Foundation.FirstOrder.Bootstrapping.Syntax.Proof.Coding
+public import Foundation.FirstOrder.Bootstrapping.Syntax.Proof.Primrec
 public import Foundation.FirstOrder.Bootstrapping.Syntax.Proof.Typed
 public import Foundation.FirstOrder.Bootstrapping.Syntax.Term.Basic
 public import Foundation.FirstOrder.Bootstrapping.Syntax.Term.Coding
