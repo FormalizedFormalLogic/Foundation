@@ -19,11 +19,13 @@ namespace LO.FirstOrder.Semiformula
 
 open Encodable
 
-lemma weight_succ {L : Language} {ξ : Type*} {n : ℕ} (k : ℕ) :
+variable {L : Language} {ξ : Type*} {n : ℕ}
+
+lemma weight_succ (k : ℕ) :
     (weight (k + 1) : Semiformula L ξ n) = ⊤ ⋏ weight k := by
   simp [weight, List.replicate_succ];
 
-variable {L : Language} {ξ : Type*} {n : ℕ} [L.Encodable] [Encodable ξ]
+variable [L.Encodable] [Encodable ξ]
 
 lemma encode_weight_succ (k : ℕ) :
     encode (weight (k + 1) : Semiformula L ξ n) =
@@ -82,13 +84,15 @@ namespace LO.FirstOrder.Theory
 
 open LO.FirstOrder.Arithmetic
 
-variable {L : Language} [L.Encodable] [L.LORDefinable] [L.Primcodable]
+variable {L : Language} [L.Encodable]
 
 abbrev codes (T : Theory L) : Set ℕ := Encodable.encode '' T
 
+section
+variable [L.Primcodable]
+
 namespace RE
 
-omit [L.LORDefinable] in
 lemma re_codes (T : Theory L) [T.RE] : REPred T.codes :=
   ((RE.re.comp Computable.snd).and (PrimrecPred.computablePred
     (Primrec.eq.comp (Primrec.encode.comp Primrec.snd) Primrec.fst)).to_re).projection.of_eq
@@ -96,9 +100,9 @@ lemma re_codes (T : Theory L) [T.RE] : REPred T.codes :=
 
 end RE
 
--- `[T.RE]` is spelled out instead of taken from a `variable`: the body does not use it, so Lean
--- would drop it from the signature and let the Craig companion be built for an arbitrary theory.
-noncomputable def reCh (T : Theory L) [T.RE] : 𝚺₁.Semisentence 1 :=
+variable [L.LORDefinable]
+
+noncomputable def reCh (T : Theory L) : 𝚺₁.Semisentence 1 :=
   .mkSigma (codeOfREPred fun n ↦ n ∈ T.codes) (by simp [codeOfREPred, codeOfPartrec'])
 
 lemma reCh_mem_iff (T : Theory L) [T.RE] (φ : Proposition L) :
@@ -107,62 +111,29 @@ lemma reCh_mem_iff (T : Theory L) [T.RE] (φ : Proposition L) :
   simpa [Theory.reCh, Theory.codes, Matrix.fun_eq_vec_one, Semiformula.quote_eq_encode] using
     codeOfREPred_spec hT (x := ⌜φ⌝)
 
-variable (T : Theory L) [T.RE]
+variable (T : Theory L)
 
 noncomputable def reWitness : 𝚺₀.Semisentence 2 :=
   (ISigma1.exists_matrix_provable T.reCh.sigma_prop).choose
 
-omit [L.LORDefinable] in
+def craig : Theory L := { φ | ∃ (σ : Sentence L) (s : ℕ), ℕ ⊧/![(s : ℕ), ⌜σ⌝] T.reWitness.val ∧ φ = σ.padding s}
+
+end
+
+variable (T : Theory L)
+
 lemma reWitness_spec (V : Type) [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] (e : Fin 1 → V) :
     V ⊧/e T.reCh.val ↔ ∃ w, V ⊧/(w :> e) T.reWitness.val :=
   (models_iff_of_provable_iff
     (ISigma1.exists_matrix_provable T.reCh.sigma_prop).choose_spec V e).trans
     Semiformula.eval_ex
 
-def craig : Theory L := { φ | ∃ (σ : Sentence L) (s : ℕ), ℕ ⊧/![(s : ℕ), ⌜σ⌝] T.reWitness.val ∧ φ = σ.padding s}
-
 end LO.FirstOrder.Theory
 
 namespace LO.FirstOrder.Arithmetic.Bootstrapping
 
-variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
+variable {L : Language} [L.Encodable] [L.LORDefinable]
 
-variable {L : Language} [L.Encodable] [L.LORDefinable] [L.Primcodable]
-
-section
-
-variable (T : Theory L) [T.RE]
-
-def _root_.LO.FirstOrder.Theory.IsCraigAxiom : V → Prop :=
-  fun x ↦ ∃ s p : V, x = p ^⋏ qqVerums s ∧ V ⊧/![s, p] T.reWitness.val
-
-noncomputable def _root_.LO.FirstOrder.Theory.craigCh : 𝚫₁.Semisentence 1 := .mkDelta
-  (.mkSigma “x. ∃ s < x, ∃ p < x, ∃ v < x,
-    !qqVerumsGraph v s ∧ !qqAndDef x p v ∧ !(T.reWitness.val) s p”
-  )
-  (.mkPi “x. ∃ s < x, ∃ p < x, ∃ v < x,
-    (∀ v', !qqVerumsGraph v' s → v' = v) ∧ !qqAndDef x p v ∧ !(T.reWitness.val) s p”
-  )
-
-end
-
-instance Theory.IsCraigAxiom.defined {T : Theory L} [T.RE] :
-    𝚫₁-Predicate[V] (T.IsCraigAxiom : V → Prop) via T.craigCh := .mk <| by
-  have h (v : Fin 1 → V) :
-      (∃ s < v 0, ∃ p < v 0, qqVerums s < v 0 ∧ v 0 = p ^⋏ qqVerums s
-        ∧ (Semiformula.Eval ![s, p] Empty.elim) T.reWitness.val) ↔
-        ∃ s p, v 0 = p ^⋏ qqVerums s ∧ (Semiformula.Evalb ![s, p]) T.reWitness.val := by
-    constructor
-    . rintro ⟨s, _, p, _, _, h, hT⟩;
-      use s, p;
-    . rintro ⟨s, p, hx, hT⟩;
-      exact ⟨s, hx ▸ lt_of_le_of_lt (le_qqVerums s) (lt_K!_right _ _), p,
-        hx ▸ lt_K!_left _ _, hx ▸ lt_K!_right _ _, hx, hT⟩
-  constructor
-  . intro v; simp [Theory.craigCh, h]
-  . intro v; simp [Theory.craigCh, Theory.IsCraigAxiom, h]
-
-omit [L.Primcodable] in
 lemma quote_eq_qqAnd_iff {φ : Proposition L} {p q : ℕ} :
     (⌜φ⌝ : ℕ) = p ^⋏ q ↔ ∃ φ₁ φ₂, φ = φ₁ ⋏ φ₂ ∧ p = ⌜φ₁⌝ ∧ q = ⌜φ₂⌝ := by
   constructor
@@ -190,7 +161,9 @@ lemma quote_eq_qqAnd_iff {φ : Proposition L} {p q : ℕ} :
   . rintro ⟨φ₁, φ₂, rfl, rfl, rfl⟩;
     rfl
 
-omit [L.Primcodable] in
+section
+variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
+
 lemma quote_weight (k : ℕ) : (⌜(Semiformula.weight k : Proposition L)⌝ : V) = qqVerums (k : V) := by
   induction k with
   | zero => simp [Semiformula.weight]
@@ -198,24 +171,58 @@ lemma quote_weight (k : ℕ) : (⌜(Semiformula.weight k : Proposition L)⌝ : V
     change ⌜(⊤ : Proposition L) ⋏ Semiformula.weight k⌝ = _
     simp [ih]
 
-omit [L.Primcodable] in
-lemma quote_eq_qqVerums {χ : Proposition L} {s : ℕ} : (⌜χ⌝ : ℕ) = qqVerums (s : ℕ) → χ = Semiformula.weight s := by
-  intro h;
-  exact (Semiformula.quote_inj_iff (V := ℕ)).mp <| by simpa [quote_weight] using h
-
-omit [L.Primcodable] in
 lemma quote_padding (φ : Proposition L) (k : ℕ) : (⌜φ.padding k⌝ : V) = ⌜φ⌝ ^⋏ qqVerums (k : V) := by
   change ⌜φ ⋏ Semiformula.weight k⌝ = _
   simp [quote_weight]
 
 namespace Sentence
 
-omit [L.Primcodable] in
 lemma quote_padding (σ : Sentence L) (k : ℕ) : (⌜σ.padding k⌝ : V) = ⌜σ⌝ ^⋏ qqVerums (k : V) := by
   simpa [Sentence.quote_def] using
     LO.FirstOrder.Arithmetic.Bootstrapping.quote_padding (V := V) (Rewriting.emb σ) k
 
 end Sentence
+
+end
+
+lemma quote_eq_qqVerums {χ : Proposition L} {s : ℕ} : (⌜χ⌝ : ℕ) = qqVerums (s : ℕ) → χ = Semiformula.weight s := by
+  intro h;
+  exact (Semiformula.quote_inj_iff (V := ℕ)).mp <| by simpa [quote_weight] using h
+
+variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] [L.Primcodable]
+
+section
+
+variable (T : Theory L)
+
+def _root_.LO.FirstOrder.Theory.IsCraigAxiom : V → Prop :=
+  fun x ↦ ∃ s p : V, x = p ^⋏ qqVerums s ∧ V ⊧/![s, p] T.reWitness.val
+
+noncomputable def _root_.LO.FirstOrder.Theory.craigCh : 𝚫₁.Semisentence 1 := .mkDelta
+  (.mkSigma “x. ∃ s < x, ∃ p < x, ∃ v < x,
+    !qqVerumsGraph v s ∧ !qqAndDef x p v ∧ !(T.reWitness.val) s p”
+  )
+  (.mkPi “x. ∃ s < x, ∃ p < x, ∃ v < x,
+    (∀ v', !qqVerumsGraph v' s → v' = v) ∧ !qqAndDef x p v ∧ !(T.reWitness.val) s p”
+  )
+
+end
+
+instance Theory.IsCraigAxiom.defined {T : Theory L} :
+    𝚫₁-Predicate[V] (T.IsCraigAxiom : V → Prop) via T.craigCh := .mk <| by
+  have h (v : Fin 1 → V) :
+      (∃ s < v 0, ∃ p < v 0, qqVerums s < v 0 ∧ v 0 = p ^⋏ qqVerums s
+        ∧ (Semiformula.Eval ![s, p] Empty.elim) T.reWitness.val) ↔
+        ∃ s p, v 0 = p ^⋏ qqVerums s ∧ (Semiformula.Evalb ![s, p]) T.reWitness.val := by
+    constructor
+    . rintro ⟨s, _, p, _, _, h, hT⟩;
+      use s, p;
+    . rintro ⟨s, p, hx, hT⟩;
+      exact ⟨s, hx ▸ lt_of_le_of_lt (le_qqVerums s) (lt_K!_right _ _), p,
+        hx ▸ lt_K!_left _ _, hx ▸ lt_K!_right _ _, hx, hT⟩
+  constructor
+  . intro v; simp [Theory.craigCh, h]
+  . intro v; simp [Theory.craigCh, Theory.IsCraigAxiom, h]
 
 lemma Theory.isCraigAxiom_quote_iff {T : Theory L} [T.RE] (φ : Proposition L) :
     T.IsCraigAxiom (⌜φ⌝ : ℕ) ↔ ∃ ρ ∈ T.craig, φ = ρ := by
@@ -245,13 +252,11 @@ namespace LO.FirstOrder.Theory
 
 open Arithmetic.Bootstrapping
 
-variable {L : Language} [L.Encodable] [L.LORDefinable] [L.Primcodable]
-
 open LO.Entailment
 
 open Encodable
 
-variable {T : Theory L} [T.RE]
+variable {L : Language} [L.Encodable] [L.LORDefinable] {T : Theory L}
 
 lemma mem_craig_codes_iff (n : ℕ) :
     n ∈ T.craig.codes ↔
@@ -276,6 +281,8 @@ lemma mem_craig_codes_iff (n : ℕ) :
       . simpa [Sentence.quote_def, Semiformula.quote_eq_encode, hσm] using hT;
       . rfl;
     . exact (Semiformula.encode_padding σ s).trans <| by simpa [hσm] using hn.symm;
+
+variable [L.Primcodable]
 
 -- `p = (m, (n, s))`: `m` is the sentence code, `n` is the candidate craig axiom code,
 -- `s` is the padding index.
@@ -319,6 +326,9 @@ lemma primrecPred_craig_codes : PrimrecPred (· ∈ T.craig.codes) := by
 instance : T.craig.Primrec :=
   ⟨((primrecPred_craig_codes (T := T)).comp Primrec.encode).of_eq fun _ ↦ by simp [Theory.codes]⟩
 
+section
+variable [T.RE]
+
 noncomputable instance : (T.craig).Δ₁ where
   ch := T.craigCh
   mem_iff φ := (Theory.IsCraigAxiom.defined (V := ℕ) (T := T)).iff.trans
@@ -326,7 +336,9 @@ noncomputable instance : (T.craig).Δ₁ where
   isDelta1 := Arithmetic.HierarchySymbol.Semiformula.ProvablyProperOn.ofProperOn.{0} _ fun V _ _ ↦
     (Theory.IsCraigAxiom.defined (V := V) (T := T)).proper
 
-instance [L.DecidableEq] : T.craig ⪯ T := WeakerThan.ofAxm! $ by
+variable [L.DecidableEq]
+
+instance : T.craig ⪯ T := WeakerThan.ofAxm! $ by
   rintro σ ⟨ρ, s, hρ, rfl⟩;
   have hρ' : ℕ ⊧/![⌜ρ⌝] T.reCh.val := (reWitness_spec T ℕ ![⌜ρ⌝]).mpr ⟨s, hρ⟩
   rcases (T.reCh_mem_iff (Rewriting.emb ρ)).mp
@@ -334,7 +346,7 @@ instance [L.DecidableEq] : T.craig ⪯ T := WeakerThan.ofAxm! $ by
   have hρT : ρ ∈ T := Rewriting.emb_injective hρτ ▸ hτ
   exact mdp (C_of_E_mpr (Entailment.padding_iff ρ s)) (by_axm hρT)
 
-instance [L.DecidableEq] : T ⪯ T.craig := WeakerThan.ofAxm! $ by
+instance : T ⪯ T.craig := WeakerThan.ofAxm! $ by
   intro σ hσ;
   have hσ' : ℕ ⊧/![⌜σ⌝] T.reCh.val :=
     (T.reCh_mem_iff (Rewriting.emb σ)).mpr ⟨σ, hσ, rfl⟩
@@ -342,10 +354,12 @@ instance [L.DecidableEq] : T ⪯ T.craig := WeakerThan.ofAxm! $ by
   have hpadding : σ.padding s ∈ T.craig := ⟨σ, s, hs, rfl⟩
   exact mdp (C_of_E_mp (Entailment.padding_iff σ s)) (by_axm hpadding)
 
-instance [L.DecidableEq] : T ≊ T.craig :=
+instance : T ≊ T.craig :=
   Equiv.antisymm_iff.mpr ⟨inferInstance, inferInstance⟩
 
-instance [L.DecidableEq] [Consistent T] : Consistent T.craig :=
+instance [Consistent T] : Consistent T.craig :=
   Consistent.of_le inferInstance (inferInstance : T.craig ⪯ T)
+
+end
 
 end LO.FirstOrder.Theory
