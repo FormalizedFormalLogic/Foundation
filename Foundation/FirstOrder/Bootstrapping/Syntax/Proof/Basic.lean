@@ -203,6 +203,12 @@ def axmGraph : 𝚺₀.Semisentence 3 :=
 
 instance axm_defined : 𝚺₀-Function₂ (axm : V → V → V) via axmGraph := .mk fun v ↦ by simp_all [axmGraph, numeral_eq_natCast, axm]
 
+instance (ℌ : HierarchySymbol) : ℌ-Function₄ (orIntro : V → V → V → V → V) :=
+  .of_zero orIntro.defined.to_definable
+
+instance (ℌ : HierarchySymbol) : ℌ-Function₂ (axm : V → V → V) :=
+  .of_zero axm_defined.to_definable
+
 @[simp] lemma seq_lt_axL (s p : V) : s < axL s p := le_iff_lt_succ.mp <| le_pair_left _ _
 @[simp] lemma arity_lt_axL (s p : V) : p < axL s p :=
   le_iff_lt_succ.mp <| le_trans (by simp) <| le_pair_right _ _

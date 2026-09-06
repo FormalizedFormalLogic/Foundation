@@ -11,7 +11,7 @@ public import Foundation.FirstOrder.Bootstrapping.FixedPoint
 # Derivability conditions of standard provability predicate
 -/
 
-namespace FFL.FirstOrder.Arithmetic
+namespace LO.FirstOrder.Arithmetic
 
 open ISigma1 Bootstrapping ProvabilityAbstraction
 
@@ -35,7 +35,7 @@ theorem provable_D2 {σ π} : 𝗜𝚺₁ ⊢ □(σ 🡒 π) 🡒 □σ 🡒 �
 
 variable (T)
 
-noncomputable abbrev _root_.FFL.FirstOrder.Theory.standardProvability : Provability 𝗜𝚺₁ T where
+noncomputable abbrev _root_.LO.FirstOrder.Theory.standardProvability : Provability 𝗜𝚺₁ T where
   prov := provable T
   bew_def := provable_D1
 
@@ -65,7 +65,7 @@ lemma provable_sigma_one_complete [𝗣𝗔⁻ ⪯ T] {σ : ArithmeticSentence} 
 theorem provable_D3 [𝗣𝗔⁻ ⪯ T] {σ : ArithmeticSentence} :
     𝗜𝚺₁ ⊢ □σ 🡒 □□σ := provable_sigma_one_complete (by simp)
 
-open FFL.Entailment FFL.Entailment.FiniteContext
+open LO.Entailment LO.Entailment.FiniteContext
 
 lemma provable_D2_context [𝗜𝚺₁ ⪯ U] {Γ σ π} (hσπ : Γ ⊢[U] □(σ 🡒 π)) (hσ : Γ ⊢[U] □σ) :
     Γ ⊢[U] □π := FiniteContext.of' (weakening inferInstance provable_D2) ⨀ hσπ ⨀ hσ
@@ -86,7 +86,7 @@ instance [𝗣𝗔⁻ ⪯ T] : T.standardProvability.HBL where
 
 instance [T.SoundOnHierarchy 𝚺 1] : T.standardProvability.Kreisel := ⟨fun h ↦ provable_sound h⟩
 
-open FFL.Entailment in
+open LO.Entailment in
 /--
   If `π` is equivalent to some 𝚺₁ sentence `σ`,
   then `π 🡒 □π` is provable in `T` (note: not `𝗜𝚺₁`, compare `provable_sigma_one_complete`)
@@ -100,7 +100,7 @@ lemma provable_sigma_one_complete_of_E {σ π} [𝗜𝚺₁ ⪯ T]
 
 end arithmetic
 
-open FFL.Entailment in
+open LO.Entailment in
 lemma exists_true_but_unprovable_sentence_of_incomplete {T : ArithmeticTheory} (h : Incomplete T) :
     ∃ δ : ArithmeticSentence, ℕ↓[ℒₒᵣ] ⊧ δ ∧ T ⊬ δ := by
   obtain ⟨δ, hδ⟩ := incomplete_def.mp h;
@@ -108,4 +108,4 @@ lemma exists_true_but_unprovable_sentence_of_incomplete {T : ArithmeticTheory} (
   . exact ⟨δ, by assumption, hδ.1⟩
   . exact ⟨∼δ, by simpa, hδ.2⟩
 
-end FFL.FirstOrder.Arithmetic
+end LO.FirstOrder.Arithmetic

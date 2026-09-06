@@ -1,5 +1,6 @@
 module
 
+public import Foundation.FirstOrder.Basic.PrimrecCoding
 public import Foundation.FirstOrder.Bootstrapping.Syntax.Formula.Typed
 public import Foundation.FirstOrder.Bootstrapping.Syntax.Term.Coding
 
@@ -242,6 +243,9 @@ lemma coe_quote_eq_quote' (φ : Semiproposition L n) :
 
 lemma quote_eq_encode_nat (φ : Semiproposition L n) : (⌜φ⌝ : ℕ) = encode φ := by simpa using quote_eq_encode (V := ℕ) φ
 
+lemma primrec_quote_natCast [L.Primcodable] : Primrec λ φ : Semiproposition L n ↦ (⌜φ⌝ : ℕ) :=
+  Primrec.encode.of_eq λ φ ↦ (quote_eq_encode_nat φ).symm
+
 @[simp] lemma quote_inj_iff {φ₁ φ₂ : Semiproposition L n} :
     (⌜φ₁⌝ : V) = ⌜φ₂⌝ ↔ φ₁ = φ₂ := by simp [quote_eq_encode]
 
@@ -301,6 +305,9 @@ lemma coe_quote_eq_quote (σ : Semisentence L n) : (↑(⌜σ⌝ : ℕ) : V) = �
   simp [quote_eq_encode]
 
 lemma quote_eq_encode_nat (σ : Semisentence L n) : (⌜σ⌝ : ℕ) = encode σ := by simpa using quote_eq_encode (V := ℕ) σ
+
+lemma primrec_quote_natCast [L.Primcodable] : Primrec λ σ : Semisentence L n ↦ (⌜σ⌝ : ℕ) :=
+  Primrec.encode.of_eq λ σ ↦ (quote_eq_encode_nat σ).symm
 
 @[simp] lemma val_quote {bv : Fin m → V} {fv : ξ → V} (σ : Semisentence L n) :
     (⌜σ⌝ : ArithmeticSemiterm ξ m).val bv fv = ⌜σ⌝ := by
