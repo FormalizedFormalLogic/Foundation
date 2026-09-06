@@ -60,9 +60,16 @@ lemma not_witnessedBefore_of_provedBefore : T.ProvedBefore θ x → ¬T.Witnesse
   rcases lt_or_ge p w with h | h <;> grind;
 
 
+-- Avoids a v4.33.1 kernel defeq blow-up when unfolding `.rew`/`.val` against `witnessedBefore`.
+private lemma fghSentence'_val_eq :
+    (T.fghSentence' θ).val = (T.witnessedBefore θ).val/[⌜T.fghSentence θ⌝] := by
+  unfold Theory.fghSentence'
+  rw [HierarchySymbol.Semiformula.val_rew]
+
 lemma diagonal_fghSentence :
-    𝗜𝚺₁ ⊢ T.fghSentence θ 🡘 (T.fghSentence' θ).val :=
-  diagonal (T.witnessedBefore θ).val
+    𝗜𝚺₁ ⊢ T.fghSentence θ 🡘 (T.fghSentence' θ).val := by
+  rw [fghSentence'_val_eq]
+  exact diagonal (T.witnessedBefore θ).val
 
 lemma refutable_fghSentence_of_provedBefore :
     𝗜𝚺₁ ⊢ (T.provedBefore θ).val/[⌜T.fghSentence θ⌝] 🡒 ∼T.fghSentence θ := by
