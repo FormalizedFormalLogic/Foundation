@@ -39,7 +39,7 @@ PRs (title and body) are written in English.
 - 🤖 Run `just axiom-audit` and confirm it passes before submitting a PR. This checks sorry-freeness and the axiom allowlist across the project, and CI re-runs it on every PR — a failing audit blocks the merge.
 - Run import-all to keep `Foundation.lean` up to date:
   ```shell
-  lake exe mk_all --module
+  just mk-all
   ```
 - If you added entries to `references.bib`, format it:
   ```shell
