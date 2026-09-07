@@ -401,6 +401,29 @@ instance : Entailment.Axiomatized (Theory L) where
   weakening {𝓢 𝓣 φ} h b :=
     ⟨b.axioms, fun ψ hψ ↦ h (b.axioms_mem ψ hψ), b.derivation⟩
 
+/-- Replaces each used axiom by its proof in another theory.
+This is a routine consequence of implication introduction and modus ponens. -/
+noncomputable def cut {U : Theory L} (h : T ⊢!* U) (b : U ⊢! φ) : T ⊢! φ :=
+  let rec go (l : List (Sentence L)) (hl : ∀ ψ ∈ l, ψ ∈ U) {φ : Sentence L}
+      (d : OneSidedLK.Pullback Derivation Rewriting.emb (⦃φ⦄ + ∼(l : Multiset _))) :
+      T ⊢! φ :=
+    match l with
+    | [] => ofDerivation (OneSidedLK.cast d (by simp))
+    | ψ :: l =>
+      Entailment.mdp
+        (go l (by simp_all) (φ := ψ 🡒 φ)
+          (OneSidedLK.cast
+            (OneSidedLK.or (Γ := ∼(l : Multiset _)) (φ := ∼ψ) (ψ := φ)
+              (OneSidedLK.cast d (by
+                change ⦃φ⦄ + ∼(ψ ::ₘ (l : Multiset _)) = _
+                simp [Multiset.tilde_def, ← Multiset.add_atom_eq_cons, add_comm, add_left_comm])))
+            (by simp [Semiformula.imp_eq]; abel)))
+        (h (hl ψ (by simp)))
+  go b.axioms.toList (by simpa using b.axioms_mem)
+    (OneSidedLK.cast b.derivation (by simp))
+
+noncomputable instance : Entailment.StrongCut (Theory L) (Theory L) := ⟨cut⟩
+
 instance : Entailment.DeductiveExplosion (Theory L) where
   dexp b φ := by
     refine ⟨b.axioms, b.axioms_mem, ?_⟩
