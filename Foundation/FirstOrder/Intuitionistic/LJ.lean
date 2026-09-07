@@ -102,9 +102,9 @@ def eta : (φ : Propositionᵢ L) → ⦃φ⦄ ⊢ᴸᴶ¹ φ
   |        ⊥ => contraction falsum (by simp) (by simp)
   |    φ ⋏ ψ => positiveAnd
       (cast (negativeAnd (Γ := 0) (φ := φ) (ψ := ψ) (Ξ := φ) <|
-        contraction (eta φ) (by simpa using Multiset.subset_add_left) (by simp)))
+        contraction (eta φ) (by simp) (by simp)))
       (cast (negativeAnd (Γ := 0) (φ := φ) (ψ := ψ) (Ξ := ψ) <|
-        contraction (eta ψ) (by simpa using Multiset.subset_add_right) (by simp)))
+        contraction (eta ψ) (by simp) (by simp)))
   |    φ ⋎ ψ => negativeOr (Γ := 0) (φ := φ) (ψ := ψ) (Ξ := φ ⋎ ψ)
       (cast (positiveOrLeft (ψ := ψ) (eta φ)))
       (cast (positiveOrRight (φ := φ) (eta ψ)))
@@ -217,6 +217,42 @@ def rewrite (f : ℕ → SyntacticTerm L) {Γ : Sequent L} {Ξ : Head L} : Γ �
         (by simp [g, Rewriting.shiftsM, free_rewrite_eq, shift_rewrite_eq, Function.comp_def])
         (by cases Ξ <;> simp [g, Head.rewrite, Head.shift, shift_rewrite_eq]))
       |>.cast (by simp [Rew.q_rewrite])
+
+/-- Height of an LJ derivation, with initial rules at height zero (standard definition). -/
+def height : {Γ : Sequent L} → {Ξ : Head L} → Γ ⊢ᴸᴶ¹ Ξ → ℕ
+  | _, _, .identity _ _ => 0
+  | _, _, .cut d₁ d₂ => max (height d₁) (height d₂) + 1
+  | _, _, .contraction d _ _ => height d + 1
+  | _, _, .verum => 0
+  | _, _, .falsum => 0
+  | _, _, .positiveImply d => height d + 1
+  | _, _, .negativeImply d₁ d₂ => max (height d₁) (height d₂) + 1
+  | _, _, .positiveAnd d₁ d₂ => max (height d₁) (height d₂) + 1
+  | _, _, .negativeAnd d => height d + 1
+  | _, _, .positiveOrLeft d => height d + 1
+  | _, _, .positiveOrRight d => height d + 1
+  | _, _, .negativeOr d₁ d₂ => max (height d₁) (height d₂) + 1
+  | _, _, .positiveForall d => height d + 1
+  | _, _, .negativeForall d => height d + 1
+  | _, _, .positiveExists d => height d + 1
+  | _, _, .negativeExists d => height d + 1
+
+/-- Transport along sequent equalities preserves height (routine). -/
+@[simp] lemma height_cast {Γ Δ : Sequent L} {Ξ Λ : Head L}
+    (d : Γ ⊢ᴸᴶ¹ Ξ) (hΓ : Γ = Δ) (hΞ : Ξ = Λ) :
+    height (d.cast hΓ hΞ) = height d := by
+  subst Δ
+  subst Λ
+  rfl
+
+/-- Term substitution preserves derivation height (standard syntactic property). -/
+@[simp] lemma height_rewrite (f : ℕ → SyntacticTerm L) {Γ : Sequent L}
+    {Ξ : Head L} (d : Γ ⊢ᴸᴶ¹ Ξ) : height (d.rewrite f) = height d := by
+  induction d generalizing f <;>
+    simp only [LJ.Derivation.rewrite, height, height_cast]
+  case positiveAnd a b iha ihb =>
+    exact congrArg (· + 1) <| congrArg₂ max (iha f) (ihb f)
+  all_goals aesop
 
 protected def map (d : Γ ⊢ᴸᴶ¹ Ξ) (f : ℕ → ℕ) :
     Γ.map (Rew.rewriteMap f ▹ ·) ⊢ᴸᴶ¹ Ξ.map (Rew.rewriteMap f ▹ ·) :=
