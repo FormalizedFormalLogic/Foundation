@@ -8,6 +8,9 @@
 #let ISigma0 = $Theory(I)Sigma_0$
 #let ISigma1 = $Theory(I)Sigma_1$
 
+// Orientation, chosen with `typst compile --input dir=LR`; see `zoo` in template.typ.
+#let dir = sys.inputs.at("dir", default: "TB")
+
 // Keys are the theories as pretty-printed by `lake exe zoo_arithmetic`; a theory with no entry
 // here is drawn under its pretty-printed name.
 #figure(caption: [Arithmetic Theory Zoo], numbering: none)[
@@ -33,5 +36,6 @@
     ),
     // `𝗣𝗔⁻` is finitely axiomatizable; its single axiom does not deserve a vertex of its own.
     omit: ("{FFL.FirstOrder.Arithmetic.PeanoMinus.finite.toFinset.conj}",),
+    dir: dir,
   )
 ]
