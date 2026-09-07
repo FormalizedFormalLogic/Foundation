@@ -7,7 +7,7 @@ public import Foundation.FirstOrder.Arithmetic.HFS
 # Various induction-related principles in $\mathsf{I}\Sigma_n$
 -/
 
-namespace LO.FirstOrder.Arithmetic
+namespace FFL.FirstOrder.Arithmetic
 
 variable {V : Type*} [ORingStructure V]
 
@@ -206,7 +206,7 @@ variable (m : ℕ) [Fact (1 ≤ m)] [V↓[ℒₒᵣ] ⊧* 𝗜𝗡𝗗𝚺 m]
 
 lemma sigma_or_pi_succ_induction {P Q : V → Prop} (hP : 𝚺-[m]-Predicate P) (hQ : 𝚷-[m]-Predicate Q)
     (zero : P 0 ∨ Q 0) (succ : ∀ x, P x ∨ Q x → P (x + 1) ∨ Q (x + 1)) : ∀ x, P x ∨ Q x := by
-  haveI : V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁ := mod_ISigma_of_le (show 1 ≤ m from Fact.out)
+  have : V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁ := mod_ISigma_of_le (show 1 ≤ m from Fact.out)
   intro a
   have : ∃ p < Exp.exp (a + 1), ∀ x ≤ a, x ∈ p ↔ P x := by
     simpa [lt_succ_iff_le] using finset_comprehension hP (a + 1)
@@ -229,7 +229,7 @@ lemma sigma_or_pi_succ_induction {P Q : V → Prop} (hP : 𝚺-[m]-Predicate P) 
 
 lemma sigma_or_pi_order_induction {P Q : V → Prop} (hP : 𝚺-[m]-Predicate P) (hQ : 𝚷-[m]-Predicate Q)
     (ind : ∀ x, (∀ y < x, P y ∨ Q y) → P x ∨ Q x) : ∀ x, P x ∨ Q x := by
-  haveI : V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁ := mod_ISigma_of_le (show 1 ≤ m from Fact.out)
+  have : V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁ := mod_ISigma_of_le (show 1 ≤ m from Fact.out)
   intro a
   have : ∃ p < Exp.exp (a + 1), ∀ x ≤ a, x ∈ p ↔ P x := by
     simpa [lt_succ_iff_le] using finset_comprehension hP (a + 1)
@@ -241,16 +241,16 @@ lemma sigma_or_pi_order_induction {P Q : V → Prop} (hP : 𝚺-[m]-Predicate P)
     intro x hx
     induction x using ISigma1.sigma1_order_induction
     · clear hp hq ind
-      apply LO.FirstOrder.Arithmetic.HierarchySymbol.Definable.imp
+      apply FFL.FirstOrder.Arithmetic.HierarchySymbol.Definable.imp
       · simp_all only [SigmaPiDelta.alt_sigma, Fin.isValue]
-        apply LO.FirstOrder.Arithmetic.HierarchySymbol.Definable.comp₂
+        apply FFL.FirstOrder.Arithmetic.HierarchySymbol.Definable.comp₂
         · simp [Fin.isValue, HierarchySymbol.DefinableFunction.var]
         · simp [HierarchySymbol.DefinableFunction.const]
-      · apply LO.FirstOrder.Arithmetic.HierarchySymbol.Definable.or
-        · apply LO.FirstOrder.Arithmetic.HierarchySymbol.Definable.comp₂
+      · apply FFL.FirstOrder.Arithmetic.HierarchySymbol.Definable.or
+        · apply FFL.FirstOrder.Arithmetic.HierarchySymbol.Definable.comp₂
           · simp
           · simp
-        · apply LO.FirstOrder.Arithmetic.HierarchySymbol.Definable.comp₂
+        · apply FFL.FirstOrder.Arithmetic.HierarchySymbol.Definable.comp₂
           · simp
           · simp
     case ind z ih =>
@@ -264,4 +264,4 @@ lemma sigma_or_pi_order_induction {P Q : V → Prop} (hP : 𝚺-[m]-Predicate P)
 
 end Induction
 
-end LO.FirstOrder.Arithmetic
+end FFL.FirstOrder.Arithmetic

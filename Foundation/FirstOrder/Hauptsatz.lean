@@ -11,7 +11,7 @@ Main reference: Jeremy Avigad, Algebraic proofs of cut elimination [Avi01]
 
 @[expose] public section
 
-namespace LO.FirstOrder.Derivation
+namespace FFL.FirstOrder.Derivation
 
 variable {L : Language}
 
@@ -325,7 +325,8 @@ def sound [L.DecidableEq] {Γ : LJ.Sequent L} {Ξ : LJ.Head L}
     all_goals simp [LJ.Derivation.height]
     all_goals try omega
     all_goals
-      exact Nat.lt_succ_iff.mpr <| Nat.le_of_eq <| LJ.Derivation.height_rewrite (t :>ₙ fun x ↦ &x) d
+      exact Nat.lt_succ_iff.mpr <| Nat.le_of_eq <|
+        (LJ.Derivation.height_cast _ _ _).trans (LJ.Derivation.height_rewrite (t :>ₙ fun x ↦ &x) d)
 
 def ljSound [L.DecidableEq] {φ : Propositionᵢ L} (d : 𝐋𝐉¹ ⊢! φ) : ⊩ φ :=
   fun p ↦ sound d p fun _ h ↦ by simp at h

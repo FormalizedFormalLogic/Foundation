@@ -8,20 +8,20 @@ public import Foundation.Vorspiel.Multiset
 /-!
 # Rewriting
 
-term/formula morphisms such as rewritings, substitutions, and embeddings are handled by the structure `LO.FirstOrder.Rew`.
-- `LO.FirstOrder.Rew.rewrite f` is a rewriting of the free variables occurring in a term by `f : ξ₁ → Semiterm L ξ₂ n`.
-- `LO.FirstOrder.Rew.subst v` is a substitution of the bounded variables occurring in a term by `v : Fin n → Semiterm L ξ n'`.
-- `LO.FirstOrder.Rew.bShift` is a transformation of the bounded variables occurring in a term by `#x ↦ #(Fin.succ x)`.
-- `LO.FirstOrder.Rew.shift` is a transformation of the free variables occurring in a term by `&x ↦ &(x + 1)`.
-- `LO.FirstOrder.Rew.emb` is a embedding of a term with no free variables.
+term/formula morphisms such as rewritings, substitutions, and embeddings are handled by the structure `FFL.FirstOrder.Rew`.
+- `FFL.FirstOrder.Rew.rewrite f` is a rewriting of the free variables occurring in a term by `f : ξ₁ → Semiterm L ξ₂ n`.
+- `FFL.FirstOrder.Rew.subst v` is a substitution of the bounded variables occurring in a term by `v : Fin n → Semiterm L ξ n'`.
+- `FFL.FirstOrder.Rew.bShift` is a transformation of the bounded variables occurring in a term by `#x ↦ #(Fin.succ x)`.
+- `FFL.FirstOrder.Rew.shift` is a transformation of the free variables occurring in a term by `&x ↦ &(x + 1)`.
+- `FFL.FirstOrder.Rew.emb` is a embedding of a term with no free variables.
 
-Rewritings `LO.FirstOrder.Rew` is naturally converted to formula rewritings by `LO.FirstOrder.Rew.hom`.
+Rewritings `FFL.FirstOrder.Rew` is naturally converted to formula rewritings by `FFL.FirstOrder.Rew.hom`.
 
 -/
 
 @[expose] public section
 
-namespace LO
+namespace FFL
 
 namespace FirstOrder
 
@@ -84,32 +84,32 @@ def bindAux (b : Fin n₁ → Semiterm L ξ₂ n₂) (e : ξ₁ → Semiterm L �
   |       &x => e x
   | func f v => func f (fun i => bindAux b e (v i))
 
-/-- `LO.FirstOrder.Rew.bind f` is a substitution of the bound variables occurring in a term by `b : Fin n₁ → Semiterm L ξ₂ n₂`, and the free variables occurring in a term by `e : ξ₁ → Semiterm L ξ₂ n₂`. -/
+/-- `FFL.FirstOrder.Rew.bind f` is a substitution of the bound variables occurring in a term by `b : Fin n₁ → Semiterm L ξ₂ n₂`, and the free variables occurring in a term by `e : ξ₁ → Semiterm L ξ₂ n₂`. -/
 def bind (b : Fin n₁ → Semiterm L ξ₂ n₂) (e : ξ₁ → Semiterm L ξ₂ n₂) : Rew L ξ₁ n₁ ξ₂ n₂ where
   toFun := bindAux b e
   func'' := fun _ _ => rfl
 
-/-- `LO.FirstOrder.Rew.rewrite f` is a substitution of the free variables occurring in a term by `f : ξ₁ → Semiterm L ξ₂ n`. -/
+/-- `FFL.FirstOrder.Rew.rewrite f` is a substitution of the free variables occurring in a term by `f : ξ₁ → Semiterm L ξ₂ n`. -/
 def rewrite (f : ξ₁ → Semiterm L ξ₂ n) : Rew L ξ₁ n ξ₂ n := bind Semiterm.bvar f
 
-/-- `LO.FirstOrder.Rew.rewriteMap` f is a substitution of the free variables occurring in a term by `e : ξ₁ → ξ₂`. -/
+/-- `FFL.FirstOrder.Rew.rewriteMap` f is a substitution of the free variables occurring in a term by `e : ξ₁ → ξ₂`. -/
 def rewriteMap (e : ξ₁ → ξ₂) : Rew L ξ₁ n ξ₂ n := rewrite (fun m => &(e m))
 
 def map (b : Fin n₁ → Fin n₂) (e : ξ₁ → ξ₂) : Rew L ξ₁ n₁ ξ₂ n₂ :=
   bind (fun n => #(b n)) (fun m => &(e m))
 
-/-- `LO.FirstOrder.Rew.subst v` is a substitution of the bound variables occurring in a term by `v : Fin n → Semiterm L ξ n'`. -/
+/-- `FFL.FirstOrder.Rew.subst v` is a substitution of the bound variables occurring in a term by `v : Fin n → Semiterm L ξ n'`. -/
 def subst {n'} (v : Fin n → Semiterm L ξ n') : Rew L ξ n ξ n' :=
   bind v fvar
 
-/-- `LO.FirstOrder.Rew.emb` is a embedding of a term with no free variables. It can be thought of as a cast from `Semiterm L Empty n` to `Semiterm L ξ n` for any type `ξ`. -/
+/-- `FFL.FirstOrder.Rew.emb` is a embedding of a term with no free variables. It can be thought of as a cast from `Semiterm L Empty n` to `Semiterm L ξ n` for any type `ξ`. -/
 def emb {o : Type v₁} [h : IsEmpty o] {ξ : Type v₂} {n} : Rew L o n ξ n := map id h.elim
 
 abbrev embs {o : Type v₁} [IsEmpty o] {n} : Rew L o n ℕ n := emb
 
 def empty {o : Type v₁} [h : IsEmpty o] {ξ : Type v₂} {n} : Rew L o 0 ξ n := map Fin.elim0 h.elim
 
-/-- `LO.FirstOrder.Rew.bShift` is a transformation of the bounded variables occurring in a term by `#x ↦ #(Fin.succ x)`. -/
+/-- `FFL.FirstOrder.Rew.bShift` is a transformation of the bounded variables occurring in a term by `#x ↦ #(Fin.succ x)`. -/
 def bShift : Rew L ξ n ξ (n + 1) :=
   map Fin.succ id
 
@@ -122,8 +122,8 @@ def cast {n n' : ℕ} (h : n = n') : Rew L ξ n ξ n' :=
 def castLE {n n' : ℕ} (h : n ≤ n') : Rew L ξ n ξ n' :=
   map (Fin.castLE h) id
 
-/-- `LO.FirstOrder.Rew.embSubsts v` is a substitution of the bound variables occurring in a term with no free variables by `v : Fin n → Semiterm L ξ n'`.
-This closely resembles `LO.FirstOrder.Rew.subst`, however the term is required to have free variables of type `Empty`. -/
+/-- `FFL.FirstOrder.Rew.embSubsts v` is a substitution of the bound variables occurring in a term with no free variables by `v : Fin n → Semiterm L ξ n'`.
+This closely resembles `FFL.FirstOrder.Rew.subst`, however the term is required to have free variables of type `Empty`. -/
 def embSubsts (v : Fin k → Semiterm L ξ n) : Rew L Empty k ξ n := Rew.bind v Empty.elim
 
 protected def q (ω : Rew L ξ₁ n₁ ξ₂ n₂) : Rew L ξ₁ (n₁ + 1) ξ₂ (n₂ + 1) :=
@@ -330,6 +330,10 @@ section castLE
 
 @[simp] lemma castLe_eq_id {h} : (castLE h : Rew L ξ n ξ n) = Rew.id := by ext <;> simp
 
+@[simp] lemma castLE_comp {h₁ : n₁ ≤ n₂} {h₂ : n₂ ≤ n₃} :
+    (castLE h₂).comp (castLE h₁) = (castLE (h₁.trans h₂) : Rew L ξ n₁ ξ n₃) := by
+  ext x <;> simp [comp_app]
+
 end castLE
 
 section embSubsts
@@ -464,7 +468,7 @@ section Syntactic
   #0 #1 ... #(n - 1) &1 &2 &3 ...
 -/
 
-/-- `LO.FirstOrder.Rew.shift` is a transformation of the free variables occurring in the term by `&x ↦ &(x + 1)`. -/
+/-- `FFL.FirstOrder.Rew.shift` is a transformation of the free variables occurring in the term by `&x ↦ &(x + 1)`. -/
 def shift : SyntacticRew L n n := map id Nat.succ
 
 /-
@@ -838,12 +842,20 @@ lemma smul_ext' {ω₁ ω₂ : Rew L ξ n₁ ζ n₂} (h : ω₁ = ω₂) {φ : 
     ω ▹ (∃¹^[k] φ) = ∃¹^[k] (ω.qpow k ▹ φ : G (n₂ + k)) := by
   induction k <;> simp [exsItr_succ, *]
 
+@[simp] lemma smul_quant (ω : Rew L ξ n₁ ζ n₂) (Γ : Polarity) (φ : F (n₁ + 1)) :
+    ω ▹ Γ.quant φ = Γ.quant (ω.q ▹ φ) := by
+  rcases Γ <;> simp
+
+@[simp] lemma smul_quantItr (ω : Rew L ξ n₁ ζ n₂) (Γ : Polarity) (φ : F (n₁ + k)) :
+    ω ▹ Polarity.quantItr Γ k φ = Polarity.quantItr Γ k (ω.qpow k ▹ φ : G (n₂ + k)) := by
+  induction k <;> simp [Polarity.quantItr_succ', *]
+
 abbrev subst [Rewriting L ξ F ξ F] (φ : F n₁) (w : Fin n₁ → Semiterm L ξ n₂) : F n₂ := Rew.subst w ▹ φ
 
-/-- Applies the substitution `LO.FirstOrder.Rew.subst w` to a formula. This substitutes the bound variables occurring in the formula by `w : Fin n₁ → Semiterm L ξ n₂`. -/
-infix:90 " ⇜ " => LO.FirstOrder.Rewriting.subst
+/-- Applies the substitution `FFL.FirstOrder.Rew.subst w` to a formula. This substitutes the bound variables occurring in the formula by `w : Fin n₁ → Semiterm L ξ n₂`. -/
+infix:90 " ⇜ " => FFL.FirstOrder.Rewriting.subst
 
-/-- Applies the substitution `LO.FirstOrder.Rew.shift` to a formula. This substitutes each free variable `&x` with `&(x + 1)`. -/
+/-- Applies the substitution `FFL.FirstOrder.Rew.shift` to a formula. This substitutes each free variable `&x` with `&(x + 1)`. -/
 abbrev shift [Rewriting L ℕ F ℕ F] : F n →ˡᶜ F n := app Rew.shift
 
 abbrev free [Rewriting L ℕ F ℕ F] : F (n + 1) →ˡᶜ F n := app Rew.free
@@ -852,8 +864,8 @@ abbrev fix [Rewriting L ℕ F ℕ F] : F n →ˡᶜ F (n + 1) := app Rew.fix
 
 def shifts [Rewriting L ℕ F ℕ F] (Γ : List (F n)) : List (F n) := Γ.map Rewriting.shift
 
-/-- Applies the substitution `LO.FirstOrder.Rew.shift` to each formula in a list of formulas. This substitutes each free variable `&x` with `&(x + 1)`. -/
-scoped[LO.FirstOrder] postfix:max "⁺" => FirstOrder.Rewriting.shifts
+/-- Applies the substitution `FFL.FirstOrder.Rew.shift` to each formula in a list of formulas. This substitutes each free variable `&x` with `&(x + 1)`. -/
+scoped[FFL.FirstOrder] postfix:max "⁺" => FirstOrder.Rewriting.shifts
 
 @[simp] lemma shifts_nil [Rewriting L ℕ F ℕ F] : ([] : List (F n))⁺ = [] := by rfl
 
@@ -864,7 +876,7 @@ scoped[LO.FirstOrder] postfix:max "⁺" => FirstOrder.Rewriting.shifts
 
 def shiftsM [Rewriting L ℕ F ℕ F] (Γ : Multiset (F n)) : Multiset (F n) := Γ.map Rewriting.shift
 
-scoped[LO.FirstOrder] postfix:max "⁺ᵐ" => FirstOrder.Rewriting.shiftsM
+scoped[FFL.FirstOrder] postfix:max "⁺ᵐ" => FirstOrder.Rewriting.shiftsM
 
 @[simp] lemma shiftsM_empty [Rewriting L ℕ F ℕ F] : (0 : Multiset (F n))⁺ᵐ = 0 := by rfl
 
@@ -918,6 +930,28 @@ class LawfulSyntacticRewriting (L : outParam Language) (S : ℕ → Type*) [LCWQ
   ReflectiveRewriting L ℕ S, TransitiveRewriting L ℕ S ℕ S ℕ S, InjMapRewriting L ℕ S ℕ S
 
 attribute [simp] ReflectiveRewriting.id_app
+
+namespace Rewriting
+
+variable [LCWQ F] [Rewriting L ξ F ξ F] [ReflectiveRewriting L ξ F]
+
+lemma quantItr_succ_smul_castLE {φ : F ((n + 1) + s)} :
+    Polarity.quantItr Γ (s + 1)
+      ((Rew.castLE (Nat.succ_add n s).le : Rew L ξ ((n + 1) + s) ξ (n + (s + 1))) ▹ φ)
+      = Γ.quant (Polarity.quantItr Γ.alt s φ) := by
+  induction s with
+  | zero => simp [Polarity.quantItr_succ']
+  | succ s ih =>
+    have hcast :
+        (Rew.castLE (Nat.succ_add n (s + 1)).le : Rew L ξ ((n + 1) + (s + 1)) ξ (n + ((s + 1) + 1)))
+          = (Rew.castLE (Nat.succ_add n s).le : Rew L ξ ((n + 1) + s) ξ (n + (s + 1))).q := by
+      simp
+    rw [Polarity.quantItr_succ', hcast, ← smul_quant]
+    rw [ih]
+    congr 1
+    rw [Polarity.quantItr_succ', Polarity.altItr_succ']
+
+end Rewriting
 
 namespace LawfulSyntacticRewriting
 
@@ -1090,6 +1124,6 @@ end Rewriting
 
 end FirstOrder
 
-end LO
+end FFL
 
 end

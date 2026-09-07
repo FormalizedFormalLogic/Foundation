@@ -3,7 +3,7 @@ module
 public import Foundation.FirstOrder.SetTheory.Universe
 
 @[expose] public section
-namespace LO.FirstOrder.SetTheory
+namespace FFL.FirstOrder.SetTheory
 
 abbrev TransitiveModel.{u} := Set Universe.{u}
 
@@ -21,4 +21,4 @@ noncomputable def model [Small U] : Universe := .mk U
 
 end TransitiveModel
 
-end LO.FirstOrder.SetTheory
+end FFL.FirstOrder.SetTheory

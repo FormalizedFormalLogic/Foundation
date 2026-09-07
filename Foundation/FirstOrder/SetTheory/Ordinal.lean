@@ -9,7 +9,7 @@ public import Foundation.FirstOrder.SetTheory.Z
 reference: Ralf Schindler, "Set Theory, Exploring Independence and Truth" [Sch14]
 -/
 
-namespace LO.FirstOrder.SetTheory
+namespace FFL.FirstOrder.SetTheory
 
 variable {V : Type*} [SetStructure V] [Nonempty V] [V↓[ℒₛₑₜ] ⊧* 𝗭]
 
@@ -472,4 +472,4 @@ noncomputable def left (x : V) : V := Classical.choose! <| left_existsUnique R x
 
 end SetLike
 
-end LO.FirstOrder.SetTheory
+end FFL.FirstOrder.SetTheory

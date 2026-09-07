@@ -10,7 +10,7 @@ public import Mathlib.Data.ENat.Basic
 
 noncomputable section
 
-namespace LO.FirstOrder.Arithmetic
+namespace FFL.FirstOrder.Arithmetic
 
 inductive RobinsonQ : ArithmeticTheory
   | equal : ∀ φ ∈ 𝗘𝗤 ℒₒᵣ, RobinsonQ φ
@@ -325,4 +325,4 @@ instance : 𝗥₀ ⪱ 𝗤 :=
   Entailment.StrictlyWeakerThan.of_unprovable_provable
     R0.unprovable_addZero (Entailment.by_axm RobinsonQ.addZero)
 
-end LO.FirstOrder.Arithmetic
+end FFL.FirstOrder.Arithmetic

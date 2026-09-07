@@ -183,6 +183,28 @@ lemma of_graph_rePred {g : α → ℕ}
 
 end ComputablePred
 
+namespace Nat
+
+variable {f : ℕ → ℕ}
+
+def boundedMax (f : ℕ → ℕ) (n : ℕ) : ℕ := Nat.rec (f 0) (λ k ih ↦ max ih (f (k + 1))) n
+
+lemma computable_boundedMax (hf : Computable f) : Computable (boundedMax f) := by
+  have h : Computable λ q : ℕ × (ℕ × ℕ) ↦ max q.2.2 (f (q.2.1 + 1)) :=
+    Computable₂.comp Primrec.nat_max.to_comp (Computable.snd.comp Computable.snd)
+      (hf.comp (Computable.succ.comp (Computable.fst.comp Computable.snd)))
+  exact Computable.nat_rec Computable.id (Computable.const (f 0)) h.to₂
+
+lemma le_boundedMax {k n : ℕ} (h : k ≤ n) : f k ≤ boundedMax f n := by
+  induction n with
+  | zero => simp_all [boundedMax]
+  | succ n ih =>
+    rcases Nat.eq_or_lt_of_le h with rfl | h
+    · simp [boundedMax]
+    · exact (ih (Nat.le_of_lt_succ h)).trans (Nat.le_max_left _ _)
+
+end Nat
+
 section
 open Primrec
 

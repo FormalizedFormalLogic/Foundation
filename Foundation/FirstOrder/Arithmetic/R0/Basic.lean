@@ -10,7 +10,7 @@ public import Foundation.FirstOrder.Arithmetic.Basic
 
 noncomputable section
 
-namespace LO.FirstOrder.Arithmetic
+namespace FFL.FirstOrder.Arithmetic
 
 inductive R0 : ArithmeticTheory
   | equal : ∀ φ ∈ 𝗘𝗤 ℒₒᵣ, R0 φ
@@ -144,7 +144,7 @@ theorem sigma_one_completeness {σ : ArithmeticSentence} (hσ : Hierarchy 𝚺 1
     ℕ↓[ℒₒᵣ] ⊧ σ → T ⊢ σ := fun H =>
   haveI : 𝗘𝗤 _ ⪯ T := Entailment.WeakerThan.trans (𝓣 := 𝗥₀) inferInstance inferInstance
   complete.{0} _ _ <| fun M _ _ ↦ by
-    haveI : M↓[ℒₒᵣ] ⊧* 𝗥₀ := ModelsTheory.of_provably_subtheory M 𝗥₀ T inferInstance
+    have : M↓[ℒₒᵣ] ⊧* 𝗥₀ := ModelsTheory.of_provably_subtheory M 𝗥₀ T inferInstance
     exact R0.model_complete hσ H
 
 open Classical in
@@ -244,6 +244,6 @@ lemma unprovable_addZero : 𝗥₀ ⊬ “∀ x, x + 0 = x” :=
 
 end R0
 
-end LO.FirstOrder.Arithmetic
+end FFL.FirstOrder.Arithmetic
 
 end

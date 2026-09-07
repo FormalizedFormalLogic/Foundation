@@ -4,7 +4,7 @@ public import Foundation.FirstOrder.Basic.Semantics.Semantics
 
 @[expose] public section
 
-namespace LO
+namespace FFL
 
 namespace FirstOrder
 
@@ -626,7 +626,7 @@ variable {L M}
   exact h
 
 @[simp] lemma exp_eq_of_lang [L.Exp] [Exp M] [Structure.Exp L M] {v : Fin 1 → M} :
-    Structure.func (L := L) Language.Exp.exp v = LO.Exp.exp (v 0) := by
+    Structure.func (L := L) Language.Exp.exp v = FFL.Exp.exp (v 0) := by
   have h := Structure.Exp.exp (L := L) (v 0)
   simp only [←Matrix.fun_eq_vec_one] at h
   exact h
@@ -700,6 +700,6 @@ end Semiterm
 
 end FirstOrder
 
-end LO
+end FFL
 
 end

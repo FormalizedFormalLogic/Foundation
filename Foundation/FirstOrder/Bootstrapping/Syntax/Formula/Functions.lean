@@ -4,7 +4,7 @@ public import Foundation.FirstOrder.Bootstrapping.Syntax.Formula.Basic
 public import Foundation.FirstOrder.Bootstrapping.Syntax.Term.Functions
 
 @[expose] public section
-namespace LO.FirstOrder.Arithmetic.Bootstrapping
+namespace FFL.FirstOrder.Arithmetic.Bootstrapping
 
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 
@@ -417,8 +417,15 @@ noncomputable def construction : UformulaRec1.Construction V (blueprint L) where
   or_defined := .mk fun v ↦ by simp [blueprint]
   all_defined := .mk fun v ↦ by simp [blueprint]
   exs_defined := .mk fun v ↦ by simp [blueprint]
-  allChanges_defined := .mk fun v ↦ by simp [blueprint]
-  exChanges_defined := .mk fun v ↦ by simp [blueprint]
+  -- Letting `simp` apply `Semiformula.eval_substs` here overflows memory on Lean v4.33.1.
+  allChanges_defined := .mk fun v ↦ by
+    simp only [blueprint, HierarchySymbol.Semiformula.val_mkSigma]
+    rw [Semiformula.eval_substs]
+    simp [qVec.defined.df]
+  exChanges_defined := .mk fun v ↦ by
+    simp only [blueprint, HierarchySymbol.Semiformula.val_mkSigma]
+    rw [Semiformula.eval_substs]
+    simp [qVec.defined.df]
 
 end Substs
 
@@ -998,7 +1005,7 @@ end complexity
 
 @[simp] lemma lt_max_succ_right (a b : V) : b < max a b + 1 := lt_succ_iff_le.mpr <| by simp
 
-/-! A structural induction correspondence to `LO.FirstOrder.Semiformula.formulaRec`.  -/
+/-! A structural induction correspondence to `FFL.FirstOrder.Semiformula.formulaRec`.  -/
 lemma IsFormula.sigma1_structural_induction {P : V → Prop} (hP : 𝚺₁-Predicate P)
     (hrel : ∀ k r v, L.IsRel k r → IsTermVec L k v → P (^rel k r v))
     (hnrel : ∀ k r v, L.IsRel k r → IsTermVec L k v → P (^nrel k r v))
@@ -1150,7 +1157,7 @@ def Language.IsFVFree (n p : V) : Prop := IsSemiformula L n p ∧ shift L p = p
 
 section
 
-def _root_.LO.FirstOrder.Arithmetic.LDef.isFVFreeDef (pL : LDef) : 𝚺₁.Semisentence 2 :=
+def _root_.FFL.FirstOrder.Arithmetic.LDef.isFVFreeDef (pL : LDef) : 𝚺₁.Semisentence 2 :=
   .mkSigma “n p | !(isSemiformula L).sigma n p ∧ !pshift LDef p p”
 
 lemma isFVFree_defined : 𝚺₁-Relation L.IsFVFree via pL.isFVFreeDef := by
@@ -1238,16 +1245,16 @@ notation:78 x:78 " ^≮ " y:79 => qqNLT x y
 @[simp] lemma lt_qqNLT_right (x y : V) : y < x ^≮ y := by
   simpa using! nth_lt_qqNRel_of_lt (i := 1) (k := 2) (r := (ltIndex : V)) (v := ?[x, y]) (by simp)
 
-def _root_.LO.FirstOrder.Arithmetic.qqEQDef : 𝚺₁.Semisentence 3 :=
+def _root_.FFL.FirstOrder.Arithmetic.qqEQDef : 𝚺₁.Semisentence 3 :=
   .mkSigma “p x y. ∃ v, !mkVec₂Def v x y ∧ !qqRelDef p 2 ↑eqIndex v”
 
-def _root_.LO.FirstOrder.Arithmetic.qqNEQDef : 𝚺₁.Semisentence 3 :=
+def _root_.FFL.FirstOrder.Arithmetic.qqNEQDef : 𝚺₁.Semisentence 3 :=
   .mkSigma “p x y. ∃ v, !mkVec₂Def v x y ∧ !qqNRelDef p 2 ↑eqIndex v”
 
-def _root_.LO.FirstOrder.Arithmetic.qqLTDef : 𝚺₁.Semisentence 3 :=
+def _root_.FFL.FirstOrder.Arithmetic.qqLTDef : 𝚺₁.Semisentence 3 :=
   .mkSigma “p x y. ∃ v, !mkVec₂Def v x y ∧ !qqRelDef p 2 ↑ltIndex v”
 
-def _root_.LO.FirstOrder.Arithmetic.qqNLTDef : 𝚺₁.Semisentence 3 :=
+def _root_.FFL.FirstOrder.Arithmetic.qqNLTDef : 𝚺₁.Semisentence 3 :=
   .mkSigma “p x y. ∃ v, !mkVec₂Def v x y ∧ !qqNRelDef p 2 ↑ltIndex v”
 
 instance qqEQ_defined : 𝚺₁-Function₂ (qqEQ : V → V → V) via qqEQDef := .mk fun v ↦ by simp [qqEQDef, numeral_eq_natCast, qqEQ]
@@ -1290,4 +1297,4 @@ lemma substs_eq {t u : V} (ht : IsUTerm ℒₒᵣ t) (hu : IsUTerm ℒₒᵣ u) 
 
 end Arithmetic
 
-end LO.FirstOrder.Arithmetic.Bootstrapping
+end FFL.FirstOrder.Arithmetic.Bootstrapping

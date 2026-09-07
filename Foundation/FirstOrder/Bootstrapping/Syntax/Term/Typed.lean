@@ -9,7 +9,7 @@ public import Foundation.FirstOrder.Bootstrapping.Syntax.Term.Functions
 
 -/
 
-namespace LO.FirstOrder.Arithmetic
+namespace FFL.FirstOrder.Arithmetic
 
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 
@@ -260,7 +260,7 @@ namespace Arithmetic
 -- already contains it; renaming would break the widely-used public API
 -- (`Bootstrapping.Arithmetic.*`). Suppress the new dupNamespace linter for the
 -- declarations in this namespace (the option is scoped by `namespace`/`end` and
--- reverts automatically at `end LO.FirstOrder.Arithmetic.Bootstrapping.Arithmetic`).
+-- reverts automatically at `end FFL.FirstOrder.Arithmetic.Bootstrapping.Arithmetic`).
 set_option linter.dupNamespace false
 
 variable {k n m : ℕ}
@@ -395,4 +395,4 @@ lemma semiterm_induction (Γ) {n : V} {P : Semiterm V ℒₒᵣ n → isSemiterm
         (by simpa using ih 1 (by simp) (by simp [ht₂]))
 -/
 
-end LO.FirstOrder.Arithmetic.Bootstrapping.Arithmetic
+end FFL.FirstOrder.Arithmetic.Bootstrapping.Arithmetic

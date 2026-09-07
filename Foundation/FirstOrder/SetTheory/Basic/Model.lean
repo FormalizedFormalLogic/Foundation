@@ -5,7 +5,7 @@ public import Foundation.FirstOrder.SetTheory.Basic.Axioms
 @[expose] public section
 /-! # Basic properties of model of set theory-/
 
-namespace LO.FirstOrder.SetTheory
+namespace FFL.FirstOrder.SetTheory
 
 variable {V : Type*} [SetStructure V]
 
@@ -107,4 +107,4 @@ lemma submodel_mem_iff {x y : U} :
 
 end
 
-end LO.FirstOrder.SetTheory
+end FFL.FirstOrder.SetTheory

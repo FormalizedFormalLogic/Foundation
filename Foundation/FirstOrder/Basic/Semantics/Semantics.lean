@@ -1,6 +1,7 @@
 module
 
 public import Foundation.FirstOrder.Basic.Syntax.Rew
+public import Foundation.Vorspiel.Fin.Basic
 public import Foundation.Vorspiel.IsEmpty
 public import Foundation.Vorspiel.Empty
 
@@ -12,7 +13,7 @@ public import Foundation.Vorspiel.Empty
 This file defines the structure and the evaluation of terms and formulas by Tarski's truth definition.
 -/
 
-namespace LO
+namespace FFL
 
 namespace FirstOrder
 
@@ -356,6 +357,18 @@ lemma eval_bShift' (φ : Semiformula L ξ n) :
     Eval b f (φ ⇜ w) ↔ φ.Eval (Semiterm.val b f ∘ w) f := by
   simp [eval_rew, Function.comp_def]
 
+lemma eval_insert1 {n} (φ : Semiformula L ξ (n + 1)) (u w : M) (e : Fin n → M) :
+    Eval (u :> w :> e) f (φ ⇜ (#0 :> (#·.succ.succ))) ↔ Eval (u :> e) f φ := by
+  simp only [eval_substs]
+  exact Iff.of_eq (congrArg (fun c => Eval c f φ)
+    (funext fun i => by induction i using Fin.cases <;> simp))
+
+lemma eval_insert2 {n} (φ : Semiformula L ξ (n + 2)) (u x w : M) (e : Fin n → M) :
+    Eval (u :> x :> w :> e) f (φ ⇜ (#0 :> #1 :> (#·.succ.succ.succ))) ↔ Eval (u :> x :> e) f φ := by
+  simp only [eval_substs, Function.comp_def]
+  exact Iff.of_eq (congrArg (fun c => Eval c f φ)
+    (Fin.funext_two (by simp) (by simp) fun i => by simp))
+
 @[simp] lemma eval_emb {f : ξ → M} (φ : Semiformula L Empty n) :
     Eval b f (Rewriting.emb (ξ := ξ) φ : Semiformula L ξ n) ↔ Eval b Empty.elim φ := by
   simp [eval_rew, Function.comp_def, Empty.eq_elim]
@@ -450,7 +463,7 @@ lemma eval_toEmpty [DecidableEq ξ] {n} {φ : Semiformula L ξ n} (hp : φ.freeV
 
 @[simp] lemma eval_univCl [Nonempty M] (φ : Proposition L) :
     Realize M φ.univCl ↔ ∀ f : ℕ → M, Evalf f φ := by
-  haveI : Inhabited M := Classical.inhabited_of_nonempty inferInstance
+  have : Inhabited M := Classical.inhabited_of_nonempty inferInstance
   simp [Semiformula.univCl, ←eval_toEmpty (f := default)]
 
 @[simp] lemma eval_enumerateFVar_idxOfFVar_eq_id [DecidableEq M] [Inhabited M] (φ : Semiformula L M n) (v) :
@@ -607,7 +620,7 @@ variable {L₁ L₂ : Language} {Φ : L₁ →ᵥ L₂}
 section lMap
 variable {M : Type u} {s₂ : Structure L₂ M} {n} {b : Fin n → M} {f : ξ → M}
 
-lemma eval_lMap [Nonempty M] {φ : Semiformula L₁ ξ n} :
+lemma eval_lMap {φ : Semiformula L₁ ξ n} :
     Eval (s := s₂) b f (lMap Φ φ) ↔ Eval (s := s₂.lMap Φ) b f φ := by
   induction φ using rec' <;>
     simp [*, Semiterm.val_lMap, lMap_rel, lMap_nrel, eval_rel, eval_nrel, Function.comp_def]
@@ -669,6 +682,6 @@ end Structure
 
 end FirstOrder
 
-end LO
+end FFL
 
 end

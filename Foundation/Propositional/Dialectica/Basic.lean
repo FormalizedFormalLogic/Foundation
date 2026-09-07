@@ -8,7 +8,7 @@ public import Foundation.Propositional.Hilbert.Basic
   # Dialectica-like realizableation of intuitionistic propositional logic
 -/
 
-namespace LO.Propositional.Dialectica
+namespace FFL.Propositional.Dialectica
 
 open Formula
 
@@ -98,6 +98,6 @@ lemma NotValid.em (a : α) : ⊮ atom a ⋎ ∼atom a := by
     refine ⟨fun _ ↦ true, ⟨(), (), ()⟩, ?_⟩
     rw [Realizable.or_right]; simp
 
-end LO.Propositional.Dialectica
+end FFL.Propositional.Dialectica
 
 end

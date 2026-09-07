@@ -11,7 +11,7 @@ Main reference: Jeremy Avigad, Algebraic proofs of cut elimination [Avi01]
 
 @[expose] public section
 
-namespace LO.FirstOrder.Derivation.Canonical
+namespace FFL.FirstOrder.Derivation.Canonical
 
 variable {L : Language}
 
@@ -138,7 +138,7 @@ open IsForced
 lemma iff_isForced {φ : Proposition L} {p : ℙ} : p ⊩ᶜ φ ↔ p ⊩ φᴺ := by rfl
 
 lemma dn_neg_iff {φ : Proposition L} {p : ℙ} : p ⊩ᶜ ∼φ ↔ p ⊩ ∼φᴺ := by
-  letI : L.DecidableEq := ⟨fun _ ↦ Classical.decEq _, fun _ ↦ Classical.decEq _⟩
+  let : L.DecidableEq := ⟨fun _ ↦ Classical.decEq _, fun _ ↦ Classical.decEq _⟩
   have e := LJ.Derivation.negDoubleNegation φ
   constructor
   · rintro ⟨h⟩
@@ -182,7 +182,7 @@ lemma complete {φ : Proposition L} : ℙ ∀⊩ᶜ φ ↔ 𝐋𝐊¹ ⊢ φ := 
     have : ¬p ⊩ φᴺ := this p (by simp)
     contradiction
   · intro b
-    letI : L.DecidableEq := ⟨fun _ ↦ Classical.decEq _, fun _ ↦ Classical.decEq _⟩
+    let : L.DecidableEq := ⟨fun _ ↦ Classical.decEq _, fun _ ↦ Classical.decEq _⟩
     exact IsForced.sound <| Provable.gödel_gentzen b
 
 protected lemma refl (φ : Proposition L) (h : 𝐋𝐊¹ ⊬ ∼φ) :
@@ -192,4 +192,4 @@ end IsWeaklyForced
 
 end Canonical
 
-end LO.FirstOrder.Derivation
+end FFL.FirstOrder.Derivation

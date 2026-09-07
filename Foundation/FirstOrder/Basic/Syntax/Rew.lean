@@ -9,18 +9,18 @@ public import Foundation.FirstOrder.Basic.Syntax.Formula
 /-!
 # Rewriting Entailment
 
-term/formula morphisms such as Rewritings, substitutions, and embs are handled by the structure `LO.FirstOrder.Rew`.
-- `LO.FirstOrder.Rew.rewrite f` is a Rewriting of the free variables occurring in the term by `f : ξ₁ → Semiterm L ξ₂ n`.
-- `LO.FirstOrder.Rew.subst v` is a substitution of the bounded variables occurring in the term by `v : Fin n → Semiterm L ξ n'`.
-- `LO.FirstOrder.Rew.bShift` is a transformation of the bounded variables occurring in the term by `#x ↦ #(Fin.succ x)`.
-- `LO.FirstOrder.Rew.shift` is a transformation of the free variables occurring in the term by `&x ↦ &(x + 1)`.
-- `LO.FirstOrder.Rew.emb` is a emb of the term with no free variables.
+term/formula morphisms such as Rewritings, substitutions, and embs are handled by the structure `FFL.FirstOrder.Rew`.
+- `FFL.FirstOrder.Rew.rewrite f` is a Rewriting of the free variables occurring in the term by `f : ξ₁ → Semiterm L ξ₂ n`.
+- `FFL.FirstOrder.Rew.subst v` is a substitution of the bounded variables occurring in the term by `v : Fin n → Semiterm L ξ n'`.
+- `FFL.FirstOrder.Rew.bShift` is a transformation of the bounded variables occurring in the term by `#x ↦ #(Fin.succ x)`.
+- `FFL.FirstOrder.Rew.shift` is a transformation of the free variables occurring in the term by `&x ↦ &(x + 1)`.
+- `FFL.FirstOrder.Rew.emb` is a emb of the term with no free variables.
 
-Rewritings `LO.FirstOrder.Rew` is naturally converted to formula Rewritings by `LO.FirstOrder.Rew.hom`.
+Rewritings `FFL.FirstOrder.Rew` is naturally converted to formula Rewritings by `FFL.FirstOrder.Rew.hom`.
 
 -/
 
-namespace LO
+namespace FFL
 
 namespace FirstOrder
 
@@ -440,7 +440,10 @@ def toEmpty [DecidableEq ξ] {n : ℕ} : (φ : Semiformula L ξ n) → φ.freeVa
   |     ∃¹ φ, h => ∃¹ φ.toEmpty (by simpa using h)
 
 @[simp] lemma emb_toEmpty [DecidableEq ξ] (φ : Semiformula L ξ n) (hp : φ.freeVariables = ∅) : Rewriting.emb (φ.toEmpty hp) = φ := by
-  induction φ using rec' <;> simp [toEmpty, Function.comp_def, *]
+  induction φ using rec' with
+  | hall φ ih => simp only [toEmpty, Rewriting.app_all, Rew.q_emb]; congr 1; exact ih hp
+  | hexs φ ih => simp only [toEmpty, Rewriting.app_exs, Rew.q_emb]; congr 1; exact ih hp
+  | _ => simp [toEmpty, Function.comp_def, *]
 
 @[simp] lemma toEmpty_emb [DecidableEq ξ] (φ : Semisentence L n) : (Rewriting.emb φ : Semiformula L ξ n).toEmpty (by simp) = φ := by
   induction φ using rec' <;> simp [toEmpty, *]
@@ -521,6 +524,6 @@ end lMap
 
 end Semiformula
 
-end LO.FirstOrder
+end FFL.FirstOrder
 
 end

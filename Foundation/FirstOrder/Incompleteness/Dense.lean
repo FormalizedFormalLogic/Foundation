@@ -5,26 +5,7 @@ public import Foundation.Logic.LindenbaumAlgebra
 public import Foundation.Vorspiel.Order.BooleanAlgebra.Iso
 
 @[expose] public section
-namespace LO
-
-namespace Entailment
-
-variable {F S : Type*} [DecidableEq F] [LogicalConnective F] [LogicalNeutral F] [Entailment S F] [AdjunctiveSet F S] [Deduction S]
-         {𝓢 : S} [Entailment.Cl 𝓢]
-
-lemma consistent_cons_of_unprovable_neg (h : 𝓢 ⊬ ∼φ) : Consistent (adjoin φ 𝓢) := by
-  apply consistent_iff_exists_unprovable.mpr;
-  use ⊥;
-  apply deduction_iff.not.mpr;
-  contrapose! h;
-  cl_prover [h];
-
-lemma consistent_cons_of_unprovable (h : 𝓢 ⊬ φ) : Consistent (adjoin (∼φ) 𝓢) := by
-  apply consistent_cons_of_unprovable_neg;
-  contrapose! h;
-  cl_prover [h];
-
-end Entailment
+namespace FFL
 
 namespace Entailment.LindenbaumAlgebra
 
@@ -84,4 +65,4 @@ theorem lindenbaum_iso (T U : ArithmeticTheory)
     Nonempty (LindenbaumAlgebra T ≃o LindenbaumAlgebra U) :=
   iso_of_countable_atomless
 
-end LO
+end FFL

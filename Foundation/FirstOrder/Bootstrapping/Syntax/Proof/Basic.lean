@@ -3,7 +3,7 @@ module
 public import Foundation.FirstOrder.Bootstrapping.Syntax.Theory
 
 @[expose] public section
-namespace LO
+namespace FFL
 
 open FirstOrder Arithmetic
 
@@ -202,6 +202,12 @@ def axmGraph : 𝚺₀.Semisentence 3 :=
   .mkSigma “y s p. ∃ y' < y, !pair₃Def y' s 9 p ∧ y = y' + 1”
 
 instance axm_defined : 𝚺₀-Function₂ (axm : V → V → V) via axmGraph := .mk fun v ↦ by simp_all [axmGraph, numeral_eq_natCast, axm]
+
+instance (ℌ : HierarchySymbol) : ℌ-Function₄ (orIntro : V → V → V → V → V) :=
+  .of_zero orIntro.defined.to_definable
+
+instance (ℌ : HierarchySymbol) : ℌ-Function₂ (axm : V → V → V) :=
+  .of_zero axm_defined.to_definable
 
 @[simp] lemma seq_lt_axL (s p : V) : s < axL s p := le_iff_lt_succ.mp <| le_pair_left _ _
 @[simp] lemma arity_lt_axL (s p : V) : p < axL s p :=
@@ -487,7 +493,10 @@ noncomputable abbrev provabilityPred (σ : Sentence L) : ArithmeticSentence := (
 noncomputable def provabilityPred' (σ : Sentence L) : 𝚺₁.Sentence := .mkSigma
   “!(provable T) !!(⌜σ⌝)”
 
-@[simp] lemma provabilityPred'_val (σ : Sentence L) : (provabilityPred' T σ).val = provabilityPred T σ := by rfl
+-- Proving this by `rfl` overflows memory on Lean v4.33.1.
+@[simp] lemma provabilityPred'_val (σ : Sentence L) : (provabilityPred' T σ).val = provabilityPred T σ := by
+  unfold provabilityPred' provabilityPred
+  simp only [HierarchySymbol.Semiformula.val_mkSigma]
 
 variable {T}
 
@@ -546,7 +555,7 @@ lemma case_iff {d : V} :
       (∃ s p, d = axm s p ∧ p ∈ s ∧ p ∈ T.Δ₁Class) ) :=
   (construction T).case
 
-alias ⟨case, _root_.LO.FirstOrder.Arithmetic.Bootstrapping.Derivation.mk⟩ := case_iff
+alias ⟨case, _root_.FFL.FirstOrder.Arithmetic.Bootstrapping.Derivation.mk⟩ := case_iff
 
 lemma induction1 (Γ) {P : V → Prop} (hP : Γ-[1]-Predicate P)
     {d} (hd : Derivation T d)
@@ -588,7 +597,7 @@ lemma induction1 (Γ) {P : V → Prop} (hP : Γ-[1]-Predicate P)
 
 lemma isFormulaSet {d : V} (h : Derivation T d) : IsFormulaSet L (fstIdx d) := (h : Derivation T d).case.1
 
-lemma _root_.LO.FirstOrder.Arithmetic.Bootstrapping.DerivationOf.isFormulaSet {d s : V} (h : DerivationOf T d s) : IsFormulaSet L s := by
+lemma _root_.FFL.FirstOrder.Arithmetic.Bootstrapping.DerivationOf.isFormulaSet {d s : V} (h : DerivationOf T d s) : IsFormulaSet L s := by
   simpa [h.1] using h.2.case.1
 
 lemma axL {s p : V} (hs : IsFormulaSet L s) (h : p ∈ s) (hn : neg L p ∈ s) : Derivation T (axL s p) :=
@@ -848,4 +857,4 @@ lemma disj (ps : V) {i} (hps : ∀ i < len ps, IsFormula L ps.[i])
 
 end Provable
 
-end LO.FirstOrder.Arithmetic.Bootstrapping
+end FFL.FirstOrder.Arithmetic.Bootstrapping

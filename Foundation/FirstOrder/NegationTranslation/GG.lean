@@ -3,7 +3,7 @@ module
 public import Foundation.FirstOrder.Intuitionistic.LJ
 
 @[expose] public section
-namespace LO.FirstOrder
+namespace FFL.FirstOrder
 
 namespace Semiformula
 
@@ -17,7 +17,7 @@ def doubleNegation {n} : Semiformula L ξ n → Semiformulaᵢ L ξ n
   |     ∀¹ φ => ∀¹ φ.doubleNegation
   |     ∃¹ φ => ∼(∀¹ ∼φ.doubleNegation)
 
-scoped[LO.FirstOrder] postfix:max "ᴺ" => Semiformula.doubleNegation
+scoped[FFL.FirstOrder] postfix:max "ᴺ" => Semiformula.doubleNegation
 
 @[simp] lemma doubleNegation_rel {k} (r : L.Rel k) (v : Fin k → Semiterm L ξ n) : (rel r v)ᴺ = ∼∼(.rel r v) := rfl
 
@@ -66,7 +66,7 @@ namespace Sequent
 def doubleNegation (Γ : Sequent L) : LJ.Sequent L :=
   Γ.map Semiformula.doubleNegation
 
-scoped[LO.FirstOrder] postfix:max "ᴺ" => Sequent.doubleNegation
+scoped[FFL.FirstOrder] postfix:max "ᴺ" => Sequent.doubleNegation
 
 @[simp] lemma doubleNegation_zero : (0 : Sequent L)ᴺ = 0 := rfl
 
@@ -201,4 +201,4 @@ theorem Provable.gödel_gentzen {L : Language.{u}} [L.DecidableEq] {φ : Proposi
     LJ.Derivation.positiveNeg (φ := (∼φ)ᴺ) d
   exact ⟨LJ.Derivation.cutOne dn (LJ.Derivation.negDoubleNegation' φ).1⟩
 
-end LO.FirstOrder
+end FFL.FirstOrder

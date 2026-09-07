@@ -4,7 +4,7 @@ public import Foundation.FirstOrder.Bootstrapping.FixedPoint
 public import Foundation.Meta.ClProver
 
 @[expose] public section
-namespace LO.FirstOrder.Arithmetic
+namespace FFL.FirstOrder.Arithmetic
 
 variable {T : ArithmeticTheory} [𝗜𝚺₁ ⪯ T] [Entailment.Consistent T]
 
@@ -26,4 +26,4 @@ theorem undefinability_of_truth : ¬∃ τ : ArithmeticSemisentence 1, ∀ σ : 
   apply TA.provable_iff.mpr;
   simpa using hτ σ;
 
-end LO.FirstOrder.Arithmetic
+end FFL.FirstOrder.Arithmetic

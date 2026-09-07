@@ -8,7 +8,7 @@ public import Foundation.FirstOrder.Intuitionistic.Rew
 
 @[expose] public section
 
-namespace LO.FirstOrder
+namespace FFL.FirstOrder
 
 variable {L : Language.{u}}
 
@@ -472,4 +472,4 @@ instance : Entailment.Deduction (Theoryᵢ L) where
 
 end Theoryᵢ.Proof
 
-end LO.FirstOrder
+end FFL.FirstOrder

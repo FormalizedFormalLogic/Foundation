@@ -4,9 +4,9 @@ public import Foundation.FirstOrder.Bootstrapping.Syntax.Term.Typed
 public import Mathlib.Combinatorics.Colex
 
 @[expose] public section
-open Encodable LO FirstOrder Arithmetic PeanoMinus Bootstrapping
+open Encodable FFL FirstOrder Arithmetic PeanoMinus Bootstrapping
 
-namespace LO.FirstOrder.Semiterm
+namespace FFL.FirstOrder.Semiterm
 
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 
@@ -189,9 +189,9 @@ lemma empty_quote_eq_encode (t : ClosedSemiterm L n) : (⌜t⌝ : V) = ↑(encod
 @[simp] lemma coe_empty_quote {ξ n} (t : ClosedSemiterm L n) : ↑(⌜t⌝ : ℕ) = (⌜t⌝ : ArithmeticSemiterm ξ m) := by
   simp [gödelNumber'_def, empty_quote_eq_encode]
 
-end LO.FirstOrder.Semiterm
+end FFL.FirstOrder.Semiterm
 
-namespace LO.FirstOrder.Arithmetic.Bootstrapping
+namespace FFL.FirstOrder.Arithmetic.Bootstrapping
 
 open Encodable FirstOrder
 
@@ -203,6 +203,13 @@ lemma mem_iff_mem_bitIndices {x s : ℕ} : x ∈ s ↔ x ∈ s.bitIndices := by
     cases b <;> simp
     · cases' x with x <;> simp [ih]
     · cases' x with x <;> simp [ih]
+
+lemma nat_mem_iff {x s : ℕ} : x ∈ s ↔ s / 2 ^ x % 2 = 1 := by
+  simp [mem_iff_mem_bitIndices, Nat.testBit_eq_decide_div_mod_eq]
+
+lemma nat_insert_eq (x s : ℕ) :
+    (insert x s : ℕ) = if s / 2 ^ x % 2 = 1 then s else s + 2 ^ x := by
+  simp [insert_eq, bitInsert, exp_nat_eq_two_pow, nat_mem_iff]
 
 variable {L : Language} [L.Encodable] [L.LORDefinable]
 
@@ -228,4 +235,4 @@ lemma IsSemiterm.sound {n t : ℕ} (ht : IsSemiterm L n t) : ∃ T : FirstOrder.
           simpa [Semiterm.quote_def] using SemitermVec.val_nth_eq (fun i ↦ (⌜v' i⌝ : Bootstrapping.Semiterm ℕ L n)) j
         _                                    = v.[i] := hv' j
 
-end LO.FirstOrder.Arithmetic.Bootstrapping
+end FFL.FirstOrder.Arithmetic.Bootstrapping

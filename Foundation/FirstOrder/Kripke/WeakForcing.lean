@@ -9,7 +9,7 @@ public import Foundation.FirstOrder.NegationTranslation.GG
 Main reference: Jeremy Avigad, "Forcing in proof theory" [Avi04]
 -/
 
-namespace LO.FirstOrder
+namespace FFL.FirstOrder
 
 variable {L : Language.{u}} [L.Relational]
 
@@ -336,4 +336,4 @@ instance [L.DecidableEq] (ℙ : ForcingNotion L) :
 
 end ForcingNotion
 
-end LO.FirstOrder
+end FFL.FirstOrder

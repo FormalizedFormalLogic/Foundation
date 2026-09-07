@@ -10,7 +10,7 @@ public import Mathlib.Data.List.MinMax
 
 @[expose] public section
 
-namespace LO
+namespace FFL
 
 namespace FirstOrder
 
@@ -381,7 +381,7 @@ instance : Entailment.Compact (Theory L) where
   core_subset b := by simpa [AdjunctiveSet.subset_iff] using b.axioms_mem
 
 instance (T : Theory L) : Entailment.ModusPonens T where
-  mdp {φ ψ} bi bp := by
+  mdp! {φ ψ} bi bp := by
     refine ⟨bi.axioms + bp.axioms, ?_, ?_⟩
     · intro χ hχ
       rcases Multiset.mem_add.mp hχ with hχ | hχ
@@ -410,7 +410,7 @@ noncomputable def cut {U : Theory L} (h : T ⊢!* U) (b : U ⊢! φ) : T ⊢! φ
     match l with
     | [] => ofDerivation (OneSidedLK.cast d (by simp))
     | ψ :: l =>
-      Entailment.mdp
+      Entailment.mdp!
         (go l (by simp_all) (φ := ψ 🡒 φ)
           (OneSidedLK.cast
             (OneSidedLK.or (Γ := ∼(l : Multiset _)) (φ := ∼ψ) (ψ := φ)
@@ -517,7 +517,7 @@ noncomputable instance : Entailment.Deduction (Theory L) where
                 (s := b.axioms) (t := ⦃ψ⦄) (f := fun χ ↦ ∼χ) (a := φ))))
         (by simp [Multiset.tilde_def, Semiformula.imp_eq, add_comm])
   inv {φ ψ T} b :=
-    Entailment.mdp
+    Entailment.mdp!
       (Entailment.Axiomatized.weakening (by simp) b)
       (Entailment.Axiomatized.byAxm (by simp))
 
@@ -532,6 +532,6 @@ def Theory.theory (T : Theory L) : Theory L := {σ | T ⊢ σ}
 
 end FirstOrder
 
-end LO
+end FFL
 
 end

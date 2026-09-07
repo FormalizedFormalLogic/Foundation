@@ -9,13 +9,13 @@ public import Foundation.Vorspiel.Multiset
 This file defines a characterization of Tait style calculus and Gentzen style calculus.
 
 ## Main Definitions
-- `LO.OneSidedLK`
+- `FFL.OneSidedLK`
 -/
 
 @[expose]
 public section
 
-namespace LO
+namespace FFL
 
 /-! ## One-sided $\mathbf{LK}$ -/
 
@@ -215,28 +215,28 @@ Hilbert axioms into one-sided sequent rules. -/
 abbrev AxiomDerivation.cl {P : Type*} [Entailment P F] (𝓟 : P)
     [Entailment.ModusPonens 𝓟] [OneSidedLK 𝔇]
     (lift : ∀ {φ}, 𝔇 ⦃φ⦄ → 𝓟 ⊢! φ) : Entailment.Cl 𝓟 where
-  negEquiv {φ} := Entailment.cast
+  negEquiv! {φ} := Entailment.cast
     (show 𝓟 ⊢! (φ ⋎ ∼φ ⋎ ⊥) ⋏ (φ ⋏ ⊤ ⋎ ∼φ) from
       lift <| AxiomDerivation.negEquiv φ)
     (by simp [Axioms.NegEquiv, LogicalConnective.DeMorgan.imply, LogicalConnective.iff])
-  verum := lift verum
-  implyK {φ ψ} := Entailment.cast (lift <| AxiomDerivation.implyK φ ψ)
+  verum! := lift verum
+  implyK! {φ ψ} := Entailment.cast (lift <| AxiomDerivation.implyK φ ψ)
     (by simp [LogicalConnective.DeMorgan.imply])
-  implyS {φ ψ χ} := Entailment.cast (lift <| AxiomDerivation.implyS φ ψ χ)
+  implyS! {φ ψ χ} := Entailment.cast (lift <| AxiomDerivation.implyS φ ψ χ)
     (by simp [LogicalConnective.DeMorgan.imply])
-  and₁ {φ ψ} := Entailment.cast (lift <| AxiomDerivation.and₁ φ ψ)
+  and₁! {φ ψ} := Entailment.cast (lift <| AxiomDerivation.and₁ φ ψ)
     (by simp [LogicalConnective.DeMorgan.imply])
-  and₂ {φ ψ} := Entailment.cast (lift <| AxiomDerivation.and₂ φ ψ)
+  and₂! {φ ψ} := Entailment.cast (lift <| AxiomDerivation.and₂ φ ψ)
     (by simp [LogicalConnective.DeMorgan.imply])
-  and₃ {φ ψ} := Entailment.cast (lift <| AxiomDerivation.and₃ φ ψ)
+  and₃! {φ ψ} := Entailment.cast (lift <| AxiomDerivation.and₃ φ ψ)
     (by simp [LogicalConnective.DeMorgan.imply])
-  or₁ {φ ψ} := Entailment.cast (lift <| AxiomDerivation.or₁ φ ψ)
+  or₁! {φ ψ} := Entailment.cast (lift <| AxiomDerivation.or₁ φ ψ)
     (by simp [LogicalConnective.DeMorgan.imply])
-  or₂ {φ ψ} := Entailment.cast (lift <| AxiomDerivation.or₂ φ ψ)
+  or₂! {φ ψ} := Entailment.cast (lift <| AxiomDerivation.or₂ φ ψ)
     (by simp [LogicalConnective.DeMorgan.imply])
-  or₃ {φ ψ χ} := Entailment.cast (lift <| AxiomDerivation.or₃ φ ψ χ)
+  or₃! {φ ψ χ} := Entailment.cast (lift <| AxiomDerivation.or₃ φ ψ χ)
     (by simp [LogicalConnective.DeMorgan.imply])
-  dne {φ} := Entailment.cast (lift <| AxiomDerivation.dne φ)
+  dne! {φ} := Entailment.cast (lift <| AxiomDerivation.dne φ)
     (by simp [LogicalConnective.DeMorgan.imply])
 
 /-- An entailment relation which is determined solely by derivability. -/
@@ -256,7 +256,7 @@ lemma provable_iff :
 variable [OneSidedLK.Cut 𝔇] (𝓟)
 
 instance : Entailment.ModusPonens 𝓟 where
-  mdp {φ ψ} b₁ b₂ :=
+  mdp! {φ ψ} b₁ b₂ :=
     equiv.symm <| cast <| modusPonens (Γ := 0) (Δ := 0) (equiv b₁) (equiv b₂)
 
 instance : Entailment.Cl 𝓟 := AxiomDerivation.cl 𝓟 PrincipalEntailment.equiv.symm
@@ -319,6 +319,6 @@ end Pullback
 
 end OneSidedLK
 
-end LO
+end FFL
 
 end

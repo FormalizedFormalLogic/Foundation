@@ -5,7 +5,7 @@ public import Foundation.Logic.LogicSymbol
 
 public section
 
-namespace LO.Meta
+namespace FFL.Meta
 
 open Mathlib Qq Lean Elab Meta Tactic
 
@@ -62,7 +62,7 @@ end ToString
 
 variable (F : Q(Type*)) (ls : Q(LogicalConnective $F)) (ln : Q(LogicalNeutral $F))
 
-abbrev _root_.LO.Meta.Lit := Litform Expr
+abbrev _root_.FFL.Meta.Lit := Litform Expr
 
 variable {F}
 
@@ -126,6 +126,6 @@ def dSubsetList (Γ Δ : List Lit) : MetaM Bool := do
 
 end Lit
 
-end LO.Meta
+end FFL.Meta
 
 end

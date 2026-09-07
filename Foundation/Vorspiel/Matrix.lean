@@ -7,7 +7,7 @@ public import Foundation.Vorspiel.Fin.Basic
 
 namespace Matrix
 
-open Fin
+open _root_.Fin
 
 section
 variable {n : ℕ} {α : Type u}

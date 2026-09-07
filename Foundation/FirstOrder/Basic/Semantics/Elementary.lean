@@ -4,7 +4,7 @@ public import Foundation.FirstOrder.Basic.Semantics.Semantics
 
 @[expose] public section
 
-namespace LO.FirstOrder
+namespace FFL.FirstOrder
 
 section
 
@@ -311,5 +311,5 @@ end Structure
 
 end
 
-end  LO.FirstOrder
+end  FFL.FirstOrder
 end

@@ -4,7 +4,7 @@ public import Foundation.FirstOrder.SetTheory.Z
 
 @[expose] public section
 
-namespace LO.FirstOrder.SetTheory
+namespace FFL.FirstOrder.SetTheory
 
 variable {V : Type*} [SetStructure V] [Nonempty V] [V↓[ℒₛₑₜ] ⊧* 𝗭𝗙]
 
@@ -175,4 +175,4 @@ end Construction
 
 end Repl
 
-end LO.FirstOrder.SetTheory
+end FFL.FirstOrder.SetTheory

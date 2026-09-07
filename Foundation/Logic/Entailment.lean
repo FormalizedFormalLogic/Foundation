@@ -10,11 +10,11 @@ This file defines a characterization of the system/proof/provability/calculus of
 Also defines soundness and completeness.
 
 ## Main Definitions
-* `LO.Entailment S F`: a general framework of deductive system `S` for formulae `F`.
-* `LO.Entailment.Inconsistent 𝓢`: a proposition that states that all formulae in `F` is provable from `𝓢`.
-* `LO.Entailment.Consistent 𝓢`: a proposition that states that `𝓢` is not inconsistent.
-* `LO.Entailment.Sound 𝓢 𝓜`: provability from `𝓢` implies satisfiability on `𝓜`.
-* `LO.Entailment.Complete 𝓢 𝓜`: satisfiability on `𝓜` implies provability from `𝓢`.
+* `FFL.Entailment S F`: a general framework of deductive system `S` for formulae `F`.
+* `FFL.Entailment.Inconsistent 𝓢`: a proposition that states that all formulae in `F` is provable from `𝓢`.
+* `FFL.Entailment.Consistent 𝓢`: a proposition that states that `𝓢` is not inconsistent.
+* `FFL.Entailment.Sound 𝓢 𝓜`: provability from `𝓢` implies satisfiability on `𝓜`.
+* `FFL.Entailment.Complete 𝓢 𝓜`: satisfiability on `𝓜` implies provability from `𝓢`.
 
 ## Notation
 * `𝓢 ⊢! φ`: a type of formalized proofs of `φ : F` from deductive system `𝓢 : S`.
@@ -28,7 +28,7 @@ Also defines soundness and completeness.
 
 @[expose] public section
 
-namespace LO
+namespace FFL
 
 /-- Entailment relation on proof system `S` and formula `F` -/
 class Entailment (S : Type*) (F : outParam Type*) where
@@ -317,13 +317,24 @@ def Independent (φ : F) : Prop := 𝓢 ⊬ φ ∧ 𝓢 ⊬ ∼φ
 class Incomplete : Prop where
   indep : ∃ φ, Independent 𝓢 φ
 
-variable {𝓢}
+variable {𝓢 : S} {𝓣 : T}
 
 lemma complete_def : Complete 𝓢 ↔ ∀ φ, 𝓢 ⊢ φ ∨ 𝓢 ⊢ ∼φ :=
   ⟨fun h ↦ h.con, Complete.mk⟩
 
 lemma incomplete_def : Incomplete 𝓢 ↔ ∃ φ, Independent 𝓢 φ :=
   ⟨fun h ↦ h.indep, Incomplete.mk⟩
+
+omit [Tilde F] in
+lemma Equiv.unprovable (e : 𝓢 ≊ 𝓣) {φ : F} : 𝓢 ⊬ φ ↔ 𝓣 ⊬ φ :=
+  not_congr <| Equiv.iff.mp e φ
+
+lemma Equiv.incomplete (e : 𝓢 ≊ 𝓣) : Incomplete 𝓢 → Incomplete 𝓣 := by
+  rintro ⟨φ, hφ⟩
+  exact ⟨φ, e.unprovable.mp hφ.1, e.unprovable.mp hφ.2⟩
+
+lemma Equiv.incomplete_iff (e : 𝓢 ≊ 𝓣) : Incomplete 𝓢 ↔ Incomplete 𝓣 :=
+  ⟨e.incomplete, e.symm.incomplete⟩
 
 @[simp] lemma not_complete_iff_incomplete : ¬Complete 𝓢 ↔ Incomplete 𝓢 := by
   simp [complete_def, incomplete_def, Independent, not_or]
@@ -640,6 +651,6 @@ end Pullback
 
 end Entailment
 
-end LO
+end FFL
 
 end
