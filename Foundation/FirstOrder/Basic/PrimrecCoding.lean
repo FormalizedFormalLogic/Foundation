@@ -68,7 +68,7 @@ lemma getM_option_eq_some_iff {n : ℕ} {β : Type*} {f : Fin n → Option β} {
 
 end Matrix
 
-namespace LO.FirstOrder
+namespace FFL.FirstOrder
 
 open Encodable Nat
 
@@ -429,7 +429,7 @@ end Semiterm
 
 namespace Semiformula
 
-open LO.FirstOrder.Semiterm
+open FFL.FirstOrder.Semiterm
 
 variable {L : Language} [L.Encodable] [L.Primcodable] {ξ : Type*} [Primcodable ξ]
 
@@ -893,6 +893,6 @@ theorem primrec₂_or {n : ℕ} : Primrec₂ (fun φ ψ : Semiformula L ξ n ↦
 
 end Semiformula
 
-end LO.FirstOrder
+end FFL.FirstOrder
 
 end

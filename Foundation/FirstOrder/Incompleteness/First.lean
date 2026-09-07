@@ -9,9 +9,9 @@ public import Foundation.FirstOrder.Bootstrapping.Syntax.CraigTrick
 # Gödel's first incompleteness theorem for arithmetic theories stronger than $\mathsf{R_0}$
 -/
 
-namespace LO.FirstOrder.Arithmetic
+namespace FFL.FirstOrder.Arithmetic
 
-open LO.Entailment Bootstrapping Bootstrapping.Arithmetic
+open FFL.Entailment Bootstrapping Bootstrapping.Arithmetic
 
 /-- Gödel's first incompleteness theorem-/
 theorem incomplete (T : ArithmeticTheory) [T.Δ₁] [𝗥₀ ⪯ T] [T.SoundOnHierarchy 𝚺 1] :
@@ -70,4 +70,4 @@ instance {T : ArithmeticTheory} [ℕ↓[ℒₒᵣ] ⊧* T] [T.Δ₁] [𝗥₀ �
   . obtain ⟨δ, δTrue, δUnprov⟩ := exists_true_but_unprovable_sentence_of_sigma1sound T;
     exact not_weakerThan_iff.mpr ⟨δ, TA.provable_iff.mpr δTrue, δUnprov⟩
 
-end LO.FirstOrder.Arithmetic
+end FFL.FirstOrder.Arithmetic

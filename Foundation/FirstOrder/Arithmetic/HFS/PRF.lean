@@ -9,7 +9,7 @@ public import Foundation.FirstOrder.Arithmetic.HFS.Seq
 
 -/
 
-namespace LO.FirstOrder.Arithmetic
+namespace FFL.FirstOrder.Arithmetic
 
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 
@@ -211,4 +211,4 @@ end Construction
 
 end PR
 
-end LO.FirstOrder.Arithmetic
+end FFL.FirstOrder.Arithmetic

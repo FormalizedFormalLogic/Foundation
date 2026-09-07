@@ -15,7 +15,7 @@ def iget [Inhabited α] (v : Fin k → α) (x : ℕ) : α := if h : x < k then v
 
 end Matrix
 
-namespace LO
+namespace FFL
 
 namespace FirstOrder
 
@@ -379,6 +379,6 @@ end BinderNotation
 
 end FirstOrder
 
-end LO
+end FFL
 
 end

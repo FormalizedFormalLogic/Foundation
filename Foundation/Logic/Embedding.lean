@@ -6,7 +6,7 @@ public import Foundation.Propositional.Entailment.Cl
 
 /-! # Faithful embeddings among logical systems -/
 
-namespace LO.Entailment
+namespace FFL.Entailment
 
 variable {F₁ F₂ F₃ : Type*} {S₁ S₂ S₃ : Type*} [Entailment S₁ F₁] [Entailment S₂ F₂] [Entailment S₃ F₃]
 
@@ -33,6 +33,6 @@ lemma fun_exists (𝓢₁ : S₁) (𝓢₂ : S₂) [FaithfullyEmbeddable 𝓢₁
 
 end FaithfullyEmbeddable
 
-end LO.Entailment
+end FFL.Entailment
 
 end

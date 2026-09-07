@@ -11,10 +11,10 @@ over a bounded matrix.
 
 @[expose] public section
 
-open LO
-open LO.FirstOrder
+open FFL
+open FFL.FirstOrder
 
-namespace LO.FirstOrder.Arithmetic.Peano
+namespace FFL.FirstOrder.Arithmetic.Peano
 
 variable {Γ : Polarity} {s n : ℕ} {φ : ArithmeticSemisentence n} {σ : ArithmeticSentence}
 
@@ -41,4 +41,4 @@ lemma exists_hierarchy_provable_of_sentence_pi (h : Hierarchy 𝚷 (s + 1) σ) :
   obtain ⟨φ', hφ'⟩ := hasPrenex h;
   exact ⟨φ'.piInv.val, φ'.piInv.val_hierarchy, Prenex.provable_iff_piInv hφ'⟩
 
-end LO.FirstOrder.Arithmetic.Peano
+end FFL.FirstOrder.Arithmetic.Peano

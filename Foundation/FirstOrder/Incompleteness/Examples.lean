@@ -13,7 +13,7 @@ The definability infrastructure is provided by
 and is used by the examples below.
 -/
 
-namespace LO.FirstOrder.Arithmetic
+namespace FFL.FirstOrder.Arithmetic
 
 instance : 𝗜𝚺₁ ⪱ 𝗜𝚺₁ ∪ 𝗜𝚺₁.Con := inferInstance
 
@@ -32,4 +32,4 @@ instance : 𝗣𝗔 ∪ 𝗣𝗔.Con ⪱ 𝗣𝗔 ∪ 𝗣𝗔.Con ∪ (𝗣𝗔
   have : 𝗜𝚺₁ ⪯ 𝗣𝗔 ∪ 𝗣𝗔.Con := Entailment.WeakerThan.trans this inferInstance
   inferInstance
 
-end LO.FirstOrder.Arithmetic
+end FFL.FirstOrder.Arithmetic

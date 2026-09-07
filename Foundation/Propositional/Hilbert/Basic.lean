@@ -6,7 +6,7 @@ public import Foundation.Propositional.Formula.Basic
 
 @[expose] public section
 
-namespace LO.Propositional
+namespace FFL.Propositional
 
 variable {α : Type*}
 
@@ -158,6 +158,6 @@ end Hilbert
 protected abbrev Int : Logic α := Hilbert.Int.logic
 protected abbrev Cl  : Logic α := Hilbert.Cl.logic
 
-end LO.Propositional
+end FFL.Propositional
 
 end

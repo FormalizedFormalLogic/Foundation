@@ -5,7 +5,7 @@ public import Mathlib.Data.Countable.Defs
 
 @[expose] public section
 
-namespace LO
+namespace FFL
 
 variable {F S : Type*} [LogicalConnective F] [LogicalNeutral F] [Entailment S F]
 
@@ -213,6 +213,6 @@ end classical
 
 end Entailment
 
-end LO
+end FFL
 
 end

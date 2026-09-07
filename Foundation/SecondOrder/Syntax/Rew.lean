@@ -25,7 +25,7 @@ def retrusion (f : Fin n → Fin m) : Fin (n + 1) → Fin (m + 1) := 0 :> fun i 
 
 end Fin
 
-namespace LO.SecondOrder
+namespace FFL.SecondOrder
 
 open FirstOrder
 
@@ -520,4 +520,4 @@ instance : Coe (Semisentence L N n) (Semiformula L Ξ ξ N n) := ⟨emb⟩
 
 end Semisentence
 
-end LO.SecondOrder
+end FFL.SecondOrder

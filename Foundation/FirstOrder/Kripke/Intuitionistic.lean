@@ -6,7 +6,7 @@ public import Foundation.FirstOrder.Kripke.Basic
 @[expose] public section
 /-! # Kripke semantics for intuitionistic first-order logic -/
 
-namespace LO.FirstOrder
+namespace FFL.FirstOrder
 
 variable {L : Language} [L.Relational]
 
@@ -320,4 +320,4 @@ instance : Semantics.And (IntKripke L) := ⟨by simp [models_def]⟩
 
 end IntKripke
 
-end LO.FirstOrder
+end FFL.FirstOrder

@@ -13,9 +13,9 @@ for some `φ₀ : ArithmeticSemisentence (n + s)` in `Hierarchy 𝚺 0`.
 
 @[expose] public section
 
-open LO
+open FFL
 
-namespace LO.FirstOrder
+namespace FFL.FirstOrder
 
 namespace Arithmetic
 
@@ -643,4 +643,4 @@ theorem exists_matrix_provable {Γ : Polarity} {s: ℕ} (T : ArithmeticTheory) [
 
 end Arithmetic
 
-end LO.FirstOrder
+end FFL.FirstOrder

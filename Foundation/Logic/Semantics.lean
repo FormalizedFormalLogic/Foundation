@@ -8,8 +8,8 @@ This file defines the semantics of formulas based on Tarski's truth definitions.
 Also provides 𝓜 characterization of compactness.
 
 ## Main Definitions
-* `LO.Semantics`: The realization of 𝓜 formula.
-* `LO.Compact`: The semantic compactness of Foundation.
+* `FFL.Semantics`: The realization of 𝓜 formula.
+* `FFL.Compact`: The semantic compactness of Foundation.
 
 ## Notation
 * `𝓜 ⊧ φ`: a proposition that states `𝓜` satisfies `φ`.
@@ -19,7 +19,7 @@ Also provides 𝓜 characterization of compactness.
 
 @[expose] public section
 
-namespace LO
+namespace FFL
 
 /-- `Semantics M F` denotes semantics of formulae `F for models `M` -/
 class Semantics (M : Type*) (F : outParam Type*) where
@@ -358,6 +358,6 @@ lemma compact_cumulative {T : ℕ → Set F} (hT : Cumulative T) :
 
 end Compact
 
-end LO
+end FFL
 
 end

@@ -4,11 +4,11 @@ public import Foundation.FirstOrder.Incompleteness.RosserProvability
 
 @[expose] public section
 
-namespace LO.FirstOrder
+namespace FFL.FirstOrder
 
 namespace ProvabilityAbstraction
 
-open LO.Entailment FirstOrder Diagonalization Provability
+open FFL.Entailment FirstOrder Diagonalization Provability
 
 variable {L₀ L : Language}
 
@@ -128,6 +128,6 @@ end
 
 end ProvabilityAbstraction
 
-end LO.FirstOrder
+end FFL.FirstOrder
 
 end

@@ -11,45 +11,45 @@ public import Foundation.FirstOrder.Arithmetic.ISigma1.Prenex
 
 open Classical
 
-namespace LO.FirstOrder.Arithmetic.Bootstrapping
+namespace FFL.FirstOrder.Arithmetic.Bootstrapping
 
-open LO.Entailment
+open FFL.Entailment
 
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] {x : V}
 
 variable (T : ArithmeticTheory) [T.Δ₁] (θ : 𝚺₀.Semisentence 1)
 
 
-def _root_.LO.FirstOrder.Theory.WitnessedBefore (φ : V) := ∃ b, V ⊧/![b] θ.val ∧ ∀ b' < b, ¬Proof T b' φ
+def _root_.FFL.FirstOrder.Theory.WitnessedBefore (φ : V) := ∃ b, V ⊧/![b] θ.val ∧ ∀ b' < b, ¬Proof T b' φ
 
-noncomputable def _root_.LO.FirstOrder.Theory.witnessedBefore : 𝚺₁.Semisentence 1 := .mkSigma
+noncomputable def _root_.FFL.FirstOrder.Theory.witnessedBefore : 𝚺₁.Semisentence 1 := .mkSigma
   “x. ∃ w, !θ w ∧ ∀ p < w, ¬!(proof T).pi p x”
 
-instance _root_.LO.FirstOrder.Theory.WitnessedBefore.defined :
+instance _root_.FFL.FirstOrder.Theory.WitnessedBefore.defined :
     𝚺₁-Predicate[V] T.WitnessedBefore θ via T.witnessedBefore θ := .mk fun v ↦ by
   simp [Theory.witnessedBefore, Theory.WitnessedBefore];
 
-instance _root_.LO.FirstOrder.Theory.WitnessedBefore.definable :
+instance _root_.FFL.FirstOrder.Theory.WitnessedBefore.definable :
     𝚺₁-Predicate[V] T.WitnessedBefore θ := (Theory.WitnessedBefore.defined T θ).to_definable
 
 
-def _root_.LO.FirstOrder.Theory.ProvedBefore (φ : V) := ∃ b, Proof T b φ ∧ ∀ b' ≤ b, ¬V ⊧/![b'] θ.val
+def _root_.FFL.FirstOrder.Theory.ProvedBefore (φ : V) := ∃ b, Proof T b φ ∧ ∀ b' ≤ b, ¬V ⊧/![b'] θ.val
 
-noncomputable def _root_.LO.FirstOrder.Theory.provedBefore : 𝚺₁.Semisentence 1 := .mkSigma
+noncomputable def _root_.FFL.FirstOrder.Theory.provedBefore : 𝚺₁.Semisentence 1 := .mkSigma
   “x. ∃ p, !(proof T).sigma p x ∧ ∀ w <⁺ p, ¬!θ w”
 
-instance _root_.LO.FirstOrder.Theory.ProvedBefore.defined :
+instance _root_.FFL.FirstOrder.Theory.ProvedBefore.defined :
     𝚺₁-Predicate[V] T.ProvedBefore θ via T.provedBefore θ := .mk fun v ↦ by
   simp [Theory.provedBefore, Theory.ProvedBefore];
 
-instance _root_.LO.FirstOrder.Theory.ProvedBefore.definable :
+instance _root_.FFL.FirstOrder.Theory.ProvedBefore.definable :
     𝚺₁-Predicate[V] T.ProvedBefore θ := (Theory.ProvedBefore.defined T θ).to_definable
 
 
-noncomputable def _root_.LO.FirstOrder.Theory.fghSentence : ArithmeticSentence :=
+noncomputable def _root_.FFL.FirstOrder.Theory.fghSentence : ArithmeticSentence :=
   fixedpoint (T.witnessedBefore θ).val
 
-noncomputable def _root_.LO.FirstOrder.Theory.fghSentence' : 𝚺₁.Sentence :=
+noncomputable def _root_.FFL.FirstOrder.Theory.fghSentence' : 𝚺₁.Sentence :=
   (T.witnessedBefore θ).rew (Rew.subst ![⌜T.fghSentence θ⌝])
 
 
@@ -132,12 +132,12 @@ lemma provable_fixedpoint'_iff_exs_or_provable_bot :
   𝗜𝚺₁ ⊢ provabilityPred T (T.fghSentence' θ).val 🡘 (∃¹ θ.val) ⋎ provabilityPred T ⊥ :=
   E_trans (E_symm $ T.standardProvability.ext' diagonal_fghSentence) provable_fixedpoint_iff_exs_or_provable_bot
 
-end LO.FirstOrder.Arithmetic.Bootstrapping
+end FFL.FirstOrder.Arithmetic.Bootstrapping
 
-namespace LO.FirstOrder.Arithmetic
+namespace FFL.FirstOrder.Arithmetic
 
 open Bootstrapping
-open LO.Entailment
+open FFL.Entailment
 
 variable (T : ArithmeticTheory) [T.Δ₁] [𝗜𝚺₁ ⪯ T] {σ : ArithmeticSentence}
 
@@ -159,4 +159,4 @@ theorem fgh_theorem_con (hσ : Hierarchy 𝚺 1 σ) :
   have hcon : 𝗜𝚺₁ ∪ T.Con ⊢ ∼provabilityPred T ⊥ := by_axm (by simp [Theory.consistent]);
   cl_prover [heq', hcon];
 
-end LO.FirstOrder.Arithmetic
+end FFL.FirstOrder.Arithmetic

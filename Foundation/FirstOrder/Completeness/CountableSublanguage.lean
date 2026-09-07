@@ -4,7 +4,7 @@ public import Foundation.FirstOrder.Basic
 public import Mathlib.Logic.Equiv.List
 
 @[expose] public section
-namespace LO
+namespace FFL
 
 namespace FirstOrder
 
@@ -269,4 +269,4 @@ end lMap
 
 end FirstOrder
 
-end LO
+end FFL

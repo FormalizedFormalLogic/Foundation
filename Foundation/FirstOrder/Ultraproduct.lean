@@ -4,7 +4,7 @@ public import Foundation.FirstOrder.Basic
 public import Mathlib.Order.Filter.Ultrafilter.Basic
 
 @[expose] public section
-namespace LO
+namespace FFL
 
 namespace FirstOrder
 
@@ -173,4 +173,4 @@ end
 
 end FirstOrder
 
-end LO
+end FFL

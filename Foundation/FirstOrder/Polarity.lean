@@ -8,7 +8,7 @@ public import Foundation.FirstOrder.Basic
 
 @[expose] public section
 
-namespace LO.FirstOrder.Semiformula
+namespace FFL.FirstOrder.Semiformula
 
 variable {L : Language} {ξ : Type*}
 
@@ -104,4 +104,4 @@ lemma Negative.eq_false {n} {φ : Semiformula L ξ n} (h : φ.Negative) : φ.pol
 @[simp] lemma polarity_rew (ω : Rew L ξ₁ n₁ ξ₂ n₂) (φ : Semiformula L ξ₁ n₁) : (ω ▹ φ).polarity = φ.polarity := by
   induction φ using rec' <;> simp [polarity, *]
 
-end LO.FirstOrder.Semiformula
+end FFL.FirstOrder.Semiformula

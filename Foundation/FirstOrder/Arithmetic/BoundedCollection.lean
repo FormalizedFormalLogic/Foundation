@@ -11,12 +11,12 @@ witnesses all instances at once (`sigma_exists_bound_witness`).
 
 @[expose] public section
 
-open LO
-open LO.FirstOrder
+open FFL
+open FFL.FirstOrder
 
 noncomputable section
 
-namespace LO.FirstOrder.Arithmetic
+namespace FFL.FirstOrder.Arithmetic
 
 variable {V : Type*} {n s : ℕ} (e : Fin n → V)
 
@@ -91,4 +91,4 @@ theorem sigma_exists_bound_witness {θ : ArithmeticSemisentence (n + 2)}
   obtain ⟨w, hw⟩ := key (a + 1)
   exact ⟨w, fun x hx => hw x (lt_trans hx (lt_add_one a)) hx⟩
 
-end LO.FirstOrder.Arithmetic
+end FFL.FirstOrder.Arithmetic

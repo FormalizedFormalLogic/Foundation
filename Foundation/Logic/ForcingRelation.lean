@@ -7,7 +7,7 @@ public import Foundation.Vorspiel.AdjunctiveSet
 
 @[expose] public section
 
-namespace LO
+namespace FFL
 
 class ForcingRelation (W : Type*) (F : outParam Type*) where
   Forces : W → F → Prop
@@ -150,6 +150,6 @@ end AllForces
 
 end WeakForcingRelation
 
-end LO
+end FFL
 
 end

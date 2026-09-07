@@ -8,13 +8,13 @@ public import Foundation.Propositional.Entailment.Cl
 This file defines a characterization of Tait style calculus and Gentzen style calculus.
 
 ## Main Definitions
-- `LO.OneSidedLK`
+- `FFL.OneSidedLK`
 -/
 
 @[expose]
 public section
 
-namespace LO
+namespace FFL
 
 /-! ## One-sided $\mathbf{LK}$ -/
 
@@ -371,6 +371,6 @@ end ContextualEntailment
 
 end OneSidedLK
 
-end LO
+end FFL
 
 end

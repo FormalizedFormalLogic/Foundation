@@ -3,11 +3,11 @@ module
 public import Foundation.FirstOrder.Incompleteness.First
 
 @[expose] public section
-namespace LO.FirstOrder.Arithmetic
+namespace FFL.FirstOrder.Arithmetic
 
 variable (T : ArithmeticTheory) [T.Δ₁] [𝗜𝚺₁ ⪯ T] [T.SoundOnHierarchy 𝚺 1]
 
-open LO.Entailment
+open FFL.Entailment
 
 open Classical
 
@@ -120,4 +120,4 @@ theorem incomplete_of_halting_problem : Entailment.Incomplete T :=
     (ComputablePred.halting_problem_re 0)
     (ComputablePred.halting_problem 0)
 
-end LO.FirstOrder.Arithmetic
+end FFL.FirstOrder.Arithmetic

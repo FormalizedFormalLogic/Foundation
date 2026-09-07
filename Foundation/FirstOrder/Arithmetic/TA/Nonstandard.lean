@@ -4,7 +4,7 @@ public import Foundation.FirstOrder.Arithmetic.TA.Basic
 public import Foundation.FirstOrder.Arithmetic.PeanoMinus.Basic
 
 @[expose] public section
-namespace LO.FirstOrder.Arithmetic
+namespace FFL.FirstOrder.Arithmetic
 
 abbrev withStar := Language.add ℒₒᵣ Language.unit
 
@@ -95,4 +95,4 @@ end Nonstandard
 
 end
 
-end LO.FirstOrder.Arithmetic
+end FFL.FirstOrder.Arithmetic

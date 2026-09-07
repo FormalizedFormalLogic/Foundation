@@ -7,7 +7,7 @@ public import Foundation.FirstOrder.Bootstrapping.DerivabilityCondition.Equation
 # Bootstrapping theory $\mathsf{PA}^-$, $\mathsf{R_0}$ in $\mathsf{I}\Sigma_1$
 -/
 
-namespace LO.FirstOrder.Arithmetic
+namespace FFL.FirstOrder.Arithmetic
 
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻]
 
@@ -16,18 +16,18 @@ lemma lt_add_self_add_one (a b : V) : a < b + a + 1 := lt_succ_iff_le.mpr <| le_
 lemma lt_succ_iff_eq_or_succ {a b : V} : a < b + 1 ↔ a = b ∨ a < b := by
   simp [lt_succ_iff_le, le_iff_eq_or_lt]
 
-end LO.FirstOrder.Arithmetic
+end FFL.FirstOrder.Arithmetic
 
-namespace LO.FirstOrder.Arithmetic.Bootstrapping.Arithmetic
+namespace FFL.FirstOrder.Arithmetic.Bootstrapping.Arithmetic
 
 -- `Arithmetic` is intentionally re-opened here even though the ambient namespace
 -- already contains it; renaming would break the widely-used public API
 -- (`Bootstrapping.Arithmetic.*`). Suppress the new dupNamespace linter for the
 -- declarations in this namespace (the option is scoped by `namespace`/`end` and
--- reverts automatically at `end LO.FirstOrder.Arithmetic.Bootstrapping.Arithmetic`).
+-- reverts automatically at `end FFL.FirstOrder.Arithmetic.Bootstrapping.Arithmetic`).
 set_option linter.dupNamespace false
 
-open Classical LO.Entailment
+open Classical FFL.Entailment
 
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 
@@ -41,7 +41,7 @@ local postfix:max "⤉" => Semiformula.shift
 
 variable (T : ArithmeticTheory) [Theory.Δ₁ T] [𝗣𝗔⁻ ⪯ T]
 
-open Entailment Entailment.FiniteContext _root_.LO.FirstOrder.Arithmetic.Bootstrapping.Semiformula
+open Entailment Entailment.FiniteContext _root_.FFL.FirstOrder.Arithmetic.Bootstrapping.Semiformula
 
 instance : 𝗘𝗤 _ ⪯ T :=
   have : 𝗣𝗔⁻ ⪯ T := inferInstance
@@ -263,4 +263,4 @@ lemma bexs_replace (φ : Semiformula V ℒₒᵣ 1) (t u : Term V ℒₒᵣ) :
     T.internalize V ⊢ (t ≐ u) 🡒 φ.bexs t 🡒 φ.bexs u := by
   simpa [SemitermVec.q, Semiformula.substs_substs] using replace T ((φ.subst ![#'0]).bexs #'0) t u
 
-end LO.FirstOrder.Arithmetic.Bootstrapping.Arithmetic
+end FFL.FirstOrder.Arithmetic.Bootstrapping.Arithmetic

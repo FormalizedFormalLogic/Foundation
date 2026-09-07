@@ -10,7 +10,7 @@ public import Foundation.FirstOrder.Order.Le
   we basically use `ORingStructure`, and generated `standardStructure` instead of `Structure ℒₒᵣ` itself.
 -/
 
-namespace LO
+namespace FFL
 
 class ORingStructure (α : Type*) extends Zero α, One α, Add α, Mul α, LT α
 
@@ -185,4 +185,4 @@ end BinderNotation
 
 end FirstOrder
 
-end LO
+end FFL

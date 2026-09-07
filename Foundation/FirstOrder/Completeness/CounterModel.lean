@@ -13,7 +13,7 @@ public import Mathlib.Logic.Encodable.Basic
 
 /-! ### Generic filters -/
 
-namespace LO.FirstOrder.Derivation.Canonical
+namespace FFL.FirstOrder.Derivation.Canonical
 
 open Order
 
@@ -212,7 +212,7 @@ end LK
 
 namespace Theory
 
-open Classical LO.Entailment
+open Classical FFL.Entailment
 
 variable {L : Language.{u}} {T : Theory L}
 
@@ -293,4 +293,4 @@ lemma Theory.Proof.complete_on_eq_models
     Structure.ElementaryEquiv.models.mpr (H (Structure.Model L M))
   Theory.Proof.complete this
 
-end LO.FirstOrder
+end FFL.FirstOrder

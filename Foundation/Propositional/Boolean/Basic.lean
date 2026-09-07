@@ -5,7 +5,7 @@ public import Foundation.Logic.Semantics
 
 @[expose] public section
 
-namespace LO.Propositional
+namespace FFL.Propositional
 
 variable {α : Type*}
 
@@ -111,7 +111,7 @@ namespace Formula
 open Semantics (Valid)
 open Formula (atom)
 open Formula.Boolean
-open _root_.LO.Propositional.Boolean
+open _root_.FFL.Propositional.Boolean
 
 variable {v : Boolean.Valuation α} {φ ψ : Formula α}
 
@@ -172,5 +172,5 @@ lemma neg_isTautology_of_letterless_of_isTautology (hl : φ.Letterless) : ¬φ.I
 end Formula
 
 
-end LO.Propositional
+end FFL.Propositional
 end

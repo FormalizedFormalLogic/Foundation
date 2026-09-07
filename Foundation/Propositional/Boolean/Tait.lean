@@ -6,7 +6,7 @@ public import Foundation.Vorspiel.Set.Basic
 
 @[expose] public section
 
-namespace LO.Propositional
+namespace FFL.Propositional
 
 /-
 
@@ -219,7 +219,7 @@ theorem Sequent.notTautology_iff : ¬Γ.IsTautology ↔ ∃ v : Valuation α, �
 
 end Propositional
 
-end LO
+end FFL
 end
 
 -/

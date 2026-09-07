@@ -4,7 +4,7 @@ public import Foundation.FirstOrder.Bootstrapping.Syntax.Term.Basic
 public import Foundation.FirstOrder.Arithmetic.Induction
 
 @[expose] public section
-namespace LO.FirstOrder.Arithmetic.Bootstrapping
+namespace FFL.FirstOrder.Arithmetic.Bootstrapping
 
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 
@@ -44,28 +44,28 @@ scoped notation "^∃ " p:64 => qqExs p
 
 section
 
-def _root_.LO.FirstOrder.Arithmetic.qqRelDef : 𝚺₀.Semisentence 4 :=
+def _root_.FFL.FirstOrder.Arithmetic.qqRelDef : 𝚺₀.Semisentence 4 :=
   .mkSigma “p k r v. ∃ p' < p, !pair₄Def p' 0 k r v ∧ p = p' + 1”
 
-def _root_.LO.FirstOrder.Arithmetic.qqNRelDef : 𝚺₀.Semisentence 4 :=
+def _root_.FFL.FirstOrder.Arithmetic.qqNRelDef : 𝚺₀.Semisentence 4 :=
   .mkSigma “p k r v. ∃ p' < p, !pair₄Def p' 1 k r v ∧ p = p' + 1”
 
-def _root_.LO.FirstOrder.Arithmetic.qqVerumDef : 𝚺₀.Semisentence 1 :=
+def _root_.FFL.FirstOrder.Arithmetic.qqVerumDef : 𝚺₀.Semisentence 1 :=
   .mkSigma “p. ∃ p' < p, !pairDef p' 2 0 ∧ p = p' + 1”
 
-def _root_.LO.FirstOrder.Arithmetic.qqFalsumDef : 𝚺₀.Semisentence 1 :=
+def _root_.FFL.FirstOrder.Arithmetic.qqFalsumDef : 𝚺₀.Semisentence 1 :=
   .mkSigma “p. ∃ p' < p, !pairDef p' 3 0 ∧ p = p' + 1”
 
-def _root_.LO.FirstOrder.Arithmetic.qqAndDef : 𝚺₀.Semisentence 3 :=
+def _root_.FFL.FirstOrder.Arithmetic.qqAndDef : 𝚺₀.Semisentence 3 :=
   .mkSigma “r p q. ∃ r' < r, !pair₃Def r' 4 p q ∧ r = r' + 1”
 
-def _root_.LO.FirstOrder.Arithmetic.qqOrDef : 𝚺₀.Semisentence 3 :=
+def _root_.FFL.FirstOrder.Arithmetic.qqOrDef : 𝚺₀.Semisentence 3 :=
   .mkSigma “r p q. ∃ r' < r, !pair₃Def r' 5 p q ∧ r = r' + 1”
 
-def _root_.LO.FirstOrder.Arithmetic.qqAllDef : 𝚺₀.Semisentence 2 :=
+def _root_.FFL.FirstOrder.Arithmetic.qqAllDef : 𝚺₀.Semisentence 2 :=
   .mkSigma “r p. ∃ r' < r, !pairDef r' 6 p ∧ r = r' + 1”
 
-def _root_.LO.FirstOrder.Arithmetic.qqExsDef : 𝚺₀.Semisentence 2 :=
+def _root_.FFL.FirstOrder.Arithmetic.qqExsDef : 𝚺₀.Semisentence 2 :=
   .mkSigma “r p. ∃ r' < r, !pairDef r' 7 p ∧ r = r' + 1”
 
 instance qqRel_defined : 𝚺₀-Function₃ (qqRel : V → V → V → V) via qqRelDef := .mk fun v ↦ by simp_all [qqRelDef, qqRel]
@@ -1492,4 +1492,4 @@ lemma semiformula_result_induction {P : V → V → V → V → Prop} (hP : 𝚺
 
 end UformulaRec1.Construction
 
-end LO.FirstOrder.Arithmetic.Bootstrapping
+end FFL.FirstOrder.Arithmetic.Bootstrapping

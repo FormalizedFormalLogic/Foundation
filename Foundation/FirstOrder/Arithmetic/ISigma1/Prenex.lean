@@ -11,10 +11,10 @@ with `θ` in `Hierarchy 𝚺 0`, and dually for `Hierarchy 𝚷 1` and `∀¹ θ
 
 @[expose] public section
 
-open LO
-open LO.FirstOrder
+open FFL
+open FFL.FirstOrder
 
-namespace LO.FirstOrder.Arithmetic.ISigma1
+namespace FFL.FirstOrder.Arithmetic.ISigma1
 
 variable {n : ℕ} {φ : ArithmeticSemisentence n} {σ : ArithmeticSentence}
 
@@ -36,4 +36,4 @@ lemma exists_matrix_provable_of_sentence (h : Hierarchy 𝚺 1 σ) :
     ∃ θ : 𝚺₀.Semisentence 1, 𝗜𝚺₁ ⊢ σ 🡘 ∃¹ θ.val :=
   exists_matrix_provable h
 
-end LO.FirstOrder.Arithmetic.ISigma1
+end FFL.FirstOrder.Arithmetic.ISigma1

@@ -8,7 +8,7 @@ public import Foundation.Vorspiel.ExistsUnique
 # (Direct) Interpretation
 -/
 
-namespace LO.FirstOrder
+namespace FFL.FirstOrder
 
 @[ext]
 structure DirectTranslation {L₁ : Language} [L₁.Eq] (T : Theory L₁) [𝗘𝗤 _ ⪯ T] (L₂ : Language) [L₂.Eq] where
@@ -611,4 +611,4 @@ protected abbrev trans (π : T₁ ⋈ T₂) (τ : T₂ ⋈ T₃) : T₁ ⋈ T₃
 
 end MutualDirectInterpretation
 
-end LO.FirstOrder
+end FFL.FirstOrder

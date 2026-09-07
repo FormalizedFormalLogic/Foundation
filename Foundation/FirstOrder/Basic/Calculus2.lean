@@ -4,7 +4,7 @@ public import Foundation.FirstOrder.Basic.Calculus
 
 /-! # Alternative definition of proof -/
 
-namespace LO.FirstOrder
+namespace FFL.FirstOrder
 
 variable {L : Language} [L.DecidableEq]
 
@@ -28,7 +28,7 @@ abbrev Derivable2 (T : Theory L) (Γ : Finset (Proposition L)) := Nonempty (T �
 
 scoped infix:45 " ⟹₂! " => Derivable2
 
-abbrev _root_.LO.FirstOrder.Theory.Proof2 (T : Theory L) (φ : Proposition L) := T ⟹₂ {φ}
+abbrev _root_.FFL.FirstOrder.Theory.Proof2 (T : Theory L) (φ : Proposition L) := T ⟹₂ {φ}
 
 scoped infix: 45 " ⊢!₂! " => Theory.Proof2
 
@@ -182,4 +182,4 @@ lemma provable_iff_derivable2 {φ : Sentence L} : T ⊢ φ ↔ Nonempty (T ⊢!�
 
 end derivation2
 
-end LO.FirstOrder
+end FFL.FirstOrder

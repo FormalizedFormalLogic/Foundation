@@ -11,7 +11,7 @@ reference: Ralf Schindler, "Set Theory, Exploring Independence and Truth" [Sch14
 
 @[expose] public section
 
-namespace LO.FirstOrder.SetTheory
+namespace FFL.FirstOrder.SetTheory
 
 variable {V : Type*} [SetStructure V] [Nonempty V] [V↓[ℒₛₑₜ] ⊧* 𝗭]
 
@@ -765,4 +765,4 @@ lemma mem_asymm₃ {x y z : V} : x ∈ y → y ∈ z → z ∉ x := by
   have : x ∈ succ x := mem_succ_self x
   simp [←h] at this
 
-end LO.FirstOrder.SetTheory
+end FFL.FirstOrder.SetTheory

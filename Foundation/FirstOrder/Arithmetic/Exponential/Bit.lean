@@ -8,7 +8,7 @@ public import Foundation.FirstOrder.Arithmetic.Exponential.Log
 
 @[expose] public section
 
-namespace LO.FirstOrder.Arithmetic
+namespace FFL.FirstOrder.Arithmetic
 
 variable {V : Type*} [ORingStructure V]
 
@@ -23,7 +23,7 @@ def Bit (i a : V) : Prop := LenBit (Exp.exp i) a
 /-- Support for `∈` notation over a model of arithmetic, implemented by binary encoding. -/
 instance : Membership V V := ⟨fun a i ↦ Bit i a⟩
 
-def _root_.LO.FirstOrder.Arithmetic.bitDef : 𝚺₀.Semisentence 2 := .mkSigma
+def _root_.FFL.FirstOrder.Arithmetic.bitDef : 𝚺₀.Semisentence 2 := .mkSigma
   “x y. ∃ z <⁺ y, !expDef z x ∧ !lenbitDef z y”
 
 set_option linter.flexible false in
@@ -263,7 +263,7 @@ lemma insert_graph (b i a : V) :
         not_false_eq_true, true_and, false_or, forall_exists_index, and_imp]
       rintro x _ rfl rfl; rfl ⟩
 
-def _root_.LO.FirstOrder.Arithmetic.insertDef : 𝚺₀.Semisentence 3 := .mkSigma
+def _root_.FFL.FirstOrder.Arithmetic.insertDef : 𝚺₀.Semisentence 3 := .mkSigma
   “b i a. (i ∈ a ∧ b = a) ∨ (i ∉ a ∧ ∃ e <⁺ b, !expDef e i ∧ b = a + e)”
 
 instance insert_defined : 𝚺₀-Function₂[V] insert via insertDef := .mk fun v ↦ by simp [insertDef, insert_graph]
@@ -328,7 +328,7 @@ lemma lt_exp_iff {a i : V} : a < Exp.exp i ↔ ∀ j ∈ a, j < i :=
 
 instance : HasSubset V := ⟨fun a b ↦ ∀ ⦃i⦄, i ∈ a → i ∈ b⟩
 
-def _root_.LO.FirstOrder.Arithmetic.bitSubsetDef : 𝚺₀.Semisentence 2 := .mkSigma
+def _root_.FFL.FirstOrder.Arithmetic.bitSubsetDef : 𝚺₀.Semisentence 2 := .mkSigma
   “a b. ∀ i < a, i ∈ a → i ∈ b”
 
 instance bitSubset_defined : 𝚺₀-Relation[V] Subset via bitSubsetDef := .mk fun v ↦ by
@@ -387,7 +387,7 @@ private lemma under_graph (x y : V) : y = under x ↔ y + 1 = Exp.exp x := by
     have := congr_arg (· - 1) h
     simpa [under] using this
 
-def _root_.LO.FirstOrder.Arithmetic.underDef : 𝚺₀.Semisentence 2 := .mkSigma
+def _root_.FFL.FirstOrder.Arithmetic.underDef : 𝚺₀.Semisentence 2 := .mkSigma
   “y x. !expDef.val (y + 1) x”
 
 instance under_defined : 𝚺₀-Function₁[V] under via underDef := .mk fun v ↦ by simp [underDef, under_graph]
@@ -589,4 +589,4 @@ theorem finite_comprehension₁! {P : V → Prop} (hP : Γ-[1]-Predicate P) (fin
 
 end
 
-end LO.FirstOrder.Arithmetic
+end FFL.FirstOrder.Arithmetic

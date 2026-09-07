@@ -5,7 +5,7 @@ public import Foundation.Vorspiel.Finset.Basic
 
 @[expose] public section
 
-namespace LO.Axioms
+namespace FFL.Axioms
 
 variable {F : Type*} [LogicalConnective F]
 variable (φ ψ χ : F)
@@ -32,12 +32,12 @@ protected abbrev OrInst₂ := ψ 🡒 φ ⋎ ψ
 
 protected abbrev OrElim := (φ 🡒 χ) 🡒 (ψ 🡒 χ) 🡒 (φ ⋎ ψ 🡒 χ)
 
-end LO.Axioms
+end FFL.Axioms
 
 
 
 
-namespace LO.Entailment
+namespace FFL.Entailment
 
 
 -- def cast (e : φ = ψ) (b : 𝓢 ⊢! φ) : 𝓢 ⊢! ψ := e ▸ b
@@ -1509,6 +1509,6 @@ end Context
 end
 
 
-end LO.Entailment
+end FFL.Entailment
 
 end

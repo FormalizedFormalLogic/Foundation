@@ -11,7 +11,7 @@ public import Foundation.Logic.ForcingRelation
 Main reference: Jeremy Avigad, Algebraic proofs of cut elimination [Avi01]
  -/
 
-namespace LO.FirstOrder.Derivation.Canonical
+namespace FFL.FirstOrder.Derivation.Canonical
 
 variable {L : Language}
 
@@ -196,4 +196,4 @@ end IsWeaklyForced
 
 end Canonical
 
-end LO.FirstOrder.Derivation
+end FFL.FirstOrder.Derivation

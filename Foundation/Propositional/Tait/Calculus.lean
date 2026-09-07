@@ -5,7 +5,7 @@ public import Foundation.Logic.Calculus
 
 @[expose] public section
 
-namespace LO.Propositional
+namespace FFL.Propositional
 
 abbrev Sequent (α : Type*) := List (NNFormula α)
 
@@ -93,6 +93,6 @@ end Proof
 
 abbrev NNFormula.IsTautology (φ : NNFormula α) : Prop := 𝐋𝐊⁰ ⊢ φ
 
-end LO.Propositional
+end FFL.Propositional
 
 end

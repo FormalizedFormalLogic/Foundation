@@ -6,7 +6,7 @@ public import Foundation.FirstOrder.SetTheory.ZF
 
 @[expose] public section
 
-namespace LO.FirstOrder.SetTheory
+namespace FFL.FirstOrder.SetTheory
 
 variable {V : Type*} [SetStructure V] [Nonempty V]
 
@@ -331,4 +331,4 @@ lemma transfiniteRec_spec_of_not_isOrdinal (F : V → V) (hF : ℒₛₑₜ-func
     transfiniteRec F hF x = ∅ := by
   simp [transfiniteRec, hx]
 
-end LO.FirstOrder.SetTheory.Replacement
+end FFL.FirstOrder.SetTheory.Replacement

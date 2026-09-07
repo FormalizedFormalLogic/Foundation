@@ -6,7 +6,7 @@ public import Mathlib.Logic.Encodable.Basic
 @[expose]
 public section
 
-namespace LO.Propositional
+namespace FFL.Propositional
 
 variable {α : Type*}
 
@@ -43,7 +43,7 @@ instance : LogicalNeutral (Formula α) where
   top := verum
   bot := falsum
 
-instance : LO.NegAbbrev (Formula α) := by tauto;
+instance : FFL.NegAbbrev (Formula α) := by tauto;
 
 section ToString
 
@@ -459,6 +459,6 @@ class SubstitutionClosed (S : Set (Formula α)) where
 
 end Substitution
 
-end LO.Propositional
+end FFL.Propositional
 
 end

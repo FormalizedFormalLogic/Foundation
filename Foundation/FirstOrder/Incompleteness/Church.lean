@@ -19,7 +19,7 @@ undecidable (`undecidability_first_order_logic`).
 
 @[expose] public section
 
-namespace LO.FirstOrder.Arithmetic
+namespace FFL.FirstOrder.Arithmetic
 
 open Bootstrapping Bootstrapping.Arithmetic
 
@@ -121,6 +121,6 @@ theorem undecidability_first_order_logic : ¬ComputablePred ((∅ : ArithmeticTh
 
 end PeanoMinusReduction
 
-end LO.FirstOrder.Arithmetic
+end FFL.FirstOrder.Arithmetic
 
 end

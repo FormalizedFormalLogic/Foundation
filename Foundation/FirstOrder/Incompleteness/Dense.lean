@@ -5,7 +5,7 @@ public import Foundation.Logic.LindenbaumAlgebra
 public import Foundation.Vorspiel.Order.BooleanAlgebra.Iso
 
 @[expose] public section
-namespace LO
+namespace FFL
 
 namespace Entailment.LindenbaumAlgebra
 
@@ -65,4 +65,4 @@ theorem lindenbaum_iso (T U : ArithmeticTheory)
     Nonempty (LindenbaumAlgebra T ≃o LindenbaumAlgebra U) :=
   iso_of_countable_atomless
 
-end LO
+end FFL
