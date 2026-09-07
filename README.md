@@ -82,7 +82,7 @@ regenerate them locally.
 
 #### Arithmetic Theory Zoo
 
-![Arithmetic Theory Zoo](https://formalizedformallogic.github.io/Foundation/zoo/arithmetic.png)
+<a href="https://formalizedformallogic.github.io/Foundation/zoo/arithmetic.png"><img alt="Arithmetic Theory Zoo" src="https://formalizedformallogic.github.io/Foundation/zoo/arithmetic.png" height="600"></a>
 
 ## Contributing
 

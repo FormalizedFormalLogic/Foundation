@@ -27,6 +27,11 @@
       "digraph Zoo {
         rankdir = TB;
 
+        // Tighter than the Graphviz defaults, so that the diagram stays legible once the README
+        // scales it down to fit.
+        ranksep = 0.28;
+        nodesep = 0.18;
+
         node [
           shape = none
           margin = 0.05
