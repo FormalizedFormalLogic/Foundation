@@ -11,6 +11,16 @@ weak.linter.style.multiGoal = true
 [[lean_lib]]
 name = "Foundation"
 
+# Generators of the zoo diagrams. Kept out of `defaultTargets`: they are built by `just zoo`.
+[[lean_lib]]
+name = "Zoo"
+globs = ["Zoo.+"]
+
+[[lean_exe]]
+name = "zoo_arithmetic"
+root = "Zoo.Arithmetic"
+supportInterpreter = true
+
 [[require]]
 scope = "leanprover"
 name = "doc-gen4"
