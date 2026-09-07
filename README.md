@@ -102,7 +102,7 @@ lake build
 List of contact information and areas of expertise of the current main developers.
 If you have any interest or questions, [create a new issue](https://github.com/FormalizedFormalLogic/Foundation/issues) or contact us directly.
 
-- Palalansoukî (Shogo Saito, [@iehality][iehality:github], ✉️:[palalansouki@gmail.com][iehality:email])
+- Palalansoukî (Shogo Saitou, [@iehality][iehality:github], ✉️:[palalansouki@gmail.com][iehality:email])
   - Overall design and maintenance.
   - First-order logic.
   - Intuitionistic first-order logic.
