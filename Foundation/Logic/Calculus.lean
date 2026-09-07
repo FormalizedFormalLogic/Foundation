@@ -42,32 +42,18 @@ def cast (b : 𝔇 Γ) (h : Γ = Δ := by abel) : 𝔇 Δ := h ▸ b
 
 def contra [OneSidedLK 𝔇] (d : 𝔇 Γ) (h : Γ ⊆ Δ := by simp) : 𝔇 Δ := contraction d h
 
-def rotate [OneSidedLK 𝔇] (d : 𝔇 (Γ + ⦃φ⦄)) : 𝔇 (Γ + ⦃φ⦄) := d
-
 def close [OneSidedLK 𝔇] (φ : F) (hp : φ ∈ Γ := by simp) (hn : ∼φ ∈ Γ := by simp) : 𝔇 Γ :=
   contraction (identity φ) (by
     intro ψ hψ
     rcases Multiset.mem_add.mp hψ with hψ | hψ <;> simp_all)
 
-def top [OneSidedLK 𝔇] (h : ⊤ ∈ Γ := by simp) : 𝔇 Γ :=
-  contraction verum (by
-    intro φ hφ
-    have : φ = ⊤ := by simpa using hφ
-    simpa [this] using h)
+def top [OneSidedLK 𝔇] (h : ⊤ ∈ Γ := by simp) : 𝔇 Γ := contraction verum (by simpa using h)
 
 def tensor [OneSidedLK 𝔇] {φ ψ : F} (dφ : 𝔇 (Γ + ⦃φ⦄)) (dψ : 𝔇 (Δ + ⦃ψ⦄)) :
     𝔇 (Γ + Δ + ⦃φ ⋏ ψ⦄) :=
   and
     (contraction dφ (by intro χ hχ; rcases Multiset.mem_add.mp hχ with hχ | hχ <;> simp_all))
     (contraction dψ (by intro χ hχ; rcases Multiset.mem_add.mp hχ with hχ | hχ <;> simp_all))
-
-def swap₁ [OneSidedLK 𝔇] (d : 𝔇 (Γ + ⦃φ₂, φ₁⦄)) : 𝔇 (Γ + ⦃φ₁, φ₂⦄) := cast d
-
-def swap₂ [OneSidedLK 𝔇] (d : 𝔇 (Γ + ⦃φ₃, φ₁, φ₂⦄)) :
-    𝔇 (Γ + ⦃φ₁, φ₂, φ₃⦄) := cast d
-
-def swap₃ [OneSidedLK 𝔇] (d : 𝔇 (Γ + ⦃φ₄, φ₁, φ₂, φ₃⦄)) :
-    𝔇 (Γ + ⦃φ₁, φ₂, φ₃, φ₄⦄) := cast d
 
 alias cut := OneSidedLK.Cut.cut
 

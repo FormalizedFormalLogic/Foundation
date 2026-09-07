@@ -71,9 +71,4 @@ def getPreimage [Encodable α] [DecidableEq β] {f : α → β} {s : Multiset α
   letI := Encodable.decidableEqOfEncodable α
   exact Encodable.chooseX (mem_map.mp h)
 
-/-- Classically extract a preimage from a mapped multiset. -/
-noncomputable def getPreimageClassical {f : α → β} {s : Multiset α}
-    (h : b ∈ s.map f) : {a : α // a ∈ s ∧ f a = b} :=
-  ⟨Classical.choose (mem_map.mp h), Classical.choose_spec (mem_map.mp h)⟩
-
 end Multiset

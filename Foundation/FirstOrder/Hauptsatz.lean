@@ -1,6 +1,6 @@
 module
 
-public import Foundation.FirstOrder.NegationTranslation.GG
+public import Foundation.FirstOrder.NegationTranslation.GoedelGentzen
 public import Foundation.FirstOrder.Basic.Coding
 
 /-!
@@ -394,15 +394,10 @@ protected def refl : (φ : Proposition L) → ⦃φ⦄ ⊩ φᴺ
 
 end Forces
 
-/-- Computable cut elimination for a constructively encodable language.
-- [Avi01, Section 3]
--/
-def constructiveHauptsatz [L.Encodable] {Γ : Sequent L} (d : ⊢ᴸᴷ¹ Γ) :
+def constructiveHauptsatz [L.DecidableEq] [L.Encodable] {Γ : Sequent L} (d : ⊢ᴸᴷ¹ Γ) :
     {d : ⊢ᴸᴷ¹ Γ // Derivation.IsCutFree d} := by
-  letI : L.DecidableEq :=
-    ⟨fun _ ↦ Encodable.decidableEqOfEncodable _, fun _ ↦ Encodable.decidableEqOfEncodable _⟩
   have f : ((ψ : Propositionᵢ L) → ψ ∈ (∼Γ)ᴺ → Forces (∼Γ) ψ) → Forces (∼Γ) ⊥ :=
-    Forces.sound (Derivation.gödelGentzen d) (∼Γ)
+    Forces.sound d.gödelGentzen (∼Γ)
   have g : (ψ : Propositionᵢ L) → ψ ∈ (∼Γ)ᴺ → Forces (∼Γ) ψ := fun φ hφ ↦
     have φ₀ := Multiset.getPreimage hφ
     have h : Forces (∼Γ) (φ₀.val)ᴺ := (Forces.refl φ₀.val).monotone <|
@@ -411,20 +406,19 @@ def constructiveHauptsatz [L.Encodable] {Γ : Sequent L} (d : ⊢ᴸᴷ¹ Γ) :
   have ⟨b, hb⟩ := (f g).falsumEquiv
   exact ⟨Derivation.cast b (by simp), by simpa using hb⟩
 
-/-- Cut elimination theorem of $\mathbf{LK}$.
-- [Avi01, Section 3]
--/
 noncomputable def hauptsatz {Γ : Sequent L} (d : ⊢ᴸᴷ¹ Γ) :
     {d : ⊢ᴸᴷ¹ Γ // Derivation.IsCutFree d} := by
-  letI : L.DecidableEq := ⟨fun _ ↦ Classical.decEq _, fun _ ↦ Classical.decEq _⟩
+  classical
   have f : ((ψ : Propositionᵢ L) → ψ ∈ (∼Γ)ᴺ → Forces (∼Γ) ψ) → Forces (∼Γ) ⊥ :=
-    Forces.sound (Derivation.gödelGentzen d) (∼Γ)
-  have g : (ψ : Propositionᵢ L) → ψ ∈ (∼Γ)ᴺ → Forces (∼Γ) ψ := fun φ hφ ↦
+    Forces.sound d.gödelGentzen (∼Γ)
+  have : ∀ ψ ∈ (∼Γ)ᴺ, Nonempty (Forces (∼Γ) ψ) := fun φ hφ ↦ by
+    have : ∃ φ₀ : Proposition L, ∼φ₀ ∈ Γ ∧ φ₀ᴺ = φ := by simpa [Sequent.doubleNegation] using hφ
+    rcases this with ⟨φ₀, hφ₀⟩
     have φ₀ := Multiset.getPreimageClassical hφ
     have h : Forces (∼Γ) (φ₀.val)ᴺ := (Forces.refl φ₀.val).monotone <|
       StrongerThan.ofSubset (by simpa using φ₀.property.1)
-    h.cast (by simpa using φ₀.property.2)
-  have ⟨b, hb⟩ := (f g).falsumEquiv
+    exact ⟨h.cast (by simpa using φ₀.property.2)⟩
+  have ⟨b, hb⟩ := (f fun φ hφ ↦ Classical.choice (this φ hφ)).falsumEquiv
   exact ⟨Derivation.cast b (by simp), by simpa using hb⟩
 
 end Canonical

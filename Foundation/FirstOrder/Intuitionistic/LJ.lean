@@ -95,7 +95,8 @@ variable {Γ Δ : Sequent L} {Ξ Λ : Head L}
 
 open Rewriting LawfulSyntacticRewriting
 
-def cast (d : Γ ⊢ᴸᴶ¹ Ξ) (seq : Γ = Δ := by abel) (heq : Ξ = Λ := by simp) : Δ ⊢ᴸᴶ¹ Λ := seq ▸ heq ▸ d
+def cast (d : Γ ⊢ᴸᴶ¹ Ξ) (seq : Γ = Δ := by abel) (heq : Ξ = Λ := by simp) :
+    Δ ⊢ᴸᴶ¹ Λ := seq ▸ heq ▸ d
 
 def eta : (φ : Propositionᵢ L) → ⦃φ⦄ ⊢ᴸᴶ¹ φ
   | .rel R v => identity R v
@@ -121,26 +122,27 @@ def eta : (φ : Propositionᵢ L) → ⦃φ⦄ ⊢ᴸᴶ¹ φ
   termination_by φ => φ.complexity
 
 def assumption {φ : Propositionᵢ L} (h : φ ∈ Γ) : Γ ⊢ᴸᴶ¹ φ :=
-  contraction (eta φ) (by
-    intro θ hθ
-    have : θ = φ := by simpa only [Multiset.mem_atom_iff] using hθ
-    simpa [this] using h) (by simp)
+  contraction (eta φ) (by simpa using h) (by simp)
 
-def positiveNeg {φ : Propositionᵢ L} (d : Γ + ⦃φ⦄ ⊢ᴸᴶ¹ (⊥ : Propositionᵢ L)) : Γ ⊢ᴸᴶ¹ (∼φ : Propositionᵢ L) :=
+def positiveNeg {φ : Propositionᵢ L} (d : Γ + ⦃φ⦄ ⊢ᴸᴶ¹ (⊥ : Propositionᵢ L)) :
+    Γ ⊢ᴸᴶ¹ (∼φ : Propositionᵢ L) :=
   positiveImply d
 
-def negativeNeg {φ : Propositionᵢ L} (d : Γ ⊢ᴸᴶ¹ φ) : Γ + ⦃(∼φ : Propositionᵢ L)⦄ ⊢ᴸᴶ¹ none :=
+def negativeNeg {φ : Propositionᵢ L} (d : Γ ⊢ᴸᴶ¹ φ) :
+    Γ + ⦃(∼φ : Propositionᵢ L)⦄ ⊢ᴸᴶ¹ none :=
   cast (seq := by rw [add_zero]; rfl) <| negativeImply (φ := φ) (ψ := ⊥) (Γ := Γ) (Δ := 0) (Ξ := none) d <|
     cast falsum (by simp) (by rfl)
 
-def modusPonens {φ ψ : Propositionᵢ L} (di : Γ ⊢ᴸᴶ¹ φ 🡒 ψ) (dφ : Γ ⊢ᴸᴶ¹ φ) : Γ ⊢ᴸᴶ¹ ψ :=
+def modusPonens {φ ψ : Propositionᵢ L} (di : Γ ⊢ᴸᴶ¹ φ 🡒 ψ) (dφ : Γ ⊢ᴸᴶ¹ φ) :
+    Γ ⊢ᴸᴶ¹ ψ :=
   contraction
     (cut (φ := φ 🡒 ψ) (Γ := Γ) (Δ := Γ) (Ξ := ψ) di <| cast (seq := by simp) <|
       negativeImply (φ := φ) (ψ := ψ) (Γ := Γ) (Δ := 0) (Ξ := ψ)
         dφ (cast (eta ψ) (by simp) (by simp)))
     (by intro θ hθ; simp_all) (by simp)
 
-def negElim {φ : Propositionᵢ L} (dn : Γ ⊢ᴸᴶ¹ (∼φ : Propositionᵢ L)) (dφ : Γ ⊢ᴸᴶ¹ φ) : Γ ⊢ᴸᴶ¹ (⊥ : Propositionᵢ L) :=
+def negElim {φ : Propositionᵢ L} (dn : Γ ⊢ᴸᴶ¹ (∼φ : Propositionᵢ L))
+    (dφ : Γ ⊢ᴸᴶ¹ φ) : Γ ⊢ᴸᴶ¹ (⊥ : Propositionᵢ L) :=
   modusPonens dn dφ
 
 def cutOne {φ : Propositionᵢ L} (dφ : Γ ⊢ᴸᴶ¹ φ) (d : ⦃φ⦄ ⊢ᴸᴶ¹ Ξ) : Γ ⊢ᴸᴶ¹ Ξ :=
@@ -148,15 +150,15 @@ def cutOne {φ : Propositionᵢ L} (dφ : Γ ⊢ᴸᴶ¹ φ) (d : ⦃φ⦄ ⊢�
 
 def andLeft {φ ψ : Propositionᵢ L} (d : Γ ⊢ᴸᴶ¹ φ ⋏ ψ) : Γ ⊢ᴸᴶ¹ φ :=
   cutOne d <| cast <| negativeAnd (Γ := 0) (φ := φ) (ψ := ψ) (Ξ := φ) <|
-    cast (contraction (Γ' := ⦃φ, ψ⦄) (eta φ) (by intro θ hθ; simp_all) (Option.IsSubsetOf.some φ)) (by simp) (by rfl)
+    assumption (by simp)
 
 def andRight {φ ψ : Propositionᵢ L} (d : Γ ⊢ᴸᴶ¹ φ ⋏ ψ) : Γ ⊢ᴸᴶ¹ ψ :=
   cutOne d <| cast <| negativeAnd (Γ := 0) (φ := φ) (ψ := ψ) (Ξ := ψ) <|
-    cast (contraction (Γ' := ⦃φ, ψ⦄) (eta ψ) (by intro θ hθ; simp_all) (Option.IsSubsetOf.some ψ)) (by simp) (by rfl)
+    assumption (by simp)
 
 def specialize {φ : Semipropositionᵢ L 1} (d : Γ ⊢ᴸᴶ¹ ∀¹ φ) (t : Term L ℕ) : Γ ⊢ᴸᴶ¹ φ/[t] :=
   cutOne d <| cast <| negativeForall (Γ := 0) (Ξ := φ/[t]) (φ := φ) (t := t) <|
-    cast (eta (φ/[t])) (by simp) (by simp)
+    assumption (by simp)
 
 def rewrite (f : ℕ → SyntacticTerm L) {Γ : Sequent L} {Ξ : Head L} : Γ ⊢ᴸᴶ¹ Ξ →
     Γ.map (Rew.rewrite f ▹ ·) ⊢ᴸᴶ¹ Head.rewrite f Ξ
@@ -267,34 +269,24 @@ def weakening (d : Γ ⊢ᴸᴶ¹ Ξ) (hΓ : Γ ⊆ Δ) : Δ ⊢ᴸᴶ¹ Ξ :=
 def dni {φ : Propositionᵢ L} (d : Γ ⊢ᴸᴶ¹ φ) : Γ ⊢ᴸᴶ¹ (∼∼φ : Propositionᵢ L) :=
   positiveNeg <| contraction d.negativeNeg (by simp) (by simp)
 
+/-- Contraposition for singleton derivations (standard intuitionistic reasoning). -/
+def contrapose {φ ψ : Propositionᵢ L} (d : ⦃φ⦄ ⊢ᴸᴶ¹ ψ) :
+    ⦃∼ψ⦄ ⊢ᴸᴶ¹ (∼φ : Propositionᵢ L) :=
+  positiveNeg <| negElim (assumption (by simp [Semiformulaᵢ.neg_def])) <|
+    cutOne (assumption (by simp)) d
+
+/-- Double negation preserves derivability, by twice applying contraposition (folklore). -/
+def doubleNegationMap {φ ψ : Propositionᵢ L} (d : ⦃φ⦄ ⊢ᴸᴶ¹ ψ) :
+    ⦃∼∼φ⦄ ⊢ᴸᴶ¹ (∼∼ψ : Propositionᵢ L) := d.contrapose.contrapose
+
 def dneOfNegative [L.DecidableEq] : {φ : Propositionᵢ L} → φ.IsNegative → ⦃∼∼φ⦄ ⊢ᴸᴶ¹ φ
-  | ⊥, _ => by
-    have dn : ⦃(∼∼⊥ : Propositionᵢ L)⦄ ⊢ᴸᴶ¹ (∼⊥ : Propositionᵢ L) := contraction
-      (positiveNeg (Γ := 0) <| cast (eta ⊥) (by simp) (by rfl))
-      (by intro θ hθ; simp_all) (Option.IsSubsetOf.some _)
-    exact negElim (assumption (φ := (∼∼⊥ : Propositionᵢ L)) (by simp)) dn
-  | φ ⋏ ψ, h => by
+  | ⊥, _ => negElim (eta _) <| contraction
+      (positiveNeg (Γ := 0) (φ := ⊥) (assumption (by simp))) (by simp) (by simp)
+  | φ ⋏ ψ, h =>
     have hn : φ.IsNegative ∧ ψ.IsNegative := by simpa using h
-    have ihφ := dneOfNegative hn.1
-    have ihψ := dneOfNegative hn.2
-    let N : Sequent L := ⦃∼∼(φ ⋏ ψ)⦄
-    have dφ : N ⊢ᴸᴶ¹ φ := by
-      have dnnφ : N ⊢ᴸᴶ¹ ↑(∼∼φ) := positiveNeg (Γ := N) <| by
-        let C : Sequent L := N + ⦃∼φ⦄
-        have dnAnd : C ⊢ᴸᴶ¹ ∼(φ ⋏ ψ) := positiveNeg (Γ := C) <| by
-          have dAnd : C + ⦃φ ⋏ ψ⦄ ⊢ᴸᴶ¹ φ ⋏ ψ := assumption (by simp [C])
-          exact negElim (assumption (φ := ∼φ) (by simp [C, Semiformulaᵢ.neg_def])) (andLeft dAnd)
-        exact negElim (assumption (φ := ∼∼(φ ⋏ ψ)) (by simp [N, Semiformulaᵢ.neg_def])) dnAnd
-      exact cutOne dnnφ ihφ
-    have dψ : N ⊢ᴸᴶ¹ ψ := by
-      have dnnψ : N ⊢ᴸᴶ¹ ↑(∼∼ψ) := positiveNeg (Γ := N) <| by
-        let C : Sequent L := N + ⦃∼ψ⦄
-        have dnAnd : C ⊢ᴸᴶ¹ ∼(φ ⋏ ψ) := positiveNeg (Γ := C) <| by
-          have dAnd : C + ⦃φ ⋏ ψ⦄ ⊢ᴸᴶ¹ φ ⋏ ψ := assumption (by simp [C])
-          exact negElim (assumption (φ := ∼ψ) (by simp [C, Semiformulaᵢ.neg_def])) (andRight dAnd)
-        exact negElim (assumption (φ := ∼∼(φ ⋏ ψ)) (by simp [N, Semiformulaᵢ.neg_def])) dnAnd
-      exact cutOne dnnψ ihψ
-    exact positiveAnd dφ dψ
+    positiveAnd
+      (cutOne (doubleNegationMap (andLeft (eta _))) (dneOfNegative hn.1))
+      (cutOne (doubleNegationMap (andRight (eta _))) (dneOfNegative hn.2))
   | φ 🡒 ψ, h => by
     have hnψ : ψ.IsNegative := by simpa using h
     have ihψ := dneOfNegative hnψ
@@ -313,78 +305,55 @@ def dneOfNegative [L.DecidableEq] : {φ : Propositionᵢ L} → φ.IsNegative �
       exact negElim
         (assumption (φ := ∼∼(φ 🡒 ψ)) (by simp [C, N, Semiformulaᵢ.neg_def])) dnImp
     exact cutOne dnnψ ihψ
-  | ∀¹ φ, h => by
-    have hnFree : (Rewriting.free φ).IsNegative := by simpa using h
-    have ihFree := dneOfNegative hnFree
-    let N : Sequent L := ⦃∼∼(∀¹ φ)⦄
-    apply positiveForall (Γ := N)
-    let S : Sequent L := N⁺ᵐ
-    have dnnFree : S ⊢ᴸᴶ¹ ↑(∼∼(Rewriting.free φ)) :=
-      positiveNeg (Γ := S) <| by
-        let C : Sequent L := S + ⦃∼(Rewriting.free φ)⦄
-        have dnAll : C ⊢ᴸᴶ¹ ↑(∼(∀¹ Rewriting.shift φ)) :=
-          positiveNeg (Γ := C) <| by
-            let D : Sequent L := C + ⦃∀¹ Rewriting.shift φ⦄
-            have dAll : D ⊢ᴸᴶ¹ ∀¹ Rewriting.shift φ := assumption (by simp [D])
-            have dFree : D ⊢ᴸᴶ¹ Rewriting.free φ := cast (specialize dAll &0) (by rfl) (by simp)
-            exact negElim
-              (assumption (φ := ∼(Rewriting.free φ)) (by simp [C, Semiformulaᵢ.neg_def])) dFree
-        exact negElim
-          (assumption (φ := ∼∼(∀¹ Rewriting.shift φ))
-            (by simp [S, N, Semiformulaᵢ.neg_def])) dnAll
-    exact cutOne dnnFree ihFree
+  | ∀¹ φ, h => positiveForall <| cutOne
+      (cast (doubleNegationMap (specialize (eta (∀¹ Rewriting.shift φ)) &0))
+        (by simp [Semiformulaᵢ.neg_def]) (by simp))
+      (dneOfNegative (by simpa using h))
   termination_by φ _ => φ.complexity
 
 def ofDNOfNegative [L.DecidableEq] {φ : Propositionᵢ L} (d : Γ ⊢ᴸᴶ¹ (∼∼φ : Propositionᵢ L))
     (h : φ.IsNegative) : Γ ⊢ᴸᴶ¹ φ := cutOne d (dneOfNegative h)
 
 /-- Mutual LJ derivability from singleton antecedents. -/
-abbrev Interderivable (L : Language.{u}) (φ ψ : Propositionᵢ L) :=
+abbrev InterDerivation (L : Language.{u}) (φ ψ : Propositionᵢ L) :=
   (⦃φ⦄ ⊢ᴸᴶ¹ ψ) × (⦃ψ⦄ ⊢ᴸᴶ¹ φ)
 
-namespace Interderivable
+namespace InterDerivation
 
 variable {φ ψ χ φ₁ φ₂ ψ₁ ψ₂ : Propositionᵢ L}
 
-protected def refl (φ : Propositionᵢ L) : Interderivable L φ φ := ⟨eta φ, eta φ⟩
+protected def refl (φ : Propositionᵢ L) : InterDerivation L φ φ := ⟨eta φ, eta φ⟩
 
-def symm (d : Interderivable L φ ψ) : Interderivable L ψ φ := ⟨d.2, d.1⟩
+def symm (d : InterDerivation L φ ψ) : InterDerivation L ψ φ := ⟨d.2, d.1⟩
 
-def trans (d₁ : Interderivable L φ ψ) (d₂ : Interderivable L ψ χ) :
-    Interderivable L φ χ := ⟨cutOne d₁.1 d₂.1, cutOne d₂.2 d₁.2⟩
-
-def contrapose (d : ⦃φ⦄ ⊢ᴸᴶ¹ ψ) : ⦃∼ψ⦄ ⊢ᴸᴶ¹ (∼φ : Propositionᵢ L) := by
-  apply positiveNeg
-  exact negElim (assumption (by simp [Semiformulaᵢ.neg_def])) <|
-    cutOne (assumption (by simp)) d
-
-def neg (d : Interderivable L φ ψ) : Interderivable L (∼φ) (∼ψ) :=
+def trans (d₁ : InterDerivation L φ ψ) (d₂ : InterDerivation L ψ χ) :
+    InterDerivation L φ χ := ⟨cutOne d₁.1 d₂.1, cutOne d₂.2 d₁.2⟩
+def neg (d : InterDerivation L φ ψ) : InterDerivation L (∼φ) (∼ψ) :=
   ⟨contrapose d.2, contrapose d.1⟩
 
-def and (dφ : Interderivable L φ₁ φ₂) (dψ : Interderivable L ψ₁ ψ₂) :
-    Interderivable L (φ₁ ⋏ ψ₁) (φ₂ ⋏ ψ₂) := by
+def and (dφ : InterDerivation L φ₁ φ₂) (dψ : InterDerivation L ψ₁ ψ₂) :
+    InterDerivation L (φ₁ ⋏ ψ₁) (φ₂ ⋏ ψ₂) := by
   constructor
   · exact positiveAnd (cutOne (andLeft (eta _)) dφ.1) (cutOne (andRight (eta _)) dψ.1)
   · exact positiveAnd (cutOne (andLeft (eta _)) dφ.2) (cutOne (andRight (eta _)) dψ.2)
 
 def all {φ ψ : Semipropositionᵢ L 1}
-    (d : Interderivable L (Rewriting.free φ) (Rewriting.free ψ)) :
-    Interderivable L (∀¹ φ) (∀¹ ψ) := by
+    (d : InterDerivation L (Rewriting.free φ) (Rewriting.free ψ)) :
+    InterDerivation L (∀¹ φ) (∀¹ ψ) := by
   let lift : ∀ {φ ψ : Semipropositionᵢ L 1},
       (⦃Rewriting.free φ⦄ ⊢ᴸᴶ¹ Rewriting.free ψ) → ⦃∀¹ φ⦄ ⊢ᴸᴶ¹ ∀¹ ψ :=
     fun {φ ψ} d ↦ positiveForall <| cutOne
-      (cast (specialize (φ := Rewriting.shift φ)
-        (assumption (Γ := ⦃∀¹ Rewriting.shift φ⦄) (by simp)) &0) (by simp) (by simp)) d
+      (cast (specialize (eta (∀¹ Rewriting.shift φ)) &0) (by simp) (by simp)) d
   exact ⟨lift d.1, lift d.2⟩
 
-def dne [L.DecidableEq] (h : φ.IsNegative) : Interderivable L (∼∼φ) φ :=
+def dne [L.DecidableEq] (h : φ.IsNegative) : InterDerivation L (∼∼φ) φ :=
   ⟨dneOfNegative h, dni (eta φ)⟩
 
 def iffnegOfNegIff [L.DecidableEq] (h : φ.IsNegative)
-    (d : Interderivable L (∼φ) ψ) : Interderivable L φ (∼ψ) :=
+    (d : InterDerivation L (∼φ) ψ) : InterDerivation L φ (∼ψ) :=
   (dne h).symm.trans d.neg
 
-end Interderivable
+end InterDerivation
 
 end Derivation
 

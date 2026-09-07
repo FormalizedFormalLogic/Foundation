@@ -1,7 +1,7 @@
 module
 
 public import Foundation.FirstOrder.Kripke.Intuitionistic
-public import Foundation.FirstOrder.NegationTranslation.GG
+public import Foundation.FirstOrder.NegationTranslation.GoedelGentzen
 
 @[expose] public section
 /-! # Weak forcing

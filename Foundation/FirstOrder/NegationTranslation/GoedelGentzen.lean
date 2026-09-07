@@ -91,39 +91,39 @@ open Rewriting LawfulSyntacticRewriting
 variable {L : Language} [L.DecidableEq]
 
 def negDoubleNegation : (φ : Proposition L) →
-    Interderivable L (∼φᴺ) (∼φ)ᴺ
-  | .rel R v => Interderivable.dne (by simp)
-  | .nrel R v => Interderivable.refl _
+    InterDerivation L (∼φᴺ) (∼φ)ᴺ
+  | .rel R v => InterDerivation.dne (by simp)
+  | .nrel R v => InterDerivation.refl _
   | ⊤ => by
       constructor
       · exact negElim (eta (∼(⊤ : Propositionᵢ L))) <|
           weakening verum (by simp)
       · apply positiveNeg
         exact assumption (by simp)
-  | ⊥ => Interderivable.refl _
+  | ⊥ => InterDerivation.refl _
   | φ ⋏ ψ => by
       have eφ := (negDoubleNegation φ).iffnegOfNegIff (by simp)
       have eψ := (negDoubleNegation ψ).iffnegOfNegIff (by simp)
       simpa using (eφ.and eψ).neg
   | φ ⋎ ψ => by
       have e := (negDoubleNegation φ).and (negDoubleNegation ψ)
-      exact (Interderivable.dne (by simp)).trans e
+      exact (InterDerivation.dne (by simp)).trans e
   | ∀¹ φ => by
       have e := (negDoubleNegation (Rewriting.free φ)).iffnegOfNegIff (by simp)
-      have e : Interderivable L (Rewriting.free φᴺ)
+      have e : InterDerivation L (Rewriting.free φᴺ)
           (Rewriting.free (∼(∼φ)ᴺ)) :=
         by simpa [Semiformula.rew_doubleNegation] using e
-      simpa using (Interderivable.all e).neg
+      simpa using (InterDerivation.all e).neg
   | ∃¹ φ => by
       have e := negDoubleNegation (Rewriting.free φ)
-      have e : Interderivable L (Rewriting.free (∼φᴺ))
+      have e : InterDerivation L (Rewriting.free (∼φᴺ))
           (Rewriting.free ((∼φ)ᴺ)) :=
         by simpa [Semiformula.rew_doubleNegation] using e
-      exact (Interderivable.dne (by simp)).trans (Interderivable.all e)
+      exact (InterDerivation.dne (by simp)).trans (InterDerivation.all e)
   termination_by φ => φ.complexity
 
 def negDoubleNegation' (φ : Proposition L) :
-    Interderivable L (∼(∼φ)ᴺ) φᴺ := by
+    InterDerivation L (∼(∼φ)ᴺ) φᴺ := by
   simpa using negDoubleNegation (∼φ)
 
 end LJ.Derivation

@@ -175,63 +175,35 @@ theorem sound {Γ : LJ.Sequent L} {Ξ : LJ.Head L} :
     (d : Γ ⊢ᴸᴶ¹ Ξ) → (w : W) → (fv : ℕ → C) → (∀ i, w ⊩↓ fv i) →
       (∀ φ ∈ Γ, w ⊩[![]|fv] φ) → ForcesHead w fv Ξ
   | .identity R v, w, fv, _, hΓ => hΓ _ (by simp)
-  | .cut (φ := φ) dφ d, w, fv, hfv, hΓ =>
-      sound d w fv hfv (fun ψ hψ ↦ by
-        rcases Multiset.mem_add.mp hψ with hψ | hψ
-        · exact hΓ ψ (Multiset.mem_add.mpr <| Or.inr hψ)
-        · have : ψ = φ := by simpa using hψ
-          subst ψ
-          exact sound dφ w fv hfv fun θ hθ ↦
-            hΓ θ (Multiset.mem_add.mpr <| Or.inl hθ))
+  | .cut dφ d, w, fv, hfv, hΓ => by
+      obtain ⟨hΓ, hΔ⟩ := Multiset.forall_mem_add.mp hΓ
+      exact sound d w fv hfv <| Multiset.forall_mem_add.mpr
+        ⟨hΔ, by simpa using sound dφ w fv hfv hΓ⟩
   | .contraction (Ξ := Ξ) d hΔ hΞ, w, fv, hfv, hΓ => by
       have hd := sound d w fv hfv fun φ hφ ↦ hΓ φ (hΔ hφ)
       cases Ξ <;> cases hΞ <;> simp_all [ForcesHead]
   | .verum, _, _, _, _ => by simp [ForcesHead]
   | .falsum, _, _, _, hΓ => hΓ (⊥ : Propositionᵢ L) (by simp)
-  | .positiveImply (φ := φ) d, w, fv, hfv, hΓ => by
+  | .positiveImply d, w, fv, hfv, hΓ => by
       intro v hvw hφ
-      exact sound d v fv (fun i ↦ domain_monotone (hfv i) v hvw) fun θ hθ ↦ by
-        rcases Multiset.mem_add.mp hθ with hθ | hθ
-        · exact (hΓ θ hθ).monotone v hvw
-        · have : θ = φ := by simpa using hθ
-          simpa [this] using hφ
-  | .negativeImply (φ := φ) (ψ := ψ) dφ dψ, w, fv, hfv, hΓ => by
-      have hφ : w ⊩[![]|fv] φ := sound dφ w fv hfv fun θ hθ ↦
-        hΓ θ (Multiset.mem_add.mpr <| Or.inl <| Multiset.mem_add.mpr <| Or.inl hθ)
-      have hi : w ⊩[![]|fv] φ 🡒 ψ := hΓ _ (by simp)
-      have hψ := hi w (by rfl) hφ
-      exact sound dψ w fv hfv fun θ hθ ↦ by
-        rcases Multiset.mem_add.mp hθ with hθ | hθ
-        · exact hΓ θ (Multiset.mem_add.mpr <| Or.inl <| Multiset.mem_add.mpr <| Or.inr hθ)
-        · have : θ = ψ := by simpa using hθ
-          simpa [this] using hψ
+      exact sound d v fv (fun i ↦ domain_monotone (hfv i) v hvw) <| Multiset.forall_mem_add.mpr
+        ⟨fun θ hθ ↦ (hΓ θ hθ).monotone v hvw, by simpa using hφ⟩
+  | .negativeImply dφ dψ, w, fv, hfv, hΓ => by
+      obtain ⟨⟨hΓ, hΔ⟩, hi⟩ := (by simpa only [Multiset.forall_mem_add,
+        Multiset.forall_mem_atom] using hΓ)
+      exact sound dψ w fv hfv <| Multiset.forall_mem_add.mpr
+        ⟨hΔ, by simpa using hi w (by rfl) (sound dφ w fv hfv hΓ)⟩
   | .positiveAnd dφ dψ, w, fv, hfv, hΓ =>
       ⟨sound dφ w fv hfv hΓ, sound dψ w fv hfv hΓ⟩
-  | .negativeAnd (φ := φ) (ψ := ψ) d, w, fv, hfv, hΓ => by
-      have h : w ⊩[![]|fv] φ ⋏ ψ := hΓ _ (by simp)
-      rcases h with ⟨hφ, hψ⟩
-      exact sound d w fv hfv fun θ hθ ↦ by
-        rcases Multiset.mem_add.mp hθ with hθ | hθ
-        · exact hΓ θ (Multiset.mem_add.mpr <| Or.inl hθ)
-        · simp only [Multiset.mem_add, Multiset.mem_atom_iff] at hθ
-          rcases hθ with hθ | hθ
-          · simpa [hθ] using hφ
-          · simpa [hθ] using hψ
+  | .negativeAnd d, w, fv, hfv, hΓ =>
+      sound d w fv hfv (by simpa only [Multiset.forall_mem_add, Multiset.forall_mem_atom, and] using hΓ)
   | .positiveOrLeft d, w, fv, hfv, hΓ => Or.inl <| sound d w fv hfv hΓ
   | .positiveOrRight d, w, fv, hfv, hΓ => Or.inr <| sound d w fv hfv hΓ
-  | .negativeOr (φ := φ) (ψ := ψ) dφ dψ, w, fv, hfv, hΓ => by
-      have h : w ⊩[![]|fv] φ ⋎ ψ := hΓ _ (by simp)
-      rcases h with hφ | hψ
-      · exact sound dφ w fv hfv fun θ hθ ↦ by
-          rcases Multiset.mem_add.mp hθ with hθ | hθ
-          · exact hΓ θ (Multiset.mem_add.mpr <| Or.inl hθ)
-          · have : θ = φ := by simpa using hθ
-            simpa [this] using hφ
-      · exact sound dψ w fv hfv fun θ hθ ↦ by
-          rcases Multiset.mem_add.mp hθ with hθ | hθ
-          · exact hΓ θ (Multiset.mem_add.mpr <| Or.inl hθ)
-          · have : θ = ψ := by simpa using hθ
-            simpa [this] using hψ
+  | .negativeOr dφ dψ, w, fv, hfv, hΓ => by
+      obtain ⟨hΓ, hφ | hψ⟩ := (by simpa only [Multiset.forall_mem_add,
+        Multiset.forall_mem_atom] using hΓ)
+      · exact sound dφ w fv hfv <| Multiset.forall_mem_add.mpr ⟨hΓ, by simpa using hφ⟩
+      · exact sound dψ w fv hfv <| Multiset.forall_mem_add.mpr ⟨hΓ, by simpa using hψ⟩
   | .positiveForall d, w, fv, hfv, hΓ => by
       intro v hvw x
       simpa [ForcesHead] using sound d v (x.val :>ₙ fv)
@@ -243,11 +215,8 @@ theorem sound {Γ : LJ.Sequent L} {Ξ : LJ.Head L} :
       obtain ⟨x, ht⟩ := t.fvar_of_relational
       have hAll : w ⊩[![]|fv] ∀¹ φ := hΓ _ (by simp)
       have hφ := hAll w (by rfl) ⟨fv x, hfv x⟩
-      exact sound d w fv hfv fun θ hθ ↦ by
-        rcases Multiset.mem_add.mp hθ with hθ | hθ
-        · exact hΓ θ (Multiset.mem_add.mpr <| Or.inl hθ)
-        · have : θ = φ/[t] := by simpa using hθ
-          simpa [this, ht] using hφ
+      exact sound d w fv hfv (by
+        simpa [ht, or_imp, forall_and] using And.intro (fun θ hθ ↦ hΓ θ (Multiset.mem_add.mpr (Or.inl hθ))) hφ)
   | .positiveExists (t := t) d, w, fv, hfv, hΓ => by
       obtain ⟨x, ht⟩ := t.fvar_of_relational
       exact ⟨⟨fv x, hfv x⟩, by simpa [ht] using sound d w fv hfv hΓ⟩

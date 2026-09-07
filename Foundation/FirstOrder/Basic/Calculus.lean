@@ -120,10 +120,7 @@ abbrev cast (d : ⊢ᴸᴷ¹ Δ) (e : Δ = Γ := by abel) : ⊢ᴸᴷ¹ Γ := e 
 
 def contra (d : ⊢ᴸᴷ¹ Δ) (h : Δ ⊆ Γ := by simp) : ⊢ᴸᴷ¹ Γ := contraction d h
 
-def top (h : ⊤ ∈ Δ := by simp) : ⊢ᴸᴷ¹ Δ := verum.contraction <| by
-  intro φ hφ
-  have : φ = ⊤ := by simpa using hφ
-  simpa [this] using h
+def top (h : ⊤ ∈ Δ := by simp) : ⊢ᴸᴷ¹ Δ := verum.contraction (by simpa using h)
 
 def identity' (r : L.Rel k) (v) (hpos : Semiformula.rel r v ∈ Δ := by simp)
     (hneg : Semiformula.nrel r v ∈ Δ := by simp) : ⊢ᴸᴷ¹ Δ :=
@@ -383,10 +380,7 @@ instance : Entailment.Compact (Theory L) where
 instance (T : Theory L) : Entailment.ModusPonens T where
   mdp! {φ ψ} bi bp := by
     refine ⟨bi.axioms + bp.axioms, ?_, ?_⟩
-    · intro χ hχ
-      rcases Multiset.mem_add.mp hχ with hχ | hχ
-      · exact bi.axioms_mem χ hχ
-      · exact bp.axioms_mem χ hχ
+    · exact Multiset.forall_mem_add.mpr ⟨bi.axioms_mem, bp.axioms_mem⟩
     · exact OneSidedLK.cast (OneSidedLK.modusPonens
         (Γ := ∼bi.axioms) (Δ := ∼bp.axioms) (φ := φ) (ψ := ψ)
         (OneSidedLK.cast bi.derivation) (OneSidedLK.cast bp.derivation)) (by simp; abel)
