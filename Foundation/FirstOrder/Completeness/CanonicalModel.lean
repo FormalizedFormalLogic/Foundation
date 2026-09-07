@@ -3,27 +3,17 @@ module
 public import Foundation.FirstOrder.Hauptsatz
 public import Foundation.Logic.ForcingRelation
 
-@[expose] public section
-
 /-!
 # Canonical model for classical first-order logic
 
 Main reference: Jeremy Avigad, Algebraic proofs of cut elimination [Avi01]
  -/
 
+@[expose] public section
+
 namespace FFL.FirstOrder.Derivation.Canonical
 
 variable {L : Language}
-
-local notation "ℙ" => Sequent L
-
-instance : LE ℙ := ⟨fun q p ↦ Nonempty (q ≼ p)⟩
-
-instance : Preorder ℙ where
-  le_refl p := ⟨StrongerThan.refl p⟩
-  le_trans p q r := by
-    rintro ⟨hqp⟩ ⟨hrq⟩
-    exact ⟨StrongerThan.trans hqp hrq⟩
 
 variable (L)
 
@@ -31,38 +21,38 @@ def ConsistentSequent := {Γ : Sequent L // IsEmpty (⊢ᴸᴷ¹ ∼Γ)}
 
 variable {L}
 
-local notation "ℙ⁻" => ConsistentSequent L
+local notation "ℙ" => ConsistentSequent L
 
 namespace ConsistentSequent
 
-instance : Preorder ℙ⁻ where
-  le q p := q.val ≤ p.val
-  le_refl p := by simp
-  le_trans p q r := le_trans
+instance : Preorder ℙ where
+  le q p := Nonempty (q.val ≼ p.val)
+  le_refl p := ⟨StrongerThan.refl p.val⟩
+  le_trans _ _ _ hqp hrq := ⟨hqp.some.trans hrq.some⟩
 
-def nil : ℙ⁻ := ⟨[], by simp⟩
+def nil : ℙ := ⟨0, by simp⟩
 
-instance : OrderTop ℙ⁻ where
+instance : OrderTop ℙ where
   top := nil
   le_top := by
     rintro ⟨Γ, hΓ⟩
-    exact ⟨StrongerThan.ofSubset <| List.nil_subset Γ⟩
+    exact ⟨StrongerThan.ofSubset <| by simp [nil]⟩
 
-def ofUnprovable (φ : Proposition L) (h : 𝐋𝐊¹ ⊬ ∼φ) : ℙ⁻ := ⟨[φ], by simpa [LK.Proof.unprovable_def] using h⟩
+def ofUnprovable (φ : Proposition L) (h : 𝐋𝐊¹ ⊬ ∼φ) : ℙ := ⟨⦃φ⦄, by simpa [LK.Proof.unprovable_def] using h⟩
 
 end ConsistentSequent
 
-abbrev IsForced (p : ℙ⁻) (φ : Propositionᵢ L) := Nonempty (Forces p.val φ)
+abbrev IsForced (p : ℙ) (φ : Propositionᵢ L) := Nonempty (Forces p.val φ)
 
-instance : ForcingRelation ℙ⁻ (Propositionᵢ L) := ⟨IsForced⟩
+instance : ForcingRelation ℙ (Propositionᵢ L) := ⟨IsForced⟩
 
-instance : WeakForcingRelation ℙ⁻ (Proposition L) := ⟨fun p φ ↦ p ⊩ φᴺ⟩
+instance : WeakForcingRelation ℙ (Proposition L) := ⟨fun p φ ↦ p ⊩ φᴺ⟩
 
 open Classical
 
 namespace IsForced
 
-@[simp] lemma rel {p : ℙ⁻} {k} {R : L.Rel k} {v} : p ⊩ .rel R v ↔ Nonempty (⊢ᴸᴷ¹ .rel R v :: ∼p.val) := by
+@[simp] lemma rel {p : ℙ} {k} {R : L.Rel k} {v} : p ⊩ .rel R v ↔ Nonempty (⊢ᴸᴷ¹ ∼p.val + ⦃.rel R v⦄) := by
   constructor
   · rintro ⟨b⟩
     have ⟨d, hd⟩ := b.relEquiv
@@ -71,14 +61,14 @@ namespace IsForced
     let ⟨b, hb⟩ := hauptsatz d
     exact ⟨Forces.relEquiv.symm ⟨b, hb⟩⟩
 
-@[simp] lemma fal {p : ℙ⁻} : p ⊩ ∀¹ φ ↔ ∀ t, p ⊩ φ/[t] := by
+@[simp] lemma fal {p : ℙ} : p ⊩ ∀¹ φ ↔ ∀ t, p ⊩ φ/[t] := by
   constructor
   · rintro ⟨b⟩ t
     exact ⟨b.allEquiv t⟩
   · rintro h
     exact ⟨Forces.allEquiv.symm fun t ↦ (h t).some⟩
 
-@[simp] lemma and {p : ℙ⁻} {φ ψ : Propositionᵢ L} : p ⊩ φ ⋏ ψ ↔ p ⊩ φ ∧ p ⊩ ψ := by
+@[simp] lemma and {p : ℙ} {φ ψ : Propositionᵢ L} : p ⊩ φ ⋏ ψ ↔ p ⊩ φ ∧ p ⊩ ψ := by
   constructor
   · rintro ⟨b⟩
     have ⟨bφ, bψ⟩ := b.andEquiv
@@ -86,7 +76,7 @@ namespace IsForced
   · rintro ⟨⟨bφ⟩, ⟨bψ⟩⟩
     exact ⟨Forces.andEquiv.symm ⟨bφ, bψ⟩⟩
 
-@[simp] lemma or {p : ℙ⁻} {φ ψ : Propositionᵢ L} : p ⊩ φ ⋎ ψ ↔ p ⊩ φ ∨ p ⊩ ψ := by
+@[simp] lemma or {p : ℙ} {φ ψ : Propositionᵢ L} : p ⊩ φ ⋎ ψ ↔ p ⊩ φ ∨ p ⊩ ψ := by
   constructor
   · rintro ⟨b⟩
     have b' := b.orEquiv
@@ -95,12 +85,12 @@ namespace IsForced
     · exact ⟨Forces.orEquiv.symm <| .inl hφ⟩
     · exact ⟨Forces.orEquiv.symm <| .inr hψ⟩
 
-@[simp] lemma not_falsum (p : ℙ⁻) : ¬p ⊩ ⊥ := by
+@[simp] lemma not_falsum (p : ℙ) : ¬p ⊩ ⊥ := by
   rintro ⟨b⟩
   have ⟨d, hd⟩ := b.falsumEquiv
   exact p.prop.false d
 
-lemma imply {p : ℙ⁻} {φ ψ : Propositionᵢ L} : p ⊩ φ 🡒 ψ ↔ (∀ q ≤ p, q ⊩ φ → q ⊩ ψ) := by
+lemma imply {p : ℙ} {φ ψ : Propositionᵢ L} : p ⊩ φ 🡒 ψ ↔ (∀ q ≤ p, q ⊩ φ → q ⊩ ψ) := by
   constructor
   · rintro ⟨b⟩ q ⟨sqp⟩ ⟨bφ⟩
     exact ⟨b.implyEquiv _ sqp bφ⟩
@@ -111,12 +101,12 @@ lemma imply {p : ℙ⁻} {φ ψ : Propositionᵢ L} : p ⊩ φ 🡒 ψ ↔ (∀ 
     · have : Nonempty (⊢ᴸᴷ¹ ∼q) := by simpa using hq
       have d : ⊢ᴸᴷ¹ ∼q := this.some
       let ⟨b, hb⟩ := hauptsatz d
-      exact Forces.implyEquiv (Forces.efq ψ p.val) q sqp (Forces.falsumEquiv.symm ⟨b, hb⟩)
+      exact (Forces.falsumEquiv.symm ⟨b, hb⟩).explosion ψ
 
-lemma not {p : ℙ⁻} {φ : Propositionᵢ L} : p ⊩ ∼φ ↔ (∀ q ≤ p, ¬q ⊩ φ) := by
+lemma not {p : ℙ} {φ : Propositionᵢ L} : p ⊩ ∼φ ↔ (∀ q ≤ p, ¬q ⊩ φ) := by
   simp [Semiformulaᵢ.neg_def, imply]
 
-@[simp] lemma exs {p : ℙ⁻} : p ⊩ ∃¹ φ ↔ ∃ t, p ⊩ φ/[t] := by
+@[simp] lemma exs {p : ℙ} : p ⊩ ∃¹ φ ↔ ∃ t, p ⊩ φ/[t] := by
   constructor
   · rintro ⟨b⟩
     have ⟨t, f⟩ := b.exsEquiv
@@ -124,10 +114,10 @@ lemma not {p : ℙ⁻} {φ : Propositionᵢ L} : p ⊩ ∼φ ↔ (∀ q ≤ p, �
   · rintro ⟨t, h⟩
     exact ⟨Forces.exsEquiv.symm ⟨t, h.some⟩⟩
 
-lemma monotone {p q : ℙ⁻} (hqp : q ≤ p) {φ : Propositionᵢ L} (hφ : p ⊩ φ) : q ⊩ φ :=
+lemma monotone {p q : ℙ} (hqp : q ≤ p) {φ : Propositionᵢ L} (hφ : p ⊩ φ) : q ⊩ φ :=
   ⟨Forces.monotone hqp.some hφ.some⟩
 
-instance : ForcingRelation.IntKripke ℙ⁻ (· ≥ ·) where
+instance : ForcingRelation.IntKripke ℙ (· ≥ ·) where
   verum _ := ⟨Forces.implyEquiv.symm fun _ _ d ↦ d⟩
   falsum _ := by simp
   and _ := and
@@ -136,8 +126,8 @@ instance : ForcingRelation.IntKripke ℙ⁻ (· ≥ ·) where
   not _ := not
   monotone hφ _ hpq := hφ.monotone hpq
 
-lemma sound_minimal {φ : Propositionᵢ L} : 𝗠𝗶𝗻¹ ⊢ φ → ℙ⁻ ∀⊩ φ := by
-  rintro ⟨d⟩ p; exact ⟨Forces.sound d p.val⟩
+lemma sound [L.DecidableEq] {φ : Propositionᵢ L} : 𝐋𝐉¹ ⊢ φ → ℙ ∀⊩ φ := by
+  rintro ⟨d⟩ p; exact ⟨Forces.ljSound d p.val⟩
 
 end IsForced
 
@@ -145,49 +135,55 @@ namespace IsWeaklyForced
 
 open IsForced
 
-lemma iff_isForced {φ : Proposition L} {p : ℙ⁻} : p ⊩ᶜ φ ↔ p ⊩ φᴺ := by rfl
+lemma iff_isForced {φ : Proposition L} {p : ℙ} : p ⊩ᶜ φ ↔ p ⊩ φᴺ := by rfl
 
-lemma dn_neg_iff {φ : Proposition L} {p : ℙ⁻} : p ⊩ᶜ ∼φ ↔ p ⊩ ∼φᴺ := by
-  have := by simpa using (sound_minimal (Derivation.neg_doubleNegation φ) p)
-  exact (this p (by simp)).symm
+lemma dn_neg_iff {φ : Proposition L} {p : ℙ} : p ⊩ᶜ ∼φ ↔ p ⊩ ∼φᴺ := by
+  let : L.DecidableEq := ⟨fun _ ↦ Classical.decEq _, fun _ ↦ Classical.decEq _⟩
+  have e := LJ.Derivation.negDoubleNegation φ
+  constructor
+  · rintro ⟨h⟩
+    exact ⟨Forces.sound e.2 p.val fun ψ hψ ↦ h.cast (Multiset.mem_atom_iff.mp hψ).symm⟩
+  · rintro ⟨h⟩
+    exact ⟨Forces.sound e.1 p.val fun ψ hψ ↦ h.cast (Multiset.mem_atom_iff.mp hψ).symm⟩
 
-@[simp] lemma verum (p : ℙ⁻) : p ⊩ᶜ ⊤ := by simp [iff_isForced, IsForced.not]
+@[simp] lemma verum (p : ℙ) : p ⊩ᶜ ⊤ := by simp [iff_isForced, IsForced.not]
 
-@[simp] lemma falsum (p : ℙ⁻) : ¬p ⊩ᶜ ⊥ := by simp [iff_isForced]
+@[simp] lemma falsum (p : ℙ) : ¬p ⊩ᶜ ⊥ := by simp [iff_isForced]
 
-@[simp] lemma not {φ : Proposition L} {p : ℙ⁻} : p ⊩ᶜ ∼φ ↔ ∀ q ≤ p, ¬q ⊩ᶜ φ := by
+@[simp] lemma not {φ : Proposition L} {p : ℙ} : p ⊩ᶜ ∼φ ↔ ∀ q ≤ p, ¬q ⊩ᶜ φ := by
   simp [IsForced.not, dn_neg_iff,]; rfl
 
-@[simp] lemma and {φ ψ : Proposition L} {p : ℙ⁻} : p ⊩ᶜ φ ⋏ ψ ↔ p ⊩ᶜ φ ∧ p ⊩ᶜ ψ := by
+@[simp] lemma and {φ ψ : Proposition L} {p : ℙ} : p ⊩ᶜ φ ⋏ ψ ↔ p ⊩ᶜ φ ∧ p ⊩ᶜ ψ := by
   simp [iff_isForced, ]
 
-@[simp] lemma or {φ ψ : Proposition L} {p : ℙ⁻} : p ⊩ᶜ φ ⋎ ψ ↔ ∀ q ≤ p, ∃ r ≤ q, r ⊩ᶜ φ ∨ r ⊩ᶜ ψ := by
+@[simp] lemma or {φ ψ : Proposition L} {p : ℙ} : p ⊩ᶜ φ ⋎ ψ ↔ ∀ q ≤ p, ∃ r ≤ q, r ⊩ᶜ φ ∨ r ⊩ᶜ ψ := by
   simp [iff_isForced, IsForced.not, ]; grind
 
-@[simp] lemma all {φ : Semiproposition L 1} {p : ℙ⁻} : p ⊩ᶜ ∀¹ φ ↔ ∀ t, p ⊩ᶜ φ/[t] := by
+@[simp] lemma all {φ : Semiproposition L 1} {p : ℙ} : p ⊩ᶜ ∀¹ φ ↔ ∀ t, p ⊩ᶜ φ/[t] := by
   simp [iff_isForced, Semiformula.subst_doubleNegation]
 
-@[simp] lemma exs {φ : Semiproposition L 1} {p : ℙ⁻} : p ⊩ᶜ ∃¹ φ ↔ ∀ q ≤ p, ∃ r ≤ q, ∃ t, r ⊩ᶜ φ/[t] := by
+@[simp] lemma exs {φ : Semiproposition L 1} {p : ℙ} : p ⊩ᶜ ∃¹ φ ↔ ∀ q ≤ p, ∃ r ≤ q, ∃ t, r ⊩ᶜ φ/[t] := by
   simp [iff_isForced, IsForced.not, Semiformula.subst_doubleNegation]; grind
 
-lemma monotone {φ : Proposition L} {p q : ℙ⁻} (h : q ≤ p) : p ⊩ᶜ φ → q ⊩ᶜ φ := IsForced.monotone h
+lemma monotone {φ : Proposition L} {p q : ℙ} (h : q ≤ p) : p ⊩ᶜ φ → q ⊩ᶜ φ := IsForced.monotone h
 
-lemma gnericity {φ : Proposition L} {p : ℙ⁻} : p ⊩ᶜ φ ↔ ∀ q ≤ p, ∃ r ≤ q, r ⊩ᶜ φ := calc
+lemma gnericity {φ : Proposition L} {p : ℙ} : p ⊩ᶜ φ ↔ ∀ q ≤ p, ∃ r ≤ q, r ⊩ᶜ φ := calc
   p ⊩ᶜ φ ↔ p ⊩ᶜ ∼∼φ := by simp
   _      ↔ ∀ q ≤ p, ∃ r ≤ q, r ⊩ᶜ φ := by rw [not]; simp [not]
 
-lemma complete {φ : Proposition L} : ℙ⁻ ∀⊩ᶜ φ ↔ 𝐋𝐊¹ ⊢ φ := by
+lemma complete {φ : Proposition L} : ℙ ∀⊩ᶜ φ ↔ 𝐋𝐊¹ ⊢ φ := by
   constructor
   · intro h
     by_contra b
-    let p : ℙ⁻ := ⟨[∼φ], ⟨fun bφ ↦ b ⟨by simpa using! bφ⟩⟩⟩
+    let p : ℙ := ⟨⦃∼φ⦄, ⟨fun bφ ↦ b ⟨by simpa using! bφ⟩⟩⟩
     have hp : p ⊩ φᴺ := h p
     have hn : p ⊩ᶜ ∼φ := ⟨Forces.refl (∼φ)⟩
     have : ∀ q ≤ p, ¬q ⊩ φᴺ := by simpa [not] using! hn
     have : ¬p ⊩ φᴺ := this p (by simp)
     contradiction
   · intro b
-    exact sound_minimal <| Provable.gödel_gentzen b
+    let : L.DecidableEq := ⟨fun _ ↦ Classical.decEq _, fun _ ↦ Classical.decEq _⟩
+    exact IsForced.sound <| Provable.gödel_gentzen b
 
 protected lemma refl (φ : Proposition L) (h : 𝐋𝐊¹ ⊬ ∼φ) :
     ConsistentSequent.ofUnprovable φ h ⊩ᶜ φ := ⟨Forces.refl φ⟩

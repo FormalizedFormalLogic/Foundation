@@ -3,6 +3,7 @@ module
 public import Foundation.Syntax.Predicate.Quantifier
 public import Foundation.Syntax.Predicate.Term
 public import Foundation.Vorspiel.Function
+public import Foundation.Vorspiel.Multiset
 
 /-!
 # Rewriting
@@ -861,17 +862,19 @@ abbrev free [Rewriting L ℕ F ℕ F] : F (n + 1) →ˡᶜ F n := app Rew.free
 
 abbrev fix [Rewriting L ℕ F ℕ F] : F n →ˡᶜ F (n + 1) := app Rew.fix
 
-def shifts [Rewriting L ℕ F ℕ F] (Γ : List (F n)) : List (F n) := Γ.map Rewriting.shift
+def shifts [Rewriting L ℕ F ℕ F] (Γ : Multiset (F n)) : Multiset (F n) := Γ.map Rewriting.shift
 
-/-- Applies the substitution `FFL.FirstOrder.Rew.shift` to each formula in a list of formulas. This substitutes each free variable `&x` with `&(x + 1)`. -/
 scoped[FFL.FirstOrder] postfix:max "⁺" => FirstOrder.Rewriting.shifts
 
-@[simp] lemma shifts_nil [Rewriting L ℕ F ℕ F] : ([] : List (F n))⁺ = [] := by rfl
+@[simp] lemma shifts_empty [Rewriting L ℕ F ℕ F] : (0 : Multiset (F n))⁺ = 0 := by rfl
 
-@[simp] lemma shifts_cons [Rewriting L ℕ F ℕ F] (φ : F n) (Γ : List (F n)) : (φ :: Γ)⁺ = shift φ :: Γ⁺ := by simp [shifts]
+@[simp] lemma shifts_add [Rewriting L ℕ F ℕ F] (Γ Δ : Multiset (F n)) : (Γ + Δ)⁺ = Γ⁺ + Δ⁺ := by simp [shifts]
 
-@[simp] lemma shifts_neg [Rewriting L ℕ F ℕ F] (Γ : List (F n)) : (∼Γ)⁺ = ∼(Γ⁺) := by
-  simp [shifts, List.tilde_def]
+@[simp] lemma shifts_singleton [Rewriting L ℕ F ℕ F] (φ : F n) : (⦃φ⦄ : Multiset (F n))⁺ = ⦃shift φ⦄ := by simp [shifts]
+
+@[simp] lemma shifts_neg [Rewriting L ℕ F ℕ F] (Γ : Multiset (F n)) :
+    (∼Γ)⁺ = ∼(Γ⁺) := by
+  simp [shifts, Multiset.tilde_def]
 
 abbrev emb {ο ξ} [IsEmpty ο] {O F : ℕ → Type*} [LCWQ O] [LCWQ F] [Rewriting L ο O ξ F] : O n →ˡᶜ F n := app (Rew.emb (ξ := ξ))
 
@@ -950,25 +953,6 @@ lemma fix_allClosure (φ : S n) :
   case zero => simp [allClosure_succ]
   case succ n ih => simp [allClosure_succ, ih]
 
-@[simp] lemma shifts_cons (φ : S n) (Γ : List (S n)) :
-    (φ :: Γ)⁺ = Rewriting.shift φ :: Γ⁺ := by simp [shifts]
-
-@[simp] lemma shifts_nil : ([] : List (S n))⁺ = [] := by rfl
-
-@[simp] lemma shifts_union (Γ Δ : List (S n)) :
-    (Γ ++ Δ)⁺ = Γ⁺ ++ Δ⁺ := by simp [shifts]
-
-lemma shifts_neg (Γ : List (S n)) :
-    (Γ.map (∼·))⁺ = (Γ⁺).map (∼·) := by simp [shifts]
-
-lemma shift_conj₂ (Γ : List (S n)) : shift (⋀Γ) = ⋀Γ⁺ := by
-  induction Γ using List.induction_with_singleton
-  case hnil => simp
-  case hsingle => simp
-  case hcons φ Γ hΓ ih =>
-    have : Γ⁺ ≠ [] := by intro H; have : Γ = [] := List.map_eq_nil_iff.mp H; contradiction
-    simp [hΓ, this, ih]
-
 variable [LawfulSyntacticRewriting L S]
 
 lemma shift_injective : Function.Injective fun φ : S n ↦ shift φ :=
@@ -1032,12 +1016,12 @@ lemma shiftEmb_def (φ : S n) :
 lemma allClosure_fixitr (φ : S 0) : ∀¹* Rew.fixitr 0 (m + 1) ▹ φ = ∀¹ Rew.fix ▹ (∀¹* Rew.fixitr 0 m ▹ φ) := by
   simp [Rew.fixitr_succ, fix_allClosure, comp_app];
 
-@[simp] lemma mem_shifts_iff {φ : S n} {Γ : List (S n)} :
+@[simp] lemma mem_shifts_iff {φ : S n} {Γ : Multiset (S n)} :
     Rewriting.shift φ ∈ Γ⁺ ↔ φ ∈ Γ :=
-  List.mem_map_of_injective shift_injective
+  Multiset.mem_map_of_injective shift_injective
 
-@[simp] lemma shifts_ss (Γ Δ : List (S n)) :
-    Γ⁺ ⊆ Δ⁺ ↔ Γ ⊆ Δ := List.map_subset_iff _ shift_injective
+@[simp] lemma shifts_ss (Γ Δ : Multiset (S n)) :
+    Γ⁺ ⊆ Δ⁺ ↔ Γ ⊆ Δ := Multiset.map_subset_iff _ shift_injective
 
 end LawfulSyntacticRewriting
 
@@ -1091,9 +1075,9 @@ variable {S : ℕ → Type*} [LCWQ S] [SyntacticRewriting L S S] [LawfulSyntacti
 @[simp] lemma shifts_emb
     [Rewriting L ο O ℕ F] [Rewriting L ℕ F ℕ F]
     [TransitiveRewriting L ο O ℕ F ℕ F]
-    (Γ : List (O n)) :
+    (Γ : Multiset (O n)) :
     (Γ.map (Rewriting.emb (ξ := ℕ)))⁺ = Γ.map (Rewriting.emb (ξ := ℕ)) := by
-  suffices ∀ a ∈ Γ, shift (emb (ξ := ℕ) a) = emb (ξ := ℕ) a by simp [shifts, Function.comp_def, ← comp_app]
+  suffices ∀ a ∈ Γ, shift (emb (ξ := ℕ) a) = emb (ξ := ℕ) a by simp [shifts, ← comp_app]
   intro j hj
   unfold emb shift
   rw [←comp_app]; congr 2

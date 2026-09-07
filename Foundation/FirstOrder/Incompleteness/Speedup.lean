@@ -9,7 +9,7 @@ public import Mathlib.Data.Nat.Log
 /-!
 # Ehrenfeucht–Mycielski speedup theorem
 
-`Theory.minProof T σ` is the least Gödel code of a proof `T ⊢!₂! ↑σ`, and `0` when `σ` is not
+`Theory.minProof T σ` is the least Gödel code of a proof `T ⊢₂! ↑σ`, and `0` when `σ` is not
 `T`-provable.
 -/
 
@@ -31,22 +31,22 @@ variable
   {T : Theory L} [T.Δ₁] {σ : Sentence L}
 
 noncomputable def _root_.FFL.FirstOrder.Theory.minProof (T : Theory L) [T.Δ₁] (σ : Sentence L) : ℕ :=
-  sInf (Set.range λ d : T ⊢!₂! (σ : Proposition L) ↦ (⌜d⌝ : ℕ))
+  sInf (Set.range λ d : T ⊢₂! (σ : Proposition L) ↦ (⌜d⌝ : ℕ))
 
 @[grind →]
 lemma proof_minProof (h : T ⊢ σ) : Proof T (T.minProof σ) ⌜σ⌝ := by
-  obtain ⟨d, hd⟩ : T.minProof σ ∈ Set.range (λ d : T ⊢!₂! (σ : Proposition L) ↦ (⌜d⌝ : ℕ)) :=
+  obtain ⟨d, hd⟩ : T.minProof σ ∈ Set.range (λ d : T ⊢₂! (σ : Proposition L) ↦ (⌜d⌝ : ℕ)) :=
     Nat.sInf_mem ⟨_, Set.mem_range_self (provable_iff_derivable2.mp h).some⟩
   exact hd ▸ proof_of_quote_proof2 d
 
 @[grind →]
 lemma minProof_eq_zero_of_unprovable (h : T ⊬ σ) : T.minProof σ = 0 := by
-  have : IsEmpty (T ⊢!₂! (σ : Proposition L)) :=
+  have : IsEmpty (T ⊢₂! (σ : Proposition L)) :=
     not_nonempty_iff.mp λ hd ↦ h (provable_iff_derivable2.mpr hd)
   simp [Theory.minProof, Set.range_eq_empty_iff.mpr this]
 
 @[grind ←]
-lemma minProof_le (d : T ⊢!₂! (σ : Proposition L)) : T.minProof σ ≤ ⌜d⌝ :=
+lemma minProof_le (d : T ⊢₂! (σ : Proposition L)) : T.minProof σ ≤ ⌜d⌝ :=
   Nat.sInf_le (Set.mem_range_self d)
 
 open Encodable
@@ -91,7 +91,7 @@ lemma computablePred_provable_of_minProof_le [L.Primcodable] (hF : Computable F)
   grind;
 
 private def speedupProof (T : Theory L) (σ π : Sentence L) :
-    insert σ T ⊢!₂! ((σ ⋎ π : Sentence L)) :=
+    insert σ T ⊢₂! ((σ ⋎ π : Sentence L)) :=
   Derivation2.or (φ := σ) (ψ := π) (by simp) $
     Derivation2.axm σ (by simp) (by simp)
 

@@ -75,7 +75,7 @@ lemma superexp_eq (x : V) : Superexp.superexp x = iterExp x x := rfl
   have exp_four : Exp.exp (4 : V) = 16 := by
     rw [show (4 : V) = 3 + 1 from three_add_one_eq_four.symm, exp_succ, exp_three]; norm_num
   have exp_eight : Exp.exp (8 : V) = 256 := by
-    rw [show (8 : V) = 2 * 4 from by norm_num, exp_even, exp_four]; norm_num
+    rw [show (8 : V) = 2 * 4 from by norm_num, exp_even, exp_four]; norm_num [sq]
   rw [superexp_eq, congrArg (iterExp 3) (two_add_one_eq_three (R := V)).symm, iterExp_succ,
     congrArg (iterExp 3) (one_add_one_eq_two (R := V)).symm, iterExp_succ,
     congrArg (iterExp 3) (zero_add 1).symm, iterExp_succ, iterExp_zero, exp_three, exp_eight]

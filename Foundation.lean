@@ -108,8 +108,8 @@ public import Foundation.FirstOrder.Incompleteness.StandardProvability
 public import Foundation.FirstOrder.Incompleteness.Tarski
 public import Foundation.FirstOrder.Incompleteness.WitnessComparison
 public import Foundation.FirstOrder.Interpretation
-public import Foundation.FirstOrder.Intuitionistic.Deduction
 public import Foundation.FirstOrder.Intuitionistic.Formula
+public import Foundation.FirstOrder.Intuitionistic.LJ
 public import Foundation.FirstOrder.Intuitionistic.Rew
 public import Foundation.FirstOrder.Kripke.Basic
 public import Foundation.FirstOrder.Kripke.Intuitionistic
@@ -183,9 +183,11 @@ public import Foundation.Vorspiel.Graph
 public import Foundation.Vorspiel.IsEmpty
 public import Foundation.Vorspiel.List.Basic
 public import Foundation.Vorspiel.Matrix
+public import Foundation.Vorspiel.Multiset
 public import Foundation.Vorspiel.Nat.Basic
 public import Foundation.Vorspiel.Nat.Matrix
 public import Foundation.Vorspiel.NotationClass
+public import Foundation.Vorspiel.Option
 public import Foundation.Vorspiel.Order.BooleanAlgebra.Basic
 public import Foundation.Vorspiel.Order.BooleanAlgebra.Extension
 public import Foundation.Vorspiel.Order.BooleanAlgebra.Iso
