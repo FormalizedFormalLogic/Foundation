@@ -1063,4 +1063,12 @@ instance : 𝗣𝗔.RE := Theory.RE.add (Theory.RE.ofFinite PeanoMinus.finite) i
 
 instance : 𝗜𝚺₁.RE := Theory.RE.add (Theory.RE.ofFinite PeanoMinus.finite) inferInstance
 
+/-! ## `𝗣𝗔` and `𝗜𝚺₁` are `Δ₁`
+
+TODO: remove. Not mathematically essential — `RE` above already suffices. -/
+
+noncomputable instance : 𝗣𝗔.Δ₁ := Theory.Δ₁.add PeanoMinus.delta1 InductionScheme.delta1_univ
+
+noncomputable instance : 𝗜𝚺₁.Δ₁ := Theory.Δ₁.add PeanoMinus.delta1 InductionScheme.delta1_sigma1
+
 end FFL.FirstOrder.Arithmetic
