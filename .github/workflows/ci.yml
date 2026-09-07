@@ -34,7 +34,7 @@ jobs:
           curl https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -sSf | sh -s -- -y --default-toolchain none
           echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
       - uses: extractions/setup-just@v4
-      - uses: typst-community/setup-typst@v4
+      - uses: typst-community/setup-typst@v5
       - uses: ts-graphviz/setup-graphviz@v2
       - name: Print tool versions
         run: |
