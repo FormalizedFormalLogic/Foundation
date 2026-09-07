@@ -22,16 +22,16 @@
       "𝗜𝚺₀": $ISigma0$,
       "𝗜𝚺₀ ∪ 𝝮₁": $ISigma0 + Omega_1$,
       "𝗜𝚺₁": $ISigma1$,
-      "𝗜𝚺₁ ∪ LO.FirstOrder.Theory.Con 𝗜𝚺₁": $ISigma1 + Con(ISigma1)$,
-      "𝗜𝚺₁ ∪ LO.FirstOrder.Theory.Incon 𝗜𝚺₁": $ISigma1 + Incon(ISigma1)$,
+      "𝗜𝚺₁ ∪ FFL.FirstOrder.Theory.Con 𝗜𝚺₁": $ISigma1 + Con(ISigma1)$,
+      "𝗜𝚺₁ ∪ FFL.FirstOrder.Theory.Incon 𝗜𝚺₁": $ISigma1 + Incon(ISigma1)$,
       "𝗣𝗔": $PA$,
-      "𝗣𝗔 ∪ LO.FirstOrder.Theory.Con 𝗣𝗔": $PA + Con(PA)$,
-      "𝗣𝗔 ∪ LO.FirstOrder.Theory.Incon 𝗣𝗔": $PA + Incon(PA)$,
-      "𝗣𝗔 ∪ LO.FirstOrder.Theory.Con 𝗣𝗔 ∪ LO.FirstOrder.Theory.Incon (𝗣𝗔 ∪ LO.FirstOrder.Theory.Con 𝗣𝗔)":
+      "𝗣𝗔 ∪ FFL.FirstOrder.Theory.Con 𝗣𝗔": $PA + Con(PA)$,
+      "𝗣𝗔 ∪ FFL.FirstOrder.Theory.Incon 𝗣𝗔": $PA + Incon(PA)$,
+      "𝗣𝗔 ∪ FFL.FirstOrder.Theory.Con 𝗣𝗔 ∪ FFL.FirstOrder.Theory.Incon (𝗣𝗔 ∪ FFL.FirstOrder.Theory.Con 𝗣𝗔)":
         $PA + Con(PA) + Incon(PA + Con(PA))$,
       "𝗧𝗔": $Theory("TA")$,
     ),
     // `𝗣𝗔⁻` is finitely axiomatizable; its single axiom does not deserve a vertex of its own.
-    omit: ("{LO.FirstOrder.Arithmetic.PeanoMinus.finite.toFinset.conj}",),
+    omit: ("{FFL.FirstOrder.Arithmetic.PeanoMinus.finite.toFinset.conj}",),
   )
 ]

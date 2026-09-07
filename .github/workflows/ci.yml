@@ -27,14 +27,22 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
+
+      # Set every tool up before the expensive steps, so that a broken install fails fast
       - name: Setup elan
         run: |
           curl https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -sSf | sh -s -- -y --default-toolchain none
           echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
-      - name: Print lake and lean version
+      - uses: extractions/setup-just@v4
+      - uses: typst-community/setup-typst@v4
+      - uses: ts-graphviz/setup-graphviz@v2
+      - name: Print tool versions
         run: |
           lake --version
           lean --version
+          just --version
+          typst --version
+          dot -V
 
       # Restore project cache
       - name: Get Mathlib cache
@@ -53,8 +61,6 @@ jobs:
         if: hashFiles('.lake/Foundation-x86_64-unknown-linux-gnu.tar.gz') != ''
         run: lake unpack
 
-      - uses: extractions/setup-just@v4
-
       - name: Build Foundation
         run: lake build Foundation
 
@@ -64,7 +70,6 @@ jobs:
       - name: Build docs
         run: lake build Foundation:docs
 
-      - uses: typst-community/setup-typst@v4
       - name: Generate zoo
         run: just zoo
 
@@ -78,7 +83,6 @@ jobs:
           path: .lake/Foundation-x86_64-unknown-linux-gnu.tar.gz
           key: ${{ steps.cache-restore.outputs.cache-primary-key }}
 
-      - uses: ts-graphviz/setup-graphviz@v2
       - name: Generate import graph
         run: just import-graph
 

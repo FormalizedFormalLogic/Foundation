@@ -21,15 +21,15 @@ namespace Zoo
 
 /-- Classes stating a relation between two theories, and the relation each of them states. -/
 def relationClasses : Array (Name × EdgeType) :=
-  #[(`LO.Entailment.WeakerThan, .sub),
-    (`LO.Entailment.StrictlyWeakerThan, .ssub),
-    (`LO.Entailment.Equiv, .eq)]
+  #[(`FFL.Entailment.WeakerThan, .sub),
+    (`FFL.Entailment.StrictlyWeakerThan, .ssub),
+    (`FFL.Entailment.Equiv, .eq)]
 
 /-- The module whose constants are scanned, and the type whose inhabitants are the vertices. -/
 def rootModule : Name := `Foundation
 
 /-- Type of the theories the zoo is about. -/
-def vertexType : Name := `LO.FirstOrder.ArithmeticTheory
+def vertexType : Name := `FFL.FirstOrder.ArithmeticTheory
 
 /--
 The relation stated by `type`, if it relates two theories of type `vertexType`.
@@ -53,6 +53,8 @@ def edgeOf? (vertex : Expr) (type : Expr) : MetaM (Option Edge) := withNewMCtxDe
 /-- Every relation between two theories stated by a constant of the environment. -/
 def edges : MetaM Edges := do
   let vertex ← mkConstWithLevelParams vertexType
+  -- Report a renamed class instead of quietly producing a zoo with no edge of that kind.
+  for (c, _) in relationClasses do discard <| getConstInfo c
   let mut edges : Edges := ∅
   for (name, ci) in (← getEnv).constants do
     if ci.isUnsafe || name.isInternal then continue
