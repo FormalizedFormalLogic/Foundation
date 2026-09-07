@@ -287,7 +287,20 @@ class Pairing (L : Language) where
 class Star (L : Language) where
   star : L.Func 0
 
-attribute [match_pattern] Zero.zero One.one Add.add Mul.mul Exp.exp Eq.eq LT.lt Mem.mem Star.star
+class Concat (L : Language) where
+  concat : L.Func 2
+
+attribute [match_pattern]
+  Zero.zero
+  One.one
+  Add.add
+  Mul.mul
+  Exp.exp
+  Eq.eq
+  LT.lt
+  Mem.mem
+  Star.star
+  Concat.concat
 
 class ORing (L : Language) extends L.Eq, L.LT, L.Zero, L.One, L.Add, L.Mul
 
