@@ -414,7 +414,6 @@ noncomputable def hauptsatz {Γ : Sequent L} (d : ⊢ᴸᴷ¹ Γ) :
   have : ∀ ψ ∈ (∼Γ)ᴺ, Nonempty (Forces (∼Γ) ψ) := fun φ hφ ↦ by
     have : ∃ φ₀ : Proposition L, ∼φ₀ ∈ Γ ∧ φ₀ᴺ = φ := by simpa [Sequent.doubleNegation] using hφ
     rcases this with ⟨φ₀, hφ₀⟩
-    have φ₀ := Multiset.getPreimageClassical hφ
     have h : Forces (∼Γ) (φ₀.val)ᴺ := (Forces.refl φ₀.val).monotone <|
       StrongerThan.ofSubset (by simpa using φ₀.property.1)
     exact ⟨h.cast (by simpa using φ₀.property.2)⟩
