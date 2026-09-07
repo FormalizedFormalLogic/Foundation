@@ -80,7 +80,7 @@ comm -13 <(cut -f1 /tmp/lean_update_before_warnings.tsv | sort -u) \
 
 ### 5. Wrap up
 
-- Run `lake exe mk_all --module` to refresh `Foundation.lean`.
+- Run `just mk-all` to refresh `Foundation.lean`.
 - Verify the `contribute/index.md` pre-submission checklist yourself:
   - The affected modules build with `lake build`, with no errors or warnings (including remaining `sorry`).
   - If `references.bib` was touched, format it.

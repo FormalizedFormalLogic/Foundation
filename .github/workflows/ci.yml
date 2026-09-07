@@ -64,6 +64,10 @@ jobs:
       - name: Build docs
         run: lake build Foundation:docs
 
+      - uses: typst-community/setup-typst@v4
+      - name: Generate zoo
+        run: just zoo
+
       - name: Pack project cache
         run: lake pack
       - name: Save project cache
@@ -87,6 +91,7 @@ jobs:
             import_graph.png
             import_graph.pdf
             import_graph.html
+            pages/zoo
           retention-days: 1
           include-hidden-files: true
 
@@ -148,6 +153,7 @@ jobs:
         uses: actions/download-artifact@v8
         with:
           name: lean-artifacts
+      # `pages/zoo` is already unpacked in place by the download above.
       - name: Copy from artifacts to pages
         run: |
           cp -r "$GITHUB_WORKSPACE/.lake/build/doc" pages/docs
