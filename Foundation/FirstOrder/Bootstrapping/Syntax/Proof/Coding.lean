@@ -229,7 +229,7 @@ lemma quote_proof_def {φ : Sentence L} (b : T ⊢! φ) : (⌜b⌝ : V) = ⌜b.t
 
 @[simp] lemma derivation_of_quote_derivation {Γ : Sequent L} (b : ⊢ᴸᴷ¹ Γ) : DerivationOf T (⌜b⌝ : V) ⌜Γ.toFinset⌝ := by
   let x := Derivation2.typedQuote V (Derivation.toDerivation2 (∅ : Theory L) b)
-  suffices DerivationOf T x.val ⌜List.toFinset Γ⌝ from this
+  suffices DerivationOf T x.val ⌜Γ.toFinset⌝ from this
   exact ⟨x.derivationOf.1, x.derivationOf.2.of_ss (by
     intro p hp
     change V ⊧/![p] (⊥ : 𝚫₁.Semisentence 1).val at hp
