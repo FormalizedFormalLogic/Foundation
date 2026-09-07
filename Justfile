@@ -22,8 +22,8 @@ zoo:
     mkdir -p pages/zoo
     typst compile --input dir=TB Zoo/arithmetic.typ pages/zoo/arithmetic_v.png
     typst compile --input dir=TB Zoo/arithmetic.typ pages/zoo/arithmetic_v.pdf
-    typst compile --input dir=LR Zoo/arithmetic.typ pages/zoo/arithmetic_h.png
-    typst compile --input dir=LR Zoo/arithmetic.typ pages/zoo/arithmetic_h.pdf
+    typst compile --input dir=RL Zoo/arithmetic.typ pages/zoo/arithmetic_h.png
+    typst compile --input dir=RL Zoo/arithmetic.typ pages/zoo/arithmetic_h.pdf
 
 # Regenerate Foundation.lean to include all modules (run after adding/removing files).
 # Restricted to the Foundation library: Zoo has no aggregator, its modules are executable roots.

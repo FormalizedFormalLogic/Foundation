@@ -11,7 +11,7 @@
 // Theories listed in `omit` are dropped along with every edge touching them.
 //
 // `dir` is the Graphviz `rankdir`: "TB" stacks the theories vertically, strongest at the top,
-// "LR" lays them out horizontally, strongest on the left.
+// "RL" lays them out horizontally, strongest on the right.
 #let zoo(path, labels: (:), omit: (), dir: "TB", width: 640pt) = {
   let edges = json(path).filter(((from, to, ..)) => {
     not omit.contains(from) and not omit.contains(to)

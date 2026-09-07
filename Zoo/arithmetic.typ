@@ -8,7 +8,7 @@
 #let ISigma0 = $Theory(I)Sigma_0$
 #let ISigma1 = $Theory(I)Sigma_1$
 
-// Orientation, chosen with `typst compile --input dir=LR`; see `zoo` in template.typ.
+// Orientation, chosen with `typst compile --input dir=RL`; see `zoo` in template.typ.
 #let dir = sys.inputs.at("dir", default: "TB")
 
 // Keys are the theories as pretty-printed by `lake exe zoo_arithmetic`; a theory with no entry
