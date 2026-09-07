@@ -286,7 +286,7 @@ lemma quote_proof_def {φ : Sentence L} (b : T ⊢! φ) : (⌜b⌝ : V) = ⌜b.t
     change V ⊧/![p] (⊥ : 𝚫₁.Semisentence 1).val at hp
     simp at hp)⟩
 
-@[simp] lemma proof_of_quote_proof2 {φ : Sentence L} (d : T ⊢!₂! (φ : Proposition L)) :
+@[simp] lemma proof_of_quote_proof2 {φ : Sentence L} (d : T ⊢₂! (φ : Proposition L)) :
     Proof T (⌜d⌝ : V) ⌜φ⌝ := by
   let x := Derivation2.typedQuote V d
   suffices Proof T x.val ⌜φ⌝ from this
@@ -377,7 +377,7 @@ lemma Derivation.sound {d : ℕ} (h : Derivation T d) : ∃ Γ, ⌜Γ⌝ = fstId
     rcases this with ⟨σ, hσ, rfl⟩
     refine ⟨Derivation2.axm σ (by simp [hσ]) hφ⟩
 
-noncomputable def Provable.sound2 {φ : Proposition L} (h : Provable T (⌜φ⌝ : ℕ)) : T ⊢!₂! φ := by
+noncomputable def Provable.sound2 {φ : Proposition L} (h : Provable T (⌜φ⌝ : ℕ)) : T ⊢₂! φ := by
   let d := Classical.choose h
   have hd : Proof T d (⌜φ⌝ : ℕ) := Classical.choose_spec h
   let Γ := Classical.choose hd.2.sound

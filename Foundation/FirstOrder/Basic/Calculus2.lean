@@ -30,7 +30,7 @@ scoped infix:45 " ⟹₂! " => Derivable2
 
 abbrev _root_.FFL.FirstOrder.Theory.Proof2 (T : Theory L) (φ : Proposition L) := T ⟹₂ {φ}
 
-scoped infix: 45 " ⊢!₂! " => Theory.Proof2
+scoped infix: 45 " ⊢₂! " => Theory.Proof2
 
 variable {T : Theory L}
 
@@ -179,17 +179,17 @@ end Derivation2
 
 namespace Theory
 
-noncomputable def Proof.toProof2 {φ : Sentence L} (b : T ⊢! φ) : T ⊢!₂! (φ : Proposition L) :=
+noncomputable def Proof.toProof2 {φ : Sentence L} (b : T ⊢! φ) : T ⊢₂! (φ : Proposition L) :=
   Derivation2.cutManyProof b.axioms b.axioms_mem <|
     Derivation2.cast (Derivation.toDerivation2 T b.derivation) (by ext x; simp [Sequent.embed])
 
-noncomputable def Proof2.toProof {φ : Sentence L} (d : T ⊢!₂! (φ : Proposition L)) : T ⊢! φ := by
+noncomputable def Proof2.toProof {φ : Sentence L} (d : T ⊢₂! (φ : Proposition L)) : T ⊢! φ := by
   rcases Derivation2.toProofData d with ⟨A, hA, b⟩
   exact ⟨A, hA, Derivation.cast b (by simp [Sequent.embed, Multiset.atom_eq_singleton])⟩
 
 end Theory
 
-lemma provable_iff_derivable2 {φ : Sentence L} : T ⊢ φ ↔ Nonempty (T ⊢!₂! (φ : Proposition L)) := by
+lemma provable_iff_derivable2 {φ : Sentence L} : T ⊢ φ ↔ Nonempty (T ⊢₂! (φ : Proposition L)) := by
   exact ⟨fun h ↦ ⟨h.get.toProof2⟩, fun ⟨h⟩ ↦ ⟨h.toProof⟩⟩
 
 end derivation2
