@@ -41,8 +41,8 @@ lemma sound {M : Type*} [s : Structure L M] [Nonempty M] (f : ℕ → M) {Γ : S
       · exact ⟨φ ⋏ ψ, by simp, by simp [hp, hq]⟩
   | all (Γ := Γ) (φ := φ) d => by
     have : (∃ ψ ∈ Γ, Evalf f ψ) ∨ ∀ a : M, Eval ![a] f φ := by
-      simpa [Rewriting.shiftsM, Matrix.vecConsLast_vecEmpty, forall_or_left]
-        using fun a : M => sound (a :>ₙ f) d
+      simpa [Rewriting.shifts, Matrix.vecConsLast_vecEmpty, forall_or_left]
+        using fun a : M ↦ sound (a :>ₙ f) d
     rcases this with (⟨ψ, hq, hhq⟩ | hp)
     · exact ⟨ψ, by simp [hq], hhq⟩
     · exact ⟨∀¹ φ, by simp, hp⟩

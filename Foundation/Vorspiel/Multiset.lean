@@ -71,4 +71,15 @@ def getPreimage [Encodable α] [DecidableEq β] {f : α → β} {s : Multiset α
   letI := Encodable.decidableEqOfEncodable α
   exact Encodable.chooseX (mem_map.mp h)
 
+lemma map_subset_iff {s₁ s₂ : Multiset α} (f : α → β) (hf : Function.Injective f) :
+    map f s₁ ⊆ map f s₂ ↔ s₁ ⊆ s₂ := by
+  constructor
+  · intro h a ha
+    have : f a ∈ map f s₁ := by simp; grind
+    have : ∃ a' ∈ s₂, f a' = f a := by simpa using h this
+    obtain ⟨a', ha', heq⟩ := this
+    rcases hf heq
+    assumption
+  · exact map_subset_map
+
 end Multiset

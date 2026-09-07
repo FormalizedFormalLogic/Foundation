@@ -76,7 +76,7 @@ inductive Derivation : Sequent L → Head L → Type _
   Derivation (Γ + ⦃φ⦄) Ξ → Derivation (Γ + ⦃ψ⦄) Ξ → Derivation (Γ + ⦃φ ⋎ ψ⦄) Ξ
 /-- Positive introduction of universal quantifier -/
 | positiveForall {φ : Semipropositionᵢ L 1} :
-  Derivation Γ⁺ᵐ (Rewriting.free φ) → Derivation Γ (∀¹ φ)
+  Derivation Γ⁺ (Rewriting.free φ) → Derivation Γ (∀¹ φ)
 /-- Negative introduction of universal quantifier -/
 | negativeForall {φ : Semipropositionᵢ L 1} {t : Term L ℕ} :
   Derivation (Γ + ⦃φ/[t]⦄) Ξ → Derivation (Γ + ⦃∀¹ φ⦄) Ξ
@@ -85,7 +85,7 @@ inductive Derivation : Sequent L → Head L → Type _
   Derivation Γ (φ/[t]) → Derivation Γ (∃¹ φ)
 /-- Negative introduction of existential quantifier -/
 | negativeExists {φ : Semipropositionᵢ L 1} :
-  Derivation (Γ⁺ᵐ + ⦃Rewriting.free φ⦄) Ξ.shift → Derivation (Γ + ⦃∃¹ φ⦄) Ξ
+  Derivation (Γ⁺ + ⦃Rewriting.free φ⦄) Ξ.shift → Derivation (Γ + ⦃∃¹ φ⦄) Ξ
 
 infix:45 " ⊢ᴸᴶ¹ " => Derivation
 
@@ -198,7 +198,7 @@ def rewrite (f : ℕ → SyntacticTerm L) {Γ : Sequent L} {Ξ : Head L} : Γ �
     (positiveForall (Γ := Γ.map (Rew.rewrite f ▹ ·))
       (φ := Rew.rewrite (Rew.bShift ∘ f) ▹ φ) <|
       (rewrite g d).cast
-        (by simp [g, Rewriting.shiftsM, shift_rewrite_eq])
+        (by simp [g, Rewriting.shifts, shift_rewrite_eq])
         (by simp [g, Head.rewrite, free_rewrite_eq, Function.comp_def]))
       |>.cast (by simp) (by simp [Head.rewrite, Rew.q_rewrite])
   | negativeForall (Γ := Γ) (φ := φ) (t := t) d =>
@@ -216,7 +216,7 @@ def rewrite (f : ℕ → SyntacticTerm L) {Γ : Sequent L} {Ξ : Head L} : Γ �
     (negativeExists (Γ := Γ.map (Rew.rewrite f ▹ ·))
       (Ξ := Head.rewrite f Ξ) (φ := Rew.rewrite (Rew.bShift ∘ f) ▹ φ) <|
       (rewrite g d).cast
-        (by simp [g, Rewriting.shiftsM, free_rewrite_eq, shift_rewrite_eq, Function.comp_def])
+        (by simp [g, Rewriting.shifts, free_rewrite_eq, shift_rewrite_eq, Function.comp_def])
         (by cases Ξ <;> simp [g, Head.rewrite, Head.shift, shift_rewrite_eq]))
       |>.cast (by simp [Rew.q_rewrite])
 
@@ -260,7 +260,7 @@ protected def map (d : Γ ⊢ᴸᴶ¹ Ξ) (f : ℕ → ℕ) :
     Γ.map (Rew.rewriteMap f ▹ ·) ⊢ᴸᴶ¹ Ξ.map (Rew.rewriteMap f ▹ ·) :=
   d.rewrite fun x ↦ &(f x)
 
-protected def shift (d : Γ ⊢ᴸᴶ¹ Ξ) : Γ⁺ᵐ ⊢ᴸᴶ¹ Ξ.shift :=
+protected def shift (d : Γ ⊢ᴸᴶ¹ Ξ) : Γ⁺ ⊢ᴸᴶ¹ Ξ.shift :=
   cast (d.map Nat.succ) (by rfl) (by cases Ξ <;> rfl)
 
 def weakening (d : Γ ⊢ᴸᴶ¹ Ξ) (hΓ : Γ ⊆ Δ) : Δ ⊢ᴸᴶ¹ Ξ :=

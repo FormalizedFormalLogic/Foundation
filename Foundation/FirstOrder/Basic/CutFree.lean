@@ -21,7 +21,7 @@ inductive IsCutFree : {Γ : Sequent L} → ⊢ᴸᴷ¹ Γ → Prop
   | or {d : ⊢ᴸᴷ¹ Γ + ⦃φ, ψ⦄} : IsCutFree d → IsCutFree d.or
   | and {dφ : ⊢ᴸᴷ¹ Γ + ⦃φ⦄} {dψ : ⊢ᴸᴷ¹ Γ + ⦃ψ⦄} :
       IsCutFree dφ → IsCutFree dψ → IsCutFree (dφ.and dψ)
-  | all {d : ⊢ᴸᴷ¹ Γ⁺ᵐ + ⦃Rewriting.free φ⦄} : IsCutFree d → IsCutFree d.all
+  | all {d : ⊢ᴸᴷ¹ Γ⁺ + ⦃Rewriting.free φ⦄} : IsCutFree d → IsCutFree d.all
   | exs (t) {d : ⊢ᴸᴷ¹ Γ + ⦃φ/[t]⦄} : IsCutFree d → IsCutFree d.exs
   | contraction {d : ⊢ᴸᴷ¹ Δ} (ss : Δ ⊆ Γ) : IsCutFree d → IsCutFree (d.contraction ss)
 
@@ -51,7 +51,7 @@ variable {Γ Δ : Sequent L}
   · rintro ⟨hφ, hψ⟩
     exact hφ.and hψ
 
-@[simp] lemma isCutFree_all_iff {d : ⊢ᴸᴷ¹ Γ⁺ᵐ + ⦃Rewriting.free φ⦄} :
+@[simp] lemma isCutFree_all_iff {d : ⊢ᴸᴷ¹ Γ⁺ + ⦃Rewriting.free φ⦄} :
     IsCutFree d.all ↔ IsCutFree d := by
   constructor
   · intro h

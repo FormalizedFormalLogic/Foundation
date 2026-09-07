@@ -52,7 +52,7 @@ def embed (Γ : Multiset (Sentence L)) : Sequent L := Γ.map Rewriting.emb
     embed (Γ + Δ) = embed Γ + embed Δ := by simp [embed]
 
 @[simp] lemma embed_shift (Γ : Multiset (Sentence L)) :
-    (embed Γ)⁺ᵐ = embed Γ := by simp [embed, Rewriting.shiftsM]
+    (embed Γ)⁺ = embed Γ := by simp [embed, Rewriting.shifts]
 
 end Sequent
 
@@ -67,7 +67,7 @@ inductive Derivation : Sequent L → Type _
 | or : Derivation (Γ + ⦃φ, ψ⦄) → Derivation (Γ + ⦃φ ⋎ ψ⦄)
 | and : Derivation (Γ + ⦃φ⦄) → Derivation (Γ + ⦃ψ⦄) →
     Derivation (Γ + ⦃φ ⋏ ψ⦄)
-| all : Derivation (Γ⁺ᵐ + ⦃φ.free⦄) → Derivation (Γ + ⦃∀¹ φ⦄)
+| all : Derivation (Γ⁺ + ⦃φ.free⦄) → Derivation (Γ + ⦃∀¹ φ⦄)
 | exs : Derivation (Γ + ⦃φ/[t]⦄) → Derivation (Γ + ⦃∃¹ φ⦄)
 
 prefix:45 "⊢ᴸᴷ¹ " => Derivation
@@ -105,7 +105,7 @@ section height
 @[simp] lemma height_or {φ ψ} (d : ⊢ᴸᴷ¹ Γ + ⦃φ, ψ⦄) :
     height (or d) = d.height.succ := rfl
 
-@[simp] lemma height_all {φ : Semiproposition L 1} (d : ⊢ᴸᴷ¹ Γ⁺ᵐ + ⦃φ.free⦄) :
+@[simp] lemma height_all {φ : Semiproposition L 1} (d : ⊢ᴸᴷ¹ Γ⁺ + ⦃φ.free⦄) :
     height (all d) = d.height.succ := rfl
 
 @[simp] lemma height_exs {t} {φ} (d : ⊢ᴸᴷ¹ Γ + ⦃φ/[t]⦄) :
@@ -190,10 +190,10 @@ def rewrite {Γ} (f : ℕ → SyntacticTerm L) :
       ((d₁.rewrite f).cast (by simp)) ((d₂.rewrite f).cast (by simp))).cast (by simp)
   | all (φ := φ) (Γ := Γ) d =>
     let g : ℕ → SyntacticTerm L := &0 :>ₙ fun x ↦ Rew.shift (f x)
-    have : ⊢ᴸᴷ¹ (Γ⁺ᵐ + ⦃φ.free⦄).map (Rew.rewrite g ▹ ·) := d.rewrite g
+    have : ⊢ᴸᴷ¹ (Γ⁺ + ⦃φ.free⦄).map (Rew.rewrite g ▹ ·) := d.rewrite g
     (all (Γ := Γ.map (Rew.rewrite f ▹ ·))
       (φ := Rew.rewrite (Rew.bShift ∘ f) ▹ φ) (Derivation.cast this (by
-        simp [g, free_rewrite_eq, Rewriting.shiftsM, shift_rewrite_eq, Function.comp_def]))).cast
+        simp [g, free_rewrite_eq, Rewriting.shifts, shift_rewrite_eq, Function.comp_def]))).cast
       (by simp [Rew.q_rewrite])
   | exs (φ := φ) (Γ := Γ) (t := t) d =>
     have : ⊢ᴸᴷ¹ (Γ + ⦃φ/[t]⦄).map (Rew.rewrite f ▹ ·) := d.rewrite f
@@ -204,7 +204,7 @@ def rewrite {Γ} (f : ℕ → SyntacticTerm L) :
 protected def map {Δ : Sequent L} (d : ⊢ᴸᴷ¹ Δ) (f : ℕ → ℕ) :
     ⊢ᴸᴷ¹ Δ.map (Rew.rewriteMap f ▹ ·) := d.rewrite (fun x ↦ &(f x))
 
-protected def shift {Δ : Sequent L} (d : ⊢ᴸᴷ¹ Δ) : ⊢ᴸᴷ¹ Δ⁺ᵐ :=
+protected def shift {Δ : Sequent L} (d : ⊢ᴸᴷ¹ Δ) : ⊢ᴸᴷ¹ Δ⁺ :=
   Derivation.cast (Derivation.map d Nat.succ) (by rfl)
 
 section Hom
@@ -212,8 +212,8 @@ section Hom
 variable {L₁ : Language} {L₂ : Language} {Δ₁ : Sequent L₁}
 
 lemma shifts_image (Φ : L₁ →ᵥ L₂) {Δ : Multiset (Proposition L₁)} :
-     (Δ.map <| Semiformula.lMap Φ)⁺ᵐ = (Δ⁺ᵐ.map <| Semiformula.lMap Φ) := by
-  simp [Rewriting.shiftsM, Semiformula.lMap_shift]
+     (Δ.map <| Semiformula.lMap Φ)⁺ = (Δ⁺.map <| Semiformula.lMap Φ) := by
+  simp [Rewriting.shifts, Semiformula.lMap_shift]
 
 def lMap (Φ : L₁ →ᵥ L₂) {Γ} : ⊢ᴸᴷ¹ Γ → ⊢ᴸᴷ¹ Γ.map (.lMap Φ)
   | identity r v =>
@@ -252,7 +252,7 @@ private lemma map_subst_eq_free (φ : Semiproposition L 1) (h : ¬φ.FVar? m) :
 
 private lemma map_rewriteMap_eq_shifts (Δ : Sequent L) (h : ∀ φ ∈ Δ, ¬φ.FVar? m) :
     Δ.map (fun φ ↦ @Rew.rewriteMap L ℕ ℕ 0
-      (fun x ↦ if x = m then 0 else x + 1) ▹ φ) = Δ⁺ᵐ := by
+      (fun x ↦ if x = m then 0 else x + 1) ▹ φ) = Δ⁺ := by
   apply Multiset.map_congr rfl
   intro φ hp
   exact Semiformula.rew_eq_of_funEqOn₀
@@ -261,7 +261,7 @@ private lemma map_rewriteMap_eq_shifts (Δ : Sequent L) (h : ∀ φ ∈ Δ, ¬φ
 def generalizeByNewVar {φ : Semiproposition L 1} (hp : ¬φ.FVar? m)
     (hΔ : ∀ ψ ∈ Δ, ¬ψ.FVar? m) (d : ⊢ᴸᴷ¹ Δ + ⦃φ/[&m]⦄) :
     ⊢ᴸᴷ¹ Δ + ⦃∀¹ φ⦄ := by
-  have : ⊢ᴸᴷ¹ Δ⁺ᵐ + ⦃φ.free⦄ :=
+  have : ⊢ᴸᴷ¹ Δ⁺ + ⦃φ.free⦄ :=
     Derivation.cast (Derivation.map d (fun x ↦ if x = m then 0 else x + 1))
     (by simp [map_subst_eq_free φ hp, map_rewriteMap_eq_shifts Δ hΔ])
   exact all this
@@ -331,7 +331,7 @@ instance classical : Entailment.Cl (𝐋𝐊¹ : LK L) := inferInstance
 
 lemma all (φ : Semiproposition L 1) :
     𝐋𝐊¹ ⊢ φ.free → 𝐋𝐊¹ ⊢ ∀¹ φ := fun h ↦
-  ⟨Derivation.all (Γ := 0) (φ := φ) (h.get.cast (by simp [Rewriting.shiftsM]))⟩
+  ⟨Derivation.all (Γ := 0) (φ := φ) (h.get.cast (by simp [Rewriting.shifts]))⟩
 
 lemma allClosure_fixitr {φ : Proposition L} (dp : 𝐋𝐊¹ ⊢ φ) :
     (m : ℕ) → 𝐋𝐊¹ ⊢ ∀¹* Rew.fixitr 0 m ▹ φ

@@ -303,7 +303,7 @@ def sound [L.DecidableEq] {Γ : LJ.Sequent L} {Ξ : LJ.Head L}
   | .positiveForall (Γ := Γ) (φ := φ) d => allEquiv.symm fun t ↦
       let f : ℕ → SyntacticTerm L := t :>ₙ fun x ↦ &x
       let dt : Γ ⊢ᴸᴶ¹ some (φ/[t]) := (d.rewrite f).cast
-        (by simp [f, Rewriting.shiftsM, Multiset.map_map, rewrite_shift_eq])
+        (by simp [f, Rewriting.shifts, Multiset.map_map, rewrite_shift_eq])
         (by simp [f, LJ.Head.rewrite, rewrite_free_eq_subst])
       sound dt p b
   | .negativeForall (φ := φ) (Γ := Γ) d =>
@@ -315,7 +315,7 @@ def sound [L.DecidableEq] {Γ : LJ.Sequent L} {Ξ : LJ.Head L}
       let ⟨t, bt⟩ := (b (∃¹ φ) (by simp)).exsEquiv
       let f : ℕ → SyntacticTerm L := t :>ₙ fun x ↦ &x
       let dt : Γ + ⦃φ/[t]⦄ ⊢ᴸᴶ¹ Ξ := (d.rewrite f).cast
-        (by simp [f, Rewriting.shiftsM, Multiset.map_map, rewrite_shift_eq,
+        (by simp [f, Rewriting.shifts, Multiset.map_map, rewrite_shift_eq,
           rewrite_free_eq_subst])
         (by cases Ξ <;> simp [f, LJ.Head.shift, LJ.Head.rewrite, rewrite_shift_eq])
       let bΓ := b.ofSubset (by intro θ hθ; simp_all)

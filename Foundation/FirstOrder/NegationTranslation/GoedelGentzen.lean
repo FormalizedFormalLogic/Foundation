@@ -76,8 +76,8 @@ scoped[FFL.FirstOrder] postfix:max "ᴺ" => Sequent.doubleNegation
 @[simp] lemma doubleNegation_add (Γ Δ : Sequent L) : (Γ + Δ)ᴺ = Γᴺ + Δᴺ := by
   simp [doubleNegation]
 
-lemma shift_doubleNegation (Γ : Sequent L) : (Γᴺ)⁺ᵐ = (Γ⁺ᵐ)ᴺ := by
-  simp [Sequent.doubleNegation, Rewriting.shiftsM, Semiformula.rew_doubleNegation]
+lemma shift_doubleNegation (Γ : Sequent L) : (Γᴺ)⁺ = (Γ⁺)ᴺ := by
+  simp [Sequent.doubleNegation, Rewriting.shifts, Semiformula.rew_doubleNegation]
 
 end Sequent
 
@@ -161,9 +161,9 @@ def gödelGentzen {Γ : Sequent L} : ⊢ᴸᴷ¹ Γ → (∼Γ)ᴺ ⊢ᴸᴶ¹ (
         (ψ := (∼ψ)ᴺ) (Ξ := (⊥ : Propositionᵢ L)) <|
         (gödelGentzen d).cast (by simp)).cast (by simp [Sequent.doubleNegation])
   | all (Γ := Γ) (φ := φ) d => by
-      have hshift : (∼Γ⁺ᵐ)ᴺ = ((∼Γ)ᴺ)⁺ᵐ := by
-        rw [←Rewriting.shiftsM_neg, Sequent.shift_doubleNegation]
-      have dFree : ((∼Γ)ᴺ)⁺ᵐ ⊢ᴸᴶ¹
+      have hshift : (∼Γ⁺)ᴺ = ((∼Γ)ᴺ)⁺ := by
+        rw [←Rewriting.shifts_neg, Sequent.shift_doubleNegation]
+      have dFree : ((∼Γ)ᴺ)⁺ ⊢ᴸᴶ¹
           (∼Rewriting.free ((∼φ)ᴺ) : Propositionᵢ L) :=
         (deductNeg (gödelGentzen d)).cast
           (by simp [hshift]) (by simp [Semiformula.rew_doubleNegation])

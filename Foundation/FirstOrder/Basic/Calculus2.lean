@@ -35,7 +35,7 @@ scoped infix: 45 " ⊢₂! " => Theory.Proof2
 variable {T : Theory L}
 
 lemma shifts_toFinset_eq_image_shift (Γ : Sequent L) :
-    Γ⁺ᵐ.toFinset = Γ.toFinset.image Rewriting.shift := by ext φ; simp [Rewriting.shiftsM]
+    Γ⁺.toFinset = Γ.toFinset.image Rewriting.shift := by ext φ; simp [Rewriting.shifts]
 
 def Derivation.toDerivation2 (T) {Γ : Sequent L} : ⊢ᴸᴷ¹ Γ → T ⟹₂ Γ.toFinset
   | Derivation.identity R v => Derivation2.closed _ (Semiformula.rel R v) (by simp) (by simp)
@@ -84,8 +84,8 @@ noncomputable def cast {Γ Δ : Finset (Proposition L)} (d : T ⟹₂ Γ)
 
 omit [L.DecidableEq] in
 @[simp] lemma shifts_tilde_embed (A : Multiset (Sentence L)) :
-    (∼Sequent.embed A)⁺ᵐ = ∼Sequent.embed A := by
-  simp [Rewriting.shiftsM, Sequent.embed, Multiset.tilde_def]
+    (∼Sequent.embed A)⁺ = ∼Sequent.embed A := by
+  simp [Rewriting.shifts, Sequent.embed, Multiset.tilde_def]
 
 @[reducible] noncomputable def cutManyProof (A : Multiset (Sentence L))
     (hA : ∀ ψ ∈ A, ψ ∈ T)
@@ -141,11 +141,11 @@ noncomputable def toProofData : {Γ : Finset (Proposition L)} → T ⟹₂ Γ �
   | Γ, all (φ := φ) h d => by
       rcases toProofData d with ⟨A, hA, b⟩
       refine ⟨A, hA, ?_⟩
-      have b' : ⊢ᴸᴷ¹ (Γ.1 + ∼Sequent.embed A)⁺ᵐ + ⦃Rewriting.free φ⦄ :=
+      have b' : ⊢ᴸᴷ¹ (Γ.1 + ∼Sequent.embed A)⁺ + ⦃Rewriting.free φ⦄ :=
         b.contra (by
-          rw [Rewriting.shiftsM_add, shifts_tilde_embed]
+          rw [Rewriting.shifts_add, shifts_tilde_embed]
           intro x hx
-          simp [Rewriting.shiftsM] at hx ⊢
+          simp [Rewriting.shifts] at hx ⊢
           aesop)
       exact (Derivation.all b').absorb (Multiset.mem_add.mpr <| Or.inl h)
   | Γ, exs (φ := φ) h t d => by
@@ -160,9 +160,9 @@ noncomputable def toProofData : {Γ : Finset (Proposition L)} → T ⟹₂ Γ �
   | _, shift (Γ := Γ) d => by
       rcases toProofData d with ⟨A, hA, b⟩
       refine ⟨A, hA, b.shift.contra ?_⟩
-      rw [Rewriting.shiftsM_add, shifts_tilde_embed]
+      rw [Rewriting.shifts_add, shifts_tilde_embed]
       intro x hx
-      simpa [Rewriting.shiftsM] using hx
+      simpa [Rewriting.shifts] using hx
   | Γ, cut (φ := φ) d dn => by
       rcases toProofData d with ⟨A, hA, b⟩
       rcases toProofData dn with ⟨B, hB, bn⟩
