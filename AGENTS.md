@@ -5,22 +5,40 @@
 
 ## Setup
 
-Proof work in this repository uses the `lean4` plugin (marketplace `lean4-skills`, providing
-`/lean4:autoprove` etc.) and the `lean-lsp` MCP server (defined in `.mcp.json`; requires `uv` and
-`ripgrep`). Enable both after cloning:
+Proof work in this repository uses two things, and each has to be enabled once per client:
+
+- the **`lean4` plugin** from the `lean4-skills` marketplace (`cameronfreer/lean4-skills`), which
+  provides `/lean4:autoprove` and its siblings;
+- the **`lean-lsp` MCP server**, launched as `uvx lean-lsp-mcp` (requires `uv` and `ripgrep`).
+
+Claude Code:
 
 ```
 /plugin marketplace add cameronfreer/lean4-skills
 /plugin install lean4@lean4-skills
 ```
 
-## Specialized agents
+and it picks the MCP server up from `.mcp.json` in this repository.
 
-Delegate matching work to these project agents when they are available:
+Codex:
+
+```
+codex plugin marketplace add cameronfreer/lean4-skills
+codex plugin add lean4@lean4-skills
+codex mcp add lean-lsp -- uvx lean-lsp-mcp
+```
+
+Codex does not read `.mcp.json`, so the MCP server has to be registered separately; the command
+above writes it into `~/.codex/config.toml`.
+
+## Agent configuration
+
+Shared, tool-independent definitions live in `.agents/`: roles under `.agents/roles/`, skills under
+`.agents/skills/`. Each client picks them up its own way — see [`.agents/README.md`](.agents/README.md)
+for the layout and for what to do when adding a client.
+
+Delegate matching work to these roles when the client exposes them:
 
 - `lean4-proof-writer`: formalize a new Lean proof from an already-decided mathematical plan.
 - `lean4-proof-refactorer`: clean up an existing proof that already compiles without `sorry`.
 - `transporter-alpha-centauri`: faithfully port an existing result from AlphaCentauri.
-
-Their tool-independent role definitions live in `.agents/roles/`. Tool-specific agent files are
-adapters and must keep the matching shared role as their authoritative instructions.
