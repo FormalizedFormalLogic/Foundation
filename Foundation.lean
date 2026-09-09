@@ -28,6 +28,7 @@ public import Foundation.FirstOrder.Arithmetic.HFS.Vec
 public import Foundation.FirstOrder.Arithmetic.IOpen.Basic
 public import Foundation.FirstOrder.Arithmetic.ISigma1.Prenex
 public import Foundation.FirstOrder.Arithmetic.Induction
+public import Foundation.FirstOrder.Arithmetic.LeastNumber.Basic
 public import Foundation.FirstOrder.Arithmetic.Omega1.Basic
 public import Foundation.FirstOrder.Arithmetic.Omega1.Nuon
 public import Foundation.FirstOrder.Arithmetic.PA.Prenex
