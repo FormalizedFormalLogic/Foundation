@@ -51,8 +51,9 @@ PRs (title and body) are written in English.
 
 🤖 Whenever an AI agent was involved in producing the changes — fully generated or merely assisted — this must be disclosed in the contribution itself:
 
-- every commit created with an AI agent carries a co-author trailer, e.g.
+- every commit created with an AI agent carries a co-author trailer naming the agent — not the model behind it, since model names turn over quickly:
   ```
   Co-Authored-By: Claude <noreply@anthropic.com>
+  Co-Authored-By: Codex <noreply@openai.com>
   ```
 - the PR states in natural language (in the body, or in the title if appropriate) that an AI agent was used.
