@@ -101,7 +101,25 @@ Citations go at the end of the docstring as a list, one line per BibTeX key, of 
 - [VS83, Theorem 10, Theorem 11(b), Theorem 11(c)]
 ```
 
-🤖 **For proofs submitted by AI agents, citations are mandatory**: every non-trivial definition and theorem must point to its source in the literature. If none exists (folklore, a routine technical bridge, original to this formalization), the docstring must say so and briefly explain why — never silently omit it.
+Cite definitions (`def`, `inductive`, `structure`, `abbrev`) and `theorem`s. Supporting lemmas do not each need a citation — a source repeated on every small closure or rewriting lemma is noise, not attribution.
+
+The alternative placement is a `## References` section at the end of the module docstring, collecting the keys the module draws on:
+
+```
+/-!
+# Strict arithmetical hierarchy
+
+…
+
+## References
+
+- [HP98, 0.30, Lemma I.1.69]
+-/
+```
+
+Prefer that form when the declarations themselves carry no docstrings.
+
+🤖 **For proofs submitted by AI agents, citations are mandatory** at the granularity above: every non-trivial definition and theorem must be traceable to its source in the literature, whether through its own docstring or through the module's `## References`. If no source exists (folklore, a routine technical bridge, original to this formalization), say so and briefly explain why — never silently omit it.
 
 ### Stale comments and planning artifacts
 
