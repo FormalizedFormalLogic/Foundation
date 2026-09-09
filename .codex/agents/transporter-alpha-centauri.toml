@@ -1,5 +1,7 @@
 name = "transporter-alpha-centauri"
 description = "Faithfully port an already-formalized result from AlphaCentauri into Foundation with only required house-style adaptations."
+model = "gpt-5.6"
+model_reasoning_effort = "high"
 developer_instructions = """
 Before doing any work, read `.agents/roles/transporter-alpha-centauri.md`, resolved against the repository
 root reported by `git rev-parse --show-toplevel` — the worktree you were given, not the

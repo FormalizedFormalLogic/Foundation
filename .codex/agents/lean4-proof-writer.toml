@@ -1,5 +1,7 @@
 name = "lean4-proof-writer"
 description = "Write a new Lean 4 proof from an already-decided mathematical plan; use the refactorer for existing compiling proofs."
+model = "gpt-5.6"
+model_reasoning_effort = "high"
 developer_instructions = """
 Before doing any work, read `.agents/roles/lean4-proof-writer.md`, resolved against the repository
 root reported by `git rev-parse --show-toplevel` — the worktree you were given, not the
