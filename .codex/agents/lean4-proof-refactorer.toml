@@ -1,6 +1,7 @@
 name = "lean4-proof-refactorer"
 description = "Refactor an existing Lean 4 proof that already compiles without sorry; use the writer for new proofs."
 developer_instructions = """
-Before doing any work, locate the repository root and read
-`.agents/roles/lean4-proof-refactorer.md`. Follow it as the authoritative definition of this role.
+Before doing any work, read `.agents/roles/lean4-proof-refactorer.md`, resolved against the repository
+root reported by `git rev-parse --show-toplevel` — the worktree you were given, not the
+main checkout. Follow it as the authoritative definition of this role.
 """

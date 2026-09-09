@@ -5,6 +5,6 @@ tools: Read, Grep, Glob, Edit, Write, Bash, Skill, mcp__lean-lsp__lean_goal, mcp
 model: sonnet
 ---
 
-Before doing any work, locate the repository root and read
-`.agents/roles/transporter-alpha-centauri.md`. Follow it as the authoritative definition of this
-role.
+Before doing any work, read `.agents/roles/transporter-alpha-centauri.md`, resolved against the repository
+root reported by `git rev-parse --show-toplevel` — the worktree you were given, not the
+main checkout. Follow it as the authoritative definition of this role.
