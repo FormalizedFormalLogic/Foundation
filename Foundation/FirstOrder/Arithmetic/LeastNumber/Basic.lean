@@ -130,7 +130,7 @@ lemma models_alt : V↓[ℒₒᵣ] ⊧* 𝗜𝗡𝗗 Γ.alt m := by
   suffices V↓[ℒₒᵣ] ⊧* InductionScheme ℒₒᵣ (Hierarchy Γ.alt m) by
     simpa [InductionOnHierarchy, Semantics.ModelsSet.union_iff] using ⟨‹_›, this⟩;
   simp only [InductionScheme];
-  refine Semantics.ModelsSet.setOf_iff.mpr ?_;
+  apply Semantics.ModelsSet.setOf_iff.mpr;
   rintro _ ⟨φ, hφ, rfl⟩;
   suffices ∀ v : ℕ → V, φ.Eval ![0] v → (∀ x, φ.Eval ![x] v → φ.Eval ![x + 1] v) →
       ∀ x, φ.Eval ![x] v by
@@ -143,13 +143,13 @@ end LeastNumberOnHierarchy
 
 variable (n : ℕ)
 
-lemma models_LOnHierarchy_of_ISigma (Γ : Polarity) (n : ℕ) [V↓[ℒₒᵣ] ⊧* 𝗜𝚺 n] :
+lemma models_LeastNumberOnHierarchy_of_ISigma (Γ : Polarity) (n : ℕ) [V↓[ℒₒᵣ] ⊧* 𝗜𝚺 n] :
     V↓[ℒₒᵣ] ⊧* 𝗟 Γ n := by
   have : V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := models_of_subtheory ‹V↓[ℒₒᵣ] ⊧* 𝗜𝚺 n›;
   suffices V↓[ℒₒᵣ] ⊧* LeastNumberScheme (Hierarchy Γ n) by
     simpa [LeastNumberOnHierarchy, Semantics.ModelsSet.union_iff] using ⟨‹_›, this⟩;
   simp only [LeastNumberScheme];
-  refine Semantics.ModelsSet.setOf_iff.mpr ?_;
+  apply Semantics.ModelsSet.setOf_iff.mpr;
   rintro _ ⟨φ, hφ, rfl⟩;
   suffices ∀ v : ℕ → V, (∃ x, φ.Eval ![x] v) → ∃ z, φ.Eval ![z] v ∧ ∀ x < z, ¬φ.Eval ![x] v by
     simpa [models_iff, Semiformula.eval_univCl, leastNumber, Semiformula.eval_substs,
@@ -158,10 +158,10 @@ lemma models_LOnHierarchy_of_ISigma (Γ : Polarity) (n : ℕ) [V↓[ℒₒᵣ] �
   exact InductionOnHierarchy.least_number Γ n (definablePred_of_hierarchy hφ v) hx;
 
 instance models_LSigma_of_ISigma [V↓[ℒₒᵣ] ⊧* 𝗜𝚺 n] : V↓[ℒₒᵣ] ⊧* 𝗟𝚺 n :=
-  models_LOnHierarchy_of_ISigma 𝚺 n
+  models_LeastNumberOnHierarchy_of_ISigma 𝚺 n
 
 instance models_LPi_of_ISigma [V↓[ℒₒᵣ] ⊧* 𝗜𝚺 n] : V↓[ℒₒᵣ] ⊧* 𝗟𝚷 n :=
-  models_LOnHierarchy_of_ISigma 𝚷 n
+  models_LeastNumberOnHierarchy_of_ISigma 𝚷 n
 
 instance models_IPi_of_LSigma [V↓[ℒₒᵣ] ⊧* 𝗟𝚺 n] : V↓[ℒₒᵣ] ⊧* 𝗜𝚷 n :=
   LeastNumberOnHierarchy.models_alt 𝚺 n
@@ -173,19 +173,14 @@ end models
 
 section theorems
 
-private lemma antisymm_of_models {T S : ArithmeticTheory} [𝗘𝗤 ℒₒᵣ ⪯ S] [𝗘𝗤 ℒₒᵣ ⪯ T]
-    (hTS : ∀ (M : Type) [ORingStructure M] [M↓[ℒₒᵣ] ⊧* S], M↓[ℒₒᵣ] ⊧* T)
-    (hST : ∀ (M : Type) [ORingStructure M] [M↓[ℒₒᵣ] ⊧* T], M↓[ℒₒᵣ] ⊧* S) : T ≊ S :=
-  Equiv.antisymm ⟨weakerThan_of_models.{0} T S hTS, weakerThan_of_models.{0} S T hST⟩
-
 theorem ISigma_equiv_IPi (n : ℕ) : 𝗜𝚺 n ≊ 𝗜𝚷 n :=
-  antisymm_of_models (fun _ _ _ ↦ inferInstance) (fun _ _ _ ↦ inferInstance)
+  equiv_of_models.{0, 0} (fun _ _ _ ↦ inferInstance) (fun _ _ _ ↦ inferInstance)
 
 theorem LSigma_equiv_ISigma (n : ℕ) : 𝗟𝚺 n ≊ 𝗜𝚺 n :=
-  antisymm_of_models (fun _ _ _ ↦ inferInstance) (fun _ _ _ ↦ inferInstance)
+  equiv_of_models.{0, 0} (fun _ _ _ ↦ inferInstance) (fun _ _ _ ↦ inferInstance)
 
 theorem LPi_equiv_ISigma (n : ℕ) : 𝗟𝚷 n ≊ 𝗜𝚺 n :=
-  antisymm_of_models (fun _ _ _ ↦ inferInstance) (fun _ _ _ ↦ inferInstance)
+  equiv_of_models.{0, 0} (fun _ _ _ ↦ inferInstance) (fun _ _ _ ↦ inferInstance)
 
 end theorems
 

@@ -104,6 +104,11 @@ lemma weakerThan_of_models (T S : ArithmeticTheory) [𝗘𝗤 ℒₒᵣ ⪯ S]
            M↓[ℒₒᵣ] ⊧* T) : T ⪯ S :=
   Entailment.weakerThan_iff.mpr fun h ↦ complete _ _ fun M _ _ ↦ Theory.Proof.sound h (H M)
 
+lemma equiv_of_models {T S : ArithmeticTheory} [𝗘𝗤 ℒₒᵣ ⪯ S] [𝗘𝗤 ℒₒᵣ ⪯ T]
+    (hTS : ∀ (M : Type*) [ORingStructure M] [M↓[ℒₒᵣ] ⊧* S], M↓[ℒₒᵣ] ⊧* T)
+    (hST : ∀ (M : Type*) [ORingStructure M] [M↓[ℒₒᵣ] ⊧* T], M↓[ℒₒᵣ] ⊧* S) : T ≊ S :=
+  Entailment.Equiv.antisymm ⟨weakerThan_of_models T S hTS, weakerThan_of_models S T hST⟩
+
 end Arithmetic
 
 class ArithmeticTheory.SoundOn (T : ArithmeticTheory) (F : ArithmeticSentence → Prop) where
