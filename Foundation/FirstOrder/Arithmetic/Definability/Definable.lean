@@ -916,3 +916,19 @@ instance [𝚫-[2].DefinableFunction f] : 𝚫-[0+1+1].DefinableFunction f := in
 end
 
 end FFL.FirstOrder.Arithmetic.HierarchySymbol
+
+namespace FFL.FirstOrder.Arithmetic
+
+variable {V : Type*} [ORingStructure V] {Γ : Polarity} {s k : ℕ}
+
+lemma definable_of_hierarchy {φ : ArithmeticSemiformula ℕ k} (hφ : Hierarchy Γ s φ) (e : ℕ → V) :
+    Γ-[s].Definable fun v ↦ φ.Eval v e :=
+  .mkPolarity (Rew.rewriteMap e ▹ φ) (hφ.rew _) fun _ ↦ by simp [Semiformula.eval_rewriteMap]
+
+lemma definablePred_of_hierarchy {φ : ArithmeticSemiformula ℕ 1} (hφ : Hierarchy Γ s φ)
+    (e : ℕ → V) : Γ-[s].DefinablePred fun x ↦ φ.Eval ![x] e :=
+  (definable_of_hierarchy hφ e).of_iff fun v ↦ by
+    have h : ![v 0] = v := (Matrix.fun_eq_vec_one v).symm
+    simp [h]
+
+end FFL.FirstOrder.Arithmetic
