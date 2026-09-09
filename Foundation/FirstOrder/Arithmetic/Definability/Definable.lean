@@ -3,7 +3,9 @@ module
 public import Foundation.FirstOrder.Arithmetic.Definability.Hierarchy
 
 @[expose] public section
-namespace FFL.FirstOrder.Arithmetic.HierarchySymbol
+namespace FFL.FirstOrder.Arithmetic
+
+namespace HierarchySymbol
 
 variable (ξ : Type*) (n : ℕ)
 
@@ -915,9 +917,7 @@ instance [𝚫-[2].DefinableFunction f] : 𝚫-[0+1+1].DefinableFunction f := in
 
 end
 
-end FFL.FirstOrder.Arithmetic.HierarchySymbol
-
-namespace FFL.FirstOrder.Arithmetic
+end HierarchySymbol
 
 variable {V : Type*} [ORingStructure V] {Γ : Polarity} {s k : ℕ}
 
