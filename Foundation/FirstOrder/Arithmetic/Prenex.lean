@@ -1,6 +1,7 @@
 module
 
 public import Foundation.FirstOrder.Arithmetic.Basic.Model
+public import Foundation.FirstOrder.Arithmetic.Basic.StrictHierarchy
 public import Foundation.FirstOrder.Arithmetic.BoundedCollection
 public import Foundation.FirstOrder.Arithmetic.Definability.Hierarchy
 
@@ -640,6 +641,21 @@ theorem exists_matrix_provable {Γ : Polarity} {s: ℕ} (T : ArithmeticTheory) [
   ∃ φ₀ : 𝚺₀.Semisentence (n + s), T ⊢ ∀¹* (φ 🡘 φ₀.val.toPrenex Γ s) := by
   obtain ⟨_, hφ'⟩ := exists_prenex_of_hierarchy T h;
   exact ⟨_, by simpa [Prenex.val] using hφ'⟩;
+
+section
+variable {Γ : Polarity} {s n : ℕ} {ξ : Type*}
+
+@[simp, grind .]
+lemma Prenex.val_strictHierarchy {φ : Prenex Γ s ξ n} : StrictHierarchy Γ s φ.val :=
+  StrictHierarchy.toPrenex_of_deltaZero φ.matrix.sigma_prop
+
+theorem exists_strictHierarchy_of_hierarchy
+    (T : ArithmeticTheory) [𝗜𝚺 s ⪯ T] {φ : ArithmeticSemisentence n} (h : Hierarchy Γ s φ) :
+    ∃ ψ : ArithmeticSemisentence n, StrictHierarchy Γ s ψ ∧ T ⊢ ∀¹* (φ 🡘 ψ) := by
+  obtain ⟨φ', hφ'⟩ := exists_prenex_of_hierarchy T h;
+  exact ⟨φ'.val, Prenex.val_strictHierarchy, hφ'⟩;
+
+end
 
 end Arithmetic
 

@@ -1,13 +1,12 @@
 module
 
-public import Foundation.FirstOrder.Arithmetic.Prenex
+public import Foundation.FirstOrder.Arithmetic.Basic.Hierarchy
 
 /-!
-# Strict arithmetical hierarchy and prenex normal form
+# Strict arithmetical hierarchy
 
 `StrictHierarchy Γ s φ` singles out the prenex `Γ`-formulas of level `s` with a `Δ₀` matrix
-beneath alternating quantifier blocks, and relates them to the ordinary cumulative hierarchy and
-to `Prenex Γ s ξ n` codes.
+beneath alternating quantifier blocks.
 -/
 
 @[expose] public section
@@ -116,20 +115,5 @@ lemma mono {φ : Semiformula L ξ n} (h : StrictHierarchy Γ s φ) (hs : s ≤ s
 end
 
 end StrictHierarchy
-
-section
-variable {Γ : Polarity} {s n : ℕ} {ξ : Type*}
-
-@[simp, grind .]
-lemma Prenex.val_strictHierarchy {φ : Prenex Γ s ξ n} : StrictHierarchy Γ s φ.val :=
-  StrictHierarchy.toPrenex_of_deltaZero φ.matrix.sigma_prop
-
-theorem exists_strictHierarchy_of_hierarchy
-    (T : ArithmeticTheory) [𝗜𝚺 s ⪯ T] {φ : ArithmeticSemisentence n} (h : Hierarchy Γ s φ) :
-    ∃ ψ : ArithmeticSemisentence n, StrictHierarchy Γ s ψ ∧ T ⊢ ∀¹* (φ 🡘 ψ) := by
-  obtain ⟨φ', hφ'⟩ := exists_prenex_of_hierarchy T h;
-  exact ⟨φ'.val, Prenex.val_strictHierarchy, hφ'⟩;
-
-end
 
 end FFL.FirstOrder.Arithmetic
