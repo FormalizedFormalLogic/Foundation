@@ -10,6 +10,10 @@ public import Foundation.FirstOrder.Arithmetic.Definability.Hierarchy
 
 For `𝗜𝚺 s ⪯ T`, every `Hierarchy Γ s` formula `φ` is `T`-provably equivalent to `φ₀.toPrenex Γ s`
 for some `φ₀ : ArithmeticSemisentence (n + s)` in `Hierarchy 𝚺 0`.
+
+## References
+
+- [HP98, 0.30, Theorem I.2.5(3), Lemma I.2.9]
 -/
 
 @[expose] public section

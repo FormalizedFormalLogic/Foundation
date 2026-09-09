@@ -7,6 +7,10 @@ public import Foundation.FirstOrder.Arithmetic.Basic.Hierarchy
 
 `StrictHierarchy Γ s φ` singles out the prenex `Γ`-formulas of level `s` with a `Δ₀` matrix
 beneath alternating quantifier blocks.
+
+## References
+
+- [HP98, 0.30, Lemma I.1.69]
 -/
 
 @[expose] public section
