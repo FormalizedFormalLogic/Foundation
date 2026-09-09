@@ -23,20 +23,19 @@ namespace Fixpoint
 set_option linter.dupNamespace false
 
 structure Blueprint (k : ℕ) where
-  core : SetTheorySemisentence (k + 2)
+  graph : SetTheorySemisentence (k + 2)
 
 namespace Blueprint
 
 variable {k} (φ : Blueprint k)
 
-instance : Coe (Blueprint k) (SetTheorySemisentence (k + 2)) := ⟨Blueprint.core⟩
+instance : Coe (Blueprint k) (SetTheorySemisentence (k + 2)) := ⟨Blueprint.graph⟩
 
-def succDef : SetTheorySemisentence (k + 3) :=
-  “α ih s. ∀ x < α + (s + 1), (x ∈ α → x ≤ s ∧ !φ.core x ih ⋯) ∧ (x ≤ s ∧ !φ.core x ih ⋯ → x ∈ α)”
+def graphDef : SetTheorySemisentence (k + 3) :=
+  “u ih α. ∀ x, (x ∈ u → (∀ z, !lh.dfn z α → x ∈ z) ∧ !φ.graph x ih ⋯) ∧ ((∀ z, !lh.dfn z α → x ∈ z) ∧ !φ.graph x ih ⋯ → x ∈ u)”
 
 def recBlueprint : Recursion.Blueprint k where
-  zero := “x. x = 0”
-  succ := φ.succDef
+  graph := φ.graphDef
 
 def limSeqDef : SetTheorySemisentence (k + 2) := (φ.recBlueprint).resultDef
 
@@ -105,10 +104,8 @@ lemma eval_succDef (v : Fin (k + 3) → V) :
     φ.succDef.val.Evalb v ↔ v 0 = c.succ (v ·.succ.succ.succ) (v 2) (v 1) := c.succ_defined.iff
 
 noncomputable def prConstruction : Recursion.Construction V φ.recBlueprint where
-  zero := fun _ ↦ ∅
-  succ := c.succ
-  zero_defined := .mk fun v ↦ by simp [Blueprint.recBlueprint, emptyset_def]
-  succ_defined := .mk fun v ↦ by simp [Blueprint.recBlueprint, c.eval_succDef]
+  core := c.core
+  core_defined := .mk fun v ↦ by simp [Blueprint.recBlueprint, c.eval_succDef]
 
 variable (v)
 
@@ -264,4 +261,4 @@ attribute [irreducible] Blueprint.fixpointDef
 
 end Fixpoint
 
-end LO.FirstOrder.Arithmetic
+end LO.FirstOrder.SetTheory

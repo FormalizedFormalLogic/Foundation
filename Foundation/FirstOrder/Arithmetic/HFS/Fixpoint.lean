@@ -23,6 +23,7 @@ namespace Fixpoint
 set_option linter.dupNamespace false
 
 structure Blueprint (k : ℕ) where
+  /-- WIP: Add a description of when `core (something :> something :> v)` is true here. -/
   core : 𝚫₁.Semisentence (k + 2)
 
 namespace Blueprint
@@ -31,8 +32,15 @@ variable {k} (φ : Blueprint k)
 
 instance : Coe (Blueprint k) (𝚫₁.Semisentence (k + 2)) := ⟨Blueprint.core⟩
 
+/-- `succDef.Evalb (u :> ih :> i :> v)` holds iff `u` is the value at `i + 1`, where `ih` is the value at `i`. Equivalently `u = c.succ v i ih`. -/
 def succDef : 𝚺₁.Semisentence (k + 3) := .mkSigma
-  “u ih s. ∀ x < u + (s + 1), (x ∈ u → x ≤ s ∧ !φ.core.sigma x ih ⋯) ∧ (x ≤ s ∧ !φ.core.pi x ih ⋯ → x ∈ u)”
+  “u ih i. ∀ x < u + (i + 1), (x ∈ u → x ≤ i ∧ !φ.core.sigma x ih ⋯) ∧ (x ≤ i ∧ !φ.core.pi x ih ⋯ → x ∈ u)”
+
+/-
+Suppose `i = 0`.
+`∀ x < u + 1, (x ∈ u ↔ x ≤ 0 ∧ !φ.core x ih ⋯)`
+`u = {!φ.core 0 ih ⋯}`
+-/
 
 def prBlueprint : PR.Blueprint k where
   zero := .mkSigma “x. x = 0”
@@ -41,7 +49,7 @@ def prBlueprint : PR.Blueprint k where
 def limSeqDef : 𝚺₁.Semisentence (k + 2) := (φ.prBlueprint).resultDef
 
 def fixpointDef : 𝚺₁.Semisentence (k + 1) :=
-  .mkSigma “x. ∃ s L, !φ.limSeqDef L s ⋯  ∧ x ∈ L”
+  .mkSigma “x. ∃ i L, !φ.limSeqDef L i ⋯  ∧ x ∈ L”
 
 def fixpointDefΔ₁ : 𝚫₁.Semisentence (k + 1) := .mkDelta
   (.mkSigma “x. ∃ L, !φ.limSeqDef L (x + 1) ⋯  ∧ x ∈ L”)
@@ -52,6 +60,7 @@ end Blueprint
 variable (V)
 
 structure Construction {k : ℕ} (φ : Blueprint k) where
+  /-- `c.Φ (v.succ.succ)` -/
   Φ : (Fin k → V) → Set V → V → Prop
   defined : 𝚫₁.Defined (fun v ↦ Φ (v ·.succ.succ) {x | x ∈ v 1} (v 0)) φ.core
   monotone {C C' : Set V} (h : C ⊆ C') {v x} : Φ v C x → Φ v C' x
@@ -74,24 +83,24 @@ variable {k : ℕ} {φ : Blueprint k} (c : Construction V φ) (v : Fin k → V)
 lemma eval_formula (v : Fin k.succ.succ → V) :
     φ.core.val.Evalb v ↔ c.Φ (v ·.succ.succ) {x | x ∈ v 1} (v 0) := c.defined.iff
 
-lemma succ_existsUnique (s ih : V) :
-    ∃! u : V, ∀ x, (x ∈ u ↔ x ≤ s ∧ c.Φ v {z | z ∈ ih} x) := by
-  have : 𝚺₁-Predicate fun x ↦ x ≤ s ∧ c.Φ v {z | z ∈ ih} x := by
+lemma succ_existsUnique (i ih : V) :
+    ∃! u : V, ∀ x, (x ∈ u ↔ x ≤ i ∧ c.Φ v {z | z ∈ ih} x) := by
+  have : 𝚺₁-Predicate fun x ↦ x ≤ i ∧ c.Φ v {z | z ∈ ih} x := by
     apply HierarchySymbol.Definable.and (by definability)
       ⟨φ.core.sigma.rew <| Rew.embSubsts (#0 :> &ih :> fun i ↦ &(v i)),
         by intro x; simp [HierarchySymbol.Semiformula.val_sigma, c.eval_formula]⟩
   exact finite_comprehension₁! this
-    ⟨s + 1, fun i ↦ by rintro ⟨hi, _⟩; exact lt_succ_iff_le.mpr hi⟩
+    ⟨i + 1, fun i ↦ by rintro ⟨hi, _⟩; exact lt_succ_iff_le.mpr hi⟩
 
-noncomputable def succ (s ih : V) : V := Classical.choose! (c.succ_existsUnique v s ih)
+noncomputable def succ (i ih : V) : V := Classical.choose! (c.succ_existsUnique v i ih)
 
 variable {v}
 
-lemma mem_succ_iff {v s ih} :
-    x ∈ c.succ v s ih ↔ x ≤ s ∧ c.Φ v {z | z ∈ ih} x := Classical.choose!_spec (c.succ_existsUnique v s ih) x
+lemma mem_succ_iff {v i ih} :
+    x ∈ c.succ v i ih ↔ x ≤ i ∧ c.Φ v {z | z ∈ ih} x := Classical.choose!_spec (c.succ_existsUnique v i ih) x
 
-private lemma succ_graph {u v s ih} :
-    u = c.succ v s ih ↔ ∀ x < u + (s + 1), x ∈ u ↔ x ≤ s ∧ c.Φ v {z | z ∈ ih} x :=
+private lemma succ_graph {u v i ih} :
+    u = c.succ v i ih ↔ ∀ x < u + (i + 1), x ∈ u ↔ x ≤ i ∧ c.Φ v {z | z ∈ ih} x :=
   ⟨by rintro rfl x _; simp [mem_succ_iff], by
     intro h; apply mem_ext
     intro x; constructor
@@ -116,13 +125,13 @@ noncomputable def prConstruction : PR.Construction V φ.prBlueprint where
 
 variable (v)
 
-noncomputable def limSeq (s : V) : V := c.prConstruction.result v s
+noncomputable def limSeq (i : V) : V := c.prConstruction.result v i
 
 variable {v}
 
 @[simp] lemma limSeq_zero : c.limSeq v 0 = ∅ := by simp [limSeq, prConstruction]
 
-lemma limSeq_succ (s : V) : c.limSeq v (s + 1) = c.succ v s (c.limSeq v s) := by simp [limSeq, prConstruction]
+lemma limSeq_succ (i : V) : c.limSeq v (i + 1) = c.succ v i (c.limSeq v i) := by simp [limSeq, prConstruction]
 
 lemma termSet_defined : 𝚺₁.DefinedFunction (fun v ↦ c.limSeq (v ·.succ) (v 0)) φ.limSeqDef := .mk
   fun v ↦ by simp [c.prConstruction.result_defined_iff, Blueprint.limSeqDef]; rfl
@@ -135,43 +144,43 @@ instance limSeq_definable :
 
 @[simp, definability] instance limSeq_definable' (Γ) : Γ-[m + 1].DefinableFunction (fun v ↦ c.limSeq (v ·.succ) (v 0)) := c.limSeq_definable.of_sigmaOne
 
-lemma mem_limSeq_succ_iff {x s : V} :
-    x ∈ c.limSeq v (s + 1) ↔ x ≤ s ∧ c.Φ v {z | z ∈ c.limSeq v s} x := by simp [limSeq_succ, mem_succ_iff]
+lemma mem_limSeq_succ_iff {x i : V} :
+    x ∈ c.limSeq v (i + 1) ↔ x ≤ i ∧ c.Φ v {z | z ∈ c.limSeq v i} x := by simp [limSeq_succ, mem_succ_iff]
 
-lemma limSeq_cumulative {s s' : V} : s ≤ s' → c.limSeq v s ⊆ c.limSeq v s' := by
-  induction s' using ISigma1.sigma1_succ_induction generalizing s
+lemma limSeq_cumulative {i i' : V} : i ≤ i' → c.limSeq v i ⊆ c.limSeq v i' := by
+  induction i' using ISigma1.sigma1_succ_induction generalizing i
   · apply HierarchySymbol.Definable.ball_le (by definability)
     apply HierarchySymbol.Definable.comp₂
-    · exact ⟨φ.limSeqDef.rew <| Rew.embSubsts (#0 :> #1 :> fun i ↦ &(v i)), by intro v; simp [c.eval_limSeqDef]⟩
-    · exact ⟨φ.limSeqDef.rew <| Rew.embSubsts (#0 :> #2 :> fun i ↦ &(v i)), by intro v; simp [c.eval_limSeqDef]⟩
+    · exact ⟨φ.limSeqDef.rew <| Rew.embSubsts (#0 :> #1 :> fun j ↦ &(v j)), by intro v; simp [c.eval_limSeqDef]⟩
+    · exact ⟨φ.limSeqDef.rew <| Rew.embSubsts (#0 :> #2 :> fun j ↦ &(v j)), by intro v; simp [c.eval_limSeqDef]⟩
   case zero =>
     simp only [nonpos_iff_eq_zero, limSeq_zero]; rintro rfl; simp
-  case succ s' ih =>
-    intro hs u hu
-    rcases zero_or_succ s with (rfl | ⟨s, rfl⟩)
+  case succ i' ih =>
+    intro hi u hu
+    rcases zero_or_succ i with (rfl | ⟨i, rfl⟩)
     · simp at hu
-    have hs : s ≤ s' := by simpa using hs
+    have hi : i ≤ i' := by simpa using hi
     rcases c.mem_limSeq_succ_iff.mp hu with ⟨hu, Hu⟩
-    exact c.mem_limSeq_succ_iff.mpr ⟨_root_.le_trans hu hs, c.monotone (fun z hz ↦ ih hs hz) Hu⟩
+    exact c.mem_limSeq_succ_iff.mpr ⟨_root_.le_trans hu hi, c.monotone (fun z hz ↦ ih hi hz) Hu⟩
 
-lemma mem_limSeq_self [c.StrongFinite] {u s : V} :
-    u ∈ c.limSeq v s → u ∈ c.limSeq v (u + 1) := by
-  induction u using ISigma1.pi1_order_induction generalizing s
+lemma mem_limSeq_self [c.StrongFinite] {x i : V} :
+    x ∈ c.limSeq v i → x ∈ c.limSeq v (x + 1) := by
+  induction x using ISigma1.pi1_order_induction generalizing i
   · apply HierarchySymbol.Definable.all
     apply HierarchySymbol.Definable.imp
     · apply HierarchySymbol.Definable.comp₂
-        ⟨φ.limSeqDef.rew <| Rew.embSubsts (#0 :> #1 :> fun i ↦ &(v i)), by intro v; simp [c.eval_limSeqDef]⟩
+        ⟨φ.limSeqDef.rew <| Rew.embSubsts (#0 :> #1 :> fun j ↦ &(v j)), by intro v; simp [c.eval_limSeqDef]⟩
         (by definability)
     · apply HierarchySymbol.Definable.comp₂
-        ⟨φ.limSeqDef.rew <| Rew.embSubsts (#0 :> ‘#2 + 1’ :> fun i ↦ &(v i)), by intro v; simp [c.eval_limSeqDef]⟩
+        ⟨φ.limSeqDef.rew <| Rew.embSubsts (#0 :> ‘#2 + 1’ :> fun j ↦ &(v j)), by intro v; simp [c.eval_limSeqDef]⟩
         (by definability)
-  case ind u ih =>
-    rcases zero_or_succ s with (rfl | ⟨s, rfl⟩)
+  case ind x ih =>
+    rcases zero_or_succ i with (rfl | ⟨i, rfl⟩)
     · simp
     intro hu
     rcases c.mem_limSeq_succ_iff.mp hu with ⟨_, Hu⟩
-    have : c.Φ v {z | z ∈ c.limSeq v s ∧ z < u} u := StrongFinite.strong_finite Hu
-    have : c.Φ v {z | z ∈ c.limSeq v u} u :=
+    have : c.Φ v {z | z ∈ c.limSeq v i ∧ z < x} x := StrongFinite.strong_finite Hu
+    have : c.Φ v {z | z ∈ c.limSeq v x} x :=
       c.monotone (by
         simp only [Set.ofPred_subset_ofPred, and_imp]
         intro z hz hzu
@@ -181,12 +190,12 @@ lemma mem_limSeq_self [c.StrongFinite] {u s : V} :
 
 variable (v)
 
-def Fixpoint (x : V) : Prop := ∃ s, x ∈ c.limSeq v s
+def Fixpoint (x : V) : Prop := ∃ i, x ∈ c.limSeq v i
 
 variable {v}
 
 lemma fixpoint_iff [c.StrongFinite] {x : V} : c.Fixpoint v x ↔ x ∈ c.limSeq v (x + 1) :=
-  ⟨by rintro ⟨s, hs⟩; exact c.mem_limSeq_self hs, fun h ↦ ⟨x + 1, h⟩⟩
+  ⟨by rintro ⟨i, hi⟩; exact c.mem_limSeq_self hi, fun h ↦ ⟨x + 1, h⟩⟩
 
 lemma fixpoint_iff_succ {x : V} : c.Fixpoint v x ↔ ∃ u, x ∈ c.limSeq v (u + 1) :=
   ⟨by
@@ -195,13 +204,13 @@ lemma fixpoint_iff_succ {x : V} : c.Fixpoint v x ↔ ∃ u, x ∈ c.limSeq v (u 
     · simp at h
     · exact ⟨u, h⟩, by rintro ⟨u, h⟩; exact ⟨u + 1, h⟩⟩
 
-lemma finite_upperbound (m : V) : ∃ s, ∀ z < m, c.Fixpoint v z → z ∈ c.limSeq v s := by
+lemma finite_upperbound (m : V) : ∃ i, ∀ z < m, c.Fixpoint v z → z ∈ c.limSeq v i := by
   have : ∃ F : V, ∀ x, x ∈ F ↔ x < m ∧ c.Fixpoint v x := by
     have : 𝚺₁-Predicate fun x ↦ x < m ∧ c.Fixpoint v x :=
       HierarchySymbol.Definable.and (by definability)
         (HierarchySymbol.Definable.exs
           (HierarchySymbol.Definable.comp₂
-            ⟨φ.limSeqDef.rew <| Rew.embSubsts (#0 :> #1 :> fun i ↦ &(v i)), by intro v; simp [c.eval_limSeqDef]⟩
+            ⟨φ.limSeqDef.rew <| Rew.embSubsts (#0 :> #1 :> fun j ↦ &(v j)), by intro v; simp [c.eval_limSeqDef]⟩
             (by definability)))
     exact finite_comprehension₁! this ⟨m, fun i hi ↦ hi.1⟩ |>.exists
   rcases this with ⟨F, hF⟩
@@ -209,12 +218,12 @@ lemma finite_upperbound (m : V) : ∃ s, ∀ z < m, c.Fixpoint v z → z ∈ c.l
     intro x hx; exact hF x |>.mp hx |>.2
   have : ∃ f, IsMapping f ∧ domain f = F ∧ ∀ (x y : V), ⟪x, y⟫ ∈ f → x ∈ c.limSeq v y := sigmaOne_skolem
     (by apply HierarchySymbol.Definable.comp₂
-          ⟨φ.limSeqDef.rew <| Rew.embSubsts (#0 :> #2 :> fun i ↦ &(v i)), by intro v; simp [c.eval_limSeqDef]⟩
+          ⟨φ.limSeqDef.rew <| Rew.embSubsts (#0 :> #2 :> fun j ↦ &(v j)), by intro v; simp [c.eval_limSeqDef]⟩
           (by definability)) this
-  rcases this with ⟨f, mf, rfl, hf⟩
+  rcases this with ⟨f, hmf, rfl, hf⟩
   exact ⟨f, by
     intro z hzm hz
-    have : ∃ u, ⟪z, u⟫ ∈ f := mf.get_exists_uniq ((hF z).mpr ⟨hzm, hz⟩) |>.exists
+    have : ∃ u, ⟪z, u⟫ ∈ f := hmf.get_exists_uniq ((hF z).mpr ⟨hzm, hz⟩) |>.exists
     rcases this with ⟨u, hu⟩
     have : z ∈ c.limSeq v u := hf z u hu
     exact c.limSeq_cumulative (le_of_lt <| lt_of_mem_rng hu) this⟩
@@ -226,14 +235,14 @@ theorem case [c.Finite] : c.Fixpoint v x ↔ c.Φ v {z | c.Fixpoint v z} x :=
       exact c.monotone (fun z hx ↦ by exact ⟨u, hx⟩) this,
    by intro hx
       rcases Finite.finite hx with ⟨m, hm⟩
-      have : ∃ s, ∀ z < m, c.Fixpoint v z → z ∈ c.limSeq v s := c.finite_upperbound m
-      rcases this with ⟨s, hs⟩
-      have : c.Φ v {z | z ∈ c.limSeq v s} x :=
+      have : ∃ i, ∀ z < m, c.Fixpoint v z → z ∈ c.limSeq v i := c.finite_upperbound m
+      rcases this with ⟨i, hi⟩
+      have : c.Φ v {z | z ∈ c.limSeq v i} x :=
         c.monotone (by
           simp only [Set.ofPred_subset_ofPred, and_imp]
-          intro z hz hzm; exact hs z hzm hz)
+          intro z hz hzm; exact hi z hzm hz)
           hm
-      exact ⟨max s x + 1,
+      exact ⟨max i x + 1,
         c.mem_limSeq_succ_iff.mpr <| ⟨by simp, c.monotone (fun z hz ↦ c.limSeq_cumulative (by simp) hz) this⟩⟩⟩
 
 section

@@ -166,7 +166,7 @@ lemma result_defined : DefinedFunction (fun v ↦ c.result (v ·.succ) (v 0)) b.
   · intro h
     simp [Blueprint.resultDef, result, c.map_defined.iff, h]
 
-@[simp] lemma eval_resultDef : b.resultDef.Evalb v ↔ v 0 = c.result (v ·.succ.succ) (v 1) := c.result_defined.iff v
+@[simp] lemma result_defined_iff : b.resultDef.Evalb v ↔ v 0 = c.result (v ·.succ.succ) (v 1) := c.result_defined.iff v
 
 @[simp] lemma mem_result : y ∈ c.result v X ↔ ∃ x ∈ X, y = c.map v x := by
   simp [result, repl_spec]
