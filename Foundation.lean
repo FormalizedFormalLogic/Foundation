@@ -11,6 +11,7 @@ public import Foundation.FirstOrder.Arithmetic.Definability.Absoluteness
 public import Foundation.FirstOrder.Arithmetic.Definability.BoundedDefinable
 public import Foundation.FirstOrder.Arithmetic.Definability.Definable
 public import Foundation.FirstOrder.Arithmetic.Definability.Hierarchy
+public import Foundation.FirstOrder.Arithmetic.Examples
 public import Foundation.FirstOrder.Arithmetic.Exponential
 public import Foundation.FirstOrder.Arithmetic.Exponential.Bit
 public import Foundation.FirstOrder.Arithmetic.Exponential.Exp
@@ -28,6 +29,7 @@ public import Foundation.FirstOrder.Arithmetic.HFS.Vec
 public import Foundation.FirstOrder.Arithmetic.IOpen.Basic
 public import Foundation.FirstOrder.Arithmetic.ISigma1.Prenex
 public import Foundation.FirstOrder.Arithmetic.Induction
+public import Foundation.FirstOrder.Arithmetic.LeastNumber.Basic
 public import Foundation.FirstOrder.Arithmetic.Omega1.Basic
 public import Foundation.FirstOrder.Arithmetic.Omega1.Nuon
 public import Foundation.FirstOrder.Arithmetic.PA.Prenex
