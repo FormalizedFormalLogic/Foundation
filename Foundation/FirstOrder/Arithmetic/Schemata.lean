@@ -3,11 +3,15 @@ module
 public import Foundation.FirstOrder.Arithmetic.PeanoMinus.Functions
 public import Foundation.FirstOrder.Arithmetic.TA.Basic
 
-@[expose] public section
-
 /-!
-# Induction schemata of Arithmetic
+# Induction and least number schemata of Arithmetic
+
+## References
+
+- [HP98, §I.2(a), I.2.3]
 -/
+
+@[expose] public section
 
 namespace FFL.FirstOrder.Arithmetic
 
@@ -18,6 +22,9 @@ variable {L : Language} [L.ORing] {ξ : Type*} [DecidableEq ξ]
 def succInd {ξ} (φ : Semiformula L ξ 1) : Formula L ξ := “!φ 0 → (∀ x, !φ x → !φ (x + 1)) → ∀ x, !φ x”
 
 def orderInd {ξ} (φ : Semiformula L ξ 1) : Formula L ξ := “(∀ x, (∀ y < x, !φ y) → !φ x) → ∀ x, !φ x”
+
+def leastNumber {ξ} (φ : Semiformula L ξ 1) : Formula L ξ :=
+  “(∃ x, !φ x) → ∃ z, !φ z ∧ ∀ x < z, ¬!φ x”
 
 variable (L)
 
@@ -51,6 +58,22 @@ notation "𝗜𝚷₁" => IPi 1
 abbrev Peano : ArithmeticTheory := 𝗣𝗔⁻ ∪ InductionScheme ℒₒᵣ Set.univ
 
 notation "𝗣𝗔" => Peano
+
+def LeastNumberScheme (Γ : ArithmeticSemiformula ℕ 1 → Prop) : ArithmeticTheory :=
+  { ψ | ∃ φ : ArithmeticSemiformula ℕ 1, Γ φ ∧ ψ = .univCl (leastNumber φ) }
+
+abbrev LeastNumberOnHierarchy (Γ : Polarity) (n : ℕ) : ArithmeticTheory :=
+  𝗣𝗔⁻ ∪ LeastNumberScheme (Arithmetic.Hierarchy Γ n)
+
+prefix:max "𝗟 " => LeastNumberOnHierarchy
+
+abbrev LSigma (n : ℕ) : ArithmeticTheory := 𝗟 𝚺 n
+
+prefix:max "𝗟𝚺" => LSigma
+
+abbrev LPi (n : ℕ) : ArithmeticTheory := 𝗟 𝚷 n
+
+prefix:max "𝗟𝚷" => LPi
 
 variable {L}
 
@@ -88,6 +111,25 @@ instance : 𝗜𝚺i ⪯ 𝗣𝗔 :=
 lemma mem_InductionScheme_of_mem {φ : ArithmeticSemiformula ℕ 1} (hp : C φ) :
     .univCl (succInd φ) ∈ InductionScheme ℒₒᵣ C := by
   simpa [InductionScheme] using ⟨φ, hp, rfl⟩
+
+lemma LeastNumberScheme_subset (h : ∀ {φ : ArithmeticSemiformula ℕ 1}, C φ → C' φ) :
+    LeastNumberScheme C ⊆ LeastNumberScheme C' := by
+  rintro _ ⟨φ, hφ, rfl⟩; exact ⟨φ, h hφ, rfl⟩;
+
+lemma mem_LeastNumberScheme_of_mem {φ : ArithmeticSemiformula ℕ 1} (hφ : C φ) :
+    .univCl (leastNumber φ) ∈ LeastNumberScheme C := ⟨φ, hφ, rfl⟩
+
+lemma LeastNumberOnHierarchy_subset_mono {n₁ n₂} (h : n₁ ≤ n₂) : 𝗟 Γ n₁ ⊆ 𝗟 Γ n₂ :=
+  Set.union_subset_union_right _ (LeastNumberScheme_subset (fun H ↦ H.mono h))
+
+lemma LeastNumberOnHierarchy_weakerThan_of_le {n₁ n₂} (h : n₁ ≤ n₂) : 𝗟 Γ n₁ ⪯ 𝗟 Γ n₂ :=
+  Entailment.WeakerThan.ofSubset (LeastNumberOnHierarchy_subset_mono h)
+
+instance (Γ : Polarity) (n : ℕ) : 𝗣𝗔⁻ ⪯ 𝗟 Γ n :=
+  Entailment.WeakerThan.ofSubset Set.subset_union_left
+
+instance (Γ : Polarity) (n : ℕ) : 𝗘𝗤 ℒₒᵣ ⪯ 𝗟 Γ n :=
+  Entailment.WeakerThan.trans (inferInstance : 𝗘𝗤 ℒₒᵣ ⪯ 𝗣𝗔⁻) inferInstance
 
 lemma mem_IOpen_of_qfree {φ : ArithmeticSemiformula ℕ 1} (hp : φ.Open) :
     .univCl (succInd φ) ∈ InductionScheme ℒₒᵣ Semiformula.Open := by
