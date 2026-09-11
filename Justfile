@@ -36,13 +36,15 @@ shake:
 axiom-audit:
     lake exe axiom-audit --root Foundation
 
-# doc-gen4 records that the HTML pass ran by touching an empty marker file, and Lake traces that
-# marker by its (always identical) contents. Once the marker is in the restored build cache the
-# HTML pass is replayed forever, so the published documentation freezes at whatever commit last
-# missed the cache. Dropping the marker and the stale output forces a regeneration; the expensive
-# per-module database pass behind it stays incremental.
+# doc-gen4 records that its HTML pass ran by touching an empty marker file, and Lake traces that
+# marker by its own -- always identical -- contents. `lake pack` carries the marker into the build
+# cache, so every run that restores the cache replays the pass and the generated HTML is never
+# rewritten. Clearing the output and the two markers that guard it forces a regeneration:
+# `doc/references.bib` comes from the bib prepass, keyed on `doc-data/references.json`, and the rest
+# of `doc/` from the HTML pass. The per-module database pass behind them stays incremental.
 #
 # Generate the API documentation into .lake/build/doc (requires `lake build Foundation` first)
 docs:
-    rm -rf .lake/build/doc .lake/build/doc-data/*.docs_built
+    rm -rf .lake/build/doc
+    rm -f .lake/build/doc-data/references.json .lake/build/doc-data/*.docs_built
     lake build Foundation:docs
