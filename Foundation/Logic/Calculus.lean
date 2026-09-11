@@ -17,12 +17,18 @@ public section
 
 namespace FFL
 
+/-! ## Structural rules -/
+
+class Structural {F : Type*} (𝔇 : Multiset F → Type*) where
+  weakening : 𝔇 Γ → 𝔇 (Γ + ⦃φ⦄)
+  contraction : 𝔇 (Γ + ⦃φ, φ⦄) → 𝔇 (Γ + ⦃φ⦄)
+
 /-! ## One-sided $\mathbf{LK}$ -/
 
 class OneSidedLK {F : Type*} [LogicalConnective F] [LogicalNeutral F]
-    [TildeInvolutive F] [LogicalConnective.DeMorgan F] [LogicalNeutral.DeMorgan F] (𝔇 : Multiset F → Type*) where
+    [TildeInvolutive F] [LogicalConnective.DeMorgan F] [LogicalNeutral.DeMorgan F]
+    (𝔇 : Multiset F → Type*) extends Structural 𝔇 where
   identity (φ) : 𝔇 ⦃φ, ∼φ⦄
-  contraction : 𝔇 Δ → Δ ⊆ Γ → 𝔇 Γ
   verum : 𝔇 ⦃⊤⦄
   and : 𝔇 (Γ + ⦃φ⦄) → 𝔇 (Γ + ⦃ψ⦄) → 𝔇 (Γ + ⦃φ ⋏ ψ⦄)
   or : 𝔇 (Γ + ⦃φ, ψ⦄) → 𝔇 (Γ + ⦃φ ⋎ ψ⦄)
@@ -40,20 +46,59 @@ variable {F : Type*} [LogicalConnective F] [LogicalNeutral F]
 
 def cast (b : 𝔇 Γ) (h : Γ = Δ := by abel) : 𝔇 Δ := h ▸ b
 
-def contra [OneSidedLK 𝔇] (d : 𝔇 Γ) (h : Γ ⊆ Δ := by simp) : 𝔇 Δ := contraction d h
+def weakenMany [Structural 𝔇] (tΔ : Δ.Traversal) (d : 𝔇 Γ) : 𝔇 (Γ + Δ) :=
+  match tΔ with
+  | .zero => cast d
+  | .succ φ t => Structural.weakening (weakenMany t d)
+
+def contractMany [Structural 𝔇] (tΓ : Γ.Traversal) (d : 𝔇 (Δ + Γ + Γ)) : 𝔇 (Δ + Γ) :=
+  match tΓ with
+  | .zero => cast d
+  | .succ φ t =>
+    let d' : 𝔇 ((Δ + (t.toList : Multiset F) + (t.toList : Multiset F)) + ⦃φ, φ⦄) :=
+      cast d (by simp [t.coe_toList]; abel)
+    contractMany t (Structural.contraction d')
+
+def absorb [Structural 𝔇] [DecidableEq F] (d : 𝔇 (Γ + ⦃φ⦄)) (h : φ ∈ Γ) : 𝔇 Γ := by
+  let e := Γ.erase φ
+  have he : Γ = e + ⦃φ⦄ := by
+    exact (Multiset.add_singleton_eq_iff.mpr ⟨h, rfl⟩).symm
+  have d' : 𝔇 (e + ⦃φ, φ⦄) := cast d (by rw [he]; abel)
+  exact cast (Structural.contraction d') (by rw [← he]; simp [he, e])
+
+def ofSubset [Structural 𝔇] [DecidableEq F]
+    (tΓ : Γ.Traversal) (tΔ : Δ.Traversal) (d : 𝔇 Γ) (h : Γ ⊆ Δ) : 𝔇 Δ := by
+  let rec go {Γ : Multiset F} (tΓ : Γ.Traversal) (d : 𝔇 (Δ + Γ))
+      (hΓ : Γ ⊆ Δ) : 𝔇 Δ :=
+    match tΓ with
+    | .zero => cast d (by simp)
+    | .succ φ t =>
+      let d₁ : 𝔇 (Δ + (t.toList : Multiset F) + ⦃φ⦄) :=
+        cast d (by simp [t.coe_toList]; abel)
+      let d₂ : 𝔇 (Δ + (t.toList : Multiset F)) :=
+        absorb d₁ (by exact mem_of_mem_add_left (hΓ (by simp)))
+      go t d₂ (by
+        intro ψ hψ
+        exact hΓ (by simp [hψ]))
+  go tΓ (cast (weakenMany tΔ d) (by abel)) h
+
+def contra [OneSidedLK 𝔇] (d : 𝔇 Γ) (h : Γ ⊆ Δ := by simp) : 𝔇 Δ :=
+  ofSubset (default : Γ.Traversal) (default : Δ.Traversal) d h
 
 def close [OneSidedLK 𝔇] (φ : F) (hp : φ ∈ Γ := by simp) (hn : ∼φ ∈ Γ := by simp) : 𝔇 Γ :=
-  contraction (identity φ) (by
+  contra (identity φ) (by
     intro ψ hψ
     rcases Multiset.mem_add.mp hψ with hψ | hψ <;> simp_all)
 
-def top [OneSidedLK 𝔇] (h : ⊤ ∈ Γ := by simp) : 𝔇 Γ := contraction verum (by simpa using h)
+def top [OneSidedLK 𝔇] (h : ⊤ ∈ Γ := by simp) : 𝔇 Γ := contra verum (by simpa using h)
 
-def tensor [OneSidedLK 𝔇] {φ ψ : F} (dφ : 𝔇 (Γ + ⦃φ⦄)) (dψ : 𝔇 (Δ + ⦃ψ⦄)) :
+def tensor [OneSidedLK 𝔇] {φ ψ : F} (tΓ : Γ.Traversal := by exact default)
+    (tΔ : Δ.Traversal := by exact default)
+    (dφ : 𝔇 (Γ + ⦃φ⦄)) (dψ : 𝔇 (Δ + ⦃ψ⦄)) :
     𝔇 (Γ + Δ + ⦃φ ⋏ ψ⦄) :=
   and
-    (contraction dφ (by intro χ hχ; rcases Multiset.mem_add.mp hχ with hχ | hχ <;> simp_all))
-    (contraction dψ (by intro χ hχ; rcases Multiset.mem_add.mp hχ with hχ | hχ <;> simp_all))
+    (cast (weakenMany tΔ dφ) (by simp; abel))
+    (cast (weakenMany tΓ dψ) (by simp; abel))
 
 alias cut := OneSidedLK.Cut.cut
 
@@ -276,8 +321,9 @@ def cast (d : 𝔇 Δ) (h : Δ = Γ.map f := by simp) : Pullback 𝔇 f Γ := by
 def uncast (d : Pullback 𝔇 f Γ) (h : Δ = Γ.map f := by simp) : 𝔇 Δ := h ▸ d
 
 instance oneSidedLK [OneSidedLK 𝔇] : OneSidedLK (Pullback 𝔇 f) where
+  weakening d := cast <| Structural.weakening (uncast d (by simp))
+  contraction d := cast <| Structural.contraction (uncast d (by simp))
   identity φ := cast <| identity (𝔇 := 𝔇) (f φ)
-  contraction {Δ Γ} d h := cast (contraction d (Multiset.map_subset_map h) : 𝔇 (Γ.map f)) (by simp)
   verum := cast verum
   and {Γ φ ψ} d₁ d₂ := cast <| and (Γ := Γ.map f) (φ := f φ) (ψ := f ψ)
     (uncast d₁ (by simp)) (uncast d₂ (by simp))
@@ -304,6 +350,16 @@ omit [TildeInvolutive F] [LogicalConnective.DeMorgan F] [LogicalNeutral.DeMorgan
 end Pullback
 
 end OneSidedLK
+
+namespace Structural
+
+alias cast := OneSidedLK.cast
+alias weakenMany := OneSidedLK.weakenMany
+alias contractMany := OneSidedLK.contractMany
+alias absorb := OneSidedLK.absorb
+alias ofSubset := OneSidedLK.ofSubset
+
+end Structural
 
 end FFL
 

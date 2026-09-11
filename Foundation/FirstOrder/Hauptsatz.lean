@@ -16,6 +16,14 @@ namespace FFL.FirstOrder.Derivation
 variable {L : Language}
 
 inductive Positive (Ξ : Sequent L) : Sequent L → Type _
+| refl : Ξ.Traversal → Positive Ξ Ξ
+| weakening : Positive Ξ Γ → Positive Ξ (Γ + ⦃φ⦄)
+| contraction : Positive Ξ (Γ + ⦃φ, φ⦄) → Positive Ξ (Γ + ⦃φ⦄)
+| or : Positive Ξ (Γ + ⦃φ, ψ⦄) → Positive Ξ (Γ + ⦃φ ⋎ ψ⦄)
+| exs : Positive Ξ (Γ + ⦃φ/[t]⦄) → Positive Ξ (Γ + ⦃∃¹ φ⦄)
+
+/--/
+inductive Positive (Ξ : Sequent L) : Sequent L → Type _
 | or : Positive Ξ (Γ + ⦃φ, ψ⦄) → Positive Ξ (Γ + ⦃φ ⋎ ψ⦄)
 | exs : Positive Ξ (Γ + ⦃φ/[t]⦄) → Positive Ξ (Γ + ⦃∃¹ φ⦄)
 | contraction : Positive Ξ Δ → Δ ⊆ Γ → Positive Ξ Γ

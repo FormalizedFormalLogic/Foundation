@@ -52,10 +52,10 @@ lemma sound {M : Type*} [s : Structure L M] [Nonempty M] (f : ℕ → M) {Γ : S
     rcases this with (⟨ψ, hq, hhq⟩ | hp)
     · exact ⟨ψ, by simp [hq], hhq⟩
     · exact ⟨∃¹ φ, by simp, t.val ![] f, hp⟩
-  | contraction (Δ := Δ) (Γ := Γ) d ss => by
-    have : ∃ φ ∈ Δ, Evalf f φ := sound f d
-    rcases this with ⟨φ, hp, h⟩
-    exact ⟨φ, ss hp, h⟩
+  | contraction d => by simpa using sound f d
+  | weakening d => by
+    obtain ⟨φ, hp, h⟩ := sound f d;
+    exact ⟨φ, Multiset.mem_add.mpr (.inl hp), h⟩;
   | cut (Γ := Γ) (Δ := Δ) (φ := φ) d dn => by
     have h : (∃ ψ ∈ Γ, Evalf f ψ) ∨ Evalf f φ := by simpa using sound f d
     have hn : (∃ ψ ∈ Δ, Evalf f ψ) ∨ ¬Evalf f φ := by simpa using sound f dn
