@@ -35,3 +35,14 @@ shake:
 # Audit Foundation for sorry/native_decide/unauthorized axioms (requires `lake build Foundation` first)
 axiom-audit:
     lake exe axiom-audit --root Foundation
+
+# doc-gen4 records that the HTML pass ran by touching an empty marker file, and Lake traces that
+# marker by its (always identical) contents. Once the marker is in the restored build cache the
+# HTML pass is replayed forever, so the published documentation freezes at whatever commit last
+# missed the cache. Dropping the marker and the stale output forces a regeneration; the expensive
+# per-module database pass behind it stays incremental.
+#
+# Generate the API documentation into .lake/build/doc (requires `lake build Foundation` first)
+docs:
+    rm -rf .lake/build/doc .lake/build/doc-data/*.docs_built
+    lake build Foundation:docs
