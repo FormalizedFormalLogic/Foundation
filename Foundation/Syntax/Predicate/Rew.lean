@@ -941,6 +941,20 @@ lemma quantItr_succ_smul_castLE {φ : F ((n + 1) + s)} :
 
 end Rewriting
 
+namespace Rewriting
+
+variable {S : ℕ → Type*} [LCWQ S] [SyntacticRewriting L S S]
+  [ReflectiveRewriting L ℕ S] [TransitiveRewriting L ℕ S ℕ S ℕ S]
+
+/-- Renaming free variables by predecessor undoes shift (a routine substitution law). -/
+lemma rewriteMap_pred_shift (φ : S n) : Rew.rewriteMap Nat.pred ▹ shift φ = φ := by
+  change Rew.rewriteMap Nat.pred ▹ (Rew.rewriteMap Nat.succ ▹ φ) = φ;
+  rw [← TransitiveRewriting.comp_app, Rew.rewriteMap_comp_rewriteMap];
+  change Rew.rewriteMap id ▹ φ = φ;
+  simp;
+
+end Rewriting
+
 namespace LawfulSyntacticRewriting
 
 variable {S : ℕ → Type*} [LCWQ S] [SyntacticRewriting L S S]

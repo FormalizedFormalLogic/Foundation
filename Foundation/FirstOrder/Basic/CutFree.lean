@@ -23,7 +23,8 @@ inductive IsCutFree : {Γ : Sequent L} → ⊢ᴸᴷ¹ Γ → Prop
       IsCutFree dφ → IsCutFree dψ → IsCutFree (dφ.and dψ)
   | all {d : ⊢ᴸᴷ¹ Γ⁺ + ⦃Rewriting.free φ⦄} : IsCutFree d → IsCutFree d.all
   | exs (t) {d : ⊢ᴸᴷ¹ Γ + ⦃φ/[t]⦄} : IsCutFree d → IsCutFree d.exs
-  | contraction {d : ⊢ᴸᴷ¹ Δ} (ss : Δ ⊆ Γ) : IsCutFree d → IsCutFree (d.contraction ss)
+  | contraction {d : ⊢ᴸᴷ¹ Γ + ⦃φ, φ⦄} : IsCutFree d → IsCutFree d.contraction
+  | weakening {d : ⊢ᴸᴷ¹ Γ} : IsCutFree d → IsCutFree (d.weakening (φ := φ))
 
 attribute [simp] IsCutFree.identity IsCutFree.verum
 
@@ -35,7 +36,7 @@ variable {Γ Δ : Sequent L}
   · intro h
     refine h.rec
       (motive := fun {_} d _ ↦ match d with | .or d => IsCutFree d | _ => True)
-      ?_ ?_ ?_ ?_ ?_ ?_ ?_
+      ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_
     all_goals simp_all
   · exact .or
 
@@ -46,7 +47,7 @@ variable {Γ Δ : Sequent L}
     refine h.rec
       (motive := fun {_} d _ ↦
         match d with | .and dφ dψ => IsCutFree dφ ∧ IsCutFree dψ | _ => True)
-      ?_ ?_ ?_ ?_ ?_ ?_ ?_
+      ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_
     all_goals simp_all
   · rintro ⟨hφ, hψ⟩
     exact hφ.and hψ
@@ -56,7 +57,7 @@ variable {Γ Δ : Sequent L}
   constructor
   · intro h
     refine h.rec (motive := fun {_} d _ ↦ match d with | .all d => IsCutFree d | _ => True)
-      ?_ ?_ ?_ ?_ ?_ ?_ ?_
+      ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_
     all_goals simp_all
   · exact .all
 
@@ -65,19 +66,29 @@ variable {Γ Δ : Sequent L}
   constructor
   · intro h
     refine h.rec (motive := fun {_} d _ ↦ match d with | .exs d => IsCutFree d | _ => True)
-      ?_ ?_ ?_ ?_ ?_ ?_ ?_
+      ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_
     all_goals simp_all
   · exact .exs t
 
-@[simp] lemma isCutFree_contraction_iff {d : ⊢ᴸᴷ¹ Δ} {ss : Δ ⊆ Γ} :
-    IsCutFree (d.contraction ss) ↔ IsCutFree d := by
+@[simp] lemma isCutFree_contraction_iff {d : ⊢ᴸᴷ¹ Γ + ⦃φ, φ⦄} :
+    IsCutFree d.contraction ↔ IsCutFree d := by
   constructor
   · intro h
     refine h.rec
-      (motive := fun {_} d _ ↦ match d with | .contraction d _ => IsCutFree d | _ => True)
-      ?_ ?_ ?_ ?_ ?_ ?_ ?_
+      (motive := fun {_} d _ ↦ match d with | .contraction d => IsCutFree d | _ => True)
+      ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_
     all_goals simp_all
-  · exact .contraction _
+  · exact .contraction
+
+@[simp] lemma isCutFree_weakening_iff {d : ⊢ᴸᴷ¹ Γ} :
+    IsCutFree (d.weakening (φ := φ)) ↔ IsCutFree d := by
+  constructor;
+  . intro h;
+    refine h.rec
+      (motive := fun {_} d _ ↦ match d with | .weakening d => IsCutFree d | _ => True)
+      ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_;
+    all_goals simp_all;
+  . exact .weakening;
 
 @[simp] lemma IsCutFree.cast {d : ⊢ᴸᴷ¹ Γ} {e : Γ = Δ} :
     IsCutFree (.cast d e) ↔ IsCutFree d := by rcases e; rfl
@@ -87,7 +98,7 @@ variable {Γ Δ : Sequent L}
   intro h
   refine h.rec
     (motive := fun {_} d _ ↦ match d with | .cut _ _ => False | _ => True)
-    ?_ ?_ ?_ ?_ ?_ ?_ ?_
+    ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_
   all_goals simp
 
 set_option backward.isDefEq.respectTransparency false in

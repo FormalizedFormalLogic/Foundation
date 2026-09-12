@@ -15,27 +15,44 @@ Human contributors need not follow this document to the letter — treat it as a
 
 Overall: construct terms directly when the type determines them, and hand the residue to automation — rather than opening holes in the goal and filling them one by one.
 
-🤖 **Prefer direct term construction over `refine … ?_`.**
+🤖 **Avoid `refine … ?_`.** Reach for it only when nothing else expresses the step.
+
+When the components are already at hand, build the term directly:
 
 ```lean
 -- Avoid:
 refine ⟨n, ?_, ?_⟩
-· exact hn
-· exact hn.le
+. exact hn
+. exact hn.le
 
 -- Prefer:
 exact ⟨n, hn, hn.le⟩
 ```
 
-Reserve `refine` for components that genuinely need tactic work — and never write bound variables inside it:
+When they still need tactic work, introduce the witness with `use`, split what remains with `and_intros`, and discharge each goal under its own focus dot:
 
 ```lean
 -- Avoid:
-refine ⟨hd, fun x hx => ?_⟩
+refine ⟨f x, hf x, ?_⟩;
 
 -- Prefer:
-refine ⟨hd, ?_⟩
-intro x hx
+use f x;
+and_intros;
+. exact hf x;
+. simpa using hg x;
+```
+
+Never write bound variables inside `refine` — introduce them with `intro` as a tactic:
+
+```lean
+-- Avoid:
+refine ⟨hd, fun x hx => ?_⟩;
+
+-- Prefer:
+and_intros;
+. exact hd;
+. intro x hx;
+  …
 ```
 
 **Use `obtain` actively when extracting witnesses from existential hypotheses** (`obtain ⟨n, hn⟩ := exists_bound f`). For other pattern decomposition, `rcases`/`rintro` are equally fine.
@@ -54,17 +71,35 @@ theorem Even.add_two : Even n → Even (n + 2)
 
 ```lean
 -- Prefer:
-have h₁ : P ↔ Q := …
-have h₂ : Q ↔ R := …
-grind
+have h₁ : P ↔ Q := …;
+have h₂ : Q ↔ R := …;
+grind;
 
 -- Avoid:
-exact step1.trans <| step2.trans <| step3.trans step4
+exact step1.trans <| step2.trans <| step3.trans step4;
 ```
 
 🤖 **Keep proofs short; extract lemmas.** A tactic block beyond roughly thirty lines should be split: promote intermediate `have`s to stand-alone (possibly `private`) lemmas.
 
 🤖 **Do not bundle lemmas into a `structure … : Prop` for convenience.** It is justified only when three or more properties must travel together as the hypothesis of a mutual or nested induction; otherwise state separate lemmas.
+
+## Tactic layout
+
+🤖 **End tactic lines with `;`.** A line that is a complete tactic invocation carries a trailing `;`, so where one tactic ends is visible without tracing the indentation:
+
+```lean
+theorem foo (h : ∃ n, P n) : Q := by
+  obtain ⟨n, hn⟩ := h;
+  induction n with
+  | zero => simpa using hn;
+  | succ n ih =>
+    rw [succ_eq];
+    exact ih hn;
+```
+
+Do not add it to a line ending in `:= by`, `with`, or an opening bracket; to the non-final lines of a tactic that wraps across several lines; to a case header that opens a multi-line block (`| succ n ih =>`); to term-mode code, including equation-compiler branches; or to a tactic embedded in a term (`(by simp)`).
+
+**Focus dots are `.`, not `·`.** Both parse; the ASCII form is the house one.
 
 ## Naming intermediate steps
 
@@ -101,7 +136,25 @@ Citations go at the end of the docstring as a list, one line per BibTeX key, of 
 - [VS83, Theorem 10, Theorem 11(b), Theorem 11(c)]
 ```
 
-🤖 **For proofs submitted by AI agents, citations are mandatory**: every non-trivial definition and theorem must point to its source in the literature. If none exists (folklore, a routine technical bridge, original to this formalization), the docstring must say so and briefly explain why — never silently omit it.
+Cite definitions (`def`, `inductive`, `structure`, `abbrev`) and `theorem`s. Supporting lemmas do not each need a citation — a source repeated on every small closure or rewriting lemma is noise, not attribution.
+
+The alternative placement is a `## References` section at the end of the module docstring, collecting the keys the module draws on:
+
+```
+/-!
+# Strict arithmetical hierarchy
+
+…
+
+## References
+
+- [HP98, 0.30, Lemma I.1.69]
+-/
+```
+
+Prefer that form when the declarations themselves carry no docstrings.
+
+🤖 **For proofs submitted by AI agents, citations are mandatory** at the granularity above: every non-trivial definition and theorem must be traceable to its source in the literature, whether through its own docstring or through the module's `## References`. If no source exists (folklore, a routine technical bridge, original to this formalization), say so and briefly explain why — never silently omit it.
 
 ### Stale comments and planning artifacts
 

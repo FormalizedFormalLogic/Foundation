@@ -179,9 +179,12 @@ theorem sound {Γ : LJ.Sequent L} {Ξ : LJ.Head L} :
       obtain ⟨hΓ, hΔ⟩ := Multiset.forall_mem_add.mp hΓ
       exact sound d w fv hfv <| Multiset.forall_mem_add.mpr
         ⟨hΔ, by simpa using sound dφ w fv hfv hΓ⟩
-  | .contraction (Ξ := Ξ) d hΔ hΞ, w, fv, hfv, hΓ => by
-      have hd := sound d w fv hfv fun φ hφ ↦ hΓ φ (hΔ hφ)
-      cases Ξ <;> cases hΞ <;> simp_all [ForcesHead]
+  | .contraction d, w, fv, hfv, hΓ =>
+      sound d w fv hfv (by simpa only [Multiset.forall_mem_add,
+        Multiset.forall_mem_atom, and_self] using hΓ)
+  | .weakening d, w, fv, hfv, hΓ =>
+      sound d w fv hfv fun φ hφ ↦ hΓ φ (Multiset.mem_add.mpr (Or.inl hφ))
+  | .weakeningRight d, w, fv, hfv, hΓ => (sound d w fv hfv hΓ).elim
   | .verum, _, _, _, _ => by simp [ForcesHead]
   | .falsum, _, _, _, hΓ => hΓ (⊥ : Propositionᵢ L) (by simp)
   | .positiveImply d, w, fv, hfv, hΓ => by

@@ -46,9 +46,12 @@ inductive Derivation : Sequent L → Head L → Type _
 /-- Cut rule -/
 | cut {φ : Propositionᵢ L} {Γ Δ Ξ} :
   Derivation Γ φ → Derivation (Δ + ⦃φ⦄) Ξ → Derivation (Γ + Δ) Ξ
-/-- Structural rule -/
-| contraction {Γ Γ' : Multiset (Propositionᵢ L)} {Ξ Ξ' : Option (Propositionᵢ L)} :
-  Derivation Γ Ξ → Γ ⊆ Γ' → Ξ ⊆ Ξ' → Derivation Γ' Ξ'
+/-- Left contraction -/
+| contraction : Derivation (Γ + ⦃φ, φ⦄) Ξ → Derivation (Γ + ⦃φ⦄) Ξ
+/-- Left weakening -/
+| weakening : Derivation Γ Ξ → Derivation (Γ + ⦃φ⦄) Ξ
+/-- Right weakening -/
+| weakeningRight : Derivation Γ none → Derivation Γ (some φ)
 /-- Positive introduction of verum -/
 | verum : Derivation 0 (some ⊤)
 /-- Negative introduction of falsum -/
@@ -98,14 +101,50 @@ open Rewriting LawfulSyntacticRewriting
 def cast (d : Γ ⊢ᴸᴶ¹ Ξ) (seq : Γ = Δ := by abel) (heq : Ξ = Λ := by simp) :
     Δ ⊢ᴸᴶ¹ Λ := seq ▸ heq ▸ d
 
+instance : Structural (fun Γ ↦ Γ ⊢ᴸᴶ¹ Ξ) where
+  weakening d := d.weakening
+  contraction d := d.contraction
+
+def traversal [L.DecidableEq] {Γ : Sequent L} {Ξ : Head L} :
+    Γ ⊢ᴸᴶ¹ Ξ → Γ.Traversal
+  | identity R v => .atom (Semiformulaᵢ.rel R v)
+  | cut d e => d.traversal.add e.traversal.remove
+  | contraction (φ := φ) d => (d.traversal.cast (by abel)).remove (a := φ)
+  | weakening (φ := φ) d => d.traversal.succ φ
+  | weakeningRight d => d.traversal
+  | verum => .zero
+  | falsum => .atom ⊥
+  | positiveImply d => d.traversal.remove
+  | negativeImply (φ := φ) (ψ := ψ) d e =>
+      (d.traversal.add e.traversal.remove).succ (φ 🡒 ψ)
+  | positiveAnd d _ => d.traversal
+  | negativeAnd (φ := φ) (ψ := ψ) d =>
+      ((d.traversal.cast (by abel)).remove (a := ψ)).remove (a := φ) |>.succ (φ ⋏ ψ)
+  | positiveOrLeft d => d.traversal
+  | positiveOrRight d => d.traversal
+  | negativeOr (φ := φ) (ψ := ψ) d _ => d.traversal.remove.succ (φ ⋎ ψ)
+  | positiveForall d =>
+      (d.traversal.map (Rew.rewriteMap Nat.pred ▹ ·)).cast (by
+        simp [Rewriting.shifts, Multiset.map_map, Rewriting.rewriteMap_pred_shift])
+  | negativeForall (φ := φ) d => d.traversal.remove.succ (∀¹ φ)
+  | positiveExists d => d.traversal
+  | negativeExists (φ := φ) d =>
+      ((d.traversal.remove.map (Rew.rewriteMap Nat.pred ▹ ·)).cast (by
+        simp [Rewriting.shifts, Multiset.map_map, Rewriting.rewriteMap_pred_shift])).succ (∃¹ φ)
+
+def contra [L.DecidableEq] (d : Γ ⊢ᴸᴶ¹ Ξ) (t : Δ.Traversal)
+    (h : Γ ⊆ Δ := by simp) : Δ ⊢ᴸᴶ¹ Ξ :=
+  Structural.ofSubset (F := Propositionᵢ L)
+    (𝔇 := fun Γ ↦ Γ ⊢ᴸᴶ¹ Ξ) (Γ := Γ) (Δ := Δ) d.traversal t d h
+
 def eta : (φ : Propositionᵢ L) → ⦃φ⦄ ⊢ᴸᴶ¹ φ
   | .rel R v => identity R v
-  |        ⊥ => contraction falsum (by simp) (by simp)
+  |        ⊥ => falsum.weakeningRight
   |    φ ⋏ ψ => positiveAnd
       (cast (negativeAnd (Γ := 0) (φ := φ) (ψ := ψ) (Ξ := φ) <|
-        contraction (eta φ) (by simp) (by simp)))
+        ((eta φ).weakening (φ := ψ)).cast (by simp)))
       (cast (negativeAnd (Γ := 0) (φ := φ) (ψ := ψ) (Ξ := ψ) <|
-        contraction (eta ψ) (by simp) (by simp)))
+        ((eta ψ).weakening (φ := φ)).cast (by simp [add_comm])))
   |    φ ⋎ ψ => negativeOr (Γ := 0) (φ := φ) (ψ := ψ) (Ξ := φ ⋎ ψ)
       (cast (positiveOrLeft (ψ := ψ) (eta φ)))
       (cast (positiveOrRight (φ := φ) (eta ψ)))
@@ -121,8 +160,8 @@ def eta : (φ : Propositionᵢ L) → ⦃φ⦄ ⊢ᴸᴶ¹ φ
         cast (eta (Rewriting.free φ)) (by simp) (by simp))
   termination_by φ => φ.complexity
 
-def assumption {φ : Propositionᵢ L} (h : φ ∈ Γ) : Γ ⊢ᴸᴶ¹ φ :=
-  contraction (eta φ) (by simpa using h) (by simp)
+def assumption [L.DecidableEq] {φ : Propositionᵢ L} (t : Γ.Traversal)
+    (h : φ ∈ Γ) : Γ ⊢ᴸᴶ¹ φ := (eta φ).contra t (by simpa using h)
 
 def positiveNeg {φ : Propositionᵢ L} (d : Γ + ⦃φ⦄ ⊢ᴸᴶ¹ (⊥ : Propositionᵢ L)) :
     Γ ⊢ᴸᴶ¹ (∼φ : Propositionᵢ L) :=
@@ -133,15 +172,17 @@ def negativeNeg {φ : Propositionᵢ L} (d : Γ ⊢ᴸᴶ¹ φ) :
   cast (seq := by rw [add_zero]; rfl) <| negativeImply (φ := φ) (ψ := ⊥) (Γ := Γ) (Δ := 0) (Ξ := none) d <|
     cast falsum (by simp) (by rfl)
 
-def modusPonens {φ ψ : Propositionᵢ L} (di : Γ ⊢ᴸᴶ¹ φ 🡒 ψ) (dφ : Γ ⊢ᴸᴶ¹ φ) :
+def modusPonens [L.DecidableEq] {φ ψ : Propositionᵢ L} (di : Γ ⊢ᴸᴶ¹ φ 🡒 ψ) (dφ : Γ ⊢ᴸᴶ¹ φ) :
     Γ ⊢ᴸᴶ¹ ψ :=
-  contraction
-    (cut (φ := φ 🡒 ψ) (Γ := Γ) (Δ := Γ) (Ξ := ψ) di <| cast (seq := by simp) <|
+  have d : Γ + Γ ⊢ᴸᴶ¹ ψ :=
+    cut (φ := φ 🡒 ψ) (Γ := Γ) (Δ := Γ) (Ξ := ψ) di <| cast (seq := by simp) <|
       negativeImply (φ := φ) (ψ := ψ) (Γ := Γ) (Δ := 0) (Ξ := ψ)
-        dφ (cast (eta ψ) (by simp) (by simp)))
-    (by intro θ hθ; simp_all) (by simp)
+        dφ (cast (eta ψ) (by simp) (by simp))
+  cast (Structural.contractMany (F := Propositionᵢ L)
+    (𝔇 := fun Δ ↦ Δ ⊢ᴸᴶ¹ (some ψ)) (Δ := 0) di.traversal
+    (cast d (by simp) (by rfl))) (by simp)
 
-def negElim {φ : Propositionᵢ L} (dn : Γ ⊢ᴸᴶ¹ (∼φ : Propositionᵢ L))
+def negElim [L.DecidableEq] {φ : Propositionᵢ L} (dn : Γ ⊢ᴸᴶ¹ (∼φ : Propositionᵢ L))
     (dφ : Γ ⊢ᴸᴶ¹ φ) : Γ ⊢ᴸᴶ¹ (⊥ : Propositionᵢ L) :=
   modusPonens dn dφ
 
@@ -150,15 +191,15 @@ def cutOne {φ : Propositionᵢ L} (dφ : Γ ⊢ᴸᴶ¹ φ) (d : ⦃φ⦄ ⊢�
 
 def andLeft {φ ψ : Propositionᵢ L} (d : Γ ⊢ᴸᴶ¹ φ ⋏ ψ) : Γ ⊢ᴸᴶ¹ φ :=
   cutOne d <| cast <| negativeAnd (Γ := 0) (φ := φ) (ψ := ψ) (Ξ := φ) <|
-    assumption (by simp)
+    ((eta φ).weakening (φ := ψ)).cast (by simp)
 
 def andRight {φ ψ : Propositionᵢ L} (d : Γ ⊢ᴸᴶ¹ φ ⋏ ψ) : Γ ⊢ᴸᴶ¹ ψ :=
   cutOne d <| cast <| negativeAnd (Γ := 0) (φ := φ) (ψ := ψ) (Ξ := ψ) <|
-    assumption (by simp)
+    ((eta ψ).weakening (φ := φ)).cast (by simp [add_comm])
 
 def specialize {φ : Semipropositionᵢ L 1} (d : Γ ⊢ᴸᴶ¹ ∀¹ φ) (t : Term L ℕ) : Γ ⊢ᴸᴶ¹ φ/[t] :=
   cutOne d <| cast <| negativeForall (Γ := 0) (Ξ := φ/[t]) (φ := φ) (t := t) <|
-    assumption (by simp)
+    (eta (φ/[t])).cast (by simp)
 
 def rewrite (f : ℕ → SyntacticTerm L) {Γ : Sequent L} {Ξ : Head L} : Γ ⊢ᴸᴶ¹ Ξ →
     Γ.map (Rew.rewrite f ▹ ·) ⊢ᴸᴶ¹ Head.rewrite f Ξ
@@ -168,9 +209,17 @@ def rewrite (f : ℕ → SyntacticTerm L) {Γ : Sequent L} {Ξ : Head L} : Γ �
       (Γ := Γ.map (Rew.rewrite f ▹ ·)) (Δ := Δ.map (Rew.rewrite f ▹ ·))
       (Ξ := Head.rewrite f Ξ)
       ((rewrite f dφ).cast) ((rewrite f d).cast (by simp))).cast (by simp)
-  | contraction d hΓ hΞ =>
-    (rewrite f d).contraction (Multiset.map_subset_map hΓ) (by
-      cases hΞ <;> simp [Head.rewrite])
+  | contraction (Γ := Γ) (φ := φ) (Ξ := Ξ) d =>
+      (contraction (Γ := Γ.map (Rew.rewrite f ▹ ·)) (φ := Rew.rewrite f ▹ φ)
+        (Ξ := Head.rewrite f Ξ)
+        ((rewrite f d).cast (by simp) (by cases Ξ <;> rfl))).cast
+        (by simp) (by cases Ξ <;> rfl)
+  | weakening (Γ := Γ) (φ := φ) (Ξ := Ξ) d =>
+      (weakening (Γ := Γ.map (Rew.rewrite f ▹ ·)) (φ := Rew.rewrite f ▹ φ)
+        (Ξ := Head.rewrite f Ξ) (rewrite f d)).cast
+        (by simp) (by cases Ξ <;> rfl)
+  | weakeningRight (φ := φ) d =>
+      ((rewrite f d).weakeningRight (φ := Rew.rewrite f ▹ φ)).cast (by simp)
   | verum => verum
   | falsum => falsum
   | positiveImply (Γ := Γ) (φ := φ) (ψ := ψ) d =>
@@ -221,23 +270,25 @@ def rewrite (f : ℕ → SyntacticTerm L) {Γ : Sequent L} {Ξ : Head L} : Γ �
       |>.cast (by simp [Rew.q_rewrite])
 
 /-- Height of an LJ derivation, with initial rules at height zero (standard definition). -/
-def height : {Γ : Sequent L} → {Ξ : Head L} → Γ ⊢ᴸᴶ¹ Ξ → ℕ
-  | _, _, .identity _ _ => 0
-  | _, _, .cut d₁ d₂ => max (height d₁) (height d₂) + 1
-  | _, _, .contraction d _ _ => height d + 1
-  | _, _, .verum => 0
-  | _, _, .falsum => 0
-  | _, _, .positiveImply d => height d + 1
-  | _, _, .negativeImply d₁ d₂ => max (height d₁) (height d₂) + 1
-  | _, _, .positiveAnd d₁ d₂ => max (height d₁) (height d₂) + 1
-  | _, _, .negativeAnd d => height d + 1
-  | _, _, .positiveOrLeft d => height d + 1
-  | _, _, .positiveOrRight d => height d + 1
-  | _, _, .negativeOr d₁ d₂ => max (height d₁) (height d₂) + 1
-  | _, _, .positiveForall d => height d + 1
-  | _, _, .negativeForall d => height d + 1
-  | _, _, .positiveExists d => height d + 1
-  | _, _, .negativeExists d => height d + 1
+def height {Γ : Sequent L} {Ξ : Head L} : Γ ⊢ᴸᴶ¹ Ξ → ℕ
+  | identity _ _ => 0
+  | cut d₁ d₂ => max (height d₁) (height d₂) + 1
+  | contraction d => height d + 1
+  | weakening d => height d + 1
+  | weakeningRight d => height d + 1
+  | verum => 0
+  | falsum => 0
+  | positiveImply d => height d + 1
+  | negativeImply d₁ d₂ => max (height d₁) (height d₂) + 1
+  | positiveAnd d₁ d₂ => max (height d₁) (height d₂) + 1
+  | negativeAnd d => height d + 1
+  | positiveOrLeft d => height d + 1
+  | positiveOrRight d => height d + 1
+  | negativeOr d₁ d₂ => max (height d₁) (height d₂) + 1
+  | positiveForall d => height d + 1
+  | negativeForall d => height d + 1
+  | positiveExists d => height d + 1
+  | negativeExists d => height d + 1
 
 /-- Transport along sequent equalities preserves height (routine). -/
 @[simp] lemma height_cast {Γ Δ : Sequent L} {Ξ Λ : Head L}
@@ -263,55 +314,42 @@ protected def map (d : Γ ⊢ᴸᴶ¹ Ξ) (f : ℕ → ℕ) :
 protected def shift (d : Γ ⊢ᴸᴶ¹ Ξ) : Γ⁺ ⊢ᴸᴶ¹ Ξ.shift :=
   cast (d.map Nat.succ) (by rfl) (by cases Ξ <;> rfl)
 
-def weakening (d : Γ ⊢ᴸᴶ¹ Ξ) (hΓ : Γ ⊆ Δ) : Δ ⊢ᴸᴶ¹ Ξ :=
-  contraction d hΓ (by cases Ξ <;> simp)
-
 def dni {φ : Propositionᵢ L} (d : Γ ⊢ᴸᴶ¹ φ) : Γ ⊢ᴸᴶ¹ (∼∼φ : Propositionᵢ L) :=
-  positiveNeg <| contraction d.negativeNeg (by simp) (by simp)
+  positiveNeg d.negativeNeg.weakeningRight
 
 /-- Contraposition for singleton derivations (standard intuitionistic reasoning). -/
 def contrapose {φ ψ : Propositionᵢ L} (d : ⦃φ⦄ ⊢ᴸᴶ¹ ψ) :
     ⦃∼ψ⦄ ⊢ᴸᴶ¹ (∼φ : Propositionᵢ L) :=
-  positiveNeg <| negElim (assumption (by simp [Semiformulaᵢ.neg_def])) <|
-    cutOne (assumption (by simp)) d
+  positiveNeg <| d.negativeNeg.weakeningRight.cast (heq := rfl)
 
 /-- Double negation preserves derivability, by twice applying contraposition (folklore). -/
 def doubleNegationMap {φ ψ : Propositionᵢ L} (d : ⦃φ⦄ ⊢ᴸᴶ¹ ψ) :
     ⦃∼∼φ⦄ ⊢ᴸᴶ¹ (∼∼ψ : Propositionᵢ L) := d.contrapose.contrapose
 
-def dneOfNegative [L.DecidableEq] : {φ : Propositionᵢ L} → φ.IsNegative → ⦃∼∼φ⦄ ⊢ᴸᴶ¹ φ
-  | ⊥, _ => negElim (eta _) <| contraction
-      (positiveNeg (Γ := 0) (φ := ⊥) (assumption (by simp))) (by simp) (by simp)
+def dneOfNegative : {φ : Propositionᵢ L} → φ.IsNegative → ⦃∼∼φ⦄ ⊢ᴸᴶ¹ φ
+  | ⊥, _ =>
+      ((positiveNeg (Γ := 0) (φ := ⊥) ((eta ⊥).cast (by simp))).negativeNeg.weakeningRight).cast (heq := rfl)
   | φ ⋏ ψ, h =>
     have hn : φ.IsNegative ∧ ψ.IsNegative := by simpa using h
     positiveAnd
       (cutOne (doubleNegationMap (andLeft (eta _))) (dneOfNegative hn.1))
       (cutOne (doubleNegationMap (andRight (eta _))) (dneOfNegative hn.2))
   | φ 🡒 ψ, h => by
-    have hnψ : ψ.IsNegative := by simpa using h
-    have ihψ := dneOfNegative hnψ
-    let N : Sequent L := ⦃∼∼(φ 🡒 ψ)⦄
-    apply positiveImply (Γ := N) (φ := φ) (ψ := ψ)
-    let C : Sequent L := N + ⦃φ⦄
-    have dnnψ : C ⊢ᴸᴶ¹ ↑(∼∼ψ) := positiveNeg (Γ := C) <| by
-      let D : Sequent L := C + ⦃∼ψ⦄
-      have dnImp : D ⊢ᴸᴶ¹ ∼(φ 🡒 ψ) := positiveNeg (Γ := D) <| by
-        let E : Sequent L := D + ⦃φ 🡒 ψ⦄
-        have dψ : E ⊢ᴸᴶ¹ ψ := modusPonens
-          (assumption (φ := φ 🡒 ψ) (by simp [E]))
-          (assumption (φ := φ) (by simp [E, D, C]))
-        exact negElim
-          (assumption (φ := ∼ψ) (by simp [D, Semiformulaᵢ.neg_def])) dψ
-      exact negElim
-        (assumption (φ := ∼∼(φ 🡒 ψ)) (by simp [C, N, Semiformulaᵢ.neg_def])) dnImp
-    exact cutOne dnnψ ihψ
+    have ihψ := dneOfNegative (φ := ψ) (by simpa using h);
+    let d₁ : ⦃φ⦄ + ⦃φ 🡒 ψ⦄ ⊢ᴸᴶ¹ ψ :=
+      negativeImply (Δ := 0) (eta φ) ((eta ψ).cast (by simp) rfl) |>.cast (heq := rfl);
+    let d₂ : ⦃φ, ∼ψ⦄ ⊢ᴸᴶ¹ (∼(φ 🡒 ψ) : Propositionᵢ L) :=
+      positiveNeg <| d₁.negativeNeg.weakeningRight.cast (heq := rfl);
+    let d₃ : ⦃∼∼(φ 🡒 ψ), φ⦄ ⊢ᴸᴶ¹ (∼∼ψ : Propositionᵢ L) :=
+      positiveNeg <| d₂.negativeNeg.weakeningRight.cast (heq := rfl);
+    exact positiveImply (cutOne d₃ ihψ);
   | ∀¹ φ, h => positiveForall <| cutOne
       (cast (doubleNegationMap (specialize (eta (∀¹ Rewriting.shift φ)) &0))
         (by simp [Semiformulaᵢ.neg_def]) (by simp))
       (dneOfNegative (by simpa using h))
   termination_by φ _ => φ.complexity
 
-def ofDNOfNegative [L.DecidableEq] {φ : Propositionᵢ L} (d : Γ ⊢ᴸᴶ¹ (∼∼φ : Propositionᵢ L))
+def ofDNOfNegative {φ : Propositionᵢ L} (d : Γ ⊢ᴸᴶ¹ (∼∼φ : Propositionᵢ L))
     (h : φ.IsNegative) : Γ ⊢ᴸᴶ¹ φ := cutOne d (dneOfNegative h)
 
 /-- Mutual LJ derivability from singleton antecedents. -/
@@ -346,10 +384,10 @@ def all {φ ψ : Semipropositionᵢ L 1}
       (cast (specialize (eta (∀¹ Rewriting.shift φ)) &0) (by simp) (by simp)) d
   exact ⟨lift d.1, lift d.2⟩
 
-def dne [L.DecidableEq] (h : φ.IsNegative) : InterDerivation L (∼∼φ) φ :=
+def dne (h : φ.IsNegative) : InterDerivation L (∼∼φ) φ :=
   ⟨dneOfNegative h, dni (eta φ)⟩
 
-def iffnegOfNegIff [L.DecidableEq] (h : φ.IsNegative)
+def iffnegOfNegIff (h : φ.IsNegative)
     (d : InterDerivation L (∼φ) ψ) : InterDerivation L φ (∼ψ) :=
   (dne h).symm.trans d.neg
 
@@ -409,14 +447,17 @@ def deduct : adjoin φ T ⊢! ψ → T ⊢! φ 🡒 ψ
       simpa [hθφ] using hΓ θ hθΓ,
     LJ.Derivation.cast (heq := by rfl) <|
       LJ.Derivation.positiveImply (φ := (φ : Propositionᵢ L)) (ψ := (ψ : Propositionᵢ L)) <|
-      LJ.Derivation.contraction (Ξ' := (ψ : Propositionᵢ L)) d (by
+      LJ.Derivation.contra d
+        (((d.traversal.filter (· ≠ (φ : Propositionᵢ L))).cast (by
+          simp [Multiset.filter_map, Rewriting.emb_injective.eq_iff])).succ
+          (φ : Propositionᵢ L)) (by
         intro θ hθ
         rcases Multiset.mem_map.mp hθ with ⟨χ, hχ, rfl⟩
         by_cases h : χ = φ
         · subst χ
           simp
         · exact Multiset.mem_add.mpr <| Or.inl <|
-            Multiset.mem_map_of_mem Rewriting.emb <| Multiset.mem_filter_of_mem hχ h) (by simp)⟩
+            Multiset.mem_map_of_mem Rewriting.emb <| Multiset.mem_filter_of_mem hχ h)⟩
 
 def deductInv : T ⊢! φ 🡒 ψ → adjoin φ T ⊢! ψ
   | ⟨Γ, hΓ, d⟩ =>

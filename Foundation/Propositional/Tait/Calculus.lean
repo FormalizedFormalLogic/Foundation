@@ -12,7 +12,8 @@ abbrev Sequent (α : Type*) := Multiset (NNFormula α)
 inductive Derivation : Sequent α → Type _
 | identity (a : α) : Derivation ⦃NNFormula.atom a, NNFormula.natom a⦄
 | cut : Derivation (Γ + ⦃φ⦄) → Derivation (Δ + ⦃∼φ⦄) → Derivation (Γ + Δ)
-| wk : Derivation Δ → Δ ⊆ Γ → Derivation Γ
+| contraction : Derivation (Γ + ⦃φ, φ⦄) → Derivation (Γ + ⦃φ⦄)
+| weakening : Derivation Γ → Derivation (Γ + ⦃φ⦄)
 | verum : Derivation ⦃⊤⦄
 | or : Derivation (Γ + ⦃φ, ψ⦄) → Derivation (Γ + ⦃φ ⋎ ψ⦄)
 | and : Derivation (Γ + ⦃φ⦄) → Derivation (Γ + ⦃ψ⦄) → Derivation (Γ + ⦃φ ⋏ ψ⦄)
@@ -26,7 +27,7 @@ variable {T U : Theory α} {Δ Δ₁ Δ₂ Γ : Sequent α}
 def height {Δ : Sequent α} : ⊢ᴸᴷ⁰ Δ → ℕ
   |identity _ => 0
   | cut dp dn => max dp.height dn.height + 1
-  |    wk d _ => d.height + 1
+  | contraction d | weakening d => d.height + 1
   |     verum => 0
   |      or d => d.height + 1
   | and dp dq => max (height dp) (height dq) + 1
@@ -36,40 +37,53 @@ protected abbrev cast (d : ⊢ᴸᴷ⁰ Δ) (e : Δ = Γ := by abel) : ⊢ᴸᴷ
 @[simp] lemma height_cast (d : ⊢ᴸᴷ⁰ Δ) (e : Δ = Γ) : height (Derivation.cast d e) = height d := by
   rcases e with rfl; simp [Derivation.cast]
 
-def weakening (d : ⊢ᴸᴷ⁰ Δ) (h : Δ ⊆ Γ := by simp) : ⊢ᴸᴷ⁰ Γ := wk d h
+instance : Structural (Derivation (α := α)) where
+  weakening d := d.weakening
+  contraction d := d.contraction
 
-def top (h : ⊤ ∈ Δ := by simp) : ⊢ᴸᴷ⁰ Δ := verum.wk (by simp [h])
+/-- Enumerates the end sequent by recursion on the local inference rules.
+This is a routine syntactic construction. -/
+def traversal [DecidableEq α] {Γ : Sequent α} : ⊢ᴸᴷ⁰ Γ → Γ.Traversal
+  | identity a => (Multiset.Traversal.atom (NNFormula.atom a)).succ (NNFormula.natom a)
+  | cut d dn => d.traversal.remove.add dn.traversal.remove
+  | contraction (φ := φ) d => (d.traversal.cast (by abel)).remove (a := φ)
+  | weakening (φ := φ) d => d.traversal.succ φ
+  | verum => .atom ⊤
+  | or (φ := φ) (ψ := ψ) d =>
+      ((d.traversal.cast (by abel)).remove (a := ψ)).remove (a := φ) |>.succ (φ ⋎ ψ)
+  | and (φ := φ) (ψ := ψ) d _ => d.traversal.remove.succ (φ ⋏ ψ)
 
-def identity' (a : α) (hpos : .atom a ∈ Δ := by simp) (hneg : .natom a ∈ Δ := by simp) : ⊢ᴸᴷ⁰ Δ :=
-  (identity a).wk (by intro φ hφ; rcases Multiset.mem_add.mp hφ with hφ | hφ <;> simp_all)
+/-- Applies structural rules along supplied traversals (a routine derived rule). -/
+def contra [DecidableEq α] (d : ⊢ᴸᴷ⁰ Δ) (t : Γ.Traversal)
+    (h : Δ ⊆ Γ := by simp) : ⊢ᴸᴷ⁰ Γ :=
+  Structural.ofSubset d.traversal t d h
 
-def tensor {φ ψ} (dφ : ⊢ᴸᴷ⁰ Γ + ⦃φ⦄) (dψ : ⊢ᴸᴷ⁰ Δ + ⦃ψ⦄) :
-    ⊢ᴸᴷ⁰ Γ + Δ + ⦃φ ⋏ ψ⦄ :=
-  and
-    (dφ.weakening (by intro χ hχ; rcases Multiset.mem_add.mp hχ with hχ | hχ <;> simp_all))
-    (dψ.weakening (by intro χ hχ; rcases Multiset.mem_add.mp hχ with hχ | hχ <;> simp_all))
+/-- Combines two derivations by weakening and conjunction (a standard derived rule). -/
+def tensor {φ ψ} (tΓ : Γ.Traversal) (tΔ : Δ.Traversal)
+    (dφ : ⊢ᴸᴷ⁰ Γ + ⦃φ⦄) (dψ : ⊢ᴸᴷ⁰ Δ + ⦃ψ⦄) : ⊢ᴸᴷ⁰ Γ + Δ + ⦃φ ⋏ ψ⦄ :=
+  and (Structural.weakenMany tΔ dφ |>.cast) (Structural.weakenMany tΓ dψ |>.cast)
 
 /-- Identity expansion; the standard structural induction on propositional formulas (folklore). -/
 def eta : (φ : NNFormula α) → ⊢ᴸᴷ⁰ ⦃φ, ∼φ⦄
-  | .atom a | .natom a => identity' a
-  | ⊤ | ⊥ => top
+  | .atom a => identity a
+  | .natom a => (identity a).cast (by simp [add_comm])
+  | ⊤ => verum.weakening
+  | ⊥ => (verum.weakening (φ := ⊥)).cast (by simp [add_comm])
   | φ ⋏ ψ =>
     (or (Γ := ⦃φ ⋏ ψ⦄) (φ := ∼φ) (ψ := ∼ψ)
       (tensor (Γ := ⦃∼φ⦄) (Δ := ⦃∼ψ⦄) (φ := φ) (ψ := ψ)
-        (eta φ).cast (eta ψ).cast).cast).cast (by simp [add_comm])
+        (.atom _) (.atom _) (eta φ).cast (eta ψ).cast).cast).cast (by simp [add_comm])
   | φ ⋎ ψ =>
     (or (Γ := ⦃∼φ ⋏ ∼ψ⦄) (φ := φ) (ψ := ψ)
       (tensor (Γ := ⦃φ⦄) (Δ := ⦃ψ⦄) (φ := ∼φ) (ψ := ∼ψ)
-        (eta φ) (eta ψ)).cast).cast (by simp [add_comm])
-
-def close (φ : NNFormula α) (hp : φ ∈ Δ := by simp) (hn : ∼φ ∈ Δ := by simp) : ⊢ᴸᴷ⁰ Δ :=
-  eta φ |>.weakening (by intro ψ hψ; rcases Multiset.mem_add.mp hψ with hψ | hψ <;> simp_all)
+        (.atom _) (.atom _) (eta φ) (eta ψ)).cast).cast (by simp [add_comm])
 
 instance : OneSidedLK (Derivation (α := α)) where
+  weakening d := d.weakening
+  contraction d := d.contraction
   verum := verum
   and d₁ d₂ := d₁.and d₂
   or d := d.or
-  contraction d ss := d.wk ss
   identity φ := eta φ
 
 instance : OneSidedLK.Cut (Derivation (α := α)) where

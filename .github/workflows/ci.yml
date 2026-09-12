@@ -68,7 +68,7 @@ jobs:
         run: just axiom-audit
 
       - name: Build docs
-        run: lake build Foundation:docs
+        run: just docs
 
       - name: Generate zoo
         run: just zoo

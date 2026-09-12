@@ -1,7 +1,7 @@
 module
 
 public import Mathlib.Data.Multiset.AddSub
-public import Mathlib.Logic.Encodable.Basic
+public import Mathlib.Data.Multiset.Basic
 public import Mathlib.Tactic.Abel
 public import Mathlib.Algebra.Order.Group.Multiset
 
@@ -65,12 +65,6 @@ lemma add_map_subset_map_filter_add_atom [DecidableEq α]
     · exact mem_add.mpr <| Or.inl <| mem_add.mpr <| Or.inl <|
         mem_map.mpr ⟨c, mem_filter.mpr ⟨hc, h⟩, rfl⟩
 
-/-- Constructively extract a preimage from a mapped multiset over an encodable type. -/
-def getPreimage [Encodable α] [DecidableEq β] {f : α → β} {s : Multiset α}
-    (h : b ∈ s.map f) : {a : α // a ∈ s ∧ f a = b} := by
-  letI := Encodable.decidableEqOfEncodable α
-  exact Encodable.chooseX (mem_map.mp h)
-
 lemma map_subset_iff {s₁ s₂ : Multiset α} (f : α → β) (hf : Function.Injective f) :
     map f s₁ ⊆ map f s₂ ↔ s₁ ⊆ s₂ := by
   constructor
@@ -81,5 +75,124 @@ lemma map_subset_iff {s₁ s₂ : Multiset α} (f : α → β) (hf : Function.In
     rcases hf heq
     assumption
   · exact map_subset_map
+
+inductive Traversal {α : Type*} : Multiset α → Type _ where
+  | zero : Traversal 0
+  | succ (a : α) : Traversal s → Traversal (s + ⦃a⦄)
+
+namespace Traversal
+
+def cast {s t : Multiset α} (h : s = t) : Traversal s → Traversal t := fun t ↦ h ▸ t
+
+def atom (a : α) : Traversal ⦃a⦄ := zero.succ a
+
+def add (t₁ : Traversal s₁) (t₂ : Traversal s₂) : Traversal (s₁ + s₂) :=
+  match t₂ with
+  |     zero => t₁.cast (by simp)
+  | succ a t => (add t₁ t).succ a |>.cast (by abel)
+
+def toList {s : Multiset α} : Traversal s → List α
+  |     zero => []
+  | succ a t => a :: t.toList
+
+lemma toList_cast {s t : Multiset α} (h : s = t) (u : Traversal s) :
+    (u.cast h).toList = u.toList := by
+  cases h
+  rfl
+
+@[simp] lemma coe_toList {s : Multiset α} (t : Traversal s) : (t.toList : Multiset α) = s :=
+  match t with
+  |     zero => rfl
+  | succ a t => by
+    simp [toList, coe_toList t, add_atom_eq_cons, ←Multiset.cons_coe]
+
+def ofList : (l : List α) → Traversal (l : Multiset α)
+  |     [] => zero
+  | a :: t => (ofList t).succ a |>.cast (by simp [add_atom_eq_cons, ←Multiset.cons_coe])
+
+lemma toList_ofList (l : List α) : (ofList l).toList = l := by
+  induction l with
+  | nil => rfl
+  | cons a l ih =>
+    change (cast _ (succ a (ofList l))).toList = _
+    rw [toList_cast]
+    exact congrArg (List.cons a) ih
+
+private lemma cast_cast {s t u : Multiset α} (d : Traversal s) (h : s = t) (h' : t = u) :
+    (d.cast h).cast h' = d.cast (h.trans h') := by
+  cases h;
+  cases h';
+  rfl;
+
+private lemma cast_succ {s t : Multiset α} (d : Traversal s) (a : α) (h : s = t) :
+    (d.succ a).cast (congrArg (· + ⦃a⦄) h) = (d.cast h).succ a := by
+  cases h;
+  rfl;
+
+-- Unfold traversal indices when transporting the list reconstruction.
+set_option backward.isDefEq.respectTransparency false in
+lemma ofList_toList {s : Multiset α} (t : Traversal s) :
+    (ofList t.toList).cast (by simp) = t := by
+  induction t with
+  | zero => rfl
+  | succ a t ih =>
+    simp only [toList, ofList];
+    rw [cast_cast];
+    exact (cast_succ (ofList t.toList) a t.coe_toList).trans (congrArg (succ a) ih);
+
+def equiv {s : Multiset α} : Traversal s ≃ {l : List α // (l : Multiset α) = s} where
+  toFun t := ⟨t.toList, by simp⟩
+  invFun l := ofList l.1 |>.cast (by simp [l.2])
+  left_inv t := ofList_toList t
+  right_inv s := by
+    apply Subtype.ext
+    simp [toList_cast, toList_ofList]
+
+/-- Construct a traversal after applying a function to every element. -/
+def map (f : α → β) {s : Multiset α} (t : Traversal s) : Traversal (s.map f) :=
+  (ofList (t.toList.map f)).cast (by
+    simpa only [Multiset.map_coe] using congrArg (Multiset.map f) t.coe_toList)
+
+/-- Construct a traversal of the elements satisfying a decidable predicate. -/
+def filter (p : α → Prop) [DecidablePred p] {s : Multiset α} (t : Traversal s) :
+    Traversal (s.filter p) :=
+  (ofList (t.toList.filter p)).cast (by
+    simpa only [Multiset.filter_coe] using congrArg (Multiset.filter p) t.coe_toList)
+
+/-- Construct a traversal after removing one occurrence of an element. -/
+def erase [DecidableEq α] (a : α) {s : Multiset α} (t : Traversal s) :
+    Traversal (s.erase a) :=
+  (ofList (t.toList.erase a)).cast (by
+    simpa only [Multiset.coe_erase] using congrArg (fun u ↦ u.erase a) t.coe_toList)
+
+/-- Remove the distinguished occurrence from a traversal of an adjoined atom. -/
+def remove [DecidableEq α] {a : α} {s : Multiset α}
+    (t : Traversal (s + ⦃a⦄)) : Traversal s :=
+  (erase a t).cast (by
+    rw [atom_eq_singleton, erase_add_right_pos s (mem_singleton_self a)]
+    rw [erase_singleton, add_zero]
+    )
+
+/-- Constructively extract a preimage from a mapped traversal. -/
+def getPreimage [DecidableEq β] {f : α → β} {s : Multiset α}
+    (t : Traversal s) {b : β} (h : b ∈ s.map f) :
+    {a : α // a ∈ s ∧ f a = b} := by
+  have hex : ∃ a ∈ t.toList, f a = b := by
+    have h' : b ∈ Multiset.map f (t.toList : Multiset α) := by
+      rw [t.coe_toList]
+      exact h
+    obtain ⟨a, ha, hab⟩ := mem_map.mp h'
+    exact ⟨a, ha, hab⟩
+  let w : {a : α // a ∈ t.toList ∧ f a = b} :=
+    List.chooseX (fun a ↦ f a = b) t.toList hex
+  have hs : w.1 ∈ s := by
+    have hc := t.coe_toList
+    exact Eq.mp (congrArg (fun m : Multiset α => w.1 ∈ m) hc) w.2.1
+  exact ⟨w.1, hs, w.2.2⟩
+
+noncomputable instance inhabited {s : Multiset α} : Inhabited (Traversal s) :=
+  ⟨ofList (s.toList) |>.cast (by simp)⟩
+
+end Traversal
 
 end Multiset
