@@ -129,13 +129,6 @@ instance : Structural (Derivation (L := L)) where
   weakening d := d.weakening
   contraction d := d.contraction
 
-private lemma unshift_shift (φ : Proposition L) :
-    Rew.rewriteMap Nat.pred ▹ Rewriting.shift φ = φ := by
-  change Rew.rewriteMap Nat.pred ▹ (Rew.rewriteMap Nat.succ ▹ φ) = φ;
-  rw [← TransitiveRewriting.comp_app, Rew.rewriteMap_comp_rewriteMap];
-  change Rew.rewriteMap id ▹ φ = φ;
-  simp;
-
 /-- Enumerates the end sequent by recursion on the local inference rules.
 This is a routine syntactic construction. -/
 def traversal [L.DecidableEq] : {Γ : Sequent L} → (⊢ᴸᴷ¹ Γ) → Γ.Traversal
@@ -150,7 +143,7 @@ def traversal [L.DecidableEq] : {Γ : Sequent L} → (⊢ᴸᴷ¹ Γ) → Γ.Tra
   | _, and (φ := φ) (ψ := ψ) d _ => d.traversal.remove.succ (φ ⋏ ψ)
   | _, all (Γ := Γ) (φ := φ) d =>
       ((d.traversal.remove.map (Rew.rewriteMap Nat.pred ▹ ·)).cast (by
-        simp [Rewriting.shifts, Multiset.map_map, unshift_shift])).succ (∀¹ φ)
+        simp [Rewriting.shifts, Multiset.map_map, Rewriting.rewriteMap_pred_shift])).succ (∀¹ φ)
   | _, exs (φ := φ) d => d.traversal.remove.succ (∃¹ φ)
 
 /-- Applies structural rules along supplied traversals (a routine derived rule). -/
@@ -158,16 +151,6 @@ def contra [L.DecidableEq] (d : ⊢ᴸᴷ¹ Δ) (t : Γ.Traversal)
     (h : Δ ⊆ Γ := by simp) : ⊢ᴸᴷ¹ Γ :=
   Structural.ofSubset (F := Proposition L) (𝔇 := Derivation (L := L))
     (Γ := Δ) (Δ := Γ) (traversal (L := L) d) t d h
-
-def top [L.DecidableEq] (t : Δ.Traversal) (h : ⊤ ∈ Δ := by simp) : ⊢ᴸᴷ¹ Δ :=
-  contra (L := L) verum t (by simpa using h)
-
-def identity' [L.DecidableEq] (r : L.Rel k) (v) (t : Δ.Traversal)
-    (hpos : Semiformula.rel r v ∈ Δ := by simp)
-    (hneg : Semiformula.nrel r v ∈ Δ := by simp) : ⊢ᴸᴷ¹ Δ :=
-  contra (L := L) (identity r v) t <| by
-    intro φ hφ
-    rcases Multiset.mem_add.mp hφ with hφ | hφ <;> simp_all
 
 def tensor {φ ψ} (tΓ : Γ.Traversal) (tΔ : Δ.Traversal)
     (dφ : ⊢ᴸᴷ¹ Γ + ⦃φ⦄) (dψ : ⊢ᴸᴷ¹ Δ + ⦃ψ⦄) :
@@ -322,33 +305,6 @@ def generalizeByNewVar {φ : Semiproposition L 1} (hp : ¬φ.FVar? m)
     Derivation.cast (Derivation.map d (fun x ↦ if x = m then 0 else x + 1))
     (by simp [map_subst_eq_free φ hp, map_rewriteMap_eq_shifts Δ hΔ])
   exact all this
-
-def exOfInstances (v : List (SyntacticTerm L)) (φ : Semiproposition L 1)
-    (h : ⊢ᴸᴷ¹ (v.map (φ/[·]) : Multiset _) + Γ) : ⊢ᴸᴷ¹ Γ + ⦃∃¹ φ⦄ := by
-  induction' v with t v ih generalizing Γ
-  · exact (h.cast (by simp)).weakening
-  · have d : ⊢ᴸᴷ¹ ((v.map (φ/[·]) : Multiset _) + Γ) + ⦃∃¹ φ⦄ :=
-      exs (t := t) (h.cast (by
-        change (φ/[t] ::ₘ (v.map (φ/[·]) : Multiset _)) + Γ =
-          ((v.map (φ/[·]) : Multiset _) + Γ) + ⦃φ/[t]⦄
-        rw [← Multiset.add_atom_eq_cons]
-        abel))
-    have d : ⊢ᴸᴷ¹ (v.map (φ/[·]) : Multiset _) + (Γ + ⦃∃¹ φ⦄) :=
-      d.cast (by simp [add_assoc, add_left_comm, add_comm])
-    exact ((ih d).cast (by abel)).contraction
-
-def exOfInstances' (v : List (SyntacticTerm L)) (φ : Semiproposition L 1)
-    (h : ⊢ᴸᴷ¹ (v.map (φ/[·]) : Multiset _) + Γ + ⦃∃¹ φ⦄) :
-    ⊢ᴸᴷ¹ Γ + ⦃∃¹ φ⦄ :=
-  ((exOfInstances (Γ := Γ + ⦃∃¹ φ⦄) v φ
-    (h.cast (by simp [add_assoc]))).cast (by abel)).contraction
-
-def allNvar [L.DecidableEq] {Δ : Sequent L} {φ} (h : ∀¹ φ ∈ Δ) :
-    ⊢ᴸᴷ¹ Δ + ⦃φ/[&Δ.newVar]⦄ → ⊢ᴸᴷ¹ Δ := fun b ↦
-  let b : ⊢ᴸᴷ¹ Δ + ⦃∀¹ φ⦄ :=
-    b.generalizeByNewVar (by simpa [Semiformula.FVar?] using Sequent.not_fvar?_newVar h)
-      (fun _ ↦ Sequent.not_fvar?_newVar)
-  Structural.absorb b h
 
 end Derivation
 

@@ -237,9 +237,6 @@ def explosion {p : Sequent L} (b : p ⊩ ⊥) : (φ : Propositionᵢ L) → p �
   | ∃¹ φ => exsEquiv.symm ⟨default, b.explosion (φ/[default])⟩
   termination_by φ => φ.complexity
 
-def efq (φ : Propositionᵢ L) : ⊩ ⊥ 🡒 φ :=
-  fun _ _ ↦ implyEquiv.symm fun _ _ d ↦ d.explosion φ
-
 def implyOf {φ ψ : Propositionᵢ L} (tp : (∼p).Traversal)
     (b : (q : Sequent L) → (∼q).Traversal → q ⊩ φ → p ⊓ q ⊩ ψ) :
     p ⊩ φ 🡒 ψ := implyEquiv.symm fun q sqp fφ ↦

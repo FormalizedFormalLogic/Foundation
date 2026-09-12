@@ -67,12 +67,6 @@ def Derivation.toDerivation2 (T) {Γ : Sequent L} : ⊢ᴸᴷ¹ Γ → T ⟹₂ 
       (Derivation2.wk (Derivation.toDerivation2 T d₁) (by intro x hx; simp_all; tauto))
       (Derivation2.wk (Derivation.toDerivation2 T d₂) (by intro x hx; simp_all; tauto))
 
-/-- Contracts a principal formula already present in the side context.
-This is a routine structural derivation. -/
-def Derivation.absorb (d : ⊢ᴸᴷ¹ Γ + ⦃φ⦄) (h : φ ∈ Γ) : ⊢ᴸᴷ¹ Γ :=
-  Structural.absorb (F := Proposition L) (𝔇 := Derivation (L := L))
-    (Γ := Γ) (φ := φ) d h
-
 namespace Derivation2
 
 structure ProofData (T : Theory L) (Γ : Finset (Proposition L)) where
@@ -132,13 +126,13 @@ noncomputable def toProofData : {Γ : Finset (Proposition L)} → T ⟹₂ Γ �
         bφ.contra default (by intro x hx; simp_all [Sequent.embed]; aesop)
       have bψ' : ⊢ᴸᴷ¹ (Γ.1 + ∼Sequent.embed (A + B)) + ⦃ψ⦄ :=
         bψ.contra default (by intro x hx; simp_all [Sequent.embed]; aesop)
-      exact (Derivation.and bφ' bψ').absorb (Multiset.mem_add.mpr <| Or.inl h)
+      exact Structural.absorb (Derivation.and bφ' bψ') (Multiset.mem_add.mpr <| Or.inl h)
   | Γ, or (φ := φ) (ψ := ψ) h d => by
       rcases toProofData d with ⟨A, hA, b⟩
       refine ⟨A, hA, ?_⟩
       have b' : ⊢ᴸᴷ¹ (Γ.1 + ∼Sequent.embed A) + ⦃φ, ψ⦄ :=
         b.contra default (by intro x hx; simp_all; aesop)
-      exact (Derivation.or b').absorb (Multiset.mem_add.mpr <| Or.inl h)
+      exact Structural.absorb (Derivation.or b') (Multiset.mem_add.mpr <| Or.inl h)
   | Γ, all (φ := φ) h d => by
       rcases toProofData d with ⟨A, hA, b⟩
       refine ⟨A, hA, ?_⟩
@@ -148,13 +142,13 @@ noncomputable def toProofData : {Γ : Finset (Proposition L)} → T ⟹₂ Γ �
           intro x hx
           simp [Rewriting.shifts] at hx ⊢
           aesop)
-      exact (Derivation.all b').absorb (Multiset.mem_add.mpr <| Or.inl h)
+      exact Structural.absorb (Derivation.all b') (Multiset.mem_add.mpr <| Or.inl h)
   | Γ, exs (φ := φ) h t d => by
       rcases toProofData d with ⟨A, hA, b⟩
       refine ⟨A, hA, ?_⟩
       have b' : ⊢ᴸᴷ¹ (Γ.1 + ∼Sequent.embed A) + ⦃φ/[t]⦄ :=
         b.contra default (by intro x hx; simp_all; aesop)
-      exact (Derivation.exs (t := t) b').absorb (Multiset.mem_add.mpr <| Or.inl h)
+      exact Structural.absorb (Derivation.exs (t := t) b') (Multiset.mem_add.mpr <| Or.inl h)
   | Γ, wk d h => by
       rcases toProofData d with ⟨A, hA, b⟩
       exact ⟨A, hA, b.contra default (by intro x hx; simp_all; aesop)⟩

@@ -62,11 +62,11 @@ inductive Derivation : Sequent L → Type _
 | all₂ {φ : Semiproposition L 1 0} : Derivation (Sequent.shift₁ Γ + ⦃φ.free₁⦄) → Derivation (Γ + ⦃∀² φ⦄)
 | exs₂ {φ : Semiproposition L 1 0} : Derivation (Γ + ⦃φ/⟦ψ⟧⦄) → Derivation (Γ + ⦃∃² φ⦄)
 
-scoped prefix:45 "⊢ᴸᴷ¹ " => Derivation
+scoped prefix:45 "⊢ᴸᴷ² " => Derivation
 
 namespace Derivation
 
-def cast {Γ Δ : Sequent L} (d : ⊢ᴸᴷ¹ Γ) (h : Γ = Δ := by abel) : ⊢ᴸᴷ¹ Δ := h ▸ d
+def cast {Γ Δ : Sequent L} (d : ⊢ᴸᴷ² Γ) (h : Γ = Δ := by abel) : ⊢ᴸᴷ² Δ := h ▸ d
 
 instance : OneSidedLK (Derivation (L := L)) where
   weakening d := d.weakening
@@ -79,15 +79,40 @@ instance : OneSidedLK (Derivation (L := L)) where
 instance : OneSidedLK.Cut (Derivation (L := L)) where
   cut d₁ d₂ := d₁.cut d₂
 
+private lemma unshift₁_shift₁ {N n : ℕ} (φ : Semiproposition L N n) :
+    (Rew.rewrite Nat.pred).app (Semiproposition.shift₁ φ) = φ := by
+  induction φ using Semiformula.rec' <;>
+    simp_all [Semiproposition.shift₁, Rew.shift];
+
+/-- Enumerates the end sequent by recursion on the local inference rules.
+This is a routine syntactic construction. -/
+def traversal [DecidableEq (Proposition L)] : {Γ : Sequent L} → (⊢ᴸᴷ² Γ) → Γ.Traversal
+  | _, identity (φ := φ) => (Multiset.Traversal.atom φ).succ (∼φ)
+  | _, cut d dn => d.traversal.remove.add dn.traversal.remove
+  | _, contraction (φ := φ) d => (d.traversal.cast (by abel)).remove (a := φ)
+  | _, weakening (φ := φ) d => d.traversal.succ φ
+  | _, verum => .atom ⊤
+  | _, and (φ := φ) (ψ := ψ) d _ => d.traversal.remove.succ (φ ⋏ ψ)
+  | _, or (φ := φ) (ψ := ψ) d =>
+      ((d.traversal.cast (by abel)).remove (a := ψ)).remove (a := φ) |>.succ (φ ⋎ ψ)
+  | _, all₁ (φ := φ) d =>
+      ((d.traversal.remove.map (FirstOrder.Rew.rewriteMap Nat.pred ▹ ·)).cast (by
+        simp [Sequent.shift₀, Multiset.map_map, Rewriting.rewriteMap_pred_shift])).succ (∀¹ φ)
+  | _, exs₁ (φ := φ) d => d.traversal.remove.succ (∃¹ φ)
+  | _, all₂ (φ := φ) d =>
+      ((d.traversal.remove.map (Rew.rewrite Nat.pred).app).cast (by
+        simp [Sequent.shift₁, Multiset.map_map, unshift₁_shift₁])).succ (∀² φ)
+  | _, exs₂ (φ := φ) d => d.traversal.remove.succ (∃² φ)
+
 /-- Applies structural rules along supplied traversals (a routine derived rule). -/
 def contra [DecidableEq (Proposition L)] {Γ Δ : Sequent L}
-    (d : ⊢ᴸᴷ¹ Γ) (tΓ : Γ.Traversal) (tΔ : Δ.Traversal)
-    (h : Γ ⊆ Δ := by simp) : ⊢ᴸᴷ¹ Δ :=
-  Structural.ofSubset tΓ tΔ d h
+    (d : ⊢ᴸᴷ² Γ) (tΔ : Δ.Traversal)
+    (h : Γ ⊆ Δ := by simp) : ⊢ᴸᴷ² Δ :=
+  Structural.ofSubset d.traversal tΔ d h
 
 end Derivation
 
-abbrev Proof (φ : Sentence L) := ⊢ᴸᴷ¹ ⦃(φ : Proposition L)⦄
+abbrev Proof (φ : Sentence L) := ⊢ᴸᴷ² ⦃(φ : Proposition L)⦄
 
 inductive Proof.Symbol (L : Language) : Type
 | symbol

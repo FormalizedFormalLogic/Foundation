@@ -89,8 +89,6 @@ variable {F : Type*} [LogicalConnective F] [LogicalNeutral F]
 
 alias cast := Structural.cast
 alias weakenMany := Structural.weakenMany
-alias contractMany := Structural.contractMany
-alias absorb := Structural.absorb
 alias ofSubset := Structural.ofSubset
 
 def contra [OneSidedLK 𝔇] [DecidableEq F] (tΓ : Γ.Traversal) (tΔ : Δ.Traversal)
