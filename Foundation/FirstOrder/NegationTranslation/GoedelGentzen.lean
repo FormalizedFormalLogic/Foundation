@@ -97,9 +97,9 @@ def negDoubleNegation : (φ : Proposition L) →
   | ⊤ => by
       constructor
       · exact negElim (eta (∼(⊤ : Propositionᵢ L))) <|
-          weakening verum (by simp)
+          verum.weakening (φ := ∼∼(⊥ : Propositionᵢ L))
       · apply positiveNeg
-        exact assumption (by simp)
+        exact assumption ((Multiset.Traversal.atom _).succ _) (by simp)
   | ⊥ => InterDerivation.refl _
   | φ ⋏ ψ => by
       have eφ := (negDoubleNegation φ).iffnegOfNegIff (by simp)
@@ -143,9 +143,8 @@ def deductNeg {Γ : Sequent L} {φ : Proposition L}
 
 def gödelGentzen {Γ : Sequent L} : ⊢ᴸᴷ¹ Γ → (∼Γ)ᴺ ⊢ᴸᴶ¹ (⊥ : Propositionᵢ L)
   | identity R v => by
-      exact LJ.Derivation.contraction
-        (LJ.Derivation.eta (∼(.rel R v) : Propositionᵢ L)).negativeNeg
-        (by simp [Sequent.doubleNegation]) (by simp)
+      exact ((LJ.Derivation.eta (∼(.rel R v) : Propositionᵢ L)).negativeNeg.cast
+        (by simp [Sequent.doubleNegation]) (by rfl)).weakeningRight
   | verum => by
       simpa [Sequent.doubleNegation] using LJ.Derivation.eta (⊥ : Propositionᵢ L)
   | and (Γ := Γ) (φ := φ) (ψ := ψ) dφ dψ => by
@@ -154,8 +153,7 @@ def gödelGentzen {Γ : Sequent L} : ⊢ᴸᴷ¹ Γ → (∼Γ)ᴺ ⊢ᴸᴶ¹ (
       have dψ : (∼Γ)ᴺ ⊢ᴸᴶ¹ (∼(∼ψ)ᴺ : Propositionᵢ L) :=
         deductNeg (gödelGentzen dψ)
       have dAnd := LJ.Derivation.positiveAnd dφ dψ
-      exact LJ.Derivation.contraction dAnd.negativeNeg
-        (by simp [Sequent.doubleNegation]) (by simp)
+      exact (dAnd.negativeNeg.cast (by simp [Sequent.doubleNegation]) (by rfl)).weakeningRight
   | or (Γ := Γ) (φ := φ) (ψ := ψ) d =>
       (LJ.Derivation.negativeAnd (Γ := (∼Γ)ᴺ) (φ := (∼φ)ᴺ)
         (ψ := (∼ψ)ᴺ) (Ξ := (⊥ : Propositionᵢ L)) <|
@@ -170,8 +168,7 @@ def gödelGentzen {Γ : Sequent L} : ⊢ᴸᴷ¹ Γ → (∼Γ)ᴺ ⊢ᴸᴶ¹ (
       have dAll := LJ.Derivation.positiveForall (Γ := (∼Γ)ᴺ)
         (φ := ∼(∼φ)ᴺ) <|
         dFree.cast (heq := by simp [Semiformula.rew_doubleNegation])
-      exact LJ.Derivation.contraction dAll.negativeNeg
-        (by simp [Sequent.doubleNegation]) (by simp)
+      exact (dAll.negativeNeg.cast (by simp [Sequent.doubleNegation]) (by rfl)).weakeningRight
   | exs (Γ := Γ) (φ := φ) (t := t) d =>
       (LJ.Derivation.negativeForall (Γ := (∼Γ)ᴺ) (φ := (∼φ)ᴺ)
         (t := t) (Ξ := (⊥ : Propositionᵢ L)) <|
@@ -186,9 +183,15 @@ def gödelGentzen {Γ : Sequent L} : ⊢ᴸᴷ¹ Γ → (∼Γ)ᴺ ⊢ᴸᴶ¹ (
       exact (LJ.Derivation.cut (Γ := (∼Γ)ᴺ) (Δ := (∼Δ)ᴺ)
         (φ := φᴺ) (Ξ := (⊥ : Propositionᵢ L)) dφ <|
         ihn.cast (by simp)).cast (by simp [Sequent.doubleNegation])
-  | contraction d h =>
-      LJ.Derivation.weakening (gödelGentzen d) <|
-        Multiset.map_subset_map <| Multiset.map_subset_map h
+  | contraction (Γ := Γ) (φ := φ) d =>
+      have e : (∼Γ)ᴺ + ⦃(∼φ)ᴺ, (∼φ)ᴺ⦄ ⊢ᴸᴶ¹ (⊥ : Propositionᵢ L) :=
+        (gödelGentzen d).cast (by simp [Sequent.doubleNegation]) (by rfl)
+      (LJ.Derivation.contraction (Γ := (∼Γ)ᴺ) (φ := (∼φ)ᴺ)
+        (Ξ := (⊥ : Propositionᵢ L)) e).cast
+        (by simp [Sequent.doubleNegation]) (by rfl)
+  | weakening (Γ := Γ) (φ := φ) d =>
+      ((gödelGentzen d).weakening (φ := (∼φ)ᴺ)).cast
+        (by simp [Sequent.doubleNegation])
 
 end Derivation
 

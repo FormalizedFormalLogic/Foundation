@@ -32,7 +32,7 @@ abbrev _root_.FFL.FirstOrder.Theory.Proof2 (T : Theory L) (φ : Proposition L) :
 
 scoped infix: 45 " ⊢₂! " => Theory.Proof2
 
-variable {T : Theory L}
+variable {T : Theory L} {Γ : Sequent L} {φ : Proposition L}
 
 lemma shifts_toFinset_eq_image_shift (Γ : Sequent L) :
     Γ⁺.toFinset = Γ.toFinset.image Rewriting.shift := by ext φ; simp [Rewriting.shifts]
@@ -70,7 +70,8 @@ def Derivation.toDerivation2 (T) {Γ : Sequent L} : ⊢ᴸᴷ¹ Γ → T ⟹₂ 
 /-- Contracts a principal formula already present in the side context.
 This is a routine structural derivation. -/
 def Derivation.absorb (d : ⊢ᴸᴷ¹ Γ + ⦃φ⦄) (h : φ ∈ Γ) : ⊢ᴸᴷ¹ Γ :=
-  Structural.absorb d h
+  Structural.absorb (F := Proposition L) (𝔇 := Derivation (L := L))
+    (Γ := Γ) (φ := φ) d h
 
 namespace Derivation2
 

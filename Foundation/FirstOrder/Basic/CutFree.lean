@@ -84,8 +84,10 @@ variable {Γ Δ : Sequent L}
     IsCutFree (d.weakening (φ := φ)) ↔ IsCutFree d := by
   constructor;
   . intro h;
-    cases h with
-    | weakening h => exact h;
+    refine h.rec
+      (motive := fun {_} d _ ↦ match d with | .weakening d => IsCutFree d | _ => True)
+      ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_;
+    all_goals simp_all;
   . exact .weakening;
 
 @[simp] lemma IsCutFree.cast {d : ⊢ᴸᴷ¹ Γ} {e : Γ = Δ} :

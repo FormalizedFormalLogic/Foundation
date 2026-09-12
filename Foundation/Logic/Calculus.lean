@@ -39,66 +39,79 @@ class OneSidedLK.Cut
     (𝔇 : Multiset F → Type*) extends OneSidedLK 𝔇 where
   cut : 𝔇 (Γ + ⦃φ⦄) → 𝔇 (Δ + ⦃∼φ⦄) → 𝔇 (Γ + Δ)
 
+namespace Structural
+
+variable {F : Type*} {𝔇 : Multiset F → Type*} {Γ Δ : Multiset F} {φ : F}
+
+def cast (d : 𝔇 Γ) (h : Γ = Δ := by abel) : 𝔇 Δ := h ▸ d
+
+/-- Repeated weakening along a traversal (a routine structural derivation). -/
+def weakenMany [Structural 𝔇] {Γ Δ : Multiset F} (t : Δ.Traversal) (d : 𝔇 Γ) : 𝔇 (Γ + Δ) :=
+  match t with
+  | .zero => cast d
+  | .succ φ t => cast (weakening (φ := φ) (weakenMany t d))
+
+/-- Repeated contraction along a traversal (a routine structural derivation). -/
+def contractMany [Structural 𝔇] {Γ Δ : Multiset F} (t : Γ.Traversal) (d : 𝔇 (Δ + Γ + Γ)) : 𝔇 (Δ + Γ) :=
+  match t with
+  | .zero => cast d
+  | @Multiset.Traversal.succ _ Γ φ t =>
+      have d₁ : 𝔇 ((Δ + Γ + Γ) + ⦃φ, φ⦄) := cast d
+      have d₂ : 𝔇 ((Δ + ⦃φ⦄) + Γ + Γ) := cast (contraction d₁)
+      cast (contractMany t d₂)
+
+/-- Absorbs a formula already in the context (a routine structural derivation). -/
+def absorb [Structural 𝔇] [DecidableEq F] (d : 𝔇 (Γ + ⦃φ⦄)) (h : φ ∈ Γ) : 𝔇 Γ :=
+  have he : Γ.erase φ + ⦃φ⦄ = Γ := by
+    simpa [Multiset.add_atom_eq_cons] using Multiset.cons_erase h
+  have d' : 𝔇 (Γ.erase φ + ⦃φ, φ⦄) :=
+    cast d (by simpa [add_assoc] using congrArg (· + ⦃φ⦄) he.symm)
+  cast (contraction d') he
+
+/-- Expands multiset inclusion into local structural rules using traversals. -/
+def ofSubset [Structural 𝔇] [DecidableEq F]
+    (tΓ : Γ.Traversal) (tΔ : Δ.Traversal) (d : 𝔇 Γ) (h : Γ ⊆ Δ) : 𝔇 Δ :=
+  let rec go {Γ : Multiset F} (t : Γ.Traversal) (h : Γ ⊆ Δ) (d : 𝔇 (Δ + Γ)) : 𝔇 Δ :=
+    match t with
+    | .zero => cast d
+    | @Multiset.Traversal.succ _ Γ φ t =>
+        have d' : 𝔇 ((Δ + Γ) + ⦃φ⦄) := cast d
+        have hp : φ ∈ Δ := h (by simp)
+        go t (fun ψ hψ ↦ h (by simp [hψ])) (absorb d' (by simp [hp]))
+  go tΓ h (cast (weakenMany tΔ d))
+
+end Structural
+
 namespace OneSidedLK
 
 variable {F : Type*} [LogicalConnective F] [LogicalNeutral F]
   [TildeInvolutive F] [LogicalConnective.DeMorgan F] [LogicalNeutral.DeMorgan F] {𝔇 : Multiset F → Type*}
 
-def cast (b : 𝔇 Γ) (h : Γ = Δ := by abel) : 𝔇 Δ := h ▸ b
+alias cast := Structural.cast
+alias weakenMany := Structural.weakenMany
+alias contractMany := Structural.contractMany
+alias absorb := Structural.absorb
+alias ofSubset := Structural.ofSubset
 
-def weakenMany [Structural 𝔇] (tΔ : Δ.Traversal) (d : 𝔇 Γ) : 𝔇 (Γ + Δ) :=
-  match tΔ with
-  | .zero => cast d
-  | .succ φ t => Structural.weakening (weakenMany t d)
+def contra [OneSidedLK 𝔇] [DecidableEq F] (tΓ : Γ.Traversal) (tΔ : Δ.Traversal)
+    (d : 𝔇 Γ) (h : Γ ⊆ Δ := by simp) : 𝔇 Δ := ofSubset tΓ tΔ d h
 
-def contractMany [Structural 𝔇] (tΓ : Γ.Traversal) (d : 𝔇 (Δ + Γ + Γ)) : 𝔇 (Δ + Γ) :=
-  match tΓ with
-  | .zero => cast d
-  | .succ φ t =>
-    let d' : 𝔇 ((Δ + (t.toList : Multiset F) + (t.toList : Multiset F)) + ⦃φ, φ⦄) :=
-      cast d (by simp [t.coe_toList]; abel)
-    contractMany t (Structural.contraction d')
-
-def absorb [Structural 𝔇] [DecidableEq F] (d : 𝔇 (Γ + ⦃φ⦄)) (h : φ ∈ Γ) : 𝔇 Γ := by
-  let e := Γ.erase φ
-  have he : Γ = e + ⦃φ⦄ := by
-    exact (Multiset.add_singleton_eq_iff.mpr ⟨h, rfl⟩).symm
-  have d' : 𝔇 (e + ⦃φ, φ⦄) := cast d (by rw [he]; abel)
-  exact cast (Structural.contraction d') (by rw [← he]; simp [he, e])
-
-def ofSubset [Structural 𝔇] [DecidableEq F]
-    (tΓ : Γ.Traversal) (tΔ : Δ.Traversal) (d : 𝔇 Γ) (h : Γ ⊆ Δ) : 𝔇 Δ := by
-  let rec go {Γ : Multiset F} (tΓ : Γ.Traversal) (d : 𝔇 (Δ + Γ))
-      (hΓ : Γ ⊆ Δ) : 𝔇 Δ :=
-    match tΓ with
-    | .zero => cast d (by simp)
-    | .succ φ t =>
-      let d₁ : 𝔇 (Δ + (t.toList : Multiset F) + ⦃φ⦄) :=
-        cast d (by simp [t.coe_toList]; abel)
-      let d₂ : 𝔇 (Δ + (t.toList : Multiset F)) :=
-        absorb d₁ (by exact mem_of_mem_add_left (hΓ (by simp)))
-      go t d₂ (by
-        intro ψ hψ
-        exact hΓ (by simp [hψ]))
-  go tΓ (cast (weakenMany tΔ d) (by abel)) h
-
-def contra [OneSidedLK 𝔇] (d : 𝔇 Γ) (h : Γ ⊆ Δ := by simp) : 𝔇 Δ :=
-  ofSubset (default : Γ.Traversal) (default : Δ.Traversal) d h
-
-def close [OneSidedLK 𝔇] (φ : F) (hp : φ ∈ Γ := by simp) (hn : ∼φ ∈ Γ := by simp) : 𝔇 Γ :=
-  contra (identity φ) (by
+def close [OneSidedLK 𝔇] [DecidableEq F] (φ : F) (t : Γ.Traversal)
+    (hp : φ ∈ Γ := by simp) (hn : ∼φ ∈ Γ := by simp) : 𝔇 Γ :=
+  contra ((Multiset.Traversal.atom φ).succ (∼φ)) t (identity φ) (by
     intro ψ hψ
     rcases Multiset.mem_add.mp hψ with hψ | hψ <;> simp_all)
 
-def top [OneSidedLK 𝔇] (h : ⊤ ∈ Γ := by simp) : 𝔇 Γ := contra verum (by simpa using h)
+def top [OneSidedLK 𝔇] [DecidableEq F] (t : Γ.Traversal) (h : ⊤ ∈ Γ := by simp) : 𝔇 Γ :=
+  contra (.atom ⊤) t verum (by simpa using h)
 
-def tensor [OneSidedLK 𝔇] {φ ψ : F} (tΓ : Γ.Traversal := by exact default)
-    (tΔ : Δ.Traversal := by exact default)
+def tensor [OneSidedLK 𝔇] {φ ψ : F} (tΓ : Γ.Traversal)
+    (tΔ : Δ.Traversal)
     (dφ : 𝔇 (Γ + ⦃φ⦄)) (dψ : 𝔇 (Δ + ⦃ψ⦄)) :
     𝔇 (Γ + Δ + ⦃φ ⋏ ψ⦄) :=
   and
-    (cast (weakenMany tΔ dφ) (by simp; abel))
-    (cast (weakenMany tΓ dψ) (by simp; abel))
+    (cast (weakenMany tΔ dφ) (by abel))
+    (cast (weakenMany tΓ dψ) (by abel))
 
 alias cut := OneSidedLK.Cut.cut
 
@@ -116,6 +129,7 @@ def modusPonens [Cut 𝔇] (di : 𝔇 (Γ + ⦃φ 🡒 ψ⦄)) (dp : 𝔇 (Δ + 
     𝔇 (Γ + Δ + ⦃ψ⦄) :=
   have h₁ : 𝔇 ⦃∼(φ 🡒 ψ), ∼φ, ψ⦄ := cast
     (tensor (𝔇 := 𝔇) (Γ := ⦃∼φ⦄) (Δ := ⦃ψ⦄) (φ := φ) (ψ := ∼ψ)
+      (.atom _) (.atom _)
       (cast (identity φ) (by abel)) (cast (identity (∼ψ)) (by simp; abel)))
     (by simp [LogicalConnective.DeMorgan.imply]; abel)
   have h₂ : 𝔇 (Γ + ⦃∼φ, ψ⦄) := cast <|
@@ -125,7 +139,7 @@ def modusPonens [Cut 𝔇] (di : 𝔇 (Γ + ⦃φ 🡒 ψ⦄)) (dp : 𝔇 (Δ + 
 def disj₂ {Γ : List F} {Δ : Multiset F} [OneSidedLK 𝔇] :
     𝔇 ((Γ : Multiset F) + Δ) → 𝔇 (Δ + ⦃⋁Γ⦄) := fun d ↦
   match Γ with
-  | [] => contra d (by intro φ hφ; simp_all)
+  | [] => cast (Structural.weakening (φ := ⊥) (cast d (by simp) : 𝔇 Δ)) (by simp)
   | [φ] => cast d (by
     change φ ::ₘ Δ = Δ + ⦃φ⦄
     exact (Multiset.add_atom_eq_cons φ Δ).symm)
@@ -139,17 +153,21 @@ def disj₂ {Γ : List F} {Δ : Multiset F} [OneSidedLK 𝔇] :
   termination_by _ => Γ.length
 
 def conj₂ [OneSidedLK 𝔇] {Γ : List F} {Δ : Multiset F}
+    (tΔ : Δ.Traversal)
     (d : (φ : F) → φ ∈ Γ → 𝔇 (Δ + ⦃φ⦄)) : 𝔇 (Δ + ⦃⋀Γ⦄) :=
   match Γ with
-  |          [] => contra verum (by intro φ hφ; simp_all)
+  |          [] => cast (weakenMany tΔ verum) (by simp; abel)
   |         [φ] => d φ (by simp)
   | φ :: ψ :: Γ =>
-    have : 𝔇 (Δ + ⦃⋀(ψ :: Γ)⦄) := conj₂ (Γ := ψ :: Γ) (fun χ h ↦ d χ (by simp_all))
+    have : 𝔇 (Δ + ⦃⋀(ψ :: Γ)⦄) := conj₂ (Γ := ψ :: Γ) tΔ (fun χ h ↦ d χ (by simp_all))
     and (Γ := Δ) (φ := φ) (ψ := ⋀(ψ :: Γ)) (d φ (by simp)) this
 
 namespace AxiomDerivation
 
 variable [OneSidedLK 𝔇]
+
+def identityWith (φ : F) (t : Γ.Traversal) : 𝔇 (Γ + ⦃φ, ∼φ⦄) :=
+  cast (Structural.weakenMany t (identity φ))
 
 def introOr (d : 𝔇 ⦃φ, ψ⦄) : 𝔇 ⦃φ ⋎ ψ⦄ :=
   cast (or (Γ := 0) (φ := φ) (ψ := ψ) (cast d (by abel))) (by simp)
@@ -159,16 +177,16 @@ def introDisj {Γ : List F} (d : 𝔇 (Γ : Multiset F)) : 𝔇 ⦃⋁Γ⦄ :=
 
 /-- The rule expansion of the classical negation equivalence axiom. This is a routine syntactic derivation. -/
 def negEquiv (φ : F) : 𝔇 ⦃(φ ⋎ ∼φ ⋎ ⊥) ⋏ (φ ⋏ ⊤ ⋎ ∼φ)⦄ :=
-  have d₁ : 𝔇 ⦃φ ⋎ ∼φ ⋎ ⊥⦄ := introDisj <| close φ (Γ := ⦃φ, ∼φ, ⊥⦄)
-  have dp : 𝔇 ⦃∼φ, φ⦄ := close φ (Γ := ⦃∼φ, φ⦄)
-  have dt : 𝔇 ⦃∼φ, ⊤⦄ := top (Γ := ⦃∼φ, ⊤⦄)
+  have d₁ : 𝔇 ⦃φ ⋎ ∼φ ⋎ ⊥⦄ := introDisj (Γ := [φ, ∼φ, ⊥]) <| cast (identityWith φ (.atom ⊥)) (by change ⦃⊥⦄ + ⦃φ, ∼φ⦄ = ⦃φ, ∼φ, ⊥⦄; abel)
+  have dp : 𝔇 ⦃∼φ, φ⦄ := cast (identity φ)
+  have dt : 𝔇 ⦃∼φ, ⊤⦄ := cast (Structural.weakening (φ := ∼φ) verum)
   have dc : 𝔇 ⦃∼φ, φ ⋏ ⊤⦄ := cast <| and (Γ := ⦃∼φ⦄) (φ := φ) (ψ := ⊤) (cast dp) (cast dt)
   cast <| and (Γ := 0) (φ := φ ⋎ ∼φ ⋎ ⊥) (ψ := φ ⋏ ⊤ ⋎ ∼φ)
     (cast d₁) (cast <| introOr (φ := φ ⋏ ⊤) (ψ := ∼φ) <| cast dc (by abel))
 
 /-- The rule expansion of the K axiom. This is a routine syntactic derivation. -/
 def implyK (φ ψ : F) : 𝔇 ⦃∼φ ⋎ ∼ψ ⋎ φ⦄ :=
-  introDisj <| close φ (Γ := ⦃∼φ, ∼ψ, φ⦄)
+  introDisj (Γ := [∼φ, ∼ψ, φ]) <| cast (identityWith φ (.atom (∼ψ))) (by change ⦃∼ψ⦄ + ⦃φ, ∼φ⦄ = ⦃∼φ, ∼ψ, φ⦄; abel)
 
 /-- The rule expansion of the S axiom. This is a routine syntactic derivation. -/
 def implyS (φ ψ χ : F) : 𝔇 ⦃φ ⋏ ψ ⋏ ∼χ ⋎ φ ⋏ ∼ψ ⋎ ∼φ ⋎ χ⦄ :=
@@ -176,15 +194,12 @@ def implyS (φ ψ χ : F) : 𝔇 ⦃φ ⋏ ψ ⋏ ∼χ ⋎ φ ⋏ ∼ψ ⋎ ∼
   let B := φ ⋏ ∼ψ
   let C := ∼φ
   let D := χ
-  have dφ : 𝔇 (⦃B, C, D⦄ + ⦃φ⦄) := close φ (Γ := ⦃B, C, D⦄ + ⦃φ⦄)
-    (by simp) (by simp [C])
-  have dbp : 𝔇 (⦃C, D, ψ⦄ + ⦃φ⦄) := close φ (Γ := ⦃C, D, ψ⦄ + ⦃φ⦄)
-    (by simp) (by simp [C])
-  have dbn : 𝔇 (⦃C, D, ψ⦄ + ⦃∼ψ⦄) := close ψ (Γ := ⦃C, D, ψ⦄ + ⦃∼ψ⦄)
+  have dφ : 𝔇 (⦃B, C, D⦄ + ⦃φ⦄) := cast (identityWith φ ((Multiset.Traversal.atom B).succ D)) (by dsimp [C]; abel)
+  have dbp : 𝔇 (⦃C, D, ψ⦄ + ⦃φ⦄) := cast (identityWith φ ((Multiset.Traversal.atom D).succ ψ)) (by dsimp [C]; abel)
+  have dbn : 𝔇 (⦃C, D, ψ⦄ + ⦃∼ψ⦄) := cast (identityWith ψ ((Multiset.Traversal.atom C).succ D))
   have dψ : 𝔇 (⦃B, C, D⦄ + ⦃ψ⦄) := cast <|
     and (Γ := ⦃C, D, ψ⦄) (φ := φ) (ψ := ∼ψ) dbp dbn
-  have dnχ : 𝔇 (⦃B, C, D⦄ + ⦃∼χ⦄) := close χ (Γ := ⦃B, C, D⦄ + ⦃∼χ⦄)
-    (by simp [D]) (by simp)
+  have dnχ : 𝔇 (⦃B, C, D⦄ + ⦃∼χ⦄) := cast (identityWith χ ((Multiset.Traversal.atom B).succ C)) (by dsimp [D]; abel)
   have dr : 𝔇 (⦃B, C, D⦄ + ⦃ψ ⋏ ∼χ⦄) := and (φ := ψ) (ψ := ∼χ) dψ dnχ
   have da : 𝔇 ⦃A, B, C, D⦄ := cast <| and (φ := φ) (ψ := ψ ⋏ ∼χ) dφ dr
   introDisj da
@@ -192,28 +207,28 @@ def implyS (φ ψ χ : F) : 𝔇 ⦃φ ⋏ ψ ⋏ ∼χ ⋎ φ ⋏ ∼ψ ⋎ ∼
 /-- The rule expansion of the first conjunction axiom. This is a routine syntactic derivation. -/
 def and₁ (φ ψ : F) : 𝔇 ⦃(∼φ ⋎ ∼ψ) ⋎ φ⦄ :=
   introOr <| cast <| or (Γ := ⦃φ⦄) (φ := ∼φ) (ψ := ∼ψ)
-    (cast <| close φ (Γ := ⦃φ, ∼φ, ∼ψ⦄))
+    (cast <| identityWith φ (.atom (∼ψ)))
 
 /-- The rule expansion of the second conjunction axiom. This is a routine syntactic derivation. -/
 def and₂ (φ ψ : F) : 𝔇 ⦃(∼φ ⋎ ∼ψ) ⋎ ψ⦄ :=
   introOr <| cast <| or (Γ := ⦃ψ⦄) (φ := ∼φ) (ψ := ∼ψ)
-    (cast <| close ψ (Γ := ⦃ψ, ∼φ, ∼ψ⦄))
+    (cast <| identityWith ψ (.atom (∼φ)))
 
 /-- The rule expansion of conjunction introduction. This is a routine syntactic derivation. -/
 def and₃ (φ ψ : F) : 𝔇 ⦃∼φ ⋎ ∼ψ ⋎ φ ⋏ ψ⦄ :=
-  have dp : 𝔇 ⦃∼φ, ∼ψ, φ⦄ := close φ (Γ := ⦃∼φ, ∼ψ, φ⦄)
-  have dq : 𝔇 ⦃∼φ, ∼ψ, ψ⦄ := close ψ (Γ := ⦃∼φ, ∼ψ, ψ⦄)
+  have dp : 𝔇 ⦃∼φ, ∼ψ, φ⦄ := cast (identityWith φ (.atom (∼ψ)))
+  have dq : 𝔇 ⦃∼φ, ∼ψ, ψ⦄ := cast (identityWith ψ (.atom (∼φ)))
   introDisj (Γ := [∼φ, ∼ψ, φ ⋏ ψ]) <| cast <|
     and (Γ := ⦃∼φ, ∼ψ⦄) (φ := φ) (ψ := ψ)
     (cast dp (by abel)) (cast dq (by abel))
 
 /-- The rule expansion of the first disjunction axiom. This is a routine syntactic derivation. -/
 def or₁ (φ ψ : F) : 𝔇 ⦃∼φ ⋎ φ ⋎ ψ⦄ :=
-  introDisj <| close φ (Γ := ⦃∼φ, φ, ψ⦄)
+  introDisj (Γ := [∼φ, φ, ψ]) <| cast (identityWith φ (.atom ψ)) (by change ⦃ψ⦄ + ⦃φ, ∼φ⦄ = ⦃∼φ, φ, ψ⦄; abel)
 
 /-- The rule expansion of the second disjunction axiom. This is a routine syntactic derivation. -/
 def or₂ (φ ψ : F) : 𝔇 ⦃∼ψ ⋎ φ ⋎ ψ⦄ :=
-  introDisj <| close ψ (Γ := ⦃∼ψ, φ, ψ⦄)
+  introDisj (Γ := [∼ψ, φ, ψ]) <| cast (identityWith ψ (.atom φ)) (by change ⦃φ⦄ + ⦃ψ, ∼ψ⦄ = ⦃∼ψ, φ, ψ⦄; abel)
 
 /-- The rule expansion of disjunction elimination. This is a routine syntactic derivation. -/
 def or₃ (φ ψ χ : F) : 𝔇 ⦃φ ⋏ ∼χ ⋎ ψ ⋏ ∼χ ⋎ ∼φ ⋏ ∼ψ ⋎ χ⦄ :=
@@ -221,20 +236,18 @@ def or₃ (φ ψ χ : F) : 𝔇 ⦃φ ⋏ ∼χ ⋎ ψ ⋏ ∼χ ⋎ ∼φ ⋏ �
   let B := ψ ⋏ ∼χ
   let C := ∼φ ⋏ ∼ψ
   let D := χ
-  have dap : 𝔇 (⦃B, D, ∼φ⦄ + ⦃φ⦄) := close φ (Γ := ⦃B, D, ∼φ⦄ + ⦃φ⦄)
-  have dan : 𝔇 (⦃B, D, ∼φ⦄ + ⦃∼χ⦄) := close χ (Γ := ⦃B, D, ∼φ⦄ + ⦃∼χ⦄)
-    (by simp [D]) (by simp)
+  have dap : 𝔇 (⦃B, D, ∼φ⦄ + ⦃φ⦄) := cast (identityWith φ ((Multiset.Traversal.atom B).succ D))
+  have dan : 𝔇 (⦃B, D, ∼φ⦄ + ⦃∼χ⦄) := cast (identityWith χ ((Multiset.Traversal.atom B).succ (∼φ))) (by dsimp [D]; abel)
   have dnp : 𝔇 (⦃A, B, D⦄ + ⦃∼φ⦄) := cast <| and (φ := φ) (ψ := ∼χ) dap dan
-  have dbp : 𝔇 (⦃A, D, ∼ψ⦄ + ⦃ψ⦄) := close ψ (Γ := ⦃A, D, ∼ψ⦄ + ⦃ψ⦄)
-  have dbn : 𝔇 (⦃A, D, ∼ψ⦄ + ⦃∼χ⦄) := close χ (Γ := ⦃A, D, ∼ψ⦄ + ⦃∼χ⦄)
-    (by simp [D]) (by simp)
+  have dbp : 𝔇 (⦃A, D, ∼ψ⦄ + ⦃ψ⦄) := cast (identityWith ψ ((Multiset.Traversal.atom A).succ D))
+  have dbn : 𝔇 (⦃A, D, ∼ψ⦄ + ⦃∼χ⦄) := cast (identityWith χ ((Multiset.Traversal.atom A).succ (∼ψ))) (by dsimp [D]; abel)
   have dnn : 𝔇 (⦃A, B, D⦄ + ⦃∼ψ⦄) := cast <| and (φ := ψ) (ψ := ∼χ) dbp dbn
   have dc : 𝔇 ⦃A, B, C, D⦄ := cast <| and (φ := ∼φ) (ψ := ∼ψ) dnp dnn
   introDisj dc
 
 /-- The rule expansion of double-negation elimination. This is a routine syntactic derivation. -/
 def dne (φ : F) : 𝔇 ⦃∼φ ⋎ φ⦄ :=
-  introOr <| close φ (Γ := ⦃∼φ, φ⦄)
+  introOr <| cast (identity φ)
 
 end AxiomDerivation
 
@@ -295,13 +308,15 @@ instance : Entailment.Cl 𝓟 := AxiomDerivation.cl 𝓟 PrincipalEntailment.equ
 variable {𝓟}
 
 lemma derivable_iff_provable_disj {Γ : List F} : Nonempty (𝔇 (Γ : Multiset F)) ↔ 𝓟 ⊢ ⋁Γ := by
+  classical
   constructor
   · rintro ⟨d⟩
     have : 𝔇 ((Γ : Multiset F) + 0) := cast d
     exact provable_iff.mpr ⟨disj₂ this⟩
   · rintro h
     have d₁ : 𝔇 ⦃⋁Γ⦄ := (provable_iff.mp h).some
-    have d₂ : 𝔇 ((Γ : Multiset F) + ⦃⋀(∼Γ)⦄) := conj₂ fun φ h ↦ close φ (by simp) (by simp_all)
+    have d₂ : 𝔇 ((Γ : Multiset F) + ⦃⋀(∼Γ)⦄) :=
+      conj₂ (.ofList Γ) fun φ h ↦ close φ ((Multiset.Traversal.ofList Γ).succ φ) (by simp) (by simp_all)
     exact ⟨cast (eCut (Γ := 0) (Δ := (Γ : Multiset F)) d₁ d₂)⟩
 
 end PrincipalEntailment
@@ -321,8 +336,8 @@ def cast (d : 𝔇 Δ) (h : Δ = Γ.map f := by simp) : Pullback 𝔇 f Γ := by
 def uncast (d : Pullback 𝔇 f Γ) (h : Δ = Γ.map f := by simp) : 𝔇 Δ := h ▸ d
 
 instance oneSidedLK [OneSidedLK 𝔇] : OneSidedLK (Pullback 𝔇 f) where
-  weakening d := cast <| Structural.weakening (uncast d (by simp))
-  contraction d := cast <| Structural.contraction (uncast d (by simp))
+  weakening {Γ φ} d := cast <| Structural.weakening (Γ := Γ.map f) (φ := f φ) (uncast d (by simp))
+  contraction {Γ φ} d := cast <| Structural.contraction (Γ := Γ.map f) (φ := f φ) (uncast d (by simp))
   identity φ := cast <| identity (𝔇 := 𝔇) (f φ)
   verum := cast verum
   and {Γ φ ψ} d₁ d₂ := cast <| and (Γ := Γ.map f) (φ := f φ) (ψ := f ψ)
@@ -351,15 +366,7 @@ end Pullback
 
 end OneSidedLK
 
-namespace Structural
 
-alias cast := OneSidedLK.cast
-alias weakenMany := OneSidedLK.weakenMany
-alias contractMany := OneSidedLK.contractMany
-alias absorb := OneSidedLK.absorb
-alias ofSubset := OneSidedLK.ofSubset
-
-end Structural
 
 end FFL
 

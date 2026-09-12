@@ -66,8 +66,12 @@ def close (φ : NNFormula α) (hp : φ ∈ Δ := by simp) (hn : ∼φ ∈ Δ := 
   eta φ |>.weakening (by intro ψ hψ; rcases Multiset.mem_add.mp hψ with hψ | hψ <;> simp_all)
 
 instance : OneSidedLK (Derivation (α := α)) where
-  weakening d := d.wk (by simp)
-  contraction d := d.wk (by simp)
+  weakening {Γ φ} d := d.wk (by
+    intro ψ hψ;
+    exact Multiset.mem_add.mpr (Or.inl hψ))
+  contraction {Γ φ} d := d.wk (by
+    intro ψ hψ;
+    simp_all)
   verum := verum
   and d₁ d₂ := d₁.and d₂
   or d := d.or

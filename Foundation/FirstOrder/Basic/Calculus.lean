@@ -77,6 +77,8 @@ namespace Derivation
 
 open Rewriting LawfulSyntacticRewriting
 
+variable {Γ Δ : Sequent L}
+
 def height {Δ : Sequent L} : ⊢ᴸᴷ¹ Δ → ℕ
   |    identity _ _ => 0
   |       cut dp dn => max dp.height dn.height + 1
@@ -137,31 +139,33 @@ private lemma unshift_shift (φ : Proposition L) :
 /-- Enumerates the end sequent by recursion on the local inference rules.
 This is a routine syntactic construction. -/
 def traversal [L.DecidableEq] : {Γ : Sequent L} → (⊢ᴸᴷ¹ Γ) → Γ.Traversal
-  | _, identity r v => (.atom (.rel r v)).succ (.nrel r v)
+  | _, identity r v =>
+      (Multiset.Traversal.atom (Semiformula.rel r v)).succ (Semiformula.nrel r v)
   | _, cut d dn => d.traversal.remove.add dn.traversal.remove
-  | _, contraction d => (d.traversal.cast (by abel)).remove
+  | _, contraction (φ := φ) d => (d.traversal.cast (by abel)).remove (a := φ)
   | _, weakening (φ := φ) d => d.traversal.succ φ
   | _, verum => .atom ⊤
   | _, or (φ := φ) (ψ := ψ) d =>
-      ((d.traversal.cast (by abel)).remove (a := ψ)).remove |>.succ (φ ⋎ ψ)
+      ((d.traversal.cast (by abel)).remove (a := ψ)).remove (a := φ) |>.succ (φ ⋎ ψ)
   | _, and (φ := φ) (ψ := ψ) d _ => d.traversal.remove.succ (φ ⋏ ψ)
   | _, all (Γ := Γ) (φ := φ) d =>
       ((d.traversal.remove.map (Rew.rewriteMap Nat.pred ▹ ·)).cast (by
-        simp [Rewriting.shifts, Multiset.map_map, Function.comp_def, unshift_shift])).succ (∀¹ φ)
+        simp [Rewriting.shifts, Multiset.map_map, unshift_shift])).succ (∀¹ φ)
   | _, exs (φ := φ) d => d.traversal.remove.succ (∃¹ φ)
 
 /-- Applies structural rules along supplied traversals (a routine derived rule). -/
 def contra [L.DecidableEq] (d : ⊢ᴸᴷ¹ Δ) (t : Γ.Traversal)
     (h : Δ ⊆ Γ := by simp) : ⊢ᴸᴷ¹ Γ :=
-  Structural.ofSubset d.traversal t d h
+  Structural.ofSubset (F := Proposition L) (𝔇 := Derivation (L := L))
+    (Γ := Δ) (Δ := Γ) (traversal (L := L) d) t d h
 
 def top [L.DecidableEq] (t : Δ.Traversal) (h : ⊤ ∈ Δ := by simp) : ⊢ᴸᴷ¹ Δ :=
-  verum.contra t (by simpa using h)
+  contra (L := L) verum t (by simpa using h)
 
 def identity' [L.DecidableEq] (r : L.Rel k) (v) (t : Δ.Traversal)
     (hpos : Semiformula.rel r v ∈ Δ := by simp)
     (hneg : Semiformula.nrel r v ∈ Δ := by simp) : ⊢ᴸᴷ¹ Δ :=
-  (identity r v).contra t <| by
+  contra (L := L) (identity r v) t <| by
     intro φ hφ
     rcases Multiset.mem_add.mp hφ with hφ | hφ <;> simp_all
 
@@ -176,15 +180,15 @@ def eta : (φ : Proposition L) → ⊢ᴸᴷ¹ ⦃φ, ∼φ⦄
   | .rel R v => identity R v
   | .nrel R v => (identity R v).cast (by simp [add_comm])
   | ⊤ => verum.weakening
-  | ⊥ => verum.weakening.cast (by simp [add_comm])
+  | ⊥ => (verum.weakening (φ := ⊥)).cast (by simp [add_comm])
   | φ ⋏ ψ =>
     (or (Γ := ⦃φ ⋏ ψ⦄) (φ := ∼φ) (ψ := ∼ψ)
       (tensor (Γ := ⦃∼φ⦄) (Δ := ⦃∼ψ⦄) (φ := φ) (ψ := ψ)
-        (.atom _) (.atom _) (eta φ).cast (eta ψ).cast).cast).cast (by simp [add_comm])
+        (Multiset.Traversal.atom _) (Multiset.Traversal.atom _) (eta φ).cast (eta ψ).cast).cast).cast (by simp [add_comm])
   | φ ⋎ ψ =>
     (or (Γ := ⦃∼φ ⋏ ∼ψ⦄) (φ := φ) (ψ := ψ)
       (tensor (Γ := ⦃φ⦄) (Δ := ⦃ψ⦄) (φ := ∼φ) (ψ := ∼ψ)
-        (.atom _) (.atom _) (eta φ) (eta ψ)).cast).cast (by simp [add_comm])
+        (Multiset.Traversal.atom _) (Multiset.Traversal.atom _) (eta φ) (eta ψ)).cast).cast (by simp [add_comm])
   | ∀¹ φ =>
     (all (Γ := ⦃∃¹ ∼φ⦄) (φ := φ)
       ((exs (Γ := ⦃φ.free⦄) (φ := ∼φ.shift) (t := &0)
@@ -211,7 +215,7 @@ instance : OneSidedLK.Cut (Derivation (L := L)) where
 lemma of_isClosed {Γ : Sequent L} (h : Γ.IsClosed) : Nonempty (⊢ᴸᴷ¹ Γ) := by
   classical
   rcases h with ⟨φ, hp, hn⟩;
-  exact ⟨(eta φ).contra default (by
+  exact ⟨contra (L := L) (eta φ) (default : Γ.Traversal) (by
     intro ψ hψ;
     simp only [Multiset.mem_add, Multiset.mem_atom_iff] at hψ;
     rcases hψ with rfl | rfl <;> assumption)⟩;
@@ -472,8 +476,8 @@ instance : Entailment.DeductiveExplosion (Theory L) where
     refine ⟨b.axioms, b.axioms_mem, ?_⟩
     have db : ⊢ᴸᴷ¹ (∼Sequent.embed b.axioms) + ⦃Rewriting.emb (⊥ : Sentence L)⦄ :=
       Derivation.cast b.derivation (by simp [Sequent.embed, add_comm])
-    exact (OneSidedLK.removeBot db).weakening.cast (by
-      simp [OneSidedLK.Pullback, Sequent.embed, add_comm])
+    exact ((OneSidedLK.removeBot db).weakening (φ := Rewriting.emb φ)).cast (by
+      simp [Sequent.embed, add_comm])
 
 lemma weakerThan_of_le {T U : Theory L} (h : T ⊆ U) : T ⪯ U :=
   Entailment.Axiomatized.weakerThanOfSubset h
@@ -502,7 +506,8 @@ lemma inconsistent_iff :
       d.cast (by rw [add_comm])
     exact ⟨Γ, hΓ, ⟨OneSidedLK.removeBot db⟩⟩
   · rintro ⟨Γ, hΓ, ⟨d⟩⟩
-    exact ⟨Γ, hΓ, ⟨d.weakening.cast (by simp [add_comm])⟩⟩
+    exact ⟨Γ, hΓ, ⟨(d.weakening (φ := Rewriting.emb (⊥ : Sentence L))).cast
+      (by simp [add_comm])⟩⟩
 
 open Entailment Derivation
 
@@ -552,10 +557,11 @@ noncomputable instance : Entailment.Deduction (Theory L) where
       simpa [hnχ] using b.axioms_mem χ hχ
     · exact Derivation.cast (Derivation.or (Γ := (∼Γ).map Rewriting.emb)
         (φ := Rewriting.emb (∼φ)) (ψ := Rewriting.emb ψ)
-        (b.derivation.contra
+        (contra (L := L) b.derivation
           (Γ := (∼Γ).map Rewriting.emb +
             ⦃Rewriting.emb (∼φ), Rewriting.emb ψ⦄)
-          default
+          (default : ((∼Γ).map Rewriting.emb +
+            ⦃Rewriting.emb (∼φ), Rewriting.emb ψ⦄).Traversal)
           (by simpa [OneSidedLK.Pullback, Multiset.tilde_def, Γ, add_assoc] using
             Multiset.map_subset_map (f := Rewriting.emb) <|
               Multiset.add_map_subset_map_filter_add_atom

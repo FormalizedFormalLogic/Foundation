@@ -125,14 +125,27 @@ lemma toList_ofList (l : List α) : (ofList l).toList = l := by
     rw [toList_cast]
     exact congrArg (List.cons a) ih
 
+private lemma cast_cast {s t u : Multiset α} (d : Traversal s) (h : s = t) (h' : t = u) :
+    (d.cast h).cast h' = d.cast (h.trans h') := by
+  cases h;
+  cases h';
+  rfl;
+
+private lemma cast_succ {s t : Multiset α} (d : Traversal s) (a : α) (h : s = t) :
+    (d.succ a).cast (congrArg (· + ⦃a⦄) h) = (d.cast h).succ a := by
+  cases h;
+  rfl;
+
+-- Unfold traversal indices when transporting the list reconstruction.
+set_option backward.isDefEq.respectTransparency false in
 lemma ofList_toList {s : Multiset α} (t : Traversal s) :
     (ofList t.toList).cast (by simp) = t := by
   induction t with
   | zero => rfl
   | succ a t ih =>
-    dsimp [toList, ofList]
-    have h₁ := congrArg (succ a) ih
-    convert h₁ using 1 <;> apply proof_irrelheq
+    simp only [toList, ofList];
+    rw [cast_cast];
+    exact (cast_succ (ofList t.toList) a t.coe_toList).trans (congrArg (succ a) ih);
 
 def equiv {s : Multiset α} : Traversal s ≃ {l : List α // (l : Multiset α) = s} where
   toFun t := ⟨t.toList, by simp⟩
@@ -146,6 +159,12 @@ def equiv {s : Multiset α} : Traversal s ≃ {l : List α // (l : Multiset α) 
 def map (f : α → β) {s : Multiset α} (t : Traversal s) : Traversal (s.map f) :=
   (ofList (t.toList.map f)).cast (by
     simpa only [Multiset.map_coe] using congrArg (Multiset.map f) t.coe_toList)
+
+/-- Construct a traversal of the elements satisfying a decidable predicate. -/
+def filter (p : α → Prop) [DecidablePred p] {s : Multiset α} (t : Traversal s) :
+    Traversal (s.filter p) :=
+  (ofList (t.toList.filter p)).cast (by
+    simpa only [Multiset.filter_coe] using congrArg (Multiset.filter p) t.coe_toList)
 
 /-- Construct a traversal after removing one occurrence of an element. -/
 def erase [DecidableEq α] (a : α) {s : Multiset α} (t : Traversal s) :
