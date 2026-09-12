@@ -52,6 +52,17 @@ lemma exists_bound_of_models_collectionAxiom {m : ℕ} {θ : ArithmeticSemisente
     fun x hx ↦ (hex x hx).imp fun u hu ↦ (heval x u).mpr hu;
   exact ⟨b, fun x hx ↦ (hb x hx).imp fun u hu ↦ ⟨le_of_lt hu.1, (heval x u).mp hu.2⟩⟩;
 
+lemma exists_bound_of_definable {Γ : Polarity} {s : ℕ}
+    (hcol : ∀ ψ : ArithmeticSemiformula ℕ 2, Hierarchy Γ s ψ →
+      V↓[ℒₒᵣ] ⊧ .univCl (collectionAxiom ψ))
+    {R : V → V → Prop} (hR : Γ-[s].DefinableRel R) (a : V) (h : ∀ x < a, ∃ y, R x y) :
+    ∃ b, ∀ x < a, ∃ y < b, R x y := by
+  obtain ⟨e, ψ, hψ, hiff⟩ := exists_hierarchy_eval_iff hR;
+  have heval : ∀ x y : V, R x y ↔ ψ.Eval ![x, y] e := fun x y ↦ by simpa using hiff ![x, y];
+  obtain ⟨b, hb⟩ := (models_collectionAxiom_iff ψ).mp (hcol ψ hψ) e a
+    fun x hx ↦ (h x hx).imp fun y hy ↦ (heval x y).mp hy;
+  exact ⟨b, fun x hx ↦ (hb x hx).imp fun y hy ↦ ⟨hy.1, (heval x y).mpr hy.2⟩⟩;
+
 end models
 
 section standardModel

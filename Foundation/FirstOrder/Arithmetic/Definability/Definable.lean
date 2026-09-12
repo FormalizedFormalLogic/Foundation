@@ -348,6 +348,13 @@ lemma of_sigma_of_pi (hσ : 𝚺-[m].Definable P) (hπ : 𝚷-[m].Definable P) :
     rcases hσ with ⟨φ, hp⟩; rcases hπ with ⟨ψ, hq⟩
     exact ⟨.mkDelta φ ψ, by intro v; simp [hp.df.iff, hq.df.iff], by intro v; simp [hp.df.iff]⟩
 
+lemma of_lt {C : HierarchySymbol} {s : ℕ} (hP : C.Definable P) (h : C.rank < s) :
+    Γ-[s].Definable P := by
+  rcases hP with ⟨φ, hφ⟩;
+  exact .of_sigma_of_pi
+    (.mkPolarity (Γ := 𝚺) φ.val (φ.hierarchy_of_lt h) fun _ ↦ hφ.iff.symm)
+    (.mkPolarity (Γ := 𝚷) φ.val (φ.hierarchy_of_lt h) fun _ ↦ hφ.iff.symm);
+
 lemma of_iff (H : ℌ.Definable Q) (h : ∀ x, P x ↔ Q x) : ℌ.Definable P := by
   rwa [show P = Q from by funext v; simp [h]]
 
@@ -930,5 +937,19 @@ lemma definablePred_of_hierarchy {φ : ArithmeticSemiformula ℕ 1} (hφ : Hiera
   (definable_of_hierarchy hφ e).of_iff fun v ↦ by
     have h : ![v 0] = v := (Matrix.fun_eq_vec_one v).symm
     simp [h]
+
+lemma definableRel_of_hierarchy {φ : ArithmeticSemiformula ℕ 2} (hφ : Hierarchy Γ s φ)
+    (e : ℕ → V) : Γ-[s].DefinableRel fun x y ↦ φ.Eval ![x, y] e :=
+  (definable_of_hierarchy hφ e).of_iff fun v ↦ by
+    have h : ![v 0, v 1] = v := (Matrix.fun_eq_vec_two v).symm
+    simp [h]
+
+lemma exists_hierarchy_eval_iff {P : (Fin k → V) → Prop} (hP : Γ-[s].Definable P) :
+    ∃ (e : ℕ → V) (φ : ArithmeticSemiformula ℕ k), Hierarchy Γ s φ ∧ ∀ v, P v ↔ φ.Eval v e := by
+  classical
+  rcases hP with ⟨φ, hφ⟩;
+  have : Inhabited V := Classical.inhabited_of_nonempty';
+  exact ⟨φ.val.enumerateFVar, Rew.rewriteMap φ.val.idxOfFVar ▹ φ.val, by simp,
+    fun _ ↦ by simp [Semiformula.eval_rewriteMap, hφ.df.iff]⟩;
 
 end FFL.FirstOrder.Arithmetic

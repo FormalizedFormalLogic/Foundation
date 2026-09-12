@@ -125,6 +125,13 @@ def mkPolarity (φ : ArithmeticSemiformula ξ n) : (Γ : Polarity) → Hierarchy
   · cases φ
     simpa using Hierarchy.of_zero (sigma_prop _)
 
+lemma hierarchy_of_lt {C : HierarchySymbol} {Γ : Polarity} {s : ℕ} (φ : C.Semiformula ξ n)
+    (h : C.rank < s) : Hierarchy Γ s φ.val := by
+  rcases C with ⟨_ | _ | _, m⟩;
+  . exact φ.sigma_prop.strict_mono _ h;
+  . exact φ.pi_prop.strict_mono _ h;
+  . exact (val_sigma φ ▸ φ.sigma.sigma_prop).strict_mono _ h;
+
 variable {M : Type*} [ORingStructure M]
 
 variable (M)

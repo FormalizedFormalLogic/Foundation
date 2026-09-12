@@ -371,6 +371,12 @@ lemma eval_insert2 {n} (φ : Semiformula L ξ (n + 2)) (u x w : M) (e : Fin n �
   exact Iff.of_eq (congrArg (fun c => Eval c f φ)
     (Fin.funext_two (by simp) (by simp) fun i => by simp))
 
+lemma eval_swap01 {n} (φ : Semiformula L ξ (n + 2)) (u w : M) (e : Fin n → M) :
+    Eval (u :> w :> e) f (φ ⇜ (#1 :> #0 :> (#·.succ.succ))) ↔ Eval (w :> u :> e) f φ := by
+  simp only [eval_substs, Function.comp_def];
+  exact Iff.of_eq (congrArg (fun c ↦ Eval c f φ)
+    (Fin.funext_two (by simp) (by simp) fun i ↦ by simp));
+
 @[simp] lemma eval_emb {f : ξ → M} (φ : Semiformula L Empty n) :
     Eval b f (Rewriting.emb (ξ := ξ) φ : Semiformula L ξ n) ↔ Eval b Empty.elim φ := by
   simp [eval_rew, Function.comp_def, Empty.eq_elim]

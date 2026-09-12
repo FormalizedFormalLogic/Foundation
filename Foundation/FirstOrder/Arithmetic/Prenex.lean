@@ -666,6 +666,32 @@ theorem exists_strictHierarchy_of_hierarchy
   obtain ⟨φ', hφ'⟩ := exists_prenex_of_hierarchy T h;
   exact ⟨φ'.val, Prenex.val_strictHierarchy, hφ'⟩;
 
+section
+
+variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻]
+
+lemma exists_strictHierarchy_eval_iff (hC : StrictCollection V s)
+    {φ : ArithmeticSemiformula ℕ 1} (hφ : Hierarchy Γ s φ) (f : ℕ → V) :
+    ∃ ψ : ArithmeticSemiformula ℕ 1, StrictHierarchy Γ s ψ ∧
+      ∀ x : V, ψ.Eval ![x] f ↔ φ.Eval ![x] f := by
+  obtain ⟨θ, hθ⟩ := Prenex.models_exists_prenex (φ := φ.toSemisentence ![#0]) (hφ.rew _);
+  use Rew.embSubsts (#0 :> fun i : Fin φ.fvSup ↦ (&(i : ℕ) : ArithmeticSemiterm ℕ 1)) ▹ θ.val;
+  and_intros;
+  . exact Prenex.val_strictHierarchy.rew _;
+  . intro x;
+    have hvec : (Semiterm.val (M := V) ![x] f) ∘
+        (#0 :> fun i : Fin φ.fvSup ↦ (&(i : ℕ) : ArithmeticSemiterm ℕ 1))
+        = (x :> fun i : Fin φ.fvSup ↦ f i) := by
+      funext i;
+      cases i using Fin.cases with
+      | zero => simp;
+      | succ i => simp;
+    simp only [Semiformula.eval_embSubsts, hvec];
+    exact (hθ V (fun _ ↦ hC) (x :> fun i : Fin φ.fvSup ↦ f i)).symm.trans
+      (φ.eval_toSemisentence_one x f);
+
+end
+
 end
 
 end Arithmetic
