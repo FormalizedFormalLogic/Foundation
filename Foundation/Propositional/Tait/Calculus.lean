@@ -43,15 +43,15 @@ instance : Structural (Derivation (α := α)) where
 
 /-- Enumerates the end sequent by recursion on the local inference rules.
 This is a routine syntactic construction. -/
-def traversal [DecidableEq α] : {Γ : Sequent α} → (⊢ᴸᴷ⁰ Γ) → Γ.Traversal
-  | _, identity a => (Multiset.Traversal.atom (NNFormula.atom a)).succ (NNFormula.natom a)
-  | _, cut d dn => d.traversal.remove.add dn.traversal.remove
-  | _, contraction (φ := φ) d => (d.traversal.cast (by abel)).remove (a := φ)
-  | _, weakening (φ := φ) d => d.traversal.succ φ
-  | _, verum => .atom ⊤
-  | _, or (φ := φ) (ψ := ψ) d =>
+def traversal [DecidableEq α] {Γ : Sequent α} : ⊢ᴸᴷ⁰ Γ → Γ.Traversal
+  | identity a => (Multiset.Traversal.atom (NNFormula.atom a)).succ (NNFormula.natom a)
+  | cut d dn => d.traversal.remove.add dn.traversal.remove
+  | contraction (φ := φ) d => (d.traversal.cast (by abel)).remove (a := φ)
+  | weakening (φ := φ) d => d.traversal.succ φ
+  | verum => .atom ⊤
+  | or (φ := φ) (ψ := ψ) d =>
       ((d.traversal.cast (by abel)).remove (a := ψ)).remove (a := φ) |>.succ (φ ⋎ ψ)
-  | _, and (φ := φ) (ψ := ψ) d _ => d.traversal.remove.succ (φ ⋏ ψ)
+  | and (φ := φ) (ψ := ψ) d _ => d.traversal.remove.succ (φ ⋏ ψ)
 
 /-- Applies structural rules along supplied traversals (a routine derived rule). -/
 def contra [DecidableEq α] (d : ⊢ᴸᴷ⁰ Δ) (t : Γ.Traversal)

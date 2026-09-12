@@ -42,6 +42,38 @@ namespace Semiformula
 
 variable {L : Language} {Ξ ξ : Type*}
 
+section Decidable
+
+variable [L.DecidableEq] [DecidableEq Ξ] [DecidableEq ξ]
+
+/-- Decides formula equality by structural recursion (a routine syntactic construction). -/
+def hasDecEq : {N n : ℕ} → (φ ψ : Semiformula L Ξ ξ N n) → Decidable (φ = ψ)
+  | _, _, φ, ψ => by
+    cases φ <;> cases ψ <;> try { apply isFalse; intro h; cases h; done };
+    case verum.verum => exact isTrue rfl;
+    case falsum.falsum => exact isTrue rfl;
+    case rel.rel k r v k' r' v' | nrel.nrel k r v k' r' v' =>
+      by_cases h : k = k';
+      . subst k';
+        simpa only [rel.injEq, nrel.injEq, heq_eq_eq, true_and] using
+          (inferInstance : Decidable (r = r' ∧ v = v'));
+      . exact isFalse (by intro e; cases e; exact h rfl);
+    case bvar.bvar X t Y u | nbvar.nbvar X t Y u |
+        fvar.fvar X t Y u | nfvar.nfvar X t Y u =>
+      simpa only [bvar.injEq, nbvar.injEq, fvar.injEq, nfvar.injEq] using
+        (inferInstance : Decidable (X = Y ∧ t = u));
+    case and.and φ ψ φ' ψ' | or.or φ ψ φ' ψ' =>
+      letI := hasDecEq φ φ';
+      letI := hasDecEq ψ ψ';
+      simpa only [and.injEq, or.injEq] using
+        (inferInstance : Decidable (φ = φ' ∧ ψ = ψ'));
+    case all₁.all₁ φ ψ | exs₁.exs₁ φ ψ | all₂.all₂ φ ψ | exs₂.exs₂ φ ψ =>
+      simpa only [all₁.injEq, exs₁.injEq, all₂.injEq, exs₂.injEq] using hasDecEq φ ψ;
+termination_by _ _ φ _ => sizeOf φ
+instance : DecidableEq (Semiformula L Ξ ξ N n) := hasDecEq
+
+end Decidable
+
 instance : Top (Semiformula L Ξ ξ N n) := ⟨verum⟩
 
 instance : Bot (Semiformula L Ξ ξ N n) := ⟨falsum⟩
