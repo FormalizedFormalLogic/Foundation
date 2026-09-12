@@ -7,6 +7,7 @@ public import Foundation.FirstOrder.Arithmetic.Basic.Model
 public import Foundation.FirstOrder.Arithmetic.Basic.Monotone
 public import Foundation.FirstOrder.Arithmetic.Basic.StrictHierarchy
 public import Foundation.FirstOrder.Arithmetic.BoundedCollection
+public import Foundation.FirstOrder.Arithmetic.Collection.Basic
 public import Foundation.FirstOrder.Arithmetic.Definability
 public import Foundation.FirstOrder.Arithmetic.Definability.Absoluteness
 public import Foundation.FirstOrder.Arithmetic.Definability.BoundedDefinable

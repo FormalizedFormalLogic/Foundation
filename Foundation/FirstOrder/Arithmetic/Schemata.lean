@@ -77,6 +77,27 @@ prefix:max "𝗟𝚷" => LPi
 
 variable {L}
 
+def collectionAxiom {ξ} (φ : Semiformula L ξ 2) : Formula L ξ :=
+  “∀ a, (∀ x < a, ∃ y, !φ x y) → ∃ b, ∀ x < a, ∃ y < b, !φ x y”
+
+def CollectionScheme (Γ : ArithmeticSemiformula ℕ 2 → Prop) : ArithmeticTheory :=
+  { ψ | ∃ φ : ArithmeticSemiformula ℕ 2, Γ φ ∧ ψ = .univCl (collectionAxiom φ) }
+
+abbrev CollectionOnHierarchy (Γ : Polarity) (n : ℕ) : ArithmeticTheory :=
+  𝗜𝚺₀ ∪ CollectionScheme (Arithmetic.Hierarchy Γ n)
+
+prefix:max "𝗕 " => CollectionOnHierarchy
+
+abbrev BSigma (n : ℕ) : ArithmeticTheory := 𝗕 𝚺 n
+
+prefix:max "𝗕𝚺" => BSigma
+
+notation "𝗕𝚺₁" => BSigma 1
+
+abbrev BPi (n : ℕ) : ArithmeticTheory := 𝗕 𝚷 n
+
+prefix:max "𝗕𝚷" => BPi
+
 variable {C C' : ArithmeticSemiformula ℕ 1 → Prop}
 
 lemma InductionScheme_subset (h : ∀ {φ : ArithmeticSemiformula ℕ 1},  C φ → C' φ) : InductionScheme ℒₒᵣ C ⊆ InductionScheme ℒₒᵣ C' := by
@@ -149,6 +170,36 @@ instance : 𝗘𝗤 ℒₒᵣ ⪯ 𝗣𝗔 :=
 -- `𝗘𝗤 ℒₒᵣ ⪯ T`, so instance search cannot infer it.
 lemma eq_weakerThan_of_ISigma {T : ArithmeticTheory} {s : ℕ} [𝗜𝚺 s ⪯ T] : 𝗘𝗤 ℒₒᵣ ⪯ T :=
   Entailment.WeakerThan.trans (inferInstance : 𝗘𝗤 ℒₒᵣ ⪯ 𝗜𝚺₀) (ISigma_weakerThan_of_le_trans (by omega) ‹𝗜𝚺 s ⪯ T›)
+
+variable {C C' : ArithmeticSemiformula ℕ 2 → Prop}
+
+lemma CollectionScheme_subset (h : ∀ {φ : ArithmeticSemiformula ℕ 2}, C φ → C' φ) :
+    CollectionScheme C ⊆ CollectionScheme C' := by
+  rintro _ ⟨φ, hφ, rfl⟩; exact ⟨φ, h hφ, rfl⟩
+
+lemma mem_CollectionScheme_of_mem {φ : ArithmeticSemiformula ℕ 2} (hφ : C φ) :
+    .univCl (collectionAxiom φ) ∈ CollectionScheme C := ⟨φ, hφ, rfl⟩
+
+variable {Γ : Polarity}
+
+lemma CollectionOnHierarchy_subset_mono {s₁ s₂} (h : s₁ ≤ s₂) : 𝗕 Γ s₁ ⊆ 𝗕 Γ s₂ :=
+  Set.union_subset_union_right _ (CollectionScheme_subset (fun H ↦ H.mono h))
+
+lemma CollectionOnHierarchy_weakerThan_of_le {s₁ s₂} (h : s₁ ≤ s₂) : 𝗕 Γ s₁ ⪯ 𝗕 Γ s₂ :=
+  Entailment.WeakerThan.ofSubset (CollectionOnHierarchy_subset_mono h)
+
+lemma CollectionOnHierarchy_subset_BSigma_succ (Γ : Polarity) (n : ℕ) : 𝗕 Γ n ⊆ 𝗕𝚺 (n + 1) :=
+  Set.union_subset_union_right _ (CollectionScheme_subset (·.accum 𝚺))
+
+lemma CollectionOnHierarchy_weakerThan_BSigma_succ (Γ : Polarity) (n : ℕ) : 𝗕 Γ n ⪯ 𝗕𝚺 (n + 1) :=
+  Entailment.WeakerThan.ofSubset (CollectionOnHierarchy_subset_BSigma_succ Γ n)
+
+instance (Γ : Polarity) (n : ℕ) : 𝗜𝚺₀ ⪯ 𝗕 Γ n :=
+  Entailment.WeakerThan.ofSubset Set.subset_union_left
+
+instance (Γ : Polarity) (n : ℕ) : 𝗘𝗤 ℒₒᵣ ⪯ 𝗕 Γ n :=
+  have : 𝗘𝗤 ℒₒᵣ ⪯ 𝗜𝚺₀ := inferInstance
+  Entailment.WeakerThan.trans this inferInstance
 
 end axioms
 
