@@ -1,7 +1,6 @@
 module
 
 public import Foundation.FirstOrder.NegationTranslation.GoedelGentzen
-public import Foundation.FirstOrder.Basic.Coding
 
 /-!
 # Hauptsatz of classical first-order logic
@@ -16,7 +15,7 @@ namespace FFL.FirstOrder.Derivation
 variable {L : Language}
 
 inductive Positive (Ξ : Sequent L) : Sequent L → Type _
-| refl : Ξ.Traversal → Positive Ξ Ξ
+| refl : Positive Ξ Ξ
 | weakening : Positive Ξ Γ → Positive Ξ (Γ + ⦃φ⦄)
 | contraction : Positive Ξ (Γ + ⦃φ, φ⦄) → Positive Ξ (Γ + ⦃φ⦄)
 | or : Positive Ξ (Γ + ⦃φ, ψ⦄) → Positive Ξ (Γ + ⦃φ ⋎ ψ⦄)
@@ -28,19 +27,14 @@ namespace Positive
 
 variable {Ξ Γ Δ : Sequent L}
 
-/-- Recovers the traversal stored at the source of a positive derivation. -/
-def sourceTraversal : {Γ : Sequent L} → Ξ ⟶⁺ Γ → Ξ.Traversal
-  | _, .refl t => t
-  | _, .weakening d | _, .contraction d | _, .or d | _, .exs d => d.sourceTraversal
-
-/-- Enumerates the target of a positive derivation. -/
-def traversal [L.DecidableEq] : {Γ : Sequent L} → Ξ ⟶⁺ Γ → Γ.Traversal
-  | _, .refl t => t
-  | _, .weakening (φ := φ) d => d.traversal.succ φ
-  | _, .contraction (φ := φ) d => (d.traversal.cast (by abel)).remove (a := φ)
-  | _, .or (φ := φ) (ψ := ψ) d =>
-      ((d.traversal.cast (by abel)).remove (a := ψ)).remove (a := φ) |>.succ (φ ⋎ ψ)
-  | _, .exs (φ := φ) d => d.traversal.remove.succ (∃¹ φ)
+/-- Transports a traversal of the source to the target of a positive derivation. -/
+def traversal [L.DecidableEq] : {Γ : Sequent L} → Ξ ⟶⁺ Γ → Ξ.Traversal → Γ.Traversal
+  | _, .refl, tΞ => tΞ
+  | _, .weakening (φ := φ) d, tΞ => (d.traversal tΞ).succ φ
+  | _, .contraction (φ := φ) d, tΞ => ((d.traversal tΞ).cast (by abel)).remove (a := φ)
+  | _, .or (φ := φ) (ψ := ψ) d, tΞ =>
+      (((d.traversal tΞ).cast (by abel)).remove (a := ψ)).remove (a := φ) |>.succ (φ ⋎ ψ)
+  | _, .exs (φ := φ) d, tΞ => (d.traversal tΞ).remove.succ (∃¹ φ)
 
 instance : Structural (Positive Ξ) where
   weakening d := d.weakening
@@ -49,45 +43,45 @@ instance : Structural (Positive Ξ) where
 def ofSubset [L.DecidableEq] (tΞ : Ξ.Traversal) (tΓ : Γ.Traversal)
     (ss : Ξ ⊆ Γ) : Ξ ⟶⁺ Γ :=
   Structural.ofSubset (F := Proposition L) (𝔇 := Positive Ξ)
-    (Γ := Ξ) (Δ := Γ) tΞ tΓ (.refl tΞ) ss
+    (Γ := Ξ) (Δ := Γ) tΞ tΓ .refl ss
 
 def trans {Ξ Γ Δ : Sequent L} : Ξ ⟶⁺ Γ → Γ ⟶⁺ Δ → Ξ ⟶⁺ Δ
   | b,    or d => or (b.trans d)
   | b,   exs d => exs (b.trans d)
   | b, weakening d => weakening (b.trans d)
   | b, contraction d => contraction (b.trans d)
-  | b, .refl _ => b
+  | b, .refl => b
 
 def cast {Ξ Γ Ξ' Γ' : Sequent L} (d : Ξ ⟶⁺ Γ)
     (hΞ : Ξ = Ξ' := by abel) (hΓ : Γ = Γ' := by abel) : Ξ' ⟶⁺ Γ' :=
   hΞ ▸ hΓ ▸ d
 
-def addLeft [L.DecidableEq] (tΔ : Δ.Traversal) : {Γ : Sequent L} → Ξ ⟶⁺ Γ → Δ + Ξ ⟶⁺ Δ + Γ
+def addLeft (Δ : Sequent L) : {Γ : Sequent L} → Ξ ⟶⁺ Γ → Δ + Ξ ⟶⁺ Δ + Γ
   | _, or (Γ := Γ) (φ := φ) (ψ := ψ) d =>
       cast (.or (Ξ := Δ + Ξ) (Γ := Δ + Γ) (φ := φ) (ψ := ψ)
-        (cast (addLeft tΔ d)))
+        (cast (addLeft Δ d)))
   | _, exs (Γ := Γ) (φ := φ) (t := t) d =>
       cast (.exs (Ξ := Δ + Ξ) (Γ := Δ + Γ) (φ := φ) (t := t)
-        (cast (addLeft tΔ d)))
-  | _, weakening (φ := φ) d => cast (.weakening (φ := φ) (addLeft tΔ d))
+        (cast (addLeft Δ d)))
+  | _, weakening (φ := φ) d => cast (.weakening (φ := φ) (addLeft Δ d))
   | _, contraction (Γ := Γ) (φ := φ) d =>
       cast (.contraction (Γ := Δ + Γ) (φ := φ)
-        (cast (addLeft tΔ d) (hΞ := rfl) (hΓ := by abel)))
-  | _, .refl t => .refl (tΔ.add t)
+        (cast (addLeft Δ d) (hΞ := rfl) (hΓ := by abel)))
+  | _, .refl => .refl
 
-def cons [L.DecidableEq] (φ) (d : Ξ ⟶⁺ Γ) : Ξ + ⦃φ⦄ ⟶⁺ Γ + ⦃φ⦄ :=
-  cast (addLeft (.atom φ) d)
+def cons (φ) (d : Ξ ⟶⁺ Γ) : Ξ + ⦃φ⦄ ⟶⁺ Γ + ⦃φ⦄ :=
+  cast (addLeft ⦃φ⦄ d)
 
-def add [L.DecidableEq] {Γ Δ Ξ Θ : Sequent L} (d : Γ ⟶⁺ Δ) (b : Ξ ⟶⁺ Θ) :
+def add {Γ Δ Ξ Θ : Sequent L} (d : Γ ⟶⁺ Δ) (b : Ξ ⟶⁺ Θ) :
     Γ + Ξ ⟶⁺ Δ + Θ :=
-  (addLeft d.sourceTraversal b).trans (cast (addLeft b.traversal d))
+  (addLeft Γ b).trans (cast (addLeft Θ d))
 
 def graft {Ξ Γ : Sequent L} (b : ⊢ᴸᴷ¹ Ξ) : Ξ ⟶⁺ Γ → ⊢ᴸᴷ¹ Γ
   |    or d => .or (d.graft b)
   |   exs d => .exs (d.graft b)
   | weakening d => .weakening (d.graft b)
   | contraction d => .contraction (d.graft b)
-  | .refl _ => b
+  | .refl => b
 
 lemma graft_isCutFree_of_isCutFree {b : ⊢ᴸᴷ¹ Ξ} {d : Ξ ⟶⁺ Γ} (hb : Derivation.IsCutFree b) : Derivation.IsCutFree (d.graft b) := by
   induction d <;> simp [graft, *]
@@ -115,7 +109,7 @@ omit [L.DecidableEq] in
 
 namespace StrongerThan
 
-protected def refl (p : Sequent L) (t : (∼p).Traversal) : p ≼ p := ⟨.refl t⟩
+protected def refl (p : Sequent L) : p ≼ p := ⟨.refl⟩
 
 def trans {r q p : Sequent L} (srq : r ≼ q) (sqp : q ≼ p) : r ≼ p := ⟨sqp.val.trans srq.val⟩
 
@@ -123,50 +117,35 @@ def ofSubset {q p : Sequent L} (tp : (∼p).Traversal) (tq : (∼q).Traversal)
     (h : q ⊇ p) : q ≼ p :=
   ⟨.ofSubset tp tq <| Multiset.map_subset_map h⟩
 
-def and {p : Sequent L} (tp : (∼p).Traversal) (φ ψ : Proposition L) :
-    p + ⦃φ ⋏ ψ⦄ ≼ p + ⦃φ, ψ⦄ := by
-  let t := (tp.succ (∼φ)).succ (∼ψ)
-  let d : ∼p + ⦃∼φ, ∼ψ⦄ ⟶⁺ ∼p + ⦃∼φ ⋎ ∼ψ⦄ :=
-    .or (.refl (t.cast (by abel)))
-  exact ⟨d.cast (by simp) (by simp)⟩
+def K_left {p : Sequent L} (φ ψ : Proposition L) :
+    p + ⦃φ ⋏ ψ⦄ ≼ p + ⦃φ⦄ := by
+  let d : ∼p + ⦃∼φ⦄ ⟶⁺ ∼p + ⦃∼φ ⋎ ∼ψ⦄ :=
+    .or (.cast (.weakening (φ := ∼ψ) (.refl : ∼p + ⦃∼φ⦄ ⟶⁺ ∼p + ⦃∼φ⦄)) rfl);
+  exact ⟨d.cast (by simp) (by simp)⟩;
 
-def K_left {p : Sequent L} (tp : (∼p).Traversal) (φ ψ : Proposition L) :
-    p + ⦃φ ⋏ ψ⦄ ≼ p + ⦃φ⦄ :=
-  trans (and tp φ ψ) (ofSubset ((tp.succ (∼φ)).cast (by simp))
-    (((tp.succ (∼φ)).succ (∼ψ)).cast (by simp; abel)) <| by
-    intro θ hθ
-    simp only [Multiset.mem_add] at *
-    tauto)
+def K_right {p : Sequent L} (φ ψ : Proposition L) :
+    p + ⦃φ ⋏ ψ⦄ ≼ p + ⦃ψ⦄ := by
+  let d : ∼p + ⦃∼ψ⦄ ⟶⁺ ∼p + ⦃∼φ ⋎ ∼ψ⦄ :=
+    .or (.cast (.weakening (φ := ∼φ) (.refl : ∼p + ⦃∼ψ⦄ ⟶⁺ ∼p + ⦃∼ψ⦄)) rfl);
+  exact ⟨d.cast (by simp) (by simp)⟩;
 
-def K_right {p : Sequent L} (tp : (∼p).Traversal) (φ ψ : Proposition L) :
-    p + ⦃φ ⋏ ψ⦄ ≼ p + ⦃ψ⦄ :=
-  trans (and tp φ ψ) (ofSubset ((tp.succ (∼ψ)).cast (by simp))
-    (((tp.succ (∼φ)).succ (∼ψ)).cast (by simp; abel)) <| by
-    intro θ hθ
-    simp only [Multiset.mem_add] at *
-    tauto)
-
-def all {p : Sequent L} (tp : (∼p).Traversal) (φ : Semiproposition L 1) (t) :
+def all {p : Sequent L} (φ : Semiproposition L 1) (t) :
     p + ⦃∀¹ φ⦄ ≼ p + ⦃φ/[t]⦄ := by
-  let d : ∼p + ⦃(∼φ)/[t]⦄ ⟶⁺ ∼p + ⦃∃¹ ∼φ⦄ := .exs (.refl (tp.succ _))
-  exact ⟨d.cast (by simp) (by simp)⟩
+  let d : ∼p + ⦃(∼φ)/[t]⦄ ⟶⁺ ∼p + ⦃∃¹ ∼φ⦄ := .exs .refl;
+  exact ⟨d.cast (by simp) (by simp)⟩;
 
-def minLeLeft (p q : Sequent L) (tp : (∼p).Traversal) (tq : (∼q).Traversal) :
-    p ⊓ q ≼ p :=
-  ofSubset tp (by simpa [inf_def] using tp.add tq) (by intro φ hφ; simp_all [inf_def])
+def minLeLeft (p q : Sequent L) (tq : (∼q).Traversal) : p ⊓ q ≼ p :=
+  ⟨Positive.cast (Structural.weakenMany tq (.refl : ∼p ⟶⁺ ∼p)) rfl (by simp [inf_def])⟩
 
-def minLeRight (p q : Sequent L) (tp : (∼p).Traversal) (tq : (∼q).Traversal) :
-    p ⊓ q ≼ q :=
-  ofSubset tq (by simpa [inf_def] using tp.add tq) (by intro φ hφ; simp_all [inf_def])
+def minLeRight (p q : Sequent L) (tp : (∼p).Traversal) : p ⊓ q ≼ q :=
+  ⟨Positive.cast (Structural.weakenMany tp (.refl : ∼q ⟶⁺ ∼q)) rfl
+    (by simp [inf_def, add_comm])⟩
 
-def leMinOfle {r p q : Sequent L} (srp : r ≼ p) (srq : r ≼ q) : r ≼ p ⊓ q := ⟨
-  let d : ∼p + ∼q ⟶⁺ ∼r := Positive.cast
-    (Structural.contractMany (F := Proposition L) (𝔇 := Positive (∼p + ∼q))
-      (Δ := 0) srp.val.traversal (Positive.cast (srp.val.add srq.val)))
-  neg_inf_p_eq _ _ ▸ d⟩
-
-def leMinRightOfLe {p q : Sequent L} (s : q ≼ p) : q ≼ p ⊓ q :=
-  leMinOfle s (.refl q s.val.traversal)
+def leMinRightOfLe {p q : Sequent L} (s : q ≼ p) (tq : (∼q).Traversal) : q ≼ p ⊓ q := by
+  let d : ∼p + ∼q ⟶⁺ ∼q + ∼q := (s.val.addLeft (∼q)).cast;
+  let d' : ∼p + ∼q ⟶⁺ ∼q :=
+    Positive.cast (Structural.contractMany (Δ := 0) tq (Positive.cast d rfl)) rfl;
+  exact ⟨d'.cast (by simp [inf_def]) rfl⟩;
 
 end StrongerThan
 
@@ -261,17 +240,18 @@ def explosion {p : Sequent L} (b : p ⊩ ⊥) : (φ : Propositionᵢ L) → p �
 def efq (φ : Propositionᵢ L) : ⊩ ⊥ 🡒 φ :=
   fun _ _ ↦ implyEquiv.symm fun _ _ d ↦ d.explosion φ
 
-def implyOf {φ ψ : Propositionᵢ L}
+def implyOf {φ ψ : Propositionᵢ L} (tp : (∼p).Traversal)
     (b : (q : Sequent L) → (∼q).Traversal → q ⊩ φ → p ⊓ q ⊩ ψ) :
     p ⊩ φ 🡒 ψ := implyEquiv.symm fun q sqp fφ ↦
-  let fψ : p ⊓ q ⊩ ψ := b q sqp.val.traversal fφ
-  fψ.monotone (StrongerThan.leMinRightOfLe sqp)
+  let tq := sqp.val.traversal tp
+  let fψ : p ⊓ q ⊩ ψ := b q tq fφ
+  fψ.monotone (StrongerThan.leMinRightOfLe sqp tq)
 
 open LawfulSyntacticRewriting
 
-def modusPonens {φ ψ : Propositionᵢ L} (tp : (∼p).Traversal)
+def modusPonens {φ ψ : Propositionᵢ L}
     (f : p ⊩ φ 🡒 ψ) (g : p ⊩ φ) : p ⊩ ψ :=
-  f.implyEquiv p (StrongerThan.refl p tp) g
+  f.implyEquiv p (StrongerThan.refl p) g
 
 abbrev ContextForces (p : Sequent L) (Γ : LJ.Sequent L) :=
   (φ : Propositionᵢ L) → φ ∈ Γ → p ⊩ φ
@@ -297,20 +277,6 @@ def HeadForces (p : Sequent L) : LJ.Head L → Type u
   | none => p ⊩ ⊥
   | some φ => p ⊩ φ
 
-def HeadForces.ofSubset {Ξ Λ : LJ.Head L} (h : Ξ ⊆ Λ) :
-    HeadForces p Ξ → HeadForces p Λ := by
-  intro b
-  cases Ξ with
-  | none => cases Λ with
-    | none => exact b
-    | some φ => exact b.explosion φ
-  | some φ => cases Λ with
-    | none => simp at h
-    | some ψ =>
-        have : φ = ψ := Option.some_subset_some.mp h
-        subst ψ
-        exact b
-
 omit [L.DecidableEq] in
 private lemma rewrite_shift_eq (t : SyntacticTerm L) (φ : Propositionᵢ L) :
     Rew.rewrite (t :>ₙ fun x ↦ &x) ▹ Rewriting.shift φ = φ := by
@@ -335,12 +301,12 @@ def sound {Γ : LJ.Sequent L} {Ξ : LJ.Head L}
   | .verum => implyEquiv.symm fun _ _ h ↦ h
   | .falsum => b ⊥ (by simp)
   | .positiveImply d => implyEquiv.symm fun q sqp bφ ↦
-      sound d q sqp.val.traversal <| (b.monotone sqp).cons bφ
+      sound d q (sqp.val.traversal tp) <| (b.monotone sqp).cons bφ
   | .negativeImply (φ := φ) (ψ := ψ) (Γ := Γ) (Δ := Δ) dφ d =>
       let bΓ := b.ofSubset (by intro θ hθ; simp_all)
       let bΔ := b.ofSubset (by intro θ hθ; simp_all)
       let bi : p ⊩ φ 🡒 ψ := b _ (by simp)
-      sound d p tp <| bΔ.cons (bi.modusPonens tp <| sound dφ p tp bΓ)
+      sound d p tp <| bΔ.cons (bi.modusPonens <| sound dφ p tp bΓ)
   | .positiveAnd dφ dψ =>
       andEquiv.symm ⟨sound dφ p tp b, sound dψ p tp b⟩
   | .negativeAnd (φ := φ) (ψ := ψ) (Γ := Γ) d =>
@@ -391,14 +357,14 @@ def relRefl {k} (R : L.Rel k) (v : Fin k → SyntacticTerm L) : ⦃.rel R v⦄ �
 
 protected def refl.or {φ ψ : Proposition L}
     (ihφ : ⦃φ⦄ ⊩ φᴺ) (ihψ : ⦃ψ⦄ ⊩ ψᴺ) : ⦃φ ⋎ ψ⦄ ⊩ (φ ⋎ ψ)ᴺ :=
-  implyOf fun q tq dq ↦
+  implyOf (.atom _) fun q tq dq ↦
     let ⟨dφ, dψ⟩ : q ⊩ ∼φᴺ × q ⊩ ∼ψᴺ := dq.andEquiv
     let tφ : (∼(⦃φ⦄ : Sequent L)).Traversal := .atom _
     let tψ : (∼(⦃ψ⦄ : Sequent L)).Traversal := .atom _
     let bφ : ⦃φ⦄ ⊓ q ⊩ ⊥ := dφ.implyEquiv (⦃φ⦄ ⊓ q)
-      (.minLeRight _ _ tφ tq) (ihφ.monotone (.minLeLeft _ _ tφ tq))
+      (.minLeRight _ _ tφ) (ihφ.monotone (.minLeLeft _ _ tq))
     let bψ : ⦃ψ⦄ ⊓ q ⊩ ⊥ := dψ.implyEquiv (⦃ψ⦄ ⊓ q)
-      (.minLeRight _ _ tψ tq) (ihψ.monotone (.minLeLeft _ _ tψ tq))
+      (.minLeRight _ _ tψ) (ihψ.monotone (.minLeLeft _ _ tq))
     let ⟨bbφ, hbbφ⟩ := bφ.falsumEquiv
     let ⟨bbψ, hbbψ⟩ := bψ.falsumEquiv
     let bbφ' : ⊢ᴸᴷ¹ ∼q + ⦃∼φ⦄ := Derivation.cast bbφ (by simp [inf_def]; abel)
@@ -411,14 +377,14 @@ protected def refl.or {φ ψ : Proposition L}
 set_option backward.isDefEq.respectTransparency false in
 protected def refl.exs {φ : Semiproposition L 1}
     (d : ∀ x, ⦃φ/[&x]⦄ ⊩ (φ/[&x])ᴺ) : ⦃∃¹ φ⦄ ⊩ (∃¹ φ)ᴺ :=
-  implyOf fun q tq f ↦
+  implyOf (.atom _) fun q tq f ↦
     let x := Sequent.newVar (∼q + ⦃∀¹ ∼φ⦄)
     let ih : ⦃φ/[&x]⦄ ⊩ φᴺ/[&x] := cast (d x) (by simp [Semiformula.subst_doubleNegation])
     let b : ⦃φ/[&x]⦄ ⊓ q ⊩ ⊥ :=
       let tφ : (∼(⦃φ/[&x]⦄ : Sequent L)).Traversal := .atom _
       (f.allEquiv &x).implyEquiv (⦃φ/[&x]⦄ ⊓ q)
-        (StrongerThan.minLeRight _ _ tφ tq)
-        (ih.monotone (StrongerThan.minLeLeft _ _ tφ tq))
+        (StrongerThan.minLeRight _ _ tφ)
+        (ih.monotone (StrongerThan.minLeLeft _ _ tq))
     let ⟨b, hb⟩ := b.falsumEquiv
     let hp : ¬(∼φ).FVar? x := by
       have : ¬(∀¹ ∼φ).FVar? x := Sequent.not_fvar?_newVar (by simp)
@@ -437,44 +403,42 @@ set_option backward.isDefEq.respectTransparency false in
 protected def refl : (φ : Proposition L) → ⦃φ⦄ ⊩ φᴺ
   |         ⊤ => implyEquiv.symm fun q sqp dφ ↦ dφ
   |         ⊥ => falsumEquiv.symm ⟨Derivation.verum, by simp⟩
-  |  .rel R v => implyOf fun q tq dq ↦
+  |  .rel R v => implyOf (.atom _) fun q tq dq ↦
     let tr : (∼(⦃.rel R v⦄ : Sequent L)).Traversal := .atom _
     let b : ⦃.rel R v⦄ ⊓ q ⊩ rel R v :=
-      (relRefl R v).monotone (StrongerThan.minLeLeft _ _ tr tq)
-    dq.implyEquiv (⦃.rel R v⦄ ⊓ q) (StrongerThan.minLeRight _ _ tr tq) b
-  | .nrel R v => implyOf fun q _ dq ↦
+      (relRefl R v).monotone (StrongerThan.minLeLeft _ _ tq)
+    dq.implyEquiv (⦃.rel R v⦄ ⊓ q) (StrongerThan.minLeRight _ _ tr) b
+  | .nrel R v => implyOf (.atom _) fun q _ dq ↦
     let ⟨d, hd⟩ := dq.relEquiv
     falsumEquiv.symm ⟨Derivation.cast d (by simp [inf_def]; abel), by simpa using hd⟩
   |     φ ⋏ ψ =>
     let ihφ : ⦃φ⦄ ⊩ φᴺ := Forces.refl φ
     let ihψ : ⦃ψ⦄ ⊩ ψᴺ := Forces.refl ψ
-    andEquiv.symm ⟨by simpa using ihφ.monotone (.K_left (p := 0) .zero φ ψ),
-      by simpa using ihψ.monotone (.K_right (p := 0) .zero φ ψ)⟩
+    andEquiv.symm ⟨by simpa using ihφ.monotone (.K_left (p := 0) φ ψ),
+      by simpa using ihψ.monotone (.K_right (p := 0) φ ψ)⟩
   |     φ ⋎ ψ => refl.or (Forces.refl φ) (Forces.refl ψ)
   |      ∀¹ φ => allEquiv.symm fun t ↦
     let b : ⦃φ/[t]⦄ ⊩ φᴺ/[t] := by simpa [Semiformula.rew_doubleNegation] using Forces.refl (φ/[t])
-    by simpa using b.monotone (StrongerThan.all (p := 0) .zero φ t)
+    by simpa using b.monotone (StrongerThan.all (p := 0) φ t)
   |      ∃¹ φ => refl.exs fun x ↦ Forces.refl (φ/[&x])
   termination_by φ => φ.complexity
 
 end Forces
 
-def constructiveHauptsatz {Γ : Sequent L} (d : ⊢ᴸᴷ¹ Γ) :
+def hauptsatz {Γ : Sequent L} (d : ⊢ᴸᴷ¹ Γ) :
     {d : ⊢ᴸᴷ¹ Γ // Derivation.IsCutFree d} := by
-  let tΓ : (∼(∼Γ)).Traversal := d.traversal.cast (by simp)
+  let t := d.traversal
+  let tΓ : (∼(∼Γ)).Traversal := t.cast (by simp)
+  let tNegΓ : (∼Γ).Traversal := t.map (∼·)
   have f : ((ψ : Propositionᵢ L) → ψ ∈ (∼Γ)ᴺ → Forces (∼Γ) ψ) → Forces (∼Γ) ⊥ :=
     Forces.sound d.gödelGentzen (∼Γ) tΓ
   have g : (ψ : Propositionᵢ L) → ψ ∈ (∼Γ)ᴺ → Forces (∼Γ) ψ := fun φ hφ ↦
-    let t : (∼Γ).Traversal := d.traversal.map (∼·)
-    have φ₀ := t.getPreimage (f := fun θ : Proposition L ↦ θᴺ)
+    have φ₀ := tNegΓ.getPreimage (f := fun θ : Proposition L ↦ θᴺ)
       (by simpa [Sequent.doubleNegation] using hφ)
     have h : Forces (∼Γ) (φ₀.val)ᴺ := (Forces.refl φ₀.val).monotone <|
       StrongerThan.ofSubset (.atom _) tΓ (by simpa using φ₀.property.1)
     h.cast φ₀.property.2
   have ⟨b, hb⟩ := (f g).falsumEquiv
   exact ⟨Derivation.cast b (by simp), by simpa using hb⟩
-
-def hauptsatz {Γ : Sequent L} (d : ⊢ᴸᴷ¹ Γ) :
-    {d : ⊢ᴸᴷ¹ Γ // Derivation.IsCutFree d} := constructiveHauptsatz d
 
 end Canonical

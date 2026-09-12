@@ -2,7 +2,6 @@ module
 
 public import Mathlib.Data.Multiset.AddSub
 public import Mathlib.Data.Multiset.Basic
-public import Mathlib.Logic.Encodable.Basic
 public import Mathlib.Tactic.Abel
 public import Mathlib.Algebra.Order.Group.Multiset
 
@@ -65,12 +64,6 @@ lemma add_map_subset_map_filter_add_atom [DecidableEq α]
       exact mem_add.mpr <| Or.inl <| mem_add.mpr <| Or.inr <| by simp
     · exact mem_add.mpr <| Or.inl <| mem_add.mpr <| Or.inl <|
         mem_map.mpr ⟨c, mem_filter.mpr ⟨hc, h⟩, rfl⟩
-
-/-- Constructively extract a preimage from a mapped multiset over an encodable type. -/
-def getPreimage [Encodable α] [DecidableEq β] {f : α → β} {s : Multiset α}
-    (h : b ∈ s.map f) : {a : α // a ∈ s ∧ f a = b} := by
-  letI := Encodable.decidableEqOfEncodable α
-  exact Encodable.chooseX (mem_map.mp h)
 
 lemma map_subset_iff {s₁ s₂ : Multiset α} (f : α → β) (hf : Function.Injective f) :
     map f s₁ ⊆ map f s₂ ↔ s₁ ⊆ s₂ := by

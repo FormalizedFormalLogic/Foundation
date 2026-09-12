@@ -29,7 +29,7 @@ namespace ConsistentSequent
 
 instance : Preorder ℙ where
   le q p := Nonempty (q.val ≼ p.val)
-  le_refl p := ⟨StrongerThan.refl p.val default⟩
+  le_refl p := ⟨StrongerThan.refl p.val⟩
   le_trans _ _ _ hqp hrq := ⟨hqp.some.trans hrq.some⟩
 
 def nil : ℙ := ⟨0, by simp⟩
