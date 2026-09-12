@@ -15,6 +15,8 @@ namespace FFL.FirstOrder.Derivation.Canonical
 
 variable {L : Language}
 
+open Classical
+
 variable (L)
 
 def ConsistentSequent := {Γ : Sequent L // IsEmpty (⊢ᴸᴷ¹ ∼Γ)}
@@ -36,7 +38,7 @@ instance : OrderTop ℙ where
   top := nil
   le_top := by
     rintro ⟨Γ, hΓ⟩
-    exact ⟨StrongerThan.ofSubset <| by simp [nil]⟩
+    exact ⟨StrongerThan.ofSubset default default <| by simp [nil]⟩
 
 def ofUnprovable (φ : Proposition L) (h : 𝐋𝐊¹ ⊬ ∼φ) : ℙ := ⟨⦃φ⦄, by simpa [LK.Proof.unprovable_def] using h⟩
 
@@ -47,8 +49,6 @@ abbrev IsForced (p : ℙ) (φ : Propositionᵢ L) := Nonempty (Forces p.val φ)
 instance : ForcingRelation ℙ (Propositionᵢ L) := ⟨IsForced⟩
 
 instance : WeakForcingRelation ℙ (Proposition L) := ⟨fun p φ ↦ p ⊩ φᴺ⟩
-
-open Classical
 
 namespace IsForced
 
@@ -127,7 +127,7 @@ instance : ForcingRelation.IntKripke ℙ (· ≥ ·) where
   monotone hφ _ hpq := hφ.monotone hpq
 
 lemma sound [L.DecidableEq] {φ : Propositionᵢ L} : 𝐋𝐉¹ ⊢ φ → ℙ ∀⊩ φ := by
-  rintro ⟨d⟩ p; exact ⟨Forces.ljSound d p.val⟩
+  rintro ⟨d⟩ p; exact ⟨Forces.ljSound d p.val default⟩
 
 end IsForced
 
@@ -142,9 +142,9 @@ lemma dn_neg_iff {φ : Proposition L} {p : ℙ} : p ⊩ᶜ ∼φ ↔ p ⊩ ∼φ
   have e := LJ.Derivation.negDoubleNegation φ
   constructor
   · rintro ⟨h⟩
-    exact ⟨Forces.sound e.2 p.val fun ψ hψ ↦ h.cast (Multiset.mem_atom_iff.mp hψ).symm⟩
+    exact ⟨Forces.sound e.2 p.val default fun ψ hψ ↦ h.cast (Multiset.mem_atom_iff.mp hψ).symm⟩
   · rintro ⟨h⟩
-    exact ⟨Forces.sound e.1 p.val fun ψ hψ ↦ h.cast (Multiset.mem_atom_iff.mp hψ).symm⟩
+    exact ⟨Forces.sound e.1 p.val default fun ψ hψ ↦ h.cast (Multiset.mem_atom_iff.mp hψ).symm⟩
 
 @[simp] lemma verum (p : ℙ) : p ⊩ᶜ ⊤ := by simp [iff_isForced, IsForced.not]
 
