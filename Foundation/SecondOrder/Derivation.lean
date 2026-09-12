@@ -2,11 +2,13 @@ module
 
 public import Foundation.SecondOrder.Syntax.Rew
 
-@[expose] public section
-
 /-!
 # Second-order one-sided $\mathbf{LK}$
+
+The structural rules are the standard local weakening and contraction rules.
 -/
+
+@[expose] public section
 
 namespace FFL.SecondOrder
 
@@ -14,55 +16,78 @@ open FirstOrder
 
 variable {L : Language}
 
-abbrev Sequent (L : Language) := List (Proposition L)
+abbrev Sequent (L : Language) := Multiset (Proposition L)
 
 namespace Sequent
 
 def shift₀ (Γ : Sequent L) : Sequent L := Γ.map Semiproposition.shift₀
 
-@[simp] lemma shift₀_nil : shift₀ ([] : Sequent L) = [] := rfl
+@[simp] lemma shift₀_zero : shift₀ (0 : Sequent L) = 0 := rfl
 
-@[simp] lemma shift₀_cons (φ : Proposition L) (Γ : Sequent L) :
-    shift₀ (φ :: Γ) = Semiproposition.shift₀ φ :: shift₀ Γ := rfl
+@[simp] lemma shift₀_add (Γ Δ : Sequent L) :
+    shift₀ (Γ + Δ) = shift₀ Γ + shift₀ Δ := Multiset.map_add _ _ _
+
+@[simp] lemma shift₀_atom (φ : Proposition L) : shift₀ ⦃φ⦄ = ⦃Semiproposition.shift₀ φ⦄ := Multiset.map_atom _ _
 
 def shift₁ (Γ : Sequent L) : Sequent L := Γ.map Semiproposition.shift₁
 
-@[simp] lemma shift₁_nil : shift₁ ([] : Sequent L) = [] := rfl
+@[simp] lemma shift₁_zero : shift₁ (0 : Sequent L) = 0 := rfl
 
-@[simp] lemma shift₁_cons (φ : Proposition L) (Γ : Sequent L) :
-    shift₁ (φ :: Γ) = Semiproposition.shift₁ φ :: shift₁ Γ := rfl
+@[simp] lemma shift₁_add (Γ Δ : Sequent L) :
+    shift₁ (Γ + Δ) = shift₁ Γ + shift₁ Δ := Multiset.map_add _ _ _
 
-instance : Tilde (Sequent L) := ⟨List.map (∼·)⟩
+@[simp] lemma shift₁_atom (φ : Proposition L) : shift₁ ⦃φ⦄ = ⦃Semiproposition.shift₁ φ⦄ := Multiset.map_atom _ _
 
-@[simp] lemma tilde_nil : ∼([] : Sequent L) = [] := rfl
+instance : Tilde (Sequent L) := ⟨Multiset.map (∼·)⟩
 
-@[simp] lemma tilde_cons (φ : Proposition L) (Γ : Sequent L) :
-    ∼(φ :: Γ) = ∼φ :: ∼Γ := rfl
+@[simp] lemma tilde_zero : ∼(0 : Sequent L) = 0 := rfl
+
+@[simp] lemma tilde_add (Γ Δ : Sequent L) : ∼(Γ + Δ) = ∼Γ + ∼Δ := Multiset.map_add _ _ _
+
+@[simp] lemma tilde_atom (φ : Proposition L) : ∼⦃φ⦄ = ⦃∼φ⦄ := Multiset.map_atom _ _
 
 end Sequent
 
 /-- Second-order one-sided $\mathbf{LK}$-derivation -/
 inductive Derivation : Sequent L → Type _
-| identity : Derivation [φ, ∼φ]
-| cut : Derivation (φ :: Γ) → Derivation (∼φ :: Γ) → Derivation Γ
-| wk : Derivation Γ → Γ ⊆ Δ → Derivation Δ
-| verum : Derivation [⊤]
-| and : Derivation (φ :: Γ) → Derivation (ψ :: Γ) → Derivation (φ ⋏ ψ :: Γ)
-| or : Derivation (φ :: ψ :: Γ) → Derivation (φ ⋎ ψ :: Γ)
-| all₁ {φ : Semiproposition L 0 1} : Derivation (φ.free₀ :: Sequent.shift₀ Γ) → Derivation ((∀¹ φ) :: Γ)
-| exs₁ {φ : Semiproposition L 0 1} : Derivation (φ/[t] :: Γ) → Derivation ((∃¹ φ) :: Γ)
-| all₂ {φ : Semiproposition L 1 0} : Derivation (φ.free₁ :: Sequent.shift₁ Γ) → Derivation ((∀² φ) :: Γ)
-| exs₂ {φ : Semiproposition L 1 0} : Derivation (φ/⟦ψ⟧ :: Γ) → Derivation ((∃² φ) :: Γ)
+| identity : Derivation ⦃φ, ∼φ⦄
+| cut : Derivation (Γ + ⦃φ⦄) → Derivation (Δ + ⦃∼φ⦄) → Derivation (Γ + Δ)
+| contraction : Derivation (Γ + ⦃φ, φ⦄) → Derivation (Γ + ⦃φ⦄)
+| weakening : Derivation Γ → Derivation (Γ + ⦃φ⦄)
+| verum : Derivation ⦃⊤⦄
+| and : Derivation (Γ + ⦃φ⦄) → Derivation (Γ + ⦃ψ⦄) → Derivation (Γ + ⦃φ ⋏ ψ⦄)
+| or : Derivation (Γ + ⦃φ, ψ⦄) → Derivation (Γ + ⦃φ ⋎ ψ⦄)
+| all₁ {φ : Semiproposition L 0 1} : Derivation (Sequent.shift₀ Γ + ⦃φ.free₀⦄) → Derivation (Γ + ⦃∀¹ φ⦄)
+| exs₁ {φ : Semiproposition L 0 1} : Derivation (Γ + ⦃φ/[t]⦄) → Derivation (Γ + ⦃∃¹ φ⦄)
+| all₂ {φ : Semiproposition L 1 0} : Derivation (Sequent.shift₁ Γ + ⦃φ.free₁⦄) → Derivation (Γ + ⦃∀² φ⦄)
+| exs₂ {φ : Semiproposition L 1 0} : Derivation (Γ + ⦃φ/⟦ψ⟧⦄) → Derivation (Γ + ⦃∃² φ⦄)
 
 scoped prefix:45 "⊢ᴸᴷ¹ " => Derivation
 
 namespace Derivation
 
-def cast {Γ Δ : Sequent L} (d : ⊢ᴸᴷ¹ Γ) (h : Γ = Δ) : ⊢ᴸᴷ¹ Δ := h ▸ d
+def cast {Γ Δ : Sequent L} (d : ⊢ᴸᴷ¹ Γ) (h : Γ = Δ := by abel) : ⊢ᴸᴷ¹ Δ := h ▸ d
+
+instance : OneSidedLK (Derivation (L := L)) where
+  weakening d := d.weakening
+  contraction d := d.contraction
+  identity _ := .identity
+  verum := .verum
+  and d₁ d₂ := d₁.and d₂
+  or d := d.or
+
+instance : OneSidedLK.Cut (Derivation (L := L)) where
+  cut d₁ d₂ := d₁.cut d₂
+
+/-- Applies structural rules along supplied traversals (a routine derived rule). -/
+def contra [DecidableEq (Proposition L)] {Γ Δ : Sequent L}
+    (d : ⊢ᴸᴷ¹ Γ) (tΓ : Γ.Traversal) (tΔ : Δ.Traversal)
+    (h : Γ ⊆ Δ := by simp) : ⊢ᴸᴷ¹ Δ :=
+  Structural.ofSubset tΓ tΔ d h
 
 end Derivation
 
-abbrev Proof (φ : Sentence L) := ⊢ᴸᴷ¹ [(φ : Proposition L)]
+abbrev Proof (φ : Sentence L) := ⊢ᴸᴷ¹ ⦃(φ : Proposition L)⦄
 
 inductive Proof.Symbol (L : Language) : Type
 | symbol
@@ -77,7 +102,7 @@ abbrev Schema (L : Language) := Set (Proposition L)
 
 protected structure Schema.Derivation (𝓢 : Schema L) (φ : Proposition L) where
   axioms : Sequent L
-  derivation : Derivation (φ :: ∼axioms)
+  derivation : Derivation (∼axioms + ⦃φ⦄)
   isInstance : ∀ φ ∈ axioms, φ ∈ 𝓢
 
 instance : Entailment (Schema L) (Proposition L) := ⟨Schema.Derivation⟩
