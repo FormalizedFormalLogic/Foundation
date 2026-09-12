@@ -10,7 +10,9 @@ public import Foundation.Vorspiel.Empty
 /-!
 # Model-theoretic semantics of first-order classical logic
 
-This file defines the structure and the evaluation of terms and formulas by Tarski's truth definition.
+This file defines the structure and the evaluation of terms and formulas by Tarski's truth
+definition, together with `Semiformula.toSemisentence`, which turns a formula with `ℕ`-indexed
+free variables into a semisentence whose extra bound variables are those free variables.
 -/
 
 namespace FFL
@@ -472,6 +474,53 @@ lemma eval_toEmpty [DecidableEq ξ] {n} {φ : Semiformula L ξ n} (hp : φ.freeV
     intro x hx; simp [Semiformula.enumerateFVar_idxOfFVar (Semiformula.mem_fvarList_iff_fvar?.mpr hx)]
 
 end rew
+
+section toSemisentence
+
+variable {k : ℕ}
+
+noncomputable def paramSubst [NeZero k] (φ : Semiformula L ℕ k)
+    (b : Fin k → Semiterm L Empty (φ.fvSup + k)) : Rew L ℕ k Empty (φ.fvSup + k) :=
+  haveI : NeZero (φ.fvSup + k) := ⟨by have := Nat.pos_of_ne_zero (NeZero.ne k); omega⟩
+  Rew.bind b fun x ↦ if h : x < φ.fvSup then #⟨x + k, by omega⟩ else #0
+
+noncomputable def toSemisentence [NeZero k] (φ : Semiformula L ℕ k)
+    (b : Fin k → Semiterm L Empty (φ.fvSup + k)) : Semisentence L (φ.fvSup + k) :=
+  paramSubst φ b ▹ φ
+
+variable {M : Type*} [Structure L M]
+
+lemma eval_toSemisentence [NeZero k] {φ : Semiformula L ℕ k}
+    (b : Fin k → Semiterm L Empty (φ.fvSup + k)) {v : Fin (φ.fvSup + k) → M} {w : Fin k → M}
+    {f : ℕ → M} (hb : ∀ i, Semiterm.val v Empty.elim (b i) = w i)
+    (hv : ∀ y : Fin φ.fvSup, v ⟨y + k, by omega⟩ = f y) :
+    M ⊧/v (φ.toSemisentence b) ↔ φ.Eval w f := by
+  rw [toSemisentence, Semiformula.eval_rew];
+  have hbv : (Semiterm.val v Empty.elim ∘ φ.paramSubst b ∘ Semiterm.bvar) = w := funext hb;
+  rw [hbv];
+  apply Semiformula.eval_iff_of_funEqOn φ;
+  intro y hy;
+  have hlt : y < φ.fvSup := Semiformula.lt_fvSup_of_fvar? hy;
+  simp [paramSubst, hlt, hv ⟨y, hlt⟩];
+
+lemma eval_toSemisentence_one (φ : Semiformula L ℕ 1) (x : M) (f : ℕ → M) :
+    M ⊧/(x :> fun i : Fin φ.fvSup ↦ f i) (φ.toSemisentence ![#0]) ↔ φ.Eval ![x] f :=
+  eval_toSemisentence ![#0]
+    (fun i ↦ by induction i using Fin.cases with | zero => simp | succ i => exact i.elim0)
+    (fun _ ↦ by simp)
+
+lemma eval_toSemisentence_two (φ : Semiformula L ℕ 2) (x y : M) (f : ℕ → M) :
+    M ⊧/(y :> x :> fun i : Fin φ.fvSup ↦ f i) (φ.toSemisentence ![#1, #0]) ↔ φ.Eval ![x, y] f :=
+  eval_toSemisentence ![#1, #0]
+    (fun i ↦ by
+      induction i using Fin.cases with
+      | zero => simp
+      | succ i => induction i using Fin.cases with
+        | zero => simp
+        | succ i => exact i.elim0)
+    (fun _ ↦ by simp)
+
+end toSemisentence
 
 end Semiformula
 
