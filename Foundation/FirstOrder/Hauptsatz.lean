@@ -27,14 +27,13 @@ namespace Positive
 
 variable {Ξ Γ Δ : Sequent L}
 
-/-- Transports a traversal of the source to the target of a positive derivation. -/
-def traversal [L.DecidableEq] : {Γ : Sequent L} → Ξ ⟶⁺ Γ → Ξ.Traversal → Γ.Traversal
-  | _, .refl, tΞ => tΞ
-  | _, .weakening (φ := φ) d, tΞ => (d.traversal tΞ).succ φ
-  | _, .contraction (φ := φ) d, tΞ => ((d.traversal tΞ).cast (by abel)).remove (a := φ)
-  | _, .or (φ := φ) (ψ := ψ) d, tΞ =>
+def traversal [L.DecidableEq] {Γ} : Ξ ⟶⁺ Γ → Ξ.Traversal → Γ.Traversal
+  | refl, tΞ => tΞ
+  | weakening (φ := φ) d, tΞ => (d.traversal tΞ).succ φ
+  | contraction (φ := φ) d, tΞ => ((d.traversal tΞ).cast (by abel)).remove (a := φ)
+  | or (φ := φ) (ψ := ψ) d, tΞ =>
       (((d.traversal tΞ).cast (by abel)).remove (a := ψ)).remove (a := φ) |>.succ (φ ⋎ ψ)
-  | _, .exs (φ := φ) d, tΞ => (d.traversal tΞ).remove.succ (∃¹ φ)
+  | exs (φ := φ) d, tΞ => (d.traversal tΞ).remove.succ (∃¹ φ)
 
 instance : Structural (Positive Ξ) where
   weakening d := d.weakening
@@ -46,28 +45,28 @@ def ofSubset [L.DecidableEq] (tΞ : Ξ.Traversal) (tΓ : Γ.Traversal)
     (Γ := Ξ) (Δ := Γ) tΞ tΓ .refl ss
 
 def trans {Ξ Γ Δ : Sequent L} : Ξ ⟶⁺ Γ → Γ ⟶⁺ Δ → Ξ ⟶⁺ Δ
-  | b,    or d => or (b.trans d)
-  | b,   exs d => exs (b.trans d)
+  | b, or d => or (b.trans d)
+  | b, exs d => exs (b.trans d)
   | b, weakening d => weakening (b.trans d)
   | b, contraction d => contraction (b.trans d)
-  | b, .refl => b
+  | b, refl => b
 
 def cast {Ξ Γ Ξ' Γ' : Sequent L} (d : Ξ ⟶⁺ Γ)
     (hΞ : Ξ = Ξ' := by abel) (hΓ : Γ = Γ' := by abel) : Ξ' ⟶⁺ Γ' :=
   hΞ ▸ hΓ ▸ d
 
-def addLeft (Δ : Sequent L) : {Γ : Sequent L} → Ξ ⟶⁺ Γ → Δ + Ξ ⟶⁺ Δ + Γ
-  | _, or (Γ := Γ) (φ := φ) (ψ := ψ) d =>
+def addLeft (Δ : Sequent L) {Γ} : Ξ ⟶⁺ Γ → Δ + Ξ ⟶⁺ Δ + Γ
+  | or (Γ := Γ) (φ := φ) (ψ := ψ) d =>
       cast (.or (Ξ := Δ + Ξ) (Γ := Δ + Γ) (φ := φ) (ψ := ψ)
         (cast (addLeft Δ d)))
-  | _, exs (Γ := Γ) (φ := φ) (t := t) d =>
+  | exs (Γ := Γ) (φ := φ) (t := t) d =>
       cast (.exs (Ξ := Δ + Ξ) (Γ := Δ + Γ) (φ := φ) (t := t)
         (cast (addLeft Δ d)))
-  | _, weakening (φ := φ) d => cast (.weakening (φ := φ) (addLeft Δ d))
-  | _, contraction (Γ := Γ) (φ := φ) d =>
+  | weakening (φ := φ) d => cast (.weakening (φ := φ) (addLeft Δ d))
+  | contraction (Γ := Γ) (φ := φ) d =>
       cast (.contraction (Γ := Δ + Γ) (φ := φ)
         (cast (addLeft Δ d) (hΞ := rfl) (hΓ := by abel)))
-  | _, .refl => .refl
+  | .refl => .refl
 
 def cons (φ) (d : Ξ ⟶⁺ Γ) : Ξ + ⦃φ⦄ ⟶⁺ Γ + ⦃φ⦄ :=
   cast (addLeft ⦃φ⦄ d)
@@ -77,11 +76,11 @@ def add {Γ Δ Ξ Θ : Sequent L} (d : Γ ⟶⁺ Δ) (b : Ξ ⟶⁺ Θ) :
   (addLeft Γ b).trans (cast (addLeft Θ d))
 
 def graft {Ξ Γ : Sequent L} (b : ⊢ᴸᴷ¹ Ξ) : Ξ ⟶⁺ Γ → ⊢ᴸᴷ¹ Γ
-  |    or d => .or (d.graft b)
-  |   exs d => .exs (d.graft b)
+  | or d => .or (d.graft b)
+  | exs d => .exs (d.graft b)
   | weakening d => .weakening (d.graft b)
   | contraction d => .contraction (d.graft b)
-  | .refl => b
+  | refl => b
 
 lemma graft_isCutFree_of_isCutFree {b : ⊢ᴸᴷ¹ Ξ} {d : Ξ ⟶⁺ Γ} (hb : Derivation.IsCutFree b) : Derivation.IsCutFree (d.graft b) := by
   induction d <;> simp [graft, *]
@@ -422,20 +421,19 @@ protected def refl : (φ : Proposition L) → ⦃φ⦄ ⊩ φᴺ
 
 end Forces
 
-def hauptsatz {Γ : Sequent L} (d : ⊢ᴸᴷ¹ Γ) :
-    {d : ⊢ᴸᴷ¹ Γ // Derivation.IsCutFree d} := by
+def hauptsatz {Γ : Sequent L} :
+    ⊢ᴸᴷ¹ Γ → {d : ⊢ᴸᴷ¹ Γ // Derivation.IsCutFree d} := fun d ↦
   let t := d.traversal
-  let tΓ : (∼(∼Γ)).Traversal := t.cast (by simp)
   let tNegΓ : (∼Γ).Traversal := t.map (∼·)
   have f : ((ψ : Propositionᵢ L) → ψ ∈ (∼Γ)ᴺ → Forces (∼Γ) ψ) → Forces (∼Γ) ⊥ :=
-    Forces.sound d.gödelGentzen (∼Γ) tΓ
+    Forces.sound d.gödelGentzen (∼Γ) (t.cast (by simp))
   have g : (ψ : Propositionᵢ L) → ψ ∈ (∼Γ)ᴺ → Forces (∼Γ) ψ := fun φ hφ ↦
     have φ₀ := tNegΓ.getPreimage (f := fun θ : Proposition L ↦ θᴺ)
       (by simpa [Sequent.doubleNegation] using hφ)
     have h : Forces (∼Γ) (φ₀.val)ᴺ := (Forces.refl φ₀.val).monotone <|
-      StrongerThan.ofSubset (.atom _) tΓ (by simpa using φ₀.property.1)
+      StrongerThan.ofSubset (.atom _) (t.cast (by simp)) (by simpa using φ₀.property.1)
     h.cast φ₀.property.2
   have ⟨b, hb⟩ := (f g).falsumEquiv
-  exact ⟨Derivation.cast b (by simp), by simpa using hb⟩
+  ⟨Derivation.cast b (by simp), by simpa using hb⟩
 
 end Canonical

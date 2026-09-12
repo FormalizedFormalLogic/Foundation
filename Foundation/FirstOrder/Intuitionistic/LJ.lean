@@ -105,36 +105,33 @@ instance : Structural (fun Γ ↦ Γ ⊢ᴸᴶ¹ Ξ) where
   weakening d := d.weakening
   contraction d := d.contraction
 
-/-- Enumerates the antecedent by recursion on the local rules.
-This is a routine syntactic construction. -/
-def traversal [L.DecidableEq] : {Γ : Sequent L} → {Ξ : Head L} →
-    (Γ ⊢ᴸᴶ¹ Ξ) → Γ.Traversal
-  | _, _, identity R v => .atom (Semiformulaᵢ.rel R v)
-  | _, _, cut d e => d.traversal.add e.traversal.remove
-  | _, _, contraction (φ := φ) d => (d.traversal.cast (by abel)).remove (a := φ)
-  | _, _, weakening (φ := φ) d => d.traversal.succ φ
-  | _, _, weakeningRight d => d.traversal
-  | _, _, verum => .zero
-  | _, _, falsum => .atom ⊥
-  | _, _, positiveImply d => d.traversal.remove
-  | _, _, negativeImply (φ := φ) (ψ := ψ) d e =>
+def traversal [L.DecidableEq] {Γ : Sequent L} {Ξ : Head L} :
+    Γ ⊢ᴸᴶ¹ Ξ → Γ.Traversal
+  | identity R v => .atom (Semiformulaᵢ.rel R v)
+  | cut d e => d.traversal.add e.traversal.remove
+  | contraction (φ := φ) d => (d.traversal.cast (by abel)).remove (a := φ)
+  | weakening (φ := φ) d => d.traversal.succ φ
+  | weakeningRight d => d.traversal
+  | verum => .zero
+  | falsum => .atom ⊥
+  | positiveImply d => d.traversal.remove
+  | negativeImply (φ := φ) (ψ := ψ) d e =>
       (d.traversal.add e.traversal.remove).succ (φ 🡒 ψ)
-  | _, _, positiveAnd d _ => d.traversal
-  | _, _, negativeAnd (φ := φ) (ψ := ψ) d =>
+  | positiveAnd d _ => d.traversal
+  | negativeAnd (φ := φ) (ψ := ψ) d =>
       ((d.traversal.cast (by abel)).remove (a := ψ)).remove (a := φ) |>.succ (φ ⋏ ψ)
-  | _, _, positiveOrLeft d => d.traversal
-  | _, _, positiveOrRight d => d.traversal
-  | _, _, negativeOr (φ := φ) (ψ := ψ) d _ => d.traversal.remove.succ (φ ⋎ ψ)
-  | _, _, positiveForall d =>
+  | positiveOrLeft d => d.traversal
+  | positiveOrRight d => d.traversal
+  | negativeOr (φ := φ) (ψ := ψ) d _ => d.traversal.remove.succ (φ ⋎ ψ)
+  | positiveForall d =>
       (d.traversal.map (Rew.rewriteMap Nat.pred ▹ ·)).cast (by
         simp [Rewriting.shifts, Multiset.map_map, Rewriting.rewriteMap_pred_shift])
-  | _, _, negativeForall (φ := φ) d => d.traversal.remove.succ (∀¹ φ)
-  | _, _, positiveExists d => d.traversal
-  | _, _, negativeExists (φ := φ) d =>
+  | negativeForall (φ := φ) d => d.traversal.remove.succ (∀¹ φ)
+  | positiveExists d => d.traversal
+  | negativeExists (φ := φ) d =>
       ((d.traversal.remove.map (Rew.rewriteMap Nat.pred ▹ ·)).cast (by
         simp [Rewriting.shifts, Multiset.map_map, Rewriting.rewriteMap_pred_shift])).succ (∃¹ φ)
 
-/-- Expands antecedent inclusion into local structural rules. -/
 def contra [L.DecidableEq] (d : Γ ⊢ᴸᴶ¹ Ξ) (t : Δ.Traversal)
     (h : Γ ⊆ Δ := by simp) : Δ ⊢ᴸᴶ¹ Ξ :=
   Structural.ofSubset (F := Propositionᵢ L)
@@ -273,25 +270,25 @@ def rewrite (f : ℕ → SyntacticTerm L) {Γ : Sequent L} {Ξ : Head L} : Γ �
       |>.cast (by simp [Rew.q_rewrite])
 
 /-- Height of an LJ derivation, with initial rules at height zero (standard definition). -/
-def height : {Γ : Sequent L} → {Ξ : Head L} → Γ ⊢ᴸᴶ¹ Ξ → ℕ
-  | _, _, .identity _ _ => 0
-  | _, _, .cut d₁ d₂ => max (height d₁) (height d₂) + 1
-  | _, _, .contraction d => height d + 1
-  | _, _, .weakening d => height d + 1
-  | _, _, .weakeningRight d => height d + 1
-  | _, _, .verum => 0
-  | _, _, .falsum => 0
-  | _, _, .positiveImply d => height d + 1
-  | _, _, .negativeImply d₁ d₂ => max (height d₁) (height d₂) + 1
-  | _, _, .positiveAnd d₁ d₂ => max (height d₁) (height d₂) + 1
-  | _, _, .negativeAnd d => height d + 1
-  | _, _, .positiveOrLeft d => height d + 1
-  | _, _, .positiveOrRight d => height d + 1
-  | _, _, .negativeOr d₁ d₂ => max (height d₁) (height d₂) + 1
-  | _, _, .positiveForall d => height d + 1
-  | _, _, .negativeForall d => height d + 1
-  | _, _, .positiveExists d => height d + 1
-  | _, _, .negativeExists d => height d + 1
+def height {Γ : Sequent L} {Ξ : Head L} : Γ ⊢ᴸᴶ¹ Ξ → ℕ
+  | identity _ _ => 0
+  | cut d₁ d₂ => max (height d₁) (height d₂) + 1
+  | contraction d => height d + 1
+  | weakening d => height d + 1
+  | weakeningRight d => height d + 1
+  | verum => 0
+  | falsum => 0
+  | positiveImply d => height d + 1
+  | negativeImply d₁ d₂ => max (height d₁) (height d₂) + 1
+  | positiveAnd d₁ d₂ => max (height d₁) (height d₂) + 1
+  | negativeAnd d => height d + 1
+  | positiveOrLeft d => height d + 1
+  | positiveOrRight d => height d + 1
+  | negativeOr d₁ d₂ => max (height d₁) (height d₂) + 1
+  | positiveForall d => height d + 1
+  | negativeForall d => height d + 1
+  | positiveExists d => height d + 1
+  | negativeExists d => height d + 1
 
 /-- Transport along sequent equalities preserves height (routine). -/
 @[simp] lemma height_cast {Γ Δ : Sequent L} {Ξ Λ : Head L}

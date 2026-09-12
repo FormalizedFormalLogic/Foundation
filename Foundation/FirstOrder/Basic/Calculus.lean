@@ -66,8 +66,7 @@ inductive Derivation : Sequent L → Type _
 | weakening : Derivation Γ → Derivation (Γ + ⦃φ⦄)
 | verum : Derivation ⦃⊤⦄
 | or : Derivation (Γ + ⦃φ, ψ⦄) → Derivation (Γ + ⦃φ ⋎ ψ⦄)
-| and : Derivation (Γ + ⦃φ⦄) → Derivation (Γ + ⦃ψ⦄) →
-    Derivation (Γ + ⦃φ ⋏ ψ⦄)
+| and : Derivation (Γ + ⦃φ⦄) → Derivation (Γ + ⦃ψ⦄) → Derivation (Γ + ⦃φ ⋏ ψ⦄)
 | all : Derivation (Γ⁺ + ⦃φ.free⦄) → Derivation (Γ + ⦃∀¹ φ⦄)
 | exs : Derivation (Γ + ⦃φ/[t]⦄) → Derivation (Γ + ⦃∃¹ φ⦄)
 
@@ -80,15 +79,15 @@ open Rewriting LawfulSyntacticRewriting
 variable {Γ Δ : Sequent L}
 
 def height {Δ : Sequent L} : ⊢ᴸᴷ¹ Δ → ℕ
-  |    identity _ _ => 0
-  |       cut dp dn => max dp.height dn.height + 1
+  |  identity _ _ => 0
+  |     cut dp dn => max dp.height dn.height + 1
   | contraction d => d.height + 1
-  | weakening d => d.height + 1
-  |           verum => 0
-  |            or d => d.height + 1
-  |       and dp dq => max (height dp) (height dq) + 1
-  |           all d => d.height + 1
-  |           exs d => d.height + 1
+  |   weakening d => d.height + 1
+  |         verum => 0
+  |          or d => d.height + 1
+  |     and dp dq => max (height dp) (height dq) + 1
+  |         all d => d.height + 1
+  |         exs d => d.height + 1
 
 section height
 
@@ -131,20 +130,20 @@ instance : Structural (Derivation (L := L)) where
 
 /-- Enumerates the end sequent by recursion on the local inference rules.
 This is a routine syntactic construction. -/
-def traversal [L.DecidableEq] : {Γ : Sequent L} → (⊢ᴸᴷ¹ Γ) → Γ.Traversal
-  | _, identity r v =>
+def traversal [L.DecidableEq] {Γ : Sequent L} : ⊢ᴸᴷ¹ Γ → Γ.Traversal
+  | identity r v =>
       (Multiset.Traversal.atom (Semiformula.rel r v)).succ (Semiformula.nrel r v)
-  | _, cut d dn => d.traversal.remove.add dn.traversal.remove
-  | _, contraction (φ := φ) d => (d.traversal.cast (by abel)).remove (a := φ)
-  | _, weakening (φ := φ) d => d.traversal.succ φ
-  | _, verum => .atom ⊤
-  | _, or (φ := φ) (ψ := ψ) d =>
+  | cut d dn => d.traversal.remove.add dn.traversal.remove
+  | contraction (φ := φ) d => (d.traversal.cast (by abel)).remove (a := φ)
+  | weakening (φ := φ) d => d.traversal.succ φ
+  | verum => .atom ⊤
+  | or (φ := φ) (ψ := ψ) d =>
       ((d.traversal.cast (by abel)).remove (a := ψ)).remove (a := φ) |>.succ (φ ⋎ ψ)
-  | _, and (φ := φ) (ψ := ψ) d _ => d.traversal.remove.succ (φ ⋏ ψ)
-  | _, all (Γ := Γ) (φ := φ) d =>
+  | and (φ := φ) (ψ := ψ) d _ => d.traversal.remove.succ (φ ⋏ ψ)
+  | all (Γ := Γ) (φ := φ) d =>
       ((d.traversal.remove.map (Rew.rewriteMap Nat.pred ▹ ·)).cast (by
         simp [Rewriting.shifts, Multiset.map_map, Rewriting.rewriteMap_pred_shift])).succ (∀¹ φ)
-  | _, exs (φ := φ) d => d.traversal.remove.succ (∃¹ φ)
+  | exs (φ := φ) d => d.traversal.remove.succ (∃¹ φ)
 
 /-- Applies structural rules along supplied traversals (a routine derived rule). -/
 def contra [L.DecidableEq] (d : ⊢ᴸᴷ¹ Δ) (t : Γ.Traversal)
