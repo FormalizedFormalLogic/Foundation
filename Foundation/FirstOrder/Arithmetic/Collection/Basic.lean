@@ -1,6 +1,5 @@
 module
 
-public import Foundation.FirstOrder.Arithmetic.Basic.StrictHierarchy
 public import Foundation.FirstOrder.Arithmetic.BoundedCollection
 
 /-!
@@ -142,40 +141,14 @@ end models_CollectionOnHierarchy
 
 section collection
 
-variable {V : Type*} [ORingStructure V] {s : ℕ}
-
 def Collection (V : Type*) [ORingStructure V]
     (C : {k : ℕ} → ArithmeticSemisentence k → Prop) : Prop :=
   ∀ {n : ℕ} {θ : ArithmeticSemisentence (n + 2)}, C θ →
     ∀ (e : Fin n → V) (a : V), (∀ x < a, ∃ u, V ⊧/(u :> x :> e) θ) →
       ∃ w, ∀ x < a, ∃ u ≤ w, V ⊧/(u :> x :> e) θ
 
-lemma Collection.mono {C C' : {k : ℕ} → ArithmeticSemisentence k → Prop} (h : Collection V C')
-    (hC : ∀ {k : ℕ} {θ : ArithmeticSemisentence k}, C θ → C' θ) : Collection V C :=
-  fun hθ ↦ h (hC hθ)
-
-abbrev StrictCollection (V : Type*) [ORingStructure V] (s : ℕ) : Prop :=
-  Collection V (StrictHierarchy 𝚺 s)
-
 abbrev HierarchyCollection (V : Type*) [ORingStructure V] (Γ : Polarity) (s : ℕ) : Prop :=
   Collection V (Hierarchy Γ s)
-
-lemma StrictCollection.of_le {s' : ℕ} (h : StrictCollection V s') (hs : s ≤ s') :
-    StrictCollection V s := h.mono fun hθ ↦ hθ.mono hs
-
-lemma strictCollection_of_models_collectionAxiom [V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻]
-    (h : ∀ ψ : ArithmeticSemiformula ℕ 2, StrictHierarchy 𝚺 s ψ →
-      V↓[ℒₒᵣ] ⊧ (.univCl (collectionAxiom ψ) : ArithmeticSentence)) :
-    StrictCollection V s := fun hθ e a hex ↦
-  exists_bound_of_models_collectionAxiom (h _ (hθ.rew _)) e a hex
-
-lemma strictCollection_of_ISigma {s : ℕ} [V↓[ℒₒᵣ] ⊧* 𝗜𝚺 s] (hs : 0 < s) : StrictCollection V s := by
-  obtain ⟨n, rfl⟩ := Nat.exists_eq_succ_of_ne_zero (show s ≠ 0 by omega);
-  have : V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := mod_paMinus_of_ISigma (n := n + 1);
-  show StrictCollection V (n + 1);
-  exact strictCollection_of_models_collectionAxiom fun ψ hψ ↦
-    consequence_iff.mp (Theory.Proof.sound
-      (ISigma.provable_collectionAxiom_of_hierarchy n hψ.hierarchy)) V inferInstance;
 
 end collection
 
