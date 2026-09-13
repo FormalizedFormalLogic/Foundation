@@ -116,7 +116,29 @@ theorem BSigma_weakerThan_ISigma (n : ℕ) : 𝗕𝚺 (n + 1) ⪯ 𝗜𝚺 (n + 
         (Entailment.by_axm hσ);
     . exact ISigma.provable_collectionAxiom_of_hierarchy n hφ;
 
+instance (n : ℕ) : 𝗕𝚺 (n + 1) ⪯ 𝗜𝚺 (n + 1) := BSigma_weakerThan_ISigma n
+
 end BSigma_ISigma
+
+section models_CollectionOnHierarchy
+
+variable {V : Type*} [ORingStructure V] {Γ : Polarity} {s : ℕ}
+
+-- This is stated as a `lemma`, not an `instance`, since `Γ` and `s` do not occur in the
+-- conclusion `V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻`, so instance search cannot infer them.
+lemma models_paMinus_of_models_CollectionOnHierarchy [V↓[ℒₒᵣ] ⊧* 𝗕 Γ s] : V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ :=
+  models_of_subtheory (T := 𝗣𝗔⁻) (U := 𝗕 Γ s) inferInstance
+
+lemma exists_bound_of_models_CollectionOnHierarchy [V↓[ℒₒᵣ] ⊧* 𝗕 Γ s] {m : ℕ}
+    {θ : ArithmeticSemisentence (m + 2)} (hθ : Hierarchy Γ s θ) (e : Fin m → V) (a : V)
+    (hex : ∀ x < a, ∃ u, V ⊧/(u :> x :> e) θ) :
+    ∃ w, ∀ x < a, ∃ u ≤ w, V ⊧/(u :> x :> e) θ :=
+  have : V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := models_paMinus_of_models_CollectionOnHierarchy (Γ := Γ) (s := s)
+  exists_bound_of_models_collectionAxiom
+    (models_of_mem (T := 𝗕 Γ s)
+      (Set.mem_union_right _ (mem_CollectionScheme_of_mem (hθ.rew _)))) e a hex
+
+end models_CollectionOnHierarchy
 
 section collection
 

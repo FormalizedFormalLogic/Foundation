@@ -82,10 +82,9 @@ section theorems
 private lemma models_ISigma_succ [V↓[ℒₒᵣ] ⊧* 𝗕𝚺 (n + 2)] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺 n] :
     V↓[ℒₒᵣ] ⊧* 𝗜𝚺 (n + 1) := by
   have hPA : V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := models_of_subtheory (T := 𝗣𝗔⁻) (U := 𝗕𝚺 (n + 2)) inferInstance;
-  have hstrict : StrictCollection V (n + 1) :=
-    strictCollection_of_models_collectionAxiom fun _ hψ ↦
-      models_of_mem (T := 𝗕𝚺 (n + 2))
-        (Set.mem_union_right _ (mem_CollectionScheme_of_mem (hψ.hierarchy.accum 𝚺)));
+  have : V↓[ℒₒᵣ] ⊧* 𝗕𝚷 n := models_of_ss inferInstance
+    ((CollectionOnHierarchy_subset_BSigma_succ 𝚷 n).trans
+      (CollectionOnHierarchy_subset_mono (Nat.le_succ (n + 1))));
   have hcol : ∀ ψ : ArithmeticSemiformula ℕ 2, Hierarchy 𝚷 (n + 1) ψ →
       V↓[ℒₒᵣ] ⊧ (.univCl (collectionAxiom ψ) : ArithmeticSentence) := fun _ hψ ↦
     models_of_mem (T := 𝗕𝚺 (n + 2))
@@ -100,7 +99,7 @@ private lemma models_ISigma_succ [V↓[ℒₒᵣ] ⊧* 𝗕𝚺 (n + 2)] [V↓[�
     simpa [models_iff, Semiformula.eval_univCl, succInd, Semiformula.eval_substs,
       Matrix.constant_eq_singleton] using this;
   intro f;
-  obtain ⟨χ, hχ, hiff⟩ := exists_pi_eval_iff hstrict hφ f;
+  obtain ⟨χ, hχ, hiff⟩ := exists_pi_eval_iff hφ f;
   exact succ_induction_of_exists_pi hcol (definableRel_of_hierarchy hχ f) hiff;
 
 lemma models_ISigma_of_models_BSigma_succ :
