@@ -7,6 +7,8 @@ public import Foundation.FirstOrder.Arithmetic.HFS.PRF
 
 # Fixpoint Construction
 
+This is a version of the Knaster-Tarski theorem on fixpoints for $\mnathsf I\Sigma_1$.
+
 -/
 
 namespace LO.FirstOrder.Arithmetic
@@ -23,7 +25,6 @@ namespace Fixpoint
 set_option linter.dupNamespace false
 
 structure Blueprint (k : ℕ) where
-  /-- WIP: Add a description of when `core (something :> something :> v)` is true here. -/
   core : 𝚫₁.Semisentence (k + 2)
 
 namespace Blueprint
@@ -35,12 +36,6 @@ instance : Coe (Blueprint k) (𝚫₁.Semisentence (k + 2)) := ⟨Blueprint.core
 /-- `succDef.Evalb (u :> ih :> i :> v)` holds iff `u` is the value at `i + 1`, where `ih` is the value at `i`. Equivalently `u = c.succ v i ih`. -/
 def succDef : 𝚺₁.Semisentence (k + 3) := .mkSigma
   “u ih i. ∀ x < u + (i + 1), (x ∈ u → x ≤ i ∧ !φ.core.sigma x ih ⋯) ∧ (x ≤ i ∧ !φ.core.pi x ih ⋯ → x ∈ u)”
-
-/-
-Suppose `i = 0`.
-`∀ x < u + 1, (x ∈ u ↔ x ≤ 0 ∧ !φ.core x ih ⋯)`
-`u = {!φ.core 0 ih ⋯}`
--/
 
 def prBlueprint : PR.Blueprint k where
   zero := .mkSigma “x. x = 0”
