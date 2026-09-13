@@ -1,0 +1,155 @@
+module
+
+public import Foundation.FirstOrder.Arithmetic.BoundedCollection
+
+/-!
+# The collection schemata `𝗕𝚺` and `𝗕𝚷` in models
+
+## References
+
+- [HP98, §I.2(a), Lemma I.2.11]
+-/
+
+@[expose] public section
+
+namespace FFL.FirstOrder.Arithmetic
+
+section models
+
+variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻]
+
+lemma models_collectionAxiom_iff (φ : ArithmeticSemiformula ℕ 2) :
+    V↓[ℒₒᵣ] ⊧ .univCl (collectionAxiom φ) ↔
+      ∀ f : ℕ → V, ∀ a : V, (∀ x < a, ∃ y, φ.Eval ![x, y] f) →
+        ∃ b, ∀ x < a, ∃ y < b, φ.Eval ![x, y] f := by
+  simp [models_iff, Semiformula.eval_univCl, collectionAxiom, Semiformula.eval_ballLT,
+    Semiformula.eval_bexsLT, Semiformula.eval_substs];
+
+lemma exists_bound_of_models_collectionAxiom {m : ℕ} {θ : ArithmeticSemisentence (m + 2)}
+    (h : V↓[ℒₒᵣ] ⊧ (.univCl (collectionAxiom
+      (Rew.embSubsts (#1 :> #0 :> fun i : Fin m ↦ (&(i : ℕ) : ArithmeticSemiterm ℕ 2)) ▹ θ)) :
+        ArithmeticSentence))
+    (e : Fin m → V) (a : V) (hex : ∀ x < a, ∃ u, V ⊧/(u :> x :> e) θ) :
+    ∃ w, ∀ x < a, ∃ u ≤ w, V ⊧/(u :> x :> e) θ := by
+  set ψ : ArithmeticSemiformula ℕ 2 :=
+    Rew.embSubsts (#1 :> #0 :> fun i : Fin m ↦ (&(i : ℕ) : ArithmeticSemiterm ℕ 2)) ▹ θ with hψdef;
+  set f : ℕ → V := fun i ↦ if hi : i < m then e ⟨i, hi⟩ else a with hf;
+  have heval : ∀ x y : V, ψ.Eval ![x, y] f ↔ V ⊧/(y :> x :> e) θ := by
+    intro x y;
+    rw [hψdef];
+    simp only [Semiformula.eval_embSubsts];
+    apply Iff.of_eq;
+    apply congrArg (fun b ↦ Semiformula.Evalb (M := V) b θ);
+    funext i;
+    cases i using Fin.cases with
+    | zero => simp;
+    | succ i =>
+      cases i using Fin.cases with
+      | zero => simp;
+      | succ i => simp [hf, i.isLt];
+  obtain ⟨b, hb⟩ := (models_collectionAxiom_iff ψ).mp h f a
+    fun x hx ↦ (hex x hx).imp fun u hu ↦ (heval x u).mpr hu;
+  exact ⟨b, fun x hx ↦ (hb x hx).imp fun u hu ↦ ⟨le_of_lt hu.1, (heval x u).mp hu.2⟩⟩;
+
+lemma exists_bound_of_definable {Γ : Polarity} {s : ℕ}
+    (hcol : ∀ ψ : ArithmeticSemiformula ℕ 2, Hierarchy Γ s ψ →
+      V↓[ℒₒᵣ] ⊧ .univCl (collectionAxiom ψ))
+    {R : V → V → Prop} (hR : Γ-[s].DefinableRel R) (a : V) (h : ∀ x < a, ∃ y, R x y) :
+    ∃ b, ∀ x < a, ∃ y < b, R x y := by
+  obtain ⟨e, ψ, hψ, hiff⟩ := exists_hierarchy_eval_iff hR;
+  have heval : ∀ x y : V, R x y ↔ ψ.Eval ![x, y] e := fun x y ↦ by simpa using hiff ![x, y];
+  obtain ⟨b, hb⟩ := (models_collectionAxiom_iff ψ).mp (hcol ψ hψ) e a
+    fun x hx ↦ (h x hx).imp fun y hy ↦ (heval x y).mp hy;
+  exact ⟨b, fun x hx ↦ (hb x hx).imp fun y hy ↦ ⟨hy.1, (heval x y).mpr hy.2⟩⟩;
+
+end models
+
+section standardModel
+
+instance models_CollectionOnHierarchy (Γ : Polarity) (n : ℕ) : ℕ↓[ℒₒᵣ] ⊧* 𝗕 Γ n := by
+  apply Semantics.ModelsSet.union_iff.mpr;
+  and_intros;
+  . infer_instance;
+  . apply Semantics.ModelsSet.setOf_iff.mpr;
+    rintro _ ⟨φ, -, rfl⟩;
+    apply models_collectionAxiom_iff _ |>.mpr;
+    intro f a h;
+    choose! g hg using h;
+    use (Finset.range a).sup g + 1;
+    intro x hx;
+    use g x;
+    and_intros;
+    . exact Nat.lt_succ_of_le (Finset.le_sup (Finset.mem_range.mpr hx));
+    . exact hg x hx;
+
+instance (Γ : Polarity) (n : ℕ) : Entailment.Consistent (𝗕 Γ n) :=
+  (𝗕 Γ n).consistent_of_sound (Eq ⊥) rfl
+
+end standardModel
+
+section BSigma_ISigma
+
+theorem ISigma.provable_collectionAxiom_of_hierarchy (n : ℕ) {φ : ArithmeticSemiformula ℕ 2}
+    (hφ : Hierarchy 𝚺 (n + 1) φ) : 𝗜𝚺 (n + 1) ⊢ .univCl (collectionAxiom φ) := by
+  apply Arithmetic.complete.{0};
+  intro M _ hMT;
+  have : M↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := mod_paMinus_of_ISigma (n := n + 1);
+  apply models_collectionAxiom_iff _ |>.mpr;
+  intro f a h;
+  obtain ⟨w, hw⟩ := sigma_exists_bound_witness (hφ.rew _) (fun i : Fin φ.fvSup ↦ f i) a <| by
+    intro x hx;
+    obtain ⟨y, hy⟩ := h x hx;
+    exact ⟨y, (φ.eval_toSemisentence_two x y f).mpr hy⟩;
+  use w + 1;
+  intro x hx;
+  obtain ⟨u, hu, hux⟩ := hw x hx;
+  use u;
+  and_intros;
+  . exact Arithmetic.lt_succ_iff_le.mpr hu;
+  . exact (φ.eval_toSemisentence_two x u f).mp hux;
+
+theorem BSigma_weakerThan_ISigma (n : ℕ) : 𝗕𝚺 (n + 1) ⪯ 𝗜𝚺 (n + 1) :=
+  Entailment.WeakerThan.ofAxm! <| by
+    rintro σ (hσ | ⟨φ, hφ, rfl⟩);
+    . exact Entailment.WeakerThan.pbl (h := ISigma_weakerThan_of_le (by omega))
+        (Entailment.by_axm hσ);
+    . exact ISigma.provable_collectionAxiom_of_hierarchy n hφ;
+
+instance (n : ℕ) : 𝗕𝚺 (n + 1) ⪯ 𝗜𝚺 (n + 1) := BSigma_weakerThan_ISigma n
+
+end BSigma_ISigma
+
+section models_CollectionOnHierarchy
+
+variable {V : Type*} [ORingStructure V] {Γ : Polarity} {s : ℕ}
+
+-- This is stated as a `lemma`, not an `instance`, since `Γ` and `s` do not occur in the
+-- conclusion `V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻`, so instance search cannot infer them.
+lemma models_paMinus_of_models_CollectionOnHierarchy [V↓[ℒₒᵣ] ⊧* 𝗕 Γ s] : V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ :=
+  models_of_subtheory (T := 𝗣𝗔⁻) (U := 𝗕 Γ s) inferInstance
+
+lemma exists_bound_of_models_CollectionOnHierarchy [V↓[ℒₒᵣ] ⊧* 𝗕 Γ s] {m : ℕ}
+    {θ : ArithmeticSemisentence (m + 2)} (hθ : Hierarchy Γ s θ) (e : Fin m → V) (a : V)
+    (hex : ∀ x < a, ∃ u, V ⊧/(u :> x :> e) θ) :
+    ∃ w, ∀ x < a, ∃ u ≤ w, V ⊧/(u :> x :> e) θ :=
+  have : V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := models_paMinus_of_models_CollectionOnHierarchy (Γ := Γ) (s := s)
+  exists_bound_of_models_collectionAxiom
+    (models_of_mem (T := 𝗕 Γ s)
+      (Set.mem_union_right _ (mem_CollectionScheme_of_mem (hθ.rew _)))) e a hex
+
+end models_CollectionOnHierarchy
+
+section collection
+
+def Collection (V : Type*) [ORingStructure V]
+    (C : {k : ℕ} → ArithmeticSemisentence k → Prop) : Prop :=
+  ∀ {n : ℕ} {θ : ArithmeticSemisentence (n + 2)}, C θ →
+    ∀ (e : Fin n → V) (a : V), (∀ x < a, ∃ u, V ⊧/(u :> x :> e) θ) →
+      ∃ w, ∀ x < a, ∃ u ≤ w, V ⊧/(u :> x :> e) θ
+
+abbrev HierarchyCollection (V : Type*) [ORingStructure V] (Γ : Polarity) (s : ℕ) : Prop :=
+  Collection V (Hierarchy Γ s)
+
+end collection
+
+end FFL.FirstOrder.Arithmetic
