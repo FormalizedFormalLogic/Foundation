@@ -319,14 +319,14 @@ private lemma models_bexs_witness [V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻]
 mutual
 
 theorem models_ball :
-    {Γ : Polarity} → {s n : ℕ} → [V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻] → (0 < s → StrictCollection V s) →
+    {Γ : Polarity} → {s n : ℕ} → [V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻] → StrictCollection V s →
       (u : ArithmeticSemiterm Empty n) →
       (φ : Prenex Γ s Empty (n + 1)) → (e : Fin n → V) →
     V ⊧/e (∀'[u] φ).val ↔ ∀ x < u.valb e, V ⊧/(x :> e) φ.val
   | _, 0, _, _, _, u, φ, e => by
     simp [ball_zero, Prenex.val, Semiformula.eval_ball];
   | 𝚺, s + 1, _, _, hC, u, φ, e => by
-    have hC' : 0 < s → StrictCollection V s := StrictCollection.imp_of_le hC (by omega);
+    have hC' : StrictCollection V s := hC.of_le (by omega);
     have iha : ∀ {m : ℕ} (u : ArithmeticSemiterm Empty m) (φ : Prenex 𝚷 s Empty (m + 1))
         (e : Fin m → V), V ⊧/e (∀'[u] φ).val ↔ ∀ x < u.valb e, V ⊧/(x :> e) φ.val :=
       fun u φ e => models_ball hC' u φ e;
@@ -341,7 +341,7 @@ theorem models_ball :
       obtain ⟨y, -, hy⟩ := hw x hx;
       exact ⟨y, hy⟩;
     . intro h;
-      exact hC (by omega) (StrictHierarchy.ofAlt φ.sigmaInv.val_strictHierarchy) e (u.valb e) h;
+      exact hC (StrictHierarchy.ofAlt φ.sigmaInv.val_strictHierarchy) e (u.valb e) h;
   | 𝚷, s + 1, _, _, hC, u, φ, e => by
     have ih : ∀ {m : ℕ} (u : ArithmeticSemiterm Empty m) (φ : Prenex 𝚺 (s + 1) Empty (m + 1))
         (e : Fin m → V), V ⊧/e (∃'[u] φ).val ↔ ∃ x < u.valb e, V ⊧/(x :> e) φ.val :=
@@ -357,14 +357,14 @@ theorem models_ball :
 termination_by Γ s n _inst _hC _u _φ _e => (s, match Γ with | 𝚺 => 0 | 𝚷 => 1)
 
 theorem models_bexs :
-    {Γ : Polarity} → {s n : ℕ} → [V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻] → (0 < s → StrictCollection V s) →
+    {Γ : Polarity} → {s n : ℕ} → [V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻] → StrictCollection V s →
       (u : ArithmeticSemiterm Empty n) →
       (φ : Prenex Γ s Empty (n + 1)) → (e : Fin n → V) →
     V ⊧/e (∃'[u] φ).val ↔ ∃ x < u.valb e, V ⊧/(x :> e) φ.val
   | _, 0, _, _, _, u, φ, e => by
     simp [bexs_zero, Prenex.val, Semiformula.eval_bexs];
   | 𝚺, s + 1, n, _, hC, u, φ, e => by
-    have hC' : 0 < s → StrictCollection V s := StrictCollection.imp_of_le hC (by omega);
+    have hC' : StrictCollection V s := hC.of_le (by omega);
     have ih : ∀ {m : ℕ} (u : ArithmeticSemiterm Empty m) (φ : Prenex 𝚷 s Empty (m + 1))
         (e : Fin m → V), V ⊧/e (∃'[u] φ).val ↔ ∃ x < u.valb e, V ⊧/(x :> e) φ.val :=
       fun u φ e => models_bexs hC' u φ e;
@@ -411,13 +411,13 @@ end
 mutual
 
 theorem models_and :
-    {Γ : Polarity} → {s n : ℕ} → [V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻] → (0 < s → StrictCollection V s) →
+    {Γ : Polarity} → {s n : ℕ} → [V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻] → StrictCollection V s →
       (φ ψ : Prenex Γ s Empty n) → (e : Fin n → V) →
     V ⊧/e (φ ⋏ ψ).val ↔ V ⊧/e φ.val ∧ V ⊧/e ψ.val
   | _, 0, _, _, _, φ, ψ, e => by
     simp [and_zero, Prenex.val];
   | 𝚺, s + 1, n, _, hC, φ, ψ, e => by
-    have hC' : 0 < s → StrictCollection V s := StrictCollection.imp_of_le hC (by omega);
+    have hC' : StrictCollection V s := hC.of_le (by omega);
     have iha : ∀ {m : ℕ} (φ ψ : Prenex 𝚷 s Empty m) (e : Fin m → V),
         V ⊧/e (φ ⋏ ψ).val ↔ V ⊧/e φ.val ∧ V ⊧/e ψ.val :=
       fun φ ψ e => models_and hC' φ ψ e;
@@ -458,13 +458,13 @@ theorem models_and :
 termination_by Γ s n _inst _hC _φ _ψ _e => (s, match Γ with | 𝚺 => 0 | 𝚷 => 1)
 
 theorem models_or :
-    {Γ : Polarity} → {s n : ℕ} → [V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻] → (0 < s → StrictCollection V s) →
+    {Γ : Polarity} → {s n : ℕ} → [V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻] → StrictCollection V s →
       (φ ψ : Prenex Γ s Empty n) → (e : Fin n → V) →
     V ⊧/e (φ ⋎ ψ).val ↔ V ⊧/e φ.val ∨ V ⊧/e ψ.val
   | _, 0, _, _, _, φ, ψ, e => by
     simp [or_zero, Prenex.val];
   | 𝚺, s + 1, _, _, hC, φ, ψ, e => by
-    have hC' : 0 < s → StrictCollection V s := StrictCollection.imp_of_le hC (by omega);
+    have hC' : StrictCollection V s := hC.of_le (by omega);
     have ih : ∀ {m : ℕ} (φ ψ : Prenex 𝚷 s Empty m) (e : Fin m → V),
         V ⊧/e (φ ⋎ ψ).val ↔ V ⊧/e φ.val ∨ V ⊧/e ψ.val :=
       fun φ ψ e => models_or hC' φ ψ e;
@@ -495,7 +495,7 @@ def all (φ : Prenex 𝚷 (s + 1) ξ (n + 1)) : Prenex 𝚷 (s + 1) ξ n := ∼(
 local prefix:64 "∃' " => Prenex.exs
 local prefix:64 "∀' " => Prenex.all
 
-lemma models_exs [V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻] (hC : 0 < s → StrictCollection V s)
+lemma models_exs [V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻] (hC : StrictCollection V s)
     (φ : Prenex 𝚺 (s + 1) Empty (n + 1)) (e : Fin n → V) :
     V ⊧/e (∃' φ).val ↔ ∃ x, V ⊧/(x :> e) φ.val := by
   show V ⊧/e
@@ -526,7 +526,7 @@ lemma models_exs [V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻] (hC : 0 < s → StrictCollec
   . rintro ⟨y, x, hx⟩;
     exact ⟨max x y, y, le_max_right x y, x, le_max_left x y, hx⟩;
 
-lemma models_all [V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻] (hC : 0 < s → StrictCollection V s)
+lemma models_all [V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻] (hC : StrictCollection V s)
     (φ : Prenex 𝚷 (s + 1) Empty (n + 1)) (e : Fin n → V) :
     V ⊧/e (∀' φ).val ↔ ∀ x, V ⊧/(x :> e) φ.val := by
   have hthis : V ⊧/e (∃' ∼φ).val ↔ ∃ x, V ⊧/(x :> e) (∼φ).val := models_exs hC (∼φ) e;
@@ -539,7 +539,7 @@ lemma models_all [V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻] (hC : 0 < s → StrictCollec
 
 theorem models_exists_prenex {Γ : Polarity} {s n : ℕ} {φ : ArithmeticSemisentence n} (h : Hierarchy Γ s φ) :
   ∃ φ' : Prenex Γ s Empty n,
-    ∀ (V : Type*) [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻], (0 < s → StrictCollection V s) →
+    ∀ (V : Type*) [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻], StrictCollection V s →
       ∀ e : Fin n → V, V ⊧/e φ ↔ V ⊧/e φ'.val := by
   induction h with
   | verum Γ s n =>
@@ -594,36 +594,36 @@ theorem models_exists_prenex {Γ : Polarity} {s n : ℕ} {φ : ArithmeticSemisen
     obtain ⟨φ', hφ'⟩ := ih;
     use ∃' φ';
     intro V _ _ hC e;
-    have hC' : 0 < s → StrictCollection V s := StrictCollection.imp_of_le hC (by omega);
+    have hC' : StrictCollection V s := hC.of_le (by omega);
     rw [models_exs hC' φ' e, Semiformula.eval_ex];
     exact exists_congr fun x => hφ' V hC (x :> e);
   | @all s n φ _ ih =>
     obtain ⟨φ', hφ'⟩ := ih;
     use ∀' φ';
     intro V _ _ hC e;
-    have hC' : 0 < s → StrictCollection V s := StrictCollection.imp_of_le hC (by omega);
+    have hC' : StrictCollection V s := hC.of_le (by omega);
     rw [models_all hC' φ' e, Semiformula.eval_all];
     exact forall_congr' fun x => hφ' V hC (x :> e);
   | @sigma s n φ _ ih =>
     obtain ⟨φ', hφ'⟩ := ih;
     use φ'.sigma;
     intro V _ _ hC e;
-    have hC' : 0 < s → StrictCollection V s := StrictCollection.imp_of_le hC (by omega);
+    have hC' : StrictCollection V s := hC.of_le (by omega);
     rw [models_sigma φ' e, Semiformula.eval_ex];
     exact exists_congr fun x => hφ' V hC' (x :> e);
   | @pi s n φ _ ih =>
     obtain ⟨φ', hφ'⟩ := ih;
     use φ'.pi;
     intro V _ _ hC e;
-    have hC' : 0 < s → StrictCollection V s := StrictCollection.imp_of_le hC (by omega);
+    have hC' : StrictCollection V s := hC.of_le (by omega);
     rw [models_pi φ' e, Semiformula.eval_all];
     exact forall_congr' fun x => hφ' V hC' (x :> e);
   | @dummy_sigma s n φ _ ih =>
     obtain ⟨φ', hφ'⟩ := ih;
     use (∀' φ').altUp;
     intro V _ _ hC e;
-    have hC₁ : 0 < s + 1 → StrictCollection V (s + 1) := StrictCollection.imp_of_le hC (by omega);
-    have hC₀ : 0 < s → StrictCollection V s := StrictCollection.imp_of_le hC (by omega);
+    have hC₁ : StrictCollection V (s + 1) := hC.of_le (by omega);
+    have hC₀ : StrictCollection V s := hC.of_le (by omega);
     exact Semiformula.eval_all.trans
       ((forall_congr' fun x => hφ' V hC₁ (x :> e)).trans
         ((models_all hC₀ φ' e).symm.trans (models_altUp (∀' φ') e).symm));
@@ -631,8 +631,8 @@ theorem models_exists_prenex {Γ : Polarity} {s n : ℕ} {φ : ArithmeticSemisen
     obtain ⟨φ', hφ'⟩ := ih;
     use (∃' φ').altUp;
     intro V _ _ hC e;
-    have hC₁ : 0 < s + 1 → StrictCollection V (s + 1) := StrictCollection.imp_of_le hC (by omega);
-    have hC₀ : 0 < s → StrictCollection V s := StrictCollection.imp_of_le hC (by omega);
+    have hC₁ : StrictCollection V (s + 1) := hC.of_le (by omega);
+    have hC₀ : StrictCollection V s := hC.of_le (by omega);
     exact Semiformula.eval_ex.trans
       ((exists_congr fun x => hφ' V hC₁ (x :> e)).trans
         ((models_exs hC₀ φ' e).symm.trans (models_altUp (∃' φ') e).symm));
@@ -643,13 +643,18 @@ theorem exists_prenex_of_hierarchy {Γ : Polarity} {s : ℕ} (T : ArithmeticTheo
   {n : ℕ} {φ : ArithmeticSemisentence n} (h : Hierarchy Γ s φ) :
   ∃ φ' : Prenex Γ s Empty n, T ⊢ ∀¹* (φ 🡘 φ'.val) := by
   have : 𝗘𝗤 ℒₒᵣ ⪯ T := eq_weakerThan_of_ISigma (s := s);
-  obtain ⟨φ', hφ'⟩ := Prenex.models_exists_prenex h;
-  use φ';
-  apply provable_iff_of_models_iff;
-  intro V _ _ e;
-  have : V↓[ℒₒᵣ] ⊧* 𝗜𝚺 s := models_of_subtheory (T := 𝗜𝚺 s) (U := T) (inferInstance);
-  have : V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := mod_paMinus_of_ISigma (n := s);
-  exact hφ' V strictCollection_of_ISigma e;
+  cases s with
+  | zero =>
+    use ⟨.mkSigma φ (Hierarchy.zero_iff.mp h)⟩;
+    exact provable_iff_of_models_iff fun V _ _ e ↦ Iff.rfl;
+  | succ s =>
+    obtain ⟨φ', hφ'⟩ := Prenex.models_exists_prenex h;
+    use φ';
+    apply provable_iff_of_models_iff;
+    intro V _ _ e;
+    have : V↓[ℒₒᵣ] ⊧* 𝗜𝚺 (s + 1) := models_of_subtheory (T := 𝗜𝚺 (s + 1)) (U := T) inferInstance;
+    have : V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := mod_paMinus_of_ISigma (n := s + 1);
+    exact hφ' V (strictCollection_of_ISigma (by omega)) e;
 
 theorem exists_matrix_provable {Γ : Polarity} {s: ℕ} (T : ArithmeticTheory) [𝗜𝚺 s ⪯ T]
   {n : ℕ} {φ : ArithmeticSemisentence n} (h : Hierarchy Γ s φ) :
@@ -687,7 +692,7 @@ lemma exists_strictHierarchy_eval_iff (hC : StrictCollection V s)
       | zero => simp;
       | succ i => simp;
     simp only [Semiformula.eval_embSubsts, hvec];
-    exact (hθ V (fun _ ↦ hC) (x :> fun i : Fin φ.fvSup ↦ f i)).symm.trans
+    exact (hθ V hC (x :> fun i : Fin φ.fvSup ↦ f i)).symm.trans
       (φ.eval_toSemisentence_one x f);
 
 end

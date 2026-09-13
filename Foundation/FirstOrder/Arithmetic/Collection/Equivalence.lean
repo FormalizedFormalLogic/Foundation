@@ -168,7 +168,7 @@ lemma hierarchyCollection_sigma_succ_of_pi (hC : HierarchyCollection V 𝚷 n) :
   intro m θ hθ e a hex;
   have hS : StrictCollection V (n + 1) := strictCollection_succ_of_hierarchyCollection hC;
   obtain ⟨θ', hθ'⟩ := Prenex.models_exists_prenex (Γ := 𝚺) (s := n + 1) hθ;
-  have hiff : ∀ b : Fin (m + 2) → V, V ⊧/b θ ↔ V ⊧/b θ'.val := hθ' V fun _ ↦ hS;
+  have hiff : ∀ b : Fin (m + 2) → V, V ⊧/b θ ↔ V ⊧/b θ'.val := hθ' V hS;
   obtain ⟨w, hw⟩ := hS (θ := θ'.val) Prenex.val_strictHierarchy e a
     fun x hx ↦ (hex x hx).imp fun u hu ↦ (hiff _).mp hu;
   exact ⟨w, fun x hx ↦ (hw x hx).imp fun u hu ↦ ⟨hu.1, (hiff _).mpr hu.2⟩⟩;

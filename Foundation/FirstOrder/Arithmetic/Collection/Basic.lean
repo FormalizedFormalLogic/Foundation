@@ -130,9 +130,6 @@ def StrictCollection (V : Type*) [ORingStructure V] (s : ℕ) : Prop :=
 lemma StrictCollection.of_le {s' : ℕ} (h : StrictCollection V s') (hs : s ≤ s') :
     StrictCollection V s := fun hθ ↦ h (hθ.mono hs)
 
-lemma StrictCollection.imp_of_le {s' : ℕ} (h : 0 < s' → StrictCollection V s') (hs : s ≤ s') :
-    0 < s → StrictCollection V s := fun hs₀ ↦ of_le (h (hs₀.trans_le hs)) hs
-
 lemma strictCollection_of_models_collectionAxiom [V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻]
     (h : ∀ ψ : ArithmeticSemiformula ℕ 2, StrictHierarchy 𝚺 s ψ →
       V↓[ℒₒᵣ] ⊧ (.univCl (collectionAxiom ψ) : ArithmeticSentence)) :
