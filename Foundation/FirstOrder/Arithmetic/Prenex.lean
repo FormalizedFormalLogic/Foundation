@@ -9,10 +9,8 @@ public import Foundation.FirstOrder.Arithmetic.Definability.Hierarchy
 /-!
 # Prenex normal form for the arithmetical hierarchy
 
-For `𝗜𝚺 s ⪯ T`, every `Hierarchy Γ s` formula `φ` is `T`-provably equivalent to `φ₀.toPrenex Γ s`
+For `𝗕𝚺 s ⪯ T`, every `Hierarchy Γ s` formula `φ` is `T`-provably equivalent to `φ₀.toPrenex Γ s`
 for some `φ₀ : ArithmeticSemisentence (n + s)` in `Hierarchy 𝚺 0`.
-
-Model-side, `𝗕𝚺 s` already suffices.
 
 ## References
 
@@ -641,24 +639,18 @@ theorem models_exists_prenex {Γ : Polarity} {s n : ℕ} {φ : ArithmeticSemisen
 
 end Prenex
 
-theorem exists_prenex_of_hierarchy {Γ : Polarity} {s : ℕ} (T : ArithmeticTheory) [𝗜𝚺 s ⪯ T]
+theorem exists_prenex_of_hierarchy {Γ : Polarity} {s : ℕ} (T : ArithmeticTheory) [𝗕𝚺 s ⪯ T]
   {n : ℕ} {φ : ArithmeticSemisentence n} (h : Hierarchy Γ s φ) :
   ∃ φ' : Prenex Γ s Empty n, T ⊢ ∀¹* (φ 🡘 φ'.val) := by
-  have : 𝗘𝗤 ℒₒᵣ ⪯ T := eq_weakerThan_of_ISigma (s := s);
-  cases s with
-  | zero =>
-    use ⟨.mkSigma φ (Hierarchy.zero_iff.mp h)⟩;
-    exact provable_iff_of_models_iff fun V _ _ e ↦ Iff.rfl;
-  | succ s =>
-    obtain ⟨φ', hφ'⟩ := Prenex.models_exists_prenex h;
-    use φ';
-    apply provable_iff_of_models_iff;
-    intro V _ _ e;
-    have : V↓[ℒₒᵣ] ⊧* 𝗜𝚺 (s + 1) := models_of_subtheory (T := 𝗜𝚺 (s + 1)) (U := T) inferInstance;
-    have : V↓[ℒₒᵣ] ⊧* 𝗕𝚺 (s + 1) := models_of_subtheory (U := 𝗜𝚺 (s + 1)) inferInstance;
-    exact hφ' V e;
+  have : 𝗘𝗤 ℒₒᵣ ⪯ T := eq_weakerThan_of_BSigma (s := s);
+  obtain ⟨φ', hφ'⟩ := Prenex.models_exists_prenex h;
+  use φ';
+  apply provable_iff_of_models_iff;
+  intro V _ _ e;
+  have : V↓[ℒₒᵣ] ⊧* 𝗕𝚺 s := models_of_subtheory (T := 𝗕𝚺 s) (U := T) inferInstance;
+  exact hφ' V e;
 
-theorem exists_matrix_provable {Γ : Polarity} {s: ℕ} (T : ArithmeticTheory) [𝗜𝚺 s ⪯ T]
+theorem exists_matrix_provable {Γ : Polarity} {s: ℕ} (T : ArithmeticTheory) [𝗕𝚺 s ⪯ T]
   {n : ℕ} {φ : ArithmeticSemisentence n} (h : Hierarchy Γ s φ) :
   ∃ φ₀ : 𝚺₀.Semisentence (n + s), T ⊢ ∀¹* (φ 🡘 φ₀.val.toPrenex Γ s) := by
   obtain ⟨_, hφ'⟩ := exists_prenex_of_hierarchy T h;
@@ -668,7 +660,7 @@ section
 variable {Γ : Polarity} {s n : ℕ}
 
 theorem exists_strictHierarchy_of_hierarchy
-    (T : ArithmeticTheory) [𝗜𝚺 s ⪯ T] {φ : ArithmeticSemisentence n} (h : Hierarchy Γ s φ) :
+    (T : ArithmeticTheory) [𝗕𝚺 s ⪯ T] {φ : ArithmeticSemisentence n} (h : Hierarchy Γ s φ) :
     ∃ ψ : ArithmeticSemisentence n, StrictHierarchy Γ s ψ ∧ T ⊢ ∀¹* (φ 🡘 ψ) := by
   obtain ⟨φ', hφ'⟩ := exists_prenex_of_hierarchy T h;
   exact ⟨φ'.val, Prenex.val_strictHierarchy, hφ'⟩;

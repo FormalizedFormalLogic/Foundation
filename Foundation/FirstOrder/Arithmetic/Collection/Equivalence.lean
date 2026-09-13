@@ -17,6 +17,19 @@ namespace FFL.FirstOrder.Arithmetic
 
 open _root_.FFL.Entailment
 
+section collection
+
+def Collection (V : Type*) [ORingStructure V]
+    (C : {k : ℕ} → ArithmeticSemisentence k → Prop) : Prop :=
+  ∀ {n : ℕ} {θ : ArithmeticSemisentence (n + 2)}, C θ →
+    ∀ (e : Fin n → V) (a : V), (∀ x < a, ∃ u, V ⊧/(u :> x :> e) θ) →
+      ∃ w, ∀ x < a, ∃ u ≤ w, V ⊧/(u :> x :> e) θ
+
+abbrev HierarchyCollection (V : Type*) [ORingStructure V] (Γ : Polarity) (s : ℕ) : Prop :=
+  Collection V (Hierarchy Γ s)
+
+end collection
+
 variable {V : Type*} [ORingStructure V] {n : ℕ}
 
 private def MonotoneWitness (V : Type*) [ORingStructure V] {m : ℕ}

@@ -117,6 +117,13 @@ theorem BSigma_weakerThan_ISigma (n : ℕ) : 𝗕𝚺 (n + 1) ⪯ 𝗜𝚺 (n + 
 
 instance (n : ℕ) : 𝗕𝚺 (n + 1) ⪯ 𝗜𝚺 (n + 1) := BSigma_weakerThan_ISigma n
 
+instance (s : ℕ) : 𝗕𝚺 s ⪯ 𝗜𝚺 (s + 1) :=
+  Entailment.WeakerThan.trans (CollectionOnHierarchy_weakerThan_of_le (Nat.le_succ s))
+    (BSigma_weakerThan_ISigma s)
+
+instance (s : ℕ) : 𝗕𝚺 s ⪯ 𝗣𝗔 :=
+  Entailment.WeakerThan.trans (inferInstance : 𝗕𝚺 s ⪯ 𝗜𝚺 (s + 1)) inferInstance
+
 end BSigma_ISigma
 
 section models_CollectionOnHierarchy
@@ -138,18 +145,5 @@ lemma exists_bound_of_models_CollectionOnHierarchy [V↓[ℒₒᵣ] ⊧* 𝗕 Γ
       (Set.mem_union_right _ (mem_CollectionScheme_of_mem (hθ.rew _)))) e a hex
 
 end models_CollectionOnHierarchy
-
-section collection
-
-def Collection (V : Type*) [ORingStructure V]
-    (C : {k : ℕ} → ArithmeticSemisentence k → Prop) : Prop :=
-  ∀ {n : ℕ} {θ : ArithmeticSemisentence (n + 2)}, C θ →
-    ∀ (e : Fin n → V) (a : V), (∀ x < a, ∃ u, V ⊧/(u :> x :> e) θ) →
-      ∃ w, ∀ x < a, ∃ u ≤ w, V ⊧/(u :> x :> e) θ
-
-abbrev HierarchyCollection (V : Type*) [ORingStructure V] (Γ : Polarity) (s : ℕ) : Prop :=
-  Collection V (Hierarchy Γ s)
-
-end collection
 
 end FFL.FirstOrder.Arithmetic

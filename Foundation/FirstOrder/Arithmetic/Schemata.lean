@@ -231,6 +231,11 @@ instance (Γ : Polarity) (n : ℕ) : 𝗘𝗤 ℒₒᵣ ⪯ 𝗕 Γ n :=
 lemma eq_weakerThan_of_ISigma {T : ArithmeticTheory} {s : ℕ} [𝗜𝚺 s ⪯ T] : 𝗘𝗤 ℒₒᵣ ⪯ T :=
   Entailment.WeakerThan.trans (inferInstance : 𝗘𝗤 ℒₒᵣ ⪯ 𝗜𝚺₀) (ISigma_weakerThan_of_le_trans (by omega) ‹𝗜𝚺 s ⪯ T›)
 
+-- This is stated as a `lemma`, not an `instance`, since `s` does not occur in the conclusion
+-- `𝗘𝗤 ℒₒᵣ ⪯ T`, so instance search cannot infer it.
+lemma eq_weakerThan_of_BSigma {T : ArithmeticTheory} {s : ℕ} [𝗕𝚺 s ⪯ T] : 𝗘𝗤 ℒₒᵣ ⪯ T :=
+  Entailment.WeakerThan.trans (inferInstance : 𝗘𝗤 ℒₒᵣ ⪯ 𝗕𝚺 s) ‹𝗕𝚺 s ⪯ T›
+
 end axioms
 
 section models
