@@ -118,17 +118,28 @@ theorem BSigma_weakerThan_ISigma (n : ℕ) : 𝗕𝚺 (n + 1) ⪯ 𝗜𝚺 (n + 
 
 end BSigma_ISigma
 
-section strictCollection
+section collection
 
 variable {V : Type*} [ORingStructure V] {s : ℕ}
 
-def StrictCollection (V : Type*) [ORingStructure V] (s : ℕ) : Prop :=
-  ∀ {n : ℕ} {θ : ArithmeticSemisentence (n + 2)}, StrictHierarchy 𝚺 s θ →
+def Collection (V : Type*) [ORingStructure V]
+    (C : {k : ℕ} → ArithmeticSemisentence k → Prop) : Prop :=
+  ∀ {n : ℕ} {θ : ArithmeticSemisentence (n + 2)}, C θ →
     ∀ (e : Fin n → V) (a : V), (∀ x < a, ∃ u, V ⊧/(u :> x :> e) θ) →
       ∃ w, ∀ x < a, ∃ u ≤ w, V ⊧/(u :> x :> e) θ
 
+lemma Collection.mono {C C' : {k : ℕ} → ArithmeticSemisentence k → Prop} (h : Collection V C')
+    (hC : ∀ {k : ℕ} {θ : ArithmeticSemisentence k}, C θ → C' θ) : Collection V C :=
+  fun hθ ↦ h (hC hθ)
+
+abbrev StrictCollection (V : Type*) [ORingStructure V] (s : ℕ) : Prop :=
+  Collection V (StrictHierarchy 𝚺 s)
+
+abbrev HierarchyCollection (V : Type*) [ORingStructure V] (Γ : Polarity) (s : ℕ) : Prop :=
+  Collection V (Hierarchy Γ s)
+
 lemma StrictCollection.of_le {s' : ℕ} (h : StrictCollection V s') (hs : s ≤ s') :
-    StrictCollection V s := fun hθ ↦ h (hθ.mono hs)
+    StrictCollection V s := h.mono fun hθ ↦ hθ.mono hs
 
 lemma strictCollection_of_models_collectionAxiom [V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻]
     (h : ∀ ψ : ArithmeticSemiformula ℕ 2, StrictHierarchy 𝚺 s ψ →
@@ -144,6 +155,6 @@ lemma strictCollection_of_ISigma {s : ℕ} [V↓[ℒₒᵣ] ⊧* 𝗜𝚺 s] (hs
     consequence_iff.mp (Theory.Proof.sound
       (ISigma.provable_collectionAxiom_of_hierarchy n hψ.hierarchy)) V inferInstance;
 
-end strictCollection
+end collection
 
 end FFL.FirstOrder.Arithmetic

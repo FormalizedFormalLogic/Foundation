@@ -19,11 +19,6 @@ open _root_.FFL.Entailment
 
 variable {V : Type*} [ORingStructure V] {Γ : Polarity} {n s : ℕ}
 
-def HierarchyCollection (V : Type*) [ORingStructure V] (Γ : Polarity) (s : ℕ) : Prop :=
-  ∀ {n : ℕ} {θ : ArithmeticSemisentence (n + 2)}, Hierarchy Γ s θ →
-    ∀ (e : Fin n → V) (a : V), (∀ x < a, ∃ u, V ⊧/(u :> x :> e) θ) →
-      ∃ w, ∀ x < a, ∃ u ≤ w, V ⊧/(u :> x :> e) θ
-
 lemma hierarchyCollection_of_models_collectionAxiom [V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻]
     (h : ∀ ψ : ArithmeticSemiformula ℕ 2, Hierarchy Γ s ψ →
       V↓[ℒₒᵣ] ⊧ (.univCl (collectionAxiom ψ) : ArithmeticSentence)) :
