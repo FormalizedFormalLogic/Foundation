@@ -10,7 +10,7 @@ beneath alternating quantifier blocks.
 
 ## References
 
-- [HP98, 0.30, Lemma I.1.69]
+- [HP98]
 -/
 
 @[expose] public section
@@ -21,12 +21,9 @@ variable {L : Language} [L.LT] {ξ : Type*}
 
 inductive StrictHierarchy : Polarity → ℕ → {n : ℕ} → Semiformula L ξ n → Prop
   | zero {Γ n} {φ : Semiformula L ξ n} : Hierarchy 𝚺 0 φ → StrictHierarchy Γ 0 φ
-  | ofAlt {Γ s n} {φ : Semiformula L ξ n} :
-      StrictHierarchy Γ.alt s φ → StrictHierarchy Γ (s + 1) φ
-  | exs {s n} {φ : Semiformula L ξ (n + 1)} :
-      StrictHierarchy 𝚺 (s + 1) φ → StrictHierarchy 𝚺 (s + 1) (∃¹ φ)
-  | all {s n} {φ : Semiformula L ξ (n + 1)} :
-      StrictHierarchy 𝚷 (s + 1) φ → StrictHierarchy 𝚷 (s + 1) (∀¹ φ)
+  | ofAlt {Γ s n} {φ : Semiformula L ξ n} : StrictHierarchy Γ.alt s φ → StrictHierarchy Γ (s + 1) φ
+  | exs {s n} {φ : Semiformula L ξ (n + 1)} : StrictHierarchy 𝚺 (s + 1) φ → StrictHierarchy 𝚺 (s + 1) (∃¹ φ)
+  | all {s n} {φ : Semiformula L ξ (n + 1)} : StrictHierarchy 𝚷 (s + 1) φ → StrictHierarchy 𝚷 (s + 1) (∀¹ φ)
 
 namespace StrictHierarchy
 
