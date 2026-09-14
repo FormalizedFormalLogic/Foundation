@@ -160,8 +160,6 @@ section BSigma_succ_BPi
 
 /-! ### `𝗕𝚺 (n + 1)` and `𝗕𝚷 n` -/
 
-section
-
 variable {m : ℕ}
 
 private structure MonotoneWitness (V : Type*) [ORingStructure V]
@@ -183,11 +181,9 @@ private lemma eval_bexsLT_swap01 (χ : ArithmeticSemisentence (m + 2)) (e : Fin 
   simp only [Semiformula.eval_bexsLT];
   exact exists_congr fun x ↦ and_congr (by simp) (Semiformula.eval_swap01 χ x v e);
 
-end
-
 section
 
-variable [V↓[ℒₒᵣ] ⊧* 𝗕𝚷 n] {m : ℕ}
+variable [V↓[ℒₒᵣ] ⊧* 𝗕𝚷 n]
 
 omit [V↓[ℒₒᵣ] ⊧* 𝗕𝚷 n] in
 private lemma exists_monotoneWitness_of_pi {θ : ArithmeticSemisentence m}

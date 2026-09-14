@@ -175,12 +175,12 @@ lemma models_nrel {k} (r : (ℒₒᵣ).Rel k) (v : Fin k → ArithmeticSemiterm 
     V ⊧/e (nrel r v : Prenex Γ s Empty n).val ↔ V ⊧/e (Semiformula.nrel r v) :=
   models_ofΔ₀ (.mkSigma (.nrel r v) (Hierarchy.nrel 𝚺 0 r v)) e
 
-variable {T : ArithmeticTheory}
-
-lemma provable_iff_sigmaInv {φ' : Prenex 𝚺 (s + 1) Empty n} (hφ' : T ⊢ ∀¹* (φ 🡘 φ'.val)) :
+lemma provable_iff_sigmaInv {T : ArithmeticTheory} {φ : ArithmeticSemiformula Empty n}
+  {φ' : Prenex 𝚺 (s + 1) Empty n} (hφ' : T ⊢ ∀¹* (φ 🡘 φ'.val)) :
   T ⊢ ∀¹* (φ 🡘 ∃¹ φ'.sigmaInv.val) := φ'.val_sigmaInv ▸ hφ'
 
-lemma provable_iff_piInv {φ' : Prenex 𝚷 (s + 1) Empty n} (hφ' : T ⊢ ∀¹* (φ 🡘 φ'.val)) :
+lemma provable_iff_piInv {T : ArithmeticTheory} {φ : ArithmeticSemiformula Empty n}
+  {φ' : Prenex 𝚷 (s + 1) Empty n} (hφ' : T ⊢ ∀¹* (φ 🡘 φ'.val)) :
   T ⊢ ∀¹* (φ 🡘 ∀¹ φ'.piInv.val) := φ'.val_piInv ▸ hφ'
 
 mutual
@@ -656,21 +656,14 @@ theorem exists_matrix_provable {Γ : Polarity} {s: ℕ} (T : ArithmeticTheory) [
   obtain ⟨_, hφ'⟩ := exists_prenex_of_hierarchy T h;
   exact ⟨_, by simpa [Prenex.val] using hφ'⟩;
 
-section
-variable {Γ : Polarity} {s n : ℕ}
-
-theorem exists_strictHierarchy_of_hierarchy
+theorem exists_strictHierarchy_of_hierarchy {Γ : Polarity} {s n : ℕ}
     (T : ArithmeticTheory) [𝗕𝚺 s ⪯ T] {φ : ArithmeticSemisentence n} (h : Hierarchy Γ s φ) :
     ∃ ψ : ArithmeticSemisentence n, StrictHierarchy Γ s ψ ∧ T ⊢ ∀¹* (φ 🡘 ψ) := by
   obtain ⟨φ', hφ'⟩ := exists_prenex_of_hierarchy T h;
   exact ⟨φ'.val, Prenex.val_strictHierarchy, hφ'⟩;
 
-section
-
-variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗕𝚺 s]
-
-lemma exists_strictHierarchy_eval_iff {φ : ArithmeticSemiformula ℕ 1} (hφ : Hierarchy Γ s φ)
-    (f : ℕ → V) :
+lemma exists_strictHierarchy_eval_iff {Γ : Polarity} {s : ℕ} {V : Type*} [ORingStructure V]
+    [V↓[ℒₒᵣ] ⊧* 𝗕𝚺 s] {φ : ArithmeticSemiformula ℕ 1} (hφ : Hierarchy Γ s φ) (f : ℕ → V) :
     ∃ ψ : ArithmeticSemiformula ℕ 1, StrictHierarchy Γ s ψ ∧
       ∀ x : V, ψ.Eval ![x] f ↔ φ.Eval ![x] f := by
   obtain ⟨θ, hθ⟩ := Prenex.models_exists_prenex (φ := φ.toSemisentence ![#0]) (hφ.rew _);
@@ -688,10 +681,6 @@ lemma exists_strictHierarchy_eval_iff {φ : ArithmeticSemiformula ℕ 1} (hφ : 
     simp only [Semiformula.eval_embSubsts, hvec];
     exact (hθ V (x :> fun i : Fin φ.fvSup ↦ f i)).symm.trans
       (φ.eval_toSemisentence_one x f);
-
-end
-
-end
 
 end Arithmetic
 
