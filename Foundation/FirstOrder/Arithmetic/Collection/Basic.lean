@@ -89,6 +89,8 @@ end standardModel
 
 section BSigma_ISigma
 
+variable {n : ℕ}
+
 theorem ISigma.provable_collectionAxiom_of_hierarchy (n : ℕ) {φ : ArithmeticSemiformula ℕ 2}
     (hφ : Hierarchy 𝚺 (n + 1) φ) : 𝗜𝚺 (n + 1) ⊢ .univCl (collectionAxiom φ) := by
   apply Arithmetic.complete.{0};
@@ -108,21 +110,18 @@ theorem ISigma.provable_collectionAxiom_of_hierarchy (n : ℕ) {φ : ArithmeticS
   . exact Arithmetic.lt_succ_iff_le.mpr hu;
   . exact (φ.eval_toSemisentence_two x u f).mp hux;
 
-theorem BSigma_weakerThan_ISigma (n : ℕ) : 𝗕𝚺 (n + 1) ⪯ 𝗜𝚺 (n + 1) :=
-  Entailment.WeakerThan.ofAxm! <| by
-    rintro σ (hσ | ⟨φ, hφ, rfl⟩);
-    . exact Entailment.WeakerThan.pbl (h := ISigma_weakerThan_of_le (by omega))
-        (Entailment.by_axm hσ);
-    . exact ISigma.provable_collectionAxiom_of_hierarchy n hφ;
+@[instance]
+theorem BSigma_weakerThan_ISigma : 𝗕𝚺 (n + 1) ⪯ 𝗜𝚺 (n + 1) := Entailment.WeakerThan.ofAxm! <| by
+  rintro σ (hσ | ⟨φ, hφ, rfl⟩);
+  . exact Entailment.WeakerThan.pbl (h := ISigma_weakerThan_of_le (by omega))
+      (Entailment.by_axm hσ);
+  . exact ISigma.provable_collectionAxiom_of_hierarchy n hφ;
 
-instance (n : ℕ) : 𝗕𝚺 (n + 1) ⪯ 𝗜𝚺 (n + 1) := BSigma_weakerThan_ISigma n
+instance : 𝗕𝚺 n ⪯ 𝗜𝚺 (n + 1) := Entailment.WeakerThan.trans
+  (CollectionOnHierarchy_weakerThan_of_le (by omega)) $ BSigma_weakerThan_ISigma
 
-instance (s : ℕ) : 𝗕𝚺 s ⪯ 𝗜𝚺 (s + 1) :=
-  Entailment.WeakerThan.trans (CollectionOnHierarchy_weakerThan_of_le (Nat.le_succ s))
-    (BSigma_weakerThan_ISigma s)
-
-instance (s : ℕ) : 𝗕𝚺 s ⪯ 𝗣𝗔 :=
-  Entailment.WeakerThan.trans (inferInstance : 𝗕𝚺 s ⪯ 𝗜𝚺 (s + 1)) inferInstance
+instance : 𝗕𝚺 n ⪯ 𝗣𝗔 :=
+  Entailment.WeakerThan.trans (inferInstance : 𝗕𝚺 n ⪯ 𝗜𝚺 (n + 1)) inferInstance
 
 end BSigma_ISigma
 

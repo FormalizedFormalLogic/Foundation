@@ -32,15 +32,15 @@ end collection
 
 variable {V : Type*} [ORingStructure V] {n : ℕ}
 
-private def MonotoneWitness (V : Type*) [ORingStructure V] {m : ℕ}
-    (χ : ArithmeticSemisentence (m + 1)) (θ : ArithmeticSemisentence m) : Prop :=
-  (∀ (e : Fin m → V) (v v' : V), v ≤ v' → V ⊧/(v :> e) χ → V ⊧/(v' :> e) χ) ∧
-    (∀ (e : Fin m → V) (v : V), V ⊧/(v :> e) χ → V ⊧/e θ) ∧
-    (∀ e : Fin m → V, V ⊧/e θ → ∃ v, V ⊧/(v :> e) χ)
+private structure MonotoneWitness (V : Type*) [ORingStructure V] {m : ℕ}
+    (χ : ArithmeticSemisentence (m + 1)) (θ : ArithmeticSemisentence m) : Prop where
+  monotone : ∀ (e : Fin m → V) (v v' : V), v ≤ v' → V ⊧/(v :> e) χ → V ⊧/(v' :> e) χ
+  sound : ∀ (e : Fin m → V) (v : V), V ⊧/(v :> e) χ → V ⊧/e θ
+  complete : ∀ e : Fin m → V, V ⊧/e θ → ∃ v, V ⊧/(v :> e) χ
 
 private lemma monotoneWitness_bShift {m : ℕ} (θ : ArithmeticSemisentence m) :
     MonotoneWitness V (Rew.bShift ▹ θ) θ := by
-  and_intros;
+  constructor;
   . intro e v v' _ h; simpa using h;
   . intro e v h; simpa using h;
   . intro e h; exact ⟨0, by simpa using h⟩;
@@ -77,17 +77,18 @@ private lemma exists_monotoneWitness_ball {m : ℕ} {θ : ArithmeticSemisentence
   use (χ ⇜ (#1 :> #0 :> (#·.succ.succ))).ballLT (Rew.bShift u);
   and_intros;
   . simpa using hχ;
-  . intro e v v' hv h;
-    exact (heval e v').mpr fun x hx ↦ hmono (x :> e) v v' hv ((heval e v).mp h x hx);
-  . intro e v h;
-    simp only [Semiformula.eval_ballLT];
-    exact fun x hx ↦ hsound (x :> e) v ((heval e v).mp h x hx);
-  . intro e h;
-    simp only [Semiformula.eval_ballLT] at h;
-    obtain ⟨w, hw⟩ := exists_bound_of_models_CollectionOnHierarchy (Γ := 𝚷) (s := n) hχ e
-      (u.valb e) fun x hx ↦ hcomplete (x :> e) (h x hx);
-    exact ⟨w, (heval e w).mpr fun x hx ↦ (hw x hx).elim fun v hv ↦
-      hmono (x :> e) v w hv.1 hv.2⟩;
+  . constructor;
+    . intro e v v' hv h;
+      exact (heval e v').mpr fun x hx ↦ hmono (x :> e) v v' hv ((heval e v).mp h x hx);
+    . intro e v h;
+      simp only [Semiformula.eval_ballLT];
+      exact fun x hx ↦ hsound (x :> e) v ((heval e v).mp h x hx);
+    . intro e h;
+      simp only [Semiformula.eval_ballLT] at h;
+      obtain ⟨w, hw⟩ := exists_bound_of_models_CollectionOnHierarchy (Γ := 𝚷) (s := n) hχ e
+        (u.valb e) fun x hx ↦ hcomplete (x :> e) (h x hx);
+      exact ⟨w, (heval e w).mpr fun x hx ↦ (hw x hx).elim fun v hv ↦
+        hmono (x :> e) v w hv.1 hv.2⟩;
 
 omit [V↓[ℒₒᵣ] ⊧* 𝗕𝚷 n] in
 private lemma exists_monotoneWitness_bexs {m : ℕ} {θ : ArithmeticSemisentence (m + 1)}
@@ -105,18 +106,19 @@ private lemma exists_monotoneWitness_bexs {m : ℕ} {θ : ArithmeticSemisentence
   use (χ ⇜ (#1 :> #0 :> (#·.succ.succ))).bexsLT (Rew.bShift u);
   and_intros;
   . simpa using hχ;
-  . intro e v v' hv h;
-    obtain ⟨x, hx, h⟩ := (heval e v).mp h;
-    exact (heval e v').mpr ⟨x, hx, hmono (x :> e) v v' hv h⟩;
-  . intro e v h;
-    obtain ⟨x, hx, h⟩ := (heval e v).mp h;
-    simp only [Semiformula.eval_bexsLT];
-    exact ⟨x, hx, hsound (x :> e) v h⟩;
-  . intro e h;
-    simp only [Semiformula.eval_bexsLT] at h;
-    obtain ⟨x, hx, h⟩ := h;
-    obtain ⟨v, hv⟩ := hcomplete (x :> e) h;
-    exact ⟨v, (heval e v).mpr ⟨x, hx, hv⟩⟩;
+  . constructor;
+    . intro e v v' hv h;
+      obtain ⟨x, hx, h⟩ := (heval e v).mp h;
+      exact (heval e v').mpr ⟨x, hx, hmono (x :> e) v v' hv h⟩;
+    . intro e v h;
+      obtain ⟨x, hx, h⟩ := (heval e v).mp h;
+      simp only [Semiformula.eval_bexsLT];
+      exact ⟨x, hx, hsound (x :> e) v h⟩;
+    . intro e h;
+      simp only [Semiformula.eval_bexsLT] at h;
+      obtain ⟨x, hx, h⟩ := h;
+      obtain ⟨v, hv⟩ := hcomplete (x :> e) h;
+      exact ⟨v, (heval e v).mpr ⟨x, hx, hv⟩⟩;
 
 private lemma exists_monotoneWitness_exs {m : ℕ} {θ : ArithmeticSemisentence (m + 1)}
     {χ : ArithmeticSemisentence (m + 2)} (hχ : Hierarchy 𝚷 n χ) (hM : MonotoneWitness V χ θ) :
@@ -127,19 +129,20 @@ private lemma exists_monotoneWitness_exs {m : ℕ} {θ : ArithmeticSemisentence 
   use (χ ⇜ (#1 :> #0 :> (#·.succ.succ))).bexsLT #0;
   and_intros;
   . simpa using hχ;
-  . intro e v v' hv h;
-    obtain ⟨x, hx, h⟩ := (eval_bexsLT_swap01 χ e v).mp h;
-    exact (eval_bexsLT_swap01 χ e v').mpr
-      ⟨x, lt_of_lt_of_le hx hv, hmono (x :> e) v v' hv h⟩;
-  . intro e v h;
-    obtain ⟨x, -, h⟩ := (eval_bexsLT_swap01 χ e v).mp h;
-    exact Semiformula.eval_ex.mpr ⟨x, hsound (x :> e) v h⟩;
-  . intro e h;
-    obtain ⟨x, hx⟩ := Semiformula.eval_ex.mp h;
-    obtain ⟨v, hv⟩ := hcomplete (x :> e) hx;
-    exact ⟨max (x + 1) v, (eval_bexsLT_swap01 χ e (max (x + 1) v)).mpr
-      ⟨x, lt_of_lt_of_le (lt_add_one x) (le_max_left _ _),
-        hmono (x :> e) v (max (x + 1) v) (le_max_right _ _) hv⟩⟩;
+  . constructor;
+    . intro e v v' hv h;
+      obtain ⟨x, hx, h⟩ := (eval_bexsLT_swap01 χ e v).mp h;
+      exact (eval_bexsLT_swap01 χ e v').mpr
+        ⟨x, lt_of_lt_of_le hx hv, hmono (x :> e) v v' hv h⟩;
+    . intro e v h;
+      obtain ⟨x, -, h⟩ := (eval_bexsLT_swap01 χ e v).mp h;
+      exact Semiformula.eval_ex.mpr ⟨x, hsound (x :> e) v h⟩;
+    . intro e h;
+      obtain ⟨x, hx⟩ := Semiformula.eval_ex.mp h;
+      obtain ⟨v, hv⟩ := hcomplete (x :> e) hx;
+      exact ⟨max (x + 1) v, (eval_bexsLT_swap01 χ e (max (x + 1) v)).mpr
+        ⟨x, lt_of_lt_of_le (lt_add_one x) (le_max_left _ _),
+          hmono (x :> e) v (max (x + 1) v) (le_max_right _ _) hv⟩⟩;
 
 private lemma exists_monotoneWitness_of_hierarchy :
     ∀ {m : ℕ} {θ : ArithmeticSemisentence m}, Hierarchy 𝚺 (n + 1) θ →
@@ -171,29 +174,31 @@ private lemma exists_monotoneWitness_of_hierarchy :
         use χ₁ ⋏ χ₂;
         and_intros;
         . simp [hχ₁, hχ₂];
-        . intro e v v' hv h;
-          exact ⟨hmono₁ e v v' hv h.1, hmono₂ e v v' hv h.2⟩;
-        . intro e v h;
-          exact ⟨hsound₁ e v h.1, hsound₂ e v h.2⟩;
-        . intro e h;
-          obtain ⟨v₁, hv₁⟩ := hcomplete₁ e h.1;
-          obtain ⟨v₂, hv₂⟩ := hcomplete₂ e h.2;
-          exact ⟨max v₁ v₂, hmono₁ e v₁ _ (le_max_left _ _) hv₁,
-            hmono₂ e v₂ _ (le_max_right _ _) hv₂⟩;
+        . constructor;
+          . intro e v v' hv h;
+            exact ⟨hmono₁ e v v' hv h.1, hmono₂ e v v' hv h.2⟩;
+          . intro e v h;
+            exact ⟨hsound₁ e v h.1, hsound₂ e v h.2⟩;
+          . intro e h;
+            obtain ⟨v₁, hv₁⟩ := hcomplete₁ e h.1;
+            obtain ⟨v₂, hv₂⟩ := hcomplete₂ e h.2;
+            exact ⟨max v₁ v₂, hmono₁ e v₁ _ (le_max_left _ _) hv₁,
+              hmono₂ e v₂ _ (le_max_right _ _) hv₂⟩;
       | or hφ hψ =>
         obtain ⟨χ₁, hχ₁, hmono₁, hsound₁, hcomplete₁⟩ := ih (by simp at hc; omega) hφ;
         obtain ⟨χ₂, hχ₂, hmono₂, hsound₂, hcomplete₂⟩ := ih (by simp at hc; omega) hψ;
         use χ₁ ⋎ χ₂;
         and_intros;
         . simp [hχ₁, hχ₂];
-        . intro e v v' hv h;
-          exact h.imp (hmono₁ e v v' hv) (hmono₂ e v v' hv);
-        . intro e v h;
-          exact h.imp (hsound₁ e v) (hsound₂ e v);
-        . intro e h;
-          rcases h with h | h;
-          . exact (hcomplete₁ e h).imp fun v hv ↦ by tauto;
-          . exact (hcomplete₂ e h).imp fun v hv ↦ by tauto;
+        . constructor;
+          . intro e v v' hv h;
+            exact h.imp (hmono₁ e v v' hv) (hmono₂ e v v' hv);
+          . intro e v h;
+            exact h.imp (hsound₁ e v) (hsound₂ e v);
+          . intro e h;
+            rcases h with h | h;
+            . exact (hcomplete₁ e h).imp fun v hv ↦ by tauto;
+            . exact (hcomplete₂ e h).imp fun v hv ↦ by tauto;
       | ball ht hφ =>
         obtain ⟨u, rfl⟩ := Rew.positive_iff.mp ht;
         obtain ⟨χ, hχ, hM⟩ :=
