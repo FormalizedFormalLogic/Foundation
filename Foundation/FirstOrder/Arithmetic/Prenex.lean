@@ -24,6 +24,8 @@ namespace FFL.FirstOrder
 
 namespace Arithmetic
 
+/-- A formula in `Γ`-prenex form of level `s`, stored as the `𝚺₀` matrix that remains after
+stripping the `s` leading alternating quantifiers. -/
 structure Prenex (Γ : Polarity) (s : ℕ) (ξ : Type*) (n : ℕ) where
   matrix : 𝚺₀.Semiformula ξ (n + s)
 
@@ -32,6 +34,8 @@ namespace Prenex
 variable {Γ : Polarity} {s : ℕ} {ξ ξ₁ ξ₂ : Type*} {n n₁ n₂ : ℕ}
 variable {V : Type*} [ORingStructure V]
 
+/-- The formula denoted by `φ`: its matrix prefixed by the `s` alternating quantifiers
+starting with `Γ`. -/
 @[coe]
 def val (φ : Prenex Γ s ξ n) : ArithmeticSemiformula ξ n := φ.matrix.val.toPrenex Γ s
 
@@ -536,6 +540,8 @@ lemma models_all [V↓[ℒₒᵣ] ⊧* 𝗕𝚺 s] (φ : Prenex 𝚷 (s + 1) Emp
   simp only [val_neg, LogicalConnective.HomClass.map_neg, LogicalConnective.Prop.neg_eq] at hthis ⊢;
   grind;
 
+/-- Every `Hierarchy Γ s` sentence is equivalent, in every model of `𝗕𝚺 s`, to the value of some
+`Prenex Γ s` formula. -/
 theorem models_exists_prenex {Γ : Polarity} {s n : ℕ} {φ : ArithmeticSemisentence n} (h : Hierarchy Γ s φ) :
   ∃ φ' : Prenex Γ s Empty n,
     ∀ (V : Type*) [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗕𝚺 s],

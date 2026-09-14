@@ -4,6 +4,7 @@ public import Foundation.FirstOrder.Basic.Syntax.Rew
 public import Foundation.Vorspiel.Fin.Basic
 public import Foundation.Vorspiel.IsEmpty
 public import Foundation.Vorspiel.Empty
+public import Mathlib.Tactic.FinCases
 
 @[expose] public section
 
@@ -512,18 +513,13 @@ lemma eval_toSemisentence [NeZero k] {φ : Semiformula L ℕ k}
 lemma eval_toSemisentence_one (φ : Semiformula L ℕ 1) (x : M) (f : ℕ → M) :
     M ⊧/(x :> fun i : Fin φ.fvSup ↦ f i) (φ.toSemisentence ![#0]) ↔ φ.Eval ![x] f :=
   eval_toSemisentence ![#0]
-    (fun i ↦ by induction i using Fin.cases with | zero => simp | succ i => exact i.elim0)
+    (fun i ↦ by fin_cases i; simp)
     (fun _ ↦ by simp)
 
 lemma eval_toSemisentence_two (φ : Semiformula L ℕ 2) (x y : M) (f : ℕ → M) :
     M ⊧/(y :> x :> fun i : Fin φ.fvSup ↦ f i) (φ.toSemisentence ![#1, #0]) ↔ φ.Eval ![x, y] f :=
   eval_toSemisentence ![#1, #0]
-    (fun i ↦ by
-      induction i using Fin.cases with
-      | zero => simp
-      | succ i => induction i using Fin.cases with
-        | zero => simp
-        | succ i => exact i.elim0)
+    (fun i ↦ by fin_cases i <;> simp)
     (fun _ ↦ by simp)
 
 end toSemisentence

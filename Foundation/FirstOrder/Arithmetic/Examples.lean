@@ -15,13 +15,13 @@ few indices.
 
 namespace FFL.FirstOrder.Arithmetic
 
-instance : 𝗕𝚺 1 ⪯ 𝗜𝚺 1 := BSigma_weakerThan_ISigma (n := 0)
+instance : 𝗕𝚺 1 ⪯ 𝗜𝚺 1 := BSigma_weakerThan_ISigma (s := 0)
 
-instance : 𝗕𝚺 2 ⪯ 𝗜𝚺 2 := BSigma_weakerThan_ISigma (n := 1)
+instance : 𝗕𝚺 2 ⪯ 𝗜𝚺 2 := BSigma_weakerThan_ISigma (s := 1)
 
-instance : 𝗕𝚺 1 ≊ 𝗕𝚷 0 := BSigma_succ_equiv_BPi (n := 0)
+instance : 𝗕𝚺 1 ≊ 𝗕𝚷 0 := BSigma_succ_equiv_BPi (s := 0)
 
-instance : 𝗕𝚺 2 ≊ 𝗕𝚷 1 := BSigma_succ_equiv_BPi (n := 1)
+instance : 𝗕𝚺 2 ≊ 𝗕𝚷 1 := BSigma_succ_equiv_BPi (s := 1)
 
 instance : 𝗜𝚺 1 ≊ 𝗜𝚷 1 := ISigma_equiv_IPi 1
 
@@ -35,9 +35,9 @@ instance : 𝗟𝚺 2 ≊ 𝗜𝚺 2 := LSigma_equiv_ISigma 2
 
 instance : 𝗜𝚺 1 ⪯ 𝗜𝚺 2 := ISigma_weakerThan_of_le (by decide)
 
-instance : 𝗜𝚺 0 ⪯ 𝗕𝚺 1 := ISigma_weakerThan_BSigma_succ (n := 0)
+instance : 𝗜𝚺 0 ⪯ 𝗕𝚺 1 := ISigma_weakerThan_BSigma_succ (s := 0)
 
-instance : 𝗜𝚺 1 ⪯ 𝗕𝚺 2 := ISigma_weakerThan_BSigma_succ (n := 1)
+instance : 𝗜𝚺 1 ⪯ 𝗕𝚺 2 := ISigma_weakerThan_BSigma_succ (s := 1)
 
 instance : 𝗜𝚺 2 ⪯ 𝗣𝗔 := inferInstance
 
