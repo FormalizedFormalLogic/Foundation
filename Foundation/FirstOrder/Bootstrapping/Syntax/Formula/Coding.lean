@@ -1,12 +1,13 @@
 module
 
+public import Foundation.FirstOrder.Basic.PrimrecCoding
 public import Foundation.FirstOrder.Bootstrapping.Syntax.Formula.Typed
 public import Foundation.FirstOrder.Bootstrapping.Syntax.Term.Coding
 
 @[expose] public section
-open Encodable LO FirstOrder Arithmetic Bootstrapping
+open Encodable FFL FirstOrder Arithmetic Bootstrapping
 
-namespace LO
+namespace FFL
 
 class LCWQIsoGödelQuote (α β : ℕ → Type*) [LCWQ α] [LCWQ β] where
   gq : ∀ n, GödelQuote (α n) (β n)
@@ -30,16 +31,16 @@ instance (n : ℕ) : GödelQuote (α n) (β n) := gq n
 @[simp] lemma iff (φ ψ : α n) : (⌜φ 🡘 ψ⌝ : β n) = ⌜φ⌝ 🡘 ⌜ψ⌝ := by simp [LogicalConnective.iff]
 
 @[simp] lemma ball (φ : α (n + 1)) (ψ : α (n + 1)) :
-    (⌜∀¹[φ] ψ⌝ : β n)  = ∀¹[⌜φ⌝] ⌜ψ⌝ := by simp [LO.FirstOrder.ball]
+    (⌜∀¹[φ] ψ⌝ : β n)  = ∀¹[⌜φ⌝] ⌜ψ⌝ := by simp [FFL.FirstOrder.ball]
 
 @[simp] lemma bexs (φ : α (n + 1)) (ψ : α (n + 1)) :
-    (⌜∃¹[φ] ψ⌝ : β n)  = ∃¹[⌜φ⌝] ⌜ψ⌝ := by simp [LO.FirstOrder.bexs]
+    (⌜∃¹[φ] ψ⌝ : β n)  = ∃¹[⌜φ⌝] ⌜ψ⌝ := by simp [FFL.FirstOrder.bexs]
 
 end LCWQIsoGödelQuote
 
-end LO
+end FFL
 
-namespace LO
+namespace FFL
 
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 
@@ -242,6 +243,9 @@ lemma coe_quote_eq_quote' (φ : Semiproposition L n) :
 
 lemma quote_eq_encode_nat (φ : Semiproposition L n) : (⌜φ⌝ : ℕ) = encode φ := by simpa using quote_eq_encode (V := ℕ) φ
 
+lemma primrec_quote_natCast [L.Primcodable] : Primrec λ φ : Semiproposition L n ↦ (⌜φ⌝ : ℕ) :=
+  Primrec.encode.of_eq λ φ ↦ (quote_eq_encode_nat φ).symm
+
 @[simp] lemma quote_inj_iff {φ₁ φ₂ : Semiproposition L n} :
     (⌜φ₁⌝ : V) = ⌜φ₂⌝ ↔ φ₁ = φ₂ := by simp [quote_eq_encode]
 
@@ -301,6 +305,9 @@ lemma coe_quote_eq_quote (σ : Semisentence L n) : (↑(⌜σ⌝ : ℕ) : V) = �
   simp [quote_eq_encode]
 
 lemma quote_eq_encode_nat (σ : Semisentence L n) : (⌜σ⌝ : ℕ) = encode σ := by simpa using quote_eq_encode (V := ℕ) σ
+
+lemma primrec_quote_natCast [L.Primcodable] : Primrec λ σ : Semisentence L n ↦ (⌜σ⌝ : ℕ) :=
+  Primrec.encode.of_eq λ σ ↦ (quote_eq_encode_nat σ).symm
 
 @[simp] lemma val_quote {bv : Fin m → V} {fv : ξ → V} (σ : Semisentence L n) :
     (⌜σ⌝ : ArithmeticSemiterm ξ m).val bv fv = ⌜σ⌝ := by
@@ -373,4 +380,4 @@ lemma IsSemiformula.sound {n φ : ℕ} (h : IsSemiformula L n φ) : ∃ F : Firs
 
 end FirstOrder.Arithmetic.Bootstrapping
 
-end LO
+end FFL

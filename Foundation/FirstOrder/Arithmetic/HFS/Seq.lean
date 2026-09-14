@@ -9,7 +9,7 @@ public import Foundation.FirstOrder.Arithmetic.HFS.Basic
 
 -/
 
-namespace LO.FirstOrder.Arithmetic
+namespace FFL.FirstOrder.Arithmetic
 
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 
@@ -25,7 +25,7 @@ private lemma seq_iff (s : V) : Seq s ↔ IsMapping s ∧ ∃ l ≤ 2 * s, ∃ d
         _ ≤ 2 * s    := by simp), ⟨domain s , by simp,  rfl, h⟩⟩,
    by rintro ⟨hs, l, _, _, _, rfl, h⟩; exact ⟨hs, l, h⟩⟩
 
-def _root_.LO.FirstOrder.Arithmetic.seqDef : 𝚺₀.Semisentence 1 := .mkSigma
+def _root_.FFL.FirstOrder.Arithmetic.seqDef : 𝚺₀.Semisentence 1 := .mkSigma
   “s. !isMappingDef s ∧ ∃ l <⁺ 2 * s, ∃ d <⁺ 2 * s, !domainDef d s ∧ !underDef d l”
 
 instance seq_defined : 𝚺₀-Predicate (Seq : V → Prop) via seqDef := .mk <| by
@@ -79,7 +79,7 @@ private lemma lh_graph (l s : V) : l = lh s ↔ (Seq s → ∃ d ≤ 2 * s, d = 
     · rcases h Hs with ⟨_, _, rfl, h⟩; simpa [h] using Hs.domain_eq
     · simp [lh_prop_of_not_seq Hs, hn Hs]⟩
 
-def _root_.LO.FirstOrder.Arithmetic.lhDef : 𝚺₀.Semisentence 2 := .mkSigma
+def _root_.FFL.FirstOrder.Arithmetic.lhDef : 𝚺₀.Semisentence 2 := .mkSigma
   “l s. (!seqDef s → ∃ d <⁺ 2 * s, !domainDef d s ∧ !underDef d l) ∧ (¬!seqDef s → l = 0)”
 
 instance lh_defined : 𝚺₀-Function₁ (lh : V → V) via lhDef := .mk fun v ↦ by simp [lhDef, -exists_eq_right_right, lh_graph]
@@ -131,7 +131,7 @@ lemma Seq.znth_eq_of_mem {s i : V} (h : Seq s) (hi : ⟪i, x⟫ ∈ s) : znth s 
 lemma znth_prop_not {s i : V} (h : ¬Seq s ∨ lh s ≤ i) : znth s i = 0 :=
   Classical.choose!_spec (znth_existsUnique s i) |>.2 (by simpa [-not_and, not_and_or] using h)
 
-def _root_.LO.FirstOrder.Arithmetic.znthDef : 𝚺₀.Semisentence 3 := .mkSigma
+def _root_.FFL.FirstOrder.Arithmetic.znthDef : 𝚺₀.Semisentence 3 := .mkSigma
   “x s i. ∃ l <⁺ 2 * s, !lhDef l s ∧ (:Seq s ∧ i < l → i ∼[s] x) ∧ (¬(:Seq s ∧ i < l) → x = 0)”
 
 private lemma znth_graph {x s i : V} : (∃ l ≤ 2 * s, l = lh s ∧ (Seq s ∧ i < l → ⟪i, x⟫ ∈ s) ∧ (¬(Seq s ∧ i < l) → x = 0)) ↔ x = znth s i := by
@@ -199,7 +199,7 @@ lemma seqCons_graph (t x s : V) :
         le_trans (pair_le_pair_left (by simp) x) (pair_polybound (2 * s) x), rfl, by rfl⟩,
    by rintro ⟨l, _, rfl, p, _, rfl, rfl⟩; rfl⟩
 
-def _root_.LO.FirstOrder.Arithmetic.seqConsDef : 𝚺₀.Semisentence 3 := .mkSigma
+def _root_.FFL.FirstOrder.Arithmetic.seqConsDef : 𝚺₀.Semisentence 3 := .mkSigma
   “t s x. ∃ l <⁺ 2 * s, !lhDef l s ∧ ∃ p <⁺ (2 * s + x + 1)², !pairDef p l x ∧ !insertDef t p s”
 
 instance seqCons_defined : 𝚺₀-Function₂ (seqCons : V → V → V) via seqConsDef := .mk fun v ↦ by simp [seqConsDef, seqCons_graph]
@@ -339,7 +339,7 @@ meta def vecConsUnexpander : Lean.PrettyPrinter.Unexpander
 
 section
 
-def _root_.LO.FirstOrder.Arithmetic.mkSeq₁Def : 𝚺₀.Semisentence 2 := .mkSigma
+def _root_.FFL.FirstOrder.Arithmetic.mkSeq₁Def : 𝚺₀.Semisentence 2 := .mkSigma
   “s x. !seqConsDef s 0 x”
 
 instance mkSeq₁_defined : 𝚺₀-Function₁ (fun x : V ↦ !⟦x⟧) via mkSeq₁Def := .mk fun v ↦ by simp [mkSeq₁Def]; rfl
@@ -348,7 +348,7 @@ instance mkSeq₁_definable : 𝚺₀-Function₁ (fun x : V ↦ !⟦x⟧) := mk
 
 instance mkSeq₁_definable' (Γ) : Γ-Function₁ (fun x : V ↦ !⟦x⟧) := mkSeq₁_definable.of_zero
 
-def _root_.LO.FirstOrder.Arithmetic.mkSeq₂Def : 𝚺₁.Semisentence 3 := .mkSigma
+def _root_.FFL.FirstOrder.Arithmetic.mkSeq₂Def : 𝚺₁.Semisentence 3 := .mkSigma
   “s x y. ∃ sx, !mkSeq₁Def sx x ∧ !seqConsDef s sx y”
 
 instance mkSeq₂_defined : 𝚺₁-Function₂ (fun x y : V ↦ !⟦x, y⟧) via mkSeq₂Def := .mk fun v ↦ by simp [mkSeq₂Def]
@@ -401,4 +401,4 @@ lemma mem_vectoSeq {n : ℕ} (v : Fin n → V) (i : Fin n) : ⟪(i : V), v i⟫ 
 
 end seqToVec
 
-end LO.FirstOrder.Arithmetic
+end FFL.FirstOrder.Arithmetic

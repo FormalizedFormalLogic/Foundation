@@ -2,21 +2,27 @@ module
 
 public import Foundation.FirstOrder.Incompleteness.Consistency
 public import Foundation.FirstOrder.Incompleteness.RosserProvability
+public import Foundation.FirstOrder.Bootstrapping.Syntax.CraigTrick
 
 @[expose] public section
 /-!
 # Gödel's second incompleteness theorem for arithmetic theories stronger than $\mathsf{I}\Sigma_1$
 -/
 
-namespace LO.FirstOrder.Arithmetic
+namespace FFL.FirstOrder.Arithmetic
 
-open LO.Entailment ProvabilityAbstraction
+open FFL.Entailment ProvabilityAbstraction
 
 variable (T : ArithmeticTheory) [T.Δ₁] [𝗜𝚺₁ ⪯ T]
 
 /-- Gödel's second incompleteness theorem -/
 theorem consistent_unprovable [Consistent T] : T ⊬ T.consistent.val :=
   ProvabilityAbstraction.con_unprovable (𝔅 := T.standardProvability)
+
+/-- Gödel's second incompleteness theorem for r.e. theories -/
+theorem craig_consistent_unprovable_of_RE (T : ArithmeticTheory) [T.RE] [𝗜𝚺₁ ⪯ T]
+    [Consistent T] : T ⊬ T.craig.consistent.val :=
+  fun h ↦ consistent_unprovable T.craig (WeakerThan.pbl h)
 
 theorem inconsistent_unprovable [ArithmeticTheory.SoundOnHierarchy T 𝚺 1] : T ⊬ ∼T.consistent.val :=
   ProvabilityAbstraction.con_unrefutable (𝔅 := T.standardProvability)
@@ -35,4 +41,4 @@ instance [ArithmeticTheory.SoundOnHierarchy T 𝚺 1] : T ⪱ T ∪ T.Incon :=
     (inconsistent_unprovable T)
     (Entailment.by_axm (by simp))
 
-end LO.FirstOrder.Arithmetic
+end FFL.FirstOrder.Arithmetic

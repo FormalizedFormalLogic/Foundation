@@ -7,7 +7,7 @@ public import Foundation.FirstOrder.Bootstrapping.DerivabilityCondition.Equation
 # Bootstrapping theory $\mathsf{PA}^-$, $\mathsf{R_0}$ in $\mathsf{I}\Sigma_1$
 -/
 
-namespace LO.FirstOrder.Arithmetic
+namespace FFL.FirstOrder.Arithmetic
 
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻]
 
@@ -16,18 +16,18 @@ lemma lt_add_self_add_one (a b : V) : a < b + a + 1 := lt_succ_iff_le.mpr <| le_
 lemma lt_succ_iff_eq_or_succ {a b : V} : a < b + 1 ↔ a = b ∨ a < b := by
   simp [lt_succ_iff_le, le_iff_eq_or_lt]
 
-end LO.FirstOrder.Arithmetic
+end FFL.FirstOrder.Arithmetic
 
-namespace LO.FirstOrder.Arithmetic.Bootstrapping.Arithmetic
+namespace FFL.FirstOrder.Arithmetic.Bootstrapping.Arithmetic
 
 -- `Arithmetic` is intentionally re-opened here even though the ambient namespace
 -- already contains it; renaming would break the widely-used public API
 -- (`Bootstrapping.Arithmetic.*`). Suppress the new dupNamespace linter for the
 -- declarations in this namespace (the option is scoped by `namespace`/`end` and
--- reverts automatically at `end LO.FirstOrder.Arithmetic.Bootstrapping.Arithmetic`).
+-- reverts automatically at `end FFL.FirstOrder.Arithmetic.Bootstrapping.Arithmetic`).
 set_option linter.dupNamespace false
 
-open Classical LO.Entailment
+open Classical FFL.Entailment
 
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 
@@ -41,7 +41,7 @@ local postfix:max "⤉" => Semiformula.shift
 
 variable (T : ArithmeticTheory) [Theory.Δ₁ T] [𝗣𝗔⁻ ⪯ T]
 
-open Entailment Entailment.FiniteContext Semiformula
+open Entailment Entailment.FiniteContext _root_.FFL.FirstOrder.Arithmetic.Bootstrapping.Semiformula
 
 instance : 𝗘𝗤 _ ⪯ T :=
   have : 𝗣𝗔⁻ ⪯ T := inferInstance
@@ -235,7 +235,7 @@ lemma ball_intro (φ : Semiformula V ℒₒᵣ 1) (n : V)
   suffices T.internalize V ⊢ (&'0 <' 𝕹 n) 🡒 φ⤉.subst ![&'0] by
     simpa [imp_def, Semiformula.free, SemitermVec.q, Semiterm.shift_substs, Semiterm.substs_substs]
   suffices T.internalize V ⊢ substItrDisj ![&'0] (#'1 ≐ #'0) n 🡒 φ⤉.subst ![&'0] from
-    C!_trans (K!_left (lt_iff_substItrDisj T &'0 n)) this
+    C_trans (K_left (lt_iff_substItrDisj T &'0 n)) this
   apply TProof.substItrDisj_left_intro
   · intro i hi
     suffices T.internalize V ⊢ (&'0 ≐ 𝕹 i) 🡒 φ⤉.subst ![&'0] by simpa
@@ -251,7 +251,7 @@ lemma bexs_intro (φ : Semiformula V ℒₒᵣ 1) (n : V) {i}
     T.internalize V ⊢ φ.bexs (𝕹 n) := by
   apply TProof.exs! (𝕹 i)
   suffices T.internalize V ⊢ (𝕹 i <' 𝕹 n) ⋏ φ.subst ![𝕹 i] by simpa
-  apply K!_intro
+  apply K_intro
   · exact numeral_lt T hi
   · exact b
 
@@ -263,4 +263,4 @@ lemma bexs_replace (φ : Semiformula V ℒₒᵣ 1) (t u : Term V ℒₒᵣ) :
     T.internalize V ⊢ (t ≐ u) 🡒 φ.bexs t 🡒 φ.bexs u := by
   simpa [SemitermVec.q, Semiformula.substs_substs] using replace T ((φ.subst ![#'0]).bexs #'0) t u
 
-end LO.FirstOrder.Arithmetic.Bootstrapping.Arithmetic
+end FFL.FirstOrder.Arithmetic.Bootstrapping.Arithmetic

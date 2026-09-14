@@ -8,8 +8,8 @@ This file defines the semantics of formulas based on Tarski's truth definitions.
 Also provides 𝓜 characterization of compactness.
 
 ## Main Definitions
-* `LO.Semantics`: The realization of 𝓜 formula.
-* `LO.Compact`: The semantic compactness of Foundation.
+* `FFL.Semantics`: The realization of 𝓜 formula.
+* `FFL.Compact`: The semantic compactness of Foundation.
 
 ## Notation
 * `𝓜 ⊧ φ`: a proposition that states `𝓜` satisfies `φ`.
@@ -19,7 +19,7 @@ Also provides 𝓜 characterization of compactness.
 
 @[expose] public section
 
-namespace LO
+namespace FFL
 
 /-- `Semantics M F` denotes semantics of formulae `F for models `M` -/
 class Semantics (M : Type*) (F : outParam Type*) where
@@ -218,7 +218,9 @@ instance empty' (𝓜 : M) : 𝓜 ⊧* (∅ : Set F) := ⟨by simp⟩
     𝓜 ⊧* Set.range φ ↔ ∀ i, 𝓜 ⊧ φ i := by simp [modelsSet_iff]
 
 @[simp] lemma setOf_iff {P : F → Prop} {𝓜 : M} :
-    𝓜 ⊧* setOf P ↔ ∀ φ, P φ → 𝓜 ⊧ φ := by simp [modelsSet_iff]
+    𝓜 ⊧* Set.ofPred P ↔ ∀ φ, P φ → 𝓜 ⊧ φ := by
+  rw [modelsSet_iff]
+  exact Iff.rfl
 
 end ModelsSet
 
@@ -298,7 +300,7 @@ lemma subset_of_le {T : ℕ → Set F} (H : Cumulative T)
 
 lemma finset_mem {T : ℕ → Set F}
     (H : Cumulative T) {u : Finset F} (hu : ↑u ⊆ ⋃ s, T s) : ∃ s, ↑u ⊆ T s := by
-  haveI := Classical.decEq
+  have := Classical.decEq
   induction u using Finset.induction
   case empty => exact ⟨0, by simp⟩
   case insert φ u _ ih =>
@@ -356,6 +358,6 @@ lemma compact_cumulative {T : ℕ → Set F} (hT : Cumulative T) :
 
 end Compact
 
-end LO
+end FFL
 
 end

@@ -7,7 +7,7 @@ public import Foundation.FirstOrder.Arithmetic.Exponential.Exp
 # Logarithmic function
 -/
 
-namespace LO.FirstOrder.Arithmetic
+namespace FFL.FirstOrder.Arithmetic
 
 variable {V : Type*} [ORingStructure V]
 
@@ -68,7 +68,7 @@ lemma log_lt_self_of_pos {y : V} (pos : 0 < y) : log y < y :=
 
 lemma log_graph {x y : V} : x = log y ↔ (y = 0 → x = 0) ∧ (0 < y → x < y ∧ ∃ y' ≤ y, Exponential x y' ∧ y < 2 * y') := Classical.choose!_eq_iff_right _
 
-def _root_.LO.FirstOrder.Arithmetic.logDef : 𝚺₀.Semisentence 2 := .mkSigma
+def _root_.FFL.FirstOrder.Arithmetic.logDef : 𝚺₀.Semisentence 2 := .mkSigma
   “x y. (y = 0 → x = 0) ∧ (0 < y → x < y ∧ ∃ y' <⁺ y, !exponentialDef x y' ∧ y < 2 * y')”
 
 instance log_defined : 𝚺₀-Function₁[V] log via logDef := .mk fun v ↦ by simp [logDef, log_graph]
@@ -156,7 +156,7 @@ lemma length_graph {i a : V} : i = ‖a‖ ↔ (0 < a → ∃ k ≤ a, k = log a
   · simp
   · simp [length_of_pos, pos, pos_iff_ne_zero.mp pos]
 
-def _root_.LO.FirstOrder.Arithmetic.lengthDef : 𝚺₀.Semisentence 2 := .mkSigma
+def _root_.FFL.FirstOrder.Arithmetic.lengthDef : 𝚺₀.Semisentence 2 := .mkSigma
   “i a. (0 < a → ∃ k <⁺ a, !logDef k a ∧ i = k + 1) ∧ (a = 0 → i = 0)”
 
 instance length_defined : 𝚺₀-Function₁[V] Length.length via lengthDef := .mk fun v ↦ by simp [lengthDef, length_graph]
@@ -327,7 +327,7 @@ lemma bexp_graph {y a x : V} : y = bexp a x ↔ ∃ l ≤ a, l = ‖a‖ ∧ (x 
     · exact (hlt lt).uniq (exp_bexp_of_lt lt)
     · rcases hle le; simp [bexp_eq_zero_of_le le]⟩
 
-def _root_.LO.FirstOrder.Arithmetic.bexpDef : 𝚺₀.Semisentence 3 := .mkSigma
+def _root_.FFL.FirstOrder.Arithmetic.bexpDef : 𝚺₀.Semisentence 3 := .mkSigma
   “y a x. ∃ l <⁺ a, !lengthDef l a ∧ (x < l → !exponentialDef x y) ∧ (l ≤ x → y = 0)”
 
 instance bexp_defined : 𝚺₀-Function₂[V] bexp via bexpDef := .mk fun v ↦ by simp [bexpDef, bexp_graph]
@@ -403,7 +403,7 @@ lemma fbit_eq_zero_iff {a i : V} : fbit a i = 0 ↔ ¬LenBit (bexp a i) a := by 
 
 lemma fbit_eq_zero_of_le {a i : V} (hi : ‖a‖ ≤ i) : fbit a i = 0 := by simp [fbit, bexp_eq_zero_of_le hi]
 
-def _root_.LO.FirstOrder.Arithmetic.fbitDef : 𝚺₀.Semisentence 3 := .mkSigma
+def _root_.FFL.FirstOrder.Arithmetic.fbitDef : 𝚺₀.Semisentence 3 := .mkSigma
   “b a i. ∃ x <⁺ a, !bexpDef x a i ∧ ∃ y <⁺ a, !divDef y a x ∧ !remDef b y 2”
 
 instance fbit_defined : 𝚺₀-Function₂[V] fbit via fbitDef := .mk fun v ↦ by simp [fbitDef, fbit]
@@ -469,4 +469,4 @@ lemma exp_le_iff_le_log {i a : V} (pos : 0 < a) : Exp.exp i ≤ a ↔ i ≤ log 
 
 end ISigma1
 
-end LO.FirstOrder.Arithmetic
+end FFL.FirstOrder.Arithmetic

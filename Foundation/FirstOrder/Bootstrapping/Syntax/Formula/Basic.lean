@@ -4,7 +4,7 @@ public import Foundation.FirstOrder.Bootstrapping.Syntax.Term.Basic
 public import Foundation.FirstOrder.Arithmetic.Induction
 
 @[expose] public section
-namespace LO.FirstOrder.Arithmetic.Bootstrapping
+namespace FFL.FirstOrder.Arithmetic.Bootstrapping
 
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 
@@ -44,28 +44,28 @@ scoped notation "^∃ " p:64 => qqExs p
 
 section
 
-def _root_.LO.FirstOrder.Arithmetic.qqRelDef : 𝚺₀.Semisentence 4 :=
+def _root_.FFL.FirstOrder.Arithmetic.qqRelDef : 𝚺₀.Semisentence 4 :=
   .mkSigma “p k r v. ∃ p' < p, !pair₄Def p' 0 k r v ∧ p = p' + 1”
 
-def _root_.LO.FirstOrder.Arithmetic.qqNRelDef : 𝚺₀.Semisentence 4 :=
+def _root_.FFL.FirstOrder.Arithmetic.qqNRelDef : 𝚺₀.Semisentence 4 :=
   .mkSigma “p k r v. ∃ p' < p, !pair₄Def p' 1 k r v ∧ p = p' + 1”
 
-def _root_.LO.FirstOrder.Arithmetic.qqVerumDef : 𝚺₀.Semisentence 1 :=
+def _root_.FFL.FirstOrder.Arithmetic.qqVerumDef : 𝚺₀.Semisentence 1 :=
   .mkSigma “p. ∃ p' < p, !pairDef p' 2 0 ∧ p = p' + 1”
 
-def _root_.LO.FirstOrder.Arithmetic.qqFalsumDef : 𝚺₀.Semisentence 1 :=
+def _root_.FFL.FirstOrder.Arithmetic.qqFalsumDef : 𝚺₀.Semisentence 1 :=
   .mkSigma “p. ∃ p' < p, !pairDef p' 3 0 ∧ p = p' + 1”
 
-def _root_.LO.FirstOrder.Arithmetic.qqAndDef : 𝚺₀.Semisentence 3 :=
+def _root_.FFL.FirstOrder.Arithmetic.qqAndDef : 𝚺₀.Semisentence 3 :=
   .mkSigma “r p q. ∃ r' < r, !pair₃Def r' 4 p q ∧ r = r' + 1”
 
-def _root_.LO.FirstOrder.Arithmetic.qqOrDef : 𝚺₀.Semisentence 3 :=
+def _root_.FFL.FirstOrder.Arithmetic.qqOrDef : 𝚺₀.Semisentence 3 :=
   .mkSigma “r p q. ∃ r' < r, !pair₃Def r' 5 p q ∧ r = r' + 1”
 
-def _root_.LO.FirstOrder.Arithmetic.qqAllDef : 𝚺₀.Semisentence 2 :=
+def _root_.FFL.FirstOrder.Arithmetic.qqAllDef : 𝚺₀.Semisentence 2 :=
   .mkSigma “r p. ∃ r' < r, !pairDef r' 6 p ∧ r = r' + 1”
 
-def _root_.LO.FirstOrder.Arithmetic.qqExsDef : 𝚺₀.Semisentence 2 :=
+def _root_.FFL.FirstOrder.Arithmetic.qqExsDef : 𝚺₀.Semisentence 2 :=
   .mkSigma “r p. ∃ r' < r, !pairDef r' 7 p ∧ r = r' + 1”
 
 instance qqRel_defined : 𝚺₀-Function₃ (qqRel : V → V → V → V) via qqRelDef := .mk fun v ↦ by simp_all [qqRelDef, qqRel]
@@ -928,8 +928,8 @@ lemma graph_ex_inv {p₁ r : V} :
 variable (param)
 
 lemma graph_exists {p : V} : IsUFormula L p → ∃ y, c.Graph L param p y := by
-  haveI : 𝚺₁-Function₁ c.allChanges := c.allChanges_defined.to_definable
-  haveI : 𝚺₁-Function₁ c.exsChanges := c.exChanges_defined.to_definable
+  have : 𝚺₁-Function₁ c.allChanges := c.allChanges_defined.to_definable
+  have : 𝚺₁-Function₁ c.exsChanges := c.exChanges_defined.to_definable
   let f : V → V → V := fun _ param ↦ Max.max param (Max.max (c.allChanges param) (c.exsChanges param))
   have hf : 𝚺₁-Function₂ f := by definability
   apply bounded_all_sigma1_order_induction hf ?_ ?_ p param
@@ -1068,9 +1068,9 @@ lemma uformula_result_induction {P : V → V → V → Prop} (hP : 𝚺₁-Relat
       P (c.exsChanges param) p (c.result L (c.exsChanges param) p) →
       P param (^∃ p) (c.exs param p (c.result L (c.exsChanges param) p))) :
     ∀ {param p : V}, IsUFormula L p → P param p (c.result L param p) := by
-  haveI : 𝚺₁-Function₂ c.result L := c.result_definable
-  haveI : 𝚺₁-Function₁ c.allChanges := c.allChanges_defined.to_definable
-  haveI : 𝚺₁-Function₁ c.exsChanges := c.exChanges_defined.to_definable
+  have : 𝚺₁-Function₂ c.result L := c.result_definable
+  have : 𝚺₁-Function₁ c.allChanges := c.allChanges_defined.to_definable
+  have : 𝚺₁-Function₁ c.exsChanges := c.exChanges_defined.to_definable
   let f : V → V → V := fun _ param ↦ Max.max param (Max.max (c.allChanges param) (c.exsChanges param))
   have hf : 𝚺₁-Function₂ f := by definability
   intro param p
@@ -1452,9 +1452,9 @@ lemma semiformula_result_induction {P : V → V → V → V → Prop} (hP : 𝚺
       P (c.exsChanges param) (n + 1) p (c.result L (c.exsChanges param) p) →
       P param n (^∃ p) (c.exs param p (c.result L (c.exsChanges param) p))) :
     ∀ {param n p : V}, IsSemiformula L n p → P param n p (c.result L param p) := by
-  haveI : 𝚺₁-Function₂ c.result L := c.result_definable
-  haveI : 𝚺₁-Function₁ c.allChanges := c.allChanges_defined.to_definable
-  haveI : 𝚺₁-Function₁ c.exsChanges := c.exChanges_defined.to_definable
+  have : 𝚺₁-Function₂ c.result L := c.result_definable
+  have : 𝚺₁-Function₁ c.allChanges := c.allChanges_defined.to_definable
+  have : 𝚺₁-Function₁ c.exsChanges := c.exChanges_defined.to_definable
   let f : V → V → V → V := fun _ param _ ↦ Max.max param (Max.max (c.allChanges param) (c.exsChanges param))
   have hf : 𝚺₁-Function₃ f := by definability
   let g : V → V → V → V := fun _ _ n ↦ n + 1
@@ -1492,4 +1492,4 @@ lemma semiformula_result_induction {P : V → V → V → V → Prop} (hP : 𝚺
 
 end UformulaRec1.Construction
 
-end LO.FirstOrder.Arithmetic.Bootstrapping
+end FFL.FirstOrder.Arithmetic.Bootstrapping

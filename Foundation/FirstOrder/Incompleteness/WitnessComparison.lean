@@ -7,7 +7,7 @@ public import Foundation.FirstOrder.Incompleteness.StandardProvability
 # Witness comparisons of provability
 -/
 
-namespace LO.FirstOrder.Arithmetic.Bootstrapping
+namespace FFL.FirstOrder.Arithmetic.Bootstrapping
 
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 
@@ -17,41 +17,41 @@ variable {L : Language} [L.Encodable] [L.LORDefinable]
 
 variable (T : Theory L) [T.Δ₁]
 
-def _root_.LO.FirstOrder.Theory.ProvabilityComparisonLE (φ ψ : V) : Prop :=
+def _root_.FFL.FirstOrder.Theory.ProvabilityComparisonLE (φ ψ : V) : Prop :=
   ∃ b, Proof T b φ ∧ ∀ b' < b, ¬Proof T b' ψ
 
-def _root_.LO.FirstOrder.Theory.ProvabilityComparisonLT (φ ψ : V) : Prop :=
+def _root_.FFL.FirstOrder.Theory.ProvabilityComparisonLT (φ ψ : V) : Prop :=
   ∃ b, Proof T b φ ∧ ∀ b' ≤ b, ¬Proof T b' ψ
 
 section
 
-noncomputable def _root_.LO.FirstOrder.Theory.provabilityComparisonLE : 𝚺₁.Semisentence 2 := .mkSigma
+noncomputable def _root_.FFL.FirstOrder.Theory.provabilityComparisonLE : 𝚺₁.Semisentence 2 := .mkSigma
   “φ ψ. ∃ b, !(proof T).sigma b φ ∧ ∀ b' < b, ¬!(proof T).pi b' ψ”
 
-instance _root_.LO.FirstOrder.Theory.provability_comparison_le_defined :
+instance _root_.FFL.FirstOrder.Theory.provability_comparison_le_defined :
     𝚺₁-Relation[V] T.ProvabilityComparisonLE via T.provabilityComparisonLE := .mk fun v ↦ by
   simp [Theory.provabilityComparisonLE, Theory.ProvabilityComparisonLE]
 
-instance _root_.LO.FirstOrder.Theory.provability_comparison_le_definable : 𝚺₁-Relation[V] T.ProvabilityComparisonLE :=
+instance _root_.FFL.FirstOrder.Theory.provability_comparison_le_definable : 𝚺₁-Relation[V] T.ProvabilityComparisonLE :=
   T.provability_comparison_le_defined.to_definable
 
 /-- instance for definability tactic -/
-instance _root_.LO.FirstOrder.Theory.provability_comparison_le_definable' :
+instance _root_.FFL.FirstOrder.Theory.provability_comparison_le_definable' :
     𝚺-[0 + 1]-Relation[V] T.ProvabilityComparisonLE := T.provability_comparison_le_definable
 
 
-noncomputable def _root_.LO.FirstOrder.Theory.provabilityComparisonLT : 𝚺₁.Semisentence 2 := .mkSigma
+noncomputable def _root_.FFL.FirstOrder.Theory.provabilityComparisonLT : 𝚺₁.Semisentence 2 := .mkSigma
   “φ ψ. ∃ b, !(proof T).sigma b φ ∧ ∀ b' <⁺ b, ¬!(proof T).pi b' ψ”
 
-instance _root_.LO.FirstOrder.Theory.provability_comparison_lt_defined :
+instance _root_.FFL.FirstOrder.Theory.provability_comparison_lt_defined :
     𝚺₁-Relation[V] T.ProvabilityComparisonLT via T.provabilityComparisonLT := .mk fun v ↦ by
   simp [Theory.provabilityComparisonLT, Theory.ProvabilityComparisonLT]
 
-instance _root_.LO.FirstOrder.Theory.provability_comparison_lt_definable : 𝚺₁-Relation[V] T.ProvabilityComparisonLT :=
+instance _root_.FFL.FirstOrder.Theory.provability_comparison_lt_definable : 𝚺₁-Relation[V] T.ProvabilityComparisonLT :=
   T.provability_comparison_lt_defined.to_definable
 
 /-- instance for definability tactic -/
-instance _root_.LO.FirstOrder.Theory.provability_comparison_lt_definable' :
+instance _root_.FFL.FirstOrder.Theory.provability_comparison_lt_definable' :
     𝚺-[0 + 1]-Relation[V] T.ProvabilityComparisonLT := T.provability_comparison_lt_definable
 
 end
@@ -122,4 +122,4 @@ end ProvabilityComparison
 
 end WitnessComparisons
 
-end LO.FirstOrder.Arithmetic.Bootstrapping
+end FFL.FirstOrder.Arithmetic.Bootstrapping

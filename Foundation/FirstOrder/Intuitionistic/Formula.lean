@@ -13,7 +13,7 @@ The quantification is represented by de Bruijn index.
 
 -/
 
-namespace LO.FirstOrder
+namespace FFL.FirstOrder
 
 inductive Semiformulaᵢ (L : Language) (ξ : Type*) : ℕ → Type _ where
   | falsum : Semiformulaᵢ L ξ n
@@ -273,4 +273,4 @@ end IsNegative
 end Semiformulaᵢ
 
 
-end LO.FirstOrder
+end FFL.FirstOrder

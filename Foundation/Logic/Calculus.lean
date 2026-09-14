@@ -1,6 +1,7 @@
 module
 
 public import Foundation.Propositional.Entailment.Cl
+public import Foundation.Vorspiel.Multiset
 
 /-!
 # Sequent calculus and variants
@@ -8,89 +9,281 @@ public import Foundation.Propositional.Entailment.Cl
 This file defines a characterization of Tait style calculus and Gentzen style calculus.
 
 ## Main Definitions
-- `LO.OneSidedLK`
+- `FFL.OneSidedLK`
 -/
 
 @[expose]
 public section
 
-namespace LO
+namespace FFL
+
+/-! ## Structural rules -/
+
+class Structural {F : Type*} (𝔇 : Multiset F → Type*) where
+  weakening : 𝔇 Γ → 𝔇 (Γ + ⦃φ⦄)
+  contraction : 𝔇 (Γ + ⦃φ, φ⦄) → 𝔇 (Γ + ⦃φ⦄)
 
 /-! ## One-sided $\mathbf{LK}$ -/
 
 class OneSidedLK {F : Type*} [LogicalConnective F] [LogicalNeutral F]
-    [TildeInvolutive F] [LogicalConnective.DeMorgan F] [LogicalNeutral.DeMorgan F] (𝔇 : List F → Type*) where
-  identity (φ) : 𝔇 [φ, ∼φ]
-  contraction : 𝔇 Δ → Δ ⊆ Γ → 𝔇 Γ
-  verum : 𝔇 [⊤]
-  and : 𝔇 (φ :: Γ) → 𝔇 (ψ :: Γ) → 𝔇 (φ ⋏ ψ :: Γ)
-  or : 𝔇 (φ :: ψ :: Γ) → 𝔇 (φ ⋎ ψ :: Γ)
+    [TildeInvolutive F] [LogicalConnective.DeMorgan F] [LogicalNeutral.DeMorgan F]
+    (𝔇 : Multiset F → Type*) extends Structural 𝔇 where
+  identity (φ) : 𝔇 ⦃φ, ∼φ⦄
+  verum : 𝔇 ⦃⊤⦄
+  and : 𝔇 (Γ + ⦃φ⦄) → 𝔇 (Γ + ⦃ψ⦄) → 𝔇 (Γ + ⦃φ ⋏ ψ⦄)
+  or : 𝔇 (Γ + ⦃φ, ψ⦄) → 𝔇 (Γ + ⦃φ ⋎ ψ⦄)
 
 class OneSidedLK.Cut
     {F : Type*} [LogicalConnective F] [LogicalNeutral F]
-    [TildeInvolutive F] [LogicalConnective.DeMorgan F] [LogicalNeutral.DeMorgan F] (𝔇 : List F → Type*) extends OneSidedLK 𝔇 where
-  cut : 𝔇 (φ :: Γ) → 𝔇 (∼φ :: Δ) → 𝔇 (Γ ++ Δ)
+    [TildeInvolutive F] [LogicalConnective.DeMorgan F] [LogicalNeutral.DeMorgan F]
+    (𝔇 : Multiset F → Type*) extends OneSidedLK 𝔇 where
+  cut : 𝔇 (Γ + ⦃φ⦄) → 𝔇 (Δ + ⦃∼φ⦄) → 𝔇 (Γ + Δ)
+
+namespace Structural
+
+variable {F : Type*} {𝔇 : Multiset F → Type*} {Γ Δ : Multiset F} {φ : F}
+
+def cast (d : 𝔇 Γ) (h : Γ = Δ := by abel) : 𝔇 Δ := h ▸ d
+
+/-- Repeated weakening along a traversal (a routine structural derivation). -/
+def weakenMany [Structural 𝔇] {Γ Δ : Multiset F} (t : Δ.Traversal) (d : 𝔇 Γ) : 𝔇 (Γ + Δ) :=
+  match t with
+  | .zero => cast d
+  | .succ φ t => cast (weakening (φ := φ) (weakenMany t d))
+
+/-- Repeated contraction along a traversal (a routine structural derivation). -/
+def contractMany [Structural 𝔇] {Γ Δ : Multiset F} (t : Γ.Traversal) (d : 𝔇 (Δ + Γ + Γ)) : 𝔇 (Δ + Γ) :=
+  match t with
+  | .zero => cast d
+  | @Multiset.Traversal.succ _ Γ φ t =>
+      have d₁ : 𝔇 ((Δ + Γ + Γ) + ⦃φ, φ⦄) := cast d
+      have d₂ : 𝔇 ((Δ + ⦃φ⦄) + Γ + Γ) := cast (contraction d₁)
+      cast (contractMany t d₂)
+
+/-- Absorbs a formula already in the context (a routine structural derivation). -/
+def absorb [Structural 𝔇] [DecidableEq F] (d : 𝔇 (Γ + ⦃φ⦄)) (h : φ ∈ Γ) : 𝔇 Γ :=
+  have he : Γ.erase φ + ⦃φ⦄ = Γ := by
+    simpa [Multiset.add_atom_eq_cons] using Multiset.cons_erase h
+  have d' : 𝔇 (Γ.erase φ + ⦃φ, φ⦄) :=
+    cast d (by simpa [add_assoc] using congrArg (· + ⦃φ⦄) he.symm)
+  cast (contraction d') he
+
+/-- Expands multiset inclusion into local structural rules using traversals. -/
+def ofSubset [Structural 𝔇] [DecidableEq F]
+    (tΓ : Γ.Traversal) (tΔ : Δ.Traversal) (d : 𝔇 Γ) (h : Γ ⊆ Δ) : 𝔇 Δ :=
+  let rec go {Γ : Multiset F} (t : Γ.Traversal) (h : Γ ⊆ Δ) (d : 𝔇 (Δ + Γ)) : 𝔇 Δ :=
+    match t with
+    | .zero => cast d
+    | @Multiset.Traversal.succ _ Γ φ t =>
+        have d' : 𝔇 ((Δ + Γ) + ⦃φ⦄) := cast d
+        have hp : φ ∈ Δ := h (by simp)
+        go t (fun ψ hψ ↦ h (by simp [hψ])) (absorb d' (by simp [hp]))
+  go tΓ h (cast (weakenMany tΔ d))
+
+end Structural
 
 namespace OneSidedLK
 
 variable {F : Type*} [LogicalConnective F] [LogicalNeutral F]
-  [TildeInvolutive F] [LogicalConnective.DeMorgan F] [LogicalNeutral.DeMorgan F] {𝔇 : List F → Type*}
+  [TildeInvolutive F] [LogicalConnective.DeMorgan F] [LogicalNeutral.DeMorgan F] {𝔇 : Multiset F → Type*}
 
-def cast (b : 𝔇 Γ) (h : Γ = Δ := by simp) : 𝔇 Δ := h ▸ b
+alias cast := Structural.cast
+alias weakenMany := Structural.weakenMany
+alias ofSubset := Structural.ofSubset
 
-def contra [OneSidedLK 𝔇] (d : 𝔇 Γ) (h : Γ ⊆ Δ := by simp) : 𝔇 Δ := contraction d (by simp [h])
+def contra [OneSidedLK 𝔇] [DecidableEq F] (tΓ : Γ.Traversal) (tΔ : Δ.Traversal)
+    (d : 𝔇 Γ) (h : Γ ⊆ Δ := by simp) : 𝔇 Δ := ofSubset tΓ tΔ d h
 
-def rotate [OneSidedLK 𝔇] (d : 𝔇 (φ :: Γ)) : 𝔇 (Γ ++ [φ]) := contra d
+def close [OneSidedLK 𝔇] [DecidableEq F] (φ : F) (t : Γ.Traversal)
+    (hp : φ ∈ Γ := by simp) (hn : ∼φ ∈ Γ := by simp) : 𝔇 Γ :=
+  contra ((Multiset.Traversal.atom φ).succ (∼φ)) t (identity φ) (by
+    intro ψ hψ
+    rcases Multiset.mem_add.mp hψ with hψ | hψ <;> simp_all)
 
-def close [OneSidedLK 𝔇] (φ : F) (hp : φ ∈ Γ := by simp) (hn : ∼φ ∈ Γ := by simp) : 𝔇 Γ := contraction (identity φ) (by simp_all)
+def top [OneSidedLK 𝔇] [DecidableEq F] (t : Γ.Traversal) (h : ⊤ ∈ Γ := by simp) : 𝔇 Γ :=
+  contra (.atom ⊤) t verum (by simpa using h)
 
-def top [OneSidedLK 𝔇] (h : ⊤ ∈ Γ := by simp) : 𝔇 Γ := contraction verum (by simp [h])
-
-def tensor [OneSidedLK 𝔇] {φ ψ : F} (dφ : 𝔇 (φ :: Γ)) (dψ : 𝔇 (ψ :: Δ)) : 𝔇 (φ ⋏ ψ :: Γ ++ Δ) :=
-  and (contraction dφ (by simp)) (contraction dψ (by simp))
-
-def swap₁ [OneSidedLK 𝔇] (d : 𝔇 (φ₂ :: φ₁ :: Γ)) : 𝔇 (φ₁ :: φ₂ :: Γ) := contraction d (by simp)
-
-def swap₂ [OneSidedLK 𝔇] (d : 𝔇 (φ₃ :: φ₁ :: φ₂ :: Γ)) : 𝔇 (φ₁ :: φ₂ :: φ₃ :: Γ) :=
-  contraction d (by grind)
-
-def swap₃ [OneSidedLK 𝔇] (d : 𝔇 (φ₄ :: φ₁ :: φ₂ :: φ₃ :: Γ)) : 𝔇 (φ₁ :: φ₂ :: φ₃ :: φ₄ :: Γ) :=
-  contraction d (by grind)
+def tensor [OneSidedLK 𝔇] {φ ψ : F} (tΓ : Γ.Traversal)
+    (tΔ : Δ.Traversal)
+    (dφ : 𝔇 (Γ + ⦃φ⦄)) (dψ : 𝔇 (Δ + ⦃ψ⦄)) :
+    𝔇 (Γ + Δ + ⦃φ ⋏ ψ⦄) :=
+  and
+    (cast (weakenMany tΔ dφ) (by abel))
+    (cast (weakenMany tΓ dψ) (by abel))
 
 alias cut := OneSidedLK.Cut.cut
 
-def eCut [Cut 𝔇] (d₁ : 𝔇 (φ :: Γ)) (d₂ : 𝔇 (ψ :: Δ)) (e : ∼φ = ψ := by simp) : 𝔇 (Γ ++ Δ) := cut d₁ (cast d₂ (by simp [e]))
+def eCut [Cut 𝔇] (d₁ : 𝔇 (Γ + ⦃φ⦄)) (d₂ : 𝔇 (Δ + ⦃ψ⦄))
+    (e : ∼φ = ψ := by simp) : 𝔇 (Γ + Δ) :=
+  cut d₁ (cast d₂ (by simp [e]))
 
-def disj₂ {Γ Δ : List F} [Cut 𝔇] : 𝔇 (Γ ++ Δ) → 𝔇 (⋁Γ :: Δ) := fun d ↦
+/-- Eliminating falsum is the routine cut against the verum rule. -/
+def removeBot [Cut 𝔇] (d : 𝔇 (Γ + ⦃⊥⦄)) : 𝔇 Γ :=
+  have dt : 𝔇 ((0 : Multiset F) + ⦃∼⊥⦄) := cast verum (by simp)
+  cast <| cut (φ := ⊥) (Γ := Γ) (Δ := 0) d dt
+
+/-- Modus ponens with independent side contexts. This is the routine cut derivation. -/
+def modusPonens [Cut 𝔇] (di : 𝔇 (Γ + ⦃φ 🡒 ψ⦄)) (dp : 𝔇 (Δ + ⦃φ⦄)) :
+    𝔇 (Γ + Δ + ⦃ψ⦄) :=
+  have h₁ : 𝔇 ⦃∼(φ 🡒 ψ), ∼φ, ψ⦄ := cast
+    (tensor (𝔇 := 𝔇) (Γ := ⦃∼φ⦄) (Δ := ⦃ψ⦄) (φ := φ) (ψ := ∼ψ)
+      (.atom _) (.atom _)
+      (cast (identity φ) (by abel)) (cast (identity (∼ψ)) (by simp; abel)))
+    (by simp [LogicalConnective.DeMorgan.imply]; abel)
+  have h₂ : 𝔇 (Γ + ⦃∼φ, ψ⦄) := cast <|
+    cut (φ := φ 🡒 ψ) (Γ := Γ) (Δ := ⦃∼φ, ψ⦄) di (cast h₁)
+  cast <| cut (φ := φ) (Γ := Δ) (Δ := Γ + ⦃ψ⦄) dp (cast h₂)
+
+def disj₂ {Γ : List F} {Δ : Multiset F} [OneSidedLK 𝔇] :
+    𝔇 ((Γ : Multiset F) + Δ) → 𝔇 (Δ + ⦃⋁Γ⦄) := fun d ↦
   match Γ with
-  |               [] => contra d
-  |              [φ] => d
-  |           [φ, ψ] => or d
-  | φ :: ψ :: χ :: Γ => by
-    let Φ := ⋁(χ :: Γ)
-    have : 𝔇 ((φ ⋎ ψ :: χ :: Γ) ++ Δ) := or d
-    have d₁ : 𝔇 ((φ ⋎ ψ) ⋎ Φ :: Δ) := disj₂ this
-    have d₂ : 𝔇 [(∼φ ⋏ ∼ψ) ⋏ ∼Φ, φ ⋎ ψ ⋎ Φ] :=
-      have : 𝔇 [φ, ψ ⋎ Φ, (∼φ ⋏ ∼ψ) ⋏ ∼Φ] :=
-        contra <| or <| rotate <| rotate <|
-          tensor (tensor (rotate (identity (𝔇 := 𝔇) φ)) (rotate (identity  ψ))) (rotate (identity Φ))
-      rotate <| or <| this
-    exact eCut d₂ d₁
+  | [] => cast (Structural.weakening (φ := ⊥) (cast d (by simp) : 𝔇 Δ)) (by simp)
+  | [φ] => cast d (by
+    change φ ::ₘ Δ = Δ + ⦃φ⦄
+    exact (Multiset.add_atom_eq_cons φ Δ).symm)
+  | φ :: ψ :: Γ => by
+    have dt : 𝔇 ((Δ + ⦃φ⦄) + ⦃⋁(ψ :: Γ)⦄) :=
+      disj₂ (cast d (by
+        change (φ ::ₘ (↑(ψ :: Γ) : Multiset F)) + Δ = (↑(ψ :: Γ) : Multiset F) + (Δ + ⦃φ⦄)
+        rw [← Multiset.add_atom_eq_cons]
+        abel))
+    exact or (Γ := Δ) (φ := φ) (ψ := ⋁(ψ :: Γ)) (cast dt (by abel))
   termination_by _ => Γ.length
 
-def conj₂ [OneSidedLK 𝔇] {Γ Δ : List F} (d : (φ : F) → φ ∈ Γ → 𝔇 (φ :: Δ)) : 𝔇 (⋀Γ :: Δ) :=
+def conj₂ [OneSidedLK 𝔇] {Γ : List F} {Δ : Multiset F}
+    (tΔ : Δ.Traversal)
+    (d : (φ : F) → φ ∈ Γ → 𝔇 (Δ + ⦃φ⦄)) : 𝔇 (Δ + ⦃⋀Γ⦄) :=
   match Γ with
-  |          [] => contra verum
+  |          [] => cast (weakenMany tΔ verum) (by simp; abel)
   |         [φ] => d φ (by simp)
   | φ :: ψ :: Γ =>
-    have : 𝔇 (⋀(ψ :: Γ) :: Δ) := conj₂ (Γ := ψ :: Γ) (fun χ h ↦ d χ (by simp_all))
-    and (d φ (by simp)) this
+    have : 𝔇 (Δ + ⦃⋀(ψ :: Γ)⦄) := conj₂ (Γ := ψ :: Γ) tΔ (fun χ h ↦ d χ (by simp_all))
+    and (Γ := Δ) (φ := φ) (ψ := ⋀(ψ :: Γ)) (d φ (by simp)) this
+
+namespace AxiomDerivation
+
+variable [OneSidedLK 𝔇]
+
+def identityWith (φ : F) (t : Γ.Traversal) : 𝔇 (Γ + ⦃φ, ∼φ⦄) :=
+  cast (Structural.weakenMany t (identity φ))
+
+def introOr (d : 𝔇 ⦃φ, ψ⦄) : 𝔇 ⦃φ ⋎ ψ⦄ :=
+  cast (or (Γ := 0) (φ := φ) (ψ := ψ) (cast d (by abel))) (by simp)
+
+def introDisj {Γ : List F} (d : 𝔇 (Γ : Multiset F)) : 𝔇 ⦃⋁Γ⦄ :=
+  cast <| disj₂ (Γ := Γ) (Δ := 0) (cast d)
+
+/-- The rule expansion of the classical negation equivalence axiom. This is a routine syntactic derivation. -/
+def negEquiv (φ : F) : 𝔇 ⦃(φ ⋎ ∼φ ⋎ ⊥) ⋏ (φ ⋏ ⊤ ⋎ ∼φ)⦄ :=
+  have d₁ : 𝔇 ⦃φ ⋎ ∼φ ⋎ ⊥⦄ := introDisj (Γ := [φ, ∼φ, ⊥]) <| cast (identityWith φ (.atom ⊥)) (by change ⦃⊥⦄ + ⦃φ, ∼φ⦄ = ⦃φ, ∼φ, ⊥⦄; abel)
+  have dp : 𝔇 ⦃∼φ, φ⦄ := cast (identity φ)
+  have dt : 𝔇 ⦃∼φ, ⊤⦄ := cast (Structural.weakening (φ := ∼φ) verum)
+  have dc : 𝔇 ⦃∼φ, φ ⋏ ⊤⦄ := cast <| and (Γ := ⦃∼φ⦄) (φ := φ) (ψ := ⊤) (cast dp) (cast dt)
+  cast <| and (Γ := 0) (φ := φ ⋎ ∼φ ⋎ ⊥) (ψ := φ ⋏ ⊤ ⋎ ∼φ)
+    (cast d₁) (cast <| introOr (φ := φ ⋏ ⊤) (ψ := ∼φ) <| cast dc (by abel))
+
+/-- The rule expansion of the K axiom. This is a routine syntactic derivation. -/
+def implyK (φ ψ : F) : 𝔇 ⦃∼φ ⋎ ∼ψ ⋎ φ⦄ :=
+  introDisj (Γ := [∼φ, ∼ψ, φ]) <| cast (identityWith φ (.atom (∼ψ))) (by change ⦃∼ψ⦄ + ⦃φ, ∼φ⦄ = ⦃∼φ, ∼ψ, φ⦄; abel)
+
+/-- The rule expansion of the S axiom. This is a routine syntactic derivation. -/
+def implyS (φ ψ χ : F) : 𝔇 ⦃φ ⋏ ψ ⋏ ∼χ ⋎ φ ⋏ ∼ψ ⋎ ∼φ ⋎ χ⦄ :=
+  let A := φ ⋏ ψ ⋏ ∼χ
+  let B := φ ⋏ ∼ψ
+  let C := ∼φ
+  let D := χ
+  have dφ : 𝔇 (⦃B, C, D⦄ + ⦃φ⦄) := cast (identityWith φ ((Multiset.Traversal.atom B).succ D)) (by dsimp [C]; abel)
+  have dbp : 𝔇 (⦃C, D, ψ⦄ + ⦃φ⦄) := cast (identityWith φ ((Multiset.Traversal.atom D).succ ψ)) (by dsimp [C]; abel)
+  have dbn : 𝔇 (⦃C, D, ψ⦄ + ⦃∼ψ⦄) := cast (identityWith ψ ((Multiset.Traversal.atom C).succ D))
+  have dψ : 𝔇 (⦃B, C, D⦄ + ⦃ψ⦄) := cast <|
+    and (Γ := ⦃C, D, ψ⦄) (φ := φ) (ψ := ∼ψ) dbp dbn
+  have dnχ : 𝔇 (⦃B, C, D⦄ + ⦃∼χ⦄) := cast (identityWith χ ((Multiset.Traversal.atom B).succ C)) (by dsimp [D]; abel)
+  have dr : 𝔇 (⦃B, C, D⦄ + ⦃ψ ⋏ ∼χ⦄) := and (φ := ψ) (ψ := ∼χ) dψ dnχ
+  have da : 𝔇 ⦃A, B, C, D⦄ := cast <| and (φ := φ) (ψ := ψ ⋏ ∼χ) dφ dr
+  introDisj da
+
+/-- The rule expansion of the first conjunction axiom. This is a routine syntactic derivation. -/
+def and₁ (φ ψ : F) : 𝔇 ⦃(∼φ ⋎ ∼ψ) ⋎ φ⦄ :=
+  introOr <| cast <| or (Γ := ⦃φ⦄) (φ := ∼φ) (ψ := ∼ψ)
+    (cast <| identityWith φ (.atom (∼ψ)))
+
+/-- The rule expansion of the second conjunction axiom. This is a routine syntactic derivation. -/
+def and₂ (φ ψ : F) : 𝔇 ⦃(∼φ ⋎ ∼ψ) ⋎ ψ⦄ :=
+  introOr <| cast <| or (Γ := ⦃ψ⦄) (φ := ∼φ) (ψ := ∼ψ)
+    (cast <| identityWith ψ (.atom (∼φ)))
+
+/-- The rule expansion of conjunction introduction. This is a routine syntactic derivation. -/
+def and₃ (φ ψ : F) : 𝔇 ⦃∼φ ⋎ ∼ψ ⋎ φ ⋏ ψ⦄ :=
+  have dp : 𝔇 ⦃∼φ, ∼ψ, φ⦄ := cast (identityWith φ (.atom (∼ψ)))
+  have dq : 𝔇 ⦃∼φ, ∼ψ, ψ⦄ := cast (identityWith ψ (.atom (∼φ)))
+  introDisj (Γ := [∼φ, ∼ψ, φ ⋏ ψ]) <| cast <|
+    and (Γ := ⦃∼φ, ∼ψ⦄) (φ := φ) (ψ := ψ)
+    (cast dp (by abel)) (cast dq (by abel))
+
+/-- The rule expansion of the first disjunction axiom. This is a routine syntactic derivation. -/
+def or₁ (φ ψ : F) : 𝔇 ⦃∼φ ⋎ φ ⋎ ψ⦄ :=
+  introDisj (Γ := [∼φ, φ, ψ]) <| cast (identityWith φ (.atom ψ)) (by change ⦃ψ⦄ + ⦃φ, ∼φ⦄ = ⦃∼φ, φ, ψ⦄; abel)
+
+/-- The rule expansion of the second disjunction axiom. This is a routine syntactic derivation. -/
+def or₂ (φ ψ : F) : 𝔇 ⦃∼ψ ⋎ φ ⋎ ψ⦄ :=
+  introDisj (Γ := [∼ψ, φ, ψ]) <| cast (identityWith ψ (.atom φ)) (by change ⦃φ⦄ + ⦃ψ, ∼ψ⦄ = ⦃∼ψ, φ, ψ⦄; abel)
+
+/-- The rule expansion of disjunction elimination. This is a routine syntactic derivation. -/
+def or₃ (φ ψ χ : F) : 𝔇 ⦃φ ⋏ ∼χ ⋎ ψ ⋏ ∼χ ⋎ ∼φ ⋏ ∼ψ ⋎ χ⦄ :=
+  let A := φ ⋏ ∼χ
+  let B := ψ ⋏ ∼χ
+  let C := ∼φ ⋏ ∼ψ
+  let D := χ
+  have dap : 𝔇 (⦃B, D, ∼φ⦄ + ⦃φ⦄) := cast (identityWith φ ((Multiset.Traversal.atom B).succ D))
+  have dan : 𝔇 (⦃B, D, ∼φ⦄ + ⦃∼χ⦄) := cast (identityWith χ ((Multiset.Traversal.atom B).succ (∼φ))) (by dsimp [D]; abel)
+  have dnp : 𝔇 (⦃A, B, D⦄ + ⦃∼φ⦄) := cast <| and (φ := φ) (ψ := ∼χ) dap dan
+  have dbp : 𝔇 (⦃A, D, ∼ψ⦄ + ⦃ψ⦄) := cast (identityWith ψ ((Multiset.Traversal.atom A).succ D))
+  have dbn : 𝔇 (⦃A, D, ∼ψ⦄ + ⦃∼χ⦄) := cast (identityWith χ ((Multiset.Traversal.atom A).succ (∼ψ))) (by dsimp [D]; abel)
+  have dnn : 𝔇 (⦃A, B, D⦄ + ⦃∼ψ⦄) := cast <| and (φ := ψ) (ψ := ∼χ) dbp dbn
+  have dc : 𝔇 ⦃A, B, C, D⦄ := cast <| and (φ := ∼φ) (ψ := ∼ψ) dnp dnn
+  introDisj dc
+
+/-- The rule expansion of double-negation elimination. This is a routine syntactic derivation. -/
+def dne (φ : F) : 𝔇 ⦃∼φ ⋎ φ⦄ :=
+  introOr <| cast (identity φ)
+
+end AxiomDerivation
 
 open Entailment
 
+/-- A one-sided classical calculus induces classical entailment whenever singleton
+derivations can be embedded as proofs. This is the routine translation of the
+Hilbert axioms into one-sided sequent rules. -/
+abbrev AxiomDerivation.cl {P : Type*} [Entailment P F] (𝓟 : P)
+    [Entailment.ModusPonens 𝓟] [OneSidedLK 𝔇]
+    (lift : ∀ {φ}, 𝔇 ⦃φ⦄ → 𝓟 ⊢! φ) : Entailment.Cl 𝓟 where
+  negEquiv! {φ} := Entailment.cast
+    (show 𝓟 ⊢! (φ ⋎ ∼φ ⋎ ⊥) ⋏ (φ ⋏ ⊤ ⋎ ∼φ) from
+      lift <| AxiomDerivation.negEquiv φ)
+    (by simp [Axioms.NegEquiv, LogicalConnective.DeMorgan.imply, LogicalConnective.iff])
+  verum! := lift verum
+  implyK! {φ ψ} := Entailment.cast (lift <| AxiomDerivation.implyK φ ψ)
+    (by simp [LogicalConnective.DeMorgan.imply])
+  implyS! {φ ψ χ} := Entailment.cast (lift <| AxiomDerivation.implyS φ ψ χ)
+    (by simp [LogicalConnective.DeMorgan.imply])
+  and₁! {φ ψ} := Entailment.cast (lift <| AxiomDerivation.and₁ φ ψ)
+    (by simp [LogicalConnective.DeMorgan.imply])
+  and₂! {φ ψ} := Entailment.cast (lift <| AxiomDerivation.and₂ φ ψ)
+    (by simp [LogicalConnective.DeMorgan.imply])
+  and₃! {φ ψ} := Entailment.cast (lift <| AxiomDerivation.and₃ φ ψ)
+    (by simp [LogicalConnective.DeMorgan.imply])
+  or₁! {φ ψ} := Entailment.cast (lift <| AxiomDerivation.or₁ φ ψ)
+    (by simp [LogicalConnective.DeMorgan.imply])
+  or₂! {φ ψ} := Entailment.cast (lift <| AxiomDerivation.or₂ φ ψ)
+    (by simp [LogicalConnective.DeMorgan.imply])
+  or₃! {φ ψ χ} := Entailment.cast (lift <| AxiomDerivation.or₃ φ ψ χ)
+    (by simp [LogicalConnective.DeMorgan.imply])
+  dne! {φ} := Entailment.cast (lift <| AxiomDerivation.dne φ)
+    (by simp [LogicalConnective.DeMorgan.imply])
+
 /-- An entailment relation which is determined solely by derivability. -/
-class PrincipalEntailment (𝔇 : outParam (List F → Type*)) {P : Type*} [Entailment P F] (𝓟 : P) where
-  equiv {φ} : 𝓟 ⊢! φ ≃ 𝔇 [φ]
+class PrincipalEntailment (𝔇 : outParam (Multiset F → Type*)) {P : Type*} [Entailment P F] (𝓟 : P) where
+  equiv {φ} : 𝓟 ⊢! φ ≃ 𝔇 ⦃φ⦄
 
 namespace PrincipalEntailment
 
@@ -99,75 +292,35 @@ variable {P : Type*} [Entailment P F] {𝓟 : P} [PrincipalEntailment 𝔇 𝓟]
 omit [LogicalConnective F] [LogicalNeutral F]
   [LogicalConnective.DeMorgan F] [LogicalNeutral.DeMorgan F] in
 lemma provable_iff :
-    𝓟 ⊢ φ ↔ Nonempty (𝔇 [φ]) := by
+    𝓟 ⊢ φ ↔ Nonempty (𝔇 ⦃φ⦄) := by
   simpa using! OneSidedLK.PrincipalEntailment.equiv.nonempty_congr
 
 variable [OneSidedLK.Cut 𝔇] (𝓟)
 
 instance : Entailment.ModusPonens 𝓟 where
-  mdp {φ ψ} b₁ b₂ :=
-    let b₁ := equiv b₁
-    let b₂ := equiv b₂
-    have : 𝔇 [∼(φ 🡒 ψ), ∼φ, ψ] := cast (tensor (𝔇 := 𝔇) (identity φ) (identity (∼ψ))) (by simp [LogicalConnective.DeMorgan.imply])
-    have : 𝔇 [∼φ, ψ] := contraction (cut b₁ this) (by simp)
-    have : 𝔇 [ψ] := contraction (cut b₂ this) (by simp)
-    equiv.symm <| cast this
+  mdp! {φ ψ} b₁ b₂ :=
+    equiv.symm <| cast <| modusPonens (Γ := 0) (Δ := 0) (equiv b₁) (equiv b₂)
 
-instance : Entailment.Cl 𝓟 where
-  negEquiv {φ} := Entailment.cast
-    (show 𝓟 ⊢! (φ ⋎ ∼φ ⋎ ⊥) ⋏ (φ ⋏ ⊤ ⋎ ∼φ) from
-      equiv.symm <| and (or <| swap₁ <| or <| close φ) (or <| and (identity φ) top))
-    (by simp [Axioms.NegEquiv, LogicalConnective.DeMorgan.imply, LogicalConnective.iff])
-  verum := equiv.symm <| verum
-  implyK {φ ψ} :=
-    have : 𝓟 ⊢! ∼φ ⋎ ∼ψ ⋎ φ := equiv.symm <| or <| swap₁ <| or <| close φ
-    Entailment.cast this (by simp [LogicalConnective.DeMorgan.imply])
-  implyS {φ ψ χ} :=
-    have : 𝓟 ⊢! φ ⋏ ψ ⋏ ∼χ ⋎ φ ⋏ ∼ψ ⋎ ∼φ ⋎ χ :=
-      equiv.symm <| or <| swap₁ <| or <| swap₁ <| or <| swap₃ <| and
-        (close φ)
-        (and (swap₃ <| and (close φ) (close ψ)) (close χ))
-    Entailment.cast this (by simp [LogicalConnective.DeMorgan.imply])
-  and₁ {φ ψ} :=
-    have : 𝓟 ⊢! (∼φ ⋎ ∼ψ) ⋎ φ :=  equiv.symm <|or <| or <| close φ
-    Entailment.cast this (by simp [LogicalConnective.DeMorgan.imply])
-  and₂ {φ ψ} :=
-    have : 𝓟 ⊢! (∼φ ⋎ ∼ψ) ⋎ ψ := equiv.symm <| or <| or <| close ψ
-    Entailment.cast this (by simp [LogicalConnective.DeMorgan.imply])
-  and₃ {φ ψ} :=
-    have : 𝓟 ⊢! ∼φ ⋎ ∼ψ ⋎ φ ⋏ ψ := equiv.symm <| or <| swap₁ <| or <| swap₁ <| and (close φ) (close ψ)
-    Entailment.cast this (by simp [LogicalConnective.DeMorgan.imply])
-  or₁ {φ ψ} :=
-    have : 𝓟 ⊢! ∼φ ⋎ φ ⋎ ψ := equiv.symm <| or <| swap₁ <| or <| close φ
-    Entailment.cast this (by simp [LogicalConnective.DeMorgan.imply])
-  or₂ {φ ψ} :=
-    have : 𝓟 ⊢! ∼ψ ⋎ φ ⋎ ψ := equiv.symm <| or <| swap₁ <| or <| close ψ
-    Entailment.cast this (by simp [LogicalConnective.DeMorgan.imply])
-  or₃ {φ ψ χ} :=
-    have : 𝓟 ⊢! φ ⋏ ∼χ ⋎ ψ ⋏ ∼ χ ⋎ ∼φ ⋏ ∼ψ ⋎ χ :=
-      equiv.symm <| or <| swap₁ <| or <| swap₁ <| or <| and
-        (swap₃ <| and (close φ) (close χ))
-        (swap₂ <| and (close ψ) (close χ))
-    Entailment.cast this (by simp [LogicalConnective.DeMorgan.imply])
-  dne {φ} :=
-    have : 𝓟 ⊢! ∼φ ⋎ φ := equiv.symm <| or <| close φ
-    Entailment.cast this (by simp [LogicalConnective.DeMorgan.imply])
+instance : Entailment.Cl 𝓟 := AxiomDerivation.cl 𝓟 PrincipalEntailment.equiv.symm
 
 variable {𝓟}
 
-lemma derivable_iff_provable_disj : Nonempty (𝔇 Γ) ↔ 𝓟 ⊢ ⋁Γ := by
+lemma derivable_iff_provable_disj {Γ : List F} : Nonempty (𝔇 (Γ : Multiset F)) ↔ 𝓟 ⊢ ⋁Γ := by
+  classical
   constructor
   · rintro ⟨d⟩
-    have : 𝔇 (Γ ++ []) := cast d
+    have : 𝔇 ((Γ : Multiset F) + 0) := cast d
     exact provable_iff.mpr ⟨disj₂ this⟩
   · rintro h
-    have d₁ : 𝔇 [⋁Γ] := (provable_iff.mp h).some
-    have d₂ : 𝔇 (⋀(∼Γ) :: Γ) := conj₂ fun φ h ↦ close φ (by simp) (by simp_all)
-    exact ⟨eCut d₁ d₂⟩
+    have d₁ : 𝔇 ⦃⋁Γ⦄ := (provable_iff.mp h).some
+    have d₂ : 𝔇 ((Γ : Multiset F) + ⦃⋀(∼Γ)⦄) :=
+      conj₂ (.ofList Γ) fun φ h ↦ close φ ((Multiset.Traversal.ofList Γ).succ φ) (by simp) (by simp_all)
+    exact ⟨cast (eCut (Γ := 0) (Δ := (Γ : Multiset F)) d₁ d₂)⟩
 
 end PrincipalEntailment
 
-abbrev Pullback (𝔇 : List F → Type*) {G : Type*} [LogicalConnective G] [LogicalNeutral G] (f : G →ˡᶜ F) : List G → Type _ := fun Γ ↦ 𝔇 (Γ.map f)
+abbrev Pullback (𝔇 : Multiset F → Type*) {G : Type*} [LogicalConnective G]
+    [LogicalNeutral G] (f : G →ˡᶜ F) : Multiset G → Type _ := fun Γ ↦ 𝔇 (Γ.map f)
 
 namespace Pullback
 
@@ -181,17 +334,19 @@ def cast (d : 𝔇 Δ) (h : Δ = Γ.map f := by simp) : Pullback 𝔇 f Γ := by
 def uncast (d : Pullback 𝔇 f Γ) (h : Δ = Γ.map f := by simp) : 𝔇 Δ := h ▸ d
 
 instance oneSidedLK [OneSidedLK 𝔇] : OneSidedLK (Pullback 𝔇 f) where
-  identity φ := cast <| identity (f φ)
-  contraction {Δ Γ} d h := cast (contraction d (List.map_subset f h) : 𝔇 (Γ.map f)) (by simp)
+  weakening {Γ φ} d := cast <| Structural.weakening (Γ := Γ.map f) (φ := f φ) (uncast d (by simp))
+  contraction {Γ φ} d := cast <| Structural.contraction (Γ := Γ.map f) (φ := f φ) (uncast d (by simp))
+  identity φ := cast <| identity (𝔇 := 𝔇) (f φ)
   verum := cast verum
-  and d₁ d₂ := cast <| and d₁ d₂
-  or d := cast <| or d
+  and {Γ φ ψ} d₁ d₂ := cast <| and (Γ := Γ.map f) (φ := f φ) (ψ := f ψ)
+    (uncast d₁ (by simp)) (uncast d₂ (by simp))
+  or {Γ φ ψ} d := cast <| or (Γ := Γ.map f) (φ := f φ) (ψ := f ψ) (uncast d (by simp))
 
 instance cut [Cut 𝔇] : Cut (Pullback 𝔇 f) where
-  cut {φ Γ Δ} bp bn :=
-    have bp : 𝔇 (f φ :: Γ.map f) := uncast bp
-    have bn : 𝔇 (∼f φ :: Δ.map f) := uncast bn
-    cast (Cut.cut bp bn)
+  cut {Γ φ Δ} bp bn :=
+    have bp : 𝔇 (Γ.map f + ⦃f φ⦄) := uncast bp
+    have bn : 𝔇 (Δ.map f + ⦃∼f φ⦄) := uncast bn
+    cast (Cut.cut (φ := f φ) bp bn)
 
 instance {P : Type*} [Entailment P F] (𝓟 : P) [PrincipalEntailment 𝔇 𝓟] :
     PrincipalEntailment (Pullback 𝔇 f) (Entailment.pullback 𝓟 f) where
@@ -207,170 +362,10 @@ omit [TildeInvolutive F] [LogicalConnective.DeMorgan F] [LogicalNeutral.DeMorgan
 
 end Pullback
 
-/-- An entailment relation which is determined by a context and derivability. -/
-class ContextualEntailment (𝔇 : outParam (List F → Type*)) (S : Type*) [Entailment S F] [AdjunctiveSet F S] where
-  equiv {𝓢 : S} {φ} : 𝓢 ⊢! φ ≃ (l : {l : List F // ∀ φ ∈ l, φ ∈ 𝓢}) × 𝔇 (φ :: ∼l)
-
-namespace ContextualEntailment
-
-variable {S : Type*} [Entailment S F] [AdjunctiveSet F S] [ContextualEntailment 𝔇 S]
-
-omit [LogicalNeutral F] [TildeInvolutive F] [LogicalConnective.DeMorgan F] [LogicalNeutral.DeMorgan F] in
-lemma provable_iff {𝓢 : S} :
-    𝓢 ⊢ φ ↔ ∃ Γ : List F, (∀ ψ ∈ Γ, ψ ∈ 𝓢) ∧ Nonempty (𝔇 (φ :: ∼Γ)) := by
-  simpa using! equiv.nonempty_congr
-
-def toProof (𝓢 : S) (d : 𝔇 [φ]) : 𝓢 ⊢! φ := equiv.symm ⟨⟨[], by simp⟩, d⟩
-
-def ofAxiom [OneSidedLK 𝔇] {𝓢 : S} (h : φ ∈ 𝓢) : 𝓢 ⊢! φ :=
-  equiv.symm ⟨⟨[φ], by simp_all⟩, identity φ⟩
-
-def ofAxiomSubset {𝓢 𝓤 : S} : 𝓢 ⊢! φ → 𝓢 ⊆ 𝓤 → 𝓤 ⊢! φ := fun b h ↦
-  have ⟨l, d⟩ := equiv b
-  equiv.symm
-    ⟨⟨l, fun φ hφ ↦ AdjunctiveSet.subset_iff.mp h _ (l.prop φ hφ)⟩, d⟩
-
-instance [OneSidedLK 𝔇] : Entailment.Axiomatized S where
-  prfAxm h := ofAxiom h
-  weakening h d := ofAxiomSubset d h
-
-variable [OneSidedLK.Cut 𝔇]
-
-instance (𝓢 : S) : Entailment.ModusPonens 𝓢 where
-  mdp {φ ψ} b₁ b₂ :=
-    let ⟨Γ₁, b₁⟩ := equiv b₁
-    let ⟨Γ₂, b₂⟩ := equiv b₂
-    have : 𝔇 [∼(φ 🡒 ψ), ∼φ, ψ] := cast (tensor (𝔇 := 𝔇) (identity φ) (identity (∼ψ))) (by simp [LogicalConnective.DeMorgan.imply])
-    have : 𝔇 (∼φ :: ψ :: ∼↑Γ₁) := contraction (cut b₁ this) (by simp)
-    have : 𝔇 (ψ :: ∼↑Γ₁ ++ ∼↑Γ₂) := contraction (cut b₂ this) (by simp)
-    equiv.symm ⟨⟨Γ₁ ++ Γ₂, by simp; grind⟩, cast this⟩
-
-instance : Entailment.StrongCut S S where
-  cut {T U φ bs b} :=
-  let rec bl (l : List F) (hl : ∀ ψ ∈ l, ψ ∈ U) (χ) (d : 𝔇 (χ :: ∼l)) : T ⊢! χ :=
-    match l with
-    |     [] => equiv.symm ⟨⟨[], by simp⟩, d⟩
-    | ψ :: l =>
-      have bχ : T ⊢! ψ 🡒 χ :=
-        Entailment.cast (bl l (by simp at hl; grind) (∼ψ ⋎ χ) (OneSidedLK.or <| OneSidedLK.swap₁ d))
-        (by simp [LogicalConnective.DeMorgan.imply])
-      have bψ : T ⊢! ψ := bs (show ψ ∈ U by simp at hl; grind)
-      Entailment.mdp bχ bψ
-  have ⟨l, hl⟩ := equiv b
-  bl l l.prop φ hl
-
-instance : Entailment.DeductiveExplosion S where
-  dexp b φ :=
-    have ⟨Γ, b⟩ := equiv b
-    equiv.symm
-    ⟨ Γ,
-      have : 𝔇 [∼⊥] := cast verum (by simp)
-      contraction (cut b this) (by simp) ⟩
-
-lemma inconsistent_iff {𝓢 : S} :
-    Entailment.Inconsistent 𝓢 ↔ ∃ Γ : List F, (∀ ψ ∈ Γ, ψ ∈ 𝓢) ∧ Nonempty (𝔇 (∼Γ)) := calc
-  _ ↔ 𝓢 ⊢ ⊥ := Entailment.inconsistent_iff_provable_bot
-  _ ↔ ∃ Γ : List F, (∀ ψ ∈ Γ, ψ ∈ 𝓢) ∧ Nonempty (𝔇 (⊥ :: ∼Γ)) := by simp [provable_iff]
-  _ ↔ ∃ Γ : List F, (∀ ψ ∈ Γ, ψ ∈ 𝓢) ∧ Nonempty (𝔇 (∼Γ)) := by
-    constructor
-    · rintro ⟨Γ, hΓ, ⟨d⟩⟩
-      have : 𝔇 [(∼⊥ : F)] := cast verum
-      exact ⟨Γ, hΓ, ⟨cast (cut d this)⟩⟩
-    · rintro ⟨Γ, hΓ, ⟨d⟩⟩
-      exact ⟨Γ, hΓ, ⟨contraction d (by simp)⟩⟩
-
-instance cl (𝓢 : S) : Entailment.Cl 𝓢 where
-  negEquiv {φ} := Entailment.cast
-    (show 𝓢 ⊢! (φ ⋎ ∼φ ⋎ ⊥) ⋏ (φ ⋏ ⊤ ⋎ ∼φ) from
-      toProof _ <| and (or <| swap₁ <| or <| close φ) (or <| and (identity φ) top))
-    (by simp [Axioms.NegEquiv, LogicalConnective.DeMorgan.imply, LogicalConnective.iff])
-  verum := toProof _ <| verum
-  implyK {φ ψ} :=
-    have : 𝓢 ⊢! ∼φ ⋎ ∼ψ ⋎ φ := toProof _ <| or <| swap₁ <| or <| close φ
-    Entailment.cast this (by simp [LogicalConnective.DeMorgan.imply])
-  implyS {φ ψ χ} :=
-    have : 𝓢 ⊢! φ ⋏ ψ ⋏ ∼χ ⋎ φ ⋏ ∼ψ ⋎ ∼φ ⋎ χ :=
-      toProof _ <| or <| swap₁ <| or <| swap₁ <| or <| swap₃ <| and
-        (close φ)
-        (and (swap₃ <| and (close φ) (close ψ)) (close χ))
-    Entailment.cast this (by simp [LogicalConnective.DeMorgan.imply])
-  and₁ {φ ψ} :=
-    have : 𝓢 ⊢! (∼φ ⋎ ∼ψ) ⋎ φ :=  toProof _ <|or <| or <| close φ
-    Entailment.cast this (by simp [LogicalConnective.DeMorgan.imply])
-  and₂ {φ ψ} :=
-    have : 𝓢 ⊢! (∼φ ⋎ ∼ψ) ⋎ ψ := toProof _ <| or <| or <| close ψ
-    Entailment.cast this (by simp [LogicalConnective.DeMorgan.imply])
-  and₃ {φ ψ} :=
-    have : 𝓢 ⊢! ∼φ ⋎ ∼ψ ⋎ φ ⋏ ψ := toProof _ <| or <| swap₁ <| or <| swap₁ <| and (close φ) (close ψ)
-    Entailment.cast this (by simp [LogicalConnective.DeMorgan.imply])
-  or₁ {φ ψ} :=
-    have : 𝓢 ⊢! ∼φ ⋎ φ ⋎ ψ := toProof _ <| or <| swap₁ <| or <| close φ
-    Entailment.cast this (by simp [LogicalConnective.DeMorgan.imply])
-  or₂ {φ ψ} :=
-    have : 𝓢 ⊢! ∼ψ ⋎ φ ⋎ ψ := toProof _ <| or <| swap₁ <| or <| close ψ
-    Entailment.cast this (by simp [LogicalConnective.DeMorgan.imply])
-  or₃ {φ ψ χ} :=
-    have : 𝓢 ⊢! φ ⋏ ∼χ ⋎ ψ ⋏ ∼ χ ⋎ ∼φ ⋏ ∼ψ ⋎ χ :=
-      toProof _ <| or <| swap₁ <| or <| swap₁ <| or <| and
-        (swap₃ <| and (close φ) (close χ))
-        (swap₂ <| and (close ψ) (close χ))
-    Entailment.cast this (by simp [LogicalConnective.DeMorgan.imply])
-  dne {φ} :=
-    have : 𝓢 ⊢! ∼φ ⋎ φ := toProof _ <| or <| close φ
-    Entailment.cast this (by simp [LogicalConnective.DeMorgan.imply])
-
-variable {P : Type*} [Entailment P F]
-
-omit [LogicalNeutral F] [LogicalConnective.DeMorgan F] [LogicalNeutral.DeMorgan F] [Cut 𝔇] in
-lemma empty_provable_iff_eprovable {𝓟 : P} [PrincipalEntailment 𝔇 𝓟] :
-    (∅ : S) ⊢ φ ↔ 𝓟 ⊢ φ := by
-  constructor
-  · rintro ⟨d⟩
-    let ⟨l, d⟩ := equiv d
-    have : 𝓟 ⊢! φ := PrincipalEntailment.equiv.symm <| cast d <| by
-      have : ∀ φ, φ ∉ (l : List F) := by simpa using l.prop
-      simp [List.eq_nil_iff_forall_not_mem]; grind
-    exact ⟨this⟩
-  · rintro ⟨b⟩
-    have : 𝔇 [φ] := PrincipalEntailment.equiv b
-    exact ⟨equiv.symm ⟨⟨[], by simp⟩, this⟩⟩
-
-lemma iff_context {𝓢 : S} {𝓟 : P} [PrincipalEntailment 𝔇 𝓟] :
-    𝓢 ⊢ φ ↔ AdjunctiveSet.set 𝓢 *⊢[𝓟] φ := by
-  constructor
-  · rintro h
-    have ⟨Γ, hΓ, ⟨d⟩⟩ := provable_iff.mp h
-    have : 𝓟 ⊢ ⋀Γ 🡒 φ := by
-      have : 𝔇 (∼Γ ++ [φ]) := contra d
-      have : Nonempty (𝔇 [⋀Γ 🡒 φ]) := by simpa [LogicalConnective.DeMorgan.imply] using Nonempty.intro (or <| disj₂ this)
-      exact PrincipalEntailment.provable_iff.mpr this
-    refine ⟨⟨Γ, by simpa using hΓ, this.some⟩⟩
-  · rintro ⟨Γ, h, d⟩
-    have : 𝓟 ⊢! ⋀Γ 🡒 φ := d
-    have d : 𝔇 [⋁(∼Γ) ⋎ φ] := cast (PrincipalEntailment.equiv this) (by simp [LogicalConnective.DeMorgan.imply])
-    have : 𝔇 (⋀Γ ⋏ ∼φ :: φ :: ∼Γ) :=
-      have : 𝔇 (⋀Γ :: ∼Γ) := conj₂ fun φ h ↦ close φ (by simp) (by simp [h])
-      contra <| tensor this (rotate <| identity φ)
-    have : 𝔇 (φ :: ∼Γ) := eCut d this
-    refine provable_iff.mpr ⟨Γ, h, ⟨this⟩⟩
-
-lemma of_principal_provable {𝓟 : P} [PrincipalEntailment 𝔇 𝓟] {𝓢 : S} : 𝓟 ⊢ φ → 𝓢 ⊢ φ := fun h ↦
-  iff_context.mpr (Entailment.Context.of! h)
-
-open Classical in
-noncomputable abbrev deduction (𝓟 : P) [PrincipalEntailment 𝔇 𝓟] : Entailment.Deduction S where
-  ofInsert {φ ψ 𝓢 b} :=
-    have : AdjunctiveSet.set (Adjoin.adjoin φ 𝓢) *⊢[𝓟] ψ := iff_context.mp ⟨b⟩
-    have : AdjunctiveSet.set 𝓢 *⊢[𝓟] φ 🡒 ψ := Context.deduct! <| by simpa using this
-    (iff_context.mpr this).get
-  inv {φ ψ 𝓢 b} :=
-    have : AdjunctiveSet.set (Adjoin.adjoin φ 𝓢) *⊢[𝓟] ψ := by simpa using Context.deductInv! (iff_context.mp ⟨b⟩)
-    (iff_context.mpr this).get
-
-end ContextualEntailment
-
 end OneSidedLK
 
-end LO
+
+
+end FFL
 
 end

@@ -1,10 +1,11 @@
 module
 
 public import Foundation.FirstOrder.SetTheory.Basic.Model
+public import Foundation.FirstOrder.Basic.BoundingHierarchy
 
 @[expose] public section
 
-namespace LO.FirstOrder.SetTheory
+namespace FFL.FirstOrder.SetTheory
 
 variable {L : Language} [L.Mem]
 
@@ -343,4 +344,4 @@ end SetTheory
 
 end FirstOrder
 
-end LO
+end FFL

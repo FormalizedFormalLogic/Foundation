@@ -6,7 +6,7 @@ public import Foundation.Logic.ForcingRelation
 public import Foundation.Vorspiel.Order.Dense
 
 @[expose] public section
-namespace LO.FirstOrder
+namespace FFL.FirstOrder
 
 /-- Kripke model for relational first-order language -/
 class KripkeModel
@@ -101,4 +101,4 @@ variable (W)
 
 end KripkeModel
 
-end LO.FirstOrder
+end FFL.FirstOrder

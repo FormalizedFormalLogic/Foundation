@@ -1,6 +1,7 @@
 module
 
 public import Foundation.Vorspiel.List.Basic
+public import Foundation.Vorspiel.Multiset
 public import Foundation.Vorspiel.NotationClass
 
 @[expose] public section
@@ -12,13 +13,13 @@ This file defines structure that has logical connectives $\top, \bot, \land, \lo
 and their homomorphisms.
 
 ## Main Definitions
-* `LO.LogicalConnective` is defined so that `LO.LogicalConnective F` is a type that has logical connectives $\top, \bot, \land, \lor, \to, \lnot$.
-* `LO.LogicalConnective.Hom` is defined so that `f : F →ˡᶜ G` is a homomorphism from `F` to `G`, i.e.,
+* `FFL.LogicalConnective` is defined so that `FFL.LogicalConnective F` is a type that has logical connectives $\top, \bot, \land, \lor, \to, \lnot$.
+* `FFL.LogicalConnective.Hom` is defined so that `f : F →ˡᶜ G` is a homomorphism from `F` to `G`, i.e.,
 a function that preserves logical connectives.
 
 -/
 
-namespace LO
+namespace FFL
 
 /--
 A class for types with logical connectives $\top, \bot, \land, \lor, \to, \lnot$.
@@ -316,9 +317,9 @@ Homomorphisms commute with `k`-ary disjunctions.
 
 end conjdisj
 
-end LO
+end FFL
 
-open LO
+open FFL
 
 namespace Matrix
 
@@ -328,7 +329,7 @@ section conjunction
 
 variable [Top α] [Wedge α]
 
-/-- The conjunction of a list of elements of type `α`, where `α` is a type with `Wedge α`. -/
+/-- The conjunction of a vector of elements of type `α`, where `α` is a type with `Wedge α`. -/
 def conj : {n : ℕ} → (Fin n → α) → α
   |     0, _ => ⊤
   | _ + 1, v => v 0 ⋏ conj (vecTail v)
@@ -343,7 +344,7 @@ section disjunction
 
 variable [Bot α] [Vee α]
 
-/-- The disjunction of a list of elements of type `α`, where `α` is a type with `Vee α`. -/
+/-- The disjunction of a vector of elements of type `α`, where `α` is a type with `Vee α`. -/
 def disj : {n : ℕ} → (Fin n → α) → α
   |     0, _ => ⊥
   | _ + 1, v => v 0 ⋎ disj (vecTail v)
@@ -628,6 +629,37 @@ lemma map_disj_append_prop (f : G) (l₁ l₂ : List α) : f (l₁ ++ l₂).disj
 end
 
 end List
+
+namespace Multiset
+
+variable {α : Type*} [Tilde α]
+
+instance : Tilde (Multiset α) := ⟨fun Γ ↦ Γ.map (∼·)⟩
+
+lemma tilde_def (Γ : Multiset α) : ∼Γ = Γ.map (∼·) := rfl
+
+@[simp] lemma tilde_zero : ∼(0 : Multiset α) = 0 := rfl
+
+@[simp] lemma tilde_add (Γ Δ : Multiset α) : ∼(Γ + Δ) = ∼Γ + ∼Δ := by
+  simp [tilde_def]
+
+@[simp] lemma tilde_atom (φ : α) : ∼(⦃φ⦄ : Multiset α) = ⦃∼φ⦄ := by
+  simp [tilde_def]
+
+@[simp] lemma mem_tilde_iff [TildeInvolutive α] {φ : α} {Γ : Multiset α} :
+    φ ∈ ∼Γ ↔ ∼φ ∈ Γ := by
+  rw [tilde_def]
+  constructor
+  · intro h
+    rcases Multiset.mem_map.mp h with ⟨ψ, hψ, rfl⟩
+    simpa using hψ
+  · intro hφ
+    simpa using Multiset.mem_map_of_mem (fun ψ ↦ ∼ψ) hφ
+
+instance [TildeInvolutive α] : TildeInvolutive (Multiset α) where
+  tilde_involutive Γ := by simp [tilde_def, Multiset.map_map]
+
+end Multiset
 
 namespace Finset
 

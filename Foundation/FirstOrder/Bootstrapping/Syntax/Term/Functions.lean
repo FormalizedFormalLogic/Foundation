@@ -3,7 +3,7 @@ module
 public import Foundation.FirstOrder.Bootstrapping.Syntax.Term.Basic
 
 @[expose] public section
-namespace LO.FirstOrder.Arithmetic.Bootstrapping
+namespace FFL.FirstOrder.Arithmetic.Bootstrapping
 
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 
@@ -819,4 +819,4 @@ end numeral
 
 end Arithmetic
 
-end LO.FirstOrder.Arithmetic.Bootstrapping
+end FFL.FirstOrder.Arithmetic.Bootstrapping

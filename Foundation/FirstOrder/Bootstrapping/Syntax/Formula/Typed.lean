@@ -8,7 +8,7 @@ public import Foundation.FirstOrder.Bootstrapping.Syntax.Formula.Iteration
 # Typed Formalized Semiformula/Formula
 -/
 
-namespace LO.FirstOrder.Arithmetic.Bootstrapping
+namespace FFL.FirstOrder.Arithmetic.Bootstrapping
 
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 
@@ -522,4 +522,4 @@ end Arithmetic
 lemma Semiformula.ball_eqss_imp (t : Semiterm V ℒₒᵣ n) (φ : Semiformula V ℒₒᵣ (n + 1)) :
     φ.ball t = ∀¹ ((Semiterm.bvar 0 <' t.bShift) 🡒 φ) := by simp [Semiformula.ball, imp_def]
 
-end LO.FirstOrder.Arithmetic.Bootstrapping
+end FFL.FirstOrder.Arithmetic.Bootstrapping

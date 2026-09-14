@@ -9,7 +9,7 @@ public import Foundation.FirstOrder.SetTheory.Basic.Misc
 reference: Ralf Schindler, "Set Theory, Exploring Independence and Truth" [Sch14]
 -/
 
-namespace LO.FirstOrder.SetTheory
+namespace FFL.FirstOrder.SetTheory
 
 def isSubsetOf : SetTheorySemisentence 2 := “x y. ∀ z ∈ x, z ∈ y”
 
@@ -170,4 +170,4 @@ instance : 𝗭𝗖 ⪯ 𝗭𝗙𝗖 := Entailment.WeakerThan.ofSubset zc_subset
 
 instance : 𝗭 ⪯ 𝗭𝗙𝗖 := Entailment.WeakerThan.trans (inferInstance : 𝗭 ⪯ 𝗭𝗙) inferInstance
 
-end LO.FirstOrder.SetTheory
+end FFL.FirstOrder.SetTheory

@@ -3,7 +3,7 @@ module
 public import Foundation.Meta.ClProver
 public import Foundation.Meta.IntProver
 
-namespace LO
+namespace FFL
 
 section
 
@@ -49,4 +49,4 @@ example (h : 𝓣 ⊢ φ 🡘 ψ) : 𝓢 ⊢ (φ 🡒 ∼(ψ 🡒 φ)) 🡒 (ψ 
 
 end
 
-end LO
+end FFL

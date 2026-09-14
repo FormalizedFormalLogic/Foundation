@@ -7,7 +7,7 @@ public import Foundation.FirstOrder.SetTheory.Z
 # Basic definitions and lemmata for relations and functions
 -/
 
-namespace LO.FirstOrder.SetTheory
+namespace FFL.FirstOrder.SetTheory
 
 variable {V : Type*} [SetStructure V] [Nonempty V] [V↓[ℒₛₑₜ] ⊧* 𝗭]
 
@@ -699,4 +699,4 @@ lemma two_pow_cardEQ_power (X : V) : 2 ^ X ≋ ℘ X := by
       have : (s₂ ⊆ X ∧ f ∈ (2 ^ X : V)) ∧ ∀ x, ⟨x, 1⟩ₖ ∈ f ↔ x ∈ s₂ := by simpa [F] using h₂
       ext z; grind
 
-end LO.FirstOrder.SetTheory
+end FFL.FirstOrder.SetTheory

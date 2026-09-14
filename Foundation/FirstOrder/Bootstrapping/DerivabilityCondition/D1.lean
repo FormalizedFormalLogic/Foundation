@@ -7,7 +7,7 @@ public import Foundation.FirstOrder.Bootstrapping.Syntax
 # Hilbert-Bernays-Löb derivability condition $\mathbf{D1}$ and soundness of internal provability.
 -/
 
-namespace LO.FirstOrder.Arithmetic.Bootstrapping
+namespace FFL.FirstOrder.Arithmetic.Bootstrapping
 
 open Classical FirstOrder
 
@@ -34,4 +34,4 @@ theorem internal_provable_of_outer_provable {φ} : T ⊢ φ → T.internalize V 
 @[simp] lemma provable_iff_provable {T : Theory L} [T.Δ₁] {φ : Sentence L} :
     Provable T (⌜φ⌝ : ℕ) ↔ T ⊢ φ := by simpa [TProvable.iff_provable] using! Provable.complete
 
-end LO.FirstOrder.Arithmetic.Bootstrapping
+end FFL.FirstOrder.Arithmetic.Bootstrapping

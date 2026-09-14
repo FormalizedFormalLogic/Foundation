@@ -4,7 +4,7 @@ public import Foundation.FirstOrder.Intuitionistic.Formula
 
 @[expose] public section
 
-namespace LO.FirstOrder
+namespace FFL.FirstOrder
 
 namespace Semiformulaᵢ
 
@@ -87,4 +87,4 @@ instance : LawfulSyntacticRewriting L (Semipropositionᵢ L) where
 
 end Semiformulaᵢ
 
-end LO.FirstOrder
+end FFL.FirstOrder

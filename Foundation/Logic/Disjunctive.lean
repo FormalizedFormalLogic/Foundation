@@ -4,7 +4,7 @@ public import Foundation.Propositional.Entailment.Cl
 
 @[expose] public section
 
-namespace LO.Entailment
+namespace FFL.Entailment
 
 variable {F : Type*} [LogicalConnective F] [LogicalNeutral F]
 variable {S : Type*} [Entailment S F]
@@ -27,12 +27,12 @@ lemma iff_complete_disjunctive [DecidableEq F] {𝓢 : S} [Entailment.Cl 𝓢] :
     intro φ ψ hpq;
     rcases (hComp.con φ) with (hp | hnp);
     . left; assumption;
-    . right; exact of_C!_of_C!_of_A! (C_of_N hnp) C!_id hpq;
+    . right; exact of_C_of_C_of_A (C_of_N hnp) C_id hpq;
   . intro hDisj;
     refine ⟨fun φ ↦ ?_⟩
     replace hDisj : ∀ {φ ψ}, 𝓢 ⊢ φ ⋎ ψ → 𝓢 ⊢ φ ∨ 𝓢 ⊢ ψ := iff_disjunctive.mp hDisj;
-    exact @hDisj φ (∼φ) lem!;
+    exact @hDisj φ (∼φ) lem;
 
-end LO.Entailment
+end FFL.Entailment
 
 end

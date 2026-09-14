@@ -1,10 +1,11 @@
 module
 
 public import Foundation.FirstOrder.Arithmetic.Basic.Model
+public import Foundation.FirstOrder.Basic.BoundingHierarchy
 
 @[expose] public section
 
-namespace LO.FirstOrder.Arithmetic
+namespace FFL.FirstOrder.Arithmetic
 
 variable {L : Language} [L.LT]
 
@@ -304,6 +305,27 @@ lemma remove_exists {φ : Semiformula L ξ (n + 1)} :
 
 end Hierarchy
 
+namespace Hierarchy
+
+lemma toPrenex {φ : Semiformula L ξ (n + s)}
+    (h : Hierarchy (Γ.altItr s) j φ) :
+    Hierarchy Γ (j + s) (φ.toPrenex Γ s) := by
+  induction s generalizing n j with
+  | zero => simpa using h
+  | succ s ih =>
+    rw [Polarity.altItr_succ] at h
+    show Hierarchy Γ (j + (s + 1)) (Polarity.quantItr Γ (s + 1) φ)
+    rw [Polarity.quantItr_succ', (show j + (s + 1) = (j + 1) + s by omega)]
+    rcases hΓ : Γ.altItr s with _ | _
+    · apply ih
+      rw [hΓ] at h ⊢
+      exact h.sigma
+    · apply ih
+      rw [hΓ] at h ⊢
+      exact h.pi
+
+end Hierarchy
+
 section LOR
 
 lemma sigma₁_induction {P : (n : ℕ) → ArithmeticSemiformula ξ n → Prop}
@@ -376,4 +398,4 @@ instance (T : ArithmeticTheory) [T.SoundOnHierarchy 𝚷 2] : Entailment.Consist
 
 end FirstOrder
 
-end LO
+end FFL

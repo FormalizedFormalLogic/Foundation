@@ -3,7 +3,7 @@ module
 public import Foundation.FirstOrder.Completeness
 
 @[expose] public section
-namespace LO
+namespace FFL
 
 namespace FirstOrder
 
@@ -38,4 +38,4 @@ end Order
 
 end FirstOrder
 
-end LO
+end FFL

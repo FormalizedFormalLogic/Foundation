@@ -11,7 +11,7 @@ public import Foundation.Meta.TwoSided
 
 public meta section
 
-namespace LO.Meta
+namespace FFL.Meta
 
 open Mathlib Qq Lean Elab Meta Tactic
 
@@ -159,7 +159,7 @@ def tryRightClose (φ : Lit) (Γ Δ : Sequent) : M (Option Expr) := do
     let eΓ ← Sequent.toExpr Γ
     let eΔ ← Sequent.toExpr Δ
     let eφ ← litToExpr φ
-    return some <| ← iapp ``LO.Meta.ClProver.Theorems.right_closed #[eΓ, eΔ, eφ, e]
+    return some <| ← iapp ``FFL.Meta.ClProver.Theorems.right_closed #[eΓ, eΔ, eφ, e]
 
 def tryLeftClose (φ : Lit) (Γ Δ : Sequent) : M (Option Expr) := do
   match ← memQList?' (← litToExpr φ) (← Δ.toExprList) with
@@ -168,111 +168,111 @@ def tryLeftClose (φ : Lit) (Γ Δ : Sequent) : M (Option Expr) := do
     let eΓ ← Sequent.toExpr Γ
     let eΔ ← Sequent.toExpr Δ
     let eφ ← litToExpr φ
-    return some <| ← iapp ``LO.Meta.ClProver.Theorems.left_closed #[eΓ, eΔ, eφ, e]
+    return some <| ← iapp ``FFL.Meta.ClProver.Theorems.left_closed #[eΓ, eΔ, eφ, e]
 
 def rotateRight (Γ Δ : Sequent) (φ : Lit) (e : Expr) : M Expr := do
   let eΓ ← Sequent.toExpr Γ
   let eΔ ← Sequent.toExpr Δ
   let eφ ← litToExpr φ
-  iapp ``LO.Meta.ClProver.Theorems.rotate_right #[eΓ, eΔ, eφ, e]
+  iapp ``FFL.Meta.ClProver.Theorems.rotate_right #[eΓ, eΔ, eφ, e]
 
 def rotateLeft (Γ Δ : Sequent) (φ : Lit) (e : Expr) : M Expr := do
   let eΓ ← Sequent.toExpr Γ
   let eΔ ← Sequent.toExpr Δ
   let eφ ← litToExpr φ
-  iapp ``LO.Meta.ClProver.Theorems.rotate_left #[eΓ, eΔ, eφ, e]
+  iapp ``FFL.Meta.ClProver.Theorems.rotate_left #[eΓ, eΔ, eφ, e]
 
 def verumRight (Γ Δ : Sequent) : M Expr := do
   let eΓ ← Sequent.toExpr Γ
   let eΔ ← Sequent.toExpr Δ
-  iapp ``LO.Meta.ClProver.Theorems.verum_right #[eΓ, eΔ]
+  iapp ``FFL.Meta.ClProver.Theorems.verum_right #[eΓ, eΔ]
 
 def falsumRight (Γ Δ : Sequent) (e : Expr) : M Expr := do
   let eΓ ← Sequent.toExpr Γ
   let eΔ ← Sequent.toExpr Δ
-  iapp ``LO.Meta.ClProver.Theorems.falsum_right #[eΓ, eΔ, e]
+  iapp ``FFL.Meta.ClProver.Theorems.falsum_right #[eΓ, eΔ, e]
 
 def andRight (Γ Δ : Sequent) (φ ψ : Lit) (e₁ e₂ : Expr) : M Expr := do
   let eΓ ← Sequent.toExpr Γ
   let eΔ ← Sequent.toExpr Δ
   let eφ ← litToExpr φ
   let eψ ← litToExpr ψ
-  iapp ``LO.Meta.ClProver.Theorems.and_right #[eΓ, eΔ, eφ, eψ, e₁, e₂]
+  iapp ``FFL.Meta.ClProver.Theorems.and_right #[eΓ, eΔ, eφ, eψ, e₁, e₂]
 
 def orRight (Γ Δ : Sequent) (φ ψ : Lit) (e : Expr) : M Expr := do
   let eΓ ← Sequent.toExpr Γ
   let eΔ ← Sequent.toExpr Δ
   let eφ ← litToExpr φ
   let eψ ← litToExpr ψ
-  iapp ``LO.Meta.ClProver.Theorems.or_right #[eΓ, eΔ, eφ, eψ, e]
+  iapp ``FFL.Meta.ClProver.Theorems.or_right #[eΓ, eΔ, eφ, eψ, e]
 
 def negRight (Γ Δ : Sequent) (φ : Lit) (e : Expr) : M Expr := do
   let eΓ ← Sequent.toExpr Γ
   let eΔ ← Sequent.toExpr Δ
   let eφ ← litToExpr φ
-  iapp ``LO.Meta.ClProver.Theorems.neg_right #[eΓ, eΔ, eφ, e]
+  iapp ``FFL.Meta.ClProver.Theorems.neg_right #[eΓ, eΔ, eφ, e]
 
 def implyRight (Γ Δ : Sequent) (φ ψ : Lit) (e : Expr) : M Expr := do
   let eΓ ← Sequent.toExpr Γ
   let eΔ ← Sequent.toExpr Δ
   let eφ ← litToExpr φ
   let eψ ← litToExpr ψ
-  iapp ``LO.Meta.ClProver.Theorems.imply_right #[eΓ, eΔ, eφ, eψ, e]
+  iapp ``FFL.Meta.ClProver.Theorems.imply_right #[eΓ, eΔ, eφ, eψ, e]
 
 def iffRight (Γ Δ : Sequent) (φ ψ : Lit) (e₁ e₂ : Expr) : M Expr := do
   let eΓ ← Sequent.toExpr Γ
   let eΔ ← Sequent.toExpr Δ
   let eφ ← litToExpr φ
   let eψ ← litToExpr ψ
-  iapp ``LO.Meta.ClProver.Theorems.iff_right #[eΓ, eΔ, eφ, eψ, e₁, e₂]
+  iapp ``FFL.Meta.ClProver.Theorems.iff_right #[eΓ, eΔ, eφ, eψ, e₁, e₂]
 
 
 def verumLeft (Γ Δ : Sequent) (e : Expr) : M Expr := do
   let eΓ ← Sequent.toExpr Γ
   let eΔ ← Sequent.toExpr Δ
-  iapp ``LO.Meta.ClProver.Theorems.verum_left #[eΓ, eΔ, e]
+  iapp ``FFL.Meta.ClProver.Theorems.verum_left #[eΓ, eΔ, e]
 
 def falsumLeft (Γ Δ : Sequent) : M Expr := do
   let eΓ ← Sequent.toExpr Γ
   let eΔ ← Sequent.toExpr Δ
-  iapp ``LO.Meta.ClProver.Theorems.falsum_left #[eΓ, eΔ]
+  iapp ``FFL.Meta.ClProver.Theorems.falsum_left #[eΓ, eΔ]
 
 def andLeft (Γ Δ : Sequent) (φ ψ : Lit) (e : Expr) : M Expr := do
   let eΓ ← Sequent.toExpr Γ
   let eΔ ← Sequent.toExpr Δ
   let eφ ← litToExpr φ
   let eψ ← litToExpr ψ
-  iapp ``LO.Meta.ClProver.Theorems.and_left #[eΓ, eΔ, eφ, eψ, e]
+  iapp ``FFL.Meta.ClProver.Theorems.and_left #[eΓ, eΔ, eφ, eψ, e]
 
 def orLeft (Γ Δ : Sequent) (φ ψ : Lit) (e₁ e₂ : Expr) : M Expr := do
   let eΓ ← Sequent.toExpr Γ
   let eΔ ← Sequent.toExpr Δ
   let eφ ← litToExpr φ
   let eψ ← litToExpr ψ
-  iapp ``LO.Meta.ClProver.Theorems.or_left #[eΓ, eΔ, eφ, eψ, e₁, e₂]
+  iapp ``FFL.Meta.ClProver.Theorems.or_left #[eΓ, eΔ, eφ, eψ, e₁, e₂]
 
 def negLeft (Γ Δ : Sequent) (φ : Lit) (e : Expr) : M Expr := do
   let eΓ ← Sequent.toExpr Γ
   let eΔ ← Sequent.toExpr Δ
   let eφ ← litToExpr φ
-  iapp ``LO.Meta.ClProver.Theorems.neg_left #[eΓ, eΔ, eφ, e]
+  iapp ``FFL.Meta.ClProver.Theorems.neg_left #[eΓ, eΔ, eφ, e]
 
 def implyLeft (Γ Δ : Sequent) (φ ψ : Lit) (e₁ e₂ : Expr) : M Expr := do
   let eΓ ← Sequent.toExpr Γ
   let eΔ ← Sequent.toExpr Δ
   let eφ ← litToExpr φ
   let eψ ← litToExpr ψ
-  iapp ``LO.Meta.ClProver.Theorems.imply_left #[eΓ, eΔ, eφ, eψ, e₁, e₂]
+  iapp ``FFL.Meta.ClProver.Theorems.imply_left #[eΓ, eΔ, eφ, eψ, e₁, e₂]
 
 def iffLeft (Γ Δ : Sequent) (φ ψ : Lit) (e₁ e₂ : Expr) : M Expr := do
   let eΓ ← Sequent.toExpr Γ
   let eΔ ← Sequent.toExpr Δ
   let eφ ← litToExpr φ
   let eψ ← litToExpr ψ
-  iapp ``LO.Meta.ClProver.Theorems.iff_left #[eΓ, eΔ, eφ, eψ, e₁, e₂]
+  iapp ``FFL.Meta.ClProver.Theorems.iff_left #[eΓ, eΔ, eφ, eψ, e₁, e₂]
 
 def toProvable (φ : Expr) (e : Expr) : M Expr := do
-  iapp ``LO.Meta.ClProver.Theorems.to_provable #[φ, e]
+  iapp ``FFL.Meta.ClProver.Theorems.to_provable #[φ, e]
 
 def prover (k : ℕ) (b : Bool) (Γ Δ : Sequent) : M Expr := do
   --logInfo m!"step: {k}, case: {b}, {← Sequent.toExpr Γ} ⟹ {← Sequent.toExpr Δ}"
@@ -372,7 +372,7 @@ structure CompatibleHypInfo where
 def HypInfo.toCompatible (h : HypInfo) : M CompatibleHypInfo := do
   let c ← read
   if (← isDefEq (← whnf h.F) (← whnf c.F)) && (← isDefEq (← whnf h.S) (← whnf c.S)) && (← isDefEq (← whnf h.E) (← whnf c.E)) then
-    let e := @Expr.const ``LO.Entailment.WeakerThan [c.levelF, c.levelS, c.levelS, c.levelE, c.levelE]
+    let e := @Expr.const ``FFL.Entailment.WeakerThan [c.levelF, c.levelS, c.levelS, c.levelE, c.levelE]
       |>.app c.F |>.app c.S |>.app c.S |>.app c.E |>.app c.E |>.app h.𝓢 |>.app c.𝓢
     let .some wt ← trySynthInstance e
       | throwError m! "error: failed to find instance {e}"
@@ -383,7 +383,7 @@ def addHyp (𝓣 wt : Expr) (Γ Δ : Sequent) (φ : Lit) (E e : Expr) : M Expr :
   let eΓ ← Sequent.toExpr Γ
   let eΔ ← Sequent.toExpr Δ
   let eφ ← litToExpr φ
-  iapp ``LO.Meta.ClProver.Theorems.add_hyp #[𝓣, wt, eΓ, eΔ, eφ, E, e]
+  iapp ``FFL.Meta.ClProver.Theorems.add_hyp #[𝓣, wt, eΓ, eΔ, eφ, E, e]
 
 def addHyps (prover : (Γ Δ : Sequent) → M Expr) (Γ Δ : Sequent) : List HypInfo → M Expr
   |        [] => prover Γ Δ
@@ -436,6 +436,6 @@ elab "cl_prover" n:(num)? seq:(termSeq)? : tactic => withMainContext do
 
 end ClProver
 
-end LO.Meta
+end FFL.Meta
 
 end

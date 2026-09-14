@@ -8,17 +8,17 @@ public import Foundation.FirstOrder.Arithmetic.Exponential
 
 -/
 
-namespace LO.FirstOrder.Arithmetic
+namespace FFL.FirstOrder.Arithmetic
 
 /-- ∀ x, ∃ y, 2^{|x|^2} = y-/
-def _root_.LO.Omega1.omega1 : ArithmeticSentence := “∀ x, ∃ y, ∃ l <⁺ x, !lengthDef l x ∧ !exponentialDef (l * l) y”
+def _root_.FFL.Omega1.omega1 : ArithmeticSentence := “∀ x, ∃ y, ∃ l <⁺ x, !lengthDef l x ∧ !exponentialDef (l * l) y”
 
-inductive _root_.LO.Omega1 : ArithmeticTheory where
+inductive _root_.FFL.Omega1 : ArithmeticTheory where
   | omega : Omega1 Omega1.omega1
 
 notation "𝝮₁" => Omega1
 
-@[simp] lemma _root_.LO.FirstOrder.Theory.OmegaOne.mem_iff {σ} : σ ∈ 𝝮₁ ↔ σ = Omega1.omega1 :=
+@[simp] lemma _root_.FFL.FirstOrder.Theory.OmegaOne.mem_iff {σ} : σ ∈ 𝝮₁ ↔ σ = Omega1.omega1 :=
   ⟨by rintro ⟨⟩; rfl, by rintro rfl; exact Omega1.omega⟩
 
 noncomputable section
@@ -133,4 +133,4 @@ instance : 𝗜𝚺₀ ∪ 𝝮₁ ⪯ 𝗜𝚺₁ := weakerThan_of_models.{0} _
 
 instance : ℕ↓[ℒₒᵣ] ⊧* 𝗜𝚺₀ ∪ 𝝮₁ := inferInstance
 
-end LO.FirstOrder.Arithmetic
+end FFL.FirstOrder.Arithmetic

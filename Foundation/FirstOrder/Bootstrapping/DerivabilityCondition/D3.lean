@@ -7,18 +7,18 @@ public import Foundation.FirstOrder.Bootstrapping.DerivabilityCondition.PeanoMin
 # Hilbert-Bernays-Löb derivability condition $\mathbf{D3}$ and formalized $\Sigma_1$-completeness
 -/
 
-namespace LO.FirstOrder.Arithmetic.Bootstrapping.Arithmetic
+namespace FFL.FirstOrder.Arithmetic.Bootstrapping.Arithmetic
 
 -- `Arithmetic` is intentionally re-opened here even though the ambient namespace
 -- already contains it; renaming would break the widely-used public API
 -- (`Bootstrapping.Arithmetic.*`). Suppress the new dupNamespace linter for the
 -- declarations in this namespace (the option is scoped by `namespace`/`end` and
--- reverts automatically at `end LO.FirstOrder.Arithmetic.Bootstrapping.Arithmetic`).
+-- reverts automatically at `end FFL.FirstOrder.Arithmetic.Bootstrapping.Arithmetic`).
 set_option linter.dupNamespace false
 
 open Classical
 
-open LO.Entailment LO.Entailment.FiniteContext
+open FFL.Entailment FFL.Entailment.FiniteContext
 
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 
@@ -118,14 +118,14 @@ theorem bold_sigma_one_complete {n} {φ : ArithmeticSemisentence n} (hp : Hierar
   case hAnd =>
     intro n φ ψ _ _ ihφ ihψ w h
     have H : V ⊧/w φ ∧ V ⊧/w ψ := by simpa using  h
-    simpa using K!_intro (ihφ H.1) (ihψ H.2)
+    simpa using K_intro (ihφ H.1) (ihψ H.2)
   case hOr =>
     intro n φ ψ _ _ ihφ ihψ w h
     suffices T.internalize V ⊢ (toNumVec w ⤔ ⌜φ⌝) ⋎ (toNumVec w ⤔ ⌜ψ⌝) by simpa
     have : V ⊧/w φ ∨ V ⊧/w ψ := by simpa using h
     rcases this with (h | h)
-    · apply A!_intro_left (ihφ h)
-    · apply A!_intro_right (ihψ h)
+    · apply A_intro_left (ihφ h)
+    · apply A_intro_right (ihψ h)
   case hBall =>
     intro n t φ _ ih w h
     have h : ∀ i < t.valb w, V ⊧/(i :> w) φ := by
@@ -166,4 +166,4 @@ theorem provable_internalize {σ : ArithmeticSentence} :
     Provable T (⌜σ⌝ : V) → Provable T (⌜provabilityPred T σ⌝ : V) := by
   simpa [models_iff] using sigma_one_complete (V := V) (T := T) (σ := provabilityPred T σ) (by simp)
 
-end LO.FirstOrder.Arithmetic.Bootstrapping.Arithmetic
+end FFL.FirstOrder.Arithmetic.Bootstrapping.Arithmetic

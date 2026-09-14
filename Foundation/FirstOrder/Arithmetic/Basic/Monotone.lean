@@ -3,7 +3,7 @@ module
 public import Foundation.FirstOrder.Arithmetic.Basic.Misc
 
 @[expose] public section
-namespace LO.FirstOrder
+namespace FFL.FirstOrder
 
 namespace Structure
 

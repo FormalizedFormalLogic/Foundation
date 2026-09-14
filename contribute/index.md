@@ -39,7 +39,7 @@ PRs (title and body) are written in English.
 - 🤖 Run `just axiom-audit` and confirm it passes before submitting a PR. This checks sorry-freeness and the axiom allowlist across the project, and CI re-runs it on every PR — a failing audit blocks the merge.
 - Run import-all to keep `Foundation.lean` up to date:
   ```shell
-  lake exe mk_all --module
+  just mk-all
   ```
 - If you added entries to `references.bib`, format it:
   ```shell
@@ -51,8 +51,9 @@ PRs (title and body) are written in English.
 
 🤖 Whenever an AI agent was involved in producing the changes — fully generated or merely assisted — this must be disclosed in the contribution itself:
 
-- every commit created with an AI agent carries a co-author trailer, e.g.
+- every commit created with an AI agent carries a co-author trailer naming the agent — not the model behind it, since model names turn over quickly:
   ```
   Co-Authored-By: Claude <noreply@anthropic.com>
+  Co-Authored-By: Codex <noreply@openai.com>
   ```
 - the PR states in natural language (in the body, or in the title if appropriate) that an AI agent was used.

@@ -15,12 +15,12 @@ The bounded variables are denoted by `#x` for `x : Fin n`, and free variables ar
 
 -/
 
-namespace LO
+namespace FFL
 
 namespace FirstOrder
 
 /--
-A semiterm of language `L`, with bound variables indexed by `Fin n` and free variables indexed by `ξ`. In `LO.FirstOrder.Semiformula`, bound variables are de Bruijn indices with a separate type from free variables.
+A semiterm of language `L`, with bound variables indexed by `Fin n` and free variables indexed by `ξ`. In `FFL.FirstOrder.Semiformula`, bound variables are de Bruijn indices with a separate type from free variables.
 -/
 inductive Semiterm (L : Language) (ξ : Type*) (n : ℕ)
   | bvar : Fin n → Semiterm L ξ n
@@ -249,5 +249,5 @@ end Semiterm
 
 end FirstOrder
 
-end LO
+end FFL
 end

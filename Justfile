@@ -15,9 +15,18 @@ import-graph:
 cloc:
     cloc --include-lang=Lean Foundation/
 
-# Regenerate Foundation.lean to include all modules (run after adding/removing files)
+# Generate the zoo diagrams as pages/zoo/*.{png,pdf} (requires typst)
+zoo:
+    lake build zoo_arithmetic
+    lake exe zoo_arithmetic Zoo/arithmetic.json
+    mkdir -p pages/zoo
+    typst compile Zoo/arithmetic.typ pages/zoo/arithmetic.png
+    typst compile Zoo/arithmetic.typ pages/zoo/arithmetic.pdf
+
+# Regenerate Foundation.lean to include all modules (run after adding/removing files).
+# Restricted to the Foundation library: Zoo has no aggregator, its modules are executable roots.
 mk-all:
-    lake exe mk_all --module
+    lake exe mk_all --module --lib Foundation
 
 # Remove unused imports/variables and drop unnecessary `public` (run before merging any work)
 shake:
@@ -26,3 +35,12 @@ shake:
 # Audit Foundation for sorry/native_decide/unauthorized axioms (requires `lake build Foundation` first)
 axiom-audit:
     lake exe axiom-audit --root Foundation
+
+# doc-gen4 guards its output with empty marker files whose Lake trace never changes, so a restored
+# build cache would otherwise leave the generated documentation frozen forever.
+#
+# Generate the API documentation into .lake/build/doc (requires `lake build Foundation` first)
+docs:
+    rm -rf .lake/build/doc
+    rm -f .lake/build/doc-data/references.json .lake/build/doc-data/*.docs_built
+    lake build Foundation:docs

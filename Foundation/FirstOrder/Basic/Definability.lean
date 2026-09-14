@@ -12,7 +12,7 @@ public import Foundation.Vorspiel.Graph
 # Relations and functions defined by a first-order formula (with parameter)
 -/
 
-namespace LO.FirstOrder
+namespace FFL.FirstOrder
 
 variable {L : Language} {M : Type*} [Structure L M]
 
@@ -517,6 +517,6 @@ end aesop
 
 end Language
 
-end LO.FirstOrder
+end FFL.FirstOrder
 
 end
