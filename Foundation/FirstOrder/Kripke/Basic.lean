@@ -1,6 +1,20 @@
 module
 
-public import Foundation.FirstOrder.Basic
+public import Foundation.FirstOrder.Syntax.Classical.Formula
+public import Foundation.FirstOrder.Syntax.Classical.Rew
+public import Foundation.FirstOrder.Tarski.Basic
+public import Foundation.FirstOrder.Tarski.Elementary
+public import Foundation.FirstOrder.Syntax.Classical.Operator
+public import Foundation.FirstOrder.Syntax.Classical.BinderNotation
+public import Foundation.FirstOrder.Tarski.Model
+public import Foundation.FirstOrder.LK.Basic
+public import Foundation.FirstOrder.LK.CutFree
+public import Foundation.FirstOrder.LK.Simplified
+public import Foundation.FirstOrder.Syntax.Classical.Coding
+public import Foundation.FirstOrder.Syntax.Classical.Eq
+public import Foundation.FirstOrder.LK.Soundness
+public import Foundation.FirstOrder.Syntax.Classical.Padding
+public import Foundation.FirstOrder.Tarski.Definability
 public import Foundation.Syntax.Predicate.Relational
 public import Foundation.Logic.ForcingRelation
 public import Foundation.Vorspiel.Order.Dense

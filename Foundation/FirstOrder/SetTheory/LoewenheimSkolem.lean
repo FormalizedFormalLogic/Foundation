@@ -1,7 +1,7 @@
 module
 
 public import Foundation.FirstOrder.SetTheory.Basic
-public import Foundation.FirstOrder.Skolemization.Hull
+public import Foundation.FirstOrder.Tarski.Skolemization
 
 @[expose] public section
 /-!

@@ -1,7 +1,7 @@
 module
 
 public import Foundation.FirstOrder.Bootstrapping.Syntax.Formula.Coding
-public import Foundation.FirstOrder.Basic.PrimrecCoding
+public import Foundation.FirstOrder.Syntax.Classical.PrimrecCoding
 public import Foundation.Vorspiel.Computability
 
 @[expose] public section

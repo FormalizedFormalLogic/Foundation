@@ -1,6 +1,6 @@
 module
 
-public import Foundation.FirstOrder.Order.Le
+public import Foundation.FirstOrder.Arithmetic.LE
 
 @[expose] public section
 /-! # Preperations for arithmetic

@@ -1,6 +1,6 @@
 module
 
-public import Foundation.FirstOrder.Completeness.CounterModel
+public import Foundation.FirstOrder.LK.Completeness.CounterModel
 public import Mathlib.SetTheory.Cardinal.Basic
 
 @[expose] public section

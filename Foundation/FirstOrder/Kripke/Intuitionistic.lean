@@ -1,6 +1,6 @@
 module
 
-public import Foundation.FirstOrder.Intuitionistic.LJ
+public import Foundation.FirstOrder.LJ.Basic
 public import Foundation.FirstOrder.Kripke.Basic
 
 @[expose] public section
