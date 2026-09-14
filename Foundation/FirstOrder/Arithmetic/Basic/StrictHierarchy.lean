@@ -42,6 +42,12 @@ lemma neg {Γ s n} {φ : Semiformula L ξ n} : StrictHierarchy Γ s φ → Stric
   | exs h => by simpa using (neg h).all
   | all h => by simpa using (neg h).exs
 
+@[simp, grind =]
+lemma neg_iff {Γ s n} {φ : Semiformula L ξ n} : StrictHierarchy Γ s (∼φ) ↔ StrictHierarchy Γ.alt s φ := ⟨
+  fun h ↦ by simpa using neg h,
+  fun h ↦ by simpa using neg h
+⟩
+
 lemma rew {Γ s n₁ n₂} {ξ₁ ξ₂ : Type*} {φ : Semiformula L ξ₁ n₁} (ω : Rew L ξ₁ n₁ ξ₂ n₂) :
     StrictHierarchy Γ s φ → StrictHierarchy Γ s (ω ▹ φ)
   | zero h => zero (Hierarchy.rew ω h)
@@ -112,6 +118,15 @@ lemma mono {φ : Semiformula L ξ n} (h : StrictHierarchy Γ s φ) (hs : s ≤ s
   | @all s₀ n₀ φ₀ h ih =>
     obtain ⟨t, rfl⟩ := Nat.exists_eq_succ_of_ne_zero (show s' ≠ 0 by omega);
     exact all (ih (s' := t + 1) (by omega));
+
+lemma strict_mono {φ : Semiformula L ξ n} (h : StrictHierarchy Γ s φ) (Γ') {s'} (hs : s < s') :
+    StrictHierarchy Γ' s' φ := by
+  obtain ⟨t, rfl⟩ : ∃ t, s' = t + 1 := ⟨s' - 1, by omega⟩;
+  rcases Γ' with _ | _ <;> rcases Γ with _ | _;
+  . exact h.mono (by omega);
+  . exact ofAlt (h.mono (by omega));
+  . exact ofAlt (h.mono (by omega));
+  . exact h.mono (by omega);
 
 end
 
