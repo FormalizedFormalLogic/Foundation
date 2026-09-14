@@ -2,7 +2,6 @@ module
 
 public import Foundation.FirstOrder.Arithmetic.Basic.Model
 public import Foundation.FirstOrder.Arithmetic.Basic.StrictHierarchy
-public import Foundation.FirstOrder.Arithmetic.BoundedCollection
 public import Foundation.FirstOrder.Arithmetic.Collection.Basic
 public import Foundation.FirstOrder.Arithmetic.Definability.Hierarchy
 
@@ -354,7 +353,7 @@ theorem models_ball :
     simp only [val_neg, LogicalConnective.HomClass.map_neg, LogicalConnective.Prop.neg_eq]
       at hthis ⊢;
     grind;
-termination_by Γ s n _inst _u _φ _e => (s, match Γ with | 𝚺 => 0 | 𝚷 => 1)
+termination_by Γ s _ _ _ _ _ => (s, match Γ with | 𝚺 => 0 | 𝚷 => 1)
 
 theorem models_bexs :
     {Γ : Polarity} → {s n : ℕ} → [V↓[ℒₒᵣ] ⊧* 𝗕𝚺 s] →
@@ -404,7 +403,7 @@ theorem models_bexs :
     simp only [val_neg, LogicalConnective.HomClass.map_neg, LogicalConnective.Prop.neg_eq]
       at hthis ⊢;
     grind;
-termination_by Γ s n _inst _u _φ _e => (s, match Γ with | 𝚺 => 0 | 𝚷 => 1)
+termination_by Γ s _ _ _ _ _ => (s, match Γ with | 𝚺 => 0 | 𝚷 => 1)
 
 end
 
@@ -456,7 +455,7 @@ theorem models_and :
     simp only [val_neg, LogicalConnective.HomClass.map_neg, LogicalConnective.Prop.neg_eq]
       at hthis ⊢;
     grind;
-termination_by Γ s n _inst _φ _ψ _e => (s, match Γ with | 𝚺 => 0 | 𝚷 => 1)
+termination_by Γ s _ _ _ _ _ => (s, match Γ with | 𝚺 => 0 | 𝚷 => 1)
 
 theorem models_or :
     {Γ : Polarity} → {s n : ℕ} → [V↓[ℒₒᵣ] ⊧* 𝗕𝚺 s] →
@@ -484,7 +483,7 @@ theorem models_or :
     simp only [val_neg, LogicalConnective.HomClass.map_neg, LogicalConnective.Prop.neg_eq]
       at hthis ⊢;
     grind;
-termination_by Γ s n _inst _φ _ψ _e => (s, match Γ with | 𝚺 => 0 | 𝚷 => 1)
+termination_by Γ s _ _ _ _ _ => (s, match Γ with | 𝚺 => 0 | 𝚷 => 1)
 
 end
 
@@ -543,19 +542,19 @@ theorem models_exists_prenex {Γ : Polarity} {s n : ℕ} {φ : ArithmeticSemisen
       ∀ e : Fin n → V, V ⊧/e φ ↔ V ⊧/e φ'.val := by
   induction h with
   | verum Γ s n =>
-    use verum;
+    use .verum;
     intro V _ _ e;
     exact (models_verum e).symm;
   | falsum Γ s n =>
-    use falsum;
+    use .falsum;
     intro V _ _ e;
     exact (models_falsum e).symm;
   | rel Γ s r v =>
-    use rel r v;
+    use .rel r v;
     intro V _ _ e;
     exact (models_rel r v e).symm;
   | nrel Γ s r v =>
-    use nrel r v;
+    use .nrel r v;
     intro V _ _ e;
     exact (models_nrel r v e).symm;
   | and _ _ ihφ ihψ =>
@@ -563,17 +562,13 @@ theorem models_exists_prenex {Γ : Polarity} {s n : ℕ} {φ : ArithmeticSemisen
     obtain ⟨ψ', hψ'⟩ := ihψ;
     use φ' ⋏ ψ';
     intro V _ _ e;
-    rw [models_and φ' ψ' e];
-    simp only [LogicalConnective.HomClass.map_and, LogicalConnective.Prop.and_eq];
-    exact and_congr (hφ' V e) (hψ' V e);
+    grind [models_and φ' ψ' e, LogicalConnective.Prop.and_eq];
   | or _ _ ihφ ihψ =>
     obtain ⟨φ', hφ'⟩ := ihφ;
     obtain ⟨ψ', hψ'⟩ := ihψ;
     use φ' ⋎ ψ';
     intro V _ _ e;
-    rw [models_or φ' ψ' e];
-    simp only [LogicalConnective.HomClass.map_or, LogicalConnective.Prop.or_eq];
-    exact or_congr (hφ' V e) (hψ' V e);
+    grind [models_or φ' ψ' e, LogicalConnective.Prop.or_eq];
   | ball pos _ ih =>
     obtain ⟨u, rfl⟩ := Rew.positive_iff.mp pos;
     obtain ⟨φ', hφ'⟩ := ih;
@@ -635,12 +630,16 @@ theorem models_exists_prenex {Γ : Polarity} {s n : ℕ} {φ : ArithmeticSemisen
     have : V↓[ℒₒᵣ] ⊧* 𝗕𝚺 s := mod_BSigma_of_le (Nat.le_succ s);
     exact Semiformula.eval_ex.trans
       ((exists_congr fun x => hφ' V (x :> e)).trans
-        ((models_exs φ' e).symm.trans (models_altUp (∃' φ') e).symm));
+      ((models_exs φ' e).symm.trans (models_altUp (∃' φ') e).symm));
 
 end Prenex
 
-theorem exists_prenex_of_hierarchy {Γ : Polarity} {s : ℕ} (T : ArithmeticTheory) [𝗕𝚺 s ⪯ T]
-  {n : ℕ} {φ : ArithmeticSemisentence n} (h : Hierarchy Γ s φ) :
+section
+
+variable {Γ : Polarity} {s : ℕ} (T : ArithmeticTheory) [𝗕𝚺 s ⪯ T]
+         {n : ℕ} {φ : ArithmeticSemisentence n}
+
+theorem exists_prenex_of_hierarchy (h : Hierarchy Γ s φ) :
   ∃ φ' : Prenex Γ s Empty n, T ⊢ ∀¹* (φ 🡘 φ'.val) := by
   have : 𝗘𝗤 ℒₒᵣ ⪯ T := eq_weakerThan_of_BSigma (s := s);
   obtain ⟨φ', hφ'⟩ := Prenex.models_exists_prenex h;
@@ -650,22 +649,19 @@ theorem exists_prenex_of_hierarchy {Γ : Polarity} {s : ℕ} (T : ArithmeticTheo
   have : V↓[ℒₒᵣ] ⊧* 𝗕𝚺 s := models_of_subtheory (T := 𝗕𝚺 s) (U := T) inferInstance;
   exact hφ' V e;
 
-theorem exists_matrix_provable {Γ : Polarity} {s: ℕ} (T : ArithmeticTheory) [𝗕𝚺 s ⪯ T]
-  {n : ℕ} {φ : ArithmeticSemisentence n} (h : Hierarchy Γ s φ) :
+theorem exists_matrix_provable (h : Hierarchy Γ s φ) :
   ∃ φ₀ : 𝚺₀.Semisentence (n + s), T ⊢ ∀¹* (φ 🡘 φ₀.val.toPrenex Γ s) := by
   obtain ⟨_, hφ'⟩ := exists_prenex_of_hierarchy T h;
   exact ⟨_, by simpa [Prenex.val] using hφ'⟩;
 
-theorem exists_strictHierarchy_of_hierarchy {Γ : Polarity} {s n : ℕ}
-    (T : ArithmeticTheory) [𝗕𝚺 s ⪯ T] {φ : ArithmeticSemisentence n} (h : Hierarchy Γ s φ) :
-    ∃ ψ : ArithmeticSemisentence n, StrictHierarchy Γ s ψ ∧ T ⊢ ∀¹* (φ 🡘 ψ) := by
+theorem exists_strictHierarchy_of_hierarchy (h : Hierarchy Γ s φ) :
+  ∃ ψ : ArithmeticSemisentence n, StrictHierarchy Γ s ψ ∧ T ⊢ ∀¹* (φ 🡘 ψ) := by
   obtain ⟨φ', hφ'⟩ := exists_prenex_of_hierarchy T h;
   exact ⟨φ'.val, Prenex.val_strictHierarchy, hφ'⟩;
 
-lemma exists_strictHierarchy_eval_iff {Γ : Polarity} {s : ℕ} {V : Type*} [ORingStructure V]
-    [V↓[ℒₒᵣ] ⊧* 𝗕𝚺 s] {φ : ArithmeticSemiformula ℕ 1} (hφ : Hierarchy Γ s φ) (f : ℕ → V) :
-    ∃ ψ : ArithmeticSemiformula ℕ 1, StrictHierarchy Γ s ψ ∧
-      ∀ x : V, ψ.Eval ![x] f ↔ φ.Eval ![x] f := by
+lemma exists_strictHierarchy_eval_iff {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗕𝚺 s]
+  {φ : ArithmeticSemiformula ℕ 1} (hφ : Hierarchy Γ s φ) (f : ℕ → V) :
+  ∃ ψ : ArithmeticSemiformula ℕ 1, StrictHierarchy Γ s ψ ∧ ∀ x : V, ψ.Eval ![x] f ↔ φ.Eval ![x] f := by
   obtain ⟨θ, hθ⟩ := Prenex.models_exists_prenex (φ := φ.toSemisentence ![#0]) (hφ.rew _);
   use Rew.embSubsts (#0 :> fun i : Fin φ.fvSup ↦ (&(i : ℕ) : ArithmeticSemiterm ℕ 1)) ▹ θ.val;
   and_intros;
@@ -681,6 +677,8 @@ lemma exists_strictHierarchy_eval_iff {Γ : Polarity} {s : ℕ} {V : Type*} [ORi
     simp only [Semiformula.eval_embSubsts, hvec];
     exact (hθ V (x :> fun i : Fin φ.fvSup ↦ f i)).symm.trans
       (φ.eval_toSemisentence_one x f);
+
+end
 
 end Arithmetic
 

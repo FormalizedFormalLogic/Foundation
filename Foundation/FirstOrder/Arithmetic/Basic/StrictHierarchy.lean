@@ -75,7 +75,7 @@ variable {ω : Rew L ξ₁ n₁ ξ₂ n₂} {φ : Semiformula L ξ₁ n₁}
 end
 
 section
-variable {Γ : Polarity} {s n : ℕ}
+variable {Γ : Polarity} {s s' n : ℕ}
 
 lemma toPrenex {j} {φ : Semiformula L ξ (n + s)} (h : StrictHierarchy (Γ.altItr s) j φ) :
     StrictHierarchy Γ (j + s) (φ.toPrenex Γ s) := by
@@ -108,13 +108,13 @@ lemma mono {φ : Semiformula L ξ n} (h : StrictHierarchy Γ s φ) (hs : s ≤ s
     exact key s' Γ₀;
   | @ofAlt Γ₀ s₀ n₀ φ₀ h ih =>
     obtain ⟨t, rfl⟩ := Nat.exists_eq_succ_of_ne_zero (show s' ≠ 0 by omega);
-    exact ofAlt (ih (s' := t) (by omega));
+    exact ofAlt $ ih (s' := t) (by omega);
   | @exs s₀ n₀ φ₀ h ih =>
     obtain ⟨t, rfl⟩ := Nat.exists_eq_succ_of_ne_zero (show s' ≠ 0 by omega);
-    exact exs (ih (s' := t + 1) (by omega));
+    exact exs $ ih (s' := t + 1) (by omega);
   | @all s₀ n₀ φ₀ h ih =>
     obtain ⟨t, rfl⟩ := Nat.exists_eq_succ_of_ne_zero (show s' ≠ 0 by omega);
-    exact all (ih (s' := t + 1) (by omega));
+    exact all $ ih (s' := t + 1) (by omega);
 
 end
 

@@ -1,14 +1,14 @@
 module
 
-public import Foundation.FirstOrder.Arithmetic.BoundedCollection
+public import Foundation.FirstOrder.Arithmetic.Schemata
 
 /-!
 # The collection schemata `𝗕𝚺` and `𝗕𝚷` in models, their equivalence, and `𝗜𝚺` from `𝗕𝚺`
 
 ## References
 
-- [HP98, §I.2(a), Lemma I.2.9, Lemma I.2.10, Lemma I.2.11, Lemma I.2.15]
-- [Bus98, Theorem 1.2.9(a)]
+- [HP98]
+- [Bus98]
 -/
 
 @[expose] public section
@@ -17,13 +17,11 @@ namespace FFL.FirstOrder.Arithmetic
 
 open _root_.FFL.Entailment
 
-variable {V : Type*} [ORingStructure V] {n : ℕ}
-
 section models
 
 /-! ### Collection axioms in models -/
 
-variable [V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻]
+variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻]
 
 lemma models_collectionAxiom_iff (φ : ArithmeticSemiformula ℕ 2) :
     V↓[ℒₒᵣ] ⊧ .univCl (collectionAxiom φ) ↔
@@ -59,8 +57,7 @@ lemma exists_bound_of_models_collectionAxiom {m : ℕ} {θ : ArithmeticSemisente
   exact ⟨b, fun x hx ↦ (hb x hx).imp fun u hu ↦ ⟨le_of_lt hu.1, (heval x u).mp hu.2⟩⟩;
 
 lemma exists_bound_of_definable {Γ : Polarity} {s : ℕ}
-    (hcol : ∀ ψ : ArithmeticSemiformula ℕ 2, Hierarchy Γ s ψ →
-      V↓[ℒₒᵣ] ⊧ .univCl (collectionAxiom ψ))
+    (hcol : ∀ ψ : ArithmeticSemiformula ℕ 2, Hierarchy Γ s ψ → V↓[ℒₒᵣ] ⊧ .univCl (collectionAxiom ψ))
     {R : V → V → Prop} (hR : Γ-[s].DefinableRel R) (a : V) (h : ∀ x < a, ∃ y, R x y) :
     ∃ b, ∀ x < a, ∃ y < b, R x y := by
   obtain ⟨e, ψ, hψ, hiff⟩ := exists_hierarchy_eval_iff hR;
@@ -96,6 +93,87 @@ instance (Γ : Polarity) (n : ℕ) : Consistent (𝗕 Γ n) :=
 
 end standardModel
 
+section boundedWitness
+
+/-! ### A single bound for a `𝚺 (s + 1)` predicate -/
+
+variable {V : Type*} {n s : ℕ} (e : Fin n → V)
+
+private def collectionCore (θ : ArithmeticSemisentence (n + 2)) :
+    ArithmeticSemiformula V 4 :=
+  Rew.embSubsts (#0 :> #1 :> fun i ↦ (&(e i) : ArithmeticSemiterm V 4)) ▹ θ
+
+private def collectionMotive (θ : ArithmeticSemisentence (n + 2)) (a : V) :
+    ArithmeticSemiformula V 1 :=
+  let cond : ArithmeticSemiformula V 3 :=
+    Semiformula.rel Language.LT.lt ![(#0 : ArithmeticSemiterm V 3), (&a : ArithmeticSemiterm V 3)]
+  let inner : ArithmeticSemiformula V 3 := (collectionCore e θ).bexsLTSucc (#1 : ArithmeticSemiterm V 3)
+  ∃¹ ((cond 🡒 inner).ballLT (#1 : ArithmeticSemiterm V 2))
+
+variable {θ : ArithmeticSemisentence (n + 2)}
+
+private lemma hierarchy_collectionCore (hθ : Hierarchy 𝚺 (s + 1) θ) :
+    Hierarchy 𝚺 (s + 1) (collectionCore e θ) := by
+  simp [collectionCore, hθ];
+
+private lemma hierarchy_collectionMotive (hθ : Hierarchy 𝚺 (s + 1) θ) (a : V) :
+    Hierarchy 𝚺 (s + 1) (collectionMotive e θ a) := by
+  have : Hierarchy 𝚺 (s + 1) (collectionCore e θ) := hierarchy_collectionCore e hθ;
+  simp [collectionMotive, this];
+
+variable [ORingStructure V]
+
+private lemma eval_collectionCore (u x w y : V) :
+    (collectionCore e θ).Eval (u :> x :> w :> ![y]) id ↔ V ⊧/(u :> x :> e) θ := by
+  simp only [collectionCore, Semiformula.eval_embSubsts, Function.comp_def];
+  exact Iff.of_eq (congrArg (fun b ↦ Semiformula.Evalb (M := V) b θ)
+    (Fin.funext_two (by simp) (by simp) fun i ↦ by simp));
+
+private lemma eval_collectionMotive [V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻] (a : V) (v : Fin 1 → V) :
+    (collectionMotive e θ a).Eval v id ↔
+      ∃ w, ∀ x < v 0, x < a → ∃ u ≤ w, V ⊧/(u :> x :> e) θ := by
+  rw [Matrix.fun_eq_vec_one v];
+  simp [collectionMotive, Semiformula.eval_ballLT, Semiformula.eval_bexsLTSucc,
+    Arithmetic.lt_succ_iff_le, eval_collectionCore, Function.comp_def];
+
+variable [V↓[ℒₒᵣ] ⊧* 𝗜𝚺 (s + 1)]
+
+private lemma collectionMotive_definable (hθ : Hierarchy 𝚺 (s + 1) θ) (a : V) :
+    𝚺-[s + 1].DefinablePred (fun y ↦ ∃ w, ∀ x < y, x < a → ∃ u ≤ w, V ⊧/(u :> x :> e) θ) := by
+  have := mod_paMinus_of_ISigma (V := V) (n := s + 1);
+  exact HierarchySymbol.Definable.mkPolarity (collectionMotive e θ a)
+    (hierarchy_collectionMotive e hθ a) (fun v ↦ (eval_collectionMotive e a v).symm);
+
+theorem sigma_exists_bound_witness {θ : ArithmeticSemisentence (n + 2)} (hθ : Hierarchy 𝚺 (s + 1) θ)
+    (e : Fin n → V) (a : V) (h : ∀ x < a, ∃ u, V ⊧/(u :> x :> e) θ) :
+    ∃ w, ∀ x < a, ∃ u ≤ w, V ⊧/(u :> x :> e) θ := by
+  have := mod_paMinus_of_ISigma (V := V) (n := s + 1);
+  have key : ∀ y : V, ∃ w, ∀ x < y, x < a → ∃ u ≤ w, V ⊧/(u :> x :> e) θ := by
+    apply InductionOnHierarchy.succ_induction_sigma 𝚺 (s + 1)
+      (P := fun y ↦ ∃ w, ∀ x < y, x < a → ∃ u ≤ w, V ⊧/(u :> x :> e) θ)
+      (hP := collectionMotive_definable e hθ a);
+    . exact ⟨0, fun x hx _ ↦ absurd hx (by simp)⟩;
+    . rintro y ⟨w, hw⟩;
+      rcases lt_or_ge y a with hya | hya;
+      . obtain ⟨u₀, hu₀⟩ := h y hya;
+        use max w u₀;
+        intro x hx _;
+        rcases le_iff_lt_or_eq.mp (Arithmetic.lt_succ_iff_le.mp hx) with hx | rfl;
+        . obtain ⟨u, hu, hPu⟩ := hw x hx (lt_trans hx hya);
+          exact ⟨u, le_trans hu (le_max_left w u₀), hPu⟩;
+        . exact ⟨u₀, le_max_right w u₀, hu₀⟩;
+      . use w;
+        intro x hx hxa;
+        rcases le_iff_lt_or_eq.mp (Arithmetic.lt_succ_iff_le.mp hx) with hx | rfl;
+        . exact hw x hx hxa;
+        . exact absurd hxa (not_lt.mpr hya);
+  obtain ⟨w, hw⟩ := key (a + 1);
+  exact ⟨w, fun x hx ↦ hw x (lt_trans hx (lt_add_one a)) hx⟩;
+
+end boundedWitness
+
+variable {V : Type*} [ORingStructure V] {n : ℕ}
+
 section BSigma_ISigma
 
 /-! ### `𝗕𝚺 (n + 1)` below `𝗜𝚺 (n + 1)` -/
@@ -126,11 +204,13 @@ theorem BSigma_weakerThan_ISigma : 𝗕𝚺 (n + 1) ⪯ 𝗜𝚺 (n + 1) := Weak
       (by_axm hσ);
   . exact ISigma.provable_collectionAxiom_of_hierarchy n hφ;
 
-instance : 𝗕𝚺 n ⪯ 𝗜𝚺 (n + 1) := WeakerThan.trans
-  (CollectionOnHierarchy_weakerThan_of_le (by omega)) $ BSigma_weakerThan_ISigma
+@[instance]
+theorem BSigma_weakerThan_ISigma_succ : 𝗕𝚺 n ⪯ 𝗜𝚺 (n + 1) :=
+  WeakerThan.trans (CollectionOnHierarchy_weakerThan_of_le (by omega)) BSigma_weakerThan_ISigma
 
-instance : 𝗕𝚺 n ⪯ 𝗣𝗔 :=
-  WeakerThan.trans (inferInstance : 𝗕𝚺 n ⪯ 𝗜𝚺 (n + 1)) inferInstance
+@[instance]
+theorem BSigma_weakerThan_Peano : 𝗕𝚺 n ⪯ 𝗣𝗔 :=
+  WeakerThan.trans BSigma_weakerThan_ISigma_succ (inferInstance : 𝗜𝚺 (n + 1) ⪯ 𝗣𝗔)
 
 end BSigma_ISigma
 
@@ -149,10 +229,10 @@ lemma exists_bound_of_models_CollectionOnHierarchy [V↓[ℒₒᵣ] ⊧* 𝗕 Γ
     {θ : ArithmeticSemisentence (m + 2)} (hθ : Hierarchy Γ s θ) (e : Fin m → V) (a : V)
     (hex : ∀ x < a, ∃ u, V ⊧/(u :> x :> e) θ) :
     ∃ w, ∀ x < a, ∃ u ≤ w, V ⊧/(u :> x :> e) θ :=
-  have : V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := models_paMinus_of_models_CollectionOnHierarchy (Γ := Γ) (s := s)
+  have : V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := models_paMinus_of_models_CollectionOnHierarchy (Γ := Γ) (s := s);
   exists_bound_of_models_collectionAxiom
     (models_of_mem (T := 𝗕 Γ s)
-      (Set.mem_union_right _ (mem_CollectionScheme_of_mem (hθ.rew _)))) e a hex
+    (Set.mem_union_right _ (mem_CollectionScheme_of_mem (hθ.rew _)))) e a hex
 
 end models_CollectionOnHierarchy
 
@@ -169,15 +249,10 @@ private structure MonotoneWitness (V : Type*) [ORingStructure V]
   complete : ∀ e : Fin m → V, V ⊧/e θ → ∃ v, V ⊧/(v :> e) χ
 
 private lemma monotoneWitness_bShift (θ : ArithmeticSemisentence m) : MonotoneWitness V (Rew.bShift ▹ θ) θ := by
-  constructor;
-  . intro e v v' _ h; simpa using h;
-  . intro e v h; simpa using h;
-  . intro e h; exact ⟨0, by simpa using h⟩;
+  constructor <;> simp;
 
-private lemma eval_bexsLT_swap01 (χ : ArithmeticSemisentence (m + 2)) (e : Fin m → V)
-    (v : V) :
-    V ⊧/(v :> e) ((χ ⇜ (#1 :> #0 :> (#·.succ.succ))).bexsLT #0) ↔
-      ∃ x < v, V ⊧/(v :> x :> e) χ := by
+private lemma eval_bexsLT_swap01 (χ : ArithmeticSemisentence (m + 2)) (e : Fin m → V) (v : V) :
+  V ⊧/(v :> e) ((χ ⇜ (#1 :> #0 :> (#·.succ.succ))).bexsLT #0) ↔ ∃ x < v, V ⊧/(v :> x :> e) χ := by
   simp only [Semiformula.eval_bexsLT];
   exact exists_congr fun x ↦ and_congr (by simp) (Semiformula.eval_swap01 χ x v e);
 
@@ -186,16 +261,13 @@ section
 variable [V↓[ℒₒᵣ] ⊧* 𝗕𝚷 n]
 
 omit [V↓[ℒₒᵣ] ⊧* 𝗕𝚷 n] in
-private lemma exists_monotoneWitness_of_pi {θ : ArithmeticSemisentence m}
-    (h : Hierarchy 𝚷 n θ) :
-    ∃ χ : ArithmeticSemisentence (m + 1), Hierarchy 𝚷 n χ ∧ MonotoneWitness V χ θ :=
+private lemma exists_monotoneWitness_of_pi {θ} (h : Hierarchy 𝚷 n θ) :
+  ∃ χ : ArithmeticSemisentence (m + 1), Hierarchy 𝚷 n χ ∧ MonotoneWitness V χ θ :=
   ⟨Rew.bShift ▹ θ, h.rew _, monotoneWitness_bShift θ⟩
 
-private lemma exists_monotoneWitness_ball {θ : ArithmeticSemisentence (m + 1)}
-    {χ : ArithmeticSemisentence (m + 2)} (u : ArithmeticSemiterm Empty m)
-    (hχ : Hierarchy 𝚷 n χ) (hM : MonotoneWitness V χ θ) :
-    ∃ χ' : ArithmeticSemisentence (m + 1), Hierarchy 𝚷 n χ' ∧
-      MonotoneWitness V χ' (θ.ballLT u) := by
+private lemma exists_monotoneWitness_ball {θ χ} (u : ArithmeticSemiterm Empty m)
+  (hχ : Hierarchy 𝚷 n χ) (hM : MonotoneWitness V χ θ) :
+  ∃ χ' : ArithmeticSemisentence (m + 1), Hierarchy 𝚷 n χ' ∧ MonotoneWitness V χ' (θ.ballLT u) := by
   obtain ⟨hmono, hsound, hcomplete⟩ := hM;
   have heval : ∀ (e : Fin m → V) (v : V),
       V ⊧/(v :> e) ((χ ⇜ (#1 :> #0 :> (#·.succ.succ))).ballLT (Rew.bShift u)) ↔
@@ -220,11 +292,9 @@ private lemma exists_monotoneWitness_ball {θ : ArithmeticSemisentence (m + 1)}
         hmono (x :> e) v w hv.1 hv.2⟩;
 
 omit [V↓[ℒₒᵣ] ⊧* 𝗕𝚷 n] in
-private lemma exists_monotoneWitness_bexs {θ : ArithmeticSemisentence (m + 1)}
-    {χ : ArithmeticSemisentence (m + 2)} (u : ArithmeticSemiterm Empty m)
-    (hχ : Hierarchy 𝚷 n χ) (hM : MonotoneWitness V χ θ) :
-    ∃ χ' : ArithmeticSemisentence (m + 1), Hierarchy 𝚷 n χ' ∧
-      MonotoneWitness V χ' (θ.bexsLT u) := by
+private lemma exists_monotoneWitness_bexs {θ χ} (u : ArithmeticSemiterm Empty m)
+  (hχ : Hierarchy 𝚷 n χ) (hM : MonotoneWitness V χ θ) :
+  ∃ χ' : ArithmeticSemisentence (m + 1), Hierarchy 𝚷 n χ' ∧ MonotoneWitness V χ' (θ.bexsLT u) := by
   obtain ⟨hmono, hsound, hcomplete⟩ := hM;
   have heval : ∀ (e : Fin m → V) (v : V),
       V ⊧/(v :> e) ((χ ⇜ (#1 :> #0 :> (#·.succ.succ))).bexsLT (Rew.bShift u)) ↔
@@ -249,10 +319,9 @@ private lemma exists_monotoneWitness_bexs {θ : ArithmeticSemisentence (m + 1)}
       obtain ⟨v, hv⟩ := hcomplete (x :> e) h;
       exact ⟨v, (heval e v).mpr ⟨x, hx, hv⟩⟩;
 
-private lemma exists_monotoneWitness_exs {θ : ArithmeticSemisentence (m + 1)}
-    {χ : ArithmeticSemisentence (m + 2)} (hχ : Hierarchy 𝚷 n χ) (hM : MonotoneWitness V χ θ) :
-    ∃ χ' : ArithmeticSemisentence (m + 1), Hierarchy 𝚷 n χ' ∧
-      MonotoneWitness V χ' (∃¹ θ) := by
+private lemma exists_monotoneWitness_exs  {θ χ}
+  (hχ : Hierarchy 𝚷 n χ) (hM : MonotoneWitness V χ θ) :
+  ∃ χ' : ArithmeticSemisentence (m + 1), Hierarchy 𝚷 n χ' ∧ MonotoneWitness V χ' (∃¹ θ) := by
   have : V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := models_paMinus_of_models_CollectionOnHierarchy (Γ := 𝚷) (s := n);
   obtain ⟨hmono, hsound, hcomplete⟩ := hM;
   use (χ ⇜ (#1 :> #0 :> (#·.succ.succ))).bexsLT #0;
@@ -273,90 +342,88 @@ private lemma exists_monotoneWitness_exs {θ : ArithmeticSemisentence (m + 1)}
         ⟨x, lt_of_lt_of_le (lt_add_one x) (le_max_left _ _),
           hmono (x :> e) v (max (x + 1) v) (le_max_right _ _) hv⟩⟩;
 
-private lemma exists_monotoneWitness_of_hierarchy :
-    ∀ {m : ℕ} {θ : ArithmeticSemisentence m}, Hierarchy 𝚺 (n + 1) θ →
+private lemma exists_monotoneWitness_of_complexity_le (c : ℕ) :
+    ∀ {m : ℕ} {θ : ArithmeticSemisentence m}, θ.complexity ≤ c → Hierarchy 𝚺 (n + 1) θ →
       ∃ χ : ArithmeticSemisentence (m + 1), Hierarchy 𝚷 n χ ∧ MonotoneWitness V χ θ := by
   have : V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := models_paMinus_of_models_CollectionOnHierarchy (Γ := 𝚷) (s := n);
-  have key : ∀ (c : ℕ) {m : ℕ} {θ : ArithmeticSemisentence m}, θ.complexity ≤ c →
-      Hierarchy 𝚺 (n + 1) θ →
-        ∃ χ : ArithmeticSemisentence (m + 1), Hierarchy 𝚷 n χ ∧ MonotoneWitness V χ θ := by
-    intro c;
-    induction c with
-    | zero =>
-      intro m θ hc hθ;
-      cases hθ with
-      | verum => exact exists_monotoneWitness_of_pi (by simp);
-      | falsum => exact exists_monotoneWitness_of_pi (by simp);
-      | rel => exact exists_monotoneWitness_of_pi (by simp);
-      | nrel => exact exists_monotoneWitness_of_pi (by simp);
-      | _ => simp [Semiformula.ball_eq, Semiformula.bexs_eq, Semiformula.imp_eq] at hc;
-    | succ c ih =>
-      intro m θ hc hθ;
-      cases hθ with
-      | verum => exact exists_monotoneWitness_of_pi (by simp);
-      | falsum => exact exists_monotoneWitness_of_pi (by simp);
-      | rel => exact exists_monotoneWitness_of_pi (by simp);
-      | nrel => exact exists_monotoneWitness_of_pi (by simp);
-      | and hφ hψ =>
-        obtain ⟨χ₁, hχ₁, hmono₁, hsound₁, hcomplete₁⟩ := ih (by simp at hc; omega) hφ;
-        obtain ⟨χ₂, hχ₂, hmono₂, hsound₂, hcomplete₂⟩ := ih (by simp at hc; omega) hψ;
-        use χ₁ ⋏ χ₂;
-        and_intros;
-        . simp [hχ₁, hχ₂];
-        . constructor;
-          . intro e v v' hv h;
-            exact ⟨hmono₁ e v v' hv h.1, hmono₂ e v v' hv h.2⟩;
-          . intro e v h;
-            exact ⟨hsound₁ e v h.1, hsound₂ e v h.2⟩;
-          . intro e h;
-            obtain ⟨v₁, hv₁⟩ := hcomplete₁ e h.1;
-            obtain ⟨v₂, hv₂⟩ := hcomplete₂ e h.2;
-            exact ⟨max v₁ v₂, hmono₁ e v₁ _ (le_max_left _ _) hv₁,
-              hmono₂ e v₂ _ (le_max_right _ _) hv₂⟩;
-      | or hφ hψ =>
-        obtain ⟨χ₁, hχ₁, hmono₁, hsound₁, hcomplete₁⟩ := ih (by simp at hc; omega) hφ;
-        obtain ⟨χ₂, hχ₂, hmono₂, hsound₂, hcomplete₂⟩ := ih (by simp at hc; omega) hψ;
-        use χ₁ ⋎ χ₂;
-        and_intros;
-        . simp [hχ₁, hχ₂];
-        . constructor;
-          . intro e v v' hv h;
-            exact h.imp (hmono₁ e v v' hv) (hmono₂ e v v' hv);
-          . intro e v h;
-            exact h.imp (hsound₁ e v) (hsound₂ e v);
-          . intro e h;
-            rcases h with h | h;
-            . exact (hcomplete₁ e h).imp fun v hv ↦ by tauto;
-            . exact (hcomplete₂ e h).imp fun v hv ↦ by tauto;
-      | ball ht hφ =>
-        obtain ⟨u, rfl⟩ := Rew.positive_iff.mp ht;
-        obtain ⟨χ, hχ, hM⟩ :=
-          ih (by simp [Semiformula.ball_eq, Semiformula.imp_eq] at hc; omega) hφ;
-        exact exists_monotoneWitness_ball u hχ hM;
-      | bexs ht hφ =>
-        obtain ⟨u, rfl⟩ := Rew.positive_iff.mp ht;
-        obtain ⟨χ, hχ, hM⟩ := ih (by simp [Semiformula.bexs_eq] at hc; omega) hφ;
-        exact exists_monotoneWitness_bexs u hχ hM;
-      | exs hφ =>
-        obtain ⟨χ, hχ, hM⟩ := ih (by simp at hc; omega) hφ;
-        exact exists_monotoneWitness_exs hχ hM;
-      | sigma hφ =>
-        exact exists_monotoneWitness_exs (hφ.rew _) (monotoneWitness_bShift _);
-      | dummy_sigma hφ =>
-        exact exists_monotoneWitness_of_pi hφ.all;
-  intro m θ hθ;
-  exact key θ.complexity le_rfl hθ;
+  induction c with
+  | zero =>
+    intro m θ hc hθ;
+    cases hθ with
+    | verum => exact exists_monotoneWitness_of_pi (by simp);
+    | falsum => exact exists_monotoneWitness_of_pi (by simp);
+    | rel => exact exists_monotoneWitness_of_pi (by simp);
+    | nrel => exact exists_monotoneWitness_of_pi (by simp);
+    | _ => simp [Semiformula.ball_eq, Semiformula.bexs_eq, Semiformula.imp_eq] at hc;
+  | succ c ih =>
+    intro m θ hc hθ;
+    cases hθ with
+    | verum => exact exists_monotoneWitness_of_pi (by simp);
+    | falsum => exact exists_monotoneWitness_of_pi (by simp);
+    | rel => exact exists_monotoneWitness_of_pi (by simp);
+    | nrel => exact exists_monotoneWitness_of_pi (by simp);
+    | and hφ hψ =>
+      obtain ⟨χ₁, hχ₁, hmono₁, hsound₁, hcomplete₁⟩ := ih (by simp at hc; omega) hφ;
+      obtain ⟨χ₂, hχ₂, hmono₂, hsound₂, hcomplete₂⟩ := ih (by simp at hc; omega) hψ;
+      use χ₁ ⋏ χ₂;
+      and_intros;
+      . simp [hχ₁, hχ₂];
+      . constructor;
+        . intro e v v' hv h;
+          exact ⟨hmono₁ e v v' hv h.1, hmono₂ e v v' hv h.2⟩;
+        . intro e v h;
+          exact ⟨hsound₁ e v h.1, hsound₂ e v h.2⟩;
+        . intro e h;
+          obtain ⟨v₁, hv₁⟩ := hcomplete₁ e h.1;
+          obtain ⟨v₂, hv₂⟩ := hcomplete₂ e h.2;
+          exact ⟨max v₁ v₂, hmono₁ e v₁ _ (le_max_left _ _) hv₁,
+            hmono₂ e v₂ _ (le_max_right _ _) hv₂⟩;
+    | or hφ hψ =>
+      obtain ⟨χ₁, hχ₁, hmono₁, hsound₁, hcomplete₁⟩ := ih (by simp at hc; omega) hφ;
+      obtain ⟨χ₂, hχ₂, hmono₂, hsound₂, hcomplete₂⟩ := ih (by simp at hc; omega) hψ;
+      use χ₁ ⋎ χ₂;
+      and_intros;
+      . simp [hχ₁, hχ₂];
+      . constructor;
+        . intro e v v' hv h;
+          exact h.imp (hmono₁ e v v' hv) (hmono₂ e v v' hv);
+        . intro e v h;
+          exact h.imp (hsound₁ e v) (hsound₂ e v);
+        . intro e h;
+          rcases h with h | h;
+          . exact (hcomplete₁ e h).imp fun v hv ↦ by tauto;
+          . exact (hcomplete₂ e h).imp fun v hv ↦ by tauto;
+    | ball ht hφ =>
+      obtain ⟨u, rfl⟩ := Rew.positive_iff.mp ht;
+      obtain ⟨χ, hχ, hM⟩ :=
+        ih (by simp [Semiformula.ball_eq, Semiformula.imp_eq] at hc; omega) hφ;
+      exact exists_monotoneWitness_ball u hχ hM;
+    | bexs ht hφ =>
+      obtain ⟨u, rfl⟩ := Rew.positive_iff.mp ht;
+      obtain ⟨χ, hχ, hM⟩ := ih (by simp [Semiformula.bexs_eq] at hc; omega) hφ;
+      exact exists_monotoneWitness_bexs u hχ hM;
+    | exs hφ =>
+      obtain ⟨χ, hχ, hM⟩ := ih (by simp at hc; omega) hφ;
+      exact exists_monotoneWitness_exs hχ hM;
+    | sigma hφ =>
+      exact exists_monotoneWitness_exs (hφ.rew _) (monotoneWitness_bShift _);
+    | dummy_sigma hφ =>
+      exact exists_monotoneWitness_of_pi hφ.all;
+
+private lemma exists_monotoneWitness_of_hierarchy {θ : ArithmeticSemisentence m}
+    (hθ : Hierarchy 𝚺 (n + 1) θ) :
+    ∃ χ : ArithmeticSemisentence (m + 1), Hierarchy 𝚷 n χ ∧ MonotoneWitness V χ θ :=
+  exists_monotoneWitness_of_complexity_le θ.complexity le_rfl hθ
 
 lemma exists_pi_eval_iff {φ : ArithmeticSemiformula ℕ 1} (hφ : Hierarchy 𝚺 (n + 1) φ) (f : ℕ → V) :
-    ∃ χ : ArithmeticSemiformula ℕ 2, Hierarchy 𝚷 n χ ∧
-      ∀ x : V, φ.Eval ![x] f ↔ ∃ w, χ.Eval ![x, w] f := by
-  obtain ⟨χ, hχ, -, hsound, hcomplete⟩ :=
-    exists_monotoneWitness_of_hierarchy (V := V)
-      (θ := (φ.toSemisentence ![#0] : ArithmeticSemisentence (φ.fvSup + 1))) (hφ.rew _);
+  ∃ χ : ArithmeticSemiformula ℕ 2, Hierarchy 𝚷 n χ ∧ ∀ x : V, φ.Eval ![x] f ↔ ∃ w, χ.Eval ![x, w] f := by
+  obtain ⟨χ, hχ, -, hsound, hcomplete⟩ := exists_monotoneWitness_of_hierarchy (V := V)
+    (θ := (φ.toSemisentence ![#0] : ArithmeticSemisentence (φ.fvSup + 1))) (hφ.rew _);
   use Rew.embSubsts (#1 :> #0 :> fun i : Fin φ.fvSup ↦ (&(i : ℕ) : ArithmeticSemiterm ℕ 2)) ▹ χ;
   and_intros;
   . exact hχ.rew _;
   . intro x;
+    rw [← φ.eval_toSemisentence_one x f];
     have hval : ∀ w : V,
         (Rew.embSubsts (#1 :> #0 :> fun i : Fin φ.fvSup ↦ (&(i : ℕ) : ArithmeticSemiterm ℕ 2)) ▹
           χ).Eval ![x, w] f ↔ V ⊧/(w :> x :> fun i : Fin φ.fvSup ↦ f i) χ := by
@@ -371,7 +438,6 @@ lemma exists_pi_eval_iff {φ : ArithmeticSemiformula ℕ 1} (hφ : Hierarchy �
         cases i using Fin.cases with
         | zero => simp;
         | succ i => simp;
-    rw [← φ.eval_toSemisentence_one x f];
     constructor;
     . intro h;
       obtain ⟨w, hw⟩ := hcomplete (x :> fun i : Fin φ.fvSup ↦ f i) h;
@@ -399,9 +465,8 @@ private lemma exists_bound_sigma_succ_of_models_BPi {θ : ArithmeticSemisentence
   obtain ⟨u, huv, hu⟩ := (eval_bexsLT_swap01 χ (x :> e) v).mp hv;
   exact ⟨u, le_of_lt (lt_of_lt_of_le huv hvw), hsound (u :> x :> e) v hu⟩;
 
-lemma models_collectionAxiom_of_models_BPi {φ : ArithmeticSemiformula ℕ 2}
-    (hφ : Hierarchy 𝚺 (n + 1) φ) :
-    V↓[ℒₒᵣ] ⊧ (.univCl (collectionAxiom φ) : ArithmeticSentence) := by
+lemma models_collectionAxiom_of_models_BPi (hφ : Hierarchy 𝚺 (n + 1) φ) :
+  V↓[ℒₒᵣ] ⊧ (.univCl (collectionAxiom φ)) := by
   have : V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := models_paMinus_of_models_CollectionOnHierarchy (Γ := 𝚷) (s := n);
   rw [models_collectionAxiom_iff];
   intro f a h;
@@ -415,21 +480,23 @@ lemma models_collectionAxiom_of_models_BPi {φ : ArithmeticSemiformula ℕ 2}
 
 end
 
-theorem BPi.provable_collectionAxiom_of_hierarchy (n : ℕ) {φ : ArithmeticSemiformula ℕ 2}
-    (hφ : Hierarchy 𝚺 (n + 1) φ) : 𝗕𝚷 n ⊢ .univCl (collectionAxiom φ) := by
+variable {n : ℕ}
+
+theorem BPi.provable_collectionAxiom_of_hierarchy (hφ : Hierarchy 𝚺 (n + 1) φ)
+  : 𝗕𝚷 n ⊢ .univCl (collectionAxiom φ) := by
   apply Arithmetic.complete.{0};
   intro M _ _;
   exact models_collectionAxiom_of_models_BPi hφ;
 
-theorem BSigma_succ_weakerThan_BPi (n : ℕ) : 𝗕𝚺 (n + 1) ⪯ 𝗕𝚷 n :=
-  WeakerThan.ofAxm! <| by
-    rintro σ (hσ | ⟨φ, hφ, rfl⟩);
-    . exact WeakerThan.pbl (h := (inferInstance : 𝗜𝚺₀ ⪯ 𝗕𝚷 n)) (by_axm hσ);
-    . exact BPi.provable_collectionAxiom_of_hierarchy n hφ;
+@[instance]
+theorem BSigma_succ_weakerThan_BPi : 𝗕𝚺 (n + 1) ⪯ 𝗕𝚷 n := WeakerThan.ofAxm! <| by
+  rintro σ (hσ | ⟨φ, hφ, rfl⟩);
+  . exact WeakerThan.pbl (h := (inferInstance : 𝗜𝚺₀ ⪯ 𝗕𝚷 n)) (by_axm hσ);
+  . exact BPi.provable_collectionAxiom_of_hierarchy hφ;
 
-theorem BSigma_succ_equiv_BPi (n : ℕ) : 𝗕𝚺 (n + 1) ≊ 𝗕𝚷 n :=
-  Equiv.antisymm_iff.mpr
-    ⟨BSigma_succ_weakerThan_BPi n, CollectionOnHierarchy_weakerThan_BSigma_succ 𝚷 n⟩
+@[instance]
+theorem BSigma_succ_equiv_BPi : 𝗕𝚺 (n + 1) ≊ 𝗕𝚷 n :=
+  Equiv.antisymm_iff.mpr ⟨BSigma_succ_weakerThan_BPi, CollectionOnHierarchy_weakerThan_BSigma_succ 𝚷 n⟩
 
 end BSigma_succ_BPi
 
@@ -530,7 +597,8 @@ lemma models_ISigma_of_models_BSigma_succ [V↓[ℒₒᵣ] ⊧* 𝗕𝚺 (n + 1)
     have : V↓[ℒₒᵣ] ⊧* 𝗜𝚺 n := ih;
     exact models_ISigma_succ;
 
-theorem ISigma_weakerThan_BSigma_succ (n : ℕ) : 𝗜𝚺 n ⪯ 𝗕𝚺 (n + 1) :=
+@[instance]
+theorem ISigma_weakerThan_BSigma_succ : 𝗜𝚺 n ⪯ 𝗕𝚺 (n + 1) :=
   weakerThan_of_models.{0} _ _ fun _ _ _ ↦ models_ISigma_of_models_BSigma_succ
 
 end theorems
