@@ -1,6 +1,6 @@
 module
 
-public import Foundation.FirstOrder.Bootstrapping.Syntax
+public import Foundation.FirstOrder.Arithmetic.Bootstrapping.Syntax
 
 @[expose] public section
 /-!

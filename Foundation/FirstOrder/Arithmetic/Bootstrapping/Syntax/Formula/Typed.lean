@@ -1,7 +1,7 @@
 module
 
-public import Foundation.FirstOrder.Bootstrapping.Syntax.Term.Typed
-public import Foundation.FirstOrder.Bootstrapping.Syntax.Formula.Iteration
+public import Foundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Term.Typed
+public import Foundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Formula.Iteration
 
 @[expose] public section
 /-!

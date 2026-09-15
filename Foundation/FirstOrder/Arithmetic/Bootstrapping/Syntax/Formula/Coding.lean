@@ -1,8 +1,8 @@
 module
 
 public import Foundation.FirstOrder.Syntax.Classical.PrimrecCoding
-public import Foundation.FirstOrder.Bootstrapping.Syntax.Formula.Typed
-public import Foundation.FirstOrder.Bootstrapping.Syntax.Term.Coding
+public import Foundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Formula.Typed
+public import Foundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Term.Coding
 
 @[expose] public section
 open Encodable FFL FirstOrder Arithmetic Bootstrapping

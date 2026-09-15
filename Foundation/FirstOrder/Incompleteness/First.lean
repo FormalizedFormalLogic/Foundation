@@ -2,7 +2,7 @@ module
 
 public import Foundation.FirstOrder.Incompleteness.StandardProvability
 public import Foundation.FirstOrder.Arithmetic.R0.Representation
-public import Foundation.FirstOrder.Bootstrapping.Syntax.CraigTrick
+public import Foundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.CraigTrick
 
 @[expose] public section
 /-!

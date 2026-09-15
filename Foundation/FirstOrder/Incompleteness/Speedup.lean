@@ -1,7 +1,7 @@
 module
 
 public import Foundation.FirstOrder.Syntax.Classical.PrimrecCoding
-public import Foundation.FirstOrder.Bootstrapping.DerivabilityCondition.D1
+public import Foundation.FirstOrder.Arithmetic.Bootstrapping.DerivabilityCondition.D1
 public import Foundation.FirstOrder.Incompleteness.Church
 public import Mathlib.Computability.Reduce
 public import Mathlib.Data.Nat.Log

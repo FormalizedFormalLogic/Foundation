@@ -1,6 +1,6 @@
 module
 
-public import Foundation.FirstOrder.Bootstrapping.Syntax.Language
+public import Foundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Language
 
 @[expose] public section
 namespace FFL.FirstOrder.Arithmetic.Bootstrapping

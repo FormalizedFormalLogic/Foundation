@@ -1,6 +1,6 @@
 module
 
-public import Foundation.FirstOrder.Bootstrapping.Syntax.Term.Typed
+public import Foundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Term.Typed
 public import Mathlib.Combinatorics.Colex
 
 @[expose] public section

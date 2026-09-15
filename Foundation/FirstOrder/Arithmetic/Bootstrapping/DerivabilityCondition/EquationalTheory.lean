@@ -2,7 +2,7 @@ module
 
 public import Foundation.Meta.ClProver
 public import Foundation.FirstOrder.Arithmetic.Basic.Model
-public import Foundation.FirstOrder.Bootstrapping.DerivabilityCondition.D1
+public import Foundation.FirstOrder.Arithmetic.Bootstrapping.DerivabilityCondition.D1
 
 @[expose] public section
 /-!

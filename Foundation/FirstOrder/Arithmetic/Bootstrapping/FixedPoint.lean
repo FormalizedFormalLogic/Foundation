@@ -1,7 +1,7 @@
 module
 
 public import Foundation.FirstOrder.Arithmetic.Basic.Model
-public import Foundation.FirstOrder.Bootstrapping.Syntax
+public import Foundation.FirstOrder.Arithmetic.Bootstrapping.Syntax
 
 @[expose] public section
 open Classical

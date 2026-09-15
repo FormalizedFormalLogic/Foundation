@@ -42,6 +42,14 @@
   - Arithmetic
     - LE.lean (old Order/Le.lean)
     - files in Arithmetic (files in old Arithmetic)
-  - Bootstrapping (old Bootstrapping)
+    - Bootstrapping (old Bootstrapping)
   - SetTheory (old SetTheory)
   - Incompleteness (old Incompleteness)
+- Propositional
+  - ...
+  - Tait/Calculus.lean -> LK/Basic.lean
+- SecondOrder
+  - LK
+    - Basic.lean (old Derivation.lean)
+  - Tarski
+    - Basic.lean (old Semantics.lean)

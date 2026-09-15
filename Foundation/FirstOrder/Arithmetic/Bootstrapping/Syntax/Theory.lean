@@ -1,6 +1,6 @@
 module
 
-public import Foundation.FirstOrder.Bootstrapping.Syntax.Formula.Coding
+public import Foundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Formula.Coding
 public import Foundation.FirstOrder.Syntax.Classical.PrimrecCoding
 public import Foundation.Vorspiel.Computability
 

@@ -1,7 +1,7 @@
 module
 
 public import Foundation.FirstOrder.Incompleteness.WitnessComparison
-public import Foundation.FirstOrder.Bootstrapping.Syntax.CraigTrick
+public import Foundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.CraigTrick
 
 @[expose] public section
 /-!
