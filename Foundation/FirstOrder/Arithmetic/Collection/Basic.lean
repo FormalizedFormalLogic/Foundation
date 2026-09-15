@@ -196,14 +196,14 @@ theorem ISigma.provable_collectionAxiom_of_hierarchy (s : ℕ) {φ : ArithmeticS
   obtain ⟨w, hw⟩ := sigma_exists_bound_witness (hφ.rew _) (fun i : Fin φ.fvSup ↦ f i) a <| by
     intro x hx;
     obtain ⟨y, hy⟩ := h x hx;
-    exact ⟨y, (φ.eval_toSemisentence_two x y f).mpr hy⟩;
+    exact ⟨y, (φ.eval_toSemisentence₂ x y f).mpr hy⟩;
   use w + 1;
   intro x hx;
   obtain ⟨u, hu, hux⟩ := hw x hx;
   use u;
   and_intros;
   . exact Arithmetic.lt_succ_iff_le.mpr hu;
-  . exact (φ.eval_toSemisentence_two x u f).mp hux;
+  . exact (φ.eval_toSemisentence₂ x u f).mp hux;
 
 @[instance]
 theorem BSigma_weakerThan_ISigma : 𝗕𝚺 (s + 1) ⪯ 𝗜𝚺 (s + 1) := WeakerThan.ofAxm! <| by

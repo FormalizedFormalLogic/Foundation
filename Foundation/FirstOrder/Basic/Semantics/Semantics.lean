@@ -510,13 +510,13 @@ lemma eval_toSemisentence [NeZero k] {φ : Semiformula L ℕ k}
   have hlt : y < φ.fvSup := Semiformula.lt_fvSup_of_fvar? hy;
   simp [paramSubst, hlt, hv ⟨y, hlt⟩];
 
-lemma eval_toSemisentence_one (φ : Semiformula L ℕ 1) (x : M) (f : ℕ → M) :
+lemma eval_toSemisentence₁ (φ : Semiformula L ℕ 1) (x : M) (f : ℕ → M) :
     M ⊧/(x :> fun i : Fin φ.fvSup ↦ f i) (φ.toSemisentence ![#0]) ↔ φ.Eval ![x] f :=
   eval_toSemisentence ![#0]
     (fun i ↦ by fin_cases i; simp)
     (fun _ ↦ by simp)
 
-lemma eval_toSemisentence_two (φ : Semiformula L ℕ 2) (x y : M) (f : ℕ → M) :
+lemma eval_toSemisentence₂ (φ : Semiformula L ℕ 2) (x y : M) (f : ℕ → M) :
     M ⊧/(y :> x :> fun i : Fin φ.fvSup ↦ f i) (φ.toSemisentence ![#1, #0]) ↔ φ.Eval ![x, y] f :=
   eval_toSemisentence ![#1, #0]
     (fun i ↦ by fin_cases i <;> simp)

@@ -51,9 +51,9 @@ lemma models_collectionAxiom_of_hierarchy [V↓[ℒₒᵣ] ⊧* 𝗕 Γ s] {φ :
     (θ := φ.toSemisentence ![#1, #0]) (hφ.rew _) (fun i : Fin φ.fvSup ↦ f i) a <| by
       intro x hx;
       obtain ⟨y, hy⟩ := h x hx;
-      exact ⟨y, (φ.eval_toSemisentence_two x y f).mpr hy⟩;
+      exact ⟨y, (φ.eval_toSemisentence₂ x y f).mpr hy⟩;
   exact ⟨w + 1, fun x hx ↦ (hw x hx).imp fun u hu ↦
-    ⟨Arithmetic.lt_succ_iff_le.mpr hu.1, (φ.eval_toSemisentence_two x u f).mp hu.2⟩⟩;
+    ⟨Arithmetic.lt_succ_iff_le.mpr hu.1, (φ.eval_toSemisentence₂ x u f).mp hu.2⟩⟩;
 
 /-- The broad and the strict collection schemata collapse: `𝗕⁺ Γ s` and `𝗕 Γ s` prove the same
 sentences.
@@ -265,7 +265,7 @@ lemma exists_pi_eval_iff {φ : ArithmeticSemiformula ℕ 1} (hφ : Hierarchy �
   and_intros;
   . exact hχ.rew _;
   . intro x;
-    rw [← φ.eval_toSemisentence_one x f];
+    rw [← φ.eval_toSemisentence₁ x f];
     have hval : ∀ w : V,
         (Rew.embSubsts (#1 :> #0 :> fun i : Fin φ.fvSup ↦ (&(i : ℕ) : ArithmeticSemiterm ℕ 2)) ▹
           χ).Eval ![x, w] f ↔ V ⊧/(w :> x :> fun i : Fin φ.fvSup ↦ f i) χ := by
@@ -316,9 +316,9 @@ lemma models_collectionAxiom_of_models_BPi (hφ : Hierarchy 𝚺 (s + 1) φ) :
     (hφ.rew _) (fun i : Fin φ.fvSup ↦ f i) a <| by
       intro x hx;
       obtain ⟨y, hy⟩ := h x hx;
-      exact ⟨y, (φ.eval_toSemisentence_two x y f).mpr hy⟩;
+      exact ⟨y, (φ.eval_toSemisentence₂ x y f).mpr hy⟩;
   exact ⟨w + 1, fun x hx ↦ (hw x hx).imp fun u hu ↦
-    ⟨Arithmetic.lt_succ_iff_le.mpr hu.1, (φ.eval_toSemisentence_two x u f).mp hu.2⟩⟩;
+    ⟨Arithmetic.lt_succ_iff_le.mpr hu.1, (φ.eval_toSemisentence₂ x u f).mp hu.2⟩⟩;
 
 end
 

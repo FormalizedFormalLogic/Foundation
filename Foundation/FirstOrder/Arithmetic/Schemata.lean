@@ -112,11 +112,6 @@ abbrev CollectionOnBroadHierarchy (Γ : Polarity) (s : ℕ) : ArithmeticTheory :
 
 prefix:max "𝗕⁺ " => CollectionOnBroadHierarchy
 
-/-- The theory the prenex normal form construction is taken relative to. -/
-abbrev PrenexBase : ℕ → ArithmeticTheory
-  | 0     => 𝗜𝚺₀
-  | s + 1 => 𝗕𝚷 s
-
 /-! ### Induction scheme lemmas -/
 
 section
@@ -529,14 +524,6 @@ abbrev mod_ISigma_of_le {s₁ s₂} (h : s₁ ≤ s₂) [V↓[ℒₒᵣ] ⊧* �
 
 abbrev mod_BSigma_of_le {s₁ s₂} (h : s₁ ≤ s₂) [V↓[ℒₒᵣ] ⊧* 𝗕𝚺 s₂] : V↓[ℒₒᵣ] ⊧* 𝗕𝚺 s₁ :=
   models_of_ss inferInstance (CollectionOnHierarchy_subset_mono h)
-
--- This is stated as a `lemma`, not an `instance`, since `Γ` does not occur in the conclusion
--- `V↓[ℒₒᵣ] ⊧* PrenexBase s`, so instance search cannot infer it.
-lemma models_PrenexBase_of_models_CollectionOnHierarchy {Γ : Polarity} {s : ℕ}
-    [h : V↓[ℒₒᵣ] ⊧* 𝗕 Γ s] : V↓[ℒₒᵣ] ⊧* PrenexBase s :=
-  match s, h with
-  | 0, h => models_of_ss h Set.subset_union_left
-  | s + 1, h => models_of_ss h (CollectionOnHierarchy_subset_of_lt (Nat.lt_succ_self s))
 
 -- This is stated as a `lemma`, not an `instance`, since `s` does not occur in the conclusion
 -- `V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻`, so instance search cannot infer it.

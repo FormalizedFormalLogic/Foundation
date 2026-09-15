@@ -24,6 +24,19 @@ namespace FFL.FirstOrder
 
 namespace Arithmetic
 
+/-- The theory the prenex normal form construction is taken relative to. -/
+abbrev PrenexBase : ℕ → ArithmeticTheory
+  | 0     => 𝗜𝚺₀
+  | s + 1 => 𝗕𝚷 s
+
+-- This is stated as a `lemma`, not an `instance`, since `Γ` does not occur in the conclusion
+-- `V↓[ℒₒᵣ] ⊧* PrenexBase s`, so instance search cannot infer it.
+lemma models_PrenexBase_of_models_CollectionOnHierarchy {V : Type*} [ORingStructure V] {Γ : Polarity} {s : ℕ}
+    [h : V↓[ℒₒᵣ] ⊧* 𝗕 Γ s] : V↓[ℒₒᵣ] ⊧* PrenexBase s :=
+  match s, h with
+  | 0, h => models_of_ss h Set.subset_union_left
+  | s + 1, h => models_of_ss h (CollectionOnHierarchy_subset_of_lt (Nat.lt_succ_self s))
+
 /-- A formula in `Γ`-prenex form of level `s`, stored as the `𝚺₀` matrix that remains after
 stripping the `s` leading alternating quantifiers. -/
 structure Prenex (Γ : Polarity) (s : ℕ) (ξ : Type*) (n : ℕ) where
@@ -683,7 +696,7 @@ lemma exists_strictHierarchy_eval_iff {V : Type*} [ORingStructure V] [V↓[ℒ�
       | succ i => simp;
     simp only [Semiformula.eval_embSubsts, hvec];
     exact (hθ V (x :> fun i : Fin φ.fvSup ↦ f i)).symm.trans
-      (φ.eval_toSemisentence_one x f);
+      (φ.eval_toSemisentence₁ x f);
 
 end
 
