@@ -106,6 +106,12 @@ abbrev BPi (s : ℕ) : ArithmeticTheory := 𝗕 𝚷 s
 
 prefix:max "𝗕𝚷" => BPi
 
+/-- The collection scheme for the broad hierarchy `Hierarchy Γ s`, i.e. Buss's `BΓ_s⁺`. -/
+abbrev CollectionOnBroadHierarchy (Γ : Polarity) (s : ℕ) : ArithmeticTheory :=
+  𝗜𝚺₀ ∪ CollectionScheme (Arithmetic.Hierarchy Γ s)
+
+prefix:max "𝗕⁺ " => CollectionOnBroadHierarchy
+
 /-- The theory the prenex normal form construction is taken relative to. -/
 abbrev PrenexBase : ℕ → ArithmeticTheory
   | 0     => 𝗜𝚺₀
@@ -194,6 +200,10 @@ lemma CollectionOnHierarchy_subset_BSigma_succ (Γ : Polarity) (s : ℕ) : 𝗕 
 lemma CollectionOnHierarchy_weakerThan_BSigma_succ (Γ : Polarity) (s : ℕ) : 𝗕 Γ s ⪯ 𝗕𝚺 (s + 1) :=
   Entailment.WeakerThan.ofSubset (CollectionOnHierarchy_subset_BSigma_succ Γ s)
 
+lemma CollectionOnHierarchy_subset_CollectionOnBroadHierarchy {Γ : Polarity} {s : ℕ} :
+    𝗕 Γ s ⊆ 𝗕⁺ Γ s :=
+  Set.union_subset_union_right _ (CollectionScheme_subset (·.hierarchy))
+
 end
 
 /-! ### Relations between the theories -/
@@ -236,6 +246,10 @@ instance (Γ : Polarity) (s : ℕ) : 𝗜𝚺₀ ⪯ 𝗕 Γ s :=
 instance (Γ : Polarity) (s : ℕ) : 𝗘𝗤 ℒₒᵣ ⪯ 𝗕 Γ s :=
   have : 𝗘𝗤 ℒₒᵣ ⪯ 𝗜𝚺₀ := inferInstance
   Entailment.WeakerThan.trans this inferInstance
+
+instance CollectionOnHierarchy_weakerThan_CollectionOnBroadHierarchy (Γ : Polarity) (s : ℕ) :
+    𝗕 Γ s ⪯ 𝗕⁺ Γ s :=
+  Entailment.WeakerThan.ofSubset CollectionOnHierarchy_subset_CollectionOnBroadHierarchy
 
 -- This is stated as a `lemma`, not an `instance`, since `s` does not occur in the conclusion
 -- `𝗘𝗤 ℒₒᵣ ⪯ T`, so instance search cannot infer it.
