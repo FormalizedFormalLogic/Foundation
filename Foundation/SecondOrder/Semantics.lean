@@ -1,6 +1,7 @@
 module
 
 public import Foundation.SecondOrder.Syntax.Rew
+public import Foundation.FirstOrder.Tarski.Basic
 
 @[expose] public section
 

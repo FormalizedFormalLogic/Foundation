@@ -1,6 +1,6 @@
 module
 
-public import Foundation.FirstOrder.Basic
+public import Foundation.FirstOrder.Tarski.Basic
 public import Foundation.Syntax.Predicate.Relational
 public import Foundation.Logic.ForcingRelation
 public import Foundation.Vorspiel.Order.Dense

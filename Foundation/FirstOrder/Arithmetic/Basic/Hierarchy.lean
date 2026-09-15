@@ -1,5 +1,6 @@
 module
 
+public import Foundation.FirstOrder.Syntax.Classical.Padding
 public import Foundation.FirstOrder.Arithmetic.Basic.Model
 
 @[expose] public section

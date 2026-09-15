@@ -1,6 +1,6 @@
 module
 
-public import Foundation.FirstOrder.Basic.PrimrecCoding
+public import Foundation.FirstOrder.Syntax.Classical.PrimrecCoding
 public import Foundation.FirstOrder.Bootstrapping.DerivabilityCondition.D1
 public import Foundation.FirstOrder.Incompleteness.Church
 public import Mathlib.Computability.Reduce

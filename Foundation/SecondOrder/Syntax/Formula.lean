@@ -1,6 +1,6 @@
 module
 
-public import Foundation.FirstOrder.Basic
+public import Foundation.FirstOrder.Syntax.Classical.Formula
 
 @[expose] public section
 

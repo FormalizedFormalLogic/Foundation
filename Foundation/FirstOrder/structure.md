@@ -1,0 +1,47 @@
+- FirstOrder
+  - Syntax
+    - Classical
+      - Formula.lean (old Basic/Syntax/Formula.lean)
+      - Rew.lean (old Basic/Syntax/Rew.lean)
+      - Polarity.lean (old Polarity.lean)
+      - Coding.lean (old Basic/Coding.lean)
+      - PrimrecCoding.lean (old Basic/PrimrecCoding.lean)
+      - Operator.lean (old Basic/Operator.lean)
+      - BinderNotation.lean (old Basic/BinderNotation.lean)
+      - Padding.lean (old Basic/Padding.lean)
+      - Eq.lean (old Basic/Eq.lean)
+    - Intuitionistic
+      - Formula.lean (old Intuitionistic/Formula.lean)
+      - Rew.lean (old Intuitionistic/Rew.lean)
+   - Syntax.lean
+  - Tarski
+    - Basic.lean (old Basic/Semantics/Semantics.lean)
+    - AesopInit.lean (old Basic/AesopInit.lean)
+    - Elementary.lean (old Basic/Semantics/Elementary.lean)
+    - Model.lean (old Basic/Model.lean)
+    - Definability.lean (old Basic/Definability.lean)
+    - Ultraproduct.lean (old Ultraproduct.lean)
+    - Skolemization.lean (old Skolemization/Hull.lean)
+  - Tarski.lean
+  - Kripke
+    - Basic.lean (old Kripke/Basic.lean)
+    - Intuitionistic.lean (old Kripke/Intuitionistic.lean)
+    - Classical.lean (old Kripke/WeakForcing.lean)
+  - Kripke.lean
+  - LK
+    - Basic.lean (old Basic/Calculus.lean)
+    - CutFree.lean (old Basic/CutFree.lean)
+    - Simplified.lean (old Basic/Calculus2.lean)
+    - Hauptsatz.lean (old Hauptsatz)
+    - Interpretation.lean (old Interpretation.lean)
+    - Soundness.lean (old Basic/Soundness.lean)
+    - Completeness (old Completeness)
+  - LJ
+    - Basic.lean (ild Intuitionistic/LJ.lean)
+    - GoedelGentzen.lean (old NegativeTranslation/GoedelGentzen.lean)
+  - Arithmetic
+    - LE.lean (old Order/Le.lean)
+    - files in Arithmetic (files in old Arithmetic)
+  - Bootstrapping (old Bootstrapping)
+  - SetTheory (old SetTheory)
+  - Incompleteness (old Incompleteness)

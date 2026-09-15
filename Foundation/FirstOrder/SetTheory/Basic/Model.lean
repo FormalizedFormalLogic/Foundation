@@ -1,6 +1,7 @@
 module
 
 public import Foundation.FirstOrder.SetTheory.Basic.Axioms
+public import Foundation.FirstOrder.Tarski.Definability
 
 @[expose] public section
 /-! # Basic properties of model of set theory-/

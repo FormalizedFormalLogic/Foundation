@@ -4,8 +4,8 @@ public import Foundation.FirstOrder.Arithmetic.ISigma1.Prenex
 public import Foundation.FirstOrder.Arithmetic.R0.Representation
 public import Foundation.FirstOrder.Bootstrapping.Syntax.Theory
 public import Foundation.FirstOrder.Bootstrapping.Syntax.Formula.Iteration
-public import Foundation.FirstOrder.Basic.Padding
-public import Foundation.FirstOrder.Basic.PrimrecCoding
+public import Foundation.FirstOrder.Syntax.Classical.Padding
+public import Foundation.FirstOrder.Syntax.Classical.PrimrecCoding
 
 /-!
 # Craig's trick
