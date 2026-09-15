@@ -247,17 +247,19 @@ def cases' {P : OmegaAddOne → Sort*}
   | .some n => nat n
   |   .none => top
 
-set_option linter.flexible false in
 instance : OmegaAddOne↓[ℒₒᵣ] ⊧* 𝗥₀ := ⟨by
   intro σ h
-  rcases h <;> simp [models_iff]
+  rcases h
   case equal h =>
     have : OmegaAddOne↓[ℒₒᵣ] ⊧* (𝗘𝗤 _ : ArithmeticTheory) := inferInstance
     exact models_theory_iff.mp this _ h
-  case Ω₃ h => exact h
+  case Ω₃ n m h => simpa [models_iff] using h
   case Ω₄ n =>
+    suffices ∀ x : OmegaAddOne, (x = ↑n ∨ x < ↑n) ↔ (x = ↑n ∨ ∃ i < n, x = ↑i) by
+      simpa [models_iff, Structure.le_iff_of_eq_of_lt]
     intro x
-    cases x using cases' <;> simp [Structure.le_iff_of_eq_of_lt]⟩
+    cases x using cases' <;> simp
+  all_goals simp [models_iff]⟩
 
 end OmegaAddOne
 

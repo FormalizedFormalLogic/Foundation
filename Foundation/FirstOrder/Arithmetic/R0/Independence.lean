@@ -19,7 +19,7 @@ namespace FFL.FirstOrder.Arithmetic.R0
 
 namespace Countermodel
 
-lemma numeral_eq_of_succ {M : Type*} [ORingStructure M] {f : ℕ → M}
+private lemma numeral_eq_of_succ {M : Type*} [ORingStructure M] {f : ℕ → M}
     (h0 : f 0 = 0) (h1 : f 1 = 1) (hs : ∀ n, f (n + 1) = f n + 1) :
     ∀ n, (ORingStructure.numeral n : M) = f n
   |     0 => h0.symm
@@ -29,7 +29,7 @@ lemma numeral_eq_of_succ {M : Type*} [ORingStructure M] {f : ℕ → M}
       rw [numeral_eq_of_succ h0 h1 hs (n + 1)];
       exact (hs (n + 1)).symm;
 
-lemma eq_or_lt_iff_eq_or_exists_lt {x n : ℕ} : x = n ∨ x < n ↔ x = n ∨ ∃ i < n, x = i := by
+private lemma eq_or_lt_iff_eq_or_exists_lt {x n : ℕ} : x = n ∨ x < n ↔ x = n ∨ ∃ i < n, x = i := by
   constructor;
   . rintro (rfl | hx);
     . left; rfl;
@@ -38,7 +38,7 @@ lemma eq_or_lt_iff_eq_or_exists_lt {x n : ℕ} : x = n ∨ x < n ↔ x = n ∨ �
     . left; rfl;
     . right; exact hi;
 
-lemma eq_or_le_iff_eq_or_exists_lt {x n : ℕ} : x = n ∨ x ≤ n ↔ x = n ∨ ∃ i < n, x = i := by
+private lemma eq_or_le_iff_eq_or_exists_lt {x n : ℕ} : x = n ∨ x ≤ n ↔ x = n ∨ ∃ i < n, x = i := by
   constructor;
   . rintro (rfl | hx);
     . left; rfl;
@@ -66,32 +66,30 @@ instance : ORingStructure NatSucc where
 
 namespace NatSucc
 
-@[simp] lemma numeral_eq (n : ℕ) : (ORingStructure.numeral n : NatSucc) = n :=
+@[simp] private lemma numeral_eq (n : ℕ) : (ORingStructure.numeral n : NatSucc) = n :=
   numeral_eq_of_succ (M := NatSucc) (f := fun k : ℕ => (k : NatSucc)) rfl rfl (fun _ => rfl) n
 
 end NatSucc
 
--- `simp [models_iff]` is used as a non-terminal simp to discharge the operator/quantifier
--- unfolding before finishing each case by hand; the flexible-simp linter is silenced for this
--- instance only.
-set_option linter.flexible false in
 instance : NatSucc↓[ℒₒᵣ] ⊧* (𝗥₀ \ Ω₁Scheme) := ⟨by
   intro σ ⟨h, hn⟩;
   rcases h with ⟨_, h⟩ | ⟨n, m⟩ | ⟨n, m⟩ | ⟨n, m, h⟩ | n | n;
   . have : NatSucc↓[ℒₒᵣ] ⊧* (𝗘𝗤 ℒₒᵣ : ArithmeticTheory) := inferInstance;
     simpa [models_iff] using models_theory_iff.mp this _ h;
   . exact absurd ⟨n, m, rfl⟩ hn;
-  . simp [models_iff, Structure.numeral_eq_numeral];
+  . suffices (ORingStructure.numeral n : NatSucc) * ORingStructure.numeral m
+      = ORingStructure.numeral (n * m) by simpa [models_iff];
+    simp only [NatSucc.numeral_eq];
     rfl;
-  . simp [models_iff];
+  . suffices (n : NatSucc) ≠ (m : NatSucc) by simpa [models_iff];
     exact h;
-  . simp [models_iff, -existsAndEq];
+  . suffices ∀ x : NatSucc, (x = n ∨ x < n) ↔ (x = n ∨ ∃ i < n, x = i) by
+      simpa [models_iff, Structure.le_iff_of_eq_of_lt, -existsAndEq];
     intro x;
-    refine Structure.le_iff_of_eq_of_lt.trans ?_;
     exact eq_or_lt_iff_eq_or_exists_lt;
-  . simp [models_iff];
-    show ¬ (n : NatSucc) < (n : NatSucc);
-    exact lt_irrefl _;⟩
+  . suffices ∀ x : NatSucc, ¬ x < x by simpa [models_iff] using this n;
+    intro x;
+    exact Nat.lt_irrefl x;⟩
 
 end Countermodel
 
@@ -114,32 +112,30 @@ instance : ORingStructure NatZeroMul where
 
 namespace NatZeroMul
 
-@[simp] lemma numeral_eq (n : ℕ) : (ORingStructure.numeral n : NatZeroMul) = n :=
+@[simp] private lemma numeral_eq (n : ℕ) : (ORingStructure.numeral n : NatZeroMul) = n :=
   numeral_eq_of_succ (M := NatZeroMul) (f := fun k : ℕ => (k : NatZeroMul)) rfl rfl (fun _ => rfl) n
 
 end NatZeroMul
 
--- `simp [models_iff]` is used as a non-terminal simp to discharge the operator/quantifier
--- unfolding before finishing each case by hand; the flexible-simp linter is silenced for this
--- instance only.
-set_option linter.flexible false in
 instance : NatZeroMul↓[ℒₒᵣ] ⊧* (𝗥₀ \ Ω₂Scheme) := ⟨by
   intro σ ⟨h, hn⟩;
   rcases h with ⟨_, h⟩ | ⟨n, m⟩ | ⟨n, m⟩ | ⟨n, m, h⟩ | n | n;
   . have : NatZeroMul↓[ℒₒᵣ] ⊧* (𝗘𝗤 ℒₒᵣ : ArithmeticTheory) := inferInstance;
     simpa [models_iff] using models_theory_iff.mp this _ h;
-  . simp [models_iff, Structure.numeral_eq_numeral];
+  . suffices (ORingStructure.numeral n : NatZeroMul) + ORingStructure.numeral m
+      = ORingStructure.numeral (n + m) by simpa [models_iff];
+    simp only [NatZeroMul.numeral_eq];
     rfl;
   . exact absurd ⟨n, m, rfl⟩ hn;
-  . simp [models_iff];
+  . suffices (n : NatZeroMul) ≠ (m : NatZeroMul) by simpa [models_iff];
     exact h;
-  . simp [models_iff, -existsAndEq];
+  . suffices ∀ x : NatZeroMul, (x = n ∨ x < n) ↔ (x = n ∨ ∃ i < n, x = i) by
+      simpa [models_iff, Structure.le_iff_of_eq_of_lt, -existsAndEq];
     intro x;
-    refine Structure.le_iff_of_eq_of_lt.trans ?_;
     exact eq_or_lt_iff_eq_or_exists_lt;
-  . simp [models_iff];
-    show ¬ (n : NatZeroMul) < (n : NatZeroMul);
-    exact lt_irrefl _;⟩
+  . suffices ∀ x : NatZeroMul, ¬ x < x by simpa [models_iff] using this n;
+    intro x;
+    exact Nat.lt_irrefl x;⟩
 
 end Countermodel
 
@@ -164,22 +160,20 @@ instance : Subsingleton Trivial := ⟨fun _ _ ↦ rfl⟩
 
 namespace Trivial
 
-@[simp] lemma eq_iff (a b : Trivial) : a = b ↔ True := eq_iff_true_of_subsingleton a b
+@[simp] private lemma eq_iff (a b : Trivial) : a = b ↔ True := eq_iff_true_of_subsingleton a b
 
-@[simp] lemma not_lt (a b : Trivial) : ¬ a < b := id
+@[simp] private lemma not_lt (a b : Trivial) : ¬ a < b := id
 
 end Trivial
 
--- `simp [models_iff]` is used as a non-terminal simp to discharge most axiom cases at once;
--- the flexible-simp linter is silenced for this instance only.
-set_option linter.flexible false in
 instance : Trivial↓[ℒₒᵣ] ⊧* (𝗥₀ \ Ω₃Scheme) := ⟨by
   intro σ ⟨h, hn⟩;
-  rcases h <;> simp [models_iff, Structure.le_iff_of_eq_of_lt];
+  rcases h;
   case equal h =>
     have : Trivial↓[ℒₒᵣ] ⊧* (𝗘𝗤 ℒₒᵣ : ArithmeticTheory) := inferInstance;
     exact models_theory_iff.mp this _ h;
-  case Ω₃ n m h => exact absurd ⟨n, m, h, rfl⟩ hn;⟩
+  case Ω₃ n m h => exact absurd ⟨n, m, h, rfl⟩ hn;
+  all_goals simp [models_iff, Structure.le_iff_of_eq_of_lt];⟩
 
 end Countermodel
 
@@ -202,31 +196,32 @@ instance : ORingStructure NatNoLt where
 
 namespace NatNoLt
 
-@[simp] lemma numeral_eq (n : ℕ) : (ORingStructure.numeral n : NatNoLt) = n :=
+@[simp] private lemma numeral_eq (n : ℕ) : (ORingStructure.numeral n : NatNoLt) = n :=
   numeral_eq_of_succ (M := NatNoLt) (f := fun k : ℕ => (k : NatNoLt)) rfl rfl (fun _ => rfl) n
 
-@[simp] lemma not_lt (a b : NatNoLt) : ¬ a < b := id
+@[simp] private lemma not_lt (a b : NatNoLt) : ¬ a < b := id
 
 end NatNoLt
 
--- `simp [models_iff]` is used as a non-terminal simp to discharge the operator/quantifier
--- unfolding before finishing each case by hand; the flexible-simp linter is silenced for this
--- instance only.
-set_option linter.flexible false in
 instance : NatNoLt↓[ℒₒᵣ] ⊧* (𝗥₀ \ Ω₄Scheme) := ⟨by
   intro σ ⟨h, hn⟩;
   rcases h with ⟨_, h⟩ | ⟨n, m⟩ | ⟨n, m⟩ | ⟨n, m, h⟩ | n | n;
   . have : NatNoLt↓[ℒₒᵣ] ⊧* (𝗘𝗤 ℒₒᵣ : ArithmeticTheory) := inferInstance;
     simpa [models_iff] using models_theory_iff.mp this _ h;
-  . simp [models_iff, Structure.numeral_eq_numeral];
+  . suffices (ORingStructure.numeral n : NatNoLt) + ORingStructure.numeral m
+      = ORingStructure.numeral (n + m) by simpa [models_iff];
+    simp only [NatNoLt.numeral_eq];
     rfl;
-  . simp [models_iff, Structure.numeral_eq_numeral];
+  . suffices (ORingStructure.numeral n : NatNoLt) * ORingStructure.numeral m
+      = ORingStructure.numeral (n * m) by simpa [models_iff];
+    simp only [NatNoLt.numeral_eq];
     rfl;
-  . simp [models_iff];
+  . suffices (n : NatNoLt) ≠ (m : NatNoLt) by simpa [models_iff];
     exact h;
   . exact absurd ⟨n, rfl⟩ hn;
-  . simp [models_iff];
-    exact NatNoLt.not_lt _ _;⟩
+  . suffices ∀ x : NatNoLt, ¬ x < x by simpa [models_iff] using this n;
+    intro x;
+    exact NatNoLt.not_lt x x;⟩
 
 end Countermodel
 
@@ -249,33 +244,33 @@ instance : ORingStructure NatLE where
 
 namespace NatLE
 
-def toNat (x : NatLE) : ℕ := x
+private def toNat (x : NatLE) : ℕ := x
 
-@[simp] lemma numeral_eq (n : ℕ) : (ORingStructure.numeral n : NatLE) = n :=
+@[simp] private lemma numeral_eq (n : ℕ) : (ORingStructure.numeral n : NatLE) = n :=
   numeral_eq_of_succ (M := NatLE) (f := fun k : ℕ => (k : NatLE)) rfl rfl (fun _ => rfl) n
 
-@[simp] lemma lt_iff {a b : NatLE} : a < b ↔ a.toNat ≤ b.toNat := Iff.rfl
+@[simp] private lemma lt_iff {a b : NatLE} : a < b ↔ a.toNat ≤ b.toNat := Iff.rfl
 
 end NatLE
 
--- `simp [models_iff]` is used as a non-terminal simp to discharge the operator/quantifier
--- unfolding before finishing each case by hand; the flexible-simp linter is silenced for this
--- instance only.
-set_option linter.flexible false in
 instance : NatLE↓[ℒₒᵣ] ⊧* (𝗥₀ \ Ω₅Scheme) := ⟨by
   intro σ ⟨h, hn⟩;
   rcases h with ⟨_, h⟩ | ⟨n, m⟩ | ⟨n, m⟩ | ⟨n, m, h⟩ | n | n;
   . have : NatLE↓[ℒₒᵣ] ⊧* (𝗘𝗤 ℒₒᵣ : ArithmeticTheory) := inferInstance;
     simpa [models_iff] using models_theory_iff.mp this _ h;
-  . simp [models_iff, Structure.numeral_eq_numeral];
+  . suffices (ORingStructure.numeral n : NatLE) + ORingStructure.numeral m
+      = ORingStructure.numeral (n + m) by simpa [models_iff];
+    simp only [NatLE.numeral_eq];
     rfl;
-  . simp [models_iff, Structure.numeral_eq_numeral];
+  . suffices (ORingStructure.numeral n : NatLE) * ORingStructure.numeral m
+      = ORingStructure.numeral (n * m) by simpa [models_iff];
+    simp only [NatLE.numeral_eq];
     rfl;
-  . simp [models_iff];
+  . suffices (n : NatLE) ≠ (m : NatLE) by simpa [models_iff];
     exact h;
-  . simp [models_iff, -existsAndEq];
+  . suffices ∀ x : NatLE, (x = n ∨ x < n) ↔ (x = n ∨ ∃ i < n, x = i) by
+      simpa [models_iff, Structure.le_iff_of_eq_of_lt, -existsAndEq];
     intro x;
-    refine Structure.le_iff_of_eq_of_lt.trans ?_;
     exact eq_or_le_iff_eq_or_exists_lt;
   . exact absurd ⟨n, rfl⟩ hn;⟩
 
