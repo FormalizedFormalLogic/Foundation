@@ -4,11 +4,6 @@ public import Foundation.FirstOrder.Arithmetic.R0.Basic
 
 /-!
 # Independence of `Ω₁`, `Ω₂`, `Ω₃`, `Ω₄` and `Ω₅` in $\mathsf{R_0}$
-
-Each of `Ω₁`, `Ω₂`, `Ω₃`, `Ω₄`, `Ω₅` is not derivable from the other axioms of `𝗥₀`, witnessed
-by a countermodel that satisfies all axioms but the scheme in question: `ℕ` with `+` collapsed to
-`a + b := a + 1` for `Ω₁`, `ℕ` with `*` collapsed to `0` for `Ω₂`, the one-element structure with
-empty `<` for `Ω₃`, `ℕ` with `<` empty for `Ω₄`, and `ℕ` with `<` interpreted as `≤` for `Ω₅`.
 -/
 
 @[expose] public section
