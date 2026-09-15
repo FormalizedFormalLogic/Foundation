@@ -354,22 +354,12 @@ instance models_R0_of_models_PeanoMinus : M↓[ℒₒᵣ] ⊧* 𝗥₀ := models
     simp [models_iff, numeral_eq_natCast]
   case Ω₂ n m =>
     simp [models_iff, numeral_eq_natCast]
-  case Ω₃ n m h =>
-    simp [models_iff, numeral_eq_natCast, h]
-  case Ω₄ n =>
-    suffices ∀ x : M, x ≤ ↑n ↔ x = ↑n ∨ ∃ i < n, x = ↑i by simpa [models_iff, numeral_eq_natCast];
+  case Ω₃ n =>
+    suffices ∀ x : M, x < ↑n ↔ ∃ i < n, x = ↑i by simpa [models_iff, numeral_eq_natCast];
     intro x
     constructor
-    . intro hx
-      rcases eq_nat_of_le_nat hx with ⟨i, rfl⟩
-      rcases eq_or_lt_of_le (show i ≤ n by exact_mod_cast hx) with rfl | hi
-      . left; rfl
-      . right; exact ⟨i, hi, rfl⟩
-    . rintro (rfl | ⟨i, hi, rfl⟩)
-      . exact le_refl _
-      . exact_mod_cast hi.le
-  case Ω₅ n =>
-    simp [models_iff, numeral_eq_natCast]
+    · intro hx; rcases eq_nat_of_lt_nat hx with ⟨x, rfl⟩; exact ⟨x, by simpa using hx, by simp⟩
+    · rintro ⟨i, hi, rfl⟩; simp [hi]
 
 instance : 𝗥₀ ⪯ 𝗣𝗔⁻ := weakerThan_of_models.{0} _ _ fun _ _ _ ↦ inferInstance
 

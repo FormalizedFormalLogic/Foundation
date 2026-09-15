@@ -16,9 +16,7 @@ inductive R0 : ArithmeticTheory
   | equal : ∀ φ ∈ 𝗘𝗤 ℒₒᵣ, R0 φ
   | Ω₁ (n m : ℕ) : R0 “↑n + ↑m = ↑(n + m)”
   | Ω₂ (n m : ℕ) : R0 “↑n * ↑m = ↑(n * m)”
-  | Ω₃ (n m : ℕ) : n ≠ m → R0 “↑n ≠ ↑m”
-  | Ω₄ (n : ℕ) : R0 “∀ x, x ≤ ↑n ↔ ⋁ i < n + 1, x = ↑i”
-  | Ω₅ (n : ℕ) : R0 “¬ ↑n < ↑n”
+  | Ω₃ (n : ℕ) : R0 “∀ x, x < ↑n ↔ ⋁ i < n, x = ↑i”
 
 notation "𝗥₀" => R0
 
@@ -31,11 +29,7 @@ instance : ℕ↓[ℒₒᵣ] ⊧* 𝗥₀ := ⟨by
   rcases h <;> try { simp [models_iff]; done }
   case equal h =>
     have : ℕ↓[ℒₒᵣ] ⊧* (𝗘𝗤 ℒₒᵣ : ArithmeticTheory) := inferInstance
-    simpa [models_iff] using models_theory_iff.mp this _ h
-  case Ω₃ h =>
-    simpa [models_iff, ←le_iff_eq_or_lt] using h
-  case Ω₄ n =>
-    simpa [models_iff] using fun (_ : ℕ) ↦ le_iff_eq_or_lt⟩
+    simpa [models_iff] using models_theory_iff.mp this _ h⟩
 
 end R0
 
@@ -51,39 +45,28 @@ lemma numeral_add_numeral (n m : ℕ) : (numeral n : M) + numeral m = numeral (n
 lemma numeral_mul_numeral (n m : ℕ) : (numeral n : M) * numeral m = numeral (n * m) := by
   simpa [models_iff] using Theory.models M _ (R0.Ω₂ n m)
 
-lemma numeral_ne_numeral_of_ne {n m : ℕ} (h : n ≠ m) : (numeral n : M) ≠ numeral m := by
-  simpa [models_iff] using Theory.models M _ (R0.Ω₃ n m h)
-
-lemma le_numeral_iff {x : M} {n : ℕ} :
-    x = numeral n ∨ x < numeral n ↔ ∃ i : Fin (n + 1), x = numeral i := by
-  have h : ∀ y : M, y = numeral n ∨ y < numeral n ↔ y = numeral n ∨ ∃ i < n, y = numeral i := by
-    simpa [models_iff, Structure.le_iff_of_eq_of_lt] using Theory.models M _ (R0.Ω₄ n)
-  rw [h x]
-  constructor
-  . rintro (rfl | ⟨i, hi, rfl⟩)
-    . exact ⟨Fin.last n, by simp⟩
-    . exact ⟨⟨i, by omega⟩, by simp⟩
-  . rintro ⟨i, rfl⟩
-    rcases eq_or_ne (i : ℕ) n with hn | hn
-    . left; simp [hn]
-    . right; exact ⟨i, by have := i.isLt; omega, rfl⟩
-
-lemma not_numeral_lt_self (n : ℕ) : ¬(numeral n : M) < numeral n := by
-  simpa [models_iff] using Theory.models M _ (R0.Ω₅ n)
-
 lemma lt_numeral_iff {x : M} {n : ℕ} : x < numeral n ↔ ∃ i : Fin n, x = numeral i := by
+  have := by simpa [models_iff] using Theory.models M _ (R0.Ω₃ n)
   constructor
   . intro hx
-    rcases le_numeral_iff.mp (by right; exact hx) with ⟨i, rfl⟩
-    rcases eq_or_ne (i : ℕ) n with hn | hn
-    . exact absurd (hn ▸ hx) (not_numeral_lt_self n)
-    . exact ⟨⟨i, by have := i.isLt; omega⟩, by simp⟩
+    rcases (this x).mp hx with ⟨i, hi, rfl⟩
+    exact ⟨⟨i, hi⟩, by simp⟩
   . rintro ⟨i, rfl⟩
-    have : (numeral i : M) = numeral n ∨ (numeral i : M) < numeral n :=
-      le_numeral_iff.mpr ⟨i.castSucc, by simp⟩
-    rcases this with h | h
-    . exact absurd h (numeral_ne_numeral_of_ne (by have := i.isLt; omega))
-    . exact h
+    exact (this (numeral i)).mpr ⟨i, by simp, rfl⟩
+
+lemma not_numeral_lt_self (n : ℕ) : ¬(numeral n : M) < numeral n := by
+  induction n using Nat.strong_induction_on with
+  | _ n ih =>
+    intro h
+    rcases lt_numeral_iff.mp h with ⟨i, hi⟩
+    exact ih i i.isLt (hi ▸ h)
+
+lemma numeral_ne_numeral_of_ne {n m : ℕ} (h : n ≠ m) : (numeral n : M) ≠ numeral m := by
+  rcases Nat.lt_or_gt_of_ne h with hnm | hnm
+  . intro he
+    exact not_numeral_lt_self n (he ▸ lt_numeral_iff.mpr ⟨⟨n, hnm⟩, by simp⟩)
+  . intro he
+    exact not_numeral_lt_self m (he ▸ lt_numeral_iff.mpr ⟨⟨m, hnm⟩, by simp⟩)
 
 @[simp] lemma numeral_inj_iff {n m : ℕ} : (numeral n : M) = numeral m ↔ n = m :=
   ⟨by contrapose; exact numeral_ne_numeral_of_ne, by rintro rfl; rfl⟩
@@ -253,10 +236,8 @@ instance : OmegaAddOne↓[ℒₒᵣ] ⊧* 𝗥₀ := ⟨by
   case equal h =>
     have : OmegaAddOne↓[ℒₒᵣ] ⊧* (𝗘𝗤 _ : ArithmeticTheory) := inferInstance
     exact models_theory_iff.mp this _ h
-  case Ω₃ n m h => simpa [models_iff] using h
-  case Ω₄ n =>
-    suffices ∀ x : OmegaAddOne, (x = ↑n ∨ x < ↑n) ↔ (x = ↑n ∨ ∃ i < n, x = ↑i) by
-      simpa [models_iff, Structure.le_iff_of_eq_of_lt]
+  case Ω₃ n =>
+    suffices ∀ x : OmegaAddOne, x < ↑n ↔ ∃ i < n, x = ↑i by simpa [models_iff]
     intro x
     cases x using cases' <;> simp
   all_goals simp [models_iff]⟩
