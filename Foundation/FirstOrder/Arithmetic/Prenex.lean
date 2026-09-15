@@ -320,15 +320,15 @@ private lemma models_bexs_witness [V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻]
 mutual
 
 theorem models_ball :
-    {Γ : Polarity} → {s n : ℕ} → [V↓[ℒₒᵣ] ⊧* 𝗕𝚺 s] →
+    {Γ : Polarity} → {s n : ℕ} → [V↓[ℒₒᵣ] ⊧* PrenexBase s] →
       (u : ArithmeticSemiterm Empty n) →
       (φ : Prenex Γ s Empty (n + 1)) → (e : Fin n → V) →
     V ⊧/e (∀'[u] φ).val ↔ ∀ x < u.valb e, V ⊧/(x :> e) φ.val
   | _, 0, _, _, u, φ, e => by
     simp [ball_zero, Prenex.val, Semiformula.eval_ball];
   | 𝚺, s + 1, _, _, u, φ, e => by
-    have : V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := models_paMinus_of_models_CollectionOnHierarchy (Γ := 𝚺) (s := s + 1);
-    have : V↓[ℒₒᵣ] ⊧* 𝗕𝚺 s := mod_BSigma_of_le (Nat.le_succ s);
+    have : V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := models_paMinus_of_models_CollectionOnHierarchy (Γ := 𝚷) (s := s);
+    have : V↓[ℒₒᵣ] ⊧* PrenexBase s := models_PrenexBase_of_models_CollectionOnHierarchy (Γ := 𝚷) (s := s);
     have iha : ∀ {m : ℕ} (u : ArithmeticSemiterm Empty m) (φ : Prenex 𝚷 s Empty (m + 1))
         (e : Fin m → V), V ⊧/e (∀'[u] φ).val ↔ ∀ x < u.valb e, V ⊧/(x :> e) φ.val :=
       fun u φ e => models_ball u φ e;
@@ -343,8 +343,8 @@ theorem models_ball :
       obtain ⟨y, -, hy⟩ := hw x hx;
       exact ⟨y, hy⟩;
     . intro h;
-      exact exists_bound_of_models_CollectionOnHierarchy (Γ := 𝚺) (s := s + 1)
-        (φ.sigmaInv.val_hierarchy.accum 𝚺) e (u.valb e) h;
+      exact exists_bound_of_models_CollectionOnHierarchy (Γ := 𝚷) (s := s)
+        φ.sigmaInv.val_hierarchy e (u.valb e) h;
   | 𝚷, s + 1, _, _, u, φ, e => by
     have ih : ∀ {m : ℕ} (u : ArithmeticSemiterm Empty m) (φ : Prenex 𝚺 (s + 1) Empty (m + 1))
         (e : Fin m → V), V ⊧/e (∃'[u] φ).val ↔ ∃ x < u.valb e, V ⊧/(x :> e) φ.val :=
@@ -360,14 +360,14 @@ theorem models_ball :
 termination_by Γ s _ _ _ _ _ => (s, match Γ with | 𝚺 => 0 | 𝚷 => 1)
 
 theorem models_bexs :
-    {Γ : Polarity} → {s n : ℕ} → [V↓[ℒₒᵣ] ⊧* 𝗕𝚺 s] →
+    {Γ : Polarity} → {s n : ℕ} → [V↓[ℒₒᵣ] ⊧* PrenexBase s] →
       (u : ArithmeticSemiterm Empty n) →
       (φ : Prenex Γ s Empty (n + 1)) → (e : Fin n → V) →
     V ⊧/e (∃'[u] φ).val ↔ ∃ x < u.valb e, V ⊧/(x :> e) φ.val
   | _, 0, _, _, u, φ, e => by
     simp [bexs_zero, Prenex.val, Semiformula.eval_bexs];
   | 𝚺, s + 1, n, _, u, φ, e => by
-    have : V↓[ℒₒᵣ] ⊧* 𝗕𝚺 s := mod_BSigma_of_le (Nat.le_succ s);
+    have : V↓[ℒₒᵣ] ⊧* PrenexBase s := models_PrenexBase_of_models_CollectionOnHierarchy (Γ := 𝚷) (s := s);
     have ih : ∀ {m : ℕ} (u : ArithmeticSemiterm Empty m) (φ : Prenex 𝚷 s Empty (m + 1))
         (e : Fin m → V), V ⊧/e (∃'[u] φ).val ↔ ∃ x < u.valb e, V ⊧/(x :> e) φ.val :=
       fun u φ e => models_bexs u φ e;
@@ -414,14 +414,14 @@ end
 mutual
 
 theorem models_and :
-    {Γ : Polarity} → {s n : ℕ} → [V↓[ℒₒᵣ] ⊧* 𝗕𝚺 s] →
+    {Γ : Polarity} → {s n : ℕ} → [V↓[ℒₒᵣ] ⊧* PrenexBase s] →
       (φ ψ : Prenex Γ s Empty n) → (e : Fin n → V) →
     V ⊧/e (φ ⋏ ψ).val ↔ V ⊧/e φ.val ∧ V ⊧/e ψ.val
   | _, 0, _, _, φ, ψ, e => by
     simp [and_zero, Prenex.val];
   | 𝚺, s + 1, n, _, φ, ψ, e => by
-    have : V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := models_paMinus_of_models_CollectionOnHierarchy (Γ := 𝚺) (s := s + 1);
-    have : V↓[ℒₒᵣ] ⊧* 𝗕𝚺 s := mod_BSigma_of_le (Nat.le_succ s);
+    have : V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := models_paMinus_of_models_CollectionOnHierarchy (Γ := 𝚷) (s := s);
+    have : V↓[ℒₒᵣ] ⊧* PrenexBase s := models_PrenexBase_of_models_CollectionOnHierarchy (Γ := 𝚷) (s := s);
     have iha : ∀ {m : ℕ} (φ ψ : Prenex 𝚷 s Empty m) (e : Fin m → V),
         V ⊧/e (φ ⋏ ψ).val ↔ V ⊧/e φ.val ∧ V ⊧/e ψ.val :=
       fun φ ψ e => models_and φ ψ e;
@@ -462,13 +462,13 @@ theorem models_and :
 termination_by Γ s _ _ _ _ _ => (s, match Γ with | 𝚺 => 0 | 𝚷 => 1)
 
 theorem models_or :
-    {Γ : Polarity} → {s n : ℕ} → [V↓[ℒₒᵣ] ⊧* 𝗕𝚺 s] →
+    {Γ : Polarity} → {s n : ℕ} → [V↓[ℒₒᵣ] ⊧* PrenexBase s] →
       (φ ψ : Prenex Γ s Empty n) → (e : Fin n → V) →
     V ⊧/e (φ ⋎ ψ).val ↔ V ⊧/e φ.val ∨ V ⊧/e ψ.val
   | _, 0, _, _, φ, ψ, e => by
     simp [or_zero, Prenex.val];
   | 𝚺, s + 1, _, _, φ, ψ, e => by
-    have : V↓[ℒₒᵣ] ⊧* 𝗕𝚺 s := mod_BSigma_of_le (Nat.le_succ s);
+    have : V↓[ℒₒᵣ] ⊧* PrenexBase s := models_PrenexBase_of_models_CollectionOnHierarchy (Γ := 𝚷) (s := s);
     have ih : ∀ {m : ℕ} (φ ψ : Prenex 𝚷 s Empty m) (e : Fin m → V),
         V ⊧/e (φ ⋎ ψ).val ↔ V ⊧/e φ.val ∨ V ⊧/e ψ.val :=
       fun φ ψ e => models_or φ ψ e;
@@ -499,9 +499,10 @@ def all (φ : Prenex 𝚷 (s + 1) ξ (n + 1)) : Prenex 𝚷 (s + 1) ξ n := ∼(
 local prefix:64 "∃' " => Prenex.exs
 local prefix:64 "∀' " => Prenex.all
 
-lemma models_exs [V↓[ℒₒᵣ] ⊧* 𝗕𝚺 s] (φ : Prenex 𝚺 (s + 1) Empty (n + 1)) (e : Fin n → V) :
+lemma models_exs [V↓[ℒₒᵣ] ⊧* 𝗕𝚷 s] (φ : Prenex 𝚺 (s + 1) Empty (n + 1)) (e : Fin n → V) :
     V ⊧/e (∃' φ).val ↔ ∃ x, V ⊧/(x :> e) φ.val := by
-  have : V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := models_paMinus_of_models_CollectionOnHierarchy (Γ := 𝚺) (s := s);
+  have : V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := models_paMinus_of_models_CollectionOnHierarchy (Γ := 𝚷) (s := s);
+  have : V↓[ℒₒᵣ] ⊧* PrenexBase s := models_PrenexBase_of_models_CollectionOnHierarchy (Γ := 𝚷) (s := s);
   show V ⊧/e
       (∃'[‘#0 + 1’] (∃'[‘#1 + 1’]
         (φ.sigmaInv.rew (Rew.subst (#0 :> #1 :> (#·.succ.succ.succ)))))).sigma.val ↔
@@ -530,7 +531,7 @@ lemma models_exs [V↓[ℒₒᵣ] ⊧* 𝗕𝚺 s] (φ : Prenex 𝚺 (s + 1) Emp
   . rintro ⟨y, x, hx⟩;
     exact ⟨max x y, y, le_max_right x y, x, le_max_left x y, hx⟩;
 
-lemma models_all [V↓[ℒₒᵣ] ⊧* 𝗕𝚺 s] (φ : Prenex 𝚷 (s + 1) Empty (n + 1)) (e : Fin n → V) :
+lemma models_all [V↓[ℒₒᵣ] ⊧* 𝗕𝚷 s] (φ : Prenex 𝚷 (s + 1) Empty (n + 1)) (e : Fin n → V) :
     V ⊧/e (∀' φ).val ↔ ∀ x, V ⊧/(x :> e) φ.val := by
   have hthis : V ⊧/e (∃' ∼φ).val ↔ ∃ x, V ⊧/(x :> e) (∼φ).val := models_exs (∼φ) e;
   have hval : (∀' φ).val = ∼(∃' ∼φ).val := by
@@ -540,11 +541,11 @@ lemma models_all [V↓[ℒₒᵣ] ⊧* 𝗕𝚺 s] (φ : Prenex 𝚷 (s + 1) Emp
   simp only [val_neg, LogicalConnective.HomClass.map_neg, LogicalConnective.Prop.neg_eq] at hthis ⊢;
   grind;
 
-/-- Every `Hierarchy Γ s` sentence is equivalent, in every model of `𝗕𝚺 s`, to the value of some
-`Prenex Γ s` formula. -/
+/-- Every `Hierarchy Γ s` sentence is equivalent, in every model of `PrenexBase s`, to the value of
+some `Prenex Γ s` formula. -/
 theorem models_exists_prenex {Γ : Polarity} {s n : ℕ} {φ : ArithmeticSemisentence n} (h : Hierarchy Γ s φ) :
   ∃ φ' : Prenex Γ s Empty n,
-    ∀ (V : Type*) [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗕𝚺 s],
+    ∀ (V : Type*) [ORingStructure V] [V↓[ℒₒᵣ] ⊧* PrenexBase s],
       ∀ e : Fin n → V, V ⊧/e φ ↔ V ⊧/e φ'.val := by
   induction h with
   | verum Γ s n =>
@@ -595,36 +596,34 @@ theorem models_exists_prenex {Γ : Polarity} {s n : ℕ} {φ : ArithmeticSemisen
     obtain ⟨φ', hφ'⟩ := ih;
     use ∃' φ';
     intro V _ _ e;
-    have : V↓[ℒₒᵣ] ⊧* 𝗕𝚺 s := mod_BSigma_of_le (Nat.le_succ s);
     rw [models_exs φ' e, Semiformula.eval_ex];
     exact exists_congr fun x => hφ' V (x :> e);
   | @all s n φ _ ih =>
     obtain ⟨φ', hφ'⟩ := ih;
     use ∀' φ';
     intro V _ _ e;
-    have : V↓[ℒₒᵣ] ⊧* 𝗕𝚺 s := mod_BSigma_of_le (Nat.le_succ s);
     rw [models_all φ' e, Semiformula.eval_all];
     exact forall_congr' fun x => hφ' V (x :> e);
   | @sigma s n φ _ ih =>
     obtain ⟨φ', hφ'⟩ := ih;
     use φ'.sigma;
     intro V _ _ e;
-    have : V↓[ℒₒᵣ] ⊧* 𝗕𝚺 s := mod_BSigma_of_le (Nat.le_succ s);
+    have : V↓[ℒₒᵣ] ⊧* PrenexBase s := models_PrenexBase_of_models_CollectionOnHierarchy (Γ := 𝚷) (s := s);
     rw [models_sigma φ' e, Semiformula.eval_ex];
     exact exists_congr fun x => hφ' V (x :> e);
   | @pi s n φ _ ih =>
     obtain ⟨φ', hφ'⟩ := ih;
     use φ'.pi;
     intro V _ _ e;
-    have : V↓[ℒₒᵣ] ⊧* 𝗕𝚺 s := mod_BSigma_of_le (Nat.le_succ s);
+    have : V↓[ℒₒᵣ] ⊧* PrenexBase s := models_PrenexBase_of_models_CollectionOnHierarchy (Γ := 𝚷) (s := s);
     rw [models_pi φ' e, Semiformula.eval_all];
     exact forall_congr' fun x => hφ' V (x :> e);
   | @dummy_sigma s n φ _ ih =>
     obtain ⟨φ', hφ'⟩ := ih;
     use (∀' φ').altUp;
     intro V _ _ e;
-    have : V↓[ℒₒᵣ] ⊧* 𝗕𝚺 (s + 1) := mod_BSigma_of_le (Nat.le_succ (s + 1));
-    have : V↓[ℒₒᵣ] ⊧* 𝗕𝚺 s := mod_BSigma_of_le (Nat.le_succ s);
+    have : V↓[ℒₒᵣ] ⊧* PrenexBase (s + 1) :=
+      models_PrenexBase_of_models_CollectionOnHierarchy (Γ := 𝚷) (s := s + 1);
     exact Semiformula.eval_all.trans
       ((forall_congr' fun x => hφ' V (x :> e)).trans
         ((models_all φ' e).symm.trans (models_altUp (∀' φ') e).symm));
@@ -632,8 +631,8 @@ theorem models_exists_prenex {Γ : Polarity} {s n : ℕ} {φ : ArithmeticSemisen
     obtain ⟨φ', hφ'⟩ := ih;
     use (∃' φ').altUp;
     intro V _ _ e;
-    have : V↓[ℒₒᵣ] ⊧* 𝗕𝚺 (s + 1) := mod_BSigma_of_le (Nat.le_succ (s + 1));
-    have : V↓[ℒₒᵣ] ⊧* 𝗕𝚺 s := mod_BSigma_of_le (Nat.le_succ s);
+    have : V↓[ℒₒᵣ] ⊧* PrenexBase (s + 1) :=
+      models_PrenexBase_of_models_CollectionOnHierarchy (Γ := 𝚷) (s := s + 1);
     exact Semiformula.eval_ex.trans
       ((exists_congr fun x => hφ' V (x :> e)).trans
       ((models_exs φ' e).symm.trans (models_altUp (∃' φ') e).symm));
@@ -653,6 +652,7 @@ theorem exists_prenex_of_hierarchy (h : Hierarchy Γ s φ) :
   apply provable_iff_of_models_iff;
   intro V _ _ e;
   have : V↓[ℒₒᵣ] ⊧* 𝗕𝚺 s := models_of_subtheory (T := 𝗕𝚺 s) (U := T) inferInstance;
+  have : V↓[ℒₒᵣ] ⊧* PrenexBase s := models_PrenexBase_of_models_CollectionOnHierarchy (Γ := 𝚺) (s := s);
   exact hφ' V e;
 
 theorem exists_matrix_provable (h : Hierarchy Γ s φ) :
@@ -668,6 +668,7 @@ theorem exists_strictHierarchy_of_hierarchy (h : Hierarchy Γ s φ) :
 lemma exists_strictHierarchy_eval_iff {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗕𝚺 s]
   {φ : ArithmeticSemiformula ℕ 1} (hφ : Hierarchy Γ s φ) (f : ℕ → V) :
   ∃ ψ : ArithmeticSemiformula ℕ 1, StrictHierarchy Γ s ψ ∧ ∀ x : V, ψ.Eval ![x] f ↔ φ.Eval ![x] f := by
+  have : V↓[ℒₒᵣ] ⊧* PrenexBase s := models_PrenexBase_of_models_CollectionOnHierarchy (Γ := 𝚺) (s := s);
   obtain ⟨θ, hθ⟩ := Prenex.models_exists_prenex (φ := φ.toSemisentence ![#0]) (hφ.rew _);
   use Rew.embSubsts (#0 :> fun i : Fin φ.fvSup ↦ (&(i : ℕ) : ArithmeticSemiterm ℕ 1)) ▹ θ.val;
   and_intros;
