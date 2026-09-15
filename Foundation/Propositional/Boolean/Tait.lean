@@ -1,7 +1,7 @@
 module
 
 public import Foundation.Propositional.Boolean.NNFormula
-public import Foundation.Propositional.Tait.Calculus
+public import Foundation.Propositional.LK.Basic
 public import Foundation.Vorspiel.Set.Basic
 
 @[expose] public section

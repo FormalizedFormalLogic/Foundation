@@ -164,12 +164,12 @@ public import Foundation.Propositional.Formula.Basic
 public import Foundation.Propositional.Formula.NNFormula
 public import Foundation.Propositional.Heyting.Semantics
 public import Foundation.Propositional.Hilbert.Basic
+public import Foundation.Propositional.LK.Basic
 public import Foundation.Propositional.Logic.Basic
-public import Foundation.Propositional.Tait.Calculus
-public import Foundation.SecondOrder.Derivation
-public import Foundation.SecondOrder.Semantics
+public import Foundation.SecondOrder.LK.Basic
 public import Foundation.SecondOrder.Syntax.Formula
 public import Foundation.SecondOrder.Syntax.Rew
+public import Foundation.SecondOrder.Tarski.Basic
 public import Foundation.Syntax.Predicate.Language
 public import Foundation.Syntax.Predicate.Quantifier
 public import Foundation.Syntax.Predicate.Relational
