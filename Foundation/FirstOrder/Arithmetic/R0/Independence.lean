@@ -32,25 +32,24 @@ instance : ORingStructure Trivial where
 
 instance : Subsingleton Trivial := ⟨fun _ _ ↦ rfl⟩
 
+namespace Trivial
+
+@[simp] lemma eq_iff (a b : Trivial) : a = b ↔ True := eq_iff_true_of_subsingleton a b
+
+@[simp] lemma not_lt (a b : Trivial) : ¬ a < b := id
+
+end Trivial
+
+-- `simp [models_iff]` is used as a non-terminal simp to discharge most axiom cases at once;
+-- the flexible-simp linter is silenced for this instance only.
+set_option linter.flexible false in
 instance : Trivial↓[ℒₒᵣ] ⊧* (𝗥₀ \ Ω₃Scheme) := ⟨by
   intro σ ⟨h, hn⟩;
-  rcases h with ⟨_, h⟩ | ⟨n, m⟩ | ⟨n, m⟩ | ⟨n, m, h⟩ | n | n;
-  . have : Trivial↓[ℒₒᵣ] ⊧* (𝗘𝗤 ℒₒᵣ : ArithmeticTheory) := inferInstance;
-    simpa [models_iff] using models_theory_iff.mp this _ h;
-  . simp only [models_iff];
-    exact Subsingleton.elim _ _;
-  . simp only [models_iff];
-    exact Subsingleton.elim _ _;
-  . exact absurd ⟨n, m, h, rfl⟩ hn;
-  . simp only [Nat.reduceAdd, Fin.Fin1.eq_one, Fin.isValue, disjLt_succ, models_iff, Semiformula.eval_all,
-      Nat.succ_eq_add_one, LogicalConnective.HomClass.map_iff, Semiformula.eval_operator, Matrix.comp₂,
-      Semiterm.val_bvar, Matrix.cons_val_fin_one, Semiterm.val_operator, Matrix.comp₀, Structure.numeral_eq_numeral,
-      Structure.le_iff_of_eq_of_lt, LogicalConnective.HomClass.map_or, Structure.eq_iff_eq, Matrix.cons_val_zero,
-      Matrix.cons_val_one, hom_disj_prop, LogicalConnective.Prop.or_eq, LogicalConnective.Prop.iff_eq];
-    intro x;
-    exact ⟨fun _ ↦ Or.inl (Subsingleton.elim _ _), fun _ ↦ Or.inl (Subsingleton.elim _ _)⟩;
-  . simp only [models_iff];
-    exact id;⟩
+  rcases h <;> simp [models_iff, Structure.le_iff_of_eq_of_lt];
+  case equal h =>
+    have : Trivial↓[ℒₒᵣ] ⊧* (𝗘𝗤 ℒₒᵣ : ArithmeticTheory) := inferInstance;
+    exact models_theory_iff.mp this _ h;
+  case Ω₃ n m h => exact absurd ⟨n, m, h, rfl⟩ hn;⟩
 
 def NatLE := ℕ
 
@@ -75,59 +74,44 @@ def toNat (x : NatLE) : ℕ := x
       show n + 1 + 1 = n + 2;
       omega;
 
-lemma lt_iff {a b : NatLE} : a < b ↔ a.toNat ≤ b.toNat := Iff.rfl
+@[simp] lemma lt_iff {a b : NatLE} : a < b ↔ a.toNat ≤ b.toNat := Iff.rfl
 
 end NatLE
 
+-- `simp [models_iff]` is used as a non-terminal simp to discharge the operator/quantifier
+-- unfolding before finishing each case by hand; the flexible-simp linter is silenced for this
+-- instance only.
+set_option linter.flexible false in
 instance : NatLE↓[ℒₒᵣ] ⊧* (𝗥₀ \ Ω₅Scheme) := ⟨by
   intro σ ⟨h, hn⟩;
   rcases h with ⟨_, h⟩ | ⟨n, m⟩ | ⟨n, m⟩ | ⟨n, m, h⟩ | n | n;
   . have : NatLE↓[ℒₒᵣ] ⊧* (𝗘𝗤 ℒₒᵣ : ArithmeticTheory) := inferInstance;
     simpa [models_iff] using models_theory_iff.mp this _ h;
-  . simp only [models_iff, Semiformula.eval_operator, Matrix.comp₂, Nat.succ_eq_add_one, Nat.reduceAdd,
-      Semiterm.val_operator, Matrix.comp₀, Structure.numeral_eq_numeral, Structure.Add.add, Structure.eq_iff_eq,
-      Fin.isValue, Matrix.cons_val_zero, Matrix.cons_val_one, Fin.Fin1.eq_one, Matrix.cons_val_fin_one];
-    rw [NatLE.numeral_eq, NatLE.numeral_eq, NatLE.numeral_eq];
+  . simp [models_iff, Structure.numeral_eq_numeral];
     rfl;
-  . simp only [models_iff, Semiformula.eval_operator, Matrix.comp₂, Nat.succ_eq_add_one, Nat.reduceAdd,
-      Semiterm.val_operator, Matrix.comp₀, Structure.numeral_eq_numeral, Structure.Mul.mul, Structure.eq_iff_eq,
-      Fin.isValue, Matrix.cons_val_zero, Matrix.cons_val_one, Fin.Fin1.eq_one, Matrix.cons_val_fin_one];
-    rw [NatLE.numeral_eq, NatLE.numeral_eq, NatLE.numeral_eq];
+  . simp [models_iff, Structure.numeral_eq_numeral];
     rfl;
-  . simp only [Semantics.Not.models_not, models_iff, Semiformula.eval_operator, Matrix.comp₂, Nat.succ_eq_add_one,
-      Nat.reduceAdd, Semiterm.val_operator, Matrix.comp₀, Structure.numeral_eq_numeral, NatLE.numeral_eq,
-      Structure.eq_iff_eq, Fin.isValue, Matrix.cons_val];
+  . simp [models_iff];
     exact h;
-  . simp only [Nat.reduceAdd, Fin.Fin1.eq_one, Fin.isValue, disjLt_succ, models_iff, Semiformula.eval_all,
-      Nat.succ_eq_add_one, LogicalConnective.HomClass.map_iff, Semiformula.eval_operator, Matrix.comp₂,
-      Semiterm.val_bvar, Matrix.cons_val_fin_one, Semiterm.val_operator, Matrix.comp₀, Structure.numeral_eq_numeral,
-      Structure.le_iff_of_eq_of_lt, LogicalConnective.HomClass.map_or, Structure.eq_iff_eq, Matrix.cons_val_zero,
-      Matrix.cons_val_one, hom_disj_prop, LogicalConnective.Prop.or_eq, LogicalConnective.Prop.iff_eq];
+  . simp [models_iff, -existsAndEq];
     intro x;
-    rw [NatLE.lt_iff];
-    simp only [NatLE.numeral_eq];
-    show x.toNat = n ∨ x.toNat ≤ n ↔ x.toNat = n ∨ ∃ i < n, x.toNat = i;
+    refine Structure.le_iff_of_eq_of_lt.trans ?_;
     constructor;
-    . rintro (rfl | h);
+    . rintro (rfl | hx);
       . left; rfl;
-      . rcases eq_or_lt_of_le h with rfl | h;
+      . rcases eq_or_lt_of_le (show x.toNat ≤ n from hx) with rfl | hlt;
         . left; rfl;
-        . right; exact ⟨x.toNat, h, rfl⟩;
-    . rintro (h | ⟨i, hi, h⟩);
-      . left; exact h;
-      . right; omega;
+        . right; exact ⟨x, hlt, rfl⟩;
+    . rintro (rfl | ⟨i, hi, rfl⟩);
+      . left; rfl;
+      . right; exact hi.le;
   . exact absurd ⟨n, rfl⟩ hn;⟩
 
 end Countermodel
 
 theorem Ω₃_independent : 𝗥₀ \ Ω₃Scheme ⊬ “↑0 ≠ ↑1” :=
   unprovable_of_countermodel _ (M := Countermodel.Trivial) <| by
-    simp only [notModels_iff, LogicalConnective.HomClass.map_neg, Semiformula.eval_operator, Matrix.comp₂,
-      Nat.succ_eq_add_one, Nat.reduceAdd, Semiterm.val_operator, Matrix.comp₀, Structure.numeral_eq_numeral,
-      ORingStructure.zero_eq_zero, ORingStructure.one_eq_one, Structure.eq_iff_eq, Fin.isValue,
-      Matrix.cons_val_zero, Matrix.cons_val_one, Fin.Fin1.eq_one, Matrix.cons_val_fin_one,
-      LogicalConnective.Prop.neg_eq, Decidable.not_not];
-    exact Subsingleton.elim _ _;
+    simp [notModels_iff];
 
 theorem Ω₅_independent : 𝗥₀ \ Ω₅Scheme ⊬ “¬ ↑0 < ↑0” :=
   unprovable_of_countermodel _ (M := Countermodel.NatLE) <| by
