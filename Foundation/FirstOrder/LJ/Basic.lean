@@ -3,6 +3,7 @@ module
 public import Foundation.Vorspiel.Multiset
 public import Foundation.Vorspiel.Option
 public import Foundation.FirstOrder.Syntax.Intuitionistic.Rew
+public import Foundation.Logic.Calculus
 
 /-! # First-order $\mathbf{LJ}$ -/
 

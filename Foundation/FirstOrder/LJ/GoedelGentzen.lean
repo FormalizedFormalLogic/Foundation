@@ -1,6 +1,7 @@
 module
 
 public import Foundation.FirstOrder.LJ.Basic
+public import Foundation.FirstOrder.LK.Basic
 
 @[expose] public section
 namespace FFL.FirstOrder

@@ -1,6 +1,7 @@
 module
 
 public import Foundation.FirstOrder.Syntax.Intuitionistic.Formula
+public import Foundation.Syntax.Predicate.Rew
 
 @[expose] public section
 

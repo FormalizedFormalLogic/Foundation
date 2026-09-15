@@ -1,5 +1,5 @@
 module
-public import Foundation.FirstOrder.Syntax.Classical.Operator
+public import Foundation.FirstOrder.Tarski.Operator
 public import Foundation.FirstOrder.Tarski.Elementary
 @[expose] public section
 

@@ -1,6 +1,7 @@
 module
 
 public import Foundation.SecondOrder.Syntax.Rew
+public import Foundation.Logic.Calculus
 
 /-!
 # Second-order one-sided $\mathbf{LK}$

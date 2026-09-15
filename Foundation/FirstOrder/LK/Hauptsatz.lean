@@ -1,6 +1,7 @@
 module
 
 public import Foundation.FirstOrder.LJ.GoedelGentzen
+public import Foundation.FirstOrder.LK.CutFree
 
 /-!
 # Hauptsatz of classical first-order logic

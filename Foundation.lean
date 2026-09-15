@@ -101,6 +101,7 @@ public import Foundation.FirstOrder.LK.Completeness.CanonicalModel
 public import Foundation.FirstOrder.LK.Completeness.CountableSublanguage
 public import Foundation.FirstOrder.LK.Completeness.CounterModel
 public import Foundation.FirstOrder.LK.CutFree
+public import Foundation.FirstOrder.LK.Eq
 public import Foundation.FirstOrder.LK.Hauptsatz
 public import Foundation.FirstOrder.LK.Interpretation
 public import Foundation.FirstOrder.LK.Simplified
@@ -134,7 +135,9 @@ public import Foundation.FirstOrder.Tarski.AesopInit
 public import Foundation.FirstOrder.Tarski.Basic
 public import Foundation.FirstOrder.Tarski.Definability
 public import Foundation.FirstOrder.Tarski.Elementary
+public import Foundation.FirstOrder.Tarski.Eq
 public import Foundation.FirstOrder.Tarski.Model
+public import Foundation.FirstOrder.Tarski.Operator
 public import Foundation.FirstOrder.Tarski.Skolemization
 public import Foundation.FirstOrder.Tarski.Ultraproduct
 public import Foundation.Logic.Calculus

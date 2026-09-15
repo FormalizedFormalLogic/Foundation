@@ -1,8 +1,11 @@
 module
 
+public import Foundation.FirstOrder.Syntax.Classical.Coding
 public import Foundation.FirstOrder.LK.Completeness.CanonicalModel
 public import Foundation.FirstOrder.LK.Completeness.CountableSublanguage
 public import Foundation.FirstOrder.Tarski.Ultraproduct
+public import Foundation.FirstOrder.LK.Eq
+public import Foundation.FirstOrder.Tarski.Model
 public import Foundation.Vorspiel.Order.Dense
 public import Mathlib.Logic.Equiv.List
 public import Mathlib.Logic.Encodable.Basic

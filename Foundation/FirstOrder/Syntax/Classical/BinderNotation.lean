@@ -1,6 +1,6 @@
 module
 
-public import Foundation.FirstOrder.Syntax.Classical.Operator
+public import Foundation.FirstOrder.Tarski.Operator
 public import Foundation.Vorspiel.Fin.Matrix
 
 @[expose] public section

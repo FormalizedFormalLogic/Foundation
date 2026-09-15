@@ -1,6 +1,7 @@
 module
 
 public import Foundation.FirstOrder.LK.Hauptsatz
+public import Foundation.FirstOrder.LK.Soundness
 public import Foundation.Logic.ForcingRelation
 
 /-!
