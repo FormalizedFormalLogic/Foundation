@@ -314,8 +314,15 @@ instance : M↓[ℒₒᵣ] ⊧* 𝗥₀ := models_theory_iff.mpr <| by
   case Ω₂ n m => simp [models_iff, numeral_mul]
   case Ω₃ n m h => simp [models_iff, numeral_ne_of_ne h];
   case Ω₄ n =>
-    suffices ∀ (x : M), x < numeral n ↔ ∃ i < n, x = numeral i by simpa [models_iff];
-    apply iff_lt_numeral_exists_numeral;
+    suffices ∀ (x : M), (x = numeral n ∨ x < numeral n) ↔ (x = numeral n ∨ ∃ i < n, x = numeral i) by
+      simpa [models_iff, Structure.le_iff_of_eq_of_lt];
+    intro x;
+    exact or_congr_right iff_lt_numeral_exists_numeral;
+  case Ω₅ n =>
+    suffices ¬ (numeral n : M) < numeral n by simpa [models_iff];
+    intro h;
+    obtain ⟨m, hm, he⟩ := iff_lt_numeral_exists_numeral.mp h;
+    exact numeral_ne_of_ne (by omega) he;
 
 end R0
 
