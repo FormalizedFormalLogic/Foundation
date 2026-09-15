@@ -155,7 +155,7 @@ lemma bind (f : List.Vector ℕ n → ℕ →. ℕ) (hf : @ArithPart₁ (n + 1) 
         -- `simp [hgv]` here triggers a simproc panic (`Lean.Expr.appArg!`, reached via
         -- `Simp.SimprocEntry.try`): deterministic, but non-fatal, so the build still
         -- succeeds. This `simp only` + `exact` avoids the unrestricted simp set that pulls
-        -- the offending simproc in. Still reproduces verbatim on v4.34.0-rc1, so keep this
+        -- the offending simproc in. Still reproduces verbatim on v4.34.0, so keep this
         -- until an upstream fix actually lands.
         · simp only [Matrix.cons_val_zero]; exact hgv.trans (Part.pure_eq_some x).symm
         · rfl
