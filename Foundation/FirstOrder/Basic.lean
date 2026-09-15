@@ -5,6 +5,7 @@ public import Foundation.FirstOrder.Basic.Syntax.Rew
 public import Foundation.FirstOrder.Basic.Semantics.Semantics
 public import Foundation.FirstOrder.Basic.Semantics.Elementary
 public import Foundation.FirstOrder.Basic.Operator
+public import Foundation.FirstOrder.Basic.BoundingHierarchy
 public import Foundation.FirstOrder.Basic.BinderNotation
 public import Foundation.FirstOrder.Basic.Model
 public import Foundation.FirstOrder.Basic.Calculus
