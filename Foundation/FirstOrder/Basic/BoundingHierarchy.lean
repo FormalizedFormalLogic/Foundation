@@ -10,6 +10,7 @@ namespace FFL.FirstOrder
 variable {L : Language}
 variable (R : Semiformula.Operator L 2)
 
+/-- This formalization generalizes the syntactic arithmetical hierarchy using `R` for bounds. -/
 inductive BoundingHierarchy : Polarity → ℕ → {n : ℕ} → Semiformula L ξ n → Prop
   | verum (Γ s n) : BoundingHierarchy Γ s (⊤ : Semiformula L ξ n)
   | falsum (Γ s n) : BoundingHierarchy Γ s (⊥ : Semiformula L ξ n)
@@ -213,6 +214,7 @@ lemma neg {φ : Semiformula L ξ n} :
   . intro hp;
     exact hp.bexs ht;
 
+/-- An auxiliary condition here requiring every application of `R` to lie in every hierarchy level. -/
 class Small (R : Semiformula.Operator L 2) (ξ : Type*) : Prop where
   operator {n : ℕ} {Γ : Polarity} {s : ℕ}
     (v : Fin 2 → Semiterm L ξ n) :
@@ -283,19 +285,19 @@ private lemma operator_preimage [R.SymbolLike ξ₁ ξ₂]
     {χ : Semiformula L ξ₁ (n₁ + 1)} {t : Semiterm L ξ₂ (n₂ + 1)}
     (hχ : ω.q ▹ χ = R.operator ![#0, t]) (ht : t.Positive) :
     ∃ u : Semiterm L ξ₁ (n₁ + 1), χ = R.operator ![#0, u] ∧ u.Positive := by
-  rcases (inferInstance : R.SymbolLike ξ₁ ξ₂).symbolLike ω.q hχ with
-    ⟨v, hχ, hv⟩
+  obtain ⟨v, hχ, hv⟩ := (inferInstance : R.SymbolLike ξ₁ ξ₂).symbolLike ω.q hχ;
   have hv0 : v 0 = #0 :=
-    (Rew.q_eq_zero_iff (ω := ω) (t := v 0)).mp (by simpa using hv 0)
-  have hv1 : ω.q (v 1) = t := by simpa using hv 1
-  refine ⟨v 1, ?_, ?_⟩
-  · calc
+    (Rew.q_eq_zero_iff (ω := ω) (t := v 0)).mp (by simpa using hv 0);
+  have hv1 : ω.q (v 1) = t := by simpa using hv 1;
+  use v 1;
+  and_intros;
+  . calc
       χ = R.operator v := hχ
       _ = R.operator ![#0, v 1] := by
-        rw [Matrix.fun_eq_vec_two v, hv0]
-        simp
-  · rw [← Rew.q_positive_iff (ω := ω) (t := v 1), hv1]
-    exact ht
+        rw [Matrix.fun_eq_vec_two v, hv0];
+        simp;
+  . rw [← Rew.q_positive_iff (ω := ω) (t := v 1), hv1];
+    exact ht;
 
 @[simp] lemma rew_iff [R.SymbolLike ξ₁ ξ₂]
     {ω : Rew L ξ₁ n₁ ξ₂ n₂} {φ : Semiformula L ξ₁ n₁} :
@@ -364,10 +366,6 @@ lemma iff_iff {φ ψ : Semiformula L ξ n} :
       (BoundingHierarchy R Γ 0 φ ∧ BoundingHierarchy R Γ 0 ψ) := by
   simp [Semiformula.iff_eq]; tauto
 
-@[simp] lemma matrix_conj_iff {Γ s n} {φ : Fin m → Semiformula L ξ n} :
-    BoundingHierarchy R Γ s (Matrix.conj fun j ↦ φ j) ↔ ∀ j, BoundingHierarchy R Γ s (φ j) :=
-  conj_iff
-
 lemma remove_forall [Small R ξ] {φ : Semiformula L ξ (n + 1)} :
     BoundingHierarchy R Γ s (∀¹ φ) → BoundingHierarchy R Γ s φ := by
   intro h
@@ -435,14 +433,6 @@ lemma remove_exists [Small R ξ] {φ : Semiformula L ξ (n + 1)} :
 @[simp] lemma finset_udisj_iff {Γ s n} [Fintype ι] {φ : ι → Semiformula L ξ n} :
     BoundingHierarchy R Γ s (Finset.udisj φ) ↔ ∀ i, BoundingHierarchy R Γ s (φ i) := by
   simp [Finset.udisj]
-
-@[simp] lemma exsItr [Small R ξ] {n k} {φ : Semiformula L ξ (n + k)} :
-    BoundingHierarchy R 𝚺 (s + 1) (∃¹^[k] φ) ↔ BoundingHierarchy R 𝚺 (s + 1) φ :=
-  exsItr_iff
-
-@[simp] lemma allItr [Small R ξ] {n k} {φ : Semiformula L ξ (n + k)} :
-    BoundingHierarchy R 𝚷 (s + 1) (∀¹^[k] φ) ↔ BoundingHierarchy R 𝚷 (s + 1) φ :=
-  allItr_iff
 
 lemma sigma₁_induction [Small R ξ]
     {P : (n : ℕ) → Semiformula L ξ n → Prop}

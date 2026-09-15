@@ -227,7 +227,7 @@ lemma iff_iff {φ ψ : Semiformula L ξ n} :
 
 @[simp] lemma matrix_conj_iff {Γ s n} {φ : Fin m → Semiformula L ξ n} :
     Hierarchy Γ s (Matrix.conj fun j ↦ φ j) ↔ ∀ j, Hierarchy Γ s (φ j) :=
-  BoundingHierarchy.matrix_conj_iff (R := BoundingOperator (L := L))
+  BoundingHierarchy.conj_iff (R := BoundingOperator (L := L))
 
 lemma remove_forall {φ : Semiformula L ξ (n + 1)} :
     Hierarchy Γ s (∀¹ φ) → Hierarchy Γ s φ :=
@@ -275,11 +275,11 @@ lemma remove_exists {φ : Semiformula L ξ (n + 1)} :
 
 @[simp] lemma exsItr {n k} {φ : Semiformula L ξ (n + k)} :
     Hierarchy 𝚺 (s + 1) (∃¹^[k] φ) ↔ Hierarchy 𝚺 (s + 1) φ :=
-  BoundingHierarchy.exsItr (R := BoundingOperator (L := L))
+  BoundingHierarchy.exsItr_iff (R := BoundingOperator (L := L))
 
 @[simp] lemma allItr {n k} {φ : Semiformula L ξ (n + k)} :
     Hierarchy 𝚷 (s + 1) (∀¹^[k] φ) ↔ Hierarchy 𝚷 (s + 1) φ :=
-  BoundingHierarchy.allItr (R := BoundingOperator (L := L))
+  BoundingHierarchy.allItr_iff (R := BoundingOperator (L := L))
 
 end Hierarchy
 
