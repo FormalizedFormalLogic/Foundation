@@ -92,7 +92,7 @@ def CollectionScheme (Γ : ArithmeticSemiformula ℕ 2 → Prop) : ArithmeticThe
   { ψ | ∃ φ : ArithmeticSemiformula ℕ 2, Γ φ ∧ ψ = .univCl (collectionAxiom φ) }
 
 abbrev CollectionOnHierarchy (Γ : Polarity) (s : ℕ) : ArithmeticTheory :=
-  𝗜𝚺₀ ∪ CollectionScheme (Arithmetic.Hierarchy Γ s)
+  𝗜𝚺₀ ∪ CollectionScheme (Arithmetic.StrictHierarchy Γ s)
 
 prefix:max "𝗕 " => CollectionOnHierarchy
 
@@ -182,17 +182,17 @@ lemma CollectionOnHierarchy_subset_mono {s₁ s₂} (h : s₁ ≤ s₂) : 𝗕 �
 lemma CollectionOnHierarchy_weakerThan_of_le {s₁ s₂} (h : s₁ ≤ s₂) : 𝗕 Γ s₁ ⪯ 𝗕 Γ s₂ :=
   Entailment.WeakerThan.ofSubset (CollectionOnHierarchy_subset_mono h)
 
-lemma CollectionOnHierarchy_subset_BSigma_succ (Γ : Polarity) (s : ℕ) : 𝗕 Γ s ⊆ 𝗕𝚺 (s + 1) :=
-  Set.union_subset_union_right _ (CollectionScheme_subset (·.accum 𝚺))
-
-lemma CollectionOnHierarchy_weakerThan_BSigma_succ (Γ : Polarity) (s : ℕ) : 𝗕 Γ s ⪯ 𝗕𝚺 (s + 1) :=
-  Entailment.WeakerThan.ofSubset (CollectionOnHierarchy_subset_BSigma_succ Γ s)
-
 lemma CollectionOnHierarchy_subset_of_lt {Γ Γ' : Polarity} {s s' : ℕ} (h : s < s') : 𝗕 Γ s ⊆ 𝗕 Γ' s' :=
   Set.union_subset_union_right _ (CollectionScheme_subset (·.strict_mono Γ' h))
 
 lemma CollectionOnHierarchy_weakerThan_of_lt {Γ Γ' : Polarity} {s s' : ℕ} (h : s < s') : 𝗕 Γ s ⪯ 𝗕 Γ' s' :=
   Entailment.WeakerThan.ofSubset (CollectionOnHierarchy_subset_of_lt h)
+
+lemma CollectionOnHierarchy_subset_BSigma_succ (Γ : Polarity) (s : ℕ) : 𝗕 Γ s ⊆ 𝗕𝚺 (s + 1) :=
+  CollectionOnHierarchy_subset_of_lt (Nat.lt_succ_self s)
+
+lemma CollectionOnHierarchy_weakerThan_BSigma_succ (Γ : Polarity) (s : ℕ) : 𝗕 Γ s ⪯ 𝗕𝚺 (s + 1) :=
+  Entailment.WeakerThan.ofSubset (CollectionOnHierarchy_subset_BSigma_succ Γ s)
 
 end
 

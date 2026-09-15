@@ -210,7 +210,7 @@ theorem BSigma_weakerThan_ISigma : 𝗕𝚺 (s + 1) ⪯ 𝗜𝚺 (s + 1) := Weak
   rintro σ (hσ | ⟨φ, hφ, rfl⟩);
   . exact WeakerThan.pbl (h := ISigma_weakerThan_of_le (by omega))
       (by_axm hσ);
-  . exact ISigma.provable_collectionAxiom_of_hierarchy s hφ;
+  . exact ISigma.provable_collectionAxiom_of_hierarchy s hφ.hierarchy;
 
 @[instance]
 theorem BSigma_weakerThan_ISigma_succ : 𝗕𝚺 s ⪯ 𝗜𝚺 (s + 1) :=
@@ -233,10 +233,10 @@ variable {Γ : Polarity} {s : ℕ}
 lemma models_paMinus_of_models_CollectionOnHierarchy [V↓[ℒₒᵣ] ⊧* 𝗕 Γ s] : V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ :=
   models_of_subtheory (T := 𝗣𝗔⁻) (U := 𝗕 Γ s) inferInstance
 
-/-- In a model of `𝗕 Γ s`, witnesses for a `Hierarchy Γ s` formula `θ` at every `x < a` can be
-chosen below a single bound `w`. -/
+/-- In a model of `𝗕 Γ s`, witnesses for a `StrictHierarchy Γ s` formula `θ` at every `x < a` can
+be chosen below a single bound `w`. -/
 lemma exists_bound_of_models_CollectionOnHierarchy [V↓[ℒₒᵣ] ⊧* 𝗕 Γ s] {m : ℕ}
-    {θ : ArithmeticSemisentence (m + 2)} (hθ : Hierarchy Γ s θ) (e : Fin m → V) (a : V)
+    {θ : ArithmeticSemisentence (m + 2)} (hθ : StrictHierarchy Γ s θ) (e : Fin m → V) (a : V)
     (hex : ∀ x < a, ∃ u, V ⊧/(u :> x :> e) θ) :
     ∃ w, ∀ x < a, ∃ u ≤ w, V ⊧/(u :> x :> e) θ :=
   have : V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := models_paMinus_of_models_CollectionOnHierarchy (Γ := Γ) (s := s);

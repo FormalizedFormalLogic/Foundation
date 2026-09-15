@@ -1,6 +1,6 @@
 module
 
-public import Foundation.FirstOrder.Arithmetic.Collection.Basic
+public import Foundation.FirstOrder.Arithmetic.Collection.Buss
 
 /-!
 # The equivalence `𝗕𝚺 (s + 1) ≊ 𝗕𝚷 s`, and `𝗜𝚺 s` from `𝗕𝚺 (s + 1)`
@@ -69,7 +69,7 @@ private lemma exists_monotoneWitness_ball {θ χ} (u : ArithmeticSemiterm Empty 
       exact fun x hx ↦ hsound (x :> e) v ((heval e v).mp h x hx);
     . intro e h;
       simp only [Semiformula.eval_ballLT] at h;
-      obtain ⟨w, hw⟩ := exists_bound_of_models_CollectionOnHierarchy (Γ := 𝚷) (s := s) hχ e
+      obtain ⟨w, hw⟩ := exists_bound_of_models_CollectionOnHierarchy_of_hierarchy (Γ := 𝚷) (s := s) hχ e
         (u.valb e) fun x hx ↦ hcomplete (x :> e) (h x hx);
       exact ⟨w, (heval e w).mpr fun x hx ↦ (hw x hx).elim fun v hv ↦
         hmono (x :> e) v w hv.1 hv.2⟩;
@@ -236,7 +236,7 @@ private lemma exists_bound_sigma_succ_of_models_BPi {θ : ArithmeticSemisentence
     ∃ w, ∀ x < a, ∃ u ≤ w, V ⊧/(u :> x :> e) θ := by
   have : V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := models_paMinus_of_models_CollectionOnHierarchy (Γ := 𝚷) (s := s);
   obtain ⟨χ, hχ, hmono, hsound, hcomplete⟩ := exists_monotoneWitness_of_hierarchy (V := V) hθ;
-  obtain ⟨w, hw⟩ := exists_bound_of_models_CollectionOnHierarchy (Γ := 𝚷) (s := s)
+  obtain ⟨w, hw⟩ := exists_bound_of_models_CollectionOnHierarchy_of_hierarchy (Γ := 𝚷) (s := s)
     (θ := (χ ⇜ (#1 :> #0 :> (#·.succ.succ))).bexsLT #0) (by simpa using hχ) e a <| by
       intro x hx;
       obtain ⟨u, hu⟩ := hex x hx;
@@ -277,7 +277,7 @@ theorem BPi.provable_collectionAxiom_of_hierarchy (hφ : Hierarchy 𝚺 (s + 1) 
 theorem BSigma_succ_weakerThan_BPi : 𝗕𝚺 (s + 1) ⪯ 𝗕𝚷 s := WeakerThan.ofAxm! <| by
   rintro σ (hσ | ⟨φ, hφ, rfl⟩);
   . exact WeakerThan.pbl (h := (inferInstance : 𝗜𝚺₀ ⪯ 𝗕𝚷 s)) (by_axm hσ);
-  . exact BPi.provable_collectionAxiom_of_hierarchy hφ;
+  . exact BPi.provable_collectionAxiom_of_hierarchy hφ.hierarchy;
 
 @[instance]
 theorem BSigma_succ_equiv_BPi : 𝗕𝚺 (s + 1) ≊ 𝗕𝚷 s :=
@@ -359,8 +359,7 @@ private lemma models_ISigma_succ [V↓[ℒₒᵣ] ⊧* 𝗕𝚺 (s + 2)] [V↓[�
     (CollectionOnHierarchy_subset_mono (Nat.le_succ (s + 1))));
   have hcol : ∀ ψ : ArithmeticSemiformula ℕ 2, Hierarchy 𝚷 (s + 1) ψ →
       V↓[ℒₒᵣ] ⊧ (.univCl (collectionAxiom ψ) : ArithmeticSentence) := fun _ hψ ↦
-    models_of_mem (T := 𝗕𝚺 (s + 2))
-      (Set.mem_union_right _ (mem_CollectionScheme_of_mem (hψ.accum 𝚺)));
+    models_collectionAxiom_of_hierarchy (Γ := 𝚺) (s := s + 2) (hψ.accum 𝚺);
   suffices V↓[ℒₒᵣ] ⊧* InductionScheme ℒₒᵣ (Hierarchy 𝚺 (s + 1)) by
     simpa [ISigma, InductionOnHierarchy, Semantics.ModelsSet.union_iff] using ⟨hPA, this⟩;
   simp only [InductionScheme];
