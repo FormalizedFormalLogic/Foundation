@@ -58,7 +58,7 @@ noncomputable instance : QPF.{u + 1, u + 1, u + 1} UniverseFunctor.{u} where
   abs_map m p := by
     ext b
     rcases p
-    simp [PFunctor.map]
+    simp [PFunctor.map]; rfl
 
 @[simp] lemma liftp_iff {P : α → Prop} {f : UniverseFunctor α} :
     Functor.Liftp P f ↔ ∀ a ∈ f, P a := by

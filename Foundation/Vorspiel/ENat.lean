@@ -16,7 +16,7 @@ variable (P : ℕ → Prop)
 
 theorem lt_find (n : ℕ) (h : ∀ m ≤ n, ¬P m) : (n : ℕ∞) < find P := by
   by_cases h : ∃ x : ℕ, P x
-  · simpa [find, h]
+  · simpa [find, h, ENat.natCast_lt_natCast, Nat.lt_find_iff]
   · simp [find, h]
 
 theorem exists_of_find_le (n : ℕ) (h : find P ≤ (n : ENat)) : ∃ m ≤ n, P m := by
@@ -26,7 +26,7 @@ theorem exists_of_find_le (n : ℕ) (h : find P ≤ (n : ENat)) : ∃ m ≤ n, P
 lemma find_eq_top_iff : find P = ⊤ ↔ ∀ (n : ℕ), ¬P n := by simp [find]
 
 lemma find_le (n : ℕ) (h : P n) : find P ≤ ↑n := by
-  suffices ∃ m ≤ n, P m by simpa [show ∃ x, P x from ⟨n, h⟩, find]
+  suffices ∃ m ≤ n, P m by simpa [show ∃ x, P x from ⟨n, h⟩, find, ENat.natCast_le_natCast, Nat.find_le_iff]
   exact ⟨n, by rfl, h⟩
 
 end ENat
