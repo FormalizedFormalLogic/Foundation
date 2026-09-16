@@ -36,7 +36,7 @@ PRs (title and body) are written in English.
 ## Before submitting
 
 - The affected modules build with `lake build`, with no errors or warnings (including remaining `sorry`).
-- 🤖 Run `just axiom-audit` and confirm it passes before submitting a PR. This checks sorry-freeness and the axiom allowlist across the project, and CI re-runs it on every PR — a failing audit blocks the merge.
+- 🤖 Run `just forgive` and confirm it passes before submitting a PR. [Forgive](https://github.com/FormalizedFormalLogic/forgive) checks sorry-freeness and the axiom allowlist in `forgive.yml` across the project, and CI re-runs it on every PR — a failing audit blocks the merge.
 - Run import-all to keep `Foundation.lean` up to date:
   ```shell
   just mk-all
