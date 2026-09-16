@@ -16,12 +16,15 @@ instance (α : Type*) : Adjoin α (Multiset α) := ⟨Multiset.cons⟩
 
 instance (α : Type*) [DecidableEq α] : Adjoin α (Finset α) := ⟨insert⟩
 
-class AdjunctiveSet (β : outParam Type*) (α : Type*) extends Membership β α, HasSubset α, EmptyCollection α, Adjoin β α where
+class AdjunctiveSet (β : outParam Type*) (α : Type*)
+    extends Membership β α, HasSubset α, EmptyCollection α, Adjoin β α where
   subset_iff {a b : α} : a ⊆ b ↔ ∀ x ∈ a, x ∈ b
   not_mem_empty (x : β) : ¬x ∈ (∅ : α)
   mem_cons_iff {x z : β} {a : α} : x ∈ adjoin z a ↔ x = z ∨ x ∈ a
 
 attribute [simp] AdjunctiveSet.not_mem_empty AdjunctiveSet.mem_cons_iff
+
+variable {α : Type*}
 
 instance Set.adjunctiveSet : AdjunctiveSet α (Set α) where
   Subset := (· ⊆ ·)
@@ -58,7 +61,8 @@ lemma subset_iff_set_subset_set {a b : α} : a ⊆ b ↔ set a ⊆ set b := by s
 @[simp, refl] lemma subset_refl (a : α) : a ⊆ a := subset_iff_set_subset_set.mpr (Set.Subset.refl _)
 
 @[trans] lemma subset_trans {a b c : α} (ha : a ⊆ b) (hb : b ⊆ c) : a ⊆ c :=
-  subset_iff_set_subset_set.mpr (Set.Subset.trans (subset_iff_set_subset_set.mp ha) (subset_iff_set_subset_set.mp hb))
+  subset_iff_set_subset_set.mpr
+    (Set.Subset.trans (subset_iff_set_subset_set.mp ha) (subset_iff_set_subset_set.mp hb))
 
 lemma subset_antisymm {a b : α} (ha : a ⊆ b) (hb : b ⊆ a) : set a = set b :=
   Set.Subset.antisymm (subset_iff_set_subset_set.mp ha) (subset_iff_set_subset_set.mp hb)
@@ -67,7 +71,8 @@ lemma subset_antisymm {a b : α} (ha : a ⊆ b) (hb : b ⊆ a) : set a = set b :
 
 @[simp] lemma mem_cons (a : α) (x : β) : x ∈ adjoin x a := by simp [mem_cons_iff]
 
-@[simp] lemma subset_cons (a : α) (x : β) : a ⊆ adjoin x a := by simp [subset_iff, mem_cons_iff]; tauto
+@[simp] lemma subset_cons (a : α) (x : β) : a ⊆ adjoin x a := by
+  simp [subset_iff, mem_cons_iff]; tauto
 
 @[simp] lemma set_empty : set (∅ : α) = ∅ := by ext; simp [set]
 
@@ -93,14 +98,18 @@ def _root_.List.toAdjunctiveSet : List β → α
 
 noncomputable def _root_.Finset.toAdjunctiveSet : Finset β → α := fun s ↦ s.toList.toAdjunctiveSet
 
-@[simp] lemma mem_list_toAdjunctiveSet {x : β} {l : List β} : x ∈ (l.toAdjunctiveSet : α) ↔ x ∈ l := by
+@[simp] lemma mem_list_toAdjunctiveSet {x : β} {l : List β} :
+    x ∈ (l.toAdjunctiveSet : α) ↔ x ∈ l := by
   induction l <;> simp [List.toAdjunctiveSet, *]
 
-@[simp] lemma mem_finset_toAdjunctiveSet {x : β} {s : Finset β} : x ∈ (s.toAdjunctiveSet : α) ↔ x ∈ s := by simp [Finset.toAdjunctiveSet]
+@[simp] lemma mem_finset_toAdjunctiveSet {x : β} {s : Finset β} :
+    x ∈ (s.toAdjunctiveSet : α) ↔ x ∈ s := by simp [Finset.toAdjunctiveSet]
 
-@[simp] lemma list_toAdjunctiveSet_finite (l : List β) : Finite (l.toAdjunctiveSet : α) := by simp [Finite, set]
+@[simp] lemma list_toAdjunctiveSet_finite (l : List β) : Finite (l.toAdjunctiveSet : α) := by
+  simp [Finite, set]
 
-@[simp] lemma finset_toAdjunctiveSet_finite (s : Finset β) : Finite (s.toAdjunctiveSet : α) := by simp [Finite, set]
+@[simp] lemma finset_toAdjunctiveSet_finite (s : Finset β) : Finite (s.toAdjunctiveSet : α) := by
+  simp [Finite, set]
 
 end AdjunctiveSet
 
@@ -112,7 +121,8 @@ lemma cons_eq (a : α) (s : Set α) : adjoin a s = insert a s := rfl
 
 @[simp] lemma adjunctiveSet_set (s : Set α) : AdjunctiveSet.set s = s := rfl
 
-@[simp] lemma adjunctiveSet_finite_iff (s : Set α) : AdjunctiveSet.Finite s ↔ s.Finite := by simp [AdjunctiveSet.Finite]
+@[simp] lemma adjunctiveSet_finite_iff (s : Set α) : AdjunctiveSet.Finite s ↔ s.Finite := by
+  simp [AdjunctiveSet.Finite]
 
 end Set
 

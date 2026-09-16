@@ -61,8 +61,8 @@ jobs:
         if: hashFiles('.lake/Foundation-x86_64-unknown-linux-gnu.tar.gz') != ''
         run: lake unpack
 
-      - name: Build Foundation
-        run: lake build Foundation
+      - name: Build Foundation (warnings are errors)
+        run: lake build Foundation --wfail
 
       - name: Check sorry-freeness and axiom allowlist (forgive)
         run: just forgive

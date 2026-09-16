@@ -9,6 +9,8 @@ public import Mathlib.Algebra.Order.Group.Multiset
 
 namespace Multiset
 
+variable {α β : Type*}
+
 /-- Function to avoid reducing `{a} + s` to `a ::ₘ s` -/
 def atom (a : α) : Multiset α := {a}
 
@@ -34,7 +36,8 @@ lemma add_atom_eq_cons (a : α) (s : Multiset α) : s + ⦃a⦄ = a ::ₘ s := b
 
 @[simp] lemma atom_le_iff {a : α} {s : Multiset α} : ⦃a⦄ ≤ s ↔ a ∈ s := by simp [atom_eq_singleton]
 
-@[simp] lemma atom_subset_iff {a : α} {s : Multiset α} : ⦃a⦄ ⊆ s ↔ a ∈ s := by simp [atom_eq_singleton]
+@[simp] lemma atom_subset_iff {a : α} {s : Multiset α} : ⦃a⦄ ⊆ s ↔ a ∈ s := by
+  simp [atom_eq_singleton]
 
 @[simp] lemma map_atom (f : α → β) (a : α) : ⦃a⦄.map f = ⦃f a⦄ := by
   simp [atom_eq_singleton]
@@ -78,7 +81,7 @@ lemma map_subset_iff {s₁ s₂ : Multiset α} (f : α → β) (hf : Function.In
 
 inductive Traversal {α : Type*} : Multiset α → Type _ where
   | zero : Traversal 0
-  | succ (a : α) : Traversal s → Traversal (s + ⦃a⦄)
+  | succ {s : Multiset α} (a : α) : Traversal s → Traversal (s + ⦃a⦄)
 
 namespace Traversal
 
@@ -86,7 +89,7 @@ def cast {s t : Multiset α} (h : s = t) : Traversal s → Traversal t := fun t 
 
 def atom (a : α) : Traversal ⦃a⦄ := zero.succ a
 
-def add (t₁ : Traversal s₁) (t₂ : Traversal s₂) : Traversal (s₁ + s₂) :=
+def add {s₁ s₂ : Multiset α} (t₁ : Traversal s₁) (t₂ : Traversal s₂) : Traversal (s₁ + s₂) :=
   match t₂ with
   |     zero => t₁.cast (by simp)
   | succ a t => (add t₁ t).succ a |>.cast (by abel)

@@ -33,25 +33,25 @@ When they still need tactic work, introduce the witness with `use`, split what r
 
 ```lean
 -- Avoid:
-refine ⟨f x, hf x, ?_⟩;
+refine ⟨f x, hf x, ?_⟩
 
 -- Prefer:
-use f x;
-and_intros;
-. exact hf x;
-. simpa using hg x;
+use f x
+and_intros
+. exact hf x
+. simpa using hg x
 ```
 
 Never write bound variables inside `refine` — introduce them with `intro` as a tactic:
 
 ```lean
 -- Avoid:
-refine ⟨hd, fun x hx => ?_⟩;
+refine ⟨hd, fun x hx => ?_⟩
 
 -- Prefer:
-and_intros;
-. exact hd;
-. intro x hx;
+and_intros
+. exact hd
+. intro x hx
   …
 ```
 
@@ -71,12 +71,12 @@ theorem Even.add_two : Even n → Even (n + 2)
 
 ```lean
 -- Prefer:
-have h₁ : P ↔ Q := …;
-have h₂ : Q ↔ R := …;
-grind;
+have h₁ : P ↔ Q := …
+have h₂ : Q ↔ R := …
+grind
 
 -- Avoid:
-exact step1.trans <| step2.trans <| step3.trans step4;
+exact step1.trans <| step2.trans <| step3.trans step4
 ```
 
 🤖 **Keep proofs short; extract lemmas.** A tactic block beyond roughly thirty lines should be split: promote intermediate `have`s to stand-alone (possibly `private`) lemmas.
@@ -84,20 +84,6 @@ exact step1.trans <| step2.trans <| step3.trans step4;
 🤖 **Do not bundle lemmas into a `structure … : Prop` for convenience.** It is justified only when three or more properties must travel together as the hypothesis of a mutual or nested induction; otherwise state separate lemmas.
 
 ## Tactic layout
-
-🤖 **End tactic lines with `;`.** A line that is a complete tactic invocation carries a trailing `;`, so where one tactic ends is visible without tracing the indentation:
-
-```lean
-theorem foo (h : ∃ n, P n) : Q := by
-  obtain ⟨n, hn⟩ := h;
-  induction n with
-  | zero => simpa using hn;
-  | succ n ih =>
-    rw [succ_eq];
-    exact ih hn;
-```
-
-Do not add it to a line ending in `:= by`, `with`, or an opening bracket; to the non-final lines of a tactic that wraps across several lines; to a case header that opens a multi-line block (`| succ n ih =>`); to term-mode code, including equation-compiler branches; or to a tactic embedded in a term (`(by simp)`).
 
 **Focus dots are `.`, not `·`.** Both parse; the ASCII form is the house one.
 

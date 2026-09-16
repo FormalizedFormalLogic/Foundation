@@ -64,16 +64,16 @@ attribute [match_pattern]
   Vee.vee
 
 @[default_instance]
-instance Tilde.instHTilde [Tilde α] : HTilde α α := ⟨Tilde.tilde⟩
+instance Tilde.instHTilde {α : Type*} [Tilde α] : HTilde α α := ⟨Tilde.tilde⟩
 
 @[default_instance]
-instance Arrow.instHArrow [Arrow α] : HArrow α α α := ⟨Arrow.arrow⟩
+instance Arrow.instHArrow {α : Type*} [Arrow α] : HArrow α α α := ⟨Arrow.arrow⟩
 
 @[default_instance]
-instance Wedge.instHWedge [Wedge α] : HWedge α α α := ⟨Wedge.wedge⟩
+instance Wedge.instHWedge {α : Type*} [Wedge α] : HWedge α α α := ⟨Wedge.wedge⟩
 
 @[default_instance]
-instance Vee.instHVee [Vee α] : HVee α α α := ⟨Vee.vee⟩
+instance Vee.instHVee {α : Type*} [Vee α] : HVee α α α := ⟨Vee.vee⟩
 
 class Box (α : Type*) where
   box : α → α
