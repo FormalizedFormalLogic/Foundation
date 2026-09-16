@@ -15,6 +15,7 @@ namespace FFL.FirstOrder.Arithmetic.Bootstrapping.Arithmetic
 -- declarations in this namespace (the option is scoped by `namespace`/`end` and
 -- reverts automatically at `end FFL.FirstOrder.Arithmetic.Bootstrapping.Arithmetic`).
 set_option linter.dupNamespace false
+set_option linter.style.openClassical false
 
 open Classical
 
@@ -54,21 +55,30 @@ theorem term_complete {n : ℕ} (t : FirstOrder.ClosedSemiterm ℒₒᵣ n) (w :
   |   .func Language.One.one v => by simp
   |   .func Language.Add.add v => by
       suffices
-          T.internalize V ⊢ (toNumVec w ⤕ ⌜v 0⌝) + (toNumVec w ⤕ ⌜v 1⌝) ≐ 𝕹 ((v 0).valb w + (v 1).valb w) by
+          T.internalize V ⊢
+            (toNumVec w ⤕ ⌜v 0⌝) + (toNumVec w ⤕ ⌜v 1⌝) ≐ 𝕹 ((v 0).valb w + (v 1).valb w) by
         simpa [Rew.func, Semiterm.val_func]
-      have ih : T.internalize V ⊢ (toNumVec w ⤕ ⌜v 0⌝) + (toNumVec w ⤕ ⌜v 1⌝) ≐ 𝕹((v 0).valb w) + 𝕹((v 1).valb w) :=
+      have ih :
+          T.internalize V ⊢
+            (toNumVec w ⤕ ⌜v 0⌝) + (toNumVec w ⤕ ⌜v 1⌝) ≐ 𝕹((v 0).valb w) + 𝕹((v 1).valb w) :=
         subst_add_eq_add T _ _ _ _ ⨀ term_complete (v 0) w ⨀ term_complete (v 1) w
-      have : T.internalize V ⊢ 𝕹((v 0).valb w) + 𝕹((v 1).valb w) ≐ 𝕹((v 0).valb w + (v 1).valb w) := numeral_add T _ _
+      have : T.internalize V ⊢
+          𝕹((v 0).valb w) + 𝕹((v 1).valb w) ≐ 𝕹((v 0).valb w + (v 1).valb w) :=
+        numeral_add T _ _
       exact eq_trans ih this
   |   .func Language.Mul.mul v => by
       suffices
-          T.internalize V ⊢ (toNumVec w ⤕ ⌜v 0⌝) * (toNumVec w ⤕ ⌜v 1⌝) ≐ 𝕹((v 0).valb w * (v 1).valb w) by
+          T.internalize V ⊢
+            (toNumVec w ⤕ ⌜v 0⌝) * (toNumVec w ⤕ ⌜v 1⌝) ≐ 𝕹((v 0).valb w * (v 1).valb w) by
         simpa [Rew.func, Semiterm.val_func]
       have ih :
-          T.internalize V ⊢ (toNumVec w ⤕ ⌜v 0⌝) * (toNumVec w ⤕ ⌜v 1⌝) ≐ 𝕹((v 0).valb w) * 𝕹((v 1).valb w) :=
+          T.internalize V ⊢
+            (toNumVec w ⤕ ⌜v 0⌝) * (toNumVec w ⤕ ⌜v 1⌝) ≐ 𝕹((v 0).valb w) * 𝕹((v 1).valb w) :=
         subst_mul_eq_mul T _ _ _ _ ⨀ term_complete (v 0) w ⨀ term_complete (v 1) w
       have :
-          T.internalize V ⊢ 𝕹((v 0).valb w) * 𝕹((v 1).valb w) ≐ 𝕹((v 0).valb w * (v 1).valb w) := numeral_mul T _ _
+          T.internalize V ⊢
+            𝕹((v 0).valb w) * 𝕹((v 1).valb w) ≐ 𝕹((v 0).valb w * (v 1).valb w) :=
+        numeral_mul T _ _
       exact eq_trans ih this
 
 open FirstOrder.Arithmetic
@@ -111,7 +121,8 @@ theorem bold_sigma_one_complete {n} {φ : ArithmeticSemisentence n} (hp : Hierar
     suffices T.internalize V ⊢ ((toNumVec w ⤕ ⌜t₁⌝) ≮' (toNumVec w ⤕ ⌜t₂⌝)) by
       simpa [Sentence.typed_quote_def]
     have : t₁.valb w ≥ t₂.valb w := by simpa using h
-    have h₀ : T.internalize V ⊢     𝕹(t₁.valb w) ≮' 𝕹(t₂.valb w) := by simpa using numeral_nlt T this
+    have h₀ : T.internalize V ⊢ 𝕹(t₁.valb w) ≮' 𝕹(t₂.valb w) := by
+      simpa using numeral_nlt T this
     have h₁ : T.internalize V ⊢ (toNumVec w ⤕ ⌜t₁⌝) ≐ 𝕹(t₁.valb w) := term_complete T t₁ w
     have h₂ : T.internalize V ⊢ (toNumVec w ⤕ ⌜t₂⌝) ≐ 𝕹(t₂.valb w) := term_complete T t₂ w
     exact subst_nlt T _ _ _ _ ⨀ eq_comm h₁ ⨀ eq_comm h₂ ⨀ h₀
@@ -130,8 +141,10 @@ theorem bold_sigma_one_complete {n} {φ : ArithmeticSemisentence n} (hp : Hierar
     intro n t φ _ ih w h
     have h : ∀ i < t.valb w, V ⊧/(i :> w) φ := by
       simpa using h
-    suffices T.internalize V ⊢ ((toNumVec w).q ⤔ ⌜φ⌝).ball (toNumVec w ⤕ ⌜t⌝) by
-      simpa [Semiterm.empty_typed_quote_def, ←Rew.emb_bShift_term, Semiformula.ball, ball, Semiformula.imp_def]
+    suffices
+        T.internalize V ⊢ ((toNumVec w).q ⤔ ⌜φ⌝).ball (toNumVec w ⤕ ⌜t⌝) by
+      simpa [Semiterm.empty_typed_quote_def, ←Rew.emb_bShift_term, Semiformula.ball, ball,
+        Semiformula.imp_def]
     have : T.internalize V ⊢ ((toNumVec w).q ⤔ ⌜φ⌝).ball 𝕹(t.valb w) := by
       apply ball_intro
       intro i hi
