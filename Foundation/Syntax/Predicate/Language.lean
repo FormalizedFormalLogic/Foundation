@@ -19,6 +19,8 @@ namespace FFL
 
 namespace FirstOrder
 
+universe u
+
 structure Language where
   Func : Nat → Type u
   Rel  : Nat → Type u
@@ -28,7 +30,7 @@ namespace Language
 class Relational (L : Language) where
   func_empty : ∀ k, IsEmpty (L.Func k)
 
-instance {L : Language} [L.Relational] : IsEmpty (L.Func k) := Relational.func_empty k
+instance {L : Language} [L.Relational] {k : Nat} : IsEmpty (L.Func k) := Relational.func_empty k
 
 class IsConstant (L : Language) where
   func_empty : ∀ k, IsEmpty (L.Func (k + 1))
@@ -245,12 +247,16 @@ abbrev unit : Language := constant PUnit
 
 end Constant
 
+universe v u₁ u₂
+
 def ofFunc (F : ℕ → Type v) : Language := ⟨F, fun _ => PEmpty⟩
 
 def add (L₁ : Language.{u₁}) (L₂ : Language.{u₂}) : Language :=
   ⟨fun k => L₁.Func k ⊕ L₂.Func k, fun k => L₁.Rel k ⊕ L₂.Rel k⟩
 
 instance : _root_.Add Language := ⟨add⟩
+
+variable {ι : Type*}
 
 def sigma (L : ι → Language) : Language := ⟨fun k => Σ i, (L i).Func k, fun k => Σ i, (L i).Rel k⟩
 
@@ -331,12 +337,13 @@ instance (L : Language) (S : Language) [L.LT] : (L.add S).LT where
   rel : {k : ℕ} → L₁.Rel k → L₂.Rel k
 
 /--
-A structure for the homomorphisms (respecting function and relation symbols) between first-order languages.
+A structure for the homomorphisms (respecting function and relation symbols) between
+first-order languages.
 -/
 scoped[FFL.FirstOrder] infix:25 " →ᵥ " => FFL.FirstOrder.Language.Hom
 
 namespace Hom
-variable (L L₁ L₂ L₃ : Language) (Φ : Hom L₁ L₂)
+variable (L L₁ L₂ L₃ : Language) (Φ : Hom L₁ L₂) {k : ℕ}
 
 protected def id : L →ᵥ L where
   func := id
@@ -410,20 +417,24 @@ protected class Language.DecidableEq (L : Language) where
   func : (k : ℕ) → DecidableEq (L.Func k)
   rel : (k : ℕ) → DecidableEq (L.Rel k)
 
-instance (L : Language) [(k : ℕ) → DecidableEq (L.Func k)] [(k : ℕ) → DecidableEq (L.Rel k)] : L.DecidableEq :=
-  ⟨fun _ ↦ inferInstance, fun _ ↦ inferInstance⟩
+instance (L : Language) [(k : ℕ) → DecidableEq (L.Func k)] [(k : ℕ) → DecidableEq (L.Rel k)] :
+    L.DecidableEq := ⟨fun _ ↦ inferInstance, fun _ ↦ inferInstance⟩
 
-instance (L : Language) [L.DecidableEq] (k : ℕ) : DecidableEq (L.Func k) := Language.DecidableEq.func k
+instance (L : Language) [L.DecidableEq] (k : ℕ) : DecidableEq (L.Func k) :=
+  Language.DecidableEq.func k
 
-instance (L : Language) [L.DecidableEq] (k : ℕ) : DecidableEq (L.Rel k) := Language.DecidableEq.rel k
+instance (L : Language) [L.DecidableEq] (k : ℕ) : DecidableEq (L.Rel k) :=
+  Language.DecidableEq.rel k
 
-instance (L : Language) [L.DecidableEq] (k : ℕ) : DecidableEq (L.Rel k) := Language.DecidableEq.rel k
+instance (L : Language) [L.DecidableEq] (k : ℕ) : DecidableEq (L.Rel k) :=
+  Language.DecidableEq.rel k
 
 protected class Language.Encodable (L : Language) where
   func : (k : ℕ) → Encodable (L.Func k)
   rel : (k : ℕ) → Encodable (L.Rel k)
 
-instance (L : Language) [(k : ℕ) → Encodable (L.Func k)] [(k : ℕ) → Encodable (L.Rel k)] : L.Encodable := ⟨fun _ ↦ inferInstance, fun _ ↦ inferInstance⟩
+instance (L : Language) [(k : ℕ) → Encodable (L.Func k)] [(k : ℕ) → Encodable (L.Rel k)] :
+    L.Encodable := ⟨fun _ ↦ inferInstance, fun _ ↦ inferInstance⟩
 
 instance (L : Language) [L.Encodable] (k : ℕ) : Encodable (L.Func k) := Language.Encodable.func k
 
