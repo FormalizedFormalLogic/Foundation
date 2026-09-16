@@ -17,7 +17,8 @@ lemma not_exists_tarski_predicate : ¬∃ τ : ArithmeticSemisentence 1, ∀ σ,
   cl_prover [h₁, h₂];
 
 /-- Tarski's Undefinability of Truth Theorem. -/
-theorem undefinability_of_truth : ¬∃ τ : ArithmeticSemisentence 1, ∀ σ : ArithmeticSentence, ℕ↓[ℒₒᵣ] ⊧ σ ↔ ℕ↓[ℒₒᵣ] ⊧ τ/[⌜σ⌝] := by
+theorem undefinability_of_truth :
+    ¬∃ τ : ArithmeticSemisentence 1, ∀ σ : ArithmeticSentence, ℕ↓[ℒₒᵣ] ⊧ σ ↔ ℕ↓[ℒₒᵣ] ⊧ τ/[⌜σ⌝] := by
   have := not_exists_tarski_predicate (T := 𝗧𝗔);
   contrapose! this;
   obtain ⟨τ, hτ⟩ := this;
