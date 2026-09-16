@@ -32,24 +32,24 @@ protected def Cl : Hilbert α := ⟨
 end Hilbert
 
 
-inductive HilbertProof (Λ : Hilbert α) : Formula α → Type _
-| axm {φ}        : φ ∈ Λ → HilbertProof Λ φ
-| mdp {φ ψ}      : HilbertProof Λ (φ 🡒 ψ) → HilbertProof Λ φ → HilbertProof Λ ψ
-| verum          : HilbertProof Λ $ Axioms.Verum
-| implyS {φ ψ χ} : HilbertProof Λ $ Axioms.ImplyS φ ψ χ
-| implyK {φ ψ}   : HilbertProof Λ $ Axioms.ImplyK φ ψ
-| andElimL {φ ψ} : HilbertProof Λ $ Axioms.AndElim₁ φ ψ
-| andElimR {φ ψ} : HilbertProof Λ $ Axioms.AndElim₂ φ ψ
-| andIntro {φ ψ} : HilbertProof Λ $ Axioms.AndInst φ ψ
-| orIntroL {φ ψ} : HilbertProof Λ $ Axioms.OrInst₁ φ ψ
-| orIntroR {φ ψ} : HilbertProof Λ $ Axioms.OrInst₂ φ ψ
-| orElim {φ ψ χ} : HilbertProof Λ $ Axioms.OrElim φ ψ χ
+inductive Hilbert.Proof (Λ : Hilbert α) : Formula α → Type _
+| axm {φ}        : φ ∈ Λ → Hilbert.Proof Λ φ
+| mdp {φ ψ}      : Hilbert.Proof Λ (φ 🡒 ψ) → Hilbert.Proof Λ φ → Hilbert.Proof Λ ψ
+| verum          : Hilbert.Proof Λ $ Axioms.Verum
+| implyS {φ ψ χ} : Hilbert.Proof Λ $ Axioms.ImplyS φ ψ χ
+| implyK {φ ψ}   : Hilbert.Proof Λ $ Axioms.ImplyK φ ψ
+| andElimL {φ ψ} : Hilbert.Proof Λ $ Axioms.AndElim₁ φ ψ
+| andElimR {φ ψ} : Hilbert.Proof Λ $ Axioms.AndElim₂ φ ψ
+| andIntro {φ ψ} : Hilbert.Proof Λ $ Axioms.AndInst φ ψ
+| orIntroL {φ ψ} : Hilbert.Proof Λ $ Axioms.OrInst₁ φ ψ
+| orIntroR {φ ψ} : Hilbert.Proof Λ $ Axioms.OrInst₂ φ ψ
+| orElim {φ ψ χ} : Hilbert.Proof Λ $ Axioms.OrElim φ ψ χ
 
-instance : Entailment (Hilbert α) (Formula α) := ⟨HilbertProof⟩
+instance : Entailment (Hilbert α) (Formula α) := ⟨Hilbert.Proof⟩
 
 namespace Hilbert
 
-open HilbertProof
+open Hilbert.Proof
 
 variable (H : Hilbert α)
 
@@ -67,7 +67,7 @@ instance : Entailment.Minimal H where
 
 variable {H} {H₁ H₂ : Hilbert α}
 
-alias ofSchema := HilbertProof.axm
+alias ofSchema := Hilbert.Proof.axm
 @[grind <=] lemma of_schema (h : φ ∈ H) : H ⊢ φ := ⟨ofSchema h⟩
 
 def ofLE (h : H₁.schema ⊆ H₂.schema) : H₁ ⊢! φ → H₂ ⊢! φ

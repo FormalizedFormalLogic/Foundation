@@ -1,6 +1,6 @@
 module
 
-public import Foundation.FirstOrder.Intuitionistic.LJ
+public import Foundation.FirstOrder.LJ.Basic
 public import Foundation.FirstOrder.Kripke.Basic
 
 @[expose] public section
@@ -10,9 +10,9 @@ namespace FFL.FirstOrder
 
 variable {L : Language} [L.Relational]
 
-namespace KripkeModel
+namespace Kripke.Model
 
-variable {W : Type*} [Preorder W] {C : Type*} [KripkeModel L W C]
+variable {W : Type*} [Preorder W] {C : Type*} [Kripke.Model L W C]
 
 def Forces {n} (w : W) (bv : Fin n → C) (fv : ξ → C) : Semiformulaᵢ L ξ n → Prop
   | .rel R t => Rel w R fun i ↦ (t i).relationalVal bv fv
@@ -23,11 +23,13 @@ def Forces {n} (w : W) (bv : Fin n → C) (fv : ξ → C) : Semiformulaᵢ L ξ 
   |     ∀¹ φ => ∀ v ≤ w, ∀ x : v, Forces v (x.val :> bv) fv φ
   |     ∃¹ φ => ∃ x : w, Forces w (x.val :> bv) fv φ
 
-scoped notation:45 w " ⊩[" bv "|" fv "] " φ:46 => Forces w bv fv φ
+scoped[FFL.FirstOrder.KripkeModel] notation:45 w " ⊩[" bv "|" fv "] " φ:46 => FFL.FirstOrder.Kripke.Model.Forces w bv fv φ
+
+open scoped FFL.FirstOrder.KripkeModel
 
 abbrev Forcesb {n} (w : W) (bv : Fin n → C) : Semisentenceᵢ L n → Prop := Forces w bv Empty.elim
 
-scoped notation:45 w " ⊩/" bv φ:46 => Forcesb w bv φ
+scoped[FFL.FirstOrder.KripkeModel] notation:45 w " ⊩/" bv φ:46 => FFL.FirstOrder.Kripke.Model.Forcesb w bv φ
 
 namespace Forces
 
@@ -271,14 +273,14 @@ lemma sound {T : Theoryᵢ L} (b : T ⊢ φ) : W ∀⊩* T → W ∀⊩ φ := fu
 
 end Forces₀
 
-end KripkeModel
+end Kripke.Model
 
 -- `World`'s and `Carrier`'s universes only occur together (via `Domain : World → Set Carrier`),
 -- which is intentional here rather than a sign of an unnecessary parameter; keeping them
 -- separate documents that the two carriers need not live in the same universe.
 set_option linter.checkUnivs false in
 /-- Kripke model for intuitionistic first-order logic -/
-structure IntKripke (L : Language) [L.Relational] where
+structure Kripke.Mod (L : Language) [L.Relational] where
   World : Type*
   [nonempty : Nonempty World]
   [preorder : Preorder World]
@@ -289,11 +291,11 @@ structure IntKripke (L : Language) [L.Relational] where
   Rel (w : World) {k : ℕ} (R : L.Rel k) : (Fin k → Carrier) → Prop
   rel_monotone : Rel w R t → ∀ v ≤ w, Rel v R t
 
-namespace IntKripke
+namespace Kripke.Mod
 
-variable (𝓚 : IntKripke L)
+variable (𝓚 : Kripke.Mod L)
 
-instance : CoeSort (IntKripke L) (Type _) := ⟨fun 𝓚 ↦ 𝓚.World⟩
+instance : CoeSort (Kripke.Mod L) (Type _) := ⟨fun 𝓚 ↦ 𝓚.World⟩
 
 instance : CoeSort 𝓚 (Type _) := ⟨fun w ↦ 𝓚.Domain w⟩
 
@@ -303,16 +305,17 @@ instance : Preorder 𝓚 := 𝓚.preorder
 
 instance : ForcingExists 𝓚 𝓚.Carrier := ⟨fun p x ↦ x ∈ 𝓚.Domain p⟩
 
-instance kripke : KripkeModel L 𝓚 𝓚.Carrier where
+instance kripke : Kripke.Model L 𝓚 𝓚.Carrier where
   Domain := 𝓚.Domain
   domain_nonempty := 𝓚.domain_nonempty
   domain_antimonotone := 𝓚.domain_antimonotone
   Rel := 𝓚.Rel
   rel_monotone := 𝓚.rel_monotone
 
-open KripkeModel
+open Kripke.Model
+open scoped FFL.FirstOrder.KripkeModel
 
-instance : Semantics (IntKripke L) (Sentenceᵢ L) := ⟨fun 𝓚 φ ↦ 𝓚 ∀⊩ φ⟩
+instance : Semantics (Kripke.Mod L) (Sentenceᵢ L) := ⟨fun 𝓚 φ ↦ 𝓚 ∀⊩ φ⟩
 
 variable {𝓚}
 
@@ -321,19 +324,19 @@ lemma models_def : 𝓚 ⊧ φ ↔ 𝓚 ∀⊩ φ := by rfl
 lemma sound {T : Theoryᵢ L} (b : T ⊢ φ) : 𝓚 ⊧* T → 𝓚 ⊧ φ := fun H ↦
   Forces₀.sound (W := 𝓚) b fun _ hφ ↦ H.models_set hφ
 
-instance (T : Theoryᵢ L) : Sound T (Semantics.models (IntKripke L) T) :=
+instance (T : Theoryᵢ L) : Sound T (Semantics.models (Kripke.Mod L) T) :=
   ⟨fun b _ H ↦ sound b H⟩
 
 lemma sound_empty (b : (∅ : Theoryᵢ L) ⊢ φ) : 𝓚 ⊧ φ := 𝓚.sound b (by simp)
 
-instance : Semantics.Top (IntKripke L) := ⟨fun 𝓚 ↦ by simpa [models_def] using ForcingRelation.AllForces.verum⟩
+instance : Semantics.Top (Kripke.Mod L) := ⟨fun 𝓚 ↦ by simpa [models_def] using ForcingRelation.AllForces.verum⟩
 
-instance : Semantics.Bot (IntKripke L) := ⟨fun 𝓚 ↦ by
+instance : Semantics.Bot (Kripke.Mod L) := ⟨fun 𝓚 ↦ by
   have : Inhabited 𝓚 := Classical.inhabited_of_nonempty'
   simp [models_def]⟩
 
-instance : Semantics.And (IntKripke L) := ⟨by simp [models_def]⟩
+instance : Semantics.And (Kripke.Mod L) := ⟨by simp [models_def]⟩
 
-end IntKripke
+end Kripke.Mod
 
 end FFL.FirstOrder

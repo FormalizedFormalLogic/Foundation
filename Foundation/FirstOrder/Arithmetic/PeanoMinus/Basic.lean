@@ -200,8 +200,8 @@ lemma one_le_of_zero_lt : ∀ x : M, 0 < x → 1 ≤ x := by
   have h := Theory.models M _ PeanoMinus.oneLeOfZeroLt
   simp only [models_iff, Semiformula.eval_all, Nat.succ_eq_add_one, Nat.reduceAdd, Fin.Fin1.eq_one, Fin.isValue,
     LogicalConnective.HomClass.map_imply, Semiformula.eval_operator, Matrix.comp₂, Semiterm.val_operator, Matrix.comp₀,
-    Structure.numeral_eq_numeral, ORingStructure.zero_eq_zero, Semiterm.val_bvar, Matrix.cons_val_fin_one,
-    Structure.lt_iff_lt, Matrix.cons_val_zero, Matrix.cons_val_one, ORingStructure.one_eq_one,
+    Tarski.Structure.numeral_eq_numeral, ORingStructure.zero_eq_zero, Semiterm.val_bvar, Matrix.cons_val_fin_one,
+    Tarski.Structure.lt_iff_lt, Matrix.cons_val_zero, Matrix.cons_val_one, ORingStructure.one_eq_one,
     LogicalConnective.Prop.arrow_eq] at h
   exact h
 
@@ -558,7 +558,7 @@ open FirstOrder FirstOrder.Semiterm
     simp [Operator.npow_succ, Operator.val_comp]
     simp [pow_succ, IH]
 
-instance : Structure.Monotone ℒₒᵣ M := ⟨
+instance : Tarski.Structure.Monotone ℒₒᵣ M := ⟨
   fun {k} f v₁ v₂ h ↦
   match k, f with
   | 0, Language.Zero.zero => by rfl

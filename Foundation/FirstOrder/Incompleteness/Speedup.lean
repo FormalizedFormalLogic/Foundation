@@ -1,7 +1,7 @@
 module
 
-public import Foundation.FirstOrder.Basic.PrimrecCoding
-public import Foundation.FirstOrder.Bootstrapping.DerivabilityCondition.D1
+public import Foundation.FirstOrder.Syntax.Classical.PrimrecCoding
+public import Foundation.FirstOrder.Arithmetic.Bootstrapping.DerivabilityCondition.D1
 public import Foundation.FirstOrder.Incompleteness.Church
 public import Mathlib.Computability.Reduce
 public import Mathlib.Data.Nat.Log
@@ -92,8 +92,8 @@ lemma computablePred_provable_of_minProof_le [L.Primcodable] (hF : Computable F)
 
 private def speedupProof (T : Theory L) (σ π : Sentence L) :
     insert σ T ⊢₂! ((σ ⋎ π : Sentence L)) :=
-  Derivation2.or (φ := σ) (ψ := π) (by simp) $
-    Derivation2.axm σ (by simp) (by simp)
+  LK2.Derivation.or (φ := σ) (ψ := π) (by simp) $
+    LK2.Derivation.axm σ (by simp) (by simp)
 
 private lemma computable_quote_speedupProof [L.Primcodable] :
     Computable λ π ↦ (⌜speedupProof T σ π⌝ : ℕ) :=
@@ -101,7 +101,7 @@ private lemma computable_quote_speedupProof [L.Primcodable] :
       orIntro (insert (s ^⋎ p) ∅) s p (axm (insert s (insert p (insert (s ^⋎ p) ∅))) s) :=
     computable₂_iff_sigma1.mpr (by definability);
   (hc.comp (Computable.const ⌜σ⌝) Sentence.primrec_quote_natCast.to_comp).of_eq λ π ↦ by
-    simp [speedupProof, Derivation2.quote_or, Derivation2.quote_axm, Sentence.quote_def];
+    simp [speedupProof, LK2.Derivation.quote_or, LK2.Derivation.quote_axm, Sentence.quote_def];
 
 private lemma minProof_or_le_speedupProof (π : Sentence L) :
   (insert σ T).minProof (σ ⋎ π) ≤ ⌜speedupProof T σ π⌝ := minProof_le (speedupProof T σ π)

@@ -1,7 +1,7 @@
 module
 
-public import Foundation.FirstOrder.Basic.Coding
-public import Foundation.FirstOrder.Basic.PrimrecCoding
+public import Foundation.FirstOrder.Syntax.Classical.Coding
+public import Foundation.FirstOrder.Syntax.Classical.PrimrecCoding
 public import Foundation.FirstOrder.Incompleteness.RosserProvability
 public import Foundation.FirstOrder.Arithmetic.R0.Representation
 public import Foundation.FirstOrder.Incompleteness.Halting

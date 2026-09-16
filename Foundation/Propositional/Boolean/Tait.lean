@@ -1,7 +1,7 @@
 module
 
 public import Foundation.Propositional.Boolean.NNFormula
-public import Foundation.Propositional.Tait.Calculus
+public import Foundation.Propositional.LK.Basic
 public import Foundation.Vorspiel.Set.Basic
 
 @[expose] public section
@@ -12,10 +12,10 @@ namespace FFL.Propositional
 
 TODO: fix
 
-variable {α : Type*} {T : Theory α} {Γ : Sequent α}
+variable {α : Type*} {T : Theory α} {Γ : LK.Sequent α}
 
-open Boolean (Valuation)
-namespace Derivation
+open Tarski (Valuation)
+namespace LK.Derivation
 
 theorem sound : T ⟹ Γ → T ⊨[Valuation α] Γ.disj := by
   intro d v hv
@@ -48,12 +48,12 @@ theorem sound : T ⟹ Γ → T ⊨[Valuation α] Γ.disj := by
 
 theorem sound! : T ⟹! Γ → T ⊨[Valuation α] Γ.disj := fun h ↦ sound h.get
 
-end Derivation
+end LK.Derivation
 
 lemma soundness {T : Theory α} {φ} : T ⊢ φ → T ⊨[Valuation α] φ := by
-  rintro ⟨b⟩ v hv; simpa using Derivation.sound b hv
+  rintro ⟨b⟩ v hv; simpa using LK.Derivation.sound b hv
 
-namespace Boolean
+namespace Tarski
 
 instance (T : Theory α) : Sound T (Semantics.models (Valuation α) T)  := ⟨soundness⟩
 
@@ -65,7 +65,7 @@ def consistentTheory : Set (Theory α) := { U : Theory α | Entailment.Consisten
 
 variable {T : Theory α}
 
-open Entailment Derivation
+open Entailment LK.Derivation
 
 lemma exists_maximal_consistent_theory (consisT : Entailment.Consistent T) :
     ∃ Z, Consistent Z ∧ T ⊆ Z ∧ ∀ U, Consistent U → Z ⊆ U → U = Z :=
@@ -108,7 +108,7 @@ lemma mem_or_neg_mem_maximalConsistentTheory {consisT : Entailment.Consistent T}
   by_contra A
   have hp : φ ∉ maximalConsistentTheory consisT ∧ ∼φ ∉ maximalConsistentTheory consisT := by simpa [not_or] using A
   have : Consistent (insert φ (maximalConsistentTheory consisT)) :=
-    Derivation.consistent_iff_unprovable.mpr
+    LK.Derivation.consistent_iff_unprovable.mpr
       (show ∼φ ∉ theory (maximalConsistentTheory consisT) from by simpa using hp.2)
   have : insert φ (maximalConsistentTheory consisT) ≠ maximalConsistentTheory consisT := by
     simp [hp]
@@ -185,7 +185,7 @@ theorem completeness! : T ⊨[Valuation α] φ → T ⊢ φ := by
     contrapose
     intro hp hs
     have : Semantics.Satisfiable (Valuation α) (insert (∼φ) T) :=
-      this (Derivation.consistent_iff_unprovable.mpr $ by simpa)
+      this (LK.Derivation.consistent_iff_unprovable.mpr $ by simpa)
     rcases this with ⟨v, hv⟩
     have : v ⊧* T := Semantics.ModelsSet.of_subset hv (by simp)
     have : v ⊧ φ := hs this
@@ -204,18 +204,18 @@ instance (T : Theory α) : Complete T (Semantics.models (Valuation α) T)  where
 
 end complete
 
-end Boolean
+end Tarski
 
-theorem Derivation.complete : T ⊨[Valuation α] Γ.disj → T ⟹! Γ := fun h ↦
-  Tait.derivable_iff_provable_disj.mpr (Boolean.completeness! h)
+theorem LK.Derivation.complete : T ⊨[Valuation α] Γ.disj → T ⟹! Γ := fun h ↦
+  Tait.derivable_iff_provable_disj.mpr (Tarski.completeness! h)
 
-theorem Derivation.complete_iff : T ⟹! Γ ↔ T ⊨[Valuation α] Γ.disj := ⟨sound!, complete⟩
+theorem LK.Derivation.complete_iff : T ⟹! Γ ↔ T ⊨[Valuation α] Γ.disj := ⟨sound!, complete⟩
 
-theorem Sequent.isTautology_iff : Γ.IsTautology ↔ ∀ v : Valuation α, ∃ φ ∈ Γ, v ⊧ φ := by
-  simp [Sequent.IsTautology, Derivation.complete_iff, Semantics.consequence_iff]
+theorem LK.Sequent.isTautology_iff : Γ.IsTautology ↔ ∀ v : Valuation α, ∃ φ ∈ Γ, v ⊧ φ := by
+  simp [LK.Sequent.IsTautology, LK.Derivation.complete_iff, Semantics.consequence_iff]
 
-theorem Sequent.notTautology_iff : ¬Γ.IsTautology ↔ ∃ v : Valuation α, ∀ φ ∈ Γ, ¬v ⊧ φ := by
-  simp [Sequent.isTautology_iff]
+theorem LK.Sequent.notTautology_iff : ¬Γ.IsTautology ↔ ∃ v : Valuation α, ∀ φ ∈ Γ, ¬v ⊧ φ := by
+  simp [LK.Sequent.isTautology_iff]
 
 end Propositional
 
