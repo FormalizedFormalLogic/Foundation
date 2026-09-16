@@ -63,7 +63,7 @@ inductive Derivation : Sequent L → Type _
 | all₂ {φ : Semiproposition L 1 0} : Derivation (Sequent.shift₁ Γ + ⦃φ.free₁⦄) → Derivation (Γ + ⦃∀² φ⦄)
 | exs₂ {φ : Semiproposition L 1 0} : Derivation (Γ + ⦃φ/⟦ψ⟧⦄) → Derivation (Γ + ⦃∃² φ⦄)
 
-scoped prefix:45 "⊢ᴸᴷ² " => Derivation
+prefix:45 "⊢ᴸᴷ² " => Derivation
 
 namespace Derivation
 
@@ -121,34 +121,42 @@ instance : Entailment (Proof.Symbol L) (Sentence L) := ⟨fun _ ↦ Proof⟩
 
 /-! ## Proof system with axioms -/
 
-abbrev Schema (L : Language) := Set (Proposition L)
-
-protected structure Schema.Derivation (𝓢 : Schema L) (φ : Proposition L) where
-  axioms : Sequent L
-  derivation : Derivation (∼axioms + ⦃φ⦄)
-  isInstance : ∀ φ ∈ axioms, φ ∈ 𝓢
-
-instance : Entailment (Schema L) (Proposition L) := ⟨Schema.Derivation⟩
-
-/-! ## Theory: a set of provable sentences -/
-
 abbrev Theory (L : Language) := Set (Sentence L)
 
-instance : Entailment (Theory L) (Sentence L) := ⟨fun T φ ↦ PLift (φ ∈ T)⟩
+/-- A theory proof uses finitely many sentence axioms, as in first-order LK. -/
+structure Theory.Proof (T : Theory L) (σ : Sentence L) where
+  axioms : Multiset (Sentence L)
+  axioms_mem : ∀ ψ ∈ axioms, ψ ∈ T
+  derivation : OneSidedLK.Pullback Derivation (Rew.emb.app.comp FirstOrder.Rewriting.emb)
+    (⦃σ⦄ + ∼axioms)
 
-def Schema.theory (𝓢 : Schema L) : Theory L := {φ | 𝓢 ⊢ ↑φ}
+namespace Theory.Proof
 
-namespace Theory
+instance : Entailment (Theory L) (Sentence L) where
+  Prf := Theory.Proof
 
-variable {T : Theory L}
+attribute [simp] Theory.Proof.axioms_mem
 
-lemma provable_def {φ : Sentence L} : T ⊢ φ ↔ φ ∈ T :=
-  ⟨fun h ↦ PLift.down h.some, fun h ↦ ⟨⟨h⟩⟩⟩
+/-- A singleton derivation gives a theory proof without using any axioms. -/
+def ofDerivation {T : Theory L} {φ : Sentence L}
+    (d : ⊢ᴸᴷ² ⦃(φ : Proposition L)⦄) : T ⊢! φ :=
+  ⟨0, by simp, by simpa [OneSidedLK.Pullback] using d⟩
 
-@[simp] lemma schema_theory_def {𝓢 : Schema L} {φ : Sentence L} :
-    𝓢.theory ⊢ φ ↔ 𝓢 ⊢ ↑φ := by simp [provable_def, Schema.theory]
+instance : Entailment.Compact (Theory L) where
+  core b := {φ | φ ∈ b.axioms}
+  corePrf b := ⟨b.axioms, by simp, b.derivation⟩
+  core_finite b := by simp [AdjunctiveSet.Finite, AdjunctiveSet.set];
+  core_subset b := by simpa [AdjunctiveSet.subset_iff] using b.axioms_mem;
 
-end Theory
+instance : Entailment.Axiomatized (Theory L) where
+  prfAxm {𝓢 φ} h :=
+    ⟨⦃φ⦄, by simpa using h, by
+      simpa [OneSidedLK.Pullback, Multiset.tilde_def] using
+        (Derivation.identity (φ := (φ : Proposition L)))⟩
+  weakening h b :=
+    ⟨b.axioms, fun ψ hψ ↦ h (b.axioms_mem ψ hψ), b.derivation⟩
+
+end Theory.Proof
 
 end FFL.SecondOrder
 

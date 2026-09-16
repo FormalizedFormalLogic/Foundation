@@ -176,11 +176,11 @@ namespace Theory
 
 noncomputable def Proof.toProof2 {φ : Sentence L} (b : T ⊢! φ) : T ⊢₂! (φ : Proposition L) :=
   Derivation2.cutManyProof b.axioms b.axioms_mem <|
-    Derivation2.cast (Derivation.toDerivation2 T b.derivation) (by ext x; simp [Sequent.embed])
+    Derivation2.cast (Derivation.toDerivation2 T b.derivation) (by ext x; simp [Sequent.embed, Multiset.map_tilde_comm])
 
 noncomputable def Proof2.toProof {φ : Sentence L} (d : T ⊢₂! (φ : Proposition L)) : T ⊢! φ := by
   rcases Derivation2.toProofData d with ⟨A, hA, b⟩
-  exact ⟨A, hA, Derivation.cast b (by simp [Sequent.embed, Multiset.atom_eq_singleton])⟩
+  exact ⟨A, hA, Derivation.cast b (by simp [Sequent.embed, Multiset.atom_eq_singleton, Multiset.map_tilde_comm])⟩
 
 end Theory
 

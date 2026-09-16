@@ -36,9 +36,6 @@ lemma not_fvar?_newVar {φ : Proposition L} {Γ : Sequent L} (h : φ ∈ Γ) :
       · exact Nat.le_max_left _ _
       · exact (ih h).trans (Nat.le_max_right _ _)
 
-@[simp] lemma lcHom_comm {Γ : Multiset (Formula L ξ)} (f : Formula L ξ →ˡᶜ Proposition L) :
-    (∼Γ).map f = ∼Γ.map f := by simp [Multiset.tilde_def]
-
 def IsClosed (Γ : Sequent L) : Prop := ∃ φ ∈ Γ, ∼φ ∈ Γ
 
 def embed (Γ : Multiset (Sentence L)) : Sequent L := Γ.map Rewriting.emb
@@ -430,9 +427,9 @@ instance : Entailment.DeductiveExplosion (Theory L) where
   dexp b φ := by
     refine ⟨b.axioms, b.axioms_mem, ?_⟩
     have db : ⊢ᴸᴷ¹ (∼Sequent.embed b.axioms) + ⦃Rewriting.emb (⊥ : Sentence L)⦄ :=
-      Derivation.cast b.derivation (by simp [Sequent.embed, add_comm])
+      Derivation.cast b.derivation (by simp [Sequent.embed, add_comm, Multiset.map_tilde_comm])
     exact ((OneSidedLK.removeBot db).weakening (φ := Rewriting.emb φ)).cast (by
-      simp [Sequent.embed, add_comm])
+      simp [Sequent.embed, add_comm, Multiset.map_tilde_comm])
 
 lemma weakerThan_of_le {T U : Theory L} (h : T ⊆ U) : T ⪯ U :=
   Entailment.Axiomatized.weakerThanOfSubset h
@@ -447,9 +444,9 @@ lemma provable_iff :
   constructor
   · rintro ⟨b⟩
     exact ⟨b.axioms, b.axioms_mem,
-      ⟨by simpa [OneSidedLK.Pullback, Sequent.embed] using b.derivation⟩⟩
+      ⟨by simpa [OneSidedLK.Pullback, Sequent.embed, Multiset.map_tilde_comm] using b.derivation⟩⟩
   · rintro ⟨Γ, hΓ, ⟨d⟩⟩
-    exact ⟨⟨Γ, hΓ, by simpa [OneSidedLK.Pullback, Sequent.embed] using d⟩⟩
+    exact ⟨Γ, hΓ, by simpa [OneSidedLK.Pullback, Sequent.embed, Multiset.map_tilde_comm] using d⟩
 
 lemma inconsistent_iff :
     Entailment.Inconsistent T ↔ ∃ Γ : Multiset (Sentence L), (∀ ψ ∈ Γ, ψ ∈ T) ∧
