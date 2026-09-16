@@ -86,7 +86,8 @@ def alt : SigmaPiDelta → SigmaPiDelta
 
 @[simp] lemma alt_alt (Γ : SigmaPiDelta) : Γ.alt.alt = Γ := by rcases Γ <;> simp
 
-@[simp] lemma alt_coe (Γ : Polarity) : SigmaPiDelta.alt Γ = (Γ.alt : SigmaPiDelta) := by cases Γ <;> simp
+@[simp] lemma alt_coe (Γ : Polarity) : SigmaPiDelta.alt Γ = (Γ.alt : SigmaPiDelta) := by
+  cases Γ <;> simp
 
 end SigmaPiDelta
 
@@ -95,12 +96,12 @@ end SigmaPiDelta
 namespace FirstOrder
 
 class UnivQuantifier (α : ℕ → Type*) where
-  all : α (n + 1) → α n
+  all : {n : ℕ} → α (n + 1) → α n
 
 prefix:64 "∀¹ " => UnivQuantifier.all
 
 class ExsQuantifier (α : ℕ → Type*) where
-  exs : α (n + 1) → α n
+  exs : {n : ℕ} → α (n + 1) → α n
 
 prefix:64 "∃¹ " => ExsQuantifier.exs
 
@@ -139,6 +140,8 @@ prefix:64 "∀¹* " => allClosure
 
 lemma allClosure_succ {n} (a : α (n + 1)) : ∀¹* a = ∀¹* ∀¹ a := rfl
 
+variable {n : ℕ}
+
 def allItr : (k : ℕ) → α (n + k) → α n
   |     0, a => a
   | k + 1, a => allItr k (∀¹ a)
@@ -170,6 +173,8 @@ prefix:64 "∃¹* " => exsClosure
 
 lemma exsClosure_succ {n} (a : α (n + 1)) : ∃¹* a = ∃¹* ∃¹ a := rfl
 
+variable {n : ℕ}
+
 def exsItr : (k : ℕ) → α (n + k) → α n
   |     0, a => a
   | k + 1, a => exsItr k (∃¹ a)
@@ -187,7 +192,7 @@ end ExsQuantifier
 
 section quantifier
 
-variable {α : ℕ → Type*}
+variable {α : ℕ → Type*} {n : ℕ}
 
 def ball [UnivQuantifier α] [Arrow (α (n + 1))] (φ : α (n + 1)) (ψ : α (n + 1)) : α n := ∀¹ (φ 🡒 ψ)
 
@@ -205,7 +210,8 @@ end FirstOrder
 
 namespace Polarity
 
-variable {α : ℕ → Type*} [FirstOrder.UnivQuantifier α] [FirstOrder.ExsQuantifier α] {n : ℕ} {Γ : Polarity}
+variable {α : ℕ → Type*} [FirstOrder.UnivQuantifier α] [FirstOrder.ExsQuantifier α]
+variable {n : ℕ} {Γ : Polarity}
 
 def quant : Polarity → α (n + 1) → α n
   | 𝚺 => FirstOrder.ExsQuantifier.exs
@@ -218,7 +224,7 @@ def quant : Polarity → α (n + 1) → α n
 /-- Prefixes `k` alternating quantifiers starting with `Γ`. -/
 def quantItr (Γ : Polarity) : (k : ℕ) → {n : ℕ} → α (n + k) → α n
   | 0,     n, φ => φ
-  | k + 1, n, φ => Γ.quant $ quantItr Γ.alt k (cast (by grind) φ)
+  | k + 1, n, φ => Γ.quant <| quantItr Γ.alt k (cast (by grind) φ)
 
 @[simp]
 lemma quantItr_zero (φ : α n) : quantItr Γ 0 φ = φ := rfl
@@ -248,12 +254,12 @@ end Polarity
 namespace SecondOrder
 
 class UnivQuantifier (α : ℕ → ℕ → Type*) where
-  all₁ : α (m + 1) n → α m n
+  all₁ : {m n : ℕ} → α (m + 1) n → α m n
 
 prefix:64 "∀² " => UnivQuantifier.all₁
 
 class ExsQuantifier (α : ℕ → ℕ → Type*) where
-  exs₁ : α (m + 1) n → α m n
+  exs₁ : {m n : ℕ} → α (m + 1) n → α m n
 
 prefix:64 "∃² " => ExsQuantifier.exs₁
 
@@ -273,6 +279,7 @@ instance (α : ℕ → ℕ → Type*) [Quantifier α] [(m : ℕ) → FirstOrder.
 section UnivQuantifier
 
 variable {α : ℕ → ℕ → Type*} [UnivQuantifier α]
+variable {n : ℕ}
 
 def allClosure : {m : ℕ} → α m n → α 0 n
   |     0, a => a
@@ -283,6 +290,8 @@ prefix:64 "∀²* " => allClosure
 @[simp] lemma allClosure_zero (a : α 0 n) : ∀²* a = a := rfl
 
 lemma allClosure_succ {n} (a : α (n + 1) n) : ∀²* a = ∀²* ∀² a := rfl
+
+variable {m : ℕ}
 
 def allItr : (k : ℕ) → α (m + k) n → α m n
   |     0, a => a
@@ -301,6 +310,7 @@ end UnivQuantifier
 section ExsQuantifier
 
 variable {α : ℕ → ℕ → Type*} [ExsQuantifier α]
+variable {n : ℕ}
 
 def exsClosure : {m : ℕ} → α m n → α 0 n
   |     0, a => a
@@ -310,7 +320,9 @@ prefix:64 "∃²* " => exsClosure
 
 @[simp] lemma exsClosure_zero (a : α 0 n) : ∃²* a = a := rfl
 
-lemma exsClosure_succ {n} (a : α (m + 1) n) : ∃²* a = ∃²* ∃² a := rfl
+variable {m : ℕ}
+
+lemma exsClosure_succ (a : α (m + 1) n) : ∃²* a = ∃²* ∃² a := rfl
 
 def exsItr : (k : ℕ) → α (m + k) n → α m n
   |     0, a => a
@@ -328,11 +340,11 @@ end ExsQuantifier
 
 section quantifier
 
-variable {α : ℕ → ℕ → Type*}
+variable {α : ℕ → ℕ → Type*} {m n : ℕ}
 
-def ball [UnivQuantifier α] [Arrow (α (m + 1) n)] (φ : α (m + 1) n) (ψ : α (m + 1) n) : α m n := ∀² (φ 🡒 ψ)
+def ball [UnivQuantifier α] [Arrow (α (m + 1) n)] (φ ψ : α (m + 1) n) : α m n := ∀² (φ 🡒 ψ)
 
-def bexs [ExsQuantifier α] [Wedge (α (m + 1) n)] (φ : α (m + 1) n) (ψ : α (m + 1) n) : α m n := ∃² (φ ⋏ ψ)
+def bexs [ExsQuantifier α] [Wedge (α (m + 1) n)] (φ ψ : α (m + 1) n) : α m n := ∃² (φ ⋏ ψ)
 
 notation:64 "∀²[" φ "] " ψ => ball φ ψ
 
