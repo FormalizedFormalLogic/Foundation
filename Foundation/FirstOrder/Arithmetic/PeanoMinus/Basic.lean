@@ -354,9 +354,7 @@ instance models_R0_of_models_PeanoMinus : M↓[ℒₒᵣ] ⊧* 𝗥₀ := models
     simp [models_iff, numeral_eq_natCast]
   case Ω₂ n m =>
     simp [models_iff, numeral_eq_natCast]
-  case Ω₃ n m h =>
-    simp [models_iff, numeral_eq_natCast, h]
-  case Ω₄ n =>
+  case Ω₃ n =>
     suffices ∀ x : M, x < ↑n ↔ ∃ i < n, x = ↑i by simpa [models_iff, numeral_eq_natCast];
     intro x
     constructor
