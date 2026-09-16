@@ -6,10 +6,16 @@ As a baseline, follow the [Mathlib style guide](https://leanprover-community.git
 
 Human contributors need not follow this document to the letter — treat it as a description of the house style. 🤖 AI coding agents should follow it as closely as possible, especially the items marked 🤖: machine-generated proofs tend to drift toward a verbose, defensive style, and those items exist to counteract that drift.
 
+## Linters
+
+The library builds with Mathlib's standard linter set, which [`lakefile.toml`](../lakefile.toml) opts into wholesale (`weak.linter.mathlibStandardSet`), minus the header linter, which enforces a copyright header this repository does not carry. `autoImplicit` is off, as in Mathlib. A warning is an error: CI builds with `lake build Foundation --wfail`. Fix a warning, never suppress it.
+
+Much of what this document would otherwise spell out — the 100-column limit, `<|` rather than `$`, `·` rather than `.` as the focus dot, `fun` rather than `λ`, core `cases`/`induction` rather than `cases'`/`induction'` — the set already enforces, so those rules are not repeated here.
+
 ## General conventions
 
 - Omit type annotations that are trivially inferred.
-- Do not introduce implicit variables ad hoc in lemma statements. Declare them with `variable` in a `section`, and cut a new `section` when the context changes, rather than keeping one giant file-wide block.
+- Do not introduce implicit variables ad hoc in lemma statements. Declare them with `variable` in a `section`, and cut a new `section` when the context changes, rather than keeping one giant file-wide block. `autoImplicit` being off, an undeclared variable is an error rather than a silently auto-bound binder.
 
 ## Proof style
 
@@ -22,8 +28,8 @@ When the components are already at hand, build the term directly:
 ```lean
 -- Avoid:
 refine ⟨n, ?_, ?_⟩
-. exact hn
-. exact hn.le
+· exact hn
+· exact hn.le
 
 -- Prefer:
 exact ⟨n, hn, hn.le⟩
@@ -38,8 +44,8 @@ refine ⟨f x, hf x, ?_⟩
 -- Prefer:
 use f x
 and_intros
-. exact hf x
-. simpa using hg x
+· exact hf x
+· simpa using hg x
 ```
 
 Never write bound variables inside `refine` — introduce them with `intro` as a tactic:
@@ -50,8 +56,8 @@ refine ⟨hd, fun x hx => ?_⟩
 
 -- Prefer:
 and_intros
-. exact hd
-. intro x hx
+· exact hd
+· intro x hx
   …
 ```
 
@@ -82,10 +88,6 @@ exact step1.trans <| step2.trans <| step3.trans step4
 🤖 **Keep proofs short; extract lemmas.** A tactic block beyond roughly thirty lines should be split: promote intermediate `have`s to stand-alone (possibly `private`) lemmas.
 
 🤖 **Do not bundle lemmas into a `structure … : Prop` for convenience.** It is justified only when three or more properties must travel together as the hypothesis of a mutual or nested induction; otherwise state separate lemmas.
-
-## Tactic layout
-
-**Focus dots are `.`, not `·`.** Both parse; the ASCII form is the house one.
 
 ## Naming intermediate steps
 
