@@ -63,20 +63,20 @@ variable {W}
 namespace Filter
 
 /-- A domain of filter `F` -/
-@[ext] structure Model (F : Filter W) where
+@[ext] structure Domain (F : Filter W) where
   val : C
   mem_filter : ∃ p ∈ F, p ⊩↓ val
 
-attribute [coe] Model.val
+attribute [coe] Domain.val
 
 variable (F : Filter W)
 
-instance : CoeOut F.Model C := ⟨fun x ↦ x.val⟩
+instance : CoeOut F.Domain C := ⟨fun x ↦ x.val⟩
 
 lemma finite_colimit [Fintype ι] (p : ι → W) (hp : ∀ i, p i ∈ F) : ∃ q ∈ F, ∀ i, q ≤ p i :=
   DirectedOn.fintype_colimit isTrans_ge (Order.PFilter.nonempty F) F.directed p hp
 
-lemma finite_colimit_domain [Fintype ι] (v : ι → F.Model) :
+lemma finite_colimit_domain [Fintype ι] (v : ι → F.Domain) :
     ∃ q ∈ F, ∀ i, q ⊩↓ ↑(v i) := by
   have : ∀ i, ∃ p ∈ F, p ⊩↓ ↑(v i) := fun i ↦ (v i).mem_filter
   choose p hp using this
@@ -84,11 +84,11 @@ lemma finite_colimit_domain [Fintype ι] (v : ι → F.Model) :
   rcases this with ⟨q, hq, hqp⟩
   refine ⟨q, hq, fun i ↦ domain_antimonotone (hqp i) (hp i).2⟩
 
-instance Str : Tarski.Structure L F.Model where
+instance Str : Tarski.Structure L F.Domain where
   func _ f _ := IsEmpty.elim' inferInstance f
   rel _ R v := ∀ p ∈ F, (∀ i, p ⊩↓ ↑(v i)) → Rel p R fun i ↦ (v i).val
 
-@[simp] lemma Str.rel_iff {k : ℕ} (R : L.Rel k) (v : Fin k → F.Model) :
+@[simp] lemma Str.rel_iff {k : ℕ} (R : L.Rel k) (v : Fin k → F.Domain) :
     F.Str.rel R v ↔ ∀ p ∈ F, (∀ i, p ⊩↓ ↑(v i)) → Rel p R fun i ↦ (v i).val := by rfl
 
 end Filter
