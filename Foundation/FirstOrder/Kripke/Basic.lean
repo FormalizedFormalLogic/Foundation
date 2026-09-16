@@ -1,6 +1,6 @@
 module
 
-public import Foundation.FirstOrder.Basic
+public import Foundation.FirstOrder.Tarski.Basic
 public import Foundation.Syntax.Predicate.Relational
 public import Foundation.Logic.ForcingRelation
 public import Foundation.Vorspiel.Order.Dense
@@ -9,7 +9,7 @@ public import Foundation.Vorspiel.Order.Dense
 namespace FFL.FirstOrder
 
 /-- Kripke model for relational first-order language -/
-class KripkeModel
+class Kripke.Model
     (L : outParam Language) [L.Relational]
     (World : Type*) [Preorder World]
     (Carrier : outParam Type*) where
@@ -19,23 +19,23 @@ class KripkeModel
   Rel (w : World) {k : ℕ} (R : L.Rel k) : (Fin k → Carrier) → Prop
   rel_monotone : Rel w R t → ∀ v ≤ w, Rel v R t
 
-class KripkeModel.ConstantDomain
+class Kripke.Model.ConstantDomain
     {L : Language} [L.Relational]
     (World : Type*) [Preorder World]
-    {Carrier : Type*} [KripkeModel L World Carrier] where
+    {Carrier : Type*} [Kripke.Model L World Carrier] where
   const_domain : ∀ w : World, Domain w = Set.univ
 
-attribute [simp] KripkeModel.ConstantDomain.const_domain
+attribute [simp] Kripke.Model.ConstantDomain.const_domain
 
-variable (L : Language) [L.Relational] (W : Type*) [Preorder W] (C : outParam Type*) [KripkeModel L W C]
+variable (L : Language) [L.Relational] (W : Type*) [Preorder W] (C : outParam Type*) [Kripke.Model L W C]
 
-instance : CoeSort W (Type _) := ⟨fun w ↦ KripkeModel.Domain w⟩
+instance : CoeSort W (Type _) := ⟨fun w ↦ Kripke.Model.Domain w⟩
 
-instance : ForcingExists W C := ⟨fun p x ↦ x ∈ KripkeModel.Domain p⟩
+instance : ForcingExists W C := ⟨fun p x ↦ x ∈ Kripke.Model.Domain p⟩
 
 variable {L W C}
 
-namespace KripkeModel
+namespace Kripke.Model
 
 lemma domain_nonempty' (p : W) : ∃ x, p ⊩↓ x := domain_nonempty p
 
@@ -63,20 +63,20 @@ variable {W}
 namespace Filter
 
 /-- A domain of filter `F` -/
-@[ext] structure Model (F : Filter W) where
+@[ext] structure Domain (F : Filter W) where
   val : C
   mem_filter : ∃ p ∈ F, p ⊩↓ val
 
-attribute [coe] Model.val
+attribute [coe] Domain.val
 
 variable (F : Filter W)
 
-instance : CoeOut F.Model C := ⟨fun x ↦ x.val⟩
+instance : CoeOut F.Domain C := ⟨fun x ↦ x.val⟩
 
 lemma finite_colimit [Fintype ι] (p : ι → W) (hp : ∀ i, p i ∈ F) : ∃ q ∈ F, ∀ i, q ≤ p i :=
   DirectedOn.fintype_colimit isTrans_ge (Order.PFilter.nonempty F) F.directed p hp
 
-lemma finite_colimit_domain [Fintype ι] (v : ι → F.Model) :
+lemma finite_colimit_domain [Fintype ι] (v : ι → F.Domain) :
     ∃ q ∈ F, ∀ i, q ⊩↓ ↑(v i) := by
   have : ∀ i, ∃ p ∈ F, p ⊩↓ ↑(v i) := fun i ↦ (v i).mem_filter
   choose p hp using this
@@ -84,11 +84,11 @@ lemma finite_colimit_domain [Fintype ι] (v : ι → F.Model) :
   rcases this with ⟨q, hq, hqp⟩
   refine ⟨q, hq, fun i ↦ domain_antimonotone (hqp i) (hp i).2⟩
 
-instance Str : Structure L F.Model where
+instance Str : Tarski.Structure L F.Domain where
   func _ f _ := IsEmpty.elim' inferInstance f
   rel _ R v := ∀ p ∈ F, (∀ i, p ⊩↓ ↑(v i)) → Rel p R fun i ↦ (v i).val
 
-@[simp] lemma Str.rel_iff {k : ℕ} (R : L.Rel k) (v : Fin k → F.Model) :
+@[simp] lemma Str.rel_iff {k : ℕ} (R : L.Rel k) (v : Fin k → F.Domain) :
     F.Str.rel R v ↔ ∀ p ∈ F, (∀ i, p ⊩↓ ↑(v i)) → Rel p R fun i ↦ (v i).val := by rfl
 
 end Filter
@@ -99,6 +99,6 @@ variable (W)
 
 
 
-end KripkeModel
+end Kripke.Model
 
 end FFL.FirstOrder

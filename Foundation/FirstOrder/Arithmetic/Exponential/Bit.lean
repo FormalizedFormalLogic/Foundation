@@ -150,7 +150,7 @@ end mem
 
 section model
 
-scoped instance : Structure.Mem ℒₒᵣ V := ⟨by intro a b; simp [Semiformula.Operator.val, operator_mem_def]⟩
+scoped instance : Tarski.Structure.Mem ℒₒᵣ V := ⟨by intro a b; simp [Semiformula.Operator.val, operator_mem_def]⟩
 
 @[simp] lemma eval_ballIn {t : ArithmeticSemiterm ξ n} {φ : ArithmeticSemiformula ξ (n + 1)} {bv : Fin n → V} {fv : ξ → V} :
     (ballIn t φ).Eval (M := V) bv fv ↔ ∀ x ∈ t.val bv fv, φ.Eval (x :> bv) fv := by

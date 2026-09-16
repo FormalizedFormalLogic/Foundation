@@ -1,6 +1,6 @@
 module
 
-public import Foundation.FirstOrder.Bootstrapping.FixedPoint
+public import Foundation.FirstOrder.Arithmetic.Bootstrapping.FixedPoint
 public import Foundation.Meta.ClProver
 
 @[expose] public section

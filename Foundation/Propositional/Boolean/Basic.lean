@@ -9,11 +9,11 @@ namespace FFL.Propositional
 
 variable {α : Type*}
 
-abbrev Boolean.Valuation (α : Type*) := α → Prop
+abbrev Tarski.Valuation (α : Type*) := α → Prop
 
-namespace Formula.Boolean
+namespace Formula
 
-open Propositional.Boolean (Valuation)
+open Propositional.Tarski (Valuation)
 
 def val (v : Valuation α) : Formula α → Prop
   | atom a  => v a
@@ -102,7 +102,7 @@ lemma equiv_of_letterless (hl : φ.Letterless) : ∀ v w : Valuation _, v ⊧ φ
     replace ihψ := ihψ hl.2;
     simp_all;
 
-end Formula.Boolean
+end Formula
 
 
 
@@ -110,17 +110,16 @@ namespace Formula
 
 open Semantics (Valid)
 open Formula (atom)
-open Formula.Boolean
-open _root_.FFL.Propositional.Boolean
+open _root_.FFL.Propositional.Tarski
 
-variable {v : Boolean.Valuation α} {φ ψ : Formula α}
+variable {v : Tarski.Valuation α} {φ ψ : Formula α}
 
-abbrev IsTautology (φ : Formula α) := Valid (Boolean.Valuation α) φ
+abbrev IsTautology (φ : Formula α) := Valid (Tarski.Valuation α) φ
 
 @[grind <=]
 lemma subst_isTautology (h : φ.IsTautology) : ∀ s, (φ⟦s⟧).IsTautology := by
   intro s v;
-  apply Formula.Boolean.iff_subst_self s |>.mp;
+  apply Formula.iff_subst_self s |>.mp;
   apply h;
 
 @[grind =]
@@ -159,8 +158,8 @@ lemma top_isTautology : (⊤ : Formula α).IsTautology := by intro v; simp;
 @[grind =>]
 lemma tautology_of_letterless_of_not_neg_isTautology (hl : φ.Letterless) : ¬((∼φ).IsTautology) → φ.IsTautology := by
   intro h v;
-  obtain ⟨w, hw⟩ : ∃ x : Boolean.Valuation _, x ⊧ φ := by simpa [IsTautology, Valid] using h;
-  have H := Formula.Boolean.equiv_of_letterless hl;
+  obtain ⟨w, hw⟩ : ∃ x : Tarski.Valuation _, x ⊧ φ := by simpa [IsTautology, Valid] using h;
+  have H := Formula.equiv_of_letterless hl;
   apply H w v |>.mp;
   assumption;
 

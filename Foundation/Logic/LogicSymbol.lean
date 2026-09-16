@@ -632,6 +632,8 @@ end List
 
 namespace Multiset
 
+section
+
 variable {α : Type*} [Tilde α]
 
 instance : Tilde (Multiset α) := ⟨fun Γ ↦ Γ.map (∼·)⟩
@@ -658,6 +660,12 @@ lemma tilde_def (Γ : Multiset α) : ∼Γ = Γ.map (∼·) := rfl
 
 instance [TildeInvolutive α] : TildeInvolutive (Multiset α) where
   tilde_involutive Γ := by simp [tilde_def, Multiset.map_map]
+
+end
+
+lemma map_tilde_comm [LogicalNeutral α] [LogicalConnective α] [LogicalNeutral β] [LogicalConnective β]
+    {Γ : Multiset α} (f : α →ˡᶜ β) :
+    (∼Γ).map f = ∼Γ.map f := by simp [Multiset.tilde_def]
 
 end Multiset
 

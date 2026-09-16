@@ -1,10 +1,10 @@
 module
 
-public import Foundation.FirstOrder.Bootstrapping.DerivabilityCondition.D1
-public import Foundation.FirstOrder.Bootstrapping.DerivabilityCondition.D2
-public import Foundation.FirstOrder.Bootstrapping.DerivabilityCondition.D3
+public import Foundation.FirstOrder.Arithmetic.Bootstrapping.DerivabilityCondition.D1
+public import Foundation.FirstOrder.Arithmetic.Bootstrapping.DerivabilityCondition.D2
+public import Foundation.FirstOrder.Arithmetic.Bootstrapping.DerivabilityCondition.D3
 public import Foundation.FirstOrder.Incompleteness.ProvabilityAbstraction.Basic
-public import Foundation.FirstOrder.Bootstrapping.FixedPoint
+public import Foundation.FirstOrder.Arithmetic.Bootstrapping.FixedPoint
 
 @[expose] public section
 /-!
