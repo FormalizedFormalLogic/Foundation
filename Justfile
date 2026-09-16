@@ -32,8 +32,7 @@ mk-all:
 shake:
     lake shake --keep-public --fix
 
-# Audit Foundation for sorry/native_decide/unauthorized axioms against forgive.yml
-# (requires `lake build Foundation` first)
+# Audit Foundation for sorry/native_decide/unauthorized axioms (requires `lake build Foundation` first)
 forgive:
     lake exe forgive Foundation
 

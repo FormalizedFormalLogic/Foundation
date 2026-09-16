@@ -1,7 +1,5 @@
 version: v0
 
-# Foundation admits only Lean's three standard axioms. Nothing is forgiven: no `sorry`
-# (`sorryAx`), no `native_decide` (`Lean.ofReduceBool`), no axiom of our own.
 accept:
   - propext
   - Quot.sound

@@ -12,7 +12,7 @@ The permitted changes are exactly: merging/adjusting imports, merging module doc
 
 ## Never port anything resting on a disallowed axiom
 
-Foundation's allowlist is `propext`, `Classical.choice`, `Quot.sound` — nothing else, and `forgive.yml` forgives nothing. CI enforces it via `just forgive`.
+Foundation's allowlist is `propext`, `Classical.choice`, `Quot.sound` — nothing else. CI enforces it via `just forgive`.
 
 Before porting, check the candidate declarations and everything they depend on. Anything reaching `sorryAx` (a remaining `sorry`), `Lean.ofReduceBool` (`native_decide`), or a bespoke `axiom` declaration must not come over, even though it builds fine in AlphaCentauri. Use `#print axioms <name>` on the AlphaCentauri side, or run its own axiom audit. If part of a requested port is tainted, port the clean part, leave the rest, and say explicitly what you left behind and why.
 
