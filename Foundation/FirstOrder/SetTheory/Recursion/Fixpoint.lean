@@ -51,14 +51,14 @@ structure Construction {k : ℕ} (φ : Blueprint k) where
   defined : Defined (fun v ↦ Φ (v ·.succ.succ) {x | x ∈ v 1} (v 0)) φ.core
   monotone {C C' : Set V} (h : C ⊆ C') {v x} : Φ v C x → Φ v C' x
 
-class Construction.Finite {k : ℕ} {φ : Blueprint k} (c : Construction V φ) where
-  finite {C : Set V} {v x} : c.Φ v C x → ∃ m, c.Φ v {y ∈ C | y < m} x
+class Construction.SetSized {k : ℕ} {φ : Blueprint k} (c : Construction V φ) where
+  set_sized {C : Set V} {v x} : c.Φ v C x → ∃ m, c.Φ v {y ∈ C | y < m} x
 
-class Construction.StrongFinite {k : ℕ} {φ : Blueprint k} (c : Construction V φ) where
-  strong_finite {C : Set V} {v x} : c.Φ v C x → c.Φ v {y ∈ C | y < x} x
+class Construction.StrongSetSized {k : ℕ} {φ : Blueprint k} (c : Construction V φ) where
+  strong_set_sized {C : Set V} {v x} : c.Φ v C x → c.Φ v {y ∈ C | y < x} x
 
-instance {k : ℕ} {φ : Blueprint k} (c : Construction V φ) [c.StrongFinite] : c.Finite where
-  finite {_ _ x} := fun h ↦ ⟨x, Construction.StrongFinite.strong_finite h⟩
+instance {k : ℕ} {φ : Blueprint k} (c : Construction V φ) [c.StrongSetSized] : c.SetSized where
+  set_sized {_ _ x} := fun h ↦ ⟨x, Construction.StrongSetSized.strong_set_sized h⟩
 
 variable {V}
 
@@ -188,7 +188,7 @@ lemma fixpoint_iff_succ {x : V} : c.Fixpoint v x ↔ ∃ u, x ∈ c.limSeq v (u 
     · simp at h
     · exact ⟨u, h⟩, by rintro ⟨u, h⟩; exact ⟨u + 1, h⟩⟩
 
-lemma finite_upperbound (m : V) : ∃ s, ∀ z < m, c.Fixpoint v z → z ∈ c.limSeq v s := by
+lemma set_sized_upperbound (m : V) : ∃ s, ∀ z < m, c.Fixpoint v z → z ∈ c.limSeq v s := by
   have : ∃ F : V, ∀ x, x ∈ F ↔ x < m ∧ c.Fixpoint v x := by
     have : Predicate fun x ↦ x < m ∧ c.Fixpoint v x :=
       HierarchySymbol.Definable.and (by definability)
@@ -212,13 +212,13 @@ lemma finite_upperbound (m : V) : ∃ s, ∀ z < m, c.Fixpoint v z → z ∈ c.l
     have : z ∈ c.limSeq v u := hf z u hu
     exact c.limSeq_cumulative (le_of_lt <| lt_of_mem_rng hu) this⟩
 
-theorem case [c.Finite] : c.Fixpoint v x ↔ c.Φ v {z | c.Fixpoint v z} x :=
+theorem case [c.SetSized] : c.Fixpoint v x ↔ c.Φ v {z | c.Fixpoint v z} x :=
   ⟨by intro h
       rcases c.fixpoint_iff_succ.mp h with ⟨u, hu⟩
       have : c.Φ v {z | z ∈ c.limSeq v u} x := (c.mem_limSeq_succ_iff.mp hu).2
       exact c.monotone (fun z hx ↦ by exact ⟨u, hx⟩) this,
    by intro hx
-      rcases Finite.finite hx with ⟨m, hm⟩
+      rcases SetSized.set_sized hx with ⟨m, hm⟩
       have : ∃ s, ∀ z < m, c.Fixpoint v z → z ∈ c.limSeq v s := c.finite_upperbound m
       rcases this with ⟨s, hs⟩
       have : c.Φ v {z | z ∈ c.limSeq v s} x :=
@@ -239,7 +239,7 @@ lemma fixpoint_defined : Defined (fun v ↦ c.Fixpoint (v ·.succ) (v 0)) φ.fix
 
 end
 
-theorem induction [c.StrongFinite] {P : V → Prop} (hP : ℒₛₑₜ-Predicate P)
+theorem induction [c.Strongset_sized] {P : V → Prop} (hP : ℒₛₑₜ-Predicate P)
     (H : ∀ C : Set V, (∀ x ∈ C, c.Fixpoint v x ∧ P x) → ∀ x, c.Φ v C x → P x) :
     ∀ x, c.Fixpoint v x → P x := by
   apply InductionOnHierarchy.order_induction_sigma (Γ := Γ) (m := 1) (P := fun x ↦ c.Fixpoint v x → P x)
@@ -252,7 +252,7 @@ theorem induction [c.StrongFinite] {P : V → Prop} (hP : ℒₛₑₜ-Predicate
         (by definability))
       (by definability)
   intro x ih hx
-  have : c.Φ v {y | c.Fixpoint v y ∧ y < x} x := StrongFinite.strong_finite (c.case.mp hx)
+  have : c.Φ v {y | c.Fixpoint v y ∧ y < x} x := Strongset_sized.strong_set_sized (c.case.mp hx)
   exact H {y | c.Fixpoint v y ∧ y < x} (by intro y ⟨hy, hyx⟩; exact ⟨hy, ih y hyx hy⟩) x this
 
 end Construction
