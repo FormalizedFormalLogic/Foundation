@@ -64,8 +64,8 @@ jobs:
       - name: Build Foundation
         run: lake build Foundation
 
-      - name: Check sorry-freeness and axiom allowlist (axiom-audit)
-        run: just axiom-audit
+      - name: Check sorry-freeness and axiom allowlist (forgive)
+        run: just forgive
 
       - name: Build docs
         run: just docs

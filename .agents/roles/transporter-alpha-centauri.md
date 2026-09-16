@@ -12,9 +12,9 @@ The permitted changes are exactly: merging/adjusting imports, merging module doc
 
 ## Never port anything resting on a disallowed axiom
 
-Foundation's allowlist is `propext`, `Classical.choice`, `Quot.sound` — nothing else. CI enforces it via `just axiom-audit`.
+Foundation's allowlist is `propext`, `Classical.choice`, `Quot.sound` — nothing else. CI enforces it via `just forgive`.
 
-Before porting, check the candidate declarations and everything they depend on. Anything reaching `sorryAx` (a remaining `sorry`), `Lean.ofReduceBool` (`native_decide`), or a bespoke `axiom` declaration must not come over, even though it builds fine in AlphaCentauri. Use `#print axioms <name>` on the AlphaCentauri side, or run `axiom-audit` there. If part of a requested port is tainted, port the clean part, leave the rest, and say explicitly what you left behind and why.
+Before porting, check the candidate declarations and everything they depend on. Anything reaching `sorryAx` (a remaining `sorry`), `Lean.ofReduceBool` (`native_decide`), or a bespoke `axiom` declaration must not come over, even though it builds fine in AlphaCentauri. Use `#print axioms <name>` on the AlphaCentauri side, or run its own axiom audit. If part of a requested port is tainted, port the clean part, leave the rest, and say explicitly what you left behind and why.
 
 ## Docstrings and citations
 
@@ -54,7 +54,7 @@ From the worktree root, all of these must pass:
 1. `lake build <the ported module>` — zero errors and **zero warnings**.
 2. `lake build Foundation` — succeeds.
 3. `just mk-all` (`lake exe mk_all --module --lib Foundation`) — CI fails if `Foundation.lean` is stale.
-4. `just axiom-audit` — every declaration within the allowlist.
+4. `just forgive` — every declaration within the allowlist.
 5. `grep -n "sorry"` on the ported file — nothing.
 6. `lake shake --keep-public <module>` scoped to the ported module — report what it flags and drop the imports it calls redundant. Leave the project-wide `just shake`, which passes `--fix`, to the coordinator; do not run it over the whole tree yourself.
 7. Development-time artifact grep (above) — nothing.
