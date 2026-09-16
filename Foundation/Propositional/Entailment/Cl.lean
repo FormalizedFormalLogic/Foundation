@@ -24,7 +24,7 @@ namespace FFL.Entailment
 variable {S F : Type*} [LogicalConnective F] [Entailment S F]
 variable {𝓢 : S} {φ ψ χ : F}
 
-class HasAxiomDNE (𝓢 : S)  where
+class HasAxiomDNE (𝓢 : S) where
   dne! {φ : F} : 𝓢 ⊢! Axioms.DNE φ
 export HasAxiomDNE (dne!)
 
@@ -53,7 +53,7 @@ end Context
 end
 
 
-class HasAxiomLEM (𝓢 : S)  where
+class HasAxiomLEM (𝓢 : S) where
   lem! {φ : F} : 𝓢 ⊢! Axioms.LEM φ
 export HasAxiomLEM (lem!)
 
@@ -80,7 +80,7 @@ end Context
 end
 
 
-class HasAxiomPeirce (𝓢 : S)  where
+class HasAxiomPeirce (𝓢 : S) where
   peirce! {φ ψ : F} : 𝓢 ⊢! Axioms.Peirce φ ψ
 export HasAxiomPeirce (peirce!)
 
@@ -107,7 +107,7 @@ end Context
 end
 
 
-class HasAxiomElimContra (𝓢 : S)  where
+class HasAxiomElimContra (𝓢 : S) where
   elimContra! {φ ψ : F} : 𝓢 ⊢! Axioms.ElimContra φ ψ
 export HasAxiomElimContra (elimContra!)
 
@@ -138,121 +138,157 @@ open FiniteContext
 open List
 
 def dn! : 𝓢 ⊢! φ 🡘 ∼∼φ := E!_intro dni! dne!
+omit [DecidableEq F] in
+open scoped Classical in
 @[simp] lemma dn : 𝓢 ⊢ φ 🡘 ∼∼φ := ⟨dn!⟩
 
-def A!_of_ANNNN! (d : 𝓢 ⊢! ∼∼φ ⋎ ∼∼ψ) : 𝓢 ⊢! φ ⋎ ψ := of_C!_of_C!_of_A! (C!_trans dne! or₁!) (C!_trans dne! or₂!) d
-omit [DecidableEq F] in lemma A_of_ANNNN (d : 𝓢 ⊢ ∼∼φ ⋎ ∼∼ψ) : 𝓢 ⊢ φ ⋎ ψ := ⟨A!_of_ANNNN! d.some⟩
+def A!_of_ANNNN! (d : 𝓢 ⊢! ∼∼φ ⋎ ∼∼ψ) : 𝓢 ⊢! φ ⋎ ψ :=
+  of_C!_of_C!_of_A! (C!_trans dne! or₁!) (C!_trans dne! or₂!) d
+omit [DecidableEq F] in
+open scoped Classical in lemma A_of_ANNNN (d : 𝓢 ⊢ ∼∼φ ⋎ ∼∼ψ) : 𝓢 ⊢ φ ⋎ ψ := ⟨A!_of_ANNNN! d.some⟩
 
 def CN!_of_CN!_left (b : 𝓢 ⊢! ∼φ 🡒 ψ) : 𝓢 ⊢! ∼ψ 🡒 φ := C!_trans (contra! b) dne!
+omit [DecidableEq F] in
+open scoped Classical in
 lemma CN_of_CN_left (b : 𝓢 ⊢ ∼φ 🡒 ψ) : 𝓢 ⊢ ∼ψ 🡒 φ := ⟨CN!_of_CN!_left b.some⟩
 
-def CCNCN'! : 𝓢 ⊢! (∼φ 🡒 ψ) 🡒 (∼ψ 🡒 φ) := deduct'! $ CN!_of_CN!_left FiniteContext.id!
+def CCNCN'! : 𝓢 ⊢! (∼φ 🡒 ψ) 🡒 (∼ψ 🡒 φ) := deduct'! <| CN!_of_CN!_left FiniteContext.id!
+omit [DecidableEq F] in
+open scoped Classical in
 @[simp] lemma CCNCN' : 𝓢 ⊢ (∼φ 🡒 ψ) 🡒 (∼ψ 🡒 φ) := ⟨CCNCN'!⟩
 
 
 def C!_of_CNN! (b : 𝓢 ⊢! ∼φ 🡒 ∼ψ) : 𝓢 ⊢! ψ 🡒 φ := C!_trans dni! (CN!_of_CN!_left b)
+omit [DecidableEq F] in
+open scoped Classical in
 lemma C_of_CNN (b : 𝓢 ⊢ ∼φ 🡒 ∼ψ) : 𝓢 ⊢ ψ 🡒 φ := ⟨C!_of_CNN! b.some⟩
 
 
-def CCNNC! : 𝓢 ⊢! (∼φ 🡒 ∼ψ) 🡒 (ψ 🡒 φ) :=  deduct'! $ C!_of_CNN! FiniteContext.id!
+def CCNNC! : 𝓢 ⊢! (∼φ 🡒 ∼ψ) 🡒 (ψ 🡒 φ) := deduct'! <| C!_of_CNN! FiniteContext.id!
+omit [DecidableEq F] in
+open scoped Classical in
 @[simp] lemma CCNNC : 𝓢 ⊢ (∼φ 🡒 ∼ψ) 🡒 (ψ 🡒 φ) := ⟨CCNNC!⟩
 
 def EN!_of_EN!_right (h : 𝓢 ⊢! φ 🡘 ∼ψ) : 𝓢 ⊢! ∼φ 🡘 ψ := by
-  apply E!_intro;
-  . apply CN!_of_CN!_left $  K!_right h;
-  . apply CN!_of_CN!_right $  K!_left h;
+  apply E!_intro
+  · apply CN!_of_CN!_left <| K!_right h
+  · apply CN!_of_CN!_right <| K!_left h
+omit [DecidableEq F] in
+open scoped Classical in
 lemma EN_of_EN_right (h : 𝓢 ⊢ φ 🡘 ∼ψ) : 𝓢 ⊢ ∼φ 🡘 ψ := ⟨EN!_of_EN!_right h.some⟩
 
-def EN!_of_EN!_left (h : 𝓢 ⊢! ∼φ 🡘 ψ) : 𝓢 ⊢! φ 🡘 ∼ψ := E!_symm $ EN!_of_EN!_right $ E!_symm h
+def EN!_of_EN!_left (h : 𝓢 ⊢! ∼φ 🡘 ψ) : 𝓢 ⊢! φ 🡘 ∼ψ := E!_symm <| EN!_of_EN!_right <| E!_symm h
+omit [DecidableEq F] in
+open scoped Classical in
 lemma EN_of_EN_left (h : 𝓢 ⊢ ∼φ 🡘 ψ) : 𝓢 ⊢ φ 🡘 ∼ψ := ⟨EN!_of_EN!_left h.some⟩
 
 def ECCOO! : 𝓢 ⊢! φ 🡘 ((φ 🡒 ⊥) 🡒 ⊥) := E!_trans dn! ENNCCOO!
+omit [DecidableEq F] in
+open scoped Classical in
 lemma ECCOO : 𝓢 ⊢ φ 🡘 ((φ 🡒 ⊥) 🡒 ⊥) := ⟨ECCOO!⟩
 
 
 def CNKANN! : 𝓢 ⊢! ∼(φ ⋏ ψ) 🡒 (∼φ ⋎ ∼ψ) := by
-  apply CN!_of_CN!_left;
-  apply deduct'!;
-  exact K!_replace (KNN!_of_NA! $ FiniteContext.id!) dne! dne!;
+  apply CN!_of_CN!_left
+  apply deduct'!
+  exact K!_replace (KNN!_of_NA! <| FiniteContext.id!) dne! dne!
+omit [DecidableEq F] in
+open scoped Classical in
 @[simp] lemma CNKANN : 𝓢 ⊢ ∼(φ ⋏ ψ) 🡒 (∼φ ⋎ ∼ψ) := ⟨CNKANN!⟩
 
 def ANN!_of_NK! (b : 𝓢 ⊢! ∼(φ ⋏ ψ)) : 𝓢 ⊢! ∼φ ⋎ ∼ψ := CNKANN! ⨀ b
+omit [DecidableEq F] in
+open scoped Classical in
 lemma ANN_of_NK (b : 𝓢 ⊢ ∼(φ ⋏ ψ)) : 𝓢 ⊢ ∼φ ⋎ ∼ψ := ⟨ANN!_of_NK! b.some⟩
 
 def AN!_of_C! (d : 𝓢 ⊢! φ 🡒 ψ) : 𝓢 ⊢! ∼φ ⋎ ψ := by
-  apply of_NN!;
-  apply N!_of_CO!;
-  apply deduct'!;
-  have d₁ : [∼(∼φ ⋎ ψ)] ⊢[𝓢]! ∼∼φ ⋏ ∼ψ := KNN!_of_NA! $ FiniteContext.id!;
-  have d₂ : [∼(∼φ ⋎ ψ)] ⊢[𝓢]! ∼φ 🡒 ⊥ := CO!_of_N! $ K!_left d₁;
-  have d₃ : [∼(∼φ ⋎ ψ)] ⊢[𝓢]! ∼φ := (of! (Γ := [∼(∼φ ⋎ ψ)]) $ contra! d) ⨀ (K!_right d₁);
-  exact d₂ ⨀ d₃;
+  apply of_NN!
+  apply N!_of_CO!
+  apply deduct'!
+  have d₁ : [∼(∼φ ⋎ ψ)] ⊢[𝓢]! ∼∼φ ⋏ ∼ψ := KNN!_of_NA! <| FiniteContext.id!
+  have d₂ : [∼(∼φ ⋎ ψ)] ⊢[𝓢]! ∼φ 🡒 ⊥ := CO!_of_N! <| K!_left d₁
+  have d₃ : [∼(∼φ ⋎ ψ)] ⊢[𝓢]! ∼φ := (of! (Γ := [∼(∼φ ⋎ ψ)]) <| contra! d) ⨀ (K!_right d₁)
+  exact d₂ ⨀ d₃
+omit [DecidableEq F] in
+open scoped Classical in
 lemma AN_of_C (d : 𝓢 ⊢ φ 🡒 ψ) : 𝓢 ⊢ ∼φ ⋎ ψ := ⟨AN!_of_C! d.some⟩
 
 def CCAN! : 𝓢 ⊢! (φ 🡒 ψ) 🡒 (∼φ ⋎ ψ) := by
-  apply deduct'!;
-  apply AN!_of_C!;
-  exact FiniteContext.byAxm!;
+  apply deduct'!
+  apply AN!_of_C!
+  exact FiniteContext.byAxm!
+omit [DecidableEq F] in
+open scoped Classical in
 lemma CCAN : 𝓢 ⊢ (φ 🡒 ψ) 🡒 ∼φ ⋎ ψ := ⟨CCAN!⟩
 
 
 instance : HasAxiomEFQ 𝓢 where
   efq! {φ} := by
-    apply C!_of_CNN!;
-    exact C!_trans (K!_left negEquiv!) $ C!_trans (C!_swap implyK!) (K!_right negEquiv!);
+    apply C!_of_CNN!
+    exact C!_trans (K!_left negEquiv!) <| C!_trans (C!_swap implyK!) (K!_right negEquiv!)
 
 instance : Entailment.Int 𝓢 where
 
 
 instance : HasAxiomElimContra 𝓢 where
   elimContra! {φ ψ} := by
-    apply deduct'!;
-    have : [∼ψ 🡒 ∼φ] ⊢[𝓢]! ∼ψ 🡒 ∼φ := FiniteContext.byAxm!;
-    exact C!_of_CNN! this;
+    apply deduct'!
+    have : [∼ψ 🡒 ∼φ] ⊢[𝓢]! ∼ψ 🡒 ∼φ := FiniteContext.byAxm!
+    exact C!_of_CNN! this
 
-instance : HasAxiomLEM 𝓢 := ⟨A!_of_ANNNN! $ AN!_of_C! dni!⟩
+instance : HasAxiomLEM 𝓢 := ⟨A!_of_ANNNN! <| AN!_of_C! dni!⟩
 
 
+omit [DecidableEq F] in
+open scoped Classical in
 lemma CNC_of_C_of_CN (hpq : 𝓢 ⊢ φ 🡒 ψ) (hpnr : 𝓢 ⊢ φ 🡒 ∼ξ) : 𝓢 ⊢ φ 🡒 ∼(ψ 🡒 ξ) :=
-  deduct' $ (contra $ CCAN) ⨀
-    (NA_of_KNN $ K_intro (dni' $ of' hpq ⨀ FiniteContext.by_axm) (of' hpnr ⨀ FiniteContext.by_axm))
+  deduct' <| (contra <| CCAN) ⨀
+    (NA_of_KNN <| K_intro (dni' <| of' hpq ⨀ FiniteContext.by_axm)
+      (of' hpnr ⨀ FiniteContext.by_axm))
 
 def of_A!_of_N! (b : 𝓢 ⊢! φ ⋎ ψ) (d : 𝓢 ⊢! ∼φ) : 𝓢 ⊢! ψ := A!_cases (C!_of_CNN! (dhyp! d)) (C!_id) b
 
+omit [DecidableEq F] in
+open scoped Classical in
 theorem of_A_of_N (b : 𝓢 ⊢ φ ⋎ ψ) (d : 𝓢 ⊢ ∼φ) : 𝓢 ⊢ ψ := ⟨of_A!_of_N! b.get d.get⟩
 
 def ECAN! : 𝓢 ⊢! (φ 🡒 ψ) 🡘 (∼φ ⋎ ψ) := E!_intro CCAN! (deduct'! (A!_cases CNC! implyK! byAxm₀!))
+omit [DecidableEq F] in
+open scoped Classical in
 theorem ECAN : 𝓢 ⊢ (φ 🡒 ψ) 🡘 (∼φ ⋎ ψ) := ⟨ECAN!⟩
 
 
 
 section
 
+omit [DecidableEq F] in
+open scoped Classical in
 @[simp]
 lemma CNDisj₂NConj₂ {Γ : List F} : 𝓢 ⊢ ∼⋁(Γ.map (∼·)) 🡒 ⋀Γ := by
   induction Γ using List.induction_with_singleton with
-  | hnil => simp;
-  | hsingle => simp;
+  | hnil => simp
+  | hsingle => simp
   | hcons φ Γ hΓ ih =>
-    simp_all only [ne_eq, not_false_eq_true, List.disj₂_cons_nonempty, List.map_cons, List.map_eq_nil_iff, List.conj₂_cons_nonempty];
+    simp_all only [ne_eq, not_false_eq_true, List.disj₂_cons_nonempty, List.map_cons,
+      List.map_eq_nil_iff, List.conj₂_cons_nonempty]
     suffices 𝓢 ⊢ ∼(∼φ ⋎ ∼∼⋁List.map (fun x ↦ ∼x) Γ) 🡒 φ ⋏ ⋀Γ by
-      apply C_trans ?_ this;
-      apply contra;
-      apply CAA_of_C_right;
-      exact dne;
-    apply C_trans CNAKNN ?_;
-    apply CKK_of_C_of_C;
-    . exact dne;
-    . exact C_trans dne ih;
+      apply C_trans ?_ this
+      apply contra
+      apply CAA_of_C_right
+      exact dne
+    apply C_trans CNAKNN ?_
+    apply CKK_of_C_of_C
+    · exact dne
+    · exact C_trans dne ih
 
 lemma CNFdisj₂NFconj₂ {Γ : Finset F} : 𝓢 ⊢ ∼(Γ.image (∼·)).disj 🡒 Γ.conj := by
-  apply C_replace ?_ ?_ $ CNDisj₂NConj₂ (Γ := Γ.toList);
-  . apply contra;
-    apply left_Disj₂_intro;
-    intro ψ hψ;
-    apply right_Fdisj_intro;
-    simpa using hψ;
-  . simp;
+  apply C_replace ?_ ?_ <| CNDisj₂NConj₂ (Γ := Γ.toList)
+  · apply contra
+    apply left_Disj₂_intro
+    intro ψ hψ
+    apply right_Fdisj_intro
+    simpa using hψ
+  · simp
 
 end
 
@@ -263,6 +299,8 @@ omit [Entailment.Cl 𝓢]
 
 variable [AdjunctiveSet F S] [Axiomatized S] [Deduction S] [∀ 𝓢 : S, Entailment.Cl 𝓢]
 
+omit [DecidableEq F] in
+open scoped Classical in
 lemma provable_iff_inconsistent_adjoin {φ : F} :
     𝓢 ⊢ φ ↔ Inconsistent (adjoin (∼φ) 𝓢) := by
   constructor
@@ -274,6 +312,8 @@ lemma provable_iff_inconsistent_adjoin {φ : F} :
     have : 𝓢 ⊢ ∼φ 🡒 ⊥ := Deduction.of_insert! (h _)
     refine of_NN <| N_iff_CO.mpr this
 
+omit [DecidableEq F] in
+open scoped Classical in
 lemma unprovable_iff_consistent_adjoin {φ : F} :
     𝓢 ⊬ φ ↔ Consistent (adjoin (∼φ) 𝓢) := by
   simpa using provable_iff_inconsistent_adjoin.not
@@ -287,14 +327,14 @@ section
 
 instance : HasAxiomPeirce 𝓢 where
   peirce! {φ ψ} := by
-    apply of_C!_of_C!_of_A! implyK! ?_ lem!;
-    apply deduct'!;
-    apply deduct!;
-    refine (FiniteContext.byAxm! (φ := (φ 🡒 ψ) 🡒 φ)) ⨀ ?_;
-    apply deduct!;
-    apply efq_of_mem_either! (φ := φ);
-    . simp;
-    . simp;
+    apply of_C!_of_C!_of_A! implyK! ?_ lem!
+    apply deduct'!
+    apply deduct!
+    refine (FiniteContext.byAxm! (φ := (φ 🡒 ψ) 🡒 φ)) ⨀ ?_
+    apply deduct!
+    apply efq_of_mem_either! (φ := φ)
+    · simp
+    · simp
 
 instance : HasAxiomEFQ 𝓢 := inferInstance
 
@@ -306,7 +346,8 @@ section
 
 variable {G T : Type*} [Entailment T G] [LogicalConnective G] [LogicalNeutral G] {𝓣 : T}
 
-abbrev Cl.ofEquiv (𝓢 : S) [Entailment.Cl 𝓢] (𝓣 : T) (f : G →ˡᶜ F) (e : (φ : G) → 𝓢 ⊢! f φ ≃ 𝓣 ⊢! φ) : Entailment.Cl 𝓣 where
+abbrev Cl.ofEquiv (𝓢 : S) [Entailment.Cl 𝓢] (𝓣 : T) (f : G →ˡᶜ F)
+    (e : (φ : G) → 𝓢 ⊢! f φ ≃ 𝓣 ⊢! φ) : Entailment.Cl 𝓣 where
   mdp! {φ ψ dpq dp} := (e ψ) (
     let d : 𝓢 ⊢! f φ 🡒 f ψ := by simpa using (e (φ 🡒 ψ)).symm dpq
     d ⨀ ((e φ).symm dp))
@@ -334,13 +375,13 @@ open FiniteContext
 
 instance [HasAxiomLEM 𝓢] : HasAxiomDNE 𝓢 where
   dne! {φ} := by
-    apply deduct'!;
+    apply deduct'!
     exact of_C!_of_C!_of_A! C!_id (by
-      apply deduct!;
-      have nnp : [∼φ, ∼∼φ] ⊢[𝓢]! ∼φ 🡒 ⊥ := CO!_of_N! $ FiniteContext.byAxm!;
-      have np : [∼φ, ∼∼φ] ⊢[𝓢]! ∼φ := FiniteContext.byAxm!;
-      exact of_O! $ nnp ⨀ np;
-    ) $ of! lem!;
+      apply deduct!
+      have nnp : [∼φ, ∼∼φ] ⊢[𝓢]! ∼φ 🡒 ⊥ := CO!_of_N! <| FiniteContext.byAxm!
+      have np : [∼φ, ∼∼φ] ⊢[𝓢]! ∼φ := FiniteContext.byAxm!
+      exact of_O! <| nnp ⨀ np
+    ) <| of! lem!
 
 instance [HasAxiomLEM 𝓢] : Entailment.Cl 𝓢 where
 

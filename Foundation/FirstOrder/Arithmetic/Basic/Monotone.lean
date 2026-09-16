@@ -24,4 +24,4 @@ end Monotone
 
 end Tarski.Structure
 
-end FirstOrder
+end FFL.FirstOrder
