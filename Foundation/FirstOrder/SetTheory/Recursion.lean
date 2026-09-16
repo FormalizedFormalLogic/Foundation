@@ -309,7 +309,7 @@ lemma transfiniteRec_spec (F : V → V) (hF : ℒₛₑₜ-function₁ F) (α : 
   suffices
       ∀ p, (∃ β ∈ (α : V), p = pairValueAttempt F β) ↔
       ∃ x ∈ (α : V), p = ⟨x, if IsOrdinal x then F (replAttemptOrEmpty F hF x) else ∅⟩ₖ by
-    simp only [transfiniteRec, if_pos α.ordinal]
+    simp only [transfiniteRec, ite_eq_left α.ordinal]
     congr 1
     ext p
     simp only [mem_replAttemptOrEmpty_iff, repl_spec]

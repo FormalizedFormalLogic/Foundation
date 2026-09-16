@@ -79,8 +79,8 @@ lemma height_eq_top_of_sound_and_consistent [𝔅.Kreisel] [Entailment.Consisten
 
 @[grind =>]
 lemma height_eq_zero_of_inconsistent (h : Entailment.Inconsistent T) : 𝔅.height = 0 := by
-  suffices 𝔅.height ≤ 0 from nonpos_iff_eq_zero.mp this
-  simpa using height_le_of_boxBot (n := 0) (h ⊥)
+  suffices 𝔅.height ≤ 0 from le_bot_iff.mp this
+  exact height_le_of_boxBot (n := 0) (h ⊥)
 
 end Provability
 

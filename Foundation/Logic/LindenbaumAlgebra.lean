@@ -1,7 +1,7 @@
 module
 
 public import Foundation.Propositional.Entailment.Cl
-public import Mathlib.Data.Countable.Defs
+public import Mathlib.Basic.Countable.Defs
 
 @[expose] public section
 
