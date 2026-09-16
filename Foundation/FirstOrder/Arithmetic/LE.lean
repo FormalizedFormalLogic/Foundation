@@ -17,7 +17,7 @@ def LT.le : Operator L 2 := Semiformula.Operator.Eq.eq.or Semiformula.Operator.L
 
 lemma le_eq {μ : Type*} {n : ℕ} (t₁ t₂ : Semiterm L μ n) :
     LT.le.operator ![t₁, t₂] = “!!t₁ = !!t₂ ∨ !!t₁ < !!t₂” := by
-  simp [Operator.operator, Operator.or, LT.le, ←TransitiveRewriting.comp_app]
+  simp [LT.le]
 
 namespace Order
 variable {T : Theory L} [𝗘𝗤 L ⪯ T]

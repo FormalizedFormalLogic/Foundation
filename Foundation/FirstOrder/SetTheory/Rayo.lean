@@ -57,11 +57,58 @@ private lemma nat_defined (n : ℕ) :
     ∃ φ : Semisentence ℒₛₑₜ 1, DefinedFunction₀ (n : Universe.{0}) φ := by
   induction n with
   | zero => exact ⟨isEmpty, ⟨fun v ↦ by
-      simpa [isEmpty, IsEmpty, zero_def] using (isEmpty_iff_eq_empty (x := v 0))
+      rw [IsEmpty.defined.iff]
+      change IsEmpty (v 0) ↔ _
+      rw [isEmpty_iff_eq_empty, ←zero_def, cast_zero_def]
     ⟩⟩
   | succ n ih =>
     obtain ⟨φ, hφ⟩ := ih
-    exact ⟨“x. ∃ y, !φ y ∧ !succ.dfn x y”, ⟨fun v ↦ by simp [num_succ_def]⟩⟩
+    exact ⟨“x. ∃ y, !φ y ∧ !succ.dfn x y”, ⟨fun v ↦ by
+      change (∃ y : Universe, (Semiformula.Eval (y :> v) Empty.elim) (φ/[#0]) ∧
+        (Semiformula.Eval (y :> v) Empty.elim) (succ.dfn/[#1, #0])) ↔ _
+      change (∃ y : Universe, (Semiformula.Eval (y :> v) Empty.elim) (φ/[#0]) ∧
+        (Semiformula.Eval (y :> v) Empty.elim) (succ.dfn/[#1, #0])) ↔
+          v 0 = ((n + 1 : ℕ) : Universe)
+      have evalφ (y : Universe) :
+          (Semiformula.Eval (y :> v) Empty.elim) (φ/[#0]) ↔ y = (n : Universe) := by
+        rw [Semiformula.eval_rew]
+        have hb : Semiterm.val (L := ℒₛₑₜ) (y :> v) Empty.elim ∘ ⇑(Rew.subst (L := ℒₛₑₜ) ![#0]) ∘
+            Semiterm.bvar = ![y] := by
+          funext i
+          cases i using Fin.cases <;> simp [Function.comp_def]
+        rw [hb]
+        have hf : Semiterm.val (L := ℒₛₑₜ) (y :> v) Empty.elim ∘ ⇑(Rew.subst (L := ℒₛₑₜ) ![#0]) ∘
+            Semiterm.fvar = (Empty.elim : Empty → Universe) := by
+          funext i
+          exact i.elim
+        rw [hf]
+        change φ.Evalb ![y] ↔ ![y] 0 = (n : Universe)
+        exact hφ.iff ![y]
+      have evalSucc (y : Universe) :
+          (Semiformula.Eval (y :> v) Empty.elim) (succ.dfn/[#1, #0]) ↔ v 0 = succ y := by
+        rw [Semiformula.eval_rew]
+        have hb : Semiterm.val (L := ℒₛₑₜ) (y :> v) Empty.elim ∘
+            ⇑(Rew.subst (L := ℒₛₑₜ) ![#1, #0]) ∘ Semiterm.bvar = ![v 0, y] := by
+          funext i
+          cases i using Fin.cases <;> simp [Function.comp_def]
+        rw [hb]
+        have hf : Semiterm.val (L := ℒₛₑₜ) (y :> v) Empty.elim ∘
+            ⇑(Rew.subst (L := ℒₛₑₜ) ![#1, #0]) ∘ Semiterm.fvar =
+              (Empty.elim : Empty → Universe) := by
+          funext i
+          exact i.elim
+        rw [hf]
+        change succ.dfn.Evalb ![v 0, y] ↔ ![v 0, y] 0 = succ (![v 0, y] 1)
+        exact succ.defined.iff ![v 0, y]
+      constructor
+      · rintro ⟨y, hy, hs⟩
+        calc
+          v 0 = succ y := (evalSucc y).mp hs
+          _ = succ (n : Universe) := congrArg succ ((evalφ y).mp hy)
+          _ = ((n + 1 : ℕ) : Universe) := (num_succ_def n).symm
+      · intro h
+        exact ⟨n, (evalφ n).mpr rfl, (evalSucc n).mpr (by simpa [num_succ_def] using h)⟩
+    ⟩⟩
 
 variable {N : ℕ}
 

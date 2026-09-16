@@ -25,7 +25,31 @@ lemma isTransitive_def {x : V} : IsTransitive x ↔ ∀ y ∈ x, y ⊆ x :=
 def IsTransitive.dfn : SetTheorySemisentence 1 := “x. ∀ y ∈ x, y ⊆ x”
 
 instance IsTransitive.defined : ℒₛₑₜ-predicate[V] IsTransitive via IsTransitive.dfn :=
-  ⟨fun v ↦ by simp [IsTransitive.dfn, isTransitive_def]⟩
+  ⟨fun v ↦ by
+    simp only [IsTransitive.dfn, Semiformula.eval_ballMem]
+    unfold Rewriting.subst
+    constructor
+    · intro h
+      constructor
+      intro y hy
+      have h' := h y hy
+      rw [Semiformula.eval_rew] at h'
+      have hb : Semiterm.val (L := ℒₛₑₜ) (y :> v) Empty.elim ∘
+          ⇑(Rew.subst (L := ℒₛₑₜ) ![#0, #1]) ∘ Semiterm.bvar = ![y, v 0] := by
+        funext i
+        cases i using Fin.cases <;> simp [Function.comp_def]
+      rw [hb] at h'
+      have hf : Semiterm.val (L := ℒₛₑₜ) (y :> v) Empty.elim ∘
+          ⇑(Rew.subst (L := ℒₛₑₜ) ![#0, #1]) ∘ Semiterm.fvar = (Empty.elim : Empty → V) := by
+        funext i
+        exact i.elim
+      rw [hf] at h'
+      have h'' : isSubsetOf.Evalb ![y, v 0] := by simpa only [Semiformula.Evalb] using h'
+      exact (Subset.defined_isSubsetOf.iff ![y, v 0]).mp h''
+    · intro h x hx
+      apply (Semiformula.eval_rew (Rew.subst ![#0, #1]) isSubsetOf).mpr
+      simpa [Function.comp_def] using (Subset.defined_isSubsetOf.iff ![x, v 0]).mpr
+        (h.transitive x (by simpa using hx))⟩
 
 instance IsTransitive.definable : ℒₛₑₜ-predicate[V] IsTransitive :=
   IsTransitive.defined.to_definable
