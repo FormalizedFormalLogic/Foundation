@@ -13,13 +13,15 @@ namespace FFL.FirstOrder
 
 variable {L : Language.{u}} [L.Relational]
 
-namespace KripkeModel
+namespace Kripke.Model
 
-variable {ℙ : Type*} [Preorder ℙ] {Name : Type*} [KripkeModel L ℙ Name]
+variable {ℙ : Type*} [Preorder ℙ] {Name : Type*} [Kripke.Model L ℙ Name]
 
 def WeaklyForces (p : ℙ) (bv : Fin n → Name) (fv : ξ → Name) (φ : Semiformula L ξ n) : Prop := Forces p bv fv φᴺ
 
-scoped notation:45 p " ⊩ᶜ[" bv "|" fv "] " φ:46 => WeaklyForces p bv fv φ
+scoped[FFL.FirstOrder.KripkeModel] notation:45 p " ⊩ᶜ[" bv "|" fv "] " φ:46 => FFL.FirstOrder.Kripke.Model.WeaklyForces p bv fv φ
+
+open scoped FFL.FirstOrder.KripkeModel
 
 @[simp] lemma exists_le {α : Type*} [Preorder α] (a : α) : ∃ x, x ≤ a := ⟨a, by rfl⟩
 
@@ -293,23 +295,23 @@ lemma sound₀ [L.DecidableEq] {σ : Sentence L} : 𝐋𝐊¹ ⊢ (σ : Proposit
 
 end WeaklyForces₀
 
-end KripkeModel
+end Kripke.Model
 
--- Inherits `IntKripke`'s universe parameters, which only occur together for the same
+-- Inherits `Kripke.Mod`'s universe parameters, which only occur together for the same
 -- intentional reason as there (`World`/`Carrier` need not share a universe).
 set_option linter.checkUnivs false in
 /-- Kripke model for classical first-order logic -/
-def ForcingNotion (L : Language) [L.Relational] := IntKripke L
+def Kripke.ForcingNotion (L : Language) [L.Relational] := Kripke.Mod L
 
-namespace ForcingNotion
+namespace Kripke.ForcingNotion
 
-variable (ℙ : ForcingNotion L)
+variable (ℙ : Kripke.ForcingNotion L)
 
 @[coe] abbrev Condition := ℙ.World
 
 abbrev Name := ℙ.Carrier
 
-instance : CoeSort (ForcingNotion L) (Type _) := ⟨fun ℙ ↦ ℙ.Condition⟩
+instance : CoeSort (Kripke.ForcingNotion L) (Type _) := ⟨fun ℙ ↦ ℙ.Condition⟩
 
 instance : CoeSort ℙ (Type _) := ⟨fun p ↦ ℙ.Domain p⟩
 
@@ -317,23 +319,24 @@ instance : Nonempty ℙ := ℙ.nonempty
 
 instance : Preorder ℙ := ℙ.preorder
 
-instance kripke : KripkeModel L ℙ ℙ.Name := IntKripke.kripke ℙ
+instance kripke : Kripke.Model L ℙ ℙ.Name := Kripke.Mod.kripke ℙ
 
 variable {ℙ}
 
-open KripkeModel
+open Kripke.Model
+open scoped FFL.FirstOrder.KripkeModel
 
-instance : Semantics (ForcingNotion L) (Sentence L) := ⟨fun ℙ φ ↦ ℙ ∀⊩ᶜ φ⟩
+instance : Semantics (Kripke.ForcingNotion L) (Sentence L) := ⟨fun ℙ φ ↦ ℙ ∀⊩ᶜ φ⟩
 
 lemma models_def : ℙ ⊧ φ ↔ ℙ ∀⊩ᶜ φ := by rfl
 
 lemma sound [L.DecidableEq] {σ : Sentence L} : 𝐋𝐊¹ ⊢ (σ : Proposition L) → ℙ ⊧ σ :=
   WeaklyForces₀.sound₀
 
-instance [L.DecidableEq] (ℙ : ForcingNotion L) :
+instance [L.DecidableEq] (ℙ : Kripke.ForcingNotion L) :
     Sound (Entailment.pullback (𝐋𝐊¹ : LK L) ((↑·) : Sentence L → Proposition L)) ℙ :=
   ⟨fun {_} ↦ sound⟩
 
-end ForcingNotion
+end Kripke.ForcingNotion
 
 end FFL.FirstOrder

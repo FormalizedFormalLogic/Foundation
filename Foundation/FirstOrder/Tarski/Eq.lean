@@ -12,20 +12,20 @@ namespace FirstOrder
 
 variable {L : Language} {ξ : Type*} [Semiformula.Operator.Eq L]
 
-namespace Structure
+namespace Tarski.Structure
 
 namespace Eq
 
-variable (L) (M : Type*) [Nonempty M] [Structure L M]
+variable (L) (M : Type*) [Nonempty M] [Tarski.Structure L M]
 
-@[simp] instance models_eq [Structure.Eq L M] :
+@[simp] instance models_eq [Tarski.Structure.Eq L M] :
     M↓[L] ⊧* 𝗘𝗤 L := ⟨by
   intro φ h
   rcases h with (_ | _ | _ | _ | _) <;> simp [models_iff, Theory.Eq.funcExt, Theory.Eq.relExt]
   · simp [Function.comp_def]; grind
   · simp [Function.comp_def]; grind⟩
 
-instance models_eqAxiom' [Structure.Eq L M] : M↓[L] ⊧* 𝗘𝗤 L := models_eq _ _
+instance models_eqAxiom' [Tarski.Structure.Eq L M] : M↓[L] ⊧* 𝗘𝗤 L := models_eq _ _
 
 variable {M}
 
@@ -100,27 +100,27 @@ lemma of_eq_of {a b : M} : (⟦a⟧ : QuotEq L M) = ⟦b⟧ ↔ eqv L a b := Quo
 namespace QuotEq
 
 def func ⦃k⦄ (f : L.Func k) (v : Fin k → QuotEq L M) : QuotEq L M :=
-  Quotient.liftVec (s := eqvSetoid L M) (⟦Structure.func f ·⟧) (fun _ _ hvw ↦ of_eq_of.mpr (eqv_funcExt f hvw)) v
+  Quotient.liftVec (s := eqvSetoid L M) (⟦Tarski.Structure.func f ·⟧) (fun _ _ hvw ↦ of_eq_of.mpr (eqv_funcExt f hvw)) v
 
 def Rel ⦃k⦄ (r : L.Rel k) (v : Fin k → QuotEq L M) : Prop :=
-  Quotient.liftVec (s := eqvSetoid L M) (Structure.rel r) (fun _ _ hvw ↦ eq_iff_iff.mpr <| eqv_relExt r hvw) v
+  Quotient.liftVec (s := eqvSetoid L M) (Tarski.Structure.rel r) (fun _ _ hvw ↦ eq_iff_iff.mpr <| eqv_relExt r hvw) v
 
-instance struc : Structure L (QuotEq L M) where
+instance struc : Tarski.Structure L (QuotEq L M) where
   func := QuotEq.func
   rel := QuotEq.Rel
 
-lemma funk_mk {k} (f : L.Func k) (v : Fin k → M) : Structure.func (M := QuotEq L M) f (⟦v ·⟧) = ⟦Structure.func f v⟧ :=
+lemma funk_mk {k} (f : L.Func k) (v : Fin k → M) : Tarski.Structure.func (M := QuotEq L M) f (⟦v ·⟧) = ⟦Tarski.Structure.func f v⟧ :=
   Quotient.liftVec_mk (s := eqvSetoid L M) _ _ _
 
-lemma rel_mk {k} (r : L.Rel k) (v : Fin k → M) : Structure.rel (M := QuotEq L M) r (⟦v ·⟧) ↔ Structure.rel r v :=
+lemma rel_mk {k} (r : L.Rel k) (v : Fin k → M) : Tarski.Structure.rel (M := QuotEq L M) r (⟦v ·⟧) ↔ Tarski.Structure.rel r v :=
   of_eq <| Quotient.liftVec_mk (s := eqvSetoid L M) _ _ _
 
 lemma funk_mk_of_eq {k} (f : L.Func k) {w : Fin k → QuotEq L M} {v : Fin k → M}
-    (h : ∀ i, w i = ⟦v i⟧) : Structure.func (M := QuotEq L M) f w = ⟦Structure.func f v⟧ :=
+    (h : ∀ i, w i = ⟦v i⟧) : Tarski.Structure.func (M := QuotEq L M) f w = ⟦Tarski.Structure.func f v⟧ :=
   funext h ▸ funk_mk f v
 
 lemma rel_mk_of_eq {k} (r : L.Rel k) {w : Fin k → QuotEq L M} {v : Fin k → M}
-    (h : ∀ i, w i = ⟦v i⟧) : Structure.rel (M := QuotEq L M) r w ↔ Structure.rel r v :=
+    (h : ∀ i, w i = ⟦v i⟧) : Tarski.Structure.rel (M := QuotEq L M) r w ↔ Tarski.Structure.rel r v :=
   funext h ▸ rel_mk r v
 
 lemma val_mk {bv fv} (t : Semiterm L ξ n) :
@@ -176,48 +176,48 @@ lemma rel_eq (a b : QuotEq L M) : op(=)[L].val (M := QuotEq L M) ![a, b] ↔ a =
   simpa [Matrix.fun_eq_vec_two, Empty.eq_elim] using
     eval_mk (H := H) (bv := ![a, b]) (fv := Empty.elim) (φ := Semiformula.Operator.Eq.eq.sentence)
 
-instance structureEq : Structure.Eq L (QuotEq L M) := ⟨rel_eq⟩
+instance structureEq : Tarski.Structure.Eq L (QuotEq L M) := ⟨rel_eq⟩
 
 end QuotEq
 
 end Eq
 
-end Structure
+end Tarski.Structure
 
 /-- Consequence can be tested on equality structures when all models satisfy the equality axioms.
 This is a routine consequence of the quotient-model construction. -/
 lemma consequence_iff_eq_of_models_eq {T : Theory L}
-    (hEq : ∀ (M : Type v) [Nonempty M] [Structure L M], M↓[L] ⊧* T → M↓[L] ⊧* 𝗘𝗤 L)
+    (hEq : ∀ (M : Type v) [Nonempty M] [Tarski.Structure L M], M↓[L] ⊧* T → M↓[L] ⊧* 𝗘𝗤 L)
     {σ : Sentence L} :
-    T ⊨[Struc.{v, u} L] σ ↔
-      (∀ (M : Type v) [Nonempty M] [Structure L M] [Structure.Eq L M], M↓[L] ⊧* T → M↓[L] ⊧ σ) := by
+    T ⊨[Tarski.Struc.{v, u} L] σ ↔
+      (∀ (M : Type v) [Nonempty M] [Tarski.Structure L M] [Tarski.Structure.Eq L M], M↓[L] ⊧* T → M↓[L] ⊧ σ) := by
   simp only [consequence_iff, Nonempty.forall];
   constructor;
   . intro h M x s _ hM; exact h M x hM;
   . intro h M x s hM;
     have : Nonempty M := ⟨x⟩;
     have H : M↓[L] ⊧* 𝗘𝗤 L := hEq M hM;
-    have e : Structure.Eq.QuotEq L M ≡ₑ[L] M := Structure.Eq.QuotEq.elementaryEquiv L M;
-    exact e.models.mp $ h (Structure.Eq.QuotEq L M) ⟦x⟧ (e.modelsTheory.mpr hM);
+    have e : Tarski.Structure.Eq.QuotEq L M ≡ₑ[L] M := Tarski.Structure.Eq.QuotEq.elementaryEquiv L M;
+    exact e.models.mp $ h (Tarski.Structure.Eq.QuotEq L M) ⟦x⟧ (e.modelsTheory.mpr hM);
 
 /-- Satisfiability has an equality-structure witness when all models satisfy the equality axioms.
 This is a routine consequence of the quotient-model construction. -/
 lemma satisfiable_iff_eq_of_models_eq {T : Theory L}
-    (hEq : ∀ (M : Type v) [Nonempty M] [Structure L M], M↓[L] ⊧* T → M↓[L] ⊧* 𝗘𝗤 L) :
-    Semantics.Satisfiable (Struc.{v, u} L) T ↔
-      (∃ (M : Type v) (_ : Nonempty M) (_ : Structure L M) (_ : Structure.Eq L M), M↓[L] ⊧* T) := by
+    (hEq : ∀ (M : Type v) [Nonempty M] [Tarski.Structure L M], M↓[L] ⊧* T → M↓[L] ⊧* 𝗘𝗤 L) :
+    Semantics.Satisfiable (Tarski.Struc.{v, u} L) T ↔
+      (∃ (M : Type v) (_ : Nonempty M) (_ : Tarski.Structure L M) (_ : Tarski.Structure.Eq L M), M↓[L] ⊧* T) := by
   simp only [satisfiable_iff, Nonempty.exists, exists_prop];
   constructor;
   . intro ⟨M, x, s, hM⟩;
     have : Nonempty M := ⟨x⟩;
     have H : M↓[L] ⊧* 𝗘𝗤 L := hEq M hM;
-    have e : Structure.Eq.QuotEq L M ≡ₑ[L] M := Structure.Eq.QuotEq.elementaryEquiv L M;
-    exact ⟨Structure.Eq.QuotEq L M, ⟦x⟧, inferInstance, inferInstance, e.modelsTheory.mpr hM⟩;
+    have e : Tarski.Structure.Eq.QuotEq L M ≡ₑ[L] M := Tarski.Structure.Eq.QuotEq.elementaryEquiv L M;
+    exact ⟨Tarski.Structure.Eq.QuotEq L M, ⟦x⟧, inferInstance, inferInstance, e.modelsTheory.mpr hM⟩;
   . intro ⟨M, i, s, _, hM⟩; exact ⟨M, i, s, hM⟩;
 
 namespace Semiformula
 
-variable {M : Type*} [s : Structure L M] [Structure.Eq L M]
+variable {M : Type*} [s : Tarski.Structure L M] [Tarski.Structure.Eq L M]
 
 @[simp] lemma eval_existsUnique {e ε} {φ : Semiformula L ξ (n + 1)} :
     Eval (M := M) e ε (∃¹! φ) ↔ ∃! x, Eval (M := M) (x :> e) ε φ := by

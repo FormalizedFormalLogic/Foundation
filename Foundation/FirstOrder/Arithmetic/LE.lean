@@ -27,12 +27,12 @@ theorem leIffEqOrLt : T ⊢ “∀ x y, x ≤ y ↔ x = y ∨ x < y” :=
 lemma complete (φ : Sentence L)
   (H : ∀ (M : Type (max u w))
       [Nonempty M] [LT M]
-      [Structure L M] [Structure.Eq L M] [Structure.LT L M]
+      [Tarski.Structure L M] [Tarski.Structure.Eq L M] [Tarski.Structure.LT L M]
       [M↓[L] ⊧* T],
       M↓[L] ⊧ φ) :
     T ⊢ φ := Theory.Proof.complete <| consequence_iff_eq.mpr fun M _ _ _ hT ↦
-  letI : (Structure.Model L M)↓[L] ⊧* T := Structure.ElementaryEquiv.modelsTheory.mp hT
-  Structure.ElementaryEquiv.models.mpr (H (Structure.Model L M))
+  letI : (Tarski.Structure.Model L M)↓[L] ⊧* T := Tarski.Structure.ElementaryEquiv.modelsTheory.mp hT
+  Tarski.Structure.ElementaryEquiv.models.mpr (H (Tarski.Structure.Model L M))
 
 end Order
 

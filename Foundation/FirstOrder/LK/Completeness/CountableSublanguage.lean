@@ -164,7 +164,7 @@ def toSubLanguageSelf (φ : Semiformula L ξ n) : Semiformula φ.sublanguage ξ 
 
 end Semiformula
 
-/-! ### Structure induced by an injective language homomorphism -/
+/-! ### Tarski.Structure induced by an injective language homomorphism -/
 
 namespace Language
 
@@ -178,15 +178,15 @@ instance unsub_injective (pf : ∀ k, L.Func k → Prop) (pr : ∀ k, L.Rel k �
 
 end Language
 
-namespace Structure
+namespace Tarski.Structure
 
-noncomputable abbrev extendStructure (Φ : L₁ →ᵥ L₂) {M : Type*} [Nonempty M] (s : Structure L₁ M) : Structure L₂ M where
+noncomputable abbrev extendStructure (Φ : L₁ →ᵥ L₂) {M : Type*} [Nonempty M] (s : Tarski.Structure L₁ M) : Tarski.Structure L₂ M where
   func {k} f₂ v := Classical.epsilon (∃ f₁ : L₁.Func k, Φ.func f₁ = f₂ ∧ · = s.func f₁ v)
   rel {k} r₂ v := ∃ r₁ : L₁.Rel k, Φ.rel r₁ = r₂ ∧ s.rel r₁ v
 
 namespace extendStructure
 
-variable {M : Type*} [Nonempty M] (s₁ : Structure L₁ M)
+variable {M : Type*} [Nonempty M] (s₁ : Tarski.Structure L₁ M)
 
 protected lemma func
     (Φ : L₁ →ᵥ L₂) [hΦ : Φ.Injective]
@@ -240,7 +240,7 @@ lemma models_lMap (Φ : L₁ →ᵥ L₂) [Φ.Injective] (φ : Sentence L₁) :
 
 end extendStructure
 
-end Structure
+end Tarski.Structure
 
 section lMap
 
@@ -250,19 +250,19 @@ lemma lMap_models_lMap_iff (Φ : L₁ →ᵥ L₂) [Φ.Injective] {T : Theory L�
     T.lMap Φ ⊨ φ.lMap Φ ↔ T ⊨ φ := by
   constructor
   · intro h s₁ hs₁
-    refine (Structure.extendStructure.models_lMap s₁.struc Φ φ).mp <| h ?_
-    suffices ∀ σ ∈ T, (Structure.extendStructure Φ s₁.struc).toStruc ⊧ σ.lMap Φ by
+    refine (Tarski.Structure.extendStructure.models_lMap s₁.struc Φ φ).mp <| h ?_
+    suffices ∀ σ ∈ T, (Tarski.Structure.extendStructure Φ s₁.struc).toStruc ⊧ σ.lMap Φ by
       simpa [Semantics.modelsSet_iff, Theory.lMap, Semantics.models]
     intro σ hσ
-    exact (Structure.extendStructure.models_lMap s₁.struc Φ σ).mpr (hs₁.models _ hσ)
+    exact (Tarski.Structure.extendStructure.models_lMap s₁.struc Φ σ).mpr (hs₁.models _ hσ)
   · exact lMap_models_lMap
 
 lemma satisfiable_lMap (Φ : L₁ →ᵥ L₂) [Φ.Injective] {T : Theory L₁} (s : Satisfiable T) :
     Satisfiable (T.lMap Φ) := by
   rcases s with ⟨⟨M, i, s⟩, hM⟩
   exact ⟨⟨M, i, s.extendStructure Φ⟩, by
-    have : ∀ φ ∈ T, (Structure.extendStructure Φ s).toStruc ⊧ φ.lMap Φ :=
-      fun φ hφ ↦ (Structure.extendStructure.models_lMap s Φ φ).mpr (hM.models _ hφ)
+    have : ∀ φ ∈ T, (Tarski.Structure.extendStructure Φ s).toStruc ⊧ φ.lMap Φ :=
+      fun φ hφ ↦ (Tarski.Structure.extendStructure.models_lMap s Φ φ).mpr (hM.models _ hφ)
     simpa [Theory.lMap] using this⟩
 
 end lMap

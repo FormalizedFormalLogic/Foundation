@@ -9,7 +9,7 @@ namespace FFL.Propositional
 
 variable {α : Type*}
 
-open Boolean (Valuation)
+open Tarski (Valuation)
 
 
 namespace NNFormula
@@ -51,7 +51,7 @@ section semantics
 
 variable {v : Valuation α}
 
--- `Valuation α` is also the model type of `Formula.Boolean.semantics` and the formula parameter of
+-- `Valuation α` is also the model type of `Formula.semantics` and the formula parameter of
 -- `Semantics` is an `outParam`, so an explicit priority is needed to pin down which of the two
 -- instances a valuation resolves to.
 instance (priority := high) semantics : Semantics (Valuation α) (NNFormula α) := ⟨fun v ↦ NNFormula.val v⟩

@@ -16,7 +16,9 @@ public import Mathlib.Logic.Encodable.Basic
 
 /-! ### Generic filters -/
 
-namespace FFL.FirstOrder.Derivation.Canonical
+namespace FFL.FirstOrder.LK.Derivation.Canonical
+
+open scoped FFL.FirstOrder.Derivation.Canonical
 
 open Order
 
@@ -149,7 +151,7 @@ lemma GenericForces.henkin {p : ℙ} {φ : Semiproposition K 1} : p ⊫ ∃¹ φ
   _         ↔ ¬p ⊫ ∼φ ⋏ ∼ψ := by rw [GenericForces.neg]
   _         ↔ p ⊫ φ ∨ p ⊫ ψ := by simp; tauto
 
-abbrev termModelOf (p : ℙ) : Structure K (Term K ℕ) where
+abbrev termModelOf (p : ℙ) : Tarski.Structure K (Term K ℕ) where
   func _ f v := .func f v
   rel _ R v := p ⊫ .rel R v
 
@@ -180,13 +182,13 @@ lemma refl (φ : Proposition K) (h : 𝐋𝐊¹ ⊬ ∼φ) :
     φ.Evalf (s := termModelOf (ConsistentSequent.ofUnprovable φ h)) (&·) :=
   (forcing_lemma φ).mpr ⟨ConsistentSequent.ofUnprovable φ h, by simp, by simpa using IsWeaklyForced.refl φ h⟩
 
-end Derivation.Canonical
+end LK.Derivation.Canonical
 
 /-! ### Completeness theorem -/
 
 namespace LK
 
-open Classical Derivation.Canonical
+open Classical LK.Derivation.Canonical
 
 variable {L : Language}
 
@@ -224,7 +226,7 @@ theorem small_satisfiable_of_consistent :
   simpa [σ] using this
 
 lemma satisfiable_iff_consistent :
-    Semantics.Satisfiable (Struc.{max u w} L) T ↔ Consistent T := by
+    Semantics.Satisfiable (Tarski.Struc.{max u w} L) T ↔ Consistent T := by
   constructor
   · exact consistent_of_satisfiable
   · intro h
@@ -234,11 +236,11 @@ lemma satisfiable_iff_consistent :
 
 /-- Completeness theorem (II) -/
 theorem Proof.complete :
-    T ⊨[Struc.{max u w} L] φ → T ⊢ φ := by
+    T ⊨[Tarski.Struc.{max u w} L] φ → T ⊢ φ := by
   contrapose!
   intro h
   have : Consistent (insert (∼φ) T) := unprovable_iff_consistent_adjoin.mp h
-  have : Semantics.Satisfiable (Struc.{max u w} L) (insert (∼φ) T) := satisfiable_iff_consistent.mpr this
+  have : Semantics.Satisfiable (Tarski.Struc.{max u w} L) (insert (∼φ) T) := satisfiable_iff_consistent.mpr this
   rcases this with ⟨⟨M, i, s⟩, hM⟩
   have : ¬M↓[L] ⊧ φ ∧ M↓[L] ⊧* T := by simpa using hM
   simpa [consequence_iff] using ⟨M, i.some, s, this.2, this.1⟩
@@ -247,12 +249,12 @@ theorem Proof.small_complete : T ⊨ φ → T ⊢ φ := Proof.complete
 
 theorem Proof.complete_iff : T ⊨ φ ↔ T ⊢ φ := ⟨fun h ↦ Proof.complete h, Proof.sound⟩
 
-instance Proof.isComplete (T : Theory L) : Complete T (Semantics.models (Struc.{max u w} L) T) := ⟨Proof.complete⟩
+instance Proof.isComplete (T : Theory L) : Complete T (Semantics.models (Tarski.Struc.{max u w} L) T) := ⟨Proof.complete⟩
 
-lemma satisfiable_iff_satisfiable : Semantics.Satisfiable (Struc.{max u w} L) T ↔ Satisfiable T := by
+lemma satisfiable_iff_satisfiable : Semantics.Satisfiable (Tarski.Struc.{max u w} L) T ↔ Satisfiable T := by
   simp [satisfiable_iff_consistent.{u, w}, satisfiable_iff_consistent.{u, u}]
 
-lemma consequence_iff_consequence : T ⊨[Struc.{max u w} L] φ ↔ T ⊨ φ := by
+lemma consequence_iff_consequence : T ⊨[Tarski.Struc.{max u w} L] φ ↔ T ⊨ φ := by
   simp [consequence_iff_unsatisfiable, satisfiable_iff_satisfiable.{u, w}]
 
 end Theory
@@ -261,7 +263,7 @@ end Theory
 
 namespace ModelsTheory
 
-variable {L : Language.{u}} (M : Type w) [Nonempty M] [Structure L M] (T U V : Theory L)
+variable {L : Language.{u}} (M : Type w) [Nonempty M] [Tarski.Structure L M] (T U V : Theory L)
 
 lemma of_provably_subtheory [le : T ⪯ U] (h : M↓[L] ⊧* U) : M↓[L] ⊧* T := ⟨fun φ hφ ↦
   have : U ⊢ φ := le.pbl (Entailment.by_axm hφ)
@@ -279,13 +281,13 @@ lemma Theory.Proof.complete_on_eq_models
     (φ : Sentence L)
     (H : ∀ (M : Type (max u v))
       [Nonempty M]
-      [Structure L M] [Structure.Eq L M]
+      [Tarski.Structure L M] [Tarski.Structure.Eq L M]
       [M↓[L] ⊧* T],
       M↓[L] ⊧ φ) :
     T ⊢ φ :=
   have : T ⊨ φ := Theory.consequence_iff_consequence.mp <| consequence_iff_eq.mpr fun M _ _ _ hT ↦
-    letI : (Structure.Model L M)↓[L] ⊧* T := Structure.ElementaryEquiv.modelsTheory.mp hT
-    Structure.ElementaryEquiv.models.mpr (H (Structure.Model L M))
+    letI : (Tarski.Structure.Model L M)↓[L] ⊧* T := Tarski.Structure.ElementaryEquiv.modelsTheory.mp hT
+    Tarski.Structure.ElementaryEquiv.models.mpr (H (Tarski.Structure.Model L M))
   Theory.Proof.complete this
 
 end FFL.FirstOrder

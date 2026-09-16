@@ -12,7 +12,9 @@ Main reference: Jeremy Avigad, Algebraic proofs of cut elimination [Avi01]
 
 @[expose] public section
 
-namespace FFL.FirstOrder.Derivation.Canonical
+namespace FFL.FirstOrder.LK.Derivation.Canonical
+
+open scoped FFL.FirstOrder.Derivation.Canonical
 
 variable {L : Language}
 
@@ -20,7 +22,7 @@ open Classical
 
 variable (L)
 
-def ConsistentSequent := {Γ : Sequent L // IsEmpty (⊢ᴸᴷ¹ ∼Γ)}
+def ConsistentSequent := {Γ : LK.Sequent L // IsEmpty (⊢ᴸᴷ¹ ∼Γ)}
 
 variable {L}
 
@@ -193,4 +195,4 @@ end IsWeaklyForced
 
 end Canonical
 
-end FFL.FirstOrder.Derivation
+end FFL.FirstOrder.LK.Derivation

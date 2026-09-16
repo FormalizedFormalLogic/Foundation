@@ -11,9 +11,9 @@ open Semiformula
 
 variable {L : Language}
 
-namespace Derivation
+namespace LK.Derivation
 
-lemma sound {M : Type*} [s : Structure L M] [Nonempty M] (f : ℕ → M) {Γ : Sequent L} :
+lemma sound {M : Type*} [s : Tarski.Structure L M] [Nonempty M] (f : ℕ → M) {Γ : LK.Sequent L} :
     ⊢ᴸᴷ¹ Γ → ∃ φ ∈ Γ, φ.Evalf f
   | identity r v => by
     by_cases h : s.rel r (Semiterm.val ![] f ∘ v)
@@ -65,28 +65,28 @@ lemma sound {M : Type*} [s : Structure L M] [Nonempty M] (f : ℕ → M) {Γ : S
       · exact ⟨ψ, by simp [hn], hq⟩
       · contradiction
 
-@[simp] lemma nil_empty : IsEmpty (⊢ᴸᴷ¹ (0 : Sequent L)) := by
+@[simp] lemma nil_empty : IsEmpty (⊢ᴸᴷ¹ (0 : LK.Sequent L)) := by
   refine ⟨fun b ↦ ?_⟩
   simpa using sound (fun _ ↦ ()) b
 
-end Derivation
+end LK.Derivation
 
-theorem LK.Proof.sound {M : Type*} [s : Structure L M] [Nonempty M] {φ : Proposition L} (f : ℕ → M) :
-    𝐋𝐊¹ ⊢ φ → φ.Evalf f := fun b ↦ by simpa using Derivation.sound f b.get
+theorem LK.Proof.sound {M : Type*} [s : Tarski.Structure L M] [Nonempty M] {φ : Proposition L} (f : ℕ → M) :
+    𝐋𝐊¹ ⊢ φ → φ.Evalf f := fun b ↦ by simpa using LK.Derivation.sound f b.get
 
 variable {T U : Theory L}
 
 namespace Theory
 
-theorem Proof.sound_proposition {M : Type*} [s : Structure L M] [Nonempty M] :
+theorem Proof.sound_proposition {M : Type*} [s : Tarski.Structure L M] [Nonempty M] :
     T ⊢ φ → M↓[L] ⊧* T → φ.Realize M := fun b H ↦ by
   rcases Proof.provable_iff.mp b with ⟨Γ, hΓ, ⟨b⟩⟩
   let f : ℕ → M := fun _ ↦ Nonempty.some inferInstance
-  have : φ.Realize M ∨ ∃ ψ, ∼ψ ∈ Sequent.embed Γ ∧ ψ.Evalf f := by simpa using b.sound f
+  have : φ.Realize M ∨ ∃ ψ, ∼ψ ∈ LK.Sequent.embed Γ ∧ ψ.Evalf f := by simpa using b.sound f
   rcases this with (h | ⟨ψ, hψ, h⟩)
   · assumption
   · have : ∃ χ : Sentence L, ∼χ ∈ Γ ∧ ↑χ = ψ := by
-      have : ∃ χ ∈ Γ, χ = ∼ψ := by simpa [Sequent.embed] using hψ
+      have : ∃ χ ∈ Γ, χ = ∼ψ := by simpa [LK.Sequent.embed] using hψ
       rcases this with ⟨χ, hχ, e⟩
       refine ⟨∼χ, by simpa using hχ, by simp [e]⟩
     rcases this with ⟨χ, hχ, rfl⟩
@@ -97,22 +97,22 @@ theorem Proof.sound_proposition {M : Type*} [s : Structure L M] [Nonempty M] :
 
 /-- Soundness theorem for first-order logic. -/
 theorem Proof.sound {φ : Sentence L} :
-    T ⊢ φ → T ⊨[Struc.{v, u} L] φ := fun b s hS ↦ by
+    T ⊢ φ → T ⊨[Tarski.Struc.{v, u} L] φ := fun b s hS ↦ by
   simpa [struc_models_iff_models (s := s), models_iff]
     using Proof.sound_proposition b hS
 
 theorem Proof.sound_small : T ⊢ φ → T ⊨ φ := Proof.sound
 
-instance (T : Theory L) : Sound T (Semantics.models (Struc.{v, u} L) T) := ⟨Theory.Proof.sound⟩
+instance (T : Theory L) : Sound T (Semantics.models (Tarski.Struc.{v, u} L) T) := ⟨Theory.Proof.sound⟩
 
-lemma consistent_of_satisfiable (h : Semantics.Satisfiable (Struc.{v, u} L) T) : Entailment.Consistent T :=
+lemma consistent_of_satisfiable (h : Semantics.Satisfiable (Tarski.Struc.{v, u} L) T) : Entailment.Consistent T :=
   Sound.consistent_of_satisfiable h
 
 end Theory
 
 section model
 
-variable (T) (M : Type*) [Nonempty M] [Structure L M]
+variable (T) (M : Type*) [Nonempty M] [Tarski.Structure L M]
 
 lemma consistent_of_model [hM : M↓[L] ⊧* T] :
     Entailment.Consistent T := Theory.consistent_of_satisfiable ⟨M↓[L], hM⟩

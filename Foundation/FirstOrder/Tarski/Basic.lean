@@ -20,76 +20,76 @@ namespace FirstOrder
 variable {L : Language.{u}}
 
 /-- A first-order `L`-structure associates domain `M` with interpretations of function and relation symbols. -/
-@[ext] class Structure (L : Language.{u}) (M : Type w) where
+@[ext] class Tarski.Structure (L : Language.{u}) (M : Type w) where
   func : ⦃k : ℕ⦄ → L.Func k → (Fin k → M) → M
   rel : ⦃k : ℕ⦄ → L.Rel k → (Fin k → M) → Prop
 
 /-- An auxiliary structure that corresponds to a first-order `L`-structure with a nonempty domain. -/
-structure Struc (L : Language) where
+structure Tarski.Struc (L : Language) where
   Dom : Type*
   nonempty : Nonempty Dom
-  struc : Structure L Dom
+  struc : Tarski.Structure L Dom
 
-abbrev SmallStruc (L : Language.{u}) := Struc.{u, u} L
+abbrev Tarski.SmallStruc (L : Language.{u}) := Tarski.Struc.{u, u} L
 
-instance : CoeSort (Struc L) (Type _) := ⟨Struc.Dom⟩
+instance : CoeSort (Tarski.Struc L) (Type _) := ⟨Tarski.Struc.Dom⟩
 
-namespace Structure
+namespace Tarski.Structure
 
-instance [n : Nonempty M] : Nonempty (Structure L M) := by
+instance [n : Nonempty M] : Nonempty (Tarski.Structure L M) := by
   rcases n with ⟨x⟩
   exact ⟨{ func := fun _ _ _ ↦ x, rel := fun _ _ _ ↦ True }⟩
 
-instance unit : Structure L Unit where
+instance unit : Tarski.Structure L Unit where
   func := fun _ _ _ ↦ ()
   rel := fun _ _ _ ↦ True
 
-protected abbrev lMap (φ : L₁ →ᵥ L₂) {M : Type w} (S : Structure L₂ M) : Structure L₁ M where
+protected abbrev lMap (φ : L₁ →ᵥ L₂) {M : Type w} (S : Tarski.Structure L₂ M) : Tarski.Structure L₁ M where
   func  _ f := S.func (φ.func f)
   rel _ r := S.rel (φ.rel r)
 
-variable (φ : L₁ →ᵥ L₂) {M : Type w} (s₂ : Structure L₂ M)
+variable (φ : L₁ →ᵥ L₂) {M : Type w} (s₂ : Tarski.Structure L₂ M)
 
 @[simp] lemma lMap_func {k} {f : L₁.Func k} {v : Fin k → M} : (s₂.lMap φ).func f v = s₂.func (φ.func f) v := rfl
 
 @[simp] lemma lMap_rel {k} {r : L₁.Rel k} {v : Fin k → M} : (s₂.lMap φ).rel r v ↔ s₂.rel (φ.rel r) v := of_eq rfl
 
-abbrev ofEquiv {M : Type w} [Structure L M] {N : Type w'} (Θ : M ≃ N) : Structure L N where
+abbrev ofEquiv {M : Type w} [Tarski.Structure L M] {N : Type w'} (Θ : M ≃ N) : Tarski.Structure L N where
   func := fun _ f v ↦ Θ (func f (Θ.symm ∘ v))
   rel  := fun _ r v ↦ rel r (Θ.symm ∘ v)
 
-protected abbrev Decidable (L : Language.{u}) (M : Type w) [s : Structure L M] :=
+protected abbrev Decidable (L : Language.{u}) (M : Type w) [s : Tarski.Structure L M] :=
   {k : ℕ} → (r : L.Rel k) → (v : Fin k → M) → Decidable (s.rel r v)
 
-noncomputable instance [Structure L M] : Structure.Decidable L M := fun r v => Classical.dec (rel r v)
+noncomputable instance [Tarski.Structure L M] : Tarski.Structure.Decidable L M := fun r v => Classical.dec (rel r v)
 
-@[reducible] def toStruc [i : Nonempty M] (s : Structure L M) : Struc L := ⟨M, i, s⟩
+@[reducible] def toStruc [i : Nonempty M] (s : Tarski.Structure L M) : Tarski.Struc L := ⟨M, i, s⟩
 
-end Structure
+end Tarski.Structure
 
-namespace Struc
+namespace Tarski.Struc
 
-instance (s : Struc L) : Nonempty s.Dom := s.nonempty
+instance (s : Tarski.Struc L) : Nonempty s.Dom := s.nonempty
 
-instance (s : Struc L) : Structure L s.Dom := s.struc
+instance (s : Tarski.Struc L) : Tarski.Structure L s.Dom := s.struc
 
-end Struc
+end Tarski.Struc
 
 namespace Semiterm
 
 variable
-  {M : Type w} {s : Structure L M}
+  {M : Type w} {s : Tarski.Structure L M}
   {b : Fin n → M} {b₁ : Fin n₁ → M} {b₂ : Fin n₂ → M}
   {f : ξ → M} {f₁ : ξ₁ → M} {f₂ : ξ₂ → M}
 
-def val [s : Structure L M] (b : Fin n → M) (f : ξ → M) : Semiterm L ξ n → M
+def val [s : Tarski.Structure L M] (b : Fin n → M) (f : ξ → M) : Semiterm L ξ n → M
   |       #x => b x
   |       &x => f x
   | func F v => s.func F fun i ↦ (v i).val b f
 
-abbrev valb [s : Structure L M] (b : Fin n → M) (t : ClosedSemiterm L n) : M := t.val b Empty.elim
+abbrev valb [s : Tarski.Structure L M] (b : Fin n → M) (t : ClosedSemiterm L n) : M := t.val b Empty.elim
 
-abbrev valf [s : Structure L M] {n} (b : Fin n → M) : Semiterm L Empty n → M := val b Empty.elim
+abbrev valf [s : Tarski.Structure L M] {n} (b : Fin n → M) : Semiterm L Empty n → M := val b Empty.elim
 
 @[simp] lemma val_bvar (x) : val b f (#x : Semiterm L ξ n) = b x := rfl
 
@@ -139,7 +139,7 @@ section Language
 
 variable (φ : L₁ →ᵥ L₂) (b : Fin n → M) (f : ξ → M)
 
-lemma val_lMap (φ : L₁ →ᵥ L₂) (s₂ : Structure L₂ M) (b : Fin n → M) (f : ξ → M) {t : Semiterm L₁ ξ n} :
+lemma val_lMap (φ : L₁ →ᵥ L₂) (s₂ : Tarski.Structure L₂ M) (b : Fin n → M) (f : ξ → M) {t : Semiterm L₁ ξ n} :
     (t.lMap φ).val (s := s₂) b f = t.val (s := s₂.lMap φ) b f := by
   induction t <;> simp [*, val_func, Semiterm.lMap_func, Function.comp_def]
 
@@ -188,11 +188,11 @@ lemma val_toEmpty [DecidableEq ξ] (t : Semiterm L ξ n) (h : t.freeVariables = 
 
 end Semiterm
 
-namespace Structure
+namespace Tarski.Structure
 
 section
 
-variable [s : Structure L M] (Θ : M ≃ N)
+variable [s : Tarski.Structure L M] (Θ : M ≃ N)
 
 lemma ofEquiv_func (f : L.Func k) (v : Fin k → N) :
     (ofEquiv Θ).func f v = Θ (func f (Θ.symm ∘ v)) := rfl
@@ -203,14 +203,14 @@ lemma ofEquiv_val (b : Fin n → N) (f : ξ → N) (t : Semiterm L ξ n) :
 
 end
 
-end Structure
+end Tarski.Structure
 
 namespace Semiformula
 
-variable {M : Type w} {s : Structure L M}
+variable {M : Type w} {s : Tarski.Structure L M}
 variable {n : ℕ} {b : Fin n → M} {b₂ : Fin n₂ → M} {f : ξ → M} {f₂ : ξ₂ → M}
 
-def EvalAux (s : Structure L M) (f : ξ → M) {n} (b : Fin n → M) : Semiformula L ξ n → Prop
+def EvalAux (s : Tarski.Structure L M) (f : ξ → M) {n} (b : Fin n → M) : Semiformula L ξ n → Prop
   |  rel φ v => s.rel φ (fun i ↦ Semiterm.val b f (v i))
   | nrel φ v => ¬s.rel φ (fun i ↦ Semiterm.val b f (v i))
   |        ⊤ => True
@@ -225,7 +225,7 @@ def EvalAux (s : Structure L M) (f : ξ → M) {n} (b : Fin n → M) : Semiformu
   by induction φ using rec' <;> simp [*, EvalAux, or_iff_not_imp_left]
 
 /-- Evaluation of semiformula with variation of free-variables `f` and bounded-variables `b` -/
-def Eval [s : Structure L M] (b : Fin n → M) (f : ξ → M) : Semiformula L ξ n →ˡᶜ Prop where
+def Eval [s : Tarski.Structure L M] (b : Fin n → M) (f : ξ → M) : Semiformula L ξ n →ˡᶜ Prop where
   toTr := EvalAux s f b
   map_top' := rfl
   map_bot' := rfl
@@ -234,17 +234,17 @@ def Eval [s : Structure L M] (b : Fin n → M) (f : ξ → M) : Semiformula L ξ
   map_neg' := by simp [EvalAux_neg]
   map_imply' := by simp [EvalAux_neg, ←neg_eq, EvalAux, imp_iff_not_or]
 
-abbrev Evalf [s : Structure L M] (f : ξ → M) : Formula L ξ →ˡᶜ Prop := Eval (s := s) ![] f
+abbrev Evalf [s : Tarski.Structure L M] (f : ξ → M) : Formula L ξ →ˡᶜ Prop := Eval (s := s) ![] f
 
-abbrev Evalb [s : Structure L M] (b : Fin n → M) :
+abbrev Evalb [s : Tarski.Structure L M] (b : Fin n → M) :
     Semiformula L Empty n →ˡᶜ Prop := Eval b Empty.elim
 
 notation:max M:90 " ⊧/" e:max => @Evalb _ M _ _ e
 
-abbrev Realize (M : Type*) [s : Structure L M] :
+abbrev Realize (M : Type*) [s : Tarski.Structure L M] :
     Sentence L →ˡᶜ Prop := Eval (s := s) ![] Empty.elim
 
-abbrev Models (s : Structure L M) : Formula L M →ˡᶜ Prop := Eval ![] id
+abbrev Models (s : Tarski.Structure L M) : Formula L M →ˡᶜ Prop := Eval ![] id
 
 lemma Eval.of_eq {b e' : Fin n → M} {f f' : ξ → M}
     {φ : Semiformula L ξ n} (h : Eval b f φ) (he : b = e') (hf : f = f') : Eval e' f' φ := he ▸ hf ▸ h
@@ -475,20 +475,20 @@ end rew
 
 end Semiformula
 
-namespace Structure
+namespace Tarski.Structure
 
 section
 
 open Semiformula
-variable [s : Structure L M] (Θ : M ≃ N)
+variable [s : Tarski.Structure L M] (Θ : M ≃ N)
 
 lemma ofEquiv_rel (r : L.Rel k) (v : Fin k → N) :
-    (Structure.ofEquiv Θ).rel r v ↔ Structure.rel r (Θ.symm ∘ v) := iff_of_eq rfl
+    (Tarski.Structure.ofEquiv Θ).rel r v ↔ Tarski.Structure.rel r (Θ.symm ∘ v) := iff_of_eq rfl
 
 lemma eval_ofEquiv_iff {b : Fin n → N} {f : ξ → N} {φ : Semiformula L ξ n} :
     Eval (s := ofEquiv Θ) b f φ ↔ Eval (Θ.symm ∘ b) (Θ.symm ∘ f) φ :=
   match φ with
-  | .rel r v | .nrel r v => by simp [Function.comp_def, ofEquiv_rel Θ, Structure.ofEquiv_val Θ]
+  | .rel r v | .nrel r v => by simp [Function.comp_def, ofEquiv_rel Θ, Tarski.Structure.ofEquiv_val Θ]
   | ⊤ | ⊥ => by simp
   | φ ⋏ ψ | φ ⋎ ψ => by simp [eval_ofEquiv_iff (φ := φ), eval_ofEquiv_iff (φ := ψ)]
   | ∀¹ φ =>
@@ -503,12 +503,12 @@ lemma evalf_ofEquiv_iff {f : ξ → N} {φ : Formula L ξ} :
 
 end
 
-end Structure
+end Tarski.Structure
 
-instance : Semantics (Struc L) (Sentence L) where
+instance : Semantics (Tarski.Struc L) (Sentence L) where
   Models := fun str ↦ Semiformula.Realize str.Dom
 
-instance : Semantics.Tarski (Struc L) where
+instance : Semantics.Tarski (Tarski.Struc L) where
   models_verum := by simp [Semantics.Models]
   models_falsum := by simp [Semantics.Models]
   models_and := by simp [Semantics.Models]
@@ -518,23 +518,23 @@ instance : Semantics.Tarski (Struc L) where
 
 section
 
-variable (M : Type*) [Nonempty M] [s : Structure L M] {T U : Theory L}
+variable (M : Type*) [Nonempty M] [s : Tarski.Structure L M] {T U : Theory L}
 
 /-- Standard structure inferred from a given domain -/
-abbrev Language.str (M : Type*) [Nonempty M] (L : Language) [s : Structure L M] : Struc L := s.toStruc
+abbrev Language.str (M : Type*) [Nonempty M] (L : Language) [s : Tarski.Structure L M] : Tarski.Struc L := s.toStruc
 
 notation: max M "↓[" L "]" => Language.str M L
 
-abbrev Consequence (T : Theory L) (σ : Sentence L) : Prop := T ⊨[SmallStruc L] σ
+abbrev Consequence (T : Theory L) (σ : Sentence L) : Prop := T ⊨[Tarski.SmallStruc L] σ
 
 /-- Semantic entailment, also known as logical consequence. -/
 scoped infix:45 " ⊨ " => Consequence
 
-abbrev Satisfiable (T : Theory L) : Prop := Semantics.Satisfiable (SmallStruc L) T
+abbrev Satisfiable (T : Theory L) : Prop := Semantics.Satisfiable (Tarski.SmallStruc L) T
 
 variable {M}
 
-lemma struc_models_iff_models {s : Struc L} : s ⊧ σ ↔ s.Dom↓[L] ⊧ σ := by rfl
+lemma struc_models_iff_models {s : Tarski.Struc L} : s ⊧ σ ↔ s.Dom↓[L] ⊧ σ := by rfl
 
 lemma models_iff : M↓[L] ⊧ σ ↔ σ.Realize M := by rfl
 
@@ -557,48 +557,48 @@ lemma models_iff_models {φ} :
     M↓[L] ⊧ φ ↔ s.toStruc ⊧ φ := of_eq rfl
 
 lemma consequence_iff {φ} :
-    T ⊨[Struc.{v, u} L] φ ↔ (∀ (M : Type v) [Nonempty M] [Structure L M], M↓[L] ⊧* T → M↓[L] ⊧ φ) :=
+    T ⊨[Tarski.Struc.{v, u} L] φ ↔ (∀ (M : Type v) [Nonempty M] [Tarski.Structure L M], M↓[L] ⊧* T → M↓[L] ⊧ φ) :=
   ⟨fun h _ _ _ hT ↦ h hT, fun h s hT ↦ h s.Dom hT⟩
 
 lemma consequence_iff' {φ} :
-    T ⊨[Struc.{v, u} L] φ ↔ (∀ (M : Type v) [Nonempty M] [Structure L M] [M↓[L] ⊧* T], M↓[L] ⊧ φ) :=
+    T ⊨[Tarski.Struc.{v, u} L] φ ↔ (∀ (M : Type v) [Nonempty M] [Tarski.Structure L M] [M↓[L] ⊧* T], M↓[L] ⊧ φ) :=
   ⟨fun h _ _ s _ ↦ Semantics.consequence_iff'.mp h s.toStruc,
    fun h s hs ↦ @h s.Dom s.nonempty s.struc hs⟩
 
 lemma valid_iff {φ} :
-    Semantics.Valid (Struc.{v, u} L) φ ↔ ∀ (M : Type v) [Nonempty M] [Structure L M], M↓[L] ⊧ φ :=
+    Semantics.Valid (Tarski.Struc.{v, u} L) φ ↔ ∀ (M : Type v) [Nonempty M] [Tarski.Structure L M], M↓[L] ⊧ φ :=
   ⟨fun hσ _ _ s ↦ @hσ s.toStruc, fun h s ↦ h s.Dom⟩
 
 lemma satisfiable_iff :
-    Semantics.Satisfiable (Struc.{v, u} L) T ↔ ∃ (M : Type v) (_ : Nonempty M) (_ : Structure L M), M↓[L] ⊧* T :=
+    Semantics.Satisfiable (Tarski.Struc.{v, u} L) T ↔ ∃ (M : Type v) (_ : Nonempty M) (_ : Tarski.Structure L M), M↓[L] ⊧* T :=
   ⟨by rintro ⟨s, hs⟩; exact ⟨s.Dom, s.nonempty, s.struc, hs⟩, by rintro ⟨M, i, s, hT⟩; exact ⟨s.toStruc, hT⟩⟩
 
 lemma unsatisfiable_iff :
-    ¬Semantics.Satisfiable (Struc.{v, u} L) T ↔ ∀ (M : Type v) (_ : Nonempty M) (_ : Structure L M), ¬M↓[L] ⊧* T := by
+    ¬Semantics.Satisfiable (Tarski.Struc.{v, u} L) T ↔ ∀ (M : Type v) (_ : Nonempty M) (_ : Tarski.Structure L M), ¬M↓[L] ⊧* T := by
   simpa using satisfiable_iff.not
 
-lemma satisfiable_intro (M : Type v) [Nonempty M] [s : Structure L M] (h : M↓[L] ⊧* T) :
-    Semantics.Satisfiable (Struc.{v, u} L) T := ⟨s.toStruc, h⟩
+lemma satisfiable_intro (M : Type v) [Nonempty M] [s : Tarski.Structure L M] (h : M↓[L] ⊧* T) :
+    Semantics.Satisfiable (Tarski.Struc.{v, u} L) T := ⟨s.toStruc, h⟩
 
-noncomputable def ModelOfSat (h : Semantics.Satisfiable (Struc.{v, u} L) T) : Type v :=
+noncomputable def ModelOfSat (h : Semantics.Satisfiable (Tarski.Struc.{v, u} L) T) : Type v :=
   Classical.choose (satisfiable_iff.mp h)
 
-noncomputable instance nonemptyModelOfSat (h : Semantics.Satisfiable (Struc.{v, u} L) T) :
+noncomputable instance nonemptyModelOfSat (h : Semantics.Satisfiable (Tarski.Struc.{v, u} L) T) :
     Nonempty (ModelOfSat h) := by
   choose i _ _ using Classical.choose_spec (satisfiable_iff.mp h); exact i
 
-noncomputable def StructureModelOfSatAux (h : Semantics.Satisfiable (Struc.{v, u} L) T) :
-    { _s : Structure L (ModelOfSat h) // (ModelOfSat h)↓[L] ⊧* T } := by
+noncomputable def StructureModelOfSatAux (h : Semantics.Satisfiable (Tarski.Struc.{v, u} L) T) :
+    { _s : Tarski.Structure L (ModelOfSat h) // (ModelOfSat h)↓[L] ⊧* T } := by
   choose _ s h using Classical.choose_spec (satisfiable_iff.mp h)
   exact ⟨s, h⟩
 
-noncomputable instance StructureModelOfSat (h : Semantics.Satisfiable (Struc.{v, u} L) T) :
-    Structure L (ModelOfSat h) := StructureModelOfSatAux h
+noncomputable instance StructureModelOfSat (h : Semantics.Satisfiable (Tarski.Struc.{v, u} L) T) :
+    Tarski.Structure L (ModelOfSat h) := StructureModelOfSatAux h
 
-lemma ModelOfSat.models (h : Semantics.Satisfiable (Struc.{v, u} L) T) : (ModelOfSat h)↓[L] ⊧* T := (StructureModelOfSatAux h).prop
+lemma ModelOfSat.models (h : Semantics.Satisfiable (Tarski.Struc.{v, u} L) T) : (ModelOfSat h)↓[L] ⊧* T := (StructureModelOfSatAux h).prop
 
 lemma consequence_iff_unsatisfiable {σ : Sentence L} :
-    T ⊨[Struc.{v, u} L] σ ↔ ¬Semantics.Satisfiable (Struc.{v, u} L) (insert (∼σ) T) := by
+    T ⊨[Tarski.Struc.{v, u} L] σ ↔ ¬Semantics.Satisfiable (Tarski.Struc.{v, u} L) (insert (∼σ) T) := by
   constructor
   · intro h
     apply unsatisfiable_iff.mpr
@@ -618,7 +618,7 @@ namespace Semiformula
 variable {L₁ L₂ : Language} {Φ : L₁ →ᵥ L₂}
 
 section lMap
-variable {M : Type u} {s₂ : Structure L₂ M} {n} {b : Fin n → M} {f : ξ → M}
+variable {M : Type u} {s₂ : Tarski.Structure L₂ M} {n} {b : Fin n → M} {f : ξ → M}
 
 lemma eval_lMap {φ : Semiformula L₁ ξ n} :
     Eval (s := s₂) b f (lMap Φ φ) ↔ Eval (s := s₂.lMap Φ) b f φ := by
@@ -634,8 +634,8 @@ end lMap
 end Semiformula
 
 lemma lMap_models_lMap {L₁ L₂ : Language.{u}} {Φ : L₁ →ᵥ L₂} {T : Theory L₁} {σ : Sentence L₁}
-    (h : T ⊨[Struc.{v, u} L₁] σ) :
-    T.lMap Φ ⊨[Struc.{v, u} L₂] Semiformula.lMap Φ σ := by
+    (h : T ⊨[Tarski.Struc.{v, u} L₁] σ) :
+    T.lMap Φ ⊨[Tarski.Struc.{v, u} L₂] Semiformula.lMap Φ σ := by
   intro s hM
   have : (s.struc.lMap Φ).toStruc ⊧ σ :=
     h ⟨fun _ hq ↦ Semiformula.models_lMap.mp <| hM.models _ (Set.mem_image_of_mem _ hq)⟩
@@ -643,7 +643,7 @@ lemma lMap_models_lMap {L₁ L₂ : Language.{u}} {Φ : L₁ →ᵥ L₂} {T : T
 
 section theory
 
-variable (M) [Nonempty M] [Structure L M]
+variable (M) [Nonempty M] [Tarski.Structure L M]
 
 variable {M}
 
@@ -664,21 +664,21 @@ lemma models_of_mem_theory {T : Theory L} [h : M↓[L] ⊧* T] (hf : φ ∈ T) :
 
 end theory
 
-namespace Structure
+namespace Tarski.Structure
 
 variable (L)
 
-abbrev theory (M : Type*) [Nonempty M] [s : Structure L M] : Theory L := Semantics.theory s.toStruc
+abbrev theory (M : Type*) [Nonempty M] [s : Tarski.Structure L M] : Theory L := Semantics.theory s.toStruc
 
-variable {L} {M : Type v} [Nonempty M] [s : Structure L M]
+variable {L} {M : Type v} [Nonempty M] [s : Tarski.Structure L M]
 
 @[simp] lemma mem_theory_iff {σ} : σ ∈ theory L M ↔ M↓[L] ⊧ σ := by rfl
 
 lemma subset_of_models : T ⊆ theory L M ↔ M↓[L] ⊧* T := ⟨fun h  ↦ ⟨fun _ hσ ↦ h hσ⟩, fun h _ hσ ↦ h.models_set hσ⟩
 
-lemma theory_satisfiable : Semantics.Satisfiable (Struc.{v} L) (theory L M) := ⟨s.toStruc, by simp⟩
+lemma theory_satisfiable : Semantics.Satisfiable (Tarski.Struc.{v} L) (theory L M) := ⟨s.toStruc, by simp⟩
 
-end Structure
+end Tarski.Structure
 
 end FirstOrder
 

@@ -83,9 +83,9 @@ lemma primrec_axm (hs : Primrec s) (hp : Primrec p) : Primrec λ x ↦ axm (s x)
   (Primrec.succ.comp (Primrec₂.natPair.comp hs (Primrec₂.natPair.comp (.const 9) hp))).of_eq
     λ x ↦ by simp [axm, nat_pair_eq]
 
-section Derivation2
+section derivation2
 
-open Derivation2
+open LK2.Derivation
 
 variable {L : Language} [L.DecidableEq] [L.Encodable] [L.LORDefinable] {T : Theory L} [T.Δ₁]
   {Γ : α → Finset (Proposition L)} {φ ψ : α → Proposition L} {ξ : α → Sentence L}
@@ -102,14 +102,14 @@ lemma primrec_quote_or {h : ∀ x, φ x ⋎ ψ x ∈ Γ x}
     {d : ∀ x, T ⟹₂ φ x ⫽ ψ x ⫽ Γ x}
     (hΓ : Primrec λ x ↦ (⌜Γ x⌝ : ℕ)) (hφ : Primrec λ x ↦ (⌜φ x⌝ : ℕ))
     (hψ : Primrec λ x ↦ (⌜ψ x⌝ : ℕ)) (hd : Primrec λ x ↦ (⌜d x⌝ : ℕ)) :
-    Primrec λ x ↦ (⌜Derivation2.or (h x) (d x)⌝ : ℕ) :=
+    Primrec λ x ↦ (⌜LK2.Derivation.or (h x) (d x)⌝ : ℕ) :=
   (primrec_orIntro hΓ hφ hψ hd).of_eq λ x ↦ by simp [quote_or]
 
 lemma primrec_quote_axm {hT : ∀ x, ξ x ∈ T} {hm : ∀ x, ((ξ x : Sentence L) : Proposition L) ∈ Γ x}
     (hΓ : Primrec λ x ↦ (⌜Γ x⌝ : ℕ)) (hξ : Primrec λ x ↦ (⌜ξ x⌝ : ℕ)) :
-    Primrec λ x ↦ (⌜Derivation2.axm (Γ := Γ x) (ξ x) (hT x) (hm x)⌝ : ℕ) :=
+    Primrec λ x ↦ (⌜LK2.Derivation.axm (Γ := Γ x) (ξ x) (hT x) (hm x)⌝ : ℕ) :=
   (primrec_axm hΓ hξ).of_eq λ x ↦ by simp [quote_axm]
 
-end Derivation2
+end derivation2
 
 end FFL.FirstOrder.Arithmetic.Bootstrapping

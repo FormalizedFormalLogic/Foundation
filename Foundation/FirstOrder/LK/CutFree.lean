@@ -13,9 +13,9 @@ namespace FFL.FirstOrder
 
 variable {L : Language.{u}}
 
-namespace Derivation
+namespace LK.Derivation
 
-inductive IsCutFree : {Γ : Sequent L} → ⊢ᴸᴷ¹ Γ → Prop
+inductive IsCutFree : {Γ : LK.Sequent L} → ⊢ᴸᴷ¹ Γ → Prop
   | identity (r : L.Rel k) (v) : IsCutFree (identity r v)
   | verum : IsCutFree verum
   | or {d : ⊢ᴸᴷ¹ Γ + ⦃φ, ψ⦄} : IsCutFree d → IsCutFree d.or
@@ -28,7 +28,7 @@ inductive IsCutFree : {Γ : Sequent L} → ⊢ᴸᴷ¹ Γ → Prop
 
 attribute [simp] IsCutFree.identity IsCutFree.verum
 
-variable {Γ Δ : Sequent L}
+variable {Γ Δ : LK.Sequent L}
 
 @[simp] lemma isCutFree_or_iff {d : ⊢ᴸᴷ¹ Γ + ⦃φ, ψ⦄} :
     IsCutFree d.or ↔ IsCutFree d := by
@@ -107,11 +107,11 @@ set_option backward.isDefEq.respectTransparency false in
   induction d generalizing f <;> simp [rewrite, *]
 
 @[simp] lemma isCutFree_map_iff_isCutFree {f : ℕ → ℕ} {d : ⊢ᴸᴷ¹ Γ} :
-    IsCutFree (Derivation.map d f) ↔ IsCutFree d := isCutFree_rewrite_iff_isCutFree
+    IsCutFree (LK.Derivation.map d f) ↔ IsCutFree d := isCutFree_rewrite_iff_isCutFree
 
 set_option backward.isDefEq.respectTransparency false in
 @[simp] lemma IsCutFree.generalizeByNewVar_isCutFree {φ : Semiproposition L 1} (hp : ¬φ.FVar? m)
     (hΔ : ∀ ψ ∈ Δ, ¬ψ.FVar? m) (d : ⊢ᴸᴷ¹ Δ + ⦃φ/[&m]⦄) :
     IsCutFree (generalizeByNewVar hp hΔ d) ↔ IsCutFree d := by simp [generalizeByNewVar]
 
-end Derivation
+end LK.Derivation

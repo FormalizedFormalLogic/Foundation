@@ -21,13 +21,13 @@ instance (L : Language) [L.Encodable] : L.skolemFunction₁.Encodable where
   func k := inferInstanceAs (Encodable (Semisentence L (k + 1)))
   rel _ := inferInstanceAs (Encodable PEmpty)
 
-namespace Structure
+namespace Tarski.Structure
 
 variable (L : Language.{u})
 
-variable (M : Type v) [Nonempty M] [𝓼 : Structure L M]
+variable (M : Type v) [Nonempty M] [𝓼 : Tarski.Structure L M]
 
-noncomputable instance skolem : Structure L.skolemFunction₁ M where
+noncomputable instance skolem : Tarski.Structure L.skolemFunction₁ M where
   func _ φ v := Classical.epsilon fun z ↦ φ.Evalb (z :> v)
   rel _ r _ := PEmpty.elim r
 
@@ -74,10 +74,10 @@ lemma closed {v : Fin k → M} (hv : ∀ i, v i ∈ SkolemHull L s)
     simpa [t, Semiterm.val_func, Function.comp_def, hu]
   exact Classical.epsilon_spec H
 
-variable [L.Eq] [Structure.Eq L M]
+variable [L.Eq] [Tarski.Structure.Eq L M]
 
 lemma closed_func {v : Fin k → M} (hv : ∀ i, v i ∈ SkolemHull L s)
-    {f : L.Func k} : Structure.func f v ∈ SkolemHull L s := by
+    {f : L.Func k} : Tarski.Structure.func f v ∈ SkolemHull L s := by
   have : ∃ z ∈ SkolemHull L s, “#0 = !!(Semiterm.func f fun i ↦ #i.succ)”.Evalb (z :> v) :=
     closed hv (φ := “#0 = !!(Semiterm.func f fun i ↦ #i.succ)”)
       (by simp [Semiterm.val_func]; simp [Function.comp_def])
@@ -87,11 +87,11 @@ lemma closed_func {v : Fin k → M} (hv : ∀ i, v i ∈ SkolemHull L s)
 
 variable (𝓼 s)
 
-instance (priority := 50) str : Structure L (SkolemHull L s) where
+instance (priority := 50) str : Tarski.Structure L (SkolemHull L s) where
   func k f v := ⟨func f fun i ↦ (v i : M), closed_func (by simp)⟩
-  rel k R v := Structure.rel R fun i ↦ (v i : M)
+  rel k R v := Tarski.Structure.rel R fun i ↦ (v i : M)
 
-omit [L.Eq] [Structure.Eq L M] in
+omit [L.Eq] [Tarski.Structure.Eq L M] in
 lemma set_nonempty : (SkolemHull L s).Nonempty := by
   have : ∃ z : M, (⊤ : Semisentence L 1).Evalb ![z] := by simp
   have : ∃ z, z ∈ SkolemHull L s := by
@@ -146,20 +146,20 @@ variable {𝓼 s}
 instance (priority := 50) elementaryEquiv : (SkolemHull L s) ≡ₑ[L] M where
   models {φ} := by simp [models_iff, Matrix.empty_eq]
 
-instance (priority := 50) eq : Structure.Eq L (SkolemHull L s) := ⟨fun x y ↦ by
+instance (priority := 50) eq : Tarski.Structure.Eq L (SkolemHull L s) := ⟨fun x y ↦ by
   rw [Subtype.ext_iff]
-  simpa [Operator.val, Matrix.fun_eq_vec_two] using Structure.Eq.eq (L := L) (M := M) x.val y.val⟩
+  simpa [Operator.val, Matrix.fun_eq_vec_two] using Tarski.Structure.Eq.eq (L := L) (M := M) x.val y.val⟩
 
 section mem
 
-variable [Operator.Mem L] [Membership M M] [Structure.Mem L M]
+variable [Operator.Mem L] [Membership M M] [Tarski.Structure.Mem L M]
 
 instance (priority := 50) membership :
   Membership (SkolemHull L s) (SkolemHull L s) := ⟨fun y x ↦ x.val ∈ y.val⟩
 
 instance (priority := 50) mem :
-    Structure.Mem L (SkolemHull L s) := ⟨fun x y ↦ by
-  simpa [Operator.val, Matrix.fun_eq_vec_two] using! Structure.Mem.mem (L := L) (M := M) x.val y.val⟩
+    Tarski.Structure.Mem L (SkolemHull L s) := ⟨fun x y ↦ by
+  simpa [Operator.val, Matrix.fun_eq_vec_two] using! Tarski.Structure.Mem.mem (L := L) (M := M) x.val y.val⟩
 
 end mem
 
@@ -187,6 +187,6 @@ lemma card_le_aleph0 (hs : s.Countable) : #(SkolemHull L s) ≤ ℵ₀ :=
 
 end SkolemHull
 
-end Structure
+end Tarski.Structure
 
 end FFL.FirstOrder

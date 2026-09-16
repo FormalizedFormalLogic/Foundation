@@ -17,22 +17,22 @@ open FirstOrder
 
 variable {L : Language}
 
-structure Struc₂ (L : Language) extends FirstOrder.Struc L where
+structure Tarski.Struc (L : Language) extends FirstOrder.Tarski.Struc L where
   sets : Set (Set Dom)
 
-abbrev SmallStruc (L : Language.{u}) := Struc.{u, u} L
+abbrev Tarski.SmallStruc (L : Language.{u}) := Tarski.Struc.{u, u} L
 
-namespace Struc₂
+namespace Tarski.Struc
 
-instance (𝓈 : Struc₂ L) : Nonempty 𝓈.Dom := 𝓈.nonempty
+instance (𝓈 : Tarski.Struc L) : Nonempty 𝓈.Dom := 𝓈.nonempty
 
-instance (𝓈 : Struc₂ L) : Structure L 𝓈.Dom := inferInstance
+instance (𝓈 : Tarski.Struc L) : FirstOrder.Tarski.Structure L 𝓈.Dom := inferInstance
 
-end Struc₂
+end Tarski.Struc
 
 namespace Semiformula
 
-variable {M : Type w} [𝓈 : Structure L M]
+variable {M : Type w} [𝓈 : FirstOrder.Tarski.Structure L M]
 
 def EvalAux
     (𝕊 : Set (Set M))
@@ -99,20 +99,20 @@ def Eval (𝕊 : Set (Set M)) (F : Ξ → Set M) (f : ξ → M) (E : Fin N → S
 
 end Semiformula
 
-def Struc₂.of {M : Type*} [Nonempty M] (𝕊 : Set (Set M)) (L : Language) [𝓈 : Structure L M] : Struc₂ L := ⟨𝓈.toStruc, 𝕊⟩
+def Tarski.Struc.of {M : Type*} [Nonempty M] (𝕊 : Set (Set M)) (L : Language) [𝓈 : FirstOrder.Tarski.Structure L M] : Tarski.Struc L := ⟨𝓈.toStruc, 𝕊⟩
 
-notation:max 𝕊 "↓[" L "]" => Struc₂.of 𝕊 L
+notation:max 𝕊 "↓[" L "]" => Tarski.Struc.of 𝕊 L
 
-instance : Semantics (Struc₂ L) (Sentence L) where
+instance : Semantics (Tarski.Struc L) (Sentence L) where
   Models 𝓈 σ := σ.Eval 𝓈.sets Empty.elim Empty.elim ![] ![]
 
-lemma models_def {𝓈 : Struc₂ L} {σ : Sentence L} :
+lemma models_def {𝓈 : Tarski.Struc L} {σ : Sentence L} :
     𝓈 ⊧ σ ↔ σ.Eval 𝓈.sets Empty.elim Empty.elim ![] ![] := by rfl
 
-lemma models_iff [Nonempty M] [Structure L M] {𝕊 : Set (Set M)} {σ : Sentence L} :
+lemma models_iff [Nonempty M] [FirstOrder.Tarski.Structure L M] {𝕊 : Set (Set M)} {σ : Sentence L} :
     𝕊↓[L] ⊧ σ ↔ σ.Eval 𝕊 Empty.elim Empty.elim ![] ![] := by rfl
 
-instance : Semantics.Tarski (Struc₂ L) where
+instance : Semantics.Tarski (Tarski.Struc L) where
   models_verum _ := by simp [models_def]
   models_falsum _ := by simp [models_def]
   models_and := by simp [models_def]

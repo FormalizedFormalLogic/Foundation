@@ -99,7 +99,7 @@ attribute [simp, grind .] KR
 
 class SoundOn
   [L.ReferenceableBy L₀] {T₀ : Theory L₀} {T : Theory L}
-  (𝔅 : Provability T₀ T) (M : outParam Type*) [Nonempty M] [Structure L₀ M]
+  (𝔅 : Provability T₀ T) (M : outParam Type*) [Nonempty M] [Tarski.Structure L₀ M]
   where
   sound_on {σ : Sentence L} : M↓[L₀] ⊧ (𝔅 σ : Sentence L₀) → T ⊢ σ
 export SoundOn (sound_on)
@@ -107,7 +107,7 @@ attribute [simp, grind .] sound_on
 
 omit [L.ReferenceableBy L₀] in
 lemma syntactical_sound {T₀ T : Theory L} {𝔅 : Provability T₀ T}
-    (M : Type*) [Nonempty M] [Structure L M] [SoundOn 𝔅 M] [M↓[L] ⊧* T₀] :
+    (M : Type*) [Nonempty M] [Tarski.Structure L M] [SoundOn 𝔅 M] [M↓[L] ⊧* T₀] :
     ∀ {σ : Sentence L}, T₀ ⊢ 𝔅 σ → T ⊢ σ := by
   intro σ h;
   apply 𝔅.sound_on;

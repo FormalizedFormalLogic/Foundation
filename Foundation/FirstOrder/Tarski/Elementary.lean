@@ -11,9 +11,9 @@ section
 variable {L : Language}
 variable {M : Type*} {M₁ : Type*} {M₂ : Type*} {M₃ : Type*}
 variable [Nonempty M] [Nonempty M₁] [Nonempty M₂] [Nonempty M₃]
-  [s : Structure L M] [s₁ : Structure L M₁] [s₂ : Structure L M₂] [s₃ : Structure L M₃]
+  [s : Tarski.Structure L M] [s₁ : Tarski.Structure L M₁] [s₂ : Tarski.Structure L M₂] [s₃ : Tarski.Structure L M₃]
 
-namespace Structure
+namespace Tarski.Structure
 
 variable (L M M₁ M₂ M₃)
 
@@ -40,18 +40,18 @@ notation:25 M " ≃ₛ[" L "] " M' => Iso L M M'
   domain_closed : ∀ {k} (f : L.Func k) {v : Fin k → M}, (∀ i, v i ∈ domain) → s.func f v ∈ domain
 
 class HomClass (F : Type*) (L : outParam (Language.{u}))
-    (M₁ : outParam (Type*)) (M₂ : outParam (Type*)) [s₁ : Structure L M₁] [s₂ : Structure L M₂] [FunLike F M₁ M₂] where
+    (M₁ : outParam (Type*)) (M₂ : outParam (Type*)) [s₁ : Tarski.Structure L M₁] [s₂ : Tarski.Structure L M₂] [FunLike F M₁ M₂] where
   map_func : ∀ (h : F) {k} (f : L.Func k) (v : Fin k → M₁), h (func f v) = func f (h ∘ v)
   map_rel : ∀ (h : F) {k} (r : L.Rel k) (v : Fin k → M₁), s₁.rel r v → s₂.rel r (h ∘ v)
 
 class EmbeddingClass (F : Type*) (L : outParam (Language.{u}))
-    (M₁ : outParam (Type*)) (M₂ : outParam (Type*)) [s₁ : Structure L M₁] [s₂ : Structure L M₂] [FunLike F M₁ M₂]
+    (M₁ : outParam (Type*)) (M₂ : outParam (Type*)) [s₁ : Tarski.Structure L M₁] [s₂ : Tarski.Structure L M₂] [FunLike F M₁ M₂]
     extends HomClass F L M₁ M₂ where
   map_inj (f : F) : Function.Injective f
   map_rel_inv (f : F) {k} (r : L.Rel k) (v : Fin k → M₁) : s₂.rel r (f ∘ v) → s₁.rel r v
 
 class IsoClass (F : Type*) (L : outParam (Language.{u}))
-    (M₁ : outParam (Type*)) (M₂ : outParam (Type*)) [s₁ : Structure L M₁] [s₂ : Structure L M₂] [FunLike F M₁ M₂]
+    (M₁ : outParam (Type*)) (M₂ : outParam (Type*)) [s₁ : Tarski.Structure L M₁] [s₂ : Tarski.Structure L M₂] [FunLike F M₁ M₂]
     extends EmbeddingClass F L M₁ M₂ where
   map_bij (f : F) : Function.Bijective f
 
@@ -145,7 +145,7 @@ instance : SetLike (ClosedSubset L M) M := ⟨ClosedSubset.domain, fun _ _ ↦ C
 omit [Nonempty M]
 lemma closed {k} (f : L.Func k) {v : Fin k → M} (hv : ∀ i, v i ∈ u) : s.func f v ∈ u := u.domain_closed f hv
 
-instance toStructure (u : ClosedSubset L M) : Structure L u where
+instance toStructure (u : ClosedSubset L M) : Tarski.Structure L u where
   func := fun k f v => ⟨s.func f (fun i ↦ ↑(v i)), u.closed f (by simp)⟩
   rel := fun k r v => s.rel r (fun i ↦ v i)
 
@@ -162,10 +162,10 @@ def inclusion : u ↪ₛ[L] M where
 
 end ClosedSubset
 
-end Structure
+end Tarski.Structure
 
 namespace Semiformula
-open Structure
+open Tarski.Structure
 
 variable {F : Type*} [FunLike F M₁ M₂] [EmbeddingClass F L M₁ M₂] (Θ : F)
 variable {e₁ : Fin n → M₁} {ε₁ : ξ → M₁}
@@ -192,9 +192,9 @@ section
 
 variable {L : Language} {M : Type*} {M₁ : Type*} {M₂ : Type*} {M₃ : Type*}
 variable [Nonempty M] [Nonempty M₁] [Nonempty M₂] [Nonempty M₃]
-  [s : Structure L M] [s₁ : Structure L M₁] [s₂ : Structure L M₂] [s₃ : Structure L M₃]
+  [s : Tarski.Structure L M] [s₁ : Tarski.Structure L M₁] [s₂ : Tarski.Structure L M₂] [s₃ : Tarski.Structure L M₃]
 
-namespace Structure
+namespace Tarski.Structure
 
 variable (L M₁ M₂)
 
@@ -207,7 +207,7 @@ variable {L M₁ M₂}
 
 namespace ElementaryEquiv
 
-@[refl] instance refl (M) [Nonempty M] [Structure L M] : M ≡ₑ[L] M := ⟨by rfl⟩
+@[refl] instance refl (M) [Nonempty M] [Tarski.Structure L M] : M ≡ₑ[L] M := ⟨by rfl⟩
 
 @[symm] lemma symm : (M₁ ≡ₑ[L] M₂) → (M₂ ≡ₑ[L] M₁) := fun h ↦ ⟨h.models.symm⟩
 
@@ -225,10 +225,10 @@ lemma modelsTheory' [M₁ ≡ₑ[L] M₂] (T : Theory L) [h : M₂↓[L] ⊧* T]
 variable {M₁ M₂}
 
 lemma ofEquiv [Nonempty N] (Θ : M ≃ N) :
-    letI : Structure L N := Structure.ofEquiv Θ
+    letI : Tarski.Structure L N := Tarski.Structure.ofEquiv Θ
     M ≡ₑ[L] N :=
-  letI : Structure L N := Structure.ofEquiv Θ
-  ⟨by simp [models_iff, Empty.eq_elim, Structure.evalf_ofEquiv_iff (Θ := Θ)]⟩
+  letI : Tarski.Structure L N := Tarski.Structure.ofEquiv Θ
+  ⟨by simp [models_iff, Empty.eq_elim, Tarski.Structure.evalf_ofEquiv_iff (Θ := Θ)]⟩
 
 omit [Nonempty M₁] [Nonempty M₂] in
 lemma val_eq_of_equiv {f₁ f₂ b₁ b₂}
@@ -307,7 +307,7 @@ lemma of_equiv
 
 end ElementaryEquiv
 
-end Structure
+end Tarski.Structure
 
 end
 

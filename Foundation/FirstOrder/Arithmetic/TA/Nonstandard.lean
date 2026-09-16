@@ -19,17 +19,17 @@ lemma trueArithWithStarUnbounded.cumulative : Cumulative trueArithWithStarUnboun
   Set.union_subset_union_right _ <|
     Set.range_subset_range_iff_exists_comp.mpr ⟨Fin.castSucc, by simp [Function.comp_def]⟩
 
-abbrev modelStar (c : ℕ) : Structure Language.unit ℕ where
+abbrev modelStar (c : ℕ) : Tarski.Structure Language.unit ℕ where
   func := fun _ ⟨⟨⟩⟩ _ ↦ c
   rel  := fun _ r _ ↦ PEmpty.elim r
 
 lemma satisfiable_trueArithWithStarUnbounded (c : ℕ) : Satisfiable (trueArithWithStarUnbounded c) := by
-  let : Structure Language.unit ℕ := modelStar c
-  have : Structure.Zero ℒₒᵣ⋆ ℕ := ⟨rfl⟩
-  have : Structure.One ℒₒᵣ⋆ ℕ := ⟨rfl⟩
-  have : Structure.Add ℒₒᵣ⋆ ℕ := ⟨fun _ _ => rfl⟩
-  have : Structure.Eq ℒₒᵣ⋆ ℕ := ⟨fun _ _ => iff_of_eq rfl⟩
-  have : Structure.LT ℒₒᵣ⋆ ℕ := ⟨fun _ _ => iff_of_eq rfl⟩
+  let : Tarski.Structure Language.unit ℕ := modelStar c
+  have : Tarski.Structure.Zero ℒₒᵣ⋆ ℕ := ⟨rfl⟩
+  have : Tarski.Structure.One ℒₒᵣ⋆ ℕ := ⟨rfl⟩
+  have : Tarski.Structure.Add ℒₒᵣ⋆ ℕ := ⟨fun _ _ => rfl⟩
+  have : Tarski.Structure.Eq ℒₒᵣ⋆ ℕ := ⟨fun _ _ => iff_of_eq rfl⟩
+  have : Tarski.Structure.LT ℒₒᵣ⋆ ℕ := ⟨fun _ _ => iff_of_eq rfl⟩
   have : ℕ↓[ℒₒᵣ⋆] ⊧* starUnbounded c := by
     have : ∀ (i : Fin c), (↑i : ℕ) < Semiterm.Operator.Star.star.val (L := ℒₒᵣ⋆) ![] := Fin.prop
     simp [starUnbounded, models_iff, this]
@@ -65,23 +65,23 @@ instance : ℕ⋆↓[ℒₒᵣ] ⊧* 𝗧𝗔 := ⟨by
     Semantics.ModelsSet.of_subset models_union_trueArithWithStarUnbounded
       (Set.subset_iUnion_of_subset 0 $ Set.subset_union_of_subset_left (by simp) _)
   intro σ hσ
-  let s : Structure ℒₒᵣ ℕ⋆ := (ModelOfSatEq.struc satisfiable_union_trueArithWithStarUnbounded).lMap
+  let s : Tarski.Structure ℒₒᵣ ℕ⋆ := (ModelOfSatEq.struc satisfiable_union_trueArithWithStarUnbounded).lMap
     (Language.Hom.add₁ ℒₒᵣ Language.unit)
   have e : s = standardModel ℕ⋆ := by
-    have : Structure.Zero ℒₒᵣ ℕ⋆ := ⟨rfl⟩
-    have : Structure.One ℒₒᵣ ℕ⋆ := ⟨rfl⟩
-    have : Structure.Add ℒₒᵣ ℕ⋆ := ⟨fun _ _ => rfl⟩
-    have : Structure.Mul ℒₒᵣ ℕ⋆ := ⟨fun _ _ => rfl⟩
-    have : Structure.Eq ℒₒᵣ ℕ⋆ := ⟨fun _ _ => by
+    have : Tarski.Structure.Zero ℒₒᵣ ℕ⋆ := ⟨rfl⟩
+    have : Tarski.Structure.One ℒₒᵣ ℕ⋆ := ⟨rfl⟩
+    have : Tarski.Structure.Add ℒₒᵣ ℕ⋆ := ⟨fun _ _ => rfl⟩
+    have : Tarski.Structure.Mul ℒₒᵣ ℕ⋆ := ⟨fun _ _ => rfl⟩
+    have : Tarski.Structure.Eq ℒₒᵣ ℕ⋆ := ⟨fun _ _ => by
       simp [Semiformula.Operator.val, Semiformula.Operator.Eq.sentence_eq,
         Matrix.fun_eq_vec_two]⟩
-    have : Structure.LT ℒₒᵣ ℕ⋆ := ⟨fun _ _ => iff_of_eq rfl⟩
+    have : Tarski.Structure.LT ℒₒᵣ ℕ⋆ := ⟨fun _ _ => iff_of_eq rfl⟩
     exact standardModel_unique _ _
   have : s.toStruc ⊧ σ := Semiformula.models_lMap.mp (this.models _ (Set.mem_image_of_mem _ hσ))
   exact e ▸ this⟩
 
 instance : ℕ⋆↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ :=
-  models_of_ss (U := 𝗧𝗔) inferInstance (Structure.subset_of_models.mpr inferInstance)
+  models_of_ss (U := 𝗧𝗔) inferInstance (Tarski.Structure.subset_of_models.mpr inferInstance)
 
 lemma star_unbounded (n : ℕ) : n < ⋆ := by
   have : ℕ⋆↓[ℒₒᵣ⋆] ⊧ (“!!(Semiterm.Operator.numeral ℒₒᵣ⋆ n) < ⋆” : Sentence ℒₒᵣ⋆) :=

@@ -16,15 +16,15 @@ namespace FirstOrder
 
 variable {L : Language}
 
-abbrev Sequent (L : Language) := Multiset (Proposition L)
+abbrev LK.Sequent (L : Language) := Multiset (Proposition L)
 
-namespace Sequent
+namespace LK.Sequent
 
 open Semiformula
 
-def newVar (Γ : Sequent L) : ℕ := (Γ.map Semiformula.fvSup).foldr max 0
+def newVar (Γ : LK.Sequent L) : ℕ := (Γ.map Semiformula.fvSup).foldr max 0
 
-lemma not_fvar?_newVar {φ : Proposition L} {Γ : Sequent L} (h : φ ∈ Γ) :
+lemma not_fvar?_newVar {φ : Proposition L} {Γ : LK.Sequent L} (h : φ ∈ Γ) :
     ¬FVar? φ Γ.newVar :=
   not_fvar?_of_lt_fvSup φ <| by
     simp only [newVar]
@@ -36,9 +36,9 @@ lemma not_fvar?_newVar {φ : Proposition L} {Γ : Sequent L} (h : φ ∈ Γ) :
       · exact Nat.le_max_left _ _
       · exact (ih h).trans (Nat.le_max_right _ _)
 
-def IsClosed (Γ : Sequent L) : Prop := ∃ φ ∈ Γ, ∼φ ∈ Γ
+def IsClosed (Γ : LK.Sequent L) : Prop := ∃ φ ∈ Γ, ∼φ ∈ Γ
 
-def embed (Γ : Multiset (Sentence L)) : Sequent L := Γ.map Rewriting.emb
+def embed (Γ : Multiset (Sentence L)) : LK.Sequent L := Γ.map Rewriting.emb
 
 @[simp] lemma embed_nil : embed (0 : Multiset (Sentence L)) = 0 := rfl
 
@@ -51,31 +51,31 @@ def embed (Γ : Multiset (Sentence L)) : Sequent L := Γ.map Rewriting.emb
 @[simp] lemma embed_shift (Γ : Multiset (Sentence L)) :
     (embed Γ)⁺ = embed Γ := by simp [embed, Rewriting.shifts]
 
-end Sequent
+end LK.Sequent
 
 /-! ## Derivation for $\mathbf{LK}$ -/
 
 /-- Derivation for $\mathbf{LK}$ -/
-inductive Derivation : Sequent L → Type _
-| identity (r : L.Rel k) (v) : Derivation ⦃.rel r v, .nrel r v⦄
-| cut : Derivation (Γ + ⦃φ⦄) → Derivation (Δ + ⦃∼φ⦄) → Derivation (Γ + Δ)
-| contraction : Derivation (Γ + ⦃φ, φ⦄) → Derivation (Γ + ⦃φ⦄)
-| weakening : Derivation Γ → Derivation (Γ + ⦃φ⦄)
-| verum : Derivation ⦃⊤⦄
-| or : Derivation (Γ + ⦃φ, ψ⦄) → Derivation (Γ + ⦃φ ⋎ ψ⦄)
-| and : Derivation (Γ + ⦃φ⦄) → Derivation (Γ + ⦃ψ⦄) → Derivation (Γ + ⦃φ ⋏ ψ⦄)
-| all : Derivation (Γ⁺ + ⦃φ.free⦄) → Derivation (Γ + ⦃∀¹ φ⦄)
-| exs : Derivation (Γ + ⦃φ/[t]⦄) → Derivation (Γ + ⦃∃¹ φ⦄)
+inductive LK.Derivation : LK.Sequent L → Type _
+| identity (r : L.Rel k) (v) : LK.Derivation ⦃.rel r v, .nrel r v⦄
+| cut : LK.Derivation (Γ + ⦃φ⦄) → LK.Derivation (Δ + ⦃∼φ⦄) → LK.Derivation (Γ + Δ)
+| contraction : LK.Derivation (Γ + ⦃φ, φ⦄) → LK.Derivation (Γ + ⦃φ⦄)
+| weakening : LK.Derivation Γ → LK.Derivation (Γ + ⦃φ⦄)
+| verum : LK.Derivation ⦃⊤⦄
+| or : LK.Derivation (Γ + ⦃φ, ψ⦄) → LK.Derivation (Γ + ⦃φ ⋎ ψ⦄)
+| and : LK.Derivation (Γ + ⦃φ⦄) → LK.Derivation (Γ + ⦃ψ⦄) → LK.Derivation (Γ + ⦃φ ⋏ ψ⦄)
+| all : LK.Derivation (Γ⁺ + ⦃φ.free⦄) → LK.Derivation (Γ + ⦃∀¹ φ⦄)
+| exs : LK.Derivation (Γ + ⦃φ/[t]⦄) → LK.Derivation (Γ + ⦃∃¹ φ⦄)
 
-prefix:45 "⊢ᴸᴷ¹ " => Derivation
+prefix:45 "⊢ᴸᴷ¹ " => LK.Derivation
 
-namespace Derivation
+namespace LK.Derivation
 
 open Rewriting LawfulSyntacticRewriting
 
-variable {Γ Δ : Sequent L}
+variable {Γ Δ : LK.Sequent L}
 
-def height {Δ : Sequent L} : ⊢ᴸᴷ¹ Δ → ℕ
+def height {Δ : LK.Sequent L} : ⊢ᴸᴷ¹ Δ → ℕ
   |  identity _ _ => 0
   |     cut dp dn => max dp.height dn.height + 1
   | contraction d => d.height + 1
@@ -100,7 +100,7 @@ section height
 @[simp] lemma height_weakening (d : ⊢ᴸᴷ¹ Γ) :
     height (weakening (φ := φ) d) = d.height.succ := rfl
 
-@[simp] lemma height_verum : height (verum : ⊢ᴸᴷ¹ (⦃⊤⦄ : Sequent L)) = 0 := rfl
+@[simp] lemma height_verum : height (verum : ⊢ᴸᴷ¹ (⦃⊤⦄ : LK.Sequent L)) = 0 := rfl
 
 @[simp] lemma height_and {φ ψ} (dp : ⊢ᴸᴷ¹ Γ + ⦃φ⦄) (dq : ⊢ᴸᴷ¹ Γ + ⦃ψ⦄) :
     height (and dp dq) = (max (height dp) (height dq)).succ := rfl
@@ -119,15 +119,15 @@ end height
 abbrev cast (d : ⊢ᴸᴷ¹ Δ) (e : Δ = Γ := by abel) : ⊢ᴸᴷ¹ Γ := e ▸ d
 
 @[simp] lemma height_cast (d : ⊢ᴸᴷ¹ Δ) (e : Δ = Γ) :
-    height (Derivation.cast d e) = height d := by rcases e with rfl; simp [Derivation.cast]
+    height (LK.Derivation.cast d e) = height d := by rcases e with rfl; simp [LK.Derivation.cast]
 
-instance : Structural (Derivation (L := L)) where
+instance : Structural (LK.Derivation (L := L)) where
   weakening d := d.weakening
   contraction d := d.contraction
 
 /-- Enumerates the end sequent by recursion on the local inference rules.
 This is a routine syntactic construction. -/
-def traversal [L.DecidableEq] {Γ : Sequent L} : ⊢ᴸᴷ¹ Γ → Γ.Traversal
+def traversal [L.DecidableEq] {Γ : LK.Sequent L} : ⊢ᴸᴷ¹ Γ → Γ.Traversal
   | identity r v =>
       (Multiset.Traversal.atom (Semiformula.rel r v)).succ (Semiformula.nrel r v)
   | cut d dn => d.traversal.remove.add dn.traversal.remove
@@ -145,7 +145,7 @@ def traversal [L.DecidableEq] {Γ : Sequent L} : ⊢ᴸᴷ¹ Γ → Γ.Traversal
 /-- Applies structural rules along supplied traversals (a routine derived rule). -/
 def contra [L.DecidableEq] (d : ⊢ᴸᴷ¹ Δ) (t : Γ.Traversal)
     (h : Δ ⊆ Γ := by simp) : ⊢ᴸᴷ¹ Γ :=
-  Structural.ofSubset (F := Proposition L) (𝔇 := Derivation (L := L))
+  Structural.ofSubset (F := Proposition L) (𝔇 := LK.Derivation (L := L))
     (Γ := Δ) (Δ := Γ) (traversal (L := L) d) t d h
 
 def tensor {φ ψ} (tΓ : Γ.Traversal) (tΔ : Δ.Traversal)
@@ -180,7 +180,7 @@ def eta : (φ : Proposition L) → ⊢ᴸᴷ¹ ⦃φ, ∼φ⦄
       (by simp [add_comm]))).cast (by simp)
   termination_by φ => φ.complexity
 
-instance : OneSidedLK (Derivation (L := L)) where
+instance : OneSidedLK (LK.Derivation (L := L)) where
   verum := verum
   and d₁ d₂ := d₁.and d₂
   or d := d.or
@@ -188,10 +188,10 @@ instance : OneSidedLK (Derivation (L := L)) where
   contraction d := d.contraction
   identity φ := eta φ
 
-instance : OneSidedLK.Cut (Derivation (L := L)) where
+instance : OneSidedLK.Cut (LK.Derivation (L := L)) where
   cut dp dn := cut dp dn
 
-lemma of_isClosed {Γ : Sequent L} (h : Γ.IsClosed) : Nonempty (⊢ᴸᴷ¹ Γ) := by
+lemma of_isClosed {Γ : LK.Sequent L} (h : Γ.IsClosed) : Nonempty (⊢ᴸᴷ¹ Γ) := by
   classical
   rcases h with ⟨φ, hp, hn⟩;
   exact ⟨contra (L := L) (eta φ) (default : Γ.Traversal) (by
@@ -224,24 +224,24 @@ def rewrite {Γ} (f : ℕ → SyntacticTerm L) :
     let g : ℕ → SyntacticTerm L := &0 :>ₙ fun x ↦ Rew.shift (f x)
     have : ⊢ᴸᴷ¹ (Γ⁺ + ⦃φ.free⦄).map (Rew.rewrite g ▹ ·) := d.rewrite g
     (all (Γ := Γ.map (Rew.rewrite f ▹ ·))
-      (φ := Rew.rewrite (Rew.bShift ∘ f) ▹ φ) (Derivation.cast this (by
+      (φ := Rew.rewrite (Rew.bShift ∘ f) ▹ φ) (LK.Derivation.cast this (by
         simp [g, free_rewrite_eq, Rewriting.shifts, shift_rewrite_eq, Function.comp_def]))).cast
       (by simp [Rew.q_rewrite])
   | exs (φ := φ) (Γ := Γ) (t := t) d =>
     have : ⊢ᴸᴷ¹ (Γ + ⦃φ/[t]⦄).map (Rew.rewrite f ▹ ·) := d.rewrite f
     (exs (Γ := Γ.map (Rew.rewrite f ▹ ·))
       (φ := Rew.rewrite (Rew.bShift ∘ f) ▹ φ) (t := Rew.rewrite f t)
-      (Derivation.cast this (by simp [rewrite_subst_eq]))).cast (by simp [Rew.q_rewrite])
+      (LK.Derivation.cast this (by simp [rewrite_subst_eq]))).cast (by simp [Rew.q_rewrite])
 
-protected def map {Δ : Sequent L} (d : ⊢ᴸᴷ¹ Δ) (f : ℕ → ℕ) :
+protected def map {Δ : LK.Sequent L} (d : ⊢ᴸᴷ¹ Δ) (f : ℕ → ℕ) :
     ⊢ᴸᴷ¹ Δ.map (Rew.rewriteMap f ▹ ·) := d.rewrite (fun x ↦ &(f x))
 
-protected def shift {Δ : Sequent L} (d : ⊢ᴸᴷ¹ Δ) : ⊢ᴸᴷ¹ Δ⁺ :=
-  Derivation.cast (Derivation.map d Nat.succ) (by rfl)
+protected def shift {Δ : LK.Sequent L} (d : ⊢ᴸᴷ¹ Δ) : ⊢ᴸᴷ¹ Δ⁺ :=
+  LK.Derivation.cast (LK.Derivation.map d Nat.succ) (by rfl)
 
 section Hom
 
-variable {L₁ : Language} {L₂ : Language} {Δ₁ : Sequent L₁}
+variable {L₁ : Language} {L₂ : Language} {Δ₁ : LK.Sequent L₁}
 
 lemma shifts_image (Φ : L₁ →ᵥ L₂) {Δ : Multiset (Proposition L₁)} :
      (Δ.map <| Semiformula.lMap Φ)⁺ = (Δ⁺.map <| Semiformula.lMap Φ) := by
@@ -253,8 +253,8 @@ def lMap (Φ : L₁ →ᵥ L₂) {Γ} : ⊢ᴸᴷ¹ Γ → ⊢ᴸᴷ¹ Γ.map (.
     (by simp [Function.comp_def])
   | cut (Γ := Γ) (Δ := Δ) (φ := φ) d dn =>
     (cut (Γ := Γ.map (.lMap Φ)) (Δ := Δ.map (.lMap Φ))
-      (φ := .lMap Φ φ) (Derivation.cast (lMap Φ d) (by simp))
-      (Derivation.cast (lMap Φ dn) (by simp))).cast (by simp)
+      (φ := .lMap Φ φ) (LK.Derivation.cast (lMap Φ d) (by simp))
+      (LK.Derivation.cast (lMap Φ dn) (by simp))).cast (by simp)
   | contraction (Γ := Γ) (φ := φ) d =>
       (contraction (Γ := Γ.map (.lMap Φ)) (φ := .lMap Φ φ)
         ((lMap Φ d).cast (by simp))).cast (by simp)
@@ -263,14 +263,14 @@ def lMap (Φ : L₁ →ᵥ L₂) {Γ} : ⊢ᴸᴷ¹ Γ → ⊢ᴸᴷ¹ Γ.map (.
   | verum => by simpa using verum
   | or (Γ := Γ) (φ := φ) (ψ := ψ) d =>
     (or (Γ := Γ.map (.lMap Φ)) (φ := .lMap Φ φ) (ψ := .lMap Φ ψ)
-      (Derivation.cast (lMap Φ d) (by simp))).cast (by simp)
+      (LK.Derivation.cast (lMap Φ d) (by simp))).cast (by simp)
   | and (Γ := Γ) (φ := φ) (ψ := ψ) dp dq =>
     (and (Γ := Γ.map (.lMap Φ)) (φ := .lMap Φ φ) (ψ := .lMap Φ ψ)
-      (Derivation.cast (lMap Φ dp) (by simp))
-      (Derivation.cast (lMap Φ dq) (by simp))).cast (by simp)
+      (LK.Derivation.cast (lMap Φ dp) (by simp))
+      (LK.Derivation.cast (lMap Φ dq) (by simp))).cast (by simp)
   | all (Γ := Γ) (φ := φ) d =>
     (all (Γ := Γ.map (.lMap Φ)) (φ := .lMap Φ φ)
-      (Derivation.cast (lMap Φ d)
+      (LK.Derivation.cast (lMap Φ d)
         (by simp [←Semiformula.lMap_free, shifts_image]))).cast (by simp)
   | exs (Γ := Γ) (φ := φ) (t := t) d =>
     (exs (Γ := Γ.map (.lMap Φ)) (φ := .lMap Φ φ)
@@ -286,7 +286,7 @@ private lemma map_subst_eq_free (φ : Semiproposition L 1) (h : ¬φ.FVar? m) :
   exact Semiformula.rew_eq_of_funEqOn (by simp [Rew.comp_app])
     (fun x hx => by simp [Rew.comp_app, ne_of_mem_of_not_mem hx h])
 
-private lemma map_rewriteMap_eq_shifts (Δ : Sequent L) (h : ∀ φ ∈ Δ, ¬φ.FVar? m) :
+private lemma map_rewriteMap_eq_shifts (Δ : LK.Sequent L) (h : ∀ φ ∈ Δ, ¬φ.FVar? m) :
     Δ.map (fun φ ↦ @Rew.rewriteMap L ℕ ℕ 0
       (fun x ↦ if x = m then 0 else x + 1) ▹ φ) = Δ⁺ := by
   apply Multiset.map_congr rfl
@@ -298,11 +298,11 @@ def generalizeByNewVar {φ : Semiproposition L 1} (hp : ¬φ.FVar? m)
     (hΔ : ∀ ψ ∈ Δ, ¬ψ.FVar? m) (d : ⊢ᴸᴷ¹ Δ + ⦃φ/[&m]⦄) :
     ⊢ᴸᴷ¹ Δ + ⦃∀¹ φ⦄ := by
   have : ⊢ᴸᴷ¹ Δ⁺ + ⦃φ.free⦄ :=
-    Derivation.cast (Derivation.map d (fun x ↦ if x = m then 0 else x + 1))
+    LK.Derivation.cast (LK.Derivation.map d (fun x ↦ if x = m then 0 else x + 1))
     (by simp [map_subst_eq_free φ hp, map_rewriteMap_eq_shifts Δ hΔ])
   exact all this
 
-end Derivation
+end LK.Derivation
 
 /-! ## Classical proof system -/
 
@@ -329,14 +329,14 @@ lemma unprovable_def (φ : Proposition L) :
     𝐋𝐊¹ ⊬ φ ↔ IsEmpty (⊢ᴸᴷ¹ ⦃φ⦄) := by
   unfold Entailment.Unprovable; simp [provable_def]
 
-instance : OneSidedLK.PrincipalEntailment (Derivation (L := L)) (𝐋𝐊¹ : LK L) where
+instance : OneSidedLK.PrincipalEntailment (LK.Derivation (L := L)) (𝐋𝐊¹ : LK L) where
   equiv := Equiv.refl _
 
 instance classical : Entailment.Cl (𝐋𝐊¹ : LK L) := inferInstance
 
 lemma all (φ : Semiproposition L 1) :
     𝐋𝐊¹ ⊢ φ.free → 𝐋𝐊¹ ⊢ ∀¹ φ := fun h ↦
-  ⟨Derivation.all (Γ := 0) (φ := φ) (h.get.cast (by simp [Rewriting.shifts]))⟩
+  ⟨LK.Derivation.all (Γ := 0) (φ := φ) (h.get.cast (by simp [Rewriting.shifts]))⟩
 
 lemma allClosure_fixitr {φ : Proposition L} (dp : 𝐋𝐊¹ ⊢ φ) :
     (m : ℕ) → 𝐋𝐊¹ ⊢ ∀¹* Rew.fixitr 0 m ▹ φ
@@ -360,7 +360,7 @@ end LK.Proof
 structure Theory.Proof (T : Theory L) (σ : Sentence L) where
   axioms : Multiset (Sentence L)
   axioms_mem : ∀ ψ ∈ axioms, ψ ∈ T
-  derivation : OneSidedLK.Pullback Derivation Rewriting.emb (⦃σ⦄ + ∼axioms)
+  derivation : OneSidedLK.Pullback LK.Derivation Rewriting.emb (⦃σ⦄ + ∼axioms)
 
 namespace Theory.Proof
 
@@ -373,7 +373,7 @@ attribute [simp] Theory.Proof.axioms_mem
 
 /-- A singleton derivation gives a theory proof without using any axioms. -/
 def ofDerivation {T : Theory L} {φ : Sentence L}
-    (d : OneSidedLK.Pullback Derivation Rewriting.emb ⦃φ⦄) : T ⊢! φ :=
+    (d : OneSidedLK.Pullback LK.Derivation Rewriting.emb ⦃φ⦄) : T ⊢! φ :=
   ⟨0, by simp, OneSidedLK.cast d⟩
 
 instance : Entailment.Compact (Theory L) where
@@ -396,7 +396,7 @@ instance : Entailment.Axiomatized (Theory L) where
   prfAxm {𝓢 φ} h :=
     ⟨⦃φ⦄, by simpa using h, by
       change ⊢ᴸᴷ¹ (⦃φ⦄ + ∼(⦃φ⦄ : Multiset (Sentence L))).map Rewriting.emb
-      simpa [Multiset.tilde_def] using Derivation.eta (Rewriting.emb φ)⟩
+      simpa [Multiset.tilde_def] using LK.Derivation.eta (Rewriting.emb φ)⟩
   weakening {𝓢 𝓣 φ} h b :=
     ⟨b.axioms, fun ψ hψ ↦ h (b.axioms_mem ψ hψ), b.derivation⟩
 
@@ -404,7 +404,7 @@ instance : Entailment.Axiomatized (Theory L) where
 This is a routine consequence of implication introduction and modus ponens. -/
 noncomputable def cut {U : Theory L} (h : T ⊢!* U) (b : U ⊢! φ) : T ⊢! φ :=
   let rec go (l : List (Sentence L)) (hl : ∀ ψ ∈ l, ψ ∈ U) {φ : Sentence L}
-      (d : OneSidedLK.Pullback Derivation Rewriting.emb (⦃φ⦄ + ∼(l : Multiset _))) :
+      (d : OneSidedLK.Pullback LK.Derivation Rewriting.emb (⦃φ⦄ + ∼(l : Multiset _))) :
       T ⊢! φ :=
     match l with
     | [] => ofDerivation (OneSidedLK.cast d (by simp))
@@ -426,10 +426,10 @@ noncomputable instance : Entailment.StrongCut (Theory L) (Theory L) := ⟨cut⟩
 instance : Entailment.DeductiveExplosion (Theory L) where
   dexp b φ := by
     refine ⟨b.axioms, b.axioms_mem, ?_⟩
-    have db : ⊢ᴸᴷ¹ (∼Sequent.embed b.axioms) + ⦃Rewriting.emb (⊥ : Sentence L)⦄ :=
-      Derivation.cast b.derivation (by simp [Sequent.embed, add_comm, Multiset.map_tilde_comm])
+    have db : ⊢ᴸᴷ¹ (∼LK.Sequent.embed b.axioms) + ⦃Rewriting.emb (⊥ : Sentence L)⦄ :=
+      LK.Derivation.cast b.derivation (by simp [LK.Sequent.embed, add_comm, Multiset.map_tilde_comm])
     exact ((OneSidedLK.removeBot db).weakening (φ := Rewriting.emb φ)).cast (by
-      simp [Sequent.embed, add_comm, Multiset.map_tilde_comm])
+      simp [LK.Sequent.embed, add_comm, Multiset.map_tilde_comm])
 
 lemma weakerThan_of_le {T U : Theory L} (h : T ⊆ U) : T ⪯ U :=
   Entailment.Axiomatized.weakerThanOfSubset h
@@ -440,28 +440,28 @@ instance (T U : Theory L) : U ⪯ T ∪ U := weakerThan_of_le (by simp)
 
 lemma provable_iff :
     T ⊢ φ ↔ ∃ Γ : Multiset (Sentence L), (∀ ψ ∈ Γ, ψ ∈ T) ∧
-      Nonempty (⊢ᴸᴷ¹ ⦃(φ : Proposition L)⦄ + ∼Sequent.embed Γ) := by
+      Nonempty (⊢ᴸᴷ¹ ⦃(φ : Proposition L)⦄ + ∼LK.Sequent.embed Γ) := by
   constructor
   · rintro ⟨b⟩
     exact ⟨b.axioms, b.axioms_mem,
-      ⟨by simpa [OneSidedLK.Pullback, Sequent.embed, Multiset.map_tilde_comm] using b.derivation⟩⟩
+      ⟨by simpa [OneSidedLK.Pullback, LK.Sequent.embed, Multiset.map_tilde_comm] using b.derivation⟩⟩
   · rintro ⟨Γ, hΓ, ⟨d⟩⟩
-    exact ⟨Γ, hΓ, by simpa [OneSidedLK.Pullback, Sequent.embed, Multiset.map_tilde_comm] using d⟩
+    exact ⟨Γ, hΓ, by simpa [OneSidedLK.Pullback, LK.Sequent.embed, Multiset.map_tilde_comm] using d⟩
 
 lemma inconsistent_iff :
     Entailment.Inconsistent T ↔ ∃ Γ : Multiset (Sentence L), (∀ ψ ∈ Γ, ψ ∈ T) ∧
-      Nonempty (⊢ᴸᴷ¹ ∼Sequent.embed Γ) := by
+      Nonempty (⊢ᴸᴷ¹ ∼LK.Sequent.embed Γ) := by
   rw [Entailment.inconsistent_iff_provable_bot, provable_iff]
   constructor
   · rintro ⟨Γ, hΓ, ⟨d⟩⟩
-    have db : ⊢ᴸᴷ¹ (∼Sequent.embed Γ) + ⦃Rewriting.emb (⊥ : Sentence L)⦄ :=
+    have db : ⊢ᴸᴷ¹ (∼LK.Sequent.embed Γ) + ⦃Rewriting.emb (⊥ : Sentence L)⦄ :=
       d.cast (by rw [add_comm])
     exact ⟨Γ, hΓ, ⟨OneSidedLK.removeBot db⟩⟩
   · rintro ⟨Γ, hΓ, ⟨d⟩⟩
     exact ⟨Γ, hΓ, ⟨(d.weakening (φ := Rewriting.emb (⊥ : Sentence L))).cast
       (by simp [add_comm])⟩⟩
 
-open Entailment Derivation
+open Entailment LK.Derivation
 
 @[simp] lemma empty_provable_iff_eprovable :
     (∅ : Theory L) ⊢ φ ↔ 𝐋𝐊¹ ⊢ (φ : Proposition L) := by
@@ -477,7 +477,7 @@ open Entailment Derivation
     change ⊢ᴸᴷ¹ ⦃Rewriting.emb φ⦄ at d
     exact ⟨ofDerivation d⟩
 
-open Entailment Derivation
+open Entailment LK.Derivation
 
 lemma of_LK_provable {T : Theory L} {φ : Sentence L} :
     𝐋𝐊¹ ⊢ (φ : Proposition L) → T ⊢ φ := by
@@ -493,9 +493,9 @@ lemma specialize {T : Theory L} (φ : Semisentence L 1) (t : ClosedTerm L) :
   have d : ⊢ᴸᴷ¹ ⦃(φt : Proposition L)⦄ +
       ⦃(∼(φ : Semiproposition L 1))/[Rew.emb t]⦄ := by
     simpa [φt, Semiformula.coe_subst_eq_subst_coe₁] using
-      Derivation.eta (φt : Proposition L)
-  exact (Derivation.or (Γ := 0) (φ := ∃¹ ∼(φ : Semiproposition L 1))
-    (ψ := (φt : Proposition L)) (Derivation.cast (Derivation.exs
+      LK.Derivation.eta (φt : Proposition L)
+  exact (LK.Derivation.or (Γ := 0) (φ := ∃¹ ∼(φ : Semiproposition L 1))
+    (ψ := (φt : Proposition L)) (LK.Derivation.cast (LK.Derivation.exs
       (Γ := ⦃(φt : Proposition L)⦄) (φ := ∼(φ : Semiproposition L 1))
       (t := Rew.emb t) d) (by simp [add_comm]))).cast (by simp [Semiformula.imp_eq, φt])
 
@@ -507,7 +507,7 @@ noncomputable instance : Entailment.Deduction (Theory L) where
     · intro χ hχ
       rcases Multiset.mem_filter.mp hχ with ⟨hχ, hnχ⟩
       simpa [hnχ] using b.axioms_mem χ hχ
-    · exact Derivation.cast (Derivation.or (Γ := (∼Γ).map Rewriting.emb)
+    · exact LK.Derivation.cast (LK.Derivation.or (Γ := (∼Γ).map Rewriting.emb)
         (φ := Rewriting.emb (∼φ)) (ψ := Rewriting.emb ψ)
         (contra (L := L) b.derivation
           (Γ := (∼Γ).map Rewriting.emb +

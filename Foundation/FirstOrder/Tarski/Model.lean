@@ -7,14 +7,14 @@ namespace FFL
 
 namespace FirstOrder
 
-namespace Structure
+namespace Tarski.Structure
 
 structure Model (L : Language) (M : Type*) where
   intro : M
 
 namespace Model
 
-variable [Structure L M]
+variable [Tarski.Structure L M]
 
 def equiv (L : Language) (M : Type*) : M ≃ Model L M where
   toFun := fun x => ⟨x⟩
@@ -22,12 +22,12 @@ def equiv (L : Language) (M : Type*) : M ≃ Model L M where
   left_inv := by intro x; simp
   right_inv := by rintro ⟨x⟩; simp
 
-instance : Structure L (Model L M) := Structure.ofEquiv (equiv L M)
+instance : Tarski.Structure L (Model L M) := Tarski.Structure.ofEquiv (equiv L M)
 
 instance [h : Nonempty M] : Nonempty (Model L M) := by
   rcases h with ⟨x⟩; exact ⟨equiv L M x⟩
 
-instance elementaryEquiv (L : Language) (M : Type*) [Nonempty M] [Structure L M] : M ≡ₑ[L] Model L M :=
+instance elementaryEquiv (L : Language) (M : Type*) [Nonempty M] [Tarski.Structure L M] : M ≡ₑ[L] Model L M :=
   ElementaryEquiv.ofEquiv _
 
 section
@@ -36,39 +36,39 @@ open Semiterm Semiformula
 
 instance [Operator.Zero L] : Zero (Model L M) := ⟨(@Operator.Zero.zero L _).val ![]⟩
 
-instance [Operator.Zero L] : Structure.Zero L (Model L M) := ⟨rfl⟩
+instance [Operator.Zero L] : Tarski.Structure.Zero L (Model L M) := ⟨rfl⟩
 
 instance [Operator.One L] : One (Model L M) := ⟨(@Operator.One.one L _).val ![]⟩
 
-instance [Operator.One L] : Structure.One L (Model L M) := ⟨rfl⟩
+instance [Operator.One L] : Tarski.Structure.One L (Model L M) := ⟨rfl⟩
 
 instance [Operator.Add L] : Add (Model L M) :=
   ⟨fun x y => (@Operator.Add.add L _).val ![x, y]⟩
 
-instance [Operator.Add L] : Structure.Add L (Model L M) := ⟨fun _ _ => rfl⟩
+instance [Operator.Add L] : Tarski.Structure.Add L (Model L M) := ⟨fun _ _ => rfl⟩
 
 instance [Operator.Mul L] : Mul (Model L M) :=
   ⟨fun x y => (@Operator.Mul.mul L _).val ![x, y]⟩
 
-instance [Operator.Mul L] : Structure.Mul L (Model L M) := ⟨fun _ _ => rfl⟩
+instance [Operator.Mul L] : Tarski.Structure.Mul L (Model L M) := ⟨fun _ _ => rfl⟩
 
 instance [Operator.Exp L] : Exp (Model L M) :=
   ⟨fun x => (@Operator.Exp.exp L _).val ![x]⟩
 
-instance [Operator.Exp L] : Structure.Exp L (Model L M) := ⟨fun _ => rfl⟩
+instance [Operator.Exp L] : Tarski.Structure.Exp L (Model L M) := ⟨fun _ => rfl⟩
 
-instance [Operator.Eq L] [Structure.Eq L M] : Structure.Eq L (Model L M) :=
+instance [Operator.Eq L] [Tarski.Structure.Eq L M] : Tarski.Structure.Eq L (Model L M) :=
   ⟨fun x y => by simp [operator_val_ofEquiv_iff]⟩
 
 instance [Operator.LT L] : LT (Model L M) :=
   ⟨fun x y => (@Operator.LT.lt L _).val ![x, y]⟩
 
-instance [Operator.LT L] : Structure.LT L (Model L M) := ⟨fun _ _ => iff_of_eq rfl⟩
+instance [Operator.LT L] : Tarski.Structure.LT L (Model L M) := ⟨fun _ _ => iff_of_eq rfl⟩
 
 instance [Operator.Mem L] : Membership (Model L M) (Model L M) :=
   ⟨fun x y => (@Operator.Mem.mem L _).val ![y, x]⟩
 
-instance [Operator.Mem L] : Structure.Mem L (Model L M) := ⟨fun _ _ => iff_of_eq rfl⟩
+instance [Operator.Mem L] : Tarski.Structure.Mem L (Model L M) := ⟨fun _ _ => iff_of_eq rfl⟩
 
 end
 
@@ -78,7 +78,7 @@ section ofFunc
 
 variable (F : ℕ → Type*) {M : Type*} (fF : {k : ℕ} → (f : F k) → (Fin k → M) → M)
 
-abbrev ofFunc : Structure (Language.ofFunc F) M where
+abbrev ofFunc : Tarski.Structure (Language.ofFunc F) M where
   func := fun _ f v => fF f v
   rel  := fun _ r _ => r.elim
 
@@ -88,9 +88,9 @@ end ofFunc
 
 section add
 
-variable (L₁ : Language.{u₁}) (L₂ : Language.{u₂}) (M : Type*) [str₁ : Structure L₁ M] [str₂ : Structure L₂ M]
+variable (L₁ : Language.{u₁}) (L₂ : Language.{u₂}) (M : Type*) [str₁ : Tarski.Structure L₁ M] [str₂ : Tarski.Structure L₂ M]
 
-instance add : Structure (L₁.add L₂) M where
+instance add : Tarski.Structure (L₁.add L₂) M where
   func := fun _ f v =>
     match f with
     | Sum.inl f => func f v
@@ -140,9 +140,9 @@ end add
 
 section sigma
 
-variable (L : ι → Language) (M : Type*) [str : (i : ι) → Structure (L i) M]
+variable (L : ι → Language) (M : Type*) [str : (i : ι) → Tarski.Structure (L i) M]
 
-instance sigma : Structure (Language.sigma L) M where
+instance sigma : Tarski.Structure (Language.sigma L) M where
   func := fun _ ⟨_, f⟩ v ↦ func f v
   rel  := fun _ ⟨_, r⟩ v ↦ rel r v
 
@@ -163,21 +163,21 @@ lemma lMap_sigma : (sigma L M).lMap (Language.Hom.sigma L i) = str i := rfl
 
 end sigma
 
-end Structure
+end Tarski.Structure
 
 section ULift
 
-variable {L : Language.{u}} {M : Type v} [Structure L M]
+variable {L : Language.{u}} {M : Type v} [Tarski.Structure L M]
 
-instance : Structure L (ULift.{v'} M) where
-  func _ f v := ⟨Structure.func f (ULift.down ∘ v)⟩
-  rel _ r v := Structure.rel r (ULift.down ∘ v)
+instance : Tarski.Structure L (ULift.{v'} M) where
+  func _ f v := ⟨Tarski.Structure.func f (ULift.down ∘ v)⟩
+  rel _ r v := Tarski.Structure.rel r (ULift.down ∘ v)
 
-@[simp] lemma Structure.func_uLift {k} (f : L.Func k) (v : Fin k → ULift.{v'} M) :
-    Structure.func f v = ⟨Structure.func f (ULift.down ∘ v)⟩ := rfl
+@[simp] lemma Tarski.Structure.func_uLift {k} (f : L.Func k) (v : Fin k → ULift.{v'} M) :
+    Tarski.Structure.func f v = ⟨Tarski.Structure.func f (ULift.down ∘ v)⟩ := rfl
 
-@[simp] lemma Structure.rel_uLift {k} (r : L.Rel k) (v : Fin k → ULift.{v'} M) :
-    Structure.rel r v = Structure.rel r (ULift.down ∘ v) := rfl
+@[simp] lemma Tarski.Structure.rel_uLift {k} (r : L.Rel k) (v : Fin k → ULift.{v'} M) :
+    Tarski.Structure.rel r v = Tarski.Structure.rel r (ULift.down ∘ v) := rfl
 
 lemma Semiterm.val_uLift {e : Fin n → ULift.{v'} M} {f : ξ → ULift.{v'} M} {t : Semiterm L ξ n} :
     Semiterm.val e f t = ⟨Semiterm.val (ULift.down ∘ e) (ULift.down ∘ f) t⟩ := by

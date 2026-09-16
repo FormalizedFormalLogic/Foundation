@@ -14,31 +14,31 @@ universe u v
 
 variable {L : Language.{u}} {ξ : Type v}
   {I : Type u} (A : I → Type u)
-  [s : (i : I) → FirstOrder.Structure L (A i)]
+  [s : (i : I) → FirstOrder.Tarski.Structure L (A i)]
   (𝓤 : Ultrafilter I)
 
-namespace Structure
+namespace Tarski.Structure
 
 structure Uprod (𝓤 : Ultrafilter I) where
   val : (i : I) → A i
 
-instance UprodStruc : Structure L (Uprod A 𝓤) where
+instance UprodStruc : Tarski.Structure L (Uprod A 𝓤) where
   func := fun _ f v => ⟨fun i ↦ (s i).func f (fun x ↦ (v x).val i)⟩
   rel  := fun _ r v => {i | (s i).rel r (fun x ↦ (v x).val i)} ∈ 𝓤
 
 instance [Nonempty I] [(i : I) → Nonempty (A i)] : Nonempty (Uprod A 𝓤) := Nonempty.map (⟨·⟩) inferInstance
 
 @[simp] lemma func_Uprod {k} (f : L.Func k) (v : Fin k → Uprod A 𝓤) :
-    Structure.func f v = ⟨fun i ↦ (s i).func f (fun x ↦ (v x).val i)⟩ := rfl
+    Tarski.Structure.func f v = ⟨fun i ↦ (s i).func f (fun x ↦ (v x).val i)⟩ := rfl
 
 @[simp] lemma rel_Uprod {k} (r : L.Rel k) (v : Fin k → Uprod A 𝓤) :
-    Structure.rel r v ↔ {i | (s i).rel r (fun x ↦ (v x).val i)} ∈ 𝓤 := of_eq rfl
+    Tarski.Structure.rel r v ↔ {i | (s i).rel r (fun x ↦ (v x).val i)} ∈ 𝓤 := of_eq rfl
 
-end Structure
+end Tarski.Structure
 
 namespace Semiterm
 
-open Structure
+open Tarski.Structure
 
 variable (e : Fin n → Uprod A 𝓤) (ε : ξ → Uprod A 𝓤)
 
@@ -48,7 +48,7 @@ lemma val_Uprod (t : Semiterm L ξ n) :
 
 end Semiterm
 
-open Structure
+open Tarski.Structure
 
 variable {A} {𝓤}
 
@@ -133,7 +133,7 @@ variable {L : Language.{u}} {T : Theory L}
 
 abbrev FinSubtheory (T : Theory L) := {t : Finset (Sentence L) // ↑t ⊆ T}
 
-variable (A : FinSubtheory T → Type u) [s : (i : FinSubtheory T) → Structure L (A i)]
+variable (A : FinSubtheory T → Type u) [s : (i : FinSubtheory T) → Tarski.Structure L (A i)]
 
 instance : Nonempty (FinSubtheory T) := ⟨∅, by simp⟩
 
@@ -155,19 +155,19 @@ lemma compactness_aux :
   constructor
   · rintro h ⟨t, ht⟩; exact Semantics.Satisfiable.of_subset h ht
   · intro h
-    have : ∀ i : FinSubtheory T, ∃ (M : Type u) (_ : Nonempty M) (_ : Structure L M), M ↓[L] ⊧* (i.val : Theory L) :=
+    have : ∀ i : FinSubtheory T, ∃ (M : Type u) (_ : Nonempty M) (_ : Tarski.Structure L M), M ↓[L] ⊧* (i.val : Theory L) :=
       by intro i; exact satisfiable_iff.mp (h i)
     choose A si s hA using this
     have : ∃ 𝓤 : Ultrafilter (FinSubtheory T), Set.image (Sentence.domain A) T ⊆ 𝓤.sets := ultrafilter_exists A hA
     rcases this with ⟨𝓤, h𝓤⟩
-    have : (Structure.Uprod A 𝓤)↓[L] ⊧* T := ⟨by intro σ hσ; exact models_Uprod.mpr (h𝓤 $ Set.mem_image_of_mem (Sentence.domain A) hσ)⟩
-    exact satisfiable_intro (Structure.Uprod A 𝓤) this
+    have : (Tarski.Structure.Uprod A 𝓤)↓[L] ⊧* T := ⟨by intro σ hσ; exact models_Uprod.mpr (h𝓤 $ Set.mem_image_of_mem (Sentence.domain A) hσ)⟩
+    exact satisfiable_intro (Tarski.Structure.Uprod A 𝓤) this
 
 theorem compact :
     Satisfiable T ↔ ∀ u : Finset (Sentence L), ↑u ⊆ T → Satisfiable (u : Theory L) := by
   rw [compactness_aux]; simp
 
-instance : Compact (SmallStruc L) := ⟨compact⟩
+instance : Compact (Tarski.SmallStruc L) := ⟨compact⟩
 
 end
 

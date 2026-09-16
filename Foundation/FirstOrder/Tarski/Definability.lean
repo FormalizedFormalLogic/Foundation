@@ -14,7 +14,7 @@ public import Foundation.Vorspiel.Graph
 
 namespace FFL.FirstOrder
 
-variable {L : Language} {M : Type*} [Structure L M]
+variable {L : Language} {M : Type*} [Tarski.Structure L M]
 
 abbrev IsDefinedBy (R : (Fin k → M) → Prop) (φ : Semisentence L k) : Prop :=
   ∀ v, φ.Evalb v ↔ R v
@@ -259,11 +259,11 @@ lemma exs {R : (Fin k → M) → M → Prop} (hR : L.Definable fun w ↦ R (w ·
   rcases hR with ⟨φ, hR⟩
   exact ⟨∃¹ φ, fun v ↦ by simp [hR.iff]⟩
 
-instance eq [L.Eq] [Structure.Eq L M] : L-relation[M] Eq := ⟨“x y. x = y”, fun _ ↦ by simp⟩
+instance eq [L.Eq] [Tarski.Structure.Eq L M] : L-relation[M] Eq := ⟨“x y. x = y”, fun _ ↦ by simp⟩
 
-instance lt [L.LT] [LT M] [Structure.LT L M] : L-relation[M] _root_.LT.lt := ⟨“x y. x < y”, fun _ ↦ by simp⟩
+instance lt [L.LT] [LT M] [Tarski.Structure.LT L M] : L-relation[M] _root_.LT.lt := ⟨“x y. x < y”, fun _ ↦ by simp⟩
 
-instance mem [L.Mem] [Membership M M] [Structure.Mem L M] : L-relation[M] Membership.mem := ⟨“x y. y ∈ x”, fun _ ↦ by simp⟩
+instance mem [L.Mem] [Membership M M] [Tarski.Structure.Mem L M] : L-relation[M] Membership.mem := ⟨“x y. y ∈ x”, fun _ ↦ by simp⟩
 
 lemma fconj {P : ι → (Fin k → M) → Prop} (s : Finset ι)
     (h : ∀ i, L.Definable fun w : Fin k → M ↦ P i w) : L.Definable fun v : Fin k → M ↦ ∀ i ∈ s, P i v := by
@@ -403,7 +403,7 @@ instance DefinableFunction₃.graph {f : M → M → M → M} [h : L.DefinableFu
 ### Definable functions
 -/
 
-variable [L.Eq] [Structure.Eq L M]
+variable [L.Eq] [Tarski.Structure.Eq L M]
 
 namespace DefinableFunction
 
@@ -422,9 +422,9 @@ lemma substitution {f : Fin k → (Fin l → M) → M}
     · simpa using projection _
     · simpa using Definable.retraction (hf i) (0 :> (·.succ.succ))
 
-instance hAdd [L.Add] [Add M] [Structure.Add L M] : L-function₂[M] HAdd.hAdd := ⟨“x y z. x = y + z”, fun _ ↦ by simp⟩
+instance hAdd [L.Add] [Add M] [Tarski.Structure.Add L M] : L-function₂[M] HAdd.hAdd := ⟨“x y z. x = y + z”, fun _ ↦ by simp⟩
 
-instance hMul [L.Mul] [Mul M] [Structure.Mul L M] : L-function₂[M] HMul.hMul := ⟨“x y z. x = y * z”, fun _ ↦ by simp⟩
+instance hMul [L.Mul] [Mul M] [Tarski.Structure.Mul L M] : L-function₂[M] HMul.hMul := ⟨“x y z. x = y * z”, fun _ ↦ by simp⟩
 
 end DefinableFunction
 
@@ -509,7 +509,7 @@ example {f : M → M} {g : M → M → M} [L.DefinableFunction₁ f] [L.Definabl
     L.DefinableRel fun x y : M ↦ ∀ z, f x = g y (g (f z) c) := by
   definability
 
-example [L.Mem] [Membership M M] [Structure.Mem L M] {f : M → M} [L.DefinableFunction₁ f] :
+example [L.Mem] [Membership M M] [Tarski.Structure.Mem L M] {f : M → M} [L.DefinableFunction₁ f] :
     L.DefinableRel fun x y : M ↦ f x = y ↔ ∀ z, z ∈ f x ↔ z ∈ y := by
   definability
 

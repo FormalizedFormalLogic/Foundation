@@ -43,7 +43,7 @@ def nestFormulaeFunc (φ : Semiformula L ξ (n + 1)) (Ψ : Fin n → Semiformula
       Rewriting.subst φ (#((0 : Fin (m + 1)).addNat n) :> fun i ↦ #(i.addCast m.succ))
   ∀¹^[n] σ
 
-variable {M : Type*} [s : Structure L M] {f : ξ → M}
+variable {M : Type*} [s : Tarski.Structure L M] {f : ξ → M}
 
 lemma eval_nestFormulae {φ : Semiformula L ξ n} {Ψ : Fin n → Semiformula L ξ (m + 1)} :
     Eval e f (φ.nestFormulae Ψ) ↔ ∀ v : Fin n → M, (∀ i, Eval (v i :> e) f (Ψ i)) → Eval v f φ := by
@@ -827,7 +827,7 @@ def sent : Semisentence L 3 := f“F X Y. ∀ f, f ∈ F ↔ f ∈ !func X Y”
 
 def sent₂ : Semisentence L 3 := f“F X Y. ∀ f, f ∈ F”
 
-variable {M : Type*} [Membership M M] [s : Structure L M] [Structure.Eq L M] [Structure.Mem L M]
+variable {M : Type*} [Membership M M] [s : Tarski.Structure L M] [Tarski.Structure.Eq L M] [Tarski.Structure.Mem L M]
 
 def Func : M → M → M := sorry
 

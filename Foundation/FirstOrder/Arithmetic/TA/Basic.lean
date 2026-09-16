@@ -5,7 +5,7 @@ public import Foundation.FirstOrder.Arithmetic.Basic
 @[expose] public section
 namespace FFL.FirstOrder.Arithmetic
 
-abbrev FirstOrderTrueArith : ArithmeticTheory := Structure.theory ℒₒᵣ ℕ
+abbrev FirstOrderTrueArith : ArithmeticTheory := Tarski.Structure.theory ℒₒᵣ ℕ
 
 notation "𝗧𝗔" => FirstOrderTrueArith
 
