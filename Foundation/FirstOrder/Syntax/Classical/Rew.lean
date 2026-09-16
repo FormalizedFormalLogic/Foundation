@@ -26,6 +26,11 @@ namespace FirstOrder
 
 namespace Semiformula
 
+variable
+  {L L₁ L₂ L₃ : Language}
+  {ξ ξ₁ ξ₂ ξ₃ : Type*}
+  {n n₁ n₂ n₃ : ℕ}
+
 def rewAux ⦃n₁ n₂ : ℕ⦄ (ω : Rew L ξ₁ n₁ ξ₂ n₂) : Semiformula L ξ₁ n₁ → Semiformula L ξ₂ n₂
   |        ⊤ => ⊤
   |        ⊥ => ⊥
@@ -40,7 +45,8 @@ lemma rewAux_neg (ω : Rew L ξ₁ n₁ ξ₂ n₂) (φ : Semiformula L ξ₁ n�
     rewAux ω (∼φ) = ∼rewAux ω φ :=
   by induction φ using Semiformula.rec' generalizing n₂ <;> simp [*, rewAux]
 
-lemma ext_rewAux' {ω₁ ω₂ : Rew L ξ₁ n₁ ξ₂ n₂} (h : ω₁ = ω₂) (φ : Semiformula L ξ₁ n₁) : rewAux ω₁ φ = rewAux ω₂ φ:= by simp [h]
+lemma ext_rewAux' {ω₁ ω₂ : Rew L ξ₁ n₁ ξ₂ n₂} (h : ω₁ = ω₂) (φ : Semiformula L ξ₁ n₁) :
+    rewAux ω₁ φ = rewAux ω₂ φ := by simp [h]
 
 def rew (ω : Rew L ξ₁ n₁ ξ₂ n₂) : Semiformula L ξ₁ n₁ →ˡᶜ Semiformula L ξ₂ n₂ where
   toTr := rewAux ω
@@ -51,14 +57,16 @@ def rew (ω : Rew L ξ₁ n₁ ξ₂ n₂) : Semiformula L ξ₁ n₁ →ˡᶜ S
   map_or' := fun φ ψ ↦ rfl
   map_imply' := fun φ ψ ↦ by simp [imp_eq, rewAux_neg, rewAux, ←neg_eq]
 
-instance : Rewriting L ξ (Semiformula L ξ) ζ (Semiformula L ζ) where
+instance {ζ : Type*} : Rewriting L ξ (Semiformula L ξ) ζ (Semiformula L ζ) where
   app := rew
   app_all (_ _) := rfl
   app_exs (_ _) := rfl
 
-abbrev subst (φ : Semiformula L ξ n) (v : Fin n → Semiterm L ξ m) : Semiformula L ξ m := Rewriting.subst φ v
+abbrev subst {m : ℕ} (φ : Semiformula L ξ n) (v : Fin n → Semiterm L ξ m) : Semiformula L ξ m :=
+  Rewriting.subst φ v
 
-@[coe] abbrev emb [IsEmpty o] (φ : Semiformula L o n) : Semiformula L ξ n := Rewriting.emb φ
+@[coe] abbrev emb {o : Type*} [IsEmpty o] (φ : Semiformula L o n) : Semiformula L ξ n :=
+  Rewriting.emb φ
 
 abbrev free (φ : Semiproposition L (n + 1)) : Semiproposition L n := Rewriting.free φ
 
@@ -98,7 +106,7 @@ lemma rew_nrel (ω : Rew L ξ₁ n₁ ξ₂ n₂) {k} (r : L.Rel k) (v : Fin k �
 @[simp] lemma rew_nrel3 (ω : Rew L ξ₁ n₁ ξ₂ n₂) {r : L.Rel 3} {t₁ t₂ t₃ : Semiterm L ξ₁ n₁} :
     ω ▹ nrel r ![t₁, t₂, t₃] = nrel r ![ω t₁, ω t₂, ω t₃] := by simp
 
-private lemma map_inj {b : Fin n₁ → Fin n₂} {f : ξ₁ → ξ₂}
+private lemma map_inj {n₁ n₂ : ℕ} {b : Fin n₁ → Fin n₂} {f : ξ₁ → ξ₂}
     (hb : Function.Injective b) (hf : Function.Injective f) :
     Function.Injective fun φ : Semiformula L ξ₁ n₁ ↦ @Rew.map L ξ₁ ξ₂ n₁ n₂ b f ▹ φ
   | rel r v => fun φ ↦
@@ -151,7 +159,7 @@ instance : TransitiveRewriting L ξ₁ (Semiformula L ξ₁) ξ₂ (Semiformula 
   comp_app {n₁ n₂ n₃ ω₁₂ ω₂₃ φ} := by
     induction φ using rec' generalizing n₂ n₃ <;> simp [Rew.comp_app, Rew.q_comp, *, Function.comp_def]
 
-instance : InjMapRewriting L ξ (Semiformula L ξ) ζ (Semiformula L ζ) where
+instance {ζ : Type*} : InjMapRewriting L ξ (Semiformula L ξ) ζ (Semiformula L ζ) where
   smul_map_injective := map_inj
 
 instance : LawfulSyntacticRewriting L (Semiproposition L) where

@@ -359,7 +359,7 @@ instance identity.defined : ℒₛₑₜ-function₁[V] identity via dfn :=
 
 instance identity.definable : ℒₛₑₜ-function₁[V] identity := defined.to_definable
 
-@[simp] lemma kpair_mem_identity_iff {X x : V} : ⟨x, y⟩ₖ ∈ identity X ↔ x ∈ X ∧ x = y := by
+@[simp] lemma kpair_mem_identity_iff {X x y : V} : ⟨x, y⟩ₖ ∈ identity X ↔ x ∈ X ∧ x = y := by
   simp only [mem_identity_iff, kpair_iff, exists_eq_right_right', and_congr_left_iff]
   grind
 
@@ -399,7 +399,8 @@ lemma mem_compose_iff {R S p : V} :
   simp only [mem_compose_iff, kpair_iff, exists_and_left, exists_eq_right_right']
   grind
 
-lemma compose_subset_prod {X Y Z R S : V} (hR : R ⊆ X ×ˢ Y) (hS : S ⊆ Y ×ˢ Z) : compose R S ⊆ X ×ˢ Z := by
+lemma compose_subset_prod {X Y Z R S : V} (hR : R ⊆ X ×ˢ Y) (hS : S ⊆ Y ×ˢ Z) :
+    compose R S ⊆ X ×ˢ Z := by
   intro p hp
   rcases mem_compose_iff.mp hp with ⟨x, y, z, hxy, hyz, rfl⟩
   have : x ∈ X ∧ y ∈ Y := by simpa using hR _ hxy
@@ -424,7 +425,8 @@ lemma compose_function {X Y Z f g : V} (hf : f ∈ Y ^ X) (hg : g ∈ Z ^ Y) : c
     rcases IsFunction.unique hyz hy'z'
     rfl
 
-lemma compose_injective {R S : V} (hR : Injective R) (hS : Injective S) : Injective (compose R S) := by
+lemma compose_injective {R S : V} (hR : Injective R) (hS : Injective S) :
+    Injective (compose R S) := by
   intro x₁ x₂ z h₁ h₂
   have : ∃ y₁, ⟨x₁, y₁⟩ₖ ∈ R ∧ ⟨y₁, z⟩ₖ ∈ S := by simpa using h₁
   rcases this with ⟨y₁, hx₁y₁, hy₁z⟩
@@ -434,13 +436,15 @@ lemma compose_injective {R S : V} (hR : Injective R) (hS : Injective S) : Inject
   rcases this
   exact hR x₁ x₂ y₁ hx₁y₁ hx₂y₂
 
-/- This definition of value is adapted from NM's contribution to Metamath: https://us.metamath.org/mpeuni/fv3.html -/
+/- This definition of value is adapted from NM's contribution to Metamath:
+https://us.metamath.org/mpeuni/fv3.html -/
 noncomputable def value (f x : V) := {z ∈ ⋃ˢ range f ; ∃ y, z ∈ y ∧ ⟨x, y⟩ₖ ∈ f}
 
 /-- If `x` is in `domain f`, then `f ‘ x` is the value of `f` at `x`, else it is `∅`. -/
 scoped notation f:arg " ‘ " x:arg => value f x
 
-def value.dfn : SetTheorySemisentence 3 := f“v f x. ∀ z, z ∈ v ↔ z ∈ !sUnion.dfn (!range.dfn f) ∧ ∃ y, z ∈ y ∧ !kpair.dfn x y ∈ f”
+def value.dfn : SetTheorySemisentence 3 :=
+  f“v f x. ∀ z, z ∈ v ↔ z ∈ !sUnion.dfn (!range.dfn f) ∧ ∃ y, z ∈ y ∧ !kpair.dfn x y ∈ f”
 
 instance value.defined : ℒₛₑₜ-function₂[V] value via value.dfn :=
   ⟨fun v ↦ by simp [dfn, value]; simp only [mem_ext_iff, mem_sep_iff]⟩
@@ -466,7 +470,8 @@ noncomputable def restrict (R A : V) : V := R ∩ (A ×ˢ range R)
 /-- Restricting the domain of a relation -/
 scoped notation R:arg " ↾ " A:arg => restrict R A
 
-def restrict.dfn : SetTheorySemisentence 3 := f“r R A. r = !inter.dfn R (!prod.dfn A (!range.dfn R))”
+def restrict.dfn : SetTheorySemisentence 3 :=
+  f“r R A. r = !inter.dfn R (!prod.dfn A (!range.dfn R))”
 
 instance restrict.defined : ℒₛₑₜ-function₂[V] restrict via restrict.dfn :=
   ⟨fun v ↦ by simp [dfn, restrict]⟩
@@ -504,7 +509,8 @@ lemma mem_restrict_iff {R A p : V} :
 instance IsFunction.restrict (f A : V) [hf : IsFunction f] : IsFunction (f ↾ A) := by
   exact IsFunction.ofSubset f (f ↾ A) (restrict_subset f A)
 
-lemma IsFunction.restrict_eq_self (f A : V) [hf : IsFunction f] (hA : domain f ⊆ A) : f ↾ A = f := by
+lemma IsFunction.restrict_eq_self (f A : V) [hf : IsFunction f] (hA : domain f ⊆ A) :
+    f ↾ A = f := by
   apply subset_antisymm
   · intro p hp
     exact (mem_restrict_iff.mp hp).1
@@ -591,7 +597,7 @@ instance CardLE.defined : ℒₛₑₜ-relation[V] CardLE via dfn := ⟨fun v �
 
 instance CardLE.definable : ℒₛₑₜ-relation[V] CardLE := defined.to_definable
 
-def CardLT.dfn : SetTheorySemisentence 2 := “X Y. !CardLE.dfn X Y ∧ ¬!CardLE.dfn Y X”
+def CardLT.dfn : SetTheorySemisentence 2 := f“X Y. !CardLE.dfn X Y ∧ ¬!CardLE.dfn Y X”
 
 instance CardLT.defined : ℒₛₑₜ-relation[V] CardLT via dfn := ⟨fun v ↦ by simp [CardLT, dfn]⟩
 
@@ -601,7 +607,7 @@ def CardEQ (X Y : V) : Prop := X ≤# Y ∧ Y ≤# X
 
 infix:60 " ≋ " => CardEQ
 
-def CardEQ.dfn : SetTheorySemisentence 2 := “X Y. !CardLE.dfn X Y ∧ !CardLE.dfn Y X”
+def CardEQ.dfn : SetTheorySemisentence 2 := f“X Y. !CardLE.dfn X Y ∧ !CardLE.dfn Y X”
 
 instance CardEQ.defined : ℒₛₑₜ-relation[V] CardEQ via dfn := ⟨fun v ↦ by simp [CardEQ, dfn]⟩
 
@@ -701,8 +707,8 @@ lemma two_pow_cardEQ_power (X : V) : 2 ^ X ≋ ℘ X := by
           intro x hx
           by_cases hxS : x ∈ s
           · apply ExistsUnique.intro 1
-            · simp only [mem_sep_iff, kpair_mem_iff, hx, mem_two_iff, one_ne_zero, or_true, and_self,
-              kpair_iff, and_true, and_false, imp_false, not_not, true_and, f]; grind
+            · simp only [mem_sep_iff, kpair_mem_iff, hx, mem_two_iff, one_ne_zero, or_true,
+              and_self, kpair_iff, and_true, and_false, imp_false, not_not, true_and, f]; grind
             · intro i hi
               simp [f, hx] at hi
               grind only

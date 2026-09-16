@@ -151,9 +151,9 @@ def eta : (φ : Propositionᵢ L) → ⦃φ⦄ ⊢ᴸᴶ¹ φ
         ((eta φ).weakening (φ := ψ)).cast (by simp)))
       (cast (negativeAnd (Γ := 0) (φ := φ) (ψ := ψ) (Ξ := ψ) <|
         ((eta ψ).weakening (φ := φ)).cast (by simp [add_comm])))
-  |    φ ⋎ ψ => negativeOr (Γ := 0) (φ := φ) (ψ := ψ) (Ξ := φ ⋎ ψ)
+  |    φ ⋎ ψ => cast (negativeOr (Γ := 0) (φ := φ) (ψ := ψ) (Ξ := φ ⋎ ψ)
       (cast (positiveOrLeft (ψ := ψ) (eta φ)))
-      (cast (positiveOrRight (φ := φ) (eta ψ)))
+      (cast (positiveOrRight (φ := φ) (eta ψ)))) (by simp)
   |    φ 🡒 ψ => positiveImply <|
       cast (negativeImply (φ := φ) (ψ := ψ) (Δ := 0) (Ξ := ψ)
         (eta φ)
@@ -175,8 +175,9 @@ def positiveNeg {φ : Propositionᵢ L} (d : Γ + ⦃φ⦄ ⊢ᴸᴶ¹ (⊥ : Pr
 
 def negativeNeg {φ : Propositionᵢ L} (d : Γ ⊢ᴸᴶ¹ φ) :
     Γ + ⦃(∼φ : Propositionᵢ L)⦄ ⊢ᴸᴶ¹ none :=
-  cast (seq := by rw [add_zero]; rfl) <| negativeImply (φ := φ) (ψ := ⊥) (Γ := Γ) (Δ := 0) (Ξ := none) d <|
-    cast falsum (by simp) (by rfl)
+  cast (seq := by rw [add_zero]; rfl) <|
+    negativeImply (φ := φ) (ψ := ⊥) (Γ := Γ) (Δ := 0) (Ξ := none) d <|
+      cast falsum (by simp) (by rfl)
 
 def modusPonens [L.DecidableEq] {φ ψ : Propositionᵢ L} (di : Γ ⊢ᴸᴶ¹ φ 🡒 ψ) (dφ : Γ ⊢ᴸᴶ¹ φ) :
     Γ ⊢ᴸᴶ¹ ψ :=
@@ -334,7 +335,8 @@ def doubleNegationMap {φ ψ : Propositionᵢ L} (d : ⦃φ⦄ ⊢ᴸᴶ¹ ψ) :
 
 def dneOfNegative : {φ : Propositionᵢ L} → φ.IsNegative → ⦃∼∼φ⦄ ⊢ᴸᴶ¹ φ
   | ⊥, _ =>
-      ((positiveNeg (Γ := 0) (φ := ⊥) ((eta ⊥).cast (by simp))).negativeNeg.weakeningRight).cast (heq := rfl)
+      ((positiveNeg (Γ := 0) (φ := ⊥) ((eta ⊥).cast (by simp))).negativeNeg.weakeningRight).cast
+        (heq := rfl)
   | φ ⋏ ψ, h =>
     have hn : φ.IsNegative ∧ ψ.IsNegative := by simpa using h
     positiveAnd
