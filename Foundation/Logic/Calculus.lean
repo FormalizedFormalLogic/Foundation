@@ -20,8 +20,8 @@ namespace FFL
 /-! ## Structural rules -/
 
 class Structural {F : Type*} (𝔇 : Multiset F → Type*) where
-  weakening : 𝔇 Γ → 𝔇 (Γ + ⦃φ⦄)
-  contraction : 𝔇 (Γ + ⦃φ, φ⦄) → 𝔇 (Γ + ⦃φ⦄)
+  weakening {Γ : Multiset F} {φ : F} : 𝔇 Γ → 𝔇 (Γ + ⦃φ⦄)
+  contraction {Γ : Multiset F} {φ : F} : 𝔇 (Γ + ⦃φ, φ⦄) → 𝔇 (Γ + ⦃φ⦄)
 
 /-! ## One-sided $\mathbf{LK}$ -/
 
@@ -30,14 +30,14 @@ class OneSidedLK {F : Type*} [LogicalConnective F] [LogicalNeutral F]
     (𝔇 : Multiset F → Type*) extends Structural 𝔇 where
   identity (φ) : 𝔇 ⦃φ, ∼φ⦄
   verum : 𝔇 ⦃⊤⦄
-  and : 𝔇 (Γ + ⦃φ⦄) → 𝔇 (Γ + ⦃ψ⦄) → 𝔇 (Γ + ⦃φ ⋏ ψ⦄)
-  or : 𝔇 (Γ + ⦃φ, ψ⦄) → 𝔇 (Γ + ⦃φ ⋎ ψ⦄)
+  and {Γ : Multiset F} {φ ψ : F} : 𝔇 (Γ + ⦃φ⦄) → 𝔇 (Γ + ⦃ψ⦄) → 𝔇 (Γ + ⦃φ ⋏ ψ⦄)
+  or {Γ : Multiset F} {φ ψ : F} : 𝔇 (Γ + ⦃φ, ψ⦄) → 𝔇 (Γ + ⦃φ ⋎ ψ⦄)
 
 class OneSidedLK.Cut
     {F : Type*} [LogicalConnective F] [LogicalNeutral F]
     [TildeInvolutive F] [LogicalConnective.DeMorgan F] [LogicalNeutral.DeMorgan F]
     (𝔇 : Multiset F → Type*) extends OneSidedLK 𝔇 where
-  cut : 𝔇 (Γ + ⦃φ⦄) → 𝔇 (Δ + ⦃∼φ⦄) → 𝔇 (Γ + Δ)
+  cut {Γ Δ : Multiset F} {φ : F} : 𝔇 (Γ + ⦃φ⦄) → 𝔇 (Δ + ⦃∼φ⦄) → 𝔇 (Γ + Δ)
 
 namespace Structural
 
@@ -85,7 +85,8 @@ end Structural
 namespace OneSidedLK
 
 variable {F : Type*} [LogicalConnective F] [LogicalNeutral F]
-  [TildeInvolutive F] [LogicalConnective.DeMorgan F] [LogicalNeutral.DeMorgan F] {𝔇 : Multiset F → Type*}
+  [TildeInvolutive F] [LogicalConnective.DeMorgan F] [LogicalNeutral.DeMorgan F]
+  {𝔇 : Multiset F → Type*} {Γ Δ : Multiset F} {φ ψ : F}
 
 alias cast := Structural.cast
 alias weakenMany := Structural.weakenMany

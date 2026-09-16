@@ -22,14 +22,14 @@ namespace FFL.FirstOrder
 A semiformula of language `L`. Free variables are of type `ξ`, and bound variables are implemented as de Bruijn indices, of a type `Fin n` separate from free variables.
 -/
 inductive Semiformula (L : Language) (ξ : Type*) : ℕ → Type _ where
-  |  verum : Semiformula L ξ n
-  | falsum : Semiformula L ξ n
-  |    rel : {arity : ℕ} → L.Rel arity → (Fin arity → Semiterm L ξ n) → Semiformula L ξ n
-  |   nrel : {arity : ℕ} → L.Rel arity → (Fin arity → Semiterm L ξ n) → Semiformula L ξ n
-  |    and : Semiformula L ξ n → Semiformula L ξ n → Semiformula L ξ n
-  |     or : Semiformula L ξ n → Semiformula L ξ n → Semiformula L ξ n
-  |    all : Semiformula L ξ (n + 1) → Semiformula L ξ n
-  |    exs : Semiformula L ξ (n + 1) → Semiformula L ξ n
+  |  verum {n : ℕ} : Semiformula L ξ n
+  | falsum {n : ℕ} : Semiformula L ξ n
+  |    rel {n arity : ℕ} : L.Rel arity → (Fin arity → Semiterm L ξ n) → Semiformula L ξ n
+  |   nrel {n arity : ℕ} : L.Rel arity → (Fin arity → Semiterm L ξ n) → Semiformula L ξ n
+  |    and {n : ℕ} : Semiformula L ξ n → Semiformula L ξ n → Semiformula L ξ n
+  |     or {n : ℕ} : Semiformula L ξ n → Semiformula L ξ n → Semiformula L ξ n
+  |    all {n : ℕ} : Semiformula L ξ (n + 1) → Semiformula L ξ n
+  |    exs {n : ℕ} : Semiformula L ξ (n + 1) → Semiformula L ξ n
 
 abbrev Formula (L : Language) (ξ : Type*) := Semiformula L ξ 0
 

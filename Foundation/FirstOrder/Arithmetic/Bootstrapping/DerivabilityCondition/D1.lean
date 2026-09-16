@@ -9,7 +9,7 @@ public import Foundation.FirstOrder.Arithmetic.Bootstrapping.Syntax
 
 namespace FFL.FirstOrder.Arithmetic.Bootstrapping
 
-open Classical FirstOrder
+open FirstOrder
 
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 
@@ -17,8 +17,9 @@ variable {L : Language} [L.Encodable] [L.LORDefinable]
 
 variable {T : Theory L} [T.Δ₁]
 
-lemma derivable_quote {Γ : Finset (Proposition L)} (d : T ⟹₂ Γ) : Derivable T (⌜Γ⌝ : V) :=
-  ⟨⌜d⌝, by simpa [Semiformula.quote_def] using! (⌜d⌝ : Theory.internalize V T ⊢!ᵈᵉʳ ⌜Γ⌝).derivationOf⟩
+lemma derivable_quote {Γ : Finset (Proposition L)} (d : T ⟹₂Γ) : Derivable T (⌜Γ⌝ : V) :=
+  ⟨⌜d⌝, by
+    simpa [Semiformula.quote_def] using! (⌜d⌝ : Theory.internalize V T ⊢!ᵈᵉʳ ⌜Γ⌝).derivationOf⟩
 
 /-- Hilbert–Bernays provability condition D1 -/
 theorem internalize_provability {φ} : T ⊢ φ → Provable T (⌜φ⌝ : V) := fun h ↦ by

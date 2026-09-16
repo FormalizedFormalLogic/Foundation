@@ -41,7 +41,7 @@ variable {T}
 lemma eq_comm {t₁ t₂ : Term V ℒₒᵣ} :
     T.internalize V ⊢ t₁ ≐ t₂ → T.internalize V ⊢ t₂ ≐ t₁ := fun h ↦ eq_symm T _ _ ⨀ h
 
-noncomputable abbrev toNumVec (w : Fin n → V) : SemitermVec V ℒₒᵣ n k := ((𝕹 ·)⨟ w)
+noncomputable abbrev toNumVec {n k : ℕ} (w : Fin n → V) : SemitermVec V ℒₒᵣ n k := ((𝕹 ·)⨟ w)
 
 variable (T)
 

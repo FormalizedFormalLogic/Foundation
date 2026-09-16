@@ -35,15 +35,15 @@ end Hilbert
 inductive Hilbert.Proof (Λ : Hilbert α) : Formula α → Type _
 | axm {φ}        : φ ∈ Λ → Hilbert.Proof Λ φ
 | mdp {φ ψ}      : Hilbert.Proof Λ (φ 🡒 ψ) → Hilbert.Proof Λ φ → Hilbert.Proof Λ ψ
-| verum          : Hilbert.Proof Λ $ Axioms.Verum
-| implyS {φ ψ χ} : Hilbert.Proof Λ $ Axioms.ImplyS φ ψ χ
-| implyK {φ ψ}   : Hilbert.Proof Λ $ Axioms.ImplyK φ ψ
-| andElimL {φ ψ} : Hilbert.Proof Λ $ Axioms.AndElim₁ φ ψ
-| andElimR {φ ψ} : Hilbert.Proof Λ $ Axioms.AndElim₂ φ ψ
-| andIntro {φ ψ} : Hilbert.Proof Λ $ Axioms.AndInst φ ψ
-| orIntroL {φ ψ} : Hilbert.Proof Λ $ Axioms.OrInst₁ φ ψ
-| orIntroR {φ ψ} : Hilbert.Proof Λ $ Axioms.OrInst₂ φ ψ
-| orElim {φ ψ χ} : Hilbert.Proof Λ $ Axioms.OrElim φ ψ χ
+| verum          : Hilbert.Proof Λ <| Axioms.Verum
+| implyS {φ ψ χ} : Hilbert.Proof Λ <| Axioms.ImplyS φ ψ χ
+| implyK {φ ψ}   : Hilbert.Proof Λ <| Axioms.ImplyK φ ψ
+| andElimL {φ ψ} : Hilbert.Proof Λ <| Axioms.AndElim₁ φ ψ
+| andElimR {φ ψ} : Hilbert.Proof Λ <| Axioms.AndElim₂ φ ψ
+| andIntro {φ ψ} : Hilbert.Proof Λ <| Axioms.AndInst φ ψ
+| orIntroL {φ ψ} : Hilbert.Proof Λ <| Axioms.OrInst₁ φ ψ
+| orIntroR {φ ψ} : Hilbert.Proof Λ <| Axioms.OrInst₂ φ ψ
+| orElim {φ ψ χ} : Hilbert.Proof Λ <| Axioms.OrElim φ ψ χ
 
 instance : Entailment (Hilbert α) (Formula α) := ⟨Hilbert.Proof⟩
 
@@ -65,13 +65,13 @@ instance : Entailment.Minimal H where
   or₂! := orIntroR
   or₃! := orElim
 
-variable {H} {H₁ H₂ : Hilbert α}
+variable {H} {H₁ H₂ : Hilbert α} {φ : Formula α}
 
 alias ofSchema := Hilbert.Proof.axm
 @[grind <=] lemma of_schema (h : φ ∈ H) : H ⊢ φ := ⟨ofSchema h⟩
 
-def ofLE (h : H₁.schema ⊆ H₂.schema) : H₁ ⊢! φ → H₂ ⊢! φ
-  | axm h₁ => axm $ h h₁
+def ofLE {φ : Formula α} (h : H₁.schema ⊆ H₂.schema) : H₁ ⊢! φ → H₂ ⊢! φ
+  | axm h₁ => axm <| h h₁
   | mdp h₁ h₂ => mdp (ofLE h h₁) (ofLE h h₂)
   | verum => verum
   | implyS => implyS
@@ -83,13 +83,14 @@ def ofLE (h : H₁.schema ⊆ H₂.schema) : H₁ ⊢! φ → H₂ ⊢! φ
   | orIntroR => orIntroR
   | orElim => orElim
 
-lemma of_le (h : H₁.schema ⊆ H₂.schema) : H₁ ⊢ φ → H₂ ⊢ φ := λ ⟨hφ⟩ => ⟨ofLE h hφ⟩
+lemma of_le (h : H₁.schema ⊆ H₂.schema) : H₁ ⊢ φ → H₂ ⊢ φ := fun ⟨hφ⟩ => ⟨ofLE h hφ⟩
 
 @[grind <=]
-lemma weakerThan_of_le (h : H₁.schema ⊆ H₂.schema) : H₁ ⪯ H₂ := Entailment.weakerThan_iff.mpr $ of_le h
+lemma weakerThan_of_le (h : H₁.schema ⊆ H₂.schema) : H₁ ⪯ H₂ :=
+  Entailment.weakerThan_iff.mpr <| of_le h
 
-def Subst {H : Hilbert α} (s) : H ⊢! φ → H ⊢! φ⟦s⟧
-  | axm h₁ => axm $ H.schema_closed φ h₁ s
+def Subst {H : Hilbert α} {φ : Formula α} (s) : H ⊢! φ → H ⊢! φ⟦s⟧
+  | axm h₁ => axm <| H.schema_closed φ h₁ s
   | mdp h₁ h₂ => mdp (Subst s h₁) (Subst s h₂)
   | verum => verum
   | implyS => implyS
@@ -101,9 +102,9 @@ def Subst {H : Hilbert α} (s) : H ⊢! φ → H ⊢! φ⟦s⟧
   | orIntroR => orIntroR
   | orElim => orElim
 
-lemma subst {H : Hilbert α} (s) : H ⊢ φ → H ⊢ φ⟦s⟧ := λ ⟨hφ⟩ => ⟨Subst s hφ⟩
+lemma subst {H : Hilbert α} (s) : H ⊢ φ → H ⊢ φ⟦s⟧ := fun ⟨hφ⟩ => ⟨Subst s hφ⟩
 
-def ofProofSchema (h : H₂ ⊢!* H₁.schema) : H₁ ⊢! φ → H₂ ⊢! φ
+def ofProofSchema {φ : Formula α} (h : H₂ ⊢!* H₁.schema) : H₁ ⊢! φ → H₂ ⊢! φ
   | axm h₁ => h h₁
   | mdp h₁ h₂ => mdp (ofProofSchema h h₁) (ofProofSchema h h₂)
   | verum => verum
@@ -116,17 +117,19 @@ def ofProofSchema (h : H₂ ⊢!* H₁.schema) : H₁ ⊢! φ → H₂ ⊢! φ
   | orIntroR => orIntroR
   | orElim => orElim
 
-lemma of_proof_schema (h : H₂ ⊢* H₁.schema) : H₁ ⊢ φ → H₂ ⊢ φ := λ ⟨hφ⟩ => ⟨ofProofSchema (fun _ hφ ↦ (h hφ).get) hφ⟩
+lemma of_proof_schema (h : H₂ ⊢* H₁.schema) : H₁ ⊢ φ → H₂ ⊢ φ :=
+  fun ⟨hφ⟩ => ⟨ofProofSchema (fun _ hφ ↦ (h hφ).get) hφ⟩
 
-lemma weakerThan_of_provable_schema (h : H₂ ⊢* H₁.schema) : H₁ ⪯ H₂ := Entailment.weakerThan_iff.mpr $ of_proof_schema h
+lemma weakerThan_of_provable_schema (h : H₂ ⊢* H₁.schema) : H₁ ⪯ H₂ :=
+  Entailment.weakerThan_iff.mpr <| of_proof_schema h
 
 section
 
 instance : Entailment.Int (Hilbert.Int : Hilbert α) where
-  efq! := axm $ by tauto
+  efq! := axm <| by tauto
 
-instance : Entailment.HasAxiomEFQ (Hilbert.Cl : Hilbert α) := ⟨axm $ by tauto⟩
-instance : Entailment.HasAxiomLEM (Hilbert.Cl : Hilbert α) := ⟨axm $ by tauto⟩
+instance : Entailment.HasAxiomEFQ (Hilbert.Cl : Hilbert α) := ⟨axm <| by tauto⟩
+instance : Entailment.HasAxiomLEM (Hilbert.Cl : Hilbert α) := ⟨axm <| by tauto⟩
 instance : Entailment.Int (Hilbert.Cl : Hilbert α) where
 instance [DecidableEq α] : Entailment.Cl (Hilbert.Cl : Hilbert α) where
 
@@ -142,7 +145,7 @@ abbrev logic (H : Hilbert α) : Logic α where
   subst s {_} := Hilbert.subst s
   mdp := Entailment.mdp;
 
-variable {H : Hilbert α}
+variable {H : Hilbert α} {φ : Formula α}
 
 lemma mem_logic_of_proof (h : H ⊢! φ) : φ ∈ H.logic := ⟨h⟩
 
@@ -156,7 +159,7 @@ end Hilbert
 
 
 protected abbrev Int : Logic α := Hilbert.Int.logic
-protected abbrev Cl  : Logic α := Hilbert.Cl.logic
+protected abbrev Cl : Logic α := Hilbert.Cl.logic
 
 end FFL.Propositional
 

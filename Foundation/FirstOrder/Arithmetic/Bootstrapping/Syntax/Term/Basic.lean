@@ -145,7 +145,7 @@ instance defined : 𝚫₁-Predicate (IsUTerm L (V := V)) via (isUTerm L) := (co
 
 instance definable : 𝚫₁-Predicate (IsUTerm L (V := V)) := defined.to_definable
 
-instance definable' (Γ) : Γ-[m + 1]-Predicate (IsUTerm L (V := V)) := definable.of_deltaOne
+instance definable' (Γ m) : Γ-[m + 1]-Predicate (IsUTerm L (V := V)) := definable.of_deltaOne
 
 end IsUTerm
 
@@ -167,7 +167,7 @@ lemma nth {n w : V} (h : IsUTermVec L n w) {i} : i < n → IsUTerm L w.[i] := h.
 
 @[simp] lemma empty : IsUTermVec (V := V) L 0 0 := ⟨by simp, by simp⟩
 
-@[simp] lemma empty_iff : IsUTermVec L 0 v ↔ v = 0 := by
+@[simp] lemma empty_iff {v : V} : IsUTermVec L 0 v ↔ v = 0 := by
   constructor
   · intro h; exact len_zero_iff_eq_nil.mp h.lh.symm
   · rintro rfl; simp
@@ -206,7 +206,7 @@ instance defined : 𝚫₁-Relation (IsUTermVec (V := V) L) via (isUTermVec L) :
 
 instance definable : 𝚫₁-Relation (IsUTermVec (V := V) L) := defined.to_definable
 
-instance definable' (Γ) : Γ-[m + 1]-Relation (IsUTermVec (V := V) L) := definable.of_deltaOne
+instance definable' (Γ m) : Γ-[m + 1]-Relation (IsUTermVec (V := V) L) := definable.of_deltaOne
 
 end
 
@@ -265,7 +265,7 @@ structure Blueprint (arity : ℕ) where
 
 namespace Blueprint
 
-variable (L) (β : Blueprint arity)
+variable {arity : ℕ} (L) (β : Blueprint arity)
 
 noncomputable def blueprint : Fixpoint.Blueprint arity := ⟨.mkDelta
   (.mkSigma “pr C.
@@ -350,12 +350,15 @@ private lemma phi_iff (param : Fin arity → V) (C pr : V) :
     · right; right
       exact ⟨k, f, v, w, ⟨hk, fun i hi ↦ hw i hi⟩, rfl⟩
 
-/-- TODO: move-/
-@[simp] lemma cons_app_9 {n : ℕ} (a : α) (s : Fin n.succ.succ.succ.succ.succ.succ.succ.succ.succ → α) : (a :> s) 9 = s 8 := rfl
+/-- TODO: move -/
+@[simp] lemma cons_app_9 {α : Type*} {n : ℕ} (a : α)
+    (s : Fin n.succ.succ.succ.succ.succ.succ.succ.succ.succ → α) : (a :> s) 9 = s 8 := rfl
 
-@[simp] lemma cons_app_10 {n : ℕ} (a : α) (s : Fin n.succ.succ.succ.succ.succ.succ.succ.succ.succ.succ → α) : (a :> s) 10 = s 9 := rfl
+@[simp] lemma cons_app_10 {α : Type*} {n : ℕ} (a : α)
+    (s : Fin n.succ.succ.succ.succ.succ.succ.succ.succ.succ.succ → α) : (a :> s) 10 = s 9 := rfl
 
-@[simp] lemma cons_app_11 {n : ℕ} (a : α) (s : Fin n.succ.succ.succ.succ.succ.succ.succ.succ.succ.succ.succ → α) : (a :> s) 11 = s 10 := rfl
+@[simp] lemma cons_app_11 {α : Type*} {n : ℕ} (a : α)
+    (s : Fin n.succ.succ.succ.succ.succ.succ.succ.succ.succ.succ.succ → α) : (a :> s) 11 = s 10 := rfl
 
 def construction : Fixpoint.Construction V (β.blueprint L) where
   Φ := c.Phi L
@@ -420,7 +423,7 @@ instance graph_definable₂ (param) : 𝚺-[0 + 1]-Relation (c.Graph L param) :=
 lemma graph_dom_isUTerm {t y} :
     c.Graph L param t y → IsUTerm L t := fun h ↦ Graph.case_iff.mp h |>.1
 
-lemma graph_bvar_iff {z} :
+lemma graph_bvar_iff {z y} :
     c.Graph L param ^#z y ↔ y = c.bvar param z := by
   constructor
   · intro H
@@ -430,7 +433,7 @@ lemma graph_bvar_iff {z} :
     · simp [qqBvar, qqFunc] at h
   · rintro rfl; exact Graph.case_iff.mpr ⟨by simp, Or.inl ⟨z, by simp⟩⟩
 
-lemma graph_fvar_iff (x) :
+lemma graph_fvar_iff (x) {y} :
     c.Graph L param ^&x y ↔ y = c.fvar param x := by
   constructor
   · intro H
@@ -655,10 +658,10 @@ variable {L}
     termBV L (^func k f v) = listMax (termBVVec L k v) := by
   simp [termBV, construction, hkf, hv]; rfl
 
-@[simp] lemma len_termBVVec {v : V} (hv : IsUTermVec L k v) :
+@[simp] lemma len_termBVVec {k v : V} (hv : IsUTermVec L k v) :
     len (termBVVec L k v) = k := construction.resultVec_lh L _ hv
 
-@[simp] lemma nth_termBVVec {v : V} (hv : IsUTermVec L k v) {i} (hi : i < k) :
+@[simp] lemma nth_termBVVec {k v : V} (hv : IsUTermVec L k v) {i} (hi : i < k) :
     (termBVVec L k v).[i] = termBV L v.[i] := construction.nth_resultVec L _ hv hi
 
 @[simp] lemma termBVVec_nil : termBVVec L 0 0 = 0 := construction.resultVec_nil L _
@@ -673,14 +676,14 @@ instance termBV.defined : 𝚺₁-Function₁ (termBV (V := V) L) via (termBVGra
 
 instance termBV.definable : 𝚺₁-Function₁ (termBV (V := V) L) := termBV.defined.to_definable
 
-instance termBV.definable' : Γ-[k + 1]-Function₁ (termBV (V := V) L) := termBV.definable.of_sigmaOne
+instance termBV.definable' (Γ k) : Γ-[k + 1]-Function₁ (termBV (V := V) L) := termBV.definable.of_sigmaOne
 
 instance termBVVec.defined : 𝚺₁-Function₂ (termBVVec (V := V) L) via (termBVVecGraph L) :=
   construction.resultVec_defined
 
 instance termBVVec.definable : 𝚺₁-Function₂ (termBVVec (V := V) L) := termBVVec.defined.to_definable
 
-instance termBVVec.definable' : Γ-[i + 1]-Function₂ (termBVVec (V := V) L) := termBVVec.definable.of_sigmaOne
+instance termBVVec.definable' (Γ i) : Γ-[i + 1]-Function₂ (termBVVec (V := V) L) := termBVVec.definable.of_sigmaOne
 
 end
 
@@ -715,7 +718,8 @@ variable {L}
 lemma IsSemiterm.def {n} {t : V} : IsSemiterm L n t ↔ IsUTerm L t ∧ termBV L t ≤ n :=
   ⟨by rintro ⟨h, bv⟩; exact ⟨h, bv⟩, by rintro ⟨h, bv⟩; exact ⟨h, bv⟩⟩
 
-lemma IsSemitermVec.def {n} {v : V} : IsSemitermVec L k n v ↔ IsUTermVec L k v ∧ ∀ i < k, termBV (V := V) L v.[i] ≤ n :=
+lemma IsSemitermVec.def {k n} {v : V} :
+    IsSemitermVec L k n v ↔ IsUTermVec L k v ∧ ∀ i < k, termBV (V := V) L v.[i] ≤ n :=
   ⟨by rintro ⟨h, bv⟩; exact ⟨h, fun _ ↦ bv⟩, by rintro ⟨h, bv⟩; exact ⟨h, bv _⟩⟩
 
 @[simp] lemma IsSemitermVec.isUTerm {k n v : V} (h : IsSemitermVec L k n v) : IsUTermVec L k v := h.1
@@ -760,12 +764,12 @@ lemma IsSemitermVec.iff {k n v : V} : IsSemitermVec L k n v ↔ (len v = k ∧ �
 
 @[simp] lemma IsSemitermVec.empty (n : V) : IsSemitermVec L 0 n 0 := ⟨by simp, by simp⟩
 
-@[simp] lemma IsSemitermVec.empty_iff {n : V} : IsSemitermVec L 0 n v ↔ v = 0 := by
+@[simp] lemma IsSemitermVec.empty_iff {n v : V} : IsSemitermVec L 0 n v ↔ v = 0 := by
   constructor
   · intro h; exact len_zero_iff_eq_nil.mp h.lh
   · rintro rfl; simp
 
-@[simp] lemma IsSemitermVec.cons_iff {n w t : V} :
+@[simp] lemma IsSemitermVec.cons_iff {k n w t : V} :
     IsSemitermVec L (k + 1) n (t ∷ w) ↔ IsSemiterm L n t ∧ IsSemitermVec L k n w := by
   constructor
   · intro h
@@ -833,7 +837,7 @@ lemma IsSemiterm.case_iff {n t : V} :
 
 alias ⟨IsSemiterm.case, IsSemiterm.mk'⟩ := IsSemiterm.case_iff
 
-lemma IsSemiterm.induction (Γ) {P : V → Prop} (hP : Γ-[1]-Predicate P)
+lemma IsSemiterm.induction (Γ) {n : V} {P : V → Prop} (hP : Γ-[1]-Predicate P)
     (hbvar : ∀ z < n, P (^#z)) (hfvar : ∀ x, P (^&x))
     (hfunc : ∀ k f v, L.IsFunc k f → IsSemitermVec L k n v → (∀ i < k, P v.[i]) → P (^func k f v)) :
     ∀ t, IsSemiterm L n t → P t := by
@@ -847,7 +851,7 @@ lemma IsSemiterm.induction (Γ) {P : V → Prop} (hP : Γ-[1]-Predicate P)
     have hv : IsSemitermVec L k n v := by simp_all
     exact hfunc k f v hf hv (fun i hi ↦ ih i hi (hv.nth hi))
 
-@[simp] lemma IsSemitermVec.nil (k : V): IsSemitermVec L 0 k 0 := ⟨by simp, by simp⟩
+@[simp] lemma IsSemitermVec.nil (k : V) : IsSemitermVec L 0 k 0 := ⟨by simp, by simp⟩
 
 @[simp] lemma IsSemitermVec.adjoin {k n w t : V} (h : IsSemitermVec L n k w) (ht : IsSemiterm L k t) : IsSemitermVec L (n + 1) k (t ∷ w) :=
   ⟨h.isUTerm.adjoin ht.isUTerm, by
@@ -856,7 +860,7 @@ lemma IsSemiterm.induction (Γ) {P : V → Prop} (hP : Γ-[1]-Predicate P)
     · simp [ht.bv]
     · simp [h.bv (by simpa using hi)]⟩
 
-lemma IsSemiterm.sigma1_induction {P : V → Prop} (hP : 𝚺₁-Predicate P)
+lemma IsSemiterm.sigma1_induction {n : V} {P : V → Prop} (hP : 𝚺₁-Predicate P)
     (hbvar : ∀ z < n, P (^#z)) (hfvar : ∀ x, P (^&x))
     (hfunc : ∀ k f v, L.IsFunc k f → IsSemitermVec L k n v → (∀ i < k, P v.[i]) → P (^func k f v)) :
     ∀ t, IsSemiterm L n t → P t := IsSemiterm.induction _ hP hbvar hfvar hfunc

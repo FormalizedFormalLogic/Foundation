@@ -68,37 +68,52 @@ def _root_.FFL.FirstOrder.Arithmetic.qqAllDef : 𝚺₀.Semisentence 2 :=
 def _root_.FFL.FirstOrder.Arithmetic.qqExsDef : 𝚺₀.Semisentence 2 :=
   .mkSigma “r p. ∃ r' < r, !pairDef r' 7 p ∧ r = r' + 1”
 
-instance qqRel_defined : 𝚺₀-Function₃ (qqRel : V → V → V → V) via qqRelDef := .mk fun v ↦ by simp_all [qqRelDef, qqRel]
+instance qqRel_defined : 𝚺₀-Function₃ (qqRel : V → V → V → V) via qqRelDef :=
+  .mk fun v ↦ by simp_all [qqRelDef, qqRel]
 
-instance qqNRel_defined : 𝚺₀-Function₃ (qqNRel : V → V → V → V) via qqNRelDef := .mk fun v ↦ by simp_all [qqNRelDef, qqNRel]
+instance qqNRel_defined : 𝚺₀-Function₃ (qqNRel : V → V → V → V) via qqNRelDef :=
+  .mk fun v ↦ by simp_all [qqNRelDef, qqNRel]
 
-instance qqVerum_defined : 𝚺₀-Function₀ (qqVerum : V) via qqVerumDef := .mk fun v ↦ by simp_all [qqVerumDef, qqVerum]
+instance qqVerum_defined : 𝚺₀-Function₀ (qqVerum : V) via qqVerumDef :=
+  .mk fun v ↦ by simp_all [qqVerumDef, qqVerum]
 
-instance qqFalsum_defined : 𝚺₀-Function₀ (qqFalsum : V) via qqFalsumDef := .mk fun v ↦ by simp_all [qqFalsumDef, qqFalsum]
+instance qqFalsum_defined : 𝚺₀-Function₀ (qqFalsum : V) via qqFalsumDef :=
+  .mk fun v ↦ by simp_all [qqFalsumDef, qqFalsum]
 
-instance qqAnd_defined : 𝚺₀-Function₂ (qqAnd : V → V → V) via qqAndDef := .mk fun v ↦ by simp_all [qqAndDef, qqAnd]
+instance qqAnd_defined : 𝚺₀-Function₂ (qqAnd : V → V → V) via qqAndDef :=
+  .mk fun v ↦ by simp_all [qqAndDef, qqAnd]
 
-instance qqOr_defined : 𝚺₀-Function₂ (qqOr : V → V → V) via qqOrDef := .mk fun v ↦ by simp_all [qqOrDef, numeral_eq_natCast, qqOr]
+instance qqOr_defined : 𝚺₀-Function₂ (qqOr : V → V → V) via qqOrDef :=
+  .mk fun v ↦ by simp_all [qqOrDef, numeral_eq_natCast, qqOr]
 
-instance qqForall_defined : 𝚺₀-Function₁ (qqAll : V → V) via qqAllDef := .mk fun v ↦ by simp_all [qqAllDef, numeral_eq_natCast, qqAll]
+instance qqForall_defined : 𝚺₀-Function₁ (qqAll : V → V) via qqAllDef :=
+  .mk fun v ↦ by simp_all [qqAllDef, numeral_eq_natCast, qqAll]
 
-instance qqExsists_defined : 𝚺₀-Function₁ (qqExs : V → V) via qqExsDef := .mk fun v ↦ by simp_all [qqExsDef, numeral_eq_natCast, qqExs]
+instance qqExsists_defined : 𝚺₀-Function₁ (qqExs : V → V) via qqExsDef :=
+  .mk fun v ↦ by simp_all [qqExsDef, numeral_eq_natCast, qqExs]
 
-instance (ℌ : HierarchySymbol) : ℌ-Function₃ (qqRel : V → V → V → V) := .of_zero qqRel_defined.to_definable
+instance (ℌ : HierarchySymbol) : ℌ-Function₃ (qqRel : V → V → V → V) :=
+  .of_zero qqRel_defined.to_definable
 
-instance (ℌ : HierarchySymbol) : ℌ-Function₃ (qqNRel : V → V → V → V) := .of_zero qqNRel_defined.to_definable
+instance (ℌ : HierarchySymbol) : ℌ-Function₃ (qqNRel : V → V → V → V) :=
+  .of_zero qqNRel_defined.to_definable
 
 -- instance (ℌ : HierarchySymbol) : ℌ-Function₀ (qqVerum : V) := .of_zero qqVerum_defined.to_definable
 
--- instance (ℌ : HierarchySymbol) : ℌ-Function₁ (qqFalsum : V → V) := .of_zero qqFalsum_defined.to_definable
+-- instance (ℌ : HierarchySymbol) : ℌ-Function₁ (qqFalsum : V → V) :=
+--   .of_zero qqFalsum_defined.to_definable
 
-instance (ℌ : HierarchySymbol) : ℌ-Function₂ (qqAnd : V → V → V) := .of_zero qqAnd_defined.to_definable
+instance (ℌ : HierarchySymbol) : ℌ-Function₂ (qqAnd : V → V → V) :=
+  .of_zero qqAnd_defined.to_definable
 
-instance (ℌ : HierarchySymbol) : ℌ-Function₂ (qqOr : V → V → V) := .of_zero qqOr_defined.to_definable
+instance (ℌ : HierarchySymbol) : ℌ-Function₂ (qqOr : V → V → V) :=
+  .of_zero qqOr_defined.to_definable
 
-instance (ℌ : HierarchySymbol) : ℌ-Function₁ (qqAll : V → V) := .of_zero qqForall_defined.to_definable
+instance (ℌ : HierarchySymbol) : ℌ-Function₁ (qqAll : V → V) :=
+  .of_zero qqForall_defined.to_definable
 
-instance (ℌ : HierarchySymbol) : ℌ-Function₁ (qqExs : V → V) := .of_zero qqExsists_defined.to_definable
+instance (ℌ : HierarchySymbol) : ℌ-Function₁ (qqExs : V → V) :=
+  .of_zero qqExsists_defined.to_definable
 
 end
 
@@ -106,23 +121,30 @@ end
     ^rel k₁ r₁ v₁ = ^rel k₂ r₂ v₂ ↔ k₁ = k₂ ∧ r₁ = r₂ ∧ v₁ = v₂ := by simp [qqRel]
 @[simp] lemma qqNRel_inj (k₁ r₁ v₁ k₂ r₂ v₂ : V) :
     ^nrel k₁ r₁ v₁ = ^nrel k₂ r₂ v₂ ↔ k₁ = k₂ ∧ r₁ = r₂ ∧ v₁ = v₂ := by simp [qqNRel]
-@[simp] lemma qqAnd_inj (p₁ q₁ p₂ q₂ : V) : p₁ ^⋏ q₁ = p₂ ^⋏ q₂ ↔ p₁ = p₂ ∧ q₁ = q₂ := by simp [qqAnd]
-@[simp] lemma qqOr_inj (p₁ q₁ p₂ q₂ : V) : p₁ ^⋎ q₁ = p₂ ^⋎ q₂ ↔ p₁ = p₂ ∧ q₁ = q₂ := by simp [qqOr]
+@[simp] lemma qqAnd_inj (p₁ q₁ p₂ q₂ : V) :
+    p₁ ^⋏ q₁ = p₂ ^⋏ q₂ ↔ p₁ = p₂ ∧ q₁ = q₂ := by simp [qqAnd]
+@[simp] lemma qqOr_inj (p₁ q₁ p₂ q₂ : V) :
+    p₁ ^⋎ q₁ = p₂ ^⋎ q₂ ↔ p₁ = p₂ ∧ q₁ = q₂ := by simp [qqOr]
 @[simp] lemma qqAll_inj (p₁ p₂ : V) : ^∀ p₁ = ^∀ p₂ ↔ p₁ = p₂ := by simp [qqAll]
 @[simp] lemma qqExs_inj (p₁ p₂ : V) : ^∃ p₁ = ^∃ p₂ ↔ p₁ = p₂ := by simp [qqExs]
 
 @[simp] lemma arity_lt_rel (k r v : V) : k < ^rel k r v :=
   le_iff_lt_succ.mp <| le_trans (le_pair_left k ⟪r, v⟫) <| le_pair_right _ _
 @[simp] lemma r_lt_rel (k r v : V) : r < ^rel k r v :=
-  le_iff_lt_succ.mp <| le_trans (le_trans (le_pair_left _ _) <| le_pair_right _ _) <| le_pair_right _ _
+  le_iff_lt_succ.mp <| le_trans (le_trans (le_pair_left _ _) <| le_pair_right _ _) <|
+    le_pair_right _ _
 @[simp] lemma v_lt_rel (k r v : V) : v < ^rel k r v :=
-  le_iff_lt_succ.mp <| le_trans (le_trans (le_pair_right _ _) <| le_pair_right _ _) <| le_pair_right _ _
+  le_iff_lt_succ.mp <| le_trans (le_trans (le_pair_right _ _) <| le_pair_right _ _) <|
+    le_pair_right _ _
 
-@[simp] lemma arity_lt_nrel (k r v : V) : k < ^nrel k r v := le_iff_lt_succ.mp <| le_trans (le_pair_left _ _) <| le_pair_right _ _
+@[simp] lemma arity_lt_nrel (k r v : V) : k < ^nrel k r v :=
+  le_iff_lt_succ.mp <| le_trans (le_pair_left _ _) <| le_pair_right _ _
 @[simp] lemma r_lt_nrel (k r v : V) : r < ^nrel k r v :=
-  le_iff_lt_succ.mp <| le_trans (le_trans (le_pair_left _ _) <| le_pair_right _ _) <| le_pair_right _ _
+  le_iff_lt_succ.mp <| le_trans (le_trans (le_pair_left _ _) <| le_pair_right _ _) <|
+    le_pair_right _ _
 @[simp] lemma v_lt_nrel (k r v : V) : v < ^nrel k r v :=
-  le_iff_lt_succ.mp <| le_trans (le_trans (le_pair_right _ _) <| le_pair_right _ _) <| le_pair_right _ _
+  le_iff_lt_succ.mp <| le_trans (le_trans (le_pair_right _ _) <| le_pair_right _ _) <|
+    le_pair_right _ _
 
 lemma nth_lt_qqRel_of_lt {i k r v : V} (hi : i < len v) : v.[i] < ^rel k r v :=
   lt_trans (nth_lt_self hi) (v_lt_rel _ _ _)
@@ -130,11 +152,15 @@ lemma nth_lt_qqRel_of_lt {i k r v : V} (hi : i < len v) : v.[i] < ^rel k r v :=
 lemma nth_lt_qqNRel_of_lt {i k r v : V} (hi : i < len v) : v.[i] < ^nrel k r v :=
   lt_trans (nth_lt_self hi) (v_lt_nrel _ _ _)
 
-@[simp] lemma lt_K!_left (p q : V) : p < p ^⋏ q := le_iff_lt_succ.mp <| le_trans (le_pair_left _ _) <| le_pair_right _ _
-@[simp] lemma lt_K!_right (p q : V) : q < p ^⋏ q := le_iff_lt_succ.mp <| le_trans (le_pair_right _ _) <| le_pair_right _ _
+@[simp] lemma lt_K!_left (p q : V) : p < p ^⋏ q :=
+  le_iff_lt_succ.mp <| le_trans (le_pair_left _ _) <| le_pair_right _ _
+@[simp] lemma lt_K!_right (p q : V) : q < p ^⋏ q :=
+  le_iff_lt_succ.mp <| le_trans (le_pair_right _ _) <| le_pair_right _ _
 
-@[simp] lemma lt_or_left (p q : V) : p < p ^⋎ q := le_iff_lt_succ.mp <| le_trans (le_pair_left _ _) <| le_pair_right _ _
-@[simp] lemma lt_or_right (p q : V) : q < p ^⋎ q := le_iff_lt_succ.mp <| le_trans (le_pair_right _ _) <| le_pair_right _ _
+@[simp] lemma lt_or_left (p q : V) : p < p ^⋎ q :=
+  le_iff_lt_succ.mp <| le_trans (le_pair_left _ _) <| le_pair_right _ _
+@[simp] lemma lt_or_right (p q : V) : q < p ^⋎ q :=
+  le_iff_lt_succ.mp <| le_trans (le_pair_right _ _) <| le_pair_right _ _
 
 @[simp] lemma lt_forall (p : V) : p < ^∀ p := le_iff_lt_succ.mp <| le_pair_right _ _
 
@@ -277,11 +303,13 @@ open FormalizedFormula
 
 section
 
-instance defined : 𝚫₁-Predicate IsUFormula (V := V) L via isUFormula L := (construction L).fixpoint_definedΔ₁
+instance defined : 𝚫₁-Predicate IsUFormula (V := V) L via isUFormula L :=
+  (construction L).fixpoint_definedΔ₁
 
 instance definable : 𝚫₁-Predicate IsUFormula (V := V) L := IsUFormula.defined.to_definable
 
-instance definable' : Γ-[m + 1]-Predicate IsUFormula (V := V) L := IsUFormula.definable.of_deltaOne
+instance definable' (Γ m) : Γ-[m + 1]-Predicate IsUFormula (V := V) L :=
+  IsUFormula.definable.of_deltaOne
 
 end
 
@@ -380,7 +408,8 @@ lemma pos {p : V} (h : IsUFormula L p) : 0 < p := by
 
 @[simp] lemma not_zero : ¬IsUFormula L (0 : V) := by intro h; simpa using h.pos
 
--- @[simp] lemma IsSemiformula.not_zero (m : V) : ¬Semiformula L m (0 : V) := by intro h; simpa using h.pos
+-- @[simp] lemma IsSemiformula.not_zero (m : V) : ¬Semiformula L m (0 : V) := by
+--   intro h; simpa using h.pos
 
 /-
 @[simp] lemma IsSemiformula.rel {k r v : V} :
@@ -393,8 +422,10 @@ lemma pos {p : V} (h : IsUFormula L p) : 0 < p := by
     Semiformula L n (p ^⋏ q) ↔ Semiformula L n p ∧ Semiformula L n q := by simp [IsSemiformula]
 @[simp] lemma IsSemiformula.or {n p q : V} :
     Semiformula L n (p ^⋎ q) ↔ Semiformula L n p ∧ Semiformula L n q := by simp [IsSemiformula]
-@[simp] lemma IsSemiformula.all {n p : V} : Semiformula L n (^∀ p) ↔ Semiformula L (n + 1) p := by simp [IsSemiformula]
-@[simp] lemma IsSemiformula.exs {n p : V} : Semiformula L n (^∃ p) ↔ Semiformula L (n + 1) p := by simp [IsSemiformula]
+@[simp] lemma IsSemiformula.all {n p : V} :
+    Semiformula L n (^∀ p) ↔ Semiformula L (n + 1) p := by simp [IsSemiformula]
+@[simp] lemma IsSemiformula.exs {n p : V} :
+    Semiformula L n (^∃ p) ↔ Semiformula L (n + 1) p := by simp [IsSemiformula]
 -/
 
 lemma induction1 (Γ) {P : V → Prop} (hP : Γ-[1]-Predicate P)
@@ -466,10 +497,12 @@ lemma IsSemiformula.induction (Γ) {P : V → V → Prop} (hP : Γ-[1]-Relation 
   · rintro n _ _ rfl; simpa using hfalsum n
   · rintro n p q hp hq ihp ihq _ _ rfl
     simpa using hand n p q hp hq
-      (by simpa [hp.2] using ihp (fstIdx p) (by simp) rfl) (by simpa [hq.2] using ihq (fstIdx q) (by simp) rfl)
+      (by simpa [hp.2] using ihp (fstIdx p) (by simp) rfl)
+      (by simpa [hq.2] using ihq (fstIdx q) (by simp) rfl)
   · rintro n p q hp hq ihp ihq _ _ rfl
     simpa using hor n p q hp hq
-      (by simpa [hp.2] using ihp (fstIdx p) (by simp) rfl) (by simpa [hq.2] using ihq (fstIdx q) (by simp) rfl)
+      (by simpa [hp.2] using ihp (fstIdx p) (by simp) rfl)
+      (by simpa [hq.2] using ihq (fstIdx q) (by simp) rfl)
   · rintro n p hp ih _ _ rfl
     simpa using hall n p hp (by simpa [hp.2] using ih (fstIdx p) (by simp) rfl)
   · rintro n p hp ih _ _ rfl

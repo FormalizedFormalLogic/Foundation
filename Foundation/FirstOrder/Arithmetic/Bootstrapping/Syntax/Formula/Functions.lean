@@ -69,7 +69,7 @@ instance neg.defined : 𝚺₁-Function₁ neg (V := V) L via negGraph L  := .mk
 
 instance neg.definable : 𝚺₁-Function₁ neg (V := V) L := neg.defined.to_definable
 
-instance neg.definable' : Γ-[m + 1]-Function₁ neg (V := V) L := .of_sigmaOne neg.definable
+instance neg.definable' (Γ m) : Γ-[m + 1]-Function₁ neg (V := V) L := .of_sigmaOne neg.definable
 
 end
 
@@ -143,7 +143,7 @@ lemma IsUFormula.neg {p : V} : IsUFormula L p → IsUFormula L (neg L p) := by
     contradiction
   · exact IsUFormula.neg
 
-@[simp] lemma IsSemiformula.neg_iff {p : V} : IsSemiformula L n (neg L p) ↔ IsSemiformula L n p := by
+@[simp] lemma IsSemiformula.neg_iff {n p : V} : IsSemiformula L n (neg L p) ↔ IsSemiformula L n p := by
   constructor
   · intro h; by_contra hp
     have Hp : IsUFormula L p := by by_contra hp; simp [neg_not_uformula hp] at h
@@ -191,7 +191,7 @@ instance imp.defined : 𝚺₁-Function₂ imp (V := V) L via impGraph L := .mk 
 
 instance imp.definable : 𝚺₁-Function₂ imp (V := V) L := imp.defined.to_definable
 
-instance imp.definable' : Γ-[m + 1]-Function₂ imp (V := V) L := imp.definable.of_sigmaOne
+instance imp.definable' (Γ m) : Γ-[m + 1]-Function₂ imp (V := V) L := imp.definable.of_sigmaOne
 
 end
 
@@ -219,7 +219,7 @@ instance iff.defined : 𝚺₁-Function₂ iff (V := V) L via iffGraph L := .mk 
 
 instance iff.definable : 𝚺₁-Function₂ iff (V := V) L := iff.defined.to_definable
 
-instance iff_definable' : Γ-[m + 1]-Function₂ iff (V := V) L := iff.definable.of_sigmaOne
+instance iff_definable' (Γ m) : Γ-[m + 1]-Function₂ iff (V := V) L := iff.definable.of_sigmaOne
 
 end
 
@@ -286,7 +286,7 @@ instance shift.defined : 𝚺₁-Function₁[V] shift L via shiftGraph L := .mk 
 
 instance shift.definable : 𝚺₁-Function₁[V] shift L := shift.defined.to_definable
 
-instance shift.definable' : Γ-[m + 1]-Function₁[V] shift L := shift.definable.of_sigmaOne
+instance shift.definable' (Γ m) : Γ-[m + 1]-Function₁[V] shift L := shift.definable.of_sigmaOne
 
 end
 
@@ -445,7 +445,7 @@ instance subst.defined : 𝚺₁-Function₂[V] subst L via substsGraph L := (co
 
 instance subst.definable : 𝚺₁-Function₂[V] subst L := subst.defined.to_definable
 
-instance subst.definable' : Γ-[m + 1]-Function₂[V] subst L := subst.definable.of_sigmaOne
+instance subst.definable' (Γ m) : Γ-[m + 1]-Function₂[V] subst L := subst.definable.of_sigmaOne
 
 attribute [irreducible] substsGraph
 
@@ -777,7 +777,7 @@ instance substs1.defined : 𝚺₁-Function₂[V] substs1 L via substs1Graph L :
 
 instance substs1.definable : 𝚺₁-Function₂[V] substs1 L := substs1.defined.to_definable
 
-instance substs1.definable' : Γ-[m + 1]-Function₂[V] substs1 L := substs1.definable.of_sigmaOne
+instance substs1.definable' (Γ m) : Γ-[m + 1]-Function₂[V] substs1 L := substs1.definable.of_sigmaOne
 
 end
 
@@ -805,7 +805,7 @@ instance free.defined : 𝚺₁-Function₁[V] free L via freeGraph L := .mk fun
 
 instance free.definable : 𝚺₁-Function₁[V] free L := free.defined.to_definable
 
-instance free.definable' : Γ-[m + 1]-Function₁[V] free L := free.definable.of_sigmaOne
+instance free.definable' (Γ m) : Γ-[m + 1]-Function₁[V] free L := free.definable.of_sigmaOne
 
 end
 
@@ -886,7 +886,7 @@ instance formulaComplexity.defined : 𝚺₁-Function₁[V] formulaComplexity L 
 
 instance formulaComplexity.definable : 𝚺₁-Function₁[V] formulaComplexity L := formulaComplexity.defined.to_definable
 
-instance formulaComplexity.definable' : Γ-[m + 1]-Function₁[V] formulaComplexity L := .of_sigmaOne formulaComplexity.definable
+instance formulaComplexity.definable' (Γ m) : Γ-[m + 1]-Function₁[V] formulaComplexity L := .of_sigmaOne formulaComplexity.definable
 
 end
 
@@ -942,7 +942,7 @@ lemma formulaComplexity_not_uformula {x : V} (h : ¬IsUFormula L x) :
   · intro p hp ihp; simp [hp, ihp]
   · intro p hp ihp; simp [hp, ihp]
 
-lemma fomulaComplexity_substs {p : V} (hp : IsSemiformula L n p) :
+lemma fomulaComplexity_substs {n p : V} (hp : IsSemiformula L n p) {m w : V} :
     IsSemitermVec L n m w → formulaComplexity L (subst L w p) = formulaComplexity L p := by
   revert m w
   apply IsSemiformula.pi1_structural_induction ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ hp
@@ -976,7 +976,7 @@ lemma fomulaComplexity_substs {p : V} (hp : IsSemiformula L n p) :
      ihp (hw.qVec),
      formulaComplexity_ex hp.isUFormula]
 
-lemma fomulaComplexity_substs1 {p : V} (hp : IsSemiformula L 1 p) (ht : IsSemiterm L m t) :
+lemma fomulaComplexity_substs1 {p : V} (hp : IsSemiformula L 1 p) {m t : V} (ht : IsSemiterm L m t) :
     formulaComplexity L (substs1 L t p) = formulaComplexity L p := by
   unfold substs1
   rw [fomulaComplexity_substs hp (IsSemitermVec.singleton.mpr ht)]

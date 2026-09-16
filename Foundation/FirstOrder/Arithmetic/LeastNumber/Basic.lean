@@ -54,8 +54,8 @@ lemma least_number {P : V → Prop} (hP : Γ-[m].DefinablePred P) {x} (h : P x) 
     have : Inhabited V := Classical.inhabited_of_nonempty';
     use φ.val.enumerateFVar, (Rew.rewriteMap φ.val.idxOfFVar) ▹ φ.val;
     and_intros;
-    . simp;
-    . intro x;
+    · simp;
+    · intro x;
       simp [Semiformula.eval_rewriteMap, hp.df.iff]
   ) h
 
@@ -70,7 +70,7 @@ lemma succ_induction {P : V → Prop} (hP : Γ.alt-[m].DefinablePred P)
     simpa [SigmaPiDelta.alt_coe];
   ) ha;
   push Not at hmin;
-  obtain ⟨z, rfl⟩ := Arithmetic.exists_succ_of_ne_zero $
+  obtain ⟨z, rfl⟩ := Arithmetic.exists_succ_of_ne_zero <|
     show y ≠ 0 by
     rintro rfl;
     contradiction;
@@ -98,7 +98,7 @@ end LeastNumberOnHierarchy
 
 variable (n : ℕ)
 
-lemma models_LeastNumberOnHierarchy_of_ISigma (Γ : Polarity) (n : ℕ) [V↓[ℒₒᵣ] ⊧* 𝗜𝚺 n] :
+lemma models_LeastNumberOnHierarchy_of_ISigma (Γ : Polarity) (n : ℕ) [V↓[ℒₒᵣ] ⊧* 𝗜𝚺n] :
     V↓[ℒₒᵣ] ⊧* 𝗟 Γ n := by
   have : V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := models_of_subtheory ‹V↓[ℒₒᵣ] ⊧* 𝗜𝚺 n›;
   suffices V↓[ℒₒᵣ] ⊧* LeastNumberScheme (Hierarchy Γ n) by
@@ -112,16 +112,16 @@ lemma models_LeastNumberOnHierarchy_of_ISigma (Γ : Polarity) (n : ℕ) [V↓[�
   intro v ⟨x, hx⟩;
   exact InductionOnHierarchy.least_number Γ n (definablePred_of_hierarchy hφ v) hx;
 
-instance models_LSigma_of_ISigma [V↓[ℒₒᵣ] ⊧* 𝗜𝚺 n] : V↓[ℒₒᵣ] ⊧* 𝗟𝚺 n :=
+instance models_LSigma_of_ISigma [V↓[ℒₒᵣ] ⊧* 𝗜𝚺n] : V↓[ℒₒᵣ] ⊧* 𝗟𝚺 n :=
   models_LeastNumberOnHierarchy_of_ISigma 𝚺 n
 
-instance models_LPi_of_ISigma [V↓[ℒₒᵣ] ⊧* 𝗜𝚺 n] : V↓[ℒₒᵣ] ⊧* 𝗟𝚷 n :=
+instance models_LPi_of_ISigma [V↓[ℒₒᵣ] ⊧* 𝗜𝚺n] : V↓[ℒₒᵣ] ⊧* 𝗟𝚷 n :=
   models_LeastNumberOnHierarchy_of_ISigma 𝚷 n
 
-instance models_IPi_of_LSigma [V↓[ℒₒᵣ] ⊧* 𝗟𝚺 n] : V↓[ℒₒᵣ] ⊧* 𝗜𝚷 n :=
+instance models_IPi_of_LSigma [V↓[ℒₒᵣ] ⊧* 𝗟𝚺n] : V↓[ℒₒᵣ] ⊧* 𝗜𝚷 n :=
   LeastNumberOnHierarchy.models_alt 𝚺 n
 
-instance models_ISigma_of_LPi [V↓[ℒₒᵣ] ⊧* 𝗟𝚷 n] : V↓[ℒₒᵣ] ⊧* 𝗜𝚺 n :=
+instance models_ISigma_of_LPi [V↓[ℒₒᵣ] ⊧* 𝗟𝚷n] : V↓[ℒₒᵣ] ⊧* 𝗜𝚺 n :=
   LeastNumberOnHierarchy.models_alt 𝚷 n
 
 end models

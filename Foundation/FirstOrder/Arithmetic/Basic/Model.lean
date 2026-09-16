@@ -6,14 +6,15 @@ public import Foundation.FirstOrder.Arithmetic.Basic.Misc
 namespace FFL.FirstOrder.Arithmetic
 
 private lemma complete_aux (T : ArithmeticTheory) [𝗘𝗤 ℒₒᵣ ⪯ T] (φ : ArithmeticSentence)
-    (H : ∀ (M : Type w)
+    (H : ∀ (M : Type*)
            [ORingStructure M]
            [Tarski.Structure ℒₒᵣ M]
            [Tarski.Structure.ORing ℒₒᵣ M]
            [M↓[ℒₒᵣ] ⊧* T],
            M↓[ℒₒᵣ] ⊧ φ) :
     T ⊢ φ := Theory.Proof.complete <| consequence_iff_eq.mpr fun M _ _ _ hT ↦
-  letI : (Tarski.Structure.Model ℒₒᵣ M)↓[ℒₒᵣ] ⊧* T := Tarski.Structure.ElementaryEquiv.modelsTheory.mp hT
+  letI : (Tarski.Structure.Model ℒₒᵣ M)↓[ℒₒᵣ] ⊧* T :=
+    Tarski.Structure.ElementaryEquiv.modelsTheory.mp hT
   Tarski.Structure.ElementaryEquiv.models.mpr (H (Tarski.Structure.Model ℒₒᵣ M))
 
 open Language
@@ -54,8 +55,10 @@ instance : Tarski.Structure.LT ℒₒᵣ M := ⟨fun _ _ ↦ iff_of_eq rfl⟩
 instance : ORing ℒₒᵣ := ORing.mk
 
 lemma standardModel_unique' (s : Tarski.Structure ℒₒᵣ M)
-    (hZero : Tarski.Structure.Zero ℒₒᵣ M) (hOne : Tarski.Structure.One ℒₒᵣ M) (hAdd : Tarski.Structure.Add ℒₒᵣ M) (hMul : Tarski.Structure.Mul ℒₒᵣ M)
-    (hEq : Tarski.Structure.Eq ℒₒᵣ M) (hLT : Tarski.Structure.LT ℒₒᵣ M) : s = standardModel M := Tarski.Structure.ext
+    (hZero : Tarski.Structure.Zero ℒₒᵣ M) (hOne : Tarski.Structure.One ℒₒᵣ M)
+    (hAdd : Tarski.Structure.Add ℒₒᵣ M) (hMul : Tarski.Structure.Mul ℒₒᵣ M)
+    (hEq : Tarski.Structure.Eq ℒₒᵣ M) (hLT : Tarski.Structure.LT ℒₒᵣ M) : s = standardModel M :=
+  Tarski.Structure.ext
   (funext₃ fun k f _ ↦
     match k, f with
     | _, Language.Zero.zero => by simp [Matrix.empty_eq]
@@ -68,14 +71,16 @@ lemma standardModel_unique' (s : Tarski.Structure ℒₒᵣ M)
     | _, Language.LT.lt => by simp)
 
 lemma standardModel_unique (s : Tarski.Structure ℒₒᵣ M)
-    [hZero : Tarski.Structure.Zero ℒₒᵣ M] [hOne : Tarski.Structure.One ℒₒᵣ M] [hAdd : Tarski.Structure.Add ℒₒᵣ M] [hMul : Tarski.Structure.Mul ℒₒᵣ M]
+    [hZero : Tarski.Structure.Zero ℒₒᵣ M] [hOne : Tarski.Structure.One ℒₒᵣ M]
+    [hAdd : Tarski.Structure.Add ℒₒᵣ M] [hMul : Tarski.Structure.Mul ℒₒᵣ M]
     [hEq : Tarski.Structure.Eq ℒₒᵣ M] [hLT : Tarski.Structure.LT ℒₒᵣ M] : s = standardModel M :=
   standardModel_unique' M s hZero hOne hAdd hMul hEq hLT
 
 end semantics
 
 /-- provable_of_models -/
-lemma complete (T : ArithmeticTheory) [𝗘𝗤 ℒₒᵣ ⪯ T] (φ : ArithmeticSentence) (H : ∀ (M : Type*) [ORingStructure M] [M↓[ℒₒᵣ] ⊧* T], M↓[ℒₒᵣ] ⊧ φ) :
+lemma complete (T : ArithmeticTheory) [𝗘𝗤 ℒₒᵣ ⪯ T] (φ : ArithmeticSentence)
+    (H : ∀ (M : Type*) [ORingStructure M] [M↓[ℒₒᵣ] ⊧* T], M↓[ℒₒᵣ] ⊧ φ) :
     T ⊢ φ := complete_aux T φ fun M _ s _ _ ↦ by
   rcases standardModel_unique M s
   exact H M
@@ -118,9 +123,11 @@ namespace ArithmeticTheory
 
 variable (T : ArithmeticTheory) (F : ArithmeticSentence → Prop)
 
-instance [ℕ↓[ℒₒᵣ] ⊧* T] : T.SoundOn F := ⟨fun b _ ↦ consequence_iff.mp (Theory.Proof.sound b) ℕ inferInstance⟩
+instance [ℕ↓[ℒₒᵣ] ⊧* T] : T.SoundOn F :=
+  ⟨fun b _ ↦ consequence_iff.mp (Theory.Proof.sound b) ℕ inferInstance⟩
 
-lemma SoundOn.of_weakerThan (F : ArithmeticSentence → Prop) (T U : ArithmeticTheory) [U ⪯ T] [T.SoundOn F] :
+lemma SoundOn.of_weakerThan (F : ArithmeticSentence → Prop) (T U : ArithmeticTheory)
+    [U ⪯ T] [T.SoundOn F] :
     U.SoundOn F :=
   ⟨fun h ↦ SoundOn.sound (Entailment.WeakerThan.pbl (𝓢 := U) (𝓣 := T) h)⟩
 
