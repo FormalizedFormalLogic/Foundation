@@ -1,7 +1,8 @@
 module
 
+public import Foundation.FirstOrder.Syntax.Classical.Padding
 public import Foundation.FirstOrder.Arithmetic.Basic.Model
-public import Foundation.FirstOrder.Basic.BoundingHierarchy
+public import Foundation.FirstOrder.Syntax.Classical.BoundingHierarchy
 
 @[expose] public section
 

@@ -1,13 +1,13 @@
 module
 
-public import Foundation.FirstOrder.Order.Le
+public import Foundation.FirstOrder.Arithmetic.LE
 
 @[expose] public section
 /-! # Preperations for arithmetic
 
 - *NOTE*:
-  To avoid the duplicate definitions of `Structure ℒₒᵣ` for models,
-  we basically use `ORingStructure`, and generated `standardStructure` instead of `Structure ℒₒᵣ` itself.
+  To avoid the duplicate definitions of `Tarski.Structure ℒₒᵣ` for models,
+  we basically use `ORingStructure`, and generated `standardStructure` instead of `Tarski.Structure ℒₒᵣ` itself.
 -/
 
 namespace FFL
@@ -123,17 +123,17 @@ end Arithmetic
 
 /-! ### Semantics of arithmetic  -/
 
-class Structure.ORing (L : Language) [L.ORing] (M : Type w) [ORingStructure M] [Structure L M] extends
-  Structure.Zero L M, Structure.One L M, Structure.Add L M, Structure.Mul L M, Structure.Eq L M, Structure.LT L M
+class Tarski.Structure.ORing (L : Language) [L.ORing] (M : Type w) [ORingStructure M] [Tarski.Structure L M] extends
+  Tarski.Structure.Zero L M, Tarski.Structure.One L M, Tarski.Structure.Add L M, Tarski.Structure.Mul L M, Tarski.Structure.Eq L M, Tarski.Structure.LT L M
 
-attribute [instance] Structure.ORing.mk
+attribute [instance] Tarski.Structure.ORing.mk
 
-namespace Structure
+namespace Tarski.Structure
 
 open Semiterm Semiformula
 
 variable [Operator.Zero L] [Operator.One L] [Operator.Add L] {M : Type u} [ORingStructure M]
-  [Structure L M] [Structure.Zero L M] [Structure.One L M] [Structure.Add L M]
+  [Tarski.Structure L M] [Tarski.Structure.Zero L M] [Tarski.Structure.One L M] [Tarski.Structure.Add L M]
 
 @[simp] lemma numeral_eq_numeral : (z : ℕ) → (Semiterm.Operator.numeral L z).val ![] = (ORingStructure.numeral z : M)
   | 0     => by simp [ORingStructure.numeral, Semiterm.Operator.numeral_zero]
@@ -141,7 +141,7 @@ variable [Operator.Zero L] [Operator.One L] [Operator.Add L] {M : Type u} [ORing
   | z + 2 => by simp [ORingStructure.numeral, Semiterm.Operator.numeral_add_two,
                   Semiterm.Operator.val_comp, Matrix.fun_eq_vec_two, numeral_eq_numeral (z + 1)]
 
-end Structure
+end Tarski.Structure
 
 namespace Semiformula
 
@@ -151,7 +151,7 @@ def ballLTSucc (t : Semiterm L ξ n) (φ : Semiformula L ξ (n + 1)) : Semiformu
 
 def bexsLTSucc (t : Semiterm L ξ n) (φ : Semiformula L ξ (n + 1)) : Semiformula L ξ n := φ.bexsLT ‘!!t + 1’
 
-variable {M : Type*} {s : Structure L M} [LT M] [One M] [Add M] [Structure.LT L M] [Structure.One L M] [Structure.Add L M]
+variable {M : Type*} {s : Tarski.Structure L M} [LT M] [One M] [Add M] [Tarski.Structure.LT L M] [Tarski.Structure.One L M] [Tarski.Structure.Add L M]
 
 lemma eval_ballLTSucc {φ : Semiformula L ξ (n + 1)} {t : Semiterm L ξ n} {fv bv} :
     (φ.ballLTSucc t).Eval (M := M) fv bv ↔ ∀ x < t.val (M := M) fv bv + 1, φ.Eval (M := M) (x :> fv) bv := by

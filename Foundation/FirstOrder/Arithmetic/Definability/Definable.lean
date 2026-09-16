@@ -1,6 +1,7 @@
 module
 
 public import Foundation.FirstOrder.Arithmetic.Definability.Hierarchy
+public import Foundation.FirstOrder.Tarski.Definability
 
 @[expose] public section
 namespace FFL.FirstOrder.Arithmetic

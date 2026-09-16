@@ -122,7 +122,7 @@ def dMem (φ : Lit) (Δ : List Lit) : MetaM Bool :=
 def dSubsetList (Γ Δ : List Lit) : MetaM Bool := do
   match Γ with
   |     [] => return true
-  | φ :: Γ => return (←φ.dMem Γ) && (←dSubsetList Γ Δ)
+  | φ :: Γ => return (←φ.dMem Δ) && (←dSubsetList Γ Δ)
 
 end Lit
 
