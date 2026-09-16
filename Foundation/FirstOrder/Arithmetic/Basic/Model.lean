@@ -8,13 +8,13 @@ namespace FFL.FirstOrder.Arithmetic
 private lemma complete_aux (T : ArithmeticTheory) [𝗘𝗤 ℒₒᵣ ⪯ T] (φ : ArithmeticSentence)
     (H : ∀ (M : Type w)
            [ORingStructure M]
-           [Structure ℒₒᵣ M]
-           [Structure.ORing ℒₒᵣ M]
+           [Tarski.Structure ℒₒᵣ M]
+           [Tarski.Structure.ORing ℒₒᵣ M]
            [M↓[ℒₒᵣ] ⊧* T],
            M↓[ℒₒᵣ] ⊧ φ) :
     T ⊢ φ := Theory.Proof.complete <| consequence_iff_eq.mpr fun M _ _ _ hT ↦
-  letI : (Structure.Model ℒₒᵣ M)↓[ℒₒᵣ] ⊧* T := Structure.ElementaryEquiv.modelsTheory.mp hT
-  Structure.ElementaryEquiv.models.mpr (H (Structure.Model ℒₒᵣ M))
+  letI : (Tarski.Structure.Model ℒₒᵣ M)↓[ℒₒᵣ] ⊧* T := Tarski.Structure.ElementaryEquiv.modelsTheory.mp hT
+  Tarski.Structure.ElementaryEquiv.models.mpr (H (Tarski.Structure.Model ℒₒᵣ M))
 
 open Language
 
@@ -22,7 +22,7 @@ section semantics
 
 variable (M : Type*) [ORingStructure M]
 
-instance standardModel : Structure ℒₒᵣ M where
+instance standardModel : Tarski.Structure ℒₒᵣ M where
   func := fun _ f ↦
     match f with
     | ORing.Func.zero => fun _ ↦ 0
@@ -34,28 +34,28 @@ instance standardModel : Structure ℒₒᵣ M where
     | ORing.Rel.eq => fun v ↦ v 0 = v 1
     | ORing.Rel.lt => fun v ↦ v 0 < v 1
 
-instance : Structure.Eq ℒₒᵣ M where
+instance : Tarski.Structure.Eq ℒₒᵣ M where
   eq a b := by
     unfold standardModel
     simp [Semiformula.Operator.val, Semiformula.Operator.Eq.sentence_eq]
 
-instance : Structure.Zero ℒₒᵣ M := ⟨rfl⟩
+instance : Tarski.Structure.Zero ℒₒᵣ M := ⟨rfl⟩
 
-instance : Structure.One ℒₒᵣ M := ⟨rfl⟩
+instance : Tarski.Structure.One ℒₒᵣ M := ⟨rfl⟩
 
-instance : Structure.Add ℒₒᵣ M := ⟨fun _ _ ↦ rfl⟩
+instance : Tarski.Structure.Add ℒₒᵣ M := ⟨fun _ _ ↦ rfl⟩
 
-instance : Structure.Mul ℒₒᵣ M := ⟨fun _ _ ↦ rfl⟩
+instance : Tarski.Structure.Mul ℒₒᵣ M := ⟨fun _ _ ↦ rfl⟩
 
-instance : Structure.Eq ℒₒᵣ M := ⟨fun _ _ ↦ iff_of_eq rfl⟩
+instance : Tarski.Structure.Eq ℒₒᵣ M := ⟨fun _ _ ↦ iff_of_eq rfl⟩
 
-instance : Structure.LT ℒₒᵣ M := ⟨fun _ _ ↦ iff_of_eq rfl⟩
+instance : Tarski.Structure.LT ℒₒᵣ M := ⟨fun _ _ ↦ iff_of_eq rfl⟩
 
 instance : ORing ℒₒᵣ := ORing.mk
 
-lemma standardModel_unique' (s : Structure ℒₒᵣ M)
-    (hZero : Structure.Zero ℒₒᵣ M) (hOne : Structure.One ℒₒᵣ M) (hAdd : Structure.Add ℒₒᵣ M) (hMul : Structure.Mul ℒₒᵣ M)
-    (hEq : Structure.Eq ℒₒᵣ M) (hLT : Structure.LT ℒₒᵣ M) : s = standardModel M := Structure.ext
+lemma standardModel_unique' (s : Tarski.Structure ℒₒᵣ M)
+    (hZero : Tarski.Structure.Zero ℒₒᵣ M) (hOne : Tarski.Structure.One ℒₒᵣ M) (hAdd : Tarski.Structure.Add ℒₒᵣ M) (hMul : Tarski.Structure.Mul ℒₒᵣ M)
+    (hEq : Tarski.Structure.Eq ℒₒᵣ M) (hLT : Tarski.Structure.LT ℒₒᵣ M) : s = standardModel M := Tarski.Structure.ext
   (funext₃ fun k f _ ↦
     match k, f with
     | _, Language.Zero.zero => by simp [Matrix.empty_eq]
@@ -67,9 +67,9 @@ lemma standardModel_unique' (s : Structure ℒₒᵣ M)
     | _, Language.Eq.eq => by simp
     | _, Language.LT.lt => by simp)
 
-lemma standardModel_unique (s : Structure ℒₒᵣ M)
-    [hZero : Structure.Zero ℒₒᵣ M] [hOne : Structure.One ℒₒᵣ M] [hAdd : Structure.Add ℒₒᵣ M] [hMul : Structure.Mul ℒₒᵣ M]
-    [hEq : Structure.Eq ℒₒᵣ M] [hLT : Structure.LT ℒₒᵣ M] : s = standardModel M :=
+lemma standardModel_unique (s : Tarski.Structure ℒₒᵣ M)
+    [hZero : Tarski.Structure.Zero ℒₒᵣ M] [hOne : Tarski.Structure.One ℒₒᵣ M] [hAdd : Tarski.Structure.Add ℒₒᵣ M] [hMul : Tarski.Structure.Mul ℒₒᵣ M]
+    [hEq : Tarski.Structure.Eq ℒₒᵣ M] [hLT : Tarski.Structure.LT ℒₒᵣ M] : s = standardModel M :=
   standardModel_unique' M s hZero hOne hAdd hMul hEq hLT
 
 end semantics
