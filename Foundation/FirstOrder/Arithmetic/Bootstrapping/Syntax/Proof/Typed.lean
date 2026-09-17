@@ -17,6 +17,10 @@ variable {L : Language} [L.Encodable] [L.LORDefinable]
 
 namespace FirstOrder.Arithmetic.Bootstrapping
 
+set_option linter.style.longLine false
+set_option linter.style.whitespace false
+set_option linter.style.openClassical false
+
 section typed_theory
 
 abbrev tmem (φ : Formula V L) (T : Theory L) [T.Δ₁] : Prop := φ.val ∈ T.Δ₁Class
@@ -166,7 +170,9 @@ lemma tprovable_tquote_iff_provable_quote_sentence {T : Theory L} [T.Δ₁] {σ 
 
 def TDerivation.toTProof {φ} (d : T ⊢!ᵈᵉʳ insert φ ∅) : T ⊢! φ := d
 
-def TDerivation.of_eq (d : T ⊢!ᵈᵉʳ Γ) (e : Γ = Δ) : T ⊢!ᵈᵉʳ Δ := by rcases e; exact d
+def TDerivation.of_eq {Γ Δ : Sequent V L} (d : T ⊢!ᵈᵉʳ Γ) (e : Γ = Δ) : T ⊢!ᵈᵉʳ Δ := by
+  rcases e
+  exact d
 
 def TProof.toTDerivation {φ} (d : T ⊢! φ) : T ⊢!ᵈᵉʳ insert φ ∅ := d
 
@@ -538,7 +544,7 @@ open Bootstrapping.Arithmetic
 
 open _root_.FFL.FirstOrder.Entailment
 
-lemma substItrDisj_right {i z : V}
+lemma substItrDisj_right {m : ℕ} {i z : V}
     (w : TermVec V ℒₒᵣ m) (φ : Semiformula V ℒₒᵣ (m + 1)) (hi : i < z) :
     A ⊢ φ.subst (𝕹 i :> w) 🡒 φ.substItrDisj w z := Provable.toTProvable <| Derivable.toProvable <| by
   apply Derivable.or
@@ -559,12 +565,13 @@ lemma substItrDisj_right {i z : V}
     · simp
     · simp
 
-lemma substItrDisj_right_intro {ψ} {i z : V} {w : TermVec V ℒₒᵣ m} {φ : Semiformula V ℒₒᵣ (m + 1)}
+lemma substItrDisj_right_intro {m : ℕ} {ψ} {i z : V} {w : TermVec V ℒₒᵣ m}
+    {φ : Semiformula V ℒₒᵣ (m + 1)}
     (hi : i < z) (h : A ⊢ ψ 🡒 φ.subst (𝕹 i :> w)) :
      A ⊢ ψ 🡒 φ.substItrDisj w z :=
   Entailment.C_trans h (substItrDisj_right A w φ hi)
 
-lemma substItrConj_right_intro {ψ} {w : TermVec V ℒₒᵣ m} {φ : Semiformula V ℒₒᵣ (m + 1)} {z : V}
+lemma substItrConj_right_intro {m : ℕ} {ψ} {w : TermVec V ℒₒᵣ m} {φ : Semiformula V ℒₒᵣ (m + 1)} {z : V}
     (h : ∀ i < z, A ⊢ ψ 🡒 φ.subst (𝕹 i :> w)) :
     A ⊢ ψ 🡒 φ.substItrConj w z := Provable.toTProvable <| Derivable.toProvable <| by
   apply Derivable.or
@@ -581,7 +588,7 @@ lemma substItrConj_right_intro {ψ} {w : TermVec V ℒₒᵣ m} {φ : Semiformul
     exact TDerivation.orInv (proof_to_tDerivation this.get)
 
 open Classical in
-lemma substItrDisj_left_intro {ψ} {w : TermVec V ℒₒᵣ m} {φ : Semiformula V ℒₒᵣ (m + 1)} {z : V}
+lemma substItrDisj_left_intro {m : ℕ} {ψ} {w : TermVec V ℒₒᵣ m} {φ : Semiformula V ℒₒᵣ (m + 1)} {z : V}
     (h : ∀ i < z, A ⊢ φ.subst (𝕹 i :> w) 🡒 ψ) :
     A ⊢ φ.substItrDisj w z 🡒 ψ := by
   apply Entailment.C_of_CNN
@@ -594,3 +601,11 @@ lemma substItrDisj_left_intro {ψ} {w : TermVec V ℒₒᵣ m} {φ : Semiformula
 end TProof
 
 end typed_derivation
+
+end Bootstrapping
+
+end Arithmetic
+
+end FirstOrder
+
+end FFL

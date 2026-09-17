@@ -23,6 +23,7 @@ namespace Arithmetic
 -- declarations in this namespace (the option is scoped by `namespace`/`end` and
 -- reverts automatically at `end Bootstrapping.Arithmetic`).
 set_option linter.dupNamespace false
+set_option linter.unusedTactic false
 
 local prefix:max "#'" => Semiterm.bvar (V := V) (L := ℒₒᵣ)
 
@@ -536,3 +537,9 @@ lemma replace (φ : Semiformula V ℒₒᵣ 1) (u₁ u₂ : Term V ℒₒᵣ) :
 end replace
 
 end Bootstrapping.Arithmetic
+
+end Arithmetic
+
+end FirstOrder
+
+end FFL
