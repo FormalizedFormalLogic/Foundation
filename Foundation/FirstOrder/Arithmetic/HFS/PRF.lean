@@ -11,6 +11,9 @@ public import Foundation.FirstOrder.Arithmetic.HFS.Seq
 
 namespace FFL.FirstOrder.Arithmetic
 
+set_option linter.style.longLine false
+set_option linter.unusedSimpArgs false
+
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 
 namespace PR
@@ -19,7 +22,7 @@ structure Blueprint (k : ℕ) where
   zero : 𝚺₁.Semisentence (k + 1)
   succ : 𝚺₁.Semisentence (k + 3)
 
-def Blueprint.cseqDef (p : Blueprint k) : 𝚺₁.Semisentence (k + 1) := .mkSigma
+def Blueprint.cseqDef {k : ℕ} (p : Blueprint k) : 𝚺₁.Semisentence (k + 1) := .mkSigma
   “s.
     :Seq s
     ∧ (∃ z < s, !p.zero z ⋯ ∧ 0 ∼[s] z)
@@ -27,10 +30,10 @@ def Blueprint.cseqDef (p : Blueprint k) : 𝚺₁.Semisentence (k + 1) := .mkSig
         (∃ l <⁺ 2 * s, !lhDef l s ∧ i + 1 < l) →
         ∀ z < s, i ∼[s] z → ∃ u < s, !p.succ u z i ⋯ ∧ i + 1 ∼[s] u)”
 
-def Blueprint.resultDef (p : Blueprint k) : 𝚺₁.Semisentence (k + 2) := .mkSigma
+def Blueprint.resultDef {k : ℕ} (p : Blueprint k) : 𝚺₁.Semisentence (k + 2) := .mkSigma
   “z u. ∃ s, !p.cseqDef s ⋯ ∧ u ∼[s] z”
 
-def Blueprint.resultDeltaDef (p : Blueprint k) : 𝚫₁.Semisentence (k + 2) := p.resultDef.graphDelta
+def Blueprint.resultDeltaDef {k : ℕ} (p : Blueprint k) : 𝚫₁.Semisentence (k + 2) := p.resultDef.graphDelta
 
 variable (V)
 
