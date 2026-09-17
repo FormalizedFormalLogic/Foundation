@@ -28,12 +28,25 @@ private lemma models_collectionAxiom_of_exists_bound [V↓[ℒₒᵣ] ⊧* 𝗣�
       (∀ x < a, ∃ u, V ⊧/(u :> x :> e) (φ.toSemisentence ![#1, #0])) →
         ∃ w, ∀ x < a, ∃ u ≤ w, V ⊧/(u :> x :> e) (φ.toSemisentence ![#1, #0])) :
     V↓[ℒₒᵣ] ⊧ (.univCl (collectionAxiom φ) : ArithmeticSentence) := by
-  rw [models_collectionAxiom_iff];
+  suffices ∀ f : ℕ → V, ∀ a : V,
+      (∀ x < a, ∃ y, φ.Eval ![x, y] f) → ∃ b, ∀ x < a, ∃ y < b, φ.Eval ![x, y] f by
+    simpa [models_iff, Semiformula.eval_univCl, collectionAxiom, Semiformula.eval_ballLT,
+      Semiformula.eval_bexsLT, Semiformula.eval_substs] using this;
   intro f a h;
   obtain ⟨w, hw⟩ := H (fun i : Fin φ.fvSup ↦ f i) a
     fun x hx ↦ (h x hx).imp fun y hy ↦ (φ.eval_toSemisentence₂ x y f).mpr hy;
   exact ⟨w + 1, fun x hx ↦ (hw x hx).imp fun u hu ↦
     ⟨lt_succ_iff_le.mpr hu.1, (φ.eval_toSemisentence₂ x u f).mp hu.2⟩⟩;
+
+private lemma exists_bound_of_definable {Γ : Polarity}
+    (hcol : ∀ ψ : ArithmeticSemiformula ℕ 2, Hierarchy Γ s ψ → V↓[ℒₒᵣ] ⊧ .univCl (collectionAxiom ψ))
+    {R : V → V → Prop} (hR : Γ-[s].DefinableRel R) (a : V) (h : ∀ x < a, ∃ y, R x y) :
+    ∃ b, ∀ x < a, ∃ y < b, R x y := by
+  have : V↓[ℒₒᵣ] ⊧* CollectionScheme (Hierarchy Γ s) :=
+    Semantics.ModelsSet.setOf_iff.mpr (by rintro _ ⟨ψ, hψ, rfl⟩; exact hcol ψ hψ);
+  obtain ⟨e, ψ, hψ, hiff⟩ := exists_hierarchy_eval_iff hR;
+  exact CollectionScheme.collection (C := Hierarchy Γ s)
+    ⟨e, ψ, hψ, fun x y ↦ by simpa using hiff ![x, y]⟩ a h;
 
 section BroadHierarchy
 
@@ -47,11 +60,13 @@ lemma exists_bound_of_models_CollectionOnHierarchy_of_hierarchy [V↓[ℒₒᵣ]
     {θ : ArithmeticSemisentence (m + 2)} (hθ : Hierarchy Γ s θ) (e : Fin m → V) (a : V)
     (hex : ∀ x < a, ∃ u, V ⊧/(u :> x :> e) θ) :
     ∃ w, ∀ x < a, ∃ u ≤ w, V ⊧/(u :> x :> e) θ := by
+  have : V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := models_paMinus_of_models_CollectionOnHierarchy (Γ := Γ) (s := s);
   obtain ⟨θ', hθ'⟩ := Prenex.models_exists_prenex (Γ' := Γ) hθ;
-  obtain ⟨w, hw⟩ := exists_bound_of_models_CollectionOnHierarchy (Γ := Γ) (s := s)
-    (θ := θ'.val) Prenex.val_strictHierarchy e a
+  obtain ⟨w, hw⟩ := CollectionOnHierarchy.collection Γ s
+    (.of_strictHierarchy (θ := θ'.val) Prenex.val_strictHierarchy e) a
     fun x hx ↦ (hex x hx).imp fun u hu ↦ (hθ' V (u :> x :> e)).mp hu;
-  exact ⟨w, fun x hx ↦ (hw x hx).imp fun u hu ↦ ⟨hu.1, (hθ' V (u :> x :> e)).mpr hu.2⟩⟩;
+  exact ⟨w, fun x hx ↦ (hw x hx).imp fun u hu ↦
+    ⟨le_of_lt hu.1, (hθ' V (u :> x :> e)).mpr hu.2⟩⟩;
 
 /-- A model of `𝗕 Γ s` satisfies the collection axiom for every `Hierarchy Γ s` formula. -/
 lemma models_collectionAxiom_of_hierarchy [V↓[ℒₒᵣ] ⊧* 𝗕 Γ s] {φ : ArithmeticSemiformula ℕ 2}

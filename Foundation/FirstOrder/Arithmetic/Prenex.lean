@@ -356,8 +356,9 @@ private theorem models_ball :
       obtain ⟨y, -, hy⟩ := hw x hx;
       exact ⟨y, hy⟩;
     . intro h;
-      exact exists_bound_of_models_CollectionOnHierarchy (Γ := 𝚷) (s := s)
-        φ.sigmaInv.val_strictHierarchy e (u.valb e) h;
+      exact (CollectionOnHierarchy.collection 𝚷 s
+        (.of_strictHierarchy φ.sigmaInv.val_strictHierarchy e) (u.valb e) h).imp
+        fun b hb x hx ↦ (hb x hx).imp fun y hy ↦ ⟨le_of_lt hy.1, hy.2⟩;
   | 𝚷, s + 1, _, _, u, φ, e => by
     have ih : ∀ {m : ℕ} (u : ArithmeticSemiterm Empty m) (φ : Prenex 𝚺 (s + 1) Empty (m + 1))
         (e : Fin m → V), V ⊧/e (∃'[u] φ).val ↔ ∃ x < u.valb e, V ⊧/(x :> e) φ.val :=
