@@ -78,7 +78,7 @@ end CollectionOnHierarchy
 
 -- This is stated as a `lemma`, not an `instance`, since `Γ` and `s` do not occur in the
 -- conclusion `V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻`, so instance search cannot infer them.
-lemma models_paMinus_of_models_CollectionOnHierarchy {Γ : Polarity} {s : ℕ} [V↓[ℒₒᵣ] ⊧* 𝗕 Γ s] :
+lemma models_paMinus_of_models_CollectionOnHierarchy (Γ : Polarity) (s : ℕ) [V↓[ℒₒᵣ] ⊧* 𝗕 Γ s] :
     V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ :=
   models_of_subtheory (T := 𝗣𝗔⁻) (U := 𝗕 Γ s) inferInstance
 

@@ -90,7 +90,7 @@ private structure MonotoneWitness {k : ℕ} (Q : (Fin (k + 1) → V) → Prop) (
 private lemma exists_monotoneWitness [V↓[ℒₒᵣ] ⊧* 𝗕𝚷 s] {k : ℕ} {P : (Fin k → V) → Prop}
     (hP : 𝚺-[s + 1].Definable P) :
     ∃ Q : (Fin (k + 1) → V) → Prop, 𝚷-[s].Definable Q ∧ MonotoneWitness Q P := by
-  have : V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := models_paMinus_of_models_CollectionOnHierarchy (Γ := 𝚷) (s := s);
+  have : V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := models_paMinus_of_models_CollectionOnHierarchy 𝚷 s;
   apply hP.sigma_succ_induction
     (Motive := fun k P ↦ ∃ Q : (Fin (k + 1) → V) → Prop, 𝚷-[s].Definable Q ∧ MonotoneWitness Q P);
   . intro k P hP;
@@ -219,7 +219,7 @@ private lemma exists_monotoneWitness [V↓[ℒₒᵣ] ⊧* 𝗕𝚷 s] {k : ℕ}
 lemma BPi.collection_sigma_succ [V↓[ℒₒᵣ] ⊧* 𝗕𝚷 s] {R : V → V → Prop}
     (hR : 𝚺-[s + 1].DefinableRel R) (a : V) (h : ∀ x < a, ∃ y, R x y) :
     ∃ b, ∀ x < a, ∃ y < b, R x y := by
-  have : V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := models_paMinus_of_models_CollectionOnHierarchy (Γ := 𝚷) (s := s);
+  have : V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := models_paMinus_of_models_CollectionOnHierarchy 𝚷 s;
   obtain ⟨Q, hQ, hM⟩ := exists_monotoneWitness hR;
   have hS : 𝚷-[s].DefinableRel fun x v : V ↦ ∃ y < v, Q ![v, x, y] := by
     apply HierarchySymbol.Definable.of_iff
