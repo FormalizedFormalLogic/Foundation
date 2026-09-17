@@ -1,6 +1,7 @@
 module
 
 public import Foundation.FirstOrder.LK.Completeness.CounterModel
+public import Foundation.FirstOrder.Kripke.Classical
 public import Foundation.Vorspiel.ExistsUnique
 
 /-!
@@ -124,7 +125,7 @@ def translateRel {k} (R : K.Rel k) (v : Fin k → Semiterm K ξ n) : Semiformula
       (#((0 : Fin (n + 1)).addNat k) :> fun i ↦ #(i.addCast (n + 1))))
 
 /-- Internal description of `p ⊩ φ`, with the condition at bound variable zero. -/
-def translationᵢ {n} : Semisentenceᵢ K n → Semisentence L (n + 1)
+def translationᵢ {n} : Semiformulaᵢ K ξ n → Semiformula L ξ (n + 1)
   | .rel R v => 𝔣.translateRel R v
   | ⊥ => ⊥
   | φ ⋏ ψ => translationᵢ φ ⋏ translationᵢ ψ
@@ -132,6 +133,53 @@ def translationᵢ {n} : Semisentenceᵢ K n → Semisentence L (n + 1)
   | φ 🡒 ψ => “p. ∀ q ≤[𝔣] p, !(translationᵢ φ) q ⋯ → !(translationᵢ ψ) q ⋯”
   | ∀¹ φ => “p. ∀ q ≤[𝔣] p, ∀ x ∈[𝔣] q, !(translationᵢ φ) q x ⋯”
   | ∃¹ φ => “p. ∃ x ∈[𝔣] p, !(translationᵢ φ) p x ⋯”
+
+def translation {n} : Semiformula K ξ n → Semiformula L ξ (n + 1) := fun φ ↦ 𝔣.translationᵢ φᴺ
+
+def interpret (φ : Semiformula K ξ n) : Semiformula L ξ n := “∀ p, @𝔣.isCond p → !(𝔣.translation φ) p ⋯”
+
+variable [K.Relational]
+
+section semantics
+
+variable {M : Type*} [Tarski.Structure L M] [Nonempty M] [M↓[L] ⊧* T]
+
+def IsCond (x : M) : Prop := 𝔣.isCond.val ![x]
+
+variable (M)
+
+abbrev Condition := {x : M // 𝔣.IsCond x}
+
+variable {M}
+
+instance : Preorder (𝔣.Condition M) := sorry
+
+instance kripkeModel : Kripke.Model K (𝔣.Condition M) M where
+  Domain p x := 𝔣.domain.val ![↑p, x]
+  Rel p k R v := (𝔣.rel R).val (↑p :> v)
+  domain_nonempty := sorry
+  domain_antimonotone := sorry
+  rel_monotone := sorry
+
+variable {𝔣}
+
+variable {p : 𝔣.Condition M} {bv : Fin n → M} {fv : ξ → M}
+
+@[simp] lemma eval_translationᵢ_iff_kripke {φ : Semiformulaᵢ K ξ n} :
+    (𝔣.translationᵢ φ).Eval (↑p :> bv) fv ↔ Kripke.Model.Forces p bv fv φ := by sorry
+
+@[simp] lemma eval_translation_iff_kripke {φ : Semiformula K ξ n} :
+    (𝔣.translation φ).Eval (↑p :> bv) fv ↔ Kripke.Model.WeaklyForces p bv fv φ := eval_translationᵢ_iff_kripke
+
+@[simp] lemma models_translationᵢ {φ : Sentenceᵢ K} :
+    (𝔣.translationᵢ φ).Evalb ![(p : M)] ↔ p ⊩ φ := eval_translationᵢ_iff_kripke
+
+@[simp] lemma models_translation {φ : Sentence K} :
+    (𝔣.translation φ).Evalb ![(p : M)] ↔ p ⊩ᶜ φ := eval_translation_iff_kripke
+
+end semantics
+
+theorem soundness {V : Theory K} (H : ∀ ψ ∈ V, T ⊢ 𝔣.interpret ψ) : V ⊢ φ → T ⊢ 𝔣.interpret φ := by sorry
 
 end ForcingTranslation
 
