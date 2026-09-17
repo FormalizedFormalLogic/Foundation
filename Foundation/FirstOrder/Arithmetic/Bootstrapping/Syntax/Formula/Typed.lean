@@ -292,7 +292,8 @@ noncomputable def substItrDisj (w : SemitermVec V ℒₒᵣ m n) (φ : Semiformu
 @[simp] lemma substItrConj_zero (w : SemitermVec V ℒₒᵣ m n) (φ : Semiformula V ℒₒᵣ (m + 1)) :
     φ.substItrConj w 0 = ⊤ := by ext; simp
 
-@[simp] lemma substItrConj_succ (w : SemitermVec V ℒₒᵣ m n) (φ : Semiformula V ℒₒᵣ (m + 1)) (z : V) :
+@[simp] lemma substItrConj_succ (w : SemitermVec V ℒₒᵣ m n) (φ : Semiformula V ℒₒᵣ (m + 1))
+    (z : V) :
     φ.substItrConj w (z + 1) = φ.subst (typedNumeral z :> w) ⋏ φ.substItrConj w z := by
   ext; simp
 
@@ -303,7 +304,8 @@ noncomputable def substItrDisj (w : SemitermVec V ℒₒᵣ m n) (φ : Semiformu
 @[simp] lemma substItrDisj_zero (w : SemitermVec V ℒₒᵣ m n) (φ : Semiformula V ℒₒᵣ (m + 1)) :
     φ.substItrDisj w 0 = ⊥ := by ext; simp
 
-@[simp] lemma substItrDisj_succ (w : SemitermVec V ℒₒᵣ m n) (φ : Semiformula V ℒₒᵣ (m + 1)) (z : V) :
+@[simp] lemma substItrDisj_succ (w : SemitermVec V ℒₒᵣ m n) (φ : Semiformula V ℒₒᵣ (m + 1))
+    (z : V) :
     φ.substItrDisj w (z + 1) = φ.subst (typedNumeral z :> w) ⋎ φ.substItrDisj w z := by
   ext; simp
 
@@ -320,13 +322,15 @@ noncomputable def substItrDisj (w : SemitermVec V ℒₒᵣ m n) (φ : Semiformu
   ext; simp [substItrConj, substItrDisj, neg_disj_substItr φ.isSemiformula w.isSemitermVec]
 
 @[simp] lemma substItrConj_substs
-    (v : SemitermVec V ℒₒᵣ n k) (w : SemitermVec V ℒₒᵣ m n) (φ : Semiformula V ℒₒᵣ (m + 1)) (z : V) :
+    (v : SemitermVec V ℒₒᵣ n k) (w : SemitermVec V ℒₒᵣ m n)
+    (φ : Semiformula V ℒₒᵣ (m + 1)) (z : V) :
     (φ.substItrConj w z).subst v = φ.substItrConj ((Semiterm.subst v)⨟ w) z := by
   ext; simp only [substItrConj, val_substs, SemitermVec.val_substs]
   rw [substs_conj_substItr φ.isSemiformula w.isSemitermVec v.isSemitermVec]; rfl
 
 @[simp] lemma substItrDisj_substs
-    (v : SemitermVec V ℒₒᵣ n k) (w : SemitermVec V ℒₒᵣ m n) (φ : Semiformula V ℒₒᵣ (m + 1)) (z : V) :
+    (v : SemitermVec V ℒₒᵣ n k) (w : SemitermVec V ℒₒᵣ m n)
+    (φ : Semiformula V ℒₒᵣ (m + 1)) (z : V) :
     (φ.substItrDisj w z).subst v = φ.substItrDisj ((Semiterm.subst v)⨟ w) z := by
   ext; simp only [substItrDisj, val_substs, SemitermVec.val_substs]
   rw [substs_disj_substItr φ.isSemiformula w.isSemitermVec v.isSemitermVec]; rfl
@@ -409,7 +413,7 @@ noncomputable def Semiterm.lessThan (t u : Semiterm V ℒₒᵣ n) : Semiformula
   ⟨t.val ^< u.val, by simp [qqLT]⟩
 
 noncomputable def Semiterm.notLessThan (t u : Semiterm V ℒₒᵣ n) : Semiformula V ℒₒᵣ n :=
-  ⟨t.val ^≮ u.val, by simp [qqNLT]⟩
+  ⟨t.val ^≮ u.val, by simp [qqNLT]⟩
 
 scoped infix:46 " ≐ " => Semiterm.equals
 
@@ -419,10 +423,12 @@ scoped infix:46 " <' " => Semiterm.lessThan
 
 scoped infix:46 " ≮' " => Semiterm.notLessThan
 
-noncomputable def Semiformula.ball (t : Semiterm V ℒₒᵣ n) (φ : Semiformula V ℒₒᵣ (n + 1)) : Semiformula V ℒₒᵣ n :=
+noncomputable def Semiformula.ball (t : Semiterm V ℒₒᵣ n) (φ : Semiformula V ℒₒᵣ (n + 1)) :
+    Semiformula V ℒₒᵣ n :=
   ∀¹ ((Semiterm.bvar 0 ≮' t.bShift) ⋎ φ)
 
-noncomputable def Semiformula.bexs (t : Semiterm V ℒₒᵣ n) (φ : Semiformula V ℒₒᵣ (n + 1)) : Semiformula V ℒₒᵣ n :=
+noncomputable def Semiformula.bexs (t : Semiterm V ℒₒᵣ n) (φ : Semiformula V ℒₒᵣ (n + 1)) :
+    Semiformula V ℒₒᵣ n :=
   ∃¹ ((Semiterm.bvar 0 <' t.bShift) ⋏ φ)
 
 namespace Arithmetic
@@ -545,11 +551,13 @@ lemma neg_bexs (t : Semiterm V ℒₒᵣ n) (φ : Semiformula V ℒₒᵣ (n + 1
     (φ.bexs t).shift = φ.shift.bexs t.shift := by
   simp [Semiformula.bexs, Semiterm.bShift_shift_comm]
 
-@[simp] lemma substs_ball (w : SemitermVec V ℒₒᵣ n m) (t : Semiterm V ℒₒᵣ n) (φ : Semiformula V ℒₒᵣ (n + 1)) :
+@[simp] lemma substs_ball (w : SemitermVec V ℒₒᵣ n m) (t : Semiterm V ℒₒᵣ n)
+    (φ : Semiformula V ℒₒᵣ (n + 1)) :
     (φ.ball t).subst w = (φ.subst w.q).ball (t.subst w) := by
   simp [Semiformula.ball]
 
-@[simp] lemma substs_bexs (w : SemitermVec V ℒₒᵣ n m) (t : Semiterm V ℒₒᵣ n) (φ : Semiformula V ℒₒᵣ (n + 1)) :
+@[simp] lemma substs_bexs (w : SemitermVec V ℒₒᵣ n m) (t : Semiterm V ℒₒᵣ n)
+    (φ : Semiformula V ℒₒᵣ (n + 1)) :
     (φ.bexs t).subst w = (φ.subst w.q).bexs (t.subst w) := by
   simp [Semiformula.bexs]
 
