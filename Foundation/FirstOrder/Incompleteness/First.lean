@@ -52,11 +52,13 @@ theorem exists_true_but_unprovable_sentence_of_sigma1sound
 instance {T : ArithmeticTheory} [T.RE] [𝗥₀ ⪯ T] : 𝗥₀ ⪯ T.craig :=
   WeakerThan.trans (𝓣 := T) inferInstance (inferInstance : T ⪯ T.craig)
 
-instance {T : ArithmeticTheory} [T.RE] [T.SoundOnHierarchy 𝚺 1] : ArithmeticTheory.SoundOnHierarchy (T.craig) 𝚺 1 :=
+instance {T : ArithmeticTheory} [T.RE] [T.SoundOnHierarchy 𝚺 1] :
+    ArithmeticTheory.SoundOnHierarchy (T.craig) 𝚺 1 :=
   ArithmeticTheory.SoundOn.of_weakerThan _ T T.craig
 
 /-- Gödel's first incompleteness theorem for r.e. theories -/
-theorem incomplete_of_RE (T : ArithmeticTheory) [T.RE] [𝗥₀ ⪯ T] [T.SoundOnHierarchy 𝚺 1] : Incomplete T :=
+theorem incomplete_of_RE (T : ArithmeticTheory) [T.RE] [𝗥₀ ⪯ T] [T.SoundOnHierarchy 𝚺 1] :
+    Incomplete T :=
   (Equiv.incomplete_iff (inferInstance : T ≊ T.craig)).mpr (incomplete T.craig)
 
 theorem exists_true_but_unprovable_sentence_of_RE_of_sigma1sound
@@ -64,10 +66,11 @@ theorem exists_true_but_unprovable_sentence_of_RE_of_sigma1sound
     ∃ δ : ArithmeticSentence, ℕ↓[ℒₒᵣ] ⊧ δ ∧ T ⊬ δ :=
   exists_true_but_unprovable_sentence_of_incomplete (incomplete_of_RE T)
 
-instance {T : ArithmeticTheory} [ℕ↓[ℒₒᵣ] ⊧* T] [T.Δ₁] [𝗥₀ ⪯ T] [T.SoundOnHierarchy 𝚺 1] : T ⪱ 𝗧𝗔 := by
+instance {T : ArithmeticTheory} [ℕ↓[ℒₒᵣ] ⊧* T] [T.Δ₁] [𝗥₀ ⪯ T] [T.SoundOnHierarchy 𝚺 1] :
+    T ⪱ 𝗧𝗔 := by
   constructor;
-  . infer_instance
-  . obtain ⟨δ, δTrue, δUnprov⟩ := exists_true_but_unprovable_sentence_of_sigma1sound T;
+  · infer_instance
+  · obtain ⟨δ, δTrue, δUnprov⟩ := exists_true_but_unprovable_sentence_of_sigma1sound T;
     exact not_weakerThan_iff.mpr ⟨δ, TA.provable_iff.mpr δTrue, δUnprov⟩
 
 end FFL.FirstOrder.Arithmetic
