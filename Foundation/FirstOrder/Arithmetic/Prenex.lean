@@ -323,8 +323,8 @@ theorem models_ball :
   | _, 0, _, _, u, φ, e => by
     simp [ball_zero, Prenex.val, Semiformula.eval_ball];
   | 𝚺, s + 1, _, _, u, φ, e => by
-    have : V↓[ℒₒᵣ] ⊧* 𝗜𝚺 s := mod_ISigma_of_le (n₂ := s + 1) (by omega);
-    have : V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := mod_paMinus_of_ISigma (n := s + 1);
+    have : V↓[ℒₒᵣ] ⊧* 𝗜𝚺 s := mod_ISigma_of_le (s₂ := s + 1) (by omega);
+    have : V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := mod_paMinus_of_ISigma (s := s + 1);
     have iha : ∀ {m : ℕ} (u : ArithmeticSemiterm Empty m) (φ : Prenex 𝚷 s Empty (m + 1))
         (e : Fin m → V), V ⊧/e (∀'[u] φ).val ↔ ∀ x < u.valb e, V ⊧/(x :> e) φ.val :=
       fun u φ e => models_ball u φ e;
@@ -362,7 +362,7 @@ theorem models_bexs :
   | _, 0, _, _, u, φ, e => by
     simp [bexs_zero, Prenex.val, Semiformula.eval_bexs];
   | 𝚺, s + 1, n, _, u, φ, e => by
-    have : V↓[ℒₒᵣ] ⊧* 𝗜𝚺 s := mod_ISigma_of_le (n₂ := s + 1) (by omega);
+    have : V↓[ℒₒᵣ] ⊧* 𝗜𝚺 s := mod_ISigma_of_le (s₂ := s + 1) (by omega);
     have ih : ∀ {m : ℕ} (u : ArithmeticSemiterm Empty m) (φ : Prenex 𝚷 s Empty (m + 1))
         (e : Fin m → V), V ⊧/e (∃'[u] φ).val ↔ ∃ x < u.valb e, V ⊧/(x :> e) φ.val :=
       fun u φ e => models_bexs u φ e;
@@ -414,8 +414,8 @@ theorem models_and :
   | _, 0, _, _, φ, ψ, e => by
     simp [and_zero, Prenex.val];
   | 𝚺, s + 1, n, _, φ, ψ, e => by
-    have : V↓[ℒₒᵣ] ⊧* 𝗜𝚺 s := mod_ISigma_of_le (n₂ := s + 1) (by omega);
-    have : V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := mod_paMinus_of_ISigma (n := s);
+    have : V↓[ℒₒᵣ] ⊧* 𝗜𝚺 s := mod_ISigma_of_le (s₂ := s + 1) (by omega);
+    have : V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := mod_paMinus_of_ISigma (s := s);
     have iha : ∀ {m : ℕ} (φ ψ : Prenex 𝚷 s Empty m) (e : Fin m → V),
         V ⊧/e (φ ⋏ ψ).val ↔ V ⊧/e φ.val ∧ V ⊧/e ψ.val :=
       fun φ ψ e => models_and φ ψ e;
@@ -461,7 +461,7 @@ theorem models_or :
   | _, 0, _, _, φ, ψ, e => by
     simp [or_zero, Prenex.val];
   | 𝚺, s + 1, _, _, φ, ψ, e => by
-    have : V↓[ℒₒᵣ] ⊧* 𝗜𝚺 s := mod_ISigma_of_le (n₂ := s + 1) (by omega);
+    have : V↓[ℒₒᵣ] ⊧* 𝗜𝚺 s := mod_ISigma_of_le (s₂ := s + 1) (by omega);
     have ih : ∀ {m : ℕ} (φ ψ : Prenex 𝚷 s Empty m) (e : Fin m → V),
         V ⊧/e (φ ⋎ ψ).val ↔ V ⊧/e φ.val ∨ V ⊧/e ψ.val :=
       fun φ ψ e => models_or φ ψ e;
@@ -495,7 +495,7 @@ local prefix:64 "∀' " => Prenex.all
 lemma models_exs [V↓[ℒₒᵣ] ⊧* 𝗜𝚺 s]
     (φ : Prenex 𝚺 (s + 1) Empty (n + 1)) (e : Fin n → V) :
     V ⊧/e (∃' φ).val ↔ ∃ x, V ⊧/(x :> e) φ.val := by
-  have : V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := mod_paMinus_of_ISigma (n := s);
+  have : V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := mod_paMinus_of_ISigma (s := s);
   show V ⊧/e
       (∃'[‘#0 + 1’] (∃'[‘#1 + 1’]
         (φ.sigmaInv.rew (Rew.subst (#0 :> #1 :> (#·.succ.succ.succ)))))).sigma.val ↔
@@ -591,28 +591,28 @@ theorem models_exists_prenex {Γ : Polarity} {s n : ℕ} {φ : ArithmeticSemisen
     obtain ⟨φ', hφ'⟩ := ih;
     use ∃' φ';
     intro V _ _ e;
-    have : V↓[ℒₒᵣ] ⊧* 𝗜𝚺 s := mod_ISigma_of_le (n₂ := s + 1) (by omega);
+    have : V↓[ℒₒᵣ] ⊧* 𝗜𝚺 s := mod_ISigma_of_le (s₂ := s + 1) (by omega);
     rw [models_exs φ' e, Semiformula.eval_ex];
     exact exists_congr fun x => hφ' V (x :> e);
   | @all s n φ _ ih =>
     obtain ⟨φ', hφ'⟩ := ih;
     use ∀' φ';
     intro V _ _ e;
-    have : V↓[ℒₒᵣ] ⊧* 𝗜𝚺 s := mod_ISigma_of_le (n₂ := s + 1) (by omega);
+    have : V↓[ℒₒᵣ] ⊧* 𝗜𝚺 s := mod_ISigma_of_le (s₂ := s + 1) (by omega);
     rw [models_all φ' e, Semiformula.eval_all];
     exact forall_congr' fun x => hφ' V (x :> e);
   | @sigma s n φ _ ih =>
     obtain ⟨φ', hφ'⟩ := ih;
     use φ'.sigma;
     intro V _ _ e;
-    have : V↓[ℒₒᵣ] ⊧* 𝗜𝚺 s := mod_ISigma_of_le (n₂ := s + 1) (by omega);
+    have : V↓[ℒₒᵣ] ⊧* 𝗜𝚺 s := mod_ISigma_of_le (s₂ := s + 1) (by omega);
     rw [models_sigma φ' e, Semiformula.eval_ex];
     exact exists_congr fun x => hφ' V (x :> e);
   | @pi s n φ _ ih =>
     obtain ⟨φ', hφ'⟩ := ih;
     use φ'.pi;
     intro V _ _ e;
-    have : V↓[ℒₒᵣ] ⊧* 𝗜𝚺 s := mod_ISigma_of_le (n₂ := s + 1) (by omega);
+    have : V↓[ℒₒᵣ] ⊧* 𝗜𝚺 s := mod_ISigma_of_le (s₂ := s + 1) (by omega);
     rw [models_pi φ' e, Semiformula.eval_all];
     exact forall_congr' fun x => hφ' V (x :> e);
   | @dummy_sigma s n φ _ ih =>
