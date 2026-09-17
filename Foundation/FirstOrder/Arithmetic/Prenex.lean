@@ -689,19 +689,24 @@ theorem exists_strictHierarchy_of_hierarchy (h : Hierarchy Γ s φ) :
 
 end
 
-lemma StrictDefinableRel.of_definableRel {V : Type*} [ORingStructure V] {Γ Γ' : Polarity} {s : ℕ}
-    [V↓[ℒₒᵣ] ⊧* 𝗕 Γ' s] {R : V → V → Prop} (hR : Γ-[s].DefinableRel R) :
-    StrictDefinableRel Γ s R := by
-  obtain ⟨e, φ, hφ, hiff⟩ := exists_hierarchy_eval_iff hR;
-  obtain ⟨θ, hθ⟩ :=
-    Prenex.models_exists_prenex (Γ' := Γ') (φ := φ.toSemisentence ![#1, #0]) (hφ.rew _);
-  use φ.fvSup, θ.val, fun i ↦ e i;
-  and_intros;
-  . exact Prenex.val_strictHierarchy;
-  . intro x y;
-    rw [show R x y ↔ φ.Eval ![x, y] e from by simpa using hiff ![x, y],
-      ← φ.eval_toSemisentence₂ x y e];
-    exact hθ V _;
+-- The `NeZero k` hypothesis comes from `Semiformula.toSemisentence`, which is what turns the
+-- `ℕ`-indexed parameters of the defining formula into trailing bound variables of a sentence.
+lemma StrictDefinable.of_definable {V : Type*} [ORingStructure V] {Γ Γ' : Polarity} {s k : ℕ}
+    [NeZero k] [V↓[ℒₒᵣ] ⊧* 𝗕 Γ' s] {P : (Fin k → V) → Prop} (hP : Γ-[s].Definable P) :
+    StrictDefinable Γ s P := by
+  obtain ⟨e, φ, hφ, hiff⟩ := exists_hierarchy_eval_iff hP;
+  obtain ⟨θ, hθ⟩ := Prenex.models_exists_prenex (Γ' := Γ')
+    (φ := φ.toSemisentence fun i ↦ #(i.castLE (Nat.le_add_left k φ.fvSup))) (hφ.rew _);
+  constructor;
+  use Rew.embSubsts (fun j ↦ if h : (j : ℕ) < k then #⟨j, h⟩ else &(e (j - k))) ▹ θ.val;
+  constructor;
+  . exact Prenex.val_strictHierarchy.rew _;
+  . intro v;
+    simp only [Semiformula.eval_embSubsts];
+    rw [← hθ V _, Semiformula.eval_toSemisentence (w := v) (f := e)
+      (fun i ↦ #(i.castLE (Nat.le_add_left k φ.fvSup)))
+      (fun i ↦ by simp [i.isLt]) (fun y ↦ by simp)];
+    exact (hiff v).symm;
 
 end Arithmetic
 

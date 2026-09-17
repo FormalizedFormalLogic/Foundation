@@ -30,7 +30,7 @@ section BroadHierarchy
 lemma CollectionOnHierarchy.collection_of_definable {Γ : Polarity} [V↓[ℒₒᵣ] ⊧* 𝗕 Γ s]
     {R : V → V → Prop} (hR : Γ-[s].DefinableRel R) (a : V) (h : ∀ x < a, ∃ y, R x y) :
     ∃ b, ∀ x < a, ∃ y < b, R x y :=
-  CollectionOnHierarchy.collection Γ s (StrictDefinableRel.of_definableRel (Γ' := Γ) hR) a h
+  CollectionOnHierarchy.collection Γ s (StrictDefinable.of_definable (Γ' := Γ) hR) a h
 
 instance CollectionOnHierarchy.models_CollectionOnBroadHierarchy {Γ : Polarity}
     [V↓[ℒₒᵣ] ⊧* 𝗕 Γ s] : V↓[ℒₒᵣ] ⊧* 𝗕⁺ Γ s := by

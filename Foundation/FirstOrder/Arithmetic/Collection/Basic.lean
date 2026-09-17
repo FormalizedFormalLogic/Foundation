@@ -71,8 +71,10 @@ instance models_CollectionScheme : V↓[ℒₒᵣ] ⊧* CollectionScheme (Strict
 /-- In a model of `𝗕 Γ s`, collection holds for the relations defined by a `StrictHierarchy Γ s`
 formula. -/
 lemma collection {R : V → V → Prop} (hR : StrictDefinableRel Γ s R) (a : V)
-    (h : ∀ x < a, ∃ y, R x y) : ∃ b, ∀ x < a, ∃ y < b, R x y :=
-  CollectionScheme.collection (C := StrictHierarchy Γ s) hR.exists_eval_iff a h
+    (h : ∀ x < a, ∃ y, R x y) : ∃ b, ∀ x < a, ∃ y < b, R x y := by
+  obtain ⟨e, φ, hφ, hiff⟩ := hR.exists_eval_iff;
+  exact CollectionScheme.collection (C := StrictHierarchy Γ s)
+    ⟨e, φ, hφ, fun x y ↦ by simpa using hiff ![x, y]⟩ a h;
 
 end CollectionOnHierarchy
 
