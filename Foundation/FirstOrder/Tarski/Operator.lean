@@ -5,6 +5,9 @@ public import Foundation.FirstOrder.Syntax.Classical.Operator
 
 @[expose] public section
 
+set_option linter.style.longLine false
+set_option linter.unusedSimpArgs false
+
 namespace FFL
 
 namespace FirstOrder
