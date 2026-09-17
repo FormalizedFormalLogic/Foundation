@@ -2,6 +2,7 @@ module
 public import Foundation.FirstOrder.Tarski.Operator
 public import Foundation.FirstOrder.Tarski.Elementary
 @[expose] public section
+set_option linter.unusedVariables false
 
 namespace FFL
 

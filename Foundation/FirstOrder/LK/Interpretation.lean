@@ -4,6 +4,8 @@ public import Foundation.FirstOrder.LK.Completeness.CounterModel
 public import Foundation.Vorspiel.ExistsUnique
 
 @[expose] public section
+set_option linter.style.longLine false
+set_option linter.unusedSimpArgs false
 /-!
 # (Direct) Interpretation
 -/

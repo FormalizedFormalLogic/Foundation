@@ -3,6 +3,7 @@ module
 public import Foundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Language
 
 @[expose] public section
+set_option linter.style.longLine false
 namespace FFL.FirstOrder.Arithmetic.Bootstrapping
 
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]

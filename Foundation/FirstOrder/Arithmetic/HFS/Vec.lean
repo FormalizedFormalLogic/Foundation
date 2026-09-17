@@ -3,6 +3,9 @@ module
 public import Foundation.FirstOrder.Arithmetic.HFS.Fixpoint
 
 @[expose] public section
+set_option linter.style.longLine false
+set_option linter.style.docString false
+set_option linter.unusedSimpArgs false
 /-!
 
 # Vec

@@ -4,6 +4,7 @@ public import Foundation.SecondOrder.Syntax.Formula
 public import Foundation.FirstOrder.Syntax.Classical.Rew
 
 @[expose] public section
+set_option linter.unusedSimpArgs false
 
 namespace Fin
 

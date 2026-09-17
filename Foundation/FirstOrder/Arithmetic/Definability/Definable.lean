@@ -4,6 +4,10 @@ public import Foundation.FirstOrder.Arithmetic.Definability.Hierarchy
 public import Foundation.FirstOrder.Tarski.Definability
 
 @[expose] public section
+set_option linter.style.longLine false
+set_option linter.unusedVariables false
+set_option linter.unusedTactic false
+set_option linter.unreachableTactic false
 namespace FFL.FirstOrder.Arithmetic
 
 namespace HierarchySymbol

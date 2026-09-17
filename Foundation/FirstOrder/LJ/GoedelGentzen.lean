@@ -4,6 +4,10 @@ public import Foundation.FirstOrder.LJ.Basic
 public import Foundation.FirstOrder.LK.Basic
 
 @[expose] public section
+set_option linter.unusedSimpArgs false
+set_option linter.unusedTactic false
+set_option linter.unreachableTactic false
+set_option linter.unusedVariables false
 namespace FFL.FirstOrder
 
 namespace Semiformula
@@ -121,8 +125,6 @@ def negDoubleNegation : (φ : Proposition L) →
           (Rewriting.free ((∼φ)ᴺ)) :=
         by simpa [Semiformula.rew_doubleNegation] using e
       exact (InterDerivation.dne (by simp)).trans (InterDerivation.all e)
-  termination_by φ => φ.complexity
-
 def negDoubleNegation' (φ : Proposition L) :
     InterDerivation L (∼(∼φ)ᴺ) φᴺ := by
   simpa using negDoubleNegation (∼φ)

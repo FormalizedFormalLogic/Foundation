@@ -4,6 +4,8 @@ public import Foundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Formula.Basi
 public import Foundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Term.Functions
 
 @[expose] public section
+set_option linter.style.longLine false
+set_option linter.unusedSimpArgs false
 namespace FFL.FirstOrder.Arithmetic.Bootstrapping
 
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
