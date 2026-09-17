@@ -12,12 +12,15 @@ states that the sentence represents _formalized law of noncontradiction_ of `T`
 is not provable in `T` itself.
 
 ## References
-- [Jeroslow, R. G., *Redundancies in the Hilbert-Bernays Derivability Conditions for Gödel's Second Incompleteness Theorem*][Jer73]
+- [Jeroslow, R. G., *Redundancies in the Hilbert-Bernays Derivability Conditions for Gödel's
+  Second Incompleteness Theorem*][Jer73]
 -/
 
 @[expose] public section
 
 namespace FFL.FirstOrder
+
+set_option linter.style.docString false
 
 open _root_.FFL.FirstOrder.Entailment
 open Arithmetic Bootstrapping
@@ -65,9 +68,11 @@ noncomputable abbrev standardRefutability (T : ArithmeticTheory) [T.Δ₁] : Ref
   refu_def {σ} h := complete 𝗜𝚺₁ _ fun (V : Type) _ _ ↦ by
     simpa [models_iff, Refutable.quote_iff] using internalize_provability h (V := V)
 
-noncomputable abbrev jeroslow (T : ArithmeticTheory) [T.Δ₁] : ArithmeticSentence := fixedpoint T.refutable
+noncomputable abbrev jeroslow (T : ArithmeticTheory) [T.Δ₁] : ArithmeticSentence :=
+  fixedpoint T.refutable
 
-private noncomputable abbrev jeroslow' (T : ArithmeticTheory) [T.Δ₁] : ArithmeticSentence := (T.refutable)/[⌜T.jeroslow⌝]
+private noncomputable abbrev jeroslow' (T : ArithmeticTheory) [T.Δ₁] : ArithmeticSentence :=
+  (T.refutable)/[⌜T.jeroslow⌝]
 
 private lemma jeroslow'_sigmaOne : Hierarchy 𝚺 1 (T.jeroslow') := by definability;
 
@@ -75,9 +80,11 @@ lemma def_jeroslow [𝗜𝚺₁ ⪯ U] : U ⊢ T.jeroslow 🡘 (T.refutable)/[�
 
 private lemma def_jeroslow' [𝗜𝚺₁ ⪯ U] : U ⊢ T.jeroslow' 🡘 (T.refutable)/[⌜T.jeroslow⌝] := by simp;
 
-private lemma provable_E_jeroslow_jeroslow' [𝗜𝚺₁ ⪯ U] : U ⊢ T.jeroslow 🡘 T.jeroslow' := Entailment.E_trans def_jeroslow def_jeroslow'
+private lemma provable_E_jeroslow_jeroslow' [𝗜𝚺₁ ⪯ U] : U ⊢ T.jeroslow 🡘 T.jeroslow' :=
+  Entailment.E_trans def_jeroslow def_jeroslow'
 
-private lemma iff_provable_jeroslow_provable_jeroslow' [𝗜𝚺₁ ⪯ U] : U ⊢ (T.jeroslow) ↔ U ⊢ (T.jeroslow') := by
+private lemma iff_provable_jeroslow_provable_jeroslow' [𝗜𝚺₁ ⪯ U] :
+    U ⊢ (T.jeroslow) ↔ U ⊢ (T.jeroslow') := by
   apply Entailment.iff_of_E provable_E_jeroslow_jeroslow';
 
 open FFL.Entailment in
@@ -110,7 +117,7 @@ variable {L : Language} [L.Encodable] [L.LORDefinable]
 variable {T : ArithmeticTheory} [T.Δ₁]
 
 /--
-  Jeroslow sentence of `T` is not provable in `T` itself.
+ Jeroslow sentence of `T` is not provable in `T` itself.
 -/
 theorem unprovable_jeroslow [𝗜𝚺₁ ⪯ T] [T.SoundOnHierarchy 𝚺 1]
   : T ⊬ T.jeroslow := by
