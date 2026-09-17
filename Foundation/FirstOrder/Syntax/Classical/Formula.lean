@@ -9,6 +9,8 @@ set_option linter.style.show false
 set_option linter.style.induction false
 set_option linter.unusedTactic false
 set_option linter.unreachableTactic false
+set_option linter.style.whitespace false
+set_option autoImplicit true
 
 @[expose] public section
 

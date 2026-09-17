@@ -15,6 +15,7 @@ set_option linter.unusedTactic false
 set_option linter.unreachableTactic false
 set_option linter.unusedDecidableInType false
 set_option linter.unusedFintypeInType false
+set_option autoImplicit true
 
 namespace FFL.Propositional
 

@@ -3,6 +3,7 @@ module
 public import Foundation.Propositional.Entailment.Cl
 
 @[expose] public section
+set_option linter.style.longLine false
 
 namespace FFL.Entailment
 
