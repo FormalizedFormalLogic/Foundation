@@ -473,6 +473,18 @@ lemma all {P : (Fin k → V) → V → Prop} (h : 𝚷-[m + 1].Definable fun w �
     𝚷-[m + 1].Definable fun v ↦ ∀ x, P v x := by
   rcases h with ⟨φ, h⟩; exact ⟨φ.all, by intro _; simp [h.iff]⟩
 
+lemma ballCons {P : (Fin (k + 1) → V) → Prop} (h : ℌ.Definable P) (t : ArithmeticSemiterm V k) :
+    ℌ.Definable fun v ↦ ∀ x < t.val v id, P (x :> v) :=
+  ball (P := fun v x ↦ P (x :> v)) (h.of_iff fun w ↦ by simp) t
+
+lemma bexsCons {P : (Fin (k + 1) → V) → Prop} (h : ℌ.Definable P) (t : ArithmeticSemiterm V k) :
+    ℌ.Definable fun v ↦ ∃ x < t.val v id, P (x :> v) :=
+  bexs (P := fun v x ↦ P (x :> v)) (h.of_iff fun w ↦ by simp) t
+
+lemma exsCons {P : (Fin (k + 1) → V) → Prop} (h : 𝚺-[m + 1].Definable P) :
+    𝚺-[m + 1].Definable fun v ↦ ∃ x, P (x :> v) :=
+  exs (P := fun v x ↦ P (x :> v)) (h.of_iff fun w ↦ by simp)
+
 lemma conj₂ (Γ : List ι) {R : ι → (Fin k → V) → Prop} (hR : ∀ i, ℌ.Definable (R i)) :
     ℌ.Definable fun x ↦ ∀ i ∈ Γ, R i x :=
   match Γ with
@@ -957,31 +969,42 @@ namespace HierarchySymbol.Definable
 
 /-- Induction on `𝚺-[s + 1]`-definable predicates: the `𝚷-[s]`-definable predicates are the base
 case, and the motive is closed under `∧`, `∨`, bounded quantification and `∃`. -/
+@[elab_as_elim]
 theorem sigma_succ_induction {V : Type*} [ORingStructure V] {s : ℕ}
-    {Motive : (k : ℕ) → ((Fin k → V) → Prop) → Prop}
-    (pi : ∀ {k} {P : (Fin k → V) → Prop}, 𝚷-[s].Definable P → Motive k P)
-    (and : ∀ {k} {P Q : (Fin k → V) → Prop}, 𝚺-[s + 1].Definable P → 𝚺-[s + 1].Definable Q →
-      Motive k P → Motive k Q → Motive k fun v ↦ P v ∧ Q v)
-    (or : ∀ {k} {P Q : (Fin k → V) → Prop}, 𝚺-[s + 1].Definable P → 𝚺-[s + 1].Definable Q →
-      Motive k P → Motive k Q → Motive k fun v ↦ P v ∨ Q v)
-    (ball : ∀ {k} {P : (Fin (k + 1) → V) → Prop} (t : ArithmeticSemiterm V k),
-      𝚺-[s + 1].Definable P → Motive (k + 1) P → Motive k fun v ↦ ∀ x < t.val v id, P (x :> v))
-    (bexs : ∀ {k} {P : (Fin (k + 1) → V) → Prop} (t : ArithmeticSemiterm V k),
-      𝚺-[s + 1].Definable P → Motive (k + 1) P → Motive k fun v ↦ ∃ x < t.val v id, P (x :> v))
-    (exs : ∀ {k} {P : (Fin (k + 1) → V) → Prop},
-      𝚺-[s + 1].Definable P → Motive (k + 1) P → Motive k fun v ↦ ∃ x, P (x :> v))
-    {k} {P : (Fin k → V) → Prop} (hP : 𝚺-[s + 1].Definable P) : Motive k P := by
-  obtain ⟨φ, hφ⟩ := hP;
-  rw [show P = fun v ↦ φ.val.Eval v id from by funext v; simp [hφ.iff]];
-  exact Hierarchy.sigma_succ_induction (P := fun k ψ ↦ Motive k fun v ↦ ψ.Eval v id)
-    (fun _ ψ h ↦ pi (.mkPolarity ψ h fun _ ↦ Iff.rfl))
-    (fun _ ψ χ hψ hχ ihψ ihχ ↦ by
-      simpa using and (.mkPolarity ψ hψ fun _ ↦ Iff.rfl) (.mkPolarity χ hχ fun _ ↦ Iff.rfl) ihψ ihχ)
-    (fun _ ψ χ hψ hχ ihψ ihχ ↦ by
-      simpa using or (.mkPolarity ψ hψ fun _ ↦ Iff.rfl) (.mkPolarity χ hχ fun _ ↦ Iff.rfl) ihψ ihχ)
-    (fun _ t ψ hψ ih ↦ by simpa using ball t (.mkPolarity ψ hψ fun _ ↦ Iff.rfl) ih)
-    (fun _ t ψ hψ ih ↦ by simpa using bexs t (.mkPolarity ψ hψ fun _ ↦ Iff.rfl) ih)
-    (fun _ ψ hψ ih ↦ by simpa using exs (.mkPolarity ψ hψ fun _ ↦ Iff.rfl) ih)
+    {motive : (k : ℕ) → (P : (Fin k → V) → Prop) → 𝚺-[s + 1].Definable P → Prop}
+    (pi : ∀ {k} {P : (Fin k → V) → Prop} (hP : 𝚷-[s].Definable P),
+      motive k P (hP.of_lt (Nat.lt_succ_self s)))
+    (and : ∀ {k} {P Q : (Fin k → V) → Prop} (hP : 𝚺-[s + 1].Definable P)
+      (hQ : 𝚺-[s + 1].Definable Q), motive k P hP → motive k Q hQ →
+      motive k (fun v ↦ P v ∧ Q v) (hP.and hQ))
+    (or : ∀ {k} {P Q : (Fin k → V) → Prop} (hP : 𝚺-[s + 1].Definable P)
+      (hQ : 𝚺-[s + 1].Definable Q), motive k P hP → motive k Q hQ →
+      motive k (fun v ↦ P v ∨ Q v) (hP.or hQ))
+    (ball : ∀ {k} {P : (Fin (k + 1) → V) → Prop} (t : ArithmeticSemiterm V k)
+      (hP : 𝚺-[s + 1].Definable P), motive (k + 1) P hP →
+      motive k (fun v ↦ ∀ x < t.val v id, P (x :> v)) (hP.ballCons t))
+    (bexs : ∀ {k} {P : (Fin (k + 1) → V) → Prop} (t : ArithmeticSemiterm V k)
+      (hP : 𝚺-[s + 1].Definable P), motive (k + 1) P hP →
+      motive k (fun v ↦ ∃ x < t.val v id, P (x :> v)) (hP.bexsCons t))
+    (exs : ∀ {k} {P : (Fin (k + 1) → V) → Prop} (hP : 𝚺-[s + 1].Definable P),
+      motive (k + 1) P hP → motive k (fun v ↦ ∃ x, P (x :> v)) hP.exsCons)
+    (k : ℕ) (P : (Fin k → V) → Prop) (hP : 𝚺-[s + 1].Definable P) : motive k P hP := by
+  obtain ⟨φ, hφ⟩ := id hP;
+  have e : P = fun v ↦ φ.val.Eval v id := by funext v; simp [hφ.iff];
+  subst e;
+  have hd : ∀ {k} (ψ : ArithmeticSemiformula V k), Hierarchy 𝚺 (s + 1) ψ →
+    𝚺-[s + 1].Definable fun v ↦ ψ.Eval v id := fun ψ hψ ↦ .mkPolarity ψ hψ fun _ ↦ Iff.rfl;
+  revert hP;
+  exact Hierarchy.sigma_succ_induction
+    (P := fun k ψ ↦ ∀ h : 𝚺-[s + 1].Definable fun v ↦ ψ.Eval v id, motive k (fun v ↦ ψ.Eval v id) h)
+    (fun _ ψ h _ ↦ pi (.mkPolarity ψ h fun _ ↦ Iff.rfl))
+    (fun _ ψ χ hψ hχ ihψ ihχ _ ↦ by
+      simpa using and (hd ψ hψ) (hd χ hχ) (ihψ <| hd ψ hψ) (ihχ <| hd χ hχ))
+    (fun _ ψ χ hψ hχ ihψ ihχ _ ↦ by
+      simpa using or (hd ψ hψ) (hd χ hχ) (ihψ <| hd ψ hψ) (ihχ <| hd χ hχ))
+    (fun _ t ψ hψ ih _ ↦ by simpa using ball t (hd ψ hψ) (ih <| hd ψ hψ))
+    (fun _ t ψ hψ ih _ ↦ by simpa using bexs t (hd ψ hψ) (ih <| hd ψ hψ))
+    (fun _ ψ hψ ih _ ↦ by simpa using exs (hd ψ hψ) (ih <| hd ψ hψ))
     k φ.val φ.sigma_prop;
 
 end HierarchySymbol.Definable

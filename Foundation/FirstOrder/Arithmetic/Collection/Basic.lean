@@ -82,15 +82,19 @@ end CollectionOnHierarchy
 -- conclusion `V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻`, so instance search cannot infer them.
 lemma models_paMinus_of_models_CollectionOnHierarchy (Γ : Polarity) (s : ℕ) [V↓[ℒₒᵣ] ⊧* 𝗕 Γ s] :
     V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ :=
-  models_of_subtheory (T := 𝗣𝗔⁻) (U := 𝗕 Γ s) inferInstance
+  models_of_subtheory (inferInstance : V↓[ℒₒᵣ] ⊧* 𝗕 Γ s)
 
 section standardModel
 
 /-! ### The standard model -/
 
 instance models_CollectionOnHierarchy (Γ : Polarity) (s : ℕ) : ℕ↓[ℒₒᵣ] ⊧* 𝗕 Γ s := by
-  have H : ∀ {R : ℕ → ℕ → Prop}, Γ-[s].DefinableRel R →
-      ∀ a, (∀ x < a, ∃ y, R x y) → ∃ b, ∀ x < a, ∃ y < b, R x y := by
+  apply Semantics.ModelsSet.union_iff.mpr;
+  and_intros;
+  . infer_instance;
+  . apply models_of_ss
+      (CollectionScheme.models_of_collection ?_)
+      (CollectionScheme_subset (·.hierarchy));
     intro R _ a h;
     choose! g hg using h;
     use (Finset.range a).sup g + 1;
@@ -99,11 +103,6 @@ instance models_CollectionOnHierarchy (Γ : Polarity) (s : ℕ) : ℕ↓[ℒₒ�
     and_intros;
     . exact Nat.lt_succ_of_le (Finset.le_sup (Finset.mem_range.mpr hx));
     . exact hg x hx;
-  apply Semantics.ModelsSet.union_iff.mpr;
-  and_intros;
-  . infer_instance;
-  . exact models_of_ss (CollectionScheme.models_of_collection H)
-      (CollectionScheme_subset (·.hierarchy));
 
 instance (Γ : Polarity) (s : ℕ) : Consistent (𝗕 Γ s) :=
   (𝗕 Γ s).consistent_of_sound (Eq ⊥) rfl

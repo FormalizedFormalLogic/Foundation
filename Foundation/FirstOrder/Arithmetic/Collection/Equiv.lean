@@ -44,11 +44,11 @@ sentences.
 
 - [Bus98, pp. 84-85]
 -/
-theorem CollectionOnBroadHierarchy_equiv_CollectionOnHierarchy {Γ : Polarity} {s : ℕ} :
-    𝗕⁺ Γ s ≊ 𝗕 Γ s :=
-  Equiv.antisymm_iff.mpr
-    ⟨weakerThan_of_models.{0} _ _ fun _ _ _ ↦ inferInstance,
-      CollectionOnHierarchy_weakerThan_CollectionOnBroadHierarchy Γ s⟩
+theorem CollectionOnBroadHierarchy_equiv_CollectionOnHierarchy {Γ : Polarity} {s : ℕ}
+  : 𝗕⁺ Γ s ≊ 𝗕 Γ s := Equiv.antisymm ⟨
+    weakerThan_of_models.{0} _ _ fun _ _ _ ↦ inferInstance,
+    CollectionOnHierarchy_weakerThan_CollectionOnBroadHierarchy Γ s
+  ⟩
 
 end BroadHierarchy
 
@@ -91,9 +91,8 @@ private lemma exists_monotoneWitness [V↓[ℒₒᵣ] ⊧* 𝗕𝚷 s] {k : ℕ}
     (hP : 𝚺-[s + 1].Definable P) :
     ∃ Q : (Fin (k + 1) → V) → Prop, 𝚷-[s].Definable Q ∧ MonotoneWitness Q P := by
   have : V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := models_paMinus_of_models_CollectionOnHierarchy 𝚷 s;
-  apply hP.sigma_succ_induction
-    (Motive := fun k P ↦ ∃ Q : (Fin (k + 1) → V) → Prop, 𝚷-[s].Definable Q ∧ MonotoneWitness Q P);
-  . intro k P hP;
+  induction k, P, hP using HierarchySymbol.Definable.sigma_succ_induction with
+  | @pi k P hP =>
     use fun w ↦ P (w ·.succ);
     and_intros;
     . exact hP.retraction Fin.succ;
@@ -105,7 +104,7 @@ private lemma exists_monotoneWitness [V↓[ℒₒᵣ] ⊧* 𝗕𝚷 s] {k : ℕ}
       . intro e h;
         use 0;
         simpa using h;
-  . intro k P₁ P₂ _ _ ih₁ ih₂;
+  | @and k P₁ P₂ _ _ ih₁ ih₂ =>
     obtain ⟨Q₁, hQ₁, hM₁⟩ := ih₁;
     obtain ⟨Q₂, hQ₂, hM₂⟩ := ih₂;
     use fun w ↦ Q₁ w ∧ Q₂ w;
@@ -121,7 +120,7 @@ private lemma exists_monotoneWitness [V↓[ℒₒᵣ] ⊧* 𝗕𝚷 s] {k : ℕ}
         obtain ⟨v₂, hv₂⟩ := hM₂.complete e h.2;
         exact ⟨max v₁ v₂, hM₁.monotone e v₁ _ (le_max_left _ _) hv₁,
           hM₂.monotone e v₂ _ (le_max_right _ _) hv₂⟩;
-  . intro k P₁ P₂ _ _ ih₁ ih₂;
+  | @or k P₁ P₂ _ _ ih₁ ih₂ =>
     obtain ⟨Q₁, hQ₁, hM₁⟩ := ih₁;
     obtain ⟨Q₂, hQ₂, hM₂⟩ := ih₂;
     use fun w ↦ Q₁ w ∨ Q₂ w;
@@ -136,7 +135,7 @@ private lemma exists_monotoneWitness [V↓[ℒₒᵣ] ⊧* 𝗕𝚷 s] {k : ℕ}
         rcases h with h | h;
         . exact (hM₁.complete e h).imp fun v hv ↦ by tauto;
         . exact (hM₂.complete e h).imp fun v hv ↦ by tauto;
-  . intro k P t _ ih;
+  | @ball k P t _ ih =>
     obtain ⟨Q, hQ, hM⟩ := ih;
     use fun w : Fin (k + 1) → V ↦ ∀ x < t.val (w ·.succ) id, Q (w 0 :> x :> (w ·.succ));
     and_intros;
@@ -163,7 +162,7 @@ private lemma exists_monotoneWitness [V↓[ℒₒᵣ] ⊧* 𝗕𝚷 s] {k : ℕ}
         intro x hx;
         obtain ⟨v, hvb, hv⟩ := hb x hx;
         exact hM.monotone (x :> e) v b (le_of_lt hvb) hv;
-  . intro k P t _ ih;
+  | @bexs k P t _ ih =>
     obtain ⟨Q, hQ, hM⟩ := ih;
     use fun w : Fin (k + 1) → V ↦ ∃ x < t.val (w ·.succ) id, Q (w 0 :> x :> (w ·.succ));
     and_intros;
@@ -188,7 +187,7 @@ private lemma exists_monotoneWitness [V↓[ℒₒᵣ] ⊧* 𝗕𝚷 s] {k : ℕ}
         use v;
         simp only [Matrix.cons_val_zero, Matrix.cons_val_succ];
         exact ⟨x, hx, hv⟩;
-  . intro k P _ ih;
+  | @exs k P _ ih =>
     obtain ⟨Q, hQ, hM⟩ := ih;
     use fun w : Fin (k + 1) → V ↦ ∃ x < w 0, Q (w 0 :> x :> (w ·.succ));
     and_intros;
