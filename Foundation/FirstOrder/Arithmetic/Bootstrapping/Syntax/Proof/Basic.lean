@@ -3,6 +3,9 @@ module
 public import Foundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Theory
 
 @[expose] public section
+set_option linter.style.longLine false
+set_option linter.style.docString false
+
 namespace FFL
 
 open FirstOrder Arithmetic
@@ -14,6 +17,9 @@ variable {L : Language} [L.Encodable] [L.LORDefinable]
 variable {T U : Theory L} [T.Δ₁] [U.Δ₁]
 
 namespace FirstOrder.Arithmetic.Bootstrapping
+
+set_option linter.style.longLine false
+set_option linter.style.docString false
 
 variable (L)
 
@@ -34,7 +40,7 @@ instance defined : 𝚫₁-Predicate[V] IsFormulaSet L via isFormulaSet L := .mk
 
 instance definable : 𝚫₁-Predicate[V] IsFormulaSet L := defined.to_definable
 
-instance definable' : Γ-[m + 1]-Predicate[V] IsFormulaSet L := .of_deltaOne definable
+instance definable' {Γ : Polarity} {m : ℕ} : Γ-[m + 1]-Predicate[V] IsFormulaSet L := .of_deltaOne definable
 
 end
 
@@ -506,14 +512,14 @@ instance Derivation.defined : 𝚫₁-Predicate[V] Derivation T via derivation T
 
 instance Derivation.definable : 𝚫₁-Predicate[V] Derivation T := Derivation.defined.to_definable
 
-instance Derivation.definable' : Γ-[m + 1]-Predicate[V] Derivation T := Derivation.definable.of_deltaOne
+instance Derivation.definable' {Γ : Polarity} {m : ℕ} : Γ-[m + 1]-Predicate[V] Derivation T := Derivation.definable.of_deltaOne
 
 instance DerivationOf.defined : 𝚫₁-Relation[V] DerivationOf T via derivationOf T := .mk
   ⟨by intro v; simp [derivationOf], by intro v; simp [derivationOf, eq_comm (b := fstIdx (v 0))]; rfl⟩
 
 instance DerivationOf.definable : 𝚫₁-Relation[V] DerivationOf T := DerivationOf.defined.to_definable
 
-instance DerivationOf.definable' : Γ-[m + 1]-Relation[V] DerivationOf T := DerivationOf.definable.of_deltaOne
+instance DerivationOf.definable' {Γ : Polarity} {m : ℕ} : Γ-[m + 1]-Relation[V] DerivationOf T := DerivationOf.definable.of_deltaOne
 
 instance Derivable.defined : 𝚺₁-Predicate[V] Derivable T via derivable T := .mk fun v ↦ by simp [derivable, Derivable]
 
@@ -527,7 +533,7 @@ instance Proof.defined : 𝚫₁-Relation[V] Proof T via proof T := .mk
 
 instance Proof.definable : 𝚫₁-Relation[V] Proof T := Proof.defined.to_definable
 
-instance Proof.definable' : Γ-[m + 1]-Relation[V] Proof T := Proof.definable.of_deltaOne
+instance Proof.definable' {Γ : Polarity} {m : ℕ} : Γ-[m + 1]-Relation[V] Proof T := Proof.definable.of_deltaOne
 
 instance Provable.defined : 𝚺₁-Predicate[V] Provable T via provable T := .mk fun v ↦ by simp [provable, Provable]
 

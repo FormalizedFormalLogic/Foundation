@@ -7,6 +7,8 @@ public import Foundation.FirstOrder.LK.Simplified
 
 namespace FFL.FirstOrder
 
+set_option linter.unusedSimpArgs false
+
 open Arithmetic Bootstrapping
 
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
