@@ -6,6 +6,10 @@ public import Foundation.Vorspiel.ENat
 @[expose] public section
 namespace FFL.FirstOrder
 
+set_option linter.style.openClassical false
+set_option linter.style.dollarSyntax false
+set_option linter.style.longLine false
+
 variable {L : Language} [L.ReferenceableBy L] {T₀ T : Theory L}
 
 open ProvabilityAbstraction
@@ -18,10 +22,11 @@ variable {𝔅 : Provability T₀ T}
 noncomputable def Provability.height (𝔅 : Provability T₀ T) : ENat := ENat.find (T ⊢ 𝔅^[·] ⊥)
 
 @[simp]
-lemma neg_iterated_prov (φ : Sentence L) : ∼(𝔅^[n] φ) = 𝔅.dia^[n] (∼φ) := by
+lemma neg_iterated_prov {n : ℕ} (φ : Sentence L) : ∼(𝔅^[n] φ) = 𝔅.dia^[n] (∼φ) := by
   induction n generalizing φ <;> simp [Provability.dia, *]
 
-lemma boxBot_monotone [T₀ ⪯ T] [𝔅.HBL] : n ≤ m → T ⊢ 𝔅^[n] ⊥ 🡒 𝔅^[m] ⊥ := by
+lemma boxBot_monotone [T₀ ⪯ T] [𝔅.HBL] {n m : ℕ} :
+    n ≤ m → T ⊢ 𝔅^[n] ⊥ 🡒 𝔅^[m] ⊥ := by
   revert m
   suffices ∀ k, T ⊢ 𝔅^[n] ⊥ 🡒 𝔅^[n + k] ⊥ by
     intro m hnm
