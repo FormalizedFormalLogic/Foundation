@@ -13,6 +13,11 @@ The structural rules are the standard local weakening and contraction rules.
 
 namespace FFL.SecondOrder
 
+set_option linter.style.longLine false
+set_option linter.unusedVariables false
+set_option linter.unusedTactic false
+set_option linter.unreachableTactic false
+
 open FirstOrder
 
 variable {L : Language}

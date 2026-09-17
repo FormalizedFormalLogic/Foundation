@@ -4,6 +4,10 @@ public import Foundation.FirstOrder.LK.Completeness.CounterModel
 public import Mathlib.SetTheory.Cardinal.Basic
 
 @[expose] public section
+set_option linter.style.longLine false
+set_option linter.unusedTactic false
+set_option linter.unreachableTactic false
+set_option linter.unusedSectionVars false
 /-! # Preperations for set theory
 
 - *NOTE*:
@@ -13,6 +17,8 @@ public import Mathlib.SetTheory.Cardinal.Basic
 -/
 
 namespace FFL.FirstOrder
+
+universe w
 
 namespace Language
 
@@ -64,7 +70,8 @@ instance : (ℒₛₑₜ).Eq := ⟨Rel.eq⟩
 
 instance : (ℒₛₑₜ).Mem := ⟨Rel.mem⟩
 
-lemma rel_eq_eq_or_mem (R : (ℒₛₑₜ).Rel k) : k = 2 ∧ (R ≍ (Eq.eq : (ℒₛₑₜ).Rel 2) ∨ R ≍ (Mem.mem : (ℒₛₑₜ).Rel 2)) :=
+lemma rel_eq_eq_or_mem {k : ℕ} (R : (ℒₛₑₜ).Rel k) :
+    k = 2 ∧ (R ≍ (Eq.eq : (ℒₛₑₜ).Rel 2) ∨ R ≍ (Mem.mem : (ℒₛₑₜ).Rel 2)) :=
   match R with
   | Rel.eq => ⟨rfl, Or.inl <| by rfl⟩
   | Rel.mem => ⟨by rfl, Or.inr <| by rfl⟩
@@ -91,7 +98,7 @@ abbrev SetTheorySemiproposition (n : ℕ) := Semiproposition ℒₛₑₜ n
 
 abbrev SetTheoryProposition := Proposition ℒₛₑₜ
 
-variable [ToString ξ]
+variable {ξ : Type*} {n : ℕ} [ToString ξ]
 
 def Semiterm.toStringSet : SetTheorySemiterm ξ n → String
   | #x => "x_{" ++ toString (n - 1 - (x : ℕ)) ++ "}"
