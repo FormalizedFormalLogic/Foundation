@@ -47,8 +47,7 @@ lemma exists_bound_of_models_CollectionOnHierarchy_of_hierarchy [V↓[ℒₒᵣ]
     {θ : ArithmeticSemisentence (m + 2)} (hθ : Hierarchy Γ s θ) (e : Fin m → V) (a : V)
     (hex : ∀ x < a, ∃ u, V ⊧/(u :> x :> e) θ) :
     ∃ w, ∀ x < a, ∃ u ≤ w, V ⊧/(u :> x :> e) θ := by
-  have : V↓[ℒₒᵣ] ⊧* PrenexBase s := models_PrenexBase_of_models_CollectionOnHierarchy (Γ := Γ) (s := s);
-  obtain ⟨θ', hθ'⟩ := Prenex.models_exists_prenex hθ;
+  obtain ⟨θ', hθ'⟩ := Prenex.models_exists_prenex (Γ' := Γ) hθ;
   obtain ⟨w, hw⟩ := exists_bound_of_models_CollectionOnHierarchy (Γ := Γ) (s := s)
     (θ := θ'.val) Prenex.val_strictHierarchy e a
     fun x hx ↦ (hex x hx).imp fun u hu ↦ (hθ' V (u :> x :> e)).mp hu;
