@@ -6,6 +6,15 @@ public import Foundation.FirstOrder.Tarski.Operator
 public import Mathlib.SetTheory.Cardinal.Basic
 
 @[expose] public section
+set_option linter.style.longLine false
+set_option linter.style.dollarSyntax false
+set_option linter.style.lambdaSyntax false
+set_option linter.style.openClassical false
+set_option linter.style.induction false
+set_option linter.unusedSimpArgs false
+set_option linter.unusedTactic false
+set_option linter.unreachableTactic false
+set_option linter.unusedVariables false
 /-! # Skolem hull -/
 
 namespace FFL.FirstOrder

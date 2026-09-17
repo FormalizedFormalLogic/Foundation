@@ -4,6 +4,17 @@ public import Foundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Term.Basic
 public import Foundation.FirstOrder.Arithmetic.Induction
 
 @[expose] public section
+set_option linter.style.longLine false
+set_option linter.style.cdot false
+set_option linter.style.whitespace false
+set_option linter.style.dollarSyntax false
+set_option linter.style.lambdaSyntax false
+set_option linter.style.openClassical false
+set_option linter.style.induction false
+set_option linter.unusedSimpArgs false
+set_option linter.unusedTactic false
+set_option linter.unreachableTactic false
+set_option linter.unusedVariables false
 namespace FFL.FirstOrder.Arithmetic.Bootstrapping
 
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
