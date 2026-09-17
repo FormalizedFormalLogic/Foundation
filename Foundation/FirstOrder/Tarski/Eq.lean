@@ -10,6 +10,12 @@ namespace FFL
 
 namespace FirstOrder
 
+set_option linter.style.longLine false
+set_option linter.unusedTactic false
+set_option linter.unreachableTactic false
+set_option linter.style.induction false
+set_option linter.unusedSimpArgs false
+
 variable {L : Language} {ξ : Type*} [Semiformula.Operator.Eq L]
 
 namespace Tarski.Structure
@@ -123,14 +129,14 @@ lemma rel_mk_of_eq {k} (r : L.Rel k) {w : Fin k → QuotEq L M} {v : Fin k → M
     (h : ∀ i, w i = ⟦v i⟧) : Tarski.Structure.rel (M := QuotEq L M) r w ↔ Tarski.Structure.rel r v :=
   funext h ▸ rel_mk r v
 
-lemma val_mk {bv fv} (t : Semiterm L ξ n) :
+lemma val_mk {n : ℕ} {bv fv} (t : Semiterm L ξ n) :
     t.val (M := QuotEq L M) (⟦bv ·⟧) (⟦fv ·⟧) = ⟦t.val bv fv⟧ := by
   induction t with
   | bvar x => rfl
   | fvar x => rfl
   | func f v ih => exact funk_mk_of_eq f ih
 
-lemma eval_mk {bv fv} {φ : Semiformula L ξ n} :
+lemma eval_mk {n : ℕ} {bv fv} {φ : Semiformula L ξ n} :
     φ.Eval (M := QuotEq L M) (⟦bv ·⟧) (⟦fv ·⟧) ↔ φ.Eval bv fv := by
   induction φ using Semiformula.rec'
   case hall n φ ih =>
@@ -219,7 +225,7 @@ namespace Semiformula
 
 variable {M : Type*} [s : Tarski.Structure L M] [Tarski.Structure.Eq L M]
 
-@[simp] lemma eval_existsUnique {e ε} {φ : Semiformula L ξ (n + 1)} :
+@[simp] lemma eval_existsUnique {n : ℕ} {e ε} {φ : Semiformula L ξ (n + 1)} :
     Eval (M := M) e ε (∃¹! φ) ↔ ∃! x, Eval (M := M) (x :> e) ε φ := by
   simp [existsUnique, Semiformula.eval_substs, Matrix.comp_vecCons'', ExistsUnique]
   simp [Function.comp_def]

@@ -18,6 +18,9 @@ open scoped FFL.FirstOrder.Derivation.Canonical
 
 variable {L : Language}
 
+set_option linter.style.longLine false
+set_option linter.style.openClassical false
+
 open Classical
 
 variable (L)
@@ -64,7 +67,7 @@ namespace IsForced
     let ⟨b, hb⟩ := hauptsatz d
     exact ⟨Forces.relEquiv.symm ⟨b, hb⟩⟩
 
-@[simp] lemma fal {p : ℙ} : p ⊩ ∀¹ φ ↔ ∀ t, p ⊩ φ/[t] := by
+@[simp] lemma fal {p : ℙ} {φ : Semiproposition L 1} : p ⊩ ∀¹ φ ↔ ∀ t, p ⊩ φ/[t] := by
   constructor
   · rintro ⟨b⟩ t
     exact ⟨b.allEquiv t⟩
@@ -109,7 +112,7 @@ lemma imply {p : ℙ} {φ ψ : Propositionᵢ L} : p ⊩ φ 🡒 ψ ↔ (∀ q �
 lemma not {p : ℙ} {φ : Propositionᵢ L} : p ⊩ ∼φ ↔ (∀ q ≤ p, ¬q ⊩ φ) := by
   simp [Semiformulaᵢ.neg_def, imply]
 
-@[simp] lemma exs {p : ℙ} : p ⊩ ∃¹ φ ↔ ∃ t, p ⊩ φ/[t] := by
+@[simp] lemma exs {p : ℙ} {φ : Semiproposition L 1} : p ⊩ ∃¹ φ ↔ ∃ t, p ⊩ φ/[t] := by
   constructor
   · rintro ⟨b⟩
     have ⟨t, f⟩ := b.exsEquiv
