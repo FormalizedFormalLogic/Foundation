@@ -60,7 +60,7 @@ variable [V↓[ℒₒᵣ] ⊧* 𝗜𝚺 (s + 1)]
 
 private lemma collectionMotive_definable (hθ : Hierarchy 𝚺 (s + 1) θ) (a : V) :
     𝚺-[s + 1].DefinablePred (fun y => ∃ w, ∀ x < y, x < a → ∃ u ≤ w, V ⊧/(u :> x :> e) θ) := by
-  have := mod_paMinus_of_ISigma (V := V) (n := s + 1)
+  have := mod_paMinus_of_ISigma (V := V) (s := s + 1)
   exact HierarchySymbol.Definable.mkPolarity (collectionMotive e θ a)
     (hierarchy_collectionMotive e hθ a) (fun v => (eval_collectionMotive e a v).symm)
 
@@ -68,7 +68,7 @@ theorem sigma_exists_bound_witness {θ : ArithmeticSemisentence (n + 2)}
     (hθ : Hierarchy 𝚺 (s + 1) θ)
     (e : Fin n → V) (a : V) (h : ∀ x < a, ∃ u, V ⊧/(u :> x :> e) θ) :
     ∃ w, ∀ x < a, ∃ u ≤ w, V ⊧/(u :> x :> e) θ := by
-  have := mod_paMinus_of_ISigma (V := V) (n := s + 1)
+  have := mod_paMinus_of_ISigma (V := V) (s := s + 1)
   have key : ∀ y : V, ∃ w, ∀ x < y, x < a → ∃ u ≤ w, V ⊧/(u :> x :> e) θ := by
     apply InductionOnHierarchy.succ_induction_sigma 𝚺 (s + 1)
       (P := fun y => ∃ w, ∀ x < y, x < a → ∃ u ≤ w, V ⊧/(u :> x :> e) θ)
