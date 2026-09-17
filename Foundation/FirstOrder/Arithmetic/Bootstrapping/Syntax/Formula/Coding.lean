@@ -4,6 +4,9 @@ public import Foundation.FirstOrder.Syntax.Classical.PrimrecCoding
 public import Foundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Formula.Typed
 public import Foundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Term.Coding
 
+set_option linter.style.longLine false
+set_option linter.style.lambdaSyntax false
+
 @[expose] public section
 open Encodable FFL FirstOrder Arithmetic Bootstrapping
 
