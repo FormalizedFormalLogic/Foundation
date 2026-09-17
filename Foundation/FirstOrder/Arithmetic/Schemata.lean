@@ -12,8 +12,12 @@ public import Foundation.FirstOrder.Arithmetic.TA.Basic
 -/
 
 @[expose] public section
+set_option linter.style.longLine false
+set_option linter.style.whitespace false
 
 namespace FFL.FirstOrder.Arithmetic
+
+variable {Γ : Polarity} {i k m n : ℕ}
 
 section axioms
 

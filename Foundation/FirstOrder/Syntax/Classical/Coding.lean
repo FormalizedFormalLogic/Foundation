@@ -4,12 +4,15 @@ public import Foundation.FirstOrder.Syntax.Classical.BinderNotation
 public import Foundation.Vorspiel.Nat.Matrix
 
 @[expose] public section
+set_option linter.style.longLine false
+set_option linter.unusedSimpArgs false
 
 namespace FFL.FirstOrder
 
 variable {L : Language} [(k : ℕ) → Encodable (L.Func k)]
 
 variable {ξ : Type*} [Encodable ξ]
+variable {n : ℕ}
 
 open Encodable
 namespace Semiterm

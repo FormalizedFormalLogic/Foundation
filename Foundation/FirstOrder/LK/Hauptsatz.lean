@@ -10,6 +10,11 @@ Main reference: Jeremy Avigad, Algebraic proofs of cut elimination [Avi01]
  -/
 
 @[expose] public section
+set_option linter.style.longLine false
+set_option linter.unusedTactic false
+set_option linter.unreachableTactic false
+set_option linter.unusedVariables false
+set_option linter.style.missingEnd false
 
 namespace FFL.FirstOrder.LK.Derivation
 

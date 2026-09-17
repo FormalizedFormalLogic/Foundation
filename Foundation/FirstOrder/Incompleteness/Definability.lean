@@ -11,6 +11,9 @@ presentations of `𝗣𝗔` and `𝗜𝚺₁`.
 -/
 
 @[expose] public section
+set_option linter.style.longLine false
+set_option linter.style.dollarSyntax false
+set_option linter.unusedSimpArgs false
 
 namespace FFL.FirstOrder.Arithmetic.Bootstrapping
 
@@ -48,7 +51,8 @@ instance qqAlls_defined : 𝚺₁-Function₂ (qqAlls : V → V → V) via qqAll
 
 instance qqAlls_definable : 𝚺₁-Function₂ (qqAlls : V → V → V) := qqAlls_defined.to_definable
 
-instance qqAlls_definable' (Γ) : Γ-[m + 1]-Function₂ (qqAlls : V → V → V) := qqAlls_definable.of_sigmaOne
+instance qqAlls_definable' {Γ : Polarity} {m : ℕ} :
+    Γ-[m + 1]-Function₂ (qqAlls : V → V → V) := qqAlls_definable.of_sigmaOne
 
 end
 
@@ -328,7 +332,8 @@ instance fvarVec_defined : 𝚺₁-Function₁ (fvarVec : V → V) via fvarVecDe
 
 instance fvarVec_definable : 𝚺₁-Function₁ (fvarVec : V → V) := fvarVec_defined.to_definable
 
-instance fvarVec_definable' (Γ) : Γ-[m + 1]-Function₁ (fvarVec : V → V) := fvarVec_definable.of_sigmaOne
+instance fvarVec_definable' {Γ : Polarity} {m : ℕ} :
+    Γ-[m + 1]-Function₁ (fvarVec : V → V) := fvarVec_definable.of_sigmaOne
 
 @[simp] lemma len_fvarVec (k : V) : len (fvarVec k) = k := by
   induction k using ISigma1.sigma1_succ_induction
