@@ -24,14 +24,14 @@ supportInterpreter = true
 [[require]]
 scope = "leanprover"
 name = "doc-gen4"
-rev = "v4.33.1"
+rev = "v4.34.0"
 
 [[require]]
 scope = "leanprover-community"
 name = "mathlib"
-rev = "v4.33.1"
+rev = "v4.34.0"
 
 [[require]]
-name = "axiom-audit"
-git = "https://github.com/SnO2WMaN/axiom-audit"
-rev = "827e715d39231df230cb5b1a200be07c151b323b"
+name = "Forgive"
+git = "https://github.com/FormalizedFormalLogic/forgive"
+rev = "v4.34.0"

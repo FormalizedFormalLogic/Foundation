@@ -173,7 +173,7 @@ lemma stepVec_ofFn {T : List ℕ} {a : ℕ} {w u : Fin a → ℕ}
   | succ a ih =>
     rw [List.ofFn_succ, stepVec_cons,
       ih (w := fun i ↦ w i.succ) (u := fun i ↦ u i.succ) fun i ↦ by simpa using h i.succ,
-      h 0, if_neg (by simp)]
+      h 0, ite_eq_right (by simp)]
     simp only [Nat.add_sub_cancel]
     simpa using (Matrix.encode_succ (u 0) (fun i ↦ u i.succ)).symm
 
@@ -185,8 +185,8 @@ lemma stepVec_eq_zero {T : List ℕ} {l : List ℕ} {j : ℕ} (hj : j ∈ l)
   | cons b l ih =>
     rw [stepVec_cons]
     rcases List.mem_cons.mp hj with rfl | hj'
-    · exact if_pos (Or.inl h)
-    · exact if_pos (Or.inr (ih hj'))
+    · exact ite_eq_left (Or.inl h)
+    · exact ite_eq_left (Or.inr (ih hj'))
 
 open Primrec in
 theorem primrec_stepVec : Primrec₂ stepVec := by
@@ -333,24 +333,24 @@ theorem step_table (n e : ℕ) :
   show stepBody (L := L) (ξ := ξ) n (table (L := L) (ξ := ξ) n (d + 1)) d = _
   rw [stepBody, ofNat]
   by_cases h0 : (Nat.unpair d).1 = 0
-  · rw [if_pos h0, h0]
+  · rw [ite_eq_left h0, h0]
     by_cases hz : (Nat.unpair d).2 < n
-    · rw [if_pos hz, dif_pos hz]
+    · rw [ite_eq_left hz, dite_eq_left hz]
       simp [encode_eq_toNat, toNat]
-    · rw [if_neg hz, dif_neg hz]
+    · rw [ite_eq_right hz, dite_eq_right hz]
       simp
   by_cases h1 : (Nat.unpair d).1 = 1
-  · rw [if_neg h0, if_pos h1, h1]
+  · rw [ite_eq_right h0, ite_eq_left h1, h1]
     rcases hx : (decode (Nat.unpair d).2 : Option ξ) with _ | x
     · simp
-    · rw [if_neg (by simp)]
+    · rw [ite_eq_right (by simp)]
       simp [encode_eq_toNat, toNat]
   by_cases h2 : (Nat.unpair d).1 = 2
-  · rw [if_neg h0, if_neg h1, if_pos h2, h2]
+  · rw [ite_eq_right h0, ite_eq_right h1, ite_eq_left h2, h2]
     simp only []
     rcases hv : (Nat.unpair (Nat.unpair (Nat.unpair d).2).2).2.natToVec
         (Nat.unpair (Nat.unpair d).2).1 with _ | v'
-    · rw [if_neg ?_]
+    · rw [ite_eq_right ?_]
       · simp
       · rintro ⟨hlen, -, -⟩
         obtain ⟨w, hw⟩ := Nat.natToVec_isSome_of_length hlen
@@ -366,7 +366,7 @@ theorem step_table (n e : ℕ) :
           <| Nat.unpair_right_le _
       rcases hf : (decode (Nat.unpair (Nat.unpair (Nat.unpair d).2).2).1 :
           Option (L.Func (Nat.unpair (Nat.unpair d).2).1)) with _ | f
-      · rw [if_neg ?_]
+      · rw [ite_eq_right ?_]
         · simp
         · rintro ⟨-, hne, -⟩
           exact hne (by simp)
@@ -377,7 +377,7 @@ theorem step_table (n e : ℕ) :
             choose t ht using fun i ↦ Option.ne_none_iff_exists'.mp (hcon i)
             rw [Matrix.getM_option_eq_some_iff.mpr ht] at hg
             exact absurd hg (by simp)
-          rw [if_neg ?_]
+          rw [ite_eq_right ?_]
           · simp [hg]
           · rintro ⟨-, -, hne⟩
             refine hne (stepVec_eq_zero (j := v' i₀) ?_ ?_)
@@ -391,9 +391,9 @@ theorem step_table (n e : ℕ) :
               (Nat.natToList (Nat.unpair (Nat.unpair (Nat.unpair d).2).2).2)
               = Matrix.vecToNat (fun i ↦ encode (t i)) + 1 := by
             rw [hl]; exact stepVec_ofFn hT
-          rw [if_pos ⟨hlen, by simp, by rw [hsv]; simp⟩, hsv]
+          rw [ite_eq_left ⟨hlen, by simp, by rw [hsv]; simp⟩, hsv]
           simp [hg, encode_eq_toNat, toNat]
-  · rw [if_neg h0, if_neg h1, if_neg h2]
+  · rw [ite_eq_right h0, ite_eq_right h1, ite_eq_right h2]
     match hi : (Nat.unpair d).1 with
     | 0 => exact absurd hi h0
     | 1 => exact absurd hi h1
@@ -461,7 +461,7 @@ lemma stepVecT_ofFn {n a : ℕ} {w u : Fin a → ℕ}
   | succ a ih =>
     rw [List.ofFn_succ, stepVecT_cons,
       ih (w := fun i ↦ w i.succ) (u := fun i ↦ u i.succ) fun i ↦ by simpa using h i.succ,
-      h 0, if_neg (by simp)]
+      h 0, ite_eq_right (by simp)]
     simp only [Nat.add_sub_cancel]
     simpa using (Matrix.encode_succ (u 0) (fun i ↦ u i.succ)).symm
 
@@ -473,8 +473,8 @@ lemma stepVecT_eq_zero {n : ℕ} {l : List ℕ} {j : ℕ} (hj : j ∈ l)
   | cons b l ih =>
     rw [stepVecT_cons]
     rcases List.mem_cons.mp hj with rfl | hj'
-    · exact if_pos (Or.inl h)
-    · exact if_pos (Or.inr (ih hj'))
+    · exact ite_eq_left (Or.inl h)
+    · exact ite_eq_left (Or.inr (ih hj'))
 
 open Primrec in
 theorem primrec_stepVecT : Primrec₂ (stepVecT (L := L) (ξ := ξ)) := by
@@ -568,14 +568,14 @@ private lemma vs_bin (n d : ℕ) (h : d.unpair.1 = 4 ∨ d.unpair.1 = 5) :
     (subArgs (n, d + 1)).map (fun b ↦ encode (ofNat (L := L) (ξ := ξ) b.1 b.2))
       = [encode (ofNat (L := L) (ξ := ξ) n d.unpair.2.unpair.1),
          encode (ofNat (L := L) (ξ := ξ) n d.unpair.2.unpair.2)] := by
-  rw [subArgs_succ, if_pos h]; simp
+  rw [subArgs_succ, ite_eq_left h]; simp
 
 omit [L.Primcodable] in
 private lemma vs_quant (n d : ℕ) (h45 : ¬(d.unpair.1 = 4 ∨ d.unpair.1 = 5))
     (h : d.unpair.1 = 6 ∨ d.unpair.1 = 7) :
     (subArgs (n, d + 1)).map (fun b ↦ encode (ofNat (L := L) (ξ := ξ) b.1 b.2))
       = [encode (ofNat (L := L) (ξ := ξ) (n + 1) d.unpair.2)] := by
-  rw [subArgs_succ, if_neg h45, if_pos h]; simp
+  rw [subArgs_succ, ite_eq_right h45, ite_eq_left h]; simp
 
 lemma subArgs_ord (b : ℕ × ℕ) : ∀ b' ∈ subArgs b, b'.2 < b.2 := by
   rcases b with ⟨n, e⟩
@@ -584,20 +584,20 @@ lemma subArgs_ord (b : ℕ × ℕ) : ∀ b' ∈ subArgs b, b'.2 < b.2 := by
   | succ d =>
     rw [subArgs_succ]
     by_cases h4 : d.unpair.1 = 4 ∨ d.unpair.1 = 5
-    · rw [if_pos h4]
+    · rw [ite_eq_left h4]
       intro b' hb'
       simp only [List.mem_cons, List.not_mem_nil, or_false] at hb'
       have h1 : d.unpair.2.unpair.1 ≤ d := le_trans (Nat.unpair_left_le _) (Nat.unpair_right_le _)
       have h2 : d.unpair.2.unpair.2 ≤ d := le_trans (Nat.unpair_right_le _) (Nat.unpair_right_le _)
       rcases hb' with rfl | rfl <;> simp <;> omega
-    · rw [if_neg h4]
+    · rw [ite_eq_right h4]
       by_cases h6 : d.unpair.1 = 6 ∨ d.unpair.1 = 7
-      · rw [if_pos h6]
+      · rw [ite_eq_left h6]
         intro b' hb'
         simp only [List.mem_cons, List.not_mem_nil, or_false] at hb'
         have : d.unpair.2 ≤ d := Nat.unpair_right_le _
         rcases hb' with rfl; simp; omega
-      · rw [if_neg h6]; simp
+      · rw [ite_eq_right h6]; simp
 
 omit [L.Primcodable] in
 theorem step_correct (n e : ℕ) :
@@ -607,56 +607,57 @@ theorem step_correct (n e : ℕ) :
   cases e with
   | zero => simp [step, ofNat]
   | succ d =>
-  rw [step, if_neg (Nat.succ_ne_zero d), Nat.add_sub_cancel, stepBody, ofNat]
+  rw [step, ite_eq_right (Nat.succ_ne_zero d), Nat.add_sub_cancel, stepBody, ofNat]
   by_cases h4 : d.unpair.1 = 4
-  · rw [vs_bin n d (Or.inl h4), if_neg (by omega), if_neg (by omega), if_neg (by omega),
-      if_neg (by omega), if_pos h4, h4]
+  · rw [vs_bin n d (Or.inl h4), ite_eq_right (by omega), ite_eq_right (by omega), ite_eq_right (by omega),
+      ite_eq_right (by omega), ite_eq_left h4, h4]
     simp only [List.getD_cons_zero, List.getD_cons_succ]
     rcases hφ : ofNat (L := L) (ξ := ξ) n d.unpair.2.unpair.1 with _ | φ
     · simp
     · rcases hψ : ofNat (L := L) (ξ := ξ) n d.unpair.2.unpair.2 with _ | ψ
       · simp
-      · rw [if_neg (by simp)]
+      · rw [ite_eq_right (by simp)]
         simp [encode_eq_toNat, toNat]
   by_cases h5 : d.unpair.1 = 5
-  · rw [vs_bin n d (Or.inr h5), if_neg (by omega), if_neg (by omega), if_neg (by omega),
-      if_neg (by omega), if_neg (by omega), if_pos h5, h5]
+  · rw [vs_bin n d (Or.inr h5), ite_eq_right (by omega), ite_eq_right (by omega), ite_eq_right (by omega),
+      ite_eq_right (by omega), ite_eq_right (by omega), ite_eq_left h5, h5]
     simp only [List.getD_cons_zero, List.getD_cons_succ]
     rcases hφ : ofNat (L := L) (ξ := ξ) n d.unpair.2.unpair.1 with _ | φ
     · simp
     · rcases hψ : ofNat (L := L) (ξ := ξ) n d.unpair.2.unpair.2 with _ | ψ
       · simp
-      · rw [if_neg (by simp)]
+      · rw [ite_eq_right (by simp)]
         simp [encode_eq_toNat, toNat]
   by_cases h6 : d.unpair.1 = 6
-  · rw [vs_quant n d (by simp [h6]) (Or.inl h6), if_neg (by omega), if_neg (by omega),
-      if_neg (by omega), if_neg (by omega), if_neg (by omega), if_neg (by omega), if_pos h6, h6]
+  · rw [vs_quant n d (by simp [h6]) (Or.inl h6), ite_eq_right (by omega), ite_eq_right (by omega),
+      ite_eq_right (by omega), ite_eq_right (by omega), ite_eq_right (by omega),
+      ite_eq_right (by omega), ite_eq_left h6, h6]
     simp only [List.getD_cons_zero]
     rcases hφ : ofNat (L := L) (ξ := ξ) (n + 1) d.unpair.2 with _ | φ
     · simp
-    · rw [if_neg (by simp)]
+    · rw [ite_eq_right (by simp)]
       simp [encode_eq_toNat, toNat]
   by_cases h7 : d.unpair.1 = 7
-  · rw [vs_quant n d (by simp [h7]) (Or.inr h7), if_neg (by omega), if_neg (by omega),
-      if_neg (by omega), if_neg (by omega), if_neg (by omega), if_neg (by omega),
-      if_neg (by omega), if_pos h7, h7]
+  · rw [vs_quant n d (by simp [h7]) (Or.inr h7), ite_eq_right (by omega), ite_eq_right (by omega),
+      ite_eq_right (by omega), ite_eq_right (by omega), ite_eq_right (by omega), ite_eq_right (by omega),
+      ite_eq_right (by omega), ite_eq_left h7, h7]
     simp only [List.getD_cons_zero]
     rcases hφ : ofNat (L := L) (ξ := ξ) (n + 1) d.unpair.2 with _ | φ
     · simp
-    · rw [if_neg (by simp)]
+    · rw [ite_eq_right (by simp)]
       simp [encode_eq_toNat, toNat]
   by_cases h2 : d.unpair.1 = 2
-  · rw [if_neg (by omega), if_neg (by omega), if_pos h2, h2]
+  · rw [ite_eq_right (by omega), ite_eq_right (by omega), ite_eq_left h2, h2]
     simp [encode_eq_toNat, toNat]
   by_cases h3 : d.unpair.1 = 3
-  · rw [if_neg (by omega), if_neg (by omega), if_neg (by omega), if_pos h3, h3]
+  · rw [ite_eq_right (by omega), ite_eq_right (by omega), ite_eq_right (by omega), ite_eq_left h3, h3]
     simp [encode_eq_toNat, toNat]
   by_cases h0 : d.unpair.1 = 0
-  · rw [if_pos h0, h0]
+  · rw [ite_eq_left h0, h0]
     simp only []
     rcases hv : (Nat.unpair (Nat.unpair (Nat.unpair d).2).2).2.natToVec
         (Nat.unpair (Nat.unpair d).2).1 with _ | v'
-    · rw [if_neg ?_]
+    · rw [ite_eq_right ?_]
       · simp
       · rintro ⟨hlen, -, -⟩
         obtain ⟨w, hw⟩ := Nat.natToVec_isSome_of_length hlen
@@ -667,7 +668,7 @@ theorem step_correct (n e : ℕ) :
           = (Nat.unpair (Nat.unpair d).2).1 := by rw [hl]; simp
       rcases hR : (decode (Nat.unpair (Nat.unpair (Nat.unpair d).2).2).1 :
           Option (L.Rel (Nat.unpair (Nat.unpair d).2).1)) with _ | R
-      · rw [if_neg ?_]
+      · rw [ite_eq_right ?_]
         · simp
         · rintro ⟨-, hne, -⟩; exact hne (by simp)
       · rcases hg : (Matrix.getM fun i ↦ (decode (v' i) : Option (Semiterm L ξ n))) with _ | t
@@ -676,7 +677,7 @@ theorem step_correct (n e : ℕ) :
             push Not at hcon
             choose t ht using fun i ↦ Option.ne_none_iff_exists'.mp (hcon i)
             rw [Matrix.getM_option_eq_some_iff.mpr ht] at hg; exact absurd hg (by simp)
-          rw [if_neg ?_]
+          rw [ite_eq_right ?_]
           · simp [hg]
           · rintro ⟨-, -, hne⟩
             refine hne (stepVecT_eq_zero (j := v' i₀) ?_ ?_)
@@ -687,14 +688,14 @@ theorem step_correct (n e : ℕ) :
           have hsv : stepVecT (L := L) (ξ := ξ) n
               (Nat.natToList (Nat.unpair (Nat.unpair (Nat.unpair d).2).2).2)
               = Matrix.vecToNat (fun i ↦ encode (t i)) + 1 := by rw [hl]; exact stepVecT_ofFn hT
-          rw [if_pos ⟨hlen, by simp, by rw [hsv]; simp⟩, hsv]
+          rw [ite_eq_left ⟨hlen, by simp, by rw [hsv]; simp⟩, hsv]
           simp [hg, encode_eq_toNat, toNat]
   by_cases h1 : d.unpair.1 = 1
-  · rw [if_neg h0, if_pos h1, h1]
+  · rw [ite_eq_right h0, ite_eq_left h1, h1]
     simp only []
     rcases hv : (Nat.unpair (Nat.unpair (Nat.unpair d).2).2).2.natToVec
         (Nat.unpair (Nat.unpair d).2).1 with _ | v'
-    · rw [if_neg ?_]
+    · rw [ite_eq_right ?_]
       · simp
       · rintro ⟨hlen, -, -⟩
         obtain ⟨w, hw⟩ := Nat.natToVec_isSome_of_length hlen
@@ -705,7 +706,7 @@ theorem step_correct (n e : ℕ) :
           = (Nat.unpair (Nat.unpair d).2).1 := by rw [hl]; simp
       rcases hR : (decode (Nat.unpair (Nat.unpair (Nat.unpair d).2).2).1 :
           Option (L.Rel (Nat.unpair (Nat.unpair d).2).1)) with _ | R
-      · rw [if_neg ?_]
+      · rw [ite_eq_right ?_]
         · simp
         · rintro ⟨-, hne, -⟩; exact hne (by simp)
       · rcases hg : (Matrix.getM fun i ↦ (decode (v' i) : Option (Semiterm L ξ n))) with _ | t
@@ -714,7 +715,7 @@ theorem step_correct (n e : ℕ) :
             push Not at hcon
             choose t ht using fun i ↦ Option.ne_none_iff_exists'.mp (hcon i)
             rw [Matrix.getM_option_eq_some_iff.mpr ht] at hg; exact absurd hg (by simp)
-          rw [if_neg ?_]
+          rw [ite_eq_right ?_]
           · simp [hg]
           · rintro ⟨-, -, hne⟩
             refine hne (stepVecT_eq_zero (j := v' i₀) ?_ ?_)
@@ -725,9 +726,10 @@ theorem step_correct (n e : ℕ) :
           have hsv : stepVecT (L := L) (ξ := ξ) n
               (Nat.natToList (Nat.unpair (Nat.unpair (Nat.unpair d).2).2).2)
               = Matrix.vecToNat (fun i ↦ encode (t i)) + 1 := by rw [hl]; exact stepVecT_ofFn hT
-          rw [if_pos ⟨hlen, by simp, by rw [hsv]; simp⟩, hsv]
+          rw [ite_eq_left ⟨hlen, by simp, by rw [hsv]; simp⟩, hsv]
           simp [hg, encode_eq_toNat, toNat]
-  · rw [if_neg h0, if_neg h1, if_neg h2, if_neg h3, if_neg h4, if_neg h5, if_neg h6, if_neg h7]
+  · rw [ite_eq_right h0, ite_eq_right h1, ite_eq_right h2, ite_eq_right h3, ite_eq_right h4,
+      ite_eq_right h5, ite_eq_right h6, ite_eq_right h7]
     match hi : d.unpair.1 with
     | 0 => exact absurd hi h0
     | 1 => exact absurd hi h1

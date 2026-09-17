@@ -1,6 +1,6 @@
 module
 
-public import Mathlib.Logic.IsEmpty.Basic
+public import Mathlib.Basic.IsEmpty.Basic
 
 @[expose] public section
 
