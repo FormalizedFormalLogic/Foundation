@@ -4,6 +4,7 @@ public import Foundation.FirstOrder.SetTheory.Basic.Axioms
 public import Foundation.FirstOrder.Tarski.Definability
 
 @[expose] public section
+set_option linter.style.longLine false
 /-! # Basic properties of model of set theory-/
 
 namespace FFL.FirstOrder.SetTheory

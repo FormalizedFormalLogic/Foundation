@@ -3,6 +3,8 @@ module
 public import Foundation.FirstOrder.Incompleteness.RosserProvability
 
 @[expose] public section
+set_option linter.style.docString false
+set_option linter.unusedSectionVars false
 
 namespace FFL.FirstOrder
 

@@ -8,6 +8,7 @@ namespace FFL.FirstOrder.SetTheory
 
 set_option linter.style.openClassical false
 set_option linter.style.longLine false
+set_option linter.style.emptyLine false
 set_option linter.unusedTactic false
 set_option linter.unreachableTactic false
 

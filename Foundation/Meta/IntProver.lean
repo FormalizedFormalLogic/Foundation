@@ -31,6 +31,7 @@ variable {F : Type*} [LogicalConnective F] [LogicalNeutral F] [DecidableEq F] {S
 -- need it internally to elaborate; omitting it breaks elaboration, so the false-positive warning
 -- is suppressed for the whole section.
 set_option linter.unusedDecidableInType false
+set_option linter.unusedSectionVars false
 
 local notation Γ:45 " ⟹ " Δ:46 => TwoSided 𝓢 Γ Δ
 

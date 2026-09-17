@@ -10,11 +10,15 @@ namespace FFL
 
 namespace FirstOrder
 
+universe u v
+
 set_option linter.style.longLine false
 set_option linter.unusedTactic false
 set_option linter.unreachableTactic false
 set_option linter.style.induction false
 set_option linter.unusedSimpArgs false
+set_option linter.style.cdot false
+set_option linter.style.dollarSyntax false
 
 variable {L : Language} {ξ : Type*} [Semiformula.Operator.Eq L]
 

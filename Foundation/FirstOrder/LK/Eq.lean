@@ -9,6 +9,10 @@ namespace FFL
 
 namespace FirstOrder
 
+universe u v
+
+set_option linter.style.longLine false
+
 variable {L : Language} {ξ : Type*} [Semiformula.Operator.Eq L]
 
 lemma consequence_iff_eq {T : Theory L} [𝗘𝗤 L ⪯ T] {σ : Sentence L} :

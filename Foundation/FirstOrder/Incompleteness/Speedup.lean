@@ -14,6 +14,7 @@ public import Mathlib.Data.Nat.Log
 -/
 
 @[expose] public section
+set_option linter.unusedSectionVars false
 
 namespace FFL.FirstOrder.Arithmetic.Bootstrapping
 

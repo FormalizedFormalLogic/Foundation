@@ -8,8 +8,10 @@ public import Foundation.FirstOrder.Arithmetic.Exponential.Log
 
 @[expose] public section
 
+set_option autoImplicit true
 set_option linter.style.longLine false
 set_option linter.style.dollarSyntax false
+set_option linter.style.whitespace false
 
 namespace FFL.FirstOrder.Arithmetic
 

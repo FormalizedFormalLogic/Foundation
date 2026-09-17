@@ -141,12 +141,12 @@ structure Context where
 abbrev M := ReaderT Context AtomM
 
 /-- Apply the function
-  `n : ∀ {F} [LogicalConnective F] [LogicalNeutral F] [DecidableEq F] {S} [Entailment S F] {𝓢}
+  `n : ∀ {F} [LogicalConnective F] [LogicalNeutral F] {S} [Entailment S F] {𝓢}
     [Entailment.Cl 𝓢], _`
 to the implicit parameters in the context, and the given list of arguments. -/
 def Context.app (c : Context) (n : Name) : Array Expr → Expr :=
   mkAppN <| @Expr.const n [c.levelF, c.levelS, c.levelE]
-    |>.app c.F |>.app c.LC |>.app c.LN |>.app c.DC |>.app c.S |>.app c.E |>.app c.𝓢 |>.app c.CL
+    |>.app c.F |>.app c.LC |>.app c.LN |>.app c.S |>.app c.E |>.app c.𝓢 |>.app c.CL
 
 def iapp (n : Name) (xs : Array Expr) : M Expr := do
   let c ← read

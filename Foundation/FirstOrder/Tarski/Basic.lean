@@ -8,6 +8,9 @@ public import Foundation.Vorspiel.Empty
 @[expose] public section
 set_option linter.unusedVariables false
 set_option linter.unusedSimpArgs false
+set_option autoImplicit true
+set_option linter.style.dollarSyntax false
+set_option linter.style.longLine false
 
 /-!
 # Model-theoretic semantics of first-order classical logic

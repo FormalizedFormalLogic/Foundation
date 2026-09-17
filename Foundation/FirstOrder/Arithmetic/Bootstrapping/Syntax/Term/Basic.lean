@@ -3,6 +3,7 @@ module
 public import Foundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Language
 
 @[expose] public section
+set_option autoImplicit true
 set_option linter.style.longLine false
 namespace FFL.FirstOrder.Arithmetic.Bootstrapping
 
@@ -243,7 +244,7 @@ alias ⟨case, mk⟩ := case_iff
 lemma func {k f v : V} (hkf : L.IsFunc k f) (hv : IsUTermVec L k v) :
     IsUTerm L (^func k f v) := func_iff.mpr ⟨hkf, hv⟩
 
-lemma induction (Γ) {P : V → Prop} (hP : Γ-[1]-Predicate P)
+lemma induction (Γ : Polarity) {P : V → Prop} (hP : Γ-[1]-Predicate P)
     (hbvar : ∀ z, P (^#z)) (hfvar : ∀ x, P (^&x))
     (hfunc : ∀ k f v, L.IsFunc k f → IsUTermVec L k v → (∀ i < k, P v.[i]) → P (^func k f v)) :
     ∀ t, IsUTerm L t → P t :=
@@ -838,7 +839,7 @@ lemma IsSemiterm.case_iff {n t : V} :
 
 alias ⟨IsSemiterm.case, IsSemiterm.mk'⟩ := IsSemiterm.case_iff
 
-lemma IsSemiterm.induction (Γ) {n : V} {P : V → Prop} (hP : Γ-[1]-Predicate P)
+lemma IsSemiterm.induction (Γ : Polarity) {n : V} {P : V → Prop} (hP : Γ-[1]-Predicate P)
     (hbvar : ∀ z < n, P (^#z)) (hfvar : ∀ x, P (^&x))
     (hfunc : ∀ k f v, L.IsFunc k f → IsSemitermVec L k n v → (∀ i < k, P v.[i]) → P (^func k f v)) :
     ∀ t, IsSemiterm L n t → P t := by
@@ -864,7 +865,7 @@ lemma IsSemiterm.induction (Γ) {n : V} {P : V → Prop} (hP : Γ-[1]-Predicate 
 lemma IsSemiterm.sigma1_induction {n : V} {P : V → Prop} (hP : 𝚺₁-Predicate P)
     (hbvar : ∀ z < n, P (^#z)) (hfvar : ∀ x, P (^&x))
     (hfunc : ∀ k f v, L.IsFunc k f → IsSemitermVec L k n v → (∀ i < k, P v.[i]) → P (^func k f v)) :
-    ∀ t, IsSemiterm L n t → P t := IsSemiterm.induction _ hP hbvar hfvar hfunc
+    ∀ t, IsSemiterm L n t → P t := IsSemiterm.induction 𝚺 hP hbvar hfvar hfunc
 
 end isSemiterm
 

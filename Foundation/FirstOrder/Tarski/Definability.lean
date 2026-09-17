@@ -11,6 +11,9 @@ set_option linter.style.longLine false
 set_option linter.unusedVariables false
 set_option linter.unusedTactic false
 set_option linter.unreachableTactic false
+set_option autoImplicit true
+set_option linter.style.cases false
+set_option linter.unusedFintypeInType false
 
 /-!
 # Relations and functions defined by a first-order formula (with parameter)

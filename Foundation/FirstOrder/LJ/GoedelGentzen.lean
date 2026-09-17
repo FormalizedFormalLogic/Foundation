@@ -8,7 +8,11 @@ set_option linter.unusedSimpArgs false
 set_option linter.unusedTactic false
 set_option linter.unreachableTactic false
 set_option linter.unusedVariables false
+set_option autoImplicit true
+set_option linter.style.longLine false
 namespace FFL.FirstOrder
+
+universe u
 
 namespace Semiformula
 
@@ -125,6 +129,12 @@ def negDoubleNegation : (φ : Proposition L) →
           (Rewriting.free ((∼φ)ᴺ)) :=
         by simpa [Semiformula.rew_doubleNegation] using e
       exact (InterDerivation.dne (by simp)).trans (InterDerivation.all e)
+termination_by φ => φ.complexity
+decreasing_by
+  all_goals first
+  | exact Nat.lt_succ_of_le (Nat.le_max_left _ _)
+  | exact Nat.lt_succ_of_le (Nat.le_max_right _ _)
+  | simp
 def negDoubleNegation' (φ : Proposition L) :
     InterDerivation L (∼(∼φ)ᴺ) φᴺ := by
   simpa using negDoubleNegation (∼φ)

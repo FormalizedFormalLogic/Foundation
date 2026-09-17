@@ -19,6 +19,9 @@ undecidable (`undecidability_first_order_logic`).
 
 @[expose] public section
 
+set_option linter.style.cdot false
+set_option linter.style.longLine false
+
 namespace FFL.FirstOrder.Arithmetic
 
 open Bootstrapping Bootstrapping.Arithmetic

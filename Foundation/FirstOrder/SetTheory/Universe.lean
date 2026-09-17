@@ -6,6 +6,7 @@ public import Mathlib.SetTheory.Cardinal.Aleph
 public import Foundation.Vorspiel.Small
 
 @[expose] public section
+set_option autoImplicit true
 set_option linter.style.longLine false
 set_option linter.unusedSimpArgs false
 set_option linter.unusedTactic false
@@ -21,6 +22,8 @@ reference:
  -/
 
 namespace FFL.FirstOrder.SetTheory
+
+universe u
 
 /-- QPF functor to generate universe -/
 @[ext]

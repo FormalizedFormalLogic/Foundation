@@ -3,11 +3,13 @@ module
 public import Foundation.FirstOrder.Arithmetic.Schemata
 
 @[expose] public section
+set_option autoImplicit true
 set_option linter.style.longLine false
 set_option linter.style.dollarSyntax false
 set_option linter.style.lambdaSyntax false
 set_option linter.style.openClassical false
 set_option linter.style.induction false
+set_option linter.style.cases false
 set_option linter.unusedSimpArgs false
 set_option linter.unusedTactic false
 set_option linter.unusedVariables false

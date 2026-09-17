@@ -15,9 +15,12 @@ set_option linter.unusedSimpArgs false
 set_option linter.unusedTactic false
 set_option linter.unreachableTactic false
 set_option linter.unusedVariables false
+set_option autoImplicit true
 /-! # Skolem hull -/
 
 namespace FFL.FirstOrder
+
+universe u v
 
 /-- Skolem function of rank 1 -/
 def Language.skolemFunction₁ (L : Language) : Language where

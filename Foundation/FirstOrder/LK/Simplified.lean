@@ -1,6 +1,8 @@
 module
 public import Foundation.FirstOrder.LK.Basic
 @[expose] public section
+set_option linter.style.longLine false
+set_option linter.style.whitespace false
 
 /-! # Alternative definition of proof -/
 

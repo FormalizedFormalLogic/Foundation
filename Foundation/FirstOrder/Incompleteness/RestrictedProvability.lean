@@ -4,6 +4,12 @@ public import Foundation.FirstOrder.Incompleteness.RosserProvability
 public import Foundation.FirstOrder.Arithmetic.HFS.Superexp
 
 @[expose] public section
+
+set_option linter.style.cdot false
+set_option linter.style.docString false
+set_option linter.style.dollarSyntax false
+set_option linter.style.longLine false
+
 /-!
 # Provability with restricted proof size
 

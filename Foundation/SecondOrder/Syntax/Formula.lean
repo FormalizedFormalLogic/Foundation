@@ -3,6 +3,9 @@ module
 public import Foundation.FirstOrder.Syntax.Classical.Formula
 
 @[expose] public section
+set_option autoImplicit true
+set_option linter.style.cdot false
+set_option linter.style.longLine false
 
 /-!
 # Formulas of monadic second-order logic

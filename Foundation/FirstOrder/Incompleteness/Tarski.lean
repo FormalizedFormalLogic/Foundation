@@ -4,6 +4,8 @@ public import Foundation.FirstOrder.Arithmetic.Bootstrapping.FixedPoint
 public import Foundation.Meta.ClProver
 
 @[expose] public section
+set_option linter.style.dollarSyntax false
+set_option linter.style.longLine false
 namespace FFL.FirstOrder.Arithmetic
 
 variable {T : ArithmeticTheory} [𝗜𝚺₁ ⪯ T] [Entailment.Consistent T]

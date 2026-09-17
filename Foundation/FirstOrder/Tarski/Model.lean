@@ -3,10 +3,14 @@ public import Foundation.FirstOrder.Tarski.Operator
 public import Foundation.FirstOrder.Tarski.Elementary
 @[expose] public section
 set_option linter.unusedVariables false
+set_option autoImplicit true
+set_option linter.style.longLine false
 
 namespace FFL
 
 namespace FirstOrder
+
+universe u u₁ u₂ v v'
 
 namespace Tarski.Structure
 

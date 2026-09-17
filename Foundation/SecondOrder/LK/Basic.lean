@@ -70,7 +70,7 @@ inductive LK.Derivation : LK.Sequent L → Type _
   LK.Derivation (Γ + ⦃φ, ψ⦄) → LK.Derivation (Γ + ⦃φ ⋎ ψ⦄)
 | all₁ {Γ : LK.Sequent L} {φ : Semiproposition L 0 1} :
   LK.Derivation (LK.Sequent.shift₀ Γ + ⦃φ.free₀⦄) → LK.Derivation (Γ + ⦃∀¹ φ⦄)
-| exs₁ {Γ : LK.Sequent L} {φ : Semiproposition L 0 1} {t : SecondOrder.FirstOrder.Term L} :
+| exs₁ {Γ : LK.Sequent L} {φ : Semiproposition L 0 1} {t : Semiterm L ℕ 0} :
   LK.Derivation (Γ + ⦃φ/[t]⦄) → LK.Derivation (Γ + ⦃∃¹ φ⦄)
 | all₂ {Γ : LK.Sequent L} {φ : Semiproposition L 1 0} :
   LK.Derivation (LK.Sequent.shift₁ Γ + ⦃φ.free₁⦄) → LK.Derivation (Γ + ⦃∀² φ⦄)

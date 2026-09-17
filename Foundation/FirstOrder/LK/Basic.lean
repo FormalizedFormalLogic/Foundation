@@ -12,6 +12,8 @@ public import Mathlib.Data.List.MinMax
 set_option linter.unusedSimpArgs false
 set_option linter.unusedTactic false
 set_option linter.unreachableTactic false
+set_option autoImplicit true
+set_option linter.style.longLine false
 
 namespace FFL
 

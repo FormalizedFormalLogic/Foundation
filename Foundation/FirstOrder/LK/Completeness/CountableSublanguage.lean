@@ -7,9 +7,13 @@ public import Mathlib.Logic.Equiv.List
 set_option linter.setNotationForOrder false
 set_option linter.unusedTactic false
 set_option linter.unreachableTactic false
+set_option autoImplicit true
+set_option linter.style.longLine false
 namespace FFL
 
 namespace FirstOrder
+
+universe u
 
 variable {L : Language.{u}}
 

@@ -13,6 +13,7 @@ public import Mathlib.Logic.Encodable.Basic
 /-! # Completeness theorem -/
 
 @[expose] public section
+set_option autoImplicit true
 set_option linter.style.longLine false
 set_option linter.style.openClassical false
 set_option linter.unusedSimpArgs false

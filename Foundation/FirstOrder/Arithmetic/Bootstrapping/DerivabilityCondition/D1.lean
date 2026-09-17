@@ -3,6 +3,7 @@ module
 public import Foundation.FirstOrder.Arithmetic.Bootstrapping.Syntax
 
 @[expose] public section
+set_option linter.style.longLine false
 /-!
 # Hilbert-Bernays-Löb derivability condition $\mathbf{D1}$ and soundness of internal provability.
 -/
@@ -14,6 +15,8 @@ open FirstOrder
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 
 variable {L : Language} [L.Encodable] [L.LORDefinable]
+
+noncomputable local instance : L.DecidableEq := ⟨fun _ ↦ Classical.decEq _, fun _ ↦ Classical.decEq _⟩
 
 variable {T : Theory L} [T.Δ₁]
 

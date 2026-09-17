@@ -26,6 +26,7 @@ set_option linter.style.dollarSyntax false
 set_option linter.style.lambdaSyntax false
 set_option linter.style.longLine false
 set_option linter.style.whitespace false
+set_option linter.unusedSectionVars false
 
 structure Provability [L.ReferenceableBy L₀] (T₀ : Theory L₀) (T : Theory L) where
   prov : Semisentence L₀ 1

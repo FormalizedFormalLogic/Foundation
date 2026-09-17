@@ -4,6 +4,8 @@ public import Foundation.FirstOrder.Syntax.Classical.BinderNotation
 public import Foundation.Vorspiel.Finset.Card
 
 @[expose] public section
+set_option autoImplicit true
+set_option linter.style.longLine false
 
 namespace Matrix
 

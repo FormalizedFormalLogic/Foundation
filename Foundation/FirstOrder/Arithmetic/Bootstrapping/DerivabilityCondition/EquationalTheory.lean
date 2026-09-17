@@ -15,6 +15,11 @@ open _root_.FFL.FirstOrder.Entailment
 
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 
+noncomputable local instance : (ℒₒᵣ).DecidableEq :=
+  ⟨fun _ ↦ Classical.decEq _, fun _ ↦ Classical.decEq _⟩
+
+noncomputable local instance : DecidableEq (Formula V ℒₒᵣ) := Classical.decEq _
+
 namespace Arithmetic
 
 -- `Arithmetic` is intentionally re-opened here even though the ambient namespace
@@ -105,7 +110,7 @@ lemma subst_ne (t₁ t₂ u₁ u₂ : Term V ℒₒᵣ) :
   simpa using TProof.specialize₄! this u₂ u₁ t₂ t₁
 
 lemma subst_nlt (t₁ t₂ u₁ u₂ : Term V ℒₒᵣ) :
-    T.internalize V ⊢ (t₁ ≐ t₂) 🡒 (u₁ ≐ u₂) 🡒 (t₁ ≮' u₁) 🡒 (t₂ ≮' u₂) := by
+    T.internalize V ⊢ (t₁ ≐ t₂) 🡒 (u₁ ≐ u₂) 🡒 (t₁ ≮' u₁) 🡒 (t₂ ≮' u₂) := by
   have : T ⊢ “∀ x₁ x₂ y₁ y₂, x₁ = x₂ → y₁ = y₂ → x₁ ≮ y₁ → x₂ ≮ y₂” :=
     complete.{0} T _ fun (M : Type) _ _ ↦ by
     simpa [models_iff] using fun a b c e h ↦ e ▸ h
@@ -486,7 +491,7 @@ lemma replace_aux (φ : V) :
         val_imp, val_equals, Semiterm.bvar_val, Fin.coe_ofNat_eq_mod, Nat.mod_succ, Nat.cast_one,
         Nat.zero_mod, Nat.cast_zero, val_substs, SemitermVec.val_succ, Matrix.head_cons,
         Matrix.tail_cons, SemitermVec.val_nil] using this
-    have ih 
+    have ih :
       T.internalize V ⊢ ∀¹ ∀¹ ((#'1 ≐ #'0) 🡒 φ⤉⤉.free1.subst ![#'1] 🡒 φ⤉⤉.free1.subst ![#'0]) := by
       apply (tprovable_iff_provable (T := T)).mpr
       simpa using ih
@@ -509,7 +514,7 @@ lemma replace_aux (φ : V) :
         val_imp, val_equals, Semiterm.bvar_val, Fin.coe_ofNat_eq_mod, Nat.mod_succ, Nat.cast_one,
         Nat.zero_mod, Nat.cast_zero, val_substs, SemitermVec.val_succ, Matrix.head_cons,
         Matrix.tail_cons, SemitermVec.val_nil] using! this
-    have ih 
+    have ih :
       T.internalize V ⊢ ∀¹ ∀¹ ((#'1 ≐ #'0) 🡒 φ⤉⤉.free1.subst ![#'1] 🡒 φ⤉⤉.free1.subst ![#'0]) := by
       apply (tprovable_iff_provable (T := T)).mpr
       simpa using ih

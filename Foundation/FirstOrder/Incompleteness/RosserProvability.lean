@@ -4,6 +4,7 @@ public import Foundation.FirstOrder.Incompleteness.WitnessComparison
 public import Foundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.CraigTrick
 
 @[expose] public section
+set_option linter.style.dollarSyntax false
 /-!
 # Rosser's provability predicate
 -/

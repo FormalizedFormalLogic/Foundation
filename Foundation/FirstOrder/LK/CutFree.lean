@@ -5,6 +5,8 @@ public import Foundation.FirstOrder.LK.Basic
 @[expose] public section
 set_option linter.unusedSimpArgs false
 set_option linter.style.missingEnd false
+set_option autoImplicit true
+set_option linter.style.cdot false
 /-!
 # Canonical model of classical first-order logic
 

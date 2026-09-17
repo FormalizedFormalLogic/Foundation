@@ -3,6 +3,8 @@ module
 public import Foundation.FirstOrder.Incompleteness.StandardProvability
 
 @[expose] public section
+set_option linter.style.longLine false
+set_option linter.style.openClassical false
 /-!
 # Consistency predicate
 -/

@@ -11,6 +11,7 @@ public import Foundation.FirstOrder.Arithmetic.Schemata
 -/
 
 @[expose] public section
+set_option linter.style.whitespace false
 
 namespace FFL.FirstOrder.Arithmetic
 

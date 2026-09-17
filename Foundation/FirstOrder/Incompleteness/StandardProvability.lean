@@ -7,6 +7,9 @@ public import Foundation.FirstOrder.Incompleteness.ProvabilityAbstraction.Basic
 public import Foundation.FirstOrder.Arithmetic.Bootstrapping.FixedPoint
 
 @[expose] public section
+set_option linter.style.docString false
+set_option linter.style.dollarSyntax false
+set_option linter.style.longLine false
 /-!
 # Derivability conditions of standard provability predicate
 -/

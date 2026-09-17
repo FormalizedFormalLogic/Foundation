@@ -17,6 +17,8 @@ is not provable in `T` itself.
 -/
 
 @[expose] public section
+set_option linter.style.dollarSyntax false
+set_option linter.style.longLine false
 
 namespace FFL.FirstOrder
 

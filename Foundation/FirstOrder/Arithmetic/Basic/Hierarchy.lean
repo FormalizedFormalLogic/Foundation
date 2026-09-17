@@ -4,6 +4,7 @@ public import Foundation.FirstOrder.Syntax.Classical.Padding
 public import Foundation.FirstOrder.Arithmetic.Basic.Model
 
 @[expose] public section
+set_option autoImplicit true
 namespace FFL.FirstOrder.Arithmetic
 
 variable {L : Language} [L.LT] {ξ : Type*} {n : ℕ}
@@ -90,15 +91,16 @@ lemma zero_iff_delta_zero {Γ} {φ : Semiformula L ξ n} : Hierarchy Γ 0 φ ↔
 @[simp] lemma alt_zero_iff_zero {Γ : Polarity} {φ : Semiformula L ξ n} :
     Hierarchy Γ.alt 0 φ ↔ Hierarchy Γ 0 φ := by rcases Γ <;> simp [pi_zero_iff_sigma_zero]
 
-lemma accum {Γ} {s : ℕ} {φ : Semiformula L ξ n} : Hierarchy Γ s φ → ∀ Γ', Hierarchy Γ' (s + 1) φ
+lemma accum {n : ℕ} {Γ} {s : ℕ} {φ : Semiformula L ξ n} :
+    Hierarchy Γ s φ → ∀ Γ', Hierarchy Γ' (s + 1) φ
   |    verum _ _ _, _ => verum _ _ _
   |   falsum _ _ _, _ => falsum _ _ _
   |    rel _ _ r v, _ => rel _ _ r v
   |   nrel _ _ r v, _ => nrel _ _ r v
-  |      and hp hq, Γ' => and (hp.accum Γ') (hq.accum Γ')
-  |       or hp hq, Γ' => or (hp.accum Γ') (hq.accum Γ')
-  |    ball pos hp, Γ' => ball pos (hp.accum Γ')
-  |     bexs pos hp, Γ' => bexs pos (hp.accum Γ')
+  |      and hp hq, _ => and (hp.accum _) (hq.accum _)
+  |       or hp hq, _ => or (hp.accum _) (hq.accum _)
+  |    ball pos hp, _ => ball pos (hp.accum _)
+  |     bexs pos hp, _ => bexs pos (hp.accum _)
   |         all hp, Γ => by
     cases Γ
     · exact hp.dummy_sigma
