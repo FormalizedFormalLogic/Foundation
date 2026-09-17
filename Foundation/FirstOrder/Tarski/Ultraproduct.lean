@@ -8,6 +8,9 @@ namespace FFL
 
 namespace FirstOrder
 
+set_option linter.style.longLine false
+set_option linter.unusedSimpArgs false
+
 section
 
 universe u v
@@ -40,7 +43,7 @@ namespace Semiterm
 
 open Tarski.Structure
 
-variable (e : Fin n → Uprod A 𝓤) (ε : ξ → Uprod A 𝓤)
+variable {n : ℕ} (e : Fin n → Uprod A 𝓤) (ε : ξ → Uprod A 𝓤)
 
 lemma val_Uprod (t : Semiterm L ξ n) :
     t.val e ε = ⟨fun i ↦ t.val (fun x ↦ (e x).val i) (fun x ↦ (ε x).val i)⟩ := by
@@ -54,7 +57,7 @@ variable {A} {𝓤}
 
 namespace Semiformula
 
-variable {e : Fin n → Uprod A 𝓤} {ε : ξ → Uprod A 𝓤}
+variable {n : ℕ} {e : Fin n → Uprod A 𝓤} {ε : ξ → Uprod A 𝓤}
 
 lemma val_vecCons_val_eq {z : Uprod A 𝓤} {i : I} :
     (z.val i :> fun x ↦ (e x).val i) = (fun x ↦ ((z :> e) x).val i) := by
@@ -129,6 +132,8 @@ end
 
 section
 
+universe u
+
 variable {L : Language.{u}} {T : Theory L}
 
 abbrev FinSubtheory (T : Theory L) := {t : Finset (Sentence L) // ↑t ⊆ T}
@@ -160,7 +165,8 @@ lemma compactness_aux :
     choose A si s hA using this
     have : ∃ 𝓤 : Ultrafilter (FinSubtheory T), Set.image (Sentence.domain A) T ⊆ 𝓤.sets := ultrafilter_exists A hA
     rcases this with ⟨𝓤, h𝓤⟩
-    have : (Tarski.Structure.Uprod A 𝓤)↓[L] ⊧* T := ⟨by intro σ hσ; exact models_Uprod.mpr (h𝓤 $ Set.mem_image_of_mem (Sentence.domain A) hσ)⟩
+    have : (Tarski.Structure.Uprod A 𝓤)↓[L] ⊧* T :=
+      ⟨by intro σ hσ; exact models_Uprod.mpr (h𝓤 <| Set.mem_image_of_mem (Sentence.domain A) hσ)⟩
     exact satisfiable_intro (Tarski.Structure.Uprod A 𝓤) this
 
 theorem compact :

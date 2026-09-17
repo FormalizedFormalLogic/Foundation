@@ -6,6 +6,11 @@ public import Foundation.FirstOrder.SetTheory.Z
 
 namespace FFL.FirstOrder.SetTheory
 
+set_option linter.style.openClassical false
+set_option linter.style.longLine false
+set_option linter.unusedTactic false
+set_option linter.unreachableTactic false
+
 variable {V : Type*} [SetStructure V] [Nonempty V] [V↓[ℒₛₑₜ] ⊧* 𝗭𝗙]
 
 /-! ## Ersatzaxiom -/
@@ -133,7 +138,7 @@ namespace Repl
 structure Blueprint (arity : ℕ) where
   graph : SetTheorySemisentence (arity + 2)
 
-def Blueprint.resultDef (b : Blueprint arity) : SetTheorySemisentence (arity + 2) :=
+def Blueprint.resultDef {arity : ℕ} (b : Blueprint arity) : SetTheorySemisentence (arity + 2) :=
   “Y X. ∀ y, y ∈ Y ↔ ∃ x ∈ X, !b.graph y x ⋯”
 
 variable (V)
@@ -166,9 +171,11 @@ lemma result_defined : DefinedFunction (fun v ↦ c.result (v ·.succ) (v 0)) b.
   · intro h
     simp [Blueprint.resultDef, result, c.map_defined.iff, h]
 
-@[simp] lemma eval_resultDef : b.resultDef.Evalb v ↔ v 0 = c.result (v ·.succ.succ) (v 1) := c.result_defined.iff v
+@[simp] lemma eval_resultDef {v : Fin (arity + 2) → V} :
+    b.resultDef.Evalb v ↔ v 0 = c.result (v ·.succ.succ) (v 1) := c.result_defined.iff v
 
-@[simp] lemma mem_result : y ∈ c.result v X ↔ ∃ x ∈ X, y = c.map v x := by
+@[simp] lemma mem_result {v : Fin arity → V} {y X : V} :
+    y ∈ c.result v X ↔ ∃ x ∈ X, y = c.map v x := by
   simp [result, repl_spec]
 
 end Construction

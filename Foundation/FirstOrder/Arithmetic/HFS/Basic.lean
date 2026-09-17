@@ -11,6 +11,8 @@ public import Foundation.FirstOrder.Arithmetic.Exponential
 
 namespace FFL.FirstOrder.Arithmetic
 
+set_option linter.style.longLine false
+
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 
 @[simp] lemma susbset_insert (x a : V) : a ⊆ insert x a := by intro z hz; simp [hz]
@@ -389,7 +391,7 @@ lemma Disjoint.not_of_mem {s t x : V} (hs : x ∈ s) (ht : x ∈ t) : ¬Disjoint
 
 lemma Disjoint.symm {s t : V} (h : Disjoint s t) : Disjoint t s := by simpa [Disjoint, inter_comm t s] using h
 
-@[simp] lemma Disjoint.singleton_iff {a : V} : Disjoint ({a} : V) s ↔ a ∉ s := by simp [Disjoint, isempty_iff]
+@[simp] lemma Disjoint.singleton_iff {a s : V} : Disjoint ({a} : V) s ↔ a ∉ s := by simp [Disjoint, isempty_iff]
 
 end disjoint
 
@@ -430,7 +432,7 @@ noncomputable def IsMapping.get {m : V} (h : IsMapping m) {x : V} (hx : x ∈ do
 @[simp] lemma IsMapping.get_mem {m : V} (h : IsMapping m) {x : V} (hx : x ∈ domain m) :
     ⟪x, h.get hx⟫ ∈ m := Classical.choose!_spec (IsMapping.get_exists_uniq h hx)
 
-lemma IsMapping.get_uniq {m : V} (h : IsMapping m) {x : V} (hx : x ∈ domain m) (hy : ⟪x, y⟫ ∈ m) : y = h.get hx :=
+lemma IsMapping.get_uniq {m : V} (h : IsMapping m) {x y : V} (hx : x ∈ domain m) (hy : ⟪x, y⟫ ∈ m) : y = h.get hx :=
     (h x hx).unique hy (by simp)
 
 @[simp] lemma IsMapping.empty : IsMapping (∅ : V) := by intro x; simp
@@ -504,7 +506,7 @@ lemma domain_restr_of_subset_domain {f s : V} (h : s ⊆ domain f) : domain (f �
 
 end restriction
 
-theorem insert_induction {P : V → Prop} (hP : Γ-[1]-Predicate P)
+theorem insert_induction {Γ} {P : V → Prop} (hP : Γ-[1]-Predicate P)
     (hempty : P ∅) (hinsert : ∀ a s, a ∉ s → P s → P (insert a s)) : ∀ s, P s :=
   InductionOnHierarchy.order_induction_sigma Γ 1 hP <| by
     intro s IH
