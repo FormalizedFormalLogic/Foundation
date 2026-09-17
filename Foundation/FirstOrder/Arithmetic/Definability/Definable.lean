@@ -953,4 +953,37 @@ lemma exists_hierarchy_eval_iff {P : (Fin k → V) → Prop} (hP : Γ-[s].Defina
   exact ⟨φ.val.enumerateFVar, Rew.rewriteMap φ.val.idxOfFVar ▹ φ.val, by simp,
     fun _ ↦ by simp [Semiformula.eval_rewriteMap, hφ.df.iff]⟩;
 
+namespace HierarchySymbol.Definable
+
+/-- Induction on `𝚺-[s + 1]`-definable predicates: the `𝚷-[s]`-definable predicates are the base
+case, and the motive is closed under `∧`, `∨`, bounded quantification and `∃`. -/
+theorem sigma_succ_induction {V : Type*} [ORingStructure V] {s : ℕ}
+    {Motive : (k : ℕ) → ((Fin k → V) → Prop) → Prop}
+    (pi : ∀ {k} {P : (Fin k → V) → Prop}, 𝚷-[s].Definable P → Motive k P)
+    (and : ∀ {k} {P Q : (Fin k → V) → Prop}, 𝚺-[s + 1].Definable P → 𝚺-[s + 1].Definable Q →
+      Motive k P → Motive k Q → Motive k fun v ↦ P v ∧ Q v)
+    (or : ∀ {k} {P Q : (Fin k → V) → Prop}, 𝚺-[s + 1].Definable P → 𝚺-[s + 1].Definable Q →
+      Motive k P → Motive k Q → Motive k fun v ↦ P v ∨ Q v)
+    (ball : ∀ {k} {P : (Fin (k + 1) → V) → Prop} (t : ArithmeticSemiterm V k),
+      𝚺-[s + 1].Definable P → Motive (k + 1) P → Motive k fun v ↦ ∀ x < t.val v id, P (x :> v))
+    (bexs : ∀ {k} {P : (Fin (k + 1) → V) → Prop} (t : ArithmeticSemiterm V k),
+      𝚺-[s + 1].Definable P → Motive (k + 1) P → Motive k fun v ↦ ∃ x < t.val v id, P (x :> v))
+    (exs : ∀ {k} {P : (Fin (k + 1) → V) → Prop},
+      𝚺-[s + 1].Definable P → Motive (k + 1) P → Motive k fun v ↦ ∃ x, P (x :> v))
+    {k} {P : (Fin k → V) → Prop} (hP : 𝚺-[s + 1].Definable P) : Motive k P := by
+  obtain ⟨φ, hφ⟩ := hP;
+  rw [show P = fun v ↦ φ.val.Eval v id from by funext v; simp [hφ.iff]];
+  exact Hierarchy.sigma_succ_induction (P := fun k ψ ↦ Motive k fun v ↦ ψ.Eval v id)
+    (fun _ ψ h ↦ pi (.mkPolarity ψ h fun _ ↦ Iff.rfl))
+    (fun _ ψ χ hψ hχ ihψ ihχ ↦ by
+      simpa using and (.mkPolarity ψ hψ fun _ ↦ Iff.rfl) (.mkPolarity χ hχ fun _ ↦ Iff.rfl) ihψ ihχ)
+    (fun _ ψ χ hψ hχ ihψ ihχ ↦ by
+      simpa using or (.mkPolarity ψ hψ fun _ ↦ Iff.rfl) (.mkPolarity χ hχ fun _ ↦ Iff.rfl) ihψ ihχ)
+    (fun _ t ψ hψ ih ↦ by simpa using ball t (.mkPolarity ψ hψ fun _ ↦ Iff.rfl) ih)
+    (fun _ t ψ hψ ih ↦ by simpa using bexs t (.mkPolarity ψ hψ fun _ ↦ Iff.rfl) ih)
+    (fun _ ψ hψ ih ↦ by simpa using exs (.mkPolarity ψ hψ fun _ ↦ Iff.rfl) ih)
+    k φ.val φ.sigma_prop;
+
+end HierarchySymbol.Definable
+
 end FFL.FirstOrder.Arithmetic
