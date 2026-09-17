@@ -153,9 +153,10 @@ lemma ext_add₂_bexp {I L i j S₁ S₂ : V} (hij : i + j ≤ ‖I‖) (hS₁ :
     (S₁ + S₂ * bexp (I ⨳ L) (i * ‖L‖)){L}[i + j] = S₂{L}[j] := by
   have hie : Exponential (i * ‖L‖) (bexp (I ⨳ L) (i * ‖L‖)) :=
     exp_bexp_of_lt (mul_len_lt_len_smash <| le_trans le_self_add hij)
-  calc  (S₁ + S₂ * bexp (I ⨳ L) (i * ‖L‖)){L}[i + j]
-      = (S₁ + S₂ * bexp (I ⨳ L) (i * ‖L‖)) / bexp (I ⨳ L) ((i + j) * ‖L‖) % (L ⨳ 1) := by
-        rw [ext_eq_smash_of_le hij]
+  calc
+    (S₁ + S₂ * bexp (I ⨳ L) (i * ‖L‖)){L}[i + j]
+        = (S₁ + S₂ * bexp (I ⨳ L) (i * ‖L‖)) / bexp (I ⨳ L) ((i + j) * ‖L‖) % (L ⨳ 1) := by
+      rw [ext_eq_smash_of_le hij]
     _ = (S₁ + S₂ * bexp (I ⨳ L) (i * ‖L‖)) / bexp (I ⨳ L) (i * ‖L‖) /
           bexp (I ⨳ L) (j * ‖L‖) % (L ⨳ 1) := by
       simp only [add_mul, ← Arithmetic.div_mul]
