@@ -9,6 +9,8 @@ public import Foundation.FirstOrder.Incompleteness.StandardProvability
 
 namespace FFL.FirstOrder.Arithmetic.Bootstrapping
 
+set_option linter.style.longLine false
+
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 
 section WitnessComparisons
@@ -108,8 +110,10 @@ lemma lt_trans : φ ≺ ψ → ψ ≺ χ → φ ≺ χ := by rintro ⟨b, hb, h�
 lemma not_lt_of_le : φ ≼ ψ → ¬ψ ≺ φ := by grind;
 
 
-lemma find_minimal_proof_fintype [Fintype ι] (φ : ι → V) (H : □(φ i)) :
+set_option linter.style.haveILetI false in
+lemma find_minimal_proof_fintype {ι : Type*} [Finite ι] (φ : ι → V) (i : ι) (H : □(φ i)) :
     ∃ j, ∀ k, (φ j) ≼ (φ k) := by
+  letI := Fintype.ofFinite ι
   rcases show ∃ dᵢ, Proof T dᵢ (φ i)from H with ⟨dᵢ, Hdᵢ⟩
   have : ∃ z, (∃ j, Proof T z (φ j)) ∧ ∀ w < z, ∀ x, ¬Proof T w (φ x) := by
     simpa using
