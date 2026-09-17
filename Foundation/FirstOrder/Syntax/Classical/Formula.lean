@@ -4,6 +4,12 @@ public import Foundation.Syntax.Predicate.Term
 public import Foundation.Syntax.Predicate.Quantifier
 public import Mathlib.Data.Nat.Cast.Order.Basic
 
+set_option linter.style.longLine false
+set_option linter.style.show false
+set_option linter.style.induction false
+set_option linter.unusedTactic false
+set_option linter.unreachableTactic false
+
 @[expose] public section
 
 /-!
