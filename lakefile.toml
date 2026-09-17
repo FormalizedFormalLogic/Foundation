@@ -24,14 +24,14 @@ supportInterpreter = true
 [[require]]
 scope = "leanprover"
 name = "doc-gen4"
-rev = "v4.34.0"
-
-[[require]]
-scope = "leanprover-community"
-name = "mathlib"
-rev = "v4.34.0"
+rev = "v4.35.0-rc2"
 
 [[require]]
 name = "Forgive"
 git = "https://github.com/FormalizedFormalLogic/forgive"
-rev = "v4.34.0"
+rev = "v4.35.0-rc2"
+
+[[require]]
+scope = "leanprover-community"
+name = "mathlib"
+rev = "v4.35.0-rc2"

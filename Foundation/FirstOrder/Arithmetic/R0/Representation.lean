@@ -301,7 +301,7 @@ private lemma codeAux_uniq {k} {c : Code k} {v : Fin k → M} {z z' : M} :
     clear H₁ H₂
     by_contra hz
     wlog h : z < z' with Hz
-    case inr =>
+    case rfind.isFalse =>
       have : z' < z := lt_of_le_of_ne (not_lt.mp h) (Ne.symm hz)
       exact Hz (k := k) c ih h₂ hm₂ h₁ hm₁ (Ne.symm hz) this
     have : ∃ x, x ≠ 0 ∧ (codeAux c).Evalf (M := M) (x :> z :> fun i => v i) := hm₂ z h
