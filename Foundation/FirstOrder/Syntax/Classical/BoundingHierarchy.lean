@@ -37,9 +37,12 @@ inductive BoundingHierarchy : Polarity → ℕ → {n : ℕ} → Semiformula L �
   | dummy_pi {s n} {φ : Semiformula L ξ (n + 1)} :
     BoundingHierarchy 𝚺 (s + 1) φ → BoundingHierarchy 𝚷 (s + 1 + 1) (∃¹ φ)
 
+/-- Bounded formulas relative to `R`, defined as the zero level of `BoundingHierarchy`. -/
+abbrev Semiformula.Bounded (φ : Semiformula L ξ n) : Prop := BoundingHierarchy R 𝚺 0 φ
+
 namespace BoundingHierarchy
 
-def DeltaZero (φ : Semiformula L ξ n) : Prop := BoundingHierarchy R 𝚺 0 φ
+abbrev DeltaZero (φ : Semiformula L ξ n) : Prop := Semiformula.Bounded R φ
 
 attribute [simp] BoundingHierarchy.verum BoundingHierarchy.falsum
   BoundingHierarchy.rel BoundingHierarchy.nrel
@@ -77,9 +80,13 @@ lemma zero_iff {Γ Γ'} {φ : Semiformula L ξ n} :
     BoundingHierarchy R Γ 0 φ ↔ BoundingHierarchy R Γ' 0 φ := by
   rcases Γ <;> rcases Γ' <;> simp [pi_zero_iff_sigma_zero]
 
+lemma zero_iff_bounded {Γ} {φ : Semiformula L ξ n} :
+    BoundingHierarchy R Γ 0 φ ↔ Semiformula.Bounded R φ :=
+  zero_iff
+
 lemma zero_iff_delta_zero {Γ} {φ : Semiformula L ξ n} :
-    BoundingHierarchy R Γ 0 φ ↔ DeltaZero R φ := by
-  simpa [DeltaZero, pi_zero_iff_sigma_zero] using zero_iff (R := R)
+    BoundingHierarchy R Γ 0 φ ↔ DeltaZero R φ :=
+  zero_iff_bounded
 
 @[simp] lemma alt_zero_iff_zero {φ : Semiformula L ξ n} :
     BoundingHierarchy R Γ.alt 0 φ ↔ BoundingHierarchy R Γ 0 φ := by
