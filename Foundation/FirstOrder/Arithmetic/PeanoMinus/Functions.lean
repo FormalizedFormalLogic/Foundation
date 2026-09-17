@@ -34,11 +34,13 @@ noncomputable def sub (a b : V) : V := Classical.choose! (sub_existsUnique a b)
 
 noncomputable scoped instance : Sub V := ⟨sub⟩
 
-lemma sub_spec_of_ge (h : a ≥ b) : a = b + (a - b) := (Classical.choose!_spec (sub_existsUnique a b)).1 h
+lemma sub_spec_of_ge (h : a ≥ b) : a = b + (a - b) :=
+  (Classical.choose!_spec (sub_existsUnique a b)).1 h
 
 lemma sub_spec_of_lt (h : a < b) : a - b = 0 := (Classical.choose!_spec (sub_existsUnique a b)).2 h
 
-lemma sub_eq_iff : c = a - b ↔ ((a ≥ b → a = b + c) ∧ (a < b → c = 0)) := Classical.choose!_eq_iff_right (sub_existsUnique a b)
+lemma sub_eq_iff : c = a - b ↔ ((a ≥ b → a = b + c) ∧ (a < b → c = 0)) :=
+  Classical.choose!_eq_iff_right (sub_existsUnique a b)
 
 @[simp] lemma sub_le_self (a b : V) : a - b ≤ a := by
   have : b ≤ a ∨ a < b := le_or_gt b a
@@ -51,11 +53,13 @@ open FirstOrder.Arithmetic.HierarchySymbol.Definable
 def _root_.FFL.FirstOrder.Arithmetic.subDef : 𝚺₀.Semisentence 3 :=
   .mkSigma “z x y. (x ≥ y → x = y + z) ∧ (x < y → z = 0)”
 
-instance sub_defined : 𝚺₀-Function₂ ((· - ·) : V → V → V) via subDef := .mk <| by intro v; simp [FirstOrder.Arithmetic.subDef, sub_eq_iff]
+instance sub_defined : 𝚺₀-Function₂ ((· - ·) : V → V → V) via subDef :=
+  .mk <| by intro v; simp [FirstOrder.Arithmetic.subDef, sub_eq_iff]
 
-instance sub_definable (ℌ : HierarchySymbol) : ℌ.DefinableFunction₂ ((· - ·) : V → V → V) := sub_defined.to_definable₀
+instance sub_definable (ℌ : HierarchySymbol) : ℌ.DefinableFunction₂ ((· - ·) : V → V → V) :=
+  sub_defined.to_definable₀
 
-instance sub_polybounded : Bounded₂ ((· - ·) : V → V → V) := ⟨#0, λ _ ↦ by simp⟩
+instance sub_polybounded : Bounded₂ ((· - ·) : V → V → V) := ⟨#0, fun _ ↦ by simp⟩
 
 @[simp] lemma sub_self (a : V) : a - a = 0 :=
   add_eq_left.mp (sub_spec_of_ge (a := a) (b := a) (by rfl)).symm
@@ -63,7 +67,8 @@ instance sub_polybounded : Bounded₂ ((· - ·) : V → V → V) := ⟨#0, λ _
 lemma sub_spec_of_le (h : a ≤ b) : a - b = 0 := by
   rcases lt_or_eq_of_le h with (lt | rfl) <;> simp [sub_spec_of_lt, *]
 
-lemma sub_add_self_of_le (h : b ≤ a) : a - b + b = a := by symm; rw [add_comm]; exact sub_spec_of_ge h
+lemma sub_add_self_of_le (h : b ≤ a) : a - b + b = a := by
+  symm; rw [add_comm]; exact sub_spec_of_ge h
 
 lemma add_tsub_self_of_le (h : b ≤ a) : b + (a - b) = a := by symm; exact sub_spec_of_ge h
 
@@ -119,7 +124,8 @@ lemma pred_lt_self_of_pos (h : 0 < a) : a - 1 < a := by
   · simp_all
   · simp
 
-protected lemma tsub_lt_iff_left (h : b ≤ a) : a - b < c ↔ a < c + b := AddLECancellable.tsub_lt_iff_right (add_le_cancel b) h
+protected lemma tsub_lt_iff_left (h : b ≤ a) : a - b < c ↔ a < c + b :=
+  AddLECancellable.tsub_lt_iff_right (add_le_cancel b) h
 
 lemma sub_mul (h : b ≤ a) : (a - b) * c = a * c - b * c := by
   have : a = (a - b) + b := (tsub_eq_iff_eq_add_of_le h).mp rfl
@@ -130,13 +136,15 @@ lemma sub_mul (h : b ≤ a) : (a - b) * c = a * c - b * c := by
 
 lemma mul_sub (h : b ≤ a) : c * (a - b) = c * a - c * b := by simp [mul_comm c, sub_mul, h]
 
-lemma add_sub_of_le (h : c ≤ b) (a : V) : a + b - c = a + (b - c) := add_tsub_assoc_of_le h a
+lemma add_sub_of_le (h : c ≤ b) (a : V) : a + b - c = a + (b - c) :=
+  add_tsub_assoc_of_le h a
 
 lemma sub_succ_add_succ {x y : V} (h : y < x) (z) : x - (y + 1) + (z + 1) = x - y + z := calc
   x - (y + 1) + (z + 1) = x - (y + 1) + 1 + z := by simp [add_assoc, add_comm]
   _                     = x - y - 1 + 1 + z   := by simp [sub_sub]
   _                     = x - y + z           := by
-    simp [show x - y - 1 + 1 = x - y from sub_add_self_of_le <| one_le_of_zero_lt _ <| pos_sub_iff_lt.mpr h]
+    simp [show x - y - 1 + 1 = x - y from
+      sub_add_self_of_le <| one_le_of_zero_lt _ <| pos_sub_iff_lt.mpr h]
 
 lemma le_sub_one_of_lt {a b : V} (h : a < b) : a ≤ b - 1 := by
   have : 1 ≤ b := one_le_of_zero_lt _ (pos_of_gt h)
@@ -158,28 +166,33 @@ lemma le_mul_self_of_pos_left (hy : 0 < b) : a ≤ b * a := by
 lemma le_mul_self_of_pos_right (hy : 0 < b) : a ≤ a * b := by
   simpa [mul_comm a b] using le_mul_self_of_pos_left hy
 
+set_option linter.style.openClassical false
 open Classical
 
 lemma dvd_iff_bounded {a b : V} : a ∣ b ↔ ∃ c ≤ b, b = a * c := by
   by_cases hx : a = 0
   · simp [hx, show ∃ x, x ≤ b from ⟨0, by simp⟩]
   · constructor
-    · rintro ⟨c, rfl⟩; exact ⟨c, le_mul_self_of_pos_left (pos_iff_ne_zero.mpr hx), rfl⟩
+    · rintro ⟨c, rfl⟩
+      exact ⟨c, le_mul_self_of_pos_left (pos_iff_ne_zero.mpr hx), rfl⟩
     · rintro ⟨c, hz, rfl⟩; exact dvd_mul_right a c
 
 def _root_.FFL.FirstOrder.Arithmetic.dvd : 𝚺₀.Semisentence 2 :=
   .mkSigma “x y. ∃ z <⁺ y, y = x * z”
 
-instance dvd_defined : 𝚺₀-Relation (fun a b : V ↦ a ∣ b) via dvd := .mk fun v ↦ by simp [dvd_iff_bounded, dvd]
+instance dvd_defined : 𝚺₀-Relation (fun a b : V ↦ a ∣ b) via dvd :=
+  .mk fun v ↦ by simp [dvd_iff_bounded, dvd]
 
-instance dvd_definable (ℌ : HierarchySymbol) : ℌ.DefinableRel ((· ∣ ·) : V → V → Prop) := dvd_defined.to_definable₀
+instance dvd_definable (ℌ : HierarchySymbol) : ℌ.DefinableRel ((· ∣ ·) : V → V → Prop) :=
+  dvd_defined.to_definable₀
 
 section
 
 syntax:45 first_order_term:45 " ∣ " first_order_term:0 : first_order_formula
 
 macro_rules
-  | `(⤫formula(lit)[ $binders* | $fbinders* | $t:first_order_term ∣ $u:first_order_term]) => `(⤫formula(lit)[ $binders* | $fbinders* | !dvd.val $t $u])
+  | `(⤫formula(lit)[ $binders* | $fbinders* | $t:first_order_term ∣ $u:first_order_term]) =>
+    `(⤫formula(lit)[ $binders* | $fbinders* | !dvd.val $t $u])
 
 end
 
@@ -201,7 +214,8 @@ lemma dvd_antisymm : a ∣ b → b ∣ a → a = b := by
     · simp [show a = 0 from by simpa using hy]
     · exact le_antisymm (le_of_dvd lty hx) (le_of_dvd ltx hy)
 
-lemma dvd_one_iff : a ∣ 1 ↔ a = 1 := ⟨by { intro hx; exact dvd_antisymm hx (by simp) }, by rintro rfl; simp⟩
+lemma dvd_one_iff : a ∣ 1 ↔ a = 1 :=
+  ⟨by { intro hx; exact dvd_antisymm hx (by simp) }, by rintro rfl; simp⟩
 
 theorem units_eq_one (u : Vˣ) : u = 1 :=
   Units.ext <| dvd_one_iff.mp ⟨u.inv, u.val_inv.symm⟩
@@ -219,7 +233,8 @@ instance : IsCancelMulZero V where
 
 open Classical in
 lemma eq_one_or_eq_of_dvd_of_prime {p a : V} (pp : Prime p) (hxp : a ∣ p) : a = 1 ∨ a = p := by
-  have : p ∣ a ∨ a ∣ 1 := Prime.left_dvd_or_dvd_right_of_dvd_mul pp (show a ∣ p * 1 from by simpa using hxp)
+  have : p ∣ a ∨ a ∣ 1 :=
+    Prime.left_dvd_or_dvd_right_of_dvd_mul pp (show a ∣ p * 1 from by simpa using hxp)
   rcases this with (hx | hx)
   · right; exact dvd_antisymm hxp hx
   · left; exact dvd_one_iff.mp hx
@@ -248,7 +263,7 @@ instance min_defined : 𝚺₀-Function₂[V] min via min.dfn := .mk fun v ↦ b
 
 instance min_definable (ℌ) : ℌ-Function₂[V] min := min_defined.to_definable₀
 
-instance min_polybounded : Bounded₂ (min : V → V → V) := ⟨#0, λ _ ↦ by simp⟩
+instance min_polybounded : Bounded₂ (min : V → V → V) := ⟨#0, fun _ ↦ by simp⟩
 
 end min
 
@@ -260,11 +275,12 @@ def max.dfn : 𝚺₀.Semisentence 3 :=
   .mkSigma “z x y. (x ≥ y → z = x) ∧ (x ≤ y → z = y)”
 
 set_option linter.flexible false in
-instance max_defined : 𝚺₀-Function₂[V] max via max.dfn := .mk fun v ↦ by simp [max.dfn]; grind
+instance max_defined : 𝚺₀-Function₂[V] max via max.dfn :=
+  .mk fun v ↦ by simp [max.dfn]; grind
 
 instance max_definable (Γ) : Γ-Function₂[V] max := max_defined.to_definable₀
 
-instance max_polybounded : Bounded₂ (max : V → V → V) := ⟨‘#0 + #1’, λ v ↦ by simp⟩
+instance max_polybounded : Bounded₂ (max : V → V → V) := ⟨‘#0 + #1’, fun v ↦ by simp⟩
 
 end max
 
