@@ -7,9 +7,18 @@ public import Foundation.Vorspiel.Arithmetic
 public import Foundation.Vorspiel.Computability
 
 @[expose] public section
+set_option linter.style.longLine false
+set_option linter.style.openClassical false
+set_option linter.style.dollarSyntax false
+set_option linter.unusedSimpArgs false
+set_option linter.unusedTactic false
+set_option linter.unreachableTactic false
+set_option linter.unusedVariables false
 open Encodable Denumerable
 
 namespace FFL.FirstOrder.Arithmetic
+
+variable {ξ : Type*} {k : ℕ}
 
 open Mathlib Encodable Semiterm.Operator.GödelNumber
 

@@ -10,6 +10,9 @@ reference: Ralf Schindler, "Set Theory, Exploring Independence and Truth" [Sch14
 -/
 
 @[expose] public section
+set_option linter.style.longLine false
+set_option linter.style.openClassical false
+set_option linter.unusedSimpArgs false
 
 namespace FFL.FirstOrder.SetTheory
 
@@ -226,7 +229,7 @@ instance insert.definable : ℒₛₑₜ-function₂[V] insert := insert.defined
 
 @[simp] lemma insert_empty_eq (x : V) : (insert x ∅ : V) = {x} := by ext; simp
 
-lemma union_insert (x y : V) : x ∪ insert y z = insert y (x ∪ z) := by ext; simp; tauto
+lemma union_insert (x y z : V) : x ∪ insert y z = insert y (x ∪ z) := by ext; simp; tauto
 
 lemma pair_eq_doubleton (x y : V) : {x, y} = doubleton x y := by ext; simp
 
@@ -340,7 +343,7 @@ noncomputable def sInter (x : V) : V := {z ∈ ⋃ˢ x ; ∀ y ∈ x, z ∈ y}
 
 prefix:110 "⋂ˢ " => sInter
 
-lemma mem_sInter_iff {x : V} : z ∈ ⋂ˢ x ↔ IsNonempty x ∧ ∀ y ∈ x, z ∈ y := by
+lemma mem_sInter_iff {x z : V} : z ∈ ⋂ˢ x ↔ IsNonempty x ∧ ∀ y ∈ x, z ∈ y := by
   simp only [sInter, mem_sep_iff, mem_sUnion_iff, and_congr_left_iff, isNonempty_def]
   grind
 
@@ -351,7 +354,7 @@ instance sInter.defined : ℒₛₑₜ-function₁[V] sInter via sInter.dfn :=
 
 instance sInter.definable : ℒₛₑₜ-function₁[V] sInter := sInter.defined.to_definable
 
-@[simp] lemma mem_sInter_iff_of_nonempty {x : V} [hx : IsNonempty x] :
+@[simp] lemma mem_sInter_iff_of_nonempty {x z : V} [hx : IsNonempty x] :
     z ∈ ⋂ˢ x ↔ ∀ y ∈ x, z ∈ y := by
   simp [SetTheory.mem_sInter_iff, hx]
 
