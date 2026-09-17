@@ -334,6 +334,57 @@ lemma of_open {φ : Semiformula L ξ n} : φ.Open → Hierarchy Γ s φ := by
   case hand ihp ihq => intro hp hq; exact ⟨ihp hp, ihq hq⟩
   case hor ihp ihq => intro hp hq; exact ⟨ihp hp, ihq hq⟩
 
+/-- A recursor for `𝚺 (s + 1)` formulas whose base case is the `𝚷 s` formulas. -/
+lemma sigma_succ_induction {s : ℕ} {P : (n : ℕ) → Semiformula L ξ n → Prop}
+    (hPi : ∀ n φ, Hierarchy 𝚷 s φ → P n φ)
+    (hAnd : ∀ n φ ψ, Hierarchy 𝚺 (s + 1) φ → Hierarchy 𝚺 (s + 1) ψ → P n φ → P n ψ → P n (φ ⋏ ψ))
+    (hOr : ∀ n φ ψ, Hierarchy 𝚺 (s + 1) φ → Hierarchy 𝚺 (s + 1) ψ → P n φ → P n ψ → P n (φ ⋎ ψ))
+    (hBall : ∀ n t φ, Hierarchy 𝚺 (s + 1) φ → P (n + 1) φ → P n (∀¹[“#0 < !!(Rew.bShift t)”] φ))
+    (hBexs : ∀ n t φ, Hierarchy 𝚺 (s + 1) φ → P (n + 1) φ → P n (∃¹[“#0 < !!(Rew.bShift t)”] φ))
+    (hExs : ∀ n φ, Hierarchy 𝚺 (s + 1) φ → P (n + 1) φ → P n (∃¹ φ))
+    (n φ) : Hierarchy 𝚺 (s + 1) φ → P n φ := by
+  generalize hΓ : (𝚺 : Polarity) = Γ;
+  generalize hs : s + 1 = S;
+  intro h;
+  induction h;
+  case verum => exact hPi _ _ (verum _ _ _);
+  case falsum => exact hPi _ _ (falsum _ _ _);
+  case rel => exact hPi _ _ (rel _ _ _ _);
+  case nrel => exact hPi _ _ (nrel _ _ _ _);
+  case and hp hq ihp ihq =>
+    rcases hΓ with rfl;
+    rcases hs with rfl;
+    exact hAnd _ _ _ hp hq (ihp rfl rfl) (ihq rfl rfl);
+  case or hp hq ihp ihq =>
+    rcases hΓ with rfl;
+    rcases hs with rfl;
+    exact hOr _ _ _ hp hq (ihp rfl rfl) (ihq rfl rfl);
+  case ball pos hp ih =>
+    rcases hΓ with rfl;
+    rcases hs with rfl;
+    rcases Rew.positive_iff.mp pos with ⟨t, rfl⟩;
+    exact hBall _ t _ hp (ih rfl rfl);
+  case bexs pos hp ih =>
+    rcases hΓ with rfl;
+    rcases hs with rfl;
+    rcases Rew.positive_iff.mp pos with ⟨t, rfl⟩;
+    exact hBexs _ t _ hp (ih rfl rfl);
+  case exs hp ih =>
+    injection hs with hs;
+    subst hs;
+    exact hExs _ _ hp (ih rfl rfl);
+  case sigma hp _ =>
+    injection hs with hs;
+    subst hs;
+    exact hExs _ _ (hp.accum _) (hPi _ _ hp);
+  case dummy_sigma hp _ =>
+    injection hs with hs;
+    subst hs;
+    exact hPi _ _ hp.all;
+  case all => simp at hΓ;
+  case pi => simp at hΓ;
+  case dummy_pi => simp at hΓ;
+
 variable {L : Language} [L.ORing]
 
 lemma iff_iff {φ ψ : Semiformula L ξ n} :
