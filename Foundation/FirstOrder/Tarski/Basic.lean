@@ -1,7 +1,6 @@
 module
 
 public import Foundation.FirstOrder.Syntax.Classical.Rew
-public import Foundation.Vorspiel.Fin.Basic
 public import Foundation.Vorspiel.IsEmpty
 public import Foundation.Vorspiel.Empty
 public import Mathlib.Tactic.FinCases
@@ -372,12 +371,6 @@ lemma eval_insert2 {n} (φ : Semiformula L ξ (n + 2)) (u x w : M) (e : Fin n �
   exact Iff.of_eq (congrArg (fun c => Eval c f φ)
     (Fin.funext_two (by simp) (by simp) fun i => by simp))
 
-lemma eval_swap01 {n} (φ : Semiformula L ξ (n + 2)) (u w : M) (e : Fin n → M) :
-    Eval (u :> w :> e) f (φ ⇜ (#1 :> #0 :> (#·.succ.succ))) ↔ Eval (w :> u :> e) f φ := by
-  simp only [eval_substs, Function.comp_def];
-  exact Iff.of_eq (congrArg (fun c ↦ Eval c f φ)
-    (Fin.funext_two (by simp) (by simp) fun i ↦ by simp));
-
 @[simp] lemma eval_emb {f : ξ → M} (φ : Semiformula L Empty n) :
     Eval b f (Rewriting.emb (ξ := ξ) φ : Semiformula L ξ n) ↔ Eval b Empty.elim φ := by
   simp [eval_rew, Function.comp_def, Empty.eq_elim]
@@ -509,12 +502,6 @@ lemma eval_toSemisentence [NeZero k] {φ : Semiformula L ℕ k}
   intro y hy;
   have hlt : y < φ.fvSup := Semiformula.lt_fvSup_of_fvar? hy;
   simp [paramSubst, hlt, hv ⟨y, hlt⟩];
-
-lemma eval_toSemisentence₁ (φ : Semiformula L ℕ 1) (x : M) (f : ℕ → M) :
-    M ⊧/(x :> fun i : Fin φ.fvSup ↦ f i) (φ.toSemisentence ![#0]) ↔ φ.Eval ![x] f :=
-  eval_toSemisentence ![#0]
-    (fun i ↦ by fin_cases i; simp)
-    (fun _ ↦ by simp)
 
 lemma eval_toSemisentence₂ (φ : Semiformula L ℕ 2) (x y : M) (f : ℕ → M) :
     M ⊧/(y :> x :> fun i : Fin φ.fvSup ↦ f i) (φ.toSemisentence ![#1, #0]) ↔ φ.Eval ![x, y] f :=
