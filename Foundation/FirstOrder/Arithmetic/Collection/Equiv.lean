@@ -83,8 +83,10 @@ private lemma MonotoneWitness.and [V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻] {P₁ P₂ 
     . rintro ⟨h₁, h₂⟩;
       obtain ⟨v₁, hv₁⟩ := (hM₁.iff e).mp h₁;
       obtain ⟨v₂, hv₂⟩ := (hM₂.iff e).mp h₂;
-      exact ⟨max v₁ v₂, hM₁.monotone e v₁ _ (le_max_left _ _) hv₁,
-        hM₂.monotone e v₂ _ (le_max_right _ _) hv₂⟩;
+      use max v₁ v₂;
+      and_intros;
+      . exact hM₁.monotone _ _ _ (by grind) hv₁;
+      . exact hM₂.monotone _ _ _ (by grind) hv₂;
     . rintro ⟨v, h₁, h₂⟩;
       exact ⟨(hM₁.iff e).mpr ⟨v, h₁⟩, (hM₂.iff e).mpr ⟨v, h₂⟩⟩;
 
@@ -92,8 +94,7 @@ private lemma MonotoneWitness.or {P₁ P₂ : (Fin k → V) → Prop} {Q₁ Q₂
     (hM₁ : MonotoneWitness P₁ Q₁) (hM₂ : MonotoneWitness P₂ Q₂) :
     MonotoneWitness (fun e ↦ P₁ e ∨ P₂ e) (fun w ↦ Q₁ w ∨ Q₂ w) where
   monotone e v v' hv h := h.imp (hM₁.monotone e v v' hv) (hM₂.monotone e v v' hv);
-  iff e := by
-    simp only [hM₁.iff, hM₂.iff, exists_or];
+  iff e := by simp only [hM₁.iff, hM₂.iff, exists_or];
 
 private lemma MonotoneWitness.bexs {k : ℕ} {P : (Fin (k + 1) → V) → Prop} {Q : (Fin (k + 2) → V) → Prop}
     (hM : MonotoneWitness P Q) (bound : (Fin k → V) → V) :
@@ -116,23 +117,29 @@ private lemma MonotoneWitness.exs [V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻] {k : ℕ} {
       (fun w : Fin (k + 1) → V ↦ ∃ x < w 0, Q (w 0 :> x :> (w ·.succ))) where
   monotone e v v' hv h := by
     obtain ⟨x, hx, hxv⟩ := h;
-    exact ⟨x, lt_of_lt_of_le hx hv, hM.monotone (x :> e) v v' hv hxv⟩;
+    use x;
+    and_intros;
+    . exact lt_of_lt_of_le hx hv;
+    . exact hM.monotone (x :> e) v v' hv hxv;
   iff e := by
     constructor;
     . rintro ⟨x, hxe⟩;
       obtain ⟨v, hv⟩ := (hM.iff (x :> e)).mp hxe;
-      exact ⟨max (x + 1) v, x, lt_of_lt_of_le (lt_add_one x) (le_max_left _ _),
-        hM.monotone (x :> e) v _ (le_max_right _ _) hv⟩;
+      use max (x + 1) v, x;
+      and_intros;
+      . exact lt_of_lt_of_le (lt_add_one x) (le_max_left _ _);
+      . exact hM.monotone (x :> e) v _ (le_max_right _ _) hv;
     . rintro ⟨v, x, -, hxv⟩;
       exact ⟨x, (hM.iff (x :> e)).mpr ⟨v, hxv⟩⟩;
 
 variable [V↓[ℒₒᵣ] ⊧* 𝗕𝚷 s]
 
-private lemma MonotoneWitness.ball [V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻] {k : ℕ} {P : (Fin (k + 1) → V) → Prop}
-    {Q : (Fin (k + 2) → V) → Prop} (hQ : 𝚷-[s].Definable Q) (hM : MonotoneWitness P Q)
-    (bound : (Fin k → V) → V) :
-    MonotoneWitness (fun e ↦ ∀ x < bound e, P (x :> e))
-      (fun w : Fin (k + 1) → V ↦ ∀ x < bound (w ·.succ), Q (w 0 :> x :> (w ·.succ))) where
+private lemma MonotoneWitness.ball [V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻]
+  {P : (Fin (k + 1) → V) → Prop} {Q : (Fin (k + 2) → V) → Prop}
+  (hQ : 𝚷-[s].Definable Q) (hM : MonotoneWitness P Q) (bound : (Fin k → V) → V) :
+  MonotoneWitness
+    (fun e ↦ ∀ x < bound e, P (x :> e))
+    (fun w : Fin (k + 1) → V ↦ ∀ x < bound (w ·.succ), Q (w 0 :> x :> (w ·.succ))) where
   monotone e v v' hv h x hx := hM.monotone (x :> e) v v' hv (h x hx);
   iff e := by
     constructor;
@@ -167,11 +174,11 @@ private lemma exists_monotoneWitness {k : ℕ} {P : (Fin k → V) → Prop} (hP 
   | @and k P₁ P₂ _ _ ih₁ ih₂ =>
     obtain ⟨Q₁, hQ₁, hM₁⟩ := ih₁;
     obtain ⟨Q₂, hQ₂, hM₂⟩ := ih₂;
-    exact ⟨fun w ↦ Q₁ w ∧ Q₂ w, hQ₁.and hQ₂, hM₁.and hM₂⟩;
+    exact ⟨fun w ↦ Q₁ w ∧ Q₂ w, .and hQ₁ hQ₂, .and hM₁ hM₂⟩;
   | @or k P₁ P₂ _ _ ih₁ ih₂ =>
     obtain ⟨Q₁, hQ₁, hM₁⟩ := ih₁;
     obtain ⟨Q₂, hQ₂, hM₂⟩ := ih₂;
-    exact ⟨fun w ↦ Q₁ w ∨ Q₂ w, hQ₁.or hQ₂, hM₁.or hM₂⟩;
+    exact ⟨fun w ↦ Q₁ w ∨ Q₂ w, .or hQ₁ hQ₂, .or hM₁ hM₂⟩;
   | @ball k P t _ ih =>
     obtain ⟨Q, hQ, hM⟩ := ih;
     use fun w : Fin (k + 1) → V ↦ ∀ x < t.val (w ·.succ) id, Q (w 0 :> x :> (w ·.succ));
@@ -237,12 +244,16 @@ instance BPi.models_BSigma_succ : V↓[ℒₒᵣ] ⊧* 𝗕𝚺 (s + 1) := by
       (CollectionScheme_subset (·.hierarchy));
 
 lemma exists_pi_definableRel_iff {P : V → Prop} (hP : 𝚺-[s + 1].DefinablePred P) :
-    ∃ Q : V → V → Prop, 𝚷-[s].DefinableRel Q ∧ ∀ x, P x ↔ ∃ w, Q x w := by
+  ∃ Q, 𝚷-[s].DefinableRel Q ∧ ∀ x, P x ↔ ∃ w, Q x w := by
   obtain ⟨Q, hQ, hM⟩ := exists_monotoneWitness hP;
-  use fun x w ↦ Q ![w, x];
+  use (fun x w ↦ Q ![w, x]);
   and_intros;
-  . exact (hQ.retraction ![1, 0]).of_iff fun u ↦
-      Iff.of_eq <| congrArg Q <| funext fun i ↦ by match i with | 0 | 1 => simp;
+  . apply (hQ.retraction ![1, 0]).of_iff;
+    intro;
+    apply Iff.of_eq;
+    apply congrArg Q;
+    funext i;
+    match i with | 0 | 1 => simp;
   . intro x;
     simpa using hM.iff ![x];
 
@@ -252,7 +263,7 @@ theorem BSigma_succ_weakerThan_BPi : 𝗕𝚺 (s + 1) ⪯ 𝗕𝚷 s :=
 
 @[instance]
 theorem BSigma_succ_equiv_BPi : 𝗕𝚺 (s + 1) ≊ 𝗕𝚷 s :=
-  Equiv.antisymm_iff.mpr ⟨BSigma_succ_weakerThan_BPi, CollectionOnHierarchy_weakerThan_BSigma_succ 𝚷 s⟩
+  Equiv.antisymm ⟨inferInstance, CollectionOnHierarchy_weakerThan_BSigma_succ 𝚷 s⟩
 
 end BSigma_succ_BPi
 
@@ -262,71 +273,52 @@ section ISigma_BSigma_succ
 
 variable {P : V → Prop} {Q : V → V → Prop}
 
-private lemma definable_step (hQ : 𝚷-[s].DefinableRel Q) :
-    𝚷-[s + 1].DefinableRel fun x w ↦ (¬∃ z, Q x z) ∨ Q (x + 1) w := by
-  have hex : 𝚺-[s + 1].DefinablePred fun x ↦ ∃ z, Q x z :=
-    HierarchySymbol.Definable.exs <|
-      .of_iff ((hQ.of_lt (s := s + 1) (Γ := 𝚺) (by simp)).retraction ![1, 0]) (by intro w; simp);
-  apply HierarchySymbol.Definable.or;
-  . exact .of_iff (hex.notSigma.retraction ![0]) (by intro v; simp);
-  . exact .of_iff (HierarchySymbol.Definable.retractiont 2
-      (hQ.of_lt (s := s + 1) (Γ := 𝚷) (by simp)) ![‘#0 + 1’, #1]) (by intro v; simp);
-
-private lemma definable_bounded (hQ : 𝚷-[s].DefinableRel Q) (a u : V) :
-    𝚷-[s].DefinablePred fun x ↦ ∃ y < u, Q x y ∨ a < x := by
-  have hlt : 𝚷-[s].Definable fun w : Fin 2 → V ↦ a < w 1 := .of_iff
-    (HierarchySymbol.Definable.retractiont 2
-    (inferInstance : 𝚷-[s].DefinableRel (LT.lt : V → V → Prop)) ![&a, #1]) (by intro w; simp);
-  have h : 𝚷-[s].Definable
-      fun v : Fin 1 → V ↦ ∃ y < (&u : ArithmeticSemiterm V 1).val v id, Q (v 0) y ∨ a < v 0 := by
-    apply HierarchySymbol.Definable.bexs;
-    exact .of_iff ((hQ.retraction ![1, 0]).or hlt) (by intro w; simp);
-  exact h.of_iff (by intro v; simp);
-
 lemma succ_induction_of_exists_pi [V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺 s] [V↓[ℒₒᵣ] ⊧* 𝗕𝚷 (s + 1)]
     (hQ : 𝚷-[s].DefinableRel Q) (hPQ : ∀ x, P x ↔ ∃ w, Q x w)
     (zero : P 0) (succ : ∀ x, P x → P (x + 1)) : ∀ x, P x := by
   intro a;
-  obtain ⟨v, hv⟩ := CollectionOnHierarchy.collection_of_definable (Γ := 𝚷)
-    (definable_step hQ) a <| by
+  have hstep : 𝚷-[s + 1].DefinableRel fun x w ↦ (¬∃ z, Q x z) ∨ Q (x + 1) w := by
+    have hex : 𝚺-[s + 1].DefinablePred fun x ↦ ∃ z, Q x z :=
+      HierarchySymbol.Definable.exs <|
+        .of_iff ((hQ.of_lt (s := s + 1) (Γ := 𝚺) (by simp)).retraction ![1, 0]) (by intro w; simp);
+    apply HierarchySymbol.Definable.or;
+    . exact .of_iff (hex.notSigma.retraction ![0]) (by intro v; simp);
+    . exact .of_iff (HierarchySymbol.Definable.retractiont 2
+        (hQ.of_lt (s := s + 1) (Γ := 𝚷) (by simp)) ![‘#0 + 1’, #1]) (by intro v; simp);
+  obtain ⟨v, hv⟩ := CollectionOnHierarchy.collection_of_definable (Γ := 𝚷) hstep a <| by
       intro x _;
       by_cases hx : ∃ z, Q x z;
-      . exact ((hPQ (x + 1)).mp (succ x ((hPQ x).mpr hx))).imp fun w hw ↦ .inr hw;
-      . exact ⟨0, .inl hx⟩;
+      . exact ((hPQ (x + 1)).mp (succ x ((hPQ x).mpr hx))).imp fun w hw ↦ by tauto;
+      . exact ⟨0, by tauto⟩;
   obtain ⟨w₀, hw₀⟩ := (hPQ 0).mp zero;
-  have hw₀' : w₀ < max v (w₀ + 1) := lt_of_lt_of_le (lt_add_one w₀) (le_max_right v (w₀ + 1));
-  have hpos : (0 : V) < max v (w₀ + 1) := lt_of_le_of_lt (by simp) hw₀';
-  have key : ∀ x, ∃ y < max v (w₀ + 1), Q x y ∨ a < x := by
-    apply InductionOnHierarchy.succ_induction 𝚷 s (definable_bounded hQ a _) ⟨w₀, hw₀', .inl hw₀⟩;
-    rintro x ⟨y, -, hy | hy⟩;
-    . by_cases hxa : x < a;
-      . obtain ⟨z, hzv, hz | hz⟩ := hv x hxa;
-        . exact absurd ⟨y, hy⟩ hz;
-        . exact ⟨z, lt_of_lt_of_le hzv (le_max_left v (w₀ + 1)), .inl hz⟩;
-      . exact ⟨0, hpos, .inr (lt_of_le_of_lt (not_lt.mp hxa) (lt_add_one x))⟩;
-    . exact ⟨0, hpos, .inr (lt_trans hy (lt_add_one x))⟩;
-  obtain ⟨y, -, hy | hy⟩ := key a;
-  . exact (hPQ a).mpr ⟨y, hy⟩;
+  obtain ⟨b, hvb, hw₀b⟩ : ∃ b : V, v ≤ b ∧ w₀ < b :=
+    ⟨max v (w₀ + 1), le_max_left _ _, lt_of_lt_of_le (lt_add_one w₀) (le_max_right _ _)⟩;
+  have hbdd : 𝚷-[s].DefinablePred fun x ↦ a < x ∨ ∃ y < b, Q x y := by
+    have hlt : 𝚷-[s].Definable fun v : Fin 1 → V ↦ a < v 0 := .of_iff
+      (HierarchySymbol.Definable.retractiont 1
+        (inferInstance : 𝚷-[s].DefinableRel (LT.lt : V → V → Prop)) ![&a, #0]) (by intro v; simp);
+    have hbexs : 𝚷-[s].Definable
+        fun v : Fin 1 → V ↦ ∃ y < (&b : ArithmeticSemiterm V 1).val v id, Q (v 0) y := by
+      apply HierarchySymbol.Definable.bexs;
+      exact .of_iff (hQ.retraction ![1, 0]) (by intro w; simp);
+    exact (hlt.or hbexs).of_iff (by intro v; simp);
+  have key : ∀ x, a < x ∨ ∃ y < b, Q x y := by
+    apply InductionOnHierarchy.succ_induction 𝚷 s hbdd;
+    . right;
+      exact ⟨w₀, hw₀b, hw₀⟩;
+    . rintro x (hx | ⟨y, -, hy⟩);
+      . left;
+        exact lt_trans hx (lt_add_one x);
+      . rcases lt_or_ge x a with hxa | hxa;
+        . obtain ⟨z, hzv, hz | hz⟩ := hv x hxa;
+          . exact absurd ⟨y, hy⟩ hz;
+          . right;
+            exact ⟨z, lt_of_lt_of_le hzv hvb, hz⟩;
+        . left;
+          exact lt_of_le_of_lt hxa (lt_add_one x);
+  obtain hy | ⟨y, -, hy⟩ := key a;
   . exact absurd hy (lt_irrefl a);
-
-private lemma models_ISigma_succ [V↓[ℒₒᵣ] ⊧* 𝗕𝚺 (s + 2)] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺 s] : V↓[ℒₒᵣ] ⊧* 𝗜𝚺 (s + 1) := by
-  have : V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := models_of_subtheory (inferInstance : V↓[ℒₒᵣ] ⊧* 𝗕𝚺 (s + 2));
-  have : V↓[ℒₒᵣ] ⊧* 𝗕𝚷 s := models_of_ss inferInstance
-    ((CollectionOnHierarchy_subset_BSigma_succ 𝚷 s).trans
-    (CollectionOnHierarchy_subset_mono (Nat.le_succ (s + 1))));
-  have : V↓[ℒₒᵣ] ⊧* 𝗕𝚷 (s + 1) :=
-    models_of_ss inferInstance (CollectionOnHierarchy_subset_BSigma_succ 𝚷 (s + 1));
-
-  suffices V↓[ℒₒᵣ] ⊧* InductionScheme ℒₒᵣ (Hierarchy 𝚺 (s + 1)) by
-    apply Semantics.ModelsSet.union_iff.mpr;
-    simp_all;
-  apply Semantics.ModelsSet.setOf_iff.mpr;
-  rintro _ ⟨φ, hφ, rfl⟩;
-  suffices ∀ f : ℕ → V, φ.Eval ![0] f → (∀ x, φ.Eval ![x] f → φ.Eval ![x + 1] f) → ∀ x, φ.Eval ![x] f by
-    simpa [models_iff, Semiformula.eval_univCl, succInd, Semiformula.eval_substs, Matrix.constant_eq_singleton];
-  intro f;
-  obtain ⟨Q, hQ, hiff⟩ := exists_pi_definableRel_iff (definablePred_of_hierarchy hφ f);
-  exact succ_induction_of_exists_pi hQ hiff;
+  . exact (hPQ a).mpr ⟨y, hy⟩;
 
 lemma models_ISigma_of_models_BSigma_succ [V↓[ℒₒᵣ] ⊧* 𝗕𝚺 (s + 1)] : V↓[ℒₒᵣ] ⊧* 𝗜𝚺 s := by
   rename_i hn;
@@ -336,7 +328,24 @@ lemma models_ISigma_of_models_BSigma_succ [V↓[ℒₒᵣ] ⊧* 𝗕𝚺 (s + 1)
   | succ s ih =>
     have : V↓[ℒₒᵣ] ⊧* 𝗕𝚺 (s + 1) :=
       models_of_ss inferInstance <| CollectionOnHierarchy_subset_mono <| Nat.le_succ (s + 1);
-    exact models_ISigma_succ;
+    have : V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := models_of_subtheory (inferInstance : V↓[ℒₒᵣ] ⊧* 𝗕𝚺 (s + 2));
+    have : V↓[ℒₒᵣ] ⊧* 𝗕𝚷 s := models_of_ss inferInstance
+      ((CollectionOnHierarchy_subset_BSigma_succ 𝚷 s).trans
+      (CollectionOnHierarchy_subset_mono (Nat.le_succ (s + 1))));
+    have : V↓[ℒₒᵣ] ⊧* 𝗕𝚷 (s + 1) :=
+      models_of_ss inferInstance (CollectionOnHierarchy_subset_BSigma_succ 𝚷 (s + 1));
+    suffices V↓[ℒₒᵣ] ⊧* InductionScheme ℒₒᵣ (Hierarchy 𝚺 (s + 1)) by
+      apply Semantics.ModelsSet.union_iff.mpr;
+      simp_all;
+    apply Semantics.ModelsSet.setOf_iff.mpr;
+    rintro _ ⟨φ, hφ, rfl⟩;
+    suffices ∀ f : ℕ → V, φ.Eval ![0] f → (∀ x, φ.Eval ![x] f → φ.Eval ![x + 1] f) →
+        ∀ x, φ.Eval ![x] f by
+      simpa [models_iff, Semiformula.eval_univCl, succInd, Semiformula.eval_substs,
+        Matrix.constant_eq_singleton];
+    intro f;
+    obtain ⟨Q, hQ, hiff⟩ := exists_pi_definableRel_iff (definablePred_of_hierarchy hφ f);
+    exact succ_induction_of_exists_pi hQ hiff;
 
 @[instance]
 theorem ISigma_weakerThan_BSigma_succ : 𝗜𝚺 s ⪯ 𝗕𝚺 (s + 1) :=
