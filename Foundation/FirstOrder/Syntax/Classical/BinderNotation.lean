@@ -355,6 +355,7 @@ syntax:60 "of_term[" first_order_term:61 "]" : first_order_formula
 
 syntax:60 "!" term:max first_order_term:61* ("⋯")? : first_order_formula
 syntax:60 "!!" term:max : first_order_formula
+syntax:60 "%" term:max first_order_term:61* ("⋯")? : first_order_formula
 
 syntax:60 ".!" term:max first_order_term:61* ("⋯")? : first_order_formula
 syntax:60 ".!!" term:max : first_order_formula
@@ -445,6 +446,19 @@ macro_rules
     let v ← vs.foldrM (β := Lean.TSyntax _) (init := ← `(fun x ↦ #(finSuccItr x $length)))
       (fun a s ↦ `(⤫term(lit)[ $binders* | $fbinders* | $a] :> $s))
     `($φ ⇜ $v)
+
+/-- `%o t₁ … tₖ` applies a formula operator, embedding its sentence before substitution.
+The optional `⋯` supplies the remaining bound variables as in `!φ`. -/
+macro_rules
+  | `(⤫formula(lit)[ $binders* | $fbinders* | %$o:term $vs:first_order_term* ]) => do
+    let v ← vs.foldrM (β := Lean.TSyntax _) (init := ← `(![]))
+      (fun a s ↦ `(⤫term(lit)[ $binders* | $fbinders* | $a ] :> $s))
+    `(Semiformula.Operator.operator $o $v)
+  | `(⤫formula(lit)[ $binders* | $fbinders* | %$o:term $vs:first_order_term* ⋯ ]) => do
+    let length := Syntax.mkNumLit (toString binders.size)
+    let v ← vs.foldrM (β := Lean.TSyntax _) (init := ← `(fun x ↦ #(finSuccItr x $length)))
+      (fun a s ↦ `(⤫term(lit)[ $binders* | $fbinders* | $a ] :> $s))
+    `(Semiformula.Operator.operator $o $v)
 
 syntax "“" ident* "| "  first_order_formula:0 "”" : term
 syntax "“" ident* ". "  first_order_formula:0 "”" : term
