@@ -82,7 +82,7 @@ lemma complete (T : ArithmeticTheory) [𝗘𝗤 ℒₒᵣ ⪯ T] (φ : Arithmeti
 
 lemma provable_iff_of_models_iff {T : ArithmeticTheory} [𝗘𝗤 ℒₒᵣ ⪯ T] {n}
     {φ ψ : ArithmeticSemisentence n}
-    (h : ∀ (V : Type) [ORingStructure V] [V↓[ℒₒᵣ] ⊧* T] (e : Fin n → V),
+    (h : ∀ (V : Type*) [ORingStructure V] [V↓[ℒₒᵣ] ⊧* T] (e : Fin n → V),
       V ⊧/e φ ↔ V ⊧/e ψ) :
     T ⊢ ∀¹* (φ 🡘 ψ) := by
   apply Arithmetic.complete T _
