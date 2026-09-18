@@ -990,8 +990,7 @@ theorem sigma_succ_induction {V : Type*} [ORingStructure V] {s : ℕ}
       motive (k + 1) P hP → motive k (fun v ↦ ∃ x, P (x :> v)) hP.exsCons)
     (k : ℕ) (P : (Fin k → V) → Prop) (hP : 𝚺-[s + 1].Definable P) : motive k P hP := by
   obtain ⟨φ, hφ⟩ := id hP;
-  have e : P = fun v ↦ φ.val.Eval v id := by funext v; simp [hφ.iff];
-  subst e;
+  obtain rfl : P = fun v ↦ φ.val.Eval v id := funext fun v ↦ by simp [hφ.iff];
   have hd : ∀ {k} (ψ : ArithmeticSemiformula V k), Hierarchy 𝚺 (s + 1) ψ →
     𝚺-[s + 1].Definable fun v ↦ ψ.Eval v id := fun ψ hψ ↦ .mkPolarity ψ hψ fun _ ↦ Iff.rfl;
   revert hP;
