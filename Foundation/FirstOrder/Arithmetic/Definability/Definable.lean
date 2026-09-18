@@ -967,8 +967,6 @@ lemma exists_hierarchy_eval_iff {P : (Fin k → V) → Prop} (hP : Γ-[s].Defina
 
 namespace HierarchySymbol.Definable
 
-/-- Induction on `𝚺-[s + 1]`-definable predicates: the `𝚷-[s]`-definable predicates are the base
-case, and the motive is closed under `∧`, `∨`, bounded quantification and `∃`. -/
 @[elab_as_elim]
 theorem sigma_succ_induction {V : Type*} [ORingStructure V] {s : ℕ}
     {motive : (k : ℕ) → (P : (Fin k → V) → Prop) → 𝚺-[s + 1].Definable P → Prop}

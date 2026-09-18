@@ -26,7 +26,6 @@ section BroadHierarchy
 
 /-! ### Collection for the broad hierarchy -/
 
-/-- In a model of `𝗕 Γ s`, collection holds for every `Γ-[s]`-definable relation. -/
 lemma CollectionOnHierarchy.collection_of_definable {Γ : Polarity} [V↓[ℒₒᵣ] ⊧* 𝗕 Γ s]
     {R : V → V → Prop} (hR : Γ-[s].DefinableRel R) (a : V) (h : ∀ x < a, ∃ y, R x y) :
     ∃ b, ∀ x < a, ∃ y < b, R x y :=
@@ -39,11 +38,7 @@ instance CollectionOnHierarchy.models_CollectionOnBroadHierarchy {Γ : Polarity}
   . exact models_of_ss (inferInstance : V↓[ℒₒᵣ] ⊧* 𝗕 Γ s) Set.subset_union_left;
   . exact CollectionScheme.models_of_collection CollectionOnHierarchy.collection_of_definable;
 
-/-- The broad and the strict collection schemata collapse: `𝗕⁺ Γ s` and `𝗕 Γ s` prove the same
-sentences.
-
-- [Bus98, pp. 84-85]
--/
+/-- - [Bus98, pp. 84-85] -/
 theorem CollectionOnBroadHierarchy_equiv_CollectionOnHierarchy {Γ : Polarity} {s : ℕ}
   : 𝗕⁺ Γ s ≊ 𝗕 Γ s := Equiv.antisymm ⟨
     weakerThan_of_models.{0} _ _ fun _ _ _ ↦ inferInstance,
@@ -204,7 +199,6 @@ private lemma exists_monotoneWitness {k : ℕ} {P : (Fin k → V) → Prop} (hP 
       simp;
     . exact hM.exs;
 
-/-- In a model of `𝗕𝚷 s`, collection holds for `𝚺-[s + 1]`-definable relations. -/
 lemma BPi.collection_sigma_succ {R : V → V → Prop}
     (hR : 𝚺-[s + 1].DefinableRel R) (a : V) (h : ∀ x < a, ∃ y, R x y) :
     ∃ b, ∀ x < a, ∃ y < b, R x y := by
@@ -215,7 +209,7 @@ lemma BPi.collection_sigma_succ {R : V → V → Prop}
       (HierarchySymbol.Definable.bexs
         (P := fun (w : Fin 2 → V) (y : V) ↦ Q ![w 1, w 0, y])
         ((hQ.retraction ![2, 1, 0]).of_iff fun u ↦
-          Iff.of_eq <| congrArg Q <| funext fun i ↦ by fin_cases i <;> simp) #1)
+          Iff.of_eq <| congrArg Q <| funext fun i ↦ by match i with | 0 | 1 | 2 => simp) #1)
       (by simp);
   obtain ⟨b, hb⟩ := CollectionOnHierarchy.collection_of_definable (Γ := 𝚷) hS a <| by
     intro x hx;
@@ -237,15 +231,13 @@ instance BPi.models_BSigma_succ : V↓[ℒₒᵣ] ⊧* 𝗕𝚺 (s + 1) := by
   . exact models_of_ss (CollectionScheme.models_of_collection (Γ := 𝚺) BPi.collection_sigma_succ)
       (CollectionScheme_subset (·.hierarchy));
 
-/-- In a model of `𝗕𝚷 s`, every `𝚺-[s + 1]`-definable predicate is the projection of a
-`𝚷-[s]`-definable relation. -/
 lemma exists_pi_definableRel_iff {P : V → Prop} (hP : 𝚺-[s + 1].DefinablePred P) :
     ∃ Q : V → V → Prop, 𝚷-[s].DefinableRel Q ∧ ∀ x, P x ↔ ∃ w, Q x w := by
   obtain ⟨Q, hQ, hM⟩ := exists_monotoneWitness hP;
   use fun x w ↦ Q ![w, x];
   and_intros;
   . exact (hQ.retraction ![1, 0]).of_iff fun u ↦
-      Iff.of_eq <| congrArg Q <| funext fun i ↦ by fin_cases i <;> simp;
+      Iff.of_eq <| congrArg Q <| funext fun i ↦ by match i with | 0 | 1 => simp;
   . intro x;
     constructor;
     . intro h;
@@ -288,8 +280,6 @@ private lemma definable_bounded {Q : V → V → Prop} (hQ : 𝚷-[s].DefinableR
     exact .of_iff ((hQ.retraction ![1, 0]).or hlt) (by intro w; simp);
   exact h.of_iff (by intro v; simp);
 
-/-- In a model of `𝗜𝚺 s` with collection for `𝗕𝚷 (s + 1)`, successor induction holds for every
-predicate of the form `fun x ↦ ∃ w, Q x w` with `Q` a `𝚷-[s]`-definable relation. -/
 lemma succ_induction_of_exists_pi [V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺 s] [V↓[ℒₒᵣ] ⊧* 𝗕𝚷 (s + 1)]
     {P : V → Prop} {Q : V → V → Prop} (hQ : 𝚷-[s].DefinableRel Q) (hPQ : ∀ x, P x ↔ ∃ w, Q x w)
     (zero : P 0) (succ : ∀ x, P x → P (x + 1)) : ∀ x, P x := by

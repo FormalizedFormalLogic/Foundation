@@ -3,7 +3,6 @@ module
 public import Foundation.FirstOrder.Syntax.Classical.Rew
 public import Foundation.Vorspiel.IsEmpty
 public import Foundation.Vorspiel.Empty
-public import Mathlib.Tactic.FinCases
 
 @[expose] public section
 
@@ -502,12 +501,6 @@ lemma eval_toSemisentence [NeZero k] {φ : Semiformula L ℕ k}
   intro y hy;
   have hlt : y < φ.fvSup := Semiformula.lt_fvSup_of_fvar? hy;
   simp [paramSubst, hlt, hv ⟨y, hlt⟩];
-
-lemma eval_toSemisentence₂ (φ : Semiformula L ℕ 2) (x y : M) (f : ℕ → M) :
-    M ⊧/(y :> x :> fun i : Fin φ.fvSup ↦ f i) (φ.toSemisentence ![#1, #0]) ↔ φ.Eval ![x, y] f :=
-  eval_toSemisentence ![#1, #0]
-    (fun i ↦ by fin_cases i <;> simp)
-    (fun _ ↦ by simp)
 
 end toSemisentence
 

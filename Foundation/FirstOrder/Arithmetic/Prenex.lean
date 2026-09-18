@@ -24,7 +24,6 @@ namespace FFL.FirstOrder
 
 namespace Arithmetic
 
--- The theory the prenex normal form construction is taken relative to.
 private abbrev PrenexBase : ℕ → ArithmeticTheory
   | 0     => 𝗜𝚺₀
   | s + 1 => 𝗕𝚷 s
@@ -555,8 +554,6 @@ private lemma models_all [V↓[ℒₒᵣ] ⊧* 𝗕𝚷 s] (φ : Prenex 𝚷 (s 
   simp only [val_neg, LogicalConnective.HomClass.map_neg, LogicalConnective.Prop.neg_eq] at hthis ⊢;
   grind;
 
-/-- Every `Hierarchy Γ s` sentence is equivalent, in every model of `𝗕 Γ' s`, to the value of
-some `Prenex Γ s` formula. -/
 theorem models_exists_prenex {Γ Γ' : Polarity} {s n : ℕ} {φ : ArithmeticSemisentence n}
     (h : Hierarchy Γ s φ) :
   ∃ φ' : Prenex Γ s Empty n,

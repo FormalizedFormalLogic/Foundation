@@ -34,7 +34,6 @@ private lemma collection_eval {φ : ArithmeticSemiformula ℕ 2} (hφ : C φ) (e
   simpa [models_iff, Semiformula.eval_univCl, collectionAxiom, Semiformula.eval_ballLT,
     Semiformula.eval_bexsLT, Semiformula.eval_substs] using h;
 
-/-- Collection holds for every relation defined by a formula in `C`. -/
 lemma collection {R : V → V → Prop}
     (hR : ∃ e : ℕ → V, ∃ φ : ArithmeticSemiformula ℕ 2, C φ ∧ ∀ x y, R x y ↔ φ.Eval ![x, y] e)
     (a : V) (h : ∀ x < a, ∃ y, R x y) : ∃ b, ∀ x < a, ∃ y < b, R x y := by
@@ -46,8 +45,6 @@ lemma collection {R : V → V → Prop}
 
 end CollectionScheme
 
-/-- Collection for the `Γ-[s]`-definable relations of `V` makes `V` a model of the collection
-scheme for `Hierarchy Γ s`. -/
 lemma CollectionScheme.models_of_collection {Γ : Polarity} {s : ℕ}
     (H : ∀ {R : V → V → Prop}, Γ-[s].DefinableRel R →
       ∀ a, (∀ x < a, ∃ y, R x y) → ∃ b, ∀ x < a, ∃ y < b, R x y) :
@@ -68,8 +65,6 @@ variable (Γ : Polarity) (s : ℕ) [V↓[ℒₒᵣ] ⊧* 𝗕 Γ s]
 instance models_CollectionScheme : V↓[ℒₒᵣ] ⊧* CollectionScheme (StrictHierarchy Γ s) :=
   models_of_subtheory ‹_›
 
-/-- In a model of `𝗕 Γ s`, collection holds for the relations defined by a `StrictHierarchy Γ s`
-formula. -/
 lemma collection {R : V → V → Prop} (hR : StrictDefinableRel Γ s R) (a : V)
     (h : ∀ x < a, ∃ y, R x y) : ∃ b, ∀ x < a, ∃ y < b, R x y := by
   obtain ⟨e, φ, hφ, hiff⟩ := hR.exists_eval_iff;
@@ -115,7 +110,6 @@ section BSigma_ISigma
 
 variable {s : ℕ}
 
-/-- In a model of `𝗜𝚺 (s + 1)`, collection holds for `𝚺-[s + 1]`-definable relations. -/
 lemma ISigma.collection [V↓[ℒₒᵣ] ⊧* 𝗜𝚺 (s + 1)] {R : V → V → Prop}
     (hR : 𝚺-[s + 1].DefinableRel R) (a : V) (h : ∀ x < a, ∃ y, R x y) :
     ∃ b, ∀ x < a, ∃ y < b, R x y := by
