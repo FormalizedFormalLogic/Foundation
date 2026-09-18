@@ -334,6 +334,33 @@ lemma of_open {φ : Semiformula L ξ n} : φ.Open → Hierarchy Γ s φ := by
   case hand ihp ihq => intro hp hq; exact ⟨ihp hp, ihq hq⟩
   case hor ihp ihq => intro hp hq; exact ⟨ihp hp, ihq hq⟩
 
+lemma zero_induction {Γ} {P : (n : ℕ) → Semiformula L ξ n → Prop}
+    (hVerum : ∀ n, P n ⊤)
+    (hFalsum : ∀ n, P n ⊥)
+    (hRel : ∀ n {k} (r : L.Rel k) v, P n (Semiformula.rel r v))
+    (hNRel : ∀ n {k} (r : L.Rel k) v, P n (Semiformula.nrel r v))
+    (hAnd : ∀ n φ ψ, Hierarchy Γ 0 φ → Hierarchy Γ 0 ψ → P n φ → P n ψ → P n (φ ⋏ ψ))
+    (hOr : ∀ n φ ψ, Hierarchy Γ 0 φ → Hierarchy Γ 0 ψ → P n φ → P n ψ → P n (φ ⋎ ψ))
+    (hBall : ∀ n t φ, Hierarchy Γ 0 φ → P (n + 1) φ → P n (∀¹[“#0 < !!(Rew.bShift t)”] φ))
+    (hBexs : ∀ n t φ, Hierarchy Γ 0 φ → P (n + 1) φ → P n (∃¹[“#0 < !!(Rew.bShift t)”] φ))
+    (n φ) : Hierarchy Γ 0 φ → P n φ
+  | .verum _ _ _ => hVerum _
+  | .falsum _ _ _ => hFalsum _
+  | .rel _ _ r v => hRel _ r v
+  | .nrel _ _ r v => hNRel _ r v
+  | .and hp hq => hAnd _ _ _ hp hq
+      (zero_induction hVerum hFalsum hRel hNRel hAnd hOr hBall hBexs _ _ hp)
+      (zero_induction hVerum hFalsum hRel hNRel hAnd hOr hBall hBexs _ _ hq)
+  | .or hp hq => hOr _ _ _ hp hq
+      (zero_induction hVerum hFalsum hRel hNRel hAnd hOr hBall hBexs _ _ hp)
+      (zero_induction hVerum hFalsum hRel hNRel hAnd hOr hBall hBexs _ _ hq)
+  | .ball pt hp => by
+    rcases Rew.positive_iff.mp pt with ⟨t, rfl⟩
+    exact hBall _ t _ hp (zero_induction hVerum hFalsum hRel hNRel hAnd hOr hBall hBexs _ _ hp)
+  | .bexs pt hp => by
+    rcases Rew.positive_iff.mp pt with ⟨t, rfl⟩
+    exact hBexs _ t _ hp (zero_induction hVerum hFalsum hRel hNRel hAnd hOr hBall hBexs _ _ hp)
+
 lemma sigma_succ_induction {s : ℕ} {P : (n : ℕ) → Semiformula L ξ n → Prop}
     (hPi : ∀ n φ, Hierarchy 𝚷 s φ → P n φ)
     (hAnd : ∀ n φ ψ, Hierarchy 𝚺 (s + 1) φ → Hierarchy 𝚺 (s + 1) ψ → P n φ → P n ψ → P n (φ ⋏ ψ))
@@ -370,35 +397,6 @@ lemma sigma_succ_induction {s : ℕ} {P : (n : ℕ) → Semiformula L ξ n → P
     exact hPi _ _ hp.all;
   | and | or | exs => grind;
   | all | pi | dummy_pi => simp at hΓ;
-
-lemma zero_induction {Γ} {P : (n : ℕ) → Semiformula L ξ n → Prop}
-    (hVerum : ∀ n, P n ⊤)
-    (hFalsum : ∀ n, P n ⊥)
-    (hRel : ∀ n {k} (r : L.Rel k) v, P n (Semiformula.rel r v))
-    (hNRel : ∀ n {k} (r : L.Rel k) v, P n (Semiformula.nrel r v))
-    (hAnd : ∀ n φ ψ, Hierarchy Γ 0 φ → Hierarchy Γ 0 ψ → P n φ → P n ψ → P n (φ ⋏ ψ))
-    (hOr : ∀ n φ ψ, Hierarchy Γ 0 φ → Hierarchy Γ 0 ψ → P n φ → P n ψ → P n (φ ⋎ ψ))
-    (hBall : ∀ n t φ, Hierarchy Γ 0 φ → P (n + 1) φ → P n (∀¹[“#0 < !!(Rew.bShift t)”] φ))
-    (hBexs : ∀ n t φ, Hierarchy Γ 0 φ → P (n + 1) φ → P n (∃¹[“#0 < !!(Rew.bShift t)”] φ))
-    (n φ) : Hierarchy Γ 0 φ → P n φ
-  |               Hierarchy.verum _ _ _ => hVerum _
-  |              Hierarchy.falsum _ _ _ => hFalsum _
-  |               Hierarchy.rel _ _ r v => hRel _ r v
-  |              Hierarchy.nrel _ _ r v => hNRel _ r v
-  |                 Hierarchy.and hp hq =>
-    hAnd _ _ _ hp hq
-      (zero_induction hVerum hFalsum hRel hNRel hAnd hOr hBall hBexs _ _ hp)
-      (zero_induction hVerum hFalsum hRel hNRel hAnd hOr hBall hBexs _ _ hq)
-  |                  Hierarchy.or hp hq =>
-    hOr _ _ _ hp hq
-      (zero_induction hVerum hFalsum hRel hNRel hAnd hOr hBall hBexs _ _ hp)
-      (zero_induction hVerum hFalsum hRel hNRel hAnd hOr hBall hBexs _ _ hq)
-  |                Hierarchy.ball pt hp => by
-    rcases Rew.positive_iff.mp pt with ⟨t, rfl⟩
-    exact hBall _ t _ hp (zero_induction hVerum hFalsum hRel hNRel hAnd hOr hBall hBexs _ _ hp)
-  |                Hierarchy.bexs pt hp => by
-    rcases Rew.positive_iff.mp pt with ⟨t, rfl⟩
-    exact hBexs _ t _ hp (zero_induction hVerum hFalsum hRel hNRel hAnd hOr hBall hBexs _ _ hp)
 
 variable {L : Language} [L.ORing]
 

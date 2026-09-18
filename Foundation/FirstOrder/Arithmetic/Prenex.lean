@@ -671,7 +671,7 @@ theorem exists_prenex_of_hierarchy (h : Hierarchy Γ s φ) :
   use φ';
   apply provable_iff_of_models_iff;
   intro V _ _ e;
-  have : V↓[ℒₒᵣ] ⊧* 𝗕𝚺 s := models_of_subtheory (T := 𝗕𝚺 s) (U := T) inferInstance;
+  have : V↓[ℒₒᵣ] ⊧* 𝗕𝚺 s := models_of_subtheory (inferInstance : V↓[ℒₒᵣ] ⊧* T);
   exact hφ' V e;
 
 theorem exists_matrix_provable (h : Hierarchy Γ s φ) :

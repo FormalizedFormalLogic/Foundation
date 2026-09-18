@@ -20,7 +20,8 @@ namespace FFL.FirstOrder.Arithmetic
 
 open _root_.FFL.Entailment
 
-variable {V : Type*} [ORingStructure V]
+variable {V : Type*} [ORingStructure V] {R : V → V → Prop}
+         {Γ : Polarity} {s : ℕ}
 
 namespace CollectionScheme
 
@@ -38,17 +39,15 @@ lemma collection {R : V → V → Prop}
     (hR : ∃ e : ℕ → V, ∃ φ : ArithmeticSemiformula ℕ 2, C φ ∧ ∀ x y, R x y ↔ φ.Eval ![x, y] e)
     (a : V) (h : ∀ x < a, ∃ y, R x y) : ∃ b, ∀ x < a, ∃ y < b, R x y := by
   obtain ⟨e, φ, hφ, hiff⟩ := hR;
-  have h' : ∀ x < a, ∃ y, φ.Eval ![x, y] e :=
-    fun x hx ↦ (h x hx).imp fun y hy ↦ (hiff x y).mp hy;
-  exact (collection_eval hφ e a h').imp fun b hb x hx ↦
-    (hb x hx).imp fun y hy ↦ ⟨hy.1, (hiff x y).mpr hy.2⟩;
+  apply collection_eval hφ e a ?_ |>.imp;
+  . grind;
+  . grind;
 
 end CollectionScheme
 
-lemma CollectionScheme.models_of_collection {Γ : Polarity} {s : ℕ}
-    (H : ∀ {R : V → V → Prop}, Γ-[s].DefinableRel R →
-      ∀ a, (∀ x < a, ∃ y, R x y) → ∃ b, ∀ x < a, ∃ y < b, R x y) :
-    V↓[ℒₒᵣ] ⊧* CollectionScheme (Hierarchy Γ s) := by
+lemma CollectionScheme.models_of_collection
+  (H : ∀ {R : V → V → Prop}, Γ-[s].DefinableRel R → ∀ a, (∀ x < a, ∃ y, R x y) → ∃ b, ∀ x < a, ∃ y < b, R x y) :
+  V↓[ℒₒᵣ] ⊧* CollectionScheme (Hierarchy Γ s) := by
   apply Semantics.ModelsSet.setOf_iff.mpr;
   rintro _ ⟨φ, hφ, rfl⟩;
   suffices ∀ e : ℕ → V, ∀ a : V,
@@ -65,11 +64,10 @@ variable (Γ : Polarity) (s : ℕ) [V↓[ℒₒᵣ] ⊧* 𝗕 Γ s]
 instance models_CollectionScheme : V↓[ℒₒᵣ] ⊧* CollectionScheme (StrictHierarchy Γ s) :=
   models_of_subtheory ‹_›
 
-lemma collection {R : V → V → Prop} (hR : StrictDefinableRel Γ s R) (a : V)
+lemma collection (hR : StrictDefinableRel Γ s R) (a : V)
     (h : ∀ x < a, ∃ y, R x y) : ∃ b, ∀ x < a, ∃ y < b, R x y := by
   obtain ⟨e, φ, hφ, hiff⟩ := hR.exists_eval_iff;
-  exact CollectionScheme.collection (C := StrictHierarchy Γ s)
-    ⟨e, φ, hφ, fun x y ↦ by simpa using hiff ![x, y]⟩ a h;
+  apply CollectionScheme.collection ⟨e, φ, hφ, fun x y ↦ by simpa using hiff ![x, y]⟩ a h;
 
 end CollectionOnHierarchy
 
@@ -99,8 +97,7 @@ instance models_CollectionOnHierarchy (Γ : Polarity) (s : ℕ) : ℕ↓[ℒₒ�
     . exact Nat.lt_succ_of_le (Finset.le_sup (Finset.mem_range.mpr hx));
     . exact hg x hx;
 
-instance (Γ : Polarity) (s : ℕ) : Consistent (𝗕 Γ s) :=
-  (𝗕 Γ s).consistent_of_sound (Eq ⊥) rfl
+instance {Γ : Polarity} {s : ℕ} : Consistent (𝗕 Γ s) := (𝗕 Γ s).consistent_of_sound (Eq ⊥) rfl
 
 end standardModel
 
@@ -117,9 +114,9 @@ lemma ISigma.collection [V↓[ℒₒᵣ] ⊧* 𝗜𝚺 (s + 1)] {R : V → V →
   have key : ∀ y : V, ∃ b, ∀ x < y, x < a → ∃ u < b, R x u := by
     apply InductionOnHierarchy.succ_induction_sigma 𝚺 (s + 1)
       (P := fun y ↦ ∃ b, ∀ x < y, x < a → ∃ u < b, R x u)
-      -- `hR` has to enter the local instances for `definability` to pick `R` up
-      (hP := by have := hR; definability);
-    . exact ⟨0, fun x hx _ ↦ absurd hx (by simp)⟩;
+      (hP := by definability);
+    . use 0;
+      simp;
     . rintro y ⟨b, hb⟩;
       rcases lt_or_ge y a with hya | hya;
       . obtain ⟨u₀, hu₀⟩ := h y hya;
@@ -135,13 +132,16 @@ lemma ISigma.collection [V↓[ℒₒᵣ] ⊧* 𝗜𝚺 (s + 1)] {R : V → V →
         . exact hb x hx hxa;
         . exact absurd hxa (not_lt.mpr hya);
   obtain ⟨b, hb⟩ := key (a + 1);
-  exact ⟨b, fun x hx ↦ hb x (lt_trans hx (lt_add_one a)) hx⟩;
+  use b;
+  intro x hx;
+  exact hb x (lt_trans hx (lt_add_one a)) hx;
 
 instance ISigma.models_BSigma_succ [V↓[ℒₒᵣ] ⊧* 𝗜𝚺 (s + 1)] : V↓[ℒₒᵣ] ⊧* 𝗕𝚺 (s + 1) := by
   apply Semantics.ModelsSet.union_iff.mpr;
   and_intros;
   . exact mod_ISigma_of_le (Nat.zero_le (s + 1));
-  . exact models_of_ss (CollectionScheme.models_of_collection (Γ := 𝚺) ISigma.collection)
+  . exact models_of_ss
+      (CollectionScheme.models_of_collection (Γ := 𝚺) ISigma.collection)
       (CollectionScheme_subset (·.hierarchy));
 
 @[instance]
