@@ -194,7 +194,7 @@ instance : Preorder (ℙ.Condition M) where
         models_of_provable (M := M) inferInstance ℙ.strongerThan_trans
     exact h p q r p.prop q.prop r.prop hpq hqr
 
-@[simp] lemma condition_le_iff {p q : ℙ.Condition M} :
+lemma condition_le_iff {p q : ℙ.Condition M} :
     p ≤ q ↔ ℙ.strongerThan.val ![(p : M), (q : M)] := Iff.rfl
 
 variable [K.Relational]
@@ -229,7 +229,7 @@ variable {ℙ}
 
 variable {p : ℙ.Condition M} {bv : Fin n → M} {fv : ξ → M}
 
-@[simp] lemma forcesExists_iff {x : M} :
+lemma forcesExists_iff {x : M} :
     p ⊩↓ x ↔ ℙ.domain.val ![(p : M), x] := Iff.rfl
 
 variable [Tarski.Structure.Eq L M]
@@ -239,7 +239,7 @@ private lemma eval_varEqual (t : Semiterm K ξ n) (y : M) :
       p ⊩↓ y ∧ y = t.relationalVal bv fv := by
   rcases t.bvar_or_fvar_of_relational with (⟨i, rfl⟩ | ⟨i, rfl⟩) <;>
     simp [varEqual, Semiformula.eval_operator, Matrix.comp_vecCons',
-      Function.comp_def, Matrix.constant_eq_singleton]
+      Function.comp_def, Matrix.constant_eq_singleton, forcesExists_iff]
 
 private lemma eval_translationᵢ_rel {k} (R : K.Rel k) (v : Fin k → Semiterm K ξ n)
     (hbv : ∀ i, p ⊩↓ bv i) (hfv : ∀ i, p ⊩↓ fv i) :
@@ -248,10 +248,10 @@ private lemma eval_translationᵢ_rel {k} (R : K.Rel k) (v : Fin k → Semiterm 
   have h : ∀ i, ℙ.domain.val ![(p : M), (v i).relationalVal bv fv] := by
     intro i
     rcases (v i).bvar_or_fvar_of_relational with (⟨j, hj⟩ | ⟨j, hj⟩)
-    . simpa [hj] using hbv j
-    . simpa [hj] using hfv j
+    . simpa [hj, forcesExists_iff] using hbv j
+    . simpa [hj, forcesExists_iff] using hfv j
   simp [translationᵢ, translateRel, Matrix.comp_vecCons', Function.comp_def,
-    eval_varEqual, forall_and, ← funext_iff, h, Kripke.Model.Forces, Kripke.Model.Rel]
+    eval_varEqual, forall_and, ← funext_iff, h, Kripke.Model.Forces, Kripke.Model.Rel, forcesExists_iff]
 
 lemma eval_translationᵢ_iff_kripke {φ : Semiformulaᵢ K ξ n}
     (hbv : ∀ i, p ⊩↓ bv i) (hfv : ∀ i, p ⊩↓ fv i) :
@@ -265,7 +265,7 @@ lemma eval_translationᵢ_iff_kripke {φ : Semiformulaᵢ K ξ n}
     exact or_congr (ihφ hbv hfv) (ihψ hbv hfv)
   | hImp φ ψ ihφ ihψ =>
     simpa [translationᵢ, Matrix.comp_vecCons', Function.comp_def,
-      Matrix.constant_eq_singleton, Kripke.Model.Forces] using
+      Matrix.constant_eq_singleton, Kripke.Model.Forces, condition_le_iff, forcesExists_iff] using
       (forall_congr' fun q : ℙ.Condition M ↦ imp_congr_right fun hqp : q ≤ p ↦ by
         have hbq := fun i ↦ Kripke.Model.domain_monotone (hbv i) q hqp
         have hfq := fun i ↦ Kripke.Model.domain_monotone (hfv i) q hqp
@@ -273,7 +273,7 @@ lemma eval_translationᵢ_iff_kripke {φ : Semiformulaᵢ K ξ n}
   | hAll φ ih =>
     simpa [translationᵢ, Matrix.comp_vecCons', Function.comp_def,
       Matrix.constant_eq_singleton, Kripke.Model.Forces, Kripke.Model.Domain,
-      Membership.mem, Set.Mem] using
+      Membership.mem, Set.Mem, condition_le_iff, forcesExists_iff] using
       (forall_congr' fun q : ℙ.Condition M ↦ imp_congr_right fun hqp : q ≤ p ↦
         forall_congr' fun x : q ↦
           ih (bv := x.val :> bv)
@@ -307,8 +307,7 @@ variable [K.Relational] {V : Theory K}
 structure Interpret (V : Theory K) : Prop where
   proves_interpret : ∀ ψ ∈ V, T ⊢ ℙ.interpret ψ
 
-theorem soundness (H : ℙ.Interpret V) : V ⊢ φ → T ⊢ ℙ.interpret φ := by
-  intro h
+theorem soundness (H : ℙ.Interpret V) : V ⊢ φ → T ⊢ ℙ.interpret φ := fun h ↦ by
   apply Theory.Proof.complete_on_eq_models.{_,0}
   intro M _ _ _ _
   apply ℙ.models_interpret.mpr
@@ -317,7 +316,8 @@ theorem soundness (H : ℙ.Interpret V) : V ⊢ φ → T ⊢ ℙ.interpret φ :=
   exact ℙ.models_interpret.mp
     (models_of_provable (M := M) inferInstance (H.proves_interpret ψ hψ))
 
-theorem soundness_consistency (H : ℙ.Interpret V) : Entailment.Consistent T → Entailment.Consistent V := by
+theorem soundness_consistency (H : ℙ.Interpret V) :
+    Entailment.Consistent T → Entailment.Consistent V := by
   intro hT
   apply Entailment.consistent_iff_unprovable_bot.mpr
   intro hV
