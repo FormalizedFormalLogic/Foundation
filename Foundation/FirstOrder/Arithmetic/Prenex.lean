@@ -635,7 +635,7 @@ theorem exists_prenex_of_hierarchy {Γ : Polarity} {s : ℕ} (T : ArithmeticTheo
   have : 𝗘𝗤 ℒₒᵣ ⪯ T := eq_weakerThan_of_ISigma (s := s);
   obtain ⟨φ', hφ'⟩ := Prenex.models_exists_prenex h;
   use φ';
-  apply provable_iff_of_models_iff;
+  apply provable_iff_of_models_iff.{0};
   intro V _ _ e;
   have : V↓[ℒₒᵣ] ⊧* 𝗜𝚺 s := models_of_subtheory (T := 𝗜𝚺 s) (U := T) (inferInstance);
   exact hφ' V e;
