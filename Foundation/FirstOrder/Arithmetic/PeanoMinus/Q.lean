@@ -3,8 +3,6 @@ module
 public import Foundation.FirstOrder.Arithmetic.PeanoMinus.Basic
 
 @[expose] public section
-set_option linter.style.longLine false
-
 lemma Nat.iff_lt_exists_add_succ {n m : ℕ} : n < m ↔ ∃ k, m = n + (k + 1) := by
   constructor;
   · intro h;
@@ -76,7 +74,9 @@ variable {a b : OmegaAddOne}
 
 @[simp] lemma add_zero : a + 0 = a := by match a with | ⊤ | .some n => trivial;
 
-@[simp] lemma add_succ : a + (b + 1) = a + b + 1 := by match a, b with | ⊤, ⊤ | ⊤, .some n | .some m, ⊤ | .some n, .some m => tauto;
+@[simp] lemma add_succ : a + (b + 1) = a + b + 1 := by
+  match a, b with
+  | ⊤, ⊤ | ⊤, .some n | .some m, ⊤ | .some n, .some m => tauto;
 
 @[simp] lemma mul_zero : a * 0 = 0 := by match a with | ⊤ | .some 0 | .some (n + 1) => rfl;
 

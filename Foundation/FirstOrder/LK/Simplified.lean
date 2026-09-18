@@ -1,8 +1,6 @@
 module
 public import Foundation.FirstOrder.LK.Basic
 @[expose] public section
-set_option linter.style.longLine false
-set_option linter.style.whitespace false
 
 /-! # Alternative definition of proof -/
 
@@ -16,10 +14,14 @@ inductive LK2.Derivation (T : Theory L) : Finset (Proposition L) → Type _
 | closed (Γ) (φ : Proposition L) : φ ∈ Γ → ∼φ ∈ Γ → LK2.Derivation T Γ
 | axm {Γ} (φ : Sentence L) : φ ∈ T → (φ : Proposition L) ∈ Γ → LK2.Derivation T Γ
 | verum {Γ} : ⊤ ∈ Γ → LK2.Derivation T Γ
-| and {Γ} {φ ψ : Proposition L} : φ ⋏ ψ ∈ Γ → LK2.Derivation T (insert φ Γ) → LK2.Derivation T (insert ψ Γ) → LK2.Derivation T Γ
-| or {Γ} {φ ψ : Proposition L} : φ ⋎ ψ ∈ Γ → LK2.Derivation T (insert φ (insert ψ Γ)) → LK2.Derivation T Γ
-| all {Γ} {φ : Semiproposition L 1} : ∀¹ φ ∈ Γ → LK2.Derivation T (insert (Rewriting.free φ) (Γ.image Rewriting.shift)) → LK2.Derivation T Γ
-| exs {Γ} {φ : Semiproposition L 1} : ∃¹ φ ∈ Γ → (t : SyntacticTerm L) → LK2.Derivation T (insert (φ/[t]) Γ) → LK2.Derivation T Γ
+| and {Γ} {φ ψ : Proposition L} : φ ⋏ ψ ∈ Γ → LK2.Derivation T (insert φ Γ) →
+    LK2.Derivation T (insert ψ Γ) → LK2.Derivation T Γ
+| or {Γ} {φ ψ : Proposition L} : φ ⋎ ψ ∈ Γ → LK2.Derivation T (insert φ (insert ψ Γ)) →
+    LK2.Derivation T Γ
+| all {Γ} {φ : Semiproposition L 1} : ∀¹ φ ∈ Γ →
+    LK2.Derivation T (insert (Rewriting.free φ) (Γ.image Rewriting.shift)) → LK2.Derivation T Γ
+| exs {Γ} {φ : Semiproposition L 1} : ∃¹ φ ∈ Γ → (t : SyntacticTerm L) →
+    LK2.Derivation T (insert (φ/[t]) Γ) → LK2.Derivation T Γ
 | wk {Δ Γ} : LK2.Derivation T Δ → Δ ⊆ Γ → LK2.Derivation T Γ
 | shift {Γ} : LK2.Derivation T Γ → LK2.Derivation T (Γ.image Rewriting.shift)
 | cut {Γ φ} : LK2.Derivation T (insert φ Γ) → LK2.Derivation T (insert (∼φ) Γ) → LK2.Derivation T Γ
@@ -76,7 +78,7 @@ structure ProofData (T : Theory L) (Γ : Finset (Proposition L)) where
   axioms_mem : ∀ ψ ∈ axioms, ψ ∈ T
   derivation : ⊢ᴸᴷ¹ Γ.1 + ∼LK.Sequent.embed axioms
 
-noncomputable def cast {Γ Δ : Finset (Proposition L)} (d : T ⟹₂ Γ)
+noncomputable def cast {Γ Δ : Finset (Proposition L)} (d : T ⟹₂Γ)
     (h : Γ = Δ := by simp) : T ⟹₂ Δ := h ▸ d
 
 omit [L.DecidableEq] in
@@ -86,7 +88,7 @@ omit [L.DecidableEq] in
 
 @[reducible] noncomputable def cutManyProof (A : Multiset (Sentence L))
     (hA : ∀ ψ ∈ A, ψ ∈ T)
-    (d : T ⟹₂ (insert (φ : Proposition L) (∼LK.Sequent.embed A).toFinset)) : T ⟹₂ {φ} :=
+    (d : T ⟹₂(insert (φ : Proposition L) (∼LK.Sequent.embed A).toFinset)) : T ⟹₂ {φ} :=
   -- Multiset induction cannot eliminate into the Type-valued derivation family.
   let rec go : (l : List (Sentence L)) → (∀ ψ ∈ l, ψ ∈ T) →
       T ⟹₂ (insert (φ : Proposition L) (∼LK.Sequent.embed (l : Multiset _)).toFinset) →
@@ -178,11 +180,14 @@ namespace Theory
 
 noncomputable def Proof.toProof2 {φ : Sentence L} (b : T ⊢! φ) : T ⊢₂! (φ : Proposition L) :=
   LK2.Derivation.cutManyProof b.axioms b.axioms_mem <|
-    LK2.Derivation.cast (LK.Derivation.toDerivation2 T b.derivation) (by ext x; simp [LK.Sequent.embed, Multiset.map_tilde_comm])
+    LK2.Derivation.cast (LK.Derivation.toDerivation2 T b.derivation) (by
+      ext x
+      simp [LK.Sequent.embed, Multiset.map_tilde_comm])
 
 noncomputable def Proof2.toProof {φ : Sentence L} (d : T ⊢₂! (φ : Proposition L)) : T ⊢! φ := by
   rcases LK2.Derivation.toProofData d with ⟨A, hA, b⟩
-  exact ⟨A, hA, LK.Derivation.cast b (by simp [LK.Sequent.embed, Multiset.atom_eq_singleton, Multiset.map_tilde_comm])⟩
+  exact ⟨A, hA, LK.Derivation.cast b (by
+    simp [LK.Sequent.embed, Multiset.atom_eq_singleton, Multiset.map_tilde_comm])⟩
 
 end Theory
 

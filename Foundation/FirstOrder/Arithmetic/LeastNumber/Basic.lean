@@ -11,8 +11,6 @@ public import Foundation.FirstOrder.Arithmetic.Schemata
 -/
 
 @[expose] public section
-set_option linter.style.whitespace false
-
 namespace FFL.FirstOrder.Arithmetic
 
 open _root_.FFL.Entailment
@@ -99,7 +97,7 @@ end LeastNumberOnHierarchy
 
 variable (s : ℕ)
 
-lemma models_LeastNumberOnHierarchy_of_ISigma (Γ : Polarity) (s : ℕ) [V↓[ℒₒᵣ] ⊧* 𝗜𝚺 s] :
+lemma models_LeastNumberOnHierarchy_of_ISigma (Γ : Polarity) (s : ℕ) [V↓[ℒₒᵣ] ⊧* 𝗜𝚺s] :
     V↓[ℒₒᵣ] ⊧* 𝗟 Γ s := by
   have : V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := models_of_subtheory ‹V↓[ℒₒᵣ] ⊧* 𝗜𝚺 s›;
   suffices V↓[ℒₒᵣ] ⊧* LeastNumberScheme (Hierarchy Γ s) by

@@ -4,7 +4,6 @@ public import Foundation.FirstOrder.SetTheory.Basic.Axioms
 public import Foundation.FirstOrder.Tarski.Definability
 
 @[expose] public section
-set_option linter.style.longLine false
 /-! # Basic properties of model of set theory-/
 
 namespace FFL.FirstOrder.SetTheory
@@ -64,7 +63,8 @@ lemma ssubset_def {x y : V} : x ⊊ y ↔ x ⊆ y ∧ x ≠ y := by rfl
 
 def SSubset.dfn : SetTheorySemisentence 2 := “x y. x ⊆ y ∧ x ≠ y”
 
-instance SSubset.defined : ℒₛₑₜ-relation[V] SSubset via SSubset.dfn := ⟨fun v ↦ by simp [ssubset_def, SSubset.dfn]⟩
+instance SSubset.defined : ℒₛₑₜ-relation[V] SSubset via SSubset.dfn :=
+  ⟨fun v ↦ by simp [ssubset_def, SSubset.dfn]⟩
 
 instance SSubset.definable : ℒₛₑₜ-relation[V] SSubset := SSubset.defined.to_definable
 

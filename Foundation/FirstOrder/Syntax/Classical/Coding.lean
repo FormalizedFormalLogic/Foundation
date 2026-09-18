@@ -4,8 +4,6 @@ public import Foundation.FirstOrder.Syntax.Classical.BinderNotation
 public import Foundation.Vorspiel.Nat.Matrix
 
 @[expose] public section
-set_option linter.style.longLine false
-set_option linter.unusedSimpArgs false
 
 namespace FFL.FirstOrder
 
@@ -20,7 +18,8 @@ namespace Semiterm
 def toNat {n : ℕ} : Semiterm L ξ n → ℕ
   |                        #z => Nat.pair 0 z + 1
   |                        &x => Nat.pair 1 (encode x) + 1
-  | func (arity := arity) f v => (Nat.pair 2 <| Nat.pair arity <| Nat.pair (encode f) <| Matrix.vecToNat fun i ↦ toNat (v i)) + 1
+  | func (arity := arity) f v =>
+    (Nat.pair 2 <| Nat.pair arity <| Nat.pair (encode f) <| Matrix.vecToNat fun i ↦ toNat (v i)) + 1
 
 def ofNat (n : ℕ) : ℕ → Option (Semiterm L ξ n)
   |     0 => none
@@ -55,7 +54,8 @@ lemma ofNat_toNat {n : ℕ} : ∀ t : Semiterm L ξ n, ofNat n (toNat t) = some 
         simp only [toNat, ofNat, Nat.unpair_pair]
         rw [Nat.unpair_pair, Nat.unpair_pair, Nat.unpair_pair, Nat.natToVec_vecToNat]
         simpa
-      have : (fun i ↦ ofNat n (toNat (v i))) = (fun i ↦ pure (v i)) := funext <| fun i ↦ ofNat_toNat (v i)
+      have : (fun i ↦ ofNat n (toNat (v i))) = (fun i ↦ pure (v i)) :=
+        funext <| fun i ↦ ofNat_toNat (v i)
       simp [this]
 
 instance encodable : Encodable (Semiterm L ξ n) where
@@ -66,9 +66,12 @@ instance encodable : Encodable (Semiterm L ξ n) where
 lemma encode_eq_toNat (t : Semiterm L ξ n) : encode t = toNat t := rfl
 
 lemma toNat_func {k} (f : L.Func k) (v : Fin k → Semiterm L ξ n) :
-    toNat (func f v) = (Nat.pair 2 <| Nat.pair k <| Nat.pair (encode f) <| Matrix.vecToNat fun i ↦ toNat (v i)) + 1 := rfl
+    toNat (func f v) =
+      (Nat.pair 2 <| Nat.pair k <| Nat.pair (encode f) <|
+        Matrix.vecToNat fun i ↦ toNat (v i)) + 1 := rfl
 
-@[simp] lemma encode_emb (t : ClosedSemiterm L n) : encode (Rew.emb t : Semiterm L ξ n) = encode t := by
+@[simp] lemma encode_emb (t : ClosedSemiterm L n) :
+    encode (Rew.emb t : Semiterm L ξ n) = encode t := by
   simp only [encode_eq_toNat]
   induction t
   · simp [toNat]
@@ -82,8 +85,10 @@ namespace Semiformula
 variable [(k : ℕ) → Encodable (L.Rel k)]
 
 def toNat {n : ℕ} : Semiformula L ξ n → ℕ
-  |  rel (arity := arity) R v => (Nat.pair 0 <| arity.pair <| (encode R).pair <| Matrix.vecToNat fun i ↦ encode (v i)) + 1
-  | nrel (arity := arity) R v => (Nat.pair 1 <| arity.pair <| (encode R).pair <| Matrix.vecToNat fun i ↦ encode (v i)) + 1
+  | rel (arity := arity) R v =>
+    (Nat.pair 0 <| arity.pair <| (encode R).pair <| Matrix.vecToNat fun i ↦ encode (v i)) + 1
+  | nrel (arity := arity) R v =>
+    (Nat.pair 1 <| arity.pair <| (encode R).pair <| Matrix.vecToNat fun i ↦ encode (v i)) + 1
   |                         ⊤ => (Nat.pair 2 0) + 1
   |                         ⊥ => (Nat.pair 3 0) + 1
   |                     φ ⋏ ψ => (Nat.pair 4 <| φ.toNat.pair ψ.toNat) + 1
@@ -120,15 +125,19 @@ def ofNat : (n : ℕ) → ℕ → Option (Semiformula L ξ n)
     | 2 => some ⊤
     | 3 => some ⊥
     | 4 =>
-      have : c.unpair.1 < e + 1 := Nat.lt_succ_iff.mpr <| le_trans (Nat.unpair_left_le _) <| Nat.unpair_right_le _
-      have : c.unpair.2 < e + 1 := Nat.lt_succ_iff.mpr <| le_trans (Nat.unpair_right_le _) <| Nat.unpair_right_le _
+      have : c.unpair.1 < e + 1 :=
+        Nat.lt_succ_iff.mpr <| le_trans (Nat.unpair_left_le _) <| Nat.unpair_right_le _
+      have : c.unpair.2 < e + 1 :=
+        Nat.lt_succ_iff.mpr <| le_trans (Nat.unpair_right_le _) <| Nat.unpair_right_le _
       do
         let φ ← ofNat n c.unpair.1
         let ψ ← ofNat n c.unpair.2
         return φ ⋏ ψ
     | 5 =>
-      have : c.unpair.1 < e + 1 := Nat.lt_succ_iff.mpr <| le_trans (Nat.unpair_left_le _) <| Nat.unpair_right_le _
-      have : c.unpair.2 < e + 1 := Nat.lt_succ_iff.mpr <| le_trans (Nat.unpair_right_le _) <| Nat.unpair_right_le _
+      have : c.unpair.1 < e + 1 :=
+        Nat.lt_succ_iff.mpr <| le_trans (Nat.unpair_left_le _) <| Nat.unpair_right_le _
+      have : c.unpair.2 < e + 1 :=
+        Nat.lt_succ_iff.mpr <| le_trans (Nat.unpair_right_le _) <| Nat.unpair_right_le _
       do
         let φ ← ofNat n c.unpair.1
         let ψ ← ofNat n c.unpair.2
@@ -172,18 +181,24 @@ lemma encode_eq_toNat
     (φ : Semiformula L ξ n) : encode φ = toNat φ := rfl
 
 lemma encode_rel {arity : ℕ} (R : L.Rel arity) (v : Fin arity → Semiterm L ξ n) :
-    encode (Semiformula.rel R v) = (Nat.pair 0 <| arity.pair <| (encode R).pair <| Matrix.vecToNat fun i ↦ encode (v i)) + 1 := rfl
+    encode (Semiformula.rel R v) =
+      (Nat.pair 0 <| arity.pair <| (encode R).pair <|
+        Matrix.vecToNat fun i ↦ encode (v i)) + 1 := rfl
 
 lemma encode_nrel {arity : ℕ} (R : L.Rel arity) (v : Fin arity → Semiterm L ξ n) :
-    encode (Semiformula.nrel R v) = (Nat.pair 1 <| arity.pair <| (encode R).pair <| Matrix.vecToNat fun i ↦ encode (v i)) + 1 := rfl
+    encode (Semiformula.nrel R v) =
+      (Nat.pair 1 <| arity.pair <| (encode R).pair <|
+        Matrix.vecToNat fun i ↦ encode (v i)) + 1 := rfl
 
 lemma encode_verum : encode (⊤ : Semiformula L ξ n) = (Nat.pair 2 0) + 1 := rfl
 
 lemma encode_falsum : encode (⊥ : Semiformula L ξ n) = (Nat.pair 3 0) + 1 := rfl
 
-lemma encode_and (φ ψ : Semiformula L ξ n) : encode (φ ⋏ ψ) = (Nat.pair 4 <| φ.toNat.pair ψ.toNat) + 1 := rfl
+lemma encode_and (φ ψ : Semiformula L ξ n) :
+    encode (φ ⋏ ψ) = (Nat.pair 4 <| φ.toNat.pair ψ.toNat) + 1 := rfl
 
-lemma encode_or (φ ψ : Semiformula L ξ n) : encode (φ ⋎ ψ) = (Nat.pair 5 <| φ.toNat.pair ψ.toNat) + 1 := rfl
+lemma encode_or (φ ψ : Semiformula L ξ n) :
+    encode (φ ⋎ ψ) = (Nat.pair 5 <| φ.toNat.pair ψ.toNat) + 1 := rfl
 
 lemma encode_all (φ : Semiformula L ξ (n + 1)) : encode (∀¹ φ) = (Nat.pair 6 <| φ.toNat) + 1 := rfl
 
@@ -192,8 +207,8 @@ lemma encode_ex (φ : Semiformula L ξ (n + 1)) : encode (∃¹ φ) = (Nat.pair 
 @[simp] lemma encode_emb (σ : Semisentence L n) :
     encode (Rewriting.emb σ : Semiformula L ξ n) = encode σ := by
   induction σ using rec' <;>
-    simp [encode_rel, encode_nrel, encode_verum, encode_falsum, encode_and, encode_or, encode_all, encode_ex,
-      ← encode_eq_toNat, *]
+    simp [encode_rel, encode_nrel, encode_verum, encode_falsum, encode_and, encode_or, encode_all,
+      encode_ex, ← encode_eq_toNat, *]
 
 @[simp] lemma encode_inj_sentence {σ : Semisentence L n} {φ : Semiformula L ξ n} :
     encode φ = encode σ ↔ φ = Rewriting.emb σ := by

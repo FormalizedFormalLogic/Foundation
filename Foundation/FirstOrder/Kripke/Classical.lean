@@ -4,7 +4,6 @@ public import Foundation.FirstOrder.Kripke.Intuitionistic
 public import Foundation.FirstOrder.LJ.GoedelGentzen
 
 @[expose] public section
-set_option linter.style.longLine false
 /-! # Weak forcing
 
 Main reference: Jeremy Avigad, "Forcing in proof theory" [Avi04]
@@ -297,12 +296,15 @@ instance : WeakForcingRelation.ClassicalKripke ℙ (· ≥ ·) where
   generic := generic
 
 lemma sound [L.DecidableEq] :
-    𝐋𝐊¹ ⊢ (φ : Proposition L) → ∀ p : ℙ, ∀ fv, (∀ i, p ⊩↓ fv i) → p ⊩ᶜ[![] | fv] φ := fun b p fv _ ↦ by
+    𝐋𝐊¹ ⊢ (φ : Proposition L) → ∀ p : ℙ, ∀ fv, (∀ i, p ⊩↓ fv i) →
+      p ⊩ᶜ[![] | fv] φ := fun b p fv _ ↦ by
   have hfv : fv = Empty.elim := Subsingleton.elim _ _
   subst fv
   rcases Provable.gödel_gentzen (φ := (φ : Proposition L)) b with ⟨d⟩
-  have hd := Kripke.Model.Forces.sound d p (fun _ ↦ (Classical.ofNonempty : p).val) (by simp) (by simp)
-  simpa [WeaklyForces, ← Semiformula.rew_doubleNegation, Kripke.Model.Forces.rew, Empty.eq_elim] using hd
+  have hd := Kripke.Model.Forces.sound d p (fun _ ↦ (Classical.ofNonempty : p).val)
+    (by simp) (by simp)
+  simpa [WeaklyForces, ← Semiformula.rew_doubleNegation, Kripke.Model.Forces.rew,
+    Empty.eq_elim] using hd
 
 lemma sound₀ [L.DecidableEq] {σ : Sentence L} : 𝐋𝐊¹ ⊢ (σ : Proposition L) → ℙ ∀⊩ᶜ σ := fun b p ↦ by
   exact sound b p Empty.elim fun i ↦ i.elim

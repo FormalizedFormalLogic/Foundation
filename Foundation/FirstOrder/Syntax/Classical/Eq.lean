@@ -4,14 +4,13 @@ public import Foundation.FirstOrder.Syntax.Classical.BinderNotation
 public import Foundation.Vorspiel.Finset.Card
 
 @[expose] public section
-set_option autoImplicit true
-set_option linter.style.longLine false
 
 namespace Matrix
 
 variable {α : Type*}
 
-def iget [Inhabited α] (v : Fin k → α) (x : ℕ) : α := if h : x < k then v ⟨x, h⟩ else default
+def iget {k : ℕ} [Inhabited α] (v : Fin k → α) (x : ℕ) : α :=
+  if h : x < k then v ⟨x, h⟩ else default
 
 end Matrix
 
@@ -38,7 +37,8 @@ variable {L}
 abbrev Eq.funcExt {k} (f : L.Func k) : Sentence L :=
   let σ : Semisentence L (k + k) :=
     (Matrix.conj fun i : Fin k ↦ “#(i.addCast k) = #(i.addNat k)”) 🡒
-      op(=).operator ![Semiterm.func f (fun i ↦ #(i.addCast k)), Semiterm.func f (fun i ↦ #(i.addNat k))]
+      op(=).operator
+        ![Semiterm.func f (fun i ↦ #(i.addCast k)), Semiterm.func f (fun i ↦ #(i.addNat k))]
   ∀¹* σ
 
 abbrev Eq.relExt {k} (r : L.Rel k) : Sentence L :=
@@ -92,7 +92,7 @@ end Theory
 
 namespace Semiformula
 
-def existsUnique {ξ} (φ : Semiformula L ξ (n + 1)) : Semiformula L ξ n :=
+def existsUnique {ξ} {n : ℕ} (φ : Semiformula L ξ (n + 1)) : Semiformula L ξ n :=
   “∃ y, !φ y ⋯ ∧ ∀ z, !φ z ⋯ → z = y”
 
 prefix:64 "∃¹! " => existsUnique

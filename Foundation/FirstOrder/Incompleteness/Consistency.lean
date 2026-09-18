@@ -3,13 +3,9 @@ module
 public import Foundation.FirstOrder.Incompleteness.StandardProvability
 
 @[expose] public section
-set_option linter.style.longLine false
-set_option linter.style.openClassical false
 /-!
 # Consistency predicate
 -/
-
-open Classical
 
 namespace FFL.FirstOrder.Arithmetic.Bootstrapping
 
@@ -38,23 +34,32 @@ section
 noncomputable def _root_.FFL.FirstOrder.Theory.consistent : 𝚷₁.Sentence :=
   .mkPi (∼provabilityPred T ⊥)
 
-@[simp] lemma consistent.defined : (T.consistent : ArithmeticSentence).Evalb (M := V) ![] ↔ T.Consistent V := by
+@[simp] lemma consistent.defined :
+    (T.consistent : ArithmeticSentence).Evalb (M := V) ![] ↔ T.Consistent V := by
+  classical
   simp [Theory.consistent, Theory.Consistent]
 
 noncomputable def _root_.FFL.FirstOrder.Theory.consistentWith : 𝚷₁.Semisentence 1 := .mkPi
   “φ. ∀ nφ, !(negGraph L) nφ φ → ¬!(provable T) nφ”
 
-instance consistentWith.defined : 𝚷₁-Predicate (T.ConsistentWith : V → Prop) via T.consistentWith := .mk fun v ↦ by
+instance consistentWith.defined : 𝚷₁-Predicate (T.ConsistentWith : V → Prop) via T.consistentWith :=
+  .mk fun v ↦ by
+  classical
   simp [Theory.ConsistentWith, Theory.consistentWith]
 
-instance consistentWith.definable : 𝚷₁-Predicate (T.ConsistentWith : V → Prop) := (consistentWith.defined T).to_definable
+instance consistentWith.definable : 𝚷₁-Predicate (T.ConsistentWith : V → Prop) :=
+  (consistentWith.defined T).to_definable
 
-noncomputable abbrev _root_.FFL.FirstOrder.Theory.consistentWithPred (σ : Sentence L) : ArithmeticSentence := T.consistentWith.val/[⌜σ⌝]
+noncomputable abbrev _root_.FFL.FirstOrder.Theory.consistentWithPred (σ : Sentence L) :
+    ArithmeticSentence :=
+  T.consistentWith.val/[⌜σ⌝]
 
-noncomputable def _root_.FFL.FirstOrder.Theory.consistentWithPred' (σ : Sentence L) : 𝚷₁.Sentence := .mkPi
+noncomputable def _root_.FFL.FirstOrder.Theory.consistentWithPred' (σ : Sentence L) : 𝚷₁.Sentence :=
+  .mkPi
   “!T.consistentWith !!(⌜σ⌝)”
 
-@[simp] lemma consistentWithPred'_val (σ : Sentence L) : (T.consistentWithPred' σ).val = T.consistentWithPred' σ := by rfl
+@[simp] lemma consistentWithPred'_val (σ : Sentence L) :
+    (T.consistentWithPred' σ).val = T.consistentWithPred' σ := by rfl
 
 variable {T}
 

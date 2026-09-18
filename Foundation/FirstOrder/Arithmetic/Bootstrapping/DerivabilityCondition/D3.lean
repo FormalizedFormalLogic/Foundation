@@ -15,10 +15,6 @@ namespace FFL.FirstOrder.Arithmetic.Bootstrapping.Arithmetic
 -- declarations in this namespace (the option is scoped by `namespace`/`end` and
 -- reverts automatically at `end FFL.FirstOrder.Arithmetic.Bootstrapping.Arithmetic`).
 set_option linter.dupNamespace false
-set_option linter.style.openClassical false
-
-open Classical
-
 open FFL.Entailment FFL.Entailment.FiniteContext
 
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]

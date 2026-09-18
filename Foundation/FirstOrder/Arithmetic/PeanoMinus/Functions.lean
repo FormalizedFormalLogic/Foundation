@@ -166,10 +166,8 @@ lemma le_mul_self_of_pos_left (hy : 0 < b) : a ≤ b * a := by
 lemma le_mul_self_of_pos_right (hy : 0 < b) : a ≤ a * b := by
   simpa [mul_comm a b] using le_mul_self_of_pos_left hy
 
-set_option linter.style.openClassical false
-open Classical
-
 lemma dvd_iff_bounded {a b : V} : a ∣ b ↔ ∃ c ≤ b, b = a * c := by
+  classical
   by_cases hx : a = 0
   · simp [hx, show ∃ x, x ≤ b from ⟨0, by simp⟩]
   · constructor

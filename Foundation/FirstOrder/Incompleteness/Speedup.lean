@@ -14,16 +14,17 @@ public import Mathlib.Data.Nat.Log
 -/
 
 @[expose] public section
-set_option linter.unusedSectionVars false
 
 namespace FFL.FirstOrder.Arithmetic.Bootstrapping
 
 section Provability
 
-variable {L : Language} [L.DecidableEq] {T : Theory L} {σ π : Sentence L}
+variable {L : Language} [inst : L.DecidableEq] {T : Theory L} {σ π : Sentence L}
 
+omit inst in
 lemma provable_insert_neg_iff_or : insert (∼σ) T ⊢ π ↔ T ⊢ σ ⋎ π :=
-  Entailment.deduction_iff.trans ⟨fun h ↦ by cl_prover [h], fun h ↦ by cl_prover [h]⟩
+  Entailment.deduction_iff.trans
+    ⟨fun h ↦ by classical cl_prover [h], fun h ↦ by classical cl_prover [h]⟩
 
 end Provability
 

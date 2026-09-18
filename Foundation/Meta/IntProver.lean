@@ -26,109 +26,123 @@ open Entailment TwoSided Tableaux FiniteContext
 variable {F : Type*} [LogicalConnective F] [LogicalNeutral F] [DecidableEq F] {S : Type*}
   [Entailment S F] {𝓢 : S} [Entailment.Int 𝓢]
 
--- `DecidableEq F` never appears literally in the surface syntax of the theorems below (the
--- `unusedDecidableInType` linter only checks the written type), but `Valid`/`Tableaux.Sequent`
--- need it internally to elaborate; omitting it breaks elaboration, so the false-positive warning
--- is suppressed for the whole section.
-set_option linter.unusedDecidableInType false
-set_option linter.unusedSectionVars false
-
 local notation Γ:45 " ⟹ " Δ:46 => TwoSided 𝓢 Γ Δ
 
 scoped notation:0 Γ:45 " ⟶ " Δ:46 => Tableaux.Sequent.mk Γ Δ
 
--- `[DecidableEq F]` and `[Entailment.Int 𝓢]` are likewise needed only to elaborate `Valid`/`⟹`
--- and do not literally occur in this theorem's stated type, so `unusedSectionVars` false-flags
--- them too; suppressed for this one declaration.
-set_option linter.unusedSectionVars false in
+omit [DecidableEq F] [Entailment.Int 𝓢] in
 lemma to_twoSided {Γ Δ} (h : Valid 𝓢 [Γ ⟶ Δ]) : Γ ⟹ Δ := by
   rcases h
   · assumption
   · simp_all
 
+-- `[DecidableEq F]` is unused in the stated type, but the proof still needs decidability
+-- during elaboration; `classical` supplies it locally instead of dropping the hypothesis.
+omit [DecidableEq F] in
 lemma to_provable {φ} (h : Valid 𝓢 [[] ⟶ [φ]]) : 𝓢 ⊢ φ := by
+  classical
   rcases h
   · exact TwoSided.to_provable <| by assumption
   · simp_all
 
+omit [DecidableEq F] in
 lemma add_hyp {𝒯 : S} (s : 𝒯 ⪯ 𝓢) {Γ Δ φ} (hφ : 𝒯 ⊢ φ) : Valid 𝓢 [φ :: Γ ⟶ Δ] → Valid 𝓢 [Γ ⟶ Δ] :=
   Valid.of_single_uppercedent <| TwoSided.add_hyp hφ
 
+omit [DecidableEq F] in
 lemma right_closed {T Γ Δ φ} (h : φ ∈ Γ) : Valid 𝓢 ((Γ ⟶ φ :: Δ) :: T) := Valid.right_closed h
 
+omit [DecidableEq F] in
 lemma left_closed {T Γ Δ φ} (h : φ ∈ Δ) : Valid 𝓢 ((φ :: Γ ⟶ Δ) :: T) := Valid.left_closed h
 
-set_option linter.unusedSectionVars false in
+omit [DecidableEq F] [Entailment.Int 𝓢] in
 lemma remove {T Γ Δ} : Valid 𝓢 T → Valid 𝓢 ((Γ ⟶ Δ) :: T) := Valid.of_subset
 
-set_option linter.unusedSectionVars false in
+omit [DecidableEq F] [Entailment.Int 𝓢] in
 lemma rotate {T Γ Δ} : Valid 𝓢 (T ++ [Γ ⟶ Δ]) → Valid 𝓢 ((Γ ⟶ Δ) :: T) := Valid.of_subset
 
 
+omit [DecidableEq F] in
 lemma remove_right {T Γ Δ φ} : Valid 𝓢 (T ++ [Γ ⟶ Δ]) → Valid 𝓢 ((Γ ⟶ φ :: Δ) :: T) := fun h ↦
   Valid.remove_right (rotate h)
 
+omit [DecidableEq F] in
 lemma rotate_right {T Γ Δ φ} :
     Valid 𝓢 (T ++ [Γ ⟶ Δ ++ [φ]]) → Valid 𝓢 ((Γ ⟶ φ :: Δ) :: T) := fun h ↦
   Valid.rotate_right (rotate h)
 
+omit [DecidableEq F] in
 lemma verum_right {T Γ Δ} : Valid 𝓢 ((Γ ⟶ ⊤ :: Δ) :: T) := Valid.verum_right
 
+omit [DecidableEq F] in
 lemma falsum_right {T Γ Δ} : Valid 𝓢 (T ++ [Γ ⟶ Δ]) → Valid 𝓢 ((Γ ⟶ ⊥ :: Δ) :: T) := fun h ↦
   Valid.falsum_right (rotate h)
 
+omit [DecidableEq F] in
 lemma and_right {T Γ Δ φ ψ} :
     Valid 𝓢 (T ++ [Γ ⟶ Δ ++ [φ]]) → Valid 𝓢 (T ++ [Γ ⟶ Δ ++ [ψ]]) →
     Valid 𝓢 ((Γ ⟶ φ ⋏ ψ :: Δ) :: T) := fun h₁ h₂ ↦
   Valid.and_right (rotate h₁) (rotate h₂)
 
+omit [DecidableEq F] in
 lemma or_right {T Γ Δ φ ψ} :
     Valid 𝓢 (T ++ [Γ ⟶ Δ ++ [φ, ψ]]) → Valid 𝓢 ((Γ ⟶ φ ⋎ ψ :: Δ) :: T) := fun h ↦
   Valid.or_right (rotate h)
 
+omit [DecidableEq F] in
 lemma neg_right {T Γ Δ φ} :
     Valid 𝓢 (T ++ [Γ ++ [φ] ⟶ []] ++ [Γ ⟶ Δ]) → Valid 𝓢 ((Γ ⟶ ∼φ :: Δ) :: T) := fun h ↦
   Valid.neg_right' <| rotate <| rotate h
 
+omit [DecidableEq F] in
 lemma imply_right {T Γ Δ φ ψ} :
     Valid 𝓢 (T ++ [Γ ++ [φ] ⟶ [ψ]] ++ [Γ ⟶ Δ]) → Valid 𝓢 ((Γ ⟶ (φ 🡒 ψ) :: Δ) :: T) := fun h ↦
   Valid.imply_right' <| rotate <| rotate h
 
+omit [DecidableEq F] in
 lemma iff_right {T Γ Δ φ ψ} :
     Valid 𝓢 (T ++ [Γ ⟶ Δ ++ [φ 🡒 ψ]]) → Valid 𝓢 (T ++ [Γ ⟶ Δ ++ [ψ 🡒 φ]]) →
     Valid 𝓢 ((Γ ⟶ (φ 🡘 ψ) :: Δ) :: T) := fun h₁ h₂ ↦
   Valid.and_right (rotate h₁) (rotate h₂)
 
 
+omit [DecidableEq F] in
 lemma remove_left {T Γ Δ φ} : Valid 𝓢 ((Γ ⟶ Δ) :: T) → Valid 𝓢 ((φ :: Γ ⟶ Δ) :: T) :=
   Valid.remove_left
 
+omit [DecidableEq F] in
 lemma rotate_left {T Γ Δ φ} : Valid 𝓢 ((Γ ++ [φ] ⟶ Δ) :: T) → Valid 𝓢 ((φ :: Γ ⟶ Δ) :: T) :=
   Valid.rotate_left
 
+omit [DecidableEq F] in
 lemma verum_left {T Γ Δ} : Valid 𝓢 ((Γ ⟶ Δ) :: T) → Valid 𝓢 ((⊤ :: Γ ⟶ Δ) :: T) := Valid.verum_left
 
-set_option linter.unusedSectionVars false in
+omit [DecidableEq F] in
 lemma falsum_left {T Γ Δ} : Valid 𝓢 ((⊥ :: Γ ⟶ Δ) :: T) := Valid.falsum_left
 
+omit [DecidableEq F] in
 lemma or_left {T Γ Δ φ ψ} :
     Valid 𝓢 ((Γ ++ [φ] ⟶ Δ) :: T) → Valid 𝓢 ((Γ ++ [ψ] ⟶ Δ) :: T) →
     Valid 𝓢 ((φ ⋎ ψ :: Γ ⟶ Δ) :: T) :=
   Valid.or_left
 
+omit [DecidableEq F] in
 lemma and_left {T Γ Δ φ ψ} :
     Valid 𝓢 ((Γ ++ [φ, ψ] ⟶ Δ) :: T) → Valid 𝓢 ((φ ⋏ ψ :: Γ ⟶ Δ) :: T) :=
   Valid.and_left
 
+omit [DecidableEq F] in
 lemma neg_left {T Γ Δ φ} :
     Valid 𝓢 ((Γ ++ [∼φ] ⟶ Δ ++ [φ]) :: T) → Valid 𝓢 ((∼φ :: Γ ⟶ Δ) :: T) :=
   Valid.neg_left
 
+omit [DecidableEq F] in
 lemma imply_left {T Γ Δ φ ψ} :
     Valid 𝓢 ((Γ ++ [φ 🡒 ψ] ⟶ Δ ++ [φ]) :: T) → Valid 𝓢 ((Γ ++ [ψ] ⟶ Δ) :: T) →
     Valid 𝓢 (((φ 🡒 ψ) :: Γ ⟶ Δ) :: T) :=
   Valid.imply_left
 
+omit [DecidableEq F] in
 lemma iff_left {T Γ Δ φ ψ} :
     Valid 𝓢 ((Γ ++ [φ 🡒 ψ, ψ 🡒 φ] ⟶ Δ) :: T) → Valid 𝓢 (((φ 🡘 ψ) :: Γ ⟶ Δ) :: T) :=
   Valid.and_left

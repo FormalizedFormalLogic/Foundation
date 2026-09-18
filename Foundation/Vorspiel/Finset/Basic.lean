@@ -66,10 +66,8 @@ lemma erase_union [DecidableEq α] {a : α} {s t : Finset α} :
 @[simp] lemma equiv_univ {α α'} [Fintype α] [Fintype α'] [DecidableEq α'] (e : α ≃ α') :
     (Finset.univ : Finset α).image e = Finset.univ := by ext x; simp
 
--- `[DecidableEq α]` is only used implicitly, through instance unification in the proof
--- term (`Finset.sup_image`); the linter cannot see that usage, but removing it breaks elaboration.
-set_option linter.unusedDecidableInType false in
-@[simp] lemma sup_univ_equiv {α α'} [DecidableEq α] [Fintype α] [Fintype α']
+open scoped Classical in
+@[simp] lemma sup_univ_equiv {α α'} [Fintype α] [Fintype α']
     [SemilatticeSup β] [OrderBot β] (f : α → β) (e : α' ≃ α) :
     Finset.sup Finset.univ (fun i => f (e i)) = Finset.sup Finset.univ f := by
   simpa [Function.comp] using! Eq.symm <| Finset.sup_image Finset.univ e f

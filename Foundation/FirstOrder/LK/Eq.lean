@@ -11,26 +11,31 @@ namespace FirstOrder
 
 universe u v
 
-set_option linter.style.longLine false
-
 variable {L : Language} {ξ : Type*} [Semiformula.Operator.Eq L]
 
 lemma consequence_iff_eq {T : Theory L} [𝗘𝗤 L ⪯ T] {σ : Sentence L} :
-    T ⊨[Tarski.Struc.{v, u} L] σ ↔ (∀ (M : Type v) [Nonempty M] [Tarski.Structure L M] [Tarski.Structure.Eq L M], M↓[L] ⊧* T → M↓[L] ⊧ σ) :=
+    T ⊨[Tarski.Struc.{v, u} L] σ ↔
+      (∀ (M : Type v) [Nonempty M] [Tarski.Structure L M] [Tarski.Structure.Eq L M],
+        M↓[L] ⊧* T → M↓[L] ⊧ σ) :=
   consequence_iff_eq_of_models_eq (fun _ _ _ hM ↦ models_of_subtheory hM)
 
 lemma consequence_iff_eq' {T : Theory L} [𝗘𝗤 L ⪯ T] {σ : Sentence L} :
-    T ⊨[Tarski.Struc.{v, u} L] σ ↔ (∀ (M : Type v) [Nonempty M] [Tarski.Structure L M] [Tarski.Structure.Eq L M] [M↓[L] ⊧* T], M↓[L] ⊧ σ) := by
+    T ⊨[Tarski.Struc.{v, u} L] σ ↔
+      (∀ (M : Type v) [Nonempty M] [Tarski.Structure L M] [Tarski.Structure.Eq L M]
+        [M↓[L] ⊧* T], M↓[L] ⊧ σ) := by
   rw [consequence_iff_eq]
 
 lemma satisfiable_iff_eq {T : Theory L} [𝗘𝗤 L ⪯ T] :
-    Semantics.Satisfiable (Tarski.Struc.{v, u} L) T ↔ (∃ (M : Type v) (_ : Nonempty M) (_ : Tarski.Structure L M) (_ : Tarski.Structure.Eq L M), M↓[L] ⊧* T) :=
+    Semantics.Satisfiable (Tarski.Struc.{v, u} L) T ↔
+      (∃ (M : Type v) (_ : Nonempty M) (_ : Tarski.Structure L M) (_ : Tarski.Structure.Eq L M),
+        M↓[L] ⊧* T) :=
   satisfiable_iff_eq_of_models_eq (fun _ _ _ hM ↦ models_of_subtheory hM)
 
 instance {T : Theory L} [𝗘𝗤 L ⪯ T] (sat : Semantics.Satisfiable (Tarski.Struc.{v, u} L) T) :
     (ModelOfSat sat)↓[L] ⊧* 𝗘𝗤 L := models_of_subtheory (ModelOfSat.models sat)
 
-def ModelOfSatEq {T : Theory L} [𝗘𝗤 L ⪯ T] (sat : Semantics.Satisfiable (Tarski.Struc.{v, u} L) T) : Type _ :=
+def ModelOfSatEq {T : Theory L} [𝗘𝗤 L ⪯ T]
+    (sat : Semantics.Satisfiable (Tarski.Struc.{v, u} L) T) : Type _ :=
   Tarski.Structure.Eq.QuotEq L (ModelOfSat sat)
 
 namespace ModelOfSatEq
@@ -39,23 +44,28 @@ variable {T : Theory L} [𝗘𝗤 L ⪯ T] (sat : Semantics.Satisfiable (Tarski.
 
 noncomputable instance : Nonempty (ModelOfSatEq sat) := Tarski.Structure.Eq.QuotEq.inhabited
 
-noncomputable instance struc : Tarski.Structure L (ModelOfSatEq sat) := Tarski.Structure.Eq.QuotEq.struc
+noncomputable instance struc : Tarski.Structure L (ModelOfSatEq sat) :=
+  Tarski.Structure.Eq.QuotEq.struc
 
-noncomputable instance : Tarski.Structure.Eq L (ModelOfSatEq sat) := Tarski.Structure.Eq.QuotEq.structureEq
+noncomputable instance : Tarski.Structure.Eq L (ModelOfSatEq sat) :=
+  Tarski.Structure.Eq.QuotEq.structureEq
 
 lemma models : (ModelOfSatEq sat)↓[L] ⊧* T :=
-  have e : ModelOfSatEq sat ≡ₑ[L] ModelOfSat sat := Tarski.Structure.Eq.QuotEq.elementaryEquiv L (ModelOfSat sat)
+  have e : ModelOfSatEq sat ≡ₑ[L] ModelOfSat sat :=
+    Tarski.Structure.Eq.QuotEq.elementaryEquiv L (ModelOfSat sat)
   e.modelsTheory.mpr (ModelOfSat.models _)
 
 instance mod : (ModelOfSatEq sat)↓[L] ⊧* T := models sat
 
 open Semiterm Semiformula
 
-noncomputable instance [Operator.Zero L] : Zero (ModelOfSatEq sat) := ⟨(@Operator.Zero.zero L _).val ![]⟩
+noncomputable instance [Operator.Zero L] : Zero (ModelOfSatEq sat) :=
+  ⟨(@Operator.Zero.zero L _).val ![]⟩
 
 instance strucZero [Operator.Zero L] : Tarski.Structure.Zero L (ModelOfSatEq sat) := ⟨rfl⟩
 
-noncomputable instance [Operator.One L] : One (ModelOfSatEq sat) := ⟨(@Operator.One.one L _).val ![]⟩
+noncomputable instance [Operator.One L] : One (ModelOfSatEq sat) :=
+  ⟨(@Operator.One.one L _).val ![]⟩
 
 instance [Operator.One L] : Tarski.Structure.One L (ModelOfSatEq sat) := ⟨rfl⟩
 

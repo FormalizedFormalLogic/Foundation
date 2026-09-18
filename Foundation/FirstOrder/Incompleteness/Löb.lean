@@ -3,7 +3,6 @@ module
 public import Foundation.FirstOrder.Incompleteness.StandardProvability
 
 @[expose] public section
-set_option linter.style.longLine false
 /-!
 # Löb's Theorem
 -/
@@ -17,7 +16,8 @@ variable {T : ArithmeticTheory} [T.Δ₁] [𝗜𝚺₁ ⪯ T] {σ : ArithmeticSe
 theorem löb_theorem : T ⊢ provabilityPred T σ 🡒 σ → T ⊢ σ :=
   ProvabilityAbstraction.löb_theorem (𝔅 := T.standardProvability)
 
-theorem formalized_löb_theorem : 𝗜𝚺₁ ⊢ provabilityPred T (provabilityPred T σ 🡒 σ) 🡒 provabilityPred T σ :=
+theorem formalized_löb_theorem :
+    𝗜𝚺₁ ⊢ provabilityPred T (provabilityPred T σ 🡒 σ) 🡒 provabilityPred T σ :=
   ProvabilityAbstraction.formalized_löb_theorem (𝔅 := T.standardProvability)
 
 end FFL.FirstOrder.Arithmetic

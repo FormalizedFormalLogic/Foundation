@@ -4,7 +4,6 @@ public import Foundation.FirstOrder.Syntax.Classical.Padding
 public import Foundation.FirstOrder.Arithmetic.Basic.Model
 
 @[expose] public section
-set_option autoImplicit true
 namespace FFL.FirstOrder.Arithmetic
 
 variable {L : Language} [L.LT] {ξ : Type*} {n : ℕ}

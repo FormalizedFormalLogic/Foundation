@@ -3,9 +3,6 @@ module
 public import Foundation.FirstOrder.Incompleteness.RosserProvability
 
 @[expose] public section
-set_option linter.style.docString false
-set_option linter.unusedSectionVars false
-
 namespace FFL.FirstOrder
 
 namespace ProvabilityAbstraction
@@ -109,16 +106,20 @@ variable
 
 local notation "𝐉" => jeroslow 𝔚
 
+omit [L.DecidableEq] in
 lemma jeroslow_not_safe [𝔅.FormalizedCompleteOn 𝐉] : T ⊢ 𝐉 🡒 (𝔅 𝐉 ⋏ 𝔚 𝐉) := by
+  classical
   have h₁ : T ⊢ 𝐉 🡒 𝔅 𝐉 := Entailment.WeakerThan.pbl <| 𝔅.formalized_complete_on;
   have h₂ : T ⊢ 𝐉 🡘 𝔚 𝐉 := jeroslow_def';
   cl_prover [h₁, h₂];
 
+omit [L.DecidableEq] in
 /--
-  Formalized law of noncontradiction cannot be proved.
-  Alternative formulation of Gödel's second incompleteness theorem.
+Formalized law of noncontradiction cannot be proved.
+Alternative formulation of Gödel's second incompleteness theorem.
 -/
 lemma unprovable_flon [consis : Consistent T] [𝔅.FormalizedCompleteOn 𝐉] : T ⊬ flon 𝔅 𝔚 := by
+  classical
   contrapose! consis;
   replace consis : T ⊢ ∀¹ safe 𝔅 𝔚 := by simpa [flon] using consis;
   have h₁ : T ⊢ ∼(𝔅 𝐉 ⋏ 𝔚 𝐉) := by

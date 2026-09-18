@@ -15,20 +15,10 @@ open _root_.FFL.FirstOrder.Entailment
 
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 
-noncomputable local instance : (ℒₒᵣ).DecidableEq :=
-  ⟨fun _ ↦ Classical.decEq _, fun _ ↦ Classical.decEq _⟩
-
-noncomputable local instance : DecidableEq (Formula V ℒₒᵣ) := Classical.decEq _
-
 namespace Arithmetic
 
--- `Arithmetic` is intentionally re-opened here even though the ambient namespace
--- already contains it; renaming would break the widely-used public API
--- (`Bootstrapping.Arithmetic.*`). Suppress the new dupNamespace linter for the
--- declarations in this namespace (the option is scoped by `namespace`/`end` and
--- reverts automatically at `end Bootstrapping.Arithmetic`).
+-- This namespace is part of the existing public API; removing the repeated name would rename it.
 set_option linter.dupNamespace false
-set_option linter.unusedTactic false
 
 local prefix:max "#'" => Semiterm.bvar (V := V) (L := ℒₒᵣ)
 
@@ -368,6 +358,7 @@ lemma replace_aux (φ : V) :
     Provable T
       (^∀ ^∀ imp ℒₒᵣ (^#1 ^= ^#0) (imp ℒₒᵣ (subst ℒₒᵣ (^#1 ∷ 0) φ) (subst ℒₒᵣ (^#0 ∷ 0) φ)))
       := by
+  classical
   apply IsFormula.sigma1_structural_induction₂_ss
   · definability
   case hand =>

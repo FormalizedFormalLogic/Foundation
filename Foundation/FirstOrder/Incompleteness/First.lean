@@ -5,7 +5,6 @@ public import Foundation.FirstOrder.Arithmetic.R0.Representation
 public import Foundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.CraigTrick
 
 @[expose] public section
-set_option linter.style.docString false
 /-!
 # Gödel's first incompleteness theorem for arithmetic theories stronger than $\mathsf{R_0}$
 -/
@@ -14,7 +13,7 @@ namespace FFL.FirstOrder.Arithmetic
 
 open FFL.Entailment Bootstrapping Bootstrapping.Arithmetic
 
-/-- Gödel's first incompleteness theorem-/
+/-- Gödel's first incompleteness theorem -/
 theorem incomplete (T : ArithmeticTheory) [T.Δ₁] [𝗥₀ ⪯ T] [T.SoundOnHierarchy 𝚺 1] :
     Incomplete T := by
   have con : Consistent T := inferInstance
