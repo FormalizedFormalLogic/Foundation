@@ -303,13 +303,13 @@ lemma sound_theory (h : T ⊢ σ) : ℙ ∀⊩ᶜ* T → ℙ ∀⊩ᶜ σ := by
     induction S, hS using Set.Finite.induction_on generalizing σ with
     | empty => exact fun _ ↦ sound₀ (Theory.Proof.empty_provable_iff_eprovable.mp hSσ)
     | @insert ψ S hψ hS ih =>
-      intro HS p;
-      have h₁ : S ⊢ ψ 🡒 σ := Entailment.deduction! hSσ;
-      have h₂ : ℙ ∀⊩ᶜ ψ 🡒 σ := ih h₁ fun χ hχ ↦ HS χ (Set.mem_insert_of_mem ψ hχ);
-      exact (WeaklyForces.imply.mp (h₂ p)) p le_rfl (HS ψ (Set.mem_insert ψ S) p);
-  obtain ⟨S, hST, hS, hSσ⟩ := Entailment.Compact.finite_provable h;
-  intro H;
-  exact sound_fin (by simpa using hS) hSσ fun ψ hψ ↦ H ψ (hST hψ);
+      intro HS p
+      have h₁ : S ⊢ ψ 🡒 σ := Entailment.deduction! hSσ
+      have h₂ : ℙ ∀⊩ᶜ ψ 🡒 σ := ih h₁ fun χ hχ ↦ HS χ (Set.mem_insert_of_mem ψ hχ)
+      exact (WeaklyForces.imply.mp (h₂ p)) p le_rfl (HS ψ (Set.mem_insert ψ S) p)
+  obtain ⟨S, hST, hS, hSσ⟩ := Entailment.Compact.finite_provable h
+  intro H
+  exact sound_fin (by simpa using hS) hSσ fun ψ hψ ↦ H ψ (hST hψ)
 
 end WeaklyForces₀
 
