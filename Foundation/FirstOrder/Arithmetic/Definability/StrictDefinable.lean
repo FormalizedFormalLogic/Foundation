@@ -5,10 +5,6 @@ public import Foundation.FirstOrder.Arithmetic.Definability.Definable
 
 /-!
 # Definability by strict-hierarchy formulas
-
-`StrictDefinable Γ s P` says the predicate `P` on `V` is defined by a `StrictHierarchy Γ s`
-formula with parameters from `V`, mirroring `HierarchySymbol.Definable` with `Γ` and `s` carried
-directly instead of a hierarchy symbol.
 -/
 
 @[expose] public section
@@ -23,14 +19,11 @@ structure IsStrictDefinedBy (R : (Fin k → V) → Prop) (φ : ArithmeticSemisen
   strictHierarchy : StrictHierarchy Γ s φ
   defined : FirstOrder.IsDefinedBy R φ
 
-/-- `R` is defined by the `StrictHierarchy Γ s` formula `φ`, whose free variables are read as
-parameters from `V`. -/
 structure IsStrictDefinedByWithParam (R : (Fin k → V) → Prop) (φ : ArithmeticSemiformula V k) :
     Prop where
   strictHierarchy : StrictHierarchy Γ s φ
   defined : FirstOrder.IsDefinedByWithParam R φ
 
-/-- `P` is defined by some `StrictHierarchy Γ s` formula with parameters from `V`. -/
 class StrictDefinable {k} (P : (Fin k → V) → Prop) : Prop where
   strictDefinable : ∃ φ : ArithmeticSemiformula V k, IsStrictDefinedByWithParam Γ s P φ
 

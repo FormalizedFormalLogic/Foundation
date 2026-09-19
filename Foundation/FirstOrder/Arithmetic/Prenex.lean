@@ -28,8 +28,6 @@ private abbrev PrenexBase : ℕ → ArithmeticTheory
   | 0     => 𝗜𝚺₀
   | s + 1 => 𝗕𝚷 s
 
--- This is stated as a `lemma`, not an `instance`, since `Γ` does not occur in the conclusion
--- `V↓[ℒₒᵣ] ⊧* PrenexBase s`, so instance search cannot infer it.
 private lemma models_PrenexBase_of_models_CollectionOnHierarchy {V : Type*} [ORingStructure V]
     (Γ : Polarity) (s : ℕ) [h : V↓[ℒₒᵣ] ⊧* 𝗕 Γ s] : V↓[ℒₒᵣ] ⊧* PrenexBase s :=
   match s, h with

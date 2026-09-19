@@ -9,9 +9,7 @@ public import Foundation.Vorspiel.Empty
 /-!
 # Model-theoretic semantics of first-order classical logic
 
-This file defines the structure and the evaluation of terms and formulas by Tarski's truth
-definition, together with `Semiformula.toSemisentence`, which turns a formula with `ℕ`-indexed
-free variables into a semisentence whose extra bound variables are those free variables.
+This file defines the structure and the evaluation of terms and formulas by Tarski's truth definition.
 -/
 
 namespace FFL
