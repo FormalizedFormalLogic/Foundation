@@ -971,21 +971,33 @@ namespace HierarchySymbol.Definable
 theorem sigma_succ_induction {V : Type*} [ORingStructure V] {s : ℕ}
     {motive : (k : ℕ) → (P : (Fin k → V) → Prop) → 𝚺-[s + 1].Definable P → Prop}
     (pi : ∀ {k} {P : (Fin k → V) → Prop} (hP : 𝚷-[s].Definable P),
-      motive k P (hP.of_lt (Nat.lt_succ_self s)))
-    (and : ∀ {k} {P Q : (Fin k → V) → Prop} (hP : 𝚺-[s + 1].Definable P)
-      (hQ : 𝚺-[s + 1].Definable Q), motive k P hP → motive k Q hQ →
-      motive k (fun v ↦ P v ∧ Q v) (hP.and hQ))
-    (or : ∀ {k} {P Q : (Fin k → V) → Prop} (hP : 𝚺-[s + 1].Definable P)
-      (hQ : 𝚺-[s + 1].Definable Q), motive k P hP → motive k Q hQ →
-      motive k (fun v ↦ P v ∨ Q v) (hP.or hQ))
+      motive k P (hP.of_lt (Nat.lt_succ_self s))
+    )
+    (and : ∀ {k} {P Q : (Fin k → V) → Prop}
+      (hP : 𝚺-[s + 1].Definable P)
+      (hQ : 𝚺-[s + 1].Definable Q),
+      motive k P hP → motive k Q hQ →
+      motive k (fun v ↦ P v ∧ Q v) (.and hP hQ)
+    )
+    (or : ∀ {k} {P Q : (Fin k → V) → Prop}
+      (hP : 𝚺-[s + 1].Definable P)
+      (hQ : 𝚺-[s + 1].Definable Q),
+      motive k P hP → motive k Q hQ →
+      motive k (fun v ↦ P v ∨ Q v) (.or hP hQ)
+    )
     (ball : ∀ {k} {P : (Fin (k + 1) → V) → Prop} (t : ArithmeticSemiterm V k)
-      (hP : 𝚺-[s + 1].Definable P), motive (k + 1) P hP →
-      motive k (fun v ↦ ∀ x < t.val v id, P (x :> v)) (hP.ballCons t))
+      (hP : 𝚺-[s + 1].Definable P),
+      motive (k + 1) P hP →
+      motive k (fun v ↦ ∀ x < t.val v id, P (x :> v)) (.ballCons hP t)
+    )
     (bexs : ∀ {k} {P : (Fin (k + 1) → V) → Prop} (t : ArithmeticSemiterm V k)
-      (hP : 𝚺-[s + 1].Definable P), motive (k + 1) P hP →
-      motive k (fun v ↦ ∃ x < t.val v id, P (x :> v)) (hP.bexsCons t))
+      (hP : 𝚺-[s + 1].Definable P),
+      motive (k + 1) P hP →
+      motive k (fun v ↦ ∃ x < t.val v id, P (x :> v)) (.bexsCons hP t)
+    )
     (exs : ∀ {k} {P : (Fin (k + 1) → V) → Prop} (hP : 𝚺-[s + 1].Definable P),
-      motive (k + 1) P hP → motive k (fun v ↦ ∃ x, P (x :> v)) hP.exsCons)
+      motive (k + 1) P hP → motive k (fun v ↦ ∃ x, P (x :> v)) (.exsCons hP)
+    )
     (k : ℕ) (P : (Fin k → V) → Prop) (hP : 𝚺-[s + 1].Definable P) : motive k P hP := by
   obtain ⟨φ, hφ⟩ := id hP;
   obtain rfl : P = fun v ↦ φ.val.Eval v id := funext fun v ↦ by simp [hφ.iff];
