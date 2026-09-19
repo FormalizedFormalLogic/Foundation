@@ -46,8 +46,6 @@ namespace Prenex
 variable {Γ : Polarity} {s : ℕ} {ξ ξ₁ ξ₂ : Type*} {n n₁ n₂ : ℕ}
 variable {V : Type*} [ORingStructure V]
 
-/-- The formula denoted by `φ`: its matrix prefixed by the `s` alternating quantifiers
-starting with `Γ`. -/
 @[coe]
 def val (φ : Prenex Γ s ξ n) : ArithmeticSemiformula ξ n := φ.matrix.val.toPrenex Γ s
 
@@ -339,7 +337,7 @@ private theorem models_ball :
   | _, 0, _, _, u, φ, e => by
     simp [ball_zero, Prenex.val, Semiformula.eval_ball];
   | 𝚺, s + 1, _, _, u, φ, e => by
-    have : V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := models_paMinus_of_models_CollectionOnHierarchy 𝚷 s;
+    have : V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := models_of_subtheory (inferInstance : V↓[ℒₒᵣ] ⊧* 𝗕 𝚷 s);
     have : V↓[ℒₒᵣ] ⊧* PrenexBase s := models_PrenexBase_of_models_CollectionOnHierarchy 𝚷 s;
     have iha : ∀ {m : ℕ} (u : ArithmeticSemiterm Empty m) (φ : Prenex 𝚷 s Empty (m + 1))
         (e : Fin m → V), V ⊧/e (∀'[u] φ).val ↔ ∀ x < u.valb e, V ⊧/(x :> e) φ.val :=
@@ -433,7 +431,7 @@ private theorem models_and :
   | _, 0, _, _, φ, ψ, e => by
     simp [and_zero, Prenex.val];
   | 𝚺, s + 1, n, _, φ, ψ, e => by
-    have : V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := models_paMinus_of_models_CollectionOnHierarchy 𝚷 s;
+    have : V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := models_of_subtheory (inferInstance : V↓[ℒₒᵣ] ⊧* 𝗕 𝚷 s);
     have : V↓[ℒₒᵣ] ⊧* PrenexBase s := models_PrenexBase_of_models_CollectionOnHierarchy 𝚷 s;
     have iha : ∀ {m : ℕ} (φ ψ : Prenex 𝚷 s Empty m) (e : Fin m → V),
         V ⊧/e (φ ⋏ ψ).val ↔ V ⊧/e φ.val ∧ V ⊧/e ψ.val :=
@@ -514,7 +512,7 @@ local prefix:64 "∀' " => Prenex.all
 
 private lemma models_exs [V↓[ℒₒᵣ] ⊧* 𝗕𝚷 s] (φ : Prenex 𝚺 (s + 1) Empty (n + 1)) (e : Fin n → V) :
     V ⊧/e (∃' φ).val ↔ ∃ x, V ⊧/(x :> e) φ.val := by
-  have : V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := models_paMinus_of_models_CollectionOnHierarchy 𝚷 s;
+  have : V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := models_of_subtheory (inferInstance : V↓[ℒₒᵣ] ⊧* 𝗕 𝚷 s);
   have : V↓[ℒₒᵣ] ⊧* PrenexBase s := models_PrenexBase_of_models_CollectionOnHierarchy 𝚷 s;
   show V ⊧/e
       (∃'[‘#0 + 1’] (∃'[‘#1 + 1’]
@@ -686,8 +684,6 @@ theorem exists_strictHierarchy_of_hierarchy (h : Hierarchy Γ s φ) :
 
 end
 
--- The `NeZero k` hypothesis comes from `Semiformula.toSemisentence`, which is what turns the
--- `ℕ`-indexed parameters of the defining formula into trailing bound variables of a sentence.
 lemma StrictDefinable.of_definable {V : Type*} [ORingStructure V] {Γ Γ' : Polarity} {s k : ℕ}
     [NeZero k] [V↓[ℒₒᵣ] ⊧* 𝗕 Γ' s] {P : (Fin k → V) → Prop} (hP : Γ-[s].Definable P) :
     StrictDefinable Γ s P := by
