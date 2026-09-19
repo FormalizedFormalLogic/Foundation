@@ -4,11 +4,15 @@ public import Foundation.FirstOrder.Incompleteness.WitnessComparison
 public import Foundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.CraigTrick
 
 @[expose] public section
+set_option linter.style.dollarSyntax false
 /-!
 # Rosser's provability predicate
 -/
 
 namespace FFL.FirstOrder.Arithmetic.Bootstrapping
+
+set_option linter.style.longLine false
+set_option linter.style.openClassical false
 
 open FFL.Entailment
 
@@ -146,7 +150,8 @@ end rosserProvability
 theorem incomplete_GR (T : ArithmeticTheory) [T.Δ₁] [𝗜𝚺₁ ⪯ T] [Consistent T] : Incomplete T :=
   ProvabilityAbstraction.rosser_first_incompleteness T.rosserProvability
 
-instance {T : ArithmeticTheory} [T.RE] [𝗜𝚺₁ ⪯ T] : 𝗜𝚺₁ ⪯ T.craig := WeakerThan.trans inferInstance (inferInstance : T ⪯ T.craig)
+instance {T : ArithmeticTheory} [T.RE] [𝗜𝚺₁ ⪯ T] : 𝗜𝚺₁ ⪯ T.craig :=
+  WeakerThan.trans inferInstance (inferInstance : T ⪯ T.craig)
 
 /-- Gödel-Rosser incompleteness theorem for r.e. theories -/
 theorem incomplete_GR_of_RE (T : ArithmeticTheory) [T.RE] [𝗜𝚺₁ ⪯ T] [Consistent T] : Incomplete T :=

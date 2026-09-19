@@ -7,6 +7,9 @@ public import Foundation.FirstOrder.Incompleteness.ProvabilityAbstraction.Basic
 public import Foundation.FirstOrder.Arithmetic.Bootstrapping.FixedPoint
 
 @[expose] public section
+set_option linter.style.docString false
+set_option linter.style.dollarSyntax false
+set_option linter.style.longLine false
 /-!
 # Derivability conditions of standard provability predicate
 -/
@@ -94,8 +97,8 @@ open FFL.Entailment in
 lemma provable_sigma_one_complete_of_E {σ π} [𝗜𝚺₁ ⪯ T]
   (hσ : Hierarchy 𝚺 1 σ) (hσπ : 𝗜𝚺₁ ⊢ σ 🡘 π) : 𝗜𝚺₁ ⊢ π 🡒 □π := by
   apply C_replace ?_ ?_ $ provable_sigma_one_complete (T := T) $ hσ;
-  . cl_prover [hσπ];
-  . apply T.standardProvability.mono';
+  · cl_prover [hσπ]
+  · apply T.standardProvability.mono'
     cl_prover [hσπ];
 
 end arithmetic
@@ -105,7 +108,7 @@ lemma exists_true_but_unprovable_sentence_of_incomplete {T : ArithmeticTheory} (
     ∃ δ : ArithmeticSentence, ℕ↓[ℒₒᵣ] ⊧ δ ∧ T ⊬ δ := by
   obtain ⟨δ, hδ⟩ := incomplete_def.mp h;
   by_cases ℕ↓[ℒₒᵣ] ⊧ δ
-  . exact ⟨δ, by assumption, hδ.1⟩
-  . exact ⟨∼δ, by simpa, hδ.2⟩
+  · exact ⟨δ, by assumption, hδ.1⟩
+  · exact ⟨∼δ, by simpa, hδ.2⟩
 
 end FFL.FirstOrder.Arithmetic

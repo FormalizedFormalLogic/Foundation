@@ -9,8 +9,6 @@ public import Foundation.FirstOrder.Arithmetic.ISigma1.Prenex
 
 @[expose] public section
 
-open Classical
-
 namespace FFL.FirstOrder.Arithmetic.Bootstrapping
 
 open FFL.Entailment
@@ -20,7 +18,8 @@ variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] {x : 
 variable (T : ArithmeticTheory) [T.Δ₁] (θ : 𝚺₀.Semisentence 1)
 
 
-def _root_.FFL.FirstOrder.Theory.WitnessedBefore (φ : V) := ∃ b, V ⊧/![b] θ.val ∧ ∀ b' < b, ¬Proof T b' φ
+def _root_.FFL.FirstOrder.Theory.WitnessedBefore (φ : V) :=
+  ∃ b, V ⊧/![b] θ.val ∧ ∀ b' < b, ¬Proof T b' φ
 
 noncomputable def _root_.FFL.FirstOrder.Theory.witnessedBefore : 𝚺₁.Semisentence 1 := .mkSigma
   “x. ∃ w, !θ w ∧ ∀ p < w, ¬!(proof T).pi p x”
@@ -33,7 +32,8 @@ instance _root_.FFL.FirstOrder.Theory.WitnessedBefore.definable :
     𝚺₁-Predicate[V] T.WitnessedBefore θ := (Theory.WitnessedBefore.defined T θ).to_definable
 
 
-def _root_.FFL.FirstOrder.Theory.ProvedBefore (φ : V) := ∃ b, Proof T b φ ∧ ∀ b' ≤ b, ¬V ⊧/![b'] θ.val
+def _root_.FFL.FirstOrder.Theory.ProvedBefore (φ : V) :=
+  ∃ b, Proof T b φ ∧ ∀ b' ≤ b, ¬V ⊧/![b'] θ.val
 
 noncomputable def _root_.FFL.FirstOrder.Theory.provedBefore : 𝚺₁.Semisentence 1 := .mkSigma
   “x. ∃ p, !(proof T).sigma p x ∧ ∀ w <⁺ p, ¬!θ w”
@@ -73,18 +73,20 @@ lemma diagonal_fghSentence :
 
 lemma refutable_fghSentence_of_provedBefore :
     𝗜𝚺₁ ⊢ (T.provedBefore θ).val/[⌜T.fghSentence θ⌝] 🡒 ∼T.fghSentence θ := by
-  apply C_trans ?_ $ contra $ K_left diagonal_fghSentence;
+  apply C_trans ?_ <| contra <| K_left diagonal_fghSentence;
   apply complete.{0};
   intro V _ _;
-  simpa [models_iff, Sentence.coe_quote_eq_quote, Theory.fghSentence'] using not_witnessedBefore_of_provedBefore;
+  simpa [models_iff, Sentence.coe_quote_eq_quote, Theory.fghSentence']
+    using not_witnessedBefore_of_provedBefore;
 
 
 local notation:max "□" σ:max => Provable T (⌜σ⌝ : V)
 
 lemma provable_of_provable_bot : □(⊥ : ArithmeticSentence) → □σ :=
-  modus_ponens_sentence T $ internalize_provability efq
+  modus_ponens_sentence T <| internalize_provability efq
 
-lemma provable_bot_of_provable_of_provable_neg : □σ → □(∼σ) → □(⊥ : ArithmeticSentence) := fun hσ hnσ ↦
+lemma provable_bot_of_provable_of_provable_neg :
+    □σ → □(∼σ) → □(⊥ : ArithmeticSentence) := fun hσ hnσ ↦
   modus_ponens_sentence T (modus_ponens_sentence T (internalize_provability (by cl_prover)) hσ) hnσ
 
 variable [𝗜𝚺₁ ⪯ T]
@@ -93,13 +95,14 @@ lemma witness_or_provable_bot_of_provable_fghSentence :
   □(T.fghSentence θ) → (∃ w, V ⊧/![w] θ.val) ∨ □(⊥ : ArithmeticSentence) := by
   intro hprov;
   by_cases hw : ∃ w, V ⊧/![w] θ.val;
-  . tauto;
-  . push Not at hw;
+  · tauto;
+  · push Not at hw;
     obtain ⟨p₀, hp₀⟩ := hprov;
     right;
     apply provable_bot_of_provable_of_provable_neg (σ := T.fghSentence θ);
-    . use p₀;
-    . apply modus_ponens_sentence T (internalize_provability (WeakerThan.pbl refutable_fghSentence_of_provedBefore));
+    · use p₀;
+    · apply modus_ponens_sentence T
+        (internalize_provability (WeakerThan.pbl refutable_fghSentence_of_provedBefore));
       apply Bootstrapping.Arithmetic.sigma_one_complete T (by simp);
       apply models_iff.mpr;
       simpa using ⟨p₀, hp₀, fun w _ ↦ hw w⟩;
@@ -107,16 +110,18 @@ lemma witness_or_provable_bot_of_provable_fghSentence :
 lemma provable_fghSentence_of_witness_or_provable_bot :
   (∃ w, V ⊧/![w] θ.val) ∨ □(⊥ : ArithmeticSentence) → □(T.fghSentence θ) := by
   rintro (⟨w₀, hw₀⟩ | hbot);
-  . by_cases hp : ∃ p < w₀, Proof T p (⌜T.fghSentence θ⌝ : V);
-    . obtain ⟨p, -, hp⟩ := hp;
+  · by_cases hp : ∃ p < w₀, Proof T p (⌜T.fghSentence θ⌝ : V);
+    · obtain ⟨p, -, hp⟩ := hp;
       use p;
-    . push Not at hp;
-      apply modus_ponens_sentence T (internalize_provability (WeakerThan.pbl (K_right diagonal_fghSentence)));
+    · push Not at hp;
+      apply modus_ponens_sentence T
+        (internalize_provability (WeakerThan.pbl (K_right diagonal_fghSentence)));
       apply Bootstrapping.Arithmetic.sigma_one_complete T (by simp);
       simpa [models_iff, Theory.fghSentence'] using ⟨w₀, hw₀, hp⟩;
-  . exact provable_of_provable_bot hbot;
+  · exact provable_of_provable_bot hbot;
 
-lemma provable_fghSentence_iff : □(T.fghSentence θ) ↔ (∃ w, V ⊧/![w] θ.val) ∨ □(⊥ : ArithmeticSentence) := ⟨
+lemma provable_fghSentence_iff :
+    □(T.fghSentence θ) ↔ (∃ w, V ⊧/![w] θ.val) ∨ □(⊥ : ArithmeticSentence) := ⟨
   witness_or_provable_bot_of_provable_fghSentence,
   provable_fghSentence_of_witness_or_provable_bot
 ⟩
@@ -130,7 +135,8 @@ lemma provable_fixedpoint_iff_exs_or_provable_bot :
 
 lemma provable_fixedpoint'_iff_exs_or_provable_bot :
   𝗜𝚺₁ ⊢ provabilityPred T (T.fghSentence' θ).val 🡘 (∃¹ θ.val) ⋎ provabilityPred T ⊥ :=
-  E_trans (E_symm $ T.standardProvability.ext' diagonal_fghSentence) provable_fixedpoint_iff_exs_or_provable_bot
+  E_trans (E_symm <| T.standardProvability.ext' diagonal_fghSentence)
+    provable_fixedpoint_iff_exs_or_provable_bot
 
 end FFL.FirstOrder.Arithmetic.Bootstrapping
 

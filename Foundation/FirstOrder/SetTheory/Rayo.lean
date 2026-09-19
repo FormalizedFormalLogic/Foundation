@@ -30,16 +30,16 @@ private lemma nat_mem_of_lt {m n : ℕ} (h : m < n) :
   | succ n ih =>
     rw [num_succ_def, mem_succ_iff]
     rcases Nat.lt_succ_iff_lt_or_eq.mp h with h | rfl
-    . exact Or.inr (ih h)
-    . exact Or.inl rfl
+    · right; exact ih h
+    · left; rfl
 
 private lemma nat_injective : Function.Injective (fun n : ℕ ↦ (n : Universe.{0})) := by
   intro m n h
   change (m : Universe) = (n : Universe) at h
   rcases lt_trichotomy m n with h₁ | h₁ | h₁
-  . exact False.elim <| mem_irrefl _ (h ▸ nat_mem_of_lt h₁)
-  . exact h₁
-  . exact False.elim <| mem_irrefl _ (h.symm ▸ nat_mem_of_lt h₁)
+  · exact False.elim <| mem_irrefl _ (h ▸ nat_mem_of_lt h₁)
+  · exact h₁
+  · exact False.elim <| mem_irrefl _ (h.symm ▸ nat_mem_of_lt h₁)
 
 lemma definableNumbers_finite (N : ℕ) : (definableNumbers N).Finite := by
   have h₁ : {φ : Semisentence ℒₛₑₜ 1 | Encodable.encode φ < N}.Finite :=
@@ -86,11 +86,11 @@ lemma rayo_unbounded (m : ℕ) : ∃ N, m < rayo N := by
   obtain ⟨φ, hφ⟩ := nat_defined m
   exact ⟨Encodable.encode φ + 1, rayo_gt (Nat.lt_succ_self _) hφ⟩
 
-lemma rayo_le_iff : rayo N ≤ k ↔ ∀ m ∈ definableNumbers N, m < k := by
+lemma rayo_le_iff {k : ℕ} : rayo N ≤ k ↔ ∀ m ∈ definableNumbers N, m < k := by
   constructor
-  . rintro h m ⟨ψ, hψ, hm⟩
+  · rintro h m ⟨ψ, hψ, hm⟩
     exact (rayo_gt hψ hm).trans_le h
-  . intro h
+  · intro h
     exact ciSup_le' fun m ↦ ciSup_le' fun hm ↦ Nat.succ_le_of_lt (h m hm)
 
 lemma rayo_not_mem_definableNumbers : rayo N ∉ definableNumbers N := by

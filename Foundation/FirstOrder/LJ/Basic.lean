@@ -11,6 +11,8 @@ public import Foundation.Logic.Calculus
 
 namespace FFL.FirstOrder
 
+universe u
+
 variable {L : Language.{u}}
 
 open Semiformulaᵢ
@@ -43,52 +45,55 @@ end Head
 
 inductive Derivation : Sequent L → Head L → Type _
 /-- Identity rule -/
-| identity (R : L.Rel k) (v) : Derivation ⦃rel R v⦄ (rel R v)
+| identity {k : ℕ} (R : L.Rel k) (v) : Derivation ⦃rel R v⦄ (rel R v)
 /-- Cut rule -/
-| cut {φ : Propositionᵢ L} {Γ Δ Ξ} :
+| cut {φ : Propositionᵢ L} {Γ Δ : Sequent L} {Ξ : Head L} :
   Derivation Γ φ → Derivation (Δ + ⦃φ⦄) Ξ → Derivation (Γ + Δ) Ξ
 /-- Left contraction -/
-| contraction : Derivation (Γ + ⦃φ, φ⦄) Ξ → Derivation (Γ + ⦃φ⦄) Ξ
+| contraction {Γ : Sequent L} {Ξ : Head L} {φ : Propositionᵢ L} :
+  Derivation (Γ + ⦃φ, φ⦄) Ξ → Derivation (Γ + ⦃φ⦄) Ξ
 /-- Left weakening -/
-| weakening : Derivation Γ Ξ → Derivation (Γ + ⦃φ⦄) Ξ
+| weakening {Γ : Sequent L} {Ξ : Head L} {φ : Propositionᵢ L} :
+  Derivation Γ Ξ → Derivation (Γ + ⦃φ⦄) Ξ
 /-- Right weakening -/
-| weakeningRight : Derivation Γ none → Derivation Γ (some φ)
+| weakeningRight {Γ : Sequent L} {φ : Propositionᵢ L} :
+  Derivation Γ none → Derivation Γ (some φ)
 /-- Positive introduction of verum -/
 | verum : Derivation 0 (some ⊤)
 /-- Negative introduction of falsum -/
 | falsum : Derivation ⦃⊥⦄ none
 /-- Positive introduction of implication -/
-| positiveImply {φ ψ : Propositionᵢ L} :
+| positiveImply {Γ : Sequent L} {φ ψ : Propositionᵢ L} :
   Derivation (Γ + ⦃φ⦄) ψ → Derivation Γ (φ 🡒 ψ)
 /-- Negative introduction of implication -/
-| negativeImply {φ ψ : Propositionᵢ L} :
+| negativeImply {Γ Δ : Sequent L} {Ξ : Head L} {φ ψ : Propositionᵢ L} :
   Derivation Γ φ → Derivation (Δ + ⦃ψ⦄) Ξ → Derivation (Γ + Δ + ⦃φ 🡒 ψ⦄) Ξ
 /-- Positive introduction of conjunction -/
-| positiveAnd {φ ψ : Propositionᵢ L} :
+| positiveAnd {Γ : Sequent L} {φ ψ : Propositionᵢ L} :
   Derivation Γ φ → Derivation Γ ψ → Derivation Γ (φ ⋏ ψ)
 /-- Negative introduction of conjunction -/
-| negativeAnd {φ ψ : Propositionᵢ L} :
+| negativeAnd {Γ : Sequent L} {Ξ : Head L} {φ ψ : Propositionᵢ L} :
   Derivation (Γ + ⦃φ, ψ⦄) Ξ → Derivation (Γ + ⦃φ ⋏ ψ⦄) Ξ
 /-- Positive introduction of disjunction (left) -/
-| positiveOrLeft {φ ψ : Propositionᵢ L} :
+| positiveOrLeft {Γ : Sequent L} {φ ψ : Propositionᵢ L} :
   Derivation Γ φ → Derivation Γ (φ ⋎ ψ)
 /-- Positive introduction of disjunction (right) -/
-| positiveOrRight {φ ψ : Propositionᵢ L} :
+| positiveOrRight {Γ : Sequent L} {φ ψ : Propositionᵢ L} :
   Derivation Γ ψ → Derivation Γ (φ ⋎ ψ)
 /-- Negative introduction of disjunction -/
-| negativeOr :
+| negativeOr {Γ : Sequent L} {Ξ : Head L} {φ ψ : Propositionᵢ L} :
   Derivation (Γ + ⦃φ⦄) Ξ → Derivation (Γ + ⦃ψ⦄) Ξ → Derivation (Γ + ⦃φ ⋎ ψ⦄) Ξ
 /-- Positive introduction of universal quantifier -/
-| positiveForall {φ : Semipropositionᵢ L 1} :
+| positiveForall {Γ : Sequent L} {φ : Semipropositionᵢ L 1} :
   Derivation Γ⁺ (Rewriting.free φ) → Derivation Γ (∀¹ φ)
 /-- Negative introduction of universal quantifier -/
-| negativeForall {φ : Semipropositionᵢ L 1} {t : Term L ℕ} :
+| negativeForall {Γ : Sequent L} {Ξ : Head L} {φ : Semipropositionᵢ L 1} {t : Term L ℕ} :
   Derivation (Γ + ⦃φ/[t]⦄) Ξ → Derivation (Γ + ⦃∀¹ φ⦄) Ξ
 /-- Positive introduction of existential quantifier -/
-| positiveExists {φ : Semipropositionᵢ L 1} {t : Term L ℕ} :
+| positiveExists {Γ : Sequent L} {φ : Semipropositionᵢ L 1} {t : Term L ℕ} :
   Derivation Γ (φ/[t]) → Derivation Γ (∃¹ φ)
 /-- Negative introduction of existential quantifier -/
-| negativeExists {φ : Semipropositionᵢ L 1} :
+| negativeExists {Γ : Sequent L} {Ξ : Head L} {φ : Semipropositionᵢ L 1} :
   Derivation (Γ⁺ + ⦃Rewriting.free φ⦄) Ξ.shift → Derivation (Γ + ⦃∃¹ φ⦄) Ξ
 
 infix:45 " ⊢ᴸᴶ¹ " => Derivation
@@ -146,9 +151,9 @@ def eta : (φ : Propositionᵢ L) → ⦃φ⦄ ⊢ᴸᴶ¹ φ
         ((eta φ).weakening (φ := ψ)).cast (by simp)))
       (cast (negativeAnd (Γ := 0) (φ := φ) (ψ := ψ) (Ξ := ψ) <|
         ((eta ψ).weakening (φ := φ)).cast (by simp [add_comm])))
-  |    φ ⋎ ψ => negativeOr (Γ := 0) (φ := φ) (ψ := ψ) (Ξ := φ ⋎ ψ)
+  |    φ ⋎ ψ => cast (negativeOr (Γ := 0) (φ := φ) (ψ := ψ) (Ξ := φ ⋎ ψ)
       (cast (positiveOrLeft (ψ := ψ) (eta φ)))
-      (cast (positiveOrRight (φ := φ) (eta ψ)))
+      (cast (positiveOrRight (φ := φ) (eta ψ)))) (by simp)
   |    φ 🡒 ψ => positiveImply <|
       cast (negativeImply (φ := φ) (ψ := ψ) (Δ := 0) (Ξ := ψ)
         (eta φ)
@@ -170,8 +175,9 @@ def positiveNeg {φ : Propositionᵢ L} (d : Γ + ⦃φ⦄ ⊢ᴸᴶ¹ (⊥ : Pr
 
 def negativeNeg {φ : Propositionᵢ L} (d : Γ ⊢ᴸᴶ¹ φ) :
     Γ + ⦃(∼φ : Propositionᵢ L)⦄ ⊢ᴸᴶ¹ none :=
-  cast (seq := by rw [add_zero]; rfl) <| negativeImply (φ := φ) (ψ := ⊥) (Γ := Γ) (Δ := 0) (Ξ := none) d <|
-    cast falsum (by simp) (by rfl)
+  cast (seq := by rw [add_zero]; rfl) <|
+    negativeImply (φ := φ) (ψ := ⊥) (Γ := Γ) (Δ := 0) (Ξ := none) d <|
+      cast falsum (by simp) (by rfl)
 
 def modusPonens [L.DecidableEq] {φ ψ : Propositionᵢ L} (di : Γ ⊢ᴸᴶ¹ φ 🡒 ψ) (dφ : Γ ⊢ᴸᴶ¹ φ) :
     Γ ⊢ᴸᴶ¹ ψ :=
@@ -329,7 +335,8 @@ def doubleNegationMap {φ ψ : Propositionᵢ L} (d : ⦃φ⦄ ⊢ᴸᴶ¹ ψ) :
 
 def dneOfNegative : {φ : Propositionᵢ L} → φ.IsNegative → ⦃∼∼φ⦄ ⊢ᴸᴶ¹ φ
   | ⊥, _ =>
-      ((positiveNeg (Γ := 0) (φ := ⊥) ((eta ⊥).cast (by simp))).negativeNeg.weakeningRight).cast (heq := rfl)
+      ((positiveNeg (Γ := 0) (φ := ⊥) ((eta ⊥).cast (by simp))).negativeNeg.weakeningRight).cast
+        (heq := rfl)
   | φ ⋏ ψ, h =>
     have hn : φ.IsNegative ∧ ψ.IsNegative := by simpa using h
     positiveAnd
@@ -429,7 +436,7 @@ instance : Entailment (Theoryᵢ L) (Sentenceᵢ L) := ⟨Theoryᵢ.Proof⟩
 
 namespace Theoryᵢ.Proof
 
-variable {T U : Theoryᵢ L} [L.DecidableEq]
+variable {T U : Theoryᵢ L} {σ φ ψ : Sentenceᵢ L} [L.DecidableEq]
 
 def weakening (ss : T ⊆ U) : T ⊢! σ → U ⊢! σ
   | ⟨Γ, hΓ, d⟩ => ⟨Γ, fun ψ hψ ↦ ss (hΓ ψ hψ), d⟩

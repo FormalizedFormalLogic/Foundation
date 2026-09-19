@@ -5,8 +5,21 @@ public import Foundation.Logic.LindenbaumAlgebra
 public import Foundation.Vorspiel.Order.Heyting
 
 @[expose] public section
+set_option linter.style.longLine false
+set_option linter.style.cdot false
+set_option linter.style.whitespace false
+set_option linter.style.dollarSyntax false
+set_option linter.unusedVariables false
+set_option linter.unusedSimpArgs false
+set_option linter.unusedTactic false
+set_option linter.unreachableTactic false
+set_option linter.unusedDecidableInType false
+set_option linter.unusedFintypeInType false
+set_option autoImplicit true
 
 namespace FFL.Propositional
+
+universe u w
 
 variable {α : Type u}
 

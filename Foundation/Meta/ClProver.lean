@@ -21,57 +21,100 @@ namespace Theorems
 
 open Entailment TwoSided FiniteContext
 
-variable {F : Type*} [LogicalConnective F] [LogicalNeutral F] [DecidableEq F] {S : Type*} [Entailment S F] (𝓢 : S) [Entailment.Cl 𝓢]
+variable {F : Type*} [LogicalConnective F] [LogicalNeutral F] [DecidableEq F] {S : Type*}
+  [Entailment S F] (𝓢 : S) [Entailment.Cl 𝓢]
 
 local notation Γ:45 " ⟹ " Δ:46 => TwoSided 𝓢 Γ Δ
 
+omit [DecidableEq F] in
+open scoped Classical in
 lemma to_provable (φ) (h : [] ⟹ [φ]) : 𝓢 ⊢ φ := TwoSided.to_provable h
 
+omit [DecidableEq F] in
+open scoped Classical in
 lemma rotate_right (Γ Δ φ) (hφ : Γ ⟹ Δ ++ [φ]) : Γ ⟹ φ :: Δ := TwoSided.rotate_right hφ
 
+omit [DecidableEq F] in
+open scoped Classical in
 lemma rotate_left (Γ Δ φ) (hφ : (Γ ++ [φ]) ⟹ Δ) : (φ :: Γ) ⟹ Δ := TwoSided.rotate_left hφ
 
-lemma add_hyp (𝒯 : S) (s : 𝒯 ⪯ 𝓢) (Γ Δ φ) (hφ : 𝒯 ⊢ φ) (h : (φ :: Γ) ⟹ Δ) : Γ ⟹ Δ := TwoSided.add_hyp hφ h
+omit [DecidableEq F] in
+open scoped Classical in
+lemma add_hyp (𝒯 : S) (s : 𝒯 ⪯ 𝓢) (Γ Δ φ) (hφ : 𝒯 ⊢ φ) (h : (φ :: Γ) ⟹ Δ) : Γ ⟹ Δ :=
+  TwoSided.add_hyp hφ h
 
+omit [DecidableEq F] in
+open scoped Classical in
 lemma right_closed (Γ Δ φ) (h : φ ∈ Γ) : Γ ⟹ φ :: Δ := TwoSided.right_closed h
 
+omit [DecidableEq F] in
+open scoped Classical in
 lemma left_closed (Γ Δ φ) (h : φ ∈ Δ) : (φ :: Γ) ⟹ Δ := TwoSided.left_closed h
 
+omit [DecidableEq F] in
+open scoped Classical in
 lemma verum_right (Γ Δ) : Γ ⟹ ⊤ :: Δ := TwoSided.verum_right
 
+omit [DecidableEq F] in
+open scoped Classical in
 lemma falsum_left (Γ Δ) : (⊥ :: Γ) ⟹ Δ := TwoSided.falsum_left
 
+omit [DecidableEq F] in
+open scoped Classical in
 lemma falsum_right (Γ Δ) (h : Γ ⟹ Δ) : Γ ⟹ ⊥ :: Δ := TwoSided.falsum_right h
 
+omit [DecidableEq F] in
+open scoped Classical in
 lemma verum_left (Γ Δ) (h : Γ ⟹ Δ) : (⊤ :: Γ) ⟹ Δ := TwoSided.verum_left h
 
+omit [DecidableEq F] in
+open scoped Classical in
 lemma and_right (Γ Δ φ ψ) (hφ : Γ ⟹ Δ ++ [φ]) (hψ : Γ ⟹ Δ ++ [ψ]) : Γ ⟹ φ ⋏ ψ :: Δ :=
   TwoSided.and_right (weakening hφ) (weakening hψ)
 
+omit [DecidableEq F] in
+open scoped Classical in
 lemma or_left (Γ Δ φ ψ) (hφ : (Γ ++ [φ]) ⟹ Δ) (hψ : (Γ ++ [ψ]) ⟹ Δ) : (φ ⋎ ψ :: Γ) ⟹ Δ :=
   TwoSided.or_left (weakening hφ) (weakening hψ)
 
+omit [DecidableEq F] in
+open scoped Classical in
 lemma or_right (Γ Δ φ ψ) (h : Γ ⟹ Δ ++ [φ, ψ]) : Γ ⟹ φ ⋎ ψ :: Δ :=
   TwoSided.or_right (weakening h)
 
+omit [DecidableEq F] in
+open scoped Classical in
 lemma and_left (Γ Δ φ ψ) (h : (Γ ++ [φ, ψ]) ⟹ Δ) : (φ ⋏ ψ :: Γ) ⟹ Δ :=
   TwoSided.and_left (weakening h)
 
+omit [DecidableEq F] in
+open scoped Classical in
 lemma neg_right (Γ Δ φ) (h : (Γ ++ [φ]) ⟹ Δ) : Γ ⟹ ∼φ :: Δ :=
   TwoSided.neg_right_cl (weakening h)
 
+omit [DecidableEq F] in
+open scoped Classical in
 lemma neg_left (Γ Δ φ) (h : Γ ⟹ Δ ++ [φ]) : (∼φ :: Γ) ⟹ Δ :=
   TwoSided.neg_left (weakening h)
 
+omit [DecidableEq F] in
+open scoped Classical in
 lemma imply_right (Γ Δ φ ψ) (h : (Γ ++ [φ]) ⟹ Δ ++ [ψ]) : Γ ⟹ (φ 🡒 ψ) :: Δ :=
   TwoSided.imply_right_cl (weakening h)
 
+omit [DecidableEq F] in
+open scoped Classical in
 lemma imply_left (Γ Δ φ ψ) (hφ : Γ ⟹ Δ ++ [φ]) (hψ : (Γ ++ [ψ]) ⟹ Δ) : ((φ 🡒 ψ) :: Γ) ⟹ Δ :=
   TwoSided.imply_left (weakening hφ) (weakening hψ)
 
-lemma iff_right (Γ Δ φ ψ) (hr : (Γ ++ [φ]) ⟹ Δ ++ [ψ]) (hl : (Γ ++ [ψ]) ⟹ Δ ++ [φ]) : Γ ⟹ (φ 🡘 ψ) :: Δ :=
+omit [DecidableEq F] in
+open scoped Classical in
+lemma iff_right (Γ Δ φ ψ) (hr : (Γ ++ [φ]) ⟹ Δ ++ [ψ]) (hl : (Γ ++ [ψ]) ⟹ Δ ++ [φ]) :
+    Γ ⟹ (φ 🡘 ψ) :: Δ :=
   TwoSided.iff_right_cl (weakening hr) (weakening hl)
 
+omit [DecidableEq F] in
+open scoped Classical in
 lemma iff_left (Γ Δ φ ψ) (hr : Γ ⟹ Δ ++ [φ, ψ]) (hl : (Γ ++ [φ, ψ]) ⟹ Δ) : ((φ 🡘 ψ) :: Γ) ⟹ Δ :=
   TwoSided.iff_left (weakening hr) (weakening hl)
 
@@ -98,18 +141,20 @@ structure Context where
 abbrev M := ReaderT Context AtomM
 
 /-- Apply the function
-  `n : ∀ {F} [LogicalConnective F] [LogicalNeutral F] [DecidableEq F] {S} [Entailment S F] {𝓢} [Entailment.Cl 𝓢], _` to the
-implicit parameters in the context, and the given list of arguments. -/
+  `n : ∀ {F} [LogicalConnective F] [LogicalNeutral F] {S} [Entailment S F] {𝓢}
+    [Entailment.Cl 𝓢], _`
+to the implicit parameters in the context, and the given list of arguments. -/
 def Context.app (c : Context) (n : Name) : Array Expr → Expr :=
   mkAppN <| @Expr.const n [c.levelF, c.levelS, c.levelE]
-    |>.app c.F |>.app c.LC |>.app c.LN |>.app c.DC |>.app c.S |>.app c.E |>.app c.𝓢 |>.app c.CL
+    |>.app c.F |>.app c.LC |>.app c.LN |>.app c.S |>.app c.E |>.app c.𝓢 |>.app c.CL
 
 def iapp (n : Name) (xs : Array Expr) : M Expr := do
   let c ← read
   return c.app n xs
 
 def getGoalTwoSided (e : Q(Prop)) : MetaM ((c : Context) × List Q($c.F) × List Q($c.F)) := do
-  let ~q(@Entailment.TwoSided $F $LC $LN $S $E $𝓢 $p $q) := e | throwError m!"(getGoal) error: {e} not a form of _ ⊢ _"
+  let ~q(@Entailment.TwoSided $F $LC $LN $S $E $𝓢 $p $q) := e
+    | throwError m!"(getGoal) error: {e} not a form of _ ⊢ _"
   let .some DC ← trySynthInstanceQ q(DecidableEq $F)
     | throwError m! "error: failed to find instance DecidableEq {F}"
   let .some CL ← trySynthInstanceQ q(Entailment.Cl $𝓢)
@@ -119,7 +164,8 @@ def getGoalTwoSided (e : Q(Prop)) : MetaM ((c : Context) × List Q($c.F) × List
   return ⟨⟨_, _, _, F, LC, LN, DC, S, E, 𝓢, CL⟩, Γ, Δ⟩
 
 def getGoalProvable (e : Q(Prop)) : MetaM ((c : Context) × Q($c.F)) := do
-  let ~q(@Entailment.Provable $F $S $E $𝓢 $p) := e | throwError m!"(getGoal) error: {e} not a form of _ ⊢ _"
+  let ~q(@Entailment.Provable $F $S $E $𝓢 $p) := e
+    | throwError m!"(getGoal) error: {e} not a form of _ ⊢ _"
   let .some DC ← trySynthInstanceQ q(DecidableEq $F)
     | throwError m! "error: failed to find instance DecidableEq {F}"
   let .some LC ← trySynthInstanceQ q(LogicalConnective $F)
@@ -360,7 +406,8 @@ structure HypInfo where
 
 def synthProvable (e : Expr) : MetaM HypInfo := do
   let (ty : Q(Prop)) ← inferType e
-  let ~q(@Entailment.Provable $F $S $E $𝓢 $φ) := ty | throwError m!"(getGoal) error: {e} not a form of _ ⊢ _"
+  let ~q(@Entailment.Provable $F $S $E $𝓢 $φ) := ty
+    | throwError m!"(getGoal) error: {e} not a form of _ ⊢ _"
   return ⟨_, _, _, F, S, E, 𝓢, φ, e⟩
 
 structure CompatibleHypInfo where
@@ -371,8 +418,10 @@ structure CompatibleHypInfo where
 
 def HypInfo.toCompatible (h : HypInfo) : M CompatibleHypInfo := do
   let c ← read
-  if (← isDefEq (← whnf h.F) (← whnf c.F)) && (← isDefEq (← whnf h.S) (← whnf c.S)) && (← isDefEq (← whnf h.E) (← whnf c.E)) then
-    let e := @Expr.const ``FFL.Entailment.WeakerThan [c.levelF, c.levelS, c.levelS, c.levelE, c.levelE]
+  if (← isDefEq (← whnf h.F) (← whnf c.F)) && (← isDefEq (← whnf h.S) (← whnf c.S)) &&
+      (← isDefEq (← whnf h.E) (← whnf c.E)) then
+    let e :=
+      @Expr.const ``FFL.Entailment.WeakerThan [c.levelF, c.levelS, c.levelS, c.levelE, c.levelE]
       |>.app c.F |>.app c.S |>.app c.S |>.app c.E |>.app c.E |>.app h.𝓢 |>.app c.𝓢
     let .some wt ← trySynthInstance e
       | throwError m! "error: failed to find instance {e}"

@@ -27,12 +27,14 @@ def IsTransitive.dfn : SetTheorySemisentence 1 := “x. ∀ y ∈ x, y ⊆ x”
 instance IsTransitive.defined : ℒₛₑₜ-predicate[V] IsTransitive via IsTransitive.dfn :=
   ⟨fun v ↦ by simp [IsTransitive.dfn, isTransitive_def]⟩
 
-instance IsTransitive.definable : ℒₛₑₜ-predicate[V] IsTransitive := IsTransitive.defined.to_definable
+instance IsTransitive.definable : ℒₛₑₜ-predicate[V] IsTransitive :=
+  IsTransitive.defined.to_definable
 
 namespace IsTransitive
 
 omit [Nonempty V] [V↓[ℒₛₑₜ] ⊧* 𝗭] in
-lemma mem_trans {x y z : V} (H : IsTransitive z) (hxy : x ∈ y) (hyz : y ∈ z) : x ∈ z := H.transitive y hyz x hxy
+lemma mem_trans {x y z : V} (H : IsTransitive z) (hxy : x ∈ y) (hyz : y ∈ z) : x ∈ z :=
+  H.transitive y hyz x hxy
 
 @[simp] protected instance empty : IsTransitive (∅ : V) := ⟨fun x ↦ by simp⟩
 
@@ -42,7 +44,7 @@ lemma succ {x : V} (h : IsTransitive x) : IsTransitive (succ x) := ⟨by
   · simp
   · exact subset_trans (h.transitive y hy) (by simp)⟩
 
-@[simp] lemma nat : x ∈ (ω : V) → IsTransitive x := by
+@[simp] lemma nat {x : V} : x ∈ (ω : V) → IsTransitive x := by
   apply naturalNumber_induction
   · definability
   case zero =>
@@ -109,11 +111,14 @@ class IsOrdinal (x : V) : Prop extends IsTransitive x where
 omit [Nonempty V] [V↓[ℒₛₑₜ] ⊧* 𝗭] in
 lemma isOrdinal_iff {x : V} :
     IsOrdinal x ↔ IsTransitive x ∧ ∀ y ∈ x, ∀ z ∈ x, y ∈ z ∨ y = z ∨ z ∈ y :=
-  ⟨fun h ↦ ⟨⟨h.transitive⟩, h.trichotomy⟩, fun h ↦ { transitive := h.1.transitive, trichotomy := h.2 }⟩
+  ⟨fun h ↦ ⟨⟨h.transitive⟩, h.trichotomy⟩,
+    fun h ↦ { transitive := h.1.transitive, trichotomy := h.2 }⟩
 
-def IsOrdinal.dfn : SetTheorySemisentence 1 := “x. !IsTransitive.dfn x ∧ ∀ y ∈ x, ∀ z ∈ x, y ∈ z ∨ y = z ∨ z ∈ y”
+def IsOrdinal.dfn : SetTheorySemisentence 1 :=
+  “x. !IsTransitive.dfn x ∧ ∀ y ∈ x, ∀ z ∈ x, y ∈ z ∨ y = z ∨ z ∈ y”
 
-instance IsOrdinal.defined : ℒₛₑₜ-predicate[V] IsOrdinal via IsOrdinal.dfn := ⟨fun δ ↦ by simp [isOrdinal_iff, dfn]⟩
+instance IsOrdinal.defined : ℒₛₑₜ-predicate[V] IsOrdinal via IsOrdinal.dfn :=
+  ⟨fun δ ↦ by simp [isOrdinal_iff, dfn]⟩
 
 instance IsOrdinal.definable : ℒₛₑₜ-predicate[V] IsOrdinal := IsOrdinal.defined.to_definable
 
@@ -237,7 +242,8 @@ lemma subset_or_supset [hα : IsOrdinal α] [hβ : IsOrdinal β] : α ⊆ β ∨
       · have : IsOrdinal ζ := of_mem hζα₀
         have : ξ ⊆ ζ ∨ ζ ⊆ ξ := by
           by_contra! A
-          have : ζ ∈ C := mem_sep_iff.mpr ⟨hα.succ.transitive α₀ hα₀sα ζ hζα₀, ξ, inferInstance, by grind⟩
+          have : ζ ∈ C :=
+            mem_sep_iff.mpr ⟨hα.succ.transitive α₀ hα₀sα ζ hζα₀, ξ, inferInstance, by grind⟩
           exact Hα₀ _ this hζα₀
         grind
       · have : ζ ∈ ξ ∨ ζ = ξ ∨ ξ ∈ ζ := ordβ₀.trichotomy ζ hζβ₀ ξ hξβ₀
@@ -261,7 +267,8 @@ lemma mem_trichotomy [hα : IsOrdinal α] [hβ : IsOrdinal β] : α ∈ β ∨ �
 
 variable {α β}
 
-lemma of_transitive_of_isOrdinal (tr : IsTransitive α) (H : ∀ β ∈ α, IsOrdinal β) : IsOrdinal α where
+lemma of_transitive_of_isOrdinal (tr : IsTransitive α) (H : ∀ β ∈ α, IsOrdinal β) :
+    IsOrdinal α where
   trichotomy ξ hξα ζ hζα :=
     have : IsOrdinal ξ := H ξ hξα
     have : IsOrdinal ζ := H ζ hζα
@@ -352,7 +359,8 @@ noncomputable instance : LinearOrder (Ordinal V) where
   le_refl α := subset_refl α.val
   le_trans α β γ := subset_trans
   lt_iff_le_not_ge α β := IsOrdinal.mem_iff_subset_and_not_subset
-  le_antisymm α β := by simpa [le_def, Ordinal.ext_iff] using subset_antisymm (x := α.val) (y := β.val)
+  le_antisymm α β := by
+    simpa [le_def, Ordinal.ext_iff] using subset_antisymm (x := α.val) (y := β.val)
   le_total α β := IsOrdinal.subset_or_supset α.val β.val
   toDecidableLE := Classical.decRel LE.le
 
@@ -376,7 +384,8 @@ protected noncomputable def succ (α : Ordinal V) : Ordinal V where
 
 protected noncomputable def ω : Ordinal V := IsOrdinal.toOrdinal ω
 
-noncomputable def minimal (α : Ordinal V) (P : V → Prop) (hP : ℒₛₑₜ-predicate P := by definability) : Ordinal V where
+noncomputable def minimal (α : Ordinal V) (P : V → Prop)
+    (hP : ℒₛₑₜ-predicate P := by definability) : Ordinal V where
   val := ⋂ˢ {x ∈ ↑α ; P x}
   ordinal := IsOrdinal.sInter fun ξ hξ ↦
     have : ξ ∈ (α : V) ∧ P ξ := by simpa using hξ
@@ -408,11 +417,14 @@ private lemma minimal_prop_of_exists_aux (H : ∃ β < α, P β) :
   apply sInter_subset_of_mem_of_nonempty
   simp [X, Pξ, lt_def.mp hξα]
 
-lemma minimal_lt_of_exists (H : ∃ β < α, P β) : α.minimal P < α := (minimal_prop_of_exists_aux H).1
+lemma minimal_lt_of_exists (H : ∃ β < α, P β) : α.minimal P < α :=
+  (minimal_prop_of_exists_aux H).1
 
-lemma minimal_prop_of_exists (H : ∃ β < α, P β) : P (α.minimal P) := (minimal_prop_of_exists_aux H).2.1
+lemma minimal_prop_of_exists (H : ∃ β < α, P β) : P (α.minimal P) :=
+  (minimal_prop_of_exists_aux H).2.1
 
-lemma minimal_le_of_exists_aux (H : ∃ β < α, P β) : ∀ ξ < α, P ξ → α.minimal P ≤ ξ := (minimal_prop_of_exists_aux H).2.2
+lemma minimal_le_of_exists_aux (H : ∃ β < α, P β) : ∀ ξ < α, P ξ → α.minimal P ≤ ξ :=
+  (minimal_prop_of_exists_aux H).2.2
 
 lemma minimal_le_of_exists (H : ∃ β < α, P β) : ∀ ξ : Ordinal V, P ξ → α.minimal P ≤ ξ := by
   intro ξ Pξ
@@ -468,7 +480,8 @@ lemma left_existsUnique (x : V) : ∃! s : V, ∀ z, z ∈ s ↔ R z x := by
 
 noncomputable def left (x : V) : V := Classical.choose! <| left_existsUnique R x
 
-@[simp] lemma mem_left (x y : V) : y ∈ left R x ↔ R y x := Classical.choose!_spec (left_existsUnique R x) y
+@[simp] lemma mem_left (x y : V) : y ∈ left R x ↔ R y x :=
+  Classical.choose!_spec (left_existsUnique R x) y
 
 end SetLike
 

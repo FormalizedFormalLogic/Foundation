@@ -6,6 +6,8 @@ public import Foundation.FirstOrder.Syntax.Classical.Formula
 
 @[expose] public section
 
+set_option linter.style.longLine false
+
 /-!
 # Rewriting Entailment
 
@@ -24,7 +26,19 @@ namespace FFL
 
 namespace FirstOrder
 
+set_option linter.style.whitespace false
+set_option linter.unusedSimpArgs false
+set_option linter.unusedTactic false
+set_option linter.unreachableTactic false
+
 namespace Semiformula
+
+universe u u₁ u₂ u₃
+
+variable
+  {L L₁ L₂ L₃ : Language}
+  {ξ ξ₁ ξ₂ ξ₃ : Type*}
+  {n n₁ n₂ n₃ : ℕ}
 
 def rewAux ⦃n₁ n₂ : ℕ⦄ (ω : Rew L ξ₁ n₁ ξ₂ n₂) : Semiformula L ξ₁ n₁ → Semiformula L ξ₂ n₂
   |        ⊤ => ⊤
@@ -40,7 +54,8 @@ lemma rewAux_neg (ω : Rew L ξ₁ n₁ ξ₂ n₂) (φ : Semiformula L ξ₁ n�
     rewAux ω (∼φ) = ∼rewAux ω φ :=
   by induction φ using Semiformula.rec' generalizing n₂ <;> simp [*, rewAux]
 
-lemma ext_rewAux' {ω₁ ω₂ : Rew L ξ₁ n₁ ξ₂ n₂} (h : ω₁ = ω₂) (φ : Semiformula L ξ₁ n₁) : rewAux ω₁ φ = rewAux ω₂ φ:= by simp [h]
+lemma ext_rewAux' {ω₁ ω₂ : Rew L ξ₁ n₁ ξ₂ n₂} (h : ω₁ = ω₂) (φ : Semiformula L ξ₁ n₁) :
+    rewAux ω₁ φ = rewAux ω₂ φ := by simp [h]
 
 def rew (ω : Rew L ξ₁ n₁ ξ₂ n₂) : Semiformula L ξ₁ n₁ →ˡᶜ Semiformula L ξ₂ n₂ where
   toTr := rewAux ω
@@ -51,14 +66,16 @@ def rew (ω : Rew L ξ₁ n₁ ξ₂ n₂) : Semiformula L ξ₁ n₁ →ˡᶜ S
   map_or' := fun φ ψ ↦ rfl
   map_imply' := fun φ ψ ↦ by simp [imp_eq, rewAux_neg, rewAux, ←neg_eq]
 
-instance : Rewriting L ξ (Semiformula L ξ) ζ (Semiformula L ζ) where
+instance {ζ : Type*} : Rewriting L ξ (Semiformula L ξ) ζ (Semiformula L ζ) where
   app := rew
   app_all (_ _) := rfl
   app_exs (_ _) := rfl
 
-abbrev subst (φ : Semiformula L ξ n) (v : Fin n → Semiterm L ξ m) : Semiformula L ξ m := Rewriting.subst φ v
+abbrev subst {m : ℕ} (φ : Semiformula L ξ n) (v : Fin n → Semiterm L ξ m) : Semiformula L ξ m :=
+  Rewriting.subst φ v
 
-@[coe] abbrev emb [IsEmpty o] (φ : Semiformula L o n) : Semiformula L ξ n := Rewriting.emb φ
+@[coe] abbrev emb {o : Type*} [IsEmpty o] (φ : Semiformula L o n) : Semiformula L ξ n :=
+  Rewriting.emb φ
 
 abbrev free (φ : Semiproposition L (n + 1)) : Semiproposition L n := Rewriting.free φ
 
@@ -98,7 +115,7 @@ lemma rew_nrel (ω : Rew L ξ₁ n₁ ξ₂ n₂) {k} (r : L.Rel k) (v : Fin k �
 @[simp] lemma rew_nrel3 (ω : Rew L ξ₁ n₁ ξ₂ n₂) {r : L.Rel 3} {t₁ t₂ t₃ : Semiterm L ξ₁ n₁} :
     ω ▹ nrel r ![t₁, t₂, t₃] = nrel r ![ω t₁, ω t₂, ω t₃] := by simp
 
-private lemma map_inj {b : Fin n₁ → Fin n₂} {f : ξ₁ → ξ₂}
+private lemma map_inj {n₁ n₂ : ℕ} {b : Fin n₁ → Fin n₂} {f : ξ₁ → ξ₂}
     (hb : Function.Injective b) (hf : Function.Injective f) :
     Function.Injective fun φ : Semiformula L ξ₁ n₁ ↦ @Rew.map L ξ₁ ξ₂ n₁ n₂ b f ▹ φ
   | rel r v => fun φ ↦
@@ -151,7 +168,7 @@ instance : TransitiveRewriting L ξ₁ (Semiformula L ξ₁) ξ₂ (Semiformula 
   comp_app {n₁ n₂ n₃ ω₁₂ ω₂₃ φ} := by
     induction φ using rec' generalizing n₂ n₃ <;> simp [Rew.comp_app, Rew.q_comp, *, Function.comp_def]
 
-instance : InjMapRewriting L ξ (Semiformula L ξ) ζ (Semiformula L ζ) where
+instance {ζ : Type*} : InjMapRewriting L ξ (Semiformula L ξ) ζ (Semiformula L ζ) where
   smul_map_injective := map_inj
 
 instance : LawfulSyntacticRewriting L (Semiproposition L) where
@@ -227,13 +244,13 @@ instance : Coe (Semisentence L n) (Semiproposition L n) := ⟨Rewriting.emb (ξ 
 
 @[simp] lemma coe_inj (σ π : Semisentence L n) : (σ : Semiproposition L n) = π ↔ σ = π := Rewriting.emb_injective.eq_iff
 
-lemma coe_rel [IsEmpty ο] {k : ℕ} (R : L.Rel k) (v : Fin k → Semiterm L ο n) :
+lemma coe_rel {ο : Type*} [IsEmpty ο] {k : ℕ} (R : L.Rel k) (v : Fin k → Semiterm L ο n) :
     (Rewriting.emb (rel R v) : Semiformula L ξ n) = (rel R fun i ↦ Rew.emb (v i)) := by rfl
 
-lemma coe_nrel [IsEmpty ο] {k : ℕ} (R : L.Rel k) (v : Fin k → Semiterm L ο n) :
+lemma coe_nrel {ο : Type*} [IsEmpty ο] {k : ℕ} (R : L.Rel k) (v : Fin k → Semiterm L ο n) :
     (Rewriting.emb (nrel R v) : Semiformula L ξ n) = (nrel R fun i ↦ Rew.emb (v i)) := by rfl
 
-lemma coe_subst_eq_subst_coe (φ : Semisentence L k) (v : Fin k → ClosedSemiterm L n) :
+lemma coe_subst_eq_subst_coe {k : ℕ} (φ : Semisentence L k) (v : Fin k → ClosedSemiterm L n) :
     (↑(φ ⇜ v) : Semiproposition L n) = (↑φ : Semiproposition L k)⇜(fun i ↦ (↑(v i) : Semiterm L ℕ n)) :=
   Rewriting.emb_subst_eq_subst_emb φ v
 
@@ -377,7 +394,8 @@ section univCl
 @[simp] lemma fvSup_sentence (σ : Semisentence L n) : (Rewriting.emb σ).fvSup = 0 := by
     induction σ using rec' <;> simp [fvSup, -rew_rel_eq_comp, -rew_nrel_eq_comp]
 
-private lemma not_fvar?_fixitr_fvSup (φ : Proposition L) : ¬(Rew.fixitr 0 φ.fvSup ▹ φ).FVar? x := by
+private lemma not_fvar?_fixitr_fvSup (φ : Proposition L) {x : ℕ} :
+    ¬(Rew.fixitr 0 φ.fvSup ▹ φ).FVar? x := by
   rw [Rew.eq_bind (Rew.fixitr 0 φ.fvSup)]
   simp only [Function.comp_def, Rew.fixitr_bvar, Rew.fixitr_fvar, Fin.natAdd_mk, zero_add]
   intro h
@@ -498,7 +516,7 @@ lemma lMap_rewrite (f : ξ₁ → Semiterm L₁ ξ₂ n) (φ : Semiformula L₁ 
     lMap Φ (Rew.rewrite f ▹ φ) = Rew.rewrite (Semiterm.lMap Φ ∘ f) ▹ lMap Φ φ := by
   simp [Rew.rewrite, lMap_bind, Function.comp_def]
 
-lemma lMap_subst (w : Fin k → Semiterm L₁ ξ n) (φ : Semiformula L₁ ξ k) :
+lemma lMap_subst {k : ℕ} (w : Fin k → Semiterm L₁ ξ n) (φ : Semiformula L₁ ξ k) :
     lMap Φ (φ ⇜ w) = (lMap Φ φ)⇜(Semiterm.lMap Φ ∘ w) := lMap_bind _ _ _
 
 lemma lMap_shift (φ : Semiproposition L₁ n) : lMap Φ (@Rew.shift L₁ n ▹ φ) = @Rew.shift L₂ n ▹ lMap Φ φ := lMap_bind _ _ _

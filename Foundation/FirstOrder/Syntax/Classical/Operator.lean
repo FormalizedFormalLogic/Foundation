@@ -3,6 +3,11 @@ module
 public import Foundation.FirstOrder.Syntax.Classical.Rew
 
 @[expose] public section
+set_option linter.style.longLine false
+set_option linter.unusedSimpArgs false
+set_option linter.unusedVariables false
+set_option autoImplicit true
+set_option linter.style.cases false
 
 namespace FFL
 

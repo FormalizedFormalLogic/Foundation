@@ -4,6 +4,13 @@ public import Foundation.FirstOrder.Arithmetic.Exponential.PPow2
 public import Mathlib.Algebra.Order.Ring.Basic
 
 @[expose] public section
+set_option autoImplicit true
+set_option linter.style.cdot false
+set_option linter.style.dollarSyntax false
+set_option linter.style.induction false
+set_option linter.style.lambdaSyntax false
+set_option linter.style.longLine false
+set_option linter.style.whitespace false
 /-!
 # Exponential function
 

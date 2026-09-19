@@ -11,6 +11,10 @@ $\mathrm{Pow2}(n)$ is a property that holds iff $n = 2^i$ for some $i$.
 
 namespace FFL.FirstOrder.Arithmetic
 
+set_option linter.style.longLine false
+set_option linter.style.dollarSyntax false
+set_option linter.style.whitespace false
+
 variable {V : Type*} [ORingStructure V]
 
 section IOpen

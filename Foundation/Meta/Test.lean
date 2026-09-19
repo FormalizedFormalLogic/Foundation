@@ -7,7 +7,8 @@ namespace FFL
 
 section
 
-variable {F : Type*} [DecidableEq F] {S : Type*} [LogicalConnective F] [LogicalNeutral F] [Entailment S F]
+variable {F : Type*} [DecidableEq F] {S : Type*} [LogicalConnective F] [LogicalNeutral F]
+  [Entailment S F]
 
 variable {𝓢 𝓣 : S} [Entailment.Cl 𝓢] {φ ψ χ ξ p q r s : F}
 
@@ -17,11 +18,12 @@ example : Entailment.TwoSided 𝓢 [φ 🡘 ψ] [φ 🡒 (χ ⋎ ψ)] := by cl_p
 
 example : Entailment.TwoSided 𝓢 [φ 🡘 ψ, χ 🡘 ξ] [(ψ 🡒 ξ) 🡘 (φ 🡒 χ)] := by cl_prover_2s 12
 
-example (h1 : 𝓢 ⊢ φ 🡘 ψ) (h2 : 𝓢 ⊢ χ 🡘 ξ) : Entailment.TwoSided 𝓢 [] [(ψ 🡒 ξ) 🡘 (φ 🡒 χ)] := by cl_prover_2s [h1, h2]
+example (h1 : 𝓢 ⊢ φ 🡘 ψ) (h2 : 𝓢 ⊢ χ 🡘 ξ) : Entailment.TwoSided 𝓢 [] [(ψ 🡒 ξ) 🡘 (φ 🡒 χ)] := by
+  cl_prover_2s [h1, h2]
 
 example : 𝓢 ⊢ (φ ⋏ ψ) 🡒 ((φ 🡒 ψ 🡒 ⊥) 🡒 ⊥) := by cl_prover
 
-example(h1 : 𝓢 ⊢ φ 🡘 ψ) (h2 : 𝓢 ⊢ χ 🡘 ξ) : 𝓢 ⊢ (ψ 🡒 ∼ξ) 🡘 (φ 🡒 ∼χ) := by cl_prover [h1, h2]
+example (h1 : 𝓢 ⊢ φ 🡘 ψ) (h2 : 𝓢 ⊢ χ 🡘 ξ) : 𝓢 ⊢ (ψ 🡒 ∼ξ) 🡘 (φ 🡒 ∼χ) := by cl_prover [h1, h2]
 
 example : 𝓢 ⊢ (φ 🡒 ψ) ⋎ (ψ 🡒 φ) := by cl_prover
 
@@ -37,7 +39,8 @@ end
 
 section
 
-variable {F : Type*} [DecidableEq F] {S : Type*} [LogicalConnective F] [LogicalNeutral F] [Entailment S F]
+variable {F : Type*} [DecidableEq F] {S : Type*} [LogicalConnective F] [LogicalNeutral F]
+  [Entailment S F]
 
 variable {𝓢 𝓣 : S} [Entailment.Int 𝓢] [𝓣 ⪯ 𝓢] {φ ψ χ ξ : F}
 

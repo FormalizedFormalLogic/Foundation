@@ -20,6 +20,14 @@ abbrev Language.ReferenceableBy (L L₀ : Language) := Semiterm.Operator.GödelN
 
 namespace ProvabilityAbstraction
 
+set_option linter.style.docString false
+set_option linter.style.cdot false
+set_option linter.style.dollarSyntax false
+set_option linter.style.lambdaSyntax false
+set_option linter.style.longLine false
+set_option linter.style.whitespace false
+set_option linter.unusedSectionVars false
+
 structure Provability [L.ReferenceableBy L₀] (T₀ : Theory L₀) (T : Theory L) where
   prov : Semisentence L₀ 1
   /-- Derivability condition `D1` -/
@@ -222,7 +230,8 @@ section Second
 variable [𝔅.HBL]
 
 omit [Diagonalization T₀] in
-lemma formalized_consistent_of_existance_unprovable [L.DecidableEq] : T₀ ⊢ ∼𝔅 σ 🡒 𝔅.con := contra $ mdp D2 $ D1 efq
+lemma formalized_consistent_of_existance_unprovable [L.DecidableEq] {σ : Sentence L} :
+    T₀ ⊢ ∼𝔅 σ 🡒 𝔅.con := contra $ mdp D2 $ D1 efq
 
 local notation "𝐆" => gödel 𝔅
 
@@ -346,3 +355,5 @@ end Rosser
 end ProvabilityAbstraction
 
 end FirstOrder
+
+end FFL

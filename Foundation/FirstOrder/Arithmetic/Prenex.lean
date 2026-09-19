@@ -24,6 +24,11 @@ namespace FFL.FirstOrder
 
 namespace Arithmetic
 
+set_option linter.style.longLine false
+set_option linter.style.cdot false
+set_option linter.style.show false
+set_option linter.style.whitespace false
+
 structure Prenex (Γ : Polarity) (s : ℕ) (ξ : Type*) (n : ℕ) where
   matrix : 𝚺₀.Semiformula ξ (n + s)
 
@@ -64,10 +69,10 @@ def verum : Prenex Γ s ξ n := ofΔ₀ (.mkSigma ⊤ (Hierarchy.verum 𝚺 0 n)
 
 def falsum : Prenex Γ s ξ n := ofΔ₀ (.mkSigma ⊥ (Hierarchy.falsum 𝚺 0 n)) Γ s
 
-def rel (r : (ℒₒᵣ).Rel k) (v : Fin k → ArithmeticSemiterm ξ n) : Prenex Γ s ξ n :=
+def rel {k : ℕ} (r : (ℒₒᵣ).Rel k) (v : Fin k → ArithmeticSemiterm ξ n) : Prenex Γ s ξ n :=
   ofΔ₀ (.mkSigma (.rel r v) (Hierarchy.rel 𝚺 0 r v)) Γ s
 
-def nrel (r : (ℒₒᵣ).Rel k) (v : Fin k → ArithmeticSemiterm ξ n) : Prenex Γ s ξ n :=
+def nrel {k : ℕ} (r : (ℒₒᵣ).Rel k) (v : Fin k → ArithmeticSemiterm ξ n) : Prenex Γ s ξ n :=
   ofΔ₀ (.mkSigma (.nrel r v) (Hierarchy.nrel 𝚺 0 r v)) Γ s
 
 
@@ -170,10 +175,12 @@ lemma models_nrel {k} (r : (ℒₒᵣ).Rel k) (v : Fin k → ArithmeticSemiterm 
 
 variable {T : ArithmeticTheory}
 
-lemma provable_iff_sigmaInv {φ' : Prenex 𝚺 (s + 1) Empty n} (hφ' : T ⊢ ∀¹* (φ 🡘 φ'.val)) :
+lemma provable_iff_sigmaInv {φ : ArithmeticSemisentence n} {φ' : Prenex 𝚺 (s + 1) Empty n}
+    (hφ' : T ⊢ ∀¹* (φ 🡘 φ'.val)) :
   T ⊢ ∀¹* (φ 🡘 ∃¹ φ'.sigmaInv.val) := φ'.val_sigmaInv ▸ hφ'
 
-lemma provable_iff_piInv {φ' : Prenex 𝚷 (s + 1) Empty n} (hφ' : T ⊢ ∀¹* (φ 🡘 φ'.val)) :
+lemma provable_iff_piInv {φ : ArithmeticSemisentence n} {φ' : Prenex 𝚷 (s + 1) Empty n}
+    (hφ' : T ⊢ ∀¹* (φ 🡘 φ'.val)) :
   T ⊢ ∀¹* (φ 🡘 ∀¹ φ'.piInv.val) := φ'.val_piInv ▸ hφ'
 
 mutual

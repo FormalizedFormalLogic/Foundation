@@ -13,6 +13,11 @@ The structural rules are the standard local weakening and contraction rules.
 
 namespace FFL.SecondOrder
 
+set_option linter.style.longLine false
+set_option linter.unusedVariables false
+set_option linter.unusedTactic false
+set_option linter.unreachableTactic false
+
 open FirstOrder
 
 variable {L : Language}
@@ -51,17 +56,26 @@ end LK.Sequent
 
 /-- Second-order one-sided $\mathbf{LK}$-derivation -/
 inductive LK.Derivation : LK.Sequent L → Type _
-| identity : LK.Derivation ⦃φ, ∼φ⦄
-| cut : LK.Derivation (Γ + ⦃φ⦄) → LK.Derivation (Δ + ⦃∼φ⦄) → LK.Derivation (Γ + Δ)
-| contraction : LK.Derivation (Γ + ⦃φ, φ⦄) → LK.Derivation (Γ + ⦃φ⦄)
-| weakening : LK.Derivation Γ → LK.Derivation (Γ + ⦃φ⦄)
+| identity {φ : Proposition L} : LK.Derivation ⦃φ, ∼φ⦄
+| cut {Γ Δ : LK.Sequent L} {φ : Proposition L} :
+  LK.Derivation (Γ + ⦃φ⦄) → LK.Derivation (Δ + ⦃∼φ⦄) → LK.Derivation (Γ + Δ)
+| contraction {Γ : LK.Sequent L} {φ : Proposition L} :
+  LK.Derivation (Γ + ⦃φ, φ⦄) → LK.Derivation (Γ + ⦃φ⦄)
+| weakening {Γ : LK.Sequent L} {φ : Proposition L} :
+  LK.Derivation Γ → LK.Derivation (Γ + ⦃φ⦄)
 | verum : LK.Derivation ⦃⊤⦄
-| and : LK.Derivation (Γ + ⦃φ⦄) → LK.Derivation (Γ + ⦃ψ⦄) → LK.Derivation (Γ + ⦃φ ⋏ ψ⦄)
-| or : LK.Derivation (Γ + ⦃φ, ψ⦄) → LK.Derivation (Γ + ⦃φ ⋎ ψ⦄)
-| all₁ {φ : Semiproposition L 0 1} : LK.Derivation (LK.Sequent.shift₀ Γ + ⦃φ.free₀⦄) → LK.Derivation (Γ + ⦃∀¹ φ⦄)
-| exs₁ {φ : Semiproposition L 0 1} : LK.Derivation (Γ + ⦃φ/[t]⦄) → LK.Derivation (Γ + ⦃∃¹ φ⦄)
-| all₂ {φ : Semiproposition L 1 0} : LK.Derivation (LK.Sequent.shift₁ Γ + ⦃φ.free₁⦄) → LK.Derivation (Γ + ⦃∀² φ⦄)
-| exs₂ {φ : Semiproposition L 1 0} : LK.Derivation (Γ + ⦃φ/⟦ψ⟧⦄) → LK.Derivation (Γ + ⦃∃² φ⦄)
+| and {Γ : LK.Sequent L} {φ ψ : Proposition L} :
+  LK.Derivation (Γ + ⦃φ⦄) → LK.Derivation (Γ + ⦃ψ⦄) → LK.Derivation (Γ + ⦃φ ⋏ ψ⦄)
+| or {Γ : LK.Sequent L} {φ ψ : Proposition L} :
+  LK.Derivation (Γ + ⦃φ, ψ⦄) → LK.Derivation (Γ + ⦃φ ⋎ ψ⦄)
+| all₁ {Γ : LK.Sequent L} {φ : Semiproposition L 0 1} :
+  LK.Derivation (LK.Sequent.shift₀ Γ + ⦃φ.free₀⦄) → LK.Derivation (Γ + ⦃∀¹ φ⦄)
+| exs₁ {Γ : LK.Sequent L} {φ : Semiproposition L 0 1} {t : Semiterm L ℕ 0} :
+  LK.Derivation (Γ + ⦃φ/[t]⦄) → LK.Derivation (Γ + ⦃∃¹ φ⦄)
+| all₂ {Γ : LK.Sequent L} {φ : Semiproposition L 1 0} :
+  LK.Derivation (LK.Sequent.shift₁ Γ + ⦃φ.free₁⦄) → LK.Derivation (Γ + ⦃∀² φ⦄)
+| exs₂ {Γ : LK.Sequent L} {φ : Semiproposition L 1 0} {ψ : Semiproposition L 0 1} :
+  LK.Derivation (Γ + ⦃φ/⟦ψ⟧⦄) → LK.Derivation (Γ + ⦃∃² φ⦄)
 
 prefix:45 "⊢ᴸᴷ² " => LK.Derivation
 

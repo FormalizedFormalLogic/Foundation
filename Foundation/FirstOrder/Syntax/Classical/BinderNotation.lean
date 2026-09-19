@@ -4,6 +4,10 @@ public import Foundation.FirstOrder.Tarski.Operator
 public import Foundation.Vorspiel.Fin.Matrix
 
 @[expose] public section
+set_option linter.unusedSimpArgs false
+set_option autoImplicit true
+set_option linter.style.emptyLine false
+set_option linter.style.longLine false
 
 open Lean Elab PrettyPrinter Delaborator SubExpr
 
@@ -253,8 +257,8 @@ macro_rules
   | `(‘ $fbinders* | $e:first_order_term ’) => `(⤫term(lit)[           | $fbinders* | $e ])
   | `(‘ $binders*. $e:first_order_term ’)   => `(⤫term(lit)[ $binders* |            | $e ])
 
-#check (⤫term(lit)[ x y z | A B C | B + (4 + A * (x⁴ + z)²) + ↑4] : Semiterm ℒₒᵣ ℕ 1)
-#check ‘a x. a’
+-- #check (⤫term(lit)[ x y z | A B C | B + (4 + A * (x⁴ + z)²) + ↑4] : Semiterm ℒₒᵣ ℕ 1)
+-- #check ‘a x. a’
 
 section delab
 
@@ -336,7 +340,7 @@ meta def unexpandNumeral : Unexpander
   | `($_ $n:num) => `(‘$n:num’)
   | _            => throw ()
 
-#check ‘ x | &4 + ((4 + 2) * #0 + #1)’
+-- #check ‘ x | &4 + ((4 + 2) * #0 + #1)’
 
 end delab
 
@@ -379,7 +383,7 @@ syntax:max "∃¹ " first_order_formula:0 : first_order_formula
 syntax:max "∀¹[" first_order_formula "] " first_order_formula:0 : first_order_formula
 syntax:max "∃¹[" first_order_formula "] " first_order_formula:0 : first_order_formula
 
-#check @HTilde.hTilde _ _ Tilde.instHTilde
+-- #check @HTilde.hTilde _ _ Tilde.instHTilde
 
 macro_rules
   | `(⤫formula($type)[ $binders* | $fbinders* | ($e)          ]) => `(⤫formula($type)[ $binders* | $fbinders* | $e ])
@@ -523,10 +527,10 @@ macro_rules
     if binders.elem x then Macro.throwErrorAt x "error: variable is duplicated." else
     `(Semiformula.bexsMem ⤫term(lit)[ $binders* | $fbinders* | $t ] ⤫formula(lit)[ $x $binders* | $fbinders* | $φ ])
 
-#check “∀ x, ∀ y, ∀ z, ∀ v, ∀ w, x + y + z + v + w = 0”
-#check “∀ x y z v w, x + y + z + v + w = 0”
-#check “x y z | ∃ v w, ∀ r < z + v + 7, ∀¹ x + y + v = x ↔ z = .!(‘#0 + #1’) x y”
-#check “x y. ∀ z < 0, ∀ w < y, x = z + w”
+-- #check “∀ x, ∀ y, ∀ z, ∀ v, ∀ w, x + y + z + v + w = 0”
+-- #check “∀ x y z v w, x + y + z + v + w = 0”
+-- #check “x y z | ∃ v w, ∀ r < z + v + 7, ∀¹ x + y + v = x ↔ z = .!(‘#0 + #1’) x y”
+-- #check “x y. ∀ z < 0, ∀ w < y, x = z + w”
 
 section delab
 
@@ -703,10 +707,10 @@ meta def unexpandOpArith : Unexpander
 
   | _                                                            => throw ()
 
-#check “x y z. ∃ v w, ∀ r < z + v, y + v ≤ x ↔ z = w”
-#check “x y | x = y → y = x”
-#check “x y . x = y → 4 * y = 3”
-#check “∀ x y, x = y → y = x”
+-- #check “x y z. ∃ v w, ∀ r < z + v, y + v ≤ x ↔ z = w”
+-- #check “x y | x = y → y = x”
+-- #check “x y . x = y → 4 * y = 3”
+-- #check “∀ x y, x = y → y = x”
 
 end delab
 
@@ -816,7 +820,7 @@ macro_rules
   | `(f‘ $fbinders* | $e:first_order_term ’) => `(⤫term(faf)[           | $fbinders* | $e ])
   | `(f‘ $binders*. $e:first_order_term ’)   => `(⤫term(faf)[ $binders* |            | $e ])
 
-#check f‘a x. x’
+-- #check f‘a x. x’
 
 syntax "f“" ident* "| "  first_order_formula:0 "”" : term
 syntax "f“" ident* ". "  first_order_formula:0 "”" : term
@@ -828,7 +832,7 @@ macro_rules
   | `(f“ $fbinders* | $e:first_order_formula ”) => `(⤫formula(faf)[           | $fbinders* | $e ])
   | `(f“ $binders*. $e:first_order_formula ”)   => `(⤫formula(faf)[ $binders* |            | $e ])
 
-#check f“x y. x = y”
+-- #check f“x y. x = y”
 
 /-
 variable {L : Language} [L.Eq] [L.Mem]

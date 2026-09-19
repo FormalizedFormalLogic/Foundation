@@ -6,25 +6,35 @@ public import Foundation.Vorspiel.IsEmpty
 public import Foundation.Vorspiel.Empty
 
 @[expose] public section
+set_option linter.unusedVariables false
+set_option linter.unusedSimpArgs false
+set_option autoImplicit true
+set_option linter.style.dollarSyntax false
+set_option linter.style.longLine false
 
 /-!
 # Model-theoretic semantics of first-order classical logic
 
-This file defines the structure and the evaluation of terms and formulas by Tarski's truth definition.
+This file defines the structure and the evaluation of terms and formulas by Tarski's truth
+definition.
 -/
 
 namespace FFL
 
 namespace FirstOrder
 
+universe u v w
+
 variable {L : Language.{u}}
 
-/-- A first-order `L`-structure associates domain `M` with interpretations of function and relation symbols. -/
+/-- A first-order `L`-structure associates domain `M` with interpretations of function and
+relation symbols. -/
 @[ext] class Tarski.Structure (L : Language.{u}) (M : Type w) where
   func : ⦃k : ℕ⦄ → L.Func k → (Fin k → M) → M
   rel : ⦃k : ℕ⦄ → L.Rel k → (Fin k → M) → Prop
 
-/-- An auxiliary structure that corresponds to a first-order `L`-structure with a nonempty domain. -/
+/-- An auxiliary structure that corresponds to a first-order `L`-structure with a nonempty
+domain. -/
 structure Tarski.Struc (L : Language) where
   Dom : Type*
   nonempty : Nonempty Dom
@@ -36,7 +46,7 @@ instance : CoeSort (Tarski.Struc L) (Type _) := ⟨Tarski.Struc.Dom⟩
 
 namespace Tarski.Structure
 
-instance [n : Nonempty M] : Nonempty (Tarski.Structure L M) := by
+instance {M : Type w} [n : Nonempty M] : Nonempty (Tarski.Structure L M) := by
   rcases n with ⟨x⟩
   exact ⟨{ func := fun _ _ _ ↦ x, rel := fun _ _ _ ↦ True }⟩
 
@@ -44,24 +54,29 @@ instance unit : Tarski.Structure L Unit where
   func := fun _ _ _ ↦ ()
   rel := fun _ _ _ ↦ True
 
-protected abbrev lMap (φ : L₁ →ᵥ L₂) {M : Type w} (S : Tarski.Structure L₂ M) : Tarski.Structure L₁ M where
+protected abbrev lMap {L₁ L₂ : Language} (φ : L₁ →ᵥ L₂) {M : Type w} (S : Tarski.Structure L₂ M) :
+    Tarski.Structure L₁ M where
   func  _ f := S.func (φ.func f)
   rel _ r := S.rel (φ.rel r)
 
 variable (φ : L₁ →ᵥ L₂) {M : Type w} (s₂ : Tarski.Structure L₂ M)
 
-@[simp] lemma lMap_func {k} {f : L₁.Func k} {v : Fin k → M} : (s₂.lMap φ).func f v = s₂.func (φ.func f) v := rfl
+@[simp] lemma lMap_func {k} {f : L₁.Func k} {v : Fin k → M} :
+    (s₂.lMap φ).func f v = s₂.func (φ.func f) v := rfl
 
-@[simp] lemma lMap_rel {k} {r : L₁.Rel k} {v : Fin k → M} : (s₂.lMap φ).rel r v ↔ s₂.rel (φ.rel r) v := of_eq rfl
+@[simp] lemma lMap_rel {k} {r : L₁.Rel k} {v : Fin k → M} :
+    (s₂.lMap φ).rel r v ↔ s₂.rel (φ.rel r) v := of_eq rfl
 
-abbrev ofEquiv {M : Type w} [Tarski.Structure L M] {N : Type w'} (Θ : M ≃ N) : Tarski.Structure L N where
+abbrev ofEquiv {M : Type w} [Tarski.Structure L M] {N : Type*} (Θ : M ≃ N) :
+    Tarski.Structure L N where
   func := fun _ f v ↦ Θ (func f (Θ.symm ∘ v))
   rel  := fun _ r v ↦ rel r (Θ.symm ∘ v)
 
 protected abbrev Decidable (L : Language.{u}) (M : Type w) [s : Tarski.Structure L M] :=
   {k : ℕ} → (r : L.Rel k) → (v : Fin k → M) → Decidable (s.rel r v)
 
-noncomputable instance [Tarski.Structure L M] : Tarski.Structure.Decidable L M := fun r v => Classical.dec (rel r v)
+noncomputable instance [Tarski.Structure L M] : Tarski.Structure.Decidable L M :=
+  fun r v => Classical.dec (rel r v)
 
 @[reducible] def toStruc [i : Nonempty M] (s : Tarski.Structure L M) : Tarski.Struc L := ⟨M, i, s⟩
 
@@ -87,9 +102,11 @@ def val [s : Tarski.Structure L M] (b : Fin n → M) (f : ξ → M) : Semiterm L
   |       &x => f x
   | func F v => s.func F fun i ↦ (v i).val b f
 
-abbrev valb [s : Tarski.Structure L M] (b : Fin n → M) (t : ClosedSemiterm L n) : M := t.val b Empty.elim
+abbrev valb [s : Tarski.Structure L M] (b : Fin n → M) (t : ClosedSemiterm L n) : M :=
+  t.val b Empty.elim
 
-abbrev valf [s : Tarski.Structure L M] {n} (b : Fin n → M) : Semiterm L Empty n → M := val b Empty.elim
+abbrev valf [s : Tarski.Structure L M] {n} (b : Fin n → M) : Semiterm L Empty n → M :=
+  val b Empty.elim
 
 @[simp] lemma val_bvar (x) : val b f (#x : Semiterm L ξ n) = b x := rfl
 
@@ -123,7 +140,7 @@ lemma val_substs (w : Fin n₁ → Semiterm L ξ n₂) (t : Semiterm L ξ n₁) 
 lemma val_bShift' (b : Fin (n + 1) → M) (t : Semiterm L ξ n) :
     (Rew.bShift t).val b f = t.val (b ·.succ) f := by simp [val_rew, Function.comp_def]
 
-@[simp] lemma val_emb {o : Type v'} [i : IsEmpty o] (t : Semiterm L o n) :
+@[simp] lemma val_emb {o : Type*} [i : IsEmpty o] (t : Semiterm L o n) :
     (Rew.emb t : Semiterm L ξ n).val b f = t.val b i.elim := by
   simp only [val_rew]; congr; funext x; exact i.elim' x
 
@@ -139,7 +156,8 @@ section Language
 
 variable (φ : L₁ →ᵥ L₂) (b : Fin n → M) (f : ξ → M)
 
-lemma val_lMap (φ : L₁ →ᵥ L₂) (s₂ : Tarski.Structure L₂ M) (b : Fin n → M) (f : ξ → M) {t : Semiterm L₁ ξ n} :
+lemma val_lMap (φ : L₁ →ᵥ L₂) (s₂ : Tarski.Structure L₂ M) (b : Fin n → M) (f : ξ → M)
+    {t : Semiterm L₁ ξ n} :
     (t.lMap φ).val (s := s₂) b f = t.val (s := s₂.lMap φ) b f := by
   induction t <;> simp [*, val_func, Semiterm.lMap_func, Function.comp_def]
 
@@ -175,7 +193,8 @@ lemma val_eq_of_funEqOn [DecidableEq ξ] (t : Semiterm L ξ n) (h : Function.fun
     simp only [val_func, Function.comp_def]
     congr; funext i; exact ih i (by intro x hx; exact h x (by simpa using ⟨i, hx⟩))
 
-lemma val_toEmpty [DecidableEq ξ] (t : Semiterm L ξ n) (h : t.freeVariables = ∅) : t.val b f = (t.toEmpty h).valb b := by
+lemma val_toEmpty [DecidableEq ξ] (t : Semiterm L ξ n) (h : t.freeVariables = ∅) :
+    t.val b f = (t.toEmpty h).valb b := by
   induction t
   case bvar => simp [Semiterm.toEmpty]
   case fvar => simp at h
@@ -247,7 +266,8 @@ abbrev Realize (M : Type*) [s : Tarski.Structure L M] :
 abbrev Models (s : Tarski.Structure L M) : Formula L M →ˡᶜ Prop := Eval ![] id
 
 lemma Eval.of_eq {b e' : Fin n → M} {f f' : ξ → M}
-    {φ : Semiformula L ξ n} (h : Eval b f φ) (he : b = e') (hf : f = f') : Eval e' f' φ := he ▸ hf ▸ h
+    {φ : Semiformula L ξ n} (h : Eval b f φ) (he : b = e') (hf : f = f') :
+    Eval e' f' φ := he ▸ hf ▸ h
 
 @[simp] lemma eval_rel {r : L.Rel k} {v} :
     Eval b f (rel r v) ↔ s.rel r (Semiterm.val b f ∘ v) := of_eq rfl
@@ -488,18 +508,27 @@ lemma ofEquiv_rel (r : L.Rel k) (v : Fin k → N) :
 lemma eval_ofEquiv_iff {b : Fin n → N} {f : ξ → N} {φ : Semiformula L ξ n} :
     Eval (s := ofEquiv Θ) b f φ ↔ Eval (Θ.symm ∘ b) (Θ.symm ∘ f) φ :=
   match φ with
-  | .rel r v | .nrel r v => by simp [Function.comp_def, ofEquiv_rel Θ, Tarski.Structure.ofEquiv_val Θ]
+  | .rel r v | .nrel r v =>
+    by simp [Function.comp_def, ofEquiv_rel Θ, Tarski.Structure.ofEquiv_val Θ]
   | ⊤ | ⊥ => by simp
   | φ ⋏ ψ | φ ⋎ ψ => by simp [eval_ofEquiv_iff (φ := φ), eval_ofEquiv_iff (φ := ψ)]
   | ∀¹ φ =>
-    ⟨fun h x ↦ by have h' := eval_ofEquiv_iff.mp (h (Θ x)); simp only [Matrix.comp_vecCons'', Equiv.symm_apply_apply] at h'; exact h',
+    ⟨fun h x ↦ by
+       have h' := eval_ofEquiv_iff.mp (h (Θ x))
+       simp only [Matrix.comp_vecCons'', Equiv.symm_apply_apply] at h'; exact h',
      fun h x ↦ eval_ofEquiv_iff.mpr (by simp only [Matrix.comp_vecCons'']; exact h (Θ.symm x))⟩
   | ∃¹ φ =>
-    ⟨by rintro ⟨x, h⟩; exists Θ.symm x; have h' := eval_ofEquiv_iff.mp h; simp only [Matrix.comp_vecCons''] at h'; exact h',
-     by rintro ⟨x, h⟩; exists Θ x; apply eval_ofEquiv_iff.mpr; simp only [Matrix.comp_vecCons'', Equiv.symm_apply_apply]; exact h⟩
+    ⟨by
+       rintro ⟨x, h⟩; exists Θ.symm x
+       have h' := eval_ofEquiv_iff.mp h
+       simp only [Matrix.comp_vecCons''] at h'; exact h',
+     by
+       rintro ⟨x, h⟩; exists Θ x; apply eval_ofEquiv_iff.mpr
+       simp only [Matrix.comp_vecCons'', Equiv.symm_apply_apply]; exact h⟩
 
 lemma evalf_ofEquiv_iff {f : ξ → N} {φ : Formula L ξ} :
-    Evalf (s := ofEquiv Θ) f φ ↔ Evalf (s := s) (Θ.symm ∘ f) φ := by simpa using eval_ofEquiv_iff (Θ := Θ) (f := f) (φ := φ) (b := ![])
+    Evalf (s := ofEquiv Θ) f φ ↔ Evalf (s := s) (Θ.symm ∘ f) φ := by
+  simpa using eval_ofEquiv_iff (Θ := Θ) (f := f) (φ := φ) (b := ![])
 
 end
 

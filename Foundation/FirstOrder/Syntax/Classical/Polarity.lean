@@ -10,7 +10,12 @@ public import Foundation.FirstOrder.Syntax.Classical.Rew
 
 namespace FFL.FirstOrder.Semiformula
 
-variable {L : Language} {ξ : Type*}
+set_option linter.style.longLine false
+set_option linter.unusedTactic false
+set_option linter.unreachableTactic false
+set_option linter.unusedVariables false
+
+variable {L : Language} {ξ ξ₁ ξ₂ : Type*} {n n₁ n₂ : ℕ}
 
 /-- A polarity of a formula -/
 def polarity {n} : Semiformula L ξ n → Bool

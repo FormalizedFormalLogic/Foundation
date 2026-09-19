@@ -13,6 +13,7 @@ variable {L : Language} [L.Relational]
 namespace Kripke.Model
 
 variable {W : Type*} [Preorder W] {C : Type*} [Kripke.Model L W C]
+variable {ξ : Type*} {n : ℕ}
 
 def Forces {n} (w : W) (bv : Fin n → C) (fv : ξ → C) : Semiformulaᵢ L ξ n → Prop
   | .rel R t => Rel w R fun i ↦ (t i).relationalVal bv fv
@@ -23,13 +24,15 @@ def Forces {n} (w : W) (bv : Fin n → C) (fv : ξ → C) : Semiformulaᵢ L ξ 
   |     ∀¹ φ => ∀ v ≤ w, ∀ x : v, Forces v (x.val :> bv) fv φ
   |     ∃¹ φ => ∃ x : w, Forces w (x.val :> bv) fv φ
 
-scoped[FFL.FirstOrder.KripkeModel] notation:45 w " ⊩[" bv "|" fv "] " φ:46 => FFL.FirstOrder.Kripke.Model.Forces w bv fv φ
+scoped[FFL.FirstOrder.KripkeModel]
+  notation:45 w " ⊩[" bv "|" fv "] " φ:46 => FFL.FirstOrder.Kripke.Model.Forces w bv fv φ
 
 open scoped FFL.FirstOrder.KripkeModel
 
 abbrev Forcesb {n} (w : W) (bv : Fin n → C) : Semisentenceᵢ L n → Prop := Forces w bv Empty.elim
 
-scoped[FFL.FirstOrder.KripkeModel] notation:45 w " ⊩/" bv φ:46 => FFL.FirstOrder.Kripke.Model.Forcesb w bv φ
+scoped[FFL.FirstOrder.KripkeModel]
+  notation:45 w " ⊩/" bv φ:46 => FFL.FirstOrder.Kripke.Model.Forcesb w bv φ
 
 namespace Forces
 
@@ -44,9 +47,11 @@ variable {w v bv fv}
 @[simp] lemma rel {k} {R : L.Rel k} {t} :
     w ⊩[bv|fv] .rel R t ↔ Rel w R fun i ↦ (t i).relationalVal bv fv := by rfl
 
-@[simp] lemma and {φ ψ : Semiformulaᵢ L ξ n} : w ⊩[bv|fv] φ ⋏ ψ ↔ w ⊩[bv|fv] φ ∧ w ⊩[bv|fv] ψ := by rfl
+@[simp] lemma and {φ ψ : Semiformulaᵢ L ξ n} :
+    w ⊩[bv|fv] φ ⋏ ψ ↔ w ⊩[bv|fv] φ ∧ w ⊩[bv|fv] ψ := by rfl
 
-@[simp] lemma or {φ ψ : Semiformulaᵢ L ξ n} : w ⊩[bv|fv] φ ⋎ ψ ↔ w ⊩[bv|fv] φ ∨ w ⊩[bv|fv] ψ := by rfl
+@[simp] lemma or {φ ψ : Semiformulaᵢ L ξ n} :
+    w ⊩[bv|fv] φ ⋎ ψ ↔ w ⊩[bv|fv] φ ∨ w ⊩[bv|fv] ψ := by rfl
 
 @[simp] lemma imply {φ ψ : Semiformulaᵢ L ξ n} :
     w ⊩[bv|fv] φ 🡒 ψ ↔ ∀ v ≤ w, Forces v bv fv φ → Forces v bv fv ψ := by rfl
@@ -78,7 +83,8 @@ variable {w v bv fv}
   |         [φ] => by simp
   | φ :: ψ :: Γ => by simp [disj (Γ := ψ :: Γ)]
 
-lemma rew {bv : Fin n₂ → C} {fv : ξ₂ → C} {ω : Rew L ξ₁ n₁ ξ₂ n₂} {φ : Semiformulaᵢ L ξ₁ n₁} :
+lemma rew {n₁ n₂ : ℕ} {ξ₁ ξ₂ : Type*} {bv : Fin n₂ → C} {fv : ξ₂ → C} {ω : Rew L ξ₁ n₁ ξ₂ n₂}
+    {φ : Semiformulaᵢ L ξ₁ n₁} :
     w ⊩[bv|fv] (ω ▹ φ) ↔
     w ⊩[fun x ↦ (ω #x).relationalVal bv fv|fun x ↦ (ω &x).relationalVal bv fv] φ := by
   induction φ using Semiformulaᵢ.rec' generalizing n₂ w
@@ -92,21 +98,25 @@ lemma rew {bv : Fin n₂ → C} {fv : ξ₂ → C} {ω : Rew L ξ₁ n₁ ξ₂ 
   case hOr φ ψ ihφ ihψ => simp [ihφ, ihψ]
   case hFalsum => simp
   case hAll φ ih =>
-    have (x : C) : (fun i ↦ (ω.q #i).relationalVal (x :> bv) fv) = (x :> fun i ↦ (ω #i).relationalVal bv fv) := by
+    have (x : C) :
+        (fun i ↦ (ω.q #i).relationalVal (x :> bv) fv) =
+          (x :> fun i ↦ (ω #i).relationalVal bv fv) := by
       funext i; cases i using Fin.cases <;> simp
     simp [ih, this]
   case hExs φ ih =>
-    have (x : C) : (fun i ↦ (ω.q #i).relationalVal (x :> bv) fv) = (x :> fun i ↦ (ω #i).relationalVal bv fv) := by
+    have (x : C) :
+        (fun i ↦ (ω.q #i).relationalVal (x :> bv) fv) =
+          (x :> fun i ↦ (ω #i).relationalVal bv fv) := by
       funext i; cases i using Fin.cases <;> simp
     simp [ih, this]
 
-@[simp] lemma free {v : W} {fv : ℕ → C} {φ : Semipropositionᵢ L (n + 1)} :
+@[simp] lemma free {v : W} {fv : ℕ → C} {x : v} {φ : Semipropositionᵢ L (n + 1)} :
     v ⊩[bv|↑x :>ₙ fv] Rewriting.free φ ↔ v ⊩[bv <: x|fv] φ := by
   have : (fun i ↦ Semiterm.relationalVal (L := L) bv (x :>ₙ fv) (Rew.free #i)) = (bv <: x) := by
     ext i; cases i using Fin.lastCases <;> simp
   simp [Rewriting.free, Forces.rew, this]
 
-lemma subst {v : W} (w : Fin k → Semiterm L ξ n) (φ : Semiformulaᵢ L ξ k) :
+lemma subst {k : ℕ} {v : W} (w : Fin k → Semiterm L ξ n) (φ : Semiformulaᵢ L ξ k) :
     v ⊩[bv|fv] (φ ⇜ w) ↔ v ⊩[fun i ↦ (w i).relationalVal bv fv|fv] φ := by
   simp [Rewriting.subst, Forces.rew]
 
@@ -201,7 +211,8 @@ theorem sound {Γ : LJ.Sequent L} {Ξ : LJ.Head L} :
   | .positiveAnd dφ dψ, w, fv, hfv, hΓ =>
       ⟨sound dφ w fv hfv hΓ, sound dψ w fv hfv hΓ⟩
   | .negativeAnd d, w, fv, hfv, hΓ =>
-      sound d w fv hfv (by simpa only [Multiset.forall_mem_add, Multiset.forall_mem_atom, and] using hΓ)
+      sound d w fv hfv
+        (by simpa only [Multiset.forall_mem_add, Multiset.forall_mem_atom, and] using hΓ)
   | .positiveOrLeft d, w, fv, hfv, hΓ => Or.inl <| sound d w fv hfv hΓ
   | .positiveOrRight d, w, fv, hfv, hΓ => Or.inr <| sound d w fv hfv hΓ
   | .negativeOr dφ dψ, w, fv, hfv, hΓ => by
@@ -221,7 +232,8 @@ theorem sound {Γ : LJ.Sequent L} {Ξ : LJ.Head L} :
       have hAll : w ⊩[![]|fv] ∀¹ φ := hΓ _ (by simp)
       have hφ := hAll w (by rfl) ⟨fv x, hfv x⟩
       exact sound d w fv hfv (by
-        simpa [ht, or_imp, forall_and] using And.intro (fun θ hθ ↦ hΓ θ (Multiset.mem_add.mpr (Or.inl hθ))) hφ)
+        simpa [ht, or_imp, forall_and] using
+          And.intro (fun θ hθ ↦ hΓ θ (Multiset.mem_add.mpr (Or.inl hθ))) hφ)
   | .positiveExists (t := t) d, w, fv, hfv, hΓ => by
       obtain ⟨x, ht⟩ := t.fvar_of_relational
       exact ⟨⟨fv x, hfv x⟩, by simpa [ht] using sound d w fv hfv hΓ⟩
@@ -263,7 +275,7 @@ instance : ForcingRelation.IntKripke W (· ≥ ·) where
 
 open Semantics
 
-lemma sound {T : Theoryᵢ L} (b : T ⊢ φ) : W ∀⊩* T → W ∀⊩ φ := fun H w ↦ by
+lemma sound {T : Theoryᵢ L} {φ : Sentenceᵢ L} (b : T ⊢ φ) : W ∀⊩* T → W ∀⊩ φ := fun H w ↦ by
   rcases domain_nonempty' w with ⟨x, hx⟩
   rcases b with ⟨Γ, hΓ, d⟩
   have hd := Forces.sound d w (fun _ ↦ x) (by simpa using hx) fun ψ hψ ↦ by
@@ -287,9 +299,10 @@ structure Kripke.Mod (L : Language) [L.Relational] where
   Carrier : Type*
   Domain : World → Set Carrier
   domain_nonempty : ∀ w, ∃ x, x ∈ Domain w
-  domain_antimonotone : w ≥ v → Domain w ⊆ Domain v
+  domain_antimonotone : ∀ {w v : World}, w ≥ v → Domain w ⊆ Domain v
   Rel (w : World) {k : ℕ} (R : L.Rel k) : (Fin k → Carrier) → Prop
-  rel_monotone : Rel w R t → ∀ v ≤ w, Rel v R t
+  rel_monotone : ∀ {w : World} {k : ℕ} {R : L.Rel k} {t : Fin k → Carrier},
+    Rel w R t → ∀ v ≤ w, Rel v R t
 
 namespace Kripke.Mod
 
@@ -319,17 +332,19 @@ instance : Semantics (Kripke.Mod L) (Sentenceᵢ L) := ⟨fun 𝓚 φ ↦ 𝓚 �
 
 variable {𝓚}
 
-lemma models_def : 𝓚 ⊧ φ ↔ 𝓚 ∀⊩ φ := by rfl
+lemma models_def {φ : Sentenceᵢ L} : 𝓚 ⊧ φ ↔ 𝓚 ∀⊩ φ := by rfl
 
-lemma sound {T : Theoryᵢ L} (b : T ⊢ φ) : 𝓚 ⊧* T → 𝓚 ⊧ φ := fun H ↦
+lemma sound {T : Theoryᵢ L} {φ : Sentenceᵢ L} (b : T ⊢ φ) : 𝓚 ⊧* T → 𝓚 ⊧ φ := fun H ↦
   Forces₀.sound (W := 𝓚) b fun _ hφ ↦ H.models_set hφ
 
 instance (T : Theoryᵢ L) : Sound T (Semantics.models (Kripke.Mod L) T) :=
   ⟨fun b _ H ↦ sound b H⟩
 
-lemma sound_empty (b : (∅ : Theoryᵢ L) ⊢ φ) : 𝓚 ⊧ φ := 𝓚.sound b (by simp)
+lemma sound_empty {φ : Sentenceᵢ L} (b : (∅ : Theoryᵢ L) ⊢ φ) : 𝓚 ⊧ φ :=
+  𝓚.sound b (by simp)
 
-instance : Semantics.Top (Kripke.Mod L) := ⟨fun 𝓚 ↦ by simpa [models_def] using ForcingRelation.AllForces.verum⟩
+instance : Semantics.Top (Kripke.Mod L) :=
+  ⟨fun 𝓚 ↦ by simpa [models_def] using ForcingRelation.AllForces.verum⟩
 
 instance : Semantics.Bot (Kripke.Mod L) := ⟨fun 𝓚 ↦ by
   have : Inhabited 𝓚 := Classical.inhabited_of_nonempty'

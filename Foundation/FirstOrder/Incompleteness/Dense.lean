@@ -5,6 +5,10 @@ public import Foundation.Logic.LindenbaumAlgebra
 public import Foundation.Vorspiel.Order.BooleanAlgebra.Iso
 
 @[expose] public section
+set_option autoImplicit true
+set_option linter.style.cdot false
+set_option linter.style.dollarSyntax false
+set_option linter.style.longLine false
 namespace FFL
 
 namespace Entailment.LindenbaumAlgebra

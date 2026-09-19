@@ -21,6 +21,8 @@ inductive Litform (α : Type*) : Type _
 
 namespace Litform
 
+variable {α : Type*}
+
 instance : LogicalConnective (Litform α) where
   wedge := Litform.and
   vee   := Litform.or
@@ -60,7 +62,7 @@ instance [Repr α] : Repr (Litform α) := ⟨fun t _ ↦ format t⟩
 
 end ToString
 
-variable (F : Q(Type*)) (ls : Q(LogicalConnective $F)) (ln : Q(LogicalNeutral $F))
+variable {u : Level} (F : Q(Type u)) (ls : Q(LogicalConnective $F)) (ln : Q(LogicalNeutral $F))
 
 abbrev _root_.FFL.Meta.Lit := Litform Expr
 
@@ -76,7 +78,7 @@ abbrev toExpr : Lit → Q($F)
   |   φ 🡒 ψ => q($(toExpr φ) 🡒 $(toExpr ψ))
   | iff φ ψ => q($(toExpr φ) 🡘 $(toExpr ψ))
 
-partial def summands {α : Q(Type $u)} (inst : Q(Add $α)) :
+partial def summands {u : Level} {α : Q(Type u)} (inst : Q(Add $α)) :
     Q($α) → MetaM (List Q($α))
   | ~q($x + $y) => return (← summands inst x) ++ (← summands inst y)
   | n => return [n]
