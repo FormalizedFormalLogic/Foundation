@@ -56,11 +56,11 @@ private lemma eval_collectionMotive [V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻] (a : V) (
   simp [collectionMotive, Semiformula.eval_ballLT, Semiformula.eval_bexsLTSucc,
     Arithmetic.lt_succ_iff_le, eval_collectionCore, Function.comp_def]
 
-variable [V↓[ℒₒᵣ] ⊧* 𝗜𝚺 (s + 1)]
+variable [V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺ (s + 1)]
 
 private lemma collectionMotive_definable (hθ : Hierarchy 𝚺 (s + 1) θ) (a : V) :
     𝚺-[s + 1].DefinablePred (fun y => ∃ w, ∀ x < y, x < a → ∃ u ≤ w, V ⊧/(u :> x :> e) θ) := by
-  have := mod_paMinus_of_ISigma (V := V) (s := s + 1)
+  have := mod_paMinus_of_ISigmaPlus (V := V) (s := s + 1)
   exact HierarchySymbol.Definable.mkPolarity (collectionMotive e θ a)
     (hierarchy_collectionMotive e hθ a) (fun v => (eval_collectionMotive e a v).symm)
 
@@ -68,9 +68,9 @@ theorem sigma_exists_bound_witness {θ : ArithmeticSemisentence (n + 2)}
     (hθ : Hierarchy 𝚺 (s + 1) θ)
     (e : Fin n → V) (a : V) (h : ∀ x < a, ∃ u, V ⊧/(u :> x :> e) θ) :
     ∃ w, ∀ x < a, ∃ u ≤ w, V ⊧/(u :> x :> e) θ := by
-  have := mod_paMinus_of_ISigma (V := V) (s := s + 1)
+  have := mod_paMinus_of_ISigmaPlus (V := V) (s := s + 1)
   have key : ∀ y : V, ∃ w, ∀ x < y, x < a → ∃ u ≤ w, V ⊧/(u :> x :> e) θ := by
-    apply InductionOnHierarchy.succ_induction_sigma 𝚺 (s + 1)
+    apply InductionOnBroadHierarchy.succ_induction_sigma 𝚺 (s + 1)
       (P := fun y => ∃ w, ∀ x < y, x < a → ∃ u ≤ w, V ⊧/(u :> x :> e) θ)
       (hP := collectionMotive_definable e hθ a)
     . exact ⟨0, fun x hx _ => absurd hx (by simp)⟩

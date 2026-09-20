@@ -131,6 +131,13 @@ lemma strict_mono {φ : Semiformula L ξ n} (h : StrictHierarchy Γ s φ) (Γ') 
 lemma of_deltaZero {φ : Semiformula L ξ n} (h : Hierarchy 𝚺 0 φ) : StrictHierarchy Γ s φ :=
   (zero h).mono (Nat.zero_le s)
 
+@[simp, grind =]
+lemma zero_iff {φ : Semiformula L ξ n} : StrictHierarchy Γ 0 φ ↔ Hierarchy 𝚺 0 φ :=
+  ⟨fun h ↦ h.hierarchy.of_zero, zero⟩
+
+lemma of_open {φ : Semiformula L ξ n} (h : φ.Open) : StrictHierarchy Γ s φ :=
+  of_deltaZero (Hierarchy.of_open h)
+
 end
 
 lemma allClosure {s : ℕ} : ∀ {n : ℕ} {φ : Semiformula L ξ n},

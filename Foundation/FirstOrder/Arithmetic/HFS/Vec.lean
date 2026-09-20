@@ -11,7 +11,7 @@ public import Foundation.FirstOrder.Arithmetic.HFS.Fixpoint
 
 namespace FFL.FirstOrder.Arithmetic
 
-variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
+variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺₁]
 
 section adjoin
 

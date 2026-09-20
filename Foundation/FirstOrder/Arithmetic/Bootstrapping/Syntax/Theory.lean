@@ -13,7 +13,7 @@ variable {L : Language} [L.Encodable] [L.LORDefinable]
 class Δ₁ (T : Theory L) where
   ch : 𝚫₁.Semisentence 1
   mem_iff : ∀ φ : Proposition L, ℕ ⊧/![⌜φ⌝] ch.val ↔ ∃ σ ∈ T, φ = σ
-  isDelta1 : ch.ProvablyProperOn 𝗜𝚺₁
+  isDelta1 : ch.ProvablyProperOn 𝗜𝚺⁺₁
 
 abbrev Δ₁ch (T : Theory L) [T.Δ₁] : 𝚫₁.Semisentence 1 := Δ₁.ch T
 
@@ -54,7 +54,7 @@ end FFL.FirstOrder.Theory
 
 namespace FFL.FirstOrder.Arithmetic.Bootstrapping
 
-variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
+variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺₁]
 
 variable {L : Language} [L.Encodable] [L.LORDefinable]
 
@@ -66,7 +66,7 @@ instance Δ₁Class.defined : 𝚫₁-Predicate[V] (· ∈ T.Δ₁Class) via T.�
   constructor
   · intro v
     have : V ⊧/![v 0] (Theory.Δ₁.ch T).sigma.val ↔ V ⊧/![v 0] (Theory.Δ₁.ch T).pi.val := by
-      have := (consequence_iff (T := 𝗜𝚺₁)).mp (Theory.Proof.sound <| FirstOrder.Theory.Δ₁.isDelta1 (T := T)) V inferInstance
+      have := (consequence_iff (T := 𝗜𝚺⁺₁)).mp (Theory.Proof.sound <| FirstOrder.Theory.Δ₁.isDelta1 (T := T)) V inferInstance
       simp [models_iff] at this ⊢
       simpa [Matrix.constant_eq_singleton] using this ![v 0]
     rwa [Matrix.fun_eq_vec_one v]

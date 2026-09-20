@@ -8,7 +8,7 @@ public import Foundation.FirstOrder.Arithmetic.Definability.Hierarchy
 /-!
 # Prenex normal form for the arithmetical hierarchy
 
-For `𝗜𝚺 s ⪯ T`, every `Hierarchy Γ s` formula `φ` is `T`-provably equivalent to `φ₀.toPrenex Γ s`
+For `𝗜𝚺⁺ s ⪯ T`, every `Hierarchy Γ s` formula `φ` is `T`-provably equivalent to `φ₀.toPrenex Γ s`
 for some `φ₀ : ArithmeticSemisentence (n + s)` in `Hierarchy 𝚺 0`.
 
 ## References
@@ -310,14 +310,14 @@ private lemma models_bexs_witness [V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻]
 mutual
 
 theorem models_ball :
-    {Γ : Polarity} → {s n : ℕ} → [V↓[ℒₒᵣ] ⊧* 𝗜𝚺 s] → (u : ArithmeticSemiterm Empty n) →
+    {Γ : Polarity} → {s n : ℕ} → [V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺ s] → (u : ArithmeticSemiterm Empty n) →
       (φ : Prenex Γ s Empty (n + 1)) → (e : Fin n → V) →
     V ⊧/e (∀'[u] φ).val ↔ ∀ x < u.valb e, V ⊧/(x :> e) φ.val
   | _, 0, _, _, u, φ, e => by
     simp [ball_zero, Prenex.val, Semiformula.eval_ball];
   | 𝚺, s + 1, _, _, u, φ, e => by
-    have : V↓[ℒₒᵣ] ⊧* 𝗜𝚺 s := mod_ISigma_of_le (s₂ := s + 1) (by omega);
-    have : V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := mod_paMinus_of_ISigma (s := s + 1);
+    have : V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺ s := mod_ISigmaPlus_of_le (s₂ := s + 1) (by omega);
+    have : V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := mod_paMinus_of_ISigmaPlus (s := s + 1);
     have iha : ∀ {m : ℕ} (u : ArithmeticSemiterm Empty m) (φ : Prenex 𝚷 s Empty (m + 1))
         (e : Fin m → V), V ⊧/e (∀'[u] φ).val ↔ ∀ x < u.valb e, V ⊧/(x :> e) φ.val :=
       fun u φ e => models_ball u φ e;
@@ -349,13 +349,13 @@ theorem models_ball :
 termination_by Γ s n _inst _u _φ _e => (s, match Γ with | 𝚺 => 0 | 𝚷 => 1)
 
 theorem models_bexs :
-    {Γ : Polarity} → {s n : ℕ} → [V↓[ℒₒᵣ] ⊧* 𝗜𝚺 s] → (u : ArithmeticSemiterm Empty n) →
+    {Γ : Polarity} → {s n : ℕ} → [V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺ s] → (u : ArithmeticSemiterm Empty n) →
       (φ : Prenex Γ s Empty (n + 1)) → (e : Fin n → V) →
     V ⊧/e (∃'[u] φ).val ↔ ∃ x < u.valb e, V ⊧/(x :> e) φ.val
   | _, 0, _, _, u, φ, e => by
     simp [bexs_zero, Prenex.val, Semiformula.eval_bexs];
   | 𝚺, s + 1, n, _, u, φ, e => by
-    have : V↓[ℒₒᵣ] ⊧* 𝗜𝚺 s := mod_ISigma_of_le (s₂ := s + 1) (by omega);
+    have : V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺ s := mod_ISigmaPlus_of_le (s₂ := s + 1) (by omega);
     have ih : ∀ {m : ℕ} (u : ArithmeticSemiterm Empty m) (φ : Prenex 𝚷 s Empty (m + 1))
         (e : Fin m → V), V ⊧/e (∃'[u] φ).val ↔ ∃ x < u.valb e, V ⊧/(x :> e) φ.val :=
       fun u φ e => models_bexs u φ e;
@@ -402,13 +402,13 @@ end
 mutual
 
 theorem models_and :
-    {Γ : Polarity} → {s n : ℕ} → [V↓[ℒₒᵣ] ⊧* 𝗜𝚺 s] → (φ ψ : Prenex Γ s Empty n) → (e : Fin n → V) →
+    {Γ : Polarity} → {s n : ℕ} → [V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺ s] → (φ ψ : Prenex Γ s Empty n) → (e : Fin n → V) →
     V ⊧/e (φ ⋏ ψ).val ↔ V ⊧/e φ.val ∧ V ⊧/e ψ.val
   | _, 0, _, _, φ, ψ, e => by
     simp [and_zero, Prenex.val];
   | 𝚺, s + 1, n, _, φ, ψ, e => by
-    have : V↓[ℒₒᵣ] ⊧* 𝗜𝚺 s := mod_ISigma_of_le (s₂ := s + 1) (by omega);
-    have : V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := mod_paMinus_of_ISigma (s := s);
+    have : V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺ s := mod_ISigmaPlus_of_le (s₂ := s + 1) (by omega);
+    have : V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := mod_paMinus_of_ISigmaPlus (s := s);
     have iha : ∀ {m : ℕ} (φ ψ : Prenex 𝚷 s Empty m) (e : Fin m → V),
         V ⊧/e (φ ⋏ ψ).val ↔ V ⊧/e φ.val ∧ V ⊧/e ψ.val :=
       fun φ ψ e => models_and φ ψ e;
@@ -449,12 +449,12 @@ theorem models_and :
 termination_by Γ s n _inst _φ _ψ _e => (s, match Γ with | 𝚺 => 0 | 𝚷 => 1)
 
 theorem models_or :
-    {Γ : Polarity} → {s n : ℕ} → [V↓[ℒₒᵣ] ⊧* 𝗜𝚺 s] → (φ ψ : Prenex Γ s Empty n) → (e : Fin n → V) →
+    {Γ : Polarity} → {s n : ℕ} → [V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺ s] → (φ ψ : Prenex Γ s Empty n) → (e : Fin n → V) →
     V ⊧/e (φ ⋎ ψ).val ↔ V ⊧/e φ.val ∨ V ⊧/e ψ.val
   | _, 0, _, _, φ, ψ, e => by
     simp [or_zero, Prenex.val];
   | 𝚺, s + 1, _, _, φ, ψ, e => by
-    have : V↓[ℒₒᵣ] ⊧* 𝗜𝚺 s := mod_ISigma_of_le (s₂ := s + 1) (by omega);
+    have : V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺ s := mod_ISigmaPlus_of_le (s₂ := s + 1) (by omega);
     have ih : ∀ {m : ℕ} (φ ψ : Prenex 𝚷 s Empty m) (e : Fin m → V),
         V ⊧/e (φ ⋎ ψ).val ↔ V ⊧/e φ.val ∨ V ⊧/e ψ.val :=
       fun φ ψ e => models_or φ ψ e;
@@ -485,10 +485,10 @@ def all (φ : Prenex 𝚷 (s + 1) ξ (n + 1)) : Prenex 𝚷 (s + 1) ξ n := ∼(
 local prefix:64 "∃' " => Prenex.exs
 local prefix:64 "∀' " => Prenex.all
 
-lemma models_exs [V↓[ℒₒᵣ] ⊧* 𝗜𝚺 s]
+lemma models_exs [V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺ s]
     (φ : Prenex 𝚺 (s + 1) Empty (n + 1)) (e : Fin n → V) :
     V ⊧/e (∃' φ).val ↔ ∃ x, V ⊧/(x :> e) φ.val := by
-  have : V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := mod_paMinus_of_ISigma (s := s);
+  have : V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := mod_paMinus_of_ISigmaPlus (s := s);
   show V ⊧/e
       (∃'[‘#0 + 1’] (∃'[‘#1 + 1’]
         (φ.sigmaInv.rew (Rew.subst (#0 :> #1 :> (#·.succ.succ.succ)))))).sigma.val ↔
@@ -517,7 +517,7 @@ lemma models_exs [V↓[ℒₒᵣ] ⊧* 𝗜𝚺 s]
   . rintro ⟨y, x, hx⟩;
     exact ⟨max x y, y, le_max_right x y, x, le_max_left x y, hx⟩;
 
-lemma models_all [V↓[ℒₒᵣ] ⊧* 𝗜𝚺 s]
+lemma models_all [V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺ s]
     (φ : Prenex 𝚷 (s + 1) Empty (n + 1)) (e : Fin n → V) :
     V ⊧/e (∀' φ).val ↔ ∀ x, V ⊧/(x :> e) φ.val := by
   have hthis : V ⊧/e (∃' ∼φ).val ↔ ∃ x, V ⊧/(x :> e) (∼φ).val := models_exs (∼φ) e;
@@ -530,7 +530,7 @@ lemma models_all [V↓[ℒₒᵣ] ⊧* 𝗜𝚺 s]
 
 theorem models_exists_prenex {Γ : Polarity} {s n : ℕ} {φ : ArithmeticSemisentence n} (h : Hierarchy Γ s φ) :
   ∃ φ' : Prenex Γ s Empty n,
-    ∀ (V : Type*) [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺 s] (e : Fin n → V), V ⊧/e φ ↔ V ⊧/e φ'.val := by
+    ∀ (V : Type*) [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺ s] (e : Fin n → V), V ⊧/e φ ↔ V ⊧/e φ'.val := by
   induction h with
   | verum Γ s n =>
     use verum;
@@ -584,36 +584,36 @@ theorem models_exists_prenex {Γ : Polarity} {s n : ℕ} {φ : ArithmeticSemisen
     obtain ⟨φ', hφ'⟩ := ih;
     use ∃' φ';
     intro V _ _ e;
-    have : V↓[ℒₒᵣ] ⊧* 𝗜𝚺 s := mod_ISigma_of_le (s₂ := s + 1) (by omega);
+    have : V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺ s := mod_ISigmaPlus_of_le (s₂ := s + 1) (by omega);
     rw [models_exs φ' e, Semiformula.eval_ex];
     exact exists_congr fun x => hφ' V (x :> e);
   | @all s n φ _ ih =>
     obtain ⟨φ', hφ'⟩ := ih;
     use ∀' φ';
     intro V _ _ e;
-    have : V↓[ℒₒᵣ] ⊧* 𝗜𝚺 s := mod_ISigma_of_le (s₂ := s + 1) (by omega);
+    have : V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺ s := mod_ISigmaPlus_of_le (s₂ := s + 1) (by omega);
     rw [models_all φ' e, Semiformula.eval_all];
     exact forall_congr' fun x => hφ' V (x :> e);
   | @sigma s n φ _ ih =>
     obtain ⟨φ', hφ'⟩ := ih;
     use φ'.sigma;
     intro V _ _ e;
-    have : V↓[ℒₒᵣ] ⊧* 𝗜𝚺 s := mod_ISigma_of_le (s₂ := s + 1) (by omega);
+    have : V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺ s := mod_ISigmaPlus_of_le (s₂ := s + 1) (by omega);
     rw [models_sigma φ' e, Semiformula.eval_ex];
     exact exists_congr fun x => hφ' V (x :> e);
   | @pi s n φ _ ih =>
     obtain ⟨φ', hφ'⟩ := ih;
     use φ'.pi;
     intro V _ _ e;
-    have : V↓[ℒₒᵣ] ⊧* 𝗜𝚺 s := mod_ISigma_of_le (s₂ := s + 1) (by omega);
+    have : V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺ s := mod_ISigmaPlus_of_le (s₂ := s + 1) (by omega);
     rw [models_pi φ' e, Semiformula.eval_all];
     exact forall_congr' fun x => hφ' V (x :> e);
   | @dummy_sigma s n φ _ ih =>
     obtain ⟨φ', hφ'⟩ := ih;
     use (∀' φ').altUp;
     intro V _ _ e;
-    have : V↓[ℒₒᵣ] ⊧* 𝗜𝚺 s := mod_ISigma_of_le (show s ≤ s + 1 + 1 by omega);
-    have : V↓[ℒₒᵣ] ⊧* 𝗜𝚺 (s + 1) := mod_ISigma_of_le (show s + 1 ≤ s + 1 + 1 by omega);
+    have : V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺ s := mod_ISigmaPlus_of_le (show s ≤ s + 1 + 1 by omega);
+    have : V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺ (s + 1) := mod_ISigmaPlus_of_le (show s + 1 ≤ s + 1 + 1 by omega);
     exact Semiformula.eval_all.trans
       ((forall_congr' fun x => hφ' V (x :> e)).trans
         ((models_all φ' e).symm.trans (models_altUp (∀' φ') e).symm));
@@ -621,26 +621,26 @@ theorem models_exists_prenex {Γ : Polarity} {s n : ℕ} {φ : ArithmeticSemisen
     obtain ⟨φ', hφ'⟩ := ih;
     use (∃' φ').altUp;
     intro V _ _ e;
-    have : V↓[ℒₒᵣ] ⊧* 𝗜𝚺 s := mod_ISigma_of_le (show s ≤ s + 1 + 1 by omega);
-    have : V↓[ℒₒᵣ] ⊧* 𝗜𝚺 (s + 1) := mod_ISigma_of_le (show s + 1 ≤ s + 1 + 1 by omega);
+    have : V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺ s := mod_ISigmaPlus_of_le (show s ≤ s + 1 + 1 by omega);
+    have : V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺ (s + 1) := mod_ISigmaPlus_of_le (show s + 1 ≤ s + 1 + 1 by omega);
     exact Semiformula.eval_ex.trans
       ((exists_congr fun x => hφ' V (x :> e)).trans
         ((models_exs φ' e).symm.trans (models_altUp (∃' φ') e).symm));
 
 end Prenex
 
-theorem exists_prenex_of_hierarchy {Γ : Polarity} {s : ℕ} (T : ArithmeticTheory) [𝗜𝚺 s ⪯ T]
+theorem exists_prenex_of_hierarchy {Γ : Polarity} {s : ℕ} (T : ArithmeticTheory) [𝗜𝚺⁺ s ⪯ T]
   {n : ℕ} {φ : ArithmeticSemisentence n} (h : Hierarchy Γ s φ) :
   ∃ φ' : Prenex Γ s Empty n, T ⊢ ∀¹* (φ 🡘 φ'.val) := by
-  have : 𝗘𝗤 ℒₒᵣ ⪯ T := eq_weakerThan_of_ISigma (s := s);
+  have : 𝗘𝗤 ℒₒᵣ ⪯ T := eq_weakerThan_of_ISigmaPlus (s := s);
   obtain ⟨φ', hφ'⟩ := Prenex.models_exists_prenex h;
   use φ';
   apply provable_iff_of_models_iff.{0};
   intro V _ _ e;
-  have : V↓[ℒₒᵣ] ⊧* 𝗜𝚺 s := models_of_subtheory (T := 𝗜𝚺 s) (U := T) (inferInstance);
+  have : V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺ s := models_of_subtheory (T := 𝗜𝚺⁺ s) (U := T) (inferInstance);
   exact hφ' V e;
 
-theorem exists_matrix_provable {Γ : Polarity} {s: ℕ} (T : ArithmeticTheory) [𝗜𝚺 s ⪯ T]
+theorem exists_matrix_provable {Γ : Polarity} {s: ℕ} (T : ArithmeticTheory) [𝗜𝚺⁺ s ⪯ T]
   {n : ℕ} {φ : ArithmeticSemisentence n} (h : Hierarchy Γ s φ) :
   ∃ φ₀ : 𝚺₀.Semisentence (n + s), T ⊢ ∀¹* (φ 🡘 φ₀.val.toPrenex Γ s) := by
   obtain ⟨_, hφ'⟩ := exists_prenex_of_hierarchy T h;
@@ -654,7 +654,7 @@ lemma Prenex.val_strictHierarchy {φ : Prenex Γ s ξ n} : StrictHierarchy Γ s 
   StrictHierarchy.toPrenex_of_deltaZero φ.matrix.sigma_prop
 
 theorem exists_strictHierarchy_of_hierarchy
-    (T : ArithmeticTheory) [𝗜𝚺 s ⪯ T] {φ : ArithmeticSemisentence n} (h : Hierarchy Γ s φ) :
+    (T : ArithmeticTheory) [𝗜𝚺⁺ s ⪯ T] {φ : ArithmeticSemisentence n} (h : Hierarchy Γ s φ) :
     ∃ ψ : ArithmeticSemisentence n, StrictHierarchy Γ s ψ ∧ T ⊢ ∀¹* (φ 🡘 ψ) := by
   obtain ⟨φ', hφ'⟩ := exists_prenex_of_hierarchy T h;
   exact ⟨φ'.val, Prenex.val_strictHierarchy, hφ'⟩;

@@ -769,12 +769,12 @@ end IOpen
 /-! ### Polynomial induction -/
 
 @[elab_as_elim]
-lemma polynomial_induction [V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻] (Γ m) [V↓[ℒₒᵣ] ⊧* 𝗜𝗡𝗗 Γ m]
+lemma polynomial_induction [V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻] (Γ m) [V↓[ℒₒᵣ] ⊧* 𝗜𝗡𝗗⁺ Γ m]
     {P : V → Prop} (hP : Γ-[m]-Predicate P)
     (zero : P 0) (even : ∀ x > 0, P x → P (2 * x)) (odd : ∀ x, P x → P (2 * x + 1)) : ∀ x, P x := by
-  have : V↓[ℒₒᵣ] ⊧* 𝗜𝗡𝗗 Γ m := inferInstance
+  have : V↓[ℒₒᵣ] ⊧* 𝗜𝗡𝗗⁺ Γ m := inferInstance
   have : V↓[ℒₒᵣ] ⊧* 𝗜𝗢𝗽𝗲𝗻 := models_of_subtheory this
-  intro x; induction x using InductionOnHierarchy.order_induction
+  intro x; induction x using InductionOnBroadHierarchy.order_induction
   · exact Γ
   · exact m
   · exact hP
@@ -791,11 +791,11 @@ lemma polynomial_induction [V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻] (Γ m) [V↓[ℒ�
     (zero : P 0) (even : ∀ x > 0, P x → P (2 * x)) (odd : ∀ x, P x → P (2 * x + 1)) : ∀ x, P x :=
   polynomial_induction 𝚺 0 (P := P) hP zero even odd
 
-@[elab_as_elim] lemma sigma1_polynomial_induction [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] {P : V → Prop} (hP : 𝚺₁-Predicate P)
+@[elab_as_elim] lemma sigma1_polynomial_induction [V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺₁] {P : V → Prop} (hP : 𝚺₁-Predicate P)
     (zero : P 0) (even : ∀ x > 0, P x → P (2 * x)) (odd : ∀ x, P x → P (2 * x + 1)) : ∀ x, P x :=
   polynomial_induction 𝚺 1 (P := P) hP zero even odd
 
-@[elab_as_elim] lemma pi1_polynomial_induction [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] {P : V → Prop} (hP : 𝚷₁-Predicate P)
+@[elab_as_elim] lemma pi1_polynomial_induction [V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺₁] {P : V → Prop} (hP : 𝚷₁-Predicate P)
     (zero : P 0) (even : ∀ x > 0, P x → P (2 * x)) (odd : ∀ x, P x → P (2 * x + 1)) : ∀ x, P x :=
   polynomial_induction 𝚷 1 (P := P) hP zero even odd
 

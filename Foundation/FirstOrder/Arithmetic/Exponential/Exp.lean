@@ -712,7 +712,7 @@ end ISigma0
 
 section ISigma1
 
-variable [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
+variable [V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺₁]
 
 namespace Exponential
 

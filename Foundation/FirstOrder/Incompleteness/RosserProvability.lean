@@ -12,7 +12,7 @@ namespace FFL.FirstOrder.Arithmetic.Bootstrapping
 
 open FFL.Entailment
 
-variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
+variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺₁]
 
 variable {L : Language} [L.Encodable] [L.LORDefinable]
 
@@ -105,12 +105,12 @@ variable {T : Theory L} [T.Δ₁] [Consistent T]
 
 local prefix:90 "𝗥" => T.rosserPred
 
-theorem rosserProvable_D1 {σ} : T ⊢ σ → 𝗜𝚺₁ ⊢ 𝗥σ := fun h ↦
-  complete 𝗜𝚺₁ _ fun (V : Type) _ _ ↦ by
+theorem rosserProvable_D1 {σ} : T ⊢ σ → 𝗜𝚺⁺₁ ⊢ 𝗥σ := fun h ↦
+  complete 𝗜𝚺⁺₁ _ fun (V : Type) _ _ ↦ by
     simpa [models_iff] using rosser_internalize_sentence h
 
-theorem rosserProvable_rosser {σ} : T ⊢ ∼σ → 𝗜𝚺₁ ⊢ ∼𝗥σ := fun h ↦
-  complete 𝗜𝚺₁ _ fun (V : Type) _ _ ↦ by
+theorem rosserProvable_rosser {σ} : T ⊢ ∼σ → 𝗜𝚺⁺₁ ⊢ ∼𝗥σ := fun h ↦
+  complete 𝗜𝚺⁺₁ _ fun (V : Type) _ _ ↦ by
     simpa [models_iff] using not_rosserProvable_sentence h
 
 end
@@ -125,7 +125,7 @@ variable {T : Theory L} [T.Δ₁] [Consistent T]
 
 variable (T)
 
-noncomputable abbrev _root_.FFL.FirstOrder.Theory.rosserProvability : Provability 𝗜𝚺₁ T where
+noncomputable abbrev _root_.FFL.FirstOrder.Theory.rosserProvability : Provability 𝗜𝚺⁺₁ T where
   prov := T.rosserProvable
   bew_def := rosserProvable_D1
 
@@ -143,17 +143,17 @@ instance : T.rosserProvability.SoundOn ℕ := by
 end rosserProvability
 
 /-- Gödel-Rosser incompleteness theorem -/
-theorem incomplete_GR (T : ArithmeticTheory) [T.Δ₁] [𝗜𝚺₁ ⪯ T] [Consistent T] : Incomplete T :=
+theorem incomplete_GR (T : ArithmeticTheory) [T.Δ₁] [𝗜𝚺⁺₁ ⪯ T] [Consistent T] : Incomplete T :=
   ProvabilityAbstraction.rosser_first_incompleteness T.rosserProvability
 
-instance {T : ArithmeticTheory} [T.RE] [𝗜𝚺₁ ⪯ T] : 𝗜𝚺₁ ⪯ T.craig := WeakerThan.trans inferInstance (inferInstance : T ⪯ T.craig)
+instance {T : ArithmeticTheory} [T.RE] [𝗜𝚺⁺₁ ⪯ T] : 𝗜𝚺⁺₁ ⪯ T.craig := WeakerThan.trans inferInstance (inferInstance : T ⪯ T.craig)
 
 /-- Gödel-Rosser incompleteness theorem for r.e. theories -/
-theorem incomplete_GR_of_RE (T : ArithmeticTheory) [T.RE] [𝗜𝚺₁ ⪯ T] [Consistent T] : Incomplete T :=
+theorem incomplete_GR_of_RE (T : ArithmeticTheory) [T.RE] [𝗜𝚺⁺₁ ⪯ T] [Consistent T] : Incomplete T :=
   (Equiv.incomplete_iff (inferInstance : T ≊ T.craig)).mpr (incomplete_GR T.craig)
 
 theorem exists_true_but_unprovable_sentence_of_RE_of_consistent
-    (T : ArithmeticTheory) [T.RE] [𝗜𝚺₁ ⪯ T] [Consistent T] :
+    (T : ArithmeticTheory) [T.RE] [𝗜𝚺⁺₁ ⪯ T] [Consistent T] :
     ∃ δ : ArithmeticSentence, ℕ↓[ℒₒᵣ] ⊧ δ ∧ T ⊬ δ :=
   exists_true_but_unprovable_sentence_of_incomplete (incomplete_GR_of_RE T)
 

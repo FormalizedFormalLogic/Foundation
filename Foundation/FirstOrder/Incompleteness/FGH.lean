@@ -15,7 +15,7 @@ namespace FFL.FirstOrder.Arithmetic.Bootstrapping
 
 open FFL.Entailment
 
-variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] {x : V}
+variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺₁] {x : V}
 
 variable (T : ArithmeticTheory) [T.Δ₁] (θ : 𝚺₀.Semisentence 1)
 
@@ -67,12 +67,12 @@ private lemma fghSentence'_val_eq :
   rw [HierarchySymbol.Semiformula.val_rew]
 
 lemma diagonal_fghSentence :
-    𝗜𝚺₁ ⊢ T.fghSentence θ 🡘 (T.fghSentence' θ).val := by
+    𝗜𝚺⁺₁ ⊢ T.fghSentence θ 🡘 (T.fghSentence' θ).val := by
   rw [fghSentence'_val_eq]
   exact diagonal (T.witnessedBefore θ).val
 
 lemma refutable_fghSentence_of_provedBefore :
-    𝗜𝚺₁ ⊢ (T.provedBefore θ).val/[⌜T.fghSentence θ⌝] 🡒 ∼T.fghSentence θ := by
+    𝗜𝚺⁺₁ ⊢ (T.provedBefore θ).val/[⌜T.fghSentence θ⌝] 🡒 ∼T.fghSentence θ := by
   apply C_trans ?_ $ contra $ K_left diagonal_fghSentence;
   apply complete.{0};
   intro V _ _;
@@ -87,7 +87,7 @@ lemma provable_of_provable_bot : □(⊥ : ArithmeticSentence) → □σ :=
 lemma provable_bot_of_provable_of_provable_neg : □σ → □(∼σ) → □(⊥ : ArithmeticSentence) := fun hσ hnσ ↦
   modus_ponens_sentence T (modus_ponens_sentence T (internalize_provability (by cl_prover)) hσ) hnσ
 
-variable [𝗜𝚺₁ ⪯ T]
+variable [𝗜𝚺⁺₁ ⪯ T]
 
 lemma witness_or_provable_bot_of_provable_fghSentence :
   □(T.fghSentence θ) → (∃ w, V ⊧/![w] θ.val) ∨ □(⊥ : ArithmeticSentence) := by
@@ -123,13 +123,13 @@ lemma provable_fghSentence_iff : □(T.fghSentence θ) ↔ (∃ w, V ⊧/![w] θ
 
 /-- The constructive form of the FGH theorem: `T.fghSentence θ` is an explicit witness. -/
 lemma provable_fixedpoint_iff_exs_or_provable_bot :
-  𝗜𝚺₁ ⊢ provabilityPred T (T.fghSentence θ) 🡘 (∃¹ θ.val) ⋎ provabilityPred T ⊥ := by
+  𝗜𝚺⁺₁ ⊢ provabilityPred T (T.fghSentence θ) 🡘 (∃¹ θ.val) ⋎ provabilityPred T ⊥ := by
   apply complete.{0};
   intro V _ _;
   simpa [models_iff] using provable_fghSentence_iff;
 
 lemma provable_fixedpoint'_iff_exs_or_provable_bot :
-  𝗜𝚺₁ ⊢ provabilityPred T (T.fghSentence' θ).val 🡘 (∃¹ θ.val) ⋎ provabilityPred T ⊥ :=
+  𝗜𝚺⁺₁ ⊢ provabilityPred T (T.fghSentence' θ).val 🡘 (∃¹ θ.val) ⋎ provabilityPred T ⊥ :=
   E_trans (E_symm $ T.standardProvability.ext' diagonal_fghSentence) provable_fixedpoint_iff_exs_or_provable_bot
 
 end FFL.FirstOrder.Arithmetic.Bootstrapping
@@ -139,10 +139,10 @@ namespace FFL.FirstOrder.Arithmetic
 open Bootstrapping
 open FFL.Entailment
 
-variable (T : ArithmeticTheory) [T.Δ₁] [𝗜𝚺₁ ⪯ T] {σ : ArithmeticSentence}
+variable (T : ArithmeticTheory) [T.Δ₁] [𝗜𝚺⁺₁ ⪯ T] {σ : ArithmeticSentence}
 
 theorem fgh_theorem (hσ : Hierarchy 𝚺 1 σ) :
-  ∃ π : 𝚺₁.Sentence, 𝗜𝚺₁ ⊢ provabilityPred T π.val 🡘 σ ⋎ provabilityPred T ⊥ := by
+  ∃ π : 𝚺₁.Sentence, 𝗜𝚺⁺₁ ⊢ provabilityPred T π.val 🡘 σ ⋎ provabilityPred T ⊥ := by
   obtain ⟨θ, hwit⟩ := ISigma1.exists_matrix_provable_of_sentence hσ;
   use T.fghSentence' θ;
   apply E_trans provable_fixedpoint'_iff_exs_or_provable_bot;
@@ -152,11 +152,11 @@ theorem fgh_theorem (hσ : Hierarchy 𝚺 1 σ) :
     by simpa [Semiformula.eval_ex] using models_iff_of_provable_iff hwit V ![]];
 
 theorem fgh_theorem_con (hσ : Hierarchy 𝚺 1 σ) :
-  ∃ π : 𝚺₁.Sentence, 𝗜𝚺₁ ∪ T.Con ⊢ σ 🡘 provabilityPred T π.val := by
+  ∃ π : 𝚺₁.Sentence, 𝗜𝚺⁺₁ ∪ T.Con ⊢ σ 🡘 provabilityPred T π.val := by
   obtain ⟨π, heq⟩ := fgh_theorem T hσ;
   use π;
-  have heq' : 𝗜𝚺₁ ∪ T.Con ⊢ provabilityPred T π.val 🡘 σ ⋎ provabilityPred T ⊥ := WeakerThan.pbl heq;
-  have hcon : 𝗜𝚺₁ ∪ T.Con ⊢ ∼provabilityPred T ⊥ := by_axm (by simp [Theory.consistent]);
+  have heq' : 𝗜𝚺⁺₁ ∪ T.Con ⊢ provabilityPred T π.val 🡘 σ ⋎ provabilityPred T ⊥ := WeakerThan.pbl heq;
+  have hcon : 𝗜𝚺⁺₁ ∪ T.Con ⊢ ∼provabilityPred T ⊥ := by_axm (by simp [Theory.consistent]);
   cl_prover [heq', hcon];
 
 end FFL.FirstOrder.Arithmetic

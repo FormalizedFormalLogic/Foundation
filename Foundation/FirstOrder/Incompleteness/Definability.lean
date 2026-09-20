@@ -7,7 +7,7 @@ public import Foundation.FirstOrder.Incompleteness.Second
 # Definability of arithmetical syntax
 
 This file constructs internal recognizers for arithmetical syntax and recursively enumerable
-presentations of `𝗣𝗔` and `𝗜𝚺₁`.
+presentations of `𝗣𝗔` and `𝗜𝚺⁺₁`.
 -/
 
 @[expose] public section
@@ -16,7 +16,7 @@ namespace FFL.FirstOrder.Arithmetic.Bootstrapping
 
 /-! ## Internal iterated universal quantifier `qqAlls` -/
 
-variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
+variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺₁]
 
 section qqAlls
 
@@ -644,7 +644,7 @@ noncomputable instance PeanoMinus.delta1 : (𝗣𝗔⁻ : ArithmeticTheory).Δ�
 
 section succInd
 
-variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
+variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺₁]
 
 lemma succInd_eq (φ : ArithmeticSemiproposition 1) :
     succInd φ =
@@ -740,7 +740,7 @@ end succInd
 
 section ch
 
-variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
+variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺₁]
 
 open Bootstrapping
 
@@ -777,7 +777,7 @@ noncomputable def chSigma1 : 𝚫₁.Semisentence 1 := chInd Bootstrapping.isSig
 
 section chDefined
 
-variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
+variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺₁]
 
 open Bootstrapping
 
@@ -1038,7 +1038,7 @@ noncomputable instance InductionScheme.delta1_sigma1 : (InductionScheme ℒₒ�
   isDelta1 := HierarchySymbol.Semiformula.ProvablyProperOn.ofProperOn.{0} _ fun V _ _ ↦ by
     have := InductionR.sigma1_defined (V := V); simp
 
-/-! ## `𝗣𝗔` and `𝗜𝚺₁` are recursively enumerable -/
+/-! ## `𝗣𝗔` and `𝗜𝚺⁺₁` are recursively enumerable -/
 
 lemma inductionScheme_re_univ : REPred (· ∈ InductionScheme ℒₒᵣ Set.univ) := by
   have hR : REPred (InductionR fun _ : ℕ ↦ True) := rePred_iff_sigma1.mpr (by definability)
@@ -1061,14 +1061,14 @@ instance : (InductionScheme ℒₒᵣ (Arithmetic.Hierarchy 𝚺 1)).RE := ⟨in
 
 instance : 𝗣𝗔.RE := Theory.RE.add (Theory.RE.ofFinite PeanoMinus.finite) inferInstance
 
-instance : 𝗜𝚺₁.RE := Theory.RE.add (Theory.RE.ofFinite PeanoMinus.finite) inferInstance
+instance : 𝗜𝚺⁺₁.RE := Theory.RE.add (Theory.RE.ofFinite PeanoMinus.finite) inferInstance
 
-/-! ## `𝗣𝗔` and `𝗜𝚺₁` are `Δ₁`
+/-! ## `𝗣𝗔` and `𝗜𝚺⁺₁` are `Δ₁`
 
 TODO: remove. Not mathematically essential — `RE` above already suffices. -/
 
 noncomputable instance : 𝗣𝗔.Δ₁ := Theory.Δ₁.add PeanoMinus.delta1 InductionScheme.delta1_univ
 
-noncomputable instance : 𝗜𝚺₁.Δ₁ := Theory.Δ₁.add PeanoMinus.delta1 InductionScheme.delta1_sigma1
+noncomputable instance : 𝗜𝚺⁺₁.Δ₁ := Theory.Δ₁.add PeanoMinus.delta1 InductionScheme.delta1_sigma1
 
 end FFL.FirstOrder.Arithmetic

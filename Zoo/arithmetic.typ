@@ -9,6 +9,10 @@
 #let IPi(n) = $Theory(I)Pi_#n$
 #let LSigma(n) = $Theory(L)Sigma_#n$
 #let LPi(n) = $Theory(L)Pi_#n$
+#let ISigmaPlus(n) = $Theory(I)Sigma^+_#n$
+#let IPiPlus(n) = $Theory(I)Pi^+_#n$
+#let LSigmaPlus(n) = $Theory(L)Sigma^+_#n$
+#let LPiPlus(n) = $Theory(L)Pi^+_#n$
 
 // Keys are the theories as pretty-printed by `lake exe zoo_arithmetic`; a theory with no entry
 // here is drawn under its pretty-printed name.
@@ -24,14 +28,16 @@
       "𝗜𝚺₀": ISigma(0),
       "𝗜𝚺₀ ∪ 𝝮₁": $ISigma(0) + Omega_1$,
       "𝗜𝚺₁": ISigma(1),
-      "𝗜𝚺2": ISigma(2),
-      "𝗜𝚷₁": IPi(1),
-      "𝗜𝚷2": IPi(2),
-      "𝗟𝚺1": LSigma(1),
-      "𝗟𝚺2": LSigma(2),
-      "𝗟𝚷1": LPi(1),
-      "𝗜𝚺₁ ∪ FFL.FirstOrder.Theory.Con 𝗜𝚺₁": $ISigma(1) + Con(ISigma(1))$,
-      "𝗜𝚺₁ ∪ FFL.FirstOrder.Theory.Incon 𝗜𝚺₁": $ISigma(1) + Incon(ISigma(1))$,
+      "𝗜𝚺⁺₀": ISigmaPlus(0),
+      "𝗜𝚺⁺₁": ISigmaPlus(1),
+      "𝗜𝚺⁺2": ISigmaPlus(2),
+      "𝗜𝚷⁺₁": IPiPlus(1),
+      "𝗜𝚷⁺2": IPiPlus(2),
+      "𝗟𝚺⁺1": LSigmaPlus(1),
+      "𝗟𝚺⁺2": LSigmaPlus(2),
+      "𝗟𝚷⁺1": LPiPlus(1),
+      "𝗜𝚺⁺₁ ∪ FFL.FirstOrder.Theory.Con 𝗜𝚺⁺₁": $ISigmaPlus(1) + Con(ISigmaPlus(1))$,
+      "𝗜𝚺⁺₁ ∪ FFL.FirstOrder.Theory.Incon 𝗜𝚺⁺₁": $ISigmaPlus(1) + Incon(ISigmaPlus(1))$,
       "𝗣𝗔": PA,
       "𝗣𝗔 ∪ FFL.FirstOrder.Theory.Con 𝗣𝗔": $PA + Con(PA)$,
       "𝗣𝗔 ∪ FFL.FirstOrder.Theory.Incon 𝗣𝗔": $PA + Incon(PA)$,

@@ -98,7 +98,7 @@ lemma height_eq_top_of_sigma1_sound (T : ArithmeticTheory) [T.Δ₁] [Arithmetic
   T.standardProvability.height_eq_top_of_sound_and_consistent
 
 @[simp, grind =]
-lemma ISigma1_height_eq_top : 𝗜𝚺₁.height = ⊤ := height_eq_top_of_sigma1_sound 𝗜𝚺₁
+lemma ISigma1_height_eq_top : 𝗜𝚺⁺₁.height = ⊤ := height_eq_top_of_sigma1_sound 𝗜𝚺⁺₁
 
 @[simp, grind =]
 lemma Peano_height_eq_top : 𝗣𝗔.height = ⊤ := height_eq_top_of_sigma1_sound 𝗣𝗔

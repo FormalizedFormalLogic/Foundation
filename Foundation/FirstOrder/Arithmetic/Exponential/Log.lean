@@ -432,7 +432,7 @@ end ISigma0
 
 section ISigma1
 
-variable [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
+variable [V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺₁]
 
 @[simp] lemma log_exponential (a : V) : log (Exp.exp a) = a := (exponential_exp a).log_eq_of_exp
 

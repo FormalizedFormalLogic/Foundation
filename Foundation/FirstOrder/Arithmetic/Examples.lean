@@ -14,18 +14,18 @@ few indices.
 
 namespace FFL.FirstOrder.Arithmetic
 
-instance : 𝗜𝚺 1 ≊ 𝗜𝚷 1 := ISigma_equiv_IPi 1
+instance : 𝗜𝚺⁺ 1 ≊ 𝗜𝚷⁺ 1 := ISigmaPlus_equiv_IPiPlus 1
 
-instance : 𝗜𝚺 2 ≊ 𝗜𝚷 2 := ISigma_equiv_IPi 2
+instance : 𝗜𝚺⁺ 2 ≊ 𝗜𝚷⁺ 2 := ISigmaPlus_equiv_IPiPlus 2
 
-instance : 𝗟𝚺 1 ≊ 𝗜𝚺 1 := LSigma_equiv_ISigma 1
+instance : 𝗟𝚺⁺ 1 ≊ 𝗜𝚺⁺ 1 := LSigmaPlus_equiv_ISigmaPlus 1
 
-instance : 𝗟𝚷 1 ≊ 𝗜𝚺 1 := LPi_equiv_ISigma 1
+instance : 𝗟𝚷⁺ 1 ≊ 𝗜𝚺⁺ 1 := LPiPlus_equiv_ISigmaPlus 1
 
-instance : 𝗟𝚺 2 ≊ 𝗜𝚺 2 := LSigma_equiv_ISigma 2
+instance : 𝗟𝚺⁺ 2 ≊ 𝗜𝚺⁺ 2 := LSigmaPlus_equiv_ISigmaPlus 2
 
-instance : 𝗜𝚺 1 ⪯ 𝗜𝚺 2 := ISigma_weakerThan_of_le (by decide)
+instance : 𝗜𝚺⁺ 1 ⪯ 𝗜𝚺⁺ 2 := ISigmaPlus_weakerThan_of_le (by decide)
 
-instance : 𝗜𝚺 2 ⪯ 𝗣𝗔 := inferInstance
+instance : 𝗜𝚺⁺ 2 ⪯ 𝗣𝗔 := inferInstance
 
 end FFL.FirstOrder.Arithmetic

@@ -6,7 +6,7 @@ public import Foundation.Meta.ClProver
 @[expose] public section
 namespace FFL.FirstOrder.Arithmetic
 
-variable {T : ArithmeticTheory} [𝗜𝚺₁ ⪯ T] [Entailment.Consistent T]
+variable {T : ArithmeticTheory} [𝗜𝚺⁺₁ ⪯ T] [Entailment.Consistent T]
 
 /-- There is no predicate `τ`, s.t. for any sentence `σ`, `σ` is provable in `T` iff `τ/[⌜σ⌝]` is so. -/
 lemma not_exists_tarski_predicate : ¬∃ τ : ArithmeticSemisentence 1, ∀ σ, T ⊢ σ 🡘 τ/[⌜σ⌝] := by

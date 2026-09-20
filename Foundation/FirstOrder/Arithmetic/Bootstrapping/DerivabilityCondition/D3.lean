@@ -20,7 +20,7 @@ open Classical
 
 open FFL.Entailment FFL.Entailment.FiniteContext
 
-variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
+variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺₁]
 
 local prefix:max "#'" => Semiterm.bvar  (V := V) (L := ℒₒᵣ)
 

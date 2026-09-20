@@ -9,7 +9,7 @@ namespace FFL.FirstOrder
 
 open Arithmetic Bootstrapping
 
-variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
+variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺₁]
 
 variable {L : Language} [L.DecidableEq] [L.Encodable] [L.LORDefinable]
 
