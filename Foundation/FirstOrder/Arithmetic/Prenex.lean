@@ -677,7 +677,7 @@ theorem exists_prenex_of_hierarchy (h : Hierarchy Γ s φ) :
   have : 𝗘𝗤 ℒₒᵣ ⪯ T := eq_weakerThan_of_BSigma (s := s);
   obtain ⟨φ', hφ'⟩ := Prenex.models_exists_prenex (Γ' := 𝚺) h;
   use φ';
-  apply provable_iff_of_models_iff;
+  apply provable_iff_of_models_iff.{0};
   intro V _ _ e;
   have : V↓[ℒₒᵣ] ⊧* 𝗕𝚺 s := models_of_subtheory (inferInstance : V↓[ℒₒᵣ] ⊧* T);
   exact hφ' V e Empty.elim;
