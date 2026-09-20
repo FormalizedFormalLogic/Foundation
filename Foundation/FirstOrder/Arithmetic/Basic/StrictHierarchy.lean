@@ -41,13 +41,13 @@ end
 -- via `variable`: otherwise the equation compiler cannot generalize them.
 
 lemma hierarchy {Γ s n} {φ : Semiformula L ξ n} : StrictHierarchy Γ s φ → Hierarchy Γ s φ
-  | zero h => h.of_zero
+  | zero h => Hierarchy.bounded _ _ _ h
   | ofAlt h => (hierarchy h).accum _
   | exs h => (hierarchy h).exs
   | all h => (hierarchy h).all
 
 lemma neg {Γ s n} {φ : Semiformula L ξ n} : StrictHierarchy Γ s φ → StrictHierarchy Γ.alt s (∼φ)
-  | zero h => zero (by exact (Hierarchy.neg h).of_zero)
+  | zero h => zero h.neg
   | ofAlt h => ofAlt (by simpa using neg h)
   | exs h => by simpa using (neg h).all
   | all h => by simpa using (neg h).exs
@@ -60,7 +60,7 @@ lemma neg_iff {Γ s n} {φ : Semiformula L ξ n} : StrictHierarchy Γ s (∼φ) 
 
 lemma rew {Γ s n₁ n₂} {ξ₁ ξ₂ : Type*} {φ : Semiformula L ξ₁ n₁} (ω : Rew L ξ₁ n₁ ξ₂ n₂) :
     StrictHierarchy Γ s φ → StrictHierarchy Γ s (ω ▹ φ)
-  | zero h => zero (Hierarchy.rew ω h)
+  | zero h => zero (h.rew ω)
   | ofAlt h => ofAlt (rew ω h)
   | exs h => by simpa using (rew ω.q h).exs
   | all h => by simpa using (rew ω.q h).all

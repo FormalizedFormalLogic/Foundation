@@ -532,22 +532,11 @@ theorem models_exists_prenex {Γ : Polarity} {s n : ℕ} {φ : ArithmeticSemisen
   ∃ φ' : Prenex Γ s Empty n,
     ∀ (V : Type*) [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺 s] (e : Fin n → V), V ⊧/e φ ↔ V ⊧/e φ'.val := by
   induction h with
-  | verum Γ s n =>
-    use verum;
+  | @bounded Γ s n φ h =>
+    let φ₀ : 𝚺₀.Semisentence n := .mkSigma φ (Hierarchy.bounded 𝚺 0 n h);
+    use ofΔ₀ φ₀ Γ s;
     intro V _ _ e;
-    exact (models_verum e).symm;
-  | falsum Γ s n =>
-    use falsum;
-    intro V _ _ e;
-    exact (models_falsum e).symm;
-  | rel Γ s r v =>
-    use rel r v;
-    intro V _ _ e;
-    exact (models_rel r v e).symm;
-  | nrel Γ s r v =>
-    use nrel r v;
-    intro V _ _ e;
-    exact (models_nrel r v e).symm;
+    exact (models_ofΔ₀ φ₀ e).symm;
   | and _ _ ihφ ihψ =>
     obtain ⟨φ', hφ'⟩ := ihφ;
     obtain ⟨ψ', hψ'⟩ := ihψ;
@@ -651,7 +640,7 @@ variable {Γ : Polarity} {s n : ℕ} {ξ : Type*}
 
 @[simp, grind .]
 lemma Prenex.val_strictHierarchy {φ : Prenex Γ s ξ n} : StrictHierarchy Γ s φ.val :=
-  StrictHierarchy.toPrenex_of_deltaZero φ.matrix.sigma_prop
+  StrictHierarchy.toPrenex_of_deltaZero (Hierarchy.zero_iff_delta_zero.mp φ.matrix.sigma_prop)
 
 theorem exists_strictHierarchy_of_hierarchy
     (T : ArithmeticTheory) [𝗜𝚺 s ⪯ T] {φ : ArithmeticSemisentence n} (h : Hierarchy Γ s φ) :

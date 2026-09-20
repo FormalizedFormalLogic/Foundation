@@ -1,6 +1,7 @@
 module
 
 public import Foundation.FirstOrder.Syntax.Classical.BinderNotation
+public import Foundation.FirstOrder.Syntax.Classical.Bounded
 public import Foundation.FirstOrder.Syntax.Classical.BoundingHierarchy
 public import Foundation.FirstOrder.Syntax.Classical.Coding
 public import Foundation.FirstOrder.Syntax.Classical.Eq

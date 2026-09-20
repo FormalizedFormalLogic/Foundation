@@ -26,17 +26,21 @@ universe u v
 
 variable {L : Language.{u}} [L.Mem] {ξ : Type v}
 
-@[simp, match_pattern] abbrev verum (Γ s n) : Hierarchy Γ s (⊤ : Semiformula L ξ n) :=
+abbrev bounded (Γ s n) {φ : Semiformula L ξ n} :
+    Semiformula.Bounded BoundingOperator φ → Hierarchy Γ s φ :=
+  BoundingHierarchy.bounded Γ s n
+
+@[simp] abbrev verum (Γ s n) : Hierarchy Γ s (⊤ : Semiformula L ξ n) :=
   BoundingHierarchy.verum Γ s n
 
-@[simp, match_pattern] abbrev falsum (Γ s n) : Hierarchy Γ s (⊥ : Semiformula L ξ n) :=
+@[simp] abbrev falsum (Γ s n) : Hierarchy Γ s (⊥ : Semiformula L ξ n) :=
   BoundingHierarchy.falsum Γ s n
 
-@[simp, match_pattern] abbrev rel (Γ s) {k} (r : L.Rel k) (v : Fin k → Semiterm L ξ x) :
+@[simp] abbrev rel (Γ s) {k} (r : L.Rel k) (v : Fin k → Semiterm L ξ x) :
     Hierarchy Γ s (Semiformula.rel r v) :=
   BoundingHierarchy.rel Γ s r v
 
-@[simp, match_pattern] abbrev nrel (Γ s) {k} (r : L.Rel k) (v : Fin k → Semiterm L ξ x) :
+@[simp] abbrev nrel (Γ s) {k} (r : L.Rel k) (v : Fin k → Semiterm L ξ x) :
     Hierarchy Γ s (Semiformula.nrel r v) :=
   BoundingHierarchy.nrel Γ s r v
 
