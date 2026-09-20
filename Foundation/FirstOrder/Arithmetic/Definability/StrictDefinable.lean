@@ -24,8 +24,7 @@ structure IsStrictDefinedByWithParam (R : (Fin k → V) → Prop) (φ : Arithmet
   strictHierarchy : StrictHierarchy Γ s φ
   defined : FirstOrder.IsDefinedByWithParam R φ
 
-class StrictDefinable {k} (P : (Fin k → V) → Prop) : Prop where
-  strictDefinable : ∃ φ : ArithmeticSemiformula V k, IsStrictDefinedByWithParam Γ s P φ
+abbrev StrictDefinable {k} (P : (Fin k → V) → Prop) := ∃ φ, IsStrictDefinedByWithParam Γ s P φ
 
 abbrev StrictDefinablePred (P : V → Prop) : Prop :=
   StrictDefinable Γ s (k := 1) fun v ↦ P (v 0)
@@ -63,24 +62,32 @@ lemma exists_eval_iff {P : (Fin k → V) → Prop} (h : StrictDefinable Γ s P) 
   . intro v;
     simp [Semiformula.eval_rewriteMap, hφ];
 
-lemma of_strictHierarchy {m : ℕ} {θ : ArithmeticSemisentence (m + 2)}
-    (hθ : StrictHierarchy Γ s θ) (e : Fin m → V) :
-    StrictDefinableRel Γ s fun x y ↦ V ⊧/(y :> x :> e) θ := by
-  constructor;
-  use Rew.embSubsts (#1 :> #0 :> fun i : Fin m ↦ (&(e i) : ArithmeticSemiterm V 2)) ▹ θ;
+lemma of_strictHierarchy {ξ : Type*} {m : ℕ} {θ : ArithmeticSemiformula ξ (m + 2)}
+    (hθ : StrictHierarchy Γ s θ) (e : Fin m → V) (f : ξ → V) :
+    StrictDefinableRel Γ s fun x y ↦ Semiformula.Eval (y :> x :> e) f θ := by
+  use Rew.bind (#1 :> #0 :> fun i : Fin m ↦ (&(e i) : ArithmeticSemiterm V 2))
+    (fun x : ξ ↦ (&(f x) : ArithmeticSemiterm V 2)) ▹ θ;
   constructor;
   . exact hθ.rew _;
   . intro v;
-    simp only [Semiformula.eval_embSubsts];
-    apply Iff.of_eq;
-    apply congrArg fun w ↦ Semiformula.Evalb (M := V) w θ;
-    funext i;
-    cases i using Fin.cases with
-    | zero => simp;
-    | succ i =>
+    simp only [Semiformula.eval_rew];
+    have hb : (Semiterm.val (L := ℒₒᵣ) (M := V) v id) ∘
+        (Rew.bind (#1 :> #0 :> fun i : Fin m ↦ (&(e i) : ArithmeticSemiterm V 2))
+          (fun x : ξ ↦ (&(f x) : ArithmeticSemiterm V 2))) ∘ Semiterm.bvar
+        = (v 1 :> v 0 :> e : Fin (m + 2) → V) := by
+      funext i;
       cases i using Fin.cases with
       | zero => simp;
-      | succ i => simp;
+      | succ i =>
+        cases i using Fin.cases with
+        | zero => simp;
+        | succ i => simp;
+    have hf : (Semiterm.val (L := ℒₒᵣ) (M := V) v id) ∘
+        (Rew.bind (#1 :> #0 :> fun i : Fin m ↦ (&(e i) : ArithmeticSemiterm V 2))
+          (fun x : ξ ↦ (&(f x) : ArithmeticSemiterm V 2))) ∘ Semiterm.fvar
+        = f := by
+      funext x; simp;
+    rw [hb, hf];
 
 end StrictDefinable
 

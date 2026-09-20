@@ -957,14 +957,6 @@ lemma definableRel_of_hierarchy {φ : ArithmeticSemiformula ℕ 2} (hφ : Hierar
     have h : ![v 0, v 1] = v := (Matrix.fun_eq_vec_two v).symm
     simp [h]
 
-lemma exists_hierarchy_eval_iff {P : (Fin k → V) → Prop} (hP : Γ-[s].Definable P) :
-    ∃ (e : ℕ → V) (φ : ArithmeticSemiformula ℕ k), Hierarchy Γ s φ ∧ ∀ v, P v ↔ φ.Eval v e := by
-  classical
-  rcases hP with ⟨φ, hφ⟩;
-  have : Inhabited V := Classical.inhabited_of_nonempty';
-  exact ⟨φ.val.enumerateFVar, Rew.rewriteMap φ.val.idxOfFVar ▹ φ.val, by simp,
-    fun _ ↦ by simp [Semiformula.eval_rewriteMap, hφ.df.iff]⟩;
-
 namespace HierarchySymbol.Definable
 
 @[elab_as_elim]

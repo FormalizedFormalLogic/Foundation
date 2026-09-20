@@ -88,8 +88,8 @@ prefix:max "𝗟𝚷" => LPi
 
 /-! ### Collection schemata -/
 
-def CollectionScheme (Γ : ArithmeticSemiformula ℕ 2 → Prop) : ArithmeticTheory :=
-  { ψ | ∃ φ : ArithmeticSemiformula ℕ 2, Γ φ ∧ ψ = .univCl (collectionAxiom φ) }
+def CollectionScheme (Γ : Set (ArithmeticSemiformula ℕ 2)) : Set ArithmeticSentence :=
+  (fun φ => .univCl (collectionAxiom φ)) '' Γ
 
 abbrev CollectionOnHierarchy (Γ : Polarity) (s : ℕ) : ArithmeticTheory :=
   𝗜𝚺₀ ∪ CollectionScheme (Arithmetic.StrictHierarchy Γ s)

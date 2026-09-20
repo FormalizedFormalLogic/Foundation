@@ -1,6 +1,7 @@
 module
 
 public import Foundation.FirstOrder.Syntax.Classical.Rew
+public import Foundation.Vorspiel.Fin.Basic
 public import Foundation.Vorspiel.IsEmpty
 public import Foundation.Vorspiel.Empty
 
@@ -471,36 +472,6 @@ lemma eval_toEmpty [DecidableEq ξ] {n} {φ : Semiformula L ξ n} (hp : φ.freeV
     intro x hx; simp [Semiformula.enumerateFVar_idxOfFVar (Semiformula.mem_fvarList_iff_fvar?.mpr hx)]
 
 end rew
-
-section toSemisentence
-
-variable {k : ℕ}
-
-noncomputable def paramSubst [NeZero k] (φ : Semiformula L ℕ k)
-    (b : Fin k → Semiterm L Empty (φ.fvSup + k)) : Rew L ℕ k Empty (φ.fvSup + k) :=
-  haveI : NeZero (φ.fvSup + k) := ⟨by have := Nat.pos_of_ne_zero (NeZero.ne k); omega⟩
-  Rew.bind b fun x ↦ if h : x < φ.fvSup then #⟨x + k, by omega⟩ else #0
-
-noncomputable def toSemisentence [NeZero k] (φ : Semiformula L ℕ k)
-    (b : Fin k → Semiterm L Empty (φ.fvSup + k)) : Semisentence L (φ.fvSup + k) :=
-  paramSubst φ b ▹ φ
-
-variable {M : Type*} [Tarski.Structure L M]
-
-lemma eval_toSemisentence [NeZero k] {φ : Semiformula L ℕ k}
-    (b : Fin k → Semiterm L Empty (φ.fvSup + k)) {v : Fin (φ.fvSup + k) → M} {w : Fin k → M}
-    {f : ℕ → M} (hb : ∀ i, Semiterm.val v Empty.elim (b i) = w i)
-    (hv : ∀ y : Fin φ.fvSup, v ⟨y + k, by omega⟩ = f y) :
-    M ⊧/v (φ.toSemisentence b) ↔ φ.Eval w f := by
-  rw [toSemisentence, Semiformula.eval_rew];
-  have hbv : (Semiterm.val v Empty.elim ∘ φ.paramSubst b ∘ Semiterm.bvar) = w := funext hb;
-  rw [hbv];
-  apply Semiformula.eval_iff_of_funEqOn φ;
-  intro y hy;
-  have hlt : y < φ.fvSup := Semiformula.lt_fvSup_of_fvar? hy;
-  simp [paramSubst, hlt, hv ⟨y, hlt⟩];
-
-end toSemisentence
 
 end Semiformula
 
