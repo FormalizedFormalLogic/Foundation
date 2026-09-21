@@ -61,98 +61,11 @@ private lemma definable_swap {ℌ : HierarchySymbol} {Q : (Fin (k + 2) → V) �
       | zero => simp;
       | succ i => cases i using Fin.cases <;> simp;
 
-private lemma definable_pair {ℌ : HierarchySymbol} {Q : (Fin (k + 2) → V) → Prop}
-    (hQ : ℌ.Definable Q) (e : Fin k → V) : ℌ.DefinableRel fun x v : V ↦ Q (v :> x :> e) :=
-  (HierarchySymbol.Definable.retractiont 2 hQ
-    (#1 :> #0 :> fun i : Fin k ↦ (&(e i) : ArithmeticSemiterm V 2))).of_iff fun w ↦
-    Iff.of_eq <| congrArg Q <| funext fun i ↦ by
-      cases i using Fin.cases with
-      | zero => simp;
-      | succ i => cases i using Fin.cases <;> simp;
-
 private structure MonotoneWitness (P : (Fin k → V) → Prop) (Q : (Fin (k + 1) → V) → Prop) : Prop where
   monotone : ∀ e v v', v ≤ v' → Q (v :> e) → Q (v' :> e)
   iff : ∀ e, P e ↔ ∃ v, Q (v :> e)
 
-
-private lemma MonotoneWitness.and [V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻] {P₁ P₂ : (Fin k → V) → Prop}
-    {Q₁ Q₂ : (Fin (k + 1) → V) → Prop} (hM₁ : MonotoneWitness P₁ Q₁) (hM₂ : MonotoneWitness P₂ Q₂) :
-    MonotoneWitness (fun e ↦ P₁ e ∧ P₂ e) (fun w ↦ Q₁ w ∧ Q₂ w) where
-  monotone e v v' hv h := ⟨hM₁.monotone e v v' hv h.1, hM₂.monotone e v v' hv h.2⟩;
-  iff e := by
-    constructor;
-    . rintro ⟨h₁, h₂⟩;
-      obtain ⟨v₁, hv₁⟩ := (hM₁.iff e).mp h₁;
-      obtain ⟨v₂, hv₂⟩ := (hM₂.iff e).mp h₂;
-      use max v₁ v₂;
-      and_intros;
-      . exact hM₁.monotone _ _ _ (by grind) hv₁;
-      . exact hM₂.monotone _ _ _ (by grind) hv₂;
-    . rintro ⟨v, h₁, h₂⟩;
-      exact ⟨(hM₁.iff e).mpr ⟨v, h₁⟩, (hM₂.iff e).mpr ⟨v, h₂⟩⟩;
-
-private lemma MonotoneWitness.or {P₁ P₂ : (Fin k → V) → Prop} {Q₁ Q₂ : (Fin (k + 1) → V) → Prop}
-    (hM₁ : MonotoneWitness P₁ Q₁) (hM₂ : MonotoneWitness P₂ Q₂) :
-    MonotoneWitness (fun e ↦ P₁ e ∨ P₂ e) (fun w ↦ Q₁ w ∨ Q₂ w) where
-  monotone e v v' hv h := h.imp (hM₁.monotone e v v' hv) (hM₂.monotone e v v' hv);
-  iff e := by simp only [hM₁.iff, hM₂.iff, exists_or];
-
-private lemma MonotoneWitness.bexs {P : (Fin (k + 1) → V) → Prop} {Q : (Fin (k + 2) → V) → Prop}
-    (hM : MonotoneWitness P Q) (bound : (Fin k → V) → V) :
-    MonotoneWitness (fun e ↦ ∃ x < bound e, P (x :> e))
-      (fun w : Fin (k + 1) → V ↦ ∃ x < bound (w ·.succ), Q (w 0 :> x :> (w ·.succ))) where
-  monotone e v v' hv h := by
-    obtain ⟨x, hx, hxv⟩ := h;
-    exact ⟨x, hx, hM.monotone (x :> e) v v' hv hxv⟩;
-  iff e := by
-    constructor;
-    . rintro ⟨x, hx, hxe⟩;
-      obtain ⟨v, hv⟩ := (hM.iff (x :> e)).mp hxe;
-      exact ⟨v, x, hx, hv⟩;
-    . rintro ⟨v, x, hx, hxv⟩;
-      exact ⟨x, hx, (hM.iff (x :> e)).mpr ⟨v, hxv⟩⟩;
-
-private lemma MonotoneWitness.exs [V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻] {k : ℕ} {P : (Fin (k + 1) → V) → Prop}
-    {Q : (Fin (k + 2) → V) → Prop} (hM : MonotoneWitness P Q) :
-    MonotoneWitness (fun e ↦ ∃ x, P (x :> e))
-      (fun w : Fin (k + 1) → V ↦ ∃ x < w 0, Q (w 0 :> x :> (w ·.succ))) where
-  monotone e v v' hv h := by
-    obtain ⟨x, hx, hxv⟩ := h;
-    use x;
-    and_intros;
-    . exact lt_of_lt_of_le hx hv;
-    . exact hM.monotone (x :> e) v v' hv hxv;
-  iff e := by
-    constructor;
-    . rintro ⟨x, hxe⟩;
-      obtain ⟨v, hv⟩ := (hM.iff (x :> e)).mp hxe;
-      use max (x + 1) v, x;
-      and_intros;
-      . exact lt_of_lt_of_le (lt_add_one x) (le_max_left _ _);
-      . exact hM.monotone (x :> e) v _ (le_max_right _ _) hv;
-    . rintro ⟨v, x, -, hxv⟩;
-      exact ⟨x, (hM.iff (x :> e)).mpr ⟨v, hxv⟩⟩;
-
 variable [V↓[ℒₒᵣ] ⊧* 𝗕𝚷 s]
-
-private lemma MonotoneWitness.ball [V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻]
-  {P : (Fin (k + 1) → V) → Prop} {Q : (Fin (k + 2) → V) → Prop}
-  (hQ : 𝚷-[s].Definable Q) (hM : MonotoneWitness P Q) (bound : (Fin k → V) → V) :
-  MonotoneWitness
-    (fun e ↦ ∀ x < bound e, P (x :> e))
-    (fun w : Fin (k + 1) → V ↦ ∀ x < bound (w ·.succ), Q (w 0 :> x :> (w ·.succ))) where
-  monotone e v v' hv h x hx := hM.monotone (x :> e) v v' hv (h x hx);
-  iff e := by
-    constructor;
-    . intro h;
-      obtain ⟨b, hb⟩ := CollectionOnHierarchy.collection_of_definable (Γ := 𝚷) (definable_pair hQ e)
-        (bound e) fun x hx ↦ (hM.iff (x :> e)).mp (h x hx);
-      use b;
-      intro x hx;
-      obtain ⟨v, hvb, hv⟩ := hb x hx;
-      exact hM.monotone (x :> e) v b hvb.le hv;
-    . rintro ⟨v, hv⟩ x hx;
-      exact (hM.iff (x :> e)).mpr ⟨v, hv x hx⟩;
 
 private lemma exists_monotoneWitness {P : (Fin k → V) → Prop} (hP : 𝚺-[s + 1].Definable P) :
   ∃ Q : (Fin (k + 1) → V) → Prop, 𝚷-[s].Definable Q ∧ MonotoneWitness P Q := by
@@ -166,11 +79,34 @@ private lemma exists_monotoneWitness {P : (Fin k → V) → Prop} (hP : 𝚺-[s 
   | @and k P₁ P₂ _ _ ih₁ ih₂ =>
     obtain ⟨Q₁, hQ₁, hM₁⟩ := ih₁;
     obtain ⟨Q₂, hQ₂, hM₂⟩ := ih₂;
-    exact ⟨fun w ↦ Q₁ w ∧ Q₂ w, .and hQ₁ hQ₂, .and hM₁ hM₂⟩;
+    use fun w ↦ Q₁ w ∧ Q₂ w;
+    and_intros;
+    . exact .and hQ₁ hQ₂;
+    . constructor;
+      . intro e v v' hv h;
+        exact ⟨hM₁.monotone e v v' hv h.1, hM₂.monotone e v v' hv h.2⟩;
+      . intro e;
+        constructor;
+        . rintro ⟨h₁, h₂⟩;
+          obtain ⟨v₁, hv₁⟩ := (hM₁.iff e).mp h₁;
+          obtain ⟨v₂, hv₂⟩ := (hM₂.iff e).mp h₂;
+          use max v₁ v₂;
+          and_intros;
+          . exact hM₁.monotone _ _ _ (by grind) hv₁;
+          . exact hM₂.monotone _ _ _ (by grind) hv₂;
+        . rintro ⟨v, h₁, h₂⟩;
+          exact ⟨(hM₁.iff e).mpr ⟨v, h₁⟩, (hM₂.iff e).mpr ⟨v, h₂⟩⟩;
   | @or k P₁ P₂ _ _ ih₁ ih₂ =>
     obtain ⟨Q₁, hQ₁, hM₁⟩ := ih₁;
     obtain ⟨Q₂, hQ₂, hM₂⟩ := ih₂;
-    exact ⟨fun w ↦ Q₁ w ∨ Q₂ w, .or hQ₁ hQ₂, .or hM₁ hM₂⟩;
+    use fun w ↦ Q₁ w ∨ Q₂ w;
+    and_intros;
+    . exact .or hQ₁ hQ₂;
+    . constructor;
+      . intro e v v' hv h;
+        exact h.imp (hM₁.monotone e v v' hv) (hM₂.monotone e v v' hv);
+      . intro e;
+        simp only [hM₁.iff, hM₂.iff, exists_or];
   | @ball k P t _ ih =>
     obtain ⟨Q, hQ, hM⟩ := ih;
     use fun w : Fin (k + 1) → V ↦ ∀ x < t.val (w ·.succ) id, Q (w 0 :> x :> (w ·.succ));
@@ -179,7 +115,27 @@ private lemma exists_monotoneWitness {P : (Fin k → V) → Prop} (hP : 𝚺-[s 
         (P := fun (v : Fin (k + 1) → V) (x : V) ↦ Q (v 0 :> x :> (v ·.succ)))
         (definable_swap hQ) (Rew.bShift t);
       simp [Semiterm.val_bShift'];
-    . exact hM.ball hQ (t.val · id);
+    . constructor;
+      . intro e v v' hv h x hx;
+        exact hM.monotone (x :> e) v v' hv (h x hx);
+      . intro e;
+        constructor;
+        . intro h;
+          have hQe : 𝚷-[s].DefinableRel fun x v : V ↦ Q (v :> x :> e) :=
+            (HierarchySymbol.Definable.retractiont 2 hQ
+              (#1 :> #0 :> fun i : Fin k ↦ (&(e i) : ArithmeticSemiterm V 2))).of_iff fun w ↦
+              Iff.of_eq <| congrArg Q <| funext fun i ↦ by
+                cases i using Fin.cases with
+                | zero => simp;
+                | succ i => cases i using Fin.cases <;> simp;
+          obtain ⟨b, hb⟩ := CollectionOnHierarchy.collection_of_definable (Γ := 𝚷) hQe
+            (t.val e id) fun x hx ↦ (hM.iff (x :> e)).mp (h x hx);
+          use b;
+          intro x hx;
+          obtain ⟨v, hvb, hv⟩ := hb x hx;
+          exact hM.monotone (x :> e) v b hvb.le hv;
+        . rintro ⟨v, hv⟩ x hx;
+          exact (hM.iff (x :> e)).mpr ⟨v, hv x hx⟩;
   | @bexs k P t _ ih =>
     obtain ⟨Q, hQ, hM⟩ := ih;
     use fun w : Fin (k + 1) → V ↦ ∃ x < t.val (w ·.succ) id, Q (w 0 :> x :> (w ·.succ));
@@ -190,7 +146,17 @@ private lemma exists_monotoneWitness {P : (Fin k → V) → Prop} (hP : 𝚺-[s 
           (definable_swap hQ) (Rew.bShift t));
       intro w;
       simp [Semiterm.val_bShift'];
-    . exact hM.bexs (t.val · id);
+    . constructor;
+      . intro e v v' hv h;
+        obtain ⟨x, hx, hxv⟩ := h;
+        exact ⟨x, hx, hM.monotone (x :> e) v v' hv hxv⟩;
+      . intro e;
+        constructor;
+        . rintro ⟨x, hx, hxe⟩;
+          obtain ⟨v, hv⟩ := (hM.iff (x :> e)).mp hxe;
+          exact ⟨v, x, hx, hv⟩;
+        . rintro ⟨v, x, hx, hxv⟩;
+          exact ⟨x, hx, (hM.iff (x :> e)).mpr ⟨v, hxv⟩⟩;
   | @exs k P _ ih =>
     obtain ⟨Q, hQ, hM⟩ := ih;
     use fun w : Fin (k + 1) → V ↦ ∃ x < w 0, Q (w 0 :> x :> (w ·.succ));
@@ -200,7 +166,23 @@ private lemma exists_monotoneWitness {P : (Fin k → V) → Prop} (hP : 𝚺-[s 
           (P := fun (v : Fin (k + 1) → V) (x : V) ↦ Q (v 0 :> x :> (v ·.succ)))
           (definable_swap hQ) #0);
       simp;
-    . exact hM.exs;
+    . constructor;
+      . intro e v v' hv h;
+        obtain ⟨x, hx, hxv⟩ := h;
+        use x;
+        and_intros;
+        . exact lt_of_lt_of_le hx hv;
+        . exact hM.monotone (x :> e) v v' hv hxv;
+      . intro e;
+        constructor;
+        . rintro ⟨x, hxe⟩;
+          obtain ⟨v, hv⟩ := (hM.iff (x :> e)).mp hxe;
+          use max (x + 1) v, x;
+          and_intros;
+          . exact lt_of_lt_of_le (lt_add_one x) (le_max_left _ _);
+          . exact hM.monotone (x :> e) v _ (le_max_right _ _) hv;
+        . rintro ⟨v, x, -, hxv⟩;
+          exact ⟨x, (hM.iff (x :> e)).mpr ⟨v, hxv⟩⟩;
 
 lemma BPi.collection_sigma_succ {R : V → V → Prop}
     (hR : 𝚺-[s + 1].DefinableRel R) (a : V) (h : ∀ x < a, ∃ y, R x y) :
