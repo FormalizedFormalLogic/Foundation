@@ -1,9 +1,9 @@
 module
 
-public import Mathlib.Computability.Halting
-public import Mathlib.Computability.Primrec.List
+public import Foundation.Vorspiel.Computability.Primrec
 public import Foundation.Vorspiel.Nat.Matrix
 public import Foundation.Vorspiel.Part
+public import Mathlib.Computability.Halting
 
 @[expose]
 public section
@@ -211,14 +211,7 @@ open Primrec
 theorem Primrec.nat_natToList : Primrec Nat.natToList := by
   have step : Primrec₂ fun (_ : Unit) (l : List (List ℕ)) ↦
       (Nat.casesOn l.length (some []) fun e ↦
-        (l[e.unpair.2]?).map fun t ↦ e.unpair.1 :: t : Option (List ℕ)) :=
-    Primrec.to₂ <| Primrec.nat_casesOn
-      (list_length.comp <| snd.comp .id)
-      (const (some ([] : List ℕ)))
-      (Primrec.to₂ <| option_map
-        (list_getElem?.comp (snd.comp fst) (snd.comp <| Primrec.unpair.comp snd))
-        (Primrec.to₂ <| list_cons.comp
-          (fst.comp <| Primrec.unpair.comp <| snd.comp fst) snd))
+        (l[e.unpair.2]?).map fun t ↦ e.unpair.1 :: t : Option (List ℕ)) := by primrec
   have main : Primrec₂ fun (_ : Unit) (n : ℕ) ↦ Nat.natToList n := by
     refine Primrec.nat_strong_rec _ step ?_
     rintro ⟨⟩ (_ | e)
@@ -227,6 +220,10 @@ theorem Primrec.nat_natToList : Primrec Nat.natToList := by
       have hlt : e.unpair.2 < e + 1 := Nat.lt_succ_of_le (Nat.unpair_right_le e)
       simp [hlen, List.getElem?_map, hlt, Nat.natToList]
   simpa using main.comp (const ()) Primrec.id
+
+@[primrec]
+theorem Primrec.nat_natToList' {α : Type*} [Primcodable α] {f : α → ℕ} (hf : Primrec f) :
+    Primrec fun a ↦ Nat.natToList (f a) := Primrec.nat_natToList.comp hf
 
 end
 

@@ -182,6 +182,8 @@ public import Foundation.Syntax.Predicate.Term
 public import Foundation.Vorspiel.AdjunctiveSet
 public import Foundation.Vorspiel.Arithmetic
 public import Foundation.Vorspiel.Computability
+public import Foundation.Vorspiel.Computability.AesopInit
+public import Foundation.Vorspiel.Computability.Primrec
 public import Foundation.Vorspiel.ENat
 public import Foundation.Vorspiel.Empty
 public import Foundation.Vorspiel.ExistsUnique

@@ -28,19 +28,17 @@ lemma term_primrec {k f} : (t : ArithmeticSemiterm ξ k) → Primrec (fun v : Li
 lemma primrecPred_ball (ε : ξ → ℕ) {n} (t : ArithmeticSemiterm ξ n) {ψ : ArithmeticSemiformula ξ (n + 1)}
     (h : PrimrecPred fun v : List.Vector ℕ (n + 1) ↦ ψ.Eval v.get ε) :
     PrimrecPred fun v : List.Vector ℕ n ↦ ∀ x < t.val v.get ε, ψ.Eval (x :> v.get) ε := by
-  have hbounded : PrimrecPred fun p : ℕ × List.Vector ℕ n ↦ ∀ x < p.1, ψ.Eval (x ::ᵥ p.2).get ε :=
-    ((PrimrecRel.forall_mem_list (h.comp (Primrec.vector_cons.comp .fst .snd)).primrecRel).comp
-      (Primrec.list_range.comp Primrec.fst) Primrec.snd).of_eq (by simp);
-  exact (hbounded.comp ((term_primrec (f := ε) t).pair Primrec.id)).of_eq
+  have hR : PrimrecRel fun (v : List.Vector ℕ n) (x : ℕ) ↦ ψ.Eval (x ::ᵥ v).get ε :=
+    PrimrecRel.mk (h.comp (by primrec));
+  exact (PrimrecPred.forall_lt' (term_primrec (f := ε) t) hR).of_eq
     fun v ↦ by simp [List.Vector.cons_get];
 
 lemma primrecPred_bexs (ε : ξ → ℕ) {n} (t : ArithmeticSemiterm ξ n) {ψ : ArithmeticSemiformula ξ (n + 1)}
     (h : PrimrecPred fun v : List.Vector ℕ (n + 1) ↦ ψ.Eval v.get ε) :
     PrimrecPred fun v : List.Vector ℕ n ↦ ∃ x < t.val v.get ε, ψ.Eval (x :> v.get) ε := by
-  have hbounded : PrimrecPred fun p : ℕ × List.Vector ℕ n ↦ ∃ x < p.1, ψ.Eval (x ::ᵥ p.2).get ε :=
-    ((PrimrecRel.exists_mem_list (h.comp (Primrec.vector_cons.comp .fst .snd)).primrecRel).comp
-      (Primrec.list_range.comp Primrec.fst) Primrec.snd).of_eq (by simp);
-  exact (hbounded.comp ((term_primrec (f := ε) t).pair Primrec.id)).of_eq
+  have hR : PrimrecRel fun (v : List.Vector ℕ n) (x : ℕ) ↦ ψ.Eval (x ::ᵥ v).get ε :=
+    PrimrecRel.mk (h.comp (by primrec));
+  exact (PrimrecPred.exists_lt' (term_primrec (f := ε) t) hR).of_eq
     fun v ↦ by simp [List.Vector.cons_get];
 
 lemma delta0_primrec (ε : ξ → ℕ) {k} {φ : ArithmeticSemiformula ξ k}

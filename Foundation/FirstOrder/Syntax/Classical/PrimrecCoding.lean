@@ -101,20 +101,28 @@ instance (k : ℕ) : Primcodable (L.Rel k) where
 example (k : ℕ) : (inferInstance : Primcodable (L.Func k)).toEncodable
     = (inferInstance : Encodable (L.Func k)) := by with_reducible_and_instances rfl
 
+variable {α : Type*} [Primcodable α] {k e : α → ℕ}
+
+/-- The pointwise form of `Language.Primcodable.func`, the form the `primrec` rule set keys on. -/
+@[primrec]
+lemma Language.Primcodable.func' (hk : Primrec k) (he : Primrec e) :
+    Primrec fun a ↦ Encodable.encode (Encodable.decode (e a) : Option (L.Func (k a))) :=
+  (Language.Primcodable.func (L := L)).comp hk he
+
+/-- The pointwise form of `Language.Primcodable.rel`, the form the `primrec` rule set keys on. -/
+@[primrec]
+lemma Language.Primcodable.rel' (hk : Primrec k) (he : Primrec e) :
+    Primrec fun a ↦ Encodable.encode (Encodable.decode (e a) : Option (L.Rel (k a))) :=
+  (Language.Primcodable.rel (L := L)).comp hk he
+
 end
 
 /-- `ℒₒᵣ` satisfies the uniform condition: `encode ∘ decode` is
 `fun k e ↦ if (k = 0 ∨ k = 2) ∧ e < 2 then e + 1 else 0`. -/
 instance : Language.Primcodable ℒₒᵣ where
   func := by
-    have h : Primrec fun p : ℕ × ℕ ↦ if (p.1 = 0 ∨ p.1 = 2) ∧ p.2 < 2 then p.2 + 1 else 0 :=
-      Primrec.ite
-        (PrimrecPred.and
-          (PrimrecPred.or
-            (Primrec.eq.comp Primrec.fst (Primrec.const 0))
-            (Primrec.eq.comp Primrec.fst (Primrec.const 2)))
-          (Primrec.nat_lt.comp Primrec.snd (Primrec.const 2)))
-        (Primrec.succ.comp Primrec.snd) (Primrec.const 0)
+    have h : Primrec fun p : ℕ × ℕ ↦ if (p.1 = 0 ∨ p.1 = 2) ∧ p.2 < 2 then p.2 + 1 else 0 := by
+      primrec
     refine h.of_eq ?_
     rintro ⟨k, e⟩
     match k, e with
@@ -127,12 +135,7 @@ instance : Language.Primcodable ℒₒᵣ where
     |     2, _ + 2 => simp [Encodable.decode]
     | _ + 3,     _ => simp [Encodable.decode]
   rel := by
-    have h : Primrec fun p : ℕ × ℕ ↦ if p.1 = 2 ∧ p.2 < 2 then p.2 + 1 else 0 :=
-      Primrec.ite
-        (PrimrecPred.and
-          (Primrec.eq.comp Primrec.fst (Primrec.const 2))
-          (Primrec.nat_lt.comp Primrec.snd (Primrec.const 2)))
-        (Primrec.succ.comp Primrec.snd) (Primrec.const 0)
+    have h : Primrec fun p : ℕ × ℕ ↦ if p.1 = 2 ∧ p.2 < 2 then p.2 + 1 else 0 := by primrec
     refine h.of_eq ?_
     rintro ⟨k, e⟩
     match k, e with
@@ -188,25 +191,19 @@ lemma stepVec_eq_zero {T : List ℕ} {l : List ℕ} {j : ℕ} (hj : j ∈ l)
     · exact ite_eq_left (Or.inl h)
     · exact ite_eq_left (Or.inr (ih hj'))
 
-open Primrec in
-theorem primrec_stepVec : Primrec₂ stepVec := by
-  have hp : Primrec fun p : List ℕ × List ℕ ↦
-      p.2.foldr (fun j acc ↦
-        if p.1.getD j 0 = 0 ∨ acc = 0 then 0
-        else Nat.pair (p.1.getD j 0 - 1) (acc - 1) + 2) 1 := by
-    refine Primrec.list_foldr (β := ℕ) (σ := ℕ)
-      (f := fun p : List ℕ × List ℕ ↦ p.2) (g := fun _ ↦ (1 : ℕ))
-      (h := fun p x ↦ if p.1.getD x.1 0 = 0 ∨ x.2 = 0 then 0
-        else Nat.pair (p.1.getD x.1 0 - 1) (x.2 - 1) + 2)
-      snd (const _) ?_
-    have hget : Primrec fun y : (List ℕ × List ℕ) × ℕ × ℕ ↦ y.1.1.getD y.2.1 0 :=
-      (Primrec.list_getD 0).comp (fst.comp fst) (fst.comp snd)
-    refine Primrec.ite (PrimrecPred.or (Primrec.eq.comp hget (const 0))
-      (Primrec.eq.comp (snd.comp snd) (const 0))) (const 0) ?_
-    exact Primrec.nat_add.comp
-      (Primrec₂.natPair.comp (nat_sub.comp hget (const 1))
-        (nat_sub.comp (snd.comp snd) (const 1))) (const 2)
-  exact hp.of_eq fun p ↦ rfl
+-- `Primrec.list_foldr` is applied with its arguments named: the higher-order unification of its
+-- conclusion against a concrete fold is out of reach for the `primrec` rule set.
+theorem primrec₂_stepVec : Primrec₂ stepVec :=
+  Primrec.list_foldr (β := ℕ) (σ := ℕ)
+    (f := fun p : List ℕ × List ℕ ↦ p.2) (g := fun _ ↦ (1 : ℕ))
+    (h := fun p x ↦ if p.1.getD x.1 0 = 0 ∨ x.2 = 0 then 0
+      else Nat.pair (p.1.getD x.1 0 - 1) (x.2 - 1) + 2)
+    Primrec.snd (Primrec.const _) (by primrec)
+
+@[primrec]
+theorem primrec_stepVec {α : Type*} [Primcodable α] {T l : α → List ℕ}
+    (hT : Primrec T) (hl : Primrec l) : Primrec fun a ↦ stepVec (T a) (l a) :=
+  primrec₂_stepVec.comp hT hl
 
 variable {L : Language} [L.Encodable] [L.Primcodable] {ξ : Type*} [Primcodable ξ]
 
@@ -237,69 +234,9 @@ values `encode (ofNat n j)` for every `j < T.length`, it returns `encode (ofNat 
 def step (n : ℕ) (T : List ℕ) : ℕ :=
   Nat.casesOn (motive := fun _ ↦ ℕ) T.length 0 (stepBody (L := L) (ξ := ξ) n T)
 
-open Primrec in
 theorem primrec_step : Primrec₂ (step (L := L) (ξ := ξ)) := by
-  set A := (ℕ × List ℕ) × ℕ with hA
-  have hn : Primrec fun q : A ↦ q.1.1 := fst.comp fst
-  have hT : Primrec fun q : A ↦ q.1.2 := snd.comp fst
-  have hd : Primrec fun q : A ↦ q.2 := snd
-  have hi : Primrec fun q : A ↦ q.2.unpair.1 := fst.comp (Primrec.unpair.comp hd)
-  have hc : Primrec fun q : A ↦ q.2.unpair.2 := snd.comp (Primrec.unpair.comp hd)
-  have ha : Primrec fun q : A ↦ q.2.unpair.2.unpair.1 := fst.comp (Primrec.unpair.comp hc)
-  have hr : Primrec fun q : A ↦ q.2.unpair.2.unpair.2 := snd.comp (Primrec.unpair.comp hc)
-  have hef : Primrec fun q : A ↦ q.2.unpair.2.unpair.2.unpair.1 :=
-    fst.comp (Primrec.unpair.comp hr)
-  have hev : Primrec fun q : A ↦ q.2.unpair.2.unpair.2.unpair.2 :=
-    snd.comp (Primrec.unpair.comp hr)
-  have hxi : Primrec fun q : A ↦ (encode (decode q.2.unpair.2 : Option ξ)) :=
-    Primrec.nat_iff.mpr (Primcodable.prim ξ) |>.comp hc
-  have hF : Primrec fun q : A ↦ (encode (decode q.2.unpair.2.unpair.2.unpair.1 :
-      Option (L.Func q.2.unpair.2.unpair.1))) :=
-    (Language.Primcodable.func (L := L)).comp ha hef
-  have hl : Primrec fun q : A ↦ Nat.natToList q.2.unpair.2.unpair.2.unpair.2 :=
-    Primrec.nat_natToList.comp hev
-  have hsv : Primrec fun q : A ↦ stepVec q.1.2 (Nat.natToList q.2.unpair.2.unpair.2.unpair.2) :=
-    primrec_stepVec.comp hT hl
-  -- branch 0
-  have b0 : Primrec fun q : A ↦
-      (if q.2.unpair.2 < q.1.1 then Nat.pair 0 q.2.unpair.2 + 2 else 0) :=
-    Primrec.ite (nat_lt.comp hc hn)
-      (Primrec.nat_add.comp (Primrec₂.natPair.comp (const 0) hc) (const 2)) (const 0)
-  -- branch 1
-  have b1 : Primrec fun q : A ↦
-      (if (encode (decode q.2.unpair.2 : Option ξ)) = 0 then 0
-        else Nat.pair 1 ((encode (decode q.2.unpair.2 : Option ξ)) - 1) + 2) :=
-    Primrec.ite (Primrec.eq.comp hxi (const 0)) (const 0)
-      (Primrec.nat_add.comp
-        (Primrec₂.natPair.comp (const 1) (nat_sub.comp hxi (const 1))) (const 2))
-  -- branch 2
-  have b2 : Primrec fun q : A ↦
-      (if (Nat.natToList q.2.unpair.2.unpair.2.unpair.2).length = q.2.unpair.2.unpair.1 ∧
-          (encode (decode q.2.unpair.2.unpair.2.unpair.1 :
-            Option (L.Func q.2.unpair.2.unpair.1))) ≠ 0 ∧
-          stepVec q.1.2 (Nat.natToList q.2.unpair.2.unpair.2.unpair.2) ≠ 0 then
-        Nat.pair 2 (Nat.pair q.2.unpair.2.unpair.1
-          (Nat.pair ((encode (decode q.2.unpair.2.unpair.2.unpair.1 :
-            Option (L.Func q.2.unpair.2.unpair.1))) - 1)
-            (stepVec q.1.2 (Nat.natToList q.2.unpair.2.unpair.2.unpair.2) - 1))) + 2
-        else 0) :=
-    Primrec.ite
-      (PrimrecPred.and (Primrec.eq.comp (list_length.comp hl) ha)
-        (PrimrecPred.and (PrimrecPred.not (Primrec.eq.comp hF (const 0)))
-          (PrimrecPred.not (Primrec.eq.comp hsv (const 0)))))
-      (Primrec.nat_add.comp
-        (Primrec₂.natPair.comp (const 2)
-          (Primrec₂.natPair.comp ha
-            (Primrec₂.natPair.comp (nat_sub.comp hF (const 1))
-              (nat_sub.comp hsv (const 1))))) (const 2))
-      (const 0)
-  have body : Primrec fun q : A ↦ stepBody (L := L) (ξ := ξ) q.1.1 q.1.2 q.2 :=
-    (Primrec.ite (Primrec.eq.comp hi (const 0)) b0
-      (Primrec.ite (Primrec.eq.comp hi (const 1)) b1
-        (Primrec.ite (Primrec.eq.comp hi (const 2)) b2 (const 0)))).of_eq fun q ↦ rfl
-  exact (Primrec.nat_casesOn (f := fun p : ℕ × List ℕ ↦ p.2.length) (g := fun _ ↦ (0 : ℕ))
-    (h := fun p d ↦ stepBody (L := L) (ξ := ξ) p.1 p.2 d)
-    (list_length.comp snd) (const 0) body).of_eq fun p ↦ rfl
+  unfold step stepBody;
+  primrec
 
 abbrev table (n e : ℕ) : List ℕ :=
   (List.range e).map fun j ↦ encode (ofNat (L := L) (ξ := ξ) n j)
@@ -407,6 +344,13 @@ theorem encode_ofNat_primrec :
   Primrec.nat_strong_rec _ (g := fun n T ↦ some (step (L := L) (ξ := ξ) n T))
     (Primrec.option_some.comp primrec_step) fun n e ↦ congrArg some (step_table n e)
 
+/-- The pointwise form of `encode_ofNat_primrec`, the form the `primrec` rule set keys on. -/
+@[primrec]
+theorem encode_decode_primrec {α : Type*} [Primcodable α] {n e : α → ℕ}
+    (hn : Primrec n) (he : Primrec e) :
+    Primrec fun a ↦ encode (decode (e a) : Option (Semiterm L ξ (n a))) :=
+  ((encode_ofNat_primrec (L := L) (ξ := ξ)).comp hn he).of_eq fun _ ↦ rfl
+
 /-- The instance sits on the `Encodable` instance already in `Basic/Coding.lean`, so nothing
 downstream sees a new `encode`; the examples below check that, and that `decode` is still
 `ofNat`. -/
@@ -476,27 +420,19 @@ lemma stepVecT_eq_zero {n : ℕ} {l : List ℕ} {j : ℕ} (hj : j ∈ l)
     · exact ite_eq_left (Or.inl h)
     · exact ite_eq_left (Or.inr (ih hj'))
 
-open Primrec in
-theorem primrec_stepVecT : Primrec₂ (stepVecT (L := L) (ξ := ξ)) := by
-  have hp : Primrec fun p : ℕ × List ℕ ↦
-      p.2.foldr (fun j acc ↦
-        if encode (decode j : Option (Semiterm L ξ p.1)) = 0 ∨ acc = 0 then 0
-        else Nat.pair (encode (decode j : Option (Semiterm L ξ p.1)) - 1) (acc - 1) + 2) 1 := by
-    refine Primrec.list_foldr (β := ℕ) (σ := ℕ)
-      (f := fun p : ℕ × List ℕ ↦ p.2) (g := fun _ ↦ (1 : ℕ))
-      (h := fun p x ↦ if encode (decode x.1 : Option (Semiterm L ξ p.1)) = 0 ∨ x.2 = 0 then 0
-        else Nat.pair (encode (decode x.1 : Option (Semiterm L ξ p.1)) - 1) (x.2 - 1) + 2)
-      snd (const _) ?_
-    have hdec : Primrec fun y : (ℕ × List ℕ) × ℕ × ℕ ↦
-        encode (decode y.2.1 : Option (Semiterm L ξ y.1.1)) :=
-      (Semiterm.encode_ofNat_primrec (L := L) (ξ := ξ)).comp (fst.comp fst) (fst.comp snd)
-        |>.of_eq fun _ ↦ rfl
-    refine Primrec.ite (PrimrecPred.or (Primrec.eq.comp hdec (const 0))
-      (Primrec.eq.comp (snd.comp snd) (const 0))) (const 0) ?_
-    exact Primrec.nat_add.comp
-      (Primrec₂.natPair.comp (nat_sub.comp hdec (const 1))
-        (nat_sub.comp (snd.comp snd) (const 1))) (const 2)
-  exact hp.of_eq fun p ↦ rfl
+-- As with `Semiterm.primrec₂_stepVec`, `Primrec.list_foldr` is applied with its arguments named.
+theorem primrec₂_stepVecT : Primrec₂ (stepVecT (L := L) (ξ := ξ)) :=
+  Primrec.list_foldr (β := ℕ) (σ := ℕ)
+    (f := fun p : ℕ × List ℕ ↦ p.2) (g := fun _ ↦ (1 : ℕ))
+    (h := fun p x ↦ if encode (decode x.1 : Option (Semiterm L ξ p.1)) = 0 ∨ x.2 = 0 then 0
+      else Nat.pair (encode (decode x.1 : Option (Semiterm L ξ p.1)) - 1) (x.2 - 1) + 2)
+    Primrec.snd (Primrec.const _) (by primrec)
+
+@[primrec]
+theorem primrec_stepVecT {α : Type*} [Primcodable α] {n : α → ℕ} {l : α → List ℕ}
+    (hn : Primrec n) (hl : Primrec l) :
+    Primrec fun a ↦ stepVecT (L := L) (ξ := ξ) (n a) (l a) :=
+  primrec₂_stepVecT.comp hn hl
 
 /-! ### The formula step function
 
@@ -741,115 +677,14 @@ theorem step_correct (n e : ℕ) :
     | 7 => exact absurd hi h7
     | k + 8 => simp
 
-open Primrec in
 theorem primrec_subArgs : Primrec subArgs := by
-  have hbody : Primrec fun r : (ℕ × ℕ) × ℕ ↦
-      (if r.2.unpair.1 = 4 ∨ r.2.unpair.1 = 5 then
-          [(r.1.1, r.2.unpair.2.unpair.1), (r.1.1, r.2.unpair.2.unpair.2)]
-        else if r.2.unpair.1 = 6 ∨ r.2.unpair.1 = 7 then [(r.1.1 + 1, r.2.unpair.2)]
-        else ([] : List (ℕ × ℕ))) := by
-    have hn : Primrec fun r : (ℕ × ℕ) × ℕ ↦ r.1.1 := fst.comp fst
-    have hi : Primrec fun r : (ℕ × ℕ) × ℕ ↦ r.2.unpair.1 := fst.comp (Primrec.unpair.comp snd)
-    have hc : Primrec fun r : (ℕ × ℕ) × ℕ ↦ r.2.unpair.2 := snd.comp (Primrec.unpair.comp snd)
-    have hc1 : Primrec fun r : (ℕ × ℕ) × ℕ ↦ r.2.unpair.2.unpair.1 :=
-      fst.comp (Primrec.unpair.comp hc)
-    have hc2 : Primrec fun r : (ℕ × ℕ) × ℕ ↦ r.2.unpair.2.unpair.2 :=
-      snd.comp (Primrec.unpair.comp hc)
-    refine Primrec.ite (PrimrecPred.or (Primrec.eq.comp hi (const 4))
-      (Primrec.eq.comp hi (const 5)))
-      (list_cons.comp (Primrec₂.pair.comp hn hc1)
-        (list_cons.comp (Primrec₂.pair.comp hn hc2) (Primrec.const ([] : List (ℕ × ℕ))))) ?_
-    exact Primrec.ite (PrimrecPred.or (Primrec.eq.comp hi (const 6))
-      (Primrec.eq.comp hi (const 7)))
-      (list_cons.comp (Primrec₂.pair.comp (succ.comp hn) hc)
-        (Primrec.const ([] : List (ℕ × ℕ)))) (Primrec.const ([] : List (ℕ × ℕ)))
-  exact (Primrec.nat_casesOn (f := fun b : ℕ × ℕ ↦ b.2) (g := fun _ ↦ ([] : List (ℕ × ℕ)))
-    (h := fun b d ↦ if d.unpair.1 = 4 ∨ d.unpair.1 = 5 then
-        [(b.1, d.unpair.2.unpair.1), (b.1, d.unpair.2.unpair.2)]
-      else if d.unpair.1 = 6 ∨ d.unpair.1 = 7 then [(b.1 + 1, d.unpair.2)] else [])
-    snd (Primrec.const _) hbody).of_eq fun b ↦ rfl
+  unfold subArgs;
+  primrec
 
-open Primrec in
 theorem primrec_step :
     Primrec fun q : (ℕ × ℕ) × List ℕ ↦ step (L := L) (ξ := ξ) q.1.1 q.1.2 q.2 := by
-  unfold step
-  have hn : Primrec fun q : (ℕ × ℕ) × List ℕ ↦ q.1.1 := fst.comp fst
-  have he : Primrec fun q : (ℕ × ℕ) × List ℕ ↦ q.1.2 := snd.comp fst
-  have hvs : Primrec fun q : (ℕ × ℕ) × List ℕ ↦ q.2 := snd
-  have hd : Primrec fun q : (ℕ × ℕ) × List ℕ ↦ q.1.2 - 1 := nat_sub.comp he (const 1)
-  have hi : Primrec fun q : (ℕ × ℕ) × List ℕ ↦ (q.1.2 - 1).unpair.1 :=
-    fst.comp (Primrec.unpair.comp hd)
-  have hc : Primrec fun q : (ℕ × ℕ) × List ℕ ↦ (q.1.2 - 1).unpair.2 :=
-    snd.comp (Primrec.unpair.comp hd)
-  have ha : Primrec fun q : (ℕ × ℕ) × List ℕ ↦ (q.1.2 - 1).unpair.2.unpair.1 :=
-    fst.comp (Primrec.unpair.comp hc)
-  have hrest : Primrec fun q : (ℕ × ℕ) × List ℕ ↦ (q.1.2 - 1).unpair.2.unpair.2 :=
-    snd.comp (Primrec.unpair.comp hc)
-  have heR : Primrec fun q : (ℕ × ℕ) × List ℕ ↦ (q.1.2 - 1).unpair.2.unpair.2.unpair.1 :=
-    fst.comp (Primrec.unpair.comp hrest)
-  have hev : Primrec fun q : (ℕ × ℕ) × List ℕ ↦ (q.1.2 - 1).unpair.2.unpair.2.unpair.2 :=
-    snd.comp (Primrec.unpair.comp hrest)
-  have hR : Primrec fun q : (ℕ × ℕ) × List ℕ ↦
-      (encode (decode (q.1.2 - 1).unpair.2.unpair.2.unpair.1 :
-        Option (L.Rel (q.1.2 - 1).unpair.2.unpair.1))) :=
-    (Language.Primcodable.rel (L := L)).comp ha heR
-  have hl : Primrec fun q : (ℕ × ℕ) × List ℕ ↦
-      Nat.natToList (q.1.2 - 1).unpair.2.unpair.2.unpair.2 := Primrec.nat_natToList.comp hev
-  have hsv : Primrec fun q : (ℕ × ℕ) × List ℕ ↦
-      stepVecT (L := L) (ξ := ξ) q.1.1 (Nat.natToList (q.1.2 - 1).unpair.2.unpair.2.unpair.2) :=
-    primrec_stepVecT.comp hn hl
-  have hv0 : Primrec fun q : (ℕ × ℕ) × List ℕ ↦ q.2.getD 0 0 :=
-    (Primrec.list_getD 0).comp hvs (const 0)
-  have hv1 : Primrec fun q : (ℕ × ℕ) × List ℕ ↦ q.2.getD 1 0 :=
-    (Primrec.list_getD 0).comp hvs (const 1)
-  have hrelArm : ∀ tag : ℕ, Primrec fun q : (ℕ × ℕ) × List ℕ ↦
-      (if (Nat.natToList (q.1.2 - 1).unpair.2.unpair.2.unpair.2).length
-            = (q.1.2 - 1).unpair.2.unpair.1 ∧
-          (encode (decode (q.1.2 - 1).unpair.2.unpair.2.unpair.1 :
-            Option (L.Rel (q.1.2 - 1).unpair.2.unpair.1))) ≠ 0 ∧
-          stepVecT (L := L) (ξ := ξ) q.1.1
-            (Nat.natToList (q.1.2 - 1).unpair.2.unpair.2.unpair.2) ≠ 0 then
-        Nat.pair tag (Nat.pair (q.1.2 - 1).unpair.2.unpair.1
-          (Nat.pair ((encode (decode (q.1.2 - 1).unpair.2.unpair.2.unpair.1 :
-            Option (L.Rel (q.1.2 - 1).unpair.2.unpair.1))) - 1)
-            (stepVecT (L := L) (ξ := ξ) q.1.1
-              (Nat.natToList (q.1.2 - 1).unpair.2.unpair.2.unpair.2) - 1))) + 2
-        else 0) := fun tag ↦
-    Primrec.ite
-      (PrimrecPred.and (Primrec.eq.comp (list_length.comp hl) ha)
-        (PrimrecPred.and (PrimrecPred.not (Primrec.eq.comp hR (const 0)))
-          (PrimrecPred.not (Primrec.eq.comp hsv (const 0)))))
-      (Primrec.nat_add.comp
-        (Primrec₂.natPair.comp (const tag)
-          (Primrec₂.natPair.comp ha
-            (Primrec₂.natPair.comp (nat_sub.comp hR (const 1))
-              (nat_sub.comp hsv (const 1))))) (const 2))
-      (const 0)
-  have hbinArm : ∀ tag : ℕ, Primrec fun q : (ℕ × ℕ) × List ℕ ↦
-      (if q.2.getD 0 0 = 0 ∨ q.2.getD 1 0 = 0 then 0
-        else Nat.pair tag (Nat.pair (q.2.getD 0 0 - 1) (q.2.getD 1 0 - 1)) + 2) := fun tag ↦
-    Primrec.ite (PrimrecPred.or (Primrec.eq.comp hv0 (const 0))
-      (Primrec.eq.comp hv1 (const 0))) (const 0)
-      (Primrec.nat_add.comp
-        (Primrec₂.natPair.comp (const tag)
-          (Primrec₂.natPair.comp (nat_sub.comp hv0 (const 1))
-            (nat_sub.comp hv1 (const 1)))) (const 2))
-  have hqArm : ∀ tag : ℕ, Primrec fun q : (ℕ × ℕ) × List ℕ ↦
-      (if q.2.getD 0 0 = 0 then 0 else Nat.pair tag (q.2.getD 0 0 - 1) + 2) := fun tag ↦
-    Primrec.ite (Primrec.eq.comp hv0 (const 0)) (const 0)
-      (Primrec.nat_add.comp
-        (Primrec₂.natPair.comp (const tag) (nat_sub.comp hv0 (const 1))) (const 2))
-  refine Primrec.ite (Primrec.eq.comp he (const 0)) (const 0) ?_
-  unfold stepBody
-  exact Primrec.ite (Primrec.eq.comp hi (const 0)) (hrelArm 0)
-    (Primrec.ite (Primrec.eq.comp hi (const 1)) (hrelArm 1)
-      (Primrec.ite (Primrec.eq.comp hi (const 2)) (const (Nat.pair 2 0 + 2))
-        (Primrec.ite (Primrec.eq.comp hi (const 3)) (const (Nat.pair 3 0 + 2))
-          (Primrec.ite (Primrec.eq.comp hi (const 4)) (hbinArm 4)
-            (Primrec.ite (Primrec.eq.comp hi (const 5)) (hbinArm 5)
-              (Primrec.ite (Primrec.eq.comp hi (const 6)) (hqArm 6)
-                (Primrec.ite (Primrec.eq.comp hi (const 7)) (hqArm 7)
-                  (const 0))))))))
+  unfold step stepBody;
+  primrec
 
 /-- `fun n e ↦ encode (Semiformula.ofNat n e)` is primitive recursive. With
 `Semiterm.encode_ofNat_primrec` this closes issue #506: `Primcodable` instances for both
@@ -881,17 +716,17 @@ example {n : ℕ} (e : ℕ) : (decode e : Option (Semiformula L ξ n)) = ofNat n
 example {n : ℕ} (φ : Semiformula L ξ n) :
     (decode (encode φ) : Option (Semiformula L ξ n)) = some φ := Encodable.encodek φ
 
+-- The codes are spelled with `encode`, not the definitionally equal `toNat`: `primrec` matches
+-- its rules at `reducible` transparency, where the two are distinct.
 theorem primrec₂_and {n : ℕ} : Primrec₂ (fun φ ψ : Semiformula L ξ n ↦ φ ⋏ ψ) :=
-  Primrec₂.encode_iff.mp <|
-    (Primrec.comp₂ (Primrec.succ.comp (Primrec₂.natPair.comp (Primrec.const 4) Primrec.id))
-      (Primrec₂.natPair.comp₂ (Primrec.encode.comp₂ Primrec₂.left)
-        (Primrec.encode.comp₂ Primrec₂.right))).of_eq fun φ ψ ↦ (encode_and φ ψ).symm
+  Primrec₂.encode_iff.mp <| Primrec₂.of_eq
+    (f := fun φ ψ : Semiformula L ξ n ↦ Nat.pair 4 ((encode φ).pair (encode ψ)) + 1)
+    (by primrec) fun φ ψ ↦ (encode_and φ ψ).symm
 
 theorem primrec₂_or {n : ℕ} : Primrec₂ (fun φ ψ : Semiformula L ξ n ↦ φ ⋎ ψ) :=
-  Primrec₂.encode_iff.mp <|
-    (Primrec.comp₂ (Primrec.succ.comp (Primrec₂.natPair.comp (Primrec.const 5) Primrec.id))
-      (Primrec₂.natPair.comp₂ (Primrec.encode.comp₂ Primrec₂.left)
-        (Primrec.encode.comp₂ Primrec₂.right))).of_eq fun φ ψ ↦ (encode_or φ ψ).symm
+  Primrec₂.encode_iff.mp <| Primrec₂.of_eq
+    (f := fun φ ψ : Semiformula L ξ n ↦ Nat.pair 5 ((encode φ).pair (encode ψ)) + 1)
+    (by primrec) fun φ ψ ↦ (encode_or φ ψ).symm
 
 end Semiformula
 
