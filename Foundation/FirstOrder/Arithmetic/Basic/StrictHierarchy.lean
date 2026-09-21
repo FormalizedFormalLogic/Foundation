@@ -140,7 +140,7 @@ lemma strict_mono {φ : Semiformula L ξ n} (h : StrictHierarchy Γ s φ) (Γ') 
   . exact h.mono (by omega);
 
 lemma of_deltaZero {φ : Semiformula L ξ n} (h : Hierarchy 𝚺 0 φ) : StrictHierarchy Γ s φ :=
-  (zero h).mono (Nat.zero_le s)
+  (zero (Hierarchy.zero_iff_delta_zero.mp h)).mono (Nat.zero_le s)
 
 end
 
