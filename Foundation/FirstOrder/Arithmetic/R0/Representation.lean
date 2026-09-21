@@ -74,10 +74,11 @@ lemma delta0_primrec (ε : ξ → ℕ) {k} {φ : ArithmeticSemiformula ξ k}
       (ih ((Hierarchy.ball_iff (t := Rew.bShift t) (by simp)).mp h))).of_eq fun v ↦ by simp;
   case hExs =>
     intro n ψ _ ih h;
-    cases h with
-    | @bexs _ _ _ ψ _ ht hφ =>
+    cases Hierarchy.zero_iff_delta_zero.mp h with
+    | bexs ht hφ =>
       rcases Rew.positive_iff.mp ht with ⟨t, rfl⟩;
-      exact (primrecPred_bexs ε t (ih (by simp [hφ]))).of_eq fun v ↦ by simp;
+      exact (primrecPred_bexs ε t
+        (ih (Hierarchy.and_iff.mpr ⟨by simp, Hierarchy.bounded _ _ _ hφ⟩))).of_eq fun v ↦ by simp;
   exact hp;
 
 lemma sigma1_re (ε : ξ → ℕ) {k} {φ : ArithmeticSemiformula ξ k} (hp : Hierarchy 𝚺 1 φ) :
