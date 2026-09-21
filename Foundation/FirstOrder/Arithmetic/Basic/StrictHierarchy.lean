@@ -139,7 +139,15 @@ lemma strict_mono {φ : Semiformula L ξ n} (h : StrictHierarchy Γ s φ) (Γ') 
   . exact ofAlt (h.mono (by omega));
   . exact h.mono (by omega);
 
+lemma of_deltaZero {φ : Semiformula L ξ n} (h : Hierarchy 𝚺 0 φ) : StrictHierarchy Γ s φ :=
+  (zero h).mono (Nat.zero_le s)
+
 end
+
+lemma allClosure {s : ℕ} : ∀ {n : ℕ} {φ : Semiformula L ξ n},
+    StrictHierarchy 𝚷 (s + 1) φ → StrictHierarchy 𝚷 (s + 1) (∀¹* φ)
+  |     0, _, h => h
+  | _ + 1, _, h => by rw [allClosure_succ]; exact allClosure h.all
 
 end StrictHierarchy
 
