@@ -1,15 +1,10 @@
 module
 
-public import Foundation.Vorspiel.Computability.AesopInit
+public import Foundation.Vorspiel.Tactic.Primrec
 public import Mathlib.Computability.Primrec.List
 
 /-!
-# The `primrec` tactic
-
-Mathlib proves `Primrec f` by composing point-free combinators by hand: one reads the shape of
-`f` off the term and threads `Primrec.comp`, `Primrec.fst` and `Primrec.snd` through it. That
-composition is mechanical, so this module hands it to Aesop, as `definability` does for
-definability.
+# The rules of the `primrec` tactic
 
 A rule of the `Primrec` rule set reads a goal `Primrec fun a ↦ e`, peels one application off `e`
 and leaves `Primrec` goals for the arguments; the leaves are `fun a ↦ a`, the constants, and
@@ -17,15 +12,15 @@ whatever the context provides. The lemmas are therefore stated in the pointwise 
 `Primrec fun a ↦ F (f a) (g a)` rather than Mathlib's point-free `Primrec₂ F`: it is the head
 symbol `F` of the pointwise form that lets the discrimination tree key the rule.
 
-`@[primrec]` adds a lemma to the rule set.
+This module states those forms for the combinators of `Mathlib.Computability.Primrec` and
+populates the rule set with them. The tactic itself is `Foundation/Vorspiel/Tactic/Primrec.lean`,
+and `@[primrec]` adds a lemma stated anywhere else.
 
-Everything here is a pointwise restatement of a Mathlib combinator, or the Aesop machinery
-driving them, so there is no informal source to cite.
+Everything here is a pointwise restatement of a Mathlib combinator, so there is no informal
+source to cite.
 -/
 
 @[expose] public section
-
-open Lean.Parser.Tactic (config)
 
 variable {α β γ δ σ : Type*} [Primcodable α] [Primcodable β] [Primcodable γ] [Primcodable δ]
   [Primcodable σ]
@@ -293,35 +288,6 @@ attribute [aesop 50% (rule_sets := [Primrec]) unsafe apply (transparency := redu
 -- context and the point-free lemmas of the rule set.
 attribute [aesop 20% (rule_sets := [Primrec]) unsafe apply (transparency := reducible)]
   Primrec.comp Primrec₂.comp PrimrecPred.comp PrimrecRel.comp
-
-/-- Aesop's normalisation runs the default `simp` set, which is too much for the goals this
-tactic is aimed at: their subterms are syntax trees of arithmetical formulas, and normalising
-them dwarfs the search. The rule set carries the few simp lemmas the search needs instead. The
-bounds on the search are raised from Aesop's defaults because a nest of projections reaches them
-honestly. -/
-meta def primrecConfig : Aesop.Options where
-  terminal := true
-  maxRuleApplicationDepth := 100
-  maxRuleApplications := 4000
-  useDefaultSimpSet := false
-  useSimpAll := false
-
-/-- Add a lemma to the `primrec` rule set. Its conclusion should be pointwise,
-`Primrec fun a ↦ F (f a) (g a)`, with a `Primrec` hypothesis for each argument. -/
-macro "primrec" : attr =>
-  `(attr|aesop 10 (rule_sets := [$(Lean.mkIdent `Primrec):ident]) safe apply
-      (transparency := reducible))
-
-/-- Prove `Primrec f`, `Primrec₂ f`, `PrimrecPred p` or `PrimrecRel r` by reading the shape of
-the function off the goal. -/
-macro "primrec" (config)? : tactic =>
-  `(tactic| aesop (config := primrecConfig)
-      (rule_sets := [$(Lean.mkIdent `Primrec):ident]))
-
-/-- `primrec`, printing the proof term it found. -/
-macro "primrec?" (config)? : tactic =>
-  `(tactic| aesop? (config := primrecConfig)
-      (rule_sets := [$(Lean.mkIdent `Primrec):ident]))
 
 section examples
 
