@@ -76,8 +76,8 @@ jobs:
           # here uses. `lake build` below builds whatever is missing, as it always has.
           assert-fresh: ''
 
-      - name: Build Foundation
-        run: lake build Foundation
+      - name: Build Foundation (warnings are errors)
+        run: lake build Foundation --wfail
 
       - name: Check sorry-freeness and axiom allowlist (forgive)
         run: just forgive
