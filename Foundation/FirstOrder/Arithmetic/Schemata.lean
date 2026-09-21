@@ -28,6 +28,9 @@ def orderInd {ξ} (φ : Semiformula L ξ 1) : Formula L ξ := “(∀ x, (∀ y 
 def leastNumber {ξ} (φ : Semiformula L ξ 1) : Formula L ξ :=
   “(∃ x, !φ x) → ∃ z, !φ z ∧ ∀ x < z, ¬!φ x”
 
+def collectionAxiom {ξ} (φ : Semiformula L ξ 2) : Formula L ξ :=
+  “∀ a, (∀ x < a, ∃ y, !φ x y) → ∃ b, ∀ x < a, ∃ y < b, !φ x y”
+
 /-! ### Induction schemata -/
 
 variable (L)
@@ -83,6 +86,32 @@ abbrev LPi (s : ℕ) : ArithmeticTheory := 𝗟 𝚷 s
 
 prefix:max "𝗟𝚷" => LPi
 
+/-! ### Collection schemata -/
+
+def CollectionScheme (Γ : Set (ArithmeticSemiformula ℕ 2)) : Set ArithmeticSentence :=
+  (fun φ => .univCl (collectionAxiom φ)) '' Γ
+
+abbrev CollectionOnHierarchy (Γ : Polarity) (s : ℕ) : ArithmeticTheory :=
+  𝗜𝚺₀ ∪ CollectionScheme (Arithmetic.StrictHierarchy Γ s)
+
+prefix:max "𝗕 " => CollectionOnHierarchy
+
+abbrev BSigma (s : ℕ) : ArithmeticTheory := 𝗕 𝚺 s
+
+prefix:max "𝗕𝚺" => BSigma
+
+notation "𝗕𝚺₁" => BSigma 1
+
+abbrev BPi (s : ℕ) : ArithmeticTheory := 𝗕 𝚷 s
+
+prefix:max "𝗕𝚷" => BPi
+
+/-- The collection scheme for the broad hierarchy `Hierarchy Γ s`, i.e. Buss's `BΓ_s⁺`. -/
+abbrev CollectionOnBroadHierarchy (Γ : Polarity) (s : ℕ) : ArithmeticTheory :=
+  𝗜𝚺₀ ∪ CollectionScheme (Arithmetic.Hierarchy Γ s)
+
+prefix:max "𝗕⁺ " => CollectionOnBroadHierarchy
+
 /-! ### Induction scheme lemmas -/
 
 section
@@ -133,6 +162,45 @@ lemma LeastNumberOnHierarchy_weakerThan_of_le {s₁ s₂} (h : s₁ ≤ s₂) : 
 
 end
 
+/-! ### Collection scheme lemmas -/
+
+section
+
+variable {C C' : ArithmeticSemiformula ℕ 2 → Prop}
+
+lemma CollectionScheme_subset (h : ∀ {φ : ArithmeticSemiformula ℕ 2}, C φ → C' φ) :
+    CollectionScheme C ⊆ CollectionScheme C' := by
+  rintro _ ⟨φ, hφ, rfl⟩; exact ⟨φ, h hφ, rfl⟩
+
+lemma mem_CollectionScheme_of_mem {φ : ArithmeticSemiformula ℕ 2} (hφ : C φ) :
+    .univCl (collectionAxiom φ) ∈ CollectionScheme C := ⟨φ, hφ, rfl⟩
+
+variable {Γ : Polarity}
+
+lemma CollectionOnHierarchy_subset_mono {s₁ s₂} (h : s₁ ≤ s₂) : 𝗕 Γ s₁ ⊆ 𝗕 Γ s₂ :=
+  Set.union_subset_union_right _ (CollectionScheme_subset (fun H ↦ H.mono h))
+
+lemma CollectionOnHierarchy_weakerThan_of_le {s₁ s₂} (h : s₁ ≤ s₂) : 𝗕 Γ s₁ ⪯ 𝗕 Γ s₂ :=
+  Entailment.WeakerThan.ofSubset (CollectionOnHierarchy_subset_mono h)
+
+lemma CollectionOnHierarchy_subset_of_lt {Γ Γ' : Polarity} {s s' : ℕ} (h : s < s') : 𝗕 Γ s ⊆ 𝗕 Γ' s' :=
+  Set.union_subset_union_right _ (CollectionScheme_subset (·.strict_mono Γ' h))
+
+lemma CollectionOnHierarchy_weakerThan_of_lt {Γ Γ' : Polarity} {s s' : ℕ} (h : s < s') : 𝗕 Γ s ⪯ 𝗕 Γ' s' :=
+  Entailment.WeakerThan.ofSubset (CollectionOnHierarchy_subset_of_lt h)
+
+lemma CollectionOnHierarchy_subset_BSigma_succ (Γ : Polarity) (s : ℕ) : 𝗕 Γ s ⊆ 𝗕𝚺 (s + 1) :=
+  CollectionOnHierarchy_subset_of_lt (Nat.lt_succ_self s)
+
+lemma CollectionOnHierarchy_weakerThan_BSigma_succ (Γ : Polarity) (s : ℕ) : 𝗕 Γ s ⪯ 𝗕𝚺 (s + 1) :=
+  Entailment.WeakerThan.ofSubset (CollectionOnHierarchy_subset_BSigma_succ Γ s)
+
+lemma CollectionOnHierarchy_subset_CollectionOnBroadHierarchy {Γ : Polarity} {s : ℕ} :
+    𝗕 Γ s ⊆ 𝗕⁺ Γ s :=
+  Set.union_subset_union_right _ (CollectionScheme_subset (·.hierarchy))
+
+end
+
 /-! ### Relations between the theories -/
 
 instance : 𝗘𝗤 ℒₒᵣ ⪯ 𝗜𝗡𝗗 Γ s :=
@@ -167,10 +235,26 @@ instance (Γ : Polarity) (s : ℕ) : 𝗣𝗔⁻ ⪯ 𝗟 Γ s :=
 instance (Γ : Polarity) (s : ℕ) : 𝗘𝗤 ℒₒᵣ ⪯ 𝗟 Γ s :=
   Entailment.WeakerThan.trans (inferInstance : 𝗘𝗤 ℒₒᵣ ⪯ 𝗣𝗔⁻) inferInstance
 
+instance (Γ : Polarity) (s : ℕ) : 𝗜𝚺₀ ⪯ 𝗕 Γ s :=
+  Entailment.WeakerThan.ofSubset Set.subset_union_left
+
+instance (Γ : Polarity) (s : ℕ) : 𝗘𝗤 ℒₒᵣ ⪯ 𝗕 Γ s :=
+  have : 𝗘𝗤 ℒₒᵣ ⪯ 𝗜𝚺₀ := inferInstance
+  Entailment.WeakerThan.trans this inferInstance
+
+instance CollectionOnHierarchy_weakerThan_CollectionOnBroadHierarchy (Γ : Polarity) (s : ℕ) :
+    𝗕 Γ s ⪯ 𝗕⁺ Γ s :=
+  Entailment.WeakerThan.ofSubset CollectionOnHierarchy_subset_CollectionOnBroadHierarchy
+
 -- This is stated as a `lemma`, not an `instance`, since `s` does not occur in the conclusion
 -- `𝗘𝗤 ℒₒᵣ ⪯ T`, so instance search cannot infer it.
 lemma eq_weakerThan_of_ISigma {T : ArithmeticTheory} {s : ℕ} [𝗜𝚺 s ⪯ T] : 𝗘𝗤 ℒₒᵣ ⪯ T :=
   Entailment.WeakerThan.trans (inferInstance : 𝗘𝗤 ℒₒᵣ ⪯ 𝗜𝚺₀) (ISigma_weakerThan_of_le_trans (by omega) ‹𝗜𝚺 s ⪯ T›)
+
+-- This is stated as a `lemma`, not an `instance`, since `s` does not occur in the conclusion
+-- `𝗘𝗤 ℒₒᵣ ⪯ T`, so instance search cannot infer it.
+lemma eq_weakerThan_of_BSigma {T : ArithmeticTheory} {s : ℕ} [𝗕𝚺 s ⪯ T] : 𝗘𝗤 ℒₒᵣ ⪯ T :=
+  Entailment.WeakerThan.trans (inferInstance : 𝗘𝗤 ℒₒᵣ ⪯ 𝗕𝚺 s) ‹𝗕𝚺 s ⪯ T›
 
 end axioms
 
@@ -437,6 +521,9 @@ instance [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] : V↓[ℒₒᵣ] ⊧* 𝗜𝚺₀ :
 
 abbrev mod_ISigma_of_le {s₁ s₂} (h : s₁ ≤ s₂) [V↓[ℒₒᵣ] ⊧* 𝗜𝚺 s₂] : V↓[ℒₒᵣ] ⊧* 𝗜𝚺 s₁ :=
   models_of_ss inferInstance (ISigma_subset_mono h)
+
+abbrev mod_BSigma_of_le {s₁ s₂} (h : s₁ ≤ s₂) [V↓[ℒₒᵣ] ⊧* 𝗕𝚺 s₂] : V↓[ℒₒᵣ] ⊧* 𝗕𝚺 s₁ :=
+  models_of_ss inferInstance (CollectionOnHierarchy_subset_mono h)
 
 -- This is stated as a `lemma`, not an `instance`, since `s` does not occur in the conclusion
 -- `V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻`, so instance search cannot infer it.
