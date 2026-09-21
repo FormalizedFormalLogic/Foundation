@@ -73,6 +73,10 @@ jobs:
           enabled: ${{ vars.LAKE_CACHE_ENABLED }}
           # A tarball hit above already carries everything this would fetch.
           skip-download: ${{ steps.cache-restore.outputs.cache-matched-key != '' }}
+          # No freshness assertion: it would demand all ~8900 Mathlib modules, while Foundation
+          # imports a subset, and `lake exe cache get` is occasionally short a module nothing
+          # here uses. `lake build` below builds whatever is missing, as it always has.
+          assert-fresh: ''
 
       - name: Build Foundation
         run: lake build Foundation
