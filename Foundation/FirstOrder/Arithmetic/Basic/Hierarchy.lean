@@ -241,6 +241,66 @@ lemma exsClosure : {n : ℕ} → {φ : Semiformula L ξ n} →
 lemma of_open {φ : Semiformula L ξ n} : φ.Open → Hierarchy Γ s φ :=
   BoundingHierarchy.of_open (R := BoundingOperator (L := L))
 
+lemma zero_induction {Γ} {P : (n : ℕ) → Semiformula L ξ n → Prop}
+    (hVerum : ∀ n, P n ⊤)
+    (hFalsum : ∀ n, P n ⊥)
+    (hRel : ∀ n {k} (r : L.Rel k) v, P n (Semiformula.rel r v))
+    (hNRel : ∀ n {k} (r : L.Rel k) v, P n (Semiformula.nrel r v))
+    (hAnd : ∀ n φ ψ, Hierarchy Γ 0 φ → Hierarchy Γ 0 ψ → P n φ → P n ψ → P n (φ ⋏ ψ))
+    (hOr : ∀ n φ ψ, Hierarchy Γ 0 φ → Hierarchy Γ 0 ψ → P n φ → P n ψ → P n (φ ⋎ ψ))
+    (hBall : ∀ n t φ, Hierarchy Γ 0 φ → P (n + 1) φ → P n (∀¹[“#0 < !!(Rew.bShift t)”] φ))
+    (hBexs : ∀ n t φ, Hierarchy Γ 0 φ → P (n + 1) φ → P n (∃¹[“#0 < !!(Rew.bShift t)”] φ))
+    (n φ) : Hierarchy Γ 0 φ → P n φ := by
+  intro h;
+  replace h := zero_iff_delta_zero.mp h;
+  induction h with
+  | verum n => exact hVerum n;
+  | falsum n => exact hFalsum n;
+  | rel r v => exact hRel _ r v;
+  | nrel r v => exact hNRel _ r v;
+  | and hp hq ihp ihq => exact hAnd _ _ _ (bounded _ _ _ hp) (bounded _ _ _ hq) ihp ihq;
+  | or hp hq ihp ihq => exact hOr _ _ _ (bounded _ _ _ hp) (bounded _ _ _ hq) ihp ihq;
+  | ball ht hp ih =>
+    obtain ⟨t, rfl⟩ := Rew.positive_iff.mp ht;
+    exact hBall _ t _ (bounded _ _ _ hp) ih;
+  | bexs ht hp ih =>
+    obtain ⟨t, rfl⟩ := Rew.positive_iff.mp ht;
+    exact hBexs _ t _ (bounded _ _ _ hp) ih;
+
+lemma sigma_succ_induction {s : ℕ} {P : (n : ℕ) → Semiformula L ξ n → Prop}
+    (hPi : ∀ n φ, Hierarchy 𝚷 s φ → P n φ)
+    (hAnd : ∀ n φ ψ, Hierarchy 𝚺 (s + 1) φ → Hierarchy 𝚺 (s + 1) ψ → P n φ → P n ψ → P n (φ ⋏ ψ))
+    (hOr : ∀ n φ ψ, Hierarchy 𝚺 (s + 1) φ → Hierarchy 𝚺 (s + 1) ψ → P n φ → P n ψ → P n (φ ⋎ ψ))
+    (hBall : ∀ n t φ, Hierarchy 𝚺 (s + 1) φ → P (n + 1) φ → P n (∀¹[“#0 < !!(Rew.bShift t)”] φ))
+    (hBexs : ∀ n t φ, Hierarchy 𝚺 (s + 1) φ → P (n + 1) φ → P n (∃¹[“#0 < !!(Rew.bShift t)”] φ))
+    (hExs : ∀ n φ, Hierarchy 𝚺 (s + 1) φ → P (n + 1) φ → P n (∃¹ φ))
+    (n φ) : Hierarchy 𝚺 (s + 1) φ → P n φ := by
+  generalize hΓ : (𝚺 : Polarity) = Γ;
+  generalize hs : s + 1 = S;
+  intro h;
+  induction h with
+  | bounded _ _ _ h => exact hPi _ _ (bounded _ _ _ h);
+  | ball pos hp ih =>
+    rcases hΓ with rfl;
+    rcases hs with rfl;
+    rcases Rew.positive_iff.mp pos with ⟨t, rfl⟩;
+    exact hBall _ t _ hp (ih rfl rfl);
+  | bexs pos hp ih =>
+    rcases hΓ with rfl;
+    rcases hs with rfl;
+    rcases Rew.positive_iff.mp pos with ⟨t, rfl⟩;
+    exact hBexs _ t _ hp (ih rfl rfl);
+  | sigma hp _ =>
+    injection hs with hs;
+    subst hs;
+    exact hExs _ _ (hp.accum _) (hPi _ _ hp);
+  | dummy_sigma hp _ =>
+    injection hs with hs;
+    subst hs;
+    exact hPi _ _ hp.all;
+  | and | or | exs => grind;
+  | all | pi | dummy_pi => simp at hΓ;
+
 lemma iff_iff {φ ψ : Semiformula L ξ n} :
     Hierarchy b s (φ 🡘 ψ) ↔
       (Hierarchy b s φ ∧ Hierarchy b.alt s φ ∧

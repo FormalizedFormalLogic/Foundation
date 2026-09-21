@@ -29,12 +29,14 @@ public import Foundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Term.Coding
 public import Foundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Term.Functions
 public import Foundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Term.Typed
 public import Foundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Theory
-public import Foundation.FirstOrder.Arithmetic.BoundedCollection
+public import Foundation.FirstOrder.Arithmetic.Collection.Basic
+public import Foundation.FirstOrder.Arithmetic.Collection.Equiv
 public import Foundation.FirstOrder.Arithmetic.Definability
 public import Foundation.FirstOrder.Arithmetic.Definability.Absoluteness
 public import Foundation.FirstOrder.Arithmetic.Definability.BoundedDefinable
 public import Foundation.FirstOrder.Arithmetic.Definability.Definable
 public import Foundation.FirstOrder.Arithmetic.Definability.Hierarchy
+public import Foundation.FirstOrder.Arithmetic.Definability.StrictDefinable
 public import Foundation.FirstOrder.Arithmetic.Examples
 public import Foundation.FirstOrder.Arithmetic.Exponential
 public import Foundation.FirstOrder.Arithmetic.Exponential.Bit
