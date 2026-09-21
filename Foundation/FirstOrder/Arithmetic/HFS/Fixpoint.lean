@@ -11,7 +11,7 @@ public import Foundation.FirstOrder.Arithmetic.HFS.PRF
 
 namespace FFL.FirstOrder.Arithmetic
 
-variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
+variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺₁]
 
 namespace Fixpoint
 
@@ -256,7 +256,7 @@ end
 theorem induction [c.StrongFinite] {P : V → Prop} (hP : Γ-[1]-Predicate P)
     (H : ∀ C : Set V, (∀ x ∈ C, c.Fixpoint v x ∧ P x) → ∀ x, c.Φ v C x → P x) :
     ∀ x, c.Fixpoint v x → P x := by
-  apply InductionOnHierarchy.order_induction_sigma (Γ := Γ) (s := 1) (P := fun x ↦ c.Fixpoint v x → P x)
+  apply InductionOnBroadHierarchy.order_induction_sigma (Γ := Γ) (s := 1) (P := fun x ↦ c.Fixpoint v x → P x)
   · apply HierarchySymbol.Definable.imp
       (HierarchySymbol.DefinablePred.comp
         (by

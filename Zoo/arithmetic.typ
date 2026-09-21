@@ -11,6 +11,10 @@
 #let LPi(n) = $Theory(L)Pi_#n$
 #let BSigma(n) = $Theory(B)Sigma_#n$
 #let BPi(n) = $Theory(B)Pi_#n$
+#let IBroadSigma(n) = $Theory(I)Sigma^+_#n$
+#let IBroadPi(n) = $Theory(I)Pi^+_#n$
+#let LBroadSigma(n) = $Theory(L)Sigma^+_#n$
+#let LBroadPi(n) = $Theory(L)Pi^+_#n$
 
 // Keys are the theories as pretty-printed by `lake exe zoo_arithmetic`; a theory with no entry
 // here is drawn under its pretty-printed name.
@@ -25,19 +29,19 @@
       "𝗜𝗢𝗽𝗲𝗻": $Theory("IOpen")$,
       "𝗜𝚺₀": ISigma(0),
       "𝗜𝚺₀ ∪ 𝝮₁": $ISigma(0) + Omega_1$,
-      "𝗜𝚺₁": ISigma(1),
-      "𝗜𝚺2": ISigma(2),
-      "𝗜𝚷₁": IPi(1),
-      "𝗜𝚷2": IPi(2),
-      "𝗟𝚺1": LSigma(1),
-      "𝗟𝚺2": LSigma(2),
-      "𝗟𝚷1": LPi(1),
+      "𝗜𝚺⁺₁": IBroadSigma(1),
+      "𝗜𝚺⁺2": IBroadSigma(2),
+      "𝗜𝚷⁺₁": IBroadPi(1),
+      "𝗜𝚷⁺2": IBroadPi(2),
+      "𝗟𝚺⁺1": LBroadSigma(1),
+      "𝗟𝚺⁺2": LBroadSigma(2),
+      "𝗟𝚷⁺1": LBroadPi(1),
       "𝗕𝚺₁": BSigma(1),
       "𝗕𝚺2": BSigma(2),
       "𝗕𝚷0": BPi(0),
       "𝗕𝚷1": BPi(1),
-      "𝗜𝚺₁ ∪ FFL.FirstOrder.Theory.Con 𝗜𝚺₁": $ISigma(1) + Con(ISigma(1))$,
-      "𝗜𝚺₁ ∪ FFL.FirstOrder.Theory.Incon 𝗜𝚺₁": $ISigma(1) + Incon(ISigma(1))$,
+      "𝗜𝚺⁺₁ ∪ FFL.FirstOrder.Theory.Con 𝗜𝚺⁺₁": $IBroadSigma(1) + Con(IBroadSigma(1))$,
+      "𝗜𝚺⁺₁ ∪ FFL.FirstOrder.Theory.Incon 𝗜𝚺⁺₁": $IBroadSigma(1) + Incon(IBroadSigma(1))$,
       "𝗣𝗔": PA,
       "𝗣𝗔 ∪ FFL.FirstOrder.Theory.Con 𝗣𝗔": $PA + Con(PA)$,
       "𝗣𝗔 ∪ FFL.FirstOrder.Theory.Incon 𝗣𝗔": $PA + Incon(PA)$,

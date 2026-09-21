@@ -33,7 +33,7 @@ section
 variable [L.Encodable] [L.LORDefinable]
          {T : Theory L} [T.Δ₁]
 
-def Refutable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] (T : Theory L) [T.Δ₁] (φ : V) : Prop
+def Refutable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺₁] (T : Theory L) [T.Δ₁] (φ : V) : Prop
   := Provable T (neg L φ)
 
 noncomputable def refutable (T : Theory L) [T.Δ₁] : 𝚺₁.Semisentence 1
@@ -41,7 +41,7 @@ noncomputable def refutable (T : Theory L) [T.Δ₁] : 𝚺₁.Semisentence 1
 
 section
 
-variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
+variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺₁]
 
 lemma Refutable.quote_iff {σ : Sentence L} : T.Refutable (⌜σ⌝ : V) ↔ Provable T (⌜∼σ⌝ : V) := by
   simp [Theory.Refutable, Sentence.quote_def, Semiformula.quote_def]
@@ -60,9 +60,9 @@ section
 
 variable {T U : ArithmeticTheory} [T.Δ₁]
 
-noncomputable abbrev standardRefutability (T : ArithmeticTheory) [T.Δ₁] : Refutability 𝗜𝚺₁ T where
+noncomputable abbrev standardRefutability (T : ArithmeticTheory) [T.Δ₁] : Refutability 𝗜𝚺⁺₁ T where
   refu := T.refutable.val
-  refu_def {σ} h := complete 𝗜𝚺₁ _ fun (V : Type) _ _ ↦ by
+  refu_def {σ} h := complete 𝗜𝚺⁺₁ _ fun (V : Type) _ _ ↦ by
     simpa [models_iff, Refutable.quote_iff] using internalize_provability h (V := V)
 
 noncomputable abbrev jeroslow (T : ArithmeticTheory) [T.Δ₁] : ArithmeticSentence := fixedpoint T.refutable
@@ -71,17 +71,17 @@ private noncomputable abbrev jeroslow' (T : ArithmeticTheory) [T.Δ₁] : Arithm
 
 private lemma jeroslow'_sigmaOne : Hierarchy 𝚺 1 (T.jeroslow') := by definability;
 
-lemma def_jeroslow [𝗜𝚺₁ ⪯ U] : U ⊢ T.jeroslow 🡘 (T.refutable)/[⌜T.jeroslow⌝] := diagonal _
+lemma def_jeroslow [𝗜𝚺⁺₁ ⪯ U] : U ⊢ T.jeroslow 🡘 (T.refutable)/[⌜T.jeroslow⌝] := diagonal _
 
-private lemma def_jeroslow' [𝗜𝚺₁ ⪯ U] : U ⊢ T.jeroslow' 🡘 (T.refutable)/[⌜T.jeroslow⌝] := by simp;
+private lemma def_jeroslow' [𝗜𝚺⁺₁ ⪯ U] : U ⊢ T.jeroslow' 🡘 (T.refutable)/[⌜T.jeroslow⌝] := by simp;
 
-private lemma provable_E_jeroslow_jeroslow' [𝗜𝚺₁ ⪯ U] : U ⊢ T.jeroslow 🡘 T.jeroslow' := Entailment.E_trans def_jeroslow def_jeroslow'
+private lemma provable_E_jeroslow_jeroslow' [𝗜𝚺⁺₁ ⪯ U] : U ⊢ T.jeroslow 🡘 T.jeroslow' := Entailment.E_trans def_jeroslow def_jeroslow'
 
-private lemma iff_provable_jeroslow_provable_jeroslow' [𝗜𝚺₁ ⪯ U] : U ⊢ (T.jeroslow) ↔ U ⊢ (T.jeroslow') := by
+private lemma iff_provable_jeroslow_provable_jeroslow' [𝗜𝚺⁺₁ ⪯ U] : U ⊢ (T.jeroslow) ↔ U ⊢ (T.jeroslow') := by
   apply Entailment.iff_of_E provable_E_jeroslow_jeroslow';
 
 open FFL.Entailment in
-instance [𝗜𝚺₁ ⪯ T] [T.SoundOnHierarchy 𝚺 1] : T.standardRefutability.SoundOn (ProvabilityAbstraction.jeroslow T.standardRefutability) := by
+instance [𝗜𝚺⁺₁ ⪯ T] [T.SoundOnHierarchy 𝚺 1] : T.standardRefutability.SoundOn (ProvabilityAbstraction.jeroslow T.standardRefutability) := by
   constructor;
   intro h;
   have := ArithmeticTheory.SoundOn.sound (F := Arithmetic.Hierarchy 𝚺 1) h $ by simp [standardRefutability, Refutability.rf];
@@ -92,9 +92,9 @@ private lemma jeroslow_eq_standard :
     ProvabilityAbstraction.jeroslow (T.standardRefutability) = T.jeroslow := by
   unfold ProvabilityAbstraction.jeroslow
   rw [show (T.standardRefutability).refu = T.refutable.val from rfl,
-      show (Diagonalization.fixedpoint (T := 𝗜𝚺₁)) = Arithmetic.fixedpoint from rfl]
+      show (Diagonalization.fixedpoint (T := 𝗜𝚺⁺₁)) = Arithmetic.fixedpoint from rfl]
 
-instance [𝗜𝚺₁ ⪯ T] : T.standardProvability.FormalizedCompleteOn (ProvabilityAbstraction.jeroslow T.standardRefutability) := by
+instance [𝗜𝚺⁺₁ ⪯ T] : T.standardProvability.FormalizedCompleteOn (ProvabilityAbstraction.jeroslow T.standardRefutability) := by
   constructor;
   rw [jeroslow_eq_standard];
   exact provable_sigma_one_complete_of_E jeroslow'_sigmaOne (Entailment.E_symm provable_E_jeroslow_jeroslow');
@@ -112,7 +112,7 @@ variable {T : ArithmeticTheory} [T.Δ₁]
 /--
   Jeroslow sentence of `T` is not provable in `T` itself.
 -/
-theorem unprovable_jeroslow [𝗜𝚺₁ ⪯ T] [T.SoundOnHierarchy 𝚺 1]
+theorem unprovable_jeroslow [𝗜𝚺⁺₁ ⪯ T] [T.SoundOnHierarchy 𝚺 1]
   : T ⊬ T.jeroslow := by
   rw [← Theory.jeroslow_eq_standard];
   exact ProvabilityAbstraction.unprovable_jeroslow (𝔚 := T.standardRefutability)
@@ -124,7 +124,7 @@ theorem unprovable_jeroslow [𝗜𝚺₁ ⪯ T] [T.SoundOnHierarchy 𝚺 1]
   (i.e. no statement can be both formally proved in `T` and formally refuted in `T`)
   is not provable in `T` itself.
 -/
-theorem unprovable_formalized_law_of_noncontradiction [𝗜𝚺₁ ⪯ T] [Entailment.Consistent T]
+theorem unprovable_formalized_law_of_noncontradiction [𝗜𝚺⁺₁ ⪯ T] [Entailment.Consistent T]
   : T ⊬ (∀¹ ∼(provable T ⋏ T.refutable) : ArithmeticSentence) := by
     simpa [flon, safe, -LogicalConnective.DeMorgan.and] using ProvabilityAbstraction.unprovable_flon
       (𝔅 := T.standardProvability) (𝔚 := T.standardRefutability)

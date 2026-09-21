@@ -5,7 +5,7 @@ public import Foundation.FirstOrder.Incompleteness.First
 @[expose] public section
 namespace FFL.FirstOrder.Arithmetic
 
-variable (T : ArithmeticTheory) [T.Δ₁] [𝗜𝚺₁ ⪯ T] [T.SoundOnHierarchy 𝚺 1]
+variable (T : ArithmeticTheory) [T.Δ₁] [𝗜𝚺⁺₁ ⪯ T] [T.SoundOnHierarchy 𝚺 1]
 
 open FFL.Entailment
 

@@ -10,7 +10,7 @@ public import Foundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Formula.Iter
 
 namespace FFL.FirstOrder.Arithmetic.Bootstrapping
 
-variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
+variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺₁]
 
 variable {L : Language} [L.Encodable] [L.LORDefinable]
 

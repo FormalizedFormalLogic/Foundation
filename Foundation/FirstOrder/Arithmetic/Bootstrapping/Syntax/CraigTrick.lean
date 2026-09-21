@@ -99,7 +99,7 @@ variable (T : Theory L) [T.RE]
 noncomputable def reWitness : 𝚺₀.Semisentence 2 :=
   (ISigma1.exists_matrix_provable T.reCh.sigma_prop).choose
 
-lemma reWitness_spec (V : Type*) [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] (e : Fin 1 → V) :
+lemma reWitness_spec (V : Type*) [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺₁] (e : Fin 1 → V) :
     V ⊧/e T.reCh.val ↔ ∃ w, V ⊧/(w :> e) T.reWitness.val :=
   (models_iff_of_provable_iff
     (ISigma1.exists_matrix_provable T.reCh.sigma_prop).choose_spec V e).trans
@@ -163,7 +163,7 @@ lemma quote_eq_qqAnd_iff {φ : Proposition L} {p q : ℕ} :
     rfl
 
 section
-variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
+variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺₁]
 
 lemma quote_weight (k : ℕ) : (⌜(Semiformula.weight k : Proposition L)⌝ : V) = qqVerums (k : V) := by
   induction k with
@@ -190,7 +190,7 @@ lemma quote_eq_qqVerums {χ : Proposition L} {s : ℕ} : (⌜χ⌝ : ℕ) = qqVe
   intro h;
   exact (Semiformula.quote_inj_iff (V := ℕ)).mp <| by simpa [quote_weight] using h
 
-variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] [L.Primcodable]
+variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺₁] [L.Primcodable]
 
 section
 
