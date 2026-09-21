@@ -53,7 +53,8 @@ public import Foundation.FirstOrder.Arithmetic.HFS.Superexp
 public import Foundation.FirstOrder.Arithmetic.HFS.Vec
 public import Foundation.FirstOrder.Arithmetic.IOpen.Basic
 public import Foundation.FirstOrder.Arithmetic.ISigma1.Prenex
-public import Foundation.FirstOrder.Arithmetic.Induction
+public import Foundation.FirstOrder.Arithmetic.Induction.Basic
+public import Foundation.FirstOrder.Arithmetic.Induction.Equiv
 public import Foundation.FirstOrder.Arithmetic.LE
 public import Foundation.FirstOrder.Arithmetic.LeastNumber.Basic
 public import Foundation.FirstOrder.Arithmetic.Omega1.Basic
@@ -68,7 +69,6 @@ public import Foundation.FirstOrder.Arithmetic.R0.Basic
 public import Foundation.FirstOrder.Arithmetic.R0.Independence
 public import Foundation.FirstOrder.Arithmetic.R0.Representation
 public import Foundation.FirstOrder.Arithmetic.Schemata
-public import Foundation.FirstOrder.Arithmetic.StrictInduction
 public import Foundation.FirstOrder.Arithmetic.TA.Basic
 public import Foundation.FirstOrder.Arithmetic.TA.Nonstandard
 public import Foundation.FirstOrder.Incompleteness.Church
