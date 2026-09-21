@@ -67,10 +67,8 @@ jobs:
       # Foundation's own oleans from the shared FFL R2 cache, keyed by revision rather than by
       # branch, so it also covers fork PRs and fresh clones.
       - name: Restore the Lake cache
-        id: lake-cache
         uses: FormalizedFormalLogic/.github/lake-cache/restore@main
         with:
-          enabled: ${{ vars.LAKE_CACHE_ENABLED }}
           # A tarball hit above already carries everything this would fetch.
           skip-download: ${{ steps.cache-restore.outputs.cache-matched-key != '' }}
           # No freshness assertion: it would demand all ~8900 Mathlib modules, while Foundation
@@ -103,7 +101,7 @@ jobs:
       # `master` only, after every gate above: a PR builds a tree that will not exist after the
       # squash-merge, and a fork PR gets no secrets anyway.
       - name: Publish the Lake cache
-        if: ${{ steps.lake-cache.outputs.enabled == 'true' && github.event_name == 'push' && github.ref == 'refs/heads/master' }}
+        if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' }}
         uses: FormalizedFormalLogic/.github/lake-cache/publish@main
         with:
           cache-key: ${{ secrets.LAKE_CACHE_KEY }}
