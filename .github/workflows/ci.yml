@@ -27,6 +27,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
+        with:
+          # `lake cache get` walks back from HEAD to a published revision.
+          fetch-depth: 100
 
       # Set every tool up before the expensive steps, so that a broken install fails fast
       - name: Setup elan
@@ -61,6 +64,16 @@ jobs:
         if: hashFiles('.lake/Foundation-x86_64-unknown-linux-gnu.tar.gz') != ''
         run: lake unpack
 
+      # Foundation's own oleans from the shared FFL R2 cache, keyed by revision rather than by
+      # branch, so it also covers fork PRs and fresh clones. See contribute/cache.md.
+      - name: Restore the Lake cache
+        id: lake-cache
+        uses: FormalizedFormalLogic/.github/lake-cache/restore@main
+        with:
+          enabled: ${{ vars.LAKE_CACHE_ENABLED }}
+          # A tarball hit above already carries everything this would fetch.
+          skip-download: ${{ steps.cache-restore.outputs.cache-matched-key != '' }}
+
       - name: Build Foundation
         run: lake build Foundation
 
@@ -82,6 +95,15 @@ jobs:
         with:
           path: .lake/Foundation-x86_64-unknown-linux-gnu.tar.gz
           key: ${{ steps.cache-restore.outputs.cache-primary-key }}
+
+      # `master` only, after every gate above: a PR builds a tree that will not exist after the
+      # squash-merge, and a fork PR gets no secrets anyway.
+      - name: Publish the Lake cache
+        if: ${{ steps.lake-cache.outputs.enabled == 'true' && github.event_name == 'push' && github.ref == 'refs/heads/master' }}
+        uses: FormalizedFormalLogic/.github/lake-cache/publish@main
+        with:
+          cache-key: ${{ secrets.LAKE_CACHE_KEY }}
+          targets: Foundation
 
       - name: Generate import graph
         run: just import-graph
