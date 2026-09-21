@@ -22,7 +22,6 @@ public import Foundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Formula.Type
 public import Foundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Language
 public import Foundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Proof.Basic
 public import Foundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Proof.Coding
-public import Foundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Proof.Primrec
 public import Foundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Proof.Typed
 public import Foundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Term.Basic
 public import Foundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Term.Coding
