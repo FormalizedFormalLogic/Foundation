@@ -1,6 +1,10 @@
 name = "Foundation"
 defaultTargets = ["Foundation"]
 
+# One published Lake cache then serves every platform, not just CI's Linux. Revisit if a native
+# library is added; Lake already drops platform-dependent executable outputs by itself.
+platformIndependent = true
+
 [leanOptions]
 pp.unicode.fun = true
 weak.linter.flexible = true

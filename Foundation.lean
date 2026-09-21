@@ -111,6 +111,7 @@ public import Foundation.FirstOrder.LK.Simplified
 public import Foundation.FirstOrder.LK.Soundness
 public import Foundation.FirstOrder.SetTheory.Basic
 public import Foundation.FirstOrder.SetTheory.Basic.Axioms
+public import Foundation.FirstOrder.SetTheory.Basic.Hierarchy
 public import Foundation.FirstOrder.SetTheory.Basic.Misc
 public import Foundation.FirstOrder.SetTheory.Basic.Model
 public import Foundation.FirstOrder.SetTheory.Function
@@ -124,6 +125,8 @@ public import Foundation.FirstOrder.SetTheory.Z
 public import Foundation.FirstOrder.SetTheory.ZF
 public import Foundation.FirstOrder.Syntax
 public import Foundation.FirstOrder.Syntax.Classical.BinderNotation
+public import Foundation.FirstOrder.Syntax.Classical.Bounded
+public import Foundation.FirstOrder.Syntax.Classical.BoundingHierarchy
 public import Foundation.FirstOrder.Syntax.Classical.Coding
 public import Foundation.FirstOrder.Syntax.Classical.Eq
 public import Foundation.FirstOrder.Syntax.Classical.Formula
