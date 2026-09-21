@@ -78,10 +78,6 @@ jobs:
           # here uses. `lake build` below builds whatever is missing, as it always has.
           assert-fresh: ''
 
-      # `--wfail` makes a warning an error. Nothing downstream can filter them out for itself:
-      # Lake replays a dependency's cached log on every build that imports it, so a warning left
-      # here reaches a downstream `--wfail` as if it were theirs, and the published cache carries
-      # it to everyone.
       - name: Build Foundation (warnings are errors)
         run: lake build Foundation --wfail
 
