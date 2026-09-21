@@ -65,7 +65,7 @@ jobs:
         run: lake unpack
 
       # Foundation's own oleans from the shared FFL R2 cache, keyed by revision rather than by
-      # branch, so it also covers fork PRs and fresh clones. See contribute/cache.md.
+      # branch, so it also covers fork PRs and fresh clones.
       - name: Restore the Lake cache
         id: lake-cache
         uses: FormalizedFormalLogic/.github/lake-cache/restore@main

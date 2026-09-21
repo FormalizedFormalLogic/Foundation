@@ -7,7 +7,7 @@ format-references:
     bibtool -F -r .bibtoolrsc -i ./references.bib -o references.bib
     sed -i '1{/^$/d}' references.bib
 
-# Download Mathlib's and Foundation's prebuilt artifacts (see contribute/cache.md)
+# Download Mathlib's and Foundation's prebuilt artifacts, so a fresh clone need not compile them
 cache:
     lake exe cache get
     LAKE_CONFIG=lake-cache.toml lake cache get --service ffl --repo FormalizedFormalLogic/Foundation --max-revs=100 || echo "cache incomplete; the build will compile the rest from source"

@@ -1,6 +1,6 @@
 # Contributing to Foundation
 
-How to contribute to Foundation: the flow to `master`, PR/commit titles, pre-submission checks, and disclosure of AI involvement. For the coding conventions of the Lean sources, see [style.md](./style.md); for the published build cache that saves a fresh clone from compiling the whole library, see [cache.md](./cache.md).
+How to contribute to Foundation: the flow to `master`, PR/commit titles, pre-submission checks, and disclosure of AI involvement. For the coding conventions of the Lean sources, see [style.md](./style.md).
 
 Items marked 🤖 are especially directed at AI coding agents.
 
