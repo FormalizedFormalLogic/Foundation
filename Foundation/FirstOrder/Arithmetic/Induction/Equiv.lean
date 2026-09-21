@@ -45,45 +45,20 @@ lemma models_ISigmaZero_of_models_InductionOnHierarchy (V : Type*) [ORingStructu
 
 /-! ### Successor induction over the strict hierarchy -/
 
-/-- The existential quantification of a `𝚷-[s]`-definable relation is defined by a strict
-`𝚺-[s + 1]` formula. -/
-private lemma exists_strictHierarchy_sigma_eval [V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺s]
-    (hQ : 𝚷-[s].DefinableRel Q) (hPQ : ∀ x, P x ↔ ∃ w, Q x w) :
-    ∃ (φ : ArithmeticSemiformula ℕ 1) (f : ℕ → V),
-      StrictHierarchy 𝚺 (s + 1) φ ∧ ∀ x, P x ↔ φ.Eval ![x] f := by
-  obtain ⟨f, χ, hχ, hiff⟩ := (strictDefinableRel_of_models_IBroadSigma (Γ := 𝚷) hQ).exists_eval_iff;
-  refine ⟨∃¹ (χ ⇜ ![#1, #0]), f, (StrictHierarchy.ofAlt (Γ := 𝚺) (hχ.rew _)).exs, fun x ↦ ?_⟩;
-  rw [hPQ x, Semiformula.eval_ex];
-  refine exists_congr fun w ↦
-    Iff.trans (show Q x w ↔ χ.Eval ![x, w] f by simpa using hiff ![x, w]) ?_;
-  simp [Semiformula.eval_substs];
-
-/-- The universal quantification of a `𝚺-[s]`-definable relation is defined by a strict
-`𝚷-[s + 1]` formula. -/
-private lemma exists_strictHierarchy_pi_eval [V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺s]
-    (hQ : 𝚺-[s].DefinableRel Q) (hPQ : ∀ x, P x ↔ ∀ w, Q x w) :
-    ∃ (φ : ArithmeticSemiformula ℕ 1) (f : ℕ → V),
-      StrictHierarchy 𝚷 (s + 1) φ ∧ ∀ x, P x ↔ φ.Eval ![x] f := by
-  obtain ⟨f, χ, hχ, hiff⟩ := (strictDefinableRel_of_models_IBroadSigma (Γ := 𝚺) hQ).exists_eval_iff;
-  refine ⟨∀¹ (χ ⇜ ![#1, #0]), f, (StrictHierarchy.ofAlt (Γ := 𝚷) (hχ.rew _)).all, fun x ↦ ?_⟩;
-  rw [hPQ x, Semiformula.eval_all];
-  refine forall_congr' fun w ↦
-    Iff.trans (show Q x w ↔ χ.Eval ![x, w] f by simpa using hiff ![x, w]) ?_;
-  simp [Semiformula.eval_substs];
-
-private lemma succ_induction_exists_pi_of_sigma [V↓[ℒₒᵣ] ⊧* 𝗜𝗡𝗗 𝚺 (s + 1)] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺s]
-    (hQ : 𝚷-[s].DefinableRel Q) (hPQ : ∀ x, P x ↔ ∃ w, Q x w)
-    (zero : P 0) (succ : ∀ x, P x → P (x + 1)) : ∀ x, P x :=
-  have ⟨φ, f, hφ, hiff⟩ := exists_strictHierarchy_sigma_eval hQ hPQ
-  InductionScheme.succ_induction (C := Arithmetic.StrictHierarchy 𝚺 (s + 1))
-    ⟨f, φ, hφ, hiff⟩ zero succ
-
+/-- The universal quantification of a `𝚺-[s]`-definable relation is a strict `𝚷-[s + 1]` formula,
+so `𝗜𝗡𝗗 𝚷 (s + 1)` gives it successor induction. -/
 lemma succ_induction_forall_sigma [V↓[ℒₒᵣ] ⊧* 𝗜𝗡𝗗 𝚷 (s + 1)] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺s]
     (hQ : 𝚺-[s].DefinableRel Q) (hPQ : ∀ x, P x ↔ ∀ w, Q x w)
-    (zero : P 0) (succ : ∀ x, P x → P (x + 1)) : ∀ x, P x :=
-  have ⟨φ, f, hφ, hiff⟩ := exists_strictHierarchy_pi_eval hQ hPQ
-  InductionScheme.succ_induction (C := Arithmetic.StrictHierarchy 𝚷 (s + 1))
-    ⟨f, φ, hφ, hiff⟩ zero succ
+    (zero : P 0) (succ : ∀ x, P x → P (x + 1)) : ∀ x, P x := by
+  obtain ⟨f, χ, hχ, hiff⟩ := (strictDefinableRel_of_models_IBroadSigma (Γ := 𝚺) hQ).exists_eval_iff;
+  have hP : ∀ x, P x ↔ (∀¹ (χ ⇜ ![#1, #0])).Eval ![x] f := by
+    intro x;
+    rw [hPQ x, Semiformula.eval_all];
+    refine forall_congr' fun w ↦
+      Iff.trans (show Q x w ↔ χ.Eval ![x, w] f by simpa using hiff ![x, w]) ?_;
+    simp [Semiformula.eval_substs];
+  exact InductionScheme.succ_induction (C := Arithmetic.StrictHierarchy 𝚷 (s + 1))
+    ⟨f, _, (StrictHierarchy.ofAlt (Γ := 𝚷) (hχ.rew _)).all, hP⟩ zero succ;
 
 /-- - [HP98, Lemma I.2.12(2)] -/
 private lemma neg_succ_induction [V↓[ℒₒᵣ] ⊧* 𝗜𝗡𝗗 𝚷 (s + 1)] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺s]
@@ -113,22 +88,27 @@ private lemma neg_succ_induction [V↓[ℒₒᵣ] ⊧* 𝗜𝗡𝗗 𝚷 (s + 1)
       . exact le_tsub_of_add_le_left hx;
   exact nzero (by simpa using key a le_rfl);
 
-/-- - [HP98, Lemma I.2.12(2)] -/
-private lemma succ_induction_exists_pi_of_pi [V↓[ℒₒᵣ] ⊧* 𝗜𝗡𝗗 𝚷 (s + 1)] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺s]
-    (hQ : 𝚷-[s].DefinableRel Q) (hPQ : ∀ x, P x ↔ ∃ w, Q x w)
-    (zero : P 0) (succ : ∀ x, P x → P (x + 1)) : ∀ x, P x := by
-  have h := neg_succ_induction (P := fun x ↦ ¬P x) (Q := fun x w ↦ ¬Q x w)
-    (HierarchySymbol.Definable.not (Γ := 𝚺) hQ) (fun x ↦ by simp [hPQ x])
-    (by simpa using zero) (fun x hx ↦ by simpa using succ x (by simpa using hx));
-  intro x;
-  simpa using h x;
-
+/-- Successor induction for the existential quantification of a `𝚷-[s]`-definable relation: for
+`𝚺` it is a strict `𝚺-[s + 1]` formula, for `𝚷` its negation is handled by `neg_succ_induction`. -/
 lemma succ_induction_exists_pi (Γ : Polarity) [V↓[ℒₒᵣ] ⊧* 𝗜𝗡𝗗 Γ (s + 1)] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺s]
     (hQ : 𝚷-[s].DefinableRel Q) (hPQ : ∀ x, P x ↔ ∃ w, Q x w)
     (zero : P 0) (succ : ∀ x, P x → P (x + 1)) : ∀ x, P x := by
   rcases Γ with _ | _;
-  . exact succ_induction_exists_pi_of_sigma hQ hPQ zero succ;
-  . exact succ_induction_exists_pi_of_pi hQ hPQ zero succ;
+  . obtain ⟨f, χ, hχ, hiff⟩ :=
+      (strictDefinableRel_of_models_IBroadSigma (Γ := 𝚷) hQ).exists_eval_iff;
+    have hP : ∀ x, P x ↔ (∃¹ (χ ⇜ ![#1, #0])).Eval ![x] f := by
+      intro x;
+      rw [hPQ x, Semiformula.eval_ex];
+      refine exists_congr fun w ↦
+        Iff.trans (show Q x w ↔ χ.Eval ![x, w] f by simpa using hiff ![x, w]) ?_;
+      simp [Semiformula.eval_substs];
+    exact InductionScheme.succ_induction (C := Arithmetic.StrictHierarchy 𝚺 (s + 1))
+      ⟨f, _, (StrictHierarchy.ofAlt (Γ := 𝚺) (hχ.rew _)).exs, hP⟩ zero succ;
+  . have h := neg_succ_induction (P := fun x ↦ ¬P x) (Q := fun x w ↦ ¬Q x w)
+      (HierarchySymbol.Definable.not (Γ := 𝚺) hQ) (fun x ↦ by simp [hPQ x])
+      (by simpa using zero) (fun x hx ↦ by simpa using succ x (by simpa using hx));
+    intro x;
+    simpa using h x;
 
 /-! ### Collection from induction over the strict hierarchy -/
 
