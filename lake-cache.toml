@@ -1,8 +1,8 @@
 [[cache.service]]
 name = "ffl"
 kind = "s3"
-artifactEndpoint = "https://ffl.sno2wman.net/artifacts"
-revisionEndpoint = "https://ffl.sno2wman.net/revisions"
+artifactEndpoint = "https://cache.formalizedformallogic.org/artifacts"
+revisionEndpoint = "https://cache.formalizedformallogic.org/revisions"
 
 [[cache.service]]
 name = "ffl-upload"
