@@ -1,16 +1,9 @@
-# Cache services for `lake cache get` / `lake cache put`, selected with `--service`.
-# Identical in every FFL repository: Lake separates them by the `<owner>/<repo>` it puts in the
-# object key. No `cache.defaultService` on purpose — that would also redirect dependency
-# downloads, which must keep going to Reservoir.
-
-# Anonymous reads, via the bucket's custom domain.
 [[cache.service]]
 name = "ffl"
 kind = "s3"
 artifactEndpoint = "https://ffl.sno2wman.net/artifacts"
 revisionEndpoint = "https://ffl.sno2wman.net/revisions"
 
-# Authenticated writes, via the S3 API. CI only; the credential is the LAKE_CACHE_KEY secret.
 [[cache.service]]
 name = "ffl-upload"
 kind = "s3"
