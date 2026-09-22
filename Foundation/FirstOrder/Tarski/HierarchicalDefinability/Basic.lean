@@ -19,8 +19,6 @@ open scoped BoundingHierarchy
 
 namespace HierarchySymbol
 
-variable (ξ : Type*) (n : ℕ)
-
 variable {L : Language} {B : FirstOrder.Semiformula.Operator L 2}
 
 variable {V : Type*} [Tarski.Structure L V]
@@ -219,8 +217,8 @@ lemma of_zero (h : (Γ'-[0]).Definable B P) {ℌ : HierarchySymbol} : ℌ.Defina
   | 𝚺-[m] | 𝚷-[m] => intro _; simp [hφ.iff]
   | 𝚫-[m] =>
     constructor
-    · simp
-    · intro _; simp [hφ.iff]
+    . simp
+    . intro _; simp [hφ.iff]
 
 instance [𝚺₀.Definable B P] (ℌ : HierarchySymbol) : ℌ.Definable B P := of_zero (Γ' := 𝚺) inferInstance
 
@@ -244,9 +242,9 @@ instance [𝚫-[m].Definable B P] (Γ) : Γ-[m].Definable B P := of_delta inferI
 
 lemma delta_iff_sigma_and_pi : 𝚫-[m].Definable B P ↔ 𝚷-[m].Definable B P ∧ 𝚺-[m].Definable B P := by
   constructor
-  · intro h
+  . intro h
     exact ⟨of_delta (Γ := 𝚷) h, of_delta (Γ := 𝚺) h⟩
-  · rintro ⟨hπ, hσ⟩
+  . rintro ⟨hπ, hσ⟩
     rcases hσ with ⟨φ, hφ⟩
     rcases hπ with ⟨ψ, hψ⟩
     exact ⟨.mkDelta φ ψ, by intro v; simp [hφ.df.iff, hψ.df.iff], by intro v; simp [hφ.df.iff]⟩
@@ -261,10 +259,10 @@ lemma of_sigma_of_pi (hσ : 𝚺-[m].Definable B P) (hπ : 𝚷-[m].Definable B 
 
 lemma of_lt {C : HierarchySymbol} {s : ℕ} (hP : C.Definable B P) (h : C.rank < s) :
     Γ-[s].Definable B P := by
-  rcases hP with ⟨φ, hφ⟩;
+  rcases hP with ⟨φ, hφ⟩
   exact .of_sigma_of_pi
     (.mkPolarity (Γ := 𝚺) φ.val (φ.hierarchy_of_lt h) fun _ ↦ hφ.iff.symm)
-    (.mkPolarity (Γ := 𝚷) φ.val (φ.hierarchy_of_lt h) fun _ ↦ hφ.iff.symm);
+    (.mkPolarity (Γ := 𝚷) φ.val (φ.hierarchy_of_lt h) fun _ ↦ hφ.iff.symm)
 
 lemma of_iff (H : ℌ.Definable B Q) (h : ∀ x, P x ↔ Q x) : ℌ.Definable B P := by
   rwa [show P = Q from by funext v; simp [h]]
@@ -287,11 +285,11 @@ lemma retractiont (h : ℌ.Definable B P) (f : Fin k → Semiterm L V n) :
 
 @[simp] instance const {P : Prop} : ℌ.Definable B (fun _ : Fin k → V ↦ P) := by
   by_cases hP : P
-  · apply Definable.mk' ⊤
+  . apply Definable.mk' ⊤
     match ℌ with
     | 𝚺-[m] | 𝚷-[m] => intro v; simp [hP]
     | 𝚫-[m] => exact ⟨by simp, by intro v; simp [hP]⟩
-  · apply Definable.mk' ⊥
+  . apply Definable.mk' ⊥
     match ℌ with
     | 𝚺-[m] | 𝚷-[m] => intro v; simp [hP]
     | 𝚫-[m] => exact ⟨by simp, by intro v; simp [hP]⟩
@@ -414,10 +412,10 @@ lemma equal' [L.Eq] [Tarski.Structure.Eq L V] (i j : Fin k) : ℌ.Definable B fu
 
 lemma of_sigma [L.Eq] [Tarski.Structure.Eq L V] {f : (Fin k → V) → V} (h : 𝚺-[m].DefinableFunction B f) {Γ} : Γ-[m].DefinableFunction B f := by
   cases' m with m
-  · exact of_zero h
+  . exact of_zero h
   apply of_sigma_of_pi
-  · exact h
-  · have : 𝚷-[m + 1].Definable B fun v ↦ ∀ y, y = f (v ·.succ) → v 0 = y := all <| imp
+  . exact h
+  . have : 𝚷-[m + 1].Definable B fun v ↦ ∀ y, y = f (v ·.succ) → v 0 = y := all <| imp
       (by simpa using retraction h (0 :> (·.succ.succ)))
       (by simpa using equal' 1 0)
     exact this.of_iff fun v ↦ by simp
@@ -431,19 +429,19 @@ lemma exsVec {k l} {P : (Fin k → V) → (Fin l → V) → Prop}
     suffices 𝚺-[m + 1].Definable B fun v : Fin k → V ↦ ∃ y, ∃ ys : Fin l → V, P v (y :> ys) by
       apply of_iff this; intro x
       constructor
-      · rintro ⟨ys, h⟩; exact ⟨ys 0, (ys ·.succ), by simpa using h⟩
-      · rintro ⟨y, ys, h⟩; exact ⟨_, h⟩
+      . rintro ⟨ys, h⟩; exact ⟨ys 0, (ys ·.succ), by simpa using h⟩
+      . rintro ⟨y, ys, h⟩; exact ⟨_, h⟩
     apply exs
     apply ih
     let g : Fin (k + (l + 1)) → Fin (k + 1 + l) := Matrix.vecAppend rfl (fun x ↦ x.succ.castAdd l) (Fin.castAdd l 0 :> fun j ↦ j.natAdd (k + 1))
     exact of_iff (retraction h g) (by
       intro v; simp only [g]
       apply iff_of_eq; congr
-      · ext i; congr 1; ext; simp [Matrix.vecAppend_eq_ite]
-      · ext i
+      . ext i; congr 1; ext; simp [Matrix.vecAppend_eq_ite]
+      . ext i
         cases' i using Fin.cases with i
-        · simp only [Matrix.cons_val_zero]; congr 1; ext; simp [Matrix.vecAppend_eq_ite]
-        · simp only [Matrix.cons_val_succ]; congr 1; ext; simp [Matrix.vecAppend_eq_ite])
+        . simp only [Matrix.cons_val_zero]; congr 1; ext; simp [Matrix.vecAppend_eq_ite]
+        . simp only [Matrix.cons_val_succ]; congr 1; ext; simp [Matrix.vecAppend_eq_ite])
 
 lemma allVec {k l} {P : (Fin k → V) → (Fin l → V) → Prop}
     (h : 𝚷-[m+1].Definable B fun w : Fin (k + l) → V ↦ P (fun i ↦ w (i.castAdd l)) (fun j ↦ w (j.natAdd k))) :
@@ -454,32 +452,32 @@ lemma allVec {k l} {P : (Fin k → V) → (Fin l → V) → Prop}
     suffices 𝚷-[m+1].Definable B fun v : Fin k → V ↦ ∀ y, ∀ ys : Fin l → V, P v (y :> ys) by
       apply of_iff this; intro x
       constructor
-      · intro h y ys; apply h
-      · intro h ys; simpa using h (ys 0) (ys ·.succ)
+      . intro h y ys; apply h
+      . intro h ys; simpa using h (ys 0) (ys ·.succ)
     apply all; apply ih
     let g : Fin (k + (l + 1)) → Fin (k + 1 + l) := Matrix.vecAppend rfl (fun x ↦ x.succ.castAdd l) (Fin.castAdd l 0 :> fun j ↦ j.natAdd (k + 1))
     exact of_iff (retraction h g) (by
       intro v; simp only [g]
       apply iff_of_eq; congr
-      · ext i; congr 1; ext; simp [Matrix.vecAppend_eq_ite]
-      · ext i
+      . ext i; congr 1; ext; simp [Matrix.vecAppend_eq_ite]
+      . ext i
         cases' i using Fin.cases with i
-        · simp only [Matrix.cons_val_zero]; congr 1; ext; simp [Matrix.vecAppend_eq_ite]
-        · simp only [Matrix.cons_val_succ]; congr 1; ext; simp [Matrix.vecAppend_eq_ite])
+        . simp only [Matrix.cons_val_zero]; congr 1; ext; simp [Matrix.vecAppend_eq_ite]
+        . simp only [Matrix.cons_val_succ]; congr 1; ext; simp [Matrix.vecAppend_eq_ite])
 
 private lemma substitution_sigma {f : Fin k → (Fin l → V) → V} (hP : 𝚺-[m+1].Definable B P) (hf : ∀ i, 𝚺-[m+1].DefinableFunction B (f i)) :
     𝚺-[m+1].Definable B fun z ↦ P (fun i ↦ f i z) := by
   have : 𝚺-[m+1].Definable B fun z ↦ ∃ ys : Fin k → V, (∀ i, ys i = f i z) ∧ P ys := by
     apply exsVec; apply and
-    · apply fintype_all; intro i
+    . apply fintype_all; intro i
       simpa using retraction (hf i) (i.natAdd l :> fun i ↦ i.castAdd k)
-    · exact retraction hP (Fin.natAdd l)
+    . exact retraction hP (Fin.natAdd l)
   exact of_iff this <| by
     intro v
     constructor
-    · intro hP
+    . intro hP
       exact ⟨(f · v), by simp, hP⟩
-    · rintro ⟨ys, hys, hP⟩
+    . rintro ⟨ys, hys, hP⟩
       have : ys = fun i ↦ f i v := funext hys
       rcases this; exact hP
 
@@ -487,16 +485,16 @@ private lemma substitution_pi {f : Fin k → (Fin l → V) → V} (hP : 𝚷-[m+
     𝚷-[m+1].Definable B fun z ↦ P (fun i ↦ f i z) := by
   have : 𝚷-[m+1].Definable B fun z ↦ ∀ ys : Fin k → V, (∀ i, ys i = f i z) → P ys := by
     apply allVec; apply imp
-    · apply fintype_all; intro i
+    . apply fintype_all; intro i
       simpa using retraction (hf i) (i.natAdd l :> fun i ↦ i.castAdd k)
-    · exact retraction hP (Fin.natAdd l)
+    . exact retraction hP (Fin.natAdd l)
   exact of_iff this <| by
     intro v
     constructor
-    · intro h ys e
+    . intro h ys e
       have : ys = (f · v) := funext e
       rcases this; exact h
-    · intro h; apply h _ (by simp)
+    . intro h; apply h _ (by simp)
 
 lemma substitution {f : Fin k → (Fin l → V) → V}
     (hP : Γ-[m + 1].Definable B P) (hf : ∀ i, 𝚺-[m + 1].DefinableFunction B (f i)) :
@@ -665,8 +663,8 @@ lemma substitution [L.Eq] [Tarski.Structure.Eq L V] {f : Fin k → (Fin l → V)
   simpa using Definable.substitution (f := (· 0) :> fun i w ↦ f i (w ·.succ)) hF <| by
     intro i
     cases' i using Fin.cases with i
-    · simp
-    · simpa using Definable.retraction (hf i) (0 :> (·.succ.succ))
+    . simp
+    . simpa using Definable.retraction (hf i) (0 :> (·.succ.succ))
 
 end DefinableFunction
 
@@ -712,16 +710,22 @@ lemma ball_operator {Γ} {P : (Fin k → V) → V → Prop} {f : (Fin k → V) �
   rcases h with ⟨φ, hp⟩
   match Γ with
   | 𝚺 => exact
-    ⟨ .mkSigma (∃¹ (bf.val ⋏ (∀¹[B.operator ![#0, #1]] φ.val ⇜ (#0 :> (#·.succ.succ))))) (.exs (.and bf.sigma_prop (BoundingHierarchy.ball (by simp) (φ.sigma_prop.rew _)))),
+    ⟨ .mkSigma (∃¹ (bf.val ⋏ (∀¹[B.operator ![#0, #1]] φ.val ⇜ (#0 :> (#·.succ.succ)))))
+        (.exs (.and bf.sigma_prop (BoundingHierarchy.ball (by simp) (φ.sigma_prop.rew _)))),
       by intro v; simp [hbf.df.iff, hp.df.iff] ⟩
   | 𝚷 => exact
-    ⟨ .mkPi (∀¹ (bf.val 🡒 (∀¹[B.operator ![#0, #1]] φ.val ⇜ (#0 :> (#·.succ.succ))))) (.all (BoundingHierarchy.imp_iff.mpr ⟨bf.sigma_prop, BoundingHierarchy.ball (by simp) (φ.pi_prop.rew _)⟩)),
+    ⟨ .mkPi (∀¹ (bf.val 🡒 (∀¹[B.operator ![#0, #1]] φ.val ⇜ (#0 :> (#·.succ.succ)))))
+        (.all (BoundingHierarchy.imp_iff.mpr ⟨bf.sigma_prop,
+          BoundingHierarchy.ball (by simp) (φ.pi_prop.rew _)⟩)),
       by intro v; simp [hbf.df.iff, hp.df.iff] ⟩
   | 𝚫 =>
     exact .of_sigma_of_pi
-      ⟨ .mkSigma (∃¹ (bf.val ⋏ (∀¹[B.operator ![#0, #1]] φ.sigma.val ⇜ (#0 :> (#·.succ.succ))))) (.exs (.and bf.sigma_prop (BoundingHierarchy.ball (by simp) (φ.sigma.sigma_prop.rew _)))),
+      ⟨ .mkSigma (∃¹ (bf.val ⋏ (∀¹[B.operator ![#0, #1]] φ.sigma.val ⇜ (#0 :> (#·.succ.succ)))))
+        (.exs (.and bf.sigma_prop (BoundingHierarchy.ball (by simp) (φ.sigma.sigma_prop.rew _)))),
           by intro v; simp [hbf.df.iff, hp.df.iff, HierarchySymbol.Semiformula.val_sigma] ⟩
-      ⟨ .mkPi (∀¹ (bf.val 🡒 (∀¹[B.operator ![#0, #1]] φ.pi.val ⇜ (#0 :> (#·.succ.succ))))) (.all (BoundingHierarchy.imp_iff.mpr ⟨bf.sigma_prop, BoundingHierarchy.ball (by simp) (φ.pi.pi_prop.rew _)⟩)),
+      ⟨ .mkPi (∀¹ (bf.val 🡒 (∀¹[B.operator ![#0, #1]] φ.pi.val ⇜ (#0 :> (#·.succ.succ)))))
+        (.all (BoundingHierarchy.imp_iff.mpr ⟨bf.sigma_prop,
+          BoundingHierarchy.ball (by simp) (φ.pi.pi_prop.rew _)⟩)),
         by intro v; simp [hbf.df.iff, hp.df.iff, hp.proper.iff'] ⟩
 
 lemma bexs_operator {Γ} {P : (Fin k → V) → V → Prop} {f : (Fin k → V) → V}
@@ -731,16 +735,22 @@ lemma bexs_operator {Γ} {P : (Fin k → V) → V → Prop} {f : (Fin k → V) �
   rcases h with ⟨φ, hp⟩
   match Γ with
   | 𝚺 => exact
-    ⟨ .mkSigma (∃¹ (bf.val ⋏ (∃¹[B.operator ![#0, #1]] φ.val ⇜ (#0 :> (#·.succ.succ))))) (.exs (.and bf.sigma_prop (BoundingHierarchy.bexs (by simp) (φ.sigma_prop.rew _)))),
+    ⟨ .mkSigma (∃¹ (bf.val ⋏ (∃¹[B.operator ![#0, #1]] φ.val ⇜ (#0 :> (#·.succ.succ)))))
+        (.exs (.and bf.sigma_prop (BoundingHierarchy.bexs (by simp) (φ.sigma_prop.rew _)))),
       by intro v; simp [hbf.df.iff, hp.df.iff] ⟩
   | 𝚷 => exact
-    ⟨ .mkPi (∀¹ (bf.val 🡒 (∃¹[B.operator ![#0, #1]] φ.val ⇜ (#0 :> (#·.succ.succ))))) (.all (BoundingHierarchy.imp_iff.mpr ⟨bf.sigma_prop, BoundingHierarchy.bexs (by simp) (φ.pi_prop.rew _)⟩)),
+    ⟨ .mkPi (∀¹ (bf.val 🡒 (∃¹[B.operator ![#0, #1]] φ.val ⇜ (#0 :> (#·.succ.succ)))))
+        (.all (BoundingHierarchy.imp_iff.mpr ⟨bf.sigma_prop,
+          BoundingHierarchy.bexs (by simp) (φ.pi_prop.rew _)⟩)),
       by intro v; simp [hbf.df.iff, hp.df.iff] ⟩
   | 𝚫 =>
     exact .of_sigma_of_pi
-      ⟨ .mkSigma (∃¹ (bf.val ⋏ (∃¹[B.operator ![#0, #1]] φ.sigma.val ⇜ (#0 :> (#·.succ.succ))))) (.exs (.and bf.sigma_prop (BoundingHierarchy.bexs (by simp) (φ.sigma.sigma_prop.rew _)))),
+      ⟨ .mkSigma (∃¹ (bf.val ⋏ (∃¹[B.operator ![#0, #1]] φ.sigma.val ⇜ (#0 :> (#·.succ.succ)))))
+        (.exs (.and bf.sigma_prop (BoundingHierarchy.bexs (by simp) (φ.sigma.sigma_prop.rew _)))),
           by intro v; simp [hbf.df.iff, hp.df.iff, HierarchySymbol.Semiformula.val_sigma] ⟩
-      ⟨ .mkPi (∀¹ (bf.val 🡒 (∃¹[B.operator ![#0, #1]] φ.pi.val ⇜ (#0 :> (#·.succ.succ))))) (.all (BoundingHierarchy.imp_iff.mpr ⟨bf.sigma_prop, BoundingHierarchy.bexs (by simp) (φ.pi.pi_prop.rew _)⟩)),
+      ⟨ .mkPi (∀¹ (bf.val 🡒 (∃¹[B.operator ![#0, #1]] φ.pi.val ⇜ (#0 :> (#·.succ.succ)))))
+        (.all (BoundingHierarchy.imp_iff.mpr ⟨bf.sigma_prop,
+          BoundingHierarchy.bexs (by simp) (φ.pi.pi_prop.rew _)⟩)),
         by intro v; simp [hbf.df.iff, hp.df.iff, hp.proper.iff'] ⟩
 
 end Definable
@@ -864,11 +874,11 @@ theorem sigma_succ_induction {V : Type*} [Tarski.Structure L V] {s : ℕ}
       motive (k + 1) P hP → motive k (fun v ↦ ∃ x, P (x :> v)) (.exsCons hP)
     )
     (k : ℕ) (P : (Fin k → V) → Prop) (hP : 𝚺-[s + 1].Definable B P) : motive k P hP := by
-  obtain ⟨φ, hφ⟩ := id hP;
-  obtain rfl : P = fun v ↦ φ.val.Eval v id := funext fun v ↦ by simp [hφ.iff];
+  obtain ⟨φ, hφ⟩ := id hP
+  obtain rfl : P = fun v ↦ φ.val.Eval v id := funext fun v ↦ by simp [hφ.iff]
   have hd : ∀ {k} (ψ : FirstOrder.Semiformula L V k), BoundingHierarchy B 𝚺 (s + 1) ψ →
-    𝚺-[s + 1].Definable B fun v ↦ ψ.Eval v id := fun ψ hψ ↦ .mkPolarity ψ hψ fun _ ↦ Iff.rfl;
-  revert hP;
+    𝚺-[s + 1].Definable B fun v ↦ ψ.Eval v id := fun ψ hψ ↦ .mkPolarity ψ hψ fun _ ↦ Iff.rfl
+  revert hP
   exact BoundingHierarchy.sigma_succ_induction
     (P := fun k ψ ↦ ∀ h : 𝚺-[s + 1].Definable B fun v ↦ ψ.Eval v id, motive k (fun v ↦ ψ.Eval v id) h)
     (fun _ ψ h _ ↦ pi (.mkPolarity ψ h fun _ ↦ Iff.rfl))
@@ -876,10 +886,10 @@ theorem sigma_succ_induction {V : Type*} [Tarski.Structure L V] {s : ℕ}
       simpa using and (hd ψ hψ) (hd χ hχ) (ihψ <| hd ψ hψ) (ihχ <| hd χ hχ))
     (fun _ ψ χ hψ hχ ihψ ihχ _ ↦ by
       simpa using or (hd ψ hψ) (hd χ hχ) (ihψ <| hd ψ hψ) (ihχ <| hd χ hχ))
-    (fun _ t ψ hψ ih _ ↦ by simpa  using ball t (hd ψ hψ) (ih <| hd ψ hψ))
-    (fun _ t ψ hψ ih _ ↦ by simpa  using bexs t (hd ψ hψ) (ih <| hd ψ hψ))
+    (fun _ t ψ hψ ih _ ↦ by simpa using ball t (hd ψ hψ) (ih <| hd ψ hψ))
+    (fun _ t ψ hψ ih _ ↦ by simpa using bexs t (hd ψ hψ) (ih <| hd ψ hψ))
     (fun _ ψ hψ ih _ ↦ by simpa using exs (hd ψ hψ) (ih <| hd ψ hψ))
-    k φ.val φ.sigma_prop;
+    k φ.val φ.sigma_prop
 
 end HierarchySymbol.Definable
 

@@ -110,31 +110,31 @@ def pi : 𝚫-[m].Semiformula R ξ n → 𝚷-[m].Semiformula R ξ n
 
 @[simp] lemma pi_mkDelta (φ : 𝚺-[m].Semiformula R ξ n) (ψ : 𝚷-[m].Semiformula R ξ n) : (mkDelta φ ψ).pi = ψ := rfl
 
-lemma val_sigma (φ : 𝚫-[m].Semiformula R ξ n) : φ.sigma.val = φ.val := by rcases φ; simp;
+lemma val_sigma (φ : 𝚫-[m].Semiformula R ξ n) : φ.sigma.val = φ.val := by rcases φ; simp
 
 def mkPolarity (φ : FirstOrder.Semiformula L ξ n) : (Γ : Polarity) → BoundingHierarchy R Γ m φ → Γ-[m].Semiformula R ξ n
   | 𝚺, h => mkSigma φ h
   | 𝚷, h => mkPi φ h
 
-@[simp] lemma val_mkPolarity (φ : FirstOrder.Semiformula L ξ n) {Γ} (h : BoundingHierarchy R Γ m φ) : (mkPolarity φ Γ h).val = φ := by cases Γ <;> rfl;
+@[simp] lemma val_mkPolarity (φ : FirstOrder.Semiformula L ξ n) {Γ} (h : BoundingHierarchy R Γ m φ) : (mkPolarity φ Γ h).val = φ := by cases Γ <;> rfl
 
 @[simp] lemma hierarchy_sigma (φ : 𝚺-[m].Semiformula R ξ n) : BoundingHierarchy R 𝚺 m φ.val := φ.sigma_prop
 
 @[simp] lemma hierarchy_pi (φ : 𝚷-[m].Semiformula R ξ n) : BoundingHierarchy R 𝚷 m φ.val := φ.pi_prop
 
 @[simp] lemma hierarchy_zero {Γ Γ' m} (φ : Γ-[0].Semiformula R ξ n) : BoundingHierarchy R Γ' m φ.val := by
-  cases Γ;
-  . exact BoundingHierarchy.of_zero φ.sigma_prop;
-  . exact BoundingHierarchy.of_zero φ.pi_prop;
+  cases Γ
+  . exact BoundingHierarchy.of_zero φ.sigma_prop
+  . exact BoundingHierarchy.of_zero φ.pi_prop
   . cases φ
-    simpa using BoundingHierarchy.of_zero (sigma_prop _);
+    simpa using BoundingHierarchy.of_zero (sigma_prop _)
 
 lemma hierarchy_of_lt {C : HierarchySymbol} {Γ : Polarity} {s : ℕ} (φ : C.Semiformula R ξ n)
     (h : C.rank < s) : BoundingHierarchy R Γ s φ.val := by
-  rcases C with ⟨_ | _ | _, m⟩;
-  . exact φ.sigma_prop.strict_mono _ h;
-  . exact φ.pi_prop.strict_mono _ h;
-  . exact (val_sigma φ ▸ φ.sigma.sigma_prop).strict_mono _ h;
+  rcases C with ⟨_ | _ | _, m⟩
+  . exact φ.sigma_prop.strict_mono _ h
+  . exact φ.pi_prop.strict_mono _ h
+  . exact (val_sigma φ ▸ φ.sigma.sigma_prop).strict_mono _ h
 
 variable {M : Type*} [Tarski.Structure L M]
 
@@ -161,11 +161,11 @@ lemma ProperWithParamOn.iff {φ : 𝚫-[m].Semiformula R M n}
 
 lemma ProperOn.iff' {φ : 𝚫-[m].Semisentence R n}
     (h : φ.ProperOn M) (e : Fin n → M) :
-    φ.pi.val.Evalb e ↔ φ.val.Evalb e := by simp [←h.iff, val_sigma];
+    φ.pi.val.Evalb e ↔ φ.val.Evalb e := by simp [←h.iff, val_sigma]
 
 lemma ProperWithParamOn.iff' {φ : 𝚫-[m].Semiformula R M n}
     (h : φ.ProperWithParamOn M) (e : Fin n → M) :
-    φ.pi.val.Eval e id ↔ φ.val.Eval e id := by simp [←h.iff, val_sigma];
+    φ.pi.val.Eval e id ↔ φ.val.Eval e id := by simp [←h.iff, val_sigma]
 
 inductive ProvablyProperOn' (T : Theory L) : {Γ : HierarchySymbol} → {n : ℕ} → (φ : Γ.Semisentence R n) → Prop
   | sigma (φ : 𝚺-[m].Semisentence R n) : φ.ProvablyProperOn' T
@@ -181,9 +181,9 @@ variable {T}
 lemma ProvablyProperOn.properOn
     {φ : 𝚫-[m].Semisentence R n} (h : φ.ProvablyProperOn T)
     (M : Type w) [Nonempty M] [Tarski.Structure L M] [M↓[L] ⊧* T] : φ.ProperOn M := by
-  intro v;
-  have := by simpa [models_iff] using consequence_iff.mp (Theory.Proof.sound h) M inferInstance;
-  exact this v;
+  intro v
+  have := by simpa [models_iff] using consequence_iff.mp (Theory.Proof.sound h) M inferInstance
+  exact this v
 
 end ProvablyProperOn
 
@@ -193,21 +193,21 @@ def rew (ω : Rew L ξ₁ n₁ ξ₂ n₂) : {Γ : HierarchySymbol} → Γ.Semif
   | 𝚫-[_], mkDelta φ ψ  => mkDelta (φ.rew ω) (ψ.rew ω)
 
 @[simp] lemma val_rew (ω : Rew L ξ₁ n₁ ξ₂ n₂) {Γ : HierarchySymbol} (φ : Γ.Semiformula R ξ₁ n₁) : (φ.rew ω).val = ω ▹ φ.val := by
-  rcases Γ with ⟨Γ, m⟩; rcases φ with (_ | _ | ⟨⟨p, _⟩, ⟨q, _⟩⟩) <;> simp [rew];
+  rcases Γ with ⟨Γ, m⟩; rcases φ with (_ | _ | ⟨⟨p, _⟩, ⟨q, _⟩⟩) <;> simp [rew]
 
 @[simp] lemma ProperOn.rew {φ : 𝚫-[m].Semisentence R n₁} (h : φ.ProperOn M) (ω : Rew L Empty n₁ Empty n₂) : (φ.rew ω).ProperOn M := by
-  rcases φ; simp only [ProperOn, Semiformula.rew, sigma_mkDelta, val_rew, Semiformula.eval_rew, Empty.eq_elim, pi_mkDelta];
-  intro e; exact h.iff _;
+  rcases φ; simp only [ProperOn, Semiformula.rew, sigma_mkDelta, val_rew, Semiformula.eval_rew, Empty.eq_elim, pi_mkDelta]
+  intro e; exact h.iff _
 
 @[simp] lemma ProperOn.rew' {φ : 𝚫-[m].Semisentence R n₁} (h : φ.ProperOn M) (ω : Rew L Empty n₁ M n₂) : (φ.rew ω).ProperWithParamOn M := by
-  rcases φ; intro e; simp [Semiformula.rew, Semiformula.eval_rew, Empty.eq_elim];
-  simpa using h.iff _;
+  rcases φ; intro e; simp [Semiformula.rew, Semiformula.eval_rew, Empty.eq_elim]
+  simpa using h.iff _
 
 @[simp] lemma ProperWithParamOn.rew {φ : 𝚫-[m].Semiformula R M n₁}
     (h : φ.ProperWithParamOn M) (f : Fin n₁ → Semiterm L M n₂) : (φ.rew (Rew.subst f)).ProperWithParamOn M := by
-  rcases φ; intro e;
-  simp only [Semiformula.rew, sigma_mkDelta, val_rew, Semiformula.eval_rew, pi_mkDelta];
-  exact h.iff _;
+  rcases φ; intro e
+  simp only [Semiformula.rew, sigma_mkDelta, val_rew, Semiformula.eval_rew, pi_mkDelta]
+  exact h.iff _
 
 lemma sigmaZero {Γ} (φ : Γ-[0].Semiformula R ξ k) : BoundingHierarchy R 𝚺 0 φ.val :=
   match Γ with
@@ -232,10 +232,10 @@ def ofDeltaOne (φ : 𝚫₁.Semiformula R ξ k) : (Γ : SigmaPiDelta) → (m : 
   | 𝚫-[_] => simp [ofZero]
 
 @[simp] lemma ProperOn.of_zero (φ : Γ'-[0].Semisentence R k) (m) : (ofZero φ 𝚫-[m]).ProperOn M := by
-  simp [ProperOn, ofZero];
+  simp [ProperOn, ofZero]
 
 @[simp] lemma ProperWithParamOn.of_zero (φ : Γ'-[0].Semiformula R M k) (m) : (ofZero φ 𝚫-[m]).ProperWithParamOn M := by
-  simp [ProperWithParamOn, ofZero];
+  simp [ProperWithParamOn, ofZero]
 
 def verum : {Γ : HierarchySymbol} → Γ.Semiformula R ξ n
   | 𝚺-[m] => mkSigma ⊤ (by simp)
@@ -300,114 +300,114 @@ def substSigma (φ : 𝚺-[m + 1].Semiformula R ξ 1) (F : 𝚺-[m + 1].Semiform
     𝚺-[m + 1].Semiformula R ξ n := (F ⋏ φ.rew (Rew.subst ![#0])).exs
 
 @[simp] lemma val_verum : (⊤ : Γ.Semiformula R ξ n).val = ⊤ := by
-  rcases Γ with ⟨Γ, m⟩; rcases Γ <;> simp <;> rfl;
+  rcases Γ with ⟨Γ, m⟩; rcases Γ <;> simp <;> rfl
 
-@[simp] lemma sigma_verum {m} : (⊤ : 𝚫-[m].Semiformula R ξ n).sigma = ⊤ := by simp [Top.top, verum];
+@[simp] lemma sigma_verum {m} : (⊤ : 𝚫-[m].Semiformula R ξ n).sigma = ⊤ := by simp [Top.top, verum]
 
-@[simp] lemma pi_verum {m} : (⊤ : 𝚫-[m].Semiformula R ξ n).pi = ⊤ := by simp [Top.top, verum];
+@[simp] lemma pi_verum {m} : (⊤ : 𝚫-[m].Semiformula R ξ n).pi = ⊤ := by simp [Top.top, verum]
 
 @[simp] lemma val_falsum : (⊥ : Γ.Semiformula R ξ n).val = ⊥ := by
-  rcases Γ with ⟨Γ, m⟩; rcases Γ <;> simp <;> rfl;
+  rcases Γ with ⟨Γ, m⟩; rcases Γ <;> simp <;> rfl
 
-@[simp] lemma sigma_falsum {m} : (⊥ : 𝚫-[m].Semiformula R ξ n).sigma = ⊥ := by simp [Bot.bot, falsum];
+@[simp] lemma sigma_falsum {m} : (⊥ : 𝚫-[m].Semiformula R ξ n).sigma = ⊥ := by simp [Bot.bot, falsum]
 
-@[simp] lemma pi_falsum {m} : (⊥ : 𝚫-[m].Semiformula R ξ n).pi = ⊥ := by simp [Bot.bot, falsum];
+@[simp] lemma pi_falsum {m} : (⊥ : 𝚫-[m].Semiformula R ξ n).pi = ⊥ := by simp [Bot.bot, falsum]
 
 @[simp] lemma val_and (φ ψ : Γ.Semiformula R ξ n) : (φ ⋏ ψ).val = φ.val ⋏ ψ.val := by
-  suffices (φ.and ψ).val = φ.val ⋏ ψ.val from this;
-  rcases Γ with ⟨Γ, m⟩; rcases Γ <;> simp [and, val, val_sigma];
+  suffices (φ.and ψ).val = φ.val ⋏ ψ.val from this
+  rcases Γ with ⟨Γ, m⟩; rcases Γ <;> simp [and, val, val_sigma]
 
 @[simp] lemma sigma_and (φ ψ : 𝚫-[m].Semiformula R ξ n) : (φ ⋏ ψ).sigma = φ.sigma ⋏ ψ.sigma := rfl
 
 @[simp] lemma pi_and (φ ψ : 𝚫-[m].Semiformula R ξ n) : (φ ⋏ ψ).pi = φ.pi ⋏ ψ.pi := rfl
 
 @[simp] lemma val_or (φ ψ : Γ.Semiformula R ξ n) : (φ ⋎ ψ).val = φ.val ⋎ ψ.val := by
-  suffices (φ.or ψ).val = φ.val ⋎ ψ.val from this;
-  rcases Γ with ⟨Γ, m⟩; rcases Γ <;> simp [or, val, val_sigma];
+  suffices (φ.or ψ).val = φ.val ⋎ ψ.val from this
+  rcases Γ with ⟨Γ, m⟩; rcases Γ <;> simp [or, val, val_sigma]
 
 @[simp] lemma sigma_or (φ ψ : 𝚫-[m].Semiformula R ξ n) : (φ ⋎ ψ).sigma = φ.sigma ⋎ ψ.sigma := rfl
 
 @[simp] lemma pi_or (φ ψ : 𝚫-[m].Semiformula R ξ n) : (φ ⋎ ψ).pi = φ.pi ⋎ ψ.pi := rfl
 
-@[simp] lemma val_negSigma {m} (φ : 𝚺-[m].Semiformula R ξ n) : φ.negSigma.val = ∼φ.val := by simp [negSigma];
+@[simp] lemma val_negSigma {m} (φ : 𝚺-[m].Semiformula R ξ n) : φ.negSigma.val = ∼φ.val := by simp [negSigma]
 
-@[simp] lemma val_negPi {m} (φ : 𝚷-[m].Semiformula R ξ n) : φ.negPi.val = ∼φ.val := by simp [negPi];
+@[simp] lemma val_negPi {m} (φ : 𝚷-[m].Semiformula R ξ n) : φ.negPi.val = ∼φ.val := by simp [negPi]
 
-lemma val_negDelta {m} (φ : 𝚫-[m].Semiformula R ξ n) : (∼φ).val = ∼φ.pi.val := by simp [HTilde.hTilde, Tilde.tilde, negDelta];
+lemma val_negDelta {m} (φ : 𝚫-[m].Semiformula R ξ n) : (∼φ).val = ∼φ.pi.val := by simp [HTilde.hTilde, Tilde.tilde, negDelta]
 
-@[simp] lemma sigma_negDelta {m} (φ : 𝚫-[m].Semiformula R ξ n) : (∼φ).sigma = φ.pi.negPi := by simp [HTilde.hTilde, Tilde.tilde, negDelta];
+@[simp] lemma sigma_negDelta {m} (φ : 𝚫-[m].Semiformula R ξ n) : (∼φ).sigma = φ.pi.negPi := by simp [HTilde.hTilde, Tilde.tilde, negDelta]
 
-@[simp] lemma sigma_negPi {m} (φ : 𝚫-[m].Semiformula R ξ n) : (∼φ).pi = φ.sigma.negSigma := by simp [HTilde.hTilde, Tilde.tilde, negDelta];
+@[simp] lemma sigma_negPi {m} (φ : 𝚫-[m].Semiformula R ξ n) : (∼φ).pi = φ.sigma.negSigma := by simp [HTilde.hTilde, Tilde.tilde, negDelta]
 
 @[simp] lemma val_ball (t : Semiterm L ξ n) (φ : Γ.Semiformula R ξ (n + 1)) : (ball t φ).val = ∀¹[R.operator ![#0, Rew.bShift t]] φ.val := by
-  rcases Γ with ⟨Γ, m⟩; rcases Γ <;> simp [ball, val, val_sigma];
+  rcases Γ with ⟨Γ, m⟩; rcases Γ <;> simp [ball, val, val_sigma]
 
 @[simp] lemma val_bexs (t : Semiterm L ξ n) (φ : Γ.Semiformula R ξ (n + 1)) : (bexs t φ).val = ∃¹[R.operator ![#0, Rew.bShift t]] φ.val := by
-  rcases Γ with ⟨Γ, m⟩; rcases Γ <;> simp [bexs, val, val_sigma];
+  rcases Γ with ⟨Γ, m⟩; rcases Γ <;> simp [bexs, val, val_sigma]
 
 @[simp] lemma val_exsSigma {m} (φ : 𝚺-[m + 1].Semiformula R ξ (n + 1)) : (exs φ).val = ∃¹ φ.val := rfl
 
 @[simp] lemma val_allPi {m} (φ : 𝚷-[m + 1].Semiformula R ξ (n + 1)) : (all φ).val = ∀¹ φ.val := rfl
 
-@[simp] lemma ProperOn.verum : (⊤ : 𝚫-[m].Semisentence R k).ProperOn M := by intro e; simp;
+@[simp] lemma ProperOn.verum : (⊤ : 𝚫-[m].Semisentence R k).ProperOn M := by intro e; simp
 
-@[simp] lemma ProperOn.falsum : (⊥ : 𝚫-[m].Semisentence R k).ProperOn M := by intro e; simp;
+@[simp] lemma ProperOn.falsum : (⊥ : 𝚫-[m].Semisentence R k).ProperOn M := by intro e; simp
 
 lemma ProperOn.and {φ ψ : 𝚫-[m].Semisentence R k} (hp : φ.ProperOn M) (hq : ψ.ProperOn M) : (φ ⋏ ψ).ProperOn M := by
-  intro e; simp [hp.iff, hq.iff];
+  intro e; simp [hp.iff, hq.iff]
 
 lemma ProperOn.or {φ ψ : 𝚫-[m].Semisentence R k} (hp : φ.ProperOn M) (hq : ψ.ProperOn M) : (φ ⋎ ψ).ProperOn M := by
-  intro e; simp [hp.iff, hq.iff];
+  intro e; simp [hp.iff, hq.iff]
 
 lemma ProperOn.neg {φ : 𝚫-[m].Semisentence R k} (hp : φ.ProperOn M) : (∼φ).ProperOn M := by
-  intro e; simp [hp.iff];
+  intro e; simp [hp.iff]
 
 lemma ProperOn.eval_neg {φ : 𝚫-[m].Semisentence R k} (hp : φ.ProperOn M) (e : Fin k → M) :
     (∼φ).val.Evalb e ↔ ¬φ.val.Evalb e := by
-  simp [←val_sigma, hp.iff];
+  simp [←val_sigma, hp.iff]
 
 lemma ProperOn.ball {t} {φ : 𝚫-[m + 1].Semisentence R (k + 1)} (hp : φ.ProperOn M) : (ball t φ).ProperOn M := by
-  intro e; simp [Semiformula.ball, hp.iff];
+  intro e; simp [Semiformula.ball, hp.iff]
 
 lemma ProperOn.bexs {t} {φ : 𝚫-[m + 1].Semisentence R (k + 1)} (hp : φ.ProperOn M) : (bexs t φ).ProperOn M := by
-  intro e; simp [Semiformula.bexs, hp.iff];
+  intro e; simp [Semiformula.bexs, hp.iff]
 
-@[simp] lemma ProperWithParamOn.verum : (⊤ : 𝚫-[m].Semiformula R M k).ProperWithParamOn M := by intro e; simp;
+@[simp] lemma ProperWithParamOn.verum : (⊤ : 𝚫-[m].Semiformula R M k).ProperWithParamOn M := by intro e; simp
 
-@[simp] lemma ProperWithParamOn.falsum : (⊥ : 𝚫-[m].Semiformula R M k).ProperWithParamOn M := by intro e; simp;
+@[simp] lemma ProperWithParamOn.falsum : (⊥ : 𝚫-[m].Semiformula R M k).ProperWithParamOn M := by intro e; simp
 
 lemma ProperWithParamOn.and {φ ψ : 𝚫-[m].Semiformula R M k}
     (hp : φ.ProperWithParamOn M) (hq : ψ.ProperWithParamOn M) : (φ ⋏ ψ).ProperWithParamOn M := by
-  intro e; simp [hp.iff, hq.iff];
+  intro e; simp [hp.iff, hq.iff]
 
 lemma ProperWithParamOn.or {φ ψ : 𝚫-[m].Semiformula R M k}
     (hp : φ.ProperWithParamOn M) (hq : ψ.ProperWithParamOn M) : (φ ⋎ ψ).ProperWithParamOn M := by
-  intro e; simp [hp.iff, hq.iff];
+  intro e; simp [hp.iff, hq.iff]
 
 lemma ProperWithParamOn.neg {φ : 𝚫-[m].Semiformula R M k} (hp : φ.ProperWithParamOn M) : (∼φ).ProperWithParamOn M := by
-  intro e; simp [hp.iff];
+  intro e; simp [hp.iff]
 
 lemma ProperWithParamOn.eval_neg {φ : 𝚫-[m].Semiformula R M k} (hp : φ.ProperWithParamOn M) (e : Fin k → M) :
     (∼φ).val.Eval e id ↔ ¬φ.val.Eval e id := by
-  simp [←val_sigma, hp.iff];
+  simp [←val_sigma, hp.iff]
 
 lemma ProperWithParamOn.ball {t} {φ : 𝚫-[m].Semiformula R M (k + 1)}
     (hp : φ.ProperWithParamOn M) : (ball t φ).ProperWithParamOn M := by
-  intro e; simp [Semiformula.ball, hp.iff];
+  intro e; simp [Semiformula.ball, hp.iff]
 
 lemma ProperWithParamOn.bexs {t} {φ : 𝚫-[m].Semiformula R M (k + 1)}
     (hp : φ.ProperWithParamOn M) : (bexs t φ).ProperWithParamOn M := by
-  intro e; simp [Semiformula.bexs, hp.iff];
+  intro e; simp [Semiformula.bexs, hp.iff]
 
 def graphDelta [L.Eq] (φ : 𝚺-[m].Semiformula R ξ (k + 1)) : 𝚫-[m].Semiformula R ξ (k + 1) :=
   match m with
   |     0 => φ.ofZero _
   | m + 1 => mkDelta φ (mkPi “x. ∀ y, !φ.val y ⋯ → y = x” (by
-      apply BoundingHierarchy.all;
-      apply BoundingHierarchy.imp_iff.mpr;
-      exact ⟨φ.sigma_prop.rew _, by simp [FirstOrder.Semiformula.Operator.eq_def]⟩;))
+      apply BoundingHierarchy.all
+      apply BoundingHierarchy.imp_iff.mpr
+      exact ⟨φ.sigma_prop.rew _, by simp [FirstOrder.Semiformula.Operator.eq_def]⟩))
 
-@[simp] lemma graphDelta_val [L.Eq] (φ : 𝚺-[m].Semiformula R ξ (k + 1)) : φ.graphDelta.val = φ.val := by cases m <;> simp [graphDelta];
+@[simp] lemma graphDelta_val [L.Eq] (φ : 𝚺-[m].Semiformula R ξ (k + 1)) : φ.graphDelta.val = φ.val := by cases m <;> simp [graphDelta]
 
 end Semiformula
 

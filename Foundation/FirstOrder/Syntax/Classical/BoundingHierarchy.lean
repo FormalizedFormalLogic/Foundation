@@ -258,31 +258,31 @@ lemma sigma_succ_induction {s : ℕ} {P : (n : ℕ) → Semiformula L ξ n → P
     (hBexs : ∀ n t φ, BoundingHierarchy R 𝚺 (s + 1) φ → P (n + 1) φ → P n (∃¹[R.operator ![#0, Rew.bShift t]] φ))
     (hExs : ∀ n φ, BoundingHierarchy R 𝚺 (s + 1) φ → P (n + 1) φ → P n (∃¹ φ))
     (n φ) : BoundingHierarchy R 𝚺 (s + 1) φ → P n φ := by
-  generalize hΓ : (𝚺 : Polarity) = Γ;
-  generalize hs : s + 1 = S;
-  intro h;
+  generalize hΓ : (𝚺 : Polarity) = Γ
+  generalize hs : s + 1 = S
+  intro h
   induction h with
-  | bounded _ _ _ h => exact hPi _ _ (bounded _ _ _ h);
+  | bounded _ _ _ h => exact hPi _ _ (bounded _ _ _ h)
   | ball pos hp ih =>
-    rcases hΓ with rfl;
-    rcases hs with rfl;
-    rcases Rew.positive_iff.mp pos with ⟨t, rfl⟩;
-    exact hBall _ t _ hp (ih rfl rfl);
+    rcases hΓ with rfl
+    rcases hs with rfl
+    rcases Rew.positive_iff.mp pos with ⟨t, rfl⟩
+    exact hBall _ t _ hp (ih rfl rfl)
   | bexs pos hp ih =>
-    rcases hΓ with rfl;
-    rcases hs with rfl;
-    rcases Rew.positive_iff.mp pos with ⟨t, rfl⟩;
-    exact hBexs _ t _ hp (ih rfl rfl);
+    rcases hΓ with rfl
+    rcases hs with rfl
+    rcases Rew.positive_iff.mp pos with ⟨t, rfl⟩
+    exact hBexs _ t _ hp (ih rfl rfl)
   | sigma hp _ =>
-    injection hs with hs;
-    subst hs;
-    exact hExs _ _ (hp.accum _) (hPi _ _ hp);
+    injection hs with hs
+    subst hs
+    exact hExs _ _ (hp.accum _) (hPi _ _ hp)
   | dummy_sigma hp _ =>
-    injection hs with hs;
-    subst hs;
-    exact hPi _ _ hp.all;
-  | and | or | exs => grind;
-  | all | pi | dummy_pi => simp at hΓ;
+    injection hs with hs
+    subst hs
+    exact hPi _ _ hp.all
+  | and | or | exs => grind
+  | all | pi | dummy_pi => simp at hΓ
 
 /-- An auxiliary condition here requiring every application of `R` to lie in every hierarchy level. -/
 class Small (R : Semiformula.Operator L 2) (ξ : Type*) : Prop where
