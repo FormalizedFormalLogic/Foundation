@@ -52,20 +52,7 @@ jobs:
       - name: Get Mathlib cache
         run: lake exe cache get
 
-      - name: Restore GitHub cache
-        id: github-cache
-        uses: actions/cache/restore@v6
-        with:
-          path: .lake/Foundation-x86_64-unknown-linux-gnu.tar.gz
-          key: lake-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('lean-toolchain') }}-${{ hashFiles('lake-manifest.json') }}-${{ github.sha }}
-          restore-keys: |
-            lake-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('lean-toolchain') }}-${{ hashFiles('lake-manifest.json') }}
-      - name: Unpack GitHub cache
-        if: hashFiles('.lake/Foundation-x86_64-unknown-linux-gnu.tar.gz') != ''
-        run: lake unpack
-
       - name: Restore remote cache (Foundation)
-        if: steps.github-cache.outputs.cache-matched-key == ''
         env:
           LAKE_CONFIG: lake-cache.toml
         run: |
@@ -82,15 +69,6 @@ jobs:
       - run: just import-graph
       - run: just zoo
       - run: just docs
-
-      - name: Pack GitHub cache
-        run: lake pack
-      - name: Save GitHub cache
-        if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
-        uses: actions/cache/save@v6
-        with:
-          path: .lake/Foundation-x86_64-unknown-linux-gnu.tar.gz
-          key: ${{ steps.github-cache.outputs.cache-primary-key }}
 
       - name: Save remote cache
         if: github.event_name == 'push' && github.ref == 'refs/heads/master'
