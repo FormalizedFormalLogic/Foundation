@@ -7,8 +7,8 @@
 [[cache.service]]
 name = "ffl"
 kind = "s3"
-artifactEndpoint = "https://ffl.sno2wman.net/artifacts"
-revisionEndpoint = "https://ffl.sno2wman.net/revisions"
+artifactEndpoint = "https://cache.formalizedformallogic.org/artifacts"
+revisionEndpoint = "https://cache.formalizedformallogic.org/revisions"
 
 # Authenticated writes, via the S3 API. CI only; the credential is the LAKE_CACHE_KEY secret.
 [[cache.service]]
