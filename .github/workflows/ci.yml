@@ -27,9 +27,8 @@ jobs:
     runs-on: ubuntu-latest
     env:
       LAKE_ARTIFACT_CACHE: true
-      # Without this, an enabled artifact cache keeps outputs out of .lake/build, which docs,
-      # packing and the artifact upload read.
       LAKE_RESTORE_ARTIFACTS: true
+      LAKE_NO_CACHE: true
     steps:
       - uses: actions/checkout@v7
         with:
@@ -67,15 +66,15 @@ jobs:
 
       - name: Restore remote cache (Foundation)
         if: steps.github-cache.outputs.cache-matched-key == ''
+        env:
+          LAKE_CONFIG: lake-cache.toml
         run: |
-          LAKE_CONFIG=lake-cache.toml lake cache get \
+          lake cache get \
             --service ffl \
             --max-revs=100 \
             --repo FormalizedFormalLogic/Foundation \
             --package Foundation \
           || echo "::warning::cache incomplete; the build will compile the rest from source"
-
-      - run: echo "LAKE_NO_CACHE=true" >> "$GITHUB_ENV"
 
       - run: lake build Foundation --wfail
 
