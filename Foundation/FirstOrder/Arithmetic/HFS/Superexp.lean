@@ -12,7 +12,7 @@ public import Foundation.FirstOrder.Arithmetic.HFS.PRF
 
 namespace FFL.FirstOrder.Arithmetic
 
-variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺₁]
+variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 
 section iterExp
 

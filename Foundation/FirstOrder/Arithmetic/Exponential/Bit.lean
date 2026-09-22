@@ -14,7 +14,7 @@ variable {V : Type*} [ORingStructure V]
 
 section
 
-variable [V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺₁]
+variable [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 
 section model
 
@@ -198,7 +198,7 @@ section empty
 
 scoped instance : EmptyCollection V := ⟨0⟩
 
-omit [V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺₁] in
+omit [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] in
 lemma emptyset_def : (∅ : V) = 0 := rfl
 
 @[simp] lemma not_mem_empty (i : V) : i ∉ (∅ : V) := by simp [emptyset_def, mem_iff_bit, Bit]
@@ -492,12 +492,12 @@ end
 
 section
 
-variable {m : ℕ} [Fact (1 ≤ m)] [V↓[ℒₒᵣ] ⊧* 𝗜𝗡𝗗⁺ 𝚺 m]
+variable {m : ℕ} [Fact (1 ≤ m)] [V↓[ℒₒᵣ] ⊧* 𝗜𝗡𝗗 𝚺 m]
 
 lemma finset_comprehension_aux (Γ : Polarity) {P : V → Prop} (hP : Γ-[m]-Predicate P) (a : V) :
-  haveI : V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺₁ := mod_IBroadSigma_of_le (show 1 ≤ m from Fact.out)
+  haveI : V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁ := mod_ISigma_of_le (show 1 ≤ m from Fact.out)
   ∃ s < Exp.exp a, ∀ i < a, i ∈ s ↔ P i := by
-  have : V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺₁ := mod_IBroadSigma_of_le (show 1 ≤ m from Fact.out)
+  have : V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁ := mod_ISigma_of_le (show 1 ≤ m from Fact.out)
   have : ∃ s < Exp.exp a, ∀ i < a, P i → i ∈ s :=
     ⟨under a, pred_lt_self_of_pos (by simp), fun i hi _ ↦ by simpa [mem_under_iff] using hi⟩
   rcases this with ⟨s, hsn, hs⟩
@@ -524,7 +524,7 @@ lemma finset_comprehension_aux (Γ : Polarity) {P : V → Prop} (hP : Γ-[m]-Pre
   exact ⟨t, lt_of_le_of_lt t_le_s hsn, fun i hi ↦ ⟨this i hi, ht i hi⟩⟩
 
 theorem finset_comprehension {Γ} {P : V → Prop} (hP : Γ-[m]-Predicate P) (a : V) :
-    haveI : V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺₁ := mod_IBroadSigma_of_le (show 1 ≤ m from Fact.out)
+    haveI : V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁ := mod_ISigma_of_le (show 1 ≤ m from Fact.out)
     ∃ s < Exp.exp a, ∀ i < a, i ∈ s ↔ P i :=
   match Γ with
   | 𝚺 => finset_comprehension_aux 𝚺 hP a
@@ -532,9 +532,9 @@ theorem finset_comprehension {Γ} {P : V → Prop} (hP : Γ-[m]-Predicate P) (a 
   | 𝚫 => finset_comprehension_aux 𝚺 hP.of_delta a
 
 theorem finset_comprehension_exists_unique {P : V → Prop} (hP : Γ-[m]-Predicate P) (a : V) :
-    haveI : V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺₁ := mod_IBroadSigma_of_le (show 1 ≤ m from Fact.out)
+    haveI : V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁ := mod_ISigma_of_le (show 1 ≤ m from Fact.out)
     ∃! s, s < Exp.exp a ∧ ∀ i < a, i ∈ s ↔ P i := by
-  have : V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺₁ := mod_IBroadSigma_of_le (show 1 ≤ m from Fact.out)
+  have : V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁ := mod_ISigma_of_le (show 1 ≤ m from Fact.out)
   rcases finset_comprehension hP a with ⟨s, hs, Hs⟩
   exact ExistsUnique.intro s ⟨hs, Hs⟩ (by
     intro t ⟨ht, Ht⟩
@@ -553,7 +553,7 @@ end
 
 section
 
-variable [V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺₁]
+variable [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 
 instance : Fact (1 ≤ 1) := ⟨by rfl⟩
 

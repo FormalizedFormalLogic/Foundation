@@ -214,6 +214,11 @@ lemma models_IBroadSigma_of_models_InductionOnHierarchy (Γ : Polarity) (s : ℕ
 instance models_IBroadSigma_of_models_ISigma [V↓[ℒₒᵣ] ⊧* 𝗜𝚺 s] : V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺s :=
   models_IBroadSigma_of_models_InductionOnHierarchy 𝚺 s V
 
+/-- The converse of `models_IBroadSigma_of_models_ISigma`, by `𝗜𝚺 s ⊆ 𝗜𝚺⁺ s`. Together the two
+let a model hypothesis be stated on either side. -/
+instance models_ISigma_of_models_IBroadSigma [V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺s] : V↓[ℒₒᵣ] ⊧* 𝗜𝚺 s :=
+  mod_ISigma_of_IBroadSigma
+
 instance models_InductionOnBroadHierarchy_of_models_InductionOnHierarchy
     [V↓[ℒₒᵣ] ⊧* 𝗜𝗡𝗗 Γ s] : V↓[ℒₒᵣ] ⊧* 𝗜𝗡𝗗⁺ Γ s :=
   have : V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺s := models_IBroadSigma_of_models_InductionOnHierarchy Γ s V
