@@ -25,6 +25,11 @@ jobs:
   build:
     name: Build project
     runs-on: ubuntu-latest
+    env:
+      LAKE_ARTIFACT_CACHE: true
+      # Without this, an enabled artifact cache keeps outputs out of .lake/build, which docs,
+      # packing and the artifact upload read.
+      LAKE_RESTORE_ARTIFACTS: true
     steps:
       - uses: actions/checkout@v7
         with:
@@ -49,7 +54,7 @@ jobs:
         run: lake exe cache get
 
       - name: Restore GitHub cache
-        id: cache-restore
+        id: github-cache
         uses: actions/cache/restore@v6
         with:
           path: .lake/Foundation-x86_64-unknown-linux-gnu.tar.gz
@@ -60,19 +65,8 @@ jobs:
         if: hashFiles('.lake/Foundation-x86_64-unknown-linux-gnu.tar.gz') != ''
         run: lake unpack
 
-      - name: Configure the Lake cache
-        run: |
-          {
-            echo "LAKE_CACHE_DIR=$GITHUB_WORKSPACE/.lake/cache"
-            echo "LAKE_ARTIFACT_CACHE=true"
-            # Without this, an enabled artifact cache keeps outputs out of .lake/build, which
-            # docs, packing and the artifact upload read.
-            echo "LAKE_RESTORE_ARTIFACTS=true"
-          } >> "$GITHUB_ENV"
-
       - name: Restore remote cache (Foundation)
-        # A tarball hit above already carries everything this would fetch.
-        if: steps.cache-restore.outputs.cache-matched-key == ''
+        if: steps.github-cache.outputs.cache-matched-key == ''
         run: |
           LAKE_CONFIG=lake-cache.toml lake cache get \
             --service ffl \
@@ -81,7 +75,6 @@ jobs:
             --package Foundation \
           || echo "::warning::cache incomplete; the build will compile the rest from source"
 
-      # Build off what is on disk. The upload below is unaffected: this only disables downloads.
       - run: echo "LAKE_NO_CACHE=true" >> "$GITHUB_ENV"
 
       - run: lake build Foundation --wfail
@@ -95,14 +88,11 @@ jobs:
         run: lake pack
       - name: Save GitHub cache
         if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
-        id: cache-save
         uses: actions/cache/save@v6
         with:
           path: .lake/Foundation-x86_64-unknown-linux-gnu.tar.gz
-          key: ${{ steps.cache-restore.outputs.cache-primary-key }}
+          key: ${{ steps.github-cache.outputs.cache-primary-key }}
 
-      # `master` only: a PR builds a tree that will not exist after the squash-merge, and a fork
-      # PR gets no secrets anyway.
       - name: Save remote cache
         if: github.event_name == 'push' && github.ref == 'refs/heads/master'
         env:
