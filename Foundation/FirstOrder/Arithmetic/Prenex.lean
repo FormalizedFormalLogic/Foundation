@@ -95,7 +95,7 @@ lemma val_deltaZero {φ : Prenex Γ 0 ξ n} : Hierarchy 𝚺 0 φ.val := φ.matr
 @[simp, grind .]
 lemma val_strictHierarchy {Γ : Polarity} {s n : ℕ} {ξ : Type*} {φ : Prenex Γ s ξ n} :
     StrictHierarchy Γ s φ.val :=
-  StrictHierarchy.toPrenex_of_deltaZero φ.matrix.sigma_prop
+  StrictHierarchy.toPrenex_of_deltaZero (Hierarchy.zero_iff_delta_zero.mp φ.matrix.sigma_prop)
 
 @[simp, grind .]
 lemma val_neg (φ : Prenex Γ s ξ n) : (∼φ).val = ∼φ.val := by
@@ -576,22 +576,11 @@ theorem models_exists_prenex {Γ Γ' : Polarity} {s n : ℕ} {φ : ArithmeticSem
     have : V↓[ℒₒᵣ] ⊧* PrenexBase s := models_PrenexBase_of_models_CollectionOnHierarchy Γ' s;
     exact hφ' V e f;
   induction h with
-  | verum Γ s n =>
-    use .verum;
+  | @bounded Γ s n φ h =>
+    let φ₀ : 𝚺₀.Semiformula ξ n := .mkSigma φ (Hierarchy.bounded 𝚺 0 n h);
+    use ofΔ₀ φ₀ Γ s;
     intro V _ _ e f;
-    exact (models_verum e).symm;
-  | falsum Γ s n =>
-    use .falsum;
-    intro V _ _ e f;
-    exact (models_falsum e).symm;
-  | rel Γ s r v =>
-    use .rel r v;
-    intro V _ _ e f;
-    exact (models_rel r v e).symm;
-  | nrel Γ s r v =>
-    use .nrel r v;
-    intro V _ _ e f;
-    exact (models_nrel r v e).symm;
+    exact (models_ofΔ₀ φ₀ e).symm;
   | and _ _ ihφ ihψ =>
     obtain ⟨φ', hφ'⟩ := ihφ;
     obtain ⟨ψ', hψ'⟩ := ihψ;
