@@ -88,24 +88,14 @@ lemma of_gentzen [DecidableEq α] {S : Sequent α} (h : ⊢ᴳ[GL] S) : 𝐆𝐋
     simp only [Finset.disj_singleton];
     cl_prover [h₂, h₃, h₄, h₅, h₆, axiomL (A := A)];
 
-/-! ### Completeness -/
+/-! ### Quasi-normal extensions -/
 
-open Entailment in
-/-- A quasi-normal extension of `GL` contains `A` if it contains `Γ` and `Γ.conj 🡒 A ∈ 𝐆𝐋`. -/
-lemma mem_sumQuasiNormal_of_conj {α : Type*} [DecidableEq α] {L : Logic α} {Γ : FormulaFinset α}
-    (hΓ : ∀ B ∈ Γ, B ∈ 𝐆𝐋 +ᴸ L) : ∀ {A}, Γ.conj 🡒 A ∈ 𝐆𝐋 → A ∈ 𝐆𝐋 +ᴸ L := by
-  induction Γ using Finset.induction_on with
-  | empty =>
-    intro A h;
-    have h₁ : ⊢ᴴ[GL] (∅ : FormulaFinset α).conj 🡒 A := h;
-    have h₂ : ⊢ᴴ[GL] (∅ : FormulaFinset α).conj := by simp [Finset.conj];
-    exact .mem₁ (h₁ ⨀ h₂);
-  | insert B Γ _ ih =>
-    intro A h;
-    have h₁ : ⊢ᴴ[GL] (insert B Γ).conj 🡒 A := h;
-    have h₂ : ⊢ᴴ[GL] B ⋏ Γ.conj 🡒 (insert B Γ).conj := CKFConjinsertFConj;
-    have h₃ : ⊢ᴴ[GL] Γ.conj 🡒 B 🡒 A := by cl_prover [h₁, h₂];
-    exact .mdp (ih (fun C hC ↦ hΓ C (by simp [hC])) h₃) (hΓ B (by simp));
+/-- A quasi-normal extension of `GL` proves `A` if it proves `Γ` and `𝐆𝐋 ⊢ Γ.conj 🡒 A`. -/
+lemma sumQuasiNormal_of_conj [DecidableEq α] {L : Logic α} {Γ : FormulaFinset α}
+    (hΓ : ∀ B ∈ Γ, 𝐆𝐋 +ᴸ L ⊢ B) (h : 𝐆𝐋 ⊢ Γ.conj 🡒 A) : 𝐆𝐋 +ᴸ L ⊢ A :=
+  sumQuasiNormal.of_left h ⨀ FConj_iff_forall_provable.mpr hΓ
+
+/-! ### Completeness -/
 
 universe u
 
