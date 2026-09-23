@@ -25,12 +25,7 @@ theorem sound_aux {T : LayeredSequent 3 α} (h : ⊢ᴳ[D] T) : T.level = 2 →
     ∀ {κ : Type*} [Nonempty κ] (M : Model κ α) [M.IsGL] (V : ℕ∞ → α → Prop),
       Sum.inr ⊤ ⊩[(M.toFreeTail V).toModel] T.toSequent := by
   induction h with
-  | axm => exact fun _ _ _ _ _ _ ↦ forcesSequent_axm;
-  | botL => exact fun _ _ _ _ _ _ ↦ forcesSequent_botL;
-  | wkL _ hΓ ih => exact fun hl _ _ M _ V ↦ forcesSequent_wkL (ih hl M V) hΓ;
-  | wkR _ hΔ ih => exact fun hl _ _ M _ V ↦ forcesSequent_wkR (ih hl M V) hΔ;
-  | impL _ _ ih₁ ih₂ => exact fun hl _ _ M _ V ↦ forcesSequent_impL (ih₁ hl M V) (ih₂ hl M V);
-  | impR _ ih => exact fun hl _ _ M _ V ↦ forcesSequent_impR (ih hl M V);
+  | axm | botL | wkL | wkR | impL | impR => intro hl _ _ M _ V; grind;
   | boxGL | liftUp₀₁ | boxL => nofun;
   | @liftUp₁₂ Γ Δ h _ =>
     intro _ κ _ M _ V hΓ;

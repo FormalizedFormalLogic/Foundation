@@ -29,20 +29,13 @@ theorem sound {T : LayeredSequent 2 α} (h : ⊢ᴳ[A] T) {κ : Type*} [Nonempty
     (M : RootedModel κ α) [M.IsGL] (a : M.NonRoot) :
     (M.graft a ℕ).root ⊩[(M.graft a ℕ).toModel] T.toSequent := by
   induction h with
-  | axm => exact forcesSequent_axm;
-  | botL => exact forcesSequent_botL;
-  | wkL _ hΓ ih => exact forcesSequent_wkL ih hΓ;
-  | wkR _ hΔ ih => exact forcesSequent_wkR ih hΔ;
-  | impL _ _ ih₁ ih₂ => exact forcesSequent_impL ih₁ ih₂;
-  | impR _ ih => exact forcesSequent_impR ih;
   | liftUp h => exact GL.Gentzen.sound _ (h.toGL rfl) _;
   | boxGL h => exact GL.Gentzen.sound _ ((boxGL h).toGL rfl) _;
   | boxGP _ ih =>
     intro hΓ;
     obtain ⟨D, hD, hrD⟩ := ih hΓ;
-    rcases Finset.mem_insert.mp hD with rfl | hD;
-    . exact absurd hrD (graft.not_forces_boxItr_bot _);
-    . exact ⟨D, hD, hrD⟩;
+    grind [graft.not_forces_boxItr_bot];
+  | _ => grind;
 
 universe u
 
