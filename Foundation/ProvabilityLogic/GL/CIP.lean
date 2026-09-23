@@ -8,7 +8,7 @@ public import Foundation.ProvabilityLogic.GL.Gentzen.Maehara
 
 ## References
 
-- [Bek87, Theorem 2]
+- [SV82]
 -/
 
 @[expose] public section
@@ -33,7 +33,7 @@ lemma imp_mem_iff_gentzen : A 🡒 B ∈ 𝐆𝐋 ↔ ⊢ᴳ[GL] {A} ⟹ {B} := 
 
 /-- **Craig interpolation property** of `GL`.
 
-- [Bek87, Theorem 2] -/
+- [SV82] -/
 theorem CIP (h : A 🡒 B ∈ 𝐆𝐋) :
     ∃ C, A 🡒 C ∈ 𝐆𝐋 ∧ C 🡒 B ∈ 𝐆𝐋 ∧ C.atoms ⊆ A.atoms ∩ B.atoms := by
   obtain ⟨C, hC⟩ := Gentzen.exists_interpolant (Γ₁ := {A}) (Γ₂ := ∅) (Δ₁ := ∅) (Δ₂ := {B})

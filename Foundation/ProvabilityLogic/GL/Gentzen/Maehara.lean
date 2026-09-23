@@ -7,7 +7,7 @@ public import Foundation.ProvabilityLogic.GL.Gentzen.Basic
 
 ## References
 
-- [Bek87, Theorem 2]
+- [SV82]
 -/
 
 @[expose] public section
@@ -37,7 +37,7 @@ lemma exists_interpolant_of_swap (h : ∃ C, IsInterpolant Γ₂ Γ₁ Δ₂ Δ�
   obtain ⟨C, hC⟩ := h;
   exact ⟨_, hC.swap⟩;
 
-/-- - [Bek87, Theorem 2] -/
+/-- - [SV82] -/
 theorem exists_interpolant (h : ⊢ᴳ[GL] S) (hΓ : S.ant ⊆ Γ₁ ∪ Γ₂) (hΔ : S.suc ⊆ Δ₁ ∪ Δ₂) :
     ∃ C, IsInterpolant Γ₁ Γ₂ Δ₁ Δ₂ C := by
   induction h generalizing Γ₁ Γ₂ Δ₁ Δ₂ with
