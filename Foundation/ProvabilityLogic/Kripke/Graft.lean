@@ -123,18 +123,18 @@ subformula-closed set on whose boxes `a` is reflexive.
 - [AB05, Lemma 12]
 - [Bek90, Lemma 5]
 -/
-lemma forces_iff [DecidableEq α] {Φ : FormulaFinset α} (hΦ : ∀ B ∈ Φ, B.subfmls ⊆ Φ)
-    (ha : ∀ B, □B ∈ Φ → a.1 ⊩[M.toModel] □B 🡒 B) {A : Formula α} (hA : A ∈ Φ) :
+lemma forces_iff [DecidableEq α] {X : FormulaFinset α} (hX : ∀ B ∈ X, B.subfmls ⊆ X)
+    (ha : ∀ B, □B ∈ X → a.1 ⊩[M.toModel] □B 🡒 B) {A : Formula α} (hA : A ∈ X) :
     (∀ x, Sum.inl x ⊩[(M.graft a ι).toModel] A ↔ x ⊩[M.toModel] A) ∧
     (∀ i, Sum.inr i ⊩[(M.graft a ι).toModel] A ↔ a.1 ⊩[M.toModel] A) := by
   induction A with
   | atom | falsum => exact ⟨fun _ ↦ Iff.rfl, fun _ ↦ Iff.rfl⟩;
   | imp B C ihB ihC =>
-    obtain ⟨hB₁, hB₂⟩ := ihB (hΦ _ hA (by grind));
-    obtain ⟨hC₁, hC₂⟩ := ihC (hΦ _ hA (by grind));
+    obtain ⟨hB₁, hB₂⟩ := ihB (hX _ hA (by grind));
+    obtain ⟨hC₁, hC₂⟩ := ihC (hX _ hA (by grind));
     exact ⟨fun x ↦ imp_congr (hB₁ x) (hC₁ x), fun i ↦ imp_congr (hB₂ i) (hC₂ i)⟩;
   | box B ih =>
-    obtain ⟨ih₁, ih₂⟩ := ih (hΦ _ hA (by grind));
+    obtain ⟨ih₁, ih₂⟩ := ih (hX _ hA (by grind));
     and_intros;
     . intro x;
       constructor;
