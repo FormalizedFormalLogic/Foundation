@@ -20,15 +20,9 @@ namespace FFL.FirstOrder.Arithmetic
 
 open FFL.Entailment ProvabilityAbstraction
 
-abbrev _root_.FFL.FirstOrder.Theory.localReflection (T : ArithmeticTheory) [T.Δ₁] :
-    Set ArithmeticSentence :=
-  T.standardProvability.localReflection
-
-notation "𝗥𝗳𝗻 " T:max => Theory.localReflection T
-
 abbrev _root_.FFL.FirstOrder.Theory.localReflectionOn
     (T : ArithmeticTheory) [T.Δ₁] (Γ : ArithmeticSentence → Prop) : Set ArithmeticSentence :=
-  T.standardProvability.localReflectionOn Γ
+  T.standardProvability.reflOn Γ
 
 notation "𝗥𝗳𝗻[" Γ "] " T:max => Theory.localReflectionOn T Γ
 
@@ -36,7 +30,7 @@ variable {T : ArithmeticTheory} [T.Δ₁]
 
 @[instance]
 lemma strictlyWeakerThan_localReflection [𝗜𝚺₁ ⪯ T] [Consistent T] :
-    T ⪱ T ∪ 𝗥𝗳𝗻 T :=
+    T ⪱ T ∪ 𝗥𝗳𝗻[Set.univ] T :=
   StrictlyWeakerThan.of_unprovable_provable (φ := T.consistent)
     (consistent_unprovable T)
     (Provability.con_of_localReflection _ trivial)
@@ -51,7 +45,7 @@ theorem localReflection_Pi1_equiv_con [𝗜𝚺₁ ⪯ T] : T ∪ 𝗥𝗳𝗻[H
     . exact by_axm (Set.mem_union_left _ hφ);
     . have : T.standardProvability.FormalizedCompleteOn (∼σ) :=
         ⟨provable_sigma_one_complete (by simpa using hσ.neg)⟩;
-      have h₁ : T ∪ T.Con ⊢ T.standardProvability.con 🡒 (T.standardProvability σ 🡒 σ) :=
+      have h₁ : T ∪ T.Con ⊢ T.standardProvability.con 🡒 T.standardProvability.refl σ :=
         WeakerThan.pbl (Provability.localReflection_of_con T.standardProvability);
       have h₂ : T ∪ T.Con ⊢ T.standardProvability.con :=
         by_axm (Set.mem_union_right _ rfl);
@@ -72,21 +66,22 @@ instance models_localReflectionOn {Γ : ArithmeticSentence → Prop} [ℕ↓[ℒ
 
 @[instance]
 lemma consistent_localReflection_of_sound [ℕ↓[ℒₒᵣ] ⊧* T] :
-    Consistent (T ∪ 𝗥𝗳𝗻 T) := Theory.consistent_of_satisfiable ⟨ℕ↓[ℒₒᵣ], inferInstance⟩
+    Consistent (T ∪ 𝗥𝗳𝗻[Set.univ] T) :=
+  Theory.consistent_of_satisfiable ⟨ℕ↓[ℒₒᵣ], models_localReflectionOn (Γ := Set.univ)⟩
 
 section Sigma1Sound
 
 variable [T.SoundOnHierarchy 𝚺 1]
 
 @[instance] theorem consistent_localReflection_of_Sigma1_sound :
-    Consistent (T ∪ 𝗥𝗳𝗻 T) := by
+    Consistent (T ∪ 𝗥𝗳𝗻[Set.univ] T) := by
   classical
   apply consistent_compact.mpr;
   intro F hF hFfin;
   -- The instances of `Rfn(T)` in the finite part `F` come from a finite set `t` of sentences.
   obtain ⟨t, -, htfin, ht⟩ :=
     Set.Finite.exists_subset_finite_image_eq (s := Set.univ) (u := F \ T)
-      (f := T.standardProvability.localReflectionSchema) ((by simpa using hFfin : F.Finite).sdiff)
+      (f := T.standardProvability.refl) ((by simpa using hFfin : F.Finite).sdiff)
       fun ψ hψ ↦ (AdjunctiveSet.subset_iff.mp hF ψ hψ.1).resolve_left hψ.2;
   -- Adjoining `∼Pr(σ)` for those `σ ∈ t` that `T` does not prove proves every instance in `F`.
   set s : Finset ArithmeticSentence := htfin.toFinset.filter fun σ ↦ T ⊬ σ;
@@ -102,7 +97,7 @@ variable [T.SoundOnHierarchy 𝚺 1]
   intro ψ hψ;
   by_cases hψT : ψ ∈ T;
   . exact by_axm (by simp [hψT]);
-  obtain ⟨σ, hσt, rfl⟩ : ψ ∈ T.standardProvability.localReflectionSchema '' t := ht ▸ ⟨hψ, hψT⟩;
+  obtain ⟨σ, hσt, rfl⟩ : ψ ∈ T.standardProvability.refl '' t := ht ▸ ⟨hψ, hψT⟩;
   by_cases hσ : T ⊢ σ;
   . have h₁ : adjoin (∼D) T ⊢ σ := Axiomatized.to_adjoin hσ;
     cl_prover [h₁];
@@ -128,7 +123,7 @@ lemma provable_localReflectionOn_hierarchy_of_strictHierarchy [𝗜𝚺n ⪯ T]
   rintro φ ⟨σ, hσ, rfl⟩;
   obtain ⟨σ', hσ', e⟩ := exists_strictHierarchy_of_hierarchy (Γ := Γ) T hσ;
   have he : T ⊢ σ 🡘 σ' := by simpa using e;
-  have hinst : S ⊢ T.standardProvability σ' 🡒 σ' :=
+  have hinst : S ⊢ T.standardProvability.refl σ' :=
     h ((Provability.mem_localReflectionOn_iff _).mpr ⟨σ', hσ', rfl⟩);
   have hext : S ⊢ T.standardProvability σ 🡘 T.standardProvability σ' :=
     WeakerThan.pbl (Provability.ext (𝔅 := T.standardProvability) he);
