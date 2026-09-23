@@ -189,13 +189,11 @@ public import Foundation.ProvabilityLogic.GL.Fixedpoint
 public import Foundation.ProvabilityLogic.GL.Gentzen.Basic
 public import Foundation.ProvabilityLogic.GL.Gentzen.Kripke
 public import Foundation.ProvabilityLogic.GL.Gentzen.Maehara
-public import Foundation.ProvabilityLogic.GL.Hilbert.Basic
 public import Foundation.ProvabilityLogic.Grz.Arithmetic
 public import Foundation.ProvabilityLogic.Grz.Basic
 public import Foundation.ProvabilityLogic.Grz.Boxdot
 public import Foundation.ProvabilityLogic.Grz.Gentzen.Basic
 public import Foundation.ProvabilityLogic.Grz.Gentzen.Kripke
-public import Foundation.ProvabilityLogic.Grz.Hilbert.Basic
 public import Foundation.ProvabilityLogic.Kripke.Basic
 public import Foundation.ProvabilityLogic.Kripke.Cone
 public import Foundation.ProvabilityLogic.Kripke.Overwrite
@@ -203,6 +201,7 @@ public import Foundation.ProvabilityLogic.Kripke.Rank
 public import Foundation.ProvabilityLogic.Kripke.RootExtension
 public import Foundation.ProvabilityLogic.Kripke.RootedModel
 public import Foundation.ProvabilityLogic.Kripke.Sequent
+public import Foundation.ProvabilityLogic.Kripke.Soundness
 public import Foundation.ProvabilityLogic.Kripke.Tail
 public import Foundation.ProvabilityLogic.Logic
 public import Foundation.ProvabilityLogic.S.Arithmetic
