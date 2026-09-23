@@ -126,6 +126,7 @@ scoped notation:55 x:56 " ⊮[" M "] " A:56 => ¬Forces M x A
 @[grind =] lemma forces_iff : x ⊩[M] A 🡘 B ↔ (x ⊩[M] A ↔ x ⊩[M] B) := by
   simp only [LogicalConnective.iff, forces_and]; grind;
 @[grind =] lemma forces_box : x ⊩[M] □A ↔ ∀ y, x ≺ y → y ⊩[M] A := Iff.rfl
+@[grind =] lemma forces_boxdot : x ⊩[M] ⊡A ↔ x ⊩[M] A ∧ ∀ y, x ≺ y → y ⊩[M] A := forces_and
 @[grind =] lemma forces_dia : x ⊩[M] ◇A ↔ ∃ y, x ≺ y ∧ y ⊩[M] A := by
   change ((∀ y, x ≺ y → y ⊩[M] A → False) → False) ↔ _; grind;
 
@@ -136,7 +137,61 @@ scoped notation:55 x:56 " ⊮[" M "] " A:56 => ¬Forces M x A
 lemma forces_boxItr : x ⊩[M] □^[n]A ↔ ∀ y, x ≺^[n] y → y ⊩[M] A := by
   induction n generalizing x <;> grind;
 
+lemma forces_conj₂ : {l : List (Formula α)} → (x ⊩[M] ⋀l ↔ ∀ B ∈ l, x ⊩[M] B)
+  | [] => by simp
+  | [B] => by simp
+  | B :: C :: l => by simp [forces_and, forces_conj₂ (l := C :: l)]
+
+@[simp]
+lemma forces_conj {Γ : FormulaFinset α} : x ⊩[M] Γ.conj ↔ ∀ B ∈ Γ, x ⊩[M] B := by
+  simp [Finset.conj, forces_conj₂];
+
+lemma forces_disj₂ : {l : List (Formula α)} → (x ⊩[M] ⋁l ↔ ∃ B ∈ l, x ⊩[M] B)
+  | [] => by simp
+  | [B] => by simp
+  | B :: C :: l => by simp [forces_or, forces_disj₂ (l := C :: l)]
+
+@[simp]
+lemma forces_disj {Γ : FormulaFinset α} : x ⊩[M] Γ.disj ↔ ∃ B ∈ Γ, x ⊩[M] B := by
+  simp [Finset.disj, forces_disj₂];
+
 end Model.World
+
+namespace Model
+
+open Formula World
+
+variable {κ α β : Type*} [Nonempty κ]
+
+/-- The model on the frame of `M` in which an atom `a` holds where `s a` is forced in `M`. -/
+def subst (M : Model κ α) (s : Substitution β α) : Model κ β where
+  Rel' := M.Rel'
+  Val' x a := x ⊩[M] s a
+
+variable {M : Model κ α} {s : Substitution β α}
+
+lemma forces_subst {x : M.World} {A : Formula β} : x ⊩[M.subst s] A ↔ x ⊩[M] A⟦s⟧ := by
+  induction A generalizing x with
+  | atom | falsum => rfl;
+  | imp A B ihA ihB => exact imp_congr ihA ihB;
+  | box A ih => exact forall_congr' fun y ↦ imp_congr_right fun _ ↦ ih;
+
+instance [M.IsGL] : (M.subst s).IsGL where
+  toIsTrans := inferInstanceAs (IsTrans _ M.Rel)
+  toIsConverseWellFounded := inferInstanceAs (IsConverseWellFounded _ M.Rel)
+
+lemma forces_congr {N : Model κ α} (hR : M.Rel' = N.Rel') (hV : ∀ x a, M.Val x a ↔ N.Val x a)
+    {x : κ} {A : Formula α} : x ⊩[M] A ↔ x ⊩[N] A := by
+  induction A generalizing x with
+  | atom a => exact hV x a;
+  | falsum => rfl;
+  | imp A B ihA ihB => exact imp_congr ihA ihB;
+  | box A ih =>
+    change (∀ y, M.Rel' x y → _) ↔ (∀ y, N.Rel' x y → _);
+    rw [hR];
+    exact forall_congr' fun y ↦ imp_congr_right fun _ ↦ ih;
+
+end Model
 
 namespace Model
 

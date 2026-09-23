@@ -130,6 +130,79 @@ lemma theory_height (hSound : ∀ {σ}, T₀ ⊢ 𝔅 σ → T ⊢ σ) (h : M.ro
     simpa [Provability.dia] using! 𝔅.dia_mono <| WeakerThan.pbl <| S.mainlemma_neg hri hiA;
   cl_prover [b₀, b₁, b₂, b₃];
 
+section
+
+variable {M : RootedModel κ α} [Fintype M.World] [M.IsGL] [DecidableEq α]
+         {S : SolovaySentences 𝔅 M.extendRoot}
+
+/-- If the root of `M` forces `□B 🡒 B` for every subformula `□B` of `A`, then the Solovay
+sentence of the new root of `M.extendRoot` decides the realizations of the subformulas of `A`
+as the root of `M` decides them.
+
+- [AB05, Lemma 49]
+-/
+lemma rfl_mainlemma (ha : ∀ B, □B ∈ A.subfmls → M.root ⊩[M.toModel] □B 🡒 B)
+    {B : ProvabilityLogic.Formula α}
+    (hB : B ∈ A.subfmls) :
+    (M.root ⊩[M.toModel] B → T₀ ⊢ S.σ none 🡒 B.interpret S.realization 𝔅) ∧
+    (M.root ⊮[M.toModel] B → T₀ ⊢ S.σ none 🡒 ∼B.interpret S.realization 𝔅) := by
+  induction B with
+  | falsum =>
+    constructor;
+    . exact fun h ↦ absurd h not_forces_bot;
+    . intro;
+      dsimp [Formula.interpret];
+      cl_prover;
+  | atom a =>
+    constructor;
+    . intro h;
+      apply right_Fdisj'_intro;
+      simpa [RootedModel.extendRoot] using h;
+    . intro h;
+      apply CN_of_CN_right;
+      apply left_Fdisj'_intro;
+      intro j hj;
+      apply S.SC1;
+      rintro rfl;
+      exact h (by simpa [RootedModel.extendRoot] using hj);
+  | imp B C ihB ihC =>
+    replace ihB := ihB (Formula.subfmls_trans hB (by grind));
+    replace ihC := ihC (Formula.subfmls_trans hB (by grind));
+    constructor;
+    . intro h;
+      rcases forces_imp.mp h with hB | hC;
+      . exact C_trans (ihB.2 hB) CNC;
+      . exact C_trans (ihC.1 hC) implyK;
+    . intro h;
+      obtain ⟨hB, hC⟩ := not_forces_imp.mp h;
+      exact CNC_of_C_of_CN (ihB.1 hB) (ihC.2 hC);
+  | box B ihB =>
+    replace ihB := ihB (Formula.subfmls_trans hB (by grind));
+    constructor;
+    . intro h;
+      have hB' : M.root ⊩[M.toModel] B := ha B hB h;
+      have h₁ : ∀ i, T₀ ⊢ S.σ i 🡒 B.interpret S.realization 𝔅 := by
+        rintro (_ | x);
+        . exact ihB.1 hB';
+        . apply S.mainlemma (Option.some_ne_none x).symm;
+          apply RootedModel.extendRoot.forces_some.mpr;
+          by_cases hx : x = M.root;
+          . exact hx ▸ hB';
+          . exact h x (M.root_rel x hx);
+      have h₂ := left_Udisj_intro _ h₁;
+      have h₃ : T₀ ⊢ B.interpret S.realization 𝔅 := by cl_prover [h₂, S.SC4];
+      exact C_of_conseq (𝔅.D1 (WeakerThan.pbl h₃));
+    . intro h;
+      obtain ⟨y, Rxy, hy⟩ := not_forces_box.mp h;
+      have h₁ : T₀ ⊢ S.σ (some y) 🡒 ∼B.interpret S.realization 𝔅 :=
+        S.mainlemma_neg (Option.some_ne_none y).symm
+          (RootedModel.extendRoot.forces_some.not.mpr hy);
+      have h₂ : T₀ ⊢ 𝔅.dia (S.σ (some y)) 🡒 ∼𝔅 (B.interpret S.realization 𝔅) :=
+        contra <| 𝔅.mono' <| CN_of_CN_right h₁;
+      exact C_trans (S.SC2 _ (some y) trivial) h₂;
+
+end
+
 end Provability.SolovaySentences
 
 end FFL.FirstOrder.ProvabilityAbstraction
@@ -478,6 +551,33 @@ lemma Solovay.box_disjunction [𝗜𝚺₁ ⪯ T] {i : M.World} (ne : M.root ≠
   exact (tprovable_tquote_iff_provable_quote (T := T)).mp this;
 
 end model
+
+section
+
+variable {M : RootedModel κ α} [Fintype M.World] [M.IsGL]
+
+/-- - [Sol76] -/
+lemma solovay_root_sound [𝗜𝚺₁ ⪯ T] [sound : T.SoundOn (Arithmetic.Hierarchy 𝚷 2)] :
+    T.Solovay M ℕ M.root := by
+  have NS : ∀ i, M.root ≠ i → ¬T.Solovay M ℕ i := by
+    intro i hi H;
+    have Bi : T ⊢ ∼T.solovay M i := (provable_iff_provable (T := T)).mp (Solovay.refute hi H);
+    set π := θ T M i ⋏ ⩕ j ∈ { j : M.World | i ≺ j }, T.consistentWith.val/[⌜T.solovay M j⌝];
+    have sπ : 𝗜𝚺₁ ⊢ T.solovay M i 🡘 π := solovay_diag T M i;
+    have h₁ : T ⊢ ∼π :=
+      Entailment.K_left (Entailment.ENN_of_E (Entailment.WeakerThan.wk inferInstance sπ)) ⨀ Bi;
+    have h₂ : ¬ℕ ⊧/![] π := by
+      simpa [models_iff] using! sound.sound (σ := ∼π) h₁ (by simp [π,
+        (show Hierarchy 𝚷 1 T.consistentWith.val by simp).strict_mono 𝚺 (show 1 < 2 by simp),
+        (show Hierarchy 𝚺 1 (θ T M i) by simp).mono (show 1 ≤ 2 by simp)]);
+    have h₃ : T.Solovay M ℕ i ↔ ℕ ⊧/![] π := by
+      simpa [models_iff] using! consequence_iff.mp (Theory.Proof.sound sπ) ℕ inferInstance;
+    exact h₂ (h₃.mp H);
+  rcases Θ.disjunction (V := ℕ) (T := T) (M := M) M.root ⟨[M.root], by simp⟩ with H | ⟨i, hri, Hi⟩;
+  . exact H;
+  . exact absurd Hi (NS i (by rintro rfl; exact Std.Irrefl.irrefl _ hri));
+
+end
 
 end FFL.FirstOrder.Arithmetic.Bootstrapping.SolovaySentences
 
