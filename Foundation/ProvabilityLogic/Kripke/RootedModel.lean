@@ -18,6 +18,21 @@ structure RootedModel (κ : Type*) [Nonempty κ] (α : Type*) extends Model κ �
   root : κ
   root_rel : ∀ x, x ≠ root → toModel.Rel root x
 
+namespace RootedModel
+
+variable {M : RootedModel κ α} {x : M.World}
+
+abbrev NonRoot (M : RootedModel κ α) := { x : M.World // x ≠ M.root }
+
+@[simp, grind .]
+lemma not_rel_root [IsTrans _ M.Rel] [Std.Irrefl M.Rel] : x ⊀ M.root := by
+  by_cases hx : x = M.root;
+  . subst hx;
+    exact Std.Irrefl.irrefl (r := M.Rel) _;
+  . exact fun h ↦ Std.Irrefl.irrefl (r := M.Rel) _ (IsTrans.trans _ _ _ h (M.root_rel x hx));
+
+end RootedModel
+
 end FFL.ProvabilityLogic.Kripke
 
 end

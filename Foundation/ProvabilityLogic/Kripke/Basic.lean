@@ -155,6 +155,12 @@ lemma forces_disj₂ : {l : List (Formula α)} → (x ⊩[M] ⋁l ↔ ∃ B ∈ 
 lemma forces_disj {Γ : FormulaFinset α} : x ⊩[M] Γ.disj ↔ ∃ B ∈ Γ, x ⊩[M] B := by
   simp [Finset.disj, forces_disj₂];
 
+/-- Called `Σ`-reflexivity in the source.
+
+- [KK23]
+-/
+def IsReflexiveOf (X : FormulaFinset α) (x : M.World) : Prop := ∀ A ∈ X, x ⊩[M] □A 🡒 A
+
 end Model.World
 
 namespace Model

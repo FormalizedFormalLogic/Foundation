@@ -41,6 +41,30 @@ lemma rank_pos_of_forces_dia {A : Formula α} (h : x ⊩[M] ◇A) : 0 < x.rank :
   obtain ⟨y, Rxy, -⟩ := forces_dia.mp h;
   exact lt_of_le_of_lt (Nat.zero_le _) (rank_lt_of_rel Rxy);
 
+/-- - [AB05, Lemma 26] -/
+lemma exists_isReflexiveOf_of_card_lt_rank {X : FormulaFinset α} (h : X.card < x.rank) :
+    ∃ y, x ≺ y ∧ y.IsReflexiveOf X := by
+  have hsucc : ∀ {x : M.World} {n}, n < x.rank → ∃ y, x ≺ y ∧ n ≤ y.rank := by
+    intro x n h;
+    by_contra! hy;
+    exact absurd (cwfHeight_le hy) (by simpa [World.rank] using h);
+  induction hn : X.card generalizing X x with
+  | zero =>
+    obtain ⟨y, Rxy, -⟩ := hsucc (hn ▸ h);
+    exact ⟨y, Rxy, by simp_all [World.IsReflexiveOf]⟩;
+  | succ n ih =>
+    obtain ⟨z, Rxz, hz⟩ := hsucc (hn ▸ h);
+    by_cases hzX : z.IsReflexiveOf X;
+    . exact ⟨z, Rxz, hzX⟩;
+    . obtain ⟨B, hB, hzB⟩ : ∃ B ∈ X, z ⊩[M] □B ∧ z ⊮[M] B := by
+        simpa [World.IsReflexiveOf, forces_imp] using hzX;
+      obtain ⟨y, Rzy, hy⟩ := ih (X := X.erase B) (x := z) (by grind) (by grind);
+      use y, IsTrans.trans _ _ _ Rxz Rzy;
+      intro C hC _;
+      by_cases hCB : C = B;
+      . exact hCB ▸ hzB.1 y Rzy;
+      . exact hy C (by simp_all) (by assumption);
+
 end Model
 
 namespace RootedModel

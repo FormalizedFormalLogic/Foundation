@@ -23,12 +23,6 @@ namespace Kripke.Model
 
 variable {κ α : Type*} [Nonempty κ] {M : Model κ α}
 
-/-- Called `Σ`-reflexivity in the source.
-
-- [KK23]
--/
-def World.IsReflexiveOf (X : FormulaFinset α) (x : M.World) : Prop := ∀ A ∈ X, x ⊩[M] □A 🡒 A
-
 /-- - [KK23, Lemma 3.2] -/
 lemma eventually_isReflexiveOf [M.IsGL] {w : ℕ → M.World} (hw : ∀ n, w (n + 1) ≺ w n)
     (X : FormulaFinset α) : ∃ i, ∀ j ≥ i, (w j).IsReflexiveOf X := by
