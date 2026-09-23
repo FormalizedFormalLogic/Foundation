@@ -1,6 +1,7 @@
 module
 
 public import Foundation.ProvabilityLogic.Kripke.RootedModel
+public import Mathlib.Algebra.Order.BigOperators.Group.Finset
 
 /-!
 # Rank and height
@@ -44,26 +45,31 @@ lemma rank_pos_of_forces_dia {A : Formula α} (h : x ⊩[M] ◇A) : 0 < x.rank :
 /-- - [AB05, Lemma 26] -/
 lemma exists_isReflexiveOf_of_card_lt_rank {X : FormulaFinset α} (h : X.card < x.rank) :
     ∃ y, x ≺ y ∧ y.IsReflexiveOf X := by
-  have hsucc : ∀ {x : M.World} {n}, n < x.rank → ∃ y, x ≺ y ∧ n ≤ y.rank := by
-    intro x n h;
-    by_contra! hy;
-    exact absurd (cwfHeight_le hy) (by simpa [World.rank] using h);
-  induction hn : X.card generalizing X x with
-  | zero =>
-    obtain ⟨y, Rxy, -⟩ := hsucc (hn ▸ h);
-    exact ⟨y, Rxy, by simp_all [World.IsReflexiveOf]⟩;
-  | succ n ih =>
-    obtain ⟨z, Rxz, hz⟩ := hsucc (hn ▸ h);
-    by_cases hzX : z.IsReflexiveOf X;
-    . exact ⟨z, Rxz, hzX⟩;
-    . obtain ⟨B, hB, hzB⟩ : ∃ B ∈ X, z ⊩[M] □B ∧ z ⊮[M] B := by
-        simpa [World.IsReflexiveOf, forces_imp] using hzX;
-      obtain ⟨y, Rzy, hy⟩ := ih (X := X.erase B) (x := z) (by grind) (by grind);
-      use y, IsTrans.trans _ _ _ Rxz Rzy;
-      intro C hC _;
-      by_cases hCB : C = B;
-      . exact hCB ▸ hzB.1 y Rzy;
-      . exact hy C (by simp_all) (by assumption);
+  obtain ⟨y, hxy⟩ : ∃ y, x ≺^[x.rank] y := by simpa using rank_lt_iff.not.mp (lt_irrefl _);
+  obtain ⟨c, hc₀, -, hc⟩ := exists_chain_of_relItr hxy;
+  have hle : ∀ B, ((Finset.Icc 1 x.rank).filter fun i ↦ c i ⊮[M] □B 🡒 B).card ≤ 1 := by
+    intro B;
+    apply Finset.card_le_one.mpr;
+    intro i hi j hj;
+    simp only [Finset.mem_filter, Finset.mem_Icc] at hi hj;
+    by_contra hij;
+    rcases Nat.lt_or_gt_of_ne hij with hij | hij;
+    . exact hj.2 (forces_axiomT_of_rel (rel_of_chain hc hij hj.1.2) hi.2);
+    . exact hi.2 (forces_axiomT_of_rel (rel_of_chain hc hij hi.1.2) hj.2);
+  have hbad : (X.biUnion fun B ↦ (Finset.Icc 1 x.rank).filter fun i ↦ c i ⊮[M] □B 🡒 B).card <
+      (Finset.Icc 1 x.rank).card := calc
+    _ ≤ ∑ B ∈ X, ((Finset.Icc 1 x.rank).filter fun i ↦ c i ⊮[M] □B 🡒 B).card :=
+      Finset.card_biUnion_le
+    _ ≤ ∑ _B ∈ X, 1 := Finset.sum_le_sum fun B _ ↦ hle B
+    _ < _ := by simpa using h
+  obtain ⟨i, hi, hib⟩ := Finset.exists_mem_notMem_of_card_lt_card hbad;
+  simp only [Finset.mem_Icc] at hi;
+  use c i;
+  and_intros;
+  . simpa [hc₀] using rel_of_chain hc (i := 0) (by omega) hi.2;
+  . intro B hB;
+    by_contra hiB;
+    exact hib (Finset.mem_biUnion.mpr ⟨B, hB, by simp [hi, hiB]⟩);
 
 end Model
 
