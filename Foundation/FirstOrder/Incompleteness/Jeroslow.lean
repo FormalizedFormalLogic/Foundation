@@ -17,12 +17,8 @@ is not provable in `T` itself.
 -/
 
 @[expose] public section
-set_option linter.style.dollarSyntax false
-set_option linter.style.longLine false
 
 namespace FFL.FirstOrder
-
-set_option linter.style.docString false
 
 open _root_.FFL.FirstOrder.Entailment
 open Arithmetic Bootstrapping
@@ -90,11 +86,14 @@ private lemma iff_provable_jeroslow_provable_jeroslow' [𝗜𝚺₁ ⪯ U] :
   apply Entailment.iff_of_E provable_E_jeroslow_jeroslow';
 
 open FFL.Entailment in
-instance [𝗜𝚺₁ ⪯ T] [T.SoundOnHierarchy 𝚺 1] : T.standardRefutability.SoundOn (ProvabilityAbstraction.jeroslow T.standardRefutability) := by
+instance [𝗜𝚺₁ ⪯ T] [T.SoundOnHierarchy 𝚺 1] :
+    T.standardRefutability.SoundOn (ProvabilityAbstraction.jeroslow T.standardRefutability) := by
   constructor;
   intro h;
-  have := ArithmeticTheory.SoundOn.sound (F := Arithmetic.Hierarchy 𝚺 1) h $ by simp [standardRefutability, Refutability.rf];
-  exact provable_iff_provable (L := ℒₒᵣ) |>.mp $ by simpa [models_iff, standardRefutability, Refutability.rf, Refutable.quote_iff] using this;
+  have := ArithmeticTheory.SoundOn.sound (F := Arithmetic.Hierarchy 𝚺 1) h <| by
+    simp [standardRefutability, Refutability.rf];
+  exact provable_iff_provable (L := ℒₒᵣ) |>.mp <| by
+    simpa [models_iff, standardRefutability, Refutability.rf, Refutable.quote_iff] using this;
 
 -- Proving this by a plain `rfl` overflows memory on Lean v4.33.1.
 private lemma jeroslow_eq_standard :
@@ -103,10 +102,13 @@ private lemma jeroslow_eq_standard :
   rw [show (T.standardRefutability).refu = T.refutable.val from rfl,
       show (Diagonalization.fixedpoint (T := 𝗜𝚺₁)) = Arithmetic.fixedpoint from rfl]
 
-instance [𝗜𝚺₁ ⪯ T] : T.standardProvability.FormalizedCompleteOn (ProvabilityAbstraction.jeroslow T.standardRefutability) := by
+instance [𝗜𝚺₁ ⪯ T] :
+    T.standardProvability.FormalizedCompleteOn
+      (ProvabilityAbstraction.jeroslow T.standardRefutability) := by
   constructor;
   rw [jeroslow_eq_standard];
-  exact provable_sigma_one_complete_of_E jeroslow'_sigmaOne (Entailment.E_symm provable_E_jeroslow_jeroslow');
+  exact provable_sigma_one_complete_of_E jeroslow'_sigmaOne
+    (Entailment.E_symm provable_E_jeroslow_jeroslow');
 
 end
 
@@ -118,20 +120,18 @@ namespace Arithmetic
 variable {L : Language} [L.Encodable] [L.LORDefinable]
 variable {T : ArithmeticTheory} [T.Δ₁]
 
-/--
- Jeroslow sentence of `T` is not provable in `T` itself.
--/
+/-- Jeroslow sentence of `T` is not provable in `T` itself. -/
 theorem unprovable_jeroslow [𝗜𝚺₁ ⪯ T] [T.SoundOnHierarchy 𝚺 1]
   : T ⊬ T.jeroslow := by
   rw [← Theory.jeroslow_eq_standard];
   exact ProvabilityAbstraction.unprovable_jeroslow (𝔚 := T.standardRefutability)
 
 /--
-  Jeroslow's formulation of the second incompleteness theorem.
+Jeroslow's formulation of the second incompleteness theorem.
 
-  The sentence represents _formalized law of noncontradiction_ of `T`
-  (i.e. no statement can be both formally proved in `T` and formally refuted in `T`)
-  is not provable in `T` itself.
+The sentence represents _formalized law of noncontradiction_ of `T`
+(i.e. no statement can be both formally proved in `T` and formally refuted in `T`)
+is not provable in `T` itself.
 -/
 theorem unprovable_formalized_law_of_noncontradiction [𝗜𝚺₁ ⪯ T] [Entailment.Consistent T]
   : T ⊬ (∀¹ ∼(provable T ⋏ T.refutable) : ArithmeticSentence) := by

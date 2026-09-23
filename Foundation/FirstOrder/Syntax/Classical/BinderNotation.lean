@@ -6,8 +6,6 @@ public import Foundation.Vorspiel.Fin.Matrix
 @[expose] public section
 set_option linter.unusedSimpArgs false
 set_option autoImplicit true
-set_option linter.style.emptyLine false
-set_option linter.style.longLine false
 
 open Lean Elab PrettyPrinter Delaborator SubExpr
 
@@ -25,25 +23,39 @@ namespace Semiformula
 
 variable {L : Language} {ξ : Type*}
 
-/-- `nestFormulae φ(x₁,…,xₙ) ![Ψ₁(x₁,y₁,…,yₘ), …, Ψₙ(xₙ,y₁,…,yₘ)]` is the formula `∀ x₁, …, xₙ ((Ψ₁(x₁,y₁,…,yₘ) ∧ … ∧ Ψₙ(xₙ,y₁,…,yₘ)) → φ(x₁,…,xₙ))`.
+/-- `nestFormulae φ(x₁,…,xₙ) ![Ψ₁(x₁,y₁,…,yₘ), …, Ψₙ(xₙ,y₁,…,yₘ)]` is the formula
+`∀ x₁, …, xₙ ((Ψ₁(x₁,y₁,…,yₘ) ∧ … ∧ Ψₙ(xₙ,y₁,…,yₘ)) → φ(x₁,…,xₙ))`.
 
-Here, each formula `Ψᵢ` has `m + 1` bound variables, one for expressing a predicate of an `xᵢ`, and `m` remaining ones. In the resulting formula, the bound variables are the `m` remaining bound variables, while all of the original `n` bound variables of `φ` get bounded to a `∀` quantifier.
+Here, each formula `Ψᵢ` has `m + 1` bound variables, one for expressing a predicate of an `xᵢ`, and
+`m` remaining ones. In the resulting formula, the bound variables are the `m` remaining bound
+variables, while all of the original `n` bound variables of `φ` get bounded to a `∀` quantifier.
 
-Intuitively, nestFormulae gives `R(f₁(y₁,…,yₘ), …, fₙ(y₁,…,yₘ))`, the result of substituting functions `f₁, … fₙ` into a relation `R`, using the defining formulae of their graphs (`xᵢ = fᵢ(y₁,…,yₘ)` iff `Ψᵢ(xᵢ,y₁,…,yₘ)`, and `R(x₁,…,xₙ)` iff `φ(x₁,…,xₙ)`). -/
-def nestFormulae (φ : Semiformula L ξ n) (Ψ : Fin n → Semiformula L ξ (m + 1)) : Semiformula L ξ m :=
+Intuitively, nestFormulae gives `R(f₁(y₁,…,yₘ), …, fₙ(y₁,…,yₘ))`, the result of substituting
+functions `f₁, … fₙ` into a relation `R`, using the defining formulae of their graphs
+(`xᵢ = fᵢ(y₁,…,yₘ)` iff `Ψᵢ(xᵢ,y₁,…,yₘ)`, and `R(x₁,…,xₙ)` iff `φ(x₁,…,xₙ)`). -/
+def nestFormulae (φ : Semiformula L ξ n) (Ψ : Fin n → Semiformula L ξ (m + 1)) :
+    Semiformula L ξ m :=
   let σ : Semiformula L ξ (m + n) :=
     (Matrix.conj fun i : Fin n ↦ Rewriting.subst (Ψ i) (#(i.addCast m) :> fun j ↦ #(j.addNat n))) 🡒
       Rewriting.subst φ fun i ↦ #(i.addCast m)
   ∀¹^[n] σ
 
-/-- `nestFormulaeFunc φ(x,x₁,…,xₙ) ![Ψ₁(x₁,y₁,…,yₘ), …, Ψₙ(xₙ,y₁,…,yₘ)]` is the formula `∀ x₁, …, xₙ ((Ψ₁(x₁,y₁,…,yₘ) ∧ … ∧ Ψₙ(xₙ,y₁,…,yₘ)) → φ(x,x₁,…,xₙ))`.
+/-- `nestFormulaeFunc φ(x,x₁,…,xₙ) ![Ψ₁(x₁,y₁,…,yₘ), …, Ψₙ(xₙ,y₁,…,yₘ)]` is the formula
+`∀ x₁, …, xₙ ((Ψ₁(x₁,y₁,…,yₘ) ∧ … ∧ Ψₙ(xₙ,y₁,…,yₘ)) → φ(x,x₁,…,xₙ))`.
 
-Here, each formula `Ψᵢ` has `m + 1` bound variables, one for expressing a predicate of an `xᵢ`, and `m` remaining ones. In the resulting formula, the bound variables are the `m` remaining bound variables plus `x`, while all of the original bound variables `x₁,…,xₙ` get bounded to a `∀` quantifier.
+Here, each formula `Ψᵢ` has `m + 1` bound variables, one for expressing a predicate of an `xᵢ`, and
+`m` remaining ones. In the resulting formula, the bound variables are the `m` remaining bound
+variables plus `x`, while all of the original bound variables `x₁,…,xₙ` get bounded to a `∀`
+quantifier.
 
-Intuitively, nestFormulaeFunc gives `F(f₁(y₁,…,yₘ), …, fₙ(y₁,…,yₘ))`, the result of substituting functions `f₁, … fₙ` into a function `F`, using the defining formulae of their graphs (`xᵢ = fᵢ(y₁,…,yₘ)` iff `Ψᵢ(xᵢ,y₁,…,yₘ)`, and `x = F(x₁,…,xₙ)` iff `φ(x,x₁,…,xₙ)`). -/
-def nestFormulaeFunc (φ : Semiformula L ξ (n + 1)) (Ψ : Fin n → Semiformula L ξ (m + 1)) : Semiformula L ξ (m + 1) :=
+Intuitively, nestFormulaeFunc gives `F(f₁(y₁,…,yₘ), …, fₙ(y₁,…,yₘ))`, the result of substituting
+functions `f₁, … fₙ` into a function `F`, using the defining formulae of their graphs
+(`xᵢ = fᵢ(y₁,…,yₘ)` iff `Ψᵢ(xᵢ,y₁,…,yₘ)`, and `x = F(x₁,…,xₙ)` iff `φ(x,x₁,…,xₙ)`). -/
+def nestFormulaeFunc (φ : Semiformula L ξ (n + 1)) (Ψ : Fin n → Semiformula L ξ (m + 1)) :
+    Semiformula L ξ (m + 1) :=
   let σ : Semiformula L ξ ((m + 1) + n) :=
-    (Matrix.conj fun i : Fin n ↦ Rewriting.subst (Ψ i) (#(i.addCast m.succ) :> fun j ↦ #(j.succ.addNat n))) 🡒
+    (Matrix.conj fun i : Fin n ↦
+        Rewriting.subst (Ψ i) (#(i.addCast m.succ) :> fun j ↦ #(j.succ.addNat n))) 🡒
       Rewriting.subst φ (#((0 : Fin (m + 1)).addNat n) :> fun i ↦ #(i.addCast m.succ))
   ∀¹^[n] σ
 
@@ -62,7 +74,8 @@ lemma eval_nestFormulae {φ : Semiformula L ξ n} {Ψ : Fin n → Semiformula L 
   simp [eval_nestFormulae, Matrix.vecForall_iff, Matrix.empty_eq]
 
 @[simp] lemma eval_nestFormulae₂ {φ : Semiformula L ξ 2} {ψ₁ ψ₂ : Semiformula L ξ (m + 1)} :
-    Eval e f (φ.nestFormulae ![ψ₁, ψ₂]) ↔ ∀ x₁, Eval (x₁ :> e) f ψ₁ → ∀ x₂, Eval (x₂ :> e) f ψ₂ → Eval ![x₁, x₂] f φ := by
+    Eval e f (φ.nestFormulae ![ψ₁, ψ₂]) ↔
+    ∀ x₁, Eval (x₁ :> e) f ψ₁ → ∀ x₂, Eval (x₂ :> e) f ψ₂ → Eval ![x₁, x₂] f φ := by
   suffices
     (∀ x₁ x₂, Eval (x₁ :> e) f ψ₁ → Eval (x₂ :> e) f ψ₂ → Eval ![x₁, x₂] f φ) ↔
     ∀ x₁, Eval (x₁ :> e) f ψ₁ → ∀ x₂, Eval (x₂ :> e) f ψ₂ → Eval ![x₁, x₂] f φ by
@@ -71,10 +84,13 @@ lemma eval_nestFormulae {φ : Semiformula L ξ n} {Ψ : Fin n → Semiformula L 
 
 @[simp] lemma eval_nestFormulae₃ {φ : Semiformula L ξ 3} {ψ₁ ψ₂ ψ₃ : Semiformula L ξ (m + 1)} :
     Eval e f (φ.nestFormulae ![ψ₁, ψ₂, ψ₃]) ↔
-    ∀ x₁, Eval (x₁ :> e) f ψ₁ → ∀ x₂, Eval (x₂ :> e) f ψ₂ → ∀ x₃, Eval (x₃ :> e) f ψ₃ → Eval ![x₁, x₂, x₃] f φ := by
+    ∀ x₁, Eval (x₁ :> e) f ψ₁ → ∀ x₂, Eval (x₂ :> e) f ψ₂ → ∀ x₃, Eval (x₃ :> e) f ψ₃ →
+      Eval ![x₁, x₂, x₃] f φ := by
   suffices
-    (∀ x₁ x₂ x₃, Eval (x₁ :> e) f ψ₁ → Eval (x₂ :> e) f ψ₂ → Eval (x₃ :> e) f ψ₃ → Eval ![x₁, x₂, x₃] f φ) ↔
-    ∀ x₁, Eval (x₁ :> e) f ψ₁ → ∀ x₂, Eval (x₂ :> e) f ψ₂ → ∀ x₃, Eval (x₃ :> e) f ψ₃ → Eval ![x₁, x₂, x₃] f φ by
+    (∀ x₁ x₂ x₃, Eval (x₁ :> e) f ψ₁ → Eval (x₂ :> e) f ψ₂ → Eval (x₃ :> e) f ψ₃ →
+      Eval ![x₁, x₂, x₃] f φ) ↔
+    ∀ x₁, Eval (x₁ :> e) f ψ₁ → ∀ x₂, Eval (x₂ :> e) f ψ₂ → ∀ x₃, Eval (x₃ :> e) f ψ₃ →
+      Eval ![x₁, x₂, x₃] f φ by
     simpa [eval_nestFormulae, Matrix.vecForall_iff, Matrix.empty_eq, Fin.forall_fin_succ]
   grind
 
@@ -101,7 +117,8 @@ lemma eval_nestFormulae {φ : Semiformula L ξ n} {Ψ : Fin n → Semiformula L 
   grind
 
 lemma eval_nestFormulaeFunc {φ : Semiformula L ξ (n + 1)} {Ψ : Fin n → Semiformula L ξ (m + 1)} :
-    Eval (z :> e) f (φ.nestFormulaeFunc Ψ) ↔ ∀ v : Fin n → M, (∀ i, Eval (v i :> e) f (Ψ i)) → Eval (z :> v) f φ := by
+    Eval (z :> e) f (φ.nestFormulaeFunc Ψ) ↔
+    ∀ v : Fin n → M, (∀ i, Eval (v i :> e) f (Ψ i)) → Eval (z :> v) f φ := by
   simp [nestFormulaeFunc, Matrix.comp_vecCons', Function.comp_def]
 
 @[simp] lemma eval_nestFormulaeFunc₀ {φ : Semiformula L ξ 1} :
@@ -113,7 +130,8 @@ lemma eval_nestFormulaeFunc {φ : Semiformula L ξ (n + 1)} {Ψ : Fin n → Semi
   simp [eval_nestFormulaeFunc, Matrix.vecForall_iff, Matrix.empty_eq]
 
 @[simp] lemma eval_nestFormulaeFunc₂ {φ : Semiformula L ξ 3} {ψ₁ ψ₂ : Semiformula L ξ (m + 1)} :
-    Eval (z :> e) f (φ.nestFormulaeFunc ![ψ₁, ψ₂]) ↔ ∀ x₁, Eval (x₁ :> e) f ψ₁ → ∀ x₂, Eval (x₂ :> e) f ψ₂ → Eval ![z, x₁, x₂] f φ := by
+    Eval (z :> e) f (φ.nestFormulaeFunc ![ψ₁, ψ₂]) ↔
+    ∀ x₁, Eval (x₁ :> e) f ψ₁ → ∀ x₂, Eval (x₂ :> e) f ψ₂ → Eval ![z, x₁, x₂] f φ := by
   suffices
     (∀ x₁ x₂, Eval (x₁ :> e) f ψ₁ → Eval (x₂ :> e) f ψ₂ → Eval ![z, x₁, x₂] f φ) ↔
     ∀ x₁, Eval (x₁ :> e) f ψ₁ → ∀ x₂, Eval (x₂ :> e) f ψ₂ → Eval ![z, x₁, x₂] f φ by
@@ -122,14 +140,18 @@ lemma eval_nestFormulaeFunc {φ : Semiformula L ξ (n + 1)} {Ψ : Fin n → Semi
 
 @[simp] lemma eval_nestFormulaeFunc₃ {φ : Semiformula L ξ 4} {ψ₁ ψ₂ ψ₃ : Semiformula L ξ (m + 1)} :
     Eval (z :> e) f (φ.nestFormulaeFunc ![ψ₁, ψ₂, ψ₃]) ↔
-    ∀ x₁, Eval (x₁ :> e) f ψ₁ → ∀ x₂, Eval (x₂ :> e) f ψ₂ → ∀ x₃, Eval (x₃ :> e) f ψ₃ → Eval ![z, x₁, x₂, x₃] f φ := by
+    ∀ x₁, Eval (x₁ :> e) f ψ₁ → ∀ x₂, Eval (x₂ :> e) f ψ₂ → ∀ x₃, Eval (x₃ :> e) f ψ₃ →
+      Eval ![z, x₁, x₂, x₃] f φ := by
   suffices
-    (∀ x₁ x₂ x₃, Eval (x₁ :> e) f ψ₁ → Eval (x₂ :> e) f ψ₂ → Eval (x₃ :> e) f ψ₃ → Eval ![z, x₁, x₂, x₃] f φ) ↔
-    ∀ x₁, Eval (x₁ :> e) f ψ₁ → ∀ x₂, Eval (x₂ :> e) f ψ₂ → ∀ x₃, Eval (x₃ :> e) f ψ₃ → Eval ![z, x₁, x₂, x₃] f φ by
+    (∀ x₁ x₂ x₃, Eval (x₁ :> e) f ψ₁ → Eval (x₂ :> e) f ψ₂ → Eval (x₃ :> e) f ψ₃ →
+      Eval ![z, x₁, x₂, x₃] f φ) ↔
+    ∀ x₁, Eval (x₁ :> e) f ψ₁ → ∀ x₂, Eval (x₂ :> e) f ψ₂ → ∀ x₃, Eval (x₃ :> e) f ψ₃ →
+      Eval ![z, x₁, x₂, x₃] f φ by
     simpa [eval_nestFormulaeFunc, Matrix.vecForall_iff, Matrix.empty_eq, Fin.forall_fin_succ]
   grind
 
-@[simp] lemma eval_nestFormulaeFunc₄ {φ : Semiformula L ξ 5} {ψ₁ ψ₂ ψ₃ ψ₄ : Semiformula L ξ (m + 1)} :
+@[simp] lemma eval_nestFormulaeFunc₄ {φ : Semiformula L ξ 5}
+    {ψ₁ ψ₂ ψ₃ ψ₄ : Semiformula L ξ (m + 1)} :
     Eval (z :> e) f (φ.nestFormulaeFunc ![ψ₁, ψ₂, ψ₃, ψ₄]) ↔
     ∀ x₁, Eval (x₁ :> e) f ψ₁ →
     ∀ x₂, Eval (x₂ :> e) f ψ₂ →
@@ -197,7 +219,8 @@ syntax:max "⌜" term:max "⌝" : first_order_term
 syntax:67  "exp " first_order_term:68 : first_order_term
 
 macro_rules
-  | `(⤫term($type)[ $binders* | $fbinders* | ($e) ]) => `(⤫term($type)[ $binders* | $fbinders* | $e ])
+  | `(⤫term($type)[ $binders* | $fbinders* | ($e) ]) =>
+    `(⤫term($type)[ $binders* | $fbinders* | $e ])
 
 macro_rules
   | `(⤫term(lit)[ $binders* | $fbinders* | $x:ident]) => do
@@ -217,33 +240,48 @@ macro_rules
   | `(⤫term(lit)[ $_*       | $_*        | ↑$m:term   ]) => `(Semiterm.numeral $m)
   | `(⤫term(lit)[ $_*       | $_*        | ⌜$x:term⌝  ]) => `(⌜$x⌝)
   | `(⤫term(lit)[ $_*       | $_*        | ⋆          ]) => `(Operator.const Operator.Star.star)
-  | `(⤫term(lit)[ $binders* | $fbinders* | $e₁ + $e₂  ]) => `(Semiterm.Operator.Add.add.operator ![⤫term(lit)[ $binders* | $fbinders* | $e₁ ], ⤫term(lit)[ $binders* | $fbinders* | $e₂ ]])
-  | `(⤫term(lit)[ $binders* | $fbinders* | $e₁ * $e₂  ]) => `(Semiterm.Operator.Mul.mul.operator ![⤫term(lit)[ $binders* | $fbinders* | $e₁ ], ⤫term(lit)[ $binders* | $fbinders* | $e₂ ]])
-  | `(⤫term(lit)[ $binders* | $fbinders* | $e₁ ^ $e₂  ]) => `(Semiterm.Operator.Pow.pow.operator ![⤫term(lit)[ $binders* | $fbinders* | $e₁ ], ⤫term(lit)[ $binders* | $fbinders* | $e₂ ]])
-  | `(⤫term(lit)[ $binders* | $fbinders* | $e ^' $n   ]) => `((Semiterm.Operator.npow _ $n).operator ![⤫term(lit)[ $binders* | $fbinders* | $e ]])
-  | `(⤫term(lit)[ $binders* | $fbinders* | $e²        ]) => `((Semiterm.Operator.npow _ 2).operator ![⤫term(lit)[ $binders* | $fbinders* | $e ]])
-  | `(⤫term(lit)[ $binders* | $fbinders* | $e³        ]) => `((Semiterm.Operator.npow _ 3).operator ![⤫term(lit)[ $binders* | $fbinders* | $e ]])
-  | `(⤫term(lit)[ $binders* | $fbinders* | $e⁴        ]) => `((Semiterm.Operator.npow _ 4).operator ![⤫term(lit)[ $binders* | $fbinders* | $e ]])
-  | `(⤫term(lit)[ $binders* | $fbinders* | exp $e     ]) => `(Semiterm.Operator.Exp.exp.operator ![⤫term(lit)[ $binders* | $fbinders* | $e ]])
+  | `(⤫term(lit)[ $binders* | $fbinders* | $e₁ + $e₂  ]) =>
+    `(Semiterm.Operator.Add.add.operator
+      ![⤫term(lit)[ $binders* | $fbinders* | $e₁ ], ⤫term(lit)[ $binders* | $fbinders* | $e₂ ]])
+  | `(⤫term(lit)[ $binders* | $fbinders* | $e₁ * $e₂  ]) =>
+    `(Semiterm.Operator.Mul.mul.operator
+      ![⤫term(lit)[ $binders* | $fbinders* | $e₁ ], ⤫term(lit)[ $binders* | $fbinders* | $e₂ ]])
+  | `(⤫term(lit)[ $binders* | $fbinders* | $e₁ ^ $e₂  ]) =>
+    `(Semiterm.Operator.Pow.pow.operator
+      ![⤫term(lit)[ $binders* | $fbinders* | $e₁ ], ⤫term(lit)[ $binders* | $fbinders* | $e₂ ]])
+  | `(⤫term(lit)[ $binders* | $fbinders* | $e ^' $n   ]) =>
+    `((Semiterm.Operator.npow _ $n).operator ![⤫term(lit)[ $binders* | $fbinders* | $e ]])
+  | `(⤫term(lit)[ $binders* | $fbinders* | $e²        ]) =>
+    `((Semiterm.Operator.npow _ 2).operator ![⤫term(lit)[ $binders* | $fbinders* | $e ]])
+  | `(⤫term(lit)[ $binders* | $fbinders* | $e³        ]) =>
+    `((Semiterm.Operator.npow _ 3).operator ![⤫term(lit)[ $binders* | $fbinders* | $e ]])
+  | `(⤫term(lit)[ $binders* | $fbinders* | $e⁴        ]) =>
+    `((Semiterm.Operator.npow _ 4).operator ![⤫term(lit)[ $binders* | $fbinders* | $e ]])
+  | `(⤫term(lit)[ $binders* | $fbinders* | exp $e     ]) =>
+    `(Semiterm.Operator.Exp.exp.operator ![⤫term(lit)[ $binders* | $fbinders* | $e ]])
   | `(⤫term(lit)[ $_*       | $_*        | !!$t:term  ]) => `($t)
   | `(⤫term(lit)[ $_*       | $_*        | .!!$t:term ]) => `(Rew.emb $t)
 
 macro_rules
   | `(⤫term(lit)[ $binders* | $fbinders* | !$t:term $vs:first_order_term*    ]) => do
-    let v ← vs.foldrM (β := Lean.TSyntax _) (init := ← `(![])) (fun a s => `(⤫term(lit)[ $binders* | $fbinders* | $a ] :> $s))
+    let v ← vs.foldrM (β := Lean.TSyntax _) (init := ← `(![]))
+      (fun a s => `(⤫term(lit)[ $binders* | $fbinders* | $a ] :> $s))
     `(Rew.subst $v $t)
   | `(⤫term(lit)[ $binders* | $fbinders* | !$t:term $vs:first_order_term* ⋯  ]) =>
     do
     let length := Syntax.mkNumLit (toString binders.size)
-    let v ← vs.foldrM (β := Lean.TSyntax _) (init := ← `(fun x ↦ #(finSuccItr x $length))) (fun a s ↦ `(⤫term(lit)[ $binders* | $fbinders* | $a] :> $s))
+    let v ← vs.foldrM (β := Lean.TSyntax _) (init := ← `(fun x ↦ #(finSuccItr x $length)))
+      (fun a s ↦ `(⤫term(lit)[ $binders* | $fbinders* | $a] :> $s))
     `(Rew.subst $v $t)
   | `(⤫term(lit)[ $binders* | $fbinders* | .!$t:term $vs:first_order_term*   ]) => do
-    let v ← vs.foldrM (β := Lean.TSyntax _) (init := ← `(![])) (fun a s ↦ `(⤫term(lit)[ $binders* | $fbinders* | $a] :> $s))
+    let v ← vs.foldrM (β := Lean.TSyntax _) (init := ← `(![]))
+      (fun a s ↦ `(⤫term(lit)[ $binders* | $fbinders* | $a] :> $s))
     `(Rew.embSubsts $v $t)
   | `(⤫term(lit)[ $binders* | $fbinders* | .!$t:term $vs:first_order_term* ⋯ ]) =>
     do
     let length := Syntax.mkNumLit (toString binders.size)
-    let v ← vs.foldrM (β := Lean.TSyntax _) (init := ← `(fun x ↦ #(finSuccItr x $length))) (fun a s ↦ `(⤫term(lit)[ $binders* | $fbinders* | $a] :> $s))
+    let v ← vs.foldrM (β := Lean.TSyntax _) (init := ← `(fun x ↦ #(finSuccItr x $length)))
+      (fun a s ↦ `(⤫term(lit)[ $binders* | $fbinders* | $a] :> $s))
     `(Rew.embSubsts $v $t)
 
 syntax "‘" first_order_term:0 "’" : term
@@ -307,7 +345,6 @@ meta def unexpandFuncArith : Unexpander
   | `($_ op(+) ![$t:term,                 &$y                     ]) => `(‘(!!$t   + &$y    )’)
   | `($_ op(+) ![$t:term,                 ↑$m:num                 ]) => `(‘(!!$t   + $m:num )’)
   | `($_ op(+) ![$t:term,                 $u                      ]) => `(‘(!!$t   + !!$u   )’)
-
   | `($_ op(*) ![‘$t:first_order_term’,   ‘$u:first_order_term’   ]) => `(‘($t     * $u     )’)
   | `($_ op(*) ![‘$t:first_order_term’,   #$x                     ]) => `(‘($t     * #$x    )’)
   | `($_ op(*) ![‘$t:first_order_term’,   &$x                     ]) => `(‘($t     * &$x    )’)
@@ -351,7 +388,8 @@ open Semiformula
 declare_syntax_cat first_order_formula
 
 
-syntax "⤫formula(" first_order.quote_type ")[" ident* " | " ident* " | " first_order_formula:0 "]" : term
+syntax "⤫formula(" first_order.quote_type ")[" ident* " | " ident* " | "
+  first_order_formula:0 "]" : term
 
 syntax "(" first_order_formula ")" : first_order_formula
 
@@ -386,20 +424,34 @@ syntax:max "∃¹[" first_order_formula "] " first_order_formula:0 : first_order
 -- #check @HTilde.hTilde _ _ Tilde.instHTilde
 
 macro_rules
-  | `(⤫formula($type)[ $binders* | $fbinders* | ($e)          ]) => `(⤫formula($type)[ $binders* | $fbinders* | $e ])
+  | `(⤫formula($type)[ $binders* | $fbinders* | ($e)          ]) =>
+    `(⤫formula($type)[ $binders* | $fbinders* | $e ])
   | `(⤫formula($type)[ $_*       | $_*        | !!$φ:term     ]) => `($φ)
   | `(⤫formula($type)[ $_*       | $_*        | .!!$φ:term    ]) => `(Rewriting.emb $φ)
   | `(⤫formula($type)[ $_*       | $_*        | ⊤             ]) => `(⊤)
   | `(⤫formula($type)[ $_*       | $_*        | ⊥             ]) => `(⊥)
-  | `(⤫formula($type)[ $binders* | $fbinders* | $φ ∧ $ψ       ]) => `(@HWedge.hWedge _ _ _ Wedge.instHWedge ⤫formula($type)[ $binders* | $fbinders* | $φ ] ⤫formula($type)[ $binders* | $fbinders* | $ψ ])
-  | `(⤫formula($type)[ $binders* | $fbinders* | $φ ∨ $ψ       ]) => `(@HVee.hVee _ _ _ Vee.instHVee ⤫formula($type)[ $binders* | $fbinders* | $φ ] ⤫formula($type)[ $binders* | $fbinders* | $ψ ])
-  | `(⤫formula($type)[ $binders* | $fbinders* | ¬$φ           ]) => `(@HTilde.hTilde _ _ Tilde.instHTilde ⤫formula($type)[ $binders* | $fbinders* | $φ ])
-  | `(⤫formula($type)[ $binders* | $fbinders* | $φ → $ψ       ]) => `(@HArrow.hArrow _ _ _ Arrow.instHArrow ⤫formula($type)[ $binders* | $fbinders* | $φ ] ⤫formula($type)[ $binders* | $fbinders* | $ψ ])
-  | `(⤫formula($type)[ $binders* | $fbinders* | $φ ↔ $ψ       ]) => `(⤫formula($type)[ $binders* | $fbinders* | $φ ] 🡘 ⤫formula($type)[ $binders* | $fbinders* | $ψ ])
-  | `(⤫formula($type)[ $binders* | $fbinders* | ⋀ $i, $φ      ]) => `(Matrix.conj fun $i ↦ ⤫formula($type)[ $binders* | $fbinders* | $φ ])
-  | `(⤫formula($type)[ $binders* | $fbinders* | ⋁ $i, $φ      ]) => `(Matrix.disj fun $i ↦ ⤫formula($type)[ $binders* | $fbinders* | $φ ])
-  | `(⤫formula($type)[ $binders* | $fbinders* | ⋀ $i < $t, $φ ]) => `(conjLt (fun $i ↦ ⤫formula($type)[ $binders* | $fbinders* | $φ ]) $t)
-  | `(⤫formula($type)[ $binders* | $fbinders* | ⋁ $i < $t, $φ ]) => `(disjLt (fun $i ↦ ⤫formula($type)[ $binders* | $fbinders* | $φ ]) $t)
+  | `(⤫formula($type)[ $binders* | $fbinders* | $φ ∧ $ψ       ]) =>
+    `(@HWedge.hWedge _ _ _ Wedge.instHWedge ⤫formula($type)[ $binders* | $fbinders* | $φ ]
+      ⤫formula($type)[ $binders* | $fbinders* | $ψ ])
+  | `(⤫formula($type)[ $binders* | $fbinders* | $φ ∨ $ψ       ]) =>
+    `(@HVee.hVee _ _ _ Vee.instHVee ⤫formula($type)[ $binders* | $fbinders* | $φ ]
+      ⤫formula($type)[ $binders* | $fbinders* | $ψ ])
+  | `(⤫formula($type)[ $binders* | $fbinders* | ¬$φ           ]) =>
+    `(@HTilde.hTilde _ _ Tilde.instHTilde ⤫formula($type)[ $binders* | $fbinders* | $φ ])
+  | `(⤫formula($type)[ $binders* | $fbinders* | $φ → $ψ       ]) =>
+    `(@HArrow.hArrow _ _ _ Arrow.instHArrow ⤫formula($type)[ $binders* | $fbinders* | $φ ]
+      ⤫formula($type)[ $binders* | $fbinders* | $ψ ])
+  | `(⤫formula($type)[ $binders* | $fbinders* | $φ ↔ $ψ       ]) =>
+    `(⤫formula($type)[ $binders* | $fbinders* | $φ ] 🡘
+      ⤫formula($type)[ $binders* | $fbinders* | $ψ ])
+  | `(⤫formula($type)[ $binders* | $fbinders* | ⋀ $i, $φ      ]) =>
+    `(Matrix.conj fun $i ↦ ⤫formula($type)[ $binders* | $fbinders* | $φ ])
+  | `(⤫formula($type)[ $binders* | $fbinders* | ⋁ $i, $φ      ]) =>
+    `(Matrix.disj fun $i ↦ ⤫formula($type)[ $binders* | $fbinders* | $φ ])
+  | `(⤫formula($type)[ $binders* | $fbinders* | ⋀ $i < $t, $φ ]) =>
+    `(conjLt (fun $i ↦ ⤫formula($type)[ $binders* | $fbinders* | $φ ]) $t)
+  | `(⤫formula($type)[ $binders* | $fbinders* | ⋁ $i < $t, $φ ]) =>
+    `(disjLt (fun $i ↦ ⤫formula($type)[ $binders* | $fbinders* | $φ ]) $t)
   | `(⤫formula($type)[ $binders* | $fbinders* | ∀ $xs*, $φ    ]) => do
     let xs := xs.reverse
     let binders' : TSyntaxArray `ident ← xs.foldrM
@@ -407,7 +459,8 @@ macro_rules
         if binders.elem z then Macro.throwErrorAt z "error: variable is duplicated." else
         return binders'.insertIdx 0 z)
       binders
-    let s : TSyntax `term ← xs.size.rec `(⤫formula($type)[ $binders'* | $fbinders* | $φ ]) (fun _ ψ ↦ ψ >>= fun ψ ↦ `(∀¹ $ψ))
+    let s : TSyntax `term ← xs.size.rec `(⤫formula($type)[ $binders'* | $fbinders* | $φ ])
+      (fun _ ψ ↦ ψ >>= fun ψ ↦ `(∀¹ $ψ))
     return s
   | `(⤫formula($type)[ $binders* | $fbinders* | ∃ $xs*, $φ    ]) => do
     let xs := xs.reverse
@@ -416,7 +469,8 @@ macro_rules
         if binders.elem z then Macro.throwErrorAt z "error: variable is duplicated." else
         return binders'.insertIdx 0 z)
       binders
-    let s : TSyntax `term ← xs.size.rec `(⤫formula($type)[ $binders'* | $fbinders* | $φ ]) (fun _ ψ ↦ ψ >>= fun ψ ↦ `(∃¹ $ψ))
+    let s : TSyntax `term ← xs.size.rec `(⤫formula($type)[ $binders'* | $fbinders* | $φ ])
+      (fun _ ψ ↦ ψ >>= fun ψ ↦ `(∃¹ $ψ))
     return s
   | `(⤫formula($type)[ $binders* | $fbinders* | ∀¹ $φ         ]) => do
     let v := mkIdent (Name.mkSimple ("var" ++ toString binders.size))
@@ -429,20 +483,28 @@ macro_rules
   | `(⤫formula($type)[ $binders* | $fbinders* | ∀¹[ $φ ] $ψ    ]) => do
     let v := mkIdent (Name.mkSimple ("var" ++ toString binders.size))
     let binders' := binders.insertIdx 0 v
-    `(∀¹[⤫formula($type)[ $binders'* | $fbinders* | $φ ]] ⤫formula($type)[ $binders'* | $fbinders* | $ψ ])
+    `(∀¹[⤫formula($type)[ $binders'* | $fbinders* | $φ ]]
+      ⤫formula($type)[ $binders'* | $fbinders* | $ψ ])
   | `(⤫formula($type)[ $binders* | $fbinders* | ∃¹[ $φ ] $ψ    ]) => do
     let v := mkIdent (Name.mkSimple ("var" ++ toString binders.size))
     let binders' := binders.insertIdx 0 v
-    `(∃¹[⤫formula($type)[ $binders'* | $fbinders* | $φ ]] ⤫formula($type)[ $binders'* | $fbinders* | $ψ ])
+    `(∃¹[⤫formula($type)[ $binders'* | $fbinders* | $φ ]]
+      ⤫formula($type)[ $binders'* | $fbinders* | $ψ ])
 
 /--
-A formula in literal notation. For a formula `φ`, write `!φ` to include `φ` in the formula. Identifiers may be written after `!φ` as its bound variables.
+A formula in literal notation. For a formula `φ`, write `!φ` to include `φ` in the formula.
+Identifiers may be written after `!φ` as its bound variables.
 
-`⋯` adds enough unnamed bound variables to fill up the arity of `φ`, with indices starting after the last named identifier. For example, assume `φ` is a `Semiformula L k`, and consider the formula `“x y z. !φ x y ⋯”`. Here `x`, `y`, and `z` are the bound variables `#0`, `#1`, and `#2` respectively. Then `!φ x y ⋯` will add `k - 2` new bound variables, and expand to `!φ #0 #1 #3 #4 ... #(k + 1)`.
+`⋯` adds enough unnamed bound variables to fill up the arity of `φ`, with indices starting after the
+last named identifier. For example, assume `φ` is a `Semiformula L k`, and consider the formula
+`“x y z. !φ x y ⋯”`. Here `x`, `y`, and `z` are the bound variables `#0`, `#1`, and `#2`
+respectively. Then `!φ x y ⋯` will add `k - 2` new bound variables, and expand to
+`!φ #0 #1 #3 #4 ... #(k + 1)`.
 -/
 macro_rules
   | `(⤫formula(lit)[ $binders* | $fbinders* | !$φ:term $vs:first_order_term*   ]) => do
-    let v ← vs.foldrM (β := Lean.TSyntax _) (init := ← `(![])) (fun a s ↦ `(⤫term(lit)[ $binders* | $fbinders* | $a ] :> $s))
+    let v ← vs.foldrM (β := Lean.TSyntax _) (init := ← `(![]))
+      (fun a s ↦ `(⤫term(lit)[ $binders* | $fbinders* | $a ] :> $s))
     `($φ ⇜ $v)
   | `(⤫formula(lit)[ $binders* | $fbinders* | !$φ:term $vs:first_order_term* ⋯ ]) =>
     do
@@ -493,39 +555,64 @@ syntax:max "∃ " ident " ≤ " first_order_term ", " first_order_formula:0 : fi
 syntax:max "∃ " ident " ∈ " first_order_term ", " first_order_formula:0 : first_order_formula
 
 macro_rules
-  | `(⤫formula($type)[ $binders* | $fbinders* | $t:first_order_term > $u:first_order_term ]) => `(⤫formula($type)[ $binders* | $fbinders* | $u:first_order_term < $t:first_order_term ])
-  | `(⤫formula($type)[ $binders* | $fbinders* | $t:first_order_term ≥ $u:first_order_term ]) => `(⤫formula($type)[ $binders* | $fbinders* | $u:first_order_term ≤ $t:first_order_term ])
-  | `(⤫formula($type)[ $binders* | $fbinders* | $t:first_order_term ∋ $u:first_order_term ]) => `(⤫formula($type)[ $binders* | $fbinders* | $u:first_order_term ∈ $t:first_order_term ])
+  | `(⤫formula($type)[ $binders* | $fbinders* | $t:first_order_term > $u:first_order_term ]) =>
+    `(⤫formula($type)[ $binders* | $fbinders* | $u:first_order_term < $t:first_order_term ])
+  | `(⤫formula($type)[ $binders* | $fbinders* | $t:first_order_term ≥ $u:first_order_term ]) =>
+    `(⤫formula($type)[ $binders* | $fbinders* | $u:first_order_term ≤ $t:first_order_term ])
+  | `(⤫formula($type)[ $binders* | $fbinders* | $t:first_order_term ∋ $u:first_order_term ]) =>
+    `(⤫formula($type)[ $binders* | $fbinders* | $u:first_order_term ∈ $t:first_order_term ])
 
 macro_rules
-  | `(⤫formula(lit)[ $binders* | $fbinders* | $t:first_order_term = $u:first_order_term ]) => `(Semiformula.Operator.operator Operator.Eq.eq ![⤫term(lit)[ $binders* | $fbinders* | $t ], ⤫term(lit)[ $binders* | $fbinders* | $u ]])
-  | `(⤫formula(lit)[ $binders* | $fbinders* | $t:first_order_term < $u:first_order_term ]) => `(Semiformula.Operator.operator Operator.LT.lt ![⤫term(lit)[ $binders* | $fbinders* | $t ], ⤫term(lit)[ $binders* | $fbinders* | $u ]])
-  | `(⤫formula(lit)[ $binders* | $fbinders* | $t:first_order_term ≤ $u:first_order_term ]) => `(Semiformula.Operator.operator Operator.LE.le ![⤫term(lit)[ $binders* | $fbinders* | $t ], ⤫term(lit)[ $binders* | $fbinders* | $u ]])
-  | `(⤫formula(lit)[ $binders* | $fbinders* | $t:first_order_term ∈ $u:first_order_term ]) => `(Semiformula.Operator.operator Operator.Mem.mem ![⤫term(lit)[ $binders* | $fbinders* | $t ], ⤫term(lit)[ $binders* | $fbinders* | $u ]])
-  | `(⤫formula(lit)[ $binders* | $fbinders* | $t:first_order_term ≠ $u:first_order_term ]) => `(@HTilde.hTilde _ _ Tilde.instHTilde (Semiformula.Operator.operator Operator.Eq.eq ![⤫term(lit)[ $binders* | $fbinders* | $t ], ⤫term(lit)[ $binders* | $fbinders* | $u ]]))
-  | `(⤫formula(lit)[ $binders* | $fbinders* | $t:first_order_term ≮ $u:first_order_term ]) => `(@HTilde.hTilde _ _ Tilde.instHTilde (Semiformula.Operator.operator Operator.LT.lt ![⤫term(lit)[ $binders* | $fbinders* | $t ], ⤫term(lit)[ $binders* | $fbinders* | $u ]]))
-  | `(⤫formula(lit)[ $binders* | $fbinders* | $t:first_order_term ≰ $u:first_order_term ]) => `(@HTilde.hTilde _ _ Tilde.instHTilde (Semiformula.Operator.operator Operator.LE.le ![⤫term(lit)[ $binders* | $fbinders* | $t ], ⤫term(lit)[ $binders* | $fbinders* | $u ]]))
-  | `(⤫formula(lit)[ $binders* | $fbinders* | $t:first_order_term ∉ $u:first_order_term ]) => `(@HTilde.hTilde _ _ Tilde.instHTilde (Semiformula.Operator.operator Operator.Mem.mem ![⤫term(lit)[ $binders* | $fbinders* | $t ], ⤫term(lit)[ $binders* | $fbinders* | $u ]]))
+  | `(⤫formula(lit)[ $binders* | $fbinders* | $t:first_order_term = $u:first_order_term ]) =>
+    `(Semiformula.Operator.operator Operator.Eq.eq
+      ![⤫term(lit)[ $binders* | $fbinders* | $t ], ⤫term(lit)[ $binders* | $fbinders* | $u ]])
+  | `(⤫formula(lit)[ $binders* | $fbinders* | $t:first_order_term < $u:first_order_term ]) =>
+    `(Semiformula.Operator.operator Operator.LT.lt
+      ![⤫term(lit)[ $binders* | $fbinders* | $t ], ⤫term(lit)[ $binders* | $fbinders* | $u ]])
+  | `(⤫formula(lit)[ $binders* | $fbinders* | $t:first_order_term ≤ $u:first_order_term ]) =>
+    `(Semiformula.Operator.operator Operator.LE.le
+      ![⤫term(lit)[ $binders* | $fbinders* | $t ], ⤫term(lit)[ $binders* | $fbinders* | $u ]])
+  | `(⤫formula(lit)[ $binders* | $fbinders* | $t:first_order_term ∈ $u:first_order_term ]) =>
+    `(Semiformula.Operator.operator Operator.Mem.mem
+      ![⤫term(lit)[ $binders* | $fbinders* | $t ], ⤫term(lit)[ $binders* | $fbinders* | $u ]])
+  | `(⤫formula(lit)[ $binders* | $fbinders* | $t:first_order_term ≠ $u:first_order_term ]) =>
+    `(@HTilde.hTilde _ _ Tilde.instHTilde (Semiformula.Operator.operator Operator.Eq.eq
+      ![⤫term(lit)[ $binders* | $fbinders* | $t ], ⤫term(lit)[ $binders* | $fbinders* | $u ]]))
+  | `(⤫formula(lit)[ $binders* | $fbinders* | $t:first_order_term ≮ $u:first_order_term ]) =>
+    `(@HTilde.hTilde _ _ Tilde.instHTilde (Semiformula.Operator.operator Operator.LT.lt
+      ![⤫term(lit)[ $binders* | $fbinders* | $t ], ⤫term(lit)[ $binders* | $fbinders* | $u ]]))
+  | `(⤫formula(lit)[ $binders* | $fbinders* | $t:first_order_term ≰ $u:first_order_term ]) =>
+    `(@HTilde.hTilde _ _ Tilde.instHTilde (Semiformula.Operator.operator Operator.LE.le
+      ![⤫term(lit)[ $binders* | $fbinders* | $t ], ⤫term(lit)[ $binders* | $fbinders* | $u ]]))
+  | `(⤫formula(lit)[ $binders* | $fbinders* | $t:first_order_term ∉ $u:first_order_term ]) =>
+    `(@HTilde.hTilde _ _ Tilde.instHTilde (Semiformula.Operator.operator Operator.Mem.mem
+      ![⤫term(lit)[ $binders* | $fbinders* | $t ], ⤫term(lit)[ $binders* | $fbinders* | $u ]]))
 
 macro_rules
   | `(⤫formula(lit)[ $binders* | $fbinders* | ∀ $x < $t, $φ ]) => do
     if binders.elem x then Macro.throwErrorAt x "error: variable is duplicated." else
-    `(Semiformula.ballLT ⤫term(lit)[ $binders* | $fbinders* | $t ] ⤫formula(lit)[ $x $binders* | $fbinders* | $φ ])
+    `(Semiformula.ballLT ⤫term(lit)[ $binders* | $fbinders* | $t ]
+      ⤫formula(lit)[ $x $binders* | $fbinders* | $φ ])
   | `(⤫formula(lit)[ $binders* | $fbinders* | ∀ $x ≤ $t, $φ ]) => do
     if binders.elem x then Macro.throwErrorAt x "error: variable is duplicated." else
-    `(Semiformula.ballLE ⤫term(lit)[ $binders* | $fbinders* | $t ] ⤫formula(lit)[ $x $binders* | $fbinders* | $φ ])
+    `(Semiformula.ballLE ⤫term(lit)[ $binders* | $fbinders* | $t ]
+      ⤫formula(lit)[ $x $binders* | $fbinders* | $φ ])
   | `(⤫formula(lit)[ $binders* | $fbinders* | ∀ $x ∈ $t, $φ ]) => do
     if binders.elem x then Macro.throwErrorAt x "error: variable is duplicated." else
-    `(Semiformula.ballMem ⤫term(lit)[ $binders* | $fbinders* | $t ] ⤫formula(lit)[ $x $binders* | $fbinders* | $φ ])
+    `(Semiformula.ballMem ⤫term(lit)[ $binders* | $fbinders* | $t ]
+      ⤫formula(lit)[ $x $binders* | $fbinders* | $φ ])
   | `(⤫formula(lit)[ $binders* | $fbinders* | ∃ $x < $t, $φ ]) => do
     if binders.elem x then Macro.throwErrorAt x "error: variable is duplicated." else
-    `(Semiformula.bexsLT ⤫term(lit)[ $binders* | $fbinders* | $t ] ⤫formula(lit)[ $x $binders* | $fbinders* | $φ ])
+    `(Semiformula.bexsLT ⤫term(lit)[ $binders* | $fbinders* | $t ]
+      ⤫formula(lit)[ $x $binders* | $fbinders* | $φ ])
   | `(⤫formula(lit)[ $binders* | $fbinders* | ∃ $x ≤ $t, $φ ]) => do
     if binders.elem x then Macro.throwErrorAt x "error: variable is duplicated." else
-    `(Semiformula.bexsLE ⤫term(lit)[ $binders* | $fbinders* | $t ] ⤫formula(lit)[ $x $binders* | $fbinders* | $φ ])
+    `(Semiformula.bexsLE ⤫term(lit)[ $binders* | $fbinders* | $t ]
+      ⤫formula(lit)[ $x $binders* | $fbinders* | $φ ])
   | `(⤫formula(lit)[ $binders* | $fbinders* | ∃ $x ∈ $t, $φ ]) => do
     if binders.elem x then Macro.throwErrorAt x "error: variable is duplicated." else
-    `(Semiformula.bexsMem ⤫term(lit)[ $binders* | $fbinders* | $t ] ⤫formula(lit)[ $x $binders* | $fbinders* | $φ ])
+    `(Semiformula.bexsMem ⤫term(lit)[ $binders* | $fbinders* | $t ]
+      ⤫formula(lit)[ $x $binders* | $fbinders* | $φ ])
 
 -- #check “∀ x, ∀ y, ∀ z, ∀ v, ∀ w, x + y + z + v + w = 0”
 -- #check “∀ x y z v w, x + y + z + v + w = 0”
@@ -601,110 +688,206 @@ meta def unexpandIff : Unexpander
 
 @[app_unexpander Semiformula.Operator.operator]
 meta def unexpandOpArith : Unexpander
-  | `($_ op(=) ![‘ $t:first_order_term ’,  ‘ $u:first_order_term ’]) => `(“ $t:first_order_term = $u      ”)
-  | `($_ op(=) ![‘ $t:first_order_term ’,  #$y:term               ]) => `(“ $t:first_order_term = #$y     ”)
-  | `($_ op(=) ![‘ $t:first_order_term ’,  &$y:term               ]) => `(“ $t:first_order_term = &$y     ”)
-  | `($_ op(=) ![‘ $t:first_order_term ’,  ↑$m:num                ]) => `(“ $t:first_order_term = $m:num  ”)
-  | `($_ op(=) ![‘ $t:first_order_term ’,  $u                     ]) => `(“ $t:first_order_term = !!$u    ”)
-  | `($_ op(=) ![#$x:term,                 ‘ $u:first_order_term ’]) => `(“ #$x                 = $u      ”)
-  | `($_ op(=) ![#$x:term,                 #$y:term               ]) => `(“ #$x                 = #$y     ”)
-  | `($_ op(=) ![#$x:term,                 &$y:term               ]) => `(“ #$x                 = &$y     ”)
-  | `($_ op(=) ![#$x:term,                 ↑$m:num                ]) => `(“ #$x                 = $m:num  ”)
-  | `($_ op(=) ![#$x:term,                 $u                     ]) => `(“ #$x                 = !!$u    ”)
-  | `($_ op(=) ![&$x:term,                 ‘ $u:first_order_term ’]) => `(“ &$x                 = $u      ”)
-  | `($_ op(=) ![&$x:term,                 #$y:term               ]) => `(“ &$x                 = #$y     ”)
-  | `($_ op(=) ![&$x:term,                 &$y:term               ]) => `(“ &$x                 = &$y     ”)
-  | `($_ op(=) ![&$x:term,                 ↑$m:num                ]) => `(“ &$x                 = $m:num  ”)
-  | `($_ op(=) ![&$x:term,                 $u                     ]) => `(“ &$x                 = !!$u    ”)
-  | `($_ op(=) ![↑$n:num,                  ‘ $u:first_order_term ’]) => `(“ $n:num              = $u      ”)
-  | `($_ op(=) ![↑$n:num,                  #$y:term               ]) => `(“ $n:num              = #$y     ”)
-  | `($_ op(=) ![↑$n:num,                  &$y:term               ]) => `(“ $n:num              = &$y     ”)
-  | `($_ op(=) ![↑$n:num,                  ↑$m:num                ]) => `(“ $n:num              = $m:num  ”)
-  | `($_ op(=) ![↑$n:num,                  $u                     ]) => `(“ $n:num              = !!$u    ”)
-  | `($_ op(=) ![$t:term,                  ‘ $u:first_order_term ’]) => `(“ !!$t                = $u      ”)
-  | `($_ op(=) ![$t:term,                  #$y:term               ]) => `(“ !!$t                = #$y     ”)
-  | `($_ op(=) ![$t:term,                  &$y:term               ]) => `(“ !!$t                = &$y     ”)
-  | `($_ op(=) ![$t:term,                  ↑$m:num                ]) => `(“ !!$t                = $m:num  ”)
-  | `($_ op(=) ![$t:term,                  $u                     ]) => `(“ !!$t                = !!$u    ”)
-
-  | `($_ op(<) ![‘ $t:first_order_term ’,  ‘ $u:first_order_term ’]) => `(“ $t:first_order_term < $u      ”)
-  | `($_ op(<) ![‘ $t:first_order_term ’,  #$y:term               ]) => `(“ $t:first_order_term < #$y     ”)
-  | `($_ op(<) ![‘ $t:first_order_term ’,  &$y:term               ]) => `(“ $t:first_order_term < &$y     ”)
-  | `($_ op(<) ![‘ $t:first_order_term ’,  ↑$m:num                ]) => `(“ $t:first_order_term < $m:num  ”)
-  | `($_ op(<) ![‘ $t:first_order_term ’,  $u                     ]) => `(“ $t:first_order_term < !!$u    ”)
-  | `($_ op(<) ![#$x:term,                 ‘ $u:first_order_term ’]) => `(“ #$x                 < $u      ”)
-  | `($_ op(<) ![#$x:term,                 #$y:term               ]) => `(“ #$x                 < #$y     ”)
-  | `($_ op(<) ![#$x:term,                 &$y:term               ]) => `(“ #$x                 < &$y     ”)
-  | `($_ op(<) ![#$x:term,                 ↑$m:num                ]) => `(“ #$x                 < $m:num  ”)
-  | `($_ op(<) ![#$x:term,                 $u                     ]) => `(“ #$x                 < !!$u    ”)
-  | `($_ op(<) ![&$x:term,                 ‘ $u:first_order_term ’]) => `(“ &$x                 < $u      ”)
-  | `($_ op(<) ![&$x:term,                 #$y:term               ]) => `(“ &$x                 < #$y     ”)
-  | `($_ op(<) ![&$x:term,                 &$y:term               ]) => `(“ &$x                 < &$y     ”)
-  | `($_ op(<) ![&$x:term,                 ↑$m:num                ]) => `(“ &$x                 < $m:num  ”)
-  | `($_ op(<) ![&$x:term,                 $u                     ]) => `(“ &$x                 < !!$u    ”)
-  | `($_ op(<) ![↑$n:num,                  ‘ $u:first_order_term ’]) => `(“ $n:num              < $u      ”)
-  | `($_ op(<) ![↑$n:num,                  #$y:term               ]) => `(“ $n:num              < #$y     ”)
-  | `($_ op(<) ![↑$n:num,                  &$y:term               ]) => `(“ $n:num              < &$y     ”)
-  | `($_ op(<) ![↑$n:num,                  ↑$m:num                ]) => `(“ $n:num              < $m:num  ”)
-  | `($_ op(<) ![↑$n:num,                  $u                     ]) => `(“ $n:num              < !!$u    ”)
-  | `($_ op(<) ![$t:term,                  ‘ $u:first_order_term ’]) => `(“ !!$t                < $u      ”)
-  | `($_ op(<) ![$t:term,                  #$y:term               ]) => `(“ !!$t                < #$y     ”)
-  | `($_ op(<) ![$t:term,                  &$y:term               ]) => `(“ !!$t                < &$y     ”)
-  | `($_ op(<) ![$t:term,                  ↑$m:num                ]) => `(“ !!$t                < $m:num  ”)
-  | `($_ op(<) ![$t:term,                  $u                     ]) => `(“ !!$t                < !!$u    ”)
-
-  | `($_ op(≤) ![‘ $t:first_order_term ’,  ‘ $u:first_order_term ’]) => `(“ $t:first_order_term ≤ $u      ”)
-  | `($_ op(≤) ![‘ $t:first_order_term ’,  #$y:term               ]) => `(“ $t:first_order_term ≤ #$y     ”)
-  | `($_ op(≤) ![‘ $t:first_order_term ’,  &$y:term               ]) => `(“ $t:first_order_term ≤ &$y     ”)
-  | `($_ op(≤) ![‘ $t:first_order_term ’,  ↑$m:num                ]) => `(“ $t:first_order_term ≤ $m:num  ”)
-  | `($_ op(≤) ![‘ $t:first_order_term ’,  $u                     ]) => `(“ $t:first_order_term ≤ !!$u    ”)
-  | `($_ op(≤) ![#$x:term,                 ‘ $u:first_order_term ’]) => `(“ #$x                 ≤ $u      ”)
-  | `($_ op(≤) ![#$x:term,                 #$y:term               ]) => `(“ #$x                 ≤ #$y     ”)
-  | `($_ op(≤) ![#$x:term,                 &$y:term               ]) => `(“ #$x                 ≤ &$y     ”)
-  | `($_ op(≤) ![#$x:term,                 ↑$m:num                ]) => `(“ #$x                 ≤ $m:num  ”)
-  | `($_ op(≤) ![#$x:term,                 $u                     ]) => `(“ #$x                 ≤ !!$u    ”)
-  | `($_ op(≤) ![&$x:term,                 ‘ $u:first_order_term ’]) => `(“ &$x                 ≤ $u      ”)
-  | `($_ op(≤) ![&$x:term,                 #$y:term               ]) => `(“ &$x                 ≤ #$y     ”)
-  | `($_ op(≤) ![&$x:term,                 &$y:term               ]) => `(“ &$x                 ≤ &$y     ”)
-  | `($_ op(≤) ![&$x:term,                 ↑$m:num                ]) => `(“ &$x                 ≤ $m:num  ”)
-  | `($_ op(≤) ![&$x:term,                 $u                     ]) => `(“ &$x                 ≤ !!$u    ”)
-  | `($_ op(≤) ![↑$n:num,                  ‘ $u:first_order_term ’]) => `(“ $n:num              ≤ $u      ”)
-  | `($_ op(≤) ![↑$n:num,                  #$y:term               ]) => `(“ $n:num              ≤ #$y     ”)
-  | `($_ op(≤) ![↑$n:num,                  &$y:term               ]) => `(“ $n:num              ≤ &$y     ”)
-  | `($_ op(≤) ![↑$n:num,                  ↑$m:num                ]) => `(“ $n:num              ≤ $m:num  ”)
-  | `($_ op(≤) ![↑$n:num,                  $u                     ]) => `(“ $n:num              ≤ !!$u    ”)
-  | `($_ op(≤) ![$t:term,                  ‘ $u:first_order_term ’]) => `(“ !!$t                ≤ $u      ”)
-  | `($_ op(≤) ![$t:term,                  #$y:term               ]) => `(“ !!$t                ≤ #$y     ”)
-  | `($_ op(≤) ![$t:term,                  &$y:term               ]) => `(“ !!$t                ≤ &$y     ”)
-  | `($_ op(≤) ![$t:term,                  ↑$m:num                ]) => `(“ !!$t                ≤ $m:num  ”)
-  | `($_ op(≤) ![$t:term,                  $u                     ]) => `(“ !!$t                ≤ !!$u    ”)
-
-  | `($_ op(∈) ![‘ $t:first_order_term ’,  ‘ $u:first_order_term ’]) => `(“ $t:first_order_term ∈ $u      ”)
-  | `($_ op(∈) ![‘ $t:first_order_term ’,  #$y:term               ]) => `(“ $t:first_order_term ∈ #$y     ”)
-  | `($_ op(∈) ![‘ $t:first_order_term ’,  &$y:term               ]) => `(“ $t:first_order_term ∈ &$y     ”)
-  | `($_ op(∈) ![‘ $t:first_order_term ’,  ↑$m:num                ]) => `(“ $t:first_order_term ∈ $m:num  ”)
-  | `($_ op(∈) ![‘ $t:first_order_term ’,  $u                     ]) => `(“ $t:first_order_term ∈ !!$u    ”)
-  | `($_ op(∈) ![#$x:term,                 ‘ $u:first_order_term ’]) => `(“ #$x                 ∈ $u      ”)
-  | `($_ op(∈) ![#$x:term,                 #$y:term               ]) => `(“ #$x                 ∈ #$y     ”)
-  | `($_ op(∈) ![#$x:term,                 &$y:term               ]) => `(“ #$x                 ∈ &$y     ”)
-  | `($_ op(∈) ![#$x:term,                 ↑$m:num                ]) => `(“ #$x                 ∈ $m:num  ”)
-  | `($_ op(∈) ![#$x:term,                 $u                     ]) => `(“ #$x                 ∈ !!$u    ”)
-  | `($_ op(∈) ![&$x:term,                 ‘ $u:first_order_term ’]) => `(“ &$x                 ∈ $u      ”)
-  | `($_ op(∈) ![&$x:term,                 #$y:term               ]) => `(“ &$x                 ∈ #$y     ”)
-  | `($_ op(∈) ![&$x:term,                 &$y:term               ]) => `(“ &$x                 ∈ &$y     ”)
-  | `($_ op(∈) ![&$x:term,                 ↑$m:num                ]) => `(“ &$x                 ∈ $m:num  ”)
-  | `($_ op(∈) ![&$x:term,                 $u                     ]) => `(“ &$x                 ∈ !!$u    ”)
-  | `($_ op(∈) ![↑$n:num,                  ‘ $u:first_order_term ’]) => `(“ $n:num              ∈ $u      ”)
-  | `($_ op(∈) ![↑$n:num,                  #$y:term               ]) => `(“ $n:num              ∈ #$y     ”)
-  | `($_ op(∈) ![↑$n:num,                  &$y:term               ]) => `(“ $n:num              ∈ &$y     ”)
-  | `($_ op(∈) ![↑$n:num,                  ↑$m:num                ]) => `(“ $n:num              ∈ $m:num  ”)
-  | `($_ op(∈) ![↑$n:num,                  $u                     ]) => `(“ $n:num              ∈ !!$u    ”)
-  | `($_ op(∈) ![$t:term,                  ‘ $u:first_order_term ’]) => `(“ !!$t                ∈ $u      ”)
-  | `($_ op(∈) ![$t:term,                  #$y:term               ]) => `(“ !!$t                ∈ #$y     ”)
-  | `($_ op(∈) ![$t:term,                  &$y:term               ]) => `(“ !!$t                ∈ &$y     ”)
-  | `($_ op(∈) ![$t:term,                  ↑$m:num                ]) => `(“ !!$t                ∈ $m:num  ”)
-  | `($_ op(∈) ![$t:term,                  $u                     ]) => `(“ !!$t                ∈ !!$u    ”)
-
+  | `($_ op(=) ![‘ $t:first_order_term ’,  ‘ $u:first_order_term ’]) =>
+    `(“ $t:first_order_term = $u      ”)
+  | `($_ op(=) ![‘ $t:first_order_term ’,  #$y:term               ]) =>
+    `(“ $t:first_order_term = #$y     ”)
+  | `($_ op(=) ![‘ $t:first_order_term ’,  &$y:term               ]) =>
+    `(“ $t:first_order_term = &$y     ”)
+  | `($_ op(=) ![‘ $t:first_order_term ’,  ↑$m:num                ]) =>
+    `(“ $t:first_order_term = $m:num  ”)
+  | `($_ op(=) ![‘ $t:first_order_term ’,  $u                     ]) =>
+    `(“ $t:first_order_term = !!$u    ”)
+  | `($_ op(=) ![#$x:term,                 ‘ $u:first_order_term ’]) =>
+    `(“ #$x                 = $u      ”)
+  | `($_ op(=) ![#$x:term,                 #$y:term               ]) =>
+    `(“ #$x                 = #$y     ”)
+  | `($_ op(=) ![#$x:term,                 &$y:term               ]) =>
+    `(“ #$x                 = &$y     ”)
+  | `($_ op(=) ![#$x:term,                 ↑$m:num                ]) =>
+    `(“ #$x                 = $m:num  ”)
+  | `($_ op(=) ![#$x:term,                 $u                     ]) =>
+    `(“ #$x                 = !!$u    ”)
+  | `($_ op(=) ![&$x:term,                 ‘ $u:first_order_term ’]) =>
+    `(“ &$x                 = $u      ”)
+  | `($_ op(=) ![&$x:term,                 #$y:term               ]) =>
+    `(“ &$x                 = #$y     ”)
+  | `($_ op(=) ![&$x:term,                 &$y:term               ]) =>
+    `(“ &$x                 = &$y     ”)
+  | `($_ op(=) ![&$x:term,                 ↑$m:num                ]) =>
+    `(“ &$x                 = $m:num  ”)
+  | `($_ op(=) ![&$x:term,                 $u                     ]) =>
+    `(“ &$x                 = !!$u    ”)
+  | `($_ op(=) ![↑$n:num,                  ‘ $u:first_order_term ’]) =>
+    `(“ $n:num              = $u      ”)
+  | `($_ op(=) ![↑$n:num,                  #$y:term               ]) =>
+    `(“ $n:num              = #$y     ”)
+  | `($_ op(=) ![↑$n:num,                  &$y:term               ]) =>
+    `(“ $n:num              = &$y     ”)
+  | `($_ op(=) ![↑$n:num,                  ↑$m:num                ]) =>
+    `(“ $n:num              = $m:num  ”)
+  | `($_ op(=) ![↑$n:num,                  $u                     ]) =>
+    `(“ $n:num              = !!$u    ”)
+  | `($_ op(=) ![$t:term,                  ‘ $u:first_order_term ’]) =>
+    `(“ !!$t                = $u      ”)
+  | `($_ op(=) ![$t:term,                  #$y:term               ]) =>
+    `(“ !!$t                = #$y     ”)
+  | `($_ op(=) ![$t:term,                  &$y:term               ]) =>
+    `(“ !!$t                = &$y     ”)
+  | `($_ op(=) ![$t:term,                  ↑$m:num                ]) =>
+    `(“ !!$t                = $m:num  ”)
+  | `($_ op(=) ![$t:term,                  $u                     ]) =>
+    `(“ !!$t                = !!$u    ”)
+  | `($_ op(<) ![‘ $t:first_order_term ’,  ‘ $u:first_order_term ’]) =>
+    `(“ $t:first_order_term < $u      ”)
+  | `($_ op(<) ![‘ $t:first_order_term ’,  #$y:term               ]) =>
+    `(“ $t:first_order_term < #$y     ”)
+  | `($_ op(<) ![‘ $t:first_order_term ’,  &$y:term               ]) =>
+    `(“ $t:first_order_term < &$y     ”)
+  | `($_ op(<) ![‘ $t:first_order_term ’,  ↑$m:num                ]) =>
+    `(“ $t:first_order_term < $m:num  ”)
+  | `($_ op(<) ![‘ $t:first_order_term ’,  $u                     ]) =>
+    `(“ $t:first_order_term < !!$u    ”)
+  | `($_ op(<) ![#$x:term,                 ‘ $u:first_order_term ’]) =>
+    `(“ #$x                 < $u      ”)
+  | `($_ op(<) ![#$x:term,                 #$y:term               ]) =>
+    `(“ #$x                 < #$y     ”)
+  | `($_ op(<) ![#$x:term,                 &$y:term               ]) =>
+    `(“ #$x                 < &$y     ”)
+  | `($_ op(<) ![#$x:term,                 ↑$m:num                ]) =>
+    `(“ #$x                 < $m:num  ”)
+  | `($_ op(<) ![#$x:term,                 $u                     ]) =>
+    `(“ #$x                 < !!$u    ”)
+  | `($_ op(<) ![&$x:term,                 ‘ $u:first_order_term ’]) =>
+    `(“ &$x                 < $u      ”)
+  | `($_ op(<) ![&$x:term,                 #$y:term               ]) =>
+    `(“ &$x                 < #$y     ”)
+  | `($_ op(<) ![&$x:term,                 &$y:term               ]) =>
+    `(“ &$x                 < &$y     ”)
+  | `($_ op(<) ![&$x:term,                 ↑$m:num                ]) =>
+    `(“ &$x                 < $m:num  ”)
+  | `($_ op(<) ![&$x:term,                 $u                     ]) =>
+    `(“ &$x                 < !!$u    ”)
+  | `($_ op(<) ![↑$n:num,                  ‘ $u:first_order_term ’]) =>
+    `(“ $n:num              < $u      ”)
+  | `($_ op(<) ![↑$n:num,                  #$y:term               ]) =>
+    `(“ $n:num              < #$y     ”)
+  | `($_ op(<) ![↑$n:num,                  &$y:term               ]) =>
+    `(“ $n:num              < &$y     ”)
+  | `($_ op(<) ![↑$n:num,                  ↑$m:num                ]) =>
+    `(“ $n:num              < $m:num  ”)
+  | `($_ op(<) ![↑$n:num,                  $u                     ]) =>
+    `(“ $n:num              < !!$u    ”)
+  | `($_ op(<) ![$t:term,                  ‘ $u:first_order_term ’]) =>
+    `(“ !!$t                < $u      ”)
+  | `($_ op(<) ![$t:term,                  #$y:term               ]) =>
+    `(“ !!$t                < #$y     ”)
+  | `($_ op(<) ![$t:term,                  &$y:term               ]) =>
+    `(“ !!$t                < &$y     ”)
+  | `($_ op(<) ![$t:term,                  ↑$m:num                ]) =>
+    `(“ !!$t                < $m:num  ”)
+  | `($_ op(<) ![$t:term,                  $u                     ]) =>
+    `(“ !!$t                < !!$u    ”)
+  | `($_ op(≤) ![‘ $t:first_order_term ’,  ‘ $u:first_order_term ’]) =>
+    `(“ $t:first_order_term ≤ $u      ”)
+  | `($_ op(≤) ![‘ $t:first_order_term ’,  #$y:term               ]) =>
+    `(“ $t:first_order_term ≤ #$y     ”)
+  | `($_ op(≤) ![‘ $t:first_order_term ’,  &$y:term               ]) =>
+    `(“ $t:first_order_term ≤ &$y     ”)
+  | `($_ op(≤) ![‘ $t:first_order_term ’,  ↑$m:num                ]) =>
+    `(“ $t:first_order_term ≤ $m:num  ”)
+  | `($_ op(≤) ![‘ $t:first_order_term ’,  $u                     ]) =>
+    `(“ $t:first_order_term ≤ !!$u    ”)
+  | `($_ op(≤) ![#$x:term,                 ‘ $u:first_order_term ’]) =>
+    `(“ #$x                 ≤ $u      ”)
+  | `($_ op(≤) ![#$x:term,                 #$y:term               ]) =>
+    `(“ #$x                 ≤ #$y     ”)
+  | `($_ op(≤) ![#$x:term,                 &$y:term               ]) =>
+    `(“ #$x                 ≤ &$y     ”)
+  | `($_ op(≤) ![#$x:term,                 ↑$m:num                ]) =>
+    `(“ #$x                 ≤ $m:num  ”)
+  | `($_ op(≤) ![#$x:term,                 $u                     ]) =>
+    `(“ #$x                 ≤ !!$u    ”)
+  | `($_ op(≤) ![&$x:term,                 ‘ $u:first_order_term ’]) =>
+    `(“ &$x                 ≤ $u      ”)
+  | `($_ op(≤) ![&$x:term,                 #$y:term               ]) =>
+    `(“ &$x                 ≤ #$y     ”)
+  | `($_ op(≤) ![&$x:term,                 &$y:term               ]) =>
+    `(“ &$x                 ≤ &$y     ”)
+  | `($_ op(≤) ![&$x:term,                 ↑$m:num                ]) =>
+    `(“ &$x                 ≤ $m:num  ”)
+  | `($_ op(≤) ![&$x:term,                 $u                     ]) =>
+    `(“ &$x                 ≤ !!$u    ”)
+  | `($_ op(≤) ![↑$n:num,                  ‘ $u:first_order_term ’]) =>
+    `(“ $n:num              ≤ $u      ”)
+  | `($_ op(≤) ![↑$n:num,                  #$y:term               ]) =>
+    `(“ $n:num              ≤ #$y     ”)
+  | `($_ op(≤) ![↑$n:num,                  &$y:term               ]) =>
+    `(“ $n:num              ≤ &$y     ”)
+  | `($_ op(≤) ![↑$n:num,                  ↑$m:num                ]) =>
+    `(“ $n:num              ≤ $m:num  ”)
+  | `($_ op(≤) ![↑$n:num,                  $u                     ]) =>
+    `(“ $n:num              ≤ !!$u    ”)
+  | `($_ op(≤) ![$t:term,                  ‘ $u:first_order_term ’]) =>
+    `(“ !!$t                ≤ $u      ”)
+  | `($_ op(≤) ![$t:term,                  #$y:term               ]) =>
+    `(“ !!$t                ≤ #$y     ”)
+  | `($_ op(≤) ![$t:term,                  &$y:term               ]) =>
+    `(“ !!$t                ≤ &$y     ”)
+  | `($_ op(≤) ![$t:term,                  ↑$m:num                ]) =>
+    `(“ !!$t                ≤ $m:num  ”)
+  | `($_ op(≤) ![$t:term,                  $u                     ]) =>
+    `(“ !!$t                ≤ !!$u    ”)
+  | `($_ op(∈) ![‘ $t:first_order_term ’,  ‘ $u:first_order_term ’]) =>
+    `(“ $t:first_order_term ∈ $u      ”)
+  | `($_ op(∈) ![‘ $t:first_order_term ’,  #$y:term               ]) =>
+    `(“ $t:first_order_term ∈ #$y     ”)
+  | `($_ op(∈) ![‘ $t:first_order_term ’,  &$y:term               ]) =>
+    `(“ $t:first_order_term ∈ &$y     ”)
+  | `($_ op(∈) ![‘ $t:first_order_term ’,  ↑$m:num                ]) =>
+    `(“ $t:first_order_term ∈ $m:num  ”)
+  | `($_ op(∈) ![‘ $t:first_order_term ’,  $u                     ]) =>
+    `(“ $t:first_order_term ∈ !!$u    ”)
+  | `($_ op(∈) ![#$x:term,                 ‘ $u:first_order_term ’]) =>
+    `(“ #$x                 ∈ $u      ”)
+  | `($_ op(∈) ![#$x:term,                 #$y:term               ]) =>
+    `(“ #$x                 ∈ #$y     ”)
+  | `($_ op(∈) ![#$x:term,                 &$y:term               ]) =>
+    `(“ #$x                 ∈ &$y     ”)
+  | `($_ op(∈) ![#$x:term,                 ↑$m:num                ]) =>
+    `(“ #$x                 ∈ $m:num  ”)
+  | `($_ op(∈) ![#$x:term,                 $u                     ]) =>
+    `(“ #$x                 ∈ !!$u    ”)
+  | `($_ op(∈) ![&$x:term,                 ‘ $u:first_order_term ’]) =>
+    `(“ &$x                 ∈ $u      ”)
+  | `($_ op(∈) ![&$x:term,                 #$y:term               ]) =>
+    `(“ &$x                 ∈ #$y     ”)
+  | `($_ op(∈) ![&$x:term,                 &$y:term               ]) =>
+    `(“ &$x                 ∈ &$y     ”)
+  | `($_ op(∈) ![&$x:term,                 ↑$m:num                ]) =>
+    `(“ &$x                 ∈ $m:num  ”)
+  | `($_ op(∈) ![&$x:term,                 $u                     ]) =>
+    `(“ &$x                 ∈ !!$u    ”)
+  | `($_ op(∈) ![↑$n:num,                  ‘ $u:first_order_term ’]) =>
+    `(“ $n:num              ∈ $u      ”)
+  | `($_ op(∈) ![↑$n:num,                  #$y:term               ]) =>
+    `(“ $n:num              ∈ #$y     ”)
+  | `($_ op(∈) ![↑$n:num,                  &$y:term               ]) =>
+    `(“ $n:num              ∈ &$y     ”)
+  | `($_ op(∈) ![↑$n:num,                  ↑$m:num                ]) =>
+    `(“ $n:num              ∈ $m:num  ”)
+  | `($_ op(∈) ![↑$n:num,                  $u                     ]) =>
+    `(“ $n:num              ∈ !!$u    ”)
+  | `($_ op(∈) ![$t:term,                  ‘ $u:first_order_term ’]) =>
+    `(“ !!$t                ∈ $u      ”)
+  | `($_ op(∈) ![$t:term,                  #$y:term               ]) =>
+    `(“ !!$t                ∈ #$y     ”)
+  | `($_ op(∈) ![$t:term,                  &$y:term               ]) =>
+    `(“ !!$t                ∈ &$y     ”)
+  | `($_ op(∈) ![$t:term,                  ↑$m:num                ]) =>
+    `(“ !!$t                ∈ $m:num  ”)
+  | `($_ op(∈) ![$t:term,                  $u                     ]) =>
+    `(“ !!$t                ∈ !!$u    ”)
   | _                                                            => throw ()
 
 -- #check “x y z. ∃ v w, ∀ r < z + v, y + v ≤ x ↔ z = w”
@@ -724,7 +907,8 @@ macro_rules
     `(($φ).nestFormulae $Ψ)
   | `(⤫formula(faf)[ $binders* | $fbinders* | !$φ:term $vs:first_order_term* ⋯ ]) => do
     let length := Syntax.mkNumLit (toString binders.size)
-    let Ψ ← vs.foldrM (β := Lean.TSyntax _) (init := ← `(fun x ↦ #(finSuccItr x $length))) fun a s ↦ do
+    let Ψ ← vs.foldrM (β := Lean.TSyntax _)
+        (init := ← `(fun x ↦ #(finSuccItr x $length))) fun a s ↦ do
       let x : TSyntax `ident ← TSyntax.freshIdent
       `(⤫term(faf)[ $x $binders* | $fbinders* | $a] :> $s)
     `(($φ).nestFormulae $Ψ)
@@ -747,7 +931,8 @@ macro_rules
     `(($f).nestFormulaeFunc $Ψ)
   | `(⤫term(faf)[ $binders* | $fbinders* | !$f:term $vs:first_order_term* ⋯ ]) => do
     let length := Syntax.mkNumLit (toString binders.size)
-    let Ψ ← vs.foldrM (β := Lean.TSyntax _) (init := ← `(fun x ↦ “#0 = #(finSuccItr x $length)”)) fun a s ↦ do
+    let Ψ ← vs.foldrM (β := Lean.TSyntax _)
+        (init := ← `(fun x ↦ “#0 = #(finSuccItr x $length)”)) fun a s ↦ do
       `(⤫term(faf)[ $binders* | $fbinders* | $a] :> $s)
     `(($f).nestFormulaeFunc $Ψ)
 
@@ -755,61 +940,75 @@ macro_rules
   | `(⤫formula(faf)[ $binders* | $fbinders* | $t:first_order_term = $u:first_order_term ]) => do
     let x₁ : TSyntax `ident ← TSyntax.freshIdent
     let x₂ : TSyntax `ident ← TSyntax.freshIdent
-    `(∀¹ (⤫term(faf)[ $x₁ $binders* | $fbinders* | $t ] 🡒 ∀¹ (⤫term(faf)[ $x₁ $x₂ $binders* | $fbinders* | $u ] 🡒 “#1 = #0”)))
+    `(∀¹ (⤫term(faf)[ $x₁ $binders* | $fbinders* | $t ]
+      🡒 ∀¹ (⤫term(faf)[ $x₁ $x₂ $binders* | $fbinders* | $u ] 🡒 “#1 = #0”)))
   | `(⤫formula(faf)[ $binders* | $fbinders* | $t:first_order_term ≠ $u:first_order_term ]) => do
     let x₁ : TSyntax `ident ← TSyntax.freshIdent
     let x₂ : TSyntax `ident ← TSyntax.freshIdent
-    `(∀¹ (⤫term(faf)[ $x₁ $binders* | $fbinders* | $t ] 🡒 ∀¹ (⤫term(faf)[ $x₁ $x₂ $binders* | $fbinders* | $u ] 🡒 “#1 ≠ #0”)))
+    `(∀¹ (⤫term(faf)[ $x₁ $binders* | $fbinders* | $t ]
+      🡒 ∀¹ (⤫term(faf)[ $x₁ $x₂ $binders* | $fbinders* | $u ] 🡒 “#1 ≠ #0”)))
   | `(⤫formula(faf)[ $binders* | $fbinders* | $t:first_order_term < $u:first_order_term ]) => do
     let x₁ : TSyntax `ident ← TSyntax.freshIdent
     let x₂ : TSyntax `ident ← TSyntax.freshIdent
-    `(∀¹ (⤫term(faf)[ $x₁ $binders* | $fbinders* | $t ] 🡒 ∀¹ (⤫term(faf)[ $x₁ $x₂ $binders* | $fbinders* | $u ] 🡒 “#1 < #0”)))
+    `(∀¹ (⤫term(faf)[ $x₁ $binders* | $fbinders* | $t ]
+      🡒 ∀¹ (⤫term(faf)[ $x₁ $x₂ $binders* | $fbinders* | $u ] 🡒 “#1 < #0”)))
   | `(⤫formula(faf)[ $binders* | $fbinders* | $t:first_order_term ≮ $u:first_order_term ]) => do
     let x₁ : TSyntax `ident ← TSyntax.freshIdent
     let x₂ : TSyntax `ident ← TSyntax.freshIdent
-    `(∀¹ (⤫term(faf)[ $x₁ $binders* | $fbinders* | $t ] 🡒 ∀¹ (⤫term(faf)[ $x₁ $x₂ $binders* | $fbinders* | $u ] 🡒 “#1 ≮ #0”)))
+    `(∀¹ (⤫term(faf)[ $x₁ $binders* | $fbinders* | $t ]
+      🡒 ∀¹ (⤫term(faf)[ $x₁ $x₂ $binders* | $fbinders* | $u ] 🡒 “#1 ≮ #0”)))
   | `(⤫formula(faf)[ $binders* | $fbinders* | $t:first_order_term ≤ $u:first_order_term ]) => do
     let x₁ : TSyntax `ident ← TSyntax.freshIdent
     let x₂ : TSyntax `ident ← TSyntax.freshIdent
-    `(∀¹ (⤫term(faf)[ $x₁ $binders* | $fbinders* | $t ] 🡒 ∀¹ (⤫term(faf)[ $x₁ $x₂ $binders* | $fbinders* | $u ] 🡒 “#1 ≤ #0”)))
+    `(∀¹ (⤫term(faf)[ $x₁ $binders* | $fbinders* | $t ]
+      🡒 ∀¹ (⤫term(faf)[ $x₁ $x₂ $binders* | $fbinders* | $u ] 🡒 “#1 ≤ #0”)))
   | `(⤫formula(faf)[ $binders* | $fbinders* | $t:first_order_term ≰ $u:first_order_term ]) => do
     let x₁ : TSyntax `ident ← TSyntax.freshIdent
     let x₂ : TSyntax `ident ← TSyntax.freshIdent
-    `(∀¹ (⤫term(faf)[ $x₁ $binders* | $fbinders* | $t ] 🡒 ∀¹ (⤫term(faf)[ $x₁ $x₂ $binders* | $fbinders* | $u ] 🡒 “#1 ≰ #0”)))
+    `(∀¹ (⤫term(faf)[ $x₁ $binders* | $fbinders* | $t ]
+      🡒 ∀¹ (⤫term(faf)[ $x₁ $x₂ $binders* | $fbinders* | $u ] 🡒 “#1 ≰ #0”)))
   | `(⤫formula(faf)[ $binders* | $fbinders* | $t:first_order_term ∈ $u:first_order_term ]) => do
     let x₁ : TSyntax `ident ← TSyntax.freshIdent
     let x₂ : TSyntax `ident ← TSyntax.freshIdent
-    `(∀¹ (⤫term(faf)[ $x₁ $binders* | $fbinders* | $t ] 🡒 ∀¹ (⤫term(faf)[ $x₁ $x₂ $binders* | $fbinders* | $u ] 🡒 “#1 ∈ #0”)))
+    `(∀¹ (⤫term(faf)[ $x₁ $binders* | $fbinders* | $t ]
+      🡒 ∀¹ (⤫term(faf)[ $x₁ $x₂ $binders* | $fbinders* | $u ] 🡒 “#1 ∈ #0”)))
   | `(⤫formula(faf)[ $binders* | $fbinders* | $t:first_order_term ∉ $u:first_order_term ]) => do
     let x₁ : TSyntax `ident ← TSyntax.freshIdent
     let x₂ : TSyntax `ident ← TSyntax.freshIdent
-    `(∀¹ (⤫term(faf)[ $x₁ $binders* | $fbinders* | $t ] 🡒 ∀¹ (⤫term(faf)[ $x₁ $x₂ $binders* | $fbinders* | $u ] 🡒 “#1 ∉ #0”)))
+    `(∀¹ (⤫term(faf)[ $x₁ $binders* | $fbinders* | $t ]
+      🡒 ∀¹ (⤫term(faf)[ $x₁ $x₂ $binders* | $fbinders* | $u ] 🡒 “#1 ∉ #0”)))
 
 macro_rules
   | `(⤫formula(faf)[ $binders* | $fbinders* | ∀ $x < $t, $φ ]) => do
     if binders.elem x then Macro.throwErrorAt x "error: variable is duplicated." else
       let vt : TSyntax `ident ← TSyntax.freshIdent
-      `(∀¹ (⤫term(faf)[ $vt $binders* | $fbinders* | $t ] 🡒 Semiformula.ballLT #0 ⤫formula(faf)[ $x $vt $binders* | $fbinders* | $φ ]))
+      `(∀¹ (⤫term(faf)[ $vt $binders* | $fbinders* | $t ] 🡒
+        Semiformula.ballLT #0 ⤫formula(faf)[ $x $vt $binders* | $fbinders* | $φ ]))
   | `(⤫formula(faf)[ $binders* | $fbinders* | ∀ $x ≤ $t, $φ ]) => do
     if binders.elem x then Macro.throwErrorAt x "error: variable is duplicated." else
       let vt : TSyntax `ident ← TSyntax.freshIdent
-      `(∀¹ (⤫term(faf)[ $vt $binders* | $fbinders* | $t ] 🡒 Semiformula.ballLE #0 ⤫formula(faf)[ $x $binders* | $fbinders* | $φ ]))
+      `(∀¹ (⤫term(faf)[ $vt $binders* | $fbinders* | $t ] 🡒
+        Semiformula.ballLE #0 ⤫formula(faf)[ $x $binders* | $fbinders* | $φ ]))
   | `(⤫formula(faf)[ $binders* | $fbinders* | ∀ $x ∈ $t, $φ ]) => do
     if binders.elem x then Macro.throwErrorAt x "error: variable is duplicated." else
       let vt : TSyntax `ident ← TSyntax.freshIdent
-      `(∀¹ (⤫term(faf)[ $vt $binders* | $fbinders* | $t ] 🡒 Semiformula.ballMem #0 ⤫formula(faf)[ $x $vt $binders* | $fbinders* | $φ ]))
+      `(∀¹ (⤫term(faf)[ $vt $binders* | $fbinders* | $t ] 🡒
+        Semiformula.ballMem #0 ⤫formula(faf)[ $x $vt $binders* | $fbinders* | $φ ]))
   | `(⤫formula(faf)[ $binders* | $fbinders* | ∃ $x < $t, $φ ]) => do
     if binders.elem x then Macro.throwErrorAt x "error: variable is duplicated." else
       let vt : TSyntax `ident ← TSyntax.freshIdent
-      `(∀¹ (⤫term(faf)[ $vt $binders* | $fbinders* | $t ] 🡒 Semiformula.bexsLT #0 ⤫formula(faf)[ $x $vt $binders* | $fbinders* | $φ ]))
+      `(∀¹ (⤫term(faf)[ $vt $binders* | $fbinders* | $t ] 🡒
+        Semiformula.bexsLT #0 ⤫formula(faf)[ $x $vt $binders* | $fbinders* | $φ ]))
   | `(⤫formula(faf)[ $binders* | $fbinders* | ∃ $x ≤ $t, $φ ]) => do
     if binders.elem x then Macro.throwErrorAt x "error: variable is duplicated." else
       let vt : TSyntax `ident ← TSyntax.freshIdent
-      `(∀¹ (⤫term(faf)[ $vt $binders* | $fbinders* | $t ] 🡒 Semiformula.bexsLE #0 ⤫formula(faf)[ $x $vt $binders* | $fbinders* | $φ ]))
+      `(∀¹ (⤫term(faf)[ $vt $binders* | $fbinders* | $t ] 🡒
+        Semiformula.bexsLE #0 ⤫formula(faf)[ $x $vt $binders* | $fbinders* | $φ ]))
   | `(⤫formula(faf)[ $binders* | $fbinders* | ∃ $x ∈ $t, $φ ]) => do
     if binders.elem x then Macro.throwErrorAt x "error: variable is duplicated." else
       let vt : TSyntax `ident ← TSyntax.freshIdent
-      `(∀¹ (⤫term(faf)[ $vt $binders* | $fbinders* | $t ] 🡒 Semiformula.bexsMem #0 ⤫formula(faf)[ $x $vt $binders* | $fbinders* | $φ ]))
+      `(∀¹ (⤫term(faf)[ $vt $binders* | $fbinders* | $t ] 🡒
+        Semiformula.bexsMem #0 ⤫formula(faf)[ $x $vt $binders* | $fbinders* | $φ ]))
 
 syntax "f‘" first_order_term:0 "’" : term
 syntax "f‘" ident* "| " first_order_term:0 "’" : term
@@ -826,7 +1025,8 @@ syntax "f“" ident* "| "  first_order_formula:0 "”" : term
 syntax "f“" ident* ". "  first_order_formula:0 "”" : term
 syntax "f“" first_order_formula:0 "”" : term
 
-/-- A formula in formula-as-function notation. Use `f“⋯. ⋯”` for bound variables, and `f“⋯ | ⋯”` for free variables. -/
+/-- A formula in formula-as-function notation. Use `f“⋯. ⋯”` for bound variables, and `f“⋯ | ⋯”` for
+free variables. -/
 macro_rules
   | `(f“ $e:first_order_formula ”)              => `(⤫formula(faf)[           |            | $e ])
   | `(f“ $fbinders* | $e:first_order_formula ”) => `(⤫formula(faf)[           | $fbinders* | $e ])
@@ -845,7 +1045,8 @@ def sent : Semisentence L 3 := f“F X Y. ∀ f, f ∈ F ↔ f ∈ !func X Y”
 
 def sent₂ : Semisentence L 3 := f“F X Y. ∀ f, f ∈ F”
 
-variable {M : Type*} [Membership M M] [s : Tarski.Structure L M] [Tarski.Structure.Eq L M] [Tarski.Structure.Mem L M]
+variable {M : Type*} [Membership M M] [s : Tarski.Structure L M] [Tarski.Structure.Eq L M]
+  [Tarski.Structure.Mem L M]
 
 def Func : M → M → M := sorry
 

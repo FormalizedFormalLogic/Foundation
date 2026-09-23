@@ -7,9 +7,6 @@ public import Foundation.FirstOrder.Incompleteness.ProvabilityAbstraction.Basic
 public import Foundation.FirstOrder.Arithmetic.Bootstrapping.FixedPoint
 
 @[expose] public section
-set_option linter.style.docString false
-set_option linter.style.dollarSyntax false
-set_option linter.style.longLine false
 /-!
 # Derivability conditions of standard provability predicate
 -/
@@ -46,7 +43,8 @@ variable {T}
 
 instance : T.standardProvability.HBL2 := ⟨provable_D2⟩
 
-lemma standardProvability_def (σ : Sentence L) : T.standardProvability σ = provabilityPred T σ := rfl
+lemma standardProvability_def (σ : Sentence L) :
+    T.standardProvability σ = provabilityPred T σ := rfl
 
 instance : T.standardProvability.SoundOn ℕ :=
   ⟨fun h ↦ by simpa [Arithmetic.standardProvability_def, models_iff] using h⟩
@@ -77,7 +75,8 @@ lemma provable_D3_context [𝗣𝗔⁻ ⪯ T] [𝗜𝚺₁ ⪯ U] {Γ σ} (hσπ
   Γ ⊢[U] □□σ := FiniteContext.of' (weakening inferInstance provable_D3) ⨀ hσπ
 
 lemma provable_sound [U.SoundOnHierarchy 𝚺 1] {σ} : U ⊢ □σ → T ⊢ σ := fun h ↦ by
-  have : ℕ↓[ℒₒᵣ] ⊧ provabilityPred T σ := ArithmeticTheory.SoundOn.sound (F := Arithmetic.Hierarchy 𝚺 1) h (by simp)
+  have : ℕ↓[ℒₒᵣ] ⊧ provabilityPred T σ :=
+    ArithmeticTheory.SoundOn.sound (F := Arithmetic.Hierarchy 𝚺 1) h (by simp)
   simpa [models_iff] using this
 
 lemma provable_complete [U.SoundOnHierarchy 𝚺 1] [𝗜𝚺₁ ⪯ U] {σ} : T ⊢ σ ↔ U ⊢ □σ :=
@@ -91,12 +90,12 @@ instance [T.SoundOnHierarchy 𝚺 1] : T.standardProvability.Kreisel := ⟨fun h
 
 open FFL.Entailment in
 /--
-  If `π` is equivalent to some 𝚺₁ sentence `σ`,
-  then `π 🡒 □π` is provable in `T` (note: not `𝗜𝚺₁`, compare `provable_sigma_one_complete`)
+If `π` is equivalent to some 𝚺₁ sentence `σ`,
+then `π 🡒 □π` is provable in `T` (note: not `𝗜𝚺₁`, compare `provable_sigma_one_complete`)
 -/
 lemma provable_sigma_one_complete_of_E {σ π} [𝗜𝚺₁ ⪯ T]
   (hσ : Hierarchy 𝚺 1 σ) (hσπ : 𝗜𝚺₁ ⊢ σ 🡘 π) : 𝗜𝚺₁ ⊢ π 🡒 □π := by
-  apply C_replace ?_ ?_ $ provable_sigma_one_complete (T := T) $ hσ;
+  apply C_replace ?_ ?_ <| provable_sigma_one_complete (T := T) <| hσ;
   · cl_prover [hσπ]
   · apply T.standardProvability.mono'
     cl_prover [hσπ];

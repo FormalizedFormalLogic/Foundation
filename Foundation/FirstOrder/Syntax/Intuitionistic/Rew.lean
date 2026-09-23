@@ -6,7 +6,6 @@ public import Foundation.Syntax.Predicate.Rew
 @[expose] public section
 set_option linter.unusedSimpArgs false
 set_option autoImplicit true
-set_option linter.style.longLine false
 
 namespace FFL.FirstOrder
 
@@ -45,7 +44,8 @@ lemma rew_rel_eq_comp (ω : Rew L ξ₁ n₁ ξ₂ n₂) {k} {r : L.Rel k} {v : 
 
 set_option linter.flexible false in
 private lemma map_inj {n₁ n₂} {b : Fin n₁ → Fin n₂} {f : ξ₁ → ξ₂}
-    (hb : Function.Injective b) (hf : Function.Injective f) : Function.Injective fun φ : Semiformulaᵢ L ξ₁ n₁ ↦ @Rew.map L ξ₁ ξ₂ n₁ n₂ b f ▹ φ
+    (hb : Function.Injective b) (hf : Function.Injective f) :
+    Function.Injective fun φ : Semiformulaᵢ L ξ₁ n₁ ↦ @Rew.map L ξ₁ ξ₂ n₁ n₂ b f ▹ φ
   | ⊥, φ => by cases φ using cases' <;> simp [rew_rel]
   | rel r v, φ => by
     cases φ using cases' <;> simp [rew_rel]
@@ -64,16 +64,19 @@ private lemma map_inj {n₁ n₂} {b : Fin n₁ → Fin n₂} {f : ξ₁ → ξ�
   | ∀¹ φ, ψ => by
     cases ψ using cases' <;> simp [rew_rel, Rew.q_map]
     intro h; exact map_inj (b := 0 :> Fin.succ ∘ b)
-      (Matrix.injective_vecCons ((Fin.succ_injective _).comp hb) (fun _ ↦ (Fin.succ_ne_zero _).symm)) hf h
+      (Matrix.injective_vecCons ((Fin.succ_injective _).comp hb)
+        (fun _ ↦ (Fin.succ_ne_zero _).symm)) hf h
   | ∃¹ φ, ψ => by
     cases ψ using cases' <;> simp [rew_rel, Rew.q_map]
     intro h; exact map_inj (b := 0 :> Fin.succ ∘ b)
-      (Matrix.injective_vecCons ((Fin.succ_injective _).comp hb) (fun _ ↦ (Fin.succ_ne_zero _).symm)) hf h
+      (Matrix.injective_vecCons ((Fin.succ_injective _).comp hb)
+        (fun _ ↦ (Fin.succ_ne_zero _).symm)) hf h
 
 instance : ReflectiveRewriting L ξ (Semiformulaᵢ L ξ) where
   id_app (φ) := by induction φ using rec' <;> simp [rew_rel, *]
 
-instance : TransitiveRewriting L ξ₁ (Semiformulaᵢ L ξ₁) ξ₂ (Semiformulaᵢ L ξ₂) ξ₃ (Semiformulaᵢ L ξ₃) where
+instance :
+    TransitiveRewriting L ξ₁ (Semiformulaᵢ L ξ₁) ξ₂ (Semiformulaᵢ L ξ₂) ξ₃ (Semiformulaᵢ L ξ₃) where
   comp_app {n₁ n₂ n₃ ω₁₂ ω₂₃ φ} := by
     induction φ using rec' generalizing n₂ n₃ <;> simp [rew_rel, Rew.comp_app, Rew.q_comp, *]
 
@@ -82,7 +85,8 @@ instance : InjMapRewriting L ξ (Semiformulaᵢ L ξ) ζ (Semiformulaᵢ L ζ) w
 
 instance : LawfulSyntacticRewriting L (Semipropositionᵢ L) where
 
-@[simp] lemma complexity_rew (ω : Rew L ξ₁ n₁ ξ₂ n₂) (φ : Semiformulaᵢ L ξ₁ n₁) : (ω ▹ φ).complexity = φ.complexity := by
+@[simp] lemma complexity_rew (ω : Rew L ξ₁ n₁ ξ₂ n₂) (φ : Semiformulaᵢ L ξ₁ n₁) :
+    (ω ▹ φ).complexity = φ.complexity := by
   induction φ using rec' generalizing n₂ <;> simp [*, rew_rel]
 
 @[simp] lemma IsNegative.rew {ω : Rew L ξ₁ n₁ ξ₂ n₂} {φ : Semiformulaᵢ L ξ₁ n₁} :

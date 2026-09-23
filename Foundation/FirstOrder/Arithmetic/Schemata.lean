@@ -13,9 +13,7 @@ public import Foundation.FirstOrder.Arithmetic.TA.Basic
 
 @[expose] public section
 set_option autoImplicit true
-set_option linter.style.longLine false
 set_option linter.style.induction false
-set_option linter.style.whitespace false
 
 namespace FFL.FirstOrder.Arithmetic
 
@@ -27,9 +25,11 @@ section axioms
 
 variable {L : Language} [L.ORing] {ξ : Type*} [DecidableEq ξ]
 
-def succInd {ξ} (φ : Semiformula L ξ 1) : Formula L ξ := “!φ 0 → (∀ x, !φ x → !φ (x + 1)) → ∀ x, !φ x”
+def succInd {ξ} (φ : Semiformula L ξ 1) : Formula L ξ :=
+  “!φ 0 → (∀ x, !φ x → !φ (x + 1)) → ∀ x, !φ x”
 
-def orderInd {ξ} (φ : Semiformula L ξ 1) : Formula L ξ := “(∀ x, (∀ y < x, !φ y) → !φ x) → ∀ x, !φ x”
+def orderInd {ξ} (φ : Semiformula L ξ 1) : Formula L ξ :=
+  “(∀ x, (∀ y < x, !φ y) → !φ x) → ∀ x, !φ x”
 
 def leastNumber {ξ} (φ : Semiformula L ξ 1) : Formula L ξ :=
   “(∃ x, !φ x) → ∃ z, !φ z ∧ ∀ x < z, ¬!φ x”
@@ -48,7 +48,8 @@ abbrev IOpen : ArithmeticTheory := 𝗣𝗔⁻ ∪ InductionScheme ℒₒᵣ Sem
 
 notation "𝗜𝗢𝗽𝗲𝗻" => IOpen
 
-abbrev InductionOnHierarchy (Γ : Polarity) (s : ℕ) : ArithmeticTheory := 𝗣𝗔⁻ ∪ InductionScheme ℒₒᵣ (Arithmetic.Hierarchy Γ s)
+abbrev InductionOnHierarchy (Γ : Polarity) (s : ℕ) : ArithmeticTheory :=
+  𝗣𝗔⁻ ∪ InductionScheme ℒₒᵣ (Arithmetic.Hierarchy Γ s)
 
 prefix:max "𝗜𝗡𝗗 " => InductionOnHierarchy
 
@@ -124,8 +125,10 @@ section
 
 variable {C C' : ArithmeticSemiformula ℕ 1 → Prop}
 
-lemma InductionScheme_subset (h : ∀ {φ : ArithmeticSemiformula ℕ 1},  C φ → C' φ) : InductionScheme ℒₒᵣ C ⊆ InductionScheme ℒₒᵣ C' := by
-  intro _; simp only [InductionScheme, Set.mem_ofPred_eq, forall_exists_index, and_imp]; rintro φ hp rfl; exact ⟨φ, h hp, rfl⟩
+lemma InductionScheme_subset (h : ∀ {φ : ArithmeticSemiformula ℕ 1}, C φ → C' φ) :
+    InductionScheme ℒₒᵣ C ⊆ InductionScheme ℒₒᵣ C' := by
+  intro _; simp only [InductionScheme, Set.mem_ofPred_eq, forall_exists_index, and_imp]
+  rintro φ hp rfl; exact ⟨φ, h hp, rfl⟩
 
 lemma mem_InductionScheme_of_mem {φ : ArithmeticSemiformula ℕ 1} (hp : C φ) :
     .univCl (succInd φ) ∈ InductionScheme ℒₒᵣ C := by
@@ -141,7 +144,7 @@ lemma ISigma_subset_mono {s₁ s₂} (h : s₁ ≤ s₂) : 𝗜𝚺 s₁ ⊆ �
 lemma ISigma_weakerThan_of_le {s₁ s₂} (h : s₁ ≤ s₂) : 𝗜𝚺 s₁ ⪯ 𝗜𝚺 s₂ :=
   Entailment.WeakerThan.ofSubset (ISigma_subset_mono h)
 
-lemma ISigma_weakerThan_of_le_trans {T : ArithmeticTheory} {s₁ s₂} (h : s₁ ≤ s₂) (hT : 𝗜𝚺 s₂ ⪯ T) :
+lemma ISigma_weakerThan_of_le_trans {T : ArithmeticTheory} {s₁ s₂} (h : s₁ ≤ s₂) (hT : 𝗜𝚺s₂ ⪯ T) :
     𝗜𝚺 s₁ ⪯ T :=
   Entailment.WeakerThan.trans (ISigma_weakerThan_of_le h) hT
 
@@ -189,10 +192,12 @@ lemma CollectionOnHierarchy_subset_mono {s₁ s₂} (h : s₁ ≤ s₂) : 𝗕 �
 lemma CollectionOnHierarchy_weakerThan_of_le {s₁ s₂} (h : s₁ ≤ s₂) : 𝗕 Γ s₁ ⪯ 𝗕 Γ s₂ :=
   Entailment.WeakerThan.ofSubset (CollectionOnHierarchy_subset_mono h)
 
-lemma CollectionOnHierarchy_subset_of_lt {Γ Γ' : Polarity} {s s' : ℕ} (h : s < s') : 𝗕 Γ s ⊆ 𝗕 Γ' s' :=
+lemma CollectionOnHierarchy_subset_of_lt {Γ Γ' : Polarity} {s s' : ℕ} (h : s < s') :
+    𝗕 Γ s ⊆ 𝗕 Γ' s' :=
   Set.union_subset_union_right _ (CollectionScheme_subset (·.strict_mono Γ' h))
 
-lemma CollectionOnHierarchy_weakerThan_of_lt {Γ Γ' : Polarity} {s s' : ℕ} (h : s < s') : 𝗕 Γ s ⪯ 𝗕 Γ' s' :=
+lemma CollectionOnHierarchy_weakerThan_of_lt {Γ Γ' : Polarity} {s s' : ℕ} (h : s < s') :
+    𝗕 Γ s ⪯ 𝗕 Γ' s' :=
   Entailment.WeakerThan.ofSubset (CollectionOnHierarchy_subset_of_lt h)
 
 lemma CollectionOnHierarchy_subset_BSigma_succ (Γ : Polarity) (s : ℕ) : 𝗕 Γ s ⊆ 𝗕𝚺 (s + 1) :=
@@ -218,12 +223,14 @@ instance : 𝗘𝗤 ℒₒᵣ ⪯ 𝗜𝗢𝗽𝗲𝗻 :=
   Entailment.WeakerThan.trans this inferInstance
 
 instance : 𝗜𝗢𝗽𝗲𝗻 ⪯ 𝗜𝗡𝗗 Γ s :=
-  Entailment.WeakerThan.ofSubset <| Set.union_subset_union_right _  <| InductionScheme_subset Arithmetic.Hierarchy.of_open
+  Entailment.WeakerThan.ofSubset <| Set.union_subset_union_right _ <|
+    InductionScheme_subset Arithmetic.Hierarchy.of_open
 
 instance : 𝗜𝚺₀ ⪯ 𝗜𝚺₁ := ISigma_weakerThan_of_le (by decide)
 
 instance : 𝗜𝚺s ⪯ 𝗣𝗔 :=
-  Entailment.WeakerThan.ofSubset <| Set.union_subset_union_right _  <| InductionScheme_subset (by intros; trivial)
+  Entailment.WeakerThan.ofSubset <| Set.union_subset_union_right _ <|
+    InductionScheme_subset (by intros; trivial)
 
 instance : 𝗣𝗔⁻ ⪯ 𝗜𝗢𝗽𝗲𝗻 := inferInstance
 
@@ -254,12 +261,13 @@ instance CollectionOnHierarchy_weakerThan_CollectionOnBroadHierarchy (Γ : Polar
 
 -- This is stated as a `lemma`, not an `instance`, since `s` does not occur in the conclusion
 -- `𝗘𝗤 ℒₒᵣ ⪯ T`, so instance search cannot infer it.
-lemma eq_weakerThan_of_ISigma {T : ArithmeticTheory} {s : ℕ} [𝗜𝚺 s ⪯ T] : 𝗘𝗤 ℒₒᵣ ⪯ T :=
-  Entailment.WeakerThan.trans (inferInstance : 𝗘𝗤 ℒₒᵣ ⪯ 𝗜𝚺₀) (ISigma_weakerThan_of_le_trans (by omega) ‹𝗜𝚺 s ⪯ T›)
+lemma eq_weakerThan_of_ISigma {T : ArithmeticTheory} {s : ℕ} [𝗜𝚺s ⪯ T] : 𝗘𝗤 ℒₒᵣ ⪯ T :=
+  Entailment.WeakerThan.trans (inferInstance : 𝗘𝗤 ℒₒᵣ ⪯ 𝗜𝚺₀)
+      (ISigma_weakerThan_of_le_trans (by omega) ‹𝗜𝚺 s ⪯ T›)
 
 -- This is stated as a `lemma`, not an `instance`, since `s` does not occur in the conclusion
 -- `𝗘𝗤 ℒₒᵣ ⪯ T`, so instance search cannot infer it.
-lemma eq_weakerThan_of_BSigma {T : ArithmeticTheory} {s : ℕ} [𝗕𝚺 s ⪯ T] : 𝗘𝗤 ℒₒᵣ ⪯ T :=
+lemma eq_weakerThan_of_BSigma {T : ArithmeticTheory} {s : ℕ} [𝗕𝚺s ⪯ T] : 𝗘𝗤 ℒₒᵣ ⪯ T :=
   Entailment.WeakerThan.trans (inferInstance : 𝗘𝗤 ℒₒᵣ ⪯ 𝗕𝚺 s) ‹𝗕𝚺 s ⪯ T›
 
 end axioms
@@ -279,7 +287,8 @@ private lemma induction_eval {φ : ArithmeticSemiformula ℕ 1} (hp : C φ) (v :
   have : V↓[ℒₒᵣ] ⊧ .univCl (succInd φ) :=
     Theory.models (T := InductionScheme _ C) V (by simpa using mem_InductionScheme_of_mem hp)
   revert v
-  simpa [models_iff, Semiformula.eval_univCl, succInd, Semiformula.eval_substs, Matrix.constant_eq_singleton] using this
+  simpa [models_iff, Semiformula.eval_univCl, succInd, Semiformula.eval_substs,
+      Matrix.constant_eq_singleton] using this
 
 @[elab_as_elim]
 lemma succ_induction {P : V → Prop}
@@ -357,7 +366,8 @@ private lemma neg_succ_induction {P : V → Prop} (hP : Γ-[s].DefinablePred P)
   have : P 0 := by simpa using this a (by rfl)
   contradiction
 
-instance models_InductionScheme_alt : V↓[ℒₒᵣ] ⊧* InductionScheme ℒₒᵣ (Arithmetic.Hierarchy Γ.alt s) := by
+instance models_InductionScheme_alt :
+    V↓[ℒₒᵣ] ⊧* InductionScheme ℒₒᵣ (Arithmetic.Hierarchy Γ.alt s) := by
   suffices
       ∀ (φ : ArithmeticSemiformula ℕ 1), Hierarchy Γ.alt s φ →
       ∀ (f : ℕ → V),
@@ -452,7 +462,7 @@ instance [V↓[ℒₒᵣ] ⊧* 𝗜𝗡𝗗 𝚷 s] : V↓[ℒₒᵣ] ⊧* 𝗜�
   · exact models_alt 𝚷 s
   · infer_instance
 
-lemma mod_ISigma_of_le {s₁ s₂} (h : s₁ ≤ s₂) [V↓[ℒₒᵣ] ⊧* 𝗜𝚺 s₂] : V↓[ℒₒᵣ] ⊧* 𝗜𝚺 s₁ :=
+lemma mod_ISigma_of_le {s₁ s₂} (h : s₁ ≤ s₂) [V↓[ℒₒᵣ] ⊧* 𝗜𝚺s₂] : V↓[ℒₒᵣ] ⊧* 𝗜𝚺s₁ :=
   models_of_ss inferInstance (ISigma_subset_mono h)
 
 instance [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] : V↓[ℒₒᵣ] ⊧* 𝗜𝚺₀ := mod_ISigma_of_le (show 0 ≤ 1 from by simp)
@@ -464,7 +474,7 @@ instance [V↓[ℒₒᵣ] ⊧* 𝗜𝚷s] : V↓[ℒₒᵣ] ⊧* 𝗜𝚺s := in
 lemma models_ISigma_iff_models_IPi {s} : V↓[ℒₒᵣ] ⊧* 𝗜𝚺 s ↔ V↓[ℒₒᵣ] ⊧* 𝗜𝚷 s :=
   ⟨fun _ ↦ inferInstance, fun _ ↦ inferInstance⟩
 
-instance [V↓[ℒₒᵣ] ⊧* 𝗜𝚺 s] : V↓[ℒₒᵣ] ⊧* 𝗜𝗡𝗗 Γ s :=
+instance [V↓[ℒₒᵣ] ⊧* 𝗜𝚺s] : V↓[ℒₒᵣ] ⊧* 𝗜𝗡𝗗 Γ s :=
   match Γ with
   | 𝚺 => inferInstance
   | 𝚷 => inferInstance
@@ -525,15 +535,15 @@ instance [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₀] : V↓[ℒₒᵣ] ⊧* 𝗜𝗢𝗽�
 
 instance [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] : V↓[ℒₒᵣ] ⊧* 𝗜𝚺₀ := inferInstance
 
-abbrev mod_ISigma_of_le {s₁ s₂} (h : s₁ ≤ s₂) [V↓[ℒₒᵣ] ⊧* 𝗜𝚺 s₂] : V↓[ℒₒᵣ] ⊧* 𝗜𝚺 s₁ :=
+abbrev mod_ISigma_of_le {s₁ s₂} (h : s₁ ≤ s₂) [V↓[ℒₒᵣ] ⊧* 𝗜𝚺s₂] : V↓[ℒₒᵣ] ⊧* 𝗜𝚺s₁ :=
   models_of_ss inferInstance (ISigma_subset_mono h)
 
-abbrev mod_BSigma_of_le {s₁ s₂} (h : s₁ ≤ s₂) [V↓[ℒₒᵣ] ⊧* 𝗕𝚺 s₂] : V↓[ℒₒᵣ] ⊧* 𝗕𝚺 s₁ :=
+abbrev mod_BSigma_of_le {s₁ s₂} (h : s₁ ≤ s₂) [V↓[ℒₒᵣ] ⊧* 𝗕𝚺s₂] : V↓[ℒₒᵣ] ⊧* 𝗕𝚺s₁ :=
   models_of_ss inferInstance (CollectionOnHierarchy_subset_mono h)
 
 -- This is stated as a `lemma`, not an `instance`, since `s` does not occur in the conclusion
 -- `V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻`, so instance search cannot infer it.
-lemma mod_paMinus_of_ISigma {s} [V↓[ℒₒᵣ] ⊧* 𝗜𝚺 s] : V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ :=
+lemma mod_paMinus_of_ISigma {s} [V↓[ℒₒᵣ] ⊧* 𝗜𝚺s] : V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ :=
   have : V↓[ℒₒᵣ] ⊧* 𝗜𝚺₀ := mod_ISigma_of_le (Nat.zero_le s)
   inferInstance
 
@@ -547,7 +557,8 @@ lemma models_succInd (φ : ArithmeticSemiformula ℕ 1) : ℕ↓[ℒₒᵣ] ⊧ 
   suffices
     ∀ f : ℕ → ℕ,
     φ.Eval ![0] f → (∀ x, φ.Eval ![x] f → φ.Eval ![x + 1] f) → ∀ x, φ.Eval ![x] f by
-    simpa [Semiformula.eval_univCl, succInd, models_iff, Matrix.constant_eq_singleton, Semiformula.eval_substs]
+    simpa [Semiformula.eval_univCl, succInd, models_iff, Matrix.constant_eq_singleton,
+        Semiformula.eval_substs]
   intro e hzero hsucc x; induction' x with x ih
   · exact hzero
   · exact hsucc x ih

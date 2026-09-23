@@ -10,11 +10,9 @@ Main reference: Jeremy Avigad, Algebraic proofs of cut elimination [Avi01]
  -/
 
 @[expose] public section
-set_option linter.style.longLine false
 set_option linter.unusedTactic false
 set_option linter.unreachableTactic false
 set_option linter.unusedVariables false
-set_option linter.style.missingEnd false
 set_option autoImplicit true
 
 namespace FFL.FirstOrder.LK.Derivation
@@ -91,7 +89,8 @@ def graft {Ξ Γ : LK.Sequent L} (b : ⊢ᴸᴷ¹ Ξ) : Ξ ⟶⁺ Γ → ⊢ᴸ�
   | contraction d => .contraction (d.graft b)
   | refl => b
 
-lemma graft_isCutFree_of_isCutFree {b : ⊢ᴸᴷ¹ Ξ} {d : Ξ ⟶⁺ Γ} (hb : LK.Derivation.IsCutFree b) : LK.Derivation.IsCutFree (d.graft b) := by
+lemma graft_isCutFree_of_isCutFree {b : ⊢ᴸᴷ¹ Ξ} {d : Ξ ⟶⁺ Γ} (hb : LK.Derivation.IsCutFree b) :
+    LK.Derivation.IsCutFree (d.graft b) := by
   induction d <;> simp [graft, *]
 
 end Positive
@@ -105,7 +104,8 @@ variable [L.DecidableEq]
 structure StrongerThan (q p : LK.Sequent L) where
   val : ∼p ⟶⁺ ∼q
 
-scoped[FFL.FirstOrder.Derivation.Canonical] infix:60 " ≼ " => FFL.FirstOrder.LK.Derivation.Canonical.StrongerThan
+scoped[FFL.FirstOrder.Derivation.Canonical] infix:60 " ≼ " =>
+  FFL.FirstOrder.LK.Derivation.Canonical.StrongerThan
 
 open scoped FFL.FirstOrder.Derivation.Canonical
 
@@ -180,16 +180,20 @@ namespace Forces
 
 variable {p q : LK.Sequent L}
 
-scoped[FFL.FirstOrder.Derivation.Canonical.Forces] infix:45 " ⊩ " => FFL.FirstOrder.LK.Derivation.Canonical.Forces
+scoped[FFL.FirstOrder.Derivation.Canonical.Forces] infix:45 " ⊩ " =>
+  FFL.FirstOrder.LK.Derivation.Canonical.Forces
 
-scoped[FFL.FirstOrder.Derivation.Canonical.Forces] prefix:45 "⊩ " => FFL.FirstOrder.LK.Derivation.Canonical.allForces
+scoped[FFL.FirstOrder.Derivation.Canonical.Forces] prefix:45 "⊩ " =>
+  FFL.FirstOrder.LK.Derivation.Canonical.allForces
 
 open scoped FFL.FirstOrder.Derivation.Canonical.Forces
 
 
-def falsumEquiv : p ⊩ ⊥ ≃ { b : ⊢ᴸᴷ¹ ∼p // LK.Derivation.IsCutFree b} := by unfold Forces; exact .refl _
+def falsumEquiv : p ⊩ ⊥ ≃ { b : ⊢ᴸᴷ¹ ∼p // LK.Derivation.IsCutFree b} := by
+  unfold Forces; exact .refl _
 
-def relEquiv {k} {R : L.Rel k} {v} : p ⊩ .rel R v ≃ { b : ⊢ᴸᴷ¹ ∼p + ⦃.rel R v⦄ // LK.Derivation.IsCutFree b } := by
+def relEquiv {k} {R : L.Rel k} {v} :
+    p ⊩ .rel R v ≃ { b : ⊢ᴸᴷ¹ ∼p + ⦃.rel R v⦄ // LK.Derivation.IsCutFree b } := by
   unfold Forces; exact .refl _
 
 def andEquiv {φ ψ : Propositionᵢ L} : p ⊩ φ ⋏ ψ ≃ (p ⊩ φ) × (p ⊩ ψ) := by
@@ -204,7 +208,8 @@ def orEquiv {φ ψ : Propositionᵢ L} : p ⊩ φ ⋎ ψ ≃ (p ⊩ φ) ⊕ (p �
     unfold Forces
     exact .refl _
 
-def implyEquiv {φ ψ : Propositionᵢ L} : p ⊩ φ 🡒 ψ ≃ ((q : LK.Sequent L) → q ≼ p → q ⊩ φ → q ⊩ ψ) := by
+def implyEquiv {φ ψ : Propositionᵢ L} :
+    p ⊩ φ 🡒 ψ ≃ ((q : LK.Sequent L) → q ≼ p → q ⊩ φ → q ⊩ ψ) := by
   conv =>
     lhs
     unfold Forces
@@ -232,7 +237,8 @@ def monotone {q p : LK.Sequent L} (s : q ≼ p) : {φ : Propositionᵢ L} → p 
     let ⟨d, hd⟩ := b.relEquiv
     relEquiv.symm ⟨s.val.cons (.rel R v) |>.graft d, Positive.graft_isCutFree_of_isCutFree hd⟩
   | φ ⋏ ψ, b => andEquiv.symm ⟨monotone s b.andEquiv.1, monotone s b.andEquiv.2⟩
-  | φ ⋎ ψ, b => orEquiv.symm <| b.orEquiv.rec (fun b ↦ .inl <| b.monotone s) (fun b ↦ .inr <| b.monotone s)
+  | φ ⋎ ψ, b =>
+    orEquiv.symm <| b.orEquiv.rec (fun b ↦ .inl <| b.monotone s) (fun b ↦ .inr <| b.monotone s)
   | φ 🡒 ψ, b => implyEquiv.symm fun r srq bφ ↦ b.implyEquiv r (srq.trans s) bφ
   | ∀¹ φ, b => allEquiv.symm fun t ↦ (b.allEquiv t).monotone s
   | ∃¹ φ, b =>
@@ -453,3 +459,5 @@ def hauptsatz {Γ : LK.Sequent L} :
   ⟨LK.Derivation.cast b (by simp), by simpa using hb⟩
 
 end Canonical
+
+end FFL.FirstOrder.LK.Derivation

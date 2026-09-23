@@ -7,7 +7,6 @@ public import Foundation.Vorspiel.Finset.Card
 public import Foundation.Vorspiel.Graph
 
 @[expose] public section
-set_option linter.style.longLine false
 set_option linter.unusedVariables false
 set_option linter.unusedTactic false
 set_option linter.unreachableTactic false
@@ -31,15 +30,18 @@ class Defined (R : outParam ((Fin k → M) → Prop)) (φ : Semisentence L k) : 
 
 /--
 The relation `R` is definable by a formula `φ` with parameters over the domain `M`.
-Here, the free variables of `φ` are indexed by the type `M`, so that `φ` may contain finitely many parameters, which are interpreted by using `id : M → M` for the valuation of free variables.
+Here, the free variables of `φ` are indexed by the type `M`, so that `φ` may contain finitely many
+parameters, which are interpreted by using `id : M → M` for the valuation of free variables.
 -/
 abbrev IsDefinedByWithParam (R : (Fin k → M) → Prop) (φ : Semiformula L M k) : Prop :=
   ∀ v, φ.Eval v id ↔ R v
 
-@[simp] lemma Defined.eval_iff {R : (Fin k → M) → Prop} {φ : Semisentence L k} [h : Defined R φ] (v) :
+@[simp] lemma Defined.eval_iff {R : (Fin k → M) → Prop} {φ : Semisentence L k}
+    [h : Defined R φ] (v) :
     φ.Evalb v ↔ R v := h.iff v
 
-lemma IsDefinedByWithParam.iff {R : (Fin k → M) → Prop} {φ : Semiformula L M k} (h : IsDefinedByWithParam R φ) (v) :
+lemma IsDefinedByWithParam.iff {R : (Fin k → M) → Prop} {φ : Semiformula L M k}
+    (h : IsDefinedByWithParam R φ) (v) :
     φ.Eval v id ↔ R v := h v
 
 abbrev DefinedFunction (f : (Fin k → M) → M) (φ : Semisentence L (k + 1)) : Prop :=
@@ -124,27 +126,36 @@ abbrev DefinablePred (P : M → Prop) : Prop := L.Definable (k := 1) fun v ↦ P
 
 abbrev DefinableRel (P : M → M → Prop) : Prop := L.Definable (k := 2) (fun v ↦ P (v 0) (v 1))
 
-abbrev DefinableRel₃ (P : M → M → M → Prop) : Prop := L.Definable (k := 3) (fun v ↦ P (v 0) (v 1) (v 2))
+abbrev DefinableRel₃ (P : M → M → M → Prop) : Prop :=
+  L.Definable (k := 3) (fun v ↦ P (v 0) (v 1) (v 2))
 
-abbrev DefinableRel₄ (P : M → M → M → M → Prop) : Prop := L.Definable (k := 4) (fun v ↦ P (v 0) (v 1) (v 2) (v 3))
+abbrev DefinableRel₄ (P : M → M → M → M → Prop) : Prop :=
+  L.Definable (k := 4) (fun v ↦ P (v 0) (v 1) (v 2) (v 3))
 
-abbrev DefinableRel₅ (P : M → M → M → M → M → Prop) : Prop := L.Definable (k := 5) (fun v ↦ P (v 0) (v 1) (v 2) (v 3) (v 4))
+abbrev DefinableRel₅ (P : M → M → M → M → M → Prop) : Prop :=
+  L.Definable (k := 5) (fun v ↦ P (v 0) (v 1) (v 2) (v 3) (v 4))
 
-abbrev DefinableRel₆ (P : M → M → M → M → M → M → Prop) : Prop := L.Definable (k := 6) (fun v ↦ P (v 0) (v 1) (v 2) (v 3) (v 4) (v 5))
+abbrev DefinableRel₆ (P : M → M → M → M → M → M → Prop) : Prop :=
+  L.Definable (k := 6) (fun v ↦ P (v 0) (v 1) (v 2) (v 3) (v 4) (v 5))
 
-abbrev DefinableFunction (f : (Fin k → M) → M) : Prop := Definable (k := k + 1) L fun v ↦ v 0 = f (v ·.succ)
+abbrev DefinableFunction (f : (Fin k → M) → M) : Prop :=
+  Definable (k := k + 1) L fun v ↦ v 0 = f (v ·.succ)
 
 abbrev DefinableFunction₀ (c : M) : Prop := L.DefinableFunction (k := 0) (fun _ ↦ c)
 
 abbrev DefinableFunction₁ (f : M → M) : Prop := L.DefinableFunction (k := 1) (fun v ↦ f (v 0))
 
-abbrev DefinableFunction₂ (f : M → M → M) : Prop := L.DefinableFunction (k := 2) (fun v ↦ f (v 0) (v 1))
+abbrev DefinableFunction₂ (f : M → M → M) : Prop :=
+  L.DefinableFunction (k := 2) (fun v ↦ f (v 0) (v 1))
 
-abbrev DefinableFunction₃ (f : M → M → M → M) : Prop := L.DefinableFunction (k := 3) (fun v ↦ f (v 0) (v 1) (v 2))
+abbrev DefinableFunction₃ (f : M → M → M → M) : Prop :=
+  L.DefinableFunction (k := 3) (fun v ↦ f (v 0) (v 1) (v 2))
 
-abbrev DefinableFunction₄ (f : M → M → M → M → M) : Prop := L.DefinableFunction (k := 4) (fun v ↦ f (v 0) (v 1) (v 2) (v 3))
+abbrev DefinableFunction₄ (f : M → M → M → M → M) : Prop :=
+  L.DefinableFunction (k := 4) (fun v ↦ f (v 0) (v 1) (v 2) (v 3))
 
-abbrev DefinableFunction₅ (f : M → M → M → M → M → M) : Prop := L.DefinableFunction (k := 5) (fun v ↦ f (v 0) (v 1) (v 2) (v 3) (v 4))
+abbrev DefinableFunction₅ (f : M → M → M → M → M → M) : Prop :=
+  L.DefinableFunction (k := 5) (fun v ↦ f (v 0) (v 1) (v 2) (v 3) (v 4))
 
 variable {L}
 
@@ -188,27 +199,32 @@ end Language
 
 namespace IsDefinedBy
 
-lemma of_vec_one {R : (Fin 1 → M) → Prop} {φ : Semisentence L 1} (h : ∀ x, φ.Evalb ![x] ↔ R ![x]) : IsDefinedBy R φ := by
+lemma of_vec_one {R : (Fin 1 → M) → Prop} {φ : Semisentence L 1}
+    (h : ∀ x, φ.Evalb ![x] ↔ R ![x]) : IsDefinedBy R φ := by
   intro v; simpa [←Matrix.fun_eq_vec_one] using h (v 0)
 
-lemma of_vec_two {R : (Fin 2 → M) → Prop} {φ : Semisentence L 2} (h : ∀ x y, φ.Evalb ![x, y] ↔ R ![x, y]) : IsDefinedBy R φ := by
+lemma of_vec_two {R : (Fin 2 → M) → Prop} {φ : Semisentence L 2}
+    (h : ∀ x y, φ.Evalb ![x, y] ↔ R ![x, y]) : IsDefinedBy R φ := by
   intro v; simpa [←Matrix.fun_eq_vec_two] using h (v 0) (v 1)
 
-lemma of_vec_three {R : (Fin 3 → M) → Prop} {φ : Semisentence L 3} (h : ∀ x y z, φ.Evalb ![x, y, z] ↔ R ![x, y, z]) : IsDefinedBy R φ := by
+lemma of_vec_three {R : (Fin 3 → M) → Prop} {φ : Semisentence L 3}
+    (h : ∀ x y z, φ.Evalb ![x, y, z] ↔ R ![x, y, z]) : IsDefinedBy R φ := by
   intro v; simpa [←Matrix.fun_eq_vec_three] using h (v 0) (v 1) (v 2)
 
 end IsDefinedBy
 
 namespace Defined
 
-lemma to_definable {R : (Fin k → M) → Prop} {φ : Semisentence L k} (hR : Defined R φ) : L.Definable R :=
+lemma to_definable {R : (Fin k → M) → Prop} {φ : Semisentence L k} (hR : Defined R φ) :
+    L.Definable R :=
   ⟨Rewriting.emb φ, fun v ↦ by simp [Semiformula.eval_emb]⟩
 
 end Defined
 
 namespace DefinedFunction
 
-lemma to_definable {f : (Fin k → M) → M} {φ : Semisentence L (k + 1)} (hf : DefinedFunction f φ) : L.DefinableFunction f :=
+lemma to_definable {f : (Fin k → M) → M} {φ : Semisentence L (k + 1)}
+    (hf : DefinedFunction f φ) : L.DefinableFunction f :=
   Defined.to_definable hf
 
 end DefinedFunction
@@ -219,7 +235,8 @@ namespace Definable
 
 variable {P Q R : (Fin k → M) → Prop}
 
-lemma of_iff {P Q : (Fin k → M) → Prop} (H : L.Definable Q) (h : ∀ x, P x ↔ Q x) : L.Definable P := by
+lemma of_iff {P Q : (Fin k → M) → Prop} (H : L.Definable Q) (h : ∀ x, P x ↔ Q x) :
+    L.Definable P := by
   rwa [show P = Q from by funext v; simp [h]]
 
 @[simp] lemma const (p : Prop) : L.Definable fun _ : Fin k → M ↦ p := by
@@ -250,7 +267,8 @@ lemma of_iff {P Q : (Fin k → M) → Prop} (H : L.Definable Q) (h : ∀ x, P x 
   rcases hR with ⟨φ, hR⟩
   exact ⟨∼φ, by intro _; simp [hR.iff]⟩
 
-@[grind .] lemma biconditional {R S : (Fin k → M) → Prop} (hR : L.Definable R) (hS : L.Definable S) :
+@[grind .] lemma biconditional {R S : (Fin k → M) → Prop} (hR : L.Definable R)
+    (hS : L.Definable S) :
     L.Definable fun v : Fin k → M ↦ R v ↔ S v := by
   rcases hR with ⟨φ, hR⟩
   rcases hS with ⟨ψ, hS⟩
@@ -268,28 +286,34 @@ lemma exs {R : (Fin k → M) → M → Prop} (hR : L.Definable fun w ↦ R (w ·
 
 instance eq [L.Eq] [Tarski.Structure.Eq L M] : L-relation[M] Eq := ⟨“x y. x = y”, fun _ ↦ by simp⟩
 
-instance lt [L.LT] [LT M] [Tarski.Structure.LT L M] : L-relation[M] _root_.LT.lt := ⟨“x y. x < y”, fun _ ↦ by simp⟩
+instance lt [L.LT] [LT M] [Tarski.Structure.LT L M] : L-relation[M] _root_.LT.lt :=
+  ⟨“x y. x < y”, fun _ ↦ by simp⟩
 
-instance mem [L.Mem] [Membership M M] [Tarski.Structure.Mem L M] : L-relation[M] Membership.mem := ⟨“x y. y ∈ x”, fun _ ↦ by simp⟩
+instance mem [L.Mem] [Membership M M] [Tarski.Structure.Mem L M] : L-relation[M] Membership.mem :=
+  ⟨“x y. y ∈ x”, fun _ ↦ by simp⟩
 
 lemma fconj {P : ι → (Fin k → M) → Prop} (s : Finset ι)
-    (h : ∀ i, L.Definable fun w : Fin k → M ↦ P i w) : L.Definable fun v : Fin k → M ↦ ∀ i ∈ s, P i v := by
+    (h : ∀ i, L.Definable fun w : Fin k → M ↦ P i w) :
+    L.Definable fun v : Fin k → M ↦ ∀ i ∈ s, P i v := by
   have : ∀ i, ∃ φ, IsDefinedByWithParam (P i) φ := fun i ↦ (h i).definable
   rcases Classical.axiomOfChoice this with ⟨φ, H⟩
   exact ⟨⩕ i ∈ s, φ i, fun v ↦ by simp [fun i ↦ (H i).iff]⟩
 
 lemma fdisj {P : ι → (Fin k → M) → Prop} (s : Finset ι)
-    (h : ∀ i, L.Definable fun w : Fin k → M ↦ P i w) : L.Definable fun v : Fin k → M ↦ ∃ i ∈ s, P i v := by
+    (h : ∀ i, L.Definable fun w : Fin k → M ↦ P i w) :
+    L.Definable fun v : Fin k → M ↦ ∃ i ∈ s, P i v := by
   have : ∀ i, ∃ φ, IsDefinedByWithParam (P i) φ := fun i ↦ (h i).definable
   rcases Classical.axiomOfChoice this with ⟨φ, H⟩
   exact ⟨⩖ i ∈ s, φ i, fun v ↦ by simp [fun i ↦ (H i).iff]⟩
 
 lemma fintype_all [Fintype ι] {P : ι → (Fin k → M) → Prop}
-    (h : ∀ i, L.Definable fun w : Fin k → M ↦ P i w) : L.Definable fun v : Fin k → M ↦ ∀ i, P i v := by
+    (h : ∀ i, L.Definable fun w : Fin k → M ↦ P i w) :
+    L.Definable fun v : Fin k → M ↦ ∀ i, P i v := by
   simpa using fconj Finset.univ h
 
 lemma fintype_exs [Fintype ι] {P : ι → (Fin k → M) → Prop}
-    (h : ∀ i, L.Definable fun w : Fin k → M ↦ P i w) : L.Definable fun v : Fin k → M ↦ ∃ i, P i v := by
+    (h : ∀ i, L.Definable fun w : Fin k → M ↦ P i w) :
+    L.Definable fun v : Fin k → M ↦ ∃ i, P i v := by
   simpa using fdisj Finset.univ h
 
 lemma retraction (h : L.Definable P) {n} (f : Fin k → Fin n) :
@@ -298,7 +322,8 @@ lemma retraction (h : L.Definable P) {n} (f : Fin k → Fin n) :
   exact ⟨(Rew.subst fun i ↦ #(f i)) ▹ φ, fun v ↦ by simp [←hφ.iff, Function.comp_def]⟩
 
 lemma exsVec {k l} {P : (Fin k → M) → (Fin l → M) → Prop}
-    (h : L.Definable fun w : Fin (k + l) → M ↦ P (fun i ↦ w (i.castAdd l)) (fun j ↦ w (j.natAdd k))) :
+    (h : L.Definable fun w : Fin (k + l) → M ↦
+      P (fun i ↦ w (i.castAdd l)) (fun j ↦ w (j.natAdd k))) :
     L.Definable fun v : Fin k → M ↦ ∃ ys : Fin l → M, P v ys := by
   induction l generalizing k
   case zero => simpa [Matrix.empty_eq] using h
@@ -309,7 +334,8 @@ lemma exsVec {k l} {P : (Fin k → M) → (Fin l → M) → Prop}
       · rintro ⟨ys, h⟩; exact ⟨ys 0, (ys ·.succ), by simpa using h⟩
       · rintro ⟨y, ys, h⟩; exact ⟨_, h⟩
     apply exs; apply ih
-    let g : Fin (k + (l + 1)) → Fin (k + 1 + l) := Matrix.vecAppend rfl (fun x ↦ x.succ.castAdd l) (Fin.castAdd l 0 :> fun j ↦ j.natAdd (k + 1))
+    let g : Fin (k + (l + 1)) → Fin (k + 1 + l) :=
+      Matrix.vecAppend rfl (fun x ↦ x.succ.castAdd l) (Fin.castAdd l 0 :> fun j ↦ j.natAdd (k + 1))
     exact of_iff (retraction h g) (by
       intro v; simp only [g]
       apply iff_of_eq; congr
@@ -320,7 +346,8 @@ lemma exsVec {k l} {P : (Fin k → M) → (Fin l → M) → Prop}
         · simp only [Matrix.cons_val_succ]; congr 1; ext; simp [Matrix.vecAppend_eq_ite])
 
 lemma allVec {k l} {P : (Fin k → M) → (Fin l → M) → Prop}
-    (h : L.Definable fun w : Fin (k + l) → M ↦ P (fun i ↦ w (i.castAdd l)) (fun j ↦ w (j.natAdd k))) :
+    (h : L.Definable fun w : Fin (k + l) → M ↦
+      P (fun i ↦ w (i.castAdd l)) (fun j ↦ w (j.natAdd k))) :
     L.Definable fun v : Fin k → M ↦ ∀ ys : Fin l → M, P v ys := by
   induction l generalizing k
   case zero => simpa [Matrix.empty_eq] using h
@@ -331,7 +358,8 @@ lemma allVec {k l} {P : (Fin k → M) → (Fin l → M) → Prop}
       · intro h y ys; apply h
       · intro h ys; simpa using h (ys 0) (ys ·.succ)
     apply all; apply ih
-    let g : Fin (k + (l + 1)) → Fin (k + 1 + l) := Matrix.vecAppend rfl (fun x ↦ x.succ.castAdd l) (Fin.castAdd l 0 :> fun j ↦ j.natAdd (k + 1))
+    let g : Fin (k + (l + 1)) → Fin (k + 1 + l) :=
+      Matrix.vecAppend rfl (fun x ↦ x.succ.castAdd l) (Fin.castAdd l 0 :> fun j ↦ j.natAdd (k + 1))
     exact of_iff (retraction h g) (by
       intro v; simp only [g]
       apply iff_of_eq; congr
@@ -369,21 +397,24 @@ lemma DefinableRel.comp {P : M → M → Prop} {k} {f g : (Fin k → M) → M}
     [hP : L.DefinableRel P]
     (hf : L.DefinableFunction f) (hg : L.DefinableFunction g) :
     L.Definable fun v ↦ P (f v) (g v) :=
-  Definable.substitution (f := ![f, g]) hP (by simp [Fin.forall_fin_iff_zero_and_forall_succ, hf, hg])
+  Definable.substitution (f := ![f, g]) hP
+    (by simp [Fin.forall_fin_iff_zero_and_forall_succ, hf, hg])
 
 lemma DefinableRel₃.comp {k} {P : M → M → M → Prop} {f₁ f₂ f₃ : (Fin k → M) → M}
     [hP : L.DefinableRel₃ P]
     (hf₁ : L.DefinableFunction f₁) (hf₂ : L.DefinableFunction f₂)
     (hf₃ : L.DefinableFunction f₃) :
     L.Definable (fun v ↦ P (f₁ v) (f₂ v) (f₃ v)) :=
-  Definable.substitution (f := ![f₁, f₂, f₃]) hP (by simp [Fin.forall_fin_iff_zero_and_forall_succ, hf₁, hf₂, hf₃])
+  Definable.substitution (f := ![f₁, f₂, f₃]) hP
+    (by simp [Fin.forall_fin_iff_zero_and_forall_succ, hf₁, hf₂, hf₃])
 
 lemma DefinableRel₄.comp {k} {P : M → M → M → M → Prop} {f₁ f₂ f₃ f₄ : (Fin k → M) → M}
     [hP : L.DefinableRel₄ P]
     (hf₁ : L.DefinableFunction f₁) (hf₂ : L.DefinableFunction f₂)
     (hf₃ : L.DefinableFunction f₃) (hf₄ : L.DefinableFunction f₄) :
     L.Definable (fun v ↦ P (f₁ v) (f₂ v) (f₃ v) (f₄ v)) :=
-  Definable.substitution (f := ![f₁, f₂, f₃, f₄]) hP (by simp [Fin.forall_fin_iff_zero_and_forall_succ, hf₁, hf₂, hf₃, hf₄])
+  Definable.substitution (f := ![f₁, f₂, f₃, f₄]) hP
+    (by simp [Fin.forall_fin_iff_zero_and_forall_succ, hf₁, hf₂, hf₃, hf₄])
 
 lemma DefinableRel₅.comp {k} {P : M → M → M → M → M → Prop} {f₁ f₂ f₃ f₄ f₅ : (Fin k → M) → M}
     [hP : L.DefinableRel₅ P]
@@ -391,7 +422,8 @@ lemma DefinableRel₅.comp {k} {P : M → M → M → M → M → Prop} {f₁ f�
     (hf₃ : L.DefinableFunction f₃) (hf₄ : L.DefinableFunction f₄)
     (hf₅ : L.DefinableFunction f₅) :
     L.Definable (fun v ↦ P (f₁ v) (f₂ v) (f₃ v) (f₄ v) (f₅ v)) :=
-  Definable.substitution (f := ![f₁, f₂, f₃, f₄, f₅]) hP (by simp [Fin.forall_fin_iff_zero_and_forall_succ, hf₁, hf₂, hf₃, hf₄, hf₅])
+  Definable.substitution (f := ![f₁, f₂, f₃, f₄, f₅]) hP
+    (by simp [Fin.forall_fin_iff_zero_and_forall_succ, hf₁, hf₂, hf₃, hf₄, hf₅])
 
 lemma DefinablePred.of_iff {P Q : M → Prop}
     (H : L.DefinablePred Q) (h : ∀ x, P x ↔ Q x) : L.DefinablePred P := by
@@ -429,9 +461,11 @@ lemma substitution {f : Fin k → (Fin l → M) → M}
     · simpa using projection _
     · simpa using Definable.retraction (hf i) (0 :> (·.succ.succ))
 
-instance hAdd [L.Add] [Add M] [Tarski.Structure.Add L M] : L-function₂[M] HAdd.hAdd := ⟨“x y z. x = y + z”, fun _ ↦ by simp⟩
+instance hAdd [L.Add] [Add M] [Tarski.Structure.Add L M] : L-function₂[M] HAdd.hAdd :=
+  ⟨“x y z. x = y + z”, fun _ ↦ by simp⟩
 
-instance hMul [L.Mul] [Mul M] [Tarski.Structure.Mul L M] : L-function₂[M] HMul.hMul := ⟨“x y z. x = y * z”, fun _ ↦ by simp⟩
+instance hMul [L.Mul] [Mul M] [Tarski.Structure.Mul L M] : L-function₂[M] HMul.hMul :=
+  ⟨“x y z. x = y * z”, fun _ ↦ by simp⟩
 
 end DefinableFunction
 
@@ -444,21 +478,24 @@ lemma DefinableFunction₂.comp {k} {F : M → M → M} {f₁ f₂ : (Fin k → 
     [hF : L.DefinableFunction₂ F]
     (hf₁ : L.DefinableFunction f₁) (hf₂ : L.DefinableFunction f₂) :
     L.DefinableFunction (fun v ↦ F (f₁ v) (f₂ v)) :=
-  DefinableFunction.substitution (f := ![f₁, f₂]) hF (by simp [Fin.forall_fin_iff_zero_and_forall_succ, *])
+  DefinableFunction.substitution (f := ![f₁, f₂]) hF
+    (by simp [Fin.forall_fin_iff_zero_and_forall_succ, *])
 
 lemma DefinableFunction₃.comp {k} {F : M → M → M → M} {f₁ f₂ f₃ : (Fin k → M) → M}
     [hF : L.DefinableFunction₃ F]
     (hf₁ : L.DefinableFunction f₁) (hf₂ : L.DefinableFunction f₂)
     (hf₃ : L.DefinableFunction f₃) :
     L.DefinableFunction (fun v ↦ F (f₁ v) (f₂ v) (f₃ v)) :=
-  DefinableFunction.substitution (f := ![f₁, f₂, f₃]) hF (by simp [Fin.forall_fin_iff_zero_and_forall_succ, *])
+  DefinableFunction.substitution (f := ![f₁, f₂, f₃]) hF
+    (by simp [Fin.forall_fin_iff_zero_and_forall_succ, *])
 
 lemma DefinableFunction₄.comp {k} {F : M → M → M → M → M} {f₁ f₂ f₃ f₄ : (Fin k → M) → M}
     [hF : L.DefinableFunction₄ F]
     (hf₁ : L.DefinableFunction f₁) (hf₂ : L.DefinableFunction f₂)
     (hf₃ : L.DefinableFunction f₃) (hf₄ : L.DefinableFunction f₄) :
     L.DefinableFunction (fun v ↦ F (f₁ v) (f₂ v) (f₃ v) (f₄ v)) :=
-  DefinableFunction.substitution (f := ![f₁, f₂, f₃, f₄]) hF (by simp [Fin.forall_fin_iff_zero_and_forall_succ, *])
+  DefinableFunction.substitution (f := ![f₁, f₂, f₃, f₄]) hF
+    (by simp [Fin.forall_fin_iff_zero_and_forall_succ, *])
 
 lemma DefinableFunction₅.comp {k} {F : M → M → M → M → M → M} {f₁ f₂ f₃ f₄ f₅ : (Fin k → M) → M}
     [hF : L.DefinableFunction₅ F]
@@ -466,7 +503,8 @@ lemma DefinableFunction₅.comp {k} {F : M → M → M → M → M → M} {f₁ 
     (hf₃ : L.DefinableFunction f₃) (hf₄ : L.DefinableFunction f₄)
     (hf₅ : L.DefinableFunction f₅) :
     L.DefinableFunction (fun v ↦ F (f₁ v) (f₂ v) (f₃ v) (f₄ v) (f₅ v)) :=
-  DefinableFunction.substitution (f := ![f₁, f₂, f₃, f₄, f₅]) hF (by simp [Fin.forall_fin_iff_zero_and_forall_succ, *])
+  DefinableFunction.substitution (f := ![f₁, f₂, f₃, f₄, f₅]) hF
+    (by simp [Fin.forall_fin_iff_zero_and_forall_succ, *])
 
 section aesop
 
@@ -507,10 +545,12 @@ macro "definability" : attr =>
   `(attr|aesop 10 (rule_sets := [$(Lean.mkIdent `Definability):ident]) safe)
 
 macro "definability" (config)? : tactic =>
-  `(tactic| aesop (config := { terminal := true }) (rule_sets := [$(Lean.mkIdent `Definability):ident]))
+  `(tactic| aesop (config := { terminal := true })
+    (rule_sets := [$(Lean.mkIdent `Definability):ident]))
 
 macro "definability?" (config)? : tactic =>
-  `(tactic| aesop? (config := { terminal := true }) (rule_sets := [$(Lean.mkIdent `Definability):ident]))
+  `(tactic| aesop? (config := { terminal := true })
+    (rule_sets := [$(Lean.mkIdent `Definability):ident]))
 
 example {f : M → M} {g : M → M → M} [L.DefinableFunction₁ f] [L.DefinableFunction₂ g] (c : M) :
     L.DefinableRel fun x y : M ↦ ∀ z, f x = g y (g (f z) c) := by

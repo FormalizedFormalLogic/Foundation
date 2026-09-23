@@ -7,7 +7,6 @@ public import Foundation.Vorspiel.Small
 
 @[expose] public section
 set_option autoImplicit true
-set_option linter.style.longLine false
 set_option linter.unusedSimpArgs false
 set_option linter.unusedTactic false
 set_option linter.unreachableTactic false
@@ -48,7 +47,8 @@ instance : Functor UniverseFunctor.{u} where
 
 lemma mem_def {a : α} {f : UniverseFunctor α} : a ∈ f ↔ a ∈ f.set := by rfl
 
-@[simp] lemma mem_mk {a : α} {s : Set α} {h : Small.{u} s} : a ∈ UniverseFunctor.mk s h ↔ a ∈ s := by rfl
+@[simp] lemma mem_mk {a : α} {s : Set α} {h : Small.{u} s} :
+    a ∈ UniverseFunctor.mk s h ↔ a ∈ s := by rfl
 
 @[simp] lemma map_functor (m : α → β) (f : UniverseFunctor α) : (m <$> f).set = m '' f := by rfl
 
@@ -122,7 +122,8 @@ instance coe_small' (x : Universe.{u}) : Small.{u} (x : Type _) := x.dest.small
 @[simp] lemma mem_mkFun {x} {ι : Type u} {f : ι → Universe.{u}} :
     x ∈ mkFun f ↔ ∃ i, f i = x := by simp [mkFun]
 
-@[simp] lemma coe_nonempty_iff_isNonempty {x : Universe} : (x : Set Universe).Nonempty ↔ IsNonempty x := by
+@[simp] lemma coe_nonempty_iff_isNonempty {x : Universe} :
+    (x : Set Universe).Nonempty ↔ IsNonempty x := by
   simp [isNonempty_def]; rfl
 
 @[ext] lemma ext {x y : Universe.{u}} (h : ∀ z, z ∈ x ↔ z ∈ y) : x = y := calc
@@ -139,9 +140,10 @@ lemma rec_mk (g : (s : Set α) → [Small.{u} s] → α) (s : Set Universe.{u}) 
     rec g (mk s) = g (rec g '' s) := by
   exact QPF.Fix.rec_eq (F := UniverseFunctor) (fun p ↦ g p.set) ⟨s, small⟩
 
--- `Universe := QPF.Fix UniverseFunctor` is a plain `def`, so unifying `s.set : Set (QPF.Fix UniverseFunctor)`
--- against `mk`'s `Set Universe` parameter (needed to resolve the `Small` instance argument) requires
--- unfolding past `implicit` transparency; mathlib's own `QPF.Fix.ind_aux`/`ind_rec` need the same relaxation.
+-- `Universe := QPF.Fix UniverseFunctor` is a plain `def`, so unifying
+-- `s.set : Set (QPF.Fix UniverseFunctor)` against `mk`'s `Set Universe` parameter (needed to
+-- resolve the `Small` instance argument) requires unfolding past `implicit` transparency;
+-- mathlib's own `QPF.Fix.ind_aux`/`ind_rec` need the same relaxation.
 set_option backward.isDefEq.respectTransparency false in
 @[elab_as_elim]
 theorem ind
@@ -153,7 +155,8 @@ theorem ind
 lemma wellFounded : WellFounded (α := Universe.{u}) (· ∈ ·) := ⟨ind fun x ih ↦ Acc.intro x ih⟩
 
 
-lemma minimal_exists_of_isNonempty {x : Universe.{u}} (hx : IsNonempty x) : ∃ y ∈ x, ∀ z ∈ x, z ∉ y := by
+lemma minimal_exists_of_isNonempty {x : Universe.{u}} (hx : IsNonempty x) :
+    ∃ y ∈ x, ∀ z ∈ x, z ∉ y := by
   let z := WellFounded.min wellFounded x (by simp [hx])
   exact ⟨z, WellFounded.min_mem wellFounded x _, fun w hw ↦ WellFounded.not_lt_min wellFounded x hw⟩
 
@@ -165,7 +168,8 @@ noncomputable instance : Inhabited Universe := ⟨empty⟩
 
 protected noncomputable def insert (x y : Universe) : Universe := mk ({x} ∪ y)
 
-@[simp] lemma mem_insert_iff {x y z : Universe} : z ∈ x.insert y ↔ z = x ∨ z ∈ y := by simp [Universe.insert]
+@[simp] lemma mem_insert_iff {x y z : Universe} : z ∈ x.insert y ↔ z = x ∨ z ∈ y := by
+  simp [Universe.insert]
 
 noncomputable def ofNat : ℕ → Universe
   |     0 => empty
@@ -189,7 +193,8 @@ noncomputable def image (x : Universe) (F : Universe → Universe) : Universe :=
 
 noncomputable def choice₁ (x : Universe) : Universe := Classical.epsilon fun z ↦ z ∈ x
 
-lemma choice₁_mem_self {x : Universe} (hx : IsNonempty x) : x.choice₁ ∈ x := Classical.epsilon_spec hx.nonempty
+lemma choice₁_mem_self {x : Universe} (hx : IsNonempty x) : x.choice₁ ∈ x :=
+  Classical.epsilon_spec hx.nonempty
 
 lemma isNonempty_iff_ne_empty {x : Universe} : IsNonempty x ↔ x ≠ empty := by
   simp [Universe.ext_iff, isNonempty_def]
@@ -214,7 +219,8 @@ lemma choice_existsUnique {𝓧 X : Universe}
     rcases this
     rfl
 
-noncomputable def sep (x : Universe.{u}) (p : Universe.{u} → Prop) : Universe.{u} := mk {z ∈ x | p z}
+noncomputable def sep (x : Universe.{u}) (p : Universe.{u} → Prop) : Universe.{u} :=
+  mk {z ∈ x | p z}
 
 @[simp] lemma mem_spec {z x : Universe.{u}} {p : Universe.{u} → Prop} :
     z ∈ sep x p ↔ z ∈ x ∧ p z := by simp [sep]
@@ -297,7 +303,8 @@ instance models_zf : Universe.{u}↓[ℒₛₑₜ] ⊧* 𝗭𝗙 := ⟨by
           ∀ f : ℕ → Universe.{u},
           (∀ x, ∃! y, R f x y) →
           ∀ X : Universe.{u}, ∃ Y : Universe.{u}, ∀ y, y ∈ Y ↔ ∃ x ∈ X, R f x y by
-        simpa [models_iff, Axiom.replacementSchema, Matrix.constant_eq_singleton, Matrix.comp_vecCons']
+        simpa [models_iff, Axiom.replacementSchema, Matrix.constant_eq_singleton,
+            Matrix.comp_vecCons']
       intro f h X
       have : ∀ x, ∃ y, R f x y := fun x ↦ (h x).exists
       choose F hF using this

@@ -6,9 +6,6 @@ public import Foundation.FirstOrder.Tarski.Operator
 public import Mathlib.SetTheory.Cardinal.Basic
 
 @[expose] public section
-set_option linter.style.longLine false
-set_option linter.style.dollarSyntax false
-set_option linter.style.lambdaSyntax false
 set_option linter.style.openClassical false
 set_option linter.style.induction false
 set_option linter.unusedSimpArgs false
@@ -27,7 +24,8 @@ def Language.skolemFunction₁ (L : Language) : Language where
   Func k := Semisentence L (k + 1)
   Rel _ := PEmpty
 
-abbrev Semisentence.skolem₁ {L : Language} (φ : Semisentence L (k + 1)) : L.skolemFunction₁.Func k := φ
+abbrev Semisentence.skolem₁ {L : Language} (φ : Semisentence L (k + 1)) :
+    L.skolemFunction₁.Func k := φ
 
 instance (L : Language) [L.Encodable] : L.skolemFunction₁.Encodable where
   func k := inferInstanceAs (Encodable (Semisentence L (k + 1)))
@@ -69,7 +67,8 @@ lemma mem_iff :
     x ∈ SkolemHull L s ↔ ∃ t : Term L.skolemFunction₁ s, t.val ![] (↑) = x := by
   simp [SkolemHull]
 
-@[simp] lemma val_mem (t : Term L.skolemFunction₁ s) : t.val ![] (↑) ∈ SkolemHull L s := by simp [SkolemHull]
+@[simp] lemma val_mem (t : Term L.skolemFunction₁ s) : t.val ![] (↑) ∈ SkolemHull L s := by
+  simp [SkolemHull]
 
 lemma subset : s ⊆ SkolemHull L s := fun x hx ↦ by
   let t : Term L.skolemFunction₁ s := &⟨x, hx⟩
@@ -131,7 +130,8 @@ variable {𝓼 s}
 @[simp] lemma str_eval {φ : Semisentence L n} :
     φ.Evalb (M := SkolemHull L s) b ↔ φ.Evalb (M := M) (b ·) :=
   match φ with
-  | .rel R v | .nrel R v => by simp [Semiformula.eval_rel, Semiformula.eval_nrel, Empty.eq_elim, Function.comp_def]
+  | .rel R v | .nrel R v => by
+    simp [Semiformula.eval_rel, Semiformula.eval_nrel, Empty.eq_elim, Function.comp_def]
   | ⊤ | ⊥ => by simp
   | φ ⋏ ψ | φ ⋎ ψ => by simp [str_eval (φ := φ), str_eval (φ := ψ)]
   | ∀¹ φ => by
@@ -160,7 +160,8 @@ instance (priority := 50) elementaryEquiv : (SkolemHull L s) ≡ₑ[L] M where
 
 instance (priority := 50) eq : Tarski.Structure.Eq L (SkolemHull L s) := ⟨fun x y ↦ by
   rw [Subtype.ext_iff]
-  simpa [Operator.val, Matrix.fun_eq_vec_two] using Tarski.Structure.Eq.eq (L := L) (M := M) x.val y.val⟩
+  simpa [Operator.val, Matrix.fun_eq_vec_two]
+      using Tarski.Structure.Eq.eq (L := L) (M := M) x.val y.val⟩
 
 section mem
 
@@ -171,7 +172,8 @@ instance (priority := 50) membership :
 
 instance (priority := 50) mem :
     Tarski.Structure.Mem L (SkolemHull L s) := ⟨fun x y ↦ by
-  simpa [Operator.val, Matrix.fun_eq_vec_two] using! Tarski.Structure.Mem.mem (L := L) (M := M) x.val y.val⟩
+  simpa [Operator.val, Matrix.fun_eq_vec_two]
+      using! Tarski.Structure.Mem.mem (L := L) (M := M) x.val y.val⟩
 
 end mem
 

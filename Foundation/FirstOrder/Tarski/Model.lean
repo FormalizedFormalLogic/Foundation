@@ -4,7 +4,6 @@ public import Foundation.FirstOrder.Tarski.Elementary
 @[expose] public section
 set_option linter.unusedVariables false
 set_option autoImplicit true
-set_option linter.style.longLine false
 
 namespace FFL
 
@@ -32,7 +31,8 @@ instance : Tarski.Structure L (Model L M) := Tarski.Structure.ofEquiv (equiv L M
 instance [h : Nonempty M] : Nonempty (Model L M) := by
   rcases h with ⟨x⟩; exact ⟨equiv L M x⟩
 
-instance elementaryEquiv (L : Language) (M : Type*) [Nonempty M] [Tarski.Structure L M] : M ≡ₑ[L] Model L M :=
+instance elementaryEquiv (L : Language) (M : Type*) [Nonempty M] [Tarski.Structure L M] :
+    M ≡ₑ[L] Model L M :=
   ElementaryEquiv.ofEquiv _
 
 section
@@ -93,7 +93,8 @@ end ofFunc
 
 section add
 
-variable (L₁ : Language.{u₁}) (L₂ : Language.{u₂}) (M : Type*) [str₁ : Tarski.Structure L₁ M] [str₂ : Tarski.Structure L₂ M]
+variable (L₁ : Language.{u₁}) (L₂ : Language.{u₂}) (M : Type*) [str₁ : Tarski.Structure L₁ M]
+    [str₂ : Tarski.Structure L₂ M]
 
 instance add : Tarski.Structure (L₁.add L₂) M where
   func := fun _ f v =>
@@ -124,11 +125,13 @@ lemma lMap_add₁ : (add L₁ L₂ M).lMap (Language.Hom.add₁ L₁ L₂) = str
 lemma lMap_add₂ : (add L₁ L₂ M).lMap (Language.Hom.add₂ L₁ L₂) = str₂ := rfl
 
 @[simp] lemma val_lMap_add₁ {n} (t : Semiterm L₁ μ n) (e : Fin n → M) (f : μ → M) :
-    Semiterm.val (s := add L₁ L₂ M) e f (t.lMap (Language.Hom.add₁ L₁ L₂)) = t.val (s := str₁) e f := by
+    Semiterm.val (s := add L₁ L₂ M) e f (t.lMap (Language.Hom.add₁ L₁ L₂)) =
+        t.val (s := str₁) e f := by
   rw [Semiterm.val_lMap, lMap_add₁]
 
 @[simp] lemma val_lMap_add₂ {n} (t : Semiterm L₂ μ n) (e : Fin n → M) (f : μ → M) :
-    Semiterm.val (s := add L₁ L₂ M) e f (t.lMap (Language.Hom.add₂ L₁ L₂)) = t.val (s := str₂) e f := by
+    Semiterm.val (s := add L₁ L₂ M) e f (t.lMap (Language.Hom.add₂ L₁ L₂)) =
+        t.val (s := str₂) e f := by
   rw [Semiterm.val_lMap, lMap_add₂]
 
 @[simp] lemma eval_lMap_add₁ {n} (φ : Semiformula L₁ μ n) (e : Fin n → M) (f : μ → M) :
@@ -151,14 +154,17 @@ instance sigma : Tarski.Structure (Language.sigma L) M where
   func := fun _ ⟨_, f⟩ v ↦ func f v
   rel  := fun _ ⟨_, r⟩ v ↦ rel r v
 
-@[simp] lemma func_sigma {k} (f : (L i).Func k) (v : Fin k → M) : (sigma L M).func ⟨i, f⟩ v = func f v := rfl
+@[simp] lemma func_sigma {k} (f : (L i).Func k) (v : Fin k → M) :
+    (sigma L M).func ⟨i, f⟩ v = func f v := rfl
 
-@[simp] lemma rel_sigma {k} (r : (L i).Rel k) (v : Fin k → M) : (sigma L M).rel ⟨i, r⟩ v ↔ rel r v := iff_of_eq rfl
+@[simp] lemma rel_sigma {k} (r : (L i).Rel k) (v : Fin k → M) :
+    (sigma L M).rel ⟨i, r⟩ v ↔ rel r v := iff_of_eq rfl
 
 lemma lMap_sigma : (sigma L M).lMap (Language.Hom.sigma L i) = str i := rfl
 
 @[simp] lemma val_lMap_sigma {n} (t : Semiterm (L i) μ n) (e : Fin n → M) (f : μ → M) :
-    Semiterm.val (s := sigma L M) e f (t.lMap (Language.Hom.sigma L i)) = t.val (s := str i) e f := by
+    Semiterm.val (s := sigma L M) e f (t.lMap (Language.Hom.sigma L i)) =
+        t.val (s := str i) e f := by
   rw [Semiterm.val_lMap, lMap_sigma]
 
 @[simp] lemma eval_lMap_sigma {n} (φ : Semiformula (L i) μ n) (e : Fin n → M) (f : μ → M) :
@@ -188,7 +194,8 @@ lemma Semiterm.val_uLift {e : Fin n → ULift.{v'} M} {f : ξ → ULift.{v'} M} 
     Semiterm.val e f t = ⟨Semiterm.val (ULift.down ∘ e) (ULift.down ∘ f) t⟩ := by
   induction t <;> simp [*, Function.comp_def]
 
-lemma Semiformula.eval_uLift {e : Fin n → ULift.{v'} M} {f : ξ → ULift.{v'} M} {φ : Semiformula L ξ n} :
+lemma Semiformula.eval_uLift {e : Fin n → ULift.{v'} M} {f : ξ → ULift.{v'} M}
+    {φ : Semiformula L ξ n} :
     φ.Eval e f ↔ φ.Eval (ULift.down ∘ e) (ULift.down ∘ f) := by
   induction φ using Semiformula.rec' <;>
     simp [*, Semiterm.val_uLift, Matrix.comp_vecCons', Function.comp_def]

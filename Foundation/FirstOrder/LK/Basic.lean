@@ -13,7 +13,6 @@ set_option linter.unusedSimpArgs false
 set_option linter.unusedTactic false
 set_option linter.unreachableTactic false
 set_option autoImplicit true
-set_option linter.style.longLine false
 
 namespace FFL
 
@@ -168,11 +167,13 @@ def eta : (φ : Proposition L) → ⊢ᴸᴷ¹ ⦃φ, ∼φ⦄
   | φ ⋏ ψ =>
     (or (Γ := ⦃φ ⋏ ψ⦄) (φ := ∼φ) (ψ := ∼ψ)
       (tensor (Γ := ⦃∼φ⦄) (Δ := ⦃∼ψ⦄) (φ := φ) (ψ := ψ)
-        (Multiset.Traversal.atom _) (Multiset.Traversal.atom _) (eta φ).cast (eta ψ).cast).cast).cast (by simp [add_comm])
+        (Multiset.Traversal.atom _) (Multiset.Traversal.atom _)
+        (eta φ).cast (eta ψ).cast).cast).cast (by simp [add_comm])
   | φ ⋎ ψ =>
     (or (Γ := ⦃∼φ ⋏ ∼ψ⦄) (φ := φ) (ψ := ψ)
       (tensor (Γ := ⦃φ⦄) (Δ := ⦃ψ⦄) (φ := ∼φ) (ψ := ∼ψ)
-        (Multiset.Traversal.atom _) (Multiset.Traversal.atom _) (eta φ) (eta ψ)).cast).cast (by simp [add_comm])
+        (Multiset.Traversal.atom _) (Multiset.Traversal.atom _) (eta φ) (eta ψ)).cast).cast
+      (by simp [add_comm])
   | ∀¹ φ =>
     (all (Γ := ⦃∃¹ ∼φ⦄) (φ := φ)
       ((exs (Γ := ⦃φ.free⦄) (φ := ∼φ.shift) (t := &0)
@@ -432,7 +433,8 @@ instance : Entailment.DeductiveExplosion (Theory L) where
   dexp b φ := by
     refine ⟨b.axioms, b.axioms_mem, ?_⟩
     have db : ⊢ᴸᴷ¹ (∼LK.Sequent.embed b.axioms) + ⦃Rewriting.emb (⊥ : Sentence L)⦄ :=
-      LK.Derivation.cast b.derivation (by simp [LK.Sequent.embed, add_comm, Multiset.map_tilde_comm])
+      LK.Derivation.cast b.derivation
+        (by simp [LK.Sequent.embed, add_comm, Multiset.map_tilde_comm])
     exact ((OneSidedLK.removeBot db).weakening (φ := Rewriting.emb φ)).cast (by
       simp [LK.Sequent.embed, add_comm, Multiset.map_tilde_comm])
 
@@ -449,7 +451,8 @@ lemma provable_iff :
   constructor
   · rintro ⟨b⟩
     exact ⟨b.axioms, b.axioms_mem,
-      ⟨by simpa [OneSidedLK.Pullback, LK.Sequent.embed, Multiset.map_tilde_comm] using b.derivation⟩⟩
+      ⟨by simpa [OneSidedLK.Pullback, LK.Sequent.embed, Multiset.map_tilde_comm] using
+        b.derivation⟩⟩
   · rintro ⟨Γ, hΓ, ⟨d⟩⟩
     exact ⟨Γ, hΓ, by simpa [OneSidedLK.Pullback, LK.Sequent.embed, Multiset.map_tilde_comm] using d⟩
 

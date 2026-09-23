@@ -6,26 +6,24 @@ public import Foundation.Vorspiel.Order.BooleanAlgebra.Iso
 
 @[expose] public section
 set_option autoImplicit true
-set_option linter.style.cdot false
-set_option linter.style.dollarSyntax false
-set_option linter.style.longLine false
 namespace FFL
 
 namespace Entailment.LindenbaumAlgebra
 
 open Entailment LindenbaumAlgebra
 
-variable {F S : Type*} [DecidableEq F] [LogicalConnective F] [LogicalNeutral F] [Entailment S F] [AdjunctiveSet F S] [Deduction S]
-         (𝓢 : S) [Entailment.Cl 𝓢]
+variable {F S : Type*} [DecidableEq F] [LogicalConnective F] [LogicalNeutral F] [Entailment S F]
+    [AdjunctiveSet F S] [Deduction S]
+    (𝓢 : S) [Entailment.Cl 𝓢]
 
 lemma dense_of_finite_extend_incomplete
     (hE : ∀ φ : F, Consistent (adjoin φ 𝓢) → Incomplete (adjoin φ 𝓢))
     (h : φ < ψ) : ∃ ξ : LindenbaumAlgebra 𝓢, φ < ξ ∧ ξ < ψ := by
   obtain ⟨φ, rfl⟩ := Quotient.exists_rep φ;
   obtain ⟨ψ, rfl⟩ := Quotient.exists_rep ψ;
-  have h₁ : 𝓢 ⊢ φ 🡒 ψ := le_def _ |>.mp $ le_of_lt h;
-  have h₂ : 𝓢 ⊬  ψ 🡒 φ := le_def _ |>.not.mp $ not_le_of_gt h;
-  obtain ⟨ρ, hρ⟩ := incomplete_def.mp $ @hE (∼φ ⋏ ψ) $ by
+  have h₁ : 𝓢 ⊢ φ 🡒 ψ := le_def _ |>.mp <| le_of_lt h;
+  have h₂ : 𝓢 ⊬  ψ 🡒 φ := le_def _ |>.not.mp <| not_le_of_gt h;
+  obtain ⟨ρ, hρ⟩ := incomplete_def.mp <| @hE (∼φ ⋏ ψ) <| by
     apply consistent_iff_exists_unprovable.mpr;
     use ⊥;
     apply deduction_iff.not.mpr;
@@ -33,16 +31,16 @@ lemma dense_of_finite_extend_incomplete
     cl_prover [h₂];
   use ⟦φ ⋎ (ψ ⋏ ∼ρ)⟧;
   refine ⟨⟨?_, ?_⟩, ⟨?_, ?_⟩⟩;
-  . apply le_def _ |>.mpr;
+  · apply le_def _ |>.mpr;
     cl_prover;
-  . apply le_def _ |>.not.mpr;
+  · apply le_def _ |>.not.mpr;
     by_contra! hC;
     apply hρ.1;
     apply deduction_iff.mpr;
     cl_prover [h₁, hC];
-  . apply le_def _ |>.mpr;
+  · apply le_def _ |>.mpr;
     cl_prover [h₁];
-  . apply le_def _ |>.not.mpr;
+  · apply le_def _ |>.not.mpr;
     by_contra hC;
     apply hρ.2;
     apply deduction_iff.mpr;
@@ -53,12 +51,14 @@ end Entailment.LindenbaumAlgebra
 open Entailment LindenbaumAlgebra FirstOrder
 
 /-- Lindenbuam algebra of `𝗜𝚺₁`-extension theory satisfies G1 is dense. -/
-lemma FirstOrder.Arithmetic.dense (T : ArithmeticTheory) [𝗜𝚺₁ ⪯ T] [T.Δ₁] {φ ψ : LindenbaumAlgebra T} :
+lemma FirstOrder.Arithmetic.dense (T : ArithmeticTheory) [𝗜𝚺₁ ⪯ T] [T.Δ₁]
+    {φ ψ : LindenbaumAlgebra T} :
     φ < ψ → ∃ ξ, φ < ξ ∧ ξ < ψ := fun h ↦ by
   refine LindenbaumAlgebra.dense_of_finite_extend_incomplete T ?_ h
   intro σ con
   have : 𝗜𝚺₁ ⪯ T := inferInstance
-  have : 𝗜𝚺₁ ⪯ insert σ T := WeakerThan.trans this (Axiomatized.le_of_subset (Set.subset_insert _ _))
+  have : 𝗜𝚺₁ ⪯ insert σ T := WeakerThan.trans this
+      (Axiomatized.le_of_subset (Set.subset_insert _ _))
   simpa using! Arithmetic.incomplete_GR (insert σ T)
 
 instance (T : ArithmeticTheory) [𝗜𝚺₁ ⪯ T] [T.Δ₁] : DenselyOrdered (LindenbaumAlgebra T) where

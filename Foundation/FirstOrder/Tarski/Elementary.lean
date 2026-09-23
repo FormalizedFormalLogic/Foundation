@@ -3,7 +3,6 @@ module
 public import Foundation.FirstOrder.Tarski.Basic
 
 @[expose] public section
-set_option linter.style.longLine false
 set_option linter.unusedSimpArgs false
 set_option autoImplicit true
 
@@ -16,7 +15,8 @@ section
 variable {L : Language}
 variable {M : Type*} {M₁ : Type*} {M₂ : Type*} {M₃ : Type*}
 variable [Nonempty M] [Nonempty M₁] [Nonempty M₂] [Nonempty M₃]
-  [s : Tarski.Structure L M] [s₁ : Tarski.Structure L M₁] [s₂ : Tarski.Structure L M₂] [s₃ : Tarski.Structure L M₃]
+  [s : Tarski.Structure L M] [s₁ : Tarski.Structure L M₁] [s₂ : Tarski.Structure L M₂]
+  [s₃ : Tarski.Structure L M₃]
 
 namespace Tarski.Structure
 
@@ -45,18 +45,21 @@ notation:25 M " ≃ₛ[" L "] " M' => Iso L M M'
   domain_closed : ∀ {k} (f : L.Func k) {v : Fin k → M}, (∀ i, v i ∈ domain) → s.func f v ∈ domain
 
 class HomClass (F : Type*) (L : outParam (Language.{u}))
-    (M₁ : outParam (Type*)) (M₂ : outParam (Type*)) [s₁ : Tarski.Structure L M₁] [s₂ : Tarski.Structure L M₂] [FunLike F M₁ M₂] where
+    (M₁ : outParam (Type*)) (M₂ : outParam (Type*)) [s₁ : Tarski.Structure L M₁]
+    [s₂ : Tarski.Structure L M₂] [FunLike F M₁ M₂] where
   map_func : ∀ (h : F) {k} (f : L.Func k) (v : Fin k → M₁), h (func f v) = func f (h ∘ v)
   map_rel : ∀ (h : F) {k} (r : L.Rel k) (v : Fin k → M₁), s₁.rel r v → s₂.rel r (h ∘ v)
 
 class EmbeddingClass (F : Type*) (L : outParam (Language.{u}))
-    (M₁ : outParam (Type*)) (M₂ : outParam (Type*)) [s₁ : Tarski.Structure L M₁] [s₂ : Tarski.Structure L M₂] [FunLike F M₁ M₂]
+    (M₁ : outParam (Type*)) (M₂ : outParam (Type*)) [s₁ : Tarski.Structure L M₁]
+    [s₂ : Tarski.Structure L M₂] [FunLike F M₁ M₂]
     extends HomClass F L M₁ M₂ where
   map_inj (f : F) : Function.Injective f
   map_rel_inv (f : F) {k} (r : L.Rel k) (v : Fin k → M₁) : s₂.rel r (f ∘ v) → s₁.rel r v
 
 class IsoClass (F : Type*) (L : outParam (Language.{u}))
-    (M₁ : outParam (Type*)) (M₂ : outParam (Type*)) [s₁ : Tarski.Structure L M₁] [s₂ : Tarski.Structure L M₂] [FunLike F M₁ M₂]
+    (M₁ : outParam (Type*)) (M₂ : outParam (Type*)) [s₁ : Tarski.Structure L M₁]
+    [s₂ : Tarski.Structure L M₂] [FunLike F M₁ M₂]
     extends EmbeddingClass F L M₁ M₂ where
   map_bij (f : F) : Function.Bijective f
 
@@ -148,15 +151,18 @@ variable (u : ClosedSubset L M)
 instance : SetLike (ClosedSubset L M) M := ⟨ClosedSubset.domain, fun _ _ ↦ ClosedSubset.ext⟩
 
 omit [Nonempty M]
-lemma closed {k} (f : L.Func k) {v : Fin k → M} (hv : ∀ i, v i ∈ u) : s.func f v ∈ u := u.domain_closed f hv
+lemma closed {k} (f : L.Func k) {v : Fin k → M} (hv : ∀ i, v i ∈ u) : s.func f v ∈ u :=
+  u.domain_closed f hv
 
 instance toStructure (u : ClosedSubset L M) : Tarski.Structure L u where
   func := fun k f v => ⟨s.func f (fun i ↦ ↑(v i)), u.closed f (by simp)⟩
   rel := fun k r v => s.rel r (fun i ↦ v i)
 
-protected lemma func {k} (f : L.Func k) (v : Fin k → u) : u.toStructure.func f v = s.func f (fun i ↦ v i) := rfl
+protected lemma func {k} (f : L.Func k) (v : Fin k → u) :
+    u.toStructure.func f v = s.func f (fun i ↦ v i) := rfl
 
-protected lemma rel {k} (r : L.Rel k) (v : Fin k → u) : u.toStructure.rel r v ↔ s.rel r (fun i ↦ v i) := of_eq rfl
+protected lemma rel {k} (r : L.Rel k) (v : Fin k → u) :
+    u.toStructure.rel r v ↔ s.rel r (fun i ↦ v i) := of_eq rfl
 
 def inclusion : u ↪ₛ[L] M where
   toFun := Subtype.val
@@ -177,7 +183,8 @@ variable {e₁ : Fin n → M₁} {ε₁ : ξ → M₁}
 
 
 omit [Nonempty M₁] [Nonempty M₂]
-lemma eval_hom_iff_of_open {n} {e₁ : Fin n → M₁} {ε₁ : ξ → M₁} {φ : Semiformula L ξ n} (h : φ.Open) :
+lemma eval_hom_iff_of_open {n} {e₁ : Fin n → M₁} {ε₁ : ξ → M₁} {φ : Semiformula L ξ n}
+    (h : φ.Open) :
     φ.Eval e₁ ε₁ ↔ φ.Eval (Θ ∘ e₁) (Θ ∘ ε₁) :=
   match φ with
   | rel r v | nrel r v => by simp [Function.comp_def, ←EmbeddingClass.rel Θ, HomClass.val_term]
@@ -197,7 +204,8 @@ section
 
 variable {L : Language} {M : Type*} {M₁ : Type*} {M₂ : Type*} {M₃ : Type*}
 variable [Nonempty M] [Nonempty M₁] [Nonempty M₂] [Nonempty M₃]
-  [s : Tarski.Structure L M] [s₁ : Tarski.Structure L M₁] [s₂ : Tarski.Structure L M₂] [s₃ : Tarski.Structure L M₃]
+  [s : Tarski.Structure L M] [s₁ : Tarski.Structure L M₁] [s₂ : Tarski.Structure L M₂]
+  [s₃ : Tarski.Structure L M₃]
 
 namespace Tarski.Structure
 
@@ -239,7 +247,8 @@ omit [Nonempty M₁] [Nonempty M₂] in
 lemma val_eq_of_equiv {f₁ f₂ b₁ b₂}
     (I : M₁ ≃ M₂)
     (hf : ∀ x, I (f₁ x) = f₂ x) (hb : ∀ x, I (b₁ x) = b₂ x)
-    (hfunc : ∀ {k} (f : L.Func k) {v₁ : Fin k → M₁} {v₂ : Fin k → M₂}, (∀ i, I (v₁ i) = v₂ i) → I (s₁.func f v₁) = s₂.func f v₂)
+    (hfunc : ∀ {k} (f : L.Func k) {v₁ : Fin k → M₁} {v₂ : Fin k → M₂},
+      (∀ i, I (v₁ i) = v₂ i) → I (s₁.func f v₁) = s₂.func f v₂)
     (t : Semiterm L ξ n) :
     I (t.val b₁ f₁) = t.val b₂ f₂ :=
   match t with
@@ -254,8 +263,10 @@ omit [Nonempty M₁] [Nonempty M₂] in
 lemma eval_iff_of_equiv {f₁ f₂ b₁ b₂}
     (I : M₁ ≃ M₂)
     (hf : ∀ x, I (f₁ x) = f₂ x) (hb : ∀ x, I (b₁ x) = b₂ x)
-    (hrel : ∀ {k} (R : L.Rel k) {v₁ : Fin k → M₁} {v₂ : Fin k → M₂}, (∀ i, I (v₁ i) = v₂ i) → (s₁.rel R v₁ ↔ s₂.rel R v₂))
-    (hfunc : ∀ {k} (f : L.Func k) {v₁ : Fin k → M₁} {v₂ : Fin k → M₂}, (∀ i, I (v₁ i) = v₂ i) → I (s₁.func f v₁) = s₂.func f v₂)
+    (hrel : ∀ {k} (R : L.Rel k) {v₁ : Fin k → M₁} {v₂ : Fin k → M₂},
+      (∀ i, I (v₁ i) = v₂ i) → (s₁.rel R v₁ ↔ s₂.rel R v₂))
+    (hfunc : ∀ {k} (f : L.Func k) {v₁ : Fin k → M₁} {v₂ : Fin k → M₂},
+      (∀ i, I (v₁ i) = v₂ i) → I (s₁.func f v₁) = s₂.func f v₂)
     (φ : Semiformula L ξ n) :
     φ.Eval b₁ f₁ ↔ φ.Eval b₂ f₂ :=
   match φ with
@@ -304,11 +315,14 @@ lemma eval_iff_of_equiv {f₁ f₂ b₁ b₂}
 
 lemma of_equiv
     (I : M₁ ≃ M₂)
-    (hrel : ∀ {k} (R : L.Rel k) {v₁ : Fin k → M₁} {v₂ : Fin k → M₂}, (∀ i, I (v₁ i) = v₂ i) → (s₁.rel R v₁ ↔ s₂.rel R v₂))
-    (hfunc : ∀ {k} (f : L.Func k) {v₁ : Fin k → M₁} {v₂ : Fin k → M₂}, (∀ i, I (v₁ i) = v₂ i) → I (s₁.func f v₁) = s₂.func f v₂) :
+    (hrel : ∀ {k} (R : L.Rel k) {v₁ : Fin k → M₁} {v₂ : Fin k → M₂},
+      (∀ i, I (v₁ i) = v₂ i) → (s₁.rel R v₁ ↔ s₂.rel R v₂))
+    (hfunc : ∀ {k} (f : L.Func k) {v₁ : Fin k → M₁} {v₂ : Fin k → M₂},
+      (∀ i, I (v₁ i) = v₂ i) → I (s₁.func f v₁) = s₂.func f v₂) :
     M₁ ≡ₑ[L] M₂ := ⟨fun {φ} ↦
   eval_iff_of_equiv
-    (b₁ := ![]) (b₂ := ![]) (f₁ := Empty.elim) (f₂ := Empty.elim) I (by simp) (by simp) hrel hfunc φ⟩
+    (b₁ := ![]) (b₂ := ![]) (f₁ := Empty.elim) (f₂ := Empty.elim) I (by simp) (by simp)
+    hrel hfunc φ⟩
 
 end ElementaryEquiv
 

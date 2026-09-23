@@ -10,8 +10,6 @@ public import Foundation.FirstOrder.Arithmetic.Q.Basic
 
 namespace FFL.FirstOrder.Arithmetic
 
-set_option linter.style.longLine false
-set_option linter.style.cdot false
 set_option linter.style.induction false
 set_option linter.unusedSimpArgs false
 
@@ -103,7 +101,8 @@ open FirstOrder Arithmetic Language
       case ltIrrefl => tauto
       case ltTrans => tauto
       case ltTri => tauto
-    · rintro (h | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl)
+    · rintro (h | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl |
+        rfl | rfl | rfl | rfl)
       · exact equal _ h
       · exact addZero
       · exact addAssoc
@@ -154,9 +153,11 @@ lemma equiv_singleton_finiteConj :
 open StrictHierarchy in
 /--
 Every axiom of `𝗣𝗔⁻` is strict `Π₁`: a block of universal quantifiers over a `Δ₀` matrix.
-The bounded shape of `Axiom.addEqOfLt` is what makes this hold; an unbounded `∃ z` would not be `Δ₀`.
+The bounded shape of `Axiom.addEqOfLt` is what makes this hold; an unbounded `∃ z` would not
+be `Δ₀`.
 
-No citation: this is a routine inspection of the axiom list rather than a result from the literature.
+No citation: this is a routine inspection of the axiom list rather than a result from the
+literature.
 -/
 theorem strictHierarchy : ∀ φ ∈ 𝗣𝗔⁻, StrictHierarchy 𝚷 1 φ := by
   rintro φ ⟨⟩
@@ -241,11 +242,12 @@ lemma zero_lt_one : (0 : M) < 1 := by
 
 lemma one_le_of_zero_lt : ∀ x : M, 0 < x → 1 ≤ x := by
   have h := Theory.models M _ PeanoMinus.oneLeOfZeroLt
-  simp only [models_iff, Semiformula.eval_all, Nat.succ_eq_add_one, Nat.reduceAdd, Fin.Fin1.eq_one, Fin.isValue,
-    LogicalConnective.HomClass.map_imply, Semiformula.eval_operator, Matrix.comp₂, Semiterm.val_operator, Matrix.comp₀,
-    Tarski.Structure.numeral_eq_numeral, ORingStructure.zero_eq_zero, Semiterm.val_bvar, Matrix.cons_val_fin_one,
-    Tarski.Structure.lt_iff_lt, Matrix.cons_val_zero, Matrix.cons_val_one, ORingStructure.one_eq_one,
-    LogicalConnective.Prop.arrow_eq] at h
+  simp only [models_iff, Semiformula.eval_all, Nat.succ_eq_add_one, Nat.reduceAdd, Fin.Fin1.eq_one,
+    Fin.isValue, LogicalConnective.HomClass.map_imply, Semiformula.eval_operator, Matrix.comp₂,
+    Semiterm.val_operator, Matrix.comp₀, Tarski.Structure.numeral_eq_numeral,
+    ORingStructure.zero_eq_zero, Semiterm.val_bvar, Matrix.cons_val_fin_one,
+    Tarski.Structure.lt_iff_lt, Matrix.cons_val_zero, Matrix.cons_val_one,
+    ORingStructure.one_eq_one, LogicalConnective.Prop.arrow_eq] at h
   exact h
 
 lemma add_lt_add : ∀ x y z : M, x < y → x + z < y + z := by
@@ -315,7 +317,8 @@ noncomputable scoped instance : LinearOrder M where
         rintro (rfl | h) <;> simp [*] ⟩
   toDecidableLE := fun _ _ => Classical.dec _
 
-protected lemma zero_mul : ∀ x : M, 0 * x = 0 := fun x => by simpa [mul_comm] using Arithmetic.mul_zero' x
+protected lemma zero_mul : ∀ x : M, 0 * x = 0 := fun x => by
+  simpa [mul_comm] using Arithmetic.mul_zero' x
 
 scoped instance : CommSemiring M where
   left_distrib := Arithmetic.mul_add_distr
@@ -357,9 +360,11 @@ scoped instance : IsOrderedAddMonoid M where
 lemma numeral_eq_natCast_app : (n : ℕ) → (ORingStructure.numeral n : M) = n
   |     0 => rfl
   |     1 => by simp
-  | n + 2 => by simp [ORingStructure.numeral, numeral_eq_natCast_app (n + 1), add_assoc, one_add_one_eq_two]
+  | n + 2 => by
+    simp [ORingStructure.numeral, numeral_eq_natCast_app (n + 1), add_assoc, one_add_one_eq_two]
 
-lemma numeral_eq_natCast : (ORingStructure.numeral : ℕ → M) = Nat.cast := by ext x; exact numeral_eq_natCast_app x
+lemma numeral_eq_natCast : (ORingStructure.numeral : ℕ → M) = Nat.cast := by
+  ext x; exact numeral_eq_natCast_app x
 
 lemma not_neg (x : M) : ¬x < 0 := by simp
 
@@ -425,33 +430,36 @@ instance models_RobinsonQ_of_models_PeanoMinus : M↓[ℒₒᵣ] ⊧* 𝗤 := mo
     suffices ∀ a b : M, a = 0 ∨ ∃ x, a = x + 1 by simpa [models_iff];
     intro a b;
     by_cases h : 0 < a;
-    . right; apply eq_succ_of_pos h;
-    . left; simpa using h;
+    · right; apply eq_succ_of_pos h;
+    · left; simpa using h;
   case ltDef h =>
     suffices ∀ a b : M, a < b ↔ ∃ x, a + (x + 1) = b by simpa [models_iff];
     intro a b;
     apply Iff.trans lt_iff_exists_add;
     constructor;
-    . rintro ⟨a, ha₁, ha₂⟩;
+    · rintro ⟨a, ha₁, ha₂⟩;
       obtain ⟨b, rfl⟩ : ∃ b, a = b + 1 := eq_succ_of_pos ha₁;
       use b;
       tauto;
-    . rintro ⟨a, ha⟩;
+    · rintro ⟨a, ha⟩;
       use (a + 1);
       constructor;
-      . simp;
-      . apply ha.symm;
+      · simp;
+      · apply ha.symm;
   all_goals simp [models_iff];
 
 instance : 𝗤 ⪯ 𝗣𝗔⁻ := weakerThan_of_models.{0} _ _ fun _ _ _ ↦ inferInstance
 
 variable {a b c : M}
 
-@[simp] lemma numeral_two_eq_two : (ORingStructure.numeral 2 : M) = 2 := by simp [numeral_eq_natCast]
+@[simp] lemma numeral_two_eq_two : (ORingStructure.numeral 2 : M) = 2 := by
+  simp [numeral_eq_natCast]
 
-@[simp] lemma numeral_three_eq_three : (ORingStructure.numeral 3 : M) = 3 := by simp [numeral_eq_natCast]
+@[simp] lemma numeral_three_eq_three : (ORingStructure.numeral 3 : M) = 3 := by
+  simp [numeral_eq_natCast]
 
-@[simp] lemma numeral_four_eq_four : (ORingStructure.numeral 4 : M) = 4 := by simp [numeral_eq_natCast]
+@[simp] lemma numeral_four_eq_four : (ORingStructure.numeral 4 : M) = 4 := by
+  simp [numeral_eq_natCast]
 
 lemma lt_succ_iff_le {x y : M} : x < y + 1 ↔ x ≤ y := Iff.symm le_iff_lt_succ
 
@@ -516,31 +524,40 @@ lemma two_pos : (0 : M) < 2 := by exact _root_.two_pos
 
 @[simp] lemma le_sq (a : M) : a ≤ a ^ 2 := by simp [sq]
 
-@[simp] lemma sq_le_sq : a ^ 2 ≤ b ^ 2 ↔ a ≤ b := by simpa [sq] using Iff.symm <| mul_self_le_mul_self_iff (by simp) (by simp)
+@[simp] lemma sq_le_sq : a ^ 2 ≤ b ^ 2 ↔ a ≤ b := by
+  simpa [sq] using Iff.symm <| mul_self_le_mul_self_iff (by simp) (by simp)
 
-@[simp] lemma sq_lt_sq : a ^ 2 < b ^ 2 ↔ a < b := by simpa [sq] using Iff.symm <| mul_self_lt_mul_self_iff (by simp) (by simp)
+@[simp] lemma sq_lt_sq : a ^ 2 < b ^ 2 ↔ a < b := by
+  simpa [sq] using Iff.symm <| mul_self_lt_mul_self_iff (by simp) (by simp)
 
-lemma le_mul_of_pos_right (h : 0 < b) : a ≤ a * b := le_mul_of_one_le_right (by simp) (pos_iff_one_le.mp h)
+lemma le_mul_of_pos_right (h : 0 < b) : a ≤ a * b :=
+  le_mul_of_one_le_right (by simp) (pos_iff_one_le.mp h)
 
-lemma le_mul_of_pos_left (h : 0 < b) : a ≤ b * a := le_mul_of_one_le_left (by simp) (pos_iff_one_le.mp h)
+lemma le_mul_of_pos_left (h : 0 < b) : a ≤ b * a :=
+  le_mul_of_one_le_left (by simp) (pos_iff_one_le.mp h)
 
 @[simp] lemma le_two_mul_left : a ≤ 2 * a := le_mul_of_pos_left (by simp)
 
-lemma lt_mul_of_pos_of_one_lt_right (pos : 0 < a) (h : 1 < b) : a < a * b := _root_.lt_mul_of_one_lt_right pos h
+lemma lt_mul_of_pos_of_one_lt_right (pos : 0 < a) (h : 1 < b) : a < a * b :=
+  _root_.lt_mul_of_one_lt_right pos h
 
-lemma lt_mul_of_pos_of_one_lt_left (pos : 0 < a) (h : 1 < b) : a < b * a := _root_.lt_mul_of_one_lt_left pos h
+lemma lt_mul_of_pos_of_one_lt_left (pos : 0 < a) (h : 1 < b) : a < b * a :=
+  _root_.lt_mul_of_one_lt_left pos h
 
 lemma mul_le_mul_left (h : b ≤ c) : a * b ≤ a * c := mul_le_mul_of_nonneg_left h (by simp)
 
 lemma mul_le_mul_right (h : b ≤ c) : b * a ≤ c * a := mul_le_mul_of_nonneg_right h (by simp)
 
-theorem lt_of_mul_lt_mul_left (h : a * b < a * c) : b < c := lt_of_mul_lt_mul_of_nonneg_left h (by simp)
+theorem lt_of_mul_lt_mul_left (h : a * b < a * c) : b < c :=
+  lt_of_mul_lt_mul_of_nonneg_left h (by simp)
 
-theorem lt_of_mul_lt_mul_right (h : b * a < c * a) : b < c := lt_of_mul_lt_mul_of_nonneg_right h (by simp)
+theorem lt_of_mul_lt_mul_right (h : b * a < c * a) : b < c :=
+  lt_of_mul_lt_mul_of_nonneg_right h (by simp)
 
 lemma pow_three (x : M) : x^3 = x * x * x := by rw [← two_add_one_eq_three, pow_add, sq]; simp
 
-lemma pow_four (x : M) : x^4 = x * x * x * x := by rw [← three_add_one_eq_four, pow_add, pow_three]; simp
+lemma pow_four (x : M) : x^4 = x * x * x * x := by
+  rw [← three_add_one_eq_four, pow_add, pow_three]; simp
 
 lemma pow_four_eq_sq_sq (x : M) : x^4 = (x^2)^2 := by simp [pow_four, sq, mul_assoc]
 
@@ -548,7 +565,8 @@ scoped instance : CovariantClass M M (· * ·) (· ≤ ·) := ⟨by intro; exact
 
 scoped instance : CovariantClass M M (· + ·) (· ≤ ·) := ⟨by intro; simp⟩
 
-scoped instance : CovariantClass M M (Function.swap (· * ·)) (· ≤ ·) := ⟨by intro; exact mul_le_mul_right⟩
+scoped instance : CovariantClass M M (Function.swap (· * ·)) (· ≤ ·) :=
+  ⟨by intro; exact mul_le_mul_right⟩
 
 @[simp] lemma one_lt_mul_self_iff {a : M} : 1 < a * a ↔ 1 < a :=
   ⟨(fun h ↦ by push Not at h ⊢; exact mul_le_one' h h).mtr, fun h ↦ one_lt_mul'' h h⟩
@@ -654,6 +672,7 @@ instance : 𝗥₀ ⪱ 𝗣𝗔⁻ :=
   Entailment.StrictlyWeakerThan.of_unprovable_provable
     R0.unprovable_addZero (Entailment.by_axm PeanoMinus.addZero)
 
-instance (M : Type*) [ORingStructure M] [M↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻] : M↓[ℒₒᵣ] ⊧* 𝗥₀ := models_of_subtheory (U := 𝗣𝗔⁻) inferInstance
+instance (M : Type*) [ORingStructure M] [M↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻] : M↓[ℒₒᵣ] ⊧* 𝗥₀ :=
+  models_of_subtheory (U := 𝗣𝗔⁻) inferInstance
 
 end FFL.FirstOrder.Arithmetic

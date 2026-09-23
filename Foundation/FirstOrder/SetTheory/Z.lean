@@ -10,7 +10,6 @@ reference: Ralf Schindler, "Set Theory, Exploring Independence and Truth" [Sch14
 -/
 
 @[expose] public section
-set_option linter.style.longLine false
 set_option linter.style.openClassical false
 set_option linter.unusedSimpArgs false
 
@@ -21,7 +20,8 @@ variable {V : Type*} [SetStructure V] [Nonempty V] [V↓[ℒₛₑₜ] ⊧* 𝗭
 /-! ## Axiom of extentionality -/
 
 lemma mem_ext_iff {x y : V} : x = y ↔ ∀ z, z ∈ x ↔ z ∈ y  := by
-  have := by simpa [models_iff, Axiom.extentionality] using Theory.models V 𝗭 Zermelo.axiom_of_extentionality
+  have := by
+    simpa [models_iff, Axiom.extentionality] using Theory.models V 𝗭 Zermelo.axiom_of_extentionality
   exact this x y
 
 alias ⟨_, mem_ext⟩ := mem_ext_iff
@@ -52,12 +52,14 @@ lemma SSubset.iff {x y : V} : x ⊊ y ↔ x ⊆ y ∧ ∃ z ∈ y, z ∉ x := by
 
 lemma SSubset.exists_not_mem {x y : V} (hxy : x ⊊ y) : ∃ z ∈ y, z ∉ x := (SSubset.iff.mp hxy).2
 
-lemma SSubset.of_subset_of_not_mem_of_mem {x y z : V} (ss : x ⊆ y) (hzx : z ∉ x) (hzy : z ∈ y) : x ⊊ y :=
+lemma SSubset.of_subset_of_not_mem_of_mem {x y z : V} (ss : x ⊆ y) (hzx : z ∉ x) (hzy : z ∈ y) :
+    x ⊊ y :=
   SSubset.iff.mpr ⟨ss, z, hzy, hzx⟩
 
 /-! ## Axiom of empty set -/
 
-lemma empty_exists : ∃ e : V, IsEmpty e := by simpa [models_iff] using! Theory.models V 𝗭 Zermelo.axiom_of_empty_set
+lemma empty_exists : ∃ e : V, IsEmpty e := by
+  simpa [models_iff] using! Theory.models V 𝗭 Zermelo.axiom_of_empty_set
 
 lemma empty_existsUnique : ∃! e : V, IsEmpty e := by
   rcases empty_exists (V := V) with ⟨e, he⟩
@@ -104,7 +106,8 @@ lemma pairing_existsUnique (x y : V) : ∃! z : V, ∀ w, w ∈ z ↔ w = x ∨ 
 
 noncomputable def doubleton (x y : V) : V := Classical.choose! (pairing_existsUnique x y)
 
-@[simp] lemma mem_doubleton_iff {x y z : V} : z ∈ doubleton x y ↔ z = x ∨ z = y := Classical.choose!_spec (pairing_existsUnique x y) z
+@[simp] lemma mem_doubleton_iff {x y z : V} : z ∈ doubleton x y ↔ z = x ∨ z = y :=
+  Classical.choose!_spec (pairing_existsUnique x y) z
 
 def doubleton.dfn : SetTheorySemisentence 3 := “p x y. ∀ z, z ∈ p ↔ z = x ∨ z = y”
 
@@ -128,7 +131,8 @@ def singleton.dfn : SetTheorySemisentence 2 := “p x. !doubleton.dfn p x x”
 instance singleton.defined : ℒₛₑₜ-function₁[V] Singleton.singleton via singleton.dfn :=
   ⟨by intro v; simp [singleton.dfn]; rfl⟩
 
-instance singleton.definable : ℒₛₑₜ-function₁[V] Singleton.singleton := singleton.defined.to_definable
+instance singleton.definable : ℒₛₑₜ-function₁[V] Singleton.singleton :=
+  singleton.defined.to_definable
 
 @[simp] instance singleton_isNonempty (x : V) : IsNonempty ({x} : V) := ⟨x, by simp⟩
 
@@ -152,7 +156,8 @@ noncomputable def sUnion (x : V) : V := Classical.choose! (union_existsUnique x)
 
 prefix:110 "⋃ˢ " => sUnion
 
-lemma mem_sUnion_iff {x z : V} : z ∈ ⋃ˢ x ↔ ∃ y ∈ x, z ∈ y := Classical.choose!_spec (union_existsUnique x) z
+lemma mem_sUnion_iff {x z : V} : z ∈ ⋃ˢ x ↔ ∃ y ∈ x, z ∈ y :=
+  Classical.choose!_spec (union_existsUnique x) z
 
 def sUnion.dfn : SetTheorySemisentence 2 := “u x. ∀ z, z ∈ u ↔ ∃ w ∈ x, z ∈ w”
 
@@ -187,7 +192,8 @@ instance union.defined : ℒₛₑₜ-function₂[V] Union.union via union.dfn :
 
 instance union.definable : ℒₛₑₜ-function₂[V] Union.union := union.defined.to_definable
 
-@[simp] lemma mem_union_iff {x y z : V} : z ∈ x ∪ y ↔ z ∈ x ∨ z ∈ y := by simp [union_def, mem_sUnion_iff]
+@[simp] lemma mem_union_iff {x y z : V} : z ∈ x ∪ y ↔ z ∈ x ∨ z ∈ y := by
+  simp [union_def, mem_sUnion_iff]
 
 @[simp] lemma union_self_eq (x : V) : x ∪ x = x := by ext; simp
 
@@ -199,7 +205,8 @@ lemma union_assoc (x y z : V) : (x ∪ y) ∪ z = x ∪ (y ∪ z) := by ext; sim
 
 @[simp] lemma empty_union (x : V) : ∅ ∪ x = x := by ext; simp
 
-@[simp] lemma IsNonempty_union_iff {x y : V} : IsNonempty (x ∪ y) ↔ IsNonempty x ∨ IsNonempty y := by
+@[simp] lemma IsNonempty_union_iff {x y : V} :
+    IsNonempty (x ∪ y) ↔ IsNonempty x ∨ IsNonempty y := by
   simp only [isNonempty_def, mem_union_iff]; grind
 
 @[simp] lemma subset_union_left (x y : V) : x ⊆ x ∪ y := fun z hz ↦ by simp [hz]
@@ -265,7 +272,8 @@ noncomputable def power (x : V) : V := Classical.choose! (power_existsUnique x)
 
 prefix:110 "℘ " => power
 
-@[simp] lemma mem_power_iff {x z : V} : z ∈ ℘ x ↔ z ⊆ x := Classical.choose!_spec (power_existsUnique x) z
+@[simp] lemma mem_power_iff {x z : V} : z ∈ ℘ x ↔ z ⊆ x :=
+  Classical.choose!_spec (power_existsUnique x) z
 
 def power.dfn : SetTheorySemisentence 2 := “p x. ∀ z, z ∈ p ↔ z ⊆ x”
 
@@ -284,27 +292,34 @@ instance power.definable : ℒₛₑₜ-function₁[V] power := power.defined.to
 
 /-! ## Aussonderungsaxiom -/
 
-lemma separation_exists_eval (x : V) (φ : SetTheorySemiformula V 1) : ∃ y : V, ∀ z : V, z ∈ y ↔ z ∈ x ∧ φ.Eval ![z] id := by
+lemma separation_exists_eval (x : V) (φ : SetTheorySemiformula V 1) :
+    ∃ y : V, ∀ z : V, z ∈ y ↔ z ∈ x ∧ φ.Eval ![z] id := by
   -- have : Inhabited V := inhabited_of_nonempty inferInstance
   let f := φ.enumerateFVar
   let ψ := (Rew.rewriteMap φ.idxOfFVar) ▹ φ
-  have := by simpa [models_iff, Semiformula.eval_univCl, Axiom.separationSchema] using Theory.models V 𝗭 (Zermelo.axiom_of_separation ψ)
+  have := by
+    simpa [models_iff, Semiformula.eval_univCl, Axiom.separationSchema]
+      using Theory.models V 𝗭 (Zermelo.axiom_of_separation ψ)
   simpa [ψ, f, Semiformula.eval_rewriteMap, Matrix.constant_eq_singleton] using this f x
 
-lemma separation_exists (x : V) (P : V → Prop) (hP : ℒₛₑₜ-predicate P) : ∃ y : V, ∀ z : V, z ∈ y ↔ z ∈ x ∧ P z := by
+lemma separation_exists (x : V) (P : V → Prop) (hP : ℒₛₑₜ-predicate P) :
+    ∃ y : V, ∀ z : V, z ∈ y ↔ z ∈ x ∧ P z := by
   rcases hP with ⟨φ, hP⟩
   simpa [hP.iff] using separation_exists_eval x φ
 
-lemma separation_existsUnique (x : V) (P : V → Prop) (hP : ℒₛₑₜ-predicate P) : ∃! y : V, ∀ z : V, z ∈ y ↔ z ∈ x ∧ P z := by
+lemma separation_existsUnique (x : V) (P : V → Prop) (hP : ℒₛₑₜ-predicate P) :
+    ∃! y : V, ∀ z : V, z ∈ y ↔ z ∈ x ∧ P z := by
   rcases separation_exists x P hP with ⟨s, hs⟩
   apply ExistsUnique.intro s hs
   intro u hu
   ext; simp_all
 
-noncomputable def sep (x : V) (P : V → Prop) (hP : ℒₛₑₜ-predicate P := by definability) : V := Classical.choose! (separation_existsUnique x P hP)
+noncomputable def sep (x : V) (P : V → Prop) (hP : ℒₛₑₜ-predicate P := by definability) : V :=
+  Classical.choose! (separation_existsUnique x P hP)
 
 @[simp] lemma mem_sep_iff {P : V → Prop} {hP : ℒₛₑₜ-predicate P} {z x : V} :
-    z ∈ sep x P (hP := hP) ↔ z ∈ x ∧ P z := Classical.choose!_spec (separation_existsUnique x P hP) z
+    z ∈ sep x P (hP := hP) ↔ z ∈ x ∧ P z :=
+  Classical.choose!_spec (separation_existsUnique x P hP) z
 
 @[simp] lemma sep_empty_eq (P : V → Prop) {hP : ℒₛₑₜ-predicate P} :
     sep ∅ P (hP := hP) = ∅ := by ext; simp
@@ -367,7 +382,8 @@ lemma sInter_subset_of_mem_of_nonempty {x y : V} [IsNonempty y] (h : x ∈ y) : 
   simp only [mem_sInter_iff_of_nonempty] at hz
   grind
 
-@[simp] lemma subset_sInter_iff_of_nonempty {x y : V} [IsNonempty y] : x ⊆ ⋂ˢ y ↔ ∀ z ∈ y, x ⊆ z := by
+@[simp] lemma subset_sInter_iff_of_nonempty {x y : V} [IsNonempty y] :
+    x ⊆ ⋂ˢ y ↔ ∀ z ∈ y, x ⊆ z := by
   constructor
   · intro h z hzy
     exact subset_trans h (sInter_subset_of_mem_of_nonempty hzy)
@@ -389,7 +405,8 @@ lemma inter_def (x y : V) : x ∩ y = ⋂ˢ {x, y} := rfl
 
 def inter.dfn : SetTheorySemisentence 3 := “u x y. ∀ z, z ∈ u ↔ z ∈ x ∧ z ∈ y”
 
-instance inter.defined : ℒₛₑₜ-function₂[V] Inter.inter via inter.dfn := ⟨by intro v; simp [inter.dfn, mem_ext_iff]⟩
+instance inter.defined : ℒₛₑₜ-function₂[V] Inter.inter via inter.dfn :=
+  ⟨by intro v; simp [inter.dfn, mem_ext_iff]⟩
 
 instance inter.definable : ℒₛₑₜ-function₂[V] Inter.inter := inter.defined.to_definable
 
@@ -405,7 +422,8 @@ lemma inter_assoc (x y z : V) : (x ∩ y) ∩ z = x ∩ (y ∩ z) := by ext; sim
 
 @[simp] lemma inter_eq_left_of_subset {x y : V} (h : x ⊆ y) : x ∩ y = x := by ext z; simpa using h z
 
-@[simp] lemma inter_eq_right_of_subset {x y : V} (h : y ⊆ x) : x ∩ y = y := by ext z; simpa using h z
+@[simp] lemma inter_eq_right_of_subset {x y : V} (h : y ⊆ x) : x ∩ y = y := by
+  ext z; simpa using h z
 
 @[simp] lemma sInter_insert (x y : V) [hy : IsNonempty y] : ⋂ˢ insert x y = x ∩ ⋂ˢ y := by
   ext; simp [*, mem_sInter_iff_of_nonempty]
@@ -441,7 +459,8 @@ lemma sdiff_def (x y : V) : x \ y = {z ∈ x ; z ∉ y} := rfl
 
 def sdiff.dfn : SetTheorySemisentence 3 := “d x y. ∀ z, z ∈ d ↔ z ∈ x ∧ z ∉ y”
 
-instance sdiff.defined : ℒₛₑₜ-function₂[V] SDiff.sdiff via sdiff.dfn := ⟨by intro v; simp [sdiff.dfn, mem_ext_iff]⟩
+instance sdiff.defined : ℒₛₑₜ-function₂[V] SDiff.sdiff via sdiff.dfn :=
+  ⟨by intro v; simp [sdiff.dfn, mem_ext_iff]⟩
 
 instance sdiff.definable : ℒₛₑₜ-function₂[V] SDiff.sdiff := sdiff.defined.to_definable
 
@@ -509,13 +528,15 @@ instance kpair.π₁.defined : ℒₛₑₜ-function₁[V] kpair.π₁ via kpair
 instance kpair.π₁.definable : ℒₛₑₜ-function₁[V] kpair.π₁ := kpair.π₁.defined.to_definable
 
 def kpair.π₂.dfn : SetTheorySemisentence 2 :=
-  “p₂ x. ∀ u, !sUnion.dfn u x → ∀ i, !sInter.dfn i x → ∀ s, (∀ z, z ∈ s ↔ (z ∈ u ∧ (z ∈ i → u = i))) → !sUnion.dfn p₂ s”
+  “p₂ x. ∀ u, !sUnion.dfn u x → ∀ i, !sInter.dfn i x →
+    ∀ s, (∀ z, z ∈ s ↔ (z ∈ u ∧ (z ∈ i → u = i))) → !sUnion.dfn p₂ s”
 
 instance kpair.π₂.defined : ℒₛₑₜ-function₁[V] kpair.π₂ via kpair.π₂.dfn :=
   ⟨by intro v
       let u := ⋃ˢ v 1
       let i := ⋂ˢ v 1
-      suffices (∀ s, (∀ z, z ∈ s ↔ z ∈ u ∧ (z ∈ i → u = i)) → v 0 = ⋃ˢ s) ↔ v 0 = ⋃ˢ {x ∈ u ; x ∈ i → u = i} by
+      suffices (∀ s, (∀ z, z ∈ s ↔ z ∈ u ∧ (z ∈ i → u = i)) → v 0 = ⋃ˢ s) ↔
+          v 0 = ⋃ˢ {x ∈ u ; x ∈ i → u = i} by
         simpa [kpair.π₂.dfn, π₂] using this
       constructor
       · intro h
@@ -579,7 +600,8 @@ instance prod.definable : ℒₛₑₜ-function₂[V] prod := prod.defined.to_de
 @[simp] lemma kpair_mem_iff {x y X Y : V} : ⟨x, y⟩ₖ ∈ X ×ˢ Y ↔ x ∈ X ∧ y ∈ Y := by
   simp [mem_prod_iff]
 
-lemma prod_subset_prod_of_subset {X₁ X₂ Y₁ Y₂ : V} (hX : X₁ ⊆ X₂) (hY : Y₁ ⊆ Y₂) : X₁ ×ˢ Y₁ ⊆ X₂ ×ˢ Y₂ := by
+lemma prod_subset_prod_of_subset {X₁ X₂ Y₁ Y₂ : V} (hX : X₁ ⊆ X₂) (hY : Y₁ ⊆ Y₂) :
+    X₁ ×ˢ Y₁ ⊆ X₂ ×ˢ Y₂ := by
   intro p hp
   have : ∃ x ∈ X₁, ∃ y ∈ Y₁, p = ⟨x, y⟩ₖ := by simpa [mem_prod_iff] using hp
   rcases this with ⟨x, hx, y, hy, rfl⟩

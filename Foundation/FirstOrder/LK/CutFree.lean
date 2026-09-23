@@ -4,9 +4,7 @@ public import Foundation.FirstOrder.LK.Basic
 
 @[expose] public section
 set_option linter.unusedSimpArgs false
-set_option linter.style.missingEnd false
 set_option autoImplicit true
-set_option linter.style.cdot false
 /-!
 # Canonical model of classical first-order logic
 
@@ -89,12 +87,12 @@ variable {Γ Δ : LK.Sequent L}
 @[simp] lemma isCutFree_weakening_iff {d : ⊢ᴸᴷ¹ Γ} :
     IsCutFree (d.weakening (φ := φ)) ↔ IsCutFree d := by
   constructor;
-  . intro h;
+  · intro h;
     refine h.rec
       (motive := fun {_} d _ ↦ match d with | .weakening d => IsCutFree d | _ => True)
       ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_;
     all_goals simp_all;
-  . exact .weakening;
+  · exact .weakening;
 
 @[simp] lemma IsCutFree.cast {d : ⊢ᴸᴷ¹ Γ} {e : Γ = Δ} :
     IsCutFree (.cast d e) ↔ IsCutFree d := by rcases e; rfl
@@ -121,3 +119,5 @@ set_option backward.isDefEq.respectTransparency false in
     IsCutFree (generalizeByNewVar hp hΔ d) ↔ IsCutFree d := by simp [generalizeByNewVar]
 
 end LK.Derivation
+
+end FFL.FirstOrder

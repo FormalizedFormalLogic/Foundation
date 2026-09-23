@@ -3,7 +3,6 @@ module
 public import Foundation.Propositional.Entailment.Cl
 
 @[expose] public section
-set_option linter.style.longLine false
 
 namespace FFL.Entailment
 
@@ -279,7 +278,8 @@ variable {𝓢}
 
 namespace Tableaux.Valid
 
-variable {T U V : Tableaux F} {Γ Γ₁ Γ₂ Δ Δ₁ Δ₂ Ξ Ξ₁ Ξ₂ Λ Λ₁ Λ₂ : List F} {φ ψ χ : F} {τ σ : Tableaux F}
+variable {T U V : Tableaux F} {Γ Γ₁ Γ₂ Δ Δ₁ Δ₂ Ξ Ξ₁ Ξ₂ Λ Λ₁ Λ₂ : List F} {φ ψ χ : F}
+  {τ σ : Tableaux F}
 
 local notation:0 Γ:45 " ⟶ " Δ:46 => Tableaux.Sequent.mk Γ Δ
 
@@ -368,11 +368,13 @@ lemma verum_left : Valid 𝓢 ((Γ ⟶ Δ) :: T) → Valid 𝓢 ((⊤ :: Γ ⟶ 
   of_single_uppercedent TwoSided.verum_left
 
 lemma and_right :
-    Valid 𝓢 ((Γ ⟶ Δ ++ [φ]) :: T) → Valid 𝓢 ((Γ ⟶ Δ ++ [ψ]) :: T) → Valid 𝓢 ((Γ ⟶ φ ⋏ ψ :: Δ) :: T) :=
+    Valid 𝓢 ((Γ ⟶ Δ ++ [φ]) :: T) → Valid 𝓢 ((Γ ⟶ Δ ++ [ψ]) :: T) →
+      Valid 𝓢 ((Γ ⟶ φ ⋏ ψ :: Δ) :: T) :=
   of_double_uppercedent TwoSided.and_right
 
 lemma or_left :
-    Valid 𝓢 ((Γ ++ [φ] ⟶ Δ) :: T) → Valid 𝓢 ((Γ ++ [ψ] ⟶ Δ) :: T) → Valid 𝓢 ((φ ⋎ ψ :: Γ ⟶ Δ) :: T) :=
+    Valid 𝓢 ((Γ ++ [φ] ⟶ Δ) :: T) → Valid 𝓢 ((Γ ++ [ψ] ⟶ Δ) :: T) →
+      Valid 𝓢 ((φ ⋎ ψ :: Γ ⟶ Δ) :: T) :=
   of_double_uppercedent TwoSided.or_left
 
 lemma or_right :
@@ -410,7 +412,8 @@ lemma neg_left :
     exact of_single_uppercedent TwoSided.neg_left_int
 
 lemma imply_right :
-    Valid 𝓢 ((Γ ++ [φ] ⟶ [ψ]) :: (Γ ⟶ Δ ++ [φ 🡒 ψ]) :: T) → Valid 𝓢 ((Γ ⟶ (φ 🡒 ψ) :: Δ) :: T) := fun h ↦ by
+    Valid 𝓢 ((Γ ++ [φ] ⟶ [ψ]) :: (Γ ⟶ Δ ++ [φ 🡒 ψ]) :: T) →
+      Valid 𝓢 ((Γ ⟶ (φ 🡒 ψ) :: Δ) :: T) := fun h ↦ by
   have h : Valid 𝓢 ((Γ ++ [φ] ⟶ [ψ]) :: (Γ ⟶ Δ ++ [φ 🡒 ψ]) :: T) := h.of_subset
   rcases h with (h | h)
   · exact Valid.head <| TwoSided.imply_right_int h
@@ -430,7 +433,8 @@ lemma imply_right' :
     · exact h.tail
 
 lemma imply_left :
-    Valid 𝓢 ((Γ ++ [φ 🡒 ψ] ⟶ Δ ++ [φ]) :: T) → Valid 𝓢 ((Γ ++ [ψ] ⟶ Δ) :: T) → Valid 𝓢 (((φ 🡒 ψ) :: Γ ⟶ Δ) :: T) :=
+    Valid 𝓢 ((Γ ++ [φ 🡒 ψ] ⟶ Δ ++ [φ]) :: T) → Valid 𝓢 ((Γ ++ [ψ] ⟶ Δ) :: T) →
+      Valid 𝓢 (((φ 🡒 ψ) :: Γ ⟶ Δ) :: T) :=
   by
     let _ : DecidableEq F := Classical.decEq F
     exact of_double_uppercedent TwoSided.imply_left_int

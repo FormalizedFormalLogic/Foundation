@@ -4,7 +4,6 @@ public import Foundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Term.Basic
 public import Foundation.FirstOrder.Arithmetic.Induction
 
 @[expose] public section
-set_option linter.style.cdot false
 set_option linter.style.openClassical false
 set_option linter.style.induction false
 set_option linter.unusedSimpArgs false

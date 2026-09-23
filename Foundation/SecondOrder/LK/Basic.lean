@@ -13,7 +13,6 @@ The structural rules are the standard local weakening and contraction rules.
 
 namespace FFL.SecondOrder
 
-set_option linter.style.longLine false
 set_option linter.unusedVariables false
 set_option linter.unusedTactic false
 set_option linter.unreachableTactic false
@@ -33,7 +32,8 @@ def shift₀ (Γ : LK.Sequent L) : LK.Sequent L := Γ.map Semiproposition.shift�
 @[simp] lemma shift₀_add (Γ Δ : LK.Sequent L) :
     shift₀ (Γ + Δ) = shift₀ Γ + shift₀ Δ := Multiset.map_add _ _ _
 
-@[simp] lemma shift₀_atom (φ : Proposition L) : shift₀ ⦃φ⦄ = ⦃Semiproposition.shift₀ φ⦄ := Multiset.map_atom _ _
+@[simp] lemma shift₀_atom (φ : Proposition L) : shift₀ ⦃φ⦄ = ⦃Semiproposition.shift₀ φ⦄ :=
+  Multiset.map_atom _ _
 
 def shift₁ (Γ : LK.Sequent L) : LK.Sequent L := Γ.map Semiproposition.shift₁
 
@@ -42,7 +42,8 @@ def shift₁ (Γ : LK.Sequent L) : LK.Sequent L := Γ.map Semiproposition.shift�
 @[simp] lemma shift₁_add (Γ Δ : LK.Sequent L) :
     shift₁ (Γ + Δ) = shift₁ Γ + shift₁ Δ := Multiset.map_add _ _ _
 
-@[simp] lemma shift₁_atom (φ : Proposition L) : shift₁ ⦃φ⦄ = ⦃Semiproposition.shift₁ φ⦄ := Multiset.map_atom _ _
+@[simp] lemma shift₁_atom (φ : Proposition L) : shift₁ ⦃φ⦄ = ⦃Semiproposition.shift₁ φ⦄ :=
+  Multiset.map_atom _ _
 
 instance : Tilde (LK.Sequent L) := ⟨Multiset.map (∼·)⟩
 

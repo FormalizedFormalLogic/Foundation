@@ -5,7 +5,6 @@ public import Foundation.FirstOrder.Tarski.Basic
 
 @[expose] public section
 
-set_option linter.style.longLine false
 set_option linter.unusedSimpArgs false
 set_option linter.unusedTactic false
 set_option linter.unreachableTactic false
@@ -66,7 +65,8 @@ variable {𝕊 : Set (Set M)} {F : Ξ → Set M} {f : ξ → M} {E : Fin N → S
     EvalAux 𝕊 F f E e (∼φ) ↔ ¬EvalAux 𝕊 F f E e φ := by
   induction φ using rec' <;> simp [*, EvalAux, or_iff_not_imp_left]
 
-def Eval (𝕊 : Set (Set M)) (F : Ξ → Set M) (f : ξ → M) (E : Fin N → Set M) (e : Fin n → M) : Semiformula L Ξ ξ N n →ˡᶜ Prop where
+def Eval (𝕊 : Set (Set M)) (F : Ξ → Set M) (f : ξ → M) (E : Fin N → Set M) (e : Fin n → M) :
+    Semiformula L Ξ ξ N n →ˡᶜ Prop where
   toTr := EvalAux 𝕊 F f E e
   map_top' := rfl
   map_bot' := rfl
@@ -107,7 +107,8 @@ def Eval (𝕊 : Set (Set M)) (F : Ξ → Set M) (f : ξ → M) (E : Fin N → S
 
 end Semiformula
 
-def Tarski.Struc.of {M : Type*} [Nonempty M] (𝕊 : Set (Set M)) (L : Language) [𝓈 : FirstOrder.Tarski.Structure L M] : Tarski.Struc L := ⟨𝓈.toStruc, 𝕊⟩
+def Tarski.Struc.of {M : Type*} [Nonempty M] (𝕊 : Set (Set M)) (L : Language)
+    [𝓈 : FirstOrder.Tarski.Structure L M] : Tarski.Struc L := ⟨𝓈.toStruc, 𝕊⟩
 
 notation:max 𝕊 "↓[" L "]" => Tarski.Struc.of 𝕊 L
 
