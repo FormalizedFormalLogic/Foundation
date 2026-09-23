@@ -1,6 +1,6 @@
 module
 
-public import Foundation.Vorspiel.Computability.Primrec
+public import Foundation.Vorspiel.Computability.Computable
 public import Foundation.Vorspiel.Nat.Matrix
 public import Foundation.Vorspiel.Part
 public import Mathlib.Computability.Halting
@@ -190,9 +190,7 @@ variable {f : ℕ → ℕ}
 def boundedMax (f : ℕ → ℕ) (n : ℕ) : ℕ := Nat.rec (f 0) (λ k ih ↦ max ih (f (k + 1))) n
 
 lemma computable_boundedMax (hf : Computable f) : Computable (boundedMax f) := by
-  have h : Computable λ q : ℕ × (ℕ × ℕ) ↦ max q.2.2 (f (q.2.1 + 1)) :=
-    Computable₂.comp Primrec.nat_max.to_comp (Computable.snd.comp Computable.snd)
-      (hf.comp (Computable.succ.comp (Computable.fst.comp Computable.snd)))
+  have h : Computable λ q : ℕ × (ℕ × ℕ) ↦ max q.2.2 (f (q.2.1 + 1)) := by computable
   exact Computable.nat_rec Computable.id (Computable.const (f 0)) h.to₂
 
 lemma le_boundedMax {k n : ℕ} (h : k ≤ n) : f k ≤ boundedMax f n := by

@@ -172,6 +172,8 @@ Attach `@[grind]` to lemmas and definitions that plausibly help `grind` close go
 
 Teach it about a new function with `@[primrec]`. State the lemma pointwise — `Primrec fun a ↦ F (f a) (g a)`, with a `Primrec` hypothesis per argument — and general in the ambient `[Primcodable α]`, because that is the form the search matches against. A point-free `Primrec F` is also worth tagging: Lean eta-reduces `Primrec fun a ↦ F a` before indexing it, and only the point-free form is retrieved then.
 
+`computable` (`Foundation/Vorspiel/Tactic/Computable.lean`) is the same tactic one level up, for `Computable f` and `Computable₂ f`. It runs over the `primrec` rules as well, so a primitive recursive subterm costs nothing extra; `@[computable]` adds a lemma, stated pointwise as above.
+
 ## No `sorry`
 
 `sorry` is never acceptable in submitted proofs. CI runs `just forgive`, which fails the build on any remaining `sorry` (as well as on axioms outside the allowlist) — a proof left in a skeleton state cannot land. If a proof is incomplete, keep it out of the PR rather than submitting it with `sorry` placeholders.

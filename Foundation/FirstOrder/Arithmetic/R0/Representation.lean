@@ -329,7 +329,7 @@ lemma codeOfREPred_spec {p : ℕ → Prop} (hp : REPred p) {x : ℕ} :
   let f : ℕ →. Unit := fun a ↦ Part.assert (p a) fun _ ↦ Part.some ()
   suffices (codeOfPartrec' fun v ↦ Part.map (fun _ ↦ 0) (f (v.get 0)))/[‘0’, #0].Evalb (![x]) ↔ p x from this
   have : Partrec fun v : List.Vector ℕ 1 ↦ (f (v.get 0)).map fun _ ↦ 0 := by
-    refine Partrec.map (Partrec.comp hp (Primrec.to_comp (by primrec))) (Computable.const 0).to₂
+    refine Partrec.map (Partrec.comp hp (by computable)) (Computable.const 0).to₂
   simpa [Semiformula.eval_substs, Matrix.comp_vecCons', Matrix.constant_eq_singleton]
     using (codeOfPartrec'_spec (Nat.Partrec'.of_part this) (v := ![x]) (y := 0)).trans (by simp [f])
 
@@ -362,7 +362,7 @@ private lemma codeOfComputablePred_val_spec (hp : ComputablePred p) (x y : ℕ) 
       Nat.Partrec' (fun v : List.Vector ℕ 1 ↦ Part.some (if p (v.get 0) then 1 else 0)) := by
     obtain ⟨f, hf, rfl⟩ := ComputablePred.computable_iff.mp hp
     have hc : Computable fun v : List.Vector ℕ 1 ↦ f (v.get 0) :=
-      hf.comp (Primrec.to_comp (by primrec))
+      hf.comp (by computable)
     have : Computable fun v : List.Vector ℕ 1 ↦ if (f (v.get 0) : Prop) then (1 : ℕ) else 0 :=
       (Computable.cond hc (Computable.const 1) (Computable.const 0)).of_eq fun v ↦ by
         cases f (v.get 0) <;> simp
@@ -418,7 +418,7 @@ theorem rePred_iff_sigma1 {p : ℕ → Prop} : REPred p ↔ 𝚺₁-Predicate p 
     simpa [←Matrix.fun_eq_vec_one] using codeOfREPred_spec h (x := v 0)
   · rintro ⟨φ, hφ⟩
     have : REPred fun x ↦ (Semiformula.Eval (x ::ᵥ List.Vector.nil).get id) _ :=
-      (sigma1_re id (φ.sigma_prop)).comp (Primrec.to_comp (by primrec))
+      (sigma1_re id (φ.sigma_prop)).comp (by computable)
     exact this.of_eq <| by intro x; simpa [List.Vector.cons_get, Matrix.empty_eq] using hφ ![x]
 
 theorem computablePred_iff_delta1 {p : ℕ → Prop} : ComputablePred p ↔ 𝚫₁-Predicate p := by
@@ -441,7 +441,7 @@ theorem computable_iff_sigma1 {f : ℕ → ℕ} : Computable f ↔ 𝚺₁-Funct
     let F : List.Vector ℕ 1 →. ℕ := fun v ↦ Part.some (f (v.get 0))
     have hF : Partrec F := by
       change Partrec fun v : List.Vector ℕ 1 ↦ Part.some (f (v.get 0))
-      exact hf.comp (Primrec.to_comp (by primrec))
+      exact hf.comp (by computable)
     refine ⟨.mkSigma (codeOfPartrec' F) (by simp [codeOfPartrec']), ?_⟩
     intro v
     simpa [F, ←Matrix.fun_eq_vec_two]
@@ -449,7 +449,7 @@ theorem computable_iff_sigma1 {f : ℕ → ℕ} : Computable f ↔ 𝚺₁-Funct
   · rintro ⟨φ, hφ⟩
     have hRe : REPred fun p : ℕ × ℕ ↦
         φ.val.Eval (p.2 ::ᵥ p.1 ::ᵥ List.Vector.nil : List.Vector ℕ 2).get id :=
-      (sigma1_re id φ.sigma_prop).comp (Primrec.to_comp (by primrec))
+      (sigma1_re id φ.sigma_prop).comp (by computable)
     exact ComputablePred.of_graph_rePred <| hRe.of_eq <| by
       intro p
       simpa [List.Vector.cons_get] using hφ ![p.2, p.1]
@@ -459,8 +459,7 @@ theorem computable₂_iff_sigma1 {f : ℕ → ℕ → ℕ} : Computable₂ f ↔
   · intro hf
     let F : List.Vector ℕ 2 →. ℕ := fun v ↦ Part.some (f (v.get 0) (v.get 1))
     have hF : Partrec F := by
-      have hArg : Computable fun v : List.Vector ℕ 2 ↦ (v.get 0, v.get 1) :=
-        Primrec.to_comp (by primrec)
+      have hArg : Computable fun v : List.Vector ℕ 2 ↦ (v.get 0, v.get 1) := by computable
       have hf' : Computable fun p : ℕ × ℕ ↦ f p.1 p.2 := hf
       change Partrec fun v : List.Vector ℕ 2 ↦ Part.some (f (v.get 0) (v.get 1))
       exact hf'.comp hArg
@@ -472,7 +471,7 @@ theorem computable₂_iff_sigma1 {f : ℕ → ℕ → ℕ} : Computable₂ f ↔
     have hRe : REPred fun p : (ℕ × ℕ) × ℕ ↦
         φ.val.Eval
           (p.2 ::ᵥ p.1.1 ::ᵥ p.1.2 ::ᵥ List.Vector.nil : List.Vector ℕ 3).get id :=
-      (sigma1_re id φ.sigma_prop).comp (Primrec.to_comp (by primrec))
+      (sigma1_re id φ.sigma_prop).comp (by computable)
     exact ComputablePred.of_graph_rePred <| hRe.of_eq <| by
       intro p
       simpa [List.Vector.cons_get] using hφ ![p.2, p.1.1, p.1.2]
