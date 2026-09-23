@@ -14,19 +14,20 @@ technical generalizations of its elementary bounded-witness arguments.
 -/
 
 @[expose] public section
-namespace FFL.FirstOrder.BoundingHierarchy
+namespace FFL.FirstOrder.Bounding
 
-open scoped BoundingHierarchy
+open scoped Bounding
 
 variable {ξ : Type*} {n : ℕ}
 
-variable {L : Language} {B : FirstOrder.Semiformula.Operator L 2}
+variable {L : Language} {ℬ : FirstOrder.Bounding L}
+variable {R : FirstOrder.Semiformula.Operator L 2}
 variable {V : Type*} [Tarski.Structure L V]
 
 /-- The non-strict bound is equality or the relation used for bounded quantifiers. -/
-class CompatibleLE (B : FirstOrder.Semiformula.Operator L 2) (V : Type*)
+class CompatibleLE (R : FirstOrder.Semiformula.Operator L 2) (V : Type*)
     [Tarski.Structure L V] [LE V] : Prop where
-  le_iff (x y : V) : x ≤ y ↔ x = y ∨ B.val ![x, y]
+  le_iff (x y : V) : x ≤ y ↔ x = y ∨ R.val ![x, y]
 
 instance compatibleLT [L.LT] [PartialOrder V] [Tarski.Structure.LT L V] :
     CompatibleLE (FirstOrder.Semiformula.Operator.LT.lt (L := L)) V where
@@ -99,50 +100,50 @@ lemma Bounded₃.comp [Preorder V] [Tarski.Structure.Monotone L V] {f : V → V 
 
 section
 
-variable [LE V] (B)
+variable [LE V] (ℬ)
 
-def DefinableBoundedFunction {k} (f : (Fin k → V) → V) := Bounded (L := L) f ∧ 𝚺₀.DefinableFunction B f
+def DefinableBoundedFunction {k} (f : (Fin k → V) → V) := Bounded (L := L) f ∧ 𝚺₀.DefinableFunction ℬ f
 
-abbrev DefinableBoundedFunction₁ (f : V → V) : Prop := DefinableBoundedFunction B (k := 1) (fun v => f (v 0))
+abbrev DefinableBoundedFunction₁ (f : V → V) : Prop := DefinableBoundedFunction ℬ (k := 1) (fun v => f (v 0))
 
-abbrev DefinableBoundedFunction₂ (f : V → V → V) : Prop := DefinableBoundedFunction B (k := 2) (fun v => f (v 0) (v 1))
+abbrev DefinableBoundedFunction₂ (f : V → V → V) : Prop := DefinableBoundedFunction ℬ (k := 2) (fun v => f (v 0) (v 1))
 
-abbrev DefinableBoundedFunction₃ (f : V → V → V → V) : Prop := DefinableBoundedFunction B (k := 3) (fun v => f (v 0) (v 1) (v 2))
+abbrev DefinableBoundedFunction₃ (f : V → V → V → V) : Prop := DefinableBoundedFunction ℬ (k := 3) (fun v => f (v 0) (v 1) (v 2))
 
-variable {B}
+variable {ℬ}
 
-lemma DefinableBoundedFunction.bounded {f : (Fin k → V) → V} (h : DefinableBoundedFunction B f) : Bounded (L := L) f := h.1
+lemma DefinableBoundedFunction.bounded {f : (Fin k → V) → V} (h : DefinableBoundedFunction ℬ f) : Bounded (L := L) f := h.1
 
-lemma DefinableBoundedFunction₁.bounded {f : V → V} (h : DefinableBoundedFunction₁ B f) : Bounded₁ (L := L) f := h.1
+lemma DefinableBoundedFunction₁.bounded {f : V → V} (h : DefinableBoundedFunction₁ ℬ f) : Bounded₁ (L := L) f := h.1
 
-lemma DefinableBoundedFunction₂.bounded {f : V → V → V} (h : DefinableBoundedFunction₂ B f) : Bounded₂ (L := L) f := h.1
+lemma DefinableBoundedFunction₂.bounded {f : V → V → V} (h : DefinableBoundedFunction₂ ℬ f) : Bounded₂ (L := L) f := h.1
 
-lemma DefinableBoundedFunction₃.bounded {f : V → V → V → V} (h : DefinableBoundedFunction₃ B f) : Bounded₃ (L := L) f := h.1
+lemma DefinableBoundedFunction₃.bounded {f : V → V → V → V} (h : DefinableBoundedFunction₃ ℬ f) : Bounded₃ (L := L) f := h.1
 
-lemma DefinableBoundedFunction.definable {f : (Fin k → V) → V} (h : DefinableBoundedFunction B f) : ℌ.DefinableFunction B f := .of_zero h.2
+lemma DefinableBoundedFunction.definable {f : (Fin k → V) → V} (h : DefinableBoundedFunction ℬ f) : ℌ.DefinableFunction ℬ f := .of_zero h.2
 
-lemma DefinableBoundedFunction₁.definable {f : V → V} (h : DefinableBoundedFunction₁ B f) : ℌ.DefinableFunction₁ B f := .of_zero h.2
+lemma DefinableBoundedFunction₁.definable {f : V → V} (h : DefinableBoundedFunction₁ ℬ f) : ℌ.DefinableFunction₁ ℬ f := .of_zero h.2
 
-lemma DefinableBoundedFunction₂.definable {f : V → V → V} (h : DefinableBoundedFunction₂ B f) : ℌ.DefinableFunction₂ B f := .of_zero h.2
+lemma DefinableBoundedFunction₂.definable {f : V → V → V} (h : DefinableBoundedFunction₂ ℬ f) : ℌ.DefinableFunction₂ ℬ f := .of_zero h.2
 
-lemma DefinableBoundedFunction₃.definable {f : V → V → V → V} (h : DefinableBoundedFunction₃ B f) : ℌ.DefinableFunction₃ B f := .of_zero h.2
+lemma DefinableBoundedFunction₃.definable {f : V → V → V → V} (h : DefinableBoundedFunction₃ ℬ f) : ℌ.DefinableFunction₃ ℬ f := .of_zero h.2
 
 namespace DefinableBoundedFunction
 
-lemma of_polybounded_of_definable (f : (Fin k → V) → V) [hb : Bounded (L := L) f] [hf : 𝚺₀.DefinableFunction B f] :
-    DefinableBoundedFunction B f := ⟨hb, hf⟩
+lemma of_polybounded_of_definable (f : (Fin k → V) → V) [hb : Bounded (L := L) f] [hf : 𝚺₀.DefinableFunction ℬ f] :
+    DefinableBoundedFunction ℬ f := ⟨hb, hf⟩
 
-@[simp] lemma of_polybounded_of_definable₁ (f : V → V) [hb : Bounded₁ (L := L) f] [hf : 𝚺₀.DefinableFunction₁ B f] :
-    DefinableBoundedFunction₁ B f := ⟨hb, hf⟩
+@[simp] lemma of_polybounded_of_definable₁ (f : V → V) [hb : Bounded₁ (L := L) f] [hf : 𝚺₀.DefinableFunction₁ ℬ f] :
+    DefinableBoundedFunction₁ ℬ f := ⟨hb, hf⟩
 
-@[simp] lemma of_polybounded_of_definable₂ (f : V → V → V) [hb : Bounded₂ (L := L) f] [hf : 𝚺₀.DefinableFunction₂ B f] :
-    DefinableBoundedFunction₂ B f := ⟨hb, hf⟩
+@[simp] lemma of_polybounded_of_definable₂ (f : V → V → V) [hb : Bounded₂ (L := L) f] [hf : 𝚺₀.DefinableFunction₂ ℬ f] :
+    DefinableBoundedFunction₂ ℬ f := ⟨hb, hf⟩
 
-@[simp] lemma of_polybounded_of_definable₃ (f : V → V → V → V) [hb : Bounded₃ (L := L) f] [hf : 𝚺₀.DefinableFunction₃ B f] :
-    DefinableBoundedFunction₃ B f := ⟨hb, hf⟩
+@[simp] lemma of_polybounded_of_definable₃ (f : V → V → V → V) [hb : Bounded₃ (L := L) f] [hf : 𝚺₀.DefinableFunction₃ ℬ f] :
+    DefinableBoundedFunction₃ ℬ f := ⟨hb, hf⟩
 
-lemma retraction {f : (Fin k → V) → V} (hf : DefinableBoundedFunction B f) (e : Fin k → Fin n) :
-    DefinableBoundedFunction B fun v ↦ f (fun i ↦ v (e i)) := ⟨hf.bounded.retraction e, hf.definable.retraction e⟩
+lemma retraction {f : (Fin k → V) → V} (hf : DefinableBoundedFunction ℬ f) (e : Fin k → Fin n) :
+    DefinableBoundedFunction ℬ fun v ↦ f (fun i ↦ v (e i)) := ⟨hf.bounded.retraction e, hf.definable.retraction e⟩
 
 end DefinableBoundedFunction
 
@@ -150,98 +151,104 @@ end
 
 namespace HierarchySymbol.Definable
 
-variable [Preorder V] [CompatibleLE B V]
+variable [hV : Preorder V] [hR : CompatibleLE R V]
+variable (hmem : R ∈ ℬ.set)
+include hV hR hmem
 
 variable  {P Q : (Fin k → V) → Prop}
 
 lemma ball' {P : (Fin k → V) → V → Prop}
-    (h : ℌ.Definable B fun w ↦ P (w ·.succ) (w 0)) (t : Semiterm L V k) :
-    ℌ.Definable B fun v ↦ ∀ x ≤ t.val v id, P v x := by
-  have ht : ℌ.Definable B fun v ↦ P v (t.val v id) := by
+    (h : ℌ.Definable ℬ fun w ↦ P (w ·.succ) (w 0)) (t : Semiterm L V k) :
+    ℌ.Definable ℬ fun v ↦ ∀ x ≤ t.val v id, P v x := by
+  have ht : ℌ.Definable ℬ fun v ↦ P v (t.val v id) := by
     simpa using h.retractiont (t :> fun i ↦ #i)
-  exact (ht.and (h.ball t)).of_iff fun v ↦ by
-    simp [CompatibleLE.le_iff (B := B), or_imp, forall_and]
+  exact (ht.and (h.ball hmem t)).of_iff fun v ↦ by
+    simp [CompatibleLE.le_iff (R := R), or_imp, forall_and]
 
 lemma bexs' {P : (Fin k → V) → V → Prop}
-    (h : ℌ.Definable B fun w ↦ P (w ·.succ) (w 0)) (t : Semiterm L V k) :
-    ℌ.Definable B fun v ↦ ∃ x ≤ t.val v id, P v x := by
-  have ht : ℌ.Definable B fun v ↦ P v (t.val v id) := by
+    (h : ℌ.Definable ℬ fun w ↦ P (w ·.succ) (w 0)) (t : Semiterm L V k) :
+    ℌ.Definable ℬ fun v ↦ ∃ x ≤ t.val v id, P v x := by
+  have ht : ℌ.Definable ℬ fun v ↦ P v (t.val v id) := by
     simpa using h.retractiont (t :> fun i ↦ #i)
-  exact (ht.or (h.bexs t)).of_iff fun v ↦ by
-    simp [CompatibleLE.le_iff (B := B), or_and_right, exists_or]
+  exact (ht.or (h.bexs hmem t)).of_iff fun v ↦ by
+    simp [CompatibleLE.le_iff (R := R), or_and_right, exists_or]
 
-lemma ball_boperator {P : (Fin k → V) → V → Prop} {f : (Fin k → V) → V}
-    (hf : DefinableBoundedFunction B f) (h : ℌ.Definable B fun w ↦ P (w ·.succ) (w 0)) :
-    ℌ.Definable B fun v ↦ ∀ x, B.val ![x, f v] → P v x := by
+lemma ball_boperator {S : Semiformula.Operator L 2} (hS : S ∈ ℬ.set)
+    {P : (Fin k → V) → V → Prop} {f : (Fin k → V) → V}
+    (hf : DefinableBoundedFunction ℬ f) (h : ℌ.Definable ℬ fun w ↦ P (w ·.succ) (w 0)) :
+    ℌ.Definable ℬ fun v ↦ ∀ x, S.val ![x, f v] → P v x := by
   rcases hf.bounded with ⟨bf, hbf⟩
-  have : ℌ.Definable B fun v ↦ ∃ x ≤ bf.val v id, x = f v ∧ ∀ y, B.val ![y, x] → P v y := by
-    apply bexs'; apply and
+  have : ℌ.Definable ℬ fun v ↦ ∃ x ≤ bf.val v id, x = f v ∧ ∀ y, S.val ![y, x] → P v y := by
+    apply bexs' hmem; apply and
     · exact hf.definable
-    · suffices ℌ.Definable B fun x ↦ ∀ y, B.val ![y, (#0).val (L := L) x id] → P (fun x_1 ↦ x x_1.succ) y by simpa
-      apply ball ?_ #0
+    · suffices ℌ.Definable ℬ fun x ↦ ∀ y, S.val ![y, (#0).val (L := L) x id] → P (fun x_1 ↦ x x_1.succ) y by simpa
+      apply ball hS ?_ #0
       simpa using h.retraction (0 :> (·.succ.succ))
   exact this.of_iff <| fun v ↦ ⟨fun h ↦ ⟨f v, hbf v, rfl, h⟩, by rintro ⟨y, hy, rfl, h⟩; exact h⟩
 
-lemma bexs_boperator {P : (Fin k → V) → V → Prop} {f : (Fin k → V) → V}
-    (hf : DefinableBoundedFunction B f) (h : ℌ.Definable B fun w ↦ P (w ·.succ) (w 0)) :
-    ℌ.Definable B fun v ↦ ∃ x, B.val ![x, f v] ∧ P v x := by
+lemma bexs_boperator {S : Semiformula.Operator L 2} (hS : S ∈ ℬ.set)
+    {P : (Fin k → V) → V → Prop} {f : (Fin k → V) → V}
+    (hf : DefinableBoundedFunction ℬ f) (h : ℌ.Definable ℬ fun w ↦ P (w ·.succ) (w 0)) :
+    ℌ.Definable ℬ fun v ↦ ∃ x, S.val ![x, f v] ∧ P v x := by
   rcases hf.bounded with ⟨bf, hbf⟩
-  have : ℌ.Definable B fun v ↦ ∃ x ≤ bf.val v id, x = f v ∧ ∃ y, B.val ![y, x] ∧ P v y := by
-    apply bexs'; apply and
+  have : ℌ.Definable ℬ fun v ↦ ∃ x ≤ bf.val v id, x = f v ∧ ∃ y, S.val ![y, x] ∧ P v y := by
+    apply bexs' hmem; apply and
     · exact hf.definable
-    · suffices ℌ.Definable B fun x ↦ ∃ y, B.val ![y, (#0).val (L := L) x id] ∧ P (fun x_1 ↦ x x_1.succ) y by simpa
-      apply bexs ?_ #0
+    · suffices ℌ.Definable ℬ fun x ↦ ∃ y, S.val ![y, (#0).val (L := L) x id] ∧ P (fun x_1 ↦ x x_1.succ) y by simpa
+      apply bexs hS ?_ #0
       simpa using h.retraction (0 :> (·.succ.succ))
   exact this.of_iff <| fun v ↦ ⟨fun h ↦ ⟨f v, hbf v, rfl, h⟩, by rintro ⟨y, hy, rfl, h⟩; exact h⟩
 
 lemma ball_ble {P : (Fin k → V) → V → Prop} {f : (Fin k → V) → V}
-    (hf : DefinableBoundedFunction B f) (h : ℌ.Definable B fun w ↦ P (w ·.succ) (w 0)) :
-    ℌ.Definable B fun v ↦ ∀ x ≤ f v, P v x := by
+    (hf : DefinableBoundedFunction ℬ f) (h : ℌ.Definable ℬ fun w ↦ P (w ·.succ) (w 0)) :
+    ℌ.Definable ℬ fun v ↦ ∀ x ≤ f v, P v x := by
   rcases hf.bounded with ⟨bf, hbf⟩
-  have : ℌ.Definable B fun v ↦ ∃ x ≤ bf.val v id, x = f v ∧ ∀ y ≤ x, P v y := by
-    apply bexs'; apply and
+  have : ℌ.Definable ℬ fun v ↦ ∃ x ≤ bf.val v id, x = f v ∧ ∀ y ≤ x, P v y := by
+    apply bexs' hmem; apply and
     · exact hf.definable
-    · suffices ℌ.Definable B fun x ↦ ∀ y ≤ (#0).val (L := L) x id, P (fun x_1 ↦ x x_1.succ) y by simpa
-      apply ball' ?_ #0
+    · suffices ℌ.Definable ℬ fun x ↦ ∀ y ≤ (#0).val (L := L) x id, P (fun x_1 ↦ x x_1.succ) y by simpa
+      apply ball' hmem ?_ #0
       simpa using h.retraction (0 :> (·.succ.succ))
   exact this.of_iff <| fun v ↦ ⟨fun h ↦ ⟨f v, hbf v, rfl, h⟩, by rintro ⟨y, hy, rfl, h⟩; exact h⟩
 
 lemma bexs_ble {P : (Fin k → V) → V → Prop} {f : (Fin k → V) → V}
-    (hf : DefinableBoundedFunction B f) (h : ℌ.Definable B fun w ↦ P (w ·.succ) (w 0)) :
-    ℌ.Definable B fun v ↦ ∃ x ≤ f v, P v x := by
+    (hf : DefinableBoundedFunction ℬ f) (h : ℌ.Definable ℬ fun w ↦ P (w ·.succ) (w 0)) :
+    ℌ.Definable ℬ fun v ↦ ∃ x ≤ f v, P v x := by
   rcases hf.bounded with ⟨bf, hbf⟩
-  have : ℌ.Definable B fun v ↦ ∃ x ≤ bf.val v id, x = f v ∧ ∃ y ≤ x, P v y := by
-    apply bexs'; apply and
+  have : ℌ.Definable ℬ fun v ↦ ∃ x ≤ bf.val v id, x = f v ∧ ∃ y ≤ x, P v y := by
+    apply bexs' hmem; apply and
     · exact hf.definable
-    · suffices ℌ.Definable B fun x ↦ ∃ y ≤ (#0).val (L := L) x id, P (fun x_1 ↦ x x_1.succ) y by simpa
-      apply bexs' ?_ #0
+    · suffices ℌ.Definable ℬ fun x ↦ ∃ y ≤ (#0).val (L := L) x id, P (fun x_1 ↦ x x_1.succ) y by simpa
+      apply bexs' hmem ?_ #0
       simpa using h.retraction (0 :> (·.succ.succ))
   exact this.of_iff <| fun v ↦ ⟨fun h ↦ ⟨f v, hbf v, rfl, h⟩, by rintro ⟨y, hy, rfl, h⟩; exact h⟩
 
-lemma ball_boperator_zero {P : (Fin k → V) → V → Prop} {f : (Fin k → V) → V}
-    (hf : DefinableBoundedFunction B f) (h : Γ-[0].Definable B fun w ↦ P (w ·.succ) (w 0)) :
-    Γ-[0].Definable B fun v ↦ ∀ x, B.val ![x, f v] → P v x := ball_boperator hf h
+lemma ball_boperator_zero {S : Semiformula.Operator L 2} (hS : S ∈ ℬ.set)
+    {P : (Fin k → V) → V → Prop} {f : (Fin k → V) → V}
+    (hf : DefinableBoundedFunction ℬ f) (h : Γ-[0].Definable ℬ fun w ↦ P (w ·.succ) (w 0)) :
+    Γ-[0].Definable ℬ fun v ↦ ∀ x, S.val ![x, f v] → P v x := ball_boperator hmem hS hf h
 
-lemma bexs_boperator_zero {P : (Fin k → V) → V → Prop} {f : (Fin k → V) → V}
-    (hf : DefinableBoundedFunction B f) (h : Γ-[0].Definable B fun w ↦ P (w ·.succ) (w 0)) :
-    Γ-[0].Definable B fun v ↦ ∃ x, B.val ![x, f v] ∧ P v x := bexs_boperator hf h
+lemma bexs_boperator_zero {S : Semiformula.Operator L 2} (hS : S ∈ ℬ.set)
+    {P : (Fin k → V) → V → Prop} {f : (Fin k → V) → V}
+    (hf : DefinableBoundedFunction ℬ f) (h : Γ-[0].Definable ℬ fun w ↦ P (w ·.succ) (w 0)) :
+    Γ-[0].Definable ℬ fun v ↦ ∃ x, S.val ![x, f v] ∧ P v x := bexs_boperator hmem hS hf h
 
 lemma ball_ble_zero {P : (Fin k → V) → V → Prop} {f : (Fin k → V) → V}
-    (hf : DefinableBoundedFunction B f) (h : Γ-[0].Definable B fun w ↦ P (w ·.succ) (w 0)) :
-    Γ-[0].Definable B fun v ↦ ∀ x ≤ f v, P v x := ball_ble hf h
+    (hf : DefinableBoundedFunction ℬ f) (h : Γ-[0].Definable ℬ fun w ↦ P (w ·.succ) (w 0)) :
+    Γ-[0].Definable ℬ fun v ↦ ∀ x ≤ f v, P v x := ball_ble hmem hf h
 
 lemma bexs_ble_zero {P : (Fin k → V) → V → Prop} {f : (Fin k → V) → V}
-    (hf : DefinableBoundedFunction B f) (h : Γ-[0].Definable B fun w ↦ P (w ·.succ) (w 0)) :
-    Γ-[0].Definable B fun v ↦ ∃ x ≤ f v, P v x := bexs_ble hf h
+    (hf : DefinableBoundedFunction ℬ f) (h : Γ-[0].Definable ℬ fun w ↦ P (w ·.succ) (w 0)) :
+    Γ-[0].Definable ℬ fun v ↦ ∃ x ≤ f v, P v x := bexs_ble hmem hf h
 
 lemma bexs_vec_le_boldfaceBoundedFunction {k} {φ : Fin l → (Fin k → V) → V} {P : (Fin k → V) → (Fin l → V) → Prop}
-    (pp : ∀ i, DefinableBoundedFunction B (φ i)) (hP : ℌ.Definable B fun w : Fin (k + l) → V ↦ P (fun i ↦ w (i.castAdd l)) (fun j ↦ w (j.natAdd k))) :
-    ℌ.Definable B fun v ↦ ∃ w ≤ (φ · v), P v w := by
+    (pp : ∀ i, DefinableBoundedFunction ℬ (φ i)) (hP : ℌ.Definable ℬ fun w : Fin (k + l) → V ↦ P (fun i ↦ w (i.castAdd l)) (fun j ↦ w (j.natAdd k))) :
+    ℌ.Definable ℬ fun v ↦ ∃ w ≤ (φ · v), P v w := by
   induction l generalizing k
   case zero => simpa [Matrix.empty_eq (α := V)] using hP
   case succ l ih =>
     simp only [Fin.exists_le_vec_iff_exists_le_exists_vec]
-    apply bexs_ble (pp 0)
+    apply bexs_ble hmem (pp 0)
     apply ih
     · intro i; apply DefinableBoundedFunction.retraction (pp i.succ)
     · let g : Fin (k + (l + 1)) → Fin (k + 1 + l) := Matrix.vecAppend rfl (fun x ↦ x.succ.castAdd l) (Fin.castAdd l 0 :> fun j ↦ j.natAdd (k + 1))
@@ -255,10 +262,10 @@ lemma bexs_vec_le_boldfaceBoundedFunction {k} {φ : Fin l → (Fin k → V) → 
           · simp only [Matrix.cons_val_succ]; congr 1; ext; simp [Matrix.vecAppend_eq_ite]
 
 lemma substitution_boldfaceBoundedFunction {f : Fin k → (Fin l → V) → V}
-    (hP : ℌ.Definable B P) (hf : ∀ i, DefinableBoundedFunction B (f i)) :
-    ℌ.Definable B fun z ↦ P (f · z) := by
-  have : ℌ.Definable B fun v ↦ ∃ w ≤ (f · v), (∀ i, w i = f i v) ∧ P w := by
-    apply bexs_vec_le_boldfaceBoundedFunction hf
+    (hP : ℌ.Definable ℬ P) (hf : ∀ i, DefinableBoundedFunction ℬ (f i)) :
+    ℌ.Definable ℬ fun z ↦ P (f · z) := by
+  have : ℌ.Definable ℬ fun v ↦ ∃ w ≤ (f · v), (∀ i, w i = f i v) ∧ P w := by
+    apply bexs_vec_le_boldfaceBoundedFunction hmem hf
     apply and
     · apply fintype_all; intro i
       simpa using retraction (.of_zero (hf i).2) (i.natAdd l :> Fin.castAdd k)
@@ -274,21 +281,21 @@ end HierarchySymbol.Definable
 
 namespace DefinableBoundedFunction
 
-lemma of_iff [LE V] {f g : (Fin k → V) → V} (H : DefinableBoundedFunction B f) (h : ∀ v, f v = g v) : DefinableBoundedFunction B g := by
+lemma of_iff [LE V] {f g : (Fin k → V) → V} (H : DefinableBoundedFunction ℬ f) (h : ∀ v, f v = g v) : DefinableBoundedFunction ℬ g := by
   have : f = g := by funext v; simp [h]
   rcases this; exact H
 
 variable [Preorder V] [L.Eq] [Tarski.Structure.Eq L V]
 
-@[simp] lemma var {k} (i : Fin k) : DefinableBoundedFunction B (fun v : Fin k → V ↦ v i) := ⟨by simp, by simp⟩
+@[simp] lemma var {k} (i : Fin k) : DefinableBoundedFunction ℬ (fun v : Fin k → V ↦ v i) := ⟨by simp, by simp⟩
 
-@[simp] lemma const {k} (c : V) : DefinableBoundedFunction B (fun _ : Fin k → V ↦ c) := ⟨by simp, by simp⟩
+@[simp] lemma const {k} (c : V) : DefinableBoundedFunction ℬ (fun _ : Fin k → V ↦ c) := ⟨by simp, by simp⟩
 
 @[simp] lemma term_retraction (t : Semiterm L V n) (e : Fin n → Fin k) :
-    DefinableBoundedFunction B fun v : Fin k → V ↦ t.val (fun x ↦ v (e x)) id := ⟨by simp, by simp⟩
+    DefinableBoundedFunction ℬ fun v : Fin k → V ↦ t.val (fun x ↦ v (e x)) id := ⟨by simp, by simp⟩
 
 @[simp] lemma term (t : Semiterm L V k) :
-  DefinableBoundedFunction B fun v : Fin k → V ↦ t.val v id := ⟨by simp, by simp⟩
+  DefinableBoundedFunction ℬ fun v : Fin k → V ↦ t.val v id := ⟨by simp, by simp⟩
 
 end DefinableBoundedFunction
 
@@ -296,115 +303,119 @@ namespace HierarchySymbol.Definable
 
 open DefinableBoundedFunction
 
-variable [Preorder V] [CompatibleLE B V]
+variable [hV : Preorder V] [hR : CompatibleLE R V]
+variable (hmem : R ∈ ℬ.set)
+include hV hR hmem
 
-lemma bcomp₁ {k} {P : V → Prop} {f : (Fin k → V) → V} [hP : ℌ.DefinablePred B P] (hf : DefinableBoundedFunction B f) :
-    ℌ.Definable B fun v ↦ P (f v) :=
-  substitution_boldfaceBoundedFunction (f := ![f]) hP (by simp [*])
+lemma bcomp₁ {k} {P : V → Prop} {f : (Fin k → V) → V} [hP : ℌ.DefinablePred ℬ P] (hf : DefinableBoundedFunction ℬ f) :
+    ℌ.Definable ℬ fun v ↦ P (f v) :=
+  substitution_boldfaceBoundedFunction hmem (f := ![f]) hP (by simp [*])
 
-lemma bcomp₂ {k} {R : V → V → Prop} {f₁ f₂ : (Fin k → V) → V} [hR : ℌ.DefinableRel B R]
-    (hf₁ : DefinableBoundedFunction B f₁) (hf₂ : DefinableBoundedFunction B f₂) :
-    ℌ.Definable B fun v ↦ R (f₁ v) (f₂ v) :=
-  substitution_boldfaceBoundedFunction (f := ![f₁, f₂]) hR (by simp [Fin.forall_fin_iff_zero_and_forall_succ, *])
+lemma bcomp₂ {k} {R : V → V → Prop} {f₁ f₂ : (Fin k → V) → V} [hR : ℌ.DefinableRel ℬ R]
+    (hf₁ : DefinableBoundedFunction ℬ f₁) (hf₂ : DefinableBoundedFunction ℬ f₂) :
+    ℌ.Definable ℬ fun v ↦ R (f₁ v) (f₂ v) :=
+  substitution_boldfaceBoundedFunction hmem (f := ![f₁, f₂]) hR (by simp [Fin.forall_fin_iff_zero_and_forall_succ, *])
 
-lemma bcomp₃ {k} {R : V → V → V → Prop} {f₁ f₂ f₃ : (Fin k → V) → V} [hR : ℌ.DefinableRel₃ B R]
-    (hf₁ : DefinableBoundedFunction B f₁) (hf₂ : DefinableBoundedFunction B f₂)
-    (hf₃ : DefinableBoundedFunction B f₃) :
-    ℌ.Definable B fun v ↦ R (f₁ v) (f₂ v) (f₃ v) :=
-  substitution_boldfaceBoundedFunction (f := ![f₁, f₂, f₃]) hR (by simp [Fin.forall_fin_iff_zero_and_forall_succ, *])
+lemma bcomp₃ {k} {R : V → V → V → Prop} {f₁ f₂ f₃ : (Fin k → V) → V} [hR : ℌ.DefinableRel₃ ℬ R]
+    (hf₁ : DefinableBoundedFunction ℬ f₁) (hf₂ : DefinableBoundedFunction ℬ f₂)
+    (hf₃ : DefinableBoundedFunction ℬ f₃) :
+    ℌ.Definable ℬ fun v ↦ R (f₁ v) (f₂ v) (f₃ v) :=
+  substitution_boldfaceBoundedFunction hmem (f := ![f₁, f₂, f₃]) hR (by simp [Fin.forall_fin_iff_zero_and_forall_succ, *])
 
-lemma bcomp₄ {k} {R : V → V → V → V → Prop} {f₁ f₂ f₃ f₄ : (Fin k → V) → V} [hR : ℌ.DefinableRel₄ B R]
-    (hf₁ : DefinableBoundedFunction B f₁) (hf₂ : DefinableBoundedFunction B f₂)
-    (hf₃ : DefinableBoundedFunction B f₃) (hf₄ : DefinableBoundedFunction B f₄) :
-    ℌ.Definable B fun v ↦ R (f₁ v) (f₂ v) (f₃ v) (f₄ v) :=
-  substitution_boldfaceBoundedFunction (f := ![f₁, f₂, f₃, f₄]) hR (by simp [Fin.forall_fin_iff_zero_and_forall_succ, *])
+lemma bcomp₄ {k} {R : V → V → V → V → Prop} {f₁ f₂ f₃ f₄ : (Fin k → V) → V} [hR : ℌ.DefinableRel₄ ℬ R]
+    (hf₁ : DefinableBoundedFunction ℬ f₁) (hf₂ : DefinableBoundedFunction ℬ f₂)
+    (hf₃ : DefinableBoundedFunction ℬ f₃) (hf₄ : DefinableBoundedFunction ℬ f₄) :
+    ℌ.Definable ℬ fun v ↦ R (f₁ v) (f₂ v) (f₃ v) (f₄ v) :=
+  substitution_boldfaceBoundedFunction hmem (f := ![f₁, f₂, f₃, f₄]) hR (by simp [Fin.forall_fin_iff_zero_and_forall_succ, *])
 
-lemma bcomp₁_zero {k} {P : V → Prop} {f : (Fin k → V) → V} [hP : Γ-[0].DefinablePred B P] (hf : DefinableBoundedFunction B f) :
-    Γ-[0].Definable B fun v ↦ P (f v) :=
-  substitution_boldfaceBoundedFunction (f := ![f]) hP (by simp [*])
+lemma bcomp₁_zero {k} {P : V → Prop} {f : (Fin k → V) → V} [hP : Γ-[0].DefinablePred ℬ P] (hf : DefinableBoundedFunction ℬ f) :
+    Γ-[0].Definable ℬ fun v ↦ P (f v) :=
+  substitution_boldfaceBoundedFunction hmem (f := ![f]) hP (by simp [*])
 
-lemma bcomp₂_zero {k} {R : V → V → Prop} {f₁ f₂ : (Fin k → V) → V} [hR : Γ-[0].DefinableRel B R]
-    (hf₁ : DefinableBoundedFunction B f₁) (hf₂ : DefinableBoundedFunction B f₂) :
-    Γ-[0].Definable B fun v ↦ R (f₁ v) (f₂ v) :=
-  substitution_boldfaceBoundedFunction (f := ![f₁, f₂]) hR (by simp [Fin.forall_fin_iff_zero_and_forall_succ, *])
+lemma bcomp₂_zero {k} {R : V → V → Prop} {f₁ f₂ : (Fin k → V) → V} [hR : Γ-[0].DefinableRel ℬ R]
+    (hf₁ : DefinableBoundedFunction ℬ f₁) (hf₂ : DefinableBoundedFunction ℬ f₂) :
+    Γ-[0].Definable ℬ fun v ↦ R (f₁ v) (f₂ v) :=
+  substitution_boldfaceBoundedFunction hmem (f := ![f₁, f₂]) hR (by simp [Fin.forall_fin_iff_zero_and_forall_succ, *])
 
-lemma bcomp₃_zero {k} {R : V → V → V → Prop} {f₁ f₂ f₃ : (Fin k → V) → V} [hR : Γ-[0].DefinableRel₃ B R]
-    (hf₁ : DefinableBoundedFunction B f₁) (hf₂ : DefinableBoundedFunction B f₂)
-    (hf₃ : DefinableBoundedFunction B f₃) :
-    Γ-[0].Definable B fun v ↦ R (f₁ v) (f₂ v) (f₃ v) :=
-  substitution_boldfaceBoundedFunction (f := ![f₁, f₂, f₃]) hR (by simp [Fin.forall_fin_iff_zero_and_forall_succ, *])
+lemma bcomp₃_zero {k} {R : V → V → V → Prop} {f₁ f₂ f₃ : (Fin k → V) → V} [hR : Γ-[0].DefinableRel₃ ℬ R]
+    (hf₁ : DefinableBoundedFunction ℬ f₁) (hf₂ : DefinableBoundedFunction ℬ f₂)
+    (hf₃ : DefinableBoundedFunction ℬ f₃) :
+    Γ-[0].Definable ℬ fun v ↦ R (f₁ v) (f₂ v) (f₃ v) :=
+  substitution_boldfaceBoundedFunction hmem (f := ![f₁, f₂, f₃]) hR (by simp [Fin.forall_fin_iff_zero_and_forall_succ, *])
 
-lemma bcomp₄_zero {k} {R : V → V → V → V → Prop} {f₁ f₂ f₃ f₄ : (Fin k → V) → V} [hR : Γ-[0].DefinableRel₄ B R]
-    (hf₁ : DefinableBoundedFunction B f₁) (hf₂ : DefinableBoundedFunction B f₂)
-    (hf₃ : DefinableBoundedFunction B f₃) (hf₄ : DefinableBoundedFunction B f₄) :
-    Γ-[0].Definable B fun v ↦ R (f₁ v) (f₂ v) (f₃ v) (f₄ v) :=
-  substitution_boldfaceBoundedFunction (f := ![f₁, f₂, f₃, f₄]) hR (by simp [Fin.forall_fin_iff_zero_and_forall_succ, *])
+lemma bcomp₄_zero {k} {R : V → V → V → V → Prop} {f₁ f₂ f₃ f₄ : (Fin k → V) → V} [hR : Γ-[0].DefinableRel₄ ℬ R]
+    (hf₁ : DefinableBoundedFunction ℬ f₁) (hf₂ : DefinableBoundedFunction ℬ f₂)
+    (hf₃ : DefinableBoundedFunction ℬ f₃) (hf₄ : DefinableBoundedFunction ℬ f₄) :
+    Γ-[0].Definable ℬ fun v ↦ R (f₁ v) (f₂ v) (f₃ v) (f₄ v) :=
+  substitution_boldfaceBoundedFunction hmem (f := ![f₁, f₂, f₃, f₄]) hR (by simp [Fin.forall_fin_iff_zero_and_forall_succ, *])
 
 end HierarchySymbol.Definable
 
 section Functions
 
-variable [Preorder V] [CompatibleLE B V] [L.Eq] [Tarski.Structure.Eq L V]
+variable [hV : Preorder V] [hR : CompatibleLE R V] [L.Eq] [Tarski.Structure.Eq L V]
+variable (hmem : R ∈ ℬ.set)
+include hV hR hmem
 
 lemma HierarchySymbol.DefinableFunction.bcomp {k} {F : (Fin l → V) → V} {f : Fin l → (Fin k → V) → V}
-    (hF : ℌ.DefinableFunction B F) (hf : ∀ i, DefinableBoundedFunction B (f i)) :
-    ℌ.DefinableFunction B (fun v ↦ F (f · v)) := by
-  simpa using Definable.substitution_boldfaceBoundedFunction (f := (· 0) :> fun i w ↦ f i (w ·.succ)) hF <| by
+    (hF : ℌ.DefinableFunction ℬ F) (hf : ∀ i, DefinableBoundedFunction ℬ (f i)) :
+    ℌ.DefinableFunction ℬ (fun v ↦ F (f · v)) := by
+  simpa using Definable.substitution_boldfaceBoundedFunction hmem (f := (· 0) :> fun i w ↦ f i (w ·.succ)) hF <| by
     intro i
     cases' i using Fin.cases with i
     · simp
     · simpa using DefinableBoundedFunction.retraction (hf i) Fin.succ
 
 lemma HierarchySymbol.DefinableFunction₁.bcomp {k} {F : V → V} {f : (Fin k → V) → V}
-    (hF : ℌ.DefinableFunction₁ B F) (hf : DefinableBoundedFunction B f) :
-    ℌ.DefinableFunction B (fun v ↦ F (f v)) :=
-  HierarchySymbol.DefinableFunction.bcomp (f := ![f]) hF (by simp [*])
+    (hF : ℌ.DefinableFunction₁ ℬ F) (hf : DefinableBoundedFunction ℬ f) :
+    ℌ.DefinableFunction ℬ (fun v ↦ F (f v)) :=
+  HierarchySymbol.DefinableFunction.bcomp hmem (f := ![f]) hF (by simp [*])
 
 lemma HierarchySymbol.DefinableFunction₂.bcomp {k} {F : V → V → V} {f₁ f₂ : (Fin k → V) → V}
-    (hF : ℌ.DefinableFunction₂ B F)
-    (hf₁ : DefinableBoundedFunction B f₁) (hf₂ : DefinableBoundedFunction B f₂) :
-    ℌ.DefinableFunction B (fun v ↦ F (f₁ v) (f₂ v)) :=
-  HierarchySymbol.DefinableFunction.bcomp (f := ![f₁, f₂]) hF (by simp [Fin.forall_fin_iff_zero_and_forall_succ, *])
+    (hF : ℌ.DefinableFunction₂ ℬ F)
+    (hf₁ : DefinableBoundedFunction ℬ f₁) (hf₂ : DefinableBoundedFunction ℬ f₂) :
+    ℌ.DefinableFunction ℬ (fun v ↦ F (f₁ v) (f₂ v)) :=
+  HierarchySymbol.DefinableFunction.bcomp hmem (f := ![f₁, f₂]) hF (by simp [Fin.forall_fin_iff_zero_and_forall_succ, *])
 
 lemma HierarchySymbol.DefinableFunction₃.bcomp {k} {F : V → V → V → V} {f₁ f₂ f₃ : (Fin k → V) → V}
-    (hF : ℌ.DefinableFunction₃ B F)
-    (hf₁ : DefinableBoundedFunction B f₁) (hf₂ : DefinableBoundedFunction B f₂)
-    (hf₃ : DefinableBoundedFunction B f₃) :
-    ℌ.DefinableFunction B (fun v ↦ F (f₁ v) (f₂ v) (f₃ v)) :=
-  HierarchySymbol.DefinableFunction.bcomp (f := ![f₁, f₂, f₃]) hF (by simp [Fin.forall_fin_iff_zero_and_forall_succ, *])
+    (hF : ℌ.DefinableFunction₃ ℬ F)
+    (hf₁ : DefinableBoundedFunction ℬ f₁) (hf₂ : DefinableBoundedFunction ℬ f₂)
+    (hf₃ : DefinableBoundedFunction ℬ f₃) :
+    ℌ.DefinableFunction ℬ (fun v ↦ F (f₁ v) (f₂ v) (f₃ v)) :=
+  HierarchySymbol.DefinableFunction.bcomp hmem (f := ![f₁, f₂, f₃]) hF (by simp [Fin.forall_fin_iff_zero_and_forall_succ, *])
 
 variable [Tarski.Structure.Monotone L V]
 
 lemma DefinableBoundedFunction₁.comp {k} {F : V → V} {f : (Fin k → V) → V}
-    (hF : DefinableBoundedFunction₁ B F) (hf : DefinableBoundedFunction B f) :
-    DefinableBoundedFunction B (fun v ↦ F (f v)) := ⟨hF.bounded.comp hf.bounded, hF.definable.bcomp hf⟩
+    (hF : DefinableBoundedFunction₁ ℬ F) (hf : DefinableBoundedFunction ℬ f) :
+    DefinableBoundedFunction ℬ (fun v ↦ F (f v)) := ⟨hF.bounded.comp hf.bounded, hF.definable.bcomp hmem hf⟩
 
 lemma DefinableBoundedFunction₂.comp {k} {F : V → V → V} {f₁ f₂ : (Fin k → V) → V}
-    (hF : DefinableBoundedFunction₂ B F)
-    (hf₁ : DefinableBoundedFunction B f₁) (hf₂ : DefinableBoundedFunction B f₂) :
-    DefinableBoundedFunction B (fun v ↦ F (f₁ v) (f₂ v)) := ⟨hF.bounded.comp hf₁.bounded hf₂.bounded, hF.definable.bcomp hf₁ hf₂⟩
+    (hF : DefinableBoundedFunction₂ ℬ F)
+    (hf₁ : DefinableBoundedFunction ℬ f₁) (hf₂ : DefinableBoundedFunction ℬ f₂) :
+    DefinableBoundedFunction ℬ (fun v ↦ F (f₁ v) (f₂ v)) := ⟨hF.bounded.comp hf₁.bounded hf₂.bounded, hF.definable.bcomp hmem hf₁ hf₂⟩
 
 lemma DefinableBoundedFunction₃.comp {k} {F : V → V → V → V} {f₁ f₂ f₃ : (Fin k → V) → V}
-    (hF : DefinableBoundedFunction₃ B F)
-    (hf₁ : DefinableBoundedFunction B f₁) (hf₂ : DefinableBoundedFunction B f₂)
-    (hf₃ : DefinableBoundedFunction B f₃) :
-    DefinableBoundedFunction B (fun v ↦ F (f₁ v) (f₂ v) (f₃ v)) :=
-  ⟨hF.bounded.comp hf₁.bounded hf₂.bounded hf₃.bounded, hF.definable.bcomp hf₁ hf₂ hf₃⟩
+    (hF : DefinableBoundedFunction₃ ℬ F)
+    (hf₁ : DefinableBoundedFunction ℬ f₁) (hf₂ : DefinableBoundedFunction ℬ f₂)
+    (hf₃ : DefinableBoundedFunction ℬ f₃) :
+    DefinableBoundedFunction ℬ (fun v ↦ F (f₁ v) (f₂ v) (f₃ v)) :=
+  ⟨hF.bounded.comp hf₁.bounded hf₂.bounded hf₃.bounded, hF.definable.bcomp hmem hf₁ hf₂ hf₃⟩
 
 lemma DefinableBoundedFunction.comp₁ {k} {F : V → V} {f : (Fin k → V) → V}
-    [hFb : Bounded₁ (L := L) F] [hFd : 𝚺₀.DefinableFunction₁ B F] (hf : DefinableBoundedFunction B f) :
-    DefinableBoundedFunction B (fun v ↦ F (f v)) := DefinableBoundedFunction₁.comp ⟨hFb, hFd⟩ hf
+    [hFb : Bounded₁ (L := L) F] [hFd : 𝚺₀.DefinableFunction₁ ℬ F] (hf : DefinableBoundedFunction ℬ f) :
+    DefinableBoundedFunction ℬ (fun v ↦ F (f v)) := DefinableBoundedFunction₁.comp hmem ⟨hFb, hFd⟩ hf
 
 lemma DefinableBoundedFunction.comp₂ {k} {F : V → V → V} {f₁ f₂ : (Fin k → V) → V}
-    [hFb : Bounded₂ (L := L) F] [hFd : 𝚺₀.DefinableFunction₂ B F]
-    (hf₁ : DefinableBoundedFunction B f₁) (hf₂ : DefinableBoundedFunction B f₂) :
-    DefinableBoundedFunction B (fun v ↦ F (f₁ v) (f₂ v)) := DefinableBoundedFunction₂.comp ⟨hFb, hFd⟩ hf₁ hf₂
+    [hFb : Bounded₂ (L := L) F] [hFd : 𝚺₀.DefinableFunction₂ ℬ F]
+    (hf₁ : DefinableBoundedFunction ℬ f₁) (hf₂ : DefinableBoundedFunction ℬ f₂) :
+    DefinableBoundedFunction ℬ (fun v ↦ F (f₁ v) (f₂ v)) := DefinableBoundedFunction₂.comp hmem ⟨hFb, hFd⟩ hf₁ hf₂
 
 lemma DefinableBoundedFunction.comp₃ {k} {F : V → V → V → V} {f₁ f₂ f₃ : (Fin k → V) → V}
-    [hFb : Bounded₃ (L := L) F] [hFd : 𝚺₀.DefinableFunction₃ B F]
-    (hf₁ : DefinableBoundedFunction B f₁) (hf₂ : DefinableBoundedFunction B f₂)
-    (hf₃ : DefinableBoundedFunction B f₃) :
-    DefinableBoundedFunction B (fun v ↦ F (f₁ v) (f₂ v) (f₃ v)) := DefinableBoundedFunction₃.comp ⟨hFb, hFd⟩ hf₁ hf₂ hf₃
+    [hFb : Bounded₃ (L := L) F] [hFd : 𝚺₀.DefinableFunction₃ ℬ F]
+    (hf₁ : DefinableBoundedFunction ℬ f₁) (hf₂ : DefinableBoundedFunction ℬ f₂)
+    (hf₃ : DefinableBoundedFunction ℬ f₃) :
+    DefinableBoundedFunction ℬ (fun v ↦ F (f₁ v) (f₂ v) (f₃ v)) := DefinableBoundedFunction₃.comp hmem ⟨hFb, hFd⟩ hf₁ hf₂ hf₃
 
 section
 
@@ -431,4 +442,4 @@ end
 
 end Functions
 
-end FFL.FirstOrder.BoundingHierarchy
+end FFL.FirstOrder.Bounding

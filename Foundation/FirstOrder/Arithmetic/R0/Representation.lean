@@ -77,7 +77,8 @@ lemma delta0_primrec (ε : ξ → ℕ) {k} {φ : ArithmeticSemiformula ξ k}
   case hExs =>
     intro n ψ _ ih h;
     cases Hierarchy.zero_iff_delta_zero.mp h with
-    | bexs ht hφ =>
+    | bexs hR ht hφ =>
+      obtain rfl := Set.mem_singleton_iff.mp hR
       rcases Rew.positive_iff.mp ht with ⟨t, rfl⟩;
       exact (primrecPred_bexs ε t
         (ih (Hierarchy.and_iff.mpr ⟨by simp, Hierarchy.bounded _ _ _ hφ⟩))).of_eq fun v ↦ by simp;

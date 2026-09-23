@@ -593,7 +593,8 @@ theorem models_exists_prenex {Γ Γ' : Polarity} {s n : ℕ} {φ : ArithmeticSem
     use φ' ⋎ ψ';
     intro V _ _ e f;
     grind [models_or φ' ψ' e, LogicalConnective.Prop.or_eq];
-  | ball pos _ ih =>
+  | ball hR pos _ ih =>
+    obtain rfl := Set.mem_singleton_iff.mp hR
     obtain ⟨u, rfl⟩ := Rew.positive_iff.mp pos;
     obtain ⟨φ', hφ'⟩ := ih;
     use ∀'[u] φ';
@@ -601,7 +602,8 @@ theorem models_exists_prenex {Γ Γ' : Polarity} {s n : ℕ} {φ : ArithmeticSem
     rw [models_ball u φ' e];
     simp only [Semiformula.eval_ball];
     exact forall_congr' fun x => (imp_congr Iff.rfl (hφ' V (x :> e) f)).trans (by simp);
-  | bexs pos _ ih =>
+  | bexs hR pos _ ih =>
+    obtain rfl := Set.mem_singleton_iff.mp hR
     obtain ⟨u, rfl⟩ := Rew.positive_iff.mp pos;
     obtain ⟨φ', hφ'⟩ := ih;
     use ∃'[u] φ';
