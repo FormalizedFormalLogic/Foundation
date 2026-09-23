@@ -126,6 +126,7 @@ scoped notation:55 x:56 " ⊮[" M "] " A:56 => ¬Forces M x A
 @[grind =] lemma forces_iff : x ⊩[M] A 🡘 B ↔ (x ⊩[M] A ↔ x ⊩[M] B) := by
   simp only [LogicalConnective.iff, forces_and]; grind;
 @[grind =] lemma forces_box : x ⊩[M] □A ↔ ∀ y, x ≺ y → y ⊩[M] A := Iff.rfl
+@[grind =] lemma forces_boxdot : x ⊩[M] ⊡A ↔ x ⊩[M] A ∧ ∀ y, x ≺ y → y ⊩[M] A := forces_and
 @[grind =] lemma forces_dia : x ⊩[M] ◇A ↔ ∃ y, x ≺ y ∧ y ⊩[M] A := by
   change ((∀ y, x ≺ y → y ⊩[M] A → False) → False) ↔ _; grind;
 

@@ -116,6 +116,26 @@ lemma forces_inr_iff [DecidableEq α] {Γ : FormulaFinset α}
       . obtain ⟨m, rfl⟩ := WithTop.ne_top_iff_exists.mp (ne_top_of_lt (rel_inr_inr.mp Rnx));
         exact (ih hB m).mpr (hroot B hA h);
 
+lemma forces_inr_boxdotTranslate_iff (n : ℕ) :
+    Sum.inr (n : ℕ∞) ⊩[M.toTail.toModel] Aᵇ ↔ M.root ⊩[M.toModel] Aᵇ := by
+  induction A generalizing n with
+  | atom | falsum => rfl;
+  | imp B C ihB ihC => exact imp_congr (ihB n) (ihC n);
+  | box B ih =>
+    simp only [Formula.boxdotTranslate_box, forces_boxdot, ih n];
+    apply and_congr_right;
+    intro hB;
+    constructor;
+    . intro h x _;
+      exact forces_inl.mp (h (.inl x) trivial);
+    . rintro h (x | j) Rnx;
+      . apply forces_inl.mpr;
+        by_cases hx : x = M.root;
+        . exact hx ▸ hB;
+        . exact h x (M.root_rel x hx);
+      . obtain ⟨m, rfl⟩ := WithTop.ne_top_iff_exists.mp (ne_top_of_lt (rel_inr_inr.mp Rnx));
+        exact (ih m).mpr hB;
+
 end toTail
 
 end RootedModel
