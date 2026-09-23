@@ -174,13 +174,14 @@ public import Foundation.Propositional.Heyting.Semantics
 public import Foundation.Propositional.Hilbert.Basic
 public import Foundation.Propositional.LK.Basic
 public import Foundation.Propositional.Logic.Basic
+public import Foundation.ProvabilityLogic.Arithmetic.Interpret
+public import Foundation.ProvabilityLogic.Arithmetic.SolovaySentences
 public import Foundation.ProvabilityLogic.Formula
 public import Foundation.ProvabilityLogic.GL.Arithmetic
 public import Foundation.ProvabilityLogic.GL.Basic
 public import Foundation.ProvabilityLogic.GL.Gentzen.Basic
 public import Foundation.ProvabilityLogic.GL.Gentzen.Kripke
 public import Foundation.ProvabilityLogic.GL.Hilbert.Basic
-public import Foundation.ProvabilityLogic.Interpret
 public import Foundation.ProvabilityLogic.Kripke.Basic
 public import Foundation.ProvabilityLogic.Kripke.Cone
 public import Foundation.ProvabilityLogic.Kripke.Rank
@@ -188,7 +189,6 @@ public import Foundation.ProvabilityLogic.Kripke.RootExtension
 public import Foundation.ProvabilityLogic.Kripke.RootedModel
 public import Foundation.ProvabilityLogic.Logic
 public import Foundation.ProvabilityLogic.Sequent
-public import Foundation.ProvabilityLogic.SolovaySentences
 public import Foundation.SecondOrder.LK.Basic
 public import Foundation.SecondOrder.Syntax.Formula
 public import Foundation.SecondOrder.Syntax.Rew

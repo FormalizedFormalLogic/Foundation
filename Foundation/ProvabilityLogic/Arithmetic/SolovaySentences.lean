@@ -1,6 +1,6 @@
 module
 
-public import Foundation.ProvabilityLogic.Interpret
+public import Foundation.ProvabilityLogic.Arithmetic.Interpret
 public import Foundation.ProvabilityLogic.Kripke.RootExtension
 public import Foundation.FirstOrder.Incompleteness.ProvabilityAbstraction.Height
 public import Foundation.Vorspiel.List.ChainI
