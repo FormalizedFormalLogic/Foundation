@@ -1,19 +1,15 @@
 module
 
-public import Foundation.ProvabilityLogic.Sequent
+public import Foundation.ProvabilityLogic.Gentzen.GL.Basic
 public import Foundation.ProvabilityLogic.Kripke.Basic
 public import Mathlib.Data.Finset.Powerset
 public import Mathlib.Basic.Finite.Prod
 
 /-!
-# The sequent calculus of `GL`
+# Kripke semantics of the sequent calculus of `GL`
 
-The cut-free sequent calculus of `GL`, its soundness and completeness with respect to finite
-transitive irreflexive Kripke models, and the admissibility of cut as a corollary.
-
-## References
-
-- [SV82]
+Soundness and completeness of the sequent calculus of `GL` with respect to finite transitive
+irreflexive Kripke models, and the admissibility of cut as a corollary.
 -/
 
 @[expose] public section
@@ -22,42 +18,6 @@ namespace FFL.ProvabilityLogic
 
 open Kripke Kripke.Model Kripke.Model.World
 
-namespace GL
-
-variable {α : Type*} [DecidableEq α]
-
-/-- Derivability in the cut-free sequent calculus of `GL`. -/
-inductive Gentzen : Sequent α → Prop
-  | axm (A) : Gentzen ({A} ⟹ {A})
-  | botL : Gentzen ({⊥} ⟹ ∅)
-  | wkL {Γ Γ' Δ} : Gentzen (Γ ⟹ Δ) → (_ : Γ ⊆ Γ' := by grind) → Gentzen (Γ' ⟹ Δ)
-  | wkR {Γ Δ Δ'} : Gentzen (Γ ⟹ Δ) → (_ : Δ ⊆ Δ' := by grind) → Gentzen (Γ ⟹ Δ')
-  | impL {Γ Δ A B} :
-    Gentzen (Γ ⟹ insert A Δ) → Gentzen (insert B Γ ⟹ Δ) → Gentzen (insert (A 🡒 B) Γ ⟹ Δ)
-  | impR {Γ Δ A B} : Gentzen (insert A Γ ⟹ insert B Δ) → Gentzen (Γ ⟹ insert (A 🡒 B) Δ)
-  | boxGL {Γ A} : Gentzen (insert (□A) (Γ ∪ Γ.box) ⟹ {A}) → Gentzen (Γ.box ⟹ {□A})
-
-@[inherit_doc] scoped prefix:45 "⊢ᴳᴸ " => Gentzen
-
-scoped notation:45 "⊬ᴳᴸ " S:46 => ¬Gentzen S
-
-namespace Gentzen
-
-variable {Γ Γ' Δ Δ' : FormulaFinset α} {A B : Formula α} {S : Sequent α}
-
-lemma union (A) (hΓ : A ∈ Γ := by grind) (hΔ : A ∈ Δ := by grind) : ⊢ᴳᴸ (Γ ⟹ Δ) :=
-  wkR (wkL (axm A) (by simpa)) (by simpa)
-
-lemma union' (A) (hΓ : A ∈ S.ant) (hΔ : A ∈ S.suc) : ⊢ᴳᴸ S := union A hΓ hΔ
-
-lemma botL_mem (h : ⊥ ∈ Γ := by grind) : ⊢ᴳᴸ (Γ ⟹ Δ) := wkR (wkL botL (by simpa)) (by simp)
-
-lemma wk (h : ⊢ᴳᴸ (Γ ⟹ Δ)) (hΓ : Γ ⊆ Γ') (hΔ : Δ ⊆ Δ') : ⊢ᴳᴸ (Γ' ⟹ Δ') := wkR (wkL h hΓ) hΔ
-
-end Gentzen
-
-end GL
-
 /-! ### Soundness -/
 
 namespace Kripke
@@ -65,26 +25,34 @@ namespace Kripke
 variable {κ α : Type*} [Nonempty κ] [DecidableEq α] {M : Model κ α}
          {Γ Δ : FormulaFinset α} {A B : Formula α}
 
-/-- A sequent is valid in `M` if at every world, some succedent holds whenever every antecedent
-does. -/
-def Sequent.Valid (M : Model κ α) (S : Sequent α) : Prop :=
-  ∀ x : M.World, (∀ C ∈ S.ant, x ⊩[M] C) → ∃ D ∈ S.suc, x ⊩[M] D
+/-- `x ⊩[M] S`: some succedent of `S` holds at `x` whenever every antecedent does. -/
+def Model.World.ForcesSequent (M : Model κ α) (x : M.World) (S : Sequent α) : Prop :=
+  (∀ C ∈ S.ant, x ⊩[M] C) → ∃ D ∈ S.suc, x ⊩[M] D
+
+@[inherit_doc] scoped[FFL.ProvabilityLogic.Kripke.Model.World]
+  notation:55 x:56 " ⊩[" M "] " S:56 => Model.World.ForcesSequent M x S
+
+/-- `M ⊧ S`: `S` is forced at every world of `M`. -/
+def Model.ValidateSequent (M : Model κ α) (S : Sequent α) : Prop := ∀ x : M.World, x ⊩[M] S
+
+@[inherit_doc] scoped[FFL.ProvabilityLogic.Kripke.Model]
+  infix:45 " ⊧ " => Model.ValidateSequent
 
 omit [DecidableEq α] in
-lemma Sequent.valid_singleton_iff :
-    Sequent.Valid M (Γ ⟹ {A}) ↔ ∀ x : M.World, (∀ C ∈ Γ, x ⊩[M] C) → x ⊩[M] A := by
-  simp [Sequent.Valid];
+lemma Model.validateSequent_singleton_iff :
+    M ⊧ (Γ ⟹ {A}) ↔ ∀ x : M.World, (∀ C ∈ Γ, x ⊩[M] C) → x ⊩[M] A := by
+  simp [Model.ValidateSequent, Model.World.ForcesSequent];
 
-lemma Sequent.valid_boxGL [M.IsGL] (h : Sequent.Valid M (insert (□A) (Γ ∪ Γ.box) ⟹ {A})) :
-    Sequent.Valid M (Γ.box ⟹ {□A}) := by
-  apply valid_singleton_iff.mpr;
+lemma Model.validateSequent_boxGL [M.IsGL] (h : M ⊧ (insert (□A) (Γ ∪ Γ.box) ⟹ {A})) :
+    M ⊧ (Γ.box ⟹ {□A}) := by
+  apply validateSequent_singleton_iff.mpr;
   intro x hx;
   have hΓ : ∀ C ∈ Γ, x ⊩[M] □C := fun C hC ↦ hx _ (Finset.mem_image_of_mem _ hC);
   by_contra hA;
   obtain ⟨y, Rxy, hy⟩ := not_forces_box.mp hA;
   obtain ⟨t, ⟨Rxt, ht⟩, tmax⟩ := M.terminalOf {y | x ≺ y ∧ y ⊮[M] A} ⟨y, Rxy, hy⟩;
   apply ht;
-  apply valid_singleton_iff.mp h t;
+  apply validateSequent_singleton_iff.mp h t;
   simp only [Finset.mem_insert, Finset.mem_union, Finset.mem_image];
   rintro C (rfl | hC | ⟨C, hC, rfl⟩);
   . intro z Rtz;
@@ -100,8 +68,8 @@ namespace GL.Gentzen
 
 variable {α : Type*} [DecidableEq α] {S : Sequent α}
 
-theorem sound {κ : Type*} [Nonempty κ] (M : Kripke.Model κ α) [M.IsGL] (h : ⊢ᴳᴸ S) :
-    Kripke.Sequent.Valid M S := by
+theorem sound {κ : Type*} [Nonempty κ] (M : Kripke.Model κ α) [M.IsGL] (h : ⊢ᴳ[GL] S) :
+    M ⊧ S := by
   induction h with
   | axm A => intro x hx; exact ⟨A, by simp, hx A (by simp)⟩;
   | botL => intro x hx; exact absurd (hx ⊥ (by simp)) not_forces_bot;
@@ -126,12 +94,12 @@ theorem sound {κ : Type*} [Nonempty κ] (M : Kripke.Model κ α) [M.IsGL] (h : 
       . exact ⟨A 🡒 D, by simp, fun _ ↦ hxD⟩;
       . exact ⟨D, by simp [hD], hxD⟩;
     . exact ⟨A 🡒 B, by simp, fun h ↦ absurd h hA⟩;
-  | boxGL _ ih => exact Kripke.Sequent.valid_boxGL ih;
+  | boxGL _ ih => exact Kripke.Model.validateSequent_boxGL ih;
 
 @[simp, grind .]
-lemma not_empty : ⊬ᴳᴸ (∅ ⟹ ∅ : Sequent α) := by
+lemma not_empty : ⊬ᴳ[GL] (∅ ⟹ ∅ : Sequent α) := by
   intro h;
-  simpa [Kripke.Sequent.Valid] using sound (Kripke.Model.pointModel (α := α) fun _ ↦ False) h 0;
+  simpa [Model.ValidateSequent, Model.World.ForcesSequent] using sound (Kripke.Model.pointModel (α := α) fun _ ↦ False) h 0;
 
 end GL.Gentzen
 
@@ -146,7 +114,7 @@ countermodel of `BS`. -/
 structure SaturatedSequent (BS : Sequent α) extends Sequent α where
   saturated : toSequent.Saturated
   subset_subfmls : ant ∪ suc ⊆ BS.subfmls
-  unprovable : ⊬ᴳᴸ toSequent
+  unprovable : ⊬ᴳ[GL] toSequent
 
 namespace SaturatedSequent
 
@@ -173,13 +141,13 @@ instance : Finite (SaturatedSequent BS) :=
 open Classical in
 /-- One saturation step for each implication of the list, processed from the last to the
 first. -/
-noncomputable def saturate (S₀ : Sequent α) (h₀ : ⊬ᴳᴸ S₀) :
-    List (Formula α) → { S : Sequent α // ⊬ᴳᴸ S }
+noncomputable def saturate (S₀ : Sequent α) (h₀ : ⊬ᴳ[GL] S₀) :
+    List (Formula α) → { S : Sequent α // ⊬ᴳ[GL] S }
   | [] => ⟨S₀, h₀⟩
   | (A 🡒 B) :: l =>
     let ⟨S, hS⟩ := saturate S₀ h₀ l;
     if hAB : A 🡒 B ∈ S.ant then
-      if h : ⊬ᴳᴸ (S.ant ⟹ insert A S.suc) then ⟨S.ant ⟹ insert A S.suc, h⟩
+      if h : ⊬ᴳ[GL] S.ant ⟹ insert A S.suc then ⟨S.ant ⟹ insert A S.suc, h⟩
       else ⟨insert B S.ant ⟹ S.suc, fun h' ↦ hS <| by
         simpa [Finset.insert_eq_of_mem hAB] using Gentzen.impL (not_not.mp h) h'⟩
     else if hAB : A 🡒 B ∈ S.suc then
@@ -188,7 +156,7 @@ noncomputable def saturate (S₀ : Sequent α) (h₀ : ⊬ᴳᴸ S₀) :
     else ⟨S, hS⟩
   | _ :: l => saturate S₀ h₀ l
 
-variable {S₀ : Sequent α} {h₀ : ⊬ᴳᴸ S₀} {l : List (Formula α)}
+variable {S₀ : Sequent α} {h₀ : ⊬ᴳ[GL] S₀} {l : List (Formula α)}
 
 lemma subset_saturate : S₀ ⊆ (saturate S₀ h₀ l).1 := by
   induction l with
@@ -298,7 +266,7 @@ lemma sortedSubfmls_pairwise {BS : Sequent α} :
   List.pairwise_insertionSort _ _
 
 /-- The saturation of an unprovable sequent within the subformulas of `BS`. -/
-noncomputable def lindenbaum {BS : Sequent α} (S₀ : Sequent α) (h₀ : ⊬ᴳᴸ S₀)
+noncomputable def lindenbaum {BS : Sequent α} (S₀ : Sequent α) (h₀ : ⊬ᴳ[GL] S₀)
     (hS₀ : S₀.ant ∪ S₀.suc ⊆ BS.subfmls) : SaturatedSequent BS where
   toSequent := (saturate S₀ h₀ (sortedSubfmls BS)).1
   unprovable := (saturate S₀ h₀ (sortedSubfmls BS)).2
@@ -312,11 +280,11 @@ noncomputable def lindenbaum {BS : Sequent α} (S₀ : Sequent α) (h₀ : ⊬�
         Finset.mem_union_right _ h) h
   }
 
-lemma subset_lindenbaum {BS : Sequent α} {S₀ : Sequent α} {h₀ : ⊬ᴳᴸ S₀}
+lemma subset_lindenbaum {BS : Sequent α} {S₀ : Sequent α} {h₀ : ⊬ᴳ[GL] S₀}
     {hS₀ : S₀.ant ∪ S₀.suc ⊆ BS.subfmls} : S₀ ⊆ (lindenbaum (BS := BS) S₀ h₀ hS₀).toSequent :=
   subset_saturate
 
-instance [Fact (⊬ᴳᴸ BS)] : Nonempty (SaturatedSequent BS) :=
+instance [Fact (⊬ᴳ[GL] BS)] : Nonempty (SaturatedSequent BS) :=
   ⟨lindenbaum BS Fact.out (by grind)⟩
 
 end SaturatedSequent
@@ -324,13 +292,13 @@ end SaturatedSequent
 open SaturatedSequent
 
 /-- The canonical countermodel of an unprovable sequent `BS`. -/
-def countermodel (BS : Sequent α) [Fact (⊬ᴳᴸ BS)] : Kripke.Model (SaturatedSequent BS) α where
+def countermodel (BS : Sequent α) [Fact (⊬ᴳ[GL] BS)] : Kripke.Model (SaturatedSequent BS) α where
   Val' x a := #a ∈ x.ant
   Rel' x y := x.ant.prebox ⊂ y.ant.prebox ∧ x.ant.prebox ⊆ y.ant
 
 namespace countermodel
 
-variable {BS : Sequent α} [Fact (⊬ᴳᴸ BS)] {x : (countermodel BS).World} {A : Formula α}
+variable {BS : Sequent α} [Fact (⊬ᴳ[GL] BS)] {x : (countermodel BS).World} {A : Formula α}
 
 instance : (countermodel BS).IsFiniteGL where
   trans x y z Rxy Ryz := by
@@ -358,7 +326,7 @@ lemma truthlemma : (A ∈ x.ant → x ⊩[countermodel BS] A) ∧ (A ∈ x.suc �
       exact ih.1 <| Rxy.2 (by simpa);
     . intro h;
       apply not_forces_box.mpr;
-      have h₀ : ⊬ᴳᴸ (insert (□A) (x.ant.prebox ∪ x.ant.prebox.box) ⟹ {A}) := fun hp ↦
+      have h₀ : ⊬ᴳ[GL] insert (□A) (x.ant.prebox ∪ x.ant.prebox.box) ⟹ {A} := fun hp ↦
         x.unprovable <| Gentzen.wk (Gentzen.boxGL hp) FormulaFinset.box_prebox_subset (by simpa using h);
       have hS₀ : (insert (□A) (x.ant.prebox ∪ x.ant.prebox.box) ⟹ {A}).ant ∪
           (insert (□A) (x.ant.prebox ∪ x.ant.prebox.box) ⟹ {A}).suc ⊆ BS.subfmls := by
@@ -396,25 +364,25 @@ universe u
 variable {α : Type u} [DecidableEq α] {S : Sequent α}
 
 theorem complete
-    (h : ∀ {κ : Type u} [Nonempty κ] (M : Kripke.Model κ α), [M.IsFiniteGL] → Kripke.Sequent.Valid M S) :
-    ⊢ᴳᴸ S := by
+    (h : ∀ {κ : Type u} [Nonempty κ] (M : Kripke.Model κ α), [M.IsFiniteGL] → M ⊧ S) :
+    ⊢ᴳ[GL] S := by
   by_contra hS;
-  have : Fact (⊬ᴳᴸ S) := ⟨hS⟩;
+  have : Fact (⊬ᴳ[GL] S) := ⟨hS⟩;
   have hS₀ := subset_lindenbaum (BS := S) (S₀ := S) (h₀ := hS) (hS₀ := by grind);
   obtain ⟨D, hD, hxD⟩ := h (countermodel S) (lindenbaum S hS (by grind))
     (fun C hC ↦ countermodel.truthlemma.1 (hS₀.ant hC));
   exact countermodel.truthlemma.2 (hS₀.suc hD) hxD;
 
 /-- Completeness with respect to finite transitive irreflexive models. -/
-theorem iff_valid : ⊢ᴳᴸ S ↔
-    ∀ {κ : Type u} [Nonempty κ] (M : Kripke.Model κ α), [M.IsFiniteGL] → Kripke.Sequent.Valid M S :=
+theorem iff_valid : ⊢ᴳ[GL] S ↔
+    ∀ {κ : Type u} [Nonempty κ] (M : Kripke.Model κ α), [M.IsFiniteGL] → M ⊧ S :=
   ⟨fun h _ _ M _ ↦ sound M h, complete⟩
 
 variable {Γ₁ Γ₂ Δ₁ Δ₂ : FormulaFinset α} {A : Formula α}
 
 /-- Cut is admissible. -/
-theorem cut (h₁ : ⊢ᴳᴸ (Γ₁ ⟹ insert A Δ₁)) (h₂ : ⊢ᴳᴸ (insert A Γ₂ ⟹ Δ₂)) :
-    ⊢ᴳᴸ (Γ₁ ∪ Γ₂ ⟹ Δ₁ ∪ Δ₂) := by
+theorem cut (h₁ : ⊢ᴳ[GL] Γ₁ ⟹ insert A Δ₁) (h₂ : ⊢ᴳ[GL] insert A Γ₂ ⟹ Δ₂) :
+    ⊢ᴳ[GL] Γ₁ ∪ Γ₂ ⟹ Δ₁ ∪ Δ₂ := by
   apply complete;
   intro _ _ M _ x hx;
   obtain ⟨D, hD, hxD⟩ := sound M h₁ x (fun C hC ↦ hx C (by simp [hC]));

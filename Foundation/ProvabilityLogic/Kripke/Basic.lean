@@ -1,6 +1,6 @@
 module
 
-public import Foundation.ProvabilityLogic.Formula
+public import Foundation.ProvabilityLogic.Formula.Basic
 public import Foundation.Logic.Semantics
 public import Foundation.Vorspiel.Rel.CWF
 
