@@ -2,7 +2,6 @@ module
 
 public import Foundation.FirstOrder.Incompleteness.ProvabilityAbstraction.Reflection
 public import Foundation.FirstOrder.Incompleteness.Second
-public import Foundation.FirstOrder.LK.Axiomatizability
 
 @[expose] public section
 /-!
@@ -35,7 +34,8 @@ notation "𝗥𝗳𝗻[" Γ "] " T:max => Theory.localReflectionOn T Γ
 
 variable {T : ArithmeticTheory} [T.Δ₁]
 
-@[instance] theorem strictlyWeakerThan_localReflection [𝗜𝚺₁ ⪯ T] [Consistent T] :
+@[instance]
+lemma strictlyWeakerThan_localReflection [𝗜𝚺₁ ⪯ T] [Consistent T] :
     T ⪱ T ∪ 𝗥𝗳𝗻 T :=
   StrictlyWeakerThan.of_unprovable_provable (φ := T.consistent)
     (consistent_unprovable T)
@@ -149,13 +149,13 @@ theorem not_provable_localReflectionOn_insert [𝗜𝚺n ⪯ T]
     inferInstance
 
 theorem inconsistent_of_provable_localReflectionOn_union_of_finite [𝗜𝚺n ⪯ T]
-    {U U' : ArithmeticTheory} (hΓ : AxiomatizableBy (Hierarchy Γ n) U U') (hU' : U'.Finite)
+    {U U' : ArithmeticTheory} (e : U ≊ U') (hU' : U'.Finite) (hΓ : ∀ σ ∈ U', Hierarchy Γ n σ)
     (h : T ∪ U ⊢* 𝗥𝗳𝗻[StrictHierarchy Γ.alt n] T) : Inconsistent (T ∪ U) := by
   classical
-  have e : T ∪ U ≊ T ∪ U' := Theory.equiv_union_right hΓ.equiv T;
+  have e : T ∪ U ≊ T ∪ U' := Theory.equiv_union_right e T;
   have hmem : ∀ σ, σ ∈ hU'.toFinset.toList ↔ σ ∈ U' := by simp;
   have hconj : Hierarchy Γ n (⋀hU'.toFinset.toList) :=
-    Hierarchy.list_conj₂_iff.mpr fun σ hσ ↦ hΓ.forall_mem σ ((hmem σ).mp hσ);
+    Hierarchy.list_conj₂_iff.mpr fun σ hσ ↦ hΓ σ ((hmem σ).mp hσ);
   have hle : T ∪ U' ⪯ insert (⋀hU'.toFinset.toList) T := WeakerThan.ofAxm! <| by
     rintro φ (hφ | hφ);
     . exact by_axm (Set.mem_insert_of_mem _ hφ);

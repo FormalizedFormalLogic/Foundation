@@ -23,7 +23,7 @@ variable {L : Language} [L.ReferenceableBy L] {T₀ T : Theory L} (𝔅 : Provab
 abbrev localReflectionSchema (σ : Sentence L) : Sentence L := 𝔅 σ 🡒 σ
 
 def localReflectionOn (Γ : Sentence L → Prop) : Set (Sentence L) :=
-  𝔅.localReflectionSchema '' {σ | Γ σ}
+  Set.image 𝔅.localReflectionSchema Γ
 
 abbrev localReflection : Set (Sentence L) := 𝔅.localReflectionOn fun _ ↦ True
 
@@ -32,7 +32,8 @@ variable {Γ Γ' : Sentence L → Prop}
 @[simp]
 lemma mem_localReflectionOn_iff {ψ : Sentence L} :
     ψ ∈ 𝔅.localReflectionOn Γ ↔ ∃ σ, Γ σ ∧ ψ = 𝔅 σ 🡒 σ := by
-  simp [localReflectionOn, localReflectionSchema, eq_comm];
+  simp [localReflectionOn, localReflectionSchema, Set.image];
+  tauto;
 
 lemma localReflectionOn_mono (h : ∀ σ, Γ σ → Γ' σ) :
     𝔅.localReflectionOn Γ ⊆ 𝔅.localReflectionOn Γ' :=
@@ -60,7 +61,7 @@ theorem localReflection_of_con [𝔅.HBL2] [𝔅.FormalizedCompleteOn (∼σ)] :
 variable {π : Sentence L}
 
 theorem inconsistent_of_localReflection_provable [Diagonalization T₀] [T₀ ⪯ T] [𝔅.HBL]
-    (h : insert π T ⊢ 𝔅 (∼π) 🡒 ∼π) : Inconsistent (insert π T) := by
+    (h : insert π T ⊢ 𝔅.localReflectionSchema (∼π)) : Inconsistent (insert π T) := by
   have h₁ : T ⊢ π 🡒 (𝔅 (∼π) 🡒 ∼π) := deduction_iff.mp h;
   have h₂ : T ⊢ ∼π := löb_theorem (by cl_prover [h₁]);
   exact inconsistent_of_provable <| by cl_prover [adjoin! π T, to_adjoin (φ := π) h₂];
