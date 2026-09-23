@@ -131,6 +131,12 @@ def ModalizedIn (p : α) : Formula α → Prop
   | A 🡒 B => A.ModalizedIn p ∧ B.ModalizedIn p
   | □_    => True
 
+/-- Every atom occurs only in the scope of `□`.
+
+- [Bek90, §4]
+-/
+abbrev Modalized (A : Formula α) : Prop := ∀ a, A.ModalizedIn a
+
 @[simp, grind =]
 lemma complexity_box : (□A).complexity = A.complexity + 1 := rfl
 
@@ -151,6 +157,9 @@ def atoms : Formula α → Finset α
 @[simp, grind =] lemma atoms_iff : (A 🡘 B).atoms = A.atoms ∪ B.atoms := by
   simp [atoms, Finset.union_comm];
 @[simp, grind =] lemma atoms_box : (□A).atoms = A.atoms := rfl
+@[simp, grind =] lemma atoms_top : (⊤ : Formula α).atoms = ∅ := rfl
+@[simp, grind =] lemma atoms_and : (A ⋏ B).atoms = A.atoms ∪ B.atoms := by simp [atoms]
+@[simp, grind =] lemma atoms_dia : (◇A).atoms = A.atoms := by simp [atoms]
 
 @[grind]
 def subfmls : Formula α → FormulaFinset α
@@ -216,6 +225,28 @@ lemma atoms_union : (Γ ∪ Δ).atoms = Γ.atoms ∪ Δ.atoms := Finset.union_bi
 @[simp, grind =] lemma atoms_box : Γ.box.atoms = Γ.atoms := Finset.image_biUnion
 
 lemma atoms_subset_of_mem (h : A ∈ Γ) : A.atoms ⊆ Γ.atoms := Finset.subset_biUnion_of_mem _ h
+
+private lemma atoms_conj₂ : {l : List (Formula α)} → ∀ a ∈ (⋀l).atoms, ∃ B ∈ l, a ∈ B.atoms
+  | [] | [_] => by simp
+  | B :: C :: l => by
+    have := atoms_conj₂ (l := C :: l);
+    simp only [List.conj₂, Formula.atoms_and, Finset.mem_union];
+    grind;
+
+private lemma atoms_disj₂ : {l : List (Formula α)} → ∀ a ∈ (⋁l).atoms, ∃ B ∈ l, a ∈ B.atoms
+  | [] | [_] => by simp
+  | B :: C :: l => by
+    have := atoms_disj₂ (l := C :: l);
+    simp only [List.disj₂, Formula.atoms_or, Finset.mem_union];
+    grind;
+
+lemma atoms_conj : Γ.conj.atoms ⊆ Γ.atoms := fun a ha ↦ by
+  obtain ⟨B, hB, haB⟩ := atoms_conj₂ a ha;
+  exact atoms_subset_of_mem (Finset.mem_toList.mp hB) haB;
+
+lemma atoms_disj : Γ.disj.atoms ⊆ Γ.atoms := fun a ha ↦ by
+  obtain ⟨B, hB, haB⟩ := atoms_disj₂ a ha;
+  exact atoms_subset_of_mem (Finset.mem_toList.mp hB) haB;
 
 @[grind]
 def subfmls (Γ : FormulaFinset α) : FormulaFinset α := Γ.biUnion Formula.subfmls

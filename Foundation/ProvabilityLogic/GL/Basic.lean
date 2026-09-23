@@ -2,6 +2,7 @@ module
 
 public import Foundation.ProvabilityLogic.Logic
 public import Foundation.ProvabilityLogic.GL.Hilbert.Basic
+public import Foundation.ProvabilityLogic.Kripke.Unravelling
 
 /-!
 # The logic `GL`
@@ -45,12 +46,16 @@ theorem provability_TFAE : [
     ⊢ᴴ[GL] A,
     ⊢ᴳ[GL] ∅ ⟹ {A},
     ∀ {κ : Type u} [Nonempty κ] (M : Model κ α), [M.IsFiniteGL] → M ⊧ A,
-    ∀ {κ : Type u} [Nonempty κ] (M : RootedModel κ α), [M.IsFiniteGL] → M.root ⊩[M.toModel] A
+    ∀ {κ : Type u} [Nonempty κ] (M : RootedModel κ α), [M.IsFiniteGL] → M.root ⊩[M.toModel] A,
+    ∀ {κ : Type u} [Nonempty κ] (M : RootedModel κ α), [M.IsFiniteGL] → [M.IsTree] →
+      M.root ⊩[M.toModel] A
   ].TFAE := by
   tfae_have 1 ↔ 2 := Iff.rfl;
   tfae_have 2 ↔ 3 := GL.Hilbert.iff_gentzen;
   tfae_have 2 ↔ 4 := GL.Hilbert.iff_valid_finite;
   tfae_have 2 ↔ 5 := GL.Hilbert.iff_root_forces;
+  tfae_have 5 → 6 := fun h _ _ M _ _ ↦ h M;
+  tfae_have 6 → 5 := fun h _ _ M _ ↦ RootedModel.unravelling.forces_root_iff.mp (h M.unravelling);
   tfae_finish;
 
 lemma iff_provable_gentzen : A ∈ 𝐆𝐋 ↔ ⊢ᴳ[GL] ∅ ⟹ {A} := provability_TFAE.out 1 3
@@ -62,6 +67,11 @@ lemma iff_valid_finite : A ∈ 𝐆𝐋 ↔
 lemma iff_root_forces : A ∈ 𝐆𝐋 ↔
     ∀ {κ : Type u} [Nonempty κ] (M : RootedModel κ α), [M.IsFiniteGL] → M.root ⊩[M.toModel] A :=
   provability_TFAE.out 1 5
+
+lemma iff_tree_root_forces : A ∈ 𝐆𝐋 ↔
+    ∀ {κ : Type u} [Nonempty κ] (M : RootedModel κ α), [M.IsFiniteGL] → [M.IsTree] →
+      M.root ⊩[M.toModel] A :=
+  provability_TFAE.out 1 6
 
 end Logic.GL
 
