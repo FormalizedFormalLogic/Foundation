@@ -70,7 +70,8 @@ instance models_localReflectionOn {Γ : ArithmeticSentence → Prop} [ℕ↓[ℒ
       models_of_provable inferInstance (T.standardProvability.sound_on h);
     simpa using this;
 
-@[instance] theorem consistent_localReflection_of_sound [ℕ↓[ℒₒᵣ] ⊧* T] :
+@[instance]
+lemma consistent_localReflection_of_sound [ℕ↓[ℒₒᵣ] ⊧* T] :
     Consistent (T ∪ 𝗥𝗳𝗻 T) := Theory.consistent_of_satisfiable ⟨ℕ↓[ℒₒᵣ], inferInstance⟩
 
 section Sigma1Sound
