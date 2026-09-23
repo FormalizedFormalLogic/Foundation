@@ -79,7 +79,7 @@ variable {α : Type u} [DecidableEq α] {A : Formula α}
 -/
 theorem provability_TFAE : [
     A ∈ 𝐒,
-    ⊢ᴳ[S] ∅ ⟹ {A},
+    ⊢ᴳ[S] ∅ ⟹[1] {A},
     ∀ {κ : Type u} [Nonempty κ] (M : Model κ α) [M.IsGL] (w : ℕ → M.World),
       (∀ n, w (n + 1) ≺ w n) → ∃ i, ∀ j ≥ i, w j ⊩[M] A,
     ∀ {κ : Type u} [Nonempty κ] (M : RootedModel κ α) [M.IsFiniteGL],
@@ -89,7 +89,8 @@ theorem provability_TFAE : [
     A.rflSubfmls.conj 🡒 A ∈ 𝐆𝐋
   ].TFAE := by
   tfae_have 1 → 3 := fun h _ _ M _ _ hw ↦ eventually_forces h M hw;
-  tfae_have 2 ↔ 3 := by simpa [ForcesSequent] using S.Gentzen.iff_eventually_forces (S := ∅ ⟹ {A});
+  tfae_have 2 ↔ 3 := by
+    simpa [ForcesSequent] using S.Gentzen.iff_eventually_forces (Γ := ∅) (Δ := {A});
   tfae_have 3 → 4 := fun h _ _ M _ ↦ h M.toTail.toModel (fun n ↦ .inr n)
     (fun n ↦ RootedModel.toTail.rel_inr_inr.mpr (by exact_mod_cast n.lt_succ_self));
   tfae_have 4 → 5 := by
@@ -104,7 +105,7 @@ theorem provability_TFAE : [
   tfae_have 6 → 1 := fun h ↦ mem_of_mem_GL_conj (by simp [Formula.rflSubfmls, axiomT]) h;
   tfae_finish;
 
-lemma iff_gentzen : A ∈ 𝐒 ↔ ⊢ᴳ[S] ∅ ⟹ {A} := provability_TFAE.out 1 2
+lemma iff_gentzen : A ∈ 𝐒 ↔ ⊢ᴳ[S] ∅ ⟹[1] {A} := provability_TFAE.out 1 2
 
 lemma iff_eventually_forces : A ∈ 𝐒 ↔
     ∀ {κ : Type u} [Nonempty κ] (M : Model κ α) [M.IsGL] (w : ℕ → M.World),

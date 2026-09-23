@@ -26,6 +26,22 @@ def Model.ValidateSequent (M : Model κ α) (S : Sequent α) : Prop := ∀ x : M
 scoped[FFL.ProvabilityLogic.Kripke.Model]
   infix:45 " ⊧ " => Model.ValidateSequent
 
+namespace Model.World
+
+variable {x : M.World}
+
+@[grind .] lemma forcesSequent_axm : x ⊩[M] ({A} ⟹ {A}) := fun hx ↦ ⟨A, by simp, hx A (by simp)⟩
+
+@[grind .] lemma forcesSequent_botL : x ⊩[M] ({⊥} ⟹ ∅) := fun hx ↦ absurd (hx ⊥ (by simp)) id
+
+lemma forcesSequent_wkL (h : x ⊩[M] (Γ ⟹ Δ)) (hΓ : Γ ⊆ Γ') : x ⊩[M] (Γ' ⟹ Δ) :=
+  fun hx ↦ h fun C hC ↦ hx C (hΓ hC)
+
+lemma forcesSequent_wkR (h : x ⊩[M] (Γ ⟹ Δ)) (hΔ : Δ ⊆ Δ') : x ⊩[M] (Γ ⟹ Δ') :=
+  fun hx ↦ (h hx).imp fun _ hD ↦ ⟨hΔ hD.1, hD.2⟩
+
+end Model.World
+
 section
 
 variable [DecidableEq α]
@@ -80,20 +96,18 @@ lemma validateSequent_singleton_iff :
 /-! ### Soundness of the propositional rules -/
 
 @[grind .]
-lemma validateSequent_axm : M ⊧ ({A} ⟹ {A}) := fun _ hx ↦ ⟨A, by simp, hx A (by simp)⟩
+lemma validateSequent_axm : M ⊧ ({A} ⟹ {A}) := fun _ ↦ forcesSequent_axm
 
 @[grind .]
-lemma validateSequent_botL : M ⊧ ({⊥} ⟹ ∅) := fun _ hx ↦ absurd (hx ⊥ (by simp)) not_forces_bot
+lemma validateSequent_botL : M ⊧ ({⊥} ⟹ ∅) := fun _ ↦ forcesSequent_botL
 
 @[grind →]
 lemma validateSequent_wkL (h : M ⊧ (Γ ⟹ Δ)) (hΓ : Γ ⊆ Γ') : M ⊧ (Γ' ⟹ Δ) :=
-  fun x hx ↦ h x (fun C hC ↦ hx C (hΓ hC))
+  fun x ↦ forcesSequent_wkL (h x) hΓ
 
 @[grind →]
-lemma validateSequent_wkR (h : M ⊧ (Γ ⟹ Δ)) (hΔ : Δ ⊆ Δ') : M ⊧ (Γ ⟹ Δ') := by
-  intro x hx;
-  obtain ⟨D, hD, hxD⟩ := h x hx;
-  exact ⟨D, hΔ hD, hxD⟩;
+lemma validateSequent_wkR (h : M ⊧ (Γ ⟹ Δ)) (hΔ : Δ ⊆ Δ') : M ⊧ (Γ ⟹ Δ') :=
+  fun x ↦ forcesSequent_wkR (h x) hΔ
 
 variable [DecidableEq α]
 

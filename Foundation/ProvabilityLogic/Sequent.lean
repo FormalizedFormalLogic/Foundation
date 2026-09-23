@@ -17,6 +17,15 @@ structure Sequent (α : Type*) where
 
 infix:50 " ⟹ " => Sequent.mk
 
+/-- A sequent labelled with one of `n` layers.
+
+- [KK23]
+-/
+structure LayeredSequent (n : ℕ) (α : Type*) extends Sequent α where
+  level : Fin n
+
+notation:50 Γ:51 " ⟹[" l "] " Δ:51 => LayeredSequent.mk (Sequent.mk Γ Δ) l
+
 namespace Sequent
 
 variable {α : Type*} {S T : Sequent α} {B C : Formula α}
@@ -224,6 +233,39 @@ theorem exists_saturated (hD : IsImpClosed D) {BS S₀ : Sequent α} (h₀ : ¬D
   . exact fun hbox _ h ↦ h₃ hbox (hl.mpr (hsub (Finset.mem_union_left _ h))) h;
 
 end Sequent
+
+namespace LayeredSequent
+
+variable {α : Type*} [DecidableEq α] {n : ℕ}
+
+/-- `D` is closed under the structural and propositional rules at every layer. -/
+structure IsPropClosed (D : LayeredSequent n α → Prop) : Prop where
+  axm (l : Fin n) (A : Formula α) : D ({A} ⟹[l] {A})
+  botL (l : Fin n) : D ({⊥} ⟹[l] ∅)
+  wkL {l : Fin n} {Γ Γ' Δ : FormulaFinset α} : D (Γ ⟹[l] Δ) → Γ ⊆ Γ' → D (Γ' ⟹[l] Δ)
+  wkR {l : Fin n} {Γ Δ Δ' : FormulaFinset α} : D (Γ ⟹[l] Δ) → Δ ⊆ Δ' → D (Γ ⟹[l] Δ')
+  impL {l : Fin n} {Γ Δ : FormulaFinset α} {A B : Formula α} :
+    D (Γ ⟹[l] insert A Δ) → D (insert B Γ ⟹[l] Δ) → D (insert (A 🡒 B) Γ ⟹[l] Δ)
+  impR {l : Fin n} {Γ Δ : FormulaFinset α} {A B : Formula α} :
+    D (insert A Γ ⟹[l] insert B Δ) → D (Γ ⟹[l] insert (A 🡒 B) Δ)
+
+namespace IsPropClosed
+
+variable {D : LayeredSequent n α → Prop} (hD : IsPropClosed D) {l : Fin n}
+         {Γ Δ : FormulaFinset α} {A : Formula α}
+include hD
+
+lemma union (A : Formula α) (hΓ : A ∈ Γ) (hΔ : A ∈ Δ) : D (Γ ⟹[l] Δ) :=
+  hD.wkR (hD.wkL (hD.axm l A) (by simpa)) (by simpa)
+
+lemma botL_mem (h : ⊥ ∈ Γ) : D (Γ ⟹[l] Δ) := hD.wkR (hD.wkL (hD.botL l) (by simpa)) (by simp)
+
+lemma isImpClosed (l : Fin n) : Sequent.IsImpClosed fun S ↦ D (S.ant ⟹[l] S.suc) :=
+  ⟨fun h₁ h₂ ↦ hD.union _ h₁ h₂, hD.impL, hD.impR⟩
+
+end IsPropClosed
+
+end LayeredSequent
 
 end FFL.ProvabilityLogic
 

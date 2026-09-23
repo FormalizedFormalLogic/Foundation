@@ -48,48 +48,70 @@ end Kripke.Model
 
 namespace S.Gentzen
 
-variable {α : Type*} [DecidableEq α] {S : Sequent α}
+variable {α : Type*} [DecidableEq α] {Γ Δ : FormulaFinset α}
 
 /-- - [KK23, Theorem 3.1] -/
-theorem sound (h : ⊢ᴳ[S] S) :
+theorem sound_aux {T : LayeredSequent 2 α} (h : ⊢ᴳ[S] T) :
     ∃ X : FormulaFinset α, ∀ {κ : Type*} [Nonempty κ] (M : Model κ α) [M.IsGL] (x : M.World),
-      x.IsReflexiveOf X → x ⊩[M] S := by
+      (T.level = 1 → x.IsReflexiveOf X) → x ⊩[M] T.toSequent := by
   induction h with
-  | ofGL h => exact ⟨∅, fun M _ x _ ↦ GL.Gentzen.sound M h x⟩;
+  | axm => exact ⟨∅, fun _ _ _ _ ↦ forcesSequent_axm⟩;
+  | botL => exact ⟨∅, fun _ _ _ _ ↦ forcesSequent_botL⟩;
+  | wkL _ hΓ ih =>
+    obtain ⟨X, h⟩ := ih;
+    exact ⟨X, fun M _ x hx ↦ forcesSequent_wkL (h M x hx) hΓ⟩;
+  | wkR _ hΔ ih =>
+    obtain ⟨X, h⟩ := ih;
+    exact ⟨X, fun M _ x hx ↦ forcesSequent_wkR (h M x hx) hΔ⟩;
   | impL _ _ ih₁ ih₂ =>
     obtain ⟨X₁, h₁⟩ := ih₁;
     obtain ⟨X₂, h₂⟩ := ih₂;
     exact ⟨X₁ ∪ X₂, fun M _ x hx ↦ forcesSequent_impL
-      (h₁ M x fun A hA ↦ hx A (by simp [hA])) (h₂ M x fun A hA ↦ hx A (by simp [hA]))⟩;
+      (h₁ M x fun hl A hA ↦ hx hl A (by simp [hA])) (h₂ M x fun hl A hA ↦ hx hl A (by simp [hA]))⟩;
   | impR _ ih =>
     obtain ⟨X, h⟩ := ih;
     exact ⟨X, fun M _ x hx ↦ forcesSequent_impR (h M x hx)⟩;
+  | liftUp _ ih =>
+    obtain ⟨X, h⟩ := ih;
+    exact ⟨∅, fun M _ x _ ↦ h M x nofun⟩;
+  | boxGL _ ih =>
+    obtain ⟨X, h⟩ := ih;
+    exact ⟨∅, fun M _ x _ ↦ validateSequent_boxGL (fun y ↦ h M y nofun) x⟩;
   | @boxL Γ Δ A _ ih =>
     obtain ⟨X, h⟩ := ih;
     use insert A X;
     intro _ _ M _ x hx hΓ;
-    apply h M x (fun B hB ↦ hx B (by simp [hB]));
+    have hx := hx rfl;
+    apply h M x (fun _ B hB ↦ hx B (by simp [hB]));
     intro C hC;
     rcases Finset.mem_insert.mp hC with rfl | hC;
     . exact hx C (by simp) (hΓ _ (by simp));
     . exact hΓ C (by simp [hC]);
 
+/-- - [KK23, Theorem 3.1] -/
+theorem sound (h : ⊢ᴳ[S] Γ ⟹[1] Δ) :
+    ∃ X : FormulaFinset α, ∀ {κ : Type*} [Nonempty κ] (M : Model κ α) [M.IsGL] (x : M.World),
+      x.IsReflexiveOf X → x ⊩[M] (Γ ⟹ Δ) := by
+  obtain ⟨X, hX⟩ := sound_aux h;
+  exact ⟨X, fun M _ x hx ↦ hX M x fun _ ↦ hx⟩;
+
 universe u
 
-variable {α : Type u} [DecidableEq α] {S : Sequent α}
+variable {α : Type u} [DecidableEq α] {Γ Δ : FormulaFinset α}
 
 /-- - [KK23, Theorem 3.1] -/
 theorem complete
     (h : ∀ {κ : Type u} [Nonempty κ] (M : Model κ α) [M.IsGL] (w : ℕ → M.World),
-      (∀ n, w (n + 1) ≺ w n) → ∃ i, w i ⊩[M] S) :
-    ⊢ᴳ[S] S := by
+      (∀ n, w (n + 1) ≺ w n) → ∃ i, w i ⊩[M] (Γ ⟹ Δ)) :
+    ⊢ᴳ[S] Γ ⟹[1] Δ := by
   by_contra hS;
-  have : Fact (⊬ᴳ[GL] S) := ⟨fun h ↦ hS (.ofGL h)⟩;
+  have hGL : ∀ {S : Sequent α}, ⊢ᴳ[GL] S → ⊢ᴳ[S] S.ant ⟹[1] S.suc := fun h ↦ .liftUp (of_GL h);
+  have : Fact (⊬ᴳ[GL] Γ ⟹ Δ) := ⟨fun h ↦ hS (hGL h)⟩;
   obtain ⟨T, hsub, hT, hsat, hsubf, hbox⟩ :=
-    Sequent.exists_saturated Gentzen.isImpClosed (BS := S) hS (by grind);
-  replace hbox : ∀ {A}, □A ∈ T.ant → A ∈ T.ant := hbox Gentzen.boxL;
-  let t : GL.SaturatedSequent S := ⟨T, hsat, hsubf, fun h ↦ hT (.ofGL h)⟩;
-  let N := ((GL.countermodel S).cone t).toTail;
+    Sequent.exists_saturated (isPropClosed.isImpClosed 1) (BS := Γ ⟹ Δ) (S₀ := Γ ⟹ Δ) hS (by grind);
+  replace hbox : ∀ {A}, □A ∈ T.ant → A ∈ T.ant := hbox boxL;
+  let t : GL.SaturatedSequent (Γ ⟹ Δ) := ⟨T, hsat, hsubf, fun h ↦ hT (hGL h)⟩;
+  let N := ((GL.countermodel (Γ ⟹ Δ)).cone t).toTail;
   have key : ∀ A (i : ℕ∞),
       (A ∈ T.ant → Sum.inr i ⊩[N.toModel] A) ∧ (A ∈ T.suc → ¬Sum.inr i ⊩[N.toModel] A) := by
     intro A;
@@ -127,13 +149,13 @@ theorem complete
 
 /-- - [KK23, Theorem 3.1] -/
 theorem TFAE : [
-    ⊢ᴳ[S] S,
+    ⊢ᴳ[S] Γ ⟹[1] Δ,
     ∃ X : FormulaFinset α, ∀ {κ : Type u} [Nonempty κ] (M : Model κ α) [M.IsGL] (x : M.World),
-      x.IsReflexiveOf X → x ⊩[M] S,
+      x.IsReflexiveOf X → x ⊩[M] (Γ ⟹ Δ),
     ∀ {κ : Type u} [Nonempty κ] (M : Model κ α) [M.IsGL] (w : ℕ → M.World),
-      (∀ n, w (n + 1) ≺ w n) → ∃ i, ∀ j ≥ i, w j ⊩[M] S,
+      (∀ n, w (n + 1) ≺ w n) → ∃ i, ∀ j ≥ i, w j ⊩[M] (Γ ⟹ Δ),
     ∀ {κ : Type u} [Nonempty κ] (M : Model κ α) [M.IsGL] (w : ℕ → M.World),
-      (∀ n, w (n + 1) ≺ w n) → ∃ i, w i ⊩[M] S
+      (∀ n, w (n + 1) ≺ w n) → ∃ i, w i ⊩[M] (Γ ⟹ Δ)
   ].TFAE := by
   tfae_have 1 → 2 := fun h ↦ by
     obtain ⟨X, hX⟩ := sound h;
@@ -146,9 +168,9 @@ theorem TFAE : [
   tfae_have 4 → 1 := complete;
   tfae_finish;
 
-lemma iff_eventually_forces : ⊢ᴳ[S] S ↔
+lemma iff_eventually_forces : ⊢ᴳ[S] Γ ⟹[1] Δ ↔
     ∀ {κ : Type u} [Nonempty κ] (M : Model κ α) [M.IsGL] (w : ℕ → M.World),
-      (∀ n, w (n + 1) ≺ w n) → ∃ i, ∀ j ≥ i, w j ⊩[M] S :=
+      (∀ n, w (n + 1) ≺ w n) → ∃ i, ∀ j ≥ i, w j ⊩[M] (Γ ⟹ Δ) :=
   TFAE.out 1 3
 
 variable {Γ₁ Γ₂ Δ₁ Δ₂ : FormulaFinset α} {A : Formula α}
@@ -157,13 +179,15 @@ variable {Γ₁ Γ₂ Δ₁ Δ₂ : FormulaFinset α} {A : Formula α}
 
 - [KK23, Theorem 3.1]
 -/
-theorem cut (h₁ : ⊢ᴳ[S] Γ₁ ⟹ insert A Δ₁) (h₂ : ⊢ᴳ[S] insert A Γ₂ ⟹ Δ₂) :
-    ⊢ᴳ[S] Γ₁ ∪ Γ₂ ⟹ Δ₁ ∪ Δ₂ := by
-  apply iff_eventually_forces.mpr;
-  intro _ _ M _ w hw;
-  obtain ⟨i₁, hi₁⟩ := iff_eventually_forces.mp h₁ M w hw;
-  obtain ⟨i₂, hi₂⟩ := iff_eventually_forces.mp h₂ M w hw;
-  exact ⟨max i₁ i₂, fun j hj ↦ forcesSequent_cut (hi₁ j (by omega)) (hi₂ j (by omega))⟩;
+theorem cut : {l : Fin 2} → ⊢ᴳ[S] Γ₁ ⟹[l] insert A Δ₁ → ⊢ᴳ[S] insert A Γ₂ ⟹[l] Δ₂ →
+    ⊢ᴳ[S] Γ₁ ∪ Γ₂ ⟹[l] Δ₁ ∪ Δ₂
+  | 0, h₁, h₂ => iff_GL.mpr (GL.Gentzen.cut (iff_GL.mp h₁) (iff_GL.mp h₂))
+  | 1, h₁, h₂ => by
+    apply iff_eventually_forces.mpr;
+    intro _ _ M _ w hw;
+    obtain ⟨i₁, hi₁⟩ := iff_eventually_forces.mp h₁ M w hw;
+    obtain ⟨i₂, hi₂⟩ := iff_eventually_forces.mp h₂ M w hw;
+    exact ⟨max i₁ i₂, fun j hj ↦ forcesSequent_cut (hi₁ j (by omega)) (hi₂ j (by omega))⟩
 
 end S.Gentzen
 
