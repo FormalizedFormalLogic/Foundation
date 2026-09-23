@@ -408,7 +408,7 @@ notation "𝐋𝐉¹[" L "]" => LJ.symbol (L := L)
 abbrev LJ.Proof (φ : Propositionᵢ L) := 0 ⊢ᴸᴶ¹ some φ
 
 instance : Entailment (LJ L) (Propositionᵢ L) where
-  Prf _ φ := Nonempty (LJ.Proof φ)
+  Entails _ φ := Nonempty (LJ.Proof φ)
 
 namespace LJ
 

@@ -30,9 +30,9 @@ namespace FFL
 
 /-- Entailment relation on proof system `S` and formula `F` -/
 class Entailment (S : Type*) (F : outParam Type*) where
-  Prf : S → F → Prop
+  Entails : S → F → Prop
 
-infix:45 " ⊢ " => Entailment.Prf
+infix:45 " ⊢ " => Entailment.Entails
 
 namespace Entailment
 
@@ -544,7 +544,7 @@ variable {S}
 abbrev pullback (𝓢 : S) (f : G → F) : Pullback S f := ⟨𝓢⟩
 
 instance (f : G → F) : Entailment (Pullback S f) G where
-  Prf := fun 𝓢 φ ↦ 𝓢.forget ⊢ f φ
+  Entails := fun 𝓢 φ ↦ 𝓢.forget ⊢ f φ
 
 namespace Pullback
 

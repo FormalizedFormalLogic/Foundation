@@ -101,7 +101,7 @@ notation "𝐋𝐊⁰" => LK.Proof.Symbol.symbol
 abbrev LK.Proof (φ : NNFormula α) := ⊢ᴸᴷ⁰ ⦃φ⦄
 
 instance : Entailment (LK.Proof.Symbol α) (NNFormula α) where
-  Prf _ φ := Nonempty (LK.Proof φ)
+  Entails _ φ := Nonempty (LK.Proof φ)
 
 namespace LK.Proof
 

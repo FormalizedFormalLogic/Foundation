@@ -133,7 +133,7 @@ structure Theory.Proof (T : Theory L) (σ : Sentence L) where
 namespace Theory.Proof
 
 instance : Entailment (Theory L) (Sentence L) where
-  Prf 𝓢 φ := Nonempty (Theory.Proof 𝓢 φ)
+  Entails 𝓢 φ := Nonempty (Theory.Proof 𝓢 φ)
 
 attribute [simp] Theory.Proof.axioms_mem
 

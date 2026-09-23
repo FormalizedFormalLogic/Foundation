@@ -166,7 +166,7 @@ def getGoalTwoSided (e : Q(Prop)) : MetaM ((c : Context) × List Q($c.F) × List
   return ⟨⟨_, _, F, instLC, instLN, instDE, S, E, 𝓢, instInt⟩, Γ, Δ⟩
 
 def getGoalProvable (e : Q(Prop)) : MetaM ((c : Context) × Q($c.F)) := do
-  let ~q(@Entailment.Prf $S $F $E $𝓢 $p) := e | throwError m!"(getGoal) error: {e} not a form of _ ⊢ _"
+  let ~q(@Entailment.Entails $S $F $E $𝓢 $p) := e | throwError m!"(getGoal) error: {e} not a form of _ ⊢ _"
   let .some instDE ← trySynthInstanceQ q(DecidableEq $F)
     | throwError m! "error: failed to find instance DecidableEq {F}"
   let .some instLC ← trySynthInstanceQ q(LogicalConnective $F)
@@ -493,7 +493,7 @@ structure HypInfo where
 
 def synthProvable (e : Expr) : MetaM HypInfo := do
   let (ty : Q(Prop)) ← inferType e
-  let ~q(@Entailment.Prf $S $F $E $𝓢 $φ) := ty | throwError m!"(getGoal) error: {e} not a form of _ ⊢ _"
+  let ~q(@Entailment.Entails $S $F $E $𝓢 $φ) := ty | throwError m!"(getGoal) error: {e} not a form of _ ⊢ _"
   return ⟨_, _, F, S, E, 𝓢, φ, e⟩
 
 structure CompatibleHypInfo where

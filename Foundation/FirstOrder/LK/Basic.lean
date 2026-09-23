@@ -316,7 +316,7 @@ notation "𝐋𝐊¹[" L "]" => LK.symbol (L := L)
 abbrev LK.Proof (φ : Proposition L) := ⊢ᴸᴷ¹ ⦃φ⦄
 
 instance : Entailment (LK L) (Proposition L) where
-  Prf _ φ := Nonempty (LK.Proof φ)
+  Entails _ φ := Nonempty (LK.Proof φ)
 
 namespace LK.Proof
 
@@ -363,7 +363,7 @@ structure Theory.Proof (T : Theory L) (σ : Sentence L) where
 namespace Theory.Proof
 
 instance : Entailment (Theory L) (Sentence L) where
-  Prf T σ := Nonempty (Theory.Proof T σ)
+  Entails T σ := Nonempty (Theory.Proof T σ)
 
 variable {T : Theory L}
 
