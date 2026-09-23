@@ -147,12 +147,12 @@ lemma of_deltaZero {φ : Semiformula L ξ n} (h : Hierarchy 𝚺 0 φ) : StrictH
 
 lemma zero_iff {φ : Semiformula L ξ n} : StrictHierarchy Γ 0 φ ↔ Hierarchy 𝚺 0 φ := by
   constructor;
-  . intro h;
+  · intro h;
     generalize hs : 0 = s at h;
     rcases h with @⟨_, _, _, h⟩ | _ | _ | _;
-    . exact Hierarchy.bounded _ _ _ h;
+    · exact Hierarchy.bounded _ _ _ h;
     all_goals omega;
-  . intro h;
+  · intro h;
     exact zero (Hierarchy.zero_iff_delta_zero.mp h);
 
 end

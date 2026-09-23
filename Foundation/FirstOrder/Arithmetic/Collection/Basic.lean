@@ -40,13 +40,14 @@ lemma collection {R : V → V → Prop}
     (a : V) (h : ∀ x < a, ∃ y, R x y) : ∃ b, ∀ x < a, ∃ y < b, R x y := by
   obtain ⟨e, φ, hφ, hiff⟩ := hR;
   apply collection_eval hφ e a ?_ |>.imp;
-  . grind;
-  . grind;
+  · grind;
+  · grind;
 
 end CollectionScheme
 
 lemma CollectionScheme.models_of_collection
-  (H : ∀ {R : V → V → Prop}, Γ-[s].DefinableRel R → ∀ a, (∀ x < a, ∃ y, R x y) → ∃ b, ∀ x < a, ∃ y < b, R x y) :
+  (H : ∀ {R : V → V → Prop}, Γ-[s].DefinableRel R →
+      ∀ a, (∀ x < a, ∃ y, R x y) → ∃ b, ∀ x < a, ∃ y < b, R x y) :
   V↓[ℒₒᵣ] ⊧* CollectionScheme (Hierarchy Γ s) := by
   apply Semantics.ModelsSet.setOf_iff.mpr;
   rintro _ ⟨φ, hφ, rfl⟩;
@@ -78,8 +79,8 @@ section standardModel
 instance models_CollectionOnHierarchy (Γ : Polarity) (s : ℕ) : ℕ↓[ℒₒᵣ] ⊧* 𝗕 Γ s := by
   apply Semantics.ModelsSet.union_iff.mpr;
   and_intros;
-  . infer_instance;
-  . apply models_of_ss
+  · infer_instance;
+  · apply models_of_ss
       (CollectionScheme.models_of_collection ?_)
       (CollectionScheme_subset (·.hierarchy));
     intro R _ a h;
@@ -88,8 +89,8 @@ instance models_CollectionOnHierarchy (Γ : Polarity) (s : ℕ) : ℕ↓[ℒₒ�
     intro x hx;
     use g x;
     and_intros;
-    . exact Nat.lt_succ_of_le (Finset.le_sup (Finset.mem_range.mpr hx));
-    . exact hg x hx;
+    · exact Nat.lt_succ_of_le (Finset.le_sup (Finset.mem_range.mpr hx));
+    · exact hg x hx;
 
 instance {Γ : Polarity} {s : ℕ} : Consistent (𝗕 Γ s) := (𝗕 Γ s).consistent_of_sound (Eq ⊥) rfl
 
@@ -101,7 +102,7 @@ section BSigma_ISigma
 
 variable {s : ℕ}
 
-lemma ISigma.collection [V↓[ℒₒᵣ] ⊧* 𝗜𝚺 (s + 1)] {R : V → V → Prop}
+lemma ISigma.collection [V↓[ℒₒᵣ] ⊧* 𝗜𝚺(s + 1)] {R : V → V → Prop}
     (hR : 𝚺-[s + 1].DefinableRel R) (a : V) (h : ∀ x < a, ∃ y, R x y) :
     ∃ b, ∀ x < a, ∃ y < b, R x y := by
   have : V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := mod_paMinus_of_ISigma (s := s + 1);
@@ -109,32 +110,32 @@ lemma ISigma.collection [V↓[ℒₒᵣ] ⊧* 𝗜𝚺 (s + 1)] {R : V → V →
     apply InductionOnHierarchy.succ_induction_sigma 𝚺 (s + 1)
       (P := fun y ↦ ∃ b, ∀ x < y, x < a → ∃ u < b, R x u)
       (hP := by definability);
-    . use 0;
+    · use 0;
       simp;
-    . rintro y ⟨b, hb⟩;
+    · rintro y ⟨b, hb⟩;
       rcases lt_or_ge y a with hya | hya;
-      . obtain ⟨u₀, hu₀⟩ := h y hya;
+      · obtain ⟨u₀, hu₀⟩ := h y hya;
         use max b (u₀ + 1);
         intro x hx _;
         rcases le_iff_lt_or_eq.mp (Arithmetic.lt_succ_iff_le.mp hx) with hx | rfl;
-        . obtain ⟨u, hu, hRu⟩ := hb x hx (lt_trans hx hya);
+        · obtain ⟨u, hu, hRu⟩ := hb x hx (lt_trans hx hya);
           exact ⟨u, lt_of_lt_of_le hu (le_max_left b (u₀ + 1)), hRu⟩;
-        . exact ⟨u₀, lt_of_lt_of_le (lt_add_one u₀) (le_max_right b (u₀ + 1)), hu₀⟩;
-      . use b;
+        · exact ⟨u₀, lt_of_lt_of_le (lt_add_one u₀) (le_max_right b (u₀ + 1)), hu₀⟩;
+      · use b;
         intro x hx hxa;
         rcases le_iff_lt_or_eq.mp (Arithmetic.lt_succ_iff_le.mp hx) with hx | rfl;
-        . exact hb x hx hxa;
-        . exact absurd hxa (not_lt.mpr hya);
+        · exact hb x hx hxa;
+        · exact absurd hxa (not_lt.mpr hya);
   obtain ⟨b, hb⟩ := key (a + 1);
   use b;
   intro x hx;
   exact hb x (lt_trans hx (lt_add_one a)) hx;
 
-instance ISigma.models_BSigma_succ [V↓[ℒₒᵣ] ⊧* 𝗜𝚺 (s + 1)] : V↓[ℒₒᵣ] ⊧* 𝗕𝚺 (s + 1) := by
+instance ISigma.models_BSigma_succ [V↓[ℒₒᵣ] ⊧* 𝗜𝚺(s + 1)] : V↓[ℒₒᵣ] ⊧* 𝗕𝚺 (s + 1) := by
   apply Semantics.ModelsSet.union_iff.mpr;
   and_intros;
-  . exact mod_ISigma_of_le (Nat.zero_le (s + 1));
-  . exact models_of_ss
+  · exact mod_ISigma_of_le (Nat.zero_le (s + 1));
+  · exact models_of_ss
       (CollectionScheme.models_of_collection (Γ := 𝚺) ISigma.collection)
       (CollectionScheme_subset (·.hierarchy));
 
