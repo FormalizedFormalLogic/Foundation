@@ -10,8 +10,8 @@ Local reflection schemas for an abstract provability predicate and their relatio
 
 ## References
 
-- [Lin97, §4.1, p. 52]
-- [AB05, §4]
+- [Lin97, §4.1, p. 52, Exercise 4.1(b)(ii), Theorem 4.1]
+- [AB05, §4, Lemma 22(i), Theorem 23, Remark 24]
 -/
 
 namespace FFL.FirstOrder.ProvabilityAbstraction.Provability
