@@ -99,6 +99,42 @@ universe u
 
 variable {α : Type u} [DecidableEq α] {Γ Δ : FormulaFinset α}
 
+/-- A saturated sequent `t` closed under `□A ↦ A` on the left is true at the finite points of a
+tail below the cone of `t` in the countermodel. -/
+lemma truthlemma_freeTail {BS : Sequent α} [Fact (⊬ᴳ[GL] BS)] {t : GL.SaturatedSequent BS}
+    (hbox : ∀ {A}, □A ∈ t.ant → A ∈ t.ant) {V : ℕ∞ → α → Prop}
+    (hV : ∀ n : ℕ, V n = fun a ↦ #a ∈ t.ant) (A : Formula α) (n : ℕ) :
+    let N := ((GL.countermodel BS).cone t).toModel.toFreeTail V;
+    (A ∈ t.ant → Sum.inr (n : ℕ∞) ⊩[N.toModel] A) ∧ (A ∈ t.suc → ¬Sum.inr (n : ℕ∞) ⊩[N.toModel] A) := by
+  induction A generalizing n with
+  | atom a =>
+    have := iff_of_eq (congrFun (hV n) a);
+    exact ⟨this.mpr, fun h h' ↦ GL.SaturatedSequent.not_mem_both ⟨this.mp h', h⟩⟩;
+  | falsum => exact ⟨fun h ↦ absurd h GL.SaturatedSequent.bot_not_mem_ant, fun _ ↦ id⟩;
+  | imp A B ihA ihB =>
+    constructor;
+    . intro h hA;
+      rcases t.saturated.impL h with h | h;
+      . exact absurd hA ((ihA n).2 h);
+      . exact (ihB n).1 h;
+    . intro h hf;
+      obtain ⟨hA, hB⟩ := t.saturated.impR h;
+      exact (ihB n).2 hB (hf ((ihA n).1 hA));
+  | box A ih =>
+    constructor;
+    . rintro h (⟨y, rfl | Rty⟩ | j) Rnj;
+      . exact Model.toFreeTail.forces_inl.mpr <| forces_cone.mpr <|
+          GL.countermodel.truthlemma.1 (hbox h);
+      . exact Model.toFreeTail.forces_inl.mpr <| forces_cone.mpr <|
+          GL.countermodel.truthlemma.1 (Rty.2 (by simpa using h));
+      . obtain ⟨m, rfl⟩ := ENat.ne_top_iff_exists.mp
+          (ne_top_of_lt (Model.toFreeTail.rel_inr_inr.mp Rnj));
+        exact (ih m).1 (hbox h);
+    . intro h hf;
+      obtain ⟨y, Rty, hy⟩ := not_forces_box.mp ((GL.countermodel.truthlemma (x := t)).2 h);
+      exact hy <| forces_cone.mp <| Model.toFreeTail.forces_inl.mp <|
+        hf (.inl ⟨y, .inr Rty⟩) trivial;
+
 /-- - [KK23, Theorem 3.1] -/
 theorem complete
     (h : ∀ {κ : Type u} [Nonempty κ] (M : Model κ α) [M.IsGL] (w : ℕ → M.World),
@@ -109,41 +145,12 @@ theorem complete
   have : Fact (⊬ᴳ[GL] Γ ⟹ Δ) := ⟨fun h ↦ hS (hGL h)⟩;
   obtain ⟨T, hsub, hT, hsat, hsubf, hbox⟩ :=
     Sequent.exists_saturated (isPropClosed.isImpClosed 1) (BS := Γ ⟹ Δ) (S₀ := Γ ⟹ Δ) hS (by grind);
-  replace hbox : ∀ {A}, □A ∈ T.ant → A ∈ T.ant := hbox boxL;
   let t : GL.SaturatedSequent (Γ ⟹ Δ) := ⟨T, hsat, hsubf, fun h ↦ hT (hGL h)⟩;
-  let N := ((GL.countermodel (Γ ⟹ Δ)).cone t).toTail;
-  have key : ∀ A (i : ℕ∞),
-      (A ∈ T.ant → Sum.inr i ⊩[N.toModel] A) ∧ (A ∈ T.suc → ¬Sum.inr i ⊩[N.toModel] A) := by
-    intro A;
-    induction A with
-    | atom a => exact fun _ ↦ ⟨id, fun h h' ↦ GL.SaturatedSequent.not_mem_both (S := t) ⟨h', h⟩⟩;
-    | falsum =>
-      exact fun _ ↦ ⟨fun h ↦ absurd h (GL.SaturatedSequent.bot_not_mem_ant (S := t)), fun _ ↦ id⟩;
-    | imp A B ihA ihB =>
-      intro i;
-      constructor;
-      . intro h hA;
-        rcases hsat.impL h with h | h;
-        . exact absurd hA ((ihA i).2 h);
-        . exact (ihB i).1 h;
-      . intro h hf;
-        obtain ⟨hA, hB⟩ := hsat.impR h;
-        exact (ihB i).2 hB (hf ((ihA i).1 hA));
-    | box A ih =>
-      intro i;
-      constructor;
-      . rintro h (⟨y, rfl | Rty⟩ | j) -;
-        . exact RootedModel.toTail.forces_inl.mpr <| forces_cone.mpr <|
-            (GL.countermodel.truthlemma (x := t)).1 (hbox h);
-        . exact RootedModel.toTail.forces_inl.mpr <| forces_cone.mpr <|
-            GL.countermodel.truthlemma.1 (Rty.2 (by simpa [t] using h));
-        . exact (ih j).1 (hbox h);
-      . intro h hf;
-        obtain ⟨y, Rty, hy⟩ := not_forces_box.mp ((GL.countermodel.truthlemma (x := t)).2 h);
-        exact hy <| forces_cone.mp <| RootedModel.toTail.forces_inl.mp <|
-          hf (.inl ⟨y, .inr Rty⟩) trivial;
-  obtain ⟨i, hi⟩ := h N.toModel (fun n ↦ .inr n)
-    (fun n ↦ RootedModel.toTail.rel_inr_inr.mpr (by exact_mod_cast n.lt_succ_self));
+  have key := truthlemma_freeTail (t := t) (hbox boxL) (V := fun _ a ↦ #a ∈ T.ant) (fun _ ↦ rfl);
+  obtain ⟨i, hi⟩ :=
+    h (((GL.countermodel (Γ ⟹ Δ)).cone t).toModel.toFreeTail fun _ a ↦ #a ∈ T.ant).toModel
+    (fun n ↦ .inr n)
+    (fun n ↦ Model.toFreeTail.rel_inr_inr.mpr (by exact_mod_cast n.lt_succ_self));
   obtain ⟨D, hD, hiD⟩ := hi fun C hC ↦ (key C i).1 (hsub.ant hC);
   exact (key D i).2 (hsub.suc hD) hiD;
 

@@ -53,23 +53,6 @@ lemma eventually_forces (h : A ∈ 𝐒) {κ : Type*} [Nonempty κ] (M : Model �
     obtain ⟨i, hi⟩ := ih (M.subst s) hw;
     exact ⟨i, fun j hj ↦ forces_subst.mp (hi j hj)⟩;
 
-variable [DecidableEq α]
-
-lemma mem_of_mem_GL_conj {Γ : FormulaFinset α} (hΓ : ∀ B ∈ Γ, B ∈ 𝐒) :
-    ∀ {A}, Γ.conj 🡒 A ∈ 𝐆𝐋 → A ∈ 𝐒 := by
-  induction Γ using Finset.induction_on with
-  | empty =>
-    intro A h;
-    have h₁ : ⊢ᴴ[GL] (∅ : FormulaFinset α).conj 🡒 A := h;
-    have h₂ : ⊢ᴴ[GL] (∅ : FormulaFinset α).conj := by simp [Finset.conj];
-    exact mem_of_mem_GL (h₁ ⨀ h₂);
-  | insert B Γ _ ih =>
-    intro A h;
-    have h₁ : ⊢ᴴ[GL] (insert B Γ).conj 🡒 A := h;
-    have h₂ : ⊢ᴴ[GL] B ⋏ Γ.conj 🡒 (insert B Γ).conj := CKFConjinsertFConj;
-    have h₃ : ⊢ᴴ[GL] Γ.conj 🡒 B 🡒 A := by cl_prover [h₁, h₂];
-    exact mdp (ih (fun C hC ↦ hΓ C (by simp [hC])) h₃) (hΓ B (by simp));
-
 universe u
 
 variable {α : Type u} [DecidableEq α] {A : Formula α}
@@ -92,17 +75,17 @@ theorem provability_TFAE : [
   tfae_have 2 ↔ 3 := by
     simpa [ForcesSequent] using S.Gentzen.iff_eventually_forces (Γ := ∅) (Δ := {A});
   tfae_have 3 → 4 := fun h _ _ M _ ↦ h M.toTail.toModel (fun n ↦ .inr n)
-    (fun n ↦ RootedModel.toTail.rel_inr_inr.mpr (by exact_mod_cast n.lt_succ_self));
+    (fun n ↦ Model.toFreeTail.rel_inr_inr.mpr (by exact_mod_cast n.lt_succ_self));
   tfae_have 4 → 5 := by
     intro h _ _ M _ hΓ;
     obtain ⟨i, hi⟩ := h M;
     have hroot : ∀ B, □B ∈ A.subfmls → M.root ⊩[M.toModel] □B 🡒 B :=
       fun B hB ↦ forces_conj.mp hΓ _
         (Finset.mem_image.mpr ⟨B, FormulaFinset.mem_prebox.mpr hB, rfl⟩);
-    exact (RootedModel.toTail.forces_inr_iff (fun _ hB ↦ Formula.subfmls_trans hB) hroot
+    exact (Model.toFreeTail.forces_inr_iff (fun _ ↦ rfl) (fun _ hB ↦ Formula.subfmls_trans hB) hroot
       Formula.mem_subfmls_self i).mp (hi i le_rfl);
   tfae_have 5 ↔ 6 := GL.iff_root_forces.symm;
-  tfae_have 6 → 1 := fun h ↦ mem_of_mem_GL_conj (by simp [Formula.rflSubfmls, axiomT]) h;
+  tfae_have 6 → 1 := GL.mem_sumQuasiNormal_of_conj (by simp [Formula.rflSubfmls, axiomT]);
   tfae_finish;
 
 lemma iff_gentzen : A ∈ 𝐒 ↔ ⊢ᴳ[S] ∅ ⟹[1] {A} := provability_TFAE.out 1 2
