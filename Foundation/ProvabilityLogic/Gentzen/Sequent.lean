@@ -1,6 +1,6 @@
 module
 
-public import Foundation.ProvabilityLogic.Formula.Basic
+public import Foundation.ProvabilityLogic.Formula
 
 /-!
 # Sequents
