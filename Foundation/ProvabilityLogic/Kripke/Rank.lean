@@ -16,8 +16,6 @@ variable {κ α : Type*} [Nonempty κ]
 
 namespace Model
 
-open Classical
-
 variable {M : Model κ α} [Fintype M.World] [M.IsGL] {x y : M.World} {n : ℕ}
 
 noncomputable def World.rank (x : M.World) : ℕ := cwfHeight (· ≺ ·) x
@@ -55,8 +53,8 @@ lemma rank_lt_height (h : M.root ≺ x) : Model.World.rank (M := M.toModel) x < 
 
 lemma rank_le_height : Model.World.rank (M := M.toModel) x ≤ M.height := by
   by_cases hx : x = M.root;
-  . subst hx; rfl;
-  . exact (rank_lt_height (M.root_rel x hx)).le;
+  · subst hx; rfl;
+  · exact (rank_lt_height (M.root_rel x hx)).le;
 
 lemma root_forces_boxItr_bot_iff : M.root ⊩[M.toModel] □^[n]⊥ ↔ M.height < n :=
   Model.forces_boxItr_bot_iff

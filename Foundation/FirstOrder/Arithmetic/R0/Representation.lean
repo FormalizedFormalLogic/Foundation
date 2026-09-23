@@ -7,11 +7,6 @@ public import Foundation.Vorspiel.Arithmetic
 public import Foundation.Vorspiel.Computability
 
 @[expose] public section
-set_option linter.style.openClassical false
-set_option linter.unusedSimpArgs false
-set_option linter.unusedTactic false
-set_option linter.unreachableTactic false
-set_option linter.unusedVariables false
 open Encodable Denumerable
 
 namespace FFL.FirstOrder.Arithmetic
@@ -372,8 +367,7 @@ end codeOfREPred
 
 section codeOfComputablePred
 
-open Classical
-
+open scoped Classical in
 noncomputable def codeOfComputablePred (p : ℕ → Prop) : ArithmeticSemisentence 1 :=
   (codeOfPartrec' (fun v ↦ Part.some (if p (v.get 0) then 1 else 0)))/[‘1’, #0]
 
@@ -383,6 +377,7 @@ noncomputable def codeOfComputablePred (p : ℕ → Prop) : ArithmeticSemisenten
 
 variable {p : ℕ → Prop}
 
+open scoped Classical in
 private lemma codeOfComputablePred_val_spec (hp : ComputablePred p) (x y : ℕ) :
     (codeOfPartrec' (fun v ↦ Part.some (if p (v.get 0) then 1 else 0))).Evalb (y :> ![x]) ↔
       y = if p x then 1 else 0 := by
@@ -409,6 +404,7 @@ theorem codeOfComputablePred_provable [𝗥₀ ⪯ T] (hp : ComputablePred p) (h
         using (codeOfComputablePred_val_spec hp x 1).trans (by by_cases hx : p x <;> simp [hx])
     simpa [models_iff, Semiformula.eval_substs, Matrix.constant_eq_singleton] using this.mpr h)
 
+open scoped Classical in
 /-- Negative representation of a computable predicate. -/
 theorem codeOfComputablePred_provable_neg [𝗣𝗔⁻ ⪯ T] (hp : ComputablePred p) (h : ¬p x) :
     T ⊢ ∼((codeOfComputablePred p)/[↑x]) := by

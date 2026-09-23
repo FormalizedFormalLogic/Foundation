@@ -14,8 +14,6 @@ public import Mathlib.Logic.Encodable.Basic
 
 @[expose] public section
 set_option autoImplicit true
-set_option linter.style.openClassical false
-set_option linter.unusedSimpArgs false
 
 /-! ### Generic filters -/
 
@@ -29,10 +27,10 @@ variable {K : Language}
 
 local notation "ℙ" => ConsistentSequent K
 
-open Classical
 def decidablePoints (φ : Proposition K) : DenseSet ℙ where
   set := {p | p ⊩ᶜ φ ∨ p ⊩ᶜ ∼φ}
   is_dense := by
+    classical
     intro p
     have : p ⊩ᶜ φ ⋎ ∼φ := IsWeaklyForced.complete.mpr Entailment.lem p
     have : ∀ q ≤ p, ∃ r ≤ q, r ⊩ᶜ φ ∨ r ⊩ᶜ ∼φ := by simpa using this
@@ -44,6 +42,7 @@ def decidablePoints (φ : Proposition K) : DenseSet ℙ where
 def henkinPoints (φ : Semiproposition K 1) : DenseSet ℙ where
   set := {p | ∀ q ≤ p, q ⊩ᶜ ∃¹ φ → ∃ t, q ⊩ᶜ φ/[t]}
   is_dense := by
+    classical
     intro p
     suffices ∃ q ≤ p, ∀ q_1 ≤ q, (∀ q ≤ q_1, ∃ r ≤ q, ∃ t, r ⊩ᶜ φ/[t]) → ∃ t, q_1 ⊩ᶜ φ/[t] by
       simpa only [IsWeaklyForced.exs, Set.mem_ofPred_eq]
@@ -196,12 +195,13 @@ end LK.Derivation.Canonical
 
 namespace LK
 
-open Classical LK.Derivation.Canonical
+open LK.Derivation.Canonical
 
 variable {L : Language}
 
 lemma satisfiable_of_irrefutable (σ : Sentence L) (h : 𝐋𝐊¹ ⊬ ∼(σ : Proposition L)) :
     Satisfiable {σ} := by
+  classical
   let K := σ.sublanguage
   let π : Sentence K := σ.toSubLanguageSelf
   have : 𝐋𝐊¹ ⊬ ∼(π : Proposition K) := fun h ↦ by
@@ -217,7 +217,7 @@ end LK
 
 namespace Theory
 
-open Classical FFL.Entailment
+open FFL.Entailment
 
 variable {L : Language.{u}} {T : Theory L}
 

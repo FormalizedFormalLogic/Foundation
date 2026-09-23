@@ -30,10 +30,6 @@ namespace FFL
 
 namespace FirstOrder
 
-set_option linter.unusedSimpArgs false
-set_option linter.unusedTactic false
-set_option linter.unreachableTactic false
-
 namespace Semiformula
 
 universe u u₁ u₂ u₃

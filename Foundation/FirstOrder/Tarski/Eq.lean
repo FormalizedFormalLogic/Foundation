@@ -12,11 +12,6 @@ namespace FirstOrder
 
 universe u v
 
-set_option linter.unusedTactic false
-set_option linter.unreachableTactic false
-set_option linter.style.induction false
-set_option linter.unusedSimpArgs false
-
 variable {L : Language} {ξ : Type*} [Semiformula.Operator.Eq L]
 
 namespace Tarski.Structure
@@ -153,13 +148,13 @@ lemma eval_mk {n : ℕ} {bv fv} {φ : Semiformula L ξ n} :
     constructor
     · intro h a; exact (ih (bv := a :> bv)).mp (by simp only [Matrix.comp_vecCons]; exact h ⟦a⟧)
     · intro h a;
-      induction' a using Quotient.ind with a
-      have h2 := ih.mpr (h a); simp only [Matrix.comp_vecCons] at h2; exact h2
+      induction a using Quotient.ind with
+      | _ a => have h2 := ih.mpr (h a); simp only [Matrix.comp_vecCons] at h2; exact h2
   case hexs n φ ih =>
     constructor
     · intro ⟨a, h⟩
-      induction' a using Quotient.ind with a
-      exact ⟨a, (ih (bv := a :> bv)).mp (by simp only [Matrix.comp_vecCons]; exact h)⟩
+      induction a using Quotient.ind with
+      | _ a => exact ⟨a, (ih (bv := a :> bv)).mp (by simp only [Matrix.comp_vecCons]; exact h)⟩
     · intro ⟨a, h⟩; refine ⟨⟦a⟧, ?_⟩
       have h2 := ih.mpr h; simp only [Matrix.comp_vecCons] at h2; exact h2
   case _ => simp [*]
@@ -186,8 +181,8 @@ variable {L M}
 
 set_option backward.isDefEq.respectTransparency false in
 lemma rel_eq (a b : QuotEq L M) : op(=)[L].val (M := QuotEq L M) ![a, b] ↔ a = b := by
-  induction' a using Quotient.ind with a
-  induction' b using Quotient.ind with b
+  induction a using Quotient.ind with | _ a =>
+  induction b using Quotient.ind with | _ b =>
   rw [of_eq_of]; simp [eqv, Semiformula.Operator.val];
   simpa [Matrix.fun_eq_vec_two, Empty.eq_elim] using
     eval_mk (H := H) (bv := ![a, b]) (fv := Empty.elim) (φ := Semiformula.Operator.Eq.eq.sentence)

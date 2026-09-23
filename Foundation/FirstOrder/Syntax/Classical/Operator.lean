@@ -3,10 +3,7 @@ module
 public import Foundation.FirstOrder.Syntax.Classical.Rew
 
 @[expose] public section
-set_option linter.unusedSimpArgs false
-set_option linter.unusedVariables false
 set_option autoImplicit true
-set_option linter.style.cases false
 
 namespace FFL
 
@@ -175,10 +172,10 @@ lemma numeral_one : numeral L 1 = One.one := by rfl
 
 lemma numeral_succ (hz : z ≠ 0) :
     numeral L (z + 1) = Operator.Add.add.comp ![numeral L z, One.one] := by
-  simp [numeral]
-  cases' z with z
-  · simp at hz
-  · rfl
+  simp only [numeral]
+  cases z with
+  | zero => simp at hz
+  | succ z => rfl
 
 lemma numeral_add_two : numeral L (z + 2) = Operator.Add.add.comp ![numeral L (z + 1), One.one] :=
   numeral_succ (by simp)

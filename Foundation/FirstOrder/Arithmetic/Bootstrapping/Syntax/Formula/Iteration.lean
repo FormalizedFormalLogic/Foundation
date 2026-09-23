@@ -4,7 +4,6 @@ public import Foundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Formula.Func
 
 @[expose] public section
 set_option autoImplicit true
-set_option linter.unusedTactic false
 namespace FFL.FirstOrder.Semiformula
 
 variable {L : Language} {ξ : Type*} {n : ℕ}

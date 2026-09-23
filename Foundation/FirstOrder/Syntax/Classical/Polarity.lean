@@ -10,10 +10,6 @@ public import Foundation.FirstOrder.Syntax.Classical.Rew
 
 namespace FFL.FirstOrder.Semiformula
 
-set_option linter.unusedTactic false
-set_option linter.unreachableTactic false
-set_option linter.unusedVariables false
-
 variable {L : Language} {ξ ξ₁ ξ₂ : Type*} {n n₁ n₂ : ℕ}
 
 /-- A polarity of a formula -/

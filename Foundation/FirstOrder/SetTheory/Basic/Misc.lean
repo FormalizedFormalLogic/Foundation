@@ -4,9 +4,6 @@ public import Foundation.FirstOrder.LK.Completeness.CounterModel
 public import Mathlib.SetTheory.Cardinal.Basic
 
 @[expose] public section
-set_option linter.unusedTactic false
-set_option linter.unreachableTactic false
-set_option linter.unusedSectionVars false
 /-! # Preperations for set theory
 
 - *NOTE*:

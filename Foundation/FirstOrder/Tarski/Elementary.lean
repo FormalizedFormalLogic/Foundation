@@ -3,7 +3,6 @@ module
 public import Foundation.FirstOrder.Tarski.Basic
 
 @[expose] public section
-set_option linter.unusedSimpArgs false
 set_option autoImplicit true
 
 namespace FFL.FirstOrder

@@ -17,8 +17,6 @@ variable {L : Language} [L.Encodable] [L.LORDefinable]
 
 namespace FirstOrder.Arithmetic.Bootstrapping
 
-set_option linter.style.openClassical false
-
 section typed_theory
 
 abbrev tmem (φ : Formula V L) (T : Theory L) [T.Δ₁] : Prop := φ.val ∈ T.Δ₁Class
@@ -547,8 +545,9 @@ noncomputable def specializeWithCtx {Γ} {φ : Semiformula V L 1} (d : Γ ⊢[T]
 lemma specialize_with_ctx! {Γ} {φ : Semiformula V L 1} (d : Γ ⊢[T] (∀¹ φ)) (t) :
     Γ ⊢[T] φ.subst ![t] := ⟨specializeWithCtx d.get t⟩
 
-open Entailment.FiniteContext Classical
+open Entailment.FiniteContext
 
+open Classical in
 noncomputable def allImpAll {Γ} {φ ψ : Semiformula V L 1} (d : Γ.map .shift ⊢[T]! φ.free 🡒 ψ.free) :
     Γ ⊢[T]! ∀¹ φ 🡒 ∀¹ ψ := by
   apply deduct!
@@ -564,6 +563,7 @@ noncomputable def allImpAll {Γ} {φ ψ : Semiformula V L 1} (d : Γ.map .shift 
 theorem all_imp_all! {Γ} {φ ψ : Semiformula V L 1} (d : Γ.map .shift ⊢[T] φ.free 🡒 ψ.free) :
     Γ ⊢[T] ∀¹ φ 🡒 ∀¹ ψ := ⟨allImpAll d.get⟩
 
+open Classical in
 noncomputable def exsImpExs {Γ} {φ ψ : Semiformula V L 1} (d : Γ.map .shift ⊢[T]! φ.free 🡒 ψ.free) :
     Γ ⊢[T]! ∃¹ φ 🡒 ∃¹ ψ := by
   apply Entailment.C!_of_CNN!

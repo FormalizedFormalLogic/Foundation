@@ -4,7 +4,6 @@ public import Foundation.FirstOrder.Tarski.Operator
 public import Foundation.Vorspiel.Fin.Matrix
 
 @[expose] public section
-set_option linter.unusedSimpArgs false
 set_option autoImplicit true
 
 open Lean Elab PrettyPrinter Delaborator SubExpr

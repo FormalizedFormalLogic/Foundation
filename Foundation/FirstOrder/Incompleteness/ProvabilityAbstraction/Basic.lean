@@ -20,8 +20,6 @@ abbrev Language.ReferenceableBy (L L₀ : Language) := Semiterm.Operator.GödelN
 
 namespace ProvabilityAbstraction
 
-set_option linter.unusedSectionVars false
-
 structure Provability [L.ReferenceableBy L₀] (T₀ : Theory L₀) (T : Theory L) where
   prov : Semisentence L₀ 1
   /-- Derivability condition `D1` -/
@@ -195,6 +193,8 @@ section First
 variable [L.DecidableEq]
 variable [T₀ ⪯ T] [Consistent T]
 
+-- `cl_prover` needs `[L.DecidableEq]` while elaborating, though the proof term does not use it.
+set_option linter.unusedSectionVars false in
 theorem unprovable_gödel : T ⊬ (gödel 𝔅) := by
   intro h;
   have h₁ : T ⊢ 𝔅 (gödel 𝔅) := WeakerThan.pbl <| D1 h;
@@ -204,6 +204,8 @@ theorem unprovable_gödel : T ⊬ (gödel 𝔅) := by
     not_consistent_iff_inconsistent.mpr <| inconsistent_iff_provable_bot.mpr this;
   contradiction
 
+-- `cl_prover` needs `[L.DecidableEq]` while elaborating, though the proof term does not use it.
+set_option linter.unusedSectionVars false in
 theorem unrefutable_gödel [𝔅.Kreisel] : T ⊬ ∼(gödel 𝔅) := by
   intro h₂;
   have h₁ : T ⊢ (gödel 𝔅) := WeakerThan.pbl <| 𝔅.KR <| by cl_prover [gödel_spec (T₀ := T₀), h₂];
@@ -235,6 +237,8 @@ local notation "𝐆" => gödel 𝔅
 
 variable [L.DecidableEq] [T₀ ⪯ T]
 
+-- `cl_prover` needs `[L.DecidableEq]` while elaborating, though the proof term does not use it.
+set_option linter.unusedSectionVars false in
 /-- Formalized First Incompleteness Theorem -/
 theorem formalized_unprovable_gödel : T₀ ⊢ 𝔅.con 🡒 ∼𝔅 𝐆 := by
   suffices T₀ ⊢ ∼𝔅 ⊥ 🡒 ∼𝔅 𝐆 from this

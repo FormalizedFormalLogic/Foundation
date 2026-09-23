@@ -58,19 +58,19 @@ lemma validateSequent_impL (h₁ : M ⊧ (Γ ⟹ insert A Δ)) (h₂ : M ⊧ (in
   intro x hx;
   have hΓ : ∀ C ∈ Γ, x ⊩[M] C := fun C hC ↦ hx C (by simp [hC]);
   by_cases hA : x ⊩[M] A;
-  . exact h₂ x (by simpa [hx _ (Finset.mem_insert_self _ _) hA] using hΓ);
-  . obtain ⟨D, hD, hxD⟩ := h₁ x hΓ;
+  · exact h₂ x (by simpa [hx _ (Finset.mem_insert_self _ _) hA] using hΓ);
+  · obtain ⟨D, hD, hxD⟩ := h₁ x hΓ;
     grind;
 
 @[grind →]
 lemma validateSequent_impR (h : M ⊧ (insert A Γ ⟹ insert B Δ)) : M ⊧ (Γ ⟹ insert (A 🡒 B) Δ) := by
   intro x hx;
   by_cases hA : x ⊩[M] A;
-  . obtain ⟨D, hD, hxD⟩ := h x (by simpa [hA] using hx);
+  · obtain ⟨D, hD, hxD⟩ := h x (by simpa [hA] using hx);
     rcases Finset.mem_insert.mp hD with rfl | hD;
-    . exact ⟨A 🡒 D, by simp, fun _ ↦ hxD⟩;
-    . grind;
-  . exact ⟨A 🡒 B, by simp, fun h ↦ absurd h hA⟩;
+    · exact ⟨A 🡒 D, by simp, fun _ ↦ hxD⟩;
+    · grind;
+  · exact ⟨A 🡒 B, by simp, fun h ↦ absurd h hA⟩;
 
 end Model
 

@@ -4,7 +4,6 @@ public import Foundation.FirstOrder.Syntax.Intuitionistic.Formula
 public import Foundation.Syntax.Predicate.Rew
 
 @[expose] public section
-set_option linter.unusedSimpArgs false
 set_option autoImplicit true
 
 namespace FFL.FirstOrder

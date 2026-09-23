@@ -10,8 +10,6 @@ public import Foundation.FirstOrder.Arithmetic.Q.Basic
 
 namespace FFL.FirstOrder.Arithmetic
 
-set_option linter.style.induction false
-set_option linter.unusedSimpArgs false
 
 namespace PeanoMinus.Axiom
 
@@ -630,14 +628,14 @@ instance : Tarski.Structure.Monotone ℒₒᵣ M := ⟨
 @[simp] lemma zero_ne_add_one (x : M) : 0 ≠ x + (1 : M) := ne_of_lt (by simp)
 
 @[simp] lemma nat_cast_inj {n m : ℕ} : (n : M) = (m : M) ↔ n = m := by
-  induction' n with n ih
-  · cases m <;> simp
-  · cases m <;> simp
+  induction n with
+  | zero => cases m <;> simp
+  | succ n ih => cases m <;> simp
 
 @[simp] lemma coe_coe_lt {n m : ℕ} : (n : M) < (m : M) ↔ n < m := by
-  induction' n with n ih
-  · cases m <;> simp
-  · cases m <;> simp
+  induction n with
+  | zero => cases m <;> simp
+  | succ n ih => cases m <;> simp
 
 lemma coe_add_one (x : ℕ) : ((x + 1 : ℕ) : M) = (x : M) + 1 := by simp
 

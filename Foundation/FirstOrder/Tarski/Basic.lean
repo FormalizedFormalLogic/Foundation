@@ -6,8 +6,6 @@ public import Foundation.Vorspiel.IsEmpty
 public import Foundation.Vorspiel.Empty
 
 @[expose] public section
-set_option linter.unusedVariables false
-set_option linter.unusedSimpArgs false
 set_option autoImplicit true
 
 /-!

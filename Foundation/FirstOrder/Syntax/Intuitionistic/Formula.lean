@@ -3,7 +3,6 @@ module
 public import Foundation.FirstOrder.Syntax.Classical.Formula
 
 @[expose] public section
-set_option linter.unusedSimpArgs false
 set_option autoImplicit true
 /-!
 # Formulas of intuitionistic first-order logic

@@ -4,7 +4,6 @@ public import Foundation.FirstOrder.Arithmetic.HFS.Fixpoint
 
 @[expose] public section
 set_option autoImplicit true
-set_option linter.unusedSimpArgs false
 /-!
 
 # Vec

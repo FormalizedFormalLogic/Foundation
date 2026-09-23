@@ -81,7 +81,9 @@ lemma box_mono (h : ⊢ᴴ[GL] A 🡒 B) : ⊢ᴴ[GL] □A 🡒 □B := axiomK �
 
 variable [DecidableEq α]
 
+omit [DecidableEq α] in
 lemma box_and : ⊢ᴴ[GL] □A ⋏ □B 🡒 □(A ⋏ B) := by
+  classical
   have h₁ : ⊢ᴴ[GL] □A 🡒 □(B 🡒 A ⋏ B) := box_mono and₃;
   have h₂ : ⊢ᴴ[GL] □(B 🡒 A ⋏ B) 🡒 □B 🡒 □(A ⋏ B) := axiomK;
   cl_prover [h₁, h₂];
@@ -191,30 +193,34 @@ variable {α : Type u} [DecidableEq α] {A : Formula α}
 
 lemma iff_gentzen : ⊢ᴴ[GL] A ↔ ⊢ᴳ[GL] ∅ ⟹ {A} := by
   constructor;
-  . intro h;
+  · intro h;
     apply Gentzen.complete;
     intro _ _ M _ x _;
     exact ⟨A, by simp, sound M h x⟩;
-  . intro h;
+  · intro h;
     have : ⊢ᴴ[GL] (∅ : FormulaFinset α).conj := by simp [Finset.conj];
     simpa using of_gentzen h ⨀ this;
 
-theorem iff_valid_finite : ⊢ᴴ[GL] A ↔ ∀ {κ : Type u} [Nonempty κ] (M : Model κ α), [M.IsFiniteGL] → M ⊧ A := by
+omit [DecidableEq α] in
+theorem iff_valid_finite :
+    ⊢ᴴ[GL] A ↔ ∀ {κ : Type u} [Nonempty κ] (M : Model κ α), [M.IsFiniteGL] → M ⊧ A := by
+  classical
   constructor;
-  . intro h _ _ M _;
+  · intro h _ _ M _;
     exact sound M h;
-  . intro h;
+  · intro h;
     apply iff_gentzen.mpr;
     apply Gentzen.complete;
     intro _ _ M _ x _;
     exact ⟨A, by simp, h M x⟩;
 
+omit [DecidableEq α] in
 theorem iff_root_forces : ⊢ᴴ[GL] A ↔
     ∀ {κ : Type u} [Nonempty κ] (M : RootedModel κ α), [M.IsFiniteGL] → M.root ⊩[M.toModel] A := by
   constructor;
-  . intro h _ _ M _;
+  · intro h _ _ M _;
     exact sound M.toModel h M.root;
-  . intro h;
+  · intro h;
     apply iff_valid_finite.mpr;
     intro _ _ M _ x;
     exact Model.forces_cone.mp <| h (M.cone x);

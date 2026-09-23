@@ -7,12 +7,7 @@ public import Foundation.Vorspiel.Finset.Card
 public import Foundation.Vorspiel.Graph
 
 @[expose] public section
-set_option linter.unusedVariables false
-set_option linter.unusedTactic false
-set_option linter.unreachableTactic false
 set_option autoImplicit true
-set_option linter.style.cases false
-set_option linter.unusedFintypeInType false
 
 /-!
 # Relations and functions defined by a first-order formula (with parameter)
@@ -306,14 +301,16 @@ lemma fdisj {P : ι → (Fin k → M) → Prop} (s : Finset ι)
   rcases Classical.axiomOfChoice this with ⟨φ, H⟩
   exact ⟨⩖ i ∈ s, φ i, fun v ↦ by simp [fun i ↦ (H i).iff]⟩
 
-lemma fintype_all [Fintype ι] {P : ι → (Fin k → M) → Prop}
+lemma fintype_all {ι : Type*} [_root_.Finite ι] {P : ι → (Fin k → M) → Prop}
     (h : ∀ i, L.Definable fun w : Fin k → M ↦ P i w) :
     L.Definable fun v : Fin k → M ↦ ∀ i, P i v := by
+  have := Fintype.ofFinite ι
   simpa using fconj Finset.univ h
 
-lemma fintype_exs [Fintype ι] {P : ι → (Fin k → M) → Prop}
+lemma fintype_exs {ι : Type*} [_root_.Finite ι] {P : ι → (Fin k → M) → Prop}
     (h : ∀ i, L.Definable fun w : Fin k → M ↦ P i w) :
     L.Definable fun v : Fin k → M ↦ ∃ i, P i v := by
+  have := Fintype.ofFinite ι
   simpa using fdisj Finset.univ h
 
 lemma retraction (h : L.Definable P) {n} (f : Fin k → Fin n) :
@@ -341,9 +338,9 @@ lemma exsVec {k l} {P : (Fin k → M) → (Fin l → M) → Prop}
       apply iff_of_eq; congr
       · ext i; congr 1; ext; simp [Matrix.vecAppend_eq_ite]
       · ext i
-        cases' i using Fin.cases with i
-        · simp only [Matrix.cons_val_zero]; congr 1; ext; simp [Matrix.vecAppend_eq_ite]
-        · simp only [Matrix.cons_val_succ]; congr 1; ext; simp [Matrix.vecAppend_eq_ite])
+        cases i using Fin.cases with
+        | zero => simp only [Matrix.cons_val_zero]; congr 1; ext; simp [Matrix.vecAppend_eq_ite]
+        | succ i => simp only [Matrix.cons_val_succ]; congr 1; ext; simp [Matrix.vecAppend_eq_ite])
 
 lemma allVec {k l} {P : (Fin k → M) → (Fin l → M) → Prop}
     (h : L.Definable fun w : Fin (k + l) → M ↦
@@ -365,9 +362,9 @@ lemma allVec {k l} {P : (Fin k → M) → (Fin l → M) → Prop}
       apply iff_of_eq; congr
       · ext i; congr 1; ext; simp [Matrix.vecAppend_eq_ite]
       · ext i
-        cases' i using Fin.cases with i
-        · simp only [Matrix.cons_val_zero]; congr 1; ext; simp [Matrix.vecAppend_eq_ite]
-        · simp only [Matrix.cons_val_succ]; congr 1; ext; simp [Matrix.vecAppend_eq_ite])
+        cases i using Fin.cases with
+        | zero => simp only [Matrix.cons_val_zero]; congr 1; ext; simp [Matrix.vecAppend_eq_ite]
+        | succ i => simp only [Matrix.cons_val_succ]; congr 1; ext; simp [Matrix.vecAppend_eq_ite])
 
 lemma substitution {P : (Fin k → M) → Prop} {f : Fin k → (Fin l → M) → M}
     (hP : L.Definable P) (hf : ∀ i, L.DefinableFunction (f i)) :
@@ -457,9 +454,9 @@ lemma substitution {f : Fin k → (Fin l → M) → M}
     L.DefinableFunction fun z ↦ F (fun i ↦ f i z) := by
   simpa using Definable.substitution (f := (· 0) :> fun i w ↦ f i (w ·.succ)) hF <| by
     intro i
-    cases' i using Fin.cases with i
-    · simpa using projection _
-    · simpa using Definable.retraction (hf i) (0 :> (·.succ.succ))
+    cases i using Fin.cases with
+    | zero => simpa using projection _
+    | succ i => simpa using Definable.retraction (hf i) (0 :> (·.succ.succ))
 
 instance hAdd [L.Add] [Add M] [Tarski.Structure.Add L M] : L-function₂[M] HAdd.hAdd :=
   ⟨“x y z. x = y + z”, fun _ ↦ by simp⟩

@@ -6,19 +6,14 @@ public import Foundation.FirstOrder.SetTheory.Z
 
 namespace FFL.FirstOrder.SetTheory
 
-set_option linter.style.openClassical false
-set_option linter.unusedTactic false
-set_option linter.unreachableTactic false
-
 variable {V : Type*} [SetStructure V] [Nonempty V] [V↓[ℒₛₑₜ] ⊧* 𝗭𝗙]
 
 /-! ## Ersatzaxiom -/
 
-open Classical
-
 lemma replacement_exists_eval (φ : SetTheorySemiformula V 2) (X : V)
     (h : (∀ x : V, ∃! y : V, φ.Eval ![x, y] id)) :
     ∃ Y : V, ∀ y : V, y ∈ Y ↔ ∃ x ∈ X, φ.Eval ![x, y] id := by
+  classical
   /- `φ` can have finitely many free variables of type `V`, these are interpreted by `id : V → V`
   as finitely many parameters in `V`.
   `f` enumerates the parameters of `φ`. -/
@@ -144,7 +139,7 @@ noncomputable def replRelOverSet (X : V) (R : V → V → Prop) (h : ∀ x ∈ X
 @[simp, definability] instance repl_definable {F : V → V} [hF : ℒₛₑₜ-function₁ F] :
     ℒₛₑₜ-function₁ (repl F hF) := by
   suffices ℒₛₑₜ-relation (fun y x ↦ y = repl F hF x) by exact this
-  simp only [repl, choose!_eq_iff_right]
+  simp only [repl, Classical.choose!_eq_iff_right]
   definability
 
 /-! ### Definability Gadgets for Replacement -/

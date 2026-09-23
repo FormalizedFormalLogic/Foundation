@@ -5,12 +5,6 @@ public import Foundation.FirstOrder.Arithmetic.Induction.Equiv
 
 @[expose] public section
 set_option autoImplicit true
-set_option linter.style.openClassical false
-set_option linter.style.induction false
-set_option linter.style.cases false
-set_option linter.unusedSimpArgs false
-set_option linter.unusedTactic false
-set_option linter.unusedVariables false
 /-!
 # Basic properties of theory $\mathsf{IOpen}$
 
@@ -536,9 +530,8 @@ end sqrt
 
 section pair
 
-open Classical
-
 -- https://github.com/leanprover-community/mathlib4/blob/b075cdd0e6ad8b5a3295e7484b2ae59e9b2ec2a7/Mathlib/Data/Nat/Pairing.lean#L37
+open scoped Classical in
 noncomputable def pair (a b : V) : V := if a < b then b * b + a else a * a + a + b
 
 --notation "⟪" a ", " b "⟫" => pair a b
@@ -573,6 +566,7 @@ instance pair_definable : 𝚺₀-Function₂[V] pair := pair_defined.to_definab
 instance : Bounded₂ (pair : V → V → V) :=
   ⟨‘x y. (y * y + x) + (x * x + x + y)’, by intro v; simp [pair]; split_ifs <;> try simp [*]⟩
 
+open scoped Classical in
 noncomputable def unpair (a : V) : V × V :=
   if a - √a * √a < √a then (a - √a * √a, √a) else (√a, a - √a * √a - √a)
 
@@ -781,9 +775,9 @@ noncomputable def unNpair : {n : ℕ} → Fin n → V → V
   | _ + 1, i, x => Fin.cases (π₁ x) (fun i ↦ unNpair i (π₂ x)) i
 
 @[simp] lemma unNpair_npair {n} (i : Fin n) (v : Fin n → V) : unNpair i (npair v) = v i := by
-  induction' n with n ih
-  · simpa [npair, unNpair] using i.elim0
-  · cases i using Fin.cases <;> simp [npair, unNpair, *]
+  induction n with
+  | zero => simpa [npair, unNpair] using i.elim0
+  | succ n ih => cases i using Fin.cases <;> simp [npair, unNpair, *]
 
 section
 
@@ -793,13 +787,14 @@ def _root_.FFL.FirstOrder.Arithmetic.unNpairDef : {n : ℕ} → (i : Fin n) → 
     Fin.cases pi₁Def (fun i ↦ .mkSigma “z v. ∃ r <⁺ v, !pi₂Def r v ∧ !(unNpairDef i) z r”) i
 
 instance unNpair_defined {n} (i : Fin n) : 𝚺₀-Function₁[V] unNpair i via unNpairDef i := by
-  induction' n with n ih
-  · exact i.elim0
-  · refine ⟨?_⟩
+  induction n with
+  | zero => exact i.elim0
+  | succ n ih =>
+    refine ⟨?_⟩
     intro v
-    cases' i using Fin.cases with i
-    · simp [unNpairDef, unNpair]
-    · simp [unNpairDef, unNpair, (ih i).iff]
+    cases i using Fin.cases with
+    | zero => simp [unNpairDef, unNpair]
+    | succ i => simp [unNpairDef, unNpair, (ih i).iff]
 
 @[definability, simp] instance unNpair_definable {n} (i : Fin n) (Γ) :
     Γ-Function₁ (unNpair i : V → V) :=

@@ -9,9 +9,6 @@ public import Mathlib.Data.List.MinMax
 /-! # One-sided sequent calculus for first-order classical logic -/
 
 @[expose] public section
-set_option linter.unusedSimpArgs false
-set_option linter.unusedTactic false
-set_option linter.unreachableTactic false
 set_option autoImplicit true
 
 namespace FFL

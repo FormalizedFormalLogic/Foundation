@@ -33,10 +33,10 @@ are both `Δ₀`.
 lemma strictDefinableRel_of_models_IBroadSigma [V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺s]
     (hR : Γ-[s].DefinableRel R) : StrictDefinableRel Γ s R := by
   rcases s with _ | t;
-  . obtain ⟨φ, hφ⟩ := hR;
+  · obtain ⟨φ, hφ⟩ := hR;
     exact ⟨φ.val, StrictHierarchy.zero_iff.mpr (Hierarchy.zero_iff.mp φ.polarity_prop),
       fun v ↦ hφ.iff⟩;
-  . have : V↓[ℒₒᵣ] ⊧* 𝗕𝚺 (t + 1) := IBroadSigma.models_BSigma_succ;
+  · have : V↓[ℒₒᵣ] ⊧* 𝗕𝚺 (t + 1) := IBroadSigma.models_BSigma_succ;
     exact StrictDefinable.of_definable (Γ' := 𝚺) hR;
 
 lemma models_ISigmaZero_of_models_InductionOnHierarchy (V : Type*) [ORingStructure V]
@@ -73,19 +73,19 @@ private lemma neg_succ_induction [V↓[ℒₒᵣ] ⊧* 𝗜𝗡𝗗 𝚷 (s + 1)
   have key : ∀ x, x ≤ a → P (a - x) := by
     refine succ_induction_forall_sigma (s := s) (P := fun x ↦ x ≤ a → P (a - x))
       (Q := fun x w ↦ x ≤ a → Q (a - x) w) ?_ ?_ ?_ ?_;
-    . apply HierarchySymbol.Definable.imp;
-      . apply HierarchySymbol.Definable.bcomp₂ (by definability) (by definability);
-      . apply HierarchySymbol.Definable.bcomp₂ (by definability) (by definability);
-    . intro x;
+    · apply HierarchySymbol.Definable.imp;
+      · apply HierarchySymbol.Definable.bcomp₂ (by definability) (by definability);
+      · apply HierarchySymbol.Definable.bcomp₂ (by definability) (by definability);
+    · intro x;
       rw [imp_congr_right fun _ ↦ hPQ (a - x)];
       exact imp_forall_iff;
-    . intro _; simpa using ha;
-    . intro x ih hx;
+    · intro _; simpa using ha;
+    · intro x ih hx;
       have h : P (a - x) := ih (le_of_add_le_left hx);
       refine (not_imp_not.mp <| nsucc (a - (x + 1))) ?_;
       rw [← Arithmetic.sub_sub, sub_add_self_of_le];
-      . exact h;
-      . exact le_tsub_of_add_le_left hx;
+      · exact h;
+      · exact le_tsub_of_add_le_left hx;
   exact nzero (by simpa using key a le_rfl);
 
 /-- Successor induction for the existential quantification of a `𝚷-[s]`-definable relation: for
@@ -94,7 +94,7 @@ lemma succ_induction_exists_pi (Γ : Polarity) [V↓[ℒₒᵣ] ⊧* 𝗜𝗡�
     (hQ : 𝚷-[s].DefinableRel Q) (hPQ : ∀ x, P x ↔ ∃ w, Q x w)
     (zero : P 0) (succ : ∀ x, P x → P (x + 1)) : ∀ x, P x := by
   rcases Γ with _ | _;
-  . obtain ⟨f, χ, hχ, hiff⟩ :=
+  · obtain ⟨f, χ, hχ, hiff⟩ :=
       (strictDefinableRel_of_models_IBroadSigma (Γ := 𝚷) hQ).exists_eval_iff;
     have hP : ∀ x, P x ↔ (∃¹ (χ ⇜ ![#1, #0])).Eval ![x] f := by
       intro x;
@@ -104,7 +104,7 @@ lemma succ_induction_exists_pi (Γ : Polarity) [V↓[ℒₒᵣ] ⊧* 𝗜𝗡�
       simp [Semiformula.eval_substs];
     exact InductionScheme.succ_induction (C := Arithmetic.StrictHierarchy 𝚺 (s + 1))
       ⟨f, _, (StrictHierarchy.ofAlt (Γ := 𝚺) (hχ.rew _)).exs, hP⟩ zero succ;
-  . have h := neg_succ_induction (P := fun x ↦ ¬P x) (Q := fun x w ↦ ¬Q x w)
+  · have h := neg_succ_induction (P := fun x ↦ ¬P x) (Q := fun x w ↦ ¬Q x w)
       (HierarchySymbol.Definable.not (Γ := 𝚺) hQ) (fun x ↦ by simp [hPQ x])
       (by simpa using zero) (fun x hx ↦ by simpa using succ x (by simpa using hx));
     intro x;
@@ -137,18 +137,18 @@ lemma exists_bound_of_definable_pi (Γ : Polarity) [V↓[ℒₒᵣ] ⊧* 𝗜�
     refine succ_induction_exists_pi Γ hbdd (fun _ ↦ Iff.rfl) ⟨0, by simp⟩ ?_;
     rintro y ⟨w, hw⟩;
     rcases lt_or_ge y a with hya | hya;
-    . obtain ⟨u₀, hu₀⟩ := h y hya;
+    · obtain ⟨u₀, hu₀⟩ := h y hya;
       refine ⟨max w u₀, ?_⟩;
       intro x hx _;
       rcases le_iff_lt_or_eq.mp (Arithmetic.lt_succ_iff_le.mp hx) with hx | rfl;
-      . obtain ⟨u, hu, hu'⟩ := hw x hx (lt_trans hx hya);
+      · obtain ⟨u, hu, hu'⟩ := hw x hx (lt_trans hx hya);
         exact ⟨u, le_trans hu (le_max_left w u₀), hu'⟩;
-      . exact ⟨u₀, le_max_right w u₀, hu₀⟩;
-    . refine ⟨w, ?_⟩;
+      · exact ⟨u₀, le_max_right w u₀, hu₀⟩;
+    · refine ⟨w, ?_⟩;
       intro x hx hxa;
       rcases le_iff_lt_or_eq.mp (Arithmetic.lt_succ_iff_le.mp hx) with hx | rfl;
-      . exact hw x hx hxa;
-      . exact absurd hxa (not_lt.mpr hya);
+      · exact hw x hx hxa;
+      · exact absurd hxa (not_lt.mpr hya);
   obtain ⟨w, hw⟩ := key (a + 1);
   exact ⟨w, fun x hx ↦ hw x (lt_trans hx (lt_add_one a)) hx⟩;
 
@@ -158,8 +158,8 @@ lemma models_BPi_of_models_InductionOnHierarchy (Γ : Polarity) [V↓[ℒₒᵣ]
   have : V↓[ℒₒᵣ] ⊧* 𝗜𝚺₀ := models_ISigmaZero_of_models_InductionOnHierarchy V Γ (s + 1);
   apply Semantics.ModelsSet.union_iff.mpr;
   and_intros;
-  . assumption;
-  . refine models_of_ss (CollectionScheme.models_of_collection (Γ := 𝚷) ?_)
+  · assumption;
+  · refine models_of_ss (CollectionScheme.models_of_collection (Γ := 𝚷) ?_)
       (CollectionScheme_subset (·.hierarchy));
     intro R hR a h;
     obtain ⟨w, hw⟩ := exists_bound_of_definable_pi Γ hR a h;
@@ -204,14 +204,14 @@ private lemma models_IBroadSigma_of_models_InductionOnHierarchy_sigma :
 lemma models_IBroadSigma_of_models_InductionOnHierarchy (Γ : Polarity) (s : ℕ) (V : Type*)
     [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝗡𝗗 Γ s] : V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺s := by
   rcases s with _ | t;
-  . exact models_of_ss inferInstance
+  · exact models_of_ss inferInstance
       (IBroadSigmaZero_subset_ISigmaZero.trans (ISigmaZero_subset_InductionOnHierarchy Γ 0));
-  . have : V↓[ℒₒᵣ] ⊧* 𝗜𝗡𝗗 𝚺 t :=
+  · have : V↓[ℒₒᵣ] ⊧* 𝗜𝗡𝗗 𝚺 t :=
       models_of_ss inferInstance (InductionOnHierarchy_subset_of_lt (Γ' := Γ) (Nat.lt_succ_self t));
     have : V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺t := models_IBroadSigma_of_models_InductionOnHierarchy_sigma t V;
     exact models_IBroadSigma_succ_of_models_InductionOnHierarchy Γ;
 
-instance models_IBroadSigma_of_models_ISigma [V↓[ℒₒᵣ] ⊧* 𝗜𝚺 s] : V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺s :=
+instance models_IBroadSigma_of_models_ISigma [V↓[ℒₒᵣ] ⊧* 𝗜𝚺s] : V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺s :=
   models_IBroadSigma_of_models_InductionOnHierarchy 𝚺 s V
 
 /-- The converse of `models_IBroadSigma_of_models_ISigma`, by `𝗜𝚺 s ⊆ 𝗜𝚺⁺ s`. Together the two
@@ -312,7 +312,7 @@ lemma models_InductionOnHierarchy_of_models_LeastNumberOnHierarchy (Γ : Polarit
   exact LeastNumberOnHierarchy.succ_induction Γ s hφ f;
 
 lemma models_LeastNumberOnHierarchy_of_models_ISigma (V : Type*) [ORingStructure V]
-    (Γ : Polarity) (s : ℕ) [V↓[ℒₒᵣ] ⊧* 𝗜𝚺 s] : V↓[ℒₒᵣ] ⊧* 𝗟 Γ s :=
+    (Γ : Polarity) (s : ℕ) [V↓[ℒₒᵣ] ⊧* 𝗜𝚺s] : V↓[ℒₒᵣ] ⊧* 𝗟 Γ s :=
   have : V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺s := models_IBroadSigma_of_models_InductionOnHierarchy 𝚺 s V
   models_of_ss (models_LeastNumberOnBroadHierarchy_of_IBroadSigma Γ s)
     (Set.union_subset_union_right _ (LeastNumberScheme_subset (·.hierarchy)))

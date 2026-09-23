@@ -11,7 +11,6 @@ presentations of `𝗣𝗔` and `𝗜𝚺⁺₁`.
 -/
 
 @[expose] public section
-set_option linter.unusedSimpArgs false
 
 namespace FFL.FirstOrder.Arithmetic.Bootstrapping
 

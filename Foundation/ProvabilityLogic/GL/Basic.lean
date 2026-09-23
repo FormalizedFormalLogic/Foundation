@@ -38,13 +38,15 @@ theorem provability_TFAE : [
 
 lemma iff_provable_gentzen : A ∈ 𝐆𝐋 ↔ ⊢ᴳ[GL] ∅ ⟹ {A} := provability_TFAE.out 1 3
 
+omit [DecidableEq α] in
 lemma iff_valid_finite : A ∈ 𝐆𝐋 ↔
     ∀ {κ : Type u} [Nonempty κ] (M : Model κ α), [M.IsFiniteGL] → M ⊧ A :=
-  provability_TFAE.out 1 4
+  by classical exact provability_TFAE.out 1 4
 
+omit [DecidableEq α] in
 lemma iff_root_forces : A ∈ 𝐆𝐋 ↔
     ∀ {κ : Type u} [Nonempty κ] (M : RootedModel κ α), [M.IsFiniteGL] → M.root ⊩[M.toModel] A :=
-  provability_TFAE.out 1 5
+  by classical exact provability_TFAE.out 1 5
 
 end Logic.GL
 

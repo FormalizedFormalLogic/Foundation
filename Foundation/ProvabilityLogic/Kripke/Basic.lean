@@ -50,10 +50,10 @@ lemma relItr_one : x ≺^[1] y ↔ x ≺ y := by simp [RelItr];
 @[grind =]
 lemma relItr_succ : x ≺^[n + 1] y ↔ ∃ z, x ≺ z ∧ z ≺^[n] y := Iff.rfl
 
-abbrev NotRel {M : Model κ α} : M.World → M.World → Prop := λ x y => ¬(x ≺ y)
+abbrev NotRel {M : Model κ α} : M.World → M.World → Prop := fun x y => ¬(x ≺ y)
 scoped infix:60 " ⊀ " => NotRel
 
-abbrev NotRelItr {M : Model κ α} (n : ℕ) : M.World → M.World → Prop := λ x y => ¬(x ≺^[n] y)
+abbrev NotRelItr {M : Model κ α} (n : ℕ) : M.World → M.World → Prop := fun x y => ¬(x ≺^[n] y)
 scoped notation x:45 " ⊀^[" n:0 "] " y:46 => NotRelItr n x y
 
 @[simp, grind =]
@@ -72,7 +72,8 @@ instance [M.IsFiniteGL] : M.IsGL where
 
 instance [M.IsGL] : Std.Irrefl M.Rel := ConverseWellFounded.irrefl
 
-class IsGrz (M : Model κ α) extends Std.Refl M.Rel, IsTrans _ M.Rel, IsWeaklyConverseWellFounded _ M.Rel
+class IsGrz (M : Model κ α) extends
+    Std.Refl M.Rel, IsTrans _ M.Rel, IsWeaklyConverseWellFounded _ M.Rel
 
 class IsFiniteGrz (M : Model κ α) extends Std.Refl M.Rel, IsTrans _ M.Rel, Std.Antisymm M.Rel where
   [finite : Finite M.World]

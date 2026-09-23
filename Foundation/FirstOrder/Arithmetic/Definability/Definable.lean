@@ -5,11 +5,6 @@ public import Foundation.FirstOrder.Tarski.Definability
 
 @[expose] public section
 set_option autoImplicit true
-set_option linter.style.cases false
-set_option linter.unusedFintypeInType false
-set_option linter.unusedVariables false
-set_option linter.unusedTactic false
-set_option linter.unreachableTactic false
 namespace FFL.FirstOrder.Arithmetic
 
 namespace HierarchySymbol
@@ -250,9 +245,9 @@ lemma of_eq {f g : (Fin k → V) → V} (h : ∀ x, f x = g x)
 lemma graph_delta {f : (Fin k → V) → V} {φ : 𝚺-[m].Semisentence (k + 1)}
     (h : DefinedFunction f φ) : DefinedFunction f φ.graphDelta :=
   ⟨by
-      cases' m with m
+      cases m
       case zero => simp [HierarchySymbol.Semiformula.graphDelta]
-      case succ =>
+      case succ m =>
         simp only [Semiformula.graphDelta]
         intro e
         simp; tauto,
@@ -543,14 +538,16 @@ open Classical in
 lemma fdisj (s : Finset ι) {R : ι → (Fin k → V) → Prop} (h : ∀ i, ℌ.Definable (R i)) :
     ℌ.Definable fun x ↦ ∃ i ∈ s, R i x := by simpa using disj₂ s.toList h
 
-lemma fintype_all [Fintype ι] {P : ι → (Fin k → V) → Prop}
+lemma fintype_all {ι : Type*} [Finite ι] {P : ι → (Fin k → V) → Prop}
     (h : ∀ i, ℌ.Definable fun w : Fin k → V ↦ P i w) :
     ℌ.Definable fun v : Fin k → V ↦ ∀ i, P i v := by
+  have := Fintype.ofFinite ι
   simpa using fconj Finset.univ h
 
-lemma fintype_exs [Fintype ι] {P : ι → (Fin k → V) → Prop}
+lemma fintype_exs {ι : Type*} [Finite ι] {P : ι → (Fin k → V) → Prop}
     (h : ∀ i, ℌ.Definable fun w : Fin k → V ↦ P i w) :
     ℌ.Definable fun v : Fin k → V ↦ ∃ i, P i v := by
+  have := Fintype.ofFinite ι
   simpa using fdisj Finset.univ h
 
 lemma equal' (i j : Fin k) : ℌ.Definable fun v : Fin k → V ↦ v i = v j := by
@@ -558,7 +555,7 @@ lemma equal' (i j : Fin k) : ℌ.Definable fun v : Fin k → V ↦ v i = v j := 
 
 lemma of_sigma {f : (Fin k → V) → V} (h : 𝚺-[m].DefinableFunction f) {Γ} :
     Γ-[m].DefinableFunction f := by
-  cases' m with m
+  rcases m with _ | m
   · exact of_zero h
   apply of_sigma_of_pi
   · exact h
@@ -588,9 +585,9 @@ lemma exsVec {k l} {P : (Fin k → V) → (Fin l → V) → Prop}
       apply iff_of_eq; congr
       · ext i; congr 1; ext; simp [Matrix.vecAppend_eq_ite]
       · ext i
-        cases' i using Fin.cases with i
-        · simp only [Matrix.cons_val_zero]; congr 1; ext; simp [Matrix.vecAppend_eq_ite]
-        · simp only [Matrix.cons_val_succ]; congr 1; ext; simp [Matrix.vecAppend_eq_ite])
+        cases i using Fin.cases with
+        | zero => simp only [Matrix.cons_val_zero]; congr 1; ext; simp [Matrix.vecAppend_eq_ite]
+        | succ i => simp only [Matrix.cons_val_succ]; congr 1; ext; simp [Matrix.vecAppend_eq_ite])
 
 lemma allVec {k l} {P : (Fin k → V) → (Fin l → V) → Prop}
     (h : 𝚷-[m + 1].Definable fun w : Fin (k + l) → V ↦
@@ -612,9 +609,9 @@ lemma allVec {k l} {P : (Fin k → V) → (Fin l → V) → Prop}
       apply iff_of_eq; congr
       · ext i; congr 1; ext; simp [Matrix.vecAppend_eq_ite]
       · ext i
-        cases' i using Fin.cases with i
-        · simp only [Matrix.cons_val_zero]; congr 1; ext; simp [Matrix.vecAppend_eq_ite]
-        · simp only [Matrix.cons_val_succ]; congr 1; ext; simp [Matrix.vecAppend_eq_ite])
+        cases i using Fin.cases with
+        | zero => simp only [Matrix.cons_val_zero]; congr 1; ext; simp [Matrix.vecAppend_eq_ite]
+        | succ i => simp only [Matrix.cons_val_succ]; congr 1; ext; simp [Matrix.vecAppend_eq_ite])
 
 private lemma substitution_sigma {f : Fin k → (Fin l → V) → V} (hP : 𝚺-[m + 1].Definable P)
     (hf : ∀ i, 𝚺-[m + 1].DefinableFunction (f i)) :
@@ -763,9 +760,9 @@ lemma graph_delta
     (h : 𝚺-[m].DefinableFunction f) : 𝚫-[m].DefinableFunction f := by
   rcases h with ⟨φ, h⟩
   exact ⟨φ.graphDelta, by
-    cases' m with m
+    cases m
     case zero => simp [HierarchySymbol.Semiformula.graphDelta]
-    case succ =>
+    case succ m =>
       simp only [Semiformula.graphDelta]
       intro e; simp [h.df.iff]; tauto,
   by intro v; simp [h.df.iff]⟩
@@ -822,9 +819,9 @@ lemma substitution {f : Fin k → (Fin l → V) → V}
     Γ-[m + 1].DefinableFunction fun z ↦ F (fun i ↦ f i z) := by
   simpa using Definable.substitution (f := (· 0) :> fun i w ↦ f i (w ·.succ)) hF <| by
     intro i
-    cases' i using Fin.cases with i
-    · simp
-    · simpa using Definable.retraction (hf i) (0 :> (·.succ.succ))
+    cases i using Fin.cases with
+    | zero => simp
+    | succ i => simpa using Definable.retraction (hf i) (0 :> (·.succ.succ))
 
 end DefinableFunction
 

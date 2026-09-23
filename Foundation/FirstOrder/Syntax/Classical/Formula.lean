@@ -4,9 +4,6 @@ public import Foundation.Syntax.Predicate.Term
 public import Foundation.Syntax.Predicate.Quantifier
 public import Mathlib.Data.Nat.Cast.Order.Basic
 
-set_option linter.style.induction false
-set_option linter.unusedTactic false
-set_option linter.unreachableTactic false
 set_option autoImplicit true
 
 @[expose] public section
@@ -377,7 +374,7 @@ def qr {n} : Semiformula L ξ n → ℕ
 @[simp] lemma qr_exs (φ : Semiformula L ξ (n + 1)) : (∃¹ φ).qr = φ.qr + 1 := rfl
 
 @[simp] lemma qr_neg (φ : Semiformula L ξ n) : (∼φ).qr = φ.qr := by
-  induction' φ using rec' <;> simp [*]
+  induction φ using rec' <;> simp [*]
 
 @[simp] lemma qr_imply (φ ψ : Semiformula L ξ n) : (φ 🡒 ψ).qr = max φ.qr ψ.qr :=
   by simp [imp_eq]

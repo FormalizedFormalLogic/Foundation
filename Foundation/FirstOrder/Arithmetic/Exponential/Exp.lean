@@ -5,7 +5,6 @@ public import Mathlib.Algebra.Order.Ring.Basic
 
 @[expose] public section
 set_option autoImplicit true
-set_option linter.style.induction false
 /-!
 # Exponential function
 
@@ -843,9 +842,9 @@ lemma exp_even (a : V) : Exp.exp (2 * a) = (Exp.exp a) ^ 2 :=
 
 set_option backward.isDefEq.respectTransparency false in
 lemma nat_cast_exp (n : ℕ) : (Exp.exp n : ℕ) = Exp.exp (n : V) := by
-  induction' n with n ih
-  · simp
-  · simp [exp_succ, ih]
+  induction n with
+  | zero => simp
+  | succ n ih => simp [exp_succ, ih]
 
 end exponential
 

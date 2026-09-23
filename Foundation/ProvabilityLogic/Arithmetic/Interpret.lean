@@ -48,8 +48,8 @@ lemma interpret_boxItr {n : ℕ} : (□^[n]A).interpret f 𝔅 = 𝔅^[n] (A.int
 
 end Formula
 
-def _root_.FFL.FirstOrder.ArithmeticTheory.provabilityLogicRelativeTo (T U : ArithmeticTheory) [T.Δ₁] :
-    Logic α :=
+def _root_.FFL.FirstOrder.ArithmeticTheory.provabilityLogicRelativeTo
+    (T U : ArithmeticTheory) [T.Δ₁] : Logic α :=
   { A | ∀ f : Realization α ℒₒᵣ, U ⊢ f T A }
 
 abbrev _root_.FFL.FirstOrder.ArithmeticTheory.provabilityLogic (T : ArithmeticTheory) [T.Δ₁] :

@@ -10,7 +10,6 @@ public import Foundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.CraigTrick
 
 namespace FFL.FirstOrder.Arithmetic.Bootstrapping
 
-set_option linter.style.openClassical false
 
 open FFL.Entailment
 
@@ -72,8 +71,7 @@ lemma provable_of_standard_proof {n : ℕ} {φ : Sentence L} :
   have : Provable T (⌜φ⌝ : ℕ) := ⟨n, this.mpr h⟩
   exact provable_iff_provable.mp this
 
-open Classical
-
+open Classical in
 theorem rosser_internalize [Consistent T] {φ : Sentence L} :
     T ⊢ φ → T.RosserProvable (⌜φ⌝ : V) := by
   intro h

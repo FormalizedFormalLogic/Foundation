@@ -4,9 +4,6 @@ public import Foundation.FirstOrder.Arithmetic.PeanoMinus.Basic
 
 @[expose] public section
 set_option autoImplicit true
-set_option linter.unusedSimpArgs false
-set_option linter.unusedTactic false
-set_option linter.unreachableTactic false
 /-!
 
 # Arithmetical Formula Sorted by Arithmetical Hierarchy

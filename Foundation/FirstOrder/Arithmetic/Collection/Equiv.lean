@@ -246,7 +246,7 @@ section ISigma_BSigma_succ
 
 variable {P : V → Prop} {Q : V → V → Prop}
 
-lemma succ_induction_of_exists_pi [V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺ s] [V↓[ℒₒᵣ] ⊧* 𝗕𝚷 (s + 1)]
+lemma succ_induction_of_exists_pi [V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺s] [V↓[ℒₒᵣ] ⊧* 𝗕𝚷(s + 1)]
     (hQ : 𝚷-[s].DefinableRel Q) (hPQ : ∀ x, P x ↔ ∃ w, Q x w)
     (zero : P 0) (succ : ∀ x, P x → P (x + 1)) : ∀ x, P x := by
   have : V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := models_of_subtheory (inferInstance : V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺ s);
@@ -278,7 +278,7 @@ lemma succ_induction_of_exists_pi [V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺ s] [V↓[ℒ
     exact (hlt.or hbexs).of_iff (by intro v; simp);
   have key : ∀ x, a < x ∨ ∃ y < b, Q x y := by
     apply InductionOnBroadHierarchy.succ_induction 𝚷 s hbdd;
-    . right;
+    · right;
       exact ⟨w₀, hw₀b, hw₀⟩;
     · rintro x (hx | ⟨y, -, hy⟩);
       · left;
@@ -294,7 +294,7 @@ lemma succ_induction_of_exists_pi [V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺ s] [V↓[ℒ
   · exact absurd hy (lt_irrefl a);
   · exact (hPQ a).mpr ⟨y, hy⟩;
 
-lemma models_IBroadSigma_of_models_BSigma_succ [V↓[ℒₒᵣ] ⊧* 𝗕𝚺 (s + 1)] : V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺ s := by
+lemma models_IBroadSigma_of_models_BSigma_succ [V↓[ℒₒᵣ] ⊧* 𝗕𝚺(s + 1)] : V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺ s := by
   rename_i hn;
   induction s generalizing hn with
   | zero =>

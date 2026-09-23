@@ -102,7 +102,7 @@ section BSigma_ISigma
 
 variable {s : ℕ}
 
-lemma IBroadSigma.collection [V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺ (s + 1)] {R : V → V → Prop}
+lemma IBroadSigma.collection [V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺(s + 1)] {R : V → V → Prop}
     (hR : 𝚺-[s + 1].DefinableRel R) (a : V) (h : ∀ x < a, ∃ y, R x y) :
     ∃ b, ∀ x < a, ∃ y < b, R x y := by
   have : V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := mod_paMinus_of_IBroadSigma (s := s + 1);
@@ -131,11 +131,11 @@ lemma IBroadSigma.collection [V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺ (s + 1)] {R : V �
   intro x hx;
   exact hb x (lt_trans hx (lt_add_one a)) hx;
 
-instance IBroadSigma.models_BSigma_succ [V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺ (s + 1)] : V↓[ℒₒᵣ] ⊧* 𝗕𝚺 (s + 1) := by
+instance IBroadSigma.models_BSigma_succ [V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺(s + 1)] : V↓[ℒₒᵣ] ⊧* 𝗕𝚺 (s + 1) := by
   apply Semantics.ModelsSet.union_iff.mpr;
   and_intros;
-  . exact models_of_ss inferInstance (ISigmaZero_subset_IBroadSigma (s := s + 1));
-  . exact models_of_ss
+  · exact models_of_ss inferInstance (ISigmaZero_subset_IBroadSigma (s := s + 1));
+  · exact models_of_ss
       (CollectionScheme.models_of_collection (Γ := 𝚺) IBroadSigma.collection)
       (CollectionScheme_subset (·.hierarchy));
 

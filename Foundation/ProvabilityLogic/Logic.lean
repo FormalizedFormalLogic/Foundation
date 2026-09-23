@@ -37,9 +37,9 @@ variable {L₁ L₂ X Y : Logic α}
 
 lemma subset_iff : (L₁ +ᴸ X) ⊆ (L₁ +ᴸ Y) ↔ X ⊆ (L₁ +ᴸ Y) := by
   constructor;
-  . intro h A hA;
+  · intro h A hA;
     exact h (mem₂ hA);
-  . intro h A hA;
+  · intro h A hA;
     induction hA with
     | mem₁ hA => exact mem₁ hA;
     | mem₂ hA => exact h hA;

@@ -45,12 +45,7 @@ lemma rotate_right_inv (hφ : Γ ⟹ φ :: Δ) : Γ ⟹ Δ ++ [φ] := weakening 
 omit [DecidableEq F] in
 lemma rotate_left_inv (hφ : (φ :: Γ) ⟹ Δ) : (Γ ++ [φ]) ⟹ Δ := weakening hφ
 
--- `DecidableEq F` is not referenced in the proof term itself, but the ambient
--- instance is needed for elaboration to disambiguate the overloaded `⨀`
--- notation; omitting it (as the `unusedSectionVars` linter suggests) breaks
--- elaboration, so the false-positive warning is suppressed here.
-set_option linter.unusedSectionVars false in
-set_option linter.unusedDecidableInType false in
+omit [DecidableEq F] in
 lemma to_provable {φ} (h : [] ⟹ [φ]) : 𝓢 ⊢ φ :=
   FiniteContext.provable_iff_provable.mpr <| left_Disj_intro [φ] (by simp) ⨀ h
 
@@ -111,12 +106,9 @@ lemma or_right (h : Γ ⟹ Δ ++ [φ, ψ]) : Γ ⟹ φ ⋎ ψ :: Δ := by
     · apply right_Disj_intro _ (by simp [hχ])
   exact this ⨀ weakening h
 
--- `DecidableEq F` is not referenced in this statement's type, but the ambient
--- instance is needed for elaboration to disambiguate the overloaded `⨀`
--- notation inside the proof; omitting it (as the `unusedSectionVars` linter
--- suggests) breaks elaboration, so the false-positive warning is suppressed here.
-set_option linter.unusedDecidableInType false in
+omit [DecidableEq F] in
 lemma and_left (h : Γ ++ [φ, ψ] ⟹ Δ) : (φ ⋏ ψ :: Γ) ⟹ Δ := by
+  classical
   have : φ :: ψ :: Γ ⟹ Δ := weakening h
   have : (φ ⋏ ψ :: Γ) ⊢[𝓢] ψ 🡒 φ 🡒 Δ.disj := wk! (by simp) (deduct <| deduct this)
   exact this ⨀ (deductInv and₂) ⨀ (deductInv and₁)
@@ -128,13 +120,9 @@ lemma neg_right_int (h : Γ ++ [φ] ⟹ []) : Γ ⟹ ∼φ :: Δ := by
   have : Γ ⟹ [∼φ] := (right_Disj_intro _ (by simp)) ⨀ this
   exact weakening this
 
--- `DecidableEq F` is not referenced in this statement's type, but the ambient
--- instance is needed for elaboration to disambiguate the overloaded `⨀`
--- notation inside the proof; omitting it (as the `unusedSectionVars` linter
--- suggests) breaks elaboration, so the false-positive warning is suppressed here.
-set_option linter.unusedDecidableInType false in
-omit [Entailment.Int 𝓢] in
+omit [DecidableEq F] [Entailment.Int 𝓢] in
 lemma neg_right_cl [Entailment.Cl 𝓢] (h : Γ ++ [φ] ⟹ Δ) : Γ ⟹ ∼φ :: Δ := by
+  classical
   have hφ : Γ ⊢[𝓢] φ 🡒 (∼φ :: Δ).disj := by
     apply deduct
     suffices (φ :: Γ) ⊢[𝓢] Δ.disj 🡒 (∼φ :: Δ).disj from this ⨀ weakening h
@@ -144,12 +132,9 @@ lemma neg_right_cl [Entailment.Cl 𝓢] (h : Γ ++ [φ] ⟹ Δ) : Γ ⟹ ∼φ :
   have hnφ : Γ ⊢[𝓢] ∼φ 🡒 (∼φ :: Δ).disj := right_Disj_intro _ (by simp)
   exact left_A_intro hφ hnφ ⨀ lem
 
--- `DecidableEq F` is not referenced in this statement's type, but the ambient
--- instance is needed for elaboration to disambiguate the overloaded `⨀`
--- notation inside the proof; omitting it (as the `unusedSectionVars` linter
--- suggests) breaks elaboration, so the false-positive warning is suppressed here.
-set_option linter.unusedDecidableInType false in
+omit [DecidableEq F] in
 lemma neg_left_int (h : Γ ++ [∼φ] ⟹ Δ ++ [φ]) : ∼φ :: Γ ⟹ Δ := by
+  classical
   have h : ∼φ :: Γ ⟹ φ :: Δ := weakening h
   suffices (∼φ :: Γ) ⊢[𝓢] (φ :: Δ).disj 🡒 Δ.disj from this ⨀ (wk! (by simp) h)
   apply left_Disj_intro
@@ -159,20 +144,13 @@ lemma neg_left_int (h : Γ ++ [∼φ] ⟹ Δ ++ [φ]) : ∼φ :: Γ ⟹ Δ := by
     exact CNC
   · apply right_Disj_intro _ (by simp [hψ])
 
--- `DecidableEq F` is not referenced in this statement's type, but the ambient
--- instance is needed for elaboration to disambiguate the overloaded `⨀`
--- notation inside the proof; omitting it (as the `unusedSectionVars` linter
--- suggests) breaks elaboration, so the false-positive warning is suppressed here.
-set_option linter.unusedDecidableInType false in
+omit [DecidableEq F] in
 lemma neg_left (h : Γ ⟹ Δ ++ [φ]) : ∼φ :: Γ ⟹ Δ :=
   neg_left_int (weakening h)
 
--- `DecidableEq F` is not referenced in this statement's type, but the ambient
--- instance is needed for elaboration to disambiguate the overloaded `⨀`
--- notation inside the proof; omitting it (as the `unusedSectionVars` linter
--- suggests) breaks elaboration, so the false-positive warning is suppressed here.
-set_option linter.unusedDecidableInType false in
+omit [DecidableEq F] in
 lemma imply_left_int (hφ : Γ ++ [φ 🡒 ψ] ⟹ Δ ++ [φ]) (hψ : Γ ++ [ψ] ⟹ Δ) : (φ 🡒 ψ) :: Γ ⟹ Δ := by
+  classical
   have hφ : (φ 🡒 ψ) :: Γ ⟹ φ :: Δ := weakening hφ
   have hψ : ψ :: Γ ⟹ Δ := weakening hψ
   suffices ((φ 🡒 ψ) :: Γ) ⊢[𝓢] (φ :: Δ).disj 🡒 Δ.disj from this ⨀ wk! (by simp) hφ
@@ -184,11 +162,7 @@ lemma imply_left_int (hφ : Γ ++ [φ 🡒 ψ] ⟹ Δ ++ [φ]) (hψ : Γ ++ [ψ]
     apply (wk! (by simp) this) ⨀ (by_axm₁ ⨀ by_axm₀)
   · apply right_Disj_intro _ (by simp [hχ])
 
--- `DecidableEq F` is not referenced in this statement's type, but the ambient
--- instance is needed for elaboration to disambiguate the overloaded `⨀`
--- notation inside the proof; omitting it (as the `unusedSectionVars` linter
--- suggests) breaks elaboration, so the false-positive warning is suppressed here.
-set_option linter.unusedDecidableInType false in
+omit [DecidableEq F] in
 lemma imply_left (hφ : Γ ⟹ Δ ++ [φ]) (hψ : Γ ++ [ψ] ⟹ Δ) : (φ 🡒 ψ) :: Γ ⟹ Δ :=
   imply_left_int (weakening hφ) (weakening hψ)
 
@@ -198,13 +172,9 @@ lemma imply_right_int (h : Γ ++ [φ] ⟹ [ψ]) : Γ ⟹ (φ 🡒 ψ) :: Δ := b
   have : (φ :: Γ) ⊢[𝓢] ψ := (left_Disj_intro _ <| by simp) ⨀ h
   exact (right_Disj_intro _ <| by simp) ⨀ deduct this
 
--- `DecidableEq F` is not referenced in this statement's type, but the ambient
--- instance is needed for elaboration to disambiguate the overloaded `⨀`
--- notation inside the proof; omitting it (as the `unusedSectionVars` linter
--- suggests) breaks elaboration, so the false-positive warning is suppressed here.
-set_option linter.unusedDecidableInType false in
-omit [Entailment.Int 𝓢] in
+omit [DecidableEq F] [Entailment.Int 𝓢] in
 lemma imply_right_cl [Entailment.Cl 𝓢] (h : Γ ++ [φ] ⟹ Δ ++ [ψ]) : Γ ⟹ (φ 🡒 ψ) :: Δ := by
+  classical
   have h : φ :: Γ ⟹ ψ :: Δ := weakening h
   have hnφ : Γ ⊢[𝓢] ∼φ 🡒 ((φ 🡒 ψ) :: Δ).disj := by
     apply right_Disj_intro' ((φ 🡒 ψ) :: Δ) (φ := φ 🡒 ψ) (by simp)
@@ -221,14 +191,10 @@ lemma imply_right_cl [Entailment.Cl 𝓢] (h : Γ ++ [φ] ⟹ Δ ++ [ψ]) : Γ �
       simp [hχ]
   exact left_A_intro hφ hnφ ⨀ lem
 
--- `DecidableEq F` is not referenced in this statement's type, but the ambient
--- instance is needed for elaboration to disambiguate the overloaded `⨀`
--- notation inside the proof; omitting it (as the `unusedSectionVars` linter
--- suggests) breaks elaboration, so the false-positive warning is suppressed here.
-set_option linter.unusedDecidableInType false in
-omit [Entailment.Int 𝓢] in
+omit [DecidableEq F] [Entailment.Int 𝓢] in
 lemma iff_right_cl [Entailment.Cl 𝓢] (hr : Γ ++ [φ] ⟹ Δ ++ [ψ]) (hl : Γ ++ [ψ] ⟹ Δ ++ [φ]) :
     Γ ⟹ (φ 🡘 ψ) :: Δ := by
+  classical
   apply and_right
   · apply rotate_right_inv
     apply imply_right_cl
@@ -237,11 +203,7 @@ lemma iff_right_cl [Entailment.Cl 𝓢] (hr : Γ ++ [φ] ⟹ Δ ++ [ψ]) (hl : �
     apply imply_right_cl
     assumption
 
--- `DecidableEq F` is not referenced in this statement's type, but the ambient
--- instance is needed for elaboration to disambiguate the overloaded `⨀`
--- notation inside the proof; omitting it (as the `unusedSectionVars` linter
--- suggests) breaks elaboration, so the false-positive warning is suppressed here.
-set_option linter.unusedDecidableInType false in
+omit [DecidableEq F] in
 lemma iff_left (hr : Γ ⟹ Δ ++ [φ, ψ]) (hl : Γ ++ [φ, ψ] ⟹ Δ) : (φ 🡘 ψ) :: Γ ⟹ Δ := by
   apply and_left
   suffices (φ 🡒 ψ) :: (ψ 🡒 φ) :: Γ ⟹ Δ from weakening this
@@ -329,10 +291,6 @@ lemma remove : Valid 𝓢 T → Valid 𝓢 ((Γ ⟶ Δ) :: T) :=
 
 variable [Entailment.Int 𝓢]
 
--- `DecidableEq F` is only needed to invoke `TwoSided.to_provable`, whose own signature
--- carries it for `⨀` notation disambiguation; it is not otherwise used in this statement's type.
-set_option linter.unusedDecidableInType false in
-variable [DecidableEq F] in
 lemma to_provable (h : Valid 𝓢 [[] ⟶ [φ]]) : 𝓢 ⊢ φ := by
   rcases h
   · exact TwoSided.to_provable <| by assumption

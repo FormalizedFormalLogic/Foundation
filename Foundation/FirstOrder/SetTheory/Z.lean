@@ -10,8 +10,6 @@ reference: Ralf Schindler, "Set Theory, Exploring Independence and Truth" [Sch14
 -/
 
 @[expose] public section
-set_option linter.style.openClassical false
-set_option linter.unusedSimpArgs false
 
 namespace FFL.FirstOrder.SetTheory
 
@@ -67,8 +65,6 @@ lemma empty_existsUnique : ∃! e : V, IsEmpty e := by
   intro x hx
   ext y
   simp [hx.not_mem, he.not_mem]
-
-open Classical
 
 noncomputable scoped instance : EmptyCollection V := ⟨Classical.choose! empty_existsUnique⟩
 
@@ -295,6 +291,7 @@ instance power.definable : ℒₛₑₜ-function₁[V] power := power.defined.to
 lemma separation_exists_eval (x : V) (φ : SetTheorySemiformula V 1) :
     ∃ y : V, ∀ z : V, z ∈ y ↔ z ∈ x ∧ φ.Eval ![z] id := by
   -- have : Inhabited V := inhabited_of_nonempty inferInstance
+  classical
   let f := φ.enumerateFVar
   let ψ := (Rew.rewriteMap φ.idxOfFVar) ▹ φ
   have := by
@@ -472,7 +469,7 @@ instance sdiff.definable : ℒₛₑₜ-function₂[V] SDiff.sdiff := sdiff.defi
     {x} \ z = ∅ := by
   ext
   simp only [mem_sdiff_iff, mem_singleton_iff, not_mem_empty,
-    iff_false, not_and, Decidable.not_not]; grind
+    iff_false, not_and]; grind
 
 @[simp, grind =] lemma singleton_sdiff_of_not_mem {x z : V} (hx : x ∉ z) :
     {x} \ z = {x} := by

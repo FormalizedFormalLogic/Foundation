@@ -4,10 +4,6 @@ public import Foundation.FirstOrder.LJ.Basic
 public import Foundation.FirstOrder.LK.Basic
 
 @[expose] public section
-set_option linter.unusedSimpArgs false
-set_option linter.unusedTactic false
-set_option linter.unreachableTactic false
-set_option linter.unusedVariables false
 set_option autoImplicit true
 namespace FFL.FirstOrder
 

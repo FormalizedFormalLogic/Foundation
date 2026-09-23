@@ -3,7 +3,6 @@ module
 public import Foundation.FirstOrder.LK.Basic
 
 @[expose] public section
-set_option linter.unusedSimpArgs false
 set_option autoImplicit true
 /-!
 # Canonical model of classical first-order logic

@@ -5,12 +5,6 @@ public import Foundation.Logic.LindenbaumAlgebra
 public import Foundation.Vorspiel.Order.Heyting
 
 @[expose] public section
-set_option linter.unusedVariables false
-set_option linter.unusedSimpArgs false
-set_option linter.unusedTactic false
-set_option linter.unreachableTactic false
-set_option linter.unusedDecidableInType false
-set_option linter.unusedFintypeInType false
 set_option autoImplicit true
 
 namespace FFL.Propositional
@@ -156,8 +150,9 @@ instance : Complete H (lindenbaum H) := ⟨lindenbaum_complete_iff.mp⟩
 
 end
 
-lemma complete [DecidableEq α] [Entailment.Int H] {φ : Formula α} (h : mod.{_, u} H ⊧ φ) :
+lemma complete [Entailment.Int H] {φ : Formula α} (h : mod.{_, u} H ⊧ φ) :
     H ⊢ φ := by
+  classical
   wlog Con : Entailment.Consistent H
   · exact Entailment.not_consistent_iff_inconsistent.mp Con φ
   exact lindenbaum_complete_iff.mp <| mod_models_iff.mp h (lindenbaum H) <| by
@@ -165,7 +160,7 @@ lemma complete [DecidableEq α] [Entailment.Int H] {φ : Formula α} (h : mod.{_
     intro ψ hψ;
     exact lindenbaum_complete_iff.mpr <| Hilbert.of_schema hψ;
 
-instance [DecidableEq α] [Entailment.Int H] : Complete H (mod.{_,u} H) := ⟨complete⟩
+instance [Entailment.Int H] : Complete H (mod.{_,u} H) := ⟨complete⟩
 
 end Heyting.Model
 

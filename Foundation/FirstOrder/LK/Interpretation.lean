@@ -5,7 +5,6 @@ public import Foundation.Vorspiel.ExistsUnique
 
 @[expose] public section
 set_option autoImplicit true
-set_option linter.unusedSimpArgs false
 /-!
 # (Direct) Interpretation
 -/
