@@ -2,7 +2,6 @@ module
 
 public import Foundation.FirstOrder.Incompleteness.ProvabilityAbstraction.Reflection
 public import Foundation.FirstOrder.Incompleteness.Second
-public import Foundation.FirstOrder.Arithmetic.Prenex
 public import Foundation.FirstOrder.LK.Axiomatizability
 
 @[expose] public section
