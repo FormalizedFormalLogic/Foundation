@@ -38,11 +38,11 @@ namespace extendRoot
 
 variable {M} {x y : M.World} {A : Formula α}
 
-@[simp] lemma rel_some_some : (M.extendRoot.Rel (some x) (some y)) ↔ M.Rel x y := Iff.rfl
+@[simp, grind =] lemma rel_some_some : (M.extendRoot.Rel (some x) (some y)) ↔ M.Rel x y := Iff.rfl
 
-@[simp] lemma rel_none_some : M.extendRoot.Rel none (some x) := trivial
+@[simp, grind .] lemma rel_none_some : M.extendRoot.Rel none (some x) := trivial
 
-@[simp] lemma not_rel_none {x : M.extendRoot.World} : x ⊀ none := by
+@[simp, grind .] lemma not_rel_none {x : M.extendRoot.World} : x ⊀ none := by
   rcases x with _ | _ <;> exact id
 
 instance [IsTrans _ M.Rel] : IsTrans _ M.extendRoot.Rel where
@@ -112,7 +112,7 @@ lemma rank_some : Model.World.rank (M := M.extendRoot.toModel) (some x) = Model.
   have h : ∀ n, Model.World.rank (M := M.extendRoot.toModel) (some x) < n ↔
       Model.World.rank (M := M.toModel) x < n := by
     intro n;
-    simp only [Model.rank_lt_iff, NotRelItr, relItr_some_iff];
+    simp only [Model.rank_lt_iff, notRelItr_iff, relItr_some_iff];
     grind;
   exact le_antisymm (Nat.le_of_lt_succ ((h _).mpr (Nat.lt_succ_self _)))
     (Nat.le_of_lt_succ ((h _).mp (Nat.lt_succ_self _)));

@@ -56,6 +56,9 @@ scoped infix:60 " ⊀ " => NotRel
 abbrev NotRelItr {M : Model κ α} (n : ℕ) : M.World → M.World → Prop := λ x y => ¬(x ≺^[n] y)
 scoped notation x:45 " ⊀^[" n:0 "] " y:46 => NotRelItr n x y
 
+@[simp, grind =]
+lemma notRelItr_iff : x ⊀^[n] y ↔ ¬x ≺^[n] y := Iff.rfl
+
 end RelItr
 
 class IsGL (M : Model κ α) extends IsTrans _ M.Rel, IsConverseWellFounded _ M.Rel

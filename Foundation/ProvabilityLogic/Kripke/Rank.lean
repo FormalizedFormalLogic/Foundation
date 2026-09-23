@@ -32,7 +32,7 @@ lemma rank_lt_iff : x.rank < n ↔ ∀ y, x ⊀^[n] y := by
       _ ↔ x.rank ≤ n                 := Nat.lt_add_one_iff
       _ ↔ ∀ y, x ≺ y → y.rank < n    :=
         ⟨fun h _ Rxy ↦ lt_of_lt_of_le (rank_lt_of_rel Rxy) h, cwfHeight_le⟩
-      _ ↔ ∀ y, x ⊀^[n + 1] y         := by simp only [NotRelItr, ih, relItr_succ]; grind;
+      _ ↔ ∀ y, x ⊀^[n + 1] y         := by simp only [notRelItr_iff, ih, relItr_succ]; grind;
 
 lemma forces_boxItr_bot_iff : x ⊩[M] □^[n]⊥ ↔ x.rank < n := by
   simp [forces_boxItr, rank_lt_iff];

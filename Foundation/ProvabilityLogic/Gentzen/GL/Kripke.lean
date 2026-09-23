@@ -75,19 +75,16 @@ theorem sound {κ : Type*} [Nonempty κ] (M : Kripke.Model κ α) [M.IsGL] (h : 
     have hAB : x ⊩[M] A 🡒 B := hx _ (Finset.mem_insert_self _ _);
     have hΓ : ∀ C ∈ Γ, x ⊩[M] C := fun C hC ↦ hx C (by simp [hC]);
     by_cases hA : x ⊩[M] A;
-    . apply ih₂ x;
-      simpa [hAB hA] using hΓ;
+    . exact ih₂ x (by simpa [hAB hA] using hΓ);
     . obtain ⟨D, hD, hxD⟩ := ih₁ x hΓ;
-      rcases Finset.mem_insert.mp hD with rfl | hD;
-      . contradiction;
-      . exact ⟨D, hD, hxD⟩;
+      grind;
   | @impR Γ Δ A B _ ih =>
     intro x hx;
     by_cases hA : x ⊩[M] A;
     . obtain ⟨D, hD, hxD⟩ := ih x (by simpa [hA] using hx);
       rcases Finset.mem_insert.mp hD with rfl | hD;
       . exact ⟨A 🡒 D, by simp, fun _ ↦ hxD⟩;
-      . exact ⟨D, by simp [hD], hxD⟩;
+      . grind;
     . exact ⟨A 🡒 B, by simp, fun h ↦ absurd h hA⟩;
   | boxGL _ ih => exact Kripke.Model.validateSequent_boxGL ih;
 
