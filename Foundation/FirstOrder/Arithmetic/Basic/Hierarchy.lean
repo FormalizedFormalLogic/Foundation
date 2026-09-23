@@ -16,6 +16,7 @@ abbrev BoundingOperator : Semiformula.Operator L 2 :=
 abbrev Hierarchy : Polarity → ℕ → {n : ℕ} → Semiformula L ξ n → Prop :=
   BoundingHierarchy (R := BoundingOperator (L := L))
 
+@[deprecated "use `Semiformula.Bounded BoundingOperator`" (since := "2026-09-23")]
 abbrev DeltaZero (φ : Semiformula L ξ n) : Prop :=
   Semiformula.Bounded BoundingOperator φ
 
@@ -129,7 +130,7 @@ lemma zero_iff {Γ Γ'} {φ : Semiformula L ξ n} :
   BoundingHierarchy.zero_iff (R := BoundingOperator (L := L))
 
 lemma zero_iff_delta_zero {Γ} {φ : Semiformula L ξ n} :
-    Hierarchy Γ 0 φ ↔ DeltaZero φ :=
+    Hierarchy Γ 0 φ ↔ Semiformula.Bounded BoundingOperator φ :=
   BoundingHierarchy.zero_iff_bounded
 
 @[simp] lemma alt_zero_iff_zero {φ : Semiformula L ξ n} :
