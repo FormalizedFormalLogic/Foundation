@@ -143,7 +143,12 @@ public import Foundation.FirstOrder.Tarski.Basic
 public import Foundation.FirstOrder.Tarski.Definability
 public import Foundation.FirstOrder.Tarski.Elementary
 public import Foundation.FirstOrder.Tarski.Eq
+public import Foundation.FirstOrder.Tarski.HierarchicalDefinability.Absoluteness
+public import Foundation.FirstOrder.Tarski.HierarchicalDefinability.Basic
+public import Foundation.FirstOrder.Tarski.HierarchicalDefinability.BoundedDefinable
+public import Foundation.FirstOrder.Tarski.HierarchicalDefinability.Hierarchy
 public import Foundation.FirstOrder.Tarski.Model
+public import Foundation.FirstOrder.Tarski.Monotone
 public import Foundation.FirstOrder.Tarski.Operator
 public import Foundation.FirstOrder.Tarski.Skolemization
 public import Foundation.FirstOrder.Tarski.Ultraproduct
