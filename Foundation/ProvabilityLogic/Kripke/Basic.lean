@@ -2,7 +2,7 @@ module
 
 public import Foundation.ProvabilityLogic.Formula
 public import Foundation.Logic.Semantics
-public import Foundation.Vorspiel.Rel.CWF
+public import Foundation.Vorspiel.Rel.WCWF
 
 /-!
 # Kripke semantics
@@ -71,6 +71,15 @@ instance [M.IsFiniteGL] : Finite M.World := IsFiniteGL.finite
 instance [M.IsFiniteGL] : M.IsGL where
 
 instance [M.IsGL] : Std.Irrefl M.Rel := ConverseWellFounded.irrefl
+
+class IsGrz (M : Model κ α) extends Std.Refl M.Rel, IsTrans _ M.Rel, IsWeaklyConverseWellFounded _ M.Rel
+
+class IsFiniteGrz (M : Model κ α) extends Std.Refl M.Rel, IsTrans _ M.Rel, Std.Antisymm M.Rel where
+  [finite : Finite M.World]
+
+instance [M.IsFiniteGrz] : Finite M.World := IsFiniteGrz.finite
+
+instance [M.IsFiniteGrz] : M.IsGrz where
 
 abbrev pointModel (v : α → Prop) : Model (Fin 1) α where
   Rel' _ _ := False
