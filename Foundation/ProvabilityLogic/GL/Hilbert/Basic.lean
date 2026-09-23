@@ -1,6 +1,6 @@
 module
 
-public import Foundation.ProvabilityLogic.Gentzen.GL.Kripke
+public import Foundation.ProvabilityLogic.GL.Gentzen.Kripke
 public import Foundation.ProvabilityLogic.Kripke.Cone
 public import Foundation.Propositional.Entailment.Cl
 public import Foundation.Meta.ClProver

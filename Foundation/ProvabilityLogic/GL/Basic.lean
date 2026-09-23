@@ -1,7 +1,7 @@
 module
 
-public import Foundation.ProvabilityLogic.Logic.Basic
-public import Foundation.ProvabilityLogic.Hilbert.GL.Basic
+public import Foundation.ProvabilityLogic.Logic
+public import Foundation.ProvabilityLogic.GL.Hilbert.Basic
 
 /-!
 # The logic `GL`

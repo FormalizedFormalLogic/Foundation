@@ -1,6 +1,6 @@
 module
 
-public import Foundation.ProvabilityLogic.Gentzen.Sequent
+public import Foundation.ProvabilityLogic.Sequent
 
 /-!
 # The sequent calculus of `GL`

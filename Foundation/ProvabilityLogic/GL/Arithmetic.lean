@@ -1,7 +1,7 @@
 module
 
-public import Foundation.ProvabilityLogic.Logic.GL.Basic
-public import Foundation.ProvabilityLogic.Arithmetic.SolovaySentences
+public import Foundation.ProvabilityLogic.GL.Basic
+public import Foundation.ProvabilityLogic.SolovaySentences
 public import Foundation.FirstOrder.Incompleteness.Löb
 
 /-!
