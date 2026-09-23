@@ -7,7 +7,7 @@ namespace FFL
 
 open FirstOrder Arithmetic
 
-variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺₁]
+variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 
 variable {L : Language} [L.Encodable] [L.LORDefinable]
 

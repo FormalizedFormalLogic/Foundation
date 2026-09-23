@@ -154,7 +154,7 @@ namespace Arithmetic
 -- reverts automatically at `end Arithmetic`).
 set_option linter.dupNamespace false
 
-variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺₁]
+variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 
 def zeroIndex : ℕ := Encodable.encode (Language.Zero.zero : (ℒₒᵣ : FirstOrder.Language).Func 0)
 

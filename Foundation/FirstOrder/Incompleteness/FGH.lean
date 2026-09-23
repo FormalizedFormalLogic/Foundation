@@ -15,7 +15,7 @@ namespace FFL.FirstOrder.Arithmetic.Bootstrapping
 
 open FFL.Entailment
 
-variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺₁] {x : V}
+variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] {x : V}
 
 variable (T : ArithmeticTheory) [T.Δ₁] (θ : 𝚺₀.Semisentence 1)
 

@@ -8,7 +8,7 @@ open Encodable FFL FirstOrder Arithmetic PeanoMinus Bootstrapping
 
 namespace FFL.FirstOrder.Semiterm
 
-variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺₁]
+variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 
 variable {L : Language} [L.Encodable] [L.LORDefinable]
 

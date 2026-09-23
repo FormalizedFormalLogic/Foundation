@@ -11,7 +11,7 @@ namespace FFL
 
 open FirstOrder Arithmetic
 
-variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺₁]
+variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 
 variable {L : Language} [L.Encodable] [L.LORDefinable]
 
@@ -117,7 +117,7 @@ def _root_.FFL.FirstOrder.Theory.internalize (T : Theory L) [T.Δ₁] : Internal
 
 variable {V}
 
-omit [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺₁] in
+omit [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] in
 @[simp] lemma internalize_theory (T : Theory L) [T.Δ₁] : (T.internalize V).theory = T := rfl
 
 structure TDerivation (T : InternalTheory V L) (Γ : Sequent V L) where

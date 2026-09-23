@@ -54,7 +54,7 @@ end FFL.FirstOrder.Theory
 
 namespace FFL.FirstOrder.Arithmetic.Bootstrapping
 
-variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺₁]
+variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 
 variable {L : Language} [L.Encodable] [L.LORDefinable]
 

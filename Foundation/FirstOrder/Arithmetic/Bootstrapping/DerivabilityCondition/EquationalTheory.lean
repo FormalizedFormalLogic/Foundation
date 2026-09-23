@@ -13,7 +13,7 @@ namespace FFL.FirstOrder.Arithmetic.Bootstrapping
 
 open Classical _root_.FFL.FirstOrder.Entailment
 
-variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺₁]
+variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 
 namespace Arithmetic
 

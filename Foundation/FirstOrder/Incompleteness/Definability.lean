@@ -16,7 +16,7 @@ namespace FFL.FirstOrder.Arithmetic.Bootstrapping
 
 /-! ## Internal iterated universal quantifier `qqAlls` -/
 
-variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺₁]
+variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 
 section qqAlls
 
@@ -644,7 +644,7 @@ noncomputable instance PeanoMinus.delta1 : (𝗣𝗔⁻ : ArithmeticTheory).Δ�
 
 section succInd
 
-variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺₁]
+variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 
 lemma succInd_eq (φ : ArithmeticSemiproposition 1) :
     succInd φ =
@@ -740,7 +740,7 @@ end succInd
 
 section ch
 
-variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺₁]
+variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 
 open Bootstrapping
 
@@ -777,7 +777,7 @@ noncomputable def chSigma1 : 𝚫₁.Semisentence 1 := chInd Bootstrapping.isSig
 
 section chDefined
 
-variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺₁]
+variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 
 open Bootstrapping
 

@@ -9,7 +9,7 @@ public import Foundation.FirstOrder.Incompleteness.StandardProvability
 
 namespace FFL.FirstOrder.Arithmetic.Bootstrapping
 
-variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺₁]
+variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 
 section WitnessComparisons
 

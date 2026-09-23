@@ -29,7 +29,7 @@ set_option linter.dupNamespace false
 
 open Classical FFL.Entailment
 
-variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺₁]
+variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 
 local prefix:max "#'" => Semiterm.bvar  (V := V) (L := ℒₒᵣ)
 
