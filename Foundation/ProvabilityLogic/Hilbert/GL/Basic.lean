@@ -8,7 +8,7 @@ public import Foundation.Meta.ClProver
 /-!
 # The Hilbert-style system `GL`
 
-`𝐆𝐋`: classical propositional logic with necessitation and the axioms `K`, `4` and `L`, as an
+`⊢ᴴ[GL] A`: classical propositional logic with necessitation and the axioms `K`, `4` and `L`, as an
 `Entailment`. It is sound and complete with respect to finite transitive irreflexive Kripke
 models, via the sequent calculus.
 -/
@@ -41,16 +41,14 @@ inductive Derivation : Formula α → Type _
   | axiom4 {A} : Derivation (□A 🡒 □□A)
   | axiomL {A} : Derivation (□(□A 🡒 A) 🡒 □A)
 
-/-- The Hilbert-style system `GL`, whose only inhabitant is `𝐆𝐋`. -/
+/-- The Hilbert-style system `GL` as an `Entailment`; its only inhabitant is `gl`. -/
 inductive Hilbert (α : Type*) : Type
   | gl
 
 end GL
 
-notation "𝐆𝐋" => GL.Hilbert.gl
-
 /-- `⊢ᴴ[GL] A`: `A` is provable in the Hilbert-style system `GL`. -/
-notation:45 "⊢ᴴ[GL] " A:46 => Entailment.Provable 𝐆𝐋 A
+notation:45 "⊢ᴴ[GL] " A:46 => Entailment.Provable GL.Hilbert.gl A
 
 namespace GL
 
@@ -58,13 +56,13 @@ variable {α : Type*}
 
 instance : Entailment (GL.Hilbert α) (Formula α) := ⟨fun _ ↦ Derivation⟩
 
-instance : ModusPonens (𝐆𝐋 : GL.Hilbert α) := ⟨Derivation.mdp⟩
-instance : HasAxiomImplyK (𝐆𝐋 : GL.Hilbert α) := ⟨Derivation.implyK⟩
-instance : HasAxiomImplyS (𝐆𝐋 : GL.Hilbert α) := ⟨Derivation.implyS⟩
-instance : HasAxiomAndInst (𝐆𝐋 : GL.Hilbert α) := ⟨Derivation.andIntro⟩
+instance : ModusPonens (GL.Hilbert.gl : GL.Hilbert α) := ⟨Derivation.mdp⟩
+instance : HasAxiomImplyK (GL.Hilbert.gl : GL.Hilbert α) := ⟨Derivation.implyK⟩
+instance : HasAxiomImplyS (GL.Hilbert.gl : GL.Hilbert α) := ⟨Derivation.implyS⟩
+instance : HasAxiomAndInst (GL.Hilbert.gl : GL.Hilbert α) := ⟨Derivation.andIntro⟩
 
 open Derivation in
-instance : Entailment.Cl (𝐆𝐋 : GL.Hilbert α) where
+instance : Entailment.Cl (GL.Hilbert.gl : GL.Hilbert α) where
   verum! := verum
   and₁! := andElimL
   and₂! := andElimR

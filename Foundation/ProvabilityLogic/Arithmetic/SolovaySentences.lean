@@ -1,6 +1,6 @@
 module
 
-public import Foundation.ProvabilityLogic.ProvabilityLogic.Interpret
+public import Foundation.ProvabilityLogic.Arithmetic.Interpret
 public import Foundation.ProvabilityLogic.Kripke.RootExtension
 public import Foundation.FirstOrder.Incompleteness.ProvabilityAbstraction.Height
 public import Foundation.Vorspiel.List.ChainI
@@ -525,6 +525,10 @@ noncomputable def FFL.FirstOrder.Theory.standardProvability.solovaySentences
       simpa [models_iff] using! disjunctive
 
 
+namespace FFL.ProvabilityLogic
+
+/-- A formula refuted at the root of a finite rooted `GL` model whose height is below that of
+`T` has a realization whose standard interpretation is unprovable in `T`. -/
 theorem unprovable_realization_exists
   (T : FirstOrder.ArithmeticTheory) [T.Δ₁] [𝗜𝚺₁ ⪯ T]
   (M : RootedModel κ α) [Fintype M.World] [M.IsGL]
@@ -544,6 +548,8 @@ theorem unprovable_realization_exists
     constructor;
     . trivial;
     . exact RootedModel.extendRoot.forces_some.not.mpr hA;
+
+end FFL.ProvabilityLogic
 
 end
 

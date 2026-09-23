@@ -174,7 +174,11 @@ public import Foundation.Propositional.Heyting.Semantics
 public import Foundation.Propositional.Hilbert.Basic
 public import Foundation.Propositional.LK.Basic
 public import Foundation.Propositional.Logic.Basic
+public import Foundation.ProvabilityLogic.Arithmetic.GL.Basic
+public import Foundation.ProvabilityLogic.Arithmetic.Interpret
+public import Foundation.ProvabilityLogic.Arithmetic.SolovaySentences
 public import Foundation.ProvabilityLogic.Formula.Basic
+public import Foundation.ProvabilityLogic.Formula.Substitution
 public import Foundation.ProvabilityLogic.Gentzen.GL.Basic
 public import Foundation.ProvabilityLogic.Gentzen.GL.Kripke
 public import Foundation.ProvabilityLogic.Gentzen.Sequent
@@ -184,9 +188,10 @@ public import Foundation.ProvabilityLogic.Kripke.Cone
 public import Foundation.ProvabilityLogic.Kripke.Rank
 public import Foundation.ProvabilityLogic.Kripke.RootExtension
 public import Foundation.ProvabilityLogic.Kripke.RootedModel
-public import Foundation.ProvabilityLogic.ProvabilityLogic.GL.Basic
-public import Foundation.ProvabilityLogic.ProvabilityLogic.Interpret
-public import Foundation.ProvabilityLogic.ProvabilityLogic.SolovaySentences
+public import Foundation.ProvabilityLogic.Logic.Basic
+public import Foundation.ProvabilityLogic.Logic.GL.Basic
+public import Foundation.ProvabilityLogic.Logic.SumNormal
+public import Foundation.ProvabilityLogic.Logic.SumQuasiNormal
 public import Foundation.SecondOrder.LK.Basic
 public import Foundation.SecondOrder.Syntax.Formula
 public import Foundation.SecondOrder.Syntax.Rew

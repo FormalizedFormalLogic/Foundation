@@ -1,0 +1,57 @@
+module
+
+public import Foundation.ProvabilityLogic.Logic.Basic
+public import Foundation.ProvabilityLogic.Hilbert.GL.Basic
+
+/-!
+# The logic `GL`
+
+`𝐆𝐋`, the set of theorems of `GL`, and its characterizations by the Hilbert-style system, the
+sequent calculus and finite Kripke models.
+-/
+
+@[expose] public section
+
+namespace FFL.ProvabilityLogic
+
+open Kripke Kripke.Model Kripke.Model.World
+
+/-- The logic `GL`: the theorems of the Hilbert-style system `GL`. -/
+abbrev Logic.GL {α : Type*} : Logic α := { A | ⊢ᴴ[GL] A }
+
+@[inherit_doc] notation "𝐆𝐋" => Logic.GL
+
+namespace Logic.GL
+
+universe u
+
+variable {α : Type u} [DecidableEq α] {A : Formula α}
+
+theorem provability_TFAE : [
+    A ∈ 𝐆𝐋,
+    ⊢ᴴ[GL] A,
+    ⊢ᴳ[GL] ∅ ⟹ {A},
+    ∀ {κ : Type u} [Nonempty κ] (M : Model κ α), [M.IsFiniteGL] → M ⊧ A,
+    ∀ {κ : Type u} [Nonempty κ] (M : RootedModel κ α), [M.IsFiniteGL] → M.root ⊩[M.toModel] A
+  ].TFAE := by
+  tfae_have 1 ↔ 2 := Iff.rfl;
+  tfae_have 2 ↔ 3 := GL.Hilbert.iff_gentzen;
+  tfae_have 2 ↔ 4 := GL.Hilbert.iff_valid_finite;
+  tfae_have 2 ↔ 5 := GL.Hilbert.iff_root_forces;
+  tfae_finish;
+
+lemma iff_provable_gentzen : A ∈ 𝐆𝐋 ↔ ⊢ᴳ[GL] ∅ ⟹ {A} := provability_TFAE.out 1 3
+
+lemma iff_valid_finite : A ∈ 𝐆𝐋 ↔
+    ∀ {κ : Type u} [Nonempty κ] (M : Model κ α), [M.IsFiniteGL] → M ⊧ A :=
+  provability_TFAE.out 1 4
+
+lemma iff_root_forces : A ∈ 𝐆𝐋 ↔
+    ∀ {κ : Type u} [Nonempty κ] (M : RootedModel κ α), [M.IsFiniteGL] → M.root ⊩[M.toModel] A :=
+  provability_TFAE.out 1 5
+
+end Logic.GL
+
+end FFL.ProvabilityLogic
+
+end

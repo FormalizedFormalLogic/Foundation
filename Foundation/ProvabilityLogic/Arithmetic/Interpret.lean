@@ -1,6 +1,6 @@
 module
 
-public import Foundation.ProvabilityLogic.Formula.Basic
+public import Foundation.ProvabilityLogic.Logic.Basic
 public import Foundation.FirstOrder.Incompleteness.StandardProvability
 
 /-!
@@ -57,12 +57,12 @@ end Formula
 /-- The provability logic of `T` relative to `U`: the modal formulas whose standard
 interpretations over `T` are all provable in `U`. -/
 def _root_.FFL.FirstOrder.ArithmeticTheory.provabilityLogicRelativeTo (T U : ArithmeticTheory) [T.Δ₁] :
-    Set (Formula α) :=
+    Logic α :=
   { A | ∀ f : Realization α ℒₒᵣ, U ⊢ f T A }
 
 /-- The provability logic of `T`. -/
 abbrev _root_.FFL.FirstOrder.ArithmeticTheory.provabilityLogic (T : ArithmeticTheory) [T.Δ₁] :
-    Set (Formula α) :=
+    Logic α :=
   T.provabilityLogicRelativeTo T
 
 end FFL.ProvabilityLogic
