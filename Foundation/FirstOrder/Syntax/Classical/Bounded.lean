@@ -130,33 +130,3 @@ lemma operator_preimage [R.SymbolLike ξ₁ ξ₂]
 end Bounded
 
 end FFL.FirstOrder.Semiformula
-
-namespace FFL.FirstOrder
-
-/-- A formula bundled with a proof that it is bounded with respect to `R`. -/
-structure BoundedSemiformula (R : Semiformula.Operator L 2) (ξ : Type*) (n : ℕ) where
-  val : Semiformula L ξ n
-  bounded : Semiformula.Bounded R val
-
-abbrev BoundedSemisentence (R : Semiformula.Operator L 2) (n : ℕ) := BoundedSemiformula R Empty n
-
-namespace BoundedSemiformula
-
-variable {L : Language} {R : Semiformula.Operator L 2} {ξ ξ₁ ξ₂ : Type*} {n n₁ n₂ : ℕ}
-
-attribute [simp] bounded
-
-instance : CoeTC (BoundedSemiformula R ξ n) (Semiformula L ξ n) := ⟨val⟩
-
-@[ext] lemma ext {φ ψ : BoundedSemiformula R ξ n} (h : φ.val = ψ.val) : φ = ψ := by
-  cases φ; cases ψ; simpa using h
-
-def rew (φ : BoundedSemiformula R ξ₁ n₁) (ω : Rew L ξ₁ n₁ ξ₂ n₂) : BoundedSemiformula R ξ₂ n₂ :=
-  ⟨ω ▹ φ.val, φ.bounded.rew ω⟩
-
-@[simp] lemma val_rew (φ : BoundedSemiformula R ξ₁ n₁) (ω : Rew L ξ₁ n₁ ξ₂ n₂) :
-    (φ.rew ω).val = ω ▹ φ.val := rfl
-
-end BoundedSemiformula
-
-end FFL.FirstOrder

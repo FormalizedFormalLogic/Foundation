@@ -19,15 +19,6 @@ abbrev Hierarchy : Polarity → ℕ → {n : ℕ} → Semiformula L ξ n → Pro
 abbrev DeltaZero (φ : Semiformula L ξ n) : Prop :=
   Semiformula.Bounded BoundingOperator φ
 
-abbrev ArithmeticBoundedSemiformula (ξ : Type*) (n : ℕ) :=
-  BoundedSemiformula (BoundingOperator (L := ℒₒᵣ)) ξ n
-
-abbrev ArithmeticBoundedSemisentence (n : ℕ) := ArithmeticBoundedSemiformula Empty n
-
-@[simp] lemma BoundedSemiformula.hierarchy {Γ s} {ξ : Type*} {n : ℕ}
-    {φ : ArithmeticBoundedSemiformula ξ n} : Hierarchy Γ s φ.val :=
-  (BoundingHierarchy.zero_iff_delta_zero (Γ := Γ)).mpr φ.bounded |>.of_zero
-
 namespace Hierarchy
 
 abbrev rec := @BoundingHierarchy.rec (R := BoundingOperator (L := L))
