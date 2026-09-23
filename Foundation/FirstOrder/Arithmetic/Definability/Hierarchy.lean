@@ -48,6 +48,10 @@ notation "𝚷₁" => HierarchySymbol.piOne
 
 notation "𝚫₁" => HierarchySymbol.deltaOne
 
+@[simp] lemma BoundedSemiformula.hierarchy {Γ s} {ξ : Type*} {n : ℕ}
+    {φ : ArithmeticBoundedSemiformula ξ n} : Hierarchy Γ s φ.val :=
+  (BoundingHierarchy.zero_iff_delta_zero (Γ := Γ)).mpr φ.bounded |>.of_zero
+
 namespace HierarchySymbol
 
 variable (ξ : Type*) (n : ℕ)

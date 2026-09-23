@@ -24,10 +24,6 @@ abbrev ArithmeticBoundedSemiformula (ξ : Type*) (n : ℕ) :=
 
 abbrev ArithmeticBoundedSemisentence (n : ℕ) := ArithmeticBoundedSemiformula Empty n
 
-@[simp] lemma BoundedSemiformula.hierarchy {Γ s} {ξ : Type*} {n : ℕ}
-    {φ : ArithmeticBoundedSemiformula ξ n} : Hierarchy Γ s φ.val :=
-  (BoundingHierarchy.zero_iff_delta_zero (Γ := Γ)).mpr φ.bounded |>.of_zero
-
 namespace Hierarchy
 
 abbrev rec := @BoundingHierarchy.rec (R := BoundingOperator (L := L))
