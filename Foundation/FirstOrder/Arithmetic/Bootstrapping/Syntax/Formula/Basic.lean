@@ -1,7 +1,7 @@
 module
 
 public import Foundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Term.Basic
-public import Foundation.FirstOrder.Arithmetic.Induction
+public import Foundation.FirstOrder.Arithmetic.Induction.Basic
 
 @[expose] public section
 namespace FFL.FirstOrder.Arithmetic.Bootstrapping
