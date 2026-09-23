@@ -177,6 +177,7 @@ public import Foundation.Propositional.LK.Basic
 public import Foundation.Propositional.Logic.Basic
 public import Foundation.ProvabilityLogic.Arithmetic.Interpret
 public import Foundation.ProvabilityLogic.Arithmetic.SolovaySentences
+public import Foundation.ProvabilityLogic.Arithmetic.StrongInterpret
 public import Foundation.ProvabilityLogic.D.Basic
 public import Foundation.ProvabilityLogic.D.Gentzen.Basic
 public import Foundation.ProvabilityLogic.D.Gentzen.Kripke
@@ -189,7 +190,9 @@ public import Foundation.ProvabilityLogic.GL.Gentzen.Basic
 public import Foundation.ProvabilityLogic.GL.Gentzen.Kripke
 public import Foundation.ProvabilityLogic.GL.Gentzen.Maehara
 public import Foundation.ProvabilityLogic.GL.Hilbert.Basic
+public import Foundation.ProvabilityLogic.Grz.Arithmetic
 public import Foundation.ProvabilityLogic.Grz.Basic
+public import Foundation.ProvabilityLogic.Grz.Boxdot
 public import Foundation.ProvabilityLogic.Grz.Gentzen.Basic
 public import Foundation.ProvabilityLogic.Grz.Gentzen.Kripke
 public import Foundation.ProvabilityLogic.Grz.Hilbert.Basic
@@ -204,6 +207,7 @@ public import Foundation.ProvabilityLogic.Kripke.Tail
 public import Foundation.ProvabilityLogic.Logic
 public import Foundation.ProvabilityLogic.S.Arithmetic
 public import Foundation.ProvabilityLogic.S.Basic
+public import Foundation.ProvabilityLogic.S.Boxdot
 public import Foundation.ProvabilityLogic.S.Gentzen.Basic
 public import Foundation.ProvabilityLogic.S.Gentzen.Kripke
 public import Foundation.ProvabilityLogic.Sequent
