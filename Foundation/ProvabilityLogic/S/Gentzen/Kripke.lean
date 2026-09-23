@@ -4,6 +4,7 @@ public import Foundation.ProvabilityLogic.S.Gentzen.Basic
 public import Foundation.ProvabilityLogic.GL.Gentzen.Kripke
 public import Foundation.ProvabilityLogic.Kripke.Cone
 public import Foundation.ProvabilityLogic.Kripke.Tail
+public import Foundation.ProvabilityLogic.Kripke.Rank
 
 /-!
 # Kripke completeness of the sequent calculus of `S`

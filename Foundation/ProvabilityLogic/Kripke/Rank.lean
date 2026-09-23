@@ -17,6 +17,57 @@ variable {κ α : Type*} [Nonempty κ]
 
 namespace Model
 
+section
+
+variable {M : Model κ α} {x y : M.World} {n : ℕ}
+
+lemma exists_chain_of_relItr (h : x ≺^[n] y) :
+    ∃ c : ℕ → M.World, c 0 = x ∧ c n = y ∧ ∀ i < n, c i ≺ c (i + 1) := by
+  induction n generalizing x with
+  | zero => exact ⟨fun _ ↦ x, rfl, h, by simp⟩;
+  | succ n ih =>
+    obtain ⟨z, Rxz, Rzy⟩ := h;
+    obtain ⟨c, hc₀, hcn, hc⟩ := ih Rzy;
+    use fun | 0 => x | i + 1 => c i;
+    and_intros;
+    . rfl;
+    . exact hcn;
+    . rintro (_ | i) hi;
+      . simpa [hc₀] using Rxz;
+      . exact hc i (by omega);
+
+lemma rel_of_chain [IsTrans _ M.Rel] {c : ℕ → M.World} (hc : ∀ i < n, c i ≺ c (i + 1))
+    {i j : ℕ} (hij : i < j) (hj : j ≤ n) : c i ≺ c j := by
+  induction j with
+  | zero => omega;
+  | succ j ih =>
+    rcases Nat.lt_succ_iff_lt_or_eq.mp hij with h | rfl;
+    . exact IsTrans.trans _ _ _ (ih h (by omega)) (hc j (by omega));
+    . exact hc i (by omega);
+
+end
+
+end Model
+
+namespace Model.World
+
+variable {M : Model κ α}
+
+/-- Called `Σ`-reflexivity in the source.
+
+- [KK23]
+-/
+def IsReflexiveOf (X : FormulaFinset α) (x : M.World) : Prop := ∀ A ∈ X, x ⊩[M] □A 🡒 A
+
+/-- Along `≺`, `□B 🡒 B` fails at most once: it holds at every successor of a world where it
+fails. -/
+lemma forces_axiomT_of_rel {y z : M.World} {B : Formula α} (Ryz : y ≺ z) (hy : y ⊮[M] □B 🡒 B) :
+    z ⊩[M] □B 🡒 B := fun _ ↦ (not_forces_imp.mp hy).1 z Ryz
+
+end Model.World
+
+namespace Model
+
 open Classical
 
 variable {M : Model κ α} [Fintype M.World] [M.IsGL] {x y : M.World} {n : ℕ}
