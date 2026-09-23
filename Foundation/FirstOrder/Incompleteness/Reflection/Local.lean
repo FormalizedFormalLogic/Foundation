@@ -26,13 +26,13 @@ abbrev _root_.FFL.FirstOrder.Theory.localReflection (T : ArithmeticTheory) [T.Δ
     Set ArithmeticSentence :=
   T.standardProvability.localReflection
 
-@[inherit_doc] notation "𝗥𝗳𝗻 " T:max => Theory.localReflection T
+notation "𝗥𝗳𝗻 " T:max => Theory.localReflection T
 
 abbrev _root_.FFL.FirstOrder.Theory.localReflectionOn
     (T : ArithmeticTheory) [T.Δ₁] (Γ : ArithmeticSentence → Prop) : Set ArithmeticSentence :=
   T.standardProvability.localReflectionOn Γ
 
-@[inherit_doc] notation "𝗥𝗳𝗻[" Γ "] " T:max => Theory.localReflectionOn T Γ
+notation "𝗥𝗳𝗻[" Γ "] " T:max => Theory.localReflectionOn T Γ
 
 variable {T : ArithmeticTheory} [T.Δ₁]
 

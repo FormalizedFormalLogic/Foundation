@@ -37,7 +37,7 @@ noncomputable def _root_.FFL.FirstOrder.Theory.uniformReflectionOn
     Set ArithmeticSentence :=
   { σ | ∃ (k : ℕ) (φ : ArithmeticSemisentence k), Γ φ ∧ σ = T.globalReflectionSchema φ }
 
-@[inherit_doc] notation "𝗥𝗙𝗡[" Γ "] " T:max => Theory.uniformReflectionOn T Γ
+notation "𝗥𝗙𝗡[" Γ "] " T:max => Theory.uniformReflectionOn T Γ
 
 variable {T : ArithmeticTheory} [T.Δ₁]
 
