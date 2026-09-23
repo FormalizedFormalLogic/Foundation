@@ -146,6 +146,15 @@ lemma forces_conj₂ : {l : List (Formula α)} → (x ⊩[M] ⋀l ↔ ∀ B ∈ 
 lemma forces_conj {Γ : FormulaFinset α} : x ⊩[M] Γ.conj ↔ ∀ B ∈ Γ, x ⊩[M] B := by
   simp [Finset.conj, forces_conj₂];
 
+lemma forces_disj₂ : {l : List (Formula α)} → (x ⊩[M] ⋁l ↔ ∃ B ∈ l, x ⊩[M] B)
+  | [] => by simp
+  | [B] => by simp
+  | B :: C :: l => by simp [forces_or, forces_disj₂ (l := C :: l)]
+
+@[simp]
+lemma forces_disj {Γ : FormulaFinset α} : x ⊩[M] Γ.disj ↔ ∃ B ∈ Γ, x ⊩[M] B := by
+  simp [Finset.disj, forces_disj₂];
+
 end Model.World
 
 namespace Model
@@ -170,6 +179,17 @@ lemma forces_subst {x : M.World} {A : Formula β} : x ⊩[M.subst s] A ↔ x ⊩
 instance [M.IsGL] : (M.subst s).IsGL where
   toIsTrans := inferInstanceAs (IsTrans _ M.Rel)
   toIsConverseWellFounded := inferInstanceAs (IsConverseWellFounded _ M.Rel)
+
+lemma forces_congr {N : Model κ α} (hR : M.Rel' = N.Rel') (hV : ∀ x a, M.Val x a ↔ N.Val x a)
+    {x : κ} {A : Formula α} : x ⊩[M] A ↔ x ⊩[N] A := by
+  induction A generalizing x with
+  | atom a => exact hV x a;
+  | falsum => rfl;
+  | imp A B ihA ihB => exact imp_congr ihA ihB;
+  | box A ih =>
+    change (∀ y, M.Rel' x y → _) ↔ (∀ y, N.Rel' x y → _);
+    rw [hR];
+    exact forall_congr' fun y ↦ imp_congr_right fun _ ↦ ih;
 
 end Model
 

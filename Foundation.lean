@@ -178,6 +178,9 @@ public import Foundation.Propositional.Logic.Basic
 public import Foundation.ProvabilityLogic.Arithmetic.Interpret
 public import Foundation.ProvabilityLogic.Arithmetic.SolovaySentences
 public import Foundation.ProvabilityLogic.Arithmetic.StrongInterpret
+public import Foundation.ProvabilityLogic.D.Basic
+public import Foundation.ProvabilityLogic.D.Gentzen.Basic
+public import Foundation.ProvabilityLogic.D.Gentzen.Kripke
 public import Foundation.ProvabilityLogic.Formula
 public import Foundation.ProvabilityLogic.GL.Arithmetic
 public import Foundation.ProvabilityLogic.GL.Basic
