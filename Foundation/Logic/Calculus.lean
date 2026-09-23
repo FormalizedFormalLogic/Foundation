@@ -256,52 +256,48 @@ derivations can be embedded as proofs. This is the routine translation of the
 Hilbert axioms into one-sided sequent rules. -/
 abbrev AxiomDerivation.cl {P : Type*} [Entailment P F] (𝓟 : P)
     [Entailment.ModusPonens 𝓟] [OneSidedLK 𝔇]
-    (lift : ∀ {φ}, 𝔇 ⦃φ⦄ → 𝓟 ⊢! φ) : Entailment.Cl 𝓟 where
-  negEquiv! {φ} := Entailment.cast
-    (show 𝓟 ⊢! (φ ⋎ ∼φ ⋎ ⊥) ⋏ (φ ⋏ ⊤ ⋎ ∼φ) from
+    (lift : ∀ {φ}, 𝔇 ⦃φ⦄ → 𝓟 ⊢ φ) : Entailment.Cl 𝓟 where
+  neg_equiv {φ} := Entailment.cast
+    (show 𝓟 ⊢ (φ ⋎ ∼φ ⋎ ⊥) ⋏ (φ ⋏ ⊤ ⋎ ∼φ) from
       lift <| AxiomDerivation.negEquiv φ)
     (by simp [Axioms.NegEquiv, LogicalConnective.DeMorgan.imply, LogicalConnective.iff])
-  verum! := lift verum
-  implyK! {φ ψ} := Entailment.cast (lift <| AxiomDerivation.implyK φ ψ)
+  verum := lift verum
+  implyK {φ ψ} := Entailment.cast (lift <| AxiomDerivation.implyK φ ψ)
     (by simp [LogicalConnective.DeMorgan.imply])
-  implyS! {φ ψ χ} := Entailment.cast (lift <| AxiomDerivation.implyS φ ψ χ)
+  implyS {φ ψ χ} := Entailment.cast (lift <| AxiomDerivation.implyS φ ψ χ)
     (by simp [LogicalConnective.DeMorgan.imply])
-  and₁! {φ ψ} := Entailment.cast (lift <| AxiomDerivation.and₁ φ ψ)
+  and₁ {φ ψ} := Entailment.cast (lift <| AxiomDerivation.and₁ φ ψ)
     (by simp [LogicalConnective.DeMorgan.imply])
-  and₂! {φ ψ} := Entailment.cast (lift <| AxiomDerivation.and₂ φ ψ)
+  and₂ {φ ψ} := Entailment.cast (lift <| AxiomDerivation.and₂ φ ψ)
     (by simp [LogicalConnective.DeMorgan.imply])
-  and₃! {φ ψ} := Entailment.cast (lift <| AxiomDerivation.and₃ φ ψ)
+  and₃ {φ ψ} := Entailment.cast (lift <| AxiomDerivation.and₃ φ ψ)
     (by simp [LogicalConnective.DeMorgan.imply])
-  or₁! {φ ψ} := Entailment.cast (lift <| AxiomDerivation.or₁ φ ψ)
+  or₁ {φ ψ} := Entailment.cast (lift <| AxiomDerivation.or₁ φ ψ)
     (by simp [LogicalConnective.DeMorgan.imply])
-  or₂! {φ ψ} := Entailment.cast (lift <| AxiomDerivation.or₂ φ ψ)
+  or₂ {φ ψ} := Entailment.cast (lift <| AxiomDerivation.or₂ φ ψ)
     (by simp [LogicalConnective.DeMorgan.imply])
-  or₃! {φ ψ χ} := Entailment.cast (lift <| AxiomDerivation.or₃ φ ψ χ)
+  or₃ {φ ψ χ} := Entailment.cast (lift <| AxiomDerivation.or₃ φ ψ χ)
     (by simp [LogicalConnective.DeMorgan.imply])
-  dne! {φ} := Entailment.cast (lift <| AxiomDerivation.dne φ)
+  dne {φ} := Entailment.cast (lift <| AxiomDerivation.dne φ)
     (by simp [LogicalConnective.DeMorgan.imply])
 
 /-- An entailment relation which is determined solely by derivability. -/
 class PrincipalEntailment (𝔇 : outParam (Multiset F → Type*)) {P : Type*} [Entailment P F] (𝓟 : P) where
-  equiv {φ} : 𝓟 ⊢! φ ≃ 𝔇 ⦃φ⦄
+  iff {φ} : 𝓟 ⊢ φ ↔ Nonempty (𝔇 ⦃φ⦄)
 
 namespace PrincipalEntailment
 
 variable {P : Type*} [Entailment P F] {𝓟 : P} [PrincipalEntailment 𝔇 𝓟]
 
-omit [LogicalConnective F] [LogicalNeutral F]
-  [LogicalConnective.DeMorgan F] [LogicalNeutral.DeMorgan F] in
-lemma provable_iff :
-    𝓟 ⊢ φ ↔ Nonempty (𝔇 ⦃φ⦄) := by
-  simpa using! OneSidedLK.PrincipalEntailment.equiv.nonempty_congr
-
 variable [OneSidedLK.Cut 𝔇] (𝓟)
 
 instance : Entailment.ModusPonens 𝓟 where
-  mdp! {φ ψ} b₁ b₂ :=
-    equiv.symm <| cast <| modusPonens (Γ := 0) (Δ := 0) (equiv b₁) (equiv b₂)
+  mdp {φ ψ} b₁ b₂ :=
+    have ⟨d₁⟩ := PrincipalEntailment.iff.mp b₁
+    have ⟨d₂⟩ := PrincipalEntailment.iff.mp b₂
+    PrincipalEntailment.iff.mpr ⟨cast <| modusPonens (Γ := 0) (Δ := 0) d₁ d₂⟩
 
-instance : Entailment.Cl 𝓟 := AxiomDerivation.cl 𝓟 PrincipalEntailment.equiv.symm
+instance : Entailment.Cl 𝓟 := AxiomDerivation.cl 𝓟 fun d ↦ PrincipalEntailment.iff.mpr ⟨d⟩
 
 variable {𝓟}
 
@@ -310,9 +306,9 @@ lemma derivable_iff_provable_disj {Γ : List F} : Nonempty (𝔇 (Γ : Multiset 
   constructor
   · rintro ⟨d⟩
     have : 𝔇 ((Γ : Multiset F) + 0) := cast d
-    exact provable_iff.mpr ⟨disj₂ this⟩
-  · rintro h
-    have d₁ : 𝔇 ⦃⋁Γ⦄ := (provable_iff.mp h).some
+    exact PrincipalEntailment.iff.mpr ⟨disj₂ this⟩
+  · intro h
+    obtain ⟨d₁⟩ := PrincipalEntailment.iff.mp h
     have d₂ : 𝔇 ((Γ : Multiset F) + ⦃⋀(∼Γ)⦄) :=
       conj₂ (.ofList Γ) fun φ h ↦ close φ ((Multiset.Traversal.ofList Γ).succ φ) (by simp) (by simp_all)
     exact ⟨cast (eCut (Γ := 0) (Δ := (Γ : Multiset F)) d₁ d₂)⟩
@@ -350,7 +346,7 @@ instance cut [Cut 𝔇] : Cut (Pullback 𝔇 f) where
 
 instance {P : Type*} [Entailment P F] (𝓟 : P) [PrincipalEntailment 𝔇 𝓟] :
     PrincipalEntailment (Pullback 𝔇 f) (Entailment.pullback 𝓟 f) where
-  equiv {φ} := PrincipalEntailment.equiv (φ := f φ)
+  iff {φ} := PrincipalEntailment.iff (φ := f φ)
 
 omit [TildeInvolutive F] [LogicalConnective.DeMorgan F] [LogicalNeutral.DeMorgan F]
   [TildeInvolutive G] [LogicalConnective.DeMorgan G] [LogicalNeutral.DeMorgan G] in
