@@ -84,6 +84,7 @@ public import Foundation.FirstOrder.Incompleteness.ProvabilityAbstraction.Basic
 public import Foundation.FirstOrder.Incompleteness.ProvabilityAbstraction.Height
 public import Foundation.FirstOrder.Incompleteness.ProvabilityAbstraction.Reflection
 public import Foundation.FirstOrder.Incompleteness.ProvabilityAbstraction.Refutability
+public import Foundation.FirstOrder.Incompleteness.Reflection.Local
 public import Foundation.FirstOrder.Incompleteness.RestrictedProvability
 public import Foundation.FirstOrder.Incompleteness.RosserProvability
 public import Foundation.FirstOrder.Incompleteness.Second
