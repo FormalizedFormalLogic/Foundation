@@ -23,14 +23,14 @@ variable {α : Type*} [DecidableEq α]
 - [KK23]
 -/
 inductive Gentzen : LayeredSequent 2 α → Prop
-  | axm (l) (A) : Gentzen ({A} ⟹[l] {A})
-  | botL (l) : Gentzen ({⊥} ⟹[l] ∅)
-  | wkL {l Γ Γ' Δ} : Gentzen (Γ ⟹[l] Δ) → (_ : Γ ⊆ Γ' := by grind) → Gentzen (Γ' ⟹[l] Δ)
-  | wkR {l Γ Δ Δ'} : Gentzen (Γ ⟹[l] Δ) → (_ : Δ ⊆ Δ' := by grind) → Gentzen (Γ ⟹[l] Δ')
-  | impL {l Γ Δ A B} :
-    Gentzen (Γ ⟹[l] insert A Δ) → Gentzen (insert B Γ ⟹[l] Δ) →
-      Gentzen (insert (A 🡒 B) Γ ⟹[l] Δ)
-  | impR {l Γ Δ A B} : Gentzen (insert A Γ ⟹[l] insert B Δ) → Gentzen (Γ ⟹[l] insert (A 🡒 B) Δ)
+  | axm (ℓ) (A) : Gentzen ({A} ⟹[ℓ] {A})
+  | botL (ℓ) : Gentzen ({⊥} ⟹[ℓ] ∅)
+  | wkL {ℓ Γ Γ' Δ} : Gentzen (Γ ⟹[ℓ] Δ) → (_ : Γ ⊆ Γ' := by grind) → Gentzen (Γ' ⟹[ℓ] Δ)
+  | wkR {ℓ Γ Δ Δ'} : Gentzen (Γ ⟹[ℓ] Δ) → (_ : Δ ⊆ Δ' := by grind) → Gentzen (Γ ⟹[ℓ] Δ')
+  | impL {ℓ Γ Δ A B} :
+    Gentzen (Γ ⟹[ℓ] insert A Δ) → Gentzen (insert B Γ ⟹[ℓ] Δ) →
+      Gentzen (insert (A 🡒 B) Γ ⟹[ℓ] Δ)
+  | impR {ℓ Γ Δ A B} : Gentzen (insert A Γ ⟹[ℓ] insert B Δ) → Gentzen (Γ ⟹[ℓ] insert (A 🡒 B) Δ)
   | liftUp {Γ Δ} : Gentzen (Γ ⟹[0] Δ) → Gentzen (Γ ⟹[1] Δ)
   | boxGL {Γ A} : Gentzen (insert (□A) (Γ ∪ Γ.box) ⟹[0] {A}) → Gentzen (Γ.box ⟹[0] {□A})
   | boxL {Γ Δ A} : Gentzen (insert A Γ ⟹[1] Δ) → Gentzen (insert (□A) Γ ⟹[1] Δ)
@@ -41,7 +41,7 @@ notation:45 "⊬ᴳ[S] " S:50 => ¬Gentzen S
 
 namespace Gentzen
 
-variable {l : Fin 2} {Γ Δ : FormulaFinset α}
+variable {ℓ : Fin 2} {Γ Δ : FormulaFinset α}
 
 lemma of_GL {S : Sequent α} (h : ⊢ᴳ[GL] S) : ⊢ᴳ[S] S.ant ⟹[0] S.suc := by
   induction h with

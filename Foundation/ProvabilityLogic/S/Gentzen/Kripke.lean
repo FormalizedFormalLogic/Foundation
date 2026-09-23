@@ -179,8 +179,8 @@ variable {Γ₁ Γ₂ Δ₁ Δ₂ : FormulaFinset α} {A : Formula α}
 
 - [KK23, Theorem 3.1]
 -/
-theorem cut : {l : Fin 2} → ⊢ᴳ[S] Γ₁ ⟹[l] insert A Δ₁ → ⊢ᴳ[S] insert A Γ₂ ⟹[l] Δ₂ →
-    ⊢ᴳ[S] Γ₁ ∪ Γ₂ ⟹[l] Δ₁ ∪ Δ₂
+theorem cut : {ℓ : Fin 2} → ⊢ᴳ[S] Γ₁ ⟹[ℓ] insert A Δ₁ → ⊢ᴳ[S] insert A Γ₂ ⟹[ℓ] Δ₂ →
+    ⊢ᴳ[S] Γ₁ ∪ Γ₂ ⟹[ℓ] Δ₁ ∪ Δ₂
   | 0, h₁, h₂ => iff_GL.mpr (GL.Gentzen.cut (iff_GL.mp h₁) (iff_GL.mp h₂))
   | 1, h₁, h₂ => by
     apply iff_eventually_forces.mpr;

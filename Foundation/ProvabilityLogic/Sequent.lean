@@ -24,7 +24,7 @@ infix:50 " ⟹ " => Sequent.mk
 structure LayeredSequent (n : ℕ) (α : Type*) extends Sequent α where
   level : Fin n
 
-notation:50 Γ:51 " ⟹[" l "] " Δ:51 => LayeredSequent.mk (Sequent.mk Γ Δ) l
+notation:50 Γ:51 " ⟹[" ℓ "] " Δ:51 => LayeredSequent.mk (Sequent.mk Γ Δ) ℓ
 
 namespace Sequent
 
@@ -240,27 +240,27 @@ variable {α : Type*} [DecidableEq α] {n : ℕ}
 
 /-- `D` is closed under the structural and propositional rules at every layer. -/
 structure IsPropClosed (D : LayeredSequent n α → Prop) : Prop where
-  axm (l : Fin n) (A : Formula α) : D ({A} ⟹[l] {A})
-  botL (l : Fin n) : D ({⊥} ⟹[l] ∅)
-  wkL {l : Fin n} {Γ Γ' Δ : FormulaFinset α} : D (Γ ⟹[l] Δ) → Γ ⊆ Γ' → D (Γ' ⟹[l] Δ)
-  wkR {l : Fin n} {Γ Δ Δ' : FormulaFinset α} : D (Γ ⟹[l] Δ) → Δ ⊆ Δ' → D (Γ ⟹[l] Δ')
-  impL {l : Fin n} {Γ Δ : FormulaFinset α} {A B : Formula α} :
-    D (Γ ⟹[l] insert A Δ) → D (insert B Γ ⟹[l] Δ) → D (insert (A 🡒 B) Γ ⟹[l] Δ)
-  impR {l : Fin n} {Γ Δ : FormulaFinset α} {A B : Formula α} :
-    D (insert A Γ ⟹[l] insert B Δ) → D (Γ ⟹[l] insert (A 🡒 B) Δ)
+  axm (ℓ : Fin n) (A : Formula α) : D ({A} ⟹[ℓ] {A})
+  botL (ℓ : Fin n) : D ({⊥} ⟹[ℓ] ∅)
+  wkL {ℓ : Fin n} {Γ Γ' Δ : FormulaFinset α} : D (Γ ⟹[ℓ] Δ) → Γ ⊆ Γ' → D (Γ' ⟹[ℓ] Δ)
+  wkR {ℓ : Fin n} {Γ Δ Δ' : FormulaFinset α} : D (Γ ⟹[ℓ] Δ) → Δ ⊆ Δ' → D (Γ ⟹[ℓ] Δ')
+  impL {ℓ : Fin n} {Γ Δ : FormulaFinset α} {A B : Formula α} :
+    D (Γ ⟹[ℓ] insert A Δ) → D (insert B Γ ⟹[ℓ] Δ) → D (insert (A 🡒 B) Γ ⟹[ℓ] Δ)
+  impR {ℓ : Fin n} {Γ Δ : FormulaFinset α} {A B : Formula α} :
+    D (insert A Γ ⟹[ℓ] insert B Δ) → D (Γ ⟹[ℓ] insert (A 🡒 B) Δ)
 
 namespace IsPropClosed
 
-variable {D : LayeredSequent n α → Prop} (hD : IsPropClosed D) {l : Fin n}
+variable {D : LayeredSequent n α → Prop} (hD : IsPropClosed D) {ℓ : Fin n}
          {Γ Δ : FormulaFinset α} {A : Formula α}
 include hD
 
-lemma union (A : Formula α) (hΓ : A ∈ Γ) (hΔ : A ∈ Δ) : D (Γ ⟹[l] Δ) :=
-  hD.wkR (hD.wkL (hD.axm l A) (by simpa)) (by simpa)
+lemma union (A : Formula α) (hΓ : A ∈ Γ) (hΔ : A ∈ Δ) : D (Γ ⟹[ℓ] Δ) :=
+  hD.wkR (hD.wkL (hD.axm ℓ A) (by simpa)) (by simpa)
 
-lemma botL_mem (h : ⊥ ∈ Γ) : D (Γ ⟹[l] Δ) := hD.wkR (hD.wkL (hD.botL l) (by simpa)) (by simp)
+lemma botL_mem (h : ⊥ ∈ Γ) : D (Γ ⟹[ℓ] Δ) := hD.wkR (hD.wkL (hD.botL ℓ) (by simpa)) (by simp)
 
-lemma isImpClosed (l : Fin n) : Sequent.IsImpClosed fun S ↦ D (S.ant ⟹[l] S.suc) :=
+lemma isImpClosed (ℓ : Fin n) : Sequent.IsImpClosed fun S ↦ D (S.ant ⟹[ℓ] S.suc) :=
   ⟨fun h₁ h₂ ↦ hD.union _ h₁ h₂, hD.impL, hD.impR⟩
 
 end IsPropClosed
