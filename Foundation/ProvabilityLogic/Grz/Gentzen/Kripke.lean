@@ -31,6 +31,7 @@ lemma Model.validateSequent_boxT [Std.Refl M.Rel] (h : M ⊧ (insert A Γ ⟹ Δ
   . exact hx _ (Finset.mem_insert_self _ _) x (Std.Refl.refl x);
   . exact hx C (Finset.mem_insert_of_mem hC);
 
+@[grind →]
 lemma Model.validateSequent_boxGrz [M.IsGrz] (h : M ⊧ (insert (□(A 🡒 □A)) Γ.box ⟹ {A})) :
     M ⊧ (Γ.box ⟹ {□A}) := by
   apply validateSequent_singleton_iff.mpr;
@@ -61,14 +62,8 @@ variable {α : Type*} [DecidableEq α] {S : Sequent α}
 theorem sound {κ : Type*} [Nonempty κ] (M : Kripke.Model κ α) [M.IsGrz] (h : ⊢ᴳ[Grz] S) :
     M ⊧ S := by
   induction h with
-  | axm => exact validateSequent_axm;
-  | botL => exact validateSequent_botL;
-  | wkL _ hΓ ih => exact validateSequent_wk ih hΓ subset_rfl;
-  | wkR _ hΔ ih => exact validateSequent_wk ih subset_rfl hΔ;
-  | impL _ _ ih₁ ih₂ => exact validateSequent_impL ih₁ ih₂;
-  | impR _ ih => exact validateSequent_impR ih;
   | boxT _ ih => exact validateSequent_boxT ih;
-  | boxGrz _ ih => exact validateSequent_boxGrz ih;
+  | _ => grind;
 
 @[simp, grind .]
 lemma not_empty : ⊬ᴳ[Grz] (∅ ⟹ ∅ : Sequent α) := by

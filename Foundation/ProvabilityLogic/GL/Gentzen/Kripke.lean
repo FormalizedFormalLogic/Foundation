@@ -22,6 +22,7 @@ namespace Kripke
 variable {κ α : Type*} [Nonempty κ] [DecidableEq α] {M : Model κ α}
          {Γ Δ : FormulaFinset α} {A B : Formula α}
 
+@[grind →]
 lemma Model.validateSequent_boxGL [M.IsGL] (h : M ⊧ (insert (□A) (Γ ∪ Γ.box) ⟹ {A})) :
     M ⊧ (Γ.box ⟹ {□A}) := by
   apply validateSequent_singleton_iff.mpr;
@@ -49,14 +50,7 @@ variable {α : Type*} [DecidableEq α] {S : Sequent α}
 
 theorem sound {κ : Type*} [Nonempty κ] (M : Kripke.Model κ α) [M.IsGL] (h : ⊢ᴳ[GL] S) :
     M ⊧ S := by
-  induction h with
-  | axm => exact validateSequent_axm;
-  | botL => exact validateSequent_botL;
-  | wkL _ hΓ ih => exact validateSequent_wk ih hΓ subset_rfl;
-  | wkR _ hΔ ih => exact validateSequent_wk ih subset_rfl hΔ;
-  | impL _ _ ih₁ ih₂ => exact validateSequent_impL ih₁ ih₂;
-  | impR _ ih => exact validateSequent_impR ih;
-  | boxGL _ ih => exact Kripke.Model.validateSequent_boxGL ih;
+  induction h <;> grind;
 
 @[simp, grind .]
 lemma not_empty : ⊬ᴳ[GL] (∅ ⟹ ∅ : Sequent α) := by

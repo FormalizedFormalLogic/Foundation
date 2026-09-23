@@ -34,17 +34,25 @@ lemma validateSequent_singleton_iff :
 
 /-! ### Soundness of the propositional rules -/
 
+@[grind .]
 lemma validateSequent_axm : M ⊧ ({A} ⟹ {A}) := fun _ hx ↦ ⟨A, by simp, hx A (by simp)⟩
 
+@[grind .]
 lemma validateSequent_botL : M ⊧ ({⊥} ⟹ ∅) := fun _ hx ↦ absurd (hx ⊥ (by simp)) not_forces_bot
 
-lemma validateSequent_wk (h : M ⊧ (Γ ⟹ Δ)) (hΓ : Γ ⊆ Γ') (hΔ : Δ ⊆ Δ') : M ⊧ (Γ' ⟹ Δ') := by
+@[grind →]
+lemma validateSequent_wkL (h : M ⊧ (Γ ⟹ Δ)) (hΓ : Γ ⊆ Γ') : M ⊧ (Γ' ⟹ Δ) :=
+  fun x hx ↦ h x (fun C hC ↦ hx C (hΓ hC))
+
+@[grind →]
+lemma validateSequent_wkR (h : M ⊧ (Γ ⟹ Δ)) (hΔ : Δ ⊆ Δ') : M ⊧ (Γ ⟹ Δ') := by
   intro x hx;
-  obtain ⟨D, hD, hxD⟩ := h x (fun C hC ↦ hx C (hΓ hC));
+  obtain ⟨D, hD, hxD⟩ := h x hx;
   exact ⟨D, hΔ hD, hxD⟩;
 
 variable [DecidableEq α]
 
+@[grind →]
 lemma validateSequent_impL (h₁ : M ⊧ (Γ ⟹ insert A Δ)) (h₂ : M ⊧ (insert B Γ ⟹ Δ)) :
     M ⊧ (insert (A 🡒 B) Γ ⟹ Δ) := by
   intro x hx;
@@ -54,6 +62,7 @@ lemma validateSequent_impL (h₁ : M ⊧ (Γ ⟹ insert A Δ)) (h₂ : M ⊧ (in
   . obtain ⟨D, hD, hxD⟩ := h₁ x hΓ;
     grind;
 
+@[grind →]
 lemma validateSequent_impR (h : M ⊧ (insert A Γ ⟹ insert B Δ)) : M ⊧ (Γ ⟹ insert (A 🡒 B) Δ) := by
   intro x hx;
   by_cases hA : x ⊩[M] A;
