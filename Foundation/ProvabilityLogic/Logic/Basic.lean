@@ -1,6 +1,7 @@
 module
 
 public import Foundation.ProvabilityLogic.Formula
+public import Foundation.Logic.Entailment
 
 /-!
 # Logics
@@ -15,6 +16,11 @@ abbrev Logic (α : Type*) := Set (Formula α)
 open Formula
 
 variable {α : Type*}
+
+instance : Entailment (Logic α) (Formula α) := ⟨fun L A ↦ PLift (A ∈ L)⟩
+
+lemma Logic.provable_iff {L : Logic α} {A : Formula α} : L ⊢ A ↔ A ∈ L :=
+  ⟨fun ⟨h⟩ ↦ h.down, fun h ↦ ⟨⟨h⟩⟩⟩
 
 /-! ### Quasi-normal sums -/
 
