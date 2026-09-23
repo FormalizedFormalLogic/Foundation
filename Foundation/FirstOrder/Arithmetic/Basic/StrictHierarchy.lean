@@ -21,7 +21,7 @@ variable {L : Language} [L.LT] {ξ : Type*}
 
 inductive StrictHierarchy : Polarity → ℕ → {n : ℕ} → Semiformula L ξ n → Prop
   | zero {Γ n} {φ : Semiformula L ξ n} :
-      Bounding.Closure (bounding (L := L)) φ → StrictHierarchy Γ 0 φ
+      ℬ[<, L].Closure φ → StrictHierarchy Γ 0 φ
   | ofAlt {Γ s n} {φ : Semiformula L ξ n} : StrictHierarchy Γ.alt s φ → StrictHierarchy Γ (s + 1) φ
   | exs {s n} {φ : Semiformula L ξ (n + 1)} : StrictHierarchy 𝚺 (s + 1) φ → StrictHierarchy 𝚺 (s + 1) (∃¹ φ)
   | all {s n} {φ : Semiformula L ξ (n + 1)} : StrictHierarchy 𝚷 (s + 1) φ → StrictHierarchy 𝚷 (s + 1) (∀¹ φ)
@@ -32,7 +32,7 @@ section
 
 variable {Γ : Polarity} {n : ℕ} {φ : Semiformula L ξ n}
 
-lemma zero_iff_bounded : StrictHierarchy Γ 0 φ ↔ Bounding.Closure (bounding (L := L)) φ :=
+lemma zero_iff_bounded : StrictHierarchy Γ 0 φ ↔ ℬ[<, L].Closure φ :=
   ⟨fun | .zero h => h, .zero⟩
 
 end
@@ -107,7 +107,7 @@ lemma toPrenex {j} {φ : Semiformula L ξ (n + s)} (h : StrictHierarchy (Γ.altI
       exact (ofAlt h).all;
 
 lemma toPrenex_of_deltaZero {φ : Semiformula L ξ (n + s)}
-    (h : Bounding.Closure (bounding (L := L)) φ) :
+    (h : ℬ[<, L].Closure φ) :
     StrictHierarchy Γ s (φ.toPrenex Γ s) := by simpa using toPrenex (Γ := Γ) (zero h)
 
 lemma mono {φ : Semiformula L ξ n} (h : StrictHierarchy Γ s φ) (hs : s ≤ s') :

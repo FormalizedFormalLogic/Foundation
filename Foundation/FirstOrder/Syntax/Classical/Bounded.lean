@@ -16,7 +16,15 @@ structure Bounding (L : Language) where
 
 def Bounding.strict : Bounding L := ⟨∅⟩
 
-def Bounding.ofOperator (R : Semiformula.Operator L 2) : Bounding L := ⟨{R}⟩
+def Bounding.lt (L : Language) [L.LT] : Bounding L :=
+  ⟨{Semiformula.Operator.LT.lt}⟩
+
+def Bounding.mem (L : Language) [L.Mem] : Bounding L :=
+  ⟨{Semiformula.Operator.Mem.mem}⟩
+
+instance : SetLike (Bounding L) (Semiformula.Operator L 2) where
+  coe ℬ := ℬ.set
+  coe_injective := by rintro ⟨s⟩ ⟨t⟩; simp
 
 namespace Bounding
 
@@ -26,12 +34,17 @@ variable {L : Language} {ξ ξ₁ ξ₂ : Type*}
 variable (ℬ : Bounding L)
 
 class SymbolLike (ξ₁ ξ₂ : Type*) : Prop where
-  symbolLike {R : Semiformula.Operator L 2} (hR : R ∈ ℬ.set) : R.SymbolLike ξ₁ ξ₂
+  symbolLike {R : Semiformula.Operator L 2} (hR : R ∈ ℬ) : R.SymbolLike ξ₁ ξ₂
 
-instance ofOperator.symbolLike {R : Semiformula.Operator L 2} [R.SymbolLike ξ₁ ξ₂] :
-    SymbolLike (Bounding.ofOperator R) ξ₁ ξ₂ where
+instance lt.symbolLike [L.LT] [(Semiformula.Operator.LT.lt : Semiformula.Operator L 2).SymbolLike ξ₁ ξ₂] :
+    SymbolLike (Bounding.lt L) ξ₁ ξ₂ where
   symbolLike hR := by
-    simpa only [Bounding.ofOperator, Set.mem_singleton_iff] using hR ▸ inferInstance
+    simpa only [Bounding.lt, Set.mem_singleton_iff] using hR ▸ inferInstance
+
+instance mem.symbolLike [L.Mem] [(Semiformula.Operator.Mem.mem : Semiformula.Operator L 2).SymbolLike ξ₁ ξ₂] :
+    SymbolLike (Bounding.mem L) ξ₁ ξ₂ where
+  symbolLike hR := by
+    simpa only [Bounding.mem, Set.mem_singleton_iff] using hR ▸ inferInstance
 
 inductive Closure (ℬ : Bounding L) : {n : ℕ} → Semiformula L ξ n → Prop
   | verum (n) : Closure ℬ (⊤ : Semiformula L ξ n)
@@ -42,10 +55,10 @@ inductive Closure (ℬ : Bounding L) : {n : ℕ} → Semiformula L ξ n → Prop
   | or {n} {φ ψ : Semiformula L ξ n} : Closure ℬ φ → Closure ℬ ψ → Closure ℬ (φ ⋎ ψ)
   | ball {n} {R : Semiformula.Operator L 2} {φ : Semiformula L ξ (n + 1)}
     {t : Semiterm L ξ (n + 1)} :
-    R ∈ ℬ.set → t.Positive → Closure ℬ φ → Closure ℬ (∀¹[R.operator ![#0, t]] φ)
+    R ∈ ℬ → t.Positive → Closure ℬ φ → Closure ℬ (∀¹[R.operator ![#0, t]] φ)
   | bexs {n} {R : Semiformula.Operator L 2} {φ : Semiformula L ξ (n + 1)}
     {t : Semiterm L ξ (n + 1)} :
-    R ∈ ℬ.set → t.Positive → Closure ℬ φ → Closure ℬ (∃¹[R.operator ![#0, t]] φ)
+    R ∈ ℬ → t.Positive → Closure ℬ φ → Closure ℬ (∃¹[R.operator ![#0, t]] φ)
 
 namespace Closure
 
@@ -56,24 +69,24 @@ attribute [simp] verum falsum rel nrel
 variable {R : Semiformula.Operator L 2} {n n₁ n₂ : ℕ}
 
 @[simp] lemma and_iff {φ ψ : Semiformula L ξ n} :
-    Closure ℬ (φ ⋏ ψ) ↔ Closure ℬ φ ∧ Closure ℬ ψ :=
+    ℬ.Closure (φ ⋏ ψ) ↔ ℬ.Closure φ ∧ ℬ.Closure ψ :=
   ⟨fun | .and hp hq => ⟨hp, hq⟩, fun ⟨hp, hq⟩ => .and hp hq⟩
 
 @[simp] lemma or_iff {φ ψ : Semiformula L ξ n} :
-    Closure ℬ (φ ⋎ ψ) ↔ Closure ℬ φ ∧ Closure ℬ ψ :=
+    ℬ.Closure (φ ⋎ ψ) ↔ ℬ.Closure φ ∧ ℬ.Closure ψ :=
   ⟨fun | .or hp hq => ⟨hp, hq⟩, fun ⟨hp, hq⟩ => .or hp hq⟩
 
-lemma neg {φ : Semiformula L ξ n} : Closure ℬ φ → Closure ℬ (∼φ) := by
+lemma neg {φ : Semiformula L ξ n} : ℬ.Closure φ → ℬ.Closure (∼φ) := by
   intro h;
   induction h <;> try (solve | simp [*]);
   case ball hR ht _ ih => simpa only [neg_ball] using bexs hR ht ih;
   case bexs hR ht _ ih => simpa only [neg_bexs] using ball hR ht ih;
 
-@[simp] lemma neg_iff {φ : Semiformula L ξ n} : Closure ℬ (∼φ) ↔ Closure ℬ φ :=
+@[simp] lemma neg_iff {φ : Semiformula L ξ n} : ℬ.Closure (∼φ) ↔ ℬ.Closure φ :=
   ⟨fun h => by simpa using h.neg, neg (ℬ := ℬ)⟩
 
 @[simp] lemma ball_iff {φ : Semiformula L ξ (n + 1)} {t : Semiterm L ξ (n + 1)}
-    (hR : R ∈ ℬ.set) (ht : t.Positive) : Closure ℬ (∀¹[R.operator ![#0, t]] φ) ↔ Closure ℬ φ := by
+    (hR : R ∈ ℬ) (ht : t.Positive) : ℬ.Closure (∀¹[R.operator ![#0, t]] φ) ↔ ℬ.Closure φ := by
   constructor;
   . generalize hq : (∀¹[R.operator ![#0, t]] φ) = ψ;
     intro h;
@@ -85,7 +98,7 @@ lemma neg {φ : Semiformula L ξ n} : Closure ℬ φ → Closure ℬ (∼φ) := 
   . exact ball hR ht;
 
 @[simp] lemma bexs_iff {φ : Semiformula L ξ (n + 1)} {t : Semiterm L ξ (n + 1)}
-    (hR : R ∈ ℬ.set) (ht : t.Positive) : Closure ℬ (∃¹[R.operator ![#0, t]] φ) ↔ Closure ℬ φ := by
+    (hR : R ∈ ℬ) (ht : t.Positive) : ℬ.Closure (∃¹[R.operator ![#0, t]] φ) ↔ ℬ.Closure φ := by
   constructor;
   . generalize hq : (∃¹[R.operator ![#0, t]] φ) = ψ;
     intro h;
@@ -97,14 +110,14 @@ lemma neg {φ : Semiformula L ξ n} : Closure ℬ φ → Closure ℬ (∼φ) := 
   . exact bexs hR ht;
 
 lemma rew (ω : Rew L ξ₁ n₁ ξ₂ n₂) {φ : Semiformula L ξ₁ n₁} :
-    Closure ℬ φ → Closure ℬ (ω ▹ φ) := by
+    ℬ.Closure φ → ℬ.Closure (ω ▹ φ) := by
   intro h;
   induction h generalizing n₂ <;> simp [*];
 
 lemma operator_preimage [SymbolLike ℬ ξ₁ ξ₂]
     {ω : Rew L ξ₁ n₁ ξ₂ n₂}
     {χ : Semiformula L ξ₁ (n₁ + 1)} {t : Semiterm L ξ₂ (n₂ + 1)}
-    (hR : R ∈ ℬ.set) (hχ : ω.q ▹ χ = R.operator ![#0, t]) (ht : t.Positive) :
+    (hR : R ∈ ℬ) (hχ : ω.q ▹ χ = R.operator ![#0, t]) (ht : t.Positive) :
     ∃ u : Semiterm L ξ₁ (n₁ + 1), χ = R.operator ![#0, u] ∧ u.Positive := by
   obtain ⟨v, hχ, hv⟩ := ((inferInstance : SymbolLike ℬ ξ₁ ξ₂).symbolLike hR).symbolLike ω.q hχ;
   have hv0 : v 0 = #0 :=
@@ -122,7 +135,7 @@ lemma operator_preimage [SymbolLike ℬ ξ₁ ξ₂]
 
 @[simp] lemma rew_iff [SymbolLike ℬ ξ₁ ξ₂]
     {ω : Rew L ξ₁ n₁ ξ₂ n₂} {φ : Semiformula L ξ₁ n₁} :
-    Closure ℬ (ω ▹ φ) ↔ Closure ℬ φ := by
+    ℬ.Closure (ω ▹ φ) ↔ ℬ.Closure φ := by
   constructor;
   . generalize eq : ω ▹ φ = ψ;
     intro h;
@@ -153,11 +166,20 @@ lemma operator_preimage [SymbolLike ℬ ξ₁ ξ₂]
 end Closure
 
 @[simp] lemma strict_closure_iff_open {φ : Semiformula L ξ n} :
-    Closure (Bounding.strict : Bounding L) φ ↔ φ.Open := by
+    (Bounding.strict : Bounding L).Closure φ ↔ φ.Open := by
   constructor
   · intro h
-    induction h <;> simp_all [Bounding.strict]
+    induction h <;> try simp_all [Bounding.strict]
+    case ball R φ t hR ht hp ih =>
+      change R ∈ (∅ : Set (Semiformula.Operator L 2)) at hR
+      simp at hR
+    case bexs R φ t hR ht hp ih =>
+      change R ∈ (∅ : Set (Semiformula.Operator L 2)) at hR
+      simp at hR
   · intro h
     induction φ using Semiformula.rec' <;> simp_all [Semiformula.Open]
 
 end FFL.FirstOrder.Bounding
+
+notation "ℬ[<, " L "]" => FFL.FirstOrder.Bounding.lt L
+notation "ℬ[∈, " L "]" => FFL.FirstOrder.Bounding.mem L

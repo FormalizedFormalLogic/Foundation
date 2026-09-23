@@ -152,7 +152,7 @@ end
 namespace HierarchySymbol.Definable
 
 variable [hV : Preorder V] [hR : CompatibleLE R V]
-variable (hmem : R ∈ ℬ.set)
+variable (hmem : R ∈ ℬ)
 include hV hR hmem
 
 variable  {P Q : (Fin k → V) → Prop}
@@ -173,7 +173,7 @@ lemma bexs' {P : (Fin k → V) → V → Prop}
   exact (ht.or (h.bexs hmem t)).of_iff fun v ↦ by
     simp [CompatibleLE.le_iff (R := R), or_and_right, exists_or]
 
-lemma ball_boperator {S : Semiformula.Operator L 2} (hS : S ∈ ℬ.set)
+lemma ball_boperator {S : Semiformula.Operator L 2} (hS : S ∈ ℬ)
     {P : (Fin k → V) → V → Prop} {f : (Fin k → V) → V}
     (hf : DefinableBoundedFunction ℬ f) (h : ℌ.Definable ℬ fun w ↦ P (w ·.succ) (w 0)) :
     ℌ.Definable ℬ fun v ↦ ∀ x, S.val ![x, f v] → P v x := by
@@ -186,7 +186,7 @@ lemma ball_boperator {S : Semiformula.Operator L 2} (hS : S ∈ ℬ.set)
       simpa using h.retraction (0 :> (·.succ.succ))
   exact this.of_iff <| fun v ↦ ⟨fun h ↦ ⟨f v, hbf v, rfl, h⟩, by rintro ⟨y, hy, rfl, h⟩; exact h⟩
 
-lemma bexs_boperator {S : Semiformula.Operator L 2} (hS : S ∈ ℬ.set)
+lemma bexs_boperator {S : Semiformula.Operator L 2} (hS : S ∈ ℬ)
     {P : (Fin k → V) → V → Prop} {f : (Fin k → V) → V}
     (hf : DefinableBoundedFunction ℬ f) (h : ℌ.Definable ℬ fun w ↦ P (w ·.succ) (w 0)) :
     ℌ.Definable ℬ fun v ↦ ∃ x, S.val ![x, f v] ∧ P v x := by
@@ -223,12 +223,12 @@ lemma bexs_ble {P : (Fin k → V) → V → Prop} {f : (Fin k → V) → V}
       simpa using h.retraction (0 :> (·.succ.succ))
   exact this.of_iff <| fun v ↦ ⟨fun h ↦ ⟨f v, hbf v, rfl, h⟩, by rintro ⟨y, hy, rfl, h⟩; exact h⟩
 
-lemma ball_boperator_zero {S : Semiformula.Operator L 2} (hS : S ∈ ℬ.set)
+lemma ball_boperator_zero {S : Semiformula.Operator L 2} (hS : S ∈ ℬ)
     {P : (Fin k → V) → V → Prop} {f : (Fin k → V) → V}
     (hf : DefinableBoundedFunction ℬ f) (h : Γ-[0].Definable ℬ fun w ↦ P (w ·.succ) (w 0)) :
     Γ-[0].Definable ℬ fun v ↦ ∀ x, S.val ![x, f v] → P v x := ball_boperator hmem hS hf h
 
-lemma bexs_boperator_zero {S : Semiformula.Operator L 2} (hS : S ∈ ℬ.set)
+lemma bexs_boperator_zero {S : Semiformula.Operator L 2} (hS : S ∈ ℬ)
     {P : (Fin k → V) → V → Prop} {f : (Fin k → V) → V}
     (hf : DefinableBoundedFunction ℬ f) (h : Γ-[0].Definable ℬ fun w ↦ P (w ·.succ) (w 0)) :
     Γ-[0].Definable ℬ fun v ↦ ∃ x, S.val ![x, f v] ∧ P v x := bexs_boperator hmem hS hf h
@@ -304,7 +304,7 @@ namespace HierarchySymbol.Definable
 open DefinableBoundedFunction
 
 variable [hV : Preorder V] [hR : CompatibleLE R V]
-variable (hmem : R ∈ ℬ.set)
+variable (hmem : R ∈ ℬ)
 include hV hR hmem
 
 lemma bcomp₁ {k} {P : V → Prop} {f : (Fin k → V) → V} [hP : ℌ.DefinablePred ℬ P] (hf : DefinableBoundedFunction ℬ f) :
@@ -354,7 +354,7 @@ end HierarchySymbol.Definable
 section Functions
 
 variable [hV : Preorder V] [hR : CompatibleLE R V] [L.Eq] [Tarski.Structure.Eq L V]
-variable (hmem : R ∈ ℬ.set)
+variable (hmem : R ∈ ℬ)
 include hV hR hmem
 
 lemma HierarchySymbol.DefinableFunction.bcomp {k} {F : (Fin l → V) → V} {f : Fin l → (Fin k → V) → V}

@@ -205,7 +205,7 @@ namespace Definable
 lemma mk' {ℌ : HierarchySymbol} (φ : ℌ.Semiformula ℬ V k) (H : IsDefinedByWithParam P φ) : ℌ.Definable ℬ P := ⟨φ, H⟩
 
 lemma mkPolarity {Γ : Polarity}
-    (φ : FirstOrder.Semiformula L V k) (hp : Hierarchy ℬ Γ m φ) (hP : ∀ v, P v ↔ φ.Eval v id) : Γ-[m].Definable ℬ P :=
+    (φ : FirstOrder.Semiformula L V k) (hp : ℬ.Hierarchy Γ m φ) (hP : ∀ v, P v ↔ φ.Eval v id) : Γ-[m].Definable ℬ P :=
   match Γ with
   | 𝚺 => ⟨.mkSigma φ hp, by intro v; simp [hP]⟩
   | 𝚷 => ⟨.mkPi φ hp, by intro v; simp [hP]⟩
@@ -339,7 +339,7 @@ lemma biconditional (h₁ : 𝚫-[m].Definable ℬ P) (h₂ : 𝚫-[m].Definable
     Γ-[m].Definable ℬ (fun v ↦ P v ↔ Q v) :=
   .of_delta <| ((h₁.impDelta h₂).and (h₂.impDelta h₁)).of_iff <| by intro v; simp [iff_iff_implies_and_implies]
 
-lemma ball {R : Semiformula.Operator L 2} (hR : R ∈ ℬ.set) {P : (Fin k → V) → V → Prop}
+lemma ball {R : Semiformula.Operator L 2} (hR : R ∈ ℬ) {P : (Fin k → V) → V → Prop}
     (h : ℌ.Definable ℬ fun w ↦ P (w ·.succ) (w 0)) (t : Semiterm L V k) :
     ℌ.Definable ℬ fun v ↦ ∀ x, R.val ![x, t.val v id] → P v x := by
   rcases h with ⟨φ, h⟩
@@ -348,7 +348,7 @@ lemma ball {R : Semiformula.Operator L 2} (hR : R ∈ ℬ.set) {P : (Fin k → V
   | 𝚷-[m] => exact ⟨HierarchySymbol.Semiformula.ball hR t φ, by intro v; simp [h.iff]⟩
   | 𝚫-[m] => exact ⟨HierarchySymbol.Semiformula.ball hR t φ, ⟨h.proper.ball hR, by intro v; simp [h.iff]⟩⟩
 
-lemma bexs {R : Semiformula.Operator L 2} (hR : R ∈ ℬ.set) {P : (Fin k → V) → V → Prop}
+lemma bexs {R : Semiformula.Operator L 2} (hR : R ∈ ℬ) {P : (Fin k → V) → V → Prop}
     (h : ℌ.Definable ℬ fun w ↦ P (w ·.succ) (w 0)) (t : Semiterm L V k) :
     ℌ.Definable ℬ fun v ↦ ∃ x, R.val ![x, t.val v id] ∧ P v x := by
   rcases h with ⟨φ, h⟩
@@ -365,12 +365,12 @@ lemma all {P : (Fin k → V) → V → Prop} (h : 𝚷-[m + 1].Definable ℬ fun
     𝚷-[m + 1].Definable ℬ fun v ↦ ∀ x, P v x := by
   rcases h with ⟨φ, h⟩; exact ⟨φ.all, by intro _; simp [h.iff]⟩
 
-lemma ballCons {R : Semiformula.Operator L 2} (hR : R ∈ ℬ.set) {P : (Fin (k + 1) → V) → Prop}
+lemma ballCons {R : Semiformula.Operator L 2} (hR : R ∈ ℬ) {P : (Fin (k + 1) → V) → Prop}
     (h : ℌ.Definable ℬ P) (t : Semiterm L V k) :
     ℌ.Definable ℬ fun v ↦ ∀ x, R.val ![x, t.val v id] → P (x :> v) :=
   ball hR (P := fun v x ↦ P (x :> v)) (h.of_iff fun w ↦ by simp) t
 
-lemma bexsCons {R : Semiformula.Operator L 2} (hR : R ∈ ℬ.set) {P : (Fin (k + 1) → V) → Prop}
+lemma bexsCons {R : Semiformula.Operator L 2} (hR : R ∈ ℬ) {P : (Fin (k + 1) → V) → Prop}
     (h : ℌ.Definable ℬ P) (t : Semiterm L V k) :
     ℌ.Definable ℬ fun v ↦ ∃ x, R.val ![x, t.val v id] ∧ P (x :> v) :=
   bexs hR (P := fun v x ↦ P (x :> v)) (h.of_iff fun w ↦ by simp) t
@@ -707,7 +707,7 @@ lemma DefinableFunction₅.comp [L.Eq] [Tarski.Structure.Eq L V] {k} {F : V → 
 
 namespace Definable
 
-lemma ball_operator {R : Semiformula.Operator L 2} (hR : R ∈ ℬ.set) {Γ}
+lemma ball_operator {R : Semiformula.Operator L 2} (hR : R ∈ ℬ) {Γ}
     {P : (Fin k → V) → V → Prop} {f : (Fin k → V) → V}
     (hf : 𝚺-[m + 1].DefinableFunction ℬ f) (h : Γ-[m + 1].Definable ℬ (fun w ↦ P (w ·.succ) (w 0))) :
     Γ-[m + 1].Definable ℬ (fun v ↦ ∀ x, R.val ![x, f v] → P v x) := by
@@ -733,7 +733,7 @@ lemma ball_operator {R : Semiformula.Operator L 2} (hR : R ∈ ℬ.set) {Γ}
           Hierarchy.ball hR (by simp) (φ.pi.pi_prop.rew _)⟩)),
         by intro v; simp [hbf.df.iff, hp.df.iff, hp.proper.iff'] ⟩
 
-lemma bexs_operator {R : Semiformula.Operator L 2} (hR : R ∈ ℬ.set) {Γ}
+lemma bexs_operator {R : Semiformula.Operator L 2} (hR : R ∈ ℬ) {Γ}
     {P : (Fin k → V) → V → Prop} {f : (Fin k → V) → V}
     (hf : 𝚺-[m + 1].DefinableFunction ℬ f) (h : Γ-[m + 1].Definable ℬ (fun w ↦ P (w ·.succ) (w 0))) :
     Γ-[m + 1].Definable ℬ (fun v ↦ ∃ x, R.val ![x, f v] ∧ P v x) := by
@@ -830,17 +830,17 @@ variable {V : Type*} [Tarski.Structure L V] {Γ : Polarity} {s k : ℕ}
 
 variable {ξ : Type*}
 
-lemma definable_of_hierarchy {φ : FirstOrder.Semiformula L ξ k} (hφ : Hierarchy ℬ Γ s φ) (e : ξ → V) :
+lemma definable_of_hierarchy {φ : FirstOrder.Semiformula L ξ k} (hφ : ℬ.Hierarchy Γ s φ) (e : ξ → V) :
     Γ-[s].Definable ℬ fun v ↦ φ.Eval v e :=
   .mkPolarity (Rew.rewriteMap e ▹ φ) (hφ.rew _) fun _ ↦ by simp [Semiformula.eval_rewriteMap]
 
-lemma definablePred_of_hierarchy {φ : FirstOrder.Semiformula L ξ 1} (hφ : Hierarchy ℬ Γ s φ)
+lemma definablePred_of_hierarchy {φ : FirstOrder.Semiformula L ξ 1} (hφ : ℬ.Hierarchy Γ s φ)
     (e : ξ → V) : Γ-[s].DefinablePred ℬ fun x ↦ φ.Eval ![x] e :=
   (definable_of_hierarchy hφ e).of_iff fun v ↦ by
     have h : ![v 0] = v := (Matrix.fun_eq_vec_one v).symm
     simp [h]
 
-lemma definableRel_of_hierarchy {φ : FirstOrder.Semiformula L ξ 2} (hφ : Hierarchy ℬ Γ s φ)
+lemma definableRel_of_hierarchy {φ : FirstOrder.Semiformula L ξ 2} (hφ : ℬ.Hierarchy Γ s φ)
     (e : ξ → V) : Γ-[s].DefinableRel ℬ fun x y ↦ φ.Eval ![x, y] e :=
   (definable_of_hierarchy hφ e).of_iff fun v ↦ by
     have h : ![v 0, v 1] = v := (Matrix.fun_eq_vec_two v).symm
@@ -866,13 +866,13 @@ theorem sigma_succ_induction {V : Type*} [Tarski.Structure L V] {s : ℕ}
       motive k P hP → motive k Q hQ →
       motive k (fun v ↦ P v ∨ Q v) (.or hP hQ)
     )
-    (ball : ∀ {k} {R : Semiformula.Operator L 2} (hR : R ∈ ℬ.set) {P : (Fin (k + 1) → V) → Prop}
+    (ball : ∀ {k} {R : Semiformula.Operator L 2} (hR : R ∈ ℬ) {P : (Fin (k + 1) → V) → Prop}
       (t : Semiterm L V k)
       (hP : 𝚺-[s + 1].Definable ℬ P),
       motive (k + 1) P hP →
       motive k (fun v ↦ ∀ x, R.val ![x, t.val v id] → P (x :> v)) (.ballCons hR hP t)
     )
-    (bexs : ∀ {k} {R : Semiformula.Operator L 2} (hR : R ∈ ℬ.set) {P : (Fin (k + 1) → V) → Prop}
+    (bexs : ∀ {k} {R : Semiformula.Operator L 2} (hR : R ∈ ℬ) {P : (Fin (k + 1) → V) → Prop}
       (t : Semiterm L V k)
       (hP : 𝚺-[s + 1].Definable ℬ P),
       motive (k + 1) P hP →
@@ -884,7 +884,7 @@ theorem sigma_succ_induction {V : Type*} [Tarski.Structure L V] {s : ℕ}
     (k : ℕ) (P : (Fin k → V) → Prop) (hP : 𝚺-[s + 1].Definable ℬ P) : motive k P hP := by
   obtain ⟨φ, hφ⟩ := id hP
   obtain rfl : P = fun v ↦ φ.val.Eval v id := funext fun v ↦ by simp [hφ.iff]
-  have hd : ∀ {k} (ψ : FirstOrder.Semiformula L V k), Hierarchy ℬ 𝚺 (s + 1) ψ →
+  have hd : ∀ {k} (ψ : FirstOrder.Semiformula L V k), ℬ.Hierarchy 𝚺 (s + 1) ψ →
     𝚺-[s + 1].Definable ℬ fun v ↦ ψ.Eval v id := fun ψ hψ ↦ .mkPolarity ψ hψ fun _ ↦ Iff.rfl
   revert hP
   exact Hierarchy.sigma_succ_induction

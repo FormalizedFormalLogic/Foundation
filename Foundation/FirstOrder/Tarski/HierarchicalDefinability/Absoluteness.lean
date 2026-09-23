@@ -25,15 +25,15 @@ variable {M N ξ : Type*} [Tarski.Structure L M] [Tarski.Structure L N]
 
 /-- An embedding whose image is initial for every bounding operator. -/
 class IsInitial (ℬ : Bounding L) (ι : M ↪ₛ[L] N) : Prop where
-  operator_iff {R : Semiformula.Operator L 2} (hR : R ∈ ℬ.set) (a b : M) :
+  operator_iff {R : Semiformula.Operator L 2} (hR : R ∈ ℬ) (a b : M) :
     R.val ![a, b] ↔ R.val ![ι a, ι b]
-  initial {R : Semiformula.Operator L 2} (hR : R ∈ ℬ.set) (a : M) (b : N) :
+  initial {R : Semiformula.Operator L 2} (hR : R ∈ ℬ) (a : M) (b : N) :
     R.val ![b, ι a] → ∃ c : M, ι c = b
 
 variable (ι : M ↪ₛ[L] N)
 variable [IsInitial ℬ ι]
 
-private lemma ball_upward {n} {R : Semiformula.Operator L 2} (hR : R ∈ ℬ.set) (t : Semiterm L ξ n) (φ : Semiformula L ξ (n + 1))
+private lemma ball_upward {n} {R : Semiformula.Operator L 2} (hR : R ∈ ℬ) (t : Semiterm L ξ n) (φ : Semiformula L ξ (n + 1))
     (ih : ∀ e ε, φ.Eval e ε → φ.Eval (ι ∘ e) (ι ∘ ε))
     (e : Fin n → M) (ε : ξ → M) :
     (∀¹[R.operator ![#0, Rew.bShift t]] φ).Eval e ε →
@@ -46,7 +46,7 @@ private lemma ball_upward {n} {R : Semiformula.Operator L 2} (hR : R ∈ ℬ.set
   simpa only [Matrix.comp_vecCons''] using
     ih (c :> e) ε (h c ((IsInitial.operator_iff (ℬ := ℬ) (ι := ι) hR _ _).mpr hb))
 
-private lemma bexs_upward {n} {R : Semiformula.Operator L 2} (hR : R ∈ ℬ.set) (t : Semiterm L ξ n) (φ : Semiformula L ξ (n + 1))
+private lemma bexs_upward {n} {R : Semiformula.Operator L 2} (hR : R ∈ ℬ) (t : Semiterm L ξ n) (φ : Semiformula L ξ (n + 1))
     (ih : ∀ e ε, φ.Eval e ε → φ.Eval (ι ∘ e) (ι ∘ ε))
     (e : Fin n → M) (ε : ξ → M) :
     (∃¹[R.operator ![#0, Rew.bShift t]] φ).Eval e ε →
@@ -58,7 +58,7 @@ private lemma bexs_upward {n} {R : Semiformula.Operator L 2} (hR : R ∈ ℬ.set
   exact ⟨ι c, (IsInitial.operator_iff (ℬ := ℬ) (ι := ι) hR _ _).mp hc,
     by simpa only [Matrix.comp_vecCons''] using ih (c :> e) ε hp⟩
 
-lemma bounded_absolute {n} {φ : Semiformula L ξ n} (hφ : Closure ℬ φ)
+lemma bounded_absolute {n} {φ : Semiformula L ξ n} (hφ : ℬ.Closure φ)
     (e : Fin n → M) (ε : ξ → M) :
     φ.Eval e ε ↔ φ.Eval (ι ∘ e) (ι ∘ ε) := by
   induction hφ generalizing ε with
@@ -89,7 +89,7 @@ lemma bounded_absolute {n} {φ : Semiformula L ξ n} (hφ : Closure ℬ φ)
       exact ⟨c, (IsInitial.operator_iff (ℬ := ℬ) (ι := ι) hR _ _).mpr hb,
         (ih (c :> e) ε).mpr (by simpa only [Matrix.comp_vecCons''] using hp)⟩
 
-lemma sigma_one_upward {n} {φ : Semiformula L ξ n} (hφ : Hierarchy ℬ 𝚺 1 φ)
+lemma sigma_one_upward {n} {φ : Semiformula L ξ n} (hφ : ℬ.Hierarchy 𝚺 1 φ)
     (e : Fin n → M) (ε : ξ → M) :
     φ.Eval e ε → φ.Eval (ι ∘ e) (ι ∘ ε) := by
   revert e ε
@@ -109,7 +109,7 @@ lemma sigma_one_upward {n} {φ : Semiformula L ξ n} (hφ : Hierarchy ℬ 𝚺 1
     rintro ⟨x, hx⟩
     exact ⟨ι x, by simpa only [Matrix.comp_vecCons''] using ih (x :> e) ε hx⟩
 
-lemma pi_one_downward {n} {φ : Semiformula L ξ n} (hφ : Hierarchy ℬ 𝚷 1 φ)
+lemma pi_one_downward {n} {φ : Semiformula L ξ n} (hφ : ℬ.Hierarchy 𝚷 1 φ)
     (e : Fin n → M) (ε : ξ → M) :
     φ.Eval (ι ∘ e) (ι ∘ ε) → φ.Eval e ε := by
   have h := sigma_one_upward ι hφ.neg e ε
@@ -167,7 +167,7 @@ lemma HierarchySymbol.DefinedFunction.shigmaOne_absolute_func {k}
   simpa [hf.iff, hf'.iff, Function.comp_def] using h
 
 lemma models_iff_of_Sigma0 {n} {σ : Semisentence L n}
-    (hσ : Hierarchy ℬ 𝚺 0 σ) {e : Fin n → M} :
+    (hσ : ℬ.Hierarchy 𝚺 0 σ) {e : Fin n → M} :
     σ.Evalb (ι ∘ e) ↔ σ.Evalb e := by
   simpa [Semiformula.Evalb, Function.comp_def, Empty.eq_elim] using
     (bounded_absolute ι (Hierarchy.zero_iff_bounded.mp hσ) e Empty.elim).symm
