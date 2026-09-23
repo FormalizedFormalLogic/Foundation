@@ -7,10 +7,7 @@ public import Foundation.Vorspiel.List.ChainI
 public import Mathlib.Data.ENat.SuccOrder
 
 /-!
-# Construction of Solovay sentences
-
-The Solovay conditions `SC1`–`SC4` over a finite rooted Kripke model, the main lemma tying
-them to forcing, and the arithmetical fixed point that realizes them.
+# Solovay sentences
 
 ## References
 
@@ -527,8 +524,6 @@ noncomputable def FFL.FirstOrder.Theory.standardProvability.solovaySentences
 
 namespace FFL.ProvabilityLogic
 
-/-- A formula refuted at the root of a finite rooted `GL` model whose height is below that of
-`T` has a realization whose standard interpretation is unprovable in `T`. -/
 theorem unprovable_realization_exists
   (T : FirstOrder.ArithmeticTheory) [T.Δ₁] [𝗜𝚺₁ ⪯ T]
   (M : RootedModel κ α) [Fintype M.World] [M.IsGL]

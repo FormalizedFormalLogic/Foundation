@@ -7,10 +7,6 @@ public import Foundation.Meta.ClProver
 
 /-!
 # The Hilbert-style system `GL`
-
-`⊢ᴴ[GL] A`: classical propositional logic with necessitation and the axioms `K`, `4` and `L`, as an
-`Entailment`. It is sound and complete with respect to finite transitive irreflexive Kripke
-models, via the sequent calculus.
 -/
 
 @[expose] public section
@@ -23,7 +19,6 @@ namespace GL
 
 variable {α : Type*}
 
-/-- Derivations of the Hilbert-style system `GL`. -/
 inductive Derivation : Formula α → Type _
   | mdp {A B} : Derivation (A 🡒 B) → Derivation A → Derivation B
   | nec {A} : Derivation A → Derivation (□A)
@@ -41,13 +36,11 @@ inductive Derivation : Formula α → Type _
   | axiom4 {A} : Derivation (□A 🡒 □□A)
   | axiomL {A} : Derivation (□(□A 🡒 A) 🡒 □A)
 
-/-- The Hilbert-style system `GL` as an `Entailment`; its only inhabitant is `gl`. -/
 inductive Hilbert (α : Type*) : Type
   | gl
 
 end GL
 
-/-- `⊢ᴴ[GL] A`: `A` is provable in the Hilbert-style system `GL`. -/
 notation:45 "⊢ᴴ[GL] " A:46 => Entailment.Provable GL.Hilbert.gl A
 
 namespace GL
@@ -206,7 +199,6 @@ lemma iff_gentzen : ⊢ᴴ[GL] A ↔ ⊢ᴳ[GL] ∅ ⟹ {A} := by
     have : ⊢ᴴ[GL] (∅ : FormulaFinset α).conj := by simp [Finset.conj];
     simpa using of_gentzen h ⨀ this;
 
-/-- `GL` is sound and complete with respect to finite transitive irreflexive Kripke models. -/
 theorem iff_valid_finite : ⊢ᴴ[GL] A ↔ ∀ {κ : Type u} [Nonempty κ] (M : Model κ α), [M.IsFiniteGL] → M ⊧ A := by
   constructor;
   . intro h _ _ M _;
@@ -217,8 +209,6 @@ theorem iff_valid_finite : ⊢ᴴ[GL] A ↔ ∀ {κ : Type u} [Nonempty κ] (M :
     intro _ _ M _ x _;
     exact ⟨A, by simp, h M x⟩;
 
-/-- `GL` is sound and complete with respect to the roots of finite transitive irreflexive rooted
-Kripke models. -/
 theorem iff_root_forces : ⊢ᴴ[GL] A ↔
     ∀ {κ : Type u} [Nonempty κ] (M : RootedModel κ α), [M.IsFiniteGL] → M.root ⊩[M.toModel] A := by
   constructor;

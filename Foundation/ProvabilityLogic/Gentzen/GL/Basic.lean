@@ -5,8 +5,6 @@ public import Foundation.ProvabilityLogic.Gentzen.Sequent
 /-!
 # The sequent calculus of `GL`
 
-The cut-free sequent calculus of `GL`.
-
 ## References
 
 - [SV82]
@@ -20,7 +18,7 @@ namespace GL
 
 variable {α : Type*} [DecidableEq α]
 
-/-- Derivability in the cut-free sequent calculus of `GL`. -/
+/-- The cut-free sequent calculus of `GL`. -/
 inductive Gentzen : Sequent α → Prop
   | axm (A) : Gentzen ({A} ⟹ {A})
   | botL : Gentzen ({⊥} ⟹ ∅)

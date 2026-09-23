@@ -6,9 +6,6 @@ public import Foundation.Vorspiel.Rel.CWF
 
 /-!
 # Kripke semantics
-
-Kripke models of the modal language, forcing, and the frame classes of `GL`: transitive and
-converse well-founded, or finite, transitive and irreflexive.
 -/
 
 @[expose] public section
@@ -17,7 +14,6 @@ namespace FFL.ProvabilityLogic
 
 namespace Kripke
 
-/-- A Kripke model with worlds `κ` and atoms `α`. -/
 structure Model (κ : Type*) [Nonempty κ] (α : Type*) where
   Rel' : κ → κ → Prop
   Val' : κ → α → Prop
@@ -32,14 +28,14 @@ abbrev Rel {M : Model κ α} : M.World → M.World → Prop := M.Rel'
 
 abbrev Val {M : Model κ α} : M.World → α → Prop := M.Val'
 
-@[inherit_doc] scoped infix:60 " ≺ " => Rel
+scoped infix:60 " ≺ " => Rel
 
 @[grind]
 def RelItr : ℕ → M.World → M.World → Prop
   |     0 => (· = ·)
   | n + 1 => fun x y ↦ ∃ z, x ≺ z ∧ RelItr n z y
 
-@[inherit_doc] scoped notation x:45 " ≺^[" n:0 "] " y:46 => RelItr n x y
+scoped notation x:45 " ≺^[" n:0 "] " y:46 => RelItr n x y
 
 section RelItr
 
@@ -54,12 +50,16 @@ lemma relItr_one : x ≺^[1] y ↔ x ≺ y := by simp [RelItr];
 @[grind =]
 lemma relItr_succ : x ≺^[n + 1] y ↔ ∃ z, x ≺ z ∧ z ≺^[n] y := Iff.rfl
 
+abbrev NotRel {M : Model κ α} : M.World → M.World → Prop := λ x y => ¬(x ≺ y)
+scoped infix:60 " ⊀ " => NotRel
+
+abbrev NotRelItr {M : Model κ α} (n : ℕ) : M.World → M.World → Prop := λ x y => ¬(x ≺^[n] y)
+scoped notation x:45 " ⊀^[" n:0 "] " y:46 => NotRelItr n x y
+
 end RelItr
 
-/-- Kripke models of `GL`: transitive and converse well-founded. -/
 class IsGL (M : Model κ α) extends IsTrans _ M.Rel, IsConverseWellFounded _ M.Rel
 
-/-- Finite Kripke models of `GL`: finite, transitive and irreflexive. -/
 class IsFiniteGL (M : Model κ α) extends IsTrans _ M.Rel, Std.Irrefl M.Rel where
   [finite : Finite M.World]
 
@@ -69,7 +69,6 @@ instance [M.IsFiniteGL] : M.IsGL where
 
 instance [M.IsGL] : Std.Irrefl M.Rel := ConverseWellFounded.irrefl
 
-/-- The one-point model with empty accessibility and valuation `v`. -/
 abbrev pointModel (v : α → Prop) : Model (Fin 1) α where
   Rel' _ _ := False
   Val' _ := v
@@ -78,10 +77,9 @@ instance (v : α → Prop) : (pointModel v).IsFiniteGL where
   trans := by tauto;
   irrefl := by tauto;
 
-/-- A maximal element of `X`: a point of `X` with no successor in `X`. -/
 noncomputable def terminalOf (M : Model κ α) [IsConverseWellFounded _ M.Rel] (X : Set M.World)
     (hX : X.Nonempty) :
-    { t // t ∈ X ∧ ∀ x ∈ X, ¬t ≺ x } :=
+    { t // t ∈ X ∧ ∀ x ∈ X, t ⊀ x } :=
   have h := ConverseWellFounded.iff_has_max.mp IsConverseWellFounded.cwf X hX;
   ⟨h.choose, h.choose_spec⟩
 
@@ -100,7 +98,7 @@ def Forces (M : Model κ α) (x : M.World) : Formula α → Prop
   | A 🡒 B => Forces M x A → Forces M x B
   | □A    => ∀ y, x ≺ y → Forces M y A
 
-@[inherit_doc] scoped notation:55 x:56 " ⊩[" M "] " A:56 => Forces M x A
+scoped notation:55 x:56 " ⊩[" M "] " A:56 => Forces M x A
 
 scoped notation:55 x:56 " ⊮[" M "] " A:56 => ¬Forces M x A
 
@@ -130,7 +128,6 @@ namespace Model
 
 variable {κ α : Type*} [Nonempty κ]
 
-/-- `M ⊧ A`: `A` is forced at every world of `M`. -/
 instance : Semantics (Model κ α) (Formula α) := ⟨fun M A ↦ ∀ x : M.World, World.Forces M x A⟩
 
 lemma models_iff {M : Model κ α} {A : Formula α} : M ⊧ A ↔ ∀ x : M.World, World.Forces M x A :=

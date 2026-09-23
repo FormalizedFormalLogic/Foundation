@@ -5,8 +5,6 @@ public import Foundation.ProvabilityLogic.Formula.Substitution
 
 /-!
 # Quasi-normal sums of logics
-
-The least set containing two logics and closed under modus ponens and substitution.
 -/
 
 @[expose] public section
@@ -17,7 +15,6 @@ open Formula
 
 variable {α : Type*}
 
-/-- The quasi-normal sum of two logics. -/
 @[grind]
 inductive Logic.sumQuasiNormal (L₁ L₂ : Logic α) : Logic α
   | mem₁ {A}    : A ∈ L₁ → sumQuasiNormal L₁ L₂ A
@@ -25,7 +22,7 @@ inductive Logic.sumQuasiNormal (L₁ L₂ : Logic α) : Logic α
   | mdp  {A B}  : sumQuasiNormal L₁ L₂ (A 🡒 B) → sumQuasiNormal L₁ L₂ A → sumQuasiNormal L₁ L₂ B
   | subst {A s} : sumQuasiNormal L₁ L₂ A → sumQuasiNormal L₁ L₂ (A⟦s⟧)
 
-@[inherit_doc] infix:50 " +ᴸ " => Logic.sumQuasiNormal
+infix:50 " +ᴸ " => Logic.sumQuasiNormal
 
 namespace Logic.sumQuasiNormal
 

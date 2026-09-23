@@ -4,8 +4,6 @@ public import Foundation.ProvabilityLogic.Formula.Basic
 
 /-!
 # Substitution
-
-Substitution of formulas for atoms.
 -/
 
 @[expose] public section
@@ -16,7 +14,6 @@ namespace Formula
 
 variable {α β : Type*}
 
-/-- A substitution of atoms of `α` by formulas over `β`. -/
 abbrev Substitution (α β : Type*) := α → Formula β
 
 @[grind]
@@ -26,7 +23,7 @@ def subst (s : Substitution α β) : Formula α → Formula β
   | A 🡒 B => A.subst s 🡒 B.subst s
   | □A    => □(A.subst s)
 
-@[inherit_doc] scoped notation:80 A "⟦" s "⟧" => Formula.subst s A
+scoped notation:80 A "⟦" s "⟧" => Formula.subst s A
 
 variable {s : Substitution α β} {A B : Formula α}
 

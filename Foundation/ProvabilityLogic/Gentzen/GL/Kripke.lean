@@ -6,10 +6,7 @@ public import Mathlib.Data.Finset.Powerset
 public import Mathlib.Basic.Finite.Prod
 
 /-!
-# Kripke semantics of the sequent calculus of `GL`
-
-Soundness and completeness of the sequent calculus of `GL` with respect to finite transitive
-irreflexive Kripke models, and the admissibility of cut as a corollary.
+# Kripke completeness of the sequent calculus of `GL`
 -/
 
 @[expose] public section
@@ -25,17 +22,15 @@ namespace Kripke
 variable {κ α : Type*} [Nonempty κ] [DecidableEq α] {M : Model κ α}
          {Γ Δ : FormulaFinset α} {A B : Formula α}
 
-/-- `x ⊩[M] S`: some succedent of `S` holds at `x` whenever every antecedent does. -/
 def Model.World.ForcesSequent (M : Model κ α) (x : M.World) (S : Sequent α) : Prop :=
   (∀ C ∈ S.ant, x ⊩[M] C) → ∃ D ∈ S.suc, x ⊩[M] D
 
-@[inherit_doc] scoped[FFL.ProvabilityLogic.Kripke.Model.World]
+scoped[FFL.ProvabilityLogic.Kripke.Model.World]
   notation:55 x:56 " ⊩[" M "] " S:56 => Model.World.ForcesSequent M x S
 
-/-- `M ⊧ S`: `S` is forced at every world of `M`. -/
 def Model.ValidateSequent (M : Model κ α) (S : Sequent α) : Prop := ∀ x : M.World, x ⊩[M] S
 
-@[inherit_doc] scoped[FFL.ProvabilityLogic.Kripke.Model]
+scoped[FFL.ProvabilityLogic.Kripke.Model]
   infix:45 " ⊧ " => Model.ValidateSequent
 
 omit [DecidableEq α] in
@@ -109,8 +104,7 @@ namespace GL
 
 variable {α : Type*} [DecidableEq α]
 
-/-- Saturated unprovable sequents built from subformulas of `BS`: the worlds of the canonical
-countermodel of `BS`. -/
+/-- The worlds of the canonical countermodel of `BS`. -/
 structure SaturatedSequent (BS : Sequent α) extends Sequent α where
   saturated : toSequent.Saturated
   subset_subfmls : ant ∪ suc ⊆ BS.subfmls
@@ -252,7 +246,6 @@ lemma saturate_saturated (hl : l.Pairwise (·.complexity ≤ ·.complexity)) :
         . simp at h;
         . first | exact ihL h hx | exact ihR h hx;
 
-/-- The subformulas of `BS`, sorted by complexity. -/
 noncomputable abbrev sortedSubfmls (BS : Sequent α) : List (Formula α) :=
   BS.subfmls.toList.insertionSort (·.complexity ≤ ·.complexity)
 
@@ -265,7 +258,6 @@ lemma sortedSubfmls_pairwise {BS : Sequent α} :
   haveI : IsTrans _ (fun A B : Formula α ↦ A.complexity ≤ B.complexity) := ⟨fun _ _ _ ↦ le_trans⟩;
   List.pairwise_insertionSort _ _
 
-/-- The saturation of an unprovable sequent within the subformulas of `BS`. -/
 noncomputable def lindenbaum {BS : Sequent α} (S₀ : Sequent α) (h₀ : ⊬ᴳ[GL] S₀)
     (hS₀ : S₀.ant ∪ S₀.suc ⊆ BS.subfmls) : SaturatedSequent BS where
   toSequent := (saturate S₀ h₀ (sortedSubfmls BS)).1
@@ -291,7 +283,6 @@ end SaturatedSequent
 
 open SaturatedSequent
 
-/-- The canonical countermodel of an unprovable sequent `BS`. -/
 def countermodel (BS : Sequent α) [Fact (⊬ᴳ[GL] BS)] : Kripke.Model (SaturatedSequent BS) α where
   Val' x a := #a ∈ x.ant
   Rel' x y := x.ant.prebox ⊂ y.ant.prebox ∧ x.ant.prebox ⊆ y.ant
@@ -373,7 +364,6 @@ theorem complete
     (fun C hC ↦ countermodel.truthlemma.1 (hS₀.ant hC));
   exact countermodel.truthlemma.2 (hS₀.suc hD) hxD;
 
-/-- Completeness with respect to finite transitive irreflexive models. -/
 theorem iff_valid : ⊢ᴳ[GL] S ↔
     ∀ {κ : Type u} [Nonempty κ] (M : Kripke.Model κ α), [M.IsFiniteGL] → M ⊧ S :=
   ⟨fun h _ _ M _ ↦ sound M h, complete⟩

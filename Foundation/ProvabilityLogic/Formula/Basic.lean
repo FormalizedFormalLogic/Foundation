@@ -5,9 +5,6 @@ public import Mathlib.Data.Finset.Preimage
 
 /-!
 # Modal formulas
-
-Formulas of the modal propositional language with the primitives `⊥`, `🡒` and `□`; the other
-connectives are abbreviations in the Łukasiewicz style.
 -/
 
 @[expose] public section
@@ -88,10 +85,9 @@ def cases' {C : Formula α → Sort*}
   | .imp A B => imp A B
   | .box A => box A
 
-/-- `□^[n]A` is `A` prefixed with `n` boxes. -/
 def boxItr (n : ℕ) (A : Formula α) : Formula α := (□·)^[n] A
 
-@[inherit_doc] notation:76 "□^[" n "]" A:80 => boxItr n A
+notation:76 "□^[" n "]" A:80 => boxItr n A
 
 @[simp, grind =] lemma boxItr_zero : □^[0]A = A := rfl
 
@@ -152,7 +148,6 @@ namespace FormulaFinset
 
 variable {α : Type*} [DecidableEq α] {Γ Δ : FormulaFinset α} {A B C : Formula α}
 
-/-- `□Γ` is the image of `Γ` under `□`. -/
 abbrev box (Γ : FormulaFinset α) : FormulaFinset α := Γ.image (□·)
 
 @[grind]
@@ -168,7 +163,6 @@ lemma mem_subfmls_subfmls (hB : B ∈ Γ.subfmls) (hC : C ∈ B.subfmls) : C ∈
   obtain ⟨D, hD, hBD⟩ := hB;
   exact ⟨D, hD, Formula.subfmls_trans hBD hC⟩;
 
-/-- `Γ.prebox` is the set of formulas `A` with `□A ∈ Γ`. -/
 noncomputable def prebox (Γ : FormulaFinset α) : FormulaFinset α :=
   Γ.preimage (□·) (by intro _ _ _ _ h; simpa using h)
 

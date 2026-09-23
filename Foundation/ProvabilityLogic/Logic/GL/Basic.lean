@@ -5,9 +5,6 @@ public import Foundation.ProvabilityLogic.Hilbert.GL.Basic
 
 /-!
 # The logic `GL`
-
-`𝐆𝐋`, the set of theorems of `GL`, and its characterizations by the Hilbert-style system, the
-sequent calculus and finite Kripke models.
 -/
 
 @[expose] public section
@@ -16,10 +13,9 @@ namespace FFL.ProvabilityLogic
 
 open Kripke Kripke.Model Kripke.Model.World
 
-/-- The logic `GL`: the theorems of the Hilbert-style system `GL`. -/
 abbrev Logic.GL {α : Type*} : Logic α := { A | ⊢ᴴ[GL] A }
 
-@[inherit_doc] notation "𝐆𝐋" => Logic.GL
+notation "𝐆𝐋" => Logic.GL
 
 namespace Logic.GL
 

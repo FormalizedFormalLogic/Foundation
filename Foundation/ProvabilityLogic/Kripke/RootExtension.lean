@@ -5,8 +5,6 @@ public import Mathlib.Data.Fintype.Option
 
 /-!
 # Root extension
-
-The extension of a rooted model by a new root below the old one.
 -/
 
 @[expose] public section
@@ -21,7 +19,7 @@ namespace RootedModel
 
 variable (M : RootedModel κ α)
 
-/-- `M` with a new root below the old one, which forces the same atoms as the old root. -/
+/-- A new root below the old one, forcing the same atoms as the old root. -/
 def extendRoot : RootedModel (Option κ) α where
   Rel' x y := match x, y with
     | some x, some y => M.Rel x y
@@ -44,7 +42,7 @@ variable {M} {x y : M.World} {A : Formula α}
 
 @[simp] lemma rel_none_some : M.extendRoot.Rel none (some x) := trivial
 
-@[simp] lemma not_rel_none {x : M.extendRoot.World} : ¬M.extendRoot.Rel x none := by
+@[simp] lemma not_rel_none {x : M.extendRoot.World} : x ⊀ none := by
   rcases x with _ | _ <;> exact id
 
 instance [IsTrans _ M.Rel] : IsTrans _ M.extendRoot.Rel where
@@ -114,7 +112,7 @@ lemma rank_some : Model.World.rank (M := M.extendRoot.toModel) (some x) = Model.
   have h : ∀ n, Model.World.rank (M := M.extendRoot.toModel) (some x) < n ↔
       Model.World.rank (M := M.toModel) x < n := by
     intro n;
-    simp only [Model.rank_lt_iff, relItr_some_iff];
+    simp only [Model.rank_lt_iff, NotRelItr, relItr_some_iff];
     grind;
   exact le_antisymm (Nat.le_of_lt_succ ((h _).mpr (Nat.lt_succ_self _)))
     (Nat.le_of_lt_succ ((h _).mp (Nat.lt_succ_self _)));

@@ -7,9 +7,6 @@ public import Foundation.FirstOrder.Incompleteness.Löb
 /-!
 # Solovay's arithmetical completeness theorem
 
-`GL` is the provability logic of every `Σ₁`-sound theory extending `𝗜𝚺₁` with a `Δ₁`
-axiomatization, in particular of `𝗣𝗔`.
-
 ## References
 
 - [Sol76]
@@ -30,8 +27,7 @@ variable {α : Type*} {L : Language} [L.ReferenceableBy L] [L.DecidableEq]
          {T U : Theory L} [Diagonalization T] [T ⪯ U]
          {𝔅 : Provability T U} [𝔅.HBL] {f : Realization α L} {A : Formula α}
 
-/-- The interpretation of a theorem of `GL` is provable in the base theory of the provability
-predicate. -/
+/-- Arithmetical soundness of `GL`. -/
 theorem arithmetical_soundness (h : A ∈ 𝐆𝐋) : T ⊢ A.interpret f 𝔅 := by
   obtain ⟨d⟩ : ⊢ᴴ[GL] A := h;
   induction d with
@@ -73,20 +69,17 @@ theorem arithmetical_completeness_of_le_height {n : ℕ} (height : n ≤ T.heigh
   exact unprovable_realization_exists T M h₂ <|
     lt_of_lt_of_le (Nat.cast_lt.mpr <| RootedModel.root_forces_boxItr_bot_iff.mp h₁) height;
 
-/-- Solovay's arithmetical completeness theorem: `GL` proves exactly the modal formulas whose
-standard interpretations are all provable in a `Σ₁`-sound theory `T`. -/
+/-- Solovay's arithmetical completeness theorem. -/
 theorem arithmetical_completeness_iff [T.SoundOnHierarchy 𝚺 1] :
     A ∈ 𝐆𝐋 ↔ ∀ f : Realization α ℒₒᵣ, T ⊢ f T A :=
   ⟨fun h _ ↦ WeakerThan.pbl (arithmetical_soundness h),
     arithmetical_completeness_of_height_eq_top (Arithmetic.height_eq_top_of_sigma1_sound T)⟩
 
-/-- `GL` is the provability logic of every `Σ₁`-sound theory. -/
 theorem eq_provabilityLogic [T.SoundOnHierarchy 𝚺 1] :
     (𝐆𝐋 : Logic α) = T.provabilityLogic := by
   ext A;
   exact arithmetical_completeness_iff;
 
-/-- `GL` is the provability logic of `𝗣𝗔`. -/
 theorem eq_provabilityLogic_peano : (𝐆𝐋 : Logic α) = 𝗣𝗔.provabilityLogic :=
   eq_provabilityLogic
 

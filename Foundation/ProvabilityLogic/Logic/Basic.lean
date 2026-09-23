@@ -4,8 +4,6 @@ public import Foundation.ProvabilityLogic.Formula.Basic
 
 /-!
 # Logics
-
-A logic is a set of modal formulas.
 -/
 
 @[expose] public section

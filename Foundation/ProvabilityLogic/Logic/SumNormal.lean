@@ -4,8 +4,6 @@ public import Foundation.ProvabilityLogic.Logic.SumQuasiNormal
 
 /-!
 # Normal sums of logics
-
-The quasi-normal sum of two logics closed additionally under necessitation.
 -/
 
 @[expose] public section
@@ -16,7 +14,6 @@ open Formula
 
 variable {α : Type*}
 
-/-- The normal sum of two logics. -/
 @[grind]
 inductive Logic.sumNormal (L₁ L₂ : Logic α) : Logic α
   | mem₁ {A}    : A ∈ L₁ → sumNormal L₁ L₂ A
@@ -25,7 +22,7 @@ inductive Logic.sumNormal (L₁ L₂ : Logic α) : Logic α
   | subst {A s} : sumNormal L₁ L₂ A → sumNormal L₁ L₂ (A⟦s⟧)
   | nec  {A}    : sumNormal L₁ L₂ A → sumNormal L₁ L₂ (□A)
 
-@[inherit_doc] infix:50 " ⊕ᴸ " => Logic.sumNormal
+infix:50 " ⊕ᴸ " => Logic.sumNormal
 
 namespace Logic.sumNormal
 

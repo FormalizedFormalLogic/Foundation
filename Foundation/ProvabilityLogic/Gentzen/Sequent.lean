@@ -4,8 +4,6 @@ public import Foundation.ProvabilityLogic.Formula.Basic
 
 /-!
 # Sequents
-
-Two-sided sequents `Γ ⟹ Δ` of finite sets of modal formulas.
 -/
 
 @[expose] public section
@@ -16,7 +14,7 @@ structure Sequent (α : Type*) where
   ant : FormulaFinset α
   suc : FormulaFinset α
 
-@[inherit_doc] infix:50 " ⟹ " => Sequent.mk
+infix:50 " ⟹ " => Sequent.mk
 
 namespace Sequent
 
@@ -30,8 +28,6 @@ instance : HasSubset (Sequent α) := ⟨Subset⟩
 
 @[simp] lemma subset_iff : S ⊆ T ↔ S.ant ⊆ T.ant ∧ S.suc ⊆ T.suc := ⟨fun h ↦ ⟨h.1, h.2⟩, fun h ↦ ⟨h.1, h.2⟩⟩
 
-/-- Every implication on the left is decomposed, and every implication on the right is
-decomposed. -/
 structure Saturated (S : Sequent α) : Prop where
   impL : ∀ {A B}, A 🡒 B ∈ S.ant → A ∈ S.suc ∨ B ∈ S.ant
   impR : ∀ {A B}, A 🡒 B ∈ S.suc → A ∈ S.ant ∧ B ∈ S.suc
