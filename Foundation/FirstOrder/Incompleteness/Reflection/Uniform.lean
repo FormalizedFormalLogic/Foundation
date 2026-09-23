@@ -10,8 +10,8 @@ The uniform reflection schema `RFN_Γ(T)` of an arithmetic theory, over formulas
 
 ## References
 
-- [Lin97, §4.1, p. 52]
-- [AB05, §4.2]
+- [Lin97]
+- [AB05]
 -/
 
 namespace FFL.FirstOrder.Arithmetic

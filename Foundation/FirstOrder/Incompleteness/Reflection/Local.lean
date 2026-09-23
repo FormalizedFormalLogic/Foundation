@@ -12,8 +12,8 @@ their relation to consistency, their soundness, and their unboundedness over fin
 
 ## References
 
-- [Lin97, §4.1, p. 52, Exercise 4.1(b)(ii), Theorem 4.1]
-- [AB05, §4, §4.2, Lemma 22(i), Theorem 23, Remark 24]
+- [Lin97]
+- [AB05]
 -/
 
 namespace FFL.FirstOrder.Arithmetic
