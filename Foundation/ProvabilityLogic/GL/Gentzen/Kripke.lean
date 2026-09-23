@@ -1,7 +1,7 @@
 module
 
 public import Foundation.ProvabilityLogic.GL.Gentzen.Basic
-public import Foundation.ProvabilityLogic.Kripke.Basic
+public import Foundation.ProvabilityLogic.Kripke.Sequent
 public import Mathlib.Data.Finset.Powerset
 public import Mathlib.Basic.Finite.Prod
 
@@ -21,22 +21,6 @@ namespace Kripke
 
 variable {κ α : Type*} [Nonempty κ] [DecidableEq α] {M : Model κ α}
          {Γ Δ : FormulaFinset α} {A B : Formula α}
-
-def Model.World.ForcesSequent (M : Model κ α) (x : M.World) (S : Sequent α) : Prop :=
-  (∀ C ∈ S.ant, x ⊩[M] C) → ∃ D ∈ S.suc, x ⊩[M] D
-
-scoped[FFL.ProvabilityLogic.Kripke.Model.World]
-  notation:55 x:56 " ⊩[" M "] " S:56 => Model.World.ForcesSequent M x S
-
-def Model.ValidateSequent (M : Model κ α) (S : Sequent α) : Prop := ∀ x : M.World, x ⊩[M] S
-
-scoped[FFL.ProvabilityLogic.Kripke.Model]
-  infix:45 " ⊧ " => Model.ValidateSequent
-
-omit [DecidableEq α] in
-lemma Model.validateSequent_singleton_iff :
-    M ⊧ (Γ ⟹ {A}) ↔ ∀ x : M.World, (∀ C ∈ Γ, x ⊩[M] C) → x ⊩[M] A := by
-  simp [Model.ValidateSequent, Model.World.ForcesSequent];
 
 lemma Model.validateSequent_boxGL [M.IsGL] (h : M ⊧ (insert (□A) (Γ ∪ Γ.box) ⟹ {A})) :
     M ⊧ (Γ.box ⟹ {□A}) := by
@@ -66,26 +50,12 @@ variable {α : Type*} [DecidableEq α] {S : Sequent α}
 theorem sound {κ : Type*} [Nonempty κ] (M : Kripke.Model κ α) [M.IsGL] (h : ⊢ᴳ[GL] S) :
     M ⊧ S := by
   induction h with
-  | axm A => intro x hx; exact ⟨A, by simp, hx A (by simp)⟩;
-  | botL => intro x hx; exact absurd (hx ⊥ (by simp)) not_forces_bot;
-  | wkL _ hΓ ih => intro x hx; exact ih x (fun C hC ↦ hx C (hΓ hC));
-  | wkR _ hΔ ih => intro x hx; obtain ⟨D, hD, hxD⟩ := ih x hx; exact ⟨D, hΔ hD, hxD⟩;
-  | @impL Γ Δ A B _ _ ih₁ ih₂ =>
-    intro x hx;
-    have hAB : x ⊩[M] A 🡒 B := hx _ (Finset.mem_insert_self _ _);
-    have hΓ : ∀ C ∈ Γ, x ⊩[M] C := fun C hC ↦ hx C (by simp [hC]);
-    by_cases hA : x ⊩[M] A;
-    . exact ih₂ x (by simpa [hAB hA] using hΓ);
-    . obtain ⟨D, hD, hxD⟩ := ih₁ x hΓ;
-      grind;
-  | @impR Γ Δ A B _ ih =>
-    intro x hx;
-    by_cases hA : x ⊩[M] A;
-    . obtain ⟨D, hD, hxD⟩ := ih x (by simpa [hA] using hx);
-      rcases Finset.mem_insert.mp hD with rfl | hD;
-      . exact ⟨A 🡒 D, by simp, fun _ ↦ hxD⟩;
-      . grind;
-    . exact ⟨A 🡒 B, by simp, fun h ↦ absurd h hA⟩;
+  | axm => exact validateSequent_axm;
+  | botL => exact validateSequent_botL;
+  | wkL _ hΓ ih => exact validateSequent_wk ih hΓ subset_rfl;
+  | wkR _ hΔ ih => exact validateSequent_wk ih subset_rfl hΔ;
+  | impL _ _ ih₁ ih₂ => exact validateSequent_impL ih₁ ih₂;
+  | impR _ ih => exact validateSequent_impR ih;
   | boxGL _ ih => exact Kripke.Model.validateSequent_boxGL ih;
 
 @[simp, grind .]

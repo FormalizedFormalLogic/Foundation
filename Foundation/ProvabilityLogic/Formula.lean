@@ -103,6 +103,9 @@ def complexity : Formula α → ℕ
 @[simp, grind =]
 lemma complexity_imp : (A 🡒 B).complexity = max A.complexity B.complexity + 1 := rfl
 
+@[simp, grind =]
+lemma complexity_box : (□A).complexity = A.complexity + 1 := rfl
+
 variable [DecidableEq α]
 
 @[grind]
