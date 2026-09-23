@@ -180,8 +180,11 @@ public import Foundation.ProvabilityLogic.Arithmetic.SolovaySentences
 public import Foundation.ProvabilityLogic.Formula
 public import Foundation.ProvabilityLogic.GL.Arithmetic
 public import Foundation.ProvabilityLogic.GL.Basic
+public import Foundation.ProvabilityLogic.GL.CIP
+public import Foundation.ProvabilityLogic.GL.Fixedpoint
 public import Foundation.ProvabilityLogic.GL.Gentzen.Basic
 public import Foundation.ProvabilityLogic.GL.Gentzen.Kripke
+public import Foundation.ProvabilityLogic.GL.Gentzen.Maehara
 public import Foundation.ProvabilityLogic.GL.Hilbert.Basic
 public import Foundation.ProvabilityLogic.Grz.Basic
 public import Foundation.ProvabilityLogic.Grz.Gentzen.Basic
@@ -189,6 +192,7 @@ public import Foundation.ProvabilityLogic.Grz.Gentzen.Kripke
 public import Foundation.ProvabilityLogic.Grz.Hilbert.Basic
 public import Foundation.ProvabilityLogic.Kripke.Basic
 public import Foundation.ProvabilityLogic.Kripke.Cone
+public import Foundation.ProvabilityLogic.Kripke.Overwrite
 public import Foundation.ProvabilityLogic.Kripke.Rank
 public import Foundation.ProvabilityLogic.Kripke.RootExtension
 public import Foundation.ProvabilityLogic.Kripke.RootedModel

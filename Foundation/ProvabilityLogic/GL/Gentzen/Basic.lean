@@ -46,6 +46,16 @@ lemma botL_mem (h : ⊥ ∈ Γ := by grind) : ⊢ᴳ[GL] Γ ⟹ Δ := wkR (wkL b
 
 lemma wk (h : ⊢ᴳ[GL] Γ ⟹ Δ) (hΓ : Γ ⊆ Γ') (hΔ : Δ ⊆ Δ') : ⊢ᴳ[GL] Γ' ⟹ Δ' := wkR (wkL h hΓ) hΔ
 
+lemma negL (h : ⊢ᴳ[GL] Γ ⟹ insert A Δ) : ⊢ᴳ[GL] insert (∼A) Γ ⟹ Δ :=
+  impL h (botL_mem (Finset.mem_insert_self _ _))
+
+lemma negR (h : ⊢ᴳ[GL] insert A Γ ⟹ Δ) : ⊢ᴳ[GL] Γ ⟹ insert (∼A) Δ := impR (wkR h)
+
+lemma orL (h₁ : ⊢ᴳ[GL] insert A Γ ⟹ Δ) (h₂ : ⊢ᴳ[GL] insert B Γ ⟹ Δ) :
+    ⊢ᴳ[GL] insert (A ⋎ B) Γ ⟹ Δ := impL (negR h₁) h₂
+
+lemma orR (h : ⊢ᴳ[GL] Γ ⟹ insert A (insert B Δ)) : ⊢ᴳ[GL] Γ ⟹ insert (A ⋎ B) Δ := impR (negL h)
+
 end Gentzen
 
 end GL
