@@ -174,6 +174,15 @@ public import Foundation.Propositional.Heyting.Semantics
 public import Foundation.Propositional.Hilbert.Basic
 public import Foundation.Propositional.LK.Basic
 public import Foundation.Propositional.Logic.Basic
+public import Foundation.ProvabilityLogic.Arithmetic.Completeness
+public import Foundation.ProvabilityLogic.Arithmetic.Interpret
+public import Foundation.ProvabilityLogic.Arithmetic.SolovaySentences
+public import Foundation.ProvabilityLogic.Formula
+public import Foundation.ProvabilityLogic.GL.Gentzen
+public import Foundation.ProvabilityLogic.GL.Hilbert
+public import Foundation.ProvabilityLogic.Kripke.Basic
+public import Foundation.ProvabilityLogic.Kripke.Rooted
+public import Foundation.ProvabilityLogic.Sequent
 public import Foundation.SecondOrder.LK.Basic
 public import Foundation.SecondOrder.Syntax.Formula
 public import Foundation.SecondOrder.Syntax.Rew
@@ -197,6 +206,7 @@ public import Foundation.Vorspiel.Function
 public import Foundation.Vorspiel.Graph
 public import Foundation.Vorspiel.IsEmpty
 public import Foundation.Vorspiel.List.Basic
+public import Foundation.Vorspiel.List.ChainI
 public import Foundation.Vorspiel.Matrix
 public import Foundation.Vorspiel.Multiset
 public import Foundation.Vorspiel.Nat.Basic
@@ -210,6 +220,7 @@ public import Foundation.Vorspiel.Order.Dense
 public import Foundation.Vorspiel.Order.Heyting
 public import Foundation.Vorspiel.Part
 public import Foundation.Vorspiel.Quotient
+public import Foundation.Vorspiel.Rel.CWF
 public import Foundation.Vorspiel.Set.Basic
 public import Foundation.Vorspiel.Small
 public import Foundation.Vorspiel.String
