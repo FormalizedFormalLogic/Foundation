@@ -13,7 +13,7 @@ public import Mathlib.Computability.Reduce
 
 The set of sentences provable in an arithmetic theory `T ⊇ 𝗥₀` is not computable, whether `T` is
 sound on `𝚺₁` sentences (`uncomputable_theory_of_sigma1Sound`) or merely consistent and extends
-`𝗜𝚺⁺₁` (`uncomputable_theory_of_consistent`). Provability in pure first-order logic is likewise
+`𝗜𝚺₁` (`uncomputable_theory_of_consistent`). Provability in pure first-order logic is likewise
 undecidable (`undecidability_first_order_logic`).
 -/
 
@@ -74,7 +74,7 @@ end Diagonalization
 
 section ConsistencyOnly
 
-variable {T : ArithmeticTheory} [𝗜𝚺⁺₁ ⪯ T] [Entailment.Consistent T]
+variable {T : ArithmeticTheory} [𝗜𝚺₁ ⪯ T] [Entailment.Consistent T]
 
 theorem uncomputable_theory_of_consistent : ¬ComputablePred T.theory := by
   by_contra hC

@@ -48,20 +48,20 @@ end Entailment.LindenbaumAlgebra
 
 open Entailment LindenbaumAlgebra FirstOrder
 
-/-- Lindenbuam algebra of `𝗜𝚺⁺₁`-extension theory satisfies G1 is dense. -/
-lemma FirstOrder.Arithmetic.dense (T : ArithmeticTheory) [𝗜𝚺⁺₁ ⪯ T] [T.Δ₁] {φ ψ : LindenbaumAlgebra T} :
+/-- Lindenbuam algebra of `𝗜𝚺₁`-extension theory satisfies G1 is dense. -/
+lemma FirstOrder.Arithmetic.dense (T : ArithmeticTheory) [𝗜𝚺₁ ⪯ T] [T.Δ₁] {φ ψ : LindenbaumAlgebra T} :
     φ < ψ → ∃ ξ, φ < ξ ∧ ξ < ψ := fun h ↦ by
   refine LindenbaumAlgebra.dense_of_finite_extend_incomplete T ?_ h
   intro σ con
-  have : 𝗜𝚺⁺₁ ⪯ T := inferInstance
-  have : 𝗜𝚺⁺₁ ⪯ insert σ T := WeakerThan.trans this (Axiomatized.le_of_subset (Set.subset_insert _ _))
+  have : 𝗜𝚺₁ ⪯ T := inferInstance
+  have : 𝗜𝚺₁ ⪯ insert σ T := WeakerThan.trans this (Axiomatized.le_of_subset (Set.subset_insert _ _))
   simpa using! Arithmetic.incomplete_GR (insert σ T)
 
-instance (T : ArithmeticTheory) [𝗜𝚺⁺₁ ⪯ T] [T.Δ₁] : DenselyOrdered (LindenbaumAlgebra T) where
+instance (T : ArithmeticTheory) [𝗜𝚺₁ ⪯ T] [T.Δ₁] : DenselyOrdered (LindenbaumAlgebra T) where
   dense _ _ := FirstOrder.Arithmetic.dense T
 
 theorem lindenbaum_iso (T U : ArithmeticTheory)
-    [𝗜𝚺⁺₁ ⪯ T] [T.Δ₁] [Consistent T] [𝗜𝚺⁺₁ ⪯ U] [U.Δ₁] [Consistent U] :
+    [𝗜𝚺₁ ⪯ T] [T.Δ₁] [Consistent T] [𝗜𝚺₁ ⪯ U] [U.Δ₁] [Consistent U] :
     Nonempty (LindenbaumAlgebra T ≃o LindenbaumAlgebra U) :=
   iso_of_countable_atomless
 

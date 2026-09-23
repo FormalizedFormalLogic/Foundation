@@ -11,12 +11,12 @@ namespace FFL.FirstOrder.Arithmetic
 
 open FFL.Entailment Bootstrapping ProvabilityAbstraction
 
-variable {T : ArithmeticTheory} [T.Δ₁] [𝗜𝚺⁺₁ ⪯ T] {σ : ArithmeticSentence}
+variable {T : ArithmeticTheory} [T.Δ₁] [𝗜𝚺₁ ⪯ T] {σ : ArithmeticSentence}
 
 theorem löb_theorem : T ⊢ provabilityPred T σ 🡒 σ → T ⊢ σ :=
   ProvabilityAbstraction.löb_theorem (𝔅 := T.standardProvability)
 
-theorem formalized_löb_theorem : 𝗜𝚺⁺₁ ⊢ provabilityPred T (provabilityPred T σ 🡒 σ) 🡒 provabilityPred T σ :=
+theorem formalized_löb_theorem : 𝗜𝚺₁ ⊢ provabilityPred T (provabilityPred T σ 🡒 σ) 🡒 provabilityPred T σ :=
   ProvabilityAbstraction.formalized_löb_theorem (𝔅 := T.standardProvability)
 
 end FFL.FirstOrder.Arithmetic

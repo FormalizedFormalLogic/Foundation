@@ -119,7 +119,7 @@ end Bootstrapping.Arithmetic
 
 open Bootstrapping Bootstrapping.Arithmetic
 
-variable {T : ArithmeticTheory} [𝗜𝚺⁺₁ ⪯ T]
+variable {T : ArithmeticTheory} [𝗜𝚺₁ ⪯ T]
 
 section Diagonalization
 
@@ -129,9 +129,9 @@ noncomputable def fixedpoint (θ : ArithmeticSemisentence 1) : ArithmeticSentenc
 
 theorem diagonal (θ : ArithmeticSemisentence 1) :
     T ⊢ fixedpoint θ 🡘 θ/[⌜fixedpoint θ⌝] :=
-  haveI : 𝗘𝗤 _ ⪯ T := Entailment.WeakerThan.trans (𝓣 := 𝗜𝚺⁺₁) inferInstance inferInstance
+  haveI : 𝗘𝗤 _ ⪯ T := Entailment.WeakerThan.trans (𝓣 := 𝗜𝚺₁) inferInstance inferInstance
   complete.{0} T _ fun (V : Type) _ _ ↦ by
-    have : V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺₁ := ModelsTheory.of_provably_subtheory V 𝗜𝚺⁺₁ T inferInstance
+    have : V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁ := ModelsTheory.of_provably_subtheory V 𝗜𝚺₁ T inferInstance
     suffices V ⊧/![] (fixedpoint θ) ↔ V ⊧/![⌜fixedpoint θ⌝] θ by
       simpa [models_iff, Matrix.constant_eq_singleton]
     let t : V := ⌜diag θ⌝
@@ -157,9 +157,9 @@ noncomputable def multifixedpoint (θ : Fin k → ArithmeticSemisentence k) (i :
 
 theorem multidiagonal (θ : Fin k → ArithmeticSemisentence k) :
     T ⊢ multifixedpoint θ i 🡘 (Rew.subst fun j ↦ ⌜multifixedpoint θ j⌝) ▹ (θ i) :=
-  haveI : 𝗘𝗤 _ ⪯ T := Entailment.WeakerThan.trans (𝓣 := 𝗜𝚺⁺₁) inferInstance inferInstance
+  haveI : 𝗘𝗤 _ ⪯ T := Entailment.WeakerThan.trans inferInstance (inferInstance : 𝗜𝚺₁ ⪯ T)
   complete.{0} T _ fun (V : Type) _ _ ↦ by
-    have : V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺₁ := ModelsTheory.of_provably_subtheory V 𝗜𝚺⁺₁ T inferInstance
+    have : V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁ := ModelsTheory.of_provably_subtheory V 𝗜𝚺₁ T inferInstance
     suffices V ⊧/![] (multifixedpoint θ i) ↔ V ⊧/(fun i ↦ ⌜multifixedpoint θ i⌝) (θ i) by
       simpa [models_iff, Function.comp_def, Matrix.empty_eq]
     let t : Fin k → V := fun i ↦ ⌜multidiag (θ i)⌝
@@ -208,9 +208,9 @@ noncomputable def parameterizedFixedpoint (θ : ArithmeticSemisentence (k + 1)) 
 
 theorem parameterized_diagonal (θ : ArithmeticSemisentence (k + 1)) :
     T ⊢ ∀¹* (parameterizedFixedpoint θ 🡘 “!θ !!(⌜parameterizedFixedpoint θ⌝) ⋯”) :=
-  haveI : 𝗘𝗤 _ ⪯ T := Entailment.WeakerThan.trans (𝓣 := 𝗜𝚺⁺₁) inferInstance inferInstance
+  haveI : 𝗘𝗤 _ ⪯ T := Entailment.WeakerThan.trans (𝓣 := 𝗜𝚺₁) inferInstance inferInstance
   complete.{0} T _ fun (V : Type) _ _ ↦ by
-    have : V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺₁ := ModelsTheory.of_provably_subtheory V 𝗜𝚺⁺₁ T inferInstance
+    have : V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁ := ModelsTheory.of_provably_subtheory V 𝗜𝚺₁ T inferInstance
     suffices
         ∀ params : Fin k → V,
           V ⊧/params (parameterizedFixedpoint θ) ↔ V ⊧/(⌜parameterizedFixedpoint θ⌝ :> params) θ by

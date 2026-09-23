@@ -13,14 +13,14 @@ namespace FFL.FirstOrder.Arithmetic
 
 open FFL.Entailment ProvabilityAbstraction
 
-variable (T : ArithmeticTheory) [T.Δ₁] [𝗜𝚺⁺₁ ⪯ T]
+variable (T : ArithmeticTheory) [T.Δ₁] [𝗜𝚺₁ ⪯ T]
 
 /-- Gödel's second incompleteness theorem -/
 theorem consistent_unprovable [Consistent T] : T ⊬ T.consistent.val :=
   ProvabilityAbstraction.con_unprovable (𝔅 := T.standardProvability)
 
 /-- Gödel's second incompleteness theorem for r.e. theories -/
-theorem craig_consistent_unprovable_of_RE (T : ArithmeticTheory) [T.RE] [𝗜𝚺⁺₁ ⪯ T]
+theorem craig_consistent_unprovable_of_RE (T : ArithmeticTheory) [T.RE] [𝗜𝚺₁ ⪯ T]
     [Consistent T] : T ⊬ T.craig.consistent.val :=
   fun h ↦ consistent_unprovable T.craig (WeakerThan.pbl h)
 

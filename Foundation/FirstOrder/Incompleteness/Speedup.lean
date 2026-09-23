@@ -121,13 +121,13 @@ theorem ehrenfeucht_mycielski_speedup [L.Primcodable]
 
 section Arithmetic
 
-variable {T : ArithmeticTheory} [T.Δ₁] [𝗜𝚺⁺₁ ⪯ T] {σ : ArithmeticSentence}
+variable {T : ArithmeticTheory} [T.Δ₁] [𝗜𝚺₁ ⪯ T] {σ : ArithmeticSentence}
 
 open FFL.Entailment in
 theorem ehrenfeucht_mycielski_speedup_arithmetic (hσ : T ⊬ σ) (f : ℕ → ℕ) (hf : Computable f) :
   ∃ π : ArithmeticSentence, T ⊢ π ∧ f ((insert σ T).minProof π) < T.minProof π :=
-  have : 𝗜𝚺⁺₁ ⪯ (insert (∼σ) T) :=
-    WeakerThan.trans ‹𝗜𝚺⁺₁ ⪯ T› (Axiomatized.le_of_subset (Set.subset_insert _ T));
+  have : 𝗜𝚺₁ ⪯ (insert (∼σ) T) :=
+    WeakerThan.trans ‹𝗜𝚺₁ ⪯ T› (Axiomatized.le_of_subset (Set.subset_insert _ T));
   have : Consistent (insert (∼σ) T) := unprovable_iff_consistent_adjoin.mp hσ;
   ehrenfeucht_mycielski_speedup uncomputable_theory_of_consistent f hf
 
