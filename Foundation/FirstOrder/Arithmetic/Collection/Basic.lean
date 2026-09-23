@@ -3,10 +3,10 @@ module
 public import Foundation.FirstOrder.Arithmetic.Schemata
 
 /-!
-# Collection in models, and `𝗕𝚺 (s + 1)` below `𝗜𝚺 (s + 1)`
+# Collection in models, and `𝗕𝚺 (s + 1)` below `𝗜𝚺⁺ (s + 1)`
 
 Collection for a definable relation in a model of a collection scheme, the converse passage from
-collection to a model of the scheme, and the collection available in a model of `𝗜𝚺 (s + 1)`.
+collection to a model of the scheme, and the collection available in a model of `𝗜𝚺⁺ (s + 1)`.
 
 ## References
 
@@ -98,16 +98,16 @@ end standardModel
 
 section BSigma_ISigma
 
-/-! ### `𝗕𝚺 (s + 1)` below `𝗜𝚺 (s + 1)` -/
+/-! ### `𝗕𝚺 (s + 1)` below `𝗜𝚺⁺ (s + 1)` -/
 
 variable {s : ℕ}
 
-lemma ISigma.collection [V↓[ℒₒᵣ] ⊧* 𝗜𝚺(s + 1)] {R : V → V → Prop}
+lemma IBroadSigma.collection [V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺ (s + 1)] {R : V → V → Prop}
     (hR : 𝚺-[s + 1].DefinableRel R) (a : V) (h : ∀ x < a, ∃ y, R x y) :
     ∃ b, ∀ x < a, ∃ y < b, R x y := by
-  have : V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := mod_paMinus_of_ISigma (s := s + 1);
+  have : V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := mod_paMinus_of_IBroadSigma (s := s + 1);
   have key : ∀ y : V, ∃ b, ∀ x < y, x < a → ∃ u < b, R x u := by
-    apply InductionOnHierarchy.succ_induction_sigma 𝚺 (s + 1)
+    apply InductionOnBroadHierarchy.succ_induction_sigma 𝚺 (s + 1)
       (P := fun y ↦ ∃ b, ∀ x < y, x < a → ∃ u < b, R x u)
       (hP := by definability);
     · use 0;
@@ -131,25 +131,25 @@ lemma ISigma.collection [V↓[ℒₒᵣ] ⊧* 𝗜𝚺(s + 1)] {R : V → V → 
   intro x hx;
   exact hb x (lt_trans hx (lt_add_one a)) hx;
 
-instance ISigma.models_BSigma_succ [V↓[ℒₒᵣ] ⊧* 𝗜𝚺(s + 1)] : V↓[ℒₒᵣ] ⊧* 𝗕𝚺 (s + 1) := by
+instance IBroadSigma.models_BSigma_succ [V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺ (s + 1)] : V↓[ℒₒᵣ] ⊧* 𝗕𝚺 (s + 1) := by
   apply Semantics.ModelsSet.union_iff.mpr;
   and_intros;
-  · exact mod_ISigma_of_le (Nat.zero_le (s + 1));
-  · exact models_of_ss
-      (CollectionScheme.models_of_collection (Γ := 𝚺) ISigma.collection)
+  . exact models_of_ss inferInstance (ISigmaZero_subset_IBroadSigma (s := s + 1));
+  . exact models_of_ss
+      (CollectionScheme.models_of_collection (Γ := 𝚺) IBroadSigma.collection)
       (CollectionScheme_subset (·.hierarchy));
 
 @[instance]
-theorem BSigma_weakerThan_ISigma : 𝗕𝚺 (s + 1) ⪯ 𝗜𝚺 (s + 1) :=
+theorem BSigma_weakerThan_IBroadSigma : 𝗕𝚺 (s + 1) ⪯ 𝗜𝚺⁺ (s + 1) :=
   weakerThan_of_models.{0} _ _ fun _ _ _ ↦ inferInstance
 
 @[instance]
-theorem BSigma_weakerThan_ISigma_succ : 𝗕𝚺 s ⪯ 𝗜𝚺 (s + 1) :=
-  WeakerThan.trans (CollectionOnHierarchy_weakerThan_of_le (by omega)) BSigma_weakerThan_ISigma
+theorem BSigma_weakerThan_IBroadSigma_succ : 𝗕𝚺 s ⪯ 𝗜𝚺⁺ (s + 1) :=
+  WeakerThan.trans (CollectionOnHierarchy_weakerThan_of_le (by omega)) BSigma_weakerThan_IBroadSigma
 
 @[instance]
 theorem BSigma_weakerThan_Peano : 𝗕𝚺 s ⪯ 𝗣𝗔 :=
-  WeakerThan.trans BSigma_weakerThan_ISigma_succ (inferInstance : 𝗜𝚺 (s + 1) ⪯ 𝗣𝗔)
+  WeakerThan.trans BSigma_weakerThan_IBroadSigma_succ (inferInstance : 𝗜𝚺⁺ (s + 1) ⪯ 𝗣𝗔)
 
 end BSigma_ISigma
 

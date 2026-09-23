@@ -145,6 +145,9 @@ lemma strict_mono {φ : Semiformula L ξ n} (h : StrictHierarchy Γ s φ) (Γ') 
 lemma of_deltaZero {φ : Semiformula L ξ n} (h : Hierarchy 𝚺 0 φ) : StrictHierarchy Γ s φ :=
   (zero (Hierarchy.zero_iff_delta_zero.mp h)).mono (Nat.zero_le s)
 
+lemma of_open {φ : Semiformula L ξ n} (h : φ.Open) : StrictHierarchy Γ s φ :=
+  of_deltaZero (Hierarchy.of_open h)
+
 lemma zero_iff {φ : Semiformula L ξ n} : StrictHierarchy Γ 0 φ ↔ Hierarchy 𝚺 0 φ := by
   constructor;
   · intro h;

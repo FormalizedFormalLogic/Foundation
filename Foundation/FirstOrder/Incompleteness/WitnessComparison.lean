@@ -97,7 +97,7 @@ lemma iff_le_refl_provable : φ ≼ φ ↔ □φ := by
   · exact le_to_provable
   · rintro ⟨b, hb⟩
     have : ∃ b, Proof T b φ ∧ ∀ z < b, ¬Proof T z φ :=
-      InductionOnHierarchy.least_number_sigma 𝚺 1 (P := (Proof T · φ)) (by definability) hb
+      InductionOnBroadHierarchy.least_number_sigma 𝚺 1 (P := (Proof T · φ)) (by definability) hb
     rcases this with ⟨b, bd, h⟩
     exact ⟨b, bd, h⟩
 
@@ -119,7 +119,7 @@ lemma find_minimal_proof_fintype {ι : Type*} [Finite ι] (φ : ι → V) {i : �
   rcases show ∃ dᵢ, Proof T dᵢ (φ i) from H with ⟨dᵢ, Hdᵢ⟩
   have : ∃ z, (∃ j, Proof T z (φ j)) ∧ ∀ w < z, ∀ x, ¬Proof T w (φ x) := by
     simpa using
-      InductionOnHierarchy.least_number_sigma 𝚺 1 (P := fun z ↦ ∃ j, Proof T z (φ j))
+      InductionOnBroadHierarchy.least_number_sigma 𝚺 1 (P := fun z ↦ ∃ j, Proof T z (φ j))
         (HierarchySymbol.Definable.fintype_exs fun j ↦ by definability) (x := dᵢ) ⟨i, Hdᵢ⟩
   rcases this with ⟨z, ⟨j, hj⟩, H⟩
   exact ⟨j, fun k ↦ ⟨z, hj, fun w hw ↦ H w hw k⟩⟩

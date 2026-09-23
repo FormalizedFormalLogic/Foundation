@@ -6,7 +6,7 @@ public import Foundation.FirstOrder.Arithmetic.Prenex
 # Equivalences between the collection schemata
 
 Collection for the definable relations of a model of `𝗕 Γ s`, the collapse `𝗕⁺ Γ s ≊ 𝗕 Γ s`, the
-equivalence `𝗕𝚺 (s + 1) ≊ 𝗕𝚷 s`, and `𝗜𝚺 s` from `𝗕𝚺 (s + 1)`.
+equivalence `𝗕𝚺 (s + 1) ≊ 𝗕𝚷 s`, and `𝗜𝚺⁺ s` from `𝗕𝚺 (s + 1)`.
 
 ## References
 
@@ -242,14 +242,14 @@ end BSigma_succ_BPi
 
 section ISigma_BSigma_succ
 
-/-! ### `𝗜𝚺 s` from `𝗕𝚺 (s + 1)` -/
+/-! ### `𝗜𝚺⁺ s` from `𝗕𝚺 (s + 1)` -/
 
 variable {P : V → Prop} {Q : V → V → Prop}
 
-lemma succ_induction_of_exists_pi [V↓[ℒₒᵣ] ⊧* 𝗜𝚺s] [V↓[ℒₒᵣ] ⊧* 𝗕𝚷(s + 1)]
+lemma succ_induction_of_exists_pi [V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺ s] [V↓[ℒₒᵣ] ⊧* 𝗕𝚷 (s + 1)]
     (hQ : 𝚷-[s].DefinableRel Q) (hPQ : ∀ x, P x ↔ ∃ w, Q x w)
     (zero : P 0) (succ : ∀ x, P x → P (x + 1)) : ∀ x, P x := by
-  have : V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := models_of_subtheory (inferInstance : V↓[ℒₒᵣ] ⊧* 𝗜𝚺 s);
+  have : V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := models_of_subtheory (inferInstance : V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺ s);
   intro a;
   have hstep : 𝚷-[s + 1].DefinableRel fun x w ↦ (¬∃ z, Q x z) ∨ Q (x + 1) w := by
     have hex : 𝚺-[s + 1].DefinablePred fun x ↦ ∃ z, Q x z :=
@@ -277,8 +277,8 @@ lemma succ_induction_of_exists_pi [V↓[ℒₒᵣ] ⊧* 𝗜𝚺s] [V↓[ℒₒ�
       exact .of_iff (hQ.retraction ![1, 0]) (by intro w; simp);
     exact (hlt.or hbexs).of_iff (by intro v; simp);
   have key : ∀ x, a < x ∨ ∃ y < b, Q x y := by
-    apply InductionOnHierarchy.succ_induction 𝚷 s hbdd;
-    · right;
+    apply InductionOnBroadHierarchy.succ_induction 𝚷 s hbdd;
+    . right;
       exact ⟨w₀, hw₀b, hw₀⟩;
     · rintro x (hx | ⟨y, -, hy⟩);
       · left;
@@ -294,11 +294,12 @@ lemma succ_induction_of_exists_pi [V↓[ℒₒᵣ] ⊧* 𝗜𝚺s] [V↓[ℒₒ�
   · exact absurd hy (lt_irrefl a);
   · exact (hPQ a).mpr ⟨y, hy⟩;
 
-lemma models_ISigma_of_models_BSigma_succ [V↓[ℒₒᵣ] ⊧* 𝗕𝚺(s + 1)] : V↓[ℒₒᵣ] ⊧* 𝗜𝚺 s := by
+lemma models_IBroadSigma_of_models_BSigma_succ [V↓[ℒₒᵣ] ⊧* 𝗕𝚺 (s + 1)] : V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺ s := by
   rename_i hn;
   induction s generalizing hn with
   | zero =>
-    exact models_of_subtheory (inferInstance : V↓[ℒₒᵣ] ⊧* 𝗕𝚺 1);
+    exact models_of_ss (inferInstance : V↓[ℒₒᵣ] ⊧* 𝗕𝚺 1)
+      (IBroadSigmaZero_subset_ISigmaZero.trans Set.subset_union_left);
   | succ s ih =>
     have : V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := models_of_subtheory hn;
     have : V↓[ℒₒᵣ] ⊧* 𝗕𝚺 (s + 1) := models_of_ss hn
@@ -322,8 +323,8 @@ lemma models_ISigma_of_models_BSigma_succ [V↓[ℒₒᵣ] ⊧* 𝗕𝚺(s + 1)]
     exact succ_induction_of_exists_pi hQ hiff;
 
 @[instance]
-theorem ISigma_weakerThan_BSigma_succ : 𝗜𝚺 s ⪯ 𝗕𝚺 (s + 1) :=
-  weakerThan_of_models.{0} _ _ fun _ _ _ ↦ models_ISigma_of_models_BSigma_succ
+theorem IBroadSigma_weakerThan_BSigma_succ : 𝗜𝚺⁺ s ⪯ 𝗕𝚺 (s + 1) :=
+  weakerThan_of_models.{0} _ _ fun _ _ _ ↦ models_IBroadSigma_of_models_BSigma_succ
 
 end ISigma_BSigma_succ
 
