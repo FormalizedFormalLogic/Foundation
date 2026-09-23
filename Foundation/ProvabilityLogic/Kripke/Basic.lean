@@ -2,7 +2,7 @@ module
 
 public import Foundation.ProvabilityLogic.Formula
 public import Foundation.Logic.Semantics
-public import Foundation.Vorspiel.Rel.CWF
+public import Foundation.Vorspiel.Rel.WCWF
 
 /-!
 # Kripke semantics
@@ -72,6 +72,15 @@ instance [M.IsFiniteGL] : M.IsGL where
 
 instance [M.IsGL] : Std.Irrefl M.Rel := ConverseWellFounded.irrefl
 
+class IsGrz (M : Model κ α) extends Std.Refl M.Rel, IsTrans _ M.Rel, IsWeaklyConverseWellFounded _ M.Rel
+
+class IsFiniteGrz (M : Model κ α) extends Std.Refl M.Rel, IsTrans _ M.Rel, Std.Antisymm M.Rel where
+  [finite : Finite M.World]
+
+instance [M.IsFiniteGrz] : Finite M.World := IsFiniteGrz.finite
+
+instance [M.IsFiniteGrz] : M.IsGrz where
+
 abbrev pointModel (v : α → Prop) : Model (Fin 1) α where
   Rel' _ _ := False
   Val' _ := v
@@ -114,6 +123,8 @@ scoped notation:55 x:56 " ⊮[" M "] " A:56 => ¬Forces M x A
 @[grind =] lemma forces_or : x ⊩[M] A ⋎ B ↔ x ⊩[M] A ∨ x ⊩[M] B := by
   change ((_ → False) → _) ↔ _; tauto;
 @[grind =] lemma forces_neg : x ⊩[M] ∼A ↔ x ⊮[M] A := Iff.rfl
+@[grind =] lemma forces_iff : x ⊩[M] A 🡘 B ↔ (x ⊩[M] A ↔ x ⊩[M] B) := by
+  simp only [LogicalConnective.iff, forces_and]; grind;
 @[grind =] lemma forces_box : x ⊩[M] □A ↔ ∀ y, x ≺ y → y ⊩[M] A := Iff.rfl
 @[grind =] lemma forces_dia : x ⊩[M] ◇A ↔ ∃ y, x ≺ y ∧ y ⊩[M] A := by
   change ((∀ y, x ≺ y → y ⊩[M] A → False) → False) ↔ _; grind;

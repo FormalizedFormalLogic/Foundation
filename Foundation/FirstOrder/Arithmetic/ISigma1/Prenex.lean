@@ -1,6 +1,6 @@
 module
 
-public import Foundation.FirstOrder.Arithmetic.Prenex
+public import Foundation.FirstOrder.Arithmetic.Induction.Equiv
 
 /-!
 # Prenex normal form theorem over $\mathsf{I\Sigma_1}$

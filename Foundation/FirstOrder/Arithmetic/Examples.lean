@@ -2,6 +2,7 @@ module
 
 public import Foundation.FirstOrder.Arithmetic.Collection.Equiv
 public import Foundation.FirstOrder.Arithmetic.LeastNumber.Basic
+public import Foundation.FirstOrder.Arithmetic.Induction.Equiv
 
 /-!
 # Relations between fragments at concrete indices
@@ -24,6 +25,8 @@ instance : 𝗕𝚺 1 ≊ 𝗕𝚷 0 := BSigma_succ_equiv_BPi (s := 0)
 instance : 𝗕𝚺 2 ≊ 𝗕𝚷 1 := BSigma_succ_equiv_BPi (s := 1)
 
 instance : 𝗜𝚺 1 ≊ 𝗜𝚷 1 := ISigma_equiv_IPi 1
+
+instance : 𝗜𝚺 1 ≊ 𝗜𝚺⁺ 1 := ISigma_equiv_IBroadSigma 1
 
 instance : 𝗜𝚺 2 ≊ 𝗜𝚷 2 := ISigma_equiv_IPi 2
 
