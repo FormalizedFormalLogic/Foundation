@@ -15,12 +15,12 @@ open Kripke Kripke.Model Kripke.Model.World
 
 namespace Logic.normalOf
 
-variable {κ α : Type*} [Nonempty κ] {M : Model κ α} {Ax : Set (Formula α)} {A : Formula α}
+variable {κ α : Type*} [Nonempty κ] {M : Model κ α} {𝔸 : Set (Formula α)} {A : Formula α}
 
-theorem sound (hAx : ∀ A ∈ Ax, M ⊧ A) (h : normalOf Ax ⊢ A) : M ⊧ A := by
+theorem sound (h𝔸 : ∀ A ∈ 𝔸, M ⊧ A) (h : normalOf 𝔸 ⊢ A) : M ⊧ A := by
   intro x;
   induction h generalizing x with
-  | axm hA => exact hAx _ hA x;
+  | axm hA => exact h𝔸 _ hA x;
   | mdp _ _ ih₁ ih₂ => exact ih₁ x (ih₂ x);
   | nec _ ih => exact fun y _ ↦ ih y;
   | axiomK => exact fun h₁ h₂ y Rxy ↦ h₁ y Rxy (h₂ y Rxy);
