@@ -20,7 +20,7 @@ namespace PeanoMinus.Axiom
 abbrev addZero : ArithmeticSentence := “∀ x, x + 0 = x”
 abbrev addAssoc : ArithmeticSentence := “∀ x y z, (x + y) + z = x + (y + z)”
 abbrev addComm : ArithmeticSentence := “∀ x y, x + y = y + x”
-abbrev addEqOfLt : ArithmeticSentence := “∀ x y, x < y → ∃ z, x + z = y”
+abbrev addEqOfLt : ArithmeticSentence := “∀ x y, x < y → ∃ z <⁺ y, x + z = y”
 abbrev zeroLe : ArithmeticSentence := “∀ x, 0 ≤ x”
 abbrev zeroLtOne : ArithmeticSentence := “0 < 1”
 abbrev oneLeOfZeroLt : ArithmeticSentence := “∀ x, 0 < x → 1 ≤ x”
@@ -151,15 +151,49 @@ lemma equiv_singleton_finiteConj :
       Entailment.WeakerThan.ofAxm! fun {σ} hσ ↦ by
         rcases hσ with rfl; exact hConj⟩
 
+open StrictHierarchy in
+/--
+Every axiom of `𝗣𝗔⁻` is strict `Π₁`: a block of universal quantifiers over a `Δ₀` matrix.
+The bounded shape of `Axiom.addEqOfLt` is what makes this hold; an unbounded `∃ z` would not be `Δ₀`.
+
+No citation: this is a routine inspection of the axiom list rather than a result from the literature.
+-/
+theorem strictHierarchy : ∀ φ ∈ 𝗣𝗔⁻, StrictHierarchy 𝚷 1 φ := by
+  rintro φ ⟨⟩
+  case equal h =>
+    rcases h
+    case refl => exact all (of_deltaZero (by simp))
+    case symm => exact all (all (of_deltaZero (by simp)))
+    case trans => exact all (all (all (of_deltaZero (by simp))))
+    case funcExt => exact StrictHierarchy.allClosure (of_deltaZero (by simp))
+    case relExt => exact StrictHierarchy.allClosure (of_deltaZero (by simp))
+  case addZero => exact all (of_deltaZero (by simp))
+  case addAssoc => exact all (all (all (of_deltaZero (by simp))))
+  case addComm => exact all (all (of_deltaZero (by simp)))
+  case addEqOfLt => exact all (all (of_deltaZero (by simp)))
+  case zeroLe => exact all (of_deltaZero (by simp))
+  case zeroLtOne => exact of_deltaZero (by simp)
+  case oneLeOfZeroLt => exact all (of_deltaZero (by simp))
+  case addLtAdd => exact all (all (all (of_deltaZero (by simp))))
+  case mulZero => exact all (of_deltaZero (by simp))
+  case mulOne => exact all (of_deltaZero (by simp))
+  case mulAssoc => exact all (all (all (of_deltaZero (by simp))))
+  case mulComm => exact all (all (of_deltaZero (by simp)))
+  case mulLtMul => exact all (all (all (of_deltaZero (by simp))))
+  case distr => exact all (all (all (of_deltaZero (by simp))))
+  case ltIrrefl => exact all (of_deltaZero (by simp))
+  case ltTrans => exact all (all (all (of_deltaZero (by simp))))
+  case ltTri => exact all (all (of_deltaZero (by simp)))
+
 set_option linter.flexible false in
 @[simp] instance : ℕ↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := ⟨by
   intro σ h
-  rcases h <;> simp [models_iff]
+  rcases h <;> simp [models_iff, Semiformula.eval_bexsLTSucc]
   case addAssoc => intros; exact add_assoc _ _ _
   case addComm  => intros; exact add_comm _ _
   case mulAssoc => intros; exact mul_assoc _ _ _
   case mulComm  => intros; exact mul_comm _ _
-  case addEqOfLt => intro a b h; exact ⟨b - a, Nat.add_sub_of_le (le_of_lt h)⟩
+  case addEqOfLt => intro a b h; exact ⟨b - a, by omega, Nat.add_sub_of_le (le_of_lt h)⟩
   case oneLeOfZeroLt => intro n hn; exact hn
   case mulLtMul => intro a b c h hl; exact (mul_lt_mul_iff_left₀ hl).mpr h
   case distr => intros; exact Nat.mul_add _ _ _
@@ -190,8 +224,12 @@ protected lemma add_assoc : ∀ x y z : M,  (x + y) + z = x + (y + z) := by
 protected lemma add_comm : ∀ x y : M,  x + y = y + x := by
   simpa [models_iff] using Theory.models M _ PeanoMinus.addComm
 
-lemma add_eq_of_lt : ∀ x y : M, x < y → ∃ z, x + z = y := by
-  simpa [models_iff] using Theory.models M _ PeanoMinus.addEqOfLt
+lemma add_eq_of_lt_bounded : ∀ x y : M, x < y → ∃ z < y + 1, x + z = y := by
+  simpa [models_iff, Semiformula.eval_bexsLTSucc] using Theory.models M _ PeanoMinus.addEqOfLt
+
+lemma add_eq_of_lt : ∀ x y : M, x < y → ∃ z, x + z = y := fun x y h ↦
+  have ⟨z, _, hz⟩ := add_eq_of_lt_bounded x y h
+  ⟨z, hz⟩
 
 @[simp] protected lemma zero_le : ∀ x : M, 0 ≤ x := by
   have h := Theory.models M _ PeanoMinus.zeroLe

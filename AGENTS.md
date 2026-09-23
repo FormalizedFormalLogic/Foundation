@@ -33,6 +33,9 @@ above writes it into `~/.codex/config.toml`.
 
 ## Agent configuration
 
+This file is the project's only instruction file: no `CLAUDE.md` is checked in, and Claude Code
+reads this one through its built-in `agents-md` plugin.
+
 Shared, tool-independent definitions live in `.agents/`: roles under `.agents/roles/`, skills under
 `.agents/skills/`. Each client picks them up its own way — see [`.agents/README.md`](.agents/README.md)
 for the layout and for what to do when adding a client.

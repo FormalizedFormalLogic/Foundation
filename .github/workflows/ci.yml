@@ -7,8 +7,6 @@ on:
   pull_request:
     branches:
       - master
-  # Required so these checks also run against the queue's speculative merge
-  # commit; otherwise a merge queue entry has no status checks to wait on.
   merge_group:
     branches:
       - master
@@ -25,10 +23,15 @@ jobs:
   build:
     name: Build project
     runs-on: ubuntu-latest
+    env:
+      LAKE_ARTIFACT_CACHE: true
+      LAKE_RESTORE_ARTIFACTS: true
+      LAKE_NO_CACHE: true
     steps:
       - uses: actions/checkout@v7
+        with:
+          fetch-depth: 100
 
-      # Set every tool up before the expensive steps, so that a broken install fails fast
       - name: Setup elan
         run: |
           curl https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -sSf | sh -s -- -y --default-toolchain none
@@ -44,47 +47,41 @@ jobs:
           typst --version
           dot -V
 
-      # Restore project cache
       - name: Get Mathlib cache
         run: lake exe cache get
-      - name: Restore cache
-        id: cache-restore
-        uses: actions/cache/restore@v6
-        with:
-          path: .lake/Foundation-x86_64-unknown-linux-gnu.tar.gz
-          # Cache entries are immutable, so the key includes the commit SHA to always save fresh.
-          # Branch isolation is already enforced by the cache's built-in scoping.
-          key: lake-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('lean-toolchain') }}-${{ hashFiles('lake-manifest.json') }}-${{ github.sha }}
-          restore-keys: |
-            lake-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('lean-toolchain') }}-${{ hashFiles('lake-manifest.json') }}
-      - name: Unpack project cache
-        if: hashFiles('.lake/Foundation-x86_64-unknown-linux-gnu.tar.gz') != ''
-        run: lake unpack
 
-      - name: Build Foundation (warnings are errors)
-        run: lake build Foundation --wfail
+      - name: Restore remote cache (Foundation)
+        env:
+          LAKE_CONFIG: lake-cache.toml
+        run: |
+          lake cache get \
+            --service ffl \
+            --max-revs=100 \
+            --repo FormalizedFormalLogic/Foundation \
+            --package Foundation \
+          || echo "::warning::cache incomplete; the build will compile the rest from source"
 
-      - name: Check sorry-freeness and axiom allowlist (forgive)
-        run: just forgive
+      - run: lake build Foundation --wfail
 
-      - name: Build docs
-        run: just docs
+      - run: just forgive
+      - run: just import-graph
+      - run: just zoo
+      # Without a cached `doc-data`, doc-gen re-analyses every imported module (~20 min), so
+      # docs are only built where they are deployed.
+      - run: just docs
+        if: github.ref == 'refs/heads/master'
 
-      - name: Generate zoo
-        run: just zoo
-
-      - name: Pack project cache
-        run: lake pack
-      - name: Save project cache
-        if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
-        id: cache-save
-        uses: actions/cache/save@v6
-        with:
-          path: .lake/Foundation-x86_64-unknown-linux-gnu.tar.gz
-          key: ${{ steps.cache-restore.outputs.cache-primary-key }}
-
-      - name: Generate import graph
-        run: just import-graph
+      - name: Save remote cache
+        if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+        env:
+          LAKE_CONFIG: lake-cache.toml
+          LAKE_CACHE_KEY: ${{ secrets.LAKE_CACHE_KEY }}
+        run: |
+          lake build --no-build -o .lake/outputs.jsonl Foundation
+          lake cache put \
+            .lake/outputs.jsonl \
+            --service ffl-upload \
+            --repo FormalizedFormalLogic/Foundation
 
       - name: Upload lean artifacts
         uses: actions/upload-artifact@v7

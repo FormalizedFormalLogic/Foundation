@@ -57,7 +57,7 @@ end Theory
 
 namespace Arithmetic
 
-variable {V : Type} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
+variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 variable {T U : ArithmeticTheory} [T.Δ₁]
 variable {fDef : 𝚺₁.Semisentence 2} {e : ℕ}
 

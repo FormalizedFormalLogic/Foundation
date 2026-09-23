@@ -99,7 +99,7 @@ variable (T : Theory L) [T.RE]
 noncomputable def reWitness : 𝚺₀.Semisentence 2 :=
   (ISigma1.exists_matrix_provable T.reCh.sigma_prop).choose
 
-lemma reWitness_spec (V : Type) [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] (e : Fin 1 → V) :
+lemma reWitness_spec (V : Type*) [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] (e : Fin 1 → V) :
     V ⊧/e T.reCh.val ↔ ∃ w, V ⊧/(w :> e) T.reWitness.val :=
   (models_iff_of_provable_iff
     (ISigma1.exists_matrix_provable T.reCh.sigma_prop).choose_spec V e).trans

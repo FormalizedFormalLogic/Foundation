@@ -1,0 +1,11 @@
+[[cache.service]]
+name = "ffl"
+kind = "s3"
+artifactEndpoint = "https://cache.formalizedformallogic.org/artifacts"
+revisionEndpoint = "https://cache.formalizedformallogic.org/revisions"
+
+[[cache.service]]
+name = "ffl-upload"
+kind = "s3"
+artifactEndpoint = "https://411f2fda06461f8aa09a9055685d6fd9.r2.cloudflarestorage.com/ffl-lake-cache/artifacts"
+revisionEndpoint = "https://411f2fda06461f8aa09a9055685d6fd9.r2.cloudflarestorage.com/ffl-lake-cache/revisions"

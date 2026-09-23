@@ -20,7 +20,8 @@ namespace FFL.FirstOrder.Arithmetic
 variable {L : Language} [L.LT] {ξ : Type*}
 
 inductive StrictHierarchy : Polarity → ℕ → {n : ℕ} → Semiformula L ξ n → Prop
-  | zero {Γ n} {φ : Semiformula L ξ n} : Hierarchy 𝚺 0 φ → StrictHierarchy Γ 0 φ
+  | zero {Γ n} {φ : Semiformula L ξ n} :
+      Semiformula.Bounded BoundingOperator φ → StrictHierarchy Γ 0 φ
   | ofAlt {Γ s n} {φ : Semiformula L ξ n} : StrictHierarchy Γ.alt s φ → StrictHierarchy Γ (s + 1) φ
   | exs {s n} {φ : Semiformula L ξ (n + 1)} :
       StrictHierarchy 𝚺 (s + 1) φ → StrictHierarchy 𝚺 (s + 1) (∃¹ φ)
@@ -29,17 +30,26 @@ inductive StrictHierarchy : Polarity → ℕ → {n : ℕ} → Semiformula L ξ 
 
 namespace StrictHierarchy
 
+section
+
+variable {Γ : Polarity} {n : ℕ} {φ : Semiformula L ξ n}
+
+lemma zero_iff_bounded : StrictHierarchy Γ 0 φ ↔ Semiformula.Bounded BoundingOperator φ :=
+  ⟨fun | .zero h => h, .zero⟩
+
+end
+
 -- Recursive lemmas over `StrictHierarchy` bind `Γ s n φ` in their own signature rather than
 -- via `variable`: otherwise the equation compiler cannot generalize them.
 
 lemma hierarchy {Γ s n} {φ : Semiformula L ξ n} : StrictHierarchy Γ s φ → Hierarchy Γ s φ
-  | zero h => h.of_zero
+  | zero h => Hierarchy.bounded _ _ _ h
   | ofAlt h => (hierarchy h).accum _
   | exs h => (hierarchy h).exs
   | all h => (hierarchy h).all
 
 lemma neg {Γ s n} {φ : Semiformula L ξ n} : StrictHierarchy Γ s φ → StrictHierarchy Γ.alt s (∼φ)
-  | zero h => zero (by exact (Hierarchy.neg h).of_zero)
+  | zero h => zero h.neg
   | ofAlt h => ofAlt (by simpa using neg h)
   | exs h => by simpa using (neg h).all
   | all h => by simpa using (neg h).exs
@@ -53,7 +63,7 @@ lemma neg_iff {Γ s n} {φ : Semiformula L ξ n} :
 
 lemma rew {Γ s n₁ n₂} {ξ₁ ξ₂ : Type*} {φ : Semiformula L ξ₁ n₁} (ω : Rew L ξ₁ n₁ ξ₂ n₂) :
     StrictHierarchy Γ s φ → StrictHierarchy Γ s (ω ▹ φ)
-  | zero h => zero (Hierarchy.rew ω h)
+  | zero h => zero (h.rew ω)
   | ofAlt h => ofAlt (rew ω h)
   | exs h => by simpa using (rew ω.q h).exs
   | all h => by simpa using (rew ω.q h).all
@@ -99,7 +109,8 @@ lemma toPrenex {j} {φ : Semiformula L ξ (n + s)} (h : StrictHierarchy (Γ.altI
       rw [hΓ] at h ⊢;
       exact (ofAlt h).all;
 
-lemma toPrenex_of_deltaZero {φ : Semiformula L ξ (n + s)} (h : Hierarchy 𝚺 0 φ) :
+lemma toPrenex_of_deltaZero {φ : Semiformula L ξ (n + s)}
+    (h : Semiformula.Bounded BoundingOperator φ) :
     StrictHierarchy Γ s (φ.toPrenex Γ s) := by simpa using toPrenex (Γ := Γ) (zero h)
 
 lemma mono {φ : Semiformula L ξ n} (h : StrictHierarchy Γ s φ) {s' : ℕ} (hs : s ≤ s') :
@@ -131,7 +142,25 @@ lemma strict_mono {φ : Semiformula L ξ n} (h : StrictHierarchy Γ s φ) (Γ') 
   · exact ofAlt (h.mono (by omega));
   · exact h.mono (by omega);
 
+lemma of_deltaZero {φ : Semiformula L ξ n} (h : Hierarchy 𝚺 0 φ) : StrictHierarchy Γ s φ :=
+  (zero (Hierarchy.zero_iff_delta_zero.mp h)).mono (Nat.zero_le s)
+
+lemma zero_iff {φ : Semiformula L ξ n} : StrictHierarchy Γ 0 φ ↔ Hierarchy 𝚺 0 φ := by
+  constructor;
+  . intro h;
+    generalize hs : 0 = s at h;
+    rcases h with @⟨_, _, _, h⟩ | _ | _ | _;
+    . exact Hierarchy.bounded _ _ _ h;
+    all_goals omega;
+  . intro h;
+    exact zero (Hierarchy.zero_iff_delta_zero.mp h);
+
 end
+
+lemma allClosure {s : ℕ} : ∀ {n : ℕ} {φ : Semiformula L ξ n},
+    StrictHierarchy 𝚷 (s + 1) φ → StrictHierarchy 𝚷 (s + 1) (∀¹* φ)
+  |     0, _, h => h
+  | _ + 1, _, h => by rw [allClosure_succ]; exact allClosure h.all
 
 end StrictHierarchy
 
