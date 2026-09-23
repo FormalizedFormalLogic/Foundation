@@ -2,25 +2,22 @@
 default:
     @just --list
 
-# Format and regenerate keys of references.bib
 format-references:
     bibtool -F -r .bibtoolrsc -i ./references.bib -o references.bib
     sed -i '1{/^$/d}' references.bib
 
-# Download Mathlib's and Foundation's prebuilt artifacts, so a fresh clone need not compile them
 cache:
     lake exe cache get
-    LAKE_CONFIG=lake-cache.toml lake cache get --service ffl --repo FormalizedFormalLogic/Foundation --max-revs=100 || echo "cache incomplete; the build will compile the rest from source"
+    LAKE_CONFIG=lake-cache.toml lake cache get \
+      --service ffl \
+      --max-revs=100 \
+      --repo FormalizedFormalLogic/Foundation \
+      --package Foundation \
+    || echo "Foundation cache missing"
 
-# Generate the import graph of Foundation as import_graph.{png,pdf,html} (requires graphviz)
 import-graph:
     lake exe graph --to Foundation import_graph.png import_graph.pdf import_graph.html
 
-# Count lines of Lean source in Foundation/, excluding blank and comment lines (requires cloc)
-cloc:
-    cloc --include-lang=Lean Foundation/
-
-# Generate the zoo diagrams as pages/zoo/*.{png,pdf} (requires typst)
 zoo:
     lake build zoo_arithmetic
     lake exe zoo_arithmetic Zoo/arithmetic.json
@@ -28,24 +25,19 @@ zoo:
     typst compile Zoo/arithmetic.typ pages/zoo/arithmetic.png
     typst compile Zoo/arithmetic.typ pages/zoo/arithmetic.pdf
 
-# Regenerate Foundation.lean to include all modules (run after adding/removing files).
-# Restricted to the Foundation library: Zoo has no aggregator, its modules are executable roots.
 mk-all:
     lake exe mk_all --module --lib Foundation
 
-# Remove unused imports/variables and drop unnecessary `public` (run before merging any work)
 shake:
     lake shake --keep-public --fix
 
-# Audit Foundation for sorry/native_decide/unauthorized axioms (requires `lake build Foundation` first)
 forgive:
     lake exe forgive Foundation
 
-# doc-gen4 guards its output with empty marker files whose Lake trace never changes, so a restored
-# build cache would otherwise leave the generated documentation frozen forever.
-#
-# Generate the API documentation into .lake/build/doc (requires `lake build Foundation` first)
 docs:
     rm -rf .lake/build/doc
     rm -f .lake/build/doc-data/references.json .lake/build/doc-data/*.docs_built
     lake build Foundation:docs
+
+cloc:
+    cloc --include-lang=Lean Foundation/

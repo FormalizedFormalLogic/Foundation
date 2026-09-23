@@ -157,7 +157,7 @@ noncomputable def multifixedpoint (θ : Fin k → ArithmeticSemisentence k) (i :
 
 theorem multidiagonal (θ : Fin k → ArithmeticSemisentence k) :
     T ⊢ multifixedpoint θ i 🡘 (Rew.subst fun j ↦ ⌜multifixedpoint θ j⌝) ▹ (θ i) :=
-  haveI : 𝗘𝗤 _ ⪯ T := Entailment.WeakerThan.trans (𝓣 := 𝗜𝚺₁) inferInstance inferInstance
+  haveI : 𝗘𝗤 _ ⪯ T := Entailment.WeakerThan.trans inferInstance (inferInstance : 𝗜𝚺₁ ⪯ T)
   complete.{0} T _ fun (V : Type) _ _ ↦ by
     have : V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁ := ModelsTheory.of_provably_subtheory V 𝗜𝚺₁ T inferInstance
     suffices V ⊧/![] (multifixedpoint θ i) ↔ V ⊧/(fun i ↦ ⌜multifixedpoint θ i⌝) (θ i) by
