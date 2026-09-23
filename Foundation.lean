@@ -96,6 +96,8 @@ public import Foundation.FirstOrder.Kripke.Classical
 public import Foundation.FirstOrder.Kripke.Intuitionistic
 public import Foundation.FirstOrder.LJ.Basic
 public import Foundation.FirstOrder.LJ.GoedelGentzen
+public import Foundation.FirstOrder.LK.Axiomatizability
+public import Foundation.FirstOrder.LK.Axiomatizability
 public import Foundation.FirstOrder.LK.Basic
 public import Foundation.FirstOrder.LK.Completeness
 public import Foundation.FirstOrder.LK.Completeness.CanonicalModel
