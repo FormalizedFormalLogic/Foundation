@@ -1,6 +1,7 @@
 module
 
 public import Foundation.FirstOrder.Syntax.Classical.Operator
+public import Foundation.FirstOrder.Syntax.Classical.BinderNotation
 
 /-!
 Bounded formulas with bounds supplied by a set of operators; this set-parametric presentation
@@ -179,5 +180,18 @@ end Closure
       simp at hR
   · intro h
     induction φ using Semiformula.rec' <;> simp_all [Semiformula.Open]
+
+/-! The bounding principle for `R`. -/
+def principle (R : Operator L 2) (φ : Semiformula L ξ 2) : Formula L ξ :=
+  “∀ a, (∀ x, %R x a → ∃ y, !φ x y) → ∃ b, ∀ x, %R x a → ∃ y, %R y b ∧ !φ x y”
+
+def schema (ℬ : Bounding L) (C : Semisentence L 2 → Prop) : Theory L :=
+  Set.image2 principle {R | R ∈ ℬ} {φ | C φ}
+
+def inductionPrinciple (R : Operator L 2) (φ : Semiformula L ξ 1) : Formula L ξ :=
+  “(∀ x, (∀ y, %R y x → !φ y) → !φ x) → ∀ x, !φ x”
+
+def inductionSchema (ℬ : Bounding L) (C : Semisentence L 1 → Prop) : Theory L :=
+  Set.image2 inductionPrinciple {R | R ∈ ℬ} {φ | C φ}
 
 end FFL.FirstOrder.Bounding

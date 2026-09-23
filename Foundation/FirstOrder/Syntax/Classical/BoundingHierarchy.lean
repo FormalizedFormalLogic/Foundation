@@ -1,6 +1,6 @@
 module
 
-public import Foundation.FirstOrder.Syntax.Classical.Bounded
+public import Foundation.FirstOrder.Syntax.Classical.Bounding
 public import Foundation.FirstOrder.Syntax.Classical.Padding
 
 @[expose] public section
@@ -8,7 +8,6 @@ public import Foundation.FirstOrder.Syntax.Classical.Padding
 namespace FFL.FirstOrder
 
 variable {L : Language}
-variable (ℬ : Bounding L)
 
 namespace Bounding
 
@@ -16,35 +15,36 @@ namespace Bounding
 
 inductive Hierarchy (ℬ : Bounding L) : Polarity → ℕ → {n : ℕ} → Semiformula L ξ n → Prop
   | bounded (Γ s n) {φ : Semiformula L ξ n} :
-    Closure ℬ φ → Hierarchy ℬ Γ s φ
+    ℬ.Closure φ → ℬ.Hierarchy Γ s φ
   | and {Γ s n} {φ ψ : Semiformula L ξ n} :
-    Hierarchy ℬ Γ s φ → Hierarchy ℬ Γ s ψ → Hierarchy ℬ Γ s (φ ⋏ ψ)
+    ℬ.Hierarchy Γ s φ → ℬ.Hierarchy Γ s ψ → ℬ.Hierarchy Γ s (φ ⋏ ψ)
   | or {Γ s n} {φ ψ : Semiformula L ξ n} :
-    Hierarchy ℬ Γ s φ → Hierarchy ℬ Γ s ψ → Hierarchy ℬ Γ s (φ ⋎ ψ)
+    ℬ.Hierarchy Γ s φ → ℬ.Hierarchy Γ s ψ → ℬ.Hierarchy Γ s (φ ⋎ ψ)
   | ball {Γ s n} {R : Semiformula.Operator L 2} {φ : Semiformula L ξ (n + 1)}
     {t : Semiterm L ξ (n + 1)} :
-    R ∈ ℬ → t.Positive → Hierarchy ℬ Γ s φ → Hierarchy ℬ Γ s (∀¹[R.operator ![#0, t]] φ)
+    R ∈ ℬ → t.Positive → ℬ.Hierarchy Γ s φ → ℬ.Hierarchy Γ s (∀¹[R.operator ![#0, t]] φ)
   | bexs {Γ s n} {R : Semiformula.Operator L 2} {φ : Semiformula L ξ (n + 1)}
     {t : Semiterm L ξ (n + 1)} :
-    R ∈ ℬ → t.Positive → Hierarchy ℬ Γ s φ → Hierarchy ℬ Γ s (∃¹[R.operator ![#0, t]] φ)
+    R ∈ ℬ → t.Positive → ℬ.Hierarchy Γ s φ → ℬ.Hierarchy Γ s (∃¹[R.operator ![#0, t]] φ)
   | exs {s n} {φ : Semiformula L ξ (n + 1)} :
-    Hierarchy ℬ 𝚺 (s + 1) φ → Hierarchy ℬ 𝚺 (s + 1) (∃¹ φ)
+    ℬ.Hierarchy 𝚺 (s + 1) φ → ℬ.Hierarchy 𝚺 (s + 1) (∃¹ φ)
   | all {s n} {φ : Semiformula L ξ (n + 1)} :
-    Hierarchy ℬ 𝚷 (s + 1) φ → Hierarchy ℬ 𝚷 (s + 1) (∀¹ φ)
+    ℬ.Hierarchy 𝚷 (s + 1) φ → ℬ.Hierarchy 𝚷 (s + 1) (∀¹ φ)
   | sigma {s n} {φ : Semiformula L ξ (n + 1)} :
-    Hierarchy ℬ 𝚷 s φ → Hierarchy ℬ 𝚺 (s + 1) (∃¹ φ)
+    ℬ.Hierarchy 𝚷 s φ → ℬ.Hierarchy 𝚺 (s + 1) (∃¹ φ)
   | pi {s n} {φ : Semiformula L ξ (n + 1)} :
-    Hierarchy ℬ 𝚺 s φ → Hierarchy ℬ 𝚷 (s + 1) (∀¹ φ)
+    ℬ.Hierarchy 𝚺 s φ → ℬ.Hierarchy 𝚷 (s + 1) (∀¹ φ)
   | dummy_sigma {s n} {φ : Semiformula L ξ (n + 1)} :
-    Hierarchy ℬ 𝚷 (s + 1) φ → Hierarchy ℬ 𝚺 (s + 1 + 1) (∀¹ φ)
+    ℬ.Hierarchy 𝚷 (s + 1) φ → ℬ.Hierarchy 𝚺 (s + 1 + 1) (∀¹ φ)
   | dummy_pi {s n} {φ : Semiformula L ξ (n + 1)} :
-    Hierarchy ℬ 𝚺 (s + 1) φ → Hierarchy ℬ 𝚷 (s + 1 + 1) (∃¹ φ)
+    ℬ.Hierarchy 𝚺 (s + 1) φ → ℬ.Hierarchy 𝚷 (s + 1 + 1) (∃¹ φ)
 
 namespace Hierarchy
 
-abbrev DeltaZero (φ : Semiformula L ξ n) : Prop := ℬ.Closure φ
+/-! TODO: remove this and replace with `ℬ.Closure` -/
+abbrev DeltaZero (ℬ : Bounding L) (φ : Semiformula L ξ n) : Prop := ℬ.Closure φ
 
-variable {ℬ}
+variable {ℬ : Bounding L}
 
 @[simp] lemma verum (Γ s n) : ℬ.Hierarchy Γ s (⊤ : Semiformula L ξ n) :=
   .bounded Γ s n (.verum n)
