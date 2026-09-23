@@ -40,11 +40,11 @@ Main results of this repository. More detailed explanations are provided in [Doc
 
 [prop:completeness]: ./Foundation/Propositional/Boolean/Tait.lean
 [first_order]: ./Foundation/FirstOrder
-[first_order:completeness]: ./Foundation/FirstOrder/Completeness/CounterModel.lean
-[first_order:hauptsatz]: ./Foundation/FirstOrder/Hauptsatz.lean
-[first_order:goedel_translation]: ./Foundation/FirstOrder/NegationTranslation/GoedelGentzen.lean
-[first_order:downward_loewenheim_skolem]: ./Foundation/FirstOrder/Skolemization/Hull.lean
-[first_order:intuitionistic]: ./Foundation/FirstOrder/Intuitionistic
+[first_order:completeness]: ./Foundation/FirstOrder/LK/Completeness/CounterModel.lean
+[first_order:hauptsatz]: ./Foundation/FirstOrder/LK/Hauptsatz.lean
+[first_order:goedel_translation]: ./Foundation/FirstOrder/LJ/GoedelGentzen.lean
+[first_order:downward_loewenheim_skolem]: ./Foundation/FirstOrder/Tarski/Skolemization.lean
+[first_order:intuitionistic]: ./Foundation/FirstOrder/Kripke/Intuitionistic.lean
 [arith]: ./Foundation/FirstOrder/Arithmetic
 [incompleteness]: ./Foundation/FirstOrder/Incompleteness
 [arith:goedel_it1]: ./Foundation/FirstOrder/Incompleteness/First.lean

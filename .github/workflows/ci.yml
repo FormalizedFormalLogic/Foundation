@@ -66,7 +66,10 @@ jobs:
       - run: just forgive
       - run: just import-graph
       - run: just zoo
+      # Without a cached `doc-data`, doc-gen re-analyses every imported module (~20 min), so
+      # docs are only built where they are deployed.
       - run: just docs
+        if: github.ref == 'refs/heads/master'
 
       - name: Save remote cache
         if: github.event_name == 'push' && github.ref == 'refs/heads/master'
