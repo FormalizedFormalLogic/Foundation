@@ -15,11 +15,11 @@ and is used by the examples below.
 
 namespace FFL.FirstOrder.Arithmetic
 
-instance : 𝗜𝚺₁ ⪱ 𝗜𝚺₁ ∪ 𝗜𝚺₁.Con := inferInstance
+instance : 𝗜𝚺⁺₁ ⪱ 𝗜𝚺⁺₁ ∪ 𝗜𝚺⁺₁.Con := inferInstance
 
-instance : 𝗜𝚺₁ ∪ 𝗜𝚺₁.Con ⪱ 𝗧𝗔 := inferInstance
+instance : 𝗜𝚺⁺₁ ∪ 𝗜𝚺⁺₁.Con ⪱ 𝗧𝗔 := inferInstance
 
-instance : 𝗜𝚺₁ ⪱ 𝗜𝚺₁ ∪ 𝗜𝚺₁.Incon := inferInstance
+instance : 𝗜𝚺⁺₁ ⪱ 𝗜𝚺⁺₁ ∪ 𝗜𝚺⁺₁.Incon := inferInstance
 
 instance : 𝗣𝗔 ⪱ 𝗣𝗔 ∪ 𝗣𝗔.Con := inferInstance
 

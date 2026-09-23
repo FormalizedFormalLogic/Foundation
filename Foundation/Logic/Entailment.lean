@@ -17,10 +17,8 @@ Also defines soundness and completeness.
 * `FFL.Entailment.Complete 𝓢 𝓜`: satisfiability on `𝓜` implies provability from `𝓢`.
 
 ## Notation
-* `𝓢 ⊢! φ`: a type of formalized proofs of `φ : F` from deductive system `𝓢 : S`.
-* `𝓢 ⊢ φ`: a proposition that states there is a proof of `φ` from `𝓢`, i.e. `φ` is provable from `𝓢`.
+* `𝓢 ⊢ φ`: a proposition that states `φ` is provable from `𝓢`.
 * `𝓢 ⊬ φ`: a proposition that states `φ` is not provable from `𝓢`.
-* `𝓢 ⊢!* T`: a type of formalized proofs for each formulae in a set `T` from `𝓢`.
 * `𝓢 ⊢* T`: a proposition that states each formulae in `T` is provable from `𝓢`.
 
 -/
@@ -32,9 +30,9 @@ namespace FFL
 
 /-- Entailment relation on proof system `S` and formula `F` -/
 class Entailment (S : Type*) (F : outParam Type*) where
-  Prf : S → F → Type*
+  Entails : S → F → Prop
 
-infix:45 " ⊢! " => Entailment.Prf
+infix:45 " ⊢ " => Entailment.Entails
 
 namespace Entailment
 
@@ -44,23 +42,13 @@ section
 
 variable (𝓢 : S)
 
-/-- Proposition that states `φ` is provable. -/
-def Provable (φ : F) : Prop := Nonempty (𝓢 ⊢! φ)
-
 /-- Abbreviation for unprovability. -/
-abbrev Unprovable (φ : F) : Prop := ¬Provable 𝓢 φ
-
-infix:45 " ⊢ " => Provable
+abbrev Unprovable (φ : F) : Prop := ¬𝓢 ⊢ φ
 
 infix:45 " ⊬ " => Unprovable
 
-/-- Proofs of set of formulae. -/
-def PrfSet (s : Set F) : Type _ := ⦃φ : F⦄ → φ ∈ s → 𝓢 ⊢! φ
-
 /-- Proposition for existance of proofs of set of formulae. -/
 def ProvableSet (s : Set F) : Prop := ∀ {φ}, φ ∈ s → 𝓢 ⊢ φ
-
-infix:45 " ⊢!* " => PrfSet
 
 infix:45 " ⊢* " => ProvableSet
 
@@ -69,22 +57,7 @@ def theory : Set F := {φ | 𝓢 ⊢ φ}
 
 end
 
-def cast {𝓢 : S} {φ ψ : F} (b : 𝓢 ⊢! φ) (e : φ = ψ := by simp) : 𝓢 ⊢! ψ := e ▸ b
-
-@[grind ⇒] lemma cast! {𝓢 : S} {φ ψ : F} (b : 𝓢 ⊢ φ) (e : φ = ψ := by simp) : 𝓢 ⊢ ψ := ⟨cast b.some e⟩
-
-lemma unprovable_iff_isEmpty {𝓢 : S} {φ : F} :
-    𝓢 ⊬ φ ↔ IsEmpty (𝓢 ⊢! φ) := by simp [Provable, Unprovable]
-
-noncomputable def Provable.get {𝓢 : S} {φ : F} (h : 𝓢 ⊢ φ) : 𝓢 ⊢! φ :=
-  Classical.choice h
-
-lemma provableSet_iff {𝓢 : S} {s : Set F} :
-    𝓢 ⊢* s ↔ Nonempty (𝓢 ⊢!* s) := by
-  simp [ProvableSet, PrfSet, Provable, Classical.nonempty_pi, ←imp_iff_not_or]
-
-noncomputable def ProvableSet.get {𝓢 : S} {s : Set F} (h : 𝓢 ⊢* s) : 𝓢 ⊢!* s :=
-  Classical.choice (α := 𝓢 ⊢!* s) (provableSet_iff.mp h : Nonempty (𝓢 ⊢!* s))
+@[grind ⇒] lemma cast {𝓢 : S} {φ ψ : F} (b : 𝓢 ⊢ φ) (e : φ = ψ := by simp) : 𝓢 ⊢ ψ := e ▸ b
 
 /-- Provability strength relation of proof systems -/
 class WeakerThan (𝓢 : S) (𝓣 : T) : Prop where
@@ -275,7 +248,7 @@ lemma Consistent.of_le {𝓢 : S} {𝓣 : T} (h𝓢 : Consistent 𝓢) (h : 𝓣
 variable (S)
 
 class DeductiveExplosion [LogicalNeutral F] where
-  dexp {𝓢 : S} : 𝓢 ⊢! ⊥ → (φ : F) → 𝓢 ⊢! φ
+  dexp {𝓢 : S} : 𝓢 ⊢ ⊥ → (φ : F) → 𝓢 ⊢ φ
 
 variable {S}
 
@@ -283,11 +256,8 @@ section
 
 variable [LogicalNeutral F] [DeductiveExplosion S]
 
-theorem DeductiveExplosion.dexp! {𝓢 : S} (h : 𝓢 ⊢ ⊥) (φ : F) : 𝓢 ⊢ φ := by
-  rcases h with ⟨b⟩; exact ⟨dexp b φ⟩
-
 lemma inconsistent_iff_provable_bot {𝓢 : S} :
-    Inconsistent 𝓢 ↔ 𝓢 ⊢ ⊥ := ⟨fun h ↦ h ⊥, fun h φ ↦ DeductiveExplosion.dexp! h φ⟩
+    Inconsistent 𝓢 ↔ 𝓢 ⊢ ⊥ := ⟨fun h ↦ h ⊥, fun h φ ↦ DeductiveExplosion.dexp h φ⟩
 
 alias ⟨_, inconsistent_of_provable⟩ := inconsistent_iff_provable_bot
 
@@ -352,13 +322,13 @@ end
 variable (S T)
 
 class Axiomatized [AdjunctiveSet F S] where
-  prfAxm {𝓢 : S} : 𝓢 ⊢!* AdjunctiveSet.set 𝓢
-  weakening {𝓢 𝓣 : S} : 𝓢 ⊆ 𝓣 → 𝓢 ⊢! φ → 𝓣 ⊢! φ
+  prfAxm {𝓢 : S} : 𝓢 ⊢* AdjunctiveSet.set 𝓢
+  weakening {𝓢 𝓣 : S} (h : 𝓢 ⊆ 𝓣 := by simp) {φ : F} : 𝓢 ⊢ φ → 𝓣 ⊢ φ
 
 alias wk := Axiomatized.weakening
 
 class StrongCut [AdjunctiveSet F T] where
-  cut {𝓢 : S} {𝓣 : T} {φ} : 𝓢 ⊢!* AdjunctiveSet.set 𝓣 → 𝓣 ⊢! φ → 𝓢 ⊢! φ
+  cut {𝓢 : S} {𝓣 : T} {φ} : 𝓢 ⊢* AdjunctiveSet.set 𝓣 → 𝓣 ⊢ φ → 𝓢 ⊢ φ
 
 variable {S T}
 
@@ -368,33 +338,23 @@ namespace Axiomatized
 
 variable [AdjunctiveSet F S] [Axiomatized S] {𝓢 𝓣 : S}
 
-def byAxm {𝓢 : S} (h : φ ∈ 𝓢) : 𝓢 ⊢! φ := prfAxm (by simp [h])
+lemma by_axm {𝓢 : S} (h : φ ∈ 𝓢) : 𝓢 ⊢ φ := prfAxm (by simp [h])
 
-lemma by_axm {𝓢 : S} (h : φ ∈ 𝓢) : 𝓢 ⊢ φ := ⟨byAxm h⟩
-
-@[simp] lemma provable_refl (𝓢 : S) : 𝓢 ⊢* AdjunctiveSet.set 𝓢 := fun hf ↦ ⟨prfAxm hf⟩
+@[simp] lemma provable_refl (𝓢 : S) : 𝓢 ⊢* AdjunctiveSet.set 𝓢 := prfAxm
 
 lemma axm_subset (𝓢 : S) : AdjunctiveSet.set 𝓢 ⊆ theory 𝓢 := fun _ hp ↦ provable_refl 𝓢 hp
 
-protected def adjoin (φ : F) (𝓢 : S) : adjoin φ 𝓢 ⊢! φ := prfAxm (by simp)
+@[simp] protected lemma adjoin (φ : F) (𝓢 : S) : adjoin φ 𝓢 ⊢ φ := prfAxm (by simp)
 
-@[simp] theorem adjoin! (φ : F) (𝓢 : S) : adjoin φ 𝓢 ⊢ φ := provable_refl _ (by simp)
+lemma le_of_subset (h : 𝓢 ⊆ 𝓣) : 𝓢 ⪯ 𝓣 := ⟨fun _ ↦ weakening h⟩
 
-lemma le_of_subset (h : 𝓢 ⊆ 𝓣) : 𝓢 ⪯ 𝓣 := ⟨by rintro φ ⟨b⟩; exact ⟨weakening h b⟩⟩
+abbrev weakerThanOfSubset (h : 𝓢 ⊆ 𝓣) : 𝓢 ⪯ 𝓣 := ⟨fun _ ↦ weakening h⟩
 
-lemma weakening! (h : 𝓢 ⊆ 𝓣 := by simp) {φ} : 𝓢 ⊢ φ → 𝓣 ⊢ φ := by rintro ⟨b⟩; exact ⟨weakening h b⟩
-
-abbrev weakerThanOfSubset (h : 𝓢 ⊆ 𝓣) : 𝓢 ⪯ 𝓣 := ⟨fun _ ↦ weakening! h⟩
-
-def toAdjoin {𝓢 : S} : 𝓢 ⊢! ψ → adjoin φ 𝓢 ⊢! ψ := fun b ↦ wk (by simp) b
-
-theorem to_adjoin {𝓢 : S} : 𝓢 ⊢ ψ → adjoin φ 𝓢 ⊢ ψ := fun b ↦ weakening! (by simp) b
+theorem to_adjoin {𝓢 : S} : 𝓢 ⊢ ψ → adjoin φ 𝓢 ⊢ ψ := weakening
 
 end Axiomatized
 
-alias byAxm := Axiomatized.byAxm
 alias by_axm := Axiomatized.by_axm
-alias wk! := Axiomatized.weakening!
 
 section axiomatized
 
@@ -410,41 +370,19 @@ lemma Inconsistent.of_supset {𝓢 𝓣 : S} (h𝓢 : Inconsistent 𝓢) (h : �
 
 end axiomatized
 
-namespace StrongCut
+abbrev WeakerThan.ofAxm! [AdjunctiveSet F S] [StrongCut S S] {𝓢₁ 𝓢₂ : S} (B : 𝓢₂ ⊢* AdjunctiveSet.set 𝓢₁) :
+    𝓢₁ ⪯ 𝓢₂ := ⟨fun _ b ↦ StrongCut.cut B b⟩
 
-variable [AdjunctiveSet F T] [StrongCut S T]
-
-lemma cut! {𝓢 : S} {𝓣 : T} {φ : F} (H : 𝓢 ⊢* AdjunctiveSet.set 𝓣) (hp : 𝓣 ⊢ φ) : 𝓢 ⊢ φ := by
-  rcases hp with ⟨b⟩; exact ⟨StrongCut.cut H.get b⟩
-
-end StrongCut
-
-noncomputable abbrev WeakerThan.ofAxm! [AdjunctiveSet F S] [StrongCut S S] {𝓢₁ 𝓢₂ : S} (B : 𝓢₂ ⊢* AdjunctiveSet.set 𝓢₁) :
-    𝓢₁ ⪯ 𝓢₂ := ⟨fun _ b ↦ StrongCut.cut! B b⟩
-
-abbrev WeakerThan.ofSubset [AdjunctiveSet F S] [Axiomatized S] {𝓢 𝓣 : S} (h : 𝓢 ⊆ 𝓣) : 𝓢 ⪯ 𝓣 := ⟨fun _ ↦ wk! h⟩
+abbrev WeakerThan.ofSubset [AdjunctiveSet F S] [Axiomatized S] {𝓢 𝓣 : S} (h : 𝓢 ⊆ 𝓣) : 𝓢 ⪯ 𝓣 := ⟨fun _ ↦ Axiomatized.weakening h⟩
 
 /-! ### Compactness -/
 
 variable (S)
 
 class Compact [AdjunctiveSet F S] where
-  core {𝓢 : S} {φ : F} : 𝓢 ⊢! φ → S
-  corePrf {𝓢 : S} {φ : F} (b : 𝓢 ⊢! φ) : core b ⊢! φ
-  core_subset {𝓢 : S} {φ : F} (b : 𝓢 ⊢! φ) : core b ⊆ 𝓢
-  core_finite {𝓢 : S} {φ : F} (b : 𝓢 ⊢! φ) : AdjunctiveSet.Finite (core b)
+  finite_provable {𝓢 : S} {φ : F} : 𝓢 ⊢ φ → ∃ 𝓕 : S, 𝓕 ⊆ 𝓢 ∧ AdjunctiveSet.Finite 𝓕 ∧ 𝓕 ⊢ φ
 
 variable {S}
-
-namespace Compact
-
-variable [AdjunctiveSet F S] [Compact S]
-
-lemma finite_provable {𝓢 : S} (h : 𝓢 ⊢ φ) : ∃ 𝓕 : S, 𝓕 ⊆ 𝓢 ∧ AdjunctiveSet.Finite 𝓕 ∧ 𝓕 ⊢ φ := by
-  rcases h with ⟨b⟩
-  exact ⟨core b, core_subset b, core_finite b, ⟨corePrf b⟩⟩
-
-end Compact
 
 end Axiomatized
 
@@ -476,8 +414,8 @@ end
 variable (S)
 
 class Deduction [Adjoin F S] where
-  ofInsert {φ ψ : F} {𝓢 : S} : adjoin φ 𝓢 ⊢! ψ → 𝓢 ⊢! φ 🡒 ψ
-  inv {φ ψ : F} {𝓢 : S} : 𝓢 ⊢! φ 🡒 ψ → adjoin φ 𝓢 ⊢! ψ
+  ofInsert {φ ψ : F} {𝓢 : S} : adjoin φ 𝓢 ⊢ ψ → 𝓢 ⊢ φ 🡒 ψ
+  inv {φ ψ : F} {𝓢 : S} : 𝓢 ⊢ φ 🡒 ψ → adjoin φ 𝓢 ⊢ ψ
 
 variable {S}
 
@@ -488,17 +426,7 @@ variable [Adjoin F S] [Deduction S] {𝓢 : S} {φ ψ : F}
 alias deduction := Deduction.ofInsert
 
 omit [LogicalNeutral F] in
-lemma Deduction.of_insert! (h : adjoin φ 𝓢 ⊢ ψ) : 𝓢 ⊢ φ 🡒 ψ := by
-  rcases h with ⟨b⟩; exact ⟨Deduction.ofInsert b⟩
-
-alias deduction! := Deduction.of_insert!
-
-omit [LogicalNeutral F] in
-lemma Deduction.inv! (h : 𝓢 ⊢ φ 🡒 ψ) : adjoin φ 𝓢 ⊢ ψ := by
-  rcases h with ⟨b⟩; exact ⟨Deduction.inv b⟩
-
-omit [LogicalNeutral F] in
-lemma deduction_iff : adjoin φ 𝓢 ⊢ ψ ↔ 𝓢 ⊢ φ 🡒 ψ := ⟨deduction!, Deduction.inv!⟩
+lemma deduction_iff : adjoin φ 𝓢 ⊢ ψ ↔ 𝓢 ⊢ φ 🡒 ψ := ⟨deduction, Deduction.inv⟩
 
 end deduction
 
@@ -616,7 +544,7 @@ variable {S}
 abbrev pullback (𝓢 : S) (f : G → F) : Pullback S f := ⟨𝓢⟩
 
 instance (f : G → F) : Entailment (Pullback S f) G where
-  Prf := fun 𝓢 φ ↦ 𝓢.forget ⊢! f φ
+  Entails := fun 𝓢 φ ↦ 𝓢.forget ⊢ f φ
 
 namespace Pullback
 

@@ -408,13 +408,13 @@ notation "𝐋𝐉¹[" L "]" => LJ.symbol (L := L)
 abbrev LJ.Proof (φ : Propositionᵢ L) := 0 ⊢ᴸᴶ¹ some φ
 
 instance : Entailment (LJ L) (Propositionᵢ L) where
-  Prf _ := LJ.Proof
+  Entails _ φ := Nonempty (LJ.Proof φ)
 
 namespace LJ
 
 namespace Proof
 
-lemma def_eq (φ : Propositionᵢ L) : (𝐋𝐉¹ ⊢! φ) = (0 ⊢ᴸᴶ¹ some φ) := rfl
+lemma def_eq (φ : Propositionᵢ L) : (𝐋𝐉¹ ⊢ φ) = Nonempty (0 ⊢ᴸᴶ¹ some φ) := rfl
 
 end Proof
 
@@ -425,21 +425,21 @@ structure Theoryᵢ.Proof (T : Theoryᵢ L) (σ : Sentenceᵢ L) where
   axioms_mem : ∀ ψ ∈ axioms, ψ ∈ T
   derivation : axioms.map Rewriting.emb ⊢ᴸᴶ¹ ↑σ
 
-instance : Entailment (Theoryᵢ L) (Sentenceᵢ L) := ⟨Theoryᵢ.Proof⟩
+instance : Entailment (Theoryᵢ L) (Sentenceᵢ L) := ⟨fun T σ ↦ Nonempty (Theoryᵢ.Proof T σ)⟩
 
 namespace Theoryᵢ.Proof
 
 variable {T U : Theoryᵢ L} [L.DecidableEq]
 
-def weakening (ss : T ⊆ U) : T ⊢! σ → U ⊢! σ
+def weakening (ss : T ⊆ U) : T.Proof σ → U.Proof σ
   | ⟨Γ, hΓ, d⟩ => ⟨Γ, fun ψ hψ ↦ ss (hΓ ψ hψ), d⟩
 
 instance : Entailment.Axiomatized (Theoryᵢ L) where
   prfAxm {T} φ h := ⟨⦃φ⦄, by simpa using AdjunctiveSet.mem_set_iff.mp h,
     LJ.Derivation.cast (LJ.Derivation.eta (φ : Propositionᵢ L)) (by simp)⟩
-  weakening := weakening
+  weakening ss := Nonempty.map (weakening ss)
 
-def deduct : adjoin φ T ⊢! ψ → T ⊢! φ 🡒 ψ
+def deduct : (adjoin φ T).Proof ψ → T.Proof (φ 🡒 ψ)
   | ⟨Γ, hΓ, d⟩ =>
     ⟨Γ.filter (· ≠ φ), by
       intro θ hθ
@@ -460,7 +460,7 @@ def deduct : adjoin φ T ⊢! ψ → T ⊢! φ 🡒 ψ
         · exact Multiset.mem_add.mpr <| Or.inl <|
             Multiset.mem_map_of_mem Rewriting.emb <| Multiset.mem_filter_of_mem hχ h)⟩
 
-def deductInv : T ⊢! φ 🡒 ψ → adjoin φ T ⊢! ψ
+def deductInv : T.Proof (φ 🡒 ψ) → (adjoin φ T).Proof ψ
   | ⟨Γ, hΓ, d⟩ =>
     ⟨Γ + ⦃φ⦄, by
       intro θ hθ
@@ -478,8 +478,8 @@ def deductInv : T ⊢! φ 🡒 ψ → adjoin φ T ⊢! ψ
         (LJ.Derivation.cast (LJ.Derivation.eta (ψ : Propositionᵢ L)) (by simp) (by simp)))⟩
 
 instance : Entailment.Deduction (Theoryᵢ L) where
-  ofInsert := deduct
-  inv := deductInv
+  ofInsert := Nonempty.map deduct
+  inv := Nonempty.map deductInv
 
 end Theoryᵢ.Proof
 

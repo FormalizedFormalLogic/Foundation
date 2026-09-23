@@ -117,7 +117,7 @@ inductive LK.Proof.Symbol (L : Language) : Type
 
 notation "𝐋𝐊²" => LK.Proof.Symbol.symbol
 
-instance : Entailment (LK.Proof.Symbol L) (Sentence L) := ⟨fun _ ↦ LK.Proof⟩
+instance : Entailment (LK.Proof.Symbol L) (Sentence L) := ⟨fun _ φ ↦ Nonempty (LK.Proof φ)⟩
 
 /-! ## Proof system with axioms -/
 
@@ -133,28 +133,27 @@ structure Theory.Proof (T : Theory L) (σ : Sentence L) where
 namespace Theory.Proof
 
 instance : Entailment (Theory L) (Sentence L) where
-  Prf := Theory.Proof
+  Entails 𝓢 φ := Nonempty (Theory.Proof 𝓢 φ)
 
 attribute [simp] Theory.Proof.axioms_mem
 
 /-- A singleton derivation gives a theory proof without using any axioms. -/
-def ofDerivation {T : Theory L} {φ : Sentence L}
-    (d : ⊢ᴸᴷ² ⦃(φ : Proposition L)⦄) : T ⊢! φ :=
-  ⟨0, by simp, by simpa [OneSidedLK.Pullback] using d⟩
+lemma ofDerivation {T : Theory L} {φ : Sentence L}
+    (d : ⊢ᴸᴷ² ⦃(φ : Proposition L)⦄) : T ⊢ φ :=
+  ⟨⟨0, by simp, by simpa [OneSidedLK.Pullback] using d⟩⟩
 
 instance : Entailment.Compact (Theory L) where
-  core b := {φ | φ ∈ b.axioms}
-  corePrf b := ⟨b.axioms, by simp, b.derivation⟩
-  core_finite b := by simp [AdjunctiveSet.Finite, AdjunctiveSet.set];
-  core_subset b := by simpa [AdjunctiveSet.subset_iff] using b.axioms_mem;
+  finite_provable {𝓢 φ} h := by
+    obtain ⟨b⟩ := h;
+    exact ⟨{ψ | ψ ∈ b.axioms}, by simpa [AdjunctiveSet.subset_iff] using b.axioms_mem,
+      by simp [AdjunctiveSet.Finite, AdjunctiveSet.set], ⟨⟨b.axioms, by simp, b.derivation⟩⟩⟩
 
 instance : Entailment.Axiomatized (Theory L) where
   prfAxm {𝓢 φ} h :=
-    ⟨⦃φ⦄, by simpa using h, by
+    ⟨⟨⦃φ⦄, by simpa using h, by
       simpa [OneSidedLK.Pullback, Multiset.tilde_def] using
-        (LK.Derivation.identity (φ := (φ : Proposition L)))⟩
-  weakening h b :=
-    ⟨b.axioms, fun ψ hψ ↦ h (b.axioms_mem ψ hψ), b.derivation⟩
+        (LK.Derivation.identity (φ := (φ : Proposition L)))⟩⟩
+  weakening h := fun ⟨b⟩ ↦ ⟨⟨b.axioms, fun ψ hψ ↦ h (b.axioms_mem ψ hψ), b.derivation⟩⟩
 
 end Theory.Proof
 

@@ -6,9 +6,15 @@ public import Foundation.FirstOrder.Arithmetic.TA.Basic
 /-!
 # Induction and least number schemata of Arithmetic
 
+The schemata come in two flavours, following [Bus98, p. 85]: the plain one is taken over the
+strict hierarchy `StrictHierarchy Γ s`, and the `⁺` one over the broad hierarchy `Hierarchy Γ s`.
+Buss writes these `IΓ_s` and `IΓ_s⁺`. The strict scheme is contained in the broad one; the converse
+needs the collection scheme and is not available here.
+
 ## References
 
 - [HP98, §I.2(a), I.2.3]
+- [Bus98, p. 85]
 -/
 
 @[expose] public section
@@ -42,7 +48,8 @@ abbrev IOpen : ArithmeticTheory := 𝗣𝗔⁻ ∪ InductionScheme ℒₒᵣ Sem
 
 notation "𝗜𝗢𝗽𝗲𝗻" => IOpen
 
-abbrev InductionOnHierarchy (Γ : Polarity) (s : ℕ) : ArithmeticTheory := 𝗣𝗔⁻ ∪ InductionScheme ℒₒᵣ (Arithmetic.Hierarchy Γ s)
+abbrev InductionOnHierarchy (Γ : Polarity) (s : ℕ) : ArithmeticTheory :=
+  𝗣𝗔⁻ ∪ InductionScheme ℒₒᵣ (Arithmetic.StrictHierarchy Γ s)
 
 prefix:max "𝗜𝗡𝗗 " => InductionOnHierarchy
 
@@ -52,15 +59,37 @@ prefix:max "𝗜𝚺" => ISigma
 
 notation "𝗜𝚺₀" => ISigma 0
 
+notation "𝗜𝚺₁" => ISigma 1
+
 abbrev IPi (s : ℕ) : ArithmeticTheory := 𝗜𝗡𝗗 𝚷 s
 
 prefix:max "𝗜𝚷" => IPi
 
 notation "𝗜𝚷₀" => IPi 0
 
-notation "𝗜𝚺₁" => ISigma 1
-
 notation "𝗜𝚷₁" => IPi 1
+
+/-- The induction scheme for the broad hierarchy `Hierarchy Γ s`, i.e. Buss's `IΓ_s⁺`. -/
+abbrev InductionOnBroadHierarchy (Γ : Polarity) (s : ℕ) : ArithmeticTheory :=
+  𝗣𝗔⁻ ∪ InductionScheme ℒₒᵣ (Arithmetic.Hierarchy Γ s)
+
+prefix:max "𝗜𝗡𝗗⁺ " => InductionOnBroadHierarchy
+
+abbrev IBroadSigma (s : ℕ) : ArithmeticTheory := 𝗜𝗡𝗗⁺ 𝚺 s
+
+prefix:max "𝗜𝚺⁺" => IBroadSigma
+
+notation "𝗜𝚺⁺₀" => IBroadSigma 0
+
+notation "𝗜𝚺⁺₁" => IBroadSigma 1
+
+abbrev IBroadPi (s : ℕ) : ArithmeticTheory := 𝗜𝗡𝗗⁺ 𝚷 s
+
+prefix:max "𝗜𝚷⁺" => IBroadPi
+
+notation "𝗜𝚷⁺₀" => IBroadPi 0
+
+notation "𝗜𝚷⁺₁" => IBroadPi 1
 
 abbrev Peano : ArithmeticTheory := 𝗣𝗔⁻ ∪ InductionScheme ℒₒᵣ Set.univ
 
@@ -74,7 +103,7 @@ def LeastNumberScheme (Γ : ArithmeticSemiformula ℕ 1 → Prop) : ArithmeticTh
   { ψ | ∃ φ : ArithmeticSemiformula ℕ 1, Γ φ ∧ ψ = .univCl (leastNumber φ) }
 
 abbrev LeastNumberOnHierarchy (Γ : Polarity) (s : ℕ) : ArithmeticTheory :=
-  𝗣𝗔⁻ ∪ LeastNumberScheme (Arithmetic.Hierarchy Γ s)
+  𝗣𝗔⁻ ∪ LeastNumberScheme (Arithmetic.StrictHierarchy Γ s)
 
 prefix:max "𝗟 " => LeastNumberOnHierarchy
 
@@ -85,6 +114,20 @@ prefix:max "𝗟𝚺" => LSigma
 abbrev LPi (s : ℕ) : ArithmeticTheory := 𝗟 𝚷 s
 
 prefix:max "𝗟𝚷" => LPi
+
+/-- The least number scheme for the broad hierarchy `Hierarchy Γ s`. -/
+abbrev LeastNumberOnBroadHierarchy (Γ : Polarity) (s : ℕ) : ArithmeticTheory :=
+  𝗣𝗔⁻ ∪ LeastNumberScheme (Arithmetic.Hierarchy Γ s)
+
+prefix:max "𝗟⁺ " => LeastNumberOnBroadHierarchy
+
+abbrev LBroadSigma (s : ℕ) : ArithmeticTheory := 𝗟⁺ 𝚺 s
+
+prefix:max "𝗟𝚺⁺" => LBroadSigma
+
+abbrev LBroadPi (s : ℕ) : ArithmeticTheory := 𝗟⁺ 𝚷 s
+
+prefix:max "𝗟𝚷⁺" => LBroadPi
 
 /-! ### Collection schemata -/
 
@@ -139,6 +182,54 @@ lemma ISigma_weakerThan_of_le_trans {T : ArithmeticTheory} {s₁ s₂} (h : s₁
     𝗜𝚺 s₁ ⪯ T :=
   Entailment.WeakerThan.trans (ISigma_weakerThan_of_le h) hT
 
+lemma IBroadSigma_subset_mono {s₁ s₂} (h : s₁ ≤ s₂) : 𝗜𝚺⁺ s₁ ⊆ 𝗜𝚺⁺ s₂ :=
+  Set.union_subset_union_right _ (InductionScheme_subset (fun H ↦ H.mono h))
+
+lemma IBroadSigma_weakerThan_of_le {s₁ s₂} (h : s₁ ≤ s₂) : 𝗜𝚺⁺ s₁ ⪯ 𝗜𝚺⁺ s₂ :=
+  Entailment.WeakerThan.ofSubset (IBroadSigma_subset_mono h)
+
+lemma IBroadSigma_weakerThan_of_le_trans {T : ArithmeticTheory} {s₁ s₂} (h : s₁ ≤ s₂) (hT : 𝗜𝚺⁺ s₂ ⪯ T) :
+    𝗜𝚺⁺ s₁ ⪯ T :=
+  Entailment.WeakerThan.trans (IBroadSigma_weakerThan_of_le h) hT
+
+/-! The strict scheme is contained in the broad one, and the two agree at level `0`, where both
+classes are `Δ₀`. -/
+
+lemma InductionOnHierarchy_subset_mono {Γ : Polarity} {s₁ s₂ : ℕ} (h : s₁ ≤ s₂) :
+    𝗜𝗡𝗗 Γ s₁ ⊆ 𝗜𝗡𝗗 Γ s₂ :=
+  Set.union_subset_union_right _ (InductionScheme_subset (fun H ↦ H.mono h))
+
+lemma InductionOnHierarchy_subset_of_lt {Γ Γ' : Polarity} {s s' : ℕ} (h : s < s') :
+    𝗜𝗡𝗗 Γ s ⊆ 𝗜𝗡𝗗 Γ' s' :=
+  Set.union_subset_union_right _ (InductionScheme_subset (·.strict_mono Γ' h))
+
+lemma InductionOnHierarchy_weakerThan_of_lt {Γ Γ' : Polarity} {s s' : ℕ} (h : s < s') :
+    𝗜𝗡𝗗 Γ s ⪯ 𝗜𝗡𝗗 Γ' s' :=
+  Entailment.WeakerThan.ofSubset (InductionOnHierarchy_subset_of_lt h)
+
+lemma ISigmaZero_subset_InductionOnHierarchy (Γ : Polarity) (s : ℕ) : 𝗜𝚺₀ ⊆ 𝗜𝗡𝗗 Γ s :=
+  Set.union_subset_union_right _
+    (InductionScheme_subset fun H ↦ .of_deltaZero (Arithmetic.StrictHierarchy.zero_iff.mp H))
+
+lemma InductionOnHierarchy_subset_InductionOnBroadHierarchy {Γ : Polarity} {s : ℕ} :
+    𝗜𝗡𝗗 Γ s ⊆ 𝗜𝗡𝗗⁺ Γ s :=
+  Set.union_subset_union_right _ (InductionScheme_subset (·.hierarchy))
+
+lemma InductionOnHierarchy_zero_eq_InductionOnBroadHierarchy_zero (Γ Γ' : Polarity) :
+    𝗜𝗡𝗗 Γ 0 = 𝗜𝗡𝗗⁺ Γ' 0 :=
+  Set.Subset.antisymm
+    (Set.union_subset_union_right _ (InductionScheme_subset fun H ↦ (Arithmetic.StrictHierarchy.zero_iff.mp H).of_zero))
+    (Set.union_subset_union_right _ (InductionScheme_subset fun H ↦ Arithmetic.StrictHierarchy.zero_iff.mpr H.of_zero))
+
+lemma ISigmaZero_eq_IBroadSigmaZero : 𝗜𝚺₀ = 𝗜𝚺⁺₀ :=
+  InductionOnHierarchy_zero_eq_InductionOnBroadHierarchy_zero 𝚺 𝚺
+
+lemma ISigmaZero_subset_IBroadSigma {s : ℕ} : 𝗜𝚺₀ ⊆ 𝗜𝚺⁺ s :=
+  Set.union_subset_union_right _ (InductionScheme_subset fun H ↦ (Arithmetic.StrictHierarchy.zero_iff.mp H).of_zero)
+
+lemma IBroadSigmaZero_subset_ISigmaZero : 𝗜𝚺⁺₀ ⊆ 𝗜𝚺₀ :=
+  le_of_eq ISigmaZero_eq_IBroadSigmaZero.symm
+
 end
 
 /-! ### Least number scheme lemmas -/
@@ -159,6 +250,16 @@ lemma LeastNumberOnHierarchy_subset_mono {s₁ s₂} (h : s₁ ≤ s₂) : 𝗟 
 
 lemma LeastNumberOnHierarchy_weakerThan_of_le {s₁ s₂} (h : s₁ ≤ s₂) : 𝗟 Γ s₁ ⪯ 𝗟 Γ s₂ :=
   Entailment.WeakerThan.ofSubset (LeastNumberOnHierarchy_subset_mono h)
+
+lemma LeastNumberOnBroadHierarchy_subset_mono {s₁ s₂} (h : s₁ ≤ s₂) : 𝗟⁺ Γ s₁ ⊆ 𝗟⁺ Γ s₂ :=
+  Set.union_subset_union_right _ (LeastNumberScheme_subset (fun H ↦ H.mono h))
+
+lemma LeastNumberOnBroadHierarchy_weakerThan_of_le {s₁ s₂} (h : s₁ ≤ s₂) : 𝗟⁺ Γ s₁ ⪯ 𝗟⁺ Γ s₂ :=
+  Entailment.WeakerThan.ofSubset (LeastNumberOnBroadHierarchy_subset_mono h)
+
+lemma LeastNumberOnHierarchy_subset_LeastNumberOnBroadHierarchy {Γ : Polarity} {s : ℕ} :
+    𝗟 Γ s ⊆ 𝗟⁺ Γ s :=
+  Set.union_subset_union_right _ (LeastNumberScheme_subset (·.hierarchy))
 
 end
 
@@ -207,16 +308,45 @@ instance : 𝗘𝗤 ℒₒᵣ ⪯ 𝗜𝗡𝗗 Γ s :=
   have : 𝗘𝗤 ℒₒᵣ ⪯ 𝗣𝗔⁻ := inferInstance
   Entailment.WeakerThan.trans this inferInstance
 
+instance : 𝗘𝗤 ℒₒᵣ ⪯ 𝗜𝗡𝗗⁺ Γ s :=
+  have : 𝗘𝗤 ℒₒᵣ ⪯ 𝗣𝗔⁻ := inferInstance
+  Entailment.WeakerThan.trans this inferInstance
+
 instance : 𝗘𝗤 ℒₒᵣ ⪯ 𝗜𝗢𝗽𝗲𝗻 :=
   have : 𝗘𝗤 ℒₒᵣ ⪯ 𝗣𝗔⁻ := inferInstance
   Entailment.WeakerThan.trans this inferInstance
 
 instance : 𝗜𝗢𝗽𝗲𝗻 ⪯ 𝗜𝗡𝗗 Γ s :=
+  Entailment.WeakerThan.ofSubset <| Set.union_subset_union_right _  <| InductionScheme_subset Arithmetic.StrictHierarchy.of_open
+
+instance : 𝗜𝗢𝗽𝗲𝗻 ⪯ 𝗜𝗡𝗗⁺ Γ s :=
   Entailment.WeakerThan.ofSubset <| Set.union_subset_union_right _  <| InductionScheme_subset Arithmetic.Hierarchy.of_open
+
+instance InductionOnHierarchy_weakerThan_InductionOnBroadHierarchy (Γ : Polarity) (s : ℕ) :
+    𝗜𝗡𝗗 Γ s ⪯ 𝗜𝗡𝗗⁺ Γ s :=
+  Entailment.WeakerThan.ofSubset InductionOnHierarchy_subset_InductionOnBroadHierarchy
 
 instance : 𝗜𝚺₀ ⪯ 𝗜𝚺₁ := ISigma_weakerThan_of_le (by decide)
 
+instance : 𝗜𝚺⁺₀ ⪯ 𝗜𝚺⁺₁ := IBroadSigma_weakerThan_of_le (by decide)
+
+instance : 𝗜𝚺₀ ⪯ 𝗜𝚺⁺ s :=
+  Entailment.WeakerThan.ofSubset ISigmaZero_subset_IBroadSigma
+
+instance (s : ℕ) : 𝗜𝚺⁺₀ ⪯ 𝗜𝚺 s :=
+  Entailment.WeakerThan.ofSubset
+    (Set.Subset.trans IBroadSigmaZero_subset_ISigmaZero (ISigma_subset_mono (Nat.zero_le s)))
+
+/-- `𝗜𝚺₀` and `𝗜𝚺⁺₀` are the same theory: at level `0` the two hierarchies both cut out `Δ₀`. -/
+instance ISigmaZero_equiv_IBroadSigmaZero : 𝗜𝚺₀ ≊ 𝗜𝚺⁺₀ :=
+  Entailment.Equiv.antisymm ⟨inferInstance, inferInstance⟩
+
+instance : 𝗜𝚺₁ ⪯ 𝗜𝚺⁺₁ := InductionOnHierarchy_weakerThan_InductionOnBroadHierarchy 𝚺 1
+
 instance : 𝗜𝚺s ⪯ 𝗣𝗔 :=
+  Entailment.WeakerThan.ofSubset <| Set.union_subset_union_right _  <| InductionScheme_subset (by intros; trivial)
+
+instance : 𝗜𝚺⁺s ⪯ 𝗣𝗔 :=
   Entailment.WeakerThan.ofSubset <| Set.union_subset_union_right _  <| InductionScheme_subset (by intros; trivial)
 
 instance : 𝗣𝗔⁻ ⪯ 𝗜𝗢𝗽𝗲𝗻 := inferInstance
@@ -224,6 +354,8 @@ instance : 𝗣𝗔⁻ ⪯ 𝗜𝗢𝗽𝗲𝗻 := inferInstance
 instance : 𝗜𝗢𝗽𝗲𝗻 ⪯ 𝗜𝚺₀ := inferInstance
 
 instance : 𝗜𝚺₁ ⪯ 𝗣𝗔 := inferInstance
+
+instance : 𝗜𝚺⁺₁ ⪯ 𝗣𝗔 := inferInstance
 
 instance : 𝗘𝗤 ℒₒᵣ ⪯ 𝗣𝗔 :=
   have : 𝗘𝗤 ℒₒᵣ ⪯ 𝗣𝗔⁻ := inferInstance
@@ -234,6 +366,16 @@ instance (Γ : Polarity) (s : ℕ) : 𝗣𝗔⁻ ⪯ 𝗟 Γ s :=
 
 instance (Γ : Polarity) (s : ℕ) : 𝗘𝗤 ℒₒᵣ ⪯ 𝗟 Γ s :=
   Entailment.WeakerThan.trans (inferInstance : 𝗘𝗤 ℒₒᵣ ⪯ 𝗣𝗔⁻) inferInstance
+
+instance (Γ : Polarity) (s : ℕ) : 𝗣𝗔⁻ ⪯ 𝗟⁺ Γ s :=
+  Entailment.WeakerThan.ofSubset Set.subset_union_left
+
+instance (Γ : Polarity) (s : ℕ) : 𝗘𝗤 ℒₒᵣ ⪯ 𝗟⁺ Γ s :=
+  Entailment.WeakerThan.trans (inferInstance : 𝗘𝗤 ℒₒᵣ ⪯ 𝗣𝗔⁻) inferInstance
+
+instance LeastNumberOnHierarchy_weakerThan_LeastNumberOnBroadHierarchy (Γ : Polarity) (s : ℕ) :
+    𝗟 Γ s ⪯ 𝗟⁺ Γ s :=
+  Entailment.WeakerThan.ofSubset LeastNumberOnHierarchy_subset_LeastNumberOnBroadHierarchy
 
 instance (Γ : Polarity) (s : ℕ) : 𝗜𝚺₀ ⪯ 𝗕 Γ s :=
   Entailment.WeakerThan.ofSubset Set.subset_union_left
@@ -250,6 +392,11 @@ instance CollectionOnHierarchy_weakerThan_CollectionOnBroadHierarchy (Γ : Polar
 -- `𝗘𝗤 ℒₒᵣ ⪯ T`, so instance search cannot infer it.
 lemma eq_weakerThan_of_ISigma {T : ArithmeticTheory} {s : ℕ} [𝗜𝚺 s ⪯ T] : 𝗘𝗤 ℒₒᵣ ⪯ T :=
   Entailment.WeakerThan.trans (inferInstance : 𝗘𝗤 ℒₒᵣ ⪯ 𝗜𝚺₀) (ISigma_weakerThan_of_le_trans (by omega) ‹𝗜𝚺 s ⪯ T›)
+
+-- This is stated as a `lemma`, not an `instance`, since `s` does not occur in the conclusion
+-- `𝗘𝗤 ℒₒᵣ ⪯ T`, so instance search cannot infer it.
+lemma eq_weakerThan_of_IBroadSigma {T : ArithmeticTheory} {s : ℕ} [𝗜𝚺⁺ s ⪯ T] : 𝗘𝗤 ℒₒᵣ ⪯ T :=
+  Entailment.WeakerThan.trans (inferInstance : 𝗘𝗤 ℒₒᵣ ⪯ 𝗜𝚺⁺₀) (IBroadSigma_weakerThan_of_le_trans (by omega) ‹𝗜𝚺⁺ s ⪯ T›)
 
 -- This is stated as a `lemma`, not an `instance`, since `s` does not occur in the conclusion
 -- `𝗘𝗤 ℒₒᵣ ⪯ T`, so instance search cannot infer it.
@@ -285,17 +432,49 @@ end InductionScheme
 
 namespace InductionOnHierarchy
 
-section
+/-! ### Induction over the strict hierarchy -/
 
 variable (Γ : Polarity) (s : ℕ) [V↓[ℒₒᵣ] ⊧* 𝗜𝗡𝗗 Γ s]
 
-instance : V↓[ℒₒᵣ] ⊧* InductionScheme ℒₒᵣ (Hierarchy Γ s) :=
+instance : V↓[ℒₒᵣ] ⊧* InductionScheme ℒₒᵣ (StrictHierarchy Γ s) :=
   have : V↓[ℒₒᵣ] ⊧* 𝗜𝗡𝗗 Γ s := inferInstance
+  models_of_subtheory this
+
+/-- Induction for a predicate defined by a `StrictHierarchy Γ s` formula with parameters. -/
+@[elab_as_elim]
+lemma succ_induction {P : V → Prop}
+    (hP : ∃ e : ℕ → V, ∃ φ : ArithmeticSemiformula ℕ 1, StrictHierarchy Γ s φ ∧ ∀ x, P x ↔ φ.Eval ![x] e)
+    (zero : P 0) (succ : ∀ x, P x → P (x + 1)) : ∀ x, P x :=
+  InductionScheme.succ_induction (C := StrictHierarchy Γ s) hP zero succ
+
+end InductionOnHierarchy
+
+lemma mod_ISigma_of_le {s₁ s₂} (h : s₁ ≤ s₂) [V↓[ℒₒᵣ] ⊧* 𝗜𝚺 s₂] : V↓[ℒₒᵣ] ⊧* 𝗜𝚺 s₁ :=
+  models_of_ss inferInstance (ISigma_subset_mono h)
+
+instance [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₀] : V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺₀ :=
+  models_of_ss inferInstance IBroadSigmaZero_subset_ISigmaZero
+
+-- This is stated as a `lemma`, not an `instance`: together with the bridge above, instance search
+-- would cycle between `V↓[ℒₒᵣ] ⊧* 𝗜𝚺₀` and `V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺₀`.
+lemma mod_ISigma_of_IBroadSigma {s} [V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺ s] : V↓[ℒₒᵣ] ⊧* 𝗜𝚺 s :=
+  models_of_ss inferInstance InductionOnHierarchy_subset_InductionOnBroadHierarchy
+
+namespace InductionOnBroadHierarchy
+
+/-! ### Induction over the broad hierarchy -/
+
+section
+
+variable (Γ : Polarity) (s : ℕ) [V↓[ℒₒᵣ] ⊧* 𝗜𝗡𝗗⁺ Γ s]
+
+instance : V↓[ℒₒᵣ] ⊧* InductionScheme ℒₒᵣ (Hierarchy Γ s) :=
+  have : V↓[ℒₒᵣ] ⊧* 𝗜𝗡𝗗⁺ Γ s := inferInstance
   models_of_subtheory this
 
 lemma succ_induction {P : V → Prop} (hP : Γ-[s].DefinablePred P)
     (zero : P 0) (succ : ∀ x, P x → P (x + 1)) : ∀ x, P x :=
-  have : V↓[ℒₒᵣ] ⊧* 𝗜𝗡𝗗 Γ s := inferInstance
+  have : V↓[ℒₒᵣ] ⊧* 𝗜𝗡𝗗⁺ Γ s := inferInstance
   have : V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := models_of_subtheory this
   InductionScheme.succ_induction (P := P) (C := Hierarchy Γ s) (by
     rcases hP with ⟨φ, hp⟩
@@ -306,7 +485,7 @@ lemma succ_induction {P : V → Prop} (hP : Γ-[s].DefinablePred P)
 
 lemma order_induction {P : V → Prop} (hP : Γ-[s].DefinablePred P)
     (ind : ∀ x, (∀ y < x, P y) → P x) : ∀ x, P x := by
-  have : V↓[ℒₒᵣ] ⊧* 𝗜𝗡𝗗 Γ s := inferInstance
+  have : V↓[ℒₒᵣ] ⊧* 𝗜𝗡𝗗⁺ Γ s := inferInstance
   have : V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := models_of_subtheory this
   suffices ∀ x, ∀ y < x, P y by
     intro x; exact this (x + 1) x (by simp only [lt_add_iff_pos_right, lt_one_iff_eq_zero])
@@ -325,7 +504,7 @@ lemma order_induction {P : V → Prop} (hP : Γ-[s].DefinablePred P)
 
 private lemma neg_succ_induction {P : V → Prop} (hP : Γ-[s].DefinablePred P)
     (nzero : ¬P 0) (nsucc : ∀ x, ¬P x → ¬P (x + 1)) : ∀ x, ¬P x := by
-  have : V↓[ℒₒᵣ] ⊧* 𝗜𝗡𝗗 Γ s := inferInstance
+  have : V↓[ℒₒᵣ] ⊧* 𝗜𝗡𝗗⁺ Γ s := inferInstance
   have : V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := models_of_subtheory this
   by_contra A
   have : ∃ x, P x := by simpa using A
@@ -370,14 +549,14 @@ instance models_InductionScheme_alt : V↓[ℒₒᵣ] ⊧* InductionScheme ℒ�
       (.mkPolarity (∼(Rew.rewriteMap v ▹ φ)) (by simpa using hp)
       (by intro x; simp [←Matrix.fun_eq_vec_one, Semiformula.eval_rewriteMap]))
 
-instance models_alt : V↓[ℒₒᵣ] ⊧* 𝗜𝗡𝗗 Γ.alt s := by
-  have : V↓[ℒₒᵣ] ⊧* 𝗜𝗡𝗗 Γ s := inferInstance
+instance models_alt : V↓[ℒₒᵣ] ⊧* 𝗜𝗡𝗗⁺ Γ.alt s := by
+  have : V↓[ℒₒᵣ] ⊧* 𝗜𝗡𝗗⁺ Γ s := inferInstance
   have : V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := models_of_subtheory this
-  simp only [InductionOnHierarchy, Semantics.ModelsSet.union_iff]; constructor <;> infer_instance
+  simp only [InductionOnBroadHierarchy, Semantics.ModelsSet.union_iff]; constructor <;> infer_instance
 
 lemma least_number {P : V → Prop} (hP : Γ-[s].DefinablePred P)
     {x} (h : P x) : ∃ y, P y ∧ ∀ z < y, ¬P z := by
-  have : V↓[ℒₒᵣ] ⊧* 𝗜𝗡𝗗 Γ s := inferInstance
+  have : V↓[ℒₒᵣ] ⊧* 𝗜𝗡𝗗⁺ Γ s := inferInstance
   have : V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := models_of_subtheory this
   by_contra A
   have A : ∀ z, P z → ∃ w < z, P w := by simpa using A
@@ -405,14 +584,14 @@ end
 
 section
 
-variable (Γ : SigmaPiDelta) (s : ℕ) [V↓[ℒₒᵣ] ⊧* 𝗜𝗡𝗗 𝚺 s]
+variable (Γ : SigmaPiDelta) (s : ℕ) [V↓[ℒₒᵣ] ⊧* 𝗜𝗡𝗗⁺ 𝚺 s]
 
 lemma succ_induction_sigma {P : V → Prop} (hP : Γ-[s].DefinablePred P)
     (zero : P 0) (succ : ∀ x, P x → P (x + 1)) : ∀ x, P x :=
   match Γ with
   | 𝚺 => succ_induction 𝚺 s hP zero succ
   | 𝚷 =>
-    haveI : V↓[ℒₒᵣ] ⊧* 𝗜𝗡𝗗 𝚷 s := models_alt 𝚺 s
+    haveI : V↓[ℒₒᵣ] ⊧* 𝗜𝗡𝗗⁺ 𝚷 s := models_alt 𝚺 s
     succ_induction 𝚷 s hP zero succ
   | 𝚫 => succ_induction 𝚺 s hP.of_delta zero succ
 
@@ -421,7 +600,7 @@ lemma order_induction_sigma {P : V → Prop} (hP : Γ-[s].DefinablePred P)
   match Γ with
   | 𝚺 => order_induction 𝚺 s hP ind
   | 𝚷 =>
-    haveI : V↓[ℒₒᵣ] ⊧* 𝗜𝗡𝗗 𝚷 s := models_alt 𝚺 s
+    haveI : V↓[ℒₒᵣ] ⊧* 𝗜𝗡𝗗⁺ 𝚷 s := models_alt 𝚺 s
     order_induction 𝚷 s hP ind
   | 𝚫 => order_induction 𝚺 s hP.of_delta ind
 
@@ -430,84 +609,85 @@ lemma least_number_sigma {P : V → Prop} (hP : Γ-[s].DefinablePred P)
   match Γ with
   | 𝚺 => least_number 𝚺 s hP h
   | 𝚷 =>
-    haveI : V↓[ℒₒᵣ] ⊧* 𝗜𝗡𝗗 𝚷 s := models_alt 𝚺 s
+    haveI : V↓[ℒₒᵣ] ⊧* 𝗜𝗡𝗗⁺ 𝚷 s := models_alt 𝚺 s
     least_number 𝚷 s hP h
   | 𝚫 => least_number 𝚺 s hP.of_delta h
 
 end
 
-instance [V↓[ℒₒᵣ] ⊧* 𝗜𝗡𝗗 𝚺 s] : V↓[ℒₒᵣ] ⊧* 𝗜𝗡𝗗 Γ s := by
+instance [V↓[ℒₒᵣ] ⊧* 𝗜𝗡𝗗⁺ 𝚺 s] : V↓[ℒₒᵣ] ⊧* 𝗜𝗡𝗗⁺ Γ s := by
   rcases Γ
   · infer_instance
   · exact models_alt 𝚺 s
 
-instance [V↓[ℒₒᵣ] ⊧* 𝗜𝗡𝗗 𝚷 s] : V↓[ℒₒᵣ] ⊧* 𝗜𝗡𝗗 Γ s := by
+instance [V↓[ℒₒᵣ] ⊧* 𝗜𝗡𝗗⁺ 𝚷 s] : V↓[ℒₒᵣ] ⊧* 𝗜𝗡𝗗⁺ Γ s := by
   rcases Γ
   · exact models_alt 𝚷 s
   · infer_instance
 
-lemma mod_ISigma_of_le {s₁ s₂} (h : s₁ ≤ s₂) [V↓[ℒₒᵣ] ⊧* 𝗜𝚺 s₂] : V↓[ℒₒᵣ] ⊧* 𝗜𝚺 s₁ :=
-  models_of_ss inferInstance (ISigma_subset_mono h)
+lemma mod_IBroadSigma_of_le {s₁ s₂} (h : s₁ ≤ s₂) [V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺ s₂] : V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺ s₁ :=
+  models_of_ss inferInstance (IBroadSigma_subset_mono h)
 
-instance [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] : V↓[ℒₒᵣ] ⊧* 𝗜𝚺₀ := mod_ISigma_of_le (show 0 ≤ 1 from by simp)
+instance [V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺₁] : V↓[ℒₒᵣ] ⊧* 𝗜𝚺₀ :=
+  models_of_ss inferInstance (ISigmaZero_subset_IBroadSigma (s := 1))
 
-instance [V↓[ℒₒᵣ] ⊧* 𝗜𝚺s] : V↓[ℒₒᵣ] ⊧* 𝗜𝚷s := inferInstance
+instance [V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺s] : V↓[ℒₒᵣ] ⊧* 𝗜𝚷⁺s := inferInstance
 
-instance [V↓[ℒₒᵣ] ⊧* 𝗜𝚷s] : V↓[ℒₒᵣ] ⊧* 𝗜𝚺s := inferInstance
+instance [V↓[ℒₒᵣ] ⊧* 𝗜𝚷⁺s] : V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺s := inferInstance
 
-lemma models_ISigma_iff_models_IPi {s} : V↓[ℒₒᵣ] ⊧* 𝗜𝚺 s ↔ V↓[ℒₒᵣ] ⊧* 𝗜𝚷 s :=
+lemma models_IBroadSigma_iff_models_IBroadPi {s} : V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺ s ↔ V↓[ℒₒᵣ] ⊧* 𝗜𝚷⁺ s :=
   ⟨fun _ ↦ inferInstance, fun _ ↦ inferInstance⟩
 
-instance [V↓[ℒₒᵣ] ⊧* 𝗜𝚺 s] : V↓[ℒₒᵣ] ⊧* 𝗜𝗡𝗗 Γ s :=
+instance [V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺ s] : V↓[ℒₒᵣ] ⊧* 𝗜𝗡𝗗⁺ Γ s :=
   match Γ with
   | 𝚺 => inferInstance
   | 𝚷 => inferInstance
 
-end InductionOnHierarchy
+end InductionOnBroadHierarchy
 
 @[elab_as_elim] lemma ISigma0.succ_induction [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₀]
     {P : V → Prop} (hP : 𝚺₀.DefinablePred P)
     (zero : P 0) (succ : ∀ x, P x → P (x + 1)) : ∀ x, P x :=
-  InductionOnHierarchy.succ_induction 𝚺 0 hP zero succ
+  InductionOnBroadHierarchy.succ_induction 𝚺 0 hP zero succ
 
-@[elab_as_elim] lemma ISigma1.sigma1_succ_induction [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
+@[elab_as_elim] lemma ISigma1.sigma1_succ_induction [V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺₁]
     {P : V → Prop} (hP : 𝚺₁-Predicate P)
     (zero : P 0) (succ : ∀ x, P x → P (x + 1)) : ∀ x, P x :=
-  InductionOnHierarchy.succ_induction 𝚺 1 hP zero succ
+  InductionOnBroadHierarchy.succ_induction 𝚺 1 hP zero succ
 
-@[elab_as_elim] lemma ISigma1.pi1_succ_induction [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
+@[elab_as_elim] lemma ISigma1.pi1_succ_induction [V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺₁]
     {P : V → Prop} (hP : 𝚷₁-Predicate P)
     (zero : P 0) (succ : ∀ x, P x → P (x + 1)) : ∀ x, P x :=
-  InductionOnHierarchy.succ_induction 𝚷 1 hP zero succ
+  InductionOnBroadHierarchy.succ_induction 𝚷 1 hP zero succ
 
 @[elab_as_elim] lemma ISigma0.order_induction [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₀]
     {P : V → Prop} (hP : 𝚺₀-Predicate P)
     (ind : ∀ x, (∀ y < x, P y) → P x) : ∀ x, P x :=
-  InductionOnHierarchy.order_induction 𝚺 0 hP ind
+  InductionOnBroadHierarchy.order_induction 𝚺 0 hP ind
 
-@[elab_as_elim] lemma ISigma1.sigma1_order_induction [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
+@[elab_as_elim] lemma ISigma1.sigma1_order_induction [V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺₁]
     {P : V → Prop} (hP : 𝚺₁-Predicate P)
     (ind : ∀ x, (∀ y < x, P y) → P x) : ∀ x, P x :=
-  InductionOnHierarchy.order_induction 𝚺 1 hP ind
+  InductionOnBroadHierarchy.order_induction 𝚺 1 hP ind
 
-@[elab_as_elim] lemma ISigma1.pi1_order_induction [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
+@[elab_as_elim] lemma ISigma1.pi1_order_induction [V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺₁]
     {P : V → Prop} (hP : 𝚷₁-Predicate P)
     (ind : ∀ x, (∀ y < x, P y) → P x) : ∀ x, P x :=
-  InductionOnHierarchy.order_induction 𝚷 1 hP ind
+  InductionOnBroadHierarchy.order_induction 𝚷 1 hP ind
 
 lemma ISigma0.least_number [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₀] {P : V → Prop} (hP : 𝚺₀-Predicate P)
     {x} (h : P x) : ∃ y, P y ∧ ∀ z < y, ¬P z :=
-  InductionOnHierarchy.least_number 𝚺 0 hP h
+  InductionOnBroadHierarchy.least_number 𝚺 0 hP h
 
-@[elab_as_elim] lemma ISigma1.succ_induction [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] (Γ)
+@[elab_as_elim] lemma ISigma1.succ_induction [V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺₁] (Γ)
     {P : V → Prop} (hP : Γ-[1]-Predicate P)
     (zero : P 0) (succ : ∀ x, P x → P (x + 1)) : ∀ x, P x :=
-  InductionOnHierarchy.succ_induction_sigma Γ 1 hP zero succ
+  InductionOnBroadHierarchy.succ_induction_sigma Γ 1 hP zero succ
 
-@[elab_as_elim] lemma ISigma1.order_induction [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] (Γ)
+@[elab_as_elim] lemma ISigma1.order_induction [V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺₁] (Γ)
     {P : V → Prop} (hP : Γ-[1]-Predicate P)
     (ind : ∀ x, (∀ y < x, P y) → P x) : ∀ x, P x :=
-  InductionOnHierarchy.order_induction_sigma Γ 1 hP ind
+  InductionOnBroadHierarchy.order_induction_sigma Γ 1 hP ind
 
 instance [V↓[ℒₒᵣ] ⊧* 𝗜𝗢𝗽𝗲𝗻] : V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ :=
   have : V↓[ℒₒᵣ] ⊧* 𝗜𝗢𝗽𝗲𝗻 := inferInstance
@@ -517,10 +697,10 @@ instance [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₀] : V↓[ℒₒᵣ] ⊧* 𝗜𝗢𝗽�
   have : V↓[ℒₒᵣ] ⊧* 𝗜𝚺₀ := inferInstance
   models_of_subtheory this
 
-instance [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] : V↓[ℒₒᵣ] ⊧* 𝗜𝚺₀ := inferInstance
+instance [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] : V↓[ℒₒᵣ] ⊧* 𝗜𝚺₀ := mod_ISigma_of_le (show 0 ≤ 1 from by simp)
 
-abbrev mod_ISigma_of_le {s₁ s₂} (h : s₁ ≤ s₂) [V↓[ℒₒᵣ] ⊧* 𝗜𝚺 s₂] : V↓[ℒₒᵣ] ⊧* 𝗜𝚺 s₁ :=
-  models_of_ss inferInstance (ISigma_subset_mono h)
+abbrev mod_IBroadSigma_of_le {s₁ s₂} (h : s₁ ≤ s₂) [V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺ s₂] : V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺ s₁ :=
+  models_of_ss inferInstance (IBroadSigma_subset_mono h)
 
 abbrev mod_BSigma_of_le {s₁ s₂} (h : s₁ ≤ s₂) [V↓[ℒₒᵣ] ⊧* 𝗕𝚺 s₂] : V↓[ℒₒᵣ] ⊧* 𝗕𝚺 s₁ :=
   models_of_ss inferInstance (CollectionOnHierarchy_subset_mono h)
@@ -531,7 +711,18 @@ lemma mod_paMinus_of_ISigma {s} [V↓[ℒₒᵣ] ⊧* 𝗜𝚺 s] : V↓[ℒₒ�
   have : V↓[ℒₒᵣ] ⊧* 𝗜𝚺₀ := mod_ISigma_of_le (Nat.zero_le s)
   inferInstance
 
+-- This is stated as a `lemma`, not an `instance`, since `s` does not occur in the conclusion
+-- `V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻`, so instance search cannot infer it.
+lemma mod_paMinus_of_IBroadSigma {s} [V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺ s] : V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ :=
+  have : V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺₀ := mod_IBroadSigma_of_le (Nat.zero_le s)
+  have : V↓[ℒₒᵣ] ⊧* 𝗜𝚺₀ := models_of_ss inferInstance (ISigmaZero_subset_IBroadSigma (s := 0))
+  inferInstance
+
 instance [V↓[ℒₒᵣ] ⊧* 𝗣𝗔] : V↓[ℒₒᵣ] ⊧* 𝗜𝚺 s :=
+  have : V↓[ℒₒᵣ] ⊧* 𝗣𝗔 := inferInstance
+  models_of_subtheory this
+
+instance [V↓[ℒₒᵣ] ⊧* 𝗣𝗔] : V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺ s :=
   have : V↓[ℒₒᵣ] ⊧* 𝗣𝗔 := inferInstance
   models_of_subtheory this
 
@@ -552,9 +743,17 @@ instance models_ISigma (Γ s) : ℕ↓[ℒₒᵣ] ⊧* 𝗜𝗡𝗗 Γ s := by
     true_and, InductionScheme]
   exact Semantics.ModelsSet.setOf_iff.mpr (fun ψ ⟨φ, _, hψ⟩ => hψ ▸ this φ)
 
+instance models_IBroadSigma (Γ s) : ℕ↓[ℒₒᵣ] ⊧* 𝗜𝗡𝗗⁺ Γ s := by
+  have : ∀ φ, ℕ↓[ℒₒᵣ] ⊧ (succInd φ).univCl := models_succInd
+  simp only [Semantics.ModelsSet.union_iff, PeanoMinus.instModelsSetStrucORingSentenceStrNat,
+    true_and, InductionScheme]
+  exact Semantics.ModelsSet.setOf_iff.mpr (fun ψ ⟨φ, _, hψ⟩ => hψ ▸ this φ)
+
 instance models_ISigmaZero : ℕ↓[ℒₒᵣ] ⊧* 𝗜𝚺₀ := inferInstance
 
 instance models_ISigmaOne : ℕ↓[ℒₒᵣ] ⊧* 𝗜𝚺₁ := inferInstance
+
+instance models_IBroadSigmaOne : ℕ↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺₁ := inferInstance
 
 instance models_Peano : ℕ↓[ℒₒᵣ] ⊧* 𝗣𝗔 := by
   have : ∀ φ, ℕ↓[ℒₒᵣ] ⊧ (succInd φ).univCl := models_succInd
@@ -562,11 +761,13 @@ instance models_Peano : ℕ↓[ℒₒᵣ] ⊧* 𝗣𝗔 := by
     true_and, InductionScheme]
   exact Semantics.ModelsSet.setOf_iff.mpr (fun ψ ⟨φ, _, hψ⟩ => hψ ▸ this φ)
 
-instance sigmaOneSound_ISigmaOne : 𝗜𝚺₁.SoundOnHierarchy 𝚺 1 := inferInstance
+instance sigmaOneSound_IBroadSigmaOne : 𝗜𝚺⁺₁.SoundOnHierarchy 𝚺 1 := inferInstance
 
 instance sigmaOneSound_Peano : 𝗣𝗔.SoundOnHierarchy 𝚺 1 := inferInstance
 
 instance : Entailment.Consistent (𝗜𝗡𝗗 Γ s) := (𝗜𝗡𝗗 Γ s).consistent_of_sound (Eq ⊥) rfl
+
+instance : Entailment.Consistent (𝗜𝗡𝗗⁺ Γ s) := (𝗜𝗡𝗗⁺ Γ s).consistent_of_sound (Eq ⊥) rfl
 
 instance : Entailment.Consistent 𝗣𝗔 := 𝗣𝗔.consistent_of_sound (Eq ⊥) rfl
 
@@ -582,6 +783,10 @@ instance (T : ArithmeticTheory) [𝗜𝚺₀ ⪯ T] : 𝗣𝗔⁻ ⪯ T :=
 
 instance (T : ArithmeticTheory) [𝗜𝚺₁ ⪯ T] : 𝗣𝗔⁻ ⪯ T :=
   have : 𝗣𝗔⁻ ⪯ 𝗜𝚺₁ := inferInstance
+  Entailment.WeakerThan.trans this inferInstance
+
+instance (T : ArithmeticTheory) [𝗜𝚺⁺₁ ⪯ T] : 𝗣𝗔⁻ ⪯ T :=
+  have : 𝗣𝗔⁻ ⪯ 𝗜𝚺⁺₁ := inferInstance
   Entailment.WeakerThan.trans this inferInstance
 
 instance (T : ArithmeticTheory) [𝗣𝗔 ⪯ T] : 𝗣𝗔⁻ ⪯ T :=

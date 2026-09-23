@@ -174,18 +174,18 @@ end LK2.Derivation
 
 namespace Theory
 
-noncomputable def Proof.toProof2 {φ : Sentence L} (b : T ⊢! φ) : T ⊢₂! (φ : Proposition L) :=
+noncomputable def Proof.toProof2 {φ : Sentence L} (b : T.Proof φ) : T ⊢₂! (φ : Proposition L) :=
   LK2.Derivation.cutManyProof b.axioms b.axioms_mem <|
     LK2.Derivation.cast (LK.Derivation.toDerivation2 T b.derivation) (by ext x; simp [LK.Sequent.embed, Multiset.map_tilde_comm])
 
-noncomputable def Proof2.toProof {φ : Sentence L} (d : T ⊢₂! (φ : Proposition L)) : T ⊢! φ := by
+noncomputable def Proof2.toProof {φ : Sentence L} (d : T ⊢₂! (φ : Proposition L)) : T.Proof φ := by
   rcases LK2.Derivation.toProofData d with ⟨A, hA, b⟩
   exact ⟨A, hA, LK.Derivation.cast b (by simp [LK.Sequent.embed, Multiset.atom_eq_singleton, Multiset.map_tilde_comm])⟩
 
 end Theory
 
 lemma provable_iff_derivable2 {φ : Sentence L} : T ⊢ φ ↔ Nonempty (T ⊢₂! (φ : Proposition L)) := by
-  exact ⟨fun h ↦ ⟨h.get.toProof2⟩, fun ⟨h⟩ ↦ ⟨h.toProof⟩⟩
+  exact ⟨fun ⟨b⟩ ↦ ⟨b.toProof2⟩, fun ⟨d⟩ ↦ ⟨d.toProof⟩⟩
 
 end derivation2
 

@@ -98,7 +98,7 @@ theorem provable_restrictedGödel (f : ℕ → ℕ) [𝚺₁-Function₁ f via f
 
 /-- Lower bound of a Gödel number of proof of restricted Gödel sentence is `f e`. -/
 theorem lower_bound_gödelNumber_proof_restrictedGödel (f : ℕ → ℕ) [𝚺₁-Function₁ f via fDef] :
-    ∀ b : T ⊢! T.restrictedGödel fDef e, f (ORingStructure.numeral e) ≤ ⌜b⌝ := by
+    ∀ b : T.Proof (T.restrictedGödel fDef e), f (ORingStructure.numeral e) ≤ ⌜b⌝ := by
   intro b;
   exact Nat.le_of_not_lt
     $ (imp_not_comm.mp $ (models_restrictedGödel f).mp (true_restrictedGödel f) ⌜b⌝)
@@ -126,7 +126,7 @@ theorem provable_restrictedGödel_superexp {e : ℕ} : T ⊢ T.restrictedGödel 
   provable_restrictedGödel Superexp.superexp
 
 theorem lower_bound_gödelNumber_proof_restrictedGödel_superexp {e : ℕ} :
-    ∀ b : T ⊢! T.restrictedGödel superexpDef e, Superexp.superexp e ≤ ⌜b⌝ := by
+    ∀ b : T.Proof (T.restrictedGödel superexpDef e), Superexp.superexp e ≤ ⌜b⌝ := by
   simpa [numeral_eq_natCast] using lower_bound_gödelNumber_proof_restrictedGödel Superexp.superexp (e := e)
 
 /--
@@ -134,7 +134,7 @@ theorem lower_bound_gödelNumber_proof_restrictedGödel_superexp {e : ℕ} :
 -/
 example :
   letI e : ℕ := 10^9;
-   T ⊢ T.restrictedGödel superexpDef e ∧ ∀ b : T ⊢! T.restrictedGödel superexpDef e, Superexp.superexp e ≤ ⌜b⌝  := by
+   T ⊢ T.restrictedGödel superexpDef e ∧ ∀ b : T.Proof (T.restrictedGödel superexpDef e), Superexp.superexp e ≤ ⌜b⌝  := by
   constructor;
   . apply provable_restrictedGödel_superexp;
   . apply lower_bound_gödelNumber_proof_restrictedGödel_superexp;
