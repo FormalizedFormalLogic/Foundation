@@ -110,6 +110,9 @@ def ModalizedIn (p : α) : Formula α → Prop
   | A 🡒 B => A.ModalizedIn p ∧ B.ModalizedIn p
   | □_    => True
 
+@[simp, grind =]
+lemma complexity_box : (□A).complexity = A.complexity + 1 := rfl
+
 variable [DecidableEq α]
 
 @[grind]

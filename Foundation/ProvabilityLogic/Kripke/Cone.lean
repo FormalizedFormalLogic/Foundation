@@ -34,6 +34,12 @@ instance [M.IsFiniteGL] : (M.cone r).IsFiniteGL where
   irrefl x := Std.Irrefl.irrefl (r := M.Rel) x.1
   finite := Subtype.finite
 
+instance [M.IsFiniteGrz] : (M.cone r).IsFiniteGrz where
+  refl x := Std.Refl.refl (r := M.Rel) x.1
+  trans _ _ _ h₁ h₂ := IsTrans.trans (r := M.Rel) _ _ _ h₁ h₂
+  antisymm x y h₁ h₂ := Subtype.ext <| Std.Antisymm.antisymm (r := M.Rel) x.1 y.1 h₁ h₂
+  finite := Subtype.finite
+
 lemma forces_cone [IsTrans _ M.Rel] {x : (M.cone r).World} : x ⊩[(M.cone r).toModel] A ↔ x.1 ⊩[M] A := by
   induction A generalizing x with
   | atom | falsum => rfl;
