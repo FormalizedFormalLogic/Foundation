@@ -124,15 +124,10 @@ lemma not_axiomD {a : α} : 𝐀 ⊬ □(□#a ⋎ □#a) 🡒 □#a ⋎ □#a :
   have hT (x : L.World) : x ⊩[L] TBB n ↔ (x : ℕ) ≠ n := by
     simpa using LetterlessFormula.forces_lift_iff (x := x) (A := TBB n);
   have h₁ : Fin.last (n + 1) ⊩[L] ∼□^[n]⊥ := fun h ↦ by simpa using forces_boxItr_bot_iff.mp h;
-  have h₂ : Fin.last (n + 1) ⊩[L] □(□TBB n ⋎ □TBB n) := by
-    intro y (Ry : (y : ℕ) < n + 1);
-    apply forces_or.mpr (.inl _);
-    intro z (Rz : (z : ℕ) < y);
-    exact (hT z).mpr (by omega);
-  have h₃ : Fin.last (n + 1) ⊮[L] □TBB n ⋎ □TBB n := by
-    intro h;
-    rcases forces_or.mp h with h | h <;>
-    exact (hT _).mp (h ⟨n, by omega⟩ (show n < n + 1 by omega)) rfl;
+  have h₂ : Fin.last (n + 1) ⊩[L] □(□TBB n ⋎ □TBB n) := fun y (Ry : (y : ℕ) < n + 1) ↦
+    forces_or.mpr <| or_self_iff.mpr fun z (Rz : (z : ℕ) < y) ↦ (hT z).mpr (by omega);
+  have h₃ : Fin.last (n + 1) ⊮[L] □TBB n ⋎ □TBB n := fun h ↦
+    (hT _).mp (or_self_iff.mp (forces_or.mp h) ⟨n, by omega⟩ (show n < n + 1 by omega)) rfl;
   have := forces_subst.mp <| GL.sound (L.subst fun _ ↦ TBB n) h (Fin.last (n + 1));
   rw [subst_imp, subst_neg, subst_boxItr] at this;
   exact h₃ (this h₁ h₂);
