@@ -151,7 +151,15 @@ lemma exists_neg_conj_TBB_mem_provabilityLogic
     (h : ¬(T.provabilityLogicRelativeTo U : Logic α) ⊆ 𝐒) :
     ∃ m, LetterlessFormula.lift (∼⩕ i ∈ Finset.range m, TBB i) ∈
       (T.provabilityLogicRelativeTo U : Logic α) := by
-  sorry
+  obtain ⟨A, hA, hAS⟩ := Set.not_subset.mp h;
+  obtain ⟨m, f, hf⟩ := exists_realization_provable_neg_of_not_S (T := T) hAS;
+  use m;
+  apply LetterlessFormula.lift_mem_provabilityLogic f;
+  have h₁ : U ⊢ ∼f T (A ⋏ LetterlessFormula.lift (⩕ i ∈ Finset.range m, TBB i)) :=
+    WeakerThan.pbl hf;
+  have h₂ : U ⊢ f T A := hA f;
+  simp only [standardInterpret, Formula.interpret] at h₁ h₂ ⊢;
+  cl_prover [h₁, h₂];
 
 /-- - [AB05, Lemma 49] -/
 theorem provabilityLogic_trace_compl_finite
