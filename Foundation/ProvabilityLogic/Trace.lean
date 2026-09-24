@@ -45,7 +45,8 @@ def trace (A : Formula α) : Set ℕ :=
 
 lemma root_forces_of_not_mem_trace {κ : Type u} [Nonempty κ] {M : RootedModel κ α}
     [Fintype M.World] [M.IsGL] (h : M.height ∉ A.trace) : M.root ⊩[M.toModel] A := by
-  sorry
+  by_contra hA;
+  exact h ⟨κ, _, M, _, _, rfl, hA⟩;
 
 lemma GL_imp_of_height_not_mem_trace
     (h : ∀ {κ : Type u} [Nonempty κ] (M : RootedModel κ α) [Fintype M.World] [M.IsGL],
