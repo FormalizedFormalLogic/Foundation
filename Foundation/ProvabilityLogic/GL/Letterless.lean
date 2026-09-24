@@ -99,7 +99,7 @@ theorem lift_mem_sumQuasiNormal_iff (h : (∃ B ∈ X, (spectrum B).Finite) ∨ 
   . exact spectrum_subset_of_lift_mem_sumQuasiNormal;
   . intro hXA;
     obtain ⟨Y, hY, hA⟩ := exists_finset_of_spectrum_subset hXA h;
-    apply mem_sumQuasiNormal_of_conj (Γ := Y.image lift);
+    apply sumQuasiNormal_of_conj (Γ := Y.image lift);
     . simp only [Finset.mem_image, forall_exists_index, and_imp];
       rintro _ C hC rfl;
       exact .mem₂ ⟨C, hY hC, rfl⟩;
