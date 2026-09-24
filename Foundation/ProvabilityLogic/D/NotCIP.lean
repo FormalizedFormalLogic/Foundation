@@ -20,11 +20,20 @@ namespace FFL.ProvabilityLogic
 
 open Entailment Formula Kripke Kripke.Model Kripke.Model.World
 
-namespace Logic.D
-
 universe u
 
 variable {α : Type u} {a b c : α} {C : Formula α}
+
+lemma Logic.S.not_iff_atom [DecidableEq α] (hab : a ≠ b) (hC : C.ModalizedIn a)
+    (hb : b ∉ C.atoms) : 𝐒 ⊬ C 🡘 #a := by
+  intro h;
+  obtain ⟨E, -, hE⟩ := Logic.GL.exists_fixpoint (A := ∼C) hab ⟨hC, trivial⟩ (by simpa using hb);
+  have h₁ : 𝐒 ⊢ (C 🡘 #a)⟦.single a E⟧ := sumQuasiNormal.subst h;
+  have h₂ : 𝐒 ⊢ ∼C⟦a ↦ E⟧ 🡘 E := S.of_GL hE;
+  simp only [subst_iff, subst_atom, Substitution.single_apply, ite_true] at h₁;
+  exact S.consistent (by cl_prover [h₁, h₂]);
+
+namespace Logic.D
 
 lemma provable_counterexample : 𝐃 ⊢ ∼(□(□#b ⋎ #a) 🡒 □#b) 🡒 □(#a 🡒 □#c) 🡒 □#c := by
   have h : 𝐆𝐋 ⊢ □(□#b ⋎ #a) ⋏ □(#a 🡒 □#c) 🡒 □(□#b ⋎ □#c) :=
@@ -88,15 +97,6 @@ lemma S_modalize_iff_of_interpolant (hab : a ≠ b) (hac : a ≠ c)
         (fun _ h ↦ subfmls_trans h) hroot (subfmls_trans hD mem_subfmls_box)) (hroot A hD) ⊤;
   exact forces_iff.mpr <| (key C (by simp [X, subfmls])).symm.trans <|
     forces_pseudoTail_interpolant_iff hab hac h₁ h₂ hC M _;
-
-lemma _root_.FFL.ProvabilityLogic.Logic.S.not_iff_atom (hab : a ≠ b) (hC : C.ModalizedIn a)
-    (hb : b ∉ C.atoms) : 𝐒 ⊬ C 🡘 #a := by
-  intro h;
-  obtain ⟨E, -, hE⟩ := Logic.GL.exists_fixpoint (A := ∼C) hab ⟨hC, trivial⟩ (by simpa using hb);
-  have h₁ : 𝐒 ⊢ (C 🡘 #a)⟦.single a E⟧ := sumQuasiNormal.subst h;
-  have h₂ : 𝐒 ⊢ ∼C⟦a ↦ E⟧ 🡘 E := S.of_GL hE;
-  simp only [subst_iff, subst_atom, Substitution.single_apply, ite_true] at h₁;
-  exact S.consistent (by cl_prover [h₁, h₂]);
 
 /-- **`𝐃` does not have the Craig interpolation property.**
 

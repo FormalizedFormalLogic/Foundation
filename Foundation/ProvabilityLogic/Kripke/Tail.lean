@@ -124,15 +124,12 @@ lemma forces_root_box_iff : Sum.inr ⊤ ⊩[(M.toFreeTail V).toModel] □A ↔
     · obtain ⟨n, rfl⟩ := ENat.ne_top_iff_exists.mp (ne_top_of_lt (rel_inr_inr.mp R));
       exact h₂ n;
 
-/-- A point of the chain forces `□A` iff the root of `M` does, if the finite points of the chain
-agree with the root of `M` on `A`, and the root of `M` forces `□A 🡒 A`. -/
 lemma forces_inr_box_iff {M : RootedModel κ α} {V : ℕ∞ → α → Prop}
     (h : ∀ n : ℕ, Sum.inr (n : ℕ∞) ⊩[(M.toModel.toFreeTail V).toModel] A ↔ M.root ⊩[M.toModel] A)
     (hroot : M.root ⊩[M.toModel] □A 🡒 A) (i : ℕ∞) :
     Sum.inr i ⊩[(M.toModel.toFreeTail V).toModel] □A ↔ M.root ⊩[M.toModel] □A := by
   constructor;
-  · intro h x Rrx;
-    exact forces_inl.mp (h (.inl x) trivial);
+  · exact fun hA x _ ↦ forces_inl.mp (hA (.inl x) trivial);
   · rintro hA (x | j) Rix;
     · apply forces_inl.mpr;
       by_cases hx : x = M.root;
