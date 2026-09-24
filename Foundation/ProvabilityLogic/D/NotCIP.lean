@@ -99,8 +99,8 @@ lemma S_modalize_iff_of_interpolant (hab : a ≠ b) (hac : a ≠ c)
 theorem not_CIP (hab : a ≠ b) (hac : a ≠ c) (hbc : b ≠ c) :
     ¬∀ A B : Formula α, 𝐃 ⊢ A 🡒 B →
       ∃ C, 𝐃 ⊢ A 🡒 C ∧ 𝐃 ⊢ C 🡒 B ∧ C.atoms ⊆ A.atoms ∩ B.atoms := by
-  intro h;
-  obtain ⟨C, h₁, h₂, hC⟩ := h _ _ (provable_counterexample (a := a) (b := b) (c := c));
+  by_contra!;
+  obtain ⟨C, h₁, h₂, hC⟩ := this _ _ (provable_counterexample (a := a) (b := b) (c := c));
   have hC : C.atoms ⊆ {a} := hC.trans (by intro; simp; grind);
   exact S.not_iff_atom hab modalizedIn_modalize
     (fun h ↦ by simpa [hab.symm] using hC <| atoms_modalize_subset h)
