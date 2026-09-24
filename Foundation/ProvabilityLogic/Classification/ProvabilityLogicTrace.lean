@@ -21,7 +21,7 @@ it is not contained in `S`.
 namespace FFL.ProvabilityLogic
 
 open Entailment FirstOrder FirstOrder.ProvabilityAbstraction Kripke Kripke.Model Kripke.Model.World
-open Formula LetterlessFormula
+open Kripke.RootedModel Formula LetterlessFormula
 
 variable {α : Type*} {T U : ArithmeticTheory} [T.Δ₁]
 
@@ -65,7 +65,25 @@ variable [𝗜𝚺₁ ⪯ T] {A : Formula α}
 lemma exists_realization_provable_imp_TBB {κ : Type*} [Nonempty κ] (M : RootedModel κ α)
     [Fintype M.World] [M.IsGL] (hA : M.root ⊮[M.toModel] A) :
     ∃ f : Realization α ℒₒᵣ, 𝗜𝚺₁ ⊢ f T (A 🡒 TBB M.height) := by
-  sorry
+  let S := standardSolovaySentences T M.extendRoot;
+  use S.realization;
+  have h : ∀ i, 𝗜𝚺₁ ⊢ S.σ i 🡒 S.realization T (A 🡒 TBB M.height) := by
+    rintro (_ | x);
+    · have h₁ : 𝗜𝚺₁ ⊢ S.σ none 🡒 T.standardProvability.dia (S.σ (some M.root)) :=
+        S.SC2 _ _ trivial;
+      have h₂ : 𝗜𝚺₁ ⊢ S.σ (some M.root) 🡒 ∼S.realization T (□^[M.height]⊥) :=
+        S.mainlemma_neg (Option.some_ne_none _).symm <|
+          extendRoot.forces_some.not.mpr <| by simp [root_forces_boxItr_bot_iff];
+      have h₃ := contra <| T.standardProvability.mono' <| CN_of_CN_right h₂;
+      simp only [standardInterpret, Formula.interpret, TBB, interpret_boxItr,
+        Function.iterate_succ_apply'] at h₃ ⊢;
+      cl_prover [h₁, h₃];
+    · apply S.mainlemma (Option.some_ne_none x).symm;
+      apply extendRoot.forces_some.mpr;
+      by_cases hx : x = M.root;
+      · exact hx ▸ fun h ↦ absurd h hA;
+      · exact fun _ ↦ forces_TBB_iff.mpr (rank_lt_height (M.root_rel x hx)).ne;
+  cl_prover [left_Udisj_intro _ h, S.SC4];
 
 /-- - [AB05, Lemma 49] -/
 lemma exists_realization_provable_neg_of_not_S (hA : 𝐒 ⊬ A) :
