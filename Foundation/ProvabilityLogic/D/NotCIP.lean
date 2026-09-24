@@ -46,7 +46,12 @@ lemma S_modalize_iff_of_interpolant (hab : a ≠ b) (hac : a ≠ c)
 
 lemma _root_.FFL.ProvabilityLogic.Logic.S.not_iff_atom (hab : a ≠ b) (hC : C.ModalizedIn a)
     (hb : b ∉ C.atoms) : 𝐒 ⊬ C 🡘 #a := by
-  sorry
+  intro h;
+  obtain ⟨E, -, hE⟩ := Logic.GL.exists_fixpoint (A := ∼C) hab ⟨hC, trivial⟩ (by simpa using hb);
+  have h₁ : 𝐒 ⊢ (C 🡘 #a)⟦.single a E⟧ := sumQuasiNormal.subst h;
+  have h₂ : 𝐒 ⊢ ∼C⟦a ↦ E⟧ 🡘 E := S.of_GL hE;
+  simp only [subst_iff, subst_atom, Substitution.single_apply, ite_true] at h₁;
+  exact S.consistent (by cl_prover [h₁, h₂]);
 
 /-- **`𝐃` does not have the Craig interpolation property.**
 
