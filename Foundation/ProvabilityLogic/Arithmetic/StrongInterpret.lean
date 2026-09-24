@@ -17,7 +17,7 @@ namespace FFL.ProvabilityLogic
 
 open Entailment FirstOrder FirstOrder.ProvabilityAbstraction
 
-variable {α : Type*} {L : Language} [L.ReferenceableBy L] [L.DecidableEq]
+variable {α : Type*} {L : Language} [L.ReferenceableBy L]
          {T₀ T : Theory L} [T₀ ⪯ T] {𝔅 : Provability T₀ T}
 
 namespace Formula

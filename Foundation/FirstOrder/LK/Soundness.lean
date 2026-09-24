@@ -7,6 +7,8 @@ public import Foundation.FirstOrder.LK.Basic
 
 namespace FFL.FirstOrder
 
+universe u v
+
 open Semiformula
 
 variable {L : Language}
@@ -71,14 +73,16 @@ lemma sound {M : Type*} [s : Tarski.Structure L M] [Nonempty M] (f : ℕ → M) 
 
 end LK.Derivation
 
-theorem LK.Proof.sound {M : Type*} [s : Tarski.Structure L M] [Nonempty M] {φ : Proposition L} (f : ℕ → M) :
+theorem LK.Proof.sound {M : Type*} [s : Tarski.Structure L M] [Nonempty M] {φ : Proposition L}
+    (f : ℕ → M) :
     𝐋𝐊¹ ⊢ φ → φ.Evalf f := fun ⟨b⟩ ↦ by simpa using LK.Derivation.sound f b
 
 variable {T U : Theory L}
 
 namespace Theory
 
-theorem Proof.sound_proposition {M : Type*} [s : Tarski.Structure L M] [Nonempty M] :
+theorem Proof.sound_proposition {M : Type*} [s : Tarski.Structure L M] [Nonempty M]
+    {φ : Sentence L} :
     T ⊢ φ → M↓[L] ⊧* T → φ.Realize M := fun b H ↦ by
   rcases Proof.provable_iff.mp b with ⟨Γ, hΓ, ⟨b⟩⟩
   let f : ℕ → M := fun _ ↦ Nonempty.some inferInstance
@@ -101,11 +105,13 @@ theorem Proof.sound {φ : Sentence L} :
   simpa [struc_models_iff_models (s := s), models_iff]
     using Proof.sound_proposition b hS
 
-theorem Proof.sound_small : T ⊢ φ → T ⊨ φ := Proof.sound
+theorem Proof.sound_small {φ : Sentence L} : T ⊢ φ → T ⊨ φ := Proof.sound
 
-instance (T : Theory L) : Sound T (Semantics.models (Tarski.Struc.{v, u} L) T) := ⟨Theory.Proof.sound⟩
+instance (T : Theory L) : Sound T (Semantics.models (Tarski.Struc.{v, u} L) T) :=
+  ⟨Theory.Proof.sound⟩
 
-lemma consistent_of_satisfiable (h : Semantics.Satisfiable (Tarski.Struc.{v, u} L) T) : Entailment.Consistent T :=
+lemma consistent_of_satisfiable (h : Semantics.Satisfiable (Tarski.Struc.{v, u} L) T) :
+    Entailment.Consistent T :=
   Sound.consistent_of_satisfiable h
 
 end Theory

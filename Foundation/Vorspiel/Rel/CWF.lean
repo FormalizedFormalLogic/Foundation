@@ -16,7 +16,7 @@ public section
 
 section
 
-abbrev ConverseWellFounded {α} (rel : Rel α α) := WellFounded $ flip rel
+abbrev ConverseWellFounded {α} (rel : Rel α α) := WellFounded <| flip rel
 
 class IsConverseWellFounded (α) (rel : Rel α α) : Prop where cwf : ConverseWellFounded rel
 
@@ -28,10 +28,12 @@ section
 
 variable {α} {R : Rel α α}
 
-lemma ConverseWellFounded.iff_has_max : ConverseWellFounded R ↔ (∀ (s : Set α), Set.Nonempty s → ∃ m ∈ s, ∀ x ∈ s, ¬(R m x)) := by
+lemma ConverseWellFounded.iff_has_max :
+    ConverseWellFounded R ↔ (∀ (s : Set α), Set.Nonempty s → ∃ m ∈ s, ∀ x ∈ s, ¬(R m x)) := by
   simp [ConverseWellFounded, WellFounded.wellFounded_iff_has_min, flip];
 
-theorem Finite.converseWellFounded_of_trans_of_irrefl [Finite α] [IsTrans α R] [Std.Irrefl R] : ConverseWellFounded R := by
+theorem Finite.converseWellFounded_of_trans_of_irrefl [Finite α] [IsTrans α R] [Std.Irrefl R] :
+    ConverseWellFounded R := by
   apply @Finite.wellFounded_of_trans_of_irrefl _ _ _
     ⟨by intro a b c rba rcb; exact IsTrans.trans c b a rcb rba⟩
     ⟨by simp [flip, Std.Irrefl.irrefl]⟩;
@@ -52,8 +54,7 @@ section cwfHeight
 
 variable [Fintype α] [IsConverseWellFounded α R]
 
-open Classical
-
+open scoped Classical in
 lemma cwfHeight_eq (a : α) :
   cwfHeight R a = Finset.sup {x : α | R a x} (fun b ↦ cwfHeight R b + 1) := by
   have h : cwfHeight R a = Finset.univ.sup fun b : {y : α // R a y} ↦ cwfHeight R b + 1 :=
@@ -62,33 +63,59 @@ lemma cwfHeight_eq (a : α) :
     Finset.univ.sup (fun b : {y : α // R a y} ↦ cwfHeight R b + 1) =
     Finset.sup {y : α | R a y} fun b ↦ cwfHeight R b + 1 from h.trans this;
   apply eq_of_le_of_ge;
-  . apply Finset.sup_le;
+  · apply Finset.sup_le;
     intro b _;
     exact Finset.le_sup (f := fun b ↦ cwfHeight R b + 1) (by simp [b.prop]);
-  . apply Finset.sup_le;
+  · apply Finset.sup_le;
     intro b hb;
     simpa using Finset.le_sup (f := fun b : {y : α // R a y} ↦ cwfHeight R b + 1)
       (b := ⟨b, by simpa using hb⟩) (s := Finset.univ) (by simp);
 
+open scoped Classical in
 lemma cwfHeight_gt_of {a b} :
   R a b → cwfHeight R a > cwfHeight R b := fun h ↦ calc
   cwfHeight R a = Finset.sup {x : α | R a x} fun b ↦ cwfHeight R b + 1 := cwfHeight_eq a
-  _               ≥ cwfHeight R b + 1 := Finset.le_sup (f := fun b ↦ cwfHeight R b + 1) (by simp [h])
+  _               ≥ cwfHeight R b + 1 :=
+    Finset.le_sup (f := fun b ↦ cwfHeight R b + 1) (by simp [h])
 
-lemma cwfHeight_le {a : α}
+lemma cwfHeight_le {n : ℕ} {a : α}
   (h : ∀ b, R a b → cwfHeight R b < n) : cwfHeight R a ≤ n := by
   rw [cwfHeight_eq];
   apply Finset.sup_le;
   intro b hab;
   exact h b (by simpa using hab);
 
-lemma lt_cwfHeight {a : α} (hb : R a b) (h : n ≤ cwfHeight R b) : n < cwfHeight R a := by
+lemma lt_cwfHeight {b : α} {n : ℕ} {a : α} (hb : R a b) (h : n ≤ cwfHeight R b) :
+    n < cwfHeight R a := by
+  classical
   have : cwfHeight R b < cwfHeight R a := by
     apply Nat.lt_of_succ_le;
     rw [cwfHeight_eq a];
     exact Finset.le_sup (s := {x : α | R a x})
       (f := fun b ↦ cwfHeight R b + 1) (b := b) (by simp [hb]);
   exact lt_of_le_of_lt h this;
+
+lemma exists_cwfHeight_eq_succ {a : α} (h : cwfHeight R a ≠ 0) :
+    ∃ b, R a b ∧ cwfHeight R a = cwfHeight R b + 1 := by
+  classical
+  have hne : ({x : α | R a x} : Finset α).Nonempty := by
+    by_contra hc;
+    apply h;
+    rw [cwfHeight_eq, Finset.not_nonempty_iff_eq_empty.mp hc, Finset.sup_empty];
+    rfl;
+  obtain ⟨b, hb, e⟩ := Finset.exists_mem_eq_sup _ hne (fun b ↦ cwfHeight R b + 1);
+  exact ⟨b, by simpa using hb, (cwfHeight_eq a).trans e⟩;
+
+lemma exists_cwfHeight_eq_of_lt [IsTrans α R] {a : α} {n : ℕ} (h : n < cwfHeight R a) :
+    ∃ b, R a b ∧ cwfHeight R b = n := by
+  induction a using WellFounded.induction IsConverseWellFounded.cwf (r := flip R)
+    generalizing n with
+  | h a ih =>
+    obtain ⟨b, hab, e⟩ := exists_cwfHeight_eq_succ (R := R) (a := a) (by omega);
+    rcases Nat.lt_or_ge n (cwfHeight R b) with hn | hn;
+    · obtain ⟨c, hbc, rfl⟩ := ih b hab hn;
+      exact ⟨c, IsTrans.trans _ _ _ hab hbc, rfl⟩;
+    · exact ⟨b, hab, by omega⟩;
 
 end cwfHeight
 

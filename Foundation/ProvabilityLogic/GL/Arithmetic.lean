@@ -16,7 +16,6 @@ public import Foundation.FirstOrder.Incompleteness.Löb
 
 namespace FFL.ProvabilityLogic
 
-open Classical
 open Entailment FirstOrder FirstOrder.ProvabilityAbstraction Kripke Kripke.Model Kripke.Model.World
 
 namespace Logic.GL
@@ -32,8 +31,8 @@ theorem arithmetical_soundness (h : 𝐆𝐋 ⊢ A) : T ⊢ A.interpret f 𝔅 :
   induction h with
   | axm hA =>
     rcases hA with (⟨B, rfl⟩ | ⟨B, rfl⟩);
-    . exact 𝔅.D3;
-    . exact formalized_löb_theorem;
+    · exact 𝔅.D3;
+    · exact formalized_löb_theorem;
   | nec _ ih => exact 𝔅.D1 (WeakerThan.pbl ih);
   | mdp _ _ ih₁ ih₂ => exact ih₁ ⨀ ih₂;
   | axiomK => exact 𝔅.D2;
@@ -43,16 +42,18 @@ end
 
 universe u
 
-variable {α : Type u} [DecidableEq α] {A : Formula α}
+variable {α : Type u} {A : Formula α}
          {T : ArithmeticTheory} [T.Δ₁] [𝗜𝚺₁ ⪯ T]
 
 /-- Solovay's arithmetical completeness theorem for theories of infinite height. -/
 theorem arithmetical_completeness_of_height_eq_top (height : T.height = ⊤) :
     (∀ f : Realization α ℒₒᵣ, T ⊢ f T A) → 𝐆𝐋 ⊢ A := by
+  classical
   contrapose!;
   intro hA;
-  obtain ⟨κ, _, M, _, hA⟩ : ∃ (κ : Type u) (_ : Nonempty κ) (M : RootedModel κ α) (_ : M.IsFiniteGL),
-      M.root ⊮[M.toModel] A := by
+  obtain ⟨κ, _, M, _, hA⟩ :
+      ∃ (κ : Type u) (_ : Nonempty κ) (M : RootedModel κ α) (_ : M.IsFiniteGL),
+        M.root ⊮[M.toModel] A := by
     simpa using iff_root_forces.not.mp hA;
   have : Fintype M.World := Fintype.ofFinite _;
   exact unprovable_realization_exists T M hA (by simp [height]);
@@ -60,10 +61,12 @@ theorem arithmetical_completeness_of_height_eq_top (height : T.height = ⊤) :
 /-- Solovay's arithmetical completeness theorem for theories of finite height. -/
 theorem arithmetical_completeness_of_le_height {n : ℕ} (height : n ≤ T.height) :
     (∀ f : Realization α ℒₒᵣ, T ⊢ f T A) → 𝐆𝐋 ⊢ □^[n]⊥ 🡒 A := by
+  classical
   contrapose!;
   intro hA;
-  obtain ⟨κ, _, M, _, hA⟩ : ∃ (κ : Type u) (_ : Nonempty κ) (M : RootedModel κ α) (_ : M.IsFiniteGL),
-      M.root ⊮[M.toModel] □^[n]⊥ 🡒 A := by
+  obtain ⟨κ, _, M, _, hA⟩ :
+      ∃ (κ : Type u) (_ : Nonempty κ) (M : RootedModel κ α) (_ : M.IsFiniteGL),
+        M.root ⊮[M.toModel] □^[n]⊥ 🡒 A := by
     simpa using iff_root_forces.not.mp hA;
   obtain ⟨h₁, h₂⟩ := not_forces_imp.mp hA;
   have : Fintype M.World := Fintype.ofFinite _;

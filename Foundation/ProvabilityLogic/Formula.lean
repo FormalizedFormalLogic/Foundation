@@ -91,7 +91,8 @@ notation:76 "□^[" n "]" A:80 => boxItr n A
 
 @[simp, grind =] lemma boxItr_zero : □^[0]A = A := rfl
 
-@[simp, grind =] lemma boxItr_succ {n : ℕ} : □^[n + 1]A = □(□^[n]A) := Function.iterate_succ_apply' _ _ _
+@[simp, grind =] lemma boxItr_succ {n : ℕ} : □^[n + 1]A = □(□^[n]A) :=
+  Function.iterate_succ_apply' _ _ _
 
 abbrev boxdot (A : Formula α) : Formula α := A ⋏ □A
 
@@ -187,15 +188,15 @@ lemma subfmls_trans : A ∈ B.subfmls → A.subfmls ⊆ B.subfmls := by
     intro h;
     simp only [subfmls, Finset.mem_insert, Finset.mem_union] at h;
     rcases h with rfl | h | h;
-    . rfl;
-    . exact (ihC h).trans (by intro; simp [subfmls]; tauto);
-    . exact (ihD h).trans (by intro; simp [subfmls]; tauto);
+    · rfl;
+    · exact (ihC h).trans (by intro; simp [subfmls]; tauto);
+    · exact (ihD h).trans (by intro; simp [subfmls]; tauto);
   | box C ih =>
     intro h;
     simp only [subfmls, Finset.mem_insert] at h;
     rcases h with rfl | h;
-    . rfl;
-    . exact (ih h).trans (by intro; simp [subfmls]; tauto);
+    · rfl;
+    · exact (ih h).trans (by intro; simp [subfmls]; tauto);
   | _ => intro h; simp_all [subfmls];
 
 end Formula

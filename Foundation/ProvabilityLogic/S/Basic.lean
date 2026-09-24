@@ -88,19 +88,25 @@ theorem provability_TFAE : [
 
 lemma iff_provable_gentzen : 𝐒 ⊢ A ↔ ⊢ᴳ[S] ∅ ⟹[1] {A} := provability_TFAE.out 1 2
 
+omit [DecidableEq α] in
 lemma iff_eventually_forces : 𝐒 ⊢ A ↔
     ∀ {κ : Type u} [Nonempty κ] (M : Model κ α) [M.IsGL] (w : ℕ → M.World),
-      (∀ n, w (n + 1) ≺ w n) → ∃ i, ∀ j ≥ i, w j ⊩[M] A :=
-  provability_TFAE.out 1 3
+      (∀ n, w (n + 1) ≺ w n) → ∃ i, ∀ j ≥ i, w j ⊩[M] A := by
+  classical
+  exact provability_TFAE.out 1 3
 
+omit [DecidableEq α] in
 lemma iff_eventually_forces_tail : 𝐒 ⊢ A ↔
     ∀ {κ : Type u} [Nonempty κ] (M : RootedModel κ α) [M.IsFiniteGL],
-      ∃ i : ℕ, ∀ j ≥ i, (Sum.inr ↑j : κ ⊕ ℕ∞) ⊩[M.toTail.toModel] A :=
-  provability_TFAE.out 1 4
+      ∃ i : ℕ, ∀ j ≥ i, (Sum.inr ↑j : κ ⊕ ℕ∞) ⊩[M.toTail.toModel] A := by
+  classical
+  exact provability_TFAE.out 1 4
 
 lemma iff_provable_GL : 𝐒 ⊢ A ↔ 𝐆𝐋 ⊢ A.rflSubfmls.conj 🡒 A := provability_TFAE.out 1 6
 
+omit [DecidableEq α] in
 lemma consistent : (𝐒 : Logic α) ⊬ ⊥ := by
+  classical
   intro h;
   have h : 𝐆𝐋 ⊢ (⊥ : Formula α).rflSubfmls.conj 🡒 ⊥ := iff_provable_GL.mp h;
   have : (⊥ : Formula α).rflSubfmls = ∅ := by

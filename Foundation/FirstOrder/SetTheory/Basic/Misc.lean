@@ -8,11 +8,14 @@ public import Mathlib.SetTheory.Cardinal.Basic
 
 - *NOTE*:
   To avoid the duplicate definitions of `Tarski.Structure ℒₛₑₜ` for models,
-  we basically use `SetStructure`, and generated `standardStructure` instead of `Tarski.Structure ℒₛₑₜ` itself.
+  we basically use `SetStructure`, and generated `standardStructure` instead of
+  `Tarski.Structure ℒₛₑₜ` itself.
   If you wish to use a type with `Tarski.Structure ℒₛₑₜ`, use `QuotNormalize`.
 -/
 
 namespace FFL.FirstOrder
+
+universe w
 
 namespace Language
 
@@ -64,7 +67,8 @@ instance : (ℒₛₑₜ).Eq := ⟨Rel.eq⟩
 
 instance : (ℒₛₑₜ).Mem := ⟨Rel.mem⟩
 
-lemma rel_eq_eq_or_mem (R : (ℒₛₑₜ).Rel k) : k = 2 ∧ (R ≍ (Eq.eq : (ℒₛₑₜ).Rel 2) ∨ R ≍ (Mem.mem : (ℒₛₑₜ).Rel 2)) :=
+lemma rel_eq_eq_or_mem {k : ℕ} (R : (ℒₛₑₜ).Rel k) :
+    k = 2 ∧ (R ≍ (Eq.eq : (ℒₛₑₜ).Rel 2) ∨ R ≍ (Mem.mem : (ℒₛₑₜ).Rel 2)) :=
   match R with
   | Rel.eq => ⟨rfl, Or.inl <| by rfl⟩
   | Rel.mem => ⟨by rfl, Or.inr <| by rfl⟩
@@ -91,7 +95,7 @@ abbrev SetTheorySemiproposition (n : ℕ) := Semiproposition ℒₛₑₜ n
 
 abbrev SetTheoryProposition := Proposition ℒₛₑₜ
 
-variable [ToString ξ]
+variable {ξ : Type*} {n : ℕ} [ToString ξ]
 
 def Semiterm.toStringSet : SetTheorySemiterm ξ n → String
   | #x => "x_{" ++ toString (n - 1 - (x : ℕ)) ++ "}"
@@ -110,8 +114,10 @@ def Semiformula.toStringSet : ∀ {n}, SetTheorySemiformula ξ n → String
   | _,         .nrel Language.Mem.mem v => s!"{(v 0).toStringSet} ∉ {(v 1).toStringSet}"
   | _,                           φ ⋏ ψ => s!"[{φ.toStringSet}] ∧ [{ψ.toStringSet}]"
   | _,                           φ ⋎ ψ => s!"[{φ.toStringSet}] ∨ [{ψ.toStringSet}]"
-  | n, ∀¹ (rel Language.Mem.mem v 🡒 φ) => s!"(∀ x{toString n} ∈ {(v 1).toStringSet}) [{φ.toStringSet}]"
-  | n, ∃¹ (rel Language.Mem.mem v ⋏ φ) => s!"(∃ x{toString n} ∈ {(v 1).toStringSet}) [{φ.toStringSet}]"
+  | n, ∀¹ (rel Language.Mem.mem v 🡒 φ) =>
+    s!"(∀ x{toString n} ∈ {(v 1).toStringSet}) [{φ.toStringSet}]"
+  | n, ∃¹ (rel Language.Mem.mem v ⋏ φ) =>
+    s!"(∃ x{toString n} ∈ {(v 1).toStringSet}) [{φ.toStringSet}]"
   | n,                            ∀¹ φ => s!"(∀ x{toString n}) [{φ.toStringSet}]"
   | n,                            ∃¹ φ => s!"(∃ x{toString n}) [{φ.toStringSet}]"
 
@@ -121,7 +127,8 @@ instance : ToString (SetTheorySemiformula ξ n) := ⟨fun φ ↦ φ.toStringSet�
 
 abbrev _root_.FFL.SetStructure (V : Type*) := Membership V V
 
-class Tarski.Structure.Set (M : Type w) [SetStructure M] [Tarski.Structure ℒₛₑₜ M] extends Tarski.Structure.Eq ℒₛₑₜ M, Tarski.Structure.Mem ℒₛₑₜ M
+class Tarski.Structure.Set (M : Type w) [SetStructure M] [Tarski.Structure ℒₛₑₜ M] extends
+    Tarski.Structure.Eq ℒₛₑₜ M, Tarski.Structure.Mem ℒₛₑₜ M
 
 attribute [instance] Tarski.Structure.Set.mk
 
@@ -135,8 +142,10 @@ private lemma consequence_of_aux (T : SetTheory) [𝗘𝗤 _ ⪯ T] (φ : SetThe
            [Nonempty M]
            [M↓[ℒₛₑₜ] ⊧* T],
            M↓[ℒₛₑₜ] ⊧ φ) :
-    T ⊨ φ := Theory.consequence_iff_consequence.{_, w}.mp <| consequence_iff_eq.mpr fun M _ _ _ hT =>
-  letI : (Tarski.Structure.Model ℒₛₑₜ M)↓[ℒₛₑₜ] ⊧* T := Tarski.Structure.ElementaryEquiv.modelsTheory.mp hT
+    T ⊨ φ :=
+  Theory.consequence_iff_consequence.{_, w}.mp <| consequence_iff_eq.mpr fun M _ _ _ hT =>
+  letI : (Tarski.Structure.Model ℒₛₑₜ M)↓[ℒₛₑₜ] ⊧* T :=
+    Tarski.Structure.ElementaryEquiv.modelsTheory.mp hT
   Tarski.Structure.ElementaryEquiv.models.mpr (H (Tarski.Structure.Model ℒₛₑₜ M))
 section semantics
 
@@ -154,21 +163,24 @@ instance : Tarski.Structure.Eq ℒₛₑₜ M := ⟨fun _ _ ↦ iff_of_eq rfl⟩
 instance : Tarski.Structure.Mem ℒₛₑₜ M := ⟨fun _ _ ↦ iff_of_eq rfl⟩
 
 lemma standardStructure_unique' (s : Tarski.Structure ℒₛₑₜ M)
-    (hEq : Tarski.Structure.Eq ℒₛₑₜ M) (hMem : Tarski.Structure.Mem ℒₛₑₜ M) : s = standardStructure M := Tarski.Structure.ext
+    (hEq : Tarski.Structure.Eq ℒₛₑₜ M) (hMem : Tarski.Structure.Mem ℒₛₑₜ M) :
+    s = standardStructure M := Tarski.Structure.ext
   (funext₃ fun k f ↦ Empty.elim f)
   (funext₃ fun k r _ =>
     match k, r with
     | _, Language.Eq.eq => by simp
     | _, Language.Mem.mem => by simp)
 
-lemma standardStructure_unique (s : Tarski.Structure ℒₛₑₜ M) [hEq : Tarski.Structure.Eq ℒₛₑₜ M] [hMem : Tarski.Structure.Mem ℒₛₑₜ M] : s = standardStructure M :=
+lemma standardStructure_unique (s : Tarski.Structure ℒₛₑₜ M) [hEq : Tarski.Structure.Eq ℒₛₑₜ M]
+    [hMem : Tarski.Structure.Mem ℒₛₑₜ M] : s = standardStructure M :=
   standardStructure_unique' M s hEq hMem
 
 
 /- ### Normalization -/
 
 /-- Normalize model without =-isomorphic. -/
-structure QuotNormalize (M : Type*) [Tarski.Structure ℒₛₑₜ M] [Nonempty M] [M↓[ℒₛₑₜ] ⊧* (𝗘𝗤 _ : SetTheory)] : Type _ where
+structure QuotNormalize (M : Type*) [Tarski.Structure ℒₛₑₜ M] [Nonempty M]
+    [M↓[ℒₛₑₜ] ⊧* (𝗘𝗤 _ : SetTheory)] : Type _ where
   toQuot : Tarski.Structure.Model ℒₛₑₜ (Tarski.Structure.Eq.QuotEq ℒₛₑₜ M)
 
 namespace QuotNormalize
@@ -194,7 +206,8 @@ lemma mem_def (x y : QuotNormalize M) : x ∈ y ↔ equiv x ∈ equiv y := by rf
 open Tarski.Structure
 
 instance elementary_equiv : QuotNormalize M ≡ₑ[ℒₛₑₜ] M :=
-  have h₁ : QuotNormalize M ≡ₑ[ℒₛₑₜ] Tarski.Structure.Model ℒₛₑₜ (Tarski.Structure.Eq.QuotEq ℒₛₑₜ M) := by
+  have h₁ : QuotNormalize M ≡ₑ[ℒₛₑₜ]
+      Tarski.Structure.Model ℒₛₑₜ (Tarski.Structure.Eq.QuotEq ℒₛₑₜ M) := by
     apply ElementaryEquiv.of_equiv equiv
     · intro k R v₁ v₂ h
       rcases Language.Set.rel_eq_eq_or_mem R with ⟨rfl, (rfl | rfl)⟩
@@ -227,12 +240,14 @@ end QuotNormalize
 
 end semantics
 
-lemma consequence_of_models (T : SetTheory) [𝗘𝗤 _ ⪯ T] (φ : SetTheorySentence) (H : ∀ (M : Type*) [SetStructure M] [Nonempty M] [M↓[ℒₛₑₜ] ⊧* T], M↓[ℒₛₑₜ] ⊧ φ) :
+lemma consequence_of_models (T : SetTheory) [𝗘𝗤 _ ⪯ T] (φ : SetTheorySentence)
+    (H : ∀ (M : Type*) [SetStructure M] [Nonempty M] [M↓[ℒₛₑₜ] ⊧* T], M↓[ℒₛₑₜ] ⊧ φ) :
     T ⊨ φ := consequence_of_aux T φ fun M _ s _ _ ↦ by
   rcases standardStructure_unique M s
   exact H M
 
-lemma provable_of_models (T : SetTheory) [𝗘𝗤 _ ⪯ T] (φ : SetTheorySentence) (H : ∀ (M : Type*) [SetStructure M] [Nonempty M] [M↓[ℒₛₑₜ] ⊧* T], M↓[ℒₛₑₜ] ⊧ φ) :
+lemma provable_of_models (T : SetTheory) [𝗘𝗤 _ ⪯ T] (φ : SetTheorySentence)
+    (H : ∀ (M : Type*) [SetStructure M] [Nonempty M] [M↓[ℒₛₑₜ] ⊧* T], M↓[ℒₛₑₜ] ⊧ φ) :
     T ⊢ φ := Theory.Proof.complete <| consequence_of_models _ _ H
 
 end SetTheory

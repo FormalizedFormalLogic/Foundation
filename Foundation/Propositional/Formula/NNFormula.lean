@@ -6,7 +6,7 @@ public import Foundation.Logic.LogicSymbol
 
 namespace FFL.Propositional
 
-inductive NNFormula (α : Type u) : Type u where
+inductive NNFormula (α : Type*) : Type _ where
   | verum  : NNFormula α
   | falsum : NNFormula α
   | atom   : α → NNFormula α
@@ -16,7 +16,7 @@ inductive NNFormula (α : Type u) : Type u where
 
 namespace NNFormula
 
-variable {α : Type u} {α₁ : Type u₁} {α₂ : Type u₂} {α₃ : Type u₃}
+variable {α : Type*}
 
 def neg : NNFormula α → NNFormula α
   | verum   => falsum
@@ -116,20 +116,24 @@ def complexity : NNFormula α → ℕ
 
 @[simp] lemma complexity_natom (a : α) : complexity (natom a) = 0 := rfl
 
-@[simp] lemma complexity_and (φ ψ : NNFormula α) : complexity (φ ⋏ ψ) = max φ.complexity ψ.complexity + 1 := rfl
-@[simp] lemma complexity_and' (φ ψ : NNFormula α) : complexity (and φ ψ) = max φ.complexity ψ.complexity + 1 := rfl
+@[simp] lemma complexity_and (φ ψ : NNFormula α) :
+    complexity (φ ⋏ ψ) = max φ.complexity ψ.complexity + 1 := rfl
+@[simp] lemma complexity_and' (φ ψ : NNFormula α) :
+    complexity (and φ ψ) = max φ.complexity ψ.complexity + 1 := rfl
 
-@[simp] lemma complexity_or (φ ψ : NNFormula α) : complexity (φ ⋎ ψ) = max φ.complexity ψ.complexity + 1 := rfl
-@[simp] lemma complexity_or' (φ ψ : NNFormula α) : complexity (or φ ψ) = max φ.complexity ψ.complexity + 1 := rfl
+@[simp] lemma complexity_or (φ ψ : NNFormula α) :
+    complexity (φ ⋎ ψ) = max φ.complexity ψ.complexity + 1 := rfl
+@[simp] lemma complexity_or' (φ ψ : NNFormula α) :
+    complexity (or φ ψ) = max φ.complexity ψ.complexity + 1 := rfl
 
 @[elab_as_elim]
-def cases' {C : NNFormula α → Sort w}
-    (hverum  : C ⊤)
+def cases' {C : NNFormula α → Sort*}
+    (hverum : C ⊤)
     (hfalsum : C ⊥)
-    (hatom   : ∀ a : α, C (atom a))
-    (hnatom  : ∀ a : α, C (natom a))
-    (hand    : ∀ (φ ψ : NNFormula α), C (φ ⋏ ψ))
-    (hor     : ∀ (φ ψ : NNFormula α), C (φ ⋎ ψ)) : (φ : NNFormula α) → C φ
+    (hatom : ∀ a : α, C (atom a))
+    (hnatom : ∀ a : α, C (natom a))
+    (hand : ∀ (φ ψ : NNFormula α), C (φ ⋏ ψ))
+    (hor : ∀ (φ ψ : NNFormula α), C (φ ⋎ ψ)) : (φ : NNFormula α) → C φ
   | ⊤       => hverum
   | ⊥       => hfalsum
   | atom a  => hatom a
@@ -138,19 +142,25 @@ def cases' {C : NNFormula α → Sort w}
   | φ ⋎ ψ   => hor φ ψ
 
 @[elab_as_elim]
-def rec' {C : NNFormula α → Sort w}
-  (hverum  : C ⊤)
+def rec' {C : NNFormula α → Sort*}
+  (hverum : C ⊤)
   (hfalsum : C ⊥)
-  (hatom   : ∀ a : α, C (atom a))
-  (hnatom  : ∀ a : α, C (natom a))
-  (hand    : ∀ (φ ψ : NNFormula α), C φ → C ψ → C (φ ⋏ ψ))
-  (hor     : ∀ (φ ψ : NNFormula α), C φ → C ψ → C (φ ⋎ ψ)) : (φ : NNFormula α) → C φ
+  (hatom : ∀ a : α, C (atom a))
+  (hnatom : ∀ a : α, C (natom a))
+  (hand : ∀ (φ ψ : NNFormula α), C φ → C ψ → C (φ ⋏ ψ))
+  (hor : ∀ (φ ψ : NNFormula α), C φ → C ψ → C (φ ⋎ ψ)) : (φ : NNFormula α) → C φ
   | ⊤       => hverum
   | ⊥       => hfalsum
   | atom a  => hatom a
   | natom a => hnatom a
-  | φ ⋏ ψ   => hand φ ψ (rec' hverum hfalsum hatom hnatom hand hor φ) (rec' hverum hfalsum hatom hnatom hand hor ψ)
-  | φ ⋎ ψ   => hor φ ψ (rec' hverum hfalsum hatom hnatom hand hor φ) (rec' hverum hfalsum hatom hnatom hand hor ψ)
+  | φ ⋏ ψ   =>
+    hand φ ψ
+      (rec' hverum hfalsum hatom hnatom hand hor φ)
+      (rec' hverum hfalsum hatom hnatom hand hor ψ)
+  | φ ⋎ ψ   =>
+    hor φ ψ
+      (rec' hverum hfalsum hatom hnatom hand hor φ)
+      (rec' hverum hfalsum hatom hnatom hand hor ψ)
 
 @[simp] lemma complexity_neg (φ : NNFormula α) : complexity (∼φ) = complexity φ :=
   by induction φ using rec' <;> simp [*]

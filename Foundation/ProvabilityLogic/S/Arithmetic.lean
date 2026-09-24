@@ -47,7 +47,7 @@ end
 
 universe u
 
-variable {α : Type u} [DecidableEq α] {A : Formula α}
+variable {α : Type u} {A : Formula α}
          {T : ArithmeticTheory} [T.Δ₁] [𝗜𝚺₁ ⪯ T] [ℕ↓[ℒₒᵣ] ⊧* T]
 
 /-- Solovay's arithmetical completeness theorem for `S`: the formulas all of whose realizations are
@@ -57,6 +57,7 @@ true are exactly the theorems of `S`.
 - [AB05, Theorem 3]
 -/
 theorem arithmetical_completeness (H : ∀ f : Realization α ℒₒᵣ, ℕ↓[ℒₒᵣ] ⊧ f T A) : 𝐒 ⊢ A := by
+  classical
   have : ℕ↓[ℒₒᵣ] ⊧* 𝗜𝚺₁ := models_of_subtheory (T := 𝗜𝚺₁) (U := T) (M := ℕ) inferInstance;
   contrapose! H;
   obtain ⟨κ, _, M, _, hA⟩ :
@@ -83,8 +84,8 @@ theorem arithmetical_completeness_iff : 𝐒 ⊢ A ↔ ∀ f : Realization α �
 
 theorem eq_provabilityLogicRelativeTo_TA : (𝐒 : Logic α) = T.provabilityLogicRelativeTo 𝗧𝗔 := by
   ext A;
-  simpa [ArithmeticTheory.provabilityLogicRelativeTo, Arithmetic.TA.provable_iff, Logic.provable_iff_mem] using
-    arithmetical_completeness_iff;
+  simpa [ArithmeticTheory.provabilityLogicRelativeTo, Arithmetic.TA.provable_iff,
+    Logic.provable_iff_mem] using arithmetical_completeness_iff;
 
 theorem eq_provabilityLogicRelativeTo_peano_TA :
     (𝐒 : Logic α) = 𝗣𝗔.provabilityLogicRelativeTo 𝗧𝗔 :=

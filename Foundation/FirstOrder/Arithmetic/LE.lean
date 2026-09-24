@@ -7,13 +7,16 @@ namespace FFL
 
 namespace FirstOrder
 
+universe u w
+
 variable {L : Language.{u}} [Semiformula.Operator.Eq L] [Semiformula.Operator.LT L]
 
 open Semiformula
 
 def LT.le : Operator L 2 := Semiformula.Operator.Eq.eq.or Semiformula.Operator.LT.lt
 
-lemma le_eq (t₁ t₂ : Semiterm L μ n) : LT.le.operator ![t₁, t₂] = “!!t₁ = !!t₂ ∨ !!t₁ < !!t₂” := by
+lemma le_eq {μ : Type*} {n : ℕ} (t₁ t₂ : Semiterm L μ n) :
+    LT.le.operator ![t₁, t₂] = “!!t₁ = !!t₂ ∨ !!t₁ < !!t₂” := by
   simp [Operator.operator, Operator.or, LT.le, ←TransitiveRewriting.comp_app]
 
 namespace Order
@@ -31,7 +34,8 @@ lemma complete (φ : Sentence L)
       [M↓[L] ⊧* T],
       M↓[L] ⊧ φ) :
     T ⊢ φ := Theory.Proof.complete <| consequence_iff_eq.mpr fun M _ _ _ hT ↦
-  letI : (Tarski.Structure.Model L M)↓[L] ⊧* T := Tarski.Structure.ElementaryEquiv.modelsTheory.mp hT
+  letI : (Tarski.Structure.Model L M)↓[L] ⊧* T :=
+    Tarski.Structure.ElementaryEquiv.modelsTheory.mp hT
   Tarski.Structure.ElementaryEquiv.models.mpr (H (Tarski.Structure.Model L M))
 
 end Order

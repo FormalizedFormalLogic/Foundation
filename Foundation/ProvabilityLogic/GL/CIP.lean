@@ -25,10 +25,10 @@ variable {α : Type u} [DecidableEq α] {A B : Formula α}
 
 lemma imp_iff_provable_gentzen : 𝐆𝐋 ⊢ A 🡒 B ↔ ⊢ᴳ[GL] {A} ⟹ {B} := by
   constructor;
-  . intro h;
+  · intro h;
     have h₁ : ⊢ᴳ[GL] insert (A 🡒 B) {A} ⟹ {B} := Gentzen.impL (Gentzen.union A) (Gentzen.union B);
     simpa using Gentzen.cut (Γ₁ := ∅) (Δ₁ := ∅) (by simpa using iff_provable_gentzen.mp h) h₁;
-  . intro h;
+  · intro h;
     simpa using iff_provable_gentzen.mpr <| Gentzen.impR (Γ := ∅) (Δ := ∅) (by simpa using h);
 
 /-- **Craig interpolation property** of `GL`.

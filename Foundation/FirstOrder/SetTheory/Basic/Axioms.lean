@@ -18,7 +18,8 @@ syntax:45 first_order_term:45 " ⊆ " first_order_term:0 : first_order_formula
 open Lean Elab PrettyPrinter Delaborator SubExpr in
 macro_rules
   | `(⤫formula($type)[ $binders* | $fbinders* | $t:first_order_term ⊆ $u:first_order_term ]) =>
-    `(⤫formula($type)[ $binders* | $fbinders* | !isSubsetOf $t:first_order_term $u:first_order_term ])
+    `(⤫formula($type)[
+        $binders* | $fbinders* | !isSubsetOf $t:first_order_term $u:first_order_term ])
 
 def isEmpty : SetTheorySemisentence 1 := “x. ∀ y, y ∉ x”
 
@@ -44,7 +45,8 @@ def union : SetTheorySentence := “∀ x, ∃ y, ∀ z, z ∈ y ↔ ∃ w ∈ x
 def power : SetTheorySentence := “∀ x, ∃ y, ∀ z, z ∈ y ↔ z ⊆ x”
 
 /-- Axiom of infinity. -/
-def infinity : SetTheorySentence := “∃ I, (∀ e, !isEmpty e → e ∈ I) ∧ (∀ x ∈ I, ∀ x', !isSucc x' x → x' ∈ I)”
+def infinity : SetTheorySentence :=
+  “∃ I, (∀ e, !isEmpty e → e ∈ I) ∧ (∀ x ∈ I, ∀ x', !isSucc x' x → x' ∈ I)”
 
 /-- Axiom of foundation. -/
 def foundation : SetTheorySentence := “∀ x, !isNonempty x → ∃ y ∈ x, ∀ z ∈ x, z ∉ y”
@@ -59,7 +61,8 @@ def replacementSchema (φ : SetTheorySemiproposition 2) : SetTheorySentence :=
 
 /-- Axiom of choice. -/
 def choice : SetTheorySentence :=
-  “∀ 𝓧, (∀ X ∈ 𝓧, !isNonempty X) ∧ (∀ X ∈ 𝓧, ∀ Y ∈ 𝓧, (∃ z, z ∈ X ∧ z ∈ Y) → X = Y) → ∃ C, ∀ X ∈ 𝓧, ∃! x, x ∈ C ∧ x ∈ X”
+  “∀ 𝓧, (∀ X ∈ 𝓧, !isNonempty X) ∧ (∀ X ∈ 𝓧, ∀ Y ∈ 𝓧, (∃ z, z ∈ X ∧ z ∈ Y) → X = Y) →
+    ∃ C, ∀ X ∈ 𝓧, ∃! x, x ∈ C ∧ x ∈ X”
 
 end Axiom
 
@@ -84,7 +87,8 @@ inductive Zermelo : SetTheory
   /-- Axiom of foundation. -/
   | axiom_of_foundation : Zermelo Axiom.foundation
   /-- Axiom schema of separation. -/
-  | axiom_of_separation (φ : SetTheorySemiproposition 1) : Zermelo (Axiom.separationSchema φ)
+  | axiom_of_separation (φ : SetTheorySemiproposition 1) :
+      Zermelo (Axiom.separationSchema φ)
 
 notation "𝗭" => Zermelo
 
@@ -111,9 +115,11 @@ inductive ZermeloFraenkel : SetTheory
   /-- Axiom of foundation. -/
   | axiom_of_foundation : ZermeloFraenkel Axiom.foundation
   /-- Axiom schema of separation. -/
-  | axiom_of_separation (φ : SetTheorySemiproposition 1) : ZermeloFraenkel (Axiom.separationSchema φ)
+  | axiom_of_separation (φ : SetTheorySemiproposition 1) :
+      ZermeloFraenkel (Axiom.separationSchema φ)
   /-- Axiom schema of replacement. -/
-  | axiom_of_replacement (φ : SetTheorySemiproposition 2) : ZermeloFraenkel (Axiom.replacementSchema φ)
+  | axiom_of_replacement (φ : SetTheorySemiproposition 2) :
+      ZermeloFraenkel (Axiom.replacementSchema φ)
 
 notation "𝗭𝗙" => ZermeloFraenkel
 

@@ -13,6 +13,7 @@ public import Mathlib.Logic.Encodable.Basic
 /-! # Completeness theorem -/
 
 @[expose] public section
+set_option autoImplicit true
 
 /-! ### Generic filters -/
 
@@ -26,10 +27,10 @@ variable {K : Language}
 
 local notation "ℙ" => ConsistentSequent K
 
-open Classical
 def decidablePoints (φ : Proposition K) : DenseSet ℙ where
   set := {p | p ⊩ᶜ φ ∨ p ⊩ᶜ ∼φ}
   is_dense := by
+    classical
     intro p
     have : p ⊩ᶜ φ ⋎ ∼φ := IsWeaklyForced.complete.mpr Entailment.lem p
     have : ∀ q ≤ p, ∃ r ≤ q, r ⊩ᶜ φ ∨ r ⊩ᶜ ∼φ := by simpa using this
@@ -41,11 +42,13 @@ def decidablePoints (φ : Proposition K) : DenseSet ℙ where
 def henkinPoints (φ : Semiproposition K 1) : DenseSet ℙ where
   set := {p | ∀ q ≤ p, q ⊩ᶜ ∃¹ φ → ∃ t, q ⊩ᶜ φ/[t]}
   is_dense := by
+    classical
     intro p
     suffices ∃ q ≤ p, ∀ q_1 ≤ q, (∀ q ≤ q_1, ∃ r ≤ q, ∃ t, r ⊩ᶜ φ/[t]) → ∃ t, q_1 ⊩ᶜ φ/[t] by
       simpa only [IsWeaklyForced.exs, Set.mem_ofPred_eq]
     have : p ⊩ᶜ (∃¹ φ) ⋎ (∀¹ ∼φ) := IsWeaklyForced.complete.mpr Entailment.lem p
-    have : ∀ q ≤ p, ∃ r ≤ q, (∀ q ≤ r, ∃ r ≤ q, ∃ t, r ⊩ᶜ φ/[t]) ∨ (∀ t, ∀ q ≤ r, ¬q ⊩ᶜ φ/[t]) := by simpa using this
+    have : ∀ q ≤ p, ∃ r ≤ q,
+        (∀ q ≤ r, ∃ r ≤ q, ∃ t, r ⊩ᶜ φ/[t]) ∨ (∀ t, ∀ q ≤ r, ¬q ⊩ᶜ φ/[t]) := by simpa using this
     rcases this p (by rfl) with ⟨q, hqp, (h | h)⟩
     · rcases h q (by rfl) with ⟨r, hrq, t, ht⟩
       refine ⟨r, le_trans hrq hqp, fun s hsr _ ↦ ⟨t, IsWeaklyForced.monotone hsr ht⟩⟩
@@ -65,7 +68,8 @@ variable [K.Encodable]
 theorem exists_genericFilter (p : ℙ) :
     ∃ G : PFilter ℙ, G.IsGeneric denseSets ∧ p ∈ G :=
   PFilter.exists_genericFilter_of_countable denseSets
-    (Set.countable_union.mpr ⟨Set.countable_range decidablePoints, Set.countable_range henkinPoints⟩) p
+    (Set.countable_union.mpr
+      ⟨Set.countable_range decidablePoints, Set.countable_range henkinPoints⟩) p
 
 noncomputable def genericFilter (p : ℙ) : PFilter ℙ := Classical.choose (exists_genericFilter p)
 
@@ -161,13 +165,15 @@ abbrev termModelOf (p : ℙ) : Tarski.Structure K (Term K ℕ) where
 @[simp] lemma termModel_rel_def (R : K.Rel k) (v) :
     (termModelOf p).rel R v ↔ p ⊫ .rel R v := by rfl
 
-@[simp] lemma termModel_val_eq (t : Semiterm K ξ n) (fv : ξ → (Term K ℕ)) (bv : Fin n → (Term K ℕ)) :
+@[simp] lemma termModel_val_eq (t : Semiterm K ξ n) (fv : ξ → (Term K ℕ))
+    (bv : Fin n → (Term K ℕ)) :
     t.val (s := termModelOf p) bv fv = Rew.bind bv fv t := by
   induction t <;> simp [*, Function.comp_def]
 
 lemma forcing_lemma (φ : Semiformula K ξ n) {fv : ξ → (Term K ℕ)} {bv : Fin n → (Term K ℕ)} :
     φ.Eval (s := termModelOf p) bv fv ↔ p ⊫ Rew.bind bv fv ▹ φ :=
-  have e (t : Term K ℕ) (φ : Semiformula K ξ (n + 1)) : ((Rew.bind bv fv).q ▹ φ)/[t] = Rew.bind (t :> bv) fv ▹ φ := by
+  have e (t : Term K ℕ) (φ : Semiformula K ξ (n + 1)) :
+      ((Rew.bind bv fv).q ▹ φ)/[t] = Rew.bind (t :> bv) fv ▹ φ := by
     unfold Rewriting.subst; rw [←TransitiveRewriting.comp_app]
     congr; ext x
     · cases x using Fin.cases <;> simp [Rew.comp_app]
@@ -180,7 +186,8 @@ lemma forcing_lemma (φ : Semiformula K ξ n) {fv : ξ → (Term K ℕ)} {bv : F
 
 lemma refl (φ : Proposition K) (h : 𝐋𝐊¹ ⊬ ∼φ) :
     φ.Evalf (s := termModelOf (ConsistentSequent.ofUnprovable φ h)) (&·) :=
-  (forcing_lemma φ).mpr ⟨ConsistentSequent.ofUnprovable φ h, by simp, by simpa using IsWeaklyForced.refl φ h⟩
+  (forcing_lemma φ).mpr
+    ⟨ConsistentSequent.ofUnprovable φ h, by simp, by simpa using IsWeaklyForced.refl φ h⟩
 
 end LK.Derivation.Canonical
 
@@ -188,12 +195,13 @@ end LK.Derivation.Canonical
 
 namespace LK
 
-open Classical LK.Derivation.Canonical
+open LK.Derivation.Canonical
 
 variable {L : Language}
 
 lemma satisfiable_of_irrefutable (σ : Sentence L) (h : 𝐋𝐊¹ ⊬ ∼(σ : Proposition L)) :
     Satisfiable {σ} := by
+  classical
   let K := σ.sublanguage
   let π : Sentence K := σ.toSubLanguageSelf
   have : 𝐋𝐊¹ ⊬ ∼(π : Proposition K) := fun h ↦ by
@@ -209,7 +217,7 @@ end LK
 
 namespace Theory
 
-open Classical FFL.Entailment
+open FFL.Entailment
 
 variable {L : Language.{u}} {T : Theory L}
 
@@ -237,10 +245,12 @@ lemma satisfiable_iff_consistent :
 /-- Completeness theorem (II) -/
 theorem Proof.complete :
     T ⊨[Tarski.Struc.{max u w} L] φ → T ⊢ φ := by
+  classical
   contrapose!
   intro h
   have : Consistent (insert (∼φ) T) := unprovable_iff_consistent_adjoin.mp h
-  have : Semantics.Satisfiable (Tarski.Struc.{max u w} L) (insert (∼φ) T) := satisfiable_iff_consistent.mpr this
+  have : Semantics.Satisfiable (Tarski.Struc.{max u w} L) (insert (∼φ) T) :=
+    satisfiable_iff_consistent.mpr this
   rcases this with ⟨⟨M, i, s⟩, hM⟩
   have : ¬M↓[L] ⊧ φ ∧ M↓[L] ⊧* T := by simpa using hM
   simpa [consequence_iff] using ⟨M, i.some, s, this.2, this.1⟩
@@ -249,9 +259,11 @@ theorem Proof.small_complete : T ⊨ φ → T ⊢ φ := Proof.complete
 
 theorem Proof.complete_iff : T ⊨ φ ↔ T ⊢ φ := ⟨fun h ↦ Proof.complete h, Proof.sound⟩
 
-instance Proof.isComplete (T : Theory L) : Complete T (Semantics.models (Tarski.Struc.{max u w} L) T) := ⟨Proof.complete⟩
+instance Proof.isComplete (T : Theory L) :
+    Complete T (Semantics.models (Tarski.Struc.{max u w} L) T) := ⟨Proof.complete⟩
 
-lemma satisfiable_iff_satisfiable : Semantics.Satisfiable (Tarski.Struc.{max u w} L) T ↔ Satisfiable T := by
+lemma satisfiable_iff_satisfiable :
+    Semantics.Satisfiable (Tarski.Struc.{max u w} L) T ↔ Satisfiable T := by
   simp [satisfiable_iff_consistent.{u, w}, satisfiable_iff_consistent.{u, u}]
 
 lemma consequence_iff_consequence : T ⊨[Tarski.Struc.{max u w} L] φ ↔ T ⊨ φ := by
@@ -269,9 +281,11 @@ lemma of_provably_subtheory [le : T ⪯ U] (h : M↓[L] ⊧* U) : M↓[L] ⊧* T
   have : U ⊢ φ := le.pbl (Entailment.by_axm hφ)
   consequence_iff'.{u, w}.mp (Theory.Proof.sound this) M⟩
 
-lemma of_add_left [M↓[L] ⊧* T ∪ U] : M↓[L] ⊧* T := models_of_ss inferInstance (show T ⊆ T ∪ U from by simp)
+lemma of_add_left [M↓[L] ⊧* T ∪ U] : M↓[L] ⊧* T :=
+  models_of_ss inferInstance (show T ⊆ T ∪ U from by simp)
 
-lemma of_add_right [M↓[L] ⊧* T ∪ U] : M↓[L] ⊧* U := models_of_ss inferInstance (show U ⊆ T ∪ U from by simp)
+lemma of_add_right [M↓[L] ⊧* T ∪ U] : M↓[L] ⊧* U :=
+  models_of_ss inferInstance (show U ⊆ T ∪ U from by simp)
 
 end ModelsTheory
 
@@ -286,7 +300,8 @@ lemma Theory.Proof.complete_on_eq_models
       M↓[L] ⊧ φ) :
     T ⊢ φ :=
   have : T ⊨ φ := Theory.consequence_iff_consequence.mp <| consequence_iff_eq.mpr fun M _ _ _ hT ↦
-    letI : (Tarski.Structure.Model L M)↓[L] ⊧* T := Tarski.Structure.ElementaryEquiv.modelsTheory.mp hT
+    letI : (Tarski.Structure.Model L M)↓[L] ⊧* T :=
+      Tarski.Structure.ElementaryEquiv.modelsTheory.mp hT
     Tarski.Structure.ElementaryEquiv.models.mpr (H (Tarski.Structure.Model L M))
   Theory.Proof.complete this
 

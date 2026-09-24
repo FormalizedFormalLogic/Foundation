@@ -3,12 +3,14 @@ module
 public import Foundation.FirstOrder.Syntax.Classical.Formula
 
 @[expose] public section
+set_option autoImplicit true
 /-!
 # Formulas of intuitionistic first-order logic
 
 This file defines the formulas of first-order logic.
 
-`φ : Semiformulaᵢ L ξ n` is a (semi-)formula of language `L` with bounded variables of `Fin n` and free variables of `ξ`.
+`φ : Semiformulaᵢ L ξ n` is a (semi-)formula of language `L` with bounded variables of `Fin n` and
+free variables of `ξ`.
 The quantification is represented by de Bruijn index.
 
 -/
@@ -71,7 +73,8 @@ variable [∀ k, ToString (L.Func k)] [∀ k, ToString (L.Rel k)] [ToString ξ]
 def toStr : ∀ {n}, Semiformulaᵢ L ξ n → String
   | _, ⊥ => "\\bot"
   | _, rel (arity := 0) r _ => "{" ++ toString r ++ "}"
-  | _, rel (arity := _ + 1) r v => "{" ++ toString r ++ "} \\left(" ++ String.vecToStr (fun i => toString (v i)) ++ "\\right)"
+  | _, rel (arity := _ + 1) r v =>
+    "{" ++ toString r ++ "} \\left(" ++ String.vecToStr (fun i => toString (v i)) ++ "\\right)"
   | _, φ ⋏ ψ => "\\left(" ++ toStr φ ++ " \\land " ++ toStr ψ ++ "\\right)"
   | _, φ ⋎ ψ => "\\left(" ++ toStr φ ++ " \\lor "  ++ toStr ψ ++ "\\right)"
   | _, φ 🡒 ψ => "\\left(" ++ toStr φ ++ " \\to "  ++ toStr ψ ++ "\\right)"
@@ -124,24 +127,36 @@ def complexity {n} : Semiformulaᵢ L ξ n → ℕ
 
 @[simp] lemma complexity_bot : complexity (⊥ : Semiformulaᵢ L ξ n) = 0 := rfl
 
-@[simp] lemma complexity_rel {k} (r : L.Rel k) (v : Fin k → Semiterm L ξ n) : complexity (rel r v) = 0 := rfl
+@[simp] lemma complexity_rel {k} (r : L.Rel k) (v : Fin k → Semiterm L ξ n) :
+    complexity (rel r v) = 0 := rfl
 
-@[simp] lemma complexity_and (φ ψ : Semiformulaᵢ L ξ n) : complexity (φ ⋏ ψ) = max φ.complexity ψ.complexity + 1 := rfl
-@[simp] lemma complexity_and' (φ ψ : Semiformulaᵢ L ξ n) : complexity (and φ ψ) = max φ.complexity ψ.complexity + 1 := rfl
+@[simp] lemma complexity_and (φ ψ : Semiformulaᵢ L ξ n) :
+    complexity (φ ⋏ ψ) = max φ.complexity ψ.complexity + 1 := rfl
+@[simp] lemma complexity_and' (φ ψ : Semiformulaᵢ L ξ n) :
+    complexity (and φ ψ) = max φ.complexity ψ.complexity + 1 := rfl
 
-@[simp] lemma complexity_or (φ ψ : Semiformulaᵢ L ξ n) : complexity (φ ⋎ ψ) = max φ.complexity ψ.complexity + 1 := rfl
-@[simp] lemma complexity_or' (φ ψ : Semiformulaᵢ L ξ n) : complexity (or φ ψ) = max φ.complexity ψ.complexity + 1 := rfl
+@[simp] lemma complexity_or (φ ψ : Semiformulaᵢ L ξ n) :
+    complexity (φ ⋎ ψ) = max φ.complexity ψ.complexity + 1 := rfl
+@[simp] lemma complexity_or' (φ ψ : Semiformulaᵢ L ξ n) :
+    complexity (or φ ψ) = max φ.complexity ψ.complexity + 1 := rfl
 
-@[simp] lemma complexity_imp (φ ψ : Semiformulaᵢ L ξ n) : complexity (φ 🡒 ψ) = max φ.complexity ψ.complexity + 1 := rfl
-@[simp] lemma complexity_imp' (φ ψ : Semiformulaᵢ L ξ n) : complexity (imp φ ψ) = max φ.complexity ψ.complexity + 1 := rfl
+@[simp] lemma complexity_imp (φ ψ : Semiformulaᵢ L ξ n) :
+    complexity (φ 🡒 ψ) = max φ.complexity ψ.complexity + 1 := rfl
+@[simp] lemma complexity_imp' (φ ψ : Semiformulaᵢ L ξ n) :
+    complexity (imp φ ψ) = max φ.complexity ψ.complexity + 1 := rfl
 
-@[simp] lemma complexity_all (φ : Semiformulaᵢ L ξ (n + 1)) : complexity (∀¹ φ) = φ.complexity + 1 := rfl
-@[simp] lemma complexity_all' (φ : Semiformulaᵢ L ξ (n + 1)) : complexity (all φ) = φ.complexity + 1 := rfl
+@[simp] lemma complexity_all (φ : Semiformulaᵢ L ξ (n + 1)) :
+    complexity (∀¹ φ) = φ.complexity + 1 := rfl
+@[simp] lemma complexity_all' (φ : Semiformulaᵢ L ξ (n + 1)) :
+    complexity (all φ) = φ.complexity + 1 := rfl
 
-@[simp] lemma complexity_exs (φ : Semiformulaᵢ L ξ (n + 1)) : complexity (∃¹ φ) = φ.complexity + 1 := rfl
-@[simp] lemma complexity_exs' (φ : Semiformulaᵢ L ξ (n + 1)) : complexity (exs φ) = φ.complexity + 1 := rfl
+@[simp] lemma complexity_exs (φ : Semiformulaᵢ L ξ (n + 1)) :
+    complexity (∃¹ φ) = φ.complexity + 1 := rfl
+@[simp] lemma complexity_exs' (φ : Semiformulaᵢ L ξ (n + 1)) :
+    complexity (exs φ) = φ.complexity + 1 := rfl
 
-@[simp] lemma complexity_neg (φ : Semiformulaᵢ L ξ n) : complexity (∼φ) = complexity φ + 1 := by simp [neg_def]
+@[simp] lemma complexity_neg (φ : Semiformulaᵢ L ξ n) : complexity (∼φ) = complexity φ + 1 := by
+  simp [neg_def]
 
 @[elab_as_elim]
 def cases' {C : ∀ n, Semiformulaᵢ L ξ n → Sort w}
@@ -173,9 +188,12 @@ def rec' {C : ∀ n, Semiformulaᵢ L ξ n → Sort w}
     (φ : Semiformulaᵢ L ξ n) → C n φ
   | rel r v => hRel r v
   |       ⊥ => hFalsum
-  |   φ ⋏ ψ => hAnd φ ψ (rec' hRel hFalsum hAnd hOr hImp hAll hExs φ) (rec' hRel hFalsum hAnd hOr hImp hAll hExs ψ)
-  |   φ ⋎ ψ => hOr φ ψ (rec' hRel hFalsum hAnd hOr hImp hAll hExs φ) (rec' hRel hFalsum hAnd hOr hImp hAll hExs ψ)
-  |   φ 🡒 ψ => hImp φ ψ (rec' hRel hFalsum hAnd hOr hImp hAll hExs φ) (rec' hRel hFalsum hAnd hOr hImp hAll hExs ψ)
+  |   φ ⋏ ψ => hAnd φ ψ (rec' hRel hFalsum hAnd hOr hImp hAll hExs φ)
+      (rec' hRel hFalsum hAnd hOr hImp hAll hExs ψ)
+  |   φ ⋎ ψ => hOr φ ψ (rec' hRel hFalsum hAnd hOr hImp hAll hExs φ)
+      (rec' hRel hFalsum hAnd hOr hImp hAll hExs ψ)
+  |   φ 🡒 ψ => hImp φ ψ (rec' hRel hFalsum hAnd hOr hImp hAll hExs φ)
+      (rec' hRel hFalsum hAnd hOr hImp hAll hExs ψ)
   |    ∀¹ φ => hAll φ (rec' hRel hFalsum hAnd hOr hImp hAll hExs φ)
   |    ∃¹ φ => hExs φ (rec' hRel hFalsum hAnd hOr hImp hAll hExs φ)
 
@@ -249,7 +267,8 @@ attribute [simp] IsNegative.falsum
 
 namespace IsNegative
 
-@[simp] lemma and_iff {φ ψ : Semiformulaᵢ L ξ n} : (φ ⋏ ψ).IsNegative ↔ φ.IsNegative ∧ ψ.IsNegative :=
+@[simp] lemma and_iff {φ ψ : Semiformulaᵢ L ξ n} :
+    (φ ⋏ ψ).IsNegative ↔ φ.IsNegative ∧ ψ.IsNegative :=
   ⟨by rintro ⟨⟩; simp_all, by rintro ⟨hφ, hψ⟩; exact .and hφ hψ⟩
 
 @[simp] lemma imp_iff {φ ψ : Semiformulaᵢ L ξ n} : (φ 🡒 ψ).IsNegative ↔ ψ.IsNegative :=
@@ -264,7 +283,8 @@ namespace IsNegative
 
 @[simp] lemma not_exs {φ : Semiformulaᵢ L ξ (n + 1)} : ¬(∃¹ φ).IsNegative := by rintro ⟨⟩
 
-@[simp] lemma not_rel {k} (r : L.Rel k) (v : Fin k → Semiterm L ξ n) : ¬(rel r v).IsNegative := by rintro ⟨⟩
+@[simp] lemma not_rel {k} (r : L.Rel k) (v : Fin k → Semiterm L ξ n) : ¬(rel r v).IsNegative := by
+  rintro ⟨⟩
 
 @[simp] lemma neg (φ : Semiformulaᵢ L ξ n) : (∼φ).IsNegative := .imply .falsum
 

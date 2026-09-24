@@ -53,9 +53,9 @@ variable {L₁ L₂ X Y : Logic α} {A : Formula α}
 
 lemma subset_iff : (L₁ +ᴸ X) ⊆ (L₁ +ᴸ Y) ↔ X ⊆ (L₁ +ᴸ Y) := by
   constructor;
-  . intro h A hA;
+  · intro h A hA;
     exact h (mem₂ hA);
-  . intro h A hA;
+  · intro h A hA;
     induction hA with
     | mem₁ hA => exact mem₁ hA;
     | mem₂ hA => exact h hA;
@@ -174,12 +174,12 @@ variable {A B : Formula α}
 
 lemma box_mono (h : normalOf 𝔸 ⊢ A 🡒 B) : normalOf 𝔸 ⊢ □A 🡒 □B := axiomK ⨀ nec h
 
-variable [DecidableEq α]
-
 lemma box_and : normalOf 𝔸 ⊢ □A ⋏ □B 🡒 □(A ⋏ B) := by
   have h₁ : normalOf 𝔸 ⊢ □A 🡒 □(B 🡒 A ⋏ B) := box_mono and₃;
   have h₂ : normalOf 𝔸 ⊢ □(B 🡒 A ⋏ B) 🡒 □B 🡒 □(A ⋏ B) := axiomK;
   cl_prover [h₁, h₂];
+
+variable [DecidableEq α]
 
 lemma box_conj {Γ : FormulaFinset α} : normalOf 𝔸 ⊢ Γ.box.conj 🡒 □Γ.conj := by
   induction Γ using Finset.induction_on with
@@ -187,7 +187,8 @@ lemma box_conj {Γ : FormulaFinset α} : normalOf 𝔸 ⊢ Γ.box.conj 🡒 □�
     have : normalOf 𝔸 ⊢ (∅ : FormulaFinset α).conj := by simp [Finset.conj];
     exact C_of_conseq (nec this);
   | insert A Γ _ ih =>
-    have h₁ : normalOf 𝔸 ⊢ (insert (□A) (FormulaFinset.box Γ)).conj 🡒 □A ⋏ (FormulaFinset.box Γ).conj :=
+    have h₁ :
+        normalOf 𝔸 ⊢ (insert (□A) (FormulaFinset.box Γ)).conj 🡒 □A ⋏ (FormulaFinset.box Γ).conj :=
       CinsertFConjKFConj;
     have h₂ : normalOf 𝔸 ⊢ □A ⋏ □Γ.conj 🡒 □(A ⋏ Γ.conj) := box_and;
     have h₃ : normalOf 𝔸 ⊢ □(A ⋏ Γ.conj) 🡒 □(insert A Γ).conj := box_mono CKFConjinsertFConj;

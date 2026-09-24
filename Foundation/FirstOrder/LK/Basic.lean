@@ -9,6 +9,7 @@ public import Mathlib.Data.List.MinMax
 /-! # One-sided sequent calculus for first-order classical logic -/
 
 @[expose] public section
+set_option autoImplicit true
 
 namespace FFL
 
@@ -163,11 +164,13 @@ def eta : (φ : Proposition L) → ⊢ᴸᴷ¹ ⦃φ, ∼φ⦄
   | φ ⋏ ψ =>
     (or (Γ := ⦃φ ⋏ ψ⦄) (φ := ∼φ) (ψ := ∼ψ)
       (tensor (Γ := ⦃∼φ⦄) (Δ := ⦃∼ψ⦄) (φ := φ) (ψ := ψ)
-        (Multiset.Traversal.atom _) (Multiset.Traversal.atom _) (eta φ).cast (eta ψ).cast).cast).cast (by simp [add_comm])
+        (Multiset.Traversal.atom _) (Multiset.Traversal.atom _)
+        (eta φ).cast (eta ψ).cast).cast).cast (by simp [add_comm])
   | φ ⋎ ψ =>
     (or (Γ := ⦃∼φ ⋏ ∼ψ⦄) (φ := φ) (ψ := ψ)
       (tensor (Γ := ⦃φ⦄) (Δ := ⦃ψ⦄) (φ := ∼φ) (ψ := ∼ψ)
-        (Multiset.Traversal.atom _) (Multiset.Traversal.atom _) (eta φ) (eta ψ)).cast).cast (by simp [add_comm])
+        (Multiset.Traversal.atom _) (Multiset.Traversal.atom _) (eta φ) (eta ψ)).cast).cast
+      (by simp [add_comm])
   | ∀¹ φ =>
     (all (Γ := ⦃∃¹ ∼φ⦄) (φ := φ)
       ((exs (Γ := ⦃φ.free⦄) (φ := ∼φ.shift) (t := &0)
@@ -424,7 +427,8 @@ instance : Entailment.DeductiveExplosion (Theory L) where
   dexp := fun ⟨b⟩ φ ↦ by
     refine ⟨b.axioms, b.axioms_mem, ?_⟩
     have db : ⊢ᴸᴷ¹ (∼LK.Sequent.embed b.axioms) + ⦃Rewriting.emb (⊥ : Sentence L)⦄ :=
-      LK.Derivation.cast b.derivation (by simp [LK.Sequent.embed, add_comm, Multiset.map_tilde_comm])
+      LK.Derivation.cast b.derivation
+        (by simp [LK.Sequent.embed, add_comm, Multiset.map_tilde_comm])
     exact ((OneSidedLK.removeBot db).weakening (φ := Rewriting.emb φ)).cast (by
       simp [LK.Sequent.embed, add_comm, Multiset.map_tilde_comm])
 
@@ -441,7 +445,8 @@ lemma provable_iff :
   constructor
   · rintro ⟨b⟩
     exact ⟨b.axioms, b.axioms_mem,
-      ⟨by simpa [OneSidedLK.Pullback, LK.Sequent.embed, Multiset.map_tilde_comm] using b.derivation⟩⟩
+      ⟨by simpa [OneSidedLK.Pullback, LK.Sequent.embed, Multiset.map_tilde_comm] using
+        b.derivation⟩⟩
   · rintro ⟨Γ, hΓ, ⟨d⟩⟩
     exact ⟨Γ, hΓ, by simpa [OneSidedLK.Pullback, LK.Sequent.embed, Multiset.map_tilde_comm] using d⟩
 
@@ -523,6 +528,21 @@ instance : Entailment.Deduction (Theory L) where
 end Theory.Proof
 
 /-! ### Theory -/
+
+namespace Theory
+
+variable {U S : Theory L}
+
+lemma weakerThan_union_right (h : U ⪯ S) (T : Theory L) : T ∪ U ⪯ T ∪ S :=
+  Entailment.WeakerThan.ofAxm! <| by
+    rintro φ (hφ | hφ);
+    · exact Entailment.by_axm (Set.mem_union_left _ hφ);
+    · exact Entailment.WeakerThan.pbl (h.pbl (Entailment.by_axm hφ));
+
+lemma equiv_union_right (e : U ≊ S) (T : Theory L) : T ∪ U ≊ T ∪ S :=
+  Entailment.Equiv.antisymm ⟨weakerThan_union_right e.le T, weakerThan_union_right e.symm.le T⟩
+
+end Theory
 
 def Theory.theory (T : Theory L) : Theory L := {σ | T ⊢ σ}
 

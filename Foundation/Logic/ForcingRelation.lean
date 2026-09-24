@@ -31,18 +31,18 @@ variable (W)
 
 class BasicSemantics where
   verum (w : W) : w ⊩ ⊤
-  and (w : W) : w ⊩ φ ⋏ ψ ↔ w ⊩ φ ∧ w ⊩ ψ
-  or (w : W) : w ⊩ φ ⋎ ψ ↔ w ⊩ φ ∨ w ⊩ ψ
+  and {φ ψ : F} (w : W) : w ⊩ φ ⋏ ψ ↔ w ⊩ φ ∧ w ⊩ ψ
+  or {φ ψ : F} (w : W) : w ⊩ φ ⋎ ψ ↔ w ⊩ φ ∨ w ⊩ ψ
 
 class Monotone (R : outParam (W → W → Prop)) where
-  monotone {w : W} : w ⊩ φ → ∀ v, R w v → v ⊩ φ
+  monotone {φ : F} {w : W} : w ⊩ φ → ∀ v, R w v → v ⊩ φ
 
 class IntKripke (R : outParam (W → W → Prop)) extends BasicSemantics W, Monotone W R where
-  imply (w : W) : w ⊩ φ 🡒 ψ ↔ (∀ v, R w v → v ⊩ φ → v ⊩ ψ)
+  imply {φ ψ : F} (w : W) : w ⊩ φ 🡒 ψ ↔ (∀ v, R w v → v ⊩ φ → v ⊩ ψ)
   falsum (w : W) : ¬w ⊩ ⊥
-  not (w : W) : w ⊩ ∼φ ↔ (∀ v, R w v → ¬v ⊩ φ)
+  not {φ : F} (w : W) : w ⊩ ∼φ ↔ (∀ v, R w v → ¬v ⊩ φ)
 
-variable {W}
+variable {W} {φ ψ : F}
 
 attribute [simp, grind .]
   BasicSemantics.verum BasicSemantics.and
@@ -54,7 +54,8 @@ attribute [grind .]
   IntKripke.not
 
 @[simp, grind =]
-lemma iff (R : W → W → Prop) [IntKripke W R] : w ⊩ (φ 🡘 ψ) ↔ (∀ v, R w v → (v ⊩ φ ↔ v ⊩ ψ)) := by
+lemma iff (w : W) (R : W → W → Prop) [IntKripke W R] :
+    w ⊩ (φ 🡘 ψ) ↔ (∀ v, R w v → (v ⊩ φ ↔ v ⊩ ψ)) := by
   simp [LogicalConnective.iff, IntKripke.imply]; grind
 
 variable (W)
@@ -63,7 +64,7 @@ abbrev AllForces (φ : F) : Prop := ∀ w : W, w ⊩ φ
 
 infix:45 " ∀⊩ " => AllForces
 
-abbrev AllForcesSet (s : S) [AdjunctiveSet F S] : Prop := ∀ φ ∈ s, W ∀⊩ φ
+abbrev AllForcesSet {S : Type*} (s : S) [AdjunctiveSet F S] : Prop := ∀ φ ∈ s, W ∀⊩ φ
 
 infix:45 " ∀⊩* " => AllForcesSet
 
@@ -100,16 +101,16 @@ variable (ℙ)
 class BasicSemantics where
   verum (p : ℙ) : p ⊩ᶜ ⊤
   falsum (p : ℙ) : ¬p ⊩ᶜ ⊥
-  and (p : ℙ) : p ⊩ᶜ φ ⋏ ψ ↔ p ⊩ᶜ φ ∧ p ⊩ᶜ ψ
+  and {φ ψ : F} (p : ℙ) : p ⊩ᶜ φ ⋏ ψ ↔ p ⊩ᶜ φ ∧ p ⊩ᶜ ψ
 
 class ClassicalKripke (R : outParam (ℙ → ℙ → Prop)) extends BasicSemantics ℙ where
-  or (p : ℙ) : p ⊩ᶜ φ ⋎ ψ ↔ ∀ q, R p q → ∃ x, R q x ∧ (x ⊩ᶜ φ ∨ x ⊩ᶜ ψ)
-  not (p : ℙ) : p ⊩ᶜ ∼φ ↔ (∀ q, R p q → ¬q ⊩ᶜ φ)
-  imply (p : ℙ) : p ⊩ᶜ φ 🡒 ψ ↔ (∀ q, R p q → q ⊩ᶜ φ → q ⊩ᶜ ψ)
-  monotone {p : ℙ} : p ⊩ᶜ φ → ∀ q, R p q → q ⊩ᶜ φ
-  generic {p : ℙ} : (∀ q, R p q → ∃ r, R q r ∧ r ⊩ᶜ φ) → p ⊩ᶜ φ
+  or {φ ψ : F} (p : ℙ) : p ⊩ᶜ φ ⋎ ψ ↔ ∀ q, R p q → ∃ x, R q x ∧ (x ⊩ᶜ φ ∨ x ⊩ᶜ ψ)
+  not {φ : F} (p : ℙ) : p ⊩ᶜ ∼φ ↔ (∀ q, R p q → ¬q ⊩ᶜ φ)
+  imply {φ ψ : F} (p : ℙ) : p ⊩ᶜ φ 🡒 ψ ↔ (∀ q, R p q → q ⊩ᶜ φ → q ⊩ᶜ ψ)
+  monotone {φ : F} {p : ℙ} : p ⊩ᶜ φ → ∀ q, R p q → q ⊩ᶜ φ
+  generic {φ : F} {p : ℙ} : (∀ q, R p q → ∃ r, R q r ∧ r ⊩ᶜ φ) → p ⊩ᶜ φ
 
-variable {ℙ}
+variable {ℙ} {φ ψ : F}
 
 attribute [simp, grind .]
   BasicSemantics.verum BasicSemantics.falsum BasicSemantics.and
@@ -121,17 +122,18 @@ abbrev AllForces (φ : F) : Prop := ∀ p : ℙ, p ⊩ᶜ φ
 
 infix:45 " ∀⊩ᶜ " => AllForces
 
-abbrev AllForcesSet (s : S) [AdjunctiveSet F S] : Prop := ∀ φ ∈ s, ℙ ∀⊩ᶜ φ
+abbrev AllForcesSet {S : Type*} (s : S) [AdjunctiveSet F S] : Prop := ∀ φ ∈ s, ℙ ∀⊩ᶜ φ
 
 infix:45 " ∀⊩ᶜ* " => AllForcesSet
 
-variable {ℙ}
+variable {ℙ} {φ ψ : F}
 
 namespace AllForces
 
 @[simp] lemma verum [BasicSemantics ℙ] : ℙ ∀⊩ᶜ ⊤ := fun _ ↦ by simp
 
-@[simp] lemma falsum [BasicSemantics ℙ] [Nonempty ℙ] : ¬ℙ ∀⊩ᶜ ⊥ := fun h ↦ by simpa using h (Classical.choice inferInstance)
+@[simp] lemma falsum [BasicSemantics ℙ] [Nonempty ℙ] : ¬ℙ ∀⊩ᶜ ⊥ :=
+  fun h ↦ by simpa using h (Classical.choice inferInstance)
 
 @[simp] lemma and [BasicSemantics ℙ] : ℙ ∀⊩ᶜ φ ⋏ ψ ↔ ℙ ∀⊩ᶜ φ ∧ ℙ ∀⊩ᶜ ψ := by
   simp [AllForces]; grind

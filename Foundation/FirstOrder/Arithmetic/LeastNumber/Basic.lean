@@ -11,7 +11,6 @@ public import Foundation.FirstOrder.Arithmetic.Schemata
 -/
 
 @[expose] public section
-
 namespace FFL.FirstOrder.Arithmetic
 
 open _root_.FFL.Entailment
@@ -54,8 +53,8 @@ lemma least_number {P : V → Prop} (hP : Γ-[s].DefinablePred P) {x} (h : P x) 
     have : Inhabited V := Classical.inhabited_of_nonempty';
     use φ.val.enumerateFVar, (Rew.rewriteMap φ.val.idxOfFVar) ▹ φ.val;
     and_intros;
-    . simp;
-    . intro x;
+    · simp;
+    · intro x;
       simp [Semiformula.eval_rewriteMap, hp.df.iff]
   ) h
 
@@ -70,7 +69,7 @@ lemma succ_induction {P : V → Prop} (hP : Γ.alt-[s].DefinablePred P)
     simpa [SigmaPiDelta.alt_coe];
   ) ha;
   push Not at hmin;
-  obtain ⟨z, rfl⟩ := Arithmetic.exists_succ_of_ne_zero $
+  obtain ⟨z, rfl⟩ := Arithmetic.exists_succ_of_ne_zero <|
     show y ≠ 0 by
     rintro rfl;
     contradiction;
@@ -98,7 +97,7 @@ end LeastNumberOnBroadHierarchy
 
 variable (s : ℕ)
 
-lemma models_LeastNumberOnBroadHierarchy_of_IBroadSigma (Γ : Polarity) (s : ℕ) [V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺ s] :
+lemma models_LeastNumberOnBroadHierarchy_of_IBroadSigma (Γ : Polarity) (s : ℕ) [V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺s] :
     V↓[ℒₒᵣ] ⊧* 𝗟⁺ Γ s := by
   have : V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := models_of_subtheory ‹V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺ s›;
   suffices V↓[ℒₒᵣ] ⊧* LeastNumberScheme (Hierarchy Γ s) by
@@ -112,16 +111,16 @@ lemma models_LeastNumberOnBroadHierarchy_of_IBroadSigma (Γ : Polarity) (s : ℕ
   intro v ⟨x, hx⟩;
   exact InductionOnBroadHierarchy.least_number Γ s (definablePred_of_hierarchy hφ v) hx;
 
-instance models_LBroadSigma_of_IBroadSigma [V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺ s] : V↓[ℒₒᵣ] ⊧* 𝗟𝚺⁺ s :=
+instance models_LBroadSigma_of_IBroadSigma [V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺s] : V↓[ℒₒᵣ] ⊧* 𝗟𝚺⁺ s :=
   models_LeastNumberOnBroadHierarchy_of_IBroadSigma 𝚺 s
 
-instance models_LBroadPi_of_IBroadSigma [V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺ s] : V↓[ℒₒᵣ] ⊧* 𝗟𝚷⁺ s :=
+instance models_LBroadPi_of_IBroadSigma [V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺s] : V↓[ℒₒᵣ] ⊧* 𝗟𝚷⁺ s :=
   models_LeastNumberOnBroadHierarchy_of_IBroadSigma 𝚷 s
 
-instance models_IBroadPi_of_LBroadSigma [V↓[ℒₒᵣ] ⊧* 𝗟𝚺⁺ s] : V↓[ℒₒᵣ] ⊧* 𝗜𝚷⁺ s :=
+instance models_IBroadPi_of_LBroadSigma [V↓[ℒₒᵣ] ⊧* 𝗟𝚺⁺s] : V↓[ℒₒᵣ] ⊧* 𝗜𝚷⁺ s :=
   LeastNumberOnBroadHierarchy.models_alt 𝚺 s
 
-instance models_IBroadSigma_of_LBroadPi [V↓[ℒₒᵣ] ⊧* 𝗟𝚷⁺ s] : V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺ s :=
+instance models_IBroadSigma_of_LBroadPi [V↓[ℒₒᵣ] ⊧* 𝗟𝚷⁺s] : V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺ s :=
   LeastNumberOnBroadHierarchy.models_alt 𝚷 s
 
 end models

@@ -39,11 +39,11 @@ lemma forces_irreflGen_boxdotTranslate [Std.Refl M.Rel] {x : M.World} :
   | box A ih =>
     simp only [Formula.boxdotTranslate_box, forces_boxdot, forces_box, ih];
     constructor;
-    . rintro ⟨h₁, h₂⟩ y Rxy;
+    · rintro ⟨h₁, h₂⟩ y Rxy;
       by_cases e : x = y;
-      . exact e ▸ h₁;
-      . exact h₂ y ⟨Rxy, e⟩;
-    . intro h;
+      · exact e ▸ h₁;
+      · exact h₂ y ⟨Rxy, e⟩;
+    · intro h;
       exact ⟨h x (Std.Refl.refl x), fun y Rxy ↦ h y Rxy.1⟩;
 
 lemma forces_boxdotTranslate_axiomGrz [M.IsGL] {x : M.World} :
@@ -57,8 +57,8 @@ lemma forces_boxdotTranslate_axiomGrz [M.IsGL] {x : M.World} :
     apply h₁;
     apply forces_boxdot.mpr;
     and_intros;
-    . exact fun hA ↦ forces_boxdot.mpr ⟨hA, h₃⟩;
-    . exact fun y Rxy hy ↦ forces_boxdot.mpr ⟨hy, fun z Ryz ↦ h₃ z (IsTrans.trans _ _ _ Rxy Ryz)⟩;
+    · exact fun hA ↦ forces_boxdot.mpr ⟨hA, h₃⟩;
+    · exact fun y Rxy hy ↦ forces_boxdot.mpr ⟨hy, fun z Ryz ↦ h₃ z (IsTrans.trans _ _ _ Rxy Ryz)⟩;
 
 end Kripke.Model
 
@@ -68,20 +68,21 @@ universe u
 
 variable {α : Type u} [DecidableEq α] {A : Formula α}
 
+omit [DecidableEq α] in
 theorem iff_boxdotTranslate_GL : 𝐆𝐫𝐳 ⊢ A ↔ 𝐆𝐋 ⊢ Aᵇ := by
   constructor;
-  . intro h;
+  · intro h;
     apply GL.iff_valid_finite.mpr;
     intro _ _ M _ x;
     induction h generalizing x with
     | axm hA =>
       rcases hA with ((⟨B, rfl⟩ | ⟨B, rfl⟩) | ⟨B, rfl⟩);
-      . intro h;
+      · intro h;
         obtain ⟨-, h₂⟩ := forces_boxdot.mp h;
         exact forces_boxdot.mpr ⟨h, fun y Rxy ↦
           forces_boxdot.mpr ⟨h₂ y Rxy, fun z Ryz ↦ h₂ z (IsTrans.trans _ _ _ Rxy Ryz)⟩⟩;
-      . exact fun h ↦ (forces_boxdot.mp h).1;
-      . exact forces_boxdotTranslate_axiomGrz;
+      · exact fun h ↦ (forces_boxdot.mp h).1;
+      · exact forces_boxdotTranslate_axiomGrz;
     | mdp _ _ ih₁ ih₂ => exact ih₁ x (ih₂ x);
     | nec _ ih => exact forces_boxdot.mpr ⟨ih x, fun y _ ↦ ih y⟩;
     | axiomK =>
@@ -93,11 +94,12 @@ theorem iff_boxdotTranslate_GL : 𝐆𝐫𝐳 ⊢ A ↔ 𝐆𝐋 ⊢ Aᵇ := by
         Axioms.AndInst, Axioms.OrInst₁, Axioms.OrInst₂, Axioms.OrElim, Axioms.DNE,
         Formula.boxdotTranslate_imp, Formula.boxdotTranslate_and, Formula.boxdotTranslate_or,
         Formula.boxdotTranslate_neg, Formula.boxdotTranslate_top]; grind;
-  . intro h;
+  · intro h;
     apply iff_valid_finite.mpr;
     intro _ _ M _ x;
     exact forces_irreflGen_boxdotTranslate.mp (GL.iff_valid_finite.mp h M.irreflGen x);
 
+omit [DecidableEq α] in
 theorem iff_boxdotTranslate_S : 𝐆𝐫𝐳 ⊢ A ↔ 𝐒 ⊢ Aᵇ :=
   iff_boxdotTranslate_GL.trans S.boxdotTranslate_iff_GL.symm
 

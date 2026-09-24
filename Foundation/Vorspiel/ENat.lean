@@ -8,8 +8,7 @@ public section
 
 namespace ENat
 
-open Classical
-
+open scoped Classical in
 noncomputable def find (P : ℕ → Prop) : ℕ∞ := if h : ∃ x : ℕ, P x then Nat.find h else ⊤
 
 variable (P : ℕ → Prop)
@@ -26,7 +25,8 @@ theorem exists_of_find_le (n : ℕ) (h : find P ≤ (n : ENat)) : ∃ m ≤ n, P
 lemma find_eq_top_iff : find P = ⊤ ↔ ∀ (n : ℕ), ¬P n := by simp [find]
 
 lemma find_le (n : ℕ) (h : P n) : find P ≤ ↑n := by
-  suffices ∃ m ≤ n, P m by simpa [show ∃ x, P x from ⟨n, h⟩, find, ENat.natCast_le_natCast, Nat.find_le_iff]
+  suffices ∃ m ≤ n, P m by
+    simpa [show ∃ x, P x from ⟨n, h⟩, find, ENat.natCast_le_natCast, Nat.find_le_iff]
   exact ⟨n, by rfl, h⟩
 
 end ENat

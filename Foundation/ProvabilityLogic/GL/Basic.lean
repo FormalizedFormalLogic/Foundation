@@ -49,8 +49,8 @@ lemma forces_axiomL [M.IsGL] {x : M.World} : x ⊩[M] □(□A 🡒 A) 🡒 □A
 theorem sound (M : Model κ α) [M.IsGL] (h : 𝐆𝐋 ⊢ A) : M ⊧ A := by
   apply normalOf.sound _ h;
   rintro _ (⟨B, rfl⟩ | ⟨B, rfl⟩) x;
-  . exact fun h y Rxy z Ryz ↦ h z (IsTrans.trans _ _ _ Rxy Ryz);
-  . exact forces_axiomL;
+  · exact fun h y Rxy z Ryz ↦ h z (IsTrans.trans _ _ _ Rxy Ryz);
+  · exact forces_axiomL;
 
 end
 
@@ -104,30 +104,34 @@ variable {α : Type u} [DecidableEq α] {A : Formula α}
 
 theorem iff_provable_gentzen : 𝐆𝐋 ⊢ A ↔ ⊢ᴳ[GL] ∅ ⟹ {A} := by
   constructor;
-  . intro h;
+  · intro h;
     apply Gentzen.complete;
     intro _ _ M _ x _;
     exact ⟨A, by simp, sound M h x⟩;
-  . intro h;
+  · intro h;
     have : 𝐆𝐋 ⊢ (∅ : FormulaFinset α).conj := by simp [Finset.conj];
     simpa using of_gentzen h ⨀ this;
 
-theorem iff_valid_finite : 𝐆𝐋 ⊢ A ↔ ∀ {κ : Type u} [Nonempty κ] (M : Model κ α), [M.IsFiniteGL] → M ⊧ A := by
+omit [DecidableEq α] in
+theorem iff_valid_finite :
+    𝐆𝐋 ⊢ A ↔ ∀ {κ : Type u} [Nonempty κ] (M : Model κ α), [M.IsFiniteGL] → M ⊧ A := by
+  classical
   constructor;
-  . intro h _ _ M _;
+  · intro h _ _ M _;
     exact sound M h;
-  . intro h;
+  · intro h;
     apply iff_provable_gentzen.mpr;
     apply Gentzen.complete;
     intro _ _ M _ x _;
     exact ⟨A, by simp, h M x⟩;
 
+omit [DecidableEq α] in
 theorem iff_root_forces : 𝐆𝐋 ⊢ A ↔
     ∀ {κ : Type u} [Nonempty κ] (M : RootedModel κ α), [M.IsFiniteGL] → M.root ⊩[M.toModel] A := by
   constructor;
-  . intro h _ _ M _;
+  · intro h _ _ M _;
     exact sound M.toModel h M.root;
-  . intro h;
+  · intro h;
     apply iff_valid_finite.mpr;
     intro _ _ M _ x;
     exact Model.forces_cone.mp <| h (M.cone x);

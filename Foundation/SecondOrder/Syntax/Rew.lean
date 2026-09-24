@@ -4,6 +4,7 @@ public import Foundation.SecondOrder.Syntax.Formula
 public import Foundation.FirstOrder.Syntax.Classical.Rew
 
 @[expose] public section
+set_option autoImplicit true
 
 namespace Fin
 
@@ -104,9 +105,11 @@ lemma rew_nrel (ω : Rew L ξ₁ n₁ ξ₂ n₂) {k} (r : L.Rel k) (v : Fin k �
 instance : ReflectiveRewriting L ξ (Semiformula L Ξ ξ N) where
   id_app (φ) := by induction φ using rec' <;> simp [rew_rel, rew_nrel, *]
 
-instance : TransitiveRewriting L ξ₁ (Semiformula L Ξ ξ₁ N) ξ₂ (Semiformula L Ξ ξ₂ N) ξ₃ (Semiformula L Ξ ξ₃ N) where
+instance : TransitiveRewriting L
+    ξ₁ (Semiformula L Ξ ξ₁ N) ξ₂ (Semiformula L Ξ ξ₂ N) ξ₃ (Semiformula L Ξ ξ₃ N) where
   comp_app {n₁ n₂ n₃ ω₁₂ ω₂₃ φ} := by
-    induction φ using rec' generalizing n₂ n₃ <;> simp [rew_rel, rew_nrel, Rew.comp_app, Rew.q_comp, *]
+    induction φ using rec' generalizing n₂ n₃ <;>
+      simp [rew_rel, rew_nrel, Rew.comp_app, Rew.q_comp, *]
 
 def bmapAux (f : Fin N → Fin M) : Semiformula L Ξ ξ N n → Semiformula L Ξ ξ M n
   |  rel R v => rel R v
@@ -290,11 +293,12 @@ variable (Ω : Rew L Ξ₁ N₁ Ξ₂ N₂ ξ)
 
 end
 
-lemma app_comm_subst {N₁ N₂} (Ω : Rew L Ξ₁ N₁ Ξ₂ N₂ ξ) (v : Fin n₁ → Semiterm L ξ n₂) (φ : Semiformula L Ξ₁ ξ N₁ n₁) :
+lemma app_comm_subst {N₁ N₂} (Ω : Rew L Ξ₁ N₁ Ξ₂ N₂ ξ) (v : Fin n₁ → Semiterm L ξ n₂)
+    (φ : Semiformula L Ξ₁ ξ N₁ n₁) :
     Ω • (FirstOrder.Rew.subst v ▹ φ) = FirstOrder.Rew.subst v ▹ (Ω • φ) := by
   induction φ using Semiformula.rec' generalizing N₂ n₂ <;>
-    simp [*, ←FirstOrder.TransitiveRewriting.comp_app, FirstOrder.Rew.subst_comp_subst, FirstOrder.Rew.q_subst,
-      Semiformula.rew_rel, Semiformula.rew_nrel]
+    simp [*, ←FirstOrder.TransitiveRewriting.comp_app, FirstOrder.Rew.subst_comp_subst,
+      FirstOrder.Rew.q_subst, Semiformula.rew_rel, Semiformula.rew_nrel]
 
 protected def id : Rew L Ξ N Ξ N ξ where
   bv X := #0 ∈# X
@@ -342,7 +346,8 @@ lemma bLeft_q (Ω : Rew L Ξ₁ N₁ Ξ₂ N₂ ξ) (f : Fin N₂ → Fin N₃) 
   · cases X using Fin.cases <;> simp [q_bv_succ, bLeft_bv, bmap_comp]
   · simp [q_fv, bLeft_fv, bmap_comp]
 
-lemma app_bmap_eq_bLeft (f : Fin N₂ → Fin N₃) (Ω : Rew L Ξ₁ N₁ Ξ₂ N₂ ξ) (φ : Semiformula L Ξ₁ ξ N₁ n) :
+lemma app_bmap_eq_bLeft (f : Fin N₂ → Fin N₃) (Ω : Rew L Ξ₁ N₁ Ξ₂ N₂ ξ)
+    (φ : Semiformula L Ξ₁ ξ N₁ n) :
     (Ω • φ).bmap f = Ω.bLeft f • φ := by
   induction φ using Semiformula.rec' generalizing N₂ N₃ <;> simp [*, bmap_comm, bLeft_q]
 
@@ -375,7 +380,8 @@ lemma bmap_app_eq (f : Fin N₀ → Fin N₁) (Ω : Rew L Ξ₁ N₁ Ξ₂ N₂ 
   · cases X using Fin.cases <;> simp [comp, app_bmap_eq_bLeft, bmap_app_eq]
   · simp [comp, app_bmap_eq_bLeft, bmap_app_eq]
 
-lemma app_comp (Ω₂₃ : Rew L Ξ₂ N₂ Ξ₃ N₃ ξ) (Ω₁₂ : Rew L Ξ₁ N₁ Ξ₂ N₂ ξ) (φ : Semiformula L Ξ₁ ξ N₁ n) :
+lemma app_comp (Ω₂₃ : Rew L Ξ₂ N₂ Ξ₃ N₃ ξ) (Ω₁₂ : Rew L Ξ₁ N₁ Ξ₂ N₂ ξ)
+    (φ : Semiformula L Ξ₁ ξ N₁ n) :
     (Ω₂₃.comp Ω₁₂) • φ = Ω₂₃ • (Ω₁₂ • φ) := by
   induction φ using Semiformula.rec' generalizing N₂ N₃ <;> simp [*, app_comm_subst]
 
@@ -484,7 +490,8 @@ end Rew
 
 namespace Semiproposition
 
-abbrev free₀ (φ : Semiproposition L N (n + 1)) : Semiproposition L N n := FirstOrder.Rewriting.free φ
+abbrev free₀ (φ : Semiproposition L N (n + 1)) : Semiproposition L N n :=
+  FirstOrder.Rewriting.free φ
 
 abbrev shift₀ (φ : Semiproposition L N n) : Semiproposition L N n := FirstOrder.Rewriting.shift φ
 
@@ -515,7 +522,8 @@ end Semiproposition
 
 namespace Semisentence
 
-@[coe] abbrev emb (φ : Semisentence L N n) : Semiformula L Ξ ξ N n := Rew.emb.app (FirstOrder.Rewriting.emb φ)
+@[coe] abbrev emb (φ : Semisentence L N n) : Semiformula L Ξ ξ N n :=
+  Rew.emb.app (FirstOrder.Rewriting.emb φ)
 
 instance : Coe (Semisentence L N n) (Semiformula L Ξ ξ N n) := ⟨emb⟩
 

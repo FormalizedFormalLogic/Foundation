@@ -44,17 +44,17 @@ theorem exists_interpolant (h : ⊢ᴳ[GL] S) (hΓ : S.ant ⊆ Γ₁ ∪ Γ₂) 
   | axm A =>
     dsimp only at hΓ hΔ;
     wlog hA : A ∈ Γ₁ generalizing Γ₁ Γ₂ Δ₁ Δ₂;
-    . exact exists_interpolant_of_swap <|
+    · exact exists_interpolant_of_swap <|
         this (by rwa [Finset.union_comm]) (by rwa [Finset.union_comm]) (by grind);
     by_cases hA' : A ∈ Δ₁;
-    . exact ⟨⊥, union A, botL_mem, by simp⟩;
-    . have h₁ := FormulaFinset.atoms_subset_of_mem hA;
+    · exact ⟨⊥, union A, botL_mem, by simp⟩;
+    · have h₁ := FormulaFinset.atoms_subset_of_mem hA;
       have h₂ := FormulaFinset.atoms_subset_of_mem (show A ∈ Δ₂ by grind);
       exact ⟨A, union A, union A (by simp) (by grind), by simp [Finset.subset_iff] at *; grind⟩;
   | botL =>
     dsimp only at hΓ;
     wlog h : ⊥ ∈ Γ₁ generalizing Γ₁ Γ₂ Δ₁ Δ₂;
-    . exact exists_interpolant_of_swap <|
+    · exact exists_interpolant_of_swap <|
         this (by rwa [Finset.union_comm]) (by rwa [Finset.union_comm]) (by grind);
     exact ⟨⊥, botL_mem, botL_mem, by simp⟩;
   | wkL _ h ih => exact ih (h.trans hΓ) hΔ;
@@ -62,7 +62,7 @@ theorem exists_interpolant (h : ⊢ᴳ[GL] S) (hΓ : S.ant ⊆ Γ₁ ∪ Γ₂) 
   | @impL Γ Δ A B _ _ ih₁ ih₂ =>
     dsimp only at hΓ hΔ ih₁ ih₂;
     wlog h : A 🡒 B ∈ Γ₁ generalizing Γ₁ Γ₂ Δ₁ Δ₂;
-    . have h' := (Finset.mem_union.mp (hΓ (Finset.mem_insert_self _ _))).resolve_left h;
+    · have h' := (Finset.mem_union.mp (hΓ (Finset.mem_insert_self _ _))).resolve_left h;
       exact exists_interpolant_of_swap <|
         this (by rwa [Finset.union_comm]) (by rwa [Finset.union_comm]) h';
     obtain ⟨C₁, hC₁⟩ :=
@@ -79,14 +79,14 @@ theorem exists_interpolant (h : ⊢ᴳ[GL] S) (hΓ : S.ant ⊆ Γ₁ ∪ Γ₂) 
     have h₅ := FormulaFinset.atoms_subset_of_mem h;
     use C₁ ⋎ C₂;
     constructor;
-    . exact wkL (impL h₁ h₂);
-    . exact orL hC₁.right hC₂.right;
-    . simp [Finset.subset_iff] at h₃ h₄ h₅ ⊢;
+    · exact wkL (impL h₁ h₂);
+    · exact orL hC₁.right hC₂.right;
+    · simp [Finset.subset_iff] at h₃ h₄ h₅ ⊢;
       grind;
   | @impR Γ Δ A B _ ih =>
     dsimp only at hΓ hΔ ih;
     wlog h : A 🡒 B ∈ Δ₁ generalizing Γ₁ Γ₂ Δ₁ Δ₂;
-    . have h' := (Finset.mem_union.mp (hΔ (Finset.mem_insert_self _ _))).resolve_left h;
+    · have h' := (Finset.mem_union.mp (hΔ (Finset.mem_insert_self _ _))).resolve_left h;
       exact exists_interpolant_of_swap <|
         this (by rwa [Finset.union_comm]) (by rwa [Finset.union_comm]) h';
     obtain ⟨C, hC⟩ :=
@@ -96,14 +96,14 @@ theorem exists_interpolant (h : ⊢ᴳ[GL] S) (hΓ : S.ant ⊆ Γ₁ ∪ Γ₂) 
     have h₂ := FormulaFinset.atoms_subset_of_mem h;
     use C;
     constructor;
-    . exact wkR (impR (wkR (Δ' := insert B (insert C Δ₁)) hC.left));
-    . exact hC.right;
-    . simp [Finset.subset_iff] at h₁ h₂ ⊢;
+    · exact wkR (impR (wkR (Δ' := insert B (insert C Δ₁)) hC.left));
+    · exact hC.right;
+    · simp [Finset.subset_iff] at h₁ h₂ ⊢;
       grind;
   | @boxGL Γ A _ ih =>
     dsimp only at hΓ hΔ ih;
     wlog h : □A ∈ Δ₂ generalizing Γ₁ Γ₂ Δ₁ Δ₂;
-    . clear ih;
+    · clear ih;
       exact exists_interpolant_of_swap <|
         this (by rwa [Finset.union_comm]) (by rwa [Finset.union_comm]) (by grind);
     have hΓ' : ∀ B ∈ Γ, □B ∈ Γ₁ ∨ □B ∈ Γ₂ :=
@@ -121,9 +121,9 @@ theorem exists_interpolant (h : ⊢ᴳ[GL] S) (hΓ : S.ant ⊆ Γ₁ ∪ Γ₂) 
     have h₆ := FormulaFinset.atoms_prebox (Γ := Γ₂);
     use □C;
     constructor;
-    . exact wk h₁ (by grind) (by simp);
-    . exact wk h₂ (by grind) (by simpa);
-    . simp [Finset.subset_iff] at h₃ h₄ h₅ h₆ ⊢;
+    · exact wk h₁ (by grind) (by simp);
+    · exact wk h₂ (by grind) (by simpa);
+    · simp [Finset.subset_iff] at h₃ h₄ h₅ h₆ ⊢;
       grind;
 
 end GL.Gentzen

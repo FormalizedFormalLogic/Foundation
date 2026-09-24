@@ -42,7 +42,8 @@ instance iterExp_defined : 𝚺₁-Function₂[V] iterExp via iterExpDef := .mk
 
 instance iterExp_definable : 𝚺₁-Function₂[V] iterExp := iterExp_defined.to_definable
 
-instance iterExp_definable' (Γ) : Γ-[m + 1]-Function₂ (iterExp : V → V → V) := iterExp_definable.of_sigmaOne
+instance iterExp_definable' (Γ) {m : ℕ} : Γ-[m + 1]-Function₂ (iterExp : V → V → V) :=
+  iterExp_definable.of_sigmaOne
 
 end iterExp
 

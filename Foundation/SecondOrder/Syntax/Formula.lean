@@ -3,6 +3,7 @@ module
 public import Foundation.FirstOrder.Syntax.Classical.Formula
 
 @[expose] public section
+set_option autoImplicit true
 
 /-!
 # Formulas of monadic second-order logic
@@ -54,10 +55,10 @@ def hasDecEq : {N n : ℕ} → (φ ψ : Semiformula L Ξ ξ N n) → Decidable (
     case falsum.falsum => exact isTrue rfl;
     case rel.rel k r v k' r' v' | nrel.nrel k r v k' r' v' =>
       by_cases h : k = k';
-      . subst k';
+      · subst k';
         simpa only [rel.injEq, nrel.injEq, heq_eq_eq, true_and] using
           (inferInstance : Decidable (r = r' ∧ v = v'));
-      . exact isFalse (by intro e; cases e; exact h rfl);
+      · exact isFalse (by intro e; cases e; exact h rfl);
     case bvar.bvar X t Y u | nbvar.nbvar X t Y u |
         fvar.fvar X t Y u | nfvar.nfvar X t Y u =>
       simpa only [bvar.injEq, nbvar.injEq, fvar.injEq, nfvar.injEq] using
@@ -259,10 +260,14 @@ def rec' {C : ∀ N n, Semiformula L Ξ ξ N n → Sort w}
   |    φ ⋎ ψ => hOr φ ψ
     (rec' hRel hNrel hBvar hNbvar hFvar hNfvar hVerum hFalsum hAnd hOr hAll₁ hExs₁ hAll₂ hExs₂ φ)
     (rec' hRel hNrel hBvar hNbvar hFvar hNfvar hVerum hFalsum hAnd hOr hAll₁ hExs₁ hAll₂ hExs₂ ψ)
-  |     ∀¹ φ => hAll₁ φ (rec' hRel hNrel hBvar hNbvar hFvar hNfvar hVerum hFalsum hAnd hOr hAll₁ hExs₁ hAll₂ hExs₂ φ)
-  |     ∃¹ φ => hExs₁ φ (rec' hRel hNrel hBvar hNbvar hFvar hNfvar hVerum hFalsum hAnd hOr hAll₁ hExs₁ hAll₂ hExs₂ φ)
-  |     ∀² φ => hAll₂ φ (rec' hRel hNrel hBvar hNbvar hFvar hNfvar hVerum hFalsum hAnd hOr hAll₁ hExs₁ hAll₂ hExs₂ φ)
-  |     ∃² φ => hExs₂ φ (rec' hRel hNrel hBvar hNbvar hFvar hNfvar hVerum hFalsum hAnd hOr hAll₁ hExs₁ hAll₂ hExs₂ φ)
+  |     ∀¹ φ => hAll₁ φ
+    (rec' hRel hNrel hBvar hNbvar hFvar hNfvar hVerum hFalsum hAnd hOr hAll₁ hExs₁ hAll₂ hExs₂ φ)
+  |     ∃¹ φ => hExs₁ φ
+    (rec' hRel hNrel hBvar hNbvar hFvar hNfvar hVerum hFalsum hAnd hOr hAll₁ hExs₁ hAll₂ hExs₂ φ)
+  |     ∀² φ => hAll₂ φ
+    (rec' hRel hNrel hBvar hNbvar hFvar hNfvar hVerum hFalsum hAnd hOr hAll₁ hExs₁ hAll₂ hExs₂ φ)
+  |     ∃² φ => hExs₂ φ
+    (rec' hRel hNrel hBvar hNbvar hFvar hNfvar hVerum hFalsum hAnd hOr hAll₁ hExs₁ hAll₂ hExs₂ φ)
 
 def complexity : Semiformula L Ξ ξ N n → ℕ
   |  rel _ _ => 0

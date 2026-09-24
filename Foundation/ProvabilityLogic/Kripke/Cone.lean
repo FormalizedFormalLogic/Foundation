@@ -28,8 +28,8 @@ def cone (M : Model κ α) (r : M.World) : RootedModel { x : M.World // x = r �
   root := ⟨r, .inl rfl⟩
   root_rel := by
     rintro ⟨x, rfl | h⟩ hx;
-    . exact absurd rfl hx;
-    . exact h;
+    · exact absurd rfl hx;
+    · exact h;
 
 instance [M.IsFiniteGL] : (M.cone r).IsFiniteGL where
   trans _ _ _ h₁ h₂ := IsTrans.trans (r := M.Rel) _ _ _ h₁ h₂
@@ -42,20 +42,21 @@ instance [M.IsFiniteGrz] : (M.cone r).IsFiniteGrz where
   antisymm x y h₁ h₂ := Subtype.ext <| Std.Antisymm.antisymm (r := M.Rel) x.1 y.1 h₁ h₂
   finite := Subtype.finite
 
-lemma forces_cone [IsTrans _ M.Rel] {x : (M.cone r).World} : x ⊩[(M.cone r).toModel] A ↔ x.1 ⊩[M] A := by
+lemma forces_cone [IsTrans _ M.Rel] {x : (M.cone r).World} :
+    x ⊩[(M.cone r).toModel] A ↔ x.1 ⊩[M] A := by
   induction A generalizing x with
   | atom | falsum => rfl;
   | imp A B ihA ihB => exact imp_congr ihA ihB;
   | box A ih =>
     obtain ⟨x, hx⟩ := x;
     constructor;
-    . intro h y Rxy;
+    · intro h y Rxy;
       have hy : y = r ∨ r ≺ y := by
         rcases hx with rfl | hx;
-        . exact .inr Rxy;
-        . exact .inr (IsTrans.trans _ _ _ hx Rxy);
+        · exact .inr Rxy;
+        · exact .inr (IsTrans.trans _ _ _ hx Rxy);
       exact ih.mp (h ⟨y, hy⟩ Rxy);
-    . intro h y Rxy;
+    · intro h y Rxy;
       exact ih.mpr (h y.1 Rxy);
 
 end Model
