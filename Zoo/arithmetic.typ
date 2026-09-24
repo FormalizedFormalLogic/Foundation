@@ -11,6 +11,7 @@
 #let LPi(n) = $Theory(L)Pi_#n$
 #let BSigma(n) = $Theory(B)Sigma_#n$
 #let BPi(n) = $Theory(B)Pi_#n$
+#let IBroadSigma(n) = $Theory(I)Sigma^+_#n$
 
 // Keys are the theories as pretty-printed by `lake exe zoo_arithmetic`; a theory with no entry
 // here is drawn under its pretty-printed name.
@@ -26,6 +27,8 @@
       "𝗜𝚺₀": ISigma(0),
       "𝗜𝚺₀ ∪ 𝝮₁": $ISigma(0) + Omega_1$,
       "𝗜𝚺₁": ISigma(1),
+      "𝗜𝚺⁺₀": IBroadSigma(0),
+      "𝗜𝚺⁺₁": IBroadSigma(1),
       "𝗜𝚺2": ISigma(2),
       "𝗜𝚷₁": IPi(1),
       "𝗜𝚷2": IPi(2),
@@ -36,8 +39,8 @@
       "𝗕𝚺2": BSigma(2),
       "𝗕𝚷0": BPi(0),
       "𝗕𝚷1": BPi(1),
-      "𝗜𝚺₁ ∪ FFL.FirstOrder.Theory.Con 𝗜𝚺₁": $ISigma(1) + Con(ISigma(1))$,
-      "𝗜𝚺₁ ∪ FFL.FirstOrder.Theory.Incon 𝗜𝚺₁": $ISigma(1) + Incon(ISigma(1))$,
+      "𝗜𝚺⁺₁ ∪ FFL.FirstOrder.Theory.Con 𝗜𝚺⁺₁": $IBroadSigma(1) + Con(IBroadSigma(1))$,
+      "𝗜𝚺⁺₁ ∪ FFL.FirstOrder.Theory.Incon 𝗜𝚺⁺₁": $IBroadSigma(1) + Incon(IBroadSigma(1))$,
       "𝗣𝗔": PA,
       "𝗣𝗔 ∪ FFL.FirstOrder.Theory.Con 𝗣𝗔": $PA + Con(PA)$,
       "𝗣𝗔 ∪ FFL.FirstOrder.Theory.Incon 𝗣𝗔": $PA + Incon(PA)$,

@@ -272,12 +272,12 @@ end LK2.Derivation
 
 noncomputable instance (Γ : LK.Sequent L) : GödelQuote (⊢ᴸᴷ¹ Γ) V := ⟨fun b ↦ ⌜LK.Derivation.toDerivation2 (∅ : Theory L) b⌝⟩
 
-noncomputable instance (φ : Sentence L) : GödelQuote (T ⊢! φ) V := ⟨fun b ↦
+noncomputable instance (φ : Sentence L) : GödelQuote (T.Proof φ) V := ⟨fun b ↦
   ⌜b.toProof2⌝⟩
 
 lemma quote_derivation_def {Γ : LK.Sequent L} (b : ⊢ᴸᴷ¹ Γ) : (⌜b⌝ : V) = ⌜LK.Derivation.toDerivation2 (∅ : Theory L) b⌝ := rfl
 
-lemma quote_proof_def {φ : Sentence L} (b : T ⊢! φ) : (⌜b⌝ : V) = ⌜b.toProof2⌝ := rfl
+lemma quote_proof_def {φ : Sentence L} (b : T.Proof φ) : (⌜b⌝ : V) = ⌜b.toProof2⌝ := rfl
 
 @[simp] lemma derivation_of_quote_derivation {Γ : LK.Sequent L} (b : ⊢ᴸᴷ¹ Γ) : DerivationOf T (⌜b⌝ : V) ⌜Γ.toFinset⌝ := by
   let x := LK2.Derivation.typedQuote V (LK.Derivation.toDerivation2 (∅ : Theory L) b)
@@ -293,10 +293,10 @@ lemma quote_proof_def {φ : Sentence L} (b : T ⊢! φ) : (⌜b⌝ : V) = ⌜b.t
   suffices Proof T x.val ⌜φ⌝ from this
   simpa using! x.derivationOf
 
-@[simp] lemma proof_of_quote_proof {φ : Sentence L} (b : T ⊢! φ) : Proof T (⌜b⌝ : V) ⌜φ⌝ :=
+@[simp] lemma proof_of_quote_proof {φ : Sentence L} (b : T.Proof φ) : Proof T (⌜b⌝ : V) ⌜φ⌝ :=
   proof_of_quote_proof2 b.toProof2
 
-lemma coe_quote_proof_eq (d : T ⊢! φ) : (↑(⌜d⌝ : ℕ) : V) = ⌜d⌝ := by
+lemma coe_quote_proof_eq (d : T.Proof φ) : (↑(⌜d⌝ : ℕ) : V) = ⌜d⌝ := by
   simp [quote_proof_def, LK2.Derivation.coe_quote_eq]
 
 namespace Arithmetic.Bootstrapping

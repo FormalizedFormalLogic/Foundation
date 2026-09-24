@@ -92,7 +92,7 @@ lemma or_right (h : Γ ⟹ Δ ++ [φ, ψ]) : Γ ⟹ φ ⋎ ψ :: Δ := by
 
 lemma and_left (h : Γ ++ [φ, ψ] ⟹ Δ) : (φ ⋏ ψ :: Γ) ⟹ Δ := by
   have : φ :: ψ :: Γ ⟹ Δ := weakening h
-  have : (φ ⋏ ψ :: Γ) ⊢[𝓢] ψ 🡒 φ 🡒 Δ.disj := wk! (by simp) (deduct <| deduct this)
+  have : (φ ⋏ ψ :: Γ) ⊢[𝓢] ψ 🡒 φ 🡒 Δ.disj := wk (by simp) (deduct <| deduct this)
   exact this ⨀ (deductInv and₂) ⨀ (deductInv and₁)
 
 lemma neg_right_int (h : Γ ++ [φ] ⟹ []) : Γ ⟹ ∼φ :: Δ := by
@@ -114,7 +114,7 @@ lemma neg_right_cl [Entailment.Cl 𝓢] (h : Γ ++ [φ] ⟹ Δ) : Γ ⟹ ∼φ :
 
 lemma neg_left_int (h : Γ ++ [∼φ] ⟹ Δ ++ [φ]) : ∼φ :: Γ ⟹ Δ := by
   have h : ∼φ :: Γ ⟹ φ :: Δ := weakening h
-  suffices (∼φ :: Γ) ⊢[𝓢] (φ :: Δ).disj 🡒 Δ.disj from this ⨀ (wk! (by simp) h)
+  suffices (∼φ :: Γ) ⊢[𝓢] (φ :: Δ).disj 🡒 Δ.disj from this ⨀ (wk (by simp) h)
   apply left_Disj_intro
   intro ψ hψ
   rcases show ψ = φ ∨ ψ ∈ Δ by simpa using hψ with (rfl | hψ)
@@ -128,13 +128,13 @@ lemma neg_left (h : Γ ⟹ Δ ++ [φ]) : ∼φ :: Γ ⟹ Δ :=
 lemma imply_left_int (hφ : Γ ++ [φ 🡒 ψ] ⟹ Δ ++ [φ]) (hψ : Γ ++ [ψ] ⟹ Δ) : (φ 🡒 ψ) :: Γ ⟹ Δ := by
   have hφ : (φ 🡒 ψ) :: Γ ⟹ φ :: Δ := weakening hφ
   have hψ : ψ :: Γ ⟹ Δ := weakening hψ
-  suffices ((φ 🡒 ψ) :: Γ) ⊢[𝓢] (φ :: Δ).disj 🡒 Δ.disj from this ⨀ wk! (by simp) hφ
+  suffices ((φ 🡒 ψ) :: Γ) ⊢[𝓢] (φ :: Δ).disj 🡒 Δ.disj from this ⨀ wk (by simp) hφ
   apply left_Disj_intro
   intro χ hχ
   rcases show χ = φ ∨ χ ∈ Δ by simpa using hχ with (rfl | hχ)
   · apply deduct
     have : Γ ⊢[𝓢] ψ 🡒 Δ.disj := deduct hψ
-    apply (wk! (by simp) this) ⨀ (by_axm₁ ⨀ by_axm₀)
+    apply (wk (by simp) this) ⨀ (by_axm₁ ⨀ by_axm₀)
   · apply right_Disj_intro _ (by simp [hχ])
 
 lemma imply_left (hφ : Γ ⟹ Δ ++ [φ]) (hψ : Γ ++ [ψ] ⟹ Δ) : (φ 🡒 ψ) :: Γ ⟹ Δ :=

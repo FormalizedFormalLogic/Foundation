@@ -130,13 +130,12 @@ initialize registerTraceClass `int_prover.detail
 structure Context where
   levelF : Level
   levelS : Level
-  levelE : Level
   F : Q(Type levelF)
   instLC : Q(LogicalConnective $F)
   instLN : Q(LogicalNeutral $F)
   instDE : Q(DecidableEq $F)
   S : Q(Type levelS)
-  E : Q(Entailment.{_, _, levelE} $S $F)
+  E : Q(Entailment.{_, _} $S $F)
   𝓢 : Q($S)
   instInt : Q(Entailment.Int $𝓢)
 
@@ -149,7 +148,7 @@ abbrev M := ReaderT Context AtomM
   `n : ∀ {F} [LogicalConnective F] [LogicalNeutral F] [DecidableEq F] {S} [Entailment S F] {𝓢} [Entailment.Int 𝓢], _` to the
 implicit parameters in the context, and the given list of arguments. -/
 def Context.app (c : Context) (n : Name) : Array Expr → Expr :=
-  mkAppN <| @Expr.const n [c.levelF, c.levelS, c.levelE]
+  mkAppN <| @Expr.const n [c.levelF, c.levelS]
     |>.app c.F |>.app c.instLC |>.app c.instLN |>.app c.instDE |>.app c.S |>.app c.E |>.app c.𝓢 |>.app c.instInt
 
 def iapp (n : Name) (xs : Array Expr) : M Expr := do
@@ -164,10 +163,10 @@ def getGoalTwoSided (e : Q(Prop)) : MetaM ((c : Context) × List Q($c.F) × List
     | throwError m! "error: failed to find instance Entailment.Cl {𝓢}"
   let Γ ← Qq.ofQList p
   let Δ ← Qq.ofQList q
-  return ⟨⟨_, _, _, F, instLC, instLN, instDE, S, E, 𝓢, instInt⟩, Γ, Δ⟩
+  return ⟨⟨_, _, F, instLC, instLN, instDE, S, E, 𝓢, instInt⟩, Γ, Δ⟩
 
 def getGoalProvable (e : Q(Prop)) : MetaM ((c : Context) × Q($c.F)) := do
-  let ~q(@Entailment.Provable $F $S $E $𝓢 $p) := e | throwError m!"(getGoal) error: {e} not a form of _ ⊢ _"
+  let ~q(@Entailment.Entails $S $F $E $𝓢 $p) := e | throwError m!"(getGoal) error: {e} not a form of _ ⊢ _"
   let .some instDE ← trySynthInstanceQ q(DecidableEq $F)
     | throwError m! "error: failed to find instance DecidableEq {F}"
   let .some instLC ← trySynthInstanceQ q(LogicalConnective $F)
@@ -176,7 +175,7 @@ def getGoalProvable (e : Q(Prop)) : MetaM ((c : Context) × Q($c.F)) := do
     | throwError m! "error: failed to find instance LogicalNeutral {F}"
   let .some instInt ← trySynthInstanceQ q(Entailment.Int $𝓢)
     | throwError m! "error: failed to find instance Entailment.Cl {𝓢}"
-  return ⟨⟨_, _, _, F, instLC, instLN, instDE, S, E, 𝓢, instInt⟩, p⟩
+  return ⟨⟨_, _, F, instLC, instLN, instDE, S, E, 𝓢, instInt⟩, p⟩
 
 abbrev Sequent := List Lit
 
@@ -485,18 +484,17 @@ def prover (k : ℕ) (b : Bool) (T : Tableaux) : M Expr := do
 structure HypInfo where
   levelF : Level
   levelS : Level
-  levelE : Level
   F : Q(Type levelF)
   S : Q(Type levelS)
-  E : Q(Entailment.{_, _, levelE} $S $F)
+  E : Q(Entailment.{_, _} $S $F)
   𝓢 : Q($S)
   φ : Q($F)
   proof : Q($𝓢 ⊢ $φ)
 
 def synthProvable (e : Expr) : MetaM HypInfo := do
   let (ty : Q(Prop)) ← inferType e
-  let ~q(@Entailment.Provable $F $S $E $𝓢 $φ) := ty | throwError m!"(getGoal) error: {e} not a form of _ ⊢ _"
-  return ⟨_, _, _, F, S, E, 𝓢, φ, e⟩
+  let ~q(@Entailment.Entails $S $F $E $𝓢 $φ) := ty | throwError m!"(getGoal) error: {e} not a form of _ ⊢ _"
+  return ⟨_, _, F, S, E, 𝓢, φ, e⟩
 
 structure CompatibleHypInfo where
   𝓢 : Expr
@@ -507,7 +505,7 @@ structure CompatibleHypInfo where
 def HypInfo.toCompatible (h : HypInfo) : M CompatibleHypInfo := do
   let c ← read
   if (← isDefEq (← whnf h.F) (← whnf c.F)) && (← isDefEq (← whnf h.S) (← whnf c.S)) && (← isDefEq (← whnf h.E) (← whnf c.E)) then
-    let e := @Expr.const ``FFL.Entailment.WeakerThan [c.levelF, c.levelS, c.levelS, c.levelE, c.levelE]
+    let e := @Expr.const ``FFL.Entailment.WeakerThan [c.levelF, c.levelS, c.levelS]
       |>.app c.F |>.app c.S |>.app c.S |>.app c.E |>.app c.E |>.app h.𝓢 |>.app c.𝓢
     let .some wt ← trySynthInstance e
       | throwError m! "error: failed to find instance {e}"

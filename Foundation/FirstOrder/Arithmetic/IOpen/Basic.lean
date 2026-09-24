@@ -1,6 +1,7 @@
 module
 
 public import Foundation.FirstOrder.Arithmetic.Schemata
+public import Foundation.FirstOrder.Arithmetic.Induction.Equiv
 
 @[expose] public section
 /-!
@@ -774,7 +775,7 @@ lemma polynomial_induction [V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻] (Γ m) [V↓[ℒ�
     (zero : P 0) (even : ∀ x > 0, P x → P (2 * x)) (odd : ∀ x, P x → P (2 * x + 1)) : ∀ x, P x := by
   have : V↓[ℒₒᵣ] ⊧* 𝗜𝗡𝗗 Γ m := inferInstance
   have : V↓[ℒₒᵣ] ⊧* 𝗜𝗢𝗽𝗲𝗻 := models_of_subtheory this
-  intro x; induction x using InductionOnHierarchy.order_induction
+  intro x; induction x using InductionOnBroadHierarchy.order_induction
   · exact Γ
   · exact m
   · exact hP

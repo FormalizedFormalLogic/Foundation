@@ -46,6 +46,10 @@ lemma interpret_boxItr {n : ℕ} : (□^[n]A).interpret f 𝔅 = 𝔅^[n] (A.int
   | zero => rfl;
   | succ n ih => simp [interpret, ih, Function.iterate_succ_apply'];
 
+lemma interpret_subst {β : Type*} {s : Substitution β α} {A : Formula β} :
+    (A⟦s⟧).interpret f 𝔅 = A.interpret ⟨fun a ↦ (s a).interpret f 𝔅⟩ 𝔅 := by
+  induction A <;> simp_all [interpret];
+
 end Formula
 
 def _root_.FFL.FirstOrder.ArithmeticTheory.provabilityLogicRelativeTo (T U : ArithmeticTheory) [T.Δ₁] :
