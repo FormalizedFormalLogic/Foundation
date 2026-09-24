@@ -59,21 +59,19 @@ lemma provable_reassoc_of_provable_imp (h : 𝐒 ⊢ A 🡒 B) :
 theorem CIP (h : 𝐒 ⊢ A 🡒 B) :
     ∃ C, 𝐒 ⊢ A 🡒 C ∧ 𝐒 ⊢ C 🡒 B ∧ C.atoms ⊆ A.atoms ∩ B.atoms := by
   obtain ⟨C, hC₁, hC₂, hCAtoms⟩ := Logic.GL.CIP (provable_reassoc_of_provable_imp h);
-  have hAnt : 𝐒 ⊢ A 🡒 C := by
-    have hP : 𝐆𝐋 ⊢ A.rflSubfmls.conj 🡒 (A 🡒 C) := by cl_prover [hC₁];
-    exact of_GL hP ⨀ provable_fconj_rflSubfmls A;
-  have hSuc : 𝐒 ⊢ C 🡒 B := by
-    have hQ : 𝐆𝐋 ⊢ B.rflSubfmls.conj 🡒 (C 🡒 B) := by cl_prover [hC₂];
-    exact of_GL hQ ⨀ provable_fconj_rflSubfmls B;
-  have hA' : (A.rflSubfmls.conj ⋏ A).atoms ⊆ A.atoms := by
-    rw [Formula.atoms_and];
-    exact Finset.union_subset
-      ((FormulaFinset.atoms_conj_subset _).trans (atoms_rflSubfmls_subset A)) subset_rfl;
-  have hB' : (B.rflSubfmls.conj 🡒 B).atoms ⊆ B.atoms := by
-    rw [Formula.atoms_imp];
-    exact Finset.union_subset
-      ((FormulaFinset.atoms_conj_subset _).trans (atoms_rflSubfmls_subset B)) subset_rfl;
-  exact ⟨C, hAnt, hSuc, hCAtoms.trans (Finset.inter_subset_inter hA' hB')⟩;
+  use C;
+  and_intros;
+  · exact of_GL (by cl_prover [hC₁]) ⨀ provable_fconj_rflSubfmls A;
+  · exact of_GL (by cl_prover [hC₂]) ⨀ provable_fconj_rflSubfmls B;
+  · have hA' : (A.rflSubfmls.conj ⋏ A).atoms ⊆ A.atoms := by
+      rw [Formula.atoms_and];
+      exact Finset.union_subset
+        ((FormulaFinset.atoms_conj_subset _).trans (atoms_rflSubfmls_subset A)) subset_rfl;
+    have hB' : (B.rflSubfmls.conj 🡒 B).atoms ⊆ B.atoms := by
+      rw [Formula.atoms_imp];
+      exact Finset.union_subset
+        ((FormulaFinset.atoms_conj_subset _).trans (atoms_rflSubfmls_subset B)) subset_rfl;
+    exact hCAtoms.trans <| Finset.inter_subset_inter hA' hB';
 
 end Logic.S
 
