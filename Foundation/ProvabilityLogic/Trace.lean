@@ -237,7 +237,8 @@ lemma subset_GLBetaMinus : (𝐆𝐋α X : Logic α) ⊆ 𝐆𝐋β⁻ X hX :=
   fun _ h ↦ GLBetaMinus.mem_iff.mpr (mem_iff.mp h).2
 
 theorem eq_inter_GLBetaMinus : (𝐆𝐋α X : Logic α) = 𝐆𝐋α Set.univ ∩ 𝐆𝐋β⁻ X hX := by
-  sorry
+  ext A;
+  simp [mem_iff, GLBetaMinus.mem_iff];
 
 end GLAlpha
 
