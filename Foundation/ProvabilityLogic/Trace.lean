@@ -56,7 +56,7 @@ lemma GL_imp_of_height_not_mem_trace
   have : Fintype M.World := Fintype.ofFinite _;
   exact root_forces_of_not_mem_trace (h M hB);
 
-lemma trace_lift (B : LetterlessFormula) : (B.lift : Formula α).trace = B.trace := by
+@[simp] lemma trace_lift (B : LetterlessFormula) : (B.lift : Formula α).trace = B.trace := by
   ext n;
   constructor;
   · rintro ⟨κ, _, M, _, _, rfl, h⟩ hB;
@@ -144,12 +144,10 @@ lemma exists_finset_trace_subset_of_mem_sumQuasiNormal {X : Logic α} (h : A ∈
     · simp [hY₁, hY₂];
     · rintro n ⟨κ, _, M, _, _, rfl, hB⟩;
       by_cases hC : M.root ⊩[M.toModel] C;
-      · have := h₁ (show M.height ∈ _ from ⟨κ, _, M, _, _, rfl, fun h ↦ hB (h hC)⟩);
-        simp only [Finset.mem_union, Set.mem_iUnion] at this ⊢;
-        grind;
-      · have := h₂ (show M.height ∈ _ from ⟨κ, _, M, _, _, rfl, hC⟩);
-        simp only [Finset.mem_union, Set.mem_iUnion] at this ⊢;
-        grind;
+      · exact Set.biUnion_subset_biUnion_left (by simp) <|
+          h₁ (show M.height ∈ _ from ⟨κ, _, M, _, _, rfl, fun h ↦ hB (h hC)⟩);
+      · exact Set.biUnion_subset_biUnion_left (by simp) <|
+          h₂ (show M.height ∈ _ from ⟨κ, _, M, _, _, rfl, hC⟩);
   | subst _ ih =>
     obtain ⟨Y, hY, h⟩ := ih;
     exact ⟨Y, hY, trace_subst_subset.trans h⟩;
@@ -210,7 +208,7 @@ variable {X : Set ℕ} {hX : Xᶜ.Finite}
 
 @[simp] theorem trace_eq : (𝐆𝐋β⁻ X hX : Logic α).trace = X := by
   rw [GL.trace_sumQuasiNormal];
-  simp [trace, Formula.trace_lift];
+  simp [trace];
 
 theorem mem_iff : A ∈ (𝐆𝐋β⁻ X hX : Logic α) ↔ A.trace ⊆ X := by
   constructor;
