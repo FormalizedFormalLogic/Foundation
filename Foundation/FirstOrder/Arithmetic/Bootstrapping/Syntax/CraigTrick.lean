@@ -67,16 +67,18 @@ lemma lt_encode_padding (φ : Semiformula L ξ n) (k : ℕ) :
 lemma primrec_encode_weight :
     Primrec fun k : ℕ ↦ encode (weight k : Semiformula L ξ n) := by
   have step : Primrec₂ fun _ r : ℕ ↦
-      Nat.pair 4 (Nat.pair (encode (⊤ : Semiformula L ξ n)) r) + 1 :=
-    Primrec.nat_add.comp
-      (Primrec₂.natPair.comp (Primrec.const 4)
-        (Primrec₂.natPair.comp (Primrec.const (encode (⊤ : Semiformula L ξ n))) Primrec.snd))
-      (Primrec.const 1);
+      Nat.pair 4 (Nat.pair (encode (⊤ : Semiformula L ξ n)) r) + 1 := by primrec;
   refine (Primrec.nat_rec₁ (encode (⊤ : Semiformula L ξ n)) step).of_eq ?_;
   intro k;
   induction k with
   | zero => simp [weight]
   | succ k ih => simp [encode_weight_succ, ih]
+
+omit [Encodable ξ] in
+@[primrec]
+lemma primrec_weight [L.Primcodable] [Primcodable ξ] {α : Type*} [Primcodable α] {k : α → ℕ}
+    (hk : Primrec k) : Primrec fun a ↦ (weight (k a) : Semiformula L ξ n) :=
+  Primrec.encode_iff.mp <| primrec_encode_weight.comp hk
 
 end FFL.FirstOrder.Semiformula
 
@@ -283,44 +285,17 @@ lemma mem_craig_codes_iff (n : ℕ) :
       . rfl;
     . exact (Semiformula.encode_padding σ s).trans <| by simpa [hσm] using hn.symm;
 
--- `p = (m, (n, s))`: `m` is the sentence code, `n` is the candidate craig axiom code,
--- `s` is the padding index.
 omit [L.LORDefinable] in
-lemma primrecPred_craig_core : PrimrecPred fun p : ℕ × (ℕ × ℕ) ↦
-    (decode₂ (Sentence L) p.1).isSome ∧
-      p.2.1 = Nat.pair 4 (Nat.pair p.1 (encode (Semiformula.weight p.2.2 : Sentence L))) + 1 ∧
-      ℕ ⊧/![p.2.2, p.1] T.reWitness.val := by
-  have hm : Primrec fun p : ℕ × (ℕ × ℕ) ↦ p.1 := Primrec.fst;
-  have hn : Primrec fun p : ℕ × (ℕ × ℕ) ↦ p.2.1 := Primrec.fst.comp Primrec.snd;
-  have hs : Primrec fun p : ℕ × (ℕ × ℕ) ↦ p.2.2 := Primrec.snd.comp Primrec.snd;
-  have hweight : Primrec fun p : ℕ × (ℕ × ℕ) ↦ encode (Semiformula.weight p.2.2 : Sentence L) :=
-    Semiformula.primrec_encode_weight.comp hs;
-  have hdecode : PrimrecPred fun p : ℕ × (ℕ × ℕ) ↦ (decode₂ (Sentence L) p.1).isSome := by
-    simpa using Primrec.eq.comp
-      (Primrec.option_isSome.comp (Primrec.decode₂.comp hm)) (Primrec.const true);
-  have heq : PrimrecPred fun p : ℕ × (ℕ × ℕ) ↦
-      p.2.1 = Nat.pair 4 (Nat.pair p.1 (encode (Semiformula.weight p.2.2 : Sentence L))) + 1 :=
-    Primrec.eq.comp hn (Primrec.nat_add.comp
-      (Primrec₂.natPair.comp (Primrec.const 4) (Primrec₂.natPair.comp hm hweight))
-      (Primrec.const 1));
-  have heval : PrimrecPred fun p : ℕ × (ℕ × ℕ) ↦ ℕ ⊧/![p.2.2, p.1] T.reWitness.val :=
-    ((Arithmetic.delta0_primrec Empty.elim T.reWitness.sigma_prop).comp
-      (Primrec.vector_cons.comp hs
-        (Primrec.vector_cons.comp hm (Primrec.const List.Vector.nil)))).of_eq fun p ↦ by
-      simp [List.Vector.cons_get];
-  exact hdecode.and (heq.and heval);
+@[primrec]
+lemma primrecPred_reWitness {α : Type*} [Primcodable α] {s m : α → ℕ}
+    (hs : Primrec s) (hm : Primrec m) :
+    PrimrecPred fun a ↦ ℕ ⊧/![s a, m a] T.reWitness.val :=
+  ((Arithmetic.delta0_primrec Empty.elim T.reWitness.sigma_prop).comp
+    (by primrec : Primrec fun a ↦ (s a ::ᵥ m a ::ᵥ List.Vector.nil : List.Vector ℕ 2))).of_eq
+    fun a ↦ by simp [List.Vector.cons_get]
 
-lemma primrecPred_craig_codes : PrimrecPred (· ∈ Encodable.encode '' T.craig) := by
-  refine PrimrecPred.of_eq ?_ fun n ↦ (mem_craig_codes_iff n).symm;
-  have hinner : PrimrecPred fun p : ℕ × ℕ ↦
-      ∃ m < p.1, (decode₂ (Sentence L) m).isSome ∧
-        p.1 = Nat.pair 4 (Nat.pair m (encode (Semiformula.weight p.2 : Sentence L))) + 1 ∧
-        ℕ ⊧/![p.2, m] T.reWitness.val :=
-    ((PrimrecRel.exists_mem_list (primrecPred_craig_core (T := T)).primrecRel).comp
-      (Primrec.list_range.comp Primrec.fst) Primrec.id).of_eq (by simp);
-  exact ((PrimrecRel.exists_mem_list
-      (hinner.comp (Primrec.pair Primrec.snd Primrec.fst)).primrecRel).comp
-    Primrec.list_range Primrec.id).of_eq (by simp);
+lemma primrecPred_craig_codes : PrimrecPred (· ∈ Encodable.encode '' T.craig) :=
+  PrimrecPred.of_eq (by primrec) fun n ↦ (mem_craig_codes_iff n).symm
 
 instance : T.craig.Primrec :=
   ⟨((primrecPred_craig_codes (T := T)).comp Primrec.encode).of_eq fun _ ↦ by simp⟩

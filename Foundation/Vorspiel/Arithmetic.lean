@@ -1,5 +1,6 @@
 module
 
+public import Foundation.Vorspiel.Computability.Primrec
 public import Foundation.Vorspiel.List.Basic
 public import Mathlib.Computability.Halting
 public import Mathlib.Computability.PartrecBasis
@@ -102,33 +103,19 @@ lemma to_partrec' {n} {f : List.Vector ℕ n →. ℕ} (hf : ArithPart₁ f) : P
   case zero => exact Partrec'.of_part (Partrec.const' 0)
   case one  => exact Partrec'.of_part (Partrec.const' 1)
   case add n i j =>
-    exact (Partrec'.of_part ((Primrec.nat_add.comp
-      (Primrec.vector_get.comp _root_.Primrec.id (_root_.Primrec.const i))
-      (Primrec.vector_get.comp _root_.Primrec.id (_root_.Primrec.const j))).to_comp.partrec))
+    have : Primrec fun v : List.Vector ℕ n ↦ v.get i + v.get j := by primrec;
+    exact Partrec'.of_part this.to_comp.partrec
   case mul n i j =>
-    exact (Partrec'.of_part ((Primrec.nat_mul.comp
-      (Primrec.vector_get.comp _root_.Primrec.id (_root_.Primrec.const i))
-      (Primrec.vector_get.comp _root_.Primrec.id (_root_.Primrec.const j))).to_comp.partrec))
+    have : Primrec fun v : List.Vector ℕ n ↦ v.get i * v.get j := by primrec;
+    exact Partrec'.of_part this.to_comp.partrec
   case proj n i =>
-    exact Partrec'.of_part
-      (Primrec.vector_get.comp _root_.Primrec.id (_root_.Primrec.const i)).to_comp.partrec
+    have : Primrec fun v : List.Vector ℕ n ↦ v.get i := by primrec;
+    exact Partrec'.of_part this.to_comp.partrec
   case equal n i j =>
-    have : Primrec (fun (v : List.Vector ℕ n) => if v.get i = v.get j then 1 else 0) :=
-      Primrec.ite
-        (Primrec.eq.comp
-          (Primrec.vector_get.comp _root_.Primrec.id (_root_.Primrec.const i))
-          (Primrec.vector_get.comp _root_.Primrec.id (_root_.Primrec.const j)))
-        (_root_.Primrec.const 1)
-        (_root_.Primrec.const 0)
+    have : Primrec fun v : List.Vector ℕ n ↦ if v.get i = v.get j then 1 else 0 := by primrec;
     exact Partrec'.of_part this.to_comp.partrec
   case lt n i j =>
-    have : Primrec (fun (v : List.Vector ℕ n) => if v.get i < v.get j then 1 else 0) :=
-      Primrec.ite
-        (Primrec.nat_lt.comp
-          (Primrec.vector_get.comp _root_.Primrec.id (_root_.Primrec.const i))
-          (Primrec.vector_get.comp _root_.Primrec.id (_root_.Primrec.const j)))
-        (_root_.Primrec.const 1)
-        (_root_.Primrec.const 0)
+    have : Primrec fun v : List.Vector ℕ n ↦ if v.get i < v.get j then 1 else 0 := by primrec;
     exact Partrec'.of_part this.to_comp.partrec
   case comp m n f g _ _ hf hg =>
     exact Partrec'.comp g hf hg

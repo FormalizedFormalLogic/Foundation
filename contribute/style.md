@@ -166,6 +166,12 @@ Prefer that form when the declarations themselves carry no docstrings.
 
 Attach `@[grind]` to lemmas and definitions that plausibly help `grind` close goals, choosing a direction (`@[grind =>]`, `@[grind .]`) where it matters. 🤖 Do not attach it mechanically to every declaration. The post-hoc form `attribute [grind] name₁ name₂ …` is also acceptable. Inside proofs, try `grind` before settling on a longer tactic sequence.
 
+## The `primrec` tactic
+
+`primrec` proves `Primrec f`, `Primrec₂ f`, `PrimrecPred p` and `PrimrecRel r`. Use it instead of chaining `Primrec.comp`/`Primrec.fst`/`Primrec.snd` by hand.
+
+Register a new function with `@[primrec]`, stating the lemma pointwise — `Primrec fun a ↦ F (f a) (g a)` with a hypothesis per argument, over an arbitrary `[Primcodable α]`.
+
 ## No `sorry`
 
 `sorry` is never acceptable in submitted proofs. CI runs `just forgive`, which fails the build on any remaining `sorry` (as well as on axioms outside the allowlist) — a proof left in a skeleton state cannot land. If a proof is incomplete, keep it out of the PR rather than submitting it with `sorry` placeholders.
