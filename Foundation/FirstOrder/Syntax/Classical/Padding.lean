@@ -44,20 +44,17 @@ end Semiformula
 
 open Entailment
 
-def Entailment.paddingIff [L.DecidableEq] [DecidableEq ξ] [Entailment S (Formula L ξ)] {𝓢 : S} [Entailment.Minimal 𝓢] (φ k) :
-    𝓢 ⊢! φ.padding k 🡘 φ := by
-  apply E!_intro
-  · apply and₁!
-  · apply right_K!_intro
-    · apply C!_id
-    · apply dhyp!
-      apply Conj!_intro
+@[simp] theorem Entailment.padding_iff [L.DecidableEq] [DecidableEq ξ] [Entailment S (Formula L ξ)] {𝓢 : S} [Entailment.Minimal 𝓢] (φ k) :
+    𝓢 ⊢ φ.padding k 🡘 φ := by
+  apply E_intro
+  · apply and₁
+  · apply right_K_intro
+    · apply C_id
+    · apply dhyp
+      apply Conj_intro
       intro φ hφ
       have : k ≠ 0 ∧ φ = ⊤ := by simpa using hφ;
-      exact this.2 ▸ HasAxiomVerum.verum!
-
-@[simp] theorem Entailment.padding_iff [L.DecidableEq] [DecidableEq ξ] [Entailment S (Formula L ξ)] {𝓢 : S} [Entailment.Minimal 𝓢] (φ k) :
-    𝓢 ⊢ φ.padding k 🡘 φ := ⟨paddingIff φ k⟩
+      exact this.2 ▸ verum
 
 end FFL.FirstOrder
 

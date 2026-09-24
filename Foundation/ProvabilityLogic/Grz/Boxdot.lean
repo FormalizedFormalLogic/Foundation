@@ -68,21 +68,22 @@ universe u
 
 variable {α : Type u} [DecidableEq α] {A : Formula α}
 
-theorem iff_boxdotTranslate_mem_GL : A ∈ 𝐆𝐫𝐳 ↔ Aᵇ ∈ 𝐆𝐋 := by
+theorem iff_boxdotTranslate_GL : 𝐆𝐫𝐳 ⊢ A ↔ 𝐆𝐋 ⊢ Aᵇ := by
   constructor;
-  . rintro ⟨d⟩;
+  . intro h;
     apply GL.iff_valid_finite.mpr;
     intro _ _ M _ x;
-    induction d generalizing x with
+    induction h generalizing x with
+    | axm hA =>
+      rcases hA with ((⟨B, rfl⟩ | ⟨B, rfl⟩) | ⟨B, rfl⟩);
+      . intro h;
+        obtain ⟨-, h₂⟩ := forces_boxdot.mp h;
+        exact forces_boxdot.mpr ⟨h, fun y Rxy ↦
+          forces_boxdot.mpr ⟨h₂ y Rxy, fun z Ryz ↦ h₂ z (IsTrans.trans _ _ _ Rxy Ryz)⟩⟩;
+      . exact fun h ↦ (forces_boxdot.mp h).1;
+      . exact forces_boxdotTranslate_axiomGrz;
     | mdp _ _ ih₁ ih₂ => exact ih₁ x (ih₂ x);
     | nec _ ih => exact forces_boxdot.mpr ⟨ih x, fun y _ ↦ ih y⟩;
-    | axiomGrz => exact forces_boxdotTranslate_axiomGrz;
-    | axiomT => exact fun h ↦ (forces_boxdot.mp h).1;
-    | axiom4 =>
-      intro h;
-      obtain ⟨-, h₂⟩ := forces_boxdot.mp h;
-      exact forces_boxdot.mpr ⟨h, fun y Rxy ↦
-        forces_boxdot.mpr ⟨h₂ y Rxy, fun z Ryz ↦ h₂ z (IsTrans.trans _ _ _ Rxy Ryz)⟩⟩;
     | axiomK =>
       intro h₁ h₂;
       obtain ⟨h₁, h₁'⟩ := forces_boxdot.mp h₁;
@@ -97,8 +98,8 @@ theorem iff_boxdotTranslate_mem_GL : A ∈ 𝐆𝐫𝐳 ↔ Aᵇ ∈ 𝐆𝐋 :=
     intro _ _ M _ x;
     exact forces_irreflGen_boxdotTranslate.mp (GL.iff_valid_finite.mp h M.irreflGen x);
 
-theorem iff_boxdotTranslate_mem_S : A ∈ 𝐆𝐫𝐳 ↔ Aᵇ ∈ 𝐒 :=
-  iff_boxdotTranslate_mem_GL.trans S.boxdotTranslate_mem_iff_GL.symm
+theorem iff_boxdotTranslate_S : 𝐆𝐫𝐳 ⊢ A ↔ 𝐒 ⊢ Aᵇ :=
+  iff_boxdotTranslate_GL.trans S.boxdotTranslate_iff_GL.symm
 
 end Logic.Grz
 

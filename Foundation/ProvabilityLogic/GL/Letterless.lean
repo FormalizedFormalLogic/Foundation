@@ -52,7 +52,7 @@ lemma lift_mem_iff : A.lift ∈ (𝐆𝐋 : Logic α) ↔ spectrum A = Set.univ 
   . intro h;
     apply Set.eq_univ_of_forall;
     intro n;
-    simpa using forces_lift_iff.mp <| GL.Hilbert.sound (finiteLineModel n α) h (Fin.last n);
+    simpa using forces_lift_iff.mp <| Logic.GL.sound (finiteLineModel n α) h (Fin.last n);
   . intro h;
     apply iff_valid_finite.mpr;
     intro _ _ M _ x;
@@ -68,7 +68,7 @@ lemma exists_finset_of_mem_sumQuasiNormal {B : Formula α} (h : B ∈ 𝐆𝐋 +
         (∀ C ∈ Y, x.rank ∈ spectrum C) → x ⊩[M] B := by
   classical
   induction h with
-  | mem₁ h => exact ⟨∅, by simp, fun M _ _ x _ ↦ GL.Hilbert.sound M h x⟩;
+  | mem₁ h => exact ⟨∅, by simp, fun M _ _ x _ ↦ Logic.GL.sound M h x⟩;
   | mem₂ h =>
     obtain ⟨C, hC, rfl⟩ := h;
     exact ⟨{C}, by simpa, fun M _ _ x hx ↦ forces_lift_iff.mpr (hx C (by simp))⟩;

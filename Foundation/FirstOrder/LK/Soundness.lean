@@ -72,7 +72,7 @@ lemma sound {M : Type*} [s : Tarski.Structure L M] [Nonempty M] (f : ℕ → M) 
 end LK.Derivation
 
 theorem LK.Proof.sound {M : Type*} [s : Tarski.Structure L M] [Nonempty M] {φ : Proposition L} (f : ℕ → M) :
-    𝐋𝐊¹ ⊢ φ → φ.Evalf f := fun b ↦ by simpa using LK.Derivation.sound f b.get
+    𝐋𝐊¹ ⊢ φ → φ.Evalf f := fun ⟨b⟩ ↦ by simpa using LK.Derivation.sound f b
 
 variable {T U : Theory L}
 

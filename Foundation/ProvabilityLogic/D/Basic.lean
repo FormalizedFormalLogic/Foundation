@@ -29,30 +29,25 @@ namespace Logic.D
 
 variable {α : Type*} {A B : Formula α}
 
-lemma mem_of_mem_GL (h : A ∈ 𝐆𝐋) : A ∈ 𝐃 := sumQuasiNormal.mem₁ h
+lemma of_GL (h : 𝐆𝐋 ⊢ A) : 𝐃 ⊢ A := sumQuasiNormal.of_left h
 
-lemma axiomP : ∼□⊥ ∈ (𝐃 : Logic α) := sumQuasiNormal.mem₂ (Set.mem_insert _ _)
+lemma axiomP : (𝐃 : Logic α) ⊢ ∼□⊥ := sumQuasiNormal.mem₂ (Set.mem_insert _ _)
 
-lemma axiomD : □(□A ⋎ □B) 🡒 □A ⋎ □B ∈ 𝐃 := sumQuasiNormal.mem₂ (Set.mem_insert_of_mem _ ⟨A, B, rfl⟩)
-
-lemma mdp (h₁ : A 🡒 B ∈ 𝐃) (h₂ : A ∈ 𝐃) : B ∈ 𝐃 := sumQuasiNormal.mdp h₁ h₂
+lemma axiomD : 𝐃 ⊢ □(□A ⋎ □B) 🡒 □A ⋎ □B := sumQuasiNormal.mem₂ (Set.mem_insert_of_mem _ ⟨A, B, rfl⟩)
 
 lemma subset_S : (𝐃 : Logic α) ⊆ 𝐒 := by
   intro A h;
   induction h with
-  | mem₁ h => exact S.mem_of_mem_GL h;
-  | mem₂ h =>
-    rcases h with rfl | ⟨A, B, rfl⟩;
-    . exact S.axiomT;
-    . exact S.axiomT;
-  | mdp _ _ ih₁ ih₂ => exact S.mdp ih₁ ih₂;
+  | mem₁ h => exact S.of_GL h;
+  | mem₂ h => rcases h with rfl | ⟨A, B, rfl⟩ <;> exact S.axiomT;
+  | mdp _ _ ih₁ ih₂ => exact sumQuasiNormal.mdp ih₁ ih₂;
   | subst _ ih => exact sumQuasiNormal.subst ih;
 
 /-- - [KKIM25, Theorem 5.8] -/
-lemma sound_freeTail (h : A ∈ 𝐃) {κ : Type*} [Nonempty κ] (M : Model κ α) [M.IsGL]
+lemma sound_freeTail (h : 𝐃 ⊢ A) {κ : Type*} [Nonempty κ] (M : Model κ α) [M.IsGL]
     (V : ℕ∞ → α → Prop) : Sum.inr ⊤ ⊩[(M.toFreeTail V).toModel] A := by
   induction h generalizing κ V with
-  | mem₁ h => exact GL.Hilbert.sound _ h _;
+  | mem₁ h => exact GL.sound _ h _;
   | mem₂ h =>
     rcases h with rfl | ⟨B, C, rfl⟩;
     . exact fun h ↦ h (.inr 0) (toFreeTail.rel_inr_inr.mpr (by simp));
@@ -78,13 +73,13 @@ lemma sound_freeTail (h : A ∈ 𝐃) {κ : Type*} [Nonempty κ] (M : Model κ �
       . exact toFreeTail.forces_inl.symm;
       . rfl;
 
-lemma not_axiomT {a : α} : □#a 🡒 #a ∉ (𝐃 : Logic α) := fun h ↦
+lemma not_axiomT {a : α} : (𝐃 : Logic α) ⊬ □#a 🡒 #a := fun h ↦
   sound_freeTail h (pointModel fun _ ↦ True) (fun i _ ↦ i ≠ ⊤)
     (by rintro (_ | i) R; exacts [trivial, ne_top_of_lt R]) rfl
 
 lemma GL_ssubset : (𝐆𝐋 : Logic α) ⊂ 𝐃 :=
-  ⟨fun _ ↦ mem_of_mem_GL, fun h ↦
-    GL.Hilbert.sound (pointModel (α := α) fun _ ↦ True) (h axiomP) 0 fun _ h ↦ h.elim⟩
+  ⟨fun _ ↦ of_GL, fun h ↦
+    GL.sound (pointModel (α := α) fun _ ↦ True) (h axiomP) 0 fun _ h ↦ h.elim⟩
 
 lemma ssubset_S [Inhabited α] : (𝐃 : Logic α) ⊂ 𝐒 :=
   ⟨subset_S, fun h ↦ not_axiomT (a := default) (h S.axiomT)⟩
@@ -92,7 +87,7 @@ lemma ssubset_S [Inhabited α] : (𝐃 : Logic α) ⊂ 𝐒 :=
 variable [DecidableEq α]
 
 /-- The `n`-ary form of axiom `D`. -/
-lemma axiomD_disj {Γ : FormulaFinset α} : □Γ.box.disj 🡒 Γ.box.disj ∈ 𝐃 := by
+lemma axiomD_disj {Γ : FormulaFinset α} : 𝐃 ⊢ □Γ.box.disj 🡒 Γ.box.disj := by
   induction Γ using Finset.induction_on with
   | empty =>
     have : (FormulaFinset.box (∅ : FormulaFinset α)).disj = ⊥ := by simp [Finset.disj];
@@ -101,14 +96,14 @@ lemma axiomD_disj {Γ : FormulaFinset α} : □Γ.box.disj 🡒 Γ.box.disj ∈ 
   | insert A Γ _ ih =>
     set Φ := (FormulaFinset.box Γ).disj;
     set Ψ := (FormulaFinset.box (insert A Γ)).disj;
-    have h₁ : ⊢ᴴ[GL] Φ 🡒 □Φ := left_Fdisj_intro _ fun C hC ↦ by
+    have h₁ : 𝐆𝐋 ⊢ Φ 🡒 □Φ := left_Fdisj_intro _ fun C hC ↦ by
       obtain ⟨B, -, rfl⟩ := Finset.mem_image.mp hC;
-      exact C_trans GL.Hilbert.axiom4 (GL.Hilbert.box_mono (right_Fdisj_intro _ hC));
-    have h₂ : ⊢ᴴ[GL] Ψ 🡒 □A ⋎ Φ := by simp [Ψ, Φ, Finset.image_insert];
-    have h₃ : ⊢ᴴ[GL] □A ⋎ Φ 🡒 Ψ := by simp [Ψ, Φ, Finset.image_insert];
-    have h₄ : ⊢ᴴ[GL] □Ψ 🡒 □(□A ⋎ □Φ) := GL.Hilbert.box_mono (by cl_prover [h₁, h₂]);
-    have h₅ : ⊢ᴴ[GL] (□(□A ⋎ □Φ) 🡒 □A ⋎ □Φ) 🡒 (□Φ 🡒 Φ) 🡒 □Ψ 🡒 Ψ := by cl_prover [h₃, h₄];
-    exact mdp (mdp (mem_of_mem_GL h₅) axiomD) ih;
+      exact C_trans GL.axiom4 (normalOf.box_mono (right_Fdisj_intro _ hC));
+    have h₂ : 𝐆𝐋 ⊢ Ψ 🡒 □A ⋎ Φ := by simp [Ψ, Φ, Finset.image_insert];
+    have h₃ : 𝐆𝐋 ⊢ □A ⋎ Φ 🡒 Ψ := by simp [Ψ, Φ, Finset.image_insert];
+    have h₄ : 𝐆𝐋 ⊢ □Ψ 🡒 □(□A ⋎ □Φ) := normalOf.box_mono (by cl_prover [h₁, h₂]);
+    have h₅ : 𝐆𝐋 ⊢ (□(□A ⋎ □Φ) 🡒 □A ⋎ □Φ) 🡒 (□Φ 🡒 Φ) 🡒 □Ψ 🡒 Ψ := by cl_prover [h₃, h₄];
+    exact of_GL h₅ ⨀ axiomD ⨀ ih;
 
 open Classical in
 /-- - [KKIM25, Proposition 3.6] -/
@@ -166,7 +161,7 @@ variable {α : Type u} [DecidableEq α] {A : Formula α}
 
 /-- - [KKIM25, Proposition 3.6, Theorem 5.8] -/
 theorem provability_TFAE : [
-    A ∈ 𝐃,
+    𝐃 ⊢ A,
     ⊢ᴳ[D] ∅ ⟹[2] {A},
     ∀ {κ : Type u} [Nonempty κ] (M : Model κ α) [M.IsGL] (V : ℕ∞ → α → Prop),
       Sum.inr ⊤ ⊩[(M.toFreeTail V).toModel] A,
@@ -174,7 +169,7 @@ theorem provability_TFAE : [
       Sum.inr ⊤ ⊩[(M.toPseudoTail o).toModel] A,
     ∀ {κ : Type u} [Nonempty κ] (M : RootedModel κ α) [M.IsFiniteGL],
       M.root ⊩[M.toModel] A.dSubfmls.conj 🡒 A,
-    A.dSubfmls.conj 🡒 A ∈ 𝐆𝐋
+    𝐆𝐋 ⊢ A.dSubfmls.conj 🡒 A
   ].TFAE := by
   tfae_have 1 → 3 := fun h _ _ M _ V ↦ sound_freeTail h M V;
   tfae_have 2 ↔ 3 := by
@@ -191,28 +186,28 @@ theorem provability_TFAE : [
   tfae_have 3 → 4 := fun h _ _ M _ _ ↦ h M.toModel _;
   tfae_have 4 → 5 := fun h _ _ M _ ↦ root_forces_of_forces_pseudoTail fun x _ ↦ h _ _;
   tfae_have 5 ↔ 6 := GL.iff_root_forces.symm;
-  tfae_have 6 → 1 := GL.mem_sumQuasiNormal_of_conj fun B hB ↦ by
+  tfae_have 6 → 1 := GL.sumQuasiNormal_of_conj fun B hB ↦ by
     obtain ⟨Γ, -, rfl⟩ := Finset.mem_image.mp hB;
     exact axiomD_disj;
   tfae_finish;
 
-lemma iff_gentzen : A ∈ 𝐃 ↔ ⊢ᴳ[D] ∅ ⟹[2] {A} := provability_TFAE.out 1 2
+lemma iff_provable_gentzen : 𝐃 ⊢ A ↔ ⊢ᴳ[D] ∅ ⟹[2] {A} := provability_TFAE.out 1 2
 
-lemma iff_forces_pseudoTail : A ∈ 𝐃 ↔
+lemma iff_forces_pseudoTail : 𝐃 ⊢ A ↔
     ∀ {κ : Type u} [Nonempty κ] (M : RootedModel κ α) [M.IsFiniteGL] (o : α → Prop),
       Sum.inr ⊤ ⊩[(M.toPseudoTail o).toModel] A :=
   provability_TFAE.out 1 4
 
-lemma iff_mem_GL : A ∈ 𝐃 ↔ A.dSubfmls.conj 🡒 A ∈ 𝐆𝐋 := provability_TFAE.out 1 6
+lemma iff_provable_GL : 𝐃 ⊢ A ↔ 𝐆𝐋 ⊢ A.dSubfmls.conj 🡒 A := provability_TFAE.out 1 6
 
-lemma iff_box_mem_GL : □A ∈ 𝐃 ↔ A ∈ 𝐆𝐋 := by
+lemma iff_box_provable_GL : 𝐃 ⊢ □A ↔ 𝐆𝐋 ⊢ A := by
   constructor;
   . intro h;
     exact GL.iff_valid_finite.mpr fun M _ x ↦
       toFreeTail.forces_inl.mp (sound_freeTail h M (fun _ _ ↦ True) (.inl x) trivial);
-  . exact fun h ↦ mem_of_mem_GL (GL.Hilbert.nec h);
+  . exact fun h ↦ of_GL (normalOf.nec h);
 
-lemma consistent : ⊥ ∉ (𝐃 : Logic α) := fun h ↦ S.consistent (subset_S h)
+lemma consistent : (𝐃 : Logic α) ⊬ ⊥ := fun h ↦ S.consistent (subset_S h)
 
 end Logic.D
 

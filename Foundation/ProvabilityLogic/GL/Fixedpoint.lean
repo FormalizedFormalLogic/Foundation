@@ -73,8 +73,8 @@ universe u
 variable {α : Type u} [DecidableEq α] {p q : α} {A D E : Formula α}
 
 /-- - [SV82, Lemma 4.3] -/
-theorem fixpoint_unique (hA : A.ModalizedIn p) (hD : A⟦p ↦ D⟧ 🡘 D ∈ 𝐆𝐋)
-    (hE : A⟦p ↦ E⟧ 🡘 E ∈ 𝐆𝐋) : D 🡘 E ∈ 𝐆𝐋 := by
+theorem fixpoint_unique (hA : A.ModalizedIn p) (hD : 𝐆𝐋 ⊢ A⟦p ↦ D⟧ 🡘 D)
+    (hE : 𝐆𝐋 ⊢ A⟦p ↦ E⟧ 🡘 E) : 𝐆𝐋 ⊢ D 🡘 E := by
   apply iff_valid_finite.mpr;
   intro _ _ M _ x;
   induction x using (IsConverseWellFounded.cwf (rel := M.Rel)).induction with
@@ -106,7 +106,7 @@ private lemma fixpoint_premise (hA : A.ModalizedIn p) :
 
 /-- - [SV82, Theorem 4.4] -/
 theorem exists_fixpoint (hpq : p ≠ q) (hA : A.ModalizedIn p) (hq : q ∉ A.atoms) :
-    ∃ D, D.atoms ⊆ A.atoms.erase p ∧ A⟦p ↦ D⟧ 🡘 D ∈ 𝐆𝐋 := by
+    ∃ D, D.atoms ⊆ A.atoms.erase p ∧ 𝐆𝐋 ⊢ A⟦p ↦ D⟧ 🡘 D := by
   have h₀ := fixpoint_premise (q := q) hA;
   obtain ⟨D, hD⟩ := Gentzen.exists_interpolant (Γ₁ := {A, □(A 🡘 #p)})
     (Γ₂ := {□(A⟦p ↦ #q⟧ 🡘 #q)}) (Δ₁ := ∅) (Δ₂ := {A⟦p ↦ #q⟧}) h₀ (by intro; simp) (by simp);
@@ -139,8 +139,8 @@ theorem exists_fixpoint (hpq : p ≠ q) (hA : A.ModalizedIn p) (hq : q ∉ A.ato
 
 - [SV82, Lemma 4.3, Theorem 4.4] -/
 theorem fixpoint_theorem (hpq : p ≠ q) (hA : A.ModalizedIn p) (hq : q ∉ A.atoms) :
-    ∃ D, D.atoms ⊆ A.atoms.erase p ∧ A⟦p ↦ D⟧ 🡘 D ∈ 𝐆𝐋 ∧
-      ∀ E, A⟦p ↦ E⟧ 🡘 E ∈ 𝐆𝐋 → D 🡘 E ∈ 𝐆𝐋 := by
+    ∃ D, D.atoms ⊆ A.atoms.erase p ∧ 𝐆𝐋 ⊢ A⟦p ↦ D⟧ 🡘 D ∧
+      ∀ E, 𝐆𝐋 ⊢ A⟦p ↦ E⟧ 🡘 E → 𝐆𝐋 ⊢ D 🡘 E := by
   obtain ⟨D, hD₁, hD₂⟩ := exists_fixpoint hpq hA hq;
   exact ⟨D, hD₁, hD₂, fun _ hE ↦ fixpoint_unique hA hD₂ hE⟩;
 
