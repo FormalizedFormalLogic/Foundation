@@ -60,7 +60,7 @@ variable {α : Type u} [DecidableEq α] {A : Formula α}
 -/
 theorem provability_TFAE : [
     𝐒 ⊢ A,
-    ⊢ᴳ[S] ∅ ⟹[1] {A},
+    ⊢ᴳ[𝐒] ∅ ⟹[1] {A},
     ∀ {κ : Type u} [Nonempty κ] (M : Model κ α) [M.IsGL] (w : ℕ → M.World),
       (∀ n, w (n + 1) ≺ w n) → ∃ i, ∀ j ≥ i, w j ⊩[M] A,
     ∀ {κ : Type u} [Nonempty κ] (M : RootedModel κ α) [M.IsFiniteGL],
@@ -86,7 +86,7 @@ theorem provability_TFAE : [
   tfae_have 6 → 1 := GL.sumQuasiNormal_of_conj (by simp [Formula.rflSubfmls, axiomT]);
   tfae_finish;
 
-lemma iff_provable_gentzen : 𝐒 ⊢ A ↔ ⊢ᴳ[S] ∅ ⟹[1] {A} := provability_TFAE.out 1 2
+lemma iff_provable_gentzen : 𝐒 ⊢ A ↔ ⊢ᴳ[𝐒] ∅ ⟹[1] {A} := provability_TFAE.out 1 2
 
 omit [DecidableEq α] in
 lemma iff_eventually_forces : 𝐒 ⊢ A ↔

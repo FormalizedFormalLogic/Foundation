@@ -25,7 +25,7 @@ namespace A.Gentzen
 variable {α : Type*} [DecidableEq α] {Γ Δ : FormulaFinset α}
 
 /-- - [Bek90, Lemma 5] -/
-theorem sound {T : LayeredSequent 2 α} (h : ⊢ᴳ[A] T) {κ : Type*} [Nonempty κ]
+theorem sound {T : LayeredSequent 2 α} (h : ⊢ᴳ[𝐀] T) {κ : Type*} [Nonempty κ]
     (M : RootedModel κ α) [M.IsGL] (a : M.NonRoot) :
     (M.graft a ℕ).root ⊩[(M.graft a ℕ).toModel] T.toSequent := by
   induction h with
@@ -45,7 +45,7 @@ variable {α : Type u} [DecidableEq α] {Γ Δ : FormulaFinset α}
 theorem GL_of_forces_graft
     (h : ∀ {κ : Type u} [Nonempty κ] (M : RootedModel κ α) [M.IsFiniteGL] (a : M.NonRoot),
       (M.graft a ℕ).root ⊩[(M.graft a ℕ).toModel] (Γ ⟹ Δ)) :
-    ⊢ᴳ[GL] Γ ⟹ insert (□^[(Γ ⟹ Δ).subfmls.prebox.card + 1]⊥) Δ := by
+    ⊢ᴳ[𝐆𝐋] Γ ⟹ insert (□^[(Γ ⟹ Δ).subfmls.prebox.card + 1]⊥) Δ := by
   apply GL.Gentzen.complete;
   intro κ _ M _ x hΓ;
   by_contra! hx;
@@ -69,19 +69,19 @@ theorem GL_of_forces_graft
 theorem complete
     (h : ∀ {κ : Type u} [Nonempty κ] (M : RootedModel κ α) [M.IsFiniteGL] (a : M.NonRoot),
       (M.graft a ℕ).root ⊩[(M.graft a ℕ).toModel] (Γ ⟹ Δ)) :
-    ⊢ᴳ[A] Γ ⟹[1] Δ :=
+    ⊢ᴳ[𝐀] Γ ⟹[1] Δ :=
   of_GL_boxItr_bot (GL_of_forces_graft h)
 
 /-- - [AB05, Lemma 51]
 - [Bek90, Lemma 5]
 -/
 theorem TFAE : [
-    ⊢ᴳ[A] Γ ⟹[1] Δ,
+    ⊢ᴳ[𝐀] Γ ⟹[1] Δ,
     ∀ {κ : Type u} [Nonempty κ] (M : RootedModel κ α) [M.IsGL] (a : M.NonRoot),
       (M.graft a ℕ).root ⊩[(M.graft a ℕ).toModel] (Γ ⟹ Δ),
     ∀ {κ : Type u} [Nonempty κ] (M : RootedModel κ α) [M.IsFiniteGL] (a : M.NonRoot),
       (M.graft a ℕ).root ⊩[(M.graft a ℕ).toModel] (Γ ⟹ Δ),
-    ∃ n : ℕ, ⊢ᴳ[GL] Γ ⟹ insert (□^[n]⊥) Δ
+    ∃ n : ℕ, ⊢ᴳ[𝐆𝐋] Γ ⟹ insert (□^[n]⊥) Δ
   ].TFAE := by
   tfae_have 1 → 2 := fun h _ _ M _ a ↦ sound h M a;
   tfae_have 2 → 3 := fun h _ _ M _ a ↦ h M a;
@@ -92,8 +92,8 @@ theorem TFAE : [
 variable {Γ₁ Γ₂ Δ₁ Δ₂ : FormulaFinset α} {A : Formula α}
 
 /-- Cut is admissible. -/
-theorem cut : {ℓ : Fin 2} → ⊢ᴳ[A] Γ₁ ⟹[ℓ] insert A Δ₁ → ⊢ᴳ[A] insert A Γ₂ ⟹[ℓ] Δ₂ →
-    ⊢ᴳ[A] Γ₁ ∪ Γ₂ ⟹[ℓ] Δ₁ ∪ Δ₂
+theorem cut : {ℓ : Fin 2} → ⊢ᴳ[𝐀] Γ₁ ⟹[ℓ] insert A Δ₁ → ⊢ᴳ[𝐀] insert A Γ₂ ⟹[ℓ] Δ₂ →
+    ⊢ᴳ[𝐀] Γ₁ ∪ Γ₂ ⟹[ℓ] Δ₁ ∪ Δ₂
   | 0, h₁, h₂ => iff_GL.mpr (GL.Gentzen.cut (iff_GL.mp h₁) (iff_GL.mp h₂))
   | 1, h₁, h₂ => complete fun M _ a ↦ forcesSequent_cut (sound h₁ M a) (sound h₂ M a)
 
