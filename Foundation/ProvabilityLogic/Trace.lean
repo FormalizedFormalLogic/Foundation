@@ -250,8 +250,8 @@ theorem subset_GLAlpha_trace (hL : L.traceᶜ.Infinite) : L ⊆ 𝐆𝐋α L.tra
     hL (hA.subset (Set.compl_subset_compl.mpr h)), h⟩;
 
 /-- - [AB05, Lemma 45] -/
-theorem subset_GLBetaMinus_trace (hL : L.traceᶜ.Finite) : L ⊆ 𝐆𝐋β⁻ L.trace hL := by
-  sorry
+theorem subset_GLBetaMinus_trace (hL : L.traceᶜ.Finite) : L ⊆ 𝐆𝐋β⁻ L.trace hL :=
+  fun _ hA ↦ GLBetaMinus.mem_iff.mpr (trace_subset_of_mem hA)
 
 end Logic
 
