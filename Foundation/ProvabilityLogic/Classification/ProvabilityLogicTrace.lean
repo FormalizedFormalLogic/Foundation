@@ -69,15 +69,13 @@ lemma exists_realization_provable_imp_TBB {κ : Type*} [Nonempty κ] (M : Rooted
   use S.realization;
   have h : ∀ i, 𝗜𝚺₁ ⊢ S.σ i 🡒 S.realization T (A 🡒 TBB M.height) := by
     rintro (_ | x);
-    · have h₁ : 𝗜𝚺₁ ⊢ S.σ none 🡒 T.standardProvability.dia (S.σ (some M.root)) :=
-        S.SC2 _ _ trivial;
-      have h₂ : 𝗜𝚺₁ ⊢ S.σ (some M.root) 🡒 ∼S.realization T (□^[M.height]⊥) :=
+    · have h₁ : 𝗜𝚺₁ ⊢ S.σ (some M.root) 🡒 ∼S.realization T (□^[M.height]⊥) :=
         S.mainlemma_neg (Option.some_ne_none _).symm <|
           extendRoot.forces_some.not.mpr <| by simp [root_forces_boxItr_bot_iff];
-      have h₃ := contra <| T.standardProvability.mono' <| CN_of_CN_right h₂;
+      have h₂ := contra <| T.standardProvability.mono' <| CN_of_CN_right h₁;
       simp only [standardInterpret, interpret, TBB, interpret_boxItr,
-        Function.iterate_succ_apply'] at h₃ ⊢;
-      cl_prover [h₁, h₃];
+        Function.iterate_succ_apply'] at h₂ ⊢;
+      cl_prover [S.SC2 none (some M.root) trivial, h₂];
     · apply S.mainlemma (Option.some_ne_none x).symm;
       apply extendRoot.forces_some.mpr;
       by_cases hx : x = M.root;
@@ -155,8 +153,7 @@ lemma exists_neg_conj_TBB_mem_provabilityLogic
   obtain ⟨m, f, hf⟩ := exists_realization_provable_neg_of_not_S (T := T) hAS;
   use m;
   apply lift_mem_provabilityLogic f;
-  have h₁ : U ⊢ ∼f T (A ⋏ lift (⩕ i ∈ Finset.range m, TBB i)) :=
-    WeakerThan.pbl hf;
+  have h₁ : U ⊢ ∼f T (A ⋏ lift (⩕ i ∈ Finset.range m, TBB i)) := WeakerThan.pbl hf;
   have h₂ : U ⊢ f T A := hA f;
   simp only [standardInterpret, interpret] at h₁ h₂ ⊢;
   cl_prover [h₁, h₂];
@@ -166,10 +163,8 @@ theorem provabilityLogic_trace_compl_finite
     (h : ¬(T.provabilityLogicRelativeTo U : Logic α) ⊆ 𝐒) :
     (T.provabilityLogicRelativeTo U : Logic α).traceᶜ.Finite := by
   obtain ⟨m, hm⟩ := exists_neg_conj_TBB_mem_provabilityLogic h;
-  apply (Set.finite_Iio m).subset;
-  intro n hn;
-  by_contra hnm;
-  exact hn <| Logic.trace_subset_of_mem hm <| by simpa using hnm;
+  exact (Set.finite_Iio m).subset fun n hn ↦
+    not_le.mp fun hnm ↦ hn <| Logic.trace_subset_of_mem hm <| by simpa using hnm;
 
 /-- - [AB05, Lemma 49] -/
 theorem betaMinus_mem_provabilityLogic (h : ¬(T.provabilityLogicRelativeTo U : Logic α) ⊆ 𝐒) :
@@ -177,22 +172,18 @@ theorem betaMinus_mem_provabilityLogic (h : ¬(T.provabilityLogicRelativeTo U : 
       (T.provabilityLogicRelativeTo U : Logic α) := by
   classical
   obtain ⟨m, hm⟩ := exists_neg_conj_TBB_mem_provabilityLogic h;
-  apply sumQuasiNormal_subset_provabilityLogic subset_rfl;
-  apply Logic.GL.sumQuasiNormal_of_conj
-    (Γ := insert (lift (∼⩕ i ∈ Finset.range m, TBB i))
-      (((Finset.range m).filter (· ∈ (T.provabilityLogicRelativeTo U : Logic α).trace)).image TBB));
-  · intro B hB;
-    rcases Finset.mem_insert.mp hB with rfl | hB;
-    · exact .mem₂ hm;
-    · obtain ⟨i, hi, rfl⟩ := Finset.mem_image.mp hB;
-      exact .mem₂ (TBB_mem_provabilityLogic_of_mem_trace (Finset.mem_filter.mp hi).2);
-  · apply GL_imp_of_height_not_mem_trace;
+  apply provabilityLogic_mdp (A := Finset.conj <| insert (lift (∼⩕ i ∈ Finset.range m, TBB i)) <|
+    ((Finset.range m).filter (· ∈ (T.provabilityLogicRelativeTo U : Logic α).trace)).image TBB);
+  · apply provabilityLogic_of_GL;
+    apply GL_imp_of_height_not_mem_trace;
     intro κ _ M _ _ hM hn;
     have h₁ : M.height < m := by
-      simpa [height] using
-        forces_lift_iff.mp (forces_conj.mp hM _ (Finset.mem_insert_self _ _));
+      simpa [height] using forces_lift_iff.mp (forces_conj.mp hM _ (Finset.mem_insert_self _ _));
     exact forces_TBB_iff.mp (forces_conj.mp hM (TBB M.height) <| Finset.mem_insert_of_mem <|
       Finset.mem_image_of_mem _ <| Finset.mem_filter.mpr ⟨by simpa, by simpa using hn⟩) rfl;
+  · exact provabilityLogic_conj <| Finset.forall_mem_insert _ _ _ |>.mpr ⟨hm,
+      Finset.forall_mem_image.mpr fun _ hi ↦
+        TBB_mem_provabilityLogic_of_mem_trace (Finset.mem_filter.mp hi).2⟩;
 
 /-- - [AB05, Lemma 49] -/
 theorem provabilityLogic_eq_GLBetaMinus (h : ¬(T.provabilityLogicRelativeTo U : Logic α) ⊆ 𝐒) :
