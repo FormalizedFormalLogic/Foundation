@@ -299,27 +299,58 @@ variable {T X σ θ V}
 
 @[simp] lemma val_modifiedSolovay {x : X.extendRoot.World} :
     V ⊧/![] (T.modifiedSolovay X σ θ x) ↔ T.ModifiedSolovay X σ θ V x := by
-  sorry
+  have hn (z : X.extendRoot.World) : V ⊧/![] (notTrig T X σ θ z) ↔ ¬Trig T X σ θ V z := by
+    unfold notTrig notTrigAux Trig;
+    split_ifs <;> simp [Theory.ConsistentWith.quote_iff];
+  simpa [models_iff, hn, Theory.ModifiedSolovay] using
+    consequence_iff.mp (Theory.Proof.sound (modifiedSolovay_diag T X σ θ x)) V inferInstance
 
 lemma trig_iff_exists_wit (hθσ : V ⊧/![] σ ↔ ∃ w, V ⊧/![w] θ.val) {z : X.extendRoot.World} :
     Trig T X σ θ V z ↔ ∃ w, Wit T X σ θ V z w := by
-  sorry
+  unfold Trig Wit;
+  split_ifs;
+  · exact hθσ;
+  · rfl;
+
+lemma wit_definable (z : X.extendRoot.World) : 𝚺₁-Predicate (Wit T X σ θ V z) :=
+  HierarchySymbol.Defined.to_definable
+    (.mkSigma ((trigSigma T X θ z).val/[#0, ⌜T.modifiedSolovay X σ θ z⌝])) (.mk fun v ↦ by simp)
 
 lemma Step.exists_wit {x y : X.extendRoot.World} (h : Step T X σ θ V x y) :
-    ∃ w, Wit T X σ θ V y w := by
-  sorry
+    ∃ w, Wit T X σ θ V y w :=
+  (h.2.2 y h.1 le_rfl).exists
+
+omit [X.IsGL] in
+lemma ord_injective : Function.Injective (ord X) := by
+  intro a b h;
+  unfold ord at h;
+  split_ifs at h with ha hb hb;
+  · exact ha.trans hb.symm;
+  · exact absurd h ((Fintype.equivFin _ b).isLt.ne');
+  · exact absurd h (Fintype.equivFin _ a).isLt.ne;
+  · exact (Fintype.equivFin _).injective (Fin.val_injective h);
 
 lemma Step.unique {x y₁ y₂ : X.extendRoot.World} (h₁ : Step T X σ θ V x y₁)
     (h₂ : Step T X σ θ V x y₂) : y₁ = y₂ := by
-  sorry
+  wlog hlt : ord X y₁ < ord X y₂ generalizing y₁ y₂;
+  · rcases (not_lt.mp hlt).lt_or_eq with hlt | heq;
+    · exact (this h₂ h₁ hlt).symm;
+    · exact ord_injective heq.symm;
+  exact absurd (h₂.2.1 y₁ h₁.1 hlt) (h₁.2.2 y₂ h₂.1 hlt.le).not_witnessLT;
 
 lemma Reach.provable {x : X.extendRoot.World} (hx : x ≠ none) (hu : x ≠ some X.u)
     (h : Reach T X σ θ V x) : Provable T (⌜∼T.modifiedSolovay X σ θ x⌝ : V) := by
-  sorry
+  rcases h.cases_tail with rfl | ⟨_, _, hs⟩;
+  · contradiction;
+  · obtain ⟨w, hw⟩ := hs.exists_wit;
+    exact ⟨w, by simpa [Wit, hu] using hw⟩;
 
 lemma Reach.models_sigma (hθσ : V ⊧/![] σ ↔ ∃ w, V ⊧/![w] θ.val)
     (h : Reach T X σ θ V (some X.u)) : V ⊧/![] σ := by
-  sorry
+  rcases h.cases_tail with h | ⟨_, _, hs⟩;
+  · simp at h;
+  · obtain ⟨w, hw⟩ := hs.exists_wit;
+    exact hθσ.mpr ⟨w, by simpa [Wit] using hw⟩;
 
 lemma Reach.disjunction (hθσ : V ⊧/![] σ ↔ ∃ w, V ⊧/![w] θ.val) {x : X.extendRoot.World}
     (h : Reach T X σ θ V x) :
