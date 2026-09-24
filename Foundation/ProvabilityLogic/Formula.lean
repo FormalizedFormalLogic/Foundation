@@ -147,7 +147,9 @@ def atoms : Formula α → Finset α
 @[simp, grind =] lemma atoms_atom {a : α} : (#a : Formula α).atoms = {a} := rfl
 @[simp, grind =] lemma atoms_bot : (⊥ : Formula α).atoms = ∅ := rfl
 @[simp, grind =] lemma atoms_imp : (A 🡒 B).atoms = A.atoms ∪ B.atoms := rfl
+@[simp, grind =] lemma atoms_top : (⊤ : Formula α).atoms = ∅ := by simp [atoms]
 @[simp, grind =] lemma atoms_neg : (∼A).atoms = A.atoms := Finset.union_empty _
+@[simp, grind =] lemma atoms_and : (A ⋏ B).atoms = A.atoms ∪ B.atoms := by simp [atoms]
 @[simp, grind =] lemma atoms_or : (A ⋎ B).atoms = A.atoms ∪ B.atoms := by simp [atoms]
 @[simp, grind =] lemma atoms_iff : (A 🡘 B).atoms = A.atoms ∪ B.atoms := by
   simp [atoms, Finset.union_comm];
@@ -190,6 +192,24 @@ lemma subfmls_trans : A ∈ B.subfmls → A.subfmls ⊆ B.subfmls := by
     · exact (ih h).trans (by intro; simp [subfmls]; tauto);
   | _ => intro h; simp_all [subfmls];
 
+@[grind →]
+lemma atoms_subset_of_mem_subfmls : A ∈ B.subfmls → A.atoms ⊆ B.atoms := by
+  induction B with
+  | imp C D ihC ihD =>
+    intro h;
+    simp only [subfmls, Finset.mem_insert, Finset.mem_union] at h;
+    rcases h with rfl | h | h;
+    · rfl;
+    · exact (ihC h).trans (by simp);
+    · exact (ihD h).trans (by simp);
+  | box C ih =>
+    intro h;
+    simp only [subfmls, Finset.mem_insert] at h;
+    rcases h with rfl | h;
+    · rfl;
+    · exact (ih h).trans (by simp);
+  | _ => intro h; simp_all [subfmls];
+
 end Formula
 
 namespace FormulaFinset
@@ -217,6 +237,19 @@ lemma atoms_union : (Γ ∪ Δ).atoms = Γ.atoms ∪ Δ.atoms := Finset.union_bi
 @[simp, grind =] lemma atoms_box : Γ.box.atoms = Γ.atoms := Finset.image_biUnion
 
 lemma atoms_subset_of_mem (h : A ∈ Γ) : A.atoms ⊆ Γ.atoms := Finset.subset_biUnion_of_mem _ h
+
+lemma atoms_conj_subset (Γ : FormulaFinset α) : Γ.conj.atoms ⊆ Γ.atoms := by
+  have h : ∀ l : List (Formula α), (⋀l).atoms ⊆ l.toFinset.biUnion Formula.atoms := by
+    intro l;
+    induction l with
+    | nil => simp;
+    | cons a l ih =>
+      rcases l with _ | ⟨b, l⟩;
+      · simp;
+      · rw [List.conj₂_cons_nonempty (List.cons_ne_nil b l), Formula.atoms_and, List.toFinset_cons,
+          Finset.biUnion_insert];
+        exact Finset.union_subset_union subset_rfl ih;
+  exact (h Γ.toList).trans_eq (by rw [atoms, Finset.toList_toFinset]);
 
 @[grind]
 def subfmls (Γ : FormulaFinset α) : FormulaFinset α := Γ.biUnion Formula.subfmls

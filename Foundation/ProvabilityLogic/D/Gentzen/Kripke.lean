@@ -21,7 +21,7 @@ namespace D.Gentzen
 
 variable {α : Type*} [DecidableEq α] {Γ Δ : FormulaFinset α}
 
-theorem sound_aux {T : LayeredSequent 3 α} (h : ⊢ᴳ[D] T) : T.level = 2 →
+theorem sound_aux {T : LayeredSequent 3 α} (h : ⊢ᴳ[𝐃] T) : T.level = 2 →
     ∀ {κ : Type*} [Nonempty κ] (M : Model κ α) [M.IsGL] (V : ℕ∞ → α → Prop),
       Sum.inr ⊤ ⊩[(M.toFreeTail V).toModel] T.toSequent := by
   induction h with
@@ -47,7 +47,7 @@ theorem sound_aux {T : LayeredSequent 3 α} (h : ⊢ᴳ[D] T) : T.level = 2 →
     exact hk D hD _ ((Finset.le_sup hD).trans (le_max_right _ _)) hnE;
 
 /-- - [KKIM25, Theorem 5.8] -/
-theorem sound (h : ⊢ᴳ[D] Γ ⟹[2] Δ) {κ : Type*} [Nonempty κ] (M : Model κ α) [M.IsGL]
+theorem sound (h : ⊢ᴳ[𝐃] Γ ⟹[2] Δ) {κ : Type*} [Nonempty κ] (M : Model κ α) [M.IsGL]
     (V : ℕ∞ → α → Prop) : Sum.inr ⊤ ⊩[(M.toFreeTail V).toModel] (Γ ⟹ Δ) :=
   sound_aux h rfl M V
 
@@ -59,12 +59,12 @@ variable {α : Type u} [DecidableEq α] {Γ Δ : FormulaFinset α}
 theorem complete
     (h : ∀ {κ : Type u} [Nonempty κ] (M : RootedModel κ α) [M.IsFiniteGL] (o : α → Prop),
       Sum.inr ⊤ ⊩[(M.toPseudoTail o).toModel] (Γ ⟹ Δ)) :
-    ⊢ᴳ[D] Γ ⟹[2] Δ := by
+    ⊢ᴳ[𝐃] Γ ⟹[2] Δ := by
   by_contra hD;
-  have : Fact (⊬ᴳ[GL] Γ ⟹ Δ) := ⟨fun h ↦ hD (liftUp₀₂ h)⟩;
+  have : Fact (⊬ᴳ[𝐆𝐋] Γ ⟹ Δ) := ⟨fun h ↦ hD (liftUp₀₂ h)⟩;
   obtain ⟨U, hsubU, hU, hsatU, hsubfU, -⟩ :=
     Sequent.exists_saturated (isPropClosed.isImpClosed 2) (BS := Γ ⟹ Δ) (S₀ := Γ ⟹ Δ) hD (by grind);
-  have hS₀ : ¬⊢ᴳ[D] U.ant.prebox.box ⟹[1] U.suc.prebox.box := fun h ↦
+  have hS₀ : ¬⊢ᴳ[𝐃] U.ant.prebox.box ⟹[1] U.suc.prebox.box := fun h ↦
     hU (wkR (wkL (liftUp₁₂ h) FormulaFinset.box_prebox_subset) FormulaFinset.box_prebox_subset);
   obtain ⟨T, hsubT, hT, hsatT, hsubfT, hbox⟩ :=
     Sequent.exists_saturated (isPropClosed.isImpClosed 1) (BS := Γ ⟹ Δ)
@@ -109,7 +109,7 @@ theorem complete
 
 /-- - [KKIM25, Theorem 5.8] -/
 theorem TFAE : [
-    ⊢ᴳ[D] Γ ⟹[2] Δ,
+    ⊢ᴳ[𝐃] Γ ⟹[2] Δ,
     ∀ {κ : Type u} [Nonempty κ] (M : Model κ α) [M.IsGL] (V : ℕ∞ → α → Prop),
       Sum.inr ⊤ ⊩[(M.toFreeTail V).toModel] (Γ ⟹ Δ),
     ∀ {κ : Type u} [Nonempty κ] (M : RootedModel κ α) [M.IsFiniteGL] (o : α → Prop),
@@ -126,8 +126,8 @@ variable {Γ₁ Γ₂ Δ₁ Δ₂ : FormulaFinset α} {A : Formula α}
 
 - [KKIM25, Theorem 5.8]
 -/
-theorem cut : {ℓ : Fin 3} → ⊢ᴳ[D] Γ₁ ⟹[ℓ] insert A Δ₁ → ⊢ᴳ[D] insert A Γ₂ ⟹[ℓ] Δ₂ →
-    ⊢ᴳ[D] Γ₁ ∪ Γ₂ ⟹[ℓ] Δ₁ ∪ Δ₂
+theorem cut : {ℓ : Fin 3} → ⊢ᴳ[𝐃] Γ₁ ⟹[ℓ] insert A Δ₁ → ⊢ᴳ[𝐃] insert A Γ₂ ⟹[ℓ] Δ₂ →
+    ⊢ᴳ[𝐃] Γ₁ ∪ Γ₂ ⟹[ℓ] Δ₁ ∪ Δ₂
   | 0, h₁, h₂ => iff_GL.mpr (GL.Gentzen.cut (iff_GL.mp h₁) (iff_GL.mp h₂))
   | 1, h₁, h₂ => iff_S.mpr (S.Gentzen.cut (iff_S.mp h₁) (iff_S.mp h₂))
   | 2, h₁, h₂ =>
