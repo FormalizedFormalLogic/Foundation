@@ -40,7 +40,8 @@ lemma computable₂_iff_sigma1_simulate {α β γ : Type*} [Primcodable α] [Pri
     {F : α → β → γ} (h : ∀ a b, f (Encodable.encode a) (Encodable.encode b) = Encodable.encode (F a b)) :
     Computable₂ F := by
   have hCode : Computable fun p : α × β ↦ f (Encodable.encode p.1) (Encodable.encode p.2) :=
-    (computable₂_iff_sigma1.mpr hf).comp (by computable) (by computable)
+    (computable₂_iff_sigma1.mpr hf).comp
+      (Computable.encode.comp Computable.fst) (Computable.encode.comp Computable.snd)
   have hDecode :=
     Computable.ofOption ((Computable.decode (α := γ)).comp hCode)
   exact Computable₂.mk <| hDecode.of_eq_tot fun p ↦ by simp [h p.1 p.2]

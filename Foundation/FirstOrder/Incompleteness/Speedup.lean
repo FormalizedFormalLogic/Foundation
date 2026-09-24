@@ -77,7 +77,7 @@ lemma computablePred_bddExists_proof [L.Primcodable] (hF : Computable F) {bd : �
   apply ComputablePred.computable_of_manyOneReducible (q := λ n : ℕ ↦ ∃ d ≤ π₁ n, Proof T d (π₂ n));
   . use λ a => Nat.pair (bd a) (encode (F a));
     and_intros;
-    . computable;
+    . exact Computable₂.comp Primrec₂.natPair.to_comp hbd (Computable.encode.comp hF);
     . simp [←nat_pair_eq, Sentence.quote_eq_encode_nat];
   . apply computablePred_iff_delta1.mpr;
     exact definable_bddExists_proof;
