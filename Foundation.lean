@@ -178,6 +178,7 @@ public import Foundation.Propositional.Heyting.Semantics
 public import Foundation.Propositional.Hilbert.Basic
 public import Foundation.Propositional.LK.Basic
 public import Foundation.Propositional.Logic.Basic
+public import Foundation.ProvabilityLogic.A.Basic
 public import Foundation.ProvabilityLogic.A.Gentzen.Basic
 public import Foundation.ProvabilityLogic.A.Gentzen.Kripke
 public import Foundation.ProvabilityLogic.Arithmetic.Interpret
