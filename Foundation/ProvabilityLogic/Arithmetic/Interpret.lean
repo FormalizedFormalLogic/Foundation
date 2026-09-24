@@ -12,7 +12,7 @@ public import Foundation.FirstOrder.Incompleteness.StandardProvability
 
 namespace FFL.ProvabilityLogic
 
-open FirstOrder FirstOrder.ProvabilityAbstraction
+open FirstOrder FirstOrder.ProvabilityAbstraction Formula
 
 variable {α : Type*} {L : Language} [L.ReferenceableBy L] {T₀ T : Theory L}
 
@@ -94,6 +94,11 @@ lemma provabilityLogic_mdp
     (h₂ : A ∈ (T.provabilityLogicRelativeTo U : Logic α)) :
     B ∈ (T.provabilityLogicRelativeTo U : Logic α) :=
   fun f ↦ (h₁ f) ⨀ (h₂ f)
+
+lemma provabilityLogic_subst {s : Substitution α α}
+    (h : A ∈ (T.provabilityLogicRelativeTo U : Logic α)) :
+    (A⟦s⟧) ∈ (T.provabilityLogicRelativeTo U : Logic α) :=
+  fun f ↦ by simpa [Formula.interpret_subst] using h ⟨fun a ↦ f T (s a)⟩
 
 end
 
