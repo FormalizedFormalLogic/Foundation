@@ -57,7 +57,20 @@ lemma GL_imp_of_height_not_mem_trace
   exact root_forces_of_not_mem_trace (h M hB);
 
 lemma trace_lift (B : LetterlessFormula) : (B.lift : Formula α).trace = B.trace := by
-  sorry
+  ext n;
+  constructor;
+  · rintro ⟨κ, _, M, _, _, rfl, h⟩ hB;
+    exact h (LetterlessFormula.forces_lift_iff.mpr hB);
+  · intro hn;
+    by_contra hn';
+    have h : 𝐆𝐋 ⊢ ∼TBB n 🡒 (B.lift : Formula α) :=
+      GL_imp_of_height_not_mem_trace fun M _ _ hM ↦ by
+        have : Model.World.rank (M := M.toModel) M.root = n := by
+          simpa [forces_neg, forces_TBB_iff] using hM;
+        rwa [show M.height = n from this];
+    rw [← LetterlessFormula.lift_TBB] at h;
+    have := Set.eq_univ_iff_forall.mp ((Logic.GL.lift_mem_iff (A := ∼TBB n 🡒 B)).mp h) n;
+    simp_all;
 
 @[simp] lemma trace_top : (⊤ : Formula α).trace = ∅ := by
   sorry
