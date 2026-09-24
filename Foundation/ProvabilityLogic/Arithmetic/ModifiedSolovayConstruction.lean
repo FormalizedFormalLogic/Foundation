@@ -3,6 +3,7 @@ module
 public import Foundation.FirstOrder.Arithmetic.ISigma1.Prenex
 public import Foundation.FirstOrder.Incompleteness.Consistency
 public import Foundation.ProvabilityLogic.Arithmetic.ModifiedSolovaySentences
+public import Foundation.ProvabilityLogic.Arithmetic.SolovaySentences
 public import Foundation.Vorspiel.List.ChainI
 
 /-!
@@ -90,22 +91,20 @@ variable {κ α : Type*} [Nonempty κ] [DecidableEq α] {A : ProvabilityLogic.Fo
 section stx
 
 variable (T : ArithmeticTheory) [T.Δ₁] (X : StrongReflexiveCountermodel κ A) [Fintype X.World]
-  [X.IsGL] (σ : ArithmeticSentence) (θ : 𝚺₀.Semisentence 1)
+  (σ : ArithmeticSentence) (θ : 𝚺₀.Semisentence 1)
 
 open Classical in
 /-- The targets of the edges from `x`. -/
-def Next (x : X.extendRoot.World) : Finset X.extendRoot.World :=
+def next (x : X.extendRoot.World) : Finset X.extendRoot.World :=
   {z | (x ≺ z ∧ z ≠ some X.u) ∨ (x = some X.root ∧ z = some X.u)}
 
-omit [X.IsGL] in
 variable {X} in
 @[simp] lemma mem_next {x z : X.extendRoot.World} :
-    z ∈ Next X x ↔ (x ≺ z ∧ z ≠ some X.u) ∨ (x = some X.root ∧ z = some X.u) := by
-  simp [Next]
+    z ∈ next X x ↔ (x ≺ z ∧ z ≠ some X.u) ∨ (x = some X.root ∧ z = some X.u) := by
+  simp [next]
 
-omit [X.IsGL] in
 variable {X} in
-lemma rel_of_mem_next {x z : X.extendRoot.World} (h : z ∈ Next X x) : x ≺ z := by
+lemma rel_of_mem_next {x z : X.extendRoot.World} (h : z ∈ next X x) : x ≺ z := by
   rcases mem_next.mp h with h | ⟨rfl, rfl⟩;
   · exact h.1;
   · exact X.root_rel_u;
@@ -114,6 +113,16 @@ open Classical in
 /-- A total order on the worlds of `X.extendRoot` in which `u` is the largest. -/
 def ord (z : X.extendRoot.World) : ℕ :=
   if z = some X.u then Fintype.card X.extendRoot.World else Fintype.equivFin _ z
+
+variable {X} in
+lemma ord_injective : Function.Injective (ord X) := by
+  intro a b h;
+  unfold ord at h;
+  split_ifs at h with ha hb hb;
+  · exact ha.trans hb.symm;
+  · exact absurd h (Fintype.equivFin _ b).isLt.ne';
+  · exact absurd h (Fintype.equivFin _ a).isLt.ne;
+  · exact (Fintype.equivFin _).injective (Fin.val_injective h);
 
 def prfNegSigma : 𝚺₁.Semisentence 2 := .mkSigma
   “w e. ∃ n, !(negGraph ℒₒᵣ) n e ∧ !(proof T).sigma w n”
@@ -133,9 +142,9 @@ def trigPi (z : X.extendRoot.World) : 𝚷₁.Semisentence 2 :=
 variable {n : ℕ} (t : X.extendRoot.World → ArithmeticSemiterm Empty n)
 
 def stpAux (x y : X.extendRoot.World) : ArithmeticSemisentence n :=
-  (⩕ z ∈ {z ∈ Next X x | ord X z < ord X y},
+  (⩕ z ∈ {z ∈ next X x | ord X z < ord X y},
     (cmpLT (trigSigma T X θ y) (trigPi T X θ z)).val/[t y, t z]) ⋏
-  (⩕ z ∈ {z ∈ Next X x | ord X y ≤ ord X z},
+  (⩕ z ∈ {z ∈ next X x | ord X y ≤ ord X z},
     (cmpLE (trigSigma T X θ y) (trigPi T X θ z)).val/[t y, t z])
 
 def chainAux : List X.extendRoot.World → ArithmeticSemisentence n
@@ -143,37 +152,56 @@ def chainAux : List X.extendRoot.World → ArithmeticSemisentence n
   |         [_] => ⊤
   | y :: x :: ε => chainAux (x :: ε) ⋏ stpAux T X θ t x y
 
+open Classical in
+def notTrigAux (z : X.extendRoot.World) : ArithmeticSemisentence n :=
+  if z = some X.u then Rew.embSubsts ![] ▹ ∼σ else T.consistentWith.val/[t z]
+
+section rew
+
+variable {n' : ℕ} (w : Fin n → ArithmeticSemiterm Empty n')
+
+lemma rew_stpAux (x y : X.extendRoot.World) :
+    Rew.subst w ▹ stpAux T X θ t x y = stpAux T X θ (fun z ↦ Rew.subst w (t z)) x y := by
+  simp [stpAux, Finset.map_conj', Function.comp_def, ← TransitiveRewriting.comp_app,
+    Rew.subst_comp_subst, Matrix.comp_vecCons', Matrix.constant_eq_singleton]
+
+lemma rew_chainAux (ε : List X.extendRoot.World) :
+    Rew.subst w ▹ chainAux T X θ t ε = chainAux T X θ (fun z ↦ Rew.subst w (t z)) ε := by
+  match ε with
+  |          [] => simp [chainAux]
+  |         [_] => simp [chainAux]
+  | _ :: x :: ε => simp [chainAux, rew_chainAux (x :: ε), rew_stpAux]
+
+omit [Fintype X.World] in
+lemma rew_notTrigAux (z : X.extendRoot.World) :
+    Rew.subst w ▹ notTrigAux T X σ t z = notTrigAux T X σ (fun z ↦ Rew.subst w (t z)) z := by
+  unfold notTrigAux;
+  split_ifs <;> simp [← TransitiveRewriting.comp_app, Rew.subst_comp_embSubsts,
+    Rew.subst_comp_subst, Matrix.empty_eq]
+
+end rew
+
 /-- The sequences from the root `none` to `x` along the edges, listed from `x`. -/
 abbrev EChain (x : X.extendRoot.World) :=
-  {ε : List X.extendRoot.World // ε.ChainI (fun a b ↦ a ∈ Next X b) x none}
+  {ε : List X.extendRoot.World // ε.ChainI (fun a b ↦ a ∈ next X b) x none}
+
+variable [X.IsGL]
 
 instance (x : X.extendRoot.World) : Finite (EChain X x) := by
-  have : Finite {ε : List X.extendRoot.World // ε.ChainI (fun a b ↦ b ≺ a) x none} :=
-    List.ChainI.finite_of_irreflexive_of_transitive
-      (show Std.Irrefl (fun a b : X.extendRoot.World ↦ b ≺ a) from
-        ⟨fun a ↦ Std.Irrefl.irrefl (r := X.extendRoot.Rel) a⟩)
-      (show IsTrans _ (fun a b : X.extendRoot.World ↦ b ≺ a) from
-        ⟨fun a b c hab hbc ↦ IsTrans.trans (r := X.extendRoot.Rel) c b a hbc hab⟩) x none;
   have mono {a b : X.extendRoot.World} {l : List X.extendRoot.World}
-      (h : l.ChainI (fun a b ↦ a ∈ Next X b) a b) :
-      l.ChainI (fun a b ↦ b ≺ a) a b := by
+      (h : l.ChainI (fun a b ↦ a ∈ next X b) a b) : l.ChainI (fun a b ↦ b ≺ a) a b := by
     induction h with
     | singleton => exact .singleton _
     | cons hR _ ih => exact .cons (rel_of_mem_next hR) ih;
-  exact Finite.of_injective (fun ε : EChain X x ↦
-    (⟨ε.1, mono ε.2⟩ : {ε : List X.extendRoot.World // ε.ChainI (fun a b ↦ b ≺ a) x none}))
-    fun _ _ h ↦ Subtype.ext (Subtype.mk.inj h)
+  exact Finite.of_injective (β := SolovaySentences.WChain X.extendRoot none x) _
+    (Subtype.impEmbedding _ _ fun _ ↦ mono).injective
 
 def HAux (x : X.extendRoot.World) : ArithmeticSemisentence n :=
   haveI := Fintype.ofFinite (EChain X x);
   ⩖ ε : EChain X x, chainAux T X θ t ε
 
-open Classical in
-def notTrigAux (z : X.extendRoot.World) : ArithmeticSemisentence n :=
-  if z = some X.u then Rew.embSubsts ![] ▹ ∼σ else T.consistentWith.val/[t z]
-
 def deltaAux (x : X.extendRoot.World) : ArithmeticSemisentence n :=
-  HAux T X θ t x ⋏ ⩕ z ∈ Next X x, notTrigAux T X σ t z
+  HAux T X θ t x ⋏ ⩕ z ∈ next X x, notTrigAux T X σ t z
 
 /-- The modified Solovay sentences.
 
@@ -203,35 +231,8 @@ lemma H_sigma_one (x : X.extendRoot.World) : Hierarchy 𝚺 1 (H T X σ θ x) :=
     | cons y ε ih => rcases ε with _ | ⟨x, ε⟩ <;> simp_all [chainAux, stpAux];
   simp [HAux, h]
 
-section rew
-
-variable {n' : ℕ} (w : Fin n → ArithmeticSemiterm Empty n')
-
-omit [X.IsGL] in
-lemma rew_stpAux (x y : X.extendRoot.World) :
-    Rew.subst w ▹ stpAux T X θ t x y = stpAux T X θ (fun z ↦ Rew.subst w (t z)) x y := by
-  simp [stpAux, Finset.map_conj', Function.comp_def, ← TransitiveRewriting.comp_app,
-    Rew.subst_comp_subst, Matrix.comp_vecCons', Matrix.constant_eq_singleton]
-
-omit [X.IsGL] in
-lemma rew_chainAux (ε : List X.extendRoot.World) :
-    Rew.subst w ▹ chainAux T X θ t ε = chainAux T X θ (fun z ↦ Rew.subst w (t z)) ε := by
-  match ε with
-  |          [] => simp [chainAux]
-  |         [_] => simp [chainAux]
-  | _ :: x :: ε => simp [chainAux, rew_chainAux (x :: ε), rew_stpAux]
-
-omit [Fintype X.World] [X.IsGL] in
-lemma rew_notTrigAux (z : X.extendRoot.World) :
-    Rew.subst w ▹ notTrigAux T X σ t z = notTrigAux T X σ (fun z ↦ Rew.subst w (t z)) z := by
-  unfold notTrigAux;
-  split_ifs <;> simp [← TransitiveRewriting.comp_app, Rew.subst_comp_embSubsts,
-    Rew.subst_comp_subst, Matrix.empty_eq]
-
-end rew
-
 lemma modifiedSolovay_diag (x : X.extendRoot.World) :
-    𝗜𝚺₁ ⊢ T.modifiedSolovay X σ θ x 🡘 H T X σ θ x ⋏ ⩕ z ∈ Next X x, notTrig T X σ θ z := by
+    𝗜𝚺₁ ⊢ T.modifiedSolovay X σ θ x 🡘 H T X σ θ x ⋏ ⩕ z ∈ next X x, notTrig T X σ θ z := by
   have : 𝗜𝚺₁ ⊢ T.modifiedSolovay X σ θ x 🡘
       (Rew.subst fun j ↦ ⌜T.modifiedSolovay X σ θ ((Fintype.equivFin _).symm j)⌝) ▹
         deltaAux T X σ θ (fun z ↦ #(Fintype.equivFin _ z)) x := by
@@ -261,14 +262,14 @@ def Trig (z : X.extendRoot.World) : Prop :=
 
 /-- The edge `x → y` is the one taken from `x`. -/
 def Step (x y : X.extendRoot.World) : Prop :=
-  y ∈ Next X x ∧
-    (∀ z ∈ Next X x, ord X z < ord X y → WitnessLT (Wit T X σ θ V y) (Wit T X σ θ V z)) ∧
-    (∀ z ∈ Next X x, ord X y ≤ ord X z → WitnessLE (Wit T X σ θ V y) (Wit T X σ θ V z))
+  y ∈ next X x ∧
+    (∀ z ∈ next X x, ord X z < ord X y → WitnessLT (Wit T X σ θ V y) (Wit T X σ θ V z)) ∧
+    (∀ z ∈ next X x, ord X y ≤ ord X z → WitnessLE (Wit T X σ θ V y) (Wit T X σ θ V z))
 
 abbrev Reach (x : X.extendRoot.World) : Prop := Relation.ReflTransGen (Step T X σ θ V) none x
 
 def _root_.FFL.FirstOrder.Theory.ModifiedSolovay (x : X.extendRoot.World) : Prop :=
-  Reach T X σ θ V x ∧ ∀ z ∈ Next X x, ¬Trig T X σ θ V z
+  Reach T X σ θ V x ∧ ∀ z ∈ next X x, ¬Trig T X σ θ V z
 
 variable {T X σ θ V}
 
@@ -284,8 +285,8 @@ variable {T X σ θ V}
 
 @[simp] lemma val_stp {x y : X.extendRoot.World} :
     V ⊧/![] (stp T X σ θ x y) ↔
-      (∀ z ∈ Next X x, ord X z < ord X y → WitnessLT (Wit T X σ θ V y) (Wit T X σ θ V z)) ∧
-      (∀ z ∈ Next X x, ord X y ≤ ord X z → WitnessLE (Wit T X σ θ V y) (Wit T X σ θ V z)) := by
+      (∀ z ∈ next X x, ord X z < ord X y → WitnessLT (Wit T X σ θ V y) (Wit T X σ θ V z)) ∧
+      (∀ z ∈ next X x, ord X y ≤ ord X z → WitnessLE (Wit T X σ θ V y) (Wit T X σ θ V z)) := by
   simp [stpAux]
 
 @[simp] lemma val_H {x : X.extendRoot.World} : V ⊧/![] (H T X σ θ x) ↔ Reach T X σ θ V x := by
@@ -321,8 +322,7 @@ lemma trig_iff_exists_wit (hθσ : V ⊧/![] σ ↔ ∃ w, V ⊧/![w] θ.val) {z
     Trig T X σ θ V z ↔ ∃ w, Wit T X σ θ V z w := by
   unfold Trig Wit;
   split_ifs;
-  · exact hθσ;
-  · rfl;
+  exacts [hθσ, .rfl];
 
 lemma wit_definable (z : X.extendRoot.World) : 𝚺₁-Predicate (Wit T X σ θ V z) :=
   HierarchySymbol.Defined.to_definable
@@ -331,16 +331,6 @@ lemma wit_definable (z : X.extendRoot.World) : 𝚺₁-Predicate (Wit T X σ θ 
 lemma Step.exists_wit {x y : X.extendRoot.World} (h : Step T X σ θ V x y) :
     ∃ w, Wit T X σ θ V y w :=
   (h.2.2 y h.1 le_rfl).exists
-
-omit [X.IsGL] in
-lemma ord_injective : Function.Injective (ord X) := by
-  intro a b h;
-  unfold ord at h;
-  split_ifs at h with ha hb hb;
-  · exact ha.trans hb.symm;
-  · exact absurd h ((Fintype.equivFin _ b).isLt.ne');
-  · exact absurd h (Fintype.equivFin _ a).isLt.ne;
-  · exact (Fintype.equivFin _).injective (Fin.val_injective h);
 
 lemma Step.unique {x y₁ y₂ : X.extendRoot.World} (h₁ : Step T X σ θ V x y₁)
     (h₂ : Step T X σ θ V x y₂) : y₁ = y₂ := by
@@ -370,12 +360,11 @@ lemma Reach.disjunction (hθσ : V ⊧/![] σ ↔ ∃ w, V ⊧/![w] θ.val) {x :
   induction x using (IsConverseWellFounded.cwf (rel := X.extendRoot.Rel)).induction with
   | h x ih =>
     by_cases hx : T.ModifiedSolovay X σ θ V x;
-    · left;
-      exact hx;
+    · simp [hx];
     right;
-    obtain ⟨z, hz, hzt⟩ : ∃ z ∈ Next X x, Trig T X σ θ V z := by
+    obtain ⟨z, hz, hzt⟩ : ∃ z ∈ next X x, Trig T X σ θ V z := by
       simpa [Theory.ModifiedSolovay, h] using hx;
-    obtain ⟨⟨y, hy⟩, hy₁, hy₂⟩ := exists_witnessFirst (ι := {z // z ∈ Next X x})
+    obtain ⟨⟨y, hy⟩, hy₁, hy₂⟩ := exists_witnessFirst (ι := {z // z ∈ next X x})
       (fun z ↦ Wit T X σ θ V z.1) (fun z ↦ wit_definable z.1) (fun z ↦ ord X z.1)
       ⟨⟨z, hz⟩, (trig_iff_exists_wit hθσ).mp hzt⟩;
     have hs : Step T X σ θ V x y := ⟨hy, fun z hz ↦ hy₁ ⟨z, hz⟩, fun z hz ↦ hy₂ ⟨z, hz⟩⟩;
@@ -388,7 +377,7 @@ lemma ModifiedSolovay.exclusive (hθσ : V ⊧/![] σ ↔ ∃ w, V ⊧/![w] θ.v
     T.ModifiedSolovay X σ θ V x → ¬T.ModifiedSolovay X σ θ V y := by
   rintro ⟨hx, hxt⟩ ⟨hy, hyt⟩;
   have key {a b : X.extendRoot.World} (hab : Relation.ReflTransGen (Step T X σ θ V) a b)
-      (ne : a ≠ b) (ha : ∀ z ∈ Next X a, ¬Trig T X σ θ V z) : False := by
+      (ne : a ≠ b) (ha : ∀ z ∈ next X a, ¬Trig T X σ θ V z) : False := by
     obtain ⟨c, hac, _⟩ := hab.cases_head.resolve_left ne;
     exact ha c hac.1 ((trig_iff_exists_wit hθσ).mpr hac.exists_wit);
   have U : Relator.RightUnique (Step T X σ θ V) := fun _ _ _ ↦ Step.unique;
@@ -402,9 +391,8 @@ lemma ModifiedSolovay.consistent {x y : X.extendRoot.World} (hxy : x ≺ y) (hy 
 
 lemma disjunctive (hθσ : V ⊧/![] σ ↔ ∃ w, V ⊧/![w] θ.val) :
     ∃ x, T.ModifiedSolovay X σ θ V x := by
-  rcases Reach.disjunction (X := X) (T := T) hθσ (x := none) .refl with h | ⟨_, _, h⟩;
-  · exact ⟨_, h⟩;
-  · exact ⟨_, h⟩;
+  rcases Reach.disjunction (X := X) (T := T) hθσ (x := none) .refl with h | ⟨_, _, h⟩ <;>
+    exact ⟨_, h⟩;
 
 end model
 
@@ -462,9 +450,8 @@ lemma provable_provable_sigma_imp :
         h.2 (some X.u) (by simp) (by simpa [Trig] using hσ);
   have h₂ : 𝗜𝚺₁ ⊢ T.standardProvability σ 🡒 T.standardProvability (∼T.modifiedSolovay X σ θ _) :=
     T.standardProvability.D2 ⨀ T.standardProvability.D1 (WeakerThan.pbl h₁);
-  have hru : some X.root ≠ some X.u := by
-    rintro h;
-    exact Std.Irrefl.irrefl (r := X.Rel) X.root (Option.some_injective _ h ▸ X.root_rel_u);
+  have hru : some X.root ≠ some X.u := fun h ↦
+    Std.Irrefl.irrefl (r := X.Rel) X.root (Option.some_injective _ h ▸ X.root_rel_u);
   have h₃ : 𝗜𝚺₁ ⊢ T.modifiedSolovay X σ θ none 🡒
       ∼T.standardProvability (∼T.modifiedSolovay X σ θ (some X.root)) :=
     complete _ _ fun (V : Type) _ _ ↦ by
