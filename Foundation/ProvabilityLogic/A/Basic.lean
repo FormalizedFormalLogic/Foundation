@@ -114,14 +114,15 @@ lemma exists_countermodel [DecidableEq α] (h : 𝐀 ⊬ A) :
     (X := A.subfmls.prebox) (not_lt.mp this);
   exact ⟨κ, inferInstance, M, inferInstance, u, h₂, Ru, hu⟩;
 
-lemma subset_D : (𝐀 : Logic α) ⊆ 𝐃 := by
-  sorry
+lemma subset_D : (𝐀 : Logic α) ⊆ 𝐃 :=
+  sumQuasiNormal.subset_iff.mpr fun _ ⟨_, _, h⟩ ↦ h ▸ D.provable_TBB
 
 lemma not_axiomD {a : α} : 𝐀 ⊬ □(□#a ⋎ □#a) 🡒 □#a ⋎ □#a := by
   sorry
 
-lemma GL_ssubset : (𝐆𝐋 : Logic α) ⊂ 𝐀 := by
-  sorry
+lemma GL_ssubset : (𝐆𝐋 : Logic α) ⊂ 𝐀 :=
+  ⟨fun _ ↦ of_GL, fun h ↦
+    GL.sound (pointModel (α := α) fun _ ↦ True) (h (provable_TBB (n := 0))) 0 fun _ h ↦ h.elim⟩
 
 lemma ssubset_D [Inhabited α] : (𝐀 : Logic α) ⊂ 𝐃 :=
   ⟨subset_D, fun h ↦ not_axiomD (a := default) (h D.axiomD)⟩
