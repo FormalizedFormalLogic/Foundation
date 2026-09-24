@@ -35,8 +35,6 @@ lemma mem_localReflectionOn_iff {ψ : Sentence L} :
 lemma localReflectionOn_mono (h : ∀ σ, Γ σ → Γ' σ) : 𝔅.reflOn Γ ⊆ 𝔅.reflOn Γ' :=
   Set.image_mono fun σ hσ ↦ h σ hσ
 
-variable [L.DecidableEq]
-
 theorem con_of_localReflection (h : Γ ⊥) : T ∪ 𝔅.reflOn Γ ⊢ 𝔅.con := by
   have h₁ : T ∪ 𝔅.reflOn Γ ⊢ 𝔅.refl ⊥ :=
     Axiomatized.by_axm (Set.mem_union_right _ ((mem_localReflectionOn_iff 𝔅).mpr ⟨⊥, h, rfl⟩));
@@ -54,7 +52,7 @@ theorem localReflection_of_con [𝔅.HBL2] [𝔅.FormalizedCompleteOn (∼σ)] :
   change T₀ ⊢ ∼𝔅 ⊥ 🡒 𝔅.refl σ;
   cl_prover [h₁, h₂, h₃, h₄];
 
-variable {π : Sentence L}
+variable [L.DecidableEq] {π : Sentence L}
 
 theorem inconsistent_of_localReflection_provable [Diagonalization T₀] [T₀ ⪯ T] [𝔅.HBL]
     (h : insert π T ⊢ 𝔅.refl (∼π)) : Inconsistent (insert π T) := by

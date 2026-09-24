@@ -40,27 +40,27 @@ theorem localReflection_Pi1_equiv_con [𝗜𝚺₁ ⪯ T] : T ∪ 𝗥𝗳𝗻[H
     (inferInstance : 𝗜𝚺₁ ⪯ T).trans (WeakerThan.ofSubset Set.subset_union_left);
   apply Equiv.antisymm;
   constructor;
-  . apply WeakerThan.ofAxm!;
+  · apply WeakerThan.ofAxm!;
     rintro φ (hφ | ⟨σ, hσ, rfl⟩);
-    . exact by_axm (Set.mem_union_left _ hφ);
-    . have : T.standardProvability.FormalizedCompleteOn (∼σ) :=
+    · exact by_axm (Set.mem_union_left _ hφ);
+    · have : T.standardProvability.FormalizedCompleteOn (∼σ) :=
         ⟨provable_sigma_one_complete (by simpa using hσ.neg)⟩;
       have h₁ : T ∪ T.Con ⊢ T.standardProvability.con 🡒 T.standardProvability.refl σ :=
         WeakerThan.pbl (Provability.localReflection_of_con T.standardProvability);
       have h₂ : T ∪ T.Con ⊢ T.standardProvability.con :=
         by_axm (Set.mem_union_right _ rfl);
       cl_prover [h₁, h₂];
-  . apply WeakerThan.ofAxm!;
+  · apply WeakerThan.ofAxm!;
     rintro φ (hφ | rfl);
-    . exact by_axm (Set.mem_union_left _ hφ);
-    . exact Provability.con_of_localReflection _ (by simp);
+    · exact by_axm (Set.mem_union_left _ hφ);
+    · exact Provability.con_of_localReflection _ (by simp);
 
 instance models_localReflectionOn {Γ : ArithmeticSentence → Prop} [ℕ↓[ℒₒᵣ] ⊧* T] :
     ℕ↓[ℒₒᵣ] ⊧* (T ∪ 𝗥𝗳𝗻[Γ] T) := by
   apply Semantics.modelsSet_iff.mpr;
   rintro φ (hφ | ⟨σ, _, rfl⟩);
-  . exact Semantics.modelsSet_iff.mp inferInstance hφ;
-  . have : ℕ↓[ℒₒᵣ] ⊧ T.standardProvability σ → ℕ↓[ℒₒᵣ] ⊧ σ := fun h ↦
+  · exact Semantics.modelsSet_iff.mp inferInstance hφ;
+  · have : ℕ↓[ℒₒᵣ] ⊧ T.standardProvability σ → ℕ↓[ℒₒᵣ] ⊧ σ := fun h ↦
       models_of_provable inferInstance (T.standardProvability.sound_on h);
     simpa using this;
 
@@ -96,12 +96,12 @@ variable [T.SoundOnHierarchy 𝚺 1]
   apply WeakerThan.ofAxm!;
   intro ψ hψ;
   by_cases hψT : ψ ∈ T;
-  . exact by_axm (by simp [hψT]);
+  · exact by_axm (by simp [hψT]);
   obtain ⟨σ, hσt, rfl⟩ : ψ ∈ T.standardProvability.refl '' t := ht ▸ ⟨hψ, hψT⟩;
   by_cases hσ : T ⊢ σ;
-  . have h₁ : adjoin (∼D) T ⊢ σ := Axiomatized.to_adjoin hσ;
+  · have h₁ : adjoin (∼D) T ⊢ σ := Axiomatized.to_adjoin hσ;
     cl_prover [h₁];
-  . have h₁ : adjoin (∼D) T ⊢ T.standardProvability σ 🡒 D :=
+  · have h₁ : adjoin (∼D) T ⊢ T.standardProvability σ 🡒 D :=
       right_Fdisj'_intro _ _ (Finset.mem_filter.mpr ⟨htfin.mem_toFinset.mpr hσt, hσ⟩);
     have h₂ : adjoin (∼D) T ⊢ ∼D := Axiomatized.adjoin _ _;
     cl_prover [h₁, h₂];
@@ -117,9 +117,9 @@ lemma provable_localReflectionOn_hierarchy_of_strictHierarchy [𝗜𝚺n ⪯ T]
   have : 𝗜𝚺₁ ⪯ S := (inferInstance : 𝗜𝚺₁ ⪯ T).trans hTS;
   have : 𝗕𝚺 n ⪯ T := by
     rcases n with _ | m;
-    . exact (CollectionOnHierarchy_weakerThan_of_le (Nat.zero_le 1)).trans
+    · exact (CollectionOnHierarchy_weakerThan_of_le (Nat.zero_le 1)).trans
         (BSigma_weakerThan_ISigma.trans (inferInstance : 𝗜𝚺₁ ⪯ T));
-    . exact BSigma_weakerThan_ISigma.trans (inferInstance : 𝗜𝚺 (m + 1) ⪯ T);
+    · exact BSigma_weakerThan_ISigma.trans (inferInstance : 𝗜𝚺 (m + 1) ⪯ T);
   rintro φ ⟨σ, hσ, rfl⟩;
   obtain ⟨σ', hσ', e⟩ := exists_strictHierarchy_of_hierarchy (Γ := Γ) T hσ;
   have he : T ⊢ σ 🡘 σ' := by simpa using e;
@@ -154,13 +154,13 @@ theorem inconsistent_of_provable_localReflectionOn_union_of_finite [𝗜𝚺n �
     Hierarchy.list_conj₂_iff.mpr fun σ hσ ↦ hΓ σ ((hmem σ).mp hσ);
   have hle : T ∪ U' ⪯ insert (⋀hU'.toFinset.toList) T := WeakerThan.ofAxm! <| by
     rintro φ (hφ | hφ);
-    . exact by_axm (Set.mem_insert_of_mem _ hφ);
-    . exact mdp (left_Conj₂_intro ((hmem φ).mpr hφ)) (by_axm (Set.mem_insert _ _));
+    · exact by_axm (Set.mem_insert_of_mem _ hφ);
+    · exact mdp (left_Conj₂_intro ((hmem φ).mpr hφ)) (by_axm (Set.mem_insert _ _));
   have hge : insert (⋀hU'.toFinset.toList) T ⪯ T ∪ U' := WeakerThan.ofAxm! <| by
     rintro φ (rfl | hφ);
-    . exact Conj₂_iff_forall_provable.mpr fun ψ hψ ↦
+    · exact Conj₂_iff_forall_provable.mpr fun ψ hψ ↦
         by_axm (Set.mem_union_right _ ((hmem ψ).mp hψ));
-    . exact by_axm (Set.mem_union_left _ hφ);
+    · exact by_axm (Set.mem_union_left _ hφ);
   exact (inconsistent_of_provable_localReflectionOn_insert hconj
     fun hσ ↦ (e.le.trans hle).pbl (h hσ)).of_ge (hge.trans e.symm.le);
 
