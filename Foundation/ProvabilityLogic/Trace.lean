@@ -51,7 +51,10 @@ lemma root_forces_of_not_mem_trace {κ : Type u} [Nonempty κ] {M : RootedModel 
 lemma GL_imp_of_height_not_mem_trace
     (h : ∀ {κ : Type u} [Nonempty κ] (M : RootedModel κ α) [Fintype M.World] [M.IsGL],
       M.root ⊩[M.toModel] B → M.height ∉ A.trace) : 𝐆𝐋 ⊢ B 🡒 A := by
-  sorry
+  apply Logic.GL.iff_root_forces.mpr;
+  intro _ _ M _ hB;
+  have : Fintype M.World := Fintype.ofFinite _;
+  exact root_forces_of_not_mem_trace (h M hB);
 
 lemma trace_lift (B : LetterlessFormula) : (B.lift : Formula α).trace = B.trace := by
   sorry
