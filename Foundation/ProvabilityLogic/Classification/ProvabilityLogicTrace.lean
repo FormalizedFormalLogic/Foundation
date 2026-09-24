@@ -143,7 +143,9 @@ theorem provabilityLogic_eq_GLAlpha
     (h : (T.provabilityLogicRelativeTo U : Logic α).traceᶜ.Infinite) :
     (T.provabilityLogicRelativeTo U : Logic α) =
       𝐆𝐋α (T.provabilityLogicRelativeTo U : Logic α).trace :=
-  sorry
+  subset_antisymm (Logic.subset_GLAlpha_trace h) <| sumQuasiNormal_subset_provabilityLogic <| by
+    rintro _ ⟨n, hn, rfl⟩;
+    exact TBB_mem_provabilityLogic_of_mem_trace hn
 
 lemma exists_neg_conj_TBB_mem_provabilityLogic
     (h : ¬(T.provabilityLogicRelativeTo U : Logic α) ⊆ 𝐒) :
