@@ -199,8 +199,8 @@ theorem mem_iff : A ∈ (𝐆𝐋α X : Logic α) ↔ A.trace.Finite ∧ A.trace
 lemma mono (h : X ⊆ Y) : (𝐆𝐋α X : Logic α) ⊆ 𝐆𝐋α Y :=
   sumQuasiNormal.subset_iff.mpr fun _ ⟨n, hn, e⟩ ↦ .mem₂ ⟨n, h hn, e⟩
 
-lemma subset_S : (𝐆𝐋α X : Logic α) ⊆ 𝐒 := by
-  sorry
+lemma subset_S : (𝐆𝐋α X : Logic α) ⊆ 𝐒 :=
+  sumQuasiNormal.subset_iff.mpr fun _ ⟨n, _, e⟩ ↦ e ▸ .mem₂ ⟨□^[n]⊥, by simp [TBB]⟩
 
 end GLAlpha
 
