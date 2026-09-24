@@ -166,7 +166,24 @@ theorem mainlemma_neg (hi : i ≠ none) {B : ProvabilityLogic.Formula α} (hB : 
 lemma provable_boxItr_bot_of_ne (S : 𝔅.ModifiedSolovaySentences X σ) {z : X.World}
     (hr : z ≠ X.root) (hu : z ≠ X.u) :
     T₀ ⊢ S.Λ (some z) 🡒 𝔅^[Model.World.rank (M := X.toModel) z + 1] ⊥ := by
-  sorry
+  classical
+  induction z using WellFounded.induction IsConverseWellFounded.cwf (r := flip X.Rel) with
+  | h z ih =>
+    suffices T₀ ⊢ (⩖ j ∈ { j : X.extendRoot.World | some z ≺ j }, S.Λ j) 🡒
+        𝔅^[Model.World.rank (M := X.toModel) z] ⊥ by
+      simpa only [Function.iterate_succ_apply'] using
+        C_trans (S.SC3 (some z) (by simp) (by simpa using hu)) (𝔅.mono' this);
+    apply left_Fdisj'_intro;
+    rintro (_ | y) hy;
+    · simp at hy;
+    · replace hy : z ≺ y := by simpa using hy;
+      have hyr : y ≠ X.root := by
+        rintro rfl;
+        exact not_rel_root hy;
+      have hyu : y ≠ X.u := by
+        rintro rfl;
+        exact hr <| X.eq_root_of_rel_u z hy;
+      exact C_trans (ih y hy hyr hyu) (𝔅.provable_boxItr_bot_mono (Model.rank_lt_of_rel hy));
 
 lemma provable_b (S : 𝔅.ModifiedSolovaySentences X σ) :
     T₀ ⊢ 𝔅.conItr X.height 🡒 𝔅 σ 🡒 ∼σ 🡒 S.Λ (some X.root) := by
