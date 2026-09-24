@@ -59,14 +59,14 @@ namespace Grz.Gentzen
 
 variable {α : Type*} [DecidableEq α] {S : Sequent α}
 
-theorem sound {κ : Type*} [Nonempty κ] (M : Kripke.Model κ α) [M.IsGrz] (h : ⊢ᴳ[Grz] S) :
+theorem sound {κ : Type*} [Nonempty κ] (M : Kripke.Model κ α) [M.IsGrz] (h : ⊢ᴳ[𝐆𝐫𝐳] S) :
     M ⊧ S := by
   induction h with
   | boxT _ ih => exact validateSequent_boxT ih;
   | _ => grind;
 
 @[simp, grind .]
-lemma not_empty : ⊬ᴳ[Grz] (∅ ⟹ ∅ : Sequent α) := by
+lemma not_empty : ⊬ᴳ[𝐆𝐫𝐳] (∅ ⟹ ∅ : Sequent α) := by
   intro h;
   let M : Kripke.Model (Fin 1) α := ⟨fun _ _ ↦ True, fun _ _ ↦ False⟩;
   have : M.IsFiniteGrz :=
@@ -122,7 +122,7 @@ structure SaturatedSequent (BS : Sequent α) extends Sequent α where
   boxT_closed : ∀ {A}, □A ∈ ant → A ∈ ant
   ant_subset : ant ⊆ closure BS
   suc_subset : suc ⊆ BS.subfmls
-  unprovable : ⊬ᴳ[Grz] toSequent
+  unprovable : ⊬ᴳ[𝐆𝐫𝐳] toSequent
 
 namespace SaturatedSequent
 
@@ -171,13 +171,13 @@ lemma SaturatedAt.mono {S T : Sequent α} {E : Formula α} (h : SaturatedAt S E)
 open Classical in
 /-- One saturation step for each implication and box of the list, processed from the last to the
 first. -/
-noncomputable def saturate (S₀ : Sequent α) (h₀ : ⊬ᴳ[Grz] S₀) :
-    List (Formula α) → { S : Sequent α // ⊬ᴳ[Grz] S }
+noncomputable def saturate (S₀ : Sequent α) (h₀ : ⊬ᴳ[𝐆𝐫𝐳] S₀) :
+    List (Formula α) → { S : Sequent α // ⊬ᴳ[𝐆𝐫𝐳] S }
   | [] => ⟨S₀, h₀⟩
   | (A 🡒 B) :: l =>
     let ⟨S, hS⟩ := saturate S₀ h₀ l;
     if hAB : A 🡒 B ∈ S.ant then
-      if h : ⊬ᴳ[Grz] S.ant ⟹ insert A S.suc then ⟨S.ant ⟹ insert A S.suc, h⟩
+      if h : ⊬ᴳ[𝐆𝐫𝐳] S.ant ⟹ insert A S.suc then ⟨S.ant ⟹ insert A S.suc, h⟩
       else ⟨insert B S.ant ⟹ S.suc, fun h' ↦ hS <| by
         simpa [Finset.insert_eq_of_mem hAB] using Gentzen.impL (not_not.mp h) h'⟩
     else if hAB : A 🡒 B ∈ S.suc then
@@ -192,7 +192,7 @@ noncomputable def saturate (S₀ : Sequent α) (h₀ : ⊬ᴳ[Grz] S₀) :
     else ⟨S, hS⟩
   | _ :: l => saturate S₀ h₀ l
 
-variable {S₀ : Sequent α} {h₀ : ⊬ᴳ[Grz] S₀} {l : List (Formula α)}
+variable {S₀ : Sequent α} {h₀ : ⊬ᴳ[𝐆𝐫𝐳] S₀} {l : List (Formula α)}
 
 lemma saturate_cons {E : Formula α} :
     (saturate S₀ h₀ l).1 ⊆ (saturate S₀ h₀ (E :: l)).1 ∧
@@ -275,7 +275,7 @@ lemma sortedClosure_pairwise : (sortedClosure BS).Pairwise (·.complexity ≤ ·
   haveI : IsTrans _ (fun A B : Formula α ↦ A.complexity ≤ B.complexity) := ⟨fun _ _ _ ↦ le_trans⟩;
   List.pairwise_insertionSort _ _
 
-noncomputable def lindenbaum (S₀ : Sequent α) (h₀ : ⊬ᴳ[Grz] S₀) (hant : S₀.ant ⊆ closure BS)
+noncomputable def lindenbaum (S₀ : Sequent α) (h₀ : ⊬ᴳ[𝐆𝐫𝐳] S₀) (hant : S₀.ant ⊆ closure BS)
     (hsuc : S₀.suc ⊆ BS.subfmls) : SaturatedSequent BS where
   toSequent := (saturate S₀ h₀ (sortedClosure BS)).1
   unprovable := (saturate S₀ h₀ (sortedClosure BS)).2
@@ -290,24 +290,24 @@ noncomputable def lindenbaum (S₀ : Sequent α) (h₀ : ⊬ᴳ[Grz] S₀) (hant
   boxT_closed := fun h ↦ saturate_saturated sortedClosure_pairwise _
     (mem_sortedClosure.mpr <| (saturate_bound hant hsuc).1 h) h
 
-lemma subset_lindenbaum {S₀ : Sequent α} {h₀ : ⊬ᴳ[Grz] S₀} {hant : S₀.ant ⊆ closure BS}
+lemma subset_lindenbaum {S₀ : Sequent α} {h₀ : ⊬ᴳ[𝐆𝐫𝐳] S₀} {hant : S₀.ant ⊆ closure BS}
     {hsuc : S₀.suc ⊆ BS.subfmls} : S₀ ⊆ (lindenbaum S₀ h₀ hant hsuc).toSequent :=
   subset_saturate
 
-instance [Fact (⊬ᴳ[Grz] BS)] : Nonempty (SaturatedSequent BS) :=
+instance [Fact (⊬ᴳ[𝐆𝐫𝐳] BS)] : Nonempty (SaturatedSequent BS) :=
   ⟨lindenbaum BS Fact.out (fun _ h ↦ subfmls_subset_closure (by grind)) (by grind)⟩
 
 end SaturatedSequent
 
 open SaturatedSequent
 
-def countermodel (BS : Sequent α) [Fact (⊬ᴳ[Grz] BS)] : Kripke.Model (SaturatedSequent BS) α where
+def countermodel (BS : Sequent α) [Fact (⊬ᴳ[𝐆𝐫𝐳] BS)] : Kripke.Model (SaturatedSequent BS) α where
   Val' x a := #a ∈ x.ant
   Rel' x y := x.ant.prebox ⊆ y.ant.prebox ∧ (y.ant.prebox ⊆ x.ant.prebox → x = y)
 
 namespace countermodel
 
-variable [Fact (⊬ᴳ[Grz] BS)] {x : (countermodel BS).World}
+variable [Fact (⊬ᴳ[𝐆𝐫𝐳] BS)] {x : (countermodel BS).World}
 
 instance : (countermodel BS).IsFiniteGrz where
   refl _ := ⟨subset_rfl, fun _ ↦ rfl⟩
@@ -339,7 +339,7 @@ lemma truthlemma : (A ∈ x.ant → x ⊩[countermodel BS] A) ∧ (A ∈ x.suc �
       apply not_forces_box.mpr;
       by_cases hA : A ∈ x.suc;
       · exact ⟨x, ⟨subset_rfl, fun _ ↦ rfl⟩, ih.2 hA⟩;
-      have h₀ : ⊬ᴳ[Grz] insert (□(A 🡒 □A)) x.ant.prebox.box ⟹ {A} := fun hp ↦
+      have h₀ : ⊬ᴳ[𝐆𝐫𝐳] insert (□(A 🡒 □A)) x.ant.prebox.box ⟹ {A} := fun hp ↦
         x.unprovable <|
           Gentzen.wk (Gentzen.boxGrz hp) FormulaFinset.box_prebox_subset (by simpa using h);
       have hant : insert (□(A 🡒 □A)) x.ant.prebox.box ⊆ closure BS :=
@@ -372,9 +372,9 @@ variable {α : Type u} [DecidableEq α] {S : Sequent α}
 
 theorem complete
     (h : ∀ {κ : Type u} [Nonempty κ] (M : Kripke.Model κ α), [M.IsFiniteGrz] → M ⊧ S) :
-    ⊢ᴳ[Grz] S := by
+    ⊢ᴳ[𝐆𝐫𝐳] S := by
   by_contra hS;
-  have : Fact (⊬ᴳ[Grz] S) := ⟨hS⟩;
+  have : Fact (⊬ᴳ[𝐆𝐫𝐳] S) := ⟨hS⟩;
   have hant : S.ant ⊆ closure S := fun _ h ↦ subfmls_subset_closure (by grind);
   have hsuc : S.suc ⊆ S.subfmls := by grind;
   have hS₀ := subset_lindenbaum (h₀ := hS) (hant := hant) (hsuc := hsuc);
@@ -382,15 +382,15 @@ theorem complete
     (fun C hC ↦ countermodel.truthlemma.1 (hS₀.ant hC));
   exact countermodel.truthlemma.2 (hS₀.suc hD) hxD;
 
-theorem iff_valid : ⊢ᴳ[Grz] S ↔
+theorem iff_valid : ⊢ᴳ[𝐆𝐫𝐳] S ↔
     ∀ {κ : Type u} [Nonempty κ] (M : Kripke.Model κ α), [M.IsFiniteGrz] → M ⊧ S :=
   ⟨fun h _ _ M _ ↦ sound M h, complete⟩
 
 variable {Γ₁ Γ₂ Δ₁ Δ₂ : FormulaFinset α} {A : Formula α}
 
 /-- Cut is admissible. -/
-theorem cut (h₁ : ⊢ᴳ[Grz] Γ₁ ⟹ insert A Δ₁) (h₂ : ⊢ᴳ[Grz] insert A Γ₂ ⟹ Δ₂) :
-    ⊢ᴳ[Grz] Γ₁ ∪ Γ₂ ⟹ Δ₁ ∪ Δ₂ := by
+theorem cut (h₁ : ⊢ᴳ[𝐆𝐫𝐳] Γ₁ ⟹ insert A Δ₁) (h₂ : ⊢ᴳ[𝐆𝐫𝐳] insert A Γ₂ ⟹ Δ₂) :
+    ⊢ᴳ[𝐆𝐫𝐳] Γ₁ ∪ Γ₂ ⟹ Δ₁ ∪ Δ₂ := by
   apply complete;
   intro _ _ M _ x hx;
   obtain ⟨D, hD, hxD⟩ := sound M h₁ x (fun C hC ↦ hx C (by simp [hC]));
