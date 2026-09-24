@@ -166,13 +166,11 @@ Prefer that form when the declarations themselves carry no docstrings.
 
 Attach `@[grind]` to lemmas and definitions that plausibly help `grind` close goals, choosing a direction (`@[grind =>]`, `@[grind .]`) where it matters. 🤖 Do not attach it mechanically to every declaration. The post-hoc form `attribute [grind] name₁ name₂ …` is also acceptable. Inside proofs, try `grind` before settling on a longer tactic sequence.
 
-## The `primrec` tactic
+## The `primrec` and `computable` tactics
 
-`primrec` (`Foundation/Vorspiel/Tactic/Primrec.lean`) proves `Primrec f`, `Primrec₂ f`, `PrimrecPred p` and `PrimrecRel r` by reading the shape of the function off the goal, so a composition of Mathlib's point-free combinators no longer has to be written by hand. Use it in place of `Primrec.comp`/`Primrec.fst`/`Primrec.snd` chains; `primrec?` prints what it found.
+`primrec` proves `Primrec f`, `Primrec₂ f`, `PrimrecPred p` and `PrimrecRel r`; `computable` proves `Computable f` and `Computable₂ f`. Use them instead of chaining `Primrec.comp`/`Primrec.fst`/`Primrec.snd` by hand.
 
-Teach it about a new function with `@[primrec]`. State the lemma pointwise — `Primrec fun a ↦ F (f a) (g a)`, with a `Primrec` hypothesis per argument — and general in the ambient `[Primcodable α]`, because that is the form the search matches against. A point-free `Primrec F` is also worth tagging: Lean eta-reduces `Primrec fun a ↦ F a` before indexing it, and only the point-free form is retrieved then.
-
-`computable` (`Foundation/Vorspiel/Tactic/Computable.lean`) is the same tactic one level up, for `Computable f` and `Computable₂ f`. It runs over the `primrec` rules as well, so a primitive recursive subterm costs nothing extra; `@[computable]` adds a lemma, stated pointwise as above.
+Register a new function with `@[primrec]` or `@[computable]`, stating the lemma pointwise — `Primrec fun a ↦ F (f a) (g a)` with a hypothesis per argument, over an arbitrary `[Primcodable α]`.
 
 ## No `sorry`
 

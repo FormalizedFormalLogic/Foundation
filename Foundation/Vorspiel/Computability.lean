@@ -220,7 +220,7 @@ theorem Primrec.nat_natToList : Primrec Nat.natToList := by
   simpa using main.comp (const ()) Primrec.id
 
 @[primrec]
-theorem Primrec.nat_natToList' {α : Type*} [Primcodable α] {f : α → ℕ} (hf : Primrec f) :
+lemma Primrec.nat_natToList' {α : Type*} [Primcodable α] {f : α → ℕ} (hf : Primrec f) :
     Primrec fun a ↦ Nat.natToList (f a) := Primrec.nat_natToList.comp hf
 
 end

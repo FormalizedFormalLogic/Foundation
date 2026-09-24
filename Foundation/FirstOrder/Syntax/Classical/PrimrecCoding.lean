@@ -103,13 +103,11 @@ example (k : ℕ) : (inferInstance : Primcodable (L.Func k)).toEncodable
 
 variable {α : Type*} [Primcodable α] {k e : α → ℕ}
 
-/-- The pointwise form of `Language.Primcodable.func`, the form the `primrec` rule set keys on. -/
 @[primrec]
 lemma Language.Primcodable.func' (hk : Primrec k) (he : Primrec e) :
     Primrec fun a ↦ Encodable.encode (Encodable.decode (e a) : Option (L.Func (k a))) :=
   (Language.Primcodable.func (L := L)).comp hk he
 
-/-- The pointwise form of `Language.Primcodable.rel`, the form the `primrec` rule set keys on. -/
 @[primrec]
 lemma Language.Primcodable.rel' (hk : Primrec k) (he : Primrec e) :
     Primrec fun a ↦ Encodable.encode (Encodable.decode (e a) : Option (L.Rel (k a))) :=
@@ -191,9 +189,8 @@ lemma stepVec_eq_zero {T : List ℕ} {l : List ℕ} {j : ℕ} (hj : j ∈ l)
     · exact ite_eq_left (Or.inl h)
     · exact ite_eq_left (Or.inr (ih hj'))
 
--- `Primrec.list_foldr` is applied with its arguments named: the higher-order unification of its
--- conclusion against a concrete fold is out of reach for the `primrec` rule set.
-theorem primrec₂_stepVec : Primrec₂ stepVec :=
+-- `primrec` cannot unify `Primrec.list_foldr` with a concrete fold, so its arguments are named.
+lemma primrec₂_stepVec : Primrec₂ stepVec :=
   Primrec.list_foldr (β := ℕ) (σ := ℕ)
     (f := fun p : List ℕ × List ℕ ↦ p.2) (g := fun _ ↦ (1 : ℕ))
     (h := fun p x ↦ if p.1.getD x.1 0 = 0 ∨ x.2 = 0 then 0
@@ -201,7 +198,7 @@ theorem primrec₂_stepVec : Primrec₂ stepVec :=
     Primrec.snd (Primrec.const _) (by primrec)
 
 @[primrec]
-theorem primrec_stepVec {α : Type*} [Primcodable α] {T l : α → List ℕ}
+lemma primrec_stepVec {α : Type*} [Primcodable α] {T l : α → List ℕ}
     (hT : Primrec T) (hl : Primrec l) : Primrec fun a ↦ stepVec (T a) (l a) :=
   primrec₂_stepVec.comp hT hl
 
@@ -344,9 +341,8 @@ theorem encode_ofNat_primrec :
   Primrec.nat_strong_rec _ (g := fun n T ↦ some (step (L := L) (ξ := ξ) n T))
     (Primrec.option_some.comp primrec_step) fun n e ↦ congrArg some (step_table n e)
 
-/-- The pointwise form of `encode_ofNat_primrec`, the form the `primrec` rule set keys on. -/
 @[primrec]
-theorem encode_decode_primrec {α : Type*} [Primcodable α] {n e : α → ℕ}
+lemma encode_decode_primrec {α : Type*} [Primcodable α] {n e : α → ℕ}
     (hn : Primrec n) (he : Primrec e) :
     Primrec fun a ↦ encode (decode (e a) : Option (Semiterm L ξ (n a))) :=
   ((encode_ofNat_primrec (L := L) (ξ := ξ)).comp hn he).of_eq fun _ ↦ rfl
@@ -420,8 +416,8 @@ lemma stepVecT_eq_zero {n : ℕ} {l : List ℕ} {j : ℕ} (hj : j ∈ l)
     · exact ite_eq_left (Or.inl h)
     · exact ite_eq_left (Or.inr (ih hj'))
 
--- As with `Semiterm.primrec₂_stepVec`, `Primrec.list_foldr` is applied with its arguments named.
-theorem primrec₂_stepVecT : Primrec₂ (stepVecT (L := L) (ξ := ξ)) :=
+-- See `Semiterm.primrec₂_stepVec`.
+lemma primrec₂_stepVecT : Primrec₂ (stepVecT (L := L) (ξ := ξ)) :=
   Primrec.list_foldr (β := ℕ) (σ := ℕ)
     (f := fun p : ℕ × List ℕ ↦ p.2) (g := fun _ ↦ (1 : ℕ))
     (h := fun p x ↦ if encode (decode x.1 : Option (Semiterm L ξ p.1)) = 0 ∨ x.2 = 0 then 0
@@ -429,7 +425,7 @@ theorem primrec₂_stepVecT : Primrec₂ (stepVecT (L := L) (ξ := ξ)) :=
     Primrec.snd (Primrec.const _) (by primrec)
 
 @[primrec]
-theorem primrec_stepVecT {α : Type*} [Primcodable α] {n : α → ℕ} {l : α → List ℕ}
+lemma primrec_stepVecT {α : Type*} [Primcodable α] {n : α → ℕ} {l : α → List ℕ}
     (hn : Primrec n) (hl : Primrec l) :
     Primrec fun a ↦ stepVecT (L := L) (ξ := ξ) (n a) (l a) :=
   primrec₂_stepVecT.comp hn hl
@@ -716,8 +712,7 @@ example {n : ℕ} (e : ℕ) : (decode e : Option (Semiformula L ξ n)) = ofNat n
 example {n : ℕ} (φ : Semiformula L ξ n) :
     (decode (encode φ) : Option (Semiformula L ξ n)) = some φ := Encodable.encodek φ
 
--- The codes are spelled with `encode`, not the definitionally equal `toNat`: `primrec` matches
--- its rules at `reducible` transparency, where the two are distinct.
+-- `encode`, not `toNat`: the two differ at `reducible` transparency.
 theorem primrec₂_and {n : ℕ} : Primrec₂ (fun φ ψ : Semiformula L ξ n ↦ φ ⋏ ψ) :=
   Primrec₂.encode_iff.mp <| Primrec₂.of_eq
     (f := fun φ ψ : Semiformula L ξ n ↦ Nat.pair 4 ((encode φ).pair (encode ψ)) + 1)

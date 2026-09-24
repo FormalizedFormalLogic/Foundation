@@ -7,17 +7,8 @@ public import Mathlib.Computability.Partrec
 /-!
 # The rules of the `computable` tactic
 
-Mathlib's `Computable` API is much thinner than its `Primrec` one, and it does not need to be
-thicker here: a `Computable` goal whose function is primitive recursive is handed to the
-`Primrec` rules by `Primrec.to_comp`, which the tactic runs alongside. What the rules below add
-are the shapes in which a computable but not primitive recursive argument can sit — the places a
-`Computable f` hypothesis of the context has to be reached through.
-
-The tactic itself is `Foundation/Vorspiel/Tactic/Computable.lean`, and `@[computable]` adds a
-lemma stated anywhere else.
-
-Everything here is a pointwise restatement of a Mathlib combinator, so there is no informal
-source to cite.
+Primitive recursive subterms are left to the `Primrec` rules, reached through `Primrec.to_comp`.
+These rules cover the shapes where a computable but not primitive recursive argument can sit.
 -/
 
 @[expose] public section
@@ -31,13 +22,13 @@ namespace Computable
 /-! ## The leaves -/
 
 variable (α) in
-theorem id' : Computable fun a : α ↦ a := Computable.id
+lemma id' : Computable fun a : α ↦ a := Computable.id
 
 /-! ## Products -/
 
-theorem fst' {f : α → β × γ} (hf : Computable f) : Computable fun a ↦ (f a).1 := fst.comp hf
+lemma fst' {f : α → β × γ} (hf : Computable f) : Computable fun a ↦ (f a).1 := fst.comp hf
 
-theorem snd' {f : α → β × γ} (hf : Computable f) : Computable fun a ↦ (f a).2 := snd.comp hf
+lemma snd' {f : α → β × γ} (hf : Computable f) : Computable fun a ↦ (f a).2 := snd.comp hf
 
 /-! ## Arithmetic -/
 
@@ -45,29 +36,29 @@ section nat
 
 variable {f g : α → ℕ}
 
-theorem succ' (hf : Computable f) : Computable fun a ↦ (f a).succ := succ.comp hf
+lemma succ' (hf : Computable f) : Computable fun a ↦ (f a).succ := succ.comp hf
 
-theorem pred' (hf : Computable f) : Computable fun a ↦ (f a).pred := pred.comp hf
+lemma pred' (hf : Computable f) : Computable fun a ↦ (f a).pred := pred.comp hf
 
-theorem nat_add' (hf : Computable f) (hg : Computable g) : Computable fun a ↦ f a + g a :=
+lemma nat_add' (hf : Computable f) (hg : Computable g) : Computable fun a ↦ f a + g a :=
   Primrec.nat_add.to_comp.comp hf hg
 
-theorem nat_sub' (hf : Computable f) (hg : Computable g) : Computable fun a ↦ f a - g a :=
+lemma nat_sub' (hf : Computable f) (hg : Computable g) : Computable fun a ↦ f a - g a :=
   Primrec.nat_sub.to_comp.comp hf hg
 
-theorem nat_mul' (hf : Computable f) (hg : Computable g) : Computable fun a ↦ f a * g a :=
+lemma nat_mul' (hf : Computable f) (hg : Computable g) : Computable fun a ↦ f a * g a :=
   Primrec.nat_mul.to_comp.comp hf hg
 
-theorem nat_max' (hf : Computable f) (hg : Computable g) : Computable fun a ↦ max (f a) (g a) :=
+lemma nat_max' (hf : Computable f) (hg : Computable g) : Computable fun a ↦ max (f a) (g a) :=
   Primrec.nat_max.to_comp.comp hf hg
 
-theorem nat_min' (hf : Computable f) (hg : Computable g) : Computable fun a ↦ min (f a) (g a) :=
+lemma nat_min' (hf : Computable f) (hg : Computable g) : Computable fun a ↦ min (f a) (g a) :=
   Primrec.nat_min.to_comp.comp hf hg
 
-theorem nat_pair' (hf : Computable f) (hg : Computable g) : Computable fun a ↦ (f a).pair (g a) :=
+lemma nat_pair' (hf : Computable f) (hg : Computable g) : Computable fun a ↦ (f a).pair (g a) :=
   Primrec₂.natPair.to_comp.comp hf hg
 
-theorem unpair' (hf : Computable f) : Computable fun a ↦ (f a).unpair := unpair.comp hf
+lemma unpair' (hf : Computable f) : Computable fun a ↦ (f a).unpair := unpair.comp hf
 
 end nat
 
@@ -77,29 +68,28 @@ section list
 
 variable {f : α → β} {l m : α → List β}
 
-theorem list_cons' (hf : Computable f) (hl : Computable l) : Computable fun a ↦ f a :: l a :=
+lemma list_cons' (hf : Computable f) (hl : Computable l) : Computable fun a ↦ f a :: l a :=
   list_cons.comp hf hl
 
-theorem list_append' (hl : Computable l) (hm : Computable m) : Computable fun a ↦ l a ++ m a :=
+lemma list_append' (hl : Computable l) (hm : Computable m) : Computable fun a ↦ l a ++ m a :=
   list_append.comp hl hm
 
-theorem list_length' (hl : Computable l) : Computable fun a ↦ (l a).length := list_length.comp hl
+lemma list_length' (hl : Computable l) : Computable fun a ↦ (l a).length := list_length.comp hl
 
-theorem list_getElem?' {n : α → ℕ} (hl : Computable l) (hn : Computable n) :
+lemma list_getElem?' {n : α → ℕ} (hl : Computable l) (hn : Computable n) :
     Computable fun a ↦ (l a)[n a]? :=
   list_getElem?.comp hl hn
 
-theorem vector_cons' {n : ℕ} {v : α → List.Vector β n} (hf : Computable f) (hv : Computable v) :
+lemma vector_cons' {n : ℕ} {v : α → List.Vector β n} (hf : Computable f) (hv : Computable v) :
     Computable fun a ↦ f a ::ᵥ v a :=
   vector_cons.comp hf hv
 
-theorem vector_toList' {n : ℕ} {v : α → List.Vector β n} (hv : Computable v) :
+lemma vector_toList' {n : ℕ} {v : α → List.Vector β n} (hv : Computable v) :
     Computable fun a ↦ (v a).toList :=
   vector_toList.comp hv
 
-/-- The pointwise form of `Computable.vector_get`. It carries a second prime because
-`vector_get'` upstream is the point-free `Computable (List.Vector.get ·)`. -/
-theorem vector_get'' {n : ℕ} {v : α → List.Vector β n} {i : α → Fin n} (hv : Computable v)
+-- `vector_get'` is taken upstream.
+lemma vector_get'' {n : ℕ} {v : α → List.Vector β n} {i : α → Fin n} (hv : Computable v)
     (hi : Computable i) : Computable fun a ↦ (v a).get (i a) :=
   vector_get.comp hv hi
 
@@ -111,14 +101,14 @@ section encodable
 
 variable {f : α → β} {n : α → ℕ}
 
-theorem encode' (hf : Computable f) : Computable fun a ↦ encode (f a) := Computable.encode.comp hf
+lemma encode' (hf : Computable f) : Computable fun a ↦ encode (f a) := Computable.encode.comp hf
 
-theorem decode' (hn : Computable n) : Computable fun a ↦ (decode (n a) : Option β) :=
+lemma decode' (hn : Computable n) : Computable fun a ↦ (decode (n a) : Option β) :=
   Computable.decode.comp hn
 
-theorem option_some' (hf : Computable f) : Computable fun a ↦ some (f a) := option_some.comp hf
+lemma option_some' (hf : Computable f) : Computable fun a ↦ some (f a) := option_some.comp hf
 
-theorem option_getD' {o : α → Option β} (ho : Computable o) (hf : Computable f) :
+lemma option_getD' {o : α → Option β} (ho : Computable o) (hf : Computable f) :
     Computable fun a ↦ (o a).getD (f a) :=
   option_getD ho hf
 
@@ -128,8 +118,7 @@ end Computable
 
 /-! ## The rule set
 
-The priorities mirror the `Primrec` ones, and for the same reasons; see
-`Foundation/Vorspiel/Computability/Primrec.lean`.
+Priorities mirror those in `Foundation/Vorspiel/Computability/Primrec.lean`.
 -/
 
 attribute [aesop (rule_sets := [Computable]) norm] Function.comp_def
@@ -157,13 +146,11 @@ attribute [aesop 3 (rule_sets := [Computable]) safe apply (transparency := reduc
 attribute [aesop 20 (rule_sets := [Computable]) safe apply (transparency := reducible)]
   Computable₂.mk
 
--- `Computable.pair` matches every goal whose value is a pair, projections included, exactly as
--- `Primrec.pair` does, so it is unsafe for the same reason.
+-- Unsafe: by structure eta it matches projections too, and loops.
 attribute [aesop 50% (rule_sets := [Computable]) unsafe apply (transparency := reducible)]
   Computable.pair
 
--- The bridge to the `Primrec` rules. It is unsafe because a computable function need not be
--- primitive recursive: Aesop follows it first, and backs out when the `Primrec` search fails.
+-- Unsafe: a computable function need not be primitive recursive.
 attribute [aesop 40% (rule_sets := [Computable]) unsafe apply (transparency := reducible)]
   Primrec.to_comp Primrec₂.to_comp
 
