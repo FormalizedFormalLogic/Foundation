@@ -152,7 +152,7 @@ instance (x : X.extendRoot.World) : Finite (EChain X x) := by
     (⟨ε.1, mono ε.2⟩ : {ε : List X.extendRoot.World // ε.ChainI (fun a b ↦ b ≺ a) x none}))
     fun _ _ h ↦ Subtype.ext (Subtype.mk.inj h)
 
-def hAux (x : X.extendRoot.World) : ArithmeticSemisentence n :=
+def HAux (x : X.extendRoot.World) : ArithmeticSemisentence n :=
   haveI := Fintype.ofFinite (EChain X x);
   ⩖ ε : EChain X x, chainAux T X θ t ε
 
@@ -161,7 +161,7 @@ def notTrigAux (z : X.extendRoot.World) : ArithmeticSemisentence n :=
   if z = some X.u then Rew.embSubsts ![] ▹ ∼σ else T.consistentWith.val/[t z]
 
 def deltaAux (x : X.extendRoot.World) : ArithmeticSemisentence n :=
-  hAux T X θ t x ⋏ ⩕ z ∈ Next X x, notTrigAux T X σ t z
+  HAux T X θ t x ⋏ ⩕ z ∈ Next X x, notTrigAux T X σ t z
 
 /-- The modified Solovay sentences.
 
@@ -178,18 +178,18 @@ abbrev stp (x y : X.extendRoot.World) : ArithmeticSentence :=
 abbrev chain (ε : List X.extendRoot.World) : ArithmeticSentence :=
   chainAux T X θ (fun z ↦ ⌜T.modifiedSolovay X σ θ z⌝) ε
 
-abbrev h (x : X.extendRoot.World) : ArithmeticSentence :=
-  hAux T X θ (fun z ↦ ⌜T.modifiedSolovay X σ θ z⌝) x
+abbrev H (x : X.extendRoot.World) : ArithmeticSentence :=
+  HAux T X θ (fun z ↦ ⌜T.modifiedSolovay X σ θ z⌝) x
 
 abbrev notTrig (z : X.extendRoot.World) : ArithmeticSentence :=
   notTrigAux T X σ (fun z ↦ ⌜T.modifiedSolovay X σ θ z⌝) z
 
-lemma h_sigma_one (x : X.extendRoot.World) : Hierarchy 𝚺 1 (h T X σ θ x) := by
+lemma H_sigma_one (x : X.extendRoot.World) : Hierarchy 𝚺 1 (H T X σ θ x) := by
   have H (ε : List X.extendRoot.World) : Hierarchy 𝚺 1 (chain T X σ θ ε) := by
     induction ε with
     | nil => simp [chainAux]
     | cons y ε ih => rcases ε with _ | ⟨x, ε⟩ <;> simp_all [chainAux, stpAux];
-  simp [hAux, H]
+  simp [HAux, H]
 
 section rew
 
@@ -219,14 +219,14 @@ lemma rew_notTrigAux (z : X.extendRoot.World) :
 end rew
 
 lemma modifiedSolovay_diag (x : X.extendRoot.World) :
-    𝗜𝚺₁ ⊢ T.modifiedSolovay X σ θ x 🡘 h T X σ θ x ⋏ ⩕ z ∈ Next X x, notTrig T X σ θ z := by
+    𝗜𝚺₁ ⊢ T.modifiedSolovay X σ θ x 🡘 H T X σ θ x ⋏ ⩕ z ∈ Next X x, notTrig T X σ θ z := by
   have : 𝗜𝚺₁ ⊢ T.modifiedSolovay X σ θ x 🡘
       (Rew.subst fun j ↦ ⌜T.modifiedSolovay X σ θ ((Fintype.equivFin _).symm j)⌝) ▹
         deltaAux T X σ θ (fun z ↦ #(Fintype.equivFin _ z)) x := by
     simpa [Theory.modifiedSolovay] using! exclusiveMultidiagonal (T := 𝗜𝚺₁)
       (i := Fintype.equivFin _ x)
       (fun j ↦ deltaAux T X σ θ (fun z ↦ #(Fintype.equivFin _ z)) ((Fintype.equivFin _).symm j));
-  simpa [deltaAux, hAux, Finset.map_conj', Finset.map_udisj, Function.comp_def, rew_chainAux,
+  simpa [deltaAux, HAux, Finset.map_conj', Finset.map_udisj, Function.comp_def, rew_chainAux,
     rew_notTrigAux] using! this
 
 end stx
@@ -276,9 +276,9 @@ variable {T X σ θ V}
       (∀ z ∈ Next X x, ord X y ≤ ord X z → WitnessLE (Wit T X σ θ V y) (Wit T X σ θ V z)) := by
   simp [stpAux]
 
-@[simp] lemma val_h {x : X.extendRoot.World} : V ⊧/![] (h T X σ θ x) ↔ Reach T X σ θ V x := by
+@[simp] lemma val_H {x : X.extendRoot.World} : V ⊧/![] (H T X σ θ x) ↔ Reach T X σ θ V x := by
   suffices (∃ ε : EChain X x, V ⊧/![] (chain T X σ θ ε.1)) ↔ Reach T X σ θ V x by
-    simpa [hAux] using this;
+    simpa [HAux] using this;
   constructor;
   · rintro ⟨⟨ε, hε⟩, hc⟩;
     generalize hn : (none : X.extendRoot.World) = r at hε;
@@ -403,33 +403,62 @@ variable {T : ArithmeticTheory} [T.Δ₁] [𝗜𝚺₁ ⪯ T] {X : StrongReflexi
   (hθσ : ∀ (V : Type) [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁], V ⊧/![] σ ↔ ∃ w, V ⊧/![w] θ.val)
 include hθσ
 
+omit [𝗜𝚺₁ ⪯ T] in
 open Classical in
-lemma provable_h_imp (x : X.extendRoot.World) :
-    𝗜𝚺₁ ⊢ h T X σ θ x 🡒 T.modifiedSolovay X σ θ x ⋎
-      ⩖ y ∈ {y : X.extendRoot.World | x ≺ y}, T.modifiedSolovay X σ θ y := by
-  sorry
+lemma provable_H_imp (x : X.extendRoot.World) :
+    𝗜𝚺₁ ⊢ H T X σ θ x 🡒 T.modifiedSolovay X σ θ x ⋎
+      ⩖ y ∈ {y : X.extendRoot.World | x ≺ y}, T.modifiedSolovay X σ θ y :=
+  complete _ _ fun (V : Type) _ _ ↦ by
+    simpa [models_iff] using! Reach.disjunction (T := T) (X := X) (hθσ V) (x := x)
 
 open Classical in
 lemma ModifiedSolovay.provable_disjunction {V : Type} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
     {x : X.extendRoot.World} (h : T.ModifiedSolovay X σ θ V x) :
     Provable T (⌜T.modifiedSolovay X σ θ x ⋎
       ⩖ y ∈ {y : X.extendRoot.World | x ≺ y}, T.modifiedSolovay X σ θ y⌝ : V) := by
-  sorry
+  have h₁ : T.internalize V ⊢ ⌜H T X σ θ x 🡒 T.modifiedSolovay X σ θ x ⋎
+      ⩖ y ∈ {y : X.extendRoot.World | x ≺ y}, T.modifiedSolovay X σ θ y⌝ :=
+    internal_provable_of_outer_provable <| WeakerThan.pbl <| provable_H_imp hθσ x;
+  have h₂ : T.internalize V ⊢ ⌜H T X σ θ x⌝ :=
+    Bootstrapping.Arithmetic.sigma_one_provable_of_models T (H_sigma_one T X σ θ x)
+      (by simpa [models_iff] using! h.1);
+  exact (tprovable_tquote_iff_provable_quote (T := T)).mp ((by simpa using! h₁) ⨀ h₂)
 
 open Classical in
 lemma ModifiedSolovay.box_disjunction {V : Type} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
     {x : X.extendRoot.World} (hx : x ≠ none) (hu : x ≠ some X.u)
     (h : T.ModifiedSolovay X σ θ V x) :
     Provable T (⌜⩖ y ∈ {y : X.extendRoot.World | x ≺ y}, T.modifiedSolovay X σ θ y⌝ : V) := by
-  sorry
+  have h₁ := (tprovable_tquote_iff_provable_quote (T := T)).mpr
+    (ModifiedSolovay.provable_disjunction hθσ h);
+  have h₂ : T.internalize V ⊢ (∼⌜T.modifiedSolovay X σ θ x⌝ : Bootstrapping.Formula V ℒₒᵣ) := by
+    simpa using! (tprovable_tquote_iff_provable_quote (T := T)).mpr (Reach.provable hx hu h.1);
+  exact (tprovable_tquote_iff_provable_quote (T := T)).mp (of_A_of_N (by simpa using! h₁) h₂)
 
-lemma provable_not_sigma_imp : 𝗜𝚺₁ ⊢ ∼σ 🡒 ∼T.modifiedSolovay X σ θ (some X.u) := by
-  sorry
+omit [𝗜𝚺₁ ⪯ T] in
+lemma provable_not_sigma_imp : 𝗜𝚺₁ ⊢ ∼σ 🡒 ∼T.modifiedSolovay X σ θ (some X.u) :=
+  complete _ _ fun (V : Type) _ _ ↦ by
+    simpa [models_iff] using fun (hσ : ¬V ⊧/![] σ) (h : T.ModifiedSolovay X σ θ V (some X.u)) ↦
+      hσ (h.1.models_sigma (hθσ V))
 
 omit hθσ in
 lemma provable_provable_sigma_imp :
     𝗜𝚺₁ ⊢ T.standardProvability σ 🡒 ∼T.modifiedSolovay X σ θ none := by
-  sorry
+  have h₁ : 𝗜𝚺₁ ⊢ σ 🡒 ∼T.modifiedSolovay X σ θ (some X.root) :=
+    complete _ _ fun (V : Type) _ _ ↦ by
+      simpa [models_iff] using fun (hσ : V ⊧/![] σ) (h : T.ModifiedSolovay X σ θ V _) ↦
+        h.2 (some X.u) (by simp) (by simpa [Trig] using hσ);
+  have h₂ : 𝗜𝚺₁ ⊢ T.standardProvability σ 🡒 T.standardProvability (∼T.modifiedSolovay X σ θ _) :=
+    T.standardProvability.D2 ⨀ T.standardProvability.D1 (WeakerThan.pbl h₁);
+  have hru : some X.root ≠ some X.u := by
+    rintro h;
+    exact Std.Irrefl.irrefl (r := X.Rel) X.root (Option.some_injective _ h ▸ X.root_rel_u);
+  have h₃ : 𝗜𝚺₁ ⊢ T.modifiedSolovay X σ θ none 🡒
+      ∼T.standardProvability (∼T.modifiedSolovay X σ θ (some X.root)) :=
+    complete _ _ fun (V : Type) _ _ ↦ by
+      simpa [models_iff, standardProvability_def] using! fun h ↦
+        ModifiedSolovay.consistent (V := V) (x := none) (y := some X.root) trivial hru h;
+  cl_prover [h₂, h₃]
 
 end
 
