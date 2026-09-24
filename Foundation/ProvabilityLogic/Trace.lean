@@ -73,7 +73,7 @@ lemma trace_lift (B : LetterlessFormula) : (B.lift : Formula α).trace = B.trace
     simp_all;
 
 @[simp] lemma trace_top : (⊤ : Formula α).trace = ∅ := by
-  sorry
+  simp [trace];
 
 @[simp] lemma trace_bot : (⊥ : Formula α).trace = Set.univ := by
   simpa [LetterlessFormula.trace] using trace_lift (α := α) ⊥;
