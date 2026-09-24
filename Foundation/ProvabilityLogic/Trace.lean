@@ -193,7 +193,8 @@ theorem mem_iff : A ∈ (𝐆𝐋α X : Logic α) ↔ A.trace.Finite ∧ A.trace
         (hfin.mem_toFinset.mpr hn))) rfl;
 
 @[simp] theorem trace_eq : (𝐆𝐋α X : Logic α).trace = X := by
-  sorry
+  rw [GL.trace_sumQuasiNormal];
+  simp [trace];
 
 lemma mono (h : X ⊆ Y) : (𝐆𝐋α X : Logic α) ⊆ 𝐆𝐋α Y := by
   sorry
