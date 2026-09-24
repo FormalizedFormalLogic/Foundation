@@ -1,10 +1,22 @@
 module
 
+public import Foundation.FirstOrder.Arithmetic.ISigma1.Prenex
+public import Foundation.FirstOrder.Incompleteness.Consistency
 public import Foundation.ProvabilityLogic.Arithmetic.ModifiedSolovaySentences
-public import Foundation.ProvabilityLogic.Arithmetic.SolovaySentences
+public import Foundation.Vorspiel.List.ChainI
 
 /-!
 # Construction of modified Solovay sentences
+
+For a `𝚫₁`-axiomatized `T` extending `𝗜𝚺₁` and a `𝚺₁` sentence `σ`, the arithmetical fixed points
+`T.modifiedSolovay X σ θ` form modified Solovay sentences for the standard provability predicate.
+Along each edge of `X.extendRoot` a trigger fires: a proof of `∼Λ z`, or a witness of `σ` on the
+edge from the old root to `u`; the limit follows the edge whose trigger fires first.
+
+## References
+
+- [Bek90, §6 Theorem 2]
+- [AB05, Lemma 51]
 -/
 
 @[expose] public section
@@ -185,11 +197,11 @@ abbrev notTrig (z : X.extendRoot.World) : ArithmeticSentence :=
   notTrigAux T X σ (fun z ↦ ⌜T.modifiedSolovay X σ θ z⌝) z
 
 lemma H_sigma_one (x : X.extendRoot.World) : Hierarchy 𝚺 1 (H T X σ θ x) := by
-  have H (ε : List X.extendRoot.World) : Hierarchy 𝚺 1 (chain T X σ θ ε) := by
+  have h (ε : List X.extendRoot.World) : Hierarchy 𝚺 1 (chain T X σ θ ε) := by
     induction ε with
     | nil => simp [chainAux]
     | cons y ε ih => rcases ε with _ | ⟨x, ε⟩ <;> simp_all [chainAux, stpAux];
-  simp [HAux, H]
+  simp [HAux, h]
 
 section rew
 
@@ -348,28 +360,28 @@ lemma Reach.provable {x : X.extendRoot.World} (hx : x ≠ none) (hu : x ≠ some
 lemma Reach.models_sigma (hθσ : V ⊧/![] σ ↔ ∃ w, V ⊧/![w] θ.val)
     (h : Reach T X σ θ V (some X.u)) : V ⊧/![] σ := by
   rcases h.cases_tail with h | ⟨_, _, hs⟩;
-  · simp at h;
+  · cases h;
   · obtain ⟨w, hw⟩ := hs.exists_wit;
     exact hθσ.mpr ⟨w, by simpa [Wit] using hw⟩;
 
 lemma Reach.disjunction (hθσ : V ⊧/![] σ ↔ ∃ w, V ⊧/![w] θ.val) {x : X.extendRoot.World}
     (h : Reach T X σ θ V x) :
     T.ModifiedSolovay X σ θ V x ∨ ∃ y, x ≺ y ∧ T.ModifiedSolovay X σ θ V y := by
-  induction x using WellFounded.induction IsConverseWellFounded.cwf (r := flip X.extendRoot.Rel)
-    with | h x ih =>
-  by_cases hx : T.ModifiedSolovay X σ θ V x;
-  · left;
-    exact hx;
-  right;
-  obtain ⟨z, hz, hzt⟩ : ∃ z ∈ Next X x, Trig T X σ θ V z := by
-    simpa [Theory.ModifiedSolovay, h] using hx;
-  obtain ⟨⟨y, hy⟩, hy₁, hy₂⟩ := exists_witnessFirst (ι := {z // z ∈ Next X x})
-    (fun z ↦ Wit T X σ θ V z.1) (fun z ↦ wit_definable z.1) (fun z ↦ ord X z.1)
-    ⟨⟨z, hz⟩, (trig_iff_exists_wit hθσ).mp hzt⟩;
-  have hs : Step T X σ θ V x y := ⟨hy, fun z hz ↦ hy₁ ⟨z, hz⟩, fun z hz ↦ hy₂ ⟨z, hz⟩⟩;
-  rcases ih y (rel_of_mem_next hy) (h.tail hs) with hy' | ⟨w, hyw, hw⟩;
-  · exact ⟨y, rel_of_mem_next hy, hy'⟩;
-  · exact ⟨w, IsTrans.trans _ _ _ (rel_of_mem_next hy) hyw, hw⟩;
+  induction x using (IsConverseWellFounded.cwf (rel := X.extendRoot.Rel)).induction with
+  | h x ih =>
+    by_cases hx : T.ModifiedSolovay X σ θ V x;
+    · left;
+      exact hx;
+    right;
+    obtain ⟨z, hz, hzt⟩ : ∃ z ∈ Next X x, Trig T X σ θ V z := by
+      simpa [Theory.ModifiedSolovay, h] using hx;
+    obtain ⟨⟨y, hy⟩, hy₁, hy₂⟩ := exists_witnessFirst (ι := {z // z ∈ Next X x})
+      (fun z ↦ Wit T X σ θ V z.1) (fun z ↦ wit_definable z.1) (fun z ↦ ord X z.1)
+      ⟨⟨z, hz⟩, (trig_iff_exists_wit hθσ).mp hzt⟩;
+    have hs : Step T X σ θ V x y := ⟨hy, fun z hz ↦ hy₁ ⟨z, hz⟩, fun z hz ↦ hy₂ ⟨z, hz⟩⟩;
+    rcases ih y (rel_of_mem_next hy) (h.tail hs) with hy' | ⟨w, hyw, hw⟩;
+    · exact ⟨y, rel_of_mem_next hy, hy'⟩;
+    · exact ⟨w, IsTrans.trans _ _ _ (rel_of_mem_next hy) hyw, hw⟩;
 
 lemma ModifiedSolovay.exclusive (hθσ : V ⊧/![] σ ↔ ∃ w, V ⊧/![w] θ.val)
     {x y : X.extendRoot.World} (ne : x ≠ y) :
