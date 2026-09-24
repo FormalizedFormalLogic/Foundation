@@ -85,6 +85,18 @@ abbrev _root_.FFL.FirstOrder.ArithmeticTheory.provabilityLogic (T : ArithmeticTh
     Logic α :=
   T.provabilityLogicRelativeTo T
 
+section
+
+variable {T U : ArithmeticTheory} [T.Δ₁] {A B : Formula α}
+
+lemma provabilityLogic_mdp
+    (h₁ : (A 🡒 B) ∈ (T.provabilityLogicRelativeTo U : Logic α))
+    (h₂ : A ∈ (T.provabilityLogicRelativeTo U : Logic α)) :
+    B ∈ (T.provabilityLogicRelativeTo U : Logic α) :=
+  fun f ↦ (h₁ f) ⨀ (h₂ f)
+
+end
+
 end FFL.ProvabilityLogic
 
 end
