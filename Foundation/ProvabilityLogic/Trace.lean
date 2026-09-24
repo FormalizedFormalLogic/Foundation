@@ -29,7 +29,7 @@ universe u
 
 lemma Kripke.Model.forces_TBB_iff {κ α : Type*} [Nonempty κ] {M : Model κ α} [Fintype M.World]
     [M.IsGL] {x : M.World} {n : ℕ} : x ⊩[M] TBB n ↔ x.rank ≠ n := by
-  sorry
+  grind [TBB, forces_boxItr_bot_iff];
 
 namespace Formula
 

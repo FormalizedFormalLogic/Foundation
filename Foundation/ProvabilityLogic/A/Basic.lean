@@ -75,7 +75,19 @@ theorem provability_TFAE [DecidableEq α] : [
       (M.graft a ℕ).root ⊩[(M.graft a ℕ).toModel] A,
     ∃ n : ℕ, 𝐆𝐋 ⊢ ∼□^[n]⊥ 🡒 A
   ].TFAE := by
-  sorry
+  tfae_have 1 → 3 := fun h _ _ M _ a ↦ sound h _ (graft.not_forces_boxItr_bot (a := a));
+  tfae_have 3 → 4 := fun h _ _ M _ a ↦ h M a;
+  tfae_have 4 → 2 := fun h ↦ A.Gentzen.complete fun M _ a _ ↦ ⟨A, by simp, h M a⟩;
+  tfae_have 2 → 5 := by
+    intro h;
+    obtain ⟨n, hn⟩ := (A.Gentzen.TFAE.out 1 4).mp h;
+    use n;
+    apply GL.iff_valid_finite.mpr;
+    intro _ _ M _ x hx;
+    obtain ⟨D, hD, hxD⟩ := GL.Gentzen.sound M hn x (by simp);
+    grind;
+  tfae_have 5 → 1 := fun ⟨_, h⟩ ↦ of_GL h ⨀ neg_boxItr_bot;
+  tfae_finish;
 
 lemma iff_provable_GL : 𝐀 ⊢ A ↔ ∃ n : ℕ, 𝐆𝐋 ⊢ ∼□^[n]⊥ 🡒 A := by
   classical
