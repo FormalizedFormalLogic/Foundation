@@ -213,7 +213,15 @@ variable {X : Set ℕ} {hX : Xᶜ.Finite}
   simp [trace, Formula.trace_lift];
 
 theorem mem_iff : A ∈ (𝐆𝐋β⁻ X hX : Logic α) ↔ A.trace ⊆ X := by
-  sorry
+  constructor;
+  · exact fun h ↦ trace_eq (hX := hX) ▸ trace_subset_of_mem h;
+  · intro h;
+    have : 𝐆𝐋 ⊢ (LetterlessFormula.betaMinus X hX).lift 🡒 A :=
+      Formula.GL_imp_of_height_not_mem_trace fun M _ _ hM hn ↦ by
+        have : rank (M := M.toModel) M.root ∉ X := by
+          simpa using LetterlessFormula.forces_lift_iff.mp hM;
+        exact this (h hn);
+    exact sumQuasiNormal.mdp (.mem₁ this) (.mem₂ rfl);
 
 /-- - [AB05, Lemma 49] -/
 lemma bot_mem_univ {hX : (Set.univ : Set ℕ)ᶜ.Finite} : (⊥ : Formula α) ∈ 𝐆𝐋β⁻ Set.univ hX := by
