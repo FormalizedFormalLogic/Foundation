@@ -103,7 +103,16 @@ lemma iff_forces_graft : 𝐀 ⊢ A ↔
 lemma exists_countermodel [DecidableEq α] (h : 𝐀 ⊬ A) :
     ∃ (κ : Type u) (_ : Nonempty κ) (M : RootedModel κ α) (_ : M.IsFiniteGL) (u : M.World),
       M.root ⊮[M.toModel] A ∧ M.root ≺ u ∧ u.IsReflexiveOf A.subfmls.prebox := by
-  sorry
+  have h : 𝐆𝐋 ⊬ ∼□^[A.subfmls.prebox.card + 1]⊥ 🡒 A := fun h' ↦ h (iff_provable_GL.mpr ⟨_, h'⟩);
+  have := GL.iff_root_forces.not.mp h;
+  push Not at this;
+  obtain ⟨κ, _, M, _, hM⟩ := this;
+  obtain ⟨h₁, h₂⟩ := not_forces_imp.mp hM;
+  have : Fintype M.World := Fintype.ofFinite _;
+  have : ¬M.height < _ := fun h ↦ h₁ (forces_boxItr_bot_iff.mpr h);
+  obtain ⟨u, Ru, hu⟩ := exists_isReflexiveOf_of_card_lt_rank (M := M.toModel) (x := M.root)
+    (X := A.subfmls.prebox) (not_lt.mp this);
+  exact ⟨κ, inferInstance, M, inferInstance, u, h₂, Ru, hu⟩;
 
 lemma subset_D : (𝐀 : Logic α) ⊆ 𝐃 := by
   sorry
