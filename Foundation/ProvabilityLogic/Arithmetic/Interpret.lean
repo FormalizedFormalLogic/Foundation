@@ -53,13 +53,7 @@ lemma interpret_subst {β : Type*} {s : Substitution β α} {A : Formula β} :
 
 lemma interpret_congr_atoms [DecidableEq α] {f₁ f₂ : Realization α L}
     (h : ∀ a ∈ A.atoms, f₁.val a = f₂.val a) : A.interpret f₁ 𝔅 = A.interpret f₂ 𝔅 := by
-  induction A with
-  | atom a => exact h a (by simp);
-  | falsum => rfl;
-  | imp A B ihA ihB =>
-    simp only [interpret];
-    rw [ihA fun a ha ↦ h a (by simp [ha]), ihB fun a ha ↦ h a (by simp [ha])];
-  | box A ih => simp only [interpret]; rw [ih fun a ha ↦ h a (by simpa using ha)];
+  induction A <;> simp_all [interpret];
 
 end Formula
 
@@ -71,9 +65,7 @@ lemma interpret_lift :
     (A.lift : Formula α).interpret f 𝔅 = A.interpret (⟨Empty.elim⟩ : Realization Empty L) 𝔅 := by
   induction A with
   | atom a => exact a.elim;
-  | falsum => rfl;
-  | imp A B ihA ihB => simp_all [lift, Formula.interpret];
-  | box A ih => simp_all [lift, Formula.interpret];
+  | _ => simp_all [lift, interpret];
 
 end LetterlessFormula
 
@@ -93,12 +85,12 @@ lemma provabilityLogic_mdp
     (h₁ : (A 🡒 B) ∈ (T.provabilityLogicRelativeTo U : Logic α))
     (h₂ : A ∈ (T.provabilityLogicRelativeTo U : Logic α)) :
     B ∈ (T.provabilityLogicRelativeTo U : Logic α) :=
-  fun f ↦ (h₁ f) ⨀ (h₂ f)
+  fun f ↦ h₁ f ⨀ h₂ f
 
 lemma provabilityLogic_subst {s : Substitution α α}
     (h : A ∈ (T.provabilityLogicRelativeTo U : Logic α)) :
     (A⟦s⟧) ∈ (T.provabilityLogicRelativeTo U : Logic α) :=
-  fun f ↦ by simpa [Formula.interpret_subst] using h ⟨fun a ↦ f T (s a)⟩
+  fun f ↦ by simpa [interpret_subst] using h ⟨fun a ↦ f T (s a)⟩
 
 end
 
