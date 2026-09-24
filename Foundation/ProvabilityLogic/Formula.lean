@@ -135,6 +135,15 @@ def ModalizedIn (p : α) : Formula α → Prop
 @[simp, grind =]
 lemma complexity_box : (□A).complexity = A.complexity + 1 := rfl
 
+/-- `A` with every atom outside the scope of `□` replaced by `⊥`. -/
+def modalize : Formula α → Formula α
+  | #_    => ⊥
+  | ⊥     => ⊥
+  | A 🡒 B => A.modalize 🡒 B.modalize
+  | □A    => □A
+
+lemma modalizedIn_modalize {p : α} : A.modalize.ModalizedIn p := by induction A <;> trivial;
+
 variable [DecidableEq α]
 
 @[grind]
@@ -152,6 +161,9 @@ def atoms : Formula α → Finset α
 @[simp, grind =] lemma atoms_iff : (A 🡘 B).atoms = A.atoms ∪ B.atoms := by
   simp [atoms, Finset.union_comm];
 @[simp, grind =] lemma atoms_box : (□A).atoms = A.atoms := rfl
+
+lemma atoms_modalize_subset : A.modalize.atoms ⊆ A.atoms := by
+  induction A <;> simp_all [modalize, Finset.union_subset_union];
 
 @[grind]
 def subfmls : Formula α → FormulaFinset α

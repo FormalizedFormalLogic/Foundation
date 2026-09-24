@@ -115,6 +115,23 @@ lemma forces_box_of_root (h : Sum.inr ⊤ ⊩[(M.toFreeTail V).toModel] □A)
     (x : (M.toFreeTail V).World) : x ⊩[(M.toFreeTail V).toModel] □A :=
   fun y Rxy ↦ h y ((M.toFreeTail V).root_rel y fun hy ↦ by subst hy; exact not_rel_root Rxy)
 
+/-- A point of the chain forces `□A` iff the root of `M` does, if the finite points of the chain
+agree with the root of `M` on `A`, and the root of `M` forces `□A 🡒 A`. -/
+lemma forces_inr_box_iff {M : RootedModel κ α} {V : ℕ∞ → α → Prop}
+    (h : ∀ n : ℕ, Sum.inr (n : ℕ∞) ⊩[(M.toModel.toFreeTail V).toModel] A ↔ M.root ⊩[M.toModel] A)
+    (hroot : M.root ⊩[M.toModel] □A 🡒 A) (i : ℕ∞) :
+    Sum.inr i ⊩[(M.toModel.toFreeTail V).toModel] □A ↔ M.root ⊩[M.toModel] □A := by
+  constructor;
+  · intro h x Rrx;
+    exact forces_inl.mp (h (.inl x) trivial);
+  · rintro hA (x | j) Rix;
+    · apply forces_inl.mpr;
+      by_cases hx : x = M.root;
+      · exact hx ▸ hroot hA;
+      · exact hA x (M.root_rel x hx);
+    · obtain ⟨m, rfl⟩ := ENat.ne_top_iff_exists.mp (ne_top_of_lt (rel_inr_inr.mp Rix));
+      exact (h m).mpr (hroot hA);
+
 /-- If the finite points of the chain carry the valuation of the root of `M`, and the root of
 `M` forces `□B 🡒 B` for all `□B ∈ X`, then they agree with the root of `M` on `X`. -/
 lemma forces_inr_iff [DecidableEq α] {M : RootedModel κ α} {V : ℕ∞ → α → Prop}
@@ -127,18 +144,7 @@ lemma forces_inr_iff [DecidableEq α] {M : RootedModel κ α} {V : ℕ∞ → α
   | falsum => rfl;
   | imp B C ihB ihC =>
     exact imp_congr (ihB (hX _ hA (by grind)) n) (ihC (hX _ hA (by grind)) n);
-  | box B ih =>
-    have hB : B ∈ X := hX _ hA (by grind);
-    constructor;
-    · intro h x Rrx;
-      exact forces_inl.mp (h (.inl x) trivial);
-    · rintro h (x | j) Rnx;
-      · apply forces_inl.mpr;
-        by_cases hx : x = M.root;
-        · exact hx ▸ hroot B hA h;
-        · exact h x (M.root_rel x hx);
-      · obtain ⟨m, rfl⟩ := ENat.ne_top_iff_exists.mp (ne_top_of_lt (rel_inr_inr.mp Rnx));
-        exact (ih hB m).mpr (hroot B hA h);
+  | box B ih => exact forces_inr_box_iff (ih (hX _ hA (by grind))) (hroot B hA) n;
 
 end toFreeTail
 
@@ -174,18 +180,7 @@ lemma forces_inr_boxdotTranslate_iff (n : ℕ) :
   | imp B C ihB ihC => exact imp_congr (ihB n) (ihC n);
   | box B ih =>
     simp only [Formula.boxdotTranslate_box, forces_boxdot, ih n];
-    apply and_congr_right;
-    intro hB;
-    constructor;
-    · intro h x _;
-      exact forces_inl.mp (h (.inl x) trivial);
-    · rintro h (x | j) Rnx;
-      · apply forces_inl.mpr;
-        by_cases hx : x = M.root;
-        · exact hx ▸ hB;
-        · exact h x (M.root_rel x hx);
-      · obtain ⟨m, rfl⟩ := WithTop.ne_top_iff_exists.mp (ne_top_of_lt (rel_inr_inr.mp Rnx));
-        exact (ih m).mpr hB;
+    exact and_congr_right fun hB ↦ forces_inr_box_iff ih (fun _ ↦ hB) n;
 
 end toTail
 
