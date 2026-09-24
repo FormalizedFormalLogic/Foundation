@@ -57,7 +57,8 @@ end
 
 /-! ### From the sequent calculus -/
 
-lemma of_gentzen [DecidableEq α] {S : Sequent α} (h : ⊢ᴳ[Grz] S) : 𝐆𝐫𝐳 ⊢ S.ant.conj 🡒 S.suc.disj := by
+lemma of_gentzen [DecidableEq α] {S : Sequent α} (h : ⊢ᴳ[Grz] S) :
+    𝐆𝐫𝐳 ⊢ S.ant.conj 🡒 S.suc.disj := by
   induction h with
   | axm A => simp;
   | botL => simp only [Finset.conj_singleton]; exact efq;

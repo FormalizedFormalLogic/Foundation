@@ -86,7 +86,8 @@ def ofLE {φ : Formula α} (h : H₁.schema ⊆ H₂.schema) : Hilbert.Proof H�
 lemma of_le (h : H₁.schema ⊆ H₂.schema) : H₁ ⊢ φ → H₂ ⊢ φ := fun ⟨hφ⟩ => ⟨ofLE h hφ⟩
 
 @[grind <=]
-lemma weakerThan_of_le (h : H₁.schema ⊆ H₂.schema) : H₁ ⪯ H₂ := Entailment.weakerThan_iff.mpr <| of_le h
+lemma weakerThan_of_le (h : H₁.schema ⊆ H₂.schema) : H₁ ⪯ H₂ :=
+  Entailment.weakerThan_iff.mpr <| of_le h
 
 def Subst {H : Hilbert α} {φ : Formula α} (s) : Hilbert.Proof H φ → Hilbert.Proof H (φ⟦s⟧)
   | axm h₁ => axm <| H.schema_closed φ h₁ s
@@ -120,7 +121,8 @@ def ofProofSchema {φ : Formula α} (h : ∀ {φ}, φ ∈ H₁.schema → Hilber
 lemma of_proof_schema (h : H₂ ⊢* H₁.schema) : H₁ ⊢ φ → H₂ ⊢ φ :=
   fun ⟨hφ⟩ => ⟨ofProofSchema (fun hφ => (h hφ).some) hφ⟩
 
-lemma weakerThan_of_provable_schema (h : H₂ ⊢* H₁.schema) : H₁ ⪯ H₂ := Entailment.weakerThan_iff.mpr <| of_proof_schema h
+lemma weakerThan_of_provable_schema (h : H₂ ⊢* H₁.schema) : H₁ ⪯ H₂ :=
+  Entailment.weakerThan_iff.mpr <| of_proof_schema h
 
 section
 
@@ -130,7 +132,7 @@ instance : Entailment.Int (Hilbert.Int : Hilbert α) where
 instance : Entailment.HasAxiomEFQ (Hilbert.Cl : Hilbert α) := ⟨⟨axm <| by tauto⟩⟩
 instance : Entailment.HasAxiomLEM (Hilbert.Cl : Hilbert α) := ⟨⟨axm <| by tauto⟩⟩
 instance : Entailment.Int (Hilbert.Cl : Hilbert α) where
-instance [DecidableEq α] : Entailment.Cl (Hilbert.Cl : Hilbert α) where
+instance : Entailment.Cl (Hilbert.Cl : Hilbert α) where
 
 end
 
@@ -156,7 +158,7 @@ end Hilbert
 
 
 protected abbrev Int : Logic α := Hilbert.Int.logic
-protected abbrev Cl  : Logic α := Hilbert.Cl.logic
+protected abbrev Cl : Logic α := Hilbert.Cl.logic
 
 end FFL.Propositional
 

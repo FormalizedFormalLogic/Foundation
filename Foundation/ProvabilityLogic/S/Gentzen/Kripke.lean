@@ -96,7 +96,8 @@ lemma truthlemma_freeTail {BS : Sequent α} [Fact (⊬ᴳ[GL] BS)] {t : GL.Satur
     (hbox : ∀ {A}, □A ∈ t.ant → A ∈ t.ant) {V : ℕ∞ → α → Prop}
     (hV : ∀ n : ℕ, V n = fun a ↦ #a ∈ t.ant) (A : Formula α) (n : ℕ) :
     let N := ((GL.countermodel BS).cone t).toModel.toFreeTail V;
-    (A ∈ t.ant → Sum.inr (n : ℕ∞) ⊩[N.toModel] A) ∧ (A ∈ t.suc → ¬Sum.inr (n : ℕ∞) ⊩[N.toModel] A) := by
+    (A ∈ t.ant → Sum.inr (n : ℕ∞) ⊩[N.toModel] A) ∧
+      (A ∈ t.suc → ¬Sum.inr (n : ℕ∞) ⊩[N.toModel] A) := by
   induction A generalizing n with
   | atom a =>
     have := iff_of_eq (congrFun (hV n) a);

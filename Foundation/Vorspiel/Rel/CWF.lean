@@ -97,6 +97,7 @@ lemma lt_cwfHeight {b : α} {n : ℕ} {a : α} (hb : R a b) (h : n ≤ cwfHeight
 
 lemma exists_cwfHeight_eq_succ {a : α} (h : cwfHeight R a ≠ 0) :
     ∃ b, R a b ∧ cwfHeight R a = cwfHeight R b + 1 := by
+  classical
   have hne : ({x : α | R a x} : Finset α).Nonempty := by
     by_contra hc;
     apply h;
@@ -107,13 +108,14 @@ lemma exists_cwfHeight_eq_succ {a : α} (h : cwfHeight R a ≠ 0) :
 
 lemma exists_cwfHeight_eq_of_lt [IsTrans α R] {a : α} {n : ℕ} (h : n < cwfHeight R a) :
     ∃ b, R a b ∧ cwfHeight R b = n := by
-  induction a using WellFounded.induction IsConverseWellFounded.cwf (r := flip R) generalizing n with
+  induction a using WellFounded.induction IsConverseWellFounded.cwf (r := flip R)
+    generalizing n with
   | h a ih =>
     obtain ⟨b, hab, e⟩ := exists_cwfHeight_eq_succ (R := R) (a := a) (by omega);
     rcases Nat.lt_or_ge n (cwfHeight R b) with hn | hn;
-    . obtain ⟨c, hbc, rfl⟩ := ih b hab hn;
+    · obtain ⟨c, hbc, rfl⟩ := ih b hab hn;
       exact ⟨c, IsTrans.trans _ _ _ hab hbc, rfl⟩;
-    . exact ⟨b, hab, by omega⟩;
+    · exact ⟨b, hab, by omega⟩;
 
 end cwfHeight
 

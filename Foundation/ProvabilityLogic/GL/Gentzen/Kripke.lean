@@ -55,7 +55,8 @@ theorem sound {κ : Type*} [Nonempty κ] (M : Kripke.Model κ α) [M.IsGL] (h : 
 @[simp, grind .]
 lemma not_empty : ⊬ᴳ[GL] (∅ ⟹ ∅ : Sequent α) := by
   intro h;
-  simpa [Model.ValidateSequent, Model.World.ForcesSequent] using sound (Kripke.Model.pointModel (α := α) fun _ ↦ False) h 0;
+  simpa [Model.ValidateSequent, Model.World.ForcesSequent]
+    using sound (Kripke.Model.pointModel (α := α) fun _ ↦ False) h 0;
 
 end GL.Gentzen
 
@@ -142,7 +143,8 @@ lemma truthlemma : (A ∈ x.ant → x ⊩[countermodel BS] A) ∧ (A ∈ x.suc �
     · intro h;
       apply not_forces_box.mpr;
       have h₀ : ⊬ᴳ[GL] insert (□A) (x.ant.prebox ∪ x.ant.prebox.box) ⟹ {A} := fun hp ↦
-        x.unprovable <| Gentzen.wk (Gentzen.boxGL hp) FormulaFinset.box_prebox_subset (by simpa using h);
+        x.unprovable <|
+          Gentzen.wk (Gentzen.boxGL hp) FormulaFinset.box_prebox_subset (by simpa using h);
       have hS₀ : (insert (□A) (x.ant.prebox ∪ x.ant.prebox.box) ⟹ {A}).ant ∪
           (insert (□A) (x.ant.prebox ∪ x.ant.prebox.box) ⟹ {A}).suc ⊆ BS.subfmls := by
         have hx := x.subset_subfmls;
@@ -163,7 +165,8 @@ lemma truthlemma : (A ∈ x.ant → x ⊩[countermodel BS] A) ∧ (A ∈ x.suc �
         exact FormulaFinset.mem_prebox.mpr <| hy.ant <|
           Finset.mem_insert_of_mem <| Finset.mem_union_right _ <| Finset.mem_image_of_mem _ hB;
       · intro hsub;
-        have : A ∈ y.ant.prebox := FormulaFinset.mem_prebox.mpr <| hy.ant <| Finset.mem_insert_self _ _;
+        have : A ∈ y.ant.prebox :=
+          FormulaFinset.mem_prebox.mpr <| hy.ant <| Finset.mem_insert_self _ _;
         exact not_mem_both (S := x) ⟨FormulaFinset.mem_prebox.mp (hsub this), h⟩;
       · intro B hB;
         exact hy.ant <| Finset.mem_insert_of_mem <| Finset.mem_union_left _ hB;

@@ -111,7 +111,8 @@ theorem iff_provable_gentzen : 𝐆𝐋 ⊢ A ↔ ⊢ᴳ[GL] ∅ ⟹ {A} := by
     have : 𝐆𝐋 ⊢ (∅ : FormulaFinset α).conj := by simp [Finset.conj];
     simpa using of_gentzen h ⨀ this;
 
-theorem iff_valid_finite : 𝐆𝐋 ⊢ A ↔ ∀ {κ : Type u} [Nonempty κ] (M : Model κ α), [M.IsFiniteGL] → M ⊧ A := by
+theorem iff_valid_finite :
+    𝐆𝐋 ⊢ A ↔ ∀ {κ : Type u} [Nonempty κ] (M : Model κ α), [M.IsFiniteGL] → M ⊧ A := by
   constructor;
   · intro h _ _ M _;
     exact sound M h;

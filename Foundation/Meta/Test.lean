@@ -7,8 +7,7 @@ namespace FFL
 
 section
 
-variable {F : Type*} [DecidableEq F] {S : Type*} [LogicalConnective F] [LogicalNeutral F]
-  [Entailment S F]
+variable {F : Type*} {S : Type*} [LogicalConnective F] [LogicalNeutral F] [Entailment S F]
 
 variable {𝓢 𝓣 : S} [Entailment.Cl 𝓢] {φ ψ χ ξ p q r s : F}
 

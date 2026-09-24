@@ -28,7 +28,8 @@ variable {α : Type*} {X : LetterlessFormulaSet}
 
 theorem sumQuasiNormal_eq_GLAlpha (h : ∀ A ∈ X, (trace A).Finite) :
     ((𝐆𝐋 : Logic α) +ᴸ X.lift) = 𝐆𝐋α X.trace := by
-  rw [GLAlpha.eq_sumQuasiNormal_lift, sumQuasiNormal_eq_iff (.inr ⟨h, by rintro _ ⟨n, -, rfl⟩; simp⟩)];
+  rw [GLAlpha.eq_sumQuasiNormal_lift,
+    sumQuasiNormal_eq_iff (.inr ⟨h, by rintro _ ⟨n, -, rfl⟩; simp⟩)];
   simp [LetterlessFormulaSet.trace];
 
 theorem sumQuasiNormal_eq_GLBetaMinus (h : ∃ B ∈ X, (spectrum B).Finite) :
