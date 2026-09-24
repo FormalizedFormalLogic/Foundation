@@ -18,20 +18,18 @@ protected abbrev ElimContra := (∼ψ 🡒 ∼φ) 🡒 (φ 🡒 ψ)
 
 end FFL.Axioms
 
-
 namespace FFL.Entailment
 
 variable {S F : Type*} [LogicalConnective F] [Entailment S F]
 variable {𝓢 : S} {φ ψ χ : F}
 
 class HasAxiomDNE (𝓢 : S)  where
-  dne! {φ : F} : 𝓢 ⊢! Axioms.DNE φ
-export HasAxiomDNE (dne!)
+  dne {φ : F} : 𝓢 ⊢ Axioms.DNE φ
+export HasAxiomDNE (dne)
 
-@[simp] lemma dne [HasAxiomDNE 𝓢] : 𝓢 ⊢ ∼∼φ 🡒 φ  := ⟨dne!⟩
+attribute [simp] dne
 
-def of_NN! [ModusPonens 𝓢] [HasAxiomDNE 𝓢] (b : 𝓢 ⊢! ∼∼φ) : 𝓢 ⊢! φ := dne! ⨀ b
-@[grind ⇒] lemma of_NN [ModusPonens 𝓢] [HasAxiomDNE 𝓢] (h : 𝓢 ⊢ ∼∼φ) : 𝓢 ⊢ φ := ⟨of_NN! h.some⟩
+@[grind ⇒] lemma of_NN [ModusPonens 𝓢] [HasAxiomDNE 𝓢] (b : 𝓢 ⊢ ∼∼φ) : 𝓢 ⊢ φ := dne ⨀ b
 
 section
 
@@ -39,26 +37,23 @@ variable [LogicalNeutral F] [Entailment.Minimal 𝓢]
 
 namespace FiniteContext
 
-instance [Entailment.HasAxiomDNE 𝓢] (Γ : FiniteContext F 𝓢) : HasAxiomDNE Γ := ⟨of! dne!⟩
+instance [Entailment.HasAxiomDNE 𝓢] (Γ : FiniteContext F 𝓢) : HasAxiomDNE Γ := ⟨of dne⟩
 
 end FiniteContext
 
-
 namespace Context
 
-instance [Entailment.HasAxiomDNE 𝓢] (Γ : Context F 𝓢) : HasAxiomDNE Γ := ⟨of! dne!⟩
+instance [Entailment.HasAxiomDNE 𝓢] (Γ : Context F 𝓢) : HasAxiomDNE Γ := ⟨of dne⟩
 
 end Context
 
 end
-
 
 class HasAxiomLEM (𝓢 : S)  where
-  lem! {φ : F} : 𝓢 ⊢! Axioms.LEM φ
-export HasAxiomLEM (lem!)
+  lem {φ : F} : 𝓢 ⊢ Axioms.LEM φ
+export HasAxiomLEM (lem)
 
-@[simp] lemma lem [HasAxiomLEM 𝓢] : 𝓢 ⊢ φ ⋎ ∼φ := ⟨lem!⟩
-
+attribute [simp] lem
 
 section
 
@@ -66,26 +61,23 @@ variable [LogicalNeutral F] [Entailment.Minimal 𝓢]
 
 namespace FiniteContext
 
-instance [Entailment.HasAxiomLEM 𝓢] (Γ : FiniteContext F 𝓢) : HasAxiomLEM Γ := ⟨of! lem!⟩
+instance [Entailment.HasAxiomLEM 𝓢] (Γ : FiniteContext F 𝓢) : HasAxiomLEM Γ := ⟨of lem⟩
 
 end FiniteContext
 
-
 namespace Context
 
-instance [Entailment.HasAxiomLEM 𝓢] (Γ : Context F 𝓢) : HasAxiomLEM Γ := ⟨of! lem!⟩
+instance [Entailment.HasAxiomLEM 𝓢] (Γ : Context F 𝓢) : HasAxiomLEM Γ := ⟨of lem⟩
 
 end Context
 
 end
-
 
 class HasAxiomPeirce (𝓢 : S)  where
-  peirce! {φ ψ : F} : 𝓢 ⊢! Axioms.Peirce φ ψ
-export HasAxiomPeirce (peirce!)
+  peirce {φ ψ : F} : 𝓢 ⊢ Axioms.Peirce φ ψ
+export HasAxiomPeirce (peirce)
 
-@[simp] lemma peirce [LogicalNeutral F] [HasAxiomPeirce 𝓢] : 𝓢 ⊢ ((φ 🡒 ψ) 🡒 φ) 🡒 φ := ⟨peirce!⟩
-
+attribute [simp] peirce
 
 section
 
@@ -93,26 +85,23 @@ variable [LogicalNeutral F] [Entailment.Minimal 𝓢]
 
 namespace FiniteContext
 
-instance [Entailment.HasAxiomPeirce 𝓢] (Γ : FiniteContext F 𝓢) : HasAxiomPeirce Γ := ⟨of! peirce!⟩
+instance [Entailment.HasAxiomPeirce 𝓢] (Γ : FiniteContext F 𝓢) : HasAxiomPeirce Γ := ⟨of peirce⟩
 
 end FiniteContext
 
-
 namespace Context
 
-instance [Entailment.HasAxiomPeirce 𝓢] (Γ : Context F 𝓢) : HasAxiomPeirce Γ := ⟨of! peirce!⟩
+instance [Entailment.HasAxiomPeirce 𝓢] (Γ : Context F 𝓢) : HasAxiomPeirce Γ := ⟨of peirce⟩
 
 end Context
 
 end
 
-
 class HasAxiomElimContra (𝓢 : S)  where
-  elimContra! {φ ψ : F} : 𝓢 ⊢! Axioms.ElimContra φ ψ
-export HasAxiomElimContra (elimContra!)
+  elim_contra {φ ψ : F} : 𝓢 ⊢ Axioms.ElimContra φ ψ
+export HasAxiomElimContra (elim_contra)
 
-@[simp] lemma elim_contra [HasAxiomElimContra 𝓢] : 𝓢 ⊢ (∼ψ 🡒 ∼φ) 🡒 (φ 🡒 ψ)  := ⟨elimContra!⟩
-
+attribute [simp] elim_contra
 
 variable {F : Type*} [LogicalConnective F] [LogicalNeutral F] [DecidableEq F]
          {S : Type*} [Entailment S F]
@@ -132,99 +121,74 @@ namespace Context
 instance (Γ : Context F 𝓢) : Entailment.Cl Γ where
 end Context
 
-
 open NegationEquiv
 open FiniteContext
 open List
 
-def dn! : 𝓢 ⊢! φ 🡘 ∼∼φ := E!_intro dni! dne!
-@[simp] lemma dn : 𝓢 ⊢ φ 🡘 ∼∼φ := ⟨dn!⟩
+@[simp] lemma dn : 𝓢 ⊢ φ 🡘 ∼∼φ := E_intro dni dne
 
-def A!_of_ANNNN! (d : 𝓢 ⊢! ∼∼φ ⋎ ∼∼ψ) : 𝓢 ⊢! φ ⋎ ψ := of_C!_of_C!_of_A! (C!_trans dne! or₁!) (C!_trans dne! or₂!) d
-omit [DecidableEq F] in lemma A_of_ANNNN (d : 𝓢 ⊢ ∼∼φ ⋎ ∼∼ψ) : 𝓢 ⊢ φ ⋎ ψ := ⟨A!_of_ANNNN! d.some⟩
+omit [DecidableEq F] in lemma A_of_ANNNN (d : 𝓢 ⊢ ∼∼φ ⋎ ∼∼ψ) : 𝓢 ⊢ φ ⋎ ψ := of_C_of_C_of_A (C_trans dne or₁) (C_trans dne or₂) d
 
-def CN!_of_CN!_left (b : 𝓢 ⊢! ∼φ 🡒 ψ) : 𝓢 ⊢! ∼ψ 🡒 φ := C!_trans (contra! b) dne!
-lemma CN_of_CN_left (b : 𝓢 ⊢ ∼φ 🡒 ψ) : 𝓢 ⊢ ∼ψ 🡒 φ := ⟨CN!_of_CN!_left b.some⟩
+lemma CN_of_CN_left (b : 𝓢 ⊢ ∼φ 🡒 ψ) : 𝓢 ⊢ ∼ψ 🡒 φ := C_trans (contra b) dne
 
-def CCNCN'! : 𝓢 ⊢! (∼φ 🡒 ψ) 🡒 (∼ψ 🡒 φ) := deduct'! $ CN!_of_CN!_left FiniteContext.id!
-@[simp] lemma CCNCN' : 𝓢 ⊢ (∼φ 🡒 ψ) 🡒 (∼ψ 🡒 φ) := ⟨CCNCN'!⟩
+@[simp] lemma CCNCN' : 𝓢 ⊢ (∼φ 🡒 ψ) 🡒 (∼ψ 🡒 φ) := deduct' $ CN_of_CN_left FiniteContext.id
 
+lemma C_of_CNN (b : 𝓢 ⊢ ∼φ 🡒 ∼ψ) : 𝓢 ⊢ ψ 🡒 φ := C_trans dni (CN_of_CN_left b)
 
-def C!_of_CNN! (b : 𝓢 ⊢! ∼φ 🡒 ∼ψ) : 𝓢 ⊢! ψ 🡒 φ := C!_trans dni! (CN!_of_CN!_left b)
-lemma C_of_CNN (b : 𝓢 ⊢ ∼φ 🡒 ∼ψ) : 𝓢 ⊢ ψ 🡒 φ := ⟨C!_of_CNN! b.some⟩
+@[simp] lemma CCNNC : 𝓢 ⊢ (∼φ 🡒 ∼ψ) 🡒 (ψ 🡒 φ) :=  deduct' $ C_of_CNN FiniteContext.id
 
+lemma EN_of_EN_right (h : 𝓢 ⊢ φ 🡘 ∼ψ) : 𝓢 ⊢ ∼φ 🡘 ψ := by
+  apply E_intro;
+  . apply CN_of_CN_left $  K_right h;
+  . apply CN_of_CN_right $  K_left h;
 
-def CCNNC! : 𝓢 ⊢! (∼φ 🡒 ∼ψ) 🡒 (ψ 🡒 φ) :=  deduct'! $ C!_of_CNN! FiniteContext.id!
-@[simp] lemma CCNNC : 𝓢 ⊢ (∼φ 🡒 ∼ψ) 🡒 (ψ 🡒 φ) := ⟨CCNNC!⟩
+lemma EN_of_EN_left (h : 𝓢 ⊢ ∼φ 🡘 ψ) : 𝓢 ⊢ φ 🡘 ∼ψ := E_symm $ EN_of_EN_right $ E_symm h
 
-def EN!_of_EN!_right (h : 𝓢 ⊢! φ 🡘 ∼ψ) : 𝓢 ⊢! ∼φ 🡘 ψ := by
-  apply E!_intro;
-  . apply CN!_of_CN!_left $  K!_right h;
-  . apply CN!_of_CN!_right $  K!_left h;
-lemma EN_of_EN_right (h : 𝓢 ⊢ φ 🡘 ∼ψ) : 𝓢 ⊢ ∼φ 🡘 ψ := ⟨EN!_of_EN!_right h.some⟩
+lemma ECCOO : 𝓢 ⊢ φ 🡘 ((φ 🡒 ⊥) 🡒 ⊥) := E_trans dn ENNCCOO
 
-def EN!_of_EN!_left (h : 𝓢 ⊢! ∼φ 🡘 ψ) : 𝓢 ⊢! φ 🡘 ∼ψ := E!_symm $ EN!_of_EN!_right $ E!_symm h
-lemma EN_of_EN_left (h : 𝓢 ⊢ ∼φ 🡘 ψ) : 𝓢 ⊢ φ 🡘 ∼ψ := ⟨EN!_of_EN!_left h.some⟩
+@[simp] lemma CNKANN : 𝓢 ⊢ ∼(φ ⋏ ψ) 🡒 (∼φ ⋎ ∼ψ) := by
+  apply CN_of_CN_left;
+  apply deduct';
+  exact K_replace (KNN_of_NA $ FiniteContext.id) dne dne;
 
-def ECCOO! : 𝓢 ⊢! φ 🡘 ((φ 🡒 ⊥) 🡒 ⊥) := E!_trans dn! ENNCCOO!
-lemma ECCOO : 𝓢 ⊢ φ 🡘 ((φ 🡒 ⊥) 🡒 ⊥) := ⟨ECCOO!⟩
+lemma ANN_of_NK (b : 𝓢 ⊢ ∼(φ ⋏ ψ)) : 𝓢 ⊢ ∼φ ⋎ ∼ψ := CNKANN ⨀ b
 
-
-def CNKANN! : 𝓢 ⊢! ∼(φ ⋏ ψ) 🡒 (∼φ ⋎ ∼ψ) := by
-  apply CN!_of_CN!_left;
-  apply deduct'!;
-  exact K!_replace (KNN!_of_NA! $ FiniteContext.id!) dne! dne!;
-@[simp] lemma CNKANN : 𝓢 ⊢ ∼(φ ⋏ ψ) 🡒 (∼φ ⋎ ∼ψ) := ⟨CNKANN!⟩
-
-def ANN!_of_NK! (b : 𝓢 ⊢! ∼(φ ⋏ ψ)) : 𝓢 ⊢! ∼φ ⋎ ∼ψ := CNKANN! ⨀ b
-lemma ANN_of_NK (b : 𝓢 ⊢ ∼(φ ⋏ ψ)) : 𝓢 ⊢ ∼φ ⋎ ∼ψ := ⟨ANN!_of_NK! b.some⟩
-
-def AN!_of_C! (d : 𝓢 ⊢! φ 🡒 ψ) : 𝓢 ⊢! ∼φ ⋎ ψ := by
-  apply of_NN!;
-  apply N!_of_CO!;
-  apply deduct'!;
-  have d₁ : [∼(∼φ ⋎ ψ)] ⊢[𝓢]! ∼∼φ ⋏ ∼ψ := KNN!_of_NA! $ FiniteContext.id!;
-  have d₂ : [∼(∼φ ⋎ ψ)] ⊢[𝓢]! ∼φ 🡒 ⊥ := CO!_of_N! $ K!_left d₁;
-  have d₃ : [∼(∼φ ⋎ ψ)] ⊢[𝓢]! ∼φ := (of! (Γ := [∼(∼φ ⋎ ψ)]) $ contra! d) ⨀ (K!_right d₁);
+lemma AN_of_C (d : 𝓢 ⊢ φ 🡒 ψ) : 𝓢 ⊢ ∼φ ⋎ ψ := by
+  apply of_NN;
+  apply N_of_CO;
+  apply deduct';
+  have d₁ : [∼(∼φ ⋎ ψ)] ⊢[𝓢] ∼∼φ ⋏ ∼ψ := KNN_of_NA $ FiniteContext.id;
+  have d₂ : [∼(∼φ ⋎ ψ)] ⊢[𝓢] ∼φ 🡒 ⊥ := CO_of_N $ K_left d₁;
+  have d₃ : [∼(∼φ ⋎ ψ)] ⊢[𝓢] ∼φ := (of (Γ := [∼(∼φ ⋎ ψ)]) $ contra d) ⨀ (K_right d₁);
   exact d₂ ⨀ d₃;
-lemma AN_of_C (d : 𝓢 ⊢ φ 🡒 ψ) : 𝓢 ⊢ ∼φ ⋎ ψ := ⟨AN!_of_C! d.some⟩
 
-def CCAN! : 𝓢 ⊢! (φ 🡒 ψ) 🡒 (∼φ ⋎ ψ) := by
-  apply deduct'!;
-  apply AN!_of_C!;
-  exact FiniteContext.byAxm!;
-lemma CCAN : 𝓢 ⊢ (φ 🡒 ψ) 🡒 ∼φ ⋎ ψ := ⟨CCAN!⟩
-
+lemma CCAN : 𝓢 ⊢ (φ 🡒 ψ) 🡒 (∼φ ⋎ ψ) := by
+  apply deduct';
+  apply AN_of_C;
+  exact FiniteContext.by_axm;
 
 instance : HasAxiomEFQ 𝓢 where
-  efq! {φ} := by
-    apply C!_of_CNN!;
-    exact C!_trans (K!_left negEquiv!) $ C!_trans (C!_swap implyK!) (K!_right negEquiv!);
+  efq {φ} := by
+    apply C_of_CNN;
+    exact C_trans (K_left neg_equiv) $ C_trans (C_swap implyK) (K_right neg_equiv);
 
 instance : Entailment.Int 𝓢 where
 
-
 instance : HasAxiomElimContra 𝓢 where
-  elimContra! {φ ψ} := by
-    apply deduct'!;
-    have : [∼ψ 🡒 ∼φ] ⊢[𝓢]! ∼ψ 🡒 ∼φ := FiniteContext.byAxm!;
-    exact C!_of_CNN! this;
+  elim_contra {φ ψ} := by
+    apply deduct';
+    have : [∼ψ 🡒 ∼φ] ⊢[𝓢] ∼ψ 🡒 ∼φ := FiniteContext.by_axm;
+    exact C_of_CNN this;
 
-instance : HasAxiomLEM 𝓢 := ⟨A!_of_ANNNN! $ AN!_of_C! dni!⟩
-
+instance : HasAxiomLEM 𝓢 := ⟨A_of_ANNNN $ AN_of_C dni⟩
 
 lemma CNC_of_C_of_CN (hpq : 𝓢 ⊢ φ 🡒 ψ) (hpnr : 𝓢 ⊢ φ 🡒 ∼ξ) : 𝓢 ⊢ φ 🡒 ∼(ψ 🡒 ξ) :=
   deduct' $ (contra $ CCAN) ⨀
     (NA_of_KNN $ K_intro (dni' $ of' hpq ⨀ FiniteContext.by_axm) (of' hpnr ⨀ FiniteContext.by_axm))
 
-def of_A!_of_N! (b : 𝓢 ⊢! φ ⋎ ψ) (d : 𝓢 ⊢! ∼φ) : 𝓢 ⊢! ψ := A!_cases (C!_of_CNN! (dhyp! d)) (C!_id) b
+theorem of_A_of_N (b : 𝓢 ⊢ φ ⋎ ψ) (d : 𝓢 ⊢ ∼φ) : 𝓢 ⊢ ψ := A_cases (C_of_CNN (dhyp d)) (C_id) b
 
-theorem of_A_of_N (b : 𝓢 ⊢ φ ⋎ ψ) (d : 𝓢 ⊢ ∼φ) : 𝓢 ⊢ ψ := ⟨of_A!_of_N! b.get d.get⟩
-
-def ECAN! : 𝓢 ⊢! (φ 🡒 ψ) 🡘 (∼φ ⋎ ψ) := E!_intro CCAN! (deduct'! (A!_cases CNC! implyK! byAxm₀!))
-theorem ECAN : 𝓢 ⊢ (φ 🡒 ψ) 🡘 (∼φ ⋎ ψ) := ⟨ECAN!⟩
-
-
+theorem ECAN : 𝓢 ⊢ (φ 🡒 ψ) 🡘 (∼φ ⋎ ψ) := E_intro CCAN (deduct' (A_cases CNC implyK by_axm₀))
 
 section
 
@@ -256,7 +220,6 @@ lemma CNFdisj₂NFconj₂ {Γ : Finset F} : 𝓢 ⊢ ∼(Γ.image (∼·)).disj 
 
 end
 
-
 section consistency
 
 omit [Entailment.Cl 𝓢]
@@ -269,9 +232,9 @@ lemma provable_iff_inconsistent_adjoin {φ : F} :
   · intro h
     apply inconsistent_of_provable_of_unprovable (φ := φ)
     · exact Axiomatized.to_adjoin h
-    · exact Axiomatized.adjoin! _ _
+    · exact Axiomatized.adjoin _ _
   · intro h
-    have : 𝓢 ⊢ ∼φ 🡒 ⊥ := Deduction.of_insert! (h _)
+    have : 𝓢 ⊢ ∼φ 🡒 ⊥ := Deduction.ofInsert (h _)
     refine of_NN <| N_iff_CO.mpr this
 
 lemma unprovable_iff_consistent_adjoin {φ : F} :
@@ -282,17 +245,16 @@ instance deductiveExplosion : Entailment.DeductiveExplosion S := inferInstance
 
 end consistency
 
-
 section
 
 instance : HasAxiomPeirce 𝓢 where
-  peirce! {φ ψ} := by
-    apply of_C!_of_C!_of_A! implyK! ?_ lem!;
-    apply deduct'!;
-    apply deduct!;
-    refine (FiniteContext.byAxm! (φ := (φ 🡒 ψ) 🡒 φ)) ⨀ ?_;
-    apply deduct!;
-    apply efq_of_mem_either! (φ := φ);
+  peirce {φ ψ} := by
+    apply of_C_of_C_of_A implyK ?_ lem;
+    apply deduct';
+    apply deduct;
+    refine (FiniteContext.by_axm (φ := (φ 🡒 ψ) 🡒 φ)) ⨀ ?_;
+    apply deduct;
+    apply efq_of_mem_either (φ := φ);
     . simp;
     . simp;
 
@@ -306,24 +268,21 @@ section
 
 variable {G T : Type*} [Entailment T G] [LogicalConnective G] [LogicalNeutral G] {𝓣 : T}
 
-abbrev Cl.ofEquiv (𝓢 : S) [Entailment.Cl 𝓢] (𝓣 : T) (f : G →ˡᶜ F) (e : (φ : G) → 𝓢 ⊢! f φ ≃ 𝓣 ⊢! φ) : Entailment.Cl 𝓣 where
-  mdp! {φ ψ dpq dp} := (e ψ) (
-    let d : 𝓢 ⊢! f φ 🡒 f ψ := by simpa using (e (φ 🡒 ψ)).symm dpq
-    d ⨀ ((e φ).symm dp))
-  negEquiv! := e _ (by simpa using negEquiv!)
-  verum! := e _ (by simpa using verum!)
-  implyK! := e _ (by simpa using implyK!)
-  implyS! := e _ (by simpa using implyS!)
-  and₁! := e _ (by simpa using and₁!)
-  and₂! := e _ (by simpa using and₂!)
-  and₃! := e _ (by simpa using and₃!)
-  or₁! := e _ (by simpa using or₁!)
-  or₂! := e _ (by simpa using or₂!)
-  or₃! := e _ (by simpa using or₃!)
-  dne! := e _ (by simpa using dne!)
+abbrev Cl.ofEquiv (𝓢 : S) [Entailment.Cl 𝓢] (𝓣 : T) (f : G →ˡᶜ F) (e : ∀ φ, 𝓢 ⊢ f φ ↔ 𝓣 ⊢ φ) : Entailment.Cl 𝓣 where
+  mdp {φ ψ} dpq dp := (e ψ).mp <| (by simpa using (e (φ 🡒 ψ)).mpr dpq) ⨀ (e φ).mpr dp
+  neg_equiv := (e _).mp (by simp)
+  verum := (e _).mp (by simp)
+  implyK := (e _).mp (by simp)
+  implyS := (e _).mp (by simp)
+  and₁ := (e _).mp (by simp)
+  and₂ := (e _).mp (by simp)
+  and₃ := (e _).mp (by simp)
+  or₁ := (e _).mp (by simp)
+  or₂ := (e _).mp (by simp)
+  or₃ := (e _).mp (by simp)
+  dne := (e _).mp (by simp)
 
 end
-
 
 section
 
@@ -333,14 +292,14 @@ variable {S F : Type*} [LogicalConnective F] [LogicalNeutral F] [DecidableEq F] 
 open FiniteContext
 
 instance [HasAxiomLEM 𝓢] : HasAxiomDNE 𝓢 where
-  dne! {φ} := by
-    apply deduct'!;
-    exact of_C!_of_C!_of_A! C!_id (by
-      apply deduct!;
-      have nnp : [∼φ, ∼∼φ] ⊢[𝓢]! ∼φ 🡒 ⊥ := CO!_of_N! $ FiniteContext.byAxm!;
-      have np : [∼φ, ∼∼φ] ⊢[𝓢]! ∼φ := FiniteContext.byAxm!;
-      exact of_O! $ nnp ⨀ np;
-    ) $ of! lem!;
+  dne {φ} := by
+    apply deduct';
+    exact of_C_of_C_of_A C_id (by
+      apply deduct;
+      have nnp : [∼φ, ∼∼φ] ⊢[𝓢] ∼φ 🡒 ⊥ := CO_of_N $ FiniteContext.by_axm;
+      have np : [∼φ, ∼∼φ] ⊢[𝓢] ∼φ := FiniteContext.by_axm;
+      exact of_O $ nnp ⨀ np;
+    ) $ of lem;
 
 instance [HasAxiomLEM 𝓢] : Entailment.Cl 𝓢 where
 

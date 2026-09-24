@@ -29,7 +29,7 @@ variable {α : Type*} {T U : ArithmeticTheory} [Diagonalization T] [T ⪯ U]
 
 - [Sol76]
 -/
-theorem arithmetical_soundness (h : A ∈ 𝐒) (f : Realization α ℒₒᵣ) :
+theorem arithmetical_soundness (h : 𝐒 ⊢ A) (f : Realization α ℒₒᵣ) :
     ℕ↓[ℒₒᵣ] ⊧ A.interpret f 𝔅 := by
   have : ℕ↓[ℒₒᵣ] ⊧* T := models_of_subtheory (T := T) (U := U) (M := ℕ) inferInstance;
   induction h generalizing f with
@@ -56,13 +56,13 @@ true are exactly the theorems of `S`.
 - [Sol76]
 - [AB05, Theorem 3]
 -/
-theorem arithmetical_completeness (H : ∀ f : Realization α ℒₒᵣ, ℕ↓[ℒₒᵣ] ⊧ f T A) : A ∈ 𝐒 := by
+theorem arithmetical_completeness (H : ∀ f : Realization α ℒₒᵣ, ℕ↓[ℒₒᵣ] ⊧ f T A) : 𝐒 ⊢ A := by
   have : ℕ↓[ℒₒᵣ] ⊧* 𝗜𝚺₁ := models_of_subtheory (T := 𝗜𝚺₁) (U := T) (M := ℕ) inferInstance;
   contrapose! H;
   obtain ⟨κ, _, M, _, hA⟩ :
       ∃ (κ : Type u) (_ : Nonempty κ) (M : RootedModel κ α) (_ : M.IsFiniteGL),
         M.root ⊮[M.toModel] A.rflSubfmls.conj 🡒 A := by
-    simpa using GL.iff_root_forces.not.mp (iff_mem_GL.not.mp H);
+    simpa using GL.iff_root_forces.not.mp (iff_provable_GL.not.mp H);
   obtain ⟨h₁, h₂⟩ := not_forces_imp.mp hA;
   have : Fintype M.World := Fintype.ofFinite _;
   let S := standardSolovaySentences T M.extendRoot;
@@ -78,12 +78,12 @@ theorem arithmetical_completeness (H : ∀ f : Realization α ℒₒᵣ, ℕ↓[
   exact h₃ h₄;
 
 /-- - [AB05, Theorem 3] -/
-theorem arithmetical_completeness_iff : A ∈ 𝐒 ↔ ∀ f : Realization α ℒₒᵣ, ℕ↓[ℒₒᵣ] ⊧ f T A :=
+theorem arithmetical_completeness_iff : 𝐒 ⊢ A ↔ ∀ f : Realization α ℒₒᵣ, ℕ↓[ℒₒᵣ] ⊧ f T A :=
   ⟨fun h f ↦ arithmetical_soundness h f, arithmetical_completeness⟩
 
 theorem eq_provabilityLogicRelativeTo_TA : (𝐒 : Logic α) = T.provabilityLogicRelativeTo 𝗧𝗔 := by
   ext A;
-  simpa [ArithmeticTheory.provabilityLogicRelativeTo, Arithmetic.TA.provable_iff] using
+  simpa [ArithmeticTheory.provabilityLogicRelativeTo, Arithmetic.TA.provable_iff, Logic.provable_iff_mem] using
     arithmetical_completeness_iff;
 
 theorem eq_provabilityLogicRelativeTo_peano_TA :

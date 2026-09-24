@@ -12,25 +12,20 @@ protected abbrev EFQ := ⊥ 🡒 φ
 
 end FFL.Axioms
 
-
-
 namespace FFL.Entailment
 
 variable {S F : Type*} [LogicalConnective F] [LogicalNeutral F] [Entailment S F]
 variable {𝓢 : S} {φ ψ χ : F}
 
 class HasAxiomEFQ (𝓢 : S)  where
-  efq! {φ : F} : 𝓢 ⊢! Axioms.EFQ φ
-export HasAxiomEFQ (efq!)
+  efq {φ : F} : 𝓢 ⊢ Axioms.EFQ φ
+export HasAxiomEFQ (efq)
 
-@[simp] lemma efq [Entailment.HasAxiomEFQ 𝓢] : 𝓢 ⊢ ⊥ 🡒 φ := ⟨efq!⟩
+attribute [simp] efq
 
-def of_O! [ModusPonens 𝓢] [Entailment.HasAxiomEFQ 𝓢] (b : 𝓢 ⊢! ⊥) : 𝓢 ⊢! φ := efq! ⨀ b
-@[grind ⇒] lemma of_O [ModusPonens 𝓢]  [Entailment.HasAxiomEFQ 𝓢] (h : 𝓢 ⊢ ⊥) : 𝓢 ⊢ φ := ⟨of_O! h.some⟩
+@[grind ⇒] lemma of_O [ModusPonens 𝓢] [Entailment.HasAxiomEFQ 𝓢] (b : 𝓢 ⊢ ⊥) : 𝓢 ⊢ φ := efq ⨀ b
 
-
-instance [(𝓢 : S) → ModusPonens 𝓢] [(𝓢 : S) → HasAxiomEFQ 𝓢] : DeductiveExplosion S := ⟨fun b _ ↦ efq! ⨀ b⟩
-
+instance [(𝓢 : S) → ModusPonens 𝓢] [(𝓢 : S) → HasAxiomEFQ 𝓢] : DeductiveExplosion S := ⟨fun b _ ↦ efq ⨀ b⟩
 
 section
 
@@ -38,16 +33,15 @@ variable [Entailment.Minimal 𝓢]
 
 namespace FiniteContext
 
-instance [Entailment.HasAxiomEFQ 𝓢] (Γ : FiniteContext F 𝓢) : HasAxiomEFQ Γ := ⟨of! efq!⟩
+instance [Entailment.HasAxiomEFQ 𝓢] (Γ : FiniteContext F 𝓢) : HasAxiomEFQ Γ := ⟨of efq⟩
 
 instance [Entailment.HasAxiomEFQ 𝓢] : DeductiveExplosion (FiniteContext F 𝓢) := inferInstance
 
 end FiniteContext
 
-
 namespace Context
 
-instance [Entailment.HasAxiomEFQ 𝓢] (Γ : Context F 𝓢) : HasAxiomEFQ Γ := ⟨of! efq!⟩
+instance [Entailment.HasAxiomEFQ 𝓢] (Γ : Context F 𝓢) : HasAxiomEFQ Γ := ⟨of efq⟩
 
 instance [Entailment.HasAxiomEFQ 𝓢] : DeductiveExplosion (FiniteContext F 𝓢) := inferInstance
 
@@ -55,10 +49,7 @@ end Context
 
 end
 
-
 end FFL.Entailment
-
-
 
 namespace FFL.Entailment
 
@@ -70,7 +61,6 @@ variable {F : Type*} [LogicalConnective F] [LogicalNeutral F] [DecidableEq F]
 
 protected class Int (𝓢 : S) extends Entailment.Minimal 𝓢, Entailment.HasAxiomEFQ 𝓢
 
-
 variable [Entailment.Int 𝓢]
 
 namespace FiniteContext
@@ -81,25 +71,21 @@ namespace Context
 instance (Γ : Context F 𝓢) : Entailment.Int Γ where
 end Context
 
-
 open NegationEquiv
 open FiniteContext
 open List
 
-def efq_of_mem_either! (h₁ : φ ∈ Γ) (h₂ : ∼φ ∈ Γ) : Γ ⊢[𝓢]! ψ := of_O! $ bot_of_mem_either! h₁ h₂
-@[simp] lemma efq_of_mem_either (h₁ : φ ∈ Γ) (h₂ : ∼φ ∈ Γ) : Γ ⊢[𝓢] ψ := ⟨efq_of_mem_either! h₁ h₂⟩
+@[simp] lemma efq_of_mem_either (h₁ : φ ∈ Γ) (h₂ : ∼φ ∈ Γ) : Γ ⊢[𝓢] ψ := of_O $ bot_of_mem_either h₁ h₂
 
-def CNC! : 𝓢 ⊢! ∼φ 🡒 φ 🡒 ψ := by
-  apply deduct'!;
-  apply deduct!;
-  apply efq_of_mem_either! (φ := φ) (by simp) (by simp);
-@[simp] lemma CNC : 𝓢 ⊢ ∼φ 🡒 φ 🡒 ψ := ⟨CNC!⟩
+@[simp] lemma CNC : 𝓢 ⊢ ∼φ 🡒 φ 🡒 ψ := by
+  apply deduct';
+  apply deduct;
+  apply efq_of_mem_either (φ := φ) (by simp) (by simp);
 
-def CCN! : 𝓢 ⊢! φ 🡒 ∼φ 🡒 ψ := by
-  apply deduct'!;
-  apply deduct!;
-  apply efq_of_mem_either! (φ := φ) (by simp) (by simp);
-@[simp] lemma CCN : 𝓢 ⊢ φ 🡒 ∼φ 🡒 ψ := ⟨CCN!⟩
+@[simp] lemma CCN : 𝓢 ⊢ φ 🡒 ∼φ 🡒 ψ := by
+  apply deduct';
+  apply deduct;
+  apply efq_of_mem_either (φ := φ) (by simp) (by simp);
 
 lemma C_of_N (h : 𝓢 ⊢ ∼φ) : 𝓢 ⊢ φ 🡒 ψ := by
   apply provable_iff_provable.mpr;
@@ -109,35 +95,30 @@ lemma C_of_N (h : 𝓢 ⊢ ∼φ) : 𝓢 ⊢ φ 🡒 ψ := by
 
 lemma CN_of_ (h : 𝓢 ⊢ φ) : 𝓢 ⊢ ∼φ 🡒 ψ := CCN ⨀ h
 
-def CANC! : 𝓢 ⊢! (∼φ ⋎ ψ) 🡒 (φ 🡒 ψ) := left_A!_intro (by
-    apply emptyPrf!;
-    apply deduct!;
-    apply deduct!;
-    exact efq_of_mem_either! (φ := φ) (by simp) (by simp)
-  ) implyK!
-@[simp] lemma CANC : 𝓢 ⊢ (∼φ ⋎ ψ) 🡒 (φ 🡒 ψ) := ⟨CANC!⟩
+@[simp] lemma CANC : 𝓢 ⊢ (∼φ ⋎ ψ) 🡒 (φ 🡒 ψ) := left_A_intro (by
+    apply emptyPrf;
+    apply deduct;
+    apply deduct;
+    exact efq_of_mem_either (φ := φ) (by simp) (by simp)
+  ) implyK
 
-def C!_of_AN! (b : 𝓢 ⊢! ∼φ ⋎ ψ) : 𝓢 ⊢! φ 🡒 ψ := CANC! ⨀ b
-lemma C_of_AN (b : 𝓢 ⊢ ∼φ ⋎ ψ) : 𝓢 ⊢ φ 🡒 ψ := ⟨C!_of_AN! b.some⟩
+lemma C_of_AN (b : 𝓢 ⊢ ∼φ ⋎ ψ) : 𝓢 ⊢ φ 🡒 ψ := CANC ⨀ b
 
-def CCNNNNNNC! : 𝓢 ⊢! (∼∼φ 🡒 ∼∼ψ) 🡒 ∼∼(φ 🡒 ψ) := by
-  apply deduct'!;
-  apply N!_of_CO!;
-  exact C!_trans
+@[simp] lemma CCNNNNNNC : 𝓢 ⊢ (∼∼φ 🡒 ∼∼ψ) 🡒 ∼∼(φ 🡒 ψ) := by
+  apply deduct';
+  apply N_of_CO;
+  exact C_trans
     (by
-      apply deductInv!;
-      apply CC!_of_CK!;
-      apply deduct!;
-      have d₁ : [(∼∼φ 🡒 ∼∼ψ) ⋏ ∼(φ 🡒 ψ)] ⊢[𝓢]! ∼∼φ 🡒 ∼∼ψ := K!_left (ψ := ∼(φ 🡒 ψ)) $ FiniteContext.id!;
-      have d₂ : [(∼∼φ 🡒 ∼∼ψ) ⋏ ∼(φ 🡒 ψ)] ⊢[𝓢]! ∼∼φ ⋏ ∼ψ := KNN!_of_NA! $ (contra! CANC!) ⨀ (K!_right (φ := (∼∼φ 🡒 ∼∼ψ)) $ FiniteContext.id!)
-      exact K!_intro (K!_right d₂) (d₁ ⨀ (K!_left d₂))
+      apply deductInv;
+      apply CC_of_CK;
+      apply deduct;
+      have d₁ : [(∼∼φ 🡒 ∼∼ψ) ⋏ ∼(φ 🡒 ψ)] ⊢[𝓢] ∼∼φ 🡒 ∼∼ψ := K_left (ψ := ∼(φ 🡒 ψ)) $ FiniteContext.id;
+      have d₂ : [(∼∼φ 🡒 ∼∼ψ) ⋏ ∼(φ 🡒 ψ)] ⊢[𝓢] ∼∼φ ⋏ ∼ψ := KNN_of_NA $ (contra CANC) ⨀ (K_right (φ := (∼∼φ 🡒 ∼∼ψ)) $ FiniteContext.id)
+      exact K_intro (K_right d₂) (d₁ ⨀ (K_left d₂))
     )
-    (CKNO! (φ := ∼ψ));
+    (CKNO (φ := ∼ψ));
 
-@[simp] lemma CCNNNNNNC : 𝓢 ⊢ (∼∼φ 🡒 ∼∼ψ) 🡒 ∼∼(φ 🡒 ψ) := ⟨CCNNNNNNC!⟩
-
-def NNC!_of_CNNNN! (b : 𝓢 ⊢! ∼∼φ 🡒 ∼∼ψ) : 𝓢 ⊢! ∼∼(φ 🡒 ψ) := CCNNNNNNC! ⨀ b
-lemma NNC_of_CNNNN (b : 𝓢 ⊢ ∼∼φ 🡒 ∼∼ψ) : 𝓢 ⊢ ∼∼(φ 🡒 ψ) := ⟨NNC!_of_CNNNN! b.some⟩
+lemma NNC_of_CNNNN (b : 𝓢 ⊢ ∼∼φ 🡒 ∼∼ψ) : 𝓢 ⊢ ∼∼(φ 🡒 ψ) := CCNNNNNNC ⨀ b
 
 section Conjunction
 
@@ -145,31 +126,24 @@ end Conjunction
 
 section disjunction
 
-def left_Disj!_intro (Γ : List F) (b : (ψ : F) → ψ ∈ Γ → 𝓢 ⊢! ψ 🡒 φ) : 𝓢 ⊢! Γ.disj 🡒 φ :=
-  match Γ with
-  |     [] => efq!
-  | ψ :: Γ => left_A!_intro (b ψ (by simp)) <| left_Disj!_intro Γ fun ψ h ↦ b ψ (by simp [h])
 omit [DecidableEq F] in
 theorem left_Disj_intro (Γ : List F) (b : (ψ : F) → ψ ∈ Γ → 𝓢 ⊢ ψ 🡒 φ) : 𝓢 ⊢ Γ.disj 🡒 φ :=
-  ⟨left_Disj!_intro Γ fun ψ h ↦ (b ψ h).get⟩
-
-def left_Disj₂!_intro (Γ : List F) (b : (ψ : F) → ψ ∈ Γ → 𝓢 ⊢! ψ 🡒 φ) : 𝓢 ⊢! ⋁Γ 🡒 φ :=
   match Γ with
-  |     [] => efq!
-  |    [ψ] => b _ (by simp)
-  | ψ :: χ :: Γ => left_A!_intro (b ψ (by simp)) <| left_Disj₂!_intro _ fun ψ h ↦ b ψ (by simp [h])
+  |     [] => efq
+  | ψ :: Γ => left_A_intro (b ψ (by simp)) <| left_Disj_intro Γ fun ψ h ↦ b ψ (by simp [h])
 
 omit [DecidableEq F] in
 lemma left_Disj₂_intro (Γ : List F) (b : (ψ : F) → ψ ∈ Γ → 𝓢 ⊢ ψ 🡒 φ) : 𝓢 ⊢ ⋁Γ 🡒 φ :=
-  ⟨left_Disj₂!_intro Γ fun ψ h ↦ (b ψ h).get⟩
+  match Γ with
+  |     [] => efq
+  |    [ψ] => b _ (by simp)
+  | ψ :: χ :: Γ => left_A_intro (b ψ (by simp)) <| left_Disj₂_intro _ fun ψ h ↦ b ψ (by simp [h])
 
-def left_Disj'!_intro (l : List ι) (ψ : ι → F) (b : ∀ i ∈ l, 𝓢 ⊢! ψ i 🡒 φ) : 𝓢 ⊢! l.disj' ψ 🡒 φ :=
-  left_Disj₂!_intro _ fun χ h ↦
+lemma left_Disj'_intro (l : List ι) (ψ : ι → F) (b : ∀ i ∈ l, 𝓢 ⊢ ψ i 🡒 φ) : 𝓢 ⊢ l.disj' ψ 🡒 φ :=
+  left_Disj₂_intro _ fun χ h ↦
     let ⟨i, hi, e⟩ := l.chooseX (ψ · = χ) (by simpa using h);
     haveI := b i hi;
     e ▸ this
-lemma left_Disj'_intro (l : List ι) (ψ : ι → F) (b : ∀ i ∈ l, 𝓢 ⊢ ψ i 🡒 φ) : 𝓢 ⊢ l.disj' ψ 🡒 φ :=
-  ⟨left_Disj'!_intro l ψ fun i hi ↦ (b i hi).get⟩
 
 lemma left_Fdisj_intro (s : Finset F) (b : (ψ : F) → ψ ∈ s → 𝓢 ⊢ ψ 🡒 φ) : 𝓢 ⊢ s.disj 🡒 φ :=
   left_Disj₂_intro _ fun ψ h ↦ b ψ (by simpa using h)
@@ -274,7 +248,6 @@ lemma left_Disj₂_intro' (hd : ∀ ψ ∈ Γ, ψ = φ) : 𝓢 ⊢ ⋁Γ 🡒 φ
 
 lemma of_Disj₂_of_mem_eq (hd : ∀ ψ ∈ Γ, ψ = φ) (h : 𝓢 ⊢ ⋁Γ) : 𝓢 ⊢ φ := (left_Disj₂_intro' hd) ⨀ h
 
-
 @[simp] lemma CDisj₂FDisj {Γ : Finset F} : 𝓢 ⊢ ⋁Γ.toList 🡒 Γ.disj := by
   apply left_Disj₂_intro;
   intro ψ hψ;
@@ -377,7 +350,6 @@ lemma left_Fdisj_intro' {Γ : Finset _} (hd : ∀ ψ ∈ Γ, ψ = φ) : 𝓢 ⊢
 
 end disjunction
 
-
 section
 
 variable {Γ Δ : Finset F}
@@ -398,7 +370,6 @@ lemma CFConjFDisj_of_A (hφψ : φ ⋎ ψ ∈ Γ) (hφ : φ ∈ Δ) (hψ : ψ �
       assumption;
 
 end
-
 
 section
 
