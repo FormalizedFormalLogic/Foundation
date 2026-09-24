@@ -103,7 +103,7 @@ variable [T.SoundOnHierarchy 𝚺 1]
     cl_prover [h₁];
   . have h₁ : adjoin (∼D) T ⊢ T.standardProvability σ 🡒 D :=
       right_Fdisj'_intro _ _ (Finset.mem_filter.mpr ⟨htfin.mem_toFinset.mpr hσt, hσ⟩);
-    have h₂ : adjoin (∼D) T ⊢ ∼D := Axiomatized.adjoin! _ _;
+    have h₂ : adjoin (∼D) T ⊢ ∼D := Axiomatized.adjoin _ _;
     cl_prover [h₁, h₂];
 
 end Sigma1Sound
