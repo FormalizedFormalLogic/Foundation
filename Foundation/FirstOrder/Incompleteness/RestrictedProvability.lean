@@ -157,10 +157,8 @@ theorem lower_bound_gödelNumber_proof_restrictedGödel_superexp {e : ℕ} :
   simpa [numeral_eq_natCast]
     using lower_bound_gödelNumber_proof_restrictedGödel Superexp.superexp (e := e)
 
-/--
-  "This sentence cannot be proved by proof whose Gödel number is less than the superexponential of
-  `10^9`" is provable and length of its proof is larger than the superexponential of `10^9`.
--/
+/-- "This sentence cannot be proved by proof whose Gödel number is less than the superexponential
+of `10^9`" is provable and length of its proof is larger than the superexponential of `10^9`. -/
 example :
     letI e : ℕ := 10 ^ 9
     T ⊢ T.restrictedGödel superexpDef e ∧

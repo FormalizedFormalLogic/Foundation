@@ -110,8 +110,10 @@ theorem iff_provable_gentzen : 𝐆𝐫𝐳 ⊢ A ↔ ⊢ᴳ[Grz] ∅ ⟹ {A} :=
     have : 𝐆𝐫𝐳 ⊢ (∅ : FormulaFinset α).conj := by simp [Finset.conj];
     simpa using of_gentzen h ⨀ this;
 
+omit [DecidableEq α] in
 theorem iff_valid_finite :
     𝐆𝐫𝐳 ⊢ A ↔ ∀ {κ : Type u} [Nonempty κ] (M : Model κ α), [M.IsFiniteGrz] → M ⊧ A := by
+  classical
   constructor;
   · intro h _ _ M _;
     exact sound M h;
@@ -121,6 +123,7 @@ theorem iff_valid_finite :
     intro _ _ M _ x _;
     exact ⟨A, by simp, h M x⟩;
 
+omit [DecidableEq α] in
 theorem iff_root_forces : 𝐆𝐫𝐳 ⊢ A ↔
     ∀ {κ : Type u} [Nonempty κ] (M : RootedModel κ α), [M.IsFiniteGrz] → M.root ⊩[M.toModel] A := by
   constructor;

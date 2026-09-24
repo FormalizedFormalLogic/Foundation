@@ -26,7 +26,7 @@ inductive LK2.Derivation (T : Theory L) : Finset (Proposition L) → Type _
 | shift {Γ} : LK2.Derivation T Γ → LK2.Derivation T (Γ.image Rewriting.shift)
 | cut {Γ φ} : LK2.Derivation T (insert φ Γ) → LK2.Derivation T (insert (∼φ) Γ) → LK2.Derivation T Γ
 
-scoped infix:45 " ⟹₂" => LK2.Derivation
+scoped infix:45 " ⟹₂ " => LK2.Derivation
 
 abbrev LK2.Derivable (T : Theory L) (Γ : Finset (Proposition L)) := Nonempty (T ⟹₂ Γ)
 
@@ -78,7 +78,7 @@ structure ProofData (T : Theory L) (Γ : Finset (Proposition L)) where
   axioms_mem : ∀ ψ ∈ axioms, ψ ∈ T
   derivation : ⊢ᴸᴷ¹ Γ.1 + ∼LK.Sequent.embed axioms
 
-noncomputable def cast {Γ Δ : Finset (Proposition L)} (d : T ⟹₂Γ)
+noncomputable def cast {Γ Δ : Finset (Proposition L)} (d : T ⟹₂ Γ)
     (h : Γ = Δ := by simp) : T ⟹₂ Δ := h ▸ d
 
 omit [L.DecidableEq] in
@@ -88,7 +88,7 @@ omit [L.DecidableEq] in
 
 @[reducible] noncomputable def cutManyProof (A : Multiset (Sentence L))
     (hA : ∀ ψ ∈ A, ψ ∈ T)
-    (d : T ⟹₂(insert (φ : Proposition L) (∼LK.Sequent.embed A).toFinset)) : T ⟹₂ {φ} :=
+    (d : T ⟹₂ (insert (φ : Proposition L) (∼LK.Sequent.embed A).toFinset)) : T ⟹₂ {φ} :=
   -- Multiset induction cannot eliminate into the Type-valued derivation family.
   let rec go : (l : List (Sentence L)) → (∀ ψ ∈ l, ψ ∈ T) →
       T ⟹₂ (insert (φ : Proposition L) (∼LK.Sequent.embed (l : Multiset _)).toFinset) →

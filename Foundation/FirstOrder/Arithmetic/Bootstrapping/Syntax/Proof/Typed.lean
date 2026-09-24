@@ -634,3 +634,7 @@ lemma substItrDisj_left_intro {ψ} {w : TermVec V ℒₒᵣ m} {φ : Semiformula
 end TProof
 
 end typed_derivation
+
+end FirstOrder.Arithmetic.Bootstrapping
+
+end FFL

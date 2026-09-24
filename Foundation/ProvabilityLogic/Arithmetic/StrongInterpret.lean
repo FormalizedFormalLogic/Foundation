@@ -32,6 +32,7 @@ def strongInterpret (f : Realization α L) (𝔅 : Provability T₀ T) : Formula
 
 variable [𝔅.HBL2] {f : Realization α L} {A : Formula α}
 
+omit [L.DecidableEq] in
 lemma interpret_boxdotTranslate_iff_strongInterpret :
     T ⊢ Aᵇ.interpret f 𝔅 🡘 A.strongInterpret f 𝔅 := by
   induction A with

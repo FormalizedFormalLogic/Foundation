@@ -111,8 +111,10 @@ theorem iff_provable_gentzen : 𝐆𝐋 ⊢ A ↔ ⊢ᴳ[GL] ∅ ⟹ {A} := by
     have : 𝐆𝐋 ⊢ (∅ : FormulaFinset α).conj := by simp [Finset.conj];
     simpa using of_gentzen h ⨀ this;
 
+omit [DecidableEq α] in
 theorem iff_valid_finite :
     𝐆𝐋 ⊢ A ↔ ∀ {κ : Type u} [Nonempty κ] (M : Model κ α), [M.IsFiniteGL] → M ⊧ A := by
+  classical
   constructor;
   · intro h _ _ M _;
     exact sound M h;
@@ -122,6 +124,7 @@ theorem iff_valid_finite :
     intro _ _ M _ x _;
     exact ⟨A, by simp, h M x⟩;
 
+omit [DecidableEq α] in
 theorem iff_root_forces : 𝐆𝐋 ⊢ A ↔
     ∀ {κ : Type u} [Nonempty κ] (M : RootedModel κ α), [M.IsFiniteGL] → M.root ⊩[M.toModel] A := by
   constructor;

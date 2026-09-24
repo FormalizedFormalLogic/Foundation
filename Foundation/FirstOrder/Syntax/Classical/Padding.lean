@@ -49,9 +49,10 @@ end Semiformula
 
 open Entailment
 
-@[simp] theorem Entailment.padding_iff [L.DecidableEq] [DecidableEq ξ] {S : Type*}
+@[simp] theorem Entailment.padding_iff [L.DecidableEq] {S : Type*}
     [Entailment S (Formula L ξ)] {𝓢 : S} [Entailment.Minimal 𝓢] (φ k) :
     𝓢 ⊢ φ.padding k 🡘 φ := by
+  classical
   apply E_intro
   · apply and₁
   · apply right_K_intro

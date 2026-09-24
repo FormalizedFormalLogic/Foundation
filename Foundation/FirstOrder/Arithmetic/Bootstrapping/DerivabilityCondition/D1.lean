@@ -18,7 +18,7 @@ variable {L : Language} [L.Encodable] [L.LORDefinable]
 variable {T : Theory L} [T.Δ₁]
 
 open Classical in
-lemma derivable_quote {Γ : Finset (Proposition L)} (d : T ⟹₂Γ) : Derivable T (⌜Γ⌝ : V) :=
+lemma derivable_quote {Γ : Finset (Proposition L)} (d : T ⟹₂ Γ) : Derivable T (⌜Γ⌝ : V) :=
   open Classical in ⟨⌜d⌝, by
     simpa [Semiformula.quote_def] using! (⌜d⌝ : Theory.internalize V T ⊢!ᵈᵉʳ ⌜Γ⌝).derivationOf⟩
 

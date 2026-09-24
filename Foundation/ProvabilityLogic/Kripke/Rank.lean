@@ -97,6 +97,7 @@ lemma rank_pos_of_forces_dia {A : Formula α} (h : x ⊩[M] ◇A) : 0 < x.rank :
 /-- - [AB05, Lemma 26] -/
 lemma exists_isReflexiveOf_of_card_lt_rank {X : FormulaFinset α} (h : X.card < x.rank) :
     ∃ y, x ≺ y ∧ y.IsReflexiveOf X := by
+  classical
   obtain ⟨y, hxy⟩ : ∃ y, x ≺^[x.rank] y := by simpa using rank_lt_iff.not.mp (lt_irrefl _);
   obtain ⟨c, hc₀, -, hc⟩ := exists_chain_of_relItr hxy;
   have hle : ∀ B, ((Finset.Icc 1 x.rank).filter fun i ↦ c i ⊮[M] □B 🡒 B).card ≤ 1 := by
