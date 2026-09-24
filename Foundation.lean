@@ -214,7 +214,6 @@ public import Foundation.ProvabilityLogic.Kripke.Rank
 public import Foundation.ProvabilityLogic.Kripke.RootExtension
 public import Foundation.ProvabilityLogic.Kripke.RootedModel
 public import Foundation.ProvabilityLogic.Kripke.Sequent
-public import Foundation.ProvabilityLogic.Kripke.Simplification
 public import Foundation.ProvabilityLogic.Kripke.Soundness
 public import Foundation.ProvabilityLogic.Kripke.Tail
 public import Foundation.ProvabilityLogic.Kripke.Unravelling

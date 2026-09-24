@@ -1,7 +1,7 @@
 module
 
+public import Foundation.ProvabilityLogic.Kripke.Bisimulation
 public import Foundation.ProvabilityLogic.Kripke.Rank
-public import Foundation.ProvabilityLogic.Kripke.Simplification
 
 /-!
 # Defining formulas
@@ -25,17 +25,16 @@ namespace Model
 
 noncomputable section
 
-open Classical
-
 variable {M : Model κ α} {N : Model κ' α} {P : Finset α} {x : M.World} {w : N.World}
 
+open Classical in
 /-- The literals over `P` true at `x`. -/
 def World.valuationConj (P : Finset α) (x : M.World) : Formula α :=
   (P.image fun a ↦ if M.Val x a then #a else ∼#a).conj
 
 @[grind .]
 lemma World.atoms_valuationConj : (x.valuationConj P).atoms ⊆ P := fun a ha ↦ by
-  have := FormulaFinset.atoms_conj ha;
+  have := FormulaFinset.atoms_conj_subset _ ha;
   simp only [FormulaFinset.atoms, Finset.mem_biUnion, Finset.mem_image] at this;
   obtain ⟨_, ⟨b, hb, rfl⟩, ha⟩ := this;
   split at ha <;> simp_all;
@@ -48,6 +47,7 @@ lemma World.forces_valuationConj : w ⊩[N] x.valuationConj P ↔ ∀ a ∈ P, (
   intro a _;
   split <;> simp_all [forces_neg];
 
+open Classical in
 /-- The characteristic formula of `x` over `P`.
 
 - [Bek90, §4]
@@ -61,6 +61,7 @@ decreasing_by all_goals exact rank_lt_of_rel y.2
 
 variable [Fintype M.World] [M.IsGL]
 
+open Classical in
 lemma World.charFormulaUnder_def : x.charFormulaUnder P =
     x.valuationConj P ⋏
     (Finset.univ.image fun y : { y // x ≺ y } ↦ ◇y.1.charFormulaUnder P).conj ⋏
@@ -75,12 +76,12 @@ lemma World.atoms_charFormulaUnder : (x.charFormulaUnder P).atoms ⊆ P := by
     intro a ha;
     simp only [Formula.atoms_and, Formula.atoms_box, Finset.mem_union] at ha;
     rcases ha with ha | ha | ha;
-    . exact World.atoms_valuationConj ha;
-    . have := FormulaFinset.atoms_conj ha;
+    · exact World.atoms_valuationConj ha;
+    · have := FormulaFinset.atoms_conj_subset _ ha;
       simp only [FormulaFinset.atoms, Finset.mem_biUnion, Finset.mem_image] at this;
       obtain ⟨_, ⟨y, -, rfl⟩, ha⟩ := this;
       exact ih y y.2 (by simpa using ha);
-    . have := FormulaFinset.atoms_disj ha;
+    · have := FormulaFinset.atoms_disj_subset _ ha;
       simp only [FormulaFinset.atoms, Finset.mem_biUnion, Finset.mem_image] at this;
       obtain ⟨_, ⟨y, -, rfl⟩, ha⟩ := this;
       exact ih y y.2 ha;
@@ -119,7 +120,7 @@ end Model
 namespace RootedModel
 
 /-- `A` defines `M` under `P`: it is over `P`, true at the root of `M`, and true at the root of a
-finite `P`-simple GL-model only if its root is `P`-bisimilar to that of `M`.
+finite GL-model only if its root is `P`-bisimilar to that of `M`.
 
 - [Bek90, §4]
 -/
@@ -127,7 +128,7 @@ structure IsDefiningFormula (P : Finset α) (M : RootedModel κ α) (A : Formula
   atoms_subset : A.atoms ⊆ P
   root_forces : M.root ⊩[M.toModel] A
   unique : ∀ {κ' : Type u} [Nonempty κ'] (N : RootedModel κ' α) [N.IsFiniteGL],
-    N.IsSimpleUnder P → N.root ⊩[N.toModel] A → ∃ Bi : M.toModel ⇄[P] N.toModel, Bi M.root N.root
+    N.root ⊩[N.toModel] A → ∃ Bi : M.toModel ⇄[P] N.toModel, Bi M.root N.root
 
 /-- - [Bek90, Lemma 7] -/
 theorem exists_isDefiningFormula {M : RootedModel κ α} [M.IsFiniteGL] (P : Finset α) :
@@ -135,7 +136,7 @@ theorem exists_isDefiningFormula {M : RootedModel κ α} [M.IsFiniteGL] (P : Fin
   have : Fintype M.World := Fintype.ofFinite _;
   exact ⟨World.charFormulaUnder (M := M.toModel) P M.root, World.atoms_charFormulaUnder,
     World.forces_charFormulaUnder_self,
-    fun N _ _ h ↦ ⟨charBisimulationUnder P M.toModel N.toModel, h⟩⟩;
+    fun N _ h ↦ ⟨charBisimulationUnder P M.toModel N.toModel, h⟩⟩;
 
 end RootedModel
 

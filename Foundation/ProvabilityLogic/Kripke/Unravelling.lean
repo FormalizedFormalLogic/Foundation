@@ -1,18 +1,11 @@
 module
 
 public import Foundation.ProvabilityLogic.Kripke.Bisimulation
-public import Foundation.ProvabilityLogic.Kripke.Graft
+public import Foundation.ProvabilityLogic.Kripke.RootedModel
 public import Mathlib.Data.Fintype.Powerset
 
 /-!
 # Tree unravelling
-
-Unravelling a rooted model into a tree is folklore in modal logic; its commutation with grafting
-is used in the source.
-
-## References
-
-- [Bek90, Lemma 8]
 -/
 
 @[expose] public section
@@ -62,8 +55,8 @@ def unravelling : RootedModel (unravelling.World M) α where
   root_rel x hx := by
     use x.2.1;
     rcases x.2.1.length_le.lt_or_eq with h | h;
-    . exact h;
-    . exact absurd (Subtype.ext (x.2.1.eq_of_length h).symm) hx;
+    · exact h;
+    · exact absurd (Subtype.ext (x.2.1.eq_of_length h).symm) hx;
 
 namespace unravelling
 
@@ -84,12 +77,12 @@ instance : Std.Irrefl M.unravelling.Rel where
 instance : M.unravelling.IsTree where
   tree {x y z} h₁ h₂ := by
     rcases List.suffix_or_suffix_of_suffix h₁.1 h₂.1 with h | h;
-    . rcases h.length_le.lt_or_eq with hl | hl;
-      . exact .inr (.inl ⟨h, hl⟩);
-      . exact .inl (Subtype.ext (h.eq_of_length hl));
-    . rcases h.length_le.lt_or_eq with hl | hl;
-      . exact .inr (.inr ⟨h, hl⟩);
-      . exact .inl (Subtype.ext (h.eq_of_length hl).symm);
+    · rcases h.length_le.lt_or_eq with hl | hl;
+      · exact .inr (.inl ⟨h, hl⟩);
+      · exact .inl (Subtype.ext (h.eq_of_length hl));
+    · rcases h.length_le.lt_or_eq with hl | hl;
+      · exact .inr (.inr ⟨h, hl⟩);
+      · exact .inl (Subtype.ext (h.eq_of_length hl).symm);
 
 instance [M.IsFiniteGL] : M.unravelling.IsFiniteGL where
   finite := by
@@ -107,12 +100,12 @@ def tipMap [IsTrans _ M.Rel] : M.unravelling.toModel →ₚ M.toModel where
     obtain ⟨y, hy⟩ := y;
     obtain ⟨t, rfl⟩ := h.1;
     rcases t with _ | ⟨a, t⟩;
-    . simp at h;
-    . exact List.rel_of_pairwise_cons hy.2 (List.mem_append_right _ (List.head_mem _));
+    · simp at h;
+    · exact List.rel_of_pairwise_cons hy.2 (List.mem_append_right _ (List.head_mem _));
   back {x v} h := by
     obtain ⟨_ | ⟨w, l⟩, hx₁, hx₂⟩ := x;
-    . simp at hx₁;
-    . have : ∀ b ∈ w :: l, b ≺ v := by
+    · simp at hx₁;
+    · have : ∀ b ∈ w :: l, b ≺ v := by
         simp only [List.mem_cons, forall_eq_or_imp];
         exact ⟨h, fun b hb ↦ IsTrans.trans _ _ _ (List.rel_of_pairwise_cons hx₂ hb) h⟩;
       exact ⟨⟨v :: w :: l, hx₁.trans (List.suffix_cons _ _), List.pairwise_cons.mpr ⟨this, hx₂⟩⟩,
@@ -122,71 +115,6 @@ def tipMap [IsTrans _ M.Rel] : M.unravelling.toModel →ₚ M.toModel where
 lemma forces_root_iff [IsTrans _ M.Rel] {A : Formula α} :
     M.unravelling.root ⊩[M.unravelling.toModel] A ↔ M.root ⊩[M.toModel] A :=
   tipMap.forces_iff
-
-/-- The chain from the root to `a`, which covers the root. -/
-def coverPoint (a : M.NonRoot) : M.unravelling.NonRoot :=
-  ⟨⟨[a.1, M.root], List.suffix_cons _ _, by simpa [flip] using M.root_rel a.1 a.2⟩,
-    fun h ↦ by simpa using congrArg (·.1.length) h⟩
-
-lemma eq_root_of_rel_coverPoint {a : M.NonRoot} {x : M.unravelling.World}
-    (h : x ≺ (coverPoint a).1) : x = M.unravelling.root := by
-  have := x.2.1.length_le;
-  have : x.1.length < 2 := h.2;
-  simp only [List.length_singleton] at *;
-  exact Subtype.ext (x.2.1.eq_of_length (by simp; omega)).symm;
-
-lemma eq_root_of_tip_eq_root [Std.Irrefl M.Rel] {x : M.unravelling.World}
-    (h : x.tip = M.root) : x = M.unravelling.root := by
-  obtain ⟨_ | ⟨w, l⟩, hx₁, hx₂⟩ := x;
-  . simp at hx₁;
-  . have hw : w = M.root := h;
-    subst hw;
-    rcases l with _ | ⟨v, l⟩;
-    . rfl;
-    . have : M.root ∈ v :: l := by
-        rcases List.suffix_cons_iff.mp hx₁ with h' | h';
-        . simp at h';
-        . exact h'.subset (by simp);
-      exact absurd (List.rel_of_pairwise_cons hx₂ this) (Std.Irrefl.irrefl (r := M.Rel) _);
-
-variable [IsTrans _ M.Rel] [Std.Irrefl M.Rel] {ι : Type*} [LT ι]
-
-/-- Unravelling commutes with grafting at a point covering the root.
-
-- [Bek90, Lemma 8]
--/
-def graftTipMap (a : M.NonRoot) (ι : Type*) [LT ι] :
-    (M.unravelling.graft (coverPoint a) ι).toModel →ₚ (M.graft a ι).toModel where
-  toFun
-    | .inl t => .inl t.tip
-    | .inr i => .inr i
-  forth {x y} R := by
-    rcases x with x | i <;> rcases y with y | j;
-    . exact tipMap.forth R;
-    . subst R;
-      rfl;
-    . rcases R with rfl | R;
-      . exact .inl rfl;
-      . exact .inr (tipMap.forth R);
-    . exact R;
-  back {x v} h := by
-    rcases x with x | i <;> rcases v with w | j;
-    . obtain ⟨y, rfl, R⟩ := tipMap.back h;
-      exact ⟨.inl y, rfl, R⟩;
-    . exact ⟨.inr j, rfl, eq_root_of_tip_eq_root h⟩;
-    . rcases h with rfl | h;
-      . exact ⟨.inl (coverPoint a).1, rfl, .inl rfl⟩;
-      . obtain ⟨y, rfl, R⟩ := tipMap.back (x := (coverPoint a).1) h;
-        exact ⟨.inl y, rfl, .inr R⟩;
-    . exact ⟨.inr j, rfl, h⟩;
-  atomic {x} := by
-    rcases x with x | i <;> exact Iff.rfl;
-
-lemma forces_graft_root_iff {a : M.NonRoot} {A : Formula α} :
-    (M.unravelling.graft (coverPoint a) ι).root
-      ⊩[(M.unravelling.graft (coverPoint a) ι).toModel] A ↔
-    (M.graft a ι).root ⊩[(M.graft a ι).toModel] A :=
-  (graftTipMap a ι).forces_iff
 
 end unravelling
 

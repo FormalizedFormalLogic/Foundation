@@ -18,8 +18,6 @@ namespace Model
 
 variable {M : Model κ α} {r x : M.World} {A : Formula α}
 
-@[grind] def World.IsInConeOf (x r : M.World) : Prop := x = r ∨ r ≺ x
-
 instance : Nonempty { x : M.World // x = r ∨ r ≺ x } := ⟨⟨r, .inl rfl⟩⟩
 
 def cone (M : Model κ α) (r : M.World) : RootedModel { x : M.World // x = r ∨ r ≺ x } α where
