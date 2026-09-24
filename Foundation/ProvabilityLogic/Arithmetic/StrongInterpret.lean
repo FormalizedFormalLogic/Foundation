@@ -17,7 +17,7 @@ namespace FFL.ProvabilityLogic
 
 open Entailment FirstOrder FirstOrder.ProvabilityAbstraction
 
-variable {α : Type*} {L : Language} [L.ReferenceableBy L] [L.DecidableEq]
+variable {α : Type*} {L : Language} [L.ReferenceableBy L]
          {T₀ T : Theory L} [T₀ ⪯ T] {𝔅 : Provability T₀ T}
 
 namespace Formula
@@ -32,7 +32,6 @@ def strongInterpret (f : Realization α L) (𝔅 : Provability T₀ T) : Formula
 
 variable [𝔅.HBL2] {f : Realization α L} {A : Formula α}
 
-omit [L.DecidableEq] in
 lemma interpret_boxdotTranslate_iff_strongInterpret :
     T ⊢ Aᵇ.interpret f 𝔅 🡘 A.strongInterpret f 𝔅 := by
   induction A with
@@ -47,7 +46,6 @@ lemma interpret_boxdotTranslate_iff_strongInterpret :
     change T ⊢ _ 🡘 A.strongInterpret f 𝔅 ⋏ 𝔅 (A.strongInterpret f 𝔅);
     cl_prover [ih, h₁, h₂];
 
-omit [L.DecidableEq] in
 lemma provable_interpret_boxdotTranslate_iff :
     T ⊢ Aᵇ.interpret f 𝔅 ↔ T ⊢ A.strongInterpret f 𝔅 :=
   ⟨fun h ↦ C_of_E_mp interpret_boxdotTranslate_iff_strongInterpret ⨀ h,
