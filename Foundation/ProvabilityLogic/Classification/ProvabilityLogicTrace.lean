@@ -136,7 +136,7 @@ theorem TBB_mem_provabilityLogic_of_mem_trace
 theorem mem_trace_provabilityLogic_iff :
     n ∈ (T.provabilityLogicRelativeTo U : Logic α).trace ↔
       TBB n ∈ (T.provabilityLogicRelativeTo U : Logic α) :=
-  sorry
+  ⟨TBB_mem_provabilityLogic_of_mem_trace, fun h ↦ Logic.trace_subset_of_mem h (by simp)⟩
 
 /-- - [AB05, Corollary 48] -/
 theorem provabilityLogic_eq_GLAlpha
