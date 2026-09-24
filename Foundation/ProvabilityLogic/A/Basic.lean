@@ -52,7 +52,14 @@ lemma neg_boxItr_bot : (𝐀 : Logic α) ⊢ ∼□^[n]⊥ := by
 
 lemma sound (h : 𝐀 ⊢ A) {κ : Type*} [Nonempty κ] (M : Model κ α) [M.IsGL] {x : M.World}
     (hx : ∀ n, x ⊮[M] □^[n]⊥) : x ⊩[M] A := by
-  sorry
+  induction h generalizing M with
+  | mem₁ h => exact GL.sound M h x;
+  | mem₂ h =>
+    obtain ⟨m, -, rfl⟩ := h;
+    exact fun h ↦ absurd h (hx (m + 1));
+  | mdp _ _ ih₁ ih₂ => exact ih₁ M hx (ih₂ M hx);
+  | subst _ ih =>
+    exact forces_subst.mp <| ih (M.subst _) fun n h ↦ hx n (by simpa using forces_subst.mp h);
 
 universe u
 
