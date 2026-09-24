@@ -76,6 +76,9 @@ noncomputable def World.rank (x : M.World) : ℕ := cwfHeight (· ≺ ·) x
 
 lemma rank_lt_of_rel (h : x ≺ y) : y.rank < x.rank := cwfHeight_gt_of h
 
+lemma exists_rel_rank_eq_of_lt (h : n < x.rank) : ∃ y, x ≺ y ∧ y.rank = n :=
+  exists_cwfHeight_eq_of_lt h
+
 lemma rank_lt_iff : x.rank < n ↔ ∀ y, x ⊀^[n] y := by
   induction n generalizing x with
   | zero => simp;

@@ -90,6 +90,26 @@ lemma lt_cwfHeight {a : α} (hb : R a b) (h : n ≤ cwfHeight R b) : n < cwfHeig
       (f := fun b ↦ cwfHeight R b + 1) (b := b) (by simp [hb]);
   exact lt_of_le_of_lt h this;
 
+lemma exists_cwfHeight_eq_succ {a : α} (h : cwfHeight R a ≠ 0) :
+    ∃ b, R a b ∧ cwfHeight R a = cwfHeight R b + 1 := by
+  have hne : ({x : α | R a x} : Finset α).Nonempty := by
+    by_contra hc;
+    apply h;
+    rw [cwfHeight_eq, Finset.not_nonempty_iff_eq_empty.mp hc, Finset.sup_empty];
+    rfl;
+  obtain ⟨b, hb, e⟩ := Finset.exists_mem_eq_sup _ hne (fun b ↦ cwfHeight R b + 1);
+  exact ⟨b, by simpa using hb, (cwfHeight_eq a).trans e⟩;
+
+lemma exists_cwfHeight_eq_of_lt [IsTrans α R] {a : α} {n : ℕ} (h : n < cwfHeight R a) :
+    ∃ b, R a b ∧ cwfHeight R b = n := by
+  induction a using WellFounded.induction IsConverseWellFounded.cwf (r := flip R) generalizing n with
+  | h a ih =>
+    obtain ⟨b, hab, e⟩ := exists_cwfHeight_eq_succ (R := R) (a := a) (by omega);
+    rcases Nat.lt_or_ge n (cwfHeight R b) with hn | hn;
+    . obtain ⟨c, hbc, rfl⟩ := ih b hab hn;
+      exact ⟨c, IsTrans.trans _ _ _ hab hbc, rfl⟩;
+    . exact ⟨b, hab, by omega⟩;
+
 end cwfHeight
 
 end
