@@ -8,7 +8,7 @@ public import Mathlib.Data.Set.Countable
 namespace Nat
 
 lemma monotone_of_succ_monotone {r : ℕ → ℕ → Prop} (rfx : Std.Refl r) (tr : IsTrans ℕ r)
-    (succ : ∀ n, r n (n + 1)) : n ≤ m → r n m := by
+    (succ : ∀ n, r n (n + 1)) {n m : ℕ} : n ≤ m → r n m := by
   revert n m
   suffices ∀ n d, r n (n + d) by
     intro n m hnm
@@ -26,13 +26,15 @@ namespace DirectedOn
 
 variable {α : Type*} {r : α → α → Prop}
 
-private lemma vector_le (tr : IsTrans α r) {s : Set α} (hs : s.Nonempty) (h : DirectedOn r s) (v : Fin n → α) (hv : ∀ i, v i ∈ s) :
+private lemma vector_le {n : ℕ} (tr : IsTrans α r) {s : Set α} (hs : s.Nonempty)
+    (h : DirectedOn r s) (v : Fin n → α) (hv : ∀ i, v i ∈ s) :
     ∃ z ∈ s, ∀ i, r (v i) z :=
   match n with
   | 0     => by
     rcases hs with ⟨x, hx⟩; exact ⟨x, hx, fun i ↦ IsEmpty.elim inferInstance i⟩
   | n + 1 => by
-    have : ∃ z ∈ s, ∀ i : Fin n, r (v i.succ) z := h.vector_le tr hs (n := n) (fun i ↦ v i.succ) fun i ↦ hv i.succ
+    have : ∃ z ∈ s, ∀ i : Fin n, r (v i.succ) z :=
+      h.vector_le tr hs (n := n) (fun i ↦ v i.succ) fun i ↦ hv i.succ
     rcases this with ⟨x, hx, hr⟩
     have : ∃ z ∈ s, r x z ∧ r (v 0) z := h x hx (v 0) (hv 0)
     rcases this with ⟨z, hz, hrxz, hrz⟩
@@ -43,9 +45,10 @@ private lemma vector_le (tr : IsTrans α r) {s : Set α} (hs : s.Nonempty) (h : 
     case succ i =>
       exact tr.trans _ _ _ (hr i) hrxz
 
-lemma fintype_colimit [Fintype ι] (tr : IsTrans α r)
+lemma fintype_colimit {ι : Type*} [Finite ι] (tr : IsTrans α r)
     {s : Set α} (hs : s.Nonempty) (h : DirectedOn r s) (v : ι → α) (hv : ∀ i, v i ∈ s) :
     ∃ z ∈ s, ∀ i, r (v i) z := by
+  have : Fintype ι := Fintype.ofFinite ι
   let f : Fin (Fintype.card ι) → α := fun x ↦ v ((Fintype.equivFin ι).symm x)
   rcases DirectedOn.vector_le tr hs h f (by intro; simp [f, hv]) with ⟨z, hzs, hz⟩
   exact ⟨z, hzs, fun i ↦ by simpa [f] using hz ((Fintype.equivFin ι) i)⟩
@@ -87,14 +90,17 @@ lemma IsIncompatiblePair.symm_iff {a b : α} : a ⟂ b ↔ b ⟂ a := by
 
 alias ⟨IsIncompatiblePair.symm, _⟩ := IsIncompatiblePair.symm_iff
 
-lemma IsIncompatiblePair.lower {a a' b b' : α} (h : a ⟂ b) (ha'a : a' ≤ a) (hb'b : b' ≤ b) : a' ⟂ b' := by
+lemma IsIncompatiblePair.lower {a a' b b' : α} (h : a ⟂ b) (ha'a : a' ≤ a) (hb'b : b' ≤ b) :
+    a' ⟂ b' := by
   rintro ⟨c, hca, hcb⟩
   exact h ⟨c, le_trans hca ha'a, le_trans hcb hb'b⟩
 
-@[simp, grind =] lemma not_isCompatiblePair_iff_isIncompatiblePair {a b : α} : ¬(a ‖ b) ↔ a ⟂ b := by
+@[simp, grind =] lemma not_isCompatiblePair_iff_isIncompatiblePair {a b : α} :
+    ¬(a ‖ b) ↔ a ⟂ b := by
   rfl
 
-@[simp, grind =] lemma not_isIncompatiblePair_iff_isCompatiblePair {a b : α} : ¬(a ⟂ b) ↔ a ‖ b := by
+@[simp, grind =] lemma not_isIncompatiblePair_iff_isCompatiblePair {a b : α} :
+    ¬(a ⟂ b) ↔ a ‖ b := by
   simp [IsIncompatiblePair, IsCompatiblePair]
 
 /-! ### Density -/
@@ -139,7 +145,7 @@ def ofDescendingChain (s : ℕ → α) (hs : ∀ i j, i ≤ j → s i ≥ s j) :
     (by rintro x y hxy ⟨i, hix⟩
         exact ⟨i, le_trans hix hxy⟩)
 
-@[simp] lemma mem_descendingChain_iff (s : ℕ → α) (hs : ∀ i j, i ≤ j → s i ≥ s j) :
+@[simp] lemma mem_descendingChain_iff (s : ℕ → α) (hs : ∀ i j, i ≤ j → s i ≥ s j) (x : α) :
     x ∈ ofDescendingChain s hs ↔ ∃ i, s i ≤ x := by rfl
 
 class IsGeneric (F : PFilter α) (𝓓 : Set (DenseSet α)) where

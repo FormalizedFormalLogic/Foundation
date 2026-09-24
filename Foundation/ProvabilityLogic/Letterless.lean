@@ -92,11 +92,11 @@ lemma spectrum_TBB : spectrum (TBB n) = {n}ᶜ := by
   ext i;
   suffices (∃ k < i, n ≤ k) ∨ i < n ↔ i ≠ n by simpa [TBB];
   constructor;
-  . rintro (⟨k, hk, hn⟩ | h) <;> omega;
-  . intro h;
+  · rintro (⟨k, hk, hn⟩ | h) <;> omega;
+  · intro h;
     rcases Nat.lt_or_gt_of_ne h with h | h;
-    . exact .inr h;
-    . exact .inl ⟨n, h, le_rfl⟩;
+    · exact .inr h;
+    · exact .inl ⟨n, h, le_rfl⟩;
 
 lemma spectrum_conj₂ : ∀ {l : List LetterlessFormula}, spectrum (⋀l) = ⋂ A ∈ l, A.spectrum
   | []  => by simp
@@ -123,8 +123,8 @@ lemma spectrum_finite_or_cofinite : A.spectrum.Finite ∨ A.spectrumᶜ.Finite :
     simp_all [Set.compl_union, Set.Finite.inter_of_left, Set.Finite.inter_of_right];
   | box A ih =>
     by_cases h : ∀ i, i ∈ spectrum A;
-    . simp [h];
-    . push Not at h;
+    · simp [h];
+    · push Not at h;
       obtain ⟨k, hk⟩ := h;
       left;
       apply (Set.finite_Iic k).subset;
@@ -168,8 +168,8 @@ lemma exists_finset_of_spectrum_subset (hXA : X.spectrum ⊆ spectrum A)
   obtain ⟨Y₀, hY₀, hfin⟩ : ∃ Y₀ : Finset LetterlessFormula, ↑Y₀ ⊆ X ∧
       {n | (∀ C ∈ Y₀, n ∈ spectrum C) ∧ n ∉ spectrum A}.Finite := by
     rcases h with ⟨B, hB, hfin⟩ | hfin;
-    . exact ⟨{B}, by simpa, hfin.subset fun n hn ↦ by simpa using hn.1⟩;
-    . exact ⟨∅, by simp, by simpa [trace, Set.compl_def] using hfin⟩;
+    · exact ⟨{B}, by simpa, hfin.subset fun n hn ↦ by simpa using hn.1⟩;
+    · exact ⟨∅, by simp, by simpa [trace, Set.compl_def] using hfin⟩;
   have hC : ∀ n, (∀ C ∈ Y₀, n ∈ spectrum C) ∧ n ∉ spectrum A → ∃ C ∈ X, n ∉ spectrum C := by
     intro n hn;
     by_contra! hc;
@@ -177,12 +177,12 @@ lemma exists_finset_of_spectrum_subset (hXA : X.spectrum ⊆ spectrum A)
   choose f hfX hf using hC;
   use Y₀ ∪ hfin.toFinset.attach.image fun n ↦ f n.1 (hfin.mem_toFinset.mp n.2);
   and_intros;
-  . intro C hC;
+  · intro C hC;
     rcases Finset.mem_union.mp hC with hC | hC;
-    . exact hY₀ hC;
-    . obtain ⟨n, -, rfl⟩ := Finset.mem_image.mp hC;
+    · exact hY₀ hC;
+    · obtain ⟨n, -, rfl⟩ := Finset.mem_image.mp hC;
       exact hfX _ _;
-  . intro n hn;
+  · intro n hn;
     by_contra hA;
     have hn' : (∀ C ∈ Y₀, n ∈ spectrum C) ∧ n ∉ spectrum A := ⟨fun C hC ↦ hn C (by simp [hC]), hA⟩;
     exact hf n hn' <| hn _ <| Finset.mem_union_right _ <|

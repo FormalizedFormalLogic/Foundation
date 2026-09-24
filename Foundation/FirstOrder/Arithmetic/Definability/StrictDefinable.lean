@@ -58,8 +58,8 @@ lemma exists_eval_iff {P : (Fin k → V) → Prop} (h : StrictDefinable Γ s P) 
   have : Inhabited V := Classical.inhabited_of_nonempty';
   use φ.enumerateFVar, Rew.rewriteMap φ.idxOfFVar ▹ φ;
   and_intros;
-  . exact hs.rew _;
-  . intro v;
+  · exact hs.rew _;
+  · intro v;
     simp [Semiformula.eval_rewriteMap, hφ];
 
 lemma of_strictHierarchy {ξ : Type*} {m : ℕ} {θ : ArithmeticSemiformula ξ (m + 2)}
@@ -68,8 +68,8 @@ lemma of_strictHierarchy {ξ : Type*} {m : ℕ} {θ : ArithmeticSemiformula ξ (
   use Rew.bind (#1 :> #0 :> fun i : Fin m ↦ (&(e i) : ArithmeticSemiterm V 2))
     (fun x : ξ ↦ (&(f x) : ArithmeticSemiterm V 2)) ▹ θ;
   constructor;
-  . exact hθ.rew _;
-  . intro v;
+  · exact hθ.rew _;
+  · intro v;
     simp only [Semiformula.eval_rew];
     have hb : (Semiterm.val (L := ℒₒᵣ) (M := V) v id) ∘
         (Rew.bind (#1 :> #0 :> fun i : Fin m ↦ (&(e i) : ArithmeticSemiterm V 2))

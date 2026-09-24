@@ -9,19 +9,21 @@ namespace FFL.FirstOrder
 variable {L : Language} [L.ReferenceableBy L] {T₀ T : Theory L}
 
 open ProvabilityAbstraction
-open Classical
 
 namespace ProvabilityAbstraction
 
 variable {𝔅 : Provability T₀ T}
 
+open scoped Classical in
 noncomputable def Provability.height (𝔅 : Provability T₀ T) : ENat := ENat.find (T ⊢ 𝔅^[·] ⊥)
 
 @[simp]
-lemma neg_iterated_prov (φ : Sentence L) : ∼(𝔅^[n] φ) = 𝔅.dia^[n] (∼φ) := by
+lemma neg_iterated_prov {n : ℕ} (φ : Sentence L) : ∼(𝔅^[n] φ) = 𝔅.dia^[n] (∼φ) := by
   induction n generalizing φ <;> simp [Provability.dia, *]
 
-lemma boxBot_monotone [T₀ ⪯ T] [𝔅.HBL] : n ≤ m → T ⊢ 𝔅^[n] ⊥ 🡒 𝔅^[m] ⊥ := by
+lemma boxBot_monotone [T₀ ⪯ T] [𝔅.HBL] {n m : ℕ} :
+    n ≤ m → T ⊢ 𝔅^[n] ⊥ 🡒 𝔅^[m] ⊥ := by
+  classical
   revert m
   suffices ∀ k, T ⊢ 𝔅^[n] ⊥ 🡒 𝔅^[n + k] ⊥ by
     intro m hnm
@@ -35,9 +37,9 @@ lemma boxBot_monotone [T₀ ⪯ T] [𝔅.HBL] : n ≤ m → T ⊢ 𝔅^[n] ⊥ �
       match n with
       | 0 => simp;
       | n + 1 =>
-        have : T ⊢ 𝔅 ((𝔅)^[n] ⊥) 🡒 𝔅 (𝔅 ((𝔅)^[n] ⊥)) := Entailment.WeakerThan.pbl $ 𝔅.D3;
+        have : T ⊢ 𝔅 ((𝔅)^[n] ⊥) 🡒 𝔅 (𝔅 ((𝔅)^[n] ⊥)) := Entailment.WeakerThan.pbl <| 𝔅.D3;
         simpa only [Function.iterate_succ_apply'] using this
-    have b₁ : T ⊢ 𝔅 (𝔅^[n] ⊥) 🡒 𝔅 (𝔅^[n + k] ⊥) := Entailment.WeakerThan.pbl $ 𝔅.mono ih;
+    have b₁ : T ⊢ 𝔅 (𝔅^[n] ⊥) 🡒 𝔅 (𝔅^[n + k] ⊥) := Entailment.WeakerThan.pbl <| 𝔅.mono ih;
     cl_prover [b₀, b₁]
 
 lemma iIncon_unprovable_of_sigma1_sound [𝔅.Kreisel] [Entailment.Consistent T] : ∀ n, T ⊬ 𝔅^[n] ⊥
@@ -59,7 +61,7 @@ lemma height_lt_pos_of_boxBot (hSound : ∀ {σ}, T₀ ⊢ 𝔅 σ → T ⊢ σ)
   {n : ℕ} (pos : 0 < n) (h : T₀ ⊢ 𝔅^[n] ⊥) : 𝔅.height < n := by
   have e : n.pred.succ = n := Eq.symm <| (Nat.sub_eq_iff_eq_add pos).mp rfl
   have : T₀ ⊢ 𝔅 (𝔅^[n.pred] ⊥) := by rwa [←Function.iterate_succ_apply' (f := 𝔅), e];
-  have : 𝔅.height ≤ n.pred := height_le_of_boxBot $ hSound this
+  have : 𝔅.height ≤ n.pred := height_le_of_boxBot <| hSound this
   have : 𝔅.height < n := by
     rw [←e]
     exact lt_of_le_of_lt this <| ENat.natCast_lt_natCast.mpr <| by simp
@@ -89,12 +91,14 @@ end ProvabilityAbstraction
 
 open ProvabilityAbstraction
 
-noncomputable abbrev ArithmeticTheory.height (T : ArithmeticTheory) [T.Δ₁] : ℕ∞ := T.standardProvability.height
+noncomputable abbrev ArithmeticTheory.height (T : ArithmeticTheory) [T.Δ₁] : ℕ∞ :=
+  T.standardProvability.height
 
 namespace Arithmetic
 
 @[grind =]
-lemma height_eq_top_of_sigma1_sound (T : ArithmeticTheory) [T.Δ₁] [ArithmeticTheory.SoundOnHierarchy T 𝚺 1] : T.height = ⊤ :=
+lemma height_eq_top_of_sigma1_sound (T : ArithmeticTheory) [T.Δ₁]
+    [ArithmeticTheory.SoundOnHierarchy T 𝚺 1] : T.height = ⊤ :=
   T.standardProvability.height_eq_top_of_sound_and_consistent
 
 @[simp, grind =]

@@ -87,20 +87,20 @@ theorem complete
     | falsum => exact ⟨fun h ↦ hU (isPropClosed.botL_mem h), fun _ ↦ id⟩;
     | imp A B ihA ihB =>
       constructor;
-      . intro h hA;
+      · intro h hA;
         rcases hsatU.impL h with h | h;
-        . exact absurd hA (ihA.2 h);
-        . exact ihB.1 h;
-      . intro h hf;
+        · exact absurd hA (ihA.2 h);
+        · exact ihB.1 h;
+      · intro h hf;
         obtain ⟨hA, hB⟩ := hsatU.impR h;
         exact ihB.2 hB (hf (ihA.1 hA));
     | box A ih =>
       constructor;
-      . rintro h (y | j) R;
-        . exact (hchain (□A) 0).1 (hbox' h) (.inl y) trivial;
-        . obtain ⟨m, rfl⟩ := ENat.ne_top_iff_exists.mp (ne_top_of_lt (toFreeTail.rel_inr_inr.mp R));
+      · rintro h (y | j) R;
+        · exact (hchain (□A) 0).1 (hbox' h) (.inl y) trivial;
+        · obtain ⟨m, rfl⟩ := ENat.ne_top_iff_exists.mp (ne_top_of_lt (toFreeTail.rel_inr_inr.mp R));
           exact (hchain A m).1 (hbox (hbox' h));
-      . intro h hf;
+      · intro h hf;
         exact (hchain (□A) 0).2
           (hsubT.suc (Finset.mem_image_of_mem _ (FormulaFinset.mem_prebox.mpr h)))
           (toFreeTail.forces_box_of_root hf _);

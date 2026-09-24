@@ -18,8 +18,6 @@ open scoped FFL.FirstOrder.Derivation.Canonical
 
 variable {L : Language}
 
-open Classical
-
 variable (L)
 
 def ConsistentSequent := {Γ : LK.Sequent L // IsEmpty (⊢ᴸᴷ¹ ∼Γ)}
@@ -40,10 +38,13 @@ def nil : ℙ := ⟨0, by simp⟩
 instance : OrderTop ℙ where
   top := nil
   le_top := by
+    classical
     rintro ⟨Γ, hΓ⟩
     exact ⟨StrongerThan.ofSubset default default <| by simp [nil]⟩
 
-def ofUnprovable (φ : Proposition L) (h : 𝐋𝐊¹ ⊬ ∼φ) : ℙ := ⟨⦃φ⦄, by simpa [LK.Proof.unprovable_def] using h⟩
+def ofUnprovable (φ : Proposition L) (h : 𝐋𝐊¹ ⊬ ∼φ) : ℙ := by
+  classical
+  exact ⟨⦃φ⦄, by simpa [LK.Proof.unprovable_def] using h⟩
 
 end ConsistentSequent
 
@@ -55,7 +56,11 @@ instance : WeakForcingRelation ℙ (Proposition L) := ⟨fun p φ ↦ p ⊩ φ�
 
 namespace IsForced
 
-@[simp] lemma rel {p : ℙ} {k} {R : L.Rel k} {v} : p ⊩ .rel R v ↔ Nonempty (⊢ᴸᴷ¹ ∼p.val + ⦃.rel R v⦄) := by
+variable {φ : Semipropositionᵢ L 1} {t : SyntacticTerm L}
+
+@[simp] lemma rel {p : ℙ} {k} {R : L.Rel k} {v} :
+    p ⊩ .rel R v ↔ Nonempty (⊢ᴸᴷ¹ ∼p.val + ⦃.rel R v⦄) := by
+  classical
   constructor
   · rintro ⟨b⟩
     have ⟨d, hd⟩ := b.relEquiv
@@ -94,6 +99,7 @@ namespace IsForced
   exact p.prop.false d
 
 lemma imply {p : ℙ} {φ ψ : Propositionᵢ L} : p ⊩ φ 🡒 ψ ↔ (∀ q ≤ p, q ⊩ φ → q ⊩ ψ) := by
+  classical
   constructor
   · rintro ⟨b⟩ q ⟨sqp⟩ ⟨bφ⟩
     exact ⟨b.implyEquiv _ sqp bφ⟩
@@ -138,6 +144,8 @@ namespace IsWeaklyForced
 
 open IsForced
 
+variable {φ : Semiproposition L 1} {t : SyntacticTerm L}
+
 lemma iff_isForced {φ : Proposition L} {p : ℙ} : p ⊩ᶜ φ ↔ p ⊩ φᴺ := by rfl
 
 lemma dn_neg_iff {φ : Proposition L} {p : ℙ} : p ⊩ᶜ ∼φ ↔ p ⊩ ∼φᴺ := by
@@ -159,13 +167,15 @@ lemma dn_neg_iff {φ : Proposition L} {p : ℙ} : p ⊩ᶜ ∼φ ↔ p ⊩ ∼φ
 @[simp] lemma and {φ ψ : Proposition L} {p : ℙ} : p ⊩ᶜ φ ⋏ ψ ↔ p ⊩ᶜ φ ∧ p ⊩ᶜ ψ := by
   simp [iff_isForced, ]
 
-@[simp] lemma or {φ ψ : Proposition L} {p : ℙ} : p ⊩ᶜ φ ⋎ ψ ↔ ∀ q ≤ p, ∃ r ≤ q, r ⊩ᶜ φ ∨ r ⊩ᶜ ψ := by
+@[simp] lemma or {φ ψ : Proposition L} {p : ℙ} :
+    p ⊩ᶜ φ ⋎ ψ ↔ ∀ q ≤ p, ∃ r ≤ q, r ⊩ᶜ φ ∨ r ⊩ᶜ ψ := by
   simp [iff_isForced, IsForced.not, ]; grind
 
-@[simp] lemma all {φ : Semiproposition L 1} {p : ℙ} : p ⊩ᶜ ∀¹ φ ↔ ∀ t, p ⊩ᶜ φ/[t] := by
+@[simp] lemma all {p : ℙ} : p ⊩ᶜ ∀¹ φ ↔ ∀ t, p ⊩ᶜ φ/[t] := by
   simp [iff_isForced, Semiformula.subst_doubleNegation]
 
-@[simp] lemma exs {φ : Semiproposition L 1} {p : ℙ} : p ⊩ᶜ ∃¹ φ ↔ ∀ q ≤ p, ∃ r ≤ q, ∃ t, r ⊩ᶜ φ/[t] := by
+@[simp] lemma exs {p : ℙ} :
+    p ⊩ᶜ ∃¹ φ ↔ ∀ q ≤ p, ∃ r ≤ q, ∃ t, r ⊩ᶜ φ/[t] := by
   simp [iff_isForced, IsForced.not, Semiformula.subst_doubleNegation]; grind
 
 lemma monotone {φ : Proposition L} {p q : ℙ} (h : q ≤ p) : p ⊩ᶜ φ → q ⊩ᶜ φ := IsForced.monotone h
@@ -175,6 +185,7 @@ lemma gnericity {φ : Proposition L} {p : ℙ} : p ⊩ᶜ φ ↔ ∀ q ≤ p, �
   _      ↔ ∀ q ≤ p, ∃ r ≤ q, r ⊩ᶜ φ := by rw [not]; simp [not]
 
 lemma complete {φ : Proposition L} : ℙ ∀⊩ᶜ φ ↔ 𝐋𝐊¹ ⊢ φ := by
+  classical
   constructor
   · intro h
     by_contra b
@@ -189,7 +200,7 @@ lemma complete {φ : Proposition L} : ℙ ∀⊩ᶜ φ ↔ 𝐋𝐊¹ ⊢ φ := 
     exact IsForced.sound <| Provable.gödel_gentzen b
 
 protected lemma refl (φ : Proposition L) (h : 𝐋𝐊¹ ⊬ ∼φ) :
-    ConsistentSequent.ofUnprovable φ h ⊩ᶜ φ := ⟨Forces.refl φ⟩
+    ConsistentSequent.ofUnprovable φ h ⊩ᶜ φ := by classical exact ⟨Forces.refl φ⟩
 
 end IsWeaklyForced
 

@@ -58,8 +58,8 @@ lemma forcesSequent_impL (h₁ : x ⊩[M] (Γ ⟹ insert A Δ)) (h₂ : x ⊩[M]
   intro hx;
   have hΓ : ∀ C ∈ Γ, x ⊩[M] C := fun C hC ↦ hx C (by simp [hC]);
   by_cases hA : x ⊩[M] A;
-  . exact h₂ (by simpa [hx _ (Finset.mem_insert_self _ _) hA] using hΓ);
-  . obtain ⟨D, hD, hxD⟩ := h₁ hΓ;
+  · exact h₂ (by simpa [hx _ (Finset.mem_insert_self _ _) hA] using hΓ);
+  · obtain ⟨D, hD, hxD⟩ := h₁ hΓ;
     grind;
 
 @[grind →]
@@ -67,11 +67,11 @@ lemma forcesSequent_impR (h : x ⊩[M] (insert A Γ ⟹ insert B Δ)) :
     x ⊩[M] (Γ ⟹ insert (A 🡒 B) Δ) := by
   intro hx;
   by_cases hA : x ⊩[M] A;
-  . obtain ⟨D, hD, hxD⟩ := h (by simpa [hA] using hx);
+  · obtain ⟨D, hD, hxD⟩ := h (by simpa [hA] using hx);
     rcases Finset.mem_insert.mp hD with rfl | hD;
-    . exact ⟨A 🡒 D, by simp, fun _ ↦ hxD⟩;
-    . grind;
-  . exact ⟨A 🡒 B, by simp, fun h ↦ absurd h hA⟩;
+    · exact ⟨A 🡒 D, by simp, fun _ ↦ hxD⟩;
+    · grind;
+  · exact ⟨A 🡒 B, by simp, fun h ↦ absurd h hA⟩;
 
 @[grind →]
 lemma forcesSequent_cut {Γ₁ Γ₂ Δ₁ Δ₂ : FormulaFinset α}
@@ -80,13 +80,13 @@ lemma forcesSequent_cut {Γ₁ Γ₂ Δ₁ Δ₂ : FormulaFinset α}
   intro hx;
   obtain ⟨D, hD, hxD⟩ := h₁ fun C hC ↦ hx C (by simp [hC]);
   rcases Finset.mem_insert.mp hD with rfl | hD;
-  . obtain ⟨E, hE, hxE⟩ := h₂ (by
+  · obtain ⟨E, hE, hxE⟩ := h₂ (by
       intro C hC;
       rcases Finset.mem_insert.mp hC with rfl | hC;
-      . exact hxD;
-      . exact hx C (by simp [hC]));
+      · exact hxD;
+      · exact hx C (by simp [hC]));
     exact ⟨E, by simp [hE], hxE⟩;
-  . exact ⟨D, by simp [hD], hxD⟩;
+  · exact ⟨D, by simp [hD], hxD⟩;
 
 end Model.World
 

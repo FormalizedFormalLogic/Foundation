@@ -29,7 +29,8 @@ inductive Gentzen : Sequent α → Prop
     Gentzen (Γ ⟹ insert A Δ) → Gentzen (insert B Γ ⟹ Δ) → Gentzen (insert (A 🡒 B) Γ ⟹ Δ)
   | impR {Γ Δ A B} : Gentzen (insert A Γ ⟹ insert B Δ) → Gentzen (Γ ⟹ insert (A 🡒 B) Δ)
   | boxT {Γ Δ A} : Gentzen (insert A Γ ⟹ Δ) → Gentzen (insert (□A) Γ ⟹ Δ)
-  | boxGrz {Γ : FormulaFinset α} {A} : Gentzen (insert (□(A 🡒 □A)) Γ.box ⟹ {A}) → Gentzen (Γ.box ⟹ {□A})
+  | boxGrz {Γ : FormulaFinset α} {A} :
+      Gentzen (insert (□(A 🡒 □A)) Γ.box ⟹ {A}) → Gentzen (Γ.box ⟹ {□A})
 
 @[inherit_doc] notation:45 "⊢ᴳ[Grz] " S:50 => Gentzen S
 

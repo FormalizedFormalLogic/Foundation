@@ -52,8 +52,8 @@ lemma interpret_subst {β : Type*} {s : Substitution β α} {A : Formula β} :
 
 end Formula
 
-def _root_.FFL.FirstOrder.ArithmeticTheory.provabilityLogicRelativeTo (T U : ArithmeticTheory) [T.Δ₁] :
-    Logic α :=
+def _root_.FFL.FirstOrder.ArithmeticTheory.provabilityLogicRelativeTo
+    (T U : ArithmeticTheory) [T.Δ₁] : Logic α :=
   { A | ∀ f : Realization α ℒₒᵣ, U ⊢ f T A }
 
 abbrev _root_.FFL.FirstOrder.ArithmeticTheory.provabilityLogic (T : ArithmeticTheory) [T.Δ₁] :

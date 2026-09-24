@@ -31,8 +31,8 @@ lemma eventually_isReflexiveOf [M.IsGL] {w : ℕ → M.World} (hw : ∀ n, w (n 
   have h : ∀ A, ∃ i, ∀ j ≥ i, w j ⊩[M] □A 🡒 A := by
     intro A;
     by_cases h : ∀ n, w n ⊩[M] A;
-    . exact ⟨0, fun j _ _ ↦ h j⟩;
-    . push Not at h;
+    · exact ⟨0, fun j _ _ ↦ h j⟩;
+    · push Not at h;
       obtain ⟨n, hn⟩ := h;
       exact ⟨n + 1, fun j hj h ↦ absurd
         (h _ (Nat.rel_of_forall_rel_succ_of_lt (fun x y : M.World ↦ y ≺ x) hw (by omega))) hn⟩;
@@ -76,8 +76,8 @@ theorem sound_aux {T : LayeredSequent 2 α} (h : ⊢ᴳ[S] T) :
     apply h M x (fun _ B hB ↦ hx B (by simp [hB]));
     intro C hC;
     rcases Finset.mem_insert.mp hC with rfl | hC;
-    . exact hx C (by simp) (hΓ _ (by simp));
-    . exact hΓ C (by simp [hC]);
+    · exact hx C (by simp) (hΓ _ (by simp));
+    · exact hΓ C (by simp [hC]);
 
 /-- - [KK23, Theorem 3.1] -/
 theorem sound (h : ⊢ᴳ[S] Γ ⟹[1] Δ) :
@@ -96,7 +96,8 @@ lemma truthlemma_freeTail {BS : Sequent α} [Fact (⊬ᴳ[GL] BS)] {t : GL.Satur
     (hbox : ∀ {A}, □A ∈ t.ant → A ∈ t.ant) {V : ℕ∞ → α → Prop}
     (hV : ∀ n : ℕ, V n = fun a ↦ #a ∈ t.ant) (A : Formula α) (n : ℕ) :
     let N := ((GL.countermodel BS).cone t).toModel.toFreeTail V;
-    (A ∈ t.ant → Sum.inr (n : ℕ∞) ⊩[N.toModel] A) ∧ (A ∈ t.suc → ¬Sum.inr (n : ℕ∞) ⊩[N.toModel] A) := by
+    (A ∈ t.ant → Sum.inr (n : ℕ∞) ⊩[N.toModel] A) ∧
+      (A ∈ t.suc → ¬Sum.inr (n : ℕ∞) ⊩[N.toModel] A) := by
   induction A generalizing n with
   | atom a =>
     have := iff_of_eq (congrFun (hV n) a);
@@ -104,24 +105,24 @@ lemma truthlemma_freeTail {BS : Sequent α} [Fact (⊬ᴳ[GL] BS)] {t : GL.Satur
   | falsum => exact ⟨fun h ↦ absurd h GL.SaturatedSequent.bot_not_mem_ant, fun _ ↦ id⟩;
   | imp A B ihA ihB =>
     constructor;
-    . intro h hA;
+    · intro h hA;
       rcases t.saturated.impL h with h | h;
-      . exact absurd hA ((ihA n).2 h);
-      . exact (ihB n).1 h;
-    . intro h hf;
+      · exact absurd hA ((ihA n).2 h);
+      · exact (ihB n).1 h;
+    · intro h hf;
       obtain ⟨hA, hB⟩ := t.saturated.impR h;
       exact (ihB n).2 hB (hf ((ihA n).1 hA));
   | box A ih =>
     constructor;
-    . rintro h (⟨y, rfl | Rty⟩ | j) Rnj;
-      . exact Model.toFreeTail.forces_inl.mpr <| forces_cone.mpr <|
+    · rintro h (⟨y, rfl | Rty⟩ | j) Rnj;
+      · exact Model.toFreeTail.forces_inl.mpr <| forces_cone.mpr <|
           GL.countermodel.truthlemma.1 (hbox h);
-      . exact Model.toFreeTail.forces_inl.mpr <| forces_cone.mpr <|
+      · exact Model.toFreeTail.forces_inl.mpr <| forces_cone.mpr <|
           GL.countermodel.truthlemma.1 (Rty.2 (by simpa using h));
-      . obtain ⟨m, rfl⟩ := ENat.ne_top_iff_exists.mp
+      · obtain ⟨m, rfl⟩ := ENat.ne_top_iff_exists.mp
           (ne_top_of_lt (Model.toFreeTail.rel_inr_inr.mp Rnj));
         exact (ih m).1 (hbox h);
-    . intro h hf;
+    · intro h hf;
       obtain ⟨y, Rty, hy⟩ := not_forces_box.mp ((GL.countermodel.truthlemma (x := t)).2 h);
       exact hy <| forces_cone.mp <| Model.toFreeTail.forces_inl.mp <|
         hf (.inl ⟨y, .inr Rty⟩) trivial;

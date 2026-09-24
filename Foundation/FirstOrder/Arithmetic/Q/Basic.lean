@@ -37,10 +37,10 @@ open ORingStructure
       simpa [models_iff]
     intro a b
     constructor;
-    . intro h;
+    · intro h;
       use (b - a - 1);
       omega;
-    . rintro ⟨c, hc⟩;
+    · rintro ⟨c, hc⟩;
       simp [←hc];
   case zeroOrSucc =>
     simp [models_iff]
@@ -125,13 +125,13 @@ lemma succ_inj_zero {a : M} : a + 1 = 1 → a = 0 := by
 lemma eq_zero_of_eq_add_zero {a b : M} (h : a + b = 0) : a = 0 ∧ b = 0 := by
   set_option push_neg.use_distrib true in contrapose! h;
   rcases h with ha | hb;
-  . obtain ⟨c, rfl⟩ := exists_succ_of_ne_zero (M := M) ha;
+  · obtain ⟨c, rfl⟩ := exists_succ_of_ne_zero (M := M) ha;
     by_cases hb0 : b = 0;
-    . subst hb0; rwa [Arithmetic.add_zero]
-    . obtain ⟨d, rfl⟩ := exists_succ_of_ne_zero (M := M) hb0;
+    · subst hb0; rwa [Arithmetic.add_zero]
+    · obtain ⟨d, rfl⟩ := exists_succ_of_ne_zero (M := M) hb0;
       rw [Arithmetic.add_succ (a := c + 1) (b := d)];
       apply Arithmetic.succ_ne_zero;
-  . obtain ⟨c, rfl⟩ := exists_succ_of_ne_zero' (M := M) hb;
+  · obtain ⟨c, rfl⟩ := exists_succ_of_ne_zero' (M := M) hb;
     rw [Arithmetic.add_succ];
     simp;
 
@@ -166,12 +166,12 @@ lemma lt_of_not_zero {a b : M} (ha : b ≠ 0) : a < a + b := by
 @[simp]
 lemma iff_le_one_eq_zero {a : M} : a < 1 ↔ a = 0 := by
   constructor;
-  . rw [Arithmetic.lt_def];
+  · rw [Arithmetic.lt_def];
     rintro ⟨b, hb⟩;
     apply eq_zero_of_eq_add_zero (b := b) ?_ |>.1;
     apply succ_inj_zero;
     rwa [Arithmetic.add_succ] at hb;
-  . rintro rfl;
+  · rintro rfl;
     apply Arithmetic.lt_def.mpr;
     use 0;
     simp;
@@ -194,9 +194,10 @@ lemma numeral_add (n m : ℕ) : (numeral n : M) + numeral m = numeral (n + m) :=
   |     0 => simp
   |     1 => simp [numeral_add_one]
   | m + 2 => calc
-    (numeral n : M) + (numeral (m + 1) + 1) = (numeral n + numeral (m + 1)) + 1 := Arithmetic.add_succ _ _
-    _                                       = numeral (n + (m + 1)) + 1         := by rw [numeral_add n (m + 1)]
-    _                                       = numeral (n + (m + 2))             := by simp [←add_assoc]; rfl
+    (numeral n : M) + (numeral (m + 1) + 1) = (numeral n + numeral (m + 1)) + 1 :=
+      Arithmetic.add_succ _ _
+    _ = numeral (n + (m + 1)) + 1 := by rw [numeral_add n (m + 1)]
+    _ = numeral (n + (m + 2)) := by simp [←add_assoc]; rfl
 
 
 lemma numeral_zero_mul {n : ℕ} : 0 * (numeral n : M) = 0 := by
@@ -218,9 +219,10 @@ lemma numeral_mul {n m : ℕ} : (numeral n : M) * numeral m = numeral (n * m) :=
   |     0 => simp
   |     1 => simp [numeral_mul_one]
   | m + 2 => calc
-    (numeral n : M) * (numeral (m + 1) + 1) = numeral n * numeral (m + 1) + numeral n := by rw [Arithmetic.mul_succ]
-    _                                       = numeral (n * (m + 1)) + numeral n       := by rw [numeral_mul]
-    _                                       = numeral (n * (m + 2))                   := by simp [numeral_add, mul_add, mul_two, ←add_assoc]
+    (numeral n : M) * (numeral (m + 1) + 1) = numeral n * numeral (m + 1) + numeral n := by
+      rw [Arithmetic.mul_succ]
+    _ = numeral (n * (m + 1)) + numeral n := by rw [numeral_mul]
+    _ = numeral (n * (m + 2)) := by simp [numeral_add, mul_add, mul_two, ←add_assoc]
 
 lemma exists_numeral_of_ne_zero {n : ℕ} (h : n ≠ 0) : ∃ m, (numeral n : M) = (numeral (m + 1)) := by
   match n with
@@ -239,7 +241,8 @@ lemma numeral_zero_succ_ne {n : ℕ} : (numeral 0 : M) ≠ (numeral (n + 1))  :=
   simp [←numeral_add];
 
 
-lemma numeral_succ_inj {n m : ℕ} (h : (numeral (n + 1) : M) = numeral (m + 1)) : (numeral n : M) = (numeral m : M) := by
+lemma numeral_succ_inj {n m : ℕ} (h : (numeral (n + 1) : M) = numeral (m + 1)) :
+    (numeral n : M) = (numeral m : M) := by
   rw [←numeral_add_one, ←numeral_add_one] at h;
   apply succ_inj h;
 
@@ -272,7 +275,8 @@ lemma numeral_lt_add {n m : ℕ} (hm : m ≠ 0) : (numeral n : M) < numeral n + 
   omega;
 
 @[simp]
-lemma numeral_lt_succ {n : ℕ} : (numeral n : M) < numeral n + numeral 1 := numeral_lt_add $ by omega;
+lemma numeral_lt_succ {n : ℕ} : (numeral n : M) < numeral n + numeral 1 :=
+  numeral_lt_add <| by omega;
 
 lemma iff_lt_numeral_exists_numeral {n : ℕ} {x : M} : x < numeral n ↔ ∃ m < n, x = numeral m := by
   match n with
@@ -280,25 +284,25 @@ lemma iff_lt_numeral_exists_numeral {n : ℕ} {x : M} : x < numeral n ↔ ∃ m 
   | 1 => simp;
   | n + 2 =>
     constructor;
-    . intro h;
+    · intro h;
       obtain ⟨a, ha⟩ := Arithmetic.lt_def.mp h;
       by_cases ha0 : a = 0;
-      . subst ha0;
+      · subst ha0;
         use n + 1;
         constructor;
-        . omega;
-        . apply succ_inj;
+        · omega;
+        · apply succ_inj;
           have ha' : (x : M) + 1 = numeral (n + 2) := by simpa using ha
           rw [ha', numeral_add_one];
-      . obtain ⟨m, hm, rfl⟩ := iff_lt_numeral_exists_numeral (x := x) (n := n + 1) |>.mp $ by
-          have ha : x + a = numeral (n + 1) := succ_inj $ by rwa [Arithmetic.add_succ] at ha;
+      · obtain ⟨m, hm, rfl⟩ := iff_lt_numeral_exists_numeral (x := x) (n := n + 1) |>.mp <| by
+          have ha : x + a = numeral (n + 1) := succ_inj <| by rwa [Arithmetic.add_succ] at ha;
           rw [←ha];
           apply lt_of_not_zero ha0;
         use m;
         constructor;
-        . omega;
-        . rfl;
-    . rintro ⟨m, hm, rfl⟩;
+        · omega;
+        · rfl;
+    · rintro ⟨m, hm, rfl⟩;
       apply numeral_lt_of_lt;
       exact hm;
 

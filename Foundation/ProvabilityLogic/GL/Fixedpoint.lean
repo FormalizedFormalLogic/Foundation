@@ -31,8 +31,8 @@ lemma forces_subst_single_congr (h : ∀ y, (y = x ∨ x ≺ y) → (y ⊩[M] B 
   | box A ih =>
     exact forall_congr' fun y ↦ imp_congr_right fun Rxy ↦ ih fun z hz ↦ h z <| .inr <| by
       rcases hz with rfl | hz;
-      . exact Rxy;
-      . exact IsTrans.trans _ _ _ Rxy hz;
+      · exact Rxy;
+      · exact IsTrans.trans _ _ _ Rxy hz;
 
 lemma forces_subst_single_congr_of_modalizedIn (hA : A.ModalizedIn p)
     (h : ∀ y, x ≺ y → (y ⊩[M] B ↔ y ⊩[M] C)) : x ⊩[M] A⟦p ↦ B⟧ ↔ x ⊩[M] A⟦p ↦ C⟧ := by
@@ -43,8 +43,8 @@ lemma forces_subst_single_congr_of_modalizedIn (hA : A.ModalizedIn p)
   | box A =>
     exact forall_congr' fun y ↦ imp_congr_right fun Rxy ↦ forces_subst_single_congr fun z hz ↦ by
       rcases hz with rfl | hz;
-      . exact h z Rxy;
-      . exact h z (IsTrans.trans _ _ _ Rxy hz);
+      · exact h z Rxy;
+      · exact h z (IsTrans.trans _ _ _ Rxy hz);
 
 end Kripke.Model.World
 

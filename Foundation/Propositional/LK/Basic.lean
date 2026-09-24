@@ -9,20 +9,24 @@ namespace FFL.Propositional
 
 abbrev LK.Sequent (α : Type*) := Multiset (NNFormula α)
 
-inductive LK.Derivation : LK.Sequent α → Type _
+inductive LK.Derivation {α : Type*} : LK.Sequent α → Type _
 | identity (a : α) : LK.Derivation ⦃NNFormula.atom a, NNFormula.natom a⦄
-| cut : LK.Derivation (Γ + ⦃φ⦄) → LK.Derivation (Δ + ⦃∼φ⦄) → LK.Derivation (Γ + Δ)
-| contraction : LK.Derivation (Γ + ⦃φ, φ⦄) → LK.Derivation (Γ + ⦃φ⦄)
-| weakening : LK.Derivation Γ → LK.Derivation (Γ + ⦃φ⦄)
+| cut {Γ Δ : LK.Sequent α} {φ : NNFormula α} :
+    LK.Derivation (Γ + ⦃φ⦄) → LK.Derivation (Δ + ⦃∼φ⦄) → LK.Derivation (Γ + Δ)
+| contraction {Γ : LK.Sequent α} {φ : NNFormula α} :
+    LK.Derivation (Γ + ⦃φ, φ⦄) → LK.Derivation (Γ + ⦃φ⦄)
+| weakening {Γ : LK.Sequent α} {φ : NNFormula α} : LK.Derivation Γ → LK.Derivation (Γ + ⦃φ⦄)
 | verum : LK.Derivation ⦃⊤⦄
-| or : LK.Derivation (Γ + ⦃φ, ψ⦄) → LK.Derivation (Γ + ⦃φ ⋎ ψ⦄)
-| and : LK.Derivation (Γ + ⦃φ⦄) → LK.Derivation (Γ + ⦃ψ⦄) → LK.Derivation (Γ + ⦃φ ⋏ ψ⦄)
+| or {Γ : LK.Sequent α} {φ ψ : NNFormula α} :
+    LK.Derivation (Γ + ⦃φ, ψ⦄) → LK.Derivation (Γ + ⦃φ ⋎ ψ⦄)
+| and {Γ : LK.Sequent α} {φ ψ : NNFormula α} :
+    LK.Derivation (Γ + ⦃φ⦄) → LK.Derivation (Γ + ⦃ψ⦄) → LK.Derivation (Γ + ⦃φ ⋏ ψ⦄)
 
 prefix:45 "⊢ᴸᴷ⁰ " => LK.Derivation
 
 namespace LK.Derivation
 
-variable {T U : Theory α} {Δ Δ₁ Δ₂ Γ : LK.Sequent α}
+variable {α : Type*} {T U : Theory α} {Δ Δ₁ Δ₂ Γ : LK.Sequent α}
 
 def height {Δ : LK.Sequent α} : ⊢ᴸᴷ⁰ Δ → ℕ
   |identity _ => 0
@@ -34,7 +38,8 @@ def height {Δ : LK.Sequent α} : ⊢ᴸᴷ⁰ Δ → ℕ
 
 protected abbrev cast (d : ⊢ᴸᴷ⁰ Δ) (e : Δ = Γ := by abel) : ⊢ᴸᴷ⁰ Γ := e ▸ d
 
-@[simp] lemma height_cast (d : ⊢ᴸᴷ⁰ Δ) (e : Δ = Γ) : height (LK.Derivation.cast d e) = height d := by
+@[simp] lemma height_cast (d : ⊢ᴸᴷ⁰ Δ) (e : Δ = Γ) :
+    height (LK.Derivation.cast d e) = height d := by
   rcases e with rfl; simp [LK.Derivation.cast]
 
 instance : Structural (LK.Derivation (α := α)) where
@@ -97,6 +102,8 @@ inductive LK.Proof.Symbol (α : Type*) : Type
   | symbol
 
 notation "𝐋𝐊⁰" => LK.Proof.Symbol.symbol
+
+variable {α : Type*}
 
 abbrev LK.Proof (φ : NNFormula α) := ⊢ᴸᴷ⁰ ⦃φ⦄
 

@@ -26,16 +26,20 @@ variable {n : ℕ}
       simpa using! ih (vecTail v)
     exact funext (fun i ↦ i.cases (by simp) (by simp))
 
-lemma lt_of_eq_natToVec {e : ℕ} {v : Fin n → ℕ} (h : e.natToVec n = some v) (i : Fin n) : v i < e := by
-  induction' n with n ih generalizing e
-  · exact i.elim0
-  · cases' e with e
-    · simp [natToVec] at h
-    · simp only [natToVec, Option.map_eq_some_iff] at h
+lemma lt_of_eq_natToVec {e : ℕ} {v : Fin n → ℕ}
+    (h : e.natToVec n = some v) (i : Fin n) : v i < e := by
+  induction n generalizing e with
+  | zero => exact i.elim0
+  | succ n ih =>
+    cases e with
+    | zero => simp [natToVec] at h
+    | succ e =>
+      simp only [natToVec, Option.map_eq_some_iff] at h
       rcases h with ⟨v, hnv, rfl⟩
-      cases' i using Fin.cases with i
-      · simp [Nat.lt_succ_iff, unpair_left_le]
-      · simp only [cons_val_succ]
+      cases i using Fin.cases with
+      | zero => simp [Nat.lt_succ_iff, unpair_left_le]
+      | succ i =>
+        simp only [cons_val_succ]
         exact lt_trans (ih hnv i) (Nat.lt_succ_iff.mpr <| unpair_right_le e)
 
 /-- List form of `Nat.natToVec`: the same decoding, with the length out of the type. -/

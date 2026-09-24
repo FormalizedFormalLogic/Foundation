@@ -28,8 +28,8 @@ lemma Model.validateSequent_boxT [Std.Refl M.Rel] (h : M ⊧ (insert A Γ ⟹ Δ
   apply h x;
   simp only [Finset.mem_insert];
   rintro C (rfl | hC);
-  . exact hx _ (Finset.mem_insert_self _ _) x (Std.Refl.refl x);
-  . exact hx C (Finset.mem_insert_of_mem hC);
+  · exact hx _ (Finset.mem_insert_self _ _) x (Std.Refl.refl x);
+  · exact hx C (Finset.mem_insert_of_mem hC);
 
 @[grind →]
 lemma Model.validateSequent_boxGrz [M.IsGrz] (h : M ⊧ (insert (□(A 🡒 □A)) Γ.box ⟹ {A})) :
@@ -46,11 +46,11 @@ lemma Model.validateSequent_boxGrz [M.IsGrz] (h : M ⊧ (insert (□(A 🡒 □A
   apply validateSequent_singleton_iff.mp h v;
   simp only [Finset.mem_insert, Finset.mem_image];
   rintro C (rfl | ⟨C, hC, rfl⟩);
-  . intro u Rvu hu;
+  · intro u Rvu hu;
     by_contra hnu;
     obtain rfl := hmax u ⟨IsTrans.trans _ _ _ Rxv Rvu, hnu⟩ Rvu;
     exact hw hu;
-  . intro z Rvz;
+  · intro z Rvz;
     exact hx _ (Finset.mem_image_of_mem _ hC) z (IsTrans.trans _ _ _ Rxv Rvz);
 
 end Kripke
@@ -83,10 +83,12 @@ variable {α : Type*} [DecidableEq α] {BS : Sequent α} {A B C : Formula α}
 
 /-- The subformulas of `BS` together with `A 🡒 □A` and `□(A 🡒 □A)` for each subformula `□A`. -/
 noncomputable def closure (BS : Sequent α) : FormulaFinset α :=
-  BS.subfmls ∪ BS.subfmls.prebox.image (fun A ↦ A 🡒 □A) ∪ BS.subfmls.prebox.image (fun A ↦ □(A 🡒 □A))
+  BS.subfmls ∪ BS.subfmls.prebox.image (fun A ↦ A 🡒 □A) ∪
+    BS.subfmls.prebox.image (fun A ↦ □(A 🡒 □A))
 
 lemma mem_closure : C ∈ closure BS ↔
-    C ∈ BS.subfmls ∨ (∃ A, □A ∈ BS.subfmls ∧ A 🡒 □A = C) ∨ (∃ A, □A ∈ BS.subfmls ∧ □(A 🡒 □A) = C) := by
+    C ∈ BS.subfmls ∨ (∃ A, □A ∈ BS.subfmls ∧ A 🡒 □A = C) ∨
+      (∃ A, □A ∈ BS.subfmls ∧ □(A 🡒 □A) = C) := by
   simp [closure];
 
 @[grind .]
@@ -97,20 +99,21 @@ lemma mem_closure_of_box (h : □A ∈ BS.subfmls) : □(A 🡒 □A) ∈ closur
   mem_closure.mpr (.inr (.inr ⟨A, h, rfl⟩))
 
 @[grind →]
-lemma mem_subfmls_of_imp_mem_closure (h : A 🡒 B ∈ closure BS) : A ∈ BS.subfmls ∧ B ∈ BS.subfmls := by
+lemma mem_subfmls_of_imp_mem_closure (h : A 🡒 B ∈ closure BS) :
+    A ∈ BS.subfmls ∧ B ∈ BS.subfmls := by
   rcases mem_closure.mp h with h | ⟨C, hC, h⟩ | ⟨C, hC, h⟩;
-  . exact ⟨BS.mem_subfmls_subfmls h Formula.mem_subfmls_imp_left,
+  · exact ⟨BS.mem_subfmls_subfmls h Formula.mem_subfmls_imp_left,
       BS.mem_subfmls_subfmls h Formula.mem_subfmls_imp_right⟩;
-  . obtain ⟨rfl, rfl⟩ := Formula.imp_inj.mp h;
+  · obtain ⟨rfl, rfl⟩ := Formula.imp_inj.mp h;
     exact ⟨BS.mem_subfmls_subfmls hC Formula.mem_subfmls_box, hC⟩;
-  . cases h;
+  · cases h;
 
 @[grind →]
 lemma mem_closure_of_box_mem_closure (h : □A ∈ closure BS) : A ∈ closure BS := by
   rcases mem_closure.mp h with h | ⟨C, hC, h⟩ | ⟨C, hC, h⟩;
-  . exact subfmls_subset_closure (BS.mem_subfmls_subfmls h Formula.mem_subfmls_box);
-  . cases h;
-  . cases h;
+  · exact subfmls_subset_closure (BS.mem_subfmls_subfmls h Formula.mem_subfmls_box);
+  · cases h;
+  · cases h;
     exact mem_closure.mpr (.inr (.inl ⟨C, hC, rfl⟩));
 
 /-- The worlds of the canonical countermodel of `BS`. -/
@@ -205,12 +208,12 @@ lemma saturate_cons {E : Formula α} :
   | imp A B =>
     dsimp only [saturate];
     split_ifs <;>
-    . intro hboth;
+    · intro hboth;
       and_intros <;> simp_all [Finset.subset_iff] <;> grind;
   | box A =>
     dsimp only [saturate];
     split_ifs <;>
-    . intro hboth;
+    · intro hboth;
       and_intros <;> simp_all [SaturatedAt, Finset.subset_iff];
   | atom | falsum =>
     intro;
@@ -234,17 +237,18 @@ lemma saturate_bound (hant : S₀.ant ⊆ closure BS) (hsuc : S₀.suc ⊆ BS.su
     | imp A B =>
       dsimp only [saturate];
       split_ifs with h₁ h₂ h₃;
-      . exact ⟨Finset.insert_subset
+      · exact ⟨Finset.insert_subset
           (subfmls_subset_closure (mem_subfmls_of_imp_mem_closure (ih₁ h₁)).2) ih₁, ih₂⟩;
-      . exact ⟨ih₁, Finset.insert_subset (mem_subfmls_of_imp_mem_closure (ih₁ h₁)).1 ih₂⟩;
-      . have := mem_subfmls_of_imp_mem_closure (subfmls_subset_closure (ih₂ h₃));
-        exact ⟨Finset.insert_subset (subfmls_subset_closure this.1) ih₁, Finset.insert_subset this.2 ih₂⟩;
-      . exact ⟨ih₁, ih₂⟩;
+      · exact ⟨ih₁, Finset.insert_subset (mem_subfmls_of_imp_mem_closure (ih₁ h₁)).1 ih₂⟩;
+      · have := mem_subfmls_of_imp_mem_closure (subfmls_subset_closure (ih₂ h₃));
+        exact ⟨Finset.insert_subset (subfmls_subset_closure this.1) ih₁,
+          Finset.insert_subset this.2 ih₂⟩;
+      · exact ⟨ih₁, ih₂⟩;
     | box A =>
       dsimp only [saturate];
       split_ifs with h;
-      . exact ⟨Finset.insert_subset (mem_closure_of_box_mem_closure (ih₁ h)) ih₁, ih₂⟩;
-      . exact ⟨ih₁, ih₂⟩;
+      · exact ⟨Finset.insert_subset (mem_closure_of_box_mem_closure (ih₁ h)) ih₁, ih₂⟩;
+      · exact ⟨ih₁, ih₂⟩;
     | _ => exact ⟨ih₁, ih₂⟩;
 
 lemma saturate_saturated (hl : l.Pairwise (·.complexity ≤ ·.complexity)) :
@@ -255,8 +259,8 @@ lemma saturate_saturated (hl : l.Pairwise (·.complexity ≤ ·.complexity)) :
     obtain ⟨hD, hl⟩ := List.pairwise_cons.mp hl;
     obtain ⟨hsub, hant, hsuc, hsat⟩ := saturate_cons (S₀ := S₀) (h₀ := h₀) (l := l) (E := D);
     rintro E (_ | ⟨_, hE⟩);
-    . exact hsat;
-    . exact (ih hl E hE).mono hsub
+    · exact hsat;
+    · exact (ih hl E hE).mono hsub
         (fun F hF ↦ (hant F hF).imp_right fun h ↦ lt_of_lt_of_le h (hD E hE))
         (fun F hF ↦ (hsuc F hF).imp_right fun h ↦ lt_of_lt_of_le h (hD E hE));
 
@@ -320,23 +324,24 @@ lemma truthlemma : (A ∈ x.ant → x ⊩[countermodel BS] A) ∧ (A ∈ x.suc �
   | falsum => exact ⟨fun h ↦ absurd h bot_not_mem_ant, fun _ ↦ id⟩;
   | imp A B ihA ihB =>
     constructor;
-    . intro h hA;
+    · intro h hA;
       rcases x.saturated.impL h with hA' | hB;
-      . exact absurd hA (ihA.2 hA');
-      . exact ihB.1 hB;
-    . intro h hf;
+      · exact absurd hA (ihA.2 hA');
+      · exact ihB.1 hB;
+    · intro h hf;
       obtain ⟨hA, hB⟩ := x.saturated.impR h;
       exact ihB.2 hB (hf (ihA.1 hA));
   | box A ih =>
     constructor;
-    . intro h y Rxy;
+    · intro h y Rxy;
       exact ih.1 <| y.boxT_closed <| FormulaFinset.mem_prebox.mp <| Rxy.1 (by simpa);
-    . intro h;
+    · intro h;
       apply not_forces_box.mpr;
       by_cases hA : A ∈ x.suc;
-      . exact ⟨x, ⟨subset_rfl, fun _ ↦ rfl⟩, ih.2 hA⟩;
+      · exact ⟨x, ⟨subset_rfl, fun _ ↦ rfl⟩, ih.2 hA⟩;
       have h₀ : ⊬ᴳ[Grz] insert (□(A 🡒 □A)) x.ant.prebox.box ⟹ {A} := fun hp ↦
-        x.unprovable <| Gentzen.wk (Gentzen.boxGrz hp) FormulaFinset.box_prebox_subset (by simpa using h);
+        x.unprovable <|
+          Gentzen.wk (Gentzen.boxGrz hp) FormulaFinset.box_prebox_subset (by simpa using h);
       have hant : insert (□(A 🡒 □A)) x.ant.prebox.box ⊆ closure BS :=
         Finset.insert_subset (mem_closure_of_box (x.suc_subset h))
           (FormulaFinset.box_prebox_subset.trans x.ant_subset);
@@ -346,16 +351,16 @@ lemma truthlemma : (A ∈ x.ant → x ⊩[countermodel BS] A) ∧ (A ∈ x.suc �
       have hy := subset_lindenbaum (h₀ := h₀) (hant := hant) (hsuc := hsuc);
       use y;
       and_intros;
-      . intro B hB;
+      · intro B hB;
         exact FormulaFinset.mem_prebox.mpr <| hy.ant <|
           Finset.mem_insert_of_mem <| Finset.mem_image_of_mem _ hB;
-      . intro hyx;
+      · intro hyx;
         have : A 🡒 □A ∈ x.ant := x.boxT_closed <| FormulaFinset.mem_prebox.mp <| hyx <|
           FormulaFinset.mem_prebox.mpr <| hy.ant (Finset.mem_insert_self _ _);
         rcases x.saturated.impL this with h' | h';
-        . contradiction;
-        . exact absurd ⟨h', h⟩ not_mem_both;
-      . exact ih.2 (hy.suc (by simp));
+        · contradiction;
+        · exact absurd ⟨h', h⟩ not_mem_both;
+      · exact ih.2 (hy.suc (by simp));
 
 end countermodel
 
@@ -390,13 +395,13 @@ theorem cut (h₁ : ⊢ᴳ[Grz] Γ₁ ⟹ insert A Δ₁) (h₂ : ⊢ᴳ[Grz] in
   intro _ _ M _ x hx;
   obtain ⟨D, hD, hxD⟩ := sound M h₁ x (fun C hC ↦ hx C (by simp [hC]));
   rcases Finset.mem_insert.mp hD with rfl | hD;
-  . obtain ⟨E, hE, hxE⟩ := sound M h₂ x (by
+  · obtain ⟨E, hE, hxE⟩ := sound M h₂ x (by
       intro C hC;
       rcases Finset.mem_insert.mp hC with rfl | hC;
-      . exact hxD;
-      . exact hx C (by simp [hC]));
+      · exact hxD;
+      · exact hx C (by simp [hC]));
     exact ⟨E, by simp [hE], hxE⟩;
-  . exact ⟨D, by simp [hD], hxD⟩;
+  · exact ⟨D, by simp [hD], hxD⟩;
 
 end Gentzen
 

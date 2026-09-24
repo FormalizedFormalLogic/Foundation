@@ -20,14 +20,14 @@ private lemma numeral_eq_of_succ {M : Type*} [ORingStructure M] {f : ℕ → M}
   |     0 => h0.symm
   |     1 => h1.symm
   | n + 2 => by
-      show (ORingStructure.numeral (n + 1) : M) + 1 = f (n + 2);
+      change (ORingStructure.numeral (n + 1) : M) + 1 = f (n + 2);
       rw [numeral_eq_of_succ h0 h1 hs (n + 1)];
       exact (hs (n + 1)).symm;
 
 private lemma lt_iff_exists_lt {x n : ℕ} : x < n ↔ ∃ i < n, x = i := by
   constructor;
-  . intro hx; exact ⟨x, hx, rfl⟩;
-  . rintro ⟨i, hi, rfl⟩; exact hi;
+  · intro hx; exact ⟨x, hx, rfl⟩;
+  · rintro ⟨i, hi, rfl⟩; exact hi;
 
 end Countermodel
 
@@ -54,14 +54,14 @@ end NatSucc
 instance : NatSucc↓[ℒₒᵣ] ⊧* (𝗥₀ \ Ω₁Scheme) := ⟨by
   intro σ ⟨h, hn⟩;
   rcases h with ⟨_, h⟩ | ⟨n, m⟩ | ⟨n, m⟩ | n;
-  . have : NatSucc↓[ℒₒᵣ] ⊧* (𝗘𝗤 ℒₒᵣ : ArithmeticTheory) := inferInstance;
+  · have : NatSucc↓[ℒₒᵣ] ⊧* (𝗘𝗤 ℒₒᵣ : ArithmeticTheory) := inferInstance;
     simpa [models_iff] using models_theory_iff.mp this _ h;
-  . exact absurd ⟨n, m, rfl⟩ hn;
-  . suffices (ORingStructure.numeral n : NatSucc) * ORingStructure.numeral m
+  · exact absurd ⟨n, m, rfl⟩ hn;
+  · suffices (ORingStructure.numeral n : NatSucc) * ORingStructure.numeral m
       = ORingStructure.numeral (n * m) by simpa [models_iff];
     simp only [NatSucc.numeral_eq];
     rfl;
-  . suffices ∀ x : NatSucc, x < (n : NatSucc) ↔ ∃ i < n, x = (i : NatSucc) by
+  · suffices ∀ x : NatSucc, x < (n : NatSucc) ↔ ∃ i < n, x = (i : NatSucc) by
       simpa [models_iff, -existsAndEq];
     intro x;
     exact lt_iff_exists_lt;⟩
@@ -95,14 +95,14 @@ end NatZeroMul
 instance : NatZeroMul↓[ℒₒᵣ] ⊧* (𝗥₀ \ Ω₂Scheme) := ⟨by
   intro σ ⟨h, hn⟩;
   rcases h with ⟨_, h⟩ | ⟨n, m⟩ | ⟨n, m⟩ | n;
-  . have : NatZeroMul↓[ℒₒᵣ] ⊧* (𝗘𝗤 ℒₒᵣ : ArithmeticTheory) := inferInstance;
+  · have : NatZeroMul↓[ℒₒᵣ] ⊧* (𝗘𝗤 ℒₒᵣ : ArithmeticTheory) := inferInstance;
     simpa [models_iff] using models_theory_iff.mp this _ h;
-  . suffices (ORingStructure.numeral n : NatZeroMul) + ORingStructure.numeral m
+  · suffices (ORingStructure.numeral n : NatZeroMul) + ORingStructure.numeral m
       = ORingStructure.numeral (n + m) by simpa [models_iff];
     simp only [NatZeroMul.numeral_eq];
     rfl;
-  . exact absurd ⟨n, m, rfl⟩ hn;
-  . suffices ∀ x : NatZeroMul, x < (n : NatZeroMul) ↔ ∃ i < n, x = (i : NatZeroMul) by
+  · exact absurd ⟨n, m, rfl⟩ hn;
+  · suffices ∀ x : NatZeroMul, x < (n : NatZeroMul) ↔ ∃ i < n, x = (i : NatZeroMul) by
       simpa [models_iff, -existsAndEq];
     intro x;
     exact lt_iff_exists_lt;⟩
@@ -138,17 +138,17 @@ end NatNoLt
 instance : NatNoLt↓[ℒₒᵣ] ⊧* (𝗥₀ \ Ω₃Scheme) := ⟨by
   intro σ ⟨h, hn⟩;
   rcases h with ⟨_, h⟩ | ⟨n, m⟩ | ⟨n, m⟩ | n;
-  . have : NatNoLt↓[ℒₒᵣ] ⊧* (𝗘𝗤 ℒₒᵣ : ArithmeticTheory) := inferInstance;
+  · have : NatNoLt↓[ℒₒᵣ] ⊧* (𝗘𝗤 ℒₒᵣ : ArithmeticTheory) := inferInstance;
     simpa [models_iff] using models_theory_iff.mp this _ h;
-  . suffices (ORingStructure.numeral n : NatNoLt) + ORingStructure.numeral m
+  · suffices (ORingStructure.numeral n : NatNoLt) + ORingStructure.numeral m
       = ORingStructure.numeral (n + m) by simpa [models_iff];
     simp only [NatNoLt.numeral_eq];
     rfl;
-  . suffices (ORingStructure.numeral n : NatNoLt) * ORingStructure.numeral m
+  · suffices (ORingStructure.numeral n : NatNoLt) * ORingStructure.numeral m
       = ORingStructure.numeral (n * m) by simpa [models_iff];
     simp only [NatNoLt.numeral_eq];
     rfl;
-  . exact absurd ⟨n, rfl⟩ hn;⟩
+  · exact absurd ⟨n, rfl⟩ hn;⟩
 
 end Countermodel
 

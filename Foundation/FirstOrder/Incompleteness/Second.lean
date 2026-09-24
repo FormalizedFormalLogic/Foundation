@@ -28,7 +28,8 @@ theorem inconsistent_unprovable [ArithmeticTheory.SoundOnHierarchy T 𝚺 1] : T
   ProvabilityAbstraction.con_unrefutable (𝔅 := T.standardProvability)
 
 /-- The consistency statement is independent. -/
-theorem inconsistent_independent [ArithmeticTheory.SoundOnHierarchy T 𝚺 1] : Independent T T.consistent.val :=
+theorem inconsistent_independent [ArithmeticTheory.SoundOnHierarchy T 𝚺 1] :
+    Independent T T.consistent.val :=
   ProvabilityAbstraction.con_independent (𝔅 := T.standardProvability)
 
 instance [Consistent T] : T ⪱ T ∪ T.Con :=

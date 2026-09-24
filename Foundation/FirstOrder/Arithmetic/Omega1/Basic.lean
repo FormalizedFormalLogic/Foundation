@@ -5,13 +5,14 @@ public import Foundation.FirstOrder.Arithmetic.Exponential
 @[expose] public section
 /-!
 # Theory $\mathsf{I}\Sigma_0 + \Omega_1$
-
 -/
 
 namespace FFL.FirstOrder.Arithmetic
 
-/-- ∀ x, ∃ y, 2^{|x|^2} = y-/
-def _root_.FFL.Omega1.omega1 : ArithmeticSentence := “∀ x, ∃ y, ∃ l <⁺ x, !lengthDef l x ∧ !exponentialDef (l * l) y”
+/-- ∀ x, ∃ y, 2^{|x|^2} = y
+-/
+def _root_.FFL.Omega1.omega1 : ArithmeticSentence :=
+  “∀ x, ∃ y, ∃ l <⁺ x, !lengthDef l x ∧ !exponentialDef (l * l) y”
 
 inductive _root_.FFL.Omega1 : ArithmeticTheory where
   | omega : Omega1 Omega1.omega1
@@ -25,14 +26,20 @@ noncomputable section
 
 variable {V : Type*} [ORingStructure V]
 
-lemma models_Omega1_iff [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₀] : V↓[ℒₒᵣ] ⊧ Omega1.omega1 ↔ ∀ x : V, ∃ y, Exponential (‖x‖^2) y := by
+lemma models_Omega1_iff [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₀] :
+    V↓[ℒₒᵣ] ⊧ Omega1.omega1 ↔ ∀ x : V, ∃ y, Exponential (‖x‖^2) y := by
   simp [models_iff, Omega1.omega1, sq]
 
-lemma omega1_of_ISigma1 [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] : V↓[ℒₒᵣ] ⊧ Omega1.omega1 := models_Omega1_iff.mpr (fun x ↦ Exponential.range_exists (‖x‖^2))
+lemma omega1_of_ISigma1 [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] : V↓[ℒₒᵣ] ⊧ Omega1.omega1 :=
+  models_Omega1_iff.mpr (fun x ↦ Exponential.range_exists (‖x‖^2))
 
 instance [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] : V↓[ℒₒᵣ] ⊧* 𝗜𝚺₀ ∪ 𝝮₁ :=
   Semantics.ModelsSet.union_iff.mpr
-    ⟨inferInstance, ⟨by intro _; simp only [Theory.OmegaOne.mem_iff]; rintro rfl; exact omega1_of_ISigma1⟩⟩
+    ⟨inferInstance, ⟨by
+      intro _
+      simp only [Theory.OmegaOne.mem_iff]
+      rintro rfl
+      exact omega1_of_ISigma1⟩⟩
 
 variable [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₀ ∪ 𝝮₁]
 
@@ -53,14 +60,17 @@ lemma smash_exists_unique (x y : V) : ∃! z, Exponential (‖x‖ * ‖y‖) z 
   rcases exists_exponential_sq_length y with ⟨z, h⟩
   have : ‖x‖ * ‖y‖ < ‖z‖ :=
     lt_of_le_of_lt (by simpa [sq] using mul_le_mul_right (length_monotone le)) h.lt_length
-  have : Exponential (‖x‖ * ‖y‖) (bexp z (‖x‖ * ‖y‖)) := exp_bexp_of_lt (a := z) (x := ‖x‖ * ‖y‖) this
+  have : Exponential (‖x‖ * ‖y‖) (bexp z (‖x‖ * ‖y‖)) :=
+    exp_bexp_of_lt (a := z) (x := ‖x‖ * ‖y‖) this
   exact ExistsUnique.intro (bexp z (‖x‖ * ‖y‖)) this (fun z' H' ↦ H'.uniq this)
 
 instance : Smash V := ⟨fun a b ↦ Classical.choose! (smash_exists_unique a b)⟩
 
-lemma exponential_smash (a b : V) : Exponential (‖a‖ * ‖b‖) (a ⨳ b) := Classical.choose!_spec (smash_exists_unique a b)
+lemma exponential_smash (a b : V) : Exponential (‖a‖ * ‖b‖) (a ⨳ b) :=
+  Classical.choose!_spec (smash_exists_unique a b)
 
-lemma exponential_smash_one (a : V) : Exponential ‖a‖ (a ⨳ 1) := by simpa using exponential_smash a 1
+lemma exponential_smash_one (a : V) : Exponential ‖a‖ (a ⨳ 1) := by
+  simpa using exponential_smash a 1
 
 def smashDef : 𝚺₀.Semisentence 3 := .mkSigma
   “z x y. ∃ lx <⁺ x, ∃ ly <⁺ y, !lengthDef lx x ∧ !lengthDef ly y ∧ !exponentialDef (lx * ly) z”
@@ -86,7 +96,8 @@ lemma length_smash (a b : V) : ‖a ⨳ b‖ = ‖a‖ * ‖b‖ + 1 := (exponen
 
 @[simp] lemma smash_zero_right (a : V) : a ⨳ 0 = 1 := (exponential_smash a 0).uniq (by simp)
 
-lemma smash_comm (a b : V) : a ⨳ b = b ⨳ a := (exponential_smash a b).uniq (by simpa [mul_comm] using exponential_smash b a)
+lemma smash_comm (a b : V) : a ⨳ b = b ⨳ a :=
+  (exponential_smash a b).uniq (by simpa [mul_comm] using exponential_smash b a)
 
 @[simp] lemma lt_smash_one_right (a : V) : a < a ⨳ 1 := by
   have : Exponential ‖a‖ (a ⨳ 1) := by simpa using (exponential_smash a 1)
@@ -101,22 +112,28 @@ lemma smash_comm (a b : V) : a ⨳ b = b ⨳ a := (exponential_smash a b).uniq (
         simpa using length_mul_pow2_add_of_lt pos (show Pow2 2 from by simp) one_lt_two
       simp [this])
 
-lemma lt_smash_iff {a b c : V} : a < b ⨳ c ↔ ‖a‖ ≤ ‖b‖ * ‖c‖ := (exponential_smash b c).lt_iff_len_le
+lemma lt_smash_iff {a b c : V} : a < b ⨳ c ↔ ‖a‖ ≤ ‖b‖ * ‖c‖ :=
+  (exponential_smash b c).lt_iff_len_le
 
 lemma smash_le_iff {a b c : V} : b ⨳ c ≤ a ↔ ‖b‖ * ‖c‖ < ‖a‖ :=
   not_iff_not.mp <| by simp [lt_smash_iff]
 
-lemma lt_smash_one_iff {a b : V} : a < b ⨳ 1 ↔ ‖a‖ ≤ ‖b‖ := by simpa using lt_smash_iff (a := a) (b := b) (c := 1)
+lemma lt_smash_one_iff {a b : V} : a < b ⨳ 1 ↔ ‖a‖ ≤ ‖b‖ := by
+  simpa using lt_smash_iff (a := a) (b := b) (c := 1)
 
-lemma smash_monotone {a₁ a₂ b₁ b₂ : V} (h₁ : a₁ ≤ b₁) (h₂ : a₂ ≤ b₂) : a₁ ⨳ a₂ ≤ b₁ ⨳ b₂ :=
-  (exponential_smash a₁ a₂).monotone_le (exponential_smash b₁ b₂) (mul_le_mul (length_monotone h₁) (length_monotone h₂) (by simp) (by simp))
+lemma smash_monotone {a₁ a₂ b₁ b₂ : V} (h₁ : a₁ ≤ b₁) (h₂ : a₂ ≤ b₂) :
+    a₁ ⨳ a₂ ≤ b₁ ⨳ b₂ :=
+  (exponential_smash a₁ a₂).monotone_le (exponential_smash b₁ b₂)
+    (mul_le_mul (length_monotone h₁) (length_monotone h₂) (by simp) (by simp))
 
-lemma bexp_eq_smash (a b : V) : bexp (a ⨳ b) (‖a‖ * ‖b‖) = a ⨳ b := bexp_eq_of_exp (by simp [length_smash]) (exponential_smash a b)
+lemma bexp_eq_smash (a b : V) : bexp (a ⨳ b) (‖a‖ * ‖b‖) = a ⨳ b :=
+  bexp_eq_of_exp (by simp [length_smash]) (exponential_smash a b)
 
 lemma smash_two_mul (a : V) {b} (pos : 0 < b) : a ⨳ (2 * b) = (a ⨳ b) * (a ⨳ 1) := by
   have h₁ : Exponential (‖a‖ * ‖b‖ + ‖a‖) (a ⨳ (2 * b)) := by
     simpa [length_two_mul_of_pos pos, mul_add] using exponential_smash a (2 * b)
-  have h₂ : Exponential (‖a‖ * ‖b‖ + ‖a‖) (a ⨳ b * a ⨳ 1) := (exponential_smash a b).add_mul (exponential_smash_one a)
+  have h₂ : Exponential (‖a‖ * ‖b‖ + ‖a‖) (a ⨳ b * a ⨳ 1) :=
+    (exponential_smash a b).add_mul (exponential_smash_one a)
   exact h₁.uniq h₂
 
 lemma smash_two_mul_le_sq_smash (a b : V) : a ⨳ (2 * b) ≤ (a ⨳ b) ^ 2 := by

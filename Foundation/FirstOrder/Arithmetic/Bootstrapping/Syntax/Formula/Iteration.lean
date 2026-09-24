@@ -3,6 +3,7 @@ module
 public import Foundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Formula.Functions
 
 @[expose] public section
+set_option autoImplicit true
 namespace FFL.FirstOrder.Semiformula
 
 variable {L : Language} {ξ : Type*} {n : ℕ}
@@ -13,7 +14,8 @@ def replicate (p : Semiformula L ξ n) : ℕ → Semiformula L ξ n
 
 lemma replicate_zero (p : Semiformula L ξ n) : p.replicate 0 = p := by simp [replicate]
 
-lemma replicate_succ (p : Semiformula L ξ n) (k : ℕ) : p.replicate (k + 1) = p ⋏ p.replicate k := by simp [replicate]
+lemma replicate_succ (p : Semiformula L ξ n) (k : ℕ) :
+    p.replicate (k + 1) = p ⋏ p.replicate k := by simp [replicate]
 
 def weight (k : ℕ) : Semiformula L ξ n := (List.replicate k ⊤).conj
 
@@ -125,7 +127,7 @@ instance qqDisj.defined : 𝚺₁-Function₁[V] qqDisj via qqDisjGraph := const
 
 instance qqDisj.definable : 𝚺₁-Function₁[V] qqDisj := qqDisj.defined.to_definable
 
-instance qqDisj.definable'  : Γ-[m + 1]-Function₁[V] qqDisj := .of_sigmaOne qqDisj.definable
+instance qqDisj.definable' : Γ-[m + 1]-Function₁[V] qqDisj := .of_sigmaOne qqDisj.definable
 
 end
 
@@ -186,12 +188,15 @@ open DisjSeqSubst
 
 noncomputable def disjSeqSubst (w p k : V) : V := construction.result ![w, p] k
 
-@[simp] lemma disjSeqSubst_zero (w p : V) : disjSeqSubst w p 0 = ^⊥ := by simp [disjSeqSubst, construction]
+@[simp] lemma disjSeqSubst_zero (w p : V) : disjSeqSubst w p 0 = ^⊥ := by
+  simp [disjSeqSubst, construction]
 
 @[simp] lemma disjSeqSubst_succ (w p k : V) :
-    disjSeqSubst w p (k + 1) = subst ℒₒᵣ (numeral k ∷ w) p ^⋎ disjSeqSubst w p k := by simp [disjSeqSubst, construction]
+    disjSeqSubst w p (k + 1) = subst ℒₒᵣ (numeral k ∷ w) p ^⋎ disjSeqSubst w p k := by
+  simp [disjSeqSubst, construction]
 
-noncomputable def disjSeqSubstGraph : 𝚺₁.Semisentence 4 := blueprint.resultDef |>.rew (Rew.subst ![#0, #3, #1, #2])
+noncomputable def disjSeqSubstGraph : 𝚺₁.Semisentence 4 :=
+  blueprint.resultDef |>.rew (Rew.subst ![#0, #3, #1, #2])
 
 section
 
@@ -200,11 +205,13 @@ instance disjSeqSubst.defined : 𝚺₁-Function₃[V] disjSeqSubst via disjSeqS
 
 instance disjSeqSubst.definable : 𝚺₁-Function₃[V] disjSeqSubst := disjSeqSubst.defined.to_definable
 
-instance disjSeqSubst.definable' : Γ-[m + 1]-Function₃[V] disjSeqSubst := .of_sigmaOne disjSeqSubst.definable
+instance disjSeqSubst.definable' : Γ-[m + 1]-Function₃[V] disjSeqSubst :=
+  .of_sigmaOne disjSeqSubst.definable
 
 end
 
-lemma _root_.FFL.FirstOrder.Arithmetic.Bootstrapping.IsSemiformula.disjSeqSubst {n m w p : V} (hw : IsSemitermVec ℒₒᵣ n m w) (hp : IsSemiformula ℒₒᵣ (n + 1) p) (k : V) :
+lemma _root_.FFL.FirstOrder.Arithmetic.Bootstrapping.IsSemiformula.disjSeqSubst {n m w p : V}
+    (hw : IsSemitermVec ℒₒᵣ n m w) (hp : IsSemiformula ℒₒᵣ (n + 1) p) (k : V) :
     IsSemiformula ℒₒᵣ m (disjSeqSubst w p k) := by
   induction k using ISigma1.sigma1_succ_induction
   · definability
@@ -213,7 +220,8 @@ lemma _root_.FFL.FirstOrder.Arithmetic.Bootstrapping.IsSemiformula.disjSeqSubst 
     simpa [ih] using hp.subst <| hw.adjoin (numeral_semiterm m k)
 
 lemma substs_conj_disjSeqSubst {n m l v w p : V}
-    (hp : IsSemiformula ℒₒᵣ (n + 1) p) (hw : IsSemitermVec ℒₒᵣ n m w) (hv : IsSemitermVec ℒₒᵣ m l v) (k : V) :
+    (hp : IsSemiformula ℒₒᵣ (n + 1) p) (hw : IsSemitermVec ℒₒᵣ n m w)
+    (hv : IsSemitermVec ℒₒᵣ m l v) (k : V) :
     subst ℒₒᵣ v (disjSeqSubst w p k) = disjSeqSubst (termSubstVec ℒₒᵣ n v w) p k := by
   induction k using ISigma1.sigma1_succ_induction
   · definability
@@ -253,18 +261,23 @@ noncomputable def substItr (w p k : V) : V := construction.result ![w, p] k
 
 @[simp] lemma substItr_zero (w p : V) : substItr w p 0 = 0 := by simp [substItr, construction]
 
-@[simp] lemma substItr_succ (w p k : V) : substItr w p (k + 1) = subst ℒₒᵣ (numeral k ∷ w) p ∷ substItr w p k := by simp [substItr, construction]
+@[simp] lemma substItr_succ (w p k : V) :
+    substItr w p (k + 1) = subst ℒₒᵣ (numeral k ∷ w) p ∷ substItr w p k := by
+  simp [substItr, construction]
 
 section
 
-noncomputable def substItrGraph : 𝚺₁.Semisentence 4 := blueprint.resultDef |>.rew (Rew.subst ![#0, #3, #1, #2])
+noncomputable def substItrGraph : 𝚺₁.Semisentence 4 :=
+  blueprint.resultDef |>.rew (Rew.subst ![#0, #3, #1, #2])
 
 instance substItr.defined : 𝚺₁-Function₃[V] substItr via substItrGraph := .mk fun v ↦ by
   simp [construction.result_defined_iff, substItrGraph, substItr]
 
-instance substItr.definable : 𝚺₁-Function₃ (substItr : V → V → V → V) := substItr.defined.to_definable
+instance substItr.definable : 𝚺₁-Function₃ (substItr : V → V → V → V) :=
+  substItr.defined.to_definable
 
-instance substItr.definable' : Γ-[m + 1]-Function₃ (substItr : V → V → V → V) := .of_sigmaOne substItr.definable
+instance substItr.definable' : Γ-[m + 1]-Function₃ (substItr : V → V → V → V) :=
+  .of_sigmaOne substItr.definable
 
 end
 
@@ -301,7 +314,8 @@ lemma _root_.FFL.FirstOrder.Arithmetic.Bootstrapping.IsSemiformula.substItrDisj
   simp only [hi, substItr_nth]
   apply hp.subst (by simp [hw])
 
-lemma neg_conj_substItr {n w p k : V} (hp : IsSemiformula ℒₒᵣ (n + 1) p) (hw : IsSemitermVec ℒₒᵣ n m w) :
+lemma neg_conj_substItr {n w p k : V} (hp : IsSemiformula ℒₒᵣ (n + 1) p)
+    (hw : IsSemitermVec ℒₒᵣ n m w) :
     neg ℒₒᵣ (^⋀ (substItr w p k)) = ^⋁ (substItr w (neg ℒₒᵣ p) k) := by
   induction k using ISigma1.sigma1_succ_induction
   · definability
@@ -313,7 +327,8 @@ lemma neg_conj_substItr {n w p k : V} (hp : IsSemiformula ℒₒᵣ (n + 1) p) (
     · exact IsSemiformula.isUFormula <| hp.subst (by simpa [hw])
     · exact IsSemiformula.isUFormula <| hp.substItrConj hw k
 
-lemma neg_disj_substItr {n w p k : V} (hp : IsSemiformula ℒₒᵣ (n + 1) p) (hw : IsSemitermVec ℒₒᵣ n m w) :
+lemma neg_disj_substItr {n w p k : V} (hp : IsSemiformula ℒₒᵣ (n + 1) p)
+    (hw : IsSemitermVec ℒₒᵣ n m w) :
     neg ℒₒᵣ (^⋁ (substItr w p k)) = ^⋀ (substItr w (neg ℒₒᵣ p) k) := by
   induction k using ISigma1.sigma1_succ_induction
   · definability
@@ -325,35 +340,40 @@ lemma neg_disj_substItr {n w p k : V} (hp : IsSemiformula ℒₒᵣ (n + 1) p) (
     · apply IsSemiformula.isUFormula <| hp.subst (by simpa [hw])
     · apply IsSemiformula.isUFormula <| hp.substItrDisj hw k
 
-lemma shift_conj_substItr {n w p k : V} (hp : IsSemiformula ℒₒᵣ (n + 1) p) (hw : IsSemitermVec ℒₒᵣ n m w) :
+lemma shift_conj_substItr {n w p k : V} (hp : IsSemiformula ℒₒᵣ (n + 1) p)
+    (hw : IsSemitermVec ℒₒᵣ n m w) :
     shift ℒₒᵣ (^⋀ (substItr w p k)) = ^⋀ (substItr (termShiftVec ℒₒᵣ n w) (shift ℒₒᵣ p) k) := by
   induction k using ISigma1.sigma1_succ_induction
   · definability
   case zero => simp
   case succ k ih =>
     simp only [substItr_succ, qqConj_cons]
-    rw [shift_and (L := ℒₒᵣ), shift_substs hp (m := m), ih, termShiftVec_cons (L := ℒₒᵣ), numeral_shift]
+    rw [shift_and (L := ℒₒᵣ), shift_substs hp (m := m), ih, termShiftVec_cons (L := ℒₒᵣ),
+      numeral_shift]
     · simp
     · exact hw.isUTerm
     · exact hw.adjoin (numeral_semiterm m k)
     · exact IsSemiformula.isUFormula <| hp.subst (by simpa [hw])
     · exact IsSemiformula.isUFormula <| hp.substItrConj hw k
 
-lemma shift_disj_substItr {n w p k : V} (hp : IsSemiformula ℒₒᵣ (n + 1) p) (hw : IsSemitermVec ℒₒᵣ n m w) :
+lemma shift_disj_substItr {n w p k : V} (hp : IsSemiformula ℒₒᵣ (n + 1) p)
+    (hw : IsSemitermVec ℒₒᵣ n m w) :
     shift ℒₒᵣ (^⋁ (substItr w p k)) = ^⋁ (substItr (termShiftVec ℒₒᵣ n w) (shift ℒₒᵣ p) k) := by
   induction k using ISigma1.sigma1_succ_induction
   · definability
   case zero => simp
   case succ k ih =>
     simp only [substItr_succ, qqDisj_cons]
-    rw [shift_or (L := ℒₒᵣ), shift_substs hp (m := m), ih, termShiftVec_cons (L := ℒₒᵣ), numeral_shift]
+    rw [shift_or (L := ℒₒᵣ), shift_substs hp (m := m), ih, termShiftVec_cons (L := ℒₒᵣ),
+      numeral_shift]
     · simp
     · exact hw.isUTerm
     · exact hw.adjoin (numeral_semiterm m k)
     · exact IsSemiformula.isUFormula <| hp.subst (by simpa [hw])
     · exact IsSemiformula.isUFormula <| hp.substItrDisj hw k
 
-lemma substs_conj_substItr {n m l w p k : V} (hp : IsSemiformula ℒₒᵣ (n + 1) p) (hw : IsSemitermVec ℒₒᵣ n m w) (hv : IsSemitermVec ℒₒᵣ m l v) :
+lemma substs_conj_substItr {n m l w p k : V} (hp : IsSemiformula ℒₒᵣ (n + 1) p)
+    (hw : IsSemitermVec ℒₒᵣ n m w) (hv : IsSemitermVec ℒₒᵣ m l v) :
     subst ℒₒᵣ v (^⋀ (substItr w p k)) = ^⋀ (substItr (termSubstVec ℒₒᵣ n v w) p k) := by
   induction k using ISigma1.sigma1_succ_induction
   · definability
@@ -370,7 +390,8 @@ lemma substs_conj_substItr {n m l w p k : V} (hp : IsSemiformula ℒₒᵣ (n + 
       numeral_substs hv]
     simp [ih]
 
-lemma substs_disj_substItr {n m l w p k : V} (hp : IsSemiformula ℒₒᵣ (n + 1) p) (hw : IsSemitermVec ℒₒᵣ n m w) (hv : IsSemitermVec ℒₒᵣ m l v) :
+lemma substs_disj_substItr {n m l w p k : V} (hp : IsSemiformula ℒₒᵣ (n + 1) p)
+    (hw : IsSemitermVec ℒₒᵣ n m w) (hv : IsSemitermVec ℒₒᵣ m l v) :
     subst ℒₒᵣ v (^⋁ (substItr w p k)) = ^⋁ (substItr (termSubstVec ℒₒᵣ n v w) p k) := by
   induction k using ISigma1.sigma1_succ_induction
   · definability
@@ -403,7 +424,8 @@ def qqVerumsGraph : 𝚺₁.Semisentence 2 := .mkSigma
 
 section
 
-instance qqVerums.defined : 𝚺₁-Function₁[V] qqVerums via qqVerumsGraph := .mk fun v ↦ by simp [qqVerumsGraph]; rfl
+instance qqVerums.defined : 𝚺₁-Function₁[V] qqVerums via qqVerumsGraph :=
+  .mk fun v ↦ by simp [qqVerumsGraph]; rfl
 
 instance qqVerums.definable : 𝚺₁-Function₁[V] qqVerums := qqVerums.defined.to_definable
 

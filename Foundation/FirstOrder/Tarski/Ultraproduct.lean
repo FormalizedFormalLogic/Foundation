@@ -26,7 +26,8 @@ instance UprodStruc : Tarski.Structure L (Uprod A 𝓤) where
   func := fun _ f v => ⟨fun i ↦ (s i).func f (fun x ↦ (v x).val i)⟩
   rel  := fun _ r v => {i | (s i).rel r (fun x ↦ (v x).val i)} ∈ 𝓤
 
-instance [Nonempty I] [(i : I) → Nonempty (A i)] : Nonempty (Uprod A 𝓤) := Nonempty.map (⟨·⟩) inferInstance
+instance [Nonempty I] [(i : I) → Nonempty (A i)] : Nonempty (Uprod A 𝓤) :=
+  Nonempty.map (⟨·⟩) inferInstance
 
 @[simp] lemma func_Uprod {k} (f : L.Func k) (v : Fin k → Uprod A 𝓤) :
     Tarski.Structure.func f v = ⟨fun i ↦ (s i).func f (fun x ↦ (v x).val i)⟩ := rfl
@@ -40,7 +41,7 @@ namespace Semiterm
 
 open Tarski.Structure
 
-variable (e : Fin n → Uprod A 𝓤) (ε : ξ → Uprod A 𝓤)
+variable {n : ℕ} (e : Fin n → Uprod A 𝓤) (ε : ξ → Uprod A 𝓤)
 
 lemma val_Uprod (t : Semiterm L ξ n) :
     t.val e ε = ⟨fun i ↦ t.val (fun x ↦ (e x).val i) (fun x ↦ (ε x).val i)⟩ := by
@@ -54,7 +55,7 @@ variable {A} {𝓤}
 
 namespace Semiformula
 
-variable {e : Fin n → Uprod A 𝓤} {ε : ξ → Uprod A 𝓤}
+variable {n : ℕ} {e : Fin n → Uprod A 𝓤} {ε : ξ → Uprod A 𝓤}
 
 lemma val_vecCons_val_eq {z : Uprod A 𝓤} {i : I} :
     (z.val i :> fun x ↦ (e x).val i) = (fun x ↦ ((z :> e) x).val i) := by
@@ -101,7 +102,10 @@ lemma eval_Uprod [(i : I) → Nonempty (A i)] {φ : Semiformula L ξ n} :
       {i | ∃ x, (Eval (x :> fun x ↦ (e x).val i) fun x ↦ (ε x).val i) φ} ∈ 𝓤 by simp [*]
     constructor
     · rintro ⟨x, hx⟩
-      exact Filter.mem_of_superset hx (by intro i h; use x.val i; simpa [val_vecCons_val_eq] using h)
+      exact Filter.mem_of_superset hx <| by
+        intro i h
+        use x.val i
+        simpa [val_vecCons_val_eq] using h
     · intro h
       let z : Uprod A 𝓤 := ⟨fun i =>
         Classical.epsilon (fun z => Eval (z :> fun x ↦ (e x).val i) (fun x ↦ (ε x).val i) φ)⟩
@@ -119,7 +123,8 @@ lemma val_Uprod [(i : I) → Nonempty (A i)] {φ : Formula L ξ} :
 end Semiformula
 
 lemma models_Uprod [Nonempty I] [(i : I) → Nonempty (A i)] {φ : Sentence L} :
-    (Uprod A 𝓤)↓[L] ⊧ φ ↔ {i | (A i)↓[L] ⊧ φ} ∈ 𝓤 := by simp [models_iff, Semiformula.val_Uprod, Empty.eq_elim]
+    (Uprod A 𝓤)↓[L] ⊧ φ ↔ {i | (A i)↓[L] ⊧ φ} ∈ 𝓤 := by
+  simp [models_iff, Semiformula.val_Uprod, Empty.eq_elim]
 
 variable (A)
 
@@ -128,6 +133,8 @@ def Sentence.domain [(i : I) → Nonempty (A i)] (φ : Sentence L) := {i | (A i)
 end
 
 section
+
+universe u
 
 variable {L : Language.{u}} {T : Theory L}
 
@@ -155,12 +162,15 @@ lemma compactness_aux :
   constructor
   · rintro h ⟨t, ht⟩; exact Semantics.Satisfiable.of_subset h ht
   · intro h
-    have : ∀ i : FinSubtheory T, ∃ (M : Type u) (_ : Nonempty M) (_ : Tarski.Structure L M), M ↓[L] ⊧* (i.val : Theory L) :=
+    have : ∀ i : FinSubtheory T, ∃ (M : Type u) (_ : Nonempty M) (_ : Tarski.Structure L M),
+        M ↓[L] ⊧* (i.val : Theory L) :=
       by intro i; exact satisfiable_iff.mp (h i)
     choose A si s hA using this
-    have : ∃ 𝓤 : Ultrafilter (FinSubtheory T), Set.image (Sentence.domain A) T ⊆ 𝓤.sets := ultrafilter_exists A hA
+    have : ∃ 𝓤 : Ultrafilter (FinSubtheory T),
+        Set.image (Sentence.domain A) T ⊆ 𝓤.sets := ultrafilter_exists A hA
     rcases this with ⟨𝓤, h𝓤⟩
-    have : (Tarski.Structure.Uprod A 𝓤)↓[L] ⊧* T := ⟨by intro σ hσ; exact models_Uprod.mpr (h𝓤 $ Set.mem_image_of_mem (Sentence.domain A) hσ)⟩
+    have : (Tarski.Structure.Uprod A 𝓤)↓[L] ⊧* T :=
+      ⟨by intro σ hσ; exact models_Uprod.mpr (h𝓤 <| Set.mem_image_of_mem (Sentence.domain A) hσ)⟩
     exact satisfiable_intro (Tarski.Structure.Uprod A 𝓤) this
 
 theorem compact :
