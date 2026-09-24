@@ -355,20 +355,44 @@ lemma Reach.models_sigma (hθσ : V ⊧/![] σ ↔ ∃ w, V ⊧/![w] θ.val)
 lemma Reach.disjunction (hθσ : V ⊧/![] σ ↔ ∃ w, V ⊧/![w] θ.val) {x : X.extendRoot.World}
     (h : Reach T X σ θ V x) :
     T.ModifiedSolovay X σ θ V x ∨ ∃ y, x ≺ y ∧ T.ModifiedSolovay X σ θ V y := by
-  sorry
+  induction x using WellFounded.induction IsConverseWellFounded.cwf (r := flip X.extendRoot.Rel)
+    with | h x ih =>
+  by_cases hx : T.ModifiedSolovay X σ θ V x;
+  · left;
+    exact hx;
+  right;
+  obtain ⟨z, hz, hzt⟩ : ∃ z ∈ Next X x, Trig T X σ θ V z := by
+    simpa [Theory.ModifiedSolovay, h] using hx;
+  obtain ⟨⟨y, hy⟩, hy₁, hy₂⟩ := exists_witnessFirst (ι := {z // z ∈ Next X x})
+    (fun z ↦ Wit T X σ θ V z.1) (fun z ↦ wit_definable z.1) (fun z ↦ ord X z.1)
+    ⟨⟨z, hz⟩, (trig_iff_exists_wit hθσ).mp hzt⟩;
+  have hs : Step T X σ θ V x y := ⟨hy, fun z hz ↦ hy₁ ⟨z, hz⟩, fun z hz ↦ hy₂ ⟨z, hz⟩⟩;
+  rcases ih y (rel_of_mem_next hy) (h.tail hs) with hy' | ⟨w, hyw, hw⟩;
+  · exact ⟨y, rel_of_mem_next hy, hy'⟩;
+  · exact ⟨w, IsTrans.trans _ _ _ (rel_of_mem_next hy) hyw, hw⟩;
 
 lemma ModifiedSolovay.exclusive (hθσ : V ⊧/![] σ ↔ ∃ w, V ⊧/![w] θ.val)
     {x y : X.extendRoot.World} (ne : x ≠ y) :
     T.ModifiedSolovay X σ θ V x → ¬T.ModifiedSolovay X σ θ V y := by
-  sorry
+  rintro ⟨hx, hxt⟩ ⟨hy, hyt⟩;
+  have key {a b : X.extendRoot.World} (hab : Relation.ReflTransGen (Step T X σ θ V) a b)
+      (ne : a ≠ b) (ha : ∀ z ∈ Next X a, ¬Trig T X σ θ V z) : False := by
+    obtain ⟨c, hac, _⟩ := hab.cases_head.resolve_left ne;
+    exact ha c hac.1 ((trig_iff_exists_wit hθσ).mpr hac.exists_wit);
+  have U : Relator.RightUnique (Step T X σ θ V) := fun _ _ _ ↦ Step.unique;
+  rcases Relation.ReflTransGen.total_of_right_unique U hx hy with h | h;
+  · exact key h ne hxt;
+  · exact key h ne.symm hyt;
 
 lemma ModifiedSolovay.consistent {x y : X.extendRoot.World} (hxy : x ≺ y) (hy : y ≠ some X.u)
     (h : T.ModifiedSolovay X σ θ V x) : ¬Provable T (⌜∼T.modifiedSolovay X σ θ y⌝ : V) := by
-  sorry
+  simpa [Trig, hy] using h.2 y (by simp [hxy, hy])
 
 lemma disjunctive (hθσ : V ⊧/![] σ ↔ ∃ w, V ⊧/![w] θ.val) :
     ∃ x, T.ModifiedSolovay X σ θ V x := by
-  sorry
+  rcases Reach.disjunction (X := X) (T := T) hθσ (x := none) .refl with h | ⟨_, _, h⟩;
+  · exact ⟨_, h⟩;
+  · exact ⟨_, h⟩;
 
 end model
 
