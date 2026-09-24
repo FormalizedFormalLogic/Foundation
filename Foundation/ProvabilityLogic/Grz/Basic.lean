@@ -40,7 +40,7 @@ variable {κ : Type*} [Nonempty κ] {M : Model κ α}
 open Classical in
 lemma forces_axiomGrz [M.IsGrz] {x : M.World} : x ⊩[M] □(□(A 🡒 □A) 🡒 A) 🡒 A := by
   intro hx;
-  have : ⊢ᴳ[Grz] {□(□(A 🡒 □A) 🡒 A)} ⟹ {□A} := by
+  have : ⊢ᴳ[𝐆𝐫𝐳] {□(□(A 🡒 □A) 🡒 A)} ⟹ {□A} := by
     simpa using Gentzen.boxGrz (Γ := {□(A 🡒 □A) 🡒 A}) <|
       Gentzen.wkL (Γ := insert (□(□(A 🡒 □A) 🡒 A)) {□(A 🡒 □A)}) <|
       Gentzen.boxT <| Gentzen.impL (Gentzen.union (□(A 🡒 □A))) (Gentzen.union A);
@@ -57,7 +57,7 @@ end
 
 /-! ### From the sequent calculus -/
 
-lemma of_gentzen [DecidableEq α] {S : Sequent α} (h : ⊢ᴳ[Grz] S) :
+lemma of_gentzen [DecidableEq α] {S : Sequent α} (h : ⊢ᴳ[𝐆𝐫𝐳] S) :
     𝐆𝐫𝐳 ⊢ S.ant.conj 🡒 S.suc.disj := by
   induction h with
   | axm A => simp;
@@ -100,7 +100,7 @@ universe u
 
 variable {α : Type u} [DecidableEq α] {A : Formula α}
 
-theorem iff_provable_gentzen : 𝐆𝐫𝐳 ⊢ A ↔ ⊢ᴳ[Grz] ∅ ⟹ {A} := by
+theorem iff_provable_gentzen : 𝐆𝐫𝐳 ⊢ A ↔ ⊢ᴳ[𝐆𝐫𝐳] ∅ ⟹ {A} := by
   constructor;
   · intro h;
     apply Gentzen.complete;
@@ -136,7 +136,7 @@ theorem iff_root_forces : 𝐆𝐫𝐳 ⊢ A ↔
 
 theorem provability_TFAE : [
     𝐆𝐫𝐳 ⊢ A,
-    ⊢ᴳ[Grz] ∅ ⟹ {A},
+    ⊢ᴳ[𝐆𝐫𝐳] ∅ ⟹ {A},
     ∀ {κ : Type u} [Nonempty κ] (M : Model κ α), [M.IsFiniteGrz] → M ⊧ A,
     ∀ {κ : Type u} [Nonempty κ] (M : RootedModel κ α), [M.IsFiniteGrz] → M.root ⊩[M.toModel] A
   ].TFAE := by

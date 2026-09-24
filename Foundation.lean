@@ -221,6 +221,7 @@ public import Foundation.ProvabilityLogic.Logic
 public import Foundation.ProvabilityLogic.S.Arithmetic
 public import Foundation.ProvabilityLogic.S.Basic
 public import Foundation.ProvabilityLogic.S.Boxdot
+public import Foundation.ProvabilityLogic.S.CIP
 public import Foundation.ProvabilityLogic.S.Gentzen.Basic
 public import Foundation.ProvabilityLogic.S.Gentzen.Kripke
 public import Foundation.ProvabilityLogic.Sequent

@@ -48,12 +48,12 @@ namespace GL.Gentzen
 
 variable {α : Type*} [DecidableEq α] {S : Sequent α}
 
-theorem sound {κ : Type*} [Nonempty κ] (M : Kripke.Model κ α) [M.IsGL] (h : ⊢ᴳ[GL] S) :
+theorem sound {κ : Type*} [Nonempty κ] (M : Kripke.Model κ α) [M.IsGL] (h : ⊢ᴳ[𝐆𝐋] S) :
     M ⊧ S := by
   induction h <;> grind;
 
 @[simp, grind .]
-lemma not_empty : ⊬ᴳ[GL] (∅ ⟹ ∅ : Sequent α) := by
+lemma not_empty : ⊬ᴳ[𝐆𝐋] (∅ ⟹ ∅ : Sequent α) := by
   intro h;
   simpa [Model.ValidateSequent, Model.World.ForcesSequent]
     using sound (Kripke.Model.pointModel (α := α) fun _ ↦ False) h 0;
@@ -70,7 +70,7 @@ variable {α : Type*} [DecidableEq α]
 structure SaturatedSequent (BS : Sequent α) extends Sequent α where
   saturated : toSequent.Saturated
   subset_subfmls : ant ∪ suc ⊆ BS.subfmls
-  unprovable : ⊬ᴳ[GL] toSequent
+  unprovable : ⊬ᴳ[𝐆𝐋] toSequent
 
 namespace SaturatedSequent
 
@@ -95,26 +95,26 @@ instance : Finite (SaturatedSequent BS) :=
     (fun S T h ↦ by simp only [Prod.mk.injEq, Subtype.mk.injEq] at h; exact ext h.1 h.2)
 
 /-- The Lindenbaum lemma. -/
-lemma lindenbaum {S₀ : Sequent α} (h₀ : ⊬ᴳ[GL] S₀) (hS₀ : S₀.ant ∪ S₀.suc ⊆ BS.subfmls) :
+lemma lindenbaum {S₀ : Sequent α} (h₀ : ⊬ᴳ[𝐆𝐋] S₀) (hS₀ : S₀.ant ∪ S₀.suc ⊆ BS.subfmls) :
     ∃ S : SaturatedSequent BS, S₀ ⊆ S.toSequent := by
   obtain ⟨S, h₁, h₂, h₃, h₄, -⟩ := Sequent.exists_saturated
     ⟨fun h₁ h₂ ↦ Gentzen.union' _ h₁ h₂, Gentzen.impL, Gentzen.impR⟩ h₀ hS₀;
   exact ⟨⟨S, h₃, h₄, h₂⟩, h₁⟩
 
-instance [Fact (⊬ᴳ[GL] BS)] : Nonempty (SaturatedSequent BS) :=
+instance [Fact (⊬ᴳ[𝐆𝐋] BS)] : Nonempty (SaturatedSequent BS) :=
   (lindenbaum (BS := BS) (S₀ := BS) Fact.out (by grind)).nonempty
 
 end SaturatedSequent
 
 open SaturatedSequent
 
-def countermodel (BS : Sequent α) [Fact (⊬ᴳ[GL] BS)] : Kripke.Model (SaturatedSequent BS) α where
+def countermodel (BS : Sequent α) [Fact (⊬ᴳ[𝐆𝐋] BS)] : Kripke.Model (SaturatedSequent BS) α where
   Val' x a := #a ∈ x.ant
   Rel' x y := x.ant.prebox ⊂ y.ant.prebox ∧ x.ant.prebox ⊆ y.ant
 
 namespace countermodel
 
-variable {BS : Sequent α} [Fact (⊬ᴳ[GL] BS)] {x : (countermodel BS).World} {A : Formula α}
+variable {BS : Sequent α} [Fact (⊬ᴳ[𝐆𝐋] BS)] {x : (countermodel BS).World} {A : Formula α}
 
 instance : (countermodel BS).IsFiniteGL where
   trans x y z Rxy Ryz := by
@@ -142,7 +142,7 @@ lemma truthlemma : (A ∈ x.ant → x ⊩[countermodel BS] A) ∧ (A ∈ x.suc �
       exact ih.1 <| Rxy.2 (by simpa);
     · intro h;
       apply not_forces_box.mpr;
-      have h₀ : ⊬ᴳ[GL] insert (□A) (x.ant.prebox ∪ x.ant.prebox.box) ⟹ {A} := fun hp ↦
+      have h₀ : ⊬ᴳ[𝐆𝐋] insert (□A) (x.ant.prebox ∪ x.ant.prebox.box) ⟹ {A} := fun hp ↦
         x.unprovable <|
           Gentzen.wk (Gentzen.boxGL hp) FormulaFinset.box_prebox_subset (by simpa using h);
       have hS₀ : (insert (□A) (x.ant.prebox ∪ x.ant.prebox.box) ⟹ {A}).ant ∪
@@ -182,22 +182,22 @@ variable {α : Type u} [DecidableEq α] {S : Sequent α}
 
 theorem complete
     (h : ∀ {κ : Type u} [Nonempty κ] (M : Kripke.Model κ α), [M.IsFiniteGL] → M ⊧ S) :
-    ⊢ᴳ[GL] S := by
+    ⊢ᴳ[𝐆𝐋] S := by
   by_contra hS;
-  have : Fact (⊬ᴳ[GL] S) := ⟨hS⟩;
+  have : Fact (⊬ᴳ[𝐆𝐋] S) := ⟨hS⟩;
   obtain ⟨x, hS₀⟩ := lindenbaum (BS := S) hS (by grind);
   obtain ⟨D, hD, hxD⟩ := h (countermodel S) x (fun C hC ↦ countermodel.truthlemma.1 (hS₀.ant hC));
   exact countermodel.truthlemma.2 (hS₀.suc hD) hxD;
 
-theorem iff_valid : ⊢ᴳ[GL] S ↔
+theorem iff_valid : ⊢ᴳ[𝐆𝐋] S ↔
     ∀ {κ : Type u} [Nonempty κ] (M : Kripke.Model κ α), [M.IsFiniteGL] → M ⊧ S :=
   ⟨fun h _ _ M _ ↦ sound M h, complete⟩
 
 variable {Γ₁ Γ₂ Δ₁ Δ₂ : FormulaFinset α} {A : Formula α}
 
 /-- Cut is admissible. -/
-theorem cut (h₁ : ⊢ᴳ[GL] Γ₁ ⟹ insert A Δ₁) (h₂ : ⊢ᴳ[GL] insert A Γ₂ ⟹ Δ₂) :
-    ⊢ᴳ[GL] Γ₁ ∪ Γ₂ ⟹ Δ₁ ∪ Δ₂ :=
+theorem cut (h₁ : ⊢ᴳ[𝐆𝐋] Γ₁ ⟹ insert A Δ₁) (h₂ : ⊢ᴳ[𝐆𝐋] insert A Γ₂ ⟹ Δ₂) :
+    ⊢ᴳ[𝐆𝐋] Γ₁ ∪ Γ₂ ⟹ Δ₁ ∪ Δ₂ :=
   complete fun M _ x ↦ forcesSequent_cut (sound M h₁ x) (sound M h₂ x)
 
 end Gentzen

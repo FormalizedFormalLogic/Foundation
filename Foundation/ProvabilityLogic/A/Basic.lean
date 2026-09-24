@@ -68,7 +68,7 @@ variable {α : Type u} {A : Formula α}
 /-- - [Bek90, Lemma 5] -/
 theorem provability_TFAE [DecidableEq α] : [
     𝐀 ⊢ A,
-    ⊢ᴳ[A] ∅ ⟹[1] {A},
+    ⊢ᴳ[𝐀] ∅ ⟹[1] {A},
     ∀ {κ : Type u} [Nonempty κ] (M : RootedModel κ α) [M.IsGL] (a : M.NonRoot),
       (M.graft a ℕ).root ⊩[(M.graft a ℕ).toModel] A,
     ∀ {κ : Type u} [Nonempty κ] (M : RootedModel κ α) [M.IsFiniteGL] (a : M.NonRoot),
