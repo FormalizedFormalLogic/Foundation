@@ -224,8 +224,8 @@ theorem mem_iff : A ∈ (𝐆𝐋β⁻ X hX : Logic α) ↔ A.trace ⊆ X := by
     exact sumQuasiNormal.mdp (.mem₁ this) (.mem₂ rfl);
 
 /-- - [AB05, Lemma 49] -/
-lemma bot_mem_univ {hX : (Set.univ : Set ℕ)ᶜ.Finite} : (⊥ : Formula α) ∈ 𝐆𝐋β⁻ Set.univ hX := by
-  sorry
+lemma bot_mem_univ {hX : (Set.univ : Set ℕ)ᶜ.Finite} : (⊥ : Formula α) ∈ 𝐆𝐋β⁻ Set.univ hX :=
+  mem_iff.mpr (Set.subset_univ _)
 
 end GLBetaMinus
 
