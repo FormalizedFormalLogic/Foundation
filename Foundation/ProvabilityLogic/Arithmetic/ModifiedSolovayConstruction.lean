@@ -260,8 +260,42 @@ def _root_.FFL.FirstOrder.Theory.ModifiedSolovay (x : X.extendRoot.World) : Prop
 
 variable {T X σ θ V}
 
+@[simp] lemma val_trigSigma {z : X.extendRoot.World} {w : V} :
+    V ⊧/![w, ⌜T.modifiedSolovay X σ θ z⌝] (trigSigma T X θ z).val ↔ Wit T X σ θ V z w := by
+  unfold trigSigma Wit;
+  split_ifs <;> simp [prfNegSigma, Sentence.quote_def, Semiformula.quote_def]
+
+@[simp] lemma val_trigPi {z : X.extendRoot.World} {w : V} :
+    V ⊧/![w, ⌜T.modifiedSolovay X σ θ z⌝] (trigPi T X θ z).val ↔ Wit T X σ θ V z w := by
+  unfold trigPi Wit;
+  split_ifs <;> simp [prfNegPi, Sentence.quote_def, Semiformula.quote_def]
+
+@[simp] lemma val_stp {x y : X.extendRoot.World} :
+    V ⊧/![] (stp T X σ θ x y) ↔
+      (∀ z ∈ Next X x, ord X z < ord X y → WitnessLT (Wit T X σ θ V y) (Wit T X σ θ V z)) ∧
+      (∀ z ∈ Next X x, ord X y ≤ ord X z → WitnessLE (Wit T X σ θ V y) (Wit T X σ θ V z)) := by
+  simp [stpAux]
+
 @[simp] lemma val_h {x : X.extendRoot.World} : V ⊧/![] (h T X σ θ x) ↔ Reach T X σ θ V x := by
-  sorry
+  suffices (∃ ε : EChain X x, V ⊧/![] (chain T X σ θ ε.1)) ↔ Reach T X σ θ V x by
+    simpa [hAux] using this;
+  constructor;
+  · rintro ⟨⟨ε, hε⟩, hc⟩;
+    generalize hn : (none : X.extendRoot.World) = r at hε;
+    induction hε with
+    | singleton => exact hn ▸ .refl
+    | @cons a b _ _ hR hC ih =>
+      obtain ⟨l, rfl⟩ := hC.tail_exists;
+      have : V ⊧/![] (chain T X σ θ (b :: l)) ∧ V ⊧/![] (stp T X σ θ b a) := by
+        simpa [-val_stp, chainAux] using hc;
+      exact .tail (ih hn this.1) ⟨hR, by simpa using this.2⟩;
+  · intro h;
+    induction h with
+    | refl => exact ⟨⟨[none], .singleton _⟩, by simp [chainAux]⟩
+    | tail _ hs ih =>
+      obtain ⟨⟨ε, hε⟩, hc⟩ := ih;
+      obtain ⟨l, rfl⟩ := hε.tail_exists;
+      exact ⟨⟨_, hε.cons hs.1⟩, by simpa [-val_stp, chainAux] using ⟨hc, by simpa using hs.2⟩⟩
 
 @[simp] lemma val_modifiedSolovay {x : X.extendRoot.World} :
     V ⊧/![] (T.modifiedSolovay X σ θ x) ↔ T.ModifiedSolovay X σ θ V x := by
