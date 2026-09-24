@@ -175,6 +175,8 @@ public import Foundation.Propositional.Heyting.Semantics
 public import Foundation.Propositional.Hilbert.Basic
 public import Foundation.Propositional.LK.Basic
 public import Foundation.Propositional.Logic.Basic
+public import Foundation.ProvabilityLogic.A.Gentzen.Basic
+public import Foundation.ProvabilityLogic.A.Gentzen.Kripke
 public import Foundation.ProvabilityLogic.Arithmetic.Interpret
 public import Foundation.ProvabilityLogic.Arithmetic.SolovaySentences
 public import Foundation.ProvabilityLogic.Arithmetic.StrongInterpret
@@ -196,6 +198,7 @@ public import Foundation.ProvabilityLogic.Grz.Gentzen.Basic
 public import Foundation.ProvabilityLogic.Grz.Gentzen.Kripke
 public import Foundation.ProvabilityLogic.Kripke.Basic
 public import Foundation.ProvabilityLogic.Kripke.Cone
+public import Foundation.ProvabilityLogic.Kripke.Graft
 public import Foundation.ProvabilityLogic.Kripke.Overwrite
 public import Foundation.ProvabilityLogic.Kripke.Rank
 public import Foundation.ProvabilityLogic.Kripke.RootExtension

@@ -116,19 +116,19 @@ lemma forces_box_of_root (h : Sum.inr ⊤ ⊩[(M.toFreeTail V).toModel] □A)
   fun y Rxy ↦ h y ((M.toFreeTail V).root_rel y fun hy ↦ by subst hy; exact not_rel_root Rxy)
 
 /-- If the finite points of the chain carry the valuation of the root of `M`, and the root of
-`M` forces `□B 🡒 B` for all `□B ∈ Γ`, then they agree with the root of `M` on `Γ`. -/
+`M` forces `□B 🡒 B` for all `□B ∈ X`, then they agree with the root of `M` on `X`. -/
 lemma forces_inr_iff [DecidableEq α] {M : RootedModel κ α} {V : ℕ∞ → α → Prop}
-    (hV : ∀ n : ℕ, V n = M.Val M.root) {Γ : FormulaFinset α}
-    (hΓ : ∀ B ∈ Γ, B.subfmls ⊆ Γ) (hroot : ∀ B, □B ∈ Γ → M.root ⊩[M.toModel] □B 🡒 B)
-    (hA : A ∈ Γ) (n : ℕ) :
+    (hV : ∀ n : ℕ, V n = M.Val M.root) {X : FormulaFinset α}
+    (hX : ∀ B ∈ X, B.subfmls ⊆ X) (hroot : ∀ B, □B ∈ X → M.root ⊩[M.toModel] □B 🡒 B)
+    (hA : A ∈ X) (n : ℕ) :
     Sum.inr (n : ℕ∞) ⊩[(M.toModel.toFreeTail V).toModel] A ↔ M.root ⊩[M.toModel] A := by
   induction A generalizing n with
   | atom a => exact iff_of_eq (congrFun (hV n) a);
   | falsum => rfl;
   | imp B C ihB ihC =>
-    exact imp_congr (ihB (hΓ _ hA (by grind)) n) (ihC (hΓ _ hA (by grind)) n);
+    exact imp_congr (ihB (hX _ hA (by grind)) n) (ihC (hX _ hA (by grind)) n);
   | box B ih =>
-    have hB : B ∈ Γ := hΓ _ hA (by grind);
+    have hB : B ∈ X := hX _ hA (by grind);
     constructor;
     . intro h x Rrx;
       exact forces_inl.mp (h (.inl x) trivial);
