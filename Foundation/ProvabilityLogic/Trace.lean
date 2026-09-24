@@ -99,7 +99,22 @@ lemma trace_subst_subset {s : Substitution α α} : (A⟦s⟧).trace ⊆ A.trace
 
 /-- - [AB05, Lemma 12] -/
 theorem trace_finite_or_compl_finite (A : Formula α) : A.trace.Finite ∨ A.traceᶜ.Finite := by
-  sorry
+  classical
+  rw [or_iff_not_imp_left];
+  intro hinf;
+  obtain ⟨_, ⟨κ, _, M, _, _, rfl, hA⟩, hm⟩ := Set.Infinite.exists_gt hinf A.subfmls.prebox.card;
+  obtain ⟨u, Rru, hu⟩ := exists_isReflexiveOf_of_card_lt_rank hm;
+  have hne : u ≠ M.root := by rintro rfl; exact Std.Irrefl.irrefl (r := M.Rel) _ Rru;
+  have := RootedModel.rank_lt_height Rru;
+  apply (Set.finite_Iio M.height).subset;
+  intro n hn;
+  by_contra hle;
+  replace hle : M.height ≤ n := by simpa using hle;
+  apply hn;
+  exact ⟨_, _, M.graft ⟨u, hne⟩ (Fin (n - u.rank - 1)), inferInstance, inferInstance,
+    by simp only [RootedModel.graft.height_eq]; omega,
+    fun h ↦ hA <| ((RootedModel.graft.forces_iff (X := A.subfmls) (fun _ ↦ subfmls_trans)
+      (fun B hB ↦ hu B (FormulaFinset.mem_prebox.mpr hB)) mem_subfmls_self).1 M.root).mp h⟩;
 
 end Formula
 
