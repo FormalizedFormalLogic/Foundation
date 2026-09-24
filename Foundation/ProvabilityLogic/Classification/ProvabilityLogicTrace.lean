@@ -175,7 +175,9 @@ theorem provabilityLogic_eq_GLBetaMinus (h : ¬(T.provabilityLogicRelativeTo U :
 /-- - [AB05, Corollary 50] -/
 theorem A_subset_provabilityLogic (h : (T.provabilityLogicRelativeTo U : Logic α).trace = .univ) :
     𝐀 ⊆ (T.provabilityLogicRelativeTo U : Logic α) :=
-  sorry
+  sumQuasiNormal_subset_provabilityLogic <| by
+    rintro _ ⟨n, -, rfl⟩;
+    exact TBB_mem_provabilityLogic_of_mem_trace (h ▸ Set.mem_univ n)
 
 end
 
