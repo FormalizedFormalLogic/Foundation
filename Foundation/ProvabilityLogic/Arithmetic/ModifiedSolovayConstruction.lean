@@ -45,16 +45,31 @@ def cmpLT (P : 𝚺₁.Semisentence 2) (Q : 𝚷₁.Semisentence 2) : 𝚺₁.Se
 
 variable {P Q : V → Prop}
 
-lemma WitnessLE.exists : WitnessLE P Q → ∃ w, P w := by
-  sorry
+lemma WitnessLE.exists : WitnessLE P Q → ∃ w, P w := fun ⟨w, hw, _⟩ ↦ ⟨w, hw⟩
 
-lemma WitnessLE.not_witnessLT : WitnessLE P Q → ¬WitnessLT Q P := by
-  sorry
+lemma WitnessLE.not_witnessLT [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] : WitnessLE P Q → ¬WitnessLT Q P := by
+  rintro ⟨w, hw, h⟩ ⟨w', hw', h'⟩;
+  rcases lt_or_ge w' w with hlt | hge;
+  · exact h w' hlt hw';
+  · exact h' w hge hw;
 
 lemma exists_witnessFirst [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] {ι : Type*} [Finite ι] (P : ι → V → Prop)
     (hP : ∀ i, 𝚺₁-Predicate (P i)) (o : ι → ℕ) (h : ∃ i w, P i w) :
     ∃ j, (∀ i, o i < o j → WitnessLT (P j) (P i)) ∧ ∀ i, o j ≤ o i → WitnessLE (P j) (P i) := by
-  sorry
+  obtain ⟨i₀, w₀, h₀⟩ := h;
+  obtain ⟨w, ⟨i₁, h₁⟩, hw⟩ : ∃ w, (∃ i, P i w) ∧ ∀ v < w, ¬∃ i, P i v :=
+    InductionOnBroadHierarchy.least_number_sigma 𝚺 1 (P := fun w ↦ ∃ i, P i w)
+      (HierarchySymbol.Definable.fintype_exs fun i ↦ hP i) (x := w₀) ⟨i₀, h₀⟩;
+  obtain ⟨j, hj, hmin⟩ := (InvImage.wf o wellFounded_lt).has_min {i | P i w} ⟨i₁, h₁⟩;
+  use j;
+  and_intros;
+  · intro i hi;
+    use w, hj;
+    intro v hv hv';
+    rcases hv.lt_or_eq with hlt | rfl;
+    · exact hw v hlt ⟨i, hv'⟩;
+    · exact hmin i hv' hi;
+  · exact fun i _ ↦ ⟨w, hj, fun v hv hv' ↦ hw v hv ⟨i, hv'⟩⟩;
 
 end comparison
 
