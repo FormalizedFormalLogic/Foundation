@@ -336,7 +336,7 @@ section Axiomatized
 
 namespace Axiomatized
 
-variable [AdjunctiveSet F S] [Axiomatized S] {𝓢 𝓣 : S}
+variable [AdjunctiveSet F S] [Axiomatized S] {𝓢 𝓣 : S} {φ ψ : F}
 
 lemma by_axm {𝓢 : S} (h : φ ∈ 𝓢) : 𝓢 ⊢ φ := prfAxm (by simp [h])
 
@@ -534,7 +534,7 @@ end
 
 namespace Entailment
 
-variable (S : Type*) {F : Type*} [Entailment S F]
+variable (S : Type*) {F G : Type*} [Entailment S F]
 
 structure Pullback (f : G → F) : Type _ where
   forget : S

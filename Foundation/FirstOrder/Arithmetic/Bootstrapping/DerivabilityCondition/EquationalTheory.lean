@@ -62,6 +62,7 @@ open _root_.FFL.FirstOrder.Entailment Entailment.FiniteContext
 
 variable {T}
 
+open scoped Classical in
 lemma eq_comm_ctx {Γ} {t u : Term V ℒₒᵣ} :
     Γ ⊢[T.internalize V] t ≐ u → Γ ⊢[T.internalize V] u ≐ t := fun b ↦
   of' (eq_symm T t u) ⨀ b
@@ -129,6 +130,7 @@ lemma vec2_eq {v : V} (h : len v = 2) : ?[v.[0], v.[1]] = v :=
     have : i = 0 ∨ i = 1 := le_one_iff_eq_zero_or_one.mp (lt_two_iff_le_one.mp hi)
     rcases this with (rfl | rfl) <;> simp)
 
+open scoped Classical in
 lemma term_replace_aux (t : V) :
     IsSemiterm ℒₒᵣ 1 t →
     Provable T (^∀ ^∀ imp ℒₒᵣ (^#1 ^= ^#0) (termSubst ℒₒᵣ (^#1 ∷ 0) t ^= termSubst ℒₒᵣ (^#0 ∷ 0) t))
@@ -249,6 +251,7 @@ lemma term_replace' (t : Semiterm V ℒₒᵣ 1) (u₁ u₂ : Term V ℒₒᵣ) 
   have := TProof.specialize₂! (term_replace T t) u₂ u₁
   simpa [Semiterm.substs_substs] using this
 
+open scoped Classical in
 lemma replace_eq (t u : Semiterm V ℒₒᵣ 1) :
     T.internalize V ⊢ ∀¹ ∀¹ ((#'1 ≐ #'0) 🡒 (t ≐ u).subst ![#'1] 🡒 (t ≐ u).subst ![#'0]) := by
   suffices
@@ -275,6 +278,7 @@ lemma replace_eq (t u : Semiterm V ℒₒᵣ 1) :
       (u⇞⇞.subst ![&'1]) (u⇞⇞.subst ![&'0]))
     ⨀ ht ⨀ hu ⨀ hh
 
+open scoped Classical in
 lemma replace_lt (t u : Semiterm V ℒₒᵣ 1) :
     T.internalize V ⊢ ∀¹ ∀¹ ((#'1 ≐ #'0) 🡒 (t <' u).subst ![#'1] 🡒 (t <' u).subst ![#'0]) := by
   suffices
@@ -301,6 +305,7 @@ lemma replace_lt (t u : Semiterm V ℒₒᵣ 1) :
       (u⇞⇞.subst ![&'1]) (u⇞⇞.subst ![&'0]))
     ⨀ ht ⨀ hu ⨀ hh
 
+open scoped Classical in
 lemma replace_ne (t u : Semiterm V ℒₒᵣ 1) :
     T.internalize V ⊢ ∀¹ ∀¹ ((#'1 ≐ #'0) 🡒 (t ≉ u).subst ![#'1] 🡒 (t ≉ u).subst ![#'0]) := by
   suffices
@@ -327,6 +332,7 @@ lemma replace_ne (t u : Semiterm V ℒₒᵣ 1) :
       (u⇞⇞.subst ![&'1]) (u⇞⇞.subst ![&'0]))
     ⨀ ht ⨀ hu ⨀ hh
 
+open scoped Classical in
 lemma replace_nlt (t u : Semiterm V ℒₒᵣ 1) :
     T.internalize V ⊢ ∀¹ ∀¹ ((#'1 ≐ #'0) 🡒 (t ≮' u).subst ![#'1] 🡒 (t ≮' u).subst ![#'0]) := by
   suffices

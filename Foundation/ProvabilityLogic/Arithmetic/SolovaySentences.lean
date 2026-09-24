@@ -153,19 +153,20 @@ lemma rfl_mainlemma (ha : ∀ B, □B ∈ A.subfmls → M.root ⊩[M.toModel] �
     (hB : B ∈ A.subfmls) :
     (M.root ⊩[M.toModel] B → T₀ ⊢ S.σ none 🡒 B.interpret S.realization 𝔅) ∧
     (M.root ⊮[M.toModel] B → T₀ ⊢ S.σ none 🡒 ∼B.interpret S.realization 𝔅) := by
+  classical
   induction B with
   | falsum =>
     constructor;
-    . exact fun h ↦ absurd h not_forces_bot;
-    . intro;
+    · exact fun h ↦ absurd h not_forces_bot;
+    · intro;
       dsimp [Formula.interpret];
       cl_prover;
   | atom a =>
     constructor;
-    . intro h;
+    · intro h;
       apply right_Fdisj'_intro;
       simpa [RootedModel.extendRoot] using h;
-    . intro h;
+    · intro h;
       apply CN_of_CN_right;
       apply left_Fdisj'_intro;
       intro j hj;
@@ -176,30 +177,30 @@ lemma rfl_mainlemma (ha : ∀ B, □B ∈ A.subfmls → M.root ⊩[M.toModel] �
     replace ihB := ihB (Formula.subfmls_trans hB (by grind));
     replace ihC := ihC (Formula.subfmls_trans hB (by grind));
     constructor;
-    . intro h;
+    · intro h;
       rcases forces_imp.mp h with hB | hC;
-      . exact C_trans (ihB.2 hB) CNC;
-      . exact C_trans (ihC.1 hC) implyK;
-    . intro h;
+      · exact C_trans (ihB.2 hB) CNC;
+      · exact C_trans (ihC.1 hC) implyK;
+    · intro h;
       obtain ⟨hB, hC⟩ := not_forces_imp.mp h;
       exact CNC_of_C_of_CN (ihB.1 hB) (ihC.2 hC);
   | box B ihB =>
     replace ihB := ihB (Formula.subfmls_trans hB (by grind));
     constructor;
-    . intro h;
+    · intro h;
       have hB' : M.root ⊩[M.toModel] B := ha B hB h;
       have h₁ : ∀ i, T₀ ⊢ S.σ i 🡒 B.interpret S.realization 𝔅 := by
         rintro (_ | x);
-        . exact ihB.1 hB';
-        . apply S.mainlemma (Option.some_ne_none x).symm;
+        · exact ihB.1 hB';
+        · apply S.mainlemma (Option.some_ne_none x).symm;
           apply RootedModel.extendRoot.forces_some.mpr;
           by_cases hx : x = M.root;
-          . exact hx ▸ hB';
-          . exact h x (M.root_rel x hx);
+          · exact hx ▸ hB';
+          · exact h x (M.root_rel x hx);
       have h₂ := left_Udisj_intro _ h₁;
       have h₃ : T₀ ⊢ B.interpret S.realization 𝔅 := by cl_prover [h₂, S.SC4];
       exact C_of_conseq (𝔅.D1 (WeakerThan.pbl h₃));
-    . intro h;
+    · intro h;
       obtain ⟨y, Rxy, hy⟩ := not_forces_box.mp h;
       have h₁ : T₀ ⊢ S.σ (some y) 🡒 ∼B.interpret S.realization 𝔅 :=
         S.mainlemma_neg (Option.some_ne_none y).symm
@@ -614,6 +615,7 @@ variable {M : RootedModel κ α} [Fintype M.World] [M.IsGL]
 /-- - [Sol76] -/
 lemma solovay_root_sound [𝗜𝚺₁ ⪯ T] [sound : T.SoundOn (Arithmetic.Hierarchy 𝚷 2)] :
     T.Solovay M ℕ M.root := by
+  classical
   have NS : ∀ i, M.root ≠ i → ¬T.Solovay M ℕ i := by
     intro i hi H;
     have Bi : T ⊢ ∼T.solovay M i := (provable_iff_provable (T := T)).mp (Solovay.refute hi H);
@@ -629,8 +631,8 @@ lemma solovay_root_sound [𝗜𝚺₁ ⪯ T] [sound : T.SoundOn (Arithmetic.Hier
       simpa [models_iff] using! consequence_iff.mp (Theory.Proof.sound sπ) ℕ inferInstance;
     exact h₂ (h₃.mp H);
   rcases Θ.disjunction (V := ℕ) (T := T) (M := M) M.root ⟨[M.root], by simp⟩ with H | ⟨i, hri, Hi⟩;
-  . exact H;
-  . exact absurd Hi (NS i (by rintro rfl; exact Std.Irrefl.irrefl _ hri));
+  · exact H;
+  · exact absurd Hi (NS i (by rintro rfl; exact Std.Irrefl.irrefl _ hri));
 
 end
 
