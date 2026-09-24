@@ -98,16 +98,10 @@ private lemma mainlemma_aux (hi : i ≠ none) {B : ProvabilityLogic.Formula α}
   | falsum => simp [Formula.interpret];
   | atom a =>
     constructor;
-    · intro h;
-      apply right_Fdisj'_intro;
-      simpa using h;
-    · intro h;
-      apply CN_of_CN_right;
-      apply left_Fdisj'_intro;
-      intro j hj;
-      apply S.SC1;
-      rintro rfl;
-      exact h (by simpa using hj);
+    · exact fun h ↦ right_Fdisj'_intro _ _ (by simpa using h);
+    · exact fun h ↦ CN_of_CN_right <| left_Fdisj'_intro _ _ fun j hj ↦ S.SC1 _ _ <| by
+        rintro rfl;
+        simp_all;
   | imp B C ihB ihC =>
     replace ihB := ihB hi (Formula.subfmls_trans hB (by grind));
     replace ihC := ihC hi (Formula.subfmls_trans hB (by grind));
@@ -121,9 +115,7 @@ private lemma mainlemma_aux (hi : i ≠ none) {B : ProvabilityLogic.Formula α}
       exact CNC_of_C_of_CN (ihB.1 hB) (ihC.2 hC);
   | box B ih =>
     replace ih := fun {j} (hj : j ≠ none) ↦ ih hj (Formula.subfmls_trans hB (by grind));
-    have hne {j : X.extendRoot.World} (Rij : i ≺ j) : j ≠ none := by
-      rintro rfl;
-      exact extendRoot.not_rel_none Rij;
+    have hne {j : X.extendRoot.World} (Rij : i ≺ j) : j ≠ none := by rintro rfl; simp_all;
     have hu : some X.u ⊩[X.extendRoot.toModel] □B → some X.u ⊩[X.extendRoot.toModel] B :=
       fun h ↦ extendRoot.forces_some.mpr <|
         X.isReflexiveOf_u B (FormulaFinset.mem_prebox.mpr hB) (extendRoot.forces_some.mp h);
@@ -132,9 +124,8 @@ private lemma mainlemma_aux (hi : i ≠ none) {B : ProvabilityLogic.Formula α}
       have h₁ : T₀ ⊢ (⩖ j ∈ { j : X.extendRoot.World | i ≺ j }, S.Λ j) 🡒
           B.interpret S.realization 𝔅 :=
         left_Fdisj'_intro _ _ fun j hj ↦ (ih (hne (by simpa using hj))).1 (h j (by simpa using hj));
-      by_cases hiu : i = some X.u;
-      · subst hiu;
-        exact C_trans S.SC3r <| 𝔅.mono' <| left_A_intro ((ih hi).1 (hu h)) h₁;
+      rcases eq_or_ne i (some X.u) with rfl | hiu;
+      · exact C_trans S.SC3r <| 𝔅.mono' <| left_A_intro ((ih hi).1 (hu h)) h₁;
       · exact C_trans (S.SC3 i hi hiu) <| 𝔅.mono' h₁;
     · intro h;
       obtain ⟨j, Rij, hj⟩ := not_forces_box.mp h;
@@ -142,10 +133,8 @@ private lemma mainlemma_aux (hi : i ≠ none) {B : ProvabilityLogic.Formula α}
         X.extendRoot.terminalOf { y | i ≺ y ∧ y ⊮[X.extendRoot.toModel] B } ⟨j, Rij, hj⟩;
       have hyu : y ≠ some X.u := by
         rintro rfl;
-        apply hy <| hu _;
-        intro z Ryz;
-        by_contra hz;
-        exact hymax z ⟨IsTrans.trans _ _ _ Riy Ryz, hz⟩ Ryz;
+        exact hy <| hu fun z Ryz ↦ of_not_not fun hz ↦
+          hymax z ⟨IsTrans.trans _ _ _ Riy Ryz, hz⟩ Ryz;
       exact C_trans (S.SC2 i y Riy hyu) <| contra <| 𝔅.mono' <| CN_of_CN_right <|
         (ih (hne Riy)).2 hy;
 
@@ -189,14 +178,12 @@ lemma provable_b (S : 𝔅.ModifiedSolovaySentences X σ) :
   apply left_Udisj_intro;
   rintro (_ | z);
   · cl_prover [S.SC5];
-  · by_cases hr : z = X.root;
-    · subst hr;
-      cl_prover;
-    by_cases hu : z = X.u;
-    · subst hu;
-      cl_prover [S.SC6];
-    cl_prover [C_trans (S.provable_boxItr_bot_of_ne hr hu) <|
-      𝔅.provable_boxItr_bot_mono <| rank_lt_height <| X.root_rel z hr];
+  rcases eq_or_ne z X.root with rfl | hr;
+  · cl_prover;
+  rcases eq_or_ne z X.u with rfl | hu;
+  · cl_prover [S.SC6];
+  cl_prover [C_trans (S.provable_boxItr_bot_of_ne hr hu) <|
+    𝔅.provable_boxItr_bot_mono <| rank_lt_height <| X.root_rel z hr];
 
 /-- Provably in `T₀`, the `X.height`-times iterated consistency and the realization of `A` yield
 the reflection instance `𝔅 σ 🡒 σ`.
