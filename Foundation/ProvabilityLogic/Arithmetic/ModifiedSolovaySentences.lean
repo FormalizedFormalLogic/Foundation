@@ -41,7 +41,7 @@ end FFL.ProvabilityLogic.Kripke
 
 namespace FFL.FirstOrder.ProvabilityAbstraction
 
-open ProvabilityLogic Kripke Kripke.Model Kripke.Model.World
+open ProvabilityLogic Kripke Kripke.Model Kripke.Model.World Kripke.RootedModel
 
 variable {L : Language} [L.ReferenceableBy L] {T₀ T : Theory L} [T₀ ⪯ T]
          {𝔅 : Provability T₀ T} [𝔅.HBL]
@@ -93,7 +93,61 @@ private lemma mainlemma_aux (hi : i ≠ none) {B : ProvabilityLogic.Formula α}
     (hB : B ∈ A.subfmls) :
     (i ⊩[X.extendRoot.toModel] B → T₀ ⊢ S.Λ i 🡒 B.interpret S.realization 𝔅) ∧
     (i ⊮[X.extendRoot.toModel] B → T₀ ⊢ S.Λ i 🡒 ∼B.interpret S.realization 𝔅) := by
-  sorry
+  classical
+  induction B generalizing i with
+  | falsum => simp [Formula.interpret];
+  | atom a =>
+    constructor;
+    · intro h;
+      apply right_Fdisj'_intro;
+      simpa using h;
+    · intro h;
+      apply CN_of_CN_right;
+      apply left_Fdisj'_intro;
+      intro j hj;
+      apply S.SC1;
+      rintro rfl;
+      exact h (by simpa using hj);
+  | imp B C ihB ihC =>
+    replace ihB := ihB hi (Formula.subfmls_trans hB (by grind));
+    replace ihC := ihC hi (Formula.subfmls_trans hB (by grind));
+    constructor;
+    · intro h;
+      rcases forces_imp.mp h with hB | hC;
+      · exact C_trans (ihB.2 hB) CNC;
+      · exact C_trans (ihC.1 hC) implyK;
+    · intro h;
+      obtain ⟨hB, hC⟩ := not_forces_imp.mp h;
+      exact CNC_of_C_of_CN (ihB.1 hB) (ihC.2 hC);
+  | box B ih =>
+    replace ih := fun {j} (hj : j ≠ none) ↦ ih hj (Formula.subfmls_trans hB (by grind));
+    have hne {j : X.extendRoot.World} (Rij : i ≺ j) : j ≠ none := by
+      rintro rfl;
+      exact extendRoot.not_rel_none Rij;
+    have hu : some X.u ⊩[X.extendRoot.toModel] □B → some X.u ⊩[X.extendRoot.toModel] B :=
+      fun h ↦ extendRoot.forces_some.mpr <|
+        X.isReflexiveOf_u B (FormulaFinset.mem_prebox.mpr hB) (extendRoot.forces_some.mp h);
+    constructor;
+    · intro h;
+      have h₁ : T₀ ⊢ (⩖ j ∈ { j : X.extendRoot.World | i ≺ j }, S.Λ j) 🡒
+          B.interpret S.realization 𝔅 :=
+        left_Fdisj'_intro _ _ fun j hj ↦ (ih (hne (by simpa using hj))).1 (h j (by simpa using hj));
+      by_cases hiu : i = some X.u;
+      · subst hiu;
+        exact C_trans S.SC3r <| 𝔅.mono' <| left_A_intro ((ih hi).1 (hu h)) h₁;
+      · exact C_trans (S.SC3 i hi hiu) <| 𝔅.mono' h₁;
+    · intro h;
+      obtain ⟨j, Rij, hj⟩ := not_forces_box.mp h;
+      obtain ⟨y, ⟨Riy, hy⟩, hymax⟩ :=
+        X.extendRoot.terminalOf { y | i ≺ y ∧ y ⊮[X.extendRoot.toModel] B } ⟨j, Rij, hj⟩;
+      have hyu : y ≠ some X.u := by
+        rintro rfl;
+        apply hy <| hu _;
+        intro z Ryz;
+        by_contra hz;
+        exact hymax z ⟨IsTrans.trans _ _ _ Riy Ryz, hz⟩ Ryz;
+      exact C_trans (S.SC2 i y Riy hyu) <| contra <| 𝔅.mono' <| CN_of_CN_right <|
+        (ih (hne Riy)).2 hy;
 
 /-- - [Bek90, §6 Lemma 2]
 - [AB05, Lemma 53]
