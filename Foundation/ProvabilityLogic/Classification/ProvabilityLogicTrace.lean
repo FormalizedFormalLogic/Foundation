@@ -175,7 +175,24 @@ theorem provabilityLogic_trace_compl_finite
 theorem betaMinus_mem_provabilityLogic (h : ¬(T.provabilityLogicRelativeTo U : Logic α) ⊆ 𝐒) :
     (betaMinus _ (provabilityLogic_trace_compl_finite h)).lift ∈
       (T.provabilityLogicRelativeTo U : Logic α) := by
-  sorry
+  classical
+  obtain ⟨m, hm⟩ := exists_neg_conj_TBB_mem_provabilityLogic h;
+  apply sumQuasiNormal_subset_provabilityLogic subset_rfl;
+  apply Logic.GL.sumQuasiNormal_of_conj
+    (Γ := insert (LetterlessFormula.lift (∼⩕ i ∈ Finset.range m, TBB i))
+      (((Finset.range m).filter (· ∈ (T.provabilityLogicRelativeTo U : Logic α).trace)).image TBB));
+  · intro B hB;
+    rcases Finset.mem_insert.mp hB with rfl | hB;
+    · exact .mem₂ hm;
+    · obtain ⟨i, hi, rfl⟩ := Finset.mem_image.mp hB;
+      exact .mem₂ (TBB_mem_provabilityLogic_of_mem_trace (Finset.mem_filter.mp hi).2);
+  · apply Formula.GL_imp_of_height_not_mem_trace;
+    intro κ _ M _ _ hM hn;
+    have h₁ : M.height < m := by
+      simpa [RootedModel.height] using
+        forces_lift_iff.mp (forces_conj.mp hM _ (Finset.mem_insert_self _ _));
+    exact forces_TBB_iff.mp (forces_conj.mp hM (TBB M.height) <| Finset.mem_insert_of_mem <|
+      Finset.mem_image_of_mem _ <| Finset.mem_filter.mpr ⟨by simpa, by simpa using hn⟩) rfl;
 
 /-- - [AB05, Lemma 49] -/
 theorem provabilityLogic_eq_GLBetaMinus (h : ¬(T.provabilityLogicRelativeTo U : Logic α) ⊆ 𝐒) :
