@@ -155,7 +155,12 @@ lemma exists_finset_trace_subset_of_mem_sumQuasiNormal {X : Logic α} (h : A ∈
     exact ⟨Y, hY, trace_subst_subset.trans h⟩;
 
 theorem trace_sumQuasiNormal (X : Logic α) : (𝐆𝐋 +ᴸ X).trace = X.trace := by
-  sorry
+  apply subset_antisymm;
+  · apply Set.iUnion₂_subset;
+    intro A hA;
+    obtain ⟨Y, hY, h⟩ := exists_finset_trace_subset_of_mem_sumQuasiNormal hA;
+    exact h.trans (Set.biUnion_subset_biUnion_left hY);
+  · exact Set.biUnion_subset_biUnion_left sumQuasiNormal.subset_right;
 
 end GL
 
