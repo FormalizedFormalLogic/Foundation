@@ -169,7 +169,28 @@ namespace GLAlpha
 variable {X Y : Set ℕ}
 
 theorem mem_iff : A ∈ (𝐆𝐋α X : Logic α) ↔ A.trace.Finite ∧ A.trace ⊆ X := by
-  sorry
+  classical
+  constructor;
+  · intro h;
+    obtain ⟨Y, hY, hA⟩ := GL.exists_finset_trace_subset_of_mem_sumQuasiNormal h;
+    have hYX : ⋃ B ∈ Y, B.trace ⊆ X := by
+      apply Set.iUnion₂_subset;
+      intro B hB;
+      obtain ⟨n, hn, rfl⟩ := hY hB;
+      simpa using hn;
+    have hfin : (⋃ B ∈ Y, B.trace).Finite := Y.finite_toSet.biUnion fun B hB ↦ by
+      obtain ⟨n, -, rfl⟩ := hY hB;
+      simp;
+    exact ⟨hfin.subset hA, hA.trans hYX⟩;
+  · rintro ⟨hfin, hX⟩;
+    apply GL.sumQuasiNormal_of_conj (Γ := hfin.toFinset.image TBB);
+    · simp only [Finset.mem_image, Set.Finite.mem_toFinset, forall_exists_index, and_imp];
+      rintro _ n hn rfl;
+      exact .mem₂ ⟨n, hX hn, rfl⟩;
+    · apply Formula.GL_imp_of_height_not_mem_trace;
+      intro _ _ M _ _ hM hn;
+      exact forces_TBB_iff.mp (forces_conj.mp hM _ (Finset.mem_image_of_mem _
+        (hfin.mem_toFinset.mpr hn))) rfl;
 
 @[simp] theorem trace_eq : (𝐆𝐋α X : Logic α).trace = X := by
   sorry
