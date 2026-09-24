@@ -12,7 +12,7 @@ reflection principle for `σ` that they yield.
 
 ## References
 
-- [Bek90, §6]
+- [Bek90, §6 Lemma 1, Lemma 1.7, Lemma 1.8, Lemma 2, Theorem 2]
 - [AB05, Lemma 51, Lemma 53]
 -/
 
@@ -75,7 +75,7 @@ structure Provability.ModifiedSolovaySentences
   protected SC3 : ∀ i : X.extendRoot.World, i ≠ none → i ≠ some X.u →
     T₀ ⊢ Λ i 🡒 𝔅 (⩖ j ∈ { j : X.extendRoot.World | i ≺ j }, Λ j)
   protected SC3r : T₀ ⊢ Λ (some X.u) 🡒
-    𝔅 (Λ (some X.u) ⋎ ⩖ j ∈ { j : X.extendRoot.World | (some X.u : X.extendRoot.World) ≺ j }, Λ j)
+    𝔅 (Λ (some X.u) ⋎ ⩖ j ∈ { j : X.extendRoot.World | some X.u ≺ j }, Λ j)
   protected SC4 : T₀ ⊢ ⩖ j, Λ j
   protected SC5 : T₀ ⊢ 𝔅 σ 🡒 ∼Λ none
   protected SC6 : T₀ ⊢ ∼σ 🡒 ∼Λ (some X.u)
@@ -177,13 +177,9 @@ lemma provable_boxItr_bot_of_ne (S : 𝔅.ModifiedSolovaySentences X σ) {z : X.
     rintro (_ | y) hy;
     · simp at hy;
     · replace hy : z ≺ y := by simpa using hy;
-      have hyr : y ≠ X.root := by
-        rintro rfl;
-        exact not_rel_root hy;
-      have hyu : y ≠ X.u := by
-        rintro rfl;
-        exact hr <| X.eq_root_of_rel_u z hy;
-      exact C_trans (ih y hy hyr hyu) (𝔅.provable_boxItr_bot_mono (Model.rank_lt_of_rel hy));
+      exact C_trans (ih y hy (by rintro rfl; exact not_rel_root hy)
+        (by rintro rfl; exact hr <| X.eq_root_of_rel_u z hy)) <|
+        𝔅.provable_boxItr_bot_mono <| Model.rank_lt_of_rel hy;
 
 lemma provable_b (S : 𝔅.ModifiedSolovaySentences X σ) :
     T₀ ⊢ 𝔅.conItr X.height 🡒 𝔅 σ 🡒 ∼σ 🡒 S.Λ (some X.root) := by
@@ -199,9 +195,8 @@ lemma provable_b (S : 𝔅.ModifiedSolovaySentences X σ) :
     by_cases hu : z = X.u;
     · subst hu;
       cl_prover [S.SC6];
-    have : T₀ ⊢ S.Λ (some z) 🡒 𝔅^[X.height] ⊥ := C_trans (S.provable_boxItr_bot_of_ne hr hu) <|
-      𝔅.provable_boxItr_bot_mono <| rank_lt_height <| X.root_rel z hr;
-    cl_prover [this];
+    cl_prover [C_trans (S.provable_boxItr_bot_of_ne hr hu) <|
+      𝔅.provable_boxItr_bot_mono <| rank_lt_height <| X.root_rel z hr];
 
 /-- Provably in `T₀`, the `X.height`-times iterated consistency and the realization of `A` yield
 the reflection instance `𝔅 σ 🡒 σ`.
@@ -211,9 +206,8 @@ the reflection instance `𝔅 σ 🡒 σ`.
 -/
 theorem reflection (S : 𝔅.ModifiedSolovaySentences X σ) :
     T₀ ⊢ 𝔅.conItr X.height 🡒 A.interpret S.realization 𝔅 🡒 𝔅 σ 🡒 σ := by
-  have := S.mainlemma_neg (Option.some_ne_none X.root) Formula.mem_subfmls_self <|
-    extendRoot.forces_some.not.mpr X.root_not_forces;
-  cl_prover [this, S.provable_b];
+  cl_prover [S.provable_b, S.mainlemma_neg (Option.some_ne_none X.root) Formula.mem_subfmls_self <|
+    extendRoot.forces_some.not.mpr X.root_not_forces];
 
 end Provability.ModifiedSolovaySentences
 
