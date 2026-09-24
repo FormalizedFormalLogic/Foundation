@@ -244,7 +244,10 @@ end GLAlpha
 
 /-- - [AB05, Lemma 45] -/
 theorem subset_GLAlpha_trace (hL : L.traceᶜ.Infinite) : L ⊆ 𝐆𝐋α L.trace := by
-  sorry
+  intro A hA;
+  have h := trace_subset_of_mem hA;
+  exact GLAlpha.mem_iff.mpr ⟨A.trace_finite_or_compl_finite.resolve_right fun hA ↦
+    hL (hA.subset (Set.compl_subset_compl.mpr h)), h⟩;
 
 /-- - [AB05, Lemma 45] -/
 theorem subset_GLBetaMinus_trace (hL : L.traceᶜ.Finite) : L ⊆ 𝐆𝐋β⁻ L.trace hL := by
