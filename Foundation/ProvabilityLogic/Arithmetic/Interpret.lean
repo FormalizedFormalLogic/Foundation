@@ -1,6 +1,7 @@
 module
 
 public import Foundation.ProvabilityLogic.Logic
+public import Foundation.ProvabilityLogic.Letterless
 public import Foundation.FirstOrder.Incompleteness.StandardProvability
 
 /-!
@@ -61,6 +62,20 @@ lemma interpret_congr_atoms [DecidableEq α] {f₁ f₂ : Realization α L}
   | box A ih => simp only [interpret]; rw [ih fun a ha ↦ h a (by simpa using ha)];
 
 end Formula
+
+namespace LetterlessFormula
+
+variable {A : LetterlessFormula} {f : Realization α L} {𝔅 : Provability T₀ T}
+
+lemma interpret_lift :
+    (A.lift : Formula α).interpret f 𝔅 = A.interpret (⟨Empty.elim⟩ : Realization Empty L) 𝔅 := by
+  induction A with
+  | atom a => exact a.elim;
+  | falsum => rfl;
+  | imp A B ihA ihB => simp_all [lift, Formula.interpret];
+  | box A ih => simp_all [lift, Formula.interpret];
+
+end LetterlessFormula
 
 def _root_.FFL.FirstOrder.ArithmeticTheory.provabilityLogicRelativeTo
     (T U : ArithmeticTheory) [T.Δ₁] : Logic α :=
