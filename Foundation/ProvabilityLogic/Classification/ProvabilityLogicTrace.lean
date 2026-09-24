@@ -89,7 +89,31 @@ lemma exists_realization_provable_imp_TBB {κ : Type*} [Nonempty κ] (M : Rooted
 lemma exists_realization_provable_neg_of_not_S (hA : 𝐒 ⊬ A) :
     ∃ n, ∃ f : Realization α ℒₒᵣ,
       𝗜𝚺₁ ⊢ ∼f T (A ⋏ LetterlessFormula.lift (⩕ i ∈ Finset.range n, TBB i)) := by
-  sorry
+  classical
+  obtain ⟨κ, _, M, _, hM⟩ :
+      ∃ (κ : Type _) (_ : Nonempty κ) (M : RootedModel κ α) (_ : M.IsFiniteGL),
+        M.root ⊮[M.toModel] A.rflSubfmls.conj 🡒 A := by
+    simpa using Logic.GL.iff_root_forces.not.mp (Logic.S.iff_provable_GL.not.mp hA);
+  obtain ⟨h₁, h₂⟩ := not_forces_imp.mp hM;
+  have : Fintype M.World := Fintype.ofFinite _;
+  let S := standardSolovaySentences T M.extendRoot;
+  use M.height, S.realization;
+  have h : ∀ i, 𝗜𝚺₁ ⊢ S.σ i 🡒
+      ∼S.realization T (A ⋏ LetterlessFormula.lift (⩕ i ∈ Finset.range M.height, TBB i)) := by
+    rintro (_ | x);
+    · have := (S.rfl_mainlemma (fun B hB ↦ forces_conj.mp h₁ _
+        (Finset.mem_image.mpr ⟨B, by simpa using hB, rfl⟩)) mem_subfmls_self).2 h₂;
+      simp only [standardInterpret, Formula.interpret] at this ⊢;
+      cl_prover [this];
+    · apply S.mainlemma_neg (Option.some_ne_none x).symm;
+      apply extendRoot.forces_some.not.mpr;
+      by_cases hx : x = M.root;
+      · exact hx ▸ fun h ↦ h₂ (forces_and.mp h).1;
+      · intro h;
+        have h₃ : ∀ i < M.height, rank (M := M.toModel) x ≠ i := by
+          simpa using forces_lift_iff.mp (forces_and.mp h).2;
+        exact h₃ _ (rank_lt_height (M.root_rel x hx)) rfl;
+  cl_prover [left_Udisj_intro _ h, S.SC4];
 
 end
 
