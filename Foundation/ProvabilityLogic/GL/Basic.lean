@@ -144,9 +144,7 @@ theorem iff_tree_root_forces : 𝐆𝐋 ⊢ A ↔
   · intro h _ _ M _ _;
     exact iff_root_forces.mp h M;
   · intro h;
-    apply iff_root_forces.mpr;
-    intro _ _ M _;
-    exact RootedModel.unravelling.forces_root_iff.mp (h M.unravelling);
+    exact iff_root_forces.mpr fun M ↦ RootedModel.unravelling.forces_root_iff.mp <| h M.unravelling;
 
 theorem provability_TFAE : [
     𝐆𝐋 ⊢ A,
