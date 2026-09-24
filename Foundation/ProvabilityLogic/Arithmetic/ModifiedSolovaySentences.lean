@@ -211,7 +211,9 @@ the reflection instance `𝔅 σ 🡒 σ`.
 -/
 theorem reflection (S : 𝔅.ModifiedSolovaySentences X σ) :
     T₀ ⊢ 𝔅.conItr X.height 🡒 A.interpret S.realization 𝔅 🡒 𝔅 σ 🡒 σ := by
-  sorry
+  have := S.mainlemma_neg (Option.some_ne_none X.root) Formula.mem_subfmls_self <|
+    extendRoot.forces_some.not.mpr X.root_not_forces;
+  cl_prover [this, S.provable_b];
 
 end Provability.ModifiedSolovaySentences
 
