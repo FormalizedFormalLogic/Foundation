@@ -131,7 +131,28 @@ namespace GL
 
 lemma exists_finset_trace_subset_of_mem_sumQuasiNormal {X : Logic α} (h : A ∈ 𝐆𝐋 +ᴸ X) :
     ∃ Y : Finset (Formula α), ↑Y ⊆ X ∧ A.trace ⊆ ⋃ B ∈ Y, B.trace := by
-  sorry
+  classical
+  induction h with
+  | mem₁ h =>
+    exact ⟨∅, by simp, fun _ ⟨_, _, M, _, _, _, hA⟩ ↦ (hA (sound M.toModel h M.root)).elim⟩;
+  | mem₂ h => exact ⟨{_}, by simpa, by simp⟩;
+  | @mdp C _ _ _ ih₁ ih₂ =>
+    obtain ⟨Y₁, hY₁, h₁⟩ := ih₁;
+    obtain ⟨Y₂, hY₂, h₂⟩ := ih₂;
+    use Y₁ ∪ Y₂;
+    and_intros;
+    · simp [hY₁, hY₂];
+    · rintro n ⟨κ, _, M, _, _, rfl, hB⟩;
+      by_cases hC : M.root ⊩[M.toModel] C;
+      · have := h₁ (show M.height ∈ _ from ⟨κ, _, M, _, _, rfl, fun h ↦ hB (h hC)⟩);
+        simp only [Finset.mem_union, Set.mem_iUnion] at this ⊢;
+        grind;
+      · have := h₂ (show M.height ∈ _ from ⟨κ, _, M, _, _, rfl, hC⟩);
+        simp only [Finset.mem_union, Set.mem_iUnion] at this ⊢;
+        grind;
+  | subst _ ih =>
+    obtain ⟨Y, hY, h⟩ := ih;
+    exact ⟨Y, hY, trace_subst_subset.trans h⟩;
 
 theorem trace_sumQuasiNormal (X : Logic α) : (𝐆𝐋 +ᴸ X).trace = X.trace := by
   sorry
