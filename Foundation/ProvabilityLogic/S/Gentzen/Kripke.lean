@@ -4,6 +4,7 @@ public import Foundation.ProvabilityLogic.S.Gentzen.Basic
 public import Foundation.ProvabilityLogic.GL.Gentzen.Kripke
 public import Foundation.ProvabilityLogic.Kripke.Cone
 public import Foundation.ProvabilityLogic.Kripke.Tail
+public import Foundation.ProvabilityLogic.Kripke.Rank
 
 /-!
 # Kripke completeness of the sequent calculus of `S`
@@ -22,12 +23,6 @@ open Kripke Kripke.Model Kripke.Model.World
 namespace Kripke.Model
 
 variable {κ α : Type*} [Nonempty κ] {M : Model κ α}
-
-/-- Called `Σ`-reflexivity in the source.
-
-- [KK23]
--/
-def World.IsReflexiveOf (X : FormulaFinset α) (x : M.World) : Prop := ∀ A ∈ X, x ⊩[M] □A 🡒 A
 
 /-- - [KK23, Lemma 3.2] -/
 lemma eventually_isReflexiveOf [M.IsGL] {w : ℕ → M.World} (hw : ∀ n, w (n + 1) ≺ w n)
@@ -55,22 +50,18 @@ theorem sound_aux {T : LayeredSequent 2 α} (h : ⊢ᴳ[S] T) :
     ∃ X : FormulaFinset α, ∀ {κ : Type*} [Nonempty κ] (M : Model κ α) [M.IsGL] (x : M.World),
       (T.level = 1 → x.IsReflexiveOf X) → x ⊩[M] T.toSequent := by
   induction h with
-  | axm => exact ⟨∅, fun _ _ _ _ ↦ forcesSequent_axm⟩;
-  | botL => exact ⟨∅, fun _ _ _ _ ↦ forcesSequent_botL⟩;
-  | wkL _ hΓ ih =>
+  | axm | botL => exact ⟨∅, by intros; grind⟩;
+  | wkL _ _ ih | wkR _ _ ih | impR _ ih =>
     obtain ⟨X, h⟩ := ih;
-    exact ⟨X, fun M _ x hx ↦ forcesSequent_wkL (h M x hx) hΓ⟩;
-  | wkR _ hΔ ih =>
-    obtain ⟨X, h⟩ := ih;
-    exact ⟨X, fun M _ x hx ↦ forcesSequent_wkR (h M x hx) hΔ⟩;
+    exact ⟨X, fun M _ x hx ↦ by have := h M x hx; grind⟩;
   | impL _ _ ih₁ ih₂ =>
     obtain ⟨X₁, h₁⟩ := ih₁;
     obtain ⟨X₂, h₂⟩ := ih₂;
-    exact ⟨X₁ ∪ X₂, fun M _ x hx ↦ forcesSequent_impL
-      (h₁ M x fun hl A hA ↦ hx hl A (by simp [hA])) (h₂ M x fun hl A hA ↦ hx hl A (by simp [hA]))⟩;
-  | impR _ ih =>
-    obtain ⟨X, h⟩ := ih;
-    exact ⟨X, fun M _ x hx ↦ forcesSequent_impR (h M x hx)⟩;
+    use X₁ ∪ X₂;
+    intro _ _ M _ x hx;
+    have := h₁ M x fun hl A hA ↦ hx hl A (by simp [hA]);
+    have := h₂ M x fun hl A hA ↦ hx hl A (by simp [hA]);
+    grind;
   | liftUp _ ih =>
     obtain ⟨X, h⟩ := ih;
     exact ⟨∅, fun M _ x _ ↦ h M x nofun⟩;
