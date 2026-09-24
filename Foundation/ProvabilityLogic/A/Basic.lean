@@ -46,7 +46,9 @@ lemma of_GL (h : 𝐆𝐋 ⊢ A) : 𝐀 ⊢ A := sumQuasiNormal.of_left h
 lemma provable_TBB : (𝐀 : Logic α) ⊢ TBB n := sumQuasiNormal.mem₂ ⟨n, trivial, rfl⟩
 
 lemma neg_boxItr_bot : (𝐀 : Logic α) ⊢ ∼□^[n]⊥ := by
-  sorry
+  induction n with
+  | zero => exact of_GL (by simp only [boxItr_zero]; cl_prover);
+  | succ n ih => exact of_GL (by unfold TBB; cl_prover) ⨀ provable_TBB ⨀ ih;
 
 lemma sound (h : 𝐀 ⊢ A) {κ : Type*} [Nonempty κ] (M : Model κ α) [M.IsGL] {x : M.World}
     (hx : ∀ n, x ⊮[M] □^[n]⊥) : x ⊩[M] A := by
