@@ -93,7 +93,9 @@ lemma trace_lift (B : LetterlessFormula) : (B.lift : Formula α).trace = B.trace
   grind;
 
 lemma trace_subst_subset {s : Substitution α α} : (A⟦s⟧).trace ⊆ A.trace := by
-  sorry
+  rintro n ⟨κ, _, M, _, _, rfl, h⟩;
+  exact ⟨κ, _, { M.toModel.subst s with root := M.root, root_rel := M.root_rel }, _,
+    inferInstanceAs (M.toModel.subst s).IsGL, rfl, fun h' ↦ h (forces_subst.mp h')⟩;
 
 /-- - [AB05, Lemma 12] -/
 theorem trace_finite_or_compl_finite (A : Formula α) : A.trace.Finite ∨ A.traceᶜ.Finite := by
