@@ -27,7 +27,9 @@ universe u
 variable {α : Type u} {a b c : α} {C : Formula α}
 
 lemma provable_counterexample : 𝐃 ⊢ ∼(□(□#b ⋎ #a) 🡒 □#b) 🡒 □(#a 🡒 □#c) 🡒 □#c := by
-  sorry
+  have h : 𝐆𝐋 ⊢ □(□#b ⋎ #a) ⋏ □(#a 🡒 □#c) 🡒 □(□#b ⋎ □#c) :=
+    C_trans normalOf.box_and (normalOf.box_mono (by cl_prover));
+  cl_prover [of_GL h, axiomD (A := #b) (B := #c)];
 
 variable [DecidableEq α]
 
