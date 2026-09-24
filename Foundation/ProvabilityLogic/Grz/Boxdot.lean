@@ -68,6 +68,7 @@ universe u
 
 variable {α : Type u} [DecidableEq α] {A : Formula α}
 
+omit [DecidableEq α] in
 theorem iff_boxdotTranslate_GL : 𝐆𝐫𝐳 ⊢ A ↔ 𝐆𝐋 ⊢ Aᵇ := by
   constructor;
   · intro h;
@@ -98,6 +99,7 @@ theorem iff_boxdotTranslate_GL : 𝐆𝐫𝐳 ⊢ A ↔ 𝐆𝐋 ⊢ Aᵇ := by
     intro _ _ M _ x;
     exact forces_irreflGen_boxdotTranslate.mp (GL.iff_valid_finite.mp h M.irreflGen x);
 
+omit [DecidableEq α] in
 theorem iff_boxdotTranslate_S : 𝐆𝐫𝐳 ⊢ A ↔ 𝐒 ⊢ Aᵇ :=
   iff_boxdotTranslate_GL.trans S.boxdotTranslate_iff_GL.symm
 

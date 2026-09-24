@@ -18,7 +18,9 @@ universe u
 
 variable {α : Type u} [DecidableEq α] {A : Formula α}
 
+omit [DecidableEq α] in
 theorem boxdotTranslate_iff_GL : 𝐒 ⊢ Aᵇ ↔ 𝐆𝐋 ⊢ Aᵇ := by
+  classical
   constructor;
   · intro h;
     apply GL.iff_root_forces.mpr;

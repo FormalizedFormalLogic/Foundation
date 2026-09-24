@@ -193,13 +193,16 @@ theorem provability_TFAE : [
 
 lemma iff_provable_gentzen : 𝐃 ⊢ A ↔ ⊢ᴳ[D] ∅ ⟹[2] {A} := provability_TFAE.out 1 2
 
+omit [DecidableEq α] in
 lemma iff_forces_pseudoTail : 𝐃 ⊢ A ↔
     ∀ {κ : Type u} [Nonempty κ] (M : RootedModel κ α) [M.IsFiniteGL] (o : α → Prop),
-      Sum.inr ⊤ ⊩[(M.toPseudoTail o).toModel] A :=
-  provability_TFAE.out 1 4
+      Sum.inr ⊤ ⊩[(M.toPseudoTail o).toModel] A := by
+  classical
+  exact provability_TFAE.out 1 4
 
 lemma iff_provable_GL : 𝐃 ⊢ A ↔ 𝐆𝐋 ⊢ A.dSubfmls.conj 🡒 A := provability_TFAE.out 1 6
 
+omit [DecidableEq α] in
 lemma iff_box_provable_GL : 𝐃 ⊢ □A ↔ 𝐆𝐋 ⊢ A := by
   constructor;
   · intro h;
@@ -207,7 +210,10 @@ lemma iff_box_provable_GL : 𝐃 ⊢ □A ↔ 𝐆𝐋 ⊢ A := by
       toFreeTail.forces_inl.mp (sound_freeTail h M (fun _ _ ↦ True) (.inl x) trivial);
   · exact fun h ↦ of_GL (normalOf.nec h);
 
-lemma consistent : (𝐃 : Logic α) ⊬ ⊥ := fun h ↦ S.consistent (subset_S h)
+omit [DecidableEq α] in
+lemma consistent : (𝐃 : Logic α) ⊬ ⊥ := by
+  classical
+  exact fun h ↦ S.consistent (subset_S h)
 
 end Logic.D
 

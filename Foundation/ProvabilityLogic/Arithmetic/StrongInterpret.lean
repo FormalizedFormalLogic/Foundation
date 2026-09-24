@@ -47,6 +47,7 @@ lemma interpret_boxdotTranslate_iff_strongInterpret :
     change T ⊢ _ 🡘 A.strongInterpret f 𝔅 ⋏ 𝔅 (A.strongInterpret f 𝔅);
     cl_prover [ih, h₁, h₂];
 
+omit [L.DecidableEq] in
 lemma provable_interpret_boxdotTranslate_iff :
     T ⊢ Aᵇ.interpret f 𝔅 ↔ T ⊢ A.strongInterpret f 𝔅 :=
   ⟨fun h ↦ C_of_E_mp interpret_boxdotTranslate_iff_strongInterpret ⨀ h,
