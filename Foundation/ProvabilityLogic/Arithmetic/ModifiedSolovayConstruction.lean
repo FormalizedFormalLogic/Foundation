@@ -185,11 +185,49 @@ abbrev notTrig (z : X.extendRoot.World) : ArithmeticSentence :=
   notTrigAux T X σ (fun z ↦ ⌜T.modifiedSolovay X σ θ z⌝) z
 
 lemma h_sigma_one (x : X.extendRoot.World) : Hierarchy 𝚺 1 (h T X σ θ x) := by
-  sorry
+  have H (ε : List X.extendRoot.World) : Hierarchy 𝚺 1 (chain T X σ θ ε) := by
+    induction ε with
+    | nil => simp [chainAux]
+    | cons y ε ih => rcases ε with _ | ⟨x, ε⟩ <;> simp_all [chainAux, stpAux];
+  simp [hAux, H]
+
+section rew
+
+variable {n' : ℕ} (w : Fin n → ArithmeticSemiterm Empty n')
+
+omit [X.IsGL] in
+lemma rew_stpAux (x y : X.extendRoot.World) :
+    Rew.subst w ▹ stpAux T X θ t x y = stpAux T X θ (fun z ↦ Rew.subst w (t z)) x y := by
+  simp [stpAux, Finset.map_conj', Function.comp_def, ← TransitiveRewriting.comp_app,
+    Rew.subst_comp_subst, Matrix.comp_vecCons', Matrix.constant_eq_singleton]
+
+omit [X.IsGL] in
+lemma rew_chainAux (ε : List X.extendRoot.World) :
+    Rew.subst w ▹ chainAux T X θ t ε = chainAux T X θ (fun z ↦ Rew.subst w (t z)) ε := by
+  match ε with
+  |          [] => simp [chainAux]
+  |         [_] => simp [chainAux]
+  | _ :: x :: ε => simp [chainAux, rew_chainAux (x :: ε), rew_stpAux]
+
+omit [Fintype X.World] [X.IsGL] in
+lemma rew_notTrigAux (z : X.extendRoot.World) :
+    Rew.subst w ▹ notTrigAux T X σ t z = notTrigAux T X σ (fun z ↦ Rew.subst w (t z)) z := by
+  unfold notTrigAux;
+  split_ifs <;> simp [← TransitiveRewriting.comp_app, Rew.subst_comp_embSubsts,
+    Rew.subst_comp_subst, Matrix.empty_eq]
+
+end rew
 
 lemma modifiedSolovay_diag (x : X.extendRoot.World) :
     𝗜𝚺₁ ⊢ T.modifiedSolovay X σ θ x 🡘 h T X σ θ x ⋏ ⩕ z ∈ Next X x, notTrig T X σ θ z := by
-  sorry
+  have : 𝗜𝚺₁ ⊢ T.modifiedSolovay X σ θ x 🡘
+      (Rew.subst fun j ↦ ⌜T.modifiedSolovay X σ θ ((Fintype.equivFin _).symm j)⌝) ▹
+        deltaAux T X σ θ (fun z ↦ #(Fintype.equivFin _ z)) x := by
+    simpa [Theory.modifiedSolovay] using! exclusiveMultidiagonal (T := 𝗜𝚺₁)
+      (i := Fintype.equivFin _ x)
+      (fun j ↦ deltaAux T X σ θ (fun z ↦ #(Fintype.equivFin _ z)) ((Fintype.equivFin _).symm j));
+  simpa [deltaAux, hAux, Finset.map_conj', Finset.map_udisj, Function.comp_def, rew_chainAux,
+    rew_notTrigAux] using! this
 
 end stx
 
