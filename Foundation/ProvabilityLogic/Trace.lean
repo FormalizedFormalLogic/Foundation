@@ -125,8 +125,7 @@ variable {α : Type u} {L : Logic α} {A : Formula α}
 /-- The trace of a logic: the union of the traces of its members. -/
 def trace (L : Logic α) : Set ℕ := ⋃ A ∈ L, A.trace
 
-lemma trace_subset_of_mem (h : A ∈ L) : A.trace ⊆ L.trace := by
-  sorry
+lemma trace_subset_of_mem (h : A ∈ L) : A.trace ⊆ L.trace := Set.subset_biUnion_of_mem h
 
 namespace GL
 
