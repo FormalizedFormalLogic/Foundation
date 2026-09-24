@@ -165,7 +165,11 @@ lemma exists_neg_conj_TBB_mem_provabilityLogic
 theorem provabilityLogic_trace_compl_finite
     (h : ¬(T.provabilityLogicRelativeTo U : Logic α) ⊆ 𝐒) :
     (T.provabilityLogicRelativeTo U : Logic α).traceᶜ.Finite := by
-  sorry
+  obtain ⟨m, hm⟩ := exists_neg_conj_TBB_mem_provabilityLogic h;
+  apply (Set.finite_Iio m).subset;
+  intro n hn;
+  by_contra hnm;
+  exact hn <| Logic.trace_subset_of_mem hm <| by simpa using hnm;
 
 /-- - [AB05, Lemma 49] -/
 theorem betaMinus_mem_provabilityLogic (h : ¬(T.provabilityLogicRelativeTo U : Logic α) ⊆ 𝐒) :
