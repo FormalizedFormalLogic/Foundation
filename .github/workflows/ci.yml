@@ -57,8 +57,31 @@ jobs:
             --service ffl-upload \
             --repo FormalizedFormalLogic/Foundation
 
-  generate:
-    name: Generate import graph and zoo
+  import-graph:
+    name: Generate import graph
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 100
+      - uses: ./.github/actions/setup-lean
+      - uses: ts-graphviz/setup-graphviz@v2
+
+      - run: lake build Foundation
+      - run: just import-graph
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: import-graph
+          path: |
+            import_graph.png
+            import_graph.pdf
+            import_graph.html
+          retention-days: 1
+
+  zoo:
+    name: Generate zoo
     runs-on: ubuntu-latest
     needs: build
     steps:
@@ -67,20 +90,14 @@ jobs:
           fetch-depth: 100
       - uses: ./.github/actions/setup-lean
       - uses: typst-community/setup-typst@v5
-      - uses: ts-graphviz/setup-graphviz@v2
 
       - run: lake build Foundation
-      - run: just import-graph
       - run: just zoo
 
       - uses: actions/upload-artifact@v7
         with:
-          name: generated
-          path: |
-            import_graph.png
-            import_graph.pdf
-            import_graph.html
-            pages/zoo
+          name: zoo
+          path: pages/zoo
           retention-days: 1
 
   docs:
@@ -159,7 +176,8 @@ jobs:
     if: github.ref == 'refs/heads/master'
     needs:
       - build
-      - generate
+      - import-graph
+      - zoo
       - docs
       - check-references
       - mk-all-check
@@ -173,16 +191,18 @@ jobs:
       - uses: actions/checkout@v7
       - uses: pandoc/actions/setup@v1
 
-      # `pages/zoo` is unpacked in place, the import graph at the root.
       - uses: actions/download-artifact@v8
         with:
-          name: generated
+          name: import-graph
+          path: pages
+      - uses: actions/download-artifact@v8
+        with:
+          name: zoo
+          path: pages/zoo
       - uses: actions/download-artifact@v8
         with:
           name: docs
           path: pages/docs
-      - name: Copy import graph to pages
-        run: cp import_graph.png import_graph.pdf import_graph.html pages/
 
       - name: Compile README.md to index.html
         run: |
