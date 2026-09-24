@@ -125,8 +125,8 @@ lemma saturateStep_box (hbox : ∀ {Γ Δ A}, D (insert A Γ ⟹ Δ) → D (inse
   obtain ⟨S, hS⟩ := S;
   simp only [saturateStep];
   split_ifs with h;
-  . simp;
-  . intro hA;
+  · simp;
+  · intro hA;
     by_contra hA';
     exact hS <| by simpa [Finset.insert_eq_of_mem hA] using hbox (not_and.mp h hA |> not_not.mp);
 
@@ -150,12 +150,12 @@ lemma saturate_subset_subfmls {BS : Sequent α} (hS₀ : S₀.ant ∪ S₀.suc �
     have h := fun {C} ↦ saturateStep_new (hD := hD) (x := x) (S := saturate hD S₀ h₀ l) (C := C);
     intro C hC;
     rcases Finset.mem_union.mp hC with hC | hC;
-    . rcases h.1 hC with hC | ⟨hC, -⟩;
-      . exact ih (Finset.mem_union_left _ hC);
-      . exact mem_subfmls_subfmls hx hC;
-    . rcases h.2 hC with hC | ⟨hC, -⟩;
-      . exact ih (Finset.mem_union_right _ hC);
-      . exact mem_subfmls_subfmls hx hC;
+    · rcases h.1 hC with hC | ⟨hC, -⟩;
+      · exact ih (Finset.mem_union_left _ hC);
+      · exact mem_subfmls_subfmls hx hC;
+    · rcases h.2 hC with hC | ⟨hC, -⟩;
+      · exact ih (Finset.mem_union_right _ hC);
+      · exact mem_subfmls_subfmls hx hC;
 
 lemma saturate_saturated (hl : l.Pairwise (·.complexity ≤ ·.complexity)) :
     (∀ {A B}, A 🡒 B ∈ l → A 🡒 B ∈ (saturate hD S₀ h₀ l).1.ant →
@@ -178,30 +178,30 @@ lemma saturate_saturated (hl : l.Pairwise (·.complexity ≤ ·.complexity)) :
       intro C hC;
       have := hx C hC;
       constructor;
-      . intro h;
+      · intro h;
         rcases hnew.1 h with h | ⟨-, h⟩;
-        . exact h;
-        . omega;
-      . intro h;
+        · exact h;
+        · omega;
+      · intro h;
         rcases hnew.2 h with h | ⟨-, h⟩;
-        . exact h;
-        . omega;
+        · exact h;
+        · omega;
     and_intros;
-    . intro A B hAB h;
+    · intro A B hAB h;
       rcases List.mem_cons.mp hAB with rfl | hAB;
-      . exact (saturateStep_imp (hD := hD)).1 h;
-      . rcases ih₁ hAB ((old hAB).1 h) with h | h;
-        . exact .inl (hsub.suc h);
-        . exact .inr (hsub.ant h);
-    . intro A B hAB h;
+      · exact (saturateStep_imp (hD := hD)).1 h;
+      · rcases ih₁ hAB ((old hAB).1 h) with h | h;
+        · exact .inl (hsub.suc h);
+        · exact .inr (hsub.ant h);
+    · intro A B hAB h;
       rcases List.mem_cons.mp hAB with rfl | hAB;
-      . exact (saturateStep_imp (hD := hD)).2 h;
-      . obtain ⟨h₁, h₂⟩ := ih₂ hAB ((old hAB).2 h);
+      · exact (saturateStep_imp (hD := hD)).2 h;
+      · obtain ⟨h₁, h₂⟩ := ih₂ hAB ((old hAB).2 h);
         exact ⟨hsub.ant h₁, hsub.suc h₂⟩;
-    . intro hbox A hA h;
+    · intro hbox A hA h;
       rcases List.mem_cons.mp hA with rfl | hA;
-      . exact saturateStep_box (hD := hD) hbox h;
-      . exact hsub.ant (ih₃ hbox hA ((old hA).1 h));
+      · exact saturateStep_box (hD := hD) hbox h;
+      · exact hsub.ant (ih₃ hbox hA ((old hA).1 h));
 
 /-- The subformulas of `BS`, sorted by complexity. -/
 noncomputable abbrev sortedSubfmls (BS : Sequent α) : List (Formula α) :=
@@ -226,12 +226,12 @@ theorem exists_saturated (hD : IsImpClosed D) {BS S₀ : Sequent α} (h₀ : ¬D
   obtain ⟨h₁, h₂, h₃⟩ := saturate_saturated (hD := hD) (h₀ := h₀) sortedSubfmls_pairwise;
   use (saturate hD S₀ h₀ (sortedSubfmls BS)).1;
   and_intros;
-  . exact subset_saturate;
-  . exact (saturate hD S₀ h₀ (sortedSubfmls BS)).2;
-  . exact ⟨fun h ↦ h₁ (hl.mpr (hsub (Finset.mem_union_left _ h))) h,
+  · exact subset_saturate;
+  · exact (saturate hD S₀ h₀ (sortedSubfmls BS)).2;
+  · exact ⟨fun h ↦ h₁ (hl.mpr (hsub (Finset.mem_union_left _ h))) h,
       fun h ↦ h₂ (hl.mpr (hsub (Finset.mem_union_right _ h))) h⟩;
-  . exact hsub;
-  . exact fun hbox _ h ↦ h₃ hbox (hl.mpr (hsub (Finset.mem_union_left _ h))) h;
+  · exact hsub;
+  · exact fun hbox _ h ↦ h₃ hbox (hl.mpr (hsub (Finset.mem_union_left _ h))) h;
 
 end Sequent
 

@@ -33,10 +33,10 @@ lemma forces_lift_iff : x ⊩[M] A.lift ↔ x.rank ∈ spectrum A := by
     suffices (∀ y, x ≺ y → y.rank ∈ spectrum A) ↔ ∀ i < x.rank, i ∈ spectrum A by
       simpa [forces_box, ih];
     constructor;
-    . intro h i hi;
+    · intro h i hi;
       obtain ⟨y, Rxy, rfl⟩ := exists_rel_rank_eq_of_lt hi;
       exact h y Rxy;
-    . exact fun h y Rxy ↦ h _ (rank_lt_of_rel Rxy);
+    · exact fun h y Rxy ↦ h _ (rank_lt_of_rel Rxy);
 
 end LetterlessFormula
 
@@ -49,11 +49,11 @@ variable {α : Type u} {A : LetterlessFormula} {X : LetterlessFormulaSet}
 lemma lift_mem_iff : A.lift ∈ (𝐆𝐋 : Logic α) ↔ spectrum A = Set.univ := by
   classical
   constructor;
-  . intro h;
+  · intro h;
     apply Set.eq_univ_of_forall;
     intro n;
     simpa using forces_lift_iff.mp <| Logic.GL.sound (finiteLineModel n α) h (Fin.last n);
-  . intro h;
+  · intro h;
     apply iff_valid_finite.mpr;
     intro _ _ M _ x;
     have : Fintype M.World := Fintype.ofFinite _;
@@ -77,8 +77,8 @@ lemma exists_finset_of_mem_sumQuasiNormal {B : Formula α} (h : B ∈ 𝐆𝐋 +
     obtain ⟨Y₂, hY₂, h₂⟩ := ih₂;
     use Y₁ ∪ Y₂;
     and_intros;
-    . simp [hY₁, hY₂];
-    . intro _ _ M _ _ x hx;
+    · simp [hY₁, hY₂];
+    · intro _ _ M _ _ x hx;
       exact h₁ M x (fun C hC ↦ hx C (by simp [hC])) (h₂ M x fun C hC ↦ hx C (by simp [hC]));
   | subst _ ih =>
     obtain ⟨Y, hY, h⟩ := ih;
@@ -96,14 +96,14 @@ theorem lift_mem_sumQuasiNormal_iff (h : (∃ B ∈ X, (spectrum B).Finite) ∨ 
     A.lift ∈ (𝐆𝐋 : Logic α) +ᴸ X.lift ↔ X.spectrum ⊆ spectrum A := by
   classical
   constructor;
-  . exact spectrum_subset_of_lift_mem_sumQuasiNormal;
-  . intro hXA;
+  · exact spectrum_subset_of_lift_mem_sumQuasiNormal;
+  · intro hXA;
     obtain ⟨Y, hY, hA⟩ := exists_finset_of_spectrum_subset hXA h;
     apply sumQuasiNormal_of_conj (Γ := Y.image lift);
-    . simp only [Finset.mem_image, forall_exists_index, and_imp];
+    · simp only [Finset.mem_image, forall_exists_index, and_imp];
       rintro _ C hC rfl;
       exact .mem₂ ⟨C, hY hC, rfl⟩;
-    . apply iff_valid_finite.mpr;
+    · apply iff_valid_finite.mpr;
       intro _ _ M _ x hx;
       have : Fintype M.World := Fintype.ofFinite _;
       have hx : ∀ C ∈ Y, x ⊩[M] C.lift :=
@@ -117,10 +117,10 @@ theorem sumQuasiNormal_subset_iff
     ((𝐆𝐋 : Logic α) +ᴸ X.lift) ⊆ (𝐆𝐋 +ᴸ Y.lift) ↔ Y.spectrum ⊆ X.spectrum := by
   rw [sumQuasiNormal.subset_iff];
   constructor;
-  . intro hs n hn;
+  · intro hs n hn;
     exact LetterlessFormulaSet.mem_spectrum.mpr fun A hA ↦
       spectrum_subset_of_lift_mem_sumQuasiNormal (hs ⟨A, hA, rfl⟩) hn;
-  . rintro hs _ ⟨A, hA, rfl⟩;
+  · rintro hs _ ⟨A, hA, rfl⟩;
     apply (lift_mem_sumQuasiNormal_iff (h.imp_right (· A hA))).mpr;
     exact fun n hn ↦ LetterlessFormulaSet.mem_spectrum.mp (hs hn) A hA;
 

@@ -57,8 +57,8 @@ private lemma def_restrictedGödel' [𝗜𝚺₁ ⪯ U] : U ⊢ T.restrictedGöd
 
 private lemma provable_E_restrictedGödel_restrictedGödel' [𝗜𝚺₁ ⪯ U] : U ⊢ T.restrictedGödel fDef e 🡘 T.restrictedGödel' fDef e := by
   apply Entailment.E_trans;
-  . exact def_restrictedGödel;
-  . exact Entailment.E_symm $ def_restrictedGödel';
+  · exact def_restrictedGödel;
+  · exact Entailment.E_symm <| def_restrictedGödel';
 
 private lemma iff_provable_restrictedGödel_provable_restrictedGödel' [𝗜𝚺₁ ⪯ U] : U ⊢ (T.restrictedGödel fDef e) ↔ U ⊢ (T.restrictedGödel' fDef e) := by
   apply Entailment.iff_of_E provable_E_restrictedGödel_restrictedGödel';
@@ -70,7 +70,7 @@ private lemma iff_true_restrictedGödel_true_restrictedGödel' : ℕ↓[ℒₒ�
 
 lemma models_restrictedGödel (f : V → V) [𝚺₁-Function₁[V] f via fDef] :
     V↓[ℒₒᵣ] ⊧ T.restrictedGödel fDef e ↔ ∀ x : V, x < f (ORingStructure.numeral e) → ¬Arithmetic.Bootstrapping.Proof T x (⌜T.restrictedGödel fDef e⌝) := by
-  apply Iff.trans $ Semantics.models_iff.mp $ models_of_provable (T := 𝗜𝚺₁) inferInstance $ def_restrictedGödel;
+  apply Iff.trans <| Semantics.models_iff.mp <| models_of_provable (T := 𝗜𝚺₁) inferInstance <| def_restrictedGödel;
   simp [models_iff, Theory.RestrictedProvable]
 
 private lemma models_neg_restrictedGödel (f : V → V) [𝚺₁-Function₁[V] f via fDef] :
@@ -94,15 +94,15 @@ theorem true_restrictedGödel (f : ℕ → ℕ) [𝚺₁-Function₁ f via fDef]
 theorem provable_restrictedGödel (f : ℕ → ℕ) [𝚺₁-Function₁ f via fDef] : T ⊢ T.restrictedGödel fDef e := by
   apply iff_provable_restrictedGödel_provable_restrictedGödel'.mpr;
   apply Arithmetic.sigma_one_completeness_iff T.restrictedGödel'_sigmaOne |>.mp;
-  apply iff_true_restrictedGödel_true_restrictedGödel'.mp $ true_restrictedGödel f;
+  apply iff_true_restrictedGödel_true_restrictedGödel'.mp <| true_restrictedGödel f;
 
 /-- Lower bound of a Gödel number of proof of restricted Gödel sentence is `f e`. -/
 theorem lower_bound_gödelNumber_proof_restrictedGödel (f : ℕ → ℕ) [𝚺₁-Function₁ f via fDef] :
     ∀ b : T.Proof (T.restrictedGödel fDef e), f (ORingStructure.numeral e) ≤ ⌜b⌝ := by
   intro b;
   exact Nat.le_of_not_lt
-    $ (imp_not_comm.mp $ (models_restrictedGödel f).mp (true_restrictedGödel f) ⌜b⌝)
-    $ proof_of_quote_proof b;
+    <| (imp_not_comm.mp <| (models_restrictedGödel f).mp (true_restrictedGödel f) ⌜b⌝)
+    <| proof_of_quote_proof b;
 
 end Arithmetic
 
@@ -136,8 +136,8 @@ example :
   letI e : ℕ := 10^9;
    T ⊢ T.restrictedGödel superexpDef e ∧ ∀ b : T.Proof (T.restrictedGödel superexpDef e), Superexp.superexp e ≤ ⌜b⌝  := by
   constructor;
-  . apply provable_restrictedGödel_superexp;
-  . apply lower_bound_gödelNumber_proof_restrictedGödel_superexp;
+  · apply provable_restrictedGödel_superexp;
+  · apply lower_bound_gödelNumber_proof_restrictedGödel_superexp;
 
 end Arithmetic
 

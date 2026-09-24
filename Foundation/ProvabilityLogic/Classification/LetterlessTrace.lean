@@ -46,8 +46,8 @@ theorem sumQuasiNormal_eq_GLAlpha_or_GLBetaMinus :
     ((∀ A ∈ X, (trace A).Finite) ∧ ((𝐆𝐋 : Logic α) +ᴸ X.lift) = 𝐆𝐋α X.trace) ∨
     ∃ hX : X.traceᶜ.Finite, ((𝐆𝐋 : Logic α) +ᴸ X.lift) = 𝐆𝐋β⁻ X.trace hX := by
   by_cases h : ∀ A ∈ X, (trace A).Finite;
-  . exact .inl ⟨h, sumQuasiNormal_eq_GLAlpha h⟩;
-  . push Not at h;
+  · exact .inl ⟨h, sumQuasiNormal_eq_GLAlpha h⟩;
+  · push Not at h;
     obtain ⟨A, hA, hinf⟩ := h;
     apply Or.inr;
     apply sumQuasiNormal_eq_GLBetaMinus;
@@ -87,7 +87,7 @@ lemma not_regular_boxItr_bot : ¬Regular T (□^[n]⊥) := by
 
 theorem regular_iff_trace_finite [𝗜𝚺₁ ⪯ T] : A.Regular T ↔ (trace A).Finite := by
   constructor;
-  . intro h;
+  · intro h;
     by_contra hinf;
     obtain ⟨m, hm⟩ := (spectrum_finite_or_cofinite.resolve_right hinf).bddAbove;
     apply not_regular_boxItr_bot (n := m + 1) (T := T);
@@ -97,15 +97,15 @@ theorem regular_iff_trace_finite [𝗜𝚺₁ ⪯ T] : A.Regular T ↔ (trace A)
     have := @hm k;
     simp only [spectrum_imp, spectrum_boxItr_bot];
     grind;
-  . intro h;
+  · intro h;
     obtain ⟨m, hm⟩ := h.bddAbove;
     apply Regular.of_imp (A := ∼□^[m + 1]⊥);
-    . apply Logic.GL.mem_iff_spectrum_eq_univ.mpr;
+    · apply Logic.GL.mem_iff_spectrum_eq_univ.mpr;
       ext k;
       have := @hm k;
       simp only [spectrum_imp, spectrum_neg, spectrum_boxItr_bot];
       grind;
-    . exact regular_neg.mpr not_regular_boxItr_bot;
+    · exact regular_neg.mpr not_regular_boxItr_bot;
 
 end LetterlessFormula
 
@@ -128,10 +128,10 @@ theorem sumQuasiNormal_classification :
   have e : X.Regular T ↔ ∀ A ∈ X, (trace A).Finite := by
     simp [LetterlessFormulaSet.Regular, regular_iff_trace_finite];
   by_cases h : X.Regular T;
-  . exact .inl ⟨h, sumQuasiNormal_eq_GLAlpha (e.mp h)⟩;
-  . rcases sumQuasiNormal_eq_GLAlpha_or_GLBetaMinus (α := α) (X := X) with h' | h';
-    . exact absurd (e.mpr h'.1) h;
-    . exact .inr ⟨h, h'⟩;
+  · exact .inl ⟨h, sumQuasiNormal_eq_GLAlpha (e.mp h)⟩;
+  · rcases sumQuasiNormal_eq_GLAlpha_or_GLBetaMinus (α := α) (X := X) with h' | h';
+    · exact absurd (e.mpr h'.1) h;
+    · exact .inr ⟨h, h'⟩;
 
 end Logic.GL
 

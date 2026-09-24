@@ -27,9 +27,9 @@ abbrev NonRoot (M : RootedModel κ α) := { x : M.World // x ≠ M.root }
 @[simp, grind .]
 lemma not_rel_root [IsTrans _ M.Rel] [Std.Irrefl M.Rel] : x ⊀ M.root := by
   by_cases hx : x = M.root;
-  . subst hx;
+  · subst hx;
     exact Std.Irrefl.irrefl (r := M.Rel) _;
-  . exact fun h ↦ Std.Irrefl.irrefl (r := M.Rel) _ (IsTrans.trans _ _ _ h (M.root_rel x hx));
+  · exact fun h ↦ Std.Irrefl.irrefl (r := M.Rel) _ (IsTrans.trans _ _ _ h (M.root_rel x hx));
 
 end RootedModel
 

@@ -35,11 +35,11 @@ lemma Model.validateSequent_boxGL [M.IsGL] (h : M ⊧ (insert (□A) (Γ ∪ Γ.
   apply validateSequent_singleton_iff.mp h t;
   simp only [Finset.mem_insert, Finset.mem_union, Finset.mem_image];
   rintro C (rfl | hC | ⟨C, hC, rfl⟩);
-  . intro z Rtz;
+  · intro z Rtz;
     by_contra hz;
     exact tmax z ⟨IsTrans.trans _ _ _ Rxt Rtz, hz⟩ Rtz;
-  . exact hΓ C hC t Rxt;
-  . intro z Rtz;
+  · exact hΓ C hC t Rxt;
+  · intro z Rtz;
     exact hΓ C hC z (IsTrans.trans _ _ _ Rxt Rtz);
 
 end Kripke
@@ -128,18 +128,18 @@ lemma truthlemma : (A ∈ x.ant → x ⊩[countermodel BS] A) ∧ (A ∈ x.suc �
   | falsum => exact ⟨fun h ↦ absurd h bot_not_mem_ant, fun _ ↦ id⟩;
   | imp A B ihA ihB =>
     constructor;
-    . intro h hA;
+    · intro h hA;
       rcases x.saturated.impL h with hA' | hB;
-      . exact absurd hA (ihA.2 hA');
-      . exact ihB.1 hB;
-    . intro h hf;
+      · exact absurd hA (ihA.2 hA');
+      · exact ihB.1 hB;
+    · intro h hf;
       obtain ⟨hA, hB⟩ := x.saturated.impR h;
       exact ihB.2 hB (hf (ihA.1 hA));
   | box A ih =>
     constructor;
-    . intro h y Rxy;
+    · intro h y Rxy;
       exact ih.1 <| Rxy.2 (by simpa);
-    . intro h;
+    · intro h;
       apply not_forces_box.mpr;
       have h₀ : ⊬ᴳ[GL] insert (□A) (x.ant.prebox ∪ x.ant.prebox.box) ⟹ {A} := fun hp ↦
         x.unprovable <| Gentzen.wk (Gentzen.boxGL hp) FormulaFinset.box_prebox_subset (by simpa using h);
@@ -151,23 +151,23 @@ lemma truthlemma : (A ∈ x.ant → x ⊩[countermodel BS] A) ∧ (A ∈ x.suc �
         simp only [Finset.mem_union, Finset.mem_insert, Finset.mem_singleton,
           FormulaFinset.mem_prebox, Finset.mem_image];
         rintro ((rfl | hB | ⟨B, hB, rfl⟩) | rfl);
-        . exact hbox;
-        . exact Sequent.mem_subfmls_subfmls (hx (Finset.mem_union_left _ hB))
+        · exact hbox;
+        · exact Sequent.mem_subfmls_subfmls (hx (Finset.mem_union_left _ hB))
             Formula.mem_subfmls_box;
-        . exact hx (Finset.mem_union_left _ hB);
-        . exact Sequent.mem_subfmls_subfmls hbox Formula.mem_subfmls_box;
+        · exact hx (Finset.mem_union_left _ hB);
+        · exact Sequent.mem_subfmls_subfmls hbox Formula.mem_subfmls_box;
       obtain ⟨y, hy⟩ := lindenbaum h₀ hS₀;
       use y;
       and_intros;
-      . intro B hB;
+      · intro B hB;
         exact FormulaFinset.mem_prebox.mpr <| hy.ant <|
           Finset.mem_insert_of_mem <| Finset.mem_union_right _ <| Finset.mem_image_of_mem _ hB;
-      . intro hsub;
+      · intro hsub;
         have : A ∈ y.ant.prebox := FormulaFinset.mem_prebox.mpr <| hy.ant <| Finset.mem_insert_self _ _;
         exact not_mem_both (S := x) ⟨FormulaFinset.mem_prebox.mp (hsub this), h⟩;
-      . intro B hB;
+      · intro B hB;
         exact hy.ant <| Finset.mem_insert_of_mem <| Finset.mem_union_left _ hB;
-      . exact ih.2 (hy.suc (by simp));
+      · exact ih.2 (hy.suc (by simp));
 
 end countermodel
 

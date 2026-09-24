@@ -49,9 +49,9 @@ lemma forces_axiomGrz [M.IsGrz] {x : M.World} : x ⊩[M] □(□(A 🡒 □A) �
 theorem sound (M : Model κ α) [M.IsGrz] (h : 𝐆𝐫𝐳 ⊢ A) : M ⊧ A := by
   apply normalOf.sound _ h;
   rintro _ ((⟨B, rfl⟩ | ⟨B, rfl⟩) | ⟨B, rfl⟩) x;
-  . exact fun h y Rxy z Ryz ↦ h z (IsTrans.trans _ _ _ Rxy Ryz);
-  . exact fun h ↦ h x (Std.Refl.refl x);
-  . exact forces_axiomGrz;
+  · exact fun h y Rxy z Ryz ↦ h z (IsTrans.trans _ _ _ Rxy Ryz);
+  · exact fun h ↦ h x (Std.Refl.refl x);
+  · exact forces_axiomGrz;
 
 end
 
@@ -101,20 +101,20 @@ variable {α : Type u} [DecidableEq α] {A : Formula α}
 
 theorem iff_provable_gentzen : 𝐆𝐫𝐳 ⊢ A ↔ ⊢ᴳ[Grz] ∅ ⟹ {A} := by
   constructor;
-  . intro h;
+  · intro h;
     apply Gentzen.complete;
     intro _ _ M _ x _;
     exact ⟨A, by simp, sound M h x⟩;
-  . intro h;
+  · intro h;
     have : 𝐆𝐫𝐳 ⊢ (∅ : FormulaFinset α).conj := by simp [Finset.conj];
     simpa using of_gentzen h ⨀ this;
 
 theorem iff_valid_finite :
     𝐆𝐫𝐳 ⊢ A ↔ ∀ {κ : Type u} [Nonempty κ] (M : Model κ α), [M.IsFiniteGrz] → M ⊧ A := by
   constructor;
-  . intro h _ _ M _;
+  · intro h _ _ M _;
     exact sound M h;
-  . intro h;
+  · intro h;
     apply iff_provable_gentzen.mpr;
     apply Gentzen.complete;
     intro _ _ M _ x _;
@@ -123,9 +123,9 @@ theorem iff_valid_finite :
 theorem iff_root_forces : 𝐆𝐫𝐳 ⊢ A ↔
     ∀ {κ : Type u} [Nonempty κ] (M : RootedModel κ α), [M.IsFiniteGrz] → M.root ⊩[M.toModel] A := by
   constructor;
-  . intro h _ _ M _;
+  · intro h _ _ M _;
     exact sound M.toModel h M.root;
-  . intro h;
+  · intro h;
     apply iff_valid_finite.mpr;
     intro _ _ M _ x;
     exact Model.forces_cone.mp <| h (M.cone x);
