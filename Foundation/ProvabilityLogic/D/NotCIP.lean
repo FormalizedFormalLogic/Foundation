@@ -28,10 +28,11 @@ lemma Logic.S.not_iff_atom [DecidableEq α] (hab : a ≠ b) (hC : C.ModalizedIn 
     (hb : b ∉ C.atoms) : 𝐒 ⊬ C 🡘 #a := by
   intro h;
   obtain ⟨E, -, hE⟩ := Logic.GL.exists_fixpoint (A := ∼C) hab ⟨hC, trivial⟩ (by simpa using hb);
-  have h₁ : 𝐒 ⊢ (C 🡘 #a)⟦.single a E⟧ := sumQuasiNormal.subst h;
+  have h₁ : 𝐒 ⊢ C⟦a ↦ E⟧ 🡘 E := by
+    simpa only [subst_iff, subst_atom, Substitution.single_apply, ite_true] using
+      show 𝐒 ⊢ (C 🡘 #a)⟦a ↦ E⟧ from sumQuasiNormal.subst h;
   have h₂ : 𝐒 ⊢ ∼C⟦a ↦ E⟧ 🡘 E := S.of_GL hE;
-  simp only [subst_iff, subst_atom, Substitution.single_apply, ite_true] at h₁;
-  exact S.consistent (by cl_prover [h₁, h₂]);
+  exact S.consistent <| by cl_prover [h₁, h₂];
 
 namespace Logic.D
 
@@ -49,32 +50,26 @@ lemma forces_pseudoTail_interpolant_iff (hab : a ≠ b) (hac : a ≠ c)
   let V x p := if p = a then M.Val x a else x ≠ M.root;
   let N : RootedModel κ α := ⟨M.toModel.overwrite V, M.root, M.root_rel⟩;
   have : N.IsFiniteGL := inferInstanceAs (M.toModel.overwrite V).IsFiniteGL;
-  have e : Sum.inr ⊤ ⊩[(N.toPseudoTail o).toModel] C ↔
-      Sum.inr ⊤ ⊩[(M.toPseudoTail o).toModel] C := by
+  have e : Sum.inr ⊤ ⊩[(M.toPseudoTail o).toModel] C ↔
+      Sum.inr ⊤ ⊩[(N.toPseudoTail o).toModel] C := by
     apply forces_congr_of_atoms (by rfl);
     rintro (x | i) p hp <;> obtain rfl := Finset.mem_singleton.mp (hC hp) <;>
       simp [N, V, Model.overwrite, Model.toFreeTail, Model.Val];
     split_ifs <;> simp;
-  have h₃ : ∀ x, ∀ p ≠ a, x ⊩[N.toModel] □#p := by
-    intro x p hp y R;
+  have h₃ : ∀ x, ∀ p ≠ a, x ⊩[N.toModel] □#p := fun x p hp y R ↦ by
     simpa [N, V, Model.overwrite, Model.Val, hp] using fun h ↦ RootedModel.not_rel_root (h ▸ R);
-  have h₄ : ∀ i, ∀ p ≠ a, Sum.inr i ⊮[(N.toPseudoTail o).toModel] □#p := by
-    intro i p hp h;
-    have : V M.root p := h (.inl M.root) trivial;
-    simp [V, hp] at this;
+  have h₄ : ∀ i, ∀ p ≠ a, Sum.inr i ⊮[(N.toPseudoTail o).toModel] □#p := fun i p hp h ↦
+    (show ¬V M.root p by simp [V, hp]) <| h (.inl M.root) trivial;
   have h₅ : ∀ n : ℕ, Sum.inr (n : ℕ∞) ⊩[(N.toPseudoTail o).toModel] #a ↔ M.Val M.root a := by
-    intro n;
-    change (if (n : ℕ∞) = ⊤ then o else V M.root) a ↔ M.Val M.root a;
-    simp [V];
+    simp [N, V, Model.overwrite, Model.toFreeTail, Model.Val];
   have hA : Sum.inr ⊤ ⊩[(N.toPseudoTail o).toModel] ∼(□(□#b ⋎ #a) 🡒 □#b) ↔ M.Val M.root a := by
     simp [forces_neg, forces_imp, forces_or, toFreeTail.forces_root_box_iff (A := □#b ⋎ #a),
       h₄ _ b hab.symm, h₃ _ b hab.symm, h₅];
   have hB : Sum.inr ⊤ ⊩[(N.toPseudoTail o).toModel] □(#a 🡒 □#c) 🡒 □#c ↔ M.Val M.root a := by
     simp [forces_imp, toFreeTail.forces_root_box_iff (A := #a 🡒 □#c), h₄ _ c hac.symm,
       h₃ _ c hac.symm, h₅];
-  have h₁ := iff_forces_pseudoTail.mp h₁ N o;
-  have h₂ := iff_forces_pseudoTail.mp h₂ N o;
-  exact ⟨fun h ↦ hB.mp (h₂ (e.mpr h)), fun h ↦ e.mp (h₁ (hA.mpr h))⟩;
+  exact e.trans ⟨fun h ↦ hB.mp <| iff_forces_pseudoTail.mp h₂ N o h,
+    fun h ↦ iff_forces_pseudoTail.mp h₁ N o <| hA.mpr h⟩;
 
 lemma S_modalize_iff_of_interpolant (hab : a ≠ b) (hac : a ≠ c)
     (h₁ : 𝐃 ⊢ ∼(□(□#b ⋎ #a) 🡒 □#b) 🡒 C) (h₂ : 𝐃 ⊢ C 🡒 □(#a 🡒 □#c) 🡒 □#c) (hC : C.atoms ⊆ {a}) :
@@ -108,7 +103,7 @@ theorem not_CIP (hab : a ≠ b) (hac : a ≠ c) (hbc : b ≠ c) :
   obtain ⟨C, h₁, h₂, hC⟩ := h _ _ (provable_counterexample (a := a) (b := b) (c := c));
   have hC : C.atoms ⊆ {a} := hC.trans (by intro; simp; grind);
   exact S.not_iff_atom hab modalizedIn_modalize
-    (fun h ↦ hab (Finset.mem_singleton.mp (hC (atoms_modalize_subset h))).symm)
+    (fun h ↦ by simpa [hab.symm] using hC <| atoms_modalize_subset h)
     (S_modalize_iff_of_interpolant hab hac h₁ h₂ hC);
 
 end Logic.D
