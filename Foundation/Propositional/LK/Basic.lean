@@ -108,14 +108,12 @@ variable {α : Type*}
 abbrev LK.Proof (φ : NNFormula α) := ⊢ᴸᴷ⁰ ⦃φ⦄
 
 instance : Entailment (LK.Proof.Symbol α) (NNFormula α) where
-  Prf _ := LK.Proof
+  Entails _ φ := Nonempty (LK.Proof φ)
 
 namespace LK.Proof
 
-lemma def_eq (φ : NNFormula α) : (𝐋𝐊⁰ ⊢! φ) = (⊢ᴸᴷ⁰ ⦃φ⦄) := rfl
-
 instance : OneSidedLK.PrincipalEntailment (LK.Derivation (α := α)) (𝐋𝐊⁰ : LK.Proof.Symbol α) where
-  equiv := Equiv.refl _
+  iff := Iff.rfl
 
 instance classical : Entailment.Cl (𝐋𝐊⁰ : LK.Proof.Symbol α) := inferInstance
 

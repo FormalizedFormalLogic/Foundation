@@ -75,7 +75,8 @@ open Classical in
 theorem rosser_internalize [Consistent T] {φ : Sentence L} :
     T ⊢ φ → T.RosserProvable (⌜φ⌝ : V) := by
   intro h
-  let n : ℕ := ⌜h.get⌝
+  have ⟨d⟩ := h
+  let n : ℕ := ⌜d⌝
   have hn : Proof T (↑n : V) ⌜φ⌝ := by simp [n, coe_quote_proof_eq]
   refine rosser_quote_def₀.mpr ⟨n, hn, ?_⟩
   intro b hb Hb
@@ -91,7 +92,8 @@ open Classical in
 theorem not_rosserProvable [Consistent T] {φ : Sentence L} :
     T ⊢ ∼φ → ¬T.RosserProvable (⌜φ⌝ : V) := by
   rintro h r
-  let n : ℕ := ⌜h.get⌝
+  have ⟨d⟩ := h
+  let n : ℕ := ⌜d⌝
   have hn : Proof T (↑n : V) ⌜∼φ⌝ := by simp [n, coe_quote_proof_eq]
   rcases rosser_quote₀.mp r with ⟨b, hb, Hb⟩
   have : b ≤ n := by grind;

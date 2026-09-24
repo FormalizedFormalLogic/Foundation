@@ -94,6 +94,27 @@ notation:76 "□^[" n "]" A:80 => boxItr n A
 @[simp, grind =] lemma boxItr_succ {n : ℕ} : □^[n + 1]A = □(□^[n]A) :=
   Function.iterate_succ_apply' _ _ _
 
+abbrev boxdot (A : Formula α) : Formula α := A ⋏ □A
+
+prefix:76 "⊡" => boxdot
+
+def boxdotTranslate : Formula α → Formula α
+  | #a    => #a
+  | ⊥     => ⊥
+  | A 🡒 B => A.boxdotTranslate 🡒 B.boxdotTranslate
+  | □A    => ⊡A.boxdotTranslate
+
+postfix:90 "ᵇ" => boxdotTranslate
+
+@[simp, grind =] lemma boxdotTranslate_atom {a : α} : (#a)ᵇ = #a := rfl
+@[simp, grind =] lemma boxdotTranslate_bot : (⊥ : Formula α)ᵇ = ⊥ := rfl
+@[simp, grind =] lemma boxdotTranslate_top : (⊤ : Formula α)ᵇ = ⊤ := rfl
+@[simp, grind =] lemma boxdotTranslate_imp : (A 🡒 B)ᵇ = Aᵇ 🡒 Bᵇ := rfl
+@[simp, grind =] lemma boxdotTranslate_neg : (∼A)ᵇ = ∼Aᵇ := rfl
+@[simp, grind =] lemma boxdotTranslate_and : (A ⋏ B)ᵇ = Aᵇ ⋏ Bᵇ := rfl
+@[simp, grind =] lemma boxdotTranslate_or : (A ⋎ B)ᵇ = Aᵇ ⋎ Bᵇ := rfl
+@[simp, grind =] lemma boxdotTranslate_box : (□A)ᵇ = ⊡Aᵇ := rfl
+
 @[grind]
 def complexity : Formula α → ℕ
   | #_      => 0

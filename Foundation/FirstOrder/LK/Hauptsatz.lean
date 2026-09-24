@@ -364,7 +364,7 @@ def sound {Γ : LJ.Sequent L} {Ξ : LJ.Head L}
       exact Nat.lt_succ_iff.mpr <| Nat.le_of_eq <|
         (LJ.Derivation.height_cast _ _ _).trans (LJ.Derivation.height_rewrite (t :>ₙ fun x ↦ &x) d)
 
-def ljSound {φ : Propositionᵢ L} (d : 𝐋𝐉¹ ⊢! φ) : ⊩ φ :=
+def ljSound {φ : Propositionᵢ L} (d : LJ.Proof φ) : ⊩ φ :=
   fun p tp ↦ sound d p tp fun _ h ↦ by simp at h
 
 def relRefl {k} (R : L.Rel k) (v : Fin k → SyntacticTerm L) : ⦃.rel R v⦄ ⊩ rel R v :=

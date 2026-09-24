@@ -110,7 +110,7 @@ omit [DecidableEq F] in
 lemma and_left (h : Γ ++ [φ, ψ] ⟹ Δ) : (φ ⋏ ψ :: Γ) ⟹ Δ := by
   classical
   have : φ :: ψ :: Γ ⟹ Δ := weakening h
-  have : (φ ⋏ ψ :: Γ) ⊢[𝓢] ψ 🡒 φ 🡒 Δ.disj := wk! (by simp) (deduct <| deduct this)
+  have : (φ ⋏ ψ :: Γ) ⊢[𝓢] ψ 🡒 φ 🡒 Δ.disj := wk (by simp) (deduct <| deduct this)
   exact this ⨀ (deductInv and₂) ⨀ (deductInv and₁)
 
 omit [DecidableEq F] in
@@ -136,7 +136,7 @@ omit [DecidableEq F] in
 lemma neg_left_int (h : Γ ++ [∼φ] ⟹ Δ ++ [φ]) : ∼φ :: Γ ⟹ Δ := by
   classical
   have h : ∼φ :: Γ ⟹ φ :: Δ := weakening h
-  suffices (∼φ :: Γ) ⊢[𝓢] (φ :: Δ).disj 🡒 Δ.disj from this ⨀ (wk! (by simp) h)
+  suffices (∼φ :: Γ) ⊢[𝓢] (φ :: Δ).disj 🡒 Δ.disj from this ⨀ (wk (by simp) h)
   apply left_Disj_intro
   intro ψ hψ
   rcases show ψ = φ ∨ ψ ∈ Δ by simpa using hψ with (rfl | hψ)
@@ -153,13 +153,13 @@ lemma imply_left_int (hφ : Γ ++ [φ 🡒 ψ] ⟹ Δ ++ [φ]) (hψ : Γ ++ [ψ]
   classical
   have hφ : (φ 🡒 ψ) :: Γ ⟹ φ :: Δ := weakening hφ
   have hψ : ψ :: Γ ⟹ Δ := weakening hψ
-  suffices ((φ 🡒 ψ) :: Γ) ⊢[𝓢] (φ :: Δ).disj 🡒 Δ.disj from this ⨀ wk! (by simp) hφ
+  suffices ((φ 🡒 ψ) :: Γ) ⊢[𝓢] (φ :: Δ).disj 🡒 Δ.disj from this ⨀ wk (by simp) hφ
   apply left_Disj_intro
   intro χ hχ
   rcases show χ = φ ∨ χ ∈ Δ by simpa using hχ with (rfl | hχ)
   · apply deduct
     have : Γ ⊢[𝓢] ψ 🡒 Δ.disj := deduct hψ
-    apply (wk! (by simp) this) ⨀ (by_axm₁ ⨀ by_axm₀)
+    apply (wk (by simp) this) ⨀ (by_axm₁ ⨀ by_axm₀)
   · apply right_Disj_intro _ (by simp [hχ])
 
 omit [DecidableEq F] in

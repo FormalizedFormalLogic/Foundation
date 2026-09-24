@@ -23,7 +23,7 @@ universe u
 
 variable {α : Type u} [DecidableEq α] {A B : Formula α}
 
-lemma imp_mem_iff_gentzen : A 🡒 B ∈ 𝐆𝐋 ↔ ⊢ᴳ[GL] {A} ⟹ {B} := by
+lemma imp_iff_provable_gentzen : 𝐆𝐋 ⊢ A 🡒 B ↔ ⊢ᴳ[GL] {A} ⟹ {B} := by
   constructor;
   · intro h;
     have h₁ : ⊢ᴳ[GL] insert (A 🡒 B) {A} ⟹ {B} := Gentzen.impL (Gentzen.union A) (Gentzen.union B);
@@ -34,12 +34,12 @@ lemma imp_mem_iff_gentzen : A 🡒 B ∈ 𝐆𝐋 ↔ ⊢ᴳ[GL] {A} ⟹ {B} := 
 /-- **Craig interpolation property** of `GL`.
 
 - [SV82] -/
-theorem CIP (h : A 🡒 B ∈ 𝐆𝐋) :
-    ∃ C, A 🡒 C ∈ 𝐆𝐋 ∧ C 🡒 B ∈ 𝐆𝐋 ∧ C.atoms ⊆ A.atoms ∩ B.atoms := by
+theorem CIP (h : 𝐆𝐋 ⊢ A 🡒 B) :
+    ∃ C, 𝐆𝐋 ⊢ A 🡒 C ∧ 𝐆𝐋 ⊢ C 🡒 B ∧ C.atoms ⊆ A.atoms ∩ B.atoms := by
   obtain ⟨C, hC⟩ := Gentzen.exists_interpolant (Γ₁ := {A}) (Γ₂ := ∅) (Δ₁ := ∅) (Δ₂ := {B})
-    (imp_mem_iff_gentzen.mp h) (by simp) (by simp);
-  exact ⟨C, imp_mem_iff_gentzen.mpr (by simpa using hC.left),
-    imp_mem_iff_gentzen.mpr (by simpa using hC.right), by simpa using hC.atoms⟩;
+    (imp_iff_provable_gentzen.mp h) (by simp) (by simp);
+  exact ⟨C, imp_iff_provable_gentzen.mpr (by simpa using hC.left),
+    imp_iff_provable_gentzen.mpr (by simpa using hC.right), by simpa using hC.atoms⟩;
 
 end Logic.GL
 
