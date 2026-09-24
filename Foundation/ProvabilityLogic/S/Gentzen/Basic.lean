@@ -35,15 +35,15 @@ inductive Gentzen : LayeredSequent 2 α → Prop
   | boxGL {Γ A} : Gentzen (insert (□A) (Γ ∪ Γ.box) ⟹[0] {A}) → Gentzen (Γ.box ⟹[0] {□A})
   | boxL {Γ Δ A} : Gentzen (insert A Γ ⟹[1] Δ) → Gentzen (insert (□A) Γ ⟹[1] Δ)
 
-@[inherit_doc] notation:45 "⊢ᴳ[S] " S:50 => Gentzen S
+@[inherit_doc] notation:45 "⊢ᴳ[𝐒] " S:50 => Gentzen S
 
-notation:45 "⊬ᴳ[S] " S:50 => ¬Gentzen S
+notation:45 "⊬ᴳ[𝐒] " S:50 => ¬Gentzen S
 
 namespace Gentzen
 
 variable {ℓ : Fin 2} {Γ Δ : FormulaFinset α}
 
-lemma of_GL {S : Sequent α} (h : ⊢ᴳ[GL] S) : ⊢ᴳ[S] S.ant ⟹[0] S.suc := by
+lemma of_GL {S : Sequent α} (h : ⊢ᴳ[𝐆𝐋] S) : ⊢ᴳ[𝐒] S.ant ⟹[0] S.suc := by
   induction h with
   | axm A => exact axm 0 A;
   | botL => exact botL 0;
@@ -53,7 +53,7 @@ lemma of_GL {S : Sequent α} (h : ⊢ᴳ[GL] S) : ⊢ᴳ[S] S.ant ⟹[0] S.suc :
   | impR _ ih => exact impR ih;
   | boxGL _ ih => exact boxGL ih;
 
-lemma toGL {T : LayeredSequent 2 α} (h : ⊢ᴳ[S] T) : T.level = 0 → ⊢ᴳ[GL] T.toSequent := by
+lemma toGL {T : LayeredSequent 2 α} (h : ⊢ᴳ[𝐒] T) : T.level = 0 → ⊢ᴳ[𝐆𝐋] T.toSequent := by
   induction h with
   | axm => exact fun _ ↦ .axm _;
   | botL => exact fun _ ↦ .botL;
@@ -68,7 +68,7 @@ lemma toGL {T : LayeredSequent 2 α} (h : ⊢ᴳ[S] T) : T.level = 0 → ⊢ᴳ[
 
 - [KK23]
 -/
-theorem iff_GL : ⊢ᴳ[S] Γ ⟹[0] Δ ↔ ⊢ᴳ[GL] Γ ⟹ Δ := ⟨fun h ↦ h.toGL rfl, of_GL⟩
+theorem iff_GL : ⊢ᴳ[𝐒] Γ ⟹[0] Δ ↔ ⊢ᴳ[𝐆𝐋] Γ ⟹ Δ := ⟨fun h ↦ h.toGL rfl, of_GL⟩
 
 lemma isPropClosed : LayeredSequent.IsPropClosed (Gentzen (α := α)) :=
   ⟨axm, botL, fun h h' ↦ wkL h h', fun h h' ↦ wkR h h', impL, impR⟩

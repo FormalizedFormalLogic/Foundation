@@ -178,6 +178,7 @@ public import Foundation.Propositional.Heyting.Semantics
 public import Foundation.Propositional.Hilbert.Basic
 public import Foundation.Propositional.LK.Basic
 public import Foundation.Propositional.Logic.Basic
+public import Foundation.ProvabilityLogic.A.Basic
 public import Foundation.ProvabilityLogic.A.Gentzen.Basic
 public import Foundation.ProvabilityLogic.A.Gentzen.Kripke
 public import Foundation.ProvabilityLogic.Arithmetic.Interpret
@@ -222,9 +223,11 @@ public import Foundation.ProvabilityLogic.Logic
 public import Foundation.ProvabilityLogic.S.Arithmetic
 public import Foundation.ProvabilityLogic.S.Basic
 public import Foundation.ProvabilityLogic.S.Boxdot
+public import Foundation.ProvabilityLogic.S.CIP
 public import Foundation.ProvabilityLogic.S.Gentzen.Basic
 public import Foundation.ProvabilityLogic.S.Gentzen.Kripke
 public import Foundation.ProvabilityLogic.Sequent
+public import Foundation.ProvabilityLogic.Trace
 public import Foundation.SecondOrder.LK.Basic
 public import Foundation.SecondOrder.Syntax.Formula
 public import Foundation.SecondOrder.Syntax.Rew

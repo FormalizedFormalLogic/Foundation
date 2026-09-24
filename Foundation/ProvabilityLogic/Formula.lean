@@ -199,6 +199,24 @@ lemma subfmls_trans : A ∈ B.subfmls → A.subfmls ⊆ B.subfmls := by
     · exact (ih h).trans (by intro; simp [subfmls]; tauto);
   | _ => intro h; simp_all [subfmls];
 
+@[grind →]
+lemma atoms_subset_of_mem_subfmls : A ∈ B.subfmls → A.atoms ⊆ B.atoms := by
+  induction B with
+  | imp C D ihC ihD =>
+    intro h;
+    simp only [subfmls, Finset.mem_insert, Finset.mem_union] at h;
+    rcases h with rfl | h | h;
+    · rfl;
+    · exact (ihC h).trans (by simp);
+    · exact (ihD h).trans (by simp);
+  | box C ih =>
+    intro h;
+    simp only [subfmls, Finset.mem_insert] at h;
+    rcases h with rfl | h;
+    · rfl;
+    · exact (ih h).trans (by simp);
+  | _ => intro h; simp_all [subfmls];
+
 end Formula
 
 namespace FormulaFinset
