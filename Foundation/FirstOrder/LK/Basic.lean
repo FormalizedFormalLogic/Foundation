@@ -524,6 +524,21 @@ end Theory.Proof
 
 /-! ### Theory -/
 
+namespace Theory
+
+variable {U S : Theory L}
+
+lemma weakerThan_union_right (h : U ⪯ S) (T : Theory L) : T ∪ U ⪯ T ∪ S :=
+  Entailment.WeakerThan.ofAxm! <| by
+    rintro φ (hφ | hφ);
+    . exact Entailment.by_axm (Set.mem_union_left _ hφ);
+    . exact Entailment.WeakerThan.pbl (h.pbl (Entailment.by_axm hφ));
+
+lemma equiv_union_right (e : U ≊ S) (T : Theory L) : T ∪ U ≊ T ∪ S :=
+  Entailment.Equiv.antisymm ⟨weakerThan_union_right e.le T, weakerThan_union_right e.symm.le T⟩
+
+end Theory
+
 def Theory.theory (T : Theory L) : Theory L := {σ | T ⊢ σ}
 
 @[simp] lemma Theory.mem_theory {T : Theory L} :
