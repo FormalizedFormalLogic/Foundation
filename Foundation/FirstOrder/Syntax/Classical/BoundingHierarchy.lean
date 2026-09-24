@@ -37,7 +37,8 @@ inductive BoundingHierarchy : Polarity → ℕ → {n : ℕ} → Semiformula L �
 
 namespace BoundingHierarchy
 
-abbrev DeltaZero (φ : Semiformula L ξ n) : Prop := Semiformula.Bounded R φ
+@[deprecated "use `Semiformula.Bounded`" (since := "2026-09-23")]
+alias DeltaZero := Semiformula.Bounded
 
 variable {R}
 
@@ -109,7 +110,7 @@ where
     | .bexs ht hp => .bexs ht (go hp)
 
 lemma zero_iff_delta_zero {Γ} {φ : Semiformula L ξ n} :
-    BoundingHierarchy R Γ 0 φ ↔ DeltaZero R φ :=
+    BoundingHierarchy R Γ 0 φ ↔ Semiformula.Bounded R φ :=
   zero_iff_bounded
 
 @[simp] lemma alt_zero_iff_zero {φ : Semiformula L ξ n} :
