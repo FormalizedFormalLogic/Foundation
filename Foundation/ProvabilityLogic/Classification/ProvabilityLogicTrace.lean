@@ -127,7 +127,10 @@ variable [𝗜𝚺₁ ⪯ T] [𝗜𝚺₁ ⪯ U] {n : ℕ}
 theorem TBB_mem_provabilityLogic_of_mem_trace
     (h : n ∈ (T.provabilityLogicRelativeTo U : Logic α).trace) :
     TBB n ∈ (T.provabilityLogicRelativeTo U : Logic α) := by
-  sorry
+  obtain ⟨A, hA, κ, _, M, _, _, rfl, hM⟩ := Set.mem_iUnion₂.mp h;
+  obtain ⟨f, hf⟩ := exists_realization_provable_imp_TBB (T := T) M hM;
+  simpa using LetterlessFormula.lift_mem_provabilityLogic (A := TBB M.height) f
+    (by simpa using WeakerThan.pbl hf ⨀ hA f);
 
 /-- - [AB05, Corollary 47] -/
 theorem mem_trace_provabilityLogic_iff :
