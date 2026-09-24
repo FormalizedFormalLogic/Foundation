@@ -82,7 +82,9 @@ lemma trace_lift (B : LetterlessFormula) : (B.lift : Formula α).trace = B.trace
   sorry
 
 @[simp] lemma trace_and : (A ⋏ B).trace = A.trace ∪ B.trace := by
-  sorry
+  ext n;
+  simp only [trace, Set.mem_ofPred_eq, Set.mem_union, forces_and, not_and_or];
+  grind;
 
 @[simp] lemma trace_conj [DecidableEq α] {Γ : FormulaFinset α} :
     Γ.conj.trace = ⋃ B ∈ Γ, B.trace := by
