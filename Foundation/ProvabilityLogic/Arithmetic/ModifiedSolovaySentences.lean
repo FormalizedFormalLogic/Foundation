@@ -187,7 +187,21 @@ lemma provable_boxItr_bot_of_ne (S : 𝔅.ModifiedSolovaySentences X σ) {z : X.
 
 lemma provable_b (S : 𝔅.ModifiedSolovaySentences X σ) :
     T₀ ⊢ 𝔅.conItr X.height 🡒 𝔅 σ 🡒 ∼σ 🡒 S.Λ (some X.root) := by
-  sorry
+  classical
+  suffices T₀ ⊢ (⩖ j, S.Λ j) 🡒 ∼𝔅^[X.height] ⊥ 🡒 𝔅 σ 🡒 ∼σ 🡒 S.Λ (some X.root) from
+    this ⨀ S.SC4;
+  apply left_Udisj_intro;
+  rintro (_ | z);
+  · cl_prover [S.SC5];
+  · by_cases hr : z = X.root;
+    · subst hr;
+      cl_prover;
+    by_cases hu : z = X.u;
+    · subst hu;
+      cl_prover [S.SC6];
+    have : T₀ ⊢ S.Λ (some z) 🡒 𝔅^[X.height] ⊥ := C_trans (S.provable_boxItr_bot_of_ne hr hu) <|
+      𝔅.provable_boxItr_bot_mono <| rank_lt_height <| X.root_rel z hr;
+    cl_prover [this];
 
 /-- Provably in `T₀`, the `X.height`-times iterated consistency and the realization of `A` yield
 the reflection instance `𝔅 σ 🡒 σ`.
