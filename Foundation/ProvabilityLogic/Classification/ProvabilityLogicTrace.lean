@@ -199,7 +199,8 @@ theorem provabilityLogic_eq_GLBetaMinus (h : ¬(T.provabilityLogicRelativeTo U :
     (T.provabilityLogicRelativeTo U : Logic α) =
       𝐆𝐋β⁻ (T.provabilityLogicRelativeTo U : Logic α).trace
         (provabilityLogic_trace_compl_finite h) :=
-  sorry
+  subset_antisymm (Logic.subset_GLBetaMinus_trace _) <| sumQuasiNormal_subset_provabilityLogic <|
+    Set.singleton_subset_iff.mpr (betaMinus_mem_provabilityLogic h)
 
 /-- - [AB05, Corollary 50] -/
 theorem A_subset_provabilityLogic (h : (T.provabilityLogicRelativeTo U : Logic α).trace = .univ) :
