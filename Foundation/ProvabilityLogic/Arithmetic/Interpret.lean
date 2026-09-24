@@ -50,6 +50,16 @@ lemma interpret_subst {β : Type*} {s : Substitution β α} {A : Formula β} :
     (A⟦s⟧).interpret f 𝔅 = A.interpret ⟨fun a ↦ (s a).interpret f 𝔅⟩ 𝔅 := by
   induction A <;> simp_all [interpret];
 
+lemma interpret_congr_atoms [DecidableEq α] {f₁ f₂ : Realization α L}
+    (h : ∀ a ∈ A.atoms, f₁.val a = f₂.val a) : A.interpret f₁ 𝔅 = A.interpret f₂ 𝔅 := by
+  induction A with
+  | atom a => exact h a (by simp);
+  | falsum => rfl;
+  | imp A B ihA ihB =>
+    simp only [interpret];
+    rw [ihA fun a ha ↦ h a (by simp [ha]), ihB fun a ha ↦ h a (by simp [ha])];
+  | box A ih => simp only [interpret]; rw [ih fun a ha ↦ h a (by simpa using ha)];
+
 end Formula
 
 def _root_.FFL.FirstOrder.ArithmeticTheory.provabilityLogicRelativeTo
