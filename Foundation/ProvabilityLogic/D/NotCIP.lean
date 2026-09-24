@@ -42,7 +42,24 @@ lemma forces_pseudoTail_interpolant_iff (hab : a ≠ b) (hac : a ≠ c)
 lemma S_modalize_iff_of_interpolant (hab : a ≠ b) (hac : a ≠ c)
     (h₁ : 𝐃 ⊢ ∼(□(□#b ⋎ #a) 🡒 □#b) 🡒 C) (h₂ : 𝐃 ⊢ C 🡒 □(#a 🡒 □#c) 🡒 □#c) (hC : C.atoms ⊆ {a}) :
     𝐒 ⊢ C.modalize 🡘 #a := by
-  sorry
+  apply (S.provability_TFAE.out 1 5).mpr;
+  intro κ _ M _ hΓ;
+  set X := (C.modalize 🡘 #a).subfmls;
+  have hroot : ∀ B, □B ∈ X → M.root ⊩[M.toModel] □B 🡒 B :=
+    fun B hB ↦ forces_conj.mp hΓ _ (Finset.mem_image.mpr ⟨B, FormulaFinset.mem_prebox.mpr hB, rfl⟩);
+  have key : ∀ D : Formula α, D.modalize ∈ X →
+      (Sum.inr ⊤ ⊩[(M.toPseudoTail fun _ ↦ False).toModel] D ↔ M.root ⊩[M.toModel] D.modalize) := by
+    intro D hD;
+    induction D with
+    | atom | falsum => exact iff_of_false id id;
+    | imp A B ihA ihB =>
+      exact imp_congr (ihA (subfmls_trans hD mem_subfmls_imp_left))
+        (ihB (subfmls_trans hD mem_subfmls_imp_right));
+    | box A =>
+      exact toFreeTail.forces_inr_box_iff (toFreeTail.forces_inr_iff (fun n ↦ by simp)
+        (fun _ h ↦ subfmls_trans h) hroot (subfmls_trans hD mem_subfmls_box)) (hroot A hD) ⊤;
+  exact forces_iff.mpr <| (key C (by simp [X, subfmls])).symm.trans <|
+    forces_pseudoTail_interpolant_iff hab hac h₁ h₂ hC M _;
 
 lemma _root_.FFL.ProvabilityLogic.Logic.S.not_iff_atom (hab : a ≠ b) (hC : C.ModalizedIn a)
     (hb : b ∉ C.atoms) : 𝐒 ⊬ C 🡘 #a := by
