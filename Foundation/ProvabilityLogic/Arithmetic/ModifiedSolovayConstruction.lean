@@ -85,6 +85,19 @@ open Classical in
 def Next (x : X.extendRoot.World) : Finset X.extendRoot.World :=
   {z | (x ≺ z ∧ z ≠ some X.u) ∨ (x = some X.root ∧ z = some X.u)}
 
+omit [X.IsGL] in
+variable {X} in
+@[simp] lemma mem_next {x z : X.extendRoot.World} :
+    z ∈ Next X x ↔ (x ≺ z ∧ z ≠ some X.u) ∨ (x = some X.root ∧ z = some X.u) := by
+  simp [Next]
+
+omit [X.IsGL] in
+variable {X} in
+lemma rel_of_mem_next {x z : X.extendRoot.World} (h : z ∈ Next X x) : x ≺ z := by
+  rcases mem_next.mp h with h | ⟨rfl, rfl⟩;
+  · exact h.1;
+  · exact X.root_rel_u;
+
 open Classical in
 /-- A total order on the worlds of `X.extendRoot` in which `u` is the largest. -/
 def ord (z : X.extendRoot.World) : ℕ :=
@@ -123,7 +136,21 @@ abbrev EChain (x : X.extendRoot.World) :=
   {ε : List X.extendRoot.World // ε.ChainI (fun a b ↦ a ∈ Next X b) x none}
 
 instance (x : X.extendRoot.World) : Finite (EChain X x) := by
-  sorry
+  have : Finite {ε : List X.extendRoot.World // ε.ChainI (fun a b ↦ b ≺ a) x none} :=
+    List.ChainI.finite_of_irreflexive_of_transitive
+      (show Std.Irrefl (fun a b : X.extendRoot.World ↦ b ≺ a) from
+        ⟨fun a ↦ Std.Irrefl.irrefl (r := X.extendRoot.Rel) a⟩)
+      (show IsTrans _ (fun a b : X.extendRoot.World ↦ b ≺ a) from
+        ⟨fun a b c hab hbc ↦ IsTrans.trans (r := X.extendRoot.Rel) c b a hbc hab⟩) x none;
+  have mono {a b : X.extendRoot.World} {l : List X.extendRoot.World}
+      (h : l.ChainI (fun a b ↦ a ∈ Next X b) a b) :
+      l.ChainI (fun a b ↦ b ≺ a) a b := by
+    induction h with
+    | singleton => exact .singleton _
+    | cons hR _ ih => exact .cons (rel_of_mem_next hR) ih;
+  exact Finite.of_injective (fun ε : EChain X x ↦
+    (⟨ε.1, mono ε.2⟩ : {ε : List X.extendRoot.World // ε.ChainI (fun a b ↦ b ≺ a) x none}))
+    fun _ _ h ↦ Subtype.ext (Subtype.mk.inj h)
 
 def hAux (x : X.extendRoot.World) : ArithmeticSemisentence n :=
   haveI := Fintype.ofFinite (EChain X x);
