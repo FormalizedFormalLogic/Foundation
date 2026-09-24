@@ -223,6 +223,7 @@ public import Foundation.ProvabilityLogic.S.Boxdot
 public import Foundation.ProvabilityLogic.S.Gentzen.Basic
 public import Foundation.ProvabilityLogic.S.Gentzen.Kripke
 public import Foundation.ProvabilityLogic.Sequent
+public import Foundation.ProvabilityLogic.Trace
 public import Foundation.SecondOrder.LK.Basic
 public import Foundation.SecondOrder.Syntax.Formula
 public import Foundation.SecondOrder.Syntax.Rew
