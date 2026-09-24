@@ -75,7 +75,7 @@ lemma exists_realization_provable_imp_TBB {κ : Type*} [Nonempty κ] (M : Rooted
         S.mainlemma_neg (Option.some_ne_none _).symm <|
           extendRoot.forces_some.not.mpr <| by simp [root_forces_boxItr_bot_iff];
       have h₃ := contra <| T.standardProvability.mono' <| CN_of_CN_right h₂;
-      simp only [standardInterpret, Formula.interpret, TBB, interpret_boxItr,
+      simp only [standardInterpret, interpret, TBB, interpret_boxItr,
         Function.iterate_succ_apply'] at h₃ ⊢;
       cl_prover [h₁, h₃];
     · apply S.mainlemma (Option.some_ne_none x).symm;
@@ -88,7 +88,7 @@ lemma exists_realization_provable_imp_TBB {κ : Type*} [Nonempty κ] (M : Rooted
 /-- - [AB05, Lemma 49] -/
 lemma exists_realization_provable_neg_of_not_S (hA : 𝐒 ⊬ A) :
     ∃ n, ∃ f : Realization α ℒₒᵣ,
-      𝗜𝚺₁ ⊢ ∼f T (A ⋏ LetterlessFormula.lift (⩕ i ∈ Finset.range n, TBB i)) := by
+      𝗜𝚺₁ ⊢ ∼f T (A ⋏ lift (⩕ i ∈ Finset.range n, TBB i)) := by
   classical
   obtain ⟨κ, _, M, _, hM⟩ :
       ∃ (κ : Type _) (_ : Nonempty κ) (M : RootedModel κ α) (_ : M.IsFiniteGL),
@@ -99,11 +99,11 @@ lemma exists_realization_provable_neg_of_not_S (hA : 𝐒 ⊬ A) :
   let S := standardSolovaySentences T M.extendRoot;
   use M.height, S.realization;
   have h : ∀ i, 𝗜𝚺₁ ⊢ S.σ i 🡒
-      ∼S.realization T (A ⋏ LetterlessFormula.lift (⩕ i ∈ Finset.range M.height, TBB i)) := by
+      ∼S.realization T (A ⋏ lift (⩕ i ∈ Finset.range M.height, TBB i)) := by
     rintro (_ | x);
     · have := (S.rfl_mainlemma (fun B hB ↦ forces_conj.mp h₁ _
         (Finset.mem_image.mpr ⟨B, by simpa using hB, rfl⟩)) mem_subfmls_self).2 h₂;
-      simp only [standardInterpret, Formula.interpret] at this ⊢;
+      simp only [standardInterpret, interpret] at this ⊢;
       cl_prover [this];
     · apply S.mainlemma_neg (Option.some_ne_none x).symm;
       apply extendRoot.forces_some.not.mpr;
@@ -129,7 +129,7 @@ theorem TBB_mem_provabilityLogic_of_mem_trace
     TBB n ∈ (T.provabilityLogicRelativeTo U : Logic α) := by
   obtain ⟨A, hA, κ, _, M, _, _, rfl, hM⟩ := Set.mem_iUnion₂.mp h;
   obtain ⟨f, hf⟩ := exists_realization_provable_imp_TBB (T := T) M hM;
-  simpa using LetterlessFormula.lift_mem_provabilityLogic (A := TBB M.height) f
+  simpa using lift_mem_provabilityLogic (A := TBB M.height) f
     (by simpa using WeakerThan.pbl hf ⨀ hA f);
 
 /-- - [AB05, Corollary 47] -/
@@ -149,16 +149,16 @@ theorem provabilityLogic_eq_GLAlpha
 
 lemma exists_neg_conj_TBB_mem_provabilityLogic
     (h : ¬(T.provabilityLogicRelativeTo U : Logic α) ⊆ 𝐒) :
-    ∃ m, LetterlessFormula.lift (∼⩕ i ∈ Finset.range m, TBB i) ∈
+    ∃ m, lift (∼⩕ i ∈ Finset.range m, TBB i) ∈
       (T.provabilityLogicRelativeTo U : Logic α) := by
   obtain ⟨A, hA, hAS⟩ := Set.not_subset.mp h;
   obtain ⟨m, f, hf⟩ := exists_realization_provable_neg_of_not_S (T := T) hAS;
   use m;
-  apply LetterlessFormula.lift_mem_provabilityLogic f;
-  have h₁ : U ⊢ ∼f T (A ⋏ LetterlessFormula.lift (⩕ i ∈ Finset.range m, TBB i)) :=
+  apply lift_mem_provabilityLogic f;
+  have h₁ : U ⊢ ∼f T (A ⋏ lift (⩕ i ∈ Finset.range m, TBB i)) :=
     WeakerThan.pbl hf;
   have h₂ : U ⊢ f T A := hA f;
-  simp only [standardInterpret, Formula.interpret] at h₁ h₂ ⊢;
+  simp only [standardInterpret, interpret] at h₁ h₂ ⊢;
   cl_prover [h₁, h₂];
 
 /-- - [AB05, Lemma 49] -/
@@ -179,17 +179,17 @@ theorem betaMinus_mem_provabilityLogic (h : ¬(T.provabilityLogicRelativeTo U : 
   obtain ⟨m, hm⟩ := exists_neg_conj_TBB_mem_provabilityLogic h;
   apply sumQuasiNormal_subset_provabilityLogic subset_rfl;
   apply Logic.GL.sumQuasiNormal_of_conj
-    (Γ := insert (LetterlessFormula.lift (∼⩕ i ∈ Finset.range m, TBB i))
+    (Γ := insert (lift (∼⩕ i ∈ Finset.range m, TBB i))
       (((Finset.range m).filter (· ∈ (T.provabilityLogicRelativeTo U : Logic α).trace)).image TBB));
   · intro B hB;
     rcases Finset.mem_insert.mp hB with rfl | hB;
     · exact .mem₂ hm;
     · obtain ⟨i, hi, rfl⟩ := Finset.mem_image.mp hB;
       exact .mem₂ (TBB_mem_provabilityLogic_of_mem_trace (Finset.mem_filter.mp hi).2);
-  · apply Formula.GL_imp_of_height_not_mem_trace;
+  · apply GL_imp_of_height_not_mem_trace;
     intro κ _ M _ _ hM hn;
     have h₁ : M.height < m := by
-      simpa [RootedModel.height] using
+      simpa [height] using
         forces_lift_iff.mp (forces_conj.mp hM _ (Finset.mem_insert_self _ _));
     exact forces_TBB_iff.mp (forces_conj.mp hM (TBB M.height) <| Finset.mem_insert_of_mem <|
       Finset.mem_image_of_mem _ <| Finset.mem_filter.mpr ⟨by simpa, by simpa using hn⟩) rfl;
