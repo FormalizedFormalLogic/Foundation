@@ -22,8 +22,7 @@ namespace Model
 
 variable {κ₁ κ₂ α : Type*} [Nonempty κ₁] [Nonempty κ₂] {M₁ : Model κ₁ α} {M₂ : Model κ₂ α}
 
-/-- A bisimulation matching the valuation only on the atoms in `P`; used for the
-`P`-isomorphism of cones in the source.
+/-- A bisimulation matching the valuation only on the atoms in `P`.
 
 - [Bek90, §4]
 -/
@@ -48,10 +47,10 @@ lemma BisimulationUnder.forces_iff [DecidableEq α] {P : Finset α} (Bi : M₁ �
   | imp A B ihA ihB => exact imp_congr (ihA h (by grind)) (ihB h (by grind));
   | box A ih =>
     constructor;
-    . intro hx y₂ R;
+    · intro hx y₂ R;
       obtain ⟨y₁, hy, R'⟩ := Bi.back h R;
       exact (ih hy hA).mp (hx y₁ R');
-    . intro hx y₁ R;
+    · intro hx y₁ R;
       obtain ⟨y₂, hy, R'⟩ := Bi.forth h R;
       exact (ih hy hA).mpr (hx y₂ R');
 
@@ -73,10 +72,10 @@ lemma PseudoEpimorphism.forces_iff (f : M₁ →ₚ M₂) {x : M₁.World} {A : 
   | imp A B ihA ihB => exact imp_congr ihA ihB;
   | box A ih =>
     constructor;
-    . intro h v R;
+    · intro h v R;
       obtain ⟨y, rfl, R'⟩ := f.back R;
       exact ih.mp (h y R');
-    . exact fun h y R ↦ ih.mpr (h (f y) (f.forth R));
+    · exact fun h y R ↦ ih.mpr (h (f y) (f.forth R));
 
 end Model
 

@@ -136,13 +136,14 @@ theorem iff_root_forces : 𝐆𝐋 ⊢ A ↔
     intro _ _ M _ x;
     exact Model.forces_cone.mp <| h (M.cone x);
 
+omit [DecidableEq α] in
 theorem iff_tree_root_forces : 𝐆𝐋 ⊢ A ↔
     ∀ {κ : Type u} [Nonempty κ] (M : RootedModel κ α), [M.IsFiniteGL] → [M.IsTree] →
       M.root ⊩[M.toModel] A := by
   constructor;
-  . intro h _ _ M _ _;
+  · intro h _ _ M _ _;
     exact iff_root_forces.mp h M;
-  . intro h;
+  · intro h;
     apply iff_root_forces.mpr;
     intro _ _ M _;
     exact RootedModel.unravelling.forces_root_iff.mp (h M.unravelling);
