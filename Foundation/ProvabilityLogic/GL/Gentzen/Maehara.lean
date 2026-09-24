@@ -22,8 +22,8 @@ variable {α : Type*} [DecidableEq α] {Γ₁ Γ₂ Δ₁ Δ₂ : FormulaFinset 
 /-- `C` is an interpolant of the sequent `Γ₁, Γ₂ ⟹ Δ₁, Δ₂` along the split into
 `Γ₁ ⟹ Δ₁` and `Γ₂ ⟹ Δ₂`. -/
 structure IsInterpolant (Γ₁ Γ₂ Δ₁ Δ₂ : FormulaFinset α) (C : Formula α) : Prop where
-  left : ⊢ᴳ[GL] Γ₁ ⟹ insert C Δ₁
-  right : ⊢ᴳ[GL] insert C Γ₂ ⟹ Δ₂
+  left : ⊢ᴳ[𝐆𝐋] Γ₁ ⟹ insert C Δ₁
+  right : ⊢ᴳ[𝐆𝐋] insert C Γ₂ ⟹ Δ₂
   atoms : C.atoms ⊆ (Γ₁ ∪ Δ₁).atoms ∩ (Γ₂ ∪ Δ₂).atoms
 
 lemma IsInterpolant.swap (h : IsInterpolant Γ₂ Γ₁ Δ₂ Δ₁ C) :
@@ -38,7 +38,7 @@ lemma exists_interpolant_of_swap (h : ∃ C, IsInterpolant Γ₂ Γ₁ Δ₂ Δ�
   exact ⟨_, hC.swap⟩;
 
 /-- - [SV82] -/
-theorem exists_interpolant (h : ⊢ᴳ[GL] S) (hΓ : S.ant ⊆ Γ₁ ∪ Γ₂) (hΔ : S.suc ⊆ Δ₁ ∪ Δ₂) :
+theorem exists_interpolant (h : ⊢ᴳ[𝐆𝐋] S) (hΓ : S.ant ⊆ Γ₁ ∪ Γ₂) (hΔ : S.suc ⊆ Δ₁ ∪ Δ₂) :
     ∃ C, IsInterpolant Γ₁ Γ₂ Δ₁ Δ₂ C := by
   induction h generalizing Γ₁ Γ₂ Δ₁ Δ₂ with
   | axm A =>
@@ -70,9 +70,9 @@ theorem exists_interpolant (h : ⊢ᴳ[GL] S) (hΓ : S.ant ⊆ Γ₁ ∪ Γ₂) 
     obtain ⟨C₂, hC₂⟩ :=
       ih₂ (Γ₁ := insert B Γ₁) (Γ₂ := Γ₂) (Δ₁ := Δ₁) (Δ₂ := Δ₂) (by grind) (by grind);
     clear ih₁ ih₂;
-    have h₁ : ⊢ᴳ[GL] Γ₁ ⟹ insert A (insert (C₁ ⋎ C₂) Δ₁) :=
+    have h₁ : ⊢ᴳ[𝐆𝐋] Γ₁ ⟹ insert A (insert (C₁ ⋎ C₂) Δ₁) :=
       wkR (orR (wkR (Δ' := insert C₁ (insert C₂ (insert A Δ₁))) hC₁.left));
-    have h₂ : ⊢ᴳ[GL] insert B Γ₁ ⟹ insert (C₁ ⋎ C₂) Δ₁ :=
+    have h₂ : ⊢ᴳ[𝐆𝐋] insert B Γ₁ ⟹ insert (C₁ ⋎ C₂) Δ₁ :=
       orR (wkR (Δ' := insert C₁ (insert C₂ Δ₁)) hC₂.left);
     have h₃ := hC₁.atoms;
     have h₄ := hC₂.atoms;
@@ -113,8 +113,8 @@ theorem exists_interpolant (h : ⊢ᴳ[GL] S) (hΓ : S.ant ⊆ Γ₁ ∪ Γ₂) 
       (by intro B; simp only [Finset.mem_insert, Finset.mem_union, Finset.mem_image]; grind)
       (by simp);
     clear ih;
-    have h₁ : ⊢ᴳ[GL] Γ₁.prebox.box ⟹ {□C} := boxGL (wkL hC.left);
-    have h₂ : ⊢ᴳ[GL] (insert C Γ₂.prebox).box ⟹ {□A} := boxGL (wkL hC.right);
+    have h₁ : ⊢ᴳ[𝐆𝐋] Γ₁.prebox.box ⟹ {□C} := boxGL (wkL hC.left);
+    have h₂ : ⊢ᴳ[𝐆𝐋] (insert C Γ₂.prebox).box ⟹ {□A} := boxGL (wkL hC.right);
     have h₃ := hC.atoms;
     have h₄ := FormulaFinset.atoms_subset_of_mem h;
     have h₅ := FormulaFinset.atoms_prebox (Γ := Γ₁);

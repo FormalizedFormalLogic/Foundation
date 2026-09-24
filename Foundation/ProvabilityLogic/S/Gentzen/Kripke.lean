@@ -46,7 +46,7 @@ namespace S.Gentzen
 variable {α : Type*} [DecidableEq α] {Γ Δ : FormulaFinset α}
 
 /-- - [KK23, Theorem 3.1] -/
-theorem sound_aux {T : LayeredSequent 2 α} (h : ⊢ᴳ[S] T) :
+theorem sound_aux {T : LayeredSequent 2 α} (h : ⊢ᴳ[𝐒] T) :
     ∃ X : FormulaFinset α, ∀ {κ : Type*} [Nonempty κ] (M : Model κ α) [M.IsGL] (x : M.World),
       (T.level = 1 → x.IsReflexiveOf X) → x ⊩[M] T.toSequent := by
   induction h with
@@ -80,7 +80,7 @@ theorem sound_aux {T : LayeredSequent 2 α} (h : ⊢ᴳ[S] T) :
     · exact hΓ C (by simp [hC]);
 
 /-- - [KK23, Theorem 3.1] -/
-theorem sound (h : ⊢ᴳ[S] Γ ⟹[1] Δ) :
+theorem sound (h : ⊢ᴳ[𝐒] Γ ⟹[1] Δ) :
     ∃ X : FormulaFinset α, ∀ {κ : Type*} [Nonempty κ] (M : Model κ α) [M.IsGL] (x : M.World),
       x.IsReflexiveOf X → x ⊩[M] (Γ ⟹ Δ) := by
   obtain ⟨X, hX⟩ := sound_aux h;
@@ -92,7 +92,7 @@ variable {α : Type u} [DecidableEq α] {Γ Δ : FormulaFinset α}
 
 /-- A saturated sequent `t` closed under `□A ↦ A` on the left is true at the finite points of a
 tail below the cone of `t` in the countermodel. -/
-lemma truthlemma_freeTail {BS : Sequent α} [Fact (⊬ᴳ[GL] BS)] {t : GL.SaturatedSequent BS}
+lemma truthlemma_freeTail {BS : Sequent α} [Fact (⊬ᴳ[𝐆𝐋] BS)] {t : GL.SaturatedSequent BS}
     (hbox : ∀ {A}, □A ∈ t.ant → A ∈ t.ant) {V : ℕ∞ → α → Prop}
     (hV : ∀ n : ℕ, V n = fun a ↦ #a ∈ t.ant) (A : Formula α) (n : ℕ) :
     let N := ((GL.countermodel BS).cone t).toModel.toFreeTail V;
@@ -131,10 +131,10 @@ lemma truthlemma_freeTail {BS : Sequent α} [Fact (⊬ᴳ[GL] BS)] {t : GL.Satur
 theorem complete
     (h : ∀ {κ : Type u} [Nonempty κ] (M : Model κ α) [M.IsGL] (w : ℕ → M.World),
       (∀ n, w (n + 1) ≺ w n) → ∃ i, w i ⊩[M] (Γ ⟹ Δ)) :
-    ⊢ᴳ[S] Γ ⟹[1] Δ := by
+    ⊢ᴳ[𝐒] Γ ⟹[1] Δ := by
   by_contra hS;
-  have hGL : ∀ {S : Sequent α}, ⊢ᴳ[GL] S → ⊢ᴳ[S] S.ant ⟹[1] S.suc := fun h ↦ .liftUp (of_GL h);
-  have : Fact (⊬ᴳ[GL] Γ ⟹ Δ) := ⟨fun h ↦ hS (hGL h)⟩;
+  have hGL : ∀ {S : Sequent α}, ⊢ᴳ[𝐆𝐋] S → ⊢ᴳ[𝐒] S.ant ⟹[1] S.suc := fun h ↦ .liftUp (of_GL h);
+  have : Fact (⊬ᴳ[𝐆𝐋] Γ ⟹ Δ) := ⟨fun h ↦ hS (hGL h)⟩;
   obtain ⟨T, hsub, hT, hsat, hsubf, hbox⟩ :=
     Sequent.exists_saturated (isPropClosed.isImpClosed 1) (BS := Γ ⟹ Δ) (S₀ := Γ ⟹ Δ) hS (by grind);
   let t : GL.SaturatedSequent (Γ ⟹ Δ) := ⟨T, hsat, hsubf, fun h ↦ hT (hGL h)⟩;
@@ -148,7 +148,7 @@ theorem complete
 
 /-- - [KK23, Theorem 3.1] -/
 theorem TFAE : [
-    ⊢ᴳ[S] Γ ⟹[1] Δ,
+    ⊢ᴳ[𝐒] Γ ⟹[1] Δ,
     ∃ X : FormulaFinset α, ∀ {κ : Type u} [Nonempty κ] (M : Model κ α) [M.IsGL] (x : M.World),
       x.IsReflexiveOf X → x ⊩[M] (Γ ⟹ Δ),
     ∀ {κ : Type u} [Nonempty κ] (M : Model κ α) [M.IsGL] (w : ℕ → M.World),
@@ -167,7 +167,7 @@ theorem TFAE : [
   tfae_have 4 → 1 := complete;
   tfae_finish;
 
-lemma iff_eventually_forces : ⊢ᴳ[S] Γ ⟹[1] Δ ↔
+lemma iff_eventually_forces : ⊢ᴳ[𝐒] Γ ⟹[1] Δ ↔
     ∀ {κ : Type u} [Nonempty κ] (M : Model κ α) [M.IsGL] (w : ℕ → M.World),
       (∀ n, w (n + 1) ≺ w n) → ∃ i, ∀ j ≥ i, w j ⊩[M] (Γ ⟹ Δ) :=
   TFAE.out 1 3
@@ -178,8 +178,8 @@ variable {Γ₁ Γ₂ Δ₁ Δ₂ : FormulaFinset α} {A : Formula α}
 
 - [KK23, Theorem 3.1]
 -/
-theorem cut : {ℓ : Fin 2} → ⊢ᴳ[S] Γ₁ ⟹[ℓ] insert A Δ₁ → ⊢ᴳ[S] insert A Γ₂ ⟹[ℓ] Δ₂ →
-    ⊢ᴳ[S] Γ₁ ∪ Γ₂ ⟹[ℓ] Δ₁ ∪ Δ₂
+theorem cut : {ℓ : Fin 2} → ⊢ᴳ[𝐒] Γ₁ ⟹[ℓ] insert A Δ₁ → ⊢ᴳ[𝐒] insert A Γ₂ ⟹[ℓ] Δ₂ →
+    ⊢ᴳ[𝐒] Γ₁ ∪ Γ₂ ⟹[ℓ] Δ₁ ∪ Δ₂
   | 0, h₁, h₂ => iff_GL.mpr (GL.Gentzen.cut (iff_GL.mp h₁) (iff_GL.mp h₂))
   | 1, h₁, h₂ => by
     apply iff_eventually_forces.mpr;

@@ -54,8 +54,8 @@ universe u
 
 variable {α : Type u} [DecidableEq α] {Γ Δ : FormulaFinset α}
 
-lemma subst (s : Substitution α α) (h : ⊢ᴳ[GL] Γ ⟹ Δ) :
-    ⊢ᴳ[GL] Γ.image (·⟦s⟧) ⟹ Δ.image (·⟦s⟧) := by
+lemma subst (s : Substitution α α) (h : ⊢ᴳ[𝐆𝐋] Γ ⟹ Δ) :
+    ⊢ᴳ[𝐆𝐋] Γ.image (·⟦s⟧) ⟹ Δ.image (·⟦s⟧) := by
   apply complete;
   intro _ _ M _ x hx;
   obtain ⟨D, hD, hxD⟩ := sound (M.overwrite fun y a ↦ y ⊩[M] s a) h x
@@ -86,7 +86,7 @@ theorem fixpoint_unique (hA : A.ModalizedIn p) (hD : 𝐆𝐋 ⊢ A⟦p ↦ D⟧
     grind;
 
 private lemma fixpoint_premise (hA : A.ModalizedIn p) :
-    ⊢ᴳ[GL] {A, □(A 🡘 #p), □(A⟦p ↦ #q⟧ 🡘 #q)} ⟹ {A⟦p ↦ #q⟧} := by
+    ⊢ᴳ[𝐆𝐋] {A, □(A 🡘 #p), □(A⟦p ↦ #q⟧ 🡘 #q)} ⟹ {A⟦p ↦ #q⟧} := by
   apply Gentzen.complete;
   intro _ _ M _ x hx;
   have h₁ : x ⊩[M] □(A 🡘 #p) := hx _ (by simp);
@@ -115,10 +115,10 @@ theorem exists_fixpoint (hpq : p ≠ q) (hA : A.ModalizedIn p) (hq : q ∉ A.ato
     have := atoms_subst_single (A := A) (p := p) (B := #q);
     simp [Finset.subset_iff] at *;
     grind;
-  have h₁ : ⊢ᴳ[GL] {A⟦p ↦ D⟧, □(A⟦p ↦ D⟧ 🡘 D)} ⟹ {D} := by
+  have h₁ : ⊢ᴳ[𝐆𝐋] {A⟦p ↦ D⟧, □(A⟦p ↦ D⟧ 🡘 D)} ⟹ {D} := by
     simpa [subst_single_of_not_mem (show p ∉ D.atoms by grind)]
       using Gentzen.subst (Substitution.single p D) hD.left;
-  have h₂ : ⊢ᴳ[GL] {D, □(A⟦p ↦ D⟧ 🡘 D)} ⟹ {A⟦p ↦ D⟧} := by
+  have h₂ : ⊢ᴳ[𝐆𝐋] {D, □(A⟦p ↦ D⟧ 🡘 D)} ⟹ {A⟦p ↦ D⟧} := by
     simpa [subst_single_of_not_mem (show p ∉ D.atoms by grind),
       subst_single_of_not_mem (show q ∉ D.atoms by grind), subst_single_subst_single hq, hpq]
       using Gentzen.subst (Substitution.single p D) <|
