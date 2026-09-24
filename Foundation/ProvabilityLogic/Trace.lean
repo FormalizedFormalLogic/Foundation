@@ -208,10 +208,11 @@ namespace GLBetaMinus
 
 variable {X : Set ℕ} {hX : Xᶜ.Finite}
 
-theorem mem_iff : A ∈ (𝐆𝐋β⁻ X hX : Logic α) ↔ A.trace ⊆ X := by
-  sorry
-
 @[simp] theorem trace_eq : (𝐆𝐋β⁻ X hX : Logic α).trace = X := by
+  rw [GL.trace_sumQuasiNormal];
+  simp [trace, Formula.trace_lift];
+
+theorem mem_iff : A ∈ (𝐆𝐋β⁻ X hX : Logic α) ↔ A.trace ⊆ X := by
   sorry
 
 /-- - [AB05, Lemma 49] -/
