@@ -11,7 +11,8 @@ Also defines soundness and completeness.
 
 ## Main Definitions
 * `FFL.Entailment S F`: a general framework of deductive system `S` for formulae `F`.
-* `FFL.Entailment.Inconsistent 𝓢`: a proposition that states that all formulae in `F` is provable from `𝓢`.
+* `FFL.Entailment.Inconsistent 𝓢`: a proposition that states that all formulae in `F` is provable
+  from `𝓢`.
 * `FFL.Entailment.Consistent 𝓢`: a proposition that states that `𝓢` is not inconsistent.
 * `FFL.Entailment.Sound 𝓢 𝓜`: provability from `𝓢` implies satisfiability on `𝓜`.
 * `FFL.Entailment.Complete 𝓢 𝓜`: satisfiability on `𝓜` implies provability from `𝓢`.
@@ -90,7 +91,8 @@ lemma WeakerThan.wk (h : 𝓢 ⪯ 𝓣) {φ} : 𝓢 ⊢ φ → 𝓣 ⊢ φ := @h
 
 lemma WeakerThan.pbl [h : 𝓢 ⪯ 𝓣] {φ} : 𝓢 ⊢ φ → 𝓣 ⊢ φ := @h.subset φ
 
-@[trans] lemma WeakerThan.trans : 𝓢 ⪯ 𝓣 → 𝓣 ⪯ 𝓤 → 𝓢 ⪯ 𝓤 := fun w₁ w₂ ↦ ⟨Set.Subset.trans w₁.subset w₂.subset⟩
+@[trans] lemma WeakerThan.trans : 𝓢 ⪯ 𝓣 → 𝓣 ⪯ 𝓤 → 𝓢 ⪯ 𝓤 :=
+  fun w₁ w₂ ↦ ⟨Set.Subset.trans w₁.subset w₂.subset⟩
 
 instance : Trans (α := S) (β := T) (γ := U) (· ⪯ ·) (· ⪯ ·) (· ⪯ ·) where
   trans := WeakerThan.trans
@@ -103,27 +105,29 @@ lemma not_weakerThan_iff : ¬𝓢 ⪯ 𝓣 ↔ (∃ φ, 𝓢 ⊢ φ ∧ 𝓣 ⊬
 lemma strictlyWeakerThan_iff : 𝓢 ⪱ 𝓣 ↔ (∀ {φ}, 𝓢 ⊢ φ → 𝓣 ⊢ φ) ∧ (∃ φ, 𝓢 ⊬ φ ∧ 𝓣 ⊢ φ) := by
   constructor
   · rintro ⟨wt, nwt⟩
-    exact ⟨weakerThan_iff.mp wt, by rcases not_weakerThan_iff.mp nwt with ⟨φ, ht, hs⟩; exact ⟨φ, hs, ht⟩⟩
+    exact ⟨weakerThan_iff.mp wt, by
+      rcases not_weakerThan_iff.mp nwt with ⟨φ, ht, hs⟩; exact ⟨φ, hs, ht⟩⟩
   · rintro ⟨h, φ, hs, ht⟩
     exact ⟨weakerThan_iff.mpr h, not_weakerThan_iff.mpr ⟨φ, ht, hs⟩⟩
 
 lemma swt_of_swt_of_wt : 𝓢 ⪱ 𝓣 → 𝓣 ⪯ 𝓤 → 𝓢 ⪱ 𝓤 := by
   rintro ⟨h₁, nh₁⟩ h₂
   constructor
-  . exact WeakerThan.trans h₁ h₂
+  · exact WeakerThan.trans h₁ h₂
   · intro h
     exact nh₁ (WeakerThan.trans h₂ h)
 
 lemma swt_of_wt_of_swt : 𝓢 ⪯ 𝓣 → 𝓣 ⪱ 𝓤 → 𝓢 ⪱ 𝓤 := by
   rintro h₁ ⟨h₂, nh₂⟩
   constructor
-  . exact WeakerThan.trans h₁ h₂
+  · exact WeakerThan.trans h₁ h₂
   · intro h
     exact nh₂ (WeakerThan.trans h h₁)
 
 instance [𝓢 ⪱ 𝓣] : 𝓢 ⪯ 𝓣 := StrictlyWeakerThan.weakerThan
 
-lemma StrictlyWeakerThan.trans : 𝓢 ⪱ 𝓣 → 𝓣 ⪱ 𝓤 → 𝓢 ⪱ 𝓤 := fun h₁ h₂ ↦ swt_of_swt_of_wt h₁ h₂.weakerThan
+lemma StrictlyWeakerThan.trans : 𝓢 ⪱ 𝓣 → 𝓣 ⪱ 𝓤 → 𝓢 ⪱ 𝓤 :=
+  fun h₁ h₂ ↦ swt_of_swt_of_wt h₁ h₂.weakerThan
 
 instance : Trans (α := S) (β := T) (γ := U) (· ⪱ ·) (· ⪯ ·) (· ⪱ ·) where
   trans := swt_of_swt_of_wt
@@ -140,7 +144,8 @@ lemma StrictlyWeakerThan.of_unprovable_provable {𝓢 : S} {𝓣 : T} [𝓢 ⪯ 
     (hS : 𝓢 ⊬ φ) (hT : 𝓣 ⊢ φ) : 𝓢 ⪱ 𝓣 := ⟨inferInstance, fun h ↦ hS (h.wk hT)⟩
 
 lemma Equiv.iff : 𝓢 ≊ 𝓣 ↔ (∀ φ, 𝓢 ⊢ φ ↔ 𝓣 ⊢ φ) :=
-  ⟨fun e ↦ by simpa [Set.ext_iff, theory] using e.eq, fun e ↦ ⟨by simpa [Set.ext_iff, theory] using e⟩⟩
+  ⟨fun e ↦ by simpa [Set.ext_iff, theory] using e.eq,
+    fun e ↦ ⟨by simpa [Set.ext_iff, theory] using e⟩⟩
 
 @[instance, simp, refl] protected lemma Equiv.refl (𝓢 : S) : 𝓢 ≊ 𝓢 := ⟨rfl⟩
 
@@ -193,7 +198,7 @@ lemma Incomparable.of_unprovable
   (h₂ : ∃ ψ, 𝓣 ⊢ ψ ∧ 𝓢 ⊬ ψ)
   : Incomparable (𝓢 : S) (𝓣 : T) := by
   constructor <;>
-  . apply Entailment.not_weakerThan_iff.mpr;
+  · apply Entailment.not_weakerThan_iff.mpr;
     assumption;
 
 end WeakerThan
@@ -283,7 +288,8 @@ class Complete : Prop where
 /-- A formula `φ` is independent from `𝓢` if, neither it nor its negation is provable by `𝓢`. -/
 def Independent (φ : F) : Prop := 𝓢 ⊬ φ ∧ 𝓢 ⊬ ∼φ
 
-/-- A proof system is incomplete if and only if there exists a formula that is both unprovable and irrefutable. -/
+/-- A proof system is incomplete if and only if there exists a formula that is both unprovable
+and irrefutable. -/
 class Incomplete : Prop where
   indep : ∃ φ, Independent 𝓢 φ
 
@@ -370,10 +376,11 @@ lemma Inconsistent.of_supset {𝓢 𝓣 : S} (h𝓢 : Inconsistent 𝓢) (h : �
 
 end axiomatized
 
-abbrev WeakerThan.ofAxm! [AdjunctiveSet F S] [StrongCut S S] {𝓢₁ 𝓢₂ : S} (B : 𝓢₂ ⊢* AdjunctiveSet.set 𝓢₁) :
-    𝓢₁ ⪯ 𝓢₂ := ⟨fun _ b ↦ StrongCut.cut B b⟩
+abbrev WeakerThan.ofAxm! [AdjunctiveSet F S] [StrongCut S S] {𝓢₁ 𝓢₂ : S}
+    (B : 𝓢₂ ⊢* AdjunctiveSet.set 𝓢₁) : 𝓢₁ ⪯ 𝓢₂ := ⟨fun _ b ↦ StrongCut.cut B b⟩
 
-abbrev WeakerThan.ofSubset [AdjunctiveSet F S] [Axiomatized S] {𝓢 𝓣 : S} (h : 𝓢 ⊆ 𝓣) : 𝓢 ⪯ 𝓣 := ⟨fun _ ↦ Axiomatized.weakening h⟩
+abbrev WeakerThan.ofSubset [AdjunctiveSet F S] [Axiomatized S] {𝓢 𝓣 : S} (h : 𝓢 ⊆ 𝓣) : 𝓢 ⪯ 𝓣 :=
+  ⟨fun _ ↦ Axiomatized.weakening h⟩
 
 /-! ### Compactness -/
 
@@ -399,7 +406,9 @@ variable [DeductiveExplosion S] [AdjunctiveSet F S] [Axiomatized S] [Compact S]
 omit [LogicalConnective F] in
 lemma inconsistent_compact {𝓢 : S} :
     Inconsistent 𝓢 ↔ ∃ 𝓕 : S, 𝓕 ⊆ 𝓢 ∧ AdjunctiveSet.Finite 𝓕 ∧ Inconsistent 𝓕 :=
-  ⟨fun H ↦ by rcases Compact.finite_provable (H ⊥) with ⟨𝓕, h𝓕, fin, h⟩; exact ⟨𝓕, h𝓕, fin, inconsistent_of_provable h⟩, by
+  ⟨fun H ↦ by
+    rcases Compact.finite_provable (H ⊥) with ⟨𝓕, h𝓕, fin, h⟩
+    exact ⟨𝓕, h𝓕, fin, inconsistent_of_provable h⟩, by
     rintro ⟨𝓕, h𝓕, _, H⟩; exact H.of_supset h𝓕⟩
 
 omit [LogicalConnective F] in
@@ -456,8 +465,8 @@ lemma not_provable_of_countermodel {φ : F} (hp : 𝓜 ⊭ φ) : 𝓢 ⊬ φ :=
 lemma consistent_of_meaningful : Semantics.Meaningful 𝓜 → Entailment.Consistent 𝓢 :=
   fun H ↦ ⟨fun h ↦ by rcases H with ⟨φ, hf⟩; exact hf (Sound.sound (h φ))⟩
 
-lemma consistent_of_model [LogicalNeutral F] [Semantics.Bot M] (𝓜 : M) [Sound 𝓢 𝓜] : Entailment.Consistent 𝓢 :=
-  consistent_of_meaningful (𝓜 := 𝓜) inferInstance
+lemma consistent_of_model [LogicalNeutral F] [Semantics.Bot M] (𝓜 : M) [Sound 𝓢 𝓜] :
+    Entailment.Consistent 𝓢 := consistent_of_meaningful (𝓜 := 𝓜) inferInstance
 
 lemma modelsSet_of_prfSet {T : Set F} (b : 𝓢 ⊢* T) : 𝓜 ⊧* T :=
   ⟨fun _ hf ↦ sound (b hf)⟩
@@ -470,7 +479,8 @@ variable {𝓢 : S} {T : Set F} [Sound 𝓢 (Semantics.models M T)]
 
 lemma consequence_of_provable {φ : F} : 𝓢 ⊢ φ → T ⊨[M] φ := sound
 
-lemma consistent_of_satisfiable [∀ 𝓜 : M, Semantics.Meaningful 𝓜] : Semantics.Satisfiable M T → Entailment.Consistent 𝓢 :=
+lemma consistent_of_satisfiable [∀ 𝓜 : M, Semantics.Meaningful 𝓜] :
+    Semantics.Satisfiable M T → Entailment.Consistent 𝓢 :=
   fun H ↦ consistent_of_meaningful (Semantics.meaningful_iff_satisfiableSet.mp H)
 
 end
@@ -501,7 +511,8 @@ variable {𝓢 : S} {s : Set F} [Complete 𝓢 (Semantics.models M s)]
 
 lemma provable_of_consequence {φ : F} : s ⊨[M] φ → 𝓢 ⊢ φ := complete
 
-lemma provable_iff_consequence [Sound 𝓢 (Semantics.models M s)] {φ : F} : s ⊨[M] φ ↔ 𝓢 ⊢ φ := ⟨complete, Sound.sound⟩
+lemma provable_iff_consequence [Sound 𝓢 (Semantics.models M s)] {φ : F} : s ⊨[M] φ ↔ 𝓢 ⊢ φ :=
+  ⟨complete, Sound.sound⟩
 
 
 section
@@ -516,7 +527,8 @@ lemma inconsistent_of_unsatisfiable :
     ¬Semantics.Satisfiable M s → Entailment.Inconsistent 𝓢 := by
   contrapose; simpa [←Entailment.not_consistent_iff_inconsistent] using satisfiable_of_consistent
 
-lemma consistent_iff_satisfiable [Sound 𝓢 (Semantics.models M s)] : Entailment.Consistent 𝓢 ↔ Semantics.Satisfiable M s :=
+lemma consistent_iff_satisfiable [Sound 𝓢 (Semantics.models M s)] :
+    Entailment.Consistent 𝓢 ↔ Semantics.Satisfiable M s :=
   ⟨satisfiable_of_consistent, Sound.consistent_of_satisfiable⟩
 
 end
