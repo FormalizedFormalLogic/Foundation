@@ -79,7 +79,7 @@ lemma trace_lift (B : LetterlessFormula) : (B.lift : Formula α).trace = B.trace
   sorry
 
 @[simp] lemma trace_TBB : (TBB n : Formula α).trace = {n} := by
-  sorry
+  simpa using trace_lift (α := α) (TBB n);
 
 @[simp] lemma trace_and : (A ⋏ B).trace = A.trace ∪ B.trace := by
   ext n;
