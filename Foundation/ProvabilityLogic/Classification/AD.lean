@@ -13,7 +13,7 @@ So no such provability logic lies strictly between `𝐀` and `𝐃`.
 ## References
 
 - [AB05, Lemma 51, Corollary 52, Corollary 55]
-- [Bek90, Lemma 5, §6 Theorem 2]
+- [Bek90, Lemma 5, Assertion 2, §6 Theorem 2]
 -/
 
 @[expose] public section
@@ -35,22 +35,20 @@ the chain, for a countermodel `M` of `A` whose root sees an `A`-reflexive world 
 def ofReflexive (M : RootedModel κ α) [M.IsGL] (hA : M.root ⊮[M.toModel] A) {v : M.World}
     (Rv : M.root ≺ v) (hv : v.IsReflexiveOf A.subfmls.prebox) :
     StrongReflexiveCountermodel (κ ⊕ Fin 1) A :=
-  have hX : ∀ B ∈ A.subfmls, B.subfmls ⊆ A.subfmls := fun _ ↦ subfmls_trans
   have ha : ∀ B, □B ∈ A.subfmls → v ⊩[M.toModel] □B 🡒 B :=
     fun B hB ↦ hv B (FormulaFinset.mem_prebox.mpr hB)
   let a : M.NonRoot := ⟨v, by rintro rfl; exact not_rel_root Rv⟩
-  have h {B : Formula α} (hB : B ∈ A.subfmls) := graft.forces_iff (a := a) (ι := Fin 1) hX ha hB
+  have h {B : Formula α} (hB : B ∈ A.subfmls) :=
+    graft.forces_iff (a := a) (ι := Fin 1) (fun _ ↦ subfmls_trans) ha hB
   { toRootedModel := M.graft a (Fin 1)
     root_not_forces := ((h mem_subfmls_self).1 M.root).not.mpr hA
     u := .inr 0
     root_rel_u := rfl
-    isReflexiveOf_u := fun B hB hB' ↦ by
+    isReflexiveOf_u B hB hB' :=
       have hB₁ := FormulaFinset.mem_prebox.mp hB
-      exact ((h (subfmls_trans hB₁ (by grind))).2 0).mpr <| ha B hB₁ <| ((h hB₁).2 0).mp hB'
+      ((h (subfmls_trans hB₁ (by grind))).2 0).mpr <| ha B hB₁ <| ((h hB₁).2 0).mp hB'
     eq_root_of_rel_u := by
-      rintro (z | j) hz
-      · exact congrArg Sum.inl hz
-      · exact absurd hz (by simp) }
+      rintro (z | j) hz <;> simp_all }
 
 end Kripke.StrongReflexiveCountermodel
 
@@ -58,46 +56,31 @@ universe u
 
 variable {α : Type u} {T U : ArithmeticTheory} [T.Δ₁] [𝗜𝚺₁ ⪯ T] {A : Formula α}
 
-/-- For `A ∉ 𝐀` and a `𝚺₁` sentence `σ`, some realization makes the `n`-times iterated consistency
-of `T` together with `A` prove the reflection instance `Pr_T(σ) 🡒 σ` in `𝗜𝚺₁`.
-
-- [Bek90, §6 Theorem 2]
-- [AB05, Lemma 51]
--/
 theorem exists_realization_sigma1_reflection_of_not_A (hA : 𝐀 ⊬ A)
     {σ : ArithmeticSentence} (hσ : Arithmetic.Hierarchy 𝚺 1 σ) :
     ∃ n, ∃ f : Realization α ℒₒᵣ,
       𝗜𝚺₁ ⊢ f T (∼□^[n]⊥ ⋏ A) 🡒 T.standardProvability σ 🡒 σ := by
   classical
-  obtain ⟨κ, _, M, _, v, hM, Rv, hv⟩ := Logic.A.exists_countermodel hA
-  let X := StrongReflexiveCountermodel.ofReflexive M hM Rv hv
-  have : Fintype X.World := Fintype.ofFinite _
-  have : X.IsGL := inferInstanceAs (M.graft _ (Fin 1)).IsGL
-  let S := Theory.standardProvability.modifiedSolovaySentences T X hσ
-  use X.height, S.realization
-  have h := S.reflection
-  simp only [Provability.conItr, standardInterpret, interpret, interpret_boxItr] at h ⊢
-  cl_prover [h]
+  obtain ⟨κ, _, M, _, v, hM, Rv, hv⟩ := Logic.A.exists_countermodel hA;
+  let X := StrongReflexiveCountermodel.ofReflexive M hM Rv hv;
+  have : Fintype X.World := Fintype.ofFinite _;
+  have : X.IsGL := inferInstanceAs (M.graft _ (Fin 1)).IsGL;
+  let S := Theory.standardProvability.modifiedSolovaySentences T X hσ;
+  use X.height, S.realization;
+  have h := S.reflection;
+  simp only [Provability.conItr, standardInterpret, interpret, interpret_boxItr] at h ⊢;
+  cl_prover [h];
 
 variable [𝗜𝚺₁ ⪯ U]
 
-/-- If the provability logic of `T` relative to `U` has trace `ℕ` and contains some `A ∉ 𝐀`, then
-`U` proves `Pr_T(σ) 🡒 σ` for every `𝚺₁` sentence `σ`.
-
-- [Bek90, §6 Theorem 2]
-- [AB05, Lemma 51]
--/
 theorem provable_sigma1_reflection_of_mem_of_not_A
     (hT : (T.provabilityLogicRelativeTo U : Logic α).trace = .univ)
     (hAL : A ∈ (T.provabilityLogicRelativeTo U : Logic α)) (hAA : 𝐀 ⊬ A)
     {σ : ArithmeticSentence} (hσ : Arithmetic.Hierarchy 𝚺 1 σ) :
     U ⊢ T.standardProvability σ 🡒 σ := by
-  classical
-  obtain ⟨n, f, hf⟩ := exists_realization_sigma1_reflection_of_not_A (T := T) hAA hσ
-  have h : ∼□^[n]⊥ ⋏ A ∈ (T.provabilityLogicRelativeTo U : Logic α) :=
-    provabilityLogic_mdp (provabilityLogic_mdp (provabilityLogic_of_GL and₃)
-      (A_subset_provabilityLogic hT Logic.A.neg_boxItr_bot)) hAL
-  exact WeakerThan.pbl hf ⨀ h f
+  obtain ⟨n, f, hf⟩ := exists_realization_sigma1_reflection_of_not_A (T := T) hAA hσ;
+  exact WeakerThan.pbl hf ⨀ provabilityLogic_mdp (provabilityLogic_mdp (provabilityLogic_of_GL and₃)
+    (A_subset_provabilityLogic hT Logic.A.neg_boxItr_bot)) hAL f;
 
 /-- If the provability logic of `T` relative to `U` has trace `ℕ` and strictly contains `𝐀`, then
 it contains `𝐃`.
@@ -107,12 +90,11 @@ it contains `𝐃`.
 theorem D_subset_provabilityLogic (hT : (T.provabilityLogicRelativeTo U : Logic α).trace = .univ)
     (h : 𝐀 ⊂ (T.provabilityLogicRelativeTo U : Logic α)) :
     𝐃 ⊆ (T.provabilityLogicRelativeTo U : Logic α) := by
-  obtain ⟨A, hAL, hAA⟩ := Set.exists_of_ssubset h
-  apply sumQuasiNormal_subset_provabilityLogic
-  rintro _ (rfl | ⟨B, C, rfl⟩)
-  · exact A_subset_provabilityLogic hT (Logic.A.neg_boxItr_bot (n := 1))
-  · intro f
-    exact provable_sigma1_reflection_of_mem_of_not_A hT hAL hAA (σ := f T (□B ⋎ □C)) <| by
+  obtain ⟨A, hAL, hAA⟩ := Set.exists_of_ssubset h;
+  apply sumQuasiNormal_subset_provabilityLogic;
+  rintro _ (rfl | ⟨B, C, rfl⟩);
+  · exact A_subset_provabilityLogic hT (Logic.A.neg_boxItr_bot (n := 1));
+  · exact fun f ↦ provable_sigma1_reflection_of_mem_of_not_A hT hAL hAA (σ := f T (□B ⋎ □C)) <| by
       simp [standardInterpret, interpret, Arithmetic.standardProvability_def]
 
 /-- No provability logic with trace `ℕ` lies strictly between `𝐀` and `𝐃`.
