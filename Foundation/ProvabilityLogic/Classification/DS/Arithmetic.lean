@@ -63,8 +63,8 @@ theorem S_subset_provabilityLogic
 theorem not_D_ssubset_provabilityLogic_ssubset_S
     (hT : (T.provabilityLogicRelativeTo U : Logic α).trace = .univ) :
     ¬(𝐃 ⊂ (T.provabilityLogicRelativeTo U : Logic α) ∧
-      (T.provabilityLogicRelativeTo U : Logic α) ⊂ 𝐒) := by
-  sorry
+      (T.provabilityLogicRelativeTo U : Logic α) ⊂ 𝐒) :=
+  fun ⟨h₁, h₂⟩ ↦ h₂.not_subset (S_subset_provabilityLogic hT h₁)
 
 end FFL.ProvabilityLogic
 
