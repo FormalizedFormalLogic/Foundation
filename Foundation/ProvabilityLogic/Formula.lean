@@ -132,6 +132,12 @@ def ModalizedIn (p : α) : Formula α → Prop
   | A 🡒 B => A.ModalizedIn p ∧ B.ModalizedIn p
   | □_    => True
 
+/-- Every atom occurs only in the scope of `□`.
+
+- [Bek90, §4]
+-/
+abbrev Modalized (A : Formula α) : Prop := ∀ a, A.ModalizedIn a
+
 @[simp, grind =]
 lemma complexity_box : (□A).complexity = A.complexity + 1 := rfl
 
@@ -163,6 +169,7 @@ def atoms : Formula α → Finset α
 @[simp, grind =] lemma atoms_iff : (A 🡘 B).atoms = A.atoms ∪ B.atoms := by
   simp [atoms, Finset.union_comm];
 @[simp, grind =] lemma atoms_box : (□A).atoms = A.atoms := rfl
+@[simp, grind =] lemma atoms_dia : (◇A).atoms = A.atoms := by simp [atoms]
 
 lemma atoms_modalize_subset : A.modalize.atoms ⊆ A.atoms := by
   induction A <;> simp_all [modalize, Finset.union_subset_union];
@@ -247,6 +254,19 @@ lemma atoms_singleton : ({A} : FormulaFinset α).atoms = A.atoms := Finset.singl
 lemma atoms_union : (Γ ∪ Δ).atoms = Γ.atoms ∪ Δ.atoms := Finset.union_biUnion
 
 @[simp, grind =] lemma atoms_box : Γ.box.atoms = Γ.atoms := Finset.image_biUnion
+
+lemma atoms_disj_subset (Γ : FormulaFinset α) : Γ.disj.atoms ⊆ Γ.atoms := by
+  have h : ∀ l : List (Formula α), (⋁l).atoms ⊆ l.toFinset.biUnion Formula.atoms := by
+    intro l;
+    induction l with
+    | nil => simp;
+    | cons a l ih =>
+      rcases l with _ | ⟨b, l⟩;
+      · simp;
+      · rw [List.disj₂_cons_nonempty (List.cons_ne_nil b l), Formula.atoms_or, List.toFinset_cons,
+          Finset.biUnion_insert];
+        exact Finset.union_subset_union subset_rfl ih;
+  exact (h Γ.toList).trans_eq (by rw [atoms, Finset.toList_toFinset]);
 
 lemma atoms_subset_of_mem (h : A ∈ Γ) : A.atoms ⊆ Γ.atoms := Finset.subset_biUnion_of_mem _ h
 

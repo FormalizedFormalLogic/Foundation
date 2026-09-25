@@ -3,6 +3,7 @@ module
 public import Foundation.ProvabilityLogic.GL.Gentzen.Kripke
 public import Foundation.ProvabilityLogic.Kripke.Cone
 public import Foundation.ProvabilityLogic.Kripke.Soundness
+public import Foundation.ProvabilityLogic.Kripke.Unravelling
 
 /-!
 # The logic `GL`
@@ -105,12 +106,15 @@ theorem provability_TFAE : [
     𝐆𝐋 ⊢ A,
     ⊢ᴳ[𝐆𝐋] ∅ ⟹ {A},
     ∀ {κ : Type u} [Nonempty κ] (M : Model κ α), [M.IsFiniteGL] → M ⊧ A,
-    ∀ {κ : Type u} [Nonempty κ] (M : RootedModel κ α), [M.IsFiniteGL] → M.root ⊩[M.toModel] A
+    ∀ {κ : Type u} [Nonempty κ] (M : RootedModel κ α), [M.IsFiniteGL] → M.root ⊩[M.toModel] A,
+    ∀ {κ : Type u} [Nonempty κ] (M : RootedModel κ α), [M.IsFiniteGL] → [M.IsTree] →
+      M.root ⊩[M.toModel] A
   ].TFAE := by
   tfae_have 1 → 3 := fun h _ _ M _ ↦ sound M h;
   tfae_have 3 → 2 := fun h ↦ Gentzen.complete fun M _ x _ ↦ ⟨A, by simp, h M x⟩;
   tfae_have 2 → 1 := fun h ↦ by simpa using of_gentzen h ⨀ (by simp [Finset.conj]);
-  tfae_have 3 → 4 := fun h _ _ M _ ↦ h M.toModel M.root;
+  tfae_have 3 → 5 := fun h _ _ M _ _ ↦ h M.toModel M.root;
+  tfae_have 5 → 4 := fun h _ _ M _ ↦ RootedModel.unravelling.forces_root_iff.mp <| h M.unravelling;
   tfae_have 4 → 3 := fun h _ _ M _ x ↦ Model.forces_cone.mp <| h (M.cone x);
   tfae_finish;
 
@@ -127,6 +131,16 @@ theorem iff_root_forces : 𝐆𝐋 ⊢ A ↔
     ∀ {κ : Type u} [Nonempty κ] (M : RootedModel κ α), [M.IsFiniteGL] → M.root ⊩[M.toModel] A := by
   classical
   exact provability_TFAE.out 1 4
+
+omit [DecidableEq α] in
+/-- `𝐆𝐋` is complete for finite trees.
+
+- [CZ97] -/
+theorem iff_tree_root_forces : 𝐆𝐋 ⊢ A ↔
+    ∀ {κ : Type u} [Nonempty κ] (M : RootedModel κ α), [M.IsFiniteGL] → [M.IsTree] →
+      M.root ⊩[M.toModel] A := by
+  classical
+  exact provability_TFAE.out 1 5
 
 end Logic.GL
 
