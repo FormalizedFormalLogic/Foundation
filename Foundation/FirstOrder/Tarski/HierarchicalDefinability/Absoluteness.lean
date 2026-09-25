@@ -32,7 +32,8 @@ class IsInitial (ℬ : Bounding L) (ι : M ↪ₛ[L] N) : Prop where
 variable (ι : M ↪ₛ[L] N)
 variable [ℬ.IsInitial ι]
 
-private lemma ball_upward {n} {R : Semiformula.Operator L 2} (hR : R ∈ ℬ) (t : Semiterm L ξ n) (φ : Semiformula L ξ (n + 1))
+private lemma ball_upward {n} {R : Semiformula.Operator L 2} (hR : R ∈ ℬ) (t :
+  Semiterm L ξ n) (φ : Semiformula L ξ (n + 1))
     (ih : ∀ e ε, φ.Eval e ε → φ.Eval (ι ∘ e) (ι ∘ ε))
     (e : Fin n → M) (ε : ξ → M) :
     (∀¹[R.operator ![#0, Rew.bShift t]] φ).Eval e ε →
@@ -45,7 +46,8 @@ private lemma ball_upward {n} {R : Semiformula.Operator L 2} (hR : R ∈ ℬ) (t
   simpa only [Matrix.comp_vecCons''] using
     ih (c :> e) ε (h c ((IsInitial.operator_iff (ℬ := ℬ) (ι := ι) hR _ _).mpr hb))
 
-private lemma bexs_upward {n} {R : Semiformula.Operator L 2} (hR : R ∈ ℬ) (t : Semiterm L ξ n) (φ : Semiformula L ξ (n + 1))
+private lemma bexs_upward {n} {R : Semiformula.Operator L 2} (hR : R ∈ ℬ) (t :
+  Semiterm L ξ n) (φ : Semiformula L ξ (n + 1))
     (ih : ∀ e ε, φ.Eval e ε → φ.Eval (ι ∘ e) (ι ∘ ε))
     (e : Fin n → M) (ε : ξ → M) :
     (∃¹[R.operator ![#0, Rew.bShift t]] φ).Eval e ε →
@@ -68,8 +70,8 @@ lemma bounded_absolute {n} {φ : Semiformula L ξ n} (hφ : ℬ.Closure φ)
   | @ball n R φ t hR ht hφ ih =>
     obtain ⟨t, rfl⟩ := Rew.positive_iff.mp ht
     constructor
-    . exact ball_upward ι hR t _ (fun e ε ↦ (ih e ε).mp) e ε
-    . simp only [Semiformula.eval_ball, Semiformula.eval_operator,
+    · exact ball_upward ι hR t _ (fun e ε ↦ (ih e ε).mp) e ε
+    · simp only [Semiformula.eval_ball, Semiformula.eval_operator,
         Matrix.comp₂, Semiterm.val_bvar,
         Matrix.cons_val_zero, Semiterm.val_bShift, ← HomClass.val_term ι]
       intro h c hc
@@ -79,8 +81,8 @@ lemma bounded_absolute {n} {φ : Semiformula L ξ n} (hφ : ℬ.Closure φ)
   | @bexs n R φ t hR ht hφ ih =>
     obtain ⟨t, rfl⟩ := Rew.positive_iff.mp ht
     constructor
-    . exact bexs_upward ι hR t _ (fun e ε ↦ (ih e ε).mp) e ε
-    . simp only [Semiformula.eval_bexs, Semiformula.eval_operator,
+    · exact bexs_upward ι hR t _ (fun e ε ↦ (ih e ε).mp) e ε
+    · simp only [Semiformula.eval_bexs, Semiformula.eval_operator,
         Matrix.comp₂, Semiterm.val_bvar,
         Matrix.cons_val_zero, Semiterm.val_bShift, ← HomClass.val_term ι]
       rintro ⟨b, hb, hp⟩
@@ -92,18 +94,19 @@ lemma sigma_one_upward {n} {φ : Semiformula L ξ n} (hφ : ℬ.Hierarchy 𝚺 1
     (e : Fin n → M) (ε : ξ → M) :
     φ.Eval e ε → φ.Eval (ι ∘ e) (ι ∘ ε) := by
   revert e ε
-  apply Hierarchy.sigma_succ_induction (s := 0) (P := fun n φ ↦ ∀ (e : Fin n → M) (ε : ξ → M), φ.Eval e ε → φ.Eval (ι ∘ e) (ι ∘ ε)) _ _ _ _ _ _ n φ hφ
-  . intro n φ h e ε
+  apply Hierarchy.sigma_succ_induction (s := 0) (P := fun n φ ↦ ∀ (e : Fin n → M) (ε : ξ → M),
+    φ.Eval e ε → φ.Eval (ι ∘ e) (ι ∘ ε)) _ _ _ _ _ _ n φ hφ
+  · intro n φ h e ε
     exact (bounded_absolute ι (Hierarchy.zero_iff_bounded.mp h) e ε).mp
-  . intro n φ ψ _ _ ihp ihq e ε h
+  · intro n φ ψ _ _ ihp ihq e ε h
     exact ⟨ihp e ε h.1, ihq e ε h.2⟩
-  . intro n φ ψ _ _ ihp ihq e ε
+  · intro n φ ψ _ _ ihp ihq e ε
     exact Or.imp (ihp e ε) (ihq e ε)
-  . intro R hR n t φ _ ih e ε
+  · intro R hR n t φ _ ih e ε
     exact ball_upward ι hR t φ ih e ε
-  . intro R hR n t φ _ ih e ε
+  · intro R hR n t φ _ ih e ε
     exact bexs_upward ι hR t φ ih e ε
-  . intro n φ _ ih e ε
+  · intro n φ _ ih e ε
     simp only [Semiformula.eval_ex]
     rintro ⟨x, hx⟩
     exact ⟨ι x, by simpa only [Matrix.comp_vecCons''] using ih (x :> e) ε hx⟩

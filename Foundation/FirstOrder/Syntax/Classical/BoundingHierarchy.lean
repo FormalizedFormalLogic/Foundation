@@ -12,7 +12,8 @@ variable {ξ : Type*} {n m s : ℕ} {Γ Γ' : Polarity}
 
 namespace Bounding
 
-/-! This formalization generalizes the syntactic arithmetical hierarchy using a set of operators for bounds. -/
+/-! This formalization generalizes the syntactic arithmetical hierarchy
+using a set of operators for bounds. -/
 
 inductive Hierarchy (ℬ : Bounding L) : Polarity → ℕ → {n : ℕ} → Semiformula L ξ n → Prop
   | bounded (Γ : Polarity) (s n : ℕ) {φ : Semiformula L ξ n} :
@@ -227,7 +228,7 @@ lemma neg {φ : Semiformula L ξ n} :
     case dummy_sigma hp _ =>
       rcases hq with rfl;
       exact (imp_iff.mp hp).2.accum _;
-  . intro hp;
+  · intro hp
     exact hp.ball hR ht;
 
 @[simp] lemma bexs_iff {Γ s n} {R : Semiformula.Operator L 2} {φ : Semiformula L ξ (n + 1)}
@@ -253,16 +254,19 @@ lemma neg {φ : Semiformula L ξ n} :
     case dummy_pi hp _ =>
       rcases hq with rfl;
       exact (and_iff.mp hp).2.accum _;
-  . intro hp;
+  · intro hp
     exact hp.bexs hR ht;
 
 /-- A formalization-specific induction principle separating the preceding Π level. -/
 lemma sigma_succ_induction {s : ℕ} {P : (n : ℕ) → Semiformula L ξ n → Prop}
     (hPi : ∀ n φ, ℬ.Hierarchy 𝚷 s φ → P n φ)
-    (hAnd : ∀ n φ ψ, ℬ.Hierarchy 𝚺 (s + 1) φ → ℬ.Hierarchy 𝚺 (s + 1) ψ → P n φ → P n ψ → P n (φ ⋏ ψ))
+    (hAnd : ∀ n φ ψ,
+      ℬ.Hierarchy 𝚺 (s + 1) φ → ℬ.Hierarchy 𝚺 (s + 1) ψ → P n φ → P n ψ → P n (φ ⋏ ψ))
     (hOr : ∀ n φ ψ, ℬ.Hierarchy 𝚺 (s + 1) φ → ℬ.Hierarchy 𝚺 (s + 1) ψ → P n φ → P n ψ → P n (φ ⋎ ψ))
-    (hBall : ∀ R ∈ ℬ, ∀ n t φ, ℬ.Hierarchy 𝚺 (s + 1) φ → P (n + 1) φ → P n (∀¹[R.operator ![#0, Rew.bShift t]] φ))
-    (hBexs : ∀ R ∈ ℬ, ∀ n t φ, ℬ.Hierarchy 𝚺 (s + 1) φ → P (n + 1) φ → P n (∃¹[R.operator ![#0, Rew.bShift t]] φ))
+    (hBall : ∀ R ∈ ℬ, ∀ n t φ, ℬ.Hierarchy 𝚺 (s + 1) φ → P (n + 1) φ → P n (∀¹[R.operator ![#0,
+      Rew.bShift t]] φ))
+    (hBexs : ∀ R ∈ ℬ, ∀ n t φ, ℬ.Hierarchy 𝚺 (s + 1) φ → P (n + 1) φ → P n (∃¹[R.operator ![#0,
+      Rew.bShift t]] φ))
     (hExs : ∀ n φ, ℬ.Hierarchy 𝚺 (s + 1) φ → P (n + 1) φ → P n (∃¹ φ))
     (n φ) : ℬ.Hierarchy 𝚺 (s + 1) φ → P n φ := by
   generalize hΓ : (𝚺 : Polarity) = Γ
@@ -291,7 +295,8 @@ lemma sigma_succ_induction {s : ℕ} {P : (n : ℕ) → Semiformula L ξ n → P
   | and | or | exs => grind
   | all | pi | dummy_pi => simp at hΓ
 
-/-- An auxiliary condition requiring every selected bounding operator to lie in every hierarchy level. -/
+/-- An auxiliary condition requiring every selected bounding operator to lie in every
+  hierarchy level. -/
 class Small (ℬ : Bounding L) (ξ : Type*) : Prop where
   operator {R : Semiformula.Operator L 2} (hR : R ∈ ℬ) {n : ℕ} {Γ : Polarity} {s : ℕ}
     (v : Fin 2 → Semiterm L ξ n) : ℬ.Hierarchy Γ s (R.operator v)
@@ -396,7 +401,7 @@ lemma rew {ξ₁ ξ₂ : Type*} {n₁ n₂ : ℕ} (ω : Rew L ξ₁ n₁ ξ₂ n
     case sigma ih => rcases eq with ⟨φ, rfl, rfl⟩; exact Hierarchy.sigma (ih rfl);
     case dummy_sigma ih => rcases eq with ⟨φ, rfl, rfl⟩; exact Hierarchy.dummy_sigma (ih rfl);
     case dummy_pi ih => rcases eq with ⟨φ, rfl, rfl⟩; exact Hierarchy.dummy_pi (ih rfl);
-  . exact Hierarchy.rew _;
+  · exact Hierarchy.rew _
 
 lemma exsClosure : {n : ℕ} → {φ : Semiformula L ξ n} →
     ℬ.Hierarchy 𝚺 (s + 1) φ → ℬ.Hierarchy 𝚺 (s + 1) (exsClosure φ)

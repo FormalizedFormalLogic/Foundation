@@ -158,7 +158,8 @@ lemma of_polybounded_of_definable (f : (Fin k → V) → V) [hb : Bounded f]
     DefinableBoundedFunction₃ f := ⟨hb, hf⟩
 
 lemma retraction {f : (Fin k → V) → V} (hf : DefinableBoundedFunction f) (e : Fin k → Fin n) :
-    DefinableBoundedFunction fun v ↦ f (fun i ↦ v (e i)) := ⟨hf.bounded.retraction e, Bounding.HierarchySymbol.DefinableFunction.retraction hf.definable e⟩
+    DefinableBoundedFunction fun v ↦ f (fun i ↦ v (e i)) := ⟨hf.bounded.retraction e,
+      Bounding.HierarchySymbol.DefinableFunction.retraction hf.definable e⟩
 
 end DefinableBoundedFunction
 

@@ -228,7 +228,8 @@ lemma two_iff {v : V} :
 section
 
 instance defined : 𝚫₁-Relation (IsUTermVec (V := V) L) via (isUTermVec L) :=
-  ⟨by intro v; simp [isUTermVec, Bounding.HierarchySymbol.Semiformula.val_sigma, IsUTerm.defined.proper.iff'],
+  ⟨by intro v; simp [isUTermVec, Bounding.HierarchySymbol.Semiformula.val_sigma,
+    IsUTerm.defined.proper.iff'],
    by intro v; simp [isUTermVec, Bounding.HierarchySymbol.Semiformula.val_sigma, IsUTermVec]⟩
 
 instance definable : 𝚫₁-Relation (IsUTermVec (V := V) L) := defined.to_definable
@@ -456,7 +457,8 @@ instance graph_definable : 𝚺₁.Definable fun v ↦ c.Graph L (v ·.succ.succ
   (graph_defined c).to_definable
 
 instance graph_definable₂ (param) : 𝚺-[0 + 1]-Relation (c.Graph L param) := by
-  simpa using Bounding.HierarchySymbol.Definable.retractiont (n := 2) (graph_definable c) (#0 :> #1 :> fun i ↦ &(param i))
+  simpa using Bounding.HierarchySymbol.Definable.retractiont (n := 2) (graph_definable
+    c) (#0 :> #1 :> fun i ↦ &(param i))
 
 lemma graph_dom_isUTerm {t y} :
     c.Graph L param t y → IsUTerm L t := fun h ↦ Graph.case_iff.mp h |>.1
@@ -628,8 +630,10 @@ variable (c)
 
 section
 
-lemma result_defined : 𝚺₁.DefinedFunction (fun v ↦ c.result L (v ·.succ) (v 0)) (β.result L) := .mk fun v ↦ by
-  simp [Blueprint.result, Bounding.HierarchySymbol.Semiformula.val_sigma, IsUTerm.defined.proper.iff',
+lemma result_defined : 𝚺₁.DefinedFunction (fun v ↦ c.result L (v ·.succ) (v 0))
+  (β.result L) := .mk fun v ↦ by
+  simp [Blueprint.result, Bounding.HierarchySymbol.Semiformula.val_sigma,
+    IsUTerm.defined.proper.iff',
     c.eval_graphDef, result, Classical.choose!_eq_iff_right]
 
 @[simp] lemma result_graphDef (v : Fin (arity + 2) → V) :
@@ -645,7 +649,8 @@ lemma resultVec_defined :
     𝚺₁.DefinedFunction (fun v ↦ c.resultVec L (v ·.succ.succ) (v 0) (v 1)) (β.resultVec L) :=
   .mk fun v ↦ by
   symm
-  simpa [Blueprint.resultVec, Bounding.HierarchySymbol.Semiformula.val_sigma, IsUTermVec.defined.proper.iff',
+  simpa [Blueprint.resultVec, Bounding.HierarchySymbol.Semiformula.val_sigma,
+    IsUTermVec.defined.proper.iff',
     c.eval_graphDef] using c.resultVec_graph
 
 lemma eval_resultVec (v : Fin (arity + 3) → V) :

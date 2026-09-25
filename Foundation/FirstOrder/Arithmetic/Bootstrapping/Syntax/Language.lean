@@ -62,10 +62,14 @@ instance _root_.FFL.FirstOrder.Language.IsFunc.definable : 𝚺₀-Relation (L.I
 instance _root_.FFL.FirstOrder.Language.IsRel.definable : 𝚺₀-Relation (L.IsRel (V := V)) :=
   Language.IsRel.defined.to_definable
 
-@[simp, definability] instance _root_.FFL.FirstOrder.Language.IsFunc.definable' (ℌ) : ℌ-Relation (L.IsFunc (V := V)) :=
+@[simp,
+  definability] instance _root_.FFL.FirstOrder.Language.IsFunc.definable' (ℌ) :
+    ℌ-Relation (L.IsFunc (V := V)) :=
   Bounding.HierarchySymbol.Definable.of_zero Language.IsFunc.definable
 
-@[simp, definability] instance _root_.FFL.FirstOrder.Language.IsRel.definable' (ℌ) : ℌ-Relation (L.IsRel (V := V)) :=
+@[simp,
+  definability] instance _root_.FFL.FirstOrder.Language.IsRel.definable' (ℌ) :
+    ℌ-Relation (L.IsRel (V := V)) :=
   Bounding.HierarchySymbol.Definable.of_zero Language.IsRel.definable
 
 section

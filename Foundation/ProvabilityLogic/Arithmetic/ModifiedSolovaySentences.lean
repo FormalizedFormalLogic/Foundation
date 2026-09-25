@@ -251,7 +251,7 @@ lemma exists_cheapest [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] {ι : Type*} [Finite ι
     (hP : ∀ i, 𝚺₁-Predicate (P i)) (o : ι → ℕ) (h : ∃ i w, P i w) :
     ∃ j, (∀ i, o i < o j → WitnessLT (P j) (P i)) ∧ ∀ i, o j ≤ o i → WitnessLE (P j) (P i) := by
   classical
-  letI := Fintype.ofFinite ι
+  let := Fintype.ofFinite ι
   obtain ⟨i₀, w₀, h₀⟩ := h;
   obtain ⟨w, ⟨i₁, h₁⟩, hw⟩ : ∃ w, (∃ i, P i w) ∧ ∀ v < w, ¬∃ i, P i v :=
     InductionOnBroadHierarchy.least_number_sigma 𝚺 1

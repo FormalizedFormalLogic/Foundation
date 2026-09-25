@@ -92,26 +92,26 @@ lemma neg {φ : Semiformula L ξ n} : ℬ.Closure φ → ℬ.Closure (∼φ) := 
 @[simp] lemma ball_iff {φ : Semiformula L ξ (n + 1)} {t : Semiterm L ξ (n + 1)}
     (hR : R ∈ ℬ) (ht : t.Positive) : ℬ.Closure (∀¹[R.operator ![#0, t]] φ) ↔ ℬ.Closure φ := by
   constructor;
-  . generalize hq : (∀¹[R.operator ![#0, t]] φ) = ψ;
+  · generalize hq : (∀¹[R.operator ![#0, t]] φ) = ψ
     intro h;
     cases h <;> simp only [FFL.FirstOrder.ball, FFL.FirstOrder.bexs,
       all_inj, imp_inj, reduceCtorEq] at hq;
     case ball hR' ht h =>
       rcases hq with ⟨_, rfl⟩;
       exact h;
-  . exact ball hR ht;
+  · exact ball hR ht
 
 @[simp] lemma bexs_iff {φ : Semiformula L ξ (n + 1)} {t : Semiterm L ξ (n + 1)}
     (hR : R ∈ ℬ) (ht : t.Positive) : ℬ.Closure (∃¹[R.operator ![#0, t]] φ) ↔ ℬ.Closure φ := by
   constructor;
-  . generalize hq : (∃¹[R.operator ![#0, t]] φ) = ψ;
+  · generalize hq : (∃¹[R.operator ![#0, t]] φ) = ψ
     intro h;
     cases h <;> simp only [FFL.FirstOrder.ball, FFL.FirstOrder.bexs,
       exs_inj, Semiformula.and_inj, reduceCtorEq] at hq;
     case bexs hR' ht h =>
       rcases hq with ⟨_, rfl⟩;
       exact h;
-  . exact bexs hR ht;
+  · exact bexs hR ht
 
 lemma rew (ω : Rew L ξ₁ n₁ ξ₂ n₂) {φ : Semiformula L ξ₁ n₁} :
     ℬ.Closure φ → ℬ.Closure (ω ▹ φ) := by
@@ -129,19 +129,19 @@ lemma operator_preimage [SymbolLike ℬ ξ₁ ξ₂]
   have hv1 : ω.q (v 1) = t := by simpa using hv 1;
   use v 1;
   and_intros;
-  . calc
+  · calc
       χ = R.operator v := hχ
       _ = R.operator ![#0, v 1] := by
         rw [Matrix.fun_eq_vec_two v, hv0];
         simp;
-  . rw [← Rew.q_positive_iff (ω := ω) (t := v 1), hv1];
+  · rw [← Rew.q_positive_iff (ω := ω) (t := v 1), hv1]
     exact ht;
 
 @[simp] lemma rew_iff [SymbolLike ℬ ξ₁ ξ₂]
     {ω : Rew L ξ₁ n₁ ξ₂ n₂} {φ : Semiformula L ξ₁ n₁} :
     ℬ.Closure (ω ▹ φ) ↔ ℬ.Closure φ := by
   constructor;
-  . generalize eq : ω ▹ φ = ψ;
+  · generalize eq : ω ▹ φ = ψ
     intro h;
     induction h generalizing φ n₁
       <;> simp only [Semiformula.eq_top_iff, Semiformula.eq_bot_iff, Semiformula.eq_rel_iff,
@@ -165,7 +165,7 @@ lemma operator_preimage [SymbolLike ℬ ξ₁ ξ₂]
       rcases eq with ⟨χ, hχ, φ, hφ, rfl⟩;
       obtain ⟨u, rfl, hu⟩ := operator_preimage (ℬ := ℬ) hR hχ ht;
       exact .bexs hR hu (ih hφ);
-  . exact rew (ℬ := ℬ) _;
+  · exact rew (ℬ := ℬ) _
 
 end Closure
 

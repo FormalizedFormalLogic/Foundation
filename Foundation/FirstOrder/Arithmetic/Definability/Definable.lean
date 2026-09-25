@@ -18,7 +18,8 @@ variable {V : Type*} [ORingStructure V]
 abbrev IsDefinedBy (R : (Fin k → V) → Prop) {ℌ : HierarchySymbol} (φ : ℌ.Semisentence k) : Prop :=
   Bounding.HierarchySymbol.IsDefinedBy R φ
 
-abbrev IsDefinedByWithParam (R : (Fin k → V) → Prop) {ℌ : HierarchySymbol} (φ : ℌ.Semiformula V k) : Prop :=
+abbrev IsDefinedByWithParam (R : (Fin k → V) → Prop) {ℌ : HierarchySymbol} (φ :
+  ℌ.Semiformula V k) : Prop :=
   Bounding.HierarchySymbol.IsDefinedByWithParam R φ
 
 abbrev Defined (R : (Fin k → V) → Prop) {ℌ : HierarchySymbol} (φ : ℌ.Semisentence k) :=
@@ -72,15 +73,20 @@ abbrev DefinablePred (P : V → Prop) : Prop := Bounding.HierarchySymbol.Definab
 
 abbrev DefinableRel (P : V → V → Prop) : Prop := Bounding.HierarchySymbol.DefinableRel ℬ[<, ℒₒᵣ] ℌ P
 
-abbrev DefinableRel₃ (P : V → V → V → Prop) : Prop := Bounding.HierarchySymbol.DefinableRel₃ ℬ[<, ℒₒᵣ] ℌ P
+abbrev DefinableRel₃ (P : V → V → V → Prop) : Prop := Bounding.HierarchySymbol.DefinableRel₃ ℬ[<,
+  ℒₒᵣ] ℌ P
 
-abbrev DefinableRel₄ (P : V → V → V → V → Prop) : Prop := Bounding.HierarchySymbol.DefinableRel₄ ℬ[<, ℒₒᵣ] ℌ P
+abbrev DefinableRel₄ (P : V → V → V → V → Prop) : Prop :=
+  Bounding.HierarchySymbol.DefinableRel₄ ℬ[<, ℒₒᵣ] ℌ P
 
-abbrev DefinableRel₅ (P : V → V → V → V → V → Prop) : Prop := Bounding.HierarchySymbol.DefinableRel₅ ℬ[<, ℒₒᵣ] ℌ P
+abbrev DefinableRel₅ (P : V → V → V → V → V → Prop) : Prop :=
+  Bounding.HierarchySymbol.DefinableRel₅ ℬ[<, ℒₒᵣ] ℌ P
 
-abbrev DefinableRel₆ (P : V → V → V → V → V → V → Prop) : Prop := Bounding.HierarchySymbol.DefinableRel₆ ℬ[<, ℒₒᵣ] ℌ P
+abbrev DefinableRel₆ (P : V → V → V → V → V → V → Prop) : Prop :=
+  Bounding.HierarchySymbol.DefinableRel₆ ℬ[<, ℒₒᵣ] ℌ P
 
-abbrev DefinableFunction (f : (Fin k → V) → V) : Prop := Bounding.HierarchySymbol.DefinableFunction ℬ[<, ℒₒᵣ] ℌ f
+abbrev DefinableFunction (f : (Fin k → V) → V) : Prop :=
+  Bounding.HierarchySymbol.DefinableFunction ℬ[<, ℒₒᵣ] ℌ f
 
 abbrev DefinableFunction₀ (c : V) : Prop :=
   Bounding.HierarchySymbol.DefinableFunction ℬ[<, ℒₒᵣ] ℌ (fun _ : Fin 0 → V ↦ c)
@@ -95,10 +101,12 @@ abbrev DefinableFunction₃ (f : V → V → V → V) : Prop :=
   Bounding.HierarchySymbol.DefinableFunction ℬ[<, ℒₒᵣ] ℌ (fun v : Fin 3 → V ↦ f (v 0) (v 1) (v 2))
 
 abbrev DefinableFunction₄ (f : V → V → V → V → V) : Prop :=
-  Bounding.HierarchySymbol.DefinableFunction ℬ[<, ℒₒᵣ] ℌ (fun v : Fin 4 → V ↦ f (v 0) (v 1) (v 2) (v 3))
+  Bounding.HierarchySymbol.DefinableFunction ℬ[<,
+    ℒₒᵣ] ℌ (fun v : Fin 4 → V ↦ f (v 0) (v 1) (v 2) (v 3))
 
 abbrev DefinableFunction₅ (f : V → V → V → V → V → V) : Prop :=
-  Bounding.HierarchySymbol.DefinableFunction ℬ[<, ℒₒᵣ] ℌ (fun v : Fin 5 → V ↦ f (v 0) (v 1) (v 2) (v 3) (v 4))
+  Bounding.HierarchySymbol.DefinableFunction ℬ[<,
+    ℒₒᵣ] ℌ (fun v : Fin 5 → V ↦ f (v 0) (v 1) (v 2) (v 3) (v 4))
 
 variable {ℌ}
 
@@ -183,18 +191,22 @@ variable {k} {P Q : (Fin k → V) → Prop}
 
 namespace DefinableRel
 
-@[simp] instance le [V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻] {ℌ : HierarchySymbol} : ℌ.DefinableRel (LE.le : V → V → Prop) :=
-  Bounding.HierarchySymbol.Defined.to_definable₀ (φ := .mkSigma “#0 ≤ #1” (by simp)) ⟨by intro _; simp⟩
+@[simp] instance le [V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻] {ℌ : HierarchySymbol} : ℌ.DefinableRel (LE.le : V
+  → V → Prop) :=
+  Bounding.HierarchySymbol.Defined.to_definable₀ (φ := .mkSigma “#0 ≤ #1” (by simp))
+    ⟨by intro _; simp⟩
 
 end DefinableRel
 
 namespace DefinableFunction₂
 
 @[simp] instance add {ℌ : HierarchySymbol} : ℌ.DefinableFunction₂ ((· + ·) : V → V → V) :=
-  Bounding.HierarchySymbol.Defined.to_definable₀ (φ := .mkSigma “#0 = #1 + #2” (by simp)) ⟨by intro _; simp⟩
+  Bounding.HierarchySymbol.Defined.to_definable₀ (φ := .mkSigma “#0 = #1 + #2” (by
+    simp)) ⟨by intro _; simp⟩
 
 @[simp] instance mul {ℌ : HierarchySymbol} : ℌ.DefinableFunction₂ ((· * ·) : V → V → V) :=
-  Bounding.HierarchySymbol.Defined.to_definable₀ (φ := .mkSigma “#0 = #1 * #2” (by simp)) ⟨by intro _; simp⟩
+  Bounding.HierarchySymbol.Defined.to_definable₀ (φ := .mkSigma “#0 = #1 * #2” (by
+    simp)) ⟨by intro _; simp⟩
 
 @[simp] instance hAdd {ℌ : HierarchySymbol} : ℌ.DefinableFunction₂ (HAdd.hAdd : V → V → V) := add
 
@@ -202,15 +214,18 @@ namespace DefinableFunction₂
 
 @[simp] protected instance sq [V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻] {ℌ : HierarchySymbol} :
     ℌ.DefinableFunction₁ fun x : V ↦ x^2 :=
-  Bounding.HierarchySymbol.Defined.to_definable₀ (φ := .mkSigma “#0 = #1 * #1” (by simp)) ⟨by intro _; simp [sq]⟩
+  Bounding.HierarchySymbol.Defined.to_definable₀ (φ := .mkSigma “#0 = #1 * #1” (by
+    simp)) ⟨by intro _; simp [sq]⟩
 
 @[simp] instance pow3 [V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻] {ℌ : HierarchySymbol} :
     ℌ.DefinableFunction₁ fun x : V ↦ x^3 :=
-  Bounding.HierarchySymbol.Defined.to_definable₀ (φ := .mkSigma “#0 = #1 * #1 * #1” (by simp)) ⟨by intro _; simp [Arithmetic.pow_three]⟩
+  Bounding.HierarchySymbol.Defined.to_definable₀ (φ := .mkSigma “#0 = #1 * #1 * #1”
+    (by simp)) ⟨by intro _; simp [Arithmetic.pow_three]⟩
 
 @[simp] instance pow4 [V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻] {ℌ : HierarchySymbol} :
     ℌ.DefinableFunction₁ fun x : V ↦ x^4 :=
-  Bounding.HierarchySymbol.Defined.to_definable₀ (φ := .mkSigma “#0 = #1 * #1 * #1 * #1” (by simp)) ⟨by intro _; simp [pow_four]⟩
+  Bounding.HierarchySymbol.Defined.to_definable₀ (φ := .mkSigma “#0 = #1 * #1 * #1 *
+    #1” (by simp)) ⟨by intro _; simp [pow_four]⟩
 
 end DefinableFunction₂
 
@@ -318,25 +333,31 @@ lemma bexsCons {P : (Fin (k + 1) → V) → Prop} {ℌ : HierarchySymbol}
 lemma ball_lt {Γ} {P : (Fin k → V) → V → Prop} {f : (Fin k → V) → V}
     (hf : 𝚺-[m + 1].DefinableFunction f) (h : Γ-[m + 1].Definable fun w ↦ P (w ·.succ) (w 0)) :
     Γ-[m + 1].Definable fun v ↦ ∀ x < f v, P v x :=
-  Bounding.HierarchySymbol.Definable.ball_operator (ℬ := ℬ[<, ℒₒᵣ]) (R := Semiformula.Operator.LT.lt)
+  Bounding.HierarchySymbol.Definable.ball_operator (ℬ := ℬ[<,
+    ℒₒᵣ]) (R := Semiformula.Operator.LT.lt)
     (by rfl) hf h
 
 lemma bexs_lt {Γ} {P : (Fin k → V) → V → Prop} {f : (Fin k → V) → V}
     (hf : 𝚺-[m + 1].DefinableFunction f) (h : Γ-[m + 1].Definable fun w ↦ P (w ·.succ) (w 0)) :
     Γ-[m + 1].Definable fun v ↦ ∃ x < f v, P v x :=
-  Bounding.HierarchySymbol.Definable.bexs_operator (ℬ := ℬ[<, ℒₒᵣ]) (R := Semiformula.Operator.LT.lt)
+  Bounding.HierarchySymbol.Definable.bexs_operator (ℬ := ℬ[<,
+    ℒₒᵣ]) (R := Semiformula.Operator.LT.lt)
     (by rfl) hf h
 
 lemma ball_le [V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻] {Γ} {P : (Fin k → V) → V → Prop} {f : (Fin k → V) → V}
     (hf : 𝚺-[m + 1].DefinableFunction f) (h : Γ-[m + 1].Definable (fun w ↦ P (w ·.succ) (w 0))) :
     Γ-[m + 1].Definable (fun v ↦ ∀ x ≤ f v, P v x) := by
-  have : Γ-[m + 1].Definable (fun v ↦ ∀ x < f v + 1, P v x) := ball_lt (Bounding.HierarchySymbol.DefinableFunction₂.comp hf (Bounding.HierarchySymbol.DefinableFunction.const 1)) h
+  have : Γ-[m + 1].Definable (fun v ↦ ∀ x < f v + 1,
+    P v x) := ball_lt (Bounding.HierarchySymbol.DefinableFunction₂.comp hf
+      (Bounding.HierarchySymbol.DefinableFunction.const 1)) h
   exact this.of_iff <| by intro v; simp [lt_succ_iff_le]
 
 lemma bexs_le [V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻] {Γ} {P : (Fin k → V) → V → Prop} {f : (Fin k → V) → V}
     (hf : 𝚺-[m + 1].DefinableFunction f) (h : Γ-[m + 1].Definable (fun w ↦ P (w ·.succ) (w 0))) :
     Γ-[m + 1].Definable (fun v ↦ ∃ x ≤ f v, P v x) := by
-  have : Γ-[m + 1].Definable (fun v ↦ ∃ x < f v + 1, P v x) := bexs_lt (Bounding.HierarchySymbol.DefinableFunction₂.comp hf (Bounding.HierarchySymbol.DefinableFunction.const 1)) h
+  have : Γ-[m + 1].Definable (fun v ↦ ∃ x < f v + 1,
+    P v x) := bexs_lt (Bounding.HierarchySymbol.DefinableFunction₂.comp hf
+      (Bounding.HierarchySymbol.DefinableFunction.const 1)) h
   exact this.of_iff <| by intro v; simp [lt_succ_iff_le]
 
 lemma ball_lt' {Γ} {P : (Fin k → V) → V → Prop} {f : (Fin k → V) → V}
@@ -432,11 +453,12 @@ theorem sigma_succ_induction {V : Type*} [ORingStructure V] {s : ℕ}
     (exs : ∀ {k} {P : (Fin (k + 1) → V) → Prop} (hP : 𝚺-[s + 1].Definable P),
       motive (k + 1) P hP → motive k (fun v ↦ ∃ x, P (x :> v)) (.exsCons hP))
     (k : ℕ) (P : (Fin k → V) → Prop) (hP : 𝚺-[s + 1].Definable P) : motive k P hP := by
-  apply Bounding.HierarchySymbol.Definable.sigma_succ_induction (motive := motive) pi and or ?_ ?_ exs k P hP
-  . intro k R hR P t hP ih
+  apply Bounding.HierarchySymbol.Definable.sigma_succ_induction (motive := motive) pi
+    and or ?_ ?_ exs k P hP
+  · intro k R hR P t hP ih
     obtain rfl := Set.mem_singleton_iff.mp hR
     simpa using ball t hP ih
-  . intro k R hR P t hP ih
+  · intro k R hR P t hP ih
     obtain rfl := Set.mem_singleton_iff.mp hR
     simpa using bexs t hP ih
 

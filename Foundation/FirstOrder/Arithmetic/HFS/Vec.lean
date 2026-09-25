@@ -430,7 +430,8 @@ instance graph_definable : 𝚺₁.Definable (fun v ↦ c.Graph (v ·.succ) (v 0
   c.graph_defined.to_definable
 
 instance graph_definable' (param) : 𝚺₁-Predicate (c.Graph param) := by
-  simpa using Bounding.HierarchySymbol.Definable.retractiont (n := 1) c.graph_definable (#0 :> fun i ↦ &(param i))
+  simpa using Bounding.HierarchySymbol.Definable.retractiont (n := 1)
+    c.graph_definable (#0 :> fun i ↦ &(param i))
 
 instance graph_definable'' (param) : 𝚺-[0 + 1]-Predicate (c.Graph param) := c.graph_definable' param
 
@@ -988,9 +989,11 @@ def _root_.FFL.FirstOrder.Arithmetic.subsetVecDef : 𝚫₁.Semisentence 2 := .m
 
 set_option linter.flexible false in
 instance subsetVec_defined : 𝚫₁-Relation (SubsetVec : V → V → Prop) via subsetVecDef :=
-  ⟨by intro v; simp [subsetVecDef, Bounding.HierarchySymbol.Semiformula.val_sigma, memVec_defined.proper.iff'],
+  ⟨by intro v; simp [subsetVecDef, Bounding.HierarchySymbol.Semiformula.val_sigma,
+    memVec_defined.proper.iff'],
    by intro v
-      simp [subsetVecDef, Bounding.HierarchySymbol.Semiformula.val_sigma, memVec_defined.proper.iff']
+      simp [subsetVecDef, Bounding.HierarchySymbol.Semiformula.val_sigma,
+        memVec_defined.proper.iff']
       constructor
       · intro h x hx; exact h x (le_of_memVec hx) hx
       · intro h x _; exact h x⟩

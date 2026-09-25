@@ -831,7 +831,8 @@ instance InductionR.defined {S : V → Prop} {cond : 𝚫₁.Semisentence 1}
   constructor
   · intro v; simp [chInd, Bounding.HierarchySymbol.Semiformula.val_sigma, eq_comm]
   · intro v
-    simp [chInd, Bounding.HierarchySymbol.Semiformula.val_sigma, InductionR, lt_succ_iff_le, eq_comm]
+    simp [chInd, Bounding.HierarchySymbol.Semiformula.val_sigma, InductionR, lt_succ_iff_le,
+      eq_comm]
 
 noncomputable instance InductionR.univ_defined :
     𝚫₁-Predicate[V] (InductionR (fun _ ↦ True) : V → Prop) via chUniv :=

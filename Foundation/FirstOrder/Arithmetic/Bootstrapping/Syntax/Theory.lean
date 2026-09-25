@@ -117,7 +117,8 @@ abbrev add (dT : T.Δ₁) (dU : U.Δ₁) : (T ∪ U).Δ₁ where
       FirstOrder.Arithmetic.Bootstrapping.Δ₁Class.mem_iff'_s, LogicalConnective.Prop.or_eq,
       Set.mem_union]
     grind
-  isDelta1 := Arithmetic.HierarchySymbol.Semiformula.ProvablyProperOn.ofProperOn.{0} _ fun V _ _ ↦ ProperOn.or (by simp) (by simp)
+  isDelta1 := Arithmetic.HierarchySymbol.Semiformula.ProvablyProperOn.ofProperOn.{0} _
+    fun V _ _ ↦ ProperOn.or (by simp) (by simp)
 
 abbrev ofEq (dT : T.Δ₁) (h : T = U) : U.Δ₁ where
   ch := dT.ch
@@ -127,7 +128,8 @@ abbrev ofEq (dT : T.Δ₁) (h : T = U) : U.Δ₁ where
 instance empty : Theory.Δ₁ (∅ : Theory L) where
   ch := ⊥
   mem_iff {ψ} := by simp
-  isDelta1 := Arithmetic.HierarchySymbol.Semiformula.ProvablyProperOn.ofProperOn.{0} _ fun V _ _ ↦ by simp
+  isDelta1 := Arithmetic.HierarchySymbol.Semiformula.ProvablyProperOn.ofProperOn.{0} _
+    fun V _ _ ↦ by simp
 
 abbrev singleton (φ : Sentence L) :
     _root_.FFL.FirstOrder.Theory.Δ₁ (Set.singleton φ) where
@@ -142,7 +144,8 @@ abbrev singleton (φ : Sentence L) :
       have : σ = φ := Set.mem_singleton_iff.mp hσ
       subst σ
       simpa [Semiformula.quote_eq_encode] using h
-  isDelta1 := Arithmetic.HierarchySymbol.Semiformula.ProvablyProperOn.ofProperOn.{0} _ fun V _ _ ↦ by
+  isDelta1 := Arithmetic.HierarchySymbol.Semiformula.ProvablyProperOn.ofProperOn.{0} _
+    fun V _ _ ↦ by
     intro
     rfl
 
@@ -156,7 +159,7 @@ abbrev ofList (l : List (Sentence L)) : Δ₁ {φ | φ ∈ l} :=
   | φ :: l => ((singleton φ).add (ofList l)).ofEq (by
       ext x
       have hmem : x ∈ Set.singleton φ ↔ x = φ := Set.mem_singleton_iff
-      simp only [Set.mem_union, Set.mem_setOf_eq, List.mem_cons, hmem])
+      simp only [Set.mem_union, Set.mem_ofPred_eq, List.mem_cons, hmem])
 
 noncomputable abbrev ofFinite (T : Theory L) (h : Set.Finite T) : T.Δ₁ :=
   (ofList h.toFinset.toList).ofEq (by ext; simp)

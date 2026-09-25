@@ -1233,7 +1233,8 @@ def _root_.FFL.FirstOrder.Arithmetic.LDef.isFVFreeDef (pL : LDef) : 𝚺₁.Semi
   .mkSigma “n p | !(isSemiformula L).sigma n p ∧ !pshift LDef p p”
 
 lemma isFVFree_defined : 𝚺₁-Relation L.IsFVFree via pL.isFVFreeDef := by
-  intro v; simp [LDef.isFVFreeDef, Bounding.HierarchySymbol.Semiformula.val_sigma, (semiformula_defined L).df.iff, (shift_defined L).df.iff]
+  intro v; simp [LDef.isFVFreeDef, Bounding.HierarchySymbol.Semiformula.val_sigma,
+    (semiformula_defined L).df.iff, (shift_defined L).df.iff]
   simp [Language.IsFVFree, eq_comm]
 
 end

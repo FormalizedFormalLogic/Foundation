@@ -112,7 +112,7 @@ private lemma exists_monotoneWitness {P : (Fin k → V) → Prop} (hP : 𝚺-[s 
     obtain ⟨Q, hQ, hM⟩ := ih;
     use fun w : Fin (k + 1) → V ↦ ∀ x < t.val (w ·.succ) id, Q (w 0 :> x :> (w ·.succ));
     and_intros;
-    . apply Bounding.HierarchySymbol.Definable.of_iff $ HierarchySymbol.Definable.ball
+    · apply Bounding.HierarchySymbol.Definable.of_iff <| HierarchySymbol.Definable.ball
         (P := fun (v : Fin (k + 1) → V) (x : V) ↦ Q (v 0 :> x :> (v ·.succ)))
         (definable_swap hQ) (Rew.bShift t);
       simp [Semiterm.val_bShift'];
@@ -141,7 +141,7 @@ private lemma exists_monotoneWitness {P : (Fin k → V) → Prop} (hP : 𝚺-[s 
     obtain ⟨Q, hQ, hM⟩ := ih;
     use fun w : Fin (k + 1) → V ↦ ∃ x < t.val (w ·.succ) id, Q (w 0 :> x :> (w ·.succ));
     and_intros;
-    . apply Bounding.HierarchySymbol.Definable.of_iff
+    · apply Bounding.HierarchySymbol.Definable.of_iff
         (HierarchySymbol.Definable.bexs
           (P := fun (v : Fin (k + 1) → V) (x : V) ↦ Q (v 0 :> x :> (v ·.succ)))
           (definable_swap hQ) (Rew.bShift t));
@@ -162,7 +162,7 @@ private lemma exists_monotoneWitness {P : (Fin k → V) → Prop} (hP : 𝚺-[s 
     obtain ⟨Q, hQ, hM⟩ := ih;
     use fun w : Fin (k + 1) → V ↦ ∃ x < w 0, Q (w 0 :> x :> (w ·.succ));
     and_intros;
-    . apply Bounding.HierarchySymbol.Definable.of_iff
+    · apply Bounding.HierarchySymbol.Definable.of_iff
         (HierarchySymbol.Definable.bexs
           (P := fun (v : Fin (k + 1) → V) (x : V) ↦ Q (v 0 :> x :> (v ·.succ)))
           (definable_swap hQ) #0);
@@ -190,7 +190,8 @@ lemma BPi.collection_sigma_succ {R : V → V → Prop}
     ∃ b, ∀ x < a, ∃ y < b, R x y := by
   have : V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := models_of_subtheory (inferInstance : V↓[ℒₒᵣ] ⊧* 𝗕 𝚷 s);
   obtain ⟨Q, hQ, hM⟩ := exists_monotoneWitness hR;
-  have hS : 𝚷-[s].DefinableRel fun x v : V ↦ ∃ y < v, Q ![v, x, y] := Bounding.HierarchySymbol.Definable.of_iff
+  have hS : 𝚷-[s].DefinableRel fun x v : V ↦ ∃ y < v, Q ![v, x,
+    y] := Bounding.HierarchySymbol.Definable.of_iff
     (HierarchySymbol.Definable.bexs
       (P := fun (w : Fin 2 → V) (y : V) ↦ Q ![w 1, w 0, y])
       ((hQ.retraction ![2, 1, 0]).of_iff fun u ↦
@@ -256,8 +257,8 @@ lemma succ_induction_of_exists_pi [V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺s] [V↓[ℒ�
       Bounding.HierarchySymbol.Definable.exs <|
         .of_iff ((hQ.of_lt (s := s + 1) (Γ := 𝚺) (by simp)).retraction ![1, 0]) (by intro w; simp);
     apply Bounding.HierarchySymbol.Definable.or
-    . exact .of_iff (hex.notSigma.retraction ![0]) (by intro v; simp);
-    . exact .of_iff (Bounding.HierarchySymbol.Definable.retractiont (n := 2)
+    · exact .of_iff (hex.notSigma.retraction ![0]) (by intro v; simp)
+    · exact .of_iff (Bounding.HierarchySymbol.Definable.retractiont (n := 2)
         (hQ.of_lt (s := s + 1) (Γ := 𝚷) (by simp)) ![‘#0 + 1’, #1]) (by intro v; simp);
   obtain ⟨v, hv⟩ := CollectionOnHierarchy.collection_of_definable (Γ := 𝚷) hstep a <| by
       intro x _;

@@ -59,15 +59,18 @@ lemma not_mem_of_lt_exp {i a : V} (h : a < Exp.exp i) : i ∉ a := fun H ↦ by
     (hf : 𝚺-[m + 1].DefinableFunction f) (h : Γ-[m + 1].Definable (fun w ↦ P (w ·.succ) (w 0))) :
     Γ-[m + 1].Definable (fun v ↦ ∀ x ∈ f v, P v x) := by
   have : Γ-[m + 1].Definable (fun v ↦ ∀ x < f v, x ∈ f v → P v x) :=
-    .ball_lt hf (.imp (Bounding.HierarchySymbol.Definable.comp₂ (P := (· ∈ ·)) (.var 0) (hf.retraction Fin.succ)) h)
-  exact this.of_iff <| by intro v; exact ⟨fun h x _ hxv ↦ h x hxv, fun h x hx ↦ h x (lt_of_mem hx) hx⟩
+    .ball_lt hf (.imp (Bounding.HierarchySymbol.Definable.comp₂ (P := (· ∈ ·)) (.var
+      0) (hf.retraction Fin.succ)) h)
+  exact this.of_iff <| by intro v; exact ⟨fun h x _ hxv ↦ h x hxv,
+    fun h x hx ↦ h x (lt_of_mem hx) hx⟩
 
 @[definability] lemma HierarchySymbol.Definable.bexs_mem (Γ m) {P : (Fin k → V) → V → Prop}
     {f : (Fin k → V) → V}
     (hf : 𝚺-[m + 1].DefinableFunction f) (h : Γ-[m + 1].Definable (fun w ↦ P (w ·.succ) (w 0))) :
     Γ-[m + 1].Definable (fun v ↦ ∃ x ∈ f v, P v x) := by
   have : Γ-[m + 1].Definable (fun v ↦ ∃ x < f v, x ∈ f v ∧ P v x) :=
-    .bexs_lt hf (.and (Bounding.HierarchySymbol.Definable.comp₂ (P := (· ∈ ·)) (.var 0) (hf.retraction _)) h)
+    .bexs_lt hf (.and (Bounding.HierarchySymbol.Definable.comp₂ (P := (· ∈ ·)) (.var
+      0) (hf.retraction _)) h)
   exact this.of_iff <| by
     intro v; exact ⟨by rintro ⟨x, hx, hxv⟩; exact ⟨x, lt_of_mem hx, hx, hxv⟩,
       by rintro ⟨x, _, hx, hvx⟩; exact ⟨x, hx, hvx⟩⟩

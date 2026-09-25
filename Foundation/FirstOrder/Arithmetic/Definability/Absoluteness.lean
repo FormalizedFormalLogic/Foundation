@@ -53,7 +53,8 @@ instance : (ℬ[<, ℒₒᵣ]).IsInitial (natCastEmbedding V) where
 
 lemma modelsWithParam_iff_models_substs {k : ℕ} {v : Fin k → ℕ}
     {φ : ArithmeticSemisentence k} :
-    φ.Evalb (M := V) (Nat.cast ∘ v) ↔ V↓[ℒₒᵣ] ⊧ (φ ⇜ (fun i ↦ Semiterm.Operator.numeral ℒₒᵣ (v i))) := by
+    φ.Evalb (M := V) (Nat.cast ∘ v) ↔ V↓[ℒₒᵣ] ⊧ (φ ⇜ (fun i ↦
+      Semiterm.Operator.numeral ℒₒᵣ (v i))) := by
   simp [models_iff, Function.comp_def, Matrix.empty_eq, numeral_eq_natCast]
 
 lemma shigmaZero_absolute {k} (φ : 𝚺₀.Semisentence k) (v : Fin k → ℕ) :
