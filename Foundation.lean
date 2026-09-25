@@ -185,6 +185,7 @@ public import Foundation.ProvabilityLogic.Arithmetic.Interpret
 public import Foundation.ProvabilityLogic.Arithmetic.SolovaySentences
 public import Foundation.ProvabilityLogic.Arithmetic.StrongInterpret
 public import Foundation.ProvabilityLogic.Classification.LetterlessTrace
+public import Foundation.ProvabilityLogic.Classification.ProvabilityLogicTrace
 public import Foundation.ProvabilityLogic.D.Basic
 public import Foundation.ProvabilityLogic.D.Gentzen.Basic
 public import Foundation.ProvabilityLogic.D.Gentzen.Kripke
