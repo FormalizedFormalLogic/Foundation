@@ -40,7 +40,7 @@ lemma provabilityLogic_subset_addTBB :
 lemma TBB_mem_provabilityLogic_addTBB {n : ℕ} (hn : n ∈ N) :
     (TBB n : Formula α) ∈ T.provabilityLogicRelativeTo (T.addTBB U N) :=
   fun f ↦ by_axm <| Set.mem_union_right U
-    ⟨n, hn, by simpa using (interpret_lift (A := TBB n) (f := f)).symm⟩
+    ⟨n, hn, by simpa using (interpret_lift (A := TBB n)).symm⟩
 
 section
 
@@ -77,15 +77,13 @@ lemma provabilityLogic_addTBB_subset_S (h : (T.provabilityLogicRelativeTo U : Lo
     (T.provabilityLogicRelativeTo
       (T.addTBB U (T.provabilityLogicRelativeTo U : Logic α).traceᶜ) : Logic α) ⊆ 𝐒 := by
   by_contra h₁;
-  have h₂ : ⊥ ∈ T.provabilityLogicRelativeTo
-      (T.addTBB U (T.provabilityLogicRelativeTo U : Logic α).traceᶜ) :=
-    (provabilityLogic_eq_GLBetaMinus h₁).symm.subset <| Logic.GLBetaMinus.mem_iff.mpr <| by
-      simp [trace_provabilityLogic_addTBB];
-  have h₃ : (𝐒 : Logic α) ⊢ (⩕ n ∈ hL.toFinset, TBB n : LetterlessFormula).lift :=
+  have h₂ : (𝐒 : Logic α) ⊢ (⩕ n ∈ hL.toFinset, TBB n : LetterlessFormula).lift :=
     Logic.GLAlpha.subset_S <| Logic.GLAlpha.mem_iff.mpr
       ⟨by simpa [LetterlessFormula.trace] using hL.biUnion fun _ _ ↦ Set.finite_singleton _,
         Set.subset_univ _⟩;
-  exact Logic.S.consistent <| h (imp_mem_provabilityLogic_of_mem_addTBB hL h₂) ⨀ h₃;
+  exact Logic.S.consistent <| h (imp_mem_provabilityLogic_of_mem_addTBB hL <|
+    (provabilityLogic_eq_GLBetaMinus h₁).symm.subset <| Logic.GLBetaMinus.mem_iff.mpr <| by
+      simp [trace_provabilityLogic_addTBB]) ⨀ h₂;
 
 lemma provabilityLogic_eq_inter_GLBetaMinus :
     (T.provabilityLogicRelativeTo U : Logic α) =
@@ -100,22 +98,6 @@ lemma provabilityLogic_eq_inter_GLBetaMinus :
     exact provabilityLogic_mdp (provabilityLogic_of_GL <| by cl_prover [h₃])
       (imp_mem_provabilityLogic_of_mem_addTBB hL h₁);
 
-theorem provabilityLogic_eq_GLAlpha_or_eq_D_inter_or_eq_S_inter
-    (h : (T.provabilityLogicRelativeTo U : Logic α) ⊆ 𝐒) :
-    (T.provabilityLogicRelativeTo U : Logic α) =
-        𝐆𝐋α (T.provabilityLogicRelativeTo U : Logic α).trace ∨
-      (T.provabilityLogicRelativeTo U : Logic α) = 𝐃 ∩ 𝐆𝐋β⁻ _ hL ∨
-      (T.provabilityLogicRelativeTo U : Logic α) = 𝐒 ∩ 𝐆𝐋β⁻ _ hL := by
-  have e := provabilityLogic_eq_inter_GLBetaMinus hL;
-  rcases provabilityLogic_eq_A_or_eq_D_or_eq_S trace_provabilityLogic_addTBB
-    (provabilityLogic_addTBB_subset_S hL h) with h | h | h;
-  · left;
-    exact e.trans <| h ▸ (Logic.GLAlpha.eq_inter_GLBetaMinus hL).symm;
-  · right; left;
-    exact h ▸ e;
-  · right; right;
-    exact h ▸ e;
-
 /-- The provability logic of `T` relative to `U` is one of `GLα X`, `GLβ⁻ X`, `D ∩ GLβ⁻ X`, and
 `S ∩ GLβ⁻ X`, where `X` is its trace.
 
@@ -129,22 +111,13 @@ theorem provabilityLogic_classification :
         (T.provabilityLogicRelativeTo U : Logic α) = 𝐆𝐋β⁻ _ hL ∨
         (T.provabilityLogicRelativeTo U : Logic α) = 𝐃 ∩ 𝐆𝐋β⁻ _ hL ∨
         (T.provabilityLogicRelativeTo U : Logic α) = 𝐒 ∩ 𝐆𝐋β⁻ _ hL := by
-  by_cases h₁ : (T.provabilityLogicRelativeTo U : Logic α).traceᶜ.Infinite;
-  · left;
-    exact provabilityLogic_eq_GLAlpha h₁;
-  have hL := Set.not_infinite.mp h₁;
-  by_cases h₂ : (T.provabilityLogicRelativeTo U : Logic α) ⊆ 𝐒;
-  · rcases provabilityLogic_eq_GLAlpha_or_eq_D_inter_or_eq_S_inter hL h₂ with h | h;
-    · left;
-      exact h;
-    · right;
-      use hL;
-      right;
-      exact h;
-  · right;
-    use hL;
-    left;
-    exact provabilityLogic_eq_GLBetaMinus h₂;
+  rcases (T.provabilityLogicRelativeTo U : Logic α).traceᶜ.finite_or_infinite with hL | hL;
+  · by_cases h : (T.provabilityLogicRelativeTo U : Logic α) ⊆ 𝐒;
+    · rcases provabilityLogic_eq_A_or_eq_D_or_eq_S trace_provabilityLogic_addTBB
+        (provabilityLogic_addTBB_subset_S hL h) with h | h | h <;>
+      grind [provabilityLogic_eq_inter_GLBetaMinus hL, Logic.GLAlpha.eq_inter_GLBetaMinus hL];
+    · grind [provabilityLogic_eq_GLBetaMinus h];
+  · grind [provabilityLogic_eq_GLAlpha hL];
 
 end
 
