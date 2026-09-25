@@ -75,8 +75,9 @@ lemma trace_provabilityLogic_TA_eq_compl_singleton_iff :
   exact ⟨fun h ↦ by simpa using h n, fun h m ↦ by simp [h, eq_comm]⟩
 
 omit [𝗜𝚺₁ ⪯ T] in
-lemma bot_notMem_provabilityLogic_TA : ⊥ ∉ (T.provabilityLogicRelativeTo 𝗧𝗔 : Logic α) := by
-  sorry
+lemma bot_notMem_provabilityLogic_TA : ⊥ ∉ (T.provabilityLogicRelativeTo 𝗧𝗔 : Logic α) :=
+  fun h ↦ by
+    simpa [standardInterpret, interpret] using Arithmetic.TA.provable_iff.mp <| h ⟨fun _ ↦ ⊥⟩
 
 lemma provabilityLogic_TA_subset_S (h : (T.provabilityLogicRelativeTo 𝗧𝗔 : Logic α).trace = .univ) :
     (T.provabilityLogicRelativeTo 𝗧𝗔 : Logic α) ⊆ 𝐒 := by
