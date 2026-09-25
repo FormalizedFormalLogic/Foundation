@@ -1,17 +1,19 @@
 module
 
-public import Foundation.ProvabilityLogic.Classification.UnivTrace
+public import Foundation.ProvabilityLogic.Classification.AD
+public import Foundation.ProvabilityLogic.Classification.DS.Arithmetic
 
 /-!
 # Classification of provability logics
 
-The provability logic of `T` relative to `U` is one of `GLα X`, `GLβ⁻ X`, `D ∩ GLβ⁻ X`, and
+A provability logic of trace `ω` contained in `𝐒` is one of `𝐀`, `𝐃`, and `𝐒`. In general, the
+provability logic of `T` relative to `U` is one of `GLα X`, `GLβ⁻ X`, `D ∩ GLβ⁻ X`, and
 `S ∩ GLβ⁻ X`, where `X` is its trace.
 
 ## References
 
 - [AB05, Theorem 40]
-- [Bek90, Assertion 6]
+- [Bek90, Assertion 3, Assertion 6]
 -/
 
 @[expose] public section
@@ -57,6 +59,22 @@ section
 
 variable [𝗜𝚺₁ ⪯ T] [𝗜𝚺₁ ⪯ U]
 
+/-- A provability logic of trace `ω` contained in `𝐒` is one of `𝐀`, `𝐃`, and `𝐒`.
+
+- [Bek90, Assertion 3]
+-/
+theorem provabilityLogic_eq_A_or_eq_D_or_eq_S
+    (hT : (T.provabilityLogicRelativeTo U : Logic α).trace = .univ)
+    (hS : T.provabilityLogicRelativeTo U ⊆ 𝐒@α) :
+    T.provabilityLogicRelativeTo U = 𝐀@α ∨
+      T.provabilityLogicRelativeTo U = 𝐃@α ∨
+      T.provabilityLogicRelativeTo U = 𝐒@α := by
+  rcases (A_subset_provabilityLogic hT).eq_or_ssubset with h | h₁;
+  · grind;
+  rcases (D_subset_provabilityLogic hT h₁).eq_or_ssubset with h | h₂;
+  · grind;
+  · simp [hS.antisymm <| S_subset_provabilityLogic hT h₂];
+
 lemma imp_mem_provabilityLogic_of_mem_addTBB (hN : N.Finite)
     (h : A ∈ T.provabilityLogicRelativeTo (T.addTBB U N)) :
     (⩕ n ∈ hN.toFinset, TBB n : LetterlessFormula).lift 🡒 A ∈ T.provabilityLogicRelativeTo U := by
@@ -84,7 +102,7 @@ lemma trace_provabilityLogic_addTBB :
 variable (hL : (T.provabilityLogicRelativeTo U : Logic α).traceᶜ.Finite)
 
 include hL in
-lemma provabilityLogic_addTBB_subset_S (h : (T.provabilityLogicRelativeTo U : Logic α) ⊆ 𝐒) :
+lemma provabilityLogic_addTBB_subset_S (h : T.provabilityLogicRelativeTo U ⊆ 𝐒@α) :
     (T.provabilityLogicRelativeTo
       (T.addTBB U (T.provabilityLogicRelativeTo U : Logic α).traceᶜ) : Logic α) ⊆ 𝐒 := by
   by_contra h₁;
@@ -120,10 +138,10 @@ theorem provabilityLogic_classification :
         𝐆𝐋α (T.provabilityLogicRelativeTo U : Logic α).trace ∨
       ∃ hL : (T.provabilityLogicRelativeTo U : Logic α).traceᶜ.Finite,
         (T.provabilityLogicRelativeTo U : Logic α) = 𝐆𝐋β⁻ _ hL ∨
-        (T.provabilityLogicRelativeTo U : Logic α) = 𝐃 ∩ 𝐆𝐋β⁻ _ hL ∨
-        (T.provabilityLogicRelativeTo U : Logic α) = 𝐒 ∩ 𝐆𝐋β⁻ _ hL := by
+        T.provabilityLogicRelativeTo U = 𝐃@α ∩ 𝐆𝐋β⁻ _ hL ∨
+        T.provabilityLogicRelativeTo U = 𝐒@α ∩ 𝐆𝐋β⁻ _ hL := by
   rcases (T.provabilityLogicRelativeTo U : Logic α).traceᶜ.finite_or_infinite with hL | hL;
-  · by_cases h : (T.provabilityLogicRelativeTo U : Logic α) ⊆ 𝐒;
+  · by_cases h : T.provabilityLogicRelativeTo U ⊆ 𝐒@α;
     · rcases provabilityLogic_eq_A_or_eq_D_or_eq_S trace_provabilityLogic_addTBB
         (provabilityLogic_addTBB_subset_S hL h) with h | h | h <;>
       grind [provabilityLogic_eq_inter_GLBetaMinus hL, Logic.GLAlpha.eq_inter_GLBetaMinus hL];
