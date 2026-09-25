@@ -8,6 +8,10 @@ public import Foundation.ProvabilityLogic.S.Basic
 /-!
 # Almost defining formulas
 
+The almost defining formula of a rooted finite GL-model `M` is a modalized formula forced at the
+root of every pseudo-tail of `M`, and fixing that root up to `P`-bisimulation once the valuation at
+the root is given. A modalized formula forced at the root of a free tail is not refuted by `𝐒`.
+
 ## References
 
 - [Bek90, §4 Lemma 4, Lemma 9, Remark 1, Remark 2]
@@ -124,7 +128,6 @@ lemma graft.exists_forces_boxItr_bot {N : RootedModel κ α} [N.IsFiniteGL] {a :
 
 variable [DecidableEq α] (P : Finset α) (M : RootedModel κ α) [Fintype M.World] [M.IsGL]
 
-open Classical in
 /-- The almost defining formula of `M` over `P`.
 
 - [Bek90, §4 Remark 1]
@@ -142,22 +145,22 @@ variable {K : RootedModel κ' α} (hΦ : K.root ⊩[K.toModel] almostDefiningFor
   {z : K.World}
 include hΦ
 
-lemma forces_dia_and_valuationConj_of_forces_almostDefiningFormula (hz : K.Rel K.root z)
+lemma forces_dia_and_valuationConj_of_forces_almostDefiningFormula (hz : K.root ≺ z)
     (h : z ⊮[K.toModel] □^[M.height + 1]⊥) :
     z ⊩[K.toModel]
       ◇charFormulaUnder (M := M.toModel) P M.root ⋏ valuationConj (M := M.toModel) P M.root :=
   (forces_and.mp hΦ).1 z hz h
 
-lemma exists_forces_charFormulaUnder_of_forces_boxItr (hz : K.Rel K.root z)
+lemma exists_forces_charFormulaUnder_of_forces_boxItr (hz : K.root ≺ z)
     (h : z ⊩[K.toModel] □^[M.height + 1]⊥) :
     ∃ y : M.World, z ⊩[K.toModel] y.charFormulaUnder P := by
   obtain ⟨_, hB, hzB⟩ := forces_disj.mp <| (forces_and.mp hΦ).2 z hz h;
   obtain ⟨y, -, rfl⟩ := Finset.mem_image.mp hB;
   exact ⟨y, hzB⟩;
 
-lemma exists_rel_forces_charFormulaUnder [K.IsGL] (hz : K.Rel K.root z)
+lemma exists_rel_forces_charFormulaUnder [K.IsGL] (hz : K.root ≺ z)
     (h : z ⊮[K.toModel] □^[M.height + 1]⊥) (x : M.World) :
-    ∃ z', K.Rel z z' ∧ z' ⊩[K.toModel] x.charFormulaUnder P := by
+    ∃ z', z ≺ z' ∧ z' ⊩[K.toModel] x.charFormulaUnder P := by
   obtain ⟨z₀, R₀, h₀⟩ := forces_dia.mp <|
     (forces_and.mp <| forces_dia_and_valuationConj_of_forces_almostDefiningFormula hΦ hz h).1;
   by_cases hx : x = M.root;
@@ -167,7 +170,7 @@ lemma exists_rel_forces_charFormulaUnder [K.IsGL] (hz : K.Rel K.root z)
 
 lemma exists_root_rel_forces_charFormulaUnder [K.IsGL]
     (hr : K.root ⊮[K.toModel] □^[M.height + 2]⊥)
-    (x : M.World) : ∃ z', K.Rel K.root z' ∧ z' ⊩[K.toModel] x.charFormulaUnder P := by
+    (x : M.World) : ∃ z', K.root ≺ z' ∧ z' ⊩[K.toModel] x.charFormulaUnder P := by
   obtain ⟨y, Ry, hy, -⟩ := exists_rel_depth hr;
   obtain ⟨z', R', h'⟩ := exists_rel_forces_charFormulaUnder hΦ Ry hy x;
   exact ⟨z', IsTrans.trans _ _ _ Ry R', h'⟩;
@@ -206,9 +209,9 @@ lemma pseudoTail_forces_almostDefiningFormula (o : α → Prop) :
     · exact absurd (toFreeTail.forces_inl.mp <| forces_boxItr_succ.mp hi (.inl M.root) trivial)
         fun h' ↦ lt_irrefl _ (root_forces_boxItr_bot_iff.mp h');
 
-/-- If the root of a rooted GL-model `K` without depth, all of whose other points have a depth,
-forces the almost defining formula of `M` and agrees with `o` on `P`, then it is `P`-bisimilar to
-the root of the pseudo-tail of `M` with root valuation `o`.
+/-- Let `K` be a rooted GL-model whose root forces no `□^[n]⊥` and whose other points each force
+some `□^[n]⊥`. If its root forces the almost defining formula of `M` and agrees with `o` on `P`,
+it is `P`-bisimilar to the root of the pseudo-tail of `M` with root valuation `o`.
 
 - [Bek90, §4 Lemma 9, Remark 2]
 -/
@@ -218,7 +221,7 @@ theorem exists_bisimulation_of_forces_almostDefiningFormula {K : RootedModel κ'
     (hΦ : K.root ⊩[K.toModel] almostDefiningFormula P M) {o : α → Prop}
     (ho : ∀ a ∈ P, (o a ↔ K.Val K.root a)) :
     ∃ Bi : (M.toPseudoTail o).toModel ⇄[P] K.toModel, Bi (.inr ⊤) K.root := by
-  have hne : ∀ {z k}, z ⊩[K.toModel] □^[k]⊥ → K.Rel K.root z :=
+  have hne : ∀ {z k}, z ⊩[K.toModel] □^[k]⊥ → K.root ≺ z :=
     fun {z k} hz ↦ K.root_rel z fun h ↦ hr k (h ▸ hz);
   let Bi : (M.toPseudoTail o).toModel ⇄[P] K.toModel := {
     toRel z₁ z₂ := match z₁ with
@@ -256,7 +259,7 @@ theorem exists_bisimulation_of_forces_almostDefiningFormula {K : RootedModel κ'
       rintro (x | i) z z' h R;
       · obtain ⟨y, R', h'⟩ := (forces_charFormulaUnder_iff.mp h).2.2 z' R;
         exact ⟨.inl y, h', R'⟩;
-      · have hz' : K.Rel K.root z' := by
+      · have hz' : K.root ≺ z' := by
           rcases h with ⟨-, rfl⟩ | ⟨m, rfl, -, h₂⟩;
           · exact R;
           · exact IsTrans.trans _ _ _ (hne h₂) R;
