@@ -109,11 +109,13 @@ theorem provabilityLogic_eq_GLAlpha_or_eq_D_inter_or_eq_S_inter
   have e := provabilityLogic_eq_inter_GLBetaMinus hL;
   rcases provabilityLogic_eq_A_or_eq_D_or_eq_S trace_provabilityLogic_addTBB
     (provabilityLogic_addTBB_subset_S hL h) with h | h | h;
-  · exact .inl <| e.trans <| h ▸ (Logic.GLAlpha.eq_inter_GLBetaMinus hL).symm;
-  · exact .inr <| .inl <| h ▸ e;
-  · exact .inr <| .inr <| h ▸ e;
+  · left;
+    exact e.trans <| h ▸ (Logic.GLAlpha.eq_inter_GLBetaMinus hL).symm;
+  · right; left;
+    exact h ▸ e;
+  · right; right;
+    exact h ▸ e;
 
-omit hL in
 /-- The provability logic of `T` relative to `U` is one of `GLα X`, `GLβ⁻ X`, `D ∩ GLβ⁻ X`, and
 `S ∩ GLβ⁻ X`, where `X` is its trace.
 
@@ -128,14 +130,21 @@ theorem provabilityLogic_classification :
         (T.provabilityLogicRelativeTo U : Logic α) = 𝐃 ∩ 𝐆𝐋β⁻ _ hL ∨
         (T.provabilityLogicRelativeTo U : Logic α) = 𝐒 ∩ 𝐆𝐋β⁻ _ hL := by
   by_cases h₁ : (T.provabilityLogicRelativeTo U : Logic α).traceᶜ.Infinite;
-  · exact .inl <| provabilityLogic_eq_GLAlpha h₁;
+  · left;
+    exact provabilityLogic_eq_GLAlpha h₁;
   have hL := Set.not_infinite.mp h₁;
   by_cases h₂ : (T.provabilityLogicRelativeTo U : Logic α) ⊆ 𝐒;
-  · rcases provabilityLogic_eq_GLAlpha_or_eq_D_inter_or_eq_S_inter hL h₂ with h | h | h;
-    · exact .inl h;
-    · exact .inr ⟨hL, .inr <| .inl h⟩;
-    · exact .inr ⟨hL, .inr <| .inr h⟩;
-  · exact .inr ⟨_, .inl <| provabilityLogic_eq_GLBetaMinus h₂⟩;
+  · rcases provabilityLogic_eq_GLAlpha_or_eq_D_inter_or_eq_S_inter hL h₂ with h | h;
+    · left;
+      exact h;
+    · right;
+      use hL;
+      right;
+      exact h;
+  · right;
+    use hL;
+    left;
+    exact provabilityLogic_eq_GLBetaMinus h₂;
 
 end
 
