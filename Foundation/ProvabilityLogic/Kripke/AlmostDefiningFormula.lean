@@ -218,7 +218,67 @@ theorem exists_bisimulation_of_forces_almostDefiningFormula {K : RootedModel κ'
     (hΦ : K.root ⊩[K.toModel] almostDefiningFormula P M) {o : α → Prop}
     (ho : ∀ a ∈ P, (o a ↔ K.Val K.root a)) :
     ∃ Bi : (M.toPseudoTail o).toModel ⇄[P] K.toModel, Bi (.inr ⊤) K.root := by
-  sorry
+  have hne : ∀ {z k}, z ⊩[K.toModel] □^[k]⊥ → K.Rel K.root z :=
+    fun {z k} hz ↦ K.root_rel z fun h ↦ hr k (h ▸ hz);
+  let Bi : (M.toPseudoTail o).toModel ⇄[P] K.toModel := {
+    toRel z₁ z₂ := match z₁ with
+      | .inl x => z₂ ⊩[K.toModel] charFormulaUnder (M := M.toModel) P x
+      | .inr i => i = ⊤ ∧ z₂ = K.root ∨ ∃ m : ℕ, i = m ∧
+          z₂ ⊮[K.toModel] □^[m + M.height + 1]⊥ ∧ z₂ ⊩[K.toModel] □^[m + M.height + 2]⊥
+    atomic := by
+      rintro (x | i) z a ha h;
+      · exact (forces_charFormulaUnder_iff.mp h).1 a ha;
+      · rcases h with ⟨rfl, rfl⟩ | ⟨m, rfl, h₁, h₂⟩;
+        · simpa [Model.Val, toFreeTail] using ho a ha;
+        · have := forces_and.mp <| forces_dia_and_valuationConj_of_forces_almostDefiningFormula hΦ
+            (hne h₂) fun h ↦ h₁ (forces_boxItr_bot_of_le (by omega) h);
+          simpa [Model.Val, toFreeTail] using forces_valuationConj.mp this.2 a ha;
+    forth := by
+      rintro (x | i) (y | j) z h R;
+      · obtain ⟨z', R', h'⟩ := (forces_charFormulaUnder_iff.mp h).2.1 y R;
+        exact ⟨z', h', R'⟩;
+      · exact absurd R toFreeTail.not_rel_inl_inr;
+      · rcases h with ⟨rfl, rfl⟩ | ⟨m, rfl, h₁, h₂⟩;
+        · obtain ⟨z', R', h'⟩ := exists_root_rel_forces_charFormulaUnder hΦ (hr _) y;
+          exact ⟨z', h', R'⟩;
+        · obtain ⟨z', R', h'⟩ := exists_rel_forces_charFormulaUnder hΦ (hne h₂)
+            (fun h ↦ h₁ (forces_boxItr_bot_of_le (by omega) h)) y;
+          exact ⟨z', h', R'⟩;
+      · obtain ⟨m', rfl⟩ := ENat.ne_top_iff_exists.mp (ne_top_of_lt R);
+        have : z ⊮[K.toModel] □^[m' + M.height + 2]⊥ := by
+          rcases h with ⟨rfl, rfl⟩ | ⟨m, rfl, h₁, -⟩;
+          · exact hr _;
+          · have : m' < m := by exact_mod_cast toFreeTail.rel_inr_inr.mp R;
+            exact fun h ↦ h₁ (forces_boxItr_bot_of_le (by omega) h);
+        obtain ⟨z', R', h₁', h₂'⟩ := exists_rel_depth this;
+        exact ⟨z', .inr ⟨m', rfl, h₁', h₂'⟩, R'⟩;
+    back := by
+      rintro (x | i) z z' h R;
+      · obtain ⟨y, R', h'⟩ := (forces_charFormulaUnder_iff.mp h).2.2 z' R;
+        exact ⟨.inl y, h', R'⟩;
+      · have hz' : K.Rel K.root z' := by
+          rcases h with ⟨-, rfl⟩ | ⟨m, rfl, -, h₂⟩;
+          · exact R;
+          · exact IsTrans.trans _ _ _ (hne h₂) R;
+        obtain ⟨k, hk⟩ := hK z' fun h ↦ not_rel_root (h ▸ hz');
+        obtain ⟨m', h₁', h₂'⟩ := exists_depth_of_forces_boxItr_bot hk;
+        by_cases hm : m' < M.height + 1;
+        · obtain ⟨y, hy⟩ := exists_forces_charFormulaUnder_of_forces_boxItr hΦ hz'
+            (forces_boxItr_bot_of_le (by omega) h₂');
+          exact ⟨.inl y, hy, trivial⟩;
+        · obtain ⟨m, rfl⟩ : ∃ m, m' = m + M.height + 1 := ⟨m' - (M.height + 1), by omega⟩;
+          use .inr m;
+          and_intros;
+          · exact .inr ⟨m, rfl, h₁', h₂'⟩;
+          · rcases h with ⟨rfl, -⟩ | ⟨i, rfl, -, h₂⟩;
+            · exact toFreeTail.rel_inr_inr.mpr (ENat.natCast_lt_top _);
+            · have h₃ := forces_boxItr_succ.mp h₂ z' R;
+              have : m < i := by
+                by_contra;
+                exact h₁' (forces_boxItr_bot_of_le (by omega) h₃);
+              exact toFreeTail.rel_inr_inr.mpr (by exact_mod_cast this);
+  }
+  exact ⟨Bi, .inl ⟨rfl, rfl⟩⟩;
 
 end RootedModel
 
