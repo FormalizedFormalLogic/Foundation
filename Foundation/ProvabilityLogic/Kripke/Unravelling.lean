@@ -6,6 +6,10 @@ public import Mathlib.Data.Fintype.Powerset
 
 /-!
 # Tree unravelling
+
+## References
+
+- [CZ97]
 -/
 
 @[expose] public section
