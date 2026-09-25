@@ -91,7 +91,29 @@ notation:76 "□^[" n "]" A:80 => boxItr n A
 
 @[simp, grind =] lemma boxItr_zero : □^[0]A = A := rfl
 
-@[simp, grind =] lemma boxItr_succ {n : ℕ} : □^[n + 1]A = □(□^[n]A) := Function.iterate_succ_apply' _ _ _
+@[simp, grind =] lemma boxItr_succ {n : ℕ} : □^[n + 1]A = □(□^[n]A) :=
+  Function.iterate_succ_apply' _ _ _
+
+abbrev boxdot (A : Formula α) : Formula α := A ⋏ □A
+
+prefix:76 "⊡" => boxdot
+
+def boxdotTranslate : Formula α → Formula α
+  | #a    => #a
+  | ⊥     => ⊥
+  | A 🡒 B => A.boxdotTranslate 🡒 B.boxdotTranslate
+  | □A    => ⊡A.boxdotTranslate
+
+postfix:90 "ᵇ" => boxdotTranslate
+
+@[simp, grind =] lemma boxdotTranslate_atom {a : α} : (#a)ᵇ = #a := rfl
+@[simp, grind =] lemma boxdotTranslate_bot : (⊥ : Formula α)ᵇ = ⊥ := rfl
+@[simp, grind =] lemma boxdotTranslate_top : (⊤ : Formula α)ᵇ = ⊤ := rfl
+@[simp, grind =] lemma boxdotTranslate_imp : (A 🡒 B)ᵇ = Aᵇ 🡒 Bᵇ := rfl
+@[simp, grind =] lemma boxdotTranslate_neg : (∼A)ᵇ = ∼Aᵇ := rfl
+@[simp, grind =] lemma boxdotTranslate_and : (A ⋏ B)ᵇ = Aᵇ ⋏ Bᵇ := rfl
+@[simp, grind =] lemma boxdotTranslate_or : (A ⋎ B)ᵇ = Aᵇ ⋎ Bᵇ := rfl
+@[simp, grind =] lemma boxdotTranslate_box : (□A)ᵇ = ⊡Aᵇ := rfl
 
 @[grind]
 def complexity : Formula α → ℕ
@@ -110,8 +132,23 @@ def ModalizedIn (p : α) : Formula α → Prop
   | A 🡒 B => A.ModalizedIn p ∧ B.ModalizedIn p
   | □_    => True
 
+/-- Every atom occurs only in the scope of `□`.
+
+- [Bek90, §4]
+-/
+abbrev Modalized (A : Formula α) : Prop := ∀ a, A.ModalizedIn a
+
 @[simp, grind =]
 lemma complexity_box : (□A).complexity = A.complexity + 1 := rfl
+
+/-- `A` with every atom outside the scope of `□` replaced by `⊥`. -/
+def modalize : Formula α → Formula α
+  | #_    => ⊥
+  | ⊥     => ⊥
+  | A 🡒 B => A.modalize 🡒 B.modalize
+  | □A    => □A
+
+lemma modalizedIn_modalize {p : α} : A.modalize.ModalizedIn p := by induction A <;> trivial;
 
 variable [DecidableEq α]
 
@@ -125,11 +162,17 @@ def atoms : Formula α → Finset α
 @[simp, grind =] lemma atoms_atom {a : α} : (#a : Formula α).atoms = {a} := rfl
 @[simp, grind =] lemma atoms_bot : (⊥ : Formula α).atoms = ∅ := rfl
 @[simp, grind =] lemma atoms_imp : (A 🡒 B).atoms = A.atoms ∪ B.atoms := rfl
+@[simp, grind =] lemma atoms_top : (⊤ : Formula α).atoms = ∅ := by simp [atoms]
 @[simp, grind =] lemma atoms_neg : (∼A).atoms = A.atoms := Finset.union_empty _
+@[simp, grind =] lemma atoms_and : (A ⋏ B).atoms = A.atoms ∪ B.atoms := by simp [atoms]
 @[simp, grind =] lemma atoms_or : (A ⋎ B).atoms = A.atoms ∪ B.atoms := by simp [atoms]
 @[simp, grind =] lemma atoms_iff : (A 🡘 B).atoms = A.atoms ∪ B.atoms := by
   simp [atoms, Finset.union_comm];
 @[simp, grind =] lemma atoms_box : (□A).atoms = A.atoms := rfl
+@[simp, grind =] lemma atoms_dia : (◇A).atoms = A.atoms := by simp [atoms]
+
+lemma atoms_modalize_subset : A.modalize.atoms ⊆ A.atoms := by
+  induction A <;> simp_all [modalize, Finset.union_subset_union];
 
 @[grind]
 def subfmls : Formula α → FormulaFinset α
@@ -157,15 +200,33 @@ lemma subfmls_trans : A ∈ B.subfmls → A.subfmls ⊆ B.subfmls := by
     intro h;
     simp only [subfmls, Finset.mem_insert, Finset.mem_union] at h;
     rcases h with rfl | h | h;
-    . rfl;
-    . exact (ihC h).trans (by intro; simp [subfmls]; tauto);
-    . exact (ihD h).trans (by intro; simp [subfmls]; tauto);
+    · rfl;
+    · exact (ihC h).trans (by intro; simp [subfmls]; tauto);
+    · exact (ihD h).trans (by intro; simp [subfmls]; tauto);
   | box C ih =>
     intro h;
     simp only [subfmls, Finset.mem_insert] at h;
     rcases h with rfl | h;
-    . rfl;
-    . exact (ih h).trans (by intro; simp [subfmls]; tauto);
+    · rfl;
+    · exact (ih h).trans (by intro; simp [subfmls]; tauto);
+  | _ => intro h; simp_all [subfmls];
+
+@[grind →]
+lemma atoms_subset_of_mem_subfmls : A ∈ B.subfmls → A.atoms ⊆ B.atoms := by
+  induction B with
+  | imp C D ihC ihD =>
+    intro h;
+    simp only [subfmls, Finset.mem_insert, Finset.mem_union] at h;
+    rcases h with rfl | h | h;
+    · rfl;
+    · exact (ihC h).trans (by simp);
+    · exact (ihD h).trans (by simp);
+  | box C ih =>
+    intro h;
+    simp only [subfmls, Finset.mem_insert] at h;
+    rcases h with rfl | h;
+    · rfl;
+    · exact (ih h).trans (by simp);
   | _ => intro h; simp_all [subfmls];
 
 end Formula
@@ -194,7 +255,33 @@ lemma atoms_union : (Γ ∪ Δ).atoms = Γ.atoms ∪ Δ.atoms := Finset.union_bi
 
 @[simp, grind =] lemma atoms_box : Γ.box.atoms = Γ.atoms := Finset.image_biUnion
 
+lemma atoms_disj_subset (Γ : FormulaFinset α) : Γ.disj.atoms ⊆ Γ.atoms := by
+  have h : ∀ l : List (Formula α), (⋁l).atoms ⊆ l.toFinset.biUnion Formula.atoms := by
+    intro l;
+    induction l with
+    | nil => simp;
+    | cons a l ih =>
+      rcases l with _ | ⟨b, l⟩;
+      · simp;
+      · rw [List.disj₂_cons_nonempty (List.cons_ne_nil b l), Formula.atoms_or, List.toFinset_cons,
+          Finset.biUnion_insert];
+        exact Finset.union_subset_union subset_rfl ih;
+  exact (h Γ.toList).trans_eq (by rw [atoms, Finset.toList_toFinset]);
+
 lemma atoms_subset_of_mem (h : A ∈ Γ) : A.atoms ⊆ Γ.atoms := Finset.subset_biUnion_of_mem _ h
+
+lemma atoms_conj_subset (Γ : FormulaFinset α) : Γ.conj.atoms ⊆ Γ.atoms := by
+  have h : ∀ l : List (Formula α), (⋀l).atoms ⊆ l.toFinset.biUnion Formula.atoms := by
+    intro l;
+    induction l with
+    | nil => simp;
+    | cons a l ih =>
+      rcases l with _ | ⟨b, l⟩;
+      · simp;
+      · rw [List.conj₂_cons_nonempty (List.cons_ne_nil b l), Formula.atoms_and, List.toFinset_cons,
+          Finset.biUnion_insert];
+        exact Finset.union_subset_union subset_rfl ih;
+  exact (h Γ.toList).trans_eq (by rw [atoms, Finset.toList_toFinset]);
 
 @[grind]
 def subfmls (Γ : FormulaFinset α) : FormulaFinset α := Γ.biUnion Formula.subfmls

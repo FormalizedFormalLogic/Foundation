@@ -92,7 +92,7 @@ variable [L.Primcodable]
 -- `[T.RE]` is spelled out instead of taken from a `variable`: the body does not use it, so Lean
 -- would drop it from the signature and let the Craig companion be built for an arbitrary theory.
 noncomputable def reCh (T : Theory L) [T.RE] : 𝚺₁.Semisentence 1 :=
-  .mkSigma (codeOfREPred (Encodable.encode '' T)) $ by simp [codeOfREPred, codeOfPartrec']
+  .mkSigma (codeOfREPred (Encodable.encode '' T)) <| by simp [codeOfREPred, codeOfPartrec']
 
 variable (T : Theory L) [T.RE]
 
@@ -115,7 +115,8 @@ variable [L.LORDefinable]
 
 lemma exists_mem_of_reCh (φ : Proposition L) (h : ℕ ⊧/![⌜φ⌝] T.reCh.val) : ∃ σ ∈ T, φ = σ := by
   rcases (Set.mem_image ..).mp ((codeOfREPred_spec (rePred_codes_of_RE T)).mp h) with ⟨σ, hσ, hσφ⟩;
-  exact ⟨σ, hσ, Semiformula.encode_inj_sentence.mp (by simpa [Semiformula.quote_eq_encode_nat] using hσφ)⟩;
+  exact ⟨σ, hσ, Semiformula.encode_inj_sentence.mp
+    (by simpa [Semiformula.quote_eq_encode_nat] using hσφ)⟩;
 
 lemma mem_of_reCh (σ : Sentence L) (h : ℕ ⊧/![⌜σ⌝] T.reCh.val) : σ ∈ T := by
   rcases (Set.mem_image ..).mp ((codeOfREPred_spec (rePred_codes_of_RE T)).mp h) with ⟨ρ, hρ, hρσ⟩;
@@ -125,7 +126,8 @@ lemma reCh_of_mem (σ : Sentence L) (hσ : σ ∈ T) : ℕ ⊧/![⌜σ⌝] T.reC
   (codeOfREPred_spec (rePred_codes_of_RE T)).mpr
     ((Set.mem_image ..).mpr ⟨σ, hσ, by simp [Sentence.quote_def, Semiformula.quote_eq_encode_nat]⟩)
 
-def craig : Theory L := { φ | ∃ (σ : Sentence L) (s : ℕ), ℕ ⊧/![(s : ℕ), ⌜σ⌝] T.reWitness.val ∧ φ = σ.padding s}
+def craig : Theory L :=
+  { φ | ∃ (σ : Sentence L) (s : ℕ), ℕ ⊧/![(s : ℕ), ⌜σ⌝] T.reWitness.val ∧ φ = σ.padding s}
 
 end
 
@@ -138,7 +140,7 @@ variable {L : Language} [L.Encodable] [L.LORDefinable]
 lemma quote_eq_qqAnd_iff {φ : Proposition L} {p q : ℕ} :
     (⌜φ⌝ : ℕ) = p ^⋏ q ↔ ∃ φ₁ φ₂, φ = φ₁ ⋏ φ₂ ∧ p = ⌜φ₁⌝ ∧ q = ⌜φ₂⌝ := by
   constructor
-  . intro h
+  · intro h
     cases φ with
     | rel | nrel => simp [qqRel, qqNRel, qqAnd] at h
     | verum =>
@@ -159,7 +161,7 @@ lemma quote_eq_qqAnd_iff {φ : Proposition L} {p q : ℕ} :
     | and φ₁ φ₂ =>
       rcases (qqAnd_inj _ _ _ _).mp h with ⟨rfl, rfl⟩
       exact ⟨φ₁, φ₂, rfl, rfl, rfl⟩
-  . rintro ⟨φ₁, φ₂, rfl, rfl, rfl⟩;
+  · rintro ⟨φ₁, φ₂, rfl, rfl, rfl⟩;
     rfl
 
 section
@@ -172,7 +174,8 @@ lemma quote_weight (k : ℕ) : (⌜(Semiformula.weight k : Proposition L)⌝ : V
     change ⌜(⊤ : Proposition L) ⋏ Semiformula.weight k⌝ = _
     simp [ih]
 
-lemma quote_padding (φ : Proposition L) (k : ℕ) : (⌜φ.padding k⌝ : V) = ⌜φ⌝ ^⋏ qqVerums (k : V) := by
+lemma quote_padding (φ : Proposition L) (k : ℕ) :
+    (⌜φ.padding k⌝ : V) = ⌜φ⌝ ^⋏ qqVerums (k : V) := by
   change ⌜φ ⋏ Semiformula.weight k⌝ = _
   simp [quote_weight]
 
@@ -186,7 +189,8 @@ end Sentence
 
 end
 
-lemma quote_eq_qqVerums {χ : Proposition L} {s : ℕ} : (⌜χ⌝ : ℕ) = qqVerums (s : ℕ) → χ = Semiformula.weight s := by
+lemma quote_eq_qqVerums {χ : Proposition L} {s : ℕ} :
+    (⌜χ⌝ : ℕ) = qqVerums (s : ℕ) → χ = Semiformula.weight s := by
   intro h;
   exact (Semiformula.quote_inj_iff (V := ℕ)).mp <| by simpa [quote_weight] using h
 
@@ -216,36 +220,36 @@ instance Theory.IsCraigAxiom.defined {T : Theory L} [T.RE] :
         ∧ (Semiformula.Eval ![s, p] Empty.elim) T.reWitness.val) ↔
         ∃ s p, v 0 = p ^⋏ qqVerums s ∧ (Semiformula.Evalb ![s, p]) T.reWitness.val := by
     constructor
-    . rintro ⟨s, _, p, _, _, h, hT⟩;
+    · rintro ⟨s, _, p, _, _, h, hT⟩;
       use s, p;
-    . rintro ⟨s, p, hx, hT⟩;
+    · rintro ⟨s, p, hx, hT⟩;
       exact ⟨s, hx ▸ lt_of_le_of_lt (le_qqVerums s) (lt_K!_right _ _), p,
         hx ▸ lt_K!_left _ _, hx ▸ lt_K!_right _ _, hx, hT⟩
   constructor
-  . intro v; simp [Theory.craigCh, h]
-  . intro v; simp [Theory.craigCh, Theory.IsCraigAxiom, h]
+  · intro v; simp [Theory.craigCh, h]
+  · intro v; simp [Theory.craigCh, Theory.IsCraigAxiom, h]
 
 lemma Theory.isCraigAxiom_quote_iff {T : Theory L} [T.RE] (φ : Proposition L) :
     T.IsCraigAxiom (⌜φ⌝ : ℕ) ↔ ∃ ρ ∈ T.craig, φ = ρ := by
   constructor
-  . rintro ⟨s, p, hφ, hT⟩
+  · rintro ⟨s, p, hφ, hT⟩
     rcases quote_eq_qqAnd_iff.mp hφ with ⟨φ₁, φ₂, hφ, hp, hs⟩
     have hφ₂ : φ₂ = Semiformula.weight s := quote_eq_qqVerums hs.symm
     have h₁ : ℕ ⊧/![p] T.reCh.val := (Theory.reWitness_spec T ℕ ![p]).mpr ⟨s, hT⟩
     rcases T.exists_mem_of_reCh φ₁ (by simpa [hp] using h₁) with ⟨ρ, hρ, hρ'⟩
     use ρ.padding s
     and_intros
-    . use ρ, s
+    · use ρ, s
       and_intros
-      . simpa [hp, hρ', Sentence.quote_def] using hT
-      . rfl
-    . rw [Semiformula.rew_padding]
+      · simpa [hp, hρ', Sentence.quote_def] using hT
+      · rfl
+    · rw [Semiformula.rew_padding]
       simpa [Semiformula.padding, Semiformula.weight, hρ', hφ₂] using hφ
-  . rintro ⟨ρ, ⟨σ, s, hT, rfl⟩, rfl⟩
+  · rintro ⟨ρ, ⟨σ, s, hT, rfl⟩, rfl⟩
     use s, ⌜σ⌝
     and_intros
-    . simpa [Sentence.quote_def] using Sentence.quote_padding (V := ℕ) σ s
-    . exact hT
+    · simpa [Sentence.quote_def] using Sentence.quote_padding (V := ℕ) σ s
+    · exact hT
 
 end FFL.FirstOrder.Arithmetic.Bootstrapping
 
@@ -266,22 +270,22 @@ lemma mem_craig_codes_iff (n : ℕ) :
           (encode (Semiformula.weight s : Sentence L))) + 1 ∧
         ℕ ⊧/![s, m] T.reWitness.val := by
   constructor
-  . rintro ⟨φ, ⟨σ, s, hs, rfl⟩, rfl⟩;
+  · rintro ⟨φ, ⟨σ, s, hs, rfl⟩, rfl⟩;
     use s, Semiformula.lt_encode_padding σ s, encode σ, Semiformula.encode_lt_encode_padding σ s;
     and_intros;
-    . simp;
-    . exact (Semiformula.encode_padding σ s).symm;
-    . simpa [Sentence.quote_def, Semiformula.quote_eq_encode] using hs;
-  . rintro ⟨s, _, m, _, hm, hn, hT⟩;
+    · simp;
+    · exact (Semiformula.encode_padding σ s).symm;
+    · simpa [Sentence.quote_def, Semiformula.quote_eq_encode] using hs;
+  · rintro ⟨s, _, m, _, hm, hn, hT⟩;
     obtain ⟨σ, hσ⟩ := Option.isSome_iff_exists.mp hm;
     have hσm : encode σ = m := decode₂_eq_some.mp hσ;
     use σ.padding s;
     and_intros;
-    . use σ, s;
+    · use σ, s;
       and_intros;
-      . simpa [Sentence.quote_def, Semiformula.quote_eq_encode, hσm] using hT;
-      . rfl;
-    . exact (Semiformula.encode_padding σ s).trans <| by simpa [hσm] using hn.symm;
+      · simpa [Sentence.quote_def, Semiformula.quote_eq_encode, hσm] using hT;
+      · rfl;
+    · exact (Semiformula.encode_padding σ s).trans <| by simpa [hσm] using hn.symm;
 
 -- `p = (m, (n, s))`: `m` is the sentence code, `n` is the candidate craig axiom code,
 -- `s` is the padding index.
@@ -336,13 +340,13 @@ noncomputable instance : (T.craig).Δ₁ where
 
 variable [L.DecidableEq]
 
-instance : T.craig ⪯ T := WeakerThan.ofAxm! $ by
+instance : T.craig ⪯ T := WeakerThan.ofAxm! <| by
   rintro σ ⟨ρ, s, hρ, rfl⟩;
   have hρ' : ℕ ⊧/![⌜ρ⌝] T.reCh.val := (reWitness_spec T ℕ ![⌜ρ⌝]).mpr ⟨s, hρ⟩
   have hρT : ρ ∈ T := T.mem_of_reCh ρ hρ'
   exact mdp (C_of_E_mpr (Entailment.padding_iff ρ s)) (by_axm hρT)
 
-instance : T ⪯ T.craig := WeakerThan.ofAxm! $ by
+instance : T ⪯ T.craig := WeakerThan.ofAxm! <| by
   intro σ hσ;
   have hσ' : ℕ ⊧/![⌜σ⌝] T.reCh.val := T.reCh_of_mem σ hσ
   rcases (reWitness_spec T ℕ ![⌜σ⌝]).mp hσ' with ⟨s, hs⟩

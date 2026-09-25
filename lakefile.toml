@@ -2,12 +2,17 @@ name = "Foundation"
 defaultTargets = ["Foundation"]
 platformIndependent = true
 
+# Mathlib's own options: `autoImplicit` off, and the standard linter set that downstream
+# projects are meant to opt into wholesale (see `register_linter_set linter.mathlibStandardSet`
+# in `Mathlib/Init.lean`), which subsumes the individual linters this file used to list (and
+# `weak.linter.refine` was not even a registered option, so it had never run). Only the header
+# linter is dropped: it enforces Mathlib's copyright header, which this repository does not
+# carry. `lake build --wfail`, which CI uses, turns every warning the set emits into an error.
 [leanOptions]
 pp.unicode.fun = true
-weak.linter.flexible = true
-weak.linter.refine = true
-weak.linter.oldObtain = true
-weak.linter.style.multiGoal = true
+autoImplicit = false
+weak.linter.mathlibStandardSet = true
+weak.linter.style.header = false
 
 [[lean_lib]]
 name = "Foundation"

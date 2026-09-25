@@ -32,7 +32,8 @@ omit [L.DecidableEq] in
 @[simp] lemma Sequent.quote_empty : (⌜(∅ : Finset (Proposition L))⌝ : V) = ∅ := by
   simp [Sequent.quote_def, emptyset_def]
 
-@[simp] lemma Sequent.mem_quote_iff {Γ : Finset (Proposition L)} {φ} : ⌜φ⌝ ∈ (⌜Γ⌝ : V) ↔ φ ∈ Γ := by
+@[simp] lemma Sequent.mem_quote_iff {Γ : Finset (Proposition L)} {φ} :
+    ⌜φ⌝ ∈ (⌜Γ⌝ : V) ↔ φ ∈ Γ := by
   induction Γ using Finset.induction generalizing φ
   case empty => simp [Sequent.quote_def]
   case insert a Γ ha ih =>
@@ -44,7 +45,8 @@ omit [L.DecidableEq] in
     rw [this]
     simp [←ih]
 
-lemma Sequent.quote_inj {Γ Δ : Finset (Proposition L)} : (⌜Γ⌝ : V) = ⌜Δ⌝ → Γ = Δ := fun h ↦ by
+lemma Sequent.quote_inj {Γ Δ : Finset (Proposition L)} :
+    (⌜Γ⌝ : V) = ⌜Δ⌝ → Γ = Δ := fun h ↦ by
   ext φ; rw [←Sequent.mem_quote_iff (V := V), h]; simp
 
 omit [L.DecidableEq] in
@@ -52,14 +54,16 @@ omit [L.DecidableEq] in
     (⌜({φ} : Finset (Proposition L))⌝ : V) = {⌜φ⌝} := by simp [Sequent.quote_def]; rfl
 
 omit [L.DecidableEq] in
-@[simp] lemma Sequent.quote_insert [L.DecidableEq] (Γ : Finset (Proposition L)) (φ) : (⌜(insert φ Γ)⌝ : V) = insert ⌜φ⌝ ⌜Γ⌝ := by
+@[simp] lemma Sequent.quote_insert [L.DecidableEq] (Γ : Finset (Proposition L)) (φ) :
+    (⌜(insert φ Γ)⌝ : V) = insert ⌜φ⌝ ⌜Γ⌝ := by
   by_cases hp : φ ∈ Γ
   · simp [Sequent.mem_quote_iff, hp, insert_eq_self_of_mem]
   · have : (⌜insert φ Γ⌝ : V) = Exp.exp ⌜φ⌝ + ⌜Γ⌝ := by simp [Sequent.quote_def, hp]
     simp [Sequent.mem_quote_iff, this, insert_eq, bitInsert, hp, add_comm]
 
 omit [L.DecidableEq] in
-lemma Sequent.mem_quote [L.DecidableEq] {Γ : Finset (Proposition L)} (hx : x ∈ (⌜Γ⌝ : V)) : ∃ φ ∈ Γ, x = ⌜φ⌝ := by
+lemma Sequent.mem_quote [L.DecidableEq] {x : V} {Γ : Finset (Proposition L)}
+    (hx : x ∈ (⌜Γ⌝ : V)) : ∃ φ ∈ Γ, x = ⌜φ⌝ := by
   induction Γ using Finset.induction
   case empty => simp at hx
   case insert a Γ _ ih =>
@@ -69,7 +73,8 @@ lemma Sequent.mem_quote [L.DecidableEq] {Γ : Finset (Proposition L)} (hx : x �
     · rcases ih hx with ⟨p, hx, rfl⟩
       exact ⟨p, by simp [*]⟩
 
-lemma Sequent.mem_quote_iff' {Γ : Finset (Proposition L)} : x ∈ (⌜Γ⌝ : V) ↔ (∃ φ ∈ Γ, x = ⌜φ⌝) := by
+lemma Sequent.mem_quote_iff' {x : V} {Γ : Finset (Proposition L)} :
+    x ∈ (⌜Γ⌝ : V) ↔ (∃ φ ∈ Γ, x = ⌜φ⌝) := by
   constructor
   · intro h; exact Sequent.mem_quote h
   · rintro ⟨p, hp, rfl⟩; simp [Sequent.mem_quote_iff, hp]
@@ -94,22 +99,28 @@ lemma setShift_quote (Γ : Finset (Proposition L)) :
     rcases by simpa using hp' with ⟨p, hp, rfl⟩
     exact ⟨⌜p⌝, by simpa [Sequent.mem_quote_iff] using hp, by simp [Semiformula.quote_def]⟩
 
-@[simp] lemma formulaSet_quote_finset (Γ : Finset (Proposition L)) : IsFormulaSet L (⌜Γ⌝ : V) := by
+@[simp] lemma formulaSet_quote_finset (Γ : Finset (Proposition L)) :
+    IsFormulaSet L (⌜Γ⌝ : V) := by
   intro x hx
   rcases LK2.Derivation.Sequent.mem_quote hx with ⟨p, _, rfl⟩;
   simp [Semiformula.quote_def]
 
-noncomputable instance : GödelQuote (Finset (Proposition L)) (Bootstrapping.Sequent V L) := ⟨fun Γ ↦ ⟨⌜Γ⌝, by simp⟩⟩
+noncomputable instance : GödelQuote (Finset (Proposition L)) (Bootstrapping.Sequent V L) :=
+  ⟨fun Γ ↦ ⟨⌜Γ⌝, by simp⟩⟩
 
-@[simp] lemma Sequent.typed_quote_val (Γ : Finset (Proposition L)) : (⌜Γ⌝ : Bootstrapping.Sequent V L).val = ⌜Γ⌝ := rfl
+@[simp] lemma Sequent.typed_quote_val (Γ : Finset (Proposition L)) :
+    (⌜Γ⌝ : Bootstrapping.Sequent V L).val = ⌜Γ⌝ := rfl
 
 @[simp] lemma Sequent.quote_mem_quote {φ : Proposition L} {Γ : Finset (Proposition L)} :
-    ⌜φ⌝ ∈ (⌜Γ⌝ : Bootstrapping.Sequent V L) ↔ φ ∈ Γ := by simp [Bootstrapping.Sequent.mem_iff, ←Semiformula.quote_def]
+    ⌜φ⌝ ∈ (⌜Γ⌝ : Bootstrapping.Sequent V L) ↔ φ ∈ Γ := by
+  simp [Bootstrapping.Sequent.mem_iff, ←Semiformula.quote_def]
 
-@[simp] lemma Sequent.typed_quote_insert (Γ : Finset (Proposition L)) (φ) : (⌜insert φ Γ⌝ : Bootstrapping.Sequent V L) = insert ⌜φ⌝ ⌜Γ⌝ := by
+@[simp] lemma Sequent.typed_quote_insert (Γ : Finset (Proposition L)) (φ) :
+    (⌜insert φ Γ⌝ : Bootstrapping.Sequent V L) = insert ⌜φ⌝ ⌜Γ⌝ := by
   ext; simp [Bootstrapping.Sequent.mem_iff, Semiformula.quote_def]
 
-@[simp] lemma Sequent.typed_quote_empty : (⌜(∅ : Finset (Proposition L))⌝ : Bootstrapping.Sequent V L) = ∅ := rfl
+@[simp] lemma Sequent.typed_quote_empty :
+    (⌜(∅ : Finset (Proposition L))⌝ : Bootstrapping.Sequent V L) = ∅ := rfl
 
 @[simp] lemma Sequent.typed_quote_singleton (φ : Proposition L) :
     (⌜({φ} : Finset (Proposition L))⌝ : Bootstrapping.Sequent V L) = {⌜φ⌝} := by
@@ -118,11 +129,13 @@ noncomputable instance : GödelQuote (Finset (Proposition L)) (Bootstrapping.Seq
   simp [Sequent.insert_empty_eq_singleton]
 
 @[simp] lemma setShift_typed_quote (Γ : Finset (Proposition L)) :
-    (⌜Finset.image Rewriting.shift Γ⌝ : Bootstrapping.Sequent V L) = (⌜Γ⌝ : Bootstrapping.Sequent V L).shift := by
+    (⌜Finset.image Rewriting.shift Γ⌝ : Bootstrapping.Sequent V L) =
+      (⌜Γ⌝ : Bootstrapping.Sequent V L).shift := by
   apply Sequent.ext'
   simp [←setShift_quote]; rfl
 
-lemma Sequent.typed_quote_inj {Γ Δ : Finset (Proposition L)} : (⌜Γ⌝ : Bootstrapping.Sequent V L) = ⌜Δ⌝ → Γ = Δ := fun h ↦ by
+lemma Sequent.typed_quote_inj {Γ Δ : Finset (Proposition L)} :
+    (⌜Γ⌝ : Bootstrapping.Sequent V L) = ⌜Δ⌝ → Γ = Δ := fun h ↦ by
   have : (⌜Γ⌝ : V) = ⌜Δ⌝ := by simpa using congr_arg Sequent.val h
   exact quote_inj this
 
@@ -154,38 +167,47 @@ lemma isFormulaSet_sound {s : ℕ} : IsFormulaSet L s → ∃ S : Finset (Propos
       simpa [hps x hxs] using hxs
     · intro h
       rw [←hps x h]
-      simpa [LK2.Derivation.Sequent.mem_quote_iff] using ⟨x, Nat.mem_bitIndices.mp (mem_iff_mem_bitIndices.mp h), rfl⟩⟩
+      simpa [LK2.Derivation.Sequent.mem_quote_iff] using
+        ⟨x, Nat.mem_bitIndices.mp (mem_iff_mem_bitIndices.mp h), rfl⟩⟩
 
 variable (V)
 
 noncomputable def typedQuote {Γ : Finset (Proposition L)} : T ⟹₂ Γ → T.internalize V ⊢!ᵈᵉʳ ⌜Γ⌝
-  |   closed Δ φ h hn => TDerivation.em ⌜φ⌝ (by simpa) (by simpa using! Sequent.quote_mem_quote.mpr hn)
+  |   closed Δ φ h hn =>
+    TDerivation.em ⌜φ⌝ (by simpa) (by simpa using! Sequent.quote_mem_quote.mpr hn)
   |       axm φ hT hΓ => TDerivation.byAxm ⌜φ⌝ (by
     simp only [tmem, internalize_theory]
     exact (Δ₁Class.mem_iff'' (T := T) (φ := φ)).mpr hT) (by
       simpa using! Sequent.quote_mem_quote.mpr hΓ)
   |           verum h => TDerivation.verum (by simpa using! Sequent.quote_mem_quote.mpr h)
   |       and (φ := φ) (ψ := ψ) h bp bq =>
-    TDerivation.and' (show ⌜φ⌝ ⋏ ⌜ψ⌝ ∈ ⌜Γ⌝ by simpa using! Sequent.quote_mem_quote.mpr h) (bp.typedQuote.cast (by simp)) (bq.typedQuote.cast (by simp))
+    TDerivation.and' (show ⌜φ⌝ ⋏ ⌜ψ⌝ ∈ ⌜Γ⌝ by simpa using! Sequent.quote_mem_quote.mpr h)
+      (bp.typedQuote.cast (by simp)) (bq.typedQuote.cast (by simp))
   |            or (φ := φ) (ψ := ψ) h b =>
-    TDerivation.or' (show ⌜φ⌝ ⋎ ⌜ψ⌝ ∈ ⌜Γ⌝ by simpa using! Sequent.quote_mem_quote.mpr h) <| b.typedQuote.cast (by simp)
+    TDerivation.or' (show ⌜φ⌝ ⋎ ⌜ψ⌝ ∈ ⌜Γ⌝ by simpa using! Sequent.quote_mem_quote.mpr h) <|
+      b.typedQuote.cast (by simp)
   |           all (φ := φ) h d =>
-    TDerivation.all' (show ∀¹ ⌜φ⌝ ∈ ⌜Γ⌝ by simpa using! Sequent.quote_mem_quote.mpr h) <| d.typedQuote.cast (by simp)
+    TDerivation.all' (show ∀¹ ⌜φ⌝ ∈ ⌜Γ⌝ by simpa using! Sequent.quote_mem_quote.mpr h) <|
+      d.typedQuote.cast (by simp)
   |          exs (φ := φ) h t d =>
-    TDerivation.exs' (show ∃¹ ⌜φ⌝ ∈ ⌜Γ⌝ by simpa using! Sequent.quote_mem_quote.mpr h) ⌜t⌝ <| d.typedQuote.cast (by simp [Matrix.constant_eq_singleton])
+    TDerivation.exs' (show ∃¹ ⌜φ⌝ ∈ ⌜Γ⌝ by simpa using! Sequent.quote_mem_quote.mpr h) ⌜t⌝ <|
+      d.typedQuote.cast (by simp [Matrix.constant_eq_singleton])
   |           wk d ss => TDerivation.wk d.typedQuote (by simpa)
   |           shift d => (TDerivation.shift d.typedQuote).cast (by simp)
   | cut (φ := φ) d dn =>
     TDerivation.cut (φ := ⌜φ⌝) (d.typedQuote.cast (by simp)) (dn.typedQuote.cast (by simp))
 
-noncomputable instance (Γ : Finset (Proposition L)) : GödelQuote (T ⟹₂ Γ) (T.internalize V ⊢!ᵈᵉʳ ⌜Γ⌝) := ⟨typedQuote V⟩
+noncomputable instance (Γ : Finset (Proposition L)) :
+    GödelQuote (T ⟹₂ Γ) (T.internalize V ⊢!ᵈᵉʳ ⌜Γ⌝) := ⟨typedQuote V⟩
 
-noncomputable instance (Γ : Finset (Proposition L)) : GödelQuote (T ⟹₂ Γ) V := ⟨fun d ↦ (⌜d⌝ : T.internalize V ⊢!ᵈᵉʳ ⌜Γ⌝).val⟩
+noncomputable instance (Γ : Finset (Proposition L)) : GödelQuote (T ⟹₂ Γ) V :=
+  ⟨fun d ↦ (⌜d⌝ : T.internalize V ⊢!ᵈᵉʳ ⌜Γ⌝).val⟩
 
 lemma quote_cast {Γ Δ : Finset (Proposition L)} (d : T ⟹₂ Γ) (h : Γ = Δ) :
     (⌜LK2.Derivation.cast d h⌝ : V) = ⌜d⌝ := by subst h; rfl
 
-lemma quote_def (d : T ⟹₂ Γ) : (⌜d⌝ : V) = (typedQuote V d).val := rfl
+lemma quote_def {Γ : Finset (Proposition L)} (d : T ⟹₂ Γ) :
+    (⌜d⌝ : V) = (typedQuote V d).val := rfl
 
 section
 
@@ -236,23 +258,25 @@ lemma quote_cut (d₁ : T ⟹₂ insert φ Γ) (d₂ : T ⟹₂ insert (∼φ) �
 end
 
 set_option backward.isDefEq.respectTransparency false in
-lemma coe_typedQuote_val_eq (d : T ⟹₂ Γ) : ↑(d.typedQuote ℕ).val = (d.typedQuote V).val :=
+lemma coe_typedQuote_val_eq {Γ : Finset (Proposition L)} (d : T ⟹₂ Γ) :
+    ↑(d.typedQuote ℕ).val = (d.typedQuote V).val :=
   match d with
   |   closed Δ φ h hn => by
     simp [typedQuote, axL, nat_cast_pair, Sequent.coe_eq, Semiformula.coe_quote_eq_quote']
   |       axm φ hT _ => by
-    simpa [typedQuote, Bootstrapping.axm, nat_cast_pair, Sequent.coe_eq] using! Sentence.coe_quote_eq_quote (V := V) φ
+    simpa [typedQuote, Bootstrapping.axm, nat_cast_pair, Sequent.coe_eq] using!
+      Sentence.coe_quote_eq_quote (V := V) φ
   |           verum h => by
     simp [typedQuote, Bootstrapping.verumIntro, nat_cast_pair, Sequent.coe_eq]
   |       and h b₁ b₂ => by
-    simp [typedQuote, Bootstrapping.andIntro, nat_cast_pair, Sequent.coe_eq, Semiformula.coe_quote_eq_quote',
-      b₁.coe_typedQuote_val_eq, b₂.coe_typedQuote_val_eq]
+    simp [typedQuote, Bootstrapping.andIntro, nat_cast_pair, Sequent.coe_eq,
+      Semiformula.coe_quote_eq_quote', b₁.coe_typedQuote_val_eq, b₂.coe_typedQuote_val_eq]
   |            or h b => by
-    simp [typedQuote, Bootstrapping.orIntro, nat_cast_pair, Sequent.coe_eq, Semiformula.coe_quote_eq_quote',
-      b.coe_typedQuote_val_eq]
+    simp [typedQuote, Bootstrapping.orIntro, nat_cast_pair, Sequent.coe_eq,
+      Semiformula.coe_quote_eq_quote', b.coe_typedQuote_val_eq]
   |           all h b => by
-    simp [typedQuote, Bootstrapping.allIntro, nat_cast_pair, Sequent.coe_eq, Semiformula.coe_quote_eq_quote',
-      b.coe_typedQuote_val_eq]
+    simp [typedQuote, Bootstrapping.allIntro, nat_cast_pair, Sequent.coe_eq,
+      Semiformula.coe_quote_eq_quote', b.coe_typedQuote_val_eq]
   |          exs h t b => by
     simp [typedQuote, Bootstrapping.exsIntro, nat_cast_pair, Sequent.coe_eq,
       Semiterm.coe_quote_eq_quote', Semiformula.coe_quote_eq_quote',
@@ -263,23 +287,27 @@ lemma coe_typedQuote_val_eq (d : T ⟹₂ Γ) : ↑(d.typedQuote ℕ).val = (d.t
     simp [typedQuote, Bootstrapping.shiftRule, nat_cast_pair, Sequent.coe_eq,
       b.coe_typedQuote_val_eq, ←setShift_typed_quote]
   |       cut b₁ b₂ => by
-    simp [typedQuote, Bootstrapping.cutRule, nat_cast_pair, Sequent.coe_eq, Semiformula.coe_quote_eq_quote',
-      b₁.coe_typedQuote_val_eq, b₂.coe_typedQuote_val_eq]
+    simp [typedQuote, Bootstrapping.cutRule, nat_cast_pair, Sequent.coe_eq,
+      Semiformula.coe_quote_eq_quote', b₁.coe_typedQuote_val_eq, b₂.coe_typedQuote_val_eq]
 
-lemma coe_quote_eq (d : T ⟹₂ Γ) : (↑(⌜d⌝ : ℕ) : V) = ⌜d⌝ := coe_typedQuote_val_eq V d
+lemma coe_quote_eq {Γ : Finset (Proposition L)} (d : T ⟹₂ Γ) : (↑(⌜d⌝ : ℕ) : V) = ⌜d⌝ :=
+  coe_typedQuote_val_eq V d
 
 end LK2.Derivation
 
-noncomputable instance (Γ : LK.Sequent L) : GödelQuote (⊢ᴸᴷ¹ Γ) V := ⟨fun b ↦ ⌜LK.Derivation.toDerivation2 (∅ : Theory L) b⌝⟩
+noncomputable instance (Γ : LK.Sequent L) : GödelQuote (⊢ᴸᴷ¹ Γ) V :=
+  ⟨fun b ↦ ⌜LK.Derivation.toDerivation2 (∅ : Theory L) b⌝⟩
 
-noncomputable instance (φ : Sentence L) : GödelQuote (T ⊢! φ) V := ⟨fun b ↦
+noncomputable instance (φ : Sentence L) : GödelQuote (T.Proof φ) V := ⟨fun b ↦
   ⌜b.toProof2⌝⟩
 
-lemma quote_derivation_def {Γ : LK.Sequent L} (b : ⊢ᴸᴷ¹ Γ) : (⌜b⌝ : V) = ⌜LK.Derivation.toDerivation2 (∅ : Theory L) b⌝ := rfl
+lemma quote_derivation_def {Γ : LK.Sequent L} (b : ⊢ᴸᴷ¹ Γ) :
+    (⌜b⌝ : V) = ⌜LK.Derivation.toDerivation2 (∅ : Theory L) b⌝ := rfl
 
-lemma quote_proof_def {φ : Sentence L} (b : T ⊢! φ) : (⌜b⌝ : V) = ⌜b.toProof2⌝ := rfl
+lemma quote_proof_def {φ : Sentence L} (b : T.Proof φ) : (⌜b⌝ : V) = ⌜b.toProof2⌝ := rfl
 
-@[simp] lemma derivation_of_quote_derivation {Γ : LK.Sequent L} (b : ⊢ᴸᴷ¹ Γ) : DerivationOf T (⌜b⌝ : V) ⌜Γ.toFinset⌝ := by
+@[simp] lemma derivation_of_quote_derivation {Γ : LK.Sequent L} (b : ⊢ᴸᴷ¹ Γ) :
+    DerivationOf T (⌜b⌝ : V) ⌜Γ.toFinset⌝ := by
   let x := LK2.Derivation.typedQuote V (LK.Derivation.toDerivation2 (∅ : Theory L) b)
   suffices DerivationOf T x.val ⌜Γ.toFinset⌝ from this
   exact ⟨x.derivationOf.1, x.derivationOf.2.of_ss (by
@@ -293,10 +321,10 @@ lemma quote_proof_def {φ : Sentence L} (b : T ⊢! φ) : (⌜b⌝ : V) = ⌜b.t
   suffices Proof T x.val ⌜φ⌝ from this
   simpa using! x.derivationOf
 
-@[simp] lemma proof_of_quote_proof {φ : Sentence L} (b : T ⊢! φ) : Proof T (⌜b⌝ : V) ⌜φ⌝ :=
+@[simp] lemma proof_of_quote_proof {φ : Sentence L} (b : T.Proof φ) : Proof T (⌜b⌝ : V) ⌜φ⌝ :=
   proof_of_quote_proof2 b.toProof2
 
-lemma coe_quote_proof_eq (d : T ⊢! φ) : (↑(⌜d⌝ : ℕ) : V) = ⌜d⌝ := by
+lemma coe_quote_proof_eq {φ : Sentence L} (d : T.Proof φ) : (↑(⌜d⌝ : ℕ) : V) = ⌜d⌝ := by
   simp [quote_proof_def, LK2.Derivation.coe_quote_eq]
 
 namespace Arithmetic.Bootstrapping
@@ -343,7 +371,8 @@ lemma Derivation.sound {d : ℕ} (h : Derivation T d) : ∃ Γ, ⌜Γ⌝ = fstId
     rcases ih d (by simp) dd with ⟨Δ, hΔ, ⟨b⟩⟩
     refine ⟨LK2.Derivation.all (φ := φ)
       (by simp [←Sequent.mem_quote_iff (V := ℕ), Semiformula.quote_all, hps])
-      (b.cast <| Sequent.quote_inj (V := ℕ) <| by simp [hΔ, hd, setShift_quote, Semiformula.quote_def])⟩
+      (b.cast <| Sequent.quote_inj (V := ℕ) <| by
+        simp [hΔ, hd, setShift_quote, Semiformula.quote_def])⟩
   · rcases by simpa using hΓ
     have : IsSemiformula L 1 φ := by simpa using hs (^∃ φ) (by simp [hps])
     rcases this.sound with ⟨φ, rfl⟩
@@ -352,7 +381,8 @@ lemma Derivation.sound {d : ℕ} (h : Derivation T d) : ∃ Γ, ⌜Γ⌝ = fstId
     refine ⟨LK2.Derivation.exs (φ := φ)
       (by simp [←Sequent.mem_quote_iff (V := ℕ), Semiformula.quote_ex, hps]) t
       (b.cast <| Sequent.quote_inj (V := ℕ) <| by
-        simp [hΔ, hd, substs1, Matrix.constant_eq_singleton, Semiformula.quote_def, Semiterm.quote_def])⟩
+        simp [hΔ, hd, substs1, Matrix.constant_eq_singleton, Semiformula.quote_def,
+          Semiterm.quote_def])⟩
   · rcases by simpa using hΓ
     rcases ih d (by simp) dd with ⟨Δ, hΔ, ⟨b⟩⟩
     refine ⟨LK2.Derivation.wk (Δ := Δ) b

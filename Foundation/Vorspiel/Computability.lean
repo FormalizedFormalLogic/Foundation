@@ -12,23 +12,29 @@ namespace Nat.Partrec
 
 open Part _root_.Primrec
 
-lemma projection {f : ℕ →. ℕ} (hf : Nat.Partrec f) (unif : ∀ {m n₁ n₂ a₁ a₂ : ℕ}, a₁ ∈ f (m.pair n₁) → a₂ ∈ f (m.pair n₂) → a₁ = a₂) :
+lemma projection {f : ℕ →. ℕ} (hf : Nat.Partrec f)
+    (unif : ∀ {m n₁ n₂ a₁ a₂ : ℕ}, a₁ ∈ f (m.pair n₁) → a₂ ∈ f (m.pair n₂) → a₁ = a₂) :
     ∃ g : ℕ →. ℕ, Nat.Partrec g ∧ (∀ a m, a ∈ g m ↔ ∃ z, a ∈ f (m.pair z)) := by
   obtain ⟨cf, rfl⟩ := Code.exists_code.1 hf
-  let F : ℕ → ℕ → Option ℕ := fun m n ↦ Nat.rec .none (fun x ih ↦ ih.casesOn (cf.evaln n (m.pair x)) .some) n
+  let F : ℕ → ℕ → Option ℕ :=
+    fun m n ↦ Nat.rec .none (fun x ih ↦ ih.casesOn (cf.evaln n (m.pair x)) .some) n
   have : Primrec₂ F := .to₂ <| Primrec.nat_rec' Primrec.snd (.const Option.none)
       (Primrec.option_casesOn (Primrec.snd.comp .snd)
-        (Code.primrec_evaln.comp <| _root_.Primrec.pair (_root_.Primrec.pair (snd.comp .fst) (.const cf)) (Primrec₂.natPair.comp (fst.comp fst) (fst.comp snd)))
+        (Code.primrec_evaln.comp <| _root_.Primrec.pair
+          (_root_.Primrec.pair (snd.comp .fst) (.const cf))
+          (Primrec₂.natPair.comp (fst.comp fst) (fst.comp snd)))
         (Primrec.option_some.comp snd).to₂).to₂
   have hF : ∀ {m n a}, a ∈ F m n ↔ ∃ x < n, a ∈ cf.evaln n (m.pair x) := by
     suffices ∀ m n s a : ℕ,
-      Nat.rec Option.none (fun x ih ↦ ih.casesOn (cf.evaln s (m.pair x)) Option.some) n = Option.some a ↔
+      Nat.rec Option.none (fun x ih ↦ ih.casesOn (cf.evaln s (m.pair x)) Option.some) n =
+        Option.some a ↔
       ∃ x < n, cf.evaln s (m.pair x) = .some a from fun m n a ↦ this m n n a
     intro m n s a
     induction n generalizing a
     case zero => simp
     case succ n ih =>
-      cases hC : @Nat.rec (fun _ ↦ Option ℕ) Option.none (fun x ih ↦ ih.rec (cf.evaln s (m.pair x)) Option.some) n
+      cases hC : @Nat.rec (fun _ ↦ Option ℕ) Option.none
+        (fun x ih ↦ ih.rec (cf.evaln s (m.pair x)) Option.some) n
       · suffices
           Code.evaln s cf (Nat.pair m n) = Option.some a
           ↔ ∃ x < n + 1, Code.evaln s cf (Nat.pair m x) = Option.some a by simpa [hC]
@@ -72,21 +78,25 @@ namespace Partrec
 
 variable {α β γ : Type*} [Primcodable α] [Primcodable β] [Primcodable γ]
 
-lemma projection {f : α → β →. γ} (hf : Partrec₂ f) (unif : ∀ {a b₁ b₂ c₁ c₂}, c₁ ∈ f a b₁ → c₂ ∈ f a b₂ → c₁ = c₂) :
+lemma projection {f : α → β →. γ} (hf : Partrec₂ f)
+    (unif : ∀ {a b₁ b₂ c₁ c₂}, c₁ ∈ f a b₁ → c₂ ∈ f a b₂ → c₁ = c₂) :
     ∃ g : α →. γ, Partrec g ∧ (∀ c a, c ∈ g a ↔ ∃ b, c ∈ f a b) := by
   have := Nat.Partrec.projection (Partrec.bind_decode₂_iff.mp hf)
     (by intro m n₁ n₂ c₁ c₂; simp only [Part.mem_bind_iff, Part.mem_ofOption,
-          Option.mem_def, Encodable.decode₂_eq_some, Part.mem_map_iff, Prod.exists, Encodable.encode_prod_val,
-          Nat.pair_eq_pair, forall_exists_index, and_imp]
+          Option.mem_def, Encodable.decode₂_eq_some, Part.mem_map_iff, Prod.exists,
+          Encodable.encode_prod_val, Nat.pair_eq_pair, forall_exists_index, and_imp]
         rintro a b₁ rfl rfl c₁ h₁ rfl a b₂ e rfl c₂ h₂ rfl
         rcases Encodable.encode_inj.mp e
         rw [unif h₁ h₂])
   rcases this with ⟨g, hg, H⟩
   let g' : α →. γ := fun a ↦ (g (Encodable.encode a)).bind fun n ↦ Encodable.decode (α := γ) n
-  refine ⟨g', ((nat_iff.2 hg).comp Computable.encode).bind (Computable.decode.ofOption.comp Computable.snd).to₂, ?_⟩
-  have H : ∀ {c a : ℕ}, c ∈ g a ↔ ∃ a' b, Encodable.encode a' = a ∧ ∃ c' ∈ f a' b, Encodable.encode c' = c := by
+  refine ⟨g', ((nat_iff.2 hg).comp Computable.encode).bind
+    (Computable.decode.ofOption.comp Computable.snd).to₂, ?_⟩
+  have H : ∀ {c a : ℕ}, c ∈ g a ↔
+      ∃ a' b, Encodable.encode a' = a ∧ ∃ c' ∈ f a' b, Encodable.encode c' = c := by
     have H : ∀ (a m : ℕ),
-      a ∈ g m ↔ ∃ z a' b, (Encodable.encode a' = m ∧ Encodable.encode b = z) ∧ ∃ a'' ∈ f a' b, Encodable.encode a'' = a := by
+      a ∈ g m ↔ ∃ z a' b, (Encodable.encode a' = m ∧ Encodable.encode b = z) ∧
+        ∃ a'' ∈ f a' b, Encodable.encode a'' = a := by
       simpa [Encodable.decode₂_eq_some] using H
     intro c a; constructor
     · intro h; rcases (H c a).mp h with ⟨b, a, b, ⟨rfl, rfl⟩, ⟨c, H, rfl⟩⟩
@@ -94,7 +104,8 @@ lemma projection {f : α → β →. γ} (hf : Partrec₂ f) (unif : ∀ {a b₁
     · rintro ⟨a, b, rfl, c, hc, rfl⟩
       exact (H _ _).mpr ⟨Encodable.encode b, a, b, ⟨rfl, rfl⟩, c, hc, rfl⟩
   intro c a
-  suffices (∃ c' ∈ g (Encodable.encode a), Encodable.decode c' = some c) ↔ ∃ b, c ∈ f a b by simpa [g']
+  suffices (∃ c' ∈ g (Encodable.encode a), Encodable.decode c' = some c) ↔ ∃ b, c ∈ f a b by
+    simpa [g']
   constructor
   · rintro ⟨c', h, hc⟩
     rcases H.mp h with ⟨a, b, ae, c, habc, rfl⟩;
@@ -120,13 +131,15 @@ lemma iff : REPred p ↔ ∃ f : α →. Unit, Partrec f ∧ p = fun x ↦ (f x)
   ⟨fun h ↦ ⟨_, h, by ext x; simp [Part.assert]⟩, by rintro ⟨f, hf, rfl⟩; exact hf.dom_re⟩
 
 lemma iff' : REPred p ↔ ∃ f : α →. Unit, Partrec f ∧ ∀ x, p x ↔ (f x).Dom :=
-  ⟨fun h ↦ ⟨_, h, by intro x; simp [Part.assert]⟩, by rintro ⟨f, hf, H⟩; exact hf.dom_re.of_eq (by simp [H])⟩
+  ⟨fun h ↦ ⟨_, h, by intro x; simp [Part.assert]⟩,
+    by rintro ⟨f, hf, H⟩; exact hf.dom_re.of_eq (by simp [H])⟩
 
 lemma and (hp : REPred p) (hq : REPred q) : REPred fun x ↦ p x ∧ q x := by
   rcases REPred.iff.mp hp with ⟨f, hf, rfl⟩
   rcases REPred.iff.mp hq with ⟨g, hg, rfl⟩
   let h : α →. Unit := fun x ↦ (f x).bind fun _ ↦ (g x).map fun _ ↦ ()
-  have : Partrec h := Partrec.bind hf <| Partrec.to₂ <| Partrec.map (hg.comp Computable.fst) (Computable.const ()).to₂
+  have : Partrec h :=
+    Partrec.bind hf <| Partrec.to₂ <| Partrec.map (hg.comp Computable.fst) (Computable.const ()).to₂
   exact REPred.iff.mpr ⟨_, this, by funext x; simp [h]⟩
 
 lemma or (hp : REPred p) (hq : REPred q) : REPred fun x ↦ p x ∨ q x := by
@@ -141,7 +154,8 @@ lemma projection {p : α × β → Prop} (hp : REPred p) : REPred fun x ↦ ∃ 
   obtain ⟨g, hg, Hg⟩ := Partrec.projection this (by simp)
   exact REPred.iff.mpr ⟨g, hg, by funext x; simp [Part.unit_dom_iff, Hg]⟩
 
-protected lemma comp {f : α → β} (hf : Computable f) {p : β → Prop} (hp : REPred p) : REPred fun x ↦ p (f x) := by
+protected lemma comp {f : α → β} (hf : Computable f) {p : β → Prop} (hp : REPred p) :
+    REPred fun x ↦ p (f x) := by
   rcases REPred.iff.mp hp with ⟨p, pp, rfl⟩
   exact REPred.iff'.mpr ⟨_, pp.comp hf, by intro x; simp⟩
 
@@ -187,10 +201,10 @@ namespace Nat
 
 variable {f : ℕ → ℕ}
 
-def boundedMax (f : ℕ → ℕ) (n : ℕ) : ℕ := Nat.rec (f 0) (λ k ih ↦ max ih (f (k + 1))) n
+def boundedMax (f : ℕ → ℕ) (n : ℕ) : ℕ := Nat.rec (f 0) (fun k ih ↦ max ih (f (k + 1))) n
 
 lemma computable_boundedMax (hf : Computable f) : Computable (boundedMax f) := by
-  have h : Computable λ q : ℕ × (ℕ × ℕ) ↦ max q.2.2 (f (q.2.1 + 1)) :=
+  have h : Computable fun q : ℕ × (ℕ × ℕ) ↦ max q.2.2 (f (q.2.1 + 1)) :=
     Computable₂.comp Primrec.nat_max.to_comp (Computable.snd.comp Computable.snd)
       (hf.comp (Computable.succ.comp (Computable.fst.comp Computable.snd)))
   exact Computable.nat_rec Computable.id (Computable.const (f 0)) h.to₂

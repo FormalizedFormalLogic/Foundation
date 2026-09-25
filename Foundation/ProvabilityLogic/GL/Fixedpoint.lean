@@ -31,8 +31,8 @@ lemma forces_subst_single_congr (h : ∀ y, (y = x ∨ x ≺ y) → (y ⊩[M] B 
   | box A ih =>
     exact forall_congr' fun y ↦ imp_congr_right fun Rxy ↦ ih fun z hz ↦ h z <| .inr <| by
       rcases hz with rfl | hz;
-      . exact Rxy;
-      . exact IsTrans.trans _ _ _ Rxy hz;
+      · exact Rxy;
+      · exact IsTrans.trans _ _ _ Rxy hz;
 
 lemma forces_subst_single_congr_of_modalizedIn (hA : A.ModalizedIn p)
     (h : ∀ y, x ≺ y → (y ⊩[M] B ↔ y ⊩[M] C)) : x ⊩[M] A⟦p ↦ B⟧ ↔ x ⊩[M] A⟦p ↦ C⟧ := by
@@ -43,8 +43,8 @@ lemma forces_subst_single_congr_of_modalizedIn (hA : A.ModalizedIn p)
   | box A =>
     exact forall_congr' fun y ↦ imp_congr_right fun Rxy ↦ forces_subst_single_congr fun z hz ↦ by
       rcases hz with rfl | hz;
-      . exact h z Rxy;
-      . exact h z (IsTrans.trans _ _ _ Rxy hz);
+      · exact h z Rxy;
+      · exact h z (IsTrans.trans _ _ _ Rxy hz);
 
 end Kripke.Model.World
 
@@ -54,8 +54,8 @@ universe u
 
 variable {α : Type u} [DecidableEq α] {Γ Δ : FormulaFinset α}
 
-lemma subst (s : Substitution α α) (h : ⊢ᴳ[GL] Γ ⟹ Δ) :
-    ⊢ᴳ[GL] Γ.image (·⟦s⟧) ⟹ Δ.image (·⟦s⟧) := by
+lemma subst (s : Substitution α α) (h : ⊢ᴳ[𝐆𝐋] Γ ⟹ Δ) :
+    ⊢ᴳ[𝐆𝐋] Γ.image (·⟦s⟧) ⟹ Δ.image (·⟦s⟧) := by
   apply complete;
   intro _ _ M _ x hx;
   obtain ⟨D, hD, hxD⟩ := sound (M.overwrite fun y a ↦ y ⊩[M] s a) h x
@@ -73,8 +73,8 @@ universe u
 variable {α : Type u} [DecidableEq α] {p q : α} {A D E : Formula α}
 
 /-- - [SV82, Lemma 4.3] -/
-theorem fixpoint_unique (hA : A.ModalizedIn p) (hD : A⟦p ↦ D⟧ 🡘 D ∈ 𝐆𝐋)
-    (hE : A⟦p ↦ E⟧ 🡘 E ∈ 𝐆𝐋) : D 🡘 E ∈ 𝐆𝐋 := by
+theorem fixpoint_unique (hA : A.ModalizedIn p) (hD : 𝐆𝐋 ⊢ A⟦p ↦ D⟧ 🡘 D)
+    (hE : 𝐆𝐋 ⊢ A⟦p ↦ E⟧ 🡘 E) : 𝐆𝐋 ⊢ D 🡘 E := by
   apply iff_valid_finite.mpr;
   intro _ _ M _ x;
   induction x using (IsConverseWellFounded.cwf (rel := M.Rel)).induction with
@@ -86,7 +86,7 @@ theorem fixpoint_unique (hA : A.ModalizedIn p) (hD : A⟦p ↦ D⟧ 🡘 D ∈ �
     grind;
 
 private lemma fixpoint_premise (hA : A.ModalizedIn p) :
-    ⊢ᴳ[GL] {A, □(A 🡘 #p), □(A⟦p ↦ #q⟧ 🡘 #q)} ⟹ {A⟦p ↦ #q⟧} := by
+    ⊢ᴳ[𝐆𝐋] {A, □(A 🡘 #p), □(A⟦p ↦ #q⟧ 🡘 #q)} ⟹ {A⟦p ↦ #q⟧} := by
   apply Gentzen.complete;
   intro _ _ M _ x hx;
   have h₁ : x ⊩[M] □(A 🡘 #p) := hx _ (by simp);
@@ -106,7 +106,7 @@ private lemma fixpoint_premise (hA : A.ModalizedIn p) :
 
 /-- - [SV82, Theorem 4.4] -/
 theorem exists_fixpoint (hpq : p ≠ q) (hA : A.ModalizedIn p) (hq : q ∉ A.atoms) :
-    ∃ D, D.atoms ⊆ A.atoms.erase p ∧ A⟦p ↦ D⟧ 🡘 D ∈ 𝐆𝐋 := by
+    ∃ D, D.atoms ⊆ A.atoms.erase p ∧ 𝐆𝐋 ⊢ A⟦p ↦ D⟧ 🡘 D := by
   have h₀ := fixpoint_premise (q := q) hA;
   obtain ⟨D, hD⟩ := Gentzen.exists_interpolant (Γ₁ := {A, □(A 🡘 #p)})
     (Γ₂ := {□(A⟦p ↦ #q⟧ 🡘 #q)}) (Δ₁ := ∅) (Δ₂ := {A⟦p ↦ #q⟧}) h₀ (by intro; simp) (by simp);
@@ -115,10 +115,10 @@ theorem exists_fixpoint (hpq : p ≠ q) (hA : A.ModalizedIn p) (hq : q ∉ A.ato
     have := atoms_subst_single (A := A) (p := p) (B := #q);
     simp [Finset.subset_iff] at *;
     grind;
-  have h₁ : ⊢ᴳ[GL] {A⟦p ↦ D⟧, □(A⟦p ↦ D⟧ 🡘 D)} ⟹ {D} := by
+  have h₁ : ⊢ᴳ[𝐆𝐋] {A⟦p ↦ D⟧, □(A⟦p ↦ D⟧ 🡘 D)} ⟹ {D} := by
     simpa [subst_single_of_not_mem (show p ∉ D.atoms by grind)]
       using Gentzen.subst (Substitution.single p D) hD.left;
-  have h₂ : ⊢ᴳ[GL] {D, □(A⟦p ↦ D⟧ 🡘 D)} ⟹ {A⟦p ↦ D⟧} := by
+  have h₂ : ⊢ᴳ[𝐆𝐋] {D, □(A⟦p ↦ D⟧ 🡘 D)} ⟹ {A⟦p ↦ D⟧} := by
     simpa [subst_single_of_not_mem (show p ∉ D.atoms by grind),
       subst_single_of_not_mem (show q ∉ D.atoms by grind), subst_single_subst_single hq, hpq]
       using Gentzen.subst (Substitution.single p D) <|
@@ -139,8 +139,8 @@ theorem exists_fixpoint (hpq : p ≠ q) (hA : A.ModalizedIn p) (hq : q ∉ A.ato
 
 - [SV82, Lemma 4.3, Theorem 4.4] -/
 theorem fixpoint_theorem (hpq : p ≠ q) (hA : A.ModalizedIn p) (hq : q ∉ A.atoms) :
-    ∃ D, D.atoms ⊆ A.atoms.erase p ∧ A⟦p ↦ D⟧ 🡘 D ∈ 𝐆𝐋 ∧
-      ∀ E, A⟦p ↦ E⟧ 🡘 E ∈ 𝐆𝐋 → D 🡘 E ∈ 𝐆𝐋 := by
+    ∃ D, D.atoms ⊆ A.atoms.erase p ∧ 𝐆𝐋 ⊢ A⟦p ↦ D⟧ 🡘 D ∧
+      ∀ E, 𝐆𝐋 ⊢ A⟦p ↦ E⟧ 🡘 E → 𝐆𝐋 ⊢ D 🡘 E := by
   obtain ⟨D, hD₁, hD₂⟩ := exists_fixpoint hpq hA hq;
   exact ⟨D, hD₁, hD₂, fun _ hE ↦ fixpoint_unique hA hD₂ hE⟩;
 

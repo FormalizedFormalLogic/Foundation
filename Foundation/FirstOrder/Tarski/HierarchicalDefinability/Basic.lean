@@ -13,6 +13,10 @@ with bounding operators and the semantic induction principle are specific to thi
 -/
 
 @[expose] public section
+
+-- Retain the established arithmetic API's implicit index binders in this port.
+set_option autoImplicit true
+
 namespace FFL.FirstOrder.Bounding
 
 open scoped Bounding
@@ -134,7 +138,9 @@ lemma of_zero {R : (Fin k → V) → Prop} {φ : 𝚺₀.Semisentence ℬ k} (h 
   match ℌ with
   | 𝚺-[m] => by intro _; simp
   | 𝚷-[m] => by intro _; simp
-  | 𝚫-[m] => ⟨by simp, by intro _; simp⟩
+  | 𝚫-[m] =>
+    ⟨HierarchySymbol.Semiformula.ProperOn.of_zero (ℬ := ℬ) (M := V)
+        (Γ' := 𝚺) φ m, by intro _; simp⟩
 
 lemma of_iff {P Q : (Fin k → V) → Prop} (h : ∀ x, P x ↔ Q x) {φ : ℌ.Semisentence ℬ k} (H : Defined Q φ) : Defined P φ := by
   rwa [show P = Q from by funext v; simp [h]]
@@ -162,7 +168,9 @@ lemma graph_delta [L.Eq] [Tarski.Structure.Eq L V] {f : (Fin k → V) → V} {φ
     (h : DefinedFunction f φ) : DefinedFunction f φ.graphDelta :=
   ⟨by
       cases' m with m
-      case zero => simp [HierarchySymbol.Semiformula.graphDelta]
+      case zero =>
+        exact HierarchySymbol.Semiformula.ProperOn.of_zero (ℬ := ℬ) (M := V)
+          (Γ' := 𝚺) φ 0
       case succ =>
         simp only [Semiformula.graphDelta]
         intro e
@@ -217,7 +225,8 @@ lemma of_zero (h : (Γ'-[0]).Definable ℬ P) {ℌ : HierarchySymbol} : ℌ.Defi
   | 𝚺-[m] | 𝚷-[m] => intro _; simp [hφ.iff]
   | 𝚫-[m] =>
     constructor
-    . simp
+    . simp [HierarchySymbol.Semiformula.ProperWithParamOn,
+        HierarchySymbol.Semiformula.ofZero]
     . intro _; simp [hφ.iff]
 
 instance [𝚺₀.Definable ℬ P] (ℌ : HierarchySymbol) : ℌ.Definable ℬ P := of_zero (Γ' := 𝚺) inferInstance
@@ -610,7 +619,9 @@ lemma graph_delta [L.Eq] [Tarski.Structure.Eq L V]
   rcases h with ⟨φ, h⟩
   exact ⟨φ.graphDelta, by
     cases' m with m
-    case zero => simp [HierarchySymbol.Semiformula.graphDelta]
+    case zero =>
+      exact HierarchySymbol.Semiformula.ProperWithParamOn.of_zero (ℬ := ℬ) (M := V)
+        (Γ' := 𝚺) φ 0
     case succ =>
       simp only [Semiformula.graphDelta]
       intro e; simp [h.df.iff]; tauto,

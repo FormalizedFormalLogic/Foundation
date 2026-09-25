@@ -74,7 +74,8 @@ lemma exists_maximal_consistent_theory (consisT : Entailment.Consistent T) :
       ( fun c hc chain hnc ↦ ⟨⋃₀ c, by
           haveI : DecidableEq α := Classical.typeDecidableEq α
           by_contra A
-          rcases Entailment.inconsistent_compact.mp (Entailment.not_consistent_iff_inconsistent.mp A) with ⟨𝓕, h𝓕, fin, 𝓕_consis⟩
+          rcases Entailment.inconsistent_compact.mp
+            (Entailment.not_consistent_iff_inconsistent.mp A) with ⟨𝓕, h𝓕, fin, 𝓕_consis⟩
           rcases Set.subset_mem_chain_of_finite c hnc chain (s := 𝓕) fin h𝓕 with ⟨U, hUc, hsU⟩
           have : Consistent U := hc hUc
           have : ¬Consistent U := (𝓕_consis.of_supset hsU).not_con
@@ -106,7 +107,8 @@ lemma mem_or_neg_mem_maximalConsistentTheory {consisT : Entailment.Consistent T}
     φ ∈ maximalConsistentTheory consisT ∨ ∼φ ∈ maximalConsistentTheory consisT := by
   haveI : DecidableEq α := Classical.typeDecidableEq α
   by_contra A
-  have hp : φ ∉ maximalConsistentTheory consisT ∧ ∼φ ∉ maximalConsistentTheory consisT := by simpa [not_or] using A
+  have hp : φ ∉ maximalConsistentTheory consisT ∧ ∼φ ∉ maximalConsistentTheory consisT := by
+    simpa [not_or] using A
   have : Consistent (insert φ (maximalConsistentTheory consisT)) :=
     LK.Derivation.consistent_iff_unprovable.mpr
       (show ∼φ ∉ theory (maximalConsistentTheory consisT) from by simpa using hp.2)
@@ -118,7 +120,8 @@ lemma mem_or_neg_mem_maximalConsistentTheory {consisT : Entailment.Consistent T}
 
 lemma mem_maximalConsistentTheory_iff :
     φ ∈ maximalConsistentTheory consisT ↔ maximalConsistentTheory consisT ⊢ φ :=
-  ⟨fun h ↦ ⟨Entailment.byAxm h⟩, fun h ↦ by have : φ ∈ theory (maximalConsistentTheory consisT) := h; simpa using this⟩
+  ⟨fun h ↦ ⟨Entailment.byAxm h⟩,
+    fun h ↦ by have : φ ∈ theory (maximalConsistentTheory consisT) := h; simpa using this⟩
 
 lemma maximalConsistentTheory_consistent' {φ} :
     φ ∈ maximalConsistentTheory consisT → ∼φ ∉ maximalConsistentTheory consisT := by
@@ -153,7 +156,8 @@ lemma mem_maximalConsistentTheory_or {φ ψ} (h : φ ⋎ ψ ∈ maximalConsisten
     simpa [not_or, not_mem_maximalConsistentTheory_iff] using A
   have : Inconsistent (maximalConsistentTheory consisT) :=
     Entailment.inconsistent_of_provable
-      (of_C!_of_C!_of_A! (N!_iff_CO!.mp b.1) (N!_iff_CO!.mp b.2) (mem_maximalConsistentTheory_iff.mp h))
+      (of_C!_of_C!_of_A! (N!_iff_CO!.mp b.1) (N!_iff_CO!.mp b.2)
+        (mem_maximalConsistentTheory_iff.mp h))
   have := this.not_con
   simp_all
 
@@ -165,7 +169,8 @@ lemma maximalConsistentTheory_satisfiable :
   case hnatom =>
     simpa using maximalConsistentTheory_consistent' hp
   case hfalsum =>
-    have : Inconsistent (maximalConsistentTheory consisT) := Entailment.inconsistent_of_provable ⟨Entailment.byAxm hp⟩
+    have : Inconsistent (maximalConsistentTheory consisT) :=
+      Entailment.inconsistent_of_provable ⟨Entailment.byAxm hp⟩
     have := this.not_con
     simp_all
   case hand φ ψ ihp ihq =>
@@ -223,3 +228,7 @@ end FFL
 end
 
 -/
+
+end Propositional
+
+end FFL

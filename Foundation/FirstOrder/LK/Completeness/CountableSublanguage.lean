@@ -4,9 +4,12 @@ public import Foundation.FirstOrder.Tarski.Basic
 public import Mathlib.Logic.Equiv.List
 
 @[expose] public section
+set_option autoImplicit true
 namespace FFL
 
 namespace FirstOrder
+
+universe u
 
 variable {L : Language.{u}}
 
@@ -117,23 +120,30 @@ def toSublanguage (pf : ∀ k, L.Func k → Prop) (pr : ∀ k, L.Rel k → Prop)
   |        ⊤,  _,  _ => ⊤
   |        ⊥,  _,  _ => ⊥
   |    φ ⋏ ψ,  hf, hr =>
-      toSublanguage pf pr φ (fun k f h ↦ hf k f (Finset.mem_union_left _ h)) (fun k r h ↦ hr k r (Finset.mem_union_left _ h)) ⋏
-      toSublanguage pf pr ψ (fun k f h ↦ hf k f (Finset.mem_union_right _ h)) (fun k r h ↦ hr k r (Finset.mem_union_right _ h))
+      toSublanguage pf pr φ (fun k f h ↦ hf k f (Finset.mem_union_left _ h))
+          (fun k r h ↦ hr k r (Finset.mem_union_left _ h)) ⋏
+      toSublanguage pf pr ψ (fun k f h ↦ hf k f (Finset.mem_union_right _ h))
+          (fun k r h ↦ hr k r (Finset.mem_union_right _ h))
   |    φ ⋎ ψ, hf, hr =>
-      toSublanguage pf pr φ (fun k f h ↦ hf k f (Finset.mem_union_left _ h)) (fun k r h ↦ hr k r (Finset.mem_union_left _ h)) ⋎
-      toSublanguage pf pr ψ (fun k f h ↦ hf k f (Finset.mem_union_right _ h)) (fun k r h ↦ hr k r (Finset.mem_union_right _ h))
+      toSublanguage pf pr φ (fun k f h ↦ hf k f (Finset.mem_union_left _ h))
+          (fun k r h ↦ hr k r (Finset.mem_union_left _ h)) ⋎
+      toSublanguage pf pr ψ (fun k f h ↦ hf k f (Finset.mem_union_right _ h))
+          (fun k r h ↦ hr k r (Finset.mem_union_right _ h))
   |     ∀¹ φ, hf, hr => ∀¹ toSublanguage pf pr φ hf hr
   |     ∃¹ φ, hf, hr => ∃¹ toSublanguage pf pr φ hf hr
 
 @[simp] lemma lMap_toSublanguage
   (pf : ∀ k, L.Func k → Prop) (pr : ∀ k, L.Rel k → Prop) {n} (φ : Semiformula L ξ n)
-  (hf : ∀ k f, ⟨k, f⟩ ∈ φ.functionSymbols → pf k f) (hr : ∀ k r, ⟨k, r⟩ ∈ φ.relationSymbols → pr k r) :
+  (hf : ∀ k f, ⟨k, f⟩ ∈ φ.functionSymbols → pf k f)
+  (hr : ∀ k r, ⟨k, r⟩ ∈ φ.relationSymbols → pr k r) :
     lMap L.unsub (φ.toSublanguage pf pr hf hr) = φ := by
   induction φ using rec' with
   | hverum => rfl
   | hfalsum => rfl
-  | hrel r v => exact congrArg (Semiformula.rel r) (funext fun i ↦ Semiterm.lMap_toSublanguage _ _ _ _)
-  | hnrel r v => exact congrArg (Semiformula.nrel r) (funext fun i ↦ Semiterm.lMap_toSublanguage _ _ _ _)
+  | hrel r v =>
+    exact congrArg (Semiformula.rel r) (funext fun i ↦ Semiterm.lMap_toSublanguage _ _ _ _)
+  | hnrel r v =>
+    exact congrArg (Semiformula.nrel r) (funext fun i ↦ Semiterm.lMap_toSublanguage _ _ _ _)
   | hand φ ψ ihφ ihψ => simp [*, toSublanguage]
   | hor φ ψ ihφ ihψ => simp [*, toSublanguage]
   | hall φ ih => exact congrArg Semiformula.all (ih hf hr)
@@ -141,15 +151,19 @@ def toSublanguage (pf : ∀ k, L.Func k → Prop) (pr : ∀ k, L.Rel k → Prop)
 
 variable (φ : Semiformula L ξ n)
 
-/-- A language consists of the function and relation symbols appearing in a given finite set of formulas. -/
+/-- A language consists of the function and relation symbols appearing in a given finite set of
+formulas. -/
 abbrev sublanguage : Language :=
-  Language.sublanguage L (fun k f ↦ ⟨k, f⟩ ∈ φ.functionSymbols) (fun k r ↦ ⟨k, r⟩ ∈ φ.relationSymbols)
+  Language.sublanguage L (fun k f ↦ ⟨k, f⟩ ∈ φ.functionSymbols)
+    (fun k r ↦ ⟨k, r⟩ ∈ φ.relationSymbols)
 
 noncomputable instance (k) : Fintype (φ.sublanguage.Func k) :=
-  Fintype.subtype (φ.functionSymbols.preimage (⟨k, ·⟩) (Set.injOn_of_injective sigma_mk_injective)) (by simp)
+  Fintype.subtype
+    (φ.functionSymbols.preimage (⟨k, ·⟩) (Set.injOn_of_injective sigma_mk_injective)) (by simp)
 
 noncomputable instance (k) : Fintype (φ.sublanguage.Rel k) :=
-  Fintype.subtype (φ.relationSymbols.preimage (⟨k, ·⟩) (Set.injOn_of_injective sigma_mk_injective)) (by simp)
+  Fintype.subtype
+    (φ.relationSymbols.preimage (⟨k, ·⟩) (Set.injOn_of_injective sigma_mk_injective)) (by simp)
 
 noncomputable instance : φ.sublanguage.Encodable where
   func _ := Fintype.toEncodable _
@@ -180,7 +194,8 @@ end Language
 
 namespace Tarski.Structure
 
-noncomputable abbrev extendStructure (Φ : L₁ →ᵥ L₂) {M : Type*} [Nonempty M] (s : Tarski.Structure L₁ M) : Tarski.Structure L₂ M where
+noncomputable abbrev extendStructure (Φ : L₁ →ᵥ L₂) {M : Type*} [Nonempty M]
+    (s : Tarski.Structure L₁ M) : Tarski.Structure L₂ M where
   func {k} f₂ v := Classical.epsilon (∃ f₁ : L₁.Func k, Φ.func f₁ = f₂ ∧ · = s.func f₁ v)
   rel {k} r₂ v := ∃ r₁ : L₁.Rel k, Φ.rel r₁ = r₂ ∧ s.rel r₁ v
 
@@ -192,7 +207,8 @@ protected lemma func
     (Φ : L₁ →ᵥ L₂) [hΦ : Φ.Injective]
     (f₁ : L₁.Func k) (v : Fin k → M) :
     (s₁.extendStructure Φ).func (Φ.func f₁) v = s₁.func f₁ v := by
-  have : ∃ y, ∃ f₁' : L₁.Func k, Φ.func f₁' = Φ.func f₁ ∧ y = s₁.func f₁' v := ⟨s₁.func f₁ v, f₁, rfl, rfl⟩
+  have : ∃ y, ∃ f₁' : L₁.Func k, Φ.func f₁' = Φ.func f₁ ∧ y = s₁.func f₁' v :=
+    ⟨s₁.func f₁ v, f₁, rfl, rfl⟩
   rcases Classical.epsilon_spec this with ⟨f', f'eq, h⟩
   rcases hΦ.func k f'eq with rfl; exact h
 
@@ -200,7 +216,8 @@ protected lemma rel
     (Φ : L₁ →ᵥ L₂) [hΦ : Φ.Injective]
     (r₁ : L₁.Rel k) (v : Fin k → M) :
     (s₁.extendStructure Φ).rel (Φ.rel r₁) v ↔ s₁.rel r₁ v := by
-  refine ⟨by intros h; rcases h with ⟨r₁', bv, h⟩; rcases hΦ.rel k bv with rfl; exact h, by intros h; refine ⟨r₁, rfl, h⟩⟩
+  refine ⟨by intros h; rcases h with ⟨r₁', bv, h⟩; rcases hΦ.rel k bv with rfl; exact h,
+    by intros h; refine ⟨r₁, rfl, h⟩⟩
 
 lemma val_lMap
     (Φ : L₁ →ᵥ L₂) [Φ.Injective]

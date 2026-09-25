@@ -50,10 +50,10 @@ lemma relItr_one : x ≺^[1] y ↔ x ≺ y := by simp [RelItr];
 @[grind =]
 lemma relItr_succ : x ≺^[n + 1] y ↔ ∃ z, x ≺ z ∧ z ≺^[n] y := Iff.rfl
 
-abbrev NotRel {M : Model κ α} : M.World → M.World → Prop := λ x y => ¬(x ≺ y)
+abbrev NotRel {M : Model κ α} : M.World → M.World → Prop := fun x y => ¬(x ≺ y)
 scoped infix:60 " ⊀ " => NotRel
 
-abbrev NotRelItr {M : Model κ α} (n : ℕ) : M.World → M.World → Prop := λ x y => ¬(x ≺^[n] y)
+abbrev NotRelItr {M : Model κ α} (n : ℕ) : M.World → M.World → Prop := fun x y => ¬(x ≺^[n] y)
 scoped notation x:45 " ⊀^[" n:0 "] " y:46 => NotRelItr n x y
 
 @[simp, grind =]
@@ -72,7 +72,8 @@ instance [M.IsFiniteGL] : M.IsGL where
 
 instance [M.IsGL] : Std.Irrefl M.Rel := ConverseWellFounded.irrefl
 
-class IsGrz (M : Model κ α) extends Std.Refl M.Rel, IsTrans _ M.Rel, IsWeaklyConverseWellFounded _ M.Rel
+class IsGrz (M : Model κ α) extends
+    Std.Refl M.Rel, IsTrans _ M.Rel, IsWeaklyConverseWellFounded _ M.Rel
 
 class IsFiniteGrz (M : Model κ α) extends Std.Refl M.Rel, IsTrans _ M.Rel, Std.Antisymm M.Rel where
   [finite : Finite M.World]
@@ -126,6 +127,7 @@ scoped notation:55 x:56 " ⊮[" M "] " A:56 => ¬Forces M x A
 @[grind =] lemma forces_iff : x ⊩[M] A 🡘 B ↔ (x ⊩[M] A ↔ x ⊩[M] B) := by
   simp only [LogicalConnective.iff, forces_and]; grind;
 @[grind =] lemma forces_box : x ⊩[M] □A ↔ ∀ y, x ≺ y → y ⊩[M] A := Iff.rfl
+@[grind =] lemma forces_boxdot : x ⊩[M] ⊡A ↔ x ⊩[M] A ∧ ∀ y, x ≺ y → y ⊩[M] A := forces_and
 @[grind =] lemma forces_dia : x ⊩[M] ◇A ↔ ∃ y, x ≺ y ∧ y ⊩[M] A := by
   change ((∀ y, x ≺ y → y ⊩[M] A → False) → False) ↔ _; grind;
 
@@ -144,6 +146,15 @@ lemma forces_conj₂ : {l : List (Formula α)} → (x ⊩[M] ⋀l ↔ ∀ B ∈ 
 @[simp]
 lemma forces_conj {Γ : FormulaFinset α} : x ⊩[M] Γ.conj ↔ ∀ B ∈ Γ, x ⊩[M] B := by
   simp [Finset.conj, forces_conj₂];
+
+lemma forces_disj₂ : {l : List (Formula α)} → (x ⊩[M] ⋁l ↔ ∃ B ∈ l, x ⊩[M] B)
+  | [] => by simp
+  | [B] => by simp
+  | B :: C :: l => by simp [forces_or, forces_disj₂ (l := C :: l)]
+
+@[simp]
+lemma forces_disj {Γ : FormulaFinset α} : x ⊩[M] Γ.disj ↔ ∃ B ∈ Γ, x ⊩[M] B := by
+  simp [Finset.disj, forces_disj₂];
 
 end Model.World
 
@@ -169,6 +180,30 @@ lemma forces_subst {x : M.World} {A : Formula β} : x ⊩[M.subst s] A ↔ x ⊩
 instance [M.IsGL] : (M.subst s).IsGL where
   toIsTrans := inferInstanceAs (IsTrans _ M.Rel)
   toIsConverseWellFounded := inferInstanceAs (IsConverseWellFounded _ M.Rel)
+
+lemma forces_congr {N : Model κ α} (hR : M.Rel' = N.Rel') (hV : ∀ x a, M.Val x a ↔ N.Val x a)
+    {x : κ} {A : Formula α} : x ⊩[M] A ↔ x ⊩[N] A := by
+  induction A generalizing x with
+  | atom a => exact hV x a;
+  | falsum => rfl;
+  | imp A B ihA ihB => exact imp_congr ihA ihB;
+  | box A ih =>
+    change (∀ y, M.Rel' x y → _) ↔ (∀ y, N.Rel' x y → _);
+    rw [hR];
+    exact forall_congr' fun y ↦ imp_congr_right fun _ ↦ ih;
+
+lemma forces_congr_of_atoms [DecidableEq α] {N : Model κ α} (hR : M.Rel' = N.Rel') {A : Formula α}
+    (hV : ∀ x, ∀ a ∈ A.atoms, M.Val x a ↔ N.Val x a) {x : κ} : x ⊩[M] A ↔ x ⊩[N] A := by
+  induction A generalizing x with
+  | atom a => exact hV x a (by simp);
+  | falsum => rfl;
+  | imp A B ihA ihB =>
+    exact imp_congr (ihA fun x a ha ↦ hV x a (by simp [ha]))
+      (ihB fun x a ha ↦ hV x a (by simp [ha]));
+  | box A ih =>
+    change (∀ y, M.Rel' x y → _) ↔ (∀ y, N.Rel' x y → _);
+    rw [hR];
+    exact forall_congr' fun y ↦ imp_congr_right fun _ ↦ ih hV;
 
 end Model
 

@@ -325,12 +325,13 @@ the branch never reconstructs a term; the argument-vector code comes from `stepV
 an argument fails to decode, its table entry is `0` and `stepVec_eq_zero` collapses the fold,
 matching `Matrix.getM` returning `none` on the other side. -/
 theorem step_table (n e : ℕ) :
-    step (L := L) (ξ := ξ) n (table (L := L) (ξ := ξ) n e) = encode (ofNat (L := L) (ξ := ξ) n e) := by
+    step (L := L) (ξ := ξ) n (table (L := L) (ξ := ξ) n e) =
+      encode (ofNat (L := L) (ξ := ξ) n e) := by
   rw [step, table_length]
   cases e with
   | zero => simp [ofNat]
   | succ d =>
-  show stepBody (L := L) (ξ := ξ) n (table (L := L) (ξ := ξ) n (d + 1)) d = _
+  change stepBody (L := L) (ξ := ξ) n (table (L := L) (ξ := ξ) n (d + 1)) d = _
   rw [stepBody, ofNat]
   by_cases h0 : (Nat.unpair d).1 = 0
   · rw [ite_eq_left h0, h0]
@@ -609,8 +610,8 @@ theorem step_correct (n e : ℕ) :
   | succ d =>
   rw [step, ite_eq_right (Nat.succ_ne_zero d), Nat.add_sub_cancel, stepBody, ofNat]
   by_cases h4 : d.unpair.1 = 4
-  · rw [vs_bin n d (Or.inl h4), ite_eq_right (by omega), ite_eq_right (by omega), ite_eq_right (by omega),
-      ite_eq_right (by omega), ite_eq_left h4, h4]
+  · rw [vs_bin n d (Or.inl h4), ite_eq_right (by omega), ite_eq_right (by omega),
+      ite_eq_right (by omega), ite_eq_right (by omega), ite_eq_left h4, h4]
     simp only [List.getD_cons_zero, List.getD_cons_succ]
     rcases hφ : ofNat (L := L) (ξ := ξ) n d.unpair.2.unpair.1 with _ | φ
     · simp
@@ -619,8 +620,8 @@ theorem step_correct (n e : ℕ) :
       · rw [ite_eq_right (by simp)]
         simp [encode_eq_toNat, toNat]
   by_cases h5 : d.unpair.1 = 5
-  · rw [vs_bin n d (Or.inr h5), ite_eq_right (by omega), ite_eq_right (by omega), ite_eq_right (by omega),
-      ite_eq_right (by omega), ite_eq_right (by omega), ite_eq_left h5, h5]
+  · rw [vs_bin n d (Or.inr h5), ite_eq_right (by omega), ite_eq_right (by omega),
+      ite_eq_right (by omega), ite_eq_right (by omega), ite_eq_right (by omega), ite_eq_left h5, h5]
     simp only [List.getD_cons_zero, List.getD_cons_succ]
     rcases hφ : ofNat (L := L) (ξ := ξ) n d.unpair.2.unpair.1 with _ | φ
     · simp
@@ -639,8 +640,8 @@ theorem step_correct (n e : ℕ) :
       simp [encode_eq_toNat, toNat]
   by_cases h7 : d.unpair.1 = 7
   · rw [vs_quant n d (by simp [h7]) (Or.inr h7), ite_eq_right (by omega), ite_eq_right (by omega),
-      ite_eq_right (by omega), ite_eq_right (by omega), ite_eq_right (by omega), ite_eq_right (by omega),
-      ite_eq_right (by omega), ite_eq_left h7, h7]
+      ite_eq_right (by omega), ite_eq_right (by omega), ite_eq_right (by omega),
+      ite_eq_right (by omega), ite_eq_right (by omega), ite_eq_left h7, h7]
     simp only [List.getD_cons_zero]
     rcases hφ : ofNat (L := L) (ξ := ξ) (n + 1) d.unpair.2 with _ | φ
     · simp
@@ -650,7 +651,8 @@ theorem step_correct (n e : ℕ) :
   · rw [ite_eq_right (by omega), ite_eq_right (by omega), ite_eq_left h2, h2]
     simp [encode_eq_toNat, toNat]
   by_cases h3 : d.unpair.1 = 3
-  · rw [ite_eq_right (by omega), ite_eq_right (by omega), ite_eq_right (by omega), ite_eq_left h3, h3]
+  · rw [ite_eq_right (by omega), ite_eq_right (by omega), ite_eq_right (by omega),
+      ite_eq_left h3, h3]
     simp [encode_eq_toNat, toNat]
   by_cases h0 : d.unpair.1 = 0
   · rw [ite_eq_left h0, h0]

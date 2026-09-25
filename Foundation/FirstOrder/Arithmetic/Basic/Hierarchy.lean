@@ -9,6 +9,7 @@ public import Foundation.FirstOrder.Syntax.Classical.BoundingHierarchy
 namespace FFL.FirstOrder.Arithmetic
 
 variable {L : Language} [L.LT]
+variable {ξ ξ₁ ξ₂ : Type*} {n n₁ n₂ m k : ℕ} {Γ b : Polarity} {s : ℕ} {ι : Type*}
 
 abbrev Hierarchy : Polarity → ℕ → {n : ℕ} → Semiformula L ξ n → Prop :=
   ℬ[<, L].Hierarchy
@@ -44,11 +45,11 @@ abbrev bounded (Γ s n) {φ : Semiformula L ξ n} :
 @[simp] abbrev falsum (Γ s n) : Hierarchy Γ s (⊥ : Semiformula L ξ n) :=
   Bounding.Hierarchy.falsum Γ s n
 
-@[simp] abbrev rel (Γ s) {k} (r : L.Rel k) (v : Fin k → Semiterm L ξ x) :
+@[simp] abbrev rel (Γ s) {k} {x : ℕ} (r : L.Rel k) (v : Fin k → Semiterm L ξ x) :
     Hierarchy Γ s (Semiformula.rel r v) :=
   Bounding.Hierarchy.rel Γ s r v
 
-@[simp] abbrev nrel (Γ s) {k} (r : L.Rel k) (v : Fin k → Semiterm L ξ x) :
+@[simp] abbrev nrel (Γ s) {k} {x : ℕ} (r : L.Rel k) (v : Fin k → Semiterm L ξ x) :
     Hierarchy Γ s (Semiformula.nrel r v) :=
   Bounding.Hierarchy.nrel Γ s r v
 
@@ -372,14 +373,14 @@ end Hierarchy
 
 namespace Hierarchy
 
-lemma toPrenex {φ : Semiformula L ξ (n + s)}
+lemma toPrenex {j : ℕ} {φ : Semiformula L ξ (n + s)}
     (h : Hierarchy (Γ.altItr s) j φ) :
     Hierarchy Γ (j + s) (φ.toPrenex Γ s) := by
   induction s generalizing n j with
   | zero => simpa using h
   | succ s ih =>
     rw [Polarity.altItr_succ] at h
-    show Hierarchy Γ (j + (s + 1)) (Polarity.quantItr Γ (s + 1) φ)
+    change Hierarchy Γ (j + (s + 1)) (Polarity.quantItr Γ (s + 1) φ)
     rw [Polarity.quantItr_succ', (show j + (s + 1) = (j + 1) + s by omega)]
     rcases hΓ : Γ.altItr s with _ | _
     · apply ih
@@ -452,9 +453,11 @@ end LOR
 
 end Arithmetic
 
-abbrev ArithmeticTheory.SoundOnHierarchy (T : ArithmeticTheory) (Γ : Polarity) (k : ℕ) := T.SoundOn (Arithmetic.Hierarchy Γ k)
+abbrev ArithmeticTheory.SoundOnHierarchy (T : ArithmeticTheory) (Γ : Polarity) (k : ℕ) :=
+  T.SoundOn (Arithmetic.Hierarchy Γ k)
 
-lemma ArithmeticTheory.soundOnHierarchy (T : ArithmeticTheory) (Γ : Polarity) (k : ℕ) [T.SoundOnHierarchy Γ k] :
+lemma ArithmeticTheory.soundOnHierarchy (T : ArithmeticTheory) (Γ : Polarity) (k : ℕ)
+    [T.SoundOnHierarchy Γ k] {σ : ArithmeticSentence} :
     T ⊢ σ → Arithmetic.Hierarchy Γ k σ → ℕ↓[ℒₒᵣ] ⊧ σ := SoundOn.sound
 
 instance (T : ArithmeticTheory) [T.SoundOnHierarchy 𝚺 1] : Entailment.Consistent T :=

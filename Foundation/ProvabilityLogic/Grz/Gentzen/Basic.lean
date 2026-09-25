@@ -29,24 +29,25 @@ inductive Gentzen : Sequent α → Prop
     Gentzen (Γ ⟹ insert A Δ) → Gentzen (insert B Γ ⟹ Δ) → Gentzen (insert (A 🡒 B) Γ ⟹ Δ)
   | impR {Γ Δ A B} : Gentzen (insert A Γ ⟹ insert B Δ) → Gentzen (Γ ⟹ insert (A 🡒 B) Δ)
   | boxT {Γ Δ A} : Gentzen (insert A Γ ⟹ Δ) → Gentzen (insert (□A) Γ ⟹ Δ)
-  | boxGrz {Γ : FormulaFinset α} {A} : Gentzen (insert (□(A 🡒 □A)) Γ.box ⟹ {A}) → Gentzen (Γ.box ⟹ {□A})
+  | boxGrz {Γ : FormulaFinset α} {A} :
+      Gentzen (insert (□(A 🡒 □A)) Γ.box ⟹ {A}) → Gentzen (Γ.box ⟹ {□A})
 
-@[inherit_doc] notation:45 "⊢ᴳ[Grz] " S:50 => Gentzen S
+@[inherit_doc] notation:45 "⊢ᴳ[𝐆𝐫𝐳] " S:50 => Gentzen S
 
-notation:45 "⊬ᴳ[Grz] " S:50 => ¬Gentzen S
+notation:45 "⊬ᴳ[𝐆𝐫𝐳] " S:50 => ¬Gentzen S
 
 namespace Gentzen
 
 variable {Γ Γ' Δ Δ' : FormulaFinset α} {A : Formula α} {S : Sequent α}
 
-lemma union (A) (hΓ : A ∈ Γ := by grind) (hΔ : A ∈ Δ := by grind) : ⊢ᴳ[Grz] Γ ⟹ Δ :=
+lemma union (A) (hΓ : A ∈ Γ := by grind) (hΔ : A ∈ Δ := by grind) : ⊢ᴳ[𝐆𝐫𝐳] Γ ⟹ Δ :=
   wkR (wkL (axm A) (by simpa)) (by simpa)
 
-lemma union' (A) (hΓ : A ∈ S.ant) (hΔ : A ∈ S.suc) : ⊢ᴳ[Grz] S := union A hΓ hΔ
+lemma union' (A) (hΓ : A ∈ S.ant) (hΔ : A ∈ S.suc) : ⊢ᴳ[𝐆𝐫𝐳] S := union A hΓ hΔ
 
-lemma botL_mem (h : ⊥ ∈ Γ := by grind) : ⊢ᴳ[Grz] Γ ⟹ Δ := wkR (wkL botL (by simpa)) (by simp)
+lemma botL_mem (h : ⊥ ∈ Γ := by grind) : ⊢ᴳ[𝐆𝐫𝐳] Γ ⟹ Δ := wkR (wkL botL (by simpa)) (by simp)
 
-lemma wk (h : ⊢ᴳ[Grz] Γ ⟹ Δ) (hΓ : Γ ⊆ Γ') (hΔ : Δ ⊆ Δ') : ⊢ᴳ[Grz] Γ' ⟹ Δ' := wkR (wkL h hΓ) hΔ
+lemma wk (h : ⊢ᴳ[𝐆𝐫𝐳] Γ ⟹ Δ) (hΓ : Γ ⊆ Γ') (hΔ : Δ ⊆ Δ') : ⊢ᴳ[𝐆𝐫𝐳] Γ' ⟹ Δ' := wkR (wkL h hΓ) hΔ
 
 end Gentzen
 

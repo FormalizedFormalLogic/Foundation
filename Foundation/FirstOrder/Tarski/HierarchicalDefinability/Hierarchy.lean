@@ -19,6 +19,8 @@ hierarchy and Tarski semantics, following the arithmetic formalization.
 
 namespace FFL.FirstOrder.Bounding
 
+universe w
+
 structure HierarchySymbol where
   Γ : SigmaPiDelta
   rank : ℕ
@@ -67,7 +69,7 @@ protected abbrev Sentence (Γ : HierarchySymbol) := Γ.Semiformula ℬ Empty 0
 
 variable {Γ : HierarchySymbol}
 
-variable {ℬ ξ n}
+variable {ℬ ξ n} {m k n₁ n₂ : ℕ} {ξ₁ ξ₂ : Type*} {Γ' : Polarity}
 
 namespace Semiformula
 

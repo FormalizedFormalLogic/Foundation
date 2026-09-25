@@ -9,7 +9,8 @@ namespace FFL.FirstOrder.Theory
 
 variable {L : Language} [L.Encodable] [L.LORDefinable]
 
-/-- TODO: define predicate `VariableFree` and make `mem_iff` `∀ φ : Sentence, ℕ ⊧/![⌜φ⌝] ch.val ↔ φ ∈ T` -/
+/-- TODO: define predicate `VariableFree` and make `mem_iff`
+`∀ φ : Sentence, ℕ ⊧/![⌜φ⌝] ch.val ↔ φ ∈ T` -/
 class Δ₁ (T : Theory L) where
   ch : 𝚫₁.Semisentence 1
   mem_iff : ∀ φ : Proposition L, ℕ ⊧/![⌜φ⌝] ch.val ↔ ∃ σ ∈ T, φ = σ
@@ -58,7 +59,8 @@ variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 
 variable {L : Language} [L.Encodable] [L.LORDefinable]
 
-def _root_.FFL.FirstOrder.Theory.Δ₁Class (T : Theory L) [T.Δ₁] : Set V := { φ : V | V ⊧/![φ] T.Δ₁ch.val }
+def _root_.FFL.FirstOrder.Theory.Δ₁Class (T : Theory L) [T.Δ₁] : Set V :=
+  { φ : V | V ⊧/![φ] T.Δ₁ch.val }
 
 variable {T : Theory L} [T.Δ₁]
 
@@ -66,7 +68,8 @@ instance Δ₁Class.defined : 𝚫₁-Predicate[V] (· ∈ T.Δ₁Class) via T.�
   constructor
   · intro v
     have : V ⊧/![v 0] (Theory.Δ₁.ch T).sigma.val ↔ V ⊧/![v 0] (Theory.Δ₁.ch T).pi.val := by
-      have := (consequence_iff (T := 𝗜𝚺₁)).mp (Theory.Proof.sound <| FirstOrder.Theory.Δ₁.isDelta1 (T := T)) V inferInstance
+      have := (consequence_iff (T := 𝗜𝚺₁)).mp
+        (Theory.Proof.sound <| FirstOrder.Theory.Δ₁.isDelta1 (T := T)) V inferInstance
       simp [models_iff] at this ⊢
       simpa [Matrix.constant_eq_singleton] using this ![v 0]
     rwa [Matrix.fun_eq_vec_one v]
@@ -79,7 +82,8 @@ instance Δ₁Class.definable : 𝚫₁-Predicate[V] (· ∈ T.Δ₁Class) := Δ
 @[simp] lemma Δ₁Class.mem_iff_s {φ : Proposition L} : (⌜φ⌝ : V) ∈ T.Δ₁Class ↔ ∃ σ ∈ T, φ = σ :=
   have : V ⊧/![⌜φ⌝] T.Δ₁ch.val ↔ ℕ ⊧/![⌜φ⌝] T.Δ₁ch.val := by
     simpa [Semiformula.coe_quote_eq_quote, Matrix.constant_eq_singleton]
-      using FirstOrder.Arithmetic.models_iff_of_Delta1 (V := V) (σ := T.Δ₁ch) (by simp) (by simp) (e := ![⌜φ⌝])
+      using FirstOrder.Arithmetic.models_iff_of_Delta1
+        (V := V) (σ := T.Δ₁ch) (by simp) (by simp) (e := ![⌜φ⌝])
   Iff.trans this (Theory.Δ₁.mem_iff _)
 
 @[simp] lemma Δ₁Class.mem_iff {φ : Sentence L} : (⌜φ⌝ : V) ∈ T.Δ₁Class ↔ φ ∈ T := by
@@ -87,9 +91,11 @@ instance Δ₁Class.definable : 𝚫₁-Predicate[V] (· ∈ T.Δ₁Class) := Δ
 
 @[simp] lemma Δ₁Class.mem_iff' {φ : Sentence L} : V ⊧/![⌜φ⌝] T.Δ₁ch.val ↔ φ ∈ T := Δ₁Class.mem_iff
 
-@[simp] lemma Δ₁Class.mem_iff'_s {φ : Proposition L} : V ⊧/![⌜φ⌝] T.Δ₁ch.val ↔ ∃ σ ∈ T, φ = σ := Δ₁Class.mem_iff_s
+@[simp] lemma Δ₁Class.mem_iff'_s {φ : Proposition L} :
+    V ⊧/![⌜φ⌝] T.Δ₁ch.val ↔ ∃ σ ∈ T, φ = σ := Δ₁Class.mem_iff_s
 
-@[simp] lemma Δ₁Class.mem_iff'' {φ : Sentence L} : ((⌜φ⌝ : Bootstrapping.Formula V L).val : V) ∈ T.Δ₁Class ↔ φ ∈ T :=
+@[simp] lemma Δ₁Class.mem_iff'' {φ : Sentence L} :
+    ((⌜φ⌝ : Bootstrapping.Formula V L).val : V) ∈ T.Δ₁Class ↔ φ ∈ T :=
   Δ₁Class.mem_iff
 
 end FFL.FirstOrder.Arithmetic.Bootstrapping
@@ -108,7 +114,8 @@ abbrev add (dT : T.Δ₁) (dU : U.Δ₁) : (T ∪ U).Δ₁ where
   ch := T.Δ₁ch ⋎ U.Δ₁ch
   mem_iff {φ} := by
     simp only [Nat.succ_eq_add_one, Nat.reduceAdd, val_or, LogicalConnective.HomClass.map_or,
-      FirstOrder.Arithmetic.Bootstrapping.Δ₁Class.mem_iff'_s, LogicalConnective.Prop.or_eq, Set.mem_union]
+      FirstOrder.Arithmetic.Bootstrapping.Δ₁Class.mem_iff'_s, LogicalConnective.Prop.or_eq,
+      Set.mem_union]
     grind
   isDelta1 := Arithmetic.HierarchySymbol.Semiformula.ProvablyProperOn.ofProperOn.{0} _ fun V _ _ ↦ ProperOn.or (by simp) (by simp)
 
@@ -122,10 +129,22 @@ instance empty : Theory.Δ₁ (∅ : Theory L) where
   mem_iff {ψ} := by simp
   isDelta1 := Arithmetic.HierarchySymbol.Semiformula.ProvablyProperOn.ofProperOn.{0} _ fun V _ _ ↦ by simp
 
-abbrev singleton (φ : Sentence L) : Theory.Δ₁ {φ} where
+abbrev singleton (φ : Sentence L) :
+    _root_.FFL.FirstOrder.Theory.Δ₁ (Set.singleton φ) where
   ch := .ofZero (.mkSigma “x. x = ↑(Encodable.encode φ)”) _
-  mem_iff {ψ} := by simp [Semiformula.quote_eq_encode]
-  isDelta1 := Arithmetic.HierarchySymbol.Semiformula.ProvablyProperOn.ofProperOn.{0} _ fun V _ _ ↦ by simp
+  mem_iff {ψ} := by
+    constructor
+    · intro h
+      have h' : ψ = Rewriting.emb φ := by
+        simpa [Semiformula.quote_eq_encode] using h
+      exact ⟨φ, Set.mem_singleton_iff.mpr rfl, h'⟩
+    · rintro ⟨σ, hσ, h⟩
+      have : σ = φ := Set.mem_singleton_iff.mp hσ
+      subst σ
+      simpa [Semiformula.quote_eq_encode] using h
+  isDelta1 := Arithmetic.HierarchySymbol.Semiformula.ProvablyProperOn.ofProperOn.{0} _ fun V _ _ ↦ by
+    intro
+    rfl
 
 @[simp] lemma singleton_toTDef_ch_val (φ : Sentence L) :
     letI := Δ₁.singleton φ
@@ -134,15 +153,26 @@ abbrev singleton (φ : Sentence L) : Theory.Δ₁ {φ} where
 abbrev ofList (l : List (Sentence L)) : Δ₁ {φ | φ ∈ l} :=
   match l with
   |     [] => empty.ofEq (by ext; simp)
-  | φ :: l => ((singleton φ).add (ofList l)).ofEq (by ext; simp)
+  | φ :: l => ((singleton φ).add (ofList l)).ofEq (by
+      ext x
+      have hmem : x ∈ Set.singleton φ ↔ x = φ := Set.mem_singleton_iff
+      simp only [Set.mem_union, Set.mem_setOf_eq, List.mem_cons, hmem])
 
-noncomputable abbrev ofFinite (T : Theory L) (h : Set.Finite T) : T.Δ₁ := (ofList h.toFinset.toList).ofEq (by ext; simp)
+noncomputable abbrev ofFinite (T : Theory L) (h : Set.Finite T) : T.Δ₁ :=
+  (ofList h.toFinset.toList).ofEq (by ext; simp)
 
 instance [T.Δ₁] [U.Δ₁] : (T ∪ U).Δ₁ := add inferInstance inferInstance
 
-instance (φ : Sentence L) : Theory.Δ₁ {φ} := singleton φ
+instance (φ : Sentence L) :
+    _root_.FFL.FirstOrder.Theory.Δ₁ (Set.singleton φ) := singleton φ
 
-instance insert [d : T.Δ₁] : (insert φ T).Δ₁ := (d.add (singleton φ)).ofEq (by ext; simp)
+instance insert {φ : Sentence L} [d : T.Δ₁] : (insert φ T).Δ₁ :=
+  (d.add (singleton φ : _root_.FFL.FirstOrder.Theory.Δ₁ (Set.singleton φ))).ofEq
+    (by
+      ext x
+      have hmem : x ∈ Set.singleton φ ↔ x = φ := Set.mem_singleton_iff
+      simp only [Set.mem_union, Set.mem_insert_iff, hmem]
+      tauto)
 
 end Δ₁
 

@@ -32,7 +32,8 @@ variable {k} (φ : Blueprint k)
 instance : Coe (Blueprint k) (𝚫₁.Semisentence (k + 2)) := ⟨Blueprint.core⟩
 
 def succDef : 𝚺₁.Semisentence (k + 3) := .mkSigma
-  “u ih s. ∀ x < u + (s + 1), (x ∈ u → x ≤ s ∧ !φ.core.sigma x ih ⋯) ∧ (x ≤ s ∧ !φ.core.pi x ih ⋯ → x ∈ u)”
+  “u ih s. ∀ x < u + (s + 1), (x ∈ u → x ≤ s ∧ !φ.core.sigma x ih ⋯) ∧
+    (x ≤ s ∧ !φ.core.pi x ih ⋯ → x ∈ u)”
 
 def prBlueprint : PR.Blueprint k where
   zero := .mkSigma “x. x = 0”
@@ -87,8 +88,9 @@ noncomputable def succ (s ih : V) : V := Classical.choose! (c.succ_existsUnique 
 
 variable {v}
 
-lemma mem_succ_iff {v s ih} :
-    x ∈ c.succ v s ih ↔ x ≤ s ∧ c.Φ v {z | z ∈ ih} x := Classical.choose!_spec (c.succ_existsUnique v s ih) x
+lemma mem_succ_iff {v : Fin k → V} {s ih x : V} :
+    x ∈ c.succ v s ih ↔ x ≤ s ∧ c.Φ v {z | z ∈ ih} x :=
+  Classical.choose!_spec (c.succ_existsUnique v s ih) x
 
 private lemma succ_graph {u v s ih} :
     u = c.succ v s ih ↔ ∀ x < u + (s + 1), x ∈ u ↔ x ≤ s ∧ c.Φ v {z | z ∈ ih} x :=
@@ -122,7 +124,8 @@ variable {v}
 
 @[simp] lemma limSeq_zero : c.limSeq v 0 = ∅ := by simp [limSeq, prConstruction]
 
-lemma limSeq_succ (s : V) : c.limSeq v (s + 1) = c.succ v s (c.limSeq v s) := by simp [limSeq, prConstruction]
+lemma limSeq_succ (s : V) : c.limSeq v (s + 1) = c.succ v s (c.limSeq v s) := by
+  simp [limSeq, prConstruction]
 
 lemma termSet_defined : 𝚺₁.DefinedFunction (fun v ↦ c.limSeq (v ·.succ) (v 0)) φ.limSeqDef := .mk
   fun v ↦ by simp [c.prConstruction.result_defined_iff, Blueprint.limSeqDef]; rfl
@@ -133,10 +136,13 @@ lemma termSet_defined : 𝚺₁.DefinedFunction (fun v ↦ c.limSeq (v ·.succ) 
 instance limSeq_definable :
   𝚺₁.DefinableFunction (fun v ↦ c.limSeq (v ·.succ) (v 0)) := c.termSet_defined.to_definable
 
-@[simp, definability] instance limSeq_definable' (Γ) : Γ-[m + 1].DefinableFunction (fun v ↦ c.limSeq (v ·.succ) (v 0)) := c.limSeq_definable.of_sigmaOne
+@[simp, definability] instance limSeq_definable' {Γ : Polarity} {m : ℕ} :
+    Γ-[m + 1].DefinableFunction (fun v ↦ c.limSeq (v ·.succ) (v 0)) :=
+  c.limSeq_definable.of_sigmaOne
 
 lemma mem_limSeq_succ_iff {x s : V} :
-    x ∈ c.limSeq v (s + 1) ↔ x ≤ s ∧ c.Φ v {z | z ∈ c.limSeq v s} x := by simp [limSeq_succ, mem_succ_iff]
+    x ∈ c.limSeq v (s + 1) ↔ x ≤ s ∧ c.Φ v {z | z ∈ c.limSeq v s} x := by
+  simp [limSeq_succ, mem_succ_iff]
 
 lemma limSeq_cumulative {s s' : V} : s ≤ s' → c.limSeq v s ⊆ c.limSeq v s' := by
   induction s' using ISigma1.sigma1_succ_induction generalizing s
@@ -219,7 +225,7 @@ lemma finite_upperbound (m : V) : ∃ s, ∀ z < m, c.Fixpoint v z → z ∈ c.l
     have : z ∈ c.limSeq v u := hf z u hu
     exact c.limSeq_cumulative (le_of_lt <| lt_of_mem_rng hu) this⟩
 
-theorem case [c.Finite] : c.Fixpoint v x ↔ c.Φ v {z | c.Fixpoint v z} x :=
+theorem case [c.Finite] {x : V} : c.Fixpoint v x ↔ c.Φ v {z | c.Fixpoint v z} x :=
   ⟨by intro h
       rcases c.fixpoint_iff_succ.mp h with ⟨u, hu⟩
       have : c.Φ v {z | z ∈ c.limSeq v u} x := (c.mem_limSeq_succ_iff.mp hu).2
@@ -234,17 +240,20 @@ theorem case [c.Finite] : c.Fixpoint v x ↔ c.Φ v {z | c.Fixpoint v z} x :=
           intro z hz hzm; exact hs z hzm hz)
           hm
       exact ⟨max s x + 1,
-        c.mem_limSeq_succ_iff.mpr <| ⟨by simp, c.monotone (fun z hz ↦ c.limSeq_cumulative (by simp) hz) this⟩⟩⟩
+        c.mem_limSeq_succ_iff.mpr <| ⟨by simp,
+          c.monotone (fun z hz ↦ c.limSeq_cumulative (by simp) hz) this⟩⟩⟩
 
 section
 
-lemma fixpoint_defined : 𝚺₁.Defined (fun v ↦ c.Fixpoint (v ·.succ) (v 0)) φ.fixpointDef := .mk fun v ↦ by
+lemma fixpoint_defined : 𝚺₁.Defined (fun v ↦ c.Fixpoint (v ·.succ) (v 0)) φ.fixpointDef :=
+  .mk fun v ↦ by
   simp [Blueprint.fixpointDef, c.eval_limSeqDef]; rfl
 
 @[simp] lemma eval_fixpointDef (v : Fin (k + 1) → V) :
     φ.fixpointDef.val.Evalb v ↔ c.Fixpoint (v ·.succ) (v 0) := c.fixpoint_defined.iff
 
-lemma fixpoint_definedΔ₁ [c.StrongFinite] : 𝚫₁.Defined (fun v ↦ c.Fixpoint (v ·.succ) (v 0)) φ.fixpointDefΔ₁ :=
+lemma fixpoint_definedΔ₁ [c.StrongFinite] :
+    𝚫₁.Defined (fun v ↦ c.Fixpoint (v ·.succ) (v 0)) φ.fixpointDefΔ₁ :=
   ⟨by intro v; simp [Blueprint.fixpointDefΔ₁, c.eval_limSeqDef],
    by intro v; simp [Blueprint.fixpointDefΔ₁, c.eval_limSeqDef, fixpoint_iff]⟩
 
@@ -253,7 +262,7 @@ lemma fixpoint_definedΔ₁ [c.StrongFinite] : 𝚫₁.Defined (fun v ↦ c.Fixp
 
 end
 
-theorem induction [c.StrongFinite] {P : V → Prop} (hP : Γ-[1]-Predicate P)
+theorem induction [c.StrongFinite] {Γ : Polarity} {P : V → Prop} (hP : Γ-[1]-Predicate P)
     (H : ∀ C : Set V, (∀ x ∈ C, c.Fixpoint v x ∧ P x) → ∀ x, c.Φ v C x → P x) :
     ∀ x, c.Fixpoint v x → P x := by
   apply InductionOnBroadHierarchy.order_induction_sigma (Γ := Γ) (s := 1) (P := fun x ↦ c.Fixpoint v x → P x)

@@ -4,7 +4,10 @@ public import Foundation.FirstOrder.LJ.Basic
 public import Foundation.FirstOrder.LK.Basic
 
 @[expose] public section
+set_option autoImplicit true
 namespace FFL.FirstOrder
+
+universe u
 
 namespace Semiformula
 
@@ -20,9 +23,11 @@ def doubleNegation {n} : Semiformula L ξ n → Semiformulaᵢ L ξ n
 
 scoped[FFL.FirstOrder] postfix:max "ᴺ" => Semiformula.doubleNegation
 
-@[simp] lemma doubleNegation_rel {k} (r : L.Rel k) (v : Fin k → Semiterm L ξ n) : (rel r v)ᴺ = ∼∼(.rel r v) := rfl
+@[simp] lemma doubleNegation_rel {k} (r : L.Rel k) (v : Fin k → Semiterm L ξ n) :
+    (rel r v)ᴺ = ∼∼(.rel r v) := rfl
 
-@[simp] lemma doubleNegation_nrel {k} (r : L.Rel k) (v : Fin k → Semiterm L ξ n) : (nrel r v)ᴺ = ∼(.rel r v) := rfl
+@[simp] lemma doubleNegation_nrel {k} (r : L.Rel k) (v : Fin k → Semiterm L ξ n) :
+    (nrel r v)ᴺ = ∼(.rel r v) := rfl
 
 @[simp] lemma doubleNegation_verum : (⊤ : Semiformula L ξ n)ᴺ = ∼⊥ := rfl
 
@@ -36,7 +41,8 @@ scoped[FFL.FirstOrder] postfix:max "ᴺ" => Semiformula.doubleNegation
 
 @[simp] lemma doubleNegation_ex (φ : Semiformula L ξ (n + 1)) : (∃¹ φ)ᴺ = ∼(∀¹ ∼φᴺ) := rfl
 
-lemma doubleNegation_imply (φ ψ : Semiformula L ξ n) : (φ 🡒 ψ)ᴺ = ∼(∼(∼φ)ᴺ ⋏ ∼ψᴺ) := by simp [imp_eq]
+lemma doubleNegation_imply (φ ψ : Semiformula L ξ n) : (φ 🡒 ψ)ᴺ = ∼(∼(∼φ)ᴺ ⋏ ∼ψᴺ) := by
+  simp [imp_eq]
 
 @[simp] lemma doubleNegation_isNegative (φ : Semiformula L ξ n) : φᴺ.IsNegative := by
   induction φ using rec' <;> simp [*]
@@ -121,8 +127,12 @@ def negDoubleNegation : (φ : Proposition L) →
           (Rewriting.free ((∼φ)ᴺ)) :=
         by simpa [Semiformula.rew_doubleNegation] using e
       exact (InterDerivation.dne (by simp)).trans (InterDerivation.all e)
-  termination_by φ => φ.complexity
-
+termination_by φ => φ.complexity
+decreasing_by
+  all_goals first
+  | exact Nat.lt_succ_of_le (Nat.le_max_left _ _)
+  | exact Nat.lt_succ_of_le (Nat.le_max_right _ _)
+  | simp
 def negDoubleNegation' (φ : Proposition L) :
     InterDerivation L (∼(∼φ)ᴺ) φᴺ := by
   simpa using negDoubleNegation (∼φ)

@@ -25,24 +25,30 @@ noncomputable instance : GödelQuote (SyntacticSemiterm L n) (Bootstrapping.Semi
 variable {V}
 
 @[simp] lemma typed_quote_bvar (x : Fin n) :
-    (⌜(#x : SyntacticSemiterm L n)⌝ : Bootstrapping.Semiterm V L n) = Bootstrapping.Semiterm.bvar x := rfl
+    (⌜(#x : SyntacticSemiterm L n)⌝ : Bootstrapping.Semiterm V L n) =
+      Bootstrapping.Semiterm.bvar x := rfl
 
 @[simp] lemma typed_quote_fvar (x : ℕ) :
-    (⌜(&x : SyntacticSemiterm L n)⌝ : Bootstrapping.Semiterm V L n) = Bootstrapping.Semiterm.fvar ↑x := rfl
+    (⌜(&x : SyntacticSemiterm L n)⌝ : Bootstrapping.Semiterm V L n) =
+      Bootstrapping.Semiterm.fvar ↑x := rfl
 
-@[simp] lemma typed_quote_func (f : L.Func k) (v : Fin k → SyntacticSemiterm L n) :
+@[simp] lemma typed_quote_func {k : ℕ} (f : L.Func k) (v : Fin k → SyntacticSemiterm L n) :
     (⌜func f v⌝ : Bootstrapping.Semiterm V L n) = Bootstrapping.Semiterm.func f fun i ↦ ⌜v i⌝ := rfl
 
 @[simp] lemma typed_quote_shift (t : SyntacticSemiterm L n) :
-    (⌜Rew.shift t⌝ : Bootstrapping.Semiterm V L n) = Bootstrapping.Semiterm.shift (⌜t⌝ : Bootstrapping.Semiterm V L n) := by
+    (⌜Rew.shift t⌝ : Bootstrapping.Semiterm V L n) =
+      Bootstrapping.Semiterm.shift (⌜t⌝ : Bootstrapping.Semiterm V L n) := by
   induction t <;> simp [Rew.func, *]; rfl
 
 @[simp] lemma typed_quote_bShift (t : SyntacticSemiterm L n) :
-    (⌜Rew.bShift t⌝ : Bootstrapping.Semiterm V L (n + 1)) = Bootstrapping.Semiterm.bShift (⌜t⌝ : Bootstrapping.Semiterm V L n) := by
+    (⌜Rew.bShift t⌝ : Bootstrapping.Semiterm V L (n + 1)) =
+      Bootstrapping.Semiterm.bShift (⌜t⌝ : Bootstrapping.Semiterm V L n) := by
   induction t <;> simp [Rew.func, *]; rfl
 
-@[simp] lemma typed_quote_substs {n m} (t : SyntacticSemiterm L n) (w : Fin n → SyntacticSemiterm L m) :
-    (⌜Rew.subst w t⌝ : Bootstrapping.Semiterm V L m) = Bootstrapping.Semiterm.subst (fun i ↦ ⌜w i⌝) ⌜t⌝ := by
+@[simp] lemma typed_quote_substs {n m} (t : SyntacticSemiterm L n)
+    (w : Fin n → SyntacticSemiterm L m) :
+    (⌜Rew.subst w t⌝ : Bootstrapping.Semiterm V L m) =
+      Bootstrapping.Semiterm.subst (fun i ↦ ⌜w i⌝) ⌜t⌝ := by
   induction t <;> simp [Rew.func, *]; rfl
 
 open Bootstrapping.Arithmetic
@@ -70,10 +76,12 @@ lemma typed_quote_numeral_eq_numeral_one :
   | k + 1 + 1 =>
     calc (⌜(↑(k + 1 + 1) : SyntacticSemiterm ℒₒᵣ n)⌝ : Bootstrapping.Semiterm V ℒₒᵣ n)
       _ = ⌜(↑(k + 1) : SyntacticSemiterm ℒₒᵣ n)⌝ + ⌜((1 : ℕ) : SyntacticSemiterm ℒₒᵣ n)⌝ := rfl
-      _ = typedNumeral ↑(k + 1) + typedNumeral 1 := by simp [typed_quote_numeral_eq_numeral (k + 1), typed_quote_numeral_eq_numeral_one]
+      _ = typedNumeral ↑(k + 1) + typedNumeral 1 := by
+        simp [typed_quote_numeral_eq_numeral (k + 1), typed_quote_numeral_eq_numeral_one]
       _ = typedNumeral (↑k + 1 + 1)              := by simp
 
-lemma typed_quote_inj {t u : SyntacticSemiterm L n} : (⌜t⌝ : Bootstrapping.Semiterm V L n) = ⌜u⌝ → t = u :=
+lemma typed_quote_inj {t u : SyntacticSemiterm L n} :
+    (⌜t⌝ : Bootstrapping.Semiterm V L n) = ⌜u⌝ → t = u :=
   match t, u with
   |         #x,         #y => by simp
   |         &x,         &y => by simp
@@ -93,7 +101,9 @@ lemma typed_quote_inj {t u : SyntacticSemiterm L n} : (⌜t⌝ : Bootstrapping.S
   |         &_,         #_
   |         &_,   func _ _
   |   func _ _,         #_
-  |   func _ _,         &_ => by simp [Bootstrapping.Semiterm.bvar, Bootstrapping.Semiterm.fvar, Bootstrapping.Semiterm.func, qqBvar, qqFvar, qqFunc]
+  |   func _ _,         &_ => by
+    simp [Bootstrapping.Semiterm.bvar, Bootstrapping.Semiterm.fvar, Bootstrapping.Semiterm.func,
+      qqBvar, qqFvar, qqFunc]
 
 @[simp] lemma typed_quote_inj_iff {t u : SyntacticSemiterm L n} :
     (⌜t⌝ : Bootstrapping.Semiterm V L n) = ⌜u⌝ ↔ t = u := ⟨typed_quote_inj, by rintro rfl; rfl⟩
@@ -101,18 +111,21 @@ lemma typed_quote_inj {t u : SyntacticSemiterm L n} : (⌜t⌝ : Bootstrapping.S
 noncomputable instance : GödelQuote (SyntacticSemiterm L n) V where
   quote t := (⌜t⌝ : Bootstrapping.Semiterm V L n).val
 
-theorem quote_def (t : SyntacticSemiterm L n) : (⌜t⌝ : V) = (⌜t⌝ : Bootstrapping.Semiterm V L n).val := rfl
+theorem quote_def (t : SyntacticSemiterm L n) :
+    (⌜t⌝ : V) = (⌜t⌝ : Bootstrapping.Semiterm V L n).val := rfl
 
-private lemma quote_eq_encode'_aux (v : Fin k → Semiterm L ℕ n)
+private lemma quote_eq_encode'_aux {k : ℕ} (v : Fin k → Semiterm L ℕ n)
     (H : ∀ i, (⌜v i⌝ : Bootstrapping.Semiterm V L n).val = encode ↑(v i)) :
-    (SemitermVec.val fun i ↦ (⌜v i⌝ : Bootstrapping.Semiterm V L n)) = ↑(Matrix.vecToNat fun i ↦ encode (v i)) := by
+    (SemitermVec.val fun i ↦ (⌜v i⌝ : Bootstrapping.Semiterm V L n)) =
+      ↑(Matrix.vecToNat fun i ↦ encode (v i)) := by
   induction k
   case zero => simp
   case succ k ih =>
     suffices
         (⌜v 0⌝ : Bootstrapping.Semiterm V L n).val = encode ↑(v 0) ∧
         SemitermVec.val (fun i ↦ ⌜v i.succ⌝) = ↑(Matrix.vecToNat fun i ↦ encode (v i.succ) : V) by
-      simpa [Matrix.vecToNat, coe_pair_eq_pair_coe, adjoin_def, Matrix.vecHead, Matrix.vecTail, Function.comp_def]
+      simpa [Matrix.vecToNat, coe_pair_eq_pair_coe, adjoin_def, Matrix.vecHead, Matrix.vecTail,
+        Function.comp_def]
     constructor
     · exact H 0
     · exact ih (fun i ↦ v i.succ) (fun i ↦ by simpa using H i.succ)
@@ -122,17 +135,21 @@ lemma quote_eq_encode (t : SyntacticSemiterm L n) : (⌜t⌝ : V) = ↑(encode t
   |       #x => simp [quote_def, encode_eq_toNat, toNat, qqBvar, coe_pair_eq_pair_coe]
   |       &x => simp [quote_def, encode_eq_toNat, toNat, qqFvar, coe_pair_eq_pair_coe]
   | func f v =>
-    suffices (⌜f⌝ : V) = ↑(encode f) ∧ (SemitermVec.val (V := V) fun i ↦ ⌜v i⌝) = ↑(Matrix.vecToNat fun i ↦ encode (v i)) by
-      simpa [quote_def, encode_eq_toNat, toNat, Bootstrapping.Semiterm.func, qqFunc, coe_pair_eq_pair_coe]
+    suffices (⌜f⌝ : V) = ↑(encode f) ∧
+        (SemitermVec.val (V := V) fun i ↦ ⌜v i⌝) = ↑(Matrix.vecToNat fun i ↦ encode (v i)) by
+      simpa [quote_def, encode_eq_toNat, toNat, Bootstrapping.Semiterm.func, qqFunc,
+        coe_pair_eq_pair_coe]
     constructor
     · rfl
     · exact quote_eq_encode'_aux _ fun i ↦ quote_eq_encode (v i)
 
-lemma quote_eq_encode' (v : Fin k → Semiterm L ℕ n) :
-    (SemitermVec.val fun i ↦ (⌜v i⌝ : Bootstrapping.Semiterm V L n)) = ↑(Matrix.vecToNat fun i ↦ encode (v i)) :=
+lemma quote_eq_encode' {k : ℕ} (v : Fin k → Semiterm L ℕ n) :
+    (SemitermVec.val fun i ↦ (⌜v i⌝ : Bootstrapping.Semiterm V L n)) =
+      ↑(Matrix.vecToNat fun i ↦ encode (v i)) :=
   quote_eq_encode'_aux _ fun i ↦ quote_eq_encode (v i)
 
-lemma quote_eq_encode_standard (t : SyntacticSemiterm L n) : (⌜t⌝ : ℕ) = encode t := by simp [quote_eq_encode]
+lemma quote_eq_encode_standard (t : SyntacticSemiterm L n) : (⌜t⌝ : ℕ) = encode t := by
+  simp [quote_eq_encode]
 
 lemma coe_quote_eq_quote (t : SyntacticSemiterm L n) : (↑(⌜t⌝ : ℕ) : V) = ⌜t⌝ := by
   simp [quote_eq_encode]
@@ -145,8 +162,9 @@ lemma coe_quote_eq_quote' (t : SyntacticSemiterm L n) :
 
 @[simp] lemma quote_fvar (x : ℕ) : (⌜(&x : SyntacticSemiterm L n)⌝ : V) = ^&↑x := rfl
 
-@[simp] lemma quote_func (f : L.Func k) (v : Fin k → SyntacticSemiterm L n) :
-    (⌜func f v⌝ : V) = ^func ↑k ⌜f⌝ (SemitermVec.val fun i ↦ (⌜v i⌝ : Bootstrapping.Semiterm V L n)) := rfl
+@[simp] lemma quote_func {k : ℕ} (f : L.Func k) (v : Fin k → SyntacticSemiterm L n) :
+    (⌜func f v⌝ : V) =
+      ^func ↑k ⌜f⌝ (SemitermVec.val fun i ↦ (⌜v i⌝ : Bootstrapping.Semiterm V L n)) := rfl
 
 variable (V)
 
@@ -159,9 +177,10 @@ theorem empty_typed_quote_def (t : ClosedSemiterm L n) :
     (⌜t⌝ : Bootstrapping.Semiterm V L n) = ⌜(Rew.emb t : SyntacticSemiterm L n)⌝ := rfl
 
 @[simp] lemma empty_typed_quote_bvar (x : Fin n) :
-    (⌜(#x : ClosedSemiterm L n)⌝ : Bootstrapping.Semiterm V L n) = Bootstrapping.Semiterm.bvar x := rfl
+    (⌜(#x : ClosedSemiterm L n)⌝ : Bootstrapping.Semiterm V L n) =
+      Bootstrapping.Semiterm.bvar x := rfl
 
-@[simp] lemma empty_typed_quote_func (f : L.Func k) (v : Fin k → ClosedSemiterm L n) :
+@[simp] lemma empty_typed_quote_func {k : ℕ} (f : L.Func k) (v : Fin k → ClosedSemiterm L n) :
     (⌜func f v⌝ : Bootstrapping.Semiterm V L n) = Bootstrapping.Semiterm.func f fun i ↦ ⌜v i⌝ := rfl
 
 @[simp] lemma empty_typed_quote_add (t u : ClosedSemiterm ℒₒᵣ n) :
@@ -177,16 +196,21 @@ theorem empty_typed_quote_def (t : ClosedSemiterm L n) :
 noncomputable instance : GödelQuote (ClosedSemiterm L n) V where
   quote t := ⌜(Rew.emb t : SyntacticSemiterm L n)⌝
 
-lemma empty_quote_def (t : ClosedSemiterm L n) : (⌜t⌝ : V) = ⌜(Rew.emb t : SyntacticSemiterm L n)⌝ := rfl
+lemma empty_quote_def (t : ClosedSemiterm L n) :
+    (⌜t⌝ : V) = ⌜(Rew.emb t : SyntacticSemiterm L n)⌝ := rfl
 
-theorem empty_quote_eq (t : ClosedSemiterm L n) : (⌜t⌝ : V) = (⌜t⌝ : Bootstrapping.Semiterm V L n).val := rfl
+theorem empty_quote_eq (t : ClosedSemiterm L n) :
+    (⌜t⌝ : V) = (⌜t⌝ : Bootstrapping.Semiterm V L n).val := rfl
 
-lemma empty_quote_eq_encode (t : ClosedSemiterm L n) : (⌜t⌝ : V) = ↑(encode t) := by simp [empty_quote_def, quote_eq_encode]
+lemma empty_quote_eq_encode (t : ClosedSemiterm L n) : (⌜t⌝ : V) = ↑(encode t) := by
+  simp [empty_quote_def, quote_eq_encode]
 
-@[simp] lemma coe_quote {ξ n} (t : SyntacticSemiterm L n) : ↑(⌜t⌝ : ℕ) = (⌜t⌝ : ArithmeticSemiterm ξ m) := by
+@[simp] lemma coe_quote {ξ n m} (t : SyntacticSemiterm L n) :
+    ↑(⌜t⌝ : ℕ) = (⌜t⌝ : ArithmeticSemiterm ξ m) := by
   simp [gödelNumber'_def, quote_eq_encode]
 
-@[simp] lemma coe_empty_quote {ξ n} (t : ClosedSemiterm L n) : ↑(⌜t⌝ : ℕ) = (⌜t⌝ : ArithmeticSemiterm ξ m) := by
+@[simp] lemma coe_empty_quote {ξ n m} (t : ClosedSemiterm L n) :
+    ↑(⌜t⌝ : ℕ) = (⌜t⌝ : ArithmeticSemiterm ξ m) := by
   simp [gödelNumber'_def, empty_quote_eq_encode]
 
 end FFL.FirstOrder.Semiterm
@@ -200,9 +224,16 @@ lemma mem_iff_mem_bitIndices {x s : ℕ} : x ∈ s ↔ x ∈ s.bitIndices := by
   induction s using Nat.binaryRec generalizing x
   case zero => simp
   case bit b s ih =>
-    cases b <;> simp
-    · cases' x with x <;> simp [ih]
-    · cases' x with x <;> simp [ih]
+    cases b
+    · simp only [Nat.bit_false_apply, Nat.bitIndices_two_mul, List.mem_map, Nat.mem_bitIndices]
+      cases x with
+      | zero => simp
+      | succ x => simp [ih]
+    · simp only [Nat.bit_true_apply, Nat.bitIndices_two_mul_add_one, List.mem_cons, List.mem_map,
+        Nat.mem_bitIndices]
+      cases x with
+      | zero => simp
+      | succ x => simp [ih]
 
 lemma nat_mem_iff {x s : ℕ} : x ∈ s ↔ s / 2 ^ x % 2 = 1 := by
   simp [mem_iff_mem_bitIndices, Nat.testBit_eq_decide_div_mod_eq]
@@ -213,7 +244,8 @@ lemma nat_insert_eq (x s : ℕ) :
 
 variable {L : Language} [L.Encodable] [L.LORDefinable]
 
-lemma IsSemiterm.sound {n t : ℕ} (ht : IsSemiterm L n t) : ∃ T : FirstOrder.SyntacticSemiterm L n, ⌜T⌝ = t := by
+lemma IsSemiterm.sound {n t : ℕ} (ht : IsSemiterm L n t) :
+    ∃ T : FirstOrder.SyntacticSemiterm L n, ⌜T⌝ = t := by
   induction t using Nat.strongRec
   case ind t ih =>
     rcases ht.case with (⟨z, hz, rfl⟩ | ⟨x, rfl⟩ | ⟨k, f, v, hf, hv, rfl⟩)
@@ -222,7 +254,8 @@ lemma IsSemiterm.sound {n t : ℕ} (ht : IsSemiterm L n t) : ∃ T : FirstOrder.
     · have : ∀ i : Fin k, ∃ t : FirstOrder.SyntacticSemiterm L n, ⌜t⌝ = v.[i] := fun i ↦
         ih v.[i] (nth_lt_qqFunc_of_lt (by simp [hv.lh])) (hv.nth i.prop)
       choose v' hv' using this
-      have : ∃ F, encode F = f := isFunc_quote_quote (V := ℕ) (L := L) (x := f) (k := k) |>.mp (by simp [hf])
+      have : ∃ F, encode F = f :=
+        isFunc_quote_quote (V := ℕ) (L := L) (x := f) (k := k) |>.mp (by simp [hf])
       rcases this with ⟨f, rfl⟩
       refine ⟨FirstOrder.Semiterm.func f v', ?_⟩
       suffices SemitermVec.val (fun i ↦ ⌜v' i⌝) = v by simpa [Semiterm.quote_func, quote_func_def]
@@ -232,7 +265,8 @@ lemma IsSemiterm.sound {n t : ℕ} (ht : IsSemiterm L n t) : ∃ T : FirstOrder.
       calc
         (SemitermVec.val fun i ↦ ⌜v' i⌝).[i] = (SemitermVec.val fun i ↦ ⌜v' i⌝).[↑j] := rfl
         _                                    = ⌜v' j⌝ := by
-          simpa [Semiterm.quote_def] using SemitermVec.val_nth_eq (fun i ↦ (⌜v' i⌝ : Bootstrapping.Semiterm ℕ L n)) j
+          simpa [Semiterm.quote_def] using
+            SemitermVec.val_nth_eq (fun i ↦ (⌜v' i⌝ : Bootstrapping.Semiterm ℕ L n)) j
         _                                    = v.[i] := hv' j
 
 end FFL.FirstOrder.Arithmetic.Bootstrapping

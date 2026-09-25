@@ -8,6 +8,7 @@ public import Foundation.FirstOrder.Syntax.Classical.BoundingHierarchy
 namespace FFL.FirstOrder.SetTheory
 
 variable {L : Language} [L.Mem]
+variable {ξ : Type*} {n : ℕ} {Γ : Polarity} {s : ℕ} {m k : ℕ} {ι : Type*}
 
 abbrev Hierarchy : Polarity → ℕ → {n : ℕ} → Semiformula L ξ n → Prop :=
   ℬ[∈, L].Hierarchy
@@ -33,11 +34,11 @@ abbrev bounded (Γ s n) {φ : Semiformula L ξ n} :
 @[simp] abbrev falsum (Γ s n) : Hierarchy Γ s (⊥ : Semiformula L ξ n) :=
   Bounding.Hierarchy.falsum Γ s n
 
-@[simp] abbrev rel (Γ s) {k} (r : L.Rel k) (v : Fin k → Semiterm L ξ x) :
+@[simp] abbrev rel (Γ s) {k} (r : L.Rel k) {x : ℕ} (v : Fin k → Semiterm L ξ x) :
     Hierarchy Γ s (Semiformula.rel r v) :=
   Bounding.Hierarchy.rel Γ s r v
 
-@[simp] abbrev nrel (Γ s) {k} (r : L.Rel k) (v : Fin k → Semiterm L ξ x) :
+@[simp] abbrev nrel (Γ s) {k} (r : L.Rel k) {x : ℕ} (v : Fin k → Semiterm L ξ x) :
     Hierarchy Γ s (Semiformula.nrel r v) :=
   Bounding.Hierarchy.nrel Γ s r v
 
@@ -199,11 +200,12 @@ lemma sigma_of_sigma_ex {φ : Semiformula L ξ (n + 1)} :
     Hierarchy 𝚺 (s + 1) (∃¹^[k] φ) ↔ Hierarchy 𝚺 (s + 1) φ :=
   Bounding.Hierarchy.exsItr_iff
 
-lemma rew (ω : Rew L ξ₁ n₁ ξ₂ n₂) {φ : Semiformula L ξ₁ n₁} :
+lemma rew {ξ₁ ξ₂ : Type*} {n₁ n₂ : ℕ} (ω : Rew L ξ₁ n₁ ξ₂ n₂) {φ : Semiformula L ξ₁ n₁} :
     Hierarchy Γ s φ → Hierarchy Γ s (ω ▹ φ) :=
   Bounding.Hierarchy.rew ω
 
-@[simp] lemma rew_iff {ω : Rew L ξ₁ n₁ ξ₂ n₂} {φ : Semiformula L ξ₁ n₁} :
+@[simp] lemma rew_iff {ξ₁ ξ₂ : Type*} {n₁ n₂ : ℕ} {ω : Rew L ξ₁ n₁ ξ₂ n₂}
+    {φ : Semiformula L ξ₁ n₁} :
     Hierarchy Γ s (ω ▹ φ) ↔ Hierarchy Γ s φ :=
   Bounding.Hierarchy.rew_iff
 

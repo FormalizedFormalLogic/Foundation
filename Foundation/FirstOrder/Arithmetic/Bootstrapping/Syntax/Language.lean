@@ -9,9 +9,11 @@ namespace FFL.FirstOrder.Arithmetic.Bootstrapping
 
 variable {L : Language} [L.Encodable]
 
-instance (k) : Semiterm.Operator.GödelNumber ℒₒᵣ (L.Func k) := ⟨fun f ↦ Semiterm.Operator.numeral ℒₒᵣ (Encodable.encode f)⟩
+instance (k) : Semiterm.Operator.GödelNumber ℒₒᵣ (L.Func k) :=
+  ⟨fun f ↦ Semiterm.Operator.numeral ℒₒᵣ (Encodable.encode f)⟩
 
-instance (k) : Semiterm.Operator.GödelNumber ℒₒᵣ (L.Rel k) := ⟨fun r ↦ Semiterm.Operator.numeral ℒₒᵣ (Encodable.encode r)⟩
+instance (k) : Semiterm.Operator.GödelNumber ℒₒᵣ (L.Rel k) :=
+  ⟨fun r ↦ Semiterm.Operator.numeral ℒₒᵣ (Encodable.encode r)⟩
 
 variable (L)
 
@@ -41,18 +43,24 @@ lemma isFunc_def (k f : V) : L.IsFunc k f ↔ V ⊧/![k, f] L.isFunc.val := by r
 lemma isRel_def (k R : V) : L.IsRel k R ↔ V ⊧/![k, R] L.isRel.val := by rfl
 
 @[simp] lemma eval_func (v : Fin 2 → V) :
-    L.isFunc.val.Evalb v ↔ L.IsFunc (v 0) (v 1) := by simp [Language.IsFunc, ← Matrix.fun_eq_vec_two]
+    L.isFunc.val.Evalb v ↔ L.IsFunc (v 0) (v 1) := by
+  simp [Language.IsFunc, ← Matrix.fun_eq_vec_two]
 
 @[simp] lemma eval_rel_iff (v : Fin 2 → V) :
-    L.isRel.val.Evalb v ↔ L.IsRel (v 0) (v 1) := by simp [Language.IsRel, ← Matrix.fun_eq_vec_two]
+    L.isRel.val.Evalb v ↔ L.IsRel (v 0) (v 1) := by
+  simp [Language.IsRel, ← Matrix.fun_eq_vec_two]
 
-instance _root_.FFL.FirstOrder.Language.IsFunc.defined : 𝚺₀-Relation (L.IsFunc (V := V)) via L.isFunc := .mk fun v ↦ by simp
+instance _root_.FFL.FirstOrder.Language.IsFunc.defined :
+    𝚺₀-Relation (L.IsFunc (V := V)) via L.isFunc := .mk fun v ↦ by simp
 
-instance _root_.FFL.FirstOrder.Language.IsRel.defined : 𝚺₀-Relation (L.IsRel (V := V)) via L.isRel := .mk fun v ↦ by simp
+instance _root_.FFL.FirstOrder.Language.IsRel.defined :
+    𝚺₀-Relation (L.IsRel (V := V)) via L.isRel := .mk fun v ↦ by simp
 
-instance _root_.FFL.FirstOrder.Language.IsFunc.definable : 𝚺₀-Relation (L.IsFunc (V := V)) := Language.IsFunc.defined.to_definable
+instance _root_.FFL.FirstOrder.Language.IsFunc.definable : 𝚺₀-Relation (L.IsFunc (V := V)) :=
+  Language.IsFunc.defined.to_definable
 
-instance _root_.FFL.FirstOrder.Language.IsRel.definable : 𝚺₀-Relation (L.IsRel (V := V)) := Language.IsRel.defined.to_definable
+instance _root_.FFL.FirstOrder.Language.IsRel.definable : 𝚺₀-Relation (L.IsRel (V := V)) :=
+  Language.IsRel.defined.to_definable
 
 @[simp, definability] instance _root_.FFL.FirstOrder.Language.IsFunc.definable' (ℌ) : ℌ-Relation (L.IsFunc (V := V)) :=
   Bounding.HierarchySymbol.Definable.of_zero Language.IsFunc.definable
@@ -64,17 +72,18 @@ section
 
 variable [V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻]
 
-instance  gödelQuoteFunc (k) : GödelQuote (L.Func k) V := ⟨fun f ↦ ↑(Encodable.encode f)⟩
+instance gödelQuoteFunc (k) : GödelQuote (L.Func k) V := ⟨fun f ↦ ↑(Encodable.encode f)⟩
 
 instance gödelQuoteRel (k) : GödelQuote (L.Rel k) V := ⟨fun R ↦ ↑(Encodable.encode R)⟩
 
 omit [L.LORDefinable] in
-lemma quote_func_def (f : L.Func k) : (⌜f⌝ : V) = ↑(Encodable.encode f) := rfl
+lemma quote_func_def {k : ℕ} (f : L.Func k) : (⌜f⌝ : V) = ↑(Encodable.encode f) := rfl
 
 omit [L.LORDefinable] in
-lemma quote_rel_def (R : L.Rel k) : (⌜R⌝ : V) = ↑(Encodable.encode R) := rfl
+lemma quote_rel_def {k : ℕ} (R : L.Rel k) : (⌜R⌝ : V) = ↑(Encodable.encode R) := rfl
 
-lemma isFunc_quote_quote {k x : ℕ} : L.IsFunc (V := V) k x ↔ ∃ f : L.Func k, Encodable.encode f = x :=
+lemma isFunc_quote_quote {k x : ℕ} :
+    L.IsFunc (V := V) k x ↔ ∃ f : L.Func k, Encodable.encode f = x :=
   have : V ⊧/![k, x] L.isFunc.val ↔ ℕ ⊧/![k, x] L.isFunc.val := by
     simpa [Matrix.comp_vecCons', Matrix.constant_eq_singleton]
       using models_iff_of_Sigma0 (V := V) (σ := L.isFunc.val) (by simp) (e := ![k, x])
@@ -94,16 +103,16 @@ lemma isRel_quote_quote {k x : ℕ} : L.IsRel (V := V) k x ↔ ∃ R : L.Rel k, 
 
 omit [L.LORDefinable]
 
-@[simp] lemma quote_func_inj (f₁ f₂ : L.Func k) : (⌜f₁⌝ : V) = (⌜f₂⌝ : V) ↔ f₁ = f₂ := by
+@[simp] lemma quote_func_inj {k : ℕ} (f₁ f₂ : L.Func k) : (⌜f₁⌝ : V) = (⌜f₂⌝ : V) ↔ f₁ = f₂ := by
   simp [quote_func_def]
 
-@[simp] lemma quote_rel_inj (R₁ R₂ : L.Rel k) : (⌜R₁⌝ : V) = (⌜R₂⌝ : V) ↔ R₁ = R₂ := by
+@[simp] lemma quote_rel_inj {k : ℕ} (R₁ R₂ : L.Rel k) : (⌜R₁⌝ : V) = (⌜R₂⌝ : V) ↔ R₁ = R₂ := by
   simp [quote_rel_def]
 
-@[simp] lemma coe_quote_func_nat (f : L.Func k) : ((⌜f⌝ : ℕ) : V) = (⌜f⌝ : V) := by
+@[simp] lemma coe_quote_func_nat {k : ℕ} (f : L.Func k) : ((⌜f⌝ : ℕ) : V) = (⌜f⌝ : V) := by
   simp [quote_func_def]
 
-@[simp] lemma coe_quote_rel_nat (R : L.Rel k) : ((⌜R⌝ : ℕ) : V) = (⌜R⌝ : V) := by
+@[simp] lemma coe_quote_rel_nat {k : ℕ} (R : L.Rel k) : ((⌜R⌝ : ℕ) : V) = (⌜R⌝ : V) := by
   simp [quote_rel_def]
 
 end
@@ -124,7 +133,7 @@ lemma _root_.FFL.FirstOrder.Language.ORing.of_mem_range_encode_func {k f : ℕ} 
     · exact ⟨Language.ORing.Func.add, rfl⟩
     · exact ⟨Language.ORing.Func.mul, rfl⟩
 
-/-- TODO: move to Basic/Syntax/Bootstrapping.Language.lean-/
+/-- TODO: move to Basic/Syntax/Bootstrapping.Language.lean -/
 lemma _root_.FFL.FirstOrder.Language.ORing.of_mem_range_encode_rel {k r : ℕ} :
     r ∈ Set.range (Encodable.encode : FirstOrder.Language.Rel ℒₒᵣ k → ℕ) ↔
     (k = 2 ∧ r = 0) ∨ (k = 2 ∧ r = 1) := by
@@ -186,7 +195,9 @@ def ltIndex : ℕ := Encodable.encode (Language.LT.lt : (ℒₒᵣ : FirstOrder.
 @[simp] lemma LOR_rel_ltIndex : (ℒₒᵣ).IsRel 2 (ltIndex : V) := by
   simpa using! codeIn_rel_quote (V := V) (L := ℒₒᵣ) Language.LT.lt
 
-lemma func_def_LOR : (ℒₒᵣ).isFunc = .mkSigma “k f. (k = 0 ∧ f = 0) ∨ (k = 0 ∧ f = 1) ∨ (k = 2 ∧ f = 0) ∨ (k = 2 ∧ f = 1)” := rfl
+lemma func_def_LOR :
+    (ℒₒᵣ).isFunc =
+      .mkSigma “k f. (k = 0 ∧ f = 0) ∨ (k = 0 ∧ f = 1) ∨ (k = 2 ∧ f = 0) ∨ (k = 2 ∧ f = 1)” := rfl
 
 lemma rel_def_LOR : (ℒₒᵣ).isRel = .mkSigma “k r. (k = 2 ∧ r = 0) ∨ (k = 2 ∧ r = 1)” := rfl
 

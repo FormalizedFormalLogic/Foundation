@@ -29,13 +29,15 @@ notation "ℬ[" L "]" => strict L
 notation "ℬ[<, " L "]" => lt L
 notation "ℬ[∈, " L "]" => mem L
 
+variable {L : Language}
+
 instance : SetLike (Bounding L) (Semiformula.Operator L 2) where
   coe ℬ := ℬ.set
   coe_injective := by rintro ⟨s⟩ ⟨t⟩; simp
 
 open Semiformula
 
-variable {L : Language} {ξ ξ₁ ξ₂ : Type*} (ℬ : Bounding L)
+variable {ξ ξ₁ ξ₂ : Type*} {n : ℕ} (ℬ : Bounding L)
 
 class SymbolLike (ξ₁ ξ₂ : Type*) : Prop where
   symbolLike {R : Semiformula.Operator L 2} (hR : R ∈ ℬ) : R.SymbolLike ξ₁ ξ₂
@@ -49,16 +51,16 @@ instance mem.symbolLike [L.Mem] : ℬ[∈, L].SymbolLike ξ₁ ξ₂ where
     simpa only [Bounding.mem, Set.mem_singleton_iff] using hR ▸ inferInstance
 
 inductive Closure (ℬ : Bounding L) : {n : ℕ} → Semiformula L ξ n → Prop
-  | verum (n) : ℬ.Closure (⊤ : Semiformula L ξ n)
-  | falsum (n) : ℬ.Closure (⊥ : Semiformula L ξ n)
-  | rel {n k} (r : L.Rel k) (v : Fin k → Semiterm L ξ n) : ℬ.Closure (.rel r v)
-  | nrel {n k} (r : L.Rel k) (v : Fin k → Semiterm L ξ n) : ℬ.Closure (.nrel r v)
-  | and {n} {φ ψ : Semiformula L ξ n} : ℬ.Closure φ → ℬ.Closure ψ → ℬ.Closure (φ ⋏ ψ)
-  | or {n} {φ ψ : Semiformula L ξ n} : ℬ.Closure φ → ℬ.Closure ψ → ℬ.Closure (φ ⋎ ψ)
-  | ball {n} {R : Semiformula.Operator L 2} {φ : Semiformula L ξ (n + 1)}
+  | verum (n : ℕ) : ℬ.Closure (⊤ : Semiformula L ξ n)
+  | falsum (n : ℕ) : ℬ.Closure (⊥ : Semiformula L ξ n)
+  | rel {n k : ℕ} (r : L.Rel k) (v : Fin k → Semiterm L ξ n) : ℬ.Closure (.rel r v)
+  | nrel {n k : ℕ} (r : L.Rel k) (v : Fin k → Semiterm L ξ n) : ℬ.Closure (.nrel r v)
+  | and {n : ℕ} {φ ψ : Semiformula L ξ n} : ℬ.Closure φ → ℬ.Closure ψ → ℬ.Closure (φ ⋏ ψ)
+  | or {n : ℕ} {φ ψ : Semiformula L ξ n} : ℬ.Closure φ → ℬ.Closure ψ → ℬ.Closure (φ ⋎ ψ)
+  | ball {n : ℕ} {R : Semiformula.Operator L 2} {φ : Semiformula L ξ (n + 1)}
     {t : Semiterm L ξ (n + 1)} :
     R ∈ ℬ → t.Positive → ℬ.Closure φ → ℬ.Closure (∀¹[R.operator ![#0, t]] φ)
-  | bexs {n} {R : Semiformula.Operator L 2} {φ : Semiformula L ξ (n + 1)}
+  | bexs {n : ℕ} {R : Semiformula.Operator L 2} {φ : Semiformula L ξ (n + 1)}
     {t : Semiterm L ξ (n + 1)} :
     R ∈ ℬ → t.Positive → ℬ.Closure φ → ℬ.Closure (∃¹[R.operator ![#0, t]] φ)
 

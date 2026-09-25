@@ -15,6 +15,10 @@ arithmetic. The hierarchy wrappers themselves are defined in
 
 namespace FFL.FirstOrder.Arithmetic
 
+universe w
+
+variable {ξ : Type*} {n m : ℕ}
+
 abbrev HierarchySymbol := Bounding.HierarchySymbol
 
 @[match_pattern] abbrev HierarchySymbol.mk (Γ : SigmaPiDelta) (n : ℕ) : HierarchySymbol :=

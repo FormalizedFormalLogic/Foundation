@@ -77,9 +77,9 @@ export Rosser (Ros)
 
 
 /--
-  Abstract version of formalized `Γ`-completeness for provability `𝔅`.
+Abstract version of formalized `Γ`-completeness for provability `𝔅`.
 
-  example: `[∀ σ ∈ 𝚺₁, 𝔅.FormalizedCompleteOn σ]` for formalized `𝚺₁`-completeness.
+example: `[∀ σ ∈ 𝚺₁, 𝔅.FormalizedCompleteOn σ]` for formalized `𝚺₁`-completeness.
 -/
 class FormalizedCompleteOn (𝔅 : Provability T₀ T) (σ) where
   formalized_complete_on : T₀ ⊢ σ 🡒 𝔅 σ
@@ -89,7 +89,7 @@ attribute [simp, grind .] formalized_complete_on
 instance [∀ σ, 𝔅.FormalizedCompleteOn (𝔅 σ)] : 𝔅.HBL3 := ⟨by simp⟩
 
 /--
-  NOTE: Named after [Vis21].
+NOTE: Named after [Vis21].
 -/
 class Kreisel [L.ReferenceableBy L] {T₀ T : Theory L} (𝔅 : Provability T₀ T) where
   KR {σ : Sentence L} : T ⊢ 𝔅 σ → T ⊢ σ
@@ -112,8 +112,8 @@ lemma syntactical_sound {T₀ T : Theory L} {𝔅 : Provability T₀ T}
   intro σ h;
   apply 𝔅.sound_on;
   apply models_of_provable (L := L) (T := T₀);
-  . infer_instance;
-  . exact h;
+  · infer_instance;
+  · exact h;
 
 end
 
@@ -128,25 +128,26 @@ variable
 
 lemma bew_distribute_imply [𝔅.HBL2] (h : T₀ ⊢ 𝔅 (σ 🡒 τ)) : T₀ ⊢ 𝔅 σ 🡒 𝔅 τ := D2 ⨀ h
 
-instance [𝔅.HBL2] : 𝔅.Mono := ⟨λ h => bew_distribute_imply $ D1 h⟩
-instance [𝔅.HBL2] : 𝔅.Ext := ⟨λ h => E_intro (mono (K_left h)) (mono (K_right h))⟩
+instance [𝔅.HBL2] : 𝔅.Mono := ⟨fun h => bew_distribute_imply <| D1 h⟩
+instance [𝔅.HBL2] : 𝔅.Ext := ⟨fun h => E_intro (mono (K_left h)) (mono (K_right h))⟩
 
 lemma bew_distribute_and [𝔅.HBL2] [L₀.DecidableEq] : T₀ ⊢ 𝔅 (σ ⋏ τ) 🡒 𝔅 σ ⋏ 𝔅 τ := by
-  have h₁ : T₀ ⊢ 𝔅 (σ ⋏ τ) 🡒 𝔅 σ := bew_distribute_imply $ D1 and₁;
-  have h₂ : T₀ ⊢ 𝔅 (σ ⋏ τ) 🡒 𝔅 τ := bew_distribute_imply $ D1 and₂;
+  have h₁ : T₀ ⊢ 𝔅 (σ ⋏ τ) 🡒 𝔅 σ := bew_distribute_imply <| D1 and₁;
+  have h₂ : T₀ ⊢ 𝔅 (σ ⋏ τ) 🡒 𝔅 τ := bew_distribute_imply <| D1 and₂;
   cl_prover [h₁, h₂];
 
-lemma bew_distribute_and' [𝔅.HBL2] [L₀.DecidableEq] : T₀ ⊢ 𝔅 (σ ⋏ τ) → T₀ ⊢ 𝔅 σ ⋏ 𝔅 τ := λ h => bew_distribute_and ⨀ h
+lemma bew_distribute_and' [𝔅.HBL2] [L₀.DecidableEq] : T₀ ⊢ 𝔅 (σ ⋏ τ) → T₀ ⊢ 𝔅 σ ⋏ 𝔅 τ :=
+  fun h => bew_distribute_and ⨀ h
 
 lemma bew_collect_and [𝔅.HBL2] [L₀.DecidableEq] [L.DecidableEq] : T₀ ⊢ 𝔅 σ ⋏ 𝔅 τ 🡒 𝔅 (σ ⋏ τ) := by
-  have h₁ : T₀ ⊢ 𝔅 σ 🡒 𝔅 (τ 🡒 σ ⋏ τ) := 𝔅.mono $ by cl_prover
+  have h₁ : T₀ ⊢ 𝔅 σ 🡒 𝔅 (τ 🡒 σ ⋏ τ) := 𝔅.mono <| by cl_prover
   have h₂ : T₀ ⊢ 𝔅 (τ 🡒 σ ⋏ τ) 🡒 𝔅 τ 🡒 𝔅 (σ ⋏ τ) := D2;
   cl_prover [h₁, h₂];
 
 
 lemma dia_mono [L₀.DecidableEq] [L.DecidableEq] [𝔅.Mono]
   (h : T ⊢ σ 🡒 τ) : T₀ ⊢ 𝔅.dia σ 🡒 𝔅.dia τ := by
-  have : T₀ ⊢ 𝔅 (∼τ) 🡒 𝔅 (∼σ) := 𝔅.mono $ by cl_prover [h];
+  have : T₀ ⊢ 𝔅 (∼τ) 🡒 𝔅 (∼σ) := 𝔅.mono <| by cl_prover [h];
   cl_prover [this]
 
 end
@@ -158,8 +159,8 @@ variable
   {𝔅 : Provability T₀ T}
   {σ τ : Sentence L}
 
-lemma mono' [𝔅.Mono] (h : T₀ ⊢ σ 🡒 τ) : T₀ ⊢ 𝔅 σ 🡒 𝔅 τ := 𝔅.mono $ WeakerThan.pbl h
-lemma ext' [𝔅.Ext] (h : T₀ ⊢ σ 🡘 τ) : T₀ ⊢ 𝔅 σ 🡘 𝔅 τ := 𝔅.ext $ WeakerThan.pbl h
+lemma mono' [𝔅.Mono] (h : T₀ ⊢ σ 🡒 τ) : T₀ ⊢ 𝔅 σ 🡒 𝔅 τ := 𝔅.mono <| WeakerThan.pbl h
+lemma ext' [𝔅.Ext] (h : T₀ ⊢ σ 🡘 τ) : T₀ ⊢ 𝔅 σ 🡘 𝔅 τ := 𝔅.ext <| WeakerThan.pbl h
 
 end
 
@@ -184,32 +185,39 @@ variable
 def gödel (𝔅 : Provability T₀ T) : Sentence L :=
   fixedpoint T₀ “x. ¬!𝔅.prov x”
 
-lemma gödel_spec : T₀ ⊢ (gödel 𝔅) 🡘 ∼𝔅 (gödel 𝔅) := by simpa [gödel, Provability.pr] using diag “x. ¬!𝔅.prov x”;
+lemma gödel_spec : T₀ ⊢ (gödel 𝔅) 🡘 ∼𝔅 (gödel 𝔅) := by
+  simpa [gödel, Provability.pr] using diag “x. ¬!𝔅.prov x”;
 
 section First
 
 variable [L.DecidableEq]
 variable [T₀ ⪯ T] [Consistent T]
 
+-- `cl_prover` needs `[L.DecidableEq]` while elaborating, though the proof term does not use it.
+set_option linter.unusedSectionVars false in
 theorem unprovable_gödel : T ⊬ (gödel 𝔅) := by
   intro h;
-  have h₁ : T ⊢ 𝔅 (gödel 𝔅) := WeakerThan.pbl $ D1 h;
-  have h₂ : T ⊢ (gödel 𝔅) 🡘 ∼𝔅 (gödel 𝔅) := WeakerThan.pbl $ gödel_spec;
+  have h₁ : T ⊢ 𝔅 (gödel 𝔅) := WeakerThan.pbl <| D1 h;
+  have h₂ : T ⊢ (gödel 𝔅) 🡘 ∼𝔅 (gödel 𝔅) := WeakerThan.pbl <| gödel_spec;
   have : T ⊢ ⊥ := by cl_prover [h₁, h₂, h];
-  have : ¬Consistent T := not_consistent_iff_inconsistent.mpr <| inconsistent_iff_provable_bot.mpr this;
+  have : ¬Consistent T :=
+    not_consistent_iff_inconsistent.mpr <| inconsistent_iff_provable_bot.mpr this;
   contradiction
 
+-- `cl_prover` needs `[L.DecidableEq]` while elaborating, though the proof term does not use it.
+set_option linter.unusedSectionVars false in
 theorem unrefutable_gödel [𝔅.Kreisel] : T ⊬ ∼(gödel 𝔅) := by
   intro h₂;
-  have h₁ : T ⊢ (gödel 𝔅) := WeakerThan.pbl $ 𝔅.KR $ by cl_prover [gödel_spec (T₀ := T₀), h₂];
-  have : T ⊢ ⊥ := (N_iff_CO.mp $ WeakerThan.pbl $ h₂) ⨀ h₁;
-  have : ¬Consistent T := not_consistent_iff_inconsistent.mpr <| inconsistent_iff_provable_bot.mpr this
+  have h₁ : T ⊢ (gödel 𝔅) := WeakerThan.pbl <| 𝔅.KR <| by cl_prover [gödel_spec (T₀ := T₀), h₂];
+  have : T ⊢ ⊥ := (N_iff_CO.mp <| WeakerThan.pbl <| h₂) ⨀ h₁;
+  have : ¬Consistent T :=
+    not_consistent_iff_inconsistent.mpr <| inconsistent_iff_provable_bot.mpr this
   contradiction;
 
 theorem gödel_independent [𝔅.Kreisel] : Independent T (gödel 𝔅) := by
   constructor
-  . apply unprovable_gödel
-  . apply unrefutable_gödel
+  · apply unprovable_gödel
+  · apply unrefutable_gödel
 
 theorem first_incompleteness [𝔅.Kreisel] : Incomplete T :=
   incomplete_def.mpr ⟨(gödel 𝔅), gödel_independent⟩
@@ -222,17 +230,20 @@ section Second
 variable [𝔅.HBL]
 
 omit [Diagonalization T₀] in
-lemma formalized_consistent_of_existance_unprovable [L.DecidableEq] : T₀ ⊢ ∼𝔅 σ 🡒 𝔅.con := contra $ mdp D2 $ D1 efq
+lemma formalized_consistent_of_existance_unprovable [L.DecidableEq] {σ : Sentence L} :
+    T₀ ⊢ ∼𝔅 σ 🡒 𝔅.con := contra <| mdp D2 <| D1 efq
 
 local notation "𝐆" => gödel 𝔅
 
 variable [L.DecidableEq] [T₀ ⪯ T]
 
+-- `cl_prover` needs `[L.DecidableEq]` while elaborating, though the proof term does not use it.
+set_option linter.unusedSectionVars false in
 /-- Formalized First Incompleteness Theorem -/
-theorem formalized_unprovable_gödel  : T₀ ⊢ 𝔅.con 🡒 ∼𝔅 𝐆 := by
+theorem formalized_unprovable_gödel : T₀ ⊢ 𝔅.con 🡒 ∼𝔅 𝐆 := by
   suffices T₀ ⊢ ∼𝔅 ⊥ 🡒 ∼𝔅 𝐆 from this
   have h₁ : T₀ ⊢ 𝔅 𝐆 🡒 𝔅 (𝔅 𝐆) := D3
-  have h₂ : T₀ ⊢ 𝔅 𝐆 🡒 𝔅 (𝔅 𝐆 🡒 ⊥) := 𝔅.mono' $ by cl_prover [gödel_spec (T₀ := T₀)]
+  have h₂ : T₀ ⊢ 𝔅 𝐆 🡒 𝔅 (𝔅 𝐆 🡒 ⊥) := 𝔅.mono' <| by cl_prover [gödel_spec (T₀ := T₀)]
   have h₃ : T₀ ⊢ 𝔅 (𝔅 𝐆 🡒 ⊥) 🡒 𝔅 (𝔅 𝐆) 🡒 𝔅 ⊥ := D2
   cl_prover [h₁, h₂, h₃]
 
@@ -250,21 +261,22 @@ theorem con_unprovable [Consistent T] : T ⊬ 𝔅.con := by
 
 theorem con_unrefutable [Consistent T] [𝔅.Kreisel] : T ⊬ ∼𝔅.con := by
   intro h
-  have : T ⊢ 𝐆 🡘 𝔅.con := WeakerThan.pbl $ gödel_iff_con;
+  have : T ⊢ 𝐆 🡘 𝔅.con := WeakerThan.pbl <| gödel_iff_con;
   have : T ⊢ ∼𝐆 := by cl_prover [h, this]
   exact unrefutable_gödel this
 
 theorem con_independent [Consistent T] [𝔅.Kreisel] : Independent T 𝔅.con := by
   constructor
-  . apply con_unprovable
-  . apply con_unrefutable
+  · apply con_unprovable
+  · apply con_unrefutable
 
 end Second
 
 
 section Löb
 
-def kreisel (𝔅 : Provability T₀ T) (σ : Sentence L) : Sentence L := fixedpoint T₀ “x. !𝔅.prov x → !σ”
+def kreisel (𝔅 : Provability T₀ T) (σ : Sentence L) : Sentence L :=
+  fixedpoint T₀ “x. !𝔅.prov x → !σ”
 
 variable {σ : Sentence L}
 
@@ -285,18 +297,18 @@ variable [L.DecidableEq] [T₀ ⪯ T]
 
 theorem löb_theorem (H : T ⊢ 𝔅 σ 🡒 σ) : T ⊢ σ := by
   have d₁ : T ⊢ 𝔅 (𝐊 σ) 🡒 σ := C_trans (WeakerThan.pbl kreisel_specAux₁) H;
-  have d₂ : T ⊢ 𝔅 (𝐊 σ)     := WeakerThan.pbl $ D1 $ WeakerThan.pbl kreisel_specAux₂ ⨀ d₁;
+  have d₂ : T ⊢ 𝔅 (𝐊 σ)     := WeakerThan.pbl <| D1 <| WeakerThan.pbl kreisel_specAux₂ ⨀ d₁;
   exact d₁ ⨀ d₂;
 
 theorem formalized_löb_theorem : T₀ ⊢ 𝔅 (𝔅 σ 🡒 σ) 🡒 𝔅 σ := by
   have h₁ : T₀ ⊢ 𝔅 (𝐊 σ) 🡒 𝔅 σ := kreisel_specAux₁;
   have h₂ : T₀ ⊢ (𝔅 σ 🡒 σ) 🡒 (𝔅 (𝐊 σ) 🡒 σ) := CCC_of_C_left h₁;
-  have h₃ : T ⊢ (𝔅 σ 🡒 σ) 🡒 𝐊 σ := WeakerThan.pbl $ C_trans (CCC_of_C_left h₁) kreisel_specAux₂;
+  have h₃ : T ⊢ (𝔅 σ 🡒 σ) 🡒 𝐊 σ := WeakerThan.pbl <| C_trans (CCC_of_C_left h₁) kreisel_specAux₂;
   exact C_trans (D2 ⨀ (D1 h₃)) h₁;
 
 lemma formalized_unprovable_not_con [Consistent T] [𝔅.Kreisel] : T ⊬ 𝔅.con 🡒 ∼𝔅 (∼𝔅.con) := by
   by_contra hC;
-  have : T ⊢ ∼𝔅.con := löb_theorem $ CN_of_CN_right hC;
+  have : T ⊢ ∼𝔅.con := löb_theorem <| CN_of_CN_right hC;
   have : T ⊬ ∼𝔅.con := con_unrefutable;
   contradiction;
 
@@ -304,11 +316,11 @@ lemma formalized_unrefutable_gödel [Consistent T] [𝔅.Kreisel] : T ⊬ 𝔅.c
   by_contra hC;
   have : T ⊬ 𝔅.con 🡒 ∼𝔅 (∼𝔅.con) := formalized_unprovable_not_con;
   have : T ⊢ 𝔅.con 🡒 ∼𝔅 (∼𝔅.con) := C_trans hC
-    $ WeakerThan.pbl
-    $ K_left $ ENN_of_E
-    $ 𝔅.ext
-    $ ENN_of_E
-    $ WeakerThan.pbl gödel_iff_con
+    <| WeakerThan.pbl
+    <| K_left <| ENN_of_E
+    <| 𝔅.ext
+    <| ENN_of_E
+    <| WeakerThan.pbl gödel_iff_con
   contradiction;
 
 end Löb
@@ -322,27 +334,30 @@ local notation "𝐑" => gödel 𝔅
 
 theorem unrefutable_rosser [𝔅.Rosser] : T ⊬ ∼𝐑 := by
   intro hnρ;
-  have hρ : T ⊢ 𝐑 := WeakerThan.pbl $ (K_right gödel_spec) ⨀ (Ros hnρ);
-  have : ¬Consistent T := not_consistent_iff_inconsistent.mpr $ inconsistent_iff_provable_bot.mpr <|
-    (N_iff_CO.mp hnρ) ⨀ hρ;
+  have hρ : T ⊢ 𝐑 := WeakerThan.pbl <| (K_right gödel_spec) ⨀ (Ros hnρ);
+  have : ¬Consistent T := not_consistent_iff_inconsistent.mpr <|
+    inconsistent_iff_provable_bot.mpr <| (N_iff_CO.mp hnρ) ⨀ hρ;
   contradiction
 
 theorem rosser_independent [L.DecidableEq] [𝔅.Rosser] : Independent T 𝐑 := by
   constructor
-  . apply unprovable_gödel
-  . apply unrefutable_rosser
+  · apply unprovable_gödel
+  · apply unrefutable_rosser
 
-theorem rosser_first_incompleteness [L.DecidableEq] (𝔅 : Provability T₀ T) [𝔅.Rosser] : Incomplete T :=
+theorem rosser_first_incompleteness [L.DecidableEq] (𝔅 : Provability T₀ T) [𝔅.Rosser] :
+    Incomplete T :=
   incomplete_def.mpr ⟨gödel 𝔅, rosser_independent⟩
 
 omit [Diagonalization T₀] [Consistent T] in
 /-- If `𝔅` satisfies Rosser provability condition, then `𝔅.con` is provable from `T`. -/
 theorem kreisel_remark [𝔅.Rosser] : T ⊢ 𝔅.con := by
   have : T₀ ⊢ ∼𝔅 ⊥ := Ros (N_iff_CO.mpr (by simp));
-  exact WeakerThan.pbl $ this;
+  exact WeakerThan.pbl <| this;
 
 end Rosser
 
 end ProvabilityAbstraction
 
 end FirstOrder
+
+end FFL

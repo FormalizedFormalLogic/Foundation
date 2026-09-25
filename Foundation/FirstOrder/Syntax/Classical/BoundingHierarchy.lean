@@ -8,35 +8,36 @@ public import Foundation.FirstOrder.Syntax.Classical.Padding
 namespace FFL.FirstOrder
 
 variable {L : Language}
+variable {ξ : Type*} {n m s : ℕ} {Γ Γ' : Polarity}
 
 namespace Bounding
 
 /-! This formalization generalizes the syntactic arithmetical hierarchy using a set of operators for bounds. -/
 
 inductive Hierarchy (ℬ : Bounding L) : Polarity → ℕ → {n : ℕ} → Semiformula L ξ n → Prop
-  | bounded (Γ s n) {φ : Semiformula L ξ n} :
+  | bounded (Γ : Polarity) (s n : ℕ) {φ : Semiformula L ξ n} :
     ℬ.Closure φ → ℬ.Hierarchy Γ s φ
-  | and {Γ s n} {φ ψ : Semiformula L ξ n} :
+  | and {Γ : Polarity} {s n : ℕ} {φ ψ : Semiformula L ξ n} :
     ℬ.Hierarchy Γ s φ → ℬ.Hierarchy Γ s ψ → ℬ.Hierarchy Γ s (φ ⋏ ψ)
-  | or {Γ s n} {φ ψ : Semiformula L ξ n} :
+  | or {Γ : Polarity} {s n : ℕ} {φ ψ : Semiformula L ξ n} :
     ℬ.Hierarchy Γ s φ → ℬ.Hierarchy Γ s ψ → ℬ.Hierarchy Γ s (φ ⋎ ψ)
-  | ball {Γ s n} {R : Semiformula.Operator L 2} {φ : Semiformula L ξ (n + 1)}
+  | ball {Γ : Polarity} {s n : ℕ} {R : Semiformula.Operator L 2} {φ : Semiformula L ξ (n + 1)}
     {t : Semiterm L ξ (n + 1)} :
     R ∈ ℬ → t.Positive → ℬ.Hierarchy Γ s φ → ℬ.Hierarchy Γ s (∀¹[R.operator ![#0, t]] φ)
-  | bexs {Γ s n} {R : Semiformula.Operator L 2} {φ : Semiformula L ξ (n + 1)}
+  | bexs {Γ : Polarity} {s n : ℕ} {R : Semiformula.Operator L 2} {φ : Semiformula L ξ (n + 1)}
     {t : Semiterm L ξ (n + 1)} :
     R ∈ ℬ → t.Positive → ℬ.Hierarchy Γ s φ → ℬ.Hierarchy Γ s (∃¹[R.operator ![#0, t]] φ)
-  | exs {s n} {φ : Semiformula L ξ (n + 1)} :
+  | exs {s n : ℕ} {φ : Semiformula L ξ (n + 1)} :
     ℬ.Hierarchy 𝚺 (s + 1) φ → ℬ.Hierarchy 𝚺 (s + 1) (∃¹ φ)
-  | all {s n} {φ : Semiformula L ξ (n + 1)} :
+  | all {s n : ℕ} {φ : Semiformula L ξ (n + 1)} :
     ℬ.Hierarchy 𝚷 (s + 1) φ → ℬ.Hierarchy 𝚷 (s + 1) (∀¹ φ)
-  | sigma {s n} {φ : Semiformula L ξ (n + 1)} :
+  | sigma {s n : ℕ} {φ : Semiformula L ξ (n + 1)} :
     ℬ.Hierarchy 𝚷 s φ → ℬ.Hierarchy 𝚺 (s + 1) (∃¹ φ)
-  | pi {s n} {φ : Semiformula L ξ (n + 1)} :
+  | pi {s n : ℕ} {φ : Semiformula L ξ (n + 1)} :
     ℬ.Hierarchy 𝚺 s φ → ℬ.Hierarchy 𝚷 (s + 1) (∀¹ φ)
-  | dummy_sigma {s n} {φ : Semiformula L ξ (n + 1)} :
+  | dummy_sigma {s n : ℕ} {φ : Semiformula L ξ (n + 1)} :
     ℬ.Hierarchy 𝚷 (s + 1) φ → ℬ.Hierarchy 𝚺 (s + 1 + 1) (∀¹ φ)
-  | dummy_pi {s n} {φ : Semiformula L ξ (n + 1)} :
+  | dummy_pi {s n : ℕ} {φ : Semiformula L ξ (n + 1)} :
     ℬ.Hierarchy 𝚺 (s + 1) φ → ℬ.Hierarchy 𝚷 (s + 1 + 1) (∃¹ φ)
 
 namespace Hierarchy
@@ -121,34 +122,35 @@ lemma zero_iff_delta_zero {Γ} {φ : Semiformula L ξ n} :
     ℬ.Hierarchy Γ.alt 0 φ ↔ ℬ.Hierarchy Γ 0 φ := by
   rcases Γ <;> simp [pi_zero_iff_sigma_zero]
 
-lemma accum {Γ} {s : ℕ} {φ : Semiformula L ξ n} :
-    ℬ.Hierarchy Γ s φ → ∀ Γ', ℬ.Hierarchy Γ' (s + 1) φ
-  | bounded _ _ _ h, Γ => bounded Γ _ _ h
-  |      and hp hq, _ => and (hp.accum _) (hq.accum _)
-  |       or hp hq, _ => or (hp.accum _) (hq.accum _)
-  | ball hR pos hp, _ => ball hR pos (hp.accum _)
-  | bexs hR pos hp, _ => bexs hR pos (hp.accum _)
-  |         all hp, Γ => by
+lemma accum {Γ} {s : ℕ} :
+    ∀ {n : ℕ} {φ : Semiformula L ξ n},
+      ℬ.Hierarchy Γ s φ → ∀ Γ', ℬ.Hierarchy Γ' (s + 1) φ
+  | _, _, bounded _ _ _ h, Γ => bounded Γ _ _ h
+  | _, _,      and hp hq, _ => and (hp.accum _) (hq.accum _)
+  | _, _,       or hp hq, _ => or (hp.accum _) (hq.accum _)
+  | _, _, ball hR pos hp, _ => ball hR pos (hp.accum _)
+  | _, _, bexs hR pos hp, _ => bexs hR pos (hp.accum _)
+  | _, _,         all hp, Γ => by
     cases Γ
     · exact hp.dummy_sigma
     · exact (hp.accum 𝚷).all
-  |          exs hp, Γ => by
+  | _, _,          exs hp, Γ => by
     cases Γ
     · exact (hp.accum 𝚺).exs
     · exact hp.dummy_pi
-  |       sigma hp, Γ => by
+  | _, _,       sigma hp, Γ => by
     cases Γ
     · exact ((hp.accum 𝚺).accum 𝚺).exs
     · exact (hp.accum 𝚺).dummy_pi
-  |          pi hp, Γ => by
+  | _, _,          pi hp, Γ => by
     cases Γ
     · exact (hp.accum 𝚷).dummy_sigma
     · exact ((hp.accum 𝚷).accum 𝚷).all
-  | dummy_sigma hp, Γ => by
+  | _, _, dummy_sigma hp, Γ => by
     cases Γ
     · exact (hp.accum 𝚷).dummy_sigma
     · exact ((hp.accum 𝚷).accum 𝚷).all
-  |    dummy_pi hp, Γ => by
+  | _, _,    dummy_pi hp, Γ => by
     cases Γ
     · exact ((hp.accum 𝚺).accum 𝚺).exs
     · exact (hp.accum 𝚺).dummy_pi
@@ -157,9 +159,9 @@ lemma strict_mono {Γ s} {φ : Semiformula L ξ n}
     (hp : ℬ.Hierarchy Γ s φ) (Γ') {s'} (h : s < s') : ℬ.Hierarchy Γ' s' φ := by
   have : ∀ d, ℬ.Hierarchy Γ' (s + d + 1) φ := by
     intro d
-    induction' d with d ih
-    · simpa using hp.accum Γ'
-    · simpa only [Nat.add_succ, add_zero] using ih.accum _
+    induction d with
+    | zero => simpa using hp.accum Γ'
+    | succ d ih => simpa only [Nat.add_succ, add_zero] using ih.accum _
   simpa [show s + (s' - s.succ) + 1 = s' from by
     simpa [Nat.succ_add] using Nat.add_sub_of_le h] using this (s' - s.succ)
 
@@ -206,7 +208,7 @@ lemma neg {φ : Semiformula L ξ n} :
     {t : Semiterm L ξ (n + 1)} (hR : R ∈ ℬ) (ht : t.Positive) :
     ℬ.Hierarchy Γ s (∀¹[R.operator ![#0, t]] φ) ↔ ℬ.Hierarchy Γ s φ := by
   constructor;
-  . generalize hq : (∀¹[R.operator ![#0, t]] φ) = ψ;
+  · generalize hq : (∀¹[R.operator ![#0, t]] φ) = ψ;
     intro H;
     induction H <;> simp only [FFL.FirstOrder.ball, FFL.FirstOrder.bexs,
       Semiformula.all_inj, Semiformula.imp_inj, reduceCtorEq] at hq;
@@ -232,7 +234,7 @@ lemma neg {φ : Semiformula L ξ n} :
     {t : Semiterm L ξ (n + 1)} (hR : R ∈ ℬ) (ht : t.Positive) :
     ℬ.Hierarchy Γ s (∃¹[R.operator ![#0, t]] φ) ↔ ℬ.Hierarchy Γ s φ := by
   constructor;
-  . generalize hq : (∃¹[R.operator ![#0, t]] φ) = ψ;
+  · generalize hq : (∃¹[R.operator ![#0, t]] φ) = ψ;
     intro H;
     induction H <;> simp only [FFL.FirstOrder.ball, FFL.FirstOrder.bexs,
       Semiformula.exs_inj, Semiformula.and_inj, reduceCtorEq] at hq;
@@ -325,7 +327,7 @@ lemma pi_of_pi_all [Small ℬ ξ] {φ : Semiformula L ξ (n + 1)} :
     ℬ.Hierarchy 𝚷 (s + 1) (∀¹ φ) ↔ ℬ.Hierarchy 𝚷 (s + 1) φ :=
   ⟨pi_of_pi_all, all⟩
 
-@[simp] lemma allItr_iff [Small ℬ ξ] {φ : Semiformula L ξ (n + k)} :
+@[simp] lemma allItr_iff [Small ℬ ξ] {k : ℕ} {φ : Semiformula L ξ (n + k)} :
     ℬ.Hierarchy 𝚷 (s + 1) (∀¹^[k] φ) ↔ ℬ.Hierarchy 𝚷 (s + 1) φ := by
   induction k <;> simp [allItr_succ, *]
 
@@ -344,11 +346,12 @@ lemma sigma_of_sigma_ex [Small ℬ ξ] {φ : Semiformula L ξ (n + 1)} :
     ℬ.Hierarchy 𝚺 (s + 1) (∃¹ φ) ↔ ℬ.Hierarchy 𝚺 (s + 1) φ :=
   ⟨sigma_of_sigma_ex, exs⟩
 
-@[simp] lemma exsItr_iff [Small ℬ ξ] {φ : Semiformula L ξ (n + k)} :
+@[simp] lemma exsItr_iff [Small ℬ ξ] {k : ℕ} {φ : Semiformula L ξ (n + k)} :
     ℬ.Hierarchy 𝚺 (s + 1) (∃¹^[k] φ) ↔ ℬ.Hierarchy 𝚺 (s + 1) φ := by
   induction k <;> simp [exsItr_succ, *]
 
-lemma rew (ω : Rew L ξ₁ n₁ ξ₂ n₂) {φ : Semiformula L ξ₁ n₁} :
+lemma rew {ξ₁ ξ₂ : Type*} {n₁ n₂ : ℕ} (ω : Rew L ξ₁ n₁ ξ₂ n₂)
+    {φ : Semiformula L ξ₁ n₁} :
     ℬ.Hierarchy Γ s φ → ℬ.Hierarchy Γ s (ω ▹ φ) := by
   intro h;
   induction h generalizing n₂ <;> try (solve | simp [*]);
@@ -360,11 +363,11 @@ lemma rew (ω : Rew L ξ₁ n₁ ξ₂ n₂) {φ : Semiformula L ξ₁ n₁} :
   case dummy_pi ih => exact (ih ω.q).dummy_pi;
   case dummy_sigma ih => exact (ih ω.q).dummy_sigma;
 
-@[simp] lemma rew_iff [SymbolLike ℬ ξ₁ ξ₂]
+@[simp] lemma rew_iff {ξ₁ ξ₂ : Type*} {n₁ n₂ : ℕ} [SymbolLike ℬ ξ₁ ξ₂]
     {ω : Rew L ξ₁ n₁ ξ₂ n₂} {φ : Semiformula L ξ₁ n₁} :
     ℬ.Hierarchy Γ s (ω ▹ φ) ↔ ℬ.Hierarchy Γ s φ := by
   constructor;
-  . generalize eq : ω ▹ φ = ψ;
+  · generalize eq : ω ▹ φ = ψ;
     intro hq;
     induction hq generalizing φ n₁
       <;> try simp only [Semiformula.eq_ball_iff,
@@ -400,13 +403,13 @@ lemma exsClosure : {n : ℕ} → {φ : Semiformula L ξ n} →
   | 0, _, hp => hp
   | _ + 1, φ, hp => exsClosure (φ := ∃¹ φ) hp.exs
 
-instance : LogicalConnective.AndOrClosed (ℬ.Hierarchy Γ s : Semiformula L ξ k → Prop) where
+instance {k : ℕ} : LogicalConnective.AndOrClosed (ℬ.Hierarchy Γ s : Semiformula L ξ k → Prop) where
   verum := verum _ _ _
   falsum := falsum _ _ _
   and := and
   or := or
 
-instance : LogicalConnective.Closed (ℬ.Hierarchy Γ 0 : Semiformula L ξ k → Prop) where
+instance {k : ℕ} : LogicalConnective.Closed (ℬ.Hierarchy Γ 0 : Semiformula L ξ k → Prop) where
   not := by simp
   imply := by simp [Semiformula.imp_eq]; tauto
 
@@ -450,7 +453,7 @@ lemma remove_exists [Small ℬ ξ] {φ : Semiformula L ξ (n + 1)} :
   case sigma h => exact h.accum _
   case dummy_pi h => exact h.accum _
 
-@[simp] lemma padding_iff {Γ s n} {φ : Semiformula L ξ n} :
+@[simp] lemma padding_iff {Γ s n k} {φ : Semiformula L ξ n} :
     ℬ.Hierarchy Γ s (φ.padding k) ↔ ℬ.Hierarchy Γ s φ := by
   simp only [Semiformula.padding, and_iff, and_iff_left_iff_imp]
   intro h
@@ -470,27 +473,33 @@ lemma remove_exists [Small ℬ ξ] {φ : Semiformula L ξ (n + 1)} :
   |         [_] => simp
   | ψ :: χ :: l => simp [list_disj₂_iff (l := χ :: l)]
 
-@[simp] lemma list_conj'_iff {Γ s n} {l : List ι} {φ : ι → Semiformula L ξ n} :
+@[simp] lemma list_conj'_iff {Γ s n} {ι : Type*} {l : List ι}
+    {φ : ι → Semiformula L ξ n} :
     ℬ.Hierarchy Γ s (l.conj' φ) ↔ ∀ i ∈ l, ℬ.Hierarchy Γ s (φ i) := by
   simp [List.conj']
 
-@[simp] lemma list_disj'_iff {Γ s n} {l : List ι} {φ : ι → Semiformula L ξ n} :
+@[simp] lemma list_disj'_iff {Γ s n} {ι : Type*} {l : List ι}
+    {φ : ι → Semiformula L ξ n} :
     ℬ.Hierarchy Γ s (l.disj' φ) ↔ ∀ i ∈ l, ℬ.Hierarchy Γ s (φ i) := by
   simp [List.disj']
 
-@[simp] lemma finset_conj'_iff {Γ s n} {t : Finset ι} {φ : ι → Semiformula L ξ n} :
+@[simp] lemma finset_conj'_iff {Γ s n} {ι : Type*} {t : Finset ι}
+    {φ : ι → Semiformula L ξ n} :
     ℬ.Hierarchy Γ s (t.conj' φ) ↔ ∀ i ∈ t, ℬ.Hierarchy Γ s (φ i) := by
   simp [Finset.conj']
 
-@[simp] lemma finset_disj'_iff {Γ s n} {t : Finset ι} {φ : ι → Semiformula L ξ n} :
+@[simp] lemma finset_disj'_iff {Γ s n} {ι : Type*} {t : Finset ι}
+    {φ : ι → Semiformula L ξ n} :
     ℬ.Hierarchy Γ s (t.disj' φ) ↔ ∀ i ∈ t, ℬ.Hierarchy Γ s (φ i) := by
   simp [Finset.disj']
 
-@[simp] lemma finset_uconj_iff {Γ s n} [Fintype ι] {φ : ι → Semiformula L ξ n} :
+@[simp] lemma finset_uconj_iff {Γ s n} {ι : Type*} [Fintype ι]
+    {φ : ι → Semiformula L ξ n} :
     ℬ.Hierarchy Γ s (Finset.uconj φ) ↔ ∀ i, ℬ.Hierarchy Γ s (φ i) := by
   simp [Finset.uconj]
 
-@[simp] lemma finset_udisj_iff {Γ s n} [Fintype ι] {φ : ι → Semiformula L ξ n} :
+@[simp] lemma finset_udisj_iff {Γ s n} {ι : Type*} [Fintype ι]
+    {φ : ι → Semiformula L ξ n} :
     ℬ.Hierarchy Γ s (Finset.udisj φ) ↔ ∀ i, ℬ.Hierarchy Γ s (φ i) := by
   simp [Finset.udisj]
 
