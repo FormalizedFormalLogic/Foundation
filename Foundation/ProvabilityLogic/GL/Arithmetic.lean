@@ -79,11 +79,11 @@ theorem arithmetical_completeness_iff [T.SoundOnHierarchy 𝚺 1] :
   ⟨fun h _ ↦ WeakerThan.pbl (arithmetical_soundness h),
     arithmetical_completeness_of_height_eq_top (Arithmetic.height_eq_top_of_sigma1_sound T)⟩
 
-theorem eq_provabilityLogic [T.SoundOnHierarchy 𝚺 1] : 𝐆𝐋 over α = T.provabilityLogic := by
+theorem eq_provabilityLogic [T.SoundOnHierarchy 𝚺 1] : 𝐆𝐋 = T.provabilityLogic (α := α) := by
   ext A;
   exact arithmetical_completeness_iff;
 
-theorem eq_provabilityLogic_peano : 𝐆𝐋 over α = 𝗣𝗔.provabilityLogic :=
+theorem eq_provabilityLogic_peano : 𝐆𝐋 = 𝗣𝗔.provabilityLogic (α := α) :=
   eq_provabilityLogic
 
 end Logic.GL
