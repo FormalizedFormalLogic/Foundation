@@ -61,7 +61,7 @@ variable {α : Type u} {T U : ArithmeticTheory} [T.Δ₁] [𝗜𝚺₁ ⪯ T] {A
 variable [𝗜𝚺₁ ⪯ U]
 
 theorem provable_sigma1_reflection_of_mem_of_not_A
-    (hT : (T.provabilityLogicRelativeTo U : Logic α).trace = .univ)
+    (hT : (T.provabilityLogicRelativeTo U (α := α)).trace = .univ)
     (hAL : A ∈ T.provabilityLogicRelativeTo U) (hAA : 𝐀 ⊬ A) (hσ : Arithmetic.Hierarchy 𝚺 1 σ) :
     U ⊢ T.standardProvability.refl σ := by
   classical
@@ -78,7 +78,7 @@ theorem provable_sigma1_reflection_of_mem_of_not_A
     (A_subset_provabilityLogic hT Logic.A.neg_boxItr_bot)) hAL S.realization;
 
 lemma provable_localReflectionOn_sigma1_of_mem_of_not_A
-    (hT : (T.provabilityLogicRelativeTo U : Logic α).trace = .univ)
+    (hT : (T.provabilityLogicRelativeTo U (α := α)).trace = .univ)
     (hAL : A ∈ T.provabilityLogicRelativeTo U) (hAA : 𝐀 ⊬ A) :
     U ⊢* T.standardProvability.reflOn (Arithmetic.Hierarchy 𝚺 1) := by
   rintro _ ⟨σ, hσ, rfl⟩;
@@ -89,9 +89,9 @@ it contains `𝐃`.
 
 - [AB05, Lemma 51, Corollary 52(ii)]
 -/
-theorem D_subset_provabilityLogic (hT : (T.provabilityLogicRelativeTo U : Logic α).trace = .univ)
-    (h : 𝐀 over α ⊂ T.provabilityLogicRelativeTo U) :
-    𝐃 over α ⊆ T.provabilityLogicRelativeTo U := by
+theorem D_subset_provabilityLogic (hT : (T.provabilityLogicRelativeTo U (α := α)).trace = .univ)
+    (h : 𝐀 ⊂ T.provabilityLogicRelativeTo U (α := α)) :
+    𝐃 ⊆ T.provabilityLogicRelativeTo U (α := α) := by
   obtain ⟨A, hAL, hAA⟩ := Set.exists_of_ssubset h;
   apply sumQuasiNormal_subset_provabilityLogic;
   rintro _ (rfl | ⟨B, C, rfl⟩);
@@ -104,9 +104,8 @@ theorem D_subset_provabilityLogic (hT : (T.provabilityLogicRelativeTo U : Logic 
 - [AB05, Corollary 55]
 -/
 theorem not_A_ssubset_provabilityLogic_ssubset_D
-    (hT : (T.provabilityLogicRelativeTo U : Logic α).trace = .univ) :
-    ¬(𝐀 over α ⊂ T.provabilityLogicRelativeTo U ∧
-      T.provabilityLogicRelativeTo U ⊂ 𝐃 over α) :=
+    (hT : (T.provabilityLogicRelativeTo U (α := α)).trace = .univ) :
+    ¬(𝐀 ⊂ T.provabilityLogicRelativeTo U (α := α) ∧ T.provabilityLogicRelativeTo U (α := α) ⊂ 𝐃) :=
   fun ⟨h₁, h₂⟩ ↦ h₂.not_subset (D_subset_provabilityLogic hT h₁)
 
 end FFL.ProvabilityLogic
