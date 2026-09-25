@@ -43,7 +43,15 @@ lemma models_boxBot_iff : ℕ↓[ℒₒᵣ] ⊧ T.standardProvability^[n + 1] �
     Provability.height_le_iff_boxBot.symm
 
 lemma models_TBB_iff (f : Realization α ℒₒᵣ) : ℕ↓[ℒₒᵣ] ⊧ f T (TBB n) ↔ T.height ≠ n := by
-  sorry
+  simp only [TBB, standardInterpret, interpret, interpret_boxItr, Semantics.Imp.models_imply,
+    models_boxBot_iff];
+  rcases n with _ | n;
+  · simp;
+  · simp only [models_boxBot_iff];
+    generalize T.height = m;
+    cases m using ENat.recTopCoe with
+    | top => simpa using ENat.top_ne_natCast (n + 1);
+    | coe m => norm_cast; omega;
 
 /-! ### Truth provability logics -/
 
