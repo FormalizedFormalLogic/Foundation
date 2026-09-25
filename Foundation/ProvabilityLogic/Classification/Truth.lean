@@ -81,7 +81,10 @@ lemma bot_notMem_provabilityLogic_TA : ⊥ ∉ (T.provabilityLogicRelativeTo �
 
 lemma provabilityLogic_TA_subset_S (h : (T.provabilityLogicRelativeTo 𝗧𝗔 : Logic α).trace = .univ) :
     (T.provabilityLogicRelativeTo 𝗧𝗔 : Logic α) ⊆ 𝐒 := by
-  sorry
+  by_contra hS;
+  apply bot_notMem_provabilityLogic_TA (T := T) (α := α);
+  rw [provabilityLogic_eq_GLBetaMinus hS];
+  exact Logic.GLBetaMinus.mem_iff.mpr <| by simp [h]
 
 /-- - [AB05, Corollary 41(ii)] -/
 theorem D_subset_provabilityLogic_TA [T.SoundOnHierarchy 𝚺 1] :
