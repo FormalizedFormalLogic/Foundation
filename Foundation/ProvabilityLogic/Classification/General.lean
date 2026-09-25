@@ -48,8 +48,17 @@ variable [𝗜𝚺₁ ⪯ T] [𝗜𝚺₁ ⪯ U]
 
 lemma imp_mem_provabilityLogic_of_mem_addTBB (hN : N.Finite) {A : Formula α}
     (h : A ∈ T.provabilityLogicRelativeTo (T.addTBB U N)) :
-    (⩕ n ∈ hN.toFinset, TBB n : LetterlessFormula).lift 🡒 A ∈ T.provabilityLogicRelativeTo U :=
-  sorry
+    (⩕ n ∈ hN.toFinset, TBB n : LetterlessFormula).lift 🡒 A ∈ T.provabilityLogicRelativeTo U := by
+  intro f;
+  obtain ⟨⟨s, hs⟩, h₁⟩ := Theory.compact_add_right (h f);
+  apply C_trans _ h₁;
+  apply right_Fconj_intro;
+  intro σ hσ;
+  obtain ⟨n, hn, rfl⟩ := hs hσ;
+  have h₂ : U ⊢ f T ((⩕ n ∈ hN.toFinset, TBB n) 🡒 TBB n : LetterlessFormula).lift :=
+    provabilityLogic_of_GL (Logic.GL.lift_mem_iff.mpr <| by
+      ext k; simpa using (em (k = n)).imp (· ▸ hn) id) f;
+  simpa only [standardInterpret, interpret_lift, interpret] using h₂;
 
 lemma trace_provabilityLogic_addTBB :
     (T.provabilityLogicRelativeTo
