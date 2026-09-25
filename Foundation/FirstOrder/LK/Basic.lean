@@ -542,6 +542,50 @@ lemma weakerThan_union_right (h : U ⪯ S) (T : Theory L) : T ∪ U ⪯ T ∪ S 
 lemma equiv_union_right (e : U ≊ S) (T : Theory L) : T ∪ U ≊ T ∪ S :=
   Entailment.Equiv.antisymm ⟨weakerThan_union_right e.le T, weakerThan_union_right e.symm.le T⟩
 
+section compact
+
+variable [L.DecidableEq] {T : Theory L} {φ : Sentence L}
+
+lemma compact_add_right (h : T ∪ U ⊢ φ) :
+    ∃ s : { s : Finset (Sentence L) // ↑s ⊆ U }, T ⊢ s.1.conj 🡒 φ := by
+  classical
+  obtain ⟨𝓕, h𝓕sub, h𝓕fin, h𝓕⟩ := Entailment.Compact.finite_provable h
+  have h𝓕fin' : 𝓕.Finite := (Set.adjunctiveSet_finite_iff 𝓕).mp h𝓕fin
+  set s : Finset (Sentence L) := h𝓕fin'.toFinset
+  have hcoe : (↑s : Theory L) = 𝓕 := h𝓕fin'.coe_toFinset
+  have hs' : (↑s : Theory L) ⊢ φ := hcoe ▸ h𝓕
+  have hsTU : (↑s : Set (Sentence L)) ⊆ T ∪ U := hcoe ▸ h𝓕sub
+  have H : adjoin s.conj (∅ : Theory L) ⊢* (↑s : Theory L) := by
+    intro ψ hψ
+    exact Entailment.mdp (Entailment.left_Fconj_intro hψ) (Entailment.by_axm (by simp))
+  have hconj : (∅ : Theory L) ⊢ s.conj 🡒 φ :=
+    Entailment.Deduction.ofInsert (Entailment.StrongCut.cut (𝓣 := (↑s : Theory L)) H hs')
+  set sT := s.filter (· ∈ T)
+  set sU := s.filter (· ∈ U)
+  have hunion : sT ∪ sU = s := by
+    ext ψ
+    simp only [sT, sU, Finset.mem_union, Finset.mem_filter]
+    constructor
+    · rintro (⟨hψ, _⟩ | ⟨hψ, _⟩) <;> exact hψ
+    · intro hψ
+      rcases hsTU hψ with hψT | hψU
+      · left; exact ⟨hψ, hψT⟩
+      · right; exact ⟨hψ, hψU⟩
+  have hcurry : (∅ : Theory L) ⊢ sT.conj 🡒 sU.conj 🡒 φ :=
+    Entailment.CK_iff_CC.mp <| Entailment.C_trans Entailment.CKFconjFconjUnion (hunion ▸ hconj)
+  have hT : T ⊢ sT.conj := Entailment.FConj_iff_forall_provable.mpr fun _ hψ ↦
+    Entailment.by_axm (Finset.mem_filter.mp hψ).2
+  have hsub : (↑sU : Set (Sentence L)) ⊆ U := fun _ hψ ↦ (Finset.mem_filter.mp hψ).2
+  use ⟨sU, hsub⟩
+  exact Entailment.mdp (Entailment.wk (by simp) hcurry) hT
+
+lemma compact_add_left (h : T ∪ U ⊢ φ) :
+    ∃ s : { s : Finset (Sentence L) // ↑s ⊆ T }, U ⊢ s.1.conj 🡒 φ := by
+  rw [show T ∪ U = U ∪ T from Set.union_comm T U] at h
+  exact compact_add_right h
+
+end compact
+
 end Theory
 
 def Theory.theory (T : Theory L) : Theory L := {σ | T ⊢ σ}
