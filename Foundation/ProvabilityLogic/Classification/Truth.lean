@@ -101,7 +101,7 @@ theorem D_subset_provabilityLogic_TA [T.SoundOnHierarchy 𝚺 1] :
 /-- - [AB05, Corollary 41(ii)] -/
 theorem soundOnHierarchy_of_axiomD_mem_provabilityLogic_TA {a : α}
     (hT : (T.provabilityLogicRelativeTo 𝗧𝗔 : Logic α).trace = .univ)
-    (h : □(□#a ⋎ □#a) 🡒 □#a ⋎ □#a ∈ (T.provabilityLogicRelativeTo 𝗧𝗔 : Logic α)) :
+    (h : □(□#a ⋎ □#a) 🡒 □#a ⋎ □#a ∈ T.provabilityLogicRelativeTo 𝗧𝗔) :
     T.SoundOnHierarchy 𝚺 1 :=
   soundOnHierarchy_iff_models_reflection.mpr fun _ hσ ↦ Arithmetic.TA.provable_iff.mp <|
     provable_sigma1_reflection_of_mem_of_not_A hT h Logic.A.not_axiomD hσ
@@ -116,7 +116,7 @@ theorem provabilityLogic_TA_eq_GLBetaMinus_iff :
     have h : ∼TBB n ∈ (T.provabilityLogicRelativeTo 𝗧𝗔 : Logic α) := fun f ↦
       Arithmetic.TA.provable_iff.mpr <| by
         simp [standardInterpret, interpret, models_TBB_iff f, hn];
-    have hS : ¬(T.provabilityLogicRelativeTo 𝗧𝗔 : Logic α) ⊆ 𝐒 :=
+    have hS : ¬T.provabilityLogicRelativeTo 𝗧𝗔 ⊆ 𝐒 :=
       fun hS ↦ Logic.S.consistent <| hS h ⨀ Logic.S.provable_TBB;
     exact (provabilityLogic_eq_GLBetaMinus hS).trans <| by
       congr 1; exact trace_provabilityLogic_TA_eq_compl_singleton_iff.mpr hn;
@@ -131,7 +131,7 @@ theorem provabilityLogic_TA_eq_S_iff :
     obtain ⟨p⟩ := ‹Nonempty α›;
     apply Semantics.modelsSet_iff.mpr;
     intro φ hφ;
-    have h₁ : □#p 🡒 #p ∈ (T.provabilityLogicRelativeTo 𝗧𝗔 : Logic α) := h ▸ Logic.S.axiomT;
+    have h₁ : □#p 🡒 #p ∈ T.provabilityLogicRelativeTo 𝗧𝗔 := h ▸ Logic.S.axiomT;
     exact Semantics.Imp.models_imply.mp (Arithmetic.TA.provable_iff.mp (h₁ ⟨fun _ ↦ φ⟩)) <|
       models_standardProvability_iff.mpr <| by_axm hφ;
   · exact fun _ ↦ Logic.S.eq_provabilityLogicRelativeTo_TA.symm;
@@ -195,7 +195,7 @@ theorem provabilityLogic_TA_classification :
   apply existsUnique_of_exists_of_unique;
   · by_cases hs : ℕ↓[ℒₒᵣ] ⊧* T;
     · use 0;
-      simpa [hs] using (Logic.S.eq_provabilityLogicRelativeTo_TA (α := α) (T := T)).symm;
+      simpa [hs] using Logic.S.eq_provabilityLogicRelativeTo_TA.symm;
     by_cases hs₁ : T.SoundOnHierarchy 𝚺 1;
     · use 1;
       simpa [hs, hs₁] using provabilityLogic_TA_eq_D_iff.mpr ⟨hs₁, hs⟩;
