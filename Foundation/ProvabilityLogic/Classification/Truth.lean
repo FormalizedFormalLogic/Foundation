@@ -61,8 +61,8 @@ lemma TBB_mem_provabilityLogic_TA_iff :
     fun h f ↦ Arithmetic.TA.provable_iff.mpr <| (models_TBB_iff f).mpr h⟩
 
 lemma mem_trace_provabilityLogic_TA_iff :
-    n ∈ (T.provabilityLogicRelativeTo 𝗧𝗔 : Logic α).trace ↔ T.height ≠ n := by
-  sorry
+    n ∈ (T.provabilityLogicRelativeTo 𝗧𝗔 : Logic α).trace ↔ T.height ≠ n :=
+  mem_trace_provabilityLogic_iff.trans TBB_mem_provabilityLogic_TA_iff
 
 lemma trace_provabilityLogic_TA_eq_univ_iff :
     (T.provabilityLogicRelativeTo 𝗧𝗔 : Logic α).trace = .univ ↔ T.height = ⊤ := by
