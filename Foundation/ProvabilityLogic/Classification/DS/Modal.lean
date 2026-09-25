@@ -47,8 +47,7 @@ lemma atoms_subst_subset [DecidableEq β] {s : Substitution α β} {A : Formula 
   induction A <;> grind;
 
 lemma atoms_pIffOn {p q : α} {S : Finset α} : (Substitution.pIffOn p S q).atoms ⊆ {p, q} := by
-  unfold Substitution.pIffOn;
-  grind;
+  grind [Substitution.pIffOn];
 
 lemma atoms_deltaPIff_subset {A : Formula α} {p : α} :
     (A.deltaPIff p).atoms ⊆ insert p A.atoms := by
@@ -56,8 +55,7 @@ lemma atoms_deltaPIff_subset {A : Formula α} {p : α} :
   obtain ⟨_, hB, hq⟩ := Finset.mem_biUnion.mp (FormulaFinset.atoms_conj_subset _ hq);
   obtain ⟨S, -, rfl⟩ := Finset.mem_image.mp hB;
   obtain ⟨b, hb, hq⟩ := Finset.mem_biUnion.mp (atoms_subst_subset hq);
-  have := atoms_pIffOn hq;
-  grind;
+  grind [atoms_pIffOn hq];
 
 end Formula
 
@@ -115,19 +113,18 @@ lemma root_forces_deltaPIff_imp (hA : Sum.inr ⊤ ⊮[(M.toPseudoTail o).toModel
   have hbox (z : K.World) (n : ℕ) :
       z ⊩[K.toModel.subst (Substitution.pIffOn p γ)] □^[n]⊥ ↔ z ⊩[K.toModel] □^[n]⊥ := by
     simpa using forces_subst (M := K.toModel) (x := z) (A := □^[n]⊥);
-  have hΦ' : K.root ⊩[K.toModel] almostDefiningFormula A.atoms M := of_not_not hΦ;
   obtain ⟨Bi, hBi⟩ := exists_bisimulation_of_forces_almostDefiningFormula
     (K := K.subst (Substitution.pIffOn p γ)) (P := A.atoms) (o := o)
     (fun n h ↦ hr n ((hbox _ n).mp h)) (fun z hz ↦ (hK z hz).imp fun n ↦ (hbox z n).mpr)
     ((forces_congr_of_modalized (K := K.toModel)
       (K' := K.toModel.subst (Substitution.pIffOn p γ)) rfl (fun _ ↦ not_rel_root)
-      (fun z hz q ↦ (val_subst_pIffOn_of_ne hp hz).symm) modalized_almostDefiningFormula).mp hΦ')
-    (fun q hq ↦ (by
-      have := val_subst_pIffOn_root (γ := γ) (q := q) hnp;
-      grind : o q ↔ (K.subst (Substitution.pIffOn p γ)).Val K.root q));
-  have : K.root ⊩[K.toModel] A⟦Substitution.pIffOn p γ⟧ := forces_conj.mp hδ _ <|
-    Finset.mem_image_of_mem _ (Finset.mem_powerset.mpr hγ₁);
-  exact hA ((Bi.forces_iff hBi subset_rfl).mpr (forces_subst.mpr this));
+      (fun z hz q ↦ (val_subst_pIffOn_of_ne hp hz).symm) modalized_almostDefiningFormula).mp
+      (of_not_not hΦ))
+    fun q hq ↦ by
+      change o q ↔ (K.subst (Substitution.pIffOn p γ)).Val K.root q;
+      grind [val_subst_pIffOn_root (γ := γ) (q := q) hnp];
+  exact hA <| (Bi.forces_iff hBi subset_rfl).mpr <| forces_subst.mpr <|
+    forces_conj.mp hδ _ <| Finset.mem_image_of_mem _ (Finset.mem_powerset.mpr hγ₁);
 
 end Kripke.RootedModel
 
