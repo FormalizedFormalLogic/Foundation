@@ -34,7 +34,7 @@ structure StrongReflexiveCountermodel (κ : Type*) [Nonempty κ] {α : Type*} [D
   root_not_forces : root ⊮[toModel] A
   u : κ
   root_rel_u : toModel.Rel root u
-  isReflexiveOf_u : IsReflexiveOf (M := toModel) A.subfmls.prebox u
+  isReflexiveOf_u : IsReflexiveOf A.subfmls.prebox u
   eq_root_of_rel_u : ∀ z, toModel.Rel z u → z = root
 
 end FFL.ProvabilityLogic.Kripke
@@ -58,7 +58,7 @@ lemma Provability.provable_boxItr_bot_mono {n m : ℕ} (h : n ≤ m) : T₀ ⊢ 
     suffices T₀ ⊢ 𝔅^[m] ⊥ 🡒 𝔅^[m + 1] ⊥ from C_trans ih this;
     rcases m with _ | m;
     · exact efq;
-    · simpa only [Function.iterate_succ_apply'] using 𝔅.D3 (σ := 𝔅^[m] ⊥);
+    · simpa only [Function.iterate_succ_apply'] using 𝔅.D3;
 
 open Classical in
 /-- Sentences indexed by the worlds of `X.extendRoot` satisfying the Solovay conditions of the
@@ -154,12 +154,12 @@ theorem mainlemma_neg (hi : i ≠ none) {B : ProvabilityLogic.Formula α} (hB : 
 
 lemma provable_boxItr_bot_of_ne (S : 𝔅.ModifiedSolovaySentences X σ) {z : X.World}
     (hr : z ≠ X.root) (hu : z ≠ X.u) :
-    T₀ ⊢ S.Λ (some z) 🡒 𝔅^[Model.World.rank (M := X.toModel) z + 1] ⊥ := by
+    T₀ ⊢ S.Λ (some z) 🡒 𝔅^[Model.World.rank z + 1] ⊥ := by
   classical
   induction z using WellFounded.induction IsConverseWellFounded.cwf (r := flip X.Rel) with
   | h z ih =>
     suffices T₀ ⊢ (⩖ j ∈ { j : X.extendRoot.World | some z ≺ j }, S.Λ j) 🡒
-        𝔅^[Model.World.rank (M := X.toModel) z] ⊥ by
+        𝔅^[Model.World.rank z] ⊥ by
       simpa only [Function.iterate_succ_apply'] using
         C_trans (S.SC3 (some z) (by simp) (by simpa using hu)) (𝔅.mono' this);
     apply left_Fdisj'_intro;
