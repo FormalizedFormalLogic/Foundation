@@ -100,50 +100,32 @@ universe u
 
 variable {α : Type u} [DecidableEq α] {A : Formula α}
 
-theorem iff_provable_gentzen : 𝐆𝐫𝐳 ⊢ A ↔ ⊢ᴳ[𝐆𝐫𝐳] ∅ ⟹ {A} := by
-  constructor;
-  · intro h;
-    apply Gentzen.complete;
-    intro _ _ M _ x _;
-    exact ⟨A, by simp, sound M h x⟩;
-  · intro h;
-    have : 𝐆𝐫𝐳 ⊢ (∅ : FormulaFinset α).conj := by simp [Finset.conj];
-    simpa using of_gentzen h ⨀ this;
-
-omit [DecidableEq α] in
-theorem iff_valid_finite :
-    𝐆𝐫𝐳 ⊢ A ↔ ∀ {κ : Type u} [Nonempty κ] (M : Model κ α), [M.IsFiniteGrz] → M ⊧ A := by
-  classical
-  constructor;
-  · intro h _ _ M _;
-    exact sound M h;
-  · intro h;
-    apply iff_provable_gentzen.mpr;
-    apply Gentzen.complete;
-    intro _ _ M _ x _;
-    exact ⟨A, by simp, h M x⟩;
-
-omit [DecidableEq α] in
-theorem iff_root_forces : 𝐆𝐫𝐳 ⊢ A ↔
-    ∀ {κ : Type u} [Nonempty κ] (M : RootedModel κ α), [M.IsFiniteGrz] → M.root ⊩[M.toModel] A := by
-  constructor;
-  · intro h _ _ M _;
-    exact sound M.toModel h M.root;
-  · intro h;
-    apply iff_valid_finite.mpr;
-    intro _ _ M _ x;
-    exact Model.forces_cone.mp <| h (M.cone x);
-
 theorem provability_TFAE : [
     𝐆𝐫𝐳 ⊢ A,
     ⊢ᴳ[𝐆𝐫𝐳] ∅ ⟹ {A},
     ∀ {κ : Type u} [Nonempty κ] (M : Model κ α), [M.IsFiniteGrz] → M ⊧ A,
     ∀ {κ : Type u} [Nonempty κ] (M : RootedModel κ α), [M.IsFiniteGrz] → M.root ⊩[M.toModel] A
   ].TFAE := by
-  tfae_have 1 ↔ 2 := iff_provable_gentzen;
-  tfae_have 1 ↔ 3 := iff_valid_finite;
-  tfae_have 1 ↔ 4 := iff_root_forces;
+  tfae_have 1 → 3 := fun h _ _ M _ ↦ sound M h;
+  tfae_have 3 → 2 := fun h ↦ Gentzen.complete fun M _ x _ ↦ ⟨A, by simp, h M x⟩;
+  tfae_have 2 → 1 := fun h ↦ by simpa using of_gentzen h ⨀ (by simp [Finset.conj]);
+  tfae_have 3 → 4 := fun h _ _ M _ ↦ h M.toModel M.root;
+  tfae_have 4 → 3 := fun h _ _ M _ x ↦ Model.forces_cone.mp <| h (M.cone x);
   tfae_finish;
+
+theorem iff_provable_gentzen : 𝐆𝐫𝐳 ⊢ A ↔ ⊢ᴳ[𝐆𝐫𝐳] ∅ ⟹ {A} := provability_TFAE.out 1 2
+
+omit [DecidableEq α] in
+theorem iff_valid_finite :
+    𝐆𝐫𝐳 ⊢ A ↔ ∀ {κ : Type u} [Nonempty κ] (M : Model κ α), [M.IsFiniteGrz] → M ⊧ A := by
+  classical
+  exact provability_TFAE.out 1 3
+
+omit [DecidableEq α] in
+theorem iff_root_forces : 𝐆𝐫𝐳 ⊢ A ↔
+    ∀ {κ : Type u} [Nonempty κ] (M : RootedModel κ α), [M.IsFiniteGrz] → M.root ⊩[M.toModel] A := by
+  classical
+  exact provability_TFAE.out 1 4
 
 end Logic.Grz
 
