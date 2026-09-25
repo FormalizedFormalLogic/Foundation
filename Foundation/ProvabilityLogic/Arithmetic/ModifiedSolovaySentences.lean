@@ -37,7 +37,7 @@ root.
 -/
 structure StrongReflexiveCountermodel (κ : Type*) [Nonempty κ] {α : Type*} [DecidableEq α]
     (A : Formula α) extends RootedModel κ α where
-  root_not_forces : root ⊮[toModel] A
+  root_not_forces : root ⊮[_] A
   u : toModel.World
   root_rel_u : root ≺ u
   isReflexiveOf_u : u.IsReflexiveOf A.subfmls.prebox
@@ -75,17 +75,23 @@ structure Provability.ModifiedSolovaySentences
 
 namespace Provability.ModifiedSolovaySentences
 
-variable {M : StrongReflexiveCountermodel κ A} [Fintype M.World] [M.IsGL] {σ : Sentence L}
-         {S : 𝔅.ModifiedSolovaySentences M σ} {i : M.extendRoot.World}
+variable {M : StrongReflexiveCountermodel κ A} [Fintype M.World] {σ : Sentence L}
+
+attribute [coe] Λ
+
+instance : CoeFun (𝔅.ModifiedSolovaySentences M σ) (fun _ ↦ M.extendRoot.World → Sentence L) :=
+  ⟨Λ⟩
+
+variable [M.IsGL] {S : 𝔅.ModifiedSolovaySentences M σ} {i : M.extendRoot.World}
 
 open Classical in
 noncomputable def realization (S : 𝔅.ModifiedSolovaySentences M σ) : Realization α L :=
-  ⟨fun a ↦ ⩖ i ∈ { i : M.extendRoot.World | i ⊩[M.extendRoot.toModel] #a }, S.Λ i⟩
+  ⟨fun a ↦ ⩖ i ∈ { i : M.extendRoot.World | i ⊩[_] #a }, S i⟩
 
 private lemma mainlemma_aux (hi : i ≠ none) {B : ProvabilityLogic.Formula α}
     (hB : B ∈ A.subfmls) :
-    (i ⊩[M.extendRoot.toModel] B → T₀ ⊢ S.Λ i 🡒 B.interpret S.realization 𝔅) ∧
-    (i ⊮[M.extendRoot.toModel] B → T₀ ⊢ S.Λ i 🡒 ∼B.interpret S.realization 𝔅) := by
+    (i ⊩[_] B → T₀ ⊢ S i 🡒 B.interpret S.realization 𝔅) ∧
+    (i ⊮[_] B → T₀ ⊢ S i 🡒 ∼B.interpret S.realization 𝔅) := by
   classical
   induction B generalizing i with
   | falsum => simp [Formula.interpret];
@@ -109,12 +115,12 @@ private lemma mainlemma_aux (hi : i ≠ none) {B : ProvabilityLogic.Formula α}
   | box B ih =>
     replace ih := fun {j} (hj : j ≠ none) ↦ ih hj (Formula.subfmls_trans hB (by grind));
     have hne {j : M.extendRoot.World} (Rij : i ≺ j) : j ≠ none := by rintro rfl; simp_all;
-    have hu : some M.u ⊩[M.extendRoot.toModel] □B → some M.u ⊩[M.extendRoot.toModel] B :=
+    have hu : some M.u ⊩[_] □B → some M.u ⊩[_] B :=
       fun h ↦ extendRoot.forces_some.mpr <|
         M.isReflexiveOf_u B (FormulaFinset.mem_prebox.mpr hB) (extendRoot.forces_some.mp h);
     constructor;
     · intro h;
-      have h₁ : T₀ ⊢ (⩖ j ∈ { j : M.extendRoot.World | i ≺ j }, S.Λ j) 🡒
+      have h₁ : T₀ ⊢ (⩖ j ∈ { j : M.extendRoot.World | i ≺ j }, S j) 🡒
           B.interpret S.realization 𝔅 :=
         left_Fdisj'_intro _ _ fun j hj ↦ (ih (hne (by simpa using hj))).1 (h j (by simpa using hj));
       rcases eq_or_ne i (some M.u) with rfl | hiu;
@@ -123,7 +129,7 @@ private lemma mainlemma_aux (hi : i ≠ none) {B : ProvabilityLogic.Formula α}
     · intro h;
       obtain ⟨j, Rij, hj⟩ := not_forces_box.mp h;
       obtain ⟨y, ⟨Riy, hy⟩, hymax⟩ :=
-        M.extendRoot.terminalOf { y | i ≺ y ∧ y ⊮[M.extendRoot.toModel] B } ⟨j, Rij, hj⟩;
+        M.extendRoot.terminalOf { y | i ≺ y ∧ y ⊮[_] B } ⟨j, Rij, hj⟩;
       have hyu : y ≠ some M.u := by
         rintro rfl;
         exact hy <| hu fun z Ryz ↦ of_not_not fun hz ↦
@@ -135,23 +141,23 @@ private lemma mainlemma_aux (hi : i ≠ none) {B : ProvabilityLogic.Formula α}
 - [AB05, Lemma 53]
 -/
 theorem mainlemma (hi : i ≠ none) {B : ProvabilityLogic.Formula α} (hB : B ∈ A.subfmls) :
-    i ⊩[M.extendRoot.toModel] B → T₀ ⊢ S.Λ i 🡒 B.interpret S.realization 𝔅 :=
+    i ⊩[_] B → T₀ ⊢ S i 🡒 B.interpret S.realization 𝔅 :=
   (mainlemma_aux hi hB).1
 
 /-- - [Bek90, §6 Lemma 2]
 - [AB05, Lemma 53]
 -/
 theorem mainlemma_neg (hi : i ≠ none) {B : ProvabilityLogic.Formula α} (hB : B ∈ A.subfmls) :
-    i ⊮[M.extendRoot.toModel] B → T₀ ⊢ S.Λ i 🡒 ∼B.interpret S.realization 𝔅 :=
+    i ⊮[_] B → T₀ ⊢ S i 🡒 ∼B.interpret S.realization 𝔅 :=
   (mainlemma_aux hi hB).2
 
 lemma provable_boxItr_bot_of_ne (S : 𝔅.ModifiedSolovaySentences M σ) {z : M.World}
     (hr : z ≠ M.root) (hu : z ≠ M.u) :
-    T₀ ⊢ S.Λ (some z) 🡒 𝔅^[Model.World.rank z + 1] ⊥ := by
+    T₀ ⊢ S (some z) 🡒 𝔅^[Model.World.rank z + 1] ⊥ := by
   classical
   induction z using WellFounded.induction IsConverseWellFounded.cwf (r := flip M.Rel) with
   | h z ih =>
-    suffices T₀ ⊢ (⩖ j ∈ { j : M.extendRoot.World | some z ≺ j }, S.Λ j) 🡒
+    suffices T₀ ⊢ (⩖ j ∈ { j : M.extendRoot.World | some z ≺ j }, S j) 🡒
         𝔅^[Model.World.rank z] ⊥ by
       simpa only [Function.iterate_succ_apply'] using
         C_trans (S.SC3 (some z) (by simp) (by simpa using hu)) (𝔅.mono' this);
@@ -164,9 +170,9 @@ lemma provable_boxItr_bot_of_ne (S : 𝔅.ModifiedSolovaySentences M σ) {z : M.
         𝔅.provable_boxItr_bot_mono <| Model.rank_lt_of_rel hy;
 
 lemma provable_b (S : 𝔅.ModifiedSolovaySentences M σ) :
-    T₀ ⊢ 𝔅.conItr M.height 🡒 𝔅 σ 🡒 ∼σ 🡒 S.Λ (some M.root) := by
+    T₀ ⊢ 𝔅.conItr M.height 🡒 𝔅 σ 🡒 ∼σ 🡒 S (some M.root) := by
   classical
-  suffices T₀ ⊢ (⩖ j, S.Λ j) 🡒 ∼𝔅^[M.height] ⊥ 🡒 𝔅 σ 🡒 ∼σ 🡒 S.Λ (some M.root) from
+  suffices T₀ ⊢ (⩖ j, S j) 🡒 ∼𝔅^[M.height] ⊥ 🡒 𝔅 σ 🡒 ∼σ 🡒 S (some M.root) from
     this ⨀ S.SC4;
   apply left_Udisj_intro;
   rintro (_ | z);
