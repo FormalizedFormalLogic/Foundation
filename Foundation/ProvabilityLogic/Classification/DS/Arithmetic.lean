@@ -24,8 +24,8 @@ open Entailment FirstOrder Formula LetterlessFormula
 variable {α β : Type*} {T U : ArithmeticTheory} [T.Δ₁]
 
 lemma LetterlessFormula.lift_mem_provabilityLogic_iff {A : LetterlessFormula} :
-    A.lift ∈ (T.provabilityLogicRelativeTo U : Logic α) ↔
-      A.lift ∈ (T.provabilityLogicRelativeTo U : Logic β) := by
+    ↑A ∈ (T.provabilityLogicRelativeTo U : Logic α) ↔
+      ↑A ∈ (T.provabilityLogicRelativeTo U : Logic β) := by
   constructor <;> intro h f <;> simpa only [standardInterpret, interpret_lift] using h ⟨fun _ ↦ ⊥⟩;
 
 variable [𝗜𝚺₁ ⪯ T] [𝗜𝚺₁ ⪯ U]
