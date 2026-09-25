@@ -83,16 +83,17 @@ instance {K : RootedModel κ α} {s : Substitution β α} [K.IsGL] : (K.subst s)
 section Transfer
 
 variable [DecidableEq α] {K : RootedModel κ α} {p q : α} {γ : Finset α}
-  (hp : K.root ⊩[K.toModel] □#p) (hnp : K.root ⊮[K.toModel] #p)
-include hp hnp
 
-lemma val_subst_pIffOn_of_ne {z : K.World} (hz : z ≠ K.root) :
+lemma val_subst_pIffOn_of_ne (hp : K.root ⊩[K.toModel] □#p) {z : K.World} (hz : z ≠ K.root) :
     (K.subst (Substitution.pIffOn p γ)).Val z q ↔ K.Val z q := by
-  sorry
+  have := hp z (K.root_rel z hz);
+  change z ⊩[K.toModel] (if q ∈ γ then #p 🡘 #q else #q) ↔ _;
+  grind;
 
-lemma val_subst_pIffOn_root :
+lemma val_subst_pIffOn_root (hnp : K.root ⊮[K.toModel] #p) :
     (K.subst (Substitution.pIffOn p γ)).Val K.root q ↔ (q ∈ γ ↔ ¬K.Val K.root q) := by
-  sorry
+  change K.root ⊩[K.toModel] (if q ∈ γ then #p 🡘 #q else #q) ↔ _;
+  grind;
 
 end Transfer
 
