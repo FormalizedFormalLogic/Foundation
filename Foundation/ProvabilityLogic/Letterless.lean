@@ -39,12 +39,16 @@ def lift : LetterlessFormula → Formula α
   | A 🡒 B => A.lift 🡒 B.lift
   | □A    => □A.lift
 
+attribute [coe] lift
+
+instance : Coe LetterlessFormula (Formula α) := ⟨lift⟩
+
 @[simp, grind =] lemma lift_bot : lift ⊥ = (⊥ : Formula α) := rfl
-@[simp, grind =] lemma lift_imp : lift (A 🡒 B) = (A.lift 🡒 B.lift : Formula α) := rfl
-@[simp, grind =] lemma lift_box : lift (□A) = (□A.lift : Formula α) := rfl
+@[simp, grind =] lemma lift_imp : lift (A 🡒 B) = (↑A 🡒 ↑B : Formula α) := rfl
+@[simp, grind =] lemma lift_box : lift (□A) = (□↑A : Formula α) := rfl
 
 @[simp, grind =]
-lemma lift_boxItr : lift (□^[n]A) = (□^[n]A.lift : Formula α) := by
+lemma lift_boxItr : lift (□^[n]A) = (□^[n]↑A : Formula α) := by
   induction n <;> simp_all;
 
 @[simp, grind =] lemma lift_TBB : lift (TBB n) = (TBB n : Formula α) := by
@@ -139,6 +143,10 @@ namespace LetterlessFormulaSet
 variable {α : Type*}
 
 abbrev lift (X : LetterlessFormulaSet) : Set (Formula α) := LetterlessFormula.lift '' X
+
+attribute [coe] lift
+
+instance : Coe LetterlessFormulaSet (Set (Formula α)) := ⟨lift⟩
 
 def spectrum (X : LetterlessFormulaSet) : Set ℕ := ⋂ A ∈ X, LetterlessFormula.spectrum A
 

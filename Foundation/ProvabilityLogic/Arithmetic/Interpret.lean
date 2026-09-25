@@ -62,7 +62,7 @@ namespace LetterlessFormula
 variable {A : LetterlessFormula} {f : Realization α L} {𝔅 : Provability T₀ T}
 
 lemma interpret_lift :
-    (A.lift : Formula α).interpret f 𝔅 = A.interpret ⟨Empty.elim⟩ 𝔅 := by
+    (↑A : Formula α).interpret f 𝔅 = A.interpret ⟨Empty.elim⟩ 𝔅 := by
   induction A with
   | atom a => exact a.elim;
   | _ => simp_all [lift, interpret];
