@@ -24,9 +24,11 @@ follows the edge whose trigger fires first.
 
 @[expose] public section
 
-open FFL.Entailment
+namespace FFL
 
-namespace FFL.ProvabilityLogic.Kripke
+open Entailment
+
+namespace ProvabilityLogic.Kripke
 
 open Model Model.World
 
@@ -43,9 +45,9 @@ structure StrongReflexiveCountermodel (κ : Type*) [Nonempty κ] {α : Type*} [D
   isReflexiveOf_u : u.IsReflexiveOf A.subfmls.prebox
   eq_root_of_rel_u : ∀ z : toModel.World, z ≺ u → z = root
 
-end FFL.ProvabilityLogic.Kripke
+end ProvabilityLogic.Kripke
 
-namespace FFL.FirstOrder.ProvabilityAbstraction
+namespace FirstOrder.ProvabilityAbstraction
 
 open ProvabilityLogic Kripke Model Model.World RootedModel
 
@@ -199,11 +201,11 @@ theorem reflection :
 
 end Provability.ModifiedSolovaySentences
 
-end FFL.FirstOrder.ProvabilityAbstraction
+end FirstOrder.ProvabilityAbstraction
 
 noncomputable section
 
-namespace FFL.FirstOrder.Arithmetic.Bootstrapping.ModifiedSolovaySentences
+namespace FirstOrder.Arithmetic.Bootstrapping.ModifiedSolovaySentences
 
 open ProvabilityLogic Kripke Model
 
@@ -630,9 +632,9 @@ lemma provable_provable_sigma_imp :
 
 end
 
-end FFL.FirstOrder.Arithmetic.Bootstrapping.ModifiedSolovaySentences
+end FirstOrder.Arithmetic.Bootstrapping.ModifiedSolovaySentences
 
-namespace FFL.ProvabilityLogic
+namespace ProvabilityLogic
 
 open FirstOrder Arithmetic Bootstrapping ModifiedSolovaySentences Kripke
 
@@ -668,8 +670,10 @@ def standardModifiedSolovaySentences
     SC5 := provable_provable_sigma_imp
     SC6 := provable_not_sigma_imp hθσ }
 
-end FFL.ProvabilityLogic
+end ProvabilityLogic
 
 end
+
+end FFL
 
 end
