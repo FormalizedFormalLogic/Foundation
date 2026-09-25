@@ -163,7 +163,22 @@ theorem provabilityLogic_TA_eq_D_iff :
 theorem provabilityLogic_TA_eq_A_iff :
     (T.provabilityLogicRelativeTo 𝗧𝗔 : Logic α) = 𝐀 ↔
       ¬T.SoundOnHierarchy 𝚺 1 ∧ T.height = ⊤ := by
-  sorry
+  inhabit α;
+  constructor;
+  · intro h;
+    and_intros;
+    · exact fun _ ↦ Logic.A.ssubset_D.not_subset <| h ▸ D_subset_provabilityLogic_TA;
+    · exact ENat.eq_top_iff_forall_ne.mpr fun _ ↦
+        (TBB_mem_provabilityLogic_TA_iff.mp <| h ▸ Logic.A.provable_TBB).symm;
+  · rintro ⟨hs₁, hT⟩;
+    replace hT := trace_provabilityLogic_TA_eq_univ_iff (α := α).mpr hT;
+    rcases provabilityLogic_eq_A_or_eq_D_or_eq_S hT (provabilityLogic_TA_subset_S hT)
+      with h | h | h;
+    · exact h;
+    · exact absurd (soundOnHierarchy_of_axiomD_mem_provabilityLogic_TA (a := default) hT
+        (h ▸ Logic.D.axiomD)) hs₁;
+    · have := provabilityLogic_TA_eq_S_iff.mp h;
+      exact (hs₁ inferInstance).elim;
 
 /-- Exactly one of the following holds: `T` is sound and `PL(T, 𝗧𝗔) = 𝐒`; `T` is `𝚺₁`-sound but
 not sound and `PL(T, 𝗧𝗔) = 𝐃`; `T` is not `𝚺₁`-sound, `T` has characteristic `ω`, and
