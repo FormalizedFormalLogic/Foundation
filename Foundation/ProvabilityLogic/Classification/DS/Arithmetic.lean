@@ -82,8 +82,8 @@ theorem provable_reflection_of_not_D
 -/
 theorem S_subset_provabilityLogic
     (hT : (T.provabilityLogicRelativeTo U : Logic α).trace = .univ)
-    (h : 𝐃 ⊂ (T.provabilityLogicRelativeTo U : Logic α)) :
-    𝐒 ⊆ (T.provabilityLogicRelativeTo U : Logic α) := by
+    (h : 𝐃@α ⊂ T.provabilityLogicRelativeTo U) :
+    𝐒@α ⊆ T.provabilityLogicRelativeTo U := by
   obtain ⟨A, hA, hAD⟩ := Set.exists_of_ssubset h;
   apply sumQuasiNormal_subset_provabilityLogic;
   rintro _ ⟨C, rfl⟩ _;
@@ -95,8 +95,8 @@ theorem S_subset_provabilityLogic
 -/
 theorem not_D_ssubset_provabilityLogic_ssubset_S
     (hT : (T.provabilityLogicRelativeTo U : Logic α).trace = .univ) :
-    ¬(𝐃 ⊂ (T.provabilityLogicRelativeTo U : Logic α) ∧
-      (T.provabilityLogicRelativeTo U : Logic α) ⊂ 𝐒) :=
+    ¬(𝐃@α ⊂ T.provabilityLogicRelativeTo U ∧
+      T.provabilityLogicRelativeTo U ⊂ 𝐒@α) :=
   fun ⟨h₁, h₂⟩ ↦ h₂.not_subset (S_subset_provabilityLogic hT h₁)
 
 end FFL.ProvabilityLogic
