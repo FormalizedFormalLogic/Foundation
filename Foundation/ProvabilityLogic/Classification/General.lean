@@ -53,8 +53,13 @@ lemma imp_mem_provabilityLogic_of_mem_addTBB (hN : N.Finite) {A : Formula α}
 
 lemma trace_provabilityLogic_addTBB :
     (T.provabilityLogicRelativeTo
-      (T.addTBB U (T.provabilityLogicRelativeTo U : Logic α).traceᶜ) : Logic α).trace = .univ :=
-  sorry
+      (T.addTBB U (T.provabilityLogicRelativeTo U : Logic α).traceᶜ) : Logic α).trace = .univ := by
+  apply Set.eq_univ_of_forall;
+  intro n;
+  apply mem_trace_provabilityLogic_iff.mpr;
+  by_cases hn : n ∈ (T.provabilityLogicRelativeTo U : Logic α).trace;
+  · exact provabilityLogic_subset_addTBB <| TBB_mem_provabilityLogic_of_mem_trace hn;
+  · exact TBB_mem_provabilityLogic_addTBB hn;
 
 variable (hL : (T.provabilityLogicRelativeTo U : Logic α).traceᶜ.Finite)
 
