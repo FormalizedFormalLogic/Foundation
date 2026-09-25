@@ -31,11 +31,11 @@ variable {α : Type*} {A B : Formula α}
 
 lemma of_GL (h : 𝐆𝐋 ⊢ A) : 𝐃 ⊢ A := sumQuasiNormal.of_left h
 
-lemma axiomP : (𝐃 : Logic α) ⊢ ∼□⊥ := sumQuasiNormal.mem₂ (Set.mem_insert _ _)
+lemma axiomP : 𝐃@α ⊢ ∼□⊥ := sumQuasiNormal.mem₂ (Set.mem_insert _ _)
 
 lemma axiomD : 𝐃 ⊢ □(□A ⋎ □B) 🡒 □A ⋎ □B := sumQuasiNormal.mem₂ (Set.mem_insert_of_mem _ ⟨A, B, rfl⟩)
 
-lemma subset_S : (𝐃 : Logic α) ⊆ 𝐒 := by
+lemma subset_S : 𝐃@α ⊆ 𝐒 := by
   intro A h;
   induction h with
   | mem₁ h => exact S.of_GL h;
@@ -73,15 +73,15 @@ lemma sound_freeTail (h : 𝐃 ⊢ A) {κ : Type*} [Nonempty κ] (M : Model κ �
       · exact toFreeTail.forces_inl.symm;
       · rfl;
 
-lemma not_axiomT {a : α} : (𝐃 : Logic α) ⊬ □#a 🡒 #a := fun h ↦
+lemma not_axiomT {a : α} : 𝐃@α ⊬ □#a 🡒 #a := fun h ↦
   sound_freeTail h (pointModel fun _ ↦ True) (fun i _ ↦ i ≠ ⊤)
     (by rintro (_ | i) R; exacts [trivial, ne_top_of_lt R]) rfl
 
-lemma GL_ssubset : (𝐆𝐋 : Logic α) ⊂ 𝐃 :=
+lemma GL_ssubset : 𝐆𝐋@α ⊂ 𝐃 :=
   ⟨fun _ ↦ of_GL, fun h ↦
     GL.sound (pointModel (α := α) fun _ ↦ True) (h axiomP) 0 fun _ h ↦ h.elim⟩
 
-lemma ssubset_S [Inhabited α] : (𝐃 : Logic α) ⊂ 𝐒 :=
+lemma ssubset_S [Inhabited α] : 𝐃@α ⊂ 𝐒 :=
   ⟨subset_S, fun h ↦ not_axiomT (a := default) (h S.axiomT)⟩
 
 variable [DecidableEq α]
@@ -211,7 +211,7 @@ lemma iff_box_provable_GL : 𝐃 ⊢ □A ↔ 𝐆𝐋 ⊢ A := by
   · exact fun h ↦ of_GL (normalOf.nec h);
 
 omit [DecidableEq α] in
-lemma consistent : (𝐃 : Logic α) ⊬ ⊥ := by
+lemma consistent : 𝐃@α ⊬ ⊥ := by
   classical
   exact fun h ↦ S.consistent (subset_S h)
 
