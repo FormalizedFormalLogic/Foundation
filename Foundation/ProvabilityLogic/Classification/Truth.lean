@@ -18,14 +18,13 @@ according to whether `T` is sound, `𝚺₁`-sound but not sound, not `𝚺₁`-
 
 namespace FFL.ProvabilityLogic
 
-open Entailment FirstOrder FirstOrder.ProvabilityAbstraction Formula
+open Entailment FirstOrder ProvabilityAbstraction Formula
 
-variable {α : Type*} {T : ArithmeticTheory} [T.Δ₁]
+variable {α : Type*} {T : ArithmeticTheory} [T.Δ₁] {σ : ArithmeticSentence}
 
 /-! ### Soundness and characteristic -/
 
-lemma models_standardProvability_iff {σ : ArithmeticSentence} :
-    ℕ↓[ℒₒᵣ] ⊧ T.standardProvability σ ↔ T ⊢ σ :=
+lemma models_standardProvability_iff : ℕ↓[ℒₒᵣ] ⊧ T.standardProvability σ ↔ T ⊢ σ :=
   ⟨T.standardProvability.sound_on,
     fun h ↦ models_of_provable inferInstance (T.standardProvability.D1 h)⟩
 
@@ -38,7 +37,7 @@ lemma soundOnHierarchy_iff_models_reflection :
     fun h ↦ ⟨fun hσ hσ' ↦
       Semantics.Imp.models_imply.mp (h _ hσ') (models_standardProvability_iff.mpr hσ)⟩⟩
 
-variable [𝗜𝚺₁ ⪯ T] {n : ℕ}
+variable [𝗜𝚺₁ ⪯ T] {n : ℕ} {a : α}
 
 lemma models_boxBot_iff : ℕ↓[ℒₒᵣ] ⊧ T.standardProvability^[n + 1] ⊥ ↔ T.height ≤ n := by
   simpa [Function.iterate_succ_apply', models_standardProvability_iff] using
@@ -99,7 +98,7 @@ theorem D_subset_provabilityLogic_TA [T.SoundOnHierarchy 𝚺 1] :
   · exact h _ <| by simp [interpret, Arithmetic.standardProvability_def];
 
 /-- - [AB05, Corollary 41(ii)] -/
-theorem soundOnHierarchy_of_axiomD_mem_provabilityLogic_TA {a : α}
+theorem soundOnHierarchy_of_axiomD_mem_provabilityLogic_TA
     (hT : (T.provabilityLogicRelativeTo 𝗧𝗔 : Logic α).trace = .univ)
     (h : □(□#a ⋎ □#a) 🡒 □#a ⋎ □#a ∈ T.provabilityLogicRelativeTo 𝗧𝗔) :
     T.SoundOnHierarchy 𝚺 1 :=

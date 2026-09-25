@@ -16,28 +16,35 @@ The provability logic of `T` relative to `U` is one of `GLα X`, `GLβ⁻ X`, `D
 
 @[expose] public section
 
+namespace FFL.FirstOrder.ArithmeticTheory
+
+open FFL.Entailment ProvabilityLogic Formula
+
+variable (T U : ArithmeticTheory) [T.Δ₁] (N : Set ℕ)
+
+/-- `U` extended by the standard `T`-interpretations of `TBB n` for `n ∈ N`. -/
+noncomputable def addTBB : ArithmeticTheory :=
+  U ∪ (fun n ↦ (TBB n : LetterlessFormula).interpret ⟨Empty.elim⟩ T.standardProvability) '' N
+
+variable {T U N}
+
+lemma weakerThan_addTBB : U ⪯ T.addTBB U N := WeakerThan.ofSubset Set.subset_union_left
+
+instance [𝗜𝚺₁ ⪯ U] : 𝗜𝚺₁ ⪯ T.addTBB U N := (inferInstance : 𝗜𝚺₁ ⪯ U).trans weakerThan_addTBB
+
+end FFL.FirstOrder.ArithmeticTheory
+
 namespace FFL.ProvabilityLogic
 
 open Entailment FirstOrder Formula LetterlessFormula
 
-variable {α : Type*} {T U : ArithmeticTheory} [T.Δ₁] {N : Set ℕ}
-
-/-- `U` extended by the standard `T`-interpretations of `TBB n` for `n ∈ N`. -/
-noncomputable def _root_.FFL.FirstOrder.ArithmeticTheory.addTBB
-    (T U : ArithmeticTheory) [T.Δ₁] (N : Set ℕ) : ArithmeticTheory :=
-  U ∪ (fun n ↦ (TBB n : LetterlessFormula).interpret ⟨Empty.elim⟩ T.standardProvability) '' N
-
-lemma _root_.FFL.FirstOrder.ArithmeticTheory.weakerThan_addTBB : U ⪯ T.addTBB U N :=
-  WeakerThan.ofSubset Set.subset_union_left
-
-instance [𝗜𝚺₁ ⪯ U] : 𝗜𝚺₁ ⪯ T.addTBB U N :=
-  (inferInstance : 𝗜𝚺₁ ⪯ U).trans ArithmeticTheory.weakerThan_addTBB
+variable {α : Type*} {T U : ArithmeticTheory} [T.Δ₁] {N : Set ℕ} {n : ℕ} {A : Formula α}
 
 lemma provabilityLogic_subset_addTBB :
     (T.provabilityLogicRelativeTo U : Logic α) ⊆ T.provabilityLogicRelativeTo (T.addTBB U N) :=
   fun _ hA f ↦ ArithmeticTheory.weakerThan_addTBB.pbl (hA f)
 
-lemma TBB_mem_provabilityLogic_addTBB {n : ℕ} (hn : n ∈ N) :
+lemma TBB_mem_provabilityLogic_addTBB (hn : n ∈ N) :
     (TBB n : Formula α) ∈ T.provabilityLogicRelativeTo (T.addTBB U N) :=
   fun f ↦ by_axm <| Set.mem_union_right U
     ⟨n, hn, by simpa using (interpret_lift (A := TBB n)).symm⟩
@@ -46,7 +53,7 @@ section
 
 variable [𝗜𝚺₁ ⪯ T] [𝗜𝚺₁ ⪯ U]
 
-lemma imp_mem_provabilityLogic_of_mem_addTBB (hN : N.Finite) {A : Formula α}
+lemma imp_mem_provabilityLogic_of_mem_addTBB (hN : N.Finite)
     (h : A ∈ T.provabilityLogicRelativeTo (T.addTBB U N)) :
     (⩕ n ∈ hN.toFinset, TBB n : LetterlessFormula).lift 🡒 A ∈ T.provabilityLogicRelativeTo U := by
   intro f;
