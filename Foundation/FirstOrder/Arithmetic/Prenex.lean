@@ -118,7 +118,7 @@ lemma val_pi {φ : Prenex 𝚺 s ξ (n + 1)} : φ.pi.val = ∀¹ φ.val := by
 @[simp, grind .]
 lemma val_sigmaInv {φ : Prenex 𝚺 (s + 1) ξ n} : φ.val = ∃¹ φ.sigmaInv.val := by
   unfold val sigmaInv
-  simp only [HierarchySymbol.Semiformula.val_rew]
+  simp only [Bounding.HierarchySymbol.Semiformula.val_rew]
   rw [← Polarity.quant_sigma, ← Polarity.alt_sigma, ← Rewriting.quantItr_succ_smul_castLE,
     ← TransitiveRewriting.comp_app]
   simp
@@ -128,7 +128,7 @@ lemma val_sigmaInv {φ : Prenex 𝚺 (s + 1) ξ n} : φ.val = ∃¹ φ.sigmaInv.
 @[simp, grind .]
 lemma val_piInv {φ : Prenex 𝚷 (s + 1) ξ n} : φ.val = ∀¹ φ.piInv.val := by
   unfold val piInv
-  simp only [HierarchySymbol.Semiformula.val_rew]
+  simp only [Bounding.HierarchySymbol.Semiformula.val_rew]
   rw [← Polarity.quant_pi, ← Polarity.alt_pi, ← Rewriting.quantItr_succ_smul_castLE,
     ← TransitiveRewriting.comp_app]
   simp

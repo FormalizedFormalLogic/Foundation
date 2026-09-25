@@ -64,7 +64,7 @@ lemma not_witnessedBefore_of_provedBefore : T.ProvedBefore θ x → ¬T.Witnesse
 private lemma fghSentence'_val_eq :
     (T.fghSentence' θ).val = (T.witnessedBefore θ).val/[⌜T.fghSentence θ⌝] := by
   unfold Theory.fghSentence'
-  rw [HierarchySymbol.Semiformula.val_rew]
+  rw [Bounding.HierarchySymbol.Semiformula.val_rew]
 
 lemma diagonal_fghSentence :
     𝗜𝚺₁ ⊢ T.fghSentence θ 🡘 (T.fghSentence' θ).val := by

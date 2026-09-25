@@ -419,11 +419,11 @@ noncomputable def construction : UformulaRec1.Construction V (blueprint L) where
   exs_defined := .mk fun v ↦ by simp [blueprint]
   -- Letting `simp` apply `Semiformula.eval_substs` here overflows memory on Lean v4.33.1.
   allChanges_defined := .mk fun v ↦ by
-    simp only [blueprint, HierarchySymbol.Semiformula.val_mkSigma]
+    simp only [blueprint, Bounding.HierarchySymbol.Semiformula.val_mkSigma]
     rw [Semiformula.eval_substs]
     simp [qVec.defined.df]
   exChanges_defined := .mk fun v ↦ by
-    simp only [blueprint, HierarchySymbol.Semiformula.val_mkSigma]
+    simp only [blueprint, Bounding.HierarchySymbol.Semiformula.val_mkSigma]
     rw [Semiformula.eval_substs]
     simp [qVec.defined.df]
 
@@ -1161,7 +1161,7 @@ def _root_.FFL.FirstOrder.Arithmetic.LDef.isFVFreeDef (pL : LDef) : 𝚺₁.Semi
   .mkSigma “n p | !(isSemiformula L).sigma n p ∧ !pshift LDef p p”
 
 lemma isFVFree_defined : 𝚺₁-Relation L.IsFVFree via pL.isFVFreeDef := by
-  intro v; simp [LDef.isFVFreeDef, HierarchySymbol.Semiformula.val_sigma, (semiformula_defined L).df.iff, (shift_defined L).df.iff]
+  intro v; simp [LDef.isFVFreeDef, Bounding.HierarchySymbol.Semiformula.val_sigma, (semiformula_defined L).df.iff, (shift_defined L).df.iff]
   simp [Language.IsFVFree, eq_comm]
 
 end

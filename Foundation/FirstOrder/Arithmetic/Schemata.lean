@@ -514,7 +514,7 @@ private lemma neg_succ_induction {P : V → Prop} (hP : Γ-[s].DefinablePred P)
     · exact Γ
     · exact s
     · suffices Γ-[s].DefinablePred fun x ↦ x ≤ a → P (a - x) by exact this
-      apply HierarchySymbol.Definable.imp
+      apply Bounding.HierarchySymbol.Definable.imp
       · apply HierarchySymbol.Definable.bcomp₂ (by definability) (by definability)
       · apply HierarchySymbol.Definable.bcomp₁ (by definability)
     case zero =>
@@ -567,7 +567,7 @@ lemma least_number {P : V → Prop} (hP : Γ-[s].DefinablePred P)
     · exact s
     · suffices Γ.alt-[s].DefinablePred fun z ↦ ∀ w < z, ¬P w by exact this
       apply HierarchySymbol.Definable.ball_blt (by definability)
-      apply HierarchySymbol.Definable.not
+      apply Bounding.HierarchySymbol.Definable.not
       apply HierarchySymbol.Definable.bcomp₁ (hP := by simpa using hP) (by definability)
     case zero => simp
     case succ x IH =>

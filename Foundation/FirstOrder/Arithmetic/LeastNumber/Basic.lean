@@ -66,7 +66,7 @@ lemma succ_induction {P : V → Prop} (hP : Γ.alt-[s].DefinablePred P)
   by_contra! hcon;
   obtain ⟨a, ha⟩ := hcon;
   obtain ⟨y, hy, hmin⟩ := least_number Γ s (P := fun x ↦ ¬P x) (by
-    apply Arithmetic.HierarchySymbol.Definable.not;
+    apply Bounding.HierarchySymbol.Definable.not
     simpa [SigmaPiDelta.alt_coe];
   ) ha;
   push Not at hmin;

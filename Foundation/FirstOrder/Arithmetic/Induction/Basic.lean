@@ -244,8 +244,8 @@ lemma sigma_or_pi_order_induction {P Q : V → Prop} (hP : 𝚺-[m]-Predicate P)
       apply FFL.FirstOrder.Arithmetic.HierarchySymbol.Definable.imp
       · simp_all only [SigmaPiDelta.alt_sigma, Fin.isValue]
         apply FFL.FirstOrder.Arithmetic.HierarchySymbol.Definable.comp₂
-        · simp [Fin.isValue, HierarchySymbol.DefinableFunction.var]
-        · simp [HierarchySymbol.DefinableFunction.const]
+        · simp [Fin.isValue]
+        · simp
       · apply FFL.FirstOrder.Arithmetic.HierarchySymbol.Definable.or
         · apply FFL.FirstOrder.Arithmetic.HierarchySymbol.Definable.comp₂
           · simp

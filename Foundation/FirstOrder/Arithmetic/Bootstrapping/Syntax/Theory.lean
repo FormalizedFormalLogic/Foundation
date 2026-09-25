@@ -102,7 +102,7 @@ variable {T U : Theory L}
 
 namespace Δ₁
 
-open Arithmetic.HierarchySymbol.Semiformula FFL.FirstOrder.Theory
+open Bounding.HierarchySymbol.Semiformula FFL.FirstOrder.Theory
 
 abbrev add (dT : T.Δ₁) (dU : U.Δ₁) : (T ∪ U).Δ₁ where
   ch := T.Δ₁ch ⋎ U.Δ₁ch
@@ -110,7 +110,7 @@ abbrev add (dT : T.Δ₁) (dU : U.Δ₁) : (T ∪ U).Δ₁ where
     simp only [Nat.succ_eq_add_one, Nat.reduceAdd, val_or, LogicalConnective.HomClass.map_or,
       FirstOrder.Arithmetic.Bootstrapping.Δ₁Class.mem_iff'_s, LogicalConnective.Prop.or_eq, Set.mem_union]
     grind
-  isDelta1 := ProvablyProperOn.ofProperOn.{0} _ fun V _ _ ↦ ProperOn.or (by simp) (by simp)
+  isDelta1 := Arithmetic.HierarchySymbol.Semiformula.ProvablyProperOn.ofProperOn.{0} _ fun V _ _ ↦ ProperOn.or (by simp) (by simp)
 
 abbrev ofEq (dT : T.Δ₁) (h : T = U) : U.Δ₁ where
   ch := dT.ch
@@ -120,12 +120,12 @@ abbrev ofEq (dT : T.Δ₁) (h : T = U) : U.Δ₁ where
 instance empty : Theory.Δ₁ (∅ : Theory L) where
   ch := ⊥
   mem_iff {ψ} := by simp
-  isDelta1 := ProvablyProperOn.ofProperOn.{0} _ fun V _ _ ↦ by simp
+  isDelta1 := Arithmetic.HierarchySymbol.Semiformula.ProvablyProperOn.ofProperOn.{0} _ fun V _ _ ↦ by simp
 
 abbrev singleton (φ : Sentence L) : Theory.Δ₁ {φ} where
   ch := .ofZero (.mkSigma “x. x = ↑(Encodable.encode φ)”) _
   mem_iff {ψ} := by simp [Semiformula.quote_eq_encode]
-  isDelta1 := ProvablyProperOn.ofProperOn.{0} _ fun V _ _ ↦ by simp
+  isDelta1 := Arithmetic.HierarchySymbol.Semiformula.ProvablyProperOn.ofProperOn.{0} _ fun V _ _ ↦ by simp
 
 @[simp] lemma singleton_toTDef_ch_val (φ : Sentence L) :
     letI := Δ₁.singleton φ

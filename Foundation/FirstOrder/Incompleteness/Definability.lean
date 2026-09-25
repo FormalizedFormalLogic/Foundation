@@ -520,11 +520,11 @@ def construction : Fixpoint.Construction V blueprint where
   defined := .mk <| by
     constructor
     · intro v
-      simp [blueprint, HierarchySymbol.Semiformula.val_sigma, eq_comm,
+      simp [blueprint, Bounding.HierarchySymbol.Semiformula.val_sigma, eq_comm,
         (termBShift.defined (L := ℒₒᵣ) (V := V)).df, (qqBall_defined (V := V)).df]
     · intro v
       symm
-      simpa [blueprint, HierarchySymbol.Semiformula.val_sigma, eq_comm,
+      simpa [blueprint, Bounding.HierarchySymbol.Semiformula.val_sigma, eq_comm,
         (termBShift.defined (L := ℒₒᵣ) (V := V)).df, (qqBall_defined (V := V)).df]
         using phi_iff (V := V) _ _
   monotone := by
@@ -785,9 +785,9 @@ instance InductionR.defined {S : V → Prop} {cond : 𝚫₁.Semisentence 1}
     [hcond : 𝚫₁-Predicate[V] S via cond] :
     𝚫₁-Predicate[V] (InductionR S : V → Prop) via chInd cond := .mk <| by
   constructor
-  · intro v; simp [chInd, HierarchySymbol.Semiformula.val_sigma, eq_comm]
+  · intro v; simp [chInd, Bounding.HierarchySymbol.Semiformula.val_sigma, eq_comm]
   · intro v
-    simp [chInd, HierarchySymbol.Semiformula.val_sigma, InductionR, lt_succ_iff_le, eq_comm]
+    simp [chInd, Bounding.HierarchySymbol.Semiformula.val_sigma, InductionR, lt_succ_iff_le, eq_comm]
 
 noncomputable instance InductionR.univ_defined :
     𝚫₁-Predicate[V] (InductionR (fun _ ↦ True) : V → Prop) via chUniv :=
@@ -1049,7 +1049,7 @@ lemma inductionScheme_re_univ : REPred (· ∈ InductionScheme ℒₒᵣ Set.uni
 
 lemma inductionScheme_re_sigma1 : REPred (· ∈ InductionScheme ℒₒᵣ (Arithmetic.Hierarchy 𝚺 1)) := by
   have hR : REPred (InductionR Bootstrapping.IsSigma1) :=
-    rePred_iff_sigma1.mpr <| HierarchySymbol.Definable.of_deltaOne
+    rePred_iff_sigma1.mpr <| Bounding.HierarchySymbol.Definable.of_deltaOne
       InductionR.sigma1_defined.to_definable
   refine (hR.comp Computable.encode).of_eq fun σ ↦ ?_
   simpa [Semiformula.quote_eq_encode] using

@@ -7,9 +7,8 @@ public import Foundation.FirstOrder.Tarski.Elementary
 # Absoluteness for bounding hierarchies
 
 Bounded formulas are absolute along embeddings whose image contains every element bounded
-by an image element. Sigma-one formulas are upward absolute and Pi-one formulas downward
-absolute. These are standard structural-induction facts; the operator-parametric formulation
-is specific to this formalization.
+by an image element. $\Sigma_1$ formulas are upward absolute and $\Pi_1$ formulas downward
+absolute.
 -/
 
 @[expose] public section
@@ -31,7 +30,7 @@ class IsInitial (ℬ : Bounding L) (ι : M ↪ₛ[L] N) : Prop where
     R.val ![b, ι a] → ∃ c : M, ι c = b
 
 variable (ι : M ↪ₛ[L] N)
-variable [IsInitial ℬ ι]
+variable [ℬ.IsInitial ι]
 
 private lemma ball_upward {n} {R : Semiformula.Operator L 2} (hR : R ∈ ℬ) (t : Semiterm L ξ n) (φ : Semiformula L ξ (n + 1))
     (ih : ∀ e ε, φ.Eval e ε → φ.Eval (ι ∘ e) (ι ∘ ε))
