@@ -61,8 +61,10 @@ lemma atoms_deltaPIff_subset {A : Formula α} {p : α} :
 end Formula
 
 lemma Logic.A.provable_deltaPIff {α : Type*} [DecidableEq α] {A : Formula α} {p : α} :
-    𝐀 +ᴸ {A} ⊢ A.deltaPIff p := by
-  sorry
+    𝐀 +ᴸ {A} ⊢ A.deltaPIff p :=
+  FConj_iff_forall_provable.mpr fun B hB ↦ by
+    obtain ⟨S, -, rfl⟩ := Finset.mem_image.mp hB;
+    exact sumQuasiNormal.subst (sumQuasiNormal.mem₂ rfl);
 
 namespace Kripke.RootedModel
 
