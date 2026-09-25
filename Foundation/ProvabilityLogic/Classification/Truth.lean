@@ -32,9 +32,11 @@ lemma models_standardProvability_iff {σ : ArithmeticSentence} :
 lemma soundOnHierarchy_iff_models_reflection :
     T.SoundOnHierarchy 𝚺 1 ↔
       ∀ σ : ArithmeticSentence, Arithmetic.Hierarchy 𝚺 1 σ →
-        ℕ↓[ℒₒᵣ] ⊧ T.standardProvability σ 🡒 σ := by
-  simp only [Semantics.Imp.models_imply, models_standardProvability_iff];
-  exact ⟨fun _ σ hσ h ↦ T.soundOnHierarchy 𝚺 1 h hσ, fun h ↦ ⟨fun hσ hσ' ↦ h _ hσ' hσ⟩⟩
+        ℕ↓[ℒₒᵣ] ⊧ T.standardProvability σ 🡒 σ :=
+  ⟨fun _ _ hσ ↦ Semantics.Imp.models_imply.mpr fun h ↦
+      T.soundOnHierarchy 𝚺 1 (models_standardProvability_iff.mp h) hσ,
+    fun h ↦ ⟨fun hσ hσ' ↦
+      Semantics.Imp.models_imply.mp (h _ hσ') (models_standardProvability_iff.mpr hσ)⟩⟩
 
 variable [𝗜𝚺₁ ⪯ T] {n : ℕ}
 
@@ -43,13 +45,14 @@ lemma models_boxBot_iff : ℕ↓[ℒₒᵣ] ⊧ T.standardProvability^[n + 1] �
     Provability.height_le_iff_boxBot.symm
 
 lemma models_TBB_iff (f : Realization α ℒₒᵣ) : ℕ↓[ℒₒᵣ] ⊧ f T (TBB n) ↔ T.height ≠ n := by
-  simp only [TBB, standardInterpret, interpret, interpret_boxItr, Semantics.Imp.models_imply,
-    models_boxBot_iff];
+  suffices T.height ≤ n → ℕ↓[ℒₒᵣ] ⊧ T.standardProvability^[n] ⊥ ↔ T.height ≠ n by
+    simpa only [TBB, standardInterpret, interpret, interpret_boxItr, Semantics.Imp.models_imply,
+      models_boxBot_iff];
   rcases n with _ | n;
   · simp;
-  · simp only [models_boxBot_iff];
-    generalize T.height = m;
-    cases m using ENat.recTopCoe with
+  · suffices T.height ≤ ↑(n + 1) → T.height ≤ n ↔ T.height ≠ ↑(n + 1) by
+      simpa only [models_boxBot_iff];
+    cases T.height using ENat.recTopCoe with
     | top => simpa using ENat.top_ne_natCast (n + 1);
     | coe m => norm_cast; omega;
 
@@ -71,7 +74,8 @@ lemma trace_provabilityLogic_TA_eq_univ_iff :
 
 lemma trace_provabilityLogic_TA_eq_compl_singleton_iff :
     (T.provabilityLogicRelativeTo 𝗧𝗔 : Logic α).trace = {n}ᶜ ↔ T.height = n := by
-  simp only [Set.ext_iff, mem_trace_provabilityLogic_TA_iff, Set.mem_compl_singleton_iff];
+  suffices (∀ m : ℕ, T.height ≠ m ↔ m ≠ n) ↔ T.height = n by
+    simpa only [Set.ext_iff, mem_trace_provabilityLogic_TA_iff, Set.mem_compl_singleton_iff];
   exact ⟨fun h ↦ by simpa using h n, fun h m ↦ by simp [h, eq_comm]⟩
 
 omit [𝗜𝚺₁ ⪯ T] in
@@ -82,14 +86,13 @@ lemma bot_notMem_provabilityLogic_TA : ⊥ ∉ (T.provabilityLogicRelativeTo �
 lemma provabilityLogic_TA_subset_S (h : (T.provabilityLogicRelativeTo 𝗧𝗔 : Logic α).trace = .univ) :
     (T.provabilityLogicRelativeTo 𝗧𝗔 : Logic α) ⊆ 𝐒 := by
   by_contra hS;
-  apply bot_notMem_provabilityLogic_TA (T := T) (α := α);
-  rw [provabilityLogic_eq_GLBetaMinus hS];
-  exact Logic.GLBetaMinus.mem_iff.mpr <| by simp [h]
+  exact bot_notMem_provabilityLogic_TA <| (provabilityLogic_eq_GLBetaMinus hS).symm.subset <|
+    Logic.GLBetaMinus.mem_iff.mpr <| by simp [h];
 
 /-- - [AB05, Corollary 41(ii)] -/
 theorem D_subset_provabilityLogic_TA [T.SoundOnHierarchy 𝚺 1] :
     𝐃 ⊆ (T.provabilityLogicRelativeTo 𝗧𝗔 : Logic α) := by
-  have h := soundOnHierarchy_iff_models_reflection.mp ‹T.SoundOnHierarchy 𝚺 1›;
+  have h := soundOnHierarchy_iff_models_reflection.mp (inferInstance : T.SoundOnHierarchy 𝚺 1);
   apply sumQuasiNormal_subset_provabilityLogic;
   rintro _ (rfl | ⟨B, C, rfl⟩) f <;> apply Arithmetic.TA.provable_iff.mpr;
   · simpa [standardInterpret, interpret] using h ⊥ (by simp);
@@ -107,18 +110,16 @@ theorem soundOnHierarchy_of_axiomD_mem_provabilityLogic_TA {a : α}
 theorem provabilityLogic_TA_eq_GLBetaMinus_iff :
     (T.provabilityLogicRelativeTo 𝗧𝗔 : Logic α) = 𝐆𝐋β⁻ {n}ᶜ (by simp) ↔ T.height = n := by
   constructor;
-  · intro h;
-    exact trace_provabilityLogic_TA_eq_compl_singleton_iff.mp <| h ▸ Logic.GLBetaMinus.trace_eq;
+  · exact fun h ↦ trace_provabilityLogic_TA_eq_compl_singleton_iff.mp <|
+      h ▸ Logic.GLBetaMinus.trace_eq;
   · intro hn;
-    have hS : ¬(T.provabilityLogicRelativeTo 𝗧𝗔 : Logic α) ⊆ 𝐒 := by
-      intro hS;
-      have h : ∼TBB n ∈ (T.provabilityLogicRelativeTo 𝗧𝗔 : Logic α) := fun f ↦
-        Arithmetic.TA.provable_iff.mpr <| by
-          simpa [standardInterpret, interpret] using (models_TBB_iff f).not.mpr (not_not.mpr hn)
-      exact Logic.S.consistent <| hS h ⨀ Logic.S.provable_TBB;
-    rw [provabilityLogic_eq_GLBetaMinus hS];
-    congr 1;
-    exact trace_provabilityLogic_TA_eq_compl_singleton_iff.mpr hn;
+    have h : ∼TBB n ∈ (T.provabilityLogicRelativeTo 𝗧𝗔 : Logic α) := fun f ↦
+      Arithmetic.TA.provable_iff.mpr <| by
+        simp [standardInterpret, interpret, models_TBB_iff f, hn];
+    have hS : ¬(T.provabilityLogicRelativeTo 𝗧𝗔 : Logic α) ⊆ 𝐒 :=
+      fun hS ↦ Logic.S.consistent <| hS h ⨀ Logic.S.provable_TBB;
+    exact (provabilityLogic_eq_GLBetaMinus hS).trans <| by
+      congr 1; exact trace_provabilityLogic_TA_eq_compl_singleton_iff.mpr hn;
 
 variable [Nonempty α]
 
@@ -131,11 +132,9 @@ theorem provabilityLogic_TA_eq_S_iff :
     apply Semantics.modelsSet_iff.mpr;
     intro φ hφ;
     have h₁ : □#p 🡒 #p ∈ (T.provabilityLogicRelativeTo 𝗧𝗔 : Logic α) := h ▸ Logic.S.axiomT;
-    have h₂ := Arithmetic.TA.provable_iff.mp (h₁ ⟨fun _ ↦ φ⟩);
-    simp only [standardInterpret, interpret, Semantics.Imp.models_imply] at h₂;
-    exact h₂ <| models_standardProvability_iff.mpr <| by_axm hφ;
-  · intro _;
-    exact Logic.S.eq_provabilityLogicRelativeTo_TA.symm;
+    exact Semantics.Imp.models_imply.mp (Arithmetic.TA.provable_iff.mp (h₁ ⟨fun _ ↦ φ⟩)) <|
+      models_standardProvability_iff.mpr <| by_axm hφ;
+  · exact fun _ ↦ Logic.S.eq_provabilityLogicRelativeTo_TA.symm;
 
 /-- - [AB05, Corollary 41(ii)] -/
 theorem provabilityLogic_TA_eq_D_iff :
