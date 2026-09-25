@@ -1,7 +1,7 @@
 module
 
 public import Foundation.ProvabilityLogic.Classification.General
-public import Foundation.Vorspiel.List.ExactlyOne
+public import Foundation.Vorspiel.List.OAOO
 
 /-!
 # Truth provability logics
@@ -190,11 +190,11 @@ theorem provabilityLogic_TA_classification : [
     T.SoundOnHierarchy 𝚺 1 ∧ ¬ℕ↓[ℒₒᵣ] ⊧* T ∧ T.provabilityLogicRelativeTo 𝗧𝗔 = 𝐃 over α,
     ¬T.SoundOnHierarchy 𝚺 1 ∧ T.height = ⊤ ∧ T.provabilityLogicRelativeTo 𝗧𝗔 = 𝐀 over α,
     ∃ n : ℕ, T.height = n ∧ (T.provabilityLogicRelativeTo 𝗧𝗔 : Logic α) = 𝐆𝐋β⁻ {n}ᶜ (by simp)
-  ].ExactlyOne := by
+  ].OAOO := by
   have h₁ : ℕ↓[ℒₒᵣ] ⊧* T → T.SoundOnHierarchy 𝚺 1 := fun _ ↦ inferInstance;
   have h₂ : T.SoundOnHierarchy 𝚺 1 → T.height = ⊤ :=
     fun _ ↦ Arithmetic.height_eq_top_of_sigma1_sound T;
-  exactly_one;
+  oaoo_split;
   · by_cases hs : ℕ↓[ℒₒᵣ] ⊧* T;
     · exact .inl ⟨hs, Logic.S.eq_provabilityLogicRelativeTo_TA.symm⟩;
     by_cases hs₁ : T.SoundOnHierarchy 𝚺 1;
