@@ -53,19 +53,6 @@ variable {L : Language} [L.ReferenceableBy L] {T₀ T : Theory L} [T₀ ⪯ T]
          {𝔅 : Provability T₀ T} [𝔅.HBL]
          {κ α : Type*} [Nonempty κ] [DecidableEq α] {A : ProvabilityLogic.Formula α}
 
-/-- The `n`-times iterated consistency `∼𝔅^[n] ⊥`. -/
-def Provability.conItr (𝔅 : Provability T₀ T) (n : ℕ) : Sentence L := ∼𝔅^[n] ⊥
-
-omit [T₀ ⪯ T] in
-lemma Provability.provable_boxItr_bot_mono {n m : ℕ} (h : n ≤ m) : T₀ ⊢ 𝔅^[n] ⊥ 🡒 𝔅^[m] ⊥ := by
-  induction m, h using Nat.le_induction with
-  | base => exact C_id
-  | succ m _ ih =>
-    suffices T₀ ⊢ 𝔅^[m] ⊥ 🡒 𝔅^[m + 1] ⊥ from C_trans ih this;
-    rcases m with _ | m;
-    · exact efq;
-    · simpa only [Function.iterate_succ_apply'] using 𝔅.D3;
-
 open Classical in
 /-- Sentences indexed by the worlds of `X.extendRoot` satisfying the Solovay conditions of the
 construction whose limit jumps from the old root to `u` once a witness of `σ` is found.
