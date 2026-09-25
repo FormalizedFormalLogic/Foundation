@@ -46,7 +46,7 @@ universe u
 
 variable {α : Type u} {A : LetterlessFormula} {X : LetterlessFormulaSet}
 
-lemma lift_mem_iff : A.lift ∈ (𝐆𝐋 : Logic α) ↔ spectrum A = Set.univ := by
+lemma lift_mem_iff : A.lift ∈ 𝐆𝐋@α ↔ spectrum A = Set.univ := by
   classical
   constructor;
   · intro h;
@@ -59,7 +59,7 @@ lemma lift_mem_iff : A.lift ∈ (𝐆𝐋 : Logic α) ↔ spectrum A = Set.univ 
     have : Fintype M.World := Fintype.ofFinite _;
     exact forces_lift_iff.mpr (by simp [h]);
 
-lemma mem_iff_spectrum_eq_univ : A ∈ (𝐆𝐋 : Logic Empty) ↔ spectrum A = Set.univ := by
+lemma mem_iff_spectrum_eq_univ : A ∈ 𝐆𝐋@Empty ↔ spectrum A = Set.univ := by
   simpa using lift_mem_iff (α := Empty) (A := A);
 
 lemma exists_finset_of_mem_sumQuasiNormal {B : Formula α} (h : B ∈ 𝐆𝐋 +ᴸ X.lift) :
@@ -84,7 +84,7 @@ lemma exists_finset_of_mem_sumQuasiNormal {B : Formula α} (h : B ∈ 𝐆𝐋 +
     obtain ⟨Y, hY, h⟩ := ih;
     exact ⟨Y, hY, fun M _ _ x hx ↦ forces_subst.mp (h (M.subst _) x hx)⟩;
 
-lemma spectrum_subset_of_lift_mem_sumQuasiNormal (h : A.lift ∈ (𝐆𝐋 : Logic α) +ᴸ X.lift) :
+lemma spectrum_subset_of_lift_mem_sumQuasiNormal (h : A.lift ∈ 𝐆𝐋@α +ᴸ X.lift) :
     X.spectrum ⊆ spectrum A := by
   obtain ⟨Y, hY, h⟩ := exists_finset_of_mem_sumQuasiNormal h;
   intro n hn;
@@ -93,7 +93,7 @@ lemma spectrum_subset_of_lift_mem_sumQuasiNormal (h : A.lift ∈ (𝐆𝐋 : Log
       simpa using LetterlessFormulaSet.mem_spectrum.mp hn C (hY hC);
 
 theorem lift_mem_sumQuasiNormal_iff (h : (∃ B ∈ X, (spectrum B).Finite) ∨ (trace A).Finite) :
-    A.lift ∈ (𝐆𝐋 : Logic α) +ᴸ X.lift ↔ X.spectrum ⊆ spectrum A := by
+    A.lift ∈ 𝐆𝐋@α +ᴸ X.lift ↔ X.spectrum ⊆ spectrum A := by
   classical
   constructor;
   · exact spectrum_subset_of_lift_mem_sumQuasiNormal;
@@ -114,7 +114,7 @@ variable {Y : LetterlessFormulaSet}
 
 theorem sumQuasiNormal_subset_iff
     (h : (∃ B ∈ Y, (spectrum B).Finite) ∨ ∀ A ∈ X, (trace A).Finite) :
-    ((𝐆𝐋 : Logic α) +ᴸ X.lift) ⊆ (𝐆𝐋 +ᴸ Y.lift) ↔ Y.spectrum ⊆ X.spectrum := by
+    (𝐆𝐋@α +ᴸ X.lift) ⊆ (𝐆𝐋 +ᴸ Y.lift) ↔ Y.spectrum ⊆ X.spectrum := by
   rw [sumQuasiNormal.subset_iff];
   constructor;
   · intro hs n hn;
@@ -127,7 +127,7 @@ theorem sumQuasiNormal_subset_iff
 theorem sumQuasiNormal_eq_iff
     (h : ((∃ B ∈ X, (spectrum B).Finite) ∧ ∃ B ∈ Y, (spectrum B).Finite) ∨
       ((∀ A ∈ X, (trace A).Finite) ∧ ∀ A ∈ Y, (trace A).Finite)) :
-    ((𝐆𝐋 : Logic α) +ᴸ X.lift) = (𝐆𝐋 +ᴸ Y.lift) ↔ X.spectrum = Y.spectrum := by
+    (𝐆𝐋@α +ᴸ X.lift) = (𝐆𝐋 +ᴸ Y.lift) ↔ X.spectrum = Y.spectrum := by
   rw [Set.Subset.antisymm_iff, Set.Subset.antisymm_iff,
     sumQuasiNormal_subset_iff (h.imp And.right And.left),
     sumQuasiNormal_subset_iff (h.imp And.left And.right)];
