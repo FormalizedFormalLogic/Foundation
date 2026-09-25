@@ -96,6 +96,16 @@ lemma height_eq_top_of_sigma1_sound (T : ArithmeticTheory) [T.Δ₁]
     [ArithmeticTheory.SoundOnHierarchy T 𝚺 1] : T.height = ⊤ :=
   T.standardProvability.height_eq_top_of_sound_and_consistent
 
+section
+
+variable {T : ArithmeticTheory} [T.Δ₁] [𝗜𝚺₁ ⪯ T] {n : ℕ}
+
+lemma models_boxBot_iff : ℕ↓[ℒₒᵣ] ⊧ T.standardProvability^[n + 1] ⊥ ↔ T.height ≤ n := by
+  simpa [Function.iterate_succ_apply', models_standardProvability_iff] using
+    Provability.height_le_iff_boxBot.symm;
+
+end
+
 @[simp, grind =]
 lemma ISigma1_height_eq_top : 𝗜𝚺⁺₁.height = ⊤ := height_eq_top_of_sigma1_sound 𝗜𝚺⁺₁
 

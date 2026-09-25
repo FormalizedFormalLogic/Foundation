@@ -21,40 +21,7 @@ namespace FFL.ProvabilityLogic
 
 open Entailment FirstOrder ProvabilityAbstraction Formula
 
-variable {α : Type*} {T : ArithmeticTheory} [T.Δ₁] {σ : ArithmeticSentence}
-
-/-! ### Soundness and characteristic -/
-
-lemma models_standardProvability_iff : ℕ↓[ℒₒᵣ] ⊧ T.standardProvability σ ↔ T ⊢ σ :=
-  ⟨T.standardProvability.sound_on,
-    fun h ↦ models_of_provable inferInstance (T.standardProvability.D1 h)⟩
-
-lemma soundOnHierarchy_iff_models_reflection :
-    T.SoundOnHierarchy 𝚺 1 ↔
-      ∀ σ : ArithmeticSentence, Arithmetic.Hierarchy 𝚺 1 σ →
-        ℕ↓[ℒₒᵣ] ⊧ T.standardProvability σ 🡒 σ :=
-  ⟨fun _ _ hσ ↦ Semantics.Imp.models_imply.mpr fun h ↦
-      T.soundOnHierarchy 𝚺 1 (models_standardProvability_iff.mp h) hσ,
-    fun h ↦ ⟨fun hσ hσ' ↦
-      Semantics.Imp.models_imply.mp (h _ hσ') (models_standardProvability_iff.mpr hσ)⟩⟩
-
-variable [𝗜𝚺₁ ⪯ T] {n : ℕ} {a : α}
-
-lemma models_boxBot_iff : ℕ↓[ℒₒᵣ] ⊧ T.standardProvability^[n + 1] ⊥ ↔ T.height ≤ n := by
-  simpa [Function.iterate_succ_apply', models_standardProvability_iff] using
-    Provability.height_le_iff_boxBot.symm
-
-lemma models_TBB_iff (f : Realization α ℒₒᵣ) : ℕ↓[ℒₒᵣ] ⊧ f T (TBB n) ↔ T.height ≠ n := by
-  suffices T.height ≤ n → ℕ↓[ℒₒᵣ] ⊧ T.standardProvability^[n] ⊥ ↔ T.height ≠ n by
-    simpa only [TBB, standardInterpret, interpret, interpret_boxItr, Semantics.Imp.models_imply,
-      models_boxBot_iff];
-  rcases n with _ | n;
-  · simp;
-  · suffices T.height ≤ ↑(n + 1) → T.height ≤ n ↔ T.height ≠ ↑(n + 1) by
-      simpa only [models_boxBot_iff];
-    cases T.height using ENat.recTopCoe with
-    | top => simpa using ENat.top_ne_natCast (n + 1);
-    | coe m => norm_cast; omega;
+variable {α : Type*} {T : ArithmeticTheory} [T.Δ₁] [𝗜𝚺₁ ⪯ T] {n : ℕ} {a : α}
 
 /-! ### Truth provability logics -/
 
@@ -93,7 +60,8 @@ lemma provabilityLogic_TA_subset_S
 /-- - [AB05, Corollary 41(ii)] -/
 theorem D_subset_provabilityLogic_TA [T.SoundOnHierarchy 𝚺 1] :
     𝐃 ⊆ T.provabilityLogicRelativeTo 𝗧𝗔 (α := α) := by
-  have h := soundOnHierarchy_iff_models_reflection.mp (inferInstance : T.SoundOnHierarchy 𝚺 1);
+  have h := Arithmetic.soundOnHierarchy_iff_models_reflection.mp
+    (inferInstance : T.SoundOnHierarchy 𝚺 1);
   apply sumQuasiNormal_subset_provabilityLogic;
   rintro _ (rfl | ⟨B, C, rfl⟩) f <;> apply Arithmetic.TA.provable_iff.mpr;
   · simpa [standardInterpret, interpret] using h ⊥ (by simp);
@@ -104,8 +72,9 @@ theorem soundOnHierarchy_of_axiomD_mem_provabilityLogic_TA
     (hT : (T.provabilityLogicRelativeTo 𝗧𝗔 (α := α)).trace = .univ)
     (h : □(□#a ⋎ □#a) 🡒 □#a ⋎ □#a ∈ T.provabilityLogicRelativeTo 𝗧𝗔) :
     T.SoundOnHierarchy 𝚺 1 :=
-  soundOnHierarchy_iff_models_reflection.mpr fun _ hσ ↦ Arithmetic.TA.provable_iff.mp <|
-    provable_sigma1_reflection_of_mem_of_not_A hT h Logic.A.not_axiomD hσ
+  Arithmetic.soundOnHierarchy_iff_models_reflection.mpr fun _ hσ ↦
+    Arithmetic.TA.provable_iff.mp <|
+      provable_sigma1_reflection_of_mem_of_not_A hT h Logic.A.not_axiomD hσ
 
 /-- - [AB05, Corollary 41(iv)] -/
 theorem provabilityLogic_TA_eq_GLBetaMinus_iff :
@@ -134,7 +103,7 @@ theorem provabilityLogic_TA_eq_S_iff :
     intro φ hφ;
     have h₁ : □#p 🡒 #p ∈ T.provabilityLogicRelativeTo 𝗧𝗔 := h ▸ Logic.S.axiomT;
     exact Semantics.Imp.models_imply.mp (Arithmetic.TA.provable_iff.mp (h₁ ⟨fun _ ↦ φ⟩)) <|
-      models_standardProvability_iff.mpr <| by_axm hφ;
+      Arithmetic.models_standardProvability_iff.mpr <| by_axm hφ;
   · exact fun _ ↦ Logic.S.eq_provabilityLogicRelativeTo_TA.symm;
 
 /-- - [AB05, Corollary 41(ii)] -/
@@ -180,9 +149,12 @@ theorem provabilityLogic_TA_eq_A_iff :
     · have := provabilityLogic_TA_eq_S_iff.mp h;
       exact (hs₁ inferInstance).elim;
 
-/-- Exactly one of the following holds: `T` is sound and `PL(T, 𝗧𝗔) = 𝐒`; `T` is `𝚺₁`-sound but
-not sound and `PL(T, 𝗧𝗔) = 𝐃`; `T` is not `𝚺₁`-sound, `T` has characteristic `ω`, and
-`PL(T, 𝗧𝗔) = 𝐀`; `T` has characteristic `n` and `PL(T, 𝗧𝗔) = 𝐆𝐋β⁻ {n}ᶜ` for some `n`.
+/-- Exactly one of the following holds.
+
+1. `T` is sound and `PL(T, 𝗧𝗔) = 𝐒`.
+2. `T` is `𝚺₁`-sound but not sound, and `PL(T, 𝗧𝗔) = 𝐃`.
+3. `T` is not `𝚺₁`-sound, `T` has characteristic `ω`, and `PL(T, 𝗧𝗔) = 𝐀`.
+4. For some `n`, `T` has characteristic `n` and `PL(T, 𝗧𝗔) = 𝐆𝐋β⁻ {n}ᶜ`.
 
 - [AB05, Corollary 41]
 -/
