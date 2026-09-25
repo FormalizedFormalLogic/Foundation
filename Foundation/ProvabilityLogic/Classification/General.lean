@@ -90,8 +90,15 @@ lemma provabilityLogic_addTBB_subset_S (h : (T.provabilityLogicRelativeTo U : Lo
 lemma provabilityLogic_eq_inter_GLBetaMinus :
     (T.provabilityLogicRelativeTo U : Logic α) =
       T.provabilityLogicRelativeTo (T.addTBB U (T.provabilityLogicRelativeTo U : Logic α).traceᶜ) ∩
-        𝐆𝐋β⁻ _ hL :=
-  sorry
+        𝐆𝐋β⁻ _ hL := by
+  apply subset_antisymm;
+  · exact Set.subset_inter provabilityLogic_subset_addTBB (Logic.subset_GLBetaMinus_trace hL);
+  · rintro A ⟨h₁, h₂⟩;
+    have h₃ : 𝐆𝐋 ⊢ ∼(⩕ n ∈ hL.toFinset, TBB n : LetterlessFormula).lift 🡒 A :=
+      GL_imp_of_height_not_mem_trace fun _ _ _ hM hn ↦ absurd (Logic.GLBetaMinus.mem_iff.mp h₂ hn)
+        (by simpa [Kripke.RootedModel.height] using forces_lift_iff (A := ∼_) |>.mp hM);
+    exact provabilityLogic_mdp (provabilityLogic_of_GL <| by cl_prover [h₃])
+      (imp_mem_provabilityLogic_of_mem_addTBB hL h₁);
 
 theorem provabilityLogic_eq_GLAlpha_or_eq_D_inter_or_eq_S_inter
     (h : (T.provabilityLogicRelativeTo U : Logic α) ⊆ 𝐒) :
