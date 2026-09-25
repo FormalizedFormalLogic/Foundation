@@ -57,6 +57,7 @@ lemma trace_provabilityLogic_addTBB :
 
 variable (hL : (T.provabilityLogicRelativeTo U : Logic α).traceᶜ.Finite)
 
+include hL in
 lemma provabilityLogic_addTBB_subset_S (h : (T.provabilityLogicRelativeTo U : Logic α) ⊆ 𝐒) :
     (T.provabilityLogicRelativeTo
       (T.addTBB U (T.provabilityLogicRelativeTo U : Logic α).traceᶜ) : Logic α) ⊆ 𝐒 :=
@@ -73,8 +74,13 @@ theorem provabilityLogic_eq_GLAlpha_or_eq_D_inter_or_eq_S_inter
     (T.provabilityLogicRelativeTo U : Logic α) =
         𝐆𝐋α (T.provabilityLogicRelativeTo U : Logic α).trace ∨
       (T.provabilityLogicRelativeTo U : Logic α) = 𝐃 ∩ 𝐆𝐋β⁻ _ hL ∨
-      (T.provabilityLogicRelativeTo U : Logic α) = 𝐒 ∩ 𝐆𝐋β⁻ _ hL :=
-  sorry
+      (T.provabilityLogicRelativeTo U : Logic α) = 𝐒 ∩ 𝐆𝐋β⁻ _ hL := by
+  have e := provabilityLogic_eq_inter_GLBetaMinus hL;
+  rcases provabilityLogic_eq_A_or_eq_D_or_eq_S trace_provabilityLogic_addTBB
+    (provabilityLogic_addTBB_subset_S hL h) with h | h | h;
+  · exact .inl <| e.trans <| h ▸ (Logic.GLAlpha.eq_inter_GLBetaMinus hL).symm;
+  · exact .inr <| .inl <| h ▸ e;
+  · exact .inr <| .inr <| h ▸ e;
 
 omit hL in
 /-- The provability logic of `T` relative to `U` is one of `GLα X`, `GLβ⁻ X`, `D ∩ GLβ⁻ X`, and
