@@ -39,7 +39,7 @@ def ofReflexive (M : RootedModel κ α) [M.IsGL] (hA : M.root ⊮[M.toModel] A) 
     fun B hB ↦ hv B (FormulaFinset.mem_prebox.mpr hB)
   let a : M.NonRoot := ⟨v, by rintro rfl; exact not_rel_root Rv⟩
   have h {B : Formula α} (hB : B ∈ A.subfmls) :=
-    graft.forces_iff (a := a) (ι := Fin 1) (fun _ ↦ subfmls_trans) ha hB
+    graft.forces_iff (fun _ ↦ subfmls_trans) ha hB
   { toRootedModel := M.graft a (Fin 1)
     root_not_forces := ((h mem_subfmls_self).1 M.root).not.mpr hA
     u := .inr 0
@@ -75,7 +75,7 @@ variable [𝗜𝚺₁ ⪯ U]
 
 theorem provable_sigma1_reflection_of_mem_of_not_A
     (hT : (T.provabilityLogicRelativeTo U : Logic α).trace = .univ)
-    (hAL : A ∈ (T.provabilityLogicRelativeTo U : Logic α)) (hAA : 𝐀 ⊬ A)
+    (hAL : A ∈ T.provabilityLogicRelativeTo U) (hAA : 𝐀 ⊬ A)
     {σ : ArithmeticSentence} (hσ : Arithmetic.Hierarchy 𝚺 1 σ) :
     U ⊢ T.standardProvability σ 🡒 σ := by
   obtain ⟨n, f, hf⟩ := exists_realization_sigma1_reflection_of_not_A (T := T) hAA hσ;
@@ -94,8 +94,8 @@ theorem D_subset_provabilityLogic (hT : (T.provabilityLogicRelativeTo U : Logic 
   apply sumQuasiNormal_subset_provabilityLogic;
   rintro _ (rfl | ⟨B, C, rfl⟩);
   · exact A_subset_provabilityLogic hT (Logic.A.neg_boxItr_bot (n := 1));
-  · exact fun f ↦ provable_sigma1_reflection_of_mem_of_not_A hT hAL hAA (σ := f T (□B ⋎ □C)) <| by
-      simp [standardInterpret, interpret, Arithmetic.standardProvability_def]
+  · exact fun f ↦ provable_sigma1_reflection_of_mem_of_not_A hT hAL hAA <| by
+      simp [interpret, Arithmetic.standardProvability_def]
 
 /-- No provability logic with trace `ℕ` lies strictly between `𝐀` and `𝐃`.
 
