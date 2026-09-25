@@ -189,7 +189,22 @@ lemma modalized_almostDefiningFormula : (almostDefiningFormula P M).Modalized :=
 
 lemma pseudoTail_forces_almostDefiningFormula (o : α → Prop) :
     Sum.inr ⊤ ⊩[(M.toPseudoTail o).toModel] almostDefiningFormula P M := by
-  sorry
+  have h : ∀ x : M.World, Sum.inl x ⊩[(M.toPseudoTail o).toModel] □^[M.height + 1]⊥ := fun x ↦
+    toFreeTail.forces_inl.mpr <| forces_boxItr_bot_iff.mpr <| Nat.lt_add_one_of_le rank_le_height;
+  apply forces_and.mpr;
+  and_intros;
+  · rintro (x | i) R hx;
+    · exact absurd (h x) hx;
+    · apply forces_and.mpr;
+      and_intros;
+      · exact forces_dia.mpr ⟨.inl M.root, trivial,
+          toFreeTail.forces_inl.mpr forces_charFormulaUnder_self⟩;
+      · exact forces_valuationConj.mpr fun a _ ↦ by simp [Model.Val, toFreeTail, ne_top_of_lt R];
+  · rintro (x | i) R hi;
+    · exact forces_disj.mpr ⟨_, Finset.mem_image_of_mem _ (Finset.mem_univ x),
+        toFreeTail.forces_inl.mpr forces_charFormulaUnder_self⟩;
+    · exact absurd (toFreeTail.forces_inl.mp <| forces_boxItr_succ.mp hi (.inl M.root) trivial)
+        fun h' ↦ lt_irrefl _ (root_forces_boxItr_bot_iff.mp h');
 
 /-- If the root of a rooted GL-model `K` without depth, all of whose other points have a depth,
 forces the almost defining formula of `M` and agrees with `o` on `P`, then it is `P`-bisimilar to
