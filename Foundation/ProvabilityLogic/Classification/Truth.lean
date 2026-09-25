@@ -84,14 +84,14 @@ lemma bot_notMem_provabilityLogic_TA : ⊥ ∉ (T.provabilityLogicRelativeTo �
     simpa [standardInterpret, interpret] using Arithmetic.TA.provable_iff.mp <| h ⟨fun _ ↦ ⊥⟩
 
 lemma provabilityLogic_TA_subset_S (h : (T.provabilityLogicRelativeTo 𝗧𝗔 : Logic α).trace = .univ) :
-    T.provabilityLogicRelativeTo 𝗧𝗔 ⊆ 𝐒@α := by
+    T.provabilityLogicRelativeTo 𝗧𝗔 ⊆ 𝐒 over α := by
   by_contra hS;
   exact bot_notMem_provabilityLogic_TA <| (provabilityLogic_eq_GLBetaMinus hS).symm.subset <|
     Logic.GLBetaMinus.mem_iff.mpr <| by simp [h];
 
 /-- - [AB05, Corollary 41(ii)] -/
 theorem D_subset_provabilityLogic_TA [T.SoundOnHierarchy 𝚺 1] :
-    𝐃@α ⊆ T.provabilityLogicRelativeTo 𝗧𝗔 := by
+    𝐃 over α ⊆ T.provabilityLogicRelativeTo 𝗧𝗔 := by
   have h := soundOnHierarchy_iff_models_reflection.mp (inferInstance : T.SoundOnHierarchy 𝚺 1);
   apply sumQuasiNormal_subset_provabilityLogic;
   rintro _ (rfl | ⟨B, C, rfl⟩) f <;> apply Arithmetic.TA.provable_iff.mpr;
@@ -125,7 +125,7 @@ variable [Nonempty α]
 
 /-- - [AB05, Corollary 41(i)] -/
 theorem provabilityLogic_TA_eq_S_iff :
-    T.provabilityLogicRelativeTo 𝗧𝗔 = 𝐒@α ↔ ℕ↓[ℒₒᵣ] ⊧* T := by
+    T.provabilityLogicRelativeTo 𝗧𝗔 = 𝐒 over α ↔ ℕ↓[ℒₒᵣ] ⊧* T := by
   constructor;
   · intro h;
     obtain ⟨p⟩ := ‹Nonempty α›;
@@ -138,7 +138,7 @@ theorem provabilityLogic_TA_eq_S_iff :
 
 /-- - [AB05, Corollary 41(ii)] -/
 theorem provabilityLogic_TA_eq_D_iff :
-    T.provabilityLogicRelativeTo 𝗧𝗔 = 𝐃@α ↔
+    T.provabilityLogicRelativeTo 𝗧𝗔 = 𝐃 over α ↔
       T.SoundOnHierarchy 𝚺 1 ∧ ¬ℕ↓[ℒₒᵣ] ⊧* T := by
   inhabit α;
   constructor;
@@ -160,7 +160,7 @@ theorem provabilityLogic_TA_eq_D_iff :
 
 /-- - [AB05, Corollary 41(iii)] -/
 theorem provabilityLogic_TA_eq_A_iff :
-    T.provabilityLogicRelativeTo 𝗧𝗔 = 𝐀@α ↔
+    T.provabilityLogicRelativeTo 𝗧𝗔 = 𝐀 over α ↔
       ¬T.SoundOnHierarchy 𝚺 1 ∧ T.height = ⊤ := by
   inhabit α;
   constructor;
@@ -186,9 +186,9 @@ not sound and `PL(T, 𝗧𝗔) = 𝐃`; `T` is not `𝚺₁`-sound, `T` has char
 - [AB05, Corollary 41]
 -/
 theorem provabilityLogic_TA_classification : [
-    ℕ↓[ℒₒᵣ] ⊧* T ∧ T.provabilityLogicRelativeTo 𝗧𝗔 = 𝐒@α,
-    T.SoundOnHierarchy 𝚺 1 ∧ ¬ℕ↓[ℒₒᵣ] ⊧* T ∧ T.provabilityLogicRelativeTo 𝗧𝗔 = 𝐃@α,
-    ¬T.SoundOnHierarchy 𝚺 1 ∧ T.height = ⊤ ∧ T.provabilityLogicRelativeTo 𝗧𝗔 = 𝐀@α,
+    ℕ↓[ℒₒᵣ] ⊧* T ∧ T.provabilityLogicRelativeTo 𝗧𝗔 = 𝐒 over α,
+    T.SoundOnHierarchy 𝚺 1 ∧ ¬ℕ↓[ℒₒᵣ] ⊧* T ∧ T.provabilityLogicRelativeTo 𝗧𝗔 = 𝐃 over α,
+    ¬T.SoundOnHierarchy 𝚺 1 ∧ T.height = ⊤ ∧ T.provabilityLogicRelativeTo 𝗧𝗔 = 𝐀 over α,
     ∃ n : ℕ, T.height = n ∧ (T.provabilityLogicRelativeTo 𝗧𝗔 : Logic α) = 𝐆𝐋β⁻ {n}ᶜ (by simp)
   ].ExactlyOne := by
   have h₁ : ℕ↓[ℒₒᵣ] ⊧* T → T.SoundOnHierarchy 𝚺 1 := fun _ ↦ inferInstance;

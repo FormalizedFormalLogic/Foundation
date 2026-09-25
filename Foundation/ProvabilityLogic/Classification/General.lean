@@ -65,10 +65,10 @@ variable [𝗜𝚺₁ ⪯ T] [𝗜𝚺₁ ⪯ U]
 -/
 theorem provabilityLogic_eq_A_or_eq_D_or_eq_S
     (hT : (T.provabilityLogicRelativeTo U : Logic α).trace = .univ)
-    (hS : T.provabilityLogicRelativeTo U ⊆ 𝐒@α) :
-    T.provabilityLogicRelativeTo U = 𝐀@α ∨
-      T.provabilityLogicRelativeTo U = 𝐃@α ∨
-      T.provabilityLogicRelativeTo U = 𝐒@α := by
+    (hS : T.provabilityLogicRelativeTo U ⊆ 𝐒 over α) :
+    T.provabilityLogicRelativeTo U = 𝐀 over α ∨
+      T.provabilityLogicRelativeTo U = 𝐃 over α ∨
+      T.provabilityLogicRelativeTo U = 𝐒 over α := by
   rcases (A_subset_provabilityLogic hT).eq_or_ssubset with h | h₁;
   · grind;
   rcases (D_subset_provabilityLogic hT h₁).eq_or_ssubset with h | h₂;
@@ -102,7 +102,7 @@ lemma trace_provabilityLogic_addTBB :
 variable (hL : (T.provabilityLogicRelativeTo U : Logic α).traceᶜ.Finite)
 
 include hL in
-lemma provabilityLogic_addTBB_subset_S (h : T.provabilityLogicRelativeTo U ⊆ 𝐒@α) :
+lemma provabilityLogic_addTBB_subset_S (h : T.provabilityLogicRelativeTo U ⊆ 𝐒 over α) :
     (T.provabilityLogicRelativeTo
       (T.addTBB U (T.provabilityLogicRelativeTo U : Logic α).traceᶜ) : Logic α) ⊆ 𝐒 := by
   by_contra h₁;
@@ -138,10 +138,10 @@ theorem provabilityLogic_classification :
         𝐆𝐋α (T.provabilityLogicRelativeTo U : Logic α).trace ∨
       ∃ hL : (T.provabilityLogicRelativeTo U : Logic α).traceᶜ.Finite,
         (T.provabilityLogicRelativeTo U : Logic α) = 𝐆𝐋β⁻ _ hL ∨
-        T.provabilityLogicRelativeTo U = 𝐃@α ∩ 𝐆𝐋β⁻ _ hL ∨
-        T.provabilityLogicRelativeTo U = 𝐒@α ∩ 𝐆𝐋β⁻ _ hL := by
+        T.provabilityLogicRelativeTo U = 𝐃 over α ∩ 𝐆𝐋β⁻ _ hL ∨
+        T.provabilityLogicRelativeTo U = 𝐒 over α ∩ 𝐆𝐋β⁻ _ hL := by
   rcases (T.provabilityLogicRelativeTo U : Logic α).traceᶜ.finite_or_infinite with hL | hL;
-  · by_cases h : T.provabilityLogicRelativeTo U ⊆ 𝐒@α;
+  · by_cases h : T.provabilityLogicRelativeTo U ⊆ 𝐒 over α;
     · rcases provabilityLogic_eq_A_or_eq_D_or_eq_S trace_provabilityLogic_addTBB
         (provabilityLogic_addTBB_subset_S hL h) with h | h | h <;>
       grind [provabilityLogic_eq_inter_GLBetaMinus hL, Logic.GLAlpha.eq_inter_GLBetaMinus hL];
