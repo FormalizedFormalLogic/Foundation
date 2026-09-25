@@ -99,8 +99,9 @@ theorem D_subset_provabilityLogic_TA [T.SoundOnHierarchy 𝚺 1] :
 theorem soundOnHierarchy_of_axiomD_mem_provabilityLogic_TA {a : α}
     (hT : (T.provabilityLogicRelativeTo 𝗧𝗔 : Logic α).trace = .univ)
     (h : □(□#a ⋎ □#a) 🡒 □#a ⋎ □#a ∈ (T.provabilityLogicRelativeTo 𝗧𝗔 : Logic α)) :
-    T.SoundOnHierarchy 𝚺 1 := by
-  sorry
+    T.SoundOnHierarchy 𝚺 1 :=
+  soundOnHierarchy_iff_models_reflection.mpr fun _ hσ ↦ Arithmetic.TA.provable_iff.mp <|
+    provable_sigma1_reflection_of_mem_of_not_A hT h Logic.A.not_axiomD hσ
 
 /-- - [AB05, Corollary 41(iv)] -/
 theorem provabilityLogic_TA_eq_GLBetaMinus_iff :
