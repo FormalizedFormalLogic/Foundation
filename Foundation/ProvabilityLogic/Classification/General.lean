@@ -75,8 +75,17 @@ variable (hL : (T.provabilityLogicRelativeTo U : Logic α).traceᶜ.Finite)
 include hL in
 lemma provabilityLogic_addTBB_subset_S (h : (T.provabilityLogicRelativeTo U : Logic α) ⊆ 𝐒) :
     (T.provabilityLogicRelativeTo
-      (T.addTBB U (T.provabilityLogicRelativeTo U : Logic α).traceᶜ) : Logic α) ⊆ 𝐒 :=
-  sorry
+      (T.addTBB U (T.provabilityLogicRelativeTo U : Logic α).traceᶜ) : Logic α) ⊆ 𝐒 := by
+  by_contra h₁;
+  have h₂ : ⊥ ∈ T.provabilityLogicRelativeTo
+      (T.addTBB U (T.provabilityLogicRelativeTo U : Logic α).traceᶜ) :=
+    (provabilityLogic_eq_GLBetaMinus h₁).symm.subset <| Logic.GLBetaMinus.mem_iff.mpr <| by
+      simp [trace_provabilityLogic_addTBB];
+  have h₃ : (𝐒 : Logic α) ⊢ (⩕ n ∈ hL.toFinset, TBB n : LetterlessFormula).lift :=
+    Logic.GLAlpha.subset_S <| Logic.GLAlpha.mem_iff.mpr
+      ⟨by simpa [LetterlessFormula.trace] using hL.biUnion fun _ _ ↦ Set.finite_singleton _,
+        Set.subset_univ _⟩;
+  exact Logic.S.consistent <| h (imp_mem_provabilityLogic_of_mem_addTBB hL h₂) ⨀ h₃;
 
 lemma provabilityLogic_eq_inter_GLBetaMinus :
     (T.provabilityLogicRelativeTo U : Logic α) =
