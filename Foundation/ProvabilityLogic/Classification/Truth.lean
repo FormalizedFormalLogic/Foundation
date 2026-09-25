@@ -56,8 +56,9 @@ lemma models_TBB_iff (f : Realization α ℒₒᵣ) : ℕ↓[ℒₒᵣ] ⊧ f T 
 /-! ### Truth provability logics -/
 
 lemma TBB_mem_provabilityLogic_TA_iff :
-    TBB n ∈ (T.provabilityLogicRelativeTo 𝗧𝗔 : Logic α) ↔ T.height ≠ n := by
-  sorry
+    TBB n ∈ (T.provabilityLogicRelativeTo 𝗧𝗔 : Logic α) ↔ T.height ≠ n :=
+  ⟨fun h ↦ (models_TBB_iff ⟨fun _ ↦ ⊥⟩).mp <| Arithmetic.TA.provable_iff.mp <| h _,
+    fun h f ↦ Arithmetic.TA.provable_iff.mpr <| (models_TBB_iff f).mpr h⟩
 
 lemma mem_trace_provabilityLogic_TA_iff :
     n ∈ (T.provabilityLogicRelativeTo 𝗧𝗔 : Logic α).trace ↔ T.height ≠ n := by
