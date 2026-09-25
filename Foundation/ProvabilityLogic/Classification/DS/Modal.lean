@@ -112,9 +112,9 @@ lemma root_forces_deltaPIff_imp (hA : Sum.inr ⊤ ⊮[(M.toPseudoTail o).toModel
       fun q hq ↦ by simp [hq]⟩;
   have hbox (z : K.World) (n : ℕ) :
       z ⊩[K.toModel.subst (Substitution.pIffOn p γ)] □^[n]⊥ ↔ z ⊩[K.toModel] □^[n]⊥ := by
-    simpa using forces_subst (M := K.toModel) (x := z) (A := □^[n]⊥);
+    simpa using forces_subst (A := □^[n]⊥);
   obtain ⟨Bi, hBi⟩ := exists_bisimulation_of_forces_almostDefiningFormula
-    (K := K.subst (Substitution.pIffOn p γ)) (P := A.atoms) (o := o)
+    (K := K.subst (Substitution.pIffOn p γ))
     (fun n h ↦ hr n ((hbox _ n).mp h)) (fun z hz ↦ (hK z hz).imp fun n ↦ (hbox z n).mpr)
     ((forces_congr_of_modalized (K := K.toModel)
       (K' := K.toModel.subst (Substitution.pIffOn p γ)) rfl (fun _ ↦ not_rel_root)
@@ -122,7 +122,7 @@ lemma root_forces_deltaPIff_imp (hA : Sum.inr ⊤ ⊮[(M.toPseudoTail o).toModel
       (of_not_not hΦ))
     fun q hq ↦ by
       change o q ↔ (K.subst (Substitution.pIffOn p γ)).Val K.root q;
-      grind [val_subst_pIffOn_root (γ := γ) (q := q) hnp];
+      grind [val_subst_pIffOn_root hnp];
   exact hA <| (Bi.forces_iff hBi subset_rfl).mpr <| forces_subst.mpr <|
     forces_conj.mp hδ _ <| Finset.mem_image_of_mem _ (Finset.mem_powerset.mpr hγ₁);
 
@@ -135,7 +135,7 @@ variable {α : Type u} {A : Formula α}
 lemma provable_subst {β : Type*} {A : Formula β} {s : Substitution β α} (h : 𝐃 ⊢ A) :
     𝐃 ⊢ A⟦s⟧ := by
   classical
-  apply ((provability_TFAE (A := A⟦s⟧)).out 1 3).mpr;
+  apply (provability_TFAE.out 1 3).mpr;
   intro κ _ M _ V;
   apply forces_subst.mp;
   apply (forces_congr (M := ((M.subst s).toFreeTail fun i a ↦
@@ -170,7 +170,7 @@ theorem exists_A_provable_deltaPIff_imp (hA : 𝐃 ⊬ A) (p : α) :
   · exact S.not_provable_neg_of_forces_freeTail modalized_almostDefiningFormula
       (pseudoTail_forces_almostDefiningFormula o);
   · exact Logic.A.iff_forces_graft.mpr fun N _ a ↦ root_forces_deltaPIff_imp hM p
-      (graft.not_forces_boxItr_bot (a := a)) fun _ ↦ graft.exists_forces_boxItr_bot;
+      graft.not_forces_boxItr_bot fun _ ↦ graft.exists_forces_boxItr_bot;
 
 /-- If `𝐃 ⊬ A`, there is a formula `B` over the atoms of `A` with `𝐒 ⊬ B` and
 `𝐀 +ᴸ {A} ⊢ B ⋎ (□#p 🡒 #p)`.

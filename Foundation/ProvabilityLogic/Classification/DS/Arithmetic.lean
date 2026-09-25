@@ -35,7 +35,7 @@ lemma A_subset_provabilityLogic_of_trace {β : Type*}
     𝐀 ⊆ (T.provabilityLogicRelativeTo U : Logic β) :=
   sumQuasiNormal_subset_provabilityLogic <| by
     rintro _ ⟨i, -, rfl⟩;
-    simpa using (lift_mem_provabilityLogic_iff (α := α) (A := TBB i)).mp <| by
+    simpa using (lift_mem_provabilityLogic_iff (A := TBB i)).mp <| by
       simpa using TBB_mem_provabilityLogic_of_mem_trace (h ▸ Set.mem_univ i)
 
 /-- If the provability logic of `T` relative to `U` has trace `ω` and contains a formula outside
@@ -46,11 +46,10 @@ lemma A_subset_provabilityLogic_of_trace {β : Type*}
 -/
 theorem provable_reflection_of_not_D
     (hT : (T.provabilityLogicRelativeTo U : Logic α).trace = .univ) {A : Formula α}
-    (hA : A ∈ (T.provabilityLogicRelativeTo U : Logic α)) (hAD : 𝐃 ⊬ A)
+    (hA : A ∈ T.provabilityLogicRelativeTo U) (hAD : 𝐃 ⊬ A)
     (σ : ArithmeticSentence) : U ⊢ T.standardProvability σ 🡒 σ := by
   classical
-  have h₁ : (𝐀 +ᴸ {A⟦fun a ↦ #(some a)⟧}) ⊆
-      (T.provabilityLogicRelativeTo U : Logic (Option α)) := by
+  have h₁ : (𝐀 +ᴸ {A⟦fun a ↦ #(some a)⟧}) ⊆ T.provabilityLogicRelativeTo U := by
     intro C hC;
     induction hC with
     | mem₁ hC => exact A_subset_provabilityLogic_of_trace hT hC;
