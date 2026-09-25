@@ -77,13 +77,13 @@ theorem arithmetical_completeness (H : ∀ f : Realization α ℒₒᵣ, ℕ↓[
 theorem arithmetical_completeness_iff : 𝐒 ⊢ A ↔ ∀ f : Realization α ℒₒᵣ, ℕ↓[ℒₒᵣ] ⊧ f T A :=
   ⟨fun h f ↦ arithmetical_soundness h f, arithmetical_completeness⟩
 
-theorem eq_provabilityLogicRelativeTo_TA : 𝐒@α = T.provabilityLogicRelativeTo 𝗧𝗔 := by
+theorem eq_provabilityLogicRelativeTo_TA : 𝐒 over α = T.provabilityLogicRelativeTo 𝗧𝗔 := by
   ext A;
   simpa [ArithmeticTheory.provabilityLogicRelativeTo, Arithmetic.TA.provable_iff,
     Logic.provable_iff_mem] using arithmetical_completeness_iff;
 
 theorem eq_provabilityLogicRelativeTo_peano_TA :
-    𝐒@α = 𝗣𝗔.provabilityLogicRelativeTo 𝗧𝗔 :=
+    𝐒 over α = 𝗣𝗔.provabilityLogicRelativeTo 𝗧𝗔 :=
   eq_provabilityLogicRelativeTo_TA
 
 end Logic.S
