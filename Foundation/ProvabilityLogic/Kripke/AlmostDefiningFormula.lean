@@ -31,11 +31,11 @@ namespace Model
 
 section Modalized
 
-variable {K K' : Model κ α} {r : κ} (hR : K.Rel' = K'.Rel') (hr : ∀ x, ¬K.Rel' x r)
+variable {K K' : Model κ α} {r : K.World} (hR : K.Rel' = K'.Rel') (hr : ∀ x, ¬K.Rel' x r)
   (hV : ∀ x ≠ r, ∀ a, K.Val x a ↔ K'.Val x a)
 include hR hr hV
 
-lemma forces_congr_of_ne {z : κ} (hz : z ≠ r) {C : Formula α} : z ⊩[K] C ↔ z ⊩[K'] C := by
+lemma forces_congr_of_ne {z : K.World} (hz : z ≠ r) {C : Formula α} : z ⊩[K] C ↔ z ⊩[K'] C := by
   induction C generalizing z with
   | atom a => exact hV z hz a;
   | falsum => rfl;
