@@ -38,10 +38,10 @@ root.
 structure StrongReflexiveCountermodel (κ : Type*) [Nonempty κ] {α : Type*} [DecidableEq α]
     (A : Formula α) extends RootedModel κ α where
   root_not_forces : root ⊮[toModel] A
-  u : κ
-  root_rel_u : toModel.Rel root u
-  isReflexiveOf_u : IsReflexiveOf A.subfmls.prebox u
-  eq_root_of_rel_u : ∀ z, toModel.Rel z u → z = root
+  u : toModel.World
+  root_rel_u : root ≺ u
+  isReflexiveOf_u : u.IsReflexiveOf A.subfmls.prebox
+  eq_root_of_rel_u : ∀ z : toModel.World, z ≺ u → z = root
 
 end FFL.ProvabilityLogic.Kripke
 
