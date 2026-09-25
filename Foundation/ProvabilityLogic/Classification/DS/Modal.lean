@@ -43,14 +43,20 @@ noncomputable def deltaPIff (A : Formula α) (p : α) : Formula α :=
 
 lemma atoms_subst_subset [DecidableEq β] {s : Substitution α β} {A : Formula α} :
     (A⟦s⟧).atoms ⊆ A.atoms.biUnion fun a ↦ (s a).atoms := by
-  sorry
+  induction A <;> grind;
 
 lemma atoms_pIffOn {p q : α} {S : Finset α} : (Substitution.pIffOn p S q).atoms ⊆ {p, q} := by
-  sorry
+  unfold Substitution.pIffOn;
+  grind;
 
 lemma atoms_deltaPIff_subset {A : Formula α} {p : α} :
     (A.deltaPIff p).atoms ⊆ insert p A.atoms := by
-  sorry
+  intro q hq;
+  obtain ⟨_, hB, hq⟩ := Finset.mem_biUnion.mp (FormulaFinset.atoms_conj_subset _ hq);
+  obtain ⟨S, -, rfl⟩ := Finset.mem_image.mp hB;
+  obtain ⟨b, hb, hq⟩ := Finset.mem_biUnion.mp (atoms_subst_subset hq);
+  have := atoms_pIffOn hq;
+  grind;
 
 end Formula
 
