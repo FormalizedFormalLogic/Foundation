@@ -32,10 +32,25 @@ variable {K K' : Model κ α} {r : κ} (hR : K.Rel' = K'.Rel') (hr : ∀ x, ¬K.
 include hR hr hV
 
 lemma forces_congr_of_ne {z : κ} (hz : z ≠ r) {C : Formula α} : z ⊩[K] C ↔ z ⊩[K'] C := by
-  sorry
+  induction C generalizing z with
+  | atom a => exact hV z hz a;
+  | falsum => rfl;
+  | imp A B ihA ihB => exact imp_congr (ihA hz) (ihB hz);
+  | box A ih =>
+    change (∀ y, K.Rel' z y → _) ↔ (∀ y, K'.Rel' z y → _);
+    rw [← hR];
+    exact forall_congr' fun y ↦ imp_congr_right fun R ↦ ih fun h ↦ hr z (h ▸ R);
 
 lemma forces_congr_of_modalized {C : Formula α} (hC : C.Modalized) : r ⊩[K] C ↔ r ⊩[K'] C := by
-  sorry
+  induction C with
+  | atom a => exact (hC a rfl).elim;
+  | falsum => rfl;
+  | imp A B ihA ihB => exact imp_congr (ihA fun p ↦ (hC p).1) (ihB fun p ↦ (hC p).2);
+  | box A =>
+    change (∀ y, K.Rel' r y → _) ↔ (∀ y, K'.Rel' r y → _);
+    rw [← hR];
+    exact forall_congr' fun y ↦ imp_congr_right fun R ↦
+      forces_congr_of_ne hR hr hV fun h ↦ hr r <| by subst h; exact R;
 
 end Modalized
 
