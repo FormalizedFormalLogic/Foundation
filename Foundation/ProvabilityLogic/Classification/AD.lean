@@ -1,6 +1,6 @@
 module
 
-public import Foundation.ProvabilityLogic.Arithmetic.ModifiedSolovayConstruction
+public import Foundation.ProvabilityLogic.Arithmetic.ModifiedSolovaySentences
 public import Foundation.ProvabilityLogic.Classification.ProvabilityLogicTrace
 
 /-!
