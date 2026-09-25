@@ -71,7 +71,8 @@ lemma trace_provabilityLogic_TA_eq_univ_iff :
 
 lemma trace_provabilityLogic_TA_eq_compl_singleton_iff :
     (T.provabilityLogicRelativeTo 𝗧𝗔 : Logic α).trace = {n}ᶜ ↔ T.height = n := by
-  sorry
+  simp only [Set.ext_iff, mem_trace_provabilityLogic_TA_iff, Set.mem_compl_singleton_iff];
+  exact ⟨fun h ↦ by simpa using h n, fun h m ↦ by simp [h, eq_comm]⟩
 
 omit [𝗜𝚺₁ ⪯ T] in
 lemma bot_notMem_provabilityLogic_TA : ⊥ ∉ (T.provabilityLogicRelativeTo 𝗧𝗔 : Logic α) := by
