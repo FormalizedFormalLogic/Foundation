@@ -182,6 +182,7 @@ public import Foundation.ProvabilityLogic.A.Basic
 public import Foundation.ProvabilityLogic.A.Gentzen.Basic
 public import Foundation.ProvabilityLogic.A.Gentzen.Kripke
 public import Foundation.ProvabilityLogic.Arithmetic.Interpret
+public import Foundation.ProvabilityLogic.Arithmetic.ModifiedSolovaySentences
 public import Foundation.ProvabilityLogic.Arithmetic.SolovaySentences
 public import Foundation.ProvabilityLogic.Arithmetic.StrongInterpret
 public import Foundation.ProvabilityLogic.Classification.LetterlessTrace
