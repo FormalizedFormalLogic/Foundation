@@ -31,11 +31,11 @@ section
 
 variable [𝗜𝚺₁ ⪯ T] [𝗜𝚺₁ ⪯ U] {A : Formula α} {X : Logic α}
 
-lemma provabilityLogic_of_GL (h : 𝐆𝐋 ⊢ A) : A ∈ (T.provabilityLogicRelativeTo U : Logic α) :=
+lemma provabilityLogic_of_GL (h : 𝐆𝐋 ⊢ A) : A ∈ T.provabilityLogicRelativeTo U :=
   fun _ ↦ WeakerThan.pbl (Logic.GL.arithmetical_soundness h)
 
 lemma sumQuasiNormal_subset_provabilityLogic (h : X ⊆ T.provabilityLogicRelativeTo U) :
-    (𝐆𝐋 +ᴸ X) ⊆ (T.provabilityLogicRelativeTo U : Logic α) := by
+    (𝐆𝐋 +ᴸ X) ⊆ T.provabilityLogicRelativeTo U := by
   intro A hA;
   induction hA with
   | mem₁ hA => exact provabilityLogic_of_GL hA;
@@ -44,9 +44,8 @@ lemma sumQuasiNormal_subset_provabilityLogic (h : X ⊆ T.provabilityLogicRelati
   | subst _ ih => exact provabilityLogic_subst ih;
 
 lemma provabilityLogic_conj [DecidableEq α] {Γ : FormulaFinset α}
-    (h : ∀ B ∈ Γ, B ∈ (T.provabilityLogicRelativeTo U : Logic α)) :
-    Γ.conj ∈ (T.provabilityLogicRelativeTo U : Logic α) :=
-  sumQuasiNormal_subset_provabilityLogic (X := ↑Γ) (fun B hB ↦ h B hB) <|
+    (h : ∀ B ∈ Γ, B ∈ T.provabilityLogicRelativeTo U) : Γ.conj ∈ T.provabilityLogicRelativeTo U :=
+  sumQuasiNormal_subset_provabilityLogic h <|
     (FConj_iff_forall_provable (𝓢 := 𝐆𝐋 +ᴸ (Γ : Logic α))).mpr fun _ ↦ .mem₂
 
 end
@@ -154,7 +153,7 @@ lemma exists_neg_conj_TBB_mem_provabilityLogic
   use m;
   apply lift_mem_provabilityLogic f;
   have h₁ : U ⊢ ∼f T (A ⋏ lift (⩕ i ∈ Finset.range m, TBB i)) := WeakerThan.pbl hf;
-  have h₂ : U ⊢ f T A := hA f;
+  have h₂ := hA f;
   simp only [standardInterpret, interpret] at h₁ h₂ ⊢;
   cl_prover [h₁, h₂];
 
@@ -173,7 +172,7 @@ theorem betaMinus_mem_provabilityLogic (h : ¬(T.provabilityLogicRelativeTo U : 
   classical
   obtain ⟨m, hm⟩ := exists_neg_conj_TBB_mem_provabilityLogic h;
   apply provabilityLogic_mdp (A := Finset.conj <| insert (lift (∼⩕ i ∈ Finset.range m, TBB i)) <|
-    ((Finset.range m).filter (· ∈ (T.provabilityLogicRelativeTo U : Logic α).trace)).image TBB);
+    ((Finset.range m).filter (· ∈ (T.provabilityLogicRelativeTo U).trace)).image TBB);
   · apply provabilityLogic_of_GL;
     apply GL_imp_of_height_not_mem_trace;
     intro κ _ M _ _ hM hn;
