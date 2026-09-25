@@ -16,9 +16,13 @@ The provability logic of `T` relative to `U` is one of `GLα X`, `GLβ⁻ X`, `D
 
 @[expose] public section
 
-namespace FFL.FirstOrder.ArithmeticTheory
+namespace FFL
 
-open FFL.Entailment ProvabilityLogic Formula
+open Entailment
+
+namespace FirstOrder.ArithmeticTheory
+
+open ProvabilityLogic Formula
 
 variable (T U : ArithmeticTheory) [T.Δ₁] (N : Set ℕ)
 
@@ -32,11 +36,11 @@ lemma weakerThan_addTBB : U ⪯ T.addTBB U N := WeakerThan.ofSubset Set.subset_u
 
 instance [𝗜𝚺₁ ⪯ U] : 𝗜𝚺₁ ⪯ T.addTBB U N := (inferInstance : 𝗜𝚺₁ ⪯ U).trans weakerThan_addTBB
 
-end FFL.FirstOrder.ArithmeticTheory
+end FirstOrder.ArithmeticTheory
 
-namespace FFL.ProvabilityLogic
+namespace ProvabilityLogic
 
-open Entailment FirstOrder Formula LetterlessFormula
+open FirstOrder Formula LetterlessFormula
 
 variable {α : Type*} {T U : ArithmeticTheory} [T.Δ₁] {N : Set ℕ} {n : ℕ} {A : Formula α}
 
@@ -128,6 +132,8 @@ theorem provabilityLogic_classification :
 
 end
 
-end FFL.ProvabilityLogic
+end ProvabilityLogic
+
+end FFL
 
 end
