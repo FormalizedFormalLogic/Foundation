@@ -125,7 +125,17 @@ variable [Nonempty α]
 /-- - [AB05, Corollary 41(i)] -/
 theorem provabilityLogic_TA_eq_S_iff :
     (T.provabilityLogicRelativeTo 𝗧𝗔 : Logic α) = 𝐒 ↔ ℕ↓[ℒₒᵣ] ⊧* T := by
-  sorry
+  constructor;
+  · intro h;
+    obtain ⟨p⟩ := ‹Nonempty α›;
+    apply Semantics.modelsSet_iff.mpr;
+    intro φ hφ;
+    have h₁ : □#p 🡒 #p ∈ (T.provabilityLogicRelativeTo 𝗧𝗔 : Logic α) := h ▸ Logic.S.axiomT;
+    have h₂ := Arithmetic.TA.provable_iff.mp (h₁ ⟨fun _ ↦ φ⟩);
+    simp only [standardInterpret, interpret, Semantics.Imp.models_imply] at h₂;
+    exact h₂ <| models_standardProvability_iff.mpr <| by_axm hφ;
+  · intro _;
+    exact Logic.S.eq_provabilityLogicRelativeTo_TA.symm;
 
 /-- - [AB05, Corollary 41(ii)] -/
 theorem provabilityLogic_TA_eq_D_iff :
