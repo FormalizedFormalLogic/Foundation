@@ -62,7 +62,7 @@ namespace LetterlessFormula
 variable {A : LetterlessFormula} {f : Realization α L} {𝔅 : Provability T₀ T}
 
 lemma interpret_lift :
-    (A.lift : Formula α).interpret f 𝔅 = A.interpret (⟨Empty.elim⟩ : Realization Empty L) 𝔅 := by
+    (A.lift : Formula α).interpret f 𝔅 = A.interpret ⟨Empty.elim⟩ 𝔅 := by
   induction A with
   | atom a => exact a.elim;
   | _ => simp_all [lift, interpret];
@@ -82,14 +82,14 @@ section
 variable {T U : ArithmeticTheory} [T.Δ₁] {A B : Formula α}
 
 lemma provabilityLogic_mdp
-    (h₁ : (A 🡒 B) ∈ (T.provabilityLogicRelativeTo U : Logic α))
-    (h₂ : A ∈ (T.provabilityLogicRelativeTo U : Logic α)) :
-    B ∈ (T.provabilityLogicRelativeTo U : Logic α) :=
+    (h₁ : (A 🡒 B) ∈ T.provabilityLogicRelativeTo U)
+    (h₂ : A ∈ T.provabilityLogicRelativeTo U) :
+    B ∈ T.provabilityLogicRelativeTo U :=
   fun f ↦ h₁ f ⨀ h₂ f
 
 lemma provabilityLogic_subst {s : Substitution α α}
-    (h : A ∈ (T.provabilityLogicRelativeTo U : Logic α)) :
-    (A⟦s⟧) ∈ (T.provabilityLogicRelativeTo U : Logic α) :=
+    (h : A ∈ T.provabilityLogicRelativeTo U) :
+    A⟦s⟧ ∈ T.provabilityLogicRelativeTo U :=
   fun f ↦ by simpa [interpret_subst] using h ⟨fun a ↦ f T (s a)⟩
 
 end
