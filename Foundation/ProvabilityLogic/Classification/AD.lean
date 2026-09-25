@@ -12,7 +12,7 @@ So no such provability logic lies strictly between `𝐀` and `𝐃`.
 
 ## References
 
-- [AB05, Lemma 51, Corollary 52, Corollary 55]
+- [AB05, Lemma 51, Corollary 52(ii), Corollary 55]
 - [Bek90, Lemma 5, Assertion 2, §6 Theorem 2]
 -/
 
@@ -85,7 +85,7 @@ theorem provable_sigma1_reflection_of_mem_of_not_A
 /-- If the provability logic of `T` relative to `U` has trace `ℕ` and strictly contains `𝐀`, then
 it contains `𝐃`.
 
-- [AB05, Lemma 51, Corollary 52]
+- [AB05, Lemma 51, Corollary 52(ii)]
 -/
 theorem D_subset_provabilityLogic (hT : (T.provabilityLogicRelativeTo U : Logic α).trace = .univ)
     (h : 𝐀 ⊂ (T.provabilityLogicRelativeTo U : Logic α)) :
