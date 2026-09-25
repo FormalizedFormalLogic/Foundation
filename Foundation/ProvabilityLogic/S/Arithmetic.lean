@@ -60,18 +60,13 @@ theorem arithmetical_completeness (H : ∀ f : Realization α ℒₒᵣ, ℕ↓[
   classical
   have : ℕ↓[ℒₒᵣ] ⊧* 𝗜𝚺₁ := models_of_subtheory (T := 𝗜𝚺₁) (U := T) (M := ℕ) inferInstance;
   contrapose! H;
-  obtain ⟨κ, _, M, _, hA⟩ :
-      ∃ (κ : Type u) (_ : Nonempty κ) (M : RootedModel κ α) (_ : M.IsFiniteGL),
-        M.root ⊮[M.toModel] A.rflSubfmls.conj 🡒 A := by
-    simpa using GL.iff_root_forces.not.mp (iff_provable_GL.not.mp H);
-  obtain ⟨h₁, h₂⟩ := not_forces_imp.mp hA;
+  obtain ⟨κ, _, M, _, h₁, h₂⟩ := exists_countermodel H;
   have : Fintype M.World := Fintype.ofFinite _;
   let S := standardSolovaySentences T M.extendRoot;
   use S.realization;
   have h₃ : ℕ↓[ℒₒᵣ] ⊧ S.σ none 🡒 ∼S.realization T A :=
-    models_of_provable inferInstance <| (Provability.SolovaySentences.rfl_mainlemma
-      (fun B hB ↦ forces_conj.mp h₁ _ (Finset.mem_image.mpr ⟨B, by simpa using hB, rfl⟩))
-      Formula.mem_subfmls_self).2 h₂;
+    models_of_provable inferInstance <|
+      (Provability.SolovaySentences.rfl_mainlemma h₂ Formula.mem_subfmls_self).2 h₁;
   have h₄ : ℕ↓[ℒₒᵣ] ⊧ S.σ none :=
     models_iff.mpr <| Arithmetic.Bootstrapping.SolovaySentences.val_solovay.mpr <|
       Arithmetic.Bootstrapping.SolovaySentences.solovay_root_sound (M := M.extendRoot);
