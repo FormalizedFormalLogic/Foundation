@@ -193,7 +193,23 @@ theorem provabilityLogic_TA_classification :
       ¬T.SoundOnHierarchy 𝚺 1 ∧ T.height = ⊤ ∧ (T.provabilityLogicRelativeTo 𝗧𝗔 : Logic α) = 𝐀,
       ∃ n : ℕ, T.height = n ∧
         (T.provabilityLogicRelativeTo 𝗧𝗔 : Logic α) = 𝐆𝐋β⁻ {n}ᶜ (by simp)] i := by
-  sorry
+  apply existsUnique_of_exists_of_unique;
+  · by_cases hs : ℕ↓[ℒₒᵣ] ⊧* T;
+    · use 0;
+      simpa [hs] using (Logic.S.eq_provabilityLogicRelativeTo_TA (α := α) (T := T)).symm;
+    by_cases hs₁ : T.SoundOnHierarchy 𝚺 1;
+    · use 1;
+      simpa [hs, hs₁] using provabilityLogic_TA_eq_D_iff.mpr ⟨hs₁, hs⟩;
+    by_cases h : T.height = ⊤;
+    · use 2;
+      simpa [hs₁, h] using provabilityLogic_TA_eq_A_iff.mpr ⟨hs₁, h⟩;
+    · obtain ⟨n, hn⟩ := ENat.ne_top_iff_exists.mp h;
+      use 3;
+      exact ⟨n, hn.symm, provabilityLogic_TA_eq_GLBetaMinus_iff.mpr hn.symm⟩;
+  · have h₁ : ℕ↓[ℒₒᵣ] ⊧* T → T.SoundOnHierarchy 𝚺 1 := fun _ ↦ inferInstance;
+    have h₂ : T.SoundOnHierarchy 𝚺 1 → T.height = ⊤ :=
+      fun _ ↦ Arithmetic.height_eq_top_of_sigma1_sound T;
+    simp +contextual [Fin.forall_fin_succ, h₁, h₂, mt h₁, mt h₂];
 
 end FFL.ProvabilityLogic
 
