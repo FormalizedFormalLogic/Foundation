@@ -106,7 +106,19 @@ theorem soundOnHierarchy_of_axiomD_mem_provabilityLogic_TA {a : α}
 /-- - [AB05, Corollary 41(iv)] -/
 theorem provabilityLogic_TA_eq_GLBetaMinus_iff :
     (T.provabilityLogicRelativeTo 𝗧𝗔 : Logic α) = 𝐆𝐋β⁻ {n}ᶜ (by simp) ↔ T.height = n := by
-  sorry
+  constructor;
+  · intro h;
+    exact trace_provabilityLogic_TA_eq_compl_singleton_iff.mp <| h ▸ Logic.GLBetaMinus.trace_eq;
+  · intro hn;
+    have hS : ¬(T.provabilityLogicRelativeTo 𝗧𝗔 : Logic α) ⊆ 𝐒 := by
+      intro hS;
+      have h : ∼TBB n ∈ (T.provabilityLogicRelativeTo 𝗧𝗔 : Logic α) := fun f ↦
+        Arithmetic.TA.provable_iff.mpr <| by
+          simpa [standardInterpret, interpret] using (models_TBB_iff f).not.mpr (not_not.mpr hn)
+      exact Logic.S.consistent <| hS h ⨀ Logic.S.provable_TBB;
+    rw [provabilityLogic_eq_GLBetaMinus hS];
+    congr 1;
+    exact trace_provabilityLogic_TA_eq_compl_singleton_iff.mpr hn;
 
 variable [Nonempty α]
 
