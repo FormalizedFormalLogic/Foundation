@@ -155,7 +155,7 @@ namespace GLAlpha
 
 variable {X Y : Set ℕ}
 
-theorem mem_iff : A ∈ (𝐆𝐋α X : Logic α) ↔ A.trace.Finite ∧ A.trace ⊆ X := by
+theorem mem_iff : A ∈ 𝐆𝐋α X ↔ A.trace.Finite ∧ A.trace ⊆ X := by
   classical
   constructor;
   · intro h;
@@ -199,7 +199,7 @@ theorem mem_iff : A ∈ (𝐆𝐋β⁻ X hX : Logic α) ↔ A.trace ⊆ X := by
     exact sumQuasiNormal.mdp (.mem₁ this) (.mem₂ rfl);
 
 /-- - [AB05, Lemma 49] -/
-lemma bot_mem_univ {hX : (Set.univ : Set ℕ)ᶜ.Finite} : (⊥ : Formula α) ∈ 𝐆𝐋β⁻ Set.univ hX :=
+lemma bot_mem_univ : (⊥ : Formula α) ∈ 𝐆𝐋β⁻ Set.univ (by simp) :=
   mem_iff.mpr (Set.subset_univ _)
 
 end GLBetaMinus
