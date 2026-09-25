@@ -30,10 +30,10 @@ notation "𝐀" => Logic.A
 
 variable {α : Type*} {A : Formula α} {n : ℕ}
 
-lemma Logic.S.provable_TBB : Logic.S (α := α) ⊢ TBB n := by
+lemma Logic.S.provable_TBB : 𝐒 ⊢ TBB n (α := α) := by
   simpa [TBB] using S.axiomT;
 
-lemma Logic.D.provable_TBB : Logic.D (α := α) ⊢ TBB n := by
+lemma Logic.D.provable_TBB : 𝐃 ⊢ TBB n (α := α) := by
   classical
   cases n with
   | zero => exact D.axiomP;
@@ -43,9 +43,9 @@ namespace Logic.A
 
 lemma of_GL (h : 𝐆𝐋 ⊢ A) : 𝐀 ⊢ A := sumQuasiNormal.of_left h
 
-lemma provable_TBB : Logic.A (α := α) ⊢ TBB n := sumQuasiNormal.mem₂ ⟨n, trivial, rfl⟩
+lemma provable_TBB : 𝐀 ⊢ TBB n (α := α) := sumQuasiNormal.mem₂ ⟨n, trivial, rfl⟩
 
-lemma neg_boxItr_bot : Logic.A (α := α) ⊢ ∼□^[n]⊥ := by
+lemma neg_boxItr_bot : 𝐀 ⊢ ∼□^[n](⊥ : Formula α) := by
   induction n with
   | zero => exact of_GL (by simp);
   | succ n ih => exact of_GL (by unfold TBB; cl_prover) ⨀ provable_TBB ⨀ ih;
@@ -113,7 +113,7 @@ lemma exists_countermodel [DecidableEq α] (h : 𝐀 ⊬ A) :
     not_lt.mp fun h ↦ h₁ <| forces_boxItr_bot_iff.mpr h;
   exact ⟨κ, inferInstance, M, inferInstance, u, h₂, Ru, hu⟩;
 
-lemma subset_D : Logic.A (α := α) ⊆ 𝐃 :=
+lemma subset_D : (𝐀 : Logic α) ⊆ 𝐃 :=
   sumQuasiNormal.subset_iff.mpr fun _ ⟨_, _, h⟩ ↦ h ▸ D.provable_TBB
 
 lemma not_axiomD {a : α} : 𝐀 ⊬ □(□#a ⋎ □#a) 🡒 □#a ⋎ □#a := by
@@ -131,11 +131,11 @@ lemma not_axiomD {a : α} : 𝐀 ⊬ □(□#a ⋎ □#a) 🡒 □#a ⋎ □#a :
   rw [subst_imp, subst_neg, subst_boxItr] at this;
   exact h₃ (this h₁ h₂);
 
-lemma GL_ssubset : Logic.GL (α := α) ⊂ 𝐀 :=
+lemma GL_ssubset : (𝐆𝐋 : Logic α) ⊂ 𝐀 :=
   ⟨fun _ ↦ of_GL, fun h ↦
     GL.sound (pointModel fun _ ↦ True) (h (provable_TBB (n := 0))) 0 fun _ h ↦ h.elim⟩
 
-lemma ssubset_D [Inhabited α] : Logic.A (α := α) ⊂ 𝐃 :=
+lemma ssubset_D [Inhabited α] : (𝐀 : Logic α) ⊂ 𝐃 :=
   ⟨subset_D, fun h ↦ not_axiomD (a := default) (h D.axiomD)⟩
 
 end Logic.A

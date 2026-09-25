@@ -118,7 +118,7 @@ lemma exists_countermodel (h : 𝐒 ⊬ A) :
     fun B hB ↦ forces_conj.mp h₁ _ (Finset.mem_image.mpr ⟨B, by simpa using hB, rfl⟩)⟩;
 
 omit [DecidableEq α] in
-lemma consistent : Logic.S (α := α) ⊬ ⊥ := by
+lemma consistent : 𝐒 ⊬ (⊥ : Formula α) := by
   classical
   intro h;
   have h : 𝐆𝐋 ⊢ (⊥ : Formula α).rflSubfmls.conj 🡒 ⊥ := iff_provable_GL.mp h;
