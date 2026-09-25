@@ -71,8 +71,8 @@ lemma exists_witnessFirst [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] {ι : Type*} [Finit
     ∃ j, (∀ i, o i < o j → WitnessLT (P j) (P i)) ∧ ∀ i, o j ≤ o i → WitnessLE (P j) (P i) := by
   obtain ⟨i₀, w₀, h₀⟩ := h;
   obtain ⟨w, ⟨i₁, h₁⟩, hw⟩ : ∃ w, (∃ i, P i w) ∧ ∀ v < w, ¬∃ i, P i v :=
-    InductionOnBroadHierarchy.least_number_sigma 𝚺 1 (P := fun w ↦ ∃ i, P i w)
-      (HierarchySymbol.Definable.fintype_exs fun i ↦ hP i) (x := w₀) ⟨i₀, h₀⟩;
+    InductionOnBroadHierarchy.least_number_sigma 𝚺 1 (HierarchySymbol.Definable.fintype_exs hP)
+      ⟨i₀, h₀⟩;
   obtain ⟨j, hj, hmin⟩ := (InvImage.wf o wellFounded_lt).has_min {i | P i w} ⟨i₁, h₁⟩;
   use j;
   and_intros;
@@ -193,7 +193,7 @@ instance (x : X.extendRoot.World) : Finite (EChain X x) := by
     induction h with
     | singleton => exact .singleton _
     | cons hR _ ih => exact .cons (rel_of_mem_next hR) ih;
-  exact Finite.of_injective (β := SolovaySentences.WChain X.extendRoot none x) _
+  exact Finite.of_injective _
     (Subtype.impEmbedding _ _ fun _ ↦ mono).injective
 
 def HAux (x : X.extendRoot.World) : ArithmeticSemisentence n :=
@@ -236,8 +236,7 @@ lemma modifiedSolovay_diag (x : X.extendRoot.World) :
   have : 𝗜𝚺₁ ⊢ T.modifiedSolovay X σ θ x 🡘
       (Rew.subst fun j ↦ ⌜T.modifiedSolovay X σ θ ((Fintype.equivFin _).symm j)⌝) ▹
         deltaAux T X σ θ (fun z ↦ #(Fintype.equivFin _ z)) x := by
-    simpa [Theory.modifiedSolovay] using! exclusiveMultidiagonal (T := 𝗜𝚺₁)
-      (i := Fintype.equivFin _ x)
+    simpa [Theory.modifiedSolovay] using! exclusiveMultidiagonal (i := Fintype.equivFin _ x)
       (fun j ↦ deltaAux T X σ θ (fun z ↦ #(Fintype.equivFin _ z)) ((Fintype.equivFin _).symm j));
   simpa [deltaAux, HAux, Finset.map_conj', Finset.map_udisj, Function.comp_def, rew_chainAux,
     rew_notTrigAux] using! this
@@ -253,7 +252,7 @@ variable (T : ArithmeticTheory) [T.Δ₁] (X : StrongReflexiveCountermodel κ A)
 open Classical in
 /-- `w` witnesses the trigger of an edge into `z`. -/
 def Wit (z : X.extendRoot.World) (w : V) : Prop :=
-  if z = some X.u then V ⊧/![w] θ.val else Proof T w (⌜∼T.modifiedSolovay X σ θ z⌝ : V)
+  if z = some X.u then V ⊧/![w] θ.val else Proof T w ⌜∼T.modifiedSolovay X σ θ z⌝
 
 open Classical in
 /-- The trigger of an edge into `z` is pulled. -/
@@ -391,7 +390,7 @@ lemma ModifiedSolovay.consistent {x y : X.extendRoot.World} (hxy : x ≺ y) (hy 
 
 lemma disjunctive (hθσ : V ⊧/![] σ ↔ ∃ w, V ⊧/![w] θ.val) :
     ∃ x, T.ModifiedSolovay X σ θ V x := by
-  rcases Reach.disjunction (X := X) (T := T) hθσ (x := none) .refl with h | ⟨_, _, h⟩ <;>
+  rcases Reach.disjunction (X := X) (T := T) hθσ .refl with h | ⟨_, _, h⟩ <;>
     exact ⟨_, h⟩;
 
 end model
@@ -409,7 +408,7 @@ lemma provable_H_imp (x : X.extendRoot.World) :
     𝗜𝚺₁ ⊢ H T X σ θ x 🡒 T.modifiedSolovay X σ θ x ⋎
       ⩖ y ∈ {y : X.extendRoot.World | x ≺ y}, T.modifiedSolovay X σ θ y :=
   complete _ _ fun (V : Type) _ _ ↦ by
-    simpa [models_iff] using! Reach.disjunction (T := T) (X := X) (hθσ V) (x := x)
+    simpa [models_iff] using! Reach.disjunction (hθσ V)
 
 open Classical in
 lemma ModifiedSolovay.provable_disjunction {V : Type} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
@@ -422,18 +421,18 @@ lemma ModifiedSolovay.provable_disjunction {V : Type} [ORingStructure V] [V↓[�
   have h₂ : T.internalize V ⊢ ⌜H T X σ θ x⌝ :=
     Bootstrapping.Arithmetic.sigma_one_provable_of_models T (H_sigma_one T X σ θ x)
       (by simpa [models_iff] using! h.1);
-  exact (tprovable_tquote_iff_provable_quote (T := T)).mp ((by simpa using! h₁) ⨀ h₂)
+  exact tprovable_tquote_iff_provable_quote.mp ((by simpa using! h₁) ⨀ h₂)
 
 open Classical in
 lemma ModifiedSolovay.box_disjunction {V : Type} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
     {x : X.extendRoot.World} (hx : x ≠ none) (hu : x ≠ some X.u)
     (h : T.ModifiedSolovay X σ θ V x) :
     Provable T (⌜⩖ y ∈ {y : X.extendRoot.World | x ≺ y}, T.modifiedSolovay X σ θ y⌝ : V) := by
-  have h₁ := (tprovable_tquote_iff_provable_quote (T := T)).mpr
+  have h₁ := tprovable_tquote_iff_provable_quote.mpr
     (ModifiedSolovay.provable_disjunction hθσ h);
-  have h₂ : T.internalize V ⊢ (∼⌜T.modifiedSolovay X σ θ x⌝ : Bootstrapping.Formula V ℒₒᵣ) := by
-    simpa using! (tprovable_tquote_iff_provable_quote (T := T)).mpr (Reach.provable hx hu h.1);
-  exact (tprovable_tquote_iff_provable_quote (T := T)).mp (of_A_of_N (by simpa using! h₁) h₂)
+  have h₂ : T.internalize V ⊢ ∼⌜T.modifiedSolovay X σ θ x⌝ := by
+    simpa using! tprovable_tquote_iff_provable_quote.mpr (Reach.provable hx hu h.1);
+  exact tprovable_tquote_iff_provable_quote.mp (of_A_of_N (by simpa using! h₁) h₂)
 
 omit [𝗜𝚺₁ ⪯ T] in
 lemma provable_not_sigma_imp : 𝗜𝚺₁ ⊢ ∼σ 🡒 ∼T.modifiedSolovay X σ θ (some X.u) :=
@@ -456,7 +455,7 @@ lemma provable_provable_sigma_imp :
       ∼T.standardProvability (∼T.modifiedSolovay X σ θ (some X.root)) :=
     complete _ _ fun (V : Type) _ _ ↦ by
       simpa [models_iff, standardProvability_def] using! fun h ↦
-        ModifiedSolovay.consistent (V := V) (x := none) (y := some X.root) trivial hru h;
+        ModifiedSolovay.consistent (x := none) (y := some X.root) trivial hru h;
   cl_prover [h₂, h₃]
 
 end
@@ -493,7 +492,7 @@ def _root_.FFL.FirstOrder.Theory.standardProvability.modifiedSolovaySentences
       simpa [models_iff, standardProvability_def] using! ModifiedSolovay.box_disjunction hθσ hx hu
     SC3r := complete _ _ fun (V : Type) _ _ ↦ by
       simpa [models_iff, standardProvability_def] using!
-        ModifiedSolovay.provable_disjunction hθσ (x := some X.u)
+        ModifiedSolovay.provable_disjunction hθσ
     SC4 := complete _ _ fun (V : Type) _ _ ↦ by
       simpa [models_iff] using! disjunctive (hθσ V)
     SC5 := provable_provable_sigma_imp
