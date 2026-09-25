@@ -254,7 +254,7 @@ public import Foundation.Vorspiel.Graph
 public import Foundation.Vorspiel.IsEmpty
 public import Foundation.Vorspiel.List.Basic
 public import Foundation.Vorspiel.List.ChainI
-public import Foundation.Vorspiel.List.ExactlyOne
+public import Foundation.Vorspiel.List.OAOO
 public import Foundation.Vorspiel.Matrix
 public import Foundation.Vorspiel.Multiset
 public import Foundation.Vorspiel.Nat.Basic
