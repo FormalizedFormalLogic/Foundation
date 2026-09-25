@@ -71,10 +71,10 @@ lemma GL_imp_of_height_not_mem_trace
   simp [trace];
 
 @[simp] lemma trace_bot : (⊥ : Formula α).trace = Set.univ := by
-  simpa [LetterlessFormula.trace] using trace_lift (α := α) ⊥;
+  simpa [LetterlessFormula.trace] using trace_lift ⊥;
 
 @[simp] lemma trace_TBB : (TBB n : Formula α).trace = {n} := by
-  simpa using trace_lift (α := α) (TBB n);
+  simpa using trace_lift (TBB n);
 
 @[simp] lemma trace_and : (A ⋏ B).trace = A.trace ∪ B.trace := by
   ext n;
@@ -88,7 +88,7 @@ lemma GL_imp_of_height_not_mem_trace
 lemma trace_subst_subset {s : Substitution α α} : (A⟦s⟧).trace ⊆ A.trace := by
   rintro n ⟨κ, _, M, _, _, rfl, h⟩;
   exact ⟨κ, _, { M.toModel.subst s with root := M.root, root_rel := M.root_rel }, _,
-    inferInstanceAs (M.toModel.subst s).IsGL, rfl, fun h' ↦ h (forces_subst.mp h')⟩;
+    inferInstance, rfl, fun h' ↦ h (forces_subst.mp h')⟩;
 
 /-- - [AB05, Lemma 12] -/
 theorem trace_finite_or_compl_finite (A : Formula α) : A.trace.Finite ∨ A.traceᶜ.Finite := by
@@ -97,13 +97,13 @@ theorem trace_finite_or_compl_finite (A : Formula α) : A.trace.Finite ∨ A.tra
   intro hinf;
   obtain ⟨_, ⟨κ, _, M, _, _, rfl, hA⟩, hm⟩ := Set.Infinite.exists_gt hinf A.subfmls.prebox.card;
   obtain ⟨u, Rru, hu⟩ := exists_isReflexiveOf_of_card_lt_rank hm;
-  have hne : u ≠ M.root := fun h ↦ Std.Irrefl.irrefl (r := M.Rel) _ (h ▸ Rru);
+  have hne : u ≠ M.root := fun h ↦ Std.Irrefl.irrefl _ (h ▸ Rru);
   have := RootedModel.rank_lt_height Rru;
   apply (Set.finite_Iio M.height).subset;
   intro n hn;
   exact Set.mem_Iio.mpr <| lt_of_not_ge fun hle ↦ hn ⟨_, _, M.graft ⟨u, hne⟩ (Fin (n - u.rank - 1)),
     inferInstance, inferInstance, by grind [RootedModel.graft.height_eq],
-    fun h ↦ hA <| ((RootedModel.graft.forces_iff (X := A.subfmls) (fun _ ↦ subfmls_trans)
+    fun h ↦ hA <| ((RootedModel.graft.forces_iff (fun _ ↦ subfmls_trans)
       (fun B hB ↦ hu B (FormulaFinset.mem_prebox.mpr hB)) mem_subfmls_self).1 M.root).mp h⟩;
 
 end Formula
@@ -189,9 +189,9 @@ variable {X : Set ℕ} {hX : Xᶜ.Finite}
 @[simp] theorem trace_eq : (𝐆𝐋β⁻ X hX : Logic α).trace = X :=
   (GL.trace_sumQuasiNormal _).trans <| by simp [trace]
 
-theorem mem_iff : A ∈ (𝐆𝐋β⁻ X hX : Logic α) ↔ A.trace ⊆ X := by
+theorem mem_iff : A ∈ 𝐆𝐋β⁻ X hX ↔ A.trace ⊆ X := by
   constructor;
-  · exact fun h ↦ trace_eq (hX := hX) ▸ trace_subset_of_mem h;
+  · exact fun h ↦ (trace_subset_of_mem h).trans_eq trace_eq;
   · intro h;
     have : 𝐆𝐋 ⊢ (LetterlessFormula.betaMinus X hX).lift 🡒 A :=
       Formula.GL_imp_of_height_not_mem_trace fun _ _ _ hM hn ↦
