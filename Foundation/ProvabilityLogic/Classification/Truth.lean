@@ -66,7 +66,8 @@ lemma mem_trace_provabilityLogic_TA_iff :
 
 lemma trace_provabilityLogic_TA_eq_univ_iff :
     (T.provabilityLogicRelativeTo 𝗧𝗔 : Logic α).trace = .univ ↔ T.height = ⊤ := by
-  sorry
+  simp [Set.eq_univ_iff_forall, mem_trace_provabilityLogic_TA_iff, ENat.eq_top_iff_forall_ne,
+    ne_comm]
 
 lemma trace_provabilityLogic_TA_eq_compl_singleton_iff :
     (T.provabilityLogicRelativeTo 𝗧𝗔 : Logic α).trace = {n}ᶜ ↔ T.height = n := by
