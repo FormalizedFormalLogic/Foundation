@@ -192,6 +192,19 @@ lemma forces_congr {N : Model κ α} (hR : M.Rel' = N.Rel') (hV : ∀ x a, M.Val
     rw [hR];
     exact forall_congr' fun y ↦ imp_congr_right fun _ ↦ ih;
 
+lemma forces_congr_of_atoms [DecidableEq α] {N : Model κ α} (hR : M.Rel' = N.Rel') {A : Formula α}
+    (hV : ∀ x, ∀ a ∈ A.atoms, M.Val x a ↔ N.Val x a) {x : κ} : x ⊩[M] A ↔ x ⊩[N] A := by
+  induction A generalizing x with
+  | atom a => exact hV x a (by simp);
+  | falsum => rfl;
+  | imp A B ihA ihB =>
+    exact imp_congr (ihA fun x a ha ↦ hV x a (by simp [ha]))
+      (ihB fun x a ha ↦ hV x a (by simp [ha]));
+  | box A ih =>
+    change (∀ y, M.Rel' x y → _) ↔ (∀ y, N.Rel' x y → _);
+    rw [hR];
+    exact forall_congr' fun y ↦ imp_congr_right fun _ ↦ ih hV;
+
 end Model
 
 namespace Model

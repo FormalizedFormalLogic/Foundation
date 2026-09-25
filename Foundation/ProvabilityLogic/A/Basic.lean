@@ -31,7 +31,7 @@ notation "𝐀" => Logic.A
 variable {α : Type*} {A : Formula α} {n : ℕ}
 
 lemma Logic.S.provable_TBB : (𝐒 : Logic α) ⊢ TBB n := by
-  simpa [TBB] using S.axiomT (A := □^[n]⊥);
+  simpa [TBB] using S.axiomT;
 
 lemma Logic.D.provable_TBB : (𝐃 : Logic α) ⊢ TBB n := by
   classical
@@ -75,7 +75,7 @@ theorem provability_TFAE [DecidableEq α] : [
       (M.graft a ℕ).root ⊩[(M.graft a ℕ).toModel] A,
     ∃ n : ℕ, 𝐆𝐋 ⊢ ∼□^[n]⊥ 🡒 A
   ].TFAE := by
-  tfae_have 1 → 3 := fun h _ _ M _ a ↦ sound h _ (graft.not_forces_boxItr_bot (a := a));
+  tfae_have 1 → 3 := fun h _ _ M _ a ↦ sound h _ graft.not_forces_boxItr_bot;
   tfae_have 3 → 4 := fun h _ _ M _ a ↦ h M a;
   tfae_have 4 → 2 := fun h ↦ ProvabilityLogic.A.Gentzen.complete fun M _ a _ ↦ ⟨A, by simp, h M a⟩;
   tfae_have 2 → 5 := by
@@ -109,8 +109,8 @@ lemma exists_countermodel [DecidableEq α] (h : 𝐀 ⊬ A) :
   obtain ⟨κ, _, M, _, hM⟩ := this;
   obtain ⟨h₁, h₂⟩ := not_forces_imp.mp hM;
   have : Fintype M.World := Fintype.ofFinite _;
-  obtain ⟨u, Ru, hu⟩ := exists_isReflexiveOf_of_card_lt_rank (M := M.toModel) (x := M.root)
-    (X := A.subfmls.prebox) <| not_lt.mp fun h ↦ h₁ <| forces_boxItr_bot_iff.mpr h;
+  obtain ⟨u, Ru, hu⟩ := exists_isReflexiveOf_of_card_lt_rank <|
+    not_lt.mp fun h ↦ h₁ <| forces_boxItr_bot_iff.mpr h;
   exact ⟨κ, inferInstance, M, inferInstance, u, h₂, Ru, hu⟩;
 
 lemma subset_D : (𝐀 : Logic α) ⊆ 𝐃 :=
@@ -123,8 +123,8 @@ lemma not_axiomD {a : α} : 𝐀 ⊬ □(□#a ⋎ □#a) 🡒 □#a ⋎ □#a :
   have hT (x : L.World) : x ⊩[L] TBB n ↔ (x : ℕ) ≠ n := by
     simpa using LetterlessFormula.forces_lift_iff (x := x) (A := TBB n);
   have h₁ : Fin.last (n + 1) ⊩[L] ∼□^[n]⊥ := fun h ↦ by simpa using forces_boxItr_bot_iff.mp h;
-  have h₂ : Fin.last (n + 1) ⊩[L] □(□TBB n ⋎ □TBB n) := fun y (Ry : (y : ℕ) < n + 1) ↦
-    forces_or.mpr <| or_self_iff.mpr fun z (Rz : (z : ℕ) < y) ↦ (hT z).mpr (by omega);
+  have h₂ : Fin.last (n + 1) ⊩[L] □(□TBB n ⋎ □TBB n) := fun y Ry ↦
+    forces_or.mpr <| or_self_iff.mpr fun z Rz ↦ (hT z).mpr (by omega);
   have h₃ : Fin.last (n + 1) ⊮[L] □TBB n ⋎ □TBB n := fun h ↦
     (hT _).mp (or_self_iff.mp (forces_or.mp h) ⟨n, by omega⟩ (show n < n + 1 by omega)) rfl;
   have := forces_subst.mp <| GL.sound (L.subst fun _ ↦ TBB n) h (Fin.last (n + 1));
@@ -133,7 +133,7 @@ lemma not_axiomD {a : α} : 𝐀 ⊬ □(□#a ⋎ □#a) 🡒 □#a ⋎ □#a :
 
 lemma GL_ssubset : (𝐆𝐋 : Logic α) ⊂ 𝐀 :=
   ⟨fun _ ↦ of_GL, fun h ↦
-    GL.sound (pointModel (α := α) fun _ ↦ True) (h (provable_TBB (n := 0))) 0 fun _ h ↦ h.elim⟩
+    GL.sound (pointModel fun _ ↦ True) (h (provable_TBB (n := 0))) 0 fun _ h ↦ h.elim⟩
 
 lemma ssubset_D [Inhabited α] : (𝐀 : Logic α) ⊂ 𝐃 :=
   ⟨subset_D, fun h ↦ not_axiomD (a := default) (h D.axiomD)⟩
