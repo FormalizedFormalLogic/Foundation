@@ -162,7 +162,7 @@ variable {α : Type u} [DecidableEq α] {A : Formula α}
 /-- - [KKIM25, Proposition 3.6, Theorem 5.8] -/
 theorem provability_TFAE : [
     𝐃 ⊢ A,
-    ⊢ᴳ[D] ∅ ⟹[2] {A},
+    ⊢ᴳ[𝐃] ∅ ⟹[2] {A},
     ∀ {κ : Type u} [Nonempty κ] (M : Model κ α) [M.IsGL] (V : ℕ∞ → α → Prop),
       Sum.inr ⊤ ⊩[(M.toFreeTail V).toModel] A,
     ∀ {κ : Type u} [Nonempty κ] (M : RootedModel κ α) [M.IsFiniteGL] (o : α → Prop),
@@ -175,7 +175,7 @@ theorem provability_TFAE : [
   tfae_have 2 ↔ 3 := by
     have h : ∀ {κ : Type u} [Nonempty κ] {M : Model κ α} {x : M.World},
         x ⊩[M] (∅ ⟹ {A}) ↔ x ⊩[M] A := by simp [ForcesSequent];
-    have e : ⊢ᴳ[D] ∅ ⟹[2] {A} ↔ ∀ {κ : Type u} [Nonempty κ] (M : Model κ α) [M.IsGL] V,
+    have e : ⊢ᴳ[𝐃] ∅ ⟹[2] {A} ↔ ∀ {κ : Type u} [Nonempty κ] (M : Model κ α) [M.IsGL] V,
         Sum.inr ⊤ ⊩[(M.toFreeTail V).toModel] (∅ ⟹ {A}) := D.Gentzen.TFAE.out 1 2;
     rw [e];
     constructor;
@@ -191,7 +191,7 @@ theorem provability_TFAE : [
     exact axiomD_disj;
   tfae_finish;
 
-lemma iff_provable_gentzen : 𝐃 ⊢ A ↔ ⊢ᴳ[D] ∅ ⟹[2] {A} := provability_TFAE.out 1 2
+lemma iff_provable_gentzen : 𝐃 ⊢ A ↔ ⊢ᴳ[𝐃] ∅ ⟹[2] {A} := provability_TFAE.out 1 2
 
 omit [DecidableEq α] in
 lemma iff_forces_pseudoTail : 𝐃 ⊢ A ↔

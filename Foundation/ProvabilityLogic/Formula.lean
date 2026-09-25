@@ -141,6 +141,15 @@ abbrev Modalized (A : Formula α) : Prop := ∀ a, A.ModalizedIn a
 @[simp, grind =]
 lemma complexity_box : (□A).complexity = A.complexity + 1 := rfl
 
+/-- `A` with every atom outside the scope of `□` replaced by `⊥`. -/
+def modalize : Formula α → Formula α
+  | #_    => ⊥
+  | ⊥     => ⊥
+  | A 🡒 B => A.modalize 🡒 B.modalize
+  | □A    => □A
+
+lemma modalizedIn_modalize {p : α} : A.modalize.ModalizedIn p := by induction A <;> trivial;
+
 variable [DecidableEq α]
 
 @[grind]
@@ -161,6 +170,9 @@ def atoms : Formula α → Finset α
   simp [atoms, Finset.union_comm];
 @[simp, grind =] lemma atoms_box : (□A).atoms = A.atoms := rfl
 @[simp, grind =] lemma atoms_dia : (◇A).atoms = A.atoms := by simp [atoms]
+
+lemma atoms_modalize_subset : A.modalize.atoms ⊆ A.atoms := by
+  induction A <;> simp_all [modalize, Finset.union_subset_union];
 
 @[grind]
 def subfmls : Formula α → FormulaFinset α
@@ -197,6 +209,24 @@ lemma subfmls_trans : A ∈ B.subfmls → A.subfmls ⊆ B.subfmls := by
     rcases h with rfl | h;
     · rfl;
     · exact (ih h).trans (by intro; simp [subfmls]; tauto);
+  | _ => intro h; simp_all [subfmls];
+
+@[grind →]
+lemma atoms_subset_of_mem_subfmls : A ∈ B.subfmls → A.atoms ⊆ B.atoms := by
+  induction B with
+  | imp C D ihC ihD =>
+    intro h;
+    simp only [subfmls, Finset.mem_insert, Finset.mem_union] at h;
+    rcases h with rfl | h | h;
+    · rfl;
+    · exact (ihC h).trans (by simp);
+    · exact (ihD h).trans (by simp);
+  | box C ih =>
+    intro h;
+    simp only [subfmls, Finset.mem_insert] at h;
+    rcases h with rfl | h;
+    · rfl;
+    · exact (ih h).trans (by simp);
   | _ => intro h; simp_all [subfmls];
 
 end Formula

@@ -56,7 +56,7 @@ end
 
 /-! ### From the sequent calculus -/
 
-lemma of_gentzen [DecidableEq α] {S : Sequent α} (h : ⊢ᴳ[GL] S) : 𝐆𝐋 ⊢ S.ant.conj 🡒 S.suc.disj := by
+lemma of_gentzen [DecidableEq α] {S : Sequent α} (h : ⊢ᴳ[𝐆𝐋] S) : 𝐆𝐋 ⊢ S.ant.conj 🡒 S.suc.disj := by
   induction h with
   | axm A => simp;
   | botL => simp only [Finset.conj_singleton]; exact efq;
@@ -104,7 +104,7 @@ variable {α : Type u} [DecidableEq α] {A : Formula α}
 
 theorem provability_TFAE : [
     𝐆𝐋 ⊢ A,
-    ⊢ᴳ[GL] ∅ ⟹ {A},
+    ⊢ᴳ[𝐆𝐋] ∅ ⟹ {A},
     ∀ {κ : Type u} [Nonempty κ] (M : Model κ α), [M.IsFiniteGL] → M ⊧ A,
     ∀ {κ : Type u} [Nonempty κ] (M : RootedModel κ α), [M.IsFiniteGL] → M.root ⊩[M.toModel] A,
     ∀ {κ : Type u} [Nonempty κ] (M : RootedModel κ α), [M.IsFiniteGL] → [M.IsTree] →
@@ -118,7 +118,7 @@ theorem provability_TFAE : [
   tfae_have 4 → 3 := fun h _ _ M _ x ↦ Model.forces_cone.mp <| h (M.cone x);
   tfae_finish;
 
-theorem iff_provable_gentzen : 𝐆𝐋 ⊢ A ↔ ⊢ᴳ[GL] ∅ ⟹ {A} := provability_TFAE.out 1 2
+theorem iff_provable_gentzen : 𝐆𝐋 ⊢ A ↔ ⊢ᴳ[𝐆𝐋] ∅ ⟹ {A} := provability_TFAE.out 1 2
 
 omit [DecidableEq α] in
 theorem iff_valid_finite :
