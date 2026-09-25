@@ -89,7 +89,11 @@ lemma provabilityLogic_TA_subset_S (h : (T.provabilityLogicRelativeTo 𝗧𝗔 :
 /-- - [AB05, Corollary 41(ii)] -/
 theorem D_subset_provabilityLogic_TA [T.SoundOnHierarchy 𝚺 1] :
     𝐃 ⊆ (T.provabilityLogicRelativeTo 𝗧𝗔 : Logic α) := by
-  sorry
+  have h := soundOnHierarchy_iff_models_reflection.mp ‹T.SoundOnHierarchy 𝚺 1›;
+  apply sumQuasiNormal_subset_provabilityLogic;
+  rintro _ (rfl | ⟨B, C, rfl⟩) f <;> apply Arithmetic.TA.provable_iff.mpr;
+  · simpa [standardInterpret, interpret] using h ⊥ (by simp);
+  · exact h _ <| by simp [interpret, Arithmetic.standardProvability_def];
 
 /-- - [AB05, Corollary 41(ii)] -/
 theorem soundOnHierarchy_of_axiomD_mem_provabilityLogic_TA {a : α}
