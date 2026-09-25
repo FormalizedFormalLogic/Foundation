@@ -55,7 +55,7 @@ lemma GL_imp_of_height_not_mem_trace
   have : Fintype M.World := Fintype.ofFinite _;
   exact root_forces_of_not_mem_trace (h M hB);
 
-@[simp] lemma trace_lift (B : LetterlessFormula) : (B.lift : Formula α).trace = B.trace := by
+@[simp] lemma trace_lift (B : LetterlessFormula) : (↑B : Formula α).trace = B.trace := by
   ext n;
   constructor;
   · rintro ⟨κ, _, M, _, _, rfl, h⟩ hB;

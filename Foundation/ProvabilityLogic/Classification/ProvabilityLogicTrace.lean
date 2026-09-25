@@ -51,7 +51,7 @@ lemma provabilityLogic_conj [DecidableEq α] {Γ : FormulaFinset α}
 end
 
 lemma LetterlessFormula.lift_mem_provabilityLogic {A : LetterlessFormula} (f : Realization α ℒₒᵣ)
-    (h : U ⊢ f T A.lift) : A.lift ∈ (T.provabilityLogicRelativeTo U : Logic α) :=
+    (h : U ⊢ f T ↑A) : ↑A ∈ (T.provabilityLogicRelativeTo U : Logic α) :=
   fun g ↦ by simpa only [standardInterpret, interpret_lift] using h
 
 /-! ### Realizations from Solovay sentences -/
