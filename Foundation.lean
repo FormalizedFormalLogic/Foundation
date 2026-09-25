@@ -192,6 +192,7 @@ public import Foundation.ProvabilityLogic.Classification.DS.Modal
 public import Foundation.ProvabilityLogic.Classification.General
 public import Foundation.ProvabilityLogic.Classification.LetterlessTrace
 public import Foundation.ProvabilityLogic.Classification.ProvabilityLogicTrace
+public import Foundation.ProvabilityLogic.Classification.Truth
 public import Foundation.ProvabilityLogic.Classification.UnivTrace
 public import Foundation.ProvabilityLogic.D.Basic
 public import Foundation.ProvabilityLogic.D.Gentzen.Basic
