@@ -7,14 +7,15 @@ public import Foundation.ProvabilityLogic.Arithmetic.SolovaySentences
 /-!
 # Modified Solovay sentences
 
-Solovay sentences for the root extension of a strong reflexive countermodel of `A` whose limit
-jumps from the old root to the reflexive world `u` once a witness of `σ` appears, and the
-reflection principle for `σ` that they yield.
+Solovay sentences for the root extension of a strong reflexive countermodel of `A` in which the
+traveler can move from the old root to the reflexive world `u` by paying a witness of `σ` as the
+toll, and the reflection principle for `σ` that they yield.
 
 For a `𝚫₁`-axiomatized `T` extending `𝗜𝚺₁` and a `𝚺₁` sentence `σ`, they are constructed as the
-arithmetical fixed points `T.modifiedSolovay M σ θ`. Along each edge of `M.extendRoot` a trigger
-fires: a proof of `∼Λ z`, or a witness of `σ` on the edge from the old root to `u`; the limit
-follows the edge whose trigger fires first.
+arithmetical fixed points `T.modifiedSolovay M σ θ`. A traveler starts at the root `none` of
+`M.extendRoot` and moves along transitions `x ⇝ z`. The toll of the gate into `z` is a proof of
+`∼Λ z`, except that the gate into `u`, reachable only from the old root, takes a witness of `σ`.
+At each world the traveler passes the gate with the cheapest toll.
 
 ## References
 
@@ -56,8 +57,9 @@ variable {L : Language} [L.ReferenceableBy L] {T₀ T : Theory L} [T₀ ⪯ T]
          {κ α : Type*} [Nonempty κ] [DecidableEq α] {A : ProvabilityLogic.Formula α}
 
 open Classical in
-/-- Sentences indexed by the worlds of `M.extendRoot` satisfying the Solovay conditions of the
-construction whose limit jumps from the old root to `u` once a witness of `σ` is found.
+/-- Sentences `Λ x` ("the traveler's final stop is `x`") indexed by the worlds of `M.extendRoot`,
+satisfying the Solovay conditions SC1–SC7 of the construction in which the gate into `u` is
+reachable only from the old root and its toll is a witness of `σ`.
 
 - [Bek90, §6 Lemma 1]
 -/
@@ -69,11 +71,11 @@ structure Provability.ModifiedSolovaySentences
   protected SC2 : ∀ i j : M.extendRoot.World, i ≺ j → j ≠ some M.u → T₀ ⊢ Λ i 🡒 𝔅.dia (Λ j)
   protected SC3 : ∀ i : M.extendRoot.World, i ≠ none → i ≠ some M.u →
     T₀ ⊢ Λ i 🡒 𝔅 (⩖ j ∈ { j : M.extendRoot.World | i ≺ j }, Λ j)
-  protected SC3r : T₀ ⊢ Λ (some M.u) 🡒
+  protected SC4 : T₀ ⊢ Λ (some M.u) 🡒
     𝔅 (Λ (some M.u) ⋎ ⩖ j ∈ { j : M.extendRoot.World | some M.u ≺ j }, Λ j)
-  protected SC4 : T₀ ⊢ ⩖ j, Λ j
-  protected SC5 : T₀ ⊢ 𝔅 σ 🡒 ∼Λ none
-  protected SC6 : T₀ ⊢ ∼σ 🡒 ∼Λ (some M.u)
+  protected SC5 : T₀ ⊢ ⩖ j, Λ j
+  protected SC6 : T₀ ⊢ 𝔅 σ 🡒 ∼Λ none
+  protected SC7 : T₀ ⊢ ∼σ 🡒 ∼Λ (some M.u)
 
 namespace Provability.ModifiedSolovaySentences
 
@@ -128,7 +130,7 @@ private lemma mainlemma_aux (hi : i ≠ none) {B : ProvabilityLogic.Formula α}
           B.interpret S.realization 𝔅 :=
         left_Fdisj'_intro _ _ fun j hj ↦ (ih (hne (by simpa using hj))).1 (h j (by simpa using hj));
       rcases eq_or_ne i (some M.u) with rfl | hiu;
-      · exact C_trans S.SC3r <| 𝔅.mono' <| left_A_intro ((ih hi).1 (hu h)) h₁;
+      · exact C_trans S.SC4 <| 𝔅.mono' <| left_A_intro ((ih hi).1 (hu h)) h₁;
       · exact C_trans (S.SC3 i hi hiu) <| 𝔅.mono' h₁;
     · intro h;
       obtain ⟨j, Rij, hj⟩ := not_forces_box.mp h;
@@ -177,14 +179,14 @@ lemma provable_b :
     T₀ ⊢ 𝔅.conItr M.height 🡒 𝔅 σ 🡒 ∼σ 🡒 S (some M.root) := by
   classical
   suffices T₀ ⊢ (⩖ j, S j) 🡒 ∼𝔅^[M.height] ⊥ 🡒 𝔅 σ 🡒 ∼σ 🡒 S (some M.root) from
-    this ⨀ S.SC4;
+    this ⨀ S.SC5;
   apply left_Udisj_intro;
   rintro (_ | z);
-  · cl_prover [S.SC5];
+  · cl_prover [S.SC6];
   rcases eq_or_ne z M.root with rfl | hr;
   · cl_prover;
   rcases eq_or_ne z M.u with rfl | hu;
-  · cl_prover [S.SC6];
+  · cl_prover [S.SC7];
   cl_prover [C_trans (S.provable_boxItr_bot_of_ne hr hu) <|
     𝔅.provable_boxItr_bot_mono <| rank_lt_height <| M.root_rel z hr];
 
@@ -245,7 +247,7 @@ lemma WitnessLE.not_witnessLT [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] : WitnessLE P Q
   · exact h w' hlt hw';
   · exact h' w hge hw;
 
-lemma exists_witnessFirst [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] {ι : Type*} [Finite ι] (P : ι → V → Prop)
+lemma exists_cheapest [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] {ι : Type*} [Finite ι] (P : ι → V → Prop)
     (hP : ∀ i, 𝚺₁-Predicate (P i)) (o : ι → ℕ) (h : ∃ i w, P i w) :
     ∃ j, (∀ i, o i < o j → WitnessLT (P j) (P i)) ∧ ∀ i, o j ≤ o i → WitnessLE (P j) (P i) := by
   obtain ⟨i₀, w₀, h₀⟩ := h;
@@ -272,7 +274,7 @@ variable {κ α : Type*} [Nonempty κ] [DecidableEq α] {A : ProvabilityLogic.Fo
 section stx
 
 open Classical in
-/-- The targets of the edges from `x`. -/
+/-- The targets of the transitions from `x`. -/
 def next (x : M.extendRoot.World) : Finset M.extendRoot.World :=
   {z | (x ≺ z ∧ z ≠ some M.u) ∨ (x = some M.root ∧ z = some M.u)}
 
@@ -288,7 +290,8 @@ lemma rel_of_mem_next {x z : M.extendRoot.World} (h : z ∈ next M x) : x ≺ z 
   · exact M.root_rel_u;
 
 open Classical in
-/-- A total order on the worlds of `M.extendRoot` in which `u` is the largest. -/
+/-- A total order on the worlds of `M.extendRoot` in which `u` is the largest; it breaks ties
+between equally cheap tolls. -/
 def ord (z : M.extendRoot.World) : ℕ :=
   if z = some M.u then Fintype.card M.extendRoot.World else Fintype.equivFin _ z
 
@@ -309,38 +312,38 @@ def prfNegPi : 𝚷₁.Semisentence 2 := .mkPi
   “w e. ∀ n, !(negGraph ℒₒᵣ) n e → !(proof T).pi w n”
 
 open Classical in
-/-- The witnesses of the trigger of an edge into `z`. -/
-def trigSigma (z : M.extendRoot.World) : 𝚺₁.Semisentence 2 :=
+/-- The tolls of the gate into `z`. -/
+def tollSigma (z : M.extendRoot.World) : 𝚺₁.Semisentence 2 :=
   if z = some M.u then .mkSigma “w e. !θ.val w” else prfNegSigma T
 
 open Classical in
-def trigPi (z : M.extendRoot.World) : 𝚷₁.Semisentence 2 :=
+def tollPi (z : M.extendRoot.World) : 𝚷₁.Semisentence 2 :=
   if z = some M.u then .mkPi “w e. !θ.val w” else prfNegPi T
 
 variable {n : ℕ} (t : M.extendRoot.World → ArithmeticSemiterm Empty n)
 
-def stpAux (x y : M.extendRoot.World) : ArithmeticSemisentence n :=
+def moveAux (x y : M.extendRoot.World) : ArithmeticSemisentence n :=
   (⩕ z ∈ {z ∈ next M x | ord M z < ord M y},
-    (cmpLT (trigSigma T M θ y) (trigPi T M θ z)).val/[t y, t z]) ⋏
+    (cmpLT (tollSigma T M θ y) (tollPi T M θ z)).val/[t y, t z]) ⋏
   (⩕ z ∈ {z ∈ next M x | ord M y ≤ ord M z},
-    (cmpLE (trigSigma T M θ y) (trigPi T M θ z)).val/[t y, t z])
+    (cmpLE (tollSigma T M θ y) (tollPi T M θ z)).val/[t y, t z])
 
 def chainAux : List M.extendRoot.World → ArithmeticSemisentence n
   |          [] => ⊥
   |         [_] => ⊤
-  | y :: x :: ε => chainAux (x :: ε) ⋏ stpAux T M θ t x y
+  | y :: x :: ε => chainAux (x :: ε) ⋏ moveAux T M θ t x y
 
 open Classical in
-def notTrigAux (z : M.extendRoot.World) : ArithmeticSemisentence n :=
+def notPayableAux (z : M.extendRoot.World) : ArithmeticSemisentence n :=
   if z = some M.u then Rew.embSubsts ![] ▹ ∼σ else T.consistentWith.val/[t z]
 
 section rew
 
 variable {n' : ℕ} (w : Fin n → ArithmeticSemiterm Empty n')
 
-lemma rew_stpAux (x y : M.extendRoot.World) :
-    Rew.subst w ▹ stpAux T M θ t x y = stpAux T M θ (fun z ↦ Rew.subst w (t z)) x y := by
-  simp [stpAux, Finset.map_conj', Function.comp_def, ← TransitiveRewriting.comp_app,
+lemma rew_moveAux (x y : M.extendRoot.World) :
+    Rew.subst w ▹ moveAux T M θ t x y = moveAux T M θ (fun z ↦ Rew.subst w (t z)) x y := by
+  simp [moveAux, Finset.map_conj', Function.comp_def, ← TransitiveRewriting.comp_app,
     Rew.subst_comp_subst, Matrix.comp_vecCons', Matrix.constant_eq_singleton]
 
 lemma rew_chainAux (ε : List M.extendRoot.World) :
@@ -348,18 +351,18 @@ lemma rew_chainAux (ε : List M.extendRoot.World) :
   match ε with
   |          [] => simp [chainAux]
   |         [_] => simp [chainAux]
-  | _ :: x :: ε => simp [chainAux, rew_chainAux (x :: ε), rew_stpAux]
+  | _ :: x :: ε => simp [chainAux, rew_chainAux (x :: ε), rew_moveAux]
 
 omit [Fintype M.World] in
-lemma rew_notTrigAux (z : M.extendRoot.World) :
-    Rew.subst w ▹ notTrigAux T M σ t z = notTrigAux T M σ (fun z ↦ Rew.subst w (t z)) z := by
-  unfold notTrigAux;
+lemma rew_notPayableAux (z : M.extendRoot.World) :
+    Rew.subst w ▹ notPayableAux T M σ t z = notPayableAux T M σ (fun z ↦ Rew.subst w (t z)) z := by
+  unfold notPayableAux;
   split_ifs <;> simp [← TransitiveRewriting.comp_app, Rew.subst_comp_embSubsts,
     Rew.subst_comp_subst, Matrix.empty_eq]
 
 end rew
 
-/-- The sequences from the root `none` to `x` along the edges, listed from `x`. -/
+/-- The sequences from the root `none` to `x` along the transitions, listed from `x`. -/
 abbrev EChain (x : M.extendRoot.World) :=
   {ε : List M.extendRoot.World // ε.ChainI (fun a b ↦ a ∈ next M b) x none}
 
@@ -379,9 +382,9 @@ def HAux (x : M.extendRoot.World) : ArithmeticSemisentence n :=
   ⩖ ε : EChain M x, chainAux T M θ t ε
 
 def deltaAux (x : M.extendRoot.World) : ArithmeticSemisentence n :=
-  HAux T M θ t x ⋏ ⩕ z ∈ next M x, notTrigAux T M σ t z
+  HAux T M θ t x ⋏ ⩕ z ∈ next M x, notPayableAux T M σ t z
 
-/-- The modified Solovay sentences.
+/-- The modified Solovay sentence `Λ x`: the traveler's final stop is `x`.
 
 - [Bek90, §6 Theorem 2]
 -/
@@ -390,8 +393,8 @@ def _root_.FFL.FirstOrder.Theory.modifiedSolovay (x : M.extendRoot.World) : Arit
     (fun j ↦ deltaAux T M σ θ (fun z ↦ #(Fintype.equivFin _ z)) ((Fintype.equivFin _).symm j))
     (Fintype.equivFin _ x)
 
-abbrev stp (x y : M.extendRoot.World) : ArithmeticSentence :=
-  stpAux T M θ (fun z ↦ ⌜T.modifiedSolovay M σ θ z⌝) x y
+abbrev move (x y : M.extendRoot.World) : ArithmeticSentence :=
+  moveAux T M θ (fun z ↦ ⌜T.modifiedSolovay M σ θ z⌝) x y
 
 abbrev chain (ε : List M.extendRoot.World) : ArithmeticSentence :=
   chainAux T M θ (fun z ↦ ⌜T.modifiedSolovay M σ θ z⌝) ε
@@ -399,25 +402,25 @@ abbrev chain (ε : List M.extendRoot.World) : ArithmeticSentence :=
 abbrev H (x : M.extendRoot.World) : ArithmeticSentence :=
   HAux T M θ (fun z ↦ ⌜T.modifiedSolovay M σ θ z⌝) x
 
-abbrev notTrig (z : M.extendRoot.World) : ArithmeticSentence :=
-  notTrigAux T M σ (fun z ↦ ⌜T.modifiedSolovay M σ θ z⌝) z
+abbrev notPayable (z : M.extendRoot.World) : ArithmeticSentence :=
+  notPayableAux T M σ (fun z ↦ ⌜T.modifiedSolovay M σ θ z⌝) z
 
 lemma H_sigma_one (x : M.extendRoot.World) : Hierarchy 𝚺 1 (H T M σ θ x) := by
   have h (ε : List M.extendRoot.World) : Hierarchy 𝚺 1 (chain T M σ θ ε) := by
     induction ε with
     | nil => simp [chainAux]
-    | cons y ε ih => rcases ε with _ | ⟨x, ε⟩ <;> simp_all [chainAux, stpAux];
+    | cons y ε ih => rcases ε with _ | ⟨x, ε⟩ <;> simp_all [chainAux, moveAux];
   simp [HAux, h]
 
 lemma modifiedSolovay_diag (x : M.extendRoot.World) :
-    𝗜𝚺₁ ⊢ T.modifiedSolovay M σ θ x 🡘 H T M σ θ x ⋏ ⩕ z ∈ next M x, notTrig T M σ θ z := by
+    𝗜𝚺₁ ⊢ T.modifiedSolovay M σ θ x 🡘 H T M σ θ x ⋏ ⩕ z ∈ next M x, notPayable T M σ θ z := by
   have : 𝗜𝚺₁ ⊢ T.modifiedSolovay M σ θ x 🡘
       (Rew.subst fun j ↦ ⌜T.modifiedSolovay M σ θ ((Fintype.equivFin _).symm j)⌝) ▹
         deltaAux T M σ θ (fun z ↦ #(Fintype.equivFin _ z)) x := by
     simpa [Theory.modifiedSolovay] using! exclusiveMultidiagonal (i := Fintype.equivFin _ x)
       (fun j ↦ deltaAux T M σ θ (fun z ↦ #(Fintype.equivFin _ z)) ((Fintype.equivFin _).symm j));
   simpa [deltaAux, HAux, Finset.map_conj', Finset.map_udisj, Function.comp_def, rew_chainAux,
-    rew_notTrigAux] using! this
+    rew_notPayableAux] using! this
 
 end stx
 
@@ -426,43 +429,45 @@ section model
 variable [M.IsGL] (V : Type*) [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 
 open Classical in
-/-- `w` witnesses the trigger of an edge into `z`. -/
-def Wit (z : M.extendRoot.World) (w : V) : Prop :=
+/-- `w` is a toll of the gate into `z`. -/
+def Toll (z : M.extendRoot.World) (w : V) : Prop :=
   if z = some M.u then V ⊧/![w] θ.val else Proof T w ⌜∼T.modifiedSolovay M σ θ z⌝
 
 open Classical in
-/-- The trigger of an edge into `z` is pulled. -/
-def Trig (z : M.extendRoot.World) : Prop :=
+/-- The gate into `z` is payable. -/
+def Payable (z : M.extendRoot.World) : Prop :=
   if z = some M.u then V ⊧/![] σ else Provable T (⌜∼T.modifiedSolovay M σ θ z⌝ : V)
 
-/-- The edge `x → y` is the one taken from `x`. -/
-def Step (x y : M.extendRoot.World) : Prop :=
+/-- The traveler at `x` moves to `y`. -/
+def Move (x y : M.extendRoot.World) : Prop :=
   y ∈ next M x ∧
-    (∀ z ∈ next M x, ord M z < ord M y → WitnessLT (Wit T M σ θ V y) (Wit T M σ θ V z)) ∧
-    (∀ z ∈ next M x, ord M y ≤ ord M z → WitnessLE (Wit T M σ θ V y) (Wit T M σ θ V z))
+    (∀ z ∈ next M x, ord M z < ord M y → WitnessLT (Toll T M σ θ V y) (Toll T M σ θ V z)) ∧
+    (∀ z ∈ next M x, ord M y ≤ ord M z → WitnessLE (Toll T M σ θ V y) (Toll T M σ θ V z))
 
-abbrev Reach (x : M.extendRoot.World) : Prop := Relation.ReflTransGen (Step T M σ θ V) none x
+/-- The traveler reaches `x`. -/
+abbrev Reach (x : M.extendRoot.World) : Prop := Relation.ReflTransGen (Move T M σ θ V) none x
 
+/-- The traveler's final stop is `x`. -/
 def _root_.FFL.FirstOrder.Theory.ModifiedSolovay (x : M.extendRoot.World) : Prop :=
-  Reach T M σ θ V x ∧ ∀ z ∈ next M x, ¬Trig T M σ θ V z
+  Reach T M σ θ V x ∧ ∀ z ∈ next M x, ¬Payable T M σ θ V z
 
 variable {T M σ θ V} {x y z : M.extendRoot.World}
 
-@[simp] lemma val_trigSigma {w : V} :
-    V ⊧/![w, ⌜T.modifiedSolovay M σ θ z⌝] (trigSigma T M θ z).val ↔ Wit T M σ θ V z w := by
-  unfold trigSigma Wit;
+@[simp] lemma val_tollSigma {w : V} :
+    V ⊧/![w, ⌜T.modifiedSolovay M σ θ z⌝] (tollSigma T M θ z).val ↔ Toll T M σ θ V z w := by
+  unfold tollSigma Toll;
   split_ifs <;> simp [prfNegSigma, Sentence.quote_def, Semiformula.quote_def]
 
-@[simp] lemma val_trigPi {w : V} :
-    V ⊧/![w, ⌜T.modifiedSolovay M σ θ z⌝] (trigPi T M θ z).val ↔ Wit T M σ θ V z w := by
-  unfold trigPi Wit;
+@[simp] lemma val_tollPi {w : V} :
+    V ⊧/![w, ⌜T.modifiedSolovay M σ θ z⌝] (tollPi T M θ z).val ↔ Toll T M σ θ V z w := by
+  unfold tollPi Toll;
   split_ifs <;> simp [prfNegPi, Sentence.quote_def, Semiformula.quote_def]
 
-@[simp] lemma val_stp :
-    V ⊧/![] (stp T M σ θ x y) ↔
-      (∀ z ∈ next M x, ord M z < ord M y → WitnessLT (Wit T M σ θ V y) (Wit T M σ θ V z)) ∧
-      (∀ z ∈ next M x, ord M y ≤ ord M z → WitnessLE (Wit T M σ θ V y) (Wit T M σ θ V z)) := by
-  simp [stpAux]
+@[simp] lemma val_move :
+    V ⊧/![] (move T M σ θ x y) ↔
+      (∀ z ∈ next M x, ord M z < ord M y → WitnessLT (Toll T M σ θ V y) (Toll T M σ θ V z)) ∧
+      (∀ z ∈ next M x, ord M y ≤ ord M z → WitnessLE (Toll T M σ θ V y) (Toll T M σ θ V z)) := by
+  simp [moveAux]
 
 @[simp] lemma val_H : V ⊧/![] (H T M σ θ x) ↔ Reach T M σ θ V x := by
   suffices (∃ ε : EChain M x, V ⊧/![] (chain T M σ θ ε.1)) ↔ Reach T M σ θ V x by
@@ -474,8 +479,8 @@ variable {T M σ θ V} {x y z : M.extendRoot.World}
     | singleton => exact hn ▸ .refl
     | @cons a b _ _ hR hC ih =>
       obtain ⟨l, rfl⟩ := hC.tail_exists;
-      have : V ⊧/![] (chain T M σ θ (b :: l)) ∧ V ⊧/![] (stp T M σ θ b a) := by
-        simpa [-val_stp, chainAux] using hc;
+      have : V ⊧/![] (chain T M σ θ (b :: l)) ∧ V ⊧/![] (move T M σ θ b a) := by
+        simpa [-val_move, chainAux] using hc;
       exact .tail (ih hn this.1) ⟨hR, by simpa using this.2⟩;
   · intro h;
     induction h with
@@ -483,31 +488,31 @@ variable {T M σ θ V} {x y z : M.extendRoot.World}
     | tail _ hs ih =>
       obtain ⟨⟨ε, hε⟩, hc⟩ := ih;
       obtain ⟨l, rfl⟩ := hε.tail_exists;
-      exact ⟨⟨_, hε.cons hs.1⟩, by simpa [-val_stp, chainAux] using ⟨hc, by simpa using hs.2⟩⟩
+      exact ⟨⟨_, hε.cons hs.1⟩, by simpa [-val_move, chainAux] using ⟨hc, by simpa using hs.2⟩⟩
 
 @[simp] lemma val_modifiedSolovay :
     V ⊧/![] (T.modifiedSolovay M σ θ x) ↔ T.ModifiedSolovay M σ θ V x := by
-  have hn (z : M.extendRoot.World) : V ⊧/![] (notTrig T M σ θ z) ↔ ¬Trig T M σ θ V z := by
-    unfold notTrig notTrigAux Trig;
+  have hn (z : M.extendRoot.World) : V ⊧/![] (notPayable T M σ θ z) ↔ ¬Payable T M σ θ V z := by
+    unfold notPayable notPayableAux Payable;
     split_ifs <;> simp [Theory.ConsistentWith.quote_iff];
   simpa [models_iff, hn, Theory.ModifiedSolovay] using
     consequence_iff.mp (Theory.Proof.sound (modifiedSolovay_diag T M σ θ x)) V inferInstance
 
-lemma trig_iff_exists_wit (hθσ : V ⊧/![] σ ↔ ∃ w, V ⊧/![w] θ.val) :
-    Trig T M σ θ V z ↔ ∃ w, Wit T M σ θ V z w := by
-  unfold Trig Wit;
+lemma payable_iff_exists_toll (hθσ : V ⊧/![] σ ↔ ∃ w, V ⊧/![w] θ.val) :
+    Payable T M σ θ V z ↔ ∃ w, Toll T M σ θ V z w := by
+  unfold Payable Toll;
   split_ifs;
   exacts [hθσ, .rfl];
 
-lemma wit_definable (z : M.extendRoot.World) : 𝚺₁-Predicate (Wit T M σ θ V z) :=
+lemma toll_definable (z : M.extendRoot.World) : 𝚺₁-Predicate (Toll T M σ θ V z) :=
   HierarchySymbol.Defined.to_definable
-    (.mkSigma ((trigSigma T M θ z).val/[#0, ⌜T.modifiedSolovay M σ θ z⌝])) (.mk fun v ↦ by simp)
+    (.mkSigma ((tollSigma T M θ z).val/[#0, ⌜T.modifiedSolovay M σ θ z⌝])) (.mk fun v ↦ by simp)
 
-lemma Step.exists_wit (h : Step T M σ θ V x y) : ∃ w, Wit T M σ θ V y w :=
+lemma Move.exists_toll (h : Move T M σ θ V x y) : ∃ w, Toll T M σ θ V y w :=
   (h.2.2 y h.1 le_rfl).exists
 
-lemma Step.unique {y₁ y₂ : M.extendRoot.World} (h₁ : Step T M σ θ V x y₁)
-    (h₂ : Step T M σ θ V x y₂) : y₁ = y₂ := by
+lemma Move.unique {y₁ y₂ : M.extendRoot.World} (h₁ : Move T M σ θ V x y₁)
+    (h₂ : Move T M σ θ V x y₂) : y₁ = y₂ := by
   wlog hlt : ord M y₁ < ord M y₂ generalizing y₁ y₂;
   · rcases (not_lt.mp hlt).lt_or_eq with hlt | heq;
     · exact (this h₂ h₁ hlt).symm;
@@ -518,15 +523,15 @@ lemma Reach.provable (hx : x ≠ none) (hu : x ≠ some M.u) (h : Reach T M σ �
     Provable T (⌜∼T.modifiedSolovay M σ θ x⌝ : V) := by
   rcases h.cases_tail with rfl | ⟨_, _, hs⟩;
   · contradiction;
-  · obtain ⟨w, hw⟩ := hs.exists_wit;
-    exact ⟨w, by simpa [Wit, hu] using hw⟩;
+  · obtain ⟨w, hw⟩ := hs.exists_toll;
+    exact ⟨w, by simpa [Toll, hu] using hw⟩;
 
 lemma Reach.models_sigma (hθσ : V ⊧/![] σ ↔ ∃ w, V ⊧/![w] θ.val)
     (h : Reach T M σ θ V (some M.u)) : V ⊧/![] σ := by
   rcases h.cases_tail with h | ⟨_, _, hs⟩;
   · cases h;
-  · obtain ⟨w, hw⟩ := hs.exists_wit;
-    exact hθσ.mpr ⟨w, by simpa [Wit] using hw⟩;
+  · obtain ⟨w, hw⟩ := hs.exists_toll;
+    exact hθσ.mpr ⟨w, by simpa [Toll] using hw⟩;
 
 lemma Reach.disjunction (hθσ : V ⊧/![] σ ↔ ∃ w, V ⊧/![w] θ.val) (h : Reach T M σ θ V x) :
     T.ModifiedSolovay M σ θ V x ∨ ∃ y, x ≺ y ∧ T.ModifiedSolovay M σ θ V y := by
@@ -535,12 +540,12 @@ lemma Reach.disjunction (hθσ : V ⊧/![] σ ↔ ∃ w, V ⊧/![w] θ.val) (h :
     by_cases hx : T.ModifiedSolovay M σ θ V x;
     · simp [hx];
     right;
-    obtain ⟨z, hz, hzt⟩ : ∃ z ∈ next M x, Trig T M σ θ V z := by
+    obtain ⟨z, hz, hzp⟩ : ∃ z ∈ next M x, Payable T M σ θ V z := by
       simpa [Theory.ModifiedSolovay, h] using hx;
-    obtain ⟨⟨y, hy⟩, hy₁, hy₂⟩ := exists_witnessFirst (ι := {z // z ∈ next M x})
-      (fun z ↦ Wit T M σ θ V z.1) (fun z ↦ wit_definable z.1) (fun z ↦ ord M z.1)
-      ⟨⟨z, hz⟩, (trig_iff_exists_wit hθσ).mp hzt⟩;
-    have hs : Step T M σ θ V x y := ⟨hy, fun z hz ↦ hy₁ ⟨z, hz⟩, fun z hz ↦ hy₂ ⟨z, hz⟩⟩;
+    obtain ⟨⟨y, hy⟩, hy₁, hy₂⟩ := exists_cheapest (ι := {z // z ∈ next M x})
+      (fun z ↦ Toll T M σ θ V z.1) (fun z ↦ toll_definable z.1) (fun z ↦ ord M z.1)
+      ⟨⟨z, hz⟩, (payable_iff_exists_toll hθσ).mp hzp⟩;
+    have hs : Move T M σ θ V x y := ⟨hy, fun z hz ↦ hy₁ ⟨z, hz⟩, fun z hz ↦ hy₂ ⟨z, hz⟩⟩;
     rcases ih y (rel_of_mem_next hy) (h.tail hs) with hy' | ⟨w, hyw, hw⟩;
     · exact ⟨y, rel_of_mem_next hy, hy'⟩;
     · exact ⟨w, IsTrans.trans _ _ _ (rel_of_mem_next hy) hyw, hw⟩;
@@ -548,18 +553,18 @@ lemma Reach.disjunction (hθσ : V ⊧/![] σ ↔ ∃ w, V ⊧/![w] θ.val) (h :
 lemma ModifiedSolovay.exclusive (hθσ : V ⊧/![] σ ↔ ∃ w, V ⊧/![w] θ.val) (ne : x ≠ y) :
     T.ModifiedSolovay M σ θ V x → ¬T.ModifiedSolovay M σ θ V y := by
   rintro ⟨hx, hxt⟩ ⟨hy, hyt⟩;
-  have key {a b : M.extendRoot.World} (hab : Relation.ReflTransGen (Step T M σ θ V) a b)
-      (ne : a ≠ b) (ha : ∀ z ∈ next M a, ¬Trig T M σ θ V z) : False := by
+  have key {a b : M.extendRoot.World} (hab : Relation.ReflTransGen (Move T M σ θ V) a b)
+      (ne : a ≠ b) (ha : ∀ z ∈ next M a, ¬Payable T M σ θ V z) : False := by
     obtain ⟨c, hac, _⟩ := hab.cases_head.resolve_left ne;
-    exact ha c hac.1 ((trig_iff_exists_wit hθσ).mpr hac.exists_wit);
-  have U : Relator.RightUnique (Step T M σ θ V) := fun _ _ _ ↦ Step.unique;
+    exact ha c hac.1 ((payable_iff_exists_toll hθσ).mpr hac.exists_toll);
+  have U : Relator.RightUnique (Move T M σ θ V) := fun _ _ _ ↦ Move.unique;
   rcases Relation.ReflTransGen.total_of_right_unique U hx hy with h | h;
   · exact key h ne hxt;
   · exact key h ne.symm hyt;
 
 lemma ModifiedSolovay.consistent (hxy : x ≺ y) (hy : y ≠ some M.u)
     (h : T.ModifiedSolovay M σ θ V x) : ¬Provable T (⌜∼T.modifiedSolovay M σ θ y⌝ : V) := by
-  simpa [Trig, hy] using h.2 y (by simp [hxy, hy])
+  simpa [Payable, hy] using h.2 y (by simp [hxy, hy])
 
 lemma disjunctive (hθσ : V ⊧/![] σ ↔ ∃ w, V ⊧/![w] θ.val) :
     ∃ x, T.ModifiedSolovay M σ θ V x := by
@@ -618,7 +623,7 @@ lemma provable_provable_sigma_imp :
   have h₁ : 𝗜𝚺₁ ⊢ σ 🡒 ∼T.modifiedSolovay M σ θ (some M.root) :=
     complete _ _ fun (V : Type) _ _ ↦ by
       simpa [models_iff] using fun (hσ : V ⊧/![] σ) (h : T.ModifiedSolovay M σ θ V _) ↦
-        h.2 (some M.u) (by simp) (by simpa [Trig] using hσ);
+        h.2 (some M.u) (by simp) (by simpa [Payable] using hσ);
   have h₂ : 𝗜𝚺₁ ⊢ T.standardProvability σ 🡒 T.standardProvability (∼T.modifiedSolovay M σ θ _) :=
     T.standardProvability.D2 ⨀ T.standardProvability.D1 (WeakerThan.pbl h₁);
   have hru : some M.root ≠ some M.u := fun h ↦
@@ -662,13 +667,13 @@ def standardModifiedSolovaySentences
       simpa [models_iff, standardProvability_def] using! ModifiedSolovay.consistent hxy hy
     SC3 _ hx hu := complete _ _ fun (V : Type) _ _ ↦ by
       simpa [models_iff, standardProvability_def] using! ModifiedSolovay.box_disjunction hθσ hx hu
-    SC3r := complete _ _ fun (V : Type) _ _ ↦ by
+    SC4 := complete _ _ fun (V : Type) _ _ ↦ by
       simpa [models_iff, standardProvability_def] using!
         ModifiedSolovay.provable_disjunction hθσ
-    SC4 := complete _ _ fun (V : Type) _ _ ↦ by
+    SC5 := complete _ _ fun (V : Type) _ _ ↦ by
       simpa [models_iff] using! disjunctive (hθσ V)
-    SC5 := provable_provable_sigma_imp
-    SC6 := provable_not_sigma_imp hθσ }
+    SC6 := provable_provable_sigma_imp
+    SC7 := provable_not_sigma_imp hθσ }
 
 end ProvabilityLogic
 
