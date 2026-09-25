@@ -16,6 +16,9 @@ namespace FFL.ProvabilityLogic
 
 abbrev Logic (α : Type*) := Set (Formula α)
 
+/-- `L over α` is `L` regarded as a logic over the atoms `α`, e.g. `𝐃 over α` is `(𝐃 : Logic α)`. -/
+scoped notation:max L:max " over " α:max => (L : Logic α)
+
 open Entailment Formula
 
 variable {α : Type*}
