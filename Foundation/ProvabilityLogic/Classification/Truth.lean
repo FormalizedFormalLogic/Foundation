@@ -39,7 +39,8 @@ lemma soundOnHierarchy_iff_models_reflection :
 variable [𝗜𝚺₁ ⪯ T] {n : ℕ}
 
 lemma models_boxBot_iff : ℕ↓[ℒₒᵣ] ⊧ T.standardProvability^[n + 1] ⊥ ↔ T.height ≤ n := by
-  sorry
+  simpa [Function.iterate_succ_apply', models_standardProvability_iff] using
+    Provability.height_le_iff_boxBot.symm
 
 lemma models_TBB_iff (f : Realization α ℒₒᵣ) : ℕ↓[ℒₒᵣ] ⊧ f T (TBB n) ↔ T.height ≠ n := by
   sorry
