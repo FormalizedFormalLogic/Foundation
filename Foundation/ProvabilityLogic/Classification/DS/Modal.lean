@@ -167,7 +167,17 @@ theorem exists_A_add_provable_or_boxImp (hA : 𝐃 ⊬ A) (p : α) :
 omit [DecidableEq α] in
 lemma provable_subst {β : Type*} {A : Formula β} {s : Substitution β α} (h : 𝐃 ⊢ A) :
     𝐃 ⊢ A⟦s⟧ := by
-  sorry
+  classical
+  apply ((provability_TFAE (A := A⟦s⟧)).out 1 3).mpr;
+  intro κ _ M _ V;
+  apply forces_subst.mp;
+  apply (forces_congr (M := ((M.subst s).toFreeTail fun i a ↦
+    Sum.inr i ⊩[(M.toFreeTail V).toModel] s a).toModel) _ _).mp (sound_freeTail h (M.subst s) _);
+  · funext x y;
+    rcases x <;> rcases y <;> rfl;
+  · rintro (x | i) a;
+    · exact toFreeTail.forces_inl.symm;
+    · rfl;
 
 omit [DecidableEq α] in
 lemma not_provable_subst_some (h : 𝐃 ⊬ A) : 𝐃 ⊬ A⟦fun a ↦ #(some a)⟧ := by
