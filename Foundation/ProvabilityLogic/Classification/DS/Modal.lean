@@ -7,7 +7,8 @@ public import Foundation.ProvabilityLogic.Kripke.AlmostDefiningFormula
 # Formulas outside `𝐃` yield formulas outside `𝐒`
 
 If `𝐃 ⊬ A`, there is a formula `B` over the atoms of `A` with `𝐒 ⊬ B` and
-`𝐀 +ᴸ {A} ⊢ B ⋎ (□#p 🡒 #p)`.
+`𝐀 +ᴸ {A} ⊢ B ⋎ (□#p 🡒 #p)`. Also, `𝐃` is closed under substitutions across atom types, so
+`𝐃 ⊬ A` persists when `A` is read over a new atom.
 
 ## References
 
@@ -132,7 +133,28 @@ end Kripke.RootedModel
 
 namespace Logic.D
 
-variable {α : Type u} [DecidableEq α] {A : Formula α}
+variable {α : Type u} {A : Formula α}
+
+lemma provable_subst {β : Type*} {A : Formula β} {s : Substitution β α} (h : 𝐃 ⊢ A) :
+    𝐃 ⊢ A⟦s⟧ := by
+  classical
+  apply ((provability_TFAE (A := A⟦s⟧)).out 1 3).mpr;
+  intro κ _ M _ V;
+  apply forces_subst.mp;
+  apply (forces_congr (M := ((M.subst s).toFreeTail fun i a ↦
+    Sum.inr i ⊩[(M.toFreeTail V).toModel] s a).toModel) _ _).mp (sound_freeTail h (M.subst s) _);
+  · funext x y;
+    rcases x <;> rcases y <;> rfl;
+  · rintro (x | i) a;
+    · exact toFreeTail.forces_inl.symm;
+    · rfl;
+
+lemma not_provable_subst_some (h : 𝐃 ⊬ A) : 𝐃 ⊬ A⟦fun a ↦ #(some a)⟧ := by
+  have e (B : Formula α) : (B⟦fun a ↦ #(some a)⟧)⟦fun a : Option α ↦ a.elim ⊥ (#·)⟧ = B := by
+    induction B <;> simp_all;
+  exact fun h' ↦ h (e A ▸ provable_subst h');
+
+variable [DecidableEq α]
 
 /-- If `𝐃 ⊬ A`, there is a formula `B` over the atoms of `A` with `𝐒 ⊬ B` and
 `𝐀 ⊢ A.deltaPIff p 🡒 B ⋎ (□#p 🡒 #p)`.
@@ -163,27 +185,6 @@ theorem exists_A_add_provable_or_boxImp (hA : 𝐃 ⊬ A) (p : α) :
     ∃ B : Formula α, 𝐒 ⊬ B ∧ B.atoms ⊆ A.atoms ∧ 𝐀 +ᴸ {A} ⊢ B ⋎ (□#p 🡒 #p) := by
   obtain ⟨B, hB₁, hB₂, hB₃⟩ := exists_A_provable_deltaPIff_imp hA p;
   exact ⟨B, hB₂, hB₁, sumQuasiNormal.of_left hB₃ ⨀ Logic.A.provable_deltaPIff⟩;
-
-omit [DecidableEq α] in
-lemma provable_subst {β : Type*} {A : Formula β} {s : Substitution β α} (h : 𝐃 ⊢ A) :
-    𝐃 ⊢ A⟦s⟧ := by
-  classical
-  apply ((provability_TFAE (A := A⟦s⟧)).out 1 3).mpr;
-  intro κ _ M _ V;
-  apply forces_subst.mp;
-  apply (forces_congr (M := ((M.subst s).toFreeTail fun i a ↦
-    Sum.inr i ⊩[(M.toFreeTail V).toModel] s a).toModel) _ _).mp (sound_freeTail h (M.subst s) _);
-  · funext x y;
-    rcases x <;> rcases y <;> rfl;
-  · rintro (x | i) a;
-    · exact toFreeTail.forces_inl.symm;
-    · rfl;
-
-omit [DecidableEq α] in
-lemma not_provable_subst_some (h : 𝐃 ⊬ A) : 𝐃 ⊬ A⟦fun a ↦ #(some a)⟧ := by
-  have e (B : Formula α) : (B⟦fun a ↦ #(some a)⟧)⟦fun a : Option α ↦ a.elim ⊥ (#·)⟧ = B := by
-    induction B <;> simp_all;
-  exact fun h' ↦ h (e A ▸ provable_subst h');
 
 end Logic.D
 
