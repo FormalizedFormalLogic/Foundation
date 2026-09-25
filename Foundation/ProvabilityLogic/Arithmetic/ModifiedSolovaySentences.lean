@@ -47,7 +47,7 @@ end FFL.ProvabilityLogic.Kripke
 
 namespace FFL.FirstOrder.ProvabilityAbstraction
 
-open ProvabilityLogic Kripke Kripke.Model Kripke.Model.World Kripke.RootedModel
+open ProvabilityLogic Kripke Model Model.World RootedModel
 
 variable {L : Language} [L.ReferenceableBy L] {T₀ T : Theory L} [T₀ ⪯ T]
          {𝔅 : Provability T₀ T} [𝔅.HBL]
@@ -82,11 +82,13 @@ attribute [coe] Λ
 instance : CoeFun (𝔅.ModifiedSolovaySentences M σ) (fun _ ↦ M.extendRoot.World → Sentence L) :=
   ⟨Λ⟩
 
-variable [M.IsGL] {S : 𝔅.ModifiedSolovaySentences M σ} {i : M.extendRoot.World}
+variable (S : 𝔅.ModifiedSolovaySentences M σ)
 
 open Classical in
-noncomputable def realization (S : 𝔅.ModifiedSolovaySentences M σ) : Realization α L :=
+noncomputable def realization : Realization α L :=
   ⟨fun a ↦ ⩖ i ∈ { i : M.extendRoot.World | i ⊩[_] #a }, S i⟩
+
+variable [M.IsGL] {i : M.extendRoot.World}
 
 private lemma mainlemma_aux (hi : i ≠ none) {B : ProvabilityLogic.Formula α}
     (hB : B ∈ A.subfmls) :
@@ -142,23 +144,23 @@ private lemma mainlemma_aux (hi : i ≠ none) {B : ProvabilityLogic.Formula α}
 -/
 theorem mainlemma (hi : i ≠ none) {B : ProvabilityLogic.Formula α} (hB : B ∈ A.subfmls) :
     i ⊩[_] B → T₀ ⊢ S i 🡒 B.interpret S.realization 𝔅 :=
-  (mainlemma_aux hi hB).1
+  (S.mainlemma_aux hi hB).1
 
 /-- - [Bek90, §6 Lemma 2]
 - [AB05, Lemma 53]
 -/
 theorem mainlemma_neg (hi : i ≠ none) {B : ProvabilityLogic.Formula α} (hB : B ∈ A.subfmls) :
     i ⊮[_] B → T₀ ⊢ S i 🡒 ∼B.interpret S.realization 𝔅 :=
-  (mainlemma_aux hi hB).2
+  (S.mainlemma_aux hi hB).2
 
-lemma provable_boxItr_bot_of_ne (S : 𝔅.ModifiedSolovaySentences M σ) {z : M.World}
+lemma provable_boxItr_bot_of_ne {z : M.World}
     (hr : z ≠ M.root) (hu : z ≠ M.u) :
-    T₀ ⊢ S (some z) 🡒 𝔅^[Model.World.rank z + 1] ⊥ := by
+    T₀ ⊢ S (some z) 🡒 𝔅^[z.rank + 1] ⊥ := by
   classical
   induction z using WellFounded.induction IsConverseWellFounded.cwf (r := flip M.Rel) with
   | h z ih =>
     suffices T₀ ⊢ (⩖ j ∈ { j : M.extendRoot.World | some z ≺ j }, S j) 🡒
-        𝔅^[Model.World.rank z] ⊥ by
+        𝔅^[z.rank] ⊥ by
       simpa only [Function.iterate_succ_apply'] using
         C_trans (S.SC3 (some z) (by simp) (by simpa using hu)) (𝔅.mono' this);
     apply left_Fdisj'_intro;
@@ -167,9 +169,9 @@ lemma provable_boxItr_bot_of_ne (S : 𝔅.ModifiedSolovaySentences M σ) {z : M.
     · replace hy : z ≺ y := by simpa using hy;
       exact C_trans (ih y hy (by rintro rfl; exact not_rel_root hy)
         (by rintro rfl; exact hr <| M.eq_root_of_rel_u z hy)) <|
-        𝔅.provable_boxItr_bot_mono <| Model.rank_lt_of_rel hy;
+        𝔅.provable_boxItr_bot_mono <| rank_lt_of_rel hy;
 
-lemma provable_b (S : 𝔅.ModifiedSolovaySentences M σ) :
+lemma provable_b :
     T₀ ⊢ 𝔅.conItr M.height 🡒 𝔅 σ 🡒 ∼σ 🡒 S (some M.root) := by
   classical
   suffices T₀ ⊢ (⩖ j, S j) 🡒 ∼𝔅^[M.height] ⊥ 🡒 𝔅 σ 🡒 ∼σ 🡒 S (some M.root) from
@@ -190,7 +192,7 @@ the reflection instance `𝔅 σ 🡒 σ`.
 - [Bek90, §6 Theorem 2]
 - [AB05, Lemma 51]
 -/
-theorem reflection (S : 𝔅.ModifiedSolovaySentences M σ) :
+theorem reflection :
     T₀ ⊢ 𝔅.conItr M.height 🡒 A.interpret S.realization 𝔅 🡒 𝔅 σ 🡒 σ := by
   cl_prover [S.provable_b, S.mainlemma_neg (Option.some_ne_none M.root) Formula.mem_subfmls_self <|
     extendRoot.forces_some.not.mpr M.root_not_forces];
@@ -203,7 +205,7 @@ noncomputable section
 
 namespace FFL.FirstOrder.Arithmetic.Bootstrapping.ModifiedSolovaySentences
 
-open ProvabilityLogic Kripke Kripke.Model Kripke.Model.World
+open ProvabilityLogic Kripke Model
 
 section comparison
 
@@ -262,11 +264,10 @@ lemma exists_witnessFirst [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] {ι : Type*} [Finit
 end comparison
 
 variable {κ α : Type*} [Nonempty κ] [DecidableEq α] {A : ProvabilityLogic.Formula α}
+  (T : ArithmeticTheory) [T.Δ₁] (M : StrongReflexiveCountermodel κ A) [Fintype M.World]
+  (σ : ArithmeticSentence) (θ : 𝚺₀.Semisentence 1)
 
 section stx
-
-variable (T : ArithmeticTheory) [T.Δ₁] (M : StrongReflexiveCountermodel κ A) [Fintype M.World]
-  (σ : ArithmeticSentence) (θ : 𝚺₀.Semisentence 1)
 
 open Classical in
 /-- The targets of the edges from `x`. -/
@@ -420,9 +421,7 @@ end stx
 
 section model
 
-variable (T : ArithmeticTheory) [T.Δ₁] (M : StrongReflexiveCountermodel κ A) [Fintype M.World]
-  [M.IsGL] (σ : ArithmeticSentence) (θ : 𝚺₀.Semisentence 1)
-  (V : Type*) [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
+variable [M.IsGL] (V : Type*) [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 
 open Classical in
 /-- `w` witnesses the trigger of an edge into `z`. -/
@@ -445,25 +444,25 @@ abbrev Reach (x : M.extendRoot.World) : Prop := Relation.ReflTransGen (Step T M 
 def _root_.FFL.FirstOrder.Theory.ModifiedSolovay (x : M.extendRoot.World) : Prop :=
   Reach T M σ θ V x ∧ ∀ z ∈ next M x, ¬Trig T M σ θ V z
 
-variable {T M σ θ V}
+variable {T M σ θ V} {x y z : M.extendRoot.World}
 
-@[simp] lemma val_trigSigma {z : M.extendRoot.World} {w : V} :
+@[simp] lemma val_trigSigma {w : V} :
     V ⊧/![w, ⌜T.modifiedSolovay M σ θ z⌝] (trigSigma T M θ z).val ↔ Wit T M σ θ V z w := by
   unfold trigSigma Wit;
   split_ifs <;> simp [prfNegSigma, Sentence.quote_def, Semiformula.quote_def]
 
-@[simp] lemma val_trigPi {z : M.extendRoot.World} {w : V} :
+@[simp] lemma val_trigPi {w : V} :
     V ⊧/![w, ⌜T.modifiedSolovay M σ θ z⌝] (trigPi T M θ z).val ↔ Wit T M σ θ V z w := by
   unfold trigPi Wit;
   split_ifs <;> simp [prfNegPi, Sentence.quote_def, Semiformula.quote_def]
 
-@[simp] lemma val_stp {x y : M.extendRoot.World} :
+@[simp] lemma val_stp :
     V ⊧/![] (stp T M σ θ x y) ↔
       (∀ z ∈ next M x, ord M z < ord M y → WitnessLT (Wit T M σ θ V y) (Wit T M σ θ V z)) ∧
       (∀ z ∈ next M x, ord M y ≤ ord M z → WitnessLE (Wit T M σ θ V y) (Wit T M σ θ V z)) := by
   simp [stpAux]
 
-@[simp] lemma val_H {x : M.extendRoot.World} : V ⊧/![] (H T M σ θ x) ↔ Reach T M σ θ V x := by
+@[simp] lemma val_H : V ⊧/![] (H T M σ θ x) ↔ Reach T M σ θ V x := by
   suffices (∃ ε : EChain M x, V ⊧/![] (chain T M σ θ ε.1)) ↔ Reach T M σ θ V x by
     simpa [HAux] using this;
   constructor;
@@ -484,7 +483,7 @@ variable {T M σ θ V}
       obtain ⟨l, rfl⟩ := hε.tail_exists;
       exact ⟨⟨_, hε.cons hs.1⟩, by simpa [-val_stp, chainAux] using ⟨hc, by simpa using hs.2⟩⟩
 
-@[simp] lemma val_modifiedSolovay {x : M.extendRoot.World} :
+@[simp] lemma val_modifiedSolovay :
     V ⊧/![] (T.modifiedSolovay M σ θ x) ↔ T.ModifiedSolovay M σ θ V x := by
   have hn (z : M.extendRoot.World) : V ⊧/![] (notTrig T M σ θ z) ↔ ¬Trig T M σ θ V z := by
     unfold notTrig notTrigAux Trig;
@@ -492,7 +491,7 @@ variable {T M σ θ V}
   simpa [models_iff, hn, Theory.ModifiedSolovay] using
     consequence_iff.mp (Theory.Proof.sound (modifiedSolovay_diag T M σ θ x)) V inferInstance
 
-lemma trig_iff_exists_wit (hθσ : V ⊧/![] σ ↔ ∃ w, V ⊧/![w] θ.val) {z : M.extendRoot.World} :
+lemma trig_iff_exists_wit (hθσ : V ⊧/![] σ ↔ ∃ w, V ⊧/![w] θ.val) :
     Trig T M σ θ V z ↔ ∃ w, Wit T M σ θ V z w := by
   unfold Trig Wit;
   split_ifs;
@@ -502,11 +501,10 @@ lemma wit_definable (z : M.extendRoot.World) : 𝚺₁-Predicate (Wit T M σ θ 
   HierarchySymbol.Defined.to_definable
     (.mkSigma ((trigSigma T M θ z).val/[#0, ⌜T.modifiedSolovay M σ θ z⌝])) (.mk fun v ↦ by simp)
 
-lemma Step.exists_wit {x y : M.extendRoot.World} (h : Step T M σ θ V x y) :
-    ∃ w, Wit T M σ θ V y w :=
+lemma Step.exists_wit (h : Step T M σ θ V x y) : ∃ w, Wit T M σ θ V y w :=
   (h.2.2 y h.1 le_rfl).exists
 
-lemma Step.unique {x y₁ y₂ : M.extendRoot.World} (h₁ : Step T M σ θ V x y₁)
+lemma Step.unique {y₁ y₂ : M.extendRoot.World} (h₁ : Step T M σ θ V x y₁)
     (h₂ : Step T M σ θ V x y₂) : y₁ = y₂ := by
   wlog hlt : ord M y₁ < ord M y₂ generalizing y₁ y₂;
   · rcases (not_lt.mp hlt).lt_or_eq with hlt | heq;
@@ -514,8 +512,8 @@ lemma Step.unique {x y₁ y₂ : M.extendRoot.World} (h₁ : Step T M σ θ V x 
     · exact ord_injective heq.symm;
   exact absurd (h₂.2.1 y₁ h₁.1 hlt) (h₁.2.2 y₂ h₂.1 hlt.le).not_witnessLT;
 
-lemma Reach.provable {x : M.extendRoot.World} (hx : x ≠ none) (hu : x ≠ some M.u)
-    (h : Reach T M σ θ V x) : Provable T (⌜∼T.modifiedSolovay M σ θ x⌝ : V) := by
+lemma Reach.provable (hx : x ≠ none) (hu : x ≠ some M.u) (h : Reach T M σ θ V x) :
+    Provable T (⌜∼T.modifiedSolovay M σ θ x⌝ : V) := by
   rcases h.cases_tail with rfl | ⟨_, _, hs⟩;
   · contradiction;
   · obtain ⟨w, hw⟩ := hs.exists_wit;
@@ -528,8 +526,7 @@ lemma Reach.models_sigma (hθσ : V ⊧/![] σ ↔ ∃ w, V ⊧/![w] θ.val)
   · obtain ⟨w, hw⟩ := hs.exists_wit;
     exact hθσ.mpr ⟨w, by simpa [Wit] using hw⟩;
 
-lemma Reach.disjunction (hθσ : V ⊧/![] σ ↔ ∃ w, V ⊧/![w] θ.val) {x : M.extendRoot.World}
-    (h : Reach T M σ θ V x) :
+lemma Reach.disjunction (hθσ : V ⊧/![] σ ↔ ∃ w, V ⊧/![w] θ.val) (h : Reach T M σ θ V x) :
     T.ModifiedSolovay M σ θ V x ∨ ∃ y, x ≺ y ∧ T.ModifiedSolovay M σ θ V y := by
   induction x using (IsConverseWellFounded.cwf (rel := M.extendRoot.Rel)).induction with
   | h x ih =>
@@ -546,8 +543,7 @@ lemma Reach.disjunction (hθσ : V ⊧/![] σ ↔ ∃ w, V ⊧/![w] θ.val) {x :
     · exact ⟨y, rel_of_mem_next hy, hy'⟩;
     · exact ⟨w, IsTrans.trans _ _ _ (rel_of_mem_next hy) hyw, hw⟩;
 
-lemma ModifiedSolovay.exclusive (hθσ : V ⊧/![] σ ↔ ∃ w, V ⊧/![w] θ.val)
-    {x y : M.extendRoot.World} (ne : x ≠ y) :
+lemma ModifiedSolovay.exclusive (hθσ : V ⊧/![] σ ↔ ∃ w, V ⊧/![w] θ.val) (ne : x ≠ y) :
     T.ModifiedSolovay M σ θ V x → ¬T.ModifiedSolovay M σ θ V y := by
   rintro ⟨hx, hxt⟩ ⟨hy, hyt⟩;
   have key {a b : M.extendRoot.World} (hab : Relation.ReflTransGen (Step T M σ θ V) a b)
@@ -559,7 +555,7 @@ lemma ModifiedSolovay.exclusive (hθσ : V ⊧/![] σ ↔ ∃ w, V ⊧/![w] θ.v
   · exact key h ne hxt;
   · exact key h ne.symm hyt;
 
-lemma ModifiedSolovay.consistent {x y : M.extendRoot.World} (hxy : x ≺ y) (hy : y ≠ some M.u)
+lemma ModifiedSolovay.consistent (hxy : x ≺ y) (hy : y ≠ some M.u)
     (h : T.ModifiedSolovay M σ θ V x) : ¬Provable T (⌜∼T.modifiedSolovay M σ θ y⌝ : V) := by
   simpa [Trig, hy] using h.2 y (by simp [hxy, hy])
 
@@ -572,8 +568,7 @@ end model
 
 section
 
-variable {T : ArithmeticTheory} [T.Δ₁] [𝗜𝚺₁ ⪯ T] {M : StrongReflexiveCountermodel κ A}
-  [Fintype M.World] [M.IsGL] {σ : ArithmeticSentence} {θ : 𝚺₀.Semisentence 1}
+variable {T M σ θ} [𝗜𝚺₁ ⪯ T] [M.IsGL]
   (hθσ : ∀ (V : Type) [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁], V ⊧/![] σ ↔ ∃ w, V ⊧/![w] θ.val)
 include hθσ
 
@@ -637,11 +632,11 @@ end
 
 end FFL.FirstOrder.Arithmetic.Bootstrapping.ModifiedSolovaySentences
 
-namespace FFL.FirstOrder.Arithmetic
+namespace FFL.ProvabilityLogic
 
-open Bootstrapping ModifiedSolovaySentences ProvabilityLogic Kripke ProvabilityAbstraction
+open FirstOrder Arithmetic Bootstrapping ModifiedSolovaySentences Kripke
 
-variable {κ α : Type*} [Nonempty κ] [DecidableEq α] {A : ProvabilityLogic.Formula α}
+variable {κ α : Type*} [Nonempty κ] [DecidableEq α] {A : Formula α}
 
 /-- Modified Solovay sentences for the standard provability predicate of `T` and a `𝚺₁`
 sentence `σ`.
@@ -649,7 +644,7 @@ sentence `σ`.
 - [Bek90, §6 Theorem 2]
 - [AB05, Lemma 51]
 -/
-def _root_.FFL.FirstOrder.Theory.standardProvability.modifiedSolovaySentences
+def standardModifiedSolovaySentences
     (T : ArithmeticTheory) [T.Δ₁] [𝗜𝚺₁ ⪯ T] (M : StrongReflexiveCountermodel κ A)
     [Fintype M.World] [M.IsGL] {σ : ArithmeticSentence} (hσ : Hierarchy 𝚺 1 σ) :
     T.standardProvability.ModifiedSolovaySentences M σ :=
@@ -673,7 +668,7 @@ def _root_.FFL.FirstOrder.Theory.standardProvability.modifiedSolovaySentences
     SC5 := provable_provable_sigma_imp
     SC6 := provable_not_sigma_imp hθσ }
 
-end FFL.FirstOrder.Arithmetic
+end FFL.ProvabilityLogic
 
 end
 
