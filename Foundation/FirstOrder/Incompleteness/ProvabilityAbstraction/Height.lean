@@ -21,26 +21,21 @@ noncomputable def Provability.height (𝔅 : Provability T₀ T) : ENat := ENat.
 lemma neg_iterated_prov {n : ℕ} (φ : Sentence L) : ∼(𝔅^[n] φ) = 𝔅.dia^[n] (∼φ) := by
   induction n generalizing φ <;> simp [Provability.dia, *]
 
-lemma boxBot_monotone [T₀ ⪯ T] [𝔅.HBL] {n m : ℕ} :
-    n ≤ m → T ⊢ 𝔅^[n] ⊥ 🡒 𝔅^[m] ⊥ := by
-  classical
-  revert m
-  suffices ∀ k, T ⊢ 𝔅^[n] ⊥ 🡒 𝔅^[n + k] ⊥ by
-    intro m hnm
-    simpa [Nat.add_sub_of_le hnm] using this (m - n)
-  intro k
-  induction k
-  case zero => simp
-  case succ k ih =>
-    simp only [← add_assoc, Function.iterate_succ_apply']
-    have b₀ : T ⊢ 𝔅^[n] ⊥ 🡒 𝔅 (𝔅^[n] ⊥) := by
-      match n with
-      | 0 => simp;
-      | n + 1 =>
-        have : T ⊢ 𝔅 ((𝔅)^[n] ⊥) 🡒 𝔅 (𝔅 ((𝔅)^[n] ⊥)) := Entailment.WeakerThan.pbl <| 𝔅.D3;
-        simpa only [Function.iterate_succ_apply'] using this
-    have b₁ : T ⊢ 𝔅 (𝔅^[n] ⊥) 🡒 𝔅 (𝔅^[n + k] ⊥) := Entailment.WeakerThan.pbl <| 𝔅.mono ih;
-    cl_prover [b₀, b₁]
+/-- The `n`-times iterated consistency `∼𝔅^[n] ⊥`. -/
+def Provability.conItr (𝔅 : Provability T₀ T) (n : ℕ) : Sentence L := ∼𝔅^[n] ⊥
+
+lemma Provability.provable_boxItr_bot_mono [𝔅.HBL3] {n m : ℕ} (h : n ≤ m) :
+    T₀ ⊢ 𝔅^[n] ⊥ 🡒 𝔅^[m] ⊥ := by
+  induction m, h using Nat.le_induction with
+  | base => exact Entailment.C_id
+  | succ m _ ih =>
+    suffices T₀ ⊢ 𝔅^[m] ⊥ 🡒 𝔅^[m + 1] ⊥ from Entailment.C_trans ih this;
+    rcases m with _ | m;
+    · exact Entailment.efq;
+    · simpa only [Function.iterate_succ_apply'] using 𝔅.D3;
+
+lemma boxBot_monotone [T₀ ⪯ T] [𝔅.HBL] {n m : ℕ} (h : n ≤ m) : T ⊢ 𝔅^[n] ⊥ 🡒 𝔅^[m] ⊥ :=
+  Entailment.WeakerThan.pbl <| 𝔅.provable_boxItr_bot_mono h
 
 lemma iIncon_unprovable_of_sigma1_sound [𝔅.Kreisel] [Entailment.Consistent T] : ∀ n, T ⊬ 𝔅^[n] ⊥
   |     0 => Entailment.consistent_iff_unprovable_bot.mp inferInstance
